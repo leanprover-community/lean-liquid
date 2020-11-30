@@ -7,7 +7,8 @@ constant bdd_normed_module (r : ℝ) (R : Type) (V : Type) : Type
 
 constant system_of_complexes : Type
 
-constant system_of_complexes.is_bdd_exact_in_degree
+/-- See top op page 59 of [Analytic], before Thm 9.4. -/
+constant system_of_complexes.is_bdd_exact_for_bdd_degree
   (C : system_of_complexes) (k : ℤ) (d : ℤ) : Prop
 
 
@@ -34,9 +35,8 @@ theorem main :
   ∀ (V : Type) [bdd_normed_module r (laurent_polynomial ℤ) V],
   ∀ c' ≥ c₀, -- this `c'` is called `c` in `Analytic.pdf`,
              -- but that conflicts with the constants `c 1, c 2, c 3` that are "implicit"
-  ∀ d ≤ m,
   begin
-    refine system_of_complexes.is_bdd_exact_in_degree _ k d,
+    refine system_of_complexes.is_bdd_exact_for_bdd_degree _ k m,
     refine @crazy_system_of_complexes r r' h0r hrr' hr'1 c Λ (id _) S (id _) V (id _) c',
     resetI,
     assumption',
