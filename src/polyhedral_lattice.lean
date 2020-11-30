@@ -19,8 +19,16 @@ See the paragraph before Thm 9.5 of [Analytic].
 
 open finset
 
+-- our definition doesn't mention `Λ ⊗ ℝ`. Are we happy with this definition?
+
 class polyhedral_lattice (Λ : Type u) extends normed_group Λ :=
 (exists_finite_basis : ∃ {ι : Type} [fintype ι] (v : ι → Λ), is_basis ℤ v)
+-- the following looks pretty complicated...
 (is_polyhedral : ∃ {ι : Type} [nonempty ι] [fintype ι] (f : ι → Λ → ℚ),
                   ∀ x : Λ, ∥x∥ = finset.max' (finset.image (λ i : ι, f i x) univ)
                                   (nonempty.image univ_nonempty _))
+
+-- TODO
+-- Can we prove that the “unit ball” `{λ ∈ Λ ⊗ R | ||λ|| ≤ 1}` is a rational polyhedron?
+-- We don't have anything on polyhedra yet.
+-- Might be a rabbit hole.
