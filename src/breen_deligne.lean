@@ -10,6 +10,7 @@ https://www.math.uni-bonn.de/people/scholze/Condensed.pdf#section*.4
 ("Appendix to Lecture IV", p. 28)
 
 -/
+noncomputable theory
 
 -- get some notation working:
 open_locale big_operators direct_sum
@@ -65,7 +66,9 @@ variables (A : Type*) [add_comm_group A]
 
 def eval : ℤ[A^m] →+ ℤ[A^n] := finsupp.sum g $ λ g_basic k, k • g_basic.eval A
 
-def comp : universal_map l n := sorry
+def comp : universal_map l n := finsupp.sum g $ λ g_basic k,
+                                finsupp.sum f $ λ f_basic k',
+                                (finsupp.single (g_basic.comp f_basic) (k * k'))
 
 lemma eval_comp : (g.comp f).eval A = (g.eval A).comp (f.eval A) :=
 begin
