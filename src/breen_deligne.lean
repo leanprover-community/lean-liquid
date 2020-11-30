@@ -2,6 +2,15 @@ import linear_algebra.matrix
 import group_theory.free_abelian_group
 import algebra.direct_sum
 
+/-!
+# Breen-Deligne resolutions
+
+Reference:
+https://www.math.uni-bonn.de/people/scholze/Condensed.pdf#section*.4
+("Appendix to Lecture IV", p. 28)
+
+-/
+
 -- get some notation working:
 open_locale big_operators direct_sum
 local notation A `^` n := fin n → A
