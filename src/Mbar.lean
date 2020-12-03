@@ -18,15 +18,16 @@ open_locale big_operators
 
 open power_series
 
-/-- Mbar r' S c is power series F_s = ∑ a_{n,s}T^n ∈ ℤ[[T]] such that ∑_{n,s} |a_{n,s}|r'^n ≤ c -/
+/-- `Mbar r' S c` is the set of power series
+`F_s = ∑ a_{n,s}T^n ∈ ℤ[[T]]` such that `∑_{n,s} |a_{n,s}|r'^n ≤ c` -/
 def Mbar (r' : ℝ) (S : Type u) [fintype S] (c : ℝ) :=
 {F : S → power_series ℤ | (∀ s, constant_coeff ℤ (F s) = 0) ∧
   (∀ s, summable (λ n, abs ((power_series.coeff ℤ n (F s) : ℝ) * r'^n))) ∧
   (∑ s, ∑' n, (abs ((power_series.coeff ℤ n (F s) : ℝ) * r'^n))) ≤ c }
 
-variables (r' : ℝ) (hr' : 0 < r') (S : Type u) [fintype S] (c₁ c₂ : ℝ)
+variables {r' : ℝ} {S : Type u} [fintype S] {c₁ c₂ : ℝ}
 
-noncomputable def Mbar.add (r' : ℝ) (hr' : 0 ≤ r') (S : Type u) [fintype S] (c₁ c₂ : ℝ) :
+noncomputable def Mbar.add :
   Mbar r' S c₁ → Mbar r' S c₂ → Mbar r' S (c₁ + c₂) :=
 λ F G, ⟨F + G, begin
   rcases F with ⟨F, hF0, hFs, hFsc⟩,
