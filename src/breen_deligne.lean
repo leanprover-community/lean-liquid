@@ -1,6 +1,7 @@
 import linear_algebra.matrix
 import group_theory.free_abelian_group
 import algebra.direct_sum
+import algebra.big_operators.finsupp
 
 /-!
 # Breen-Deligne resolutions
@@ -46,12 +47,22 @@ variables (A : Type*) [add_comm_group A]
 def eval : ℤ[A^m] →+ ℤ[A^n] :=
 free_abelian_group.lift $ λ a, free_abelian_group.of $ λ i, ∑ j, g i j • a j
 
+@[simp] lemma eval_of (x : A^m) :
+  g.eval A (free_abelian_group.of x) = (free_abelian_group.of $ λ i, ∑ j, g i j • x j) :=
+free_abelian_group.lift.of _ _
+
 def comp : basic_universal_map l n := matrix.mul g f
 
 lemma eval_comp : (g.comp f).eval A = (g.eval A).comp (f.eval A) :=
 begin
-  -- we need an `ext` lemma for homs out of `free_abelian_group`s.
-  sorry
+  ext1 x',
+  apply free_abelian_group.lift.ext,
+  intro x,
+  simp only [add_monoid_hom.coe_comp, function.comp_app, eval_of, comp, finset.smul_sum,
+    matrix.mul_apply, finset.sum_smul, mul_smul],
+  congr' 1,
+  ext1 i,
+  exact finset.sum_comm
 end
 
 end basic_universal_map
@@ -70,9 +81,33 @@ def comp : universal_map l n := finsupp.sum g $ λ g_basic k,
                                 finsupp.sum f $ λ f_basic k',
                                 (finsupp.single (g_basic.comp f_basic) (k * k'))
 
+section
+
+variables {ι γ A' B C : Type*} [add_comm_monoid A'] [add_comm_monoid B] [add_comm_monoid C]
+@[simp] lemma add_monoid_hom.finsupp_sum_apply (f : ι →₀ A) (g : ι → A → B →+ C) (b : B) :
+  f.sum g b = f.sum (λ i a, g i a b) :=
+begin
+  apply finsupp.induction f,
+  { simp only [add_monoid_hom.zero_apply, finsupp.sum_zero_index] },
+  clear f,
+  intros i a f hif ha0 IH,
+  rw [finsupp.sum_add_index, finsupp.sum_add_index, add_monoid_hom.add_apply,
+      finsupp.sum_single_index, finsupp.sum_single_index, IH],
+end
+
+
+end
+
 lemma eval_comp : (g.comp f).eval A = (g.eval A).comp (f.eval A) :=
 begin
-  sorry
+  ext1 x',
+  apply free_abelian_group.lift.ext,
+  intro x,
+  apply finsupp.induction₂ g,
+  simp only [comp, eval, add_monoid_hom.finsupp_sum_apply, add_monoid_hom.comp_apply,
+    add_monoid_hom.gsmul_apply, basic_universal_map.eval_of],
+
+  simp only [add_monoid_hom.comp_apply, finsupp.sum, add_monoid_hom.finset_sum_apply],
 end
 
 end universal_map
