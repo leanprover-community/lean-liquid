@@ -35,7 +35,7 @@ meta def silly := `[
 -- Why is it so hard to prove something is finite?!
 -- This proof can probably be cleaned up significantly...
 lemma Mbar_bdd_finset {r : ℝ} (hr : 0 < r) {S : Fintype} {c : ℝ} {M : ℕ} :
-  finset (Mbar_bdd r hr S c M) :=
+  fintype (Mbar_bdd r hr S c M) :=
 begin
   let MM := Mbar_bdd r hr S c M,
   let MMM := {F : S → fin (M+1) → ℤ | ∀ s i, abs (F s i : ℝ) * r^i.1 ≤ c},
@@ -59,7 +59,6 @@ begin
     apply_fun (λ u, u.1) at h,
     ext1,
     assumption },
-  suffices : fintype MM, by exact this.1,
   suffices : fintype MMM, by exactI fintype.of_injective ι claim,
   let MMMM := Π (s : S) (i : fin (M+1)), { m : ℤ | abs (m : ℝ) * r^i.1 ≤ c},
   let δ : MMM → MMMM := λ m s i, ⟨m.1 s i, _⟩,
