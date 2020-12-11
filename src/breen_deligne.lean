@@ -2,6 +2,7 @@ import linear_algebra.matrix
 import group_theory.free_abelian_group
 import algebra.direct_sum
 import algebra.big_operators.finsupp
+import data.tuple
 
 /-!
 # Breen-Deligne resolutions
@@ -10,15 +11,20 @@ Reference:
 https://www.math.uni-bonn.de/people/scholze/Condensed.pdf#section*.4
 ("Appendix to Lecture IV", p. 28)
 
+We formalize the notion of `breen_deligne_data`.
+Roughly speaking, this is a collection of formal finite sums of matrices
+that encode that data that rolls out of the Breen--Deligne resolution.
+
 -/
 noncomputable theory
 
 -- get some notation working:
 open_locale big_operators direct_sum
-local notation A `^` n := fin n → A
+local notation A `^` n := tuple A n
 local notation `ℤ[` A `]` := free_abelian_group A
 
-namespace breen_deligne_data
+namespace breen_deligne
+open free_abelian_group
 
 /-!
 Suppose you have an abelian group `A`.
@@ -45,18 +51,18 @@ variables {l m n : ℕ} (g : basic_universal_map m n) (f : basic_universal_map l
 variables (A : Type*) [add_comm_group A]
 
 def eval : ℤ[A^m] →+ ℤ[A^n] :=
-free_abelian_group.lift $ λ a, free_abelian_group.of $ λ i, ∑ j, g i j • a j
+map $ λ x i, ∑ j, g i j • x j
 
 @[simp] lemma eval_of (x : A^m) :
-  g.eval A (free_abelian_group.of x) = (free_abelian_group.of $ λ i, ∑ j, g i j • x j) :=
-free_abelian_group.lift.of _ _
+  g.eval A (of x) = (of $ λ i, ∑ j, g i j • x j) :=
+lift.of _ _
 
 def comp : basic_universal_map l n := matrix.mul g f
 
 lemma eval_comp : (g.comp f).eval A = (g.eval A).comp (f.eval A) :=
 begin
   ext1 x',
-  apply free_abelian_group.lift.ext,
+  apply lift.ext,
   intro x,
   simp only [add_monoid_hom.coe_comp, function.comp_app, eval_of, comp, finset.smul_sum,
     matrix.mul_apply, finset.sum_smul, mul_smul],
@@ -68,90 +74,73 @@ end
 end basic_universal_map
 
 @[derive add_comm_group]
-def universal_map (m n : ℕ) := finsupp (basic_universal_map m n) ℤ
+def universal_map (m n : ℕ) := ℤ[basic_universal_map m n]
 
 namespace universal_map
+universe variable u
 
 variables {l m n : ℕ} (g : universal_map m n) (f : universal_map l m)
-variables (A : Type*) [add_comm_group A]
+variables (A : Type u) [add_comm_group A]
 
-def eval : ℤ[A^m] →+ ℤ[A^n] := finsupp.sum g $ λ g_basic k, k • g_basic.eval A
+def eval : universal_map m n →+ ℤ[A^m] →+ ℤ[A^n] :=
+free_abelian_group.lift $ λ f, f.eval A
 
-def comp : universal_map l n := finsupp.sum g $ λ g_basic k,
-                                finsupp.sum f $ λ f_basic k',
-                                (finsupp.single (g_basic.comp f_basic) (k * k'))
+@[simp] lemma eval_of (f : basic_universal_map m n) :
+  eval A (of f) = f.eval A :=
+lift.of _ _
+
+def comp : universal_map m n →+ universal_map l m →+ universal_map l n :=
+free_abelian_group.lift $ λ g, free_abelian_group.lift $ λ f,
+of $ g.comp f
+
+@[simp] lemma comp_of (g : basic_universal_map m n) (f : basic_universal_map l m) :
+  comp (of g) (of f) = of (g.comp f) :=
+lift.of _ _
 
 section
+open add_monoid_hom
 
-variables {ι γ A' B C : Type*} [add_comm_monoid A'] [add_comm_monoid B] [add_comm_monoid C]
-@[simp] lemma add_monoid_hom.finsupp_sum_apply (f : ι →₀ A) (g : ι → A → B →+ C) (b : B) :
-  f.sum g b = f.sum (λ i a, g i a b) :=
+lemma eval_comp : eval A (comp g f) = (eval A g).comp (eval A f) :=
+show comp_hom (comp_hom (@eval l n A _)) (comp) g f =
+  comp_hom (comp_hom (comp_hom.flip (@eval l m A _)) (comp_hom)) (@eval m n A _) g f,
 begin
-  apply finsupp.induction f,
-  { simp only [add_monoid_hom.zero_apply, finsupp.sum_zero_index] },
-  clear f,
-  intros i a f hif ha0 IH,
-  rw [finsupp.sum_add_index, finsupp.sum_add_index, add_monoid_hom.add_apply,
-      finsupp.sum_single_index, finsupp.sum_single_index, IH],
+  congr' 1, apply lift.ext; clear g; intro g,
+  ext1 f; apply lift.ext; clear f; intro f,
+  show eval A (comp (of g) (of f)) = (eval A (of g)).comp (eval A (of f)),
+  simp only [basic_universal_map.eval_comp, comp_of, eval_of]
 end
 
+-- we probably want some `finvec` goodies to make this look better
+def double : universal_map m n →+ universal_map (m + m) (n + n) :=
+map $ λ f, tuple.append
+(λ j, tuple.append (f j) 0)
+(λ j, tuple.append 0 (f j))
 
-end
-
-lemma eval_comp : (g.comp f).eval A = (g.eval A).comp (f.eval A) :=
-begin
-  ext1 x',
-  apply free_abelian_group.lift.ext,
-  intro x,
-  apply finsupp.induction₂ g,
-  simp only [comp, eval, add_monoid_hom.finsupp_sum_apply, add_monoid_hom.comp_apply,
-    add_monoid_hom.gsmul_apply, basic_universal_map.eval_of],
-
-  simp only [add_monoid_hom.comp_apply, finsupp.sum, add_monoid_hom.finset_sum_apply],
 end
 
 end universal_map
 
-/-!
-In the end, we want a complex of maps `⊕_i ℤ[A^i] → ⊕_j ℤ[A^j]`.
--/
+/-- Roughly speaking, this is a collection of formal finite sums of matrices
+that encode that data that rolls out of the Breen--Deligne resolution. -/
+structure data :=
+(rank       : ℕ → ℕ)
+(map        : Π n, universal_map (rank (n+1)) (rank n))
+(rank_zero  : rank 0 = 1) -- this "hardcodes" that the complex end in `ℤ[A] → A`
+(is_complex : ∀ n, universal_map.comp (map n) (map (n+1)) = 0)
 
-@[derive add_comm_group]
-def termwise_data {m n : ℕ} (k : ℕ^m) (l : ℕ^n) := Π i j, universal_map (k i) (l j)
+-- we probably want some `finvec` goodies to make this more pleasant.
+def σ_add (BD : data) (n : ℕ) : universal_map (BD.rank n + BD.rank n) (BD.rank n) :=
+of $ λ j, tuple.append (λ i, if i = j then 1 else 0) (λ i, if i = j then 1 else 0)
 
-namespace termwise_data
+def σ_proj (BD : data) (n : ℕ) : universal_map (BD.rank n + BD.rank n) (BD.rank n) :=
+of (λ j, tuple.append (λ i, if i = j then 1 else 0) 0) +
+of (λ j, tuple.append 0 (λ i, if i = j then 1 else 0))
 
-def eval {m n : ℕ} {k : ℕ^m} {l : ℕ^n} (f : termwise_data k l) (A : Type*) [add_comm_group A] :
-  (⨁ i, ℤ[A^(k i)]) →+ ⨁ j, ℤ[A^(l j)] :=
-direct_sum.to_add_monoid $ λ i, sorry -- fail, we don't know how to do maps into direct sums
+structure homotopy (BD : data) :=
+(map         : Π n, universal_map (BD.rank n + BD.rank n) (BD.rank (n+1)))
+(is_homotopy : ∀ n, σ_add BD (n+1) - σ_proj BD (n+1) =
+                universal_map.comp (BD.map (n+1)) (map (n+1)) +
+                universal_map.comp (map n) (BD.map n).double)
+(is_homotopy_zero : σ_add BD 0 - σ_proj BD 0 = sorry) -- do we want/need this?
 
-variables {l m n : ℕ} {x : ℕ^l} {y : ℕ^m} {z : ℕ^n}
-variables (g : termwise_data y z) (f : termwise_data x y)
-variables (A : Type*) [add_comm_group A]
-
-include g f -- ← can be removed once the def is actually filled in
-def comp : termwise_data x z := sorry
-
-lemma eval_comp : (g.comp f).eval A = (g.eval A).comp (f.eval A) :=
-begin
-  sorry
-end
-
-end termwise_data
-
-end breen_deligne_data
-
-structure breen_deligne_data :=
-(nr_of_summands : ℕ → ℕ)
-(ranks : Π n, ℕ^(nr_of_summands n))
-(data  : Π n, breen_deligne_data.termwise_data (ranks (n+1)) (ranks n))
-
-namespace breen_deligne_data
-
-variables (BD : breen_deligne_data)
-
-def is_complex : Prop := ∀ n, (BD.data n).comp (BD.data (n+1)) = 0
-
-end breen_deligne_data
-
-theorem breen_deligne : ∃ BD : breen_deligne_data, BD.is_complex := sorry
+end breen_deligne
