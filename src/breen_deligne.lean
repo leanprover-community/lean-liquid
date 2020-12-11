@@ -125,7 +125,7 @@ that encode that data that rolls out of the Breen--Deligne resolution. -/
 structure data :=
 (rank       : ℕ → ℕ)
 (map        : Π n, universal_map (rank (n+1)) (rank n))
-(rank_zero  : rank 0 = 1) -- this "hardcodes" that the complex end in `ℤ[A] → A`
+-- (rank_zero  : rank 0 = 1) -- this "hardcodes" that the complex end in `ℤ[A] → A`
 (is_complex : ∀ n, universal_map.comp (map n) (map (n+1)) = 0)
 
 -- we probably want some `finvec` goodies to make this more pleasant.
@@ -141,6 +141,7 @@ structure homotopy (BD : data) :=
 (is_homotopy : ∀ n, σ_add BD (n+1) - σ_proj BD (n+1) =
                 universal_map.comp (BD.map (n+1)) (map (n+1)) +
                 universal_map.comp (map n) (BD.map n).double)
-(is_homotopy_zero : σ_add BD 0 - σ_proj BD 0 = sorry) -- do we want/need this?
+(is_homotopy_zero : σ_add BD 0 - σ_proj BD 0 = universal_map.comp (BD.map 0) (map 0))
+-- TODO! Is ↑ the thing we want?
 
 end breen_deligne
