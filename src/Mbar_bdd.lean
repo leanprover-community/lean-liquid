@@ -66,7 +66,8 @@ let h := abs_le.1 $ Mbar_bdd_coeff_bound hr F.1 F.2.2 n s in
 ⟨F.1 s n, ceil_le.2 $ h.1, le_floor.2 h.2⟩
 
 lemma Mbar_bdd_finset {r : ℝ} (hr : 0 < r) {S : Fintype} {c : ℝ} {M : ℕ} :
-  fintype (Mbar_bdd r hr S c M) := fintype.of_injective (temp_map hr) begin
+  fintype (Mbar_bdd r hr S c M) :=
+fintype.of_injective (temp_map hr) begin
   rintros ⟨f1, hf1⟩ ⟨f2, hf2⟩ h,
   ext s n,
   change (temp_map hr ⟨f1, hf1⟩ n s).1 = (temp_map hr ⟨f2, hf2⟩ n s).1,
