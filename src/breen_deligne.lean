@@ -2,7 +2,6 @@ import linear_algebra.matrix
 import group_theory.free_abelian_group
 import algebra.direct_sum
 import algebra.big_operators.finsupp
-import data.tuple
 import prereqs
 
 /-!
@@ -22,7 +21,7 @@ noncomputable theory
 -- get some notation working:
 open_locale big_operators direct_sum
 
-def type_pow : has_pow (Type*) ℕ := ⟨λ A n, tuple A n⟩
+def type_pow : has_pow (Type*) ℕ := ⟨λ A n, fin n → A⟩
 
 local attribute [instance] type_pow
 local notation `ℤ[` A `]` := free_abelian_group A
@@ -217,18 +216,18 @@ universe variables u
 open universal_map
 variables {m n : ℕ} (A : Type u) [add_comm_group A] (f : universal_map m n)
 
-lemma eval_σ_add (n : ℕ) : eval A (σ_add n) = map (λ x, x.left + x.right) :=
-begin
-  ext x, apply lift.ext; clear x, intro x,
-  delta σ_add,
-  rw [eval_of, basic_universal_map.eval_of],
-  congr' 1,
-  ext i,
-  simp only [pi.add_apply],
-  rw (sum_fin_sum_equiv.sum_comp _).symm,
-  swap, { apply_instance },
-  sorry
-end
+-- lemma eval_σ_add (n : ℕ) : eval A (σ_add n) = map (λ x, x.left + x.right) :=
+-- begin
+--   ext x, apply lift.ext; clear x, intro x,
+--   delta σ_add,
+--   rw [eval_of, basic_universal_map.eval_of],
+--   congr' 1,
+--   ext i,
+--   simp only [pi.add_apply],
+--   rw (sum_fin_sum_equiv.sum_comp _).symm,
+--   swap, { apply_instance },
+--   sorry
+-- end
 
 lemma σ_add_comp_double : comp (σ_add n) (double f) = comp f (σ_add m) :=
 show add_monoid_hom.comp_hom ((@comp (m+m) (n+n) n) (σ_add _)) (double) f =
@@ -245,19 +244,19 @@ begin
     matrix.reindex_linear_equiv_sum_empty_symm]
 end
 
-lemma eval_σ_proj (n : ℕ) : eval A (σ_proj n) = map tuple.left + map tuple.right :=
-begin
-  ext x, apply lift.ext; clear x, intro x,
-  delta σ_proj,
-  simp only [add_monoid_hom.map_add, add_monoid_hom.add_apply,
-    eval_of, basic_universal_map.eval_of],
-  congr' 2,
-  { ext i,
-    rw [(sum_fin_sum_equiv.sum_comp _).symm, finset.sum_eq_single (sum.inl i)],
-    { dsimp, sorry },
-    all_goals { sorry } },
-  sorry
-end
+-- lemma eval_σ_proj (n : ℕ) : eval A (σ_proj n) = map tuple.left + map tuple.right :=
+-- begin
+--   ext x, apply lift.ext; clear x, intro x,
+--   delta σ_proj,
+--   simp only [add_monoid_hom.map_add, add_monoid_hom.add_apply,
+--     eval_of, basic_universal_map.eval_of],
+--   congr' 2,
+--   { ext i,
+--     rw [(sum_fin_sum_equiv.sum_comp _).symm, finset.sum_eq_single (sum.inl i)],
+--     { dsimp, sorry },
+--     all_goals { sorry } },
+--   sorry
+-- end
 
 lemma σ_proj_comp_double : comp (σ_proj n) (double f) = comp f (σ_proj m) :=
 show add_monoid_hom.comp_hom ((@comp (m+m) (n+n) n) (σ_proj _)) (double) f =
