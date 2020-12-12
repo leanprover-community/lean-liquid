@@ -73,3 +73,39 @@ fintype.of_injective (temp_map hr) begin
   change (temp_map hr ⟨f1, hf1⟩ n s).1 = (temp_map hr ⟨f2, hf2⟩ n s).1,
   rw h,
 end
+
+def ι {M N : ℕ} (h : M ≤ N) : fin M ↪ fin N := (fin.cast_le h).to_embedding
+
+-- Should this be in mathlib?
+lemma sum_eq_sum_map_ι {M N : ℕ} (h : M ≤ N) (f : fin N → ℝ) :
+  ∑ i, f (ι h i) = ∑ j in finset.map (ι h) finset.univ, f j :=
+finset.sum_bij' (λ a _, ι h a) (λ a ha, by {rw mem_map, exact ⟨a, ha, rfl⟩})
+(λ a ha, rfl) (λ a ha, ⟨a.1, begin
+  rcases finset.mem_map.mp ha with ⟨⟨w,ww⟩,hw,rfl⟩,
+  change w < M,
+  linarith,
+end ⟩)
+(λ a ha, finset.mem_univ _) (λ a ha, by tidy) (λ a ha, by tidy)
+
+/-- The transition maps between the Mbar_bdd sets. -/
+def transition {r : ℝ} {hr : 0 < r} {S : Fintype} {c : ℝ} {M N : ℕ} (h : M ≤ N) :
+  Mbar_bdd r hr S c N → Mbar_bdd r hr S c M := λ ⟨a,ha⟩,
+⟨λ s i, a s (ι (by linarith) i),
+begin
+  refine ⟨λ s, ha.1 _, le_trans _ ha.2⟩,
+  apply finset.sum_le_sum,
+  intros s hs,
+  let I := finset.map (ι (by linarith : M+1 ≤ N+1))
+    (finset.univ : finset (fin (M+1))),
+  refine le_trans _
+    (finset.sum_le_sum_of_subset_of_nonneg (finset.subset_univ I) _),
+  { rw ← sum_eq_sum_map_ι,
+    apply le_of_eq,
+    congr },
+  { intros,
+    exact mul_nonneg (abs_nonneg _) (pow_nonneg (le_of_lt hr) _) }
+end⟩
+
+lemma transition_transition {r : ℝ} {hr : 0 < r} {S : Fintype} {c : ℝ}
+  {M N K : ℕ} (h : M ≤ N) (hh : N ≤ K) (x : Mbar_bdd r hr S c K):
+  transition h (transition hh x) = transition (le_trans h hh) x := by tidy

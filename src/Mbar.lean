@@ -66,7 +66,8 @@ lemma sum_fin_eq {M : ℕ} (f : ℕ → ℝ) : ∑ i in finset.range M, f i = �
   (λ a ha, ⟨a, finset.mem_range.mp ha⟩) (λ a ha, finset.mem_univ _) (λ a ha, rfl)
   (λ a _, a.1) (λ a ha, finset.mem_range.mpr a.2) (λ a ha, rfl) (λ a ha, by simp)
 
-def truncate {hr : 0 < r'} {M : ℕ} : Mbar r' S c → Mbar_bdd r' hr ⟨S⟩ c M := λ F,
+/-- The truncation map fro Mbar to Mbar_bdd -/
+def truncate (hr : 0 < r') (M : ℕ) : Mbar r' S c → Mbar_bdd r' hr ⟨S⟩ c M := λ F,
 ⟨λ s, (F.1 s).truncate M, begin
   rcases F with ⟨F,hF1,hF2,hF3⟩,
   refine ⟨λ s, by simpa [power_series.truncate] using hF1 s, le_trans _ hF3⟩,
@@ -81,3 +82,7 @@ def truncate {hr : 0 < r'} {M : ℕ} : Mbar r' S c → Mbar_bdd r' hr ⟨S⟩ c 
   rw [abs_mul, abs_of_pos (pow_pos hr _)],
   refl,
 end⟩
+
+/-- The truncation maps commute with the transition maps. -/
+lemma truncate_transition {hr : 0 < r'} {M N : ℕ} (h : M ≤ N) (x : Mbar r' S c) :
+  transition h (truncate hr N x) = truncate hr M x := by tidy
