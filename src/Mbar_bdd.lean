@@ -23,7 +23,7 @@ instance (a b : ℤ) : fintype (Icc a b) := nonempty.some (Icc_finite a b)
 def Mbar_bdd (r : ℝ) (hr : 0 < r) (S : Fintype) (c : ℝ) (M : ℕ) :=
 {F : S → fin (M + 1) → ℤ |
   (∀ s, F s 0 = 0) ∧
-  (∑ s i, abs (F s i : ℝ) * r^i.1 ≤ c) }
+  (∑ s i, abs (F s i : ℝ) * r^(i : ℕ) ≤ c) }
 
 -- for mathlib?
 namespace finset
@@ -38,7 +38,7 @@ end finset
 open finset
 
 lemma Mbar_bdd_coeff_bound {r : ℝ} (hr : 0 < r) {S : Fintype} {c : ℝ} {M : ℕ}
-  (F : S → fin (M + 1) → ℤ) (hF : ∑ s i, abs (F s i : ℝ) * r^i.1 ≤ c) (n : fin (M + 1)) (s : S) :
+  (F : S → fin (M + 1) → ℤ) (hF : ∑ s i, abs (F s i : ℝ) * r^(i : ℕ) ≤ c) (n : fin (M + 1)) (s : S) :
   abs (F s n : ℝ) ≤ c / min (r ^ M) 1 :=
 begin
   rw le_div_iff (lt_min (pow_pos hr _) zero_lt_one),
@@ -49,11 +49,11 @@ begin
       exact pow_le_pow_of_le_one (le_of_lt hr) hr1 (nat.lt_add_one_iff.1 n.2) },
     { exact le_trans (min_le_right _ _) (one_le_pow_of_one_le (le_of_lt hr1) _) },
   end
-  ... ≤ ∑ i, abs (F s i : ℝ) * r^i.1 : begin
+  ... ≤ ∑ i, abs (F s i : ℝ) * r^(i : ℕ) : begin
     refine single_le_sum' (λ _ _, _) n (mem_univ _),
     exact mul_nonneg (abs_nonneg _) (pow_nonneg (le_of_lt hr) _),
   end
-  ... ≤ ∑ s i, abs (F s i : ℝ) * r^i.1 : begin
+  ... ≤ ∑ s i, abs (F s i : ℝ) * r^(i : ℕ) : begin
     refine single_le_sum' (λ _ _, _) s (mem_univ _),
     exact sum_nonneg (λ _ _, mul_nonneg (abs_nonneg _) (pow_nonneg (le_of_lt hr) _)),
   end
