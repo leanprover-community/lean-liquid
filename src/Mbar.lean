@@ -188,7 +188,8 @@ begin
     refine le_add_of_nonneg_of_le (finset.sum_nonneg _) _,
     { intros, exact abs_nonneg _ },
     apply tsum_le_tsum,
-    { rintro ⟨i⟩,
+    { -- we should be able to dedup parts of this with the block that follows it
+      rintro ⟨i⟩,
       { simpa only [int.cast_zero, zero_mul, coeff_zero_eq_constant_coeff,
           ring_hom.coe_add_monoid_hom, abs_zero, pow_one, zero_add,
           power_series.constant_coeff_Tinv, subtype.val_eq_coe] using abs_nonneg _ },
@@ -196,8 +197,7 @@ begin
         subtype.val_eq_coe, pow_succ', ← real.norm_eq_abs, mul_assoc, norm_norm,
         real.norm_of_nonneg h0r.le] } },
     { rw ← summable_mul_right_iff h0r.ne.symm, exact hsummable _ },
-    { sorry /- see below, we should dedup these proofs -/ }
-     },
+    { exact (summable_nat_add_iff 1).mpr (x.summable s) } },
   { intro s, rw summable_mul_right_iff h0r.ne.symm,
     have H := x.summable s,
     refine summable_of_norm_bounded _ ((summable_nat_add_iff 1).mpr H) _,
