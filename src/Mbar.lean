@@ -172,6 +172,18 @@ end⟩
 lemma truncate_transition {hr : 0 < r'} {M N : ℕ} (h : M ≤ N) (x : Mbar r' S c) :
   transition h (truncate hr N x) = truncate hr M x := by tidy
 
+-- Injectivity of the map Mbar to limit of Mbar_bdd
+lemma eq_iff_truncate_eq {hr : 0 < r'} (x y : Mbar r' S c)
+  (cond : ∀ M, truncate hr M x = truncate hr M y) : x = y :=
+begin
+  ext s n,
+  specialize cond n,
+  let i : fin (n+1) := ⟨n, by linarith⟩,
+  change (truncate hr n x).1 s i = _,
+  rw cond,
+  refl,
+end
+
 def Tinv {r : ℝ} {S : Type u} [fintype S] {c : ℝ} (h0r : 0 < r) :
   Mbar r S c → Mbar r S (c / r) :=
 λ x, ⟨λ s, power_series.Tinv (x.1 s),
