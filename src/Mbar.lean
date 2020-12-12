@@ -5,6 +5,7 @@ import topology.algebra.infinite_sum
 import data.finset.basic
 import data.equiv.basic
 import analysis.normed_space.basic
+import analysis.specific_limits
 import .Mbar_bdd
 /-
 
@@ -76,7 +77,6 @@ namespace power_series
 
 def truncate (F : power_series ℤ) (M : ℕ) : fin (M+1) → ℤ :=
 λ i, coeff _ i F
-
 
 variables {R : Type*} [add_monoid R]
 
@@ -178,10 +178,56 @@ lemma eq_iff_truncate_eq {hr : 0 < r'} (x y : Mbar r' S c)
 begin
   ext s n,
   specialize cond n,
-  let i : fin (n+1) := ⟨n, by linarith⟩,
-  change (truncate hr n x).1 s i = _,
+  change (truncate hr n x).1 s ⟨n, by linarith⟩ = (truncate hr n y).1 s ⟨n,_⟩,
   rw cond,
+end
+
+def mk_seq {hr : 0 < r'} (T : Π (M : ℕ), Mbar_bdd r' hr ⟨S⟩ c M) : S → ℕ → ℤ :=
+  λ s n, (T n).1 s ⟨n, by linarith⟩
+
+lemma mk_seq_sum_range_eq {hr : 0 < r'} (T : Π (M : ℕ), Mbar_bdd r' hr ⟨S⟩ c M)
+  (compat : ∀ (M N : ℕ) (h : M ≤ N), transition h (T N) = T M) (s : S) (n) :
+  ∑ i in finset.range (n+1), (abs (mk_seq T s i : ℝ)) * r'^i = ∑ i : fin (n+1), (abs ((T n).1 s i : ℝ)) * r'^i.1 :=
+finset.sum_bij' (λ a ha, ⟨a, by {rw finset.mem_range at ha, linarith}⟩)
+(λ a ha, finset.mem_univ _)
+begin
+  intros a ha,
+  rw finset.mem_range at ha,
+  change abs ((T a).1 s _ : ℝ) * _ = _,
+  congr,
+  rw [← compat a n (by linarith), transition_eq],
   refl,
+end
+(λ a ha, a.1) (λ a ha, by {rw finset.mem_range, exact a.2})
+(λ a ha, rfl) (λ a ha, by tidy)
+
+-- Surjectivity
+lemma exists_of_compat {hr : 0 < r'} (T : Π (M : ℕ), Mbar_bdd r' hr ⟨S⟩ c M)
+  (compat : ∀ (M N : ℕ) (h : M ≤ N), transition h (T N) = T M) :
+  ∃ (F : Mbar r' S c), ∀ M, truncate hr M F = T M :=
+begin
+  refine ⟨⟨λ s, power_series.mk $ λ n, (T n).1 s ⟨n, by linarith⟩,_,_,_⟩,_⟩,
+  { intro s,
+    apply (T 0).2.1 },
+  { intros s,
+    let A : ℕ → ℝ := λ n, ∑ i in finset.range (n+1), abs (mk_seq T s i : ℝ) * r'^i,
+    have claim1 : ∀ n, A n ≤ c,
+    { intros n,
+      dsimp only [A],
+      rw mk_seq_sum_range_eq T compat s n,
+      have := (T n).2.2,
+      apply le_trans _ this,
+      refine finset.single_le_sum' (λ _ _, _) s (finset.mem_univ _),
+      exact finset.sum_nonneg (λ i _, mul_nonneg (abs_nonneg _) (pow_nonneg (le_of_lt hr) _)) },
+    have claim2 : ∀ n, 0 ≤ A n,
+    { intros n,
+      exact finset.sum_nonneg (λ i _, mul_nonneg (abs_nonneg _) (pow_nonneg (le_of_lt hr) _)) },
+    -- The partial sums are given by the (A n).
+    -- The above proves they're all bounded above and all nonnegative.
+    -- We should be able to apply a lemma from mathlib.
+    sorry },
+  { sorry },
+  { sorry },
 end
 
 def Tinv {r : ℝ} {S : Type u} [fintype S] {c : ℝ} (h0r : 0 < r) :

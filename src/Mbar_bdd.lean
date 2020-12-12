@@ -106,6 +106,10 @@ begin
     exact mul_nonneg (abs_nonneg _) (pow_nonneg (le_of_lt hr) _) }
 end⟩
 
+lemma transition_eq {r : ℝ} {hr : 0 < r} {S : Fintype} {c : ℝ} {M N : ℕ} (h : M ≤ N)
+  (F : Mbar_bdd r hr S c N) (s : S) (i : fin (M+1)) :
+  (transition h F).1 s i = F.1 s (ι (by linarith) i) := by tidy
+
 lemma transition_transition {r : ℝ} {hr : 0 < r} {S : Fintype} {c : ℝ}
   {M N K : ℕ} (h : M ≤ N) (hh : N ≤ K) (x : Mbar_bdd r hr S c K):
   transition h (transition hh x) = transition (le_trans h hh) x := by tidy
