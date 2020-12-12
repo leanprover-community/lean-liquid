@@ -32,14 +32,14 @@ def Mbar (r' : ℝ) (S : Type u) [fintype S] (c : ℝ) :=
 
 variables {r' : ℝ} {S : Type u} [fintype S] {c c₁ c₂ : ℝ}
 
-def Mbar.constant_coeff_eq_zero {r' : ℝ} {S : Type u} [fintype S] {c : ℝ} (x : Mbar r' S c) :=
-x.2.1
+def Mbar.constant_coeff_eq_zero (x : Mbar r' S c) := x.2.1
 
-def Mbar.summable {r' : ℝ} {S : Type u} [fintype S] {c : ℝ} (x : Mbar r' S c) :=
-x.2.2.1
+def Mbar.summable (x : Mbar r' S c) := x.2.2.1
 
-def Mbar.sum_tsum_le {r' : ℝ} {S : Type u} [fintype S] {c : ℝ} (x : Mbar r' S c) :=
-x.2.2.2
+def Mbar.sum_tsum_le (x : Mbar r' S c) := x.2.2.2
+
+def Mbar.cast_le (h : c₁ ≤ c₂) (x : Mbar r' S c₁) : Mbar r' S c₂ :=
+⟨x.1, x.constant_coeff_eq_zero, x.summable, x.sum_tsum_le.trans h⟩
 
 noncomputable def Mbar.add :
   Mbar r' S c₁ → Mbar r' S c₂ → Mbar r' S (c₁ + c₂) :=
