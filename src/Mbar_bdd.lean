@@ -78,7 +78,7 @@ end ⟩)
 (λ a ha, finset.mem_univ _) (λ a ha, by tidy) (λ a ha, by tidy)
 
 /-- The transition maps between the Mbar_bdd sets. -/
-def transition {r : ℝ} (hr : 0 < r) {S : Fintype} {c : ℝ} {M N : ℕ} (h : M ≤ N) :
+def transition (r : ℝ) {S : Fintype} {c : ℝ} {M N : ℕ} (h : M ≤ N) :
   Mbar_bdd r S c N → Mbar_bdd r S c M := λ ⟨a,ha⟩,
 ⟨λ s i, a s (ι (by linarith) i),
 begin
@@ -96,10 +96,10 @@ begin
     exact (abs_nonneg _) }
 end⟩
 
-lemma transition_eq {r : ℝ} {hr : 0 < r} {S : Fintype} {c : ℝ} {M N : ℕ} (h : M ≤ N)
+lemma transition_eq {r : ℝ} {S : Fintype} {c : ℝ} {M N : ℕ} (h : M ≤ N)
   (F : Mbar_bdd r S c N) (s : S) (i : fin (M+1)) :
-  (transition hr h F).1 s i = F.1 s (ι (by linarith) i) := by tidy
+  (transition r h F).1 s i = F.1 s (ι (by linarith) i) := by tidy
 
-lemma transition_transition {r : ℝ} (hr : 0 < r) {S : Fintype} {c : ℝ}
+lemma transition_transition {r : ℝ} {S : Fintype} {c : ℝ}
   {M N K : ℕ} (h : M ≤ N) (hh : N ≤ K) (x : Mbar_bdd r S c K):
-  transition hr h (transition hr hh x) = transition hr (le_trans h hh) x := by tidy
+  transition r h (transition r hh x) = transition r (le_trans h hh) x := by tidy
