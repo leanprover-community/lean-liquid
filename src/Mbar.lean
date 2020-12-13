@@ -77,6 +77,7 @@ lemma sum_fin_eq {M : ℕ} (f : ℕ → ℝ) : ∑ i in finset.range M, f i = �
   (λ a ha, ⟨a, finset.mem_range.mp ha⟩) (λ a ha, finset.mem_univ _) (λ a ha, rfl)
   (λ a _, a) (λ a ha, finset.mem_range.mpr a.2) (λ a ha, rfl) (λ a ha, by simp)
 
+def Tinv_aux {R : Type*} [has_zero R] : (ℕ → R) → ℕ → R := λ F n, if n = 0 then 0 else F (n + 1)
 /-
 namespace power_series
 
@@ -154,6 +155,7 @@ end
 
 end power_series
 -/
+
 namespace Mbar
 
 /-- The truncation map fro Mbar to Mbar_bdd -/
@@ -185,92 +187,122 @@ end
 def mk_seq (T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M) : S → ℕ → ℤ :=
   λ s n, (T n).1 s ⟨n, by linarith⟩
 
-def mk_seq_eq_of_compat (T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M)
-  (compat : ∀ (M N : ℕ) (h : M ≤ N), transition r' h (T N) = T M)
+lemma mk_seq_zero {T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M} (s : S) : mk_seq T s 0 = 0 := (T 0).2.1 s
 
+lemma mk_seq_eq_of_compat {T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M}
+  (compat : ∀ (M N : ℕ) (h : M ≤ N), transition r' h (T N) = T M)
+  {s : S} {n : ℕ} {M : ℕ} (hnM : n < M + 1) :
+  mk_seq T s n = (T M).1 s ⟨n, hnM⟩ :=
+begin
+  have hnM : n ≤ M := nat.lt_succ_iff.mp hnM,
+  unfold mk_seq,
+  rw ← compat n M hnM,
+  apply transition_eq,
+end
+
+-- This code of Adam's might be useful for the next two sorrys
+--   refine ⟨⟨λ s n, (T n).1 s ⟨n, by linarith⟩,λ s, (T 0).2.1 _,_,_⟩,_⟩,
+--   { intros s,
+--     let A : ℕ → ℝ := λ n, ∑ i in finset.range (n+1), abs (mk_seq T s i : ℝ) * r'^i,
+--     have claim1 : ∀ n, A n ≤ c,
+--     { intros n,
+--       dsimp only [A],
+--       rw mk_seq_sum_range_eq T compat s n,
+--       have := (T n).2.2,
+--       apply le_trans _ this,
+--       refine finset.single_le_sum (λ _ _, _) (finset.mem_univ s),
+--       exact finset.sum_nonneg (λ i _, mul_nonneg (abs_nonneg _) (pow_nonneg (le_of_lt hr) _)) },
+--     have claim2 : ∀ n, 0 ≤ A n,
+--     { intros n,
+--       exact finset.sum_nonneg (λ i _, mul_nonneg (abs_nonneg _) (pow_nonneg (le_of_lt hr) _)) },
+--     -- The partial sums are given by the (A n).
+--     -- The above proves they're all bounded above and all nonnegative.
+--     -- We should be able to apply a lemma from mathlib.
+--     sorry },
+--   { sorry },
+--   { sorry },
+-- end
+
+lemma mk_seq_summable {T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M}
+  (compat : ∀ (M N : ℕ) (h : M ≤ N), transition r' h (T N) = T M) (s : S) :
+  _root_.summable (λ (n : ℕ), abs (↑(mk_seq T s n) * r' ^ n)) :=
+begin
+  sorry
+end
+
+lemma mk_seq_sum_le {T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M}
+  (compat : ∀ (M N : ℕ) (h : M ≤ N), transition r' h (T N) = T M) :
+  (∑ s, ∑' (n : ℕ), abs (↑(mk_seq T s n) * r' ^ n)) ≤ c :=
+begin
+  sorry
+end
+
+lemma truncate_mk_seq {T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M}
+  (compat : ∀ (M N : ℕ) (h : M ≤ N), transition r' h (T N) = T M) (M : ℕ) :
+  truncate M ⟨mk_seq T, mk_seq_zero, mk_seq_summable compat, mk_seq_sum_le compat⟩ = T M :=
+begin
+  ext s ⟨i, hi⟩,
+  exact mk_seq_eq_of_compat compat _,
+end
 
 lemma mk_seq_sum_range_eq {hr : 0 < r'} (T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M)
-  (compat : ∀ (M N : ℕ) (h : M ≤ N), transition hr h (T N) = T M) (s : S) (n) :
+  (compat : ∀ (M N : ℕ) (h : M ≤ N), transition r' h (T N) = T M) (s : S) (n) :
   ∑ i in finset.range (n+1), abs ((mk_seq T s i : ℝ) * r'^i) =
   ∑ i : fin (n+1), abs (((T n).1 s i : ℝ) * r'^i.1) :=
-finset.sum_bij' (λ a ha, ⟨a, by {rw finset.mem_range at ha, linarith}⟩)
-(λ a ha, finset.mem_univ _)
 begin
-  intros a ha,
-  rw finset.mem_range at ha,
+  rw sum_fin_eq,
   congr',
-  change abs ((T a).1 s _ : ℝ) * _ = _,
-  congr,
-  rw [← compat a n (by linarith), transition_eq],
-  refl,
+  ext ⟨i, hi⟩,
+  congr',
+  exact mk_seq_eq_of_compat compat _,
 end
-(λ a ha, a.1) (λ a ha, by {rw finset.mem_range, exact a.2})
-(λ a ha, rfl) (λ a ha, by tidy)
 
 -- Surjectivity
-lemma exists_of_compat {hr : 0 < r'} (T : Π (M : ℕ), Mbar_bdd r' hr ⟨S⟩ c M)
-  (compat : ∀ (M N : ℕ) (h : M ≤ N), transition h (T N) = T M) :
-  ∃ (F : Mbar r' S c), ∀ M, truncate hr M F = T M :=
-begin
-  refine ⟨⟨λ s, power_series.mk $ λ n, (T n).1 s ⟨n, by linarith⟩,_,_,_⟩,_⟩,
-  { intro s,
-    apply (T 0).2.1 },
-  { intros s,
-    let A : ℕ → ℝ := λ n, ∑ i in finset.range (n+1), abs (mk_seq T s i : ℝ) * r'^i,
-    have claim1 : ∀ n, A n ≤ c,
-    { intros n,
-      dsimp only [A],
-      rw mk_seq_sum_range_eq T compat s n,
-      have := (T n).2.2,
-      apply le_trans _ this,
-      refine finset.single_le_sum (λ _ _, _) (finset.mem_univ s),
-      exact finset.sum_nonneg (λ i _, mul_nonneg (abs_nonneg _) (pow_nonneg (le_of_lt hr) _)) },
-    have claim2 : ∀ n, 0 ≤ A n,
-    { intros n,
-      exact finset.sum_nonneg (λ i _, mul_nonneg (abs_nonneg _) (pow_nonneg (le_of_lt hr) _)) },
-    -- The partial sums are given by the (A n).
-    -- The above proves they're all bounded above and all nonnegative.
-    -- We should be able to apply a lemma from mathlib.
-    sorry },
-  { sorry },
-  { sorry },
-end
+lemma exists_of_compat {hr : 0 < r'} (T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M)
+  (compat : ∀ (M N : ℕ) (h : M ≤ N), transition r' h (T N) = T M) :
+  ∃ (F : Mbar r' S c), ∀ M, truncate M F = T M :=
+⟨⟨mk_seq T, mk_seq_zero, mk_seq_summable compat, mk_seq_sum_le compat⟩, truncate_mk_seq compat⟩
+
+
 
 def Tinv {r : ℝ} {S : Type u} [fintype S] {c : ℝ} (h0r : 0 < r) :
   Mbar r S c → Mbar r S (c / r) :=
-λ x, ⟨λ s, power_series.Tinv (x.1 s),
-begin
-  have hsummable : _ := _,
-  refine ⟨_, hsummable, _⟩,
-  { intro s, exact power_series.constant_coeff_Tinv _ },
-  { rw [le_div_iff h0r, finset.sum_mul],
-    refine le_trans _ x.sum_tsum_le,
-    apply finset.sum_le_sum,
-    rintro s -,
-    rw ← tsum_mul_right _ (hsummable s),
-    conv_rhs { rw [← @sum_add_tsum_nat_add ℝ _ _ _ _ _ 1 (x.summable s)] },
-    refine le_add_of_nonneg_of_le (finset.sum_nonneg _) _,
-    { intros, exact abs_nonneg _ },
-    apply tsum_le_tsum,
-    { -- we should be able to dedup parts of this with the block that follows it
-      rintro ⟨i⟩,
-      { simpa only [int.cast_zero, zero_mul, coeff_zero_eq_constant_coeff,
-          ring_hom.coe_add_monoid_hom, abs_zero, pow_one, zero_add,
-          power_series.constant_coeff_Tinv, subtype.val_eq_coe] using abs_nonneg _ },
-      { simp only [nat.succ_pos', normed_field.norm_mul, power_series.coeff_Tinv_of_pos,
-        subtype.val_eq_coe, pow_succ', ← real.norm_eq_abs, mul_assoc, norm_norm,
-        real.norm_of_nonneg h0r.le] } },
-    { rw ← summable_mul_right_iff h0r.ne.symm, exact hsummable _ },
-    { exact (summable_nat_add_iff 1).mpr (x.summable s) } },
-  { intro s, rw summable_mul_right_iff h0r.ne.symm,
-    have H := x.summable s,
-    refine summable_of_norm_bounded _ ((summable_nat_add_iff 1).mpr H) _,
-    rintro ⟨i⟩,
-    { simpa only [norm_zero, int.cast_zero, zero_mul, coeff_zero_eq_constant_coeff,
-        ring_hom.coe_add_monoid_hom, abs_zero, pow_one, zero_add, power_series.constant_coeff_Tinv,
-        subtype.val_eq_coe] using abs_nonneg _ },
-    { simp only [nat.succ_pos', normed_field.norm_mul, power_series.coeff_Tinv_of_pos,
-        subtype.val_eq_coe, pow_succ', ← real.norm_eq_abs, mul_assoc, norm_norm] } },
-end⟩
+λ F, ⟨λ s, Tinv_aux (F.1 s), λ s, rfl, sorry, sorry⟩
+
+-- This code of Johan's will be useful for the two sorrys above
+-- ⟨λ s, power_series.Tinv (x.1 s),
+-- begin
+--   have hsummable : _ := _,
+--   refine ⟨_, hsummable, _⟩,
+--   { intro s, exact power_series.constant_coeff_Tinv _ },
+--   { rw [le_div_iff h0r, finset.sum_mul],
+--     refine le_trans _ x.sum_tsum_le,
+--     apply finset.sum_le_sum,
+--     rintro s -,
+--     rw ← tsum_mul_right _ (hsummable s),
+--     conv_rhs { rw [← @sum_add_tsum_nat_add ℝ _ _ _ _ _ 1 (x.summable s)] },
+--     refine le_add_of_nonneg_of_le (finset.sum_nonneg _) _,
+--     { intros, exact abs_nonneg _ },
+--     apply tsum_le_tsum,
+--     { -- we should be able to dedup parts of this with the block that follows it
+--       rintro ⟨i⟩,
+--       { simpa only [int.cast_zero, zero_mul, coeff_zero_eq_constant_coeff,
+--           ring_hom.coe_add_monoid_hom, abs_zero, pow_one, zero_add,
+--           power_series.constant_coeff_Tinv, subtype.val_eq_coe] using abs_nonneg _ },
+--       { simp only [nat.succ_pos', normed_field.norm_mul, power_series.coeff_Tinv_of_pos,
+--         subtype.val_eq_coe, pow_succ', ← real.norm_eq_abs, mul_assoc, norm_norm,
+--         real.norm_of_nonneg h0r.le] } },
+--     { rw ← summable_mul_right_iff h0r.ne.symm, exact hsummable _ },
+--     { exact (summable_nat_add_iff 1).mpr (x.summable s) } },
+--   { intro s, rw summable_mul_right_iff h0r.ne.symm,
+--     have H := x.summable s,
+--     refine summable_of_norm_bounded _ ((summable_nat_add_iff 1).mpr H) _,
+--     rintro ⟨i⟩,
+--     { simpa only [norm_zero, int.cast_zero, zero_mul, coeff_zero_eq_constant_coeff,
+--         ring_hom.coe_add_monoid_hom, abs_zero, pow_one, zero_add, power_series.constant_coeff_Tinv,
+--         subtype.val_eq_coe] using abs_nonneg _ },
+--     { simp only [nat.succ_pos', normed_field.norm_mul, power_series.coeff_Tinv_of_pos,
+--         subtype.val_eq_coe, pow_succ', ← real.norm_eq_abs, mul_assoc, norm_norm] } },
+-- end⟩
 
 end Mbar

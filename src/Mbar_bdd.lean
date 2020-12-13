@@ -21,7 +21,7 @@ end
 instance (a b : ℤ) : fintype (Icc a b) := nonempty.some (Icc_finite a b)
 
 def Mbar_bdd (r : ℝ) (S : Fintype) (c : ℝ) (M : ℕ) :=
-{F : S → fin (M + 1) → ℤ |
+{F : S → fin (M + 1) → ℤ //
   (∀ s, F s 0 = 0) ∧
   (∑ s i, abs ((F s i : ℝ) * r ^ (i : ℕ)) ≤ c) }
 
