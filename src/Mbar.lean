@@ -27,9 +27,9 @@ open power_series
 /-- `Mbar r' S c` is the set of power series
 `F_s = ∑ a_{n,s}T^n ∈ ℤ[[T]]` such that `∑_{n,s} |a_{n,s}|r'^n ≤ c` -/
 def Mbar (r' : ℝ) (S : Type u) [fintype S] (c : ℝ) :=
-{F : S → power_series ℤ // (∀ s, constant_coeff ℤ (F s) = 0) ∧
-  (∀ s, summable (λ n, abs ((power_series.coeff ℤ n (F s) : ℝ) * r'^n))) ∧
-  (∑ s, ∑' n, (abs ((power_series.coeff ℤ n (F s) : ℝ) * r'^n))) ≤ c }
+{F : S → ℕ → ℤ // (∀ s, F s 0 = 0) ∧
+  (∀ s, summable (λ n, abs ((F s n : ℝ) * r'^n))) ∧
+  (∑ s, ∑' n, (abs ((F s n : ℝ) * r'^n))) ≤ c }
 
 variables {r' : ℝ} {S : Type u} [fintype S] {c c₁ c₂ : ℝ}
 
@@ -42,12 +42,16 @@ def Mbar.sum_tsum_le (x : Mbar r' S c) := x.2.2.2
 def Mbar.cast_le (h : c₁ ≤ c₂) (x : Mbar r' S c₁) : Mbar r' S c₂ :=
 ⟨x.1, x.constant_coeff_eq_zero, x.summable, x.sum_tsum_le.trans h⟩
 
-noncomputable def Mbar.add :
+-- lemma abs_mul_pow_pos {x r : ℝ} (hr : 0 < r) {n : ℕ} :
+--   abs (x * r ^ n) = abs x * r ^ n :=
+-- by rw [abs_mul, abs_of_pos (pow_pos hr _)]
+
+noncomputable def Mbar.add (hr' : 0 < r') :
   Mbar r' S c₁ → Mbar r' S c₂ → Mbar r' S (c₁ + c₂) :=
 λ F G, ⟨F.1 + G.1, begin
   rcases F with ⟨F, hF0, hFs, hFsc⟩,
   rcases G with ⟨G, hG0, hGs, hGsc⟩,
-  have hFGs : ∀ (s : S), summable (λ (n : ℕ), abs (↑((coeff ℤ n) ((F + G) s)) * r' ^ n)),
+  have hFGs : ∀ (s : S), summable (λ (n : ℕ), abs (((F + G) s n : ℝ) * r' ^ n)),
   { intro s,
     simp_rw summable_abs_iff at hFs hGs ⊢,
     convert summable.add (hFs s) (hGs s),
@@ -73,6 +77,7 @@ lemma sum_fin_eq {M : ℕ} (f : ℕ → ℝ) : ∑ i in finset.range M, f i = �
   (λ a ha, ⟨a, finset.mem_range.mp ha⟩) (λ a ha, finset.mem_univ _) (λ a ha, rfl)
   (λ a _, a) (λ a ha, finset.mem_range.mpr a.2) (λ a ha, rfl) (λ a ha, by simp)
 
+/-
 namespace power_series
 
 def truncate (F : power_series ℤ) (M : ℕ) : fin (M+1) → ℤ :=
@@ -148,51 +153,52 @@ begin
 end
 
 end power_series
-
+-/
 namespace Mbar
 
 /-- The truncation map fro Mbar to Mbar_bdd -/
-def truncate (hr : 0 < r') (M : ℕ) : Mbar r' S c → Mbar_bdd r' hr ⟨S⟩ c M := λ F,
-⟨λ s, (F.1 s).truncate M, begin
+def truncate (M : ℕ) : Mbar r' S c → Mbar_bdd r' ⟨S⟩ c M := λ F,
+⟨λ s n, F.1 s n.1, begin
   rcases F with ⟨F,hF1,hF2,hF3⟩,
-  refine ⟨λ s, by simpa [power_series.truncate] using hF1 s, le_trans _ hF3⟩,
+  refine ⟨λ s, by simpa using hF1 s, le_trans _ hF3⟩,
   apply finset.sum_le_sum,
-  intros s hs,
-  have claim := @sum_le_tsum ℝ ℕ _ _ _ (λ n, abs ((power_series.coeff ℤ n (F s) : ℝ) * r'^n))
-    (finset.range (M+1)) (λ b hb, abs_nonneg _) (hF2 s),
-  erw sum_fin_eq (λ n, abs ((coeff ℤ n (F s) : ℝ) * r'^n)) at claim,
-  convert claim,
-  funext,
-  dsimp only,
-  rw [abs_mul, abs_of_pos (pow_pos hr _)],
-  refl,
+  rintros (s : S) -,
+  simp only [fin.val_eq_coe],
+  rw ← sum_fin_eq (λ i, abs ((F s i : ℝ) * r' ^i)),
+  exact sum_le_tsum _ (λ _ _, abs_nonneg _) (hF2 s),
 end⟩
 
-/-- The truncation maps commute with the transition maps. -/
-lemma truncate_transition {hr : 0 < r'} {M N : ℕ} (h : M ≤ N) (x : Mbar r' S c) :
-  transition h (truncate hr N x) = truncate hr M x := by tidy
+-- /-- The truncation maps commute with the transition maps. -/
+-- lemma truncate_transition {hr : 0 < r'} {M N : ℕ} (h : M ≤ N) (x : Mbar r' S c) :
+--   transition h (truncate hr N x) = truncate hr M x := by tidy
 
 -- Injectivity of the map Mbar to limit of Mbar_bdd
 lemma eq_iff_truncate_eq {hr : 0 < r'} (x y : Mbar r' S c)
-  (cond : ∀ M, truncate hr M x = truncate hr M y) : x = y :=
+  (cond : ∀ M, truncate M x = truncate M y) : x = y :=
 begin
   ext s n,
   specialize cond n,
-  change (truncate hr n x).1 s ⟨n, by linarith⟩ = (truncate hr n y).1 s ⟨n,_⟩,
+  change (truncate n x).1 s ⟨n, by linarith⟩ = (truncate n y).1 s ⟨n,_⟩,
   rw cond,
 end
 
-def mk_seq {hr : 0 < r'} (T : Π (M : ℕ), Mbar_bdd r' hr ⟨S⟩ c M) : S → ℕ → ℤ :=
+def mk_seq (T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M) : S → ℕ → ℤ :=
   λ s n, (T n).1 s ⟨n, by linarith⟩
 
-lemma mk_seq_sum_range_eq {hr : 0 < r'} (T : Π (M : ℕ), Mbar_bdd r' hr ⟨S⟩ c M)
-  (compat : ∀ (M N : ℕ) (h : M ≤ N), transition h (T N) = T M) (s : S) (n) :
-  ∑ i in finset.range (n+1), (abs (mk_seq T s i : ℝ)) * r'^i = ∑ i : fin (n+1), (abs ((T n).1 s i : ℝ)) * r'^i.1 :=
+def mk_seq_eq_of_compat (T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M)
+  (compat : ∀ (M N : ℕ) (h : M ≤ N), transition r' h (T N) = T M)
+
+
+lemma mk_seq_sum_range_eq {hr : 0 < r'} (T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M)
+  (compat : ∀ (M N : ℕ) (h : M ≤ N), transition hr h (T N) = T M) (s : S) (n) :
+  ∑ i in finset.range (n+1), abs ((mk_seq T s i : ℝ) * r'^i) =
+  ∑ i : fin (n+1), abs (((T n).1 s i : ℝ) * r'^i.1) :=
 finset.sum_bij' (λ a ha, ⟨a, by {rw finset.mem_range at ha, linarith}⟩)
 (λ a ha, finset.mem_univ _)
 begin
   intros a ha,
   rw finset.mem_range at ha,
+  congr',
   change abs ((T a).1 s _ : ℝ) * _ = _,
   congr,
   rw [← compat a n (by linarith), transition_eq],
@@ -217,7 +223,7 @@ begin
       rw mk_seq_sum_range_eq T compat s n,
       have := (T n).2.2,
       apply le_trans _ this,
-      refine finset.single_le_sum' (λ _ _, _) s (finset.mem_univ _),
+      refine finset.single_le_sum (λ _ _, _) (finset.mem_univ s),
       exact finset.sum_nonneg (λ i _, mul_nonneg (abs_nonneg _) (pow_nonneg (le_of_lt hr) _)) },
     have claim2 : ∀ n, 0 ≤ A n,
     { intros n,
