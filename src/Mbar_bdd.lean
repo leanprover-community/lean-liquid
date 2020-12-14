@@ -27,6 +27,15 @@ def Mbar_bdd (r : ℝ) (S : Fintype) (c : ℝ) (M : ℕ) :=
 
 open finset
 
+lemma nonneg_of_Mbar_bdd {r : ℝ} {S : Fintype} {c : ℝ} {M : ℕ}
+  (x : Mbar_bdd r S c M) : 0 ≤ c :=
+begin
+  -- This should be a simple term-mode proof but I got a deterministic
+  -- timeout when I tried it...
+  refine le_trans (finset.sum_nonneg _) x.2.2,
+  exact (λ _ _, finset.sum_nonneg (λ _ _, abs_nonneg _)),
+end
+
 lemma Mbar_bdd_coeff_bound {r : ℝ} (hr : 0 < r) {S : Fintype} {c : ℝ} {M : ℕ}
   (F : S → fin (M + 1) → ℤ) (hF : ∑ s i, abs ((F s i : ℝ) * r^(i : ℕ)) ≤ c)
   (n : fin (M + 1)) (s : S) :
