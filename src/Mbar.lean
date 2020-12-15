@@ -82,89 +82,9 @@ def Tinv_aux {R : Type*} [has_zero R] : (ℕ → R) → ℕ → R := λ F n, if 
 
 @[simp] lemma Tinv_aux_zero {R : Type*} [has_zero R] (f : ℕ → R) : Tinv_aux f 0 = 0 := rfl
 
-@[simp] lemma Tinv_aux_succ {R : Type*} [has_zero R] (f : ℕ → R) (i : ℕ) : Tinv_aux f (i + 1) = f (i + 2) :=
+@[simp] lemma Tinv_aux_succ {R : Type*} [has_zero R] (f : ℕ → R) (i : ℕ) :
+  Tinv_aux f (i + 1) = f (i + 2) :=
 if_neg (nat.succ_ne_zero i)
-
---dif_neg (nat.succ_ne_zero i)
-
-
-/-
-namespace power_series
-
-def truncate (F : power_series ℤ) (M : ℕ) : fin (M+1) → ℤ :=
-λ i, coeff _ i F
-
-variables {R : Type*} [add_monoid R]
-
--- move this
--- is this the correct def??
-def Tinv : power_series R →+ power_series R :=
-{ to_fun := λ F, mk $ λ n, if n = 0 then 0 else coeff R (n+1) F,
-  map_zero' := by { ext n, simp only [if_t_t, coeff_mk, add_monoid_hom.map_zero] },
-  map_add' :=
-  begin
-    intros F G,
-    ext n,
-    simp only [coeff_mk, add_monoid_hom.map_add],
-    split_ifs,
-    { rw add_zero },
-    { refl }
-  end }
-
-lemma Tinv_def (F : power_series R) :
-  Tinv F = mk (λ n, if n = 0 then 0 else coeff R (n+1) F) := rfl
-
-@[simp] lemma coeff_zero_Tinv (F : power_series R) :
-  coeff R 0 (Tinv F) = 0 :=
-by rw [Tinv_def, coeff_mk, if_pos rfl]
-
-@[simp] lemma constant_coeff_Tinv {R : Type*} [semiring R] (F : power_series R) :
-  constant_coeff R (Tinv F) = 0 :=
-by rw [← coeff_zero_eq_constant_coeff_apply, coeff_zero_Tinv]
-
-@[simp] lemma coeff_succ_Tinv (n : ℕ) (F : power_series R) :
-  coeff R (n+1) (Tinv F) = coeff R (n+2) F :=
-by rw [Tinv_def, coeff_mk, if_neg (nat.succ_ne_zero n)]
-
-@[simp] lemma coeff_Tinv_of_pos (n : ℕ) (h : 0 < n) (F : power_series R) :
-  coeff R n (Tinv F) = coeff R (n+1) F :=
-by { obtain ⟨n, rfl⟩ := nat.exists_eq_add_of_le h, rw [add_comm, coeff_succ_Tinv] }
-
-@[simp] lemma Tinv_monomial_zero (r : R) :
-  Tinv (monomial R 0 r) = 0 :=
-by { ext n, simp only [Tinv_def, coeff_mk, add_monoid_hom.map_zero, coeff_monomial,
-    if_t_t, add_eq_zero_iff, if_false, one_ne_zero, and_false] }
-
-@[simp] lemma Tinv_monomial_one (r : R) :
-  Tinv (monomial R 1 r) = 0 :=
-begin
-  ext n,
-  simp only [Tinv_def, coeff_mk, add_monoid_hom.map_zero, coeff_monomial],
-  split_ifs with h1 h2; try { refl },
-  cases h2, contradiction
-end
-
-@[simp] lemma Tinv_monomial_add_two (n : ℕ) (r : R) :
-  Tinv (monomial R (n+2) r) = (monomial R (n+1) r) :=
-begin
-  ext k,
-  simp only [Tinv_def, coeff_mk, add_monoid_hom.map_zero, coeff_monomial],
-  split_ifs with h1 h2 h3; try { refl <|> cases h2 <|> cases h3 <|> cases h },
-  { exact (nat.succ_ne_zero _ h1).elim },
-  { contradiction },
-  { contradiction }
-end
-
-@[simp] lemma Tinv_monomial_of_two_le (n : ℕ) (hn : 2 ≤ n) (r : R) :
-  Tinv (monomial R n r) = (monomial R (n-1) r) :=
-begin
-  obtain ⟨n, rfl⟩ := nat.exists_eq_add_of_le hn,
-  rw [add_comm, Tinv_monomial_add_two],
-  refl
-end
-
-end power_series
--/
 
 namespace Mbar
 
@@ -349,20 +269,19 @@ def Tinv {r : ℝ} {S : Type u} [fintype S] {c : ℝ} [fact (0 < r)] :
 begin
   have h0r : 0 < r, by assumption,
   rw [le_div_iff h0r, finset.sum_mul],
-    refine le_trans _ F.sum_tsum_le,
-    apply finset.sum_le_sum,
-    rintro s -,
-    rw ← tsum_mul_right _ (Tinv_aux_summable F s),
-    conv_rhs { rw [← @sum_add_tsum_nat_add ℝ _ _ _ _ _ 1 (F.summable s)] },
-    refine le_add_of_nonneg_of_le (finset.sum_nonneg (λ _ _, abs_nonneg _)) _,
-    apply tsum_le_tsum,
-    { -- we should be able to dedup parts of this with the block that follows it
-      rintro ⟨i⟩,
-      { simp [abs_nonneg] },
-      { simp only [Tinv_aux_succ, real.norm_eq_abs, abs_mul, pow_add, mul_assoc,
-          pow_one, abs_abs, abs_of_pos h0r] } },
-    { rw ← summable_mul_right_iff h0r.ne.symm, exact Tinv_aux_summable F s },
-    { exact (summable_nat_add_iff 1).mpr (F.summable s) }
+  refine le_trans _ F.sum_tsum_le,
+  apply finset.sum_le_sum,
+  rintro s -,
+  rw ← tsum_mul_right _ (Tinv_aux_summable h0r F s),
+  conv_rhs { rw [← @sum_add_tsum_nat_add ℝ _ _ _ _ _ 1 (F.summable s)] },
+  refine le_add_of_nonneg_of_le (finset.sum_nonneg (λ _ _, abs_nonneg _)) _,
+  apply tsum_le_tsum,
+  { rintro ⟨i⟩,
+    { simp [abs_nonneg] },
+    { simp only [Tinv_aux_succ, real.norm_eq_abs, abs_mul, pow_add, mul_assoc,
+        pow_one, abs_abs, abs_of_pos h0r] } },
+  { rw ← summable_mul_right_iff h0r.ne.symm, exact Tinv_aux_summable h0r F s },
+  { exact (summable_nat_add_iff 1).mpr (F.summable s) }
 end⟩
 
 end Mbar
