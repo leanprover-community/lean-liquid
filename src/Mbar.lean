@@ -6,6 +6,7 @@ import data.finset.basic
 import data.equiv.basic
 import analysis.normed_space.basic
 import analysis.specific_limits
+import data.equiv.basic
 import .Mbar_bdd
 /-!
 
@@ -285,7 +286,7 @@ begin
   exact mk_seq_eq_of_compat compat _,
 end
 
-def equiv : Mbar r' S c ≃ Mbar_bdd.limit r' ⟨S⟩ c :=
+def eqv : Mbar r' S c ≃ Mbar_bdd.limit r' ⟨S⟩ c :=
 { to_fun := λ F, ⟨λ N, truncate _ F, by tidy⟩,
   inv_fun := λ F, of_compat F.2,
   left_inv := by tidy,
@@ -293,8 +294,40 @@ def equiv : Mbar r' S c ≃ Mbar_bdd.limit r' ⟨S⟩ c :=
 
 section topological_structure
 
-instance : topological_space (Mbar r' S c) := topological_space.induced equiv (by apply_instance)
+instance : topological_space (Mbar r' S c) := topological_space.induced eqv (by apply_instance)
+
 --TODO: t2_space and compact_space instances for Mbar
+
+lemma is_open_iff {U : set (Mbar_bdd.limit r' ⟨S⟩ c)} : is_open (eqv ⁻¹' U) ↔ is_open U :=
+begin
+  -- this should be made cleaner with some mathlib lemmas
+  -- about images/preimages of sets under equiv's.
+  rw is_open_induced_iff,
+  split,
+  { rintros ⟨V,hV,h⟩,
+    apply_fun (λ S, eqv '' S) at h,
+    simp_rw [eqv.image_eq_preimage] at h,
+    have : V = U, { convert h, by tidy, by tidy },
+    rw ← this,
+    assumption },
+  { intros hU,
+    exact ⟨U,hU,rfl⟩ },
+end
+
+def homeo : Mbar r' S c ≃ₜ Mbar_bdd.limit r' ⟨S⟩ c :=
+{ continuous_to_fun := begin
+    simp only [equiv.to_fun_as_coe, continuous_def],
+    intros U hU,
+    rwa is_open_iff
+  end,
+  continuous_inv_fun := begin
+    simp only [equiv.to_fun_as_coe, continuous_def],
+    intros U hU,
+    erw [← eqv.image_eq_preimage, ← is_open_iff],
+    have : eqv ⁻¹' (eqv '' U) = U, by tidy, -- this should be in mathlib.
+    rwa this,
+  end,
+  ..eqv }
 
 end topological_structure
 
