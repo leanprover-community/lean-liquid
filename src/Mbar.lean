@@ -271,48 +271,36 @@ lemma exists_of_compat {hr : 0 < r'} (T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M)
   ∃ (F : Mbar r' S c), ∀ M, truncate M F = T M :=
 ⟨⟨mk_seq T, mk_seq_zero, mk_seq_summable compat, mk_seq_sum_le compat⟩, truncate_mk_seq compat⟩
 
---set_option pp.notation false
+lemma Tinv_aux_summable {r : ℝ} {S : Type u} [fintype S] {c : ℝ} (h0r : 0 < r) (F : Mbar r S c)
+  (s : S) : _root_.summable (λ (n : ℕ), abs (↑(Tinv_aux (F.val s) n) * r ^ n)) :=
+begin
+  rw summable_mul_right_iff h0r.ne.symm,
+  have H := F.summable s,
+  refine summable_of_norm_bounded _ ((summable_nat_add_iff 1).mpr H) _,
+  rintro ⟨i⟩,
+  { simp only [abs_nonneg, norm_zero, int.cast_zero, zero_mul, abs_zero, Tinv_aux_zero]},
+  { simp only [Tinv_aux_succ, real.norm_eq_abs, abs_mul, pow_add, mul_assoc, pow_one, abs_abs] },
+end
+
 def Tinv {r : ℝ} {S : Type u} [fintype S] {c : ℝ} (h0r : 0 < r) :
   Mbar r S c → Mbar r S (c / r) :=
-λ F, ⟨λ s, Tinv_aux (F.1 s), λ s, rfl, begin
-  intro s,
-  rw summable_mul_right_iff h0r.ne.symm,
-    have H := F.summable s,
-    refine summable_of_norm_bounded _ ((summable_nat_add_iff 1).mpr H) _,
-    rintro ⟨i⟩,
-    { simp only [abs_nonneg, norm_zero, int.cast_zero, zero_mul, abs_zero, Tinv_aux_zero]},
-    { simp only [Tinv_aux_succ, real.norm_eq_abs, abs_mul, pow_add, mul_assoc, pow_one, abs_abs] },
-end,
+λ F, ⟨λ s, Tinv_aux (F.1 s), λ s, rfl, Tinv_aux_summable h0r F,
 begin
-  sorry
+  rw [le_div_iff h0r, finset.sum_mul],
+    refine le_trans _ F.sum_tsum_le,
+    apply finset.sum_le_sum,
+    rintro s -,
+    rw ← tsum_mul_right _ (Tinv_aux_summable h0r F s),
+    conv_rhs { rw [← @sum_add_tsum_nat_add ℝ _ _ _ _ _ 1 (F.summable s)] },
+    refine le_add_of_nonneg_of_le (finset.sum_nonneg (λ _ _, abs_nonneg _)) _,
+    apply tsum_le_tsum,
+    { -- we should be able to dedup parts of this with the block that follows it
+      rintro ⟨i⟩,
+      { simp [abs_nonneg] },
+      { simp only [Tinv_aux_succ, real.norm_eq_abs, abs_mul, pow_add, mul_assoc,
+          pow_one, abs_abs, abs_of_pos h0r] } },
+    { rw ← summable_mul_right_iff h0r.ne.symm, exact Tinv_aux_summable h0r F s },
+    { exact (summable_nat_add_iff 1).mpr (F.summable s) }
 end⟩
-
--- This code of Johan's will be useful for the sorry above
--- ⟨λ s, power_series.Tinv (x.1 s),
--- begin
---   have hsummable : _ := _,
---   refine ⟨_, hsummable, _⟩,
---   { intro s, exact power_series.constant_coeff_Tinv _ },
---   { rw [le_div_iff h0r, finset.sum_mul],
---     refine le_trans _ x.sum_tsum_le,
---     apply finset.sum_le_sum,
---     rintro s -,
---     rw ← tsum_mul_right _ (hsummable s),
---     conv_rhs { rw [← @sum_add_tsum_nat_add ℝ _ _ _ _ _ 1 (x.summable s)] },
---     refine le_add_of_nonneg_of_le (finset.sum_nonneg _) _,
---     { intros, exact abs_nonneg _ },
---     apply tsum_le_tsum,
---     { -- we should be able to dedup parts of this with the block that follows it
---       rintro ⟨i⟩,
---       { simpa only [int.cast_zero, zero_mul, coeff_zero_eq_constant_coeff,
---           ring_hom.coe_add_monoid_hom, abs_zero, pow_one, zero_add,
---           power_series.constant_coeff_Tinv, subtype.val_eq_coe] using abs_nonneg _ },
---       { simp only [nat.succ_pos', normed_field.norm_mul, power_series.coeff_Tinv_of_pos,
---         subtype.val_eq_coe, pow_succ', ← real.norm_eq_abs, mul_assoc, norm_norm,
---         real.norm_of_nonneg h0r.le] } },
---     { rw ← summable_mul_right_iff h0r.ne.symm, exact hsummable _ },
---     { exact (summable_nat_add_iff 1).mpr (x.summable s) } },
---   { intro s, rw summable_mul_right_iff h0r.ne.symm,
-
 
 end Mbar
