@@ -118,10 +118,10 @@ lemma transition_transition {r : ℝ} {S : Fintype} {c : ℝ}
   {M N K : ℕ} (h : M ≤ N) (hh : N ≤ K) (x : Mbar_bdd r S c K):
   transition r h (transition r hh x) = transition r (le_trans h hh) x := by tidy
 
-def limit (r : ℝ) (S : Fintype) (c : ℝ) :=
+@[reducible] def limit (r S c) :=
 { F : Π (M : ℕ), Mbar_bdd r S c M // ∀ (M N : ℕ) (h : M ≤ N), transition r h (F N) = F M }
 
-def emb {r : ℝ} {S : Fintype} {c : ℝ} : limit r S c → (Π (M : ℕ), Mbar_bdd r S c M) := λ F, F.1
+def emb_aux : limit r S c → (Π (M : ℕ), Mbar_bdd r S c M) := coe
 
 section topological_structure
 
@@ -134,6 +134,20 @@ example [fact (0 < r)] : compact_space (Mbar_bdd r S c M) := by apply_instance
 local attribute [reducible] limit
 instance : topological_space (limit r S c) := by apply_instance
 instance : t2_space (limit r S c) := by apply_instance
+
+def emb (r S c) : closed_embedding (@emb_aux r S c) :=
+{ induced := rfl,
+  inj := by tidy,
+  closed_range := begin
+    sorry,
+  end }
+
+instance [fact (0 < r)] : compact_space (limit r S c) :=
+begin
+  erw [← compact_iff_compact_space, compact_iff_compact_univ, compact_iff_compact_in_subtype],
+  apply is_closed.compact,
+  exact embedding_is_closed (emb r S c).to_embedding (emb r S c).closed_range is_closed_univ,
+end
 
 --TODO: Compactness of Mbar_bdd.limit
 
