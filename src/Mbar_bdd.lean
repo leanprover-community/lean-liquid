@@ -135,7 +135,6 @@ local attribute [reducible] limit
 instance : topological_space (limit r S c) := by apply_instance
 instance : t2_space (limit r S c) := by apply_instance
 
-/-
 --TODO: Fill in the sorry to obtain compactness of Mbar_bdd.limit
 def emb (r S c) : closed_embedding (@emb_aux r S c) :=
 { induced := rfl,
@@ -150,7 +149,6 @@ begin
   apply is_closed.compact,
   exact embedding_is_closed (emb r S c).to_embedding (emb r S c).closed_range is_closed_univ,
 end
--/
 
 end topological_structure
 

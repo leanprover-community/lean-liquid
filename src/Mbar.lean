@@ -272,7 +272,7 @@ begin
   refine le_trans _ F.sum_tsum_le,
   apply finset.sum_le_sum,
   rintro s -,
-  rw ← tsum_mul_right _ (Tinv_aux_summable h0r F s),
+  rw ← tsum_mul_right _ (Tinv_aux_summable F s),
   conv_rhs { rw [← @sum_add_tsum_nat_add ℝ _ _ _ _ _ 1 (F.summable s)] },
   refine le_add_of_nonneg_of_le (finset.sum_nonneg (λ _ _, abs_nonneg _)) _,
   apply tsum_le_tsum,
@@ -280,7 +280,7 @@ begin
     { simp [abs_nonneg] },
     { simp only [Tinv_aux_succ, real.norm_eq_abs, abs_mul, pow_add, mul_assoc,
         pow_one, abs_abs, abs_of_pos h0r] } },
-  { rw ← summable_mul_right_iff h0r.ne.symm, exact Tinv_aux_summable h0r F s },
+  { rw ← summable_mul_right_iff h0r.ne.symm, exact Tinv_aux_summable F s },
   { exact (summable_nat_add_iff 1).mpr (F.summable s) }
 end⟩
 
