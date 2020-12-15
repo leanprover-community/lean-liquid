@@ -49,7 +49,7 @@ def Mbar.cast_le (h : c₁ ≤ c₂) (x : Mbar r' S c₁) : Mbar r' S c₂ :=
 --   abs (x * r ^ n) = abs x * r ^ n :=
 -- by rw [abs_mul, abs_of_pos (pow_pos hr _)]
 
-noncomputable def Mbar.add (hr' : 0 < r') :
+noncomputable def Mbar.add :
   Mbar r' S c₁ → Mbar r' S c₂ → Mbar r' S (c₁ + c₂) :=
 λ F G, ⟨F.1 + G.1, begin
   rcases F with ⟨F, hF0, hFs, hFsc⟩,
@@ -184,7 +184,7 @@ end⟩
 --   transition h (truncate hr N x) = truncate hr M x := by tidy
 
 -- Injectivity of the map Mbar to limit of Mbar_bdd
-lemma eq_iff_truncate_eq {hr : 0 < r'} (x y : Mbar r' S c)
+lemma eq_iff_truncate_eq (x y : Mbar r' S c)
   (cond : ∀ M, truncate M x = truncate M y) : x = y :=
 begin
   ext s n,
@@ -200,18 +200,18 @@ def mk_seq (T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M) : S → ℕ → ℤ :=
 lemma mk_seq_zero {T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M} (s : S) : mk_seq T s 0 = 0 := (T 0).2.1 s
 
 lemma mk_seq_eq_of_compat {T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M}
-  (compat : ∀ (M N : ℕ) (h : M ≤ N), transition r' h (T N) = T M)
+  (compat : ∀ (M N : ℕ) (h : M ≤ N), Mbar_bdd.transition r' h (T N) = T M)
   {s : S} {n : ℕ} {M : ℕ} (hnM : n < M + 1) :
   mk_seq T s n = (T M).1 s ⟨n, hnM⟩ :=
 begin
   have hnM : n ≤ M := nat.lt_succ_iff.mp hnM,
   unfold mk_seq,
   rw ← compat n M hnM,
-  apply transition_eq,
+  apply Mbar_bdd.transition_eq,
 end
 
 lemma mk_seq_sum_range_eq (T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M)
-  (compat : ∀ (M N : ℕ) (h : M ≤ N), transition r' h (T N) = T M) (s : S) (n) :
+  (compat : ∀ (M N : ℕ) (h : M ≤ N), Mbar_bdd.transition r' h (T N) = T M) (s : S) (n) :
   ∑ i in finset.range (n+1), abs ((mk_seq T s i : ℝ) * r'^i) =
   ∑ i : fin (n+1), abs (((T n).1 s i : ℝ) * r'^i.1) :=
 begin
@@ -223,13 +223,13 @@ begin
 end
 
 lemma mk_seq_summable {T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M}
-  (compat : ∀ (M N : ℕ) (h : M ≤ N), transition r' h (T N) = T M) (s : S) :
+  (compat : ∀ (M N : ℕ) (h : M ≤ N), Mbar_bdd.transition r' h (T N) = T M) (s : S) :
   _root_.summable (λ (n : ℕ), abs (↑(mk_seq T s n) * r' ^ n)) :=
 begin
   refine @summable_of_sum_range_le (λ n, abs ((mk_seq T s n : ℝ) * r'^n)) c
     (λ _, abs_nonneg _) (λ n, _),
   cases n,
-  { exact le_trans (by simp) (nonneg_of_Mbar_bdd (T 0)) },
+  { exact le_trans (by simp) (Mbar_bdd.nonneg_of_Mbar_bdd (T 0)) },
   { rw mk_seq_sum_range_eq T compat s n,
     refine le_trans _ (T n).2.2,
     refine finset.single_le_sum (λ _ _, _) (finset.mem_univ s),
@@ -239,18 +239,18 @@ end
 open filter
 
 lemma mk_seq_tendsto {T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M}
-  (compat : ∀ (M N : ℕ) (h : M ≤ N), transition r' h (T N) = T M) :
+  (compat : ∀ (M N : ℕ) (h : M ≤ N), Mbar_bdd.transition r' h (T N) = T M) :
   tendsto (λ (n : ℕ), ∑ (s : S), ∑  i in finset.range n, abs ((mk_seq T s i : ℝ) * r'^i))
   at_top (nhds $ ∑ (s : S), ∑' n, abs ((mk_seq T s n : ℝ) * r'^n)) := tendsto_finset_sum _ $
 λ s _, has_sum.tendsto_sum_nat $ summable.has_sum $ mk_seq_summable compat s
 
 lemma mk_seq_sum_le {T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M}
-  (compat : ∀ (M N : ℕ) (h : M ≤ N), transition r' h (T N) = T M) :
+  (compat : ∀ (M N : ℕ) (h : M ≤ N), Mbar_bdd.transition r' h (T N) = T M) :
   (∑ s, ∑' (n : ℕ), abs (↑(mk_seq T s n) * r' ^ n)) ≤ c :=
 begin
   refine le_of_tendsto (mk_seq_tendsto compat) (eventually_of_forall _),
   rintros (_ | n),
-  { simp [nonneg_of_Mbar_bdd (T 0)] },
+  { simp [Mbar_bdd.nonneg_of_Mbar_bdd (T 0)] },
   { convert (T n).2.2,
     funext,
     rw mk_seq_sum_range_eq T compat s n,
@@ -258,18 +258,45 @@ begin
 end
 
 lemma truncate_mk_seq {T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M}
-  (compat : ∀ (M N : ℕ) (h : M ≤ N), transition r' h (T N) = T M) (M : ℕ) :
+  (compat : ∀ (M N : ℕ) (h : M ≤ N), Mbar_bdd.transition r' h (T N) = T M) (M : ℕ) :
   truncate M ⟨mk_seq T, mk_seq_zero, mk_seq_summable compat, mk_seq_sum_le compat⟩ = T M :=
 begin
   ext s ⟨i, hi⟩,
   exact mk_seq_eq_of_compat compat _,
 end
 
+/-
 -- Surjectivity
-lemma exists_of_compat {hr : 0 < r'} (T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M)
+lemma of_compat (T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M)
   (compat : ∀ (M N : ℕ) (h : M ≤ N), transition r' h (T N) = T M) :
   ∃ (F : Mbar r' S c), ∀ M, truncate M F = T M :=
 ⟨⟨mk_seq T, mk_seq_zero, mk_seq_summable compat, mk_seq_sum_le compat⟩, truncate_mk_seq compat⟩
+-/
+
+def of_compat {T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M}
+  (compat : ∀ (M N : ℕ) (h : M ≤ N), Mbar_bdd.transition r' h (T N) = T M) : Mbar r' S c :=
+⟨mk_seq T, mk_seq_zero, mk_seq_summable compat, mk_seq_sum_le compat⟩
+
+@[simp] lemma truncate_of_compat {T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M}
+  (compat : ∀ (M N : ℕ) (h : M ≤ N), Mbar_bdd.transition r' h (T N) = T M) (M : ℕ) :
+  truncate M (of_compat compat) = T M :=
+begin
+  ext s ⟨i, hi⟩,
+  exact mk_seq_eq_of_compat compat _,
+end
+
+def equiv : Mbar r' S c ≃ Mbar_bdd.limit r' ⟨S⟩ c :=
+{ to_fun := λ F, ⟨λ N, truncate _ F, by tidy⟩,
+  inv_fun := λ F, of_compat F.2,
+  left_inv := by tidy,
+  right_inv := by tidy }
+
+section topological_structure
+
+instance : topological_space (Mbar r' S c) := topological_space.induced equiv (by apply_instance)
+--TODO: t2_space and compact_space instances for Mbar
+
+end topological_structure
 
 lemma Tinv_aux_summable {r : ℝ} {S : Type u} [fintype S] {c : ℝ} (h0r : 0 < r) (F : Mbar r S c)
   (s : S) : _root_.summable (λ (n : ℕ), abs (↑(Tinv_aux (F.val s) n) * r ^ n)) :=
