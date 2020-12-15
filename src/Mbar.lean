@@ -7,13 +7,16 @@ import data.equiv.basic
 import analysis.normed_space.basic
 import analysis.specific_limits
 import .Mbar_bdd
-/-
+/-!
 
-Scholze Analytic.pdf
+## $\overline{\mathcal{M}}_{r'}(S)$
 
-p57, S finite
+This file contains a definition of ℳ-barᵣ'(S) as defined on p57 of Analytic.pdf .
+Currently it's a subtype.
 
-Mbar_r'(S)_{<=c}={(sum_{n≥1}a_{n,s}T^n)[s] | sum_{s,n}|a_{n,s}|r^n<=c}
+## Implementation issues
+
+We model Tℤ[[T]] as functions ℕ → ℤ which vanish at 0.
 
 -/
 
@@ -25,7 +28,7 @@ open_locale big_operators
 open power_series
 
 /-- `Mbar r' S c` is the set of power series
-`F_s = ∑ a_{n,s}T^n ∈ ℤ[[T]]` such that `∑_{n,s} |a_{n,s}|r'^n ≤ c` -/
+`F_s = ∑ a_{n,s}T^n ∈ Tℤ[[T]]` such that `∑_{n,s} |a_{n,s}|r'^n ≤ c` -/
 def Mbar (r' : ℝ) (S : Type u) [fintype S] (c : ℝ) :=
 {F : S → ℕ → ℤ // (∀ s, F s 0 = 0) ∧
   (∀ s, summable (λ n, abs ((F s n : ℝ) * r'^n))) ∧
@@ -57,19 +60,16 @@ noncomputable def Mbar.add (hr' : 0 < r') :
     convert summable.add (hFs s) (hGs s),
     ext n,
     simp [add_mul] },
-  refine ⟨_, hFGs, _⟩,
-  { intro s,
-    simp [hF0 s, hG0 s] },
-  { refine le_trans _ (add_le_add hFsc hGsc),
-    rw ← finset.sum_add_distrib,
-    apply finset.sum_le_sum,
-    rintro s -,
-    rw ← tsum_add (hFs s) (hGs s),
-    refine tsum_le_tsum _ (hFGs s) _,
-    { intro n,
-      convert abs_add _ _,
-      simp [add_mul] },
-    { exact summable.add (hFs s) (hGs s) } }
+  refine ⟨λ s, by simp [hF0 s, hG0 s], hFGs, _⟩,
+  refine le_trans _ (add_le_add hFsc hGsc),
+  rw ← finset.sum_add_distrib,
+  refine finset.sum_le_sum _,
+  rintro s -,
+  rw ← tsum_add (hFs s) (hGs s),
+  refine tsum_le_tsum _ (hFGs s) (summable.add (hFs s) (hGs s)),
+  intro n,
+  convert abs_add _ _,
+  simp [add_mul],
 end⟩
 
 lemma sum_fin_eq {M : ℕ} (f : ℕ → ℝ) : ∑ i in finset.range M, f i = ∑ (i : fin M), f i :=
@@ -78,6 +78,15 @@ lemma sum_fin_eq {M : ℕ} (f : ℕ → ℝ) : ∑ i in finset.range M, f i = �
   (λ a _, a) (λ a ha, finset.mem_range.mpr a.2) (λ a ha, rfl) (λ a ha, by simp)
 
 def Tinv_aux {R : Type*} [has_zero R] : (ℕ → R) → ℕ → R := λ F n, if n = 0 then 0 else F (n + 1)
+
+@[simp] lemma Tinv_aux_zero {R : Type*} [has_zero R] (f : ℕ → R) : Tinv_aux f 0 = 0 := rfl
+
+@[simp] lemma Tinv_aux_succ {R : Type*} [has_zero R] (f : ℕ → R) (i : ℕ) : Tinv_aux f (i + 1) = f (i + 2) :=
+if_neg (nat.succ_ne_zero i)
+
+--dif_neg (nat.succ_ne_zero i)
+
+
 /-
 namespace power_series
 
@@ -183,6 +192,8 @@ begin
   rw cond,
 end
 
+/-- Underlying function of the element of Mbar f' S associated to a sequence of
+  elements of the truncated Mbars. -/
 def mk_seq (T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M) : S → ℕ → ℤ :=
   λ s n, (T n).1 s ⟨n, by linarith⟩
 
@@ -215,7 +226,8 @@ lemma mk_seq_summable {T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M}
   (compat : ∀ (M N : ℕ) (h : M ≤ N), transition r' h (T N) = T M) (s : S) :
   _root_.summable (λ (n : ℕ), abs (↑(mk_seq T s n) * r' ^ n)) :=
 begin
-  refine @summable_of_sum_range_le (λ n, abs ((mk_seq T s n : ℝ) * r'^n)) c (λ _, abs_nonneg _) (λ n, _),
+  refine @summable_of_sum_range_le (λ n, abs ((mk_seq T s n : ℝ) * r'^n)) c
+    (λ _, abs_nonneg _) (λ n, _),
   cases n,
   { exact le_trans (by simp) (nonneg_of_Mbar_bdd (T 0)) },
   { rw mk_seq_sum_range_eq T compat s n,
@@ -225,6 +237,7 @@ begin
 end
 
 open filter
+
 lemma mk_seq_tendsto {T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M}
   (compat : ∀ (M N : ℕ) (h : M ≤ N), transition r' h (T N) = T M) :
   tendsto (λ (n : ℕ), ∑ (s : S), ∑  i in finset.range n, abs ((mk_seq T s i : ℝ) * r'^i))
@@ -236,7 +249,7 @@ lemma mk_seq_sum_le {T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M}
   (∑ s, ∑' (n : ℕ), abs (↑(mk_seq T s n) * r' ^ n)) ≤ c :=
 begin
   refine le_of_tendsto (mk_seq_tendsto compat) (eventually_of_forall _),
-  rintros (_|n),
+  rintros (_ | n),
   { simp [nonneg_of_Mbar_bdd (T 0)] },
   { convert (T n).2.2,
     funext,
@@ -258,11 +271,23 @@ lemma exists_of_compat {hr : 0 < r'} (T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M)
   ∃ (F : Mbar r' S c), ∀ M, truncate M F = T M :=
 ⟨⟨mk_seq T, mk_seq_zero, mk_seq_summable compat, mk_seq_sum_le compat⟩, truncate_mk_seq compat⟩
 
+--set_option pp.notation false
 def Tinv {r : ℝ} {S : Type u} [fintype S] {c : ℝ} (h0r : 0 < r) :
   Mbar r S c → Mbar r S (c / r) :=
-λ F, ⟨λ s, Tinv_aux (F.1 s), λ s, rfl, sorry, sorry⟩
+λ F, ⟨λ s, Tinv_aux (F.1 s), λ s, rfl, begin
+  intro s,
+  rw summable_mul_right_iff h0r.ne.symm,
+    have H := F.summable s,
+    refine summable_of_norm_bounded _ ((summable_nat_add_iff 1).mpr H) _,
+    rintro ⟨i⟩,
+    { simp only [abs_nonneg, norm_zero, int.cast_zero, zero_mul, abs_zero, Tinv_aux_zero]},
+    { simp only [Tinv_aux_succ, real.norm_eq_abs, abs_mul, pow_add, mul_assoc, pow_one, abs_abs] },
+end,
+begin
+  sorry
+end⟩
 
--- This code of Johan's will be useful for the two sorrys above
+-- This code of Johan's will be useful for the sorry above
 -- ⟨λ s, power_series.Tinv (x.1 s),
 -- begin
 --   have hsummable : _ := _,
@@ -288,14 +313,6 @@ def Tinv {r : ℝ} {S : Type u} [fintype S] {c : ℝ} (h0r : 0 < r) :
 --     { rw ← summable_mul_right_iff h0r.ne.symm, exact hsummable _ },
 --     { exact (summable_nat_add_iff 1).mpr (x.summable s) } },
 --   { intro s, rw summable_mul_right_iff h0r.ne.symm,
---     have H := x.summable s,
---     refine summable_of_norm_bounded _ ((summable_nat_add_iff 1).mpr H) _,
---     rintro ⟨i⟩,
---     { simpa only [norm_zero, int.cast_zero, zero_mul, coeff_zero_eq_constant_coeff,
---         ring_hom.coe_add_monoid_hom, abs_zero, pow_one, zero_add, power_series.constant_coeff_Tinv,
---         subtype.val_eq_coe] using abs_nonneg _ },
---     { simp only [nat.succ_pos', normed_field.norm_mul, power_series.coeff_Tinv_of_pos,
---         subtype.val_eq_coe, pow_succ', ← real.norm_eq_abs, mul_assoc, norm_norm] } },
--- end⟩
+
 
 end Mbar
