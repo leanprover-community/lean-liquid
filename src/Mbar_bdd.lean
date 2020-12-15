@@ -129,11 +129,9 @@ instance : topological_space (Mbar_bdd r S c M) := ⊥
 instance : discrete_topology (Mbar_bdd r S c M) := ⟨rfl⟩
 
 -- sanity check
+example : t2_space (Mbar_bdd r S c M) := by apply_instance
+example : totally_disconnected_space (Mbar_bdd r S c M) := by apply_instance
 example [fact (0 < r)] : compact_space (Mbar_bdd r S c M) := by apply_instance
-
-local attribute [reducible] limit
-instance : topological_space (limit r S c) := by apply_instance
-instance : t2_space (limit r S c) := by apply_instance
 
 --TODO: Fill in the sorry to obtain compactness of Mbar_bdd.limit
 def emb (r S c) : closed_embedding (@emb_aux r S c) :=
