@@ -250,6 +250,34 @@ def homeo : Mbar r' S c ≃ₜ Mbar_bdd.limit r' ⟨S⟩ c :=
 instance : t2_space (Mbar r' S c) :=
 ⟨λ x y h, separated_by_continuous homeo.continuous (λ c, h $ homeo.injective c)⟩
 
+instance [fact (0 < r')] : compact_space (Mbar r' S c) :=
+begin
+  constructor,
+  rw homeo.embedding.compact_iff_compact_image,
+  simp only [set.image_univ, homeomorph.range_coe],
+  obtain ⟨h⟩ := (by apply_instance : compact_space (Mbar_bdd.limit r' ⟨S⟩ c)),
+  exact h,
+end
+
+instance : totally_disconnected_space (Mbar r' S c) :=
+begin
+  constructor,
+  intros A _ hA,
+  constructor,
+  suffices subsing : subsingleton (homeo '' A),
+  { -- This block can probably be streamlined a bit...
+    rintros ⟨a,ha⟩ ⟨b,hb⟩,
+    ext1,
+    suffices : homeo a = homeo b, by exact homeo.injective this,
+    let x : ↥(homeo '' A) := ⟨homeo a, ⟨a, ha, rfl⟩⟩,
+    let y : ↥(homeo '' A) := ⟨homeo b, ⟨b, hb, rfl⟩⟩,
+    cases subsing,
+    change ↑x = ↑y,
+    rw subsing x y },
+  obtain ⟨h⟩ := (by apply_instance : totally_disconnected_space (Mbar_bdd.limit r' ⟨S⟩ c)),
+  exact h _ (by tauto) (is_preconnected.image hA _ homeo.continuous.continuous_on),
+end
+
 end topological_structure
 
 lemma Tinv_aux_summable {r : ℝ} {S : Type u} [fintype S] {c : ℝ} [fact (0 < r)] (F : Mbar r S c)

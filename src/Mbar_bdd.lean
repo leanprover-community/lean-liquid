@@ -129,16 +129,42 @@ instance : topological_space (Mbar_bdd r S c M) := ⊥
 instance : discrete_topology (Mbar_bdd r S c M) := ⟨rfl⟩
 
 -- sanity check
-example : t2_space (Mbar_bdd r S c M) := by apply_instance
-example : totally_disconnected_space (Mbar_bdd r S c M) := by apply_instance
+example : t2_space (limit r S c) := by apply_instance
+example : totally_disconnected_space (limit r S c) := by apply_instance
 example [fact (0 < r)] : compact_space (Mbar_bdd r S c M) := by apply_instance
 
---TODO: Fill in the sorry to obtain compactness of Mbar_bdd.limit
+def Γ : Π (m n : ℕ) (h : m ≤ n), set (Π (M : ℕ), Mbar_bdd r S c M) := λ m n h,
+  { F | transition r h (F n) = F m }
+
+def Γ₀ : Π (m n : ℕ) (h : m ≤ n), set (Mbar_bdd r S c m × Mbar_bdd r S c n) := λ m n h,
+  { a | transition r h a.2 = a.1 }
+
+def π : Π (m : ℕ), (Π (M : ℕ), Mbar_bdd r S c M) → Mbar_bdd r S c m := λ m F, F m
+
+def π₂ : Π (m n : ℕ) (h : m ≤ n), (Π (M : ℕ), Mbar_bdd r S c M) → Mbar_bdd r S c m × Mbar_bdd r S c n :=
+  λ m n h F, ⟨F m, F n⟩
+
+lemma range_emb_aux_eq : range (@emb_aux r S c) = ⋂ (x : {y : ℕ × ℕ // y.1 ≤ y.2}), Γ x.1.1 x.1.2 x.2 :=
+  set.ext $ λ x, iff.intro (λ ⟨w,hx⟩ y ⟨z,hz⟩, hz ▸ hx ▸ w.2 _ _ _)
+  (λ h0, ⟨⟨x,λ m n h1, h0 _ ⟨⟨⟨m,n⟩,h1⟩,rfl⟩⟩, rfl⟩)
+
+lemma π_continuous {m : ℕ} : continuous (π m : _ → Mbar_bdd r S c m) := continuous_apply _
+
+lemma π₂_eq {m n : ℕ} {h : m ≤ n} : (π₂ m n h : _ → Mbar_bdd r S c m × _) = (λ x, ⟨x m, x n⟩) :=
+  by {ext; refl}
+
+lemma π₂_continuous {m n : ℕ} {h : m ≤ n} : continuous (π₂ m n h : _ → Mbar_bdd r S c _ × _) :=
+  by {rw π₂_eq, exact continuous.prod_mk π_continuous π_continuous}
+
 def emb (r S c) : closed_embedding (@emb_aux r S c) :=
 { induced := rfl,
   inj := by tidy,
   closed_range := begin
-    sorry,
+    rw range_emb_aux_eq,
+    apply is_closed_Inter,
+    rintros ⟨⟨m,n⟩,h0⟩,
+    rw (show (Γ m n h0 : set (Π M, Mbar_bdd r S c M)) = π₂ m n h0 ⁻¹' (Γ₀ m n h0), by tauto),
+    refine is_closed.preimage π₂_continuous (is_closed_discrete _),
   end }
 
 instance [fact (0 < r)] : compact_space (limit r S c) :=
