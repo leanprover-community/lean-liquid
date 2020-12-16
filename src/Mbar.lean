@@ -73,6 +73,7 @@ noncomputable def Mbar.add :
   simp [add_mul],
 end⟩
 
+def Mbar.add' : Mbar r' S c₁ × Mbar r' S c₂ → Mbar r' S (c₁ + c₂) := λ x, Mbar.add x.1 x.2
 
 lemma sum_fin_eq {M : ℕ} (f : ℕ → ℝ) : ∑ i in finset.range M, f i = ∑ (i : fin M), f i :=
 @finset.sum_bij' ℕ ℝ (fin M) _ (finset.range M) finset.univ f (λ i, f i)
@@ -89,7 +90,6 @@ if_neg (nat.succ_ne_zero i)
 
 namespace Mbar
 
-
 /-- The truncation map fro Mbar to Mbar_bdd -/
 def truncate (M : ℕ) : Mbar r' S c → Mbar_bdd r' ⟨S⟩ c M := λ F,
 ⟨λ s n, F.1 s n.1, begin
@@ -101,9 +101,6 @@ def truncate (M : ℕ) : Mbar r' S c → Mbar_bdd r' ⟨S⟩ c M := λ F,
   rw ← sum_fin_eq (λ i, abs ((F s i : ℝ) * r' ^i)),
   exact sum_le_tsum _ (λ _ _, abs_nonneg _) (hF2 s),
 end⟩
-
-lemma truncate_add (M : ℕ) (x : Mbar r' S c₁) (y : Mbar r' S c₂) :
-  truncate M (add x y) = Mbar_bdd.add (truncate M x) (truncate M y) := by {ext, refl}
 
 -- /-- The truncation maps commute with the transition maps. -/
 -- lemma truncate_transition {hr : 0 < r'} {M N : ℕ} (h : M ≤ N) (x : Mbar r' S c) :
@@ -300,6 +297,25 @@ begin
     suffices : continuous (homeo ∘ f), by rwa homeo.comp_continuous_iff at this,
     rw Mbar_bdd.continuous_iff,
     exact h }
+end
+
+lemma continuous_truncate {M} : continuous (@truncate r' S _ c M) := (continuous_iff id).mp continuous_id _
+
+lemma continuous_add' : continuous (Mbar.add' : _ → Mbar r' S (c₁ + c₂)) :=
+begin
+  rw continuous_iff,
+  intros M,
+  have : truncate M ∘ (λ x : Mbar r' S c₁ × Mbar r' S c₂, Mbar.add x.1 x.2) =
+    (λ x : (Mbar r' S c₁ × Mbar r' S c₂), Mbar_bdd.add (truncate M x.1) (truncate M x.2)) := by {ext; refl},
+  erw this,
+  suffices : continuous (λ x : Mbar_bdd r' ⟨S⟩ c₁ M × Mbar_bdd r' ⟨S⟩ c₂ M, Mbar_bdd.add x.1 x.2),
+  { have claim : (λ x : (Mbar r' S c₁ × Mbar r' S c₂), Mbar_bdd.add (truncate M x.1) (truncate M x.2)) =
+      (λ x : Mbar_bdd r' ⟨S⟩ c₁ M × Mbar_bdd r' ⟨S⟩ c₂ M, Mbar_bdd.add x.1 x.2) ∘
+      (λ x : Mbar r' S c₁ × Mbar r' S c₂, (truncate M x.1, truncate M x.2)), by {ext, refl},
+    rw claim,
+    refine continuous.comp this _,
+    refine continuous.prod_map continuous_truncate continuous_truncate },
+  exact continuous_of_discrete_topology,
 end
 
 end topological_structure
