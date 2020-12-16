@@ -174,6 +174,23 @@ begin
   exact embedding_is_closed (emb r S c).to_embedding (emb r S c).closed_range is_closed_univ,
 end
 
+def proj (M : ℕ) : Mbar_bdd.limit r S c → Mbar_bdd r S c M := λ F, F.1 M
+
+lemma proj_eq (M : ℕ) : (proj M : _ → Mbar_bdd r S c _) = (π M) ∘ emb_aux := rfl
+
+lemma continuous_iff {α : Type*} [topological_space α] (f : α → Mbar_bdd.limit r S c) :
+  continuous f ↔ (∀ (M : ℕ), continuous ((proj M) ∘ f)) :=
+begin
+  split,
+  { intros hf M,
+    refine continuous.comp _ hf,
+    rw proj_eq,
+    exact continuous.comp π_continuous (emb _ _ _).continuous },
+  { intros h,
+    rw [embedding.continuous_iff (emb r S c).to_embedding],
+    exact continuous_pi h }
+end
+
 end topological_structure
 
 

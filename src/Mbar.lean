@@ -247,6 +247,9 @@ def homeo : Mbar r' S c ≃ₜ Mbar_bdd.limit r' ⟨S⟩ c :=
   end,
   ..eqv }
 
+lemma truncate_eq (M : ℕ) : (truncate M : Mbar r' S c → Mbar_bdd r' ⟨S⟩ c M) =
+  (Mbar_bdd.proj M) ∘ homeo := rfl
+
 instance : t2_space (Mbar r' S c) :=
 ⟨λ x y h, separated_by_continuous homeo.continuous (λ c, h $ homeo.injective c)⟩
 
@@ -276,6 +279,21 @@ begin
     rw subsing x y },
   obtain ⟨h⟩ := (by apply_instance : totally_disconnected_space (Mbar_bdd.limit r' ⟨S⟩ c)),
   exact h _ (by tauto) (is_preconnected.image hA _ homeo.continuous.continuous_on),
+end
+
+lemma continuous_iff {α : Type*} [topological_space α] (f : α → Mbar r' S c) :
+  continuous f ↔ (∀ M, continuous ((truncate M) ∘ f)) :=
+begin
+  split,
+  { intros hf M,
+    rw [truncate_eq, function.comp.assoc],
+    revert M,
+    rw ← Mbar_bdd.continuous_iff,
+    refine continuous.comp homeo.continuous hf },
+  { intro h,
+    suffices : continuous (homeo ∘ f), by rwa homeo.comp_continuous_iff at this,
+    rw Mbar_bdd.continuous_iff,
+    exact h }
 end
 
 end topological_structure
