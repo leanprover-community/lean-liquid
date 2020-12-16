@@ -252,11 +252,10 @@ instance : t2_space (Mbar r' S c) :=
 
 end topological_structure
 
-lemma Tinv_aux_summable {r : ℝ} {S : Type u} [fintype S] {c : ℝ} [fact (0 < r)] (F : Mbar r S c)
-  (s : S) : _root_.summable (λ (n : ℕ), abs (↑(Tinv_aux (F.val s) n) * r ^ n)) :=
+lemma Tinv_aux_summable [h0r : fact (0 < r')] (F : Mbar r' S c)
+  (s : S) : _root_.summable (λ (n : ℕ), abs (↑(Tinv_aux (F.val s) n) * r' ^ n)) :=
 begin
-  have h0r : 0 < r, by assumption,
-  rw summable_mul_right_iff h0r.ne.symm,
+  rw summable_mul_right_iff (ne_of_gt h0r),
   have H := F.summable s,
   refine summable_of_norm_bounded _ ((summable_nat_add_iff 1).mpr H) _,
   rintro ⟨i⟩,
@@ -264,11 +263,10 @@ begin
   { simp only [Tinv_aux_succ, real.norm_eq_abs, abs_mul, pow_add, mul_assoc, pow_one, abs_abs] },
 end
 
-def Tinv {r : ℝ} {S : Type u} [fintype S] {c : ℝ} [fact (0 < r)] :
+def Tinv {r : ℝ} {S : Type u} [fintype S] {c : ℝ} [h0r : fact (0 < r)] :
   Mbar r S c → Mbar r S (c / r) :=
 λ F, ⟨λ s, Tinv_aux (F.1 s), λ s, rfl, Tinv_aux_summable F,
 begin
-  have h0r : 0 < r, by assumption,
   rw [le_div_iff h0r, finset.sum_mul],
   refine le_trans _ F.sum_tsum_le,
   apply finset.sum_le_sum,
@@ -281,7 +279,7 @@ begin
     { simp [abs_nonneg] },
     { simp only [Tinv_aux_succ, real.norm_eq_abs, abs_mul, pow_add, mul_assoc,
         pow_one, abs_abs, abs_of_pos h0r] } },
-  { rw ← summable_mul_right_iff h0r.ne.symm, exact Tinv_aux_summable F s },
+  { rw ← summable_mul_right_iff (ne_of_gt h0r), exact Tinv_aux_summable F s },
   { exact (summable_nat_add_iff 1).mpr (F.summable s) }
 end⟩
 

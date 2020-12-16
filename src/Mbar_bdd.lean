@@ -43,19 +43,19 @@ begin
   exact (λ _ _, finset.sum_nonneg (λ _ _, abs_nonneg _)),
 end
 
-lemma coeff_bound [fact (0 < r)] (F : S → fin (M + 1) → ℤ)
+lemma coeff_bound [h0r : fact (0 < r)] (F : S → fin (M + 1) → ℤ)
   (hF : ∑ s i, abs ((F s i : ℝ) * r^(i : ℕ)) ≤ c) (n : fin (M + 1)) (s : S) :
   abs (F s n : ℝ) ≤ c / min (r ^ M) 1 :=
 begin
-  rw le_div_iff (lt_min (pow_pos (by assumption : 0 < r) _) zero_lt_one),
+  rw le_div_iff (lt_min (pow_pos h0r _) zero_lt_one),
   calc abs ↑(F s n) * min (r ^ M) 1 ≤ abs ↑(F s n) * r ^ n.1 : begin
     refine mul_le_mul_of_nonneg_left _ (abs_nonneg _),
     cases le_or_lt r 1 with hr1 hr1,
     { refine le_trans (min_le_left _ _) _,
-      exact pow_le_pow_of_le_one (le_of_lt (by assumption)) hr1 (nat.lt_add_one_iff.1 n.2) },
+      exact pow_le_pow_of_le_one (le_of_lt h0r) hr1 (nat.lt_add_one_iff.1 n.2) },
     { exact le_trans (min_le_right _ _) (one_le_pow_of_one_le (le_of_lt hr1) _) },
   end
-  ... = abs ((F s n : ℝ) * r ^ n.1) : by rw [abs_mul, abs_of_pos (pow_pos (by assumption : 0 < r) _)]
+  ... = abs ((F s n : ℝ) * r ^ n.1) : by rw [abs_mul, abs_of_pos (pow_pos h0r _)]
   ... ≤ ∑ i, abs ((F s i : ℝ) * r ^ (i : ℕ)) :
     single_le_sum (λ (i : fin (M + 1)) _, abs_nonneg ((F s i : ℝ) * r ^ i.val)) (mem_univ n)
   ... ≤ ∑ s i, abs ((F s i : ℝ) * r^(i : ℕ)) : begin
