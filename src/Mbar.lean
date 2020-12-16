@@ -216,8 +216,6 @@ section topological_structure
 
 instance : topological_space (Mbar r' S c) := topological_space.induced eqv (by apply_instance)
 
---TODO: t2_space and compact_space instances for Mbar
-
 lemma is_open_iff {U : set (Mbar_bdd.limit r' ⟨S⟩ c)} : is_open (eqv ⁻¹' U) ↔ is_open U :=
 begin
   -- this should be made cleaner with some mathlib lemmas
@@ -248,6 +246,9 @@ def homeo : Mbar r' S c ≃ₜ Mbar_bdd.limit r' ⟨S⟩ c :=
     rwa this,
   end,
   ..eqv }
+
+instance : t2_space (Mbar r' S c) :=
+⟨λ x y h, separated_by_continuous homeo.continuous (λ c, h $ homeo.injective c)⟩
 
 end topological_structure
 
