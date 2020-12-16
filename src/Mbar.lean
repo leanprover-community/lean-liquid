@@ -73,6 +73,7 @@ noncomputable def Mbar.add :
   simp [add_mul],
 end⟩
 
+
 lemma sum_fin_eq {M : ℕ} (f : ℕ → ℝ) : ∑ i in finset.range M, f i = ∑ (i : fin M), f i :=
 @finset.sum_bij' ℕ ℝ (fin M) _ (finset.range M) finset.univ f (λ i, f i)
   (λ a ha, ⟨a, finset.mem_range.mp ha⟩) (λ a ha, finset.mem_univ _) (λ a ha, rfl)
@@ -88,6 +89,7 @@ if_neg (nat.succ_ne_zero i)
 
 namespace Mbar
 
+
 /-- The truncation map fro Mbar to Mbar_bdd -/
 def truncate (M : ℕ) : Mbar r' S c → Mbar_bdd r' ⟨S⟩ c M := λ F,
 ⟨λ s n, F.1 s n.1, begin
@@ -99,6 +101,9 @@ def truncate (M : ℕ) : Mbar r' S c → Mbar_bdd r' ⟨S⟩ c M := λ F,
   rw ← sum_fin_eq (λ i, abs ((F s i : ℝ) * r' ^i)),
   exact sum_le_tsum _ (λ _ _, abs_nonneg _) (hF2 s),
 end⟩
+
+lemma truncate_add (M : ℕ) (x : Mbar r' S c₁) (y : Mbar r' S c₂) :
+  truncate M (add x y) = Mbar_bdd.add (truncate M x) (truncate M y) := by {ext, refl}
 
 -- /-- The truncation maps commute with the transition maps. -/
 -- lemma truncate_transition {hr : 0 < r'} {M N : ℕ} (h : M ≤ N) (x : Mbar r' S c) :
@@ -211,6 +216,7 @@ def eqv : Mbar r' S c ≃ Mbar_bdd.limit r' ⟨S⟩ c :=
   inv_fun := λ F, of_compat F.2,
   left_inv := by tidy,
   right_inv := by tidy }
+
 
 section topological_structure
 

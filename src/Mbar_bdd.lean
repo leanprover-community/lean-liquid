@@ -32,6 +32,9 @@ namespace Mbar_bdd
 
 variables {r : ℝ} {S : Fintype} {c : ℝ} {M : ℕ}
 
+def constant_coeff_eq_zero (x : Mbar_bdd r S c M) : ∀ s, x.1 s 0 = 0 := x.2.1
+def sum_sum_le (x : Mbar_bdd r S c M) := x.2.2
+
 open finset
 
 lemma nonneg_of_Mbar_bdd {r : ℝ} {S : Fintype} {c : ℝ} {M : ℕ}
@@ -193,5 +196,26 @@ end
 
 end topological_structure
 
+section addition
+
+variables {c₁ c₂ : ℝ}
+
+def add : Mbar_bdd r S c₁ M → Mbar_bdd r S c₂ M → Mbar_bdd r S (c₁ + c₂) M := λ F G,
+{ val := F.1 + G.1,
+  property := begin
+    refine ⟨λ s, (_ : F.1 _ _ + G.1 _ _ = _),_⟩,
+    { simp [constant_coeff_eq_zero] },
+    { refine le_trans _ (add_le_add F.2.2 G.2.2),
+      rw ← finset.sum_add_distrib,
+      refine finset.sum_le_sum _,
+      rintro s -,
+      rw ← sum_add_distrib,
+      refine finset.sum_le_sum _,
+      rintro i -,
+      convert abs_add _ _,
+      simp [add_mul] },
+  end }
+
+end addition
 
 end Mbar_bdd
