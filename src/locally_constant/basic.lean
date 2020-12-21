@@ -3,6 +3,38 @@ import topology.algebra.monoid
 
 variables {X Y : Type*} [topological_space X]
 
+-- move this
+section for_mathlib
+
+def finite_of_is_compact_of_discrete [discrete_topology X] (s : set X) (hs : is_compact s) :
+  s.finite :=
+begin
+  have := hs.elim_finite_subcover (λ x : X, ({x} : set X))
+    (λ x, is_open_discrete _),
+  simp only [set.subset_univ, forall_prop_of_true, set.Union_of_singleton] at this,
+  rcases this with ⟨t, ht⟩,
+  suffices : (⋃ (i : X) (H : i ∈ t), {i} : set X) = (t : set X),
+  { rw this at ht, exact t.finite_to_set.subset ht },
+  ext x,
+  simp only [exists_prop, set.mem_Union, set.mem_singleton_iff, exists_eq_right', finset.mem_coe]
+end
+
+noncomputable
+def fintype_of_univ_finite (H : set.finite (set.univ : set Y)) :
+  fintype Y :=
+begin
+  choose t ht using H.exists_finset,
+  refine ⟨t, _⟩,
+  simpa only [set.mem_univ, iff_true] using ht
+end
+
+noncomputable
+def fintype_of_compact_of_discrete [compact_space X] [discrete_topology X] :
+  fintype X :=
+fintype_of_univ_finite $ finite_of_is_compact_of_discrete _ compact_univ
+
+end for_mathlib
+
 open_locale topological_space
 
 def is_locally_constant (f : X → Y) : Prop := ∀ s, is_open (f ⁻¹' s)
@@ -67,7 +99,7 @@ lemma iff_continuous {_ : topological_space Y} [discrete_topology Y] (f : X → 
   is_locally_constant f ↔ _root_.continuous f :=
 ⟨continuous, λ h s, h.is_open_preimage s (is_open_discrete _)⟩
 
-lemma map_eq_of_is_preconnected {f : X → Y} (hf : is_locally_constant f)
+lemma apply_eq_of_is_preconnected {f : X → Y} (hf : is_locally_constant f)
   (s : set X) (hs : is_preconnected s) (x y : X) (hx : x ∈ s) (hy : y ∈ s) :
   f y = f x :=
 begin
@@ -82,6 +114,16 @@ begin
     ⟨f x, set.mem_inter (set.mem_image_of_mem f hx) (set.mem_singleton _)⟩
     ⟨f y, set.mem_diff_singleton.mpr ⟨set.mem_image_of_mem f hy, hxy⟩⟩
 end
+
+lemma range_finite [compact_space X] {f : X → Y} (hf : is_locally_constant f) :
+  (set.range f).finite :=
+begin
+  letI : topological_space Y := ⊥,
+  haveI : discrete_topology Y := ⟨rfl⟩,
+  rw @iff_continuous X Y ‹_› ‹_› at hf,
+  exact finite_of_is_compact_of_discrete _ (compact_range hf)
+end
+
 
 @[to_additive]
 lemma one [has_one Y] : is_locally_constant (1 : X → Y) := const 1
@@ -105,32 +147,32 @@ begin
   exact hf.mul hg
 end
 
--- -- to additive doesn't want to generate this
--- -- also, `[has_sub Y]` doesn't work :sad:
--- lemma sub [add_group Y] ⦃f g : X → Y⦄ (hf : is_locally_constant f) (hg : is_locally_constant g) :
---   is_locally_constant (f - g) :=
--- begin
---   rw iff_exists_open at hf hg ⊢,
---   intro x,
---   obtain ⟨U, hU, hxU, HU⟩ := hf x,
---   obtain ⟨V, hV, hxV, HV⟩ := hg x,
---   use [U ∩ V, is_open_inter hU hV, ⟨hxU, hxV⟩],
---   rintro x' ⟨hx'U, hx'V⟩,
---   simp only [pi.sub_apply, HU x' hx'U, HV x' hx'V]
--- end
+-- to additive doesn't want to generate this
+-- also, `[has_sub Y]` doesn't work :sad:
+lemma sub [add_group Y] ⦃f g : X → Y⦄ (hf : is_locally_constant f) (hg : is_locally_constant g) :
+  is_locally_constant (f - g) :=
+begin
+  rw iff_exists_open at hf hg ⊢,
+  intro x,
+  obtain ⟨U, hU, hxU, HU⟩ := hf x,
+  obtain ⟨V, hV, hxV, HV⟩ := hg x,
+  use [U ∩ V, is_open_inter hU hV, ⟨hxU, hxV⟩],
+  rintro x' ⟨hx'U, hx'V⟩,
+  simp only [pi.sub_apply, HU x' hx'U, HV x' hx'V]
+end
 
--- @[to_additive]
--- lemma div [group Y] ⦃f g : X → Y⦄ (hf : is_locally_constant f) (hg : is_locally_constant g) :
---   is_locally_constant (f / g) :=
--- begin
---   rw iff_exists_open at hf hg ⊢,
---   intro x,
---   obtain ⟨U, hU, hxU, HU⟩ := hf x,
---   obtain ⟨V, hV, hxV, HV⟩ := hg x,
---   use [U ∩ V, is_open_inter hU hV, ⟨hxU, hxV⟩],
---   rintro x' ⟨hx'U, hx'V⟩,
---   simp only [pi.div_apply, HU x' hx'U, HV x' hx'V]
--- end
+@[to_additive]
+lemma div [group Y] ⦃f g : X → Y⦄ (hf : is_locally_constant f) (hg : is_locally_constant g) :
+  is_locally_constant (f / g) :=
+begin
+  rw iff_exists_open at hf hg ⊢,
+  intro x,
+  obtain ⟨U, hU, hxU, HU⟩ := hf x,
+  obtain ⟨V, hV, hxV, HV⟩ := hg x,
+  use [U ∩ V, is_open_inter hU hV, ⟨hxU, hxV⟩],
+  rintro x' ⟨hx'U, hx'V⟩,
+  simp only [pi.div_apply, HU x' hx'U, HV x' hx'V]
+end
 
 end is_locally_constant
 
@@ -170,5 +212,9 @@ f.is_locally_constant.continuous
 def const (X : Type*) {Y : Type*} [topological_space X] (y : Y) :
   locally_constant X Y :=
 ⟨function.const X y, is_locally_constant.const _⟩
+
+lemma range_finite [compact_space X] (f : locally_constant X Y) :
+  (set.range f).finite :=
+f.is_locally_constant.range_finite
 
 end locally_constant
