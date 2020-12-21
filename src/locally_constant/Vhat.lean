@@ -5,8 +5,11 @@ import topology.metric_space.completion
 
 noncomputable theory
 
-variables (V : Type*) (S : Type*) [normed_group V] [topological_space S]
-variables [compact_space S] [t2_space S] [totally_disconnected_space S]
+variables (V S S₁ S₂ : Type*) [normed_group V]
+variables
+  [topological_space S] [compact_space S] [t2_space S] [totally_disconnected_space S]
+  [topological_space S₁] [compact_space S₁] [t2_space S₁] [totally_disconnected_space S₁]
+  [topological_space S₂] [compact_space S₂] [t2_space S₂] [totally_disconnected_space S₂]
 
 -- move this
 section for_mathlib
@@ -41,5 +44,13 @@ end for_mathlib
 
 local attribute [instance] locally_constant.normed_group
 
-@[derive [add_comm_group, metric_space]]
+@[derive [add_comm_group, metric_space, normed_group]]
 def hat := uniform_space.completion (locally_constant S V)
+
+namespace hat
+open uniform_space
+
+def comap (f : S₁ → S₂) : hat V S₂ → hat V S₁ :=
+completion.map $ locally_constant.comap f
+
+end hat

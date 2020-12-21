@@ -1,7 +1,7 @@
 import topology.subset_properties
 import topology.algebra.monoid
 
-variables {X Y : Type*} [topological_space X]
+variables {X Y Z : Type*} [topological_space X]
 
 -- move this
 section for_mathlib
@@ -216,5 +216,24 @@ def const (X : Type*) {Y : Type*} [topological_space X] (y : Y) :
 lemma range_finite [compact_space X] (f : locally_constant X Y) :
   (set.range f).finite :=
 f.is_locally_constant.range_finite
+
+def map (f : Y → Z) : locally_constant X Y → locally_constant X Z :=
+λ g, ⟨f ∘ g, λ s, by { rw set.preimage_comp, apply g.is_locally_constant }⟩
+
+open_locale classical
+
+noncomputable
+def comap [topological_space Y] (f : X → Y) :
+  locally_constant Y Z → locally_constant X Z :=
+if hf : _root_.continuous f
+then λ g, ⟨g ∘ f, λ s,
+  by { rw set.preimage_comp, apply hf.is_open_preimage, apply g.is_locally_constant }⟩
+else
+begin
+  by_cases H : nonempty X,
+  { introsI g, exact const X (g $ f $ classical.arbitrary X) },
+  { intro g, refine ⟨λ x, (H ⟨x⟩).elim, _⟩,
+    intro s, rw is_open_iff_nhds, intro x, exact (H ⟨x⟩).elim }
+end
 
 end locally_constant
