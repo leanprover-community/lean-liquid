@@ -45,12 +45,18 @@ end for_mathlib
 local attribute [instance] locally_constant.normed_group
 
 @[derive [add_comm_group, metric_space, normed_group]]
-def hat := uniform_space.completion (locally_constant S V)
+def locally_constant.completion (S V : Type*)
+  [topological_space S] [compact_space S] [normed_group V] :=
+uniform_space.completion (locally_constant S V)
 
-namespace hat
+namespace locally_constant
+namespace completion
 open uniform_space
 
-def comap (f : S₁ → S₂) : hat V S₂ → hat V S₁ :=
+local notation `hat` := completion
+
+def comap (f : S₁ → S₂) : hat S₂ V → hat S₁ V :=
 completion.map $ locally_constant.comap f
 
-end hat
+end completion
+end locally_constant
