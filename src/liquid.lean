@@ -1,11 +1,6 @@
-import data.real.basic
-
-constant system_of_complexes : Type
-
-/-- Def 9.3 of [Analytic]. -/
-constant system_of_complexes.is_bdd_exact_for_bdd_degree
-  (C : system_of_complexes) (k : ℤ) (d : ℤ) : Prop
-
+import breen_deligne
+import system_of_complexes
+import locally_constant.Vhat
 
 variables (r r' : ℝ) (h0r : 0 < r) (hrr' : r < r') (hr'1 : r < 1)
 variables (c : ℕ+ → ℝ) -- implicit constants, chosen once and for all

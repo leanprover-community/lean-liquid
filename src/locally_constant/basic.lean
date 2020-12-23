@@ -220,6 +220,8 @@ f.is_locally_constant.range_finite
 def map (f : Y → Z) : locally_constant X Y → locally_constant X Z :=
 λ g, ⟨f ∘ g, λ s, by { rw set.preimage_comp, apply g.is_locally_constant }⟩
 
+@[simp] lemma map_apply (f : Y → Z) (g : locally_constant X Y) : ⇑(map f g) = f ∘ g := rfl
+
 open_locale classical
 
 noncomputable

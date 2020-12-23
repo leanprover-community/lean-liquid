@@ -56,6 +56,14 @@ variables {f g : normed_group_hom V₁ V₂}
 
 protected lemma continuous (f : normed_group_hom V₁ V₂) : continuous f := f.continuous_to_fun
 
+protected lemma uniform_continuous (f : normed_group_hom V₁ V₂) :
+  uniform_continuous f :=
+begin
+  haveI : is_add_group_hom f := f.to_add_monoid_hom.is_add_group_hom,
+  apply uniform_continuous_of_continuous,
+  exact f.continuous
+end
+
 @[continuity] lemma coe_continuous : continuous (f : V₁ → V₂) := f.continuous_to_fun
 
 @[ext] theorem ext (H : ∀ x, f x = g x) : f = g :=

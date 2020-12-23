@@ -1,78 +1,96 @@
-import locally_constant.analysis
 import topology.category.Profinite
 import topology.algebra.group_completion
 import topology.metric_space.completion
 
+import locally_constant.NormedGroup
+import locally_constant.for_mathlib
+import normed_with_aut
+
 noncomputable theory
 
-variables (V S S₁ S₂ : Type*) [normed_group V]
-variables
-  [topological_space S] [compact_space S] [t2_space S] [totally_disconnected_space S]
-  [topological_space S₁] [compact_space S₁] [t2_space S₁] [totally_disconnected_space S₁]
-  [topological_space S₂] [compact_space S₂] [t2_space S₂] [totally_disconnected_space S₂]
-
--- move this
-section for_mathlib
-
-namespace uniform_space
-namespace completion
-
-instance (V : Type*) [uniform_space V] [has_norm V] :
-  has_norm (completion V) :=
-{ norm := completion.extension has_norm.norm }
-
-lemma uniform_continuous_norm : uniform_continuous (norm : V → ℝ) :=
-begin
-  rw metric.uniform_continuous_iff,
-  intros ε hε,
-  use [ε, hε],
-  intros x y hxy,
-  rw dist_eq_norm at hxy ⊢,
-  calc ∥∥x∥ - ∥y∥∥
-      = abs(∥x∥ - ∥y∥) : by rw real.norm_eq_abs
-  ... ≤ ∥x - y∥ : abs_norm_sub_norm_le x y
-  ... < ε : hxy
-end
-
-instance : normed_group (completion V) :=
-{ dist_eq :=
-  begin
-    intros x y,
-    apply completion.induction_on₂ x y; clear x y,
-    { refine is_closed_eq (completion.uniform_continuous_extension₂ _).continuous _,
-      refine continuous.comp _ continuous_sub,
-      exact completion.continuous_extension },
-    { intros x y,
-      show completion.extension₂ _ _ _ = completion.extension _ _,
-      -- the following line needs `completion.coe_sub`
-      rw [sub_eq_add_neg, ← completion.coe_neg, ← completion.coe_add, ← sub_eq_add_neg],
-      rw [completion.extension₂_coe_coe, completion.extension_coe, dist_eq_norm],
-      { exact uniform_continuous_norm _ },
-      { exact uniform_continuous_dist } }
-  end,
-  .. (show add_comm_group (completion V), by apply_instance),
-  .. (show metric_space (completion V), by apply_instance) }
-
-end completion
-end uniform_space
-
-end for_mathlib
-
-local attribute [instance] locally_constant.normed_group
-
-@[derive [add_comm_group, metric_space, normed_group]]
-def locally_constant.completion (S V : Type*)
-  [topological_space S] [compact_space S] [normed_group V] :=
-uniform_space.completion (locally_constant S V)
-
-namespace locally_constant
-namespace completion
+namespace NormedGroup
 open uniform_space
 
-local notation `hat` := completion
+def Completion : NormedGroup ⥤ NormedGroup :=
+{ obj := λ V, NormedGroup.of (completion V),
+  map := λ V W f,
+  { to_fun := completion.map f,
+    continuous_to_fun := completion.continuous_map,
+    map_zero' := by { erw [completion.map_coe], { congr' 1, exact f.map_zero' },
+      exact normed_group_hom.uniform_continuous f },
+    map_add' :=
+    begin
+    intros x y,
+    apply completion.induction_on₂ x y; clear x y,
+    { refine is_closed_eq _ _,
+      { exact completion.continuous_map.comp continuous_add },
+      { apply continuous.add,
+        { exact completion.continuous_map.comp continuous_fst },
+        { exact completion.continuous_map.comp continuous_snd } } },
+    { intros x y,
+      rw [← completion.coe_add, completion.map_coe,
+        completion.map_coe, completion.map_coe, ← completion.coe_add],
+      { congr' 1, exact f.map_add' x y },
+      all_goals { exact normed_group_hom.uniform_continuous f } }
+    end },
+  map_id' := λ V, by { ext1 v, show completion.map id v = v, rw completion.map_id, refl },
+  map_comp' :=
+  begin
+    intros U V W f g, ext1 v, show completion.map (g ∘ f) v = _, rw ← completion.map_comp,
+    { refl },
+    { exact normed_group_hom.uniform_continuous _ },
+    { exact normed_group_hom.uniform_continuous _ }
+  end }
 
-def comap (f : S₁ → S₂) : hat S₂ V → hat S₁ V :=
-completion.map $ locally_constant.comap f
+instance normed_with_aut_Completion (V : NormedGroup) (r : ℝ) [normed_with_aut r V] :
+  normed_with_aut r (Completion.obj V) :=
+{ T := Completion.map_iso (normed_with_aut.T r),
+  norm_T :=
+  begin
+    rw ← function.funext_iff,
+    refine abstract_completion.funext completion.cpkg _ _ _,
+    { apply continuous_norm.comp _, exact completion.continuous_map },
+    { apply continuous_const.mul continuous_norm },
+    intro v,
+    calc _ = _ : congr_arg norm (completion.map_coe _ _)
+       ... = _ : _,
+    { exact normed_group_hom.uniform_continuous _ },
+    { erw [completion.norm_coe, normed_with_aut.norm_T, completion.norm_coe] }
+  end }
 
-end completion
-end locally_constant
+/-- The functor that sends `V` to `V-hat(S)`, for a given compact space `S`. -/
+def LCC (S : Type*) [topological_space S] [compact_space S] :
+  NormedGroup ⥤ NormedGroup :=
+NormedGroup.LocallyConstant S ⋙ NormedGroup.Completion
+
+variables (S : Type*) [topological_space S] [compact_space S]
+
+instance normed_with_aut_LocallyConstant (V : NormedGroup) (r : ℝ) [normed_with_aut r V] :
+  normed_with_aut r ((LocallyConstant S).obj V) :=
+{ T := (LocallyConstant S).map_iso (normed_with_aut.T r),
+  norm_T :=
+  begin
+    rintro (f : locally_constant S V),
+    show Sup _ = r * Sup _,
+    dsimp,
+    simp only [normed_with_aut.norm_T],
+    -- from here on, it should be easy...
+    by_cases H : nonempty S, swap,
+    { simp only [set.range_eq_empty.mpr H, real.Sup_empty, mul_zero] },
+    obtain ⟨x⟩ := H, haveI : nonempty S := ⟨x⟩,
+    apply le_antisymm ((real.Sup_le _ _ _).mpr _) _,
+    { exact ⟨_, set.mem_range_self x⟩ },
+    { apply real.Sup_exists_of_finite, apply is_locally_constant.range_finite,
+      apply (is_locally_constant.const _).mul,
+      sorry },
+    sorry
+  end }
+
+instance normed_with_aut_LCC (V : NormedGroup) (r : ℝ) [normed_with_aut r V] :
+  normed_with_aut r ((LCC S).obj V) :=
+show normed_with_aut r (Completion.obj $ (LocallyConstant S).obj V), by apply_instance
+
+-- def comap (f : S₁ → S₂) : hat S₂ V → hat S₁ V :=
+-- completion.map $ locally_constant.comap f
+
+end NormedGroup
