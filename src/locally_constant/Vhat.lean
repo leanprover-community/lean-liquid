@@ -5,11 +5,12 @@ import topology.metric_space.completion
 import locally_constant.NormedGroup
 import locally_constant.for_mathlib
 import normed_with_aut
+import for_mathlib.functor
 
 noncomputable theory
 
 namespace NormedGroup
-open uniform_space
+open uniform_space opposite
 
 def Completion : NormedGroup ⥤ NormedGroup :=
 { obj := λ V, NormedGroup.of (completion V),
@@ -71,17 +72,18 @@ instance normed_with_aut_Completion (V : NormedGroup) (r : ℝ) [normed_with_aut
     { erw [completion.norm_coe, normed_with_aut.norm_T, completion.norm_coe] }
   end }
 
-/-- The functor that sends `V` to `V-hat(S)`, for a given compact space `S`. -/
-def LCC (S : Type*) [topological_space S] [compact_space S] :
-  NormedGroup ⥤ NormedGroup :=
-NormedGroup.LocallyConstant S ⋙ NormedGroup.Completion
+/-- `LCC` (Locally Constant Completion) is the bifunctor
+that sends a normed abelian group `V` and a compact space `S` to `V-hat(S)`.
+Here `V-hat(S)` is the completion (for the sup norm) of the locally constant functions `S → V`. -/
+def LCC : NormedGroup ⥤ CompHausᵒᵖ ⥤ NormedGroup :=
+(LocallyConstant.uncurry ⋙ Completion).curry
 
 variables (S : Type*) [topological_space S] [compact_space S]
 
-instance normed_with_aut_LocallyConstant (V : NormedGroup) (r : ℝ)
+instance normed_with_aut_LocallyConstant (V : NormedGroup) (S : CompHaus) (r : ℝ)
   [normed_with_aut r V] [hr : fact (0 < r)] :
-  normed_with_aut r ((LocallyConstant S).obj V) :=
-{ T := (LocallyConstant S).map_iso normed_with_aut.T,
+  normed_with_aut r ((LocallyConstant.obj V).obj (op S)) :=
+{ T := (LocallyConstant.map_iso normed_with_aut.T),
   norm_T :=
   begin
     rintro (f : locally_constant S V),
@@ -93,11 +95,9 @@ instance normed_with_aut_LocallyConstant (V : NormedGroup) (r : ℝ)
     simp only [exists_prop, set.mem_range, exists_exists_eq_and, set.mem_set_of_eq]
   end }
 
-instance normed_with_aut_LCC (V : NormedGroup) (r : ℝ) [normed_with_aut r V] [hr : fact (0 < r)] :
-  normed_with_aut r ((LCC S).obj V) :=
-show normed_with_aut r (Completion.obj $ (LocallyConstant S).obj V), by apply_instance
-
--- def comap (f : S₁ → S₂) : hat S₂ V → hat S₁ V :=
--- completion.map $ locally_constant.comap f
+instance normed_with_aut_LCC (V : NormedGroup) (S : CompHaus) (r : ℝ)
+  [normed_with_aut r V] [hr : fact (0 < r)] :
+  normed_with_aut r ((LCC.obj V).obj (op S)) :=
+show normed_with_aut r (Completion.obj $ (LocallyConstant.obj V).obj (op S)), by apply_instance
 
 end NormedGroup

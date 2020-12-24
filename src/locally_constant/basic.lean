@@ -1,7 +1,7 @@
 import topology.subset_properties
 import topology.algebra.monoid
 
-variables {X Y Z : Type*} [topological_space X]
+variables {X Y Z α : Type*} [topological_space X]
 
 -- move this
 section for_mathlib
@@ -91,13 +91,13 @@ end
 lemma const (y : Y) : is_locally_constant (function.const X y) :=
 of_constant _ ⟨y, λ _, rfl⟩
 
-lemma continuous {_ : topological_space Y} {f : X → Y} (hf : is_locally_constant f) :
+protected lemma continuous {_ : topological_space Y} {f : X → Y} (hf : is_locally_constant f) :
   continuous f :=
 ⟨λ U hU, hf _⟩
 
 lemma iff_continuous {_ : topological_space Y} [discrete_topology Y] (f : X → Y) :
-  is_locally_constant f ↔ _root_.continuous f :=
-⟨continuous, λ h s, h.is_open_preimage s (is_open_discrete _)⟩
+  is_locally_constant f ↔ continuous f :=
+⟨is_locally_constant.continuous, λ h s, h.is_open_preimage s (is_open_discrete _)⟩
 
 lemma apply_eq_of_is_preconnected {f : X → Y} (hf : is_locally_constant f)
   (s : set X) (hs : is_preconnected s) (x y : X) (hx : x ∈ s) (hy : y ∈ s) :
@@ -205,7 +205,7 @@ coe_inj (funext h)
 theorem ext_iff {f g : locally_constant X Y} : f = g ↔ ∀ x, f x = g x :=
 ⟨λ h x, h ▸ rfl, λ h, ext h⟩
 
-lemma continuous [topological_space Y] (f : locally_constant X Y) : continuous f :=
+protected lemma continuous [topological_space Y] (f : locally_constant X Y) : continuous f :=
 f.is_locally_constant.continuous
 
 /-- The constant locally constant function on `X` with value `y : Y`. -/
@@ -222,12 +222,21 @@ def map (f : Y → Z) : locally_constant X Y → locally_constant X Z :=
 
 @[simp] lemma map_apply (f : Y → Z) (g : locally_constant X Y) : ⇑(map f g) = f ∘ g := rfl
 
+@[simp] lemma map_id : @map X Y Y _ id = id := by { ext, refl }
+
+@[simp] lemma map_comp {Y₁ Y₂ Y₃ : Type*} (g : Y₂ → Y₃) (f : Y₁ → Y₂) :
+  @map X _ _ _ g ∘ map f = map (g ∘ f) := by { ext, refl }
+
+section comap
+
 open_locale classical
 
+variables [topological_space Y]
+
 noncomputable
-def comap [topological_space Y] (f : X → Y) :
+def comap (f : X → Y) :
   locally_constant Y Z → locally_constant X Z :=
-if hf : _root_.continuous f
+if hf : continuous f
 then λ g, ⟨g ∘ f, λ s,
   by { rw set.preimage_comp, apply hf.is_open_preimage, apply g.is_locally_constant }⟩
 else
@@ -237,5 +246,19 @@ begin
   { intro g, refine ⟨λ x, (H ⟨x⟩).elim, _⟩,
     intro s, rw is_open_iff_nhds, intro x, exact (H ⟨x⟩).elim }
 end
+
+@[simp] lemma coe_comap (f : X → Y) (g : locally_constant Y Z) (hf : continuous f) :
+  ⇑(comap f g) = g ∘ f :=
+by { rw [comap, dif_pos hf], refl }
+
+@[simp] lemma comap_id : @comap X X Z _ _ id = id :=
+by { ext, simp only [continuous_id, id.def, function.comp.right_id, coe_comap] }
+
+lemma comap_comp [topological_space Z]
+  (f : X → Y) (g : Y → Z) (hf : continuous f) (hg : continuous g) :
+  @comap _ _ α _ _ f ∘ comap g = comap (g ∘ f) :=
+by { ext, simp only [hf, hg, hg.comp hf, coe_comap] }
+
+end comap
 
 end locally_constant
