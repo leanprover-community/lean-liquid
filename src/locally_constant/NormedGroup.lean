@@ -3,17 +3,52 @@ import NormedGroup
 
 noncomputable theory
 
-lemma real.Sup_mul (r : ℝ) (s : set ℝ) (hr : 0 ≤ r) :
+set_option pp.proofs true
+
+-- feel free to golf!!
+lemma real.Sup_mul (r : ℝ) (s : set ℝ) (hr : 0 < r) :
   Sup ({x | ∃ y ∈ s, r * y = x}) = r * Sup s :=
 begin
-  sorry
+  let P₁ : Prop := (∃ (x : ℝ), x ∈ {x : ℝ | ∃ (y : ℝ) (H : y ∈ s), r * y = x}) ∧
+    ∃ (x : ℝ), ∀ (y : ℝ), y ∈ {x : ℝ | ∃ (y : ℝ) (H : y ∈ s), r * y = x} → y ≤ x,
+  let P₂ : Prop := (∃ (x : ℝ), x ∈ s) ∧ ∃ (x : ℝ), ∀ (y : ℝ), y ∈ s → y ≤ x,
+  have H : P₁ ↔ P₂ := _,
+  { by_cases h : P₁,
+    { apply le_antisymm,
+      { rw real.Sup_le _ h.1 h.2,
+        rintro _ ⟨x, hx, rfl⟩,
+        apply mul_le_mul_of_nonneg_left _ hr.le,
+        rw H at h,
+        exact real.le_Sup _ h.2 hx },
+      { rw H at h,
+        rw [← le_div_iff' hr, real.Sup_le _ h.1 h.2],
+        intros x hx,
+        rw le_div_iff' hr,
+        rw ← H at h,
+        exact real.le_Sup _ h.2 ⟨_, hx, rfl⟩ } },
+    { simp only [real.Sup_def],
+      classical,
+      rw [dif_neg, dif_neg, mul_zero],
+      { rw H at h, exact h }, { exact h } } },
+  { apply and_congr,
+    { simp only [exists_prop, set.mem_set_of_eq],
+      rw exists_comm,
+      simp only [and_comm, exists_eq_left'] },
+    { simp only [exists_prop, set.mem_set_of_eq, and_comm],
+      simp only [exists_eq_left', mul_comm r, ← div_eq_iff_mul_eq hr.ne.symm],
+      split; rintro ⟨x, hx⟩,
+      { refine ⟨x / r, λ y hy, _⟩,
+        rw ← mul_div_cancel y hr.ne.symm at hy,
+        rw le_div_iff hr,
+        exact hx _ hy },
+      { refine ⟨r * x, λ y hy, _⟩,
+        rw ← div_le_iff' hr,
+        exact hx _ hy } } },
 end
 
 namespace NormedGroup
 
 local attribute [instance] locally_constant.normed_group locally_constant.metric_space
-
-set_option pp.all true
 
 @[simps]
 def LocallyConstant (S : Type*) [topological_space S] [compact_space S] :
@@ -41,12 +76,13 @@ def LocallyConstant (S : Type*) [topological_space S] [compact_space S] :
         { apply real.Sup_exists_of_finite,
           rw [set.range_comp, set.range_comp],
           exact (g.range_finite.image _).image _ },
-        { refine ⟨x, _⟩,
-          -- refl doesn't want to close the goal :shock:
-          dsimp [NormedGroup], refl } },
-      { convert real.Sup_mul C _ C_pos,
-        ext,
-        simp only [exists_prop, set.mem_range, exists_exists_eq_and, set.mem_set_of_eq], }
-    end } }
+        { exact set.mem_range_self _ } },
+      { convert real.Sup_mul C _ C_pos using 2,
+        ext x,
+        simp only [set.mem_range, exists_prop, set.set_of_mem_eq, exists_exists_eq_and],
+        simp only [set.mem_set_of_eq] }
+    end },
+  map_id' := by { intros, ext, refl },
+  map_comp' := by { intros, ext, refl } }
 
 end NormedGroup

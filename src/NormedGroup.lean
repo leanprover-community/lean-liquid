@@ -60,15 +60,16 @@ instance : has_coe_to_fun (normed_group_hom V₁ V₂) := ⟨_, normed_group_hom
 
 @[simp] lemma map_neg (x) : f (-x) = -(f x) := f.to_add_monoid_hom.map_neg _
 
-lemma bound : ∃ C, 0 ≤ C ∧ ∀ v, ∥f v∥ ≤ C * ∥v∥ :=
+lemma bound : ∃ C, 0 < C ∧ ∀ v, ∥f v∥ ≤ C * ∥v∥ :=
 begin
   obtain ⟨C, hC⟩ := f.bound',
-  use [max C 0],
-  simp only [le_max_iff, le_refl, or_true, true_and],
+  use [max C 1],
+  simp only [lt_max_iff, zero_lt_one, or_true, true_and],
   intro v,
   calc ∥f v∥
       ≤ C * ∥v∥ : hC v
-  ... ≤ max C 0 * ∥v∥ : mul_le_mul (le_max_left _ _) le_rfl (norm_nonneg _) (le_max_right _ _)
+  ... ≤ max C 1 * ∥v∥ : mul_le_mul (le_max_left _ _) le_rfl (norm_nonneg _) _,
+  exact zero_le_one.trans (le_max_right _ _)
 end
 
 lemma lipschitz_of_bound (C : ℝ) (h : ∀x, ∥f x∥ ≤ C * ∥x∥) :
@@ -123,7 +124,7 @@ def comp (g : normed_group_hom V₂ V₃) (f : normed_group_hom V₁ V₂) :
         ≤ Cg * ∥f v∥    : hg _
     ... ≤ Cg * Cf * ∥v∥ : _,
     rw mul_assoc,
-    exact mul_le_mul le_rfl (hf v) (norm_nonneg _) Cg_pos
+    exact mul_le_mul le_rfl (hf v) (norm_nonneg _) Cg_pos.le
   end
   .. g.to_add_monoid_hom.comp f.to_add_monoid_hom }
 
