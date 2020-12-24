@@ -15,7 +15,20 @@ def Completion : NormedGroup ⥤ NormedGroup :=
 { obj := λ V, NormedGroup.of (completion V),
   map := λ V W f,
   { to_fun := completion.map f,
-    continuous_to_fun := completion.continuous_map,
+    bound' :=
+    begin
+      obtain ⟨C, C_pos, hC⟩ := f.bound,
+      use C,
+      intro v,
+      apply completion.induction_on v; clear v,
+      { refine is_closed_le _ _,
+        { exact continuous_norm.comp completion.continuous_map },
+        { exact continuous_const.mul continuous_norm } },
+      { intro v,
+        rw [completion.map_coe, completion.norm_coe, completion.norm_coe],
+        { apply hC },
+        { exact f.uniform_continuous } }
+    end,
     map_zero' := by { erw [completion.map_coe], { congr' 1, exact f.map_zero' },
       exact normed_group_hom.uniform_continuous f },
     map_add' :=
@@ -44,7 +57,7 @@ def Completion : NormedGroup ⥤ NormedGroup :=
 
 instance normed_with_aut_Completion (V : NormedGroup) (r : ℝ) [normed_with_aut r V] :
   normed_with_aut r (Completion.obj V) :=
-{ T := Completion.map_iso (normed_with_aut.T r),
+{ T := Completion.map_iso normed_with_aut.T,
   norm_T :=
   begin
     rw ← function.funext_iff,
@@ -65,28 +78,22 @@ NormedGroup.LocallyConstant S ⋙ NormedGroup.Completion
 
 variables (S : Type*) [topological_space S] [compact_space S]
 
-instance normed_with_aut_LocallyConstant (V : NormedGroup) (r : ℝ) [normed_with_aut r V] :
+instance normed_with_aut_LocallyConstant (V : NormedGroup) (r : ℝ)
+  [normed_with_aut r V] [hr : fact (0 < r)] :
   normed_with_aut r ((LocallyConstant S).obj V) :=
-{ T := (LocallyConstant S).map_iso (normed_with_aut.T r),
+{ T := (LocallyConstant S).map_iso normed_with_aut.T,
   norm_T :=
   begin
     rintro (f : locally_constant S V),
     show Sup _ = r * Sup _,
     dsimp,
     simp only [normed_with_aut.norm_T],
-    -- from here on, it should be easy...
-    by_cases H : nonempty S, swap,
-    { simp only [set.range_eq_empty.mpr H, real.Sup_empty, mul_zero] },
-    obtain ⟨x⟩ := H, haveI : nonempty S := ⟨x⟩,
-    apply le_antisymm ((real.Sup_le _ _ _).mpr _) _,
-    { exact ⟨_, set.mem_range_self x⟩ },
-    { apply real.Sup_exists_of_finite, apply is_locally_constant.range_finite,
-      apply (is_locally_constant.const _).mul,
-      sorry },
-    sorry
+    convert real.Sup_mul r _ hr,
+    ext,
+    simp only [exists_prop, set.mem_range, exists_exists_eq_and, set.mem_set_of_eq]
   end }
 
-instance normed_with_aut_LCC (V : NormedGroup) (r : ℝ) [normed_with_aut r V] :
+instance normed_with_aut_LCC (V : NormedGroup) (r : ℝ) [normed_with_aut r V] [hr : fact (0 < r)] :
   normed_with_aut r ((LCC S).obj V) :=
 show normed_with_aut r (Completion.obj $ (LocallyConstant S).obj V), by apply_instance
 
