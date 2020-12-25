@@ -7,7 +7,8 @@ import data.equiv.basic
 import analysis.normed_space.basic
 import analysis.specific_limits
 import data.equiv.basic
-import .Mbar_bdd
+
+import Mbar.bounded
 /-!
 
 ## $\overline{\mathcal{M}}_{r'}(S)$
