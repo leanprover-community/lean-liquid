@@ -37,13 +37,15 @@ def Mbar (r' : ℝ) (S : Type u) [fintype S] (c : ℝ) :=
 
 variables {r' : ℝ} {S : Type u} [fintype S] {c c₁ c₂ : ℝ}
 
-def Mbar.constant_coeff_eq_zero (x : Mbar r' S c) := x.2.1
+protected lemma Mbar.constant_coeff_eq_zero (x : Mbar r' S c) (s : S) : x.1 s 0 = 0 := x.2.1 s
 
-def Mbar.summable (x : Mbar r' S c) := x.2.2.1
+protected lemma Mbar.summable (x : Mbar r' S c) (s : S) :
+  summable (λ n, abs ((x.1 s n : ℝ) * r'^n)) := x.2.2.1 s
 
-def Mbar.sum_tsum_le (x : Mbar r' S c) := x.2.2.2
+protected lemma Mbar.sum_tsum_le (x : Mbar r' S c) :
+  (∑ s, ∑' n, (abs ((x.1 s n : ℝ) * r'^n))) ≤ c := x.2.2.2
 
-def Mbar.cast_le (h : c₁ ≤ c₂) (x : Mbar r' S c₁) : Mbar r' S c₂ :=
+protected def Mbar.cast_le (h : c₁ ≤ c₂) (x : Mbar r' S c₁) : Mbar r' S c₂ :=
 ⟨x.1, x.constant_coeff_eq_zero, x.summable, x.sum_tsum_le.trans h⟩
 
 -- lemma abs_mul_pow_pos {x r : ℝ} (hr : 0 < r) {n : ℕ} :
@@ -147,7 +149,7 @@ end
 
 lemma mk_seq_summable {T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M}
   (compat : ∀ (M N : ℕ) (h : M ≤ N), Mbar_bdd.transition r' h (T N) = T M) (s : S) :
-  _root_.summable (λ (n : ℕ), abs (↑(mk_seq T s n) * r' ^ n)) :=
+  summable (λ (n : ℕ), abs (↑(mk_seq T s n) * r' ^ n)) :=
 begin
   refine @summable_of_sum_range_le (λ n, abs ((mk_seq T s n : ℝ) * r'^n)) c
     (λ _, abs_nonneg _) (λ n, _),
@@ -320,8 +322,8 @@ end
 
 end topological_structure
 
-lemma Tinv_aux_summable [h0r : fact (0 < r')] (F : Mbar r' S c)
-  (s : S) : _root_.summable (λ (n : ℕ), abs (↑(Tinv_aux (F.val s) n) * r' ^ n)) :=
+lemma Tinv_aux_summable [h0r : fact (0 < r')] (F : Mbar r' S c) (s : S) :
+  summable (λ (n : ℕ), abs (↑(Tinv_aux (F.val s) n) * r' ^ n)) :=
 begin
   rw summable_mul_right_iff (ne_of_gt h0r),
   have H := F.summable s,
@@ -350,5 +352,13 @@ begin
   { rw ← summable_mul_right_iff (ne_of_gt h0r), exact Tinv_aux_summable F s },
   { exact (summable_nat_add_iff 1).mpr (F.summable s) }
 end⟩
+.
+lemma continuous_Tinv (r : ℝ) (S : Type u) [fintype S] (c : ℝ) [h0r : fact (0 < r)] :
+  continuous (@Tinv r S _ c _) :=
+begin
+  rw continuous_iff,
+  intro M,
+  sorry
+end
 
 end Mbar
