@@ -54,7 +54,7 @@ https://leanprover.zulipchat.com/#narrow/stream/266894-liquid/topic/bounded.20ex
 
 /-- Def 9.3 of [Analytic]. -/
 def is_bdd_exact_for_bdd_degree_above_idx
-  (c₀' : nnreal) (k : nnreal) (m : ℤ) [hk : fact (1 ≤ k)] : Prop :=
+  (k : nnreal) (m : ℤ) (c₀' : nnreal) [hk : fact (1 ≤ k)] : Prop :=
 ∀ c ≥ c₀', ∀ i < m,
 ∀ x : C.X (k * c) (i+1),
 ∃ y : C.X c i, ∥(C.res x) - (C.d y) ∥ ≤ k * ∥C.d x∥
