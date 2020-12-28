@@ -31,23 +31,41 @@ open power_series
 
 /-- `Mbar r' S c` is the set of power series
 `F_s = ∑ a_{n,s}T^n ∈ Tℤ[[T]]` such that `∑_{n,s} |a_{n,s}|r'^n ≤ c` -/
-def Mbar (r' : ℝ) (S : Type u) [fintype S] (c : ℝ) :=
-{F : S → ℕ → ℤ // (∀ s, F s 0 = 0) ∧
-  (∀ s, summable (λ n, abs ((F s n : ℝ) * r'^n))) ∧
-  (∑ s, ∑' n, (abs ((F s n : ℝ) * r'^n))) ≤ c }
+structure Mbar (r' : ℝ) (S : Type u) [fintype S] (c : ℝ) :=
+(to_fun : S → ℕ → ℤ)
+(coeff_zero' : ∀ s, to_fun s 0 = 0)
+(summable' : ∀ s, summable (λ n, abs ((to_fun s n : ℝ) * r' ^ n)))
+(sum_tsum_le' : (∑ s, ∑' n, (abs ((to_fun s n : ℝ) * r'^n))) ≤ c)
 
 variables {r' : ℝ} {S : Type u} [fintype S] {c c₁ c₂ : ℝ}
 
-protected lemma Mbar.constant_coeff_eq_zero (x : Mbar r' S c) (s : S) : x.1 s 0 = 0 := x.2.1 s
+namespace Mbar
+instance has_coe_to_fun : has_coe_to_fun (Mbar r' S c) := ⟨_, Mbar.to_fun⟩
 
-protected lemma Mbar.summable (x : Mbar r' S c) (s : S) :
-  summable (λ n, abs ((x.1 s n : ℝ) * r'^n)) := x.2.2.1 s
+@[simp] lemma coe_mk (x h₁ h₂ h₃) : ((⟨x, h₁, h₂, h₃⟩ : Mbar r' S c) : S → ℕ → ℤ) = x := rfl
 
-protected lemma Mbar.sum_tsum_le (x : Mbar r' S c) :
-  (∑ s, ∑' n, (abs ((x.1 s n : ℝ) * r'^n))) ≤ c := x.2.2.2
+protected lemma coeff_zero (x : Mbar r' S c) (s : S) : x s 0 = 0 := x.coeff_zero' s
 
-protected def Mbar.cast_le (h : c₁ ≤ c₂) (x : Mbar r' S c₁) : Mbar r' S c₂ :=
-⟨x.1, x.constant_coeff_eq_zero, x.summable, x.sum_tsum_le.trans h⟩
+protected lemma summable (x : Mbar r' S c) (s : S) :
+  summable (λ n, abs ((x s n : ℝ) * r'^n)) := x.summable' s
+
+protected lemma sum_tsum_le (x : Mbar r' S c) :
+  (∑ s, ∑' n, (abs ((x s n : ℝ) * r'^n))) ≤ c := x.sum_tsum_le'
+
+protected def cast_le (h : c₁ ≤ c₂) (x : Mbar r' S c₁) : Mbar r' S c₂ :=
+⟨x.1, x.coeff_zero, x.summable, x.sum_tsum_le.trans h⟩
+
+def mk' (x : S → ℕ → ℤ)
+  (h : (∀ s, x s 0 = 0) ∧
+       (∀ s, summable (λ n, abs ((x s n : ℝ) * r'^n))) ∧
+       (∑ s, ∑' n, (abs ((x s n : ℝ) * r'^n))) ≤ c) :
+  Mbar r' S c :=
+{ to_fun := x, coeff_zero' := h.1, summable' := h.2.1, sum_tsum_le' := h.2.2 }
+
+@[ext] lemma ext (x y : Mbar r' S c) (h : ⇑x = y) : x = y :=
+by { cases x, cases y, congr, exact h }
+
+end Mbar
 
 -- lemma abs_mul_pow_pos {x r : ℝ} (hr : 0 < r) {n : ℕ} :
 --   abs (x * r ^ n) = abs x * r ^ n :=
@@ -55,26 +73,26 @@ protected def Mbar.cast_le (h : c₁ ≤ c₂) (x : Mbar r' S c₁) : Mbar r' S 
 
 noncomputable def Mbar.add :
   Mbar r' S c₁ → Mbar r' S c₂ → Mbar r' S (c₁ + c₂) :=
-λ F G, ⟨F.1 + G.1, begin
-  rcases F with ⟨F, hF0, hFs, hFsc⟩,
-  rcases G with ⟨G, hG0, hGs, hGsc⟩,
-  have hFGs : ∀ (s : S), summable (λ (n : ℕ), abs (((F + G) s n : ℝ) * r' ^ n)),
+λ F G, Mbar.mk' (F + G)
+begin
+  have H : _ := _,
+  refine ⟨λ s, by simp [F.coeff_zero s, G.coeff_zero s], H, _⟩,
+  { refine le_trans _ (add_le_add F.sum_tsum_le G.sum_tsum_le),
+    rw ← finset.sum_add_distrib,
+    refine finset.sum_le_sum _,
+    rintro s -,
+    rw ← tsum_add (F.summable s) (G.summable s),
+    refine tsum_le_tsum _ (H s) (summable.add (F.summable s) (G.summable s)),
+    intro n,
+    convert abs_add _ _,
+    simp [add_mul] },
   { intro s,
+    have hFs := F.summable, have hGs := G.summable,
     simp_rw summable_abs_iff at hFs hGs ⊢,
     convert summable.add (hFs s) (hGs s),
     ext n,
-    simp [add_mul] },
-  refine ⟨λ s, by simp [hF0 s, hG0 s], hFGs, _⟩,
-  refine le_trans _ (add_le_add hFsc hGsc),
-  rw ← finset.sum_add_distrib,
-  refine finset.sum_le_sum _,
-  rintro s -,
-  rw ← tsum_add (hFs s) (hGs s),
-  refine tsum_le_tsum _ (hFGs s) (summable.add (hFs s) (hGs s)),
-  intro n,
-  convert abs_add _ _,
-  simp [add_mul],
-end⟩
+    simp [add_mul] }
+end
 
 def Mbar.add' : Mbar r' S c₁ × Mbar r' S c₂ → Mbar r' S (c₁ + c₂) := λ x, Mbar.add x.1 x.2
 
@@ -324,7 +342,7 @@ end
 end topological_structure
 
 lemma Tinv_aux_summable [h0r : fact (0 < r')] (F : Mbar r' S c) (s : S) :
-  summable (λ (n : ℕ), abs (↑(Tinv_aux (F.val s) n) * r' ^ n)) :=
+  summable (λ (n : ℕ), abs (↑(Tinv_aux (F s) n) * r' ^ n)) :=
 begin
   rw summable_mul_right_iff (ne_of_gt h0r),
   have H := F.summable s,
@@ -334,26 +352,29 @@ begin
   { simp only [Tinv_aux_succ, real.norm_eq_abs, abs_mul, pow_add, mul_assoc, pow_one, abs_abs] },
 end
 
-def Tinv {r : ℝ} {S : Type u} [fintype S] {c : ℝ} [h0r : fact (0 < r)] :
-  Mbar r S c → Mbar r S (c / r) :=
-λ F, ⟨λ s, Tinv_aux (F.1 s), λ s, rfl, Tinv_aux_summable F,
-begin
-  rw [le_div_iff h0r, finset.sum_mul],
-  refine le_trans _ F.sum_tsum_le,
-  apply finset.sum_le_sum,
-  rintro s -,
-  rw ← tsum_mul_right _ (Tinv_aux_summable F s),
-  conv_rhs { rw [← @sum_add_tsum_nat_add ℝ _ _ _ _ _ 1 (F.summable s)] },
-  refine le_add_of_nonneg_of_le (finset.sum_nonneg (λ _ _, abs_nonneg _)) _,
-  apply tsum_le_tsum,
-  { rintro ⟨i⟩,
-    { simp [abs_nonneg] },
-    { simp only [Tinv_aux_succ, real.norm_eq_abs, abs_mul, pow_add, mul_assoc,
-        pow_one, abs_abs, abs_of_pos h0r] } },
-  { rw ← summable_mul_right_iff (ne_of_gt h0r), exact Tinv_aux_summable F s },
-  { exact (summable_nat_add_iff 1).mpr (F.summable s) }
-end⟩
-.
+def Tinv {r : ℝ} {S : Type u} [fintype S] {c : ℝ} [h0r : fact (0 < r)] (F : Mbar r S c) :
+  Mbar r S (c / r) :=
+{ to_fun := λ s, Tinv_aux (F s),
+  coeff_zero' := λ s, rfl,
+  summable' := Tinv_aux_summable F,
+  sum_tsum_le' :=
+  begin
+    rw [le_div_iff h0r, finset.sum_mul],
+    refine le_trans _ F.sum_tsum_le,
+    apply finset.sum_le_sum,
+    rintro s -,
+    rw ← tsum_mul_right _ (Tinv_aux_summable F s),
+    conv_rhs { rw [← @sum_add_tsum_nat_add ℝ _ _ _ _ _ 1 (F.summable s)] },
+    refine le_add_of_nonneg_of_le (finset.sum_nonneg (λ _ _, abs_nonneg _)) _,
+    apply tsum_le_tsum,
+    { rintro ⟨i⟩,
+      { simp [abs_nonneg] },
+      { simp only [Tinv_aux_succ, real.norm_eq_abs, abs_mul, pow_add, mul_assoc,
+          pow_one, abs_abs, abs_of_pos h0r] } },
+    { rw ← summable_mul_right_iff (ne_of_gt h0r), exact Tinv_aux_summable F s },
+    { exact (summable_nat_add_iff 1).mpr (F.summable s) }
+  end }
+
 lemma continuous_Tinv (r : ℝ) (S : Type u) [fintype S] (c : ℝ) [h0r : fact (0 < r)] :
   continuous (@Tinv r S _ c _) :=
 begin
