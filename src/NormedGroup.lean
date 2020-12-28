@@ -49,7 +49,10 @@ attribute [derive [has_coe_to_sort, large_category, concrete_category]] NormedGr
 def of (M : Type u) [normed_group M] : NormedGroup := bundled.of M
 
 noncomputable
-instance : inhabited NormedGroup := ⟨of punit⟩
+instance : has_zero NormedGroup := ⟨of punit⟩
+
+noncomputable
+instance : inhabited NormedGroup := ⟨0⟩
 
 instance (M : NormedGroup) : normed_group M := M.str
 

@@ -188,8 +188,8 @@ end universal_map
 /-- Roughly speaking, this is a collection of formal finite sums of matrices
 that encode that data that rolls out of the Breen--Deligne resolution. -/
 structure data :=
-(rank       : ℕ → ℕ)
-(map        : Π n, universal_map (rank (n+1)) (rank n))
+(rank : ℕ → ℕ)
+(map  : Π n, universal_map (rank (n+1)) (rank n))
 
 def is_complex (BD : data) : Prop :=
 ∀ n, universal_map.comp (BD.map n) (BD.map (n+1)) = 0
@@ -290,9 +290,21 @@ structure homotopy (BD : data) :=
 -- TODO! Is ↑ the thing we want?
 
 structure package :=
-(data : data)
-(complex  : is_complex data)
-(homotopy : homotopy data)
+(data       : data)
+(is_complex : is_complex data)
+(homotopy   : homotopy data)
+
+namespace package
+
+def rank (BD : package) := BD.data.rank
+
+def map (BD : package) := BD.data.map
+
+@[simp] lemma map_comp_map (BD : package) (n : ℕ) :
+  universal_map.comp (BD.map n) (BD.map (n+1)) = 0 :=
+BD.is_complex n
+
+end package
 
 namespace eg
 /-! ## An explicit nontrivial example -/
