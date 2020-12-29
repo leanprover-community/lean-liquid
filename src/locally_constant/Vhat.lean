@@ -83,7 +83,7 @@ variables (S : Type*) [topological_space S] [compact_space S]
 instance normed_with_aut_LocallyConstant (V : NormedGroup) (S : CompHaus) (r : ℝ)
   [normed_with_aut r V] [hr : fact (0 < r)] :
   normed_with_aut r ((LocallyConstant.obj V).obj (op S)) :=
-{ T := (LocallyConstant.map_iso normed_with_aut.T),
+{ T := (LocallyConstant.map_iso normed_with_aut.T).app (op S),
   norm_T :=
   begin
     rintro (f : locally_constant S V),
