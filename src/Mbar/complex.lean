@@ -177,7 +177,8 @@ def Mbar_complex [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' < 1)]
     ext1 i,
     cases i,
     -- the proofs below used to work... now they time out :sad:
-    -- {
+    -- { show (BD.map i).eval_Mbar V S r' (c * c' i) (c * c' (i + 1)) ≫
+    --        (BD.map (i+1)).eval_Mbar V S r' (c * c' (i+1)) (c * c' (i + 2)) = _,
     --   erw ← universal_map.eval_Mbar_comp V S r r' _ (c * c' (i+1)) _ (BD.map i) (BD.map (i+1)),
     --   { rw [BD.map_comp_map, universal_map.eval_Mbar_zero], refl },
     --   apply_instance },
