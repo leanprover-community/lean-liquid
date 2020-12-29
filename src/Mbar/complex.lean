@@ -84,7 +84,7 @@ variables {l m n : ℕ}
 
 namespace basic_universal_map
 
-/-- Addition puts goes from `Mbar r' S c` to `Mbar r' S c'` for suitable `c'`.
+/-- Addition goes from `Mbar r' S c` to `Mbar r' S c'` for suitable `c'`.
 This predicate says what *suitable* means for basic universal maps.
 See Lemma 9.11 of [Analytic]. -/
 def suitable (f : basic_universal_map m n) (c c' : ℝ) : Prop := sorry
@@ -106,7 +106,7 @@ end basic_universal_map
 
 namespace universal_map
 
-/-- Addition puts goes from `Mbar r' S c` to `Mbar r' S c'` for suitable `c'`.
+/-- Addition goes from `Mbar r' S c` to `Mbar r' S c'` for suitable `c'`.
 This predicate says what *suitable* means for universal maps.
 See Lemma 9.11 of [Analytic]. -/
 def suitable (f : universal_map m n) (c c' : ℝ) : Prop := sorry
