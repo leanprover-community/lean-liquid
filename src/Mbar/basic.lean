@@ -52,8 +52,8 @@ protected lemma summable (x : Mbar r' S c) (s : S) :
 protected lemma sum_tsum_le (x : Mbar r' S c) :
   (∑ s, ∑' n, (abs ((x s n : ℝ) * r'^n))) ≤ c := x.sum_tsum_le'
 
-protected def cast_le (h : c₁ ≤ c₂) (x : Mbar r' S c₁) : Mbar r' S c₂ :=
-⟨x.1, x.coeff_zero, x.summable, x.sum_tsum_le.trans h⟩
+protected def cast_le  [hc : fact (c₁ ≤ c₂)] (x : Mbar r' S c₁) : Mbar r' S c₂ :=
+⟨x.1, x.coeff_zero, x.summable, x.sum_tsum_le.trans hc⟩
 
 def mk' (x : S → ℕ → ℤ)
   (h : (∀ s, x s 0 = 0) ∧
@@ -382,5 +382,10 @@ begin
   intro M,
   sorry
 end
+
+lemma continuous_cast_le (r : ℝ) (S : Type u) [fintype S] (c₁ c₂ : ℝ)
+  [h0r : fact (0 < r)] [hc : fact (c₁ ≤ c₂)] :
+  continuous (@Mbar.cast_le r' S _ c₁ c₂ _) :=
+sorry
 
 end Mbar

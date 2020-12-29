@@ -1,6 +1,7 @@
 import algebra.punit_instances
 import category_theory.concrete_category.bundled_hom
 import category_theory.limits.shapes.zero
+import category_theory.limits.shapes.kernels
 
 import .normed_group_hom
 
@@ -61,5 +62,8 @@ instance (M : NormedGroup) : normed_group M := M.str
 instance : limits.has_zero_morphisms.{u (u+1)} NormedGroup :=
 { comp_zero' := by { intros, apply normed_group_hom.zero_comp },
   zero_comp' := by { intros, apply normed_group_hom.comp_zero } }
+
+instance : limits.has_kernels.{u (u+1)} NormedGroup :=
+{ has_limit := sorry }
 
 end NormedGroup
