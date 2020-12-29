@@ -23,17 +23,35 @@ end
 
 instance (a b : ℤ) : fintype (Icc a b) := nonempty.some (Icc_finite a b)
 
-def Mbar_bdd (r : ℝ) (S : Fintype) (c : ℝ) (M : ℕ) :=
-{F : S → fin (M + 1) → ℤ //
-  (∀ s, F s 0 = 0) ∧
-  (∑ s i, abs ((F s i : ℝ) * r ^ (i : ℕ)) ≤ c) }
+structure Mbar_bdd (r : ℝ) (S : Fintype) (c : ℝ) (M : ℕ) :=
+(to_fun : S → fin (M + 1) → ℤ)
+(coeff_zero' : ∀ s, to_fun s 0 = 0)
+(sum_le' : (∑ s i, abs ((to_fun s i : ℝ) * r^(i : ℕ))) ≤ c)
 
 namespace Mbar_bdd
 
-variables {r : ℝ} {S : Fintype} {c : ℝ} {M : ℕ}
+variables {r : ℝ} {S : Fintype} {c c₁ c₂ : ℝ} {M : ℕ}
 
-def constant_coeff_eq_zero (x : Mbar_bdd r S c M) : ∀ s, x.1 s 0 = 0 := x.2.1
-def sum_sum_le (x : Mbar_bdd r S c M) := x.2.2
+instance has_coe_to_fun : has_coe_to_fun (Mbar_bdd r S c M) := ⟨_, Mbar_bdd.to_fun⟩
+
+@[simp] lemma coe_mk (x h₁ h₂) : ((⟨x, h₁, h₂⟩ : Mbar_bdd r S c M) : S → ℕ → ℤ) = x := rfl
+
+@[simp] protected lemma coeff_zero (x : Mbar_bdd r S c M) (s : S) : x s 0 = 0 := x.coeff_zero' s
+
+protected lemma sum_le (x : Mbar_bdd r S c M) :
+  (∑ s i, (abs ((x s i : ℝ) * r^(i:ℕ)))) ≤ c := x.sum_le'
+
+protected def cast_le [hc : fact (c₁ ≤ c₂)] (x : Mbar_bdd r S c₁ M) : Mbar_bdd r S c₂ M :=
+⟨x.1, x.coeff_zero, x.sum_le.trans hc⟩
+
+def mk' (x : S → fin (M + 1) → ℤ)
+  (h : (∀ s, x s 0 = 0) ∧
+       (∑ s i, (abs ((x s i : ℝ) * r^(i:ℕ)))) ≤ c) :
+  Mbar_bdd r S c M :=
+{ to_fun := x, coeff_zero' := h.1, sum_le' := h.2 }
+
+@[ext] lemma ext (x y : Mbar_bdd r S c M) (h : ⇑x = y) : x = y :=
+by { cases x, cases y, congr, exact h }
 
 open finset
 
@@ -42,7 +60,7 @@ lemma nonneg_of_Mbar_bdd {r : ℝ} {S : Fintype} {c : ℝ} {M : ℕ}
 begin
   -- This should be a simple term-mode proof but I got a deterministic
   -- timeout when I tried it...
-  refine le_trans (finset.sum_nonneg _) x.2.2,
+  refine (finset.sum_nonneg _).trans x.sum_le,
   exact (λ _ _, finset.sum_nonneg (λ _ _, abs_nonneg _)),
 end
 
@@ -70,14 +88,14 @@ end
 
 private def temp_map [fact (0 < r)] (F : Mbar_bdd r S c M) (n : fin (M + 1)) (s : S) :
   Icc (ceil (-(c / min (r ^ M) 1))) (floor (c / min (r ^ M) 1)) :=
-let h := abs_le.1 $ coeff_bound F.1 F.2.2 n s in
-⟨F.1 s n, ceil_le.2 $ h.1, le_floor.2 h.2⟩
+let h := abs_le.1 $ coeff_bound F F.sum_le n s in
+⟨F s n, ceil_le.2 $ h.1, le_floor.2 h.2⟩
 
 instance [fact (0 < r)] : fintype (Mbar_bdd r S c M) :=
 fintype.of_injective temp_map begin
-  rintros ⟨f1, hf1⟩ ⟨f2, hf2⟩ h,
+  rintros ⟨f1, hf1, hf1'⟩ ⟨f2, hf2, hf2'⟩ h,
   ext s n,
-  change (temp_map ⟨f1, hf1⟩ n s).1 = (temp_map ⟨f2, hf2⟩ n s).1,
+  change (temp_map ⟨f1, hf1, hf1'⟩ n s).1 = (temp_map ⟨f2, hf2, hf2'⟩ n s).1,
   rw h,
 end
 
@@ -95,31 +113,38 @@ end ⟩)
 (λ a ha, finset.mem_univ _) (λ a ha, by tidy) (λ a ha, by tidy)
 
 /-- The transition maps between the Mbar_bdd sets. -/
-def transition (r : ℝ) {S : Fintype} {c : ℝ} {M N : ℕ} (h : M ≤ N) :
-  Mbar_bdd r S c N → Mbar_bdd r S c M := λ ⟨a,ha⟩,
-⟨λ s i, a s (ι (by linarith) i),
-begin
-  refine ⟨λ s, ha.1 _, le_trans _ ha.2⟩,
-  apply finset.sum_le_sum,
-  intros s hs,
-  let I := finset.map (ι (by linarith : M+1 ≤ N+1))
-    (finset.univ : finset (fin (M+1))),
-  refine le_trans _
-    (finset.sum_le_sum_of_subset_of_nonneg (finset.subset_univ I) _),
-  { rw ← sum_eq_sum_map_ι,
-    apply le_of_eq,
-    congr },
-  { intros,
-    exact (abs_nonneg _) }
-end⟩
+def transition (r : ℝ) {S : Fintype} {c : ℝ} {M N : ℕ} (h : M ≤ N) (x : Mbar_bdd r S c N) :
+  Mbar_bdd r S c M :=
+{ to_fun := λ s i, x s (ι (add_le_add_right h 1) i),
+  coeff_zero' := λ s, x.coeff_zero _,
+  sum_le' :=
+  begin
+    refine le_trans _ x.sum_le,
+    apply finset.sum_le_sum,
+    intros s hs,
+    let I := finset.map (ι (by linarith : M+1 ≤ N+1))
+      (finset.univ : finset (fin (M+1))),
+    refine le_trans _
+      (finset.sum_le_sum_of_subset_of_nonneg (finset.subset_univ I) _),
+    { rw ← sum_eq_sum_map_ι,
+      apply le_of_eq,
+      congr },
+    { intros,
+      exact (abs_nonneg _) }
+  end }
 
 lemma transition_eq {r : ℝ} {S : Fintype} {c : ℝ} {M N : ℕ} (h : M ≤ N)
   (F : Mbar_bdd r S c N) (s : S) (i : fin (M+1)) :
   (transition r h F).1 s i = F.1 s (ι (by linarith) i) := by tidy
 
 lemma transition_transition {r : ℝ} {S : Fintype} {c : ℝ}
-  {M N K : ℕ} (h : M ≤ N) (hh : N ≤ K) (x : Mbar_bdd r S c K):
+  {M N K : ℕ} (h : M ≤ N) (hh : N ≤ K) (x : Mbar_bdd r S c K) :
   transition r h (transition r hh x) = transition r (le_trans h hh) x := by tidy
+
+lemma transition_cast_le {N : ℕ} (h : M ≤ N) [hc : fact (c₁ ≤ c₂)] (x : Mbar_bdd r S c₁ N) :
+  transition r h (@Mbar_bdd.cast_le r S c₁ c₂ N _ x) =
+    Mbar_bdd.cast_le (transition r h x) :=
+by { ext, refl }
 
 @[reducible] def limit (r S c) :=
 { F : Π (M : ℕ), Mbar_bdd r S c M // ∀ (M N : ℕ) (h : M ≤ N), transition r h (F N) = F M }
@@ -198,22 +223,20 @@ end topological_structure
 
 section addition
 
-variables {c₁ c₂ : ℝ}
-
-def add : Mbar_bdd r S c₁ M → Mbar_bdd r S c₂ M → Mbar_bdd r S (c₁ + c₂) M := λ F G,
-{ val := F.1 + G.1,
-  property := begin
-    refine ⟨λ s, (_ : F.1 _ _ + G.1 _ _ = _),_⟩,
-    { simp [constant_coeff_eq_zero] },
-    { refine le_trans _ (add_le_add F.2.2 G.2.2),
-      rw ← finset.sum_add_distrib,
-      refine finset.sum_le_sum _,
-      rintro s -,
-      rw ← sum_add_distrib,
-      refine finset.sum_le_sum _,
-      rintro i -,
-      convert abs_add _ _,
-      simp [add_mul] },
+def add (F : Mbar_bdd r S c₁ M) (G : Mbar_bdd r S c₂ M) : Mbar_bdd r S (c₁ + c₂) M :=
+{ to_fun := F + G,
+  coeff_zero' := λ s, by simp,
+  sum_le' :=
+  begin
+    refine le_trans _ (add_le_add F.sum_le G.sum_le),
+    rw ← finset.sum_add_distrib,
+    refine finset.sum_le_sum _,
+    rintro s -,
+    rw ← sum_add_distrib,
+    refine finset.sum_le_sum _,
+    rintro i -,
+    convert abs_add _ _,
+    simp [add_mul]
   end }
 
 end addition

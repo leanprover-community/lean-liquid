@@ -163,10 +163,8 @@ variables [normed_with_aut r V]
 -- move this
 instance fact_mul_nonneg : fact (0 ≤ c₁ * c₂) := mul_nonneg ‹_› ‹_›
 
-def Mbar_complex [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' < 1)]
-  (BD : breen_deligne.package) (c' : ℕ → ℝ) [fact (BD.suitable c')]
-  (V : NormedGroup) [normed_with_aut r V]
-  (S : Type*) [fintype S] : cochain_complex NormedGroup :=
+def Mbar_complex (BD : breen_deligne.package) (c' : ℕ → ℝ) [fact (BD.suitable c')] :
+  cochain_complex NormedGroup :=
 { X := int.extend_from_nat 0 $ λ i, LCC_Mbar_pow_Tinv V S r r' (c * c' i) (BD.rank i),
   d := int.extend_from_nat 0 $ λ i,
   show LCC_Mbar_pow_Tinv V S r r' (c * c' i) (BD.rank i) ⟶
@@ -174,24 +172,25 @@ def Mbar_complex [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' < 1)]
   from (BD.map i).eval_Mbar V S r r' (c * c' i) (c * c' (i+1)),
   d_squared' :=
   begin
-    ext1 i,
-    cases i,
-    -- the proofs below used to work... now they time out :sad:
-    -- { show (BD.map i).eval_Mbar V S r' (c * c' i) (c * c' (i + 1)) ≫
-    --        (BD.map (i+1)).eval_Mbar V S r' (c * c' (i+1)) (c * c' (i + 2)) = _,
+    ext1 ⟨i⟩,
+    { dsimp,
+      have aux := BD.map_comp_map i,
+      sorry },
+    -- the proof below used to work... now they time out :sad:
+    -- { show (BD.map i).eval_Mbar V S r r' (c * c' i) (c * c' (i + 1)) ≫
+    --        (BD.map (i+1)).eval_Mbar V S r r' (c * c' (i+1)) (c * c' (i + 2)) = _,
     --   erw ← universal_map.eval_Mbar_comp V S r r' _ (c * c' (i+1)) _ (BD.map i) (BD.map (i+1)),
     --   { rw [BD.map_comp_map, universal_map.eval_Mbar_zero], refl },
     --   apply_instance },
-    -- { dsimp [int.extend_from_nat], simp only [pi.zero_apply, category_theory.limits.zero_comp] }
+    { show 0 ≫ _ = 0, rw [zero_comp] }
   end }
 
 instance nnreal.fact_nonneg_unop_op (c : ℝ≥0ᵒᵖ) :
   fact ((0 : ℝ) ≤ (unop c : ℝ≥0)) := nnreal.coe_nonneg _
 
-def Mbar_system [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' < 1)]
-  (BD : breen_deligne.package) (c' : ℕ → ℝ) [fact (BD.suitable c')] :
+def Mbar_system (BD : breen_deligne.package) (c' : ℕ → ℝ) [fact (BD.suitable c')] :
   system_of_complexes :=
-{ obj := λ c, Mbar_complex r r' (unop c : ℝ≥0) BD c' V S,
+{ obj := λ c, Mbar_complex V S r r' (unop c : ℝ≥0) BD c',
   map := λ c₂ c₁ h,
   { f := int.extend_from_nat 0 $ λ i,
     show LCC_Mbar_pow_Tinv V S r r' ((unop c₂ : ℝ≥0) * c' i) (BD.rank i) ⟶

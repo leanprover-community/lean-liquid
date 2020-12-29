@@ -13,7 +13,7 @@ import Mbar.bounded
 
 ## $\overline{\mathcal{M}}_{r'}(S)$
 
-This file contains a definition of ℳ-barᵣ'(S) as defined on p57 of Analytic.pdf .
+This file contains a definition of ℳ-barᵣ'(S) as defined on p57 of Analysorrytic.pdf .
 Currently it's a subtype.
 
 ## Implementation issues
@@ -44,7 +44,7 @@ instance has_coe_to_fun : has_coe_to_fun (Mbar r' S c) := ⟨_, Mbar.to_fun⟩
 
 @[simp] lemma coe_mk (x h₁ h₂ h₃) : ((⟨x, h₁, h₂, h₃⟩ : Mbar r' S c) : S → ℕ → ℤ) = x := rfl
 
-protected lemma coeff_zero (x : Mbar r' S c) (s : S) : x s 0 = 0 := x.coeff_zero' s
+@[simp] protected lemma coeff_zero (x : Mbar r' S c) (s : S) : x s 0 = 0 := x.coeff_zero' s
 
 protected lemma summable (x : Mbar r' S c) (s : S) :
   summable (λ n, abs ((x s n : ℝ) * r'^n)) := x.summable' s
@@ -52,7 +52,7 @@ protected lemma summable (x : Mbar r' S c) (s : S) :
 protected lemma sum_tsum_le (x : Mbar r' S c) :
   (∑ s, ∑' n, (abs ((x s n : ℝ) * r'^n))) ≤ c := x.sum_tsum_le'
 
-protected def cast_le  [hc : fact (c₁ ≤ c₂)] (x : Mbar r' S c₁) : Mbar r' S c₂ :=
+protected def cast_le [hc : fact (c₁ ≤ c₂)] (x : Mbar r' S c₁) : Mbar r' S c₂ :=
 ⟨x.1, x.coeff_zero, x.summable, x.sum_tsum_le.trans hc⟩
 
 def mk' (x : S → ℕ → ℤ)
@@ -112,16 +112,18 @@ if_neg (nat.succ_ne_zero i)
 namespace Mbar
 
 /-- The truncation map fro Mbar to Mbar_bdd -/
-def truncate (M : ℕ) : Mbar r' S c → Mbar_bdd r' ⟨S⟩ c M := λ F,
-⟨λ s n, F.1 s n.1, begin
-  rcases F with ⟨F,hF1,hF2,hF3⟩,
-  refine ⟨λ s, by simpa using hF1 s, le_trans _ hF3⟩,
-  apply finset.sum_le_sum,
-  rintros (s : S) -,
-  simp only [fin.val_eq_coe],
-  rw ← sum_fin_eq (λ i, abs ((F s i : ℝ) * r' ^i)),
-  exact sum_le_tsum _ (λ _ _, abs_nonneg _) (hF2 s),
-end⟩
+def truncate (M : ℕ) (F : Mbar r' S c) : Mbar_bdd r' ⟨S⟩ c M :=
+{ to_fun := λ s n, F s n.1,
+  coeff_zero' := by simp,
+  sum_le' :=
+  begin
+    refine le_trans _ F.sum_tsum_le,
+    apply finset.sum_le_sum,
+    rintros (s : S) -,
+    simp only [fin.val_eq_coe],
+    rw ← sum_fin_eq (λ i, abs ((F s i : ℝ) * r' ^i)),
+    exact sum_le_tsum _ (λ _ _, abs_nonneg _) (F.summable s),
+  end }
 
 -- /-- The truncation maps commute with the transition maps. -/
 -- lemma truncate_transition {hr : 0 < r'} {M N : ℕ} (h : M ≤ N) (x : Mbar r' S c) :
@@ -136,12 +138,18 @@ begin
   rw cond,
 end
 
+lemma truncate_cast_le (M : ℕ) [hc : fact (c₁ ≤ c₂)] (x : Mbar r' S c₁) :
+  truncate M (@Mbar.cast_le r' S _ c₁ c₂ _ x) =
+    Mbar_bdd.cast_le (truncate M x) :=
+by { ext, refl }
+
 /-- Underlying function of the element of Mbar f' S associated to a sequence of
   elements of the truncated Mbars. -/
 def mk_seq (T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M) : S → ℕ → ℤ :=
   λ s n, (T n).1 s ⟨n, by linarith⟩
 
-lemma mk_seq_zero {T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M} (s : S) : mk_seq T s 0 = 0 := (T 0).2.1 s
+lemma mk_seq_zero {T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M} (s : S) : mk_seq T s 0 = 0 :=
+(T 0).coeff_zero s
 
 lemma mk_seq_eq_of_compat {T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M}
   (compat : ∀ (M N : ℕ) (h : M ≤ N), Mbar_bdd.transition r' h (T N) = T M)
@@ -175,7 +183,7 @@ begin
   cases n,
   { exact le_trans (by simp) (Mbar_bdd.nonneg_of_Mbar_bdd (T 0)) },
   { rw mk_seq_sum_range_eq T compat s n,
-    refine le_trans _ (T n).2.2,
+    refine le_trans _ (T n).sum_le,
     refine finset.single_le_sum (λ _ _, _) (finset.mem_univ s),
     exact finset.sum_nonneg (λ _ _, abs_nonneg _) },
 end
@@ -195,7 +203,7 @@ begin
   refine le_of_tendsto (mk_seq_tendsto compat) (eventually_of_forall _),
   rintros (_ | n),
   { simp [Mbar_bdd.nonneg_of_Mbar_bdd (T 0)] },
-  { convert (T n).2.2,
+  { convert (T n).sum_le,
     funext,
     rw mk_seq_sum_range_eq T compat s n,
     refl }
@@ -386,6 +394,11 @@ end
 lemma continuous_cast_le (r : ℝ) (S : Type u) [fintype S] (c₁ c₂ : ℝ)
   [h0r : fact (0 < r)] [hc : fact (c₁ ≤ c₂)] :
   continuous (@Mbar.cast_le r' S _ c₁ c₂ _) :=
-sorry
+begin
+  rw continuous_iff,
+  intro M,
+  simp only [function.comp, truncate_cast_le],
+  exact continuous_bot.comp continuous_truncate
+end
 
 end Mbar
