@@ -46,12 +46,15 @@ def LCC_Mbar_pow.Tinv [fact (0 < r')] :
   continuous_pi $ λ i, (Mbar.continuous_Tinv r' S c).comp (continuous_apply i)⟩
 
 -- move this
-instance fix_my_name [fact (0 < r')] [fact (r' ≤ 1)] [fact (0 ≤ c)] : fact (c ≤ c / r') :=
-sorry
+instance fix_my_name [h1 : fact (0 < r')] [h2 : fact (r' ≤ 1)] [h3 : fact (0 ≤ c)] : fact (c ≤ c / r') :=
+begin
+  rw le_div_iff h1,
+  nth_rewrite 1 ← mul_one c,
+  exact mul_le_mul (le_of_eq rfl) h2 (le_of_lt h1) h3,
+end
 
 -- move this
-instance fix_my_name₂ [fact (0 < r')] [fact (0 ≤ c)] : fact (0 ≤ c / r') :=
-sorry
+instance fix_my_name₂ [h1 : fact (0 < r')] [h2 : fact (0 ≤ c)] : fact (0 ≤ c / r') := by simpa [le_div_iff h1]
 
 -- move this
 instance fix_my_name₃ [fact (0 < r')] [fact (c₁ ≤ c₂)] :
