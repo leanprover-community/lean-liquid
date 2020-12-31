@@ -2,6 +2,7 @@ import algebra.punit_instances
 import category_theory.concrete_category.bundled_hom
 import category_theory.limits.shapes.zero
 import category_theory.limits.shapes.kernels
+import category_theory.limits.creates
 
 import .normed_group_hom
 
@@ -63,7 +64,29 @@ instance : limits.has_zero_morphisms.{u (u+1)} NormedGroup :=
 { comp_zero' := by { intros, apply normed_group_hom.zero_comp },
   zero_comp' := by { intros, apply normed_group_hom.comp_zero } }
 
+section kernels
+
+open category_theory.limits
+
+def kernel_cone {V W : NormedGroup} (f : V ⟶ W) : limits.fork f 0 :=
+@fork.of_ι _ _ _ _ _ _ (of f.ker) (normed_group_hom.ker.incl f) $
+begin
+  ext v,
+  simp only [normed_group_hom.ker.incl_to_fun, pi.zero_apply, coe_comp, normed_group_hom.coe_zero],
+  exact v.2
+end
+
 instance : limits.has_kernels.{u (u+1)} NormedGroup :=
-{ has_limit := sorry }
+{ has_limit := λ V W f,
+  { exists_limit := nonempty.intro
+    { cone := kernel_cone.{u u} f,
+      is_limit := fork.is_limit.mk _
+        (λ c, normed_group_hom.ker.lift (fork.ι c) _ $
+        show _ ≫ f = 0,
+        by simp only [fork.ι_eq_app_zero, fork.condition c, comp_zero])
+        (λ c, normed_group_hom.ker.incl_comp_lift _ _ _)
+        (λ c g h, by { ext x, dsimp, rw ← h, refl }) } } }
+
+end kernels
 
 end NormedGroup

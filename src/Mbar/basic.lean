@@ -13,7 +13,7 @@ import Mbar.bounded
 
 ## $\overline{\mathcal{M}}_{r'}(S)$
 
-This file contains a definition of ℳ-barᵣ'(S) as defined on p57 of Analysorrytic.pdf .
+This file contains a definition of ℳ-barᵣ'(S) as defined on p57 of Analytic.pdf .
 Currently it's a subtype.
 
 ## Implementation issues

@@ -152,3 +152,61 @@ by { ext, exact f.map_zero' }
 by { ext, refl }
 
 end normed_group_hom
+
+namespace add_subgroup
+
+variables {V : Type*} [normed_group V] (W : add_subgroup V)
+
+instance : has_norm W :=
+{ norm := λ v, ∥(v : V)∥ }
+
+instance : metric_space W :=
+metric_space.induced (coe : W → V) subtype.val_injective infer_instance
+
+instance : normed_group W :=
+{ dist_eq := λ v w, dist_eq_norm _ _ }
+
+end add_subgroup
+
+namespace normed_group_hom
+
+section kernels
+
+variables {V V₁ V₂ V₃ : Type*}
+variables [normed_group V] [normed_group V₁] [normed_group V₂] [normed_group V₃]
+variables (f : normed_group_hom V₁ V₂) (g : normed_group_hom V₂ V₃)
+
+/-- The kernel of a bounded group homomorphism. Naturally endowed with a `normed_group` instance. -/
+def ker : add_subgroup V₁ := f.to_add_monoid_hom.ker
+
+instance : normed_group f.ker :=
+{ dist_eq := λ v w, dist_eq_norm _ _ }
+
+lemma mem_ker (v : V₁) : v ∈ f.ker ↔ f v = 0 :=
+by { erw f.to_add_monoid_hom.mem_ker, refl }
+
+/-- The inclusion of the kernel, as bounded group homomorphism. -/
+@[simps] def ker.incl : normed_group_hom f.ker V₁ :=
+{ to_fun := (coe : f.ker → V₁),
+  map_zero' := add_subgroup.coe_zero _,
+  map_add' := λ v w, add_subgroup.coe_add _ _ _,
+  bound' := ⟨1, λ v, by { rw [one_mul], refl }⟩ }
+
+@[simps] def ker.lift (h : g.comp f = 0) :
+  normed_group_hom V₁ g.ker :=
+{ to_fun := λ v, ⟨f v, by { erw g.mem_ker, show (g.comp f) v = 0, rw h, refl }⟩,
+  map_zero' := by { simp only [map_zero], refl },
+  map_add' := λ v w, by { simp only [map_add], refl },
+  bound' :=
+  begin
+    obtain ⟨C, C_pos, hC⟩ := f.bound,
+    exact ⟨C, hC⟩
+  end }
+
+@[simp] lemma ker.incl_comp_lift (h : g.comp f = 0) :
+  (ker.incl g).comp (ker.lift f g h) = f :=
+by { ext, refl }
+
+end kernels
+
+end normed_group_hom
