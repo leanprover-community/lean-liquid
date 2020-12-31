@@ -42,7 +42,7 @@ def extend_from_nat : Π i, X i
 
 end int
 
-variables (V : NormedGroup) (S : Type*) (r r' c c' c₁ c₂ c₃ : ℝ) (a : ℕ) [fintype S]
+variables (V : NormedGroup) (S : Type*) (r r' c c' c₁ c₂ c₃ c₄ : ℝ) (a : ℕ) [fintype S]
 
 -- move this
 instance fix_my_name [h1 : fact (0 < r')] [h2 : fact (r' ≤ 1)] [h3 : fact (0 ≤ c)] :
@@ -252,7 +252,8 @@ end LCC_Mbar_pow_Tinv
 
 variables [fact (0 < r)] [normed_with_aut r V]
 variables [fact (0 < r')] [fact (r' ≤ 1)]
-variables [fact (0 ≤ c)] [fact (0 ≤ c')] [fact (0 ≤ c₁)] [fact (0 ≤ c₂)] [fact (0 ≤ c₃)]
+variables [fact (0 ≤ c)] [fact (0 ≤ c')]
+variables [fact (0 ≤ c₁)] [fact (0 ≤ c₂)] [fact (0 ≤ c₃)] [fact (0 ≤ c₄)]
 
 namespace breen_deligne
 
@@ -300,6 +301,12 @@ lemma eval_Mbar_comp (f : universal_map m n) (g : universal_map l m)
   [fact ((universal_map.comp f g).suitable c₁ c₃)] :
   (universal_map.comp f g).eval_Mbar V S r r' c₁ c₃ =
     f.eval_Mbar V S r r' c₁ c₂ ≫ g.eval_Mbar V S r r' c₂ c₃ :=
+sorry
+
+lemma eval_Mbar_comp_res (f : universal_map m n)
+  [fact (f.suitable c₁ c₂)] [fact (f.suitable c₃ c₄)] [fact (c₃ ≤ c₁)] [fact (c₄ ≤ c₂)] :
+  f.eval_Mbar V S r r' c₁ c₂ ≫ LCC_Mbar_pow_Tinv.res V S r r' c₄ c₂ _ =
+  LCC_Mbar_pow_Tinv.res V S r r' c₃ c₁ _ ≫ f.eval_Mbar V S r r' c₃ c₄ :=
 sorry
 
 instance suitable_of_mul_left
@@ -354,6 +361,11 @@ def Mbar_complex (BD : breen_deligne.package) (c' : ℕ → ℝ) [fact (BD.suita
     { show 0 ≫ _ = 0, rw [zero_comp] }
   end }
 
+@[simp] lemma Mbar_complex.d_neg_succ_of_nat
+  (BD : breen_deligne.package) (c' : ℕ → ℝ) [fact (BD.suitable c')] (n : ℕ) :
+  (Mbar_complex V S r r' c BD c').d -[1+n] = 0 := rfl
+
+-- move this
 instance nnreal.fact_nonneg_unop_op (c : ℝ≥0ᵒᵖ) :
   fact ((0 : ℝ) ≤ (unop c : ℝ≥0)) := nnreal.coe_nonneg _
 
@@ -366,7 +378,11 @@ def Mbar_system (BD : breen_deligne.package) (c' : ℕ → ℝ) [fact (BD.suitab
       exact LCC_Mbar_pow_Tinv.res V S r r' _ _ (BD.rank i) },
     comm' :=
     begin
-      dsimp, sorry
+      ext1 ⟨i⟩,
+      { dsimp [int.extend_from_nat],
+        apply universal_map.eval_Mbar_comp_res },
+      { dsimp [int.extend_from_nat],
+        simp only [Mbar_complex.d_neg_succ_of_nat, zero_comp] }
     end },
   map_id' :=
   begin
