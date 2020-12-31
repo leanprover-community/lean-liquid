@@ -58,7 +58,9 @@ instance : inhabited NormedGroup := ⟨0⟩
 
 instance (M : NormedGroup) : normed_group M := M.str
 
-@[simp] lemma coe_of (R : Type u) [normed_group R] : (NormedGroup.of R : Type u) = R := rfl
+@[simp] lemma coe_of (V : Type u) [normed_group V] : (NormedGroup.of V : Type u) = V := rfl
+
+@[simp] lemma coe_id (V : NormedGroup) : ⇑(𝟙 V) = id := rfl
 
 instance : limits.has_zero_morphisms.{u (u+1)} NormedGroup :=
 { comp_zero' := by { intros, apply normed_group_hom.zero_comp },

@@ -4,6 +4,7 @@ import locally_constant.Vhat
 import Mbar.basic
 
 import for_mathlib.CompHaus
+import for_mathlib.continuous_map
 
 noncomputable theory
 
@@ -43,6 +44,24 @@ end int
 
 variables (V : NormedGroup) (S : Type*) (r r' c c' c₁ c₂ c₃ : ℝ) (a : ℕ) [fintype S]
 
+-- move this
+instance fix_my_name [h1 : fact (0 < r')] [h2 : fact (r' ≤ 1)] [h3 : fact (0 ≤ c)] :
+  fact (c ≤ c / r') :=
+begin
+  rw le_div_iff h1,
+  nth_rewrite 1 ← mul_one c,
+  exact mul_le_mul (le_of_eq rfl) h2 (le_of_lt h1) h3,
+end
+
+-- move this
+instance fix_my_name₂ [h1 : fact (0 < r')] [h2 : fact (0 ≤ c)] : fact (0 ≤ c / r') :=
+by simpa [le_div_iff h1]
+
+-- move this
+instance fix_my_name₃ [fact (0 < r')] [fact (c₁ ≤ c₂)] :
+  fact (c₁ / r' ≤ c₂ / r') :=
+by { rwa [div_eq_inv_mul, div_eq_inv_mul, mul_le_mul_left], rwa [inv_pos] }
+
 /-- The functor `V-hat`, from compact Hausdorff spaces to normed groups. -/
 abbreviation hat := NormedGroup.LCC.obj V
 
@@ -61,6 +80,17 @@ instance [fact (0 < r)] [fact (0 < r')] [normed_with_aut r V] :
   normed_with_aut r (LCC_Mbar_pow V S r' c a) :=
 NormedGroup.normed_with_aut_LCC V _ r
 
+lemma T_inv_eq [fact (0 < r)] [fact (0 < r')] [normed_with_aut r V] :
+  (normed_with_aut.T.inv : LCC_Mbar_pow V S r' c a ⟶ LCC_Mbar_pow V S r' c a) =
+    (NormedGroup.LCC.map (normed_with_aut.T.inv : V ⟶ V)).app
+      (op $ CompHaus.of ((Mbar r' S c)^a)) :=
+begin
+  dsimp [LCC_Mbar_pow, LCC_Mbar_pow.normed_with_aut, NormedGroup.normed_with_aut_LCC,
+    NormedGroup.normed_with_aut_Completion, NormedGroup.normed_with_aut_LocallyConstant,
+    NormedGroup.LCC],
+  erw [locally_constant.comap_hom_id, category.id_comp]
+end
+
 def res [fact (0 < r')] [fact (c₁ ≤ c₂)] :
   LCC_Mbar_pow V S r' c₂ a ⟶ LCC_Mbar_pow V S r' c₁ a :=
 (hat V).map $ has_hom.hom.op
@@ -77,23 +107,30 @@ def Tinv [fact (0 < r')] :
 ⟨λ x, Mbar.Tinv ∘ x,
   continuous_pi $ λ i, (Mbar.continuous_Tinv r' S c).comp (continuous_apply i)⟩
 
-end LCC_Mbar_pow
+lemma Tinv_res [fact (0 < r')] [fact (c₁ ≤ c₂)] :
+  Tinv V S r' c₂ a ≫ res V S r' c₁ c₂ a = res V S r' _ _ a ≫ Tinv V S r' _ a :=
+by { delta Tinv res, rw [← functor.map_comp, ← functor.map_comp], refl }
 
--- move this
-instance fix_my_name [h1 : fact (0 < r')] [h2 : fact (r' ≤ 1)] [h3 : fact (0 ≤ c)] : fact (c ≤ c / r') :=
+open uniform_space
+
+lemma T_inv_res [fact (0 < r)] [fact (0 < r')] [fact (c₁ ≤ c₂)] [normed_with_aut r V] :
+  normed_with_aut.T.inv ≫ res V S r' c₁ c₂ a = res V S r' _ _ a ≫ normed_with_aut.T.inv :=
 begin
-  rw le_div_iff h1,
-  nth_rewrite 1 ← mul_one c,
-  exact mul_le_mul (le_of_eq rfl) h2 (le_of_lt h1) h3,
+  ext f,
+  -- we should have more simp lemmas, to see that this next step is the obvious one
+  apply completion.induction_on f; clear f,
+  { exact is_closed_eq (normed_group_hom.continuous _) (normed_group_hom.continuous _) },
+  intro f,
+  -- we should have more simp lemmas, to see that this next step is the obvious one
+  show completion.map _ (completion.map _ _) = completion.map _ (completion.map _ _),
+  erw [completion.map_coe, completion.map_coe, completion.map_coe, completion.map_coe],
+  { congr' 1, dsimp [locally_constant.comap_hom], ext x,
+    show locally_constant.comap _ _ _ = _,
+    simp only [normed_group_hom.coe_mk, id.def, locally_constant.map_hom_to_fun,
+      NormedGroup.coe_id, coe_comp, locally_constant.map_id], },
 end
 
--- move this
-instance fix_my_name₂ [h1 : fact (0 < r')] [h2 : fact (0 ≤ c)] : fact (0 ≤ c / r') := by simpa [le_div_iff h1]
-
--- move this
-instance fix_my_name₃ [fact (0 < r')] [fact (c₁ ≤ c₂)] :
-  fact (c₁ / r' ≤ c₂ / r') :=
-by { rwa [div_eq_inv_mul, div_eq_inv_mul, mul_le_mul_left], rwa [inv_pos] }
+end LCC_Mbar_pow
 
 /-
 TODO: Do we want to define the `T⁻¹`-invariants as a kernel,
@@ -103,7 +140,7 @@ or would it be better to use equalizers?
 def LCC_Mbar_pow_Tinv [fact (0 < r)] [fact (0 < r')] [fact (r' ≤ 1)] [fact (0 ≤ c)]
   [normed_with_aut r V] :
   NormedGroup :=
-kernel ((LCC_Mbar_pow.Tinv V S r' c a) - (normed_with_aut.T.hom ≫ (LCC_Mbar_pow.res V S r' _ _ a)))
+kernel ((LCC_Mbar_pow.Tinv V S r' c a) - (normed_with_aut.T.inv ≫ (LCC_Mbar_pow.res V S r' _ _ a)))
 
 def LCC_Mbar_pow_Tinv.res [fact (0 < r)] [fact (0 < r')] [fact (r' ≤ 1)]
   [fact (0 ≤ c₁)] [fact (0 ≤ c₂)] [fact (c₁ ≤ c₂)] [normed_with_aut r V] :
@@ -112,9 +149,9 @@ kernel.lift _ (kernel.ι _ ≫ LCC_Mbar_pow.res _ _ _ _ _ _)
 begin
   rw category.assoc,
   -- now we need to know that `res` commutes with the two types of `Tinv`
-  -- ext v,
-  -- dsimp,
-  -- simp only [pi.zero_apply, normed_group_hom.coe_sub, coe_comp, pi.sub_apply],
+  ext v,
+  dsimp,
+  simp only [pi.zero_apply, normed_group_hom.coe_sub, coe_comp, pi.sub_apply],
   sorry
 end
 
