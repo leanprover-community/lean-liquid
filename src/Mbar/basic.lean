@@ -101,26 +101,17 @@ lemma sum_fin_eq {M : ℕ} (f : ℕ → ℝ) : ∑ i in finset.range M, f i = �
   (λ a ha, ⟨a, finset.mem_range.mp ha⟩) (λ a ha, finset.mem_univ _) (λ a ha, rfl)
   (λ a _, a) (λ a ha, finset.mem_range.mpr a.2) (λ a ha, rfl) (λ a ha, by simp)
 
-def Tinv_aux {R : Type*} [has_zero R] : (ℕ → R) → ℕ → R := λ F n, if n = 0 then 0 else F (n + 1)
-
-@[simp] lemma Tinv_aux_zero {R : Type*} [has_zero R] (f : ℕ → R) : Tinv_aux f 0 = 0 := rfl
-
-@[simp] lemma Tinv_aux_succ {R : Type*} [has_zero R] (f : ℕ → R) (i : ℕ) :
-  Tinv_aux f (i + 1) = f (i + 2) :=
-if_neg (nat.succ_ne_zero i)
-
 namespace Mbar
 
 /-- The truncation map fro Mbar to Mbar_bdd -/
-def truncate (M : ℕ) (F : Mbar r' S c) : Mbar_bdd r' ⟨S⟩ c M :=
-{ to_fun := λ s n, F s n.1,
+@[simps] def truncate (M : ℕ) (F : Mbar r' S c) : Mbar_bdd r' ⟨S⟩ c M :=
+{ to_fun := λ s n, F s n,
   coeff_zero' := by simp,
   sum_le' :=
   begin
     refine le_trans _ F.sum_tsum_le,
     apply finset.sum_le_sum,
     rintros (s : S) -,
-    simp only [fin.val_eq_coe],
     rw ← sum_fin_eq (λ i, abs ((F s i : ℝ) * r' ^i)),
     exact sum_le_tsum _ (λ _ _, abs_nonneg _) (F.summable s),
   end }
@@ -349,6 +340,24 @@ end
 
 end topological_structure
 
+section Tinv
+
+/-!
+### The action of T⁻¹
+-/
+
+def Tinv_aux {R : Type*} [has_zero R] : (ℕ → R) → ℕ → R := λ F n, if n = 0 then 0 else F (n + 1)
+
+@[simp] lemma Tinv_aux_zero {R : Type*} [has_zero R] (f : ℕ → R) : Tinv_aux f 0 = 0 := rfl
+
+@[simp] lemma Tinv_aux_ne_zero {R : Type*} [has_zero R] (f : ℕ → R) (i : ℕ) (hi : i ≠ 0) :
+  Tinv_aux f i = f (i + 1) :=
+if_neg hi
+
+@[simp] lemma Tinv_aux_succ {R : Type*} [has_zero R] (f : ℕ → R) (i : ℕ) :
+  Tinv_aux f (i + 1) = f (i + 2) :=
+if_neg (nat.succ_ne_zero i)
+
 lemma Tinv_aux_summable [h0r : fact (0 < r')] (F : Mbar r' S c) (s : S) :
   summable (λ (n : ℕ), abs (↑(Tinv_aux (F s) n) * r' ^ n)) :=
 begin
@@ -360,6 +369,7 @@ begin
   { simp only [Tinv_aux_succ, real.norm_eq_abs, abs_mul, pow_add, mul_assoc, pow_one, abs_abs] },
 end
 
+@[simps]
 def Tinv {r : ℝ} {S : Type u} [fintype S] {c : ℝ} [h0r : fact (0 < r)] (F : Mbar r S c) :
   Mbar r S (c / r) :=
 { to_fun := λ s, Tinv_aux (F s),
@@ -383,13 +393,29 @@ def Tinv {r : ℝ} {S : Type u} [fintype S] {c : ℝ} [h0r : fact (0 < r)] (F : 
     { exact (summable_nat_add_iff 1).mpr (F.summable s) }
   end }
 
+lemma truncate_Tinv {r : ℝ} {S : Type u} [fintype S] {c : ℝ} [h0r : fact (0 < r)]
+  (F : Mbar r S c) (M : ℕ) :
+  truncate M (Tinv F) = Mbar_bdd.Tinv (truncate (M+1) F) :=
+begin
+  ext s i,
+  by_cases hi : i = 0,
+  { subst hi, simp only [Mbar_bdd.coeff_zero] },
+  { simp only [hi, Tinv_to_fun, Mbar_bdd.Tinv_to_fun, fin.coe_succ, Mbar_bdd.Tinv_aux_ne_zero,
+      truncate_to_fun, ne.def, not_false_iff],
+    rw Tinv_aux_ne_zero,
+    simpa only [fin.ext_iff, fin.coe_zero] using hi }
+end
+
 lemma continuous_Tinv (r : ℝ) (S : Type u) [fintype S] (c : ℝ) [h0r : fact (0 < r)] :
   continuous (@Tinv r S _ c _) :=
 begin
   rw continuous_iff,
   intro M,
-  sorry
+  simp only [function.comp, truncate_Tinv],
+  exact continuous_bot.comp continuous_truncate
 end
+
+end Tinv
 
 lemma continuous_cast_le (r : ℝ) (S : Type u) [fintype S] (c₁ c₂ : ℝ)
   [h0r : fact (0 < r)] [hc : fact (c₁ ≤ c₂)] :

@@ -1,6 +1,7 @@
 import data.fintype.intervals
 import data.real.basic
-import algebra.big_operators.basic
+import algebra.big_operators.ring
+import data.fintype.card
 import category_theory.Fintype
 import topology.order
 import topology.separation
@@ -240,5 +241,52 @@ def add (F : Mbar_bdd r S c₁ M) (G : Mbar_bdd r S c₂ M) : Mbar_bdd r S (c₁
   end }
 
 end addition
+
+section Tinv
+
+/-!
+### The action of T⁻¹
+-/
+
+variables {R : Type*} [has_zero R]
+
+def Tinv_aux (F : (fin (M+2)) → R) (n : fin (M+1)) : R :=
+if n = 0 then 0 else F n.succ
+
+@[simp] lemma Tinv_aux_zero (f : fin (M+2) → R) : Tinv_aux f 0 = 0 := rfl
+
+@[simp] lemma Tinv_aux_ne_zero (f : fin (M+2) → R) (i : fin (M+1)) (hi : i ≠ 0) :
+  Tinv_aux f i = f i.succ :=
+if_neg hi
+
+@[simps]
+def Tinv {r : ℝ} {S : Fintype} {c : ℝ} [h0r : fact (0 < r)] (F : Mbar_bdd r S c (M+1)) :
+  Mbar_bdd r S (c / r) M :=
+{ to_fun := λ s, Tinv_aux (F s),
+  coeff_zero' := λ s, rfl,
+  sum_le' :=
+  begin
+    rw [le_div_iff h0r, sum_mul],
+    refine le_trans _ F.sum_le,
+    apply sum_le_sum,
+    rintro s -,
+    rw [sum_mul, sum_fin_eq_sum_range, sum_fin_eq_sum_range, sum_range_succ' _ (M+1)],
+    dsimp,
+    simp only [nat.succ_pos', add_zero, int.cast_zero, dif_pos,
+      Mbar_bdd.coeff_zero, zero_mul, abs_zero, add_lt_add_iff_right],
+    apply sum_le_sum,
+    rintro ⟨i⟩ hi,
+    { simp only [abs_nonneg, nat.succ_pos', fin.mk_zero, int.cast_zero, dif_pos,
+        lt_add_iff_pos_left, zero_mul, abs_zero, Tinv_aux_zero] },
+    { rw finset.mem_range at hi,
+      rw [dif_pos hi, dif_pos (add_lt_add_right hi 1), Tinv_aux_ne_zero],
+      swap,
+      { simp only [fin.ext_iff, fin.coe_zero, ne.def, fin.coe_mk, nat.succ_ne_zero, not_false_iff] },
+      { simp only [abs_mul, pow_add, mul_assoc, pow_one, abs_of_pos h0r],
+        apply le_of_eq,
+        congr, } }
+  end }
+
+end Tinv
 
 end Mbar_bdd
