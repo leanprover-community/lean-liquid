@@ -65,9 +65,21 @@ by { rwa [div_eq_inv_mul, div_eq_inv_mul, mul_le_mul_left], rwa [inv_pos] }
 /-- The functor `V-hat`, from compact Hausdorff spaces to normed groups. -/
 abbreviation hat := NormedGroup.LCC.obj V
 
+def LC_Mbar_pow [fact (0 < r')] : NormedGroup :=
+(NormedGroup.LocallyConstant.obj V).obj (op $ CompHaus.of $ (Mbar r' S c)^a)
+
 /-- The space `V-hat(Mbar_{r'}(S)_{≤c}^a)`. -/
 def LCC_Mbar_pow [fact (0 < r')] : NormedGroup :=
 (hat V).obj (op $ CompHaus.of ((Mbar r' S c)^a))
+
+lemma LCC_Mbar_pow_eq [fact (0 < r')] :
+  LCC_Mbar_pow V S r' c a = NormedGroup.Completion.obj (LC_Mbar_pow V S r' c a) := rfl
+
+instance LCC_Mbar_pow_complete_space [fact (0 < r')] : complete_space (LCC_Mbar_pow V S r' c a) :=
+begin
+  rw LCC_Mbar_pow_eq,
+  apply_instance
+end
 
 namespace LCC_Mbar_pow
 
@@ -91,31 +103,55 @@ begin
   erw [locally_constant.comap_hom_id, category.id_comp]
 end
 
-def res [fact (0 < r')] [fact (c₁ ≤ c₂)] :
-  LCC_Mbar_pow V S r' c₂ a ⟶ LCC_Mbar_pow V S r' c₁ a :=
-(hat V).map $ has_hom.hom.op
+def res₀ [fact (0 < r')] [fact (c₁ ≤ c₂)] :
+  LC_Mbar_pow V S r' c₂ a ⟶ LC_Mbar_pow V S r' c₁ a :=
+(NormedGroup.LocallyConstant.obj V).map $ has_hom.hom.op $
 ⟨λ x, Mbar.cast_le ∘ x,
   continuous_pi $ λ i, (Mbar.continuous_cast_le r' S c₁ c₂).comp (continuous_apply i)⟩
 
+def res [fact (0 < r')] [fact (c₁ ≤ c₂)] :
+  LCC_Mbar_pow V S r' c₂ a ⟶ LCC_Mbar_pow V S r' c₁ a := NormedGroup.Completion.map $ res₀ _ _ _ _ _ _
+--(hat V).map $ has_hom.hom.op
+--⟨λ x, Mbar.cast_le ∘ x,
+--  continuous_pi $ λ i, (Mbar.continuous_cast_le r' S c₁ c₂).comp (continuous_apply i)⟩
+
+lemma res₀_comp_res₀ [fact (0 < r')] [fact (c₁ ≤ c₂)] [fact (c₂ ≤ c₃)] [fact (c₁ ≤ c₃)] :
+  res₀ V S r' c₂ c₃ a ≫ res₀ V S r' c₁ c₂ a = res₀ V S r' c₁ c₃ a :=
+by { delta res₀, rw ← functor.map_comp, refl }
+
 lemma res_comp_res [fact (0 < r')] [fact (c₁ ≤ c₂)] [fact (c₂ ≤ c₃)] [fact (c₁ ≤ c₃)] :
   res V S r' c₂ c₃ a ≫ res V S r' c₁ c₂ a = res V S r' c₁ c₃ a :=
-by { delta res, rw ← functor.map_comp, refl }
+by {delta res, rw [← functor.map_comp, res₀_comp_res₀] }
+--by { delta res, rw ← functor.map_comp, refl }
 
-def Tinv [fact (0 < r')] :
-  LCC_Mbar_pow V S r' (c / r') a ⟶ LCC_Mbar_pow V S r' c a :=
-(hat V).map $ has_hom.hom.op
+def Tinv₀ [fact (0 < r')] :
+  LC_Mbar_pow V S r' (c / r') a ⟶ LC_Mbar_pow V S r' c a :=
+(NormedGroup.LocallyConstant.obj V).map $ has_hom.hom.op $
 ⟨λ x, Mbar.Tinv ∘ x,
   continuous_pi $ λ i, (Mbar.continuous_Tinv r' S c).comp (continuous_apply i)⟩
 
+def Tinv [fact (0 < r')] :
+  LCC_Mbar_pow V S r' (c / r') a ⟶ LCC_Mbar_pow V S r' c a :=
+NormedGroup.Completion.map $ Tinv₀ _ _ _ _ _
+--(hat V).map $ has_hom.hom.op
+--⟨λ x, Mbar.Tinv ∘ x,
+--  continuous_pi $ λ i, (Mbar.continuous_Tinv r' S c).comp (continuous_apply i)⟩
+
+lemma Tinv₀_res [fact (0 < r')] [fact (c₁ ≤ c₂)] :
+  Tinv₀ V S r' c₂ a ≫ res₀ V S r' c₁ c₂ a = res₀ V S r' _ _ a ≫ Tinv₀ V S r' _ a :=
+by { delta Tinv₀ res₀, rw [← functor.map_comp, ← functor.map_comp], refl }
+
 lemma Tinv_res [fact (0 < r')] [fact (c₁ ≤ c₂)] :
   Tinv V S r' c₂ a ≫ res V S r' c₁ c₂ a = res V S r' _ _ a ≫ Tinv V S r' _ a :=
-by { delta Tinv res, rw [← functor.map_comp, ← functor.map_comp], refl }
+by { delta Tinv res, rw [← functor.map_comp, ← functor.map_comp, Tinv₀_res] }
+--by { delta Tinv res, rw [← functor.map_comp, ← functor.map_comp], refl }
 
 open uniform_space
 
 lemma T_inv_res [fact (0 < r)] [fact (0 < r')] [fact (c₁ ≤ c₂)] [normed_with_aut r V] :
   normed_with_aut.T.inv ≫ res V S r' c₁ c₂ a = res V S r' _ _ a ≫ normed_with_aut.T.inv :=
 begin
+
   ext f,
   -- we should have more simp lemmas, to see that this next step is the obvious one
   apply completion.induction_on f; clear f,
