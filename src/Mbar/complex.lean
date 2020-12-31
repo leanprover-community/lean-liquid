@@ -68,6 +68,9 @@ abbreviation hat := NormedGroup.LCC.obj V
 def LC_Mbar_pow [fact (0 < r')] : NormedGroup :=
 (NormedGroup.LocallyConstant.obj V).obj (op $ CompHaus.of $ (Mbar r' S c)^a)
 
+instance normed_with_aut_LC_Mbar_pow [fact (0 < r)] [fact (0 < r')] [normed_with_aut r V] :
+  normed_with_aut r (LC_Mbar_pow V S r' c a) := by {unfold LC_Mbar_pow, apply_instance}
+
 /-- The space `V-hat(Mbar_{r'}(S)_{≤c}^a)`. -/
 def LCC_Mbar_pow [fact (0 < r')] : NormedGroup :=
 (hat V).obj (op $ CompHaus.of ((Mbar r' S c)^a))
@@ -103,7 +106,7 @@ begin
   erw [locally_constant.comap_hom_id, category.id_comp]
 end
 
-def res₀ [fact (0 < r')] [fact (c₁ ≤ c₂)] :
+@[simp] def res₀ [fact (0 < r')] [fact (c₁ ≤ c₂)] :
   LC_Mbar_pow V S r' c₂ a ⟶ LC_Mbar_pow V S r' c₁ a :=
 (NormedGroup.LocallyConstant.obj V).map $ has_hom.hom.op $
 ⟨λ x, Mbar.cast_le ∘ x,
@@ -146,12 +149,51 @@ lemma Tinv_res [fact (0 < r')] [fact (c₁ ≤ c₂)] :
 by { delta Tinv res, rw [← functor.map_comp, ← functor.map_comp, Tinv₀_res] }
 --by { delta Tinv res, rw [← functor.map_comp, ← functor.map_comp], refl }
 
-open uniform_space
+open uniform_space NormedGroup
+
+lemma T_res₀ [fact (0 < r)] [fact (0 < r')] [fact (c₁ ≤ c₂)] [normed_with_aut r V] :
+  normed_with_aut.T.hom ≫ res₀ V S r' c₁ c₂ a = res₀ V S r' _ _ a ≫ normed_with_aut.T.hom :=
+begin
+  simp only [LocallyConstant_obj_map, iso.app_hom, normed_with_aut_LocallyConstant_T,
+    continuous_map.coe_mk, functor.map_iso_hom, LocallyConstant_map_app, res₀, has_hom.hom.unop_op],
+  ext x s,
+  simp only [locally_constant.comap_hom_to_fun, function.comp_app,
+    locally_constant.map_hom_to_fun, locally_constant.map_apply, coe_comp],
+  repeat {erw locally_constant.coe_comap},
+  refl,
+  repeat {refine continuous_pi (λ i, (Mbar.continuous_cast_le r' S c₁ c₂).comp (continuous_apply i))},
+end
+
+lemma T_inv₀_res₀ [fact (0 < r)] [fact (0 < r')] [fact (c₁ ≤ c₂)] [normed_with_aut r V] :
+  normed_with_aut.T.inv ≫ res₀ V S r' c₁ c₂ a = res₀ V S r' _ _ a ≫ normed_with_aut.T.inv :=
+begin
+  simp only [iso.inv_comp_eq],
+  symmetry,
+  rw ← category.assoc,
+  simp only [iso.comp_inv_eq],
+  apply T_res₀,
+end
+
+lemma T_res [fact (0 < r)] [fact (0 < r')] [fact (c₁ ≤ c₂)] [normed_with_aut r V] :
+  normed_with_aut.T.hom ≫ res V S r' c₁ c₂ a = res V S r' _ _ a ≫ normed_with_aut.T.hom :=
+begin
+  change NormedGroup.Completion.map _ ≫ NormedGroup.Completion.map (res₀ _ _ _ _ _ _) = _,
+  change _ = NormedGroup.Completion.map (res₀ _ _ _ _ _ _) ≫ NormedGroup.Completion.map _,
+  simp_rw ← category_theory.functor.map_comp,
+  apply congr_arg,
+  --apply T_res₀, -- doesn't work (WHY?) :-(
+  exact @T_res₀ V S r r' c₁ c₂ a _ _ _ _ _,
+end
 
 lemma T_inv_res [fact (0 < r)] [fact (0 < r')] [fact (c₁ ≤ c₂)] [normed_with_aut r V] :
   normed_with_aut.T.inv ≫ res V S r' c₁ c₂ a = res V S r' _ _ a ≫ normed_with_aut.T.inv :=
 begin
-
+  simp only [iso.inv_comp_eq],
+  symmetry,
+  rw ← category.assoc,
+  simp only [iso.comp_inv_eq],
+  apply T_res,
+  /-
   ext f,
   -- we should have more simp lemmas, to see that this next step is the obvious one
   apply completion.induction_on f; clear f,
@@ -164,6 +206,7 @@ begin
     show locally_constant.comap _ _ _ = _,
     simp only [normed_group_hom.coe_mk, id.def, locally_constant.map_hom_to_fun,
       NormedGroup.coe_id, coe_comp, locally_constant.map_id], },
+  -/
 end
 
 end LCC_Mbar_pow

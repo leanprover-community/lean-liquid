@@ -150,7 +150,7 @@ instance normed_with_aut_Completion (V : NormedGroup) (r : ℝ) [normed_with_aut
 @[simp] lemma Completion_T_inv_eq (V : NormedGroup) (r : ℝ) [normed_with_aut r V] :
   (normed_with_aut.T.hom : Completion.obj V ⟶ _) = Completion.map normed_with_aut.T.hom := rfl
 
-lemma T_inv_incl {V : NormedGroup} {r : ℝ} [normed_with_aut r V] :
+lemma T_hom_incl {V : NormedGroup} {r : ℝ} [normed_with_aut r V] :
   (incl : V ⟶ _) ≫ normed_with_aut.T.hom = normed_with_aut.T.hom ≫ incl :=
 begin
   ext x,
@@ -160,9 +160,9 @@ begin
   exact normed_group_hom.uniform_continuous _,
 end
 
-lemma T_inv_eq {V : NormedGroup} {r : ℝ} [normed_with_aut r V] :
+lemma T_hom_eq {V : NormedGroup} {r : ℝ} [normed_with_aut r V] :
   normed_with_aut.T.hom = Completion.lift ((normed_with_aut.T.hom : V ⟶ V) ≫ incl) :=
-lift_unique _ _ T_inv_incl
+lift_unique _ _ T_hom_incl
 
 /-- `LCC` (Locally Constant Completion) is the bifunctor
 that sends a normed abelian group `V` and a compact space `S` to `V-hat(S)`.
@@ -172,6 +172,7 @@ def LCC : NormedGroup ⥤ CompHausᵒᵖ ⥤ NormedGroup :=
 
 variables (S : Type*) [topological_space S] [compact_space S]
 
+@[simps]
 instance normed_with_aut_LocallyConstant (V : NormedGroup) (S : CompHaus) (r : ℝ)
   [normed_with_aut r V] [hr : fact (0 < r)] :
   normed_with_aut r ((LocallyConstant.obj V).obj (op S)) :=
