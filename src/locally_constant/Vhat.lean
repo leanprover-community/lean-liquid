@@ -115,7 +115,9 @@ begin
   intros h,
   ext,
   apply completion.induction_on x; clear x,
-  { sorry },
+  { refine is_closed_eq _ _,
+    exact g.continuous,
+    exact normed_group_hom.continuous _ },
   { intros a,
     change (incl ≫ g) _ = (incl ≫ Completion.lift f) _,
     rw [lift_comp_incl, h] }
