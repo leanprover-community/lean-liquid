@@ -56,6 +56,12 @@ def Completion : NormedGroup ⥤ NormedGroup :=
     { exact normed_group_hom.uniform_continuous _ }
   end }
 
+instance Completion_complete_space {V : NormedGroup} : complete_space (Completion.obj V) :=
+begin
+  change complete_space (completion V),
+  apply_instance
+end
+
 @[simps]
 def incl {V : NormedGroup} : V ⟶ Completion.obj V :=
 { to_fun := λ v, (v : completion V),
@@ -140,6 +146,23 @@ instance normed_with_aut_Completion (V : NormedGroup) (r : ℝ) [normed_with_aut
     { exact normed_group_hom.uniform_continuous _ },
     { erw [completion.norm_coe, normed_with_aut.norm_T, completion.norm_coe] }
   end }
+
+@[simp] lemma Completion_T_inv_eq (V : NormedGroup) (r : ℝ) [normed_with_aut r V] :
+  (normed_with_aut.T.hom : Completion.obj V ⟶ _) = Completion.map normed_with_aut.T.hom := rfl
+
+lemma T_inv_incl {V : NormedGroup} {r : ℝ} [normed_with_aut r V] :
+  (incl : V ⟶ _) ≫ normed_with_aut.T.hom = normed_with_aut.T.hom ≫ incl :=
+begin
+  ext x,
+  simp only [incl_to_fun, category_theory.coe_comp, Completion_T_inv_eq],
+  change completion.map normed_with_aut.T.hom _ = _,
+  rw completion.map_coe,
+  exact normed_group_hom.uniform_continuous _,
+end
+
+lemma T_inv_eq {V : NormedGroup} {r : ℝ} [normed_with_aut r V] :
+  normed_with_aut.T.hom = Completion.lift ((normed_with_aut.T.hom : V ⟶ V) ≫ incl) :=
+lift_unique _ _ T_inv_incl
 
 /-- `LCC` (Locally Constant Completion) is the bifunctor
 that sends a normed abelian group `V` and a compact space `S` to `V-hat(S)`.
