@@ -113,10 +113,8 @@ end
   continuous_pi $ λ i, (Mbar.continuous_cast_le r' S c₁ c₂).comp (continuous_apply i)⟩
 
 def res [fact (0 < r')] [fact (c₁ ≤ c₂)] :
-  LCC_Mbar_pow V S r' c₂ a ⟶ LCC_Mbar_pow V S r' c₁ a := NormedGroup.Completion.map $ res₀ _ _ _ _ _ _
---(hat V).map $ has_hom.hom.op
---⟨λ x, Mbar.cast_le ∘ x,
---  continuous_pi $ λ i, (Mbar.continuous_cast_le r' S c₁ c₂).comp (continuous_apply i)⟩
+  LCC_Mbar_pow V S r' c₂ a ⟶ LCC_Mbar_pow V S r' c₁ a :=
+NormedGroup.Completion.map $ res₀ _ _ _ _ _ _
 
 lemma res₀_comp_res₀ [fact (0 < r')] [fact (c₁ ≤ c₂)] [fact (c₂ ≤ c₃)] [fact (c₁ ≤ c₃)] :
   res₀ V S r' c₂ c₃ a ≫ res₀ V S r' c₁ c₂ a = res₀ V S r' c₁ c₃ a :=
@@ -125,7 +123,6 @@ by { delta res₀, rw ← functor.map_comp, refl }
 lemma res_comp_res [fact (0 < r')] [fact (c₁ ≤ c₂)] [fact (c₂ ≤ c₃)] [fact (c₁ ≤ c₃)] :
   res V S r' c₂ c₃ a ≫ res V S r' c₁ c₂ a = res V S r' c₁ c₃ a :=
 by {delta res, rw [← functor.map_comp, res₀_comp_res₀] }
---by { delta res, rw ← functor.map_comp, refl }
 
 def Tinv₀ [fact (0 < r')] :
   LC_Mbar_pow V S r' (c / r') a ⟶ LC_Mbar_pow V S r' c a :=
@@ -136,9 +133,6 @@ def Tinv₀ [fact (0 < r')] :
 def Tinv [fact (0 < r')] :
   LCC_Mbar_pow V S r' (c / r') a ⟶ LCC_Mbar_pow V S r' c a :=
 NormedGroup.Completion.map $ Tinv₀ _ _ _ _ _
---(hat V).map $ has_hom.hom.op
---⟨λ x, Mbar.Tinv ∘ x,
---  continuous_pi $ λ i, (Mbar.continuous_Tinv r' S c).comp (continuous_apply i)⟩
 
 lemma Tinv₀_res [fact (0 < r')] [fact (c₁ ≤ c₂)] :
   Tinv₀ V S r' c₂ a ≫ res₀ V S r' c₁ c₂ a = res₀ V S r' _ _ a ≫ Tinv₀ V S r' _ a :=
@@ -147,7 +141,6 @@ by { delta Tinv₀ res₀, rw [← functor.map_comp, ← functor.map_comp], refl
 lemma Tinv_res [fact (0 < r')] [fact (c₁ ≤ c₂)] :
   Tinv V S r' c₂ a ≫ res V S r' c₁ c₂ a = res V S r' _ _ a ≫ Tinv V S r' _ a :=
 by { delta Tinv res, rw [← functor.map_comp, ← functor.map_comp, Tinv₀_res] }
---by { delta Tinv res, rw [← functor.map_comp, ← functor.map_comp], refl }
 
 open uniform_space NormedGroup
 
@@ -193,20 +186,6 @@ begin
   rw ← category.assoc,
   simp only [iso.comp_inv_eq],
   apply T_res,
-  /-
-  ext f,
-  -- we should have more simp lemmas, to see that this next step is the obvious one
-  apply completion.induction_on f; clear f,
-  { exact is_closed_eq (normed_group_hom.continuous _) (normed_group_hom.continuous _) },
-  intro f,
-  -- we should have more simp lemmas, to see that this next step is the obvious one
-  show completion.map _ (completion.map _ _) = completion.map _ (completion.map _ _),
-  erw [completion.map_coe, completion.map_coe, completion.map_coe, completion.map_coe],
-  { congr' 1, dsimp [locally_constant.comap_hom], ext x,
-    show locally_constant.comap _ _ _ = _,
-    simp only [normed_group_hom.coe_mk, id.def, locally_constant.map_hom_to_fun,
-      NormedGroup.coe_id, coe_comp, locally_constant.map_id], },
-  -/
 end
 
 end LCC_Mbar_pow
