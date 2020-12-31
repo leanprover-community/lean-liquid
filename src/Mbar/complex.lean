@@ -142,7 +142,9 @@ def LCC_Mbar_pow_Tinv [fact (0 < r)] [fact (0 < r')] [fact (r' ≤ 1)] [fact (0 
   NormedGroup :=
 kernel ((LCC_Mbar_pow.Tinv V S r' c a) - (normed_with_aut.T.inv ≫ (LCC_Mbar_pow.res V S r' _ _ a)))
 
-def LCC_Mbar_pow_Tinv.res [fact (0 < r)] [fact (0 < r')] [fact (r' ≤ 1)]
+namespace LCC_Mbar_pow_Tinv
+
+def res [fact (0 < r)] [fact (0 < r')] [fact (r' ≤ 1)]
   [fact (0 ≤ c₁)] [fact (0 ≤ c₂)] [fact (c₁ ≤ c₂)] [normed_with_aut r V] :
   LCC_Mbar_pow_Tinv V S r r' c₂ a ⟶ LCC_Mbar_pow_Tinv V S r r' c₁ a :=
 kernel.lift _ (kernel.ι _ ≫ LCC_Mbar_pow.res _ _ _ _ _ _)
@@ -154,6 +156,20 @@ begin
   simp only [pi.zero_apply, normed_group_hom.coe_sub, coe_comp, pi.sub_apply],
   sorry
 end
+
+lemma res_comp_res [fact (0 < r)] [fact (0 < r')] [fact (r' ≤ 1)]
+  [fact (0 ≤ c₁)] [fact (0 ≤ c₂)] [fact (0 ≤ c₃)]
+  [fact (c₁ ≤ c₂)] [fact (c₂ ≤ c₃)] [fact (c₁ ≤ c₃)]
+  [normed_with_aut r V] :
+  res V S r r' c₂ c₃ a ≫ res V S r r' c₁ c₂ a = res V S r r' c₁ c₃ a :=
+sorry
+
+@[simp] lemma res_refl [fact (0 < r)] [fact (0 < r')] [fact (r' ≤ 1)] [fact (0 ≤ c)] [fact (c ≤ c)]
+  [normed_with_aut r V] :
+  res V S r r' c c a = 𝟙 _ :=
+sorry
+
+end LCC_Mbar_pow_Tinv
 
 variables [fact (0 < r)] [normed_with_aut r V]
 variables [fact (0 < r')] [fact (r' ≤ 1)]
@@ -267,10 +283,29 @@ def Mbar_system (BD : breen_deligne.package) (c' : ℕ → ℝ) [fact (BD.suitab
 { obj := λ c, Mbar_complex V S r r' (unop c : ℝ≥0) BD c',
   map := λ c₂ c₁ h,
   { f := int.extend_from_nat 0 $ λ i,
-    show LCC_Mbar_pow_Tinv V S r r' ((unop c₂ : ℝ≥0) * c' i) (BD.rank i) ⟶
-         LCC_Mbar_pow_Tinv V S r r' ((unop c₁ : ℝ≥0) * c' i) (BD.rank i),
     by { haveI : fact (((unop c₁ : ℝ≥0) : ℝ) ≤ (unop c₂ : ℝ≥0)) := h.unop.down.down,
       exact LCC_Mbar_pow_Tinv.res V S r r' _ _ (BD.rank i) },
-    comm' := sorry },
-  map_id' := sorry,
-  map_comp' := sorry }
+    comm' :=
+    begin
+      dsimp, sorry
+    end },
+  map_id' :=
+  begin
+    intro c,
+    ext ⟨i⟩ : 2,
+    { dsimp [int.extend_from_nat],
+      rw LCC_Mbar_pow_Tinv.res_refl V S r r' _ _, refl },
+    { dsimp [int.extend_from_nat], ext }
+  end,
+  map_comp' :=
+  begin
+    intros c₃ c₂ c₁ h h',
+    haveI H' : fact (((unop c₁ : ℝ≥0) : ℝ) ≤ (unop c₂ : ℝ≥0)) := h'.unop.down.down,
+    haveI H : fact (((unop c₂ : ℝ≥0) : ℝ) ≤ (unop c₃ : ℝ≥0)) := h.unop.down.down,
+    have : fact (((unop c₁ : ℝ≥0) : ℝ) ≤ (unop c₃ : ℝ≥0)) := le_trans H' H,
+    ext ⟨i⟩ : 2,
+    { dsimp [int.extend_from_nat],
+      rw LCC_Mbar_pow_Tinv.res_comp_res V S r r' _ _ _ _ },
+    { dsimp [int.extend_from_nat],
+      rw zero_comp },
+  end }
