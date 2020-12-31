@@ -50,26 +50,34 @@ abbreviation hat := NormedGroup.LCC.obj V
 def LCC_Mbar_pow [fact (0 < r')] : NormedGroup :=
 (hat V).obj (op $ CompHaus.of ((Mbar r' S c)^a))
 
+namespace LCC_Mbar_pow
+
 -- Achtung! Achtung! It is very important that the `[normed_with_aut r V]` instance comes last!
 -- Reason: `r` is an out_param, so it should be fixed as soon as possible
 -- by searching for `[normed_aut ?x_0 V]`
 -- and Lean tries to fill in the typeclass assumptions from right to left.
 -- Otherwise it might go on a wild goose chase for `[fact (0 < r)]`...
-instance LCC_Mbar_pow.normed_with_aut [fact (0 < r)] [fact (0 < r')] [normed_with_aut r V] :
+instance [fact (0 < r)] [fact (0 < r')] [normed_with_aut r V] :
   normed_with_aut r (LCC_Mbar_pow V S r' c a) :=
 NormedGroup.normed_with_aut_LCC V _ r
 
-def LCC_Mbar_pow.res [fact (0 < r')] [fact (c₁ ≤ c₂)] :
+def res [fact (0 < r')] [fact (c₁ ≤ c₂)] :
   LCC_Mbar_pow V S r' c₂ a ⟶ LCC_Mbar_pow V S r' c₁ a :=
 (hat V).map $ has_hom.hom.op
 ⟨λ x, Mbar.cast_le ∘ x,
   continuous_pi $ λ i, (Mbar.continuous_cast_le r' S c₁ c₂).comp (continuous_apply i)⟩
 
-def LCC_Mbar_pow.Tinv [fact (0 < r')] :
+lemma res_comp_res [fact (0 < r')] [fact (c₁ ≤ c₂)] [fact (c₂ ≤ c₃)] [fact (c₁ ≤ c₃)] :
+  res V S r' c₂ c₃ a ≫ res V S r' c₁ c₂ a = res V S r' c₁ c₃ a :=
+by { delta res, rw ← functor.map_comp, refl }
+
+def Tinv [fact (0 < r')] :
   LCC_Mbar_pow V S r' (c / r') a ⟶ LCC_Mbar_pow V S r' c a :=
 (hat V).map $ has_hom.hom.op
 ⟨λ x, Mbar.Tinv ∘ x,
   continuous_pi $ λ i, (Mbar.continuous_Tinv r' S c).comp (continuous_apply i)⟩
+
+end LCC_Mbar_pow
 
 -- move this
 instance fix_my_name [h1 : fact (0 < r')] [h2 : fact (r' ≤ 1)] [h3 : fact (0 ≤ c)] : fact (c ≤ c / r') :=
@@ -87,6 +95,10 @@ instance fix_my_name₃ [fact (0 < r')] [fact (c₁ ≤ c₂)] :
   fact (c₁ / r' ≤ c₂ / r') :=
 by { rwa [div_eq_inv_mul, div_eq_inv_mul, mul_le_mul_left], rwa [inv_pos] }
 
+/-
+TODO: Do we want to define the `T⁻¹`-invariants as a kernel,
+or would it be better to use equalizers?
+-/
 /-- The space `V-hat(Mbar_{r'}(S)_{≤c}^a)^{T⁻¹}`. -/
 def LCC_Mbar_pow_Tinv [fact (0 < r)] [fact (0 < r')] [fact (r' ≤ 1)] [fact (0 ≤ c)]
   [normed_with_aut r V] :
@@ -100,6 +112,9 @@ kernel.lift _ (kernel.ι _ ≫ LCC_Mbar_pow.res _ _ _ _ _ _)
 begin
   rw category.assoc,
   -- now we need to know that `res` commutes with the two types of `Tinv`
+  -- ext v,
+  -- dsimp,
+  -- simp only [pi.zero_apply, normed_group_hom.coe_sub, coe_comp, pi.sub_apply],
   sorry
 end
 
