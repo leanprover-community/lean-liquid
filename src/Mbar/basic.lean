@@ -37,7 +37,7 @@ structure Mbar (r' : ℝ) (S : Type u) [fintype S] (c : ℝ) :=
 (summable' : ∀ s, summable (λ n, abs ((to_fun s n : ℝ) * r' ^ n)))
 (sum_tsum_le' : (∑ s, ∑' n, (abs ((to_fun s n : ℝ) * r'^n))) ≤ c)
 
-variables {r' : ℝ} {S : Type u} [fintype S] {c c₁ c₂ : ℝ}
+variables {r' : ℝ} {S : Type u} [fintype S] {c c₁ c₂ c₃ : ℝ}
 
 namespace Mbar
 instance has_coe_to_fun : has_coe_to_fun (Mbar r' S c) := ⟨_, Mbar.to_fun⟩
@@ -65,19 +65,31 @@ def mk' (x : S → ℕ → ℤ)
 @[ext] lemma ext (x y : Mbar r' S c) (h : ⇑x = y) : x = y :=
 by { cases x, cases y, congr, exact h }
 
+instance [h : fact (0 ≤ c)] : has_zero (Mbar r' S c) :=
+{ zero :=
+  { to_fun := 0,
+    coeff_zero' := λ s, rfl,
+    summable' := λ s, by simpa using summable_zero,
+    sum_tsum_le' := by simpa using h } }
+
 end Mbar
 
 -- lemma abs_mul_pow_pos {x r : ℝ} (hr : 0 < r) {n : ℕ} :
 --   abs (x * r ^ n) = abs x * r ^ n :=
 -- by rw [abs_mul, abs_of_pos (pow_pos hr _)]
 
-noncomputable def Mbar.add :
-  Mbar r' S c₁ → Mbar r' S c₂ → Mbar r' S (c₁ + c₂) :=
+variables (c₃)
+
+-- move this
+instance fact_le_refl :fact (c ≤ c) := le_rfl
+
+noncomputable def Mbar.add [h : fact (c₁ + c₂ ≤ c₃)] :
+  Mbar r' S c₁ → Mbar r' S c₂ → Mbar r' S c₃ :=
 λ F G, Mbar.mk' (F + G)
 begin
   have H : _ := _,
   refine ⟨λ s, by simp [F.coeff_zero s, G.coeff_zero s], H, _⟩,
-  { refine le_trans _ (add_le_add F.sum_tsum_le G.sum_tsum_le),
+  { refine le_trans _ ((add_le_add F.sum_tsum_le G.sum_tsum_le).trans h),
     rw ← finset.sum_add_distrib,
     refine finset.sum_le_sum _,
     rintro s -,
@@ -94,7 +106,53 @@ begin
     simp [add_mul] }
 end
 
-def Mbar.add' : Mbar r' S c₁ × Mbar r' S c₂ → Mbar r' S (c₁ + c₂) := λ x, Mbar.add x.1 x.2
+def Mbar.add' [fact (c₁ + c₂ ≤ c₃)] : Mbar r' S c₁ × Mbar r' S c₂ → Mbar r' S c₃ :=
+λ x, Mbar.add c₃ x.1 x.2
+
+noncomputable def Mbar.neg (F : Mbar r' S c) : Mbar r' S c :=
+Mbar.mk' (-F)
+begin
+  refine ⟨λ s, by simp [F.coeff_zero s], _, _⟩,
+  { intro s, convert F.summable s using 1,
+    funext, simp only [neg_mul_eq_neg_mul_symm, pi.neg_apply, abs_neg, int.cast_neg], },
+  { convert F.sum_tsum_le,
+    funext, simp only [neg_mul_eq_neg_mul_symm, pi.neg_apply, abs_neg, int.cast_neg], }
+end
+
+-- move this
+-- instance fix_my_name4 (n : ℕ) [fact (0 ≤ c)] : fact (0 ≤ c * n) := sorry
+
+noncomputable def Mbar.nsmul :
+  Π (n : ℕ) (c' : ℝ) [fact (0 ≤ c')] [fact (c * n ≤ c')], Mbar r' S c → Mbar r' S c'
+| 0     c' h0 h := λ F, by exactI 0
+| (n+1) c' h0 h := λ F,
+have fact (0 ≤ c' - c),
+begin
+  simp only [sub_nonneg, fact] at h ⊢,
+  contrapose! h,
+  have : 0 < c := lt_of_le_of_lt h0 h,
+  calc c' < c * 1 : by rwa mul_one
+  ... ≤ c * (n + 1 : ℕ) : (mul_le_mul_left this).mpr _,
+  simp only [nat.cast_add, nat.cast_one, le_add_iff_nonneg_left, nat.cast_nonneg],
+end,
+have fact (c * n ≤ c' - c),
+  by { rw [le_sub_iff_add_le], simpa only [mul_add, mul_one, nat.cast_add, nat.cast_one] using h },
+have fact (c' - c + c ≤ c'), by simpa only [sub_add_cancel] using le_rfl,
+by exactI Mbar.add _ (Mbar.nsmul n (c' - c) F) F
+
+-- move this
+-- @[simp] lemma int.abs_neg_succ_of_nat (n : ℕ) :
+--   abs (-[1+n]) = n+1 :=
+
+noncomputable def Mbar.gsmul :
+  Π (n : ℤ) (c' : ℝ) [fact (0 ≤ c')] [fact (c * abs n ≤ c')], Mbar r' S c → Mbar r' S c'
+| (n:ℕ)  c' h0 h := λ F,
+have fact (c * n ≤ c'), by simpa only [int.cast_coe_nat, nat.abs_cast] using h,
+by exactI Mbar.nsmul n c' F
+| -[1+n] c' h0 h := λ F,
+have fact (c * (n+1:ℕ) ≤ c'),
+  by simpa only [int.cast_neg_succ_of_nat, abs_neg, ← nat.cast_add_one, nat.abs_cast] using h,
+by exactI Mbar.nsmul (n+1) c' F.neg
 
 lemma sum_fin_eq {M : ℕ} (f : ℕ → ℝ) : ∑ i in finset.range M, f i = ∑ (i : fin M), f i :=
 @finset.sum_bij' ℕ ℝ (fin M) _ (finset.range M) finset.univ f (λ i, f i)
@@ -319,14 +377,17 @@ begin
     exact h }
 end
 
-lemma continuous_truncate {M} : continuous (@truncate r' S _ c M) := (continuous_iff id).mp continuous_id _
+lemma continuous_truncate {M} : continuous (@truncate r' S _ c M) :=
+(continuous_iff id).mp continuous_id _
 
-lemma continuous_add' : continuous (Mbar.add' : _ → Mbar r' S (c₁ + c₂)) :=
+lemma continuous_add' :
+  continuous (Mbar.add' (c₁ + c₂) : Mbar r' S c₁ × Mbar r' S c₂ → Mbar r' S (c₁ + c₂)) :=
 begin
   rw continuous_iff,
   intros M,
-  have : truncate M ∘ (λ x : Mbar r' S c₁ × Mbar r' S c₂, Mbar.add x.1 x.2) =
-    (λ x : (Mbar r' S c₁ × Mbar r' S c₂), Mbar_bdd.add (truncate M x.1) (truncate M x.2)) := by {ext; refl},
+  have : truncate M ∘ (λ x : Mbar r' S c₁ × Mbar r' S c₂, Mbar.add _ x.1 x.2) =
+    (λ x : (Mbar r' S c₁ × Mbar r' S c₂), Mbar_bdd.add (truncate M x.1) (truncate M x.2)) :=
+    by {ext; refl},
   erw this,
   suffices : continuous (λ x : Mbar_bdd r' ⟨S⟩ c₁ M × Mbar_bdd r' ⟨S⟩ c₂ M, Mbar_bdd.add x.1 x.2),
   { have claim : (λ x : (Mbar r' S c₁ × Mbar r' S c₂), Mbar_bdd.add (truncate M x.1) (truncate M x.2)) =
