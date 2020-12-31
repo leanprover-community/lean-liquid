@@ -11,9 +11,35 @@ open opposite category_theory category_theory.limits
 open_locale nnreal
 local attribute [instance] type_pow
 
-def int.extend_from_nat {X : ℤ → Sort*} (x : Π i, X i) (f : Π i : ℕ, X i) : Π i, X i
+namespace int
+/-! ### extend from nat
+
+A helper function to define a function on the integers
+by extending a function from the naturals.
+
+We use this to define a complex indexed by `ℤ` by extending a complex indexed by `ℕ`
+with zeros on negative indices.
+-/
+
+variables {X : ℤ → Sort*} (x : Π i, X i) (f : Π i : ℕ, X i)
+
+def extend_from_nat : Π i, X i
 | (n : ℕ)   := f n
 | i@-[1+n]  := x i
+
+@[simp] lemma extend_from_nat_apply_nat (n : ℕ) :
+  extend_from_nat x f n = f n := rfl
+
+@[simp] lemma extend_from_nat_apply_of_nat (n : ℕ) :
+  extend_from_nat x f (int.of_nat n) = f n := rfl
+
+@[simp] lemma extend_from_nat_apply_nat_add_one (n : ℕ) :
+  extend_from_nat x f (n+1) = f (n+1) := rfl
+
+@[simp] lemma extend_from_nat_apply_neg_succ_of_nat (n : ℕ) :
+  extend_from_nat x f -[1+n] = x -[1+n] := rfl
+
+end int
 
 variables (V : NormedGroup) (S : Type*) (r r' c c' c₁ c₂ c₃ : ℝ) (a : ℕ) [fintype S]
 
@@ -114,9 +140,9 @@ This predicate says what *suitable* means for universal maps.
 See Lemma 9.11 of [Analytic]. -/
 def suitable (f : universal_map m n) (c c' : ℝ) : Prop := sorry
 
-def eval_Mbar {m n : ℕ} (f : universal_map m n) [fact (f.suitable c c')] :
-  (LCC_Mbar_pow_Tinv V S r r' c n) ⟶ (LCC_Mbar_pow_Tinv V S r r' c' m) :=
-sorry
+constant eval_Mbar {m n : ℕ} (f : universal_map m n) [fact (f.suitable c c')] :
+  (LCC_Mbar_pow_Tinv V S r r' c n) ⟶ (LCC_Mbar_pow_Tinv V S r r' c' m)
+  --  := sorry
 
 lemma eval_Mbar_zero [fact ((0 : universal_map m n).suitable c c')] :
   (0 : universal_map m n).eval_Mbar V S r r' c c' = 0 :=
@@ -169,22 +195,15 @@ instance fact_mul_nonneg : fact (0 ≤ c₁ * c₂) := mul_nonneg ‹_› ‹_�
 def Mbar_complex (BD : breen_deligne.package) (c' : ℕ → ℝ) [fact (BD.suitable c')] :
   cochain_complex NormedGroup :=
 { X := int.extend_from_nat 0 $ λ i, LCC_Mbar_pow_Tinv V S r r' (c * c' i) (BD.rank i),
-  d := int.extend_from_nat 0 $ λ i,
-  show LCC_Mbar_pow_Tinv V S r r' (c * c' i) (BD.rank i) ⟶
-       LCC_Mbar_pow_Tinv V S r r' (c * c' (i+1)) (BD.rank (i+1)),
-  from (BD.map i).eval_Mbar V S r r' (c * c' i) (c * c' (i+1)),
+  d := int.extend_from_nat 0 $ λ i, (BD.map i).eval_Mbar V S r r' (c * c' i) (c * c' (i+1)),
   d_squared' :=
   begin
     ext1 ⟨i⟩,
     { dsimp,
-      have aux := BD.map_comp_map i,
-      sorry },
-    -- the proof below used to work... now they time out :sad:
-    -- { show (BD.map i).eval_Mbar V S r r' (c * c' i) (c * c' (i + 1)) ≫
-    --        (BD.map (i+1)).eval_Mbar V S r r' (c * c' (i+1)) (c * c' (i + 2)) = _,
-    --   erw ← universal_map.eval_Mbar_comp V S r r' _ (c * c' (i+1)) _ (BD.map i) (BD.map (i+1)),
-    --   { rw [BD.map_comp_map, universal_map.eval_Mbar_zero], refl },
-    --   apply_instance },
+      simp only [pi.comp_apply, pi.zero_apply],
+      erw ← universal_map.eval_Mbar_comp V S r r' _ (c * c' (i+1)) _ (BD.map i) (BD.map (i+1)),
+      rw [BD.map_comp_map, universal_map.eval_Mbar_zero],
+      apply_instance },
     { show 0 ≫ _ = 0, rw [zero_comp] }
   end }
 
