@@ -56,6 +56,71 @@ def Completion : NormedGroup ⥤ NormedGroup :=
     { exact normed_group_hom.uniform_continuous _ }
   end }
 
+@[simps]
+def incl {V : NormedGroup} : V ⟶ Completion.obj V :=
+{ to_fun := λ v, (v : completion V),
+  map_zero' := by simpa [completion.coe_eq],
+  map_add' := completion.coe_add,
+  bound' := ⟨1, λ v, by simp⟩ }
+
+@[simp] lemma norm_incl_eq {V : NormedGroup} {v : V} : ∥incl v∥ = ∥v∥ := by simp
+
+def Completion.lift {V W : NormedGroup} [complete_space W] (f : V ⟶ W) : Completion.obj V ⟶ W :=
+{ to_fun := completion.extension f,
+  map_zero' := begin
+    erw completion.extension_coe,
+    { simp },
+    { exact normed_group_hom.uniform_continuous _ },
+  end,
+  map_add' := begin
+    intros x y,
+    apply completion.induction_on₂ x y; clear x y,
+    { refine is_closed_eq _ _,
+      { refine continuous.comp _ _,
+        exact completion.continuous_extension,
+        exact continuous_add },
+      { refine continuous.add _ _,
+        exact continuous.comp completion.continuous_extension continuous_fst,
+        exact continuous.comp completion.continuous_extension continuous_snd } },
+    { intros x y,
+      rw ← completion.coe_add,
+      repeat {rw completion.extension_coe},
+      exact normed_group_hom.map_add _ _ _,
+      all_goals {exact normed_group_hom.uniform_continuous _} }
+  end,
+  bound' := begin
+    rcases f.bound with ⟨c,hc,h⟩,
+    use c,
+    intros v,
+    apply completion.induction_on v; clear v,
+    { sorry },
+    { intros a,
+      rw completion.extension_coe,
+      { change _ ≤ c * ∥ incl _ ∥,
+        simpa using h a },
+      { exact normed_group_hom.uniform_continuous _ }}
+  end }
+
+lemma lift_comp_incl {V W : NormedGroup} [complete_space W] (f : V ⟶ W) : incl ≫ (Completion.lift f) = f :=
+begin
+  ext,
+  change completion.extension f x = _,
+  refine completion.extension_coe _ _,
+  exact normed_group_hom.uniform_continuous _,
+end
+
+lemma lift_unique {V W : NormedGroup} [complete_space W] (f : V ⟶ W) (g : Completion.obj V ⟶ W) :
+  incl ≫ g = f → g = Completion.lift f :=
+begin
+  intros h,
+  ext,
+  apply completion.induction_on x; clear x,
+  { sorry },
+  { intros a,
+    change (incl ≫ g) _ = (incl ≫ Completion.lift f) _,
+    rw [lift_comp_incl, h] }
+end
+
 instance normed_with_aut_Completion (V : NormedGroup) (r : ℝ) [normed_with_aut r V] :
   normed_with_aut r (Completion.obj V) :=
 { T := Completion.map_iso normed_with_aut.T,
