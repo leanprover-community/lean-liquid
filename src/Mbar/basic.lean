@@ -101,11 +101,24 @@ def neg (F : Mbar r' S) : Mbar r' S :=
     simp only [neg_mul_eq_neg_mul_symm, pi.neg_apply, abs_neg, int.cast_neg],
   end }
 
--- instance : add_comm_group (Mbar r' S) :=
--- { zero := zero,
---   add := add,
---   sub := sub,
---   neg := neg, }
+instance : has_zero (Mbar r' S) := ⟨zero⟩
+instance : has_add (Mbar r' S) := ⟨add⟩
+instance : has_sub (Mbar r' S) := ⟨sub⟩
+instance : has_neg (Mbar r' S) := ⟨neg⟩
+
+@[simp] lemma coe_zero : ⇑(0 : Mbar r' S) = 0 := rfl
+@[simp] lemma coe_add (F G : Mbar r' S) : ⇑(F + G : Mbar r' S) = F + G := rfl
+@[simp] lemma coe_sub (F G : Mbar r' S) : ⇑(F - G : Mbar r' S) = F - G := rfl
+@[simp] lemma coe_neg (F : Mbar r' S) : ⇑(-F : Mbar r' S) = -F := rfl
+
+instance : add_comm_group (Mbar r' S) :=
+{ zero := 0, add := (+), sub := has_sub.sub, neg := has_neg.neg,
+  zero_add := by { intros, ext, simp only [coe_zero, zero_add, coe_add] },
+  add_zero := by { intros, ext, simp only [coe_zero, add_zero, coe_add] },
+  add_assoc := by { intros, ext, simp only [add_assoc, coe_add] },
+  add_left_neg := by { intros, ext, simp only [coe_add, coe_neg, coe_zero, add_left_neg] },
+  add_comm := by { intros, ext, simp only [coe_add, add_comm] },
+  sub_eq_add_neg := by { intros, ext, simp only [coe_sub, coe_add, coe_neg, sub_eq_add_neg] } }
 
 section Tinv
 
