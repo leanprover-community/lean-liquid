@@ -62,13 +62,12 @@ protected lemma summable (x : Mbar r' S) (s : S) :
 @[ext] lemma ext (x y : Mbar r' S) (h : ⇑x = y) : x = y :=
 by { cases x, cases y, congr, exact h }
 
-instance : has_zero (Mbar r' S) :=
-{ zero :=
-  { to_fun := 0,
-    coeff_zero' := λ s, rfl,
-    summable' := λ s, by simpa using summable_zero } }
+def zero : Mbar r' S :=
+{ to_fun := 0,
+  coeff_zero' := λ s, rfl,
+  summable' := λ s, by simpa using summable_zero }
 
-noncomputable def add (F : Mbar r' S) (G : Mbar r' S) : Mbar r' S :=
+def add (F : Mbar r' S) (G : Mbar r' S) : Mbar r' S :=
 { to_fun := F + G,
   coeff_zero' := λ s, by simp [F.coeff_zero s, G.coeff_zero s],
   summable' :=
@@ -78,22 +77,38 @@ noncomputable def add (F : Mbar r' S) (G : Mbar r' S) : Mbar r' S :=
     simp_rw summable_abs_iff at hFs hGs ⊢,
     convert summable.add (hFs s) (hGs s),
     ext n,
-    simp [add_mul]
+    simp only [add_mul, int.cast_add, pi.add_apply]
   end }
 
-noncomputable def neg (F : Mbar r' S) : Mbar r' S :=
+def sub (F : Mbar r' S) (G : Mbar r' S) : Mbar r' S :=
+{ to_fun := F - G,
+  coeff_zero' := λ s, by simp [F.coeff_zero s, G.coeff_zero s],
+  summable' :=
+  begin
+    intro s,
+    have hFs := F.summable, have hGs := G.summable,
+    simp_rw summable_abs_iff at hFs hGs ⊢,
+    convert summable.sub (hFs s) (hGs s),
+    ext n,
+    simp only [sub_mul, int.cast_sub, pi.sub_apply]
+  end }
+
+def neg (F : Mbar r' S) : Mbar r' S :=
 { to_fun := -F,
   coeff_zero' := λ s, by simp [F.coeff_zero s],
   summable' :=
   begin
-    intro s, convert F.summable s using 1,
-    funext, simp only [neg_mul_eq_neg_mul_symm, pi.neg_apply, abs_neg, int.cast_neg],
+    intro s,
+    convert F.summable s using 1,
+    ext n,
+    simp only [neg_mul_eq_neg_mul_symm, pi.neg_apply, abs_neg, int.cast_neg],
   end }
 
-lemma sum_fin_eq {M : ℕ} (f : ℕ → ℝ) : ∑ i in finset.range M, f i = ∑ (i : fin M), f i :=
-@finset.sum_bij' ℕ ℝ (fin M) _ (finset.range M) finset.univ f (λ i, f i)
-  (λ a ha, ⟨a, finset.mem_range.mp ha⟩) (λ a ha, finset.mem_univ _) (λ a ha, rfl)
-  (λ a _, a) (λ a ha, finset.mem_range.mpr a.2) (λ a ha, rfl) (λ a ha, by simp)
+-- instance : add_comm_group (Mbar r' S) :=
+-- { zero := zero,
+--   add := add,
+--   sub := sub,
+--   neg := neg, }
 
 section Tinv
 
