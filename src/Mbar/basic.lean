@@ -8,6 +8,9 @@ import analysis.specific_limits
 import data.equiv.basic
 
 import Mbar.bounded
+
+import for_mathlib.tsum
+
 /-!
 
 ## $\overline{\mathcal{M}}_{r'}(S)$
@@ -56,8 +59,15 @@ instance has_coe_to_fun : has_coe_to_fun (Mbar r' S) := ⟨_, Mbar.to_fun⟩
 protected lemma summable (x : Mbar r' S) (s : S) :
   summable (λ n, abs ((x s n : ℝ) * r'^n)) := x.summable' s
 
+lemma summable_nnabs (F : Mbar r' S) (s : S) :
+  summable (λ (i : ℕ), real.nnabs ((F s i) * r' ^ i)) :=
+by { rw ← nnreal.summable_coe, simpa only [nnreal.coe_nnabs] using F.summable s }
+
 @[ext] lemma ext (x y : Mbar r' S) (h : ⇑x = y) : x = y :=
 by { cases x, cases y, congr, exact h }
+
+lemma ext_iff (x y : Mbar r' S) : x = y ↔ (x : S → ℕ → ℤ) = y :=
+⟨congr_arg _, ext x y⟩
 
 def zero : Mbar r' S :=
 { to_fun := 0,
@@ -119,6 +129,51 @@ instance : add_comm_group (Mbar r' S) :=
   add_left_neg := by { intros, ext, simp only [coe_add, coe_neg, coe_zero, add_left_neg] },
   add_comm := by { intros, ext, simp only [coe_add, add_comm] },
   sub_eq_add_neg := by { intros, ext, simp only [coe_sub, coe_add, coe_neg, sub_eq_add_neg] } }
+.
+
+instance : has_norm (Mbar r' S) :=
+{ norm := λ F, ∑ s, ∑' n, (abs ((F s n : ℝ) * r'^n)) }
+
+lemma norm_def (F : Mbar r' S) : ∥F∥ = ∑ s, ∑' n, (abs ((F s n : ℝ) * r'^n)) := rfl
+
+instance [hr' : fact (0 < r')] : normed_group (Mbar r' S) :=
+normed_group.of_core _
+{ norm_eq_zero_iff :=
+  begin
+    intro F,
+    rw [norm_def, finset.sum_eq_zero_iff_of_nonneg, ext_iff, function.funext_iff],
+    { apply forall_congr,
+      intro s,
+      simp only [forall_prop_of_true, finset.mem_univ, coe_zero, pi.zero_apply,
+        tsum_abs_eq_coe_tsum_nnabs],
+      rw [← nnreal.coe_tsum, ← nnreal.coe_zero, nnreal.eq_iff,
+          tsum_eq_zero_iff (F.summable_nnabs s), function.funext_iff],
+      apply forall_congr,
+      intro n,
+      simp only [←nnreal.eq_iff, int.cast_eq_zero, abs_eq_zero, nnreal.coe_zero, pi.zero_apply,
+        or_iff_left_iff_imp, nnreal.coe_nnabs, mul_eq_zero],
+      intro H,
+      exact (ne_of_gt hr' (pow_eq_zero H)).elim },
+    { exact (λ _ _, tsum_nonneg (λ _, abs_nonneg _)) }
+  end,
+  triangle :=
+  begin
+    intros F G,
+    simp only [norm_def],
+    rw ← finset.sum_add_distrib,
+    refine finset.sum_le_sum _,
+    rintro s -,
+    rw ← tsum_add (F.summable s) (G.summable s),
+    refine tsum_le_tsum _ ((F + G).summable _) (summable.add (F.summable s) (G.summable s)),
+    intro n,
+    convert abs_add _ _,
+    simp [add_mul]
+  end,
+  norm_neg :=
+  begin
+    intro F, rw [norm_def, norm_def],
+    simp only [neg_mul_eq_neg_mul_symm, pi.neg_apply, abs_neg, int.cast_neg, coe_neg]
+  end }
 
 section Tinv
 
