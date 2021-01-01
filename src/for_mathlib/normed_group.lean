@@ -50,6 +50,7 @@ namespace normed_group_hom
 
 open_locale big_operators nnreal
 
+@[simps]
 def mk_to_pi {ι : Type} [fintype ι] (W : ι → Type*) [Π i, normed_group (W i)]
   (f : Π i, normed_group_hom V (W i)) : normed_group_hom V (Π i, W i) :=
 { to_fun := λ v i, f i v,
@@ -71,6 +72,7 @@ def mk_to_pi {ι : Type} [fintype ι] (W : ι → Type*) [Π i, normed_group (W 
     apply finset.le_sup (finset.mem_univ _)
   end }
 
+@[simps]
 def mk_from_pi {ι : Type} [fintype ι] (V : ι → Type*) [Π i, normed_group (V i)]
   (W : Type*) [normed_group W] (f : Π i, normed_group_hom (V i) W) :
   normed_group_hom (Π i, V i) W :=

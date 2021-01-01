@@ -19,6 +19,9 @@ instance : has_coe_to_fun (normed_group_hom V₁ V₂) := ⟨_, normed_group_hom
 
 @[simp] lemma coe_mk (f) (h₁) (h₂) (h₃) : ⇑(⟨f, h₁, h₂, h₃⟩ : normed_group_hom V₁ V₂) = f := rfl
 
+@[simp] lemma mk_to_monoid_hom (f) (h₁) (h₂) (h₃) :
+  (⟨f, h₁, h₂, h₃⟩ : normed_group_hom V₁ V₂).to_add_monoid_hom = ⟨f, h₁, h₂⟩ := rfl
+
 @[simp] lemma map_zero : f 0 = 0 := f.to_add_monoid_hom.map_zero
 
 @[simp] lemma map_add (x y) : f (x + y) = f x + f y := f.to_add_monoid_hom.map_add _ _
