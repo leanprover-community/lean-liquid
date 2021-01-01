@@ -1,4 +1,3 @@
-import ring_theory.power_series
 import data.real.basic
 import algebra.big_operators.basic
 import topology.algebra.infinite_sum
@@ -25,8 +24,6 @@ universe u
 
 noncomputable theory
 open_locale big_operators
-
-open power_series
 
 section defs
 

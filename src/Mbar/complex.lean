@@ -1,7 +1,7 @@
 import system_of_complexes
 import breen_deligne
 import locally_constant.Vhat
-import Mbar.basic
+import Mbar.Mbar_le
 
 import for_mathlib.CompHaus
 import for_mathlib.continuous_map
@@ -66,14 +66,14 @@ by { rwa [div_eq_inv_mul, div_eq_inv_mul, mul_le_mul_left], rwa [inv_pos] }
 abbreviation hat := NormedGroup.LCC.obj V
 
 def LC_Mbar_pow [fact (0 < r')] : NormedGroup :=
-(NormedGroup.LocallyConstant.obj V).obj (op $ CompHaus.of $ (Mbar r' S c)^a)
+(NormedGroup.LocallyConstant.obj V).obj (op $ CompHaus.of $ (Mbar_le r' S c)^a)
 
 instance normed_with_aut_LC_Mbar_pow [fact (0 < r)] [fact (0 < r')] [normed_with_aut r V] :
   normed_with_aut r (LC_Mbar_pow V S r' c a) := by {unfold LC_Mbar_pow, apply_instance}
 
 /-- The space `V-hat(Mbar_{r'}(S)_{≤c}^a)`. -/
 def LCC_Mbar_pow [fact (0 < r')] : NormedGroup :=
-(hat V).obj (op $ CompHaus.of ((Mbar r' S c)^a))
+(hat V).obj (op $ CompHaus.of ((Mbar_le r' S c)^a))
 
 lemma LCC_Mbar_pow_eq [fact (0 < r')] :
   LCC_Mbar_pow V S r' c a = NormedGroup.Completion.obj (LC_Mbar_pow V S r' c a) := rfl
@@ -98,7 +98,7 @@ NormedGroup.normed_with_aut_LCC V _ r
 lemma T_inv_eq [fact (0 < r)] [fact (0 < r')] [normed_with_aut r V] :
   (normed_with_aut.T.inv : LCC_Mbar_pow V S r' c a ⟶ LCC_Mbar_pow V S r' c a) =
     (NormedGroup.LCC.map (normed_with_aut.T.inv : V ⟶ V)).app
-      (op $ CompHaus.of ((Mbar r' S c)^a)) :=
+      (op $ CompHaus.of ((Mbar_le r' S c)^a)) :=
 begin
   dsimp [LCC_Mbar_pow, LCC_Mbar_pow.normed_with_aut, NormedGroup.normed_with_aut_LCC,
     NormedGroup.normed_with_aut_Completion, NormedGroup.normed_with_aut_LocallyConstant,
@@ -109,8 +109,8 @@ end
 @[simp] def res₀ [fact (0 < r')] [fact (c₁ ≤ c₂)] :
   LC_Mbar_pow V S r' c₂ a ⟶ LC_Mbar_pow V S r' c₁ a :=
 (NormedGroup.LocallyConstant.obj V).map $ has_hom.hom.op $
-⟨λ x, Mbar.cast_le ∘ x,
-  continuous_pi $ λ i, (Mbar.continuous_cast_le r' S c₁ c₂).comp (continuous_apply i)⟩
+⟨λ x, Mbar_le.cast_le ∘ x,
+  continuous_pi $ λ i, (Mbar_le.continuous_cast_le r' S c₁ c₂).comp (continuous_apply i)⟩
 
 def res [fact (0 < r')] [fact (c₁ ≤ c₂)] :
   LCC_Mbar_pow V S r' c₂ a ⟶ LCC_Mbar_pow V S r' c₁ a :=
@@ -127,8 +127,8 @@ by {delta res, rw [← functor.map_comp, res₀_comp_res₀] }
 def Tinv₀ [fact (0 < r')] :
   LC_Mbar_pow V S r' (c / r') a ⟶ LC_Mbar_pow V S r' c a :=
 (NormedGroup.LocallyConstant.obj V).map $ has_hom.hom.op $
-⟨λ x, Mbar.Tinv ∘ x,
-  continuous_pi $ λ i, (Mbar.continuous_Tinv r' S c).comp (continuous_apply i)⟩
+⟨λ x, Mbar_le.Tinv ∘ x,
+  continuous_pi $ λ i, (Mbar_le.continuous_Tinv r' S c).comp (continuous_apply i)⟩
 
 def Tinv [fact (0 < r')] :
   LCC_Mbar_pow V S r' (c / r') a ⟶ LCC_Mbar_pow V S r' c a :=
@@ -152,9 +152,10 @@ begin
   ext x s,
   simp only [locally_constant.comap_hom_to_fun, function.comp_app,
     locally_constant.map_hom_to_fun, locally_constant.map_apply, coe_comp],
-  repeat {erw locally_constant.coe_comap},
+  repeat { erw locally_constant.coe_comap },
   refl,
-  repeat {refine continuous_pi (λ i, (Mbar.continuous_cast_le r' S c₁ c₂).comp (continuous_apply i))},
+  repeat
+  { exact continuous_pi (λ i, (Mbar_le.continuous_cast_le r' S c₁ c₂).comp (continuous_apply i)) }
 end
 
 lemma T_inv₀_res₀ [fact (0 < r)] [fact (0 < r')] [fact (c₁ ≤ c₂)] [normed_with_aut r V] :

@@ -147,22 +147,8 @@ begin
   exact hf.mul hg
 end
 
--- to additive doesn't want to generate this
--- also, `[has_sub Y]` doesn't work :sad:
-lemma sub [add_group Y] ⦃f g : X → Y⦄ (hf : is_locally_constant f) (hg : is_locally_constant g) :
-  is_locally_constant (f - g) :=
-begin
-  rw iff_exists_open at hf hg ⊢,
-  intro x,
-  obtain ⟨U, hU, hxU, HU⟩ := hf x,
-  obtain ⟨V, hV, hxV, HV⟩ := hg x,
-  use [U ∩ V, is_open_inter hU hV, ⟨hxU, hxV⟩],
-  rintro x' ⟨hx'U, hx'V⟩,
-  simp only [pi.sub_apply, HU x' hx'U, HV x' hx'V]
-end
-
 @[to_additive]
-lemma div [group Y] ⦃f g : X → Y⦄ (hf : is_locally_constant f) (hg : is_locally_constant g) :
+lemma div [has_div Y] ⦃f g : X → Y⦄ (hf : is_locally_constant f) (hg : is_locally_constant g) :
   is_locally_constant (f / g) :=
 begin
   rw iff_exists_open at hf hg ⊢,

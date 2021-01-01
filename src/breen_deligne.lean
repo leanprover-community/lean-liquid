@@ -64,9 +64,7 @@ def comp : basic_universal_map l n := matrix.mul g f
 
 lemma eval_comp : (g.comp f).eval A = (g.eval A).comp (f.eval A) :=
 begin
-  ext1 x',
-  apply lift.ext,
-  intro x,
+  ext1 x,
   simp only [add_monoid_hom.coe_comp, function.comp_app, eval_of, comp, finset.smul_sum,
     matrix.mul_apply, finset.sum_smul, mul_smul],
   congr' 1,
@@ -111,7 +109,7 @@ of $ g.comp f
 
 @[simp] lemma comp_of (g : basic_universal_map m n) (f : basic_universal_map l m) :
   comp (of g) (of f) = of (g.comp f) :=
-lift.of _ _
+by rw [comp, lift.of, lift.of]
 
 section
 open add_monoid_hom
@@ -120,8 +118,7 @@ lemma eval_comp : eval A (comp g f) = (eval A g).comp (eval A f) :=
 show comp_hom (comp_hom (@eval l n A _)) (comp) g f =
   comp_hom (comp_hom (comp_hom.flip (@eval l m A _)) (comp_hom)) (@eval m n A _) g f,
 begin
-  congr' 1, apply lift.ext; clear g; intro g,
-  ext1 f; apply lift.ext; clear f; intro f,
+  congr' 2, clear f g, ext g f : 2,
   show eval A (comp (of g) (of f)) = (eval A (of g)).comp (eval A (of f)),
   simp only [basic_universal_map.eval_comp, comp_of, eval_of]
 end
@@ -131,9 +128,7 @@ lemma comp_assoc (h : universal_map m n) (g : universal_map l m) (f : universal_
 show comp_hom (comp_hom (@comp k l n)) (@comp l m n) h g f =
      comp_hom (comp_hom (comp_hom.flip (@comp k l m)) (comp_hom)) (@comp k m n) h g f,
 begin
-  congr' 2, apply lift.ext, clear h g f, intro h,
-  ext1 g, apply lift.ext, clear g, intro g,
-  ext1 f, apply lift.ext, clear f, intro f,
+  congr' 3, clear h g f, ext h g f : 3,
   show comp (comp (of h) (of g)) (of f) = comp (of h) (comp (of g) (of f)),
   simp only [basic_universal_map.comp_assoc, comp_of]
 end
@@ -143,14 +138,14 @@ def id (n : ℕ) : universal_map n n := of (basic_universal_map.id n)
 @[simp] lemma id_comp : comp (id _) f = f :=
 show comp (id _) f = add_monoid_hom.id _ f,
 begin
-  apply lift.ext; clear f, intro f,
+  congr' 1, clear f, ext1 f,
   simp only [id, comp_of, id_apply, basic_universal_map.id_comp]
 end
 
 @[simp] lemma comp_id : comp g (id _) = g :=
 show (@comp m m n).flip (id _) g = add_monoid_hom.id _ g,
 begin
-  apply lift.ext; clear g, intro g,
+  congr' 1, clear g, ext1 g,
   show comp (of g) (id _) = (of g),
   simp only [id, comp_of, id_apply, basic_universal_map.comp_id]
 end
@@ -169,8 +164,7 @@ lemma comp_double_double (g : universal_map m n) (f : universal_map l m) :
 show comp_hom (comp_hom (comp_hom.flip (@double l m)) ((@comp (l+l) (m+m) (n+n)))) (double) g f =
      comp_hom (comp_hom (@double l n)) (@comp l m n) g f,
 begin
-  congr' 1, apply lift.ext, clear f g, intro g,
-  ext1 f, apply lift.ext, clear f, intro f,
+  congr' 2, clear g f, ext g f : 2,
   show comp (double (of g)) (double (of f)) = double (comp (of g) (of f)),
   simp only [double_of, comp_of, basic_universal_map.comp],
   rw [matrix.reindex_mul, matrix.from_blocks_multiply],
@@ -233,7 +227,7 @@ lemma σ_add_comp_double : comp (σ_add n) (double f) = comp f (σ_add m) :=
 show add_monoid_hom.comp_hom ((@comp (m+m) (n+n) n) (σ_add _)) (double) f =
   (@comp (m+m) m n).flip (σ_add _) f,
 begin
-  apply lift.ext, clear f, intro f,
+  congr' 1, clear f, ext1 f,
   show comp (σ_add n) (double (of f)) = comp (of f) (σ_add m),
   dsimp only [double_of, σ_add],
   simp only [comp_of],
@@ -262,7 +256,7 @@ lemma σ_proj_comp_double : comp (σ_proj n) (double f) = comp f (σ_proj m) :=
 show add_monoid_hom.comp_hom ((@comp (m+m) (n+n) n) (σ_proj _)) (double) f =
   (@comp (m+m) m n).flip (σ_proj _) f,
 begin
-  apply lift.ext, clear f, intro f,
+  congr' 1, clear f, ext1 f,
   show comp (σ_proj n) (double (of f)) = comp (of f) (σ_proj m),
   dsimp only [double_of, σ_proj],
   simp only [add_monoid_hom.map_add, add_monoid_hom.add_apply, comp_of],

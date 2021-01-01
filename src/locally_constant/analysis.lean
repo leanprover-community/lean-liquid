@@ -151,7 +151,7 @@ protected def metric_space [metric_space Y] : metric_space (locally_constant X Y
 /-- The metric space on locally constant functions on a compact space, with sup distance. -/
 protected def normed_group {G : Type*} [normed_group G] : normed_group (locally_constant X G) :=
 { dist_eq := λ f g, show Sup _ = Sup _,
-    by simp only [normed_group.dist_eq, locally_constant.sub_apply],
+  by simp only [normed_group.dist_eq, locally_constant.sub_apply],
   .. locally_constant.has_norm, .. locally_constant.add_comm_group,
   .. locally_constant.metric_space }
 

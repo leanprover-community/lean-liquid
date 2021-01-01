@@ -27,18 +27,12 @@ instance [has_mul Y] : has_mul (locally_constant X Y) :=
 lemma mul_apply [has_mul Y] (f g : locally_constant X Y) (x : X) :
   (f * g) x = f x * g x := rfl
 
-instance [add_group Y] : has_sub (locally_constant X Y) :=
-{ sub := λ f g, ⟨f - g, f.is_locally_constant.sub g.is_locally_constant⟩ }
-
 @[to_additive]
-instance [group Y] : has_div (locally_constant X Y) :=
+instance [has_div Y] : has_div (locally_constant X Y) :=
 { div := λ f g, ⟨f / g, f.is_locally_constant.div g.is_locally_constant⟩ }
 
-lemma sub_apply [add_group Y] (f g : locally_constant X Y) (x : X) :
-  (f - g) x = f x - g x := rfl
-
 @[to_additive]
-lemma div_apply [group Y] (f g : locally_constant X Y) (x : X) :
+lemma div_apply [has_div Y] (f g : locally_constant X Y) (x : X) :
   (f / g) x = f x / g x := rfl
 
 @[to_additive]
@@ -64,7 +58,8 @@ instance [comm_monoid Y] : comm_monoid (locally_constant X Y) :=
 @[to_additive]
 instance [group Y] : group (locally_constant X Y) :=
 { mul_left_inv := by { intros, ext, simp only [mul_apply, inv_apply, one_apply, mul_left_inv] },
-  .. locally_constant.monoid, .. locally_constant.has_inv }
+  div_eq_mul_inv := by { intros, ext, simp only [mul_apply, inv_apply, div_apply, div_eq_mul_inv] },
+  .. locally_constant.monoid, .. locally_constant.has_inv, .. locally_constant.has_div }
 
 @[to_additive]
 instance [comm_group Y] : comm_group (locally_constant X Y) :=

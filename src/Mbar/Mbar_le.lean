@@ -19,8 +19,6 @@ universe u
 noncomputable theory
 open_locale big_operators
 
-open power_series
-
 variables {r' : ℝ} {S : Type u} [fintype S] {c c₁ c₂ c₃ : ℝ}
 
 namespace Mbar_le
@@ -393,6 +391,10 @@ section Tinv
 ### The action of T⁻¹
 -/
 
+/-
+TODO: deduplicate this, by using `Mbar.Tinv`.
+-/
+
 def Tinv_aux {R : Type*} [has_zero R] : (ℕ → R) → ℕ → R := λ F n, if n = 0 then 0 else F (n + 1)
 
 @[simp] lemma Tinv_aux_zero {R : Type*} [has_zero R] (f : ℕ → R) : Tinv_aux f 0 = 0 := rfl
@@ -428,7 +430,7 @@ def Tinv {r : ℝ} {S : Type u} [fintype S] {c : ℝ} [h0r : fact (0 < r)] (F : 
     refine le_trans _ F.sum_tsum_le,
     apply finset.sum_le_sum,
     rintro s -,
-    rw ← tsum_mul_right _ (Tinv_aux_summable F s),
+    rw ← tsum_mul_right,
     conv_rhs { rw [← @sum_add_tsum_nat_add ℝ _ _ _ _ _ 1 (F.summable s)] },
     refine le_add_of_nonneg_of_le (finset.sum_nonneg (λ _ _, abs_nonneg _)) _,
     apply tsum_le_tsum,
@@ -436,7 +438,7 @@ def Tinv {r : ℝ} {S : Type u} [fintype S] {c : ℝ} [h0r : fact (0 < r)] (F : 
       { simp [abs_nonneg] },
       { simp only [Tinv_aux_succ, real.norm_eq_abs, abs_mul, pow_add, mul_assoc,
           pow_one, abs_abs, abs_of_pos h0r] } },
-    { rw ← summable_mul_right_iff (ne_of_gt h0r), exact Tinv_aux_summable F s },
+    { exact (Tinv_aux_summable F s).mul_right _ },
     { exact (summable_nat_add_iff 1).mpr (F.summable s) }
   end }
 

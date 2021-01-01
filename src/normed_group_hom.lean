@@ -145,7 +145,7 @@ instance : add_comm_group (normed_group_hom V₁ V₂) :=
 by refine_struct
 { .. normed_group_hom.has_add, .. normed_group_hom.has_zero,
   .. normed_group_hom.has_neg, ..normed_group_hom.has_sub };
-{ intros, ext, simp [add_assoc, add_comm, add_left_comm] }
+{ intros, ext, simp [add_assoc, add_comm, add_left_comm, sub_eq_add_neg] }
 
 @[simp] lemma comp_zero (f : normed_group_hom V₂ V₃) : f.comp (0 : normed_group_hom V₁ V₂) = 0 :=
 by { ext, exact f.map_zero' }
