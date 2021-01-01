@@ -1,4 +1,7 @@
+import data.fintype.card
+
 import Mbar.basic
+
 /-!
 
 ## $\overline{\mathcal{M}}_{r'}(S)$
@@ -142,11 +145,6 @@ have fact (c * (n+1:ℕ) ≤ c'),
   by simpa only [int.cast_neg_succ_of_nat, abs_neg, ← nat.cast_add_one, nat.abs_cast] using h,
 by exactI Mbar_le.nsmul (n+1) c' F.neg
 
-lemma sum_fin_eq {M : ℕ} (f : ℕ → ℝ) : ∑ i in finset.range M, f i = ∑ (i : fin M), f i :=
-@finset.sum_bij' ℕ ℝ (fin M) _ (finset.range M) finset.univ f (λ i, f i)
-  (λ a ha, ⟨a, finset.mem_range.mp ha⟩) (λ a ha, finset.mem_univ _) (λ a ha, rfl)
-  (λ a _, a) (λ a ha, finset.mem_range.mpr a.2) (λ a ha, rfl) (λ a ha, by simp)
-
 namespace Mbar_le
 
 /-- The truncation map fro Mbar_le to Mbar_bdd -/
@@ -158,7 +156,7 @@ namespace Mbar_le
     refine le_trans _ F.sum_tsum_le,
     apply finset.sum_le_sum,
     rintros (s : S) -,
-    rw ← sum_fin_eq (λ i, abs ((F s i : ℝ) * r' ^i)),
+    rw fin.sum_univ_eq_sum_range (λ i, abs ((F s i : ℝ) * r' ^i)) (M+1),
     exact sum_le_tsum _ (λ _ _, abs_nonneg _) (F.summable s),
   end }
 
@@ -202,9 +200,9 @@ end
 lemma mk_seq_sum_range_eq (T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M)
   (compat : ∀ (M N : ℕ) (h : M ≤ N), Mbar_bdd.transition r' h (T N) = T M) (s : S) (n) :
   ∑ i in finset.range (n+1), abs ((mk_seq T s i : ℝ) * r'^i) =
-  ∑ i : fin (n+1), abs (((T n).1 s i : ℝ) * r'^i.1) :=
+  ∑ i : fin (n+1), abs (((T n).1 s i : ℝ) * r'^(i:ℕ)) :=
 begin
-  rw sum_fin_eq,
+  rw ← fin.sum_univ_eq_sum_range,
   congr',
   ext ⟨i, hi⟩,
   congr',
