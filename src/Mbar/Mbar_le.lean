@@ -1,5 +1,7 @@
 import data.fintype.card
 
+import for_mathlib.normed_group
+
 import Mbar.basic
 
 /-!
@@ -72,76 +74,53 @@ variables (c₃)
 -- move this
 instance fact_le_refl : fact (c ≤ c) := le_rfl
 
-noncomputable def Mbar_le.add [h : fact (c₁ + c₂ ≤ c₃)] :
-  Mbar_le r' S c₁ → Mbar_le r' S c₂ → Mbar_le r' S c₃ :=
-λ F G, Mbar_le.mk' (F + G)
-begin
-  have H : _ := _,
-  refine ⟨λ s, by simp [F.coeff_zero s, G.coeff_zero s], H, _⟩,
-  { refine le_trans _ ((add_le_add F.sum_tsum_le G.sum_tsum_le).trans h),
-    rw ← finset.sum_add_distrib,
-    refine finset.sum_le_sum _,
-    rintro s -,
-    rw ← tsum_add (F.summable s) (G.summable s),
-    refine tsum_le_tsum _ (H s) (summable.add (F.summable s) (G.summable s)),
-    intro n,
-    convert abs_add _ _,
-    simp [add_mul] },
-  { intro s,
-    have hFs := F.summable, have hGs := G.summable,
-    simp_rw summable_abs_iff at hFs hGs ⊢,
-    convert summable.add (hFs s) (hGs s),
-    ext n,
-    simp [add_mul] }
-end
+def Mbar_le.add [fact (0 < r')] [h : fact (c₁ + c₂ ≤ c₃)]
+  (F : Mbar_le r' S c₁) (G : Mbar_le r' S c₂) :
+  Mbar_le r' S c₃ :=
+{ to_fun := F.to_Mbar + G.to_Mbar,
+  sum_tsum_le' := calc ∥F.to_Mbar + G.to_Mbar∥
+        ≤ ∥F.to_Mbar∥ + ∥G.to_Mbar∥ : norm_add_le _ _
+    ... ≤ c₁ + c₂ : (add_le_add F.sum_tsum_le G.sum_tsum_le)
+    ... ≤ c₃ : h,
+  .. (F.to_Mbar + G.to_Mbar) }
 
-def Mbar_le.add' [fact (c₁ + c₂ ≤ c₃)] : Mbar_le r' S c₁ × Mbar_le r' S c₂ → Mbar_le r' S c₃ :=
+def Mbar_le.add' [fact (0 < r')] [fact (c₁ + c₂ ≤ c₃)] :
+  Mbar_le r' S c₁ × Mbar_le r' S c₂ → Mbar_le r' S c₃ :=
 λ x, Mbar_le.add c₃ x.1 x.2
 
-noncomputable def Mbar_le.neg (F : Mbar_le r' S c) : Mbar_le r' S c :=
-Mbar_le.mk' (-F)
-begin
-  refine ⟨λ s, by simp [F.coeff_zero s], _, _⟩,
-  { intro s, convert F.summable s using 1,
-    funext, simp only [neg_mul_eq_neg_mul_symm, pi.neg_apply, abs_neg, int.cast_neg], },
-  { convert F.sum_tsum_le,
-    funext, simp only [neg_mul_eq_neg_mul_symm, pi.neg_apply, abs_neg, int.cast_neg], }
-end
+def Mbar_le.neg [fact (0 < r')] (F : Mbar_le r' S c) : Mbar_le r' S c :=
+{ to_fun := -F.to_Mbar,
+  sum_tsum_le' := show ∥-F.to_Mbar∥ ≤ c, by simpa only [norm_neg] using F.sum_tsum_le,
+  .. -F.to_Mbar }
 
 -- move this
 -- instance fix_my_name4 (n : ℕ) [fact (0 ≤ c)] : fact (0 ≤ c * n) := sorry
 
-noncomputable def Mbar_le.nsmul :
-  Π (n : ℕ) (c' : ℝ) [fact (0 ≤ c')] [fact (c * n ≤ c')], Mbar_le r' S c → Mbar_le r' S c'
-| 0     c' h0 h := λ F, by exactI 0
-| (n+1) c' h0 h := λ F,
-have fact (0 ≤ c' - c),
-begin
-  simp only [sub_nonneg, fact] at h ⊢,
-  contrapose! h,
-  have : 0 < c := lt_of_le_of_lt h0 h,
-  calc c' < c * 1 : by rwa mul_one
-  ... ≤ c * (n + 1 : ℕ) : (mul_le_mul_left this).mpr _,
-  simp only [nat.cast_add, nat.cast_one, le_add_iff_nonneg_left, nat.cast_nonneg],
-end,
-have fact (c * n ≤ c' - c),
-  by { rw [le_sub_iff_add_le], simpa only [mul_add, mul_one, nat.cast_add, nat.cast_one] using h },
-have fact (c' - c + c ≤ c'), by simpa only [sub_add_cancel] using le_rfl,
-by exactI Mbar_le.add _ (Mbar_le.nsmul n (c' - c) F) F
+@[simps]
+def Mbar_le.nsmul [fact (0 < r')] (c' : ℝ) (n : ℕ) [fact (0 ≤ c')] [fact (c * n ≤ c')]
+  (F : Mbar_le r' S c) : Mbar_le r' S c' :=
+{ to_fun := (n •ℕ F.to_Mbar : Mbar r' S),
+  sum_tsum_le' :=
+  calc ∥(n •ℕ F.to_Mbar : Mbar r' S)∥
+      ≤ n * ∥F.to_Mbar∥ : norm_nsmul_le _ _
+  ... ≤ n * c : mul_le_mul le_rfl F.sum_tsum_le (norm_nonneg _) (nat.cast_nonneg _)
+  ... ≤ c' : by rwa mul_comm,
+  .. (n •ℕ F.to_Mbar : Mbar r' S) }
 
 -- move this
 -- @[simp] lemma int.abs_neg_succ_of_nat (n : ℕ) :
 --   abs (-[1+n]) = n+1 :=
 
-noncomputable def Mbar_le.gsmul :
-  Π (n : ℤ) (c' : ℝ) [fact (0 ≤ c')] [fact (c * abs n ≤ c')], Mbar_le r' S c → Mbar_le r' S c'
-| (n:ℕ)  c' h0 h := λ F,
-have fact (c * n ≤ c'), by simpa only [int.cast_coe_nat, nat.abs_cast] using h,
-by exactI Mbar_le.nsmul n c' F
-| -[1+n] c' h0 h := λ F,
-have fact (c * (n+1:ℕ) ≤ c'),
-  by simpa only [int.cast_neg_succ_of_nat, abs_neg, ← nat.cast_add_one, nat.abs_cast] using h,
-by exactI Mbar_le.nsmul (n+1) c' F.neg
+@[simps]
+def Mbar_le.gsmul [fact (0 < r')] (c' : ℝ) (n : ℤ) [fact (0 ≤ c')] [fact (c * abs n ≤ c')]
+  (F : Mbar_le r' S c) : Mbar_le r' S c' :=
+{ to_fun := (n •ℤ F.to_Mbar : Mbar r' S),
+  sum_tsum_le' :=
+  calc ∥(n •ℤ F.to_Mbar : Mbar r' S)∥
+      ≤ abs n * ∥F.to_Mbar∥ : norm_gsmul_le _ _
+  ... ≤ abs n * c : mul_le_mul le_rfl F.sum_tsum_le (norm_nonneg _) (abs_nonneg _)
+  ... ≤ c' : by rwa mul_comm,
+  .. (n •ℤ F.to_Mbar : Mbar r' S) }
 
 namespace Mbar_le
 
@@ -364,7 +343,7 @@ end
 lemma continuous_truncate {M} : continuous (@truncate r' S _ c M) :=
 (continuous_iff id).mp continuous_id _
 
-lemma continuous_add' :
+lemma continuous_add' [fact (0 < r')] :
   continuous (Mbar_le.add' (c₁ + c₂) : Mbar_le r' S c₁ × Mbar_le r' S c₂ → Mbar_le r' S (c₁ + c₂)) :=
 begin
   rw continuous_iff,
