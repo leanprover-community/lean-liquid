@@ -4,6 +4,8 @@ import normed_group_hom
 
 noncomputable theory
 
+open_locale nnreal
+
 section
 
 variables {V : Type*} [normed_group V]
@@ -37,6 +39,9 @@ def nsmul (n : ℕ) : normed_group_hom V V :=
   map_add' := λ _ _, nsmul_add _ _ _,
   bound' := ⟨n, λ v, norm_nsmul_le _ _⟩ }
 
+lemma nsmul_bound_by (n : ℕ) : (nsmul n : normed_group_hom V V).bound_by n :=
+λ v, by simpa only [nnreal.coe_nat_cast] using norm_nsmul_le n v
+
 @[simps]
 def gsmul (n : ℤ) : normed_group_hom V V :=
 { to_fun := λ v, n •ℤ v,
@@ -44,57 +49,72 @@ def gsmul (n : ℤ) : normed_group_hom V V :=
   map_add' := λ _ _, gsmul_add _ _ _,
   bound' := ⟨abs n, λ v, norm_gsmul_le _ _⟩ }
 
+lemma gsmul_bound_by (n : ℤ) : (gsmul n : normed_group_hom V V).bound_by (real.nnabs n) :=
+norm_gsmul_le _
+
 end normed_group
 
 namespace normed_group_hom
 
 open_locale big_operators nnreal
 
-@[simps]
-def mk_to_pi {ι : Type} [fintype ι] (W : ι → Type*) [Π i, normed_group (W i)]
-  (f : Π i, normed_group_hom V (W i)) : normed_group_hom V (Π i, W i) :=
+def mk_to_pi' {ι : Type} [fintype ι] (W : ι → Type*) [Π i, normed_group (W i)]
+  (f : Π i, normed_group_hom V (W i)) (C : ι → ℝ≥0) (hC : ∀ i, (f i).bound_by (C i)) :
+  normed_group_hom V (Π i, W i) :=
+mk'
 { to_fun := λ v i, f i v,
   map_zero' := by { simp only [map_zero], refl },
-  map_add' := by { intros, simp only [map_add], refl },
-  bound' :=
-  begin
-    have := λ i, (f i).bound,
-    choose C hC using this,
-    let C' : ι → ℝ≥0 := λ i, ⟨C i, (hC i).1.le⟩,
-    let C₀ : ℝ≥0 := finset.sup finset.univ C',
-    use C₀,
-    intro v,
-    rw pi_norm_le_iff (mul_nonneg C₀.coe_nonneg (norm_nonneg _)),
-    intro i,
-    calc ∥f i v∥ ≤ C' i * ∥v∥ : (hC i).2 v
-    ... ≤ C₀ * ∥v∥ : mul_le_mul _ le_rfl (norm_nonneg _) C₀.coe_nonneg,
-    rw nnreal.coe_le_coe,
-    apply finset.le_sup (finset.mem_univ _)
-  end }
+  map_add' := by { intros, simp only [map_add], refl } }
+(finset.sup finset.univ C)
+begin
+  intro v,
+  rw pi_norm_le_iff (mul_nonneg (nnreal.coe_nonneg _) (norm_nonneg _)),
+  intro i,
+  calc ∥f i v∥ ≤ C i * ∥v∥ : (hC i) v
+  ... ≤ _ * ∥v∥ : mul_le_mul _ le_rfl (norm_nonneg _) (nnreal.coe_nonneg _),
+  rw nnreal.coe_le_coe,
+  apply finset.le_sup (finset.mem_univ _)
+end
 
-@[simps]
+lemma mk_to_pi'_bound_by {ι : Type} [fintype ι] (W : ι → Type*) [Π i, normed_group (W i)]
+  (f : Π i, normed_group_hom V (W i)) (C : ι → ℝ≥0) (hC : ∀ i, (f i).bound_by (C i)) :
+  (mk_to_pi' _ f C hC).bound_by (finset.sup finset.univ C) :=
+mk'_bound_by _ _ _
+
+def mk_to_pi {ι : Type} [fintype ι] (W : ι → Type*) [Π i, normed_group (W i)]
+  (f : Π i, normed_group_hom V (W i)) : normed_group_hom V (Π i, W i) :=
+mk_to_pi' _ f (λ i, classical.some (f i).bound) $ λ i, (classical.some_spec (f i).bound).2
+
+def mk_from_pi' {ι : Type} [fintype ι] (V : ι → Type*) [Π i, normed_group (V i)]
+  (W : Type*) [normed_group W] (f : Π i, normed_group_hom (V i) W)
+  (C : ι → ℝ≥0) (hC : ∀ i, (f i).bound_by (C i)) :
+  normed_group_hom (Π i, V i) W :=
+mk'
+{ to_fun := λ v, ∑ i, f i (v i),
+  map_zero' := by { simp only [pi.zero_apply, map_zero, finset.sum_const_zero] },
+  map_add' := by { intros, simp only [pi.add_apply, map_add, finset.sum_add_distrib] } }
+(∑ i, C i)
+begin
+  intro v,
+  calc ∥∑ i, f i (v i)∥ ≤ ∑ i, ∥f i (v i)∥ : norm_sum_le _ _
+  ... ≤ ∑ i, C i * ∥v∥ : finset.sum_le_sum _ -- proven below
+  ... = (∑ i, C i) * ∥v∥ : by rw finset.sum_mul
+  ... = ↑(∑ i, C i) * ∥v∥ : by rw nnreal.coe_sum,
+  rintro i -,
+  calc ∥f i (v i)∥ ≤ C i * ∥v i∥ : (hC i) _
+  ... ≤ C i * ∥v∥ : mul_le_mul le_rfl (norm_le_pi_norm _ _) (norm_nonneg _) (C i).coe_nonneg
+end
+
+def mk_from_pi'_bound_by {ι : Type} [fintype ι] (V : ι → Type*) [Π i, normed_group (V i)]
+  (W : Type*) [normed_group W] (f : Π i, normed_group_hom (V i) W)
+  (C : ι → ℝ≥0) (hC : ∀ i, (f i).bound_by (C i)) :
+  (mk_from_pi' _ _ f C hC).bound_by (∑ i, C i) :=
+mk'_bound_by _ _ _
+
 def mk_from_pi {ι : Type} [fintype ι] (V : ι → Type*) [Π i, normed_group (V i)]
   (W : Type*) [normed_group W] (f : Π i, normed_group_hom (V i) W) :
   normed_group_hom (Π i, V i) W :=
-{ to_fun := λ v, ∑ i, f i (v i),
-  map_zero' := by { simp only [pi.zero_apply, map_zero, finset.sum_const_zero] },
-  map_add' := by { intros, simp only [pi.add_apply, map_add, finset.sum_add_distrib] },
-  bound' :=
-  begin
-    have := λ i, (f i).bound,
-    choose C hC using this,
-    let C' : ι → ℝ≥0 := λ i, ⟨C i, (hC i).1.le⟩,
-    let C₀ : ℝ≥0 := ∑ i, C' i,
-    use C₀,
-    intro v,
-    calc ∥∑ i, f i (v i)∥ ≤ ∑ i, ∥f i (v i)∥ : norm_sum_le _ _
-    ... ≤ ∑ i, C' i * ∥v∥ : finset.sum_le_sum _ -- proven below
-    ... = (∑ i, C' i) * ∥v∥ : finset.sum_mul.symm
-    ... = C₀ * ∥v∥ : by { congr' 1, rw nnreal.coe_sum },
-    rintro i -,
-    calc ∥f i (v i)∥ ≤ C' i * ∥v i∥ : (hC i).2 _
-    ... ≤ C' i * ∥v∥ : mul_le_mul le_rfl (norm_le_pi_norm _ _) (norm_nonneg _) (hC i).1.le
-  end }
+mk_from_pi' _ _ f (λ i, classical.some (f i).bound) $ λ i, (classical.some_spec (f i).bound).2
 
 end normed_group_hom
 

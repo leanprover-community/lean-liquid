@@ -104,7 +104,7 @@ def Completion.lift {V W : NormedGroup} [complete_space W] (f : V ⟶ W) : Compl
       refine continuous.mul continuous_const continuous_norm },
     { intros a,
       rw completion.extension_coe,
-      { change _ ≤ c * ∥ incl _ ∥,
+      { change _ ≤ ↑c * ∥incl _∥,
         simpa using h a },
       { exact normed_group_hom.uniform_continuous _ }}
   end }

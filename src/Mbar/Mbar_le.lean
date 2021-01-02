@@ -19,7 +19,7 @@ We model Tℤ[[T]] as functions ℕ → ℤ which vanish at 0.
 universe u
 
 noncomputable theory
-open_locale big_operators
+open_locale big_operators nnreal
 
 variables {r' : ℝ} {S : Type u} [fintype S] {c c₁ c₂ c₃ : ℝ}
 
@@ -535,5 +535,18 @@ begin
   intros s i, congr' 1,
   rw hφ (truncate N x)
 end
+
+def hom_of_normed_group_hom {C : ℝ≥0} (c₁ c₂ : ℝ)
+  [fact (0 < r')] [hC : fact (0 ≤ C)] [hc : fact (↑C * c₁ ≤ c₂)]
+  (f : normed_group_hom (Mbar r' S) (Mbar r' S)) (h : f.bound_by C) (F : Mbar_le r' S c₁) :
+  Mbar_le r' S c₂ :=
+{ to_fun := λ s i, f F.to_Mbar s i,
+  coeff_zero' := Mbar.coeff_zero _,
+  summable' := Mbar.summable _,
+  sum_tsum_le' :=
+    calc ∥f F.to_Mbar∥
+        ≤ C * ∥F.to_Mbar∥ : h _
+    ... ≤ C * c₁ : mul_le_mul le_rfl F.sum_tsum_le (norm_nonneg _) hC
+    ... ≤ c₂ : hc }
 
 end Mbar_le

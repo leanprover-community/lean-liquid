@@ -1,7 +1,6 @@
 import system_of_complexes
-import breen_deligne
 import locally_constant.Vhat
-import Mbar.Mbar_le
+import Mbar.breen_deligne
 
 import for_mathlib.CompHaus
 import for_mathlib.continuous_map
@@ -241,22 +240,17 @@ variables {l m n : ℕ}
 
 namespace basic_universal_map
 
-/-- Addition goes from `Mbar r' S c` to `Mbar r' S c'` for suitable `c'`.
-This predicate says what *suitable* means for basic universal maps.
-See Lemma 9.11 of [Analytic]. -/
-def suitable (f : basic_universal_map m n) (c c' : ℝ) : Prop := sorry
-
-def eval_Mbar (f : basic_universal_map m n) [fact (f.suitable c c')] :
+def eval_Mbar_Tinv (f : basic_universal_map m n) [fact (f.suitable c c')] :
   (LCC_Mbar_pow_Tinv V S r r' c n) ⟶ (LCC_Mbar_pow_Tinv V S r r' c' m) :=
 sorry
 
-lemma eval_Mbar_zero [fact ((0 : basic_universal_map m n).suitable c c')] :
-  (0 : basic_universal_map m n).eval_Mbar V S r r' c c' = 0 :=
+lemma eval_Mbar_Tinv_zero [fact ((0 : basic_universal_map m n).suitable c c')] :
+  (0 : basic_universal_map m n).eval_Mbar_Tinv V S r r' c c' = 0 :=
 sorry
 
-lemma eval_Mbar_comp (f : basic_universal_map m n) (g : basic_universal_map l m)
+lemma eval_Mbar_Tinv_comp (f : basic_universal_map m n) (g : basic_universal_map l m)
   [fact (f.suitable c₁ c₂)] [fact (g.suitable c₂ c₃)] [fact ((f.comp g).suitable c₁ c₃)] :
-  (f.comp g).eval_Mbar V S r r' c₁ c₃ = f.eval_Mbar V S r r' c₁ c₂ ≫ g.eval_Mbar V S r r' c₂ c₃ :=
+  (f.comp g).eval_Mbar_Tinv V S r r' c₁ c₃ = f.eval_Mbar_Tinv V S r r' c₁ c₂ ≫ g.eval_Mbar_Tinv V S r r' c₂ c₃ :=
 sorry
 
 end basic_universal_map
@@ -268,25 +262,25 @@ This predicate says what *suitable* means for universal maps.
 See Lemma 9.11 of [Analytic]. -/
 def suitable (f : universal_map m n) (c c' : ℝ) : Prop := sorry
 
-constant eval_Mbar {m n : ℕ} (f : universal_map m n) [fact (f.suitable c c')] :
+constant eval_Mbar_Tinv {m n : ℕ} (f : universal_map m n) [fact (f.suitable c c')] :
   (LCC_Mbar_pow_Tinv V S r r' c n) ⟶ (LCC_Mbar_pow_Tinv V S r r' c' m)
   --  := sorry
 
-lemma eval_Mbar_zero [fact ((0 : universal_map m n).suitable c c')] :
-  (0 : universal_map m n).eval_Mbar V S r r' c c' = 0 :=
+lemma eval_Mbar_Tinv_zero [fact ((0 : universal_map m n).suitable c c')] :
+  (0 : universal_map m n).eval_Mbar_Tinv V S r r' c c' = 0 :=
 sorry
 
-lemma eval_Mbar_comp (f : universal_map m n) (g : universal_map l m)
+lemma eval_Mbar_Tinv_comp (f : universal_map m n) (g : universal_map l m)
   [fact (f.suitable c₁ c₂)] [fact (g.suitable c₂ c₃)]
   [fact ((universal_map.comp f g).suitable c₁ c₃)] :
-  (universal_map.comp f g).eval_Mbar V S r r' c₁ c₃ =
-    f.eval_Mbar V S r r' c₁ c₂ ≫ g.eval_Mbar V S r r' c₂ c₃ :=
+  (universal_map.comp f g).eval_Mbar_Tinv V S r r' c₁ c₃ =
+    f.eval_Mbar_Tinv V S r r' c₁ c₂ ≫ g.eval_Mbar_Tinv V S r r' c₂ c₃ :=
 sorry
 
-lemma eval_Mbar_comp_res (f : universal_map m n)
+lemma eval_Mbar_Tinv_comp_res (f : universal_map m n)
   [fact (f.suitable c₁ c₂)] [fact (f.suitable c₃ c₄)] [fact (c₃ ≤ c₁)] [fact (c₄ ≤ c₂)] :
-  f.eval_Mbar V S r r' c₁ c₂ ≫ LCC_Mbar_pow_Tinv.res V S r r' c₄ c₂ _ =
-  LCC_Mbar_pow_Tinv.res V S r r' c₃ c₁ _ ≫ f.eval_Mbar V S r r' c₃ c₄ :=
+  f.eval_Mbar_Tinv V S r r' c₁ c₂ ≫ LCC_Mbar_pow_Tinv.res V S r r' c₄ c₂ _ =
+  LCC_Mbar_pow_Tinv.res V S r r' c₃ c₁ _ ≫ f.eval_Mbar_Tinv V S r r' c₃ c₄ :=
 sorry
 
 instance suitable_of_mul_left
@@ -329,14 +323,14 @@ instance fact_mul_nonneg : fact (0 ≤ c₁ * c₂) := mul_nonneg ‹_› ‹_�
 def Mbar_complex (BD : breen_deligne.package) (c' : ℕ → ℝ) [fact (BD.suitable c')] :
   cochain_complex NormedGroup :=
 { X := int.extend_from_nat 0 $ λ i, LCC_Mbar_pow_Tinv V S r r' (c * c' i) (BD.rank i),
-  d := int.extend_from_nat 0 $ λ i, (BD.map i).eval_Mbar V S r r' (c * c' i) (c * c' (i+1)),
+  d := int.extend_from_nat 0 $ λ i, (BD.map i).eval_Mbar_Tinv V S r r' (c * c' i) (c * c' (i+1)),
   d_squared' :=
   begin
     ext1 ⟨i⟩,
     { dsimp,
       simp only [pi.comp_apply, pi.zero_apply],
-      erw ← universal_map.eval_Mbar_comp V S r r' _ (c * c' (i+1)) _ (BD.map i) (BD.map (i+1)),
-      rw [BD.map_comp_map, universal_map.eval_Mbar_zero],
+      erw ← universal_map.eval_Mbar_Tinv_comp V S r r' _ (c * c' (i+1)) _ (BD.map i) (BD.map (i+1)),
+      rw [BD.map_comp_map, universal_map.eval_Mbar_Tinv_zero],
       apply_instance },
     { show 0 ≫ _ = 0, rw [zero_comp] }
   end }
@@ -360,7 +354,7 @@ def Mbar_system (BD : breen_deligne.package) (c' : ℕ → ℝ) [fact (BD.suitab
     begin
       ext1 ⟨i⟩,
       { dsimp [int.extend_from_nat],
-        apply universal_map.eval_Mbar_comp_res },
+        apply universal_map.eval_Mbar_Tinv_comp_res },
       { dsimp [int.extend_from_nat],
         simp only [Mbar_complex.d_neg_succ_of_nat, zero_comp] }
     end },

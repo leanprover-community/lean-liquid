@@ -1,5 +1,7 @@
 import analysis.normed_space.basic
 
+open_locale nnreal
+
 set_option old_structure_cmd true
 
 /-- A morphism of normed abelian groups is a bounded group homomorphism. -/
@@ -30,13 +32,22 @@ instance : has_coe_to_fun (normed_group_hom V₁ V₂) := ⟨_, normed_group_hom
 
 @[simp] lemma map_neg (x) : f (-x) = -(f x) := f.to_add_monoid_hom.map_neg _
 
-def bound_by (C) : Prop := ∀ x, ∥f x∥ ≤ C * ∥x∥
+def mk' (f : V₁ →+ V₂) (C : ℝ≥0) (hC : ∀ x, ∥f x∥ ≤ C * ∥x∥) : normed_group_hom V₁ V₂ :=
+{ bound' := ⟨C, hC⟩ .. f}
+
+@[simp] lemma coe_mk' (f : V₁ →+ V₂) (C) (hC) : ⇑(mk' f C hC) = f := rfl
+
+def bound_by (C : ℝ≥0) : Prop := ∀ x, ∥f x∥ ≤ C * ∥x∥
+
+lemma mk'_bound_by (f : V₁ →+ V₂) (C) (hC) : (mk' f C hC).bound_by C := hC
 
 lemma bound : ∃ C, 0 < C ∧ f.bound_by C :=
 begin
   obtain ⟨C, hC⟩ := f.bound',
-  use [max C 1],
-  simp only [lt_max_iff, zero_lt_one, or_true, true_and],
+  let C' : ℝ≥0 := ⟨max C 1, le_max_right_of_le zero_le_one⟩,
+  use C',
+  simp only [C', ← nnreal.coe_lt_coe, subtype.coe_mk, nnreal.coe_zero,
+    lt_max_iff, zero_lt_one, or_true, true_and],
   intro v,
   calc ∥f v∥
       ≤ C * ∥v∥ : hC v
@@ -44,11 +55,11 @@ begin
   exact zero_le_one.trans (le_max_right _ _)
 end
 
-lemma lipschitz_of_bound_by (C : ℝ) (h : f.bound_by C) :
+lemma lipschitz_of_bound_by (C : ℝ≥0) (h : f.bound_by C) :
   lipschitz_with (nnreal.of_real C) f :=
 lipschitz_with.of_dist_le' $ λ x y, by simpa only [dist_eq_norm, f.map_sub] using h (x - y)
 
-theorem antilipschitz_of_bound_by {K : nnreal} (h : ∀ x, ∥x∥ ≤ K * ∥f x∥) :
+theorem antilipschitz_of_bound_by {K : ℝ≥0} (h : ∀ x, ∥x∥ ≤ K * ∥f x∥) :
   antilipschitz_with K f :=
 antilipschitz_with.of_le_mul_dist $
 λ x y, by simpa only [dist_eq_norm, f.map_sub] using h (x - y)
@@ -204,11 +215,7 @@ by { erw f.to_add_monoid_hom.mem_ker, refl }
 { to_fun := λ v, ⟨f v, by { erw g.mem_ker, show (g.comp f) v = 0, rw h, refl }⟩,
   map_zero' := by { simp only [map_zero], refl },
   map_add' := λ v w, by { simp only [map_add], refl },
-  bound' :=
-  begin
-    obtain ⟨C, C_pos, hC⟩ := f.bound,
-    exact ⟨C, hC⟩
-  end }
+  bound' := f.bound' }
 
 @[simp] lemma ker.incl_comp_lift (h : g.comp f = 0) :
   (ker.incl g).comp (ker.lift f g h) = f :=
