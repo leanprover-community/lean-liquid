@@ -159,7 +159,29 @@ begin
     rintro s -,
     apply tsum_le_of_sum_range_le,
     { intros, exact abs_nonneg _ },
-    { sorry } }
+    { intro n,
+      rw finset.sum_fin_eq_sum_range,
+      by_cases hn : n ≤ M + 1,
+      { rw ← finset.sum_range_add_sum_Ico _ hn,
+        refine le_trans (le_of_eq _) (le_add_of_nonneg_right _),
+        { apply finset.sum_congr rfl,
+          intros i hi,
+          rw finset.mem_range at hi,
+          rw [dif_pos (lt_of_lt_of_le hi hn), dif_pos (lt_of_lt_of_le hi hn)], refl },
+        { apply finset.sum_nonneg,
+          intros, split_ifs, { exact abs_nonneg _ }, { refl } } },
+      { push_neg at hn,
+        rw ← finset.sum_range_add_sum_Ico _ hn.le,
+        apply le_of_eq,
+        convert add_zero _,
+        { apply finset.sum_eq_zero,
+          rintro i hi,
+          rw finset.Ico.mem at hi,
+          rw dif_neg,
+          { simp only [int.cast_zero, zero_mul, abs_zero] },
+          { push_neg, exact hi.1 } },
+        { ext, split_ifs, { refl },
+          { simp only [int.cast_zero, zero_mul, abs_zero] } } } } }
 end
 
 -- /-- The truncation maps commute with the transition maps. -/
@@ -480,7 +502,7 @@ begin
   exact continuous_bot.comp continuous_truncate
 end
 
-lemma continuous_foobar [fact (0 < r')] [fact (0 ≤ c₁)] [fact (0 ≤ c₂)]
+lemma continuous_of_normed_group_hom [fact (0 < r')] [fact (0 ≤ c₁)] [fact (0 ≤ c₂)]
   (f : normed_group_hom (Mbar r' S) (Mbar r' S))
   (g : Mbar_le r' S c₁ → Mbar_le r' S c₂)
   (h : ∀ x, (g x).to_Mbar = f x.to_Mbar)
