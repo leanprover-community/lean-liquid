@@ -63,6 +63,9 @@ instance [h : fact (0 ≤ c)] : has_zero (Mbar_le r' S c) :=
     summable' := λ s, by simpa using summable_zero,
     sum_tsum_le' := by simpa using h } }
 
+lemma to_Mbar_injective : function.injective (Mbar_le.to_Mbar : Mbar_le r' S c → Mbar r' S) :=
+by { intros x y h, cases x, cases y, congr, exact congr_arg Mbar.to_fun h }
+
 end Mbar_le
 
 -- lemma abs_mul_pow_pos {x r : ℝ} (hr : 0 < r) {n : ℕ} :
@@ -136,6 +139,28 @@ namespace Mbar_le
     rw fin.sum_univ_eq_sum_range (λ i, abs ((F s i : ℝ) * r' ^i)) (M+1),
     exact sum_le_tsum _ (λ _ _, abs_nonneg _) (F.summable s),
   end }
+
+lemma truncate_surjective (M : ℕ) :
+  function.surjective (truncate M : Mbar_le r' S c → Mbar_bdd r' ⟨S⟩ c M) :=
+begin
+  intro x,
+  let F : Mbar_le r' S c :=
+  { to_fun := λ s n, if h : n < M + 1 then x s ⟨n, h⟩ else 0, .. },
+  { use F, ext s i, simp only [coe_mk, truncate_to_fun, fin.eta],
+    rw dif_pos, exact i.property },
+  { intro s, rw dif_pos (nat.zero_lt_succ _), exact x.coeff_zero s },
+  { intro s,
+    apply @summable_of_ne_finset_zero _ _ _ _ _ (finset.range (M+1)),
+    intros i hi,
+    rw finset.mem_range at hi,
+    simp only [hi, int.cast_zero, zero_mul, abs_zero, dif_neg, not_false_iff] },
+  { apply le_trans _ x.sum_le,
+    apply finset.sum_le_sum,
+    rintro s -,
+    apply tsum_le_of_sum_range_le,
+    { intros, exact abs_nonneg _ },
+    { sorry } }
+end
 
 -- /-- The truncation maps commute with the transition maps. -/
 -- lemma truncate_transition {hr : 0 < r'} {M N : ℕ} (h : M ≤ N) (x : Mbar_le r' S c) :
@@ -453,6 +478,40 @@ begin
   intro M,
   simp only [function.comp, truncate_cast_le],
   exact continuous_bot.comp continuous_truncate
+end
+
+lemma continuous_foobar [fact (0 < r')] [fact (0 ≤ c₁)] [fact (0 ≤ c₂)]
+  (f : normed_group_hom (Mbar r' S) (Mbar r' S))
+  (g : Mbar_le r' S c₁ → Mbar_le r' S c₂)
+  (h : ∀ x, (g x).to_Mbar = f x.to_Mbar)
+  (H : ∀ M, ∃ N, ∀ (F : Mbar r' S),
+    (∀ s i, i < N + 1 → F s i = 0) → (∀ s i, i < M + 1 → f F s i = 0)) :
+  continuous g :=
+begin
+  rw continuous_iff,
+  intros M,
+  rcases H M with ⟨N, hN⟩,
+  let φ : Mbar_bdd r' ⟨S⟩ c₁ N → Mbar_le r' S c₁ :=
+    classical.some (truncate_surjective N).has_right_inverse,
+  have hφ : function.right_inverse φ (truncate N) :=
+    classical.some_spec (truncate_surjective N).has_right_inverse,
+  suffices : truncate M ∘ g = truncate M ∘ g ∘ φ ∘ truncate N,
+  { rw [this, ← function.comp.assoc, ← function.comp.assoc],
+    apply continuous_bot.comp continuous_truncate },
+  ext1 x,
+  suffices : ∀ s i, i < M + 1 → (g x).to_Mbar s i = (g (φ (truncate N x))).to_Mbar s i,
+  { ext s i, dsimp [function.comp], apply this, exact i.property },
+  intros s i hi,
+  rw [h, h, ← sub_eq_zero],
+  show ((f x.to_Mbar) - f (φ (truncate N x)).to_Mbar) s i = 0,
+  rw [← f.map_sub],
+  apply hN _ _ _ _ hi,
+  clear hi i s, intros s i hi,
+  simp only [Mbar.coe_sub, pi.sub_apply, sub_eq_zero],
+  suffices : ∀ s i, (truncate N x) s i = truncate N (φ (truncate N x)) s i,
+  { exact this s ⟨i, hi⟩ },
+  intros s i, congr' 1,
+  rw hφ (truncate N x)
 end
 
 end Mbar_le

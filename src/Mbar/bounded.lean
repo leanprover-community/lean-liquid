@@ -54,6 +54,13 @@ def mk' (x : S → fin (M + 1) → ℤ)
 @[ext] lemma ext (x y : Mbar_bdd r S c M) (h : ⇑x = y) : x = y :=
 by { cases x, cases y, congr, exact h }
 
+instance [fact (0 ≤ c)] : has_zero (Mbar_bdd r S c M) :=
+{ zero :=
+  { to_fun := 0,
+    coeff_zero' := λ s, rfl,
+    sum_le' :=
+    by simpa only [int.cast_zero, zero_mul, pi.zero_apply, abs_zero, finset.sum_const_zero] } }
+
 open finset
 
 lemma nonneg_of_Mbar_bdd {r : ℝ} {S : Fintype} {c : ℝ} {M : ℕ}

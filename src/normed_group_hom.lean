@@ -30,7 +30,9 @@ instance : has_coe_to_fun (normed_group_hom V₁ V₂) := ⟨_, normed_group_hom
 
 @[simp] lemma map_neg (x) : f (-x) = -(f x) := f.to_add_monoid_hom.map_neg _
 
-lemma bound : ∃ C, 0 < C ∧ ∀ v, ∥f v∥ ≤ C * ∥v∥ :=
+def bound_by (C) : Prop := ∀ x, ∥f x∥ ≤ C * ∥x∥
+
+lemma bound : ∃ C, 0 < C ∧ f.bound_by C :=
 begin
   obtain ⟨C, hC⟩ := f.bound',
   use [max C 1],
@@ -42,11 +44,11 @@ begin
   exact zero_le_one.trans (le_max_right _ _)
 end
 
-lemma lipschitz_of_bound (C : ℝ) (h : ∀x, ∥f x∥ ≤ C * ∥x∥) :
+lemma lipschitz_of_bound_by (C : ℝ) (h : f.bound_by C) :
   lipschitz_with (nnreal.of_real C) f :=
 lipschitz_with.of_dist_le' $ λ x y, by simpa only [dist_eq_norm, f.map_sub] using h (x - y)
 
-theorem antilipschitz_of_bound {K : nnreal} (h : ∀ x, ∥x∥ ≤ K * ∥f x∥) :
+theorem antilipschitz_of_bound_by {K : nnreal} (h : ∀ x, ∥x∥ ≤ K * ∥f x∥) :
   antilipschitz_with K f :=
 antilipschitz_with.of_le_mul_dist $
 λ x y, by simpa only [dist_eq_norm, f.map_sub] using h (x - y)
@@ -55,7 +57,7 @@ protected lemma uniform_continuous (f : normed_group_hom V₁ V₂) :
   uniform_continuous f :=
 begin
   obtain ⟨C, C_pos, hC⟩ := f.bound,
-  exact (lipschitz_of_bound f C hC).uniform_continuous
+  exact (lipschitz_of_bound_by f C hC).uniform_continuous
 end
 
 @[continuity]
