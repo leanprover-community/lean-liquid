@@ -62,6 +62,8 @@ begin
     refine continuous.comp _ (continuous_pi _),
     { -- we need an instance of `discrete_topology (Π i, X i)` for finite products
       /- convert continuous_bot -/
+      convert continuous_of_discrete_topology,
+      --refine type_pow_topology.discrete_topology, ???
       sorry },
     { intro i, exact continuous_truncate.comp (continuous_apply _) } },
   ext1 x,
