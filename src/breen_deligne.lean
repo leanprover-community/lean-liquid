@@ -4,6 +4,8 @@ import algebra.direct_sum
 import algebra.big_operators.finsupp
 import prereqs
 
+import type_pow
+
 /-!
 # Breen-Deligne resolutions
 
@@ -20,8 +22,6 @@ noncomputable theory
 
 -- get some notation working:
 open_locale big_operators direct_sum
-
-def type_pow : has_pow (Type*) ℕ := ⟨λ A n, fin n → A⟩
 
 local attribute [instance] type_pow
 local notation `ℤ[` A `]` := free_abelian_group A
