@@ -104,6 +104,12 @@ class topological_pseudo_normed_group' (B_ : ℝ≥0 → Type*) (M : Type*)
 -/
 
 
+/-
+Thought by Johan:
+Maybe we want both defintions above, and write a bit of glue to move between them.
+Both seem useful for different bits of what we want to do.
+-/
+
 attribute [instance] pseudo_normed_group.to_add_comm_group
 
 namespace pseudo_normed_group
@@ -116,6 +122,38 @@ by { rw [sub_eq_add_neg], exact add_mem_filtration h₁ (neg_mem_filtration h₂
 
 lemma neg_mem_filtration_iff (c x) : -x ∈ filtration M c ↔ x ∈ filtration M c :=
 ⟨λ h, by { rw [← neg_neg x], exact neg_mem_filtration h }, λ h, neg_mem_filtration h⟩
+
+lemma sum_mem_filtration {ι : Type*} (x : ι → M) (c : ι → ℝ≥0) (s : finset ι)
+  (h : ∀ i ∈ s, x i ∈ filtration M (c i)) :
+  (∑ i in s, x i) ∈ filtration M (∑ i in s, (c i)) :=
+begin
+  classical,
+  revert h, apply finset.induction_on s; clear s,
+  { intro, simpa only [finset.sum_empty] using zero_mem_filtration _ },
+  { intros i s his IH h,
+    rw [finset.sum_insert his, finset.sum_insert his],
+    apply add_mem_filtration (h _ _) (IH _),
+    { exact finset.mem_insert_self i s },
+    { intros j hj, apply h, exact finset.mem_insert_of_mem hj } }
+end
+
+lemma smul_nat_mem_filtration (n : ℕ) (x : M) (c : ℝ≥0) (hx : x ∈ filtration M c) :
+  n • x ∈ filtration M (n * c) :=
+begin
+  induction n with n ih,
+  { simpa only [nat.cast_zero, zero_mul, zero_smul] using zero_mem_filtration _ },
+  { simp only [nat.succ_eq_add_one, add_smul, one_smul, nat.cast_succ, add_mul, one_mul],
+    exact add_mem_filtration ih hx }
+end
+
+lemma smul_int_mem_filtration (n : ℤ) (x : M) (c : ℝ≥0) (hx : x ∈ filtration M c) :
+  n • x ∈ filtration M (n.nat_abs * c) :=
+begin
+  induction n with n n,
+  { exact smul_nat_mem_filtration n x c hx },
+  { rw [int.nat_abs_of_neg_succ_of_nat, int.neg_succ_of_nat_coe, neg_smul, neg_mem_filtration_iff],
+    exact smul_nat_mem_filtration _ _ _ hx }
+end
 
 instance pi {ι : Type*} (M : ι → Type*) [Π i, pseudo_normed_group (M i)] :
   pseudo_normed_group (Π i, M i) :=
@@ -133,282 +171,92 @@ end pseudo_normed_group
 
 open pseudo_normed_group
 
-section
-
-set_option old_structure_cmd true
-
-structure pseudo_normed_group_hom (M₁ M₂ : Type*) [pseudo_normed_group M₁] [pseudo_normed_group M₂]
-  extends M₁ →+ M₂ :=
-(bound : ℝ≥0)
-(map_mem_filtration' : ∀ ⦃c x⦄, x ∈ filtration M₁ c → to_fun x ∈ filtration M₂ (bound * c))
-
-end
-
-namespace pseudo_normed_group_hom
+namespace add_monoid_hom
 
 variables {M M₁ M₂ M₃ : Type*}
 variables [pseudo_normed_group M] [pseudo_normed_group M₁]
 variables [pseudo_normed_group M₂] [pseudo_normed_group M₃]
-variables (f g : pseudo_normed_group_hom M₁ M₂)
 
-instance : has_coe_to_fun (pseudo_normed_group_hom M₁ M₂) := ⟨_, pseudo_normed_group_hom.to_fun⟩
+instance : pseudo_normed_group (M₁ →+ M₂) :=
+{ filtration := λ N, { f | ∀ ⦃c⦄ ⦃x : M₁⦄, x ∈ filtration M₁ c → f x ∈ filtration M₂ (N * c) },
+  filtration_mono := λ N₁ N₂ h f hf c x hx, filtration_mono (mul_le_mul_right' h c) (hf hx),
+  zero_mem_filtration := λ N c x hx, zero_mem_filtration _,
+  neg_mem_filtration := λ N f hf c x hx, neg_mem_filtration $ hf hx,
+  add_mem_filtration := λ N₁ N₂ f₁ f₂ hf₁ hf₂ c x hx,
+  by { rw add_mul, apply add_mem_filtration (hf₁ hx) (hf₂ hx) },
+  .. add_monoid_hom.add_comm_group }
 
-@[simp] lemma coe_mk (f) (h₁) (h₂) (C) (h₃) :
-  ⇑(⟨f, h₁, h₂, C, h₃⟩ : pseudo_normed_group_hom M₁ M₂) = f := rfl
+lemma comp_mem_filtration {g f cg cf}
+  (hg : g ∈ filtration (M₂ →+ M₃) cg) (hf : f ∈ filtration (M₁ →+ M₂) cf) :
+  g.comp f ∈ filtration (M₁ →+ M₃) (cg * cf) :=
+λ c x hx, by { rw mul_assoc, exact hg (hf hx) }
 
-@[simp] lemma mk_to_add_monoid_hom (f) (h₁) (h₂) (C) (h₃) :
-  (⟨f, h₁, h₂, C, h₃⟩ : pseudo_normed_group_hom M₁ M₂).to_add_monoid_hom = ⟨f, h₁, h₂⟩ := rfl
+@[simp] lemma id_mem_filtration (c : ℝ≥0) (hc : 1 ≤ c) : id M ∈ filtration (M →+ M) c :=
+λ c' x hx, by refine filtration_mono _ hx;
+calc c' = 1 * c' : by rw one_mul
+    ... ≤ c * c' : mul_le_mul_right' hc c'
 
-@[simp] lemma coe_to_add_monoid_hom (f : pseudo_normed_group_hom M₁ M₂) :
-  ⇑f.to_add_monoid_hom = f := rfl
-
-@[simp] lemma map_zero : f 0 = 0 := f.to_add_monoid_hom.map_zero
-
-@[simp] lemma map_add (x y) : f (x + y) = f x + f y := f.to_add_monoid_hom.map_add _ _
-
-@[simp] lemma map_sub (x y) : f (x - y) = f x - f y := f.to_add_monoid_hom.map_sub _ _
-
-@[simp] lemma map_neg (x) : f (-x) = -(f x) := f.to_add_monoid_hom.map_neg _
-
-lemma map_mem_filtration ⦃c x⦄ (h : x ∈ filtration M₁ c) : f x ∈ filtration M₂ (f.bound * c) :=
-f.map_mem_filtration' h
-
-@[ext] theorem ext (H : ∀ x, f x = g x) (H' : f.bound = g.bound) : f = g :=
-by cases f; cases g; congr'; exact funext H
-
-def mk' (f : M₁ →+ M₂) (C : ℝ≥0) (hC : ∀ c x, x ∈ filtration M₁ c → f x ∈ filtration M₂ (C * c)) :
-  pseudo_normed_group_hom M₁ M₂ :=
-{ bound := C, map_mem_filtration' := hC, .. f}
-
-@[simp] lemma coe_mk' (f : M₁ →+ M₂) (C) (hC) : ⇑(mk' f C hC) = f := rfl
-
-instance : has_zero (pseudo_normed_group_hom M₁ M₂) :=
-⟨mk' (0 : M₁ →+ M₂) 0 $ by intros; exact zero_mem_filtration _⟩
-
-instance : inhabited (pseudo_normed_group_hom M₁ M₂) := ⟨0⟩
-
-@[simps]
-def id : pseudo_normed_group_hom M M :=
-{ bound := 1,
-  map_mem_filtration' := λ c x h,
-    by simpa only [one_mul, add_monoid_hom.to_fun_eq_coe, add_monoid_hom.id_apply] using h,
-  .. add_monoid_hom.id M }
-
-instance : has_one (pseudo_normed_group_hom M M) := ⟨id⟩
-
-lemma one_def : (1 : pseudo_normed_group_hom M M) = id := rfl
-
-@[simps]
-def comp (g : pseudo_normed_group_hom M₂ M₃) (f : pseudo_normed_group_hom M₁ M₂) :
-  pseudo_normed_group_hom M₁ M₃ :=
-{ bound := g.bound * f.bound,
-  map_mem_filtration' := λ c x h,
-  begin
-    simp only [add_monoid_hom.coe_comp, add_monoid_hom.to_fun_eq_coe, function.comp_app, mul_assoc],
-    exact g.map_mem_filtration (f.map_mem_filtration h)
-  end,
-  .. g.to_add_monoid_hom.comp f.to_add_monoid_hom }
-
-private def add (f g : pseudo_normed_group_hom M₁ M₂) : pseudo_normed_group_hom M₁ M₂ :=
-mk' (f.to_add_monoid_hom + g.to_add_monoid_hom) (f.bound + g.bound)
-begin
-  intros c x h, rw add_mul,
-  exact add_mem_filtration (f.map_mem_filtration h) (g.map_mem_filtration h)
-end
-
-private def neg (f : pseudo_normed_group_hom M₁ M₂) : pseudo_normed_group_hom M₁ M₂ :=
-mk' (-f.to_add_monoid_hom) f.bound $ λ c x h, neg_mem_filtration (f.map_mem_filtration h)
-
-instance : has_neg (pseudo_normed_group_hom M₁ M₂) := ⟨neg⟩
-
-private def sub (f g : pseudo_normed_group_hom M₁ M₂) : pseudo_normed_group_hom M₁ M₂ :=
-mk' (f.to_add_monoid_hom - g.to_add_monoid_hom) (f.bound + g.bound)
-begin
-  intros c x h, rw add_mul,
-  exact sub_mem_filtration (f.map_mem_filtration h) (g.map_mem_filtration h)
-end
-
-instance : has_sub (pseudo_normed_group_hom M₁ M₂) := ⟨sub⟩
-
-/-
-Because of our unorthodox choice of bundling `bound`
-into the definition of `pseudo_normed_group_hom`,
-we cannot get an `add_comm_group` structure on `pseudo_normed_group_hom`:
-we can't get `f + (-f) = 0` because the RHS has a bound that is typically nonzero.
--/
-
-instance : add_comm_monoid (pseudo_normed_group_hom M₁ M₂) :=
-{ zero := 0,
-  add := add,
-  add_assoc := by { intros, ext; exact add_assoc _ _ _ },
-  zero_add := by { intros, ext; exact zero_add _ },
-  add_zero := by { intros, ext; exact add_zero _ },
-  add_comm := by { intros, ext; exact add_comm _ _ } }
-
-@[simp] lemma bound_id : (id : pseudo_normed_group_hom M M).bound = 1 := rfl
-
-@[simp] lemma bound_one : (1 : pseudo_normed_group_hom M M).bound = 1 := rfl
-
-@[simp] lemma bound_comp (g : pseudo_normed_group_hom M₂ M₃) (f : pseudo_normed_group_hom M₁ M₂) :
-  (g.comp f).bound = g.bound * f.bound := rfl
-
-@[simp] lemma bound_zero : (0 : pseudo_normed_group_hom M₁ M₂).bound = 0 := rfl
-
-@[simp] lemma bound_add : (f + g).bound = f.bound + g.bound := rfl
-
-@[simp] lemma bound_neg : (-f).bound = f.bound := rfl
-
-@[simp] lemma bound_sub : (f - g).bound = f.bound + g.bound := rfl
-
-@[simp] lemma bound_sum {ι : Type*} (f : ι → pseudo_normed_group_hom M₁ M₂) (s : finset ι) :
-  (∑ i in s, f i).bound = ∑ i in s, (f i).bound :=
-begin
-  classical,
-  apply finset.induction_on s; clear s,
-  { simp only [bound_zero, finset.sum_empty] },
-  { intros i s his IH,
-    simp only [IH, his, bound_add, finset.sum_insert, not_false_iff] }
-end
-
-@[simp] lemma coe_id : ⇑(id : pseudo_normed_group_hom M M) = id := rfl
-
-@[simp] lemma coe_one : ⇑(1 : pseudo_normed_group_hom M M) = id := rfl
-
-@[simp] lemma coe_comp (g : pseudo_normed_group_hom M₂ M₃) (f : pseudo_normed_group_hom M₁ M₂) :
-  ⇑(g.comp f) = g ∘ f := rfl
-
-@[simp] lemma coe_zero : ⇑(0 : pseudo_normed_group_hom M₁ M₂) = 0 := rfl
-
-@[simp] lemma coe_add : ⇑(f + g) = f + g := rfl
-
-@[simp] lemma coe_neg : ⇑(-f) = -f := rfl
-
-@[simp] lemma coe_sub : ⇑(f - g) = f - g := rfl
-
-@[simp] lemma coe_sum {ι : Type*} (f : ι → pseudo_normed_group_hom M₁ M₂) (s : finset ι) :
-  ⇑(∑ i in s, f i) = ∑ i in s, (f i) :=
-begin
-  classical,
-  apply finset.induction_on s; clear s,
-  { simp only [finset.sum_empty, coe_zero] },
-  { intros i s his IH,
-    simp only [IH, his, coe_add, finset.sum_insert, not_false_iff] }
-end
-
-@[simp] protected lemma neg_zero : -(0 : pseudo_normed_group_hom M₁ M₂) = 0 :=
-by { ext; simp only [coe_zero, coe_neg, neg_zero, bound_neg] }
-
-@[simp] protected lemma neg_neg : - -(f : pseudo_normed_group_hom M₁ M₂) = f :=
-by { ext; simp only [coe_neg, neg_neg, bound_neg] }
-
-def to_add_monoid_hom_hom : pseudo_normed_group_hom M₁ M₂ →+ (M₁ →+ M₂) :=
-{ to_fun := to_add_monoid_hom,
-  map_zero' := rfl,
-  map_add' := λ _ _, rfl }
-
+-- move this, maybe it already exists?
 @[simps {rhs_md:=semireducible, fully_applied:=ff}]
-def mk_to_pi {ι : Type*} [fintype ι] {M : ι → Type*} [Π i, pseudo_normed_group (M i)]
-  (f : Π i, pseudo_normed_group_hom M₁ (M i)) :
-  pseudo_normed_group_hom M₁ (Π i, M i) :=
-mk'
+def mk_to_pi {M₁} [add_monoid M₁] {ι : Type*} {M : ι → Type*} [Π i, add_monoid (M i)]
+  (f : Π i, M₁ →+ (M i)) :
+  M₁ →+ (Π i, M i) :=
 { to_fun := λ v i, f i v,
   map_zero' := by { simp only [map_zero], refl },
   map_add' := by { intros, simp only [map_add], refl } }
-(finset.univ.sup (λ i, (f i).bound))
-begin
-  intros c x h i,
-  simp only [add_monoid_hom.coe_mk],
-  refine filtration_mono _ ((f i).map_mem_filtration h),
-  apply mul_le_mul_of_nonneg_right _ (zero_le c),
-  exact finset.le_sup (finset.mem_univ i)
-end
 
-@[simps {rhs_md:=semireducible, fully_applied:=ff}]
-def apply {ι : Type*} (M : ι → Type*) [Π i, pseudo_normed_group (M i)] (i : ι) :
-  pseudo_normed_group_hom (Π i, M i) (M i) :=
-mk' (add_monoid_hom.apply M i) 1 $
-λ c x h, by { rw [one_mul], exact (h i) }
+lemma mk_to_pi_mem_filtration {ι : Type*} {M : ι → Type*}
+  [Π i, pseudo_normed_group (M i)] (f : Π i, M₁ →+ (M i))
+  {c} (hfc : ∀ i, f i ∈ filtration (M₁ →+ (M i)) c) :
+  mk_to_pi f ∈ filtration (M₁ →+ (Π i, M i)) c :=
+λ c' x h i, hfc i h
 
-@[simp] lemma bound_apply {ι : Type*} (M : ι → Type*) [Π i, pseudo_normed_group (M i)] (i : ι) :
-  (apply M i).bound = 1 := rfl
+lemma apply_mem_filtration {ι : Type*} (M : ι → Type*) [Π i, pseudo_normed_group (M i)]
+  (i : ι) (c : ℝ≥0) (hc : 1 ≤ c) :
+  (apply M i) ∈ filtration ((Π i, M i) →+ M i) c :=
+λ c' x hx, by refine filtration_mono _ (hx i);
+calc c' = 1 * c' : by rw one_mul
+    ... ≤ c * c' : mul_le_mul_right' hc c'
 
-def mk_from_pi {ι : Type*} [fintype ι] {M : ι → Type*} [Π i, pseudo_normed_group (M i)]
-  (f : Π i, pseudo_normed_group_hom (M i) M₂) :
-  pseudo_normed_group_hom (Π i, M i) M₂ :=
+def mk_from_pi {ι : Type*} [fintype ι] {M : ι → Type*} {M₂}
+  [Π i, add_monoid (M i)] [add_comm_monoid M₂] (f : Π i, (M i) →+ M₂) :
+  (Π i, M i) →+ M₂ :=
 ∑ i, (f i).comp (apply M i)
 
-@[simp] lemma bound_mk_from_pi {ι : Type*} [fintype ι] {M : ι → Type*}
-  [Π i, pseudo_normed_group (M i)] (f : Π i, pseudo_normed_group_hom (M i) M₂) :
-  (mk_from_pi f).bound = ∑ i, (f i).bound :=
-by simp only [mk_from_pi, bound_sum, bound_apply, mul_one, bound_comp]
-
-@[simp] lemma coe_mk_from_pi {ι : Type*} [fintype ι] {M : ι → Type*} [Π i, pseudo_normed_group (M i)]
-  (f : Π i, pseudo_normed_group_hom (M i) M₂) :
-  ⇑(mk_from_pi f) = ∑ i, (f i ∘ apply M i) :=
+@[simp] lemma mk_from_pi_apply {ι : Type*} [fintype ι] {M : ι → Type*} [Π i, add_comm_monoid (M i)]
+  (f : Π i, M i →+ M₂) (x : Π i, M i) :
+  mk_from_pi f x = (∑ i, f i (x i)) :=
 begin
-  ext x,
-  simp only [apply_to_fun, add_monoid_hom.apply_apply, add_monoid_hom.to_fun_eq_coe,
-    fintype.sum_apply, function.comp_app],
-  show add_monoid_hom.eval x (to_add_monoid_hom_hom (mk_from_pi f)) = _,
+  show add_monoid_hom.eval x (mk_from_pi f) = _,
   simp only [mk_from_pi, add_monoid_hom.map_sum],
   refl
 end
 
-def nsmul : ℕ →+ pseudo_normed_group_hom M M := nat.cast_add_monoid_hom _
+@[simp] lemma coe_mk_from_pi {ι : Type*} [fintype ι] {M : ι → Type*} [Π i, add_comm_monoid (M i)]
+  (f : Π i, M i →+ M₂) :
+  ⇑(mk_from_pi f) = ∑ i, (f i ∘ apply M i) :=
+by { ext x, rw [@mk_from_pi_apply M₂ _ ι _ M _ f x, fintype.sum_apply], refl }
 
-@[simp] protected lemma nsmul_one : (nsmul 1 : pseudo_normed_group_hom M M) = id := nat.cast_one
-
-@[simp] lemma coe_nsmul (n : ℕ) :
-  ⇑(nsmul n : pseudo_normed_group_hom M M) = λ x, n • x :=
+lemma mk_from_pi_mem_filtration {ι : Type*} [fintype ι] {M : ι → Type*}
+  [Π i, pseudo_normed_group (M i)] (f : Π i, (M i) →+ M₂)
+  {c : ι → ℝ≥0} (hfc : ∀ i, f i ∈ filtration ((M i) →+ M₂) (c i)) :
+  (mk_from_pi f) ∈ filtration ((Π i, M i) →+ M₂) (∑ i, c i) :=
+λ c' x h,
 begin
-  ext,
-  induction n with n ih,
-  { simp only [coe_zero, pi.zero_apply, zero_smul, add_monoid_hom.map_zero] },
-  { simp only [ih, nat.succ_eq_add_one, add_monoid_hom.map_add, pi.add_apply, id_to_fun,
-      add_monoid_hom.to_fun_eq_coe, add_monoid_hom.id_apply, coe_add, add_smul, one_smul,
-      pseudo_normed_group_hom.nsmul_one] }
+  rw [finset.sum_mul, @mk_from_pi_apply M₂ _ ι _ M _ f x],
+  refine sum_mem_filtration _ _ _ _,
+  rintro i -,
+  exact hfc i (h i)
 end
 
-@[simp] lemma bound_nsmul (n : ℕ) : (nsmul n : pseudo_normed_group_hom M M).bound = n :=
-begin
-  induction n with n ih,
-  { simp only [bound_zero, nat.cast_zero, add_monoid_hom.map_zero] },
-  { simp only [ih, nat.succ_eq_add_one, bound_add, add_monoid_hom.map_add, bound_id,
-      add_left_inj, nat.cast_add, nat.cast_one, pseudo_normed_group_hom.nsmul_one] }
-end
+lemma const_smul_hom_nat_mem_filtration (n : ℕ) (c : ℝ≥0) (h : ↑n ≤ c) :
+  const_smul_hom M n ∈ filtration (M →+ M) c :=
+λ c' x hx, by simpa only [const_smul_hom_apply]
+  using filtration_mono (mul_le_mul_right' h c') (smul_nat_mem_filtration _ _ _ hx)
 
-def gsmul : ℤ → pseudo_normed_group_hom M M
-| (n:ℕ)  := nsmul n
-| -[1+n] := -nsmul (n+1)
+lemma const_smul_hom_int_mem_filtration (n : ℤ) (c : ℝ≥0) (h : ↑(n.nat_abs) ≤ c) :
+  const_smul_hom M n ∈ filtration (M →+ M) c :=
+λ c' x hx, by simpa only [const_smul_hom_apply]
+  using filtration_mono (mul_le_mul_right' h c') (smul_int_mem_filtration _ _ _ hx)
 
-@[simp] protected lemma gsmul_zero : (gsmul 0 : pseudo_normed_group_hom M M) = 0 :=
-nsmul.map_zero
-
-@[simp] protected lemma gsmul_one : (gsmul 1 : pseudo_normed_group_hom M M) = id :=
-pseudo_normed_group_hom.nsmul_one
-
-@[simp] protected lemma gsmul_nat (n : ℕ) : (gsmul n : pseudo_normed_group_hom M M) = nsmul n := rfl
-
-@[simp] protected lemma gsmul_neg_succ_of_nat (n : ℕ) :
-  (gsmul (-[1+n]) : pseudo_normed_group_hom M M) = -nsmul (n+1) := rfl
-
-@[simp] lemma gsmul_neg : ∀ n, (gsmul (-n) : pseudo_normed_group_hom M M) = -gsmul n
-| (0:ℕ)   := pseudo_normed_group_hom.neg_zero.symm
-| (n+1:ℕ) := rfl
-| -[1+n]  := (pseudo_normed_group_hom.neg_neg _).symm
-
-@[simp] lemma coe_gsmul : ∀ n, ⇑(gsmul n : pseudo_normed_group_hom M M) = λ x, n • x
-| (0:ℕ)   := by simpa only [zero_smul] using pseudo_normed_group_hom.gsmul_zero
-| (n+1:ℕ) := coe_nsmul _
-| -[1+n]  := show ⇑(-nsmul (n+1) : pseudo_normed_group_hom M M) = λ x, -[1+n] • x,
-by { simp only [coe_neg, coe_nsmul, int.neg_succ_of_nat_coe], refl }
-
-@[simp] lemma bound_gsmul : ∀ n, (gsmul n : pseudo_normed_group_hom M M).bound = n.nat_abs
-| (0:ℕ)   := rfl
-| (n+1:ℕ) := bound_nsmul _
-| -[1+n]  :=
-calc (gsmul -[1+n]).bound
-    = (nsmul (n+1)).bound : bound_neg _
-... = (n+1)               : bound_nsmul _
-
-end pseudo_normed_group_hom
+end add_monoid_hom

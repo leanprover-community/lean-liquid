@@ -250,7 +250,8 @@ sorry
 
 lemma eval_Mbar_Tinv_comp (f : basic_universal_map m n) (g : basic_universal_map l m)
   [fact (f.suitable c₁ c₂)] [fact (g.suitable c₂ c₃)] [fact ((f.comp g).suitable c₁ c₃)] :
-  (f.comp g).eval_Mbar_Tinv V S r r' c₁ c₃ = f.eval_Mbar_Tinv V S r r' c₁ c₂ ≫ g.eval_Mbar_Tinv V S r r' c₂ c₃ :=
+  (f.comp g).eval_Mbar_Tinv V S r r' c₁ c₃ =
+  f.eval_Mbar_Tinv V S r r' c₁ c₂ ≫ g.eval_Mbar_Tinv V S r r' c₂ c₃ :=
 sorry
 
 end basic_universal_map
