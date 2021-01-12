@@ -41,20 +41,20 @@ def extend_from_nat : Π i, X i
 
 end int
 
-variables (V : NormedGroup) (S : Type*) (r r' c c' c₁ c₂ c₃ c₄ : ℝ) (a : ℕ) [fintype S]
+variables (V : NormedGroup) (S : Type*) (r r' c c' c₁ c₂ c₃ c₄ : ℝ≥0) (a : ℕ) [fintype S]
 
--- move this
-instance fix_my_name [h1 : fact (0 < r')] [h2 : fact (r' ≤ 1)] [h3 : fact (0 ≤ c)] :
-  fact (c ≤ c / r') :=
-begin
-  rw le_div_iff h1,
-  nth_rewrite 1 ← mul_one c,
-  exact mul_le_mul (le_of_eq rfl) h2 (le_of_lt h1) h3,
-end
+-- -- move this
+-- instance fix_my_name [h1 : fact (0 < r')] [h2 : fact (r' ≤ 1)] [h3 : fact (0 ≤ c)] :
+--   fact (c ≤ c / r') :=
+-- begin
+--   rw le_div_iff h1,
+--   nth_rewrite 1 ← mul_one c,
+--   exact mul_le_mul (le_of_eq rfl) h2 (le_of_lt h1) h3,
+-- end
 
--- move this
-instance fix_my_name₂ [h1 : fact (0 < r')] [h2 : fact (0 ≤ c)] : fact (0 ≤ c / r') :=
-by simpa [le_div_iff h1]
+-- -- move this
+-- instance fix_my_name₂ [h1 : fact (0 < r')] [h2 : fact (0 ≤ c)] : fact (0 ≤ c / r') :=
+-- by simpa [le_div_iff h1]
 
 -- move this
 instance fix_my_name₃ [fact (0 < r')] [fact (c₁ ≤ c₂)] :

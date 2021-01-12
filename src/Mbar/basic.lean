@@ -8,6 +8,7 @@ import analysis.specific_limits
 import data.equiv.basic
 
 import Mbar.bounded
+import pseudo_normed_group.basic
 
 import for_mathlib.tsum
 
@@ -26,7 +27,7 @@ We model Tℤ[[T]] as functions ℕ → ℤ which vanish at 0.
 universe u
 
 noncomputable theory
-open_locale big_operators
+open_locale big_operators nnreal
 
 section defs
 
@@ -34,19 +35,14 @@ set_option old_structure_cmd true
 
 /-- `Mbar r' S` is the set of power series
 `F_s = ∑ a_{n,s}T^n ∈ Tℤ[[T]]` such that `∑_{n,s} |a_{n,s}|r'^n` converges -/
-structure Mbar (r' : ℝ) (S : Type u) [fintype S] :=
+structure Mbar (r' : ℝ≥0) (S : Type u) [fintype S] :=
 (to_fun : S → ℕ → ℤ)
 (coeff_zero' : ∀ s, to_fun s 0 = 0)
-(summable' : ∀ s, summable (λ n, abs ((to_fun s n : ℝ) * r' ^ n)))
-
-/-- `Mbar_le r' S c` is the set of power series
-`F_s = ∑ a_{n,s}T^n ∈ Tℤ[[T]]` such that `∑_{n,s} |a_{n,s}|r'^n ≤ c` -/
-structure Mbar_le (r' : ℝ) (S : Type u) [fintype S] (c : ℝ) extends Mbar r' S :=
-(sum_tsum_le' : (∑ s, ∑' n, (abs ((to_fun s n : ℝ) * r'^n))) ≤ c)
+(summable' : ∀ s, summable (λ n, (↑(to_fun s n).nat_abs * r' ^ n)))
 
 end defs
 
-variables {r' : ℝ} {S : Type u} [fintype S]
+variables {r' : ℝ≥0} {S : Type u} [fintype S]
 
 namespace Mbar
 
@@ -57,11 +53,11 @@ instance has_coe_to_fun : has_coe_to_fun (Mbar r' S) := ⟨_, Mbar.to_fun⟩
 @[simp] protected lemma coeff_zero (x : Mbar r' S) (s : S) : x s 0 = 0 := x.coeff_zero' s
 
 protected lemma summable (x : Mbar r' S) (s : S) :
-  summable (λ n, abs ((x s n : ℝ) * r'^n)) := x.summable' s
+  summable (λ n, (↑(x s n).nat_abs * r' ^ n)) := x.summable' s
 
-lemma summable_nnabs (F : Mbar r' S) (s : S) :
-  summable (λ (i : ℕ), real.nnabs ((F s i) * r' ^ i)) :=
-by { rw ← nnreal.summable_coe, simpa only [nnreal.coe_nnabs] using F.summable s }
+-- lemma summable_nnabs (F : Mbar r' S) (s : S) :
+--   summable (λ (i : ℕ), real.nnabs ((F s i) * r' ^ i)) :=
+-- by { rw ← nnreal.summable_coe, simpa only [nnreal.coe_nnabs] using F.summable s }
 
 @[ext] lemma ext (x y : Mbar r' S) (h : ⇑x = y) : x = y :=
 by { cases x, cases y, congr, exact h }
@@ -80,11 +76,12 @@ def add (F : Mbar r' S) (G : Mbar r' S) : Mbar r' S :=
   summable' :=
   begin
     intro s,
-    have hFs := F.summable, have hGs := G.summable,
-    simp_rw summable_abs_iff at hFs hGs ⊢,
-    convert summable.add (hFs s) (hGs s),
-    ext n,
-    simp only [add_mul, int.cast_add, pi.add_apply]
+    apply nnreal.summable_of_le _ ((F.summable s).add (G.summable s)),
+    intro n,
+    rw [← add_mul, ← nat.cast_add],
+    apply mul_le_mul_right',
+    rw nat.cast_le,
+    exact int.nat_abs_add_le _ _
   end }
 
 def sub (F : Mbar r' S) (G : Mbar r' S) : Mbar r' S :=
@@ -93,11 +90,13 @@ def sub (F : Mbar r' S) (G : Mbar r' S) : Mbar r' S :=
   summable' :=
   begin
     intro s,
-    have hFs := F.summable, have hGs := G.summable,
-    simp_rw summable_abs_iff at hFs hGs ⊢,
-    convert summable.sub (hFs s) (hGs s),
-    ext n,
-    simp only [sub_mul, int.cast_sub, pi.sub_apply]
+    apply nnreal.summable_of_le _ ((F.summable s).add (G.summable s)),
+    intro n,
+    rw [← add_mul, ← nat.cast_add],
+    apply mul_le_mul_right',
+    rw [nat.cast_le, sub_eq_add_neg, ← int.nat_abs_neg (G s n)],
+    -- there should be an `int.nat_abs_sub_le`
+    exact int.nat_abs_add_le _ _
   end }
 
 def neg (F : Mbar r' S) : Mbar r' S :=
@@ -108,7 +107,7 @@ def neg (F : Mbar r' S) : Mbar r' S :=
     intro s,
     convert F.summable s using 1,
     ext n,
-    simp only [neg_mul_eq_neg_mul_symm, pi.neg_apply, abs_neg, int.cast_neg],
+    simp only [pi.neg_apply, int.nat_abs_neg]
   end }
 
 instance : has_zero (Mbar r' S) := ⟨zero⟩
@@ -131,48 +130,34 @@ instance : add_comm_group (Mbar r' S) :=
   sub_eq_add_neg := by { intros, ext, simp only [coe_sub, coe_add, coe_neg, sub_eq_add_neg] } }
 .
 
-instance : has_norm (Mbar r' S) :=
-{ norm := λ F, ∑ s, ∑' n, (abs ((F s n : ℝ) * r'^n)) }
+-- instance : has_norm (Mbar r' S) :=
+-- { norm := λ F, ∑ s, ∑' n, (abs ((F s n : ℝ) * r'^n)) }
 
-lemma norm_def (F : Mbar r' S) : ∥F∥ = ∑ s, ∑' n, (abs ((F s n : ℝ) * r'^n)) := rfl
+-- lemma norm_def (F : Mbar r' S) : ∥F∥ = ∑ s, ∑' n, (abs ((F s n : ℝ) * r'^n)) := rfl
 
-instance [hr' : fact (0 < r')] : normed_group (Mbar r' S) :=
-normed_group.of_core _
-{ norm_eq_zero_iff :=
+instance : pseudo_normed_group (Mbar r' S) :=
+{ filtration := λ c, {F | (∑ s, ∑' n, (↑(F s n).nat_abs * r' ^ n)) ≤ c},
+  filtration_mono := λ c₁ c₂ h F hF, le_trans (by exact hF) h, -- `by exact`, why??
+  zero_mem_filtration := λ c,
+  by { dsimp, simp only [tsum_zero, nat.cast_zero, zero_mul, pi.zero_apply, zero_le',
+    finset.sum_const_zero, int.nat_abs_zero] },
+  neg_mem_filtration := λ c F hF,
+  by { dsimp, simpa only [pi.neg_apply, int.nat_abs_neg, int.nat_abs, coe_neg, set.mem_set_of_eq] },
+  add_mem_filtration := λ c₁ c₂ F₁ F₂ hF₁ hF₂,
   begin
-    intro F,
-    rw [norm_def, finset.sum_eq_zero_iff_of_nonneg, ext_iff, function.funext_iff],
-    { apply forall_congr,
-      intro s,
-      simp only [forall_prop_of_true, finset.mem_univ, coe_zero, pi.zero_apply,
-        tsum_abs_eq_coe_tsum_nnabs],
-      rw [← nnreal.coe_tsum, ← nnreal.coe_zero, nnreal.eq_iff,
-          tsum_eq_zero_iff (F.summable_nnabs s), function.funext_iff],
-      apply forall_congr,
-      intro n,
-      simp only [←nnreal.eq_iff, int.cast_eq_zero, abs_eq_zero, nnreal.coe_zero, pi.zero_apply,
-        or_iff_left_iff_imp, nnreal.coe_nnabs, mul_eq_zero],
-      intro H,
-      exact (ne_of_gt hr' (pow_eq_zero H)).elim },
-    { exact (λ _ _, tsum_nonneg (λ _, abs_nonneg _)) }
-  end,
-  triangle :=
-  begin
-    intros F G,
-    simp only [norm_def],
+    dsimp at hF₁ hF₂ ⊢,
+    refine le_trans _ (add_le_add hF₁ hF₂),
     rw ← finset.sum_add_distrib,
     refine finset.sum_le_sum _,
     rintro s -,
-    rw ← tsum_add (F.summable s) (G.summable s),
-    refine tsum_le_tsum _ ((F + G).summable _) (summable.add (F.summable s) (G.summable s)),
+    rw ← tsum_add (F₁.summable s) (F₂.summable s),
+    refine tsum_le_tsum _ ((F₁ + F₂).summable _) ((F₁.summable s).add (F₂.summable s)),
     intro n,
-    convert abs_add _ _,
-    simp [add_mul]
-  end,
-  norm_neg :=
-  begin
-    intro F, rw [norm_def, norm_def],
-    simp only [neg_mul_eq_neg_mul_symm, pi.neg_apply, abs_neg, int.cast_neg, coe_neg]
+    dsimp,
+    rw [← add_mul, ← nat.cast_add],
+    apply mul_le_mul_right',
+    rw nat.cast_le,
+    exact int.nat_abs_add_le _ _
   end }
 
 section Tinv
@@ -194,22 +179,55 @@ if_neg hi
 if_neg (nat.succ_ne_zero i)
 
 lemma Tinv_aux_summable [h0r : fact (0 < r')] (F : Mbar r' S) (s : S) :
-  summable (λ (n : ℕ), abs (↑(Tinv_aux (F s) n) * r' ^ n)) :=
+  summable (λ n, (↑(Tinv_aux (F s) n).nat_abs * r' ^ n)) :=
 begin
-  rw summable_mul_right_iff (ne_of_gt h0r),
-  have H := F.summable s,
-  refine summable_of_norm_bounded _ ((summable_nat_add_iff 1).mpr H) _,
+  have : ∀ n:ℕ, r' ^ n = r' ^ n * r' * r'⁻¹,
+  { intro, rw [mul_inv_cancel_right' (ne_of_gt h0r)] },
+  conv { congr, funext, rw [this, ← mul_assoc] },
+  apply summable.mul_right,
+  refine nnreal.summable_of_le _ (nnreal.summable_nat_add _ (F.summable s) 1),
   rintro ⟨i⟩,
-  { simp only [abs_nonneg, norm_zero, int.cast_zero, zero_mul, abs_zero, Tinv_aux_zero]},
-  { simp only [Tinv_aux_succ, real.norm_eq_abs, abs_mul, pow_add, mul_assoc, pow_one, abs_abs] },
+  { simp only [nat.cast_zero, zero_mul, Tinv_aux_zero, zero_le', int.nat_abs_zero] },
+  { simp only [Tinv_aux_succ, pow_add, mul_assoc, pow_one] }
 end
 
-@[simps]
-def Tinv {r : ℝ} {S : Type u} [fintype S] [h0r : fact (0 < r)] (F : Mbar r S) :
-  Mbar r S :=
-{ to_fun := λ s, Tinv_aux (F s),
-  coeff_zero' := λ s, rfl,
-  summable' := Tinv_aux_summable F }
+def Tinv {r : ℝ≥0} {S : Type u} [fintype S] [h0r : fact (0 < r)] :
+  Mbar r S →+ Mbar r S :=
+add_monoid_hom.mk' (λ F,
+  { to_fun := λ s, Tinv_aux (F s),
+    coeff_zero' := λ s, rfl,
+    summable' := Tinv_aux_summable F })
+  begin
+    intros F G,
+    ext s (_|n),
+    { simp only [add_zero, pi.add_apply, Mbar.coeff_zero] },
+    { simp only [coe_mk, pi.add_apply, Tinv_aux_succ, coe_add] }
+  end
+
+open pseudo_normed_group
+
+lemma Tinv_mem_filtration [h0r : fact (0 < r')] :
+  Tinv ∈ filtration (Mbar r' S →+ Mbar r' S) (r'⁻¹) :=
+begin
+  intros c F hF,
+  simp only [Tinv, add_monoid_hom.coe_mk'],
+  change _ ≤ _ at hF,
+  rw mul_comm,
+  apply le_mul_inv_of_mul_le (ne_of_gt h0r),
+  rw finset.sum_mul,
+  apply le_trans _ hF,
+  apply finset.sum_le_sum,
+  rintro s -,
+  rw ← nnreal.tsum_mul_right,
+  conv_rhs { rw [← sum_add_tsum_nat_add' 1 (F.summable s)] },
+  refine le_add_of_nonneg_of_le zero_le' _,
+  apply tsum_le_tsum,
+  { rintro (_|i),
+    { simp only [nat.cast_zero, zero_mul, Mbar.coeff_zero, int.nat_abs_zero], exact zero_le' },
+    { simp only [Tinv_aux_succ, mul_assoc, coe_mk, pow_succ'] } },
+  { exact (Tinv_aux_summable F s).mul_right _ },
+  { exact (nnreal.summable_nat_add_iff 1).mpr (F.summable s) }
+end
 
 end Tinv
 

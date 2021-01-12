@@ -6,9 +6,10 @@ import category_theory.Fintype
 import topology.order
 import topology.separation
 import topology.subset_properties
+import data.real.nnreal
 
 noncomputable theory
-open_locale big_operators classical
+open_locale big_operators classical nnreal
 
 -- Thanks to Ruben Van de Velde and Yury G. Kudryashov for help with
 -- the Ico_finite and Icc_finite lemmas.
@@ -24,14 +25,14 @@ end
 
 instance (a b : ℤ) : fintype (Icc a b) := nonempty.some (Icc_finite a b)
 
-structure Mbar_bdd (r : ℝ) (S : Fintype) (c : ℝ) (M : ℕ) :=
+structure Mbar_bdd (r : ℝ≥0) (S : Fintype) (c : ℝ≥0) (M : ℕ) :=
 (to_fun : S → fin (M + 1) → ℤ)
 (coeff_zero' : ∀ s, to_fun s 0 = 0)
-(sum_le' : (∑ s i, abs ((to_fun s i : ℝ) * r^(i : ℕ))) ≤ c)
+(sum_le' : (∑ s i, (↑(to_fun s i).nat_abs * r^(i : ℕ))) ≤ c)
 
 namespace Mbar_bdd
 
-variables {r : ℝ} {S : Fintype} {c c₁ c₂ : ℝ} {M : ℕ}
+variables {r : ℝ≥0} {S : Fintype} {c c₁ c₂ : ℝ≥0} {M : ℕ}
 
 instance has_coe_to_fun : has_coe_to_fun (Mbar_bdd r S c M) := ⟨_, Mbar_bdd.to_fun⟩
 
@@ -40,64 +41,72 @@ instance has_coe_to_fun : has_coe_to_fun (Mbar_bdd r S c M) := ⟨_, Mbar_bdd.to
 @[simp] protected lemma coeff_zero (x : Mbar_bdd r S c M) (s : S) : x s 0 = 0 := x.coeff_zero' s
 
 protected lemma sum_le (x : Mbar_bdd r S c M) :
-  (∑ s i, (abs ((x s i : ℝ) * r^(i:ℕ)))) ≤ c := x.sum_le'
+  (∑ s i, ((↑(x s i).nat_abs * r^(i:ℕ)))) ≤ c := x.sum_le'
 
 protected def cast_le [hc : fact (c₁ ≤ c₂)] (x : Mbar_bdd r S c₁ M) : Mbar_bdd r S c₂ M :=
 ⟨x.1, x.coeff_zero, x.sum_le.trans hc⟩
 
 def mk' (x : S → fin (M + 1) → ℤ)
   (h : (∀ s, x s 0 = 0) ∧
-       (∑ s i, (abs ((x s i : ℝ) * r^(i:ℕ)))) ≤ c) :
+       (∑ s i, ((↑(x s i).nat_abs * r^(i:ℕ)))) ≤ c) :
   Mbar_bdd r S c M :=
 { to_fun := x, coeff_zero' := h.1, sum_le' := h.2 }
 
 @[ext] lemma ext (x y : Mbar_bdd r S c M) (h : ⇑x = y) : x = y :=
 by { cases x, cases y, congr, exact h }
 
-instance [fact (0 ≤ c)] : has_zero (Mbar_bdd r S c M) :=
+instance : has_zero (Mbar_bdd r S c M) :=
 { zero :=
   { to_fun := 0,
     coeff_zero' := λ s, rfl,
     sum_le' :=
-    by simpa only [int.cast_zero, zero_mul, pi.zero_apply, abs_zero, finset.sum_const_zero] } }
+    by simp only [zero_mul, pi.zero_apply, finset.sum_const_zero,
+      nat.cast_zero, zero_le', int.nat_abs_zero] } }
 
 open finset
 
-lemma nonneg_of_Mbar_bdd {r : ℝ} {S : Fintype} {c : ℝ} {M : ℕ}
-  (x : Mbar_bdd r S c M) : 0 ≤ c :=
-begin
-  -- This should be a simple term-mode proof but I got a deterministic
-  -- timeout when I tried it...
-  refine (finset.sum_nonneg _).trans x.sum_le,
-  exact (λ _ _, finset.sum_nonneg (λ _ _, abs_nonneg _)),
-end
-
 lemma coeff_bound [h0r : fact (0 < r)] (F : S → fin (M + 1) → ℤ)
-  (hF : ∑ s i, abs ((F s i : ℝ) * r^(i : ℕ)) ≤ c) (n : fin (M + 1)) (s : S) :
-  abs (F s n : ℝ) ≤ c / min (r ^ M) 1 :=
+  (hF : ∑ s i, (↑(F s i).nat_abs * r^(i : ℕ)) ≤ c) (n : fin (M + 1)) (s : S) :
+  ↑(F s n).nat_abs ≤ c / min (r ^ M) 1 :=
 begin
-  rw le_div_iff (lt_min (pow_pos h0r _) zero_lt_one),
-  calc abs ↑(F s n) * min (r ^ M) 1 ≤ abs ↑(F s n) * r ^ n.1 : begin
-    refine mul_le_mul_of_nonneg_left _ (abs_nonneg _),
+  rw [div_eq_mul_inv],
+  apply le_mul_inv_of_mul_le ((lt_min (pow_pos h0r _) zero_lt_one).ne.symm),
+  calc ↑(F s n).nat_abs * min (r ^ M) 1 ≤ ↑(F s n).nat_abs * r ^ (n:ℕ) : begin
+    refine mul_le_mul_of_nonneg_left _ (subtype.property (_ : ℝ≥0)),
     cases le_or_lt r 1 with hr1 hr1,
     { refine le_trans (min_le_left _ _) _,
       exact pow_le_pow_of_le_one (le_of_lt h0r) hr1 (nat.lt_add_one_iff.1 n.2) },
     { exact le_trans (min_le_right _ _) (one_le_pow_of_one_le (le_of_lt hr1) _) },
   end
-  ... = abs ((F s n : ℝ) * r ^ n.1) : by rw [abs_mul, abs_of_pos (pow_pos h0r _)]
-  ... ≤ ∑ i, abs ((F s i : ℝ) * r ^ (i : ℕ)) :
-    single_le_sum (λ (i : fin (M + 1)) _, abs_nonneg ((F s i : ℝ) * r ^ i.val)) (mem_univ n)
-  ... ≤ ∑ s i, abs ((F s i : ℝ) * r^(i : ℕ)) : begin
+  -- ... = (↑(F s n).nat_abs * r ^ (n:ℕ)) : by {  } --rw [abs_mul, abs_of_pos (pow_pos h0r _)]
+  ... ≤ ∑ i, (↑(F s i).nat_abs * r ^ (i:ℕ)) :
+    single_le_sum (λ (i : fin (M + 1)) _, _) (mem_univ n)
+  ... ≤ ∑ s i, (↑(F s i).nat_abs * r^(i : ℕ)) : begin
     refine single_le_sum (λ _ _, _) (mem_univ s),
-    exact sum_nonneg (λ _ _, (abs_nonneg _)),
+    exact sum_nonneg (λ _ _, (subtype.property (_ : ℝ≥0))),
   end
-  ... ≤ c : hF
+  ... ≤ c : hF,
+  apply subtype.property (_ : ℝ≥0)
 end
 
+-- move this
+lemma cast_nat_abs {R : Type*} [linear_ordered_ring R] : ∀ (n : ℤ), (n.nat_abs : R) = abs n
+| (n : ℕ) := by simp only [int.nat_abs_of_nat, int.cast_coe_nat, nat.abs_cast]
+| -[1+n]  := by simp only [int.nat_abs, int.cast_neg_succ_of_nat, abs_neg,
+                           ← nat.cast_succ, nat.abs_cast]
+
+lemma cast_nat_abs_eq_nnabs_cast (n : ℤ) :
+  (n.nat_abs : ℝ≥0) = real.nnabs n :=
+by { ext, rw [nnreal.coe_nat_cast, cast_nat_abs, nnreal.coe_nnabs] }
+
 private def temp_map [fact (0 < r)] (F : Mbar_bdd r S c M) (n : fin (M + 1)) (s : S) :
-  Icc (ceil (-(c / min (r ^ M) 1))) (floor (c / min (r ^ M) 1)) :=
-let h := abs_le.1 $ coeff_bound F F.sum_le n s in
-⟨F s n, ceil_le.2 $ h.1, le_floor.2 h.2⟩
+  Icc (ceil (-(c / min (r ^ M) 1) : ℝ)) (floor (c / min (r ^ M) 1 : ℝ)) :=
+begin
+  have h : (-(c / min (r ^ M) 1) : ℝ) ≤ F s n ∧ (F s n : ℝ) ≤ (c / min (r ^ M) 1 : ℝ),
+  { rw [← abs_le, ← nnreal.coe_nnabs, ← cast_nat_abs_eq_nnabs_cast, nnreal.coe_nat_cast],
+    norm_cast, exact coeff_bound F F.sum_le n s },
+  exact ⟨F s n, ceil_le.2 $ h.1, le_floor.2 h.2⟩
+end
 
 instance [fact (0 < r)] : fintype (Mbar_bdd r S c M) :=
 fintype.of_injective temp_map begin
@@ -110,7 +119,7 @@ end
 def ι {M N : ℕ} (h : M ≤ N) : fin M ↪ fin N := (fin.cast_le h).to_embedding
 
 -- Should this be in mathlib?
-lemma sum_eq_sum_map_ι {M N : ℕ} (h : M ≤ N) (f : fin N → ℝ) :
+lemma sum_eq_sum_map_ι {M N : ℕ} (h : M ≤ N) (f : fin N → ℝ≥0) :
   ∑ i, f (ι h i) = ∑ j in finset.map (ι h) finset.univ, f j :=
 finset.sum_bij' (λ a _, ι h a) (λ a ha, by {rw mem_map, exact ⟨a, ha, rfl⟩})
 (λ a ha, rfl) (λ a ha, ⟨a.1, begin
@@ -121,7 +130,7 @@ end ⟩)
 (λ a ha, finset.mem_univ _) (λ a ha, by tidy) (λ a ha, by tidy)
 
 /-- The transition maps between the Mbar_bdd sets. -/
-def transition (r : ℝ) {S : Fintype} {c : ℝ} {M N : ℕ} (h : M ≤ N) (x : Mbar_bdd r S c N) :
+def transition (r : ℝ≥0) {S : Fintype} {c : ℝ≥0} {M N : ℕ} (h : M ≤ N) (x : Mbar_bdd r S c N) :
   Mbar_bdd r S c M :=
 { to_fun := λ s i, x s (ι (add_le_add_right h 1) i),
   coeff_zero' := λ s, x.coeff_zero _,
@@ -137,15 +146,14 @@ def transition (r : ℝ) {S : Fintype} {c : ℝ} {M N : ℕ} (h : M ≤ N) (x : 
     { rw ← sum_eq_sum_map_ι,
       apply le_of_eq,
       congr },
-    { intros,
-      exact (abs_nonneg _) }
+    { intros, exact subtype.property (_ : ℝ≥0) }
   end }
 
-lemma transition_eq {r : ℝ} {S : Fintype} {c : ℝ} {M N : ℕ} (h : M ≤ N)
+lemma transition_eq {r : ℝ≥0} {S : Fintype} {c : ℝ≥0} {M N : ℕ} (h : M ≤ N)
   (F : Mbar_bdd r S c N) (s : S) (i : fin (M+1)) :
   (transition r h F).1 s i = F.1 s (ι (by linarith) i) := by tidy
 
-lemma transition_transition {r : ℝ} {S : Fintype} {c : ℝ}
+lemma transition_transition {r : ℝ≥0} {S : Fintype} {c : ℝ≥0}
   {M N K : ℕ} (h : M ≤ N) (hh : N ≤ K) (x : Mbar_bdd r S c K) :
   transition r h (transition r hh x) = transition r (le_trans h hh) x := by tidy
 
@@ -243,57 +251,12 @@ def add (F : Mbar_bdd r S c₁ M) (G : Mbar_bdd r S c₂ M) : Mbar_bdd r S (c₁
     rw ← sum_add_distrib,
     refine finset.sum_le_sum _,
     rintro i -,
-    convert abs_add _ _,
-    simp [add_mul]
+    rw ← add_mul,
+    apply mul_le_mul_right',
+    norm_cast,
+    apply int.nat_abs_add_le
   end }
 
 end addition
-
-section Tinv
-
-/-!
-### The action of T⁻¹
--/
-
-variables {R : Type*} [has_zero R]
-
-def Tinv_aux (F : (fin (M+2)) → R) (n : fin (M+1)) : R :=
-if n = 0 then 0 else F n.succ
-
-@[simp] lemma Tinv_aux_zero (f : fin (M+2) → R) : Tinv_aux f 0 = 0 := rfl
-
-@[simp] lemma Tinv_aux_ne_zero (f : fin (M+2) → R) (i : fin (M+1)) (hi : i ≠ 0) :
-  Tinv_aux f i = f i.succ :=
-if_neg hi
-
-@[simps]
-def Tinv {r : ℝ} {S : Fintype} {c : ℝ} [h0r : fact (0 < r)] (F : Mbar_bdd r S c (M+1)) :
-  Mbar_bdd r S (c / r) M :=
-{ to_fun := λ s, Tinv_aux (F s),
-  coeff_zero' := λ s, rfl,
-  sum_le' :=
-  begin
-    rw [le_div_iff h0r, sum_mul],
-    refine le_trans _ F.sum_le,
-    apply sum_le_sum,
-    rintro s -,
-    rw [sum_mul, sum_fin_eq_sum_range, sum_fin_eq_sum_range, sum_range_succ' _ (M+1)],
-    dsimp,
-    simp only [nat.succ_pos', add_zero, int.cast_zero, dif_pos,
-      Mbar_bdd.coeff_zero, zero_mul, abs_zero, add_lt_add_iff_right],
-    apply sum_le_sum,
-    rintro ⟨i⟩ hi,
-    { simp only [abs_nonneg, nat.succ_pos', fin.mk_zero, int.cast_zero, dif_pos,
-        lt_add_iff_pos_left, zero_mul, abs_zero, Tinv_aux_zero] },
-    { rw finset.mem_range at hi,
-      rw [dif_pos hi, dif_pos (add_lt_add_right hi 1), Tinv_aux_ne_zero],
-      swap,
-      { simp only [fin.ext_iff, fin.coe_zero, ne.def, fin.coe_mk, nat.succ_ne_zero, not_false_iff] },
-      { simp only [abs_mul, pow_add, mul_assoc, pow_one, abs_of_pos h0r],
-        apply le_of_eq,
-        congr, } }
-  end }
-
-end Tinv
 
 end Mbar_bdd
