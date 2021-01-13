@@ -293,8 +293,9 @@ lemma suitable_smul_iff (k : ℤ) (hk : k ≠ 0) (f : universal_map m n) (c₁ c
 by { apply forall_congr, intros g, rw support_smul k hk }
 
 lemma suitable_neg_iff (f : universal_map m n) (c₁ c₂ : ℝ≥0) :
-  fact (suitable c₁ c₂ (-f)) ↔ fact (f.suitable c₁ c₂) :=
-⟨by { introsI h, rw ← neg_neg f, apply_instance }, by introsI h; apply_instance⟩
+  suitable c₁ c₂ (-f) ↔ f.suitable c₁ c₂ :=
+⟨by { intro h, rw ← neg_neg f, exact @universal_map.suitable_neg _ _ _ c₁ c₂ h },
+ by { intro h, exact @universal_map.suitable_neg _ _ _ c₁ c₂ h }⟩
 
 lemma suitable_comp (f : universal_map m n) (g : universal_map l m)
   (hf : f.suitable c₂ c₁) (hg : g.suitable c₃ c₂) :
@@ -345,6 +346,26 @@ begin
   exact hg.elim
 end
 
+@[simp] lemma eval_Mbar_pow_neg (f : universal_map m n) :
+  eval_Mbar_pow V S r' c₁ c₂ (-f) = -f.eval_Mbar_pow V S r' c₁ c₂ :=
+begin
+  rw eval_Mbar_pow,
+  split_ifs,
+  { rw suitable_neg_iff at h,
+    rw [eval_Mbar_pow, dif_pos h],
+    simp only [eval_Mbar_pow, add_monoid_hom.map_neg, finset.sum_neg_distrib, neg_smul, neg_inj],
+    apply finset.sum_bij (λ g hg, _),
+    swap 5, { refine ⟨↑g, _⟩, simpa only [support_neg] using g.2 },
+    { intros, exact finset.mem_univ _ },
+    { intros, refl },
+    { intros _ _ _ _ H, simp only [subtype.ext_iff, subtype.coe_mk] at H ⊢, exact H },
+    { intros g hg,
+      refine ⟨⟨↑g, _⟩, finset.mem_univ _, _⟩, { simpa only [support_neg] using g.2 },
+      ext, refl } },
+  { rw suitable_neg_iff at h,
+    rw [eval_Mbar_pow, dif_neg h, neg_zero] }
+end
+
 lemma eval_Mbar_pow_comp (f : universal_map m n) (g : universal_map l m)
   [h₁ : fact (f.suitable c₂ c₁)] [h₂ : fact (g.suitable c₃ c₂)] :
   (universal_map.comp f g).eval_Mbar_pow V S r' c₁ c₃ =
@@ -357,7 +378,11 @@ begin
     simp only [eval_Mbar_pow_zero, zero_comp, pi.zero_apply,
       add_monoid_hom.coe_zero, add_monoid_hom.map_zero] },
   { intros f hf hg, sorry },
-  { intros f hf IH hg, resetI, specialize IH, sorry },
+  { intros f hf IH hg, resetI, specialize IH,
+    show _ = normed_group_hom.comp_hom _ _,
+    simp only [IH, pi.neg_apply, add_monoid_hom.map_neg, eval_Mbar_pow_neg, add_monoid_hom.coe_neg,
+      neg_inj],
+    refl },
   { intros f₁ f₂ hf₁ hf₂ IH₁ IH₂ hg, resetI, specialize IH₁, specialize IH₂, sorry }
 end
 
