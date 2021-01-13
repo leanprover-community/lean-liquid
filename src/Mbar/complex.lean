@@ -435,6 +435,7 @@ begin
     { introsI, simp only [eval_Mbar_pow_zero, comp_zero, add_monoid_hom.map_zero] },
     { introsI j hj g i hi f h₁ h₂ h₃, apply eval_Mbar_pow_comp_smul_of; assumption },
     { introsI g k hk f hfg IH1 IH2 i hi f₀ h₁ h₂ h₃,
+      simp only [add_monoid_hom.map_add],
       sorry } },
   sorry
 end
