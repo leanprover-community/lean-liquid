@@ -8,6 +8,7 @@ import normed_with_aut
 import for_mathlib.functor
 
 noncomputable theory
+open_locale nnreal
 
 namespace NormedGroup
 open uniform_space opposite
@@ -173,14 +174,14 @@ def LCC : NormedGroup ⥤ CompHausᵒᵖ ⥤ NormedGroup :=
 variables (S : Type*) [topological_space S] [compact_space S]
 
 @[simps]
-instance normed_with_aut_LocallyConstant (V : NormedGroup) (S : CompHaus) (r : ℝ)
+instance normed_with_aut_LocallyConstant (V : NormedGroup) (S : CompHaus) (r : ℝ≥0)
   [normed_with_aut r V] [hr : fact (0 < r)] :
   normed_with_aut r ((LocallyConstant.obj V).obj (op S)) :=
 { T := (LocallyConstant.map_iso normed_with_aut.T).app (op S),
   norm_T :=
   begin
     rintro (f : locally_constant S V),
-    show Sup _ = r * Sup _,
+    show Sup _ = ↑r * Sup _,
     dsimp,
     simp only [normed_with_aut.norm_T],
     convert real.Sup_mul r _ hr,
@@ -188,7 +189,7 @@ instance normed_with_aut_LocallyConstant (V : NormedGroup) (S : CompHaus) (r : �
     simp only [exists_prop, set.mem_range, exists_exists_eq_and, set.mem_set_of_eq]
   end }
 
-instance normed_with_aut_LCC (V : NormedGroup) (S : CompHaus) (r : ℝ)
+instance normed_with_aut_LCC (V : NormedGroup) (S : CompHaus) (r : ℝ≥0)
   [normed_with_aut r V] [hr : fact (0 < r)] :
   normed_with_aut r ((LCC.obj V).obj (op S)) :=
 show normed_with_aut r (Completion.obj $ (LocallyConstant.obj V).obj (op S)), by apply_instance

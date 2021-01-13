@@ -43,14 +43,15 @@ end int
 
 variables (V : NormedGroup) (S : Type*) (r r' c c' c₁ c₂ c₃ c₄ : ℝ≥0) (a : ℕ) [fintype S]
 
--- -- move this
--- instance fix_my_name [h1 : fact (0 < r')] [h2 : fact (r' ≤ 1)] [h3 : fact (0 ≤ c)] :
---   fact (c ≤ c / r') :=
--- begin
---   rw le_div_iff h1,
---   nth_rewrite 1 ← mul_one c,
---   exact mul_le_mul (le_of_eq rfl) h2 (le_of_lt h1) h3,
--- end
+-- move this
+instance fix_my_name [h1 : fact (0 < r')] [h2 : fact (r' ≤ 1)] :
+  fact (c ≤ r'⁻¹ * c) :=
+begin
+  rw mul_comm,
+  apply le_mul_inv_of_mul_le (ne_of_gt h1),
+  nth_rewrite 1 ← mul_one c,
+  exact mul_le_mul (le_of_eq rfl) h2 (le_of_lt h1) zero_le',
+end
 
 -- -- move this
 -- instance fix_my_name₂ [h1 : fact (0 < r')] [h2 : fact (0 ≤ c)] : fact (0 ≤ c / r') :=
@@ -58,8 +59,8 @@ variables (V : NormedGroup) (S : Type*) (r r' c c' c₁ c₂ c₃ c₄ : ℝ≥0
 
 -- move this
 instance fix_my_name₃ [fact (0 < r')] [fact (c₁ ≤ c₂)] :
-  fact (c₁ / r' ≤ c₂ / r') :=
-by { rwa [div_eq_inv_mul, div_eq_inv_mul, mul_le_mul_left], rwa [inv_pos] }
+  fact (r'⁻¹ * c₁ ≤ r'⁻¹ * c₂) :=
+by { rwa [mul_le_mul_left], rw zero_lt_iff at *, apply inv_ne_zero, assumption }
 
 /-- The functor `V-hat`, from compact Hausdorff spaces to normed groups. -/
 abbreviation hat := NormedGroup.LCC.obj V
@@ -68,7 +69,7 @@ def LC_Mbar_pow [fact (0 < r')] : NormedGroup :=
 (NormedGroup.LocallyConstant.obj V).obj (op $ CompHaus.of $ (Mbar_le r' S c)^a)
 
 instance normed_with_aut_LC_Mbar_pow [fact (0 < r)] [fact (0 < r')] [normed_with_aut r V] :
-  normed_with_aut r (LC_Mbar_pow V S r' c a) := by {unfold LC_Mbar_pow, apply_instance}
+  normed_with_aut r (LC_Mbar_pow V S r' c a) := by { unfold LC_Mbar_pow, apply_instance }
 
 /-- The space `V-hat(Mbar_{r'}(S)_{≤c}^a)`. -/
 def LCC_Mbar_pow [fact (0 < r')] : NormedGroup :=
@@ -124,13 +125,13 @@ lemma res_comp_res [fact (0 < r')] [fact (c₁ ≤ c₂)] [fact (c₂ ≤ c₃)]
 by {delta res, rw [← functor.map_comp, res₀_comp_res₀] }
 
 def Tinv₀ [fact (0 < r')] :
-  LC_Mbar_pow V S r' (c / r') a ⟶ LC_Mbar_pow V S r' c a :=
+  LC_Mbar_pow V S r' (r'⁻¹ * c) a ⟶ LC_Mbar_pow V S r' c a :=
 (NormedGroup.LocallyConstant.obj V).map $ has_hom.hom.op $
 ⟨λ x, Mbar_le.Tinv ∘ x,
-  continuous_pi $ λ i, (Mbar_le.continuous_Tinv r' S c).comp (continuous_apply i)⟩
+  continuous_pi $ λ i, (Mbar_le.continuous_Tinv r' S _ _).comp (continuous_apply i)⟩
 
 def Tinv [fact (0 < r')] :
-  LCC_Mbar_pow V S r' (c / r') a ⟶ LCC_Mbar_pow V S r' c a :=
+  LCC_Mbar_pow V S r' (r'⁻¹ * c) a ⟶ LCC_Mbar_pow V S r' c a :=
 NormedGroup.Completion.map $ Tinv₀ _ _ _ _ _
 
 lemma Tinv₀_res [fact (0 < r')] [fact (c₁ ≤ c₂)] :
@@ -190,68 +191,34 @@ end
 
 end LCC_Mbar_pow
 
-/-
-TODO: Do we want to define the `T⁻¹`-invariants as a kernel,
-or would it be better to use equalizers?
--/
-/-- The space `V-hat(Mbar_{r'}(S)_{≤c}^a)^{T⁻¹}`. -/
-def LCC_Mbar_pow_Tinv [fact (0 < r)] [fact (0 < r')] [fact (r' ≤ 1)] [fact (0 ≤ c)]
-  [normed_with_aut r V] :
-  NormedGroup :=
-kernel ((LCC_Mbar_pow.Tinv V S r' c a) - (normed_with_aut.T.inv ≫ (LCC_Mbar_pow.res V S r' _ _ a)))
-
-namespace LCC_Mbar_pow_Tinv
-
-def res [fact (0 < r)] [fact (0 < r')] [fact (r' ≤ 1)]
-  [fact (0 ≤ c₁)] [fact (0 ≤ c₂)] [fact (c₁ ≤ c₂)] [normed_with_aut r V] :
-  LCC_Mbar_pow_Tinv V S r r' c₂ a ⟶ LCC_Mbar_pow_Tinv V S r r' c₁ a :=
-kernel.lift _ (kernel.ι _ ≫ LCC_Mbar_pow.res _ _ _ _ _ _)
-begin
-  rw category.assoc,
-  -- now we need to know that `res` commutes with the two types of `Tinv`
-  ext v,
-  dsimp,
-  simp only [pi.zero_apply, normed_group_hom.coe_sub, coe_comp, pi.sub_apply],
-  sorry
-end
-
-lemma res_comp_res [fact (0 < r)] [fact (0 < r')] [fact (r' ≤ 1)]
-  [fact (0 ≤ c₁)] [fact (0 ≤ c₂)] [fact (0 ≤ c₃)]
-  [fact (c₁ ≤ c₂)] [fact (c₂ ≤ c₃)] [fact (c₁ ≤ c₃)]
-  [normed_with_aut r V] :
-  res V S r r' c₂ c₃ a ≫ res V S r r' c₁ c₂ a = res V S r r' c₁ c₃ a :=
-sorry
-
-@[simp] lemma res_refl [fact (0 < r)] [fact (0 < r')] [fact (r' ≤ 1)] [fact (0 ≤ c)] [fact (c ≤ c)]
-  [normed_with_aut r V] :
-  res V S r r' c c a = 𝟙 _ :=
-sorry
-
-end LCC_Mbar_pow_Tinv
-
-variables [fact (0 < r)] [normed_with_aut r V]
-variables [fact (0 < r')] [fact (r' ≤ 1)]
-variables [fact (0 ≤ c)] [fact (0 ≤ c')]
-variables [fact (0 ≤ c₁)] [fact (0 ≤ c₂)] [fact (0 ≤ c₃)] [fact (0 ≤ c₄)]
-
 namespace breen_deligne
+
+variable [fact (0 < r')]
 
 variables {l m n : ℕ}
 
 namespace basic_universal_map
 
-def eval_Mbar_Tinv (f : basic_universal_map m n) [fact (f.suitable c c')] :
-  (LCC_Mbar_pow_Tinv V S r r' c n) ⟶ (LCC_Mbar_pow_Tinv V S r r' c' m) :=
-sorry
+def eval_Mbar_pow (f : basic_universal_map m n) [fact (f.suitable c' c)] :
+  (LCC_Mbar_pow V S r' c n) ⟶ (LCC_Mbar_pow V S r' c' m) :=
+(hat V).map $ has_hom.hom.op $ ⟨f.eval_Mbar_le _ _ _ _, f.eval_Mbar_le_continuous _ _ _ _⟩
 
-lemma eval_Mbar_Tinv_zero [fact ((0 : basic_universal_map m n).suitable c c')] :
-  (0 : basic_universal_map m n).eval_Mbar_Tinv V S r r' c c' = 0 :=
-sorry
+lemma fact_zero_suitable : fact ((0 : basic_universal_map m n).suitable c c') :=
+λ i, by simp only [nat.cast_zero, zero_mul, zero_le', finset.sum_const_zero,
+          matrix.zero_apply, int.nat_abs_zero]
 
-lemma eval_Mbar_Tinv_comp (f : basic_universal_map m n) (g : basic_universal_map l m)
+local attribute [instance] fact_zero_suitable
+
+lemma eval_Mbar_pow_zero :
+  (0 : basic_universal_map m n).eval_Mbar_pow V S r' c c' = 0 :=
+begin
+
+end
+
+lemma eval_Mbar_pow_comp (f : basic_universal_map m n) (g : basic_universal_map l m)
   [fact (f.suitable c₁ c₂)] [fact (g.suitable c₂ c₃)] [fact ((f.comp g).suitable c₁ c₃)] :
-  (f.comp g).eval_Mbar_Tinv V S r r' c₁ c₃ =
-  f.eval_Mbar_Tinv V S r r' c₁ c₂ ≫ g.eval_Mbar_Tinv V S r r' c₂ c₃ :=
+  (f.comp g).eval_Mbar_pow V S r' c₁ c₃ =
+  f.eval_Mbar_pow V S r' c₁ c₂ ≫ g.eval_Mbar_pow V S r' c₂ c₃ :=
 sorry
 
 end basic_universal_map
@@ -263,11 +230,11 @@ This predicate says what *suitable* means for universal maps.
 See Lemma 9.11 of [Analytic]. -/
 def suitable (f : universal_map m n) (c c' : ℝ) : Prop := sorry
 
-constant eval_Mbar_Tinv {m n : ℕ} (f : universal_map m n) [fact (f.suitable c c')] :
-  (LCC_Mbar_pow_Tinv V S r r' c n) ⟶ (LCC_Mbar_pow_Tinv V S r r' c' m)
+constant eval_Mbar_pow {m n : ℕ} (f : universal_map m n) [fact (f.suitable c c')] :
+  (LCC_Mbar_pow V S r' c n) ⟶ (LCC_Mbar_pow V S r' c' m)
   --  := sorry
 
-lemma eval_Mbar_Tinv_zero [fact ((0 : universal_map m n).suitable c c')] :
+lemma eval_Mbar_pow_zero [fact ((0 : universal_map m n).suitable c c')] :
   (0 : universal_map m n).eval_Mbar_Tinv V S r r' c c' = 0 :=
 sorry
 
@@ -290,14 +257,13 @@ instance suitable_of_mul_left
 
 end universal_map
 
-
 namespace package
 
 def suitable (BD : package) (c : ℕ → ℝ) : Prop := sorry
 
 variables (BD : package) (cs : ℕ → ℝ) (i : ℕ) [fact (BD.suitable cs)]
 
-instance nonneg_of_suitable : fact (0 ≤ cs i) := sorry
+-- instance nonneg_of_suitable : fact (0 ≤ cs i) := sorry
 
 instance basic_suitable_of_suitable : fact ((BD.map i).suitable (cs i) (cs (i+1))) := sorry
 
@@ -314,12 +280,53 @@ end package
 
 end breen_deligne
 
+
+/-
+TODO: Do we want to define the `T⁻¹`-invariants as a kernel,
+or would it be better to use equalizers?
+-/
+/-- The space `V-hat(Mbar_{r'}(S)_{≤c}^a)^{T⁻¹}`. -/
+def LCC_Mbar_pow_Tinv [fact (0 < r)] [fact (0 < r')] [fact (r' ≤ 1)]
+  [normed_with_aut r V] :
+  NormedGroup :=
+kernel ((LCC_Mbar_pow.Tinv V S r' c a) - (normed_with_aut.T.inv ≫ (LCC_Mbar_pow.res V S r' _ _ a)))
+
+namespace LCC_Mbar_pow_Tinv
+
+def res [fact (0 < r)] [fact (0 < r')] [fact (r' ≤ 1)] [fact (c₁ ≤ c₂)] [normed_with_aut r V] :
+  LCC_Mbar_pow_Tinv V S r r' c₂ a ⟶ LCC_Mbar_pow_Tinv V S r r' c₁ a :=
+kernel.lift _ (kernel.ι _ ≫ LCC_Mbar_pow.res _ _ _ _ _ _)
+begin
+  rw category.assoc,
+  -- now we need to know that `res` commutes with the two types of `Tinv`
+  ext v,
+  dsimp,
+  simp only [pi.zero_apply, normed_group_hom.coe_sub, coe_comp, pi.sub_apply],
+  sorry
+end
+
+lemma res_comp_res [fact (0 < r)] [fact (0 < r')] [fact (r' ≤ 1)]
+  [fact (c₁ ≤ c₂)] [fact (c₂ ≤ c₃)] [fact (c₁ ≤ c₃)]
+  [normed_with_aut r V] :
+  res V S r r' c₂ c₃ a ≫ res V S r r' c₁ c₂ a = res V S r r' c₁ c₃ a :=
+sorry
+
+@[simp] lemma res_refl [fact (0 < r)] [fact (0 < r')] [fact (r' ≤ 1)] [fact (c ≤ c)]
+  [normed_with_aut r V] :
+  res V S r r' c c a = 𝟙 _ :=
+sorry
+
+end LCC_Mbar_pow_Tinv
+
+variables [fact (0 < r)] [normed_with_aut r V]
+variables [fact (0 < r')] [fact (r' ≤ 1)]
+
 open breen_deligne
 
 variables [normed_with_aut r V]
 
--- move this
-instance fact_mul_nonneg : fact (0 ≤ c₁ * c₂) := mul_nonneg ‹_› ‹_›
+-- -- move this
+-- instance fact_mul_nonneg : fact (0 ≤ c₁ * c₂) := mul_nonneg ‹_› ‹_›
 
 def Mbar_complex (BD : breen_deligne.package) (c' : ℕ → ℝ) [fact (BD.suitable c')] :
   cochain_complex NormedGroup :=

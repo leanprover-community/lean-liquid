@@ -113,7 +113,7 @@ Mbar_le.hom_of_normed_group_hom' r' S c₁ c₂ H.sup_mul_le (f.eval_png (Mbar r
 
 open add_monoid_hom (apply)
 
-lemma eval_Mbar_le_continuous [fact (0 ≤ c₂)] [H : fact (f.suitable c₁ c₂)] :
+lemma eval_Mbar_le_continuous [H : fact (f.suitable c₁ c₂)] :
   continuous (f.eval_Mbar_le r' S c₁ c₂) :=
 Mbar_le.hom_of_normed_group_hom'_continuous _ _ _ _ H.sup_mul_le _ _ $
 begin

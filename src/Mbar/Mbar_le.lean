@@ -91,35 +91,6 @@ def Mbar_le.add' [fact (0 < r')] [fact (c₁ + c₂ ≤ c₃)] :
 def Mbar_le.neg [fact (0 < r')] (F : Mbar_le r' S c) : Mbar_le r' S c :=
 subtype.mk (-F.1) $ neg_mem_filtration F.mem_filtration
 
--- move this
--- instance fix_my_name4 (n : ℕ) [fact (0 ≤ c)] : fact (0 ≤ c * n) := sorry
-
--- @[simps]
--- def Mbar_le.nsmul [fact (0 < r')] (c' : ℝ) (n : ℕ) [fact (0 ≤ c')] [fact (c * n ≤ c')]
---   (F : Mbar_le r' S c) : Mbar_le r' S c' :=
--- { to_fun := (n •ℕ F.to_Mbar : Mbar r' S),
---   sum_tsum_le' :=
---   calc ∥(n •ℕ F.to_Mbar : Mbar r' S)∥
---       ≤ n * ∥F.to_Mbar∥ : norm_nsmul_le _ _
---   ... ≤ n * c : mul_le_mul le_rfl F.sum_tsum_le (norm_nonneg _) (nat.cast_nonneg _)
---   ... ≤ c' : by rwa mul_comm,
---   .. (n •ℕ F.to_Mbar : Mbar r' S) }
-
--- move this
--- @[simp] lemma int.abs_neg_succ_of_nat (n : ℕ) :
---   abs (-[1+n]) = n+1 :=
-
--- @[simps]
--- def Mbar_le.gsmul [fact (0 < r')] (c' : ℝ) (n : ℤ) [fact (0 ≤ c')] [fact (c * abs n ≤ c')]
---   (F : Mbar_le r' S c) : Mbar_le r' S c' :=
--- { to_fun := (n •ℤ F.to_Mbar : Mbar r' S),
---   sum_tsum_le' :=
---   calc ∥(n •ℤ F.to_Mbar : Mbar r' S)∥
---       ≤ abs n * ∥F.to_Mbar∥ : norm_gsmul_le _ _
---   ... ≤ abs n * c : mul_le_mul le_rfl F.sum_tsum_le (norm_nonneg _) (abs_nonneg _)
---   ... ≤ c' : by rwa mul_comm,
---   .. (n •ℤ F.to_Mbar : Mbar r' S) }
-
 namespace Mbar_le
 
 /-- The truncation map fro Mbar_le to Mbar_bdd -/
