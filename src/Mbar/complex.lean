@@ -4,11 +4,13 @@ import Mbar.breen_deligne
 
 import for_mathlib.CompHaus
 import for_mathlib.continuous_map
+import for_mathlib.free_abelian_group
+import for_mathlib.add_monoid_hom
 
 noncomputable theory
 
 open opposite category_theory category_theory.limits
-open_locale nnreal
+open_locale nnreal big_operators
 local attribute [instance] type_pow
 
 namespace int
@@ -244,34 +246,203 @@ end basic_universal_map
 
 namespace universal_map
 
+open free_abelian_group
+
 /-- Addition goes from `Mbar r' S c` to `Mbar r' S c'` for suitable `c'`.
 This predicate says what *suitable* means for universal maps.
 See Lemma 9.11 of [Analytic]. -/
-def suitable (f : universal_map m n) (c c' : ℝ) : Prop := sorry
+def suitable (f : universal_map m n) (c₁ c₂ : ℝ≥0) : Prop :=
+∀ g ∈ f.support, basic_universal_map.suitable g c₁ c₂
 
-constant eval_Mbar_pow {m n : ℕ} (f : universal_map m n) [fact (f.suitable c c')] :
-  (LCC_Mbar_pow V S r' c n) ⟶ (LCC_Mbar_pow V S r' c' m)
-  --  := sorry
+instance suitable_of_mem_support (f : universal_map m n) (c₁ c₂ : ℝ≥0) (g : {g // g ∈ f.support})
+  [h : fact (f.suitable c₁ c₂)] :
+  fact (basic_universal_map.suitable ↑g c₁ c₂) :=
+h g.1 g.2
 
-lemma eval_Mbar_pow_zero [fact ((0 : universal_map m n).suitable c c')] :
-  (0 : universal_map m n).eval_Mbar_Tinv V S r r' c c' = 0 :=
-sorry
+instance suitable_of (f : basic_universal_map m n) (c₁ c₂ : ℝ≥0) [h : fact (f.suitable c₁ c₂)] :
+  fact (suitable (of f) c₁ c₂) :=
+begin
+  intros g hg,
+  rw [support_of, finset.mem_singleton] at hg,
+  rwa hg
+end
 
-lemma eval_Mbar_Tinv_comp (f : universal_map m n) (g : universal_map l m)
-  [fact (f.suitable c₁ c₂)] [fact (g.suitable c₂ c₃)]
-  [fact ((universal_map.comp f g).suitable c₁ c₃)] :
-  (universal_map.comp f g).eval_Mbar_Tinv V S r r' c₁ c₃ =
-    f.eval_Mbar_Tinv V S r r' c₁ c₂ ≫ g.eval_Mbar_Tinv V S r r' c₂ c₃ :=
-sorry
+lemma suitable_congr (f g : universal_map m n) (c₁ c₂ : ℝ≥0) (h : f = g) :
+  f.suitable c₁ c₂ ↔ g.suitable c₁ c₂ :=
+by subst h
 
-lemma eval_Mbar_Tinv_comp_res (f : universal_map m n)
-  [fact (f.suitable c₁ c₂)] [fact (f.suitable c₃ c₄)] [fact (c₃ ≤ c₁)] [fact (c₄ ≤ c₂)] :
-  f.eval_Mbar_Tinv V S r r' c₁ c₂ ≫ LCC_Mbar_pow_Tinv.res V S r r' c₄ c₂ _ =
-  LCC_Mbar_pow_Tinv.res V S r r' c₃ c₁ _ ≫ f.eval_Mbar_Tinv V S r r' c₃ c₄ :=
+lemma suitable_of_suitable_of (f : basic_universal_map m n) (c₁ c₂ : ℝ≥0)
+  [h : fact (suitable (of f) c₁ c₂)] :
+  fact (f.suitable c₁ c₂) :=
+h f $ by simp only [finset.mem_singleton, support_of]
+
+lemma suitable_of_iff (f : basic_universal_map m n) (c₁ c₂ : ℝ≥0) :
+  fact (suitable (of f) c₁ c₂) ↔ fact (f.suitable c₁ c₂) :=
+⟨by introsI h; apply suitable_of_suitable_of, by introsI h; apply_instance⟩
+
+instance suitable_neg (f : universal_map m n) (c₁ c₂ : ℝ≥0) [h : fact (f.suitable c₁ c₂)] :
+  fact (suitable (-f) c₁ c₂) :=
+by { intros g hg, rw [support_neg] at hg, exact h g hg }
+
+lemma suitable_smul_iff (k : ℤ) (hk : k ≠ 0) (f : universal_map m n) (c₁ c₂ : ℝ≥0) :
+  suitable (k • f) c₁ c₂ ↔ f.suitable c₁ c₂ :=
+by { apply forall_congr, intros g, rw support_smul k hk }
+
+lemma suitable_neg_iff (f : universal_map m n) (c₁ c₂ : ℝ≥0) :
+  fact (suitable (-f) c₁ c₂) ↔ fact (f.suitable c₁ c₂) :=
+⟨by { introsI h, rw ← neg_neg f, apply_instance }, by introsI h; apply_instance⟩
+
+def eval_Mbar_pow {m n : ℕ} (f : universal_map m n) [fact (f.suitable c₂ c₁)] :
+  (LCC_Mbar_pow V S r' c₁ n) ⟶ (LCC_Mbar_pow V S r' c₂ m) :=
+∑ g : {g // g ∈ f.support}, coeff ↑g f •
+                              (basic_universal_map.eval_Mbar_pow V S r' c₁ c₂ ↑g)
+
+lemma zero_suitable : fact ((0 : universal_map m n).suitable c' c) :=
+λ g hg,
+by { simp only [support_zero, finset.not_mem_empty] at hg, exact hg.elim }
+
+local attribute [instance] zero_suitable
+
+@[simp] lemma eval_Mbar_pow_zero :
+  (0 : universal_map m n).eval_Mbar_pow V S r' c c' = 0 :=
+begin
+  rw [eval_Mbar_pow, finset.sum_eq_zero],
+  rintro ⟨g, hg⟩,
+  simp only [support_zero, finset.not_mem_empty] at hg,
+  exact hg.elim
+end
+
+@[simp] lemma eval_Mbar_pow_of (f : basic_universal_map m n) [fact (f.suitable c₂ c₁)] :
+  eval_Mbar_pow V S r' c₁ c₂ (of f) = f.eval_Mbar_pow V S r' c₁ c₂ :=
+begin
+  rw [eval_Mbar_pow, finset.sum_eq_single],
+  swap 4, { refine ⟨f, _⟩, simp only [finset.mem_singleton, support_of] },
+  { simp only [coeff_of_self, one_smul, subtype.coe_mk] },
+  { rintro ⟨g, hg⟩ H H',
+    simp only [finset.mem_singleton, support_of] at hg,
+    simp only [ne.def] at H',
+    exact (H' hg).elim },
+  { intro h, exact (h (finset.mem_univ _)).elim }
+end
+
+lemma eval_Mbar_pow_comp_of (g : basic_universal_map l m) (f : basic_universal_map m n)
+  [h₁ : fact (f.suitable c₂ c₁)]
+  [h₂ : fact (g.suitable c₃ c₂)]
+  [h₃ : fact (((comp (of f)) (of g)).suitable c₃ c₁)] :
+  eval_Mbar_pow V S r' c₁ c₃ ((comp (of f)) (of g)) =
+    eval_Mbar_pow V S r' c₁ c₂ (of f) ≫ eval_Mbar_pow V S r' c₂ c₃ (of g) :=
+begin
+  have := h₃ (f.comp g),
+  simp only [comp_of, support_of, finset.mem_singleton_self, true_implies_iff] at ⊢ this,
+  haveI : fact ((f.comp g).suitable c₃ c₁) := this,
+  simp only [eval_Mbar_pow_of],
+  rw ← basic_universal_map.eval_Mbar_pow_comp
+end
+
+@[simp] lemma eval_Mbar_pow_neg (f : universal_map m n) [fact (f.suitable c₂ c₁)] :
+  eval_Mbar_pow V S r' c₁ c₂ (-f) = -f.eval_Mbar_pow V S r' c₁ c₂ :=
+begin
+  simp only [eval_Mbar_pow, add_monoid_hom.map_neg, finset.sum_neg_distrib, neg_smul, neg_inj],
+  apply finset.sum_bij (λ g hg, _),
+  swap 5, { refine ⟨↑g, _⟩, simpa only [support_neg] using g.2 },
+  { intros, exact finset.mem_univ _ },
+  { intros, refl },
+  { intros _ _ _ _ H, simp only [subtype.ext_iff, subtype.coe_mk] at H ⊢, exact H },
+  { intros g hg,
+    refine ⟨⟨↑g, _⟩, finset.mem_univ _, _⟩, { simpa only [support_neg] using g.2 },
+    ext, refl }
+end
+
+@[simp] lemma eval_Mbar_pow_smul (k : ℤ) (f : universal_map m n)
+  [fact (f.suitable c₂ c₁)] [fact ((k • f).suitable c₂ c₁)] :
+  eval_Mbar_pow V S r' c₁ c₂ (k • f) = k • f.eval_Mbar_pow V S r' c₁ c₂ :=
+begin
+  by_cases hk : k = 0,
+  { simp only [hk, eval_Mbar_pow_zero, zero_smul] },
+  simp only [eval_Mbar_pow],
+  rw finset.smul_sum,
+  let e : {g // g ∈ f.support} ≃ {g // g ∈ (k • f).support} :=
+  equiv.subtype_congr_prop (by { ext, rw support_smul k hk }),
+  rw ← e.sum_comp,
+  apply fintype.sum_congr,
+  rintro ⟨g, hg⟩,
+  rw ← smul_assoc,
+  congr' 1,
+  simp only [← gsmul_eq_smul k, ← add_monoid_hom.map_gsmul],
+  refl
+end
+
+lemma eval_Mbar_pow_comp (f : universal_map m n) (g : universal_map l m)
+  [h₁ : fact (f.suitable c₂ c₁)] [h₂ : fact (g.suitable c₃ c₂)]
+  [h₃ : fact ((universal_map.comp f g).suitable c₃ c₁)] :
+  (universal_map.comp f g).eval_Mbar_pow V S r' c₁ c₃ =
+    f.eval_Mbar_pow V S r' c₁ c₂ ≫ g.eval_Mbar_pow V S r' c₂ c₃ :=
+begin
+  unfreezingI { revert h₁ h₂ h₃ },
+  apply free_abelian_group.induction_on'' f; clear f,
+  { introsI, simp only [eval_Mbar_pow_zero, zero_comp, pi.zero_apply,
+      add_monoid_hom.coe_zero, add_monoid_hom.map_zero] },
+  { apply free_abelian_group.induction_on'' g; clear g,
+    { introsI, simp only [eval_Mbar_pow_zero, comp_zero, add_monoid_hom.map_zero] },
+    { introsI j hj g i hi f h₁ h₂ h₃,
+      have h₄ : fact (suitable (of f) c₂ c₁), { rwa ← suitable_smul_iff i hi },
+      have h₅ : fact (suitable (of g) c₃ c₂), { rwa ← suitable_smul_iff j hj },
+      show _ = normed_group_hom.comp_hom _ _,
+      resetI,
+      simp only [eval_Mbar_pow_smul],
+      have H3 := h₃,
+      simp only [← gsmul_eq_smul, add_monoid_hom.map_gsmul] at H3 ⊢,
+      simp only [gsmul_eq_smul] at H3 ⊢,
+      simp only [comp_of, add_monoid_hom.int_smul_apply] at H3 ⊢,
+      have h₆ : fact (universal_map.suitable (of (f.comp g)) c₃ c₁),
+      { rwa [suitable_smul_iff j hj, suitable_smul_iff i hi] at H3 },
+      resetI,
+      simp only [← smul_assoc, eval_Mbar_pow_smul],
+      rw [smul_assoc, smul_assoc, smul_comm],
+      congr' 2,
+      simp only [suitable_of_iff] at h₄ h₅ h₆, resetI,
+      apply eval_Mbar_pow_comp_of },
+    { introsI g k hk f hfg IH1 IH2 i hi, sorry } },
+  sorry
+end
+
+-- lemma eval_Mbar_pow_comp (f : universal_map m n) (g : universal_map l m)
+--   [h₁ : fact (f.suitable c₂ c₁)] [h₂ : fact (g.suitable c₃ c₂)]
+--   [h₃ : fact ((universal_map.comp f g).suitable c₃ c₁)] :
+--   (universal_map.comp f g).eval_Mbar_pow V S r' c₁ c₃ =
+--     f.eval_Mbar_pow V S r' c₁ c₂ ≫ g.eval_Mbar_pow V S r' c₂ c₃ :=
+-- begin
+--   unfreezingI { revert h₁ h₂ h₃ },
+--   apply free_abelian_group.induction_on f; clear f,
+--   { introsI, simp only [eval_Mbar_pow_zero, zero_comp, pi.zero_apply,
+--       add_monoid_hom.coe_zero, add_monoid_hom.map_zero] },
+--   { apply free_abelian_group.induction_on g; clear g,
+--     { introsI, simp only [eval_Mbar_pow_zero, comp_zero, add_monoid_hom.map_zero] },
+--     { introsI g f h₁ h₂ h₃, apply eval_Mbar_pow_comp_of },
+--     { introsI g IH f h₁ h₂ h₃,
+--       rw suitable_neg_iff at h₂,
+--       have : fact (suitable (of (f.comp g)) c₃ c₁),
+--       { rw ← suitable_neg_iff, refine (suitable_congr _ _ _ _ _).mp h₃,
+--         simp only [comp_of, add_monoid_hom.map_neg] },
+--       resetI,
+--       show _ = normed_group_hom.comp_hom _ _,
+--       simp only [comp_of, add_monoid_hom.map_neg, eval_Mbar_pow_neg,
+--           pi.neg_apply, neg_inj, add_monoid_hom.coe_neg],
+--       apply IH },
+--     { introsI g₁ g₂ IH1 IH2 f h₁ h₂ h₃, } },
+--   -- show _ = normed_group_hom.comp_hom (g.eval_Mbar_pow V S r' c₂ c₃) _,
+--   -- simp only [eval_Mbar_pow, add_monoid_hom.map_sum, add_monoid_hom.sum_apply],
+--   -- rw finset.sum_sigma',
+-- end
+
+lemma eval_Mbar_pow_comp_res (f : universal_map m n)
+  [fact (f.suitable c₂ c₁)] [fact (f.suitable c₄ c₃)] [fact (c₃ ≤ c₁)] [fact (c₄ ≤ c₂)] :
+  f.eval_Mbar_pow V S r' c₁ c₂ ≫ LCC_Mbar_pow.res V S r' c₄ c₂ m =
+  LCC_Mbar_pow.res V S r' c₃ c₁ n ≫ f.eval_Mbar_pow V S r' c₃ c₄ :=
 sorry
 
 instance suitable_of_mul_left
-  (f : universal_map m n) (c c₁ c₂ : ℝ) [fact (f.suitable c₁ c₂)] :
+  (f : universal_map m n) (c c₁ c₂ : ℝ≥0) [fact (f.suitable c₁ c₂)] :
   fact (f.suitable (c * c₁) (c * c₂)) := sorry
 
 end universal_map

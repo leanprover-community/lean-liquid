@@ -1,6 +1,6 @@
 import analysis.normed_space.basic
 
-open_locale nnreal
+open_locale nnreal big_operators
 
 set_option old_structure_cmd true
 
@@ -27,6 +27,10 @@ instance : has_coe_to_fun (normed_group_hom V₁ V₂) := ⟨_, normed_group_hom
 @[simp] lemma map_zero : f 0 = 0 := f.to_add_monoid_hom.map_zero
 
 @[simp] lemma map_add (x y) : f (x + y) = f x + f y := f.to_add_monoid_hom.map_add _ _
+
+@[simp] lemma map_sum {ι : Type*} (v : ι → V₁) (s : finset ι) :
+  f (∑ i in s, v i) = ∑ i in s, f (v i) :=
+f.to_add_monoid_hom.map_sum _ _
 
 @[simp] lemma map_sub (x y) : f (x - y) = f x - f y := f.to_add_monoid_hom.map_sub _ _
 
@@ -162,12 +166,27 @@ by refine_struct
 { .. normed_group_hom.has_add, .. normed_group_hom.has_zero,
   .. normed_group_hom.has_neg, ..normed_group_hom.has_sub };
 { intros, ext, simp [add_assoc, add_comm, add_left_comm, sub_eq_add_neg] }
+.
+def comp_hom : (normed_group_hom V₂ V₃) →+ (normed_group_hom V₁ V₂) →+ (normed_group_hom V₁ V₃) :=
+add_monoid_hom.mk' (λ g, add_monoid_hom.mk' (λ f, g.comp f)
+  (by { intros, ext, exact g.map_add _ _ }))
+  (by { intros, ext, refl })
 
 @[simp] lemma comp_zero (f : normed_group_hom V₂ V₃) : f.comp (0 : normed_group_hom V₁ V₂) = 0 :=
 by { ext, exact f.map_zero' }
 
 @[simp] lemma zero_comp (f : normed_group_hom V₁ V₂) : (0 : normed_group_hom V₂ V₃).comp f = 0 :=
 by { ext, refl }
+
+@[simp] lemma sum_apply {ι : Type*} (s : finset ι) (f : ι → normed_group_hom V₁ V₂) (v : V₁) :
+  (∑ i in s, f i) v = ∑ i in s, (f i v) :=
+begin
+  classical,
+  apply finset.induction_on s,
+  { simp only [coe_zero, finset.sum_empty, pi.zero_apply] },
+  { intros i s his IH,
+    simp only [his, IH, pi.add_apply, finset.sum_insert, not_false_iff, coe_add] }
+end
 
 end normed_group_hom
 

@@ -130,6 +130,21 @@ begin
   refl
 end
 
+-- -- this cannot be an instance because c₂ can't be inferred from the goal
+-- lemma suitable_comp (f : basic_universal_map m n) (g : basic_universal_map l m)
+--   (hf : fact (f.suitable c₂ c₁)) (hg : fact (g.suitable c₃ c₂)) :
+--   fact ((f.comp g).suitable c₃ c₁) :=
+-- begin
+--   intros i,
+--   refine le_trans _ (hf i),
+--   simp only [finset.sum_mul, comp, int.nat_abs, matrix.mul_apply],
+--   simp only [← nat.coe_cast_ring_hom, ring_hom.map_sum, ring_hom.map_mul],
+--   suffices : ∑ j, (f.comp g i j).nat_abs ≤ ∑ j k, (f i k * g k j).nat_abs,
+--   { have := hf i,
+--     have := hg _,
+--      },
+-- end
+
 lemma eval_Mbar_le_comp (f : basic_universal_map m n) (g : basic_universal_map l m)
   [fact (f.suitable c₂ c₁)] [fact (g.suitable c₃ c₂)] [fact ((f.comp g).suitable c₃ c₁)] :
   (f.comp g).eval_Mbar_le r' S c₃ c₁ = f.eval_Mbar_le r' S c₂ c₁ ∘ g.eval_Mbar_le r' S c₃ c₂ :=
