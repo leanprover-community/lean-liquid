@@ -292,16 +292,26 @@ lemma suitable_neg_iff (f : universal_map m n) (c₁ c₂ : ℝ≥0) :
   fact (suitable (-f) c₁ c₂) ↔ fact (f.suitable c₁ c₂) :=
 ⟨by { introsI h, rw ← neg_neg f, apply_instance }, by introsI h; apply_instance⟩
 
-def eval_Mbar_pow {m n : ℕ} (f : universal_map m n) [fact (f.suitable c₂ c₁)] :
-  (LCC_Mbar_pow V S r' c₁ n) ⟶ (LCC_Mbar_pow V S r' c₂ m) :=
-∑ g : {g // g ∈ f.support}, coeff ↑g f •
-                              (basic_universal_map.eval_Mbar_pow V S r' c₁ c₂ ↑g)
+lemma suitable_of_suitable_add_of₁ (g : universal_map m n) (i : ℤ) (hi : i ≠ 0)
+  (f : basic_universal_map m n) (hfg : f ∉ g.support) (h : suitable (g + i • of f) c₁ c₂) :
+  g.suitable c₁ c₂ :=
+sorry
+
+lemma suitable_of_suitable_add_of₂ (g : universal_map m n) (i : ℤ) (hi : i ≠ 0)
+  (f : basic_universal_map m n) (hfg : f ∉ g.support) (h : suitable (g + i • of f) c₁ c₂) :
+  f.suitable c₁ c₂ :=
+sorry
 
 lemma zero_suitable : fact ((0 : universal_map m n).suitable c' c) :=
 λ g hg,
 by { simp only [support_zero, finset.not_mem_empty] at hg, exact hg.elim }
 
 local attribute [instance] zero_suitable
+
+def eval_Mbar_pow {m n : ℕ} (f : universal_map m n) [fact (f.suitable c₂ c₁)] :
+  (LCC_Mbar_pow V S r' c₁ n) ⟶ (LCC_Mbar_pow V S r' c₂ m) :=
+∑ g : {g // g ∈ f.support}, coeff ↑g f •
+                              (basic_universal_map.eval_Mbar_pow V S r' c₁ c₂ ↑g)
 
 @[simp] lemma eval_Mbar_pow_zero :
   (0 : universal_map m n).eval_Mbar_pow V S r' c c' = 0 :=
@@ -372,6 +382,45 @@ begin
   refl
 end
 
+@[simp] lemma eval_Mbar_pow_add_smul_of (f : universal_map m n) (k : ℤ) (hk : k ≠ 0)
+  (g : basic_universal_map m n) (hfg : g ∉ f.support)
+  [fact (f.suitable c₂ c₁)] [fact (g.suitable c₂ c₁)] [fact ((f + k • of g).suitable c₂ c₁)] :
+  (f + k • of g).eval_Mbar_pow V S r' c₁ c₂ =
+    (f.eval_Mbar_pow V S r' c₁ c₂) + k • (g.eval_Mbar_pow V S r' c₁ c₂) :=
+begin
+  simp only [eval_Mbar_pow, add_monoid_hom.map_add, add_smul, finset.sum_add_distrib],
+  congr' 1,
+  { apply finset.sum_bij_ne_zero; sorry },
+  { sorry }
+end
+
+lemma eval_Mbar_pow_comp_smul_of (j i : ℤ) (hj : j ≠ 0) (hi : i ≠ 0)
+  (g : basic_universal_map l m) (f : basic_universal_map m n)
+  [h₁ : fact (suitable (i • of f) c₂ c₁)]
+  [h₂ : fact (suitable (j • of g) c₃ c₂)]
+  [h₃ : fact (((comp (i • of f)) (j • of g)).suitable c₃ c₁)] :
+  eval_Mbar_pow V S r' c₁ c₃ ((comp (i • of f)) (j • of g)) =
+    eval_Mbar_pow V S r' c₁ c₂ (i • of f) ≫ eval_Mbar_pow V S r' c₂ c₃ (j • of g) :=
+begin
+  have h₄ : fact (suitable (of f) c₂ c₁), { rwa ← suitable_smul_iff i hi },
+  have h₅ : fact (suitable (of g) c₃ c₂), { rwa ← suitable_smul_iff j hj },
+  show _ = normed_group_hom.comp_hom _ _,
+  resetI,
+  simp only [eval_Mbar_pow_smul],
+  have H3 := h₃,
+  simp only [← gsmul_eq_smul, add_monoid_hom.map_gsmul] at H3 ⊢,
+  simp only [gsmul_eq_smul] at H3 ⊢,
+  simp only [comp_of, add_monoid_hom.int_smul_apply] at H3 ⊢,
+  have h₆ : fact (universal_map.suitable (of (f.comp g)) c₃ c₁),
+  { rwa [suitable_smul_iff j hj, suitable_smul_iff i hi] at H3 },
+  resetI,
+  simp only [← smul_assoc, eval_Mbar_pow_smul],
+  rw [smul_assoc, smul_assoc, smul_comm],
+  congr' 2,
+  simp only [suitable_of_iff] at h₄ h₅ h₆, resetI,
+  apply eval_Mbar_pow_comp_of
+end
+
 lemma eval_Mbar_pow_comp (f : universal_map m n) (g : universal_map l m)
   [h₁ : fact (f.suitable c₂ c₁)] [h₂ : fact (g.suitable c₃ c₂)]
   [h₃ : fact ((universal_map.comp f g).suitable c₃ c₁)] :
@@ -384,25 +433,9 @@ begin
       add_monoid_hom.coe_zero, add_monoid_hom.map_zero] },
   { apply free_abelian_group.induction_on'' g; clear g,
     { introsI, simp only [eval_Mbar_pow_zero, comp_zero, add_monoid_hom.map_zero] },
-    { introsI j hj g i hi f h₁ h₂ h₃,
-      have h₄ : fact (suitable (of f) c₂ c₁), { rwa ← suitable_smul_iff i hi },
-      have h₅ : fact (suitable (of g) c₃ c₂), { rwa ← suitable_smul_iff j hj },
-      show _ = normed_group_hom.comp_hom _ _,
-      resetI,
-      simp only [eval_Mbar_pow_smul],
-      have H3 := h₃,
-      simp only [← gsmul_eq_smul, add_monoid_hom.map_gsmul] at H3 ⊢,
-      simp only [gsmul_eq_smul] at H3 ⊢,
-      simp only [comp_of, add_monoid_hom.int_smul_apply] at H3 ⊢,
-      have h₆ : fact (universal_map.suitable (of (f.comp g)) c₃ c₁),
-      { rwa [suitable_smul_iff j hj, suitable_smul_iff i hi] at H3 },
-      resetI,
-      simp only [← smul_assoc, eval_Mbar_pow_smul],
-      rw [smul_assoc, smul_assoc, smul_comm],
-      congr' 2,
-      simp only [suitable_of_iff] at h₄ h₅ h₆, resetI,
-      apply eval_Mbar_pow_comp_of },
-    { introsI g k hk f hfg IH1 IH2 i hi, sorry } },
+    { introsI j hj g i hi f h₁ h₂ h₃, apply eval_Mbar_pow_comp_smul_of; assumption },
+    { introsI g k hk f hfg IH1 IH2 i hi f₀ h₁ h₂ h₃,
+      sorry } },
   sorry
 end
 
