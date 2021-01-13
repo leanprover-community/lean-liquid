@@ -287,14 +287,14 @@ end free_predicate
 -- probably needs a better name
 @[elab_as_eliminator] protected lemma induction_on_free_predicate
   {P : free_abelian_group X → Prop}
-  (a : free_abelian_group X)
   (Q : free_abelian_group X → Prop)
   (hQ : free_predicate Q)
+  (a : free_abelian_group X)
+  (hQa : Q a)
   (hP0 : P 0)
   (hof : ∀ x, Q (of x) → P (of x))
   (hneg : ∀ a, Q a → P a → P (-a))
-  (hadd : ∀ a b, Q a → Q b → P a → P b → P (a + b))
-  (hQa : Q a) :
+  (hadd : ∀ a b, Q a → Q b → P a → P b → P (a + b)) :
   P a :=
 begin
   revert hQa,
