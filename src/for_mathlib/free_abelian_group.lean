@@ -148,12 +148,8 @@ begin
   simp only [(to_finsupp X).map_sum, ← gsmul_eq_smul, add_monoid_hom.map_gsmul, to_finsupp_of],
   apply finset.sum_congr rfl,
   intros x hx,
-  rw [gsmul_eq_smul],
-  convert finsupp.smul_single (coeff x a) x (1:ℤ) using 1,
-  { -- this should be easy after bumping mathlib
-    sorry },
-  { rw [← gsmul_eq_smul, gsmul_one],
-    simp only [coeff, int.cast_id, add_monoid_hom.comp_apply, finsupp.apply_add_hom_apply] }
+  simp only [← finsupp.single_add_hom_apply, ← add_monoid_hom.map_gsmul, gsmul_one, coeff,
+    int.cast_id, add_monoid_hom.comp_apply, finsupp.apply_add_hom_apply]
 end
 
 -- probably needs a better name
