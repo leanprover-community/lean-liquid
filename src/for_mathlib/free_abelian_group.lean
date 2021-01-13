@@ -108,6 +108,33 @@ begin
   simp only [h, gsmul_int_int, false_or, ne.def, mul_eq_zero]
 end
 
+open_locale classical
+
+lemma support_add (a b : free_abelian_group X) : (support (a + b)) ⊆ a.support ∪ b.support :=
+begin
+  simp only [support, add_monoid_hom.map_add],
+  apply finsupp.support_add
+end
+
+lemma support_sum (s : finset X) (n : X → ℤ) :
+  (support (∑ x in s, n x • of x)) ⊆ s :=
+begin
+  apply finset.induction_on s,
+  { simp only [finset.empty_subset, finset.sum_empty, support_zero] },
+  intros x s hxs IH,
+  rw finset.sum_insert hxs,
+  apply finset.subset.trans (support_add _ _),
+  by_cases hn : n x = 0,
+  { simp only [hn, finset.empty_union, zero_smul, support_zero],
+    apply finset.subset.trans IH (finset.subset_insert x s) },
+  rw [support_smul _ hn, support_of],
+  intros y hy,
+  simp only [finset.mem_union, finset.mem_singleton] at hy,
+  simp only [finset.mem_insert],
+  apply or.imp id _ hy,
+  intro h, exact IH h
+end
+
 @[simp] lemma coeff_of_self (x : X) : coeff x (of x) = 1 :=
 by simp only [coeff, add_monoid_hom.coe_comp, finsupp.apply_add_hom_apply,
       finsupp.single_eq_same, function.comp_app, to_finsupp_of]
@@ -151,7 +178,7 @@ begin
   apply h2 _ _ hxa _ _ IH,
   { intro n, by_cases hn : n = 0, { rwa [hn, zero_smul] }, exact h1 n hn x },
   contrapose! hxs,
-  sorry
+  apply support_sum _ _ hxs
 end
 
 end free_abelian_group

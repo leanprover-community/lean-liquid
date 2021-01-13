@@ -449,9 +449,9 @@ end universal_map
 
 namespace package
 
-def suitable (BD : package) (c : ℕ → ℝ) : Prop := sorry
+def suitable (BD : package) (c : ℕ → ℝ≥0) : Prop := sorry
 
-variables (BD : package) (cs : ℕ → ℝ) (i : ℕ) [fact (BD.suitable cs)]
+variables (BD : package) (cs : ℕ → ℝ≥0) (i : ℕ) [fact (BD.suitable cs)]
 
 -- instance nonneg_of_suitable : fact (0 ≤ cs i) := sorry
 
