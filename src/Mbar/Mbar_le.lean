@@ -31,7 +31,11 @@ def Mbar_le (r' : ℝ≥0) (S : Type u) [fintype S] (c : ℝ≥0) :=
 
 namespace Mbar_le
 
+instance has_coe : has_coe (Mbar_le r' S c) (Mbar r' S) := ⟨subtype.val⟩
+
 instance has_coe_to_fun : has_coe_to_fun (Mbar_le r' S c) := ⟨λ F, S → ℕ → ℤ, λ F, F.1⟩
+
+@[simp] lemma coe_coe_to_fun (F : Mbar_le r' S c) : ⇑(F : Mbar r' S) = F := rfl
 
 @[simp] lemma coe_mk (x h) : ((⟨x, h⟩ : Mbar_le r' S c) : S → ℕ → ℤ) = x := rfl
 
@@ -82,14 +86,14 @@ instance fact_le_refl : fact (c ≤ c) := le_rfl
 def Mbar_le.add [fact (0 < r')] [h : fact (c₁ + c₂ ≤ c₃)]
   (F : Mbar_le r' S c₁) (G : Mbar_le r' S c₂) :
   Mbar_le r' S c₃ :=
-subtype.mk (F.1 + G.1) $ filtration_mono h $ add_mem_filtration F.mem_filtration G.mem_filtration
+subtype.mk (F + G) $ filtration_mono h $ add_mem_filtration F.mem_filtration G.mem_filtration
 
 def Mbar_le.add' [fact (0 < r')] [fact (c₁ + c₂ ≤ c₃)] :
   Mbar_le r' S c₁ × Mbar_le r' S c₂ → Mbar_le r' S c₃ :=
 λ x, Mbar_le.add c₃ x.1 x.2
 
 def Mbar_le.neg [fact (0 < r')] (F : Mbar_le r' S c) : Mbar_le r' S c :=
-subtype.mk (-F.1) $ neg_mem_filtration F.mem_filtration
+subtype.mk (-F) $ neg_mem_filtration F.mem_filtration
 
 namespace Mbar_le
 
@@ -378,7 +382,7 @@ end
 lemma continuous_of_normed_group_hom [fact (0 < r')]
   (f : (Mbar r' S) →+ (Mbar r' S))
   (g : Mbar_le r' S c₁ → Mbar_le r' S c₂)
-  (h : ∀ x, (g x).1 = f x.1)
+  (h : ∀ x, ↑(g x) = f x)
   (H : ∀ M, ∃ N, ∀ (F : Mbar r' S),
     (∀ s i, i < N + 1 → F s i = 0) → (∀ s i, i < M + 1 → f F s i = 0)) :
   continuous g :=
@@ -394,11 +398,11 @@ begin
   { rw [this, ← function.comp.assoc, ← function.comp.assoc],
     apply continuous_bot.comp continuous_truncate },
   ext1 x,
-  suffices : ∀ s i, i < M + 1 → (g x).1 s i = (g (φ (truncate N x))).1 s i,
+  suffices : ∀ s i, i < M + 1 → (g x) s i = (g (φ (truncate N x))) s i,
   { ext s i, dsimp [function.comp], apply this, exact i.property },
   intros s i hi,
-  rw [h, h, ← sub_eq_zero],
-  show ((f x.1) - f (φ (truncate N x)).1) s i = 0,
+  rw [← coe_coe_to_fun, h, ← coe_coe_to_fun, h, ← sub_eq_zero],
+  show ((f x) - f (φ (truncate N x))) s i = 0,
   rw [← f.map_sub],
   apply hN _ _ _ _ hi,
   clear hi i s, intros s i hi,
@@ -413,7 +417,7 @@ def hom_of_normed_group_hom {C : ℝ≥0} (c₁ c₂ : ℝ≥0) [fact (0 < r')] 
   (f : Mbar r' S →+ Mbar r' S) (h : f ∈ filtration (Mbar r' S →+ Mbar r' S) C)
   (F : Mbar_le r' S c₁) :
   Mbar_le r' S c₂ :=
-⟨{ to_fun := λ s i, f F.1 s i,
+⟨{ to_fun := λ s i, f F s i,
   coeff_zero' := Mbar.coeff_zero _,
   summable' := Mbar.summable _ },
   filtration_mono hc (h F.mem_filtration)⟩

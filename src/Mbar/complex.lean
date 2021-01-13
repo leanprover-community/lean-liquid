@@ -203,23 +203,42 @@ def eval_Mbar_pow (f : basic_universal_map m n) [fact (f.suitable c' c)] :
   (LCC_Mbar_pow V S r' c n) ⟶ (LCC_Mbar_pow V S r' c' m) :=
 (hat V).map $ has_hom.hom.op $ ⟨f.eval_Mbar_le _ _ _ _, f.eval_Mbar_le_continuous _ _ _ _⟩
 
-lemma fact_zero_suitable : fact ((0 : basic_universal_map m n).suitable c c') :=
-λ i, by simp only [nat.cast_zero, zero_mul, zero_le', finset.sum_const_zero,
-          matrix.zero_apply, int.nat_abs_zero]
-
 local attribute [instance] fact_zero_suitable
 
-lemma eval_Mbar_pow_zero :
-  (0 : basic_universal_map m n).eval_Mbar_pow V S r' c c' = 0 :=
-begin
+-- WARNING: this lemma is false
 
-end
+-- lemma eval_Mbar_pow_zero :
+--   (0 : basic_universal_map m n).eval_Mbar_pow V S r' c c' = 0 :=
+-- begin
+--   dsimp [eval_Mbar_pow],
+--   convert NormedGroup.Completion.map_zero _ _ using 1,
+--   ext1 v,
+--   rw NormedGroup.LCC_obj_map V,
+--   simp only [continuous_map.coe_mk, pi.zero_apply, normed_group_hom.coe_zero, has_hom.hom.unop_op,
+--     eval_Mbar_le_zero],
+--   -- the following is ugly, need to clean up
+--   dsimp at *,
+--   congr,
+--   rw locally_constant.comap_const 0, swap 3, { exact 0 },
+--   { ext f x, dsimp, show f 0 = 0,
+--     /- This sorry is false )-; -/
+--     sorry },
+--   { intro, refl }
+-- end
 
 lemma eval_Mbar_pow_comp (f : basic_universal_map m n) (g : basic_universal_map l m)
-  [fact (f.suitable c₁ c₂)] [fact (g.suitable c₂ c₃)] [fact ((f.comp g).suitable c₁ c₃)] :
+  [fact (f.suitable c₂ c₁)] [fact (g.suitable c₃ c₂)] [fact ((f.comp g).suitable c₃ c₁)] :
   (f.comp g).eval_Mbar_pow V S r' c₁ c₃ =
   f.eval_Mbar_pow V S r' c₁ c₂ ≫ g.eval_Mbar_pow V S r' c₂ c₃ :=
-sorry
+begin
+  dsimp [eval_Mbar_pow],
+  rw [← category_theory.functor.map_comp, ← op_comp],
+  congr' 2,
+  ext1 j,
+  dsimp,
+  rw eval_Mbar_le_comp r' S c₁ c₂ c₃,
+  refl
+end
 
 end basic_universal_map
 

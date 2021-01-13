@@ -25,10 +25,15 @@ def hom_of_normed_group_hom' {C : ℝ≥0} (c₁ c₂ : ℝ≥0) {m n : ℕ} (hc
   (F : (Mbar_le r' S c₁)^m) :
   (Mbar_le r' S c₂)^n :=
 λ j,
-(⟨({to_fun := λ s i, f (λ k, (F k).1) j s i,
+(⟨({to_fun := λ s i, f (λ k, (F k)) j s i,
     coeff_zero' := λ s, Mbar.coeff_zero _ _,
     summable' := λ s, Mbar.summable _ _ } : Mbar r' S),
     by apply filtration_mono hc (h $ λ i, (F i).mem_filtration)⟩ : Mbar_le r' S c₂)
+
+@[simp] lemma coe_hom_of_normed_group_hom'_apply {C : ℝ≥0} (c₁ c₂ : ℝ≥0) {m n : ℕ} (hc : C * c₁ ≤ c₂)
+  (f : (Mbar r' S)^m →+ (Mbar r' S)^n) (h : f ∈ filtration ((Mbar r' S)^m →+ (Mbar r' S)^n) C)
+  (F : (Mbar_le r' S c₁)^m) (j : fin n) (s : S) (i : ℕ) :
+  (hom_of_normed_group_hom' r' S c₁ c₂ hc f h F j) s i = f (λ k, (F k)) j s i := rfl
 
 lemma continuous_of_normed_group_hom' (c₁ c₂ : ℝ≥0) {m n : ℕ}
   (f : ((Mbar r' S) ^ m) →+ ((Mbar r' S) ^ n))
@@ -85,8 +90,8 @@ namespace breen_deligne
 
 namespace basic_universal_map
 
-variables {k m n : ℕ}
-variables (r' : ℝ≥0) (S : Type*) (c₁ c₂ : ℝ≥0) [fintype S] [fact (0 < r')]
+variables {k l m n : ℕ}
+variables (r' : ℝ≥0) (S : Type*) (c₁ c₂ c₃ : ℝ≥0) [fintype S] [fact (0 < r')]
 variables (f : basic_universal_map m n)
 
 /-- Addition goes from `Mbar r' S c` to `Mbar r' S c'` for suitable `c'`.
@@ -110,6 +115,33 @@ def eval_Mbar_le [H : fact (f.suitable c₁ c₂)] :
   ((Mbar_le r' S c₁)^m) → ((Mbar_le r' S c₂)^n) :=
 Mbar_le.hom_of_normed_group_hom' r' S c₁ c₂ H.sup_mul_le (f.eval_png (Mbar r' S)) $
 λ c F hF, eval_png_mem_filtration _ _ hF
+
+lemma fact_zero_suitable : fact ((0 : basic_universal_map m n).suitable c₁ c₂) :=
+λ i, by simp only [nat.cast_zero, zero_mul, zero_le', finset.sum_const_zero,
+          matrix.zero_apply, int.nat_abs_zero]
+
+local attribute [instance] fact_zero_suitable
+
+@[simp] lemma eval_Mbar_le_zero : eval_Mbar_le r' S c₁ c₂ (0 : basic_universal_map m n) = 0 :=
+begin
+  ext j s i,
+  simp only [eval_Mbar_le, pi.zero_apply, Mbar_le.coe_hom_of_normed_group_hom'_apply,
+    Mbar.coe_zero, eval_png_zero, add_monoid_hom.coe_zero],
+  refl
+end
+
+lemma eval_Mbar_le_comp (f : basic_universal_map m n) (g : basic_universal_map l m)
+  [fact (f.suitable c₂ c₁)] [fact (g.suitable c₃ c₂)] [fact ((f.comp g).suitable c₃ c₁)] :
+  (f.comp g).eval_Mbar_le r' S c₃ c₁ = f.eval_Mbar_le r' S c₂ c₁ ∘ g.eval_Mbar_le r' S c₃ c₂ :=
+begin
+  ext j s i,
+  simp only [eval_Mbar_le, Mbar_le.coe_hom_of_normed_group_hom'_apply],
+  rw eval_png_comp,
+  simp only [add_monoid_hom.coe_comp, function.comp_app],
+  congr' 2,
+  ext,
+  simp only [Mbar_le.coe_hom_of_normed_group_hom'_apply, Mbar_le.coe_coe_to_fun],
+end
 
 open add_monoid_hom (apply)
 

@@ -245,6 +245,16 @@ lemma comap_comp [topological_space Z]
   @comap _ _ α _ _ f ∘ comap g = comap (g ∘ f) :=
 by { ext, simp only [hf, hg, hg.comp hf, coe_comap] }
 
+lemma comap_const (f : X → Y) (y : Y) (h : ∀ x, f x = y) :
+  (comap f : locally_constant Y Z → locally_constant X Z) =
+  λ g, ⟨λ x, g y, is_locally_constant.const _⟩ :=
+begin
+  ext, rw coe_comap,
+  { simp only [h, coe_mk, function.comp_app] },
+  { rw show f = λ x, y, by ext; apply h,
+    exact continuous_const }
+end
+
 end comap
 
 end locally_constant

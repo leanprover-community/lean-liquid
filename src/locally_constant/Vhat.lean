@@ -13,6 +13,7 @@ open_locale nnreal
 namespace NormedGroup
 open uniform_space opposite
 
+@[simps]
 def Completion : NormedGroup ⥤ NormedGroup :=
 { obj := λ V, NormedGroup.of (completion V),
   map := λ V W f,
@@ -71,6 +72,26 @@ def incl {V : NormedGroup} : V ⟶ Completion.obj V :=
   bound' := ⟨1, λ v, by simp⟩ }
 
 @[simp] lemma norm_incl_eq {V : NormedGroup} {v : V} : ∥incl v∥ = ∥v∥ := by simp
+
+def Completion.map_hom (V W : NormedGroup) : (V ⟶ W) →+ (Completion.obj V ⟶ Completion.obj W) :=
+add_monoid_hom.mk' (category_theory.functor.map Completion) $
+begin
+  intros f g, ext v,
+  apply uniform_space.completion.induction_on v,
+  { refine is_closed_eq (normed_group_hom.continuous _) _,
+    apply continuous.add; apply normed_group_hom.continuous },
+  { clear v, intro v,
+    simp only [normed_group_hom.coe_add, pi.add_apply,
+      Completion_map_to_fun, normed_group_hom.coe_add],
+    rw [uniform_space.completion.map_coe,
+        uniform_space.completion.map_coe f.uniform_continuous,
+        uniform_space.completion.map_coe g.uniform_continuous],
+    { rw [pi.add_apply, uniform_space.completion.coe_add] },
+    { exact (f + g).uniform_continuous } }
+end
+
+@[simp] lemma Completion.map_zero (V W : NormedGroup) : Completion.map (0 : V ⟶ W) = 0 :=
+(Completion.map_hom V W).map_zero
 
 def Completion.lift {V W : NormedGroup} [complete_space W] (f : V ⟶ W) : Completion.obj V ⟶ W :=
 { to_fun := completion.extension f,
@@ -170,6 +191,15 @@ that sends a normed abelian group `V` and a compact space `S` to `V-hat(S)`.
 Here `V-hat(S)` is the completion (for the sup norm) of the locally constant functions `S → V`. -/
 def LCC : NormedGroup ⥤ CompHausᵒᵖ ⥤ NormedGroup :=
 (LocallyConstant.uncurry ⋙ Completion).curry
+
+lemma LCC_obj_map (V : NormedGroup) {X Y : CompHausᵒᵖ} (f : Y ⟶ X) (v : (LCC.obj V).obj Y) :
+  (LCC.obj V).map f v = completion.map (locally_constant.comap f.unop) v :=
+begin
+  show Completion.map (((LocallyConstant.obj V).map f) ≫ _) v = _,
+  simp only [category_theory.functor.map_id, category_theory.category.comp_id,
+    LocallyConstant_obj_map, category_theory.nat_trans.id_app],
+  refl
+end
 
 variables (S : Type*) [topological_space S] [compact_space S]
 
