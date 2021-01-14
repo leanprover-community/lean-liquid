@@ -9,15 +9,13 @@ variables
 variables (BD : breen_deligne.package)
 variables (c' : ℕ → ℝ≥0)  -- implicit constants, chosen once and for all
                           -- see the sentence after that statement of Thm 9.5
-variables [hc' : fact (BD.suitable c')]
-
-include hc'
 
 -- sanity check
 lemma exists_suitable : ∃ c, BD.suitable c := sorry
 
 /-- Thm 9.5 in `Analytic.pdf` -/
-theorem main (r r' : ℝ) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)] :
+theorem main [BD.suitable c']
+  (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)] :
   ∀ m : ℕ,
   ∃ (k : ℝ≥0) (hk : fact (1 ≤ k)),
   ∃ c₀ : ℝ≥0,
