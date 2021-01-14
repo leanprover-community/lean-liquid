@@ -7,8 +7,8 @@ open_locale nnreal
 
 variables
 variables (BD : breen_deligne.package)
-variables (c' : ℕ → ℝ)  -- implicit constants, chosen once and for all
-                        -- see the sentence after that statement of Thm 9.5
+variables (c' : ℕ → ℝ≥0)  -- implicit constants, chosen once and for all
+                          -- see the sentence after that statement of Thm 9.5
 variables [hc' : fact (BD.suitable c')]
 
 include hc'
