@@ -264,7 +264,11 @@ begin
     ((function.comp Mbar_le.Tinv) ∘ (f.eval_Mbar_le r' S c₁ c₂)) x j s k,
   dsimp [function.comp, Mbar.Tinv],
   cases k,
-  { squeeze_simp, },
+  { simp only [Mbar.coeff_zero] },
+  { simp only [Mbar.Tinv_aux_succ, add_monoid_hom.coe_mk', eval_Mbar_le_apply, Mbar.coe_smul,
+      Mbar.coe_mk, Mbar_le.coe_coe_to_fun, eval_png_apply, Mbar.coe_sum, fintype.sum_apply,
+      pi.smul_apply, Mbar.Tinv_succ],
+    refl }
 end
 
 end basic_universal_map

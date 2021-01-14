@@ -128,12 +128,6 @@ instance : add_comm_group (Mbar r' S) :=
   add_left_neg := by { intros, ext, simp only [coe_add, coe_neg, coe_zero, add_left_neg] },
   add_comm := by { intros, ext, simp only [coe_add, add_comm] },
   sub_eq_add_neg := by { intros, ext, simp only [coe_sub, coe_add, coe_neg, sub_eq_add_neg] } }
-.
-
--- instance : has_norm (Mbar r' S) :=
--- { norm := λ F, ∑ s, ∑' n, (abs ((F s n : ℝ) * r'^n)) }
-
--- lemma norm_def (F : Mbar r' S) : ∥F∥ = ∑ s, ∑' n, (abs ((F s n : ℝ) * r'^n)) := rfl
 
 instance : pseudo_normed_group (Mbar r' S) :=
 { filtration := λ c, {F | (∑ s, ∑' n, (↑(F s n).nat_abs * r' ^ n)) ≤ c},
@@ -159,6 +153,25 @@ instance : pseudo_normed_group (Mbar r' S) :=
     rw nat.cast_le,
     exact int.nat_abs_add_le _ _
   end }
+.
+
+def coe_hom : Mbar r' S →+ (S → ℕ → ℤ) :=
+add_monoid_hom.mk' coe_fn $ coe_add
+
+@[simp] lemma coe_sum {ι : Type*} (s : finset ι) (F : ι → Mbar r' S) :
+  ⇑(∑ i in s, F i) = ∑ i in s, (F i) :=
+show coe_hom (∑ i in s, F i) = ∑ i in s, coe_hom (F i), from add_monoid_hom.map_sum _ _ _
+
+@[simp] lemma coe_gsmul (n : ℤ) (F : Mbar r' S) :
+  ⇑(n •ℤ F) = n •ℤ F :=
+show coe_hom (n •ℤ F) = n •ℤ coe_hom F, from add_monoid_hom.map_gsmul _ _ _
+
+@[simp] lemma coe_smul (n : ℤ) (F : Mbar r' S) :
+  ⇑(n • F) = n • F :=
+begin
+  rw [← gsmul_eq_smul, coe_gsmul], ext,
+  simp only [gsmul_int_int, function.gsmul_apply, pi.smul_apply, ← gsmul_eq_smul]
+end
 
 section Tinv
 
