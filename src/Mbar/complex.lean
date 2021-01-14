@@ -444,31 +444,27 @@ begin
       (suitable c₁ c₂) (suitable_free_predicate c₁ c₂) f hf; unfreezingI { clear_dependent f },
     { simp },
     { intros x hx,
-      haveI foo : x.suitable c₁ c₂ := by {rw ← suitable_of_iff, apply_instance},
-      have ZZZ := eval_Mbar_pow_comp_of V S r' c₁ c₂ c₃ g x,
-      apply eval_Mbar_pow_comp_of,--
-      sorry },
-    -- for this second sorry, note `eval_Mbar_pow_comp_of`
-    sorry,
-    sorry },
+      rw suitable_of_iff at hx,
+      resetI,
+      apply eval_Mbar_pow_comp_of },
+    { sorry },
+    { sorry } },
   { intros g hg IH hf, resetI, specialize IH,
     show _ = normed_group_hom.comp_hom _ _,
     simp only [IH, pi.neg_apply, add_monoid_hom.map_neg, eval_Mbar_pow_neg, add_monoid_hom.coe_neg,
       neg_inj],
     refl },
-  { intros g₁ g₂ hg₁ hg₂ IH₁ IH₂ hf, resetI, specialize IH₁, specialize IH₂,
-    change universal_map m n at g₁, have Hg₁ : fact (g₁.suitable c₂ c₃) := hg₁,
-    change universal_map m n at g₂, have Hg₂ : fact (g₂.suitable c₂ c₃) := hg₂,
-    have Hg₁f : fact ((comp g₁ f).suitable c₁ c₃) := hg₁.comp hf,
-    have Hg₂f : fact ((comp g₂ f).suitable c₁ c₃) := hg₂.comp hf,
+  { rintros (g₁ : universal_map m n) (g₂ : universal_map m n) hg₁ hg₂ IH₁ IH₂ hf,
     resetI,
+    haveI Hg₁f : (comp g₁ f).suitable c₁ c₃ := suitable.comp c₂,
+    haveI Hg₂f : (comp g₂ f).suitable c₁ c₃ := suitable.comp c₂,
     simp only [add_monoid_hom.map_add, add_monoid_hom.add_apply, eval_Mbar_pow_add, IH₁, IH₂],
     show _ = normed_group_hom.comp_hom _ _,
-    simp only [add_monoid_hom.map_add], refl }
+    simpa [add_monoid_hom.map_add] }
 end
 
 @[simp] lemma eval_Mbar_pow_smul (k : ℤ) (f : universal_map m n)
-  [fact (f.suitable c₁ c₂)] [fact ((k • f).suitable c₁ c₂)] :
+  [f.suitable c₁ c₂] [(k • f).suitable c₁ c₂] :
   eval_Mbar_pow V S r' c₁ c₂ (k • f) = k • f.eval_Mbar_pow V S r' c₁ c₂ :=
 begin
   by_cases hk : k = 0,
@@ -482,7 +478,7 @@ begin
 end
 
 lemma eval_Mbar_pow_comp_res (f : universal_map m n)
-  [fact (f.suitable c₁ c₂)] [fact (f.suitable c₃ c₄)] [fact (c₁ ≤ c₃)] [fact (c₂ ≤ c₄)] :
+  [f.suitable c₁ c₂] [f.suitable c₃ c₄] [fact (c₁ ≤ c₃)] [fact (c₂ ≤ c₄)] :
   f.eval_Mbar_pow V S r' c₃ c₄ ≫ LCC_Mbar_pow.res V S r' c₁ c₃ m =
   LCC_Mbar_pow.res V S r' c₂ c₄ n ≫ f.eval_Mbar_pow V S r' c₁ c₂ :=
 begin
@@ -495,14 +491,14 @@ begin
   rw [← gsmul_eq_smul, add_monoid_hom.map_gsmul,
       ← gsmul_eq_smul, add_monoid_hom.map_gsmul,
       add_monoid_hom.gsmul_apply],
-  haveI : fact (g.suitable c₁ c₂) := f.suitable_of_mem_support c₁ c₂ g hg,
-  haveI : fact (g.suitable c₃ c₄) := f.suitable_of_mem_support c₃ c₄ g hg,
+  haveI : g.suitable c₁ c₂ := f.suitable_of_mem_support c₁ c₂ g hg,
+  haveI : g.suitable c₃ c₄ := f.suitable_of_mem_support c₃ c₄ g hg,
   have := basic_universal_map.eval_Mbar_pow_comp_res V S r' c₁ c₂ c₃ c₄ g,
   change normed_group_hom.comp_hom _ _ = normed_group_hom.comp_hom _ _ at this,
   rw this
 end
 
-lemma eval_Mbar_pow_comp_Tinv (f : universal_map m n) [fact (f.suitable c₁ c₂)] :
+lemma eval_Mbar_pow_comp_Tinv (f : universal_map m n) [f.suitable c₁ c₂] :
   LCC_Mbar_pow.Tinv V S r' c₂ n ≫ eval_Mbar_pow V S r' c₁ c₂ f =
     eval_Mbar_pow V S r' (r'⁻¹ * c₁) (r'⁻¹ * c₂) f ≫ LCC_Mbar_pow.Tinv V S r' c₁ m :=
 begin
@@ -514,7 +510,7 @@ begin
   rw [← gsmul_eq_smul, ← gsmul_eq_smul, add_monoid_hom.map_gsmul, add_monoid_hom.map_gsmul,
       add_monoid_hom.gsmul_apply],
   congr' 1,
-  haveI : fact (g.suitable c₁ c₂) := suitable_of_mem_support f c₁ c₂ g hg,
+  haveI : g.suitable c₁ c₂ := suitable_of_mem_support f c₁ c₂ g hg,
   exact g.eval_Mbar_pow_comp_Tinv V S r' _ _
 end
 
