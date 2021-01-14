@@ -393,7 +393,12 @@ lemma eval_Mbar_pow_add (f g : universal_map m n)
 begin
   haveI hfg : fact ((f + g).suitable c₁ c₂) := hf.add hg,
   simp only [eval_Mbar_pow_def],
-  sorry
+  rw finset.sum_subset (support_add f g), -- two goals
+  simp only [add_monoid_hom.map_add _ f g, add_smul],
+  convert finset.sum_add_distrib using 2, -- three goals
+  apply finset.sum_subset (finset.subset_union_left _ _), swap,
+  apply finset.sum_subset (finset.subset_union_right _ _),
+  all_goals { rintros x - h, rw not_mem_support_iff at h, simp [h] },
 end
 
 lemma eval_Mbar_pow_comp_of (g : basic_universal_map m n) (f : basic_universal_map l m)
