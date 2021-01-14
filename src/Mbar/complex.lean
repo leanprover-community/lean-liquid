@@ -277,6 +277,8 @@ See Lemma 9.11 of [Analytic]. -/
 def suitable (c₁ c₂ : ℝ≥0) (f : universal_map m n) : Prop :=
 ∀ g ∈ f.support, basic_universal_map.suitable g c₁ c₂
 
+attribute [class] suitable
+
 lemma suitable_of_mem_support (f : universal_map m n) (c₁ c₂ : ℝ≥0)
   (g : basic_universal_map m n) (hg : g ∈ f.support) [h : fact (f.suitable c₁ c₂)] :
   fact (g.suitable c₁ c₂) :=
