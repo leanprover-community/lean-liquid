@@ -207,27 +207,28 @@ def eval_Mbar_pow_aux (f : basic_universal_map m n) [fact (f.suitable c₁ c₂)
   continuous_to_fun := f.eval_Mbar_le_continuous _ _ _ _}
 
 def eval_Mbar_pow (f : basic_universal_map m n) :
-  (LCC_Mbar_pow V S r' c₁ n) ⟶ (LCC_Mbar_pow V S r' c₂ m) :=
-if H : f.suitable c₂ c₁
-then (hat V).map $ has_hom.hom.op $ @eval_Mbar_pow_aux S r' c₂ c₁ _ _ _ _ f H
+  (LCC_Mbar_pow V S r' c₂ n) ⟶ (LCC_Mbar_pow V S r' c₁ m) :=
+if H : f.suitable c₁ c₂
+then (hat V).map $ has_hom.hom.op $ @eval_Mbar_pow_aux S r' c₁ c₂ _ _ _ _ f H
 else 0
 
-lemma eval_Mbar_pow_def (f : basic_universal_map m n) [hf : fact (f.suitable c₂ c₁)] :
+lemma eval_Mbar_pow_def (f : basic_universal_map m n) [hf : fact (f.suitable c₁ c₂)] :
   f.eval_Mbar_pow V S r' c₁ c₂ =
     (hat V).map (has_hom.hom.op $ ⟨f.eval_Mbar_le _ _ _ _, f.eval_Mbar_le_continuous _ _ _ _⟩) :=
 by { rw [eval_Mbar_pow, dif_pos], refl }
 
-lemma eval_Mbar_pow_comp (f : basic_universal_map m n) (g : basic_universal_map l m)
-  [fact (f.suitable c₂ c₁)] [fact (g.suitable c₃ c₂)] [fact ((f.comp g).suitable c₃ c₁)] :
-  (f.comp g).eval_Mbar_pow V S r' c₁ c₃ =
-  f.eval_Mbar_pow V S r' c₁ c₂ ≫ g.eval_Mbar_pow V S r' c₂ c₃ :=
+lemma eval_Mbar_pow_comp (g : basic_universal_map m n) (f : basic_universal_map l m)
+  [hg : fact (g.suitable c₂ c₃)] [hf : fact (f.suitable c₁ c₂)] :
+  (g.comp f).eval_Mbar_pow V S r' c₁ c₃ =
+  g.eval_Mbar_pow V S r' c₂ c₃ ≫ f.eval_Mbar_pow V S r' c₁ c₂ :=
 begin
+  haveI : fact ((g.comp f).suitable c₁ c₃) := hg.comp hf,
   simp only [eval_Mbar_pow_def],
   rw [← category_theory.functor.map_comp, ← op_comp],
   congr' 2,
   ext1 j,
   dsimp,
-  rw eval_Mbar_le_comp r' S c₁ c₂ c₃,
+  rw eval_Mbar_le_comp r' S _ c₂ _,
   refl
 end
 
@@ -237,8 +238,12 @@ namespace universal_map
 
 open free_abelian_group
 
-/-- Addition goes from `Mbar r' S c` to `Mbar r' S c'` for suitable `c'`.
-This predicate says what *suitable* means for universal maps.
+/-- A univeral map `f` is `suitable c₁ c₂` if all of the matrices `g`
+occuring in the formal sum `f` satisfy `g.suitable c₁ c₂`.
+This definition is tailored in such a way that we get a sensible
+`(LCC_Mbar_pow V S r' c₂ n) ⟶ (LCC_Mbar_pow V S r' c₁ m)`
+if `f.suitable c₁ c₂`.
+
 See Lemma 9.11 of [Analytic]. -/
 def suitable (c₁ c₂ : ℝ≥0) (f : universal_map m n) : Prop :=
 ∀ g ∈ f.support, basic_universal_map.suitable g c₁ c₂
@@ -301,22 +306,22 @@ lemma suitable_smul_iff (k : ℤ) (hk : k ≠ 0) (f : universal_map m n) (c₁ c
 (suitable_free_predicate c₁ c₂).smul_iff k hk
 
 -- this cannot be an instance, because c₂ cannot be inferred
-lemma suitable.comp {f : universal_map m n} {g : universal_map l m} {c₁ c₂ c₃ : ℝ≥0}
-  (hf : f.suitable c₂ c₁) (hg : g.suitable c₃ c₂) :
-  (comp f g).suitable c₃ c₁ :=
+lemma suitable.comp {g : universal_map m n} {f : universal_map l m} {c₁ c₂ c₃ : ℝ≥0}
+  (hg : g.suitable c₂ c₃) (hf : f.suitable c₁ c₂) :
+  (comp g f).suitable c₁ c₃ :=
 begin
   apply free_abelian_group.induction_on_free_predicate
-    (suitable c₂ c₁) (suitable_free_predicate c₂ c₁) f hf; unfreezingI { clear_dependent f },
+    (suitable c₂ c₃) (suitable_free_predicate c₂ c₃) g hg; unfreezingI { clear_dependent g },
   { simpa only [pi.zero_apply, add_monoid_hom.coe_zero, add_monoid_hom.map_zero]
       using suitable_zero _ _ },
-  { intros f hf,
+  { intros g hg,
     apply free_abelian_group.induction_on_free_predicate
-      (suitable c₃ c₂) (suitable_free_predicate c₃ c₂) g hg; unfreezingI { clear_dependent g },
+      (suitable c₁ c₂) (suitable_free_predicate c₁ c₂) f hf; unfreezingI { clear_dependent f },
       { simp only [add_monoid_hom.map_zero], exact suitable_zero _ _ },
-      { intros g hg,
+      { intros f hf,
         rw comp_of,
         rw suitable_of_iff at hf hg ⊢,
-        exact hf.comp hg },
+        exact hg.comp hf },
       { intros g hg H, simpa only [add_monoid_hom.map_neg, suitable_neg_iff] },
       { intros g₁ g₂ hg₁ hg₂ H₁ H₂,
         simp only [add_monoid_hom.map_add],
@@ -329,17 +334,17 @@ begin
 end
 
 def eval_Mbar_pow {m n : ℕ} (f : universal_map m n) :
-  (LCC_Mbar_pow V S r' c₁ n) ⟶ (LCC_Mbar_pow V S r' c₂ m) :=
-if H : (f.suitable c₂ c₁)
-then by have H' : fact (f.suitable c₂ c₁) := H; exactI
+  (LCC_Mbar_pow V S r' c₂ n) ⟶ (LCC_Mbar_pow V S r' c₁ m) :=
+if H : (f.suitable c₁ c₂)
+then by have H' : fact (f.suitable c₁ c₂) := H; exactI
   ∑ g in f.support, coeff g f • (g.eval_Mbar_pow V S r' c₁ c₂)
 else 0
 
-lemma eval_Mbar_pow_def {m n : ℕ} (f : universal_map m n) [H : fact (f.suitable c₂ c₁)] :
+lemma eval_Mbar_pow_def {m n : ℕ} (f : universal_map m n) [H : fact (f.suitable c₁ c₂)] :
   f.eval_Mbar_pow V S r' c₁ c₂ = ∑ g in f.support, coeff g f • (g.eval_Mbar_pow V S r' c₁ c₂) :=
 by { rw [eval_Mbar_pow, dif_pos], exact H }
 
-@[simp] lemma eval_Mbar_pow_of (f : basic_universal_map m n) [fact (f.suitable c₂ c₁)] :
+@[simp] lemma eval_Mbar_pow_of (f : basic_universal_map m n) [fact (f.suitable c₁ c₂)] :
   eval_Mbar_pow V S r' c₁ c₂ (of f) = f.eval_Mbar_pow V S r' c₁ c₂ :=
 by simp only [eval_Mbar_pow_def, support_of, coeff_of_self, one_smul, finset.sum_singleton]
 
@@ -360,55 +365,55 @@ begin
 end
 
 lemma eval_Mbar_pow_add (f g : universal_map m n)
-  [hf : fact (f.suitable c₂ c₁)] [hg : fact (g.suitable c₂ c₁)] :
+  [hf : fact (f.suitable c₁ c₂)] [hg : fact (g.suitable c₁ c₂)] :
   eval_Mbar_pow V S r' c₁ c₂ (f + g) =
     f.eval_Mbar_pow V S r' c₁ c₂ + g.eval_Mbar_pow V S r' c₁ c₂ :=
 begin
-  haveI hfg : fact ((f + g).suitable c₂ c₁) := hf.add hg,
+  haveI hfg : fact ((f + g).suitable c₁ c₂) := hf.add hg,
   simp only [eval_Mbar_pow_def],
   sorry
 end
 
-lemma eval_Mbar_pow_comp_of (g : basic_universal_map l m) (f : basic_universal_map m n)
-  [hf : fact (f.suitable c₂ c₁)]
-  [hg : fact (g.suitable c₃ c₂)] :
-  eval_Mbar_pow V S r' c₁ c₃ ((comp (of f)) (of g)) =
-    eval_Mbar_pow V S r' c₁ c₂ (of f) ≫ eval_Mbar_pow V S r' c₂ c₃ (of g) :=
+lemma eval_Mbar_pow_comp_of (g : basic_universal_map m n) (f : basic_universal_map l m)
+  [hg : fact (g.suitable c₂ c₃)] [hf : fact (f.suitable c₁ c₂)] :
+  eval_Mbar_pow V S r' c₁ c₃ ((comp (of g)) (of f)) =
+    eval_Mbar_pow V S r' c₂ c₃ (of g) ≫ eval_Mbar_pow V S r' c₁ c₂ (of f) :=
 begin
-  haveI hfg : fact ((f.comp g).suitable c₃ c₁) := hf.comp hg,
+  haveI hfg : fact ((g.comp f).suitable c₁ c₃) := hg.comp hf,
   simp only [comp_of, eval_Mbar_pow_of],
   rw ← basic_universal_map.eval_Mbar_pow_comp
 end
 
-lemma eval_Mbar_pow_comp (f : universal_map m n) (g : universal_map l m)
-  [hf : fact (f.suitable c₂ c₁)] [hg : fact (g.suitable c₃ c₂)] :
-  (comp f g).eval_Mbar_pow V S r' c₁ c₃ =
-    f.eval_Mbar_pow V S r' c₁ c₂ ≫ g.eval_Mbar_pow V S r' c₂ c₃ :=
+lemma eval_Mbar_pow_comp (g : universal_map m n) (f : universal_map l m)
+  [hg : fact (g.suitable c₂ c₃)] [hf : fact (f.suitable c₁ c₂)] :
+  (comp g f).eval_Mbar_pow V S r' c₁ c₃ =
+    g.eval_Mbar_pow V S r' c₂ c₃ ≫ f.eval_Mbar_pow V S r' c₁ c₂ :=
 begin
-  unfreezingI { revert hg },
+  unfreezingI { revert hf },
   apply free_abelian_group.induction_on_free_predicate
-    (suitable c₂ c₁) (suitable_free_predicate c₂ c₁) f hf; unfreezingI { clear_dependent f },
+    (suitable c₂ c₃) (suitable_free_predicate c₂ c₃) g hg; unfreezingI { clear_dependent g },
   { intros h₂,
     simp only [eval_Mbar_pow_zero, zero_comp, pi.zero_apply,
       add_monoid_hom.coe_zero, add_monoid_hom.map_zero] },
-  { intros f hf hg,
-    -- now do another nested induction on `g`
+  { intros g hg hf,
+    -- now do another nested induction on `f`
     apply free_abelian_group.induction_on_free_predicate
-      (suitable c₃ c₂) (suitable_free_predicate c₃ c₂) g hg; unfreezingI { clear_dependent g },
+      (suitable c₁ c₂) (suitable_free_predicate c₁ c₂) f hf; unfreezingI { clear_dependent f },
     sorry,
+    -- for this second sorry, note `eval_Mbar_pow_comp_of`
     sorry,
     sorry,
     sorry },
-  { intros f hf IH hg, resetI, specialize IH,
+  { intros g hg IH hf, resetI, specialize IH,
     show _ = normed_group_hom.comp_hom _ _,
     simp only [IH, pi.neg_apply, add_monoid_hom.map_neg, eval_Mbar_pow_neg, add_monoid_hom.coe_neg,
       neg_inj],
     refl },
-  { intros f₁ f₂ hf₁ hf₂ IH₁ IH₂ hg, resetI, specialize IH₁, specialize IH₂,
-    change universal_map m n at f₁, have Hf₁ : fact (f₁.suitable c₂ c₁) := hf₁,
-    change universal_map m n at f₂, have Hf₂ : fact (f₂.suitable c₂ c₁) := hf₂,
-    have Hf₁g : fact ((comp f₁ g).suitable c₃ c₁) := hf₁.comp hg,
-    have Hf₂g : fact ((comp f₂ g).suitable c₃ c₁) := hf₂.comp hg,
+  { intros g₁ g₂ hg₁ hg₂ IH₁ IH₂ hf, resetI, specialize IH₁, specialize IH₂,
+    change universal_map m n at g₁, have Hg₁ : fact (g₁.suitable c₂ c₃) := hg₁,
+    change universal_map m n at g₂, have Hg₂ : fact (g₂.suitable c₂ c₃) := hg₂,
+    have Hg₁f : fact ((comp g₁ f).suitable c₁ c₃) := hg₁.comp hf,
+    have Hg₂f : fact ((comp g₂ f).suitable c₁ c₃) := hg₂.comp hf,
     resetI,
     simp only [add_monoid_hom.map_add, add_monoid_hom.add_apply, eval_Mbar_pow_add, IH₁, IH₂],
     show _ = normed_group_hom.comp_hom _ _,
@@ -416,28 +421,23 @@ begin
 end
 
 @[simp] lemma eval_Mbar_pow_smul (k : ℤ) (f : universal_map m n)
-  [fact (f.suitable c₂ c₁)] [fact ((k • f).suitable c₂ c₁)] :
+  [fact (f.suitable c₁ c₂)] [fact ((k • f).suitable c₁ c₂)] :
   eval_Mbar_pow V S r' c₁ c₂ (k • f) = k • f.eval_Mbar_pow V S r' c₁ c₂ :=
 begin
   by_cases hk : k = 0,
   { simp only [hk, eval_Mbar_pow_zero, zero_smul] },
-  simp only [eval_Mbar_pow_def],
+  simp only [eval_Mbar_pow_def, support_smul k hk],
   rw finset.smul_sum,
-  let e : {g // g ∈ f.support} ≃ {g // g ∈ (k • f).support} :=
-  equiv.subtype_congr_prop (by { ext, rw support_smul k hk }),
-  rw ← e.sum_comp,
-  apply fintype.sum_congr,
-  rintro ⟨g, hg⟩,
+  apply finset.sum_congr rfl,
+  rintro g hg,
   rw ← smul_assoc,
-  congr' 1,
-  simp only [← gsmul_eq_smul k, ← add_monoid_hom.map_gsmul],
-  refl
+  simp only [← gsmul_eq_smul k, ← add_monoid_hom.map_gsmul]
 end
 
 lemma eval_Mbar_pow_comp_res (f : universal_map m n)
-  [fact (f.suitable c₂ c₁)] [fact (f.suitable c₄ c₃)] [fact (c₃ ≤ c₁)] [fact (c₄ ≤ c₂)] :
-  f.eval_Mbar_pow V S r' c₁ c₂ ≫ LCC_Mbar_pow.res V S r' c₄ c₂ m =
-  LCC_Mbar_pow.res V S r' c₃ c₁ n ≫ f.eval_Mbar_pow V S r' c₃ c₄ :=
+  [fact (f.suitable c₁ c₂)] [fact (f.suitable c₃ c₄)] [fact (c₁ ≤ c₃)] [fact (c₂ ≤ c₄)] :
+  f.eval_Mbar_pow V S r' c₃ c₄ ≫ LCC_Mbar_pow.res V S r' c₁ c₃ m =
+  LCC_Mbar_pow.res V S r' c₂ c₄ n ≫ f.eval_Mbar_pow V S r' c₁ c₂ :=
 sorry
 
 instance suitable_of_mul_left
@@ -448,17 +448,20 @@ end universal_map
 
 namespace package
 
-def suitable (BD : package) (c : ℕ → ℝ≥0) : Prop := sorry
+class suitable (BD : package) (cs : ℕ → ℝ≥0) : Prop :=
+(universal_suitable : ∀ i, (BD.map i).suitable (cs (i+1)) (cs i))
+(homotopy_suitable : (sorry : Prop)) -- see 9.12 of [Analytic]
 
-variables (BD : package) (cs : ℕ → ℝ≥0) (i : ℕ) [fact (BD.suitable cs)]
+variables (BD : package) (cs : ℕ → ℝ≥0) (i : ℕ) [BD.suitable cs]
 
 -- instance nonneg_of_suitable : fact (0 ≤ cs i) := sorry
 
-instance basic_suitable_of_suitable : fact ((BD.map i).suitable (cs i) (cs (i+1))) := sorry
+instance basic_suitable_of_suitable : fact ((BD.map i).suitable (cs (i+1)) (cs i)) :=
+suitable.universal_suitable i
 
 instance suitable_of_suitable :
-  fact ((universal_map.comp (BD.map i) (BD.map (i+1))).suitable (cs i) (cs (i+2))) :=
-sorry
+  fact ((universal_map.comp (BD.map i) (BD.map (i+1))).suitable (cs (i+2)) (cs i)) :=
+universal_map.suitable.comp (suitable.universal_suitable i) (suitable.universal_suitable (i+1))
 
 instance suitable_of_mul_right [fact (c₁ ≤ c₂)] : fact ((c₁ * cs i) ≤ (c₂ * cs i)) := sorry
 
@@ -517,7 +520,7 @@ variables [normed_with_aut r V]
 -- -- move this
 -- instance fact_mul_nonneg : fact (0 ≤ c₁ * c₂) := mul_nonneg ‹_› ‹_›
 
-def Mbar_complex (BD : breen_deligne.package) (c' : ℕ → ℝ) [fact (BD.suitable c')] :
+def Mbar_complex (BD : breen_deligne.package) (c' : ℕ → ℝ≥0) [fact (BD.suitable c')] :
   cochain_complex NormedGroup :=
 { X := int.extend_from_nat 0 $ λ i, LCC_Mbar_pow_Tinv V S r r' (c * c' i) (BD.rank i),
   d := int.extend_from_nat 0 $ λ i, (BD.map i).eval_Mbar_Tinv V S r r' (c * c' i) (c * c' (i+1)),
@@ -533,14 +536,14 @@ def Mbar_complex (BD : breen_deligne.package) (c' : ℕ → ℝ) [fact (BD.suita
   end }
 
 @[simp] lemma Mbar_complex.d_neg_succ_of_nat
-  (BD : breen_deligne.package) (c' : ℕ → ℝ) [fact (BD.suitable c')] (n : ℕ) :
+  (BD : breen_deligne.package) (c' : ℕ → ℝ≥0) [fact (BD.suitable c')] (n : ℕ) :
   (Mbar_complex V S r r' c BD c').d -[1+n] = 0 := rfl
 
 -- move this
 instance nnreal.fact_nonneg_unop_op (c : ℝ≥0ᵒᵖ) :
   fact ((0 : ℝ) ≤ (unop c : ℝ≥0)) := nnreal.coe_nonneg _
 
-def Mbar_system (BD : breen_deligne.package) (c' : ℕ → ℝ) [fact (BD.suitable c')] :
+def Mbar_system (BD : breen_deligne.package) (c' : ℕ → ℝ≥0) [fact (BD.suitable c')] :
   system_of_complexes :=
 { obj := λ c, Mbar_complex V S r r' (unop c : ℝ≥0) BD c',
   map := λ c₂ c₁ h,

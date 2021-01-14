@@ -124,17 +124,17 @@ begin
 end
 
 -- this cannot be an instance, because c₂ cannot be inferred
-lemma suitable.comp {f : basic_universal_map m n} {g : basic_universal_map l m} {c₁ c₂ c₃ : ℝ≥0}
-  (hf : f.suitable c₂ c₁) (hg : g.suitable c₃ c₂) :
-  (f.comp g).suitable c₃ c₁ :=
+lemma suitable.comp {g : basic_universal_map m n} {f : basic_universal_map l m} {c₁ c₂ c₃ : ℝ≥0}
+  (hg : g.suitable c₂ c₃) (hf : f.suitable c₁ c₂) :
+  (g.comp f).suitable c₁ c₃ :=
 begin
   intro i,
   simp only [← nat.coe_cast_ring_hom, ← ring_hom.map_sum, comp, matrix.mul_apply],
-  calc  ↑(∑ k, (∑ j, f i j * g j k).nat_abs) * c₃
-      ≤ ↑(∑ j, (f i j).nat_abs * ∑ k, (g j k).nat_abs) * c₃    : _ -- proof below
-  ... = ∑ j, ↑(f i j).nat_abs * ((∑ k, ↑(g j k).nat_abs) * c₃) : _ -- proof below
-  ... ≤ ∑ j, ↑(f i j).nat_abs * c₂                             : _ -- proof below
-  ... ≤ c₁                                                 : by { rw ← finset.sum_mul, exact hf i },
+  calc  ↑(∑ k, (∑ j, g i j * f j k).nat_abs) * c₁
+      ≤ ↑(∑ j, (g i j).nat_abs * ∑ k, (f j k).nat_abs) * c₁    : _ -- proof below
+  ... = ∑ j, ↑(g i j).nat_abs * ((∑ k, ↑(f j k).nat_abs) * c₁) : _ -- proof below
+  ... ≤ ∑ j, ↑(g i j).nat_abs * c₂                             : _ -- proof below
+  ... ≤ c₃                                                 : by { rw ← finset.sum_mul, exact hg i },
   { refine mul_le_mul' _ le_rfl,
     rw nat.cast_le,
     simp only [finset.mul_sum],
@@ -145,7 +145,7 @@ begin
     apply nat_abs_sum_le_sum_nat_abs },
   { simp only [← nat.coe_cast_ring_hom, ring_hom.map_sum, ring_hom.map_mul,
       finset.sum_mul, mul_assoc] },
-  { apply finset.sum_le_sum, rintro j -, exact mul_le_mul' le_rfl (hg j) }
+  { apply finset.sum_le_sum, rintro j -, exact mul_le_mul' le_rfl (hf j) }
 end
 
 def eval_Mbar_le [H : fact (f.suitable c₁ c₂)] :
