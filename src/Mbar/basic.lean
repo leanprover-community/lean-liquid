@@ -204,6 +204,16 @@ add_monoid_hom.mk' (λ F,
     { simp only [coe_mk, pi.add_apply, Tinv_aux_succ, coe_add] }
   end
 
+@[simp] lemma Tinv_zero [fact (0 < r')] (F : Mbar r' S) (s : S) : Tinv F s 0 = 0 := rfl
+
+@[simp] lemma Tinv_ne_zero [fact (0 < r')] (F : Mbar r' S) (s : S) (i : ℕ) (hi : i ≠ 0) :
+  Tinv F s i = F s (i + 1) :=
+if_neg hi
+
+@[simp] lemma Tinv_succ [fact (0 < r')] (F : Mbar r' S) (s : S) (i : ℕ) :
+  Tinv F s (i + 1) = F s (i + 2) :=
+Tinv_aux_succ (F s) i
+
 open pseudo_normed_group
 
 lemma Tinv_mem_filtration [h0r : fact (0 < r')] :

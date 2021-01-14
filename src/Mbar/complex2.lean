@@ -50,12 +50,12 @@ namespace universal_map
 
 variables {l m n : ℕ}
 
-def eval_Mbar_pow_Tinv (f : universal_map m n) :
+def eval_Mbar_pow_Tinv (f : universal_map m n) [fact (f.suitable c₁ c₂)] :
   LCC_Mbar_pow_Tinv V S r r' c₂ n ⟶ LCC_Mbar_pow_Tinv V S r r' c₁ m :=
 equalizer.map
   (f.eval_Mbar_pow V S r' ((r'⁻¹ * c₁)) ((r'⁻¹ * c₂)))
   (f.eval_Mbar_pow V S r' c₁ c₂)
-  (by apply eval_Mbar_pow_comp_Tinv)
+  (by rw eval_Mbar_pow_comp_Tinv)
 begin
   sorry
 end
@@ -70,7 +70,7 @@ begin
 end
 
 lemma eval_Mbar_pow_Tinv_comp (g : universal_map m n) (f : universal_map l m)
-  [hg : fact (g.suitable c₂ c₃)] [hf : fact (f.suitable c₁ c₂)] :
+  [fact (g.suitable c₂ c₃)] [fact (f.suitable c₁ c₂)] [fact ((comp g f).suitable c₁ c₃)] :
   (comp g f).eval_Mbar_pow_Tinv V S r r' c₁ c₃ =
     g.eval_Mbar_pow_Tinv V S r r' c₂ c₃ ≫ f.eval_Mbar_pow_Tinv V S r r' c₁ c₂ :=
 by simp only [eval_Mbar_pow_Tinv, equalizer.map_comp_map, ← eval_Mbar_pow_comp]
@@ -119,8 +119,8 @@ def Mbar_complex (BD : breen_deligne.package) (c' : ℕ → ℝ≥0) [BD.suitabl
     { dsimp,
       simp only [pi.comp_apply, pi.zero_apply],
       erw ← universal_map.eval_Mbar_pow_Tinv_comp V S r r' _ (c * c' (i+1)) _ (BD.map i) (BD.map (i+1)),
-      rw [BD.map_comp_map, universal_map.eval_Mbar_pow_Tinv_zero],
-      apply_instance, apply_instance },
+      simp only [BD.map_comp_map, universal_map.eval_Mbar_pow_Tinv_zero],
+      apply_instance },
     { show 0 ≫ _ = 0, rw [zero_comp] }
   end }
 

@@ -438,6 +438,12 @@ lemma continuous_hom_of_normed_group_hom {C : ℝ≥0} (c₁ c₂ : ℝ≥0)
   continuous (hom_of_normed_group_hom c₁ c₂ f h) :=
 continuous_of_normed_group_hom f _ (λ F, by { ext, refl }) H
 
+@[simp] lemma coe_hom_of_normed_group_hom_apply {C : ℝ≥0} (c₁ c₂ : ℝ≥0)
+  [fact (0 < r')] [hc : fact (C * c₁ ≤ c₂)]
+  (f : Mbar r' S →+ Mbar r' S) (h : f ∈ filtration (Mbar r' S →+ Mbar r' S) C)
+  (F : (Mbar_le r' S c₁)) (s : S) (i : ℕ) :
+  (hom_of_normed_group_hom c₁ c₂ f h) F s i = f F s i := rfl
+
 section Tinv
 
 /-!
@@ -447,6 +453,11 @@ section Tinv
 def Tinv {r : ℝ≥0} {S : Type u} [fintype S] {c₁ c₂ : ℝ≥0} [fact (0 < r)] [fact (r⁻¹ * c₁ ≤ c₂)] :
   Mbar_le r S c₁ → Mbar_le r S c₂ :=
 hom_of_normed_group_hom c₁ c₂ Mbar.Tinv Mbar.Tinv_mem_filtration
+
+@[simp] lemma Tinv_apply {r : ℝ≥0} {S : Type u} [fintype S] {c₁ c₂ : ℝ≥0}
+  [fact (0 < r)] [fact (r⁻¹ * c₁ ≤ c₂)] (F : Mbar_le r S c₁) (s : S) (i : ℕ) :
+  (Tinv F : Mbar_le r S c₂) s i = Mbar.Tinv (F : Mbar r S) s i :=
+rfl
 
 lemma continuous_Tinv (r : ℝ≥0) (S : Type u) [fintype S] (c₁ c₂ : ℝ≥0)
   [fact (0 < r)] [fact (r⁻¹ * c₁ ≤ c₂)] :

@@ -239,14 +239,10 @@ lemma eval_Mbar_pow_comp_res (f : basic_universal_map m n)
   LCC_Mbar_pow.res V S r' c₂ c₄ n ≫ f.eval_Mbar_pow V S r' c₁ c₂ :=
 begin
   rw [eval_Mbar_pow_def, eval_Mbar_pow_def, NormedGroup.LCC_obj_map', NormedGroup.LCC_obj_map'],
-  delta LCC_Mbar_pow.res,
-  rw [← functor.map_comp, ← functor.map_comp],
-  congr' 1,
-  delta LCC_Mbar_pow.res₀,
-  rw [← functor.map_comp, ← functor.map_comp],
-  congr' 1,
-  rw [← op_comp, ← op_comp],
-  congr' 1,
+  delta LCC_Mbar_pow.res LCC_Mbar_pow.res₀,
+  rw [← functor.map_comp, ← functor.map_comp, ← functor.map_comp,
+      ← functor.map_comp, ← op_comp, ← op_comp],
+  congr' 3,
   ext x i s k,
   show (f.eval_Mbar_le r' S c₃ c₄ ∘ (function.comp Mbar_le.cast_le)) x i s k =
     ((function.comp Mbar_le.cast_le) ∘ (f.eval_Mbar_le r' S c₁ c₂)) x i s k,
@@ -255,10 +251,20 @@ begin
 end
 
 lemma eval_Mbar_pow_comp_Tinv (f : basic_universal_map m n) [fact (f.suitable c₁ c₂)] :
-  LCC_Mbar_pow.Tinv V S r' c₂ n ≫ f.eval_Mbar_pow V S r' c₁ c₂ =
-    f.eval_Mbar_pow V S r' (r'⁻¹ * c₁) (r'⁻¹ * c₂) ≫ LCC_Mbar_pow.Tinv V S r' c₁ m :=
+  f.eval_Mbar_pow V S r' (r'⁻¹ * c₁) (r'⁻¹ * c₂) ≫ LCC_Mbar_pow.Tinv V S r' c₁ m =
+    LCC_Mbar_pow.Tinv V S r' c₂ n ≫ f.eval_Mbar_pow V S r' c₁ c₂ :=
 begin
-  sorry
+  rw [eval_Mbar_pow_def, eval_Mbar_pow_def, NormedGroup.LCC_obj_map', NormedGroup.LCC_obj_map'],
+  delta LCC_Mbar_pow.Tinv LCC_Mbar_pow.Tinv₀,
+  rw [← functor.map_comp, ← functor.map_comp, ← functor.map_comp,
+      ← functor.map_comp, ← op_comp, ← op_comp],
+  congr' 3,
+  ext x j s k, dsimp at *,
+  show (f.eval_Mbar_le r' S _ _ ∘ (function.comp Mbar_le.Tinv)) x j s k =
+    ((function.comp Mbar_le.Tinv) ∘ (f.eval_Mbar_le r' S c₁ c₂)) x j s k,
+  dsimp [function.comp, Mbar.Tinv],
+  cases k,
+  { squeeze_simp, },
 end
 
 end basic_universal_map
@@ -494,8 +500,8 @@ begin
 end
 
 lemma eval_Mbar_pow_comp_Tinv (f : universal_map m n) [fact (f.suitable c₁ c₂)] :
-  LCC_Mbar_pow.Tinv V S r' c₂ n ≫ eval_Mbar_pow V S r' c₁ c₂ f =
-    eval_Mbar_pow V S r' (r'⁻¹ * c₁) (r'⁻¹ * c₂) f ≫ LCC_Mbar_pow.Tinv V S r' c₁ m :=
+  eval_Mbar_pow V S r' (r'⁻¹ * c₁) (r'⁻¹ * c₂) f ≫ LCC_Mbar_pow.Tinv V S r' c₁ m =
+    LCC_Mbar_pow.Tinv V S r' c₂ n ≫ eval_Mbar_pow V S r' c₁ c₂ f :=
 begin
   show normed_group_hom.comp_hom _ _ = normed_group_hom.comp_hom _ _,
   rw [eval_Mbar_pow_def, eval_Mbar_pow_def, add_monoid_hom.map_sum, add_monoid_hom.map_sum,
