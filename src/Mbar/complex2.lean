@@ -50,7 +50,7 @@ namespace universal_map
 
 variables {l m n : ℕ}
 
-def eval_Mbar_pow_Tinv (f : universal_map m n) [fact (f.suitable c₁ c₂)] :
+def eval_Mbar_pow_Tinv (f : universal_map m n) [f.suitable c₁ c₂] :
   LCC_Mbar_pow_Tinv V S r r' c₂ n ⟶ LCC_Mbar_pow_Tinv V S r r' c₁ m :=
 equalizer.map
   (f.eval_Mbar_pow V S r' ((r'⁻¹ * c₁)) ((r'⁻¹ * c₂)))
@@ -58,8 +58,6 @@ equalizer.map
   (by rw eval_Mbar_pow_comp_Tinv)
   (by rw [category.assoc, ← eval_Mbar_pow_comp_res V S r' c₁ c₂ (r'⁻¹ * c₁) (r'⁻¹ * c₂) f,
       eval_Mbar_pow_comp_T_inv_assoc])
-
-local attribute [instance] suitable_zero
 
 @[simp] lemma eval_Mbar_pow_Tinv_zero :
   (0 : universal_map m n).eval_Mbar_pow_Tinv V S r r' c₁ c₂ = 0 :=
@@ -69,7 +67,7 @@ begin
 end
 
 lemma eval_Mbar_pow_Tinv_comp (g : universal_map m n) (f : universal_map l m)
-  [fact (g.suitable c₂ c₃)] [fact (f.suitable c₁ c₂)] [fact ((comp g f).suitable c₁ c₃)] :
+  [g.suitable c₂ c₃] [f.suitable c₁ c₂] [(comp g f).suitable c₁ c₃] :
   (comp g f).eval_Mbar_pow_Tinv V S r r' c₁ c₃ =
     g.eval_Mbar_pow_Tinv V S r r' c₂ c₃ ≫ f.eval_Mbar_pow_Tinv V S r r' c₁ c₂ :=
 by simp only [eval_Mbar_pow_Tinv, equalizer.map_comp_map, ← eval_Mbar_pow_comp]
@@ -78,7 +76,7 @@ by simp only [eval_Mbar_pow_Tinv, equalizer.map_comp_map, ← eval_Mbar_pow_comp
 instance fix_my_name [fact (c₁ ≤ c₂)] : fact (r' * c₁ ≤ r' * c₂) := mul_le_mul' le_rfl ‹_›
 
 lemma eval_Mbar_pow_Tinv_comp_res (f : universal_map m n)
-  [fact (f.suitable c₁ c₂)] [fact (f.suitable c₃ c₄)] [fact (c₁ ≤ c₃)] [fact (c₂ ≤ c₄)] :
+  [f.suitable c₁ c₂] [f.suitable c₃ c₄] [fact (c₁ ≤ c₃)] [fact (c₂ ≤ c₄)] :
   f.eval_Mbar_pow_Tinv V S r r' c₃ c₄ ≫ LCC_Mbar_pow_Tinv.res V S r r' c₁ c₃ m =
   LCC_Mbar_pow_Tinv.res V S r r' c₂ c₄ n ≫ f.eval_Mbar_pow_Tinv V S r r' c₁ c₂ :=
 begin
