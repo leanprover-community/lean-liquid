@@ -60,7 +60,10 @@ local attribute [instance] suitable_zero
 
 @[simp] lemma eval_Mbar_pow_Tinv_zero :
   (0 : universal_map m n).eval_Mbar_pow_Tinv V S r r' c₁ c₂ = 0 :=
-sorry
+begin
+  apply equalizer.hom_ext,
+  simp only [eval_Mbar_pow_Tinv, eval_Mbar_pow_zero, zero_comp, equalizer.map_ι, comp_zero]
+end
 
 lemma eval_Mbar_pow_Tinv_comp (g : universal_map m n) (f : universal_map l m)
   [hg : fact (g.suitable c₂ c₃)] [hf : fact (f.suitable c₁ c₂)] :
