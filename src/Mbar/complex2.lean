@@ -66,12 +66,12 @@ lemma eval_Mbar_pow_Tinv_comp (g : universal_map m n) (f : universal_map l m)
   [hg : fact (g.suitable c₂ c₃)] [hf : fact (f.suitable c₁ c₂)] :
   (comp g f).eval_Mbar_pow_Tinv V S r r' c₁ c₃ =
     g.eval_Mbar_pow_Tinv V S r r' c₂ c₃ ≫ f.eval_Mbar_pow_Tinv V S r r' c₁ c₂ :=
-sorry
+by simp only [eval_Mbar_pow_Tinv, equalizer.map_comp_map, ← eval_Mbar_pow_comp]
 
 -- move this
 instance fix_my_name [fact (c₁ ≤ c₂)] : fact (r' * c₁ ≤ r' * c₂) := mul_le_mul' le_rfl ‹_›
 
--- move this, fix name
+-- ugly, should go away
 lemma helper (r' : ℝ≥0) (f : universal_map m n) [fact (f.suitable c₁ c₂)] :
   (f.suitable (r' * c₁) (r' * c₂)) :=
 show fact (f.suitable (r' * c₁) (r' * c₂)), by apply_instance
