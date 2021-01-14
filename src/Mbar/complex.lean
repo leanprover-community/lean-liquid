@@ -459,6 +459,10 @@ sorry
 instance suitable_of_mul_left (f : universal_map m n) (c c₁ c₂ : ℝ≥0) [fact (f.suitable c₁ c₂)] :
   fact (f.suitable (c * c₁) (c * c₂)) := sorry
 
+-- move this
+instance le_of_mul_right [fact (c₁ ≤ c₂)] : fact ((c₁ * c₃) ≤ (c₂ * c₃)) :=
+mul_le_mul' ‹_› le_rfl
+
 end universal_map
 
 namespace package
@@ -475,8 +479,6 @@ suitable.universal_suitable i
 instance suitable_of_suitable :
   fact ((universal_map.comp (BD.map i) (BD.map (i+1))).suitable (c' (i+2)) (c' i)) :=
 universal_map.suitable.comp (suitable.universal_suitable i) (suitable.universal_suitable (i+1))
-
-instance suitable_of_mul_right [fact (c₁ ≤ c₂)] : fact ((c₁ * c' i) ≤ (c₂ * c' i)) := sorry
 
 -- sanity check
 lemma exists_suitable : ∃ c, BD.suitable c := sorry
