@@ -13,6 +13,9 @@ variables [hc' : fact (BD.suitable c')]
 
 include hc'
 
+-- sanity check
+lemma exists_suitable : ∃ c, BD.suitable c := sorry
+
 /-- Thm 9.5 in `Analytic.pdf` -/
 theorem main (r r' : ℝ) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)] :
   ∀ m : ℕ,

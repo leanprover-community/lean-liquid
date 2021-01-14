@@ -518,9 +518,6 @@ instance suitable_of_suitable :
   fact ((universal_map.comp (BD.map i) (BD.map (i+1))).suitable (c' (i+2)) (c' i)) :=
 universal_map.suitable.comp (suitable.universal_suitable i) (suitable.universal_suitable (i+1))
 
--- sanity check
-lemma exists_suitable : ∃ c, BD.suitable c := sorry
-
 end package
 
 end breen_deligne
