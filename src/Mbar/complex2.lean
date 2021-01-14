@@ -54,7 +54,11 @@ def eval_Mbar_pow_Tinv (f : universal_map m n) :
   LCC_Mbar_pow_Tinv V S r r' c₂ n ⟶ LCC_Mbar_pow_Tinv V S r r' c₁ m :=
 equalizer.map
   (f.eval_Mbar_pow V S r' ((r'⁻¹ * c₁)) ((r'⁻¹ * c₂)))
-  (f.eval_Mbar_pow V S r' c₁ c₂) sorry sorry
+  (f.eval_Mbar_pow V S r' c₁ c₂)
+  (by apply eval_Mbar_pow_comp_Tinv)
+begin
+  sorry
+end
 
 local attribute [instance] suitable_zero
 

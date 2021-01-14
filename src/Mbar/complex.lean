@@ -254,6 +254,13 @@ begin
   simp only [Mbar_le.coe_cast_le]
 end
 
+lemma eval_Mbar_pow_comp_Tinv (f : basic_universal_map m n) [fact (f.suitable c₁ c₂)] :
+  LCC_Mbar_pow.Tinv V S r' c₂ n ≫ f.eval_Mbar_pow V S r' c₁ c₂ =
+    f.eval_Mbar_pow V S r' (r'⁻¹ * c₁) (r'⁻¹ * c₂) ≫ LCC_Mbar_pow.Tinv V S r' c₁ m :=
+begin
+  sorry
+end
+
 end basic_universal_map
 
 namespace universal_map
@@ -326,6 +333,10 @@ hf.add hg
 lemma suitable_smul_iff (k : ℤ) (hk : k ≠ 0) (f : universal_map m n) (c₁ c₂ : ℝ≥0) :
   suitable c₁ c₂ (k • f) ↔ f.suitable c₁ c₂ :=
 (suitable_free_predicate c₁ c₂).smul_iff k hk
+
+instance suitable_of_mul_left (f : universal_map m n) [h : fact (f.suitable c₁ c₂)] :
+  fact (f.suitable (c * c₁) (c * c₂)) :=
+λ g hg, @basic_universal_map.suitable_of_mul_left _ _ _ _ _ _ (h g hg)
 
 -- this cannot be an instance, because c₂ cannot be inferred
 lemma suitable.comp {g : universal_map m n} {f : universal_map l m} {c₁ c₂ c₃ : ℝ≥0}
@@ -482,9 +493,21 @@ begin
   rw this
 end
 
-instance suitable_of_mul_left (f : universal_map m n) [h : fact (f.suitable c₁ c₂)] :
-  fact (f.suitable (c * c₁) (c * c₂)) :=
-λ g hg, @basic_universal_map.suitable_of_mul_left _ _ _ _ _ _ (h g hg)
+lemma eval_Mbar_pow_comp_Tinv (f : universal_map m n) [fact (f.suitable c₁ c₂)] :
+  LCC_Mbar_pow.Tinv V S r' c₂ n ≫ eval_Mbar_pow V S r' c₁ c₂ f =
+    eval_Mbar_pow V S r' (r'⁻¹ * c₁) (r'⁻¹ * c₂) f ≫ LCC_Mbar_pow.Tinv V S r' c₁ m :=
+begin
+  show normed_group_hom.comp_hom _ _ = normed_group_hom.comp_hom _ _,
+  rw [eval_Mbar_pow_def, eval_Mbar_pow_def, add_monoid_hom.map_sum, add_monoid_hom.map_sum,
+      add_monoid_hom.sum_apply],
+  apply finset.sum_congr rfl,
+  intros g hg,
+  rw [← gsmul_eq_smul, ← gsmul_eq_smul, add_monoid_hom.map_gsmul, add_monoid_hom.map_gsmul,
+      add_monoid_hom.gsmul_apply],
+  congr' 1,
+  haveI : fact (g.suitable c₁ c₂) := suitable_of_mem_support f c₁ c₂ g hg,
+  exact g.eval_Mbar_pow_comp_Tinv V S r' _ _
+end
 
 -- move this
 instance le_of_mul_right [fact (c₁ ≤ c₂)] : fact ((c₁ * c₃) ≤ (c₂ * c₃)) :=
