@@ -23,3 +23,7 @@ theorem main [BD.suitable c']
   ∀ (V : NormedGroup) [normed_with_aut r V],
   by exactI (Mbar_system V S r r' BD c').is_bdd_exact_for_bdd_degree_above_idx k m c₀ :=
 sorry
+
+/-
+TODO: we currently do not require that the maps in the complex are norm-nonincreasing
+-/
