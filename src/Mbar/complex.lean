@@ -248,6 +248,27 @@ begin
   refl
 end
 
+lemma eval_Mbar_pow_comp_res (f : basic_universal_map m n)
+  [fact (f.suitable c₁ c₂)] [fact (f.suitable c₃ c₄)] [fact (c₁ ≤ c₃)] [fact (c₂ ≤ c₄)] :
+  f.eval_Mbar_pow V S r' c₃ c₄ ≫ LCC_Mbar_pow.res V S r' c₁ c₃ m =
+  LCC_Mbar_pow.res V S r' c₂ c₄ n ≫ f.eval_Mbar_pow V S r' c₁ c₂ :=
+begin
+  rw [eval_Mbar_pow_def, eval_Mbar_pow_def, NormedGroup.LCC_obj_map', NormedGroup.LCC_obj_map'],
+  delta LCC_Mbar_pow.res,
+  rw [← functor.map_comp, ← functor.map_comp],
+  congr' 1,
+  delta LCC_Mbar_pow.res₀,
+  rw [← functor.map_comp, ← functor.map_comp],
+  congr' 1,
+  rw [← op_comp, ← op_comp],
+  congr' 1,
+  ext x i s k,
+  show (f.eval_Mbar_le r' S c₃ c₄ ∘ (function.comp Mbar_le.cast_le)) x i s k =
+    ((function.comp Mbar_le.cast_le) ∘ (f.eval_Mbar_le r' S c₁ c₂)) x i s k,
+  dsimp [function.comp],
+  simp only [Mbar_le.coe_cast_le]
+end
+
 end basic_universal_map
 
 namespace universal_map
@@ -264,10 +285,10 @@ See Lemma 9.11 of [Analytic]. -/
 def suitable (c₁ c₂ : ℝ≥0) (f : universal_map m n) : Prop :=
 ∀ g ∈ f.support, basic_universal_map.suitable g c₁ c₂
 
-instance suitable_of_mem_support (f : universal_map m n) (c₁ c₂ : ℝ≥0) (g : {g // g ∈ f.support})
-  [h : fact (f.suitable c₁ c₂)] :
-  fact (basic_universal_map.suitable ↑g c₁ c₂) :=
-h g.1 g.2
+lemma suitable_of_mem_support (f : universal_map m n) (c₁ c₂ : ℝ≥0)
+  (g : basic_universal_map m n) (hg : g ∈ f.support) [h : fact (f.suitable c₁ c₂)] :
+  fact (g.suitable c₁ c₂) :=
+h g hg
 
 instance suitable_of (f : basic_universal_map m n) (c₁ c₂ : ℝ≥0) [h : fact (f.suitable c₁ c₂)] :
   fact (suitable c₁ c₂ (of f)) :=
@@ -454,10 +475,26 @@ lemma eval_Mbar_pow_comp_res (f : universal_map m n)
   [fact (f.suitable c₁ c₂)] [fact (f.suitable c₃ c₄)] [fact (c₁ ≤ c₃)] [fact (c₂ ≤ c₄)] :
   f.eval_Mbar_pow V S r' c₃ c₄ ≫ LCC_Mbar_pow.res V S r' c₁ c₃ m =
   LCC_Mbar_pow.res V S r' c₂ c₄ n ≫ f.eval_Mbar_pow V S r' c₁ c₂ :=
-sorry
+begin
+  show normed_group_hom.comp_hom _ _ = normed_group_hom.comp_hom _ _,
+  rw [eval_Mbar_pow_def, add_monoid_hom.map_sum,
+      eval_Mbar_pow_def, add_monoid_hom.map_sum,
+      add_monoid_hom.sum_apply],
+  apply finset.sum_congr rfl,
+  rintro g hg,
+  rw [← gsmul_eq_smul, add_monoid_hom.map_gsmul,
+      ← gsmul_eq_smul, add_monoid_hom.map_gsmul,
+      add_monoid_hom.gsmul_apply],
+  haveI : fact (g.suitable c₁ c₂) := f.suitable_of_mem_support c₁ c₂ g hg,
+  haveI : fact (g.suitable c₃ c₄) := f.suitable_of_mem_support c₃ c₄ g hg,
+  have := basic_universal_map.eval_Mbar_pow_comp_res V S r' c₁ c₂ c₃ c₄ g,
+  change normed_group_hom.comp_hom _ _ = normed_group_hom.comp_hom _ _ at this,
+  rw this
+end
 
-instance suitable_of_mul_left (f : universal_map m n) (c c₁ c₂ : ℝ≥0) [fact (f.suitable c₁ c₂)] :
-  fact (f.suitable (c * c₁) (c * c₂)) := sorry
+instance suitable_of_mul_left (f : universal_map m n) [h : fact (f.suitable c₁ c₂)] :
+  fact (f.suitable (c * c₁) (c * c₂)) :=
+λ g hg, @basic_universal_map.suitable_of_mul_left _ _ _ _ _ _ (h g hg)
 
 -- move this
 instance le_of_mul_right [fact (c₁ ≤ c₂)] : fact ((c₁ * c₃) ≤ (c₂ * c₃)) :=
@@ -470,6 +507,7 @@ namespace package
 class suitable (BD : package) (c' : ℕ → ℝ≥0) : Prop :=
 (universal_suitable : ∀ i, (BD.map i).suitable (c' (i+1)) (c' i))
 (homotopy_suitable : (sorry : Prop)) -- see 9.12 of [Analytic]
+-- jmc: do we need this condition here ↑, or somewhere else? Not clear to me.
 
 variables (BD : package) (c' : ℕ → ℝ≥0) (i : ℕ) [BD.suitable c']
 

@@ -50,6 +50,14 @@ protected lemma mem_filtration (x : Mbar_le r' S c) :
 protected def cast_le [hc : fact (c₁ ≤ c₂)] (x : Mbar_le r' S c₁) : Mbar_le r' S c₂ :=
 ⟨⟨x, x.coeff_zero, x.summable⟩, filtration_mono hc x.mem_filtration⟩
 
+@[simp] lemma coe_cast_le [hc : fact (c₁ ≤ c₂)] (x : Mbar_le r' S c₁) :
+  ((x.cast_le : Mbar_le r' S c₂) : Mbar r' S) = x :=
+by { ext, refl }
+
+@[simp] lemma cast_le_apply [hc : fact (c₁ ≤ c₂)] (x : Mbar_le r' S c₁) (s : S) (i : ℕ) :
+  (x.cast_le : Mbar_le r' S c₂) s i = x s i :=
+rfl
+
 def mk' (x : S → ℕ → ℤ)
   (h : (∀ s, x s 0 = 0) ∧
        (∀ s, summable (λ n, ↑(x s n).nat_abs * r'^n)) ∧

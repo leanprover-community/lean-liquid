@@ -91,7 +91,7 @@ namespace breen_deligne
 namespace basic_universal_map
 
 variables {k l m n : ℕ}
-variables (r' : ℝ≥0) (S : Type*) (c₁ c₂ c₃ : ℝ≥0) [fintype S] [fact (0 < r')]
+variables (r' : ℝ≥0) (S : Type*) (c c₁ c₂ c₃ : ℝ≥0) [fintype S] [fact (0 < r')]
 variables (f : basic_universal_map m n)
 
 /-- Addition goes from `Mbar r' S c` to `Mbar r' S c'` for suitable `c'`.
@@ -110,6 +110,10 @@ begin
   rw [← nnreal.mul_le_iff_le_inv H, mul_comm],
   apply h
 end
+
+instance suitable_of_mul_left (f : basic_universal_map m n) [h : fact (f.suitable c₁ c₂)] :
+  fact (f.suitable (c * c₁) (c * c₂)) :=
+λ i, by { rw mul_left_comm, exact mul_le_mul' le_rfl (h i) }
 
 -- move this
 lemma nat_abs_sum_le_sum_nat_abs {ι : Type*} (s : finset ι) (f : ι → ℤ) :
@@ -148,16 +152,21 @@ begin
   { apply finset.sum_le_sum, rintro j -, exact mul_le_mul' le_rfl (hf j) }
 end
 
-def eval_Mbar_le [H : fact (f.suitable c₁ c₂)] :
-  ((Mbar_le r' S c₁)^m) → ((Mbar_le r' S c₂)^n) :=
-Mbar_le.hom_of_normed_group_hom' r' S c₁ c₂ H.sup_mul_le (f.eval_png (Mbar r' S)) $
-λ c F hF, eval_png_mem_filtration _ _ hF
-
 lemma fact_zero_suitable : fact ((0 : basic_universal_map m n).suitable c₁ c₂) :=
 λ i, by simp only [nat.cast_zero, zero_mul, zero_le', finset.sum_const_zero,
           matrix.zero_apply, int.nat_abs_zero]
 
 local attribute [instance] fact_zero_suitable
+
+def eval_Mbar_le [H : fact (f.suitable c₁ c₂)] :
+  ((Mbar_le r' S c₁)^m) → ((Mbar_le r' S c₂)^n) :=
+Mbar_le.hom_of_normed_group_hom' r' S c₁ c₂ H.sup_mul_le (f.eval_png (Mbar r' S)) $
+λ c F hF, eval_png_mem_filtration _ _ hF
+
+@[simp] lemma eval_Mbar_le_apply [fact (f.suitable c₁ c₂)]
+  (x : (Mbar_le r' S c₁)^m) (j : fin n) (s : S) (i : ℕ) :
+  (f.eval_Mbar_le r' S c₁ c₂ x j) s i = f.eval_png (Mbar r' S) (λ i, x i) j s i :=
+rfl
 
 @[simp] lemma eval_Mbar_le_zero : eval_Mbar_le r' S c₁ c₂ (0 : basic_universal_map m n) = 0 :=
 begin
@@ -166,21 +175,6 @@ begin
     Mbar.coe_zero, eval_png_zero, add_monoid_hom.coe_zero],
   refl
 end
-
--- -- this cannot be an instance because c₂ can't be inferred from the goal
--- lemma suitable_comp (f : basic_universal_map m n) (g : basic_universal_map l m)
---   (hf : fact (f.suitable c₂ c₁)) (hg : fact (g.suitable c₃ c₂)) :
---   fact ((f.comp g).suitable c₃ c₁) :=
--- begin
---   intros i,
---   refine le_trans _ (hf i),
---   simp only [finset.sum_mul, comp, int.nat_abs, matrix.mul_apply],
---   simp only [← nat.coe_cast_ring_hom, ring_hom.map_sum, ring_hom.map_mul],
---   suffices : ∑ j, (f.comp g i j).nat_abs ≤ ∑ j k, (f i k * g k j).nat_abs,
---   { have := hf i,
---     have := hg _,
---      },
--- end
 
 lemma eval_Mbar_le_comp (f : basic_universal_map m n) (g : basic_universal_map l m)
   [fact (f.suitable c₂ c₁)] [fact (g.suitable c₃ c₂)] [fact ((f.comp g).suitable c₃ c₁)] :

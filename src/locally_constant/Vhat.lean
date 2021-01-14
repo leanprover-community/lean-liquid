@@ -192,14 +192,17 @@ Here `V-hat(S)` is the completion (for the sup norm) of the locally constant fun
 def LCC : NormedGroup ⥤ CompHausᵒᵖ ⥤ NormedGroup :=
 (LocallyConstant.uncurry ⋙ Completion).curry
 
-lemma LCC_obj_map (V : NormedGroup) {X Y : CompHausᵒᵖ} (f : Y ⟶ X) (v : (LCC.obj V).obj Y) :
-  (LCC.obj V).map f v = completion.map (locally_constant.comap f.unop) v :=
+lemma LCC_obj_map' (V : NormedGroup) {X Y : CompHausᵒᵖ} (f : Y ⟶ X) :
+  (LCC.obj V).map f = Completion.map ((LocallyConstant.obj V).map f) :=
 begin
-  show Completion.map (((LocallyConstant.obj V).map f) ≫ _) v = _,
+  show Completion.map (((LocallyConstant.obj V).map f) ≫ _) = _,
   simp only [category_theory.functor.map_id, category_theory.category.comp_id,
     LocallyConstant_obj_map, category_theory.nat_trans.id_app],
-  refl
 end
+
+lemma LCC_obj_map (V : NormedGroup) {X Y : CompHausᵒᵖ} (f : Y ⟶ X) (v : (LCC.obj V).obj Y) :
+  (LCC.obj V).map f v = completion.map (locally_constant.comap f.unop) v :=
+by { rw LCC_obj_map', refl }
 
 variables (S : Type*) [topological_space S] [compact_space S]
 
