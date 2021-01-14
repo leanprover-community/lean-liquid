@@ -529,12 +529,12 @@ class suitable (BD : package) (c' : ℕ → ℝ≥0) : Prop :=
 
 variables (BD : package) (c' : ℕ → ℝ≥0) (i : ℕ) [BD.suitable c']
 
-instance basic_suitable_of_suitable : fact ((BD.map i).suitable (c' (i+1)) (c' i)) :=
+instance basic_suitable_of_suitable : ((BD.map i).suitable (c' (i+1)) (c' i)) :=
 suitable.universal_suitable i
 
 instance suitable_of_suitable :
-  fact ((universal_map.comp (BD.map i) (BD.map (i+1))).suitable (c' (i+2)) (c' i)) :=
-universal_map.suitable.comp (suitable.universal_suitable i) (suitable.universal_suitable (i+1))
+  ((universal_map.comp (BD.map i) (BD.map (i+1))).suitable (c' (i+2)) (c' i)) :=
+universal_map.suitable.comp (c' (i + 1))--(suitable.universal_suitable i) (suitable.universal_suitable (i+1))
 
 end package
 
