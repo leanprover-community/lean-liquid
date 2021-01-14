@@ -100,19 +100,21 @@ See Lemma 9.11 of [Analytic]. -/
 def suitable (f : basic_universal_map m n) (c₁ c₂ : ℝ≥0) : Prop :=
 ∀ i, (∑ j, ↑(f i j).nat_abs) * c₁ ≤ c₂
 
-lemma suitable.sup_mul_le {f : basic_universal_map m n} {c₁ c₂ : ℝ≥0} (h : f.suitable c₁ c₂) :
+attribute [class] suitable
+
+lemma suitable.sup_mul_le {f : basic_universal_map m n} {c₁ c₂ : ℝ≥0} [h : f.suitable c₁ c₂] :
   (finset.univ.sup $ λ i, ∑ j, ↑(f i j).nat_abs) * c₁ ≤ c₂ :=
 begin
   by_cases H : c₁ = 0,
-  { subst H, rw mul_zero, exact zero_le' },
+  { unfreezingI {subst H}, rw mul_zero, exact zero_le' },
   rw [mul_comm, nnreal.mul_le_iff_le_inv H, finset.sup_le_iff],
   rintro i -,
   rw [← nnreal.mul_le_iff_le_inv H, mul_comm],
   apply h
 end
 
-instance suitable_of_mul_left (f : basic_universal_map m n) [h : fact (f.suitable c₁ c₂)] :
-  fact (f.suitable (c * c₁) (c * c₂)) :=
+instance suitable_of_mul_left (f : basic_universal_map m n) [h : f.suitable c₁ c₂] :
+  f.suitable (c * c₁) (c * c₂) :=
 λ i, by { rw mul_left_comm, exact mul_le_mul' le_rfl (h i) }
 
 -- move this
@@ -129,7 +131,7 @@ end
 
 -- this cannot be an instance, because c₂ cannot be inferred
 lemma suitable.comp {g : basic_universal_map m n} {f : basic_universal_map l m} {c₁ c₂ c₃ : ℝ≥0}
-  (hg : g.suitable c₂ c₃) (hf : f.suitable c₁ c₂) :
+  [hg : g.suitable c₂ c₃] [hf : f.suitable c₁ c₂] :
   (g.comp f).suitable c₁ c₃ :=
 begin
   intro i,
