@@ -24,6 +24,13 @@ theorem main [BD.suitable c']
   by exactI (Mbar_system V S r r' BD c').is_bdd_exact_for_bdd_degree_above_idx k m c₀ :=
 sorry
 
-/-
-TODO: we currently do not require that the maps in the complex are norm-nonincreasing
--/
+/-- The system of complexes `Mbar_system` is admissible. -/
+lemma Mbar_system.admissible [BD.suitable c']
+  (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)] :
+  ∀ m : ℕ,
+  ∃ (k : ℝ≥0) (hk : fact (1 ≤ k)),
+  ∃ c₀ : ℝ≥0,
+  ∀ (S : Type) [fintype S],
+  ∀ (V : NormedGroup) [normed_with_aut r V],
+  by exactI (Mbar_system V S r r' BD c').admissible :=
+sorry -- our current conditions in `BD.suitable c'` are too weak to prove this

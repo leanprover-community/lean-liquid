@@ -59,4 +59,10 @@ def is_bdd_exact_for_bdd_degree_above_idx
 ∀ x : C.X (k * c) (i+1),
 ∃ y : C.X c i, ∥(C.res x) - (C.d y)∥ ≤ k * ∥C.d x∥
 
+/-- A system of complexes is *admissible* if all the differentials and restriction maps
+are norm-nonincreasing. -/
+structure admissible (C : system_of_complexes) : Prop :=
+(differential_norm_noninc : ∀ c i, normed_group_hom.bound_by (C.d : C.X c i ⟶ C.X c (i+1)) 1)
+(restriction_norm_noninc : ∀ c' c i h, normed_group_hom.bound_by (@res C c' c i h) 1)
+
 end system_of_complexes

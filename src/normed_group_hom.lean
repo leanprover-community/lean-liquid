@@ -167,6 +167,13 @@ by refine_struct
   .. normed_group_hom.has_neg, ..normed_group_hom.has_sub };
 { intros, ext, simp [add_assoc, add_comm, add_left_comm, sub_eq_add_neg] }
 .
+
+noncomputable
+instance : has_norm (normed_group_hom V₁ V₂) :=
+⟨λ f, ↑(⨅ (r : ℝ≥0) (h : f.bound_by r), r)⟩
+
+-- TODO: make this into a `normed_group` instance
+
 def comp_hom : (normed_group_hom V₂ V₃) →+ (normed_group_hom V₁ V₂) →+ (normed_group_hom V₁ V₃) :=
 add_monoid_hom.mk' (λ g, add_monoid_hom.mk' (λ f, g.comp f)
   (by { intros, ext, exact g.map_add _ _ }))
