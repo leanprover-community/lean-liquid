@@ -130,7 +130,8 @@ begin
 end
 
 -- this cannot be an instance, because c₂ cannot be inferred
-lemma suitable.comp {g : basic_universal_map m n} {f : basic_universal_map l m} {c₁ c₂ c₃ : ℝ≥0}
+lemma suitable.comp {g : basic_universal_map m n} {f : basic_universal_map l m}
+  {c₁ : ℝ≥0} (c₂ : ℝ≥0) {c₃ : ℝ≥0}
   [hg : g.suitable c₂ c₃] [hf : f.suitable c₁ c₂] :
   (g.comp f).suitable c₁ c₃ :=
 begin
@@ -191,7 +192,7 @@ end
 
 open add_monoid_hom (apply)
 
-lemma eval_Mbar_le_continuous [H : f.suitable c₁ c₂] :
+lemma eval_Mbar_le_continuous [f.suitable c₁ c₂] :
   continuous (f.eval_Mbar_le r' S c₁ c₂) :=
 Mbar_le.hom_of_normed_group_hom'_continuous _ _ _ _ f.sup_mul_le _ _ $
 begin
