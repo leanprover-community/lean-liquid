@@ -88,7 +88,9 @@ end
 
 namespace LCC_Mbar_pow
 
--- Achtung! Achtung! It is very important that the `[normed_with_aut r V]` instance comes last!
+-- Achtung! Achtung!
+-- For technical reasons,
+-- it is very important that the `[normed_with_aut r V]` instance comes last!
 -- Reason: `r` is an out_param, so it should be fixed as soon as possible
 -- by searching for `[normed_aut ?x_0 V]`
 -- and Lean tries to fill in the typeclass assumptions from right to left.
