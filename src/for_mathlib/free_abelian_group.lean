@@ -249,6 +249,9 @@ begin
   solve_by_elim
 end
 
+lemma neg_iff (h : free_predicate Q) : Q (-a) ↔ Q a :=
+⟨λ ha, by simpa only [neg_neg] using h.neg ha, h.neg⟩
+
 def add_subgroup (h : free_predicate Q) : add_subgroup (free_abelian_group X) :=
 { carrier := {a | Q a},
   zero_mem' := h.zero,

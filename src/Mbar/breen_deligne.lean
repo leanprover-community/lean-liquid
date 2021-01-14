@@ -111,6 +111,43 @@ begin
   apply h
 end
 
+-- move this
+lemma nat_abs_sum_le_sum_nat_abs {ι : Type*} (s : finset ι) (f : ι → ℤ) :
+  (∑ i in s, f i).nat_abs ≤ ∑ i in s, (f i).nat_abs :=
+begin
+  classical,
+  apply finset.induction_on s,
+  { simp only [finset.sum_empty, int.nat_abs_zero] },
+  { intros i s his IH,
+    simp only [his, finset.sum_insert, not_false_iff],
+    exact (int.nat_abs_add_le _ _).trans (add_le_add le_rfl IH) }
+end
+
+-- this cannot be an instance, because c₂ cannot be inferred
+lemma suitable.comp {f : basic_universal_map m n} {g : basic_universal_map l m} {c₁ c₂ c₃ : ℝ≥0}
+  (hf : f.suitable c₂ c₁) (hg : g.suitable c₃ c₂) :
+  (f.comp g).suitable c₃ c₁ :=
+begin
+  intro i,
+  simp only [← nat.coe_cast_ring_hom, ← ring_hom.map_sum, comp, matrix.mul_apply],
+  calc  ↑(∑ k, (∑ j, f i j * g j k).nat_abs) * c₃
+      ≤ ↑(∑ j, (f i j).nat_abs * ∑ k, (g j k).nat_abs) * c₃    : _ -- proof below
+  ... = ∑ j, ↑(f i j).nat_abs * ((∑ k, ↑(g j k).nat_abs) * c₃) : _ -- proof below
+  ... ≤ ∑ j, ↑(f i j).nat_abs * c₂                             : _ -- proof below
+  ... ≤ c₁                                                 : by { rw ← finset.sum_mul, exact hf i },
+  { refine mul_le_mul' _ le_rfl,
+    rw nat.cast_le,
+    simp only [finset.mul_sum],
+    rw finset.sum_comm,
+    apply finset.sum_le_sum,
+    rintro k -,
+    simp only [← int.nat_abs_mul],
+    apply nat_abs_sum_le_sum_nat_abs },
+  { simp only [← nat.coe_cast_ring_hom, ring_hom.map_sum, ring_hom.map_mul,
+      finset.sum_mul, mul_assoc] },
+  { apply finset.sum_le_sum, rintro j -, exact mul_le_mul' le_rfl (hg j) }
+end
+
 def eval_Mbar_le [H : fact (f.suitable c₁ c₂)] :
   ((Mbar_le r' S c₁)^m) → ((Mbar_le r' S c₂)^n) :=
 Mbar_le.hom_of_normed_group_hom' r' S c₁ c₂ H.sup_mul_le (f.eval_png (Mbar r' S)) $
