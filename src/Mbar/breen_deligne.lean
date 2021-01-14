@@ -102,7 +102,7 @@ def suitable (f : basic_universal_map m n) (c₁ c₂ : ℝ≥0) : Prop :=
 
 attribute [class] suitable
 
-lemma suitable.sup_mul_le {f : basic_universal_map m n} {c₁ c₂ : ℝ≥0} [h : f.suitable c₁ c₂] :
+lemma sup_mul_le (f : basic_universal_map m n) {c₁ c₂ : ℝ≥0} [h : f.suitable c₁ c₂] :
   (finset.univ.sup $ λ i, ∑ j, ↑(f i j).nat_abs) * c₁ ≤ c₂ :=
 begin
   by_cases H : c₁ = 0,
@@ -154,18 +154,16 @@ begin
   { apply finset.sum_le_sum, rintro j -, exact mul_le_mul' le_rfl (hf j) }
 end
 
-lemma fact_zero_suitable : fact ((0 : basic_universal_map m n).suitable c₁ c₂) :=
+instance zero_suitable : (0 : basic_universal_map m n).suitable c₁ c₂ :=
 λ i, by simp only [nat.cast_zero, zero_mul, zero_le', finset.sum_const_zero,
           matrix.zero_apply, int.nat_abs_zero]
 
-local attribute [instance] fact_zero_suitable
-
-def eval_Mbar_le [H : fact (f.suitable c₁ c₂)] :
+def eval_Mbar_le [H : f.suitable c₁ c₂] :
   ((Mbar_le r' S c₁)^m) → ((Mbar_le r' S c₂)^n) :=
-Mbar_le.hom_of_normed_group_hom' r' S c₁ c₂ H.sup_mul_le (f.eval_png (Mbar r' S)) $
+Mbar_le.hom_of_normed_group_hom' r' S c₁ c₂ f.sup_mul_le (f.eval_png (Mbar r' S)) $
 λ c F hF, eval_png_mem_filtration _ _ hF
 
-@[simp] lemma eval_Mbar_le_apply [fact (f.suitable c₁ c₂)]
+@[simp] lemma eval_Mbar_le_apply [f.suitable c₁ c₂]
   (x : (Mbar_le r' S c₁)^m) (j : fin n) (s : S) (i : ℕ) :
   (f.eval_Mbar_le r' S c₁ c₂ x j) s i = f.eval_png (Mbar r' S) (λ i, x i) j s i :=
 rfl
@@ -179,7 +177,7 @@ begin
 end
 
 lemma eval_Mbar_le_comp (f : basic_universal_map m n) (g : basic_universal_map l m)
-  [fact (f.suitable c₂ c₁)] [fact (g.suitable c₃ c₂)] [fact ((f.comp g).suitable c₃ c₁)] :
+  [f.suitable c₂ c₁] [g.suitable c₃ c₂] [(f.comp g).suitable c₃ c₁] :
   (f.comp g).eval_Mbar_le r' S c₃ c₁ = f.eval_Mbar_le r' S c₂ c₁ ∘ g.eval_Mbar_le r' S c₃ c₂ :=
 begin
   ext j s i,
@@ -193,9 +191,9 @@ end
 
 open add_monoid_hom (apply)
 
-lemma eval_Mbar_le_continuous [H : fact (f.suitable c₁ c₂)] :
+lemma eval_Mbar_le_continuous [H : f.suitable c₁ c₂] :
   continuous (f.eval_Mbar_le r' S c₁ c₂) :=
-Mbar_le.hom_of_normed_group_hom'_continuous _ _ _ _ H.sup_mul_le _ _ $
+Mbar_le.hom_of_normed_group_hom'_continuous _ _ _ _ f.sup_mul_le _ _ $
 begin
   intro M,
   use M,
