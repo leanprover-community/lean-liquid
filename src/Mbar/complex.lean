@@ -231,9 +231,7 @@ begin
   rw [← category_theory.functor.map_comp, ← op_comp],
   congr' 2,
   ext1 j,
-  dsimp,
-  rw eval_Mbar_le_comp r' S _ c₂ _,
-  refl
+  simpa [eval_Mbar_le_comp r' S _ c₂ _],
 end
 
 lemma eval_Mbar_pow_comp_res (f : basic_universal_map m n)
