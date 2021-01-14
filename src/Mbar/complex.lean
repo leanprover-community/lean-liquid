@@ -270,17 +270,14 @@ begin
       pi.smul_apply, Mbar.Tinv_succ],
     refl }
 end
-.
+
 lemma eval_Mbar_pow_comp_T_inv (f : basic_universal_map m n) [fact (f.suitable c₁ c₂)]
   [fact (0 < r)] [normed_with_aut r V] :
   f.eval_Mbar_pow V S r' c₁ c₂ ≫ normed_with_aut.T.inv =
     normed_with_aut.T.inv ≫ f.eval_Mbar_pow V S r' c₁ c₂ :=
 begin
-  rw [eval_Mbar_pow_def, NormedGroup.LCC_obj_map'],
-  symmetry,
-  rw iso.inv_comp_eq,
-  symmetry,
-  refine nat_iso.naturality_2 _ _,
+  rw [LCC_Mbar_pow.T_inv_eq, LCC_Mbar_pow.T_inv_eq, eval_Mbar_pow_def],
+  apply nat_trans.naturality
 end
 
 end basic_universal_map
@@ -545,7 +542,7 @@ begin
       add_monoid_hom.gsmul_apply],
   congr' 1,
   haveI : fact (g.suitable c₁ c₂) := suitable_of_mem_support f c₁ c₂ g hg,
-  exact g.eval_Mbar_pow_comp_T_inv V S r' _ _
+  exact g.eval_Mbar_pow_comp_T_inv V S r r' _ _
 end
 
 -- move this
