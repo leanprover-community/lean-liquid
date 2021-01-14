@@ -68,11 +68,33 @@ lemma eval_Mbar_pow_Tinv_comp (g : universal_map m n) (f : universal_map l m)
     g.eval_Mbar_pow_Tinv V S r r' c₂ c₃ ≫ f.eval_Mbar_pow_Tinv V S r r' c₁ c₂ :=
 sorry
 
+-- move this
+instance fix_my_name [fact (c₁ ≤ c₂)] : fact (r' * c₁ ≤ r' * c₂) := mul_le_mul' le_rfl ‹_›
+
+-- move this, fix name
+lemma helper (r' : ℝ≥0) (f : universal_map m n) [fact (f.suitable c₁ c₂)] :
+  (f.suitable (r' * c₁) (r' * c₂)) :=
+show fact (f.suitable (r' * c₁) (r' * c₂)), by apply_instance
+
 lemma eval_Mbar_pow_Tinv_comp_res (f : universal_map m n)
   [fact (f.suitable c₁ c₂)] [fact (f.suitable c₃ c₄)] [fact (c₁ ≤ c₃)] [fact (c₂ ≤ c₄)] :
   f.eval_Mbar_pow_Tinv V S r r' c₃ c₄ ≫ LCC_Mbar_pow_Tinv.res V S r r' c₁ c₃ m =
   LCC_Mbar_pow_Tinv.res V S r r' c₂ c₄ n ≫ f.eval_Mbar_pow_Tinv V S r r' c₁ c₂ :=
-sorry
+begin
+  delta eval_Mbar_pow_Tinv LCC_Mbar_pow_Tinv.res,
+  rw [equalizer.map_comp_map, equalizer.map_comp_map],
+  simp only [eval_Mbar_pow_comp_res V S r' c₁ c₂ c₃ c₄],
+  congr' 1,
+  apply eval_Mbar_pow_comp_res,
+  -- what the hack!! this lemma uses `sorry` but Lean doesn't tell me where!
+  -- begin more explicit about the last step doesn't help
+  --
+  -- refine @eval_Mbar_pow_comp_res V S r' (r'⁻¹ * c₁) (r'⁻¹ * c₂) (r'⁻¹ * c₃) (r'⁻¹ * c₄)
+  --   _ _ m n f
+  --   (_ : suitable (r'⁻¹ * c₁) (r'⁻¹ * c₂) f)
+  --   (_ : suitable (r'⁻¹ * c₃) (r'⁻¹ * c₄) f) _ _,
+  -- apply helper, apply helper,
+end
 
 end universal_map
 
