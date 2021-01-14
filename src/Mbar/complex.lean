@@ -9,7 +9,7 @@ import for_mathlib.add_monoid_hom
 
 noncomputable theory
 
-open opposite category_theory category_theory.limits
+open opposite category_theory category_theory.category category_theory.limits
 open_locale classical nnreal big_operators
 local attribute [instance] type_pow
 
@@ -138,7 +138,7 @@ NormedGroup.Completion.map $ res₀ _ _ _ _ _ _
 lemma res_refl [fact (0 < r')] : res V S r' c c a = 𝟙 _ :=
 by { delta res, rw [res₀_refl], exact category_theory.functor.map_id _ _ }
 
-lemma res_comp_res [fact (0 < r')] [fact (c₁ ≤ c₂)] [fact (c₂ ≤ c₃)] [fact (c₁ ≤ c₃)] :
+@[reassoc] lemma res_comp_res [fact (0 < r')] [fact (c₁ ≤ c₂)] [fact (c₂ ≤ c₃)] [fact (c₁ ≤ c₃)] :
   res V S r' c₂ c₃ a ≫ res V S r' c₁ c₂ a = res V S r' c₁ c₃ a :=
 by {delta res, rw [← functor.map_comp, res₀_comp_res₀] }
 
@@ -162,7 +162,7 @@ by { delta Tinv res, rw [← functor.map_comp, ← functor.map_comp, Tinv₀_res
 
 open uniform_space NormedGroup
 
-lemma T_res₀ [fact (0 < r)] [fact (0 < r')] [fact (c₁ ≤ c₂)] [normed_with_aut r V] :
+@[reassoc] lemma T_res₀ [fact (0 < r)] [fact (0 < r')] [fact (c₁ ≤ c₂)] [normed_with_aut r V] :
   normed_with_aut.T.hom ≫ res₀ V S r' c₁ c₂ a = res₀ V S r' _ _ a ≫ normed_with_aut.T.hom :=
 begin
   simp only [LocallyConstant_obj_map, iso.app_hom, normed_with_aut_LocallyConstant_T,
@@ -176,17 +176,11 @@ begin
   { exact continuous_pi (λ i, (Mbar_le.continuous_cast_le r' S c₁ c₂).comp (continuous_apply i)) }
 end
 
-lemma T_inv₀_res₀ [fact (0 < r)] [fact (0 < r')] [fact (c₁ ≤ c₂)] [normed_with_aut r V] :
+@[reassoc] lemma T_inv₀_res₀ [fact (0 < r)] [fact (0 < r')] [fact (c₁ ≤ c₂)] [normed_with_aut r V] :
   normed_with_aut.T.inv ≫ res₀ V S r' c₁ c₂ a = res₀ V S r' _ _ a ≫ normed_with_aut.T.inv :=
-begin
-  simp only [iso.inv_comp_eq],
-  symmetry,
-  rw ← category.assoc,
-  simp only [iso.comp_inv_eq],
-  apply T_res₀,
-end
+by simp only [iso.inv_comp_eq, T_res₀_assoc, iso.hom_inv_id, comp_id]
 
-lemma T_res [fact (0 < r)] [fact (0 < r')] [fact (c₁ ≤ c₂)] [normed_with_aut r V] :
+@[reassoc] lemma T_res [fact (0 < r)] [fact (0 < r')] [fact (c₁ ≤ c₂)] [normed_with_aut r V] :
   normed_with_aut.T.hom ≫ res V S r' c₁ c₂ a = res V S r' _ _ a ≫ normed_with_aut.T.hom :=
 begin
   change NormedGroup.Completion.map _ ≫ NormedGroup.Completion.map (res₀ _ _ _ _ _ _) = _,
@@ -197,15 +191,9 @@ begin
   exact @T_res₀ V S r r' c₁ c₂ a _ _ _ _ _,
 end
 
-lemma T_inv_res [fact (0 < r)] [fact (0 < r')] [fact (c₁ ≤ c₂)] [normed_with_aut r V] :
+@[reassoc] lemma T_inv_res [fact (0 < r)] [fact (0 < r')] [fact (c₁ ≤ c₂)] [normed_with_aut r V] :
   normed_with_aut.T.inv ≫ res V S r' c₁ c₂ a = res V S r' _ _ a ≫ normed_with_aut.T.inv :=
-begin
-  simp only [iso.inv_comp_eq],
-  symmetry,
-  rw ← category.assoc,
-  simp only [iso.comp_inv_eq],
-  apply T_res,
-end
+by simp only [iso.inv_comp_eq, T_res_assoc, iso.hom_inv_id, comp_id]
 
 end LCC_Mbar_pow
 

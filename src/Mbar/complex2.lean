@@ -1,46 +1,48 @@
 import Mbar.complex
+import for_mathlib.equalizers
 
 open_locale classical nnreal
 noncomputable theory
 
-open breen_deligne category_theory category_theory.limits
+open opposite breen_deligne category_theory category_theory.limits
+
 variables (BD : package) (c' : ℕ → ℝ≥0) [BD.suitable c']
-variables (V : NormedGroup) (S : Type*) (r r' c c₁ c₂ : ℝ≥0) (a : ℕ) [fintype S][fact (0 < r')]
+variables (V : NormedGroup) (S : Type*) (r r' c c₁ c₂ c₃ : ℝ≥0) (a : ℕ) [fintype S][fact (0 < r')]
 
 /-
 TODO: Do we want to define the `T⁻¹`-invariants as a kernel,
 or would it be better to use equalizers?
 -/
 /-- The space `V-hat(Mbar_{r'}(S)_{≤c}^a)^{T⁻¹}`. -/
-def LCC_Mbar_pow_Tinv [fact (0 < r)] [fact (0 < r')] [fact (r' ≤ 1)]
-  [normed_with_aut r V] :
+def LCC_Mbar_pow_Tinv [fact (0 < r)] [fact (0 < r')] [fact (r' ≤ 1)] [normed_with_aut r V] :
   NormedGroup :=
-kernel ((LCC_Mbar_pow.Tinv V S r' c a) - (normed_with_aut.T.inv ≫ (LCC_Mbar_pow.res V S r' _ _ a)))
+equalizer (LCC_Mbar_pow.Tinv V S r' c a) (normed_with_aut.T.inv ≫ (LCC_Mbar_pow.res V S r' _ _ a))
 
 namespace LCC_Mbar_pow_Tinv
 
 def res [fact (0 < r)] [fact (0 < r')] [fact (r' ≤ 1)] [fact (c₁ ≤ c₂)] [normed_with_aut r V] :
   LCC_Mbar_pow_Tinv V S r r' c₂ a ⟶ LCC_Mbar_pow_Tinv V S r r' c₁ a :=
-kernel.lift _ (kernel.ι _ ≫ LCC_Mbar_pow.res _ _ _ _ _ _)
+equalizer.map (LCC_Mbar_pow.res _ _ _ _ _ _) (LCC_Mbar_pow.res _ _ _ _ _ _)
 begin
-  rw category.assoc,
-  -- now we need to know that `res` commutes with the two types of `Tinv`
-  ext v,
-  dsimp,
-  simp only [pi.zero_apply, normed_group_hom.coe_sub, coe_comp, pi.sub_apply],
-  sorry
+  rw LCC_Mbar_pow.Tinv_res
+end
+begin
+  haveI : fact (c₁ ≤ r'⁻¹ * c₂) :=
+    le_trans ‹c₁ ≤ c₂› (show fact (c₂ ≤ r'⁻¹ * c₂), by apply_instance),
+  rw [category.assoc, LCC_Mbar_pow.res_comp_res,
+      ← LCC_Mbar_pow.T_inv_res_assoc, LCC_Mbar_pow.res_comp_res]
 end
 
 lemma res_comp_res [fact (0 < r)] [fact (0 < r')] [fact (r' ≤ 1)]
   [fact (c₁ ≤ c₂)] [fact (c₂ ≤ c₃)] [fact (c₁ ≤ c₃)]
   [normed_with_aut r V] :
   res V S r r' c₂ c₃ a ≫ res V S r r' c₁ c₂ a = res V S r r' c₁ c₃ a :=
-sorry
+by simp only [res, equalizer.map_comp_map, LCC_Mbar_pow.res_comp_res]
 
 @[simp] lemma res_refl [fact (0 < r)] [fact (0 < r')] [fact (r' ≤ 1)] [fact (c ≤ c)]
   [normed_with_aut r V] :
   res V S r r' c c a = 𝟙 _ :=
-sorry
+by { simp only [res, equalizer.map_id, LCC_Mbar_pow.res_refl], refl }
 
 end LCC_Mbar_pow_Tinv
 
