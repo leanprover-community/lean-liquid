@@ -130,7 +130,7 @@ begin
 end
 
 -- this cannot be an instance, because c₂ cannot be inferred
-lemma suitable.comp {g : basic_universal_map m n} {f : basic_universal_map l m}
+lemma suitable_comp {g : basic_universal_map m n} {f : basic_universal_map l m}
   {c₁ : ℝ≥0} (c₂ : ℝ≥0) {c₃ : ℝ≥0}
   [hg : g.suitable c₂ c₃] [hf : f.suitable c₁ c₂] :
   (g.comp f).suitable c₁ c₃ :=
