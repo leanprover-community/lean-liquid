@@ -437,9 +437,13 @@ begin
     -- now do another nested induction on `f`
     apply free_abelian_group.induction_on_free_predicate
       (suitable c₁ c₂) (suitable_free_predicate c₁ c₂) f hf; unfreezingI { clear_dependent f },
-    sorry,
+    { simp },
+    { intros x hx,
+      haveI foo : fact (x.suitable c₁ c₂) := universal_map.suitable_of hx,
+      have ZZZ := eval_Mbar_pow_comp_of V S r' c₁ c₂ c₃ g x,
+      apply eval_Mbar_pow_comp_of,--
+      sorry },
     -- for this second sorry, note `eval_Mbar_pow_comp_of`
-    sorry,
     sorry,
     sorry },
   { intros g hg IH hf, resetI, specialize IH,
