@@ -1,5 +1,5 @@
 [package]
-name = "liquid"
+name = "lean-liquid"
 version = "0.1"
 lean_version = "leanprover-community/lean:3.23.0"
 path = "src"
