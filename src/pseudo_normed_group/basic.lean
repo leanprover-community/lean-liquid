@@ -17,7 +17,7 @@ section for_mathlib
 @[simp] lemma function.nsmul_apply {X M : Type*} [add_comm_monoid M]
   (n : ℕ) (f : X → M) (x : X) :
   (n •ℕ f) x = n •ℕ (f x) :=
-by rw [semimodule.nsmul_eq_smul ℕ, semimodule.nsmul_eq_smul ℕ, nat.cast_id, pi.smul_apply]
+by rw [nsmul_eq_smul, nsmul_eq_smul, pi.smul_apply]
 
 @[simp, to_additive] lemma monoid_hom.coe_one {M₁ M₂ : Type*} [monoid M₁] [monoid M₂] :
   ⇑(1 : M₁ →* M₂) = 1 := rfl
