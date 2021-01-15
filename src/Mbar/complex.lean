@@ -568,9 +568,6 @@ namespace package
 
 class suitable (BD : package) (c' : ℕ → ℝ≥0) : Prop :=
 (universal_suitable : ∀ i, (BD.map i).suitable (c' (i+1)) (c' i))
--- (homotopy_suitable : (sorry : Prop)) -- see 9.12 of [Analytic]
--- jmc: do we need this condition here ↑, or somewhere else? Not clear to me.
--- TODO: check with Peter
 
 variables (BD : package) (c' : ℕ → ℝ≥0) (i : ℕ) [BD.suitable c']
 
@@ -579,80 +576,8 @@ suitable.universal_suitable i
 
 instance suitable_of_suitable :
   ((universal_map.comp (BD.map i) (BD.map (i+1))).suitable (c' (i+2)) (c' i)) :=
-universal_map.suitable.comp (c' (i + 1))--(suitable.universal_suitable i) (suitable.universal_suitable (i+1))
+universal_map.suitable.comp (c' (i + 1))
 
 end package
 
 end breen_deligne
-
-section system_up_to_Tinv
-/-!
-## Almost there
-
-We're pretty close to defining the desired system of complexes.
-Here we will define the system with objects `V-hat (Mbar_{r'}(S)_{≤ c}^a)`.
-
-In a final step, we will need to take `T⁻¹`-invariants of those objects
-(for the correct notion of invariants, i.e., the equalizer of two `T⁻¹`-actions).
--/
-
-open breen_deligne
-
-variables (BD : package) (c' : ℕ → ℝ≥0) [BD.suitable c'] [fact (0 < r')]
-
-def Mbar_complex' :
-  cochain_complex NormedGroup :=
-{ X := int.extend_from_nat 0 $ λ i, LCC_Mbar_pow V S r' (c * c' i) (BD.rank i),
-  d := int.extend_from_nat 0 $ λ i, (BD.map i).eval_Mbar_pow V S r' (c * c' (i+1)) (c * c' i),
-  d_squared' :=
-  begin
-    ext1 ⟨i⟩,
-    { dsimp,
-      simp only [pi.comp_apply, pi.zero_apply],
-      erw ← universal_map.eval_Mbar_pow_comp V S r' _ (c * c' (i+1)) _ (BD.map i) (BD.map (i+1)),
-      rw [BD.map_comp_map, universal_map.eval_Mbar_pow_zero],
-      apply_instance, apply_instance },
-    { show 0 ≫ _ = 0, rw [zero_comp] }
-  end }
-
-@[simp] lemma Mbar_complex'.d_neg_succ_of_nat
-  (BD : package) (c' : ℕ → ℝ≥0) [BD.suitable c'] [fact (0 < r')] (n : ℕ) :
-  (Mbar_complex' V S r' c BD c').d -[1+n] = 0 := rfl
-
-def Mbar_system' (BD : breen_deligne.package) (c' : ℕ → ℝ≥0) [BD.suitable c'] :
-  system_of_complexes :=
-{ obj := λ c, Mbar_complex' V S r' (unop c : ℝ≥0) BD c',
-  map := λ c₂ c₁ h,
-  { f := int.extend_from_nat 0 $ λ i,
-    by { haveI : fact (((unop c₁ : ℝ≥0) : ℝ) ≤ (unop c₂ : ℝ≥0)) := h.unop.down.down,
-      exact LCC_Mbar_pow.res V S r' _ _ (BD.rank i) },
-    comm' :=
-    begin
-      ext1 ⟨i⟩,
-      { dsimp [int.extend_from_nat],
-        apply universal_map.eval_Mbar_pow_comp_res },
-      { dsimp [int.extend_from_nat],
-        simp only [Mbar_complex'.d_neg_succ_of_nat, zero_comp] }
-    end },
-  map_id' :=
-  begin
-    intro c,
-    ext ⟨i⟩ : 2,
-    { dsimp [int.extend_from_nat],
-      rw LCC_Mbar_pow.res_refl V S r' _ _, refl },
-    { dsimp [int.extend_from_nat], ext }
-  end,
-  map_comp' :=
-  begin
-    intros c₃ c₂ c₁ h h',
-    haveI H' : fact (((unop c₁ : ℝ≥0) : ℝ) ≤ (unop c₂ : ℝ≥0)) := h'.unop.down.down,
-    haveI H : fact (((unop c₂ : ℝ≥0) : ℝ) ≤ (unop c₃ : ℝ≥0)) := h.unop.down.down,
-    have : fact (((unop c₁ : ℝ≥0) : ℝ) ≤ (unop c₃ : ℝ≥0)) := le_trans H' H,
-    ext ⟨i⟩ : 2,
-    { dsimp [int.extend_from_nat],
-      rw LCC_Mbar_pow.res_comp_res V S r' _ _ _ _ },
-    { dsimp [int.extend_from_nat],
-      rw zero_comp },
-  end }
-
-end system_up_to_Tinv
