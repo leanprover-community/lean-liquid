@@ -1,0 +1,20 @@
+on:
+  push:
+
+jobs:
+  update_lean_xyz_branch_and_build:
+    runs-on: ubuntu-latest
+    name: Update lean-x.y.z branch and build project
+    steps:
+
+    - name: checkout project
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: update branch
+      if: github.ref == 'refs/heads/master'
+      uses: leanprover-contrib/update-versions-action@master
+
+    - name: build project
+      uses: leanprover-contrib/lean-build-action@master
