@@ -107,7 +107,7 @@ begin
   dsimp [LCC_Mbar_pow, LCC_Mbar_pow.normed_with_aut, NormedGroup.normed_with_aut_LCC,
     NormedGroup.normed_with_aut_Completion, NormedGroup.normed_with_aut_LocallyConstant,
     NormedGroup.LCC],
-  erw [locally_constant.comap_hom_id, category.id_comp]
+  erw [locally_constant.comap_hom_id, category.comp_id]
 end
 
 @[simp] def res₀ [fact (0 < r')] [fact (c₁ ≤ c₂)] :

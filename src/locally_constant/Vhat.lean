@@ -1,3 +1,4 @@
+import category_theory.currying
 import topology.category.Profinite
 import topology.algebra.group_completion
 import topology.metric_space.completion
@@ -5,13 +6,12 @@ import topology.metric_space.completion
 import locally_constant.NormedGroup
 import locally_constant.for_mathlib
 import normed_with_aut
-import for_mathlib.functor
 
 noncomputable theory
 open_locale nnreal
 
 namespace NormedGroup
-open uniform_space opposite
+open uniform_space opposite category_theory
 
 @[simps]
 def Completion : NormedGroup ⥤ NormedGroup :=
@@ -190,14 +190,15 @@ lift_unique _ _ T_hom_incl
 that sends a normed abelian group `V` and a compact space `S` to `V-hat(S)`.
 Here `V-hat(S)` is the completion (for the sup norm) of the locally constant functions `S → V`. -/
 def LCC : NormedGroup ⥤ CompHausᵒᵖ ⥤ NormedGroup :=
-(LocallyConstant.uncurry ⋙ Completion).curry
+curry.obj ((uncurry.obj LocallyConstant) ⋙ Completion)
 
 lemma LCC_obj_map' (V : NormedGroup) {X Y : CompHausᵒᵖ} (f : Y ⟶ X) :
   (LCC.obj V).map f = Completion.map ((LocallyConstant.obj V).map f) :=
 begin
-  show Completion.map (((LocallyConstant.obj V).map f) ≫ _) = _,
-  simp only [category_theory.functor.map_id, category_theory.category.comp_id,
-    LocallyConstant_obj_map, category_theory.nat_trans.id_app],
+  delta LCC,
+  simp only [curry.obj_obj_map, LocallyConstant_obj_map, functor.comp_map, uncurry.obj_map,
+    nat_trans.id_app, functor.map_comp, functor.map_id, category_theory.functor.map_id],
+  erw [← functor.map_comp, category.id_comp]
 end
 
 lemma LCC_obj_map (V : NormedGroup) {X Y : CompHausᵒᵖ} (f : Y ⟶ X) (v : (LCC.obj V).obj Y) :
