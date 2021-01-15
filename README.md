@@ -6,7 +6,7 @@ A project to formalize Theorem 9.5 of Scholze--Clausen [Analytic.pdf]
 
 ## The statement
 
-The statement can be found in [`src/liquid.lean`](https://github.com/leanprover-community/lean-liquid/blob/master/src/liquid.lean#L32)
+The statement can be found in [`src/liquid.lean`](https://github.com/leanprover-community/lean-liquid/blob/master/src/liquid.lean#L34)
 
 ```lean
 theorem main [BD.suitable c']
@@ -20,7 +20,7 @@ theorem main [BD.suitable c']
 sorry
 ```
 
-See [`src/liquid.lean`](https://github.com/leanprover-community/lean-liquid/blob/master/src/liquid.lean#43)
+See [`src/liquid.lean`](https://github.com/leanprover-community/lean-liquid/blob/master/src/liquid.lean#45)
 for details on how to read this statement.
 
 ## How to browse this repository

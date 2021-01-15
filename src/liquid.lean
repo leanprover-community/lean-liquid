@@ -3,6 +3,8 @@ import system_of_complexes
 import locally_constant.Vhat
 import Mbar.complex2
 
+import by_exactI_hack
+
 /-!
 # Liquid Tensor Experiment
 
@@ -35,8 +37,8 @@ theorem main [BD.suitable c']
   ∃ (k : ℝ≥0) [fact (1 ≤ k)],
   ∃ c₀ : ℝ≥0,
   ∀ (S : Type) [fintype S],
-  ∀ (V : NormedGroup) [normed_with_aut r V],
-  by exactI (Mbar_system V S r r' BD c').is_bdd_exact_for_bdd_degree_above_idx k m c₀ :=
+  ∀ (V : NormedGroup) [normed_with_aut r V],​
+    (Mbar_system V S r r' BD c').is_bdd_exact_for_bdd_degree_above_idx k m c₀ :=
 sorry
 
 /-!
@@ -52,10 +54,6 @@ We will now briefly explain some of the more peculiar syntax.
   See also the "Brief note on type theory" below.
 * `[normed_with_aut r V]` adds the assumption that `V` is endowed with an automorphism `T`
   that scales elements `v` of `V` by the positive scalar `r`: `∥T(v)∥ = r * ∥v∥`.
-* `by exactI` is needed to help Lean over a speedbump:
-  because we are inside an existential (`∃`) statement the assumptions of the form `[foo]`
-  that were made after the existential operator are not accesible to part of
-  Lean's automation. The `by exactI` is needed to "reset the instance cache".
 * `Mbar_system` is the system of complexes of normed abelian groups
   occuring in Theorems 9.4/9.5 of [Analytic.pdf].
 * `is_bdd_exact_for_bdd_degree_above_idx` is the assertion that a system of complexes
