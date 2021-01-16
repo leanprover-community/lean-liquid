@@ -30,6 +30,10 @@ We will add some useful instructions soon.
 We have just finished the formalisation of the *statement* (not the proof!) of Theorem 9.5,
 and we are currently busy with cleaning up the code.
 
+## Brief note on type theory
+
+TODO
+
 ## Source reference
 
 `[Analytic.pdf]` : http://www.math.uni-bonn.de/people/scholze/Analytic.pdf

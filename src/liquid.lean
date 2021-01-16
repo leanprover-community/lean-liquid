@@ -51,7 +51,7 @@ We will now briefly explain some of the more peculiar syntax.
   with respect to the package of Breen--Deligne data `BD`.
 * `[fact (0 < r)]` records the "fact" `0 < r` as an assumption to whatever comes later.
 * `(S : Type) [fintype S]` is Lean's way of saying "`S` is a finite set".
-  See also the "Brief note on type theory" below.
+  See also the "Brief note on type theory" in `README.md`.
 * `[normed_with_aut r V]` adds the assumption that `V` is endowed with an automorphism `T`
   that scales elements `v` of `V` by the positive scalar `r`: `∥T(v)∥ = r * ∥v∥`.
 * `Mbar_system` is the system of complexes of normed abelian groups
