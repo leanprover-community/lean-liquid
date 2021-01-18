@@ -89,6 +89,11 @@ which means that some things work slightly differently from set theory.
   This means that we can define the square function on the integers via
   `λ x, x^2`, which translates to `x ↦ x^2` in set-theoretic notation.
   
+For a more extensive discussion of type theory,
+see the dedicated
+[page](https://leanprover-community.github.io/lean-perfectoid-spaces/type_theory.html)
+on the perfectoid project website.
+
 ## Source reference
 
 `[Analytic]` : http://www.math.uni-bonn.de/people/scholze/Analytic.pdf
