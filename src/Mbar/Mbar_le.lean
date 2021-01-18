@@ -86,16 +86,16 @@ end Mbar_le
 
 variables (c₃)
 
-def Mbar_le.add [fact (0 < r')] [h : fact (c₁ + c₂ ≤ c₃)]
+def Mbar_le.add [h : fact (c₁ + c₂ ≤ c₃)]
   (F : Mbar_le r' S c₁) (G : Mbar_le r' S c₂) :
   Mbar_le r' S c₃ :=
 subtype.mk (F + G) $ filtration_mono h $ add_mem_filtration F.mem_filtration G.mem_filtration
 
-def Mbar_le.add' [fact (0 < r')] [fact (c₁ + c₂ ≤ c₃)] :
+def Mbar_le.add' [fact (c₁ + c₂ ≤ c₃)] :
   Mbar_le r' S c₁ × Mbar_le r' S c₂ → Mbar_le r' S c₃ :=
 λ x, Mbar_le.add c₃ x.1 x.2
 
-def Mbar_le.neg [fact (0 < r')] (F : Mbar_le r' S c) : Mbar_le r' S c :=
+def Mbar_le.neg (F : Mbar_le r' S c) : Mbar_le r' S c :=
 subtype.mk (-F) $ neg_mem_filtration F.mem_filtration
 
 namespace Mbar_le
@@ -351,7 +351,7 @@ end
 lemma continuous_truncate {M} : continuous (@truncate r' S _ c M) :=
 (continuous_iff id).mp continuous_id _
 
-lemma continuous_add' [fact (0 < r')] :
+lemma continuous_add' :
   continuous (Mbar_le.add' (c₁ + c₂) : Mbar_le r' S c₁ × Mbar_le r' S c₂ → Mbar_le r' S (c₁ + c₂)) :=
 begin
   rw continuous_iff,
@@ -372,8 +372,7 @@ end
 
 end topological_structure
 
-lemma continuous_cast_le (r : ℝ≥0) (S : Type u) [fintype S] (c₁ c₂ : ℝ≥0)
-  [h0r : fact (0 < r)] [hc : fact (c₁ ≤ c₂)] :
+lemma continuous_cast_le (r' : ℝ≥0) (S : Type u) [fintype S] (c₁ c₂ : ℝ≥0) [hc : fact (c₁ ≤ c₂)] :
   continuous (@Mbar_le.cast_le r' S _ c₁ c₂ _) :=
 begin
   rw continuous_iff,
@@ -382,7 +381,7 @@ begin
   exact continuous_bot.comp continuous_truncate
 end
 
-lemma continuous_of_normed_group_hom [fact (0 < r')]
+lemma continuous_of_normed_group_hom
   (f : (Mbar r' S) →+ (Mbar r' S))
   (g : Mbar_le r' S c₁ → Mbar_le r' S c₂)
   (h : ∀ x, ↑(g x) = f x)
@@ -416,7 +415,7 @@ begin
   rw hφ (truncate N x)
 end
 
-def hom_of_normed_group_hom {C : ℝ≥0} (c₁ c₂ : ℝ≥0) [fact (0 < r')] [hc : fact (C * c₁ ≤ c₂)]
+def hom_of_normed_group_hom {C : ℝ≥0} (c₁ c₂ : ℝ≥0) [hc : fact (C * c₁ ≤ c₂)]
   (f : Mbar r' S →+ Mbar r' S) (h : f ∈ filtration (Mbar r' S →+ Mbar r' S) C)
   (F : Mbar_le r' S c₁) :
   Mbar_le r' S c₂ :=
@@ -426,7 +425,7 @@ def hom_of_normed_group_hom {C : ℝ≥0} (c₁ c₂ : ℝ≥0) [fact (0 < r')] 
   filtration_mono hc (h F.mem_filtration)⟩
 
 lemma continuous_hom_of_normed_group_hom {C : ℝ≥0} (c₁ c₂ : ℝ≥0)
-  [fact (0 < r')] [hc : fact (C * c₁ ≤ c₂)]
+  [hc : fact (C * c₁ ≤ c₂)]
   (f : Mbar r' S →+ Mbar r' S) (h : f ∈ filtration (Mbar r' S →+ Mbar r' S) C)
   (H : ∀ M, ∃ N, ∀ (F : Mbar r' S),
     (∀ s i, i < N + 1 → F s i = 0) → (∀ s i, i < M + 1 → f F s i = 0)) :
@@ -434,14 +433,14 @@ lemma continuous_hom_of_normed_group_hom {C : ℝ≥0} (c₁ c₂ : ℝ≥0)
 continuous_of_normed_group_hom f _ (λ F, by { ext, refl }) H
 
 @[simp] lemma coe_hom_of_normed_group_hom_apply {C : ℝ≥0} (c₁ c₂ : ℝ≥0)
-  [fact (0 < r')] [hc : fact (C * c₁ ≤ c₂)]
+  [hc : fact (C * c₁ ≤ c₂)]
   (f : Mbar r' S →+ Mbar r' S) (h : f ∈ filtration (Mbar r' S →+ Mbar r' S) C)
   (F : (Mbar_le r' S c₁)) (s : S) (i : ℕ) :
   (hom_of_normed_group_hom c₁ c₂ f h) F s i = f F s i := rfl
 
 open pseudo_normed_group
 
-variables (r') (S) [fact (0 < r')]
+variables (r') (S)
 
 def hom_of_normed_group_hom' {C : ℝ≥0} (c₁ c₂ : ℝ≥0) {m n : ℕ} (hc : C * c₁ ≤ c₂)
   (f : (Mbar r' S)^m →+ (Mbar r' S)^n) (h : f ∈ filtration ((Mbar r' S)^m →+ (Mbar r' S)^n) C)
@@ -497,7 +496,7 @@ begin
   exact (hφ _).symm
 end
 
-def hom_of_normed_group_hom'_continuous
+lemma hom_of_normed_group_hom'_continuous
   {C : ℝ≥0} (c₁ c₂ : ℝ≥0) {m n : ℕ} (hc : C * c₁ ≤ c₂)
   (f : (Mbar r' S)^m →+ (Mbar r' S)^n) (h : f ∈ filtration ((Mbar r' S)^m →+ (Mbar r' S)^n) C)
   (H : ∀ M : ℕ, ∃ N : ℕ, ∀ (F : (Mbar r' S)^m),
