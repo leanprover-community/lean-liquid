@@ -10,11 +10,6 @@ noncomputable theory
 
 open_locale big_operators nnreal
 
--- move this
--- instance normed_group_pow (V : Type*) (n : ℕ) [normed_group V] :
---   normed_group (V^n) :=
--- pi.normed_group
-
 namespace Mbar_le
 open pseudo_normed_group
 

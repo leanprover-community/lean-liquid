@@ -45,25 +45,6 @@ end int
 
 variables (V : NormedGroup) (S : Type*) (r r' c c₁ c₂ c₃ c₄ : ℝ≥0) (a : ℕ) [fintype S]
 
--- move this
-instance fix_my_name [h1 : fact (0 < r')] [h2 : fact (r' ≤ 1)] :
-  fact (c ≤ r'⁻¹ * c) :=
-begin
-  rw mul_comm,
-  apply le_mul_inv_of_mul_le (ne_of_gt h1),
-  nth_rewrite 1 ← mul_one c,
-  exact mul_le_mul (le_of_eq rfl) h2 (le_of_lt h1) zero_le',
-end
-
--- -- move this
--- instance fix_my_name₂ [h1 : fact (0 < r')] [h2 : fact (0 ≤ c)] : fact (0 ≤ c / r') :=
--- by simpa [le_div_iff h1]
-
--- move this
-instance fix_my_name₃ [fact (0 < r')] [fact (c₁ ≤ c₂)] :
-  fact (r'⁻¹ * c₁ ≤ r'⁻¹ * c₂) :=
-by { rwa [mul_le_mul_left], rw zero_lt_iff at *, apply inv_ne_zero, assumption }
-
 /-- The functor `V-hat`, from compact Hausdorff spaces to normed groups. -/
 abbreviation hat := NormedGroup.LCC.obj V
 

@@ -6,7 +6,7 @@ import facts
 universe variables v u
 noncomputable theory
 open opposite category_theory
-open_locale ℝ≥0
+open_locale nnreal
 
 /-!
 # Systems of complexes of normed abelian groups

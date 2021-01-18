@@ -1,6 +1,7 @@
 import data.fintype.card
 
 import for_mathlib.normed_group
+import facts
 
 import Mbar.basic
 
@@ -77,19 +78,9 @@ by { ext:2, exact h }
 instance : has_zero (Mbar_le r' S c) :=
 ⟨⟨0, zero_mem_filtration _⟩⟩
 
--- lemma to_Mbar_injective : function.injective (Mbar_le.to_Mbar : Mbar_le r' S c → Mbar r' S) :=
--- by { intros x y h, cases x, cases y, congr, exact congr_arg Mbar.to_fun h }
-
 end Mbar_le
 
--- lemma abs_mul_pow_pos {x r : ℝ} (hr : 0 < r) {n : ℕ} :
---   abs (x * r ^ n) = abs x * r ^ n :=
--- by rw [abs_mul, abs_of_pos (pow_pos hr _)]
-
 variables (c₃)
-
--- move this
-instance fact_le_refl : fact (c ≤ c) := le_rfl
 
 def Mbar_le.add [fact (0 < r')] [h : fact (c₁ + c₂ ≤ c₃)]
   (F : Mbar_le r' S c₁) (G : Mbar_le r' S c₂) :
