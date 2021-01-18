@@ -2,7 +2,7 @@
 
 ![](https://github.com/leanprover-community/lean-liquid/workflows/continuous%20integration/badge.svg?branch=master)
 
-A project to formalize Theorem 9.5 of Scholze--Clausen [Analytic.pdf]
+A project to formalize Theorem 9.5 of Scholze--Clausen [Analytic]
 
 ## The statement
 
@@ -91,6 +91,6 @@ which means that some things work slightly differently from set theory.
   
 ## Source reference
 
-`[Analytic.pdf]` : http://www.math.uni-bonn.de/people/scholze/Analytic.pdf
+`[Analytic]` : http://www.math.uni-bonn.de/people/scholze/Analytic.pdf
 
-[Analytic.pdf]: http://www.math.uni-bonn.de/people/scholze/Analytic.pdf
+[Analytic]: http://www.math.uni-bonn.de/people/scholze/Analytic.pdf

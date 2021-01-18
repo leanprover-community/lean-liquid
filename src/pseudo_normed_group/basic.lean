@@ -70,7 +70,7 @@ end
 
 end for_mathlib
 
-/-- See top of p66 in [Analytic.pdf]. -/
+/-- See top of p66 in [Analytic]. -/
 class pseudo_normed_group (M : Type*) :=
 [to_add_comm_group : add_comm_group M]
 (filtration [] : ℝ≥0 → set M)
