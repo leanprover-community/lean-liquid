@@ -1,11 +1,12 @@
-import system_of_complexes
-import locally_constant.Vhat
-import Mbar.breen_deligne
-
 import for_mathlib.CompHaus
 import for_mathlib.continuous_map
 import for_mathlib.free_abelian_group
 import for_mathlib.add_monoid_hom
+import facts
+
+import system_of_complexes
+import locally_constant.Vhat
+import Mbar.breen_deligne
 
 noncomputable theory
 
@@ -538,10 +539,6 @@ begin
   haveI : g.suitable c₁ c₂ := suitable_of_mem_support f c₁ c₂ g hg,
   exact g.eval_Mbar_pow_comp_T_inv V S r r' _ _
 end
-
--- move this
-instance le_of_mul_right [fact (c₁ ≤ c₂)] : fact ((c₁ * c₃) ≤ (c₂ * c₃)) :=
-mul_le_mul' ‹_› le_rfl
 
 end universal_map
 

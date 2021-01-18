@@ -13,6 +13,8 @@ instance fact_le_refl : fact (c ≤ c) := le_rfl
 
 instance fact_mul_le_mul_left [fact (c₁ ≤ c₂)] : fact (r' * c₁ ≤ r' * c₂) := mul_le_mul' le_rfl ‹_›
 
+instance fact_mul_le_mul_right [fact (c₁ ≤ c₂)] : fact (c₁ * r' ≤ c₂ * r') := mul_le_mul' ‹_› le_rfl
+
 instance fact_le_inv_mul_self [h1 : fact (0 < r')] [h2 : fact (r' ≤ 1)] : fact (c ≤ r'⁻¹ * c) :=
 begin
   rw mul_comm,
