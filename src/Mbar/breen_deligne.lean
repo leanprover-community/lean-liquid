@@ -2,82 +2,11 @@ import Mbar.Mbar_le
 import pseudo_normed_group.breen_deligne
 import normed_group_hom
 
-import for_mathlib.discrete_topology
-
 local attribute [instance] type_pow
 
 noncomputable theory
 
 open_locale big_operators nnreal
-
-namespace Mbar_le
-open pseudo_normed_group
-
-variables (r' : ℝ≥0) (S : Type*) [fintype S] [fact (0 < r')]
-
-def hom_of_normed_group_hom' {C : ℝ≥0} (c₁ c₂ : ℝ≥0) {m n : ℕ} (hc : C * c₁ ≤ c₂)
-  (f : (Mbar r' S)^m →+ (Mbar r' S)^n) (h : f ∈ filtration ((Mbar r' S)^m →+ (Mbar r' S)^n) C)
-  (F : (Mbar_le r' S c₁)^m) :
-  (Mbar_le r' S c₂)^n :=
-λ j,
-(⟨({to_fun := λ s i, f (λ k, (F k)) j s i,
-    coeff_zero' := λ s, Mbar.coeff_zero _ _,
-    summable' := λ s, Mbar.summable _ _ } : Mbar r' S),
-    by apply filtration_mono hc (h $ λ i, (F i).mem_filtration)⟩ : Mbar_le r' S c₂)
-
-@[simp] lemma coe_hom_of_normed_group_hom'_apply {C : ℝ≥0} (c₁ c₂ : ℝ≥0) {m n : ℕ} (hc : C * c₁ ≤ c₂)
-  (f : (Mbar r' S)^m →+ (Mbar r' S)^n) (h : f ∈ filtration ((Mbar r' S)^m →+ (Mbar r' S)^n) C)
-  (F : (Mbar_le r' S c₁)^m) (j : fin n) (s : S) (i : ℕ) :
-  (hom_of_normed_group_hom' r' S c₁ c₂ hc f h F j) s i = f (λ k, (F k)) j s i := rfl
-
-lemma continuous_of_normed_group_hom' (c₁ c₂ : ℝ≥0) {m n : ℕ}
-  (f : ((Mbar r' S) ^ m) →+ ((Mbar r' S) ^ n))
-  (g : (Mbar_le r' S c₁)^m → (Mbar_le r' S c₂)^n)
-  (h : ∀ x j, (g x j).1 = f (λ i, (x i).1) j)
-  (H : ∀ M : ℕ, ∃ N : ℕ, ∀ (F : (Mbar r' S)^m),
-    (∀ i s k, k < N + 1 → (F i : Mbar r' S) s k = 0) → (∀ j s k, k < M + 1 → f F j s k = 0)) :
-  continuous g :=
-begin
-  apply continuous_pi,
-  intro j,
-  rw continuous_iff,
-  intros M,
-  rcases H M with ⟨N, hN⟩,
-  let φ : (Mbar_bdd r' ⟨S⟩ c₁ N)^m → (Mbar_le r' S c₁)^m :=
-    function.comp (classical.some (truncate_surjective N).has_right_inverse),
-  have hφ : function.right_inverse φ (function.comp $ truncate N),
-  { intro x, ext1 i,
-    exact (classical.some_spec (truncate_surjective N).has_right_inverse) (x i) },
-  suffices :
-    truncate M ∘ (λ F, g F j) = truncate M ∘ (λ F, g F j) ∘ φ ∘ (function.comp $ truncate N),
-  { rw [this, ← function.comp.assoc, ← function.comp.assoc],
-    refine continuous_of_discrete_topology.comp (continuous_pi _),
-    intro i, exact continuous_truncate.comp (continuous_apply _) },
-  ext1 x,
-  suffices : ∀ s k, k < M + 1 → (g x j).1 s k = (g (φ (λ i, truncate N (x i))) j).1 s k,
-  { ext s k, dsimp [function.comp], apply this, exact k.property },
-  intros s k hk,
-  rw [h, h, ← sub_eq_zero],
-  show (f (λ i, (x i).1) - f (λ i, (φ (λ i', truncate N (x i')) i).1)) j s k = 0,
-  rw [← f.map_sub],
-  apply hN _ _ _ _ _ hk,
-  clear hk k s, intros i s k hk,
-  simp only [Mbar.coe_sub, pi.sub_apply, sub_eq_zero],
-  suffices : ∀ k, (truncate N (x i)) s k = truncate N (φ (λ i', truncate N (x i')) i) s k,
-  { exact this ⟨k, hk⟩ },
-  intros k, congr' 1, revert i, rw ← function.funext_iff,
-  exact (hφ _).symm
-end
-
-def hom_of_normed_group_hom'_continuous
-  {C : ℝ≥0} (c₁ c₂ : ℝ≥0) {m n : ℕ} (hc : C * c₁ ≤ c₂)
-  (f : (Mbar r' S)^m →+ (Mbar r' S)^n) (h : f ∈ filtration ((Mbar r' S)^m →+ (Mbar r' S)^n) C)
-  (H : ∀ M : ℕ, ∃ N : ℕ, ∀ (F : (Mbar r' S)^m),
-    (∀ i s k, k < N + 1 → (F i : Mbar r' S) s k = 0) → (∀ j s k, k < M + 1 → f F j s k = 0)) :
-  continuous (hom_of_normed_group_hom' r' S c₁ c₂ hc f h) :=
-continuous_of_normed_group_hom' r' S c₁ c₂ f _ (λ x i, by { ext, refl }) H
-
-end Mbar_le
 
 open normed_group_hom normed_group
 

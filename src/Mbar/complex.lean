@@ -2,6 +2,17 @@ import for_mathlib.equalizers
 import Mbar.Mbar_pow
 import system_of_complexes
 
+/-!
+# The system of complexes associated with `V` and `Mbar_le r' S c`
+
+In this file we have two main definitions:
+
+* `LCC_Mbar_pow_Tinv` is the normed abelian group `V-hat(Mbar_{r'}(S)_{≤c}^a)^{T⁻¹}`
+* `Mbar_system` packages all those normed abelian groups together
+  into a system of complexes.
+  Those complexes are constructed using Breen--Deligne data.
+-/
+
 open_locale classical nnreal
 noncomputable theory
 
