@@ -2,11 +2,30 @@ import for_mathlib.CompHaus
 import for_mathlib.continuous_map
 import for_mathlib.free_abelian_group
 import for_mathlib.add_monoid_hom
+import for_mathlib.extend_from_nat
 import facts
 
-import system_of_complexes
 import locally_constant.Vhat
 import Mbar.breen_deligne
+
+/-!
+# The completion of the group of locally constant maps from `Mbar_le r' S c` to `V`
+
+In this file we define `V-hat(Mbar_{r'}(S)_{≤c}^a)`
+as the completion of the normed group of locally constant maps from
+`(Mbar_le r' S c)^a` to `V`, where the norm is the sup-norm.
+
+This definition is recorded in `LCC_Mbar_pow`.
+
+We also define `LC_Mbar_pow`, which is the uncompleted version:
+locally constant maps from `(Mbar_le r' S c)^a` to `V`.
+So `LCC_Mbar_pow` is the completion of `LC_Mbar_pow`, hence the extra `C`.
+
+Several definition and lemmas follow the pattern of
+first being defined/proven on the level of `LC_Mbar_pow`
+(often indicated by a subscript `foo₀`)
+and afterwards on the level of `LCC_Mbar_pow`.
+-/
 
 noncomputable theory
 
@@ -14,48 +33,40 @@ open opposite category_theory category_theory.category category_theory.limits
 open_locale classical nnreal big_operators
 local attribute [instance] type_pow
 
-namespace int
-/-! ### extend from nat
-
-A helper function to define a function on the integers
-by extending a function from the naturals.
-
-We use this to define a complex indexed by `ℤ` by extending a complex indexed by `ℕ`
-with zeros on negative indices.
--/
-
-variables {X : ℤ → Sort*} (x : Π i, X i) (f : Π i : ℕ, X i)
-
-def extend_from_nat : Π i, X i
-| (n : ℕ)   := f n
-| i@-[1+n]  := x i
-
-@[simp] lemma extend_from_nat_apply_nat (n : ℕ) :
-  extend_from_nat x f n = f n := rfl
-
-@[simp] lemma extend_from_nat_apply_of_nat (n : ℕ) :
-  extend_from_nat x f (int.of_nat n) = f n := rfl
-
-@[simp] lemma extend_from_nat_apply_nat_add_one (n : ℕ) :
-  extend_from_nat x f (n+1) = f (n+1) := rfl
-
-@[simp] lemma extend_from_nat_apply_neg_succ_of_nat (n : ℕ) :
-  extend_from_nat x f -[1+n] = x -[1+n] := rfl
-
-end int
-
 variables (V : NormedGroup) (S : Type*) (r r' c c₁ c₂ c₃ c₄ : ℝ≥0) (a : ℕ) [fintype S]
 
 /-- The functor `V-hat`, from compact Hausdorff spaces to normed groups. -/
 abbreviation hat := NormedGroup.LCC.obj V
 
+/-- The normed group of locally constant functions
+from `(Mbar_le r' S c)^a` to a normed group `V`.
+
+Mnemonic: `LC` stands for *locally constant*. -/
 def LC_Mbar_pow [fact (0 < r')] : NormedGroup :=
 (NormedGroup.LocallyConstant.obj V).obj (op $ CompHaus.of $ (Mbar_le r' S c)^a)
+
+/-
+In this ↑ definition, we apply the functor
+`(NormedGroup.LocallyConstant.obj V)` to an object of `CompHaus`,
+namely `(Mbar_le r' S c)^a`.
+
+* Since the functor is contravariant, we need to pass to `CompHausᵒᵖ`,
+  which is accomplished by the `op`,
+* Since `(Mbar_le r' S c)^a` is a priori only a *type*
+  it has to be packaged into an object of `CompHaus`,
+  which is accomplished by the `CompHaus.of`.
+  The topology is automatically inferred by the *typeclass system*.
+* The `$` symbols are a syntactic trick to avoid excessive parentheses:
+  `f $ g x` means `f (g x)`
+-/
 
 instance normed_with_aut_LC_Mbar_pow [fact (0 < r)] [fact (0 < r')] [normed_with_aut r V] :
   normed_with_aut r (LC_Mbar_pow V S r' c a) := by { unfold LC_Mbar_pow, apply_instance }
 
-/-- The space `V-hat(Mbar_{r'}(S)_{≤c}^a)`. -/
+/-- The space `V-hat(Mbar_{r'}(S)_{≤c}^a)` is the completion
+of the normed group of locally constant functions from `(Mbar_{r'}(S)_{≤c}^a)` to `V`.
+
+Mnemonic: `LCC` stands for *locally compact, completed*. -/
 def LCC_Mbar_pow [fact (0 < r')] : NormedGroup :=
 (hat V).obj (op $ CompHaus.of ((Mbar_le r' S c)^a))
 
@@ -63,10 +74,7 @@ lemma LCC_Mbar_pow_eq [fact (0 < r')] :
   LCC_Mbar_pow V S r' c a = NormedGroup.Completion.obj (LC_Mbar_pow V S r' c a) := rfl
 
 instance LCC_Mbar_pow_complete_space [fact (0 < r')] : complete_space (LCC_Mbar_pow V S r' c a) :=
-begin
-  rw LCC_Mbar_pow_eq,
-  apply_instance
-end
+by { rw LCC_Mbar_pow_eq, apply_instance }
 
 namespace LCC_Mbar_pow
 
@@ -92,6 +100,7 @@ begin
   erw [locally_constant.comap_hom_id, category.comp_id]
 end
 
+/-- The natural restriction map. -/
 @[simp] def res₀ [fact (0 < r')] [fact (c₁ ≤ c₂)] :
   LC_Mbar_pow V S r' c₂ a ⟶ LC_Mbar_pow V S r' c₁ a :=
 (NormedGroup.LocallyConstant.obj V).map $ has_hom.hom.op $
@@ -113,6 +122,7 @@ lemma res₀_comp_res₀ [fact (0 < r')] [fact (c₁ ≤ c₂)] [fact (c₂ ≤ 
   res₀ V S r' c₂ c₃ a ≫ res₀ V S r' c₁ c₂ a = res₀ V S r' c₁ c₃ a :=
 by { delta res₀, rw ← functor.map_comp, refl }
 
+/-- The natural restriction map. -/
 def res [fact (0 < r')] [fact (c₁ ≤ c₂)] :
   LCC_Mbar_pow V S r' c₂ a ⟶ LCC_Mbar_pow V S r' c₁ a :=
 NormedGroup.Completion.map $ res₀ _ _ _ _ _ _
@@ -124,12 +134,16 @@ by { delta res, rw [res₀_refl], exact category_theory.functor.map_id _ _ }
   res V S r' c₂ c₃ a ≫ res V S r' c₁ c₂ a = res V S r' c₁ c₃ a :=
 by {delta res, rw [← functor.map_comp, res₀_comp_res₀] }
 
+/-- The action of `T⁻¹` as morphism
+`LC_Mbar_pow V S r' (r'⁻¹ * c) a ⟶ LC_Mbar_pow V S r' c a`. -/
 def Tinv₀ [fact (0 < r')] :
   LC_Mbar_pow V S r' (r'⁻¹ * c) a ⟶ LC_Mbar_pow V S r' c a :=
 (NormedGroup.LocallyConstant.obj V).map $ has_hom.hom.op $
 ⟨λ x, Mbar_le.Tinv ∘ x,
   continuous_pi $ λ i, (Mbar_le.continuous_Tinv r' S _ _).comp (continuous_apply i)⟩
 
+/-- The action of `T⁻¹` as morphism
+`LCC_Mbar_pow V S r' (r'⁻¹ * c) a ⟶ LCC_Mbar_pow V S r' c a`. -/
 def Tinv [fact (0 < r')] :
   LCC_Mbar_pow V S r' (r'⁻¹ * c) a ⟶ LCC_Mbar_pow V S r' c a :=
 NormedGroup.Completion.map $ Tinv₀ _ _ _ _ _
@@ -187,11 +201,30 @@ variables {l m n : ℕ}
 
 namespace basic_universal_map
 
+/-- This function is a packaged version of `f.eval_Mbar_le` as morphism in `CompHaus`.
+We only use this in the definition of `f.eval_Mbar_pow`. -/
 def eval_Mbar_pow_aux (f : basic_universal_map m n) [f.suitable c₁ c₂] :
   CompHaus.of (Mbar_le r' S c₁ ^ m) ⟶ CompHaus.of (Mbar_le r' S c₂ ^ n) :=
 { to_fun := f.eval_Mbar_le _ _ _ _,
   continuous_to_fun := f.eval_Mbar_le_continuous _ _ _ _}
 
+/- `f.eval_Mbar_pow` is the morphism of normed groups
+`(LCC_Mbar_pow V S r' c₂ n) ⟶ (LCC_Mbar_pow V S r' c₁ m)`
+induced by `f : basic_universal_map m n` (aka a matrix).
+
+Roughly speaking, `f` induces a map between powers of `Mbar_le`,
+by matrix multiplication. We push that map through the functor `V-hat`,
+to obtain `f.eval_Mbar_pow`.
+
+Implementation details:
+This definition only makes sense when `c₁` and `c₂` are *suitable* with respect to `f`.
+However, several induction proofs below become horribly complicated
+if we add this suitability condition as assumption in the definition.
+(For example because addition will change the constants `c₁` and `c₂`
+at the most inconvenient moments.)
+We therefore apply an old trick:
+we extend the definition to the arbitrary `c₁` and `c₂` by defining `f.eval_Mbar_pow`
+to be `0` when the suitability condition is not satisfied. -/
 def eval_Mbar_pow (f : basic_universal_map m n) :
   (LCC_Mbar_pow V S r' c₂ n) ⟶ (LCC_Mbar_pow V S r' c₁ m) :=
 if H : f.suitable c₁ c₂
@@ -373,6 +406,24 @@ begin
     resetI, apply_instance }
 end
 
+/-- `f.eval_Mbar_pow` is the morphism
+`(LCC_Mbar_pow V S r' c₂ n) ⟶ (LCC_Mbar_pow V S r' c₁ m)`
+induced by `f : universal_map m n`, in the following way:
+
+For every `g : basic_universal_map m n` occurring in the
+the formal sum `f`, we have `g.eval_Mbar_pow`.
+Now we take the sum of those maps.
+
+Since `V-hat` is not an additive functor,
+this definition is not the same as apply `V-hat`
+to the sum of the maps `g.eval_Mbar_le`.
+
+Implementation details:
+we apply the same trick as in the definition
+`breen_deligne.basic_universal_map.eval_Mbar_pow`.
+The definition only makes sense if the constants `c₁` and `c₂`
+are *suitable* with respect to `f`.
+We extend the definition to other input values, by declaring it to be `0`. -/
 def eval_Mbar_pow {m n : ℕ} (f : universal_map m n) :
   (LCC_Mbar_pow V S r' c₂ n) ⟶ (LCC_Mbar_pow V S r' c₁ m) :=
 if H : (f.suitable c₁ c₂)
@@ -544,6 +595,14 @@ end universal_map
 
 namespace package
 
+/-- A sequence of nonnegative real numbers `c' 0`, `c' 1`, ...
+is *suitable* with respect to a Breen--Deligne package `BD`,
+if for all `i : ℕ`, the constants `c' (i+1)` and `c' i` are
+suitable with respect to the universal map `BD.map i`.
+
+This definition ensures that we get a well-defined complex
+of normed groups `LCC_Mbar_pow V S r' (c' i) (BD.rank i)`,
+induced by the maps `BD.map i`. -/
 class suitable (BD : package) (c' : ℕ → ℝ≥0) : Prop :=
 (universal_suitable : ∀ i, (BD.map i).suitable (c' (i+1)) (c' i))
 
