@@ -2,9 +2,11 @@ import linear_algebra.matrix
 import group_theory.free_abelian_group
 import algebra.direct_sum
 import algebra.big_operators.finsupp
-import prereqs
 
-import type_pow
+import for_mathlib.linear_algebra
+
+import hacks_and_tricks.type_pow
+import hacks_and_tricks.by_exactI_hack
 
 /-!
 # Breen-Deligne resolutions

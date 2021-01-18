@@ -4,7 +4,7 @@ import algebra.big_operators
 import algebra.module.pi
 import topology.basic
 
-import type_pow
+import hacks_and_tricks.type_pow
 
 noncomputable theory
 

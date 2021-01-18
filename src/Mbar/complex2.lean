@@ -9,10 +9,6 @@ open opposite breen_deligne category_theory category_theory.limits
 variables (BD : package) (c' : ℕ → ℝ≥0) [BD.suitable c']
 variables (V : NormedGroup) (S : Type*) (r r' c c₁ c₂ c₃ c₄ : ℝ≥0) (a : ℕ) [fintype S]
 
-/-
-TODO: Do we want to define the `T⁻¹`-invariants as a kernel,
-or would it be better to use equalizers?
--/
 /-- The space `V-hat(Mbar_{r'}(S)_{≤c}^a)^{T⁻¹}`. -/
 def LCC_Mbar_pow_Tinv [fact (0 < r)] [fact (0 < r')] [fact (r' ≤ 1)] [normed_with_aut r V] :
   NormedGroup :=

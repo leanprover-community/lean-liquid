@@ -1,9 +1,4 @@
-import breen_deligne
-import system_of_complexes
-import locally_constant.Vhat
 import Mbar.complex2
-
-import by_exactI_hack
 
 /-!
 # Liquid Tensor Experiment
@@ -37,8 +32,8 @@ theorem main [BD.suitable c']
   ∃ (k : ℝ≥0) [fact (1 ≤ k)],
   ∃ c₀ : ℝ≥0,
   ∀ (S : Type) [fintype S],
-  ∀ (V : NormedGroup) [normed_with_aut r V],​
-    (Mbar_system V S r r' BD c').is_bdd_exact_for_bdd_degree_above_idx k m c₀ :=
+  ∀ (V : NormedGroup) [normed_with_aut r V],
+    ​(Mbar_system V S r r' BD c').is_bdd_exact_for_bdd_degree_above_idx k m c₀ :=
 sorry
 
 /-!
