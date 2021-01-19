@@ -52,6 +52,19 @@ see [this](https://leanprover-community.github.io/install/project.html).
 
 With the project opened in VScode,
 you are all set to start exploring the code.
+There are two pieces of functionality that help a lot when browsing through Lean code:
+
+* "Go to definition": If you right-click on a name of a definition or lemma
+  (such as `Mbar`, or `Tinv_continuous`), then you can choose "Go to definition" from the menu,
+  and you will be taken to the relevant location in the source files.
+  This also works by `Ctrl`-clicking on the name.
+* "Goal view": in the event that you would like to read a *proof*,
+  you can step through the proof line-by-line,
+  and see the internals of Lean's "brain" in the Goal window.
+  If the Goal window is not open,
+  you can open it by clicking on one of the icons in the top right hand corner.
+
+### Organization of the project
 
 * All the Lean code (the juicy stuff) is contained in the directory `src/`.
 * The file `liquid.lean` contains the statement of the theorem that we want to check.
@@ -62,13 +75,66 @@ you are all set to start exploring the code.
     It does *not* contain a formal proof of the Breen--Deligne resolution.
     At some point we may formalize Breen--Deligne resolutions,
     but this is not part of our first target.
-  - `Mbar/*.lean` contains a definition of the spaces ![](svg/VhatMbar.svg)
-    and how they fit together in the system of complexes
-    that occurs in the statement of the theorem.
   - `system_of_complexes.lean` contains the definition of a system of complexes
     of normed abelian groups indexed by nonnegative real numbers.
     It also contains the definition of `is_bdd_exact_for_bdd_degree_above_idx`,
     which is the exactness condition claimed in the main theorem.
+  - `Mbar/*.lean` contains a definition of the spaces ![](svg/VhatMbar.svg)
+    and how they fit together in the system of complexes
+    that occurs in the statement of the theorem.
+    See the file listing below for some details.
+* The remaining files and folders are "established" mathematics,
+  that was missing from mathlib, Lean's library of formalized mathematics.
+
+```
+src
+├── liquid.lean
+├── breen_deligne.lean
+├── system_of_complexes.lean
+├── Mbar
+│   ├── basic.lean
+│   │     -- the definition of `Mbar`, a space of certain converging power series
+│   ├── bounded.lean
+│   │     -- finite quotients of `Mbar`, giving the profinite topology
+│   ├── Mbar_le.lean
+│   │     -- the subspace of `Mbar` consisting of power series converging to `≤ c`
+│   ├── breen_deligne.lean
+│   │     -- action of (basic) universal maps on powers of `Mbar_le`
+│   ├── Mbar_pow.lean
+│   │     -- the completion of the normed group of locally constant functions
+│   │     -- from powers of `Mbar_le` to a normed group `V`
+│   └── complex.lean
+│         -- the system of complexes built from (`T⁻¹`-invariants of) the objects above
+├── normed_group
+│   ├── NormedGroup.lean
+│   └── normed_with_aut.lean
+├── pseudo_normed_group
+│   ├── basic.lean
+│   └── breen_deligne.lean
+├── locally_constant
+│   ├── algebra.lean
+│   ├── analysis.lean
+│   ├── basic.lean
+│   ├── NormedGroup.lean
+│   └── Vhat.lean
+├── for_mathlib
+│   ├── add_monoid_hom.lean
+│   ├── CompHaus.lean
+│   ├── continuous_map.lean
+│   ├── discrete_topology.lean
+│   ├── equalizers.lean
+│   ├── extend_from_nat.lean
+│   ├── free_abelian_group.lean
+│   ├── linear_algebra.lean
+│   ├── locally_constant.lean
+│   ├── normed_group_hom.lean
+│   ├── normed_group.lean
+│   └── tsum.lean
+├── hacks_and_tricks
+│   ├── by_exactI_hack.lean
+│   └── type_pow.lean
+└── facts.lean
+```
 
 ## Brief note on type theory
 
