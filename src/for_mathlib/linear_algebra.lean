@@ -15,4 +15,4 @@ begin
 end
 
 end matrix
-#lint- only unused_arguments
+#lint- only unused_arguments def_lemma

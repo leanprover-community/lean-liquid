@@ -24,4 +24,4 @@ begin
 end
 
 end nnreal
-#lint- only unused_arguments
+#lint- only unused_arguments def_lemma

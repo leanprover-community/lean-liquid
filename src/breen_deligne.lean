@@ -370,4 +370,4 @@ end eg
 def eg : package := ⟨eg.data, eg.is_complex, eg.homotopy⟩
 
 end breen_deligne
-#lint- only unused_arguments
+#lint- only unused_arguments def_lemma

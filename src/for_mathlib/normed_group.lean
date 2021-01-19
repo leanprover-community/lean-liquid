@@ -105,7 +105,7 @@ begin
   ... ≤ C i * ∥v∥ : mul_le_mul le_rfl (norm_le_pi_norm _ _) (norm_nonneg _) (C i).coe_nonneg
 end
 
-def mk_from_pi'_bound_by {ι : Type} [fintype ι] (V : ι → Type*) [Π i, normed_group (V i)]
+lemma mk_from_pi'_bound_by {ι : Type} [fintype ι] (V : ι → Type*) [Π i, normed_group (V i)]
   (W : Type*) [normed_group W] (f : Π i, normed_group_hom (V i) W)
   (C : ι → ℝ≥0) (hC : ∀ i, (f i).bound_by (C i)) :
   (mk_from_pi' _ _ f C hC).bound_by (∑ i, C i) :=
@@ -119,4 +119,4 @@ mk_from_pi' _ _ f (λ i, classical.some (f i).bound) $ λ i, (classical.some_spe
 end normed_group_hom
 
 end
-#lint- only unused_arguments
+#lint- only unused_arguments def_lemma

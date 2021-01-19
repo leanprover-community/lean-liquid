@@ -52,4 +52,4 @@ end
 end basic_universal_map
 
 end breen_deligne
-#lint- only unused_arguments
+#lint- only unused_arguments def_lemma

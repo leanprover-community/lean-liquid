@@ -335,4 +335,4 @@ begin
 end
 
 end free_abelian_group
-#lint- only unused_arguments
+#lint- only unused_arguments def_lemma

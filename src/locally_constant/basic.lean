@@ -9,7 +9,7 @@ section for_mathlib
 instance discrete_topology_bot : @discrete_topology α ⊥ :=
 { eq_bot := rfl }
 
-def finite_of_is_compact_of_discrete [discrete_topology X] (s : set X) (hs : is_compact s) :
+lemma finite_of_is_compact_of_discrete [discrete_topology X] (s : set X) (hs : is_compact s) :
   s.finite :=
 begin
   have := hs.elim_finite_subcover (λ x : X, ({x} : set X))
@@ -264,4 +264,4 @@ end
 end comap
 
 end locally_constant
-#lint- only unused_arguments
+#lint- only unused_arguments def_lemma

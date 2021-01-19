@@ -13,4 +13,4 @@ begin
   intro i,
   exact (continuous_apply i).is_open_preimage _ (is_open_discrete {x i})
 end
-#lint- only unused_arguments
+#lint- only unused_arguments def_lemma

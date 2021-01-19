@@ -618,4 +618,4 @@ universal_map.suitable.comp (c' (i + 1))
 end package
 
 end breen_deligne
-#lint- only unused_arguments
+#lint- only unused_arguments def_lemma

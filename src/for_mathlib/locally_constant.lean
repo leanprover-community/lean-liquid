@@ -60,4 +60,4 @@ end completion
 end uniform_space
 
 end for_mathlib
-#lint- only unused_arguments
+#lint- only unused_arguments def_lemma

@@ -200,7 +200,7 @@ by {ext; refl}
 lemma π₂_continuous {m n : ℕ} : continuous (π₂ m n : _ → Mbar_bdd r S c _ × _) :=
 by {rw π₂_eq, exact continuous.prod_mk π_continuous π_continuous}
 
-def emb (r S c) : closed_embedding (@emb_aux r S c) :=
+lemma emb (r S c) : closed_embedding (@emb_aux r S c) :=
 { induced := rfl,
   inj := by tidy,
   closed_range := begin
@@ -261,4 +261,4 @@ end addition
 
 end Mbar_bdd
 
-#lint- only unused_arguments
+#lint- only unused_arguments def_lemma

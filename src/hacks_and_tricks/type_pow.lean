@@ -18,4 +18,4 @@ instance topological_space {n : ℕ} {α : Type*} [topological_space α] : topol
 
 end type_pow_topology
 
-#lint- only unused_arguments
+#lint- only unused_arguments def_lemma

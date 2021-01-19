@@ -189,4 +189,4 @@ def Mbar_system (BD : breen_deligne.package) (c' : ℕ → ℝ≥0) [BD.suitable
     { dsimp [int.extend_from_nat],
       rw zero_comp },
   end }
-#lint- only unused_arguments
+#lint- only unused_arguments def_lemma

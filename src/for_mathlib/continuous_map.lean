@@ -8,4 +8,4 @@ variables {X Y : Type*} [topological_space X] [topological_space Y]
   ⇑(⟨f, h⟩ : continuous_map X Y) = f := rfl
 
 end continuous_map
-#lint- only unused_arguments
+#lint- only unused_arguments def_lemma

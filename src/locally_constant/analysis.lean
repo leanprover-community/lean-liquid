@@ -273,4 +273,4 @@ end comap_hom
 end compact_domain
 
 end locally_constant
-#lint- only unused_arguments
+#lint- only unused_arguments def_lemma
