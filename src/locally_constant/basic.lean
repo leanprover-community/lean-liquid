@@ -1,6 +1,21 @@
 import topology.subset_properties
 import topology.algebra.monoid
 
+/-!
+# Locally constant functions
+
+This file setups the theory of locally constant function from a topological space to a type.
+
+## Main definitions and constructions
+
+* `is_locally_constant f` : a map `f : X → Y` where `X` is a topological space is locally
+                            constant if everything set in `Y` has an open preimage.
+* `locally_constant X Y` : the type of locally constant maps from `X` to `Y`
+* `locally_constant.map` : push-forward of locally constant maps
+* `locally_constant.comap` : pull-back of locally constant maps
+
+-/
+
 variables {X Y Z α : Type*} [topological_space X]
 
 -- move this
@@ -22,6 +37,7 @@ begin
   simp only [exists_prop, set.mem_Union, set.mem_singleton_iff, exists_eq_right', finset.mem_coe]
 end
 
+/-- If `(set.univ : set Y)` is finite then `Y` is a finite type. -/
 noncomputable
 def fintype_of_univ_finite (H : set.finite (set.univ : set Y)) :
   fintype Y :=
@@ -31,6 +47,7 @@ begin
   simpa only [set.mem_univ, iff_true] using ht
 end
 
+/-- A compact discrete space is finite. -/
 noncomputable
 def fintype_of_compact_of_discrete [compact_space X] [discrete_topology X] :
   fintype X :=
@@ -40,7 +57,8 @@ end for_mathlib
 
 open_locale topological_space
 
-def is_locally_constant (f : X → Y) : Prop := ∀ s, is_open (f ⁻¹' s)
+/-- A function between topological spaces is constant if the preimage of any set is open. -/
+def is_locally_constant (f : X → Y) : Prop := ∀ s : set Y, is_open (f ⁻¹' s)
 
 namespace is_locally_constant
 
@@ -168,6 +186,7 @@ end
 
 end is_locally_constant
 
+/-- A (bundled) locally constant function from a topological space `X` to a type `Y`. -/
 structure locally_constant (X Y : Type*) [topological_space X] :=
 (to_fun : X → Y)
 (is_locally_constant : is_locally_constant to_fun)
@@ -209,6 +228,7 @@ lemma range_finite [compact_space X] (f : locally_constant X Y) :
   (set.range f).finite :=
 f.is_locally_constant.range_finite
 
+/-- Push forward of locally constant maps under any map, by post-composition. -/
 def map (f : Y → Z) : locally_constant X Y → locally_constant X Z :=
 λ g, ⟨f ∘ g, λ s, by { rw set.preimage_comp, apply g.is_locally_constant }⟩
 
@@ -225,6 +245,7 @@ open_locale classical
 
 variables [topological_space Y]
 
+/-- Pull back of locally constant maps under any map, by pre-composition. -/
 noncomputable
 def comap (f : X → Y) :
   locally_constant Y Z → locally_constant X Z :=
