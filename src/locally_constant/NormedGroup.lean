@@ -12,6 +12,10 @@ open opposite locally_constant
 
 local attribute [instance] locally_constant.normed_group locally_constant.metric_space
 
+/-- The bifunctor of locally constant maps from compact Hausdorff spaces to normed groups.
+    The effects on homs of groups or space are defined in terms of push-forward
+    (ie. post-composition) and pull-back (ie. pre-composition) of locally constant maps
+    respectively. -/
 @[simps]
 def LocallyConstant : NormedGroup ⥤ CompHausᵒᵖ ⥤ NormedGroup :=
 { obj := λ V,
