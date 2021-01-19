@@ -25,6 +25,11 @@ end
 
 instance (a b : ℤ) : fintype (Icc a b) := nonempty.some (Icc_finite a b)
 
+/--
+`Mbar_bdd r S c M` is the subset of `S → Tℤ[[T]]/(T^{M+1})` consisting of elements
+`F_s = ∑_{n=1}^M a_{n,s} T^n` such that `∑_{s,n} |a_{n,s}| r^n ≤ c`.
+This is an auxiliary object used to define the profinite topology on `Mbar r S`.
+-/
 structure Mbar_bdd (r : ℝ≥0) (S : Fintype) (c : ℝ≥0) (M : ℕ) :=
 (to_fun : S → fin (M + 1) → ℤ)
 (coeff_zero' : ∀ s, to_fun s 0 = 0)
@@ -43,14 +48,16 @@ instance has_coe_to_fun : has_coe_to_fun (Mbar_bdd r S c M) := ⟨_, Mbar_bdd.to
 protected lemma sum_le (x : Mbar_bdd r S c M) :
   (∑ s i, ((↑(x s i).nat_abs * r^(i:ℕ)))) ≤ c := x.sum_le'
 
+/-- The obvious map from `Mbar_bdd r S c₁ M` to `Mbar_bdd r S c₂ M`, for `c₁ ≤ c₂`. -/
 protected def cast_le [hc : fact (c₁ ≤ c₂)] (x : Mbar_bdd r S c₁ M) : Mbar_bdd r S c₂ M :=
 ⟨x.1, x.coeff_zero, x.sum_le.trans hc⟩
 
+/-- Make a term of type `Mbar_bdd r S c M`, given the two defining hypotheses. -/
 def mk' (x : S → fin (M + 1) → ℤ)
-  (h : (∀ s, x s 0 = 0) ∧
-       (∑ s i, ((↑(x s i).nat_abs * r^(i:ℕ)))) ≤ c) :
+  (h1 : (∀ s, x s 0 = 0))
+  (h2 : (∑ s i, ((↑(x s i).nat_abs * r^(i:ℕ)))) ≤ c) :
   Mbar_bdd r S c M :=
-{ to_fun := x, coeff_zero' := h.1, sum_le' := h.2 }
+{ to_fun := x, coeff_zero' := h1, sum_le' := h2 }
 
 @[ext] lemma ext (x y : Mbar_bdd r S c M) (h : ⇑x = y) : x = y :=
 by { cases x, cases y, congr, exact h }
@@ -99,6 +106,7 @@ lemma cast_nat_abs_eq_nnabs_cast (n : ℤ) :
   (n.nat_abs : ℝ≥0) = real.nnabs n :=
 by { ext, rw [nnreal.coe_nat_cast, cast_nat_abs, nnreal.coe_nnabs] }
 
+/-- An auxiliary function used to prove finiteness of `Mbar_bdd r S c M`. -/
 private def temp_map [fact (0 < r)] (F : Mbar_bdd r S c M) (n : fin (M + 1)) (s : S) :
   Icc (ceil (-(c / min (r ^ M) 1) : ℝ)) (floor (c / min (r ^ M) 1 : ℝ)) :=
 begin
@@ -116,7 +124,8 @@ fintype.of_injective temp_map begin
   rw h,
 end
 
-def ι {M N : ℕ} (h : M ≤ N) : fin M ↪ fin N := (fin.cast_le h).to_embedding
+/-- The obvious embedding from `fin M` to `fin N` for `M ≤ N`. -/
+private def ι {M N : ℕ} (h : M ≤ N) : fin M ↪ fin N := (fin.cast_le h).to_embedding
 
 -- Should this be in mathlib?
 lemma sum_eq_sum_map_ι {M N : ℕ} (h : M ≤ N) (f : fin N → ℝ≥0) :
@@ -129,7 +138,7 @@ finset.sum_bij' (λ a _, ι h a) (λ a ha, by {rw mem_map, exact ⟨a, ha, rfl�
 end ⟩)
 (λ a ha, finset.mem_univ _) (λ a ha, by tidy) (λ a ha, by tidy)
 
-/-- The transition maps between the Mbar_bdd sets. -/
+/-- The transition map from `Mbar_bdd r S c N` to `Mbar_bdd r S c M`, given `M ≤ N`. -/
 def transition (r : ℝ≥0) {S : Fintype} {c : ℝ≥0} {M N : ℕ} (h : M ≤ N) (x : Mbar_bdd r S c N) :
   Mbar_bdd r S c M :=
 { to_fun := λ s i, x s (ι (add_le_add_right h 1) i),
@@ -162,9 +171,11 @@ lemma transition_cast_le {N : ℕ} (h : M ≤ N) [hc : fact (c₁ ≤ c₂)] (x 
     Mbar_bdd.cast_le (transition r h x) :=
 by { ext, refl }
 
-@[reducible] def limit (r S c) :=
+/-- The limit of `Mbar_bdd r S c M` along the `transition` maps as `M` increases. -/
+abbreviation limit (r S c) :=
 { F : Π (M : ℕ), Mbar_bdd r S c M // ∀ (M N : ℕ) (h : M ≤ N), transition r h (F N) = F M }
 
+/-- The obvious embedding `Mbar_bdd.limit r S c` into the product of `Mbar_bdd r S c M` as `M` varies. -/
 def emb_aux : limit r S c → (Π (M : ℕ), Mbar_bdd r S c M) := coe
 
 section topological_structure
@@ -177,15 +188,19 @@ example : t2_space (limit r S c) := by apply_instance
 example : totally_disconnected_space (limit r S c) := by apply_instance
 example [fact (0 < r)] : compact_space (Mbar_bdd r S c M) := by apply_instance
 
-def Γ : Π (m n : ℕ) (h : m ≤ n), set (Π (M : ℕ), Mbar_bdd r S c M) := λ m n h,
+/-- An auxiliary object used in proving the topological properties of `Mbar_bdd.limit r S c`. -/
+private def Γ : Π (m n : ℕ) (h : m ≤ n), set (Π (M : ℕ), Mbar_bdd r S c M) := λ m n h,
   { F | transition r h (F n) = F m }
 
-def Γ₀ : Π (m n : ℕ) (h : m ≤ n), set (Mbar_bdd r S c m × Mbar_bdd r S c n) := λ m n h,
+/-- An auxiliary object used in proving the topological properties of `Mbar_bdd.limit r S c`. -/
+private def Γ₀ : Π (m n : ℕ) (h : m ≤ n), set (Mbar_bdd r S c m × Mbar_bdd r S c n) := λ m n h,
   { a | transition r h a.2 = a.1 }
 
-def π : Π (m : ℕ), (Π (M : ℕ), Mbar_bdd r S c M) → Mbar_bdd r S c m := λ m F, F m
+/-- An auxiliary object used in proving the topological properties of `Mbar_bdd.limit r S c`. -/
+private def π : Π (m : ℕ), (Π (M : ℕ), Mbar_bdd r S c M) → Mbar_bdd r S c m := λ m F, F m
 
-def π₂ : Π (m n : ℕ), (Π (M : ℕ), Mbar_bdd r S c M) → Mbar_bdd r S c m × Mbar_bdd r S c n :=
+/-- An auxiliary object used in proving the topological properties of `Mbar_bdd.limit r S c`. -/
+private def π₂ : Π (m n : ℕ), (Π (M : ℕ), Mbar_bdd r S c M) → Mbar_bdd r S c m × Mbar_bdd r S c n :=
   λ m n F, ⟨F m, F n⟩
 
 lemma range_emb_aux_eq : range (@emb_aux r S c) = ⋂ (x : {y : ℕ × ℕ // y.1 ≤ y.2}), Γ x.1.1 x.1.2 x.2 :=
@@ -218,6 +233,7 @@ begin
   exact embedding_is_closed (emb r S c).to_embedding (emb r S c).closed_range is_closed_univ,
 end
 
+/-- The projection from `Mbar_bdd.limit r S c M` to `Mbar_bdd r S c M`.  -/
 def proj (M : ℕ) : Mbar_bdd.limit r S c → Mbar_bdd r S c M := λ F, F.1 M
 
 lemma proj_eq (M : ℕ) : (proj M : _ → Mbar_bdd r S c _) = (π M) ∘ emb_aux := rfl
@@ -239,6 +255,10 @@ end topological_structure
 
 section addition
 
+/-- The addition on `Mbar_bdd r S c`.
+It takes a term of type `Mbar_bdd r S c₁` and a term of type `Mbar_bdd r S c₂`
+and produces a term of type `Mbar_bdd r S (c₁ + c₂)`.
+-/
 def add (F : Mbar_bdd r S c₁ M) (G : Mbar_bdd r S c₂ M) : Mbar_bdd r S (c₁ + c₂) M :=
 { to_fun := F + G,
   coeff_zero' := λ s, by simp,
