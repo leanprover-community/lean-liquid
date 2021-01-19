@@ -65,11 +65,13 @@ by { cases x, cases y, congr, exact h }
 lemma ext_iff (x y : Mbar r' S) : x = y ↔ (x : S → ℕ → ℤ) = y :=
 ⟨congr_arg _, ext x y⟩
 
+/-- The zero element of `Mbar r' S`, defined as the constant 0-function. -/
 def zero : Mbar r' S :=
 { to_fun := 0,
   coeff_zero' := λ s, rfl,
   summable' := λ s, by simpa using summable_zero }
 
+/-- Addition in `Mbar r' S`, defined as pointwise addition. -/
 def add (F : Mbar r' S) (G : Mbar r' S) : Mbar r' S :=
 { to_fun := F + G,
   coeff_zero' := λ s, by simp [F.coeff_zero s, G.coeff_zero s],
@@ -84,6 +86,7 @@ def add (F : Mbar r' S) (G : Mbar r' S) : Mbar r' S :=
     exact int.nat_abs_add_le _ _
   end }
 
+/-- Subtraction in `Mbar r' S`, defined as pointwise subtraction. -/
 def sub (F : Mbar r' S) (G : Mbar r' S) : Mbar r' S :=
 { to_fun := F - G,
   coeff_zero' := λ s, by simp [F.coeff_zero s, G.coeff_zero s],
@@ -99,6 +102,7 @@ def sub (F : Mbar r' S) (G : Mbar r' S) : Mbar r' S :=
     exact int.nat_abs_add_le _ _
   end }
 
+/-- Negation in `Mbar r' S`, defined as pointwise negation. -/
 def neg (F : Mbar r' S) : Mbar r' S :=
 { to_fun := -F,
   coeff_zero' := λ s, by simp [F.coeff_zero s],
@@ -155,6 +159,10 @@ instance : pseudo_normed_group (Mbar r' S) :=
   end }
 .
 
+/--
+The coercion from `Mbar r' S` functions `S → ℕ → ℤ`.
+This is an additive group homomorphism.
+-/
 def coe_hom : Mbar r' S →+ (S → ℕ → ℤ) :=
 add_monoid_hom.mk' coe_fn $ coe_add
 
@@ -175,10 +183,9 @@ end
 
 section Tinv
 
-/-!
-### The action of T⁻¹
+/--
+The action of T⁻¹.
 -/
-
 def Tinv_aux {R : Type*} [has_zero R] : (ℕ → R) → ℕ → R := λ F n, if n = 0 then 0 else F (n + 1)
 
 @[simp] lemma Tinv_aux_zero {R : Type*} [has_zero R] (f : ℕ → R) : Tinv_aux f 0 = 0 := rfl
@@ -204,6 +211,11 @@ begin
   { simp only [Tinv_aux_succ, pow_add, mul_assoc, pow_one] }
 end
 
+/--
+The `T⁻¹` action on `Mbar r' S`.
+This is defined, essentially, as a shift in `ℕ` (accounting for the restriction at 0).
+This is an addition group homomorphism.
+-/
 def Tinv {r : ℝ≥0} {S : Type u} [fintype S] [h0r : fact (0 < r)] :
   Mbar r S →+ Mbar r S :=
 add_monoid_hom.mk' (λ F,
