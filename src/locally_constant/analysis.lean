@@ -1,6 +1,18 @@
 import locally_constant.algebra
 import for_mathlib.normed_group_hom
 
+/-!
+# Analysis of locally constant maps
+
+This file defines the normed group of locally constant maps into a normed group.
+
+## Main construction
+
+* The instance `locally_constant.normed_group`
+* `locally_constant.map_hom`: push-forward of locally constant maps as a normed group hom
+* `locally_constant.comap_hom`: pull-back of locally constant maps as a normed group hom
+-/
+
 noncomputable theory
 
 -- move this
@@ -161,6 +173,8 @@ section map_hom
 
 variables [normed_group V] [normed_group V₁] [normed_group V₂] [normed_group V₃]
 
+/-- Push-forward of locally constant maps under a normed group hom, as a normed
+group hom between types of locally constant functions. -/
 @[simps]
 def map_hom (f : normed_group_hom V₁ V₂) :
   normed_group_hom (locally_constant X V₁) (locally_constant X V₂) :=
@@ -210,6 +224,8 @@ section comap_hom
 variables [topological_space Y] [compact_space Y] [topological_space Z] [compact_space Z]
 variables [normed_group V]
 
+/-- Pull-back of locally constant maps under a normed group hom, as a normed
+group hom between types of locally constant functions. -/
 @[simps]
 def comap_hom (f : X → Y) (hf : continuous f) :
   normed_group_hom (locally_constant Y V) (locally_constant X V) :=
@@ -273,4 +289,5 @@ end comap_hom
 end compact_domain
 
 end locally_constant
+
 #lint- only unused_arguments def_lemma doc_blame
