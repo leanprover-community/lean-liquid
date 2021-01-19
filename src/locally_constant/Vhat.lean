@@ -13,6 +13,7 @@ open_locale nnreal
 namespace NormedGroup
 open uniform_space opposite category_theory
 
+/-- The completion of a normed group, as an endofunctor on `NormedGroup`. -/
 @[simps]
 def Completion : NormedGroup ⥤ NormedGroup :=
 { obj := λ V, NormedGroup.of (completion V),
@@ -64,6 +65,7 @@ begin
   apply_instance
 end
 
+/-- The canonical morphism from a normed group `V` to its completion. -/
 @[simps]
 def incl {V : NormedGroup} : V ⟶ Completion.obj V :=
 { to_fun := λ v, (v : completion V),
@@ -73,6 +75,12 @@ def incl {V : NormedGroup} : V ⟶ Completion.obj V :=
 
 @[simp] lemma norm_incl_eq {V : NormedGroup} {v : V} : ∥incl v∥ = ∥v∥ := by simp
 
+/--
+Given a morphism of normed groups `V ⟶ W`, this defines the associated morphism
+from the completion of `V` to the completion of `W`.
+The difference from the definition obtained from the functoriality of completion is in that the
+map sending a morphism `f` to the association morphism of completions is itself additive.
+-/
 def Completion.map_hom (V W : NormedGroup) : (V ⟶ W) →+ (Completion.obj V ⟶ Completion.obj W) :=
 add_monoid_hom.mk' (category_theory.functor.map Completion) $
 begin
@@ -93,6 +101,11 @@ end
 @[simp] lemma Completion.map_zero (V W : NormedGroup) : Completion.map (0 : V ⟶ W) = 0 :=
 (Completion.map_hom V W).map_zero
 
+/--
+Given a morphism of normed groups `f : V → W` with `W` complete, this provides a lift of `f` to
+the completion of `V`. The lemmas `lift_unique` and `lift_comp_incl` provide the api for the
+universal property of the completion.
+-/
 def Completion.lift {V W : NormedGroup} [complete_space W] (f : V ⟶ W) : Completion.obj V ⟶ W :=
 { to_fun := completion.extension f,
   map_zero' := begin
