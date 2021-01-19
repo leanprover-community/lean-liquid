@@ -107,4 +107,4 @@ structure admissible (C : system_of_complexes) : Prop :=
 (restriction_norm_noninc : ∀ c' c i h, normed_group_hom.bound_by (@res C c' c i h) 1)
 
 end system_of_complexes
-#lint- only unused_arguments def_lemma
+#lint- only unused_arguments def_lemma doc_blame

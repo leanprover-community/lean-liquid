@@ -83,6 +83,9 @@ instance zero_suitable : (0 : basic_universal_map m n).suitable c₁ c₂ :=
 λ i, by simp only [nat.cast_zero, zero_mul, zero_le', finset.sum_const_zero,
           matrix.zero_apply, int.nat_abs_zero]
 
+/-- `f.eval_Mbar_le` for `f : basic_universal_map m n` is
+the map `(Mbar_le r' S c₁)^m → (Mbar_le r' S c₂)^n` induced
+by the natural map `(Mbar r' S)^m → (Mbar r' S)^n` associated with `f`. -/
 def eval_Mbar_le [H : f.suitable c₁ c₂] :
   ((Mbar_le r' S c₁)^m) → ((Mbar_le r' S c₂)^n) :=
 Mbar_le.hom_of_normed_group_hom' r' S c₁ c₂ f.sup_mul_le (f.eval_png (Mbar r' S)) $
@@ -138,4 +141,4 @@ end basic_universal_map
 
 end breen_deligne
 
-#lint- only unused_arguments def_lemma
+#lint- only unused_arguments def_lemma doc_blame

@@ -24,4 +24,4 @@ begin
 end
 
 end nnreal
-#lint- only unused_arguments def_lemma
+#lint- only unused_arguments def_lemma doc_blame

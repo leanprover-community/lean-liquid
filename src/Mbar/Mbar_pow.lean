@@ -208,7 +208,7 @@ def eval_Mbar_pow_aux (f : basic_universal_map m n) [f.suitable c₁ c₂] :
 { to_fun := f.eval_Mbar_le _ _ _ _,
   continuous_to_fun := f.eval_Mbar_le_continuous _ _ _ _}
 
-/- `f.eval_Mbar_pow` is the morphism of normed groups
+/-- `f.eval_Mbar_pow` is the morphism of normed groups
 `(LCC_Mbar_pow V S r' c₂ n) ⟶ (LCC_Mbar_pow V S r' c₁ m)`
 induced by `f : basic_universal_map m n` (aka a matrix).
 
@@ -618,4 +618,4 @@ universal_map.suitable.comp (c' (i + 1))
 end package
 
 end breen_deligne
-#lint- only unused_arguments def_lemma
+#lint- only unused_arguments def_lemma doc_blame

@@ -26,6 +26,8 @@ end
 
 variables [has_equalizers C]
 
+/-- The induced morphism between two equalizers,
+constructed from a morphism of equalizer diagrams. -/
 def map (φ : X₁ ⟶ X₂) (ψ : Y₁ ⟶ Y₂) (hf : f₁ ≫ ψ = φ ≫ f₂) (hg : g₁ ≫ ψ = φ ≫ g₂) :
   equalizer f₁ g₁ ⟶ equalizer f₂ g₂ :=
 equalizer.lift (equalizer.ι _ _ ≫ φ) $
@@ -50,4 +52,4 @@ end limits
 
 end category_theory
 
-#lint- only unused_arguments def_lemma
+#lint- only unused_arguments def_lemma doc_blame

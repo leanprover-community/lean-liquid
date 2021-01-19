@@ -80,6 +80,9 @@ class pseudo_normed_group (M : Type*) :=
 (add_mem_filtration : ∀ ⦃c₁ c₂ x₁ x₂⦄,
   x₁ ∈ filtration c₁ → x₂ ∈ filtration c₂ → x₁ + x₂ ∈ filtration (c₁ + c₂))
 
+/-- The additive commutative group instance underlying a pseudo normed group. -/
+add_decl_doc pseudo_normed_group.to_add_comm_group
+
 open function
 
 class pseudo_normed_group' (B_ : ℝ≥0 → Type*) (M : out_param Type*) :=
@@ -197,6 +200,8 @@ calc c' = 1 * c' : by rw one_mul
     ... ≤ c * c' : mul_le_mul_right' hc c'
 
 -- move this, maybe it already exists?
+/-- Constructor for additive monoid homomorphisms into a product of additive monoids,
+taking as input a family of monoid homomorphisms into the factors. -/
 @[simps {rhs_md:=semireducible, fully_applied:=ff}]
 def mk_to_pi {M₁} [add_monoid M₁] {ι : Type*} {M : ι → Type*} [Π i, add_monoid (M i)]
   (f : Π i, M₁ →+ (M i)) :
@@ -218,6 +223,8 @@ lemma apply_mem_filtration {ι : Type*} (M : ι → Type*) [Π i, pseudo_normed_
 calc c' = 1 * c' : by rw one_mul
     ... ≤ c * c' : mul_le_mul_right' hc c'
 
+/-- Constructor for additive monoid homomorphisms out of a finite product of additive monoids,
+taking as input a family of monoid homomorphisms out of the factors. -/
 def mk_from_pi {ι : Type*} [fintype ι] {M : ι → Type*} {M₂}
   [Π i, add_monoid (M i)] [add_comm_monoid M₂] (f : Π i, (M i) →+ M₂) :
   (Π i, M i) →+ M₂ :=
@@ -260,4 +267,4 @@ lemma const_smul_hom_int_mem_filtration (n : ℤ) (c : ℝ≥0) (h : ↑(n.nat_a
   using filtration_mono (mul_le_mul_right' h c') (smul_int_mem_filtration _ _ _ hx)
 
 end add_monoid_hom
-#lint- only unused_arguments def_lemma
+#lint- only unused_arguments def_lemma doc_blame

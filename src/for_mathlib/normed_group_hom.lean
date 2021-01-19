@@ -250,4 +250,4 @@ by { ext, refl }
 end kernels
 
 end normed_group_hom
-#lint- only unused_arguments def_lemma
+#lint- only unused_arguments def_lemma doc_blame

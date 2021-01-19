@@ -31,4 +31,4 @@ def LocallyConstant : NormedGroup ⥤ CompHausᵒᵖ ⥤ NormedGroup :=
   map_comp' := by { intros, ext, refl } }
 
 end NormedGroup
-#lint- only unused_arguments def_lemma
+#lint- only unused_arguments def_lemma doc_blame

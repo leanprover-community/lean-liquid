@@ -119,4 +119,5 @@ mk_from_pi' _ _ f (λ i, classical.some (f i).bound) $ λ i, (classical.some_spe
 end normed_group_hom
 
 end
-#lint- only unused_arguments def_lemma
+
+#lint- only unused_arguments def_lemma doc_blame

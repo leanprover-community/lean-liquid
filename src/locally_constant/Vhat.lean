@@ -229,4 +229,4 @@ instance normed_with_aut_LCC (V : NormedGroup) (S : CompHaus) (r : ℝ≥0)
 show normed_with_aut r (Completion.obj $ (LocallyConstant.obj V).obj (op S)), by apply_instance
 
 end NormedGroup
-#lint- only unused_arguments def_lemma
+#lint- only unused_arguments def_lemma doc_blame

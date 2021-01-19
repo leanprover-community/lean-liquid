@@ -5,6 +5,7 @@ In this file, we define notation `X^n` to take powers of types.
 By definition, `X^n` is modelled as functions from `fin n` to `X`.
 -/
 
+/-- A definition of powers of a type. -/
 def type_pow : has_pow (Type*) ℕ := ⟨λ A n, fin n → A⟩
 
 namespace type_pow_topology
@@ -18,4 +19,4 @@ instance topological_space {n : ℕ} {α : Type*} [topological_space α] : topol
 
 end type_pow_topology
 
-#lint- only unused_arguments def_lemma
+#lint- only unused_arguments def_lemma doc_blame

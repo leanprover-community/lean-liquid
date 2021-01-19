@@ -47,6 +47,12 @@ where `b i` is a `ℤ`-linear combination `c i 1 * a 1 + ... + c i m * a m`.
 So a "basic universal map" is specified by the `n × m`-matrix `c`.
 -/
 
+/-- A `basic_universal_map m n` is an `n × m`-matrix.
+It captures data for a homomorphism `ℤ[A^m] → ℤ[A^n]`
+functorial in the abelian group `A`.
+
+A general such homomorphism is a formal linear combination
+of `basic_universal_map`s, which we aptly call `universal_map`s. -/
 @[derive add_comm_group]
 def basic_universal_map (m n : ℕ) := matrix (fin n) (fin m) ℤ
 
@@ -55,6 +61,8 @@ namespace basic_universal_map
 variables {k l m n : ℕ} (g : basic_universal_map m n) (f : basic_universal_map l m)
 variables (A : Type*) [add_comm_group A]
 
+/-- `f.eval A` for a `f : basic_universal_map m n`
+is the homomorphism `ℤ[A^m] →+ ℤ[A^n]` induced by matrix multiplication. -/
 def eval : ℤ[A^m] →+ ℤ[A^n] :=
 map $ λ x i, ∑ j, g i j • (x : fin _ → A) j
 
@@ -62,6 +70,8 @@ map $ λ x i, ∑ j, g i j • (x : fin _ → A) j
   g.eval A (of x) = (of $ λ i, ∑ j, g i j • x j) :=
 lift.of _ _
 
+/-- The composition of basic universal maps,
+defined as matrix multiplication. -/
 def comp : basic_universal_map l n := matrix.mul g f
 
 lemma eval_comp : (g.comp f).eval A = (g.eval A).comp (f.eval A) :=
@@ -79,6 +89,7 @@ lemma comp_assoc
   comp (comp h g) f = comp h (comp g f) :=
 matrix.mul_assoc _ _ _
 
+/-- The identity `basic_universal_map`. -/
 def id (n : ℕ) : basic_universal_map n n := (1 : matrix (fin n) (fin n) ℤ)
 
 @[simp] lemma id_comp : (id _).comp f = f :=
@@ -89,6 +100,9 @@ by simp only [comp, id, matrix.mul_one]
 
 end basic_universal_map
 
+/-- A `universal_map m n` is a formal `ℤ`-linear combination
+of `basic_universal_map`s.
+It captures the data for a homomorphism `ℤ[A^m] → ℤ[A^n]`. -/
 @[derive add_comm_group]
 def universal_map (m n : ℕ) := ℤ[basic_universal_map m n]
 
@@ -98,6 +112,9 @@ universe variable u
 variables {k l m n : ℕ} (g : universal_map m n) (f : universal_map l m)
 variables (A : Type u) [add_comm_group A]
 
+/-- `f.eval A` for a `f : universal_map m n`
+is the homomorphism `ℤ[A^m] →+ ℤ[A^n]` induced by matrix multiplication
+of the summands occurring in the formal linear combination `f`. -/
 def eval : universal_map m n →+ ℤ[A^m] →+ ℤ[A^n] :=
 free_abelian_group.lift $ λ f, f.eval A
 
@@ -105,6 +122,9 @@ free_abelian_group.lift $ λ f, f.eval A
   eval A (of f) = f.eval A :=
 lift.of _ _
 
+/-- The composition of `universal_map`s `g` and `f`,
+given by the formal linear combination of all compositions
+of summands occurring in `g` and `f`. -/
 def comp : universal_map m n →+ universal_map l m →+ universal_map l n :=
 free_abelian_group.lift $ λ g, free_abelian_group.lift $ λ f,
 of $ g.comp f
@@ -135,6 +155,7 @@ begin
   simp only [basic_universal_map.comp_assoc, comp_of]
 end
 
+/-- The identity `universal_map`. -/
 def id (n : ℕ) : universal_map n n := of (basic_universal_map.id n)
 
 @[simp] lemma id_comp : comp (id _) f = f :=
@@ -152,6 +173,8 @@ begin
   simp only [id, comp_of, id_apply, basic_universal_map.comp_id]
 end
 
+/-- `double f` is the `universal_map` from `ℤ[A^m ⊕ A^m]` to `ℤ[A^n ⊕ A^n]`
+given by applying `f` on both "components". -/
 def double : universal_map m n →+ universal_map (m + m) (n + n) :=
 map $ λ f, matrix.reindex_linear_equiv sum_fin_sum_equiv sum_fin_sum_equiv $
 matrix.from_blocks f 0 0 f
@@ -187,6 +210,8 @@ structure data :=
 (rank : ℕ → ℕ)
 (map  : Π n, universal_map (rank (n+1)) (rank n))
 
+/-- Breen--Deligne data is a complex
+if the composition of all pairs of two subsequent maps in the data is `0`. -/
 def is_complex (BD : data) : Prop :=
 ∀ n, universal_map.comp (BD.map n) (BD.map (n+1)) = 0
 
@@ -195,16 +220,23 @@ We use a small hack: mathlib only has block matrices with 4 blocks.
 So we add two zero-width blocks in the definition of `σ_add` and `σ_proj`.
 -/
 
+/-- The universal map `ℤ[A^n ⊕ A^n] → ℤ[A^n]`
+induced by the addition on `A^n`. -/
 def σ_add (n : ℕ) : universal_map (n + n) n :=
 of $ matrix.reindex_linear_equiv (equiv.sum_empty _) sum_fin_sum_equiv $
 matrix.from_blocks 1 1 0 0
 
+/-- The universal map `ℤ[A^n ⊕ A^n] → ℤ[A^n]`
+that is the formal sum of the two projection maps. -/
 def σ_proj (n : ℕ) : universal_map (n + n) n :=
 (of $ matrix.reindex_linear_equiv (equiv.sum_empty _) sum_fin_sum_equiv $
 matrix.from_blocks 1 0 0 0) +
 (of $ matrix.reindex_linear_equiv (equiv.sum_empty _) sum_fin_sum_equiv $
 matrix.from_blocks 0 1 0 0)
 
+/-- The universal map `ℤ[A^n ⊕ A^n] → ℤ[A^n]`
+that is the difference between `σ_diff` (induced by the addition on `A^n`)
+and `σ_proj` (the formal sum of the two projections). -/
 def σ_diff (n : ℕ) := σ_add n - σ_proj n
 
 section
@@ -277,6 +309,9 @@ end
 
 end
 
+/-- A `homotopy` for Breen--Deligne data `BD` consists of maps `map n`,
+for each natural number `n`, that constitute a homotopy between
+the two universal maps `σ_add` and `σ_proj`. -/
 structure homotopy (BD : data) :=
 (map         : Π n, universal_map (BD.rank n + BD.rank n) (BD.rank (n+1)))
 (is_homotopy : ∀ n, σ_diff (BD.rank (n+1)) =
@@ -285,6 +320,9 @@ structure homotopy (BD : data) :=
 (is_homotopy_zero : σ_add (BD.rank 0) - σ_proj (BD.rank 0) = universal_map.comp (BD.map 0) (map 0))
 -- TODO! Is ↑ the thing we want?
 
+/-- A Breen--Deligne `package` consists of Breen--Deligne `data`
+that forms a complex, together with a `homotopy`
+between the two universal maps `σ_add` and `σ_proj`. -/
 structure package :=
 (data       : data)
 (is_complex : is_complex data)
@@ -292,8 +330,10 @@ structure package :=
 
 namespace package
 
+/-- `BD.rank i` is the rank of the `i`th entry in the Breen--Deligne resolution described by `BD`. -/
 def rank (BD : package) := BD.data.rank
 
+/-- `BD.map i` is the `i`-th universal mapin the Breen--Deligne resolution described by `BD`. -/
 def map (BD : package) := BD.data.map
 
 @[simp] lemma map_comp_map (BD : package) (n : ℕ) :
@@ -307,6 +347,7 @@ namespace eg
 
 open universal_map
 
+/-- The `i`-th rank of this BD package is `2^i`. -/
 def rank : ℕ → ℕ
 | 0     := 1
 | (n+1) := rank n + rank n
@@ -315,13 +356,18 @@ lemma rank_eq : ∀ n, rank n = 2 ^ n
 | 0     := rfl
 | (n+1) := by rw [pow_succ, two_mul, rank, rank_eq]
 
+/-- The `i`-th map of this BD package is inductively defined
+as the simplest solution to the homotopy condition,
+so that the homotopy will consist of identity maps. -/
 def map : Π n, universal_map (rank (n+1)) (rank n)
 | 0     := σ_diff 1
 | (n+1) := (σ_diff (rank (n+1))) - (map n).double
 
+/-- The Breen--Deligne data for the example BD package. -/
 @[simps]
 def data : data := ⟨rank, map⟩
 
+/-- The `n`-th homotopy map for the example BD package is the identity. -/
 def hmap (n : ℕ) : universal_map (rank n + rank n) (rank (n+1)) :=
 universal_map.id _
 
@@ -339,6 +385,7 @@ begin
     fin_cases j, fin_cases i; refl }
 end
 
+/-- The homotopy for the example BD package. -/
 @[simps]
 def homotopy : homotopy data := ⟨hmap, hmap_is_homotopy, hmap_is_homotopy_zero⟩
 
@@ -370,4 +417,4 @@ end eg
 def eg : package := ⟨eg.data, eg.is_complex, eg.homotopy⟩
 
 end breen_deligne
-#lint- only unused_arguments def_lemma
+#lint- only unused_arguments def_lemma doc_blame

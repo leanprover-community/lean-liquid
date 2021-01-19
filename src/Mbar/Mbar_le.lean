@@ -52,6 +52,7 @@ protected lemma summable (x : Mbar_le r' S c) (s : S) :
 protected lemma mem_filtration (x : Mbar_le r' S c) :
   x.1 ∈ filtration (Mbar r' S) c := x.property
 
+/-- The inclusion map `Mbar_le r' S c₁ → Mbar_le r' S c₂` for `c₁ ≤ c₂`. -/
 protected def cast_le [hc : fact (c₁ ≤ c₂)] (x : Mbar_le r' S c₁) : Mbar_le r' S c₂ :=
 ⟨⟨x, x.coeff_zero, x.summable⟩, filtration_mono hc x.mem_filtration⟩
 
@@ -63,6 +64,11 @@ by { ext, refl }
   (x.cast_le : Mbar_le r' S c₂) s i = x s i :=
 rfl
 
+/-- An alternative constructor for terms of type `Mbar_le r' S c`,
+taking as input a function `x : S → ℕ → ℤ`
+(to be thought of as power series indexed by `S`)
+together with a single proof obligation
+showing that `x` is summable and converges to a real number `≤ c` at `r'`. -/
 def mk' (x : S → ℕ → ℤ)
   (h : (∀ s, x s 0 = 0) ∧
        (∀ s, summable (λ n, ↑(x s n).nat_abs * r'^n)) ∧
@@ -86,15 +92,23 @@ end Mbar_le
 
 variables (c₃)
 
+/-- The addition on `Mbar_le`.
+This addition is not homogeneous, but has type
+`(Mbar_le r' S c₁) → (Mbar_le r' S c₂) → (Mbar_le r' S c₃)`
+for `c₁ + c₂ ≤ c₃`. -/
 def Mbar_le.add [h : fact (c₁ + c₂ ≤ c₃)]
   (F : Mbar_le r' S c₁) (G : Mbar_le r' S c₂) :
   Mbar_le r' S c₃ :=
 subtype.mk (F + G) $ filtration_mono h $ add_mem_filtration F.mem_filtration G.mem_filtration
 
+/-- An uncurried version of addition on `Mbar_le`,
+meaning that it takes only 1 input, coming from a product type. -/
 def Mbar_le.add' [fact (c₁ + c₂ ≤ c₃)] :
   Mbar_le r' S c₁ × Mbar_le r' S c₂ → Mbar_le r' S c₃ :=
 λ x, Mbar_le.add c₃ x.1 x.2
 
+-- TODO: register this as an instance??
+/-- The negation on `Mbar_le`. -/
 def Mbar_le.neg (F : Mbar_le r' S c) : Mbar_le r' S c :=
 subtype.mk (-F) $ neg_mem_filtration F.mem_filtration
 
@@ -245,6 +259,9 @@ lemma of_compat (T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M)
 ⟨⟨mk_seq T, mk_seq_zero, mk_seq_summable compat, mk_seq_sum_le compat⟩, truncate_mk_seq compat⟩
 -/
 
+/-- `of_compat hT` is the limit of a compatible family `T M : Mbar_bdd r' ⟨S⟩ c M`.
+This realizes `Mbar_le` as the profinite limit of the spaces `Mbar_bdd`,
+see also `Mbar_le.eqv`. -/
 def of_compat {T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M}
   (compat : ∀ (M N : ℕ) (h : M ≤ N), Mbar_bdd.transition r' h (T N) = T M) : Mbar_le r' S c :=
 ⟨⟨mk_seq T, mk_seq_zero, mk_seq_summable compat⟩, mk_seq_sum_le compat⟩
@@ -257,6 +274,8 @@ begin
   exact mk_seq_eq_of_compat compat _,
 end
 
+/-- The equivalence (as types) between `Mbar_le r' S c`
+and the profinite limit of the spaces `Mbar_bdd r' ⟨S⟩ c M`. -/
 def eqv : Mbar_le r' S c ≃ Mbar_bdd.limit r' ⟨S⟩ c :=
 { to_fun := λ F, ⟨λ N, truncate _ F, by tidy⟩,
   inv_fun := λ F, of_compat F.2,
@@ -284,6 +303,11 @@ begin
     exact ⟨U,hU,rfl⟩ },
 end
 
+/-- The homeomorphism between `Mbar_le r' S c`
+and the profinite limit of the spaces `Mbar_bdd r' ⟨S⟩ c M`.
+
+This is `Mbar_le.eqv`, lifted to a homeomorphism by transporting
+the topology from the profinite limit to `Mbar_le`. -/
 def homeo : Mbar_le r' S c ≃ₜ Mbar_bdd.limit r' ⟨S⟩ c :=
 { continuous_to_fun := begin
     simp only [equiv.to_fun_as_coe, continuous_def],
@@ -415,6 +439,12 @@ begin
   rw hφ (truncate N x)
 end
 
+/-- Construct a map between `Mbar_le r' S c₁` and `Mbar_le r' S c₂`
+from a bounded group homomorphism `Mbar r' S → Mbar r' S`.
+
+If `f` satisfies a suitable criterion,
+then the constructed map is continuous for the profinite topology;
+see `continuous_of_normed_group_hom`. -/
 def hom_of_normed_group_hom {C : ℝ≥0} (c₁ c₂ : ℝ≥0) [hc : fact (C * c₁ ≤ c₂)]
   (f : Mbar r' S →+ Mbar r' S) (h : f ∈ filtration (Mbar r' S →+ Mbar r' S) C)
   (F : Mbar_le r' S c₁) :
@@ -442,6 +472,12 @@ open pseudo_normed_group
 
 variables (r') (S)
 
+/-- Construct a map between `(Mbar_le r' S c₁)^m` and `(Mbar_le r' S c₂)^n`
+from a bounded group homomorphism `f : (Mbar r' S)^m → (Mbar r' S)^n`.
+
+If `f` satisfies a suitable criterion,
+then the constructed map is continuous for the profinite topology;
+see `continuous_of_normed_group_hom'`. -/
 def hom_of_normed_group_hom' {C : ℝ≥0} (c₁ c₂ : ℝ≥0) {m n : ℕ} (hc : C * c₁ ≤ c₂)
   (f : (Mbar r' S)^m →+ (Mbar r' S)^n) (h : f ∈ filtration ((Mbar r' S)^m →+ (Mbar r' S)^n) C)
   (F : (Mbar_le r' S c₁)^m) :
@@ -510,6 +546,10 @@ section Tinv
 ### The action of T⁻¹
 -/
 
+/-- The action of `T⁻¹` as map `Mbar_le r S c₁ → Mbar_le r S c₂`.
+
+This action is induced by the action of `T⁻¹` on power series modulo constants: `ℤ⟦T⟧/ℤ`.
+So `T⁻¹` sends `T^(n+1)` to `T^n`, but `T^0 = 0`. -/
 def Tinv {r : ℝ≥0} {S : Type u} [fintype S] {c₁ c₂ : ℝ≥0} [fact (0 < r)] [fact (r⁻¹ * c₁ ≤ c₂)] :
   Mbar_le r S c₁ → Mbar_le r S c₂ :=
 hom_of_normed_group_hom c₁ c₂ Mbar.Tinv Mbar.Tinv_mem_filtration
@@ -536,4 +576,4 @@ end
 end Tinv
 
 end Mbar_le
-#lint- only unused_arguments def_lemma
+#lint- only unused_arguments def_lemma doc_blame
