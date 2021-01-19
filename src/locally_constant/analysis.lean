@@ -1,5 +1,5 @@
 import locally_constant.algebra
-import normed_group_hom
+import for_mathlib.normed_group_hom
 
 noncomputable theory
 

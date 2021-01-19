@@ -1,6 +1,6 @@
 import Mbar.Mbar_le
 import pseudo_normed_group.breen_deligne
-import normed_group_hom
+import for_mathlib.normed_group_hom
 
 local attribute [instance] type_pow
 

@@ -4,7 +4,7 @@ import category_theory.limits.shapes.zero
 import category_theory.limits.shapes.kernels
 import category_theory.limits.creates
 
-import .normed_group_hom
+import for_mathlib.normed_group_hom
 
 /-!
 # The category of normed abelian groups and continuous group homomorphisms

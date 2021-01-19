@@ -4,8 +4,8 @@ import topology.algebra.group_completion
 import topology.metric_space.completion
 
 import locally_constant.NormedGroup
-import locally_constant.for_mathlib
-import normed_with_aut
+import for_mathlib.locally_constant
+import normed_group.normed_with_aut
 
 noncomputable theory
 open_locale nnreal

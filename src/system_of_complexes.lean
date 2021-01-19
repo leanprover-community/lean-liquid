@@ -1,6 +1,6 @@
 import algebra.homology.chain_complex
 
-import NormedGroup
+import normed_group.NormedGroup
 import facts
 
 universe variables v u

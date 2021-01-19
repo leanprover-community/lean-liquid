@@ -1,7 +1,7 @@
 import topology.category.Compactum
 
 import locally_constant.analysis
-import NormedGroup
+import normed_group.NormedGroup
 
 noncomputable theory
 

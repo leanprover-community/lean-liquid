@@ -1,6 +1,6 @@
 import analysis.normed_space.basic
 
-import normed_group_hom
+import for_mathlib.normed_group_hom
 
 noncomputable theory
 

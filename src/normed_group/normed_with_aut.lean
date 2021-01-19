@@ -1,4 +1,4 @@
-import NormedGroup
+import normed_group.NormedGroup
 
 /-- A `normed_with_aut r V` structure on a normed abelian group `V`
 consists of an automorphism `T` satisfying `∥T v∥ = r * ∥v∥`.

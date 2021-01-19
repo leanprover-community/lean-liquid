@@ -1,5 +1,10 @@
 import topology.constructions
 
+/-
+In this file, we define notation `X^n` to take powers of types.
+By definition, `X^n` is modelled as functions from `fin n` to `X`.
+-/
+
 def type_pow : has_pow (Type*) ℕ := ⟨λ A n, fin n → A⟩
 
 namespace type_pow_topology
