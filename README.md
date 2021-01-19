@@ -94,10 +94,10 @@ src
 ├── Mbar
 │   ├── basic.lean
 │   │     -- the definition of `Mbar`, a space of certain converging power series
-│   ├── bounded.lean
-│   │     -- finite quotients of `Mbar`, giving the profinite topology
 │   ├── Mbar_le.lean
 │   │     -- the subspace of `Mbar` consisting of power series converging to `≤ c`
+│   ├── bounded.lean
+│   │     -- finite quotients of `Mbar_le`, giving the profinite topology
 │   ├── breen_deligne.lean
 │   │     -- action of (basic) universal maps on powers of `Mbar_le`
 │   ├── Mbar_pow.lean
