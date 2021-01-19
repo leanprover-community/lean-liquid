@@ -6,6 +6,9 @@ variables {X Y Z α : Type*} [topological_space X]
 -- move this
 section for_mathlib
 
+instance discrete_topology_bot : @discrete_topology α ⊥ :=
+{ eq_bot := rfl }
+
 def finite_of_is_compact_of_discrete [discrete_topology X] (s : set X) (hs : is_compact s) :
   s.finite :=
 begin
@@ -99,6 +102,10 @@ lemma iff_continuous {_ : topological_space Y} [discrete_topology Y] (f : X → 
   is_locally_constant f ↔ continuous f :=
 ⟨is_locally_constant.continuous, λ h s, h.is_open_preimage s (is_open_discrete _)⟩
 
+lemma iff_continuous_bot (f : X → Y) :
+  is_locally_constant f ↔ @continuous X Y _ ⊥ f :=
+iff_continuous f
+
 lemma apply_eq_of_is_preconnected {f : X → Y} (hf : is_locally_constant f)
   (s : set X) (hs : is_preconnected s) (x y : X) (hx : x ∈ s) (hy : y ∈ s) :
   f y = f x :=
@@ -123,7 +130,6 @@ begin
   rw @iff_continuous X Y ‹_› ‹_› at hf,
   exact finite_of_is_compact_of_discrete _ (compact_range hf)
 end
-
 
 @[to_additive]
 lemma one [has_one Y] : is_locally_constant (1 : X → Y) := const 1
