@@ -1,6 +1,20 @@
 import analysis.normed_space.basic
-
 open_locale nnreal big_operators
+
+/-!
+# Normed groups homomorphisms
+
+This file gathers definitions and elementary constructions about bounded group homormorphisms
+between normed groups (abreviated to "normed group homs").
+
+The main lemmas relate the boundedness condition to continuity and Lispschitzness.
+
+The main construction is to endow the type of normed group homs between two given normed group
+with a group structure and a norm (we haven't proved yet that these two make a normed group
+structure).
+
+Some easy other constructions are related to subgroups of normed groups.
+-/
 
 set_option old_structure_cmd true
 
@@ -8,6 +22,9 @@ set_option old_structure_cmd true
 structure normed_group_hom (V W : Type*) [normed_group V] [normed_group W]
   extends add_monoid_hom V W :=
 (bound' : ∃ C, ∀ v, ∥to_fun v∥ ≤ C * ∥v∥)
+
+attribute [nolint doc_blame] normed_group_hom.mk
+attribute [nolint doc_blame] normed_group_hom.to_add_monoid_hom
 
 namespace normed_group_hom
 
@@ -36,12 +53,14 @@ f.to_add_monoid_hom.map_sum _ _
 
 @[simp] lemma map_neg (x) : f (-x) = -(f x) := f.to_add_monoid_hom.map_neg _
 
+/-- Make a normed group hom from a group hom and a norm bound. -/
 def mk' (f : V₁ →+ V₂) (C : ℝ≥0) (hC : ∀ x, ∥f x∥ ≤ C * ∥x∥) : normed_group_hom V₁ V₂ :=
 { bound' := ⟨C, hC⟩ .. f}
 
 @[simp] lemma coe_mk' (f : V₁ →+ V₂) (C) (hC) : ⇑(mk' f C hC) = f := rfl
 
-def bound_by (C : ℝ≥0) : Prop := ∀ x, ∥f x∥ ≤ C * ∥x∥
+/-- Predicate asserting a norm bound on a normed group hom. -/
+def bound_by (f : normed_group_hom V₁ V₂) (C : ℝ≥0) : Prop := ∀ x, ∥f x∥ ≤ C * ∥x∥
 
 lemma mk'_bound_by (f : V₁ →+ V₂) (C) (hC) : (mk' f C hC).bound_by C := hC
 
@@ -93,13 +112,13 @@ instance : inhabited (normed_group_hom V₁ V₂) := ⟨0⟩
 lemma coe_inj ⦃f g : normed_group_hom V₁ V₂⦄ (h : (f : V₁ → V₂) = g) : f = g :=
 by cases f; cases g; cases h; refl
 
-/-- The identity as a continuous map. -/
+/-- The identity as a continuous normed group hom. -/
 @[simps]
 def id : normed_group_hom V V :=
 { bound' := ⟨1, λ v, show ∥v∥ ≤ 1 * ∥v∥, by rw [one_mul]⟩,
   .. add_monoid_hom.id V }
 
-/-- The composition of continuous maps, as a continuous map. -/
+/-- The composition of continuous normed group homs. -/
 @[simps]
 def comp (g : normed_group_hom V₂ V₃) (f : normed_group_hom V₁ V₂) :
   normed_group_hom V₁ V₃ :=
@@ -117,6 +136,7 @@ def comp (g : normed_group_hom V₂ V₃) (f : normed_group_hom V₁ V₂) :
   end
   .. g.to_add_monoid_hom.comp f.to_add_monoid_hom }
 
+/-- Addition of normed group homs. -/
 instance : has_add (normed_group_hom V₁ V₂) :=
 ⟨λ f g,
 { bound' :=
@@ -132,6 +152,7 @@ instance : has_add (normed_group_hom V₁ V₂) :=
   end,
   .. (f.to_add_monoid_hom + g.to_add_monoid_hom) }⟩
 
+/-- Opposite of a normed group hom. -/
 instance : has_neg (normed_group_hom V₁ V₂) :=
 ⟨λ f,
 { bound' :=
@@ -144,6 +165,7 @@ instance : has_neg (normed_group_hom V₁ V₂) :=
     ... ≤ C * ∥v∥ : hC _
   end, .. (-f.to_add_monoid_hom) }⟩
 
+/-- Subtraction of normed group homs. -/
 instance : has_sub (normed_group_hom V₁ V₂) :=
 ⟨λ f g,
 { bound' :=
@@ -161,6 +183,7 @@ instance : has_sub (normed_group_hom V₁ V₂) :=
 
 @[simp] lemma coe_sub (f g : normed_group_hom V₁ V₂) : ⇑(f - g) = f - g := rfl
 
+/-- Homs between two given normed groups form a commutative additive group. -/
 instance : add_comm_group (normed_group_hom V₁ V₂) :=
 by refine_struct
 { .. normed_group_hom.has_add, .. normed_group_hom.has_zero,
@@ -168,12 +191,11 @@ by refine_struct
 { intros, ext, simp [add_assoc, add_comm, add_left_comm, sub_eq_add_neg] }
 .
 
-noncomputable
-instance : has_norm (normed_group_hom V₁ V₂) :=
+/-- The norm of a normed groups hom. -/
+noncomputable instance : has_norm (normed_group_hom V₁ V₂) :=
 ⟨λ f, ↑(⨅ (r : ℝ≥0) (h : f.bound_by r), r)⟩
 
--- TODO: make this into a `normed_group` instance
-
+/-- Composition of normed groups hom as an additive group morphism. -/
 def comp_hom : (normed_group_hom V₂ V₃) →+ (normed_group_hom V₁ V₂) →+ (normed_group_hom V₁ V₃) :=
 add_monoid_hom.mk' (λ g, add_monoid_hom.mk' (λ f, g.comp f)
   (by { intros, ext, exact g.map_add _ _ }))
@@ -201,12 +223,15 @@ namespace add_subgroup
 
 variables {V : Type*} [normed_group V] (W : add_subgroup V)
 
+/-- The induced norm on a subgroup of a normed group. -/
 instance : has_norm W :=
 { norm := λ v, ∥(v : V)∥ }
 
+/-- The metric structure on a subgroup of a normed group. -/
 instance : metric_space W :=
 metric_space.induced (coe : W → V) subtype.val_injective infer_instance
 
+/-- The normed group structure on a subgroup of a normed group. -/
 instance : normed_group W :=
 { dist_eq := λ v w, dist_eq_norm _ _ }
 
@@ -223,6 +248,7 @@ variables (f : normed_group_hom V₁ V₂) (g : normed_group_hom V₂ V₃)
 /-- The kernel of a bounded group homomorphism. Naturally endowed with a `normed_group` instance. -/
 def ker : add_subgroup V₁ := f.to_add_monoid_hom.ker
 
+/-- The normed group structure on the kernel of a normed group hom. -/
 instance : normed_group f.ker :=
 { dist_eq := λ v w, dist_eq_norm _ _ }
 
@@ -236,6 +262,8 @@ by { erw f.to_add_monoid_hom.mem_ker, refl }
   map_add' := λ v w, add_subgroup.coe_add _ _ _,
   bound' := ⟨1, λ v, by { rw [one_mul], refl }⟩ }
 
+/-- Given a normed group hom `f : V₁ → V₂` satisfying `g.comp f = 0` for some `g : V₂ → V₃`,
+    the corestriction of `f` to the kernel of `g`. -/
 @[simps] def ker.lift (h : g.comp f = 0) :
   normed_group_hom V₁ g.ker :=
 { to_fun := λ v, ⟨f v, by { erw g.mem_ker, show (g.comp f) v = 0, rw h, refl }⟩,
