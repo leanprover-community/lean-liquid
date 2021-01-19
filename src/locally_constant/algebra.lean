@@ -89,3 +89,4 @@ instance [comm_ring Y] : comm_ring (locally_constant X Y) :=
 { .. locally_constant.comm_semiring, .. locally_constant.ring }
 
 end locally_constant
+#lint- only unused_arguments

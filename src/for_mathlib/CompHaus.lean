@@ -12,3 +12,4 @@ def of : CompHaus :=
 @[simp] lemma coe_of : (CompHaus.of X : Type _) = X := rfl
 
 end CompHaus
+#lint- only unused_arguments

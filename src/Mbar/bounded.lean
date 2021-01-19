@@ -185,8 +185,8 @@ def Γ₀ : Π (m n : ℕ) (h : m ≤ n), set (Mbar_bdd r S c m × Mbar_bdd r S 
 
 def π : Π (m : ℕ), (Π (M : ℕ), Mbar_bdd r S c M) → Mbar_bdd r S c m := λ m F, F m
 
-def π₂ : Π (m n : ℕ) (h : m ≤ n), (Π (M : ℕ), Mbar_bdd r S c M) → Mbar_bdd r S c m × Mbar_bdd r S c n :=
-  λ m n h F, ⟨F m, F n⟩
+def π₂ : Π (m n : ℕ), (Π (M : ℕ), Mbar_bdd r S c M) → Mbar_bdd r S c m × Mbar_bdd r S c n :=
+  λ m n F, ⟨F m, F n⟩
 
 lemma range_emb_aux_eq : range (@emb_aux r S c) = ⋂ (x : {y : ℕ × ℕ // y.1 ≤ y.2}), Γ x.1.1 x.1.2 x.2 :=
   set.ext $ λ x, iff.intro (λ ⟨w,hx⟩ y ⟨z,hz⟩, hz ▸ hx ▸ w.2 _ _ _)
@@ -194,11 +194,11 @@ lemma range_emb_aux_eq : range (@emb_aux r S c) = ⋂ (x : {y : ℕ × ℕ // y.
 
 lemma π_continuous {m : ℕ} : continuous (π m : _ → Mbar_bdd r S c m) := continuous_apply _
 
-lemma π₂_eq {m n : ℕ} {h : m ≤ n} : (π₂ m n h : _ → Mbar_bdd r S c m × _) = (λ x, ⟨x m, x n⟩) :=
-  by {ext; refl}
+lemma π₂_eq {m n : ℕ} : (π₂ m n : _ → Mbar_bdd r S c m × _) = (λ x, ⟨x m, x n⟩) :=
+by {ext; refl}
 
-lemma π₂_continuous {m n : ℕ} {h : m ≤ n} : continuous (π₂ m n h : _ → Mbar_bdd r S c _ × _) :=
-  by {rw π₂_eq, exact continuous.prod_mk π_continuous π_continuous}
+lemma π₂_continuous {m n : ℕ} : continuous (π₂ m n : _ → Mbar_bdd r S c _ × _) :=
+by {rw π₂_eq, exact continuous.prod_mk π_continuous π_continuous}
 
 def emb (r S c) : closed_embedding (@emb_aux r S c) :=
 { induced := rfl,
@@ -206,8 +206,8 @@ def emb (r S c) : closed_embedding (@emb_aux r S c) :=
   closed_range := begin
     rw range_emb_aux_eq,
     apply is_closed_Inter,
-    rintros ⟨⟨m,n⟩,h0⟩,
-    rw (show (Γ m n h0 : set (Π M, Mbar_bdd r S c M)) = π₂ m n h0 ⁻¹' (Γ₀ m n h0), by tauto),
+    rintros ⟨⟨m, n⟩, h0⟩,
+    rw (show (Γ m n h0 : set (Π M, Mbar_bdd r S c M)) = π₂ m n ⁻¹' (Γ₀ m n h0), by tauto),
     refine is_closed.preimage π₂_continuous (is_closed_discrete _),
   end }
 
@@ -260,3 +260,5 @@ def add (F : Mbar_bdd r S c₁ M) (G : Mbar_bdd r S c₂ M) : Mbar_bdd r S (c₁
 end addition
 
 end Mbar_bdd
+
+#lint- only unused_arguments

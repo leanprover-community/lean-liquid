@@ -31,3 +31,4 @@ by simpa [add_comm] using
 
 lemma tsum_eq_zero {ι} (f : ι → ℝ≥0) (h : ∀ b, f b = 0) : (∑' b, f b) = 0 :=
 by simp only [h, tsum_zero]
+#lint- only unused_arguments

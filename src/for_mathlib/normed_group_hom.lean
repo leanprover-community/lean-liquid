@@ -250,3 +250,4 @@ by { ext, refl }
 end kernels
 
 end normed_group_hom
+#lint- only unused_arguments

@@ -31,3 +31,4 @@ show eval m (n •ℤ f) = n •ℤ eval m f, from add_monoid_hom.map_gsmul _ _ 
 end
 
 end add_monoid_hom
+#lint- only unused_arguments

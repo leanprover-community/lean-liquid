@@ -24,3 +24,4 @@ begin
 end
 
 end nnreal
+#lint- only unused_arguments

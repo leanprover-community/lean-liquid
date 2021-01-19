@@ -102,3 +102,4 @@ by apply_instance
 end equalizers_and_kernels
 
 end NormedGroup
+#lint- only unused_arguments

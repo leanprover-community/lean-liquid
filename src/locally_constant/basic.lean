@@ -264,3 +264,4 @@ end
 end comap
 
 end locally_constant
+#lint- only unused_arguments

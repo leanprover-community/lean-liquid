@@ -17,3 +17,5 @@ instance topological_space {n : ℕ} {α : Type*} [topological_space α] : topol
 --instance {n : ℕ} {α : Type*} [topological_space α] [discrete_topology α] : discrete_topology (α^n) := sorry
 
 end type_pow_topology
+
+#lint- only unused_arguments

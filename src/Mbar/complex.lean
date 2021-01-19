@@ -54,7 +54,7 @@ lemma res_comp_res [fact (c₁ ≤ c₂)] [fact (c₂ ≤ c₃)] [fact (c₁ ≤
   res V S r r' c₂ c₃ a ≫ res V S r r' c₁ c₂ a = res V S r r' c₁ c₃ a :=
 by simp only [res, equalizer.map_comp_map, LCC_Mbar_pow.res_comp_res]
 
-@[simp] lemma res_refl [normed_with_aut r V] : res V S r r' c c a = 𝟙 _ :=
+@[simp] lemma res_refl : res V S r r' c c a = 𝟙 _ :=
 by { simp only [res, equalizer.map_id, LCC_Mbar_pow.res_refl], refl }
 
 end LCC_Mbar_pow_Tinv
@@ -189,3 +189,4 @@ def Mbar_system (BD : breen_deligne.package) (c' : ℕ → ℝ≥0) [BD.suitable
     { dsimp [int.extend_from_nat],
       rw zero_comp },
   end }
+#lint- only unused_arguments

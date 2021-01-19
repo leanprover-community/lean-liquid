@@ -260,3 +260,4 @@ lemma const_smul_hom_int_mem_filtration (n : ℤ) (c : ℝ≥0) (h : ↑(n.nat_a
   using filtration_mono (mul_le_mul_right' h c') (smul_int_mem_filtration _ _ _ hx)
 
 end add_monoid_hom
+#lint- only unused_arguments

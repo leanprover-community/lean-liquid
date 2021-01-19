@@ -15,7 +15,7 @@ namespace breen_deligne
 namespace basic_universal_map
 
 variables {k l m n : ℕ}
-variables (r' : ℝ≥0) (S : Type*) (c c₁ c₂ c₃ : ℝ≥0) [fintype S] [fact (0 < r')]
+variables (r' : ℝ≥0) (S : Type*) (c c₁ c₂ c₃ : ℝ≥0) [fintype S]
 variables (f : basic_universal_map m n)
 
 /-- Addition goes from `Mbar r' S c` to `Mbar r' S c'` for suitable `c'`.
@@ -137,3 +137,5 @@ end
 end basic_universal_map
 
 end breen_deligne
+
+#lint- only unused_arguments

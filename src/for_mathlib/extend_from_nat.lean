@@ -1,5 +1,6 @@
 namespace int
-/-! ### extend from nat
+/-!
+### extend from nat
 
 A helper function to define a function on the integers
 by extending a function from the naturals.
@@ -10,6 +11,7 @@ with zeros on negative indices.
 
 variables {X : ℤ → Sort*} (x : Π i, X i) (f : Π i : ℕ, X i)
 
+/-- Define a (dependent) function on `ℤ`, by extending it by `0` from a function on `ℕ`. -/
 def extend_from_nat : Π i, X i
 | (n : ℕ)   := f n
 | i@-[1+n]  := x i
