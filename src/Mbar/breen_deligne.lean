@@ -2,6 +2,20 @@ import Mbar.Mbar_le
 import pseudo_normed_group.breen_deligne
 import for_mathlib.normed_group_hom
 
+/-!
+# The interplay between Breen--Deligne data and `Mbar_le`
+
+In this file we define how `universal_map`s
+(typically part of some BD package)
+act on powers of the spaces `Mbar_le r' S c`.
+This is not completely straight-forward, since `Mbar_le r' S c`
+is not stable under addition: the `c` changes.
+We therefore have some sort of "moving target".
+
+We also show that the resulting maps are continuous
+for the profinite topology on `Mbar_le`.
+-/
+
 local attribute [instance] type_pow
 
 noncomputable theory

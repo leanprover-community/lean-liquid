@@ -8,15 +8,11 @@ import hacks_and_tricks.type_pow
 import Mbar.basic
 
 /-!
+# $\overline{\mathcal{M}}_{r'}(S)_{≤ c}$
 
-## $\overline{\mathcal{M}}_{r'}(S)$
-
-This file contains a definition of ℳ-barᵣ'(S) as defined on p57 of [Analytic].
-
-## Implementation issues
-
-We model Tℤ[[T]] as functions ℕ → ℤ which vanish at 0.
-
+In this file we put a profinite topology on the subspace
+`Mbar_le r' S c` of `Mbar_le r' S` consisting of power series
+`F_s = ∑ a_{n,s}T^n ∈ Tℤ[[T]]` such that `∑_{n,s} |a_{n,s}|r'^n ≤ c`.
 -/
 
 universe u
