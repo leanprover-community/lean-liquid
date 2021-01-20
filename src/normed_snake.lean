@@ -16,8 +16,7 @@ lemma normed_group_hom.is_strict.injective {f : normed_group_hom V W} (hf : f.is
   function.injective f :=
 begin
   intros x y h,
-  suffices : x - y = 0, by rwa sub_eq_zero at this,
-  rw [← sub_eq_zero] at h,
+  rw ← sub_eq_zero at *,
   suffices : ∥ x - y ∥ = 0, by simpa,
   rw ← hf,
   simpa,
