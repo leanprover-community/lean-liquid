@@ -160,7 +160,7 @@ instance : pseudo_normed_group (Mbar r' S) :=
 .
 
 /--
-The coercion from `Mbar r' S` functions `S → ℕ → ℤ`.
+The coercion from `Mbar r' S` to functions `S → ℕ → ℤ`.
 This is an additive group homomorphism.
 -/
 def coe_hom : Mbar r' S →+ (S → ℕ → ℤ) :=
@@ -214,7 +214,7 @@ end
 /--
 The `T⁻¹` action on `Mbar r' S`.
 This is defined, essentially, as a shift in `ℕ` (accounting for the restriction at 0).
-This is an addition group homomorphism.
+This is an additive group homomorphism.
 -/
 def Tinv {r : ℝ≥0} {S : Type u} [fintype S] [h0r : fact (0 < r)] :
   Mbar r S →+ Mbar r S :=

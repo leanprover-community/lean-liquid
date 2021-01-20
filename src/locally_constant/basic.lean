@@ -57,7 +57,7 @@ end for_mathlib
 
 open_locale topological_space
 
-/-- A function between topological spaces is constant if the preimage of any set is open. -/
+/-- A function between topological spaces is locally constant if the preimage of any set is open. -/
 def is_locally_constant (f : X → Y) : Prop := ∀ s : set Y, is_open (f ⁻¹' s)
 
 namespace is_locally_constant

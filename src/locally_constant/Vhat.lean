@@ -79,7 +79,7 @@ def incl {V : NormedGroup} : V ⟶ Completion.obj V :=
 Given a morphism of normed groups `V ⟶ W`, this defines the associated morphism
 from the completion of `V` to the completion of `W`.
 The difference from the definition obtained from the functoriality of completion is in that the
-map sending a morphism `f` to the association morphism of completions is itself additive.
+map sending a morphism `f` to the associated morphism of completions is itself additive.
 -/
 def Completion.map_hom (V W : NormedGroup) : (V ⟶ W) →+ (Completion.obj V ⟶ Completion.obj W) :=
 add_monoid_hom.mk' (category_theory.functor.map Completion) $
