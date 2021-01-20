@@ -145,7 +145,7 @@ begin
   use y,
   simp only [res_res] at hy,
   refine le_trans hy (mul_le_mul _ _ (norm_nonneg _) (nnreal.coe_nonneg _)),
-  { simpa },
+  { simpa only },
   { rw d_res, apply le_trans (hC_adm.res_norm_noninc _ _ _ _ _) _,
     simp only [one_mul, nnreal.coe_one] }
 end
