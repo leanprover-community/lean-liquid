@@ -16,6 +16,14 @@ variables (M : Type*) [pseudo_normed_group M]
 
 open add_monoid_hom pseudo_normed_group
 
+-- TODO: make this definition readable.
+/-- `f.eval_png` is the group homomorphism `(M^m) →+ (M^n)`
+obtained by matrix multiplication with the matrix `f`.
+
+Implementation detail: We currently cannot multiply a matrix with `ℤ`-coefficients
+with a vector with coefficients in a `ℤ`-module.
+Hence we write out the definition of the homomorphism in a slightly convoluted way.
+See the lemma `eval_png_apply` for a readable formula. -/
 def eval_png : (M^m) →+ (M^n) :=
 mk_to_pi $ λ j, mk_from_pi $ λ i, const_smul_hom _ $ f j i
 

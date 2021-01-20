@@ -1,6 +1,19 @@
 import group_theory.free_abelian_group
 import data.finsupp.basic
 
+/-!
+In this file we define the equivalence between `free_abelian_group X`
+and `X →₀ ℤ` (the type of finitely supported function `X → ℤ`).
+Both types come with useful machinery, and the purpose of this file
+is to transport some of the machinery from one to the author.
+
+We also define a new induction principle on `free_abelian_group X`,
+needed for proving that the maps in `Mbar_complex` compose the way they should.
+This induction principle is `induction_on_free_predicate` below.
+A `free_predicate` on a free abelian group is a predicate that contains
+`a : free_abelian_group X` if and only if it contains all the summands of `a`.
+-/
+
 noncomputable theory
 
 open_locale big_operators
@@ -9,6 +22,8 @@ namespace int
 
 variables {A : Type*} [add_comm_group A]
 
+/-- `int.cast_add_hom' a` is the additive group homomorphism `ℤ → A`
+that sends `1 : ℤ` to `a : A`. -/
 def cast_add_hom' (a : A) : ℤ →+ A :=
 add_monoid_hom.mk' (λ n, n • a) $ λ m n, add_smul _ _ _
 
@@ -19,9 +34,11 @@ end int
 namespace free_abelian_group
 variables (X : Type*)
 
+/-- The group homomorphism `free_abelian_group X →+ (X →₀ ℤ)`. -/
 def to_finsupp : free_abelian_group X →+ (X →₀ ℤ) :=
 free_abelian_group.lift $ λ x, finsupp.single x 1
 
+/-- The group homomorphism `(X →₀ ℤ) →+ free_abelian_group X`. -/
 def from_finsupp : (X →₀ ℤ) →+ free_abelian_group X :=
 finsupp.lift_add_hom $ λ x, @int.cast_add_hom' (free_abelian_group X) _ (of x)
 
@@ -67,6 +84,7 @@ by rw [← add_monoid_hom.comp_apply, from_finsupp_comp_to_finsupp, add_monoid_h
 
 variable (X)
 
+/-- The additive equivalence between `free_abelian_group X` and `(X →₀ ℤ)`. -/
 @[simps]
 def equiv_finsupp : free_abelian_group X ≃+ (X →₀ ℤ) :=
 { to_fun := to_finsupp X,
@@ -77,9 +95,13 @@ def equiv_finsupp : free_abelian_group X ≃+ (X →₀ ℤ) :=
 
 variable {X}
 
+/-- `coeff x` is the additive group homomorphism `free_abelian_group X →+ ℤ`
+that sends `a` to the multiplicity of `x : X` in `a`. -/
 def coeff (x : X) : free_abelian_group X →+ ℤ :=
 (finsupp.apply_add_hom x).comp (to_finsupp X)
 
+/-- `support a` for `a : free_abelian_group X` is the finite set of `x : X`
+that occur in the formal sum `a`. -/
 def support (a : free_abelian_group X) : finset X :=
 (to_finsupp X a).support
 
@@ -252,6 +274,7 @@ end
 lemma neg_iff (h : free_predicate Q) : Q (-a) ↔ Q a :=
 ⟨λ ha, by simpa only [neg_neg] using h.neg ha, h.neg⟩
 
+/-- The additive subgroup of elements of `free_abelian_group X` satisfying a given `free_predicate`. -/
 def add_subgroup (h : free_predicate Q) : add_subgroup (free_abelian_group X) :=
 { carrier := {a | Q a},
   zero_mem' := h.zero,
@@ -287,7 +310,8 @@ lemma smul_nat_iff (h : free_predicate Q) (n : ℕ) (hn : n ≠ 0) : Q (n • a)
 
 end free_predicate
 
--- probably needs a better name
+/-- An induction principle for elements of `free_abelian_group X`
+satisfying some `free_predicate Q`. -/
 @[elab_as_eliminator] protected lemma induction_on_free_predicate
   {P : free_abelian_group X → Prop}
   (Q : free_abelian_group X → Prop)

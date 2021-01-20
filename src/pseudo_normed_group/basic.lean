@@ -70,7 +70,19 @@ end
 
 end for_mathlib
 
-/-- See top of p66 in [Analytic]. -/
+/-- A pseudo-normed group is an abelian group `M`
+together with an increasing filtration indexed by `ℝ≥0` of subsets `M_{≤c}`
+containing `0` and closed under negation,
+and such that if `x₁ ∈ M_{≤c₁}` and `x₂ ∈ M_{c₂}`, then `x₁ + x₂ ∈ M_{≤c₁ + c₂}`.
+
+See also the top of p66 in [Analytic].
+
+Implementation details:
+* In [Analytic], the filtration is indexed by *positive* real numbers (excluding) `0`,
+  whereas this definition includes `0` in the indexing set.
+* We do not ask for the filtration to be exhaustive (similar to [Analytic]),
+  which is convenient, because it means that `M₁ →+ M₂` is naturally a pseudo-normed group
+  if `M₁` and `M₂` are pseudo-normed groups. -/
 class pseudo_normed_group (M : Type*) :=
 [to_add_comm_group : add_comm_group M]
 (filtration [] : ℝ≥0 → set M)
@@ -80,25 +92,28 @@ class pseudo_normed_group (M : Type*) :=
 (add_mem_filtration : ∀ ⦃c₁ c₂ x₁ x₂⦄,
   x₁ ∈ filtration c₁ → x₂ ∈ filtration c₂ → x₁ + x₂ ∈ filtration (c₁ + c₂))
 
-/-- The additive commutative group instance underlying a pseudo normed group. -/
+/-- The additive commutative group instance underlying a pseudo-normed group. -/
 add_decl_doc pseudo_normed_group.to_add_comm_group
 
 open function
 
-class pseudo_normed_group' (B_ : ℝ≥0 → Type*) (M : out_param Type*) :=
-[to_add_comm_group : add_comm_group M]
-[has_zero : Π r, has_zero (B_ r)]
-[has_neg : Π r, has_neg (B_ r)]
-(map : ∀ ⦃c₁ c₂⦄, c₁ ≤ c₂ → B_ c₁ → B_ c₂) -- rename
-(incl : ∀ c, B_ c → M)
-(incl_injective : ∀ c, injective (incl c))
-(incl_zero : ∀ c, incl c 0 = 0)
-(incl_neg : ∀ {c} (f : B_ c), incl c (-f) = - (incl c f))
-(incl_map : ∀ {c₁ c₂} (h : c₁ ≤ c₂), (incl c₂) ∘ (map h) = (incl c₁))
-(B_add {c₁ c₂} : B_ c₁ → B_ c₂ → B_ (c₁ + c₂))
-(incl_add {c₁ c₂} (f : B_ c₁) (g : B_ c₂) : incl _ (B_add f g) = incl _ f + incl _ g)
-(map_refl {c} : map (le_refl c) = id)
-(map_trans {c₁ c₂ c₃} (h1 : c₁ ≤ c₂) (h2 : c₂ ≤ c₃) : map (h1.trans h2) = map h2 ∘ map h1)
+-- An alternative attempt at pseudo-normed groups,
+-- that we might want to keep/switch to in the future
+
+-- class pseudo_normed_group' (B_ : ℝ≥0 → Type*) (M : out_param Type*) :=
+-- [to_add_comm_group : add_comm_group M]
+-- [has_zero : Π r, has_zero (B_ r)]
+-- [has_neg : Π r, has_neg (B_ r)]
+-- (map : ∀ ⦃c₁ c₂⦄, c₁ ≤ c₂ → B_ c₁ → B_ c₂) -- rename
+-- (incl : ∀ c, B_ c → M)
+-- (incl_injective : ∀ c, injective (incl c))
+-- (incl_zero : ∀ c, incl c 0 = 0)
+-- (incl_neg : ∀ {c} (f : B_ c), incl c (-f) = - (incl c f))
+-- (incl_map : ∀ {c₁ c₂} (h : c₁ ≤ c₂), (incl c₂) ∘ (map h) = (incl c₁))
+-- (B_add {c₁ c₂} : B_ c₁ → B_ c₂ → B_ (c₁ + c₂))
+-- (incl_add {c₁ c₂} (f : B_ c₁) (g : B_ c₂) : incl _ (B_add f g) = incl _ f + incl _ g)
+-- (map_refl {c} : map (le_refl c) = id)
+-- (map_trans {c₁ c₂ c₃} (h1 : c₁ ≤ c₂) (h2 : c₂ ≤ c₃) : map (h1.trans h2) = map h2 ∘ map h1)
 
 /-
 class topological_pseudo_normed_group' (B_ : ℝ≥0 → Type*) (M : Type*)
@@ -200,8 +215,8 @@ calc c' = 1 * c' : by rw one_mul
     ... ≤ c * c' : mul_le_mul_right' hc c'
 
 -- move this, maybe it already exists?
-/-- Constructor for additive monoid homomorphisms into a product of additive monoids,
-taking as input a family of monoid homomorphisms into the factors. -/
+/-- The additive monoid homomorphism into a product of additive monoids,
+constructed from a family of monoid homomorphisms into the factors. -/
 @[simps {rhs_md:=semireducible, fully_applied:=ff}]
 def mk_to_pi {M₁} [add_monoid M₁] {ι : Type*} {M : ι → Type*} [Π i, add_monoid (M i)]
   (f : Π i, M₁ →+ (M i)) :
@@ -223,8 +238,8 @@ lemma apply_mem_filtration {ι : Type*} (M : ι → Type*) [Π i, pseudo_normed_
 calc c' = 1 * c' : by rw one_mul
     ... ≤ c * c' : mul_le_mul_right' hc c'
 
-/-- Constructor for additive monoid homomorphisms out of a finite product of additive monoids,
-taking as input a family of monoid homomorphisms out of the factors. -/
+/-- The additive monoid homomorphism out of a finite product of additive monoids,
+constructed from a family of monoid homomorphisms out of the factors. -/
 def mk_from_pi {ι : Type*} [fintype ι] {M : ι → Type*} {M₂}
   [Π i, add_monoid (M i)] [add_comm_monoid M₂] (f : Π i, (M i) →+ M₂) :
   (Π i, M i) →+ M₂ :=

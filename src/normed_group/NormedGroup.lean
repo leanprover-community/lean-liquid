@@ -70,6 +70,7 @@ section equalizers_and_kernels
 
 open category_theory.limits
 
+/-- The equalizer cone for a parallel pair of morphisms of normed groups. -/
 def parallel_pair_cone {V W : NormedGroup.{u}} (f g : V ⟶ W) :
   cone (parallel_pair f g) :=
 @fork.of_ι _ _ _ _ _ _ (of (f - g).ker) (normed_group_hom.ker.incl (f - g)) $

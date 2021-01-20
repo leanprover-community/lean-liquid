@@ -1,6 +1,5 @@
 import data.fintype.card
 
-import for_mathlib.normed_group
 import for_mathlib.discrete_topology
 
 import facts
