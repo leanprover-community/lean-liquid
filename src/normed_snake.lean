@@ -44,5 +44,5 @@ lemma normed_snake (k : ℝ≥0) (m : ℤ) (c₀ : ℝ≥0) [fact (1 ≤ k)]
   (hM_adm : M.admissible)
   (hM'_adm : M'.admissible)
   (k_new : ℝ≥0) [fact (1 ≤ k_new)] (hk : k_new = k^3 + k) :
-  N.is_bdd_exact_for_bdd_degree_above_idx k_new m c₀ :=
+  N.is_bdd_exact_for_bdd_degree_above_idx k_new (m-1) c₀ :=
 sorry
