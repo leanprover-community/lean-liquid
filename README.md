@@ -2,7 +2,8 @@
 
 ![](https://github.com/leanprover-community/lean-liquid/workflows/continuous%20integration/badge.svg?branch=master)
 
-A project to formalize Theorem 9.5 of Scholze--Clausen [Analytic]
+For the eponymous blogpost by Peter Scholze: see https://xenaproject.wordpress.com/2020/12/05/liquid-tensor-experiment/.
+The aim of this project is to formalize Theorem 9.4 of Scholze--Clausen [Analytic]
 
 ## The statement
 
