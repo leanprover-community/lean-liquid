@@ -25,7 +25,7 @@ def category_theory.has_hom.hom.apply (f : M ⟶ N) (c : ℝ≥0) (i : ℤ) :=
 
 variables (M M' N)
 
-/-- The normed snake lemma. See Proposition -/
+/-- The normed snake lemma. See Proposition 9.10 from Analytic.pdf -/
 lemma normed_snake (k : ℝ≥0) (m : ℤ) (c₀ : ℝ≥0) [fact (1 ≤ k)]
   (hf : ∀ c i, normed_group_hom.is_strict (f.apply c i))
   (Hf : ∀ (c : ℝ≥0) (i : ℤ) (hi : i ≤ m+1) (x : M.X (k * c) i),
