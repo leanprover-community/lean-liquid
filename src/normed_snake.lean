@@ -14,7 +14,14 @@ def normed_group_hom.is_strict (f : normed_group_hom V W) : Prop :=
 
 lemma normed_group_hom.is_strict.injective {f : normed_group_hom V W} (hf : f.is_strict) :
   function.injective f :=
-sorry
+begin
+  intros x y h,
+  suffices : x - y = 0, by rwa sub_eq_zero at this,
+  rw [← sub_eq_zero] at h,
+  suffices : ∥ x - y ∥ = 0, by simpa,
+  rw ← hf,
+  simpa,
+end
 
 end prereqs
 
