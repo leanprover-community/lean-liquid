@@ -277,5 +277,16 @@ by { ext, refl }
 
 end kernels
 
+section range
+
+variables {V V₁ V₂ V₃ : Type*}
+variables [normed_group V] [normed_group V₁] [normed_group V₂] [normed_group V₃]
+variables (f : normed_group_hom V₁ V₂) (g : normed_group_hom V₂ V₃)
+
+/-- The image of a bounded group homomorphism. Naturally endowed with a `normed_group` instance. -/
+def range : add_subgroup V₂ := f.to_add_monoid_hom.range
+
+end range
+
 end normed_group_hom
 #lint- only unused_arguments def_lemma doc_blame

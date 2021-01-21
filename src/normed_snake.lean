@@ -36,8 +36,9 @@ lemma normed_snake (k : ℝ≥0) (m : ℤ) (c₀ : ℝ≥0) [fact (1 ≤ k)]
   (hf : ∀ c i, normed_group_hom.is_strict (f.apply c i))
   (Hf : ∀ (c : ℝ≥0) (i : ℤ) (hi : i ≤ m+1) (x : M.X (k * c) i),
     ∥(M.res x : M.X c i)∥ ≤ k * ∥f.apply (k*c) i x∥)
-  (hg : ∀ c i, function.surjective (g.apply c i))
-  (hN : ∀ c i x, ∥g.apply c i x∥ = ∥x∥)
+  (hg : ∀ c i, (g.apply c i).ker = (f.apply c i).range)
+  (hgsur : ∀ c i, function.surjective (g.apply c i))
+  (hN : ∀ c i x, ∥g.apply c i x∥ = Inf {r : ℝ | ∃ y ∈ (f.apply c i).range, r = ∥x + y∥ })
   -- jmc: Is this ↑↑ the correct way of saying "`N` has the quotient norm"?
   (hM : M.is_bdd_exact_for_bdd_degree_above_idx k m c₀)
   (hM' : M'.is_bdd_exact_for_bdd_degree_above_idx k m c₀)
@@ -45,4 +46,11 @@ lemma normed_snake (k : ℝ≥0) (m : ℤ) (c₀ : ℝ≥0) [fact (1 ≤ k)]
   (hM'_adm : M'.admissible)
   (k_new : ℝ≥0) [fact (1 ≤ k_new)] (hk : k_new = k^3 + k) :
   N.is_bdd_exact_for_bdd_degree_above_idx k_new (m-1) c₀ :=
-sorry
+begin
+  intros c hc i hi n,
+  let n₁ := N.d n,
+  obtain ⟨m', hm'⟩ := hgsur (k_new * c) (i + 1) n,
+  let m₁' := M'.d m',
+  let C := ∥n₁∥,
+  sorry
+end
