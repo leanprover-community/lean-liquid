@@ -23,7 +23,8 @@ begin
   exact mul_le_mul (le_of_eq rfl) h2 (le_of_lt h1) zero_le',
 end
 
-instance one_le_add {a b : ℝ≥0} [ha : fact (1 ≤ a)] [hb : fact (1 ≤ b)] : fact (1 ≤ a + b) := le_trans ha $ by simp
+instance one_le_add {a b : ℝ≥0} [ha : fact (1 ≤ a)] : fact (1 ≤ a + b) := le_trans ha $ by simp
+instance one_le_add' {a b : ℝ≥0} [hb : fact (1 ≤ b)] : fact (1 ≤ a + b) := le_trans hb $ by simp
 
 instance one_le_pow {n : ℕ} {a : ℝ≥0} [h : fact (1 ≤ a)] : fact (1 ≤ a^n) :=
 begin
