@@ -85,12 +85,20 @@ lemma normed_snake (k : ℝ≥0) (m : ℤ) (c₀ : ℝ≥0) [hk : fact (1 ≤ k)
   N.is_weak_bdd_exact_for_bdd_degree_above_idx (k ^ 3 + k) (m - 1) c₀ :=
 begin
   intros c hc i hi norig ε hε,
-  let c_new := k * (k * (k * c)),
-  letI : fact (c_new ≤ (k ^ 3 + k) * c) := sorry,
+  set c_new := k * (k * (k * c)) with hc_new,
+  haveI : fact (c_new ≤ (k ^ 3 + k) * c) := by
+  { show k * (k * (k * c)) ≤ (k ^ 3 + k) * c,
+    rw add_mul,
+    convert (le_add_iff_nonneg_right (k^3 * c)).2 (zero_le') using 1,
+    ring },
   let n := @system_of_complexes.res _ _ c_new _ _ norig,
   set n₁ := N.d n with hn₁,
   let C := ∥n₁∥,
-  letI : fact (c ≤ c_new) := sorry,
+  haveI : fact (c ≤ c_new) := by
+  { show c ≤ k * (k * (k * c)),
+    refine le_trans _ (le_mul_of_one_le_left' hk),
+    refine le_trans _ (le_mul_of_one_le_left' hk),
+    refine le_trans (le_refl _) (le_mul_of_one_le_left' hk) },
   suffices hnorig : ∃ (y : (N.X c i)), ∥(N.res) n - (N.d) y∥ ≤ (k ^ 3 + k) * C + ε,
   { sorry },
   obtain ⟨m', hm'⟩ := hgsur _ _ n,
@@ -114,7 +122,7 @@ begin
       system_of_complexes.d, system_of_complexes.d, homological_complex.d_squared _ _,
       normed_group_hom.coe_zero, ← neg_inj, pi.zero_apply, zero_sub, neg_neg, neg_neg,
       ← system_of_complexes.d] },
-  have hi3 : i + 1 + 1 + 1 ≤ m + 1 := sorry,
+  have hi3 : i + 1 + 1 + 1 ≤ m + 1 := by linarith,
   have hle := Hf _ _ hi3 m₂,
   rw [hm₂, norm_neg] at hle,
   replace hle := le_trans hle (mul_le_mul_of_nonneg_left (hM'_adm.d_norm_noninc _ _ m₁'')
@@ -122,8 +130,8 @@ begin
   rw [nnreal.coe_one, one_mul] at hle,
   replace hle := le_trans hle (mul_le_mul_of_nonneg_left (le_of_lt hm₁''.2)
     (le_trans zero_le_one hk)),
-  have hkc : k * c ≥ c₀ := sorry,
-  have hi1 : i + 1 < m := sorry,
+  have hkc : c₀ ≤ k * c := sorry,
+  have hi1 : i + 1 < m := by linarith,
   obtain ⟨m, hm⟩ := hM (k * c) hkc _ hi1 (M.res m₁) ε hε,
   rw [system_of_complexes.res_res, system_of_complexes.d_res _] at hm,
   letI : fact (k * c ≤ c_new) := sorry,
