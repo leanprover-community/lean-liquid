@@ -286,6 +286,9 @@ variables (f : normed_group_hom V₁ V₂) (g : normed_group_hom V₂ V₃)
 /-- The image of a bounded group homomorphism. Naturally endowed with a `normed_group` instance. -/
 def range : add_subgroup V₂ := f.to_add_monoid_hom.range
 
+lemma mem_range (v : V₂) : v ∈ f.range ↔ ∃ w, f w = v :=
+by { rw [range, add_monoid_hom.mem_range], refl }
+
 end range
 
 end normed_group_hom

@@ -131,6 +131,14 @@ def is_bdd_exact_for_bdd_degree_above_idx
 ∀ x : C.X (k * c) (i+1),
 ∃ y : C.X c i, ∥(C.res x) - (C.d y)∥ ≤ k * ∥C.d x∥
 
+/-- Weak version of `is_bdd_exact_for_bdd_degree_above_idx`. -/
+--TODO: equivalence for complete spaces
+def is_weak_bdd_exact_for_bdd_degree_above_idx
+  (k : ℝ≥0) (m : ℤ) [hk : fact (1 ≤ k)] (c₀ : ℝ≥0) : Prop :=
+∀ c ≥ c₀, ∀ i < m,
+∀ x : C.X (k * c) (i+1),
+∀ (ε : ℝ) (hε : 0 < ε), ∃ y : C.X c i, ∥(C.res x) - (C.d y)∥ ≤ k * ∥C.d x∥ + ε
+
 namespace is_bdd_exact_for_bdd_degree_above_idx
 
 variables (k k' : ℝ≥0) (m m' : ℤ) [fact (1 ≤ k)] [fact (1 ≤ k')] (c₀ c₀' : ℝ≥0)
