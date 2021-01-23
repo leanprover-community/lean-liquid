@@ -126,6 +126,12 @@ begin
   have hi1 : i + 1 < m := sorry,
   obtain ⟨m, hm⟩ := hM (k * c) hkc _ hi1 (M.res m₁) ε hε,
   rw [system_of_complexes.res_res, system_of_complexes.d_res _] at hm,
+  letI : fact (k * c ≤ c_new) := sorry,
+  let mnew' := (M'.res m')  - (f.apply _ _ m),
+  have hmnewlift : g.apply _ _ mnew' = N.res n,
+  {
+    sorry --easy.
+  },
   sorry,
 
 end
