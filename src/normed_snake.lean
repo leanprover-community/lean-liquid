@@ -114,13 +114,18 @@ begin
       system_of_complexes.d, system_of_complexes.d, homological_complex.d_squared _ _,
       normed_group_hom.coe_zero, ← neg_inj, pi.zero_apply, zero_sub, neg_neg, neg_neg,
       ← system_of_complexes.d] },
-  have hindlw : i + 1 + 1 + 1 ≤ m + 1 := sorry,
-  have hle := Hf _ _ hindlw m₂,
+  have hi3 : i + 1 + 1 + 1 ≤ m + 1 := sorry,
+  have hle := Hf _ _ hi3 m₂,
   rw [hm₂, norm_neg] at hle,
   replace hle := le_trans hle (mul_le_mul_of_nonneg_left (hM'_adm.d_norm_noninc _ _ m₁'')
     (le_trans zero_le_one hk)),
   rw [nnreal.coe_one, one_mul] at hle,
   replace hle := le_trans hle (mul_le_mul_of_nonneg_left (le_of_lt hm₁''.2)
     (le_trans zero_le_one hk)),
-  sorry
+  have hkc : k * c ≥ c₀ := sorry,
+  have hi1 : i + 1 < m := sorry,
+  obtain ⟨m, hm⟩ := hM (k * c) hkc _ hi1 (M.res m₁) ε hε,
+  rw [system_of_complexes.res_res, system_of_complexes.d_res _] at hm,
+  sorry,
+
 end
