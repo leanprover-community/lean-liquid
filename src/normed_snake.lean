@@ -86,7 +86,7 @@ lemma normed_snake (k : ℝ≥0) (m : ℤ) (c₀ : ℝ≥0) [fact (1 ≤ k)]
 begin
   intros c hc i hi norig ε hε,
   let c_new := k ^ 3 * c,
-  letI : fact (c_new ≤ (k^3 + k) * c) := by sorry,
+  letI : fact (c_new ≤ (k^3 + k) * c) := sorry,
   let n := @system_of_complexes.res _ _ c_new _ _ norig,
   set n₁ := N.d n with hn₁,
   let C := ∥n₁∥,

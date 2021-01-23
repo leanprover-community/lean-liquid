@@ -158,6 +158,16 @@ begin
     simp only [one_mul, nnreal.coe_one] }
 end
 
+lemma weak (hC : C.is_bdd_exact_for_bdd_degree_above_idx k m c₀) :
+  C.is_weak_bdd_exact_for_bdd_degree_above_idx k m c₀ :=
+begin
+  intros c hc i hi x ε hε,
+  rcases hC c hc i hi x with ⟨y, hy⟩,
+  use y,
+  apply le_trans hy,
+  linarith
+end
+
 end is_bdd_exact_for_bdd_degree_above_idx
 
 end system_of_complexes
