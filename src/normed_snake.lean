@@ -130,7 +130,7 @@ begin
   let mnew' := (M'.res m')  - (f.apply _ _ m),
   have hmnewlift : g.apply _ _ mnew' = N.res n,
   {
-    sorry --easy.
+    sorry --easy. Maybe better to postpone to the end?
   },
   sorry,
 
