@@ -10,7 +10,7 @@ The aim of this project is to formalize Theorem 9.4 of Scholze--Clausen, [Analyt
 The statement can be found in [`src/liquid.lean`](https://github.com/leanprover-community/lean-liquid/blob/master/src/liquid.lean#L29)
 
 ```lean
-theorem main [BD.suitable c']
+theorem first_target [BD.suitable c']
   (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)] :
   ∀ m : ℕ,
   ∃ (k : ℝ≥0) [fact (1 ≤ k)],
