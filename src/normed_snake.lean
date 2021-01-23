@@ -86,11 +86,11 @@ lemma normed_snake (k : ℝ≥0) (m : ℤ) (c₀ : ℝ≥0) [hk : fact (1 ≤ k)
 begin
   intros c hc i hi norig ε hε,
   let c_new := k * (k * (k * c)),
-  letI : fact (c_new ≤ (k ^ 3 + k) * c) := by sorry,
+  letI : fact (c_new ≤ (k ^ 3 + k) * c) := sorry,
   let n := @system_of_complexes.res _ _ c_new _ _ norig,
   set n₁ := N.d n with hn₁,
   let C := ∥n₁∥,
-  letI : fact (c ≤ c_new) := by sorry,
+  letI : fact (c ≤ c_new) := sorry,
   suffices hnorig : ∃ (y : (N.X c i)), ∥(N.res) n - (N.d) y∥ ≤ (k ^ 3 + k) * C + ε,
   { sorry },
   obtain ⟨m', hm'⟩ := hgsur _ _ n,
@@ -114,7 +114,7 @@ begin
       system_of_complexes.d, system_of_complexes.d, homological_complex.d_squared _ _,
       normed_group_hom.coe_zero, ← neg_inj, pi.zero_apply, zero_sub, neg_neg, neg_neg,
       ← system_of_complexes.d] },
-  have hindlw : i + 1 + 1 + 1 ≤ m + 1 := by sorry,
+  have hindlw : i + 1 + 1 + 1 ≤ m + 1 := sorry,
   have hle := Hf _ _ hindlw m₂,
   rw [hm₂, norm_neg] at hle,
   replace hle := le_trans hle (mul_le_mul_of_nonneg_left (hM'_adm.d_norm_noninc _ _ m₁'')
@@ -123,9 +123,4 @@ begin
   replace hle := le_trans hle (mul_le_mul_of_nonneg_left (le_of_lt hm₁''.2)
     (le_trans zero_le_one hk)),
   sorry
-end
-
-lemma test (a b c : ℝ) (h : a ≤ b) (h0 : 0 ≤ c) : c * a ≤ c * b :=
-begin
-exact mul_le_mul_of_nonneg_left h h0
 end
