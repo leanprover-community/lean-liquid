@@ -174,8 +174,3 @@ begin
   sorry,
 
 end
-
-lemma test (M : Type*) [add_comm_group M] (a b c : M) (h : a = b + c) : a - b = c :=
-begin
-  exact sub_eq_of_eq_add' h
-end
