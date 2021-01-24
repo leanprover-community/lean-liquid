@@ -31,13 +31,20 @@ def category_theory.has_hom.hom.apply (f : M ⟶ N) (c : ℝ≥0) (i : ℤ) :=
 
 variables (M M' N)
 
-lemma commutes (f : M ⟶ N) (c : ℝ≥0) (i : ℤ) (m : M.X c i) :
+lemma commutes (f : M ⟶ N) {c : ℝ≥0} {i : ℤ} (m : M.X c i) :
   N.d (f.apply c i m) = f.apply c (i + 1) (M.d m) :=
 begin
   have h : ((M.obj (op c)).d i ≫ (f.app (op c)).f (i + 1)) m =
     (f.app (op c)).f (i + 1) ((M.obj (op c)).d i m),
   { exact coe_comp ((M.obj (op c)).d i) ((f.app (op c)).f (i + 1)) m },
   rwa [homological_complex.comm_at (f.app (op c)) i] at h,
+end
+
+lemma commutes_res (f : M ⟶ N) (c c' : ℝ≥0) [h : fact (c ≤ c')] {i : ℤ} (m : M.X c' i) :
+  @system_of_complexes.res N c' c _ _ (f.apply c' i m) =
+  f.apply c i (@system_of_complexes.res M c' c _ _ m) :=
+begin
+  sorry
 end
 
 lemma quotient_norm {M N : NormedGroup} {f : M ⟶ N} (hsur : function.surjective f)
@@ -118,7 +125,7 @@ begin
   let m₁' := M'.d m',
   have hm₁' : g.apply _ _ m₁' = n₁,
   { rw [hn₁, ← hm'],
-    exact (commutes M' N g _ _ m').symm },
+    exact (commutes M' N g m').symm },
   --I have to check, but probably we need to use something like ε₁ = ε/(k^3+k) in the following
   obtain ⟨m₁'', hm₁''⟩ := quotient_norm (hgsur _ _) (hN _ _) hε n₁,
   have hm₁exist : ∃ m₁ : M.X _ _, m₁' = f.apply _ _ m₁ + m₁'',
@@ -154,6 +161,21 @@ begin
   {
     sorry --easy. Maybe better to postpone to the end?
   },
+  let mnew₁' := M'.d mnew',
+  have hmnew' : mnew₁' = M'.res m₁'' + f.apply _ _ (M.res m₁ - M.d m),
+  { calc mnew₁' = M'.d ((M'.res m')  - (f.apply _ _ m)) : by refl
+            ... = M'.res (M'.d m')  - (f.apply _ _ (M.d m)) : by rw [normed_group_hom.map_sub,
+              system_of_complexes.d_res _, commutes _]
+            ... = M'.res (M'.d m')  - (f.apply _ _ (M.res m₁)) +
+              ((f.apply _ _ (M.res m₁)) - (f.apply _ _ (M.d m))) : by abel
+            ... = M'.res m₁'' + f.apply _ _ ((M.res m₁) - (M.d m)) : by
+              rw [← normed_group_hom.map_sub, ← commutes_res _ _ _, ← normed_group_hom.map_sub,
+              ← sub_eq_of_eq_add' hm₁] },
   sorry,
 
+end
+
+lemma test (M : Type*) [add_comm_group M] (a b c : M) (h : a = b + c) : a - b = c :=
+begin
+  exact sub_eq_of_eq_add' h
 end
