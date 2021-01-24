@@ -91,16 +91,29 @@ begin
     rw add_mul,
     convert (le_add_iff_nonneg_right (k^3 * c)).2 (zero_le') using 1,
     ring },
-  let n := @system_of_complexes.res _ _ c_new _ _ norig,
+  set n := @system_of_complexes.res _ _ c_new _ _ norig with hn,
   set n₁ := N.d n with hn₁,
   let C := ∥n₁∥,
-  haveI : fact (c ≤ c_new) := by
-  { show c ≤ k * (k * (k * c)),
-    refine le_trans _ (le_mul_of_one_le_left' hk),
-    refine le_trans _ (le_mul_of_one_le_left' hk),
-    refine le_trans (le_refl _) (le_mul_of_one_le_left' hk) },
+  haveI : fact (c ≤ c_new) :=
+  calc c ≤ k * c             : le_mul_of_one_le_left' hk
+     ... ≤ k * (k * c)       : le_mul_of_one_le_left' hk
+     ... ≤ k * (k * (k * c)) : le_mul_of_one_le_left' hk,
   suffices hnorig : ∃ (y : (N.X c i)), ∥(N.res) n - (N.d) y∥ ≤ (k ^ 3 + k) * C + ε,
-  { sorry },
+  { refine Exists.imp _ hnorig,
+    rintro a ha,
+    simp only [system_of_complexes.res_res] at ha,
+    calc _ ≤ _ : ha
+       ... ≤ _ : _,
+    simp only [C, hn₁, hn, nnreal.coe_add, add_le_add_iff_right, nnreal.coe_pow],
+    apply mul_le_mul_of_nonneg_left,
+    { rw system_of_complexes.d_res,
+      have hN_adm : N.admissible :=
+      begin
+        sorry,
+      end,
+      convert hN_adm.res_norm_noninc _ _ _ _ (N.d norig),
+      simp, },
+    { exact_mod_cast (nnreal.coe_nonneg (k^3 + k)), }, },
   obtain ⟨m', hm'⟩ := hgsur _ _ n,
   let m₁' := M'.d m',
   have hm₁' : g.apply _ _ m₁' = n₁,
