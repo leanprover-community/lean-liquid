@@ -1,5 +1,6 @@
 import algebra.homology.chain_complex
 
+import system_of_complexes
 import normed_group.NormedGroup
 import facts
 
@@ -67,7 +68,11 @@ def d {c : ℝ≥0} {p q : ℤ} :
 
 lemma d_comp_res (h : fact (c₂ ≤ c₁)) :
   @d C c₁ p q ≫ @res C _ _ _ _ h = @res C _ _ p q _ ≫ @d C c₂ p q :=
-sorry -- TODO
+begin
+  have step1 := (homological_complex.comm_at (C.map (hom_of_le h).op) p),
+  have step2 := congr_arg differential_object.hom.f step1,
+  exact congr_fun step2 q
+end
 
 lemma d_res (h : fact (c₂ ≤ c₁)) (x) :
   @d C c₂ p q (@res C _ _ p q _ x) = @res C _ _ _ _ h (@d C c₁ p q x) :=
@@ -106,5 +111,10 @@ structure admissible (C : system_of_double_complexes) : Prop :=
 (d'_norm_noninc : ∀ c p q, normed_group_hom.bound_by (C.d' : C.X c p q ⟶ C.X c p (q+1)) 1)
 (res_norm_noninc : ∀ c' c p q h, normed_group_hom.bound_by (@res C c' c p q h) 1)
 
+/-- The `p`-th row in a system of double complexes, as system of complexes. -/
+def row (C : system_of_double_complexes) (p : ℤ) : system_of_complexes := sorry
+
+/-- The `q`-th column in a system of double complexes, as system of complexes. -/
+def col (C : system_of_double_complexes) (q : ℤ) : system_of_complexes := sorry
 
 end system_of_double_complexes
