@@ -77,6 +77,12 @@ begin
     exact norm_nonneg _ }
 end
 
+lemma quotient_norm_le {M N : NormedGroup} {f : M ⟶ N} (hsur : function.surjective f)
+  (hquot : ∀ x, ∥f x∥ = Inf {r : ℝ | ∃ y ∈ f.ker, r = ∥x + y∥ }) (m : M) : ∥f m∥ ≤ ∥m∥ :=
+begin
+  sorry
+end
+
 /-- The normed snake lemma. See Proposition 9.10 from Analytic.pdf -/
 lemma normed_snake (k : ℝ≥0) (m : ℤ) (c₀ : ℝ≥0) [hk : fact (1 ≤ k)]
   (hf : ∀ c i, normed_group_hom.is_strict (f.apply c i))
@@ -153,35 +159,48 @@ begin
     (le_trans zero_le_one hk)),
   have hkc : c₀ ≤ k * c := le_trans hc (le_mul_of_one_le_left' hk),
   have hi1 : i + 1 < m := by linarith,
-  obtain ⟨m, hm⟩ := hM (k * c) hkc _ hi1 (M.res m₁) ε hε,
-  rw [system_of_complexes.res_res, system_of_complexes.d_res _] at hm,
+  obtain ⟨m₀, hm₀⟩ := hM (k * c) hkc _ hi1 (M.res m₁) ε hε,
+  rw [system_of_complexes.res_res, system_of_complexes.d_res _] at hm₀,
   letI kccnew : fact (k * c ≤ c_new) := sorry,
-  let mnew' := (M'.res m')  - (f.apply _ _ m),
-  have hmnewlift : g.apply _ _ mnew' = N.res n,
-  {
-    sorry --easy. Maybe better to postpone to the end?
-  },
+  let mnew' := (M'.res m')  - (f.apply _ _ m₀),
   let mnew₁' := M'.d mnew',
-  have hmnew' : mnew₁' = M'.res m₁'' + f.apply _ _ (M.res m₁ - M.d m),
-  { calc mnew₁' = M'.d ((M'.res m')  - (f.apply _ _ m)) : by refl
-            ... = M'.res (M'.d m')  - (f.apply _ _ (M.d m)) : by rw [normed_group_hom.map_sub,
+  have hmnew' : mnew₁' = M'.res m₁'' + f.apply _ _ (M.res m₁ - M.d m₀),
+  { calc mnew₁' = M'.d ((M'.res m')  - (f.apply _ _ m₀)) : by refl
+            ... = M'.res (M'.d m')  - (f.apply _ _ (M.d m₀)) : by rw [normed_group_hom.map_sub,
               system_of_complexes.d_res _, commutes _]
             ... = M'.res (M'.d m')  - (f.apply _ _ (M.res m₁)) +
-              ((f.apply _ _ (M.res m₁)) - (f.apply _ _ (M.d m))) : by abel
-            ... = M'.res m₁'' + f.apply _ _ ((M.res m₁) - (M.d m)) : by
+              ((f.apply _ _ (M.res m₁)) - (f.apply _ _ (M.d m₀))) : by abel
+            ... = M'.res m₁'' + f.apply _ _ ((M.res m₁) - (M.d m₀)) : by
               rw [← normed_group_hom.map_sub, ← commutes_res _ _ _, ← normed_group_hom.map_sub,
               ← sub_eq_of_eq_add' hm₁] },
   have hnormle : ∥mnew₁'∥ ≤ (C + ε) * (k ^ 2  + 1) + ε,
-  { replace hm := le_trans hm (add_le_add_right (mul_le_mul_of_nonneg_left hle
+  { replace hm₀ := le_trans hm₀ (add_le_add_right (mul_le_mul_of_nonneg_left hle
       (@nnreal.zero_le_coe k)) ε),
-    rw [← mul_assoc ↑k _ _] at hm,
-    calc ∥mnew₁'∥ = ∥M'.res m₁'' + f.apply _ _ (M.res m₁ - M.d m)∥ : by rw [hmnew']
-              ... ≤ ∥M'.res m₁''∥ + ∥f.apply _ _ (M.res m₁ - M.d m)∥ : norm_add_le _ _
-              ... ≤ 1 * ∥m₁''∥ + ∥f.apply _ _ (M.res m₁ - M.d m)∥ : add_le_add_right
+    rw [← mul_assoc ↑k _ _] at hm₀,
+    calc ∥mnew₁'∥ = ∥M'.res m₁'' + f.apply _ _ (M.res m₁ - M.d m₀)∥ : by rw [hmnew']
+              ... ≤ ∥M'.res m₁''∥ + ∥f.apply _ _ (M.res m₁ - M.d m₀)∥ : norm_add_le _ _
+              ... ≤ 1 * ∥m₁''∥ + ∥f.apply _ _ (M.res m₁ - M.d m₀)∥ : add_le_add_right
                 (hM'_adm.res_norm_noninc _ (k * c) _ kccnew m₁'') _
-              ... = ∥m₁''∥ + ∥M.res m₁ - M.d m∥ : by rw [hf _ _ _, one_mul]
-              ... ≤ ∥n₁∥ + ε + ∥M.res m₁ - M.d m∥ : add_le_add_right (le_of_lt hm₁''.2)  _
-              ... ≤ ∥n₁∥ + ε + (k * k * (∥n₁∥ + ε) + ε) : add_le_add_left hm _
+              ... = ∥m₁''∥ + ∥M.res m₁ - M.d m₀∥ : by rw [hf _ _ _, one_mul]
+              ... ≤ ∥n₁∥ + ε + ∥M.res m₁ - M.d m₀∥ : add_le_add_right (le_of_lt hm₁''.2)  _
+              ... ≤ ∥n₁∥ + ε + (k * k * (∥n₁∥ + ε) + ε) : add_le_add_left hm₀ _
               ... = (∥n₁∥ + ε) * (k ^ 2  + 1) + ε : by ring },
-  sorry,
+  obtain ⟨mnew₀, hmnew₀⟩ := hM' c hc _ (lt_trans hi (sub_one_lt m)) mnew' ε hε,
+  replace hmnew₀ := le_trans hmnew₀ (add_le_add_right (mul_le_mul_of_nonneg_left
+    hnormle (@nnreal.zero_le_coe k)) ε),
+  let nnew₀ := g.apply _ _ mnew₀,
+  have hmnewlift : g.apply _ _ ((M'.res mnew') - (M'.d mnew₀)) = N.res n - N.d nnew₀,
+  { suffices h : g.apply _ _ mnew' = N.res n,
+    { rw [normed_group_hom.map_sub, ← commutes_res, ← commutes, h, system_of_complexes.res_res] },
+    rw [normed_group_hom.map_sub],
+    have hker : (f.apply (k * c) (i + 1)) m₀ ∈ (g.apply (k * c) (i + 1)).ker,
+    { rw [hg _ _, normed_group_hom.mem_range _ _],
+      use m₀ },
+    rw [(normed_group_hom.mem_ker _ _).1 hker, sub_zero, ← commutes_res, hm'] },
+  use nnew₀,
+  rw [← hmnewlift],
+  suffices : ∥M'.res mnew' - (M'.d) mnew₀∥ ≤ (↑k ^ 3 + ↑k) * C + ε,
+  { exact le_trans (quotient_norm_le (hgsur _ _) (hN _ _) (M'.res mnew' - (M'.d) mnew₀)) this },
+
+  sorry
 end
