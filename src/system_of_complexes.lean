@@ -35,6 +35,11 @@ We therefore set all objects indexed by negative integers to `0`, in our use cas
 @[derive category_theory.category]
 def system_of_complexes := ℝ≥0ᵒᵖ ⥤ (cochain_complex NormedGroup)
 
+variables {M M' N : system_of_complexes.{u}} (f : M ⟶ M') (g : M' ⟶ N)
+
+def category_theory.has_hom.hom.apply (f : M ⟶ N) (c : ℝ≥0) (i : ℤ) :=
+(f.app (op c)).f i
+
 namespace system_of_complexes
 
 variables (C C₁ C₂ : system_of_complexes.{u})
@@ -86,6 +91,24 @@ definitionally equal. -/
 def congr {c c' : ℝ≥0} {i i' : ℤ} (hc : c = c') (hi : i = i') :
   C.X c i ⟶ C.X c' i' :=
 eq_to_hom $ by { subst hc, subst hi }
+
+variables (M M' N)
+
+lemma d_apply (f : M ⟶ N) {c : ℝ≥0} {i : ℤ} (m : M.X c i) :
+  N.d (f.apply c i m) = f.apply c (i + 1) (M.d m) :=
+begin
+  have h : ((M.obj (op c)).d i ≫ (f.app (op c)).f (i + 1)) m =
+    (f.app (op c)).f (i + 1) ((M.obj (op c)).d i m),
+  { exact coe_comp ((M.obj (op c)).d i) ((f.app (op c)).f (i + 1)) m },
+  rwa [homological_complex.comm_at (f.app (op c)) i] at h,
+end
+
+lemma res_apply (f : M ⟶ N) (c c' : ℝ≥0) [h : fact (c ≤ c')] {i : ℤ} (m : M.X c' i) :
+  @system_of_complexes.res N c' c _ _ (f.apply c' i m) =
+  f.apply c i (@system_of_complexes.res M c' c _ _ m) :=
+begin
+  sorry
+end
 
 /-- A system of complexes is *admissible*
 if all the differentials and restriction maps are norm-nonincreasing.
@@ -168,6 +191,54 @@ begin
 end
 
 end is_bdd_exact_for_bdd_degree_above_idx
+
+section quotient
+
+--TODO: define quotient exlicitely and prove quotient of admissible is admissible
+-- (or at least state it, so to kill the sorry in weak_normed_snake)
+
+lemma quotient_norm {M N : NormedGroup} {f : M ⟶ N} (hsur : function.surjective f)
+  (hquot : ∀ x, ∥f x∥ = Inf {r : ℝ | ∃ y ∈ f.ker, r = ∥x + y∥ }) {ε : ℝ} (hε : 0 < ε)
+  (n : N) : ∃ (m : M), f m = n ∧ ∥m∥ < ∥n∥ + ε :=
+begin
+  have hlt := lt_add_of_pos_right (∥n∥) hε,
+  obtain ⟨m, hm⟩ := hsur n,
+  nth_rewrite 0 [← hm] at hlt,
+  rw [hquot m] at hlt,
+  replace hlt := (real.Inf_lt _ _ _).1 hlt,
+  { obtain ⟨r, hr, hlt⟩ := hlt,
+    simp only [exists_prop, set.mem_set_of_eq] at hr,
+    obtain ⟨m₁, hm₁⟩ := hr,
+    use (m + m₁),
+    split,
+    { rw [normed_group_hom.map_add, (normed_group_hom.mem_ker f m₁).1 hm₁.1, add_zero, hm] },
+    rwa [← hm₁.2] },
+  { use ∥m∥,
+    simp only [exists_prop, set.mem_set_of_eq],
+    use 0,
+    split,
+    { exact (normed_group_hom.ker f).zero_mem },
+    { rw add_zero } },
+  { use 0,
+    intros x hx,
+    simp only [exists_prop, set.mem_set_of_eq] at hx,
+    obtain ⟨y, hy⟩ := hx,
+    rw hy.2,
+    exact norm_nonneg _ }
+end
+
+lemma quotient_norm_le {M N : NormedGroup} {f : M ⟶ N} (hsur : function.surjective f)
+  (hquot : ∀ x, ∥f x∥ = Inf {r : ℝ | ∃ y ∈ f.ker, r = ∥x + y∥ }) (m : M) : ∥f m∥ ≤ ∥m∥ :=
+begin
+  rw hquot,
+  apply real.Inf_le,
+  { use 0,
+    rintros y ⟨r,hr,rfl⟩,
+    simp },
+  { refine ⟨0, add_subgroup.zero_mem _, by simp⟩ }
+end
+
+end quotient
 
 end system_of_complexes
 

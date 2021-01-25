@@ -291,5 +291,25 @@ by { rw [range, add_monoid_hom.mem_range], refl }
 
 end range
 
+section strict
+
+variables {V W : Type*} [normed_group V] [normed_group W]
+
+/-- A strict `normed_group_hom` is a `normed_group_hom` that preserves the norm. -/
+def is_strict (f : normed_group_hom V W) : Prop :=
+∀ v, ∥f v∥ = ∥v∥
+
+lemma normed_group_hom.is_strict.injective {f : normed_group_hom V W} (hf : f.is_strict) :
+  function.injective f :=
+begin
+  intros x y h,
+  rw ← sub_eq_zero at *,
+  suffices : ∥ x - y ∥ = 0, by simpa,
+  rw ← hf,
+  simpa,
+end
+
+end strict
+
 end normed_group_hom
 #lint- only unused_arguments def_lemma doc_blame
