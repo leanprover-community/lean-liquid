@@ -103,11 +103,22 @@ begin
   rwa [homological_complex.comm_at (f.app (op c)) i] at h,
 end
 
+lemma res_comp_apply (f : M ⟶ N) (c c' : ℝ≥0) [h : fact (c ≤ c')] (i : ℤ) :
+  @system_of_complexes.res M c' c _ _ ≫ (f.apply c i) =
+  f.apply c' i ≫ (@system_of_complexes.res N c' c _ _) :=
+begin
+  have step1 := f.naturality (hom_of_le h).op,
+  have step2 := congr_arg differential_object.hom.f step1,
+  exact congr_fun step2 i
+end
+
 lemma res_apply (f : M ⟶ N) (c c' : ℝ≥0) [h : fact (c ≤ c')] {i : ℤ} (m : M.X c' i) :
   @system_of_complexes.res N c' c _ _ (f.apply c' i m) =
   f.apply c i (@system_of_complexes.res M c' c _ _ m) :=
 begin
-  sorry
+  show (f.apply c' i ≫ (@system_of_complexes.res N c' c _ _)) m =
+    (@system_of_complexes.res M c' c _ _ ≫ (f.apply c i)) m,
+  rw res_comp_apply
 end
 
 /-- A system of complexes is *admissible*
