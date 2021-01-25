@@ -4,7 +4,7 @@ universe variables u
 
 noncomputable theory
 open_locale nnreal
-open category_theory opposite
+open category_theory opposite normed_group_hom
 
 section prereqs -- move this
 variables {V W : Type*} [normed_group V] [normed_group W]
@@ -61,13 +61,13 @@ begin
     obtain ⟨m₁, hm₁⟩ := hr,
     use (m + m₁),
     split,
-    { rw [normed_group_hom.map_add, (normed_group_hom.mem_ker f m₁).1 hm₁.1, add_zero, hm] },
+    { rw [map_add, (mem_ker f m₁).1 hm₁.1, add_zero, hm] },
     rwa [← hm₁.2] },
   { use ∥m∥,
     simp only [exists_prop, set.mem_set_of_eq],
     use 0,
     split,
-    { exact (normed_group_hom.ker f).zero_mem },
+    { exact (ker f).zero_mem },
     { rw add_zero } },
   { use 0,
     intros x hx,
@@ -103,26 +103,37 @@ lemma weak_normed_snake (k : ℝ≥0) (m : ℤ) (c₀ : ℝ≥0) [hk : fact (1 �
   N.is_weak_bdd_exact_for_bdd_degree_above_idx (k ^ 3 + k) (m - 1) c₀ :=
 begin
   intros c hc i hi norig ε hε,
+
   set c_new := k * (k * (k * c)) with hc_new,
+  let ε₁ := ε/(↑k ^ 3 + 2 * ↑k + 1),
+
   haveI : fact (c_new ≤ (k ^ 3 + k) * c) := by
   { show k * (k * (k * c)) ≤ (k ^ 3 + k) * c,
     rw add_mul,
     convert (le_add_iff_nonneg_right (k^3 * c)).2 (zero_le') using 1,
     ring },
   set n := @system_of_complexes.res _ _ c_new _ _ norig with hn,
-  set n₁ := N.d n with hn₁,
-  let C := ∥n₁∥,
   haveI : fact (c ≤ c_new) :=
   calc c ≤ k * c             : le_mul_of_one_le_left' hk
      ... ≤ k * (k * c)       : le_mul_of_one_le_left' hk
      ... ≤ k * (k * (k * c)) : le_mul_of_one_le_left' hk,
-  suffices hnorig : ∃ (y : (N.X c i)), ∥(N.res) n - (N.d) y∥ ≤ (k ^ 3 + k) * C + ε,
+  have honele : 1 ≤ k^3 + 2 * k + 1, by {change fact _, apply_instance},
+  have hzerok : ↑k ^ 3 + 2 * ↑k + 1 ≠ (0 : ℝ),
+  { refine ne_of_gt (lt_of_lt_of_le zero_lt_one _),
+    norm_cast,
+    exact honele },
+  have hε₁ : 0 < ε₁, by { refine div_pos hε (lt_of_lt_of_le zero_lt_one honele) },
+  have hi3 : i + 1 + 1 + 1 ≤ m + 1 := by linarith,
+  have hi1 : i + 1 < m := by linarith,
+  have hkc : c₀ ≤ k * c := le_trans hc (le_mul_of_one_le_left' hk),
+
+  suffices hnorig : ∃ (y : (N.X c i)), ∥(N.res) n - (N.d) y∥ ≤ (k ^ 3 + k) * ∥N.d n∥ + ε,
   { refine Exists.imp _ hnorig,
     rintro a ha,
     simp only [system_of_complexes.res_res] at ha,
     calc _ ≤ _ : ha
        ... ≤ _ : _,
-    simp only [C, hn₁, hn, nnreal.coe_add, add_le_add_iff_right, nnreal.coe_pow],
+    simp only [hn, nnreal.coe_add, add_le_add_iff_right, nnreal.coe_pow],
     apply mul_le_mul_of_nonneg_left,
     { rw system_of_complexes.d_res,
       have hN_adm : N.admissible :=
@@ -134,36 +145,22 @@ begin
     { exact_mod_cast (nnreal.coe_nonneg (k^3 + k)), }, },
   obtain ⟨m', hm'⟩ := hgsur _ _ n,
   let m₁' := M'.d m',
-  have hm₁' : g.apply _ _ m₁' = n₁,
-  { rw [hn₁, ← hm'],
-    exact (commutes M' N g m').symm },
-  let ε₁ := ε/(↑k ^ 3 + 2 * ↑k + 1),
-  have honele : 1 ≤ k^3 + 2 * k + 1, by {change fact _, apply_instance},
-  have hzerok : ↑k ^ 3 + 2 * ↑k + 1 ≠ (0 : ℝ),
-  { refine ne_of_gt (lt_of_lt_of_le zero_lt_one _),
-    norm_cast,
-    exact honele },
-  have hε₁ : 0 < ε₁, by { refine div_pos hε (lt_of_lt_of_le zero_lt_one honele) },
-  let ε₁ := ε/(↑k ^ 3 + 2 * ↑k + 1),
-  --have hzerok : ↑k ^ 3 + 2 * ↑k + 1 ≠ (0 : ℝ) := sorry,
-  --have hε₁ : 0 < ε₁ := sorry,
-  obtain ⟨m₁'', hm₁''⟩ := quotient_norm (hgsur _ _) (hN _ _) hε₁ n₁,
+  have hm₁' : g.apply _ _ m₁' = N.d n := by simpa [hm'] using (commutes M' N g m').symm,
+  obtain ⟨m₁'', hm₁''⟩ := quotient_norm (hgsur _ _) (hN _ _) hε₁ (N.d n),
   have hm₁exist : ∃ m₁ : M.X _ _, m₁' = f.apply _ _ m₁ + m₁'',
   { have hrange : m₁' - m₁'' ∈ (f.apply _ _).range,
-    { rw [← hg _ _, normed_group_hom.mem_ker  _ _, normed_group_hom.map_sub, hm₁',
-        hm₁''.1, sub_self] },
-    obtain ⟨m₁, hm₁⟩ := (normed_group_hom.mem_range _ _).1 hrange,
+    { rw [← hg _ _, mem_ker  _ _, map_sub, hm₁', hm₁''.1, sub_self] },
+    obtain ⟨m₁, hm₁⟩ := (mem_range _ _).1 hrange,
     use m₁,
     rw [hm₁, sub_add_cancel] },
   obtain ⟨m₁, hm₁⟩ := hm₁exist,
   let m₂ := M.d m₁,
   let m₂'' := M'.d m₁'',
   have hm₂ : f.apply _ _ m₂ = -m₂'',
-  { rw [← commutes _ _ _, eq_sub_of_add_eq hm₁.symm, normed_group_hom.map_sub, ← coe_comp _ _ _,
+  { rw [← commutes _ _ _, eq_sub_of_add_eq hm₁.symm, map_sub, ← coe_comp _ _ _,
       system_of_complexes.d, system_of_complexes.d, homological_complex.d_squared _ _,
-      normed_group_hom.coe_zero, ← neg_inj, pi.zero_apply, zero_sub, neg_neg, neg_neg,
+      coe_zero, ← neg_inj, pi.zero_apply, zero_sub, neg_neg, neg_neg,
       ← system_of_complexes.d] },
-  have hi3 : i + 1 + 1 + 1 ≤ m + 1 := by linarith,
   have hle := Hf _ _ hi3 m₂,
   rw [hm₂, norm_neg] at hle,
   replace hle := le_trans hle (mul_le_mul_of_nonneg_left (hM'_adm.d_norm_noninc _ _ m₁'')
@@ -171,15 +168,13 @@ begin
   rw [nnreal.coe_one, one_mul] at hle,
   replace hle := le_trans hle (mul_le_mul_of_nonneg_left (le_of_lt hm₁''.2)
     (le_trans zero_le_one hk)),
-  have hkc : c₀ ≤ k * c := le_trans hc (le_mul_of_one_le_left' hk),
-  have hi1 : i + 1 < m := by linarith,
   obtain ⟨m₀, hm₀⟩ := hM (k * c) hkc _ hi1 (M.res m₁) ε₁ hε₁,
   rw [system_of_complexes.res_res, system_of_complexes.d_res _] at hm₀,
   letI kccnew : fact (k * c ≤ c_new) :=
   begin
     rw hc_new,
     refine mul_le_mul (le_refl _) _ (zero_le _) (zero_le _),
-    rw (show k * (k * c) = c * (k^2), by ring),
+    rw (show k * (k * c) = c * (k ^ 2), by ring),
     refine le_mul_of_le_of_one_le (le_refl _) _,
     change fact _,
     apply_instance,
@@ -188,44 +183,43 @@ begin
   let mnew₁' := M'.d mnew',
   have hmnew' : mnew₁' = M'.res m₁'' + f.apply _ _ (M.res m₁ - M.d m₀),
   { calc mnew₁' = M'.d ((M'.res m')  - (f.apply _ _ m₀)) : by refl
-            ... = M'.res (M'.d m')  - (f.apply _ _ (M.d m₀)) : by rw [normed_group_hom.map_sub,
+            ... = M'.res (M'.d m')  - (f.apply _ _ (M.d m₀)) : by rw [map_sub,
               system_of_complexes.d_res _, commutes _]
             ... = M'.res (M'.d m')  - (f.apply _ _ (M.res m₁)) +
               ((f.apply _ _ (M.res m₁)) - (f.apply _ _ (M.d m₀))) : by abel
             ... = M'.res m₁'' + f.apply _ _ ((M.res m₁) - (M.d m₀)) : by
-              rw [← normed_group_hom.map_sub, ← commutes_res _ _ _, ← normed_group_hom.map_sub,
-              ← sub_eq_of_eq_add' hm₁] },
-  have hnormle : ∥mnew₁'∥ ≤ (C + ε₁) * (k ^ 2  + 1) + ε₁,
+              rw [← map_sub, ← commutes_res _ _ _, ← map_sub, ← sub_eq_of_eq_add' hm₁] },
+  have hnormle : ∥mnew₁'∥ ≤ (∥N.d n∥ + ε₁) * (k ^ 2  + 1) + ε₁,
   { replace hm₀ := le_trans hm₀ (add_le_add_right (mul_le_mul_of_nonneg_left hle
       (@nnreal.zero_le_coe k)) ε₁),
     rw [← mul_assoc ↑k _ _] at hm₀,
     calc ∥mnew₁'∥ = ∥M'.res m₁'' + f.apply _ _ (M.res m₁ - M.d m₀)∥ : by rw [hmnew']
               ... ≤ ∥M'.res m₁''∥ + ∥f.apply _ _ (M.res m₁ - M.d m₀)∥ : norm_add_le _ _
               ... ≤ 1 * ∥m₁''∥ + ∥f.apply _ _ (M.res m₁ - M.d m₀)∥ : add_le_add_right
-                (hM'_adm.res_norm_noninc _ (k * c) _ kccnew m₁'') _
+                (hM'_adm.res_norm_noninc _ _ _ kccnew m₁'') _
               ... = ∥m₁''∥ + ∥M.res m₁ - M.d m₀∥ : by rw [hf _ _ _, one_mul]
-              ... ≤ ∥n₁∥ + ε₁ + ∥M.res m₁ - M.d m₀∥ : add_le_add_right (le_of_lt hm₁''.2)  _
-              ... ≤ ∥n₁∥ + ε₁ + (k * k * (∥n₁∥ + ε₁) + ε₁) : add_le_add_left hm₀ _
-              ... = (∥n₁∥ + ε₁) * (k ^ 2  + 1) + ε₁ : by ring },
-  obtain ⟨mnew₀, hmnew₀⟩ := hM' c hc _ (lt_trans hi (sub_one_lt m)) mnew' ε₁ hε₁,
+              ... ≤ ∥N.d n∥ + ε₁ + ∥M.res m₁ - M.d m₀∥ : add_le_add_right (le_of_lt hm₁''.2)  _
+              ... ≤ ∥N.d n∥ + ε₁ + (k * k * (∥N.d n∥ + ε₁) + ε₁) : add_le_add_left hm₀ _
+              ... = (∥N.d n∥ + ε₁) * (k ^ 2  + 1) + ε₁ : by ring },
+  obtain ⟨mnew₀, hmnew₀⟩ := hM' _ hc _ (lt_trans hi (sub_one_lt m)) mnew' _ hε₁,
   replace hmnew₀ := le_trans hmnew₀ (add_le_add_right (mul_le_mul_of_nonneg_left
     hnormle (@nnreal.zero_le_coe k)) ε₁),
   let nnew₀ := g.apply _ _ mnew₀,
   have hmnewlift : g.apply _ _ ((M'.res mnew') - (M'.d mnew₀)) = N.res n - N.d nnew₀,
   { suffices h : g.apply _ _ mnew' = N.res n,
-    { rw [normed_group_hom.map_sub, ← commutes_res, ← commutes, h, system_of_complexes.res_res] },
-    rw [normed_group_hom.map_sub],
-    have hker : (f.apply (k * c) (i + 1)) m₀ ∈ (g.apply (k * c) (i + 1)).ker,
-    { rw [hg _ _, normed_group_hom.mem_range _ _],
+    { rw [map_sub, ← commutes_res, ← commutes, h, system_of_complexes.res_res] },
+    rw [map_sub],
+    have hker : (f.apply _ _) m₀ ∈ (g.apply _ _).ker,
+    { rw [hg _ _, mem_range _ _],
       use m₀ },
-    rw [(normed_group_hom.mem_ker _ _).1 hker, sub_zero, ← commutes_res, hm'] },
+    rw [(mem_ker _ _).1 hker, sub_zero, ← commutes_res, hm'] },
   use nnew₀,
   rw [← hmnewlift],
-  suffices : ∥M'.res mnew' - (M'.d) mnew₀∥ ≤ (k ^ 3 + k) * C + ε,
+  suffices : ∥M'.res mnew' - (M'.d) mnew₀∥ ≤ (k ^ 3 + k) * ∥N.d n∥ + ε,
   { exact le_trans (quotient_norm_le (hgsur _ _) (hN _ _) (M'.res mnew' - (M'.d) mnew₀)) this },
-  calc ∥(M'.res) mnew' - (M'.d) mnew₀∥ ≤ k * ((C + ε₁) * (k ^ 2 + 1) + ε₁) + ε₁ : hmnew₀
-    ... = (k ^ 3 + k) * C + (k ^ 3 + 2 * k + 1) * ε₁ : by ring
-    ... = (k ^ 3 + k) * C + (k ^ 3 + 2 * k + 1) * (ε / (↑k ^ 3 + 2 * ↑k + 1)) : by refl
-    ... = (k ^ 3 + k) * C + (k ^ 3 + 2 * k + 1) * ε / (k ^ 3 + 2 * k + 1) : by ring
-    ... = (k ^ 3 + k) * C + ε : by rw mul_div_cancel_left ε hzerok,
+  calc ∥(M'.res) mnew' - (M'.d) mnew₀∥ ≤ k * ((∥N.d n∥ + ε₁) * (k ^ 2 + 1) + ε₁) + ε₁ : hmnew₀
+    ... = (k ^ 3 + k) * ∥N.d n∥ + (k ^ 3 + 2 * k + 1) * ε₁ : by ring
+    ... = (k ^ 3 + k) * ∥N.d n∥ + (k ^ 3 + 2 * k + 1) * (ε / (↑k ^ 3 + 2 * ↑k + 1)) : by refl
+    ... = (k ^ 3 + k) * ∥N.d n∥ + (k ^ 3 + 2 * k + 1) * ε / (k ^ 3 + 2 * k + 1) : by ring
+    ... = (k ^ 3 + k) * ∥N.d n∥ + ε : by rw mul_div_cancel_left ε hzerok
 end
