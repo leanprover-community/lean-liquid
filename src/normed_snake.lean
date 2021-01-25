@@ -137,8 +137,13 @@ begin
   have hm₁' : g.apply _ _ m₁' = n₁,
   { rw [hn₁, ← hm'],
     exact (commutes M' N g m').symm },
-  --I have to check, but probably we need to use something like ε₁ = ε/(k^3+2k+1) in the following
-  obtain ⟨m₁'', hm₁''⟩ := quotient_norm (hgsur _ _) (hN _ _) hε n₁,
+  let ε₁ := ε/(↑k ^ 3 + 2 * ↑k + 1),
+  have hzerok : ↑k ^ 3 + 2 * ↑k + 1 ≠ (0 : ℝ) := sorry,
+  have hε₁ : 0 < ε₁ := sorry,
+  let ε₁ := ε/(↑k ^ 3 + 2 * ↑k + 1),
+  have hzerok : ↑k ^ 3 + 2 * ↑k + 1 ≠ (0 : ℝ) := sorry,
+  have hε₁ : 0 < ε₁ := sorry,
+  obtain ⟨m₁'', hm₁''⟩ := quotient_norm (hgsur _ _) (hN _ _) hε₁ n₁,
   have hm₁exist : ∃ m₁ : M.X _ _, m₁' = f.apply _ _ m₁ + m₁'',
   { have hrange : m₁' - m₁'' ∈ (f.apply _ _).range,
     { rw [← hg _ _, normed_group_hom.mem_ker  _ _, normed_group_hom.map_sub, hm₁',
@@ -164,7 +169,7 @@ begin
     (le_trans zero_le_one hk)),
   have hkc : c₀ ≤ k * c := le_trans hc (le_mul_of_one_le_left' hk),
   have hi1 : i + 1 < m := by linarith,
-  obtain ⟨m₀, hm₀⟩ := hM (k * c) hkc _ hi1 (M.res m₁) ε hε,
+  obtain ⟨m₀, hm₀⟩ := hM (k * c) hkc _ hi1 (M.res m₁) ε₁ hε₁,
   rw [system_of_complexes.res_res, system_of_complexes.d_res _] at hm₀,
   letI kccnew : fact (k * c ≤ c_new) := sorry,
   let mnew' := (M'.res m')  - (f.apply _ _ m₀),
@@ -178,21 +183,21 @@ begin
             ... = M'.res m₁'' + f.apply _ _ ((M.res m₁) - (M.d m₀)) : by
               rw [← normed_group_hom.map_sub, ← commutes_res _ _ _, ← normed_group_hom.map_sub,
               ← sub_eq_of_eq_add' hm₁] },
-  have hnormle : ∥mnew₁'∥ ≤ (C + ε) * (k ^ 2  + 1) + ε,
+  have hnormle : ∥mnew₁'∥ ≤ (C + ε₁) * (k ^ 2  + 1) + ε₁,
   { replace hm₀ := le_trans hm₀ (add_le_add_right (mul_le_mul_of_nonneg_left hle
-      (@nnreal.zero_le_coe k)) ε),
+      (@nnreal.zero_le_coe k)) ε₁),
     rw [← mul_assoc ↑k _ _] at hm₀,
     calc ∥mnew₁'∥ = ∥M'.res m₁'' + f.apply _ _ (M.res m₁ - M.d m₀)∥ : by rw [hmnew']
               ... ≤ ∥M'.res m₁''∥ + ∥f.apply _ _ (M.res m₁ - M.d m₀)∥ : norm_add_le _ _
               ... ≤ 1 * ∥m₁''∥ + ∥f.apply _ _ (M.res m₁ - M.d m₀)∥ : add_le_add_right
                 (hM'_adm.res_norm_noninc _ (k * c) _ kccnew m₁'') _
               ... = ∥m₁''∥ + ∥M.res m₁ - M.d m₀∥ : by rw [hf _ _ _, one_mul]
-              ... ≤ ∥n₁∥ + ε + ∥M.res m₁ - M.d m₀∥ : add_le_add_right (le_of_lt hm₁''.2)  _
-              ... ≤ ∥n₁∥ + ε + (k * k * (∥n₁∥ + ε) + ε) : add_le_add_left hm₀ _
-              ... = (∥n₁∥ + ε) * (k ^ 2  + 1) + ε : by ring },
-  obtain ⟨mnew₀, hmnew₀⟩ := hM' c hc _ (lt_trans hi (sub_one_lt m)) mnew' ε hε,
+              ... ≤ ∥n₁∥ + ε₁ + ∥M.res m₁ - M.d m₀∥ : add_le_add_right (le_of_lt hm₁''.2)  _
+              ... ≤ ∥n₁∥ + ε₁ + (k * k * (∥n₁∥ + ε₁) + ε₁) : add_le_add_left hm₀ _
+              ... = (∥n₁∥ + ε₁) * (k ^ 2  + 1) + ε₁ : by ring },
+  obtain ⟨mnew₀, hmnew₀⟩ := hM' c hc _ (lt_trans hi (sub_one_lt m)) mnew' ε₁ hε₁,
   replace hmnew₀ := le_trans hmnew₀ (add_le_add_right (mul_le_mul_of_nonneg_left
-    hnormle (@nnreal.zero_le_coe k)) ε),
+    hnormle (@nnreal.zero_le_coe k)) ε₁),
   let nnew₀ := g.apply _ _ mnew₀,
   have hmnewlift : g.apply _ _ ((M'.res mnew') - (M'.d mnew₀)) = N.res n - N.d nnew₀,
   { suffices h : g.apply _ _ mnew' = N.res n,
@@ -204,8 +209,11 @@ begin
     rw [(normed_group_hom.mem_ker _ _).1 hker, sub_zero, ← commutes_res, hm'] },
   use nnew₀,
   rw [← hmnewlift],
-  suffices : ∥M'.res mnew' - (M'.d) mnew₀∥ ≤ (↑k ^ 3 + ↑k) * C + ε,
+  suffices : ∥M'.res mnew' - (M'.d) mnew₀∥ ≤ (k ^ 3 + k) * C + ε,
   { exact le_trans (quotient_norm_le (hgsur _ _) (hN _ _) (M'.res mnew' - (M'.d) mnew₀)) this },
-
-  sorry
+  calc ∥(M'.res) mnew' - (M'.d) mnew₀∥ ≤ k * ((C + ε₁) * (k ^ 2 + 1) + ε₁) + ε₁ : hmnew₀
+    ... = (k ^ 3 + k) * C + (k ^ 3 + 2 * k + 1) * ε₁ : by ring
+    ... = (k ^ 3 + k) * C + (k ^ 3 + 2 * k + 1) * (ε / (↑k ^ 3 + 2 * ↑k + 1)) : by refl
+    ... = (k ^ 3 + k) * C + (k ^ 3 + 2 * k + 1) * ε / (k ^ 3 + 2 * k + 1) : by ring
+    ... = (k ^ 3 + k) * C + ε : by rw mul_div_cancel_left ε hzerok,
 end
