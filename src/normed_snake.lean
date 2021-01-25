@@ -117,10 +117,9 @@ begin
   calc c ≤ k * c             : le_mul_of_one_le_left' hk
      ... ≤ k * (k * c)       : le_mul_of_one_le_left' hk
      ... ≤ k * (k * (k * c)) : le_mul_of_one_le_left' hk,
-  have honele : 1 ≤ k^3 + 2 * k + 1, by {change fact _, apply_instance},
+  have honele : 1 ≤ k ^ 3 + 2 * k + 1, by {change fact _, apply_instance},
   have hzerok : ↑k ^ 3 + 2 * ↑k + 1 ≠ (0 : ℝ),
-  { refine ne_of_gt (lt_of_lt_of_le zero_lt_one _),
-    exact_mod_cast honele },
+  { exact_mod_cast ne_of_gt (lt_of_lt_of_le zero_lt_one honele) },
   have hε₁ : 0 < ε₁, by { refine div_pos hε (lt_of_lt_of_le zero_lt_one honele) },
   have hi3 : i + 1 + 1 + 1 ≤ m + 1 := by linarith,
   have hi1 : i + 1 < m := by linarith,
