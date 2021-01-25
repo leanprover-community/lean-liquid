@@ -80,7 +80,12 @@ end
 lemma quotient_norm_le {M N : NormedGroup} {f : M ⟶ N} (hsur : function.surjective f)
   (hquot : ∀ x, ∥f x∥ = Inf {r : ℝ | ∃ y ∈ f.ker, r = ∥x + y∥ }) (m : M) : ∥f m∥ ≤ ∥m∥ :=
 begin
-  sorry
+  rw hquot,
+  apply real.Inf_le,
+  { use 0,
+    rintros y ⟨r,hr,rfl⟩,
+    simp },
+  { refine ⟨0, add_subgroup.zero_mem _, by simp⟩ }
 end
 
 /-- The normed snake lemma. See Proposition 9.10 from Analytic.pdf -/
