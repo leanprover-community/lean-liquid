@@ -37,7 +37,7 @@ def system_of_complexes := ℝ≥0ᵒᵖ ⥤ (cochain_complex NormedGroup)
 
 namespace system_of_complexes
 
-variables (C : system_of_complexes)
+variables (C C₁ C₂ : system_of_complexes.{u})
 
 /-- `C.X c i` is the object $C_c^i$ in a system of complexes `C`. -/
 def X (c : ℝ≥0) (i : ℤ) : NormedGroup :=
@@ -133,7 +133,8 @@ def is_bdd_exact_for_bdd_degree_above_idx
 
 namespace is_bdd_exact_for_bdd_degree_above_idx
 
-variables (k k' : ℝ≥0) (m m' : ℤ) [fact (1 ≤ k)] [fact (1 ≤ k')] (c₀ c₀' : ℝ≥0)
+variables {C C₁ C₂}
+variables {k k' : ℝ≥0} {m m' : ℤ} {c₀ c₀' : ℝ≥0} [fact (1 ≤ k)] [fact (1 ≤ k')]
 
 lemma of_le (hC : C.is_bdd_exact_for_bdd_degree_above_idx k m c₀)
   (hC_adm : C.admissible) (hk : k ≤ k') (hm : m' ≤ m) (hc₀ : c₀ ≤ c₀') :
@@ -150,8 +151,16 @@ begin
     simp only [one_mul, nnreal.coe_one] }
 end
 
+lemma of_iso (h : C₁.is_bdd_exact_for_bdd_degree_above_idx k m c₀) (f : C₁ ≅ C₂) :
+  C₂.is_bdd_exact_for_bdd_degree_above_idx k m c₀ :=
+begin
+  intros c hc i hi x,
+  specialize h c hc i hi,
+  sorry
+end
+
 end is_bdd_exact_for_bdd_degree_above_idx
 
 end system_of_complexes
 
-#lint- only unused_arguments def_lemma doc_blame
+-- #lint- only unused_arguments def_lemma doc_blame
