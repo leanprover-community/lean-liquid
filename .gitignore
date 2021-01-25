@@ -1,3 +1,8 @@
 *.olean
 /_target
 /leanpkg.path
+
+
+decls.pickle
+decls.yaml
+src/all.lean
