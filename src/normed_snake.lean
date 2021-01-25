@@ -126,7 +126,7 @@ begin
   have hm₁' : g.apply _ _ m₁' = n₁,
   { rw [hn₁, ← hm'],
     exact (commutes M' N g m').symm },
-  --I have to check, but probably we need to use something like ε₁ = ε/(k^3+k) in the following
+  --I have to check, but probably we need to use something like ε₁ = ε/(k^3+2k+1) in the following
   obtain ⟨m₁'', hm₁''⟩ := quotient_norm (hgsur _ _) (hN _ _) hε n₁,
   have hm₁exist : ∃ m₁ : M.X _ _, m₁' = f.apply _ _ m₁ + m₁'',
   { have hrange : m₁' - m₁'' ∈ (f.apply _ _).range,
