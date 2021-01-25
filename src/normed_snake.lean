@@ -141,8 +141,6 @@ begin
   have hzerok : ↑k ^ 3 + 2 * ↑k + 1 ≠ (0 : ℝ) := sorry,
   have hε₁ : 0 < ε₁ := sorry,
   let ε₁ := ε/(↑k ^ 3 + 2 * ↑k + 1),
-  have hzerok : ↑k ^ 3 + 2 * ↑k + 1 ≠ (0 : ℝ) := sorry,
-  have hε₁ : 0 < ε₁ := sorry,
   obtain ⟨m₁'', hm₁''⟩ := quotient_norm (hgsur _ _) (hN _ _) hε₁ n₁,
   have hm₁exist : ∃ m₁ : M.X _ _, m₁' = f.apply _ _ m₁ + m₁'',
   { have hrange : m₁' - m₁'' ∈ (f.apply _ _).range,
