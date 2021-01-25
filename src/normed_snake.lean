@@ -151,7 +151,7 @@ begin
   rw [nnreal.coe_one, one_mul] at hle,
   replace hle := le_trans hle (mul_le_mul_of_nonneg_left (le_of_lt hm₁''.2)
     (le_trans zero_le_one hk)),
-  have hkc : c₀ ≤ k * c := sorry,
+  have hkc : c₀ ≤ k * c := le_trans hc (le_mul_of_one_le_left' hk),
   have hi1 : i + 1 < m := by linarith,
   obtain ⟨m, hm⟩ := hM (k * c) hkc _ hi1 (M.res m₁) ε hε,
   rw [system_of_complexes.res_res, system_of_complexes.d_res _] at hm,
