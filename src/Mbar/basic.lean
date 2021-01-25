@@ -133,7 +133,7 @@ instance : add_comm_group (Mbar r' S) :=
   add_comm := by { intros, ext, simp only [coe_add, add_comm] },
   sub_eq_add_neg := by { intros, ext, simp only [coe_sub, coe_add, coe_neg, sub_eq_add_neg] } }
 
-instance : pseudo_normed_group (Mbar r' S) :=
+instance pseudo_normed_group : pseudo_normed_group (Mbar r' S) :=
 { filtration := λ c, {F | (∑ s, ∑' n, (↑(F s n).nat_abs * r' ^ n)) ≤ c},
   filtration_mono := λ c₁ c₂ h F hF, le_trans (by exact hF) h, -- `by exact`, why??
   zero_mem_filtration := λ c,
