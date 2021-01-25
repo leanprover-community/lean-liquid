@@ -155,7 +155,7 @@ begin
   have hi1 : i + 1 < m := by linarith,
   obtain ⟨m, hm⟩ := hM (k * c) hkc _ hi1 (M.res m₁) ε hε,
   rw [system_of_complexes.res_res, system_of_complexes.d_res _] at hm,
-  letI : fact (k * c ≤ c_new) := sorry,
+  letI kccnew : fact (k * c ≤ c_new) := sorry,
   let mnew' := (M'.res m')  - (f.apply _ _ m),
   have hmnewlift : g.apply _ _ mnew' = N.res n,
   {
@@ -171,6 +171,17 @@ begin
             ... = M'.res m₁'' + f.apply _ _ ((M.res m₁) - (M.d m)) : by
               rw [← normed_group_hom.map_sub, ← commutes_res _ _ _, ← normed_group_hom.map_sub,
               ← sub_eq_of_eq_add' hm₁] },
+  have hnormle : ∥mnew₁'∥ ≤ (C + ε) * (k ^ 2  + 1) + ε,
+  { replace hm := le_trans hm (add_le_add_right (mul_le_mul_of_nonneg_left hle
+      (@nnreal.zero_le_coe k)) ε),
+    rw [← mul_assoc ↑k _ _] at hm,
+    calc ∥mnew₁'∥ = ∥M'.res m₁'' + f.apply _ _ (M.res m₁ - M.d m)∥ : by rw [hmnew']
+              ... ≤ ∥M'.res m₁''∥ + ∥f.apply _ _ (M.res m₁ - M.d m)∥ : norm_add_le _ _
+              ... ≤ 1 * ∥m₁''∥ + ∥f.apply _ _ (M.res m₁ - M.d m)∥ : add_le_add_right
+                (hM'_adm.res_norm_noninc _ (k * c) _ kccnew m₁'') _
+              ... = ∥m₁''∥ + ∥M.res m₁ - M.d m∥ : by rw [hf _ _ _, one_mul]
+              ... ≤ ∥n₁∥ + ε + ∥M.res m₁ - M.d m∥ : add_le_add_right (le_of_lt hm₁''.2)  _
+              ... ≤ ∥n₁∥ + ε + (k * k * (∥n₁∥ + ε) + ε) : add_le_add_left hm _
+              ... = (∥n₁∥ + ε) * (k ^ 2  + 1) + ε : by ring },
   sorry,
-
 end
