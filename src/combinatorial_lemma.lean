@@ -1,21 +1,16 @@
 import algebra.group.basic
 import normed_group.NormedGroup
 
+import Mbar.basic
+import polyhedral_lattice
+
 /-!
 In this file we state and prove lemmas 9.7 and 9.8 of [Analytic].
 -/
 
-open_locale classical
+open_locale nnreal big_operators
 
-section move_this
-
--- rewrite to include multiplicative version
-def torsion_free (A : Type*) [add_comm_group A] : Prop :=
-∀ (a : A) (n : ℕ), n • a = 0 → n = 0
-
--- do we have this in mathlib for mere groups (not modules)??
-def finitely_generated (A : Type*) [add_comm_group A] : Prop :=
-∃ s : finset A, ∀ a : A, a ∈ add_subgroup.closure (s : set A)
+section lem97
 
 variables (Λ : Type*) [add_comm_group Λ]
 
@@ -100,7 +95,7 @@ begin
 end
 
 /-- Lemma 9.7 of [Analytic]. -/
-lemma lem97 (hΛ_tf : torsion_free Λ) (hΛ_fg : finitely_generated Λ)
+lemma lem97 (hΛ_tf : torsion_free Λ) (hΛ_fg : module.finite ℤ Λ)
   (N : ℕ) (s : finset Λ) :
   ∃ F : finset (Λ →+ ℤ), ∀ x : Λ →+ ℤ, ∃ (x' ∈ F) (y : Λ →+ ℤ),
     x - x' = N • y ∧
@@ -110,4 +105,35 @@ begin
   sorry
 end
 
-end move_this
+end lem97
+
+open pseudo_normed_group
+
+-- move this
+namespace normed_group
+
+instance (V : Type*) [normed_group V] : pseudo_normed_group V :=
+{ filtration := λ c, {v | ∥v∥ ≤ c},
+  filtration_mono := λ c₁ c₂ h v (hv : ∥v∥ ≤ c₁), le_trans hv h,
+  zero_mem_filtration := λ c, by simp only [set.mem_set_of_eq, norm_zero, nnreal.zero_le_coe],
+  neg_mem_filtration := λ c v hv, by simpa only [set.mem_set_of_eq, norm_neg] using hv,
+  add_mem_filtration := λ c₁ c₂ v₁ v₂ hv₁ hv₂,
+    calc ∥v₁ + v₂∥
+        ≤ ∥v₁∥ + ∥v₂∥ : norm_add_le _ _
+    ... ≤ c₁ + c₂ : add_le_add hv₁ hv₂ }
+
+end normed_group
+
+variables (Λ : Type*) (r' : ℝ≥0) (S : Type*)
+variables [fintype S] [normed_group Λ] [polyhedral_lattice Λ]
+
+instance foo : pseudo_normed_group (Mbar r' S) := by apply_instance
+
+lemma lem98 (N : ℕ) (hn : 0 < N) :
+  ∃ d, ∀ c (x : Λ →+ Mbar r' S) (hx : x ∈ filtration (Λ →+ Mbar r' S) c),
+    ∃ y : fin N → (Λ →+ Mbar r' S),
+      (∑ i, y i = x) ∧
+      (∀ i, y i ∈ filtration (Λ →+ Mbar r' S) (c/N + d)) :=
+begin
+  sorry
+end
