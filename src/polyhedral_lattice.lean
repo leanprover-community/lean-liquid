@@ -17,7 +17,7 @@ end move_this
 class polyhedral_lattice (A : Type*) [normed_group A] :=
 (tf : torsion_free A)
 (polyhedral' [] : ∃ s : finset A, submodule.span ℤ (s : set A) = ⊤ ∧
-              ∀ n : {a // a ∈ s} → ℤ, ∥∑ a, n a • a.1∥ = ∑ a, n a • ∥a.1∥)
+              ∀ n : {a // a ∈ s} → ℤ, ∥∑ a, n a • a.1∥ = ∑ a, ∥ n a ∥ • ∥a.1∥)
 
 namespace polyhedral_lattice
 
@@ -45,7 +45,13 @@ instance int : polyhedral_lattice ℤ :=
       rw submodule.mem_span_singleton,
       use n,
       rw [← gsmul_eq_smul, gsmul_one, int.cast_id] },
-    { sorry }
+    { intros x,
+      let b : {a : ℤ // a ∈ ({1} : finset ℤ)} := ⟨1, by simp⟩,
+      have : (finset.univ : finset {a // a ∈ ({1} : finset ℤ)}) = {b}, by tauto,
+      simp only [this, mul_one, algebra.id.smul_eq_mul, eq_self_iff_true, finset.mem_singleton,
+        finset.sum_singleton, subtype.coe_mk, norm_one, subtype.val_eq_coe],
+      congr,
+      exact gsmul_int_one _ },
   end }
 
 -- lemma polyhedral : ∃ (ι : Type*) [fintype ι] (a : ι → A),
