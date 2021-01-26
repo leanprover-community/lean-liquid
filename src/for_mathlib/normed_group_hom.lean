@@ -291,6 +291,57 @@ by { rw [range, add_monoid_hom.mem_range], refl }
 
 end range
 
+section quotient
+
+variables {M N : Type*} [normed_group M] [normed_group N]
+
+/-- `is_quotient f`, for `f : M ⟶ N` means that `N` is the quotient of `M`
+by the kernel of `f`. -/
+structure is_quotient (f : normed_group_hom M N) : Prop :=
+(surjective : function.surjective f)
+(norm : ∀ x, ∥f x∥ = Inf {r : ℝ | ∃ y ∈ f.ker, r = ∥x + y∥ })
+
+lemma quotient_norm_lift {f : normed_group_hom M N} (hquot : is_quotient f) {ε : ℝ} (hε : 0 < ε)
+  (n : N) : ∃ (m : M), f m = n ∧ ∥m∥ < ∥n∥ + ε :=
+begin
+  have hlt := lt_add_of_pos_right (∥n∥) hε,
+  obtain ⟨m, hm⟩ := hquot.surjective n,
+  nth_rewrite 0 [← hm] at hlt,
+  rw [hquot.norm m] at hlt,
+  replace hlt := (real.Inf_lt _ _ _).1 hlt,
+  { obtain ⟨r, hr, hlt⟩ := hlt,
+    simp only [exists_prop, set.mem_set_of_eq] at hr,
+    obtain ⟨m₁, hm₁⟩ := hr,
+    use (m + m₁),
+    split,
+    { rw [normed_group_hom.map_add, (normed_group_hom.mem_ker f m₁).1 hm₁.1, add_zero, hm] },
+    rwa [← hm₁.2] },
+  { use ∥m∥,
+    simp only [exists_prop, set.mem_set_of_eq],
+    use 0,
+    split,
+    { exact (normed_group_hom.ker f).zero_mem },
+    { rw add_zero } },
+  { use 0,
+    intros x hx,
+    simp only [exists_prop, set.mem_set_of_eq] at hx,
+    obtain ⟨y, hy⟩ := hx,
+    rw hy.2,
+    exact norm_nonneg _ }
+end
+
+lemma quotient_norm_le {f : normed_group_hom M N} (hquot : is_quotient f) (m : M) : ∥f m∥ ≤ ∥m∥ :=
+begin
+  rw hquot.norm,
+  apply real.Inf_le,
+  { use 0,
+    rintros y ⟨r,hr,rfl⟩,
+    simp },
+  { refine ⟨0, add_subgroup.zero_mem _, by simp⟩ }
+end
+
+end quotient
+
 section strict
 
 variables {V W : Type*} [normed_group V] [normed_group W]
