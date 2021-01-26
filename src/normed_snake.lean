@@ -62,8 +62,7 @@ begin
     apply mul_le_mul_of_nonneg_left,
     { rw d_res,
       have hN_adm : N.admissible := admissible_of_quotient hgquot hM'_adm,
-      convert hN_adm.res_norm_noninc _ _ _ _ (N.d norig),
-      simp only [one_mul, nnreal.coe_one], },
+      convert hN_adm.res_norm_noninc _ _ _ _ (N.d norig) },
     { exact_mod_cast (nnreal.coe_nonneg (k ^ 3 + k)) } },
 
   obtain ⟨m', hm'⟩ := (hgquot _ _).surjective n,
@@ -83,7 +82,6 @@ begin
   rw [hm₂, norm_neg] at hle,
   replace hle := le_trans hle (mul_le_mul_of_nonneg_left (hM'_adm.d_norm_noninc _ _ m₁'')
     (le_trans zero_le_one hk)),
-  rw [nnreal.coe_one, one_mul] at hle,
   replace hle := le_trans hle (mul_le_mul_of_nonneg_left (le_of_lt hm₁''.2)
     (le_trans zero_le_one hk)),
   obtain ⟨m₀, hm₀⟩ := hM _ hkc _ hi1 (M.res m₁) ε₁ hε₁,
@@ -103,9 +101,9 @@ begin
     rw [← mul_assoc ↑k _ _] at hm₀,
     calc ∥mnew₁'∥ = ∥M'.res m₁'' + f.apply _ _ (M.res m₁ - M.d m₀)∥ : by rw [hmnew']
               ... ≤ ∥M'.res m₁''∥ + ∥f.apply _ _ (M.res m₁ - M.d m₀)∥ : norm_add_le _ _
-              ... ≤ 1 * ∥m₁''∥ + ∥f.apply _ _ (M.res m₁ - M.d m₀)∥ : add_le_add_right
+              ... ≤ ∥m₁''∥ + ∥f.apply _ _ (M.res m₁ - M.d m₀)∥ : add_le_add_right
                 (hM'_adm.res_norm_noninc _ _ _ kccnew m₁'') _
-              ... = ∥m₁''∥ + ∥M.res m₁ - M.d m₀∥ : by rw [hf _ _ _, one_mul]
+              ... = ∥m₁''∥ + ∥M.res m₁ - M.d m₀∥ : by rw [hf _ _ _]
               ... ≤ ∥N.d n∥ + ε₁ + ∥M.res m₁ - M.d m₀∥ : add_le_add_right (le_of_lt hm₁''.2)  _
               ... ≤ ∥N.d n∥ + ε₁ + (k * k * (∥N.d n∥ + ε₁) + ε₁) : add_le_add_left hm₀ _
               ... = (∥N.d n∥ + ε₁) * (k ^ 2  + 1) + ε₁ : by ring },

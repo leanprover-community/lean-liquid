@@ -127,8 +127,8 @@ if all the differentials and restriction maps are norm-nonincreasing.
 
 See Definition 9.3 of [Analytic]. -/
 structure admissible (C : system_of_complexes) : Prop :=
-(d_norm_noninc : ∀ c i, normed_group_hom.bound_by (C.d : C.X c i ⟶ C.X c (i+1)) 1)
-(res_norm_noninc : ∀ c' c i h, normed_group_hom.bound_by (@res C c' c i h) 1)
+(d_norm_noninc : ∀ c i (x : C.X c i), ∥C.d x∥ ≤ ∥x∥)
+(res_norm_noninc : ∀ c' c i h (x : C.X c' i), ∥@res C c' c i h x∥ ≤ ∥x∥)
 
 /-
 Peter Scholze:
@@ -223,10 +223,9 @@ begin
     refine le_of_forall_pos_le_add _,
     intros ε hε,
     obtain ⟨m, hm⟩ := quotient_norm_lift (hquot _ _) hε m',
-    rw [← hm.1, nnreal.coe_one, one_mul, d_apply],
+    rw [← hm.1, d_apply],
     calc ∥(f.apply _ _) (M.d m)∥ ≤ ∥M.d m∥ : quotient_norm_le (hquot _ _) _
-      ... ≤ ↑1 * ∥m∥ : hadm.d_norm_noninc _ _ m
-      ... = ∥m∥ : by rw [nnreal.coe_one, one_mul]
+      ... ≤ ∥m∥ : hadm.d_norm_noninc _ _ m
       ... ≤ ∥m'∥ + ε : le_of_lt hm.2
       ... = ∥(f.apply _ _) m∥ + ε : by rw [hm.1] },
   { intros c' c i hc m',
@@ -234,10 +233,9 @@ begin
     refine le_of_forall_pos_le_add _,
     intros ε hε,
     obtain ⟨m, hm⟩ := quotient_norm_lift (hquot _ _) hε m',
-    rw [← hm.1, nnreal.coe_one, one_mul, res_apply],
+    rw [← hm.1, res_apply],
     calc ∥(f.apply _ _) (M.res m)∥ ≤ ∥(M.res) m∥ : quotient_norm_le (hquot _ _) _
-      ... ≤ ↑1 * ∥m∥ : hadm.res_norm_noninc c' c _ hc m
-      ... = ∥m∥ : by rw [nnreal.coe_one, one_mul]
+      ... ≤ ∥m∥ : hadm.res_norm_noninc c' c _ hc m
       ... ≤ ∥m'∥ + ε : le_of_lt hm.2
       ... = ∥(f.apply _ _) m∥ + ε : by rw [hm.1] }
 end

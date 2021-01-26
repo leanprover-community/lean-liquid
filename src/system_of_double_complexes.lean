@@ -107,9 +107,9 @@ if all the differentials and restriction maps are norm-nonincreasing.
 
 See Definition 9.3 of [Analytic]. -/
 structure admissible (C : system_of_double_complexes) : Prop :=
-(d_norm_noninc : ∀ c p q, normed_group_hom.bound_by (C.d : C.X c p q ⟶ C.X c (p+1) q) 1)
-(d'_norm_noninc : ∀ c p q, normed_group_hom.bound_by (C.d' : C.X c p q ⟶ C.X c p (q+1)) 1)
-(res_norm_noninc : ∀ c' c p q h, normed_group_hom.bound_by (@res C c' c p q h) 1)
+(d_norm_noninc : ∀ c p q (x : C.X c p q), ∥C.d x∥ ≤ ∥x∥)
+(d'_norm_noninc : ∀ c p q (x : C.X c p q), ∥C.d' x∥ ≤ ∥x∥)
+(res_norm_noninc : ∀ c' c p q h (x : C.X c' p q), ∥@res C c' c p q h x∥ ≤ ∥x∥)
 
 /-- The `p`-th row in a system of double complexes, as system of complexes. -/
 def row (C : system_of_double_complexes) (p : ℤ) : system_of_complexes := sorry
