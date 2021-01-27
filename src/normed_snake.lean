@@ -15,11 +15,10 @@ lemma weak_normed_snake (k : ℝ≥0) (m : ℤ) (c₀ : ℝ≥0) [hk : fact (1 �
   (Hf : ∀ (c : ℝ≥0) (i : ℤ) (hi : i ≤ m + 1) (x : M.X (k * c) i),
     ∥(M.res x : M.X c i)∥ ≤ k * ∥f.apply (k * c) i x∥)
   (hg : ∀ c i, (g.apply c i).ker = (f.apply c i).range)
-  (hgsur : ∀ c i, function.surjective (g.apply c i))
-  (hN : ∀ c i x, ∥g.apply c i x∥ = Inf {r : ℝ | ∃ y ∈ (g.apply c i).ker, r = ∥x + y∥ })
+  (hgquot : system_of_complexes.is_quotient g)
   (hM : M.is_weak_bdd_exact_for_bdd_degree_above_idx k m c₀)
   (hM' : M'.is_weak_bdd_exact_for_bdd_degree_above_idx k m c₀)
-  (hM_adm : M.admissible)
+--  (hM_adm : M.admissible)
   (hM'_adm : M'.admissible) :
   N.is_weak_bdd_exact_for_bdd_degree_above_idx (k ^ 3 + k) (m - 1) c₀ :=
 begin
@@ -62,16 +61,14 @@ begin
     simp only [hn, nnreal.coe_add, add_le_add_iff_right, nnreal.coe_pow],
     apply mul_le_mul_of_nonneg_left,
     { rw d_res,
-      have hN_adm : N.admissible,
-      { sorry },
-      convert hN_adm.res_norm_noninc _ _ _ _ (N.d norig),
-      simp only [one_mul, nnreal.coe_one], },
+      have hN_adm : N.admissible := admissible_of_quotient hgquot hM'_adm,
+      convert hN_adm.res_norm_noninc _ _ _ _ (N.d norig) },
     { exact_mod_cast (nnreal.coe_nonneg (k ^ 3 + k)) } },
 
-  obtain ⟨m', hm'⟩ := hgsur _ _ n,
+  obtain ⟨m', hm'⟩ := (hgquot _ _).surjective n,
   let m₁' := M'.d m',
   have hm₁' : g.apply _ _ m₁' = N.d n := by simpa [hm'] using (d_apply _ _ g m').symm,
-  obtain ⟨m₁'', hm₁''⟩ := quotient_norm (hgsur _ _) (hN _ _) hε₁ (N.d n),
+  obtain ⟨m₁'', hm₁''⟩ := quotient_norm_lift (hgquot _ _) hε₁ (N.d n),
   have hm₁exist : ∃ m₁ : M.X _ _,  f.apply _ _ m₁ + m₁'' = m₁',
   { have hrange : m₁' - m₁'' ∈ (f.apply _ _).range,
     { rw [← hg _ _, mem_ker  _ _, map_sub, hm₁', hm₁''.1, sub_self] },
@@ -85,7 +82,6 @@ begin
   rw [hm₂, norm_neg] at hle,
   replace hle := le_trans hle (mul_le_mul_of_nonneg_left (hM'_adm.d_norm_noninc _ _ m₁'')
     (le_trans zero_le_one hk)),
-  rw [nnreal.coe_one, one_mul] at hle,
   replace hle := le_trans hle (mul_le_mul_of_nonneg_left (le_of_lt hm₁''.2)
     (le_trans zero_le_one hk)),
   obtain ⟨m₀, hm₀⟩ := hM _ hkc _ hi1 (M.res m₁) ε₁ hε₁,
@@ -105,9 +101,9 @@ begin
     rw [← mul_assoc ↑k _ _] at hm₀,
     calc ∥mnew₁'∥ = ∥M'.res m₁'' + f.apply _ _ (M.res m₁ - M.d m₀)∥ : by rw [hmnew']
               ... ≤ ∥M'.res m₁''∥ + ∥f.apply _ _ (M.res m₁ - M.d m₀)∥ : norm_add_le _ _
-              ... ≤ 1 * ∥m₁''∥ + ∥f.apply _ _ (M.res m₁ - M.d m₀)∥ : add_le_add_right
+              ... ≤ ∥m₁''∥ + ∥f.apply _ _ (M.res m₁ - M.d m₀)∥ : add_le_add_right
                 (hM'_adm.res_norm_noninc _ _ _ kccnew m₁'') _
-              ... = ∥m₁''∥ + ∥M.res m₁ - M.d m₀∥ : by rw [hf _ _ _, one_mul]
+              ... = ∥m₁''∥ + ∥M.res m₁ - M.d m₀∥ : by rw [hf _ _ _]
               ... ≤ ∥N.d n∥ + ε₁ + ∥M.res m₁ - M.d m₀∥ : add_le_add_right (le_of_lt hm₁''.2)  _
               ... ≤ ∥N.d n∥ + ε₁ + (k * k * (∥N.d n∥ + ε₁) + ε₁) : add_le_add_left hm₀ _
               ... = (∥N.d n∥ + ε₁) * (k ^ 2  + 1) + ε₁ : by ring },
@@ -126,7 +122,7 @@ begin
   use nnew₀,
   rw [← hmnewlift],
   suffices : ∥M'.res mnew' - (M'.d) mnew₀∥ ≤ (k ^ 3 + k) * ∥N.d n∥ + ε,
-  { exact le_trans (quotient_norm_le (hgsur _ _) (hN _ _) (M'.res mnew' - (M'.d) mnew₀)) this },
+  { exact le_trans (quotient_norm_le (hgquot _ _) (M'.res mnew' - (M'.d) mnew₀)) this },
   calc ∥(M'.res) mnew' - (M'.d) mnew₀∥ ≤ k * ((∥N.d n∥ + ε₁) * (k ^ 2 + 1) + ε₁) + ε₁ : hmnew₀
     ... = (k ^ 3 + k) * ∥N.d n∥ + (k ^ 3 + 2 * k + 1) * ε₁ : by ring
     ... = (k ^ 3 + k) * ∥N.d n∥ + (k ^ 3 + 2 * k + 1) * (ε / (↑k ^ 3 + 2 * ↑k + 1)) : by refl

@@ -1,6 +1,7 @@
 import algebra.homology.chain_complex
 
 import normed_group.NormedGroup
+import algebra.ordered_group
 import facts
 
 universe variables v u
@@ -126,8 +127,8 @@ if all the differentials and restriction maps are norm-nonincreasing.
 
 See Definition 9.3 of [Analytic]. -/
 structure admissible (C : system_of_complexes) : Prop :=
-(d_norm_noninc : ∀ c i, normed_group_hom.bound_by (C.d : C.X c i ⟶ C.X c (i+1)) 1)
-(res_norm_noninc : ∀ c' c i h, normed_group_hom.bound_by (@res C c' c i h) 1)
+(d_norm_noninc : ∀ c i (x : C.X c i), ∥C.d x∥ ≤ ∥x∥)
+(res_norm_noninc : ∀ c' c i h (x : C.X c' i), ∥@res C c' c i h x∥ ≤ ∥x∥)
 
 /-
 Peter Scholze:
@@ -205,48 +206,38 @@ end is_bdd_exact_for_bdd_degree_above_idx
 
 section quotient
 
---TODO: define quotient exlicitely and prove quotient of admissible is admissible
--- (or at least state it, so to kill the sorry in weak_normed_snake)
+open normed_group_hom
 
-lemma quotient_norm {M N : NormedGroup} {f : M ⟶ N} (hsur : function.surjective f)
-  (hquot : ∀ x, ∥f x∥ = Inf {r : ℝ | ∃ y ∈ f.ker, r = ∥x + y∥ }) {ε : ℝ} (hε : 0 < ε)
-  (n : N) : ∃ (m : M), f m = n ∧ ∥m∥ < ∥n∥ + ε :=
-begin
-  have hlt := lt_add_of_pos_right (∥n∥) hε,
-  obtain ⟨m, hm⟩ := hsur n,
-  nth_rewrite 0 [← hm] at hlt,
-  rw [hquot m] at hlt,
-  replace hlt := (real.Inf_lt _ _ _).1 hlt,
-  { obtain ⟨r, hr, hlt⟩ := hlt,
-    simp only [exists_prop, set.mem_set_of_eq] at hr,
-    obtain ⟨m₁, hm₁⟩ := hr,
-    use (m + m₁),
-    split,
-    { rw [normed_group_hom.map_add, (normed_group_hom.mem_ker f m₁).1 hm₁.1, add_zero, hm] },
-    rwa [← hm₁.2] },
-  { use ∥m∥,
-    simp only [exists_prop, set.mem_set_of_eq],
-    use 0,
-    split,
-    { exact (normed_group_hom.ker f).zero_mem },
-    { rw add_zero } },
-  { use 0,
-    intros x hx,
-    simp only [exists_prop, set.mem_set_of_eq] at hx,
-    obtain ⟨y, hy⟩ := hx,
-    rw hy.2,
-    exact norm_nonneg _ }
-end
+variables {M M'}
 
-lemma quotient_norm_le {M N : NormedGroup} {f : M ⟶ N} (hsur : function.surjective f)
-  (hquot : ∀ x, ∥f x∥ = Inf {r : ℝ | ∃ y ∈ f.ker, r = ∥x + y∥ }) (m : M) : ∥f m∥ ≤ ∥m∥ :=
+/-- The quotient of a system of complexes. -/
+def is_quotient (f : M ⟶ M') : Prop :=
+∀ c i, normed_group_hom.is_quotient (f.apply c i)
+
+/-- The quotient of an admissible system of complexes is admissible. -/
+lemma admissible_of_quotient {f : M ⟶ M'} (hquot : is_quotient f) (hadm : M.admissible) :
+  M'.admissible :=
 begin
-  rw hquot,
-  apply real.Inf_le,
-  { use 0,
-    rintros y ⟨r,hr,rfl⟩,
-    simp },
-  { refine ⟨0, add_subgroup.zero_mem _, by simp⟩ }
+  split,
+  { intros c i m',
+    refine le_of_forall_pos_le_add _,
+    intros ε hε,
+    obtain ⟨m, hm⟩ := quotient_norm_lift (hquot _ _) hε m',
+    rw [← hm.1, d_apply],
+    calc ∥(f.apply _ _) (M.d m)∥ ≤ ∥M.d m∥ : quotient_norm_le (hquot _ _) _
+      ... ≤ ∥m∥ : hadm.d_norm_noninc _ _ m
+      ... ≤ ∥m'∥ + ε : le_of_lt hm.2
+      ... = ∥(f.apply _ _) m∥ + ε : by rw [hm.1] },
+  { intros c' c i hc m',
+    letI h := hc,
+    refine le_of_forall_pos_le_add _,
+    intros ε hε,
+    obtain ⟨m, hm⟩ := quotient_norm_lift (hquot _ _) hε m',
+    rw [← hm.1, res_apply],
+    calc ∥(f.apply _ _) (M.res m)∥ ≤ ∥(M.res) m∥ : quotient_norm_le (hquot _ _) _
+      ... ≤ ∥m∥ : hadm.res_norm_noninc c' c _ hc m
+      ... ≤ ∥m'∥ + ε : le_of_lt hm.2
+      ... = ∥(f.apply _ _) m∥ + ε : by rw [hm.1] }
 end
 
 end quotient

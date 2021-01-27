@@ -79,6 +79,14 @@ lemma d_res (h : fact (c₂ ≤ c₁)) (x) :
 show (@res C _ _ p q _ ≫ @d C c₂ p q) x = (@d C c₁ p q ≫ @res C _ _ _ _ h) x,
 by rw d_comp_res
 
+@[simp] lemma d_comp_d {c : ℝ≥0} {p q : ℤ} :
+  @d C c p q ≫ C.d = 0 :=
+sorry
+
+@[simp] lemma d_d {c : ℝ≥0} {p q : ℤ} (x : C.X c p q) :
+  C.d (C.d x) = 0 :=
+show (@d C c _ _ ≫ C.d) x = 0, by { rw d_comp_d, refl }
+
 /-- `C.d'` is the differential `C.X c p q ⟶ C.X c p (q+1)` for a system of double complexes `C`. -/
 def d' {c : ℝ≥0} {p q : ℤ} :
   C.X c p q ⟶ C.X c p (q+1) :=
@@ -93,6 +101,13 @@ lemma d'_res (h : fact (c₂ ≤ c₁)) (x) :
 show (@res C _ _ p q _ ≫ @d' C c₂ p q) x = (@d' C c₁ p q ≫ @res C _ _ _ _ h) x,
 by rw d'_comp_res
 
+@[simp] lemma d'_comp_d' {c : ℝ≥0} {p q : ℤ} :
+  @d' C c p q ≫ C.d' = 0 :=
+((C.obj $ op c).X p).d_squared q
+
+@[simp] lemma d'_d' {c : ℝ≥0} {p q : ℤ} (x : C.X c p q) :
+  C.d' (C.d' x) = 0 :=
+show (@d' C c _ _ ≫ C.d') x = 0, by { rw d'_comp_d', refl }
 
 /-- Convenience definition:
 The identity morphism of an object in the system of double complexes
@@ -107,14 +122,25 @@ if all the differentials and restriction maps are norm-nonincreasing.
 
 See Definition 9.3 of [Analytic]. -/
 structure admissible (C : system_of_double_complexes) : Prop :=
-(d_norm_noninc : ∀ c p q, normed_group_hom.bound_by (C.d : C.X c p q ⟶ C.X c (p+1) q) 1)
-(d'_norm_noninc : ∀ c p q, normed_group_hom.bound_by (C.d' : C.X c p q ⟶ C.X c p (q+1)) 1)
-(res_norm_noninc : ∀ c' c p q h, normed_group_hom.bound_by (@res C c' c p q h) 1)
+(d_norm_noninc : ∀ c p q (x : C.X c p q), ∥C.d x∥ ≤ ∥x∥)
+(d'_norm_noninc : ∀ c p q (x : C.X c p q), ∥C.d' x∥ ≤ ∥x∥)
+(res_norm_noninc : ∀ c' c p q h (x : C.X c' p q), ∥@res C c' c p q h x∥ ≤ ∥x∥)
 
 /-- The `p`-th row in a system of double complexes, as system of complexes. -/
-def row (C : system_of_double_complexes) (p : ℤ) : system_of_complexes := sorry
+def row (C : system_of_double_complexes) (p : ℤ) : system_of_complexes :=
+{ obj := λ c, (C.obj c).X p,
+  map := λ c₁ c₂ h, (C.map h).f p,
+  map_id' := λ c, by simp only [pi.id_apply, differential_object.id_f, category_theory.functor.map_id],
+  map_comp' := by { intros, simp at * } }
 
 /-- The `q`-th column in a system of double complexes, as system of complexes. -/
-def col (C : system_of_double_complexes) (q : ℤ) : system_of_complexes := sorry
+def col (C : system_of_double_complexes) (q : ℤ) : system_of_complexes :=
+{ obj := λ c,
+  { X := λ p, C.X (unop c) p q,
+    d := λ p, @d C _ p q,
+    d_squared' := sorry },
+  map := λ c₁ c₂ h, sorry,
+  map_id' := λ c, sorry,
+  map_comp' := sorry }
 
 end system_of_double_complexes
