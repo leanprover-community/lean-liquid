@@ -1,5 +1,7 @@
 import pseudo_normed_group.basic
-import breen_deligne
+import breen_deligne.basic
+
+import for_mathlib.add_monoid_hom
 
 noncomputable theory
 

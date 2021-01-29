@@ -71,7 +71,7 @@ There are two pieces of functionality that help a lot when browsing through Lean
 * The file `liquid.lean` contains the statement of the theorem that we want to check.
 * The ingredients that go into the theorem statement are defined in several other files.
   The most important pieces are:
-  - `breen_deligne.lean` contains an axiomatic definition
+  - `breen_deligne/basic.lean` contains an axiomatic definition
     of the data describing a Breen--Deligne resolution.
     It does *not* contain a formal proof of the Breen--Deligne resolution.
     At some point we may formalize Breen--Deligne resolutions,
@@ -90,7 +90,9 @@ There are two pieces of functionality that help a lot when browsing through Lean
 ```
 src
 ├── liquid.lean
-├── breen_deligne.lean
+├── breen_deligne
+│   ├── basic.lean
+│   └── suitable.lean
 ├── system_of_complexes.lean
 ├── Mbar
 │   ├── basic.lean
