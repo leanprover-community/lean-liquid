@@ -46,8 +46,6 @@ end normed_group
 variables (Λ : Type*) (r' : ℝ≥0) (S : Type*)
 variables [fintype S] [normed_group Λ] [polyhedral_lattice Λ]
 
-instance foo : pseudo_normed_group (Mbar r' S) := by apply_instance
-
 lemma lem98 (N : ℕ) (hn : 0 < N) :
   ∃ d, ∀ c (x : Λ →+ Mbar r' S) (hx : x ∈ filtration (Λ →+ Mbar r' S) c),
     ∃ y : fin N → (Λ →+ Mbar r' S),
