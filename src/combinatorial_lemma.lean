@@ -19,7 +19,7 @@ lemma lem97 (hΛ_tf : torsion_free Λ) (hΛ_fg : module.finite ℤ Λ)
   (N : ℕ) (s : finset Λ) :
   ∃ F : finset (Λ →+ ℤ), ∀ x : Λ →+ ℤ, ∃ (x' ∈ F) (y : Λ →+ ℤ),
     x - x' = N • y ∧
-    ∀ a ∈ s, 0 ≤ x a ↔ 0 ≤ (x - x') a :=
+    ∀ a ∈ s, 0 ≤ x' a ↔ 0 ≤ (x - x') a :=
 begin
   sorry
 end
