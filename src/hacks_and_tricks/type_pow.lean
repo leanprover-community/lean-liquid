@@ -19,4 +19,38 @@ instance topological_space {n : ℕ} {α : Type*} [topological_space α] : topol
 
 end type_pow_topology
 
+namespace add_monoid_hom
+
+universes u v
+
+local attribute [instance] type_pow
+
+/-- The group homomorphism `A^n →+ B^n` induced by a group homomorphism `A →+ B`. -/
+def pow {A : Type u} [add_comm_group A] {B : Type u} [add_comm_group B]
+  (φ : A →+ B) (n : ℕ) : A^n →+ B^n :=
+{ to_fun := (∘) φ,
+  map_zero' := funext (λ _, φ.map_zero),
+  map_add' := λ _ _, funext (λ _, φ.map_add _ _) }
+
+lemma pow_eval {A : Type u} [add_comm_group A] {B : Type u} [add_comm_group B]
+  (φ : A →+ B) (n : ℕ) (as : A ^ n) (i : fin n) : φ.pow n as i = φ (as i) := rfl
+
+end add_monoid_hom
+
+local attribute [instance] type_pow
+
+/-- The natural bijection `(A^m)^n ≃ (A^n)^m`. -/
+def pow_pow {A : Type*} {m n : ℕ} : (A^m)^n ≃ (A^n)^m :=
+{ to_fun := λ f i j, f j i,
+  inv_fun := λ f j i, f i j,
+  left_inv := λ _, rfl,
+  right_inv := λ _, rfl }
+
+/-- The natural bijection `A^n ≃ B^n` induced by a bijection `A ≃ B`.-/
+def pow_equiv {A B : Type*} (e : A ≃ B) {n : ℕ} : A^n ≃ B^n :=
+{ to_fun := λ f i, e (f i),
+  inv_fun := λ g i, e.symm (g i),
+  left_inv := λ f, funext (λ i, equiv.symm_apply_apply _ _),
+  right_inv := λ g, funext (λ i, equiv.apply_symm_apply _ _) }
+
 #lint- only unused_arguments def_lemma doc_blame

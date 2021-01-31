@@ -47,15 +47,6 @@ local notation `ℤ[` A `]` := free_abelian_group A
 
 universes u
 
-def add_monoid_hom.pow {A : Type u} [add_comm_group A] {B : Type u} [add_comm_group B]
-  (φ : A →+ B) (n : ℕ) : A^n →+ B^n :=
-{ to_fun := (∘) φ,
-  map_zero' := funext (λ _, φ.map_zero),
-  map_add' := λ _ _, funext (λ _, φ.map_add _ _) }
-
-lemma add_monoid_hom.pow_eval {A : Type u} [add_comm_group A] {B : Type u} [add_comm_group B]
-  (φ : A →+ B) (n : ℕ) (as : A ^ n) (i : fin n) : φ.pow n as i = φ (as i) := rfl
-
 namespace breen_deligne
 
 section functorial_map_section
@@ -111,63 +102,74 @@ end functorial_map
 
 end functorial_map_section
 
+section punit_stuff
+
+open free_abelian_group
+
+def aux_equiv : ℤ[punit] ≃+ ℤ :=
+{ inv_fun := λ n, n • of (punit.star),
+  to_fun := free_abelian_group.lift (λ _, (1 : ℤ)),
+  left_inv := λ z, free_abelian_group.induction_on z
+    (by {dsimp only, rw [add_monoid_hom.map_zero, zero_smul]})
+    (λ x, punit.cases_on x (by simp))
+    (λ x, punit.cases_on x (by simp))
+    (λ x y hx hy, by { simp only [lift.add, add_smul] at *, rw [hx, hy]}),
+  right_inv := λ n, by { rw [add_monoid_hom.map_int_module_smul, lift.of], exact gsmul_int_one n},
+  map_add' := add_monoid_hom.map_add _ }
+
+end punit_stuff
+
 open universal_map
 open add_monoid_hom
-
-/-
-simplify tactic failed to simplify
-state:
-m n : ℕ,
-U : universal_map m n,
-A : Type ?,
-_x : add_comm_group A,
-B : Type ?,
-_x : add_comm_group B,
-φ : A →+ B
-⊢ (map ⇑(φ.pow n)).comp (⇑(eval A) U) = (⇑(eval B) U).comp (map ⇑(φ.pow m))
-
-φ induces A^n → B^n and hence ℤ[A^n] →+ ℤ[B^n]
-eval A U is the map ℤ[A^m] →+ ℤ[A^n] coming from the universal map
-eval B U is the map ℤ[B^m] →+ ℤ[B^n] coming from the universal map
-φ induced A^m → B^m and hence ℤ[A^m] →+ ℤ[B^m]
-
-the claim is compositions ℤ[A^m] →+ ℤ[B^n] are the same
-we're checking by evaluating them both on elements `as` of A^m
-
-
--/
-
-example (A B : Type) [add_comm_group A] [add_comm_group B] (φ : A →+ B) (z : ℤ) (a : A) :
-  φ (z • a) = z • φ a := map_int_module_smul φ z a
 
 def universal_map_equiv_functorial_map (m n : ℕ) : universal_map m n ≃+ functorial_map m n :=
 { to_fun := λ U,
   { f := λ A _, by exactI eval A U,
     functorial := λ A _ B _ φ, begin
+      -- proof that evaluation of universal maps is functorial for group homomorphisms
+      -- We start by unravelling what the question is.
       resetI,
       ext as,
-      rw comp_apply,
-      rw comp_apply,
-      -- free_abelian_group.map_of should be redefined now map is an add_group_hom not a map
-      -- Bhavik says make a dsimp lemma
+      rw [comp_apply, comp_apply],
+      -- free_abelian_group.map_of should be redefined now map is an add_group_hom not a map?
+      -- Bhavik says make a dsimp lemma, I say make map_of'
       change _ = ((eval B) U) ((φ.pow m) <$> (free_abelian_group.of as)),
       rw free_abelian_group.map_of,
+      --  We need to prove that for all `as : A^m`, evaluating U then mapping with φ
+      -- is the same as applying φ and then evaluating U on the corresponding element of
+      -- ℤ[B^m].
+      -- By linearity, we can assume that `U` is a basic universal map `f`.
       apply free_abelian_group.induction_on U,
       { simp },
       { intro f,
+        -- Here is the proof for basic universal maps.
         simp only [basic_universal_map.eval_of, eval_of],
+        -- We use the universal property
         convert free_abelian_group.map_of _ _,
+        -- which boils the question down to checking that φ : A^n → B^n and φ : A^m → B^m
+        -- commutes with the matrix action A^m → A^n
         ext i,
+        -- and this just boils down to trivialities
         rw [pow_eval, add_monoid_hom.map_sum],
         apply finset.sum_congr rfl,
         rintros j -,
         rw [pow_eval, map_int_module_smul] },
+        -- the rest is just checking that the question about universal maps was linear
+        -- so the reduction to the basic case was OK.
       { intros F hF,
         simp only [add_monoid_hom.map_neg, neg_inj, neg_apply, hF] },
       { intros F G hF hG, simp only [hF, hG, add_monoid_hom.map_add, add_apply]}
     end },
-  inv_fun := sorry, -- sorrying data
-  left_inv := sorry,
+  inv_fun := λ F,
+  begin
+    let f := F.f (free_abelian_group (punit)^m),
+    let u := f (free_abelian_group.of (λ i j, if i = j then free_abelian_group.of punit.star else 0)),
+--    exact free_abelian_group.map _ u,
+    sorry,
+  end,
+    left_inv := begin
+      intro x,
+    end,
   right_inv := sorry,
   map_add' := sorry }
 
