@@ -127,6 +127,8 @@ lemma mem_filtration_pi {ι : Type*} (M : ι → Type*) [Π i, pseudo_normed_gro
   (c : ℝ≥0) (x : Π i, M i) :
   x ∈ filtration (Π i, M i) c ↔ ∀ i, x i ∈ filtration (M i) c := iff.rfl
 
+/-- The natural inclusion `filtration M c₁ → filtration M c₂`,
+for a pseudo normed group `M`, and `c₁ ≤ c₂`. -/
 def cast_le {c₁ c₂ : ℝ≥0} [h : fact (c₁ ≤ c₂)] (x : filtration M c₁) :
   filtration M c₂ :=
 ⟨x, filtration_mono h x.2⟩
