@@ -6,11 +6,32 @@ import breen_deligne.basic
 
 # Universality of universal maps
 
-A `universal_map m n` in this repo is a formal `ℤ`-linear combination
+A `universal_map m n` in this repo is a finite formal `ℤ`-linear combination
 of `m × n` matrices. In this file we show that to give a term of this
-type is to give a collection of additive group homomorphisms `ℤ[A^m] → ℤ[A^n]`
+type is to give a term of type `functorial_map m n`, which is defined to
+be a collection of additive group homomorphisms `ℤ[A^m] →+ ℤ[A^n]`
 for each abelian group `A`, functorial in `A`.
 
+The dictionary: given an `m × n` matrix with integer coefficients,
+it induces a map `A^m → A^n` in the obvious way and hence a group
+homomorphism `ℤ[A^m] →+ ℤ[A^n]`; hence finite formal integer
+combinations of these also give group homomorphisms.
+It is not hard to check that homomorphisms obtained in this way are
+functorial in `A`.
+
+Conversely, we start by identifying `(ℤ^p)^q` with `q × p` matrices in
+the obvious way. Now given a functorial collection of homomorphisms `ℤ[A^m] → ℤ[A^n]`,
+evaluating at collection at the group `A=ℤ^m` and the element of `(ℤ^m)^m`
+corresponding to the `m × m` identity matrix gives an element of `ℤ[(ℤ^m)^n]` which
+can be thought of in a natural way as a finite ℤ-linear combination of
+`m × n` matrices.
+
+The proofs that these constructions are inverse to one another is relatively
+straightforward, and is of course given in full below. To show that the
+construction `functorial_map m n → universal_map m n → functorial_map m n`
+is the identity, we observe that the value of a `functorial_map m n` at
+an element `x : A^m` can be computed by using functoriality applied
+to the map `ℤ^m → A` sending the i'th basis vector to `x i`.
 
 -/
 
