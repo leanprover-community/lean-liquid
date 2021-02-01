@@ -145,6 +145,10 @@ def aux_equiv₂ {α β : Type*} (f : α ≃ β) : free_abelian_group α ≃+ fr
 
 end punit_stuff
 
+lemma aux_lemma {A : Type*} [add_comm_group A] (a : A) (c : ℤ[punit]) :
+  (free_abelian_group.lift (λ _, (1 : ℤ))) c • a = free_abelian_group.lift (λ _, a) c :=
+sorry
+
 open universal_map
 open add_monoid_hom
 
@@ -153,76 +157,76 @@ open add_monoid_hom
 def universal_map_equiv_functorial_map (m n : ℕ) : universal_map m n ≃+ functorial_map.{u} m n :=
 { to_fun := λ U,
   { f := λ A _, by exactI eval A U,
-    functorial := sorry },
-    -- λ A _ B _ φ, begin
-    --   -- proof that evaluation of universal maps is functorial for group homomorphisms
-    --   -- We start by unravelling what the question is.
-    --   resetI,
-    --   ext as,
-    --   rw [comp_apply, comp_apply],
-    --   -- free_abelian_group.map_of should be redefined now map is an add_group_hom not a map?
-    --   -- Bhavik says make a dsimp lemma, I say make map_of'
-    --   change _ = ((eval B) U) ((φ.pow m) <$> (free_abelian_group.of as)),
-    --   rw free_abelian_group.map_of,
-    --   --  We need to prove that for all `as : A^m`, evaluating U then mapping with φ
-    --   -- is the same as applying φ and then evaluating U on the corresponding element of
-    --   -- ℤ[B^m].
-    --   -- By linearity, we can assume that `U` is a basic universal map `f`.
-    --   apply free_abelian_group.induction_on U,
-    --   { simp only [map_zero, zero_apply]},
-    --   { intro f,
-    --     -- Here is the proof for basic universal maps.
-    --     simp only [basic_universal_map.eval_of, eval_of],
-    --     -- We use the universal property
-    --     convert free_abelian_group.map_of _ _,
-    --     -- which boils the question down to checking that φ : A^n → B^n and φ : A^m → B^m
-    --     -- commutes with the matrix action A^m → A^n
-    --     ext i,
-    --     -- and this just boils down to trivialities
-    --     rw [pow_eval, add_monoid_hom.map_sum],
-    --     apply finset.sum_congr rfl,
-    --     rintros j -,
-    --     rw [pow_eval, map_int_module_smul] },
-    --     -- the rest is just checking that the question about universal maps was linear
-    --     -- so the reduction to the basic case was OK.
-    --   { intros F hF,
-    --     simp only [add_monoid_hom.map_neg, neg_inj, neg_apply, hF] },
-    --   { intros F G hF hG, simp only [hF, hG, add_monoid_hom.map_add, add_apply]}
-    -- end },
+    functorial :=
+    λ A _ B _ φ, begin
+      -- proof that evaluation of universal maps is functorial for group homomorphisms
+      -- We start by unravelling what the question is.
+      resetI,
+      ext as,
+      rw [comp_apply, comp_apply],
+      -- free_abelian_group.map_of should be redefined now map is an add_group_hom not a map?
+      -- Bhavik says make a dsimp lemma, I say make map_of'
+      change _ = ((eval B) U) ((φ.pow m) <$> (free_abelian_group.of as)),
+      rw free_abelian_group.map_of,
+      --  We need to prove that for all `as : A^m`, evaluating U then mapping with φ
+      -- is the same as applying φ and then evaluating U on the corresponding element of
+      -- ℤ[B^m].
+      -- By linearity, we can assume that `U` is a basic universal map `f`.
+      apply free_abelian_group.induction_on U,
+      { simp only [map_zero, zero_apply]},
+      { intro f,
+        -- Here is the proof for basic universal maps.
+        simp only [basic_universal_map.eval_of, eval_of],
+        -- We use the universal property
+        convert free_abelian_group.map_of _ _,
+        -- which boils the question down to checking that φ : A^n → B^n and φ : A^m → B^m
+        -- commutes with the matrix action A^m → A^n
+        ext i,
+        -- and this just boils down to trivialities
+        rw [pow_eval, add_monoid_hom.map_sum],
+        apply finset.sum_congr rfl,
+        rintros j -,
+        rw [pow_eval, map_int_module_smul] },
+        -- the rest is just checking that the question about universal maps was linear
+        -- so the reduction to the basic case was OK.
+      { intros F hF,
+        simp only [add_monoid_hom.map_neg, neg_inj, neg_apply, hF] },
+      { intros F G hF hG, simp only [hF, hG, add_monoid_hom.map_add, add_apply]}
+    end },
   inv_fun := λ F, free_abelian_group.lift
     (λ x, free_abelian_group.of
       (λ i j, (aux_equiv₁ ((x : (ℤ[punit] ^ m) ^ n) i j)) : basic_universal_map m n))
     (F.f
       (free_abelian_group (punit)^m)
       (free_abelian_group.of (λ i j, if i = j then free_abelian_group.of punit.star else 0))),
-    left_inv := sorry,
-    -- begin
-    --   intro u,
-    --   apply free_abelian_group.induction_on u,
-    --   { simp only [map_zero, zero_apply]},
-    --   { intro b,
-    --     simp only [free_abelian_group.lift.of, basic_universal_map.eval_of, eval_of],
-    --     congr',
-    --     ext i j',
-    --     convert aux_equiv₁.right_inv (b i j'),
-    --     apply _root_.congr_arg,
-    --     change _ = (b i j') • _,
-    --     -- next 7 lines = hack to get around pi.has_scalar != mul_action.to_has_scalar
-    --     have h2 := fintype.sum_apply j' (λ (j : fin m),
-    --       @has_scalar.smul _ _ (mul_action.to_has_scalar)
-    --       (b i j) (λ (j_1 : fin m), ite (j = j_1) (free_abelian_group.of punit.star) 0 : (ℤ[punit]^m))),
-    --     dsimp at h2,
-    --     convert h2,
-    --     ext j,
-    --     apply _root_.congr_fun,
-    --     congr', clear h2,
-    --     simp_rw [smul_ite, smul_zero],
-    --     rw finset.sum_ite_eq',
-    --     rw if_pos (finset.mem_univ _) },
-    --   { simp },
-    --   { intros u v hu hv,
-    --     simp * at * }
-    -- end,
+    left_inv :=
+    begin
+      intro u,
+      apply free_abelian_group.induction_on u,
+      { simp only [map_zero, zero_apply]},
+      { intro b,
+        simp only [free_abelian_group.lift.of, basic_universal_map.eval_of, eval_of],
+        congr',
+        ext i j',
+        convert aux_equiv₁.right_inv (b i j'),
+        apply _root_.congr_arg,
+        change _ = (b i j') • _,
+        -- next 7 lines = hack to get around pi.has_scalar != mul_action.to_has_scalar
+        have h2 := fintype.sum_apply j' (λ (j : fin m),
+          @has_scalar.smul _ _ (mul_action.to_has_scalar)
+          (b i j) (λ (j_1 : fin m), ite (j = j_1) (free_abelian_group.of punit.star) 0 : (ℤ[punit]^m))),
+        dsimp at h2,
+        convert h2,
+        ext j,
+        apply _root_.congr_fun,
+        congr', clear h2,
+        simp_rw [smul_ite, smul_zero],
+        rw finset.sum_ite_eq',
+        rw if_pos (finset.mem_univ _) },
+      { simp },
+      { intros u v hu hv,
+        simp * at * }
+    end,
   right_inv := begin
     intro F,
     ext A inst,
@@ -243,11 +247,23 @@ def universal_map_equiv_functorial_map (m n : ℕ) : universal_map m n ≃+ func
         (free_abelian_group.map ⇑(φ.pow n)) t,
       rw ← this, refl,
       intro t,
-      -- if ℤ[punit] = ℤ, the LHS of goal is now
-      -- eval A t x (t is a universal map modulo universes)
-      -- and the RHS should also unravel to this
       apply free_abelian_group.induction_on t,
-      sorry, sorry, sorry, sorry },
+      { simp only [map_zero, zero_apply]},
+      { clear t, intro t,
+        rw free_abelian_group.lift.of,
+        rw eval_of,
+        convert (free_abelian_group.map_of _ _).symm,
+        rw free_abelian_group.map_of,
+        convert free_abelian_group.map_of _ _,
+        ext i,
+        simp only [φ, pow_hom, add_monoid_hom.pow],
+        apply finset.sum_congr rfl,
+        rintro j -,
+        delta aux_equiv₁,
+        simp only [add_equiv.coe_mk],
+        apply aux_lemma },
+      { simp only [imp_self, forall_const, neg_inj, map_neg, neg_apply]},
+      { intros x y hx hy, simp * at * } },
     { ext i,
       simp only [id_mat, add_monoid_hom.pow, φ, pow_hom, coe_mk, function.comp_app],
       symmetry,
@@ -256,7 +272,13 @@ def universal_map_equiv_functorial_map (m n : ℕ) : universal_map m n ≃+ func
       ext j,
       split_ifs; simp },
   end,
-  map_add' := sorry -- should be no problem
+  map_add' := begin
+    intros u v,
+    ext,
+    resetI,
+    simp,
+    refl,
+  end,
   }
 
 end breen_deligne
