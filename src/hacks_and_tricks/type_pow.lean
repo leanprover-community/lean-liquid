@@ -8,9 +8,14 @@ By definition, `X^n` is modelled as functions from `fin n` to `X`.
 /-- A definition of powers of a type. -/
 def type_pow : has_pow (Type*) ℕ := ⟨λ A n, fin n → A⟩
 
+
 namespace type_pow_topology
 
 local attribute [instance] type_pow
+
+variables (z : ℤ) (A : Type) [add_comm_group A] (n : ℕ) (x : A^n)
+example : add_comm_group (fin n → A) := by show_term {apply_instance}
+
 
 instance topological_space {n : ℕ} {α : Type*} [topological_space α] : topological_space (α^n) :=
   Pi.topological_space
@@ -34,6 +39,18 @@ def pow {A : Type u} [add_comm_group A] {B : Type u} [add_comm_group B]
 
 lemma pow_eval {A : Type u} [add_comm_group A] {B : Type u} [add_comm_group B]
   (φ : A →+ B) (n : ℕ) (as : A ^ n) (i : fin n) : φ.pow n as i = φ (as i) := rfl
+
+open_locale big_operators
+
+/-- The group homomorphism `A^n →+ B` induced by `n` group homs `A →+ B` -/
+def pow_hom {A : Type u} [add_comm_group A] {B : Type u} [add_comm_group B]
+  {n : ℕ} (φ : fin n → A →+ B) : (A^n →+ B) :=
+{ to_fun := λ z, ∑ (i : fin n), φ i (z i),
+  map_zero' := by simp only [pi.zero_apply, finset.sum_const_zero, map_zero],
+  map_add' := λ x y, begin
+    rw [← finset.sum_add_distrib],
+    simp,
+  end }
 
 end add_monoid_hom
 
