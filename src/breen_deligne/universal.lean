@@ -106,7 +106,7 @@ section punit_stuff
 
 open free_abelian_group
 
-def aux_equiv : ℤ[punit] ≃+ ℤ :=
+def aux_equiv₁ : ℤ[punit] ≃+ ℤ :=
 { inv_fun := λ n, n • of (punit.star),
   to_fun := free_abelian_group.lift (λ _, (1 : ℤ)),
   left_inv := λ z, free_abelian_group.induction_on z
@@ -116,6 +116,26 @@ def aux_equiv : ℤ[punit] ≃+ ℤ :=
     (λ x y hx hy, by { simp only [lift.add, add_smul] at *, rw [hx, hy]}),
   right_inv := λ n, by { rw [add_monoid_hom.map_int_module_smul, lift.of], exact gsmul_int_one n},
   map_add' := add_monoid_hom.map_add _ }
+
+def aux_equiv₂ {α β : Type*} (f : α ≃ β) : free_abelian_group α ≃+ free_abelian_group β :=
+{ to_fun := free_abelian_group.lift $ free_abelian_group.of ∘ f,
+  inv_fun := free_abelian_group.lift $ free_abelian_group.of ∘ f.symm,
+  left_inv := begin
+    intros x,
+    refine free_abelian_group.induction_on x (by simp) (by simp) (by simp) _,
+    intros x y h,
+    simp [h],
+  end,
+  right_inv := begin
+    intros x,
+    refine free_abelian_group.induction_on x (by simp) (by simp) (by simp) _,
+    intros x y h,
+    simp [h],
+  end,
+  map_add' := begin
+     intros x y,
+     simp,
+  end }
 
 end punit_stuff
 
@@ -160,17 +180,28 @@ def universal_map_equiv_functorial_map (m n : ℕ) : universal_map m n ≃+ func
         simp only [add_monoid_hom.map_neg, neg_inj, neg_apply, hF] },
       { intros F G hF hG, simp only [hF, hG, add_monoid_hom.map_add, add_apply]}
     end },
-  inv_fun := λ F,
-  begin
-    let f := F.f (free_abelian_group (punit)^m),
-    let u := f (free_abelian_group.of (λ i j, if i = j then free_abelian_group.of punit.star else 0)),
---    exact free_abelian_group.map _ u,
-    sorry,
-  end,
+  inv_fun := λ F, free_abelian_group.lift
+    (λ x, free_abelian_group.of
+      (λ i j, (aux_equiv₁ ((x : (ℤ[punit] ^ m) ^ n) i j)) : basic_universal_map m n))
+    (F.f
+      (free_abelian_group (punit)^m)
+      (free_abelian_group.of (λ i j, if i = j then free_abelian_group.of punit.star else 0))),
     left_inv := begin
-      intro x,
+      intro u,
+      apply free_abelian_group.induction_on u,
+      { simp },
+      { intro b,
+        simp only [free_abelian_group.lift.of, basic_universal_map.eval_of, eval_of],
+        congr',
+        ext i j,
+        sorry -- I've done a goal like this above
+      },
+      { simp },
+      { intros u v hu hv,
+        simp * at * }
     end,
-  right_inv := sorry,
-  map_add' := sorry }
+  right_inv := sorry, -- no idea how hard this will be
+  map_add' := sorry -- should be no problem
+  }
 
 end breen_deligne
