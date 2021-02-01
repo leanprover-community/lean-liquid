@@ -127,6 +127,13 @@ lemma mem_filtration_pi {ι : Type*} (M : ι → Type*) [Π i, pseudo_normed_gro
   (c : ℝ≥0) (x : Π i, M i) :
   x ∈ filtration (Π i, M i) c ↔ ∀ i, x i ∈ filtration (M i) c := iff.rfl
 
+def cast_le {c₁ c₂ : ℝ≥0} [h : fact (c₁ ≤ c₂)] (x : filtration M c₁) :
+  filtration M c₂ :=
+⟨x, filtration_mono h x.2⟩
+
+@[simp] lemma coe_cast_le {c₁ c₂ : ℝ≥0} [h : fact (c₁ ≤ c₂)] (x : filtration M c₁) :
+  ((cast_le x : filtration M c₂) : M) = x := rfl
+
 end pseudo_normed_group
 
 open pseudo_normed_group
