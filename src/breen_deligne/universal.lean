@@ -193,14 +193,23 @@ def universal_map_equiv_functorial_map (m n : ℕ) : universal_map m n ≃+ func
       { intro b,
         simp only [free_abelian_group.lift.of, basic_universal_map.eval_of, eval_of],
         congr',
-        ext i j,
-        sorry -- I've done a goal like this above
+        ext i j',
+        convert aux_equiv₁.right_inv (b i j'),
+        apply _root_.congr_arg,
+        change _ = (b i j') • _,
+        sorry -- just need (sum (functions)) (j') = sum (functions evaluated at j')
       },
       { simp },
       { intros u v hu hv,
         simp * at * }
     end,
-  right_inv := sorry, -- no idea how hard this will be
+  right_inv := begin
+    intro F,
+    simp,
+    ext A h,
+    simp,
+    sorry, -- this looks fine, use functoriality
+  end,
   map_add' := sorry -- should be no problem
   }
 
