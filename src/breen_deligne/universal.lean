@@ -246,7 +246,8 @@ def universal_map_equiv_functorial_map (m n : ℕ) : universal_map m n ≃+ func
       -- if ℤ[punit] = ℤ, the LHS of goal is now
       -- eval A t x (t is a universal map modulo universes)
       -- and the RHS should also unravel to this
-      sorry },
+      apply free_abelian_group.induction_on t,
+      sorry, sorry, sorry, sorry },
     { ext i,
       simp only [id_mat, add_monoid_hom.pow, φ, pow_hom, coe_mk, function.comp_app],
       symmetry,
