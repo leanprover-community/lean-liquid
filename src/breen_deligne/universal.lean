@@ -147,7 +147,20 @@ end punit_stuff
 
 lemma aux_lemma {A : Type*} [add_comm_group A] (a : A) (c : ℤ[punit]) :
   (free_abelian_group.lift (λ _, (1 : ℤ))) c • a = free_abelian_group.lift (λ _, a) c :=
-sorry
+begin
+  rw ← aux_equiv₁.left_inv c,
+  generalize : aux_equiv₁.to_fun c = d,
+  delta aux_equiv₁, dsimp only,
+  apply int.induction_on d,
+  { simp },
+  { intros i hi,
+    simp [add_smul, ←hi],
+  },
+  { intros i hi,
+    simp at *,
+    simp [sub_smul, ←hi] }
+end
+
 
 open universal_map
 open add_monoid_hom
