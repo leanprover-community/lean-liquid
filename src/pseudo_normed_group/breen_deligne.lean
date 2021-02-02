@@ -80,7 +80,7 @@ begin
   rintro i -,
   refine pfpng_ctu'_of_pfpng_ctu i (λ (x : M) j, f j i • x) _,
   intro j,
-  exact pfpng_ctu_smul_int _
+  exact pfpng_ctu_smul_int _ _
 end
 
 end profinitely_filtered_pseudo_normed_group
