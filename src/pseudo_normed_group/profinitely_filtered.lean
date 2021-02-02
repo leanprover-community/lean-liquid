@@ -3,8 +3,12 @@ import topology.algebra.group
 
 import pseudo_normed_group.basic
 
+import hacks_and_tricks.type_pow
+
 open pseudo_normed_group
 open_locale nnreal big_operators
+
+local attribute [instance] type_pow
 
 -- /-- A *profinitely filtered pseudo normed topological group* is
 -- * an abelian group `M` with an increasing filtration `filtration M c, c : ℝ≥0` such that
@@ -179,6 +183,113 @@ instance : profinitely_filtered_pseudo_normed_group punit :=
 
 end punit
 
-namespace profinitely_filtered_pseudo_normed_group
+section continuity
 
-end profinitely_filtered_pseudo_normed_group
+variables {M M₁ M₂ M₃ : Type*}
+
+/-- Helper function for pseudo normed groups.
+`pow_incl` is the natural inclusion function `(filtration M c)^n → M^n`.
+Note that `(filtration M c)^n` is not the same type as `filtration (M^n) c`,
+although they are naturally equivalent. -/
+def pow_incl {n : ℕ} {c : ℝ≥0} [pseudo_normed_group M] :
+  (filtration M c : Type*)^n → M^n :=
+λ x j, x j
+
+lemma pow_incl_injective {n : ℕ} {c : ℝ≥0} [pseudo_normed_group M] :
+  function.injective (@pow_incl M n c _) :=
+λ x y h, funext $ λ j, subtype.coe_injective $ congr_fun h j
+
+variables [profinitely_filtered_pseudo_normed_group M]
+variables [profinitely_filtered_pseudo_normed_group M₁]
+variables [profinitely_filtered_pseudo_normed_group M₂]
+variables [profinitely_filtered_pseudo_normed_group M₃]
+
+/-- A function `f : M₁ → M₂` between profinitely filtered pseudo normed groups
+is continuous if it is continuous when restricted to the filtration sets.
+
+Implementation detail: to avoid diamonds of topologies on `filtration M c`
+we avoid `topological_space M`.
+We therefore give a hands on definition of continuity. -/
+def pfpng_ctu (f : M₁ → M₂) : Prop :=
+∀ ⦃c₁ c₂⦄ (f₀ : filtration M₁ c₁ → filtration M₂ c₂) (h : ∀ x, f ↑x = f₀ x), continuous f₀
+
+section pfpng_ctu
+
+lemma pfpng_ctu_const (y : M₂) : pfpng_ctu (λ x : M₁, y) :=
+begin
+  intros c₁ c₂ f₀ h,
+  suffices : f₀ = λ x, f₀ ⟨0, zero_mem_filtration _⟩,
+  { rw this, exact continuous_const },
+  ext1 x,
+  apply subtype.coe_injective,
+  rw [← h, ← h]
+end
+
+lemma pfpng_ctu.add {f g : M₁ → M₂} (hf : pfpng_ctu f) (hg : pfpng_ctu g) :
+  pfpng_ctu (f + g) :=
+begin
+  intros c₁ c₂ fg₀ h,
+  -- use `profinitely_filtered_pseudo_normed_group.continuous_add'`
+  -- and `profinitely_filtered_pseudo_normed_group.cast_le_open_map`.
+  sorry
+end
+
+-- we want this lemma, but probably prove it for `n : ℕ` first
+lemma pfpng_ctu_smul_int (n : ℤ) : pfpng_ctu (λ x : M, n • x) :=
+sorry
+
+end pfpng_ctu
+
+/-- A function `f : M₁^m → M₂^n` between powers of profinitely filtered pseudo normed groups
+is continuous if it is continuous when restricted to the filtration sets.
+
+Implementation details:
+
+* To avoid diamonds of topologies on `filtration M c` we avoid `topological_space M`.
+* This definitions attempts to avoid moving between `(filtration M c)^n` and `filtration (M^n) c`.
+  It is therefore particularly ad hoc. -/
+def pfpng_ctu' {m n : ℕ} (f : M₁^m → M₂^n) : Prop :=
+∀ ⦃c₁ c₂⦄ (f₀ : (filtration M₁ c₁ : Type*)^m → (filtration M₂ c₂ : Type*)^n)
+  (h : ∀ x, f (pow_incl x) = pow_incl (f₀ x)), continuous f₀
+
+section pfpng_ctu'
+
+variables {m n : ℕ}
+
+lemma pfpng_ctu'_const (y : M₂^n) : pfpng_ctu' (λ x : M₁^m, y) :=
+begin
+  intros c₁ c₂ f₀ h,
+  suffices : f₀ = λ x, f₀ (λ i, ⟨0, zero_mem_filtration _⟩),
+  { rw this, exact continuous_const },
+  ext1 x,
+  apply pow_incl_injective,
+  rw [← h, ← h]
+end
+
+lemma pfpng_ctu'.add {f g : M₁^m → M₂^n} (hf : pfpng_ctu' f) (hg : pfpng_ctu' g) :
+  pfpng_ctu' (f + g) :=
+begin
+  intros c₁ c₂ fg₀ h,
+  -- use `profinitely_filtered_pseudo_normed_group.continuous_add'`
+  -- and `profinitely_filtered_pseudo_normed_group.cast_le_open_map`.
+  sorry
+end
+
+lemma pfpng_ctu'_sum {ι : Type*} (s : finset ι)
+  (f : ι → M₁^m → M₂^n) (h : ∀ i ∈ s, pfpng_ctu' (f i)) :
+  pfpng_ctu' (∑ i in s, f i) :=
+begin
+  classical, revert h,
+  apply finset.induction_on s; clear s,
+  { simp only [finset.sum_empty], intro, exact pfpng_ctu'_const 0 },
+  intros i s his IH h,
+  simp [his, IH, h, finset.sum_insert],
+  apply pfpng_ctu'.add,
+  { exact h _ (finset.mem_insert_self _ _) },
+  { apply IH,
+    intros i' hi', exact h _ (finset.mem_insert_of_mem hi') }
+end
+
+end pfpng_ctu'
+
+end continuity
