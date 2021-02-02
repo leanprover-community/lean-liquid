@@ -199,6 +199,10 @@ lemma pow_incl_injective {n : ℕ} {c : ℝ≥0} [pseudo_normed_group M] :
   function.injective (@pow_incl M n c _) :=
 λ x y h, funext $ λ j, subtype.coe_injective $ congr_fun h j
 
+@[simp] lemma pow_incl_apply {n : ℕ} {c : ℝ≥0} [pseudo_normed_group M]
+  (x : (filtration M c : Type*)^n) (j : fin n) :
+  pow_incl x j = x j := rfl
+
 variables [profinitely_filtered_pseudo_normed_group M]
 variables [profinitely_filtered_pseudo_normed_group M₁]
 variables [profinitely_filtered_pseudo_normed_group M₂]
@@ -289,6 +293,27 @@ begin
   { apply IH,
     intros i' hi', exact h _ (finset.mem_insert_of_mem hi') }
 end
+
+lemma pfpng_ctu'_of_pfpng_ctu (i : fin m) (f : M₁ → M₂^n) (h : ∀ j, pfpng_ctu (λ x, f x j)) :
+  pfpng_ctu' (λ x, f (x i)) :=
+begin
+  intros c₁ c₂ f₀ h₀,
+  apply continuous_pi,
+  intro j,
+  have aux : ∀ (x : filtration M₁ c₁), f x j ∈ filtration M₂ c₂,
+  { intro x, specialize h₀ (λ i, x), dsimp at h₀, simp only [h₀, pow_incl_apply],
+    exact (f₀ (λ i, x) j).2 },
+  let g : filtration M₁ c₁ → filtration M₂ c₂ := λ x, ⟨f x j, aux x⟩,
+  have hg : ∀ x, f₀ x j = g (x i),
+  { intro x, apply subtype.coe_injective, exact (congr_fun (h₀ x) j).symm },
+  simp only [hg],
+  exact (h j g (λ x, rfl)).comp (continuous_apply _),
+end
+
+-- -- we don't need this
+-- lemma pfpng_ctu'_iff_pfpng_ctu (i : fin m) (f : M₁ → M₂^n) :
+--   pfpng_ctu' (λ x, f (x i)) ↔ (∀ j, pfpng_ctu (λ x, f x j)) :=
+-- sorry
 
 end pfpng_ctu'
 

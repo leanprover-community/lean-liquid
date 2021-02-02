@@ -15,7 +15,11 @@ namespace breen_deligne
 namespace basic_universal_map
 
 variables {m n : ℕ} (f : basic_universal_map m n)
-variables (M : Type*) [pseudo_normed_group M]
+variables (M : Type*)
+
+section pseudo_normed_group
+
+variables [pseudo_normed_group M]
 
 open add_monoid_hom pseudo_normed_group
 
@@ -59,6 +63,27 @@ begin
     matrix.mul_apply, finset.smul_sum, finset.sum_smul, mul_smul],
   rw finset.sum_comm
 end
+
+end pseudo_normed_group
+
+section profinitely_filtered_pseudo_normed_group
+
+variables [profinitely_filtered_pseudo_normed_group M]
+
+lemma pfpng_ctu'_eval_png : pfpng_ctu' (f.eval_png M) :=
+begin
+  have : (f.eval_png M : M^m → M^n) = ∑ i, λ x j, f j i • (x i),
+  { ext x j,
+    rw [f.eval_png_apply M x, finset.sum_apply, finset.sum_apply] },
+  rw this,
+  refine pfpng_ctu'_sum _ _ _,
+  rintro i -,
+  refine pfpng_ctu'_of_pfpng_ctu i (λ (x : M) j, f j i • x) _,
+  intro j,
+  exact pfpng_ctu_smul_int _
+end
+
+end profinitely_filtered_pseudo_normed_group
 
 end basic_universal_map
 
