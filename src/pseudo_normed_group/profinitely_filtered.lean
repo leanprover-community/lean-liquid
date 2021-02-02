@@ -44,8 +44,8 @@ class profinitely_filtered_pseudo_normed_group (M : Type*)
 (neg' : Π {c}, (filtration c) → (filtration c))
 (neg'_eq : ∀ {c : ℝ≥0} (x : filtration c), (neg' x : M) = -x)
 (continuous_neg' : Π c, continuous (@neg' c))
-(continuous_cast_le : ∀ (c₁ c₂) [h : fact (c₁ ≤ c₂)],
-  continuous (@pseudo_normed_group.cast_le M _ _ _ h))
+(embedding_cast_le : ∀ (c₁ c₂) [h : fact (c₁ ≤ c₂)],
+  embedding (@pseudo_normed_group.cast_le M _ _ _ h))
 
 namespace profinitely_filtered_pseudo_normed_group
 
@@ -179,7 +179,9 @@ instance : profinitely_filtered_pseudo_normed_group punit :=
   neg' := λ _ _, ⟨punit.star, set.mem_univ _⟩,
   neg'_eq := λ _ _, dec_trivial,
   continuous_neg' := λ _, continuous_const,
-  continuous_cast_le := λ c₁ c₂ h s hs, is_open_discrete _ }
+  embedding_cast_le := λ c₁ c₂ h,
+  { induced := sorry,
+    inj := λ _ _ _, subtype.ext dec_trivial } }
 
 end punit
 
@@ -215,7 +217,7 @@ Implementation detail: to avoid diamonds of topologies on `filtration M c`
 we avoid `topological_space M`.
 We therefore give a hands on definition of continuity. -/
 def pfpng_ctu (f : M₁ → M₂) : Prop :=
-∀ ⦃c₁ c₂⦄ [fact (c₁ ≤ c₂)] (f₀ : filtration M₁ c₁ → filtration M₂ c₂)
+∀ ⦃c₁ c₂⦄ (f₀ : filtration M₁ c₁ → filtration M₂ c₂)
   (h : ∀ x, f ↑x = f₀ x), continuous f₀
 
 section pfpng_ctu
@@ -224,7 +226,7 @@ open profinitely_filtered_pseudo_normed_group
 
 lemma pfpng_ctu_const (y : M₂) : pfpng_ctu (λ x : M₁, y) :=
 begin
-  intros c₁ c₂ H f₀ h,
+  intros c₁ c₂ f₀ h,
   suffices : f₀ = λ x, f₀ ⟨0, zero_mem_filtration _⟩,
   { rw this, exact continuous_const },
   ext1 x,
@@ -235,7 +237,7 @@ end
 lemma pfpng_ctu.neg {f : M₁ → M₂} (hf : pfpng_ctu f) :
   pfpng_ctu (-f) :=
 begin
-  introsI c₁ c₂ H f₀ h,
+  intros c₁ c₂ f₀ h,
   let g := neg' ∘ f₀,
   have hg : f₀ = neg' ∘ g, { ext, simp [neg'_eq, neg_neg] },
   rw hg,
@@ -245,30 +247,51 @@ begin
   simp only [g, neg'_eq, ← h, neg_neg, pi.neg_apply]
 end
 
-lemma pfpng_ctu.add {f g : M₁ → M₂} (hf : pfpng_ctu f) (hg : pfpng_ctu g) :
+lemma pfpng_ctu.add {f g : M₁ → M₂} (hf : pfpng_ctu f) (hg : pfpng_ctu g)
+  (H : ∀ c₁, ∃ c₂, ∀ x : filtration M₁ c₁, f x ∈ filtration M₂ c₂) :
   pfpng_ctu (f + g) :=
 begin
-  introsI c₁ c₂ H fg₀ h,
-  -- statement is currently false:
-  -- If `f` and `g` map arbitrarily small elements to arbitrarily large ones,
-  -- then `hf` and `hg` are vacuous.
-  -- Use `continuous_add'` and `cast_le_open_map`.
-  sorry
+  intros c₁ c₂ fg₀ hfg₀,
+  obtain ⟨cf, hcf⟩ := H c₁,
+  let f₀ : filtration M₁ c₁ → filtration M₂ cf := λ x, ⟨f x, hcf x⟩,
+  have hf₀ : ∀ x, f ↑x = f₀ x := λ x, rfl,
+  have f₀_ctu : continuous f₀ := hf f₀ hf₀,
+  let cg := cf + c₂,
+  haveI : fact (c₂ ≤ cf + cg) :=
+    calc c₂ ≤ cf + c₂        : self_le_add_left _ _
+        ... ≤ cf + (cf + c₂) : self_le_add_left _ _,
+  have hcg : ∀ x : filtration M₁ c₁, g x ∈ filtration M₂ cg,
+  { intros x,
+    have : g x = -(f x) + (f + g) x,
+    { simp only [pi.add_apply, neg_add_cancel_left] },
+    rw this,
+    refine add_mem_filtration (neg_mem_filtration $ hcf x) _,
+    rw hfg₀,
+    exact (fg₀ x).2 },
+  let g₀ : filtration M₁ c₁ → filtration M₂ cg := λ x, ⟨g x, hcg x⟩,
+  have hg₀ : ∀ x, g ↑x = g₀ x := λ x, rfl,
+  have g₀_ctu : continuous g₀ := hg g₀ hg₀,
+  have aux := (f₀_ctu.prod_mk g₀_ctu),
+  rw (embedding_cast_le c₂ (cf + cg)).continuous_iff,
+  convert (continuous_add' cf cg).comp aux using 1,
+  ext, dsimp, rw [← hfg₀, add'_eq], refl
 end
 
 variables (M)
 
 lemma pfpng_ctu_id : pfpng_ctu (@id M) :=
 begin
-  introsI c₁ c₂ H f₀ h,
-  suffices : f₀ = cast_le,
-  { rw this, exact continuous_cast_le c₁ c₂ },
-  ext, rw ← h, refl
+  intros c₁ c₂ f₀ h,
+  haveI : fact (c₁ ≤ max c₁ c₂) := le_max_left _ _,
+  haveI : fact (c₂ ≤ max c₁ c₂) := le_max_right _ _,
+  have : @cast_le M _ c₂ (max c₁ c₂) _ ∘ f₀ = cast_le, { ext, dsimp, rw ← h, refl },
+  rw [(embedding_cast_le c₂ (max c₁ c₂)).continuous_iff, this],
+  exact (embedding_cast_le _ _).continuous
 end
 
 lemma pfpng_ctu_smul_nat : ∀ (n : ℕ), pfpng_ctu (λ x : M, n • x)
 | 0     := pfpng_ctu_const 0
-| (n+1) := (pfpng_ctu_id M).add (pfpng_ctu_smul_nat n)
+| (n+1) := (pfpng_ctu_id M).add (pfpng_ctu_smul_nat n) (λ c, ⟨c, λ x, x.2⟩)
 
 lemma pfpng_ctu_smul_int : ∀ (n : ℤ), pfpng_ctu (λ x : M, n • x)
 | (n:ℕ)  := pfpng_ctu_smul_nat M n
@@ -285,7 +308,7 @@ Implementation details:
 * This definitions attempts to avoid moving between `(filtration M c)^n` and `filtration (M^n) c`.
   It is therefore particularly ad hoc. -/
 def pfpng_ctu' {m n : ℕ} (f : M₁^m → M₂^n) : Prop :=
-∀ ⦃c₁ c₂⦄ [fact (c₁ ≤ c₂)] (f₀ : (filtration M₁ c₁ : Type*)^m → (filtration M₂ c₂ : Type*)^n)
+∀ ⦃c₁ c₂⦄ (f₀ : (filtration M₁ c₁ : Type*)^m → (filtration M₂ c₂ : Type*)^n)
   (h : ∀ x, f (pow_incl x) = pow_incl (f₀ x)), continuous f₀
 
 section pfpng_ctu'
@@ -294,7 +317,7 @@ variables {m n : ℕ}
 
 lemma pfpng_ctu'_const (y : M₂^n) : pfpng_ctu' (λ x : M₁^m, y) :=
 begin
-  introsI c₁ c₂ H f₀ h,
+  intros c₁ c₂ f₀ h,
   suffices : f₀ = λ x, f₀ (λ i, ⟨0, zero_mem_filtration _⟩),
   { rw this, exact continuous_const },
   ext1 x,
@@ -305,9 +328,8 @@ end
 lemma pfpng_ctu'.add {f g : M₁^m → M₂^n} (hf : pfpng_ctu' f) (hg : pfpng_ctu' g) :
   pfpng_ctu' (f + g) :=
 begin
-  introsI c₁ c₂ H fg₀ h,
+  intros c₁ c₂ fg₀ h,
   -- statement needs adjusting, see `pfnpg_ctu.add`.
-  -- use `continuous_add'` and `cast_le_open_map`.
   sorry
 end
 
@@ -329,7 +351,7 @@ end
 lemma pfpng_ctu'_of_pfpng_ctu (i : fin m) (f : M₁ → M₂^n) (h : ∀ j, pfpng_ctu (λ x, f x j)) :
   pfpng_ctu' (λ x, f (x i)) :=
 begin
-  introsI c₁ c₂ H f₀ h₀,
+  intros c₁ c₂ f₀ h₀,
   apply continuous_pi,
   intro j,
   have aux : ∀ (x : filtration M₁ c₁), f x j ∈ filtration M₂ c₂,
