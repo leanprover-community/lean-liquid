@@ -140,7 +140,7 @@ variables (M)
 
 /-- `rescale M r` is the pseudo normed group whose filtration is rescaled by `r : ℝ≥0`.
 So `filtration (rescale M r) c` is `filtration M (r * c)`-/
-@[nolint unused_argument, derive add_comm_group]
+@[nolint unused_arguments, derive add_comm_group]
 def rescale (r : ℝ≥0) := M
 
 namespace rescale
