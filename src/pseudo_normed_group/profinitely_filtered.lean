@@ -10,20 +10,6 @@ open_locale nnreal big_operators
 
 local attribute [instance] type_pow
 
--- /-- A *profinitely filtered pseudo normed topological group* is
--- * an abelian group `M` with an increasing filtration `filtration M c, c : ℝ≥0` such that
--- * `filtration M c` is a profinite set
--- * `M` is pseudo normed, so `0 ∈ filtration M c`, `-(filtration M c = filtration M c`,
---   and `x₁ ∈ filtration M c₁, x₂ ∈ filtration M c₂ → (x₁ + x₂) ∈ filtration M (c₁ + c₂)`
--- * (bounded) addition and negation are continuous.
-
--- Morphisms are continuous and bounded homomorphisms. -/
--- class profinitely_filtered_pseudo_normed_group' (M : Type*)
---   [pseudo_normed_group M] [topological_space M] extends topological_add_group M :=
--- [to_t2_space : t2_space M]
--- [to_totally_disconnected_space : totally_disconnected_space M]
--- (is_compact : ∀ c, is_compact (filtration M c))
-
 /-- A *profinitely filtered pseudo normed topological group* is
 * an abelian group `M` with an increasing filtration `filtration M c, c : ℝ≥0` such that
 * `filtration M c` is a profinite set
@@ -38,12 +24,10 @@ class profinitely_filtered_pseudo_normed_group (M : Type*)
 [t2 : ∀ c, t2_space (filtration c)]
 [td : ∀ c, totally_disconnected_space (filtration c)]
 [compact : ∀ c, compact_space (filtration c)]
-(add' : Π {c₁ c₂}, (filtration c₁) × (filtration c₂) → (filtration (c₁ + c₂)))
-(add'_eq : ∀ {c₁ c₂ : ℝ≥0} (x : (filtration c₁) × (filtration c₂)), (add' x : M) = x.1 + x.2)
-(continuous_add' : Π (c₁ c₂), continuous (@add' c₁ c₂))
-(neg' : Π {c}, (filtration c) → (filtration c))
-(neg'_eq : ∀ {c : ℝ≥0} (x : filtration c), (neg' x : M) = -x)
-(continuous_neg' : Π c, continuous (@neg' c))
+(continuous_add' : Π (c₁ c₂), @continuous (filtration c₁ × filtration c₂) (filtration (c₁ + c₂)) _ _
+  (λ x, ⟨x.1 + x.2, add_mem_filtration x.1.2 x.2.2⟩))
+(continuous_neg' : Π c, @continuous (filtration c) (filtration c) _ _
+  (λ x, ⟨-x, neg_mem_filtration x.2⟩))
 (embedding_cast_le : ∀ (c₁ c₂) [h : fact (c₁ ≤ c₂)],
   embedding (@pseudo_normed_group.cast_le M _ _ _ h))
 
@@ -60,8 +44,21 @@ instance (c : ℝ≥0) : t2_space (filtration M c) := t2 c
 instance (c : ℝ≥0) : totally_disconnected_space (filtration M c) := td c
 instance (c : ℝ≥0) : compact_space (filtration M c) := compact c
 
-end profinitely_filtered_pseudo_normed_group
+/-- Bounded uncurried addition for profinitely filtered pseudo normed groups. -/
+def add' {c₁ c₂} (x : (filtration M c₁) × (filtration M c₂)) : filtration M (c₁ + c₂) :=
+⟨(x.1 + x.2 : M), add_mem_filtration x.1.2 x.2.2⟩
 
+@[simp] lemma add'_eq {c₁ c₂ : ℝ≥0} (x : (filtration M c₁) × (filtration M c₂)) :
+  (add' x : M) = x.1 + x.2 := rfl
+
+/-- Bounded negation for profinitely filtered pseudo normed groups. -/
+def neg' {c} (x : filtration M c) : filtration M c :=
+⟨(-x : M), neg_mem_filtration x.2⟩
+
+@[simp] lemma neg'_eq {c : ℝ≥0} (x : filtration M c) :
+  (neg' x : M) = -x := rfl
+
+end profinitely_filtered_pseudo_normed_group
 section
 set_option old_structure_cmd true
 
@@ -178,12 +175,8 @@ instance : profinitely_filtered_pseudo_normed_group punit :=
   zero_mem_filtration := λ _, set.mem_univ _,
   neg_mem_filtration := λ _ _ _, set.mem_univ _,
   add_mem_filtration := λ _ _ _ _ _ _, set.mem_univ _,
-  add' := λ _ _ _, ⟨punit.star, set.mem_univ _⟩,
-  add'_eq := λ _ _ _, dec_trivial,
-  continuous_add' := λ _ _, continuous_const,
-  neg' := λ _ _, ⟨punit.star, set.mem_univ _⟩,
-  neg'_eq := λ _ _, dec_trivial,
-  continuous_neg' := λ _, continuous_const,
+  continuous_add' := λ _ _,  continuous_of_discrete_topology,
+  continuous_neg' := λ _, continuous_of_discrete_topology,
   embedding_cast_le := λ c₁ c₂ h,
   { induced := subsingleton.elim _ _,
     inj := λ _ _ _, subtype.ext dec_trivial } }
@@ -244,12 +237,12 @@ lemma pfpng_ctu.neg {f : M₁ → M₂} (hf : pfpng_ctu f) :
 begin
   intros c₁ c₂ f₀ h,
   let g := neg' ∘ f₀,
-  have hg : f₀ = neg' ∘ g, { ext, simp [neg'_eq, neg_neg] },
+  have hg : f₀ = neg' ∘ g, { ext, simp [neg_neg] },
   rw hg,
   refine (continuous_neg' c₂).comp (hf g _),
   intro x,
   specialize h x,
-  simp only [g, neg'_eq, ← h, neg_neg, pi.neg_apply]
+  simp only [g, ← h, neg_neg, pi.neg_apply, neg'_eq]
 end
 
 lemma pfpng_ctu.add {f g : M₁ → M₂} (hf : pfpng_ctu f) (hg : pfpng_ctu g)
@@ -279,7 +272,7 @@ begin
   have aux := (f₀_ctu.prod_mk g₀_ctu),
   rw (embedding_cast_le c₂ (cf + cg)).continuous_iff,
   convert (continuous_add' cf cg).comp aux using 1,
-  ext, dsimp, rw [← hfg₀, add'_eq], refl
+  ext, dsimp, rw [← hfg₀, pi.add_apply]
 end
 
 variables (M)
@@ -388,7 +381,7 @@ begin
   convert (continuous_add' cf cg).comp aux' using 1,
   ext x,
   replace hfg₀ := congr_fun (hfg₀ x) j,
-  dsimp at hfg₀ ⊢, rw [← hfg₀, add'_eq], refl
+  dsimp at hfg₀ ⊢, rw [← hfg₀], refl
 end
 
 lemma pfpng_ctu'_sum {ι : Type*} (s : finset ι)
