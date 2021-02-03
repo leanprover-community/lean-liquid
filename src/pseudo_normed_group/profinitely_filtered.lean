@@ -45,20 +45,6 @@ instance (c : ℝ≥0) : t2_space (filtration M c) := t2 c
 instance (c : ℝ≥0) : totally_disconnected_space (filtration M c) := td c
 instance (c : ℝ≥0) : compact_space (filtration M c) := compact c
 
-/-- Bounded uncurried addition for profinitely filtered pseudo normed groups. -/
-def add' {c₁ c₂} (x : (filtration M c₁) × (filtration M c₂)) : filtration M (c₁ + c₂) :=
-⟨(x.1 + x.2 : M), add_mem_filtration x.1.2 x.2.2⟩
-
-@[simp] lemma add'_eq {c₁ c₂ : ℝ≥0} (x : (filtration M c₁) × (filtration M c₂)) :
-  (add' x : M) = x.1 + x.2 := rfl
-
-/-- Bounded negation for profinitely filtered pseudo normed groups. -/
-def neg' {c} (x : filtration M c) : filtration M c :=
-⟨(-x : M), neg_mem_filtration x.2⟩
-
-@[simp] lemma neg'_eq {c : ℝ≥0} (x : filtration M c) :
-  (neg' x : M) = -x := rfl
-
 end profinitely_filtered_pseudo_normed_group
 
 section
@@ -68,9 +54,9 @@ structure profinitely_filtered_pseudo_normed_group_hom (M₁ M₂ : Type*)
   [profinitely_filtered_pseudo_normed_group M₁]
   [profinitely_filtered_pseudo_normed_group M₂]
   extends M₁ →+ M₂ :=
-(strict' : ∀ c x, x ∈ filtration M₁ c → to_fun x ∈ filtration M₂ c)
-(continuous' : ∀ c, @continuous (filtration M₁ c) (filtration M₂ c) _ _
-  $ λ x, ⟨to_fun x, strict' c x x.2⟩)
+(bound' : ∃ C, ∀ c x, x ∈ filtration M₁ c → to_fun x ∈ filtration M₂ (C * c))
+(continuous' : ∀ ⦃c₁ c₂⦄ (f₀ : filtration M₁ c₁ → filtration M₂ c₂)
+  (h : ∀ x, to_fun ↑x = f₀ x), continuous f₀)
 
 end
 
@@ -78,6 +64,8 @@ attribute [nolint doc_blame] profinitely_filtered_pseudo_normed_group_hom.mk
   profinitely_filtered_pseudo_normed_group_hom.to_add_monoid_hom
 
 namespace profinitely_filtered_pseudo_normed_group_hom
+
+open profinitely_filtered_pseudo_normed_group
 
 variables {M M₁ M₂ M₃ : Type*}
 variables [profinitely_filtered_pseudo_normed_group M]
@@ -111,22 +99,36 @@ f.to_add_monoid_hom.map_sum _ _
 @[simp] lemma map_neg (x) : f (-x) = -(f x) := f.to_add_monoid_hom.map_neg _
 
 /-- Make a profinitely filtered pseudo normed group hom
-from a group hom and proofs that it is strict and continuous. -/
-def mk' (f : M₁ →+ M₂) (h : ∀ c x, x ∈ filtration M₁ c → f x ∈ filtration M₂ c)
-  (h' : ∀ c, @continuous (filtration M₁ c) (filtration M₂ c) _ _ $ λ x, ⟨f x, h c x x.2⟩) :
+from a group hom and a proof that it is bounded and continuous. -/
+def mk' (f : M₁ →+ M₂)  (h : ∃ C, ∀ c, ∃ (H : ∀ x, x ∈ filtration M₁ c → f x ∈ filtration M₂ (C * c)),
+    @continuous (filtration M₁ c) (filtration M₂ (C * c)) _ _ (λ x, ⟨f x, H x x.2⟩)) :
   profinitely_filtered_pseudo_normed_group_hom M₁ M₂ :=
-{ strict' := h, continuous' := h', .. f}
+{ bound' := by { obtain ⟨C, hC⟩ := h, refine ⟨C, λ c, (hC c).some⟩ },
+  continuous' := λ c₁ c₂ f₀ hf₀,
+  begin
+    obtain ⟨C, hC⟩ := h,
+    obtain ⟨_, H⟩ := hC c₁,
+    haveI : fact ((C * c₁) ≤ max (C * c₁) c₂) := le_max_left _ _,
+    haveI : fact (c₂ ≤ max (C * c₁) c₂) := le_max_right _ _,
+    rw (embedding_cast_le c₂ (max (C * c₁) c₂)).continuous_iff,
+    rw (embedding_cast_le (C * c₁) (max (C * c₁) c₂)).continuous_iff at H,
+    convert H using 1,
+    ext, dsimp, rw ← hf₀, refl
+  end,
+  .. f}
 
-@[simp] lemma coe_mk' (f : M₁ →+ M₂) (h) (h') : ⇑(mk' f h h') = f := rfl
+@[simp] lemma coe_mk' (f : M₁ →+ M₂) (h) : ⇑(mk' f h) = f := rfl
 
-lemma strict {c : ℝ≥0} {x : M₁} (h : x ∈ filtration M₁ c) : f x ∈ filtration M₂ c :=
-f.strict' c x h
+lemma bound : ∃ C, ∀ ⦃c x⦄, x ∈ filtration M₁ c → f x ∈ filtration M₂ (C * c) := f.bound'
 
-/-- `f.level c` is the function `filtration M₁ c → filtration M₂ c`
-induced by a `profinitely_filtered_pseudo_normed_group_hom M₁ M₂`. -/
-@[simps] def level (c : ℝ≥0) (x : filtration M₁ c) : filtration M₂ c := ⟨f x, f.strict x.2⟩
+protected lemma continuous ⦃c₁ c₂⦄ (f₀ : filtration M₁ c₁ → filtration M₂ c₂) (h : ∀ x, f ↑x = f₀ x) :
+  continuous f₀ := f.continuous' f₀ h
 
-lemma level_continuous (c : ℝ≥0) : continuous (f.level c) := f.continuous' c
+-- /-- `f.level c` is the function `filtration M₁ c → filtration M₂ c`
+-- induced by a `profinitely_filtered_pseudo_normed_group_hom M₁ M₂`. -/
+-- @[simps] def level (c : ℝ≥0) (x : filtration M₁ c) : filtration M₂ c := ⟨f x, f.strict x.2⟩
+
+-- lemma level_continuous (c : ℝ≥0) : continuous (f.level c) := f.continuous' c
 
 variables {f g}
 
@@ -134,29 +136,44 @@ variables {f g}
 by cases f; cases g; congr'; exact funext H
 
 instance : has_zero (profinitely_filtered_pseudo_normed_group_hom M₁ M₂) :=
-⟨{ strict' := λ c x h, zero_mem_filtration c,
-   continuous' := λ c, @continuous_const _ (filtration M₂ c) _ _ ⟨0, zero_mem_filtration c⟩,
-   .. (0 : M₁ →+ M₂) }⟩
+⟨mk' (0 : M₁ →+ M₂) ⟨0, λ c, ⟨λ _ _, zero_mem_filtration _, @continuous_const _ _ _ _ 0⟩⟩⟩
 
 instance : inhabited (profinitely_filtered_pseudo_normed_group_hom M₁ M₂) := ⟨0⟩
 
-lemma coe_inj ⦃f g : profinitely_filtered_pseudo_normed_group_hom M₁ M₂⦄ (h : (f : M₁ → M₂) = g) : f = g :=
+lemma coe_inj ⦃f g : profinitely_filtered_pseudo_normed_group_hom M₁ M₂⦄ (h : (f : M₁ → M₂) = g) :
+  f = g :=
 by cases f; cases g; cases h; refl
 
 /-- The identity function as `profinitely_filtered_pseudo_normed_group_hom`. -/
 @[simps] def id : profinitely_filtered_pseudo_normed_group_hom M M :=
-{ strict' := λ c x, id,
-  continuous' := λ c, by { convert continuous_id, ext, refl },
-  .. add_monoid_hom.id _ }
+mk' (add_monoid_hom.id _) $
+begin
+  refine ⟨1, λ c, ⟨_, _⟩⟩,
+  { intros, rwa one_mul },
+  haveI : fact (1 * c ≤ c) := by { apply le_of_eq, rw one_mul },
+  rw (embedding_cast_le (1 * c) c).continuous_iff,
+  convert continuous_id, ext, refl
+end
 
 /-- The composition of `profinitely_filtered_pseudo_normed_group_hom`s. -/
 @[simps] def comp
   (g : profinitely_filtered_pseudo_normed_group_hom M₂ M₃)
   (f : profinitely_filtered_pseudo_normed_group_hom M₁ M₂) :
   profinitely_filtered_pseudo_normed_group_hom M₁ M₃ :=
-{ strict' := λ c x hxc, g.strict (f.strict hxc),
-  continuous' := λ c, (g.level_continuous c).comp (f.level_continuous c),
-  .. g.to_add_monoid_hom.comp f.to_add_monoid_hom }
+mk' (g.to_add_monoid_hom.comp f.to_add_monoid_hom) $
+begin
+  obtain ⟨Cf, hCf⟩ := f.bound,
+  obtain ⟨Cg, hCg⟩ := g.bound,
+  refine ⟨Cg * Cf, λ c, ⟨_, _⟩⟩,
+  { intros x hx, rw mul_assoc, exact hCg (hCf hx) },
+  let f₀ : filtration M₁ c → filtration M₂ (Cf * c) := λ x, ⟨f x, hCf x.2⟩,
+  have hf₀ : continuous f₀ := f.continuous _ (λ x, rfl),
+  let g₀ : filtration M₂ (Cf * c) → filtration M₃ (Cg * (Cf * c)) := λ x, ⟨g x, hCg x.2⟩,
+  have hg₀ : continuous g₀ := g.continuous _ (λ x, rfl),
+  haveI : fact (Cg * Cf * c ≤ Cg * (Cf * c)) := by { apply le_of_eq, rw mul_assoc },
+  rw (embedding_cast_le (Cg * Cf * c) (Cg * (Cf * c))).continuous_iff,
+  exact hg₀.comp hf₀
+end
 
 end profinitely_filtered_pseudo_normed_group_hom
 

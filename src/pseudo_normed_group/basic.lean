@@ -76,6 +76,23 @@ namespace pseudo_normed_group
 
 variables {M : Type*} [pseudo_normed_group M]
 
+instance (c : ℝ≥0) : has_zero (filtration M c) := ⟨⟨0, zero_mem_filtration _⟩⟩
+instance (c : ℝ≥0) : has_neg (filtration M c) := ⟨λ x, ⟨-x, neg_mem_filtration x.2⟩⟩
+
+/-- Bounded uncurried addition for pseudo normed groups. -/
+def add' {c₁ c₂} (x : (filtration M c₁) × (filtration M c₂)) : filtration M (c₁ + c₂) :=
+⟨(x.1 + x.2 : M), add_mem_filtration x.1.2 x.2.2⟩
+
+@[simp] lemma add'_eq {c₁ c₂ : ℝ≥0} (x : (filtration M c₁) × (filtration M c₂)) :
+  (add' x : M) = x.1 + x.2 := rfl
+
+/-- Bounded negation for pseudo normed groups. -/
+def neg' {c} (x : filtration M c) : filtration M c :=
+⟨(-x : M), neg_mem_filtration x.2⟩
+
+@[simp] lemma neg'_eq {c : ℝ≥0} (x : filtration M c) :
+  (neg' x : M) = -x := rfl
+
 lemma sub_mem_filtration ⦃c₁ c₂ x₁ x₂⦄ (h₁ : x₁ ∈ filtration M c₁) (h₂ : x₂ ∈ filtration M c₂) :
   x₁ - x₂ ∈ filtration M (c₁ + c₂) :=
 by { rw [sub_eq_add_neg], exact add_mem_filtration h₁ (neg_mem_filtration h₂) }
