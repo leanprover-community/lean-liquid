@@ -132,11 +132,24 @@ by cases f; cases g; cases h; refl
                   ... = Tinv (g (f x)) : by rw g.map_Tinv,
   .. (g.to_add_monoid_hom.comp f.to_add_monoid_hom) }
 
+/-- The `profinitely_filtered_pseudo_normed_group_hom` underlying a
+`profinitely_filtered_pseudo_normed_group_with_Tinv_hom`. -/
+def to_profinitely_filtered_pseudo_normed_group_hom :
+  profinitely_filtered_pseudo_normed_group_hom M₁ M₂ :=
+profinitely_filtered_pseudo_normed_group_hom.mk' f.to_add_monoid_hom
+begin
+  refine ⟨1, λ c, ⟨_, _⟩⟩,
+  { rw one_mul, intros x h, exact f.strict h },
+  haveI : fact (1 * c ≤ c) := by { apply le_of_eq, rw one_mul },
+  rw (embedding_cast_le (1 * c) c).continuous_iff,
+  exact f.level_continuous c
+end
+
 end profinitely_filtered_pseudo_normed_group_with_Tinv_hom
 
 namespace punit
 
-def profinitely_filtered_pseudo_normed_group_with_Tinv (r : ℝ≥0) :
+instance profinitely_filtered_pseudo_normed_group_with_Tinv (r : ℝ≥0) :
   profinitely_filtered_pseudo_normed_group_with_Tinv r punit :=
 { Tinv := profinitely_filtered_pseudo_normed_group_hom.id,
   Tinv_mem_filtration := λ c x h, set.mem_univ _,
