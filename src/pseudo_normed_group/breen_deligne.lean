@@ -68,6 +68,8 @@ end pseudo_normed_group
 
 section profinitely_filtered_pseudo_normed_group
 
+open pseudo_normed_group
+
 variables [profinitely_filtered_pseudo_normed_group M]
 
 lemma pfpng_ctu'_eval_png : pfpng_ctu' (f.eval_png M) :=
@@ -76,11 +78,18 @@ begin
   { ext x j,
     rw [f.eval_png_apply M x, finset.sum_apply, finset.sum_apply] },
   rw this,
-  refine pfpng_ctu'_sum _ _ _,
-  rintro i -,
-  refine pfpng_ctu'_of_pfpng_ctu i (λ (x : M) j, f j i • x) _,
-  intro j,
-  exact pfpng_ctu_smul_int _ _
+  refine pfpng_ctu'_sum _ _ _ _,
+  { rintro i -,
+    refine pfpng_ctu'_of_pfpng_ctu i (λ (x : M) j, f j i • x) _,
+    intro j,
+    exact pfpng_ctu_smul_int _ _ },
+  { rintro i - c₁,
+    let C : ℝ≥0 := finset.univ.sup (λ j, (f j i).nat_abs),
+    refine ⟨C * c₁, _⟩,
+    intros x j,
+    have := add_monoid_hom.const_smul_hom_int_mem_filtration (f j i) _ le_rfl (x i).2,
+    apply filtration_mono (mul_le_mul' _ le_rfl) this,
+    exact finset.le_sup (finset.mem_univ j) }
 end
 
 end profinitely_filtered_pseudo_normed_group

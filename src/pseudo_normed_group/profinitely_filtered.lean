@@ -313,6 +313,8 @@ def pfpng_ctu' {m n : ℕ} (f : M₁^m → M₂^n) : Prop :=
 
 section pfpng_ctu'
 
+open profinitely_filtered_pseudo_normed_group
+
 variables {m n : ℕ}
 
 lemma pfpng_ctu'_const (y : M₂^n) : pfpng_ctu' (λ x : M₁^m, y) :=
@@ -323,29 +325,6 @@ begin
   ext1 x,
   apply pow_incl_injective,
   rw [← h, ← h]
-end
-
-lemma pfpng_ctu'.add {f g : M₁^m → M₂^n} (hf : pfpng_ctu' f) (hg : pfpng_ctu' g) :
-  pfpng_ctu' (f + g) :=
-begin
-  intros c₁ c₂ fg₀ h,
-  -- statement needs adjusting, see `pfnpg_ctu.add`.
-  sorry
-end
-
-lemma pfpng_ctu'_sum {ι : Type*} (s : finset ι)
-  (f : ι → M₁^m → M₂^n) (h : ∀ i ∈ s, pfpng_ctu' (f i)) :
-  pfpng_ctu' (∑ i in s, f i) :=
-begin
-  classical, revert h,
-  apply finset.induction_on s; clear s,
-  { simp only [finset.sum_empty], intro, exact pfpng_ctu'_const 0 },
-  intros i s his IH h,
-  simp [his, IH, h, finset.sum_insert],
-  apply pfpng_ctu'.add,
-  { exact h _ (finset.mem_insert_self _ _) },
-  { apply IH,
-    intros i' hi', exact h _ (finset.mem_insert_of_mem hi') }
 end
 
 lemma pfpng_ctu'_of_pfpng_ctu (i : fin m) (f : M₁ → M₂^n) (h : ∀ j, pfpng_ctu (λ x, f x j)) :
@@ -368,6 +347,62 @@ end
 -- lemma pfpng_ctu'_iff_pfpng_ctu (i : fin m) (f : M₁ → M₂^n) :
 --   pfpng_ctu' (λ x, f (x i)) ↔ (∀ j, pfpng_ctu (λ x, f x j)) :=
 -- sorry
+
+lemma pfpng_ctu'.add {f g : M₁^m → M₂^n} (hf : pfpng_ctu' f) (hg : pfpng_ctu' g)
+  (H : ∀ c₁, ∃ c₂, ∀ (x : (filtration M₁ c₁ : Type*)^m) j, f (pow_incl x) j ∈ filtration M₂ c₂) :
+  pfpng_ctu' (f + g) :=
+begin
+  intros c₁ c₂ fg₀ hfg₀,
+  obtain ⟨cf, hcf⟩ := H c₁,
+  let f₀ : (filtration M₁ c₁ : Type*)^m → (filtration M₂ cf : Type*)^n :=
+  λ x j, ⟨f (pow_incl x) j, hcf x j⟩,
+  have hf₀ : ∀ x, f (pow_incl x) = pow_incl (f₀ x) := λ x, rfl,
+  have f₀_ctu : continuous f₀ := hf f₀ hf₀,
+  let cg := cf + c₂,
+  haveI : fact (c₂ ≤ cf + cg) :=
+    calc c₂ ≤ cf + c₂        : self_le_add_left _ _
+        ... ≤ cf + (cf + c₂) : self_le_add_left _ _,
+  have hcg : ∀ (x : (filtration M₁ c₁ : Type*)^m) j, g (pow_incl x) j ∈ filtration M₂ cg,
+  { intros x j,
+    have : g (pow_incl x) j = -(f (pow_incl x) j) + (f + g) (pow_incl x) j,
+    { simp only [pi.add_apply, neg_add_cancel_left] },
+    rw this,
+    refine add_mem_filtration (neg_mem_filtration $ hcf x j) _,
+    rw hfg₀,
+    exact (fg₀ x j).2 },
+  let g₀ : (filtration M₁ c₁ : Type*)^m → (filtration M₂ cg : Type*)^n :=
+  λ x j, ⟨g (pow_incl x) j, hcg x j⟩,
+  have hg₀ : ∀ x, g (pow_incl x) = pow_incl (g₀ x) := λ x, rfl,
+  have g₀_ctu : continuous g₀ := hg g₀ hg₀,
+  have aux := f₀_ctu.prod_mk g₀_ctu,
+  apply continuous_pi,
+  intro j,
+  have aux' := ((continuous_apply j).prod_map (continuous_apply j)).comp aux,
+  dsimp [function.comp] at aux',
+  rw (embedding_cast_le c₂ (cf + cg)).continuous_iff,
+  convert (continuous_add' cf cg).comp aux' using 1,
+  ext x,
+  replace hfg₀ := congr_fun (hfg₀ x) j,
+  dsimp at hfg₀ ⊢, rw [← hfg₀, add'_eq], refl
+end
+
+lemma pfpng_ctu'_sum {ι : Type*} (s : finset ι)
+  (f : ι → M₁^m → M₂^n) (h : ∀ i ∈ s, pfpng_ctu' (f i))
+  (H : ∀ i ∈ s, ∀ c₁, ∃ c₂, ∀ (x : (filtration M₁ c₁ : Type*)^m) j, f i (pow_incl x) j ∈ filtration M₂ c₂) :
+  pfpng_ctu' (∑ i in s, f i) :=
+begin
+  classical, revert h H,
+  apply finset.induction_on s; clear s,
+  { simp only [finset.sum_empty], intros, exact pfpng_ctu'_const 0 },
+  intros i s his IH h H,
+  simp [his, IH, h, finset.sum_insert],
+  apply pfpng_ctu'.add,
+  { exact h _ (finset.mem_insert_self _ _) },
+  { apply IH,
+    { intros i' hi', exact h _ (finset.mem_insert_of_mem hi') },
+    { intros i' hi', exact H _ (finset.mem_insert_of_mem hi') } },
+  { exact H _ (finset.mem_insert_self _ _) }
+end
 
 end pfpng_ctu'
 
