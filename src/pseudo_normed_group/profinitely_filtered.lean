@@ -167,6 +167,11 @@ namespace punit
 -- move this
 instance : topological_space punit := ⊥
 
+-- move this
+instance (X : Type*) [subsingleton X] (p : X → Prop) :
+  subsingleton (subtype p) :=
+⟨λ x y, subtype.ext $ subsingleton.elim _ _⟩
+
 instance : profinitely_filtered_pseudo_normed_group punit :=
 { filtration := λ _, set.univ,
   filtration_mono := λ _ _ _, set.subset_univ _,
@@ -180,7 +185,7 @@ instance : profinitely_filtered_pseudo_normed_group punit :=
   neg'_eq := λ _ _, dec_trivial,
   continuous_neg' := λ _, continuous_const,
   embedding_cast_le := λ c₁ c₂ h,
-  { induced := sorry,
+  { induced := subsingleton.elim _ _,
     inj := λ _ _ _, subtype.ext dec_trivial } }
 
 end punit
