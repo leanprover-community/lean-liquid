@@ -4,6 +4,7 @@ import topology.algebra.group
 import pseudo_normed_group.basic
 
 import hacks_and_tricks.type_pow
+import facts
 
 open pseudo_normed_group
 open_locale nnreal big_operators
@@ -59,11 +60,11 @@ def neg' {c} (x : filtration M c) : filtration M c :=
   (neg' x : M) = -x := rfl
 
 end profinitely_filtered_pseudo_normed_group
+
 section
 set_option old_structure_cmd true
 
-structure profinitely_filtered_pseudo_normed_group_hom
-  (M₁ M₂ : Type*)
+structure profinitely_filtered_pseudo_normed_group_hom (M₁ M₂ : Type*)
   [profinitely_filtered_pseudo_normed_group M₁]
   [profinitely_filtered_pseudo_normed_group M₂]
   extends M₁ →+ M₂ :=
@@ -187,6 +188,8 @@ section continuity
 
 variables {M M₁ M₂ M₃ : Type*}
 
+namespace pseudo_normed_group
+
 /-- Helper function for pseudo normed groups.
 `pow_incl` is the natural inclusion function `(filtration M c)^n → M^n`.
 Note that `(filtration M c)^n` is not the same type as `filtration (M^n) c`,
@@ -202,6 +205,10 @@ lemma pow_incl_injective {n : ℕ} {c : ℝ≥0} [pseudo_normed_group M] :
 @[simp] lemma pow_incl_apply {n : ℕ} {c : ℝ≥0} [pseudo_normed_group M]
   (x : (filtration M c : Type*)^n) (j : fin n) :
   pow_incl x j = x j := rfl
+
+end pseudo_normed_group
+
+open pseudo_normed_group profinitely_filtered_pseudo_normed_group
 
 variables [profinitely_filtered_pseudo_normed_group M]
 variables [profinitely_filtered_pseudo_normed_group M₁]
@@ -219,8 +226,6 @@ def pfpng_ctu (f : M₁ → M₂) : Prop :=
   (h : ∀ x, f ↑x = f₀ x), continuous f₀
 
 section pfpng_ctu
-
-open profinitely_filtered_pseudo_normed_group
 
 lemma pfpng_ctu_const (y : M₂) : pfpng_ctu (λ x : M₁, y) :=
 begin
@@ -310,8 +315,6 @@ def pfpng_ctu' {m n : ℕ} (f : M₁^m → M₂^n) : Prop :=
   (h : ∀ x, f (pow_incl x) = pow_incl (f₀ x)), continuous f₀
 
 section pfpng_ctu'
-
-open profinitely_filtered_pseudo_normed_group
 
 variables {m n : ℕ}
 

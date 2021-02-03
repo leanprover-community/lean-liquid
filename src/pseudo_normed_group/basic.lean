@@ -136,6 +136,27 @@ def cast_le {c₁ c₂ : ℝ≥0} [h : fact (c₁ ≤ c₂)] (x : filtration M c
 @[simp] lemma coe_cast_le {c₁ c₂ : ℝ≥0} [h : fact (c₁ ≤ c₂)] (x : filtration M c₁) :
   ((cast_le x : filtration M c₂) : M) = x := rfl
 
+variables (M)
+
+/-- `rescale M r` is the pseudo normed group whose filtration is rescaled by `r : ℝ≥0`.
+So `filtration (rescale M r) c` is `filtration M (r * c)`-/
+@[nolint unused_argument, derive add_comm_group]
+def rescale (r : ℝ≥0) := M
+
+namespace rescale
+
+variable (r : ℝ≥0)
+
+instance : pseudo_normed_group (rescale M r) :=
+{ filtration := λ c, show set M, from filtration M (r * c),
+  filtration_mono := λ c₁ c₂ h, filtration_mono (mul_le_mul' le_rfl h),
+  zero_mem_filtration := λ c, @zero_mem_filtration M _ _,
+  neg_mem_filtration := λ c, @neg_mem_filtration M _ _,
+  add_mem_filtration := λ c₁ c₂,
+    by { dsimp, rw mul_add, apply add_mem_filtration } }
+
+end rescale
+
 end pseudo_normed_group
 
 open pseudo_normed_group
