@@ -34,31 +34,31 @@ Implementation detail: `cochain_complex` assumes that the complex is indexed by 
 whereas we are interested in complexes indexed by `ℕ`.
 We therefore set all objects indexed by negative integers to `0`, in our use case. -/
 @[derive category_theory.category]
-def system_of_complexes := ℝ≥0ᵒᵖ ⥤ (cochain_complex NormedGroup)
+def system_of_complexes : Type* := ℝ≥0ᵒᵖ ⥤ (cochain_complex NormedGroup)
 
 variables {M M' N : system_of_complexes.{u}} (f : M ⟶ M') (g : M' ⟶ N)
 
-def category_theory.has_hom.hom.apply (f : M ⟶ N) (c : ℝ≥0) (i : ℤ) :=
+/-- `C.X c i` is the object $C_c^i$ in a system of complexes `C`. -/
+def system_of_complexes.X (C : system_of_complexes.{u}) (c : ℝ≥0) (i : ℤ) : NormedGroup :=
+(C.obj $ op c).X i
+
+/-- `f.apply c i` is application of the natural transformation `f`: $f_c^i : M_c^i ⟶ N_c^i$. -/
+def category_theory.has_hom.hom.apply (f : M ⟶ N) (c : ℝ≥0) (i : ℤ) : M.X c i ⟶ N.X c i :=
 (f.app (op c)).f i
 
 namespace system_of_complexes
 
 variables (C C₁ C₂ : system_of_complexes.{u})
 
-/-- `C.X c i` is the object $C_c^i$ in a system of complexes `C`. -/
-def X (c : ℝ≥0) (i : ℤ) : NormedGroup :=
-(C.obj $ op c).X i
-
 /-- `C.res` is the restriction map `C.X c' i ⟶ C.X c i` for a system of complexes `C`,
 and nonnegative reals `c ≤ c'`. -/
-def res {c' c : ℝ≥0} {i : ℤ} [h : fact (c ≤ c')] :
-  C.X c' i ⟶ C.X c i :=
+def res {c' c : ℝ≥0} {i : ℤ} [h : fact (c ≤ c')] : C.X c' i ⟶ C.X c i :=
 (C.map (hom_of_le h).op).f i
 
 variables {c₁ c₂ c₃ : ℝ≥0} (i : ℤ)
 
 @[simp] lemma res_comp_res (h₁ : fact (c₂ ≤ c₁)) (h₂ : fact (c₃ ≤ c₂)) :
-  @res C _ _ i h₁ ≫ @res C _ _ i h₂  = @res C _ _ i (le_trans h₂ h₁) :=
+  @res C _ _ i h₁ ≫ @res C _ _ i h₂ = @res C _ _ i (le_trans h₂ h₁) :=
 begin
   have := (category_theory.functor.map_comp C (hom_of_le h₁).op (hom_of_le h₂).op),
   rw [← op_comp] at this,
