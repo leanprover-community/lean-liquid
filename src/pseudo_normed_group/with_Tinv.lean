@@ -18,7 +18,7 @@ class profinitely_filtered_pseudo_normed_group_with_Tinv (r : out_param $ ℝ≥
 
 namespace profinitely_filtered_pseudo_normed_group_with_Tinv
 
-variables {M M₁ M₂ M₃ : Type*} {r : ℝ≥0}
+variables {r : ℝ≥0} {M M₁ M₂ M₃ : Type*}
 variables [profinitely_filtered_pseudo_normed_group_with_Tinv r M]
 variables [profinitely_filtered_pseudo_normed_group_with_Tinv r M₁]
 variables [profinitely_filtered_pseudo_normed_group_with_Tinv r M₂]
@@ -29,6 +29,12 @@ variables [profinitely_filtered_pseudo_normed_group_with_Tinv r M₃]
 -- instance (c : ℝ≥0) : totally_disconnected_space (filtration M c) := td c
 -- instance (c : ℝ≥0) : compact_space (filtration M c) := compact c
 
+@[simps]
+def Tinv₀ (c : ℝ≥0) (x : filtration M c) : filtration M (r⁻¹ * c) :=
+⟨Tinv (x : M), Tinv_mem_filtration _ _ x.2⟩
+
+lemma Tinv₀_continuous (c : ℝ≥0) : continuous (@Tinv₀ r M _ c) :=
+Tinv.continuous _ $ λ x, rfl
 end profinitely_filtered_pseudo_normed_group_with_Tinv
 
 section
@@ -36,7 +42,7 @@ set_option old_structure_cmd true
 
 open profinitely_filtered_pseudo_normed_group_with_Tinv
 
-structure profinitely_filtered_pseudo_normed_group_with_Tinv_hom (r : ℝ≥0) (M₁ M₂ : Type*) 
+structure profinitely_filtered_pseudo_normed_group_with_Tinv_hom (r : ℝ≥0) (M₁ M₂ : Type*)
   [profinitely_filtered_pseudo_normed_group_with_Tinv r M₁]
   [profinitely_filtered_pseudo_normed_group_with_Tinv r M₂]
   extends M₁ →+ M₂ :=
