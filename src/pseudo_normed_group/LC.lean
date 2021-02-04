@@ -292,28 +292,56 @@ end
 lemma map_comp_eval_LCFP [ϕ.suitable c₁ c₂] :
   map V r' c₂ n f ≫ ϕ.eval_LCFP V r' M₁ c₁ c₂ = ϕ.eval_LCFP V r' M₂ c₁ c₂ ≫ map V r' c₁ m f :=
 begin
-  sorry
+  show normed_group_hom.comp_hom _ _ = normed_group_hom.comp_hom _ _,
+  simp only [eval_LCFP_def, add_monoid_hom.map_sum, add_monoid_hom.sum_apply],
+  apply finset.sum_congr rfl,
+  intros g hg,
+  haveI : g.suitable c₁ c₂ := suitable_of_mem_support ϕ c₁ c₂ g hg,
+  simp only [← gsmul_eq_smul, add_monoid_hom.map_gsmul, add_monoid_hom.gsmul_apply],
+  congr' 1,
+  exact g.map_comp_eval_LCFP V r' _ _ _
 end
 
 lemma res_comp_eval_LCFP
   [fact (c₁ ≤ c₂)] [ϕ.suitable c₂ c₄] [ϕ.suitable c₁ c₃] [fact (c₃ ≤ c₄)] :
   res V r' c₃ c₄ n ≫ ϕ.eval_LCFP V r' M c₁ c₃ = ϕ.eval_LCFP V r' M c₂ c₄ ≫ res V r' c₁ c₂ m :=
 begin
-  sorry
+  show normed_group_hom.comp_hom _ _ = normed_group_hom.comp_hom _ _,
+  simp only [eval_LCFP_def, add_monoid_hom.map_sum, add_monoid_hom.sum_apply],
+  apply finset.sum_congr rfl,
+  intros g hg,
+  simp only [← gsmul_eq_smul, add_monoid_hom.map_gsmul, add_monoid_hom.gsmul_apply],
+  haveI : g.suitable c₂ c₄ := suitable_of_mem_support ϕ _ _ g hg,
+  haveI : g.suitable c₁ c₃ := suitable_of_mem_support ϕ _ _ g hg,
+  congr' 1,
+  exact g.res_comp_eval_LCFP V r' M c₁ c₂ c₃ c₄
 end
 
 lemma Tinv_comp_eval_LCFP [fact (0 < r')] [ϕ.suitable c₁ c₂] :
   Tinv V r' c₂ n ≫ ϕ.eval_LCFP V r' M (r' * c₁) (r' * c₂) = ϕ.eval_LCFP V r' M c₁ c₂ ≫ Tinv V r' c₁ m :=
 begin
-  sorry
+  show normed_group_hom.comp_hom _ _ = normed_group_hom.comp_hom _ _,
+  simp only [eval_LCFP_def, add_monoid_hom.map_sum, add_monoid_hom.sum_apply],
+  apply finset.sum_congr rfl,
+  intros g hg,
+  haveI : g.suitable c₁ c₂ := suitable_of_mem_support ϕ c₁ c₂ g hg,
+  simp only [← gsmul_eq_smul, add_monoid_hom.map_gsmul, add_monoid_hom.gsmul_apply],
+  congr' 1,
+  exact g.Tinv_comp_eval_LCFP V r' _ _ _
 end
 
 lemma T_inv_comp_eval_LCFP [normed_with_aut r V] [fact (0 < r)] [ϕ.suitable c₁ c₂] :
   T_inv r V r' c₂ n ≫ ϕ.eval_LCFP V r' M₁ c₁ c₂ =
     ϕ.eval_LCFP V r' M₁ c₁ c₂ ≫ T_inv r V r' c₁ m :=
 begin
-  simp only [eval_LCFP_def],
-  sorry
+  show normed_group_hom.comp_hom _ _ = normed_group_hom.comp_hom _ _,
+  simp only [eval_LCFP_def, add_monoid_hom.map_sum, add_monoid_hom.sum_apply],
+  apply finset.sum_congr rfl,
+  intros g hg,
+  haveI : g.suitable c₁ c₂ := suitable_of_mem_support ϕ c₁ c₂ g hg,
+  simp only [← gsmul_eq_smul, add_monoid_hom.map_gsmul, add_monoid_hom.gsmul_apply],
+  congr' 1,
+  exact g.T_inv_comp_eval_LCFP r V r' _ _
 end
 
 end universal_map
