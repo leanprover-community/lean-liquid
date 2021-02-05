@@ -44,11 +44,11 @@ def system_of_complexes.X (C : system_of_complexes.{u}) (c : ℝ≥0) (i : ℤ) 
 (C.obj $ op c).X i
 
 /-- `f.apply c i` is application of the natural transformation `f`: $f_c^i : M_c^i ⟶ N_c^i$. -/
-def category_theory.has_hom.hom.apply (f : M ⟶ N) (c : ℝ≥0) (i : ℤ) : M.X c i ⟶ N.X c i :=
+def category_theory.has_hom.hom.apply (f : M ⟶ N) {c : ℝ≥0} {i : ℤ} : M.X c i ⟶ N.X c i :=
 (f.app (op c)).f i
 
 /-- `f.apply c i` is application of the natural isomorphism `f`: $f_c^i : M_c^i ≅ N_c^i$. -/
-def category_theory.iso.apply (f : M ≅ N) (c : ℝ≥0) (i : ℤ) : M.X c i ≅ N.X c i :=
+def category_theory.iso.apply (f : M ≅ N) {c : ℝ≥0} {i : ℤ} : M.X c i ≅ N.X c i :=
 pi.iso_app (differential_object.iso_app $ f.app $ op c) i
 
 namespace system_of_complexes
@@ -90,6 +90,34 @@ lemma d_res (h : fact (c₂ ≤ c₁)) (x) :
 show (@res C _ _ i _ ≫ @d C c₂ i) x = (@d C c₁ i ≫ @res C _ _ _ h) x,
 by rw d_comp_res
 
+section iso
+
+variables (ϕ : M ≅ N) (c : ℝ≥0) (i)
+
+lemma apply_hom_eq_hom_apply : (ϕ.apply.hom : M.X c i ⟶ N.X c i) = ϕ.hom.apply := rfl
+
+lemma apply_inv_eq_inv_apply : (ϕ.apply.inv : N.X c i ⟶ M.X c i) = ϕ.inv.apply := rfl
+
+@[simp] lemma hom_apply_comp_inv_apply :
+  (ϕ.hom.apply : M.X c i ⟶ N.X c i) ≫ ϕ.inv.apply = 𝟙 _ :=
+by rw [← apply_hom_eq_hom_apply, ← apply_inv_eq_inv_apply, iso.hom_inv_id]
+
+@[simp] lemma inv_apply_comp_hom_apply :
+  (ϕ.inv.apply : N.X c i ⟶ M.X c i) ≫ ϕ.hom.apply = 𝟙 _ :=
+by rw [← apply_hom_eq_hom_apply, ← apply_inv_eq_inv_apply, iso.inv_hom_id]
+
+@[simp] lemma inv_apply_hom_apply (x : M.X c i) :
+  ϕ.inv.apply (ϕ.hom.apply x) = x :=
+show ((ϕ.hom.apply : M.X c i ⟶ N.X c i) ≫ ϕ.inv.apply) x = x,
+by simp only [hom_apply_comp_inv_apply, coe_id, id.def]
+
+@[simp] lemma hom_apply_inv_apply (x : N.X c i) :
+  ϕ.hom.apply (ϕ.inv.apply x) = x :=
+show ((ϕ.inv.apply : N.X c i ⟶ M.X c i) ≫ ϕ.hom.apply) x = x,
+by simp only [inv_apply_comp_hom_apply, coe_id, id.def]
+
+end iso
+
 /-- Convenience definition:
 The identity morphism of an object in the system of complexes
 when it is given by different indices that are not
@@ -101,7 +129,7 @@ eq_to_hom $ by { subst hc, subst hi }
 variables (M M' N)
 
 lemma d_apply (f : M ⟶ N) {c : ℝ≥0} {i : ℤ} (m : M.X c i) :
-  N.d (f.apply c i m) = f.apply c (i + 1) (M.d m) :=
+  N.d (f.apply m) = f.apply (M.d m) :=
 begin
   have h : ((M.obj (op c)).d i ≫ (f.app (op c)).f (i + 1)) m =
     (f.app (op c)).f (i + 1) ((M.obj (op c)).d i m),
@@ -110,8 +138,7 @@ begin
 end
 
 lemma res_comp_apply (f : M ⟶ N) (c c' : ℝ≥0) [h : fact (c ≤ c')] (i : ℤ) :
-  @system_of_complexes.res M c' c _ _ ≫ (f.apply c i) =
-  f.apply c' i ≫ (@system_of_complexes.res N c' c _ _) :=
+  @res M c' c i _ ≫ f.apply = f.apply ≫ N.res :=
 begin
   have step1 := f.naturality (hom_of_le h).op,
   have step2 := congr_arg differential_object.hom.f step1,
@@ -119,11 +146,9 @@ begin
 end
 
 lemma res_apply (f : M ⟶ N) (c c' : ℝ≥0) [h : fact (c ≤ c')] {i : ℤ} (m : M.X c' i) :
-  @system_of_complexes.res N c' c _ _ (f.apply c' i m) =
-  f.apply c i (@system_of_complexes.res M c' c _ _ m) :=
+  @res N c' c _ _ (f.apply m) = f.apply (M.res m) :=
 begin
-  show (f.apply c' i ≫ (@system_of_complexes.res N c' c _ _)) m =
-    (@system_of_complexes.res M c' c _ _ ≫ (f.apply c i)) m,
+  show (f.apply ≫ (@res N c' c _ _)) m = (@res M c' c _ _ ≫ (f.apply)) m,
   rw res_comp_apply
 end
 
@@ -132,8 +157,8 @@ if all the differentials and restriction maps are norm-nonincreasing.
 
 See Definition 9.3 of [Analytic]. -/
 structure admissible (C : system_of_complexes) : Prop :=
-(d_norm_noninc : ∀ c i (x : C.X c i), ∥C.d x∥ ≤ ∥x∥)
-(res_norm_noninc : ∀ c' c i h (x : C.X c' i), ∥@res C c' c i h x∥ ≤ ∥x∥)
+(d_norm_noninc : ∀ c i, (C.d : C.X c i ⟶ C.X c (i+1)).norm_noninc)
+(res_norm_noninc : ∀ c' c i h, (@res C c' c i h).norm_noninc)
 
 /-
 Peter Scholze:
@@ -199,12 +224,25 @@ begin
     simp only [one_mul, nnreal.coe_one] }
 end
 
-lemma of_iso (h : C₁.is_bdd_exact_for_bdd_degree_above_idx k m c₀) (f : C₁ ≅ C₂) :
+lemma of_iso (h : C₁.is_bdd_exact_for_bdd_degree_above_idx k m c₀) (f : C₁ ≅ C₂)
+  (hf : ∀ c i, (f.hom.apply : C₁.X c i ⟶ C₂.X c i).is_strict) :
   C₂.is_bdd_exact_for_bdd_degree_above_idx k m c₀ :=
 begin
   intros c hc i hi x,
-  specialize h c hc i hi,
-  sorry
+  obtain ⟨y, hy⟩ := h c hc i hi (f.inv.apply x),
+  refine ⟨f.hom.apply y, _⟩,
+  calc  ∥C₂.res x - C₂.d (f.hom.apply y)∥
+      = ∥C₂.res x - f.hom.apply (C₁.d y)∥ : by rw d_apply
+  ... = ∥f.hom.apply (f.inv.apply (C₂.res x)) - f.hom.apply (C₁.d y)∥ : by rw hom_apply_inv_apply
+  ... = ∥f.hom.apply (f.inv.apply (C₂.res x) - C₁.d y)∥ : by rw f.hom.apply.map_sub
+  ... = ∥f.inv.apply (C₂.res x) - C₁.d y∥ : hf _ _ _
+  ... = ∥C₁.res (f.inv.apply x) - C₁.d y∥ : by rw res_apply
+  ... ≤ k * ∥C₁.d (f.inv.apply x)∥ : hy
+  ... = k * ∥(C₂.d) x∥ : congr_arg _ _,
+  calc  ∥C₁.d (f.inv.apply x)∥
+      = ∥f.inv.apply (C₂.d x)∥ : by rw d_apply
+  ... = ∥f.hom.apply (f.inv.apply (C₂.d x))∥ : (hf _ _ _).symm
+  ... = ∥(C₂.d) x∥ : by rw hom_apply_inv_apply
 end
 
 end is_bdd_exact_for_bdd_degree_above_idx
@@ -217,7 +255,7 @@ variables {M M'}
 
 /-- The quotient of a system of complexes. -/
 def is_quotient (f : M ⟶ M') : Prop :=
-∀ c i, normed_group_hom.is_quotient (f.apply c i)
+∀ c i, normed_group_hom.is_quotient (f.apply : M.X c i ⟶ M'.X c i)
 
 /-- The quotient of an admissible system of complexes is admissible. -/
 lemma admissible_of_quotient {f : M ⟶ M'} (hquot : is_quotient f) (hadm : M.admissible) :
@@ -229,20 +267,20 @@ begin
     intros ε hε,
     obtain ⟨m, hm⟩ := quotient_norm_lift (hquot _ _) hε m',
     rw [← hm.1, d_apply],
-    calc ∥(f.apply _ _) (M.d m)∥ ≤ ∥M.d m∥ : quotient_norm_le (hquot _ _) _
+    calc ∥f.apply (M.d m)∥ ≤ ∥M.d m∥ : quotient_norm_le (hquot _ _) _
       ... ≤ ∥m∥ : hadm.d_norm_noninc _ _ m
       ... ≤ ∥m'∥ + ε : le_of_lt hm.2
-      ... = ∥(f.apply _ _) m∥ + ε : by rw [hm.1] },
+      ... = ∥f.apply m∥ + ε : by rw [hm.1] },
   { intros c' c i hc m',
     letI h := hc,
     refine le_of_forall_pos_le_add _,
     intros ε hε,
     obtain ⟨m, hm⟩ := quotient_norm_lift (hquot _ _) hε m',
     rw [← hm.1, res_apply],
-    calc ∥(f.apply _ _) (M.res m)∥ ≤ ∥(M.res) m∥ : quotient_norm_le (hquot _ _) _
+    calc ∥f.apply (M.res m)∥ ≤ ∥(M.res) m∥ : quotient_norm_le (hquot _ _) _
       ... ≤ ∥m∥ : hadm.res_norm_noninc c' c _ hc m
       ... ≤ ∥m'∥ + ε : le_of_lt hm.2
-      ... = ∥(f.apply _ _) m∥ + ε : by rw [hm.1] }
+      ... = ∥f.apply m∥ + ε : by rw [hm.1] }
 end
 
 end quotient

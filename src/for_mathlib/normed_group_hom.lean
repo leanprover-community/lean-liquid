@@ -342,15 +342,37 @@ end
 
 end quotient
 
-section strict
+variables {V W V₁ V₂ V₃ : Type*}
+variables [normed_group V] [normed_group W]
+variables [normed_group V₁] [normed_group V₂] [normed_group V₃]
+variables {f : normed_group_hom V W}
 
-variables {V W : Type*} [normed_group V] [normed_group W]
+/-- A `normed_group_hom` is *norm-nonincreasing* if `∥f v∥ ≤ ∥v∥` for all `v`. -/
+def norm_noninc (f : normed_group_hom V W) : Prop :=
+∀ v, ∥f v∥ ≤ ∥v∥
 
 /-- A strict `normed_group_hom` is a `normed_group_hom` that preserves the norm. -/
 def is_strict (f : normed_group_hom V W) : Prop :=
 ∀ v, ∥f v∥ = ∥v∥
 
-lemma normed_group_hom.is_strict.injective {f : normed_group_hom V W} (hf : f.is_strict) :
+namespace norm_noninc
+
+lemma bound_by_one (hf : f.norm_noninc) : f.bound_by 1 :=
+λ v, by simpa only [one_mul, nnreal.coe_one] using hf v
+
+lemma id : (id : normed_group_hom V V).norm_noninc :=
+λ v, le_rfl
+
+lemma comp {g : normed_group_hom V₂ V₃} {f : normed_group_hom V₁ V₂}
+  (hg : g.norm_noninc) (hf : f.norm_noninc) :
+  (g.comp f).norm_noninc :=
+λ v, (hg (f v)).trans (hf v)
+
+end norm_noninc
+
+namespace is_strict
+
+lemma injective (hf : f.is_strict) :
   function.injective f :=
 begin
   intros x y h,
@@ -360,7 +382,22 @@ begin
   simpa,
 end
 
-end strict
+lemma norm_noninc (hf : f.is_strict) : f.norm_noninc :=
+λ v, le_of_eq $ hf v
+
+lemma bound_by_one (hf : f.is_strict) : f.bound_by 1 :=
+hf.norm_noninc.bound_by_one
+
+lemma id : (id : normed_group_hom V V).is_strict :=
+λ v, rfl
+
+lemma comp {g : normed_group_hom V₂ V₃} {f : normed_group_hom V₁ V₂}
+  (hg : g.is_strict) (hf : f.is_strict) :
+  (g.comp f).is_strict :=
+λ v, (hg (f v)).trans (hf v)
+
+end is_strict
 
 end normed_group_hom
+
 #lint- only unused_arguments def_lemma doc_blame
