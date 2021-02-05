@@ -277,6 +277,17 @@ def add (F : Mbar_bdd r S c₁ M) (G : Mbar_bdd r S c₂ M) : Mbar_bdd r S (c₁
     apply int.nat_abs_add_le
   end }
 
+/-- Negation on Mbar_bdd r S c -/
+def neg (F : Mbar_bdd r S c M) : Mbar_bdd r S c M :=
+{ to_fun := -F,
+  coeff_zero' := λ s, by simp,
+  sum_le' :=
+  begin
+    simp only [abs_neg, pi.neg_apply, int.nat_abs_neg, int.nat_abs],
+    exact F.sum_le,
+  end }
+
+
 end addition
 
 end Mbar_bdd

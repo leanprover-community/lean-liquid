@@ -38,7 +38,7 @@ the map `(Mbar_le r' S c₁)^m → (Mbar_le r' S c₂)^n` induced
 by the natural map `(Mbar r' S)^m → (Mbar r' S)^n` associated with `f`. -/
 def eval_Mbar_le [H : f.suitable c₁ c₂] :
   ((Mbar_le r' S c₁)^m) → ((Mbar_le r' S c₂)^n) :=
-Mbar_le.hom_of_normed_group_hom' r' S c₁ c₂ f.sup_mul_le (f.eval_png (Mbar r' S)) $
+Mbar_le.hom_of_normed_group_hom' r' S c₁ c₂ (f.sup_mul_le c₁ c₂) (f.eval_png (Mbar r' S)) $
 λ c F hF, eval_png_mem_filtration _ _ hF
 
 @[simp] lemma eval_Mbar_le_apply [f.suitable c₁ c₂]
@@ -71,7 +71,7 @@ open add_monoid_hom (apply)
 
 lemma eval_Mbar_le_continuous [f.suitable c₁ c₂] :
   continuous (f.eval_Mbar_le r' S c₁ c₂) :=
-Mbar_le.hom_of_normed_group_hom'_continuous _ _ _ _ f.sup_mul_le _ _ $
+Mbar_le.hom_of_normed_group_hom'_continuous _ _ _ _ (f.sup_mul_le c₁ c₂) _ _ $
 begin
   intro M,
   use M,

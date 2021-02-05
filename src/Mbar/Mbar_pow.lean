@@ -5,6 +5,8 @@ import for_mathlib.add_monoid_hom
 import for_mathlib.extend_from_nat
 import facts
 
+import pseudo_normed_group.CLC
+
 import locally_constant.Vhat
 import Mbar.breen_deligne
 
@@ -43,18 +45,18 @@ from `(Mbar_le r' S c)^a` to a normed group `V`.
 
 Mnemonic: `LC` stands for *locally constant*. -/
 def LC_Mbar_pow [fact (0 < r')] : NormedGroup :=
-(NormedGroup.LocallyConstant.obj V).obj (op $ CompHaus.of $ (Mbar_le r' S c)^a)
+(NormedGroup.LocallyConstant.obj V).obj (op $ Profinite.of $ (Mbar_le r' S c)^a)
 
 /-
 In this ↑ definition, we apply the functor
-`(NormedGroup.LocallyConstant.obj V)` to an object of `CompHaus`,
+`(NormedGroup.LocallyConstant.obj V)` to an object of `Profinite`,
 namely `(Mbar_le r' S c)^a`.
 
-* Since the functor is contravariant, we need to pass to `CompHausᵒᵖ`,
+* Since the functor is contravariant, we need to pass to `Profiniteᵒᵖ`,
   which is accomplished by the `op`,
 * Since `(Mbar_le r' S c)^a` is a priori only a *type*
-  it has to be packaged into an object of `CompHaus`,
-  which is accomplished by the `CompHaus.of`.
+  it has to be packaged into an object of `Profinite`,
+  which is accomplished by the `Profinite.of`.
   The topology is automatically inferred by the *typeclass system*.
 * The `$` symbols are a syntactic trick to avoid excessive parentheses:
   `f $ g x` means `f (g x)`
@@ -68,7 +70,7 @@ of the normed group of locally constant functions from `(Mbar_{r'}(S)_{≤c}^a)`
 
 Mnemonic: `LCC` stands for *locally compact, completed*. -/
 def LCC_Mbar_pow [fact (0 < r')] : NormedGroup :=
-(hat V).obj (op $ CompHaus.of ((Mbar_le r' S c)^a))
+(hat V).obj (op $ Profinite.of ((Mbar_le r' S c)^a))
 
 lemma LCC_Mbar_pow_eq [fact (0 < r')] :
   LCC_Mbar_pow V S r' c a = NormedGroup.Completion.obj (LC_Mbar_pow V S r' c a) := rfl
@@ -92,7 +94,7 @@ NormedGroup.normed_with_aut_LCC V _ r
 lemma T_inv_eq [fact (0 < r)] [fact (0 < r')] [normed_with_aut r V] :
   (normed_with_aut.T.inv : LCC_Mbar_pow V S r' c a ⟶ LCC_Mbar_pow V S r' c a) =
     (NormedGroup.LCC.map (normed_with_aut.T.inv : V ⟶ V)).app
-      (op $ CompHaus.of ((Mbar_le r' S c)^a)) :=
+      (op $ Profinite.of ((Mbar_le r' S c)^a)) :=
 begin
   dsimp [LCC_Mbar_pow, LCC_Mbar_pow.normed_with_aut, NormedGroup.normed_with_aut_LCC,
     NormedGroup.normed_with_aut_Completion, NormedGroup.normed_with_aut_LocallyConstant,
@@ -201,10 +203,10 @@ variables {l m n : ℕ}
 
 namespace basic_universal_map
 
-/-- This function is a packaged version of `f.eval_Mbar_le` as morphism in `CompHaus`.
+/-- This function is a packaged version of `f.eval_Mbar_le` as morphism in `Profinite`.
 We only use this in the definition of `f.eval_Mbar_pow`. -/
 def eval_Mbar_pow_aux (f : basic_universal_map m n) [f.suitable c₁ c₂] :
-  CompHaus.of (Mbar_le r' S c₁ ^ m) ⟶ CompHaus.of (Mbar_le r' S c₂ ^ n) :=
+  Profinite.of (Mbar_le r' S c₁ ^ m) ⟶ Profinite.of (Mbar_le r' S c₂ ^ n) :=
 { to_fun := f.eval_Mbar_le _ _ _ _,
   continuous_to_fun := f.eval_Mbar_le_continuous _ _ _ _}
 

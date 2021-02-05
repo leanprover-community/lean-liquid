@@ -200,12 +200,12 @@ lemma T_hom_eq {V : NormedGroup} {r : ℝ} [normed_with_aut r V] :
 lift_unique _ _ T_hom_incl
 
 /-- `LCC` (Locally Constant Completion) is the bifunctor
-that sends a normed abelian group `V` and a compact space `S` to `V-hat(S)`.
+that sends a normed abelian group `V` and a profinite space `S` to `V-hat(S)`.
 Here `V-hat(S)` is the completion (for the sup norm) of the locally constant functions `S → V`. -/
-def LCC : NormedGroup ⥤ CompHausᵒᵖ ⥤ NormedGroup :=
+def LCC : NormedGroup ⥤ Profiniteᵒᵖ ⥤ NormedGroup :=
 curry.obj ((uncurry.obj LocallyConstant) ⋙ Completion)
 
-lemma LCC_obj_map' (V : NormedGroup) {X Y : CompHausᵒᵖ} (f : Y ⟶ X) :
+lemma LCC_obj_map' (V : NormedGroup) {X Y : Profiniteᵒᵖ} (f : Y ⟶ X) :
   (LCC.obj V).map f = Completion.map ((LocallyConstant.obj V).map f) :=
 begin
   delta LCC,
@@ -214,14 +214,14 @@ begin
   erw [← functor.map_comp, category.id_comp]
 end
 
-lemma LCC_obj_map (V : NormedGroup) {X Y : CompHausᵒᵖ} (f : Y ⟶ X) (v : (LCC.obj V).obj Y) :
+lemma LCC_obj_map (V : NormedGroup) {X Y : Profiniteᵒᵖ} (f : Y ⟶ X) (v : (LCC.obj V).obj Y) :
   (LCC.obj V).map f v = completion.map (locally_constant.comap f.unop) v :=
 by { rw LCC_obj_map', refl }
 
 variables (S : Type*) [topological_space S] [compact_space S]
 
 @[simps]
-instance normed_with_aut_LocallyConstant (V : NormedGroup) (S : CompHaus) (r : ℝ≥0)
+instance normed_with_aut_LocallyConstant (V : NormedGroup) (S : Profinite) (r : ℝ≥0)
   [normed_with_aut r V] [hr : fact (0 < r)] :
   normed_with_aut r ((LocallyConstant.obj V).obj (op S)) :=
 { T := (LocallyConstant.map_iso normed_with_aut.T).app (op S),
@@ -236,7 +236,7 @@ instance normed_with_aut_LocallyConstant (V : NormedGroup) (S : CompHaus) (r : �
     simp only [exists_prop, set.mem_range, exists_exists_eq_and, set.mem_set_of_eq]
   end }
 
-instance normed_with_aut_LCC (V : NormedGroup) (S : CompHaus) (r : ℝ≥0)
+instance normed_with_aut_LCC (V : NormedGroup) (S : Profinite) (r : ℝ≥0)
   [normed_with_aut r V] [hr : fact (0 < r)] :
   normed_with_aut r ((LCC.obj V).obj (op S)) :=
 show normed_with_aut r (Completion.obj $ (LocallyConstant.obj V).obj (op S)), by apply_instance

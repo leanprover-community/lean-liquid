@@ -122,6 +122,7 @@ src
 │   └── Vhat.lean
 ├── for_mathlib
 │   ├── add_monoid_hom.lean
+│   ├── category_theory.lean
 │   ├── CompHaus.lean
 │   ├── continuous_map.lean
 │   ├── discrete_topology.lean
@@ -147,19 +148,19 @@ We highlight two syntactical differences.
 
 * Firstly, the element-of relation (`∈`) plays no fundamental role.
   Instead, there is a typing judgment (`:`).
-  
+
   This means that we write `x : X` to say that "`x` is a term of type `X`"
   instead of "`x` is an element of the set `X`".
   Conveniently, we can write `f : X → Y` to mean "`f` has type `X → Y`",
   in other words "`f` is a function from `X` to `Y`".
-  
+
 * Secondly, type theorists do not use the mapsto symbol (`↦`),
   but instead use lambda-notation.
   This means that we can define the square function on the integers via
   `λ x, x^2`, which translates to `x ↦ x^2` in set-theoretic notation.
   For more information about `λ`, see the Wikipedia page on
   [lambda calculus](https://en.wikipedia.org/wiki/Lambda_calculus).
-  
+
 For a more extensive discussion of type theory,
 see the dedicated
 [page](https://leanprover-community.github.io/lean-perfectoid-spaces/type_theory.html)

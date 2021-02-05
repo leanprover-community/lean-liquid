@@ -6,6 +6,7 @@ import facts
 import hacks_and_tricks.type_pow
 
 import Mbar.basic
+import pseudo_normed_group.profinitely_filtered
 
 /-!
 # $\overline{\mathcal{M}}_{r'}(S)_{≤ c}$
@@ -59,6 +60,16 @@ by { ext, refl }
   (x.cast_le : Mbar_le r' S c₂) s i = x s i :=
 rfl
 
+lemma injective_cast_le [fact (c₁ ≤ c₂)] :
+  function.injective (Mbar_le.cast_le : Mbar_le r' S c₁ → Mbar_le r' S c₂) :=
+λ x y h,
+begin
+  ext s n,
+  change x.cast_le s n = y.cast_le s n,
+  rw h,
+end
+
+
 /-- An alternative constructor for terms of type `Mbar_le r' S c`,
 taking as input a function `x : S → ℕ → ℤ`
 (to be thought of as power series indexed by `S`)
@@ -109,7 +120,7 @@ subtype.mk (-F) $ neg_mem_filtration F.mem_filtration
 
 namespace Mbar_le
 
-/-- The truncation map fro Mbar_le to Mbar_bdd -/
+/-- The truncation map from Mbar_le to Mbar_bdd -/
 @[simps] def truncate (M : ℕ) (F : Mbar_le r' S c) : Mbar_bdd r' ⟨S⟩ c M :=
 { to_fun := λ s n, F s n,
   coeff_zero' := by simp,
@@ -284,18 +295,8 @@ instance : topological_space (Mbar_le r' S c) := topological_space.induced eqv (
 
 lemma is_open_iff {U : set (Mbar_bdd.limit r' ⟨S⟩ c)} : is_open (eqv ⁻¹' U) ↔ is_open U :=
 begin
-  -- this should be made cleaner with some mathlib lemmas
-  -- about images/preimages of sets under equiv's.
   rw is_open_induced_iff,
-  split,
-  { rintros ⟨V,hV,h⟩,
-    apply_fun (λ S, eqv '' S) at h,
-    simp_rw [eqv.image_eq_preimage] at h,
-    have : V = U, { convert h, by tidy, by tidy },
-    rw ← this,
-    assumption },
-  { intros hU,
-    exact ⟨U,hU,rfl⟩ },
+  simp [function.surjective.preimage_injective (equiv.surjective (eqv : Mbar_le r' S c ≃ _))],
 end
 
 /-- The homeomorphism between `Mbar_le r' S c`
@@ -313,8 +314,7 @@ def homeo : Mbar_le r' S c ≃ₜ Mbar_bdd.limit r' ⟨S⟩ c :=
     simp only [equiv.to_fun_as_coe, continuous_def],
     intros U hU,
     erw [← eqv.image_eq_preimage, ← is_open_iff],
-    have : eqv ⁻¹' (eqv '' U) = U, by tidy, -- this should be in mathlib.
-    rwa this,
+    rwa eqv.preimage_image U,
   end,
   ..eqv }
 
@@ -336,18 +336,9 @@ end
 instance : totally_disconnected_space (Mbar_le r' S c) :=
 begin
   constructor,
-  intros A _ hA,
-  constructor,
+  rintros A - hA,
   suffices subsing : subsingleton (homeo '' A),
-  { -- This block can probably be streamlined a bit...
-    rintros ⟨a,ha⟩ ⟨b,hb⟩,
-    ext1,
-    suffices : homeo a = homeo b, by exact homeo.injective this,
-    let x : ↥(homeo '' A) := ⟨homeo a, ⟨a, ha, rfl⟩⟩,
-    let y : ↥(homeo '' A) := ⟨homeo b, ⟨b, hb, rfl⟩⟩,
-    cases subsing,
-    change ↑x = ↑y,
-    rw subsing x y },
+  { apply set.subsingleton_of_image (homeo.injective) _ subsing },
   obtain ⟨h⟩ := (by apply_instance : totally_disconnected_space (Mbar_bdd.limit r' ⟨S⟩ c)),
   exact h _ (by tauto) (is_preconnected.image hA _ homeo.continuous.continuous_on),
 end
@@ -387,6 +378,15 @@ begin
     refine continuous.comp this _,
     refine continuous.prod_map continuous_truncate continuous_truncate },
   exact continuous_of_discrete_topology,
+end
+
+lemma continuous_neg :
+  continuous (Mbar_le.neg : Mbar_le r' S c → Mbar_le r' S c) :=
+begin
+  rw continuous_iff,
+  intro M,
+  change continuous (λ x : Mbar_le r' S c, Mbar_bdd.neg (truncate M x)),
+  exact continuous.comp continuous_of_discrete_topology continuous_truncate,
 end
 
 end topological_structure
@@ -571,4 +571,53 @@ end
 end Tinv
 
 end Mbar_le
-#lint- only unused_arguments def_lemma doc_blame
+
+-- Gouezel is doing it
+lemma embedding_of_injective {X Y : Type*} [topological_space X] [topological_space Y]
+  [compact_space X] [t2_space X] [compact_space Y] [t2_space Y] {f : X → Y}
+    (hf1 : continuous f) (hf2 : function.injective f) :
+  embedding f := sorry
+
+-- move this up a bit
+instance [fact (0 < r')] : profinitely_filtered_pseudo_normed_group (Mbar r' S) :=
+{ topology := λ c, show topological_space (Mbar_le r' S c), by apply_instance,
+  t2 := λ c, show t2_space (Mbar_le r' S c), by apply_instance,
+  td := λ c, show totally_disconnected_space (Mbar_le r' S c), by apply_instance,
+  compact := λ c, show compact_space (Mbar_le r' S c), by apply_instance,
+  continuous_add' := λ c₁ c₂, Mbar_le.continuous_add',
+  continuous_neg' := λ c, Mbar_le.continuous_neg,
+  embedding_cast_le := begin
+    intros c₁ c₂,
+    introI h,
+    -- this needs some work ;-)
+    letI : topological_space (filtration (Mbar r' S) c₁),
+    { show topological_space (Mbar_le r' S c₁),
+      apply_instance },
+    haveI : compact_space (filtration (Mbar r' S) c₁) := by {
+      change compact_space (Mbar_le r' S c₁),
+      apply_instance
+    },
+    haveI : t2_space (filtration (Mbar r' S) c₁) := by {
+      change t2_space (Mbar_le r' S c₁),
+      apply_instance
+    },
+    letI : topological_space (filtration (Mbar r' S) c₂),
+    { show topological_space (Mbar_le r' S c₂),
+      apply_instance },
+    haveI : compact_space (filtration (Mbar r' S) c₂) := by {
+      change compact_space (Mbar_le r' S c₂),
+      apply_instance
+    },
+    haveI : t2_space (filtration (Mbar r' S) c₂) := by {
+      change t2_space (Mbar_le r' S c₂),
+      apply_instance
+    },
+    have hmaps_are_equal : (Mbar_le.cast_le : Mbar_le r' S c₁ → Mbar_le r' S c₂) = pseudo_normed_group.cast_le,
+    { ext, refl },
+    rw ← hmaps_are_equal,
+    exact embedding_of_injective
+      (Mbar_le.continuous_cast_le r' S c₁ c₂) (Mbar_le.injective_cast_le),
+  end,
+  .. Mbar.pseudo_normed_group }
+
+--#lint- only unused_arguments def_lemma doc_blame

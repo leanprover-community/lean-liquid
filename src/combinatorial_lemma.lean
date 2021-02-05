@@ -2,7 +2,8 @@ import algebra.group.basic
 import analysis.convex.cone
 import normed_group.NormedGroup
 import Mbar.basic
-import polyhedral_lattice
+import polyhedral_lattice.basic
+import normed_group.pseudo_normed_group
 
 /-!
 In this file we state and prove lemmas 9.7 and 9.8 of [Analytic].
@@ -204,20 +205,6 @@ end lem97
 
 open pseudo_normed_group
 
--- move this
-namespace normed_group
-
-instance (V : Type*) [normed_group V] : pseudo_normed_group V :=
-{ filtration := λ c, {v | ∥v∥ ≤ c},
-  filtration_mono := λ c₁ c₂ h v (hv : ∥v∥ ≤ c₁), le_trans hv h,
-  zero_mem_filtration := λ c, by simp only [set.mem_set_of_eq, norm_zero, nnreal.zero_le_coe],
-  neg_mem_filtration := λ c v hv, by simpa only [set.mem_set_of_eq, norm_neg] using hv,
-  add_mem_filtration := λ c₁ c₂ v₁ v₂ hv₁ hv₂,
-    calc ∥v₁ + v₂∥
-        ≤ ∥v₁∥ + ∥v₂∥ : norm_add_le _ _
-    ... ≤ c₁ + c₂ : add_le_add hv₁ hv₂ }
-
-end normed_group
 
 variables (Λ : Type*) (r' : ℝ≥0) (S : Type*)
 variables [fintype S] [normed_group Λ] [polyhedral_lattice Λ]

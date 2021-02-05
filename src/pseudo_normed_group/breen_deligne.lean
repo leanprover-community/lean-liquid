@@ -55,6 +55,19 @@ begin
   exact const_smul_hom_int_mem_filtration _ _ le_rfl
 end
 
+lemma eval_png_mem_filtration' (c₁ c₂ : ℝ≥0) [h : f.suitable c₁ c₂]
+  (x : M^m) (hx : x ∈ filtration (M^m) c₁) :
+  (f.eval_png M x) ∈ filtration (M^n) c₂ :=
+filtration_mono (f.sup_mul_le c₁ c₂) (f.eval_png_mem_filtration M hx)
+
+/-- `f.eval_png₀ M` is the group homomorphism `(M^m) →+ (M^n)`
+obtained by matrix multiplication with the matrix `f`,
+but restricted to `(filtration M c₁)^m → (filtration M c₂)^n`. -/
+def eval_png₀ (c₁ c₂ : ℝ≥0) [h : f.suitable c₁ c₂] (x : (filtration M c₁ : Type*)^m) :
+  (filtration M c₂ : Type*)^n :=
+λ j, (⟨f.eval_png M (pow_incl x) j,
+  eval_png_mem_filtration' f M c₁ c₂ _ (λ i, (x i).2) j⟩ : (filtration M c₂ : Type*))
+
 lemma eval_png_comp {l m n} (g : basic_universal_map m n) (f : basic_universal_map l m) :
   (g.comp f).eval_png M = (g.eval_png M).comp (f.eval_png M) :=
 begin
@@ -92,9 +105,13 @@ begin
     exact finset.le_sup (finset.mem_univ j) }
 end
 
+lemma eval_png₀_continuous (c₁ c₂ : ℝ≥0) [f.suitable c₁ c₂] : continuous (f.eval_png₀ M c₁ c₂) :=
+f.pfpng_ctu'_eval_png M _ $ λ x, rfl
+
 end profinitely_filtered_pseudo_normed_group
 
 end basic_universal_map
 
 end breen_deligne
+
 #lint- only unused_arguments def_lemma doc_blame

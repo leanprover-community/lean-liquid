@@ -9,7 +9,13 @@ variables (r' k c c₁ c₂ : ℝ≥0)
 instance fact_le_mul_of_one_le_left [hk : fact (1 ≤ k)] : fact (c ≤ k * c) :=
 le_mul_of_one_le_left c.2 hk
 
+instance fact_mul_le_of_le_one_left [hk : fact (k ≤ 1)] : fact (k * c ≤ c) :=
+mul_le_of_le_one_left c.2 hk
+
 instance fact_le_refl : fact (c ≤ c) := le_rfl
+
+instance fact_inv_mul_le [h : fact (0 < r')] : fact (r'⁻¹ * (r' * c) ≤ c) :=
+le_of_eq $ inv_mul_cancel_left' (ne_of_gt h) _
 
 instance fact_mul_le_mul_left [fact (c₁ ≤ c₂)] : fact (r' * c₁ ≤ r' * c₂) := mul_le_mul' le_rfl ‹_›
 

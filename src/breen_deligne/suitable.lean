@@ -23,7 +23,7 @@ def suitable (f : basic_universal_map m n) (c₁ c₂ : ℝ≥0) : Prop :=
 
 attribute [class] suitable
 
-lemma sup_mul_le (f : basic_universal_map m n) {c₁ c₂ : ℝ≥0} [h : f.suitable c₁ c₂] :
+lemma sup_mul_le (f : basic_universal_map m n) (c₁ c₂ : ℝ≥0) [h : f.suitable c₁ c₂] :
   (finset.univ.sup $ λ i, ∑ j, ↑(f i j).nat_abs) * c₁ ≤ c₂ :=
 begin
   by_cases H : c₁ = 0,
