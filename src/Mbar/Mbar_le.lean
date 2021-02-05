@@ -572,6 +572,7 @@ end Tinv
 
 end Mbar_le
 
+-- Gouezel is doing it
 lemma embedding_of_injective {X Y : Type*} [topological_space X] [topological_space Y]
   [compact_space X] [t2_space X] [compact_space Y] [t2_space Y] {f : X → Y}
     (hf1 : continuous f) (hf2 : function.injective f) :
@@ -590,8 +591,8 @@ instance [fact (0 < r')] : profinitely_filtered_pseudo_normed_group (Mbar r' S) 
     introI h,
     -- this needs some work ;-)
     letI : topological_space (filtration (Mbar r' S) c₁),
-      show topological_space (Mbar_le r' S c₁),
-      apply_instance,
+    { show topological_space (Mbar_le r' S c₁),
+      apply_instance },
     haveI : compact_space (filtration (Mbar r' S) c₁) := by {
       change compact_space (Mbar_le r' S c₁),
       apply_instance
@@ -601,8 +602,8 @@ instance [fact (0 < r')] : profinitely_filtered_pseudo_normed_group (Mbar r' S) 
       apply_instance
     },
     letI : topological_space (filtration (Mbar r' S) c₂),
-      show topological_space (Mbar_le r' S c₂),
-      apply_instance,
+    { show topological_space (Mbar_le r' S c₂),
+      apply_instance },
     haveI : compact_space (filtration (Mbar r' S) c₂) := by {
       change compact_space (Mbar_le r' S c₂),
       apply_instance
@@ -612,7 +613,7 @@ instance [fact (0 < r')] : profinitely_filtered_pseudo_normed_group (Mbar r' S) 
       apply_instance
     },
     have hmaps_are_equal : (Mbar_le.cast_le : Mbar_le r' S c₁ → Mbar_le r' S c₂) = pseudo_normed_group.cast_le,
-    ext, refl,
+    { ext, refl },
     rw ← hmaps_are_equal,
     exact embedding_of_injective
       (Mbar_le.continuous_cast_le r' S c₁ c₂) (Mbar_le.injective_cast_le),
