@@ -3,6 +3,7 @@ import algebra.homology.chain_complex
 import normed_group.NormedGroup
 import algebra.ordered_group
 import facts
+import for_mathlib.category_theory
 
 universe variables v u
 noncomputable theory
@@ -45,6 +46,10 @@ def system_of_complexes.X (C : system_of_complexes.{u}) (c : ℝ≥0) (i : ℤ) 
 /-- `f.apply c i` is application of the natural transformation `f`: $f_c^i : M_c^i ⟶ N_c^i$. -/
 def category_theory.has_hom.hom.apply (f : M ⟶ N) (c : ℝ≥0) (i : ℤ) : M.X c i ⟶ N.X c i :=
 (f.app (op c)).f i
+
+/-- `f.apply c i` is application of the natural isomorphism `f`: $f_c^i : M_c^i ≅ N_c^i$. -/
+def category_theory.iso.apply (f : M ≅ N) (c : ℝ≥0) (i : ℤ) : M.X c i ≅ N.X c i :=
+pi.iso_app (differential_object.iso_app $ f.app $ op c) i
 
 namespace system_of_complexes
 
