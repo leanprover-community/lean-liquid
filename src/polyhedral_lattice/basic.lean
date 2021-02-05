@@ -1,6 +1,7 @@
 import analysis.normed_space.basic
 import ring_theory.finiteness
 
+import for_mathlib.finset
 import hacks_and_tricks.by_exactI_hack
 
 noncomputable theory
@@ -39,7 +40,10 @@ instance int : polyhedral_lattice ℤ :=
     intro x,
     simp only [finset.image_insert, rat.cast_neg, finset.image_singleton,
       add_monoid_hom.neg_apply, rat.cast_coe_int, int.coe_cast_add_hom],
-    sorry
+    convert (finset.max'_insert (x:ℝ) {-(x:ℝ)} _).symm,
+    rw finset.max'_singleton,
+    rw max_comm,
+    refl,
   end }
 
 end polyhedral_lattice
