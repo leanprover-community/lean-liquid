@@ -50,6 +50,10 @@ Completion.map (LCFP.res V r' c₁ c₂ n)
 @[simp] lemma res_refl : @res V r' M _ c c n _ = 𝟙 _ :=
 by { delta res, rw LCFP.res_refl, apply category_theory.functor.map_id }
 
+lemma res_comp_res [fact (c₁ ≤ c₂)] [fact (c₂ ≤ c₃)] [fact (c₁ ≤ c₃)] :
+  res V r' c₂ c₃ n ≫ res V r' c₁ c₂ n = @res V r' M _ c₁ c₃ n _ :=
+by simp only [res, ← category_theory.functor.map_comp, ← op_comp, LCFP.res_comp_res]
+
 lemma map_comp_res [fact (c₁ ≤ c₂)] :
   map V r' c₂ n f ≫ res V r' c₁ c₂ n = res V r' c₁ c₂ n ≫ map V r' c₁ n f :=
 by simp only [map, res, ← category_theory.functor.map_comp, ← op_comp, LCFP.map_comp_res]

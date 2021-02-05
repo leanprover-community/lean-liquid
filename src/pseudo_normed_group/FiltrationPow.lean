@@ -71,6 +71,10 @@ def cast_le [fact (c₁ ≤ c₂)] : FiltrationPow r' M c₁ n ⟶ FiltrationPow
 
 @[simp] lemma cast_le_refl : cast_le r' c c n = 𝟙 (FiltrationPow r' M c n) := by { ext, refl }
 
+lemma cast_le_trans [fact (c₁ ≤ c₂)] [fact (c₂ ≤ c₃)] [fact (c₁ ≤ c₃)] :
+  cast_le r' c₁ c₂ n ≫ cast_le r' c₂ c₃ n = @cast_le r' M _ c₁ c₃ n _ :=
+by { ext, refl }
+
 lemma map_comp_cast_le [fact (c₁ ≤ c₂)] :
   map r' c₁ n f ≫ cast_le r' c₁ c₂ n = cast_le r' c₁ c₂ n ≫ map r' c₂ n f :=
 by { ext, refl }

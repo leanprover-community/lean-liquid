@@ -51,13 +51,14 @@ def res [fact (c₁ ≤ c₂)] : LCFP V r' M c₂ n ⟶ LCFP V r' M c₁ n :=
 @[simp] lemma res_refl : res V r' c c n = 𝟙 (LCFP V r' M c n) :=
 by { delta res, rw FiltrationPow.cast_le_refl, apply category_theory.functor.map_id }
 
+lemma res_comp_res [fact (c₁ ≤ c₂)] [fact (c₂ ≤ c₃)] [fact (c₁ ≤ c₃)] :
+  res V r' c₂ c₃ n ≫ res V r' c₁ c₂ n = @res V r' M _ c₁ c₃ n _ :=
+by simp only [res, ← category_theory.functor.map_comp, ← op_comp, FiltrationPow.cast_le_trans]
+
 lemma map_comp_res [fact (c₁ ≤ c₂)] :
   map V r' c₂ n f ≫ res V r' c₁ c₂ n = res V r' c₁ c₂ n ≫ map V r' c₁ n f :=
-begin
-  delta map res,
-  rw [← category_theory.functor.map_comp, ← category_theory.functor.map_comp,
-    ← op_comp, ← op_comp, FiltrationPow.map_comp_cast_le]
-end
+by simp only [map, res, ← category_theory.functor.map_comp, ← op_comp,
+    FiltrationPow.map_comp_cast_le]
 
 section Tinv
 open profinitely_filtered_pseudo_normed_group_with_Tinv
