@@ -107,32 +107,31 @@ namespace basic_universal_map
 variables (ϕ : basic_universal_map m n)
 
 @[simps]
-def eval_CLCFP [ϕ.suitable c₁ c₂] : CLCFP V r' M c₂ n ⟶ CLCFP V r' M c₁ m :=
+def eval_CLCFP : CLCFP V r' M c₂ n ⟶ CLCFP V r' M c₁ m :=
 Completion.map (ϕ.eval_LCFP V r' M c₁ c₂)
 
 lemma map_comp_eval_CLCFP [ϕ.suitable c₁ c₂] :
   map V r' c₂ n f ≫ ϕ.eval_CLCFP V r' M₁ c₁ c₂ = ϕ.eval_CLCFP V r' M₂ c₁ c₂ ≫ map V r' c₁ m f :=
-by simp only [map, basic_universal_map.eval_CLCFP, ← category_theory.functor.map_comp,
-  ← op_comp, map_comp_eval_LCFP]
+by simp only [map, eval_CLCFP, ← category_theory.functor.map_comp, ← op_comp, map_comp_eval_LCFP]
 
 lemma res_comp_eval_CLCFP
   [fact (c₁ ≤ c₂)] [ϕ.suitable c₂ c₄] [ϕ.suitable c₁ c₃] [fact (c₃ ≤ c₄)] :
   res V r' c₃ c₄ n ≫ ϕ.eval_CLCFP V r' M c₁ c₃ =
     ϕ.eval_CLCFP V r' M c₂ c₄ ≫ res V r' c₁ c₂ m :=
-by simp only [res, basic_universal_map.eval_CLCFP, ← category_theory.functor.map_comp,
-  ← op_comp, res_comp_eval_LCFP V r' _ c₁ c₂ c₃ c₄]
+by simp only [res, eval_CLCFP, ← category_theory.functor.map_comp, ← op_comp,
+  res_comp_eval_LCFP V r' _ c₁ c₂ c₃ c₄]
 
 lemma Tinv_comp_eval_CLCFP [fact (0 < r')] [ϕ.suitable c₁ c₂] :
   Tinv V r' c₂ n ≫ ϕ.eval_CLCFP V r' M (r' * c₁) (r' * c₂) =
     ϕ.eval_CLCFP V r' M c₁ c₂ ≫ Tinv V r' c₁ m :=
-by simp only [Tinv, basic_universal_map.eval_CLCFP, ← category_theory.functor.map_comp,
-  ← op_comp, Tinv_comp_eval_LCFP V r' _ c₁ c₂]
+by simp only [Tinv, eval_CLCFP, ← category_theory.functor.map_comp, ← op_comp,
+  Tinv_comp_eval_LCFP V r' _ c₁ c₂]
 
 lemma T_inv_comp_eval_CLCFP [normed_with_aut r V] [fact (0 < r)] [ϕ.suitable c₁ c₂] :
   T_inv r V r' c₂ n ≫ ϕ.eval_CLCFP V r' M c₁ c₂ =
     ϕ.eval_CLCFP V r' M c₁ c₂ ≫ T_inv r V r' c₁ m :=
-by simp only [T_inv, basic_universal_map.eval_CLCFP, ← category_theory.functor.map_comp,
-  ← op_comp, T_inv_comp_eval_LCFP r V r' c₁ c₂]
+by simp only [T_inv, eval_CLCFP, ← category_theory.functor.map_comp, ← op_comp,
+  T_inv_comp_eval_LCFP r V r' c₁ c₂]
 
 end basic_universal_map
 
