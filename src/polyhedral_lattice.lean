@@ -4,7 +4,7 @@ import ring_theory.finiteness
 import hacks_and_tricks.by_exactI_hack
 
 noncomputable theory
-open_locale big_operators
+open_locale big_operators classical
 
 section move_this
 
@@ -14,23 +14,32 @@ def torsion_free (A : Type*) [add_comm_group A] : Prop :=
 
 end move_this
 
-class polyhedral_lattice (A : Type*) [normed_group A] :=
-(tf : torsion_free A)
-(polyhedral' [] : sorry)
+class polyhedral_lattice (Λ : Type*) [normed_group Λ] :=
+[fg : module.finite ℤ Λ]
+(tf : torsion_free Λ)
+(polyhedral' [] : ∃ (s : finset (Λ →+ ℚ)) (hs : s.nonempty),
+  ∀ x : Λ, ∥x∥ = finset.max' (s.image $ λ f, f x) (hs.image _))
 
 namespace polyhedral_lattice
 
-variables (A : Type*) [normed_group A] [polyhedral_lattice A]
+variables (Λ : Type*) [normed_group Λ] [polyhedral_lattice Λ]
 
-instance : module.finite ℤ A :=
-sorry
+instance : module.finite ℤ Λ := fg
 
 instance int : polyhedral_lattice ℤ :=
-{ tf := λ m hm n h,
+{ fg := sorry, -- module.finite.self has the wrong instances :sad:
+  tf := λ m hm n h,
   begin
     rw [← nsmul_eq_smul, nsmul_eq_mul, mul_eq_zero] at h,
     simpa only [hm, int.coe_nat_eq_zero, or_false, int.nat_cast_eq_coe_nat] using h
   end,
-  polyhedral' := sorry }
+  polyhedral' :=
+  begin
+    refine ⟨{int.cast_add_hom ℚ, -int.cast_add_hom ℚ}, finset.insert_nonempty _ _, _⟩,
+    intro x,
+    simp only [finset.image_insert, rat.cast_neg, finset.image_singleton,
+      add_monoid_hom.neg_apply, rat.cast_coe_int, int.coe_cast_add_hom],
+    sorry
+  end }
 
 end polyhedral_lattice
