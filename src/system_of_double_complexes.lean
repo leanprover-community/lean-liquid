@@ -135,7 +135,6 @@ structure admissible (C : system_of_double_complexes) : Prop :=
 (res_norm_noninc : ∀ c' c p q h (x : C.X c' p q), ∥@res C c' c p q h x∥ ≤ ∥x∥)
 
 attribute [simps] differential_object.forget
-attribute [simps {fully_applied := ff}] functor.pi -- we need the simp lemmas for this that are not fully applied
 
 /-- The `p`-th row in a system of double complexes, as system of complexes.
   It has object `(C.obj c).X p`over `c`. -/
@@ -162,15 +161,15 @@ C.comp
     (by { intros, ext, simp }))
 
 @[simp] lemma col_X (C : system_of_double_complexes) (p q : ℤ) (c : ℝ≥0) :
-  (C.col' q).X c p = C.X c p q :=
+  (C.col q).X c p = C.X c p q :=
 by refl
 
 @[simp] lemma col_res (C : system_of_double_complexes) (p q : ℤ) {c' c : ℝ≥0} [h : fact (c ≤ c')] :
-  (C.col' q).res = @res C _ _ p q h :=
+  (C.col q).res = @res C _ _ p q h :=
 by refl
 
 @[simp] lemma col_d (C : system_of_double_complexes) (p q : ℤ) (c : ℝ≥0) :
-  (C.col' q).d = @d C c p q :=
-by { dsimp [system_of_complexes.d, col', d], simp }
+  (C.col q).d = @d C c p q :=
+by { dsimp [system_of_complexes.d, col, d], simp }
 
 end system_of_double_complexes
