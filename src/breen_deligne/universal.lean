@@ -37,17 +37,20 @@ to the map `ℤ^m → A` sending the i'th basis vector to `x i`.
 
 noncomputable theory
 
+section PR6046
 -- these should be in algebra.group.hom, just after the definition of `has_inv`
 -- This is #6046 . When the below lines start causing "declaration already declared"
 -- errors just comment out these comments and these two lemmas
 
 @[simp, to_additive] lemma monoid_hom.inv_comp {M N A} {mM : monoid M} {gN : monoid N}
   {gG : comm_group A} (φ : N →* A) (ψ : M →* N) : φ⁻¹.comp ψ = (φ.comp ψ)⁻¹ :=
-by { ext, simp only [function.comp_app, monoid_hom.inv_apply, monoid_hom.coe_comp]}
+by { ext, simp only [function.comp_app, monoid_hom.inv_apply, monoid_hom.coe_comp] }
 
 @[simp, to_additive] lemma monoid_hom.comp_inv {M A B} {mM : monoid M} {mA : comm_group A}
   {mB : comm_group B} (φ : A →* B) (ψ : M →* A) : φ.comp ψ⁻¹ = (φ.comp ψ)⁻¹ :=
-by {ext, simp only [function.comp_app, monoid_hom.inv_apply, monoid_hom.map_inv, monoid_hom.coe_comp]}
+by {ext, simp only [function.comp_app, monoid_hom.inv_apply, monoid_hom.map_inv, monoid_hom.coe_comp] }
+
+end PR6046
 
 -- get some notation working:
 open_locale big_operators direct_sum
@@ -112,8 +115,8 @@ section punit_stuff
 
 open free_abelian_group
 
--- this deserves a proper name and should probably be in `group_theory.free_abelian_group`.
-def aux_equiv₁ : ℤ[punit] ≃+ ℤ :=
+-- this is now on `free-abelian-group-equivs` branch
+def punit_equiv : ℤ[punit] ≃+ ℤ :=
 { inv_fun := λ n, n • of (punit.star),
   to_fun := free_abelian_group.lift (λ _, (1 : ℤ)),
   left_inv := λ z, free_abelian_group.induction_on z
@@ -124,8 +127,8 @@ def aux_equiv₁ : ℤ[punit] ≃+ ℤ :=
   right_inv := λ n, by { rw [add_monoid_hom.map_int_module_smul, lift.of], exact gsmul_int_one n},
   map_add' := add_monoid_hom.map_add _ }
 
--- this deserves a proper name and should be somewhere else.
-def aux_equiv₂ {α β : Type*} (f : α ≃ β) : free_abelian_group α ≃+ free_abelian_group β :=
+-- this is now on `free-abelian-group-equivs` branch
+def equiv_of_equiv {α β : Type*} (f : α ≃ β) : free_abelian_group α ≃+ free_abelian_group β :=
 { to_fun := free_abelian_group.lift $ free_abelian_group.of ∘ f,
   inv_fun := free_abelian_group.lift $ free_abelian_group.of ∘ f.symm,
   left_inv := begin
@@ -153,12 +156,12 @@ def aux_equiv₂ {α β : Type*} (f : α ≃ β) : free_abelian_group α ≃+ fr
 
 end punit_stuff
 
-lemma aux_lemma {A : Type*} [add_comm_group A] (a : A) (c : ℤ[punit]) :
+lemma lift_smul_eq_lift {A : Type*} [add_comm_group A] (a : A) (c : ℤ[punit]) :
   (free_abelian_group.lift (λ _, (1 : ℤ))) c • a = free_abelian_group.lift (λ _, a) c :=
 begin
-  rw ← aux_equiv₁.left_inv c,
-  generalize : aux_equiv₁.to_fun c = d,
-  delta aux_equiv₁, dsimp only,
+  rw ← punit_equiv.left_inv c,
+  generalize : punit_equiv.to_fun c = d,
+  delta punit_equiv, dsimp only,
   apply int.induction_on d,
   { simp },
   { intros i hi,
@@ -217,7 +220,7 @@ def universal_map_equiv_functorial_map (m n : ℕ) : universal_map m n ≃+ func
   -- The construction of a universal map from a functorial map
   inv_fun := λ F, free_abelian_group.lift
     (λ x, free_abelian_group.of
-      (λ i j, (aux_equiv₁ ((x : (ℤ[punit] ^ m) ^ n) i j)) : basic_universal_map m n))
+      (λ i j, (punit_equiv ((x : (ℤ[punit] ^ m) ^ n) i j)) : basic_universal_map m n))
     (F.f
     -- We evaluate on ℤ^m (in universe `u`)
       (free_abelian_group (punit)^m)
@@ -239,18 +242,20 @@ def universal_map_equiv_functorial_map (m n : ℕ) : universal_map m n ≃+ func
         -- and it boils down to checking that a sum over j of `b i j` times `delta j j'`
         -- is b i j'. Because of universe issues and typeclass issues this is a bit
         -- bumpier than expected.
-        convert aux_equiv₁.right_inv (b i j'),
+        convert punit_equiv.right_inv (b i j'),
         apply _root_.congr_arg,
         change _ = (b i j') • _,
-        -- next 7 lines = hack to get around pi.has_scalar != mul_action.to_has_scalar
+        -- next 10 lines = hack to get around pi.has_scalar != mul_action.to_has_scalar
         have h2 := fintype.sum_apply j' (λ (j : fin m),
           @has_scalar.smul _ _ (mul_action.to_has_scalar)
           (b i j) (λ (j_1 : fin m), ite (j = j_1) (free_abelian_group.of punit.star) 0 : (ℤ[punit]^m))),
-        dsimp at h2,
-        convert h2,
-        ext j,
-        apply _root_.congr_fun,
-        congr', clear h2,
+        dsimp only at h2,
+        convert h2; clear h2,
+        { ext j,
+          apply _root_.congr_fun,
+          congr' },
+        change b i j' • free_abelian_group.of punit.star =
+          ∑ (c : fin m), b i c • ite (c = j') (free_abelian_group.of punit.star) 0,
         -- Now we're over that hump it is as easy as it sounded 10 lines ago.
         simp_rw [smul_ite, smul_zero],
         rw finset.sum_ite_eq',
@@ -283,7 +288,7 @@ def universal_map_equiv_functorial_map (m n : ℕ) : universal_map m n ≃+ func
       suffices : ∀ (t : ℤ[(ℤ[punit] ^ m) ^ n]),
         breen_deligne.universal_map.eval
           A
-          (free_abelian_group.lift (λ (y : fin n → fin m → ℤ[punit]), free_abelian_group.of (λ (i : fin n) (j : fin m), aux_equiv₁ (y i j))) t)
+          (free_abelian_group.lift (λ (y : fin n → fin m → ℤ[punit]), free_abelian_group.of (λ (i : fin n) (j : fin m), punit_equiv (y i j))) t)
           (free_abelian_group.of x) =
         (free_abelian_group.map ⇑(φ.pow n)) t,
       rw ← this, refl,
@@ -303,9 +308,9 @@ def universal_map_equiv_functorial_map (m n : ℕ) : universal_map m n ≃+ func
         simp only [φ, pow_hom, add_monoid_hom.pow],
         apply finset.sum_congr rfl,
         rintro j -,
-        delta aux_equiv₁,
+        delta punit_equiv,
         simp only [add_equiv.coe_mk],
-        apply aux_lemma },
+        apply lift_smul_eq_lift },
       { simp only [imp_self, forall_const, neg_inj, map_neg, neg_apply]},
       { intros x y hx hy, simp * at * } },
     { -- The second and final thing we need to check is that evaluating `φ` on
