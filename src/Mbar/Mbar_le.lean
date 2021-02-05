@@ -60,6 +60,16 @@ by { ext, refl }
   (x.cast_le : Mbar_le r' S c₂) s i = x s i :=
 rfl
 
+lemma injective_cast_le [fact (c₁ ≤ c₂)] :
+  function.injective (Mbar_le.cast_le : Mbar_le r' S c₁ → Mbar_le r' S c₂) :=
+λ x y h,
+begin
+  ext s n,
+  change x.cast_le s n = y.cast_le s n,
+  rw h,
+end
+
+
 /-- An alternative constructor for terms of type `Mbar_le r' S c`,
 taking as input a function `x : S → ℕ → ℤ`
 (to be thought of as power series indexed by `S`)
@@ -304,8 +314,7 @@ def homeo : Mbar_le r' S c ≃ₜ Mbar_bdd.limit r' ⟨S⟩ c :=
     simp only [equiv.to_fun_as_coe, continuous_def],
     intros U hU,
     erw [← eqv.image_eq_preimage, ← is_open_iff],
-    have : eqv ⁻¹' (eqv '' U) = U, by tidy, -- this should be in mathlib.
-    rwa this,
+    rwa eqv.preimage_image U,
   end,
   ..eqv }
 
@@ -563,9 +572,9 @@ end Tinv
 
 end Mbar_le
 
-lemma foo (X Y : Type*) [topological_space X] [topological_space Y]
-  [discrete_topology X] [discrete_topology Y] (f : X → Y)
-(hf : function.injective f) :
+lemma embedding_of_injective {X Y : Type*} [topological_space X] [topological_space Y]
+  [compact_space X] [t2_space X] [compact_space Y] [t2_space Y] {f : X → Y}
+    (hf1 : continuous f) (hf2 : function.injective f) :
   embedding f := sorry
 
 -- move this up a bit
@@ -577,9 +586,36 @@ instance [fact (0 < r')] : profinitely_filtered_pseudo_normed_group (Mbar r' S) 
   continuous_add' := λ c₁ c₂, Mbar_le.continuous_add',
   continuous_neg' := λ c, Mbar_le.continuous_neg,
   embedding_cast_le := begin
-    intros,
-    change embedding cast_le,
-    sorry
+    intros c₁ c₂,
+    introI h,
+    -- this needs some work ;-)
+    letI : topological_space (filtration (Mbar r' S) c₁),
+      show topological_space (Mbar_le r' S c₁),
+      apply_instance,
+    haveI : compact_space (filtration (Mbar r' S) c₁) := by {
+      change compact_space (Mbar_le r' S c₁),
+      apply_instance
+    },
+    haveI : t2_space (filtration (Mbar r' S) c₁) := by {
+      change t2_space (Mbar_le r' S c₁),
+      apply_instance
+    },
+    letI : topological_space (filtration (Mbar r' S) c₂),
+      show topological_space (Mbar_le r' S c₂),
+      apply_instance,
+    haveI : compact_space (filtration (Mbar r' S) c₂) := by {
+      change compact_space (Mbar_le r' S c₂),
+      apply_instance
+    },
+    haveI : t2_space (filtration (Mbar r' S) c₂) := by {
+      change t2_space (Mbar_le r' S c₂),
+      apply_instance
+    },
+    have hmaps_are_equal : (Mbar_le.cast_le : Mbar_le r' S c₁ → Mbar_le r' S c₂) = pseudo_normed_group.cast_le,
+    ext, refl,
+    rw ← hmaps_are_equal,
+    exact embedding_of_injective
+      (Mbar_le.continuous_cast_le r' S c₁ c₂) (Mbar_le.injective_cast_le),
   end,
   .. Mbar.pseudo_normed_group }
 
