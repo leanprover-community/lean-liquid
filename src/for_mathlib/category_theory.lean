@@ -5,7 +5,8 @@ universes w v u
 
 open category_theory.limits
 
-/-! Some results in category theory that don't exist (or at least, that I couldn't find) yet -/
+/-! Some results in category theory that don't exist (or at least, that I couldn't find) yet.
+ This should maybe be split up in different files. -/
 
 namespace category_theory
 
