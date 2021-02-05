@@ -134,23 +134,43 @@ structure admissible (C : system_of_double_complexes) : Prop :=
 (d'_norm_noninc : ∀ c p q (x : C.X c p q), ∥C.d' x∥ ≤ ∥x∥)
 (res_norm_noninc : ∀ c' c p q h (x : C.X c' p q), ∥@res C c' c p q h x∥ ≤ ∥x∥)
 
-/-- The `p`-th row in a system of double complexes, as system of complexes. -/
+attribute [simps] differential_object.forget
+attribute [simps {fully_applied := ff}] functor.pi -- we need the simp lemmas for this that are not fully applied
+
+/-- The `p`-th row in a system of double complexes, as system of complexes.
+  It has object `(C.obj c).X p`over `c`. -/
 def row (C : system_of_double_complexes) (p : ℤ) : system_of_complexes :=
-{ obj := λ c, (C.obj c).X p,
-  map := λ c₁ c₂ h, (C.map h).f p,
-  map_id' := λ c, by simp only [pi.id_apply, differential_object.id_f, category_theory.functor.map_id],
-  map_comp' := by { intros, simp at * } }
+C.comp ((homological_complex.forget _).comp $ pi.eval _ p)
+
+@[simp] lemma row_X (C : system_of_double_complexes) (p q : ℤ) (c : ℝ≥0) :
+  (C.row p).X c q = C.X c p q :=
+by refl
+
+@[simp] lemma row_res (C : system_of_double_complexes) (p q : ℤ) {c' c : ℝ≥0} [h : fact (c ≤ c')] :
+  (C.row p).res = @res C _ _ p q h :=
+by refl
+
+@[simp] lemma row_d (C : system_of_double_complexes) (p q : ℤ) (c : ℝ≥0) :
+  (C.row p).d = @d' C c p q :=
+by refl
 
 /-- The `q`-th column in a system of double complexes, as system of complexes. -/
 def col (C : system_of_double_complexes) (q : ℤ) : system_of_complexes :=
-{ obj := λ c,
-  { X := λ p, C.X (unop c) p q,
-    d := λ p, @d C _ p q,
-    d_squared' := by { ext1 n, apply d_comp_d } },
-  map := λ c₁ c₂ h,
-  { f := λ p, @res C _ _ _ _ (le_of_hom h.unop),
-    comm' := by { ext1 n, apply d_comp_res } },
-  map_id' := λ c, by { ext n : 2, apply res_refl },
-  map_comp' := λ c₁ c₂ c₃ h₁ h₂, by { ext n : 2, symmetry, apply res_comp_res, } }
+C.comp
+  (differential_object.functor (functor.pi $ λ n, (homological_complex.forget _).comp $ pi.eval _ q)
+    { app := λ X, 𝟙 _, naturality' := by { intros, ext, simp } }
+    (by { intros, ext, simp }))
+
+@[simp] lemma col_X (C : system_of_double_complexes) (p q : ℤ) (c : ℝ≥0) :
+  (C.col' q).X c p = C.X c p q :=
+by refl
+
+@[simp] lemma col_res (C : system_of_double_complexes) (p q : ℤ) {c' c : ℝ≥0} [h : fact (c ≤ c')] :
+  (C.col' q).res = @res C _ _ p q h :=
+by refl
+
+@[simp] lemma col_d (C : system_of_double_complexes) (p q : ℤ) (c : ℝ≥0) :
+  (C.col' q).d = @d C c p q :=
+by { dsimp [system_of_complexes.d, col', d], simp }
 
 end system_of_double_complexes
