@@ -27,7 +27,7 @@ variables (Λ : Type*) [normed_group Λ] [polyhedral_lattice Λ]
 instance : module.finite ℤ Λ := fg
 
 instance int : polyhedral_lattice ℤ :=
-{ fg := sorry, -- module.finite.self has the wrong instances :sad:
+{ fg := by convert module.finite.self _,
   tf := λ m hm n h,
   begin
     rw [← nsmul_eq_smul, nsmul_eq_mul, mul_eq_zero] at h,
