@@ -45,16 +45,20 @@ def res {c' c : ℝ≥0} {p q : ℤ} [h : fact (c ≤ c')] :
   C.X c' p q ⟶ C.X c p q :=
 ((C.map (hom_of_le h).op).f p).f q
 
-variables {c₁ c₂ c₃ : ℝ≥0} (p q : ℤ)
+variables (c : ℝ≥0) {c₁ c₂ c₃ : ℝ≥0} (p q : ℤ)
+
+@[simp] lemma res_refl : @res C c c p q _ = 𝟙 _ :=
+begin
+  have := (category_theory.functor.map_id C (op $ c)),
+  delta res, erw this, refl
+end
 
 @[simp] lemma res_comp_res (h₁ : fact (c₂ ≤ c₁)) (h₂ : fact (c₃ ≤ c₂)) :
   @res C _ _ p q h₁ ≫ @res C _ _ p q h₂  = @res C _ _ p q (le_trans h₂ h₁) :=
 begin
   have := (category_theory.functor.map_comp C (hom_of_le h₁).op (hom_of_le h₂).op),
   rw [← op_comp] at this,
-  delta res,
-  erw this,
-  refl,
+  delta res, erw this, refl,
 end
 
 @[simp] lemma res_res (h₁ : fact (c₂ ≤ c₁)) (h₂ : fact (c₃ ≤ c₂)) (x : C.X c₁ p q) :
@@ -81,7 +85,11 @@ by rw d_comp_res
 
 @[simp] lemma d_comp_d {c : ℝ≥0} {p q : ℤ} :
   @d C c p q ≫ C.d = 0 :=
-sorry
+begin
+  have step1 := (homological_complex.d_squared (C.obj $ op c)) p,
+  have step2 := congr_arg differential_object.hom.f step1,
+  exact congr_fun step2 q
+end
 
 @[simp] lemma d_d {c : ℝ≥0} {p q : ℤ} (x : C.X c p q) :
   C.d (C.d x) = 0 :=
@@ -138,9 +146,11 @@ def col (C : system_of_double_complexes) (q : ℤ) : system_of_complexes :=
 { obj := λ c,
   { X := λ p, C.X (unop c) p q,
     d := λ p, @d C _ p q,
-    d_squared' := sorry },
-  map := λ c₁ c₂ h, sorry,
-  map_id' := λ c, sorry,
-  map_comp' := sorry }
+    d_squared' := by { ext1 n, apply d_comp_d } },
+  map := λ c₁ c₂ h,
+  { f := λ p, @res C _ _ _ _ (le_of_hom h.unop),
+    comm' := by { ext1 n, apply d_comp_res } },
+  map_id' := λ c, by { ext n : 2, apply res_refl },
+  map_comp' := λ c₁ c₂ c₃ h₁ h₂, by { ext n : 2, symmetry, apply res_comp_res, } }
 
 end system_of_double_complexes
