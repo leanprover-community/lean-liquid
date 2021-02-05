@@ -285,18 +285,8 @@ instance : topological_space (Mbar_le r' S c) := topological_space.induced eqv (
 
 lemma is_open_iff {U : set (Mbar_bdd.limit r' ⟨S⟩ c)} : is_open (eqv ⁻¹' U) ↔ is_open U :=
 begin
-  -- this should be made cleaner with some mathlib lemmas
-  -- about images/preimages of sets under equiv's.
   rw is_open_induced_iff,
-  split,
-  { rintros ⟨V,hV,h⟩,
-    apply_fun (λ S, eqv '' S) at h,
-    simp_rw [eqv.image_eq_preimage] at h,
-    have : V = U, { convert h, by tidy, by tidy },
-    rw ← this,
-    assumption },
-  { intros hU,
-    exact ⟨U,hU,rfl⟩ },
+  simp [function.surjective.preimage_injective (equiv.surjective (eqv : Mbar_le r' S c ≃ _))],
 end
 
 /-- The homeomorphism between `Mbar_le r' S c`
@@ -573,6 +563,11 @@ end Tinv
 
 end Mbar_le
 
+lemma foo (X Y : Type*) [topological_space X] [topological_space Y]
+  [discrete_topology X] [discrete_topology Y] (f : X → Y)
+(hf : function.injective f) :
+  embedding f := sorry
+
 -- move this up a bit
 instance [fact (0 < r')] : profinitely_filtered_pseudo_normed_group (Mbar r' S) :=
 { topology := λ c, show topological_space (Mbar_le r' S c), by apply_instance,
@@ -581,7 +576,11 @@ instance [fact (0 < r')] : profinitely_filtered_pseudo_normed_group (Mbar r' S) 
   compact := λ c, show compact_space (Mbar_le r' S c), by apply_instance,
   continuous_add' := λ c₁ c₂, Mbar_le.continuous_add',
   continuous_neg' := λ c, Mbar_le.continuous_neg,
-  embedding_cast_le := sorry,
+  embedding_cast_le := begin
+    intros,
+    change embedding cast_le,
+    sorry
+  end,
   .. Mbar.pseudo_normed_group }
 
-#lint- only unused_arguments def_lemma doc_blame
+--#lint- only unused_arguments def_lemma doc_blame
