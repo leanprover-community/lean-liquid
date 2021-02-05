@@ -14,7 +14,7 @@ local attribute [instance] type_pow
 /-- A *profinitely filtered pseudo normed topological group* is
 * an abelian group `M` with an increasing filtration `filtration M c, c : ℝ≥0` such that
 * `filtration M c` is a profinite set
-* `M` is pseudo normed, so `0 ∈ filtration M c`, `-(filtration M c = filtration M c`,
+* `M` is pseudo normed, so `0 ∈ filtration M c`, `-(filtration M c) = filtration M c`,
   and `x₁ ∈ filtration M c₁, x₂ ∈ filtration M c₂ → (x₁ + x₂) ∈ filtration M (c₁ + c₂)`
 * (bounded) addition and negation are continuous.
 
