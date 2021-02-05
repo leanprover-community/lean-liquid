@@ -100,7 +100,7 @@ f.to_add_monoid_hom.map_sum _ _
 
 /-- Make a profinitely filtered pseudo normed group hom
 from a group hom and a proof that it is bounded and continuous. -/
-def mk' (f : M₁ →+ M₂)  (h : ∃ C, ∀ c, ∃ (H : ∀ x, x ∈ filtration M₁ c → f x ∈ filtration M₂ (C * c)),
+def mk' (f : M₁ →+ M₂) (h : ∃ C, ∀ c, ∃ (H : ∀ x, x ∈ filtration M₁ c → f x ∈ filtration M₂ (C * c)),
     @continuous (filtration M₁ c) (filtration M₂ (C * c)) _ _ (λ x, ⟨f x, H x x.2⟩)) :
   profinitely_filtered_pseudo_normed_group_hom M₁ M₂ :=
 { bound' := by { obtain ⟨C, hC⟩ := h, refine ⟨C, λ c, (hC c).some⟩ },
@@ -115,7 +115,7 @@ def mk' (f : M₁ →+ M₂)  (h : ∃ C, ∀ c, ∃ (H : ∀ x, x ∈ filtratio
     convert H using 1,
     ext, dsimp, rw ← hf₀, refl
   end,
-  .. f}
+  .. f }
 
 @[simp] lemma coe_mk' (f : M₁ →+ M₂) (h) : ⇑(mk' f h) = f := rfl
 

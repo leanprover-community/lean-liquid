@@ -6,6 +6,7 @@ import facts
 import hacks_and_tricks.type_pow
 
 import Mbar.basic
+import pseudo_normed_group.profinitely_filtered
 
 /-!
 # $\overline{\mathcal{M}}_{r'}(S)_{≤ c}$
@@ -571,4 +572,16 @@ end
 end Tinv
 
 end Mbar_le
+
+-- move this up a bit
+instance [fact (0 < r')] : profinitely_filtered_pseudo_normed_group (Mbar r' S) :=
+{ topology := λ c, show topological_space (Mbar_le r' S c), by apply_instance,
+  t2 := λ c, show t2_space (Mbar_le r' S c), by apply_instance,
+  td := λ c, show totally_disconnected_space (Mbar_le r' S c), by apply_instance,
+  compact := λ c, show compact_space (Mbar_le r' S c), by apply_instance,
+  continuous_add' := λ c₁ c₂, Mbar_le.continuous_add',
+  continuous_neg' := λ c, sorry,
+  embedding_cast_le := sorry,
+  .. Mbar.pseudo_normed_group }
+
 #lint- only unused_arguments def_lemma doc_blame

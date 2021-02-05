@@ -1,6 +1,5 @@
-import for_mathlib.equalizers
 import Mbar.Mbar_pow
-import system_of_complexes
+import pseudo_normed_group.system_of_complexes
 
 /-!
 # The system of complexes associated with `V` and `Mbar_le r' S c`
