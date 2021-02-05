@@ -572,11 +572,25 @@ end Tinv
 
 end Mbar_le
 
--- Gouezel is doing it
-lemma embedding_of_injective {X Y : Type*} [topological_space X] [topological_space Y]
-  [compact_space X] [t2_space X] [compact_space Y] [t2_space Y] {f : X → Y}
-    (hf1 : continuous f) (hf2 : function.injective f) :
-  embedding f := sorry
+section PR6057
+-- PR #6057
+variables {α β : Type*} [topological_space α] [topological_space β]
+lemma continuous.is_closed_map [compact_space α] [t2_space β] {f : α → β} (h : continuous f) :
+  is_closed_map f :=
+λ s hs, (hs.compact.image h).is_closed
+
+lemma continuous.closed_embedding [compact_space α] [t2_space β] {f : α → β} (h : continuous f)
+  (hf : function.injective f) : closed_embedding f :=
+closed_embedding_of_continuous_injective_closed h hf h.is_closed_map
+
+example [compact_space α] [t2_space β] {f : α → β} (h : continuous f)
+  (hf : function.injective f) : embedding f :=
+begin
+  have h2 := continuous.closed_embedding h hf,
+  exact h2.to_embedding
+end
+
+end PR6057
 
 -- move this up a bit
 instance [fact (0 < r')] : profinitely_filtered_pseudo_normed_group (Mbar r' S) :=
@@ -586,38 +600,14 @@ instance [fact (0 < r')] : profinitely_filtered_pseudo_normed_group (Mbar r' S) 
   compact := λ c, show compact_space (Mbar_le r' S c), by apply_instance,
   continuous_add' := λ c₁ c₂, Mbar_le.continuous_add',
   continuous_neg' := λ c, Mbar_le.continuous_neg,
-  embedding_cast_le := begin
-    intros c₁ c₂,
+  embedding_cast_le := λ c₁ c₂, begin
     introI h,
-    -- this needs some work ;-)
-    letI : topological_space (filtration (Mbar r' S) c₁),
-    { show topological_space (Mbar_le r' S c₁),
-      apply_instance },
-    haveI : compact_space (filtration (Mbar r' S) c₁) := by {
-      change compact_space (Mbar_le r' S c₁),
-      apply_instance
-    },
-    haveI : t2_space (filtration (Mbar r' S) c₁) := by {
-      change t2_space (Mbar_le r' S c₁),
-      apply_instance
-    },
-    letI : topological_space (filtration (Mbar r' S) c₂),
-    { show topological_space (Mbar_le r' S c₂),
-      apply_instance },
-    haveI : compact_space (filtration (Mbar r' S) c₂) := by {
-      change compact_space (Mbar_le r' S c₂),
-      apply_instance
-    },
-    haveI : t2_space (filtration (Mbar r' S) c₂) := by {
-      change t2_space (Mbar_le r' S c₂),
-      apply_instance
-    },
-    have hmaps_are_equal : (Mbar_le.cast_le : Mbar_le r' S c₁ → Mbar_le r' S c₂) = pseudo_normed_group.cast_le,
-    { ext, refl },
-    rw ← hmaps_are_equal,
-    exact embedding_of_injective
-      (Mbar_le.continuous_cast_le r' S c₁ c₂) (Mbar_le.injective_cast_le),
+    rw show pseudo_normed_group.cast_le = (Mbar_le.cast_le : Mbar_le r' S c₁ → Mbar_le r' S c₂),
+      by {ext, refl},
+    exact (@continuous.closed_embedding _ _ Mbar_le.topological_space Mbar_le.topological_space
+      Mbar_le.compact_space Mbar_le.t2_space _
+      (Mbar_le.continuous_cast_le r' S c₁ c₂) (Mbar_le.injective_cast_le)).to_embedding,
   end,
   .. Mbar.pseudo_normed_group }
 
---#lint- only unused_arguments def_lemma doc_blame
+#lint- only unused_arguments def_lemma doc_blame
