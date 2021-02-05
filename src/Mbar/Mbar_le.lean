@@ -110,7 +110,7 @@ subtype.mk (-F) $ neg_mem_filtration F.mem_filtration
 
 namespace Mbar_le
 
-/-- The truncation map fro Mbar_le to Mbar_bdd -/
+/-- The truncation map from Mbar_le to Mbar_bdd -/
 @[simps] def truncate (M : ℕ) (F : Mbar_le r' S c) : Mbar_bdd r' ⟨S⟩ c M :=
 { to_fun := λ s n, F s n,
   coeff_zero' := by simp,
@@ -337,18 +337,9 @@ end
 instance : totally_disconnected_space (Mbar_le r' S c) :=
 begin
   constructor,
-  intros A _ hA,
-  constructor,
+  rintros A - hA,
   suffices subsing : subsingleton (homeo '' A),
-  { -- This block can probably be streamlined a bit...
-    rintros ⟨a,ha⟩ ⟨b,hb⟩,
-    ext1,
-    suffices : homeo a = homeo b, by exact homeo.injective this,
-    let x : ↥(homeo '' A) := ⟨homeo a, ⟨a, ha, rfl⟩⟩,
-    let y : ↥(homeo '' A) := ⟨homeo b, ⟨b, hb, rfl⟩⟩,
-    cases subsing,
-    change ↑x = ↑y,
-    rw subsing x y },
+  { apply set.subsingleton_of_image (homeo.injective) _ subsing },
   obtain ⟨h⟩ := (by apply_instance : totally_disconnected_space (Mbar_bdd.limit r' ⟨S⟩ c)),
   exact h _ (by tauto) (is_preconnected.image hA _ homeo.continuous.continuous_on),
 end
@@ -388,6 +379,15 @@ begin
     refine continuous.comp this _,
     refine continuous.prod_map continuous_truncate continuous_truncate },
   exact continuous_of_discrete_topology,
+end
+
+lemma continuous_neg :
+  continuous (Mbar_le.neg : Mbar_le r' S c → Mbar_le r' S c) :=
+begin
+  rw continuous_iff,
+  intro M,
+  change continuous (λ x : Mbar_le r' S c, Mbar_bdd.neg (truncate M x)),
+  exact continuous.comp continuous_of_discrete_topology continuous_truncate,
 end
 
 end topological_structure
@@ -580,7 +580,7 @@ instance [fact (0 < r')] : profinitely_filtered_pseudo_normed_group (Mbar r' S) 
   td := λ c, show totally_disconnected_space (Mbar_le r' S c), by apply_instance,
   compact := λ c, show compact_space (Mbar_le r' S c), by apply_instance,
   continuous_add' := λ c₁ c₂, Mbar_le.continuous_add',
-  continuous_neg' := λ c, sorry,
+  continuous_neg' := λ c, Mbar_le.continuous_neg,
   embedding_cast_le := sorry,
   .. Mbar.pseudo_normed_group }
 
