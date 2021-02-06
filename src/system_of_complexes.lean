@@ -60,7 +60,7 @@ namespace system_of_complexes
 
 variables (C C₁ C₂ : system_of_complexes.{u})
 
-/-- `C.res` is the restriction map `C c' i ⟶ C c i` for a system of complexes `C`,
+/-- `res` is the restriction map `C c' i ⟶ C c i` for a system of complexes `C`,
 and nonnegative reals `c ≤ c'`. -/
 def res {C : system_of_complexes} {c' c : ℝ≥0} {i : ℤ} [h : fact (c ≤ c')] : C c' i ⟶ C c i :=
 (C.map (hom_of_le h).op).f i
@@ -165,6 +165,8 @@ structure admissible (C : system_of_complexes) : Prop :=
 (d_norm_noninc : ∀ c i, (d : C c i ⟶ C c (i+1)).norm_noninc)
 (res_norm_noninc : ∀ c' c i h, (@res C c' c i h).norm_noninc)
 
+def completion (C : system_of_complexes) : system_of_complexes := sorry
+
 /-- `is_bdd_exact_for_bdd_degree_above_idx k m c₀` is a predicate on systems of complexes.
 
 A system of complexes `C` is *`≤ k`-exact in degrees `≤ m` for `c ≥ c₀`*
@@ -194,7 +196,31 @@ def is_weak_bdd_exact_for_bdd_degree_above_idx
 ∀ x : C (k * c) (i+1),
 ∀ ε > 0, ∃ y : C c i, ∥res x - d y∥ ≤ K * ∥d x∥ + ε
 
---TODO: equivalence between weak and strong for complete spaces
+namespace is_weak_bdd_exact_for_bdd_degree_above_idx
+
+variables {C C₁ C₂}
+variables {k k' K K' : ℝ≥0} {m m' : ℤ} {c₀ c₀' : ℝ≥0} [fact (1 ≤ k)] [fact (1 ≤ k')]
+
+lemma to_exact (hC : C.is_weak_bdd_exact_for_bdd_degree_above_idx k K m c₀) {δ : ℝ≥0} (hδ : 0 < δ)
+  (H : ∀ c ≥ c₀, ∀ i < m, ∀ x : C (k * c) (i+1), d x = 0 → ∃ y : C c i, res x = d y) :
+  C.is_bdd_exact_for_bdd_degree_above_idx k (K + δ) m c₀ :=
+sorry
+
+lemma controlled_y (hC : C.is_weak_bdd_exact_for_bdd_degree_above_idx k K m c₀) :
+∀ c ≥ c₀, ∀ i < m,
+∀ x : C (k^2 * c) (i+1),
+∀ (ε > 0) (δ > 0), ∃ y : C c i, ∥res x - d y∥ ≤ K * ∥d x∥ + ε ∧ ∥y∥ ≤ K*(K + 1)*∥x∥ + δ :=
+sorry
+
+lemma completion (hC : C.is_weak_bdd_exact_for_bdd_degree_above_idx k K m c₀) :
+ C.completion.is_weak_bdd_exact_for_bdd_degree_above_idx (k^2) K m c₀ :=
+sorry
+
+lemma strong_of_complete (hC : C.is_weak_bdd_exact_for_bdd_degree_above_idx k K m c₀) :
+ ∀ δ > 0, C.is_bdd_exact_for_bdd_degree_above_idx (k^2) (K + δ) m c₀ :=
+sorry
+
+end is_weak_bdd_exact_for_bdd_degree_above_idx
 
 namespace is_bdd_exact_for_bdd_degree_above_idx
 
