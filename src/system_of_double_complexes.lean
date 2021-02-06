@@ -173,15 +173,17 @@ by refl
   (C.col q).d = @d C c p q :=
 by { dsimp [system_of_complexes.d, col, d], simp }
 
+/-- The assumptions on `M` in Proposition 9.6 bundled into a structure. Note that in `cond3b`
+  our `q` is one smaller than the `q` in the notes (so that we don't have to deal with `q - 1`). -/
 structure normed_spectral_conditions (m : ℕ) (k : ℝ≥0) [fact (1 ≤ k)]
   (ε : ℝ) (hε : 0 < ε) (k₀ : ℝ≥0) [fact (1 ≤ k₀)]
   (M : system_of_double_complexes)
   (k' : ℝ≥0) [fact (k₀ ≤ k')] [fact (1 ≤ k')] (c₀ H : ℝ≥0) [fact (0 < H)] :=
 (col_exact : ∀ j ≤ m, (M.col j).is_bdd_exact_for_bdd_degree_above_idx k (m+1) c₀)
 (row_exact : ∀ i ≤ m + 1, (M.row i).is_bdd_exact_for_bdd_degree_above_idx k m c₀)
-(h : Π {q} [fact (q ≤ m)] {c} [fact (c₀ ≤ c)], M.X (k' * c) 0 (q+1) ⟶ M.X c 1 q)
-(norm_h_le : ∀ q [fact (q ≤ m)] (c) [fact (c₀ ≤ c)] (x : M.X (k' * c) 0 (q+1)), ∥h x∥ ≤ H * ∥x∥)
-(cond3b : ∀ q [fact (q+1 ≤ m)] (c) [fact (c₀ ≤ c)]
+(h : Π {q : ℤ} [fact (q ≤ m)] {c} [fact (c₀ ≤ c)], M.X (k' * c) 0 (q+1) ⟶ M.X c 1 q)
+(norm_h_le : ∀ (q : ℤ) [fact (q ≤ m)] (c) [fact (c₀ ≤ c)] (x : M.X (k' * c) 0 (q+1)), ​∥h x∥ ≤ H * ∥x∥)
+(cond3b : ∀ (q : ℤ) [fact (q+1 ≤ m)] (c) [fact (c₀ ≤ c)]
   (x : M.X (k' * (k' * c)) 0 (q+1)) (u1 u2 : units ℤ),
   ​∥M.res (M.d x) + (u1:ℤ) • h (M.d' x) + (u2:ℤ) • M.d' (h x)∥ ≤ ε * ∥(res M x : M.X c 0 (q+1))∥)
 .
@@ -194,24 +196,24 @@ variables (M : system_of_double_complexes.{u})
 variables (k' : ℝ≥0) [fact (k₀ ≤ k')] [fact (1 ≤ k')] (c₀ H : ℝ≥0) [fact (0 < H)]
 
 lemma cond3bpp (NSC : normed_spectral_conditions.{u u} m k ε hε k₀ M k' c₀ H)
-  (q : ℕ) [fact (q + 1 ≤ m)] (c : ℝ≥0) [fact (c₀ ≤ c)] (x : M.X (k' * (k' * c)) 0 (q+1)) :
+  (q : ℤ) [fact (q + 1 ≤ m)] (c : ℝ≥0) [fact (c₀ ≤ c)] (x : M.X (k' * (k' * c)) 0 (q+1)) :
   ​∥M.res (M.d x) + NSC.h (M.d' x) + M.d' (NSC.h x)∥ ≤ ε * ∥(res M x : M.X c 0 (q+1))∥ :=
 by simpa only [units.coe_one, one_smul] using NSC.cond3b q c x 1 1
 
 lemma cond3bpm (NSC : normed_spectral_conditions.{u u} m k ε hε k₀ M k' c₀ H)
-  (q : ℕ) [fact (q + 1 ≤ m)] (c : ℝ≥0) [fact (c₀ ≤ c)] (x : M.X (k' * (k' * c)) 0 (q+1)) :
+  (q : ℤ) [fact (q + 1 ≤ m)] (c : ℝ≥0) [fact (c₀ ≤ c)] (x : M.X (k' * (k' * c)) 0 (q+1)) :
   ​∥M.res (M.d x) + NSC.h (M.d' x) - M.d' (NSC.h x)∥ ≤ ε * ∥(res M x : M.X c 0 (q+1))∥ :=
 by simpa only [units.coe_one, one_smul, neg_smul, units.coe_neg, ← sub_eq_add_neg]
   using NSC.cond3b q c x 1 (-1)
 
 lemma cond3bmp (NSC : normed_spectral_conditions.{u u} m k ε hε k₀ M k' c₀ H)
-  (q : ℕ) [fact (q + 1 ≤ m)] (c : ℝ≥0) [fact (c₀ ≤ c)] (x : M.X (k' * (k' * c)) 0 (q+1)) :
+  (q : ℤ) [fact (q + 1 ≤ m)] (c : ℝ≥0) [fact (c₀ ≤ c)] (x : M.X (k' * (k' * c)) 0 (q+1)) :
   ​∥M.res (M.d x) - NSC.h (M.d' x) + M.d' (NSC.h x)∥ ≤ ε * ∥(res M x : M.X c 0 (q+1))∥ :=
 by simpa only [units.coe_one, one_smul, neg_smul, units.coe_neg, ← sub_eq_add_neg]
   using NSC.cond3b q c x (-1) 1
 
 lemma cond3bmm (NSC : normed_spectral_conditions.{u u} m k ε hε k₀ M k' c₀ H)
-  (q : ℕ) [fact (q + 1 ≤ m)] (c : ℝ≥0) [fact (c₀ ≤ c)] (x : M.X (k' * (k' * c)) 0 (q+1)) :
+  (q : ℤ) [fact (q + 1 ≤ m)] (c : ℝ≥0) [fact (c₀ ≤ c)] (x : M.X (k' * (k' * c)) 0 (q+1)) :
   ​∥M.res (M.d x) - NSC.h (M.d' x) - M.d' (NSC.h x)∥ ≤ ε * ∥(res M x : M.X c 0 (q+1))∥ :=
 by simpa only [units.coe_one, one_smul, neg_smul, units.coe_neg, ← sub_eq_add_neg]
   using NSC.cond3b q c x (-1) (-1)
