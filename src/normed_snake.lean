@@ -24,22 +24,19 @@ lemma weak_normed_snake {k k' k'' K K' K'' : ℝ≥0}
   N.is_weak_bdd_exact_for_bdd_degree_above_idx (k''*k*k') (K'*(K*K'' + 1)) (m - 1) c₀ :=
 begin
   have bound_nonneg : (0 : ℝ) ≤ K' * (K * K'' + 1),
-  { apply mul_nonneg nnreal.zero_le_coe,
-    apply add_nonneg,
-    exact_mod_cast nnreal.zero_le_coe,
-    exact zero_le_one },
+  { exact_mod_cast nnreal.zero_le_coe },
   intros c hc i hi,
   let c₁ := k'' * (k * (k' * c)),
   suffices : ∀ n : N c₁ (i + 1), ∀ ε > 0,
     ∃ y : N c i, ∥res n - d y∥ ≤ K' * (K * K'' + 1) * ∥d n∥ + ε,
   { dsimp [c₁] at this,
     intros n₁ ε hε,
-    haveI hc : fact (k'' * k * k' * c = c₁) := by { show _ = _, dsimp [c₁], ring },
+    haveI hc : fact (k'' * k * k' * c = c₁) := by { dsimp [fact, c₁], ring },
     let n : ↥(N c₁ (i + 1)) := res n₁,
     rcases this n ε hε with ⟨y, hy : ∥res (res n₁) - d y∥ ≤ K' * (K * K'' + 1) * ∥d (res n₁)∥ + ε⟩,
     rw [res_res, d_res] at hy,
-    have : ∥(res (d n₁) : N (k'' * (k * (k' * c))) (i + 1 + 1)) ∥ ≤ ∥d n₁∥,
-      by {apply (admissible_of_quotient hgquot hM'_adm).res_norm_noninc, },
+    have : ∥(res (d n₁) : N (k'' * (k * (k' * c))) (i + 1 + 1))∥ ≤ ∥d n₁∥,
+      by { apply (admissible_of_quotient hgquot hM'_adm).res_norm_noninc, },
     exact ⟨y, hy.trans (add_le_add_right (mul_le_mul_of_nonneg_left this bound_nonneg) ε)⟩ },
   intros n ε hε,
   let ε₁ := ε/(K' * (K * K'' + 2) + 1),
@@ -53,9 +50,9 @@ begin
   obtain ⟨m' : M' c₁ (i + 1), hm' : g m' = n⟩ := (hgquot _ _).surjective _,
   let m₁' := d m',
   have hm₁' : g m₁' = d n := by simpa [hm'] using (d_apply _ _ g m').symm,
-  obtain ⟨m₁'' : M' c₁ (i + 1 + 1), hgm₁'' : g m₁'' = d n, hnorm_m₁'' : ∥m₁''∥ < ∥d n∥ + ε₁⟩
-    := quotient_norm_lift (hgquot _ _) hε₁ (d n),
-  obtain ⟨m₁, hm₁⟩ : ∃ m₁ : M c₁ (i + 1 + 1),  f m₁ + m₁'' = m₁',
+  obtain ⟨m₁'' : M' c₁ (i + 1 + 1), hgm₁'' : g m₁'' = d n, hnorm_m₁'' : ∥m₁''∥ < ∥d n∥ + ε₁⟩ :=
+    quotient_norm_lift (hgquot _ _) hε₁ (d n),
+  obtain ⟨m₁, hm₁⟩ : ∃ m₁ : M c₁ (i + 1 + 1), f m₁ + m₁'' = m₁',
   { have hrange : m₁' - m₁'' ∈ f.apply.range,
     { rw [← hg _ _, mem_ker  _ _, normed_group_hom.map_sub],
       change g m₁' - g m₁'' = 0,
@@ -64,8 +61,8 @@ begin
     exact ⟨m₁, by rw [hm₁, sub_add_cancel]⟩ },
 
   have hm₂ : f (d m₁) = -d m₁'',
-  { rw [← d_apply, eq_sub_of_add_eq hm₁, normed_group_hom.map_sub, ← coe_comp, d, d, homological_complex.d_squared,
-      coe_zero, ← neg_inj, pi.zero_apply, zero_sub], },
+  { rw [← d_apply, eq_sub_of_add_eq hm₁, normed_group_hom.map_sub, ← coe_comp,
+        d, d, homological_complex.d_squared, coe_zero, ← neg_inj, pi.zero_apply, zero_sub], },
   have hle : ∥res (d m₁)∥ ≤ K'' * ∥m₁''∥,
     calc ∥res (d m₁)∥ ≤ K'' * ∥f (d m₁)∥ : Hf _ _ (by linarith) (d m₁)
                   ... = K'' * ∥d m₁''∥ : by rw [hm₂, norm_neg]
@@ -90,7 +87,8 @@ begin
             ... = res (d m') - (f (d m₀)) : by rw [normed_group_hom.map_sub, d_res _, d_apply]
             ... = res (d m') - (f (res m₁)) + (f (res m₁) - f (d m₀)) : by abel
             ... = res m₁'' + f ((res m₁) - (d m₀)) : by
-                               {  rw [← system_of_complexes.map_sub, ← res_apply, ← normed_group_hom.map_sub, ← sub_eq_of_eq_add' hm₁.symm] },
+                               { rw [← system_of_complexes.map_sub, ← res_apply,
+                                     ← normed_group_hom.map_sub, ← sub_eq_of_eq_add' hm₁.symm] },
   have hnormle : ∥mnew₁'∥ ≤ (K*K'' + 1)*∥d n∥ + (K*K'' + 2) * ε₁,
     calc ∥mnew₁'∥ = ∥res m₁'' + f (res m₁ - d m₀)∥ : by rw [hmnew']
               ... ≤ ∥res m₁''∥ + ∥f (res m₁ - d m₀)∥ : norm_add_le _ _
