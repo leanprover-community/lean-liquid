@@ -26,7 +26,7 @@ instance : profinitely_filtered_pseudo_normed_group Λ :=
 { compact := λ c, by apply_instance, -- compact of finite
   continuous_add' := λ _ _, continuous_of_discrete_topology,
   continuous_neg' := λ _, continuous_of_discrete_topology,
-  embedding_cast_le := sorry,
+  continuous_cast_le := λ _ _ _, continuous_of_discrete_topology,
   .. (show pseudo_normed_group Λ, by apply_instance) }
 
 instance : profinitely_filtered_pseudo_normed_group_with_Tinv r' (Λ →+ M) :=

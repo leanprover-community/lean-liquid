@@ -6,6 +6,25 @@ import pseudo_normed_group.basic
 import hacks_and_tricks.type_pow
 import facts
 
+section PR6057
+-- PR #6057
+variables {α β : Type*} [topological_space α] [topological_space β]
+lemma continuous.is_closed_map [compact_space α] [t2_space β] {f : α → β} (h : continuous f) :
+  is_closed_map f :=
+λ s hs, (hs.compact.image h).is_closed
+
+lemma continuous.closed_embedding [compact_space α] [t2_space β] {f : α → β} (h : continuous f)
+  (hf : function.injective f) : closed_embedding f :=
+closed_embedding_of_continuous_injective_closed h hf h.is_closed_map
+
+example [compact_space α] [t2_space β] {f : α → β} (h : continuous f)
+  (hf : function.injective f) : embedding f :=
+begin
+  have h2 := continuous.closed_embedding h hf,
+  exact h2.to_embedding
+end
+
+end PR6057
 open pseudo_normed_group
 open_locale nnreal big_operators
 
@@ -29,8 +48,8 @@ class profinitely_filtered_pseudo_normed_group (M : Type*)
   (λ x, ⟨x.1 + x.2, add_mem_filtration x.1.2 x.2.2⟩))
 (continuous_neg' : Π c, @continuous (filtration c) (filtration c) _ _
   (λ x, ⟨-x, neg_mem_filtration x.2⟩))
-(embedding_cast_le : ∀ (c₁ c₂) [h : fact (c₁ ≤ c₂)],
-  embedding (@pseudo_normed_group.cast_le M _ _ _ h))
+(continuous_cast_le : ∀ (c₁ c₂) [h : fact (c₁ ≤ c₂)],
+  continuous (@pseudo_normed_group.cast_le M _ _ _ h))
 
 namespace profinitely_filtered_pseudo_normed_group
 
@@ -44,6 +63,19 @@ instance (c : ℝ≥0) : topological_space (filtration M c) := topology c
 instance (c : ℝ≥0) : t2_space (filtration M c) := t2 c
 instance (c : ℝ≥0) : totally_disconnected_space (filtration M c) := td c
 instance (c : ℝ≥0) : compact_space (filtration M c) := compact c
+
+lemma is_closed_map_cast_le (c₁ c₂) [h : fact (c₁ ≤ c₂)] :
+  is_closed_map (@pseudo_normed_group.cast_le M _ _ _ h) :=
+(continuous_cast_le c₁ c₂).is_closed_map
+
+lemma closed_embedding_cast_le (c₁ c₂) [h : fact (c₁ ≤ c₂)] :
+  closed_embedding (@pseudo_normed_group.cast_le M _ _ _ h) :=
+closed_embedding_of_continuous_injective_closed
+  (continuous_cast_le c₁ c₂) (injective_cast_le c₁ c₂) (is_closed_map_cast_le c₁ c₂)
+
+lemma embedding_cast_le (c₁ c₂) [h : fact (c₁ ≤ c₂)] :
+  embedding (@pseudo_normed_group.cast_le M _ _ _ h) :=
+(closed_embedding_cast_le c₁ c₂).to_embedding
 
 end profinitely_filtered_pseudo_normed_group
 
@@ -195,9 +227,7 @@ instance : profinitely_filtered_pseudo_normed_group punit :=
   add_mem_filtration := λ _ _ _ _ _ _, set.mem_univ _,
   continuous_add' := λ _ _,  continuous_of_discrete_topology,
   continuous_neg' := λ _, continuous_of_discrete_topology,
-  embedding_cast_le := λ c₁ c₂ h,
-  { induced := subsingleton.elim _ _,
-    inj := λ _ _ _, subtype.ext dec_trivial } }
+  continuous_cast_le := λ _ _ _, continuous_of_discrete_topology }
 
 end punit
 

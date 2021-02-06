@@ -153,6 +153,11 @@ def cast_le {c₁ c₂ : ℝ≥0} [h : fact (c₁ ≤ c₂)] (x : filtration M c
 @[simp] lemma coe_cast_le {c₁ c₂ : ℝ≥0} [h : fact (c₁ ≤ c₂)] (x : filtration M c₁) :
   ((cast_le x : filtration M c₂) : M) = x := rfl
 
+lemma injective_cast_le (c₁ c₂ : ℝ≥0) [fact (c₁ ≤ c₂)] :
+  function.injective (cast_le : filtration M c₁ → filtration M c₂) :=
+λ x y h, subtype.coe_injective $
+by simpa only [coe_cast_le] using congr_arg (coe : filtration M c₂ → M) h
+
 variables (M)
 
 /-- `rescale M r` is the pseudo normed group whose filtration is rescaled by `r : ℝ≥0`.
