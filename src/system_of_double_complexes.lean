@@ -143,7 +143,7 @@ def row (C : system_of_double_complexes) (p : ℤ) : system_of_complexes :=
 C.comp ((homological_complex.forget _).comp $ pi.eval _ p)
 
 @[simp] lemma row_X (C : system_of_double_complexes) (p q : ℤ) (c : ℝ≥0) :
-  (C.row p).X c q = C.X c p q :=
+  C.row p c q = C.X c p q :=
 by refl
 
 @[simp] lemma row_res (C : system_of_double_complexes) (p q : ℤ) {c' c : ℝ≥0} [h : fact (c ≤ c')] :
@@ -162,7 +162,7 @@ C.comp
     (by { intros, ext, simp }))
 
 @[simp] lemma col_X (C : system_of_double_complexes) (p q : ℤ) (c : ℝ≥0) :
-  (C.col q).X c p = C.X c p q :=
+  C.col q c p = C.X c p q :=
 by refl
 
 @[simp] lemma col_res (C : system_of_double_complexes) (p q : ℤ) {c' c : ℝ≥0} [h : fact (c ≤ c')] :
