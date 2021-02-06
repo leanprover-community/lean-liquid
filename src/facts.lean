@@ -6,11 +6,15 @@ namespace nnreal
 
 variables (r' k c c₁ c₂ : ℝ≥0)
 
-instance fact_le_mul_of_one_le_left [hk : fact (1 ≤ k)] : fact (c ≤ k * c) :=
-le_mul_of_one_le_left c.2 hk
+instance fact_le_mul_of_one_le_left [hk : fact (1 ≤ k)] [hc : fact (c₁ ≤ c₂)] :
+  fact (c₁ ≤ k * c₂) :=
+calc c₁ = 1 * c₁ : (one_mul _).symm
+    ... ≤ k * c₂ : mul_le_mul' hk hc
 
-instance fact_mul_le_of_le_one_left [hk : fact (k ≤ 1)] : fact (k * c ≤ c) :=
-mul_le_of_le_one_left c.2 hk
+instance fact_mul_le_of_le_one_left [hk : fact (k ≤ 1)] [hc : fact (c₁ ≤ c₂)] :
+  fact (k * c₁ ≤ c₂) :=
+calc k * c₁ ≤ 1 * c₂ : mul_le_mul' hk hc
+        ... = c₂     : one_mul _
 
 instance fact_le_refl : fact (c ≤ c) := le_rfl
 
@@ -28,6 +32,16 @@ begin
   nth_rewrite 1 ← mul_one c,
   exact mul_le_mul (le_of_eq rfl) h2 (le_of_lt h1) zero_le',
 end
+
+instance fact_le_of_add_one_le (m q : ℕ) [h : fact (q + 1 ≤ m)] : fact (q ≤ m) :=
+le_trans q.le_succ h
+
+instance fact_le_max_left (a b c : ℝ≥0) [h : fact (a ≤ b)] : fact (a ≤ max b c) :=
+le_trans h $ le_max_left _ _
+
+instance fact_one_le_mul_self (a : ℝ≥0) [h : fact (1 ≤ a)] : fact (1 ≤ a * a) :=
+calc (1 : ℝ≥0) = 1 * 1 : (mul_one 1).symm
+           ... ≤ a * a : mul_le_mul' h h
 
 instance one_le_add {a b : ℝ≥0} [ha : fact (1 ≤ a)] : fact (1 ≤ a + b) := le_trans ha $ by simp
 instance one_le_add' {a b : ℝ≥0} [hb : fact (1 ≤ b)] : fact (1 ≤ a + b) := le_trans hb $ by simp

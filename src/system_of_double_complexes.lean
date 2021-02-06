@@ -172,22 +172,29 @@ by refl
   (C.col q).d = @d C c p q :=
 by { dsimp [system_of_complexes.d, col, d], simp }
 
+structure normed_spectral.conditions (m : ℕ) (k : ℝ≥0) [fact (1 ≤ k)]
+  (ε : ℝ) (hε : 0 < ε) (k₀ : ℝ≥0) [fact (1 ≤ k₀)]
+  (M : system_of_double_complexes)
+  (k' : ℝ≥0) [fact (k₀ ≤ k')] [fact (1 ≤ k')] (c₀ H : ℝ≥0) [fact (0 < H)] :=
+(cond1 : ∀ j ≤ m, (M.col j).is_bdd_exact_for_bdd_degree_above_idx k (m+1) c₀)
+(cond2 : ∀ i ≤ m + 1, (M.row i).is_bdd_exact_for_bdd_degree_above_idx k m c₀)
+(h : Π q [fact (q ≤ m)] (c) [fact (c₀ ≤ c)], M.X (k' * c) 0 (q+1) ⟶ M.X c 1 q)
+(cond3a : ∀ q [fact (q ≤ m)] (c) [fact (c₀ ≤ c)] (x : M.X (k' * c) 0 (q+1)),
+​  ∥ h q c x ∥ ≤ H * ∥ x ∥)
+(cond3b : ∀ q [fact (q + 1 ≤ m)] (c) [fact (c₀ ≤ c)]
+  (x : M.X (k' * (k' * c)) 0 (q+1)) (u1 u2 : units ℤ),
+  ​∥M.res (M.d x) + (u1 : ℤ) • h (q+1) (k' * c) (M.d' x) + (u2 : ℤ) • M.d' (h q (k' * c) x)∥ ≤
+    ε * ∥ (res M x : M.X c 0 (q+1)) ∥)
+
 /-- Proposition 9.6 in [Analytic] -/
 theorem analytic_9_6 (m : ℕ) (k : ℝ≥0) [fact (1 ≤ k)] :
   ∃ (ε : ℝ) (hε : ε > 0) (k₀ : ℝ≥0) [fact (1 ≤ k₀)],
-  ∀ (M : system_of_double_complexes) (k' ≥ k₀) (c₀ : ℝ≥0) (H : ℝ≥0) (hH : 0 < H)
-  (cond1 : ∀ j ≤ m, (M.col j).is_bdd_exact_for_bdd_degree_above_idx k (m+1) c₀)
-  (cond2 : ∀ i ≤ m + 1, (M.row i).is_bdd_exact_for_bdd_degree_above_idx k m c₀)
-  (h : ∀ q [fact (q ≤ m)] (c) [fact (c₀ ≤ c)], M.X (k' * c) 0 (q+1) ⟶ M.X c 1 q)
-  (cond3a :
-    (∀ q [fact (q ≤ m)] (c) [fact (c₀ ≤ c)] (x : M.X (k' * c) 0 (q+1)), ​∥ h q c x ∥ ≤ H * ∥ x ∥))
-  (cond3b :
-    (∀ q [fact (q + 1 ≤ m)] (c) [fact (c₀ ≤ c)] (x : M.X (k' * (k' * c)) 0 (q+1)) (u1 u2 : units ℤ)
-    [fact (c ≤ k' * (k' * c))] [fact (k' * c ≤ k' * (k' * c))] [fact (c₀ ≤ k' * c)] [fact (q ≤ m)], -- these facts follow from previous ones
-    ​∥ M.res (M.d x) + (u1 : ℤ) • h (q+1) (k' * c) (M.d' x) + (u2 : ℤ) • M.d' (h q (k' * c) x)∥ ≤
-      ε * ∥ (res M x : M.X c 0 (q+1)) ∥))
-  [fact (1 ≤ max (k' * k') (2 * k₀ * H))], -- (follows)
-    ​(M.row 0).is_bdd_exact_for_bdd_degree_above_idx (max (k' * k') (2 * k₀ * H)) (m+1) c₀ :=
-sorry
+  ∀ (M : system_of_double_complexes) (k' : ℝ≥0) [fact (k₀ ≤ k')] [fact (1 ≤ k')] -- follows
+    (c₀ H : ℝ≥0) [fact (0 < H)],
+  ​∀ (cond : normed_spectral.conditions m k ε hε k₀ M k' c₀ H),
+  (M.row 0).is_bdd_exact_for_bdd_degree_above_idx (max (k' * k') (2 * k₀ * H)) (m+1) c₀ :=
+begin
+  sorry
+end
 
 end system_of_double_complexes
