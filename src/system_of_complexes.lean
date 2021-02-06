@@ -5,6 +5,8 @@ import algebra.ordered_group
 import facts
 import for_mathlib.category_theory
 
+import tactic.gptf
+
 universe variables v u
 noncomputable theory
 open opposite category_theory
@@ -201,10 +203,33 @@ namespace is_weak_bdd_exact_for_bdd_degree_above_idx
 variables {C C₁ C₂}
 variables {k k' K K' : ℝ≥0} {m m' : ℤ} {c₀ c₀' : ℝ≥0} [fact (1 ≤ k)] [fact (1 ≤ k')]
 
+lemma of_le (hC : C.is_weak_bdd_exact_for_bdd_degree_above_idx k K m c₀)
+  (hC_adm : C.admissible) (hk : k ≤ k') (hK : K ≤ K') (hm : m' ≤ m) (hc₀ : c₀ ≤ c₀') :
+  C.is_weak_bdd_exact_for_bdd_degree_above_idx k' K' m' c₀' :=
+begin
+  intros c hc i hi x ε ε_pos,
+  haveI : fact (k ≤ k') := hk,
+  obtain ⟨y, hy⟩ := hC c (hc₀.trans hc) i (lt_of_lt_of_le hi hm) (res x) ε ε_pos,
+  use y,
+  simp only [res_res] at hy,
+  refine le_trans hy _,
+  rw d_res,
+  apply add_le_add_right,
+  exact mul_le_mul hK (hC_adm.res_norm_noninc _ _ _ _ (d x)) (norm_nonneg _) ((zero_le K).trans hK)
+end
+
 lemma to_exact (hC : C.is_weak_bdd_exact_for_bdd_degree_above_idx k K m c₀) {δ : ℝ≥0} (hδ : 0 < δ)
   (H : ∀ c ≥ c₀, ∀ i < m, ∀ x : C (k * c) (i+1), d x = 0 → ∃ y : C c i, res x = d y) :
   C.is_bdd_exact_for_bdd_degree_above_idx k (K + δ) m c₀ :=
-sorry
+begin
+  intros c hc i hi x,
+  by_cases hdx : d x = 0,
+  { rcases H c hc i hi x hdx with ⟨y, hy⟩,
+    exact ⟨y, by simp [hy, hdx]⟩ },
+  { have : ((K + δ : ℝ≥0) : ℝ) * ∥d x∥ = K * ∥d x∥ + δ * ∥d x∥, apply_mod_cast add_mul,
+    simp_rw this,
+    apply hC c hc i hi x (δ*∥d x∥) (mul_pos (by exact_mod_cast hδ) $ norm_pos_iff.mpr hdx) },
+end
 
 lemma controlled_y (hC : C.is_weak_bdd_exact_for_bdd_degree_above_idx k K m c₀) :
 ∀ c ≥ c₀, ∀ i < m,
@@ -216,8 +241,9 @@ lemma completion (hC : C.is_weak_bdd_exact_for_bdd_degree_above_idx k K m c₀) 
  C.completion.is_weak_bdd_exact_for_bdd_degree_above_idx (k^2) K m c₀ :=
 sorry
 
-lemma strong_of_complete (hC : C.is_weak_bdd_exact_for_bdd_degree_above_idx k K m c₀) :
- ∀ δ > 0, C.is_bdd_exact_for_bdd_degree_above_idx (k^2) (K + δ) m c₀ :=
+lemma strong_of_complete (hC : C.is_weak_bdd_exact_for_bdd_degree_above_idx k K m c₀)
+  (hC' : admissible C) :
+  ∀ δ > 0, C.is_bdd_exact_for_bdd_degree_above_idx (k^2) (K + δ) m c₀ :=
 sorry
 
 end is_weak_bdd_exact_for_bdd_degree_above_idx
