@@ -57,7 +57,7 @@ variables (C C₁ C₂ : system_of_complexes.{u})
 
 /-- `C.res` is the restriction map `C.X c' i ⟶ C.X c i` for a system of complexes `C`,
 and nonnegative reals `c ≤ c'`. -/
-def res {c' c : ℝ≥0} {i : ℤ} [h : fact (c ≤ c')] : C.X c' i ⟶ C.X c i :=
+def res {C : system_of_complexes} {c' c : ℝ≥0} {i : ℤ} [h : fact (c ≤ c')] : C.X c' i ⟶ C.X c i :=
 (C.map (hom_of_le h).op).f i
 
 variables {c₁ c₂ c₃ : ℝ≥0} (i : ℤ)
@@ -77,7 +77,7 @@ end
 by { rw ← (C.res_comp_res i h₁ h₂), refl }
 
 /-- `C.d` is the differential `C.X c i ⟶ C.X c (i+1)` for a system of complexes `C`. -/
-def d {c : ℝ≥0} {i : ℤ} :
+def d {C : system_of_complexes} {c : ℝ≥0} {i : ℤ} :
   C.X c i ⟶ C.X c (i+1) :=
 (C.obj $ op c).d i
 
@@ -129,7 +129,7 @@ eq_to_hom $ by { subst hc, subst hi }
 variables (M M' N)
 
 lemma d_apply (f : M ⟶ N) {c : ℝ≥0} {i : ℤ} (m : M.X c i) :
-  N.d (f.apply m) = f.apply (M.d m) :=
+  d (f.apply m) = f.apply (d m) :=
 begin
   have h : ((M.obj (op c)).d i ≫ (f.app (op c)).f (i + 1)) m =
     (f.app (op c)).f (i + 1) ((M.obj (op c)).d i m),
@@ -138,7 +138,7 @@ begin
 end
 
 lemma res_comp_apply (f : M ⟶ N) (c c' : ℝ≥0) [h : fact (c ≤ c')] (i : ℤ) :
-  @res M c' c i _ ≫ f.apply = f.apply ≫ N.res :=
+  @res M c' c i _ ≫ f.apply = f.apply ≫ res :=
 begin
   have step1 := f.naturality (hom_of_le h).op,
   have step2 := congr_arg differential_object.hom.f step1,
@@ -146,7 +146,7 @@ begin
 end
 
 lemma res_apply (f : M ⟶ N) (c c' : ℝ≥0) [h : fact (c ≤ c')] {i : ℤ} (m : M.X c' i) :
-  @res N c' c _ _ (f.apply m) = f.apply (M.res m) :=
+  @res N c' c _ _ (f.apply m) = f.apply (res m) :=
 begin
   show (f.apply ≫ (@res N c' c _ _)) m = (@res M c' c _ _ ≫ (f.apply)) m,
   rw res_comp_apply
@@ -157,22 +157,8 @@ if all the differentials and restriction maps are norm-nonincreasing.
 
 See Definition 9.3 of [Analytic]. -/
 structure admissible (C : system_of_complexes) : Prop :=
-(d_norm_noninc : ∀ c i, (C.d : C.X c i ⟶ C.X c (i+1)).norm_noninc)
+(d_norm_noninc : ∀ c i, (d : C.X c i ⟶ C.X c (i+1)).norm_noninc)
 (res_norm_noninc : ∀ c' c i h, (@res C c' c i h).norm_noninc)
-
-/-
-Peter Scholze:
-(Note that `k` plays a strange double role in Definition 9.3,
-quantifying both the depth of restriction and the increase in norm;
-somehow it was not necessary to disentangle this for the argument,
-so I used one variable for two distinct things.
-Only one of them really needs to be `≥1`,
-the one parametrizing the depth of restriction.
-If one wants to get good estimates at some point,
-it may be useful to introduce two parameters here.)
-
-https://leanprover.zulipchat.com/#narrow/stream/266894-liquid/topic/bounded.20exactness/near/220823654
--/
 
 /-- `is_bdd_exact_for_bdd_degree_above_idx k m c₀` is a predicate on systems of complexes.
 
@@ -191,58 +177,58 @@ Implementation details:
   We change this to `i < m` and `y : C.X c i`, because this has better definitional properties.
   (This is a hack around an inconvenience known as dependent type theory hell.) -/
 def is_bdd_exact_for_bdd_degree_above_idx
-  (k : ℝ≥0) (m : ℤ) [hk : fact (1 ≤ k)] (c₀ : ℝ≥0) : Prop :=
+  (k K : ℝ≥0) (m : ℤ) [hk : fact (1 ≤ k)] (c₀ : ℝ≥0) : Prop :=
 ∀ c ≥ c₀, ∀ i < m,
 ∀ x : C.X (k * c) (i+1),
-∃ y : C.X c i, ∥(C.res x) - (C.d y)∥ ≤ k * ∥C.d x∥
+∃ y : C.X c i, ∥res x - d y∥ ≤ K * ∥d x∥
 
 /-- Weak version of `is_bdd_exact_for_bdd_degree_above_idx`. -/
---TODO: equivalence for complete spaces
 def is_weak_bdd_exact_for_bdd_degree_above_idx
-  (k : ℝ≥0) (m : ℤ) [hk : fact (1 ≤ k)] (c₀ : ℝ≥0) : Prop :=
+  (k K : ℝ≥0) (m : ℤ) [hk : fact (1 ≤ k)] (c₀ : ℝ≥0) : Prop :=
 ∀ c ≥ c₀, ∀ i < m,
 ∀ x : C.X (k * c) (i+1),
-∀ (ε : ℝ) (hε : 0 < ε), ∃ y : C.X c i, ∥(C.res x) - (C.d y)∥ ≤ k * ∥C.d x∥ + ε
+∀ ε > 0, ∃ y : C.X c i, ∥res x - d y∥ ≤ K * ∥d x∥ + ε
+
+--TODO: equivalence between weak and strong for complete spaces
 
 namespace is_bdd_exact_for_bdd_degree_above_idx
 
 variables {C C₁ C₂}
-variables {k k' : ℝ≥0} {m m' : ℤ} {c₀ c₀' : ℝ≥0} [fact (1 ≤ k)] [fact (1 ≤ k')]
+variables {k k' K K' : ℝ≥0} {m m' : ℤ} {c₀ c₀' : ℝ≥0} [fact (1 ≤ k)] [fact (1 ≤ k')]
 
-lemma of_le (hC : C.is_bdd_exact_for_bdd_degree_above_idx k m c₀)
-  (hC_adm : C.admissible) (hk : k ≤ k') (hm : m' ≤ m) (hc₀ : c₀ ≤ c₀') :
-  C.is_bdd_exact_for_bdd_degree_above_idx k' m' c₀' :=
+lemma of_le (hC : C.is_bdd_exact_for_bdd_degree_above_idx k K m c₀)
+  (hC_adm : C.admissible) (hk : k ≤ k') (hK : K ≤ K') (hm : m' ≤ m) (hc₀ : c₀ ≤ c₀') :
+  C.is_bdd_exact_for_bdd_degree_above_idx k' K' m' c₀' :=
 begin
   intros c hc i hi x,
   haveI : fact (k ≤ k') := hk,
-  obtain ⟨y, hy⟩ := hC c (hc₀.trans hc) i (lt_of_lt_of_le hi hm) (C.res x),
+  obtain ⟨y, hy⟩ := hC c (hc₀.trans hc) i (lt_of_lt_of_le hi hm) (res x),
   use y,
   simp only [res_res] at hy,
-  refine le_trans hy (mul_le_mul _ _ (norm_nonneg _) (nnreal.coe_nonneg _)),
-  { simpa only },
-  { rw d_res, apply le_trans (hC_adm.res_norm_noninc _ _ _ _ _) _,
-    simp only [one_mul, nnreal.coe_one] }
+  refine le_trans hy _,
+  rw d_res,
+  exact mul_le_mul hK (hC_adm.res_norm_noninc _ _ _ _ (d x)) (norm_nonneg _) ((zero_le K).trans hK)
 end
 
-lemma of_iso (h : C₁.is_bdd_exact_for_bdd_degree_above_idx k m c₀) (f : C₁ ≅ C₂)
+lemma of_iso (h : C₁.is_bdd_exact_for_bdd_degree_above_idx k K m c₀) (f : C₁ ≅ C₂)
   (hf : ∀ c i, (f.hom.apply : C₁.X c i ⟶ C₂.X c i).is_strict) :
-  C₂.is_bdd_exact_for_bdd_degree_above_idx k m c₀ :=
+  C₂.is_bdd_exact_for_bdd_degree_above_idx k K m c₀ :=
 begin
   intros c hc i hi x,
   obtain ⟨y, hy⟩ := h c hc i hi (f.inv.apply x),
   refine ⟨f.hom.apply y, _⟩,
-  calc  ∥C₂.res x - C₂.d (f.hom.apply y)∥
-      = ∥C₂.res x - f.hom.apply (C₁.d y)∥ : by rw d_apply
-  ... = ∥f.hom.apply (f.inv.apply (C₂.res x)) - f.hom.apply (C₁.d y)∥ : by rw hom_apply_inv_apply
-  ... = ∥f.hom.apply (f.inv.apply (C₂.res x) - C₁.d y)∥ : by rw f.hom.apply.map_sub
-  ... = ∥f.inv.apply (C₂.res x) - C₁.d y∥ : hf _ _ _
-  ... = ∥C₁.res (f.inv.apply x) - C₁.d y∥ : by rw res_apply
-  ... ≤ k * ∥C₁.d (f.inv.apply x)∥ : hy
-  ... = k * ∥(C₂.d) x∥ : congr_arg _ _,
-  calc  ∥C₁.d (f.inv.apply x)∥
-      = ∥f.inv.apply (C₂.d x)∥ : by rw d_apply
-  ... = ∥f.hom.apply (f.inv.apply (C₂.d x))∥ : (hf _ _ _).symm
-  ... = ∥(C₂.d) x∥ : by rw hom_apply_inv_apply
+  calc  ∥res x - d (f.hom.apply y)∥
+      = ∥res x - f.hom.apply (d y)∥ : by rw d_apply
+  ... = ∥f.hom.apply (f.inv.apply (res x)) - f.hom.apply (d y)∥ : by rw hom_apply_inv_apply
+  ... = ∥f.hom.apply (f.inv.apply (res x) - d y)∥ : by rw f.hom.apply.map_sub
+  ... = ∥f.inv.apply (res x) - d y∥ : hf _ _ _
+  ... = ∥res (f.inv.apply x) - d y∥ : by rw res_apply
+  ... ≤ K * ∥d (f.inv.apply x)∥ : hy
+  ... = K * ∥d x∥ : congr_arg _ _,
+  calc  ∥d (f.inv.apply x)∥
+      = ∥f.inv.apply (d x)∥ : by rw d_apply
+  ... = ∥f.hom.apply (f.inv.apply (d x))∥ : (hf _ _ _).symm
+  ... = ∥d x∥ : by rw hom_apply_inv_apply
 end
 
 end is_bdd_exact_for_bdd_degree_above_idx
@@ -267,7 +253,7 @@ begin
     intros ε hε,
     obtain ⟨m, hm⟩ := quotient_norm_lift (hquot _ _) hε m',
     rw [← hm.1, d_apply],
-    calc ∥f.apply (M.d m)∥ ≤ ∥M.d m∥ : quotient_norm_le (hquot _ _) _
+    calc ∥f.apply (d m)∥ ≤ ∥d m∥ : quotient_norm_le (hquot _ _) _
       ... ≤ ∥m∥ : hadm.d_norm_noninc _ _ m
       ... ≤ ∥m'∥ + ε : le_of_lt hm.2
       ... = ∥f.apply m∥ + ε : by rw [hm.1] },
@@ -277,7 +263,7 @@ begin
     intros ε hε,
     obtain ⟨m, hm⟩ := quotient_norm_lift (hquot _ _) hε m',
     rw [← hm.1, res_apply],
-    calc ∥f.apply (M.res m)∥ ≤ ∥(M.res) m∥ : quotient_norm_le (hquot _ _) _
+    calc ∥f.apply (res m)∥ ≤ ∥res m∥ : quotient_norm_le (hquot _ _) _
       ... ≤ ∥m∥ : hadm.res_norm_noninc c' c _ hc m
       ... ≤ ∥m'∥ + ε : le_of_lt hm.2
       ... = ∥f.apply m∥ + ε : by rw [hm.1] }

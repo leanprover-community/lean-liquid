@@ -29,11 +29,11 @@ variables (c' : ℕ → ℝ≥0)  -- implicit constants, chosen once and for all
 theorem first_target [BD.suitable c']
   (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)] :
   ∀ m : ℕ,
-  ∃ (k : ℝ≥0) [fact (1 ≤ k)],
+  ∃ (k K : ℝ≥0) [fact (1 ≤ k)],
   ∃ c₀ : ℝ≥0,
   ∀ (S : Type) [fintype S],
   ∀ (V : NormedGroup) [normed_with_aut r V],
-    ​(Mbar_system V S r r' BD c').is_bdd_exact_for_bdd_degree_above_idx k m c₀ :=
+    ​(Mbar_system V S r r' BD c').is_bdd_exact_for_bdd_degree_above_idx k K m c₀ :=
 sorry
 
 /-!

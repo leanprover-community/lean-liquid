@@ -4,7 +4,7 @@ open_locale nnreal
 
 namespace nnreal
 
-variables (r' k c c₁ c₂ : ℝ≥0)
+variables (r' k c c₁ c₂ c₃ : ℝ≥0)
 
 instance fact_le_mul_of_one_le_left [hk : fact (1 ≤ k)] [hc : fact (c₁ ≤ c₂)] :
   fact (c₁ ≤ k * c₂) :=
@@ -17,6 +17,18 @@ calc k * c₁ ≤ 1 * c₂ : mul_le_mul' hk hc
         ... = c₂     : one_mul _
 
 instance fact_le_refl : fact (c ≤ c) := le_rfl
+
+instance fact_le_subst_right [fact (c₁ ≤ c₂)] [h : fact (c₂ = c₃)]: fact (c₁ ≤ c₃) :=
+by rwa ← show c₂ = c₃, from h
+
+instance fact_le_subst_right' [fact (c₁ ≤ c₂)] [h : fact (c₃ = c₂)]: fact (c₁ ≤ c₃) :=
+by rwa ← show c₂ = c₃, from h.symm
+
+instance fact_le_subst_left [fact (c₁ ≤ c₂)] [h : fact (c₁ = c₃)]: fact (c₃ ≤ c₂) :=
+by rwa ← show c₁ = c₃, from h
+
+instance fact_le_subst_left' [fact (c₁ ≤ c₂)] [h : fact (c₃ = c₁)]: fact (c₃ ≤ c₂) :=
+by rwa ← show c₁ = c₃, from h.symm
 
 instance fact_inv_mul_le [h : fact (0 < r')] : fact (r'⁻¹ * (r' * c) ≤ c) :=
 le_of_eq $ inv_mul_cancel_left' (ne_of_gt h) _

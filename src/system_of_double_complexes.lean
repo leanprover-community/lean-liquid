@@ -147,11 +147,11 @@ C.comp ((homological_complex.forget _).comp $ pi.eval _ p)
 by refl
 
 @[simp] lemma row_res (C : system_of_double_complexes) (p q : ℤ) {c' c : ℝ≥0} [h : fact (c ≤ c')] :
-  (C.row p).res = @res C _ _ p q h :=
+  @system_of_complexes.res (C.row p) _ _ q h  = @res C _ _ p q h :=
 by refl
 
 @[simp] lemma row_d (C : system_of_double_complexes) (p q : ℤ) (c : ℝ≥0) :
-  (C.row p).d = @d' C c p q :=
+  @system_of_complexes.d (C.row p) _ _ = @d' C c p q :=
 by refl
 
 /-- The `q`-th column in a system of double complexes, as system of complexes. -/
@@ -166,21 +166,21 @@ C.comp
 by refl
 
 @[simp] lemma col_res (C : system_of_double_complexes) (p q : ℤ) {c' c : ℝ≥0} [h : fact (c ≤ c')] :
-  (C.col q).res = @res C _ _ p q h :=
+  @system_of_complexes.res (C.col q) _ _ _ _ = @res C _ _ p q h :=
 by refl
 
 @[simp] lemma col_d (C : system_of_double_complexes) (p q : ℤ) (c : ℝ≥0) :
-  (C.col q).d = @d C c p q :=
+  @system_of_complexes.d (C.col q) _ _ = @d C c p q :=
 by { dsimp [system_of_complexes.d, col, d], simp }
 
 /-- The assumptions on `M` in Proposition 9.6 bundled into a structure. Note that in `cond3b`
   our `q` is one smaller than the `q` in the notes (so that we don't have to deal with `q - 1`). -/
-structure normed_spectral_conditions (m : ℕ) (k : ℝ≥0) [fact (1 ≤ k)]
+structure normed_spectral_conditions (m : ℕ) (k K : ℝ≥0) [fact (1 ≤ k)]
   (ε : ℝ) (hε : 0 < ε) (k₀ : ℝ≥0) [fact (1 ≤ k₀)]
   (M : system_of_double_complexes)
   (k' : ℝ≥0) [fact (k₀ ≤ k')] [fact (1 ≤ k')] (c₀ H : ℝ≥0) [fact (0 < H)] :=
-(col_exact : ∀ j ≤ m, (M.col j).is_bdd_exact_for_bdd_degree_above_idx k (m+1) c₀)
-(row_exact : ∀ i ≤ m + 1, (M.row i).is_bdd_exact_for_bdd_degree_above_idx k m c₀)
+(col_exact : ∀ j ≤ m, (M.col j).is_bdd_exact_for_bdd_degree_above_idx k K (m+1) c₀)
+(row_exact : ∀ i ≤ m + 1, (M.row i).is_bdd_exact_for_bdd_degree_above_idx k K m c₀)
 (h : Π {q : ℤ} [fact (q ≤ m)] {c} [fact (c₀ ≤ c)], M.X (k' * c) 0 (q+1) ⟶ M.X c 1 q)
 (norm_h_le : ∀ (q : ℤ) [fact (q ≤ m)] (c) [fact (c₀ ≤ c)] (x : M.X (k' * c) 0 (q+1)), ​∥h x∥ ≤ H * ∥x∥)
 (cond3b : ∀ (q : ℤ) [fact (q+1 ≤ m)] (c) [fact (c₀ ≤ c)]
@@ -190,29 +190,29 @@ structure normed_spectral_conditions (m : ℕ) (k : ℝ≥0) [fact (1 ≤ k)]
 
 namespace normed_spectral_conditions
 
-variables (m : ℕ) (k : ℝ≥0) [fact (1 ≤ k)]
+variables (m : ℕ) (k K : ℝ≥0) [fact (1 ≤ k)]
 variables (ε : ℝ) (hε : 0 < ε) (k₀ : ℝ≥0) [fact (1 ≤ k₀)]
 variables (M : system_of_double_complexes.{u})
 variables (k' : ℝ≥0) [fact (k₀ ≤ k')] [fact (1 ≤ k')] (c₀ H : ℝ≥0) [fact (0 < H)]
 
-lemma cond3bpp (NSC : normed_spectral_conditions.{u u} m k ε hε k₀ M k' c₀ H)
+lemma cond3bpp (NSC : normed_spectral_conditions.{u u} m k K ε hε k₀ M k' c₀ H)
   (q : ℤ) [fact (q + 1 ≤ m)] (c : ℝ≥0) [fact (c₀ ≤ c)] (x : M.X (k' * (k' * c)) 0 (q+1)) :
   ​∥M.res (M.d x) + NSC.h (M.d' x) + M.d' (NSC.h x)∥ ≤ ε * ∥(res M x : M.X c 0 (q+1))∥ :=
 by simpa only [units.coe_one, one_smul] using NSC.cond3b q c x 1 1
 
-lemma cond3bpm (NSC : normed_spectral_conditions.{u u} m k ε hε k₀ M k' c₀ H)
+lemma cond3bpm (NSC : normed_spectral_conditions.{u u} m k K ε hε k₀ M k' c₀ H)
   (q : ℤ) [fact (q + 1 ≤ m)] (c : ℝ≥0) [fact (c₀ ≤ c)] (x : M.X (k' * (k' * c)) 0 (q+1)) :
   ​∥M.res (M.d x) + NSC.h (M.d' x) - M.d' (NSC.h x)∥ ≤ ε * ∥(res M x : M.X c 0 (q+1))∥ :=
 by simpa only [units.coe_one, one_smul, neg_smul, units.coe_neg, ← sub_eq_add_neg]
   using NSC.cond3b q c x 1 (-1)
 
-lemma cond3bmp (NSC : normed_spectral_conditions.{u u} m k ε hε k₀ M k' c₀ H)
+lemma cond3bmp (NSC : normed_spectral_conditions.{u u} m k K ε hε k₀ M k' c₀ H)
   (q : ℤ) [fact (q + 1 ≤ m)] (c : ℝ≥0) [fact (c₀ ≤ c)] (x : M.X (k' * (k' * c)) 0 (q+1)) :
   ​∥M.res (M.d x) - NSC.h (M.d' x) + M.d' (NSC.h x)∥ ≤ ε * ∥(res M x : M.X c 0 (q+1))∥ :=
 by simpa only [units.coe_one, one_smul, neg_smul, units.coe_neg, ← sub_eq_add_neg]
   using NSC.cond3b q c x (-1) 1
 
-lemma cond3bmm (NSC : normed_spectral_conditions.{u u} m k ε hε k₀ M k' c₀ H)
+lemma cond3bmm (NSC : normed_spectral_conditions.{u u} m k K ε hε k₀ M k' c₀ H)
   (q : ℤ) [fact (q + 1 ≤ m)] (c : ℝ≥0) [fact (c₀ ≤ c)] (x : M.X (k' * (k' * c)) 0 (q+1)) :
   ​∥M.res (M.d x) - NSC.h (M.d' x) - M.d' (NSC.h x)∥ ≤ ε * ∥(res M x : M.X c 0 (q+1))∥ :=
 by simpa only [units.coe_one, one_smul, neg_smul, units.coe_neg, ← sub_eq_add_neg]
@@ -220,13 +220,16 @@ by simpa only [units.coe_one, one_smul, neg_smul, units.coe_neg, ← sub_eq_add_
 
 end normed_spectral_conditions
 
-/-- Proposition 9.6 in [Analytic] -/
-theorem analytic_9_6 (m : ℕ) (k : ℝ≥0) [fact (1 ≤ k)] :
+/-- Proposition 9.6 in [Analytic]
+Constants (max (k' * k') (2 * k₀ * H)) and K in the statement are not the right ones.
+We need to investigate the consequences of the k Zeeman effect here.
+-/
+theorem analytic_9_6 (m : ℕ) (k K : ℝ≥0) [fact (1 ≤ k)] :
   ∃ (ε : ℝ) (hε : ε > 0) (k₀ : ℝ≥0) [fact (1 ≤ k₀)],
   ∀ (M : system_of_double_complexes) (k' : ℝ≥0) [fact (k₀ ≤ k')] [fact (1 ≤ k')] -- follows
     (c₀ H : ℝ≥0) [fact (0 < H)],
-  ​∀ (cond : normed_spectral_conditions m k ε hε k₀ M k' c₀ H),
-  (M.row 0).is_bdd_exact_for_bdd_degree_above_idx (max (k' * k') (2 * k₀ * H)) (m+1) c₀ :=
+  ​∀ (cond : normed_spectral_conditions m k K ε hε k₀ M k' c₀ H),
+  (M.row 0).is_bdd_exact_for_bdd_degree_above_idx (max (k' * k') (2 * k₀ * H)) K (m+1) c₀ :=
 begin
   sorry
 end
