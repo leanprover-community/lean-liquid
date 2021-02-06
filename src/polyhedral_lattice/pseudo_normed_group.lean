@@ -1,6 +1,6 @@
 import polyhedral_lattice.basic
 import normed_group.pseudo_normed_group
-import pseudo_normed_group.system_of_complexes -- ← minimize
+import pseudo_normed_group.with_Tinv
 
 noncomputable theory
 open_locale nnreal
@@ -29,7 +29,41 @@ instance : profinitely_filtered_pseudo_normed_group Λ :=
   continuous_cast_le := λ _ _ _, continuous_of_discrete_topology,
   .. (show pseudo_normed_group Λ, by apply_instance) }
 
-instance : profinitely_filtered_pseudo_normed_group_with_Tinv r' (Λ →+ M) :=
+include r'
+
+instance add_monoid_hom.profinitely_filtered_pseudo_normed_group :
+  profinitely_filtered_pseudo_normed_group (Λ →+ M) :=
+{ topology := λ c, sorry,
+  t2 := sorry,
+  td := sorry,
+  compact := sorry,
+  continuous_add' := sorry,
+  continuous_neg' := sorry,
+  continuous_cast_le := sorry,
+  .. (show pseudo_normed_group (Λ →+ M), by apply_instance) }
+
+def Tinv' : (Λ →+ M) →+ (Λ →+ M) :=
+add_monoid_hom.comp_hom
+  (@profinitely_filtered_pseudo_normed_group_with_Tinv.Tinv r' M _).to_add_monoid_hom
+
+variables {Λ r' M}
+
+lemma Tinv'_mem_filtration (c : ℝ≥0) (x : Λ →+ M) (hx : x ∈ filtration (Λ →+ M) c) :
+  (Tinv' Λ r' M) x ∈ filtration (Λ →+ M) (r'⁻¹ * c) :=
 sorry
+
+variables (Λ r' M)
+
+def Tinv : profinitely_filtered_pseudo_normed_group_hom (Λ →+ M) (Λ →+ M) :=
+profinitely_filtered_pseudo_normed_group_hom.mk' (Tinv' Λ r' M)
+begin
+  refine ⟨r'⁻¹, λ c, ⟨Tinv'_mem_filtration c, _⟩⟩,
+  sorry
+end
+
+instance : profinitely_filtered_pseudo_normed_group_with_Tinv r' (Λ →+ M) :=
+{ Tinv := sorry,
+  Tinv_mem_filtration := sorry,
+  .. (show profinitely_filtered_pseudo_normed_group (Λ →+ M), by apply_instance) }
 
 end polyhedral_lattice
