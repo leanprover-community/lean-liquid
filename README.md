@@ -26,6 +26,15 @@ for details on how to read this statement.
 
 ## How to browse this repository
 
+### Blueprint
+
+Below we explain how to engage with the Lean code directly.
+We also provide a [blueprint](https://leanprover-community.github.io/liquid/)
+including a [dependency graph](https://leanprover-community.github.io/liquid/dep_graph.html)
+of the main ingredients in the repository.
+This blueprint is developed in sync with the Lean formalization,
+and will hence see frequent updates during the length of the project.
+
 ### Getting the project
 
 At the moment, the recommended way of browsing this repository,
