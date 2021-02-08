@@ -2,6 +2,8 @@ import data.finset.lattice
 
 variables {α : Type*} [linear_order α]
 
+-- Both lemmas (and `min'` versions) PR'd as https://github.com/leanprover-community/mathlib/pull/6089
+
 lemma finset.max'_subset {s t : finset α} (H : s.nonempty) (hst : s ⊆ t) :
   s.max' H ≤ t.max' (H.mono hst) :=
 finset.le_max' _ _ (hst (s.max'_mem H))

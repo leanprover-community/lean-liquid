@@ -1,6 +1,4 @@
 import topology.subset_properties
-import topology.algebra.monoid
--- minimize ↑ imports
 
 variables {X Y Z α : Type*} [topological_space X]
 

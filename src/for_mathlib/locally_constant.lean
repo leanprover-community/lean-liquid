@@ -1,4 +1,3 @@
-import topology.category.Profinite
 import topology.algebra.group_completion
 import topology.metric_space.completion
 

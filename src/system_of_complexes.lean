@@ -194,14 +194,14 @@ structure admissible (C : system_of_complexes) : Prop :=
 
 def completion (C : system_of_complexes) : system_of_complexes := sorry
 
-/-- `is_bdd_exact_for_bdd_degree_above_idx k m c₀` is a predicate on systems of complexes.
+/-- `is_bdd_exact_for_bdd_degree_above_idx k K m c₀` is a predicate on systems of complexes.
 
-A system of complexes `C` is *`≤ k`-exact in degrees `≤ m` for `c ≥ c₀`*
+A system of complexes `C` is `(k,K)`-exact in degrees `≤ m` for `c ≥ c₀`*
 if the following condition is satisfied:
 For all `c ≥ c₀` and all `x : C (k * c) i` with `i ≤ m` there is some `y : C c (i-1)`
-(which is defined to be `0` when `i = 0`) such that `∥(C.res x) - (C.d y)∥ ≤ k * ∥C.d x∥`.
+(which is defined to be `0` when `i = 0`) such that `∥(C.res x) - (C.d y)∥ ≤ K * ∥C.d x∥`.
 
-See Definition 9.3 of [Analytic].
+See Definition 9.3 of [Analytic] (which coalesces the roles of `k` and `K`).
 
 Implementation details:
 * Because our chain complexes are indexed by `ℤ` instead of `ℕ`,
