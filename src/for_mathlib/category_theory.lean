@@ -16,6 +16,7 @@ variables {C : Type u₁} [category.{v₁} C] [has_zero_morphisms C] [has_shift 
           {D : Type u₂} [category.{v₂} D] [has_zero_morphisms D] [has_shift D]
   {X Y Z : differential_object C}
 
+-- PR'd to mathlib as https://github.com/leanprover-community/mathlib/pull/6083
 /--
 An isomorphism of differential objects gives an isomorphism of the underlying objects.
 -/
@@ -23,6 +24,7 @@ An isomorphism of differential objects gives an isomorphism of the underlying ob
 ⟨f.hom.f, f.inv.f, by { dsimp, rw [← comp_f, iso.hom_inv_id, id_f] },
   by { dsimp, rw [← comp_f, iso.inv_hom_id, id_f] }⟩
 
+-- PR'd to mathlib as https://github.com/leanprover-community/mathlib/pull/6084
 /--
 A functor `F : C ⥤ D` which commutes with shift functors on `C` and `D` and preserves zero morphisms
 can be lifted to a functor `differential_object C ⥤ differential_object D`.
