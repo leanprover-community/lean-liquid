@@ -125,13 +125,38 @@ by simp only [inv_apply_comp_hom_apply, coe_id, id.def]
 
 end iso
 
+section congr
+
+variables {C}
+
 /-- Convenience definition:
 The identity morphism of an object in the system of complexes
 when it is given by different indices that are not
 definitionally equal. -/
-def congr {c c' : ℝ≥0} {i i' : ℤ} (hc : c = c') (hi : i = i') :
+def congr  {c c' : ℝ≥0} {i i' : ℤ} [hc : fact (c = c')] [hi : fact (i = i')] :
   C c i ⟶ C c' i' :=
-eq_to_hom $ by { subst hc, subst hi }
+eq_to_hom $ by { tactic.unfreeze_local_instances,
+                 change c = c' at hc, change i = i' at hi, subst hc, subst hi }
+
+lemma d_congr {c c' : ℝ≥0} {i i' : ℤ} [hc : fact(c = c')] [hi : fact(i = i')] (x : C c i) :
+  d (congr x : C c' i') = congr (d x) :=
+sorry
+
+
+lemma res_congr {c c' c'' : ℝ≥0} {i i' : ℤ} [hcc' : fact(c = c')] [hcc'' : fact(c'' ≤ c)]
+  [hi : fact(i = i')] (x : C c i) :
+  (res (congr x : C c' i') : C c'' i') = @congr C c'' c'' i i' rfl _ (res x) :=
+sorry
+
+lemma norm_congr {c c' : ℝ≥0} {i i' : ℤ} [hc : fact(c = c')] [hi : fact(i = i')] (x : C c i) :
+  ∥(congr x : C c' i')∥ = ∥x∥ :=
+sorry
+
+lemma bijective_congr {c c' : ℝ≥0} {i i' : ℤ} [hc : fact(c = c')] [hi : fact(i = i')] (x x' : C c i) :
+  (congr x : C c' i') = (congr x' : C c' i') ↔ x = x' :=
+sorry
+
+end congr
 
 variables (M M' N)
 
@@ -198,6 +223,26 @@ def is_weak_bdd_exact_for_bdd_degree_above_idx
 ∀ x : C (k * c) (i+1),
 ∀ ε > 0, ∃ y : C c i, ∥res x - d y∥ ≤ K * ∥d x∥ + ε
 
+lemma is_bdd_exact_for_bdd_degree_above_idx_of_shift  {k K : ℝ≥0} {m : ℤ} [hk : fact (1 ≤ k)] {c₀ : ℝ≥0}
+  (H : ∀ c ≥ c₀, ∀ i < m - 1, ∀ x : C (k * c) (i + 1 + 1),
+   ∃ y : C c (i + 1), ∥res x - d y∥ ≤ K * ∥d x∥) :
+   C.is_bdd_exact_for_bdd_degree_above_idx k K m c₀ :=
+begin
+  intros c hc i hi x,
+  haveI : fact(i + 1 = (i-1) + 1 + 1) := by change _ = _ ; ring,
+  haveI : fact(k*c = k*c) := rfl,
+  haveI : fact(c = c) := rfl,
+  haveI : fact (i - 1 + 1 = i) := by change _ = _ ; ring,
+  cases H c hc (i-1) (by linarith) (congr x) with y hy,
+  use (congr y : C c i),
+  rw [d_congr, norm_congr] at hy,
+  -- The strategy here is to keep pushing congr towards exterior until being able to
+  -- get to ∥congr (...)∥ and get rid of congr. In general we would try to get to situation
+  -- like congr x = congr x' and get rid of congr
+  -- But we are hitting limitations of the `fact` trick here
+   sorry
+end
+
 namespace is_weak_bdd_exact_for_bdd_degree_above_idx
 
 variables {C C₁ C₂}
@@ -244,7 +289,39 @@ sorry
 lemma strong_of_complete (hC : C.is_weak_bdd_exact_for_bdd_degree_above_idx k K m c₀)
   (hC' : admissible C) :
   ∀ δ > 0, C.is_bdd_exact_for_bdd_degree_above_idx (k^2) (K + δ) m c₀ :=
-sorry
+begin
+  intros δ hδ,
+  suffices : ∀ c ≥ c₀, ∀ i < m, ∀ x : C (k * (k * c)) (i + 1), d x = 0 → ∃ y : C c i, res x = d y,
+  { have hC'' : C.is_weak_bdd_exact_for_bdd_degree_above_idx (k^2) K m c₀,
+    { apply hC.of_le hC' _ (le_refl _) (le_refl _) (le_refl _),
+      -- nnreal hell now
+      have : (1 : ℝ) ≤ k, assumption,
+      suffices : (k : ℝ) ≤ k^2, exact_mod_cast this,
+      rw pow_two,
+      conv_lhs { rw ← mul_one (k : ℝ) },
+      apply mul_le_mul ; linarith },
+    -- exact hC''.to_exact hδ this
+    sorry -- We need some congr magic here again, because `k*(k*c)` is not defeq `k*k*c`
+    },
+  intros c hc i hi x hx,
+  have fact₁ : k * c ≥ c₀, sorry,
+  let ε : ℕ → ℝ := λ j, 1/(4*K*2^j),
+  have ε_pos : ∀ j, 0 < ε j, sorry,
+  haveI : fact (k * c ≤ k ^ 2 * c) := sorry,
+  have seq : ∀ j : ℕ, ∃ w : C (k*c) i, ∥res x - d w∥ ≤ ε j,
+  { intro j,
+    convert hC (k*c) fact₁ i hi x (ε j) (ε_pos j),
+    simp only [hx, norm_zero, zero_add, mul_zero] },
+  choose w hw using seq,
+  let δ : ℕ → ℝ := λ j, 1/(4*2^j),
+  have δ_pos : ∀ j, 0 < δ j, sorry,
+  have seq : ∀ j : ℕ, ∃ z : C c (i - 1), ∥res (w (j+1) - w j) - d z∥ ≤ ε j,
+  {
+    sorry },
+  choose z hz using seq,
+  sorry
+end
+
 
 end is_weak_bdd_exact_for_bdd_degree_above_idx
 

@@ -45,6 +45,10 @@ begin
   exact mul_le_mul (le_of_eq rfl) h2 (le_of_lt h1) zero_le',
 end
 
+instance fact_add_one_eq (i i' : ℤ) [h : fact (i = i')] : fact (i+1 = i'+1) := congr_arg _ h
+
+instance fact_refl (i : ℤ) : fact (i = i) := rfl
+
 instance fact_le_of_add_one_le (q : ℤ) (m : ℕ) [h : fact (q + 1 ≤ m)] : fact (q ≤ m) :=
 (int.le_add_one le_rfl).trans  h
 
