@@ -1,5 +1,5 @@
 import data.real.nnreal
-import tactic.gptf
+import tactic.ring
 
 open_locale nnreal
 
@@ -52,21 +52,46 @@ do (assumption >> trace "by assumption" <|>
 
 end
 
-def res {C : mock_complex} (c c' : ℝ≥0) {i : ℤ} (x : C c' i) (hc : c ≤ c' . magic) : C c i :=
+def res {C : mock_complex} {c c' : ℝ≥0} {i : ℤ} (x : C c' i) (hc : c ≤ c' . magic) : C c i :=
 C.restriction c' c i hc x
 
 def d {C : mock_complex} {c : ℝ≥0} {i : ℤ} (x : C c i) : C c (i+1) :=
 C.differential c i x
 
 lemma d_res {C : mock_complex} {c c' : ℝ≥0} {i : ℤ} (x : C c' i) (hc : c ≤ c') :
-  d (res _ _ x) = res _ _ (d x) :=
+  d (res x) = res (d x) :=
 by apply C.commute
 
 lemma res_res {C : mock_complex} {c c' c'' : ℝ≥0} {i : ℤ} (x : C c'' i) (h : c ≤ c') (h' : c' ≤ c'') :
-  res _ _ (res _ _ x) = res _ _ x :=
+  res (res x) = res x :=
 by apply C.restriction_functorial
 
 lemma res_res_mul {C : mock_complex} {c k : ℝ≥0} {i : ℤ} (x : C (k^2*c) i) (h : 1 ≤ k) :
-  res c (k*c) (res (k*c) (k^2*c) x) = res _ _ x :=
+  (res (res x : C (k*c) i) (by magic) : C c i) = res x :=
 --  @res C c (k*c) i (res x) (by simp [stupid_one, stupid_two, stupid_three, *]) = res x :=
 by apply C.restriction_functorial
+
+-- this doesn't work, because DTT
+-- example {C : mock_complex} {c} {i} (x : C c i) : ∃ y : C c (i-1), d y = x := sorry
+
+section
+open tactic
+
+meta def magic' : tactic unit :=
+do (tactic.interactive.refl <|> assumption <|> tactic.interactive.ring1 none) <|>
+   target >>= trace
+
+end
+
+def aux {C : mock_complex} {c : ℝ≥0} {i j : ℤ} (h : j = i) (x : C c i) : C c j :=
+h.symm.rec_on x
+
+def d' {C : mock_complex} {c : ℝ≥0} {i j : ℤ} (x : C c i) (hij : j = i + 1 . magic') : C c j :=
+aux hij $ C.differential c i x
+
+example {C : mock_complex} {c} {i} (x : C c i) : ∃ y : C c (i-1), d' y = x :=
+sorry
+
+lemma d'_res {C : mock_complex} {c c' : ℝ≥0} {i j : ℤ} (x : C c' i) (hc : c ≤ c') (hj : j = i + 1) :
+  (d' (res x) : C c j) = res (d' x) :=
+by { cases hj, apply C.commute }

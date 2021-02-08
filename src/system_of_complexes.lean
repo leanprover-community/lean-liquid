@@ -62,14 +62,47 @@ namespace system_of_complexes
 
 variables (C C₁ C₂ : system_of_complexes.{u})
 
+section
+open tactic
+
+meta def magic : tactic unit :=
+do (assumption >> trace "by assumption" <|>
+   `[rw ← nnreal.coe_le_coe at *, linarith] >> trace "by linarith") <|>
+   `[simp [stupid_one, stupid_two, stupid_three, *]] <|>
+   target >>= trace
+
+meta def magic' : tactic unit :=
+do (tactic.interactive.refl <|> assumption <|> tactic.interactive.ring1 none) <|>
+   target >>= trace
+
+end
+
+/-- Convenience definition:
+The identity morphism of an object in the system of complexes
+when it is given by different indices that are not
+definitionally equal. -/
+def congr_hom {c c' : ℝ≥0} {i i' : ℤ} (hc : c = c') (hi : i = i') :
+  C c i ⟶ C c' i' :=
+eq_to_hom $ by { subst hc, subst hi }
+
+/-- Convenience definition:
+The identity morphism of an object in the system of complexes
+when it is given by different indices that are not
+definitionally equal. -/
+def congr {C : system_of_complexes} {c c' : ℝ≥0} {i i' : ℤ}
+  (x : C c i) (hc : c = c' . magic) (hi : i = i' . magic') :
+  C c' i' :=
+congr_hom _ hc hi x
+
 /-- `res` is the restriction map `C c' i ⟶ C c i` for a system of complexes `C`,
 and nonnegative reals `c ≤ c'`. -/
-def res {C : system_of_complexes} {c' c : ℝ≥0} {i : ℤ} [h : fact (c ≤ c')] : C c' i ⟶ C c i :=
+def res {C : system_of_complexes} {c' c : ℝ≥0} {i : ℤ} [h : fact (c ≤ c')] :
+  C c' i ⟶ C c i :=
 (C.map (hom_of_le h).op).f i
 
-variables {c₁ c₂ c₃ : ℝ≥0} (i : ℤ)
+variables {c₁ c₂ c₃ c₄ : ℝ≥0} (i i' i₁ i₂ i₃ j j' : ℤ)
 
-@[simp] lemma res_comp_res (h₁ : fact (c₂ ≤ c₁)) (h₂ : fact (c₃ ≤ c₂)) :
+@[simp] lemma res_comp_res {i : ℤ} (h₁ : fact (c₂ ≤ c₁)) (h₂ : fact (c₃ ≤ c₂)) :
   @res C _ _ i h₁ ≫ @res C _ _ i h₂ = @res C _ _ i (le_trans h₂ h₁) :=
 begin
   have := (category_theory.functor.map_comp C (hom_of_le h₁).op (hom_of_le h₂).op),
@@ -80,22 +113,30 @@ begin
 end
 
 @[simp] lemma res_res (h₁ : fact (c₂ ≤ c₁)) (h₂ : fact (c₃ ≤ c₂)) (x : C c₁ i) :
-  @res C _ _ i h₂ (@res C _ _ i h₁ x) = @res C _ _ i (le_trans h₂ h₁) x :=
-by { rw ← (C.res_comp_res i h₁ h₂), refl }
+  @res C _ _ i h₂ (res x) = @res C _ _ i (le_trans h₂ h₁) x :=
+by { rw ← (C.res_comp_res h₁ h₂), refl }
 
 /-- `C.d` is the differential `C c i ⟶ C c (i+1)` for a system of complexes `C`. -/
-def d {C : system_of_complexes} {c : ℝ≥0} {i : ℤ} :
-  C c i ⟶ C c (i+1) :=
-(C.obj $ op c).d i
+def d {C : system_of_complexes} {c : ℝ≥0} {i j : ℤ} [hj : fact (j = i + 1)] :
+  C c i ⟶ C c j :=
+(C.obj $ op c).d i ≫ congr_hom _ rfl hj.symm
 
-lemma d_comp_res (h : fact (c₂ ≤ c₁)) :
-  @d C c₁ i ≫ @res C _ _ _ h = @res C _ _ i _ ≫ @d C c₂ i :=
-homological_complex.comm_at (C.map (hom_of_le h).op) i
+lemma d_rfl : @d C c₁ i (i+1) rfl = (C.obj (op c₁)).d i :=
+by { ext, refl }
 
-lemma d_res (h : fact (c₂ ≤ c₁)) (x) :
-  @d C c₂ i (@res C _ _ i _ x) = @res C _ _ _ h (@d C c₁ i x) :=
-show (@res C _ _ i _ ≫ @d C c₂ i) x = (@d C c₁ i ≫ @res C _ _ _ h) x,
-by rw d_comp_res
+lemma d_comp_res
+  (h : fact (c₂ ≤ c₁)) (hj : fact (j = i + 1)) :
+  d ≫ @res C _ _ j h = @res C _ _ i _ ≫ d :=
+begin
+  unfreezingI { cases hj },
+  simp only [d_rfl],
+  exact homological_complex.comm_at (C.map (hom_of_le h).op) i,
+end
+
+lemma d_res
+  (h : fact (c₂ ≤ c₁)) (hj : fact (j = i + 1)) (x : C c₁ i) :
+  d (@res C _ _ i _ x) = @res C _ _ j h (d x) :=
+show (res ≫ d) x = (d ≫ res) x, by rw d_comp_res
 
 section iso
 
@@ -129,44 +170,46 @@ section congr
 
 variables {C}
 
-/-- Convenience definition:
-The identity morphism of an object in the system of complexes
-when it is given by different indices that are not
-definitionally equal. -/
-def congr  {c c' : ℝ≥0} {i i' : ℤ} [hc : fact (c = c')] [hi : fact (i = i')] :
-  C c i ⟶ C c' i' :=
-eq_to_hom $ by { tactic.unfreeze_local_instances,
-                 change c = c' at hc, change i = i' at hi, subst hc, subst hi }
+-- /-- Convenience definition:
+-- The identity morphism of an object in the system of complexes
+-- when it is given by different indices that are not
+-- definitionally equal. -/
+-- def congr  {c c' : ℝ≥0} {i i' : ℤ} [hc : fact (c = c')] [hi : fact (i = i')] :
+--   C c i ⟶ C c' i' :=
+-- eq_to_hom $ by { tactic.unfreeze_local_instances,
+--                  change c = c' at hc, change i = i' at hi, subst hc, subst hi }
 
-lemma d_congr {c c' : ℝ≥0} {i i' : ℤ} [hc : fact(c = c')] [hi : fact(i = i')] (x : C c i) :
-  d (congr x : C c' i') = congr (d x) :=
-sorry
+@[simp] lemma d_congr {i i' j : ℤ}
+  (hi : fact (i = i')) (hji : fact (j = i+1)) (hji' : fact (j = i'+1)) (x : C c₁ i) :
+  (d (congr x rfl : C c₁ i') : C c₁ j) = (d x) :=
+by { unfreezingI { cases hi, cases hji, refl } }
 
+@[simp] lemma res_congr {i : ℤ} (hcc' : fact(c₂ ≤ c₁)) (hc : fact (c₁ = c₃)) (x : C c₁ i) :
+  (res (congr x : C c₃ i) : C c₂ i) = res x :=
+by { unfreezingI { cases hc, refl } }
 
-lemma res_congr {c c' c'' : ℝ≥0} {i i' : ℤ} [hcc' : fact(c = c')] [hcc'' : fact(c'' ≤ c)]
-  [hi : fact(i = i')] (x : C c i) :
-  (res (congr x : C c' i') : C c'' i') = @congr C c'' c'' i i' rfl _ (res x) :=
-sorry
+@[simp] lemma norm_congr {c : ℝ≥0} {i i' : ℤ}
+  (hi : fact (i = i')) (hc : fact (c = c₂)) (x : C c i) :
+  ∥(congr x : C c₂ i')∥ = ∥x∥ :=
+by { unfreezingI { cases hi, cases hc, refl } }
 
-lemma norm_congr {c c' : ℝ≥0} {i i' : ℤ} [hc : fact(c = c')] [hi : fact(i = i')] (x : C c i) :
-  ∥(congr x : C c' i')∥ = ∥x∥ :=
-sorry
-
-lemma bijective_congr {c c' : ℝ≥0} {i i' : ℤ} [hc : fact(c = c')] [hi : fact(i = i')] (x x' : C c i) :
-  (congr x : C c' i') = (congr x' : C c' i') ↔ x = x' :=
-sorry
+-- lemma bijective_congr {c c' : ℝ≥0} {i i' : ℤ} [hc : fact(c = c')] [hi : fact(i = i')] (x x' : C c i) :
+--   (congr x : C c' i') = (congr x' : C c' i') ↔ x = x' :=
+-- sorry
 
 end congr
 
 variables (M M' N)
 
-lemma d_apply (f : M ⟶ N) {c : ℝ≥0} {i : ℤ} (m : M c i) :
-  d (f m) = f (d m) :=
+lemma d_apply (f : M ⟶ N) {c : ℝ≥0} {i j : ℤ}
+  (hj : fact (j = i + 1)) (hc : fact (c = c₂)) (m : M c i) :
+  (d (f m) : N c₂ j) = f (d m) :=
 begin
-  have h : ((M.obj (op c)).d i ≫ (f.app (op c)).f (i + 1)) m =
-    (f.app (op c)).f (i + 1) ((M.obj (op c)).d i m),
-  { exact coe_comp ((M.obj (op c)).d i) ((f.app (op c)).f (i + 1)) m },
-  rwa [homological_complex.comm_at (f.app (op c)) i] at h,
+  unfreezingI { cases hj, cases hc },
+  have h : ((M.obj (op c₂)).d i ≫ (f.app (op c₂)).f (i + 1)) m =
+    (f.app (op c₂)).f (i + 1) ((M.obj (op c₂)).d i m),
+  { exact coe_comp ((M.obj (op c₂)).d i) ((f.app (op c₂)).f (i + 1)) m },
+  rwa [homological_complex.comm_at (f.app (op c₂)) i] at h,
 end
 
 lemma res_comp_apply (f : M ⟶ N) (c c' : ℝ≥0) [h : fact (c ≤ c')] (i : ℤ) :
@@ -214,28 +257,25 @@ def is_bdd_exact_for_bdd_degree_above_idx
   (k K : ℝ≥0) (m : ℤ) [hk : fact (1 ≤ k)] (c₀ : ℝ≥0) : Prop :=
 ∀ c ≥ c₀, ∀ i < m,
 ∀ x : C (k * c) (i+1),
-∃ y : C c i, ∥res x - d y∥ ≤ K * ∥d x∥
+∃ y : C c i, ∥res x - d y∥ ≤ K * ∥(d x : C _ (i+1+1))∥
 
 /-- Weak version of `is_bdd_exact_for_bdd_degree_above_idx`. -/
 def is_weak_bdd_exact_for_bdd_degree_above_idx
   (k K : ℝ≥0) (m : ℤ) [hk : fact (1 ≤ k)] (c₀ : ℝ≥0) : Prop :=
 ∀ c ≥ c₀, ∀ i < m,
 ∀ x : C (k * c) (i+1),
-∀ ε > 0, ∃ y : C c i, ∥res x - d y∥ ≤ K * ∥d x∥ + ε
+∀ ε > 0, ∃ y : C c i, ∥res x - d y∥ ≤ K * ∥(d x : C _ (i+1+1))∥ + ε
 
 lemma is_bdd_exact_for_bdd_degree_above_idx_of_shift  {k K : ℝ≥0} {m : ℤ} [hk : fact (1 ≤ k)] {c₀ : ℝ≥0}
   (H : ∀ c ≥ c₀, ∀ i < m - 1, ∀ x : C (k * c) (i + 1 + 1),
-   ∃ y : C c (i + 1), ∥res x - d y∥ ≤ K * ∥d x∥) :
+   ∃ y : C c (i + 1), ∥res x - d y∥ ≤ K * ∥(d x : C _ (i+1+1+1))∥) :
    C.is_bdd_exact_for_bdd_degree_above_idx k K m c₀ :=
 begin
   intros c hc i hi x,
-  haveI : fact(i + 1 = (i-1) + 1 + 1) := by change _ = _ ; ring,
-  haveI : fact(k*c = k*c) := rfl,
-  haveI : fact(c = c) := rfl,
-  haveI : fact (i - 1 + 1 = i) := by change _ = _ ; ring,
-  cases H c hc (i-1) (by linarith) (congr x) with y hy,
-  use (congr y : C c i),
-  rw [d_congr, norm_congr] at hy,
+  cases H c hc (i-1) (by linarith) (congr x rfl) with y hy,
+  use (congr y rfl : C c i),
+  rw [d_congr] at hy ⊢,
+  swap, apply_instance, swap, apply_instance,
   -- The strategy here is to keep pushing congr towards exterior until being able to
   -- get to ∥congr (...)∥ and get rid of congr. In general we would try to get to situation
   -- like congr x = congr x' and get rid of congr

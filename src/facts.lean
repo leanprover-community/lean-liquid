@@ -49,6 +49,10 @@ instance fact_add_one_eq (i i' : ℤ) [h : fact (i = i')] : fact (i+1 = i'+1) :=
 
 instance fact_refl (i : ℤ) : fact (i = i) := rfl
 
+instance fact_sub_add_one_eq (i : ℤ) : fact (i - 1 + 1 = i) := sub_add_cancel i _
+
+instance fact_eq_sub_add_one (i : ℤ) : fact (i = i - 1 + 1) := (sub_add_cancel i _).symm
+
 instance fact_le_of_add_one_le (q : ℤ) (m : ℕ) [h : fact (q + 1 ≤ m)] : fact (q ≤ m) :=
 (int.le_add_one le_rfl).trans  h
 
