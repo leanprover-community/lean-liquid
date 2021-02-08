@@ -1,4 +1,4 @@
-import for_mathlib.CompHaus
+import topology.category.CompHaus
 import for_mathlib.continuous_map
 import for_mathlib.free_abelian_group
 import for_mathlib.add_monoid_hom
