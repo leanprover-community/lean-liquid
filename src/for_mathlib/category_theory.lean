@@ -54,6 +54,7 @@ def functor (F : C ⥤ D) (η : (shift C).functor.comp F ⟶ F.comp (shift D).fu
 
 end differential_object
 
+-- PR'd as https://github.com/leanprover-community/mathlib/pull/6086
 namespace pi
 variables {I : Type w} {C : I → Type u} [Π i, category.{v} (C i)]
   {X Y Z : Π i, C i}
