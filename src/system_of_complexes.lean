@@ -267,20 +267,14 @@ def is_weak_bdd_exact_for_bdd_degree_above_idx
 ∀ ε > 0, ∃ y : C c i, ∥res x - d y∥ ≤ K * ∥(d x : C _ (i+1+1))∥ + ε
 
 lemma is_bdd_exact_for_bdd_degree_above_idx_of_shift  {k K : ℝ≥0} {m : ℤ} [hk : fact (1 ≤ k)] {c₀ : ℝ≥0}
-  (H : ∀ c ≥ c₀, ∀ i < m - 1, ∀ x : C (k * c) (i + 1 + 1),
-   ∃ y : C c (i + 1), ∥res x - d y∥ ≤ K * ∥(d x : C _ (i+1+1+1))∥) :
+  (H : ∀ c ≥ c₀, ∀ i < m - 1, ∀ x : C (k * c) (i+1+1),
+   ∃ y : C c (i+1), ∥res x - d y∥ ≤ K * ∥(d x : C _ (i+1+1+1))∥) :
    C.is_bdd_exact_for_bdd_degree_above_idx k K m c₀ :=
 begin
   intros c hc i hi x,
-  cases H c hc (i-1) (by linarith) (congr x rfl) with y hy,
-  use (congr y rfl : C c i),
-  rw [d_congr] at hy ⊢,
-  swap, apply_instance, swap, apply_instance,
-  -- The strategy here is to keep pushing congr towards exterior until being able to
-  -- get to ∥congr (...)∥ and get rid of congr. In general we would try to get to situation
-  -- like congr x = congr x' and get rid of congr
-  -- But we are hitting limitations of the `fact` trick here
-   sorry
+  specialize H c hc (i-1) (by linarith),
+  rw [sub_add_cancel] at H,
+  exact H x,
 end
 
 namespace is_weak_bdd_exact_for_bdd_degree_above_idx
