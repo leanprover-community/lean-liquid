@@ -98,21 +98,72 @@ lemma incl_embedding : embedding (@incl Λ r' M _ _ _ c) :=
 { induced := rfl,
   inj := incl_injective Λ r' M c }
 
+lemma incl_inducing : inducing (@incl Λ r' M _ _ _ c) := ⟨rfl⟩
+
+lemma incl_continuous : continuous (@incl Λ r' M _ _ _ c) :=
+(incl_inducing _ _ _ _).continuous
+
 instance : t2_space (filtration (Λ →+ M) c) :=
 (incl_embedding Λ r' M c).t2_space
 
 instance : totally_disconnected_space (filtration (Λ →+ M) c) :=
 (incl_embedding Λ r' M c).totally_disconnected_space
 
--- need to prove that the range of `incl c` is closed
+lemma incl_range_is_closed : (is_closed (set.range (@incl Λ r' M _ _ _ c))) :=
+begin
+  sorry
+end
+
 instance : compact_space (filtration (Λ →+ M) c) :=
-sorry
+{ compact_univ :=
+  begin
+    apply (incl_inducing Λ r' M c).is_compact _,
+    apply is_closed.compact,
+    rw set.image_univ,
+    exact incl_range_is_closed _ _ _ _
+  end }
+
+lemma continuous_iff {X : Type*} [topological_space X]
+  (ϕ : X → (filtration (Λ →+ M) c)) :
+  continuous ϕ ↔ ∀ l : Λ, continuous (λ x, incl c (ϕ x) l) :=
+begin
+  rw (incl_inducing Λ r' M c).continuous_iff,
+  split,
+  { intros h l, exact (continuous_apply l).comp h },
+  { exact continuous_pi }
+end
+
+open profinitely_filtered_pseudo_normed_group
 
 instance profinitely_filtered_pseudo_normed_group :
   profinitely_filtered_pseudo_normed_group (Λ →+ M) :=
-{ continuous_add' := sorry,
-  continuous_neg' := sorry,
-  continuous_cast_le := sorry,
+{ continuous_add' :=
+  begin
+    intros c₁ c₂,
+    rw continuous_iff,
+    intro l,
+    have step1 :=
+      ((continuous_apply l).comp (incl_continuous Λ r' M c₁)).prod_map
+      ((continuous_apply l).comp (incl_continuous Λ r' M c₂)),
+    have step2 := (continuous_add' (c₁ * nnnorm l) (c₂ * nnnorm l)),
+    have := step2.comp step1,
+    refine (@continuous_cast_le _ _ _ _ (id _)).comp this,
+    rw add_mul, exact le_rfl
+  end,
+  continuous_neg' :=
+  begin
+    intro c,
+    rw continuous_iff,
+    intro l,
+    exact (continuous_neg' _).comp ((continuous_apply l).comp (incl_continuous Λ r' M c)),
+  end,
+  continuous_cast_le :=
+  begin
+    introsI c₁ c₂ h,
+    rw continuous_iff,
+    intro l,
+    exact (continuous_cast_le _ _).comp ((continuous_apply l).comp (incl_continuous Λ r' M c₁))
+  end,
   .. add_monoid_hom.pseudo_normed_group }
 
 end add_monoid_hom
