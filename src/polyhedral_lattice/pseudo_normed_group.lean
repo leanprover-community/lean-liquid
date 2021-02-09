@@ -2,6 +2,8 @@ import polyhedral_lattice.basic
 import normed_group.pseudo_normed_group
 import pseudo_normed_group.with_Tinv
 
+import for_mathlib.topological_group
+
 noncomputable theory
 open_locale nnreal
 
@@ -13,11 +15,29 @@ variables (Λ : Type*) (r' : ℝ≥0) (M : Type*)
 variables [normed_group Λ] [polyhedral_lattice Λ]
 variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M]
 
-instance : discrete_topology Λ :=
-sorry
-
 lemma filtration_finite (c : ℝ≥0) : (filtration Λ c).finite :=
-sorry
+begin
+  obtain ⟨s, hs₀, hs⟩ := polyhedral_lattice.polyhedral' Λ,
+  sorry
+end
+
+open metric
+
+instance : discrete_topology Λ :=
+discrete_topology_of_open_singleton_zero _ $
+begin
+  have aux := filtration_finite Λ 1,
+  let s := (filtration Λ 1) \ {0},
+  have s_fin : s.finite,
+  { sorry },
+  let s₀ : finset Λ := s_fin.to_finset,
+  by_cases hs₀ : s₀.nonempty,
+  { let ε : ℝ≥0 := finset.min' (s₀.image $ nnnorm) (hs₀.image _),
+    suffices : ({0} : set Λ) = ball (0:Λ) (ε/2),
+    { rw this, apply is_open_ball },
+    sorry },
+  sorry
+end
 
 instance filtration_fintype (c : ℝ≥0) : fintype (filtration Λ c) :=
 (filtration_finite Λ c).fintype

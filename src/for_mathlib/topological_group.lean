@@ -6,7 +6,7 @@ section
 variables (G : Type*) [topological_space G] [group G] [topological_group G]
 
 @[to_additive]
-lemma discrete_of_open_singleton_one (h : is_open ({1} : set G)) : discrete_topology G :=
+lemma discrete_topology_of_open_singleton_one (h : is_open ({1} : set G)) : discrete_topology G :=
 begin
   rw ← singletons_open_iff_discrete,
   intro g,
