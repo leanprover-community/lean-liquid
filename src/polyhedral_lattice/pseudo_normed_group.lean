@@ -121,8 +121,32 @@ instance : t2_space (filtration (Λ →+ M) c) :=
 instance : totally_disconnected_space (filtration (Λ →+ M) c) :=
 (incl_embedding Λ r' M c).totally_disconnected_space
 
+lemma incl_range_eq :
+  (set.range (@incl Λ r' M _ _ _ c)) =
+    ⋂ l₁ l₂, {f | (⟨f (l₁ + l₂), sorry⟩ : filtration M (c * (nnnorm l₁ + nnnorm l₂))) =
+    ⟨f l₁ + f l₂, sorry⟩} :=
+begin
+  ext f,
+  simp only [set.mem_range, set.mem_Inter],
+  split,
+  { rintro ⟨⟨f, hf⟩, rfl⟩ l₁ l₂, exact f.map_add _ _ },
+  { intro h,
+    refine ⟨⟨add_monoid_hom.mk' (λ l, f l) h, _⟩, _⟩,
+    { intros c' l hl,
+      rw mem_filtration_iff at hl,
+      exact filtration_mono (mul_le_mul' le_rfl hl) (f l).2 },
+    { ext, refl } }
+end
+
 lemma incl_range_is_closed : (is_closed (set.range (@incl Λ r' M _ _ _ c))) :=
 begin
+  rw incl_range_eq,
+  apply is_closed_Inter,
+  intro l₁,
+  apply is_closed_Inter,
+  intro l₂,
+  apply is_closed_eq,
+  sorry,
   sorry
 end
 
