@@ -9,7 +9,7 @@ open_locale nnreal
 
 namespace polyhedral_lattice
 
-open pseudo_normed_group
+open pseudo_normed_group normed_group
 
 variables (Λ : Type*) (r' : ℝ≥0) (M : Type*)
 variables [normed_group Λ] [polyhedral_lattice Λ]
@@ -26,17 +26,33 @@ open metric
 instance : discrete_topology Λ :=
 discrete_topology_of_open_singleton_zero _ $
 begin
+  classical,
   have aux := filtration_finite Λ 1,
-  let s := (filtration Λ 1) \ {0},
-  have s_fin : s.finite,
-  { sorry },
-  let s₀ : finset Λ := s_fin.to_finset,
+  let s := aux.to_finset,
+  let s₀ := s.erase 0,
   by_cases hs₀ : s₀.nonempty,
   { let ε : ℝ≥0 := finset.min' (s₀.image $ nnnorm) (hs₀.image _),
-    suffices : ({0} : set Λ) = ball (0:Λ) (ε/2),
+    have hε : 0 < ε,
+    { sorry },
+    suffices : ({0} : set Λ) = ball (0:Λ) ε,
     { rw this, apply is_open_ball },
+    ext,
+    simp only [metric.mem_ball, set.mem_singleton_iff, dist_zero_right],
+    split,
+    { rintro rfl, rw norm_zero, exact_mod_cast hε },
+    intro h,
     sorry },
-  sorry
+  { suffices : ({0} : set Λ) = ball (0:Λ) 1,
+    { rw this, apply is_open_ball },
+    ext,
+    simp only [metric.mem_ball, set.mem_singleton_iff, dist_zero_right],
+    split,
+    { rintro rfl, rw norm_zero, exact zero_lt_one },
+    intro h,
+    contrapose! hs₀,
+    refine ⟨x, _⟩,
+    simp only [set.finite.mem_to_finset, finset.mem_erase, mem_filtration_iff, nnreal.coe_one],
+    exact ⟨hs₀, h.le⟩ }
 end
 
 instance filtration_fintype (c : ℝ≥0) : fintype (filtration Λ c) :=

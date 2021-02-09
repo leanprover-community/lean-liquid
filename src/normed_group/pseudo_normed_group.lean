@@ -1,6 +1,8 @@
 import pseudo_normed_group.basic
 import analysis.normed_space.basic
 
+open_locale nnreal
+
 namespace normed_group
 
 instance (V : Type*) [normed_group V] : pseudo_normed_group V :=
@@ -19,5 +21,8 @@ open pseudo_normed_group
 
 lemma mem_filtration_nnnorm (v : V) : v ∈ filtration V (nnnorm v) :=
 show ∥v∥ ≤ ∥v∥, from le_rfl
+
+@[simp] lemma mem_filtration_iff (v : V) (c : ℝ≥0) :
+  v ∈ filtration V c ↔ ∥v∥ ≤ c := iff.rfl
 
 end normed_group
