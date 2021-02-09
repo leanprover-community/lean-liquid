@@ -3,6 +3,7 @@ import normed_group.pseudo_normed_group
 import pseudo_normed_group.with_Tinv
 
 import for_mathlib.topological_group
+import for_mathlib.topology
 
 noncomputable theory
 open_locale nnreal
@@ -69,27 +70,37 @@ include r'
 
 namespace add_monoid_hom
 
-variables {Λ r' M}
+variables {Λ r' M} (c : ℝ≥0)
 
 def incl (c : ℝ≥0) : filtration (Λ →+ M) c → Π l : Λ, filtration M (c * nnnorm l) :=
 λ f l, ⟨f l, f.2 $ normed_group.mem_filtration_nnnorm _⟩
 
-@[simp] lemma coe_incl_apply (c : ℝ≥0) (f : filtration (Λ →+ M) c) (l : Λ) :
+@[simp] lemma coe_incl_apply (f : filtration (Λ →+ M) c) (l : Λ) :
   (incl c f l : M) = f l :=
 rfl
 
-variables (Λ r' M) (c : ℝ≥0)
+variables (Λ r' M)
+
+lemma incl_injective : function.injective (@incl Λ r' M _ _ _ c) :=
+begin
+  intros f g h,
+  ext l,
+  show (incl c f l : M) = incl c g l,
+  rw h
+end
 
 instance : topological_space (filtration (Λ →+ M) c) :=
 topological_space.induced (incl c) infer_instance
 
--- this should be `by apply_instance`
-instance : t2_space (filtration (Λ →+ M) c) :=
-sorry
+lemma incl_embedding : embedding (@incl Λ r' M _ _ _ c) :=
+{ induced := rfl,
+  inj := incl_injective Λ r' M c }
 
--- this should be `by apply_instance`
+instance : t2_space (filtration (Λ →+ M) c) :=
+(incl_embedding Λ r' M c).t2_space
+
 instance : totally_disconnected_space (filtration (Λ →+ M) c) :=
-sorry
+(incl_embedding Λ r' M c).totally_disconnected_space
 
 -- need to prove that the range of `incl c` is closed
 instance : compact_space (filtration (Λ →+ M) c) :=
