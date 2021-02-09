@@ -58,8 +58,6 @@ end embedding
 
 namespace inducing
 
-#check cluster_pt
-
 lemma exists_open {f : X → Y} (hf : inducing f) ⦃U : set X⦄ (hU : is_open U) :
   ∃ V, is_open V ∧ f ⁻¹' V = U :=
 begin
