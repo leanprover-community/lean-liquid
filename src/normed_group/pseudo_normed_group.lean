@@ -13,4 +13,11 @@ instance (V : Type*) [normed_group V] : pseudo_normed_group V :=
         ≤ ∥v₁∥ + ∥v₂∥ : norm_add_le _ _
     ... ≤ c₁ + c₂ : add_le_add hv₁ hv₂ }
 
+variables {V : Type*} [normed_group V]
+
+open pseudo_normed_group
+
+lemma mem_filtration_nnnorm (v : V) : v ∈ filtration V (nnnorm v) :=
+show ∥v∥ ≤ ∥v∥, from le_rfl
+
 end normed_group
