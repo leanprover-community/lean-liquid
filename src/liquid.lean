@@ -1,4 +1,4 @@
-import Mbar.complex
+import thm95
 
 /-!
 # Liquid Tensor Experiment
@@ -21,6 +21,8 @@ Once we have fixed this data, we can state the theorem.
 
 open_locale nnreal -- enable the notation `ℝ≥0` for the nonnegative real numbers.
 
+open ProFiltPseuNormGrpWithTinv (of)
+
 variables (BD : breen_deligne.package)
 variables (c' : ℕ → ℝ≥0)  -- implicit constants, chosen once and for all
                           -- see the sentence after that statement of Thm 9.5
@@ -33,7 +35,7 @@ theorem first_target [BD.suitable c']
   ∃ c₀ : ℝ≥0,
   ∀ (S : Type) [fintype S],
   ∀ (V : NormedGroup) [normed_with_aut r V],
-    ​(Mbar_system V S r r' BD c').is_bdd_exact_for_bdd_degree_above_idx k K m c₀ :=
+    ​(BD.system c' r V r' (of r' (Mbar r' S))).is_bdd_exact_for_bdd_degree_above_idx k K m c₀ :=
 sorry
 
 /-!
