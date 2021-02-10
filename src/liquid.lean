@@ -21,7 +21,7 @@ Once we have fixed this data, we can state the theorem.
 
 open_locale nnreal -- enable the notation `ℝ≥0` for the nonnegative real numbers.
 
-open ProFiltPseuNormGrpWithTinv (of)
+open ProFiltPseuNormGrpWithTinv
 
 variables (BD : breen_deligne.package)
 variables (c' : ℕ → ℝ≥0)  -- implicit constants, chosen once and for all
@@ -36,7 +36,18 @@ theorem first_target [BD.suitable c']
   ∀ (S : Type) [fintype S],
   ∀ (V : NormedGroup) [normed_with_aut r V],
     ​(BD.system c' r V r' (of r' (Mbar r' S))).is_bdd_exact_for_bdd_degree_above_idx k K m c₀ :=
-sorry
+begin
+  intro m,
+  obtain ⟨k, K, hk, H⟩ := thm95 BD c' r r' m,
+  specialize H ℤ,
+  obtain ⟨c₀, H⟩ := H,
+  use [k, K, hk, c₀],
+  introsI S hS V hV,
+  specialize H S V,
+  -- let i : Hom ℤ (Mbar r' S) ≅ of r' (Mbar r' S) := by admit,
+  -- refine H.of_iso ((BD.System c' r V r').map_iso _) _,
+  sorry
+end
 
 /-!
 ## On the statement
