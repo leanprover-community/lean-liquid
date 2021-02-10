@@ -5,6 +5,8 @@ import pseudo_normed_group.with_Tinv
 import for_mathlib.topological_group
 import for_mathlib.topology
 
+import facts
+
 noncomputable theory
 open_locale nnreal
 
@@ -19,7 +21,6 @@ variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M]
 lemma filtration_finite (c : ℝ≥0) : (filtration Λ c).finite :=
 begin
   obtain ⟨s, hs₀, hs⟩ := polyhedral_lattice.polyhedral' Λ,
-
   sorry
 end
 
@@ -124,15 +125,15 @@ instance : totally_disconnected_space (filtration (Λ →+ M) c) :=
 
 lemma incl_range_eq :
   (set.range (@incl Λ r' M _ _ _ c)) =
-    ⋂ l₁ l₂, {f | (⟨f (l₁ + l₂), filtration_mono
-      (mul_le_mul' le_rfl (nnnorm_add_le _ _))
-      (f (l₁ + l₂)).2⟩ : filtration M (c * (nnnorm l₁ + nnnorm l₂))) =
-    ⟨f l₁ + f l₂, by { convert add_mem_filtration (f l₁).2 (f l₂).2, rw mul_add, }⟩} :=
+    ⋂ l₁ l₂, {f | (cast_le (f (l₁ + l₂)) : filtration M (c * (nnnorm l₁ + nnnorm l₂))) =
+    cast_le (add' (f l₁, f l₂))} :=
 begin
   ext f,
-  simp only [set.mem_range, set.mem_Inter],
+  simp only [set.mem_range, set.mem_Inter, coe_fn_coe_base, coe_incl_apply,
+    set.mem_set_of_eq, subtype.coe_mk, subtype.ext_iff],
   split,
-  { rintro ⟨⟨f, hf⟩, rfl⟩ l₁ l₂, exact f.map_add _ _ },
+  { rintro ⟨⟨f, hf⟩, rfl⟩ l₁ l₂,
+    exact f.map_add _ _ },
   { intro h,
     refine ⟨⟨add_monoid_hom.mk' (λ l, f l) h, _⟩, _⟩,
     { intros c' l hl,
@@ -140,6 +141,8 @@ begin
       exact filtration_mono (mul_le_mul' le_rfl hl) (f l).2 },
     { ext, refl } }
 end
+
+open profinitely_filtered_pseudo_normed_group
 
 lemma incl_range_is_closed : (is_closed (set.range (@incl Λ r' M _ _ _ c))) :=
 begin
@@ -149,8 +152,9 @@ begin
   apply is_closed_Inter,
   intro l₂,
   apply is_closed_eq,
-  sorry,
-  sorry
+  { exact (continuous_cast_le _ _).comp (continuous_apply (l₁ + l₂)) },
+  { exact (continuous_cast_le _ _).comp ((continuous_add' _ _).comp
+          ((continuous_apply l₁).prod_mk (continuous_apply l₂))) },
 end
 
 instance : compact_space (filtration (Λ →+ M) c) :=
@@ -171,8 +175,6 @@ begin
   { intros h l, exact (continuous_apply l).comp h },
   { exact continuous_pi }
 end
-
-open profinitely_filtered_pseudo_normed_group
 
 instance profinitely_filtered_pseudo_normed_group :
   profinitely_filtered_pseudo_normed_group (Λ →+ M) :=

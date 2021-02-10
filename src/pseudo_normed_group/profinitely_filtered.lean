@@ -25,12 +25,11 @@ class profinitely_filtered_pseudo_normed_group (M : Type*)
 [t2 : ∀ c, t2_space (filtration c)]
 [td : ∀ c, totally_disconnected_space (filtration c)]
 [compact : ∀ c, compact_space (filtration c)]
-(continuous_add' : Π (c₁ c₂), @continuous (filtration c₁ × filtration c₂) (filtration (c₁ + c₂)) _ _
-  (λ x, ⟨x.1 + x.2, add_mem_filtration x.1.2 x.2.2⟩))
-(continuous_neg' : Π c, @continuous (filtration c) (filtration c) _ _
-  (λ x, ⟨-x, neg_mem_filtration x.2⟩))
+(continuous_add' : ∀ (c₁ c₂),
+  continuous (add' : filtration c₁ × filtration c₂ → filtration (c₁ + c₂)))
+(continuous_neg' : ∀ c, continuous (neg' : filtration c → filtration c))
 (continuous_cast_le : ∀ (c₁ c₂) [h : fact (c₁ ≤ c₂)],
-  continuous (@pseudo_normed_group.cast_le M _ _ _ h))
+  continuous (cast_le : filtration c₁ → filtration c₂))
 
 namespace profinitely_filtered_pseudo_normed_group
 

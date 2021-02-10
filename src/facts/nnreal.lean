@@ -66,5 +66,8 @@ begin
     apply nat.succ_ne_zero }
 end
 
+instance fact_le_mul_add : fact (c * c₁ + c * c₂ ≤ c * (c₁ + c₂)) :=
+by { rw mul_add, exact le_rfl }
+
 end nnreal
 #lint- only unused_arguments def_lemma doc_blame
