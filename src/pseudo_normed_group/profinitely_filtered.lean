@@ -374,7 +374,7 @@ end
 -- -- we don't need this
 -- lemma pfpng_ctu'_iff_pfpng_ctu (i : fin m) (f : M₁ → M₂^n) :
 --   pfpng_ctu' (λ x, f (x i)) ↔ (∀ j, pfpng_ctu (λ x, f x j)) :=
--- sorry
+-- admit
 
 lemma pfpng_ctu'.add {f g : M₁^m → M₂^n} (hf : pfpng_ctu' f) (hg : pfpng_ctu' g)
   (H : ∀ c₁, ∃ c₂, ∀ (x : (filtration M₁ c₁ : Type*)^m) j, f (pow_incl x) j ∈ filtration M₂ c₂) :

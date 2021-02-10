@@ -254,7 +254,7 @@ variables {m n : ℕ} (A : Type u) [add_comm_group A] (f : universal_map m n)
 --   simp only [pi.add_apply],
 --   rw (sum_fin_sum_equiv.sum_comp _).symm,
 --   swap, { apply_instance },
---   sorry
+--   admit
 -- end
 
 lemma σ_add_comp_double : comp (σ_add n) (double f) = comp f (σ_add m) :=
@@ -281,9 +281,9 @@ end
 --   congr' 2,
 --   { ext i,
 --     rw [(sum_fin_sum_equiv.sum_comp _).symm, finset.sum_eq_single (sum.inl i)],
---     { dsimp, sorry },
---     all_goals { sorry } },
---   sorry
+--     { dsimp, admit },
+--     all_goals { admit } },
+--   admit
 -- end
 
 lemma σ_proj_comp_double : comp (σ_proj n) (double f) = comp f (σ_proj m) :=

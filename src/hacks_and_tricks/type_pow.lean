@@ -15,7 +15,7 @@ local attribute [instance] type_pow
 instance topological_space {n : ℕ} {α : Type*} [topological_space α] : topological_space (α^n) :=
   Pi.topological_space
 
---instance {n : ℕ} {α : Type*} [topological_space α] [discrete_topology α] : discrete_topology (α^n) := sorry
+--instance {n : ℕ} {α : Type*} [topological_space α] [discrete_topology α] : discrete_topology (α^n) := admit
 
 end type_pow_topology
 

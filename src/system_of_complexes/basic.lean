@@ -167,8 +167,6 @@ structure admissible (C : system_of_complexes) : Prop :=
 (d_norm_noninc : ∀ c i, (d : C c i ⟶ C c (i+1)).norm_noninc)
 (res_norm_noninc : ∀ c' c i h, (@res C c' c i h).norm_noninc)
 
-def completion (C : system_of_complexes) : system_of_complexes := sorry
-
 /-- `is_bdd_exact_for_bdd_degree_above_idx k K m c₀` is a predicate on systems of complexes.
 
 A system of complexes `C` is `(k,K)`-exact in degrees `≤ m` for `c ≥ c₀`*
@@ -230,21 +228,6 @@ begin
     simp_rw this,
     apply hC c hc i hi x (δ*∥d x∥) (mul_pos (by exact_mod_cast hδ) $ norm_pos_iff.mpr hdx) },
 end
-
-lemma controlled_y (hC : C.is_weak_bdd_exact_for_bdd_degree_above_idx k K m c₀) :
-∀ c ≥ c₀, ∀ i < m,
-∀ x : C (k^2 * c) (i+1),
-∀ (ε > 0) (δ > 0), ∃ y : C c i, ∥res x - d y∥ ≤ K * ∥d x∥ + ε ∧ ∥y∥ ≤ K*(K + 1)*∥x∥ + δ :=
-sorry
-
-lemma completion (hC : C.is_weak_bdd_exact_for_bdd_degree_above_idx k K m c₀) :
- C.completion.is_weak_bdd_exact_for_bdd_degree_above_idx (k^2) K m c₀ :=
-sorry
-
-lemma strong_of_complete (hC : C.is_weak_bdd_exact_for_bdd_degree_above_idx k K m c₀)
-  (hC' : admissible C) :
-  ∀ δ > 0, C.is_bdd_exact_for_bdd_degree_above_idx (k^2) (K + δ) m c₀ :=
-sorry
 
 end is_weak_bdd_exact_for_bdd_degree_above_idx
 

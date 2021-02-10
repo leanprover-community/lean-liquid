@@ -107,8 +107,8 @@ end
 --   specialize hx hU',
 --   have : f '' V ∈ F.map f,
 --   { rw filter.mem_map, },
---   sorry,
---   sorry
+--   admit,
+--   admit
 -- end
 
 end inducing
