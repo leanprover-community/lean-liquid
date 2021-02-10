@@ -1,7 +1,5 @@
 import data.fintype.card
 
-import for_mathlib.discrete_topology
-
 import facts
 import hacks_and_tricks.type_pow
 

@@ -1,7 +1,6 @@
 import analysis.normed_space.basic
 import ring_theory.finiteness
 
-import for_mathlib.finset
 import hacks_and_tricks.by_exactI_hack
 
 noncomputable theory
