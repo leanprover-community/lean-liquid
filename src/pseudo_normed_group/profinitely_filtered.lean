@@ -6,25 +6,6 @@ import pseudo_normed_group.basic
 import hacks_and_tricks.type_pow
 import facts
 
-section PR6057
--- PR #6057
-variables {α β : Type*} [topological_space α] [topological_space β]
-lemma continuous.is_closed_map [compact_space α] [t2_space β] {f : α → β} (h : continuous f) :
-  is_closed_map f :=
-λ s hs, (hs.compact.image h).is_closed
-
-lemma continuous.closed_embedding [compact_space α] [t2_space β] {f : α → β} (h : continuous f)
-  (hf : function.injective f) : closed_embedding f :=
-closed_embedding_of_continuous_injective_closed h hf h.is_closed_map
-
-example [compact_space α] [t2_space β] {f : α → β} (h : continuous f)
-  (hf : function.injective f) : embedding f :=
-begin
-  have h2 := continuous.closed_embedding h hf,
-  exact h2.to_embedding
-end
-
-end PR6057
 open pseudo_normed_group
 open_locale nnreal big_operators
 
