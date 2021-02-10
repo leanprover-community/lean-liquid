@@ -19,6 +19,7 @@ instance [uniform_space V] [has_norm V] :
   has_norm (completion V) :=
 { norm := completion.extension has_norm.norm }
 
+-- PR 6162
 lemma uniform_continuous_norm [normed_group V] : uniform_continuous (norm : V → ℝ) :=
 begin
   rw metric.uniform_continuous_iff,
