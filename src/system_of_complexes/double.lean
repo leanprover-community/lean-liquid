@@ -1,6 +1,6 @@
 import algebra.homology.chain_complex
 import hacks_and_tricks.by_exactI_hack
-import system_of_complexes
+import system_of_complexes.basic
 import normed_group.NormedGroup
 import facts
 

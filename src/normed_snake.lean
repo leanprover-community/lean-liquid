@@ -1,4 +1,4 @@
-import system_of_complexes
+import system_of_complexes.basic
 
 universe variables u
 
