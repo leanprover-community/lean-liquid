@@ -34,7 +34,7 @@ theorem first_target [BD.suitable c']
   ∀ (S : Type) [fintype S],
   ∀ (V : NormedGroup) [normed_with_aut r V],
     ​(Mbar_system V S r r' BD c').is_bdd_exact_for_bdd_degree_above_idx k K m c₀ :=
-admit
+sorry
 
 /-!
 ## On the statement
