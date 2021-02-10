@@ -157,7 +157,8 @@ by refl
 /-- The `q`-th column in a system of double complexes, as system of complexes. -/
 def col (C : system_of_double_complexes) (q : ℤ) : system_of_complexes :=
 C.comp
-  (differential_object.functor (functor.pi $ λ n, (homological_complex.forget _).comp $ pi.eval _ q)
+  (functor.map_differential_object _
+    (functor.pi $ λ n, (homological_complex.forget _).comp $ pi.eval _ q)
     { app := λ X, 𝟙 _, naturality' := by { intros, ext, simp } }
     (by { intros, ext, simp }))
 
