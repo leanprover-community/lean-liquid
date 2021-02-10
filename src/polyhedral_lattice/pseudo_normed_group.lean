@@ -19,6 +19,7 @@ variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M]
 lemma filtration_finite (c : ℝ≥0) : (filtration Λ c).finite :=
 begin
   obtain ⟨s, hs₀, hs⟩ := polyhedral_lattice.polyhedral' Λ,
+
   sorry
 end
 
@@ -123,8 +124,10 @@ instance : totally_disconnected_space (filtration (Λ →+ M) c) :=
 
 lemma incl_range_eq :
   (set.range (@incl Λ r' M _ _ _ c)) =
-    ⋂ l₁ l₂, {f | (⟨f (l₁ + l₂), sorry⟩ : filtration M (c * (nnnorm l₁ + nnnorm l₂))) =
-    ⟨f l₁ + f l₂, sorry⟩} :=
+    ⋂ l₁ l₂, {f | (⟨f (l₁ + l₂), filtration_mono
+      (mul_le_mul' le_rfl (nnnorm_add_le _ _))
+      (f (l₁ + l₂)).2⟩ : filtration M (c * (nnnorm l₁ + nnnorm l₂))) =
+    ⟨f l₁ + f l₂, by { convert add_mem_filtration (f l₁).2 (f l₂).2, rw mul_add, }⟩} :=
 begin
   ext f,
   simp only [set.mem_range, set.mem_Inter],
