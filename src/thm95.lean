@@ -31,5 +31,5 @@ theorem thm95 [BD.suitable c']
   ∃ c₀ : ℝ≥0,
   ∀ (S : Type) [fintype S],
   ∀ (V : NormedGroup) [normed_with_aut r V],
-    ​(BD.system c' r V r' (Hom Λ (Mbar r' S))).is_bdd_exact_for_bdd_degree_above_idx k K m c₀ :=
+    ​(BD.system c' r V r' (Hom Λ (Mbar r' S))).is_bounded_exact k K m c₀ :=
 sorry

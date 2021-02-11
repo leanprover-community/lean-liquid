@@ -35,7 +35,7 @@ theorem first_target [BD.suitable c']
   ∃ c₀ : ℝ≥0,
   ∀ (S : Type) [fintype S],
   ∀ (V : NormedGroup) [normed_with_aut r V],
-    ​(BD.system c' r V r' (of r' (Mbar r' S))).is_bdd_exact_for_bdd_degree_above_idx k K m c₀ :=
+    ​(BD.system c' r V r' (of r' (Mbar r' S))).is_bounded_exact k K m c₀ :=
 begin
   intro m,
   obtain ⟨k, K, hk, H⟩ := thm95 BD c' r r' m,
@@ -64,7 +64,7 @@ We will now briefly explain some of the more peculiar syntax.
   that scales elements `v` of `V` by the positive scalar `r`: `∥T(v)∥ = r * ∥v∥`.
 * `Mbar_system` is the system of complexes of normed abelian groups
   occuring in Theorems 9.4/9.5 of [Analytic].
-* `is_bdd_exact_for_bdd_degree_above_idx` is the assertion that a system of complexes
+* `is_bounded_exact` is the assertion that a system of complexes
   of normed abelian groups satisfies a suitable exactness criterion of being
   `≤ k`-exact in degrees `≤ m` for `c ≥ c₀` (where `c` is an index to the system of complexes).
 * `sorry` tells Lean to accept this theorem without proof. We are working hard on removing it!

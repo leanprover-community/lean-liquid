@@ -180,8 +180,8 @@ structure normed_spectral_conditions (m : ℕ) (k K : ℝ≥0) [fact (1 ≤ k)]
   (ε : ℝ) (hε : 0 < ε) (k₀ : ℝ≥0) [fact (1 ≤ k₀)]
   (M : system_of_double_complexes)
   (k' : ℝ≥0) [fact (k₀ ≤ k')] [fact (1 ≤ k')] (c₀ H : ℝ≥0) [fact (0 < H)] :=
-(col_exact : ∀ j ≤ m, (M.col j).is_bdd_exact_for_bdd_degree_above_idx k K (m+1) c₀)
-(row_exact : ∀ i ≤ m + 1, (M.row i).is_bdd_exact_for_bdd_degree_above_idx k K m c₀)
+(col_exact : ∀ j ≤ m, (M.col j).is_bounded_exact k K (m+1) c₀)
+(row_exact : ∀ i ≤ m + 1, (M.row i).is_bounded_exact k K m c₀)
 (h : Π {q : ℤ} [fact (q ≤ m)] {c} [fact (c₀ ≤ c)], M.X (k' * c) 0 (q+1) ⟶ M.X c 1 q)
 (norm_h_le : ∀ (q : ℤ) [fact (q ≤ m)] (c) [fact (c₀ ≤ c)] (x : M.X (k' * c) 0 (q+1)), ​∥h x∥ ≤ H * ∥x∥)
 (cond3b : ∀ (q : ℤ) [fact (q+1 ≤ m)] (c) [fact (c₀ ≤ c)]
@@ -230,7 +230,7 @@ theorem analytic_9_6 (m : ℕ) (k K : ℝ≥0) [fact (1 ≤ k)] :
   ∀ (M : system_of_double_complexes) (k' : ℝ≥0) [fact (k₀ ≤ k')] [fact (1 ≤ k')] -- follows
     (c₀ H : ℝ≥0) [fact (0 < H)],
   ​∀ (cond : normed_spectral_conditions m k K ε hε k₀ M k' c₀ H),
-  (M.row 0).is_bdd_exact_for_bdd_degree_above_idx (max (k' * k') (2 * k₀ * H)) K (m+1) c₀ :=
+  (M.row 0).is_bounded_exact (max (k' * k') (2 * k₀ * H)) K (m+1) c₀ :=
 begin
   sorry
 end

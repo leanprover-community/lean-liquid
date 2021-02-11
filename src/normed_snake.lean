@@ -13,15 +13,15 @@ variables (M M' N : system_of_complexes.{u}) (f : M ⟶ M') (g : M' ⟶ N)
 lemma weak_normed_snake {k k' k'' K K' K'' : ℝ≥0}
   [hk : fact (1 ≤ k)] [hk' : fact (1 ≤ k')] [hk'' : fact (1 ≤ k'')]
   {m : ℤ} {c₀ : ℝ≥0}
-  (hM : M.is_weak_bdd_exact_for_bdd_degree_above_idx k K m c₀)
-  (hM' : M'.is_weak_bdd_exact_for_bdd_degree_above_idx k' K' m c₀)
+  (hM : M.is_weak_bounded_exact k K m c₀)
+  (hM' : M'.is_weak_bounded_exact k' K' m c₀)
   (hM'_adm : M'.admissible)
   (hf : ∀ c i, is_strict (f.apply : M c i ⟶ M' c i))
   (Hf : ∀ (c : ℝ≥0) (i : ℤ) (hi : i ≤ m + 1) (x : M (k'' * c) i),
     ∥(res x : M c i)∥ ≤ K'' * ∥f x∥)
   (hg : ∀ c i, (g.apply : M' c i ⟶ N c i).ker = f.apply.range)
   (hgquot : system_of_complexes.is_quotient g) :
-  N.is_weak_bdd_exact_for_bdd_degree_above_idx (k''*k*k') (K'*(K*K'' + 1)) (m - 1) c₀ :=
+  N.is_weak_bounded_exact (k''*k*k') (K'*(K*K'' + 1)) (m - 1) c₀ :=
 begin
   have bound_nonneg : (0 : ℝ) ≤ K' * (K * K'' + 1),
   { exact_mod_cast nnreal.zero_le_coe },

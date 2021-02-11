@@ -17,7 +17,7 @@ theorem first_target [BD.suitable c']
   ∃ c₀ : ℝ≥0,
   ∀ (S : Type) [fintype S],
   ∀ (V : NormedGroup) [normed_with_aut r V],​
-    (Mbar_system V S r r' BD c').is_bdd_exact_for_bdd_degree_above_idx k m c₀ :=
+    (Mbar_system V S r r' BD c').is_bounded_exact k m c₀ :=
 sorry
 ```
 
@@ -87,7 +87,7 @@ There are two pieces of functionality that help a lot when browsing through Lean
     but this is not part of our first target.
   - `system_of_complexes/` contains the definition of a system of complexes
     of normed abelian groups indexed by nonnegative real numbers.
-    It also contains the definition of `is_bdd_exact_for_bdd_degree_above_idx`,
+    It also contains the definition of `is_bounded_exact`,
     which is the exactness condition claimed in the main theorem.
   - `Mbar/*.lean` contains a definition of the spaces ![](svg/VhatMbar.svg)
     and how they fit together in the system of complexes
