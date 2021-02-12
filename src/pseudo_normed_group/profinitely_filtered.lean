@@ -192,9 +192,6 @@ end profinitely_filtered_pseudo_normed_group_hom
 namespace punit
 
 -- move this
-instance : topological_space punit := ⊥
-
--- move this
 instance (X : Type*) [subsingleton X] (p : X → Prop) :
   subsingleton (subtype p) :=
 ⟨λ x y, subtype.ext $ subsingleton.elim _ _⟩
