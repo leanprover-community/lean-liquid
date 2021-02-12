@@ -14,8 +14,6 @@ namespace type_pow_topology
 local attribute [instance] type_pow
 
 variables (z : ℤ) (A : Type) [add_comm_group A] (n : ℕ) (x : A^n)
-example : add_comm_group (fin n → A) := by show_term {apply_instance}
-
 
 instance topological_space {n : ℕ} {α : Type*} [topological_space α] : topological_space (α^n) :=
   Pi.topological_space

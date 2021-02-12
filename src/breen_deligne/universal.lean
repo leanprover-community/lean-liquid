@@ -37,21 +37,6 @@ to the map `ℤ^m → A` sending the i'th basis vector to `x i`.
 
 noncomputable theory
 
-section PR6046
--- these should be in algebra.group.hom, just after the definition of `has_inv`
--- This is #6046 . When the below lines start causing "declaration already declared"
--- errors just comment out these comments and these two lemmas
-
-@[simp, to_additive] lemma monoid_hom.inv_comp {M N A} {mM : monoid M} {gN : monoid N}
-  {gG : comm_group A} (φ : N →* A) (ψ : M →* N) : φ⁻¹.comp ψ = (φ.comp ψ)⁻¹ :=
-by { ext, simp only [function.comp_app, monoid_hom.inv_apply, monoid_hom.coe_comp] }
-
-@[simp, to_additive] lemma monoid_hom.comp_inv {M A B} {mM : monoid M} {mA : comm_group A}
-  {mB : comm_group B} (φ : A →* B) (ψ : M →* A) : φ.comp ψ⁻¹ = (φ.comp ψ)⁻¹ :=
-by {ext, simp only [function.comp_app, monoid_hom.inv_apply, monoid_hom.map_inv, monoid_hom.coe_comp] }
-
-end PR6046
-
 -- get some notation working:
 open_locale big_operators direct_sum
 
