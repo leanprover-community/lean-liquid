@@ -1,7 +1,6 @@
 import topology.subset_properties
+import topology.connected
 import topology.algebra.monoid
-
-import for_mathlib.compact
 
 /-!
 # Locally constant functions
