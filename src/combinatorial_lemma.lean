@@ -15,12 +15,18 @@ section lem97
 
 variables (Λ : Type*) [add_comm_group Λ]
 
+lemma abs_add_eq_add_abs_iff (a b : ℤ) :
+  abs (a + b) = abs a + abs b ↔ (0 ≤ a ∧ 0 ≤ b ∨ a ≤ 0 ∧ b ≤ 0) :=
+begin
+  sorry
+end
+
 /-- Lemma 9.7 of [Analytic]. -/
-lemma lem97 (hΛ_tf : torsion_free Λ) (hΛ_fg : module.finite ℤ Λ)
+lemma lem97 (hΛ_tf : torsion_free Λ) [hΛ_fg : module.finite ℤ Λ]
   (N : ℕ) (s : finset Λ) :
   ∃ F : finset (Λ →+ ℤ), ∀ x : Λ →+ ℤ, ∃ (x' ∈ F) (y : Λ →+ ℤ),
     x - x' = N • y ∧
-    ∀ a ∈ s, 0 ≤ x' a ↔ 0 ≤ (x - x') a :=
+    ∀ a ∈ s, (0 ≤ x' a ∧ 0 ≤ (x - x') a) ∨ (x' a ≤ 0 ∧ (x - x') a ≤ 0) :=
 begin
   sorry
 end
@@ -36,7 +42,7 @@ variables [fintype S] [normed_group Λ] [polyhedral_lattice Λ]
 lemma lem98 (N : ℕ) (hn : 0 < N) :
   ∃ d, ∀ c (x : Λ →+ Mbar r' S) (hx : x ∈ filtration (Λ →+ Mbar r' S) c),
     ∃ y : fin N → (Λ →+ Mbar r' S),
-      (∑ i, y i = x) ∧
+      (x = ∑ i, y i) ∧
       (∀ i, y i ∈ filtration (Λ →+ Mbar r' S) (c/N + d)) :=
 begin
   sorry

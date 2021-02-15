@@ -4,7 +4,7 @@ import ring_theory.finiteness
 import hacks_and_tricks.by_exactI_hack
 
 noncomputable theory
-open_locale big_operators classical
+open_locale big_operators classical nnreal
 
 section move_this
 
@@ -13,6 +13,15 @@ def torsion_free (A : Type*) [add_comm_group A] : Prop :=
 ∀ (a : A) (ha : a ≠ 0) (n : ℕ), n • a = 0 → n = 0
 
 end move_this
+
+/-- A finite family `x : ι → Λ` generates the norm on `Λ`
+if for every `l : Λ`,
+there exists a scaling factor `d : ℕ`, and coefficients `c : ι → ℕ`,
+such that `d • l = ∑ i, c i • x i` and `d * ∥l∥ = ∑ i, (c i) * ∥x i∥`.
+-/
+def generates_norm {Λ ι : Type*} [normed_group Λ] [fintype ι] (x : ι → Λ) :=
+∀ l : Λ, ∃ (d : ℕ) (hd : 0 < d) (c : ι → ℕ),
+  (d • l = ∑ i, c i • x i) ∧ ((d : ℝ) * ∥l∥ = ∑ i, (c i : ℝ) * ∥x i∥)
 
 class polyhedral_lattice (Λ : Type*) [normed_group Λ] :=
 [fg : module.finite ℤ Λ]
