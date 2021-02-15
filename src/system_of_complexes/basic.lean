@@ -60,14 +60,47 @@ pi.iso_app (differential_object.iso_app $ f.app $ op c) i
 
 namespace system_of_complexes
 
+section
+
+open tactic
+
+meta def nnreal_magic : tactic unit :=
+do (assumption >> trace "by assumption" <|>
+   `[rw ← nnreal.coe_le_coe at *, linarith] >> trace "by linarith") <|>
+   `[simp [stupid_one, stupid_two, stupid_three, *]] <|>
+   target >>= trace
+
+meta def int_magic : tactic unit :=
+do (assumption <|> tactic.interactive.ring1 none <|> tactic.interactive.refl) <|>
+   target >>= trace
+
+end
+
 variables (C C₁ C₂ : system_of_complexes.{u})
+
+/-- Convenience definition:
+The identity morphism of an object in the system of complexes
+when it is given by different indices that are not
+definitionally equal. -/
+def congr_hom {c c' : ℝ≥0} {i i' : ℤ} (hc : c = c') (hi : i = i') :
+  C c i ⟶ C c' i' :=
+eq_to_hom $ by { subst hc, subst hi }
+
+/-- Convenience definition:
+The identity morphism of an object in the system of complexes
+when it is given by different indices that are not
+definitionally equal. -/
+def congr {C : system_of_complexes} {c c' : ℝ≥0} {i i' : ℤ}
+  (x : C c i) (hc : c = c' . nnreal_magic) (hi : i = i' . int_magic) :
+  C c' i' :=
+congr_hom _ hc hi x
 
 /-- `res` is the restriction map `C c' i ⟶ C c i` for a system of complexes `C`,
 and nonnegative reals `c ≤ c'`. -/
 def res {C : system_of_complexes} {c' c : ℝ≥0} {i : ℤ} [h : fact (c ≤ c')] : C c' i ⟶ C c i :=
 (C.map (hom_of_le h).op).f i
 
-variables {c₁ c₂ c₃ : ℝ≥0} (i : ℤ)
+variables {c₁ c₂ c₃ c₄ : ℝ≥0} (i i' i₁ i₂ i₃ j j' : ℤ)
 
 @[simp] lemma res_comp_res (h₁ : fact (c₂ ≤ c₁)) (h₂ : fact (c₃ ≤ c₂)) :
   @res C _ _ i h₁ ≫ @res C _ _ i h₂ = @res C _ _ i (le_trans h₂ h₁) :=
@@ -80,22 +113,48 @@ begin
 end
 
 @[simp] lemma res_res (h₁ : fact (c₂ ≤ c₁)) (h₂ : fact (c₃ ≤ c₂)) (x : C c₁ i) :
-  @res C _ _ i h₂ (@res C _ _ i h₁ x) = @res C _ _ i (le_trans h₂ h₁) x :=
+  @res C _ _ i h₂ (res x) = @res C _ _ i (le_trans h₂ h₁) x :=
 by { rw ← (C.res_comp_res i h₁ h₂), refl }
 
 /-- `C.d` is the differential `C c i ⟶ C c (i+1)` for a system of complexes `C`. -/
-def d {C : system_of_complexes} {c : ℝ≥0} {i : ℤ} :
-  C c i ⟶ C c (i+1) :=
-(C.obj $ op c).d i
+def differential (c : ℝ≥0) (i j : ℤ) (hij : i + 1 = j) :
+  C c i ⟶ C c j :=
+(C.obj $ op c).d i ≫ congr_hom _ rfl hij
 
-lemma d_comp_res (h : fact (c₂ ≤ c₁)) :
-  @d C c₁ i ≫ @res C _ _ _ h = @res C _ _ i _ ≫ @d C c₂ i :=
-homological_complex.comm_at (C.map (hom_of_le h).op) i
+local notation `d` := differential _ _ _ _ (by int_magic)
 
-lemma d_res (h : fact (c₂ ≤ c₁)) (x) :
-  @d C c₂ i (@res C _ _ i _ x) = @res C _ _ _ h (@d C c₁ i x) :=
-show (@res C _ _ i _ ≫ @d C c₂ i) x = (@d C c₁ i ≫ @res C _ _ _ h) x,
-by rw d_comp_res
+-- /-- `C.d` is the differential `C c i ⟶ C c (i+1)` for a system of complexes `C`. -/
+-- def d {C : system_of_complexes} {c : ℝ≥0} {i : ℤ} :
+--   C c i ⟶ C c (i+1) :=
+-- (C.obj $ op c).d i
+
+lemma differential_rfl : differential C c₁ i (i+1) rfl = (C.obj (op c₁)).d i :=
+by { ext, refl }
+
+lemma d_comp_d {c} (h : i₁ + 1 = i₂) (h' : i₂ + 1 = i₃) :
+  (d : C c i₁ ⟶ C c i₂) ≫ (d : C c i₂ ⟶ C c i₃) = 0 :=
+begin
+  subst i₂, subst i₃,
+  simp only [differential_rfl],
+  exact homological_complex.d_squared _ _
+end
+
+lemma d_d {c} (h : i₁ + 1 = i₂) (h' : i₂ + 1 = i₃) (x : C c i₁) :
+  (differential C c i₂ _ (by int_magic) (d x : C c i₂) : C c i₃) = 0 :=
+show ((d : C c i₁ ⟶ C c i₂) ≫ (d : C c i₂ ⟶ C c i₃)) x = 0,
+by { rw d_comp_d, refl }
+
+lemma d_comp_res (h : fact (c₂ ≤ c₁)) (hij : i + 1 = j) :
+  d ≫ @res C _ _ j h = @res C _ _ i _ ≫ d :=
+begin
+  subst j,
+  simp only [differential_rfl],
+  exact homological_complex.comm_at (C.map (hom_of_le h).op) i,
+end
+
+lemma d_res (h : fact (c₂ ≤ c₁)) (hij : i + 1 = j) (x : C c₁ i) :
+  d (res x) = @res C _ _ j h (d x) :=
+show (res ≫ d) x = (d ≫ res) x, by rw d_comp_res
 
 section iso
 
@@ -125,19 +184,12 @@ by simp only [inv_apply_comp_hom_apply, coe_id, id.def]
 
 end iso
 
-/-- Convenience definition:
-The identity morphism of an object in the system of complexes
-when it is given by different indices that are not
-definitionally equal. -/
-def congr {c c' : ℝ≥0} {i i' : ℤ} (hc : c = c') (hi : i = i') :
-  C c i ⟶ C c' i' :=
-eq_to_hom $ by { subst hc, subst hi }
-
 variables (M M' N)
 
-lemma d_apply (f : M ⟶ N) {c : ℝ≥0} {i : ℤ} (m : M c i) :
-  d (f m) = f (d m) :=
+lemma d_apply (f : M ⟶ N) {c : ℝ≥0} {i j : ℤ} (hj : i + 1 = j) (m : M c i) :
+  (d (f m) : N c j) = f (d m) :=
 begin
+  subst j,
   have h : ((M.obj (op c)).d i ≫ (f.app (op c)).f (i + 1)) m =
     (f.app (op c)).f (i + 1) ((M.obj (op c)).d i m),
   { exact coe_comp ((M.obj (op c)).d i) ((f.app (op c)).f (i + 1)) m },
@@ -185,16 +237,16 @@ Implementation details:
   (This is a hack around an inconvenience known as dependent type theory hell.) -/
 def is_bounded_exact
   (k K : ℝ≥0) (m : ℤ) [hk : fact (1 ≤ k)] (c₀ : ℝ≥0) : Prop :=
-∀ c ≥ c₀, ∀ i < m,
-∀ x : C (k * c) (i+1),
-∃ y : C c i, ∥res x - d y∥ ≤ K * ∥d x∥
+∀ c ≥ c₀, ∀ i ≤ m,
+∀ x : C (k * c) i,
+∃ y : C c (i-1), ∥res x - d y∥ ≤ K * ∥d x∥
 
 /-- Weak version of `is_bounded_exact`. -/
 def is_weak_bounded_exact
   (k K : ℝ≥0) (m : ℤ) [hk : fact (1 ≤ k)] (c₀ : ℝ≥0) : Prop :=
-∀ c ≥ c₀, ∀ i < m,
-∀ x : C (k * c) (i+1),
-∀ ε > 0, ∃ y : C c i, ∥res x - d y∥ ≤ K * ∥d x∥ + ε
+∀ c ≥ c₀, ∀ i ≤ m,
+∀ x : C (k * c) i,
+∀ ε : ℝ, 0 < ε → ∃ y : C c (i-1), ∥res x - d y∥ ≤ K * ∥d x∥ + ε
 
 namespace is_weak_bounded_exact
 
@@ -207,7 +259,7 @@ lemma of_le (hC : C.is_weak_bounded_exact k K m c₀)
 begin
   intros c hc i hi x ε ε_pos,
   haveI : fact (k ≤ k') := hk,
-  obtain ⟨y, hy⟩ := hC c (hc₀.trans hc) i (lt_of_lt_of_le hi hm) (res x) ε ε_pos,
+  obtain ⟨y, hy⟩ := hC c (hc₀.trans hc) i (hi.trans hm) (res x) ε ε_pos,
   use y,
   simp only [res_res] at hy,
   refine le_trans hy _,
@@ -217,16 +269,18 @@ begin
 end
 
 lemma to_exact (hC : C.is_weak_bounded_exact k K m c₀) {δ : ℝ≥0} (hδ : 0 < δ)
-  (H : ∀ c ≥ c₀, ∀ i < m, ∀ x : C (k * c) (i+1), d x = 0 → ∃ y : C c i, res x = d y) :
+  (H : ∀ c ≥ c₀, ∀ i ≤ m, ∀ x : C (k * c) i, d x = 0 → ∃ y : C c (i-1), res x = d y) :
   C.is_bounded_exact k (K + δ) m c₀ :=
 begin
   intros c hc i hi x,
   by_cases hdx : d x = 0,
   { rcases H c hc i hi x hdx with ⟨y, hy⟩,
-    exact ⟨y, by simp [hy, hdx]⟩ },
-  { have : ((K + δ : ℝ≥0) : ℝ) * ∥d x∥ = K * ∥d x∥ + δ * ∥d x∥, apply_mod_cast add_mul,
+    exact ⟨y, by simp only [hy, hdx, norm_zero, mul_zero, sub_self]⟩ },
+  { have : ((K + δ : ℝ≥0) : ℝ) * ∥d x∥ = K * ∥d x∥ + δ * ∥d x∥,
+    by simp only [add_mul, nnreal.coe_add],
     simp_rw this,
-    apply hC c hc i hi x (δ*∥d x∥) (mul_pos (by exact_mod_cast hδ) $ norm_pos_iff.mpr hdx) },
+    refine hC c hc i hi x (δ*∥d x∥) _,
+    exact (mul_pos (by exact_mod_cast hδ) $ norm_pos_iff.mpr hdx) },
 end
 
 end is_weak_bounded_exact
@@ -242,7 +296,7 @@ lemma of_le (hC : C.is_bounded_exact k K m c₀)
 begin
   intros c hc i hi x,
   haveI : fact (k ≤ k') := hk,
-  obtain ⟨y, hy⟩ := hC c (hc₀.trans hc) i (lt_of_lt_of_le hi hm) (res x),
+  obtain ⟨y, hy⟩ := hC c (hc₀.trans hc) i (hi.trans hm) (res x),
   use y,
   simp only [res_res] at hy,
   refine le_trans hy _,
