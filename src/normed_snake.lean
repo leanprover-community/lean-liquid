@@ -11,11 +11,21 @@ variables (M M' N : system_of_complexes.{u}) (f : M ⟶ M') (g : M' ⟶ N)
 local notation `d` := system_of_complexes.differential _ _ _ _ (by int_magic)
 
 example (M : system_of_complexes) (c : ℝ≥0)
+  (h : ∀ i : ℤ, ∀ x : M c (i+1), d x = 0 → ∃ y, d y = x)
+  (i : ℤ) (x : M c i) (hx : d x = 0) :
+  ∃ y : M c (i-1), d y = x :=
+begin
+  specialize h (i-1),
+  -- rw sub_add_cancel at h,
+end
+
+example (M : system_of_complexes) (c : ℝ≥0)
   (h : ∀ i : ℤ, ∀ x : M c i, d x = 0 → ∃ y : M c (i-1), d y = x)
   (i : ℤ) (x : M c (i+1)) (hx : d x = 0) :
   ∃ y, d y = x :=
 begin
-  
+  specialize h (i+1),
+  simp at h,
 end
 
 set_option pp.proofs true
