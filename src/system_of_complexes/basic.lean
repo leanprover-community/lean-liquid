@@ -3,7 +3,6 @@ import algebra.homology.chain_complex
 import normed_group.NormedGroup
 import algebra.ordered_group
 import facts
-import for_mathlib.category_theory
 
 import tactic.gptf
 
