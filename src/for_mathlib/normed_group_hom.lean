@@ -1,4 +1,5 @@
 import analysis.normed_space.basic
+import topology.sequences
 open_locale nnreal big_operators
 
 /-!
@@ -392,15 +393,73 @@ begin
   simpa [norm_zero, add_monoid_hom.map_zero] using norm_mk_le S 0
 end
 
-/-- The quotient norm is actually a norm. -/
-@[nolint unused_arguments]
+/-- If `(m : M)` has norm equal to `0` in `quotient S` for a complete subgroup `S` of `M`, then
+`m ∈ S`. -/
+lemma norm_zero_eq_zero (S : add_subgroup M) [complete_space S] (m : M)
+  (h : ∥(quotient_add_group.mk' S) m∥ = 0) : m ∈ S :=
+begin
+  choose g hg using λ n, (norm_mk_lt' S m (@nat.one_div_pos_of_nat ℝ _ n)),
+  simp only [h, one_div, zero_add] at hg,
+  have hcauchy : cauchy_seq g,
+  { rw metric.cauchy_seq_iff,
+    intros ε hε,
+    obtain ⟨k, hk⟩ := exists_nat_ge (ε/2)⁻¹,
+    have kpos := lt_of_lt_of_le (inv_pos.mpr (half_pos hε)) hk,
+    replace hk := (inv_le_inv kpos (inv_pos.mpr (half_pos hε))).2 hk,
+    rw [inv_inv'] at hk,
+    refine ⟨k, λ a b ha hb, _⟩,
+    have apos := lt_trans (lt_of_lt_of_le kpos (nat.cast_le.2 (ge.le ha))) (lt_add_one a),
+    have bpos := lt_trans (lt_of_lt_of_le kpos (nat.cast_le.2 (ge.le hb))) (lt_add_one b),
+    replace ha : (k : ℝ ) ≤ ↑(a + 1) := nat.cast_le.2 (le_add_right ha),
+    replace hb : (k : ℝ ) ≤ ↑(b + 1) := nat.cast_le.2 (le_add_right hb),
+    have haε := le_trans ((inv_le_inv apos kpos).2 ha) hk,
+    have hbε := le_trans ((inv_le_inv bpos kpos).2 hb) hk,
+    calc dist (g a) (g b)
+        = ∥(g a) - (g b)∥ : dist_eq_norm _ _
+    ... = ∥(m + (g a)) + (-(m + (g b)))∥ : by abel
+    ... ≤ ∥m + (g a)∥ + ∥-(m + (g b))∥ : norm_add_le _ _
+    ... = ∥m + (g a)∥ + ∥m + (g b)∥ : by rw [norm_neg _]
+    ... < (↑a + 1)⁻¹ + (↑b + 1)⁻¹ : add_lt_add (hg a).2 (hg b).2
+    ... ≤ ε/2 + ε/2 : add_le_add haε hbε
+    ... = ε : add_halves ε },
+  have Scom : is_complete (S : set M) := complete_space_coe_iff_is_complete.mp _inst_3,
+  suffices : m ∈ (S : set M), by exact this,
+  obtain ⟨s, hs, hlim⟩ := cauchy_seq_tendsto_of_is_complete Scom (λ n, (hg n).1) hcauchy,
+  suffices : ∥m + s∥ = 0,
+  { rw [norm_eq_zero] at this,
+    rw [eq_neg_of_add_eq_zero this],
+    exact add_subgroup.neg_mem S hs },
+  have hlimnorm : filter.tendsto (λ n, ∥m + (g n)∥) filter.at_top (nhds 0),
+  { apply (@metric.tendsto_at_top _ _ _ ⟨0⟩ _ _ _).2,
+    intros ε hε,
+    obtain ⟨k, hk⟩ := exists_nat_ge ε⁻¹,
+    have kpos := lt_of_lt_of_le (inv_pos.mpr hε) hk,
+    replace hk := (inv_le_inv kpos (inv_pos.mpr hε)).2 hk,
+    rw [inv_inv'] at hk,
+    refine ⟨k, λ n hn, _⟩,
+    replace hn : (k : ℝ) ≤ ↑(n + 1) := nat.cast_le.2 (le_add_right hn),
+    have npos : (0 : ℝ) < ↑(n + 1) := nat.cast_lt.2 (nat.succ_pos n),
+    replace hn := le_trans ((inv_le_inv npos kpos).2 hn) hk,
+    simp only [dist_zero_right, norm_norm],
+    calc ∥m + g n∥
+        < (↑n + 1)⁻¹ : (hg n).2
+    ... ≤ ε : hn },
+  exact tendsto_nhds_unique ((continuous.to_sequentially_continuous (@continuous_norm M _))
+    (λ (n : ℕ), m + g n) (tendsto.const_add m hlim)) hlimnorm
+end
+
+/-- The norm on `quotient S` is actually a norm if `S` is a complete subgroup of `M`. -/
 lemma quotient.is_normed_group.core (S : add_subgroup M) [complete_space S] :
   normed_group.core (quotient S) :=
 begin
   split,
   { intro x,
     refine ⟨λ h, _ , λ h, by simpa [h] using norm_mk_zero S⟩,
-    sorry },
+    obtain ⟨m, hm⟩ := surjective_quot_mk _ x,
+    replace hm : quotient_add_group.mk' S m = x := hm,
+    rw [← hm, ← add_monoid_hom.mem_ker, quotient_add_group.ker_mk],
+    rw [← hm] at h,
+    exact norm_zero_eq_zero S m h },
   { intros x y,
     refine le_of_forall_pos_le_add (λ ε hε, _),
     replace hε := half_pos hε,
@@ -442,13 +501,16 @@ def normed_group.mk (S : add_subgroup M) [complete_space S] : normed_group_hom M
 { bound' := ⟨1, λ m, by simpa [one_mul] using norm_mk_le _ m⟩,
   ..quotient_add_group.mk' S }
 
+/-- `normed_group.mk S` agrees with `quotient_add_group.mk' S`. -/
 lemma normed_group.mk.apply (S : add_subgroup M) [complete_space S] (m : M) :
   normed_group.mk S m = quotient_add_group.mk' S m := rfl
 
+/-- `normed_group.mk S` is surjective. -/
 lemma surjective_normed_group.mk (S : add_subgroup M) [complete_space S] :
   function.surjective (normed_group.mk S) :=
 surjective_quot_mk _
 
+/-- The kernel of `normed_group.mk S` is `S`. -/
 lemma normed_group.mk.ker (S : add_subgroup M) [complete_space S] : (normed_group.mk S).ker = S :=
 quotient_add_group.ker_mk  _
 
@@ -458,6 +520,7 @@ structure is_quotient (f : normed_group_hom M N) : Prop :=
 (surjective : function.surjective f)
 (norm : ∀ x, ∥f x∥ = Inf {r : ℝ | ∃ y ∈ f.ker, r = ∥x + y∥ })
 
+/-- `normed_group.mk S` satisfies `is_quotient`. -/
 lemma is_quotient_quotient (S : add_subgroup M) [complete_space S] :
   is_quotient (normed_group.mk S) :=
 ⟨surjective_normed_group.mk S, λ m, by simpa [normed_group.mk.ker S] using quotient_norm_eq S m⟩
