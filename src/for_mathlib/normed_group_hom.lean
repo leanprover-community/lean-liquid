@@ -302,16 +302,6 @@ noncomputable
 instance norm_on_quotient (S : add_subgroup M) : has_norm (quotient S) :=
 { norm := λ x, Inf {r : ℝ | ∃ (y : M), quotient_add_group.mk' S y = x ∧ r = ∥y∥ } }
 
-lemma norm_set_bounded {S : add_subgroup M} (x : (quotient S)) :
-  ∃ (a : ℝ), ∀ (b : ℝ), b ∈ {r : ℝ | ∃ m, quotient_add_group.mk' S m = x ∧ r = ∥m∥} → a ≤ b :=
-begin
-  use 0,
-  intros r hr,
-  simp only [set.mem_set_of_eq] at hr,
-  obtain ⟨m, hm, rfl⟩ := hr,
-  exact norm_nonneg m
-end
-
 /-- The norm of the image under the natural morphism to the quotient. -/
 lemma quotient_norm_eq (S : add_subgroup M) (m : M) :
   ∥quotient_add_group.mk' S m∥ = Inf {r : ℝ | ∃ s ∈ S, r = ∥m + s∥ } :=
@@ -341,14 +331,19 @@ begin
     rw [add_monoid_hom.map_add, hker, add_zero] }
 end
 
+/-- The norm of the projection is smaller or equal to the norm of the original element. -/
 lemma norm_mk_le (S : add_subgroup M) (m : M) : ∥quotient_add_group.mk' S m∥ ≤ ∥m∥ :=
 begin
   unfold norm,
-  refine real.Inf_le _ (norm_set_bounded (quotient_add_group.mk' S m)) _,
+  refine real.Inf_le _ (⟨0, λ r hr, _⟩) _,
+  { rw [set.mem_set_of_eq] at hr,
+    obtain ⟨m, hm, rfl⟩ := hr,
+    exact norm_nonneg m },
   { rw [set.mem_set_of_eq],
     exact ⟨m, rfl, rfl⟩ }
 end
 
+/-- The quotient norm is nonnegative. -/
 lemma norm_mk_nonneg (S : add_subgroup M) (m : M) : 0 ≤ ∥quotient_add_group.mk' S m∥ :=
 begin
   refine real.lb_le_Inf _ _ _,
@@ -390,12 +385,14 @@ begin
     exact hn.2 }
 end
 
+/-- The quotient norm of `0` is `0`. -/
 lemma norm_mk_zero (S : add_subgroup M) : ∥(0 : (quotient S))∥ = 0 :=
 begin
   refine le_antisymm _ (norm_mk_nonneg S 0),
   simpa [norm_zero, add_monoid_hom.map_zero] using norm_mk_le S 0
 end
 
+/-- The quotient norm is actually a norm. -/
 @[nolint unused_arguments]
 lemma quotient.is_normed_group.core (S : add_subgroup M) [complete_space S] :
   normed_group.core (quotient S) :=
@@ -433,16 +430,37 @@ begin
         norm_neg]⟩ } }
 end
 
+/-- An instance of `normed_group` on the quotient by a subgroup. -/
 noncomputable
 instance quotient_normed_group (S : add_subgroup M) [complete_space S] :
   normed_group (quotient S) :=
 normed_group.of_core (quotient S) (quotient.is_normed_group.core S)
 
-/-- `is_quotient f`, for `f : M ⟶ N` means that `N` is the quotient of `M`
+/-- The canonical morphism `M → (quotient S)` as morphism of normed groups. -/
+noncomputable
+def normed_group.mk (S : add_subgroup M) [complete_space S] : normed_group_hom M (quotient S) :=
+{ bound' := ⟨1, λ m, by simpa [one_mul] using norm_mk_le _ m⟩,
+  ..quotient_add_group.mk' S }
+
+lemma normed_group.mk.apply (S : add_subgroup M) [complete_space S] (m : M) :
+  normed_group.mk S m = quotient_add_group.mk' S m := rfl
+
+lemma surjective_normed_group.mk (S : add_subgroup M) [complete_space S] :
+  function.surjective (normed_group.mk S) :=
+surjective_quot_mk _
+
+lemma normed_group.mk.ker (S : add_subgroup M) [complete_space S] : (normed_group.mk S).ker = S :=
+quotient_add_group.ker_mk  _
+
+/-- `is_quotient f`, for `f : M ⟶ N` means that `N` is isomorphic to the quotient of `M`
 by the kernel of `f`. -/
 structure is_quotient (f : normed_group_hom M N) : Prop :=
 (surjective : function.surjective f)
 (norm : ∀ x, ∥f x∥ = Inf {r : ℝ | ∃ y ∈ f.ker, r = ∥x + y∥ })
+
+lemma is_quotient_quotient (S : add_subgroup M) [complete_space S] :
+  is_quotient (normed_group.mk S) :=
+⟨surjective_normed_group.mk S, λ m, by simpa [normed_group.mk.ker S] using quotient_norm_eq S m⟩
 
 lemma quotient_norm_lift {f : normed_group_hom M N} (hquot : is_quotient f) {ε : ℝ} (hε : 0 < ε)
   (n : N) : ∃ (m : M), f m = n ∧ ∥m∥ < ∥n∥ + ε :=
