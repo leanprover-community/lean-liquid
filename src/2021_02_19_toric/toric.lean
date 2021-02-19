@@ -10,6 +10,8 @@ variables [comm_semiring R] [add_comm_monoid M] [add_comm_monoid N] [semimodule 
 
 @[derive has_coe_to_fun] def pairing := M →ₗ[R] N →ₗ[R] P
 
+def pairing.flip : pairing R M N P → pairing R N M P := linear_map.flip
+
 end pairing
 
 namespace add_submonoid
@@ -27,8 +29,6 @@ variables [ordered_comm_ring R] [add_comm_monoid M] [add_comm_monoid N] [semimod
   [semimodule R N] [ordered_add_comm_monoid P] [semimodule R P]
 
 variables {R M N P} (f : pairing R M N P)
-
-def flip : pairing R N M P := linear_map.flip f
 
 def dual_set (s : set M) : add_submonoid N :=
 { carrier := { n : N | ∀ m ∈ s, (0 : P) ≤ f m n },
