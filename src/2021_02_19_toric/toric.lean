@@ -47,7 +47,15 @@ variables [ordered_semimodule R P]
 lemma smul_nonneg_iff (r : R) (hr : 0 < r) (p : P) :
   0 ≤ r • p ↔ 0 ≤ p :=
 begin
-  sorry
+  split,
+  { intro h,
+    rw le_iff_lt_or_eq at h ⊢,
+    refine h.imp (smul_pos_iff_of_pos hr).mp _,
+    intro hrp,
+    /- is this even true? do we need some extra `torsion_free` assumption here? -/
+    sorry },
+  { intro h,
+    simpa only [smul_zero] using smul_le_smul_of_nonneg h hr.le }
 end
 
 lemma dual_set_saturated (s : set M) : (f.dual_set s).saturated R :=
