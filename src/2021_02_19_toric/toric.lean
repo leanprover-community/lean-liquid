@@ -1,4 +1,5 @@
 import data.polynomial.degree.lemmas
+import algebra.module.ordered
 
 variables (R M N P : Type*)
 
@@ -23,7 +24,7 @@ end add_submonoid
 namespace pairing
 
 variables [ordered_comm_ring R] [add_comm_monoid M] [add_comm_monoid N] [semimodule R M]
-  [semimodule R N] [linear_ordered_add_comm_group P] [semimodule R P]
+  [semimodule R N] [ordered_add_comm_monoid P] [semimodule R P]
 
 variables {R M N P} (f : pairing R M N P)
 
@@ -40,12 +41,21 @@ def dual_set (s : set M) : add_submonoid N :=
 lemma mem_dual_set (s : set M) (n : N) :
   n ∈ f.dual_set s ↔ ∀ m ∈ s, 0 ≤ f m n := iff.rfl
 
+variables [ordered_semimodule R P]
+
+-- move this
+lemma smul_nonneg_iff (r : R) (hr : 0 < r) (p : P) :
+  0 ≤ r • p ↔ 0 ≤ p :=
+begin
+  sorry
+end
+
 lemma dual_set_saturated (s : set M) : (f.dual_set s).saturated R :=
 begin
   intros r hr n hn m hm,
   specialize hn m hm,
-  rw linear_map.map_smul at hn,
-  sorry
+  rwa [linear_map.map_smul, smul_nonneg_iff r hr] at hn,
+  apply_instance
 end
 
 end pairing
