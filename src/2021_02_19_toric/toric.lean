@@ -18,13 +18,16 @@ end pairing
 
 namespace submodule
 
-variables {M} [ordered_comm_ring R] [add_comm_monoid M] [semimodule R M]
+variables {M} [comm_semiring R₀] [comm_semiring R] [algebra R₀ R] [add_comm_monoid M]
+  [semimodule R₀ M] [semimodule R M] [is_scalar_tower R₀ R M]
 
-def saturated (s : add_submonoid M) : Prop :=
-∀ (r : R) (hr : 0 < r) (m : M), r • m ∈ s → m ∈ s
+/-- This definition does not assume that `R₀` injects into `R`.  If the map `R₀ → R` has a
+non-trivial kernel, the only saturated submodule is the whole module. -/
+def saturated (s : submodule R₀ M) : Prop :=
+∀ (r : R₀) (hr : r ≠ 0) (m : M), r • m ∈ s → m ∈ s
 
-def saturation (s : submodule R M) : submodule R M :=
-{ carrier := { m : M | m = 0 ∨ ∃ (r : R), 0 < r ∧ r • m ∈ s },
+def saturation (s : submodule R₀ M) : submodule R₀ M :=
+{ carrier := { m : M | m = 0 ∨ ∃ (r : R₀), r ≠ 0 ∧ r • m ∈ s },
   zero_mem' := or.inl rfl,
   add_mem' := begin
     rintros a b (rfl | ra) (rfl | rb),
