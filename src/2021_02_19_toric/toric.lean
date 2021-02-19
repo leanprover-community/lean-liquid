@@ -11,14 +11,21 @@ variables [comm_semiring R] [add_comm_monoid M] [add_comm_monoid N] [semimodule 
 
 end pairing
 
+namespace add_submonoid
+
+variables {M} [ordered_comm_ring R] [add_comm_monoid M] [semimodule R M]
+
+def saturated (s : add_submonoid M) : Prop :=
+∀ (r : R) (hr : 0 < r) (m : M), r • m ∈ s → m ∈ s
+
+end add_submonoid
+
 namespace pairing
 
-variables [ordered_comm_ring R]
+variables [ordered_comm_ring R] [add_comm_monoid M] [add_comm_monoid N] [semimodule R M]
+  [semimodule R N] [linear_ordered_add_comm_group P] [semimodule R P]
 
-variables [add_comm_monoid M] [add_comm_monoid N] [semimodule R M] [semimodule R N]
-  [linear_ordered_add_comm_group P] [semimodule R P]
-
-variable (f : pairing R M N P)
+variables {R M N P} (f : pairing R M N P)
 
 def flip : pairing R N M P := linear_map.flip f
 
@@ -30,5 +37,15 @@ def dual_set (s : set M) : add_submonoid N :=
     exact add_nonneg (hn1 m hm) (hn2 m hm)
   end }
 
+lemma mem_dual_set (s : set M) (n : N) :
+  n ∈ f.dual_set s ↔ ∀ m ∈ s, 0 ≤ f m n := iff.rfl
+
+lemma dual_set_saturated (s : set M) : (f.dual_set s).saturated R :=
+begin
+  intros r hr n hn m hm,
+  specialize hn m hm,
+  rw linear_map.map_smul at hn,
+  sorry
+end
 
 end pairing
