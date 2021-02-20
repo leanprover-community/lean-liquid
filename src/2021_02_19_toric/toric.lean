@@ -1,5 +1,6 @@
 import data.polynomial.degree.lemmas
 import algebra.module.ordered
+import algebra.regular
 
 variables (R₀ R M N P : Type*)
 
@@ -8,6 +9,7 @@ section pairing
 variables [comm_semiring R] [add_comm_monoid M] [add_comm_monoid N] [semimodule R M]
   [semimodule R N] [add_comm_monoid P] [semimodule R P]
 
+/-- An R-pairing on the R-modules M, N, P is an R-linear map M -> Hom_R(N,P). -/
 @[derive has_coe_to_fun] def pairing := M →ₗ[R] N →ₗ[R] P
 
 variables {R M N P}
@@ -22,35 +24,40 @@ variables {M} [comm_semiring R₀] [comm_semiring R] [algebra R₀ R] [add_comm_
   [semimodule R₀ M] [semimodule R M] [is_scalar_tower R₀ R M]
 
 /-- This definition does not assume that `R₀` injects into `R`.  If the map `R₀ → R` has a
-non-trivial kernel, the only saturated submodule is the whole module. -/
+non-trivial kernel, this might not be the definition you think. -/
 def saturated (s : submodule R₀ M) : Prop :=
-∀ (r : R₀) (hr : r ≠ 0) (m : M), r • m ∈ s → m ∈ s
+∀ (r : R₀) (hr : is_regular r) (m : M), r • m ∈ s → m ∈ s
 
 def saturation (s : submodule R₀ M) : submodule R₀ M :=
-{ carrier := { m : M | m = 0 ∨ ∃ (r : R₀), r ≠ 0 ∧ r • m ∈ s },
-  zero_mem' := or.inl rfl,
+{ carrier := { m : M | ∃ (r : R₀), is_regular r ∧ r • m ∈ s },
+  zero_mem' := ⟨1, is_regular_one, by { rw smul_zero, exact s.zero_mem }⟩,
   add_mem' := begin
-    rintros a b (rfl | ra) (rfl | rb),
-    { rw [add_zero],
-      exact or.inl rfl },
-    { rw zero_add,
-      refine or.inr rb },
-    { rw add_zero,
-      refine or.inr ra },
-    { rcases ra with ⟨ra, ra0, ras⟩,
-      rcases rb with ⟨rb, rb0, rbs⟩,
-      refine or.inr _,
-      refine ⟨(ra * rb), mul_pos ra0 rb0, _⟩,
-      rw [smul_add, mul_smul _ _ b, mul_comm ra, mul_smul],
-      exact s.add_mem (s.smul_mem _ ras) (s.smul_mem _ rbs) }
+    rintros a b ⟨q, hqreg, hqa⟩ ⟨r, hrreg, hrb⟩,
+    use q * r,
+    rw is_regular_mul_iff,
+    use ⟨hqreg, hrreg⟩,
+    rw [smul_add],
+    apply s.add_mem,
+    { rw [mul_comm, mul_smul],
+      apply s.smul_mem,
+      exact hqa },
+    { rw mul_smul,
+      apply s.smul_mem,
+      exact hrb, },
   end,
-   }
+  smul_mem' := begin
+    rintros c m ⟨r, hrreg, hrm⟩,
+    use [r, hrreg],
+    rw smul_algebra_smul_comm,
+    apply s.smul_mem,
+    exact hrm,
+  end }
 
 end submodule
 
 namespace pairing
 
-variables [linear_ordered_comm_ring R] [add_comm_monoid M] [add_comm_monoid N] [semimodule R M]
+variables [comm_semiring R] [add_comm_monoid M] [add_comm_monoid N] [semimodule R M]
   [semimodule R N] [ordered_add_comm_monoid P] [semimodule R P]
 
 variables {R M N P} (f : pairing R M N P)
