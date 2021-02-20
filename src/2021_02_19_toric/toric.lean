@@ -4,10 +4,13 @@ import algebra.regular
 
 variables (R₀ R M N P : Type*)
 
+variables [comm_semiring R₀] [comm_semiring R] [algebra R₀ R]
+  [add_comm_monoid M] [semimodule R₀ M] [semimodule R M] [is_scalar_tower R₀ R M]
+  [add_comm_monoid N] [semimodule R₀ N] [semimodule R N] [is_scalar_tower R₀ R N]
+  [add_comm_monoid P] [semimodule R₀ P] [semimodule R P] [is_scalar_tower R₀ R P]
+  (P₀ : submodule R₀ P)
 section pairing
 
-variables [comm_semiring R] [add_comm_monoid M] [add_comm_monoid N] [semimodule R M]
-  [semimodule R N] [add_comm_monoid P] [semimodule R P]
 
 /-- An R-pairing on the R-modules M, N, P is an R-linear map M -> Hom_R(N,P). -/
 @[derive has_coe_to_fun] def pairing := M →ₗ[R] N →ₗ[R] P
@@ -18,10 +21,9 @@ def pairing.flip : pairing R M N P → pairing R N M P := linear_map.flip
 
 end pairing
 
-namespace submodule
+variables {M}
 
-variables {M} [comm_semiring R₀] [comm_semiring R] [algebra R₀ R] [add_comm_monoid M]
-  [semimodule R₀ M] [semimodule R M] [is_scalar_tower R₀ R M]
+namespace submodule
 
 /-- This definition does not assume that `R₀` injects into `R`.  If the map `R₀ → R` has a
 non-trivial kernel, this might not be the definition you think. -/
@@ -52,12 +54,12 @@ end submodule
 
 namespace pairing
 
-variables [comm_semiring R] [add_comm_monoid M] [add_comm_monoid N] [semimodule R M]
-  [semimodule R N] [ordered_add_comm_monoid P] [semimodule R P]
+--variables [comm_semiring R₀] [comm_semiring R] [add_comm_monoid M] [add_comm_monoid N]
+--  [semimodule R M] [semimodule R N] [ordered_add_comm_monoid P] [semimodule R P]
 
-variables {R M N P} (f : pairing R M N P)
+variables {R₀ R M N P} (f : pairing R M N P)
 
-def dual_set (s : set M) : submodule R N :=
+def dual_set (s : set M) : submodule R₀ N :=
 { carrier := { n : N | ∀ m ∈ s, (0 : P) ≤ f m n },
   zero_mem' := λ m hm, by simp only [linear_map.map_zero],
   add_mem' := λ n1 n2 hn1 hn2 m hm, begin
