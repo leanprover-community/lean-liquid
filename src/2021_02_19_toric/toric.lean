@@ -179,6 +179,8 @@ begin
   change ∀ (n : N), n ∈ (dual_set P₀ f ↑S) → f m n ∈ P₀ at hm,
   simp_rw mem_dual_set at hm,
   -- is this true? I (KMB) don't know and the guru (Damiano) has left!
+  -- oh wait, no way is this true, we need some nondegeneracy condition
+  -- on f, it's surely not true if f is just the zero map.
   sorry,
 end
 
