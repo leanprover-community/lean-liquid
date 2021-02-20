@@ -33,24 +33,19 @@ def saturation (s : submodule R₀ M) : submodule R₀ M :=
   zero_mem' := ⟨1, is_regular_one, by { rw smul_zero, exact s.zero_mem }⟩,
   add_mem' := begin
     rintros a b ⟨q, hqreg, hqa⟩ ⟨r, hrreg, hrb⟩,
-    use q * r,
-    rw is_regular_mul_iff,
-    use ⟨hqreg, hrreg⟩,
+    refine ⟨q * r, is_regular_mul_iff.mpr ⟨hqreg, hrreg⟩, _⟩,
     rw [smul_add],
-    apply s.add_mem,
+    refine s.add_mem _ _,
     { rw [mul_comm, mul_smul],
-      apply s.smul_mem,
-      exact hqa },
+      exact s.smul_mem _ hqa },
     { rw mul_smul,
-      apply s.smul_mem,
-      exact hrb, },
+      exact s.smul_mem _ hrb },
   end,
   smul_mem' := begin
     rintros c m ⟨r, hrreg, hrm⟩,
     use [r, hrreg],
     rw smul_algebra_smul_comm,
-    apply s.smul_mem,
-    exact hrm,
+    exact s.smul_mem _ hrm,
   end }
 
 end submodule
