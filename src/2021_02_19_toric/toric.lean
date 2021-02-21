@@ -53,6 +53,13 @@ def saturation (s : submodule R₀ M) : submodule R₀ M :=
 lemma le_saturation (s : submodule R₀ M) : s ≤ saturation R₀ s :=
 λ m hm, ⟨1, is_regular_one, by rwa one_smul⟩
 
+/- I (DT) extracted this lemma from the proof of `dual_eq_dual_saturation`, since it seems a
+lemma that we may use elsewhere as well. -/
+lemma set_subset_saturation  {S : set M} :
+  S ⊆ (submodule.saturation R₀ (submodule.span R₀ S)) :=
+set.subset.trans (submodule.subset_span : S ⊆ submodule.span R₀ S)
+  (submodule.le_saturation R₀ (submodule.span R₀ S))
+
 end submodule
 
 namespace pairing
@@ -86,8 +93,7 @@ lemma smul_regular_iff {r : R₀} (hr : is_regular r) (p : P) :
 
 lemma dual_set_saturated (s : set M) (hP₀ : P₀.saturated R₀) :
   (f.dual_set P₀ s).saturated R₀ :=
-λ r hr n hn m hm,
-by simpa [smul_regular_iff hP₀ hr] using hn m hm
+λ r hr n hn m hm, by simpa [smul_regular_iff hP₀ hr] using hn m hm
 
 end saturated
 
@@ -103,17 +109,11 @@ lemma dual_subset {s t : set M} (st : s ⊆ t) : f.dual_set P₀ t ≤ f.dual_se
 lemma mem_span_dual_set (s : set M) :
   f.dual_set P₀ (submodule.span R₀ s) = f.dual_set P₀ s :=
 begin
-  apply le_antisymm,
-  { apply dual_subset,
-    exact submodule.subset_span,
-  },
-  { intros n hn m hm,
-    rw mem_dual_set at hn,
-    apply submodule.span_induction hm hn,
+  refine (dual_subset f submodule.subset_span).antisymm _,
+  { refine λ n hn m hm, submodule.span_induction hm hn _ _ _,
     { simp only [linear_map.map_zero, submodule.zero_mem, linear_map.zero_apply] },
-    { intros x y hx hy, simp [P₀.add_mem hx hy] },
-    { intros r m hm,
-      simp [P₀.smul_mem _ hm] } }
+    { exact λ x y hx hy, by simp [P₀.add_mem hx hy] },
+    { exact λ r m hm, by simp [P₀.smul_mem _ hm] } }
 end
 
 lemma subset_dual_dual {s : set M} : s ⊆ f.flip.dual_set P₀ (f.dual_set P₀ s) :=
@@ -132,28 +132,21 @@ subset_dual_set_of_subset_dual_set _ ST
 lemma dual_set_closure_eq {s : set M} :
   f.dual_set P₀ (submodule.span R₀ s) = f.dual_set P₀ s :=
 begin
-  refine le_antisymm (dual_subset _ submodule.subset_span) _,
-  intros n hn m hm,
-  apply submodule.span_induction hm hn,
+  refine (dual_subset _ submodule.subset_span).antisymm _,
+  refine λ n hn m hm, submodule.span_induction hm hn _ _ _,
   { simp only [linear_map.map_zero, linear_map.zero_apply, P₀.zero_mem] },
-  { intros x y hx hy,
-    simp only [linear_map.add_apply, linear_map.map_add, P₀.add_mem hx hy] },
-  { intros r m hmn,
-    simp [P₀.smul_mem r hmn] },
+  { exact λ x y hx hy, by simp only [linear_map.add_apply, linear_map.map_add, P₀.add_mem hx hy] },
+  { exact λ r m hmn, by simp [P₀.smul_mem r hmn] },
 end
 
 lemma dual_eq_dual_saturation {S : set M} (hP₀ : P₀.saturated R₀) :
   f.dual_set P₀ S = f.dual_set P₀ ((submodule.span R₀ S).saturation R₀) :=
 begin
-  apply le_antisymm,
-  { rintro n hn m ⟨r, hr_reg, hrm⟩,
-    rw ← smul_regular_iff hP₀ hr_reg,
-    rw [← mem_span_dual_set, mem_dual_set] at hn,
-    specialize hn (r • m) hrm,
-    simpa using hn },
-  { apply dual_subset,
-    refine set.subset.trans (submodule.subset_span : S ⊆ submodule.span R₀ S) _,
-    apply submodule.le_saturation R₀ (submodule.span R₀ S) },
+  refine le_antisymm _ (dual_subset _ (submodule.set_subset_saturation R₀)),
+  rintro n hn m ⟨r, hr_reg, hrm⟩,
+  refine (smul_regular_iff hP₀ hr_reg _).mp _,
+  rw [← mem_span_dual_set, mem_dual_set] at hn,
+  simpa using hn (r • m) hrm
 end
 
 /- flip the inequalities assuming saturatedness -/
@@ -175,7 +168,7 @@ lemma dual_dual_of_saturated {S : submodule R₀ M} (Ss : S.saturated R₀) :
 begin
   refine le_antisymm _ (subset_dual_dual f),
   intros m hm,
-  rw mem_dual_set at hm,
+--  rw mem_dual_set at hm,
   change ∀ (n : N), n ∈ (dual_set P₀ f ↑S) → f m n ∈ P₀ at hm,
   simp_rw mem_dual_set at hm,
   -- is this true? I (KMB) don't know and the guru (Damiano) has left!
