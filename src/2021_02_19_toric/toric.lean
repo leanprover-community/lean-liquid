@@ -163,6 +163,13 @@ lemma le_dual_set_iff {S : submodule R₀ M} {T : submodule R₀ N} :
   S ≤ f.flip.dual_set P₀ T ↔ T ≤ f.dual_set P₀ S :=
 subset_dual_set_iff _
 
+/- This lemma is a weakining of the next one.  It has the advantage that we can prove it in
+this level of generality!  ;)
+-/
+lemma dual_dual_dual_of_saturated {S : submodule R₀ M} (Ss : S.saturated R₀) :
+  f.dual_set P₀ (f.flip.dual_set P₀ (f.dual_set P₀ S)) = f.dual_set P₀ S :=
+le_antisymm (λ m hm n hn, hm _ ((le_dual_set_iff f).mpr rfl.le hn)) (λ m hm n hn, hn m hm)
+
 lemma dual_dual_of_saturated {S : submodule R₀ M} (Ss : S.saturated R₀) :
   f.flip.dual_set P₀ (f.dual_set P₀ S) = S :=
 begin
@@ -174,7 +181,10 @@ begin
   -- is this true? I (KMB) don't know and the guru (Damiano) has left!
   -- oh wait, no way is this true, we need some nondegeneracy condition
   -- on f, it's surely not true if f is just the zero map.
+  -- I (DT) think that you are right, Kevin.  We may now start to make assumptions
+  -- that are more specific to our situation.
   sorry,
 end
+
 
 end pairing
