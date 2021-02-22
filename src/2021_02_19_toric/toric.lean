@@ -82,11 +82,20 @@ generators, in the case in which the cone is `pointed`. -/
 def extremal_rays (s : submodule R₀ M) : set (submodule R₀ M) :=
 { r | s.has_extremal_ray r }
 
-variables [comm_semiring R] [algebra R₀ R] [semimodule R M] --[is_scalar_tower R₀ R M]
+/-  The `is_scalar_tower R₀ R M` assumption is not needed to state `pointed`, but will likely play
+a role in the proof of `sup_extremal_rays`. -/
+variables [comm_semiring R] [semimodule R M]
 
 /--  A pointed submodule is a submodule `s` that intersects the hyperplane `ker φ` just in the
 origin.  Alternatively, the submodule `s` contains no `R` linear subspace. -/
 def pointed (s : submodule R₀ M) : Prop := ∃ φ : M →ₗ[R] R, ∀ x : M, x ∈ s → φ x = 0 → x = 0
+
+variables [algebra R₀ R] [is_scalar_tower R₀ R M]
+
+/-- This lemma shows that any `R₀`-submodule of `R` is pointed, since the identity function is
+a "separating hyperplane".  This should not happen if the module is not cyclic for `R`. -/
+lemma pointed_of_sub_R {s : submodule R₀ R} : pointed R s :=
+⟨1, λ _ _ h, h⟩
 
 /--  Hopefully, this lemma will be easy to prove. -/
 lemma sup_extremal_rays {s : submodule R₀ M} (sp : s.pointed R) :
@@ -131,8 +140,13 @@ section pairing
 /-- An R-pairing on the R-modules M, N, P is an R-linear map M -> Hom_R(N,P). -/
 @[derive has_coe_to_fun] def pairing := M →ₗ[R] N →ₗ[R] P
 
+instance pairing.inhabited : inhabited (pairing R M N P) :=
+⟨{to_fun := 0, map_add' := by simp, map_smul' := by simp }⟩
+
 variables {R M N P}
 
+/--  Given a pairing between the `R`-modules `M` and `N`, we obtain a pairing between `N` and `M`
+by exchanging the factors. -/
 def pairing.flip : pairing R M N P → pairing R N M P := linear_map.flip
 
 end pairing
@@ -144,6 +158,9 @@ namespace pairing
 
 variables {R₀ R M N P} (f : pairing R M N P)
 
+/--  For a subset `s ⊆ M`, the `dual_set s` is the submodule consisting of all elements of `N`
+that have "positive pairing with all the elements of `s`.  "Positive" means that it lies in the
+`R₀`-submodule `P₀` of `P`. -/
 def dual_set (s : set M) : submodule R₀ N :=
 { carrier := { n : N | ∀ m ∈ s, f m n ∈ P₀ },
   zero_mem' := λ m hm, by simp only [linear_map.map_zero, P₀.zero_mem],
@@ -284,6 +301,5 @@ begin
   -- that are more specific to our situation.
   sorry,
 end
-
 
 end pairing
