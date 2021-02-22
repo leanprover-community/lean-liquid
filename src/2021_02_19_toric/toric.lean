@@ -97,7 +97,7 @@ lemma dual_set_saturated (s : set M) (hP₀ : P₀.saturated R₀) :
 
 end saturated
 
--- this instance is missing -- see forthcoming PR by KMB 20/02/21
+-- this instance can be removed when #6331 is merged.
 instance : is_scalar_tower R₀ R (N →ₗ[R] P) :=
 { smul_assoc := λ _ _ _, linear_map.ext $ by simp }
 
