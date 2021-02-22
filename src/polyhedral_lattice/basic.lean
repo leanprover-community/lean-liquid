@@ -1,8 +1,9 @@
 import analysis.normed_space.basic
 import ring_theory.finiteness
+import algebra.direct_sum
 
-import hacks_and_tricks.by_exactI_hack
-import hacks_and_tricks.type_pow
+-- import hacks_and_tricks.by_exactI_hack
+-- import hacks_and_tricks.type_pow
 
 noncomputable theory
 open_locale big_operators classical nnreal
@@ -17,17 +18,8 @@ def torsion_free (A : Type*) [add_comm_group A] : Prop :=
 variables {R ι : Type*} [comm_ring R] [fintype ι]
 variables (M : ι → Type*) [Π i, add_comm_group (M i)] [Π i, module R (M i)]
 
-instance module.finite.pi : module.finite R (Π i, M i) :=
-sorry
-
-end move_this
-
-section move_this
-variables {ι : Type*} [fintype ι] {M : ι → Type*} [Π i, normed_group (M i)]
-
-lemma pi_norm_def (x : Π i, M i) :
-  ∥x∥ = ((finset.sup finset.univ (λ i, nnnorm (x i)) : ℝ≥0) : ℝ) :=
-rfl
+-- instance module.finite.pi : module.finite R (Π i, M i) :=
+-- sorry
 
 end move_this
 
@@ -48,56 +40,74 @@ class polyhedral_lattice (Λ : Type*) [normed_group Λ] :=
 
 namespace polyhedral_lattice
 
-variables (Λ : Type*) [normed_group Λ] [polyhedral_lattice Λ]
+variables {ι : Type} [fintype ι] (Λ : ι → Type*)
+variables [Π i, normed_group (Λ i)] [Π i, polyhedral_lattice (Λ i)]
 
-instance : module.finite ℤ Λ := fg
+-- instance : module.finite ℤ Λ := fg
 
-lemma helper {ι : Type*} (s : finset ι) (f : ι → ℕ) (h : ∀ i, 0 < f i) :
-  0 < ∏ i in s, f i :=
-begin
-  -- there should be a "direct" proof
-  let f₀ : ι → pnat := λ i, ⟨f i, h i⟩,
-  let x := ∏ i in s, f₀ i,
-  convert x.2,
-  show s.prod f = monoid_hom.of coe (s.prod f₀),
-  rw monoid_hom.map_prod,
-  refl,
-end
+open_locale direct_sum big_operators
 
-instance pi {ι : Type*} [fintype ι] (Λ : ι → Type*)
-  [Π i, normed_group (Λ i)] [h : Π i, polyhedral_lattice (Λ i)] :
-  polyhedral_lattice (Π i, Λ i) :=
-{ fg := sorry, -- why is TC not finding the instance at the top of this file?
+instance : has_norm (⨁ i, Λ i) :=
+⟨λ x, ∑ i, ∥x i∥⟩
+
+lemma direct_sum_norm_def (x : ⨁ i, Λ i) : ∥x∥ = ∑ i, ∥x i∥ := rfl
+
+instance : normed_group (⨁ i, Λ i) :=
+normed_group.of_core _ $
+{ norm_eq_zero_iff :=
+  begin
+    intros x,
+    simp only [direct_sum_norm_def, ← coe_nnnorm, ← nnreal.coe_sum, finset.mem_univ,
+      nnreal.coe_eq_zero, finset.sum_eq_zero_iff, nnnorm_eq_zero, forall_prop_of_true],
+    split,
+    { intro h, ext, rw direct_sum.zero_apply, apply h, },
+    { rintro rfl, intro, rw direct_sum.zero_apply, }
+  end,
+  triangle :=
+  begin
+    intros x y,
+    simp only [direct_sum_norm_def, ← finset.sum_add_distrib, direct_sum.add_apply],
+    apply finset.sum_le_sum,
+    rintro i -,
+    apply norm_add_le,
+  end,
+  norm_neg :=
+  begin
+    intro x,
+    simp only [direct_sum_norm_def],
+    apply finset.sum_congr rfl,
+    rintro i -,
+    rw ← norm_neg (x i),
+    congr' 1,
+    apply dfinsupp.neg_apply -- this is missing for direct_sum
+  end }
+
+instance : polyhedral_lattice (⨁ i, Λ i) :=
+{ fg := sorry,
   tf := sorry,
   rational :=
   begin
     intro l,
-    have := λ i, rational (l i),
+    have := λ i, polyhedral_lattice.rational (l i),
     choose q hq using this,
-    simp only [pi_norm_def],
-    sorry -- need to case split on `nonempty ι`?
+    use ∑ i, q i,
+    simp only [direct_sum_norm_def, hq],
+    change ∑ i, algebra_map ℚ ℝ (q i) = algebra_map ℚ ℝ (∑ i, q i),
+    rw ring_hom.map_sum,
   end,
   polyhedral :=
   begin
-    have := λ i, polyhedral (Λ i),
-    choose T _ft x H using this, resetI,
-    refine ⟨Π i, T i, infer_instance, λ t i, x i (t i), _⟩,
+    have := λ i, polyhedral_lattice.polyhedral (Λ i),
+    choose J _instJ x hx using this, resetI,
+    refine ⟨Σ i, J i, infer_instance, λ j, direct_sum.of _ j.1 (x _ j.2), _⟩,
     intro l,
-    have := λ i, H i (l i),
+    have := λ i, hx i (l i),
     choose d hd c H1 H2 using this,
-    refine ⟨∏ i, d i, _, _, _, _⟩,
-    { apply helper _ _ hd },
-    /- The next `sorry` seems nontrivial.
-    Maybe we should record more data? Should we have access to the poset of faces? -/
+    refine ⟨∏ i, d i, _, λ j, (∏ i in (finset.univ.erase j.1 : finset ι), d i) * c j.1 j.2, _, _⟩,
     sorry,
     sorry,
     sorry
   end }
-
-local attribute [instance] type_pow
-
-instance (n : ℕ) : polyhedral_lattice (Λ^n) :=
-polyhedral_lattice.pi _
 
 end polyhedral_lattice
 
@@ -158,8 +168,7 @@ instance int.polyhedral_lattice : polyhedral_lattice ℤ :=
   end,
   polyhedral :=
   begin
-    refine ⟨units ℤ, infer_instance, coe, _, λ e, ⟨1, _⟩⟩, swap,
-    { rw [rat.cast_one, int.norm_coe_units] },
+    refine ⟨units ℤ, infer_instance, coe, _⟩,
     intro n,
     refine ⟨1, zero_lt_one, (λ e, int.to_nat (e * n)), _, _⟩,
     { rw [int.sum_units_to_nat, one_smul] },
