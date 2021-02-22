@@ -108,7 +108,7 @@ def punit_equiv : ℤ[punit] ≃+ ℤ :=
     (by {dsimp only, rw [add_monoid_hom.map_zero, zero_smul]})
     (λ x, punit.cases_on x (by simp))
     (λ x, punit.cases_on x (by simp))
-    (λ x y hx hy, by { simp only [lift.add, add_smul] at *, rw [hx, hy]}),
+    (λ x y hx hy, by { simp only [add_monoid_hom.map_add, add_smul] at *, rw [hx, hy]}),
   right_inv := λ n, by { rw [add_monoid_hom.map_int_module_smul, lift.of], exact gsmul_int_one n},
   map_add' := add_monoid_hom.map_add _ }
 
@@ -119,24 +119,26 @@ def equiv_of_equiv {α β : Type*} (f : α ≃ β) : free_abelian_group α ≃+ 
   left_inv := begin
     intros x,
     refine free_abelian_group.induction_on x
-    (by simp only [lift.zero])
+    (by simp only [add_monoid_hom.map_zero])
     (by simp only [equiv.symm_apply_apply, eq_self_iff_true, function.comp_app, lift.of, forall_true_iff])
-    (by simp only [equiv.symm_apply_apply, eq_self_iff_true, function.comp_app, lift.neg, lift.of, forall_true_iff]) _,
+    (by simp only [equiv.symm_apply_apply, eq_self_iff_true, function.comp_app,
+      add_monoid_hom.map_neg, lift.of, forall_true_iff]) _,
     intros x y h,
-    simp only [h, imp_self, add_right_inj, lift.add],
+    simp only [h, imp_self, add_right_inj, add_monoid_hom.map_add],
   end,
   right_inv := begin
     intros x,
     refine free_abelian_group.induction_on x
-    (by simp only [lift.zero])
+    (by simp only [add_monoid_hom.map_zero])
     (by simp only [eq_self_iff_true, function.comp_app, equiv.apply_symm_apply, lift.of, forall_true_iff])
-    (by simp only [eq_self_iff_true, function.comp_app, equiv.apply_symm_apply, lift.neg, lift.of, forall_true_iff]) _,
+    (by simp only [eq_self_iff_true, function.comp_app, equiv.apply_symm_apply,
+      add_monoid_hom.map_neg, lift.of, forall_true_iff]) _,
     intros x y h,
-    simp only [h, imp_self, add_right_inj, lift.add],
+    simp only [h, imp_self, add_right_inj, add_monoid_hom.map_add],
   end,
   map_add' := begin
      intros x y,
-     simp only [lift.add],
+     simp only [add_monoid_hom.map_add],
   end }
 
 end punit_stuff

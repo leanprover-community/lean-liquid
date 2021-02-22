@@ -220,24 +220,6 @@ end
 
 end normed_group_hom
 
-namespace add_subgroup
-
-variables {V : Type*} [normed_group V] (W : add_subgroup V)
-
-/-- The induced norm on a subgroup of a normed group. -/
-instance : has_norm W :=
-{ norm := λ v, ∥(v : V)∥ }
-
-/-- The metric structure on a subgroup of a normed group. -/
-instance : metric_space W :=
-metric_space.induced (coe : W → V) subtype.val_injective infer_instance
-
-/-- The normed group structure on a subgroup of a normed group. -/
-instance : normed_group W :=
-{ dist_eq := λ v w, dist_eq_norm _ _ }
-
-end add_subgroup
-
 namespace normed_group_hom
 
 section kernels
