@@ -74,8 +74,10 @@ lemma is_cyclic_bot : is_cyclic (⊥ : submodule R₀ M) :=
 ⟨_, span_zero_singleton⟩
 
 /--  An extremal ray `r` is a cyclic submodule that can only be "reached" by vectors in `r`. -/
-def has_extremal_ray (s r : submodule R₀ M) : Prop :=
-r.is_cyclic ∧ ∀ {x y : M}, x ∈ s → y ∈ s → x + y ∈ r → (x ∈ r ∧ y ∈ r)
+structure has_extremal_ray (s r : submodule R₀ M) : Prop :=
+(incl : r ≤ s)
+(is_cyclic : r.is_cyclic)
+(mem_of_sum_mem : ∀ {x y : M}, x ∈ s → y ∈ s → x + y ∈ r → (x ∈ r ∧ y ∈ r))
 
 /--  The set of all extremal rays of a submodule.  Hopefully, these are a good replacement for
 generators, in the case in which the cone is `pointed`. -/
@@ -100,7 +102,10 @@ lemma pointed_of_sub_R {s : submodule R₀ R} : pointed R s :=
 /--  Hopefully, this lemma will be easy to prove. -/
 lemma sup_extremal_rays {s : submodule R₀ M} (sp : s.pointed R) :
   (⨆ r ∈ s.extremal_rays, r) = s :=
-sorry
+begin
+  refine le_antisymm (bsupr_le $ λ i hi, hi.1) _,
+  sorry
+end
 
 end comm_semiring
 
