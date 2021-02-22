@@ -1,6 +1,8 @@
 import data.polynomial.degree.lemmas
 import algebra.module.ordered
 import algebra.regular
+import ring_theory.noetherian
+import linear_algebra.finite_dimensional
 
 variables (R₀ R M N P : Type*)
 
@@ -9,6 +11,7 @@ variables [comm_semiring R₀] [comm_semiring R] [algebra R₀ R]
   [add_comm_monoid N] [semimodule R₀ N] [semimodule R N] [is_scalar_tower R₀ R N]
   [add_comm_monoid P] [semimodule R₀ P] [semimodule R P] [is_scalar_tower R₀ R P]
   (P₀ : submodule R₀ P)
+
 section pairing
 
 
@@ -24,6 +27,8 @@ end pairing
 variables {M}
 
 namespace submodule
+
+variable {R₀}
 
 /-- This definition does not assume that `R₀` injects into `R`.  If the map `R₀ → R` has a
 non-trivial kernel, this might not be the definition you think. -/
@@ -50,15 +55,35 @@ def saturation (s : submodule R₀ M) : submodule R₀ M :=
     exact s.smul_mem _ hrm,
   end }
 
-lemma le_saturation (s : submodule R₀ M) : s ≤ saturation R₀ s :=
+lemma le_saturation (s : submodule R₀ M) : s ≤ saturation s :=
 λ m hm, ⟨1, is_regular_one, by rwa one_smul⟩
 
 /- I (DT) extracted this lemma from the proof of `dual_eq_dual_saturation`, since it seems a
 lemma that we may use elsewhere as well. -/
 lemma set_subset_saturation  {S : set M} :
-  S ⊆ (submodule.saturation R₀ (submodule.span R₀ S)) :=
+  S ⊆ (submodule.saturation (submodule.span R₀ S)) :=
 set.subset.trans (submodule.subset_span : S ⊆ submodule.span R₀ S)
-  (submodule.le_saturation R₀ (submodule.span R₀ S))
+  (submodule.le_saturation (submodule.span R₀ S))
+
+
+/-
+TODO: develop the API for the definitions
+`is_cyclic`, `pointed`, `has_extremal_ray`, `extremal_rays`.
+Prove(?) `sup_extremal_rays`, if it is true, even in the test case.
+-/
+def is_cyclic (s : submodule R₀ M) : Prop := ∃ m : M, submodule.span R₀ {m} = s
+
+def pointed (s : submodule R₀ M) : Prop := ∃ φ : M →ₗ[R] R, ∀ x : M, x ∈ s → φ x = 0 → x = 0
+
+def has_extremal_ray (s r : submodule R₀ M) : Prop :=
+r.is_cyclic ∧ ∀ {x y : M}, x ∈ s → y ∈ s → x + y ∈ r → (x ∈ r ∧ y ∈ r)
+
+def extremal_rays (s : submodule R₀ M) : set (submodule R₀ M) :=
+{ r | s.has_extremal_ray r }
+
+lemma sup_extremal_rays {s : submodule R₀ M} (sp : s.pointed R) :
+  ⨆ r ∈ s.extremal_rays, r = s :=
+sorry
 
 end submodule
 
@@ -73,26 +98,22 @@ def dual_set (s : set M) : submodule R₀ N :=
     rw linear_map.map_add,
     exact P₀.add_mem (hn1 m hm) (hn2 m hm),
   end,
-  smul_mem' := begin
-    rintro r n h m hms,
-    simp [h m hms, P₀.smul_mem],
-  end
-}
+  smul_mem' := λ r n h m hms, by simp [h m hms, P₀.smul_mem] }
 
 lemma mem_dual_set (s : set M) (n : N) :
   n ∈ f.dual_set P₀ s ↔ ∀ m ∈ s, f m n ∈ P₀ := iff.rfl
 
 section saturated
 
-variables {P₀} (hP₀ : P₀.saturated R₀)
+variables {P₀} (hP₀ : P₀.saturated)
 include hP₀
 
 lemma smul_regular_iff {r : R₀} (hr : is_regular r) (p : P) :
   r • p ∈ P₀ ↔ p ∈ P₀ :=
 ⟨hP₀ _ hr _, P₀.smul_mem _⟩
 
-lemma dual_set_saturated (s : set M) (hP₀ : P₀.saturated R₀) :
-  (f.dual_set P₀ s).saturated R₀ :=
+lemma dual_set_saturated (s : set M) (hP₀ : P₀.saturated) :
+  (f.dual_set P₀ s).saturated :=
 λ r hr n hn m hm, by simpa [smul_regular_iff hP₀ hr] using hn m hm
 
 end saturated
@@ -139,10 +160,10 @@ begin
   { exact λ r m hmn, by simp [P₀.smul_mem r hmn] },
 end
 
-lemma dual_eq_dual_saturation {S : set M} (hP₀ : P₀.saturated R₀) :
-  f.dual_set P₀ S = f.dual_set P₀ ((submodule.span R₀ S).saturation R₀) :=
+lemma dual_eq_dual_saturation {S : set M} (hP₀ : P₀.saturated) :
+  f.dual_set P₀ S = f.dual_set P₀ ((submodule.span R₀ S).saturation) :=
 begin
-  refine le_antisymm _ (dual_subset _ (submodule.set_subset_saturation R₀)),
+  refine le_antisymm _ (dual_subset _ (submodule.set_subset_saturation)),
   rintro n hn m ⟨r, hr_reg, hrm⟩,
   refine (smul_regular_iff hP₀ hr_reg _).mp _,
   rw [← mem_span_dual_set, mem_dual_set] at hn,
@@ -166,9 +187,32 @@ subset_dual_set_iff _
 /- This lemma is a weakining of the next one.  It has the advantage that we can prove it in
 this level of generality!  ;)
 -/
-lemma dual_dual_dual_of_saturated {S : submodule R₀ M} (Ss : S.saturated R₀) :
+lemma dual_dual_dual (S : set M) :
   f.dual_set P₀ (f.flip.dual_set P₀ (f.dual_set P₀ S)) = f.dual_set P₀ S :=
-le_antisymm (λ m hm n hn, hm _ ((le_dual_set_iff f).mpr rfl.le hn)) (λ m hm n hn, hn m hm)
+le_antisymm (λ m hm n hn, hm _ ((subset_dual_set_iff f).mpr set.subset.rfl hn))
+  (λ m hm n hn, hn m hm)
+
+variable (P₀)
+
+def dual_set_rays (s : set M) : set (submodule R₀ N) :=
+{ r | r.is_cyclic ∧ ∃ s' ⊆ s, r = f.dual_set P₀ s' }
+
+/-  We may need extra assumptions for this. -/
+lemma dual_set_rays_eq_extremal_rays (s : set M) :
+  f.dual_set_rays P₀ s = (f.dual_set P₀ s).extremal_rays :=
+sorry
+
+/--
+dual_set_rays = extremal_rays
+-/
+
+lemma dual_set_pointed (s : set M) (hs : (submodule.span R₀ s).saturation) :
+  (f.dual_set P₀ s).pointed R := sorry
+
+--def dual_set_generators (s : set M) : set N := { n : N | }
+
+lemma dual_fg_of_finite {s : set M} (fs : s.finite) : (f.dual_set P₀ s).fg :=
+sorry
 
 lemma dual_dual_of_saturated {S : submodule R₀ M} (Ss : S.saturated R₀) :
   f.flip.dual_set P₀ (f.dual_set P₀ S) = S :=
