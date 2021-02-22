@@ -25,6 +25,8 @@ non-trivial kernel, this might not be the definition you think. -/
 def saturated (s : submodule R₀ M) : Prop :=
 ∀ (r : R₀) (hr : is_regular r) (m : M), r • m ∈ s → m ∈ s
 
+/--  The saturation of a submodule `s ⊆ M` is the submodule obtained from `s` by adding all
+elements of `M` that admit a multiple by a regular element of `R₀` lying in `s`. -/
 def saturation (s : submodule R₀ M) : submodule R₀ M :=
 { carrier := { m : M | ∃ (r : R₀), is_regular r ∧ r • m ∈ s },
   zero_mem' := ⟨1, is_regular_one, by { rw smul_zero, exact s.zero_mem }⟩,
@@ -38,13 +40,10 @@ def saturation (s : submodule R₀ M) : submodule R₀ M :=
     { rw mul_smul,
       exact s.smul_mem _ hrb },
   end,
-  smul_mem' := begin
-    rintros c m ⟨r, hrreg, hrm⟩,
-    use [r, hrreg],
-    rw smul_algebra_smul_comm,
-    exact s.smul_mem _ hrm,
-  end }
+  smul_mem' := λ c m ⟨r, hrreg, hrm⟩,
+    ⟨r, hrreg, by {rw smul_algebra_smul_comm, exact s.smul_mem _ hrm}⟩ }
 
+/--  The saturation of `s` contains `s`. -/
 lemma le_saturation (s : submodule R₀ M) : s ≤ saturation s :=
 λ m hm, ⟨1, is_regular_one, by rwa one_smul⟩
 
@@ -74,17 +73,22 @@ variables {R₀ M}
 lemma is_cyclic_bot : is_cyclic (⊥ : submodule R₀ M) :=
 ⟨_, span_zero_singleton⟩
 
+/--  An extremal ray `r` is a cyclic submodule that can only be "reached" by vectors in `r`. -/
 def has_extremal_ray (s r : submodule R₀ M) : Prop :=
 r.is_cyclic ∧ ∀ {x y : M}, x ∈ s → y ∈ s → x + y ∈ r → (x ∈ r ∧ y ∈ r)
 
+/--  The set of all extremal rays of a submodule.  Hopefully, these are a good replacement for
+generators, in the case in which the cone is `pointed`. -/
 def extremal_rays (s : submodule R₀ M) : set (submodule R₀ M) :=
 { r | s.has_extremal_ray r }
 
 variables [comm_semiring R] [algebra R₀ R] [semimodule R M] --[is_scalar_tower R₀ R M]
 
-/--  A pointed submodule is a submodule that . -/
+/--  A pointed submodule is a submodule `s` that intersects the hyperplane `ker φ` just in the
+origin.  Alternatively, the submodule `s` contains no `R` linear subspace. -/
 def pointed (s : submodule R₀ M) : Prop := ∃ φ : M →ₗ[R] R, ∀ x : M, x ∈ s → φ x = 0 → x = 0
 
+/--  Hopefully, this lemma will be easy to prove. -/
 lemma sup_extremal_rays {s : submodule R₀ M} (sp : s.pointed R) :
   ⨆ r ∈ s.extremal_rays, r = s :=
 sorry
@@ -243,17 +247,19 @@ le_antisymm (λ m hm n hn, hm _ ((subset_dual_set_iff f).mpr set.subset.rfl hn))
 
 variable (P₀)
 
+/--  The rays of the dual of the set `s` are the duals of the subsets of `s` that happen to be
+cyclic. -/
 def dual_set_rays (s : set M) : set (submodule R₀ N) :=
 { r | r.is_cyclic ∧ ∃ s' ⊆ s, r = f.dual_set P₀ s' }
 
 /-  We may need extra assumptions for this. -/
+/--  The link between the rays of the dual and the extremal rays of the dual should be the
+crucial finiteness step: if `s` is finite, there are only finitely many `dual_set_rays`, since
+there are at most as many as there are subsets of `s`.  If the extremal rays generate
+dual of `s`, then we are in a good position to prove Gordan's lemma! -/
 lemma dual_set_rays_eq_extremal_rays (s : set M) :
   f.dual_set_rays P₀ s = (f.dual_set P₀ s).extremal_rays :=
 sorry
-
-/--
-dual_set_rays = extremal_rays
--/
 
 lemma dual_set_pointed (s : set M) (hs : (submodule.span R₀ s).saturation) :
   (f.dual_set P₀ s).pointed R := sorry
