@@ -214,7 +214,7 @@ lemma dual_set_pointed (s : set M) (hs : (submodule.span R₀ s).saturation) :
 lemma dual_fg_of_finite {s : set M} (fs : s.finite) : (f.dual_set P₀ s).fg :=
 sorry
 
-lemma dual_dual_of_saturated {S : submodule R₀ M} (Ss : S.saturated R₀) :
+lemma dual_dual_of_saturated {S : submodule R₀ M} (Ss : S.saturated) :
   f.flip.dual_set P₀ (f.dual_set P₀ S) = S :=
 begin
   refine le_antisymm _ (subset_dual_dual f),
