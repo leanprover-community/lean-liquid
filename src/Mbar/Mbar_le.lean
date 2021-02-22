@@ -1,7 +1,5 @@
 import data.fintype.card
 
-import for_mathlib.discrete_topology
-
 import facts
 import hacks_and_tricks.type_pow
 
@@ -572,12 +570,6 @@ end Tinv
 
 end Mbar_le
 
--- Gouezel is doing it
-lemma embedding_of_injective {X Y : Type*} [topological_space X] [topological_space Y]
-  [compact_space X] [t2_space X] [compact_space Y] [t2_space Y] {f : X → Y}
-    (hf1 : continuous f) (hf2 : function.injective f) :
-  embedding f := sorry
-
 -- move this up a bit
 instance [fact (0 < r')] : profinitely_filtered_pseudo_normed_group (Mbar r' S) :=
 { topology := λ c, show topological_space (Mbar_le r' S c), by apply_instance,
@@ -586,38 +578,13 @@ instance [fact (0 < r')] : profinitely_filtered_pseudo_normed_group (Mbar r' S) 
   compact := λ c, show compact_space (Mbar_le r' S c), by apply_instance,
   continuous_add' := λ c₁ c₂, Mbar_le.continuous_add',
   continuous_neg' := λ c, Mbar_le.continuous_neg,
-  embedding_cast_le := begin
-    intros c₁ c₂,
+  continuous_cast_le := λ c₁ c₂,
+  begin
     introI h,
-    -- this needs some work ;-)
-    letI : topological_space (filtration (Mbar r' S) c₁),
-    { show topological_space (Mbar_le r' S c₁),
-      apply_instance },
-    haveI : compact_space (filtration (Mbar r' S) c₁) := by {
-      change compact_space (Mbar_le r' S c₁),
-      apply_instance
-    },
-    haveI : t2_space (filtration (Mbar r' S) c₁) := by {
-      change t2_space (Mbar_le r' S c₁),
-      apply_instance
-    },
-    letI : topological_space (filtration (Mbar r' S) c₂),
-    { show topological_space (Mbar_le r' S c₂),
-      apply_instance },
-    haveI : compact_space (filtration (Mbar r' S) c₂) := by {
-      change compact_space (Mbar_le r' S c₂),
-      apply_instance
-    },
-    haveI : t2_space (filtration (Mbar r' S) c₂) := by {
-      change t2_space (Mbar_le r' S c₂),
-      apply_instance
-    },
-    have hmaps_are_equal : (Mbar_le.cast_le : Mbar_le r' S c₁ → Mbar_le r' S c₂) = pseudo_normed_group.cast_le,
-    { ext, refl },
-    rw ← hmaps_are_equal,
-    exact embedding_of_injective
-      (Mbar_le.continuous_cast_le r' S c₁ c₂) (Mbar_le.injective_cast_le),
+    rw show pseudo_normed_group.cast_le = (Mbar_le.cast_le : Mbar_le r' S c₁ → Mbar_le r' S c₂),
+      by {ext, refl},
+    exact Mbar_le.continuous_cast_le r' S c₁ c₂,
   end,
   .. Mbar.pseudo_normed_group }
 
---#lint- only unused_arguments def_lemma doc_blame
+#lint- only unused_arguments def_lemma doc_blame

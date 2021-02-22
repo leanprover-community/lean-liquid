@@ -16,7 +16,7 @@ begin
   rw ← tendsto_coe,
   rw ← tendsto_coe,
   simp only [coe_sum],
-  convert has_sum_nat_add_iff k,
+  convert _root_.has_sum_nat_add_iff k,
   refl,
   classical,
   rw nnreal.coe_add,

@@ -116,7 +116,7 @@ variables (A : Type u) [add_comm_group A]
 is the homomorphism `ℤ[A^m] →+ ℤ[A^n]` induced by matrix multiplication
 of the summands occurring in the formal linear combination `f`. -/
 def eval : universal_map m n →+ ℤ[A^m] →+ ℤ[A^n] :=
-free_abelian_group.lift $ λ f, f.eval A
+free_abelian_group.lift $ λ (f : basic_universal_map m n), f.eval A
 
 @[simp] lemma eval_of (f : basic_universal_map m n) :
   eval A (of f) = f.eval A :=
@@ -126,7 +126,7 @@ lift.of _ _
 given by the formal linear combination of all compositions
 of summands occurring in `g` and `f`. -/
 def comp : universal_map m n →+ universal_map l m →+ universal_map l n :=
-free_abelian_group.lift $ λ g, free_abelian_group.lift $ λ f,
+free_abelian_group.lift $ λ (g : basic_universal_map m n), free_abelian_group.lift $ λ f,
 of $ g.comp f
 
 @[simp] lemma comp_of (g : basic_universal_map m n) (f : basic_universal_map l m) :
@@ -254,7 +254,7 @@ variables {m n : ℕ} (A : Type u) [add_comm_group A] (f : universal_map m n)
 --   simp only [pi.add_apply],
 --   rw (sum_fin_sum_equiv.sum_comp _).symm,
 --   swap, { apply_instance },
---   sorry
+--   admit
 -- end
 
 lemma σ_add_comp_double : comp (σ_add n) (double f) = comp f (σ_add m) :=
@@ -281,9 +281,9 @@ end
 --   congr' 2,
 --   { ext i,
 --     rw [(sum_fin_sum_equiv.sum_comp _).symm, finset.sum_eq_single (sum.inl i)],
---     { dsimp, sorry },
---     all_goals { sorry } },
---   sorry
+--     { dsimp, admit },
+--     all_goals { admit } },
+--   admit
 -- end
 
 lemma σ_proj_comp_double : comp (σ_proj n) (double f) = comp f (σ_proj m) :=

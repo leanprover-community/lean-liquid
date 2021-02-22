@@ -24,19 +24,6 @@ variables [profinitely_filtered_pseudo_normed_group_with_Tinv r M₁]
 variables [profinitely_filtered_pseudo_normed_group_with_Tinv r M₂]
 variables [profinitely_filtered_pseudo_normed_group_with_Tinv r M₃]
 
--- def mk' (r' : ℝ≥0) (M : Type*) [pfpng : profinitely_filtered_pseudo_normed_group M]
---   (Tinv : M →+ M)
---   (H1 : ∀ ⦃c x⦄, x ∈ filtration M c → Tinv x ∈ filtration M (r'⁻¹ * c))
---   (H2 : ∀ c, @continuous (filtration M c) (filtration M (r'⁻¹ * c)) _ _ $
---     λ x, ⟨Tinv x, H1 x.2⟩) :
---   profinitely_filtered_pseudo_normed_group_with_Tinv r' M :=
--- { Tinv := profinitely_filtered_pseudo_normed_group_hom.mk' Tinv _,
---   -- { bound' := ⟨r'⁻¹, λ c x h, H1 h⟩,
---   --   continuous' := _,
---   --   .. Tinv },
---   Tinv_mem_filtration := λ c x h, H1 h,
---   .. pfpng }
-
 @[simps]
 def Tinv₀ (c : ℝ≥0) (x : filtration M c) : filtration M (r⁻¹ * c) :=
 ⟨Tinv (x : M), Tinv_mem_filtration _ _ x.2⟩

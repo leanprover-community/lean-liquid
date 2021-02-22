@@ -1,6 +1,6 @@
 import for_mathlib.extend_from_nat
 
-import system_of_complexes
+import system_of_complexes.basic
 import pseudo_normed_group.Tinv
 import pseudo_normed_group.category
 

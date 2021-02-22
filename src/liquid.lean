@@ -1,4 +1,4 @@
-import Mbar.complex
+import thm95
 
 /-!
 # Liquid Tensor Experiment
@@ -21,6 +21,8 @@ Once we have fixed this data, we can state the theorem.
 
 open_locale nnreal -- enable the notation `ℝ≥0` for the nonnegative real numbers.
 
+open ProFiltPseuNormGrpWithTinv
+
 variables (BD : breen_deligne.package)
 variables (c' : ℕ → ℝ≥0)  -- implicit constants, chosen once and for all
                           -- see the sentence after that statement of Thm 9.5
@@ -29,12 +31,23 @@ variables (c' : ℕ → ℝ≥0)  -- implicit constants, chosen once and for all
 theorem first_target [BD.suitable c']
   (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)] :
   ∀ m : ℕ,
-  ∃ (k : ℝ≥0) [fact (1 ≤ k)],
+  ∃ (k K : ℝ≥0) [fact (1 ≤ k)],
   ∃ c₀ : ℝ≥0,
   ∀ (S : Type) [fintype S],
   ∀ (V : NormedGroup) [normed_with_aut r V],
-    ​(Mbar_system V S r r' BD c').is_bdd_exact_for_bdd_degree_above_idx k m c₀ :=
-sorry
+    ​(BD.system c' r V r' (of r' (Mbar r' S))).is_bounded_exact k K m c₀ :=
+begin
+  intro m,
+  obtain ⟨k, K, hk, H⟩ := thm95 BD c' r r' m,
+  specialize H ℤ,
+  obtain ⟨c₀, H⟩ := H,
+  use [k, K, hk, c₀],
+  introsI S hS V hV,
+  specialize H S V,
+  -- let i : Hom ℤ (Mbar r' S) ≅ of r' (Mbar r' S) := by admit,
+  -- refine H.of_iso ((BD.System c' r V r').map_iso _) _,
+  sorry
+end
 
 /-!
 ## On the statement
@@ -51,7 +64,7 @@ We will now briefly explain some of the more peculiar syntax.
   that scales elements `v` of `V` by the positive scalar `r`: `∥T(v)∥ = r * ∥v∥`.
 * `Mbar_system` is the system of complexes of normed abelian groups
   occuring in Theorems 9.4/9.5 of [Analytic].
-* `is_bdd_exact_for_bdd_degree_above_idx` is the assertion that a system of complexes
+* `is_bounded_exact` is the assertion that a system of complexes
   of normed abelian groups satisfies a suitable exactness criterion of being
   `≤ k`-exact in degrees `≤ m` for `c ≥ c₀` (where `c` is an index to the system of complexes).
 * `sorry` tells Lean to accept this theorem without proof. We are working hard on removing it!

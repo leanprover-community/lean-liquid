@@ -25,12 +25,11 @@ class profinitely_filtered_pseudo_normed_group (M : Type*)
 [t2 : ∀ c, t2_space (filtration c)]
 [td : ∀ c, totally_disconnected_space (filtration c)]
 [compact : ∀ c, compact_space (filtration c)]
-(continuous_add' : Π (c₁ c₂), @continuous (filtration c₁ × filtration c₂) (filtration (c₁ + c₂)) _ _
-  (λ x, ⟨x.1 + x.2, add_mem_filtration x.1.2 x.2.2⟩))
-(continuous_neg' : Π c, @continuous (filtration c) (filtration c) _ _
-  (λ x, ⟨-x, neg_mem_filtration x.2⟩))
-(embedding_cast_le : ∀ (c₁ c₂) [h : fact (c₁ ≤ c₂)],
-  embedding (@pseudo_normed_group.cast_le M _ _ _ h))
+(continuous_add' : ∀ (c₁ c₂),
+  continuous (add' : filtration c₁ × filtration c₂ → filtration (c₁ + c₂)))
+(continuous_neg' : ∀ c, continuous (neg' : filtration c → filtration c))
+(continuous_cast_le : ∀ (c₁ c₂) [h : fact (c₁ ≤ c₂)],
+  continuous (cast_le : filtration c₁ → filtration c₂))
 
 namespace profinitely_filtered_pseudo_normed_group
 
@@ -44,6 +43,19 @@ instance (c : ℝ≥0) : topological_space (filtration M c) := topology c
 instance (c : ℝ≥0) : t2_space (filtration M c) := t2 c
 instance (c : ℝ≥0) : totally_disconnected_space (filtration M c) := td c
 instance (c : ℝ≥0) : compact_space (filtration M c) := compact c
+
+lemma is_closed_map_cast_le (c₁ c₂) [h : fact (c₁ ≤ c₂)] :
+  is_closed_map (@pseudo_normed_group.cast_le M _ _ _ h) :=
+(continuous_cast_le c₁ c₂).is_closed_map
+
+lemma closed_embedding_cast_le (c₁ c₂) [h : fact (c₁ ≤ c₂)] :
+  closed_embedding (@pseudo_normed_group.cast_le M _ _ _ h) :=
+closed_embedding_of_continuous_injective_closed
+  (continuous_cast_le c₁ c₂) (injective_cast_le c₁ c₂) (is_closed_map_cast_le c₁ c₂)
+
+lemma embedding_cast_le (c₁ c₂) [h : fact (c₁ ≤ c₂)] :
+  embedding (@pseudo_normed_group.cast_le M _ _ _ h) :=
+(closed_embedding_cast_le c₁ c₂).to_embedding
 
 end profinitely_filtered_pseudo_normed_group
 
@@ -180,9 +192,6 @@ end profinitely_filtered_pseudo_normed_group_hom
 namespace punit
 
 -- move this
-instance : topological_space punit := ⊥
-
--- move this
 instance (X : Type*) [subsingleton X] (p : X → Prop) :
   subsingleton (subtype p) :=
 ⟨λ x y, subtype.ext $ subsingleton.elim _ _⟩
@@ -195,9 +204,7 @@ instance : profinitely_filtered_pseudo_normed_group punit :=
   add_mem_filtration := λ _ _ _ _ _ _, set.mem_univ _,
   continuous_add' := λ _ _,  continuous_of_discrete_topology,
   continuous_neg' := λ _, continuous_of_discrete_topology,
-  embedding_cast_le := λ c₁ c₂ h,
-  { induced := subsingleton.elim _ _,
-    inj := λ _ _ _, subtype.ext dec_trivial } }
+  continuous_cast_le := λ _ _ _, continuous_of_discrete_topology }
 
 end punit
 
@@ -364,7 +371,7 @@ end
 -- -- we don't need this
 -- lemma pfpng_ctu'_iff_pfpng_ctu (i : fin m) (f : M₁ → M₂^n) :
 --   pfpng_ctu' (λ x, f (x i)) ↔ (∀ j, pfpng_ctu (λ x, f x j)) :=
--- sorry
+-- admit
 
 lemma pfpng_ctu'.add {f g : M₁^m → M₂^n} (hf : pfpng_ctu' f) (hg : pfpng_ctu' g)
   (H : ∀ c₁, ∃ c₂, ∀ (x : (filtration M₁ c₁ : Type*)^m) j, f (pow_incl x) j ∈ filtration M₂ c₂) :

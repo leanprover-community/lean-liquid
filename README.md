@@ -17,7 +17,7 @@ theorem first_target [BD.suitable c']
   ∃ c₀ : ℝ≥0,
   ∀ (S : Type) [fintype S],
   ∀ (V : NormedGroup) [normed_with_aut r V],​
-    (Mbar_system V S r r' BD c').is_bdd_exact_for_bdd_degree_above_idx k m c₀ :=
+    (Mbar_system V S r r' BD c').is_bounded_exact k m c₀ :=
 sorry
 ```
 
@@ -25,6 +25,15 @@ See [`src/liquid.lean`](https://github.com/leanprover-community/lean-liquid/blob
 for details on how to read this statement.
 
 ## How to browse this repository
+
+### Blueprint
+
+Below we explain how to engage with the Lean code directly.
+We also provide a [blueprint](https://leanprover-community.github.io/liquid/)
+including a [dependency graph](https://leanprover-community.github.io/liquid/dep_graph.html)
+of the main ingredients in the repository.
+This blueprint is developed in sync with the Lean formalization,
+and will hence see frequent updates during the length of the project.
 
 ### Getting the project
 
@@ -76,69 +85,13 @@ There are two pieces of functionality that help a lot when browsing through Lean
     It does *not* contain a formal proof of the Breen--Deligne resolution.
     At some point we may formalize Breen--Deligne resolutions,
     but this is not part of our first target.
-  - `system_of_complexes.lean` contains the definition of a system of complexes
+  - `system_of_complexes/` contains the definition of a system of complexes
     of normed abelian groups indexed by nonnegative real numbers.
-    It also contains the definition of `is_bdd_exact_for_bdd_degree_above_idx`,
+    It also contains the definition of `is_bounded_exact`,
     which is the exactness condition claimed in the main theorem.
   - `Mbar/*.lean` contains a definition of the spaces ![](svg/VhatMbar.svg)
     and how they fit together in the system of complexes
     that occurs in the statement of the theorem.
-    See the file listing below for some details.
-* The remaining files and folders are "established" mathematics,
-  that was missing from mathlib, Lean's library of formalized mathematics.
-
-```
-src
-├── liquid.lean
-├── breen_deligne
-│   ├── basic.lean
-│   └── suitable.lean
-├── system_of_complexes.lean
-├── Mbar
-│   ├── basic.lean
-│   │     -- the definition of `Mbar`, a space of certain converging power series
-│   ├── Mbar_le.lean
-│   │     -- the subspace of `Mbar` consisting of power series converging to `≤ c`
-│   ├── bounded.lean
-│   │     -- finite quotients of `Mbar_le`, giving the profinite topology
-│   ├── breen_deligne.lean
-│   │     -- action of (basic) universal maps on powers of `Mbar_le`
-│   ├── Mbar_pow.lean
-│   │     -- the completion of the normed group of locally constant functions
-│   │     -- from powers of `Mbar_le` to a normed group `V`
-│   └── complex.lean
-│         -- the system of complexes built from (`T⁻¹`-invariants of) the objects above
-├── normed_group
-│   ├── NormedGroup.lean
-│   └── normed_with_aut.lean
-├── pseudo_normed_group
-│   ├── basic.lean
-│   └── breen_deligne.lean
-├── locally_constant
-│   ├── algebra.lean
-│   ├── analysis.lean
-│   ├── basic.lean
-│   ├── NormedGroup.lean
-│   └── Vhat.lean
-├── for_mathlib
-│   ├── add_monoid_hom.lean
-│   ├── category_theory.lean
-│   ├── CompHaus.lean
-│   ├── continuous_map.lean
-│   ├── discrete_topology.lean
-│   ├── equalizers.lean
-│   ├── extend_from_nat.lean
-│   ├── free_abelian_group.lean
-│   ├── linear_algebra.lean
-│   ├── locally_constant.lean
-│   ├── normed_group_hom.lean
-│   ├── normed_group.lean
-│   └── tsum.lean
-├── hacks_and_tricks
-│   ├── by_exactI_hack.lean
-│   └── type_pow.lean
-└── facts.lean
-```
 
 ## Brief note on type theory
 
