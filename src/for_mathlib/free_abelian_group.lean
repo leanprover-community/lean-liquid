@@ -36,7 +36,7 @@ variables (X : Type*)
 
 /-- The group homomorphism `free_abelian_group X →+ (X →₀ ℤ)`. -/
 def to_finsupp : free_abelian_group X →+ (X →₀ ℤ) :=
-free_abelian_group.lift $ λ x, finsupp.single x 1
+free_abelian_group.lift $ λ x, finsupp.single x (1 : ℤ)
 
 /-- The group homomorphism `(X →₀ ℤ) →+ free_abelian_group X`. -/
 def from_finsupp : (X →₀ ℤ) →+ free_abelian_group X :=

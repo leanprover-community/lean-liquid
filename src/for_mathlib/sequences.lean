@@ -1,7 +1,5 @@
 import topology.sequences
-
-import for_mathlib.locally_constant
-
+import topology.algebra.normed_group
 import topology.algebra.group_completion
 import topology.metric_space.completion
 

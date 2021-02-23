@@ -220,24 +220,6 @@ end
 
 end normed_group_hom
 
-namespace add_subgroup
-
-variables {V : Type*} [normed_group V] (W : add_subgroup V)
-
-/-- The induced norm on a subgroup of a normed group. -/
-instance : has_norm W :=
-{ norm := λ v, ∥(v : V)∥ }
-
-/-- The metric structure on a subgroup of a normed group. -/
-instance : metric_space W :=
-metric_space.induced (coe : W → V) subtype.val_injective infer_instance
-
-/-- The normed group structure on a subgroup of a normed group. -/
-instance : normed_group W :=
-{ dist_eq := λ v w, dist_eq_norm _ _ }
-
-end add_subgroup
-
 namespace normed_group_hom
 
 section kernels
@@ -313,21 +295,17 @@ begin
   ext r,
   split,
   { intro h,
-    simp only [exists_prop, set.mem_set_of_eq] at h ⊢,
-    obtain ⟨n, hn⟩ := h,
+    obtain ⟨n, hn, rfl⟩ := h,
     use n - m,
     split,
-    { rw [← quotient_add_group.ker_mk S, add_monoid_hom.mem_ker, add_monoid_hom.map_sub, hn.1,
+    { rw [← quotient_add_group.ker_mk S, add_monoid_hom.mem_ker, add_monoid_hom.map_sub, hn,
         sub_self] },
-    { simp only [hn.right, add_sub_cancel'_right] } },
+    { rw add_sub_cancel'_right } },
   { intro h,
-    simp only [exists_prop, set.mem_set_of_eq] at h ⊢,
-    obtain ⟨s, hs⟩ := h,
+    obtain ⟨s, hs, rfl⟩ := h,
     use m + s,
-    refine ⟨_, hs.2⟩,
-    have hker : s ∈ (quotient_add_group.mk' S).ker := by
-      { rw [quotient_add_group.ker_mk S],
-        exact hs.1 },
+    refine ⟨_, rfl⟩,
+    have hker : s ∈ (quotient_add_group.mk' S).ker := by rwa [quotient_add_group.ker_mk S],
     rw [add_monoid_hom.mem_ker] at hker,
     rw [add_monoid_hom.map_add, hker, add_zero] }
 end
