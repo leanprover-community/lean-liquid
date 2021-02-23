@@ -1,4 +1,4 @@
-import locally_constant.algebra
+import topology.locally_constant.algebra
 import for_mathlib.normed_group_hom
 
 /-!
