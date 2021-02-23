@@ -73,7 +73,9 @@ variables {R₀ M}
 lemma is_cyclic_bot : is_cyclic (⊥ : submodule R₀ M) :=
 ⟨_, span_zero_singleton⟩
 
-/--  An extremal ray `r` is a cyclic submodule that can only be "reached" by vectors in `r`. -/
+/--  An extremal ray of a submodule `s` is a cyclic submodule `r` with the property that if two
+elements of `s` have sum contained in `r`, then the elements themselves are contained in `r`.
+These are the "edges" of the cone. -/
 structure has_extremal_ray (s r : submodule R₀ M) : Prop :=
 (incl : r ≤ s)
 (is_cyclic : r.is_cyclic)
@@ -259,9 +261,8 @@ lemma le_dual_set_iff {S : submodule R₀ M} {T : submodule R₀ N} :
   S ≤ f.flip.dual_set P₀ T ↔ T ≤ f.dual_set P₀ S :=
 subset_dual_set_iff _
 
-/- This lemma is a weakining of the next one.  It has the advantage that we can prove it in
-this level of generality!  ;)
--/
+/- This lemma is a weakining of `dual_dual_of_saturated`.
+It has the advantage that we can prove it in this level of generality!  ;) -/
 lemma dual_dual_dual (S : set M) :
   f.dual_set P₀ (f.flip.dual_set P₀ (f.dual_set P₀ S)) = f.dual_set P₀ S :=
 le_antisymm (λ m hm n hn, hm _ ((subset_dual_set_iff f).mpr set.subset.rfl hn))
@@ -290,6 +291,19 @@ lemma dual_set_pointed (s : set M) (hs : (submodule.span R₀ s).saturation) :
 
 lemma dual_fg_of_finite {s : set M} (fs : s.finite) : (f.dual_set P₀ s).fg :=
 sorry
+
+/-
+/--  The behaviour of `dual_set` under smultiplication. -/
+lemma dual_smul {s : set M} {r : R₀} {m : M} :
+  f.dual_set P₀ (s.insert m) ≤ f.dual_set P₀ (s.insert (r • m)) :=
+begin
+  intros n hn m hm,
+  rcases hm with rfl | hm,
+  { rw [linear_map.map_smul_of_tower, linear_map.smul_apply],
+    exact P₀.smul_mem r (hn m (s.mem_insert m)) },
+  { exact hn _ (set.mem_insert_iff.mpr (or.inr hm)) }
+end
+-/
 
 lemma dual_dual_of_saturated {S : submodule R₀ M} (Ss : S.saturated) :
   f.flip.dual_set P₀ (f.dual_set P₀ S) = S :=
