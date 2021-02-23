@@ -103,9 +103,16 @@ instance : polyhedral_lattice (⨁ i, Λ i) :=
     intro l,
     have := λ i, hx i (l i),
     choose d hd c H1 H2 using this,
-    refine ⟨∏ i, d i, _, λ j, (∏ i in (finset.univ.erase j.1 : finset ι), d i) * c j.1 j.2, _, _⟩,
+    let d' : ι → ℕ := λ i₀, ∏ i in (finset.univ.erase i₀), d i,
+    have hl : l = ∑ i, direct_sum.of _ i (l i),
+    { sorry },
+    refine ⟨∏ i, d i, _, λ j, d' j.1 * c j.1 j.2, _, _⟩,
     sorry,
-    sorry,
+    { rw [hl, finset.smul_sum, ← finset.univ_sigma_univ, finset.sum_sigma],
+      apply fintype.sum_congr,
+      intro i,
+      dsimp,
+      simp only [mul_smul, ← finset.smul_sum], sorry },
     sorry
   end }
 
@@ -163,8 +170,8 @@ instance int.polyhedral_lattice : polyhedral_lattice ℤ :=
   end,
   rational :=
   begin
-    intro n, refine ⟨n.nat_abs, _⟩, simp only [rat.cast_coe_nat],
-    sorry
+    intro n, refine ⟨abs n, _⟩,
+    simpa only [rat.cast_abs, rat.cast_coe_int] using rfl
   end,
   polyhedral :=
   begin
