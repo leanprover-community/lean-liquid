@@ -91,6 +91,17 @@ add_monoid_hom.mk' (λ l,
     exact_mod_cast h s n l
   end }) $ λ l₁ l₂, by { ext s n, exact (y s n).map_add l₁ l₂ }
 
+def Mbar.mk_aux' {ι : Type} [fintype ι] (l : ι → Λ) (hl : generates_norm l)
+  (x : Λ →+ Mbar r' S) (y : S → ℕ → Λ →+ ℤ)
+  (h : ∀ s n i, (y s n (l i)).nat_abs ≤ (x (l i) s n).nat_abs) :
+  Λ →+ Mbar r' S :=
+Mbar.mk_aux x y
+begin
+  intros s n l,
+  obtain ⟨d, hd, c, h1, h2⟩ := hl l,
+  sorry
+end
+
 end
 
 lemma lem98 (N : ℕ) (hn : 0 < N) :
@@ -99,8 +110,7 @@ lemma lem98 (N : ℕ) (hn : 0 < N) :
       (x = ∑ i, y i) ∧
       (∀ i, y i ∈ filtration (Λ →+ Mbar r' S) (c/N + d)) :=
 begin
-  obtain ⟨ι, _ftι, l, hl⟩ := polyhedral_lattice.polyhedral Λ,
-  haveI hΛ_fg : module.finite ℤ Λ := polyhedral_lattice.fg,
+  obtain ⟨ι, _ftι, l, hl⟩ := polyhedral_lattice.polyhedral Λ, resetI,
   obtain ⟨A, hA⟩ := lem97' Λ polyhedral_lattice.tf N l,
   let d := finset.univ.sup (λ i, ∑ a in A, (a (l i)).nat_abs),
   use d,

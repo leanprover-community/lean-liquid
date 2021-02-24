@@ -33,17 +33,17 @@ def generates_norm {Λ ι : Type*} [normed_group Λ] [fintype ι] (x : ι → Λ
   (d • l = ∑ i, c i • x i) ∧ ((d : ℝ) * ∥l∥ = ∑ i, (c i : ℝ) * ∥x i∥)
 
 class polyhedral_lattice (Λ : Type*) [normed_group Λ] :=
-[fg : module.finite ℤ Λ] -- redundant, but removing it requires some work I think?
+[fg : module.finite ℤ Λ]
 (tf : torsion_free Λ)
 (rational : ∀ l : Λ, ∃ q : ℚ, ∥l∥ = q)
 (polyhedral [] : ∃ (ι : Type) [fintype ι] (x : ι → Λ), generates_norm x)
 
 namespace polyhedral_lattice
 
+attribute [instance] polyhedral_lattice.fg
+
 variables {ι : Type} [fintype ι] (Λ : ι → Type*)
 variables [Π i, normed_group (Λ i)] [Π i, polyhedral_lattice (Λ i)]
-
--- instance : module.finite ℤ Λ := fg
 
 open_locale direct_sum big_operators
 
