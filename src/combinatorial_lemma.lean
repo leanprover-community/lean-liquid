@@ -91,25 +91,25 @@ add_monoid_hom.mk' (λ l,
     exact_mod_cast h s n l
   end }) $ λ l₁ l₂, by { ext s n, exact (y s n).map_add l₁ l₂ }
 
-def Mbar.mk_aux' {ι : Type} [fintype ι] (l : ι → Λ) (hl : generates_norm l)
+lemma needs_better_name {ι : Type} [fintype ι] (l : ι → Λ) (hl : generates_norm l)
   (x : Λ →+ Mbar r' S) (y : S → ℕ → Λ →+ ℤ)
-  (h : ∀ s n i, (y s n (l i)).nat_abs ≤ (x (l i) s n).nat_abs) :
-  Λ →+ Mbar r' S :=
-Mbar.mk_aux x y
+  (h : ∀ s n i, (y s n (l i)).nat_abs ≤ (x (l i) s n).nat_abs)
+  (s : S) (n : ℕ) (l : Λ) :
+  ((y s n l).nat_abs ≤ (x l s n).nat_abs) :=
 begin
-  intros s n l,
   obtain ⟨d, hd, c, h1, h2⟩ := hl l,
   sorry
 end
 
 end
 
-lemma lem98 (N : ℕ) (hn : 0 < N) :
+lemma lem98 [fact (r' < 1)] (N : ℕ) (hN : 0 < N) :
   ∃ d, ∀ c (x : Λ →+ Mbar r' S) (hx : x ∈ filtration (Λ →+ Mbar r' S) c),
     ∃ y : fin N → (Λ →+ Mbar r' S),
       (x = ∑ i, y i) ∧
       (∀ i, y i ∈ filtration (Λ →+ Mbar r' S) (c/N + d)) :=
 begin
+  classical,
   obtain ⟨ι, _ftι, l, hl⟩ := polyhedral_lattice.polyhedral Λ, resetI,
   obtain ⟨A, hA⟩ := lem97' Λ polyhedral_lattice.tf N l,
   let d := finset.univ.sup (λ i, ∑ a in A, (a (l i)).nat_abs),
@@ -118,12 +118,29 @@ begin
   -- `x` is a homomorphism `Λ →+ Mbar r' S`
   -- we split it into pieces `Λ →+ ℤ` for all coefficients indexed by `s` and `n`
   let x' : S → ℕ → Λ →+ ℤ := λ s n, (Mbar.coeff r' s n).comp x,
-  have := λ s n, hA (x' s n),
+  have := λ s n, hA (x' s n), clear hA,
   choose x₁' hx₁' x₀' hx₀' H using this,
   -- now we assemble `x₀' : S → ℕ → Λ →+ ℤ` into a homomorphism `Λ →+ Mbar r' S`
   let x₀ : Λ →+ Mbar r' S := Mbar.mk_aux x x₀' _, swap,
-  { intros s n l, sorry },
-  let x₁ : Λ →+ Mbar r' S := Mbar.mk_aux x x₁' _, swap,
-  { intros s n l, sorry },
+  { intros s n l',
+    apply needs_better_name l hl x,
+    intros s' n' i,
+    specialize H s' n' i,
+    refine le_trans (le_add_right _) H.symm.le,
+    exact nat.le_mul_of_pos_left hN },
+  let xₐ : (Λ →+ ℤ) → Mbar r' S := λ a,
+  { to_fun := λ s n, if x₁' s n = a ∧ 0 < n then 1 else 0,
+    coeff_zero' := λ s, by simp only [not_lt_zero', and_false, if_false],
+    summable' :=
+    begin
+      intro s,
+      have := (normed_ring.summable_geometric_of_norm_lt_1 (r' : ℝ) _), swap,
+      { rwa nnreal.norm_eq },
+      simp only [← nnreal.coe_pow, nnreal.summable_coe] at this,
+      apply nnreal.summable_of_le _ this,
+      intro n,
+      refine (mul_le_mul' _ le_rfl).trans (one_mul _).le,
+      split_ifs; simp
+    end },
   sorry
 end
