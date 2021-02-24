@@ -1,10 +1,10 @@
 import category_theory.currying
 import topology.category.Profinite
+import topology.algebra.normed_group
 import topology.algebra.group_completion
 import topology.metric_space.completion
 
 import locally_constant.NormedGroup
-import for_mathlib.locally_constant
 import normed_group.normed_with_aut
 
 noncomputable theory

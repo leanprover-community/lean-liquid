@@ -230,7 +230,7 @@ instance [fact (0 < r)] : compact_space (limit r S c) :=
 begin
   erw [← compact_iff_compact_space, compact_iff_compact_univ, compact_iff_compact_in_subtype],
   apply is_closed.compact,
-  exact embedding_is_closed (emb r S c).to_embedding (emb r S c).closed_range is_closed_univ,
+  exact (emb r S c).is_closed_map _ is_closed_univ
 end
 
 /-- The projection from `Mbar_bdd.limit r S c M` to `Mbar_bdd r S c M`.  -/

@@ -87,6 +87,14 @@ def d {C : system_of_complexes} {c : ℝ≥0} {i : ℤ} :
   C c i ⟶ C c (i+1) :=
 (C.obj $ op c).d i
 
+lemma d_comp_d (c : ℝ≥0) (i : ℤ) :
+  (d : C c i ⟶ C c (i+1)) ≫ d = 0 :=
+(C.obj $ op c).d_squared _
+
+@[simp] lemma d_d (c : ℝ≥0) (i : ℤ) (x : C c i) :
+  d (d x) = 0 :=
+show ((d : C c i ⟶ C c (i+1)) ≫ d) x = 0, by { rw d_comp_d, refl }
+
 lemma d_comp_res (h : fact (c₂ ≤ c₁)) :
   @d C c₁ i ≫ @res C _ _ _ h = @res C _ _ i _ ≫ @d C c₂ i :=
 homological_complex.comm_at (C.map (hom_of_le h).op) i
@@ -215,19 +223,6 @@ begin
   exact mul_le_mul hK (hC_adm.res_norm_noninc _ _ _ _ (d x)) (norm_nonneg _) ((zero_le K).trans hK)
 end
 
-lemma to_exact (hC : C.is_weak_bounded_exact k K m c₀) {δ : ℝ≥0} (hδ : 0 < δ)
-  (H : ∀ c ≥ c₀, ∀ i < m, ∀ x : C (k * c) (i+1), d x = 0 → ∃ y : C c i, res x = d y) :
-  C.is_bounded_exact k (K + δ) m c₀ :=
-begin
-  intros c hc i hi x,
-  by_cases hdx : d x = 0,
-  { rcases H c hc i hi x hdx with ⟨y, hy⟩,
-    exact ⟨y, by simp [hy, hdx]⟩ },
-  { have : ((K + δ : ℝ≥0) : ℝ) * ∥d x∥ = K * ∥d x∥ + δ * ∥d x∥, apply_mod_cast add_mul,
-    simp_rw this,
-    apply hC c hc i hi x (δ*∥d x∥) (mul_pos (by exact_mod_cast hδ) $ norm_pos_iff.mpr hdx) },
-end
-
 end is_weak_bounded_exact
 
 namespace is_bounded_exact
@@ -270,8 +265,39 @@ begin
   ... = ∥d x∥ : by rw hom_apply_inv_apply
 end
 
+lemma of_shift  {k K : ℝ≥0} {m : ℤ} [hk : fact (1 ≤ k)] {c₀ : ℝ≥0}
+  (H : ∀ c ≥ c₀, ∀ i < m - 1, ∀ x : C (k * c) (i + 1 + 1),
+   ∃ y : C c (i + 1), ∥res x - d y∥ ≤ K * ∥d x∥) :
+   C.is_bounded_exact k K m c₀ :=
+begin
+  intros c hc i hi x,
+  specialize H c hc (i-1) (by linarith),
+  rw [sub_add_cancel] at H,
+  exact H x,
+end
+
 end is_bounded_exact
 
+namespace is_weak_bounded_exact
+
+variables {C C₁ C₂}
+variables {k k' K K' : ℝ≥0} {m m' : ℤ} {c₀ c₀' : ℝ≥0} [fact (1 ≤ k)] [fact (1 ≤ k')]
+
+lemma to_exact (hC : C.is_weak_bounded_exact k K m c₀) {δ : ℝ≥0} (hδ : 0 < δ)
+  (H : ∀ c ≥ c₀, ∀ i < m - 1, ∀ x : C (k * c) (i + 1 + 1),
+    d x = 0 → ∃ y : C c (i + 1), res x = d y) : C.is_bounded_exact k (K + δ) m c₀ :=
+begin
+  apply is_bounded_exact.of_shift,
+  intros c hc i hi x,
+  by_cases hdx : d x = 0,
+  { rcases H c hc i hi x hdx with ⟨y, hy⟩,
+    exact ⟨y, by simp [hy, hdx]⟩ },
+  { have : ((K + δ : ℝ≥0) : ℝ) * ∥d x∥ = K * ∥d x∥ + δ * ∥d x∥, apply_mod_cast add_mul,
+    simp_rw this,
+    apply hC c hc _ _ x (δ*∥d x∥) (mul_pos (by exact_mod_cast hδ) $ norm_pos_iff.mpr hdx), linarith },
+end
+
+end is_weak_bounded_exact
 section quotient
 
 open normed_group_hom
