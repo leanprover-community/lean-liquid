@@ -17,7 +17,6 @@ variables [normed_group Λ] [polyhedral_lattice Λ]
 
 lemma filtration_finite (c : ℝ≥0) : (filtration Λ c).finite :=
 begin
-  obtain ⟨s, hs₀, hs⟩ := polyhedral_lattice.polyhedral' Λ,
   sorry
 end
 
