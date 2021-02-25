@@ -101,8 +101,9 @@ add_monoid_hom.mk' (λ l',
   begin
     obtain ⟨d, hd, c, h1, h2⟩ := hl l',
     suffices : y s 0 (d • l') = 0,
-    { rw [← nsmul_eq_smul, add_monoid_hom.map_nsmul, nsmul_eq_smul] at this,
-      sorry },
+    { rw [← nsmul_eq_smul, add_monoid_hom.map_nsmul, nsmul_eq_mul,
+        mul_eq_zero, int.nat_cast_eq_coe_nat, int.coe_nat_eq_zero] at this,
+      exact this.resolve_left hd.ne' },
     rw [h1, add_monoid_hom.map_sum, finset.sum_eq_zero],
     rintro i -,
     suffices : y s 0 (l i) = 0,
@@ -113,10 +114,15 @@ add_monoid_hom.mk' (λ l',
   summable' :=
   begin
     intro s,
-    obtain ⟨d, hd, c, h1, h2⟩ := hl l',
+    obtain ⟨d, hd, c, h1, h2⟩ := hl.generates_nnnorm l',
     suffices : summable (λ n, ↑(y s n (d • l')).nat_abs * r' ^ n),
-    { simp only [← nsmul_eq_smul, add_monoid_hom.map_nsmul] at this,
-      sorry },
+    { refine nnreal.summable_of_le _ this,
+      intro n,
+      refine mul_le_mul' _ le_rfl,
+      rw [← nsmul_eq_smul, add_monoid_hom.map_nsmul, nsmul_eq_mul,
+        int.nat_abs_mul, int.nat_cast_eq_coe_nat, int.nat_abs_of_nat],
+      norm_cast,
+      exact nat.le_mul_of_pos_left hd },
     rw h1,
     suffices : summable (λ n, ∑ i, c i • ↑(y s n (l i)).nat_abs * r' ^ n),
     { apply nnreal.summable_of_le _ this,
@@ -141,20 +147,78 @@ add_monoid_hom.mk' (λ l',
     exact nat.mul_le_mul le_rfl (h _ _ _)
   end }) $ λ l₁ l₂, by { ext s n, exact (y s n).map_add l₁ l₂ }
 
--- TODO: is this true in the generality it is stated in?
--- We only need it for `M = Mbar r' S`, in which case it is certainly true
-lemma generates_norm.add_monoid_hom_mem_filtration_iff
-  {ι : Type} [fintype ι] {l : ι → Λ} (hl : generates_norm l)
-  {M : Type*} [pseudo_normed_group M] (x : Λ →+ M) (c : ℝ≥0) :
+section pseudo_normed_group
+
+variables (M : Type*) [pseudo_normed_group M]
+
+def pseudo_normed_group.archimedean : Prop :=
+∀ (m : M) (c : ℝ≥0) (n : ℕ), 0 < n →
+  ((n • m) ∈ filtration M (n • c) ↔ m ∈ filtration M c)
+
+lemma Mbar.archimedean : pseudo_normed_group.archimedean (Mbar r' S) :=
+begin
+  intros x c N hN,
+  simp only [Mbar.mem_filtration_iff],
+  have hN' : 0 < (N : ℝ≥0) := by exact_mod_cast hN,
+  conv_rhs { rw ← mul_le_mul_left hN' },
+  simp only [← nsmul_eq_smul, nsmul_eq_mul, finset.mul_sum, finset.sum_mul,
+    Mbar.coe_nsmul, pi.mul_apply, pi.nat_apply, @pi.nat_apply ℕ ℤ _ _ _ N,
+    int.nat_abs_mul, int.nat_abs_of_nat, int.nat_cast_eq_coe_nat, nat.cast_mul],
+  convert iff.rfl,
+  ext s,
+  simp only [nnreal.coe_nat_cast, nnreal.coe_tsum, nnreal.coe_mul,
+    ← tsum_mul_left, ← mul_assoc],
+end
+
+lemma pseudo_normed_group.add_monoid_hom_archimedean
+  (h : pseudo_normed_group.archimedean M) :
+  pseudo_normed_group.archimedean (Λ →+ M) :=
+begin
+  intros f c N hN,
+  apply forall_congr, intro c,
+  apply forall_congr, intro l,
+  apply forall_congr, intro hl,
+  simp only [← nsmul_eq_smul, nsmul_eq_mul, mul_assoc],
+  simp only [nsmul_eq_smul, ← nsmul_eq_mul, add_monoid_hom.nat_smul_apply],
+  exact h _ _ N hN
+end
+
+variables {M}
+
+-- move this
+lemma pseudo_normed_group.smul_mem_filtration (n : ℕ) (m : M) (c : ℝ≥0)
+  (h : m ∈ filtration M c) :
+  (n • m) ∈ filtration M (n • c) :=
+begin
+  induction n with n ih, { simpa only [zero_smul] using zero_mem_filtration _ },
+  simp only [nat.succ_eq_add_one, add_smul, one_smul],
+  exact add_mem_filtration ih h,
+end
+
+lemma generates_norm.add_monoid_hom_mem_filtration_iff {ι : Type} [fintype ι]
+  {l : ι → Λ} (hl : generates_norm l) (hM : pseudo_normed_group.archimedean M)
+  (x : Λ →+ M) (c : ℝ≥0) :
   x ∈ filtration (Λ →+ M) c ↔
   ∀ c' i, (l i) ∈ filtration Λ c' → x (l i) ∈ filtration M (c * c') :=
 begin
   refine ⟨λ H c' i h, H h, _⟩,
   intros H c' l' hl',
-  rw normed_group.mem_filtration_iff at hl',
-  obtain ⟨d, hd, c, h1, h2⟩ := hl l',
-  sorry,
+  obtain ⟨d, hd, cᵢ, h1, h2⟩ := hl.generates_nnnorm l',
+  rw [← hM _ _ d hd, ← nsmul_eq_smul, ← x.map_nsmul, nsmul_eq_smul, h1, x.map_sum],
+  refine filtration_mono _ (sum_mem_filtration _ (λ i, c * cᵢ i * nnnorm (l i)) _ _),
+  { calc ∑ i, c * cᵢ i * nnnorm (l i)
+        = c * ∑ i, cᵢ i * nnnorm (l i) : by simp only [mul_assoc, ← finset.mul_sum]
+    ... = c * (d * nnnorm l') : by rw h2
+    ... ≤ c * (d * c') : mul_le_mul' le_rfl (mul_le_mul' le_rfl hl')
+    ... = d • (c * c') : by rw [← nsmul_eq_smul, nsmul_eq_mul, mul_left_comm] },
+  rintro i -,
+  convert pseudo_normed_group.smul_mem_filtration (cᵢ i) _ _
+    (H (nnnorm (l i)) i (le_refl (nnnorm (l i)))),
+  { rw [← nsmul_eq_smul, x.map_nsmul, nsmul_eq_smul] },
+  { rw [← nsmul_eq_smul, nsmul_eq_mul, mul_left_comm, mul_assoc] }
 end
+
+end pseudo_normed_group
 
 end
 
@@ -170,20 +234,6 @@ begin
   let d := finset.univ.sup (λ i, ∑ a in A, (a (l i)).nat_abs),
   use d,
   intros c x hx,
-  -- by_cases hι : nonempty ι, swap,
-  -- { use 0,
-  --   -- factor out part of this subproof? It's boring
-  --   simp only [pi.zero_apply, finset.sum_const_zero, zero_mem_filtration, forall_true_iff, and_true],
-  --   ext1 l',
-  --   rw add_monoid_hom.zero_apply,
-  --   obtain ⟨d, hd, c, h1, h2⟩ := hl l',
-  --   rw ← finset.univ_eq_empty at hι,
-  --   simp only [hι, finset.sum_empty] at h1,
-  --   suffices : l' = 0, { rw [this, add_monoid_hom.map_zero] },
-  --   contrapose! hd with hl',
-  --   rw nat.le_zero_iff,
-  --   exact polyhedral_lattice.tf _ hl' d h1 },
-  -- obtain ⟨i₀⟩ := hι,
   -- `x` is a homomorphism `Λ →+ Mbar r' S`
   -- we split it into pieces `Λ →+ ℤ` for all coefficients indexed by `s` and `n`
   let x' : S → ℕ → Λ →+ ℤ := λ s n, (Mbar.coeff r' s n).comp x,
@@ -217,7 +267,7 @@ begin
     rw [finset.sum_eq_single (x₁' s n)],
     { simp only [true_and, and_congr, if_congr, eq_self_iff_true],
       split_ifs with hn,
-        { sorry },
+        { simp only [← gsmul_eq_smul, mul_one, gsmul_int_int], refl },
         { rw smul_zero,
           obtain rfl : n = 0 := nat.eq_zero_of_le_zero (le_of_not_lt hn),
           exact (x₁ l).coeff_zero s } },

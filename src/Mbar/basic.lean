@@ -160,6 +160,11 @@ instance pseudo_normed_group : pseudo_normed_group (Mbar r' S) :=
   end }
 .
 
+lemma mem_filtration_iff (x : Mbar r' S) (c : ℝ≥0) :
+  x ∈ pseudo_normed_group.filtration (Mbar r' S) c ↔
+    (∑ s, ∑' n, (↑(x s n).nat_abs * r' ^ n)) ≤ c :=
+iff.rfl
+
 /--
 The coercion from `Mbar r' S` to functions `S → ℕ → ℤ`.
 This is an additive group homomorphism.
