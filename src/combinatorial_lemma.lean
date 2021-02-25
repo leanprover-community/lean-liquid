@@ -91,6 +91,7 @@ calc ((n.nat_abs : ℝ≥0) : ℝ)
 variables {Λ r'}
 
 -- ugly name
+@[simps]
 def Mbar.mk_aux
   {ι : Type} [fintype ι] {l : ι → Λ} (hl : generates_norm l)
   (x : Λ →+ Mbar r' S) (y : S → ℕ → Λ →+ ℤ)
@@ -226,7 +227,7 @@ end
 variables {Λ r' S}
 
 @[simps]
-def Mbar.mk_of_add_monoid_hom (x : S → ℕ → Λ →+ ℤ) (a : Λ →+ ℤ)
+def Mbar.mk_of_add_monoid_hom [fact (r' < 1)] (x : S → ℕ → Λ →+ ℤ) (a : Λ →+ ℤ)
   [∀ s n, decidable (x s n = a)] :
   Mbar r' S :=
 { to_fun := λ s n, if x s n = a ∧ 0 < n then 1 else 0,
@@ -281,12 +282,13 @@ begin
   apply hx'
 end
 
+@[simps]
 lemma Mbar.mk_tensor (a : Λ →+ ℤ) (x : Mbar r' S) :
   Λ →+ Mbar r' S :=
 add_monoid_hom.mk' (λ l, a l • x) $ λ l₁ l₂, by rw [a.map_add, add_smul]
 
 -- better name?
-lemma lem_98_aux (A : finset (Λ →+ ℤ))
+lemma lem_98_aux [fact (r' < 1)] (A : finset (Λ →+ ℤ))
   (x₁' : S → ℕ → Λ →+ ℤ) [∀ s n a, decidable (x₁' s n = a)]
   (hx₁' : ∀ s n, x₁' s n ∈ A) (x₁ : Λ →+ Mbar r' S)
   (hx₁ : ∀ l s n, x₁ l s n = x₁' s n l) (l : Λ) :
@@ -316,6 +318,32 @@ lemma lem98_int [fact (r' < 1)] (N : ℕ) (hN : 0 < N) (c : ℝ≥0)
       (∀ i, y i ∈ filtration (Mbar r' S) (c/N + 1)) :=
 begin
   sorry
+end
+
+lemma lem98_aux' [fact (r' < 1)] (N : ℕ)
+  (A : finset (Λ →+ ℤ))
+  (x x₀ x₁ : Λ →+ Mbar r' S)
+  (x' x₀' x₁' : S → ℕ → Λ →+ ℤ) [∀ s n a, decidable (x₁' s n = a)]
+  (H : ∀ s n, x' s n = N • x₀' s n + x₁' s n)
+  (hx : ∀ l s n, x l s n = x' s n l)
+  (hx₀ : ∀ l s n, x₀ l s n = x₀' s n l)
+  (hx₁ : ∀ l s n, x₁ l s n = x₁' s n l)
+  (Hx₁ : ∀ (l : Λ), x₁ l = ∑ (a : Λ →+ ℤ) in A, a l • Mbar.mk_of_add_monoid_hom x₁' a)
+  (y' : (Λ →+ ℤ) → fin N → Mbar r' S)
+  (hy' : ∀ (a : Λ →+ ℤ), Mbar.mk_of_add_monoid_hom x₁' a = finset.univ.sum (y' a))
+  (y : fin N → Λ →+ Mbar r' S)
+  (hy : ∀ i, y i = x₀ + ∑ a in A, Mbar.mk_tensor a (y' a i)) :
+  x = ∑ (i : fin N), y i :=
+begin
+  intros,
+  ext l s n,
+  simp only [hx, H, hy, ← hx₁, Hx₁, hy', Mbar.coe_add,
+    finset.sum_apply, add_monoid_hom.coe_add, Mbar.coe_sum,
+    pi.add_apply, Mbar.mk_tensor_apply, fintype.sum_apply, finset.sum_congr,
+    add_monoid_hom.nat_smul_apply, pi.smul_apply, add_monoid_hom.sum_apply,
+    add_monoid_hom.sum_apply, finset.smul_sum, Mbar.mk_tensor_apply],
+  rw [finset.sum_add_distrib, finset.sum_const, finset.card_univ,
+    fintype.card_fin, nsmul_eq_smul, finset.sum_comm, ← hx₀],
 end
 
 lemma lem98 [fact (r' < 1)] (N : ℕ) (hN : 0 < N) :
@@ -359,6 +387,7 @@ begin
     λ j, x₀ + ∑ a in A, Mbar.mk_tensor a (y' a j),
   use y,
   split,
-  { sorry },
+  { apply lem98_aux' N A x x₀ x₁ x' x₀' x₁' hx₀' _ _ _ hx₁ y' hy'1 y,
+    all_goals { intros, refl } },
   { sorry }
 end
