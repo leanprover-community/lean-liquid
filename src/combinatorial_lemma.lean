@@ -426,5 +426,5 @@ begin
     all_goals { intros, refl } },
   use [y, hxy],
   intro i, dsimp [y], clear_dependent H,
-
+  sorry
 end
