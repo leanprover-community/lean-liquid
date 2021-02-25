@@ -90,6 +90,7 @@ calc ((n.nat_abs : ℝ≥0) : ℝ)
 
 variables {Λ r'}
 
+-- ugly name
 def Mbar.mk_aux
   {ι : Type} [fintype ι] {l : ι → Λ} (hl : generates_norm l)
   (x : Λ →+ Mbar r' S) (y : S → ℕ → Λ →+ ℤ)
@@ -222,6 +223,101 @@ end pseudo_normed_group
 
 end
 
+variables {Λ r' S}
+
+@[simps]
+def Mbar.mk_of_add_monoid_hom (x : S → ℕ → Λ →+ ℤ) (a : Λ →+ ℤ)
+  [∀ s n, decidable (x s n = a)] :
+  Mbar r' S :=
+{ to_fun := λ s n, if x s n = a ∧ 0 < n then 1 else 0,
+  coeff_zero' := λ s, by simp only [not_lt_zero', and_false, if_false],
+  summable' :=
+  begin
+    intro s,
+    have := (normed_ring.summable_geometric_of_norm_lt_1 (r' : ℝ) _), swap,
+    { rwa nnreal.norm_eq },
+    simp only [← nnreal.coe_pow, nnreal.summable_coe] at this,
+    apply nnreal.summable_of_le _ this,
+    intro n,
+    refine (mul_le_mul' _ le_rfl).trans (one_mul _).le,
+    split_ifs; simp
+  end }
+
+lemma Mbar.mk_aux_mem_filtration
+  (ι : Type) (c : ℝ≥0) (N : ℕ) (hN : 0 < N) [fintype ι]
+  {l : ι → Λ} (hl : generates_norm l)
+  {x : Λ →+ Mbar r' S}
+  (hx : x ∈ filtration (Λ →+ Mbar r' S) c)
+  (x₀' : S → ℕ → Λ →+ ℤ)
+  (x₁' : S → ℕ → Λ →+ ℤ)
+  (x' : S → ℕ → Λ →+ ℤ)
+  (hx' : ∀ l s n, x l s n = x' s n l)
+  (H : ∀ s n i, (x' s n (l i)).nat_abs =
+    N * (x₀' s n (l i)).nat_abs + (x₁' s n (l i)).nat_abs)
+  (H' : ∀ s n i, (x₀' s n (l i)).nat_abs ≤ (x (l i) s n).nat_abs) :
+  Mbar.mk_aux hl x x₀' H' ∈ filtration (Λ →+ Mbar r' S) (c / ↑N) :=
+begin
+  set x₀ := Mbar.mk_aux hl x x₀' H',
+  refine (Mbar.archimedean.add_monoid_hom _ _ _ _ hN).mp _,
+  have aux : N • (c / N) = c,
+  { rw [← nsmul_eq_smul, nsmul_eq_mul, mul_comm, div_mul_cancel],
+    exact_mod_cast hN.ne' },
+  rw aux,
+  rw hl.add_monoid_hom_mem_filtration_iff Mbar.archimedean at hx ⊢,
+  intros c' i hli,
+  specialize hx c' i hli,
+  rw Mbar.mem_filtration_iff at hx ⊢,
+  refine le_trans (finset.sum_le_sum _) hx,
+  rintro s -,
+  refine tsum_le_tsum _ (((N • x₀) (l i)).summable s) ((x (l i)).summable s),
+  intro n,
+  refine mul_le_mul' _ le_rfl,
+  norm_cast,
+  simp only [add_monoid_hom.nat_smul_apply],
+  simp only [← nsmul_eq_smul, Mbar.coe_nsmul, nsmul_eq_mul,
+    pi.mul_apply, pi.nat_apply, @pi.nat_apply ℕ ℤ _ _ _ N,
+    int.nat_cast_eq_coe_nat, int.nat_abs_mul, int.nat_abs_of_nat],
+  convert le_trans (le_add_right le_rfl) (H s n i).ge,
+  apply hx'
+end
+
+lemma Mbar.mk_tensor (a : Λ →+ ℤ) (x : Mbar r' S) :
+  Λ →+ Mbar r' S :=
+add_monoid_hom.mk' (λ l, a l • x) $ λ l₁ l₂, by rw [a.map_add, add_smul]
+
+-- better name?
+lemma lem_98_aux (A : finset (Λ →+ ℤ))
+  (x₁' : S → ℕ → Λ →+ ℤ) [∀ s n a, decidable (x₁' s n = a)]
+  (hx₁' : ∀ s n, x₁' s n ∈ A) (x₁ : Λ →+ Mbar r' S)
+  (hx₁ : ∀ l s n, x₁ l s n = x₁' s n l) (l : Λ) :
+  x₁ l = ∑ a in A, a l • Mbar.mk_of_add_monoid_hom x₁' a :=
+begin
+  ext s n,
+  simp only [finset.sum_apply, Mbar.coe_sum, pi.smul_apply, Mbar.coe_smul,
+    Mbar.coe_mk],
+  rw [finset.sum_eq_single (x₁' s n)],
+  { simp only [true_and, and_congr, if_congr, eq_self_iff_true,
+          Mbar.mk_of_add_monoid_hom_to_fun],
+    split_ifs with hn,
+      { simp only [← gsmul_eq_smul, mul_one, gsmul_int_int, hx₁] },
+      { rw [smul_zero],
+        obtain rfl : n = 0 := nat.eq_zero_of_le_zero (le_of_not_lt hn),
+        exact (x₁ l).coeff_zero s } },
+  { intros a haA ha,
+    simp only [ha.symm, false_and, if_false, smul_zero,
+      Mbar.mk_of_add_monoid_hom_to_fun] },
+  { intro hsn, exact (hsn (hx₁' s n)).elim }
+end
+
+lemma lem98_int [fact (r' < 1)] (N : ℕ) (hN : 0 < N) (c : ℝ≥0)
+  (x : Mbar r' S) (hx : x ∈ filtration (Mbar r' S) c)
+  (H : ∀ s n, (x s n).nat_abs ≤ 1) :
+  ∃ y : fin N → Mbar r' S, (x = ∑ i, y i) ∧
+      (∀ i, y i ∈ filtration (Mbar r' S) (c/N + 1)) :=
+begin
+  sorry
+end
+
 lemma lem98 [fact (r' < 1)] (N : ℕ) (hN : 0 < N) :
   ∃ d, ∀ c (x : Λ →+ Mbar r' S) (hx : x ∈ filtration (Λ →+ Mbar r' S) c),
     ∃ y : fin N → (Λ →+ Mbar r' S),
@@ -239,76 +335,30 @@ begin
   let x' : S → ℕ → Λ →+ ℤ := λ s n, (Mbar.coeff r' s n).comp x,
   have := λ s n, hA (x' s n), clear hA,
   choose x₁' hx₁' x₀' hx₀' H using this,
-  -- now we assemble `x₀' : S → ℕ → Λ →+ ℤ` into a homomorphism `Λ →+ Mbar r' S`
-  let x₀ : Λ →+ Mbar r' S := Mbar.mk_aux hl x x₀'
+  have hx₀_aux : ∀ s n i, (x₀' s n (l i)).nat_abs ≤ (x (l i) s n).nat_abs :=
     (λ s n i, le_trans (le_add_right (nat.le_mul_of_pos_left hN)) (H s n i).ge),
+  -- now we assemble `x₀' : S → ℕ → Λ →+ ℤ` into a homomorphism `Λ →+ Mbar r' S`
+  let x₀ : Λ →+ Mbar r' S := Mbar.mk_aux hl x x₀' hx₀_aux,
+  have hx₀ : x₀ ∈ filtration (Λ →+ Mbar r' S) (c / N) :=
+    Mbar.mk_aux_mem_filtration _ _ _ hN hl hx x₀' x₁' x' (λ _ _ _, rfl) H hx₀_aux,
+  -- and similarly for `x₁'`
   let x₁ : Λ →+ Mbar r' S := Mbar.mk_aux hl x x₁'
     (λ s n i, le_trans (le_add_left le_rfl) (H s n i).ge),
-  let xₐ : (Λ →+ ℤ) → Mbar r' S := λ a,
-  { to_fun := λ s n, if x₁' s n = a ∧ 0 < n then 1 else 0,
-    coeff_zero' := λ s, by simp only [not_lt_zero', and_false, if_false],
-    summable' :=
-    begin
-      intro s,
-      have := (normed_ring.summable_geometric_of_norm_lt_1 (r' : ℝ) _), swap,
-      { rwa nnreal.norm_eq },
-      simp only [← nnreal.coe_pow, nnreal.summable_coe] at this,
-      apply nnreal.summable_of_le _ this,
-      intro n,
-      refine (mul_le_mul' _ le_rfl).trans (one_mul _).le,
-      split_ifs; simp
-    end },
-  have hx₀ : x₀ ∈ filtration (Λ →+ Mbar r' S) (c / N),
-  { refine (Mbar.archimedean.add_monoid_hom _ _ _ _ hN).mp _,
-    have aux : N • (c / N) = c,
-    { rw [← nsmul_eq_smul, nsmul_eq_mul, mul_comm, div_mul_cancel],
-      exact_mod_cast hN.ne' },
-    rw aux,
-    rw hl.add_monoid_hom_mem_filtration_iff Mbar.archimedean at hx ⊢,
-    intros c' i hli,
-    specialize hx c' i hli,
-    rw Mbar.mem_filtration_iff at hx ⊢,
-    refine le_trans (finset.sum_le_sum _) hx,
-    rintro s -,
-    refine tsum_le_tsum _ (((N • x₀) (l i)).summable s) ((x (l i)).summable s),
-    intro n,
-    refine mul_le_mul' _ le_rfl,
-    norm_cast,
-    simp only [add_monoid_hom.nat_smul_apply],
-    simp only [← nsmul_eq_smul, Mbar.coe_nsmul, nsmul_eq_mul,
-      pi.mul_apply, pi.nat_apply, @pi.nat_apply ℕ ℤ _ _ _ N,
-      int.nat_cast_eq_coe_nat, int.nat_abs_mul, int.nat_abs_of_nat],
-    exact le_trans (le_add_right le_rfl) (H s n i).ge },
-  have hx₁ : ∀ l, x₁ l = ∑ a in A, a l • xₐ a,
-  { intro l, ext s n,
-    simp only [finset.sum_apply, Mbar.coe_sum, pi.smul_apply, Mbar.coe_smul,
-      Mbar.coe_mk],
-    rw [finset.sum_eq_single (x₁' s n)],
-    { simp only [true_and, and_congr, if_congr, eq_self_iff_true],
-      split_ifs with hn,
-        { simp only [← gsmul_eq_smul, mul_one, gsmul_int_int], refl },
-        { rw smul_zero,
-          obtain rfl : n = 0 := nat.eq_zero_of_le_zero (le_of_not_lt hn),
-          exact (x₁ l).coeff_zero s } },
-    { intros a haA ha,
-      simp only [xₐ, ha.symm, false_and, if_false, smul_zero] },
-    { intro hsn, exact (hsn (hx₁' s n)).elim } },
-  -- is this the correct `y`? I think I might need to do something smarter
-  -- I think I can only bound the norm of `y 0`
-  -- in terms of a `d` that depends on `r'`
-  let y : fin N → Λ →+ Mbar r' S := λ j, if j = ⟨0, hN⟩ then x₀ + x₁ else x₀,
+  -- `x₁` can be written as a sum of tensors
+  -- `x₁ = ∑ a in A, a ⊗ xₐ`, for some `xₐ : Mbar r' S`
+  let xₐ : (Λ →+ ℤ) → Mbar r' S := λ a, Mbar.mk_of_add_monoid_hom x₁' a,
+  have hx₁ : ∀ l, x₁ l = ∑ a in A, a l • xₐ a := lem_98_aux _ _ hx₁' _ (λ _ _ _, rfl),
+  -- now it is time to start building `y`
+  -- we first decompose the `xₐ a` into `N` pieces
+  have := λ a, lem98_int N hN _ (xₐ a) _ _,
+  swap 3, { rw Mbar.mem_filtration_iff }, swap,
+  { intros s n, dsimp [xₐ, Mbar.mk_of_add_monoid_hom_to_fun], split_ifs; simp },
+  choose y' hy'1 hy'2 using this,
+  -- the candidate `y` combines `x₀` together with the pieces `y'` of `xₐ a`
+  let y : fin N → Λ →+ Mbar r' S :=
+    λ j, x₀ + ∑ a in A, Mbar.mk_tensor a (y' a j),
   use y,
   split,
   { sorry },
-  { intro j,
-    rw hl.add_monoid_hom_mem_filtration_iff Mbar.archimedean,
-    intros c' i hli,
-    by_cases hj : j = ⟨0, hN⟩,
-    { dsimp only [y], rw [if_pos hj, add_mul],
-      apply add_mem_filtration (hx₀ hli),
-      rw hx₁,
-      clear hj,
-      sorry },
-    { dsimp only [y], rw [if_neg hj],
-      exact filtration_mono (mul_le_mul' (self_le_add_right _ _) le_rfl) (hx₀ hli) } }
+  { sorry }
 end
