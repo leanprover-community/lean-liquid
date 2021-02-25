@@ -392,7 +392,9 @@ begin
   classical,
   obtain ⟨ι, _ftι, l, hl⟩ := polyhedral_lattice.polyhedral Λ, resetI,
   obtain ⟨A, hA⟩ := lem97' Λ polyhedral_lattice.tf N l,
-  let d := finset.univ.sup (λ i, ∑ a in A, (a (l i)).nat_abs),
+  let d : ℝ≥0 :=
+    ∑ a in A, finset.univ.sup (λ i, ↑(a (l i)).nat_abs / nnnorm (l i)) *
+      (fintype.card S * (1 - r')⁻¹ / N + 1),
   use d,
   intros c x hx,
   -- `x` is a homomorphism `Λ →+ Mbar r' S`
@@ -415,9 +417,10 @@ begin
   have hx₁ : ∀ l, x₁ l = ∑ a in A, a l • xₐ a := lem_98_aux _ _ hx₁' _ (λ _ _ _, rfl),
   -- now it is time to start building `y`
   -- we first decompose the `xₐ a` into `N` pieces
-  have := λ a, lem98_int N hN _ (xₐ a) _ _,
-  swap 3, { rw Mbar.mem_filtration_iff }, swap,
-  { intros s n, dsimp [xₐ, Mbar.mk_of_add_monoid_hom_to_fun], split_ifs; simp },
+  have hxₐ : ∀ a s n, (xₐ a s n).nat_abs ≤ 1,
+  { intros a s n, dsimp [xₐ, Mbar.mk_of_add_monoid_hom_to_fun], split_ifs; simp },
+  have := λ a, lem98_int N hN _ (xₐ a) _ (hxₐ a),
+  swap 3, { rw Mbar.mem_filtration_iff },
   choose y' hy'1 hy'2 using this,
   -- the candidate `y` combines `x₀` together with the pieces `y'` of `xₐ a`
   let y : fin N → Λ →+ Mbar r' S := λ j, x₀ + ∑ a in A, Mbar.mk_tensor a (y' a j),
@@ -425,6 +428,32 @@ begin
   { apply lem98_aux' N A x x₀ x₁ x' x₀' x₁' hx₀' _ _ _ hx₁ y' hy'1 y,
     all_goals { intros, refl } },
   use [y, hxy],
-  intro i, dsimp [y], clear_dependent H,
-  sorry
+  intro j, dsimp [y], clear_dependent H,
+  refine add_mem_filtration hx₀ (sum_mem_filtration _ _ _ _),
+  intros a ha,
+  refine filtration_mono _ (Mbar.mk_tensor_mem_filtration hl a _ _ (hy'2 a j)),
+  clear hy'2 d,
+  simp only [div_eq_mul_inv],
+  refine mul_le_mul' le_rfl (add_le_add (mul_le_mul' _ le_rfl) le_rfl),
+  calc ∑ s, ∑' n, (↑(xₐ a s n).nat_abs * r' ^ n)
+      ≤ ∑ s : S, ∑' n : ℕ, r' ^ n : finset.sum_le_sum _
+  ... = ∑ s : S, (1 - r')⁻¹ : fintype.sum_congr _ _ _
+  ... = fintype.card S * (1 - r')⁻¹ : by rw [finset.sum_const, finset.card_univ, nsmul_eq_mul],
+  { rintro s -,
+    refine tsum_le_tsum _ ((xₐ a).summable s) _,
+    { intro n,
+      calc ↑(xₐ a s n).nat_abs * r' ^ n ≤ 1 * r' ^ n : mul_le_mul' _ le_rfl
+      ... = r' ^ n : by rw one_mul,
+      exact_mod_cast hxₐ a s n },
+    { simp only [← nnreal.summable_coe, nnreal.coe_pow],
+      refine (normed_ring.summable_geometric_of_norm_lt_1 _ _),
+      rwa nnreal.norm_eq } },
+  { intro s,
+    apply eq_inv_of_mul_left_eq_one,
+    apply nnreal.eq,
+    simp only [nnreal.coe_mul, nnreal.coe_one, nnreal.coe_tsum, nnreal.coe_pow],
+    convert geom_series_mul_neg (r':ℝ) _,
+    { rw [nnreal.coe_sub, nnreal.coe_one], exact le_of_lt ‹_› },
+    { rwa nnreal.norm_eq } }
 end
+
