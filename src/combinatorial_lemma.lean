@@ -75,30 +75,55 @@ def Mbar.coeff (s : S) (n : ℕ) : Mbar r' S →+ ℤ :=
 
 variables {Λ r'}
 
-def Mbar.mk_aux (x : Λ →+ Mbar r' S) (y : S → ℕ → Λ →+ ℤ)
-  (h : ∀ s n l, (y s n l).nat_abs ≤ (x l s n).nat_abs) :
+def Mbar.mk_aux
+  {ι : Type} [fintype ι] {l : ι → Λ} (hl : generates_norm l)
+  (x : Λ →+ Mbar r' S) (y : S → ℕ → Λ →+ ℤ)
+  (h : ∀ s n i, (y s n (l i)).nat_abs ≤ (x (l i) s n).nat_abs) :
   Λ →+ Mbar r' S :=
-add_monoid_hom.mk' (λ l,
-{ to_fun := λ s n, y s n l,
+add_monoid_hom.mk' (λ l',
+{ to_fun := λ s n, y s n l',
   coeff_zero' := λ s,
-  by simpa only [int.nat_abs_eq_zero, Mbar.coeff_zero, le_zero_iff, int.nat_abs_zero] using h s 0 l,
+  begin
+    obtain ⟨d, hd, c, h1, h2⟩ := hl l',
+    suffices : y s 0 (d • l') = 0,
+    { sorry },
+    rw [h1, add_monoid_hom.map_sum, finset.sum_eq_zero],
+    rintro i -,
+    suffices : y s 0 (l i) = 0,
+    { sorry },
+    specialize h s 0 i,
+    simpa only [int.nat_abs_eq_zero, Mbar.coeff_zero, le_zero_iff, int.nat_abs_zero] using h
+  end,
   summable' :=
   begin
     intro s,
-    apply nnreal.summable_of_le _ ((x l).summable s),
+    obtain ⟨d, hd, c, h1, h2⟩ := hl l',
+    suffices : summable (λ n, ↑(y s n (d • l')).nat_abs * r' ^ n),
+    { sorry },
+    rw h1,
+    suffices : summable (λ n, ∑ i, c i • ↑(y s n (l i)).nat_abs * r' ^ n),
+    { sorry },
+    apply summable_sum,
+    rintro i -,
+    apply nnreal.summable_of_le _ ((c i • x (l i)).summable s),
     intro n,
     apply mul_le_mul' _ le_rfl,
-    exact_mod_cast h s n l
+    sorry
   end }) $ λ l₁ l₂, by { ext s n, exact (y s n).map_add l₁ l₂ }
 
-lemma needs_better_name {ι : Type} [fintype ι] (l : ι → Λ) (hl : generates_norm l)
-  (x : Λ →+ Mbar r' S) (y : S → ℕ → Λ →+ ℤ)
-  (h : ∀ s n i, (y s n (l i)).nat_abs ≤ (x (l i) s n).nat_abs)
-  (s : S) (n : ℕ) (l : Λ) :
-  ((y s n l).nat_abs ≤ (x l s n).nat_abs) :=
+-- TODO: is this true in the generality it is stated in?
+-- We only need it for `M = Mbar r' S`, in which case it is certainly true
+lemma generates_norm.add_monoid_hom_mem_filtration_iff
+  {ι : Type} [fintype ι] {l : ι → Λ} (hl : generates_norm l)
+  {M : Type*} [pseudo_normed_group M] (x : Λ →+ M) (c : ℝ≥0) :
+  x ∈ filtration (Λ →+ M) c ↔
+  ∀ c' i, (l i) ∈ filtration Λ c' → x (l i) ∈ filtration M (c * c') :=
 begin
-  obtain ⟨d, hd, c, h1, h2⟩ := hl l,
-  sorry
+  refine ⟨λ H c' i h, H h, _⟩,
+  intros H c' l' hl',
+  rw normed_group.mem_filtration_iff at hl',
+  obtain ⟨d, hd, c, h1, h2⟩ := hl l',
+  sorry,
 end
 
 end
@@ -115,19 +140,30 @@ begin
   let d := finset.univ.sup (λ i, ∑ a in A, (a (l i)).nat_abs),
   use d,
   intros c x hx,
+  -- by_cases hι : nonempty ι, swap,
+  -- { use 0,
+  --   -- factor out part of this subproof? It's boring
+  --   simp only [pi.zero_apply, finset.sum_const_zero, zero_mem_filtration, forall_true_iff, and_true],
+  --   ext1 l',
+  --   rw add_monoid_hom.zero_apply,
+  --   obtain ⟨d, hd, c, h1, h2⟩ := hl l',
+  --   rw ← finset.univ_eq_empty at hι,
+  --   simp only [hι, finset.sum_empty] at h1,
+  --   suffices : l' = 0, { rw [this, add_monoid_hom.map_zero] },
+  --   contrapose! hd with hl',
+  --   rw nat.le_zero_iff,
+  --   exact polyhedral_lattice.tf _ hl' d h1 },
+  -- obtain ⟨i₀⟩ := hι,
   -- `x` is a homomorphism `Λ →+ Mbar r' S`
   -- we split it into pieces `Λ →+ ℤ` for all coefficients indexed by `s` and `n`
   let x' : S → ℕ → Λ →+ ℤ := λ s n, (Mbar.coeff r' s n).comp x,
   have := λ s n, hA (x' s n), clear hA,
   choose x₁' hx₁' x₀' hx₀' H using this,
   -- now we assemble `x₀' : S → ℕ → Λ →+ ℤ` into a homomorphism `Λ →+ Mbar r' S`
-  let x₀ : Λ →+ Mbar r' S := Mbar.mk_aux x x₀' _, swap,
-  { intros s n l',
-    apply needs_better_name l hl x,
-    intros s' n' i,
-    specialize H s' n' i,
-    refine le_trans (le_add_right _) H.symm.le,
-    exact nat.le_mul_of_pos_left hN },
+  let x₀ : Λ →+ Mbar r' S := Mbar.mk_aux hl x x₀'
+    (λ s n i, le_trans (le_add_right (nat.le_mul_of_pos_left hN)) (H s n i).symm.le),
+  let x₁ : Λ →+ Mbar r' S := Mbar.mk_aux hl x x₁'
+    (λ s n i, le_trans (le_add_left le_rfl) (H s n i).symm.le),
   let xₐ : (Λ →+ ℤ) → Mbar r' S := λ a,
   { to_fun := λ s n, if x₁' s n = a ∧ 0 < n then 1 else 0,
     coeff_zero' := λ s, by simp only [not_lt_zero', and_false, if_false],
@@ -142,5 +178,38 @@ begin
       refine (mul_le_mul' _ le_rfl).trans (one_mul _).le,
       split_ifs; simp
     end },
-  sorry
+  have hx₀ : x₀ ∈ filtration (Λ →+ Mbar r' S) (c / N),
+  { sorry },
+  have hx₁ : ∀ l, x₁ l = ∑ a in A, a l • xₐ a,
+  { intro l, ext s n,
+    simp only [finset.sum_apply, Mbar.coe_sum, pi.smul_apply, Mbar.coe_smul,
+      Mbar.coe_mk],
+    rw [finset.sum_eq_single (x₁' s n)],
+    { simp only [true_and, and_congr, if_congr, eq_self_iff_true],
+      split_ifs with hn,
+        { sorry },
+        { rw smul_zero,
+          obtain rfl : n = 0 := nat.eq_zero_of_le_zero (le_of_not_lt hn),
+          exact (x₁ l).coeff_zero s } },
+    { intros a haA ha,
+      simp only [xₐ, ha.symm, false_and, if_false, smul_zero] },
+    { intro hsn, exact (hsn (hx₁' s n)).elim } },
+  -- is this the correct `y`? I think I might need to do something smarter
+  -- I think I can only bound the norm of `y 0`
+  -- in terms of a `d` that depends on `r'`
+  let y : fin N → Λ →+ Mbar r' S := λ j, if j = ⟨0, hN⟩ then x₀ + x₁ else x₀,
+  use y,
+  split,
+  { sorry },
+  { intro j,
+    rw hl.add_monoid_hom_mem_filtration_iff,
+    intros c' i hli,
+    by_cases hj : j = ⟨0, hN⟩,
+    { dsimp only [y], rw [if_pos hj, add_mul],
+      apply add_mem_filtration (hx₀ hli),
+      rw hx₁,
+      clear hj,
+      sorry },
+    { dsimp only [y], rw [if_neg hj],
+      exact filtration_mono (mul_le_mul' (self_le_add_right _ _) le_rfl) (hx₀ hli) } }
 end
