@@ -188,7 +188,7 @@ end
 variables {M}
 
 -- move this
-lemma pseudo_normed_group.smul_mem_filtration (n : ℕ) (m : M) (c : ℝ≥0)
+lemma pseudo_normed_group.nat_smul_mem_filtration (n : ℕ) (m : M) (c : ℝ≥0)
   (h : m ∈ filtration M c) :
   (n • m) ∈ filtration M (n • c) :=
 begin
@@ -197,13 +197,30 @@ begin
   exact add_mem_filtration ih h,
 end
 
+-- move this
+lemma pseudo_normed_group.smul_mem_filtration (n : ℤ) (m : M) (c : ℝ≥0)
+  (h : m ∈ filtration M c) :
+  (n • m) ∈ filtration M (n.nat_abs • c) :=
+begin
+  by_cases hn : 0 ≤ n,
+  { lift n to ℕ using hn,
+    simp only [int.nat_abs_of_nat, ← gsmul_eq_smul, gsmul_coe_nat, nsmul_eq_smul],
+    exact pseudo_normed_group.nat_smul_mem_filtration n m c h },
+  { push_neg at hn, rw ← neg_pos at hn,
+    lift -n to ℕ using hn.le with k hk,
+    rw [← neg_neg n, int.nat_abs_neg, ← hk, int.nat_abs_of_nat, neg_smul],
+    apply neg_mem_filtration,
+    simp only [neg_smul, ← gsmul_eq_smul, gsmul_coe_nat, nsmul_eq_smul],
+    exact pseudo_normed_group.nat_smul_mem_filtration k m c h }
+end
+
 lemma generates_norm.add_monoid_hom_mem_filtration_iff {ι : Type} [fintype ι]
   {l : ι → Λ} (hl : generates_norm l) (hM : pseudo_normed_group.archimedean M)
   (x : Λ →+ M) (c : ℝ≥0) :
   x ∈ filtration (Λ →+ M) c ↔
-  ∀ c' i, (l i) ∈ filtration Λ c' → x (l i) ∈ filtration M (c * c') :=
+  ∀ i, x (l i) ∈ filtration M (c * nnnorm (l i)) :=
 begin
-  refine ⟨λ H c' i h, H h, _⟩,
+  refine ⟨λ H i, H (le_refl (nnnorm (l i))), _⟩,
   intros H c' l' hl',
   obtain ⟨d, hd, cᵢ, h1, h2⟩ := hl.generates_nnnorm l',
   rw [← hM _ _ d hd, ← nsmul_eq_smul, ← x.map_nsmul, nsmul_eq_smul, h1, x.map_sum],
@@ -214,8 +231,7 @@ begin
     ... ≤ c * (d * c') : mul_le_mul' le_rfl (mul_le_mul' le_rfl hl')
     ... = d • (c * c') : by rw [← nsmul_eq_smul, nsmul_eq_mul, mul_left_comm] },
   rintro i -,
-  convert pseudo_normed_group.smul_mem_filtration (cᵢ i) _ _
-    (H (nnnorm (l i)) i (le_refl (nnnorm (l i)))),
+  convert pseudo_normed_group.nat_smul_mem_filtration (cᵢ i) _ _ (H i),
   { rw [← nsmul_eq_smul, x.map_nsmul, nsmul_eq_smul] },
   { rw [← nsmul_eq_smul, nsmul_eq_mul, mul_left_comm, mul_assoc] }
 end
@@ -265,8 +281,8 @@ begin
     exact_mod_cast hN.ne' },
   rw aux,
   rw hl.add_monoid_hom_mem_filtration_iff Mbar.archimedean at hx ⊢,
-  intros c' i hli,
-  specialize hx c' i hli,
+  intro i,
+  specialize hx i,
   rw Mbar.mem_filtration_iff at hx ⊢,
   refine le_trans (finset.sum_le_sum _) hx,
   rintro s -,
@@ -286,6 +302,27 @@ end
 lemma Mbar.mk_tensor (a : Λ →+ ℤ) (x : Mbar r' S) :
   Λ →+ Mbar r' S :=
 add_monoid_hom.mk' (λ l, a l • x) $ λ l₁ l₂, by rw [a.map_add, add_smul]
+
+lemma Mbar.mk_tensor_mem_filtration {ι : Type} [fintype ι] {l : ι → Λ}
+  (hl : generates_norm l) (a : Λ →+ ℤ) (x : Mbar r' S) (c : ℝ≥0)
+  (hxc : x ∈ filtration (Mbar r' S) c) :
+  Mbar.mk_tensor a x ∈ filtration (Λ →+ Mbar r' S)
+    ((finset.univ.sup $ λ i, (a (l i)).nat_abs / nnnorm (l i)) * c) :=
+begin
+  rw hl.add_monoid_hom_mem_filtration_iff Mbar.archimedean,
+  intro i,
+  rw [Mbar.mk_tensor_apply, mul_right_comm],
+  by_cases H : l i = 0,
+  { simpa only [H, a.map_zero, zero_smul] using zero_mem_filtration _ },
+  rw ← nnnorm_eq_zero at H,
+  refine filtration_mono _ (pseudo_normed_group.smul_mem_filtration _ _ _ hxc),
+  rw [← nsmul_eq_smul, nsmul_eq_mul],
+  refine mul_le_mul' _ le_rfl,
+  rw ← inv_inv' (nnnorm (l i)),
+  apply le_mul_inv_of_mul_le (inv_ne_zero H),
+  rw ← div_eq_mul_inv,
+  exact finset.le_sup (finset.mem_univ i),
+end
 
 -- better name?
 lemma lem_98_aux [fact (r' < 1)] (A : finset (Λ →+ ℤ))
@@ -383,11 +420,11 @@ begin
   { intros s n, dsimp [xₐ, Mbar.mk_of_add_monoid_hom_to_fun], split_ifs; simp },
   choose y' hy'1 hy'2 using this,
   -- the candidate `y` combines `x₀` together with the pieces `y'` of `xₐ a`
-  let y : fin N → Λ →+ Mbar r' S :=
-    λ j, x₀ + ∑ a in A, Mbar.mk_tensor a (y' a j),
-  use y,
-  split,
+  let y : fin N → Λ →+ Mbar r' S := λ j, x₀ + ∑ a in A, Mbar.mk_tensor a (y' a j),
+  have hxy : x = ∑ i, y i,
   { apply lem98_aux' N A x x₀ x₁ x' x₀' x₁' hx₀' _ _ _ hx₁ y' hy'1 y,
     all_goals { intros, refl } },
-  { sorry }
+  use [y, hxy],
+  intro i, dsimp [y], clear_dependent H,
+
 end
