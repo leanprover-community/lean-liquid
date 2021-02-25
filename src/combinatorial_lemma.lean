@@ -142,7 +142,7 @@ add_monoid_hom.mk' (λ l',
     apply mul_le_mul' _ le_rfl,
     simp only [← nsmul_eq_smul, nsmul_eq_mul, int.nat_cast_eq_coe_nat,
       ← nnreal.coe_nat_abs, int.nat_abs_mul, int.nat_abs_of_nat, ← nat.cast_mul,
-      Mbar.coe_nsmul, pi.mul_apply, pi.nat_apply, @pi.nat_apply ℕ ℤ _ _ _ (c i)],
+        Mbar.coe_nsmul, pi.mul_apply, pi.nat_apply, @pi.nat_apply ℕ ℤ _ _ _ (c i)],
     norm_cast,
     exact nat.mul_le_mul le_rfl (h _ _ _)
   end }) $ λ l₁ l₂, by { ext s n, exact (y s n).map_add l₁ l₂ }
@@ -170,7 +170,7 @@ begin
     ← tsum_mul_left, ← mul_assoc],
 end
 
-lemma pseudo_normed_group.add_monoid_hom_archimedean
+lemma pseudo_normed_group.archimedean.add_monoid_hom
   (h : pseudo_normed_group.archimedean M) :
   pseudo_normed_group.archimedean (Λ →+ M) :=
 begin
@@ -241,9 +241,9 @@ begin
   choose x₁' hx₁' x₀' hx₀' H using this,
   -- now we assemble `x₀' : S → ℕ → Λ →+ ℤ` into a homomorphism `Λ →+ Mbar r' S`
   let x₀ : Λ →+ Mbar r' S := Mbar.mk_aux hl x x₀'
-    (λ s n i, le_trans (le_add_right (nat.le_mul_of_pos_left hN)) (H s n i).symm.le),
+    (λ s n i, le_trans (le_add_right (nat.le_mul_of_pos_left hN)) (H s n i).ge),
   let x₁ : Λ →+ Mbar r' S := Mbar.mk_aux hl x x₁'
-    (λ s n i, le_trans (le_add_left le_rfl) (H s n i).symm.le),
+    (λ s n i, le_trans (le_add_left le_rfl) (H s n i).ge),
   let xₐ : (Λ →+ ℤ) → Mbar r' S := λ a,
   { to_fun := λ s n, if x₁' s n = a ∧ 0 < n then 1 else 0,
     coeff_zero' := λ s, by simp only [not_lt_zero', and_false, if_false],
@@ -259,7 +259,26 @@ begin
       split_ifs; simp
     end },
   have hx₀ : x₀ ∈ filtration (Λ →+ Mbar r' S) (c / N),
-  { sorry },
+  { refine (Mbar.archimedean.add_monoid_hom _ _ _ _ hN).mp _,
+    have aux : N • (c / N) = c,
+    { rw [← nsmul_eq_smul, nsmul_eq_mul, mul_comm, div_mul_cancel],
+      exact_mod_cast hN.ne' },
+    rw aux,
+    rw hl.add_monoid_hom_mem_filtration_iff Mbar.archimedean at hx ⊢,
+    intros c' i hli,
+    specialize hx c' i hli,
+    rw Mbar.mem_filtration_iff at hx ⊢,
+    refine le_trans (finset.sum_le_sum _) hx,
+    rintro s -,
+    refine tsum_le_tsum _ (((N • x₀) (l i)).summable s) ((x (l i)).summable s),
+    intro n,
+    refine mul_le_mul' _ le_rfl,
+    norm_cast,
+    simp only [add_monoid_hom.nat_smul_apply],
+    simp only [← nsmul_eq_smul, Mbar.coe_nsmul, nsmul_eq_mul,
+      pi.mul_apply, pi.nat_apply, @pi.nat_apply ℕ ℤ _ _ _ N,
+      int.nat_cast_eq_coe_nat, int.nat_abs_mul, int.nat_abs_of_nat],
+    exact le_trans (le_add_right le_rfl) (H s n i).ge },
   have hx₁ : ∀ l, x₁ l = ∑ a in A, a l • xₐ a,
   { intro l, ext s n,
     simp only [finset.sum_apply, Mbar.coe_sum, pi.smul_apply, Mbar.coe_smul,
@@ -282,7 +301,7 @@ begin
   split,
   { sorry },
   { intro j,
-    rw hl.add_monoid_hom_mem_filtration_iff,
+    rw hl.add_monoid_hom_mem_filtration_iff Mbar.archimedean,
     intros c' i hli,
     by_cases hj : j = ⟨0, hN⟩,
     { dsimp only [y], rw [if_pos hj, add_mul],
