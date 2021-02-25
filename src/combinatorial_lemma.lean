@@ -73,6 +73,21 @@ def Mbar.coeff (s : S) (n : ℕ) : Mbar r' S →+ ℤ :=
   map_zero' := rfl,
   map_add' := λ x y, rfl }
 
+-- move this
+@[simp] lemma nnreal.coe_nat_abs (n : ℤ) : ↑n.nat_abs = nnnorm n :=
+nnreal.eq $
+calc ((n.nat_abs : ℝ≥0) : ℝ)
+    = ↑(n.nat_abs : ℤ) : by simp only [int.cast_coe_nat, nnreal.coe_nat_cast]
+... = abs n            : by simp only [← int.abs_eq_nat_abs, int.cast_abs]
+... = ∥n∥               : rfl
+
+-- move this
+@[simp] lemma pi.nat_apply {α β : Type*} [has_zero β] [has_one β] [has_add β] :
+  ∀ (n : ℕ), (n : α → β) = λ _, n
+| 0     := rfl
+| (n+1) := show (n + 1 : α → β) = λ _, n + 1, by { rw pi.nat_apply, refl }
+.
+
 variables {Λ r'}
 
 def Mbar.mk_aux
@@ -86,11 +101,12 @@ add_monoid_hom.mk' (λ l',
   begin
     obtain ⟨d, hd, c, h1, h2⟩ := hl l',
     suffices : y s 0 (d • l') = 0,
-    { sorry },
+    { rw [← nsmul_eq_smul, add_monoid_hom.map_nsmul, nsmul_eq_smul] at this,
+      sorry },
     rw [h1, add_monoid_hom.map_sum, finset.sum_eq_zero],
     rintro i -,
     suffices : y s 0 (l i) = 0,
-    { sorry },
+    { rw [← nsmul_eq_smul, add_monoid_hom.map_nsmul, this, nsmul_zero] },
     specialize h s 0 i,
     simpa only [int.nat_abs_eq_zero, Mbar.coeff_zero, le_zero_iff, int.nat_abs_zero] using h
   end,
@@ -99,16 +115,30 @@ add_monoid_hom.mk' (λ l',
     intro s,
     obtain ⟨d, hd, c, h1, h2⟩ := hl l',
     suffices : summable (λ n, ↑(y s n (d • l')).nat_abs * r' ^ n),
-    { sorry },
+    { simp only [← nsmul_eq_smul, add_monoid_hom.map_nsmul] at this,
+      sorry },
     rw h1,
     suffices : summable (λ n, ∑ i, c i • ↑(y s n (l i)).nat_abs * r' ^ n),
-    { sorry },
+    { apply nnreal.summable_of_le _ this,
+      intro n,
+      rw ← finset.sum_mul,
+      refine mul_le_mul' _ le_rfl,
+      simp only [add_monoid_hom.map_sum, ← nsmul_eq_smul, nnreal.coe_nat_abs,
+        add_monoid_hom.map_nsmul],
+      refine le_trans (nnnorm_sum_le _ _) (le_of_eq (fintype.sum_congr _ _ _)),
+      intro i,
+      simp only [nsmul_eq_mul, int.nat_cast_eq_coe_nat, ← nnreal.coe_nat_abs,
+        int.nat_abs_mul, int.nat_abs_of_nat, nat.cast_mul] },
     apply summable_sum,
     rintro i -,
     apply nnreal.summable_of_le _ ((c i • x (l i)).summable s),
     intro n,
     apply mul_le_mul' _ le_rfl,
-    sorry
+    simp only [← nsmul_eq_smul, nsmul_eq_mul, int.nat_cast_eq_coe_nat,
+      ← nnreal.coe_nat_abs, int.nat_abs_mul, int.nat_abs_of_nat, ← nat.cast_mul,
+      Mbar.coe_nsmul, pi.mul_apply, pi.nat_apply, @pi.nat_apply ℕ ℤ _ _ _ (c i)],
+    norm_cast,
+    exact nat.mul_le_mul le_rfl (h _ _ _)
   end }) $ λ l₁ l₂, by { ext s n, exact (y s n).map_add l₁ l₂ }
 
 -- TODO: is this true in the generality it is stated in?

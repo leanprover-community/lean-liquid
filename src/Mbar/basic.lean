@@ -171,16 +171,17 @@ add_monoid_hom.mk' coe_fn $ coe_add
   ⇑(∑ i in s, F i) = ∑ i in s, (F i) :=
 show coe_hom (∑ i in s, F i) = ∑ i in s, coe_hom (F i), from add_monoid_hom.map_sum _ _ _
 
-@[simp] lemma coe_gsmul (n : ℤ) (F : Mbar r' S) :
-  ⇑(n •ℤ F) = n •ℤ F :=
+@[simp] lemma coe_gsmul (n : ℤ) (F : Mbar r' S) : ⇑(n •ℤ F) = n •ℤ F :=
 show coe_hom (n •ℤ F) = n •ℤ coe_hom F, from add_monoid_hom.map_gsmul _ _ _
 
-@[simp] lemma coe_smul (n : ℤ) (F : Mbar r' S) :
-  ⇑(n • F) = n • F :=
+@[simp] lemma coe_smul (n : ℤ) (F : Mbar r' S) : ⇑(n • F) = n • F :=
 begin
   rw [← gsmul_eq_smul, coe_gsmul], ext,
   simp only [gsmul_int_int, function.gsmul_apply, pi.smul_apply, ← gsmul_eq_smul]
 end
+
+@[simp] lemma coe_nsmul (n : ℕ) (F : Mbar r' S) : ⇑(n •ℕ F) = n •ℕ F :=
+coe_gsmul n F
 
 section Tinv
 
