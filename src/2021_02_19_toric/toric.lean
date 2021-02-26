@@ -100,9 +100,18 @@ variables [comm_semiring R] [semimodule R M]
 
 /--  A pointed submodule is a submodule `s` that intersects the hyperplane `ker φ` just in the
 origin.  Alternatively, the submodule `s` contains no `R` linear subspace. -/
+-- this definition applies equally well to `subsets` of `M`, not necessarily to submodules.
 def pointed (s : submodule R₀ M) : Prop := ∃ φ : M →ₗ[R] R, ∀ x : M, x ∈ s → φ x = 0 → x = 0
+def pointed_subset (s : set M) : Prop := ∃ φ : M →ₗ[R] R, ∀ x : M, x ∈ s → φ x = 0 → x = 0
 
 variables [algebra R₀ R] [is_scalar_tower R₀ R M]
+
+/--  A submodule of a pointed submodule is pointed. -/
+lemma pointed_of_submodule {s t : submodule R₀ M} (st : s ≤ t) (pt : pointed R t) : pointed R s :=
+begin
+  cases pt with l hl,
+  exact ⟨l, λ m ms m0, hl m (st ms) m0⟩,
+end
 
 /-- Any `R₀`-submodule of `R` is pointed, since the identity function is a "separating hyperplane".
 This should not happen if the module is not cyclic for `R`. -/
@@ -423,6 +432,73 @@ variables {M : Type*} [add_comm_group M] --[semimodule ℕ M]
 --  [add_comm_monoid N] --[semimodule ℕ N] [semimodule ℤ N] --[is_scalar_tower ℕ ℤ N]
 --  [add_comm_monoid P] --[semimodule ℕ P] [semimodule ℤ P] --[is_scalar_tower ℕ ℤ P]
 --  (P₀ : submodule ℕ P)
+
+def basis_set_adjunction {R M N : Type*}
+  [ring R] [add_comm_group M] [add_comm_group N] [module R M] [module R N]
+  {ι : Type*} (v : ι → M) (bv : is_basis R v) (t : ι → N) :
+  ∃ l : M →ₗ[R] N, ∀ i : ι, l (v i) = t i :=
+⟨bv.constr t, λ i, constr_basis bv⟩
+
+open_locale classical big_operators
+
+lemma mem_span_add {R : Type*} [semiring R] [add_comm_group M] [semimodule R M]
+  (m : M) (s : set M) (hm : m ∈ submodule.span R s) :
+  ∃ c : finsupp M R, ((c.support : set M) ⊆ s) ∧ ((c.sum, begin
+
+  end) = m) :=
+
+
+def pointed_of_is_basis {N : Type*} [add_comm_group N]
+  {ι : Type*} (v : ι → M) (bv : is_basis ℤ v) (t : ι → N) :
+  pointed ℤ (submodule.span ℕ (set.range v)) :=
+begin
+  obtain ⟨l, hl⟩ : ∃ l : M →ₗ[ℤ] ℤ, ∀ i : ι, l (v i) = 1 := ⟨bv.constr (λ _, 1), λ i, constr_basis bv⟩,
+  unfold pointed,
+
+  use l,
+  { simp only [forall_const, eq_self_iff_true, linear_map.map_add] },
+  { intros m x,
+    rw [algebra.id.smul_eq_mul, linear_map.map_smul],
+    refine congr _ rfl,
+    exact funext (λ (y : ℤ), by simp only [has_scalar.smul, gsmul_int_int]) },
+  { rintros m hm (m0 : l m = 0),
+    obtain ⟨T, Tv, mT⟩ := mem_span_finite_of_mem_span hm,
+    revert mT Tv m,
+    refine finset.induction_on T _ _,
+    { simp },
+    {
+      intros a s as ih m ms lm0 asv mT,
+      rw [finset.coe_insert, mem_span_insert] at mT,
+      obtain G := @finsupp.total ι M ℤ _ _ _ v _,
+      rcases mT with ⟨c1, m1, m1s, rfl⟩,
+      sorry,
+    } }
+end
+#exit
+      apply ih _ ms lm0,
+      obtain F := ih m1 _,
+      rotate,
+      cases bv,
+      apply set.mem_of_mem_of_subset _ m1s,
+
+      simp only [set.mem_range, mem_coe],
+      dsimp,
+      use span ℕ (v '' set.univ),
+      simp,
+      apply ih,
+
+--      simp only [finset.coe_insert, set.image_univ] at *,
+--      simp only [set.Inter_eq_univ] at *,
+    },
+    rw ← span_image at hm,
+    rw mem_span at hm,
+    rw m.as_sum at m0,
+  --library_search,
+  --rw smul_eq_mul,
+
+  obtain ⟨l, hl⟩ : ∃ l : M →ₗ[ℤ] N, ∀ i : ι, l (v i) = t i := ⟨bv.constr t, λ i, constr_basis bv⟩,
+  sorry },
+end
 
 lemma of_non_deg {ι : Type*} {f : pairing ℤ M M ℤ} {v : ι → M}
   (nd : perfect f) (sp : submodule.span ℤ (v '' set.univ)) :
