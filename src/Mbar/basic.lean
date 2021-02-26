@@ -30,6 +30,14 @@ universe u
 noncomputable theory
 open_locale big_operators nnreal
 
+-- move this
+@[simp] lemma nnreal.coe_nat_abs (n : ℤ) : ↑n.nat_abs = nnnorm n :=
+nnreal.eq $
+calc ((n.nat_abs : ℝ≥0) : ℝ)
+    = ↑(n.nat_abs : ℤ) : by simp only [int.cast_coe_nat, nnreal.coe_nat_cast]
+... = abs n            : by simp only [← int.abs_eq_nat_abs, int.cast_abs]
+... = ∥n∥               : rfl
+
 section defs
 
 set_option old_structure_cmd true
@@ -56,9 +64,10 @@ instance has_coe_to_fun : has_coe_to_fun (Mbar r' S) := ⟨_, Mbar.to_fun⟩
 protected lemma summable (x : Mbar r' S) (s : S) :
   summable (λ n, (↑(x s n).nat_abs * r' ^ n)) := x.summable' s
 
--- lemma summable_nnabs (F : Mbar r' S) (s : S) :
---   summable (λ (i : ℕ), real.nnabs ((F s i) * r' ^ i)) :=
--- by { rw ← nnreal.summable_coe, simpa only [nnreal.coe_nnabs] using F.summable s }
+lemma summable_coe_real (x : Mbar r' S) (s : S) :
+  summable (λ n, ∥x s n∥ * r' ^ n) :=
+by simpa only [← nnreal.summable_coe, nnreal.coe_nat_cast, nnreal.coe_nat_abs,
+  nnreal.coe_mul, nnreal.coe_pow] using x.summable s
 
 @[ext] lemma ext (x y : Mbar r' S) (h : ⇑x = y) : x = y :=
 by { cases x, cases y, congr, exact h }
@@ -134,35 +143,59 @@ instance : add_comm_group (Mbar r' S) :=
   add_comm := by { intros, ext, simp only [coe_add, add_comm] },
   sub_eq_add_neg := by { intros, ext, simp only [coe_sub, coe_add, coe_neg, sub_eq_add_neg] } }
 
+/-- The norm of `F : Mbar r' S` as nonnegative real number.
+It is defined as `∑ s, ∑' n, (↑(F s n).nat_abs * r' ^ n)`. -/
+def nnnorm (F : Mbar r' S) : ℝ≥0 := ∑ s, ∑' n, (↑(F s n).nat_abs * r' ^ n)
+
+notation `∥`F`∥₊` := Mbar.nnnorm F
+
+lemma nnnorm_def (F : Mbar r' S) : ∥F∥₊ = ∑ s, ∑' n, (↑(F s n).nat_abs * r' ^ n) := rfl
+
+@[simp] lemma nnnorm_zero : ∥(0 : Mbar r' S)∥₊ = 0 :=
+by simp only [nnnorm, Mbar.coe_zero, tsum_zero, nat.cast_zero, zero_mul, pi.zero_apply, zero_le',
+    finset.sum_const_zero, int.nat_abs_zero]
+
+@[simp] lemma nnnorm_neg (F : Mbar r' S) : ∥-F∥₊ = ∥F∥₊ :=
+by simp only [nnnorm, Mbar.coe_neg, pi.neg_apply, int.nat_abs_neg, int.nat_abs,
+  coe_neg, set.mem_set_of_eq]
+
+lemma nnnorm_add_le (F₁ F₂ : Mbar r' S) : ∥F₁ + F₂∥₊ ≤ ∥F₁∥₊ + ∥F₂∥₊ :=
+begin
+  dsimp [nnnorm],
+  rw ← finset.sum_add_distrib,
+  refine finset.sum_le_sum _,
+  rintro s -,
+  rw ← tsum_add (F₁.summable s) (F₂.summable s),
+  refine tsum_le_tsum _ ((F₁ + F₂).summable _) ((F₁.summable s).add (F₂.summable s)),
+  intro n,
+  dsimp,
+  rw [← add_mul, ← nat.cast_add],
+  apply mul_le_mul_right',
+  rw nat.cast_le,
+  exact int.nat_abs_add_le _ _
+end
+
+lemma nnnorm_sum_le {ι : Type*} (s : finset ι) (F : ι → Mbar r' S) :
+  ∥∑ i in s, F i∥₊ ≤ ∑ i in s, ∥F i∥₊ :=
+begin
+  classical,
+  apply finset.induction_on s; clear s,
+  { simp only [finset.sum_empty, nnnorm_zero] },
+  intros i s his IH,
+  simp only [finset.sum_insert his],
+  exact (nnnorm_add_le _ _).trans (add_le_add le_rfl IH)
+end
+
 instance pseudo_normed_group : pseudo_normed_group (Mbar r' S) :=
-{ filtration := λ c, {F | (∑ s, ∑' n, (↑(F s n).nat_abs * r' ^ n)) ≤ c},
+{ filtration := λ c, {F | ∥F∥₊ ≤ c},
   filtration_mono := λ c₁ c₂ h F hF, le_trans (by exact hF) h, -- `by exact`, why??
-  zero_mem_filtration := λ c,
-  by { dsimp, simp only [tsum_zero, nat.cast_zero, zero_mul, pi.zero_apply, zero_le',
-    finset.sum_const_zero, int.nat_abs_zero] },
-  neg_mem_filtration := λ c F hF,
-  by { dsimp, simpa only [pi.neg_apply, int.nat_abs_neg, int.nat_abs, coe_neg, set.mem_set_of_eq] },
+  zero_mem_filtration := λ c, by { dsimp, rw nnnorm_zero, apply zero_le' },
+  neg_mem_filtration := λ c F hF, by { dsimp, rwa nnnorm_neg },
   add_mem_filtration := λ c₁ c₂ F₁ F₂ hF₁ hF₂,
-  begin
-    dsimp at hF₁ hF₂ ⊢,
-    refine le_trans _ (add_le_add hF₁ hF₂),
-    rw ← finset.sum_add_distrib,
-    refine finset.sum_le_sum _,
-    rintro s -,
-    rw ← tsum_add (F₁.summable s) (F₂.summable s),
-    refine tsum_le_tsum _ ((F₁ + F₂).summable _) ((F₁.summable s).add (F₂.summable s)),
-    intro n,
-    dsimp,
-    rw [← add_mul, ← nat.cast_add],
-    apply mul_le_mul_right',
-    rw nat.cast_le,
-    exact int.nat_abs_add_le _ _
-  end }
-.
+  by exact le_trans (nnnorm_add_le _ _) (add_le_add hF₁ hF₂) }
 
 lemma mem_filtration_iff (x : Mbar r' S) (c : ℝ≥0) :
-  x ∈ pseudo_normed_group.filtration (Mbar r' S) c ↔
-    (∑ s, ∑' n, (↑(x s n).nat_abs * r' ^ n)) ≤ c :=
+  x ∈ pseudo_normed_group.filtration (Mbar r' S) c ↔ ∥x∥₊ ≤ c :=
 iff.rfl
 
 /--
@@ -256,7 +289,7 @@ begin
   change _ ≤ _ at hF,
   rw mul_comm,
   apply le_mul_inv_of_mul_le (ne_of_gt h0r),
-  rw finset.sum_mul,
+  rw [nnnorm_def, finset.sum_mul],
   apply le_trans _ hF,
   apply finset.sum_le_sum,
   rintro s -,
@@ -274,4 +307,5 @@ end
 end Tinv
 
 end Mbar
+
 #lint- only unused_arguments def_lemma doc_blame
