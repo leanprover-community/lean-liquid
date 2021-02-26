@@ -294,7 +294,9 @@ instance : topological_space (Mbar_le r' S c) := topological_space.induced eqv (
 lemma is_open_iff {U : set (Mbar_bdd.limit r' ⟨S⟩ c)} : is_open (eqv ⁻¹' U) ↔ is_open U :=
 begin
   rw is_open_induced_iff,
-  simp [function.surjective.preimage_injective (equiv.surjective (eqv : Mbar_le r' S c ≃ _))],
+  have := function.surjective.preimage_injective (equiv.surjective (eqv : Mbar_le r' S c ≃ _)),
+  simp only [iff_self, this.eq_iff],
+  simp only [exists_eq_right],
 end
 
 /-- The homeomorphism between `Mbar_le r' S c`
