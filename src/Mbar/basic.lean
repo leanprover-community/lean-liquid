@@ -31,6 +31,9 @@ noncomputable theory
 open_locale big_operators nnreal
 
 -- move this
+lemma int.norm_def (n : ℤ) : ∥n∥ = abs n := rfl
+
+-- move this
 @[simp] lemma nnreal.coe_nat_abs (n : ℤ) : ↑n.nat_abs = nnnorm n :=
 nnreal.eq $
 calc ((n.nat_abs : ℝ≥0) : ℝ)
@@ -145,6 +148,7 @@ instance : add_comm_group (Mbar r' S) :=
 
 /-- The norm of `F : Mbar r' S` as nonnegative real number.
 It is defined as `∑ s, ∑' n, (↑(F s n).nat_abs * r' ^ n)`. -/
+protected
 def nnnorm (F : Mbar r' S) : ℝ≥0 := ∑ s, ∑' n, (↑(F s n).nat_abs * r' ^ n)
 
 notation `∥`F`∥₊` := Mbar.nnnorm F
@@ -152,17 +156,16 @@ notation `∥`F`∥₊` := Mbar.nnnorm F
 lemma nnnorm_def (F : Mbar r' S) : ∥F∥₊ = ∑ s, ∑' n, (↑(F s n).nat_abs * r' ^ n) := rfl
 
 @[simp] lemma nnnorm_zero : ∥(0 : Mbar r' S)∥₊ = 0 :=
-by simp only [nnnorm, Mbar.coe_zero, tsum_zero, nat.cast_zero, zero_mul, pi.zero_apply, zero_le',
-    finset.sum_const_zero, int.nat_abs_zero]
+by simp only [nnnorm_def, Mbar.coe_zero, tsum_zero, nat.cast_zero, zero_mul, pi.zero_apply,
+    zero_le', finset.sum_const_zero, int.nat_abs_zero]
 
 @[simp] lemma nnnorm_neg (F : Mbar r' S) : ∥-F∥₊ = ∥F∥₊ :=
-by simp only [nnnorm, Mbar.coe_neg, pi.neg_apply, int.nat_abs_neg, int.nat_abs,
+by simp only [nnnorm_def, Mbar.coe_neg, pi.neg_apply, int.nat_abs_neg, int.nat_abs,
   coe_neg, set.mem_set_of_eq]
 
 lemma nnnorm_add_le (F₁ F₂ : Mbar r' S) : ∥F₁ + F₂∥₊ ≤ ∥F₁∥₊ + ∥F₂∥₊ :=
 begin
-  dsimp [nnnorm],
-  rw ← finset.sum_add_distrib,
+  simp only [nnnorm_def, ← finset.sum_add_distrib],
   refine finset.sum_le_sum _,
   rintro s -,
   rw ← tsum_add (F₁.summable s) (F₂.summable s),
@@ -220,6 +223,21 @@ end
 
 @[simp] lemma coe_nsmul (n : ℕ) (F : Mbar r' S) : ⇑(n •ℕ F) = n •ℕ F :=
 coe_gsmul n F
+
+@[simp] lemma nnnorm_smul (N : ℤ) (F : Mbar r' S) : ∥N • F∥₊ = nnnorm N * ∥F∥₊ :=
+begin
+  simp only [nnnorm_def, finset.mul_sum],
+  apply fintype.sum_congr,
+  intro s,
+  apply nnreal.eq,
+  simp only [nnreal.coe_mul, nnreal.coe_tsum, ← tsum_mul_left, ← mul_assoc,
+    nnreal.coe_nat_abs, coe_nnnorm, coe_smul, pi.smul_apply, int.norm_def,
+    ← abs_mul, ← int.cast_mul],
+  apply tsum_congr,
+  intro n,
+  simp only [← smul_eq_mul],
+  congr /- evil congr, should be simp -/
+end
 
 section Tinv
 

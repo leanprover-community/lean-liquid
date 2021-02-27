@@ -374,7 +374,6 @@ begin
   rw [finset.sum_add_distrib, finset.sum_const, finset.card_univ,
     fintype.card_fin, nsmul_eq_smul, finset.sum_comm, ← hx₀],
 end
-lemma int.norm_def (n : ℤ) : ∥n∥ = abs n := rfl
 
 lemma lem98_crux [fact (r' < 1)] {ι : Type} [fintype ι] {l : ι → Λ}
   (hl : generates_norm l) (N : ℕ) (hN : 0 < N) (A : finset (Λ →+ ℤ))
@@ -417,9 +416,9 @@ begin
   { simp only [Mbar.coe_smul, Mbar.mk_of_add_monoid_hom_to_fun,
       pi.smul_apply, eq_self_iff_true, true_and, if_congr, and_congr],
     split_ifs,
-    { simp only [norm_one_class.norm_one, mul_one],
-      congr' 1,
-      sorry },
+    { simp only [int.norm_def, ← abs_mul, ← int.cast_mul],
+      simp only [← smul_eq_mul],
+      congr, /- evil congr, should be simp -/ },
     { simp only [mul_zero, norm_zero, smul_zero] } },
   all_goals { try { intro hsnA, exact (hsnA (hx₁'A s n)).elim } },
   all_goals { intros a haA hasn },
@@ -498,19 +497,20 @@ begin
     ... = ∑ a in A, (nnnorm (a (l i)) * ∥xₐ a∥₊ / N + nnnorm (a (l i))) : finset.sum_congr rfl _
     ... = ∑ a in A, (nnnorm (a (l i)) * ∥xₐ a∥₊ / N) + ∑ a in A, nnnorm (a (l i)) : _
     ... ≤ ∑ a in A, (nnnorm (a (l i)) * ∥xₐ a∥₊ / N) + d * nnnorm (l i) : add_le_add le_rfl _,
-    { intros a ha,
-      clear_dependent H hxy y,
-      -- needs `Mbar.nnnorm_smul`
-      sorry
-    },
+    { intros a ha, rw Mbar.nnnorm_smul },
     { intros a ha, refine mul_le_mul' le_rfl (hy'2 a j) },
     { intros a ha, rw [mul_add, mul_one, mul_div_assoc] },
     { rw finset.sum_add_distrib },
-    {
-      clear_dependent H hxy y,
-      dsimp only [d], clear d,
-      sorry
-    } },
+    { calc ∑ a in A, nnnorm (a (l i))
+          = (∑ a in A, nnnorm (a (l i)) / nnnorm (l i)) * nnnorm (l i) : _
+      ... ≤ finset.univ.sup (λ i, ∑ a in A, nnnorm (a (l i)) / nnnorm (l i)) * nnnorm (l i) : _,
+      { by_cases hli : l i = 0,
+        { simp only [hli, nnnorm_zero, add_monoid_hom.map_zero, zero_div,
+               finset.sum_const_zero, zero_mul] },
+        rw ← nnnorm_eq_zero at hli,
+        simp only [div_eq_mul_inv, ← finset.sum_mul],
+        rw [inv_mul_cancel_right' hli] },
+      { exact mul_le_mul' (finset.le_sup (finset.mem_univ i)) le_rfl } } },
   { simp only [div_eq_mul_inv, add_mul, finset.sum_mul, ← nsmul_eq_smul, nsmul_eq_mul],
     congr' 2,
     rw [mul_comm, inv_mul_cancel_left'],
