@@ -348,8 +348,8 @@ lemma dual_set_pointed (s : set M) (hs : (submodule.span R₀ s).saturation) :
 
 --def dual_set_generators (s : set M) : set N := { n : N | }
 
-lemma dual_fg_of_finite {s : set M} (fs : s.finite) : (f.dual_set P₀ s).fg :=
-sorry
+--lemma dual_fg_of_finite {s : set M} (fs : s.finite) : (f.dual_set P₀ s).fg :=
+--sorry
 
 /-
 /--  The behaviour of `dual_set` under smultiplication. -/
@@ -447,28 +447,34 @@ def pointed_of_is_basis {N : Type*} [add_comm_group N]
   {ι : Type*} (v : ι → M) (bv : is_basis ℤ v) (t : ι → N) :
   pointed ℤ (submodule.span ℕ (set.range v)) :=
 begin
-  obtain ⟨l, hl⟩ : ∃ l : M →ₗ[ℤ] ℤ, ∀ i : ι, l (v i) = 1 := ⟨bv.constr (λ _, 1), λ i, constr_basis bv⟩,
-  unfold pointed,
-
-  use l,
-  { simp only [forall_const, eq_self_iff_true, linear_map.map_add] },
-  { intros m x,
-    rw [algebra.id.smul_eq_mul, linear_map.map_smul],
-    refine congr _ rfl,
-    exact funext (λ (y : ℤ), by simp only [has_scalar.smul, gsmul_int_int]) },
-  { rintros m hm (m0 : l m = 0),
-    obtain ⟨T, Tv, mT⟩ := mem_span_finite_of_mem_span hm,
-    revert mT Tv m,
-    refine finset.induction_on T _ _,
-    { simp },
-    {
-      intros a s as ih m ms lm0 asv mT,
-      rw [finset.coe_insert, mem_span_insert] at mT,
-      obtain G := @finsupp.total ι M ℤ _ _ _ v _,
-      rcases mT with ⟨c1, m1, m1s, rfl⟩,
-      sorry,
-    } }
+  obtain ⟨l, hl⟩ : ∃ l : M →ₗ[ℤ] ℤ, ∀ i : ι, l (v i) = 1 :=
+    ⟨bv.constr (λ _, 1), λ i, constr_basis bv⟩,
+  refine Exists.intro
+  { to_fun := ⇑l,
+    map_add' := by simp only [forall_const, eq_self_iff_true, linear_map.map_add],
+    map_smul' := λ m x, by
+    { rw [algebra.id.smul_eq_mul, linear_map.map_smul],
+      refine congr _ rfl,
+      exact funext (λ (y : ℤ), by simp only [has_scalar.smul, gsmul_int_int]) } } _,
+  rintros m hm (m0 : l m = 0),
+  obtain ⟨c, csup, rfl⟩ := span_as_sum hm,
+  simp_rw [linear_map.map_sum, linear_map.map_smul_of_tower] at m0,
+  have : ∑ (i : M) in c.support, c i • l i = ∑ (i : M) in c.support, c i,
+  { refine finset.sum_congr rfl (λ x hx, _),
+    rcases set.mem_range.mp (set.mem_of_mem_of_subset (finset.mem_coe.mpr hx) csup) with ⟨i, rfl⟩,
+    simp [hl _, (•)], },
+  rw this at m0,
+  have : ∑ (i : M) in c.support, (0 : M) = 0,
+  { rw finset.sum_eq_zero,
+    simp only [eq_self_iff_true, forall_true_iff] },
+  rw ← this,
+  refine finset.sum_congr rfl (λ x hx, _),
+  rw finset.sum_eq_zero_iff_of_nonneg at m0,
+  { rw [int.coe_nat_eq_zero.mp (m0 x hx), zero_smul] },
+  { exact λ x hx, int.coe_nat_nonneg _ }
 end
+
+
 #exit
       apply ih _ ms lm0,
       obtain F := ih m1 _,

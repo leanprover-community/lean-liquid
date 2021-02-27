@@ -5,7 +5,7 @@ open submodule
 open_locale big_operators classical
 
 lemma submodule.span_as_sum {R M : Type*} [semiring R] [add_comm_group M] [semimodule R M]
-  (m : M) (s : set M) (hm : m ∈ submodule.span R s) :
+  {m : M} {s : set M} (hm : m ∈ submodule.span R s) :
   ∃ c : M →₀ R, (c.support : set M) ⊆ s ∧ (∑ i in c.support, c i • i) = m :=
 begin
   -- the element `m` is in the span of `s`, if it is in the span of a finite subset `T ⊆ s`
