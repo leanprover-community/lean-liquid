@@ -17,6 +17,8 @@ import algebra.big_operators.basic
 -- the example is here since otherwise Lean complains that `section does not accept doc string`
 example : true := trivial
 
+open_locale big_operators classical
+
 -- Here we make the general statements that require few assumptions on the various types.
 section abstract
 
@@ -100,10 +102,14 @@ def extremal_rays (s : submodule R₀ M) : set (submodule R₀ M) :=
 a role in the proof of `sup_extremal_rays`. -/
 variables [comm_semiring R] [semimodule R M]
 
-/--  A pointed submodule is a submodule `s` that intersects the hyperplane `ker φ` just in the
-origin.  Alternatively, the submodule `s` contains no `R` linear subspace. -/
--- this definition applies equally well to `subsets` of `M`, not necessarily to submodules.
+/--  A pointed submodule is a submodule `s` for which there exists a linear function `φ : M → R`,
+such that the hyperplane `ker φ` intersects `s` in just the origin.
+Alternatively, the submodule `s` contains no `R` linear subspace. -/
 def pointed (s : submodule R₀ M) : Prop := ∃ φ : M →ₗ[R] R, ∀ x : M, x ∈ s → φ x = 0 → x = 0
+
+/--  A pointed subset is a submodule `s` for which there exists a linear function `φ : M → R`,
+such that the hyperplane `ker φ` intersects `s` in just the origin. -/
+-- We may not need this definition.
 def pointed_subset (s : set M) : Prop := ∃ φ : M →ₗ[R] R, ∀ x : M, x ∈ s → φ x = 0 → x = 0
 
 variables [algebra R₀ R] [is_scalar_tower R₀ R M]
@@ -404,6 +410,7 @@ begin
 end
 -/
 
+
 end pairing
 
 end pairing
@@ -411,6 +418,59 @@ end pairing
 end abstract
 
 -- ending the section to clear out all the assumptions
+
+section add_group
+
+variables {R₀ R : Type*} [comm_ring R₀] [comm_ring R] [algebra R₀ R]
+variables {M : Type*} [add_comm_group M] [module R₀ M] [module R M] [is_scalar_tower R₀ R M]
+--variables {M N : Type*} [add_comm_monoid M] --[semimodule ℕ M] [semimodule ℤ M]
+  --[algebra ℕ ℤ] [is_scalar_tower ℕ ℤ M]
+
+--variables {P : Type*}
+--  [add_comm_monoid N] --[semimodule ℕ N] [semimodule ℤ N] --[is_scalar_tower ℕ ℤ N]
+--  [add_comm_monoid P] --[semimodule ℕ P] [semimodule ℤ P] --[is_scalar_tower ℕ ℤ P]
+--  (P₀ : submodule ℕ P)
+
+
+open pairing submodule
+
+/-
+lemma pointed_of_is_basis {ι : Type*} (v : ι → M) (bv : is_basis R v) :
+  pointed R (submodule.span R₀ (set.range v)) :=
+begin
+  obtain ⟨l, hl⟩ : ∃ l : M →ₗ[R] R, ∀ i : ι, l (v i) = 1 :=
+    ⟨bv.constr (λ _, 1), λ i, constr_basis bv⟩,
+  refine Exists.intro
+  { to_fun := ⇑l,
+    map_add' := by simp only [forall_const, eq_self_iff_true, linear_map.map_add],
+    map_smul' := λ m x, by
+    { rw [algebra.id.smul_eq_mul, linear_map.map_smul],
+      refine congr _ rfl,
+      exact funext (λ y, by simp only [has_scalar.smul, gsmul_int_int]) } } _,
+  rintros m hm (m0 : l m = 0),
+  obtain ⟨c, csup, rfl⟩ := span_as_sum hm,
+  simp_rw [linear_map.map_sum] at m0,--, linear_map.map_smul_of_tower] at m0,
+  have : linear_map.compatible_smul M R R₀ R := sorry,
+  conv_lhs at m0 {
+    apply_congr, skip, rw @linear_map.map_smul_of_tower _ _ _ _ _ _ _ _ _ _ _ this l, skip },
+  have : ∑ (i : M) in c.support, (c i • l i : R) = ∑ (i : M) in c.support, (c i : R),
+  { refine finset.sum_congr rfl (λ x hx, _),
+    rcases set.mem_range.mp (set.mem_of_mem_of_subset (finset.mem_coe.mpr hx) csup) with ⟨i, rfl⟩,
+    simp [hl _, (•)], },
+  rw this at m0,
+  have : ∑ (i : M) in c.support, (0 : M) = 0,
+  { rw finset.sum_eq_zero,
+    simp only [eq_self_iff_true, forall_true_iff] },
+  rw ← this,
+  refine finset.sum_congr rfl (λ x hx, _),
+  rw finset.sum_eq_zero_iff_of_nonneg at m0,
+  { rw [int.coe_nat_eq_zero.mp (m0 x hx), zero_smul] },
+  { exact λ x hx, int.coe_nat_nonneg _ }
+end
+-/
+
+end add_group
+
 
 /- In the intended application, these are the players:
 * `R₀ = ℕ`;
@@ -435,16 +495,7 @@ variables {M : Type*} [add_comm_group M] --[semimodule ℕ M]
 --  [add_comm_monoid P] --[semimodule ℕ P] [semimodule ℤ P] --[is_scalar_tower ℕ ℤ P]
 --  (P₀ : submodule ℕ P)
 
-def basis_set_adjunction {R M N : Type*}
-  [ring R] [add_comm_group M] [add_comm_group N] [module R M] [module R N]
-  {ι : Type*} (v : ι → M) (bv : is_basis R v) (t : ι → N) :
-  ∃ l : M →ₗ[R] N, ∀ i : ι, l (v i) = t i :=
-⟨bv.constr t, λ i, constr_basis bv⟩
-
-open_locale big_operators classical
-
-def pointed_of_is_basis {N : Type*} [add_comm_group N]
-  {ι : Type*} (v : ι → M) (bv : is_basis ℤ v) (t : ι → N) :
+lemma pointed_of_is_basis {ι : Type*} (v : ι → M) (bv : is_basis ℤ v) :
   pointed ℤ (submodule.span ℕ (set.range v)) :=
 begin
   obtain ⟨l, hl⟩ : ∃ l : M →ₗ[ℤ] ℤ, ∀ i : ι, l (v i) = 1 :=
@@ -475,41 +526,18 @@ begin
 end
 
 
-#exit
-      apply ih _ ms lm0,
-      obtain F := ih m1 _,
-      rotate,
-      cases bv,
-      apply set.mem_of_mem_of_subset _ m1s,
-
-      simp only [set.mem_range, mem_coe],
-      dsimp,
-      use span ℕ (v '' set.univ),
-      simp,
-      apply ih,
-
---      simp only [finset.coe_insert, set.image_univ] at *,
---      simp only [set.Inter_eq_univ] at *,
-    },
-    rw ← span_image at hm,
-    rw mem_span at hm,
-    rw m.as_sum at m0,
-  --library_search,
-  --rw smul_eq_mul,
-
-  obtain ⟨l, hl⟩ : ∃ l : M →ₗ[ℤ] N, ∀ i : ι, l (v i) = t i := ⟨bv.constr t, λ i, constr_basis bv⟩,
-  sorry },
-end
-
 lemma of_non_deg {ι : Type*} {f : pairing ℤ M M ℤ} {v : ι → M}
   (nd : perfect f) (sp : submodule.span ℤ (v '' set.univ)) :
   pointed ℤ (submodule.span ℕ (v '' set.univ)) :=
 begin
-  tidy?,
+--  tidy?,
   sorry
 end
 
+end pairing
 
+end concrete
+/- This might be junk
 def standard_pairing_Z : pairing ℤ ℤ ℤ ℤ :=
 { to_fun := λ z,
   { to_fun := λ n, z * n,
@@ -646,9 +674,4 @@ begin
   tidy?,
   convert pointed_of_sub_R M,
 end
-
-
-
-end pairing
-
-end concrete
+-/

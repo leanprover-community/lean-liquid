@@ -29,7 +29,7 @@ begin
     mem_span_insert.mp m1i,
   -- apply the induction hypothesis to obtain the coefficients for the elements of `T`
   obtain ⟨c1, c1ss, rfl⟩ : ∃ (c : M →₀ R), (c.support) ⊆ T ∧ ∑ (i : M) in c.support, c i • i = z :=
-    ih z T rfl.subset hz,
+    ih rfl.subset hz,
   -- separate the cases in which the coefficient `a` of the "new" element `m1` vanishes...
   by_cases a0 : a = 0,
   { -- in this case, the coefficients that we get by induction work straight away
@@ -88,6 +88,40 @@ end
 
 
 #exit
+
+lemma submodule.span_as_sum_kevin {R M : Type*} [semiring R] [add_comm_group M] [semimodule R M]
+  {m : M} {s : set M} (hm : m ∈ submodule.span R s) :
+  ∃ c : M →₀ R, (c.support : set M) ⊆ s ∧ (∑ i in c.support, c i • i) = m :=
+begin
+  by_cases tr : (1 : R) = 0,
+  refine ⟨0, _, _⟩,
+  { simp only [set.empty_subset, finset.coe_empty, finsupp.support_zero] },
+  { rw [← one_smul R m, tr],
+    simp only [finsupp.coe_zero, zero_smul, finset.sum_const_zero] },
+--  haveI : nontrivial R:= nontrivial_of_ne 1 0 tr,
+  apply span_induction hm,
+  { refine λ x xs, ⟨finsupp.single x 1, _, _⟩,
+    { rw finsupp.support_single_ne_zero tr,
+      exact finset.singleton_subset_set_iff.mpr xs },
+    { rw finsupp.support_single_ne_zero tr,
+      simp } },
+  { refine ⟨0, _, _⟩,
+    { simp only [set.empty_subset, finset.coe_empty, finsupp.support_zero] },
+    { simp only [finsupp.coe_zero, zero_smul, finset.sum_const_zero]} },
+  {
+    rintros x y ⟨cx, cxs, rfl⟩ ⟨cy, cys, rfl⟩,
+    refine ⟨cx + cy, _, _⟩,
+    sorry,--inclusions
+    simp,
+    sorry,
+  },
+  {
+    rintros a x ⟨cx, cxs, rfl⟩,
+    refine ⟨a • cx, _, _⟩,
+  },
+end
+
+
 
 lemma submodule.span_as_sum {R : Type*} [semiring R] [semimodule R M]
   (m : M) (s : set M) (hm : m ∈ submodule.span R s) :
