@@ -2,7 +2,7 @@ import data.polynomial.degree.lemmas
 import algebra.module.ordered
 import algebra.regular
 --import ring_theory.noetherian
-import 2021_02_19_toric.submodule.as_span
+import toric_2021_02_19.span_as_sum
 --import linear_algebra.finite_dimensional
 import algebra.big_operators.basic
 --import analysis.normed_space.inner_product
