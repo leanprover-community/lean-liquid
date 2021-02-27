@@ -1,5 +1,7 @@
 import algebra.group.basic
 import normed_group.NormedGroup
+import set_theory.ordinal
+import order.lexicographic
 
 import Mbar.basic
 import polyhedral_lattice.basic
@@ -81,6 +83,22 @@ def Mbar.coeff (s : S) (n : ℕ) : Mbar r' S →+ ℤ :=
 .
 
 variables {Λ r'}
+
+@[simps]
+def Mbar.of_mask (x : Mbar r' S) (mask : S → ℕ → Prop) [∀ s n, decidable (mask s n)] :
+  Mbar r' S :=
+{ to_fun := λ s n, if mask s n then x s n else 0,
+  coeff_zero' := λ s, by { split_ifs, { exact x.coeff_zero s }, { refl } },
+  summable' := λ s,
+  begin
+    apply nnreal.summable_of_le _ (x.summable s),
+    intro n,
+    apply mul_le_mul' _ le_rfl,
+    norm_cast,
+    split_ifs,
+    { refl },
+    { rw int.nat_abs_zero, exact zero_le' }
+  end }
 
 -- ugly name
 @[simps]
@@ -232,17 +250,12 @@ end pseudo_normed_group
 
 end
 
-variables {Λ r' S}
-
 @[simps]
-def Mbar.mk_of_add_monoid_hom [fact (r' < 1)] (x : S → ℕ → Λ →+ ℤ) (a : Λ →+ ℤ)
-  [∀ s n, decidable (x s n = a)] :
-  Mbar r' S :=
-{ to_fun := λ s n, if x s n = a ∧ 0 < n then 1 else 0,
-  coeff_zero' := λ s, by simp only [not_lt_zero', and_false, if_false],
-  summable' :=
+def Mbar.geom [fact (r' < 1)] : Mbar r' S :=
+{ to_fun := λ s n, if n = 0 then 0 else 1,
+  coeff_zero' := λ s, if_pos rfl,
+  summable' := λ s,
   begin
-    intro s,
     have := (normed_ring.summable_geometric_of_norm_lt_1 (r' : ℝ) _), swap,
     { rwa nnreal.norm_eq },
     simp only [← nnreal.coe_pow, nnreal.summable_coe] at this,
@@ -251,6 +264,14 @@ def Mbar.mk_of_add_monoid_hom [fact (r' < 1)] (x : S → ℕ → Λ →+ ℤ) (a
     refine (mul_le_mul' _ le_rfl).trans (one_mul _).le,
     split_ifs; simp
   end }
+
+variables {Λ r' S}
+
+@[simps]
+def Mbar.mk_of_add_monoid_hom [fact (r' < 1)] (x : S → ℕ → Λ →+ ℤ) (a : Λ →+ ℤ)
+  [∀ s n, decidable (x s n = a)] :
+  Mbar r' S :=
+Mbar.of_mask (Mbar.geom r' S) $ λ s n, x s n = a
 
 lemma Mbar.mk_aux_mem_filtration
   (ι : Type) (c : ℝ≥0) (N : ℕ) (hN : 0 < N) [fintype ι]
@@ -327,17 +348,32 @@ begin
   simp only [finset.sum_apply, Mbar.coe_sum, pi.smul_apply, Mbar.coe_smul,
     Mbar.coe_mk],
   rw [finset.sum_eq_single (x₁' s n)],
-  { simp only [true_and, and_congr, if_congr, eq_self_iff_true,
+  { simp only [true_and, and_congr, if_congr, eq_self_iff_true, if_true,
           Mbar.mk_of_add_monoid_hom_to_fun],
     split_ifs with hn,
-      { simp only [← gsmul_eq_smul, mul_one, gsmul_int_int, hx₁] },
-      { rw [smul_zero],
-        obtain rfl : n = 0 := nat.eq_zero_of_le_zero (le_of_not_lt hn),
-        exact (x₁ l).coeff_zero s } },
+    { rw [smul_zero, hn], exact (x₁ l).coeff_zero s },
+    { simp only [← gsmul_eq_smul, mul_one, gsmul_int_int, hx₁] } },
   { intros a haA ha,
     simp only [ha.symm, false_and, if_false, smul_zero,
       Mbar.mk_of_add_monoid_hom_to_fun] },
   { intro hsn, exact (hsn (hx₁' s n)).elim }
+end
+
+def mask_fun (f : ℕ → ℝ≥0) (mask : ℕ → Prop) [∀ n, decidable (mask n)] : ℕ → ℝ≥0 :=
+λ n, if mask n then f n else 0
+
+lemma exists_partition (N : ℕ) (hN : 0 < N) (f : ℕ → ℝ≥0) (hf : ∀ n, f n ≤ 1) :
+  ∃ (mask : fin N → ℕ → Prop) [∀ i n, decidable (mask i n)], by exactI
+    (∀ n, ∃! i, mask i n) ∧ (∀ i, ∑' n, mask_fun f (mask i) n ≤ (∑' n, f n) / N + 1) :=
+sorry
+
+lemma lem98_int_fin (nS : ℕ) [fact (r' < 1)] (N : ℕ) (hN : 0 < N) (c : ℝ≥0)
+  (x : Mbar r' (fin nS)) (hx : x ∈ filtration (Mbar r' (fin nS)) c)
+  (H : ∀ s n, (x s n).nat_abs ≤ 1) :
+  ∃ y : fin N → Mbar r' (fin nS), (x = ∑ i, y i) ∧
+      (∀ i, y i ∈ filtration (Mbar r' (fin nS)) (c/N + 1)) :=
+begin
+  sorry
 end
 
 lemma lem98_int [fact (r' < 1)] (N : ℕ) (hN : 0 < N) (c : ℝ≥0)
@@ -346,6 +382,8 @@ lemma lem98_int [fact (r' < 1)] (N : ℕ) (hN : 0 < N) (c : ℝ≥0)
   ∃ y : fin N → Mbar r' S, (x = ∑ i, y i) ∧
       (∀ i, y i ∈ filtration (Mbar r' S) (c/N + 1)) :=
 begin
+  classical,
+  obtain ⟨e⟩ := fintype.equiv_fin S,
   sorry
 end
 
@@ -413,13 +451,13 @@ begin
   simp only [finset.sum_apply, Mbar.coe_sum, Mbar.mk_of_add_monoid_hom_to_fun,
     pi.smul_apply],
   rw [finset.sum_eq_single (x₁' s n), finset.sum_eq_single (x₁' s n)],
-  { simp only [Mbar.coe_smul, Mbar.mk_of_add_monoid_hom_to_fun,
+  { simp only [Mbar.coe_smul, Mbar.mk_of_add_monoid_hom_to_fun, if_true,
       pi.smul_apply, eq_self_iff_true, true_and, if_congr, and_congr],
     split_ifs,
+    { simp only [mul_zero, norm_zero, smul_zero] },
     { simp only [int.norm_def, ← abs_mul, ← int.cast_mul],
       simp only [← smul_eq_mul],
-      congr, /- evil congr, should be simp -/ },
-    { simp only [mul_zero, norm_zero, smul_zero] } },
+      congr, /- evil congr, should be simp -/ } },
   all_goals { try { intro hsnA, exact (hsnA (hx₁'A s n)).elim } },
   all_goals { intros a haA hasn },
   { simp only [hasn.symm, Mbar.mk_of_add_monoid_hom_to_fun, norm_zero,
