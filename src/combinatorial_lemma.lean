@@ -1,6 +1,7 @@
 import algebra.group.basic
 import normed_group.NormedGroup
 import set_theory.ordinal
+import set_theory.cardinal_ordinal
 import order.lexicographic
 
 import Mbar.basic
@@ -376,6 +377,21 @@ begin
   sorry
 end
 
+lemma fintype_prod_nat_equiv_nat (S : Type*) [fintype S] [hS : nonempty S] :
+  nonempty (S × ℕ ≃ ℕ) :=
+begin
+  classical,
+  obtain ⟨e'⟩ := fintype.equiv_fin S,
+  refine nonempty.intro _,
+  calc S × ℕ ≃ fin (fintype.card S) × ℕ : equiv.prod_congr_left (λ _, e')
+         ... ≃ ℕ : classical.choice $ cardinal.eq.1 _,
+  rw [← cardinal.lift_id (cardinal.mk ℕ),
+    cardinal.mk_prod, ← cardinal.omega, cardinal.mul_eq_right];
+  simp [le_of_lt (cardinal.nat_lt_omega _), le_refl],
+  rw ← fintype.card_pos_iff at hS,
+  exact_mod_cast hS.ne'
+end
+
 lemma lem98_int [fact (r' < 1)] (N : ℕ) (hN : 0 < N) (c : ℝ≥0)
   (x : Mbar r' S) (hx : x ∈ filtration (Mbar r' S) c)
   (H : ∀ s n, (x s n).nat_abs ≤ 1) :
@@ -383,7 +399,31 @@ lemma lem98_int [fact (r' < 1)] (N : ℕ) (hN : 0 < N) (c : ℝ≥0)
       (∀ i, y i ∈ filtration (Mbar r' S) (c/N + 1)) :=
 begin
   classical,
-  obtain ⟨e⟩ := fintype.equiv_fin S,
+  by_cases hS : nonempty S, swap,
+  { refine ⟨λ i, 0, _, _⟩,
+    { ext s n, exact (hS ⟨s⟩).elim },
+    { intro, exact zero_mem_filtration _ } },
+  resetI,
+  obtain ⟨e⟩ := fintype_prod_nat_equiv_nat S,
+  let f : ℕ → ℝ≥0 :=
+    λ n, ↑(x (e.symm n).1 (e.symm n).2).nat_abs * r' ^ (e.symm n).2,
+  obtain ⟨mask, h0, h1, h2⟩ := exists_partition N hN f _, swap,
+  -- obtain ⟨mask, -, h1, h2⟩ := exists_partition N hN f _, swap,
+  { intro n,
+    calc f n ≤ 1 * 1 : mul_le_mul' _ _
+    ... = 1 : mul_one 1,
+    { exact_mod_cast (H _ _) },
+    { exact pow_le_one _ zero_le' (le_of_lt ‹_›) } },
+  refine ⟨λ i, Mbar.of_mask x (function.curry $ mask i ∘ e), _, _⟩,
+  { ext s n,
+    simp only [Mbar.coe_sum, if_congr, function.curry_apply, fintype.sum_apply,
+      function.comp_app, Mbar.of_mask_to_fun, finset.sum_congr],
+    obtain ⟨i, hi1, hi2⟩ := h1 (e (s, n)),
+    rw [finset.sum_eq_single i, if_pos hi1],
+    { rintro j - hj,
+      rw if_neg,
+      exact mt (hi2 j) hj },
+    { intro hi, exact (hi (finset.mem_univ i)).elim } },
   sorry
 end
 
