@@ -398,7 +398,6 @@ lemma lem98_int [fact (r' < 1)] (N : ℕ) (hN : 0 < N) (c : ℝ≥0)
   ∃ y : fin N → Mbar r' S, (x = ∑ i, y i) ∧
       (∀ i, y i ∈ filtration (Mbar r' S) (c/N + 1)) :=
 begin
-  classical,
   by_cases hS : nonempty S, swap,
   { refine ⟨λ i, 0, _, _⟩,
     { ext s n, exact (hS ⟨s⟩).elim },
@@ -408,13 +407,20 @@ begin
   let f : ℕ → ℝ≥0 :=
     λ n, ↑(x (e.symm n).1 (e.symm n).2).nat_abs * r' ^ (e.symm n).2,
   obtain ⟨mask, h0, h1, h2⟩ := exists_partition N hN f _, swap,
-  -- obtain ⟨mask, -, h1, h2⟩ := exists_partition N hN f _, swap,
   { intro n,
     calc f n ≤ 1 * 1 : mul_le_mul' _ _
     ... = 1 : mul_one 1,
     { exact_mod_cast (H _ _) },
     { exact pow_le_one _ zero_le' (le_of_lt ‹_›) } },
-  refine ⟨λ i, Mbar.of_mask x (function.curry $ mask i ∘ e), _, _⟩,
+  resetI,
+  have hf : ∑ i, mask_fun f (mask i) = f,
+  { ext1 n, simp only [fintype.sum_apply, mask_fun],
+    obtain ⟨i, hi1, hi2⟩ := h1 n,
+    rw [finset.sum_eq_single i, if_pos hi1],
+    { rintro j - hj, rw if_neg, exact mt (hi2 j) hj },
+    { intro hi, exact (hi (finset.mem_univ i)).elim } },
+  let y := λ i, Mbar.of_mask x (λ s n, mask i (e (s, n))),
+  have hxy : x = ∑ i, y i,
   { ext s n,
     simp only [Mbar.coe_sum, if_congr, function.curry_apply, fintype.sum_apply,
       function.comp_app, Mbar.of_mask_to_fun, finset.sum_congr],
@@ -424,7 +430,20 @@ begin
       rw if_neg,
       exact mt (hi2 j) hj },
     { intro hi, exact (hi (finset.mem_univ i)).elim } },
-  sorry
+  have hxf : ∥x∥₊ = ∑' n, f n,
+  { sorry },
+  refine ⟨y, hxy, _⟩,
+  intro i,
+  rw [Mbar.mem_filtration_iff] at hx ⊢,
+  refine le_trans (le_of_eq _) ((h2 i).trans _),
+  { rw [Mbar.nnnorm_def, ← tsum_sum], swap,
+    { rintro s -, exact (y i).summable s },
+    -- now we need to massage the RHS using `e : S × ℕ ≃ ℕ`
+    sorry
+    },
+  { simp only [div_eq_mul_inv],
+    refine add_le_add (mul_le_mul' _ le_rfl) le_rfl,
+    exact hxf.ge.trans hx }
 end
 
 lemma lem98_aux' [fact (r' < 1)] (N : ℕ)
