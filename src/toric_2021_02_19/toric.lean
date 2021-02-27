@@ -1,8 +1,10 @@
 import data.polynomial.degree.lemmas
 import algebra.module.ordered
 import algebra.regular
-import ring_theory.noetherian
-import linear_algebra.finite_dimensional
+--import ring_theory.noetherian
+import 2021_02_19_toric.submodule.as_span
+--import linear_algebra.finite_dimensional
+import algebra.big_operators.basic
 --import analysis.normed_space.inner_product
 
 /-- In the intended application, these are the players:
@@ -158,7 +160,7 @@ begin
   refine (span_singleton_le_iff_mem t0 s).mpr _,
   rcases (submodule.ne_bot_iff _).mp s0 with ⟨m, hm, m0⟩,
   rcases (le_span_singleton_iff.mp st) _ hm with ⟨c, rfl⟩,
-  refine ss _ (is_regular_of_cancel_monoid_with_zero _) _ hm,
+  refine ss _ (is_regular_of_ne_zero _) _ hm,
   exact λ h, m0 (by rw [h, zero_smul]),
 end
 
@@ -439,14 +441,7 @@ def basis_set_adjunction {R M N : Type*}
   ∃ l : M →ₗ[R] N, ∀ i : ι, l (v i) = t i :=
 ⟨bv.constr t, λ i, constr_basis bv⟩
 
-open_locale classical big_operators
-
-lemma mem_span_add {R : Type*} [semiring R] [add_comm_group M] [semimodule R M]
-  (m : M) (s : set M) (hm : m ∈ submodule.span R s) :
-  ∃ c : finsupp M R, ((c.support : set M) ⊆ s) ∧ ((c.sum, begin
-
-  end) = m) :=
-
+open_locale big_operators classical
 
 def pointed_of_is_basis {N : Type*} [add_comm_group N]
   {ι : Type*} (v : ι → M) (bv : is_basis ℤ v) (t : ι → N) :
