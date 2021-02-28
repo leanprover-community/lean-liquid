@@ -508,7 +508,10 @@ begin
       refine congr _ rfl,
       exact funext (λ (y : ℤ), by simp only [has_scalar.smul, gsmul_int_int]) } } _,
   rintros m hm (m0 : l m = 0),
+  obtain ⟨ck, csupk, rk⟩ := span_as_sum hm,
+--  obtain ⟨ck, csupk, rk⟩ := @span_as_sum ℕ _ _ _ _ _ (set.range v) hm,
   obtain ⟨c, csup, rfl⟩ := span_as_sum hm,
+  change l (∑ i in c.support, c i • i) = 0 at m0,
   simp_rw [linear_map.map_sum, linear_map.map_smul_of_tower] at m0,
   have : ∑ (i : M) in c.support, c i • l i = ∑ (i : M) in c.support, c i,
   { refine finset.sum_congr rfl (λ x hx, _),
@@ -521,7 +524,9 @@ begin
   rw ← this,
   refine finset.sum_congr rfl (λ x hx, _),
   rw finset.sum_eq_zero_iff_of_nonneg at m0,
-  { rw [int.coe_nat_eq_zero.mp (m0 x hx), zero_smul] },
+  { convert zero_smul ℤ _,
+    obtain F := (m0 x hx),
+    exact int.coe_nat_eq_zero.mp (m0 x hx) },
   { exact λ x hx, int.coe_nat_nonneg _ }
 end
 

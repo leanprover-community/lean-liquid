@@ -1,263 +1,116 @@
 import linear_algebra.basis
+--import algebra.ring.basic
+import ring_theory.subring
 
-open submodule
+section span_as_sum
+
+universe u
+
+open submodule finsupp
 
 open_locale big_operators classical
 
-lemma submodule.span_as_sum {R M : Type*} [semiring R] [add_comm_group M] [semimodule R M]
+lemma span_as_sum_converse {R : Type*} {M : Type u} [semiring R] [add_comm_group M] [semimodule R M]
+  {m : M} {s : set M}
+  (hx : ∃ c : M →₀ R, (c.support : set M) ⊆ s ∧ (c.sum (λ i, (smul_add_hom R M).flip i)) = m) :
+  m ∈ submodule.span R s :=
+begin
+  rcases hx with ⟨c, cM, rfl⟩,
+  refine sum_mem (span R s) _,
+  rintros d ds S ⟨h1, rfl⟩,
+  rintros g ⟨h1m : s ⊆ ↑h1, rfl⟩,
+  refine h1.smul_mem (c d) _,
+  exact @set.mem_of_mem_of_subset M d _ _ ((finset.mem_coe).mpr ds) (set.subset.trans cM h1m),
+end
+
+/-- If `m ∈ M` is contained in the `R`-submodule spanned by a set `s ⊆ M`, then we can write
+`m` as a finite `R`-linear combination of elements of `s`.
+The implementation uses `finsupp.sum`.
+The Type `M` has an explicit universe, since otherwise it gets assigned `Type (max u_2 u_3)`.
+  -/
+--lemma span_as_sum {R : Type*} {M : Type u} [semiring R] [add_comm_group M] [semimodule R M]
+--  {m : M} {s : set M} (hm : m ∈ submodule.span R s) :
+--  ∃ c : M →₀ R, (c.support : set M) ⊆ s ∧ (c.sum (λ i, (smul_add_hom R M).flip i)) = m :=
+lemma span_as_sum {R : Type*} {M : Type u} [semiring R] [add_comm_group M] [semimodule R M]
   {m : M} {s : set M} (hm : m ∈ submodule.span R s) :
-  ∃ c : M →₀ R, (c.support : set M) ⊆ s ∧ (∑ i in c.support, c i • i) = m :=
+  ∃ c : M →₀ R, (c.support : set M) ⊆ s ∧ (c.sum (λ i, ((smul_add_hom R M).flip) i)) = m :=
 begin
-  -- the element `m` is in the span of `s`, if it is in the span of a finite subset `T ⊆ s`
-  obtain ⟨T, Tv, mT⟩ := mem_span_finite_of_mem_span hm,
-  -- now that we know that our element `m` is in the span of `T ⊆ S`, we no longer need to carry
-  -- around that it is also in the span of `S`
-  clear hm,
-  -- prepare for doing induction on
-  revert m s,
-  -- induction on the finset `T`: the base case `T = ∅` is trivial.
-  refine finset.induction_on T (λ m s es me, ⟨0, by simpa [eq_comm] using me⟩) _,
-  -- clear unneded clutter (not sure why this did not go away on its own)
-  clear T,
-  -- induction step: we add an element `m1` to the finset `T`, we have an element `m`
-  -- in the span of `T ∪ {m1}`
-  refine λ m1 T m1T ih m s ims m1i, _,
-  -- move sets/finsets around
-  rw [finset.coe_insert] at m1i,
-  -- we isolate the coefficient `a` of `m1`
-  obtain ⟨a, z, hz, rfl⟩ : ∃ (a : R) (z : M) (H : z ∈ span R ↑T), m = a • m1 + z :=
-    mem_span_insert.mp m1i,
-  -- apply the induction hypothesis to obtain the coefficients for the elements of `T`
-  obtain ⟨c1, c1ss, rfl⟩ : ∃ (c : M →₀ R), (c.support) ⊆ T ∧ ∑ (i : M) in c.support, c i • i = z :=
-    ih rfl.subset hz,
-  -- separate the cases in which the coefficient `a` of the "new" element `m1` vanishes...
-  by_cases a0 : a = 0,
-  { -- in this case, the coefficients that we get by induction work straight away
-    refine ⟨c1, λ g hg, ims (finset.mem_insert_of_mem (c1ss hg)), _⟩,
-    rw [a0, zero_smul, zero_add] },
-  -- or the new coefficient `a` is non-zero
-  -- the new element `m1` is not in the support of the coefficients for `m` arising from the
-  -- induction hypothesis
-  have mc1 : m1 ∉ c1.support := λ h, m1T (finset.mem_coe.mp (set.mem_of_mem_of_subset h c1ss)),
-  -- by construction, the support of `c1` does not contain `m1`
-  have dc1m : disjoint c1.support (finsupp.single m1 a).support,
-  { rw [finsupp.support_single_ne_zero a0],
-    exact finset.disjoint_singleton.mpr mc1 },
-  -- moreover, the involved coefficients are really the coefficients appearing in the support
-  -- of `c1` and `{m1}`
-  have cpa : (c1 + finsupp.single m1 a).support = c1.support ∪ {m1},
-  { ext x,
-    rw ← finsupp.support_single_ne_zero a0,
-    refine ⟨λ h, finsupp.support_add h, λ h, _⟩,
-    refine finset.mem_of_subset (eq.subset _) h,
-    rw finsupp.support_add_eq dc1m },
-  -- of course, `m` is the sum of the coefficients coming from the induction and
-  -- the new coefficient `a` for `m1`
-  refine ⟨c1 + finsupp.single m1 a, λ h hs, ims _, _⟩,
-  -- make sure that the support is still contained in `T ∪ {m1}`
-  { -- we use `hs`, once we undo trivialities
-    rw [cpa, finset.union_comm] at hs,
-    refine set.mem_of_mem_of_subset hs _,
-    rw [← finset.insert_eq, finset.coe_insert, finset.coe_insert],
-    exact set.insert_subset_insert c1ss },
-  -- in this branch, we show that the element `m` really is the sum that we claim it is
-  { -- remove clutter from the proof
-    clear m1i m1T hz ih,
-    -- a complicated way of writing `a • m1`, as a sum over the singleton `{m1}`
-    have : ∑ (x : M) in {m1}, (c1 + finsupp.single m1 a) x • x = a • m1,
-    { rw [finset.sum_singleton, finsupp.coe_add, pi.add_apply, add_smul, finsupp.single_eq_same],
-      refine add_left_eq_self.mpr _,
-      rw [finsupp.not_mem_support_iff.mp mc1, zero_smul] },
-    -- we start by matching up term, first one of the sums equals `a • m1`
-    rw [cpa, finset.sum_union (by rwa finsupp.support_single_ne_zero a0 at dc1m), add_comm,
-      this, finsupp.coe_add],
-    -- next, we split the other sum
-    simp_rw [pi.add_apply, add_smul, finset.sum_add_distrib],
-    -- now we clear `a • m1` and one of the sums, since they are equal on both sides
-    refine (add_right_inj _).mpr (add_right_eq_self.mpr _),
-    -- we show that the remaining sum vanishes, by showing that all its terms vanish
-    refine finset.sum_eq_zero (λ x xc1, _),
-    -- it suffices to show that we are `smul`ling by `0`
-    convert zero_smul _ x,
-    -- for this, it suffices to show that `x` is not equal to `m1`
-    rw [← finsupp.not_mem_support_iff, finsupp.support_single_ne_zero a0, finset.not_mem_singleton],
-    -- since `x` is in the support of `c1`, it follows that `x ≠ m1`, the proof is by contradiction
-    rintros rfl,
-    exact mc1 xc1 }
+  classical,
+  refine span_induction hm (λ x hx, _) ⟨0, by simp⟩ _ _; clear hm m,
+  { refine ⟨finsupp.single x 1, λ y hy, _, by simp⟩,
+    rw [finset.mem_coe, finsupp.mem_support_single] at hy,
+    rwa hy.1 },
+  { rintros x y ⟨c, hc, rfl⟩ ⟨d, hd, rfl⟩,
+    refine ⟨c + d, _, by simp⟩,
+    refine set.subset.trans _ (set.union_subset hc hd),
+    rw [← finset.coe_union, finset.coe_subset],
+    convert finsupp.support_add },
+  { rintros r m ⟨c, hc, rfl⟩,
+    refine ⟨r • c, λ x hx, hc _, _⟩,
+    { rw [finset.mem_coe, finsupp.mem_support_iff] at hx ⊢,
+      rw [finsupp.coe_smul] at hx,
+      exact right_ne_zero_of_mul hx },
+    { rw finsupp.sum_smul_index' (λ (m : M), _),
+      { convert (add_monoid_hom.map_finsupp_sum (smul_add_hom R M r) _ _).symm,
+        ext m s,
+        simp [mul_smul r s m] },
+      { exact (((smul_add_hom R M).flip) m).map_zero } } }
 end
 
+lemma span_as_sum_iff {R : Type*} {M : Type u} [semiring R] [add_comm_group M] [semimodule R M]
+  {m : M} {s : set M} :
+  m ∈ submodule.span R s ↔
+  ∃ c : M →₀ R, (c.support : set M) ⊆ s ∧ (c.sum (λ i, (smul_add_hom R M).flip i)) = m :=
+⟨λ h, span_as_sum h, λ h, span_as_sum_converse h⟩
 
-#exit
+end span_as_sum
 
-lemma submodule.span_as_sum_kevin {R M : Type*} [semiring R] [add_comm_group M] [semimodule R M]
-  {m : M} {s : set M} (hm : m ∈ submodule.span R s) :
-  ∃ c : M →₀ R, (c.support : set M) ⊆ s ∧ (∑ i in c.support, c i • i) = m :=
-begin
-  by_cases tr : (1 : R) = 0,
-  refine ⟨0, _, _⟩,
-  { simp only [set.empty_subset, finset.coe_empty, finsupp.support_zero] },
-  { rw [← one_smul R m, tr],
-    simp only [finsupp.coe_zero, zero_smul, finset.sum_const_zero] },
---  haveI : nontrivial R:= nontrivial_of_ne 1 0 tr,
-  apply span_induction hm,
-  { refine λ x xs, ⟨finsupp.single x 1, _, _⟩,
-    { rw finsupp.support_single_ne_zero tr,
-      exact finset.singleton_subset_set_iff.mpr xs },
-    { rw finsupp.support_single_ne_zero tr,
-      simp } },
-  { refine ⟨0, _, _⟩,
-    { simp only [set.empty_subset, finset.coe_empty, finsupp.support_zero] },
-    { simp only [finsupp.coe_zero, zero_smul, finset.sum_const_zero]} },
-  {
-    rintros x y ⟨cx, cxs, rfl⟩ ⟨cy, cys, rfl⟩,
-    refine ⟨cx + cy, _, _⟩,
-    sorry,--inclusions
-    simp,
-    sorry,
-  },
-  {
-    rintros a x ⟨cx, cxs, rfl⟩,
-    refine ⟨a • cx, _, _⟩,
-  },
-end
+section Rnnoneg
 
+variables (R : Type*) [ordered_semiring R]
 
+/--  The subtype of non-negative elements of `R`. -/
+def pR : subsemiring R :=
+{ carrier := {r : R | 0 ≤ r},
+  one_mem' := by simp only [set.mem_set_of_eq, zero_le_one],
+  mul_mem' := begin
+    rintros x y (x0 : 0 ≤ x) (y0 : 0 ≤ y),
+    exact mul_nonneg x0 y0,
+  end,
+  zero_mem' := rfl.le,
+  add_mem' := begin
+    rintros x y (x0 : 0 ≤ x) (y0 : 0 ≤ y),
+    exact add_nonneg x0 y0,
+  end }
 
-lemma submodule.span_as_sum {R : Type*} [semiring R] [semimodule R M]
-  (m : M) (s : set M) (hm : m ∈ submodule.span R s) :
-  ∃ c : M →₀ R, (c.support : set M) ⊆ s ∧ (∑ i in c.support, c i • i) = m :=
-begin
-  -- the element `m` is in the span of `s`, if it is in the span of a finite subset `T ⊆ s`
-  obtain ⟨T, Tv, mT⟩ := mem_span_finite_of_mem_span hm,
-  -- now that we know that our element `m` is in the span of `T ⊆ S`, we no longer need to carry
-  -- around that it is also in the span of `S`
-  clear hm,
-  -- prepare for doing induction on
-  revert m s,
-  -- induction on the finset `T`: the base case `T = ∅` is trivial.
-  refine finset.induction_on T (λ m s es me, ⟨0, by simpa [eq_comm] using me⟩) _,
-  -- clear unneded clutter (not sure why this did not go away on its own)
-  clear T,
-  -- induction step: we add an element `m1` to the finset `T`, we have an element `m`
-  -- in the span of `T ∪ {m1}`
-  refine λ m1 T m1T ih m s ims m1i, _,
-  -- move sets/finsets around
-  rw [finset.coe_insert] at m1i,
-  -- we isolate the coefficient `a` of `m1`
-  obtain ⟨a, z, hz, rfl⟩ : ∃ (a : R) (z : M) (H : z ∈ span R ↑T), m = a • m1 + z :=
-    mem_span_insert.mp m1i,
-  -- apply the induction hypothesis to obtain the coefficients for the elements of `T`
-  obtain ⟨c1, c1ss, rfl⟩ : ∃ (c : M →₀ R), (c.support) ⊆ T ∧ ∑ (i : M) in c.support, c i • i = z :=
-    ih z T rfl.subset hz,
-  -- separate the cases in which the coefficient `a` of the "new" element `m1` vanishes...
-  by_cases a0 : a = 0,
-  { -- in this case, the coefficients that we get by induction work straight away
-    refine ⟨c1, λ g hg, ims (finset.mem_insert_of_mem (c1ss hg)), _⟩,
-    rw [a0, zero_smul, zero_add] },
-  -- or the new coefficient `a` is non-zero
-  -- the new element `m1` is not in the support of the coefficients for `m` arising from the
-  -- induction hypothesis
-  have mc1 : m1 ∉ c1.support := λ h, m1T (finset.mem_coe.mp (set.mem_of_mem_of_subset h c1ss)),
-    have dc1m : disjoint c1.support (finsupp.single m1 a).support,
-    { rw [finsupp.support_single_ne_zero a0],
-      exact finset.disjoint_singleton.mpr mc1 },
-    have cpa : (c1 + finsupp.single m1 a).support = c1.support ∪ {m1},
-    { ext x,
-      rw ← finsupp.support_single_ne_zero a0,
-      refine ⟨λ h, finsupp.support_add h, λ h, _⟩,
-      refine finset.mem_of_subset (eq.subset _) h,
-      rw finsupp.support_add_eq dc1m },
-  -- of course, the expression of `m` is as the sum of the coefficients coming from the induction
-  -- and the new coefficient `a` for `m1`
-  refine ⟨c1 + finsupp.single m1 a, λ h hs, ims _, _⟩,
-  { rw [finset.mem_coe, finset.insert_eq, finset.mem_union, finset.mem_singleton],
-    obtain F : h = m1 ∨ h ∈ c1.support.val := by simpa [finsupp.support_single_ne_zero a0,
-      finset.union_comm] using set.mem_of_mem_of_subset hs finsupp.support_add,
-    cases F,
-    { exact or.inl F },
-    { exact or.inr (finset.coe_subset.mp c1ss F) } },
-  { clear m1i m1T hz ih,
-    have : ∑ (x : M) in {m1}, (c1 + finsupp.single m1 a) x • x = a • m1,
-    { rw [finset.sum_singleton, finsupp.coe_add, pi.add_apply, add_smul, finsupp.single_eq_same],
-      refine add_left_eq_self.mpr _,
-      rw [finsupp.not_mem_support_iff.mp mc1, zero_smul] },
-    rw [cpa, finset.sum_union (by rwa finsupp.support_single_ne_zero a0 at dc1m), add_comm],
-    rw [this, finsupp.coe_add],
-    simp_rw [pi.add_apply, add_smul, finset.sum_add_distrib],
-    refine (add_right_inj _).mpr (add_right_eq_self.mpr _),
-    refine finset.sum_eq_zero (λ x xc1, _),
-    convert zero_smul _ x,
-    rw [← finsupp.not_mem_support_iff, finsupp.support_single_ne_zero a0, finset.not_mem_singleton],
-    rintros rfl,
-    exact mc1 xc1 }
-end
+/--  The non-negative elements come with a partial order. -/
+def popR : partial_order (pR R) := by apply_instance
 
+/--  ... and they form an ordered semiring. -/
+instance : ordered_semiring (pR R) :=
+{ add_left_cancel := begin
+    rintros a ⟨b, b0 : 0 ≤ b⟩ ⟨c, c0 : 0 ≤ c⟩ bc,
+    injection bc with hbc,
+    simpa only [subtype.mk_eq_mk, add_right_inj] using hbc,
+  end,
+  add_right_cancel := begin
+    rintros ⟨a, a0 : 0 ≤ a⟩ b ⟨c, c0 : 0 ≤ c⟩ ac,
+    injection ac with hac,
+    simpa only [add_left_inj, subtype.mk_eq_mk] using hac,
+  end,
+  add_le_add_left := begin
+    rintros ⟨a, a0 : 0 ≤ a⟩ ⟨b, b0 : 0 ≤ b⟩ (ab : a ≤ b) ⟨c, c0 : 0 ≤ c⟩,
+    apply add_le_add_left ab,
+  end,
+  le_of_add_le_add_left := begin
+    rintros ⟨a, a0 : 0 ≤ a⟩ ⟨b, b0 : 0 ≤ b⟩ ⟨c, c0 : 0 ≤ c⟩ (hbc : a + b ≤ a + c),
+    change b ≤ c,
+    exact le_of_add_le_add_left hbc,
+  end,
+  zero_le_one := zero_le_one,
+  mul_lt_mul_of_pos_left := λ _ _ _, mul_lt_mul_of_pos_left,
+  mul_lt_mul_of_pos_right := λ _ _ _, mul_lt_mul_of_pos_right,
+  ..(infer_instance : semiring (pR R)),
+  ..(infer_instance : partial_order (pR R)) }
 
-
-
-lemma submodule.span_as_sum {R : Type*} [semiring R] [semimodule R M]
-  (m : M) (s : set M) (hm : m ∈ submodule.span R s) :
-  ∃ su : finset M, ∃ c : M →₀ R,
-    c.support = su ∧ (c.support : set M) ⊆ s ∧ ((∑ i in su, c i • i) = m) :=
---  ∃ c : finsupp M R, ((c.support : set M) ⊆ s) ∧ ((∑ i ∈ c.support, c i • i) = m) :=
-begin
-  obtain ⟨T, Tv, mT⟩ := mem_span_finite_of_mem_span hm,
-  revert mT Tv m s,
-  refine finset.induction_on T _ _,
-  { refine λ m s ms es me, _,
-    exact ⟨∅, 0, finsupp.support_zero, by simpa [eq_comm] using me⟩ },
-  refine λ m S ms ih m1 s m1s ims m1i, _,
-  rw [finset.coe_insert] at m1i,
-  choose a z hz ide using mem_span_insert.mp m1i,
-  subst ide,
-  by_cases a0 : a = 0,
-  { subst a0,
-    rw [zero_smul, zero_add] at m1s m1i,
-    obtain ⟨su, c, csu, cS, F⟩ := ih _ _ hz rfl.subset hz,
-    simp_rw [zero_smul, zero_add],
-    refine ⟨su, c, csu, _, F⟩,
-    refine λ g hg, ims _,
-    rw [finset.coe_insert, set.mem_insert_iff],
-    exact or.inr (cS hg) },
-  obtain F := ih z S hz rfl.subset hz,
-  choose su c1 c1s c1ss ide using F,
-  have mc1 : m ∉ c1.support := λ h, ms (finset.mem_coe.mp (set.mem_of_mem_of_subset h c1ss)),
-  subst ide,
-  subst c1s,
-  refine ⟨insert m c1.support, c1 + finsupp.single m a, _, _, _⟩,
-  { rw [add_comm, finsupp.support_add_eq, finsupp.support_single_ne_zero a0, finset.insert_eq],
-    rwa [finsupp.support_single_ne_zero a0, finset.singleton_disjoint] },
-  { intros h hs,
-    apply ims,
-    have : (c1 + finsupp.single m a).support ⊆ c1.support ∪ (finsupp.single m a).support :=
-      finsupp.support_add,
-    rw finset.insert_eq,
-    rw [finsupp.support_single_ne_zero a0, finset.union_comm] at this,
-    obtain F := set.mem_of_mem_of_subset hs this ,
-    simp at F ⊢,
-    cases F,
-    exact or.inl F,
-    refine or.inr _,
-    simp at c1ss,
-    exact c1ss F },
-  { rw finset.sum_insert mc1,
-    simp only [pi.add_apply, finsupp.coe_add],
-    simp_rw [add_smul, finset.sum_add_distrib],
-    rw add_comm,
-    rw [finsupp.single_eq_same],
-    rw [add_comm (a • m), ← add_assoc],
-    simp only [add_left_inj],
-    rw [add_assoc, ← add_zero (∑ (i : M) in c1.support, c1 i • i)],
-    simp only [add_right_eq_self],
-    have c10: c1 m = 0 := finsupp.not_mem_support_iff.mp mc1,
-    rw [c10, zero_smul, add_zero],
-    apply finset.sum_eq_zero,
-    intros x xc1,
-    convert zero_smul _ x,
-    rw [← finsupp.not_mem_support_iff, finsupp.support_single_ne_zero a0],
-    simp only [ne.def, finset.mem_singleton],
-    rintros rfl,
-    exact mc1 xc1 }
-end
-
-#exit
+end Rnnoneg
