@@ -232,7 +232,38 @@ theorem analytic_9_6 (m : ℕ) (k K : ℝ≥0) [fact (1 ≤ k)] :
   ​∀ (cond : normed_spectral_conditions m k K ε hε k₀ M k' c₀ H),
   (M.row 0).is_bounded_exact (max (k' * k') (2 * k₀ * H)) K (m+1) c₀ :=
 begin
-  sorry
+  induction m with m hm,
+  { -- base case m = 0
+    -- ε = 1/(2k) works
+    use [1/(2*k)],
+    existsi _, swap,
+    { have hk : 1 ≤ k := fact.elim (by apply_instance),
+      rw [gt_iff_lt, one_div, inv_pos],
+      refine mul_pos (by norm_num) (lt_of_lt_of_le zero_lt_one (by assumption_mod_cast)) },
+    -- k₀ = k works
+    use k,
+    use (by assumption),
+    intros,
+    resetI,
+    let cond_row_exact := normed_spectral_conditions.row_exact cond,
+    intros c hc i hi x,
+    change i < 1 at hi,
+    -- Statement is of the form "for all x ∈ M_{0,i+1} exists y ∈ M_{0,i} such that..."
+    -- Cases i<-1 are trivial because x=y=0 works.
+    cases lt_or_le i (-1 : ℤ) with h h,
+    { -- this should deal with -1
+      use 0,
+      rw lt_neg_iff_add_neg at h,
+      have hx : (M.row 0) (max (k' * k') (2 * k * H) * c) (i + 1) = 0,
+      { -- this should be an assumption?
+        sorry },
+      -- goal should be 0 ≤ 0
+      sorry },
+    -- cases i = -1 and i = 0 left
+    { sorry }
+  },
+  { -- inductive step
+    sorry }
 end
 
 end system_of_double_complexes
