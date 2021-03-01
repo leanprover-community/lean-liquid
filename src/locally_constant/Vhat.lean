@@ -1,4 +1,5 @@
 import category_theory.currying
+import category_theory.abelian.additive_functor
 import topology.category.Profinite
 import topology.algebra.normed_group
 import topology.algebra.group_completion
@@ -10,12 +11,14 @@ import normed_group.normed_with_aut
 noncomputable theory
 open_locale nnreal
 
+universe u
+
 namespace NormedGroup
 open uniform_space opposite category_theory
 
 /-- The completion of a normed group, as an endofunctor on `NormedGroup`. -/
 @[simps]
-def Completion : NormedGroup ⥤ NormedGroup :=
+def Completion : NormedGroup.{u} ⥤ NormedGroup.{u} :=
 { obj := λ V, NormedGroup.of (completion V),
   map := λ V W f,
   { to_fun := completion.map f,
@@ -81,7 +84,7 @@ from the completion of `V` to the completion of `W`.
 The difference from the definition obtained from the functoriality of completion is in that the
 map sending a morphism `f` to the associated morphism of completions is itself additive.
 -/
-def Completion.map_hom (V W : NormedGroup) : (V ⟶ W) →+ (Completion.obj V ⟶ Completion.obj W) :=
+def Completion.map_hom (V W : NormedGroup.{u}) : (V ⟶ W) →+ (Completion.obj V ⟶ Completion.obj W) :=
 add_monoid_hom.mk' (category_theory.functor.map Completion) $
 begin
   intros f g, ext v,
@@ -98,8 +101,15 @@ begin
     { exact (f + g).uniform_continuous } }
 end
 
+
 @[simp] lemma Completion.map_zero (V W : NormedGroup) : Completion.map (0 : V ⟶ W) = 0 :=
 (Completion.map_hom V W).map_zero
+
+instance : preadditive NormedGroup.{u} := { hom_group := λ P Q, infer_instance }
+
+instance : functor.additive Completion :=
+{ map_zero' := Completion.map_zero,
+  map_add' := λ X Y, (Completion.map_hom _ _).map_add }
 
 /--
 Given a morphism of normed groups `f : V → W` with `W` complete, this provides a lift of `f` to
@@ -166,7 +176,7 @@ begin
     rw [lift_comp_incl, h] }
 end
 
-instance normed_with_aut_Completion (V : NormedGroup) (r : ℝ) [normed_with_aut r V] :
+instance normed_with_aut_Completion (V : NormedGroup.{u}) (r : ℝ) [normed_with_aut r V] :
   normed_with_aut r (Completion.obj V) :=
 { T := Completion.map_iso normed_with_aut.T,
   norm_T :=
@@ -182,7 +192,7 @@ instance normed_with_aut_Completion (V : NormedGroup) (r : ℝ) [normed_with_aut
     { erw [completion.norm_coe, normed_with_aut.norm_T, completion.norm_coe] }
   end }
 
-@[simp] lemma Completion_T_inv_eq (V : NormedGroup) (r : ℝ) [normed_with_aut r V] :
+@[simp] lemma Completion_T_inv_eq (V : NormedGroup.{u}) (r : ℝ) [normed_with_aut r V] :
   (normed_with_aut.T.hom : Completion.obj V ⟶ _) = Completion.map normed_with_aut.T.hom := rfl
 
 lemma T_hom_incl {V : NormedGroup} {r : ℝ} [normed_with_aut r V] :

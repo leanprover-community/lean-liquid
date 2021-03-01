@@ -1,5 +1,6 @@
 import analysis.specific_limits
 import system_of_complexes.basic
+import locally_constant.Vhat
 
 open finset filter
 open_locale nnreal big_operators topological_space
@@ -10,7 +11,8 @@ universe variables u
 variables (C C₁ C₂ : system_of_complexes.{u})
 variables {k k' K K' : ℝ≥0} {m m' : ℤ} {c₀ c₀' : ℝ≥0} [fact (1 ≤ k)] [fact (1 ≤ k')]
 
-def completion (C : system_of_complexes) : system_of_complexes := sorry
+noncomputable def completion : system_of_complexes :=
+C ⋙ NormedGroup.Completion.pushforward_homological_complex
 
 namespace is_weak_bounded_exact
 
