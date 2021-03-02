@@ -218,7 +218,7 @@ show coe_hom (n •ℤ F) = n •ℤ coe_hom F, from add_monoid_hom.map_gsmul _ 
 @[simp] lemma coe_smul (n : ℤ) (F : Mbar r' S) : ⇑(n • F) = n • F :=
 begin
   rw [← gsmul_eq_smul, coe_gsmul], ext,
-  simp only [gsmul_int_int, function.gsmul_apply, pi.smul_apply, ← gsmul_eq_smul]
+  simp only [pi.smul_apply, function.gsmul_apply, smul_eq_mul, gsmul_int_int]
 end
 
 @[simp] lemma coe_nsmul (n : ℕ) (F : Mbar r' S) : ⇑(n •ℕ F) = n •ℕ F :=
@@ -232,11 +232,7 @@ begin
   apply nnreal.eq,
   simp only [nnreal.coe_mul, nnreal.coe_tsum, ← tsum_mul_left, ← mul_assoc,
     nnreal.coe_nat_abs, coe_nnnorm, coe_smul, pi.smul_apply, int.norm_def,
-    ← abs_mul, ← int.cast_mul],
-  apply tsum_congr,
-  intro n,
-  simp only [← smul_eq_mul],
-  congr /- evil congr, should be simp -/
+    ← abs_mul, ← int.cast_mul, smul_eq_mul],
 end
 
 section Tinv
