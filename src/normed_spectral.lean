@@ -56,7 +56,8 @@ end normed_spectral_conditions
 Constants (max (k' * k') (2 * k₀ * H)) and K in the statement are not the right ones.
 We need to investigate the consequences of the k Zeeman effect here.
 -/
-theorem analytic_9_6 (m : ℤ) (k K : ℝ≥0) [fact (1 ≤ k)] :
+theorem analytic_9_6 (m : ℤ) :
+  ∀ (k K : ℝ≥0) [fact (1 ≤ k)],
   ∃ (ε : ℝ) (hε : ε > 0) (k₀ : ℝ≥0) [fact (1 ≤ k₀)],
   ∀ (M : system_of_double_complexes.{u}) (hM : M.admissible)
     (k' : ℝ≥0) [fact (k₀ ≤ k')] [fact (1 ≤ k')] -- follows
@@ -79,6 +80,7 @@ begin
   -- induction m with m hm,
   { -- base case m = 0
     -- ε = 1/(2k) works
+    introsI,
     use [1/(2*k)],
     existsi _, swap,
     { have hk : 1 ≤ k := fact.elim (by apply_instance),
