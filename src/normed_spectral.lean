@@ -61,6 +61,8 @@ theorem analytic_9_6 (m : ℕ) (k K : ℝ≥0) [fact (1 ≤ k)] :
   ∀ (M : system_of_double_complexes) (k' : ℝ≥0) [fact (k₀ ≤ k')] [fact (1 ≤ k')] -- follows
     (c₀ H : ℝ≥0) [fact (0 < H)],
   ​∀ (Hneg : (M.row 0).is_bounded_exact (max (k' * k') (2 * k₀ * H)) K (-1) c₀)
+    (Hd : ∀ c q (x : M.X c (-1) q), M.d x = 0)
+    (Hd' : ∀ c p (x : M.X c p (-1)), M.d' x = 0)
     (cond : normed_spectral_conditions m k K ε hε k₀ M k' c₀ H),
   (M.row 0).is_bounded_exact (max (k' * k') (2 * k₀ * H)) K (m+1) c₀ :=
 begin
@@ -75,23 +77,17 @@ begin
     -- k₀ = k works
     use k,
     use (by assumption),
-    intros,
-    resetI,
-    let cond_row_exact := normed_spectral_conditions.row_exact cond,
+    introsI M k' _k' _1k' c₀ H _H Hneg Hd Hd' cond,
     intros c hc i hi x,
     change i < 1 at hi,
     -- Statement is of the form "for all x ∈ M_{0,i+1} exists y ∈ M_{0,i} such that..."
     -- Cases i<-1 are trivial because x=y=0 works.
     cases lt_or_le i (-1 : ℤ) with h h,
     { -- this should deal with -1
-      use 0,
-      rw lt_neg_iff_add_neg at h,
-      have hx : (M.row 0) (max (k' * k') (2 * k * H) * c) (i + 1) = 0,
-      { -- this should be an assumption?
-        sorry },
-      -- goal should be 0 ≤ 0
-      sorry },
+      exact Hneg c hc i h x },
     -- cases i = -1 and i = 0 left
+    interval_cases i,
+    { sorry },
     { sorry }
   },
   { -- inductive step
