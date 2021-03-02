@@ -72,7 +72,8 @@ begin
     introsI,
     intros c hc i hi,
     refine Hneg c hc i _,
-    sorry },
+    have : (m : ℤ) ≥ 0 := int.coe_zero_le m,
+    linarith },
   -- induction m with m hm,
   { -- base case m = 0
     -- ε = 1/(2k) works
