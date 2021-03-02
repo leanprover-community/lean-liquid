@@ -45,9 +45,6 @@ begin
   exact mul_le_mul (le_of_eq rfl) h2 (le_of_lt h1) zero_le',
 end
 
-instance fact_le_of_add_one_le (q : ℤ) (m : ℕ) [h : fact (q + 1 ≤ m)] : fact (q ≤ m) :=
-(int.le_add_one le_rfl).trans  h
-
 instance fact_le_max_left (a b c : ℝ≥0) [h : fact (a ≤ b)] : fact (a ≤ max b c) :=
 le_trans h $ le_max_left _ _
 
