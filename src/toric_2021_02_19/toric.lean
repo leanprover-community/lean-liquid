@@ -3,7 +3,8 @@ import algebra.module.ordered
 import algebra.regular
 --import ring_theory.noetherian
 import toric_2021_02_19.span_as_sum
---import linear_algebra.finite_dimensional
+import linear_algebra.basic
+import linear_algebra.finite_dimensional
 import algebra.big_operators.basic
 --import analysis.normed_space.inner_product
 
@@ -495,6 +496,42 @@ variables {M : Type*} [add_comm_group M] --[semimodule ℕ M]
 --  [add_comm_monoid P] --[semimodule ℕ P] [semimodule ℤ P] --[is_scalar_tower ℕ ℤ P]
 --  (P₀ : submodule ℕ P)
 
+lemma pointed_pR {R : Type*} [ordered_comm_ring R] [module R M] [semimodule (pR R) M]
+  [is_scalar_tower (pR R) R M] {ι : Type*} (v : ι → M) (bv : is_basis R v) :
+  pointed R (submodule.span (pR R) (set.range v)) :=
+begin
+  obtain ⟨l, hl⟩ : ∃ l : M →ₗ[R] R, ∀ i : ι, l (v i) = 1 :=
+    ⟨bv.constr (λ _, 1), λ i, constr_basis bv⟩,
+  refine Exists.intro
+  { to_fun := ⇑l,
+    map_add' := by simp only [forall_const, eq_self_iff_true, linear_map.map_add],
+    map_smul' := λ m x, by
+    { rw [algebra.id.smul_eq_mul, linear_map.map_smul],
+      refine congr _ rfl,
+      exact funext (λ (y : R), by simp only [has_scalar.smul, gsmul_int_int]) } } _,
+  rintros m hm (m0 : l m = 0),
+--  obtain ⟨ck, csupk, rk⟩ := mem_span_set.mp hm,
+--  obtain ⟨ck, csupk, rk⟩ := @span_as_sum ℕ _ _ _ _ _ (set.range v) hm,
+  obtain ⟨c, csup, rfl⟩ := mem_span_set.mp hm,
+  change l (∑ i in c.support, c i • i) = 0 at m0,
+  simp_rw [linear_map.map_sum, linear_map.map_smul_of_tower] at m0,
+  have : ∑ (i : M) in c.support, c i • l i = ∑ (i : M) in c.support, c i,
+  { refine finset.sum_congr rfl (λ x hx, _),
+    rcases set.mem_range.mp (set.mem_of_mem_of_subset (finset.mem_coe.mpr hx) csup) with ⟨i, rfl⟩,
+    simp [hl _, (•)], },
+  rw this at m0,
+  have : ∑ (i : M) in c.support, (0 : M) = 0,
+  { rw finset.sum_eq_zero,
+    simp only [eq_self_iff_true, forall_true_iff] },
+  rw ← this,
+  refine finset.sum_congr rfl (λ x hx, _),
+  rw finset.sum_eq_zero_iff_of_nonneg at m0,
+  { convert zero_smul (pR R) _,
+    exact subtype.coe_injective (m0 x hx) },
+  { exact λ x hx, mem_pR_nonneg (c x) }
+end
+
+/- Try to prove it with the lemma above. -/
 lemma pointed_of_is_basis {ι : Type*} (v : ι → M) (bv : is_basis ℤ v) :
   pointed ℤ (submodule.span ℕ (set.range v)) :=
 begin
@@ -508,9 +545,9 @@ begin
       refine congr _ rfl,
       exact funext (λ (y : ℤ), by simp only [has_scalar.smul, gsmul_int_int]) } } _,
   rintros m hm (m0 : l m = 0),
-  obtain ⟨ck, csupk, rk⟩ := span_as_sum hm,
+--  obtain ⟨ck, csupk, rk⟩ := mem_span_set.mp hm,
 --  obtain ⟨ck, csupk, rk⟩ := @span_as_sum ℕ _ _ _ _ _ (set.range v) hm,
-  obtain ⟨c, csup, rfl⟩ := span_as_sum hm,
+  obtain ⟨c, csup, rfl⟩ := mem_span_set.mp hm,
   change l (∑ i in c.support, c i • i) = 0 at m0,
   simp_rw [linear_map.map_sum, linear_map.map_smul_of_tower] at m0,
   have : ∑ (i : M) in c.support, c i • l i = ∑ (i : M) in c.support, c i,
