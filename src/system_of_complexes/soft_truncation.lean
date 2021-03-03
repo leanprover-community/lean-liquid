@@ -72,8 +72,6 @@ variables (C : system_of_complexes)
 def soft_truncation' : system_of_complexes ⥤ system_of_complexes :=
 (whiskering_right _ _ _).obj $ NormedGroup.soft_truncation'
 
-#check @system_of_complexes.is_bounded_exact
-
 lemma soft_truncation'_d_neg (c : ℝ≥0) (i : ℤ) (hi : i < 0) :
   (d : (soft_truncation'.obj C) c i ⟶ _) = 0 := sorry
 
