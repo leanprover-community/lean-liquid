@@ -20,6 +20,9 @@ def topological_closure {M : Type*} [normed_group M] (A : add_subgroup M) : add_
     simpa,
   end }
 
+instance {M : Type*} [normed_group M] {A : add_subgroup M} :
+  fact (is_closed (A.topological_closure : set M)) := is_closed_closure
+
 end add_subgroup
 
 namespace normed_group_hom -- probably needs to change
