@@ -170,28 +170,29 @@ end
 
 /-- An instance of `normed_group` on the quotient by a subgroup. -/
 noncomputable
-instance quotient_normed_group (S : add_subgroup M) (hS : is_closed (↑S : set M)) :
+instance quotient_normed_group (S : add_subgroup M) [hS : fact (is_closed (↑S : set M))] :
   normed_group (quotient S) :=
 normed_group.of_core (quotient S) (quotient.is_normed_group.core S hS)
 
 /-- The canonical morphism `M → (quotient S)` as morphism of normed groups. -/
 noncomputable
-def normed_group.mk (S : add_subgroup M) (hS : is_closed (↑S : set M)) :
+def normed_group.mk (S : add_subgroup M) [hS : fact (is_closed (↑S : set M))] :
   normed_group_hom M (quotient S) :=
 { bound' := ⟨1, λ m, by simpa [one_mul] using norm_mk_le _ m⟩,
   ..quotient_add_group.mk' S }
 
 /-- `normed_group.mk S` agrees with `quotient_add_group.mk' S`. -/
-lemma normed_group.mk.apply (S : add_subgroup M) [complete_space S] (m : M) :
+lemma normed_group.mk.apply (S : add_subgroup M) [fact (is_closed (S : set M))] (m : M) :
   normed_group.mk S m = quotient_add_group.mk' S m := rfl
 
 /-- `normed_group.mk S` is surjective. -/
-lemma surjective_normed_group.mk (S : add_subgroup M) [complete_space S] :
+lemma surjective_normed_group.mk (S : add_subgroup M) [fact (is_closed (S : set M))] :
   function.surjective (normed_group.mk S) :=
 surjective_quot_mk _
 
 /-- The kernel of `normed_group.mk S` is `S`. -/
-lemma normed_group.mk.ker (S : add_subgroup M) [complete_space S] : (normed_group.mk S).ker = S :=
+lemma normed_group.mk.ker (S : add_subgroup M) [fact (is_closed (S : set M))] :
+  (normed_group.mk S).ker = S :=
 quotient_add_group.ker_mk  _
 
 /-- `is_quotient f`, for `f : M ⟶ N` means that `N` is isomorphic to the quotient of `M`
@@ -201,7 +202,7 @@ structure is_quotient (f : normed_group_hom M N) : Prop :=
 (norm : ∀ x, ∥f x∥ = Inf {r : ℝ | ∃ y ∈ f.ker, r = ∥x + y∥ })
 
 /-- `normed_group.mk S` satisfies `is_quotient`. -/
-lemma is_quotient_quotient (S : add_subgroup M) [complete_space S] :
+lemma is_quotient_quotient (S : add_subgroup M) [fact (is_closed (S : set M))] :
   is_quotient (normed_group.mk S) :=
 ⟨surjective_normed_group.mk S, λ m, by simpa [normed_group.mk.ker S] using quotient_norm_eq S m⟩
 
