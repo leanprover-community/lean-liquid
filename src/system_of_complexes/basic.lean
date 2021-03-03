@@ -1,5 +1,7 @@
 import algebra.homology.chain_complex
 
+import for_mathlib.normed_group_quotient
+
 import normed_group.NormedGroup
 import algebra.ordered_group
 import facts
