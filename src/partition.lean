@@ -19,7 +19,6 @@ structure recursion_data (N : ℕ) (hN : 0 < N) (f : ℕ → ℝ≥0) (hf : ∀ 
 
 def recursion_data_zero (N : ℕ) (hN : 0 < N) (f : ℕ → ℝ≥0) (hf : ∀ n, f n ≤ 1) :
   recursion_data N hN f hf 0 :=
--- have _i : has_zero (fin N) := sorry, -- this follows from hN
 { m := λ j, j = ⟨0, hN⟩,
   dec_inst := by apply_instance,
   hm := ⟨_, rfl, by simp⟩,
@@ -125,11 +124,7 @@ begin
   { intros i,
     set S₁ : ℝ≥0 := ∑' (n : ℕ), f n,
     have hf'' : has_sum f S₁ := hf'.has_sum,
-    let factor : ℝ≥0 := ⟨N⁻¹, sorry⟩, -- manipulate `hN`
-    have hf''' : has_sum _ (S₁ / N),
-    { convert hf''.mul_right factor,
-      simp [factor],
-      sorry }, -- casting
+    have hf''' : has_sum _ (S₁ / N) := hf''.mul_right (N:ℝ≥0)⁻¹,
     have : mask_fun f (mask i) ≤ f,
     { intros n,
       dsimp [mask_fun],
@@ -142,8 +137,6 @@ begin
     have := tendsto.add_const 1 hf''', -- there's a namespacing mistake here in the library
     apply le_of_tendsto_of_tendsto' h_mask this,
     intros n,
-    simp,
-    convert h_sum n i,
-    -- more casting
-    sorry }
+    simp only [div_eq_mul_inv, finset.sum_mul] at h_sum ⊢,
+    exact h_sum n i }
 end
