@@ -28,7 +28,7 @@ namespace soft_truncation'
 -- Note: the next sorry needs a `NormedGroup`, so we need to bundle.
 def X (C : cochain_complex NormedGroup) : ℤ → NormedGroup
 | -[1+n]  := 0
-| 0       := sorry -- this should be C0 modulo (the closure of the image of) C-1
+| 0       := NormedGroup.of $ quotient (C.d (-1)).range.topological_closure
 | (n+1:ℕ) := C.X (n+1)
 
 def d (C : cochain_complex NormedGroup) :
