@@ -106,7 +106,6 @@ sorry
 /-
 TODO
 
-* define `has_shift` instance for `system_of_complexes`
 * lemmas for how `has_shift` interacts with bounded exactness
 -/
 
