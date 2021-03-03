@@ -7,6 +7,7 @@ import order.lexicographic
 import Mbar.basic
 import polyhedral_lattice.basic
 import normed_group.pseudo_normed_group
+import partition
 
 /-!
 In this file we state and prove lemmas 9.7 and 9.8 of [Analytic].
