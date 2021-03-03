@@ -50,18 +50,27 @@ let I := (finset.univ : finset (fin N)).exists_min_image
     split_ifs,
     { rw h,
       have : dat.partial_sums I.some * N ≤ (∑ (n : fin (k + 1 + 1)), f ↑n),
-      { calc dat.partial_sums I.some * N ≤ ∑ i, dat.partial_sums i : _ -- follows from I
+      { calc dat.partial_sums I.some * N
+            = ∑ i : fin N, dat.partial_sums I.some : _
+        ... ≤ ∑ i, dat.partial_sums i : _ -- follows from I
         ... = ∑ n : fin (k + 1), f n : dat.h₁
         ... ≤ ∑ n : fin (k + 1 + 1), f n : _,
-        { sorry },
-        rw @fin.sum_univ_cast_succ _ _ (k + 1),
-        simp },
+        { simp only [finset.sum_const, finset.card_fin, nsmul_eq_mul, mul_comm] },
+        { obtain ⟨-, HI⟩ := I.some_spec,
+          apply finset.sum_le_sum,
+          intros j hj, exact HI j hj },
+        { rw @fin.sum_univ_cast_succ _ _ (k + 1),
+          simp } },
       have : dat.partial_sums I.some ≤ (∑ (n : fin (k + 1 + 1)), f ↑n) / ↑N,
-      { sorry }, -- algebra from previous
+      { rwa nnreal.le_div_iff_mul_le, exact_mod_cast hN.ne' },
       exact add_le_add this (hf (k + 1)) },
-    { transitivity (∑ n : fin (k + 1), f n) / N + 1,
-      { simpa using dat.h₂ i },
-      sorry } -- shouldn't be hard, but I wish `linarith` worked here!
+    { calc dat.partial_sums i + 0
+          ≤ (∑ (n : fin (k + 1)), f ↑n) / ↑N + 1 : by simpa using dat.h₂ i
+      ... ≤ (∑ (n : fin (k + 1 + 1)), f ↑n) / ↑N + 1 : add_le_add _ le_rfl,
+      simp only [div_eq_mul_inv, fin.sum_univ_eq_sum_range],
+      refine mul_le_mul' _ le_rfl,
+      simp only [finset.sum_range_succ],
+      exact self_le_add_left _ _ }
   end }
 
 noncomputable def partition (N : ℕ) (hN : 0 < N) (f : ℕ → ℝ≥0) (hf : ∀ n, f n ≤ 1) :
