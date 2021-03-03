@@ -40,6 +40,8 @@ We therefore set all objects indexed by negative integers to `0`, in our use cas
 @[derive category_theory.category]
 def system_of_complexes : Type* := ℝ≥0ᵒᵖ ⥤ (cochain_complex NormedGroup)
 
+instance : has_shift system_of_complexes := has_shift.mk $ (shift _).congr_right
+
 variables {M M' N : system_of_complexes.{u}} (f : M ⟶ M') (g : M' ⟶ N)
 
 instance : has_coe_to_fun system_of_complexes :=
