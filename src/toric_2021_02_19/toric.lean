@@ -496,6 +496,23 @@ variables {M : Type*} [add_comm_group M] --[semimodule ℕ M]
 --  [add_comm_monoid P] --[semimodule ℕ P] [semimodule ℤ P] --[is_scalar_tower ℕ ℤ P]
 --  (P₀ : submodule ℕ P)
 
+lemma speed_up_1 {M R : Type*} [add_comm_group M] [ordered_comm_ring R] [module R M]
+  [semimodule ↥(pR R) M]
+  (l : M →ₗ[R] R)
+  (c : M →₀ ↥(pR R)) :
+  l (c.sum (λ (mi : M) (r : ↥(pR R)), r • mi)) = l (∑ (i : M) in c.support, c i • i) := rfl
+
+lemma speed_up_2 {M R : Type*} [add_comm_group M] [ordered_comm_ring R] [semimodule ↥(pR R) M]
+  {x : M}
+  {c : M →₀ ↥(pR R)}
+  (hx : x ∈ c.support)
+  (m0 : ∀ (x : M), x ∈ c.support → ((c x) : R) = 0) :
+  (λ (mi : M) (r : (pR R)), r • mi) x (c x) = 0 :=
+begin
+  convert zero_smul (pR R) _,
+  exact subtype.coe_injective (m0 x hx)
+end
+
 lemma pointed_pR {R : Type*} [ordered_comm_ring R] [module R M] [semimodule (pR R) M]
   [is_scalar_tower (pR R) R M] {ι : Type*} (v : ι → M) (bv : is_basis R v) :
   pointed R (submodule.span (pR R) (set.range v)) :=
@@ -510,15 +527,14 @@ begin
       refine congr _ rfl,
       exact funext (λ (y : R), by simp only [has_scalar.smul, gsmul_int_int]) } } _,
   rintros m hm (m0 : l m = 0),
---  obtain ⟨ck, csupk, rk⟩ := mem_span_set.mp hm,
---  obtain ⟨ck, csupk, rk⟩ := @span_as_sum ℕ _ _ _ _ _ (set.range v) hm,
   obtain ⟨c, csup, rfl⟩ := mem_span_set.mp hm,
-  change l (∑ i in c.support, c i • i) = 0 at m0,
+  rw speed_up_1 at m0,
+--  change l (∑ i in c.support, c i • i) = 0 at m0, --takes some time
   simp_rw [linear_map.map_sum, linear_map.map_smul_of_tower] at m0,
   have : ∑ (i : M) in c.support, c i • l i = ∑ (i : M) in c.support, c i,
   { refine finset.sum_congr rfl (λ x hx, _),
     rcases set.mem_range.mp (set.mem_of_mem_of_subset (finset.mem_coe.mpr hx) csup) with ⟨i, rfl⟩,
-    simp [hl _, (•)], },
+    simp only [hl _, (•), mul_one, algebra.id.smul_eq_mul], },
   rw this at m0,
   have : ∑ (i : M) in c.support, (0 : M) = 0,
   { rw finset.sum_eq_zero,
@@ -526,8 +542,7 @@ begin
   rw ← this,
   refine finset.sum_congr rfl (λ x hx, _),
   rw finset.sum_eq_zero_iff_of_nonneg at m0,
-  { convert zero_smul (pR R) _,
-    exact subtype.coe_injective (m0 x hx) },
+  { exact speed_up_2 hx m0 },
   { exact λ x hx, mem_pR_nonneg (c x) }
 end
 
