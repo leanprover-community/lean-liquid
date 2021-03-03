@@ -1,6 +1,20 @@
 import system_of_complexes.basic
 import for_mathlib.normed_group_quotient
 
+/-!
+# Soft truncation
+
+In this file we define soft truncation functors
+for (systems of) complexes of normed groups.
+
+We call these `soft_truncation'` to distinguish them from the usual soft truncation functors.
+The difference is solely in the definition of the object in degree `0`.
+Usually this object is defined as `C 0` modulo the kernel of `d : C 0 ⟶ C 1`.
+Instead, we define it as `C 0` modulo the image of `d : C (-1) ⟶ C 0`.
+Hence the two definitions agree iff `C` is exact in degree `0`.
+
+-/
+
 noncomputable theory
 open_locale nnreal
 
