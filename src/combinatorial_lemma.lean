@@ -373,13 +373,14 @@ structure recursion_data (N : ℕ) (hN : 0 < N) (f : ℕ → ℝ≥0) (hf : ∀ 
 
 def recursion_data_zero (N : ℕ) (hN : 0 < N) (f : ℕ → ℝ≥0) (hf : ∀ n, f n ≤ 1) :
   recursion_data N hN f hf 0 :=
-have _i : has_zero (fin N) := sorry, -- this follows from hN
-{ m := λ j, j = @has_zero.zero _ _i,
-  dec_inst := sorry, -- ugh, decidability
-  hm := ⟨@has_zero.zero _ _i, rfl, by simp⟩,
-  partial_sums := λ j, if j = @has_zero.zero _ _i then f 0 else 0,
+-- have _i : has_zero (fin N) := sorry, -- this follows from hN
+{ m := λ j, j = ⟨0, hN⟩,
+  dec_inst := by apply_instance,
+  hm := ⟨_, rfl, by simp⟩,
+  partial_sums := λ j, if j = ⟨0, hN⟩ then f 0 else 0,
   h₁ := by simp,
-  h₂ := begin
+  h₂ :=
+  begin
     intros i,
     split_ifs,
     { simp,
@@ -390,10 +391,11 @@ have _i : has_zero (fin N) := sorry, -- this follows from hN
 
 noncomputable def recursion_data_succ (N : ℕ) (hN : 0 < N) (f : ℕ → ℝ≥0) (hf : ∀ n, f n ≤ 1) (k : ℕ)
   (dat : recursion_data N hN f hf k) :
-  recursion_data N hN f hf (k + 1):=
-let I := (finset.univ : finset (fin N)).exists_min_image dat.partial_sums sorry in -- sorry follows from hN
+  recursion_data N hN f hf (k + 1) :=
+let I := (finset.univ : finset (fin N)).exists_min_image
+  dat.partial_sums ⟨⟨0, hN⟩, finset.mem_univ _⟩ in
 { m := λ j, j = I.some,
-  dec_inst := sorry, -- ugh, decidability
+  dec_inst := by apply_instance,
   hm := ⟨I.some, by simp, by simp⟩,
   partial_sums := λ i, dat.partial_sums i + (if i = I.some then f (k + 1) else 0),
   h₁ := begin
@@ -405,12 +407,14 @@ let I := (finset.univ : finset (fin N)).exists_min_image dat.partial_sums sorry 
     split_ifs,
     { rw h,
       have : dat.partial_sums I.some * N ≤ (∑ (n : fin (k + 1 + 1)), f ↑n),
-      { calc dat.partial_sums I.some * N ≤ ∑ i, dat.partial_sums i : sorry -- follows from I
+      { calc dat.partial_sums I.some * N ≤ ∑ i, dat.partial_sums i : _ -- follows from I
         ... = ∑ n : fin (k + 1), f n : dat.h₁
         ... ≤ ∑ n : fin (k + 1 + 1), f n : _,
+        { sorry },
         rw @fin.sum_univ_cast_succ _ _ (k + 1),
         simp },
-      have : dat.partial_sums I.some ≤ (∑ (n : fin (k + 1 + 1)), f ↑n) / ↑N := sorry, -- algebra from previous
+      have : dat.partial_sums I.some ≤ (∑ (n : fin (k + 1 + 1)), f ↑n) / ↑N,
+      { sorry }, -- algebra from previous
       exact add_le_add this (hf (k + 1)) },
     { transitivity (∑ n : fin (k + 1), f n) / N + 1,
       { simpa using dat.h₂ i },
