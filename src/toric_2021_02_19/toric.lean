@@ -540,16 +540,16 @@ begin
   { rw finset.sum_eq_zero,
     simp only [eq_self_iff_true, forall_true_iff] },
   rw ← this,
-  refine finset.sum_congr rfl (λ x hx, _),
-  rw finset.sum_eq_zero_iff_of_nonneg at m0,
-  { exact speed_up_2 hx m0 },
-  { exact λ x hx, mem_pR_nonneg (c x) }
+  refine finset.sum_congr rfl (λ x hx, speed_up_2 hx _),
+  rwa finset.sum_eq_zero_iff_of_nonneg at m0,
+  exact λ x hx, mem_pR_nonneg (c x)
 end
 
 /- Try to prove it with the lemma above. -/
 lemma pointed_of_is_basis {ι : Type*} (v : ι → M) (bv : is_basis ℤ v) :
   pointed ℤ (submodule.span ℕ (set.range v)) :=
 begin
+
   obtain ⟨l, hl⟩ : ∃ l : M →ₗ[ℤ] ℤ, ∀ i : ι, l (v i) = 1 :=
     ⟨bv.constr (λ _, 1), λ i, constr_basis bv⟩,
   refine Exists.intro

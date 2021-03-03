@@ -1,3 +1,4 @@
+import tactic
 import linear_algebra.finsupp
 import algebra.ring.basic
 import ring_theory.subring
@@ -26,6 +27,38 @@ def pR : subsemiring R :=
 variable {R}
 
 @[simp] lemma mem_pR_nonneg (y : (pR R)) : 0 ≤ y := y.2
+
+/-
+instance : has_coe (pR ℤ) ℕ :=
+{ coe := λ ⟨h, hh⟩, int.to_nat h }
+
+instance : has_coe ℕ (pR ℤ) :=
+{ coe := λ h, h }
+
+
+lemma pRZ : ℕ ≃ pR ℤ :=
+{ to_fun := λ n, n,
+  inv_fun := λ ⟨h, hh⟩, int.to_nat h,
+  left_inv := begin
+    intros x,
+    dsimp at *,
+    induction x with x hx,
+    { refl },
+    {
+      rw [nat.succ_eq_add_one],
+      tidy?,
+      simp,
+      conv_lhs {
+        rw int.coe_nat_add x 1,
+      },
+      simp [hx],
+    },
+  end,
+  right_inv := _ }
+
+#exit
+
+-/
 
 variables {α β : Type*}
 
