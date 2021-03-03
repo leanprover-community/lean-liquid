@@ -361,14 +361,14 @@ begin
   { intro hsn, exact (hsn (hx₁' s n)).elim }
 end
 
-lemma lem98_int_fin (nS : ℕ) [fact (r' < 1)] (N : ℕ) (hN : 0 < N) (c : ℝ≥0)
-  (x : Mbar r' (fin nS)) (hx : x ∈ filtration (Mbar r' (fin nS)) c)
-  (H : ∀ s n, (x s n).nat_abs ≤ 1) :
-  ∃ y : fin N → Mbar r' (fin nS), (x = ∑ i, y i) ∧
-      (∀ i, y i ∈ filtration (Mbar r' (fin nS)) (c/N + 1)) :=
-begin
-  sorry
-end
+-- lemma lem98_int_fin (nS : ℕ) [fact (r' < 1)] (N : ℕ) (hN : 0 < N) (c : ℝ≥0)
+--   (x : Mbar r' (fin nS)) (hx : x ∈ filtration (Mbar r' (fin nS)) c)
+--   (H : ∀ s n, (x s n).nat_abs ≤ 1) :
+--   ∃ y : fin N → Mbar r' (fin nS), (x = ∑ i, y i) ∧
+--       (∀ i, y i ∈ filtration (Mbar r' (fin nS)) (c/N + 1)) :=
+-- begin
+--   admit
+-- end
 
 lemma fintype_prod_nat_equiv_nat (S : Type*) [fintype S] [hS : nonempty S] :
   nonempty (S × ℕ ≃ ℕ) :=
