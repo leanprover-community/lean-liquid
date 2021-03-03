@@ -4,6 +4,24 @@ variables {V V₁ V₂ V₃ : Type*}
 variables [normed_group V] [normed_group V₁] [normed_group V₂] [normed_group V₃]
 variables (f g : normed_group_hom V₁ V₂)
 
+namespace add_subgroup
+
+-- TODO: generalize to topological groups and move?
+def topological_closure {M : Type*} [normed_group M] (A : add_subgroup M) : add_subgroup M :=
+{ carrier := _root_.closure A,
+  zero_mem' := _root_.subset_closure (zero_mem _),
+  add_mem' := λ a b ha hb, A.to_add_submonoid.top_closure_add_self_subset ⟨a,b,ha,hb,rfl⟩,
+  neg_mem' := begin
+    have claim := image_closure_subset_closure_image (continuous_neg : continuous (λ x : M, -x)),
+    have : (λ x : M, -x) '' A = A, by tidy,
+    intros x hx,
+    rw ← this,
+    apply claim,
+    simpa,
+  end }
+
+end add_subgroup
+
 namespace normed_group_hom -- probably needs to change
 section quotient
 
