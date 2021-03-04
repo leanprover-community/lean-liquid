@@ -125,29 +125,26 @@ open normed_group_hom
 noncomputable
 def lift {f : A ⟶ B} {g : B ⟶ C} (cond : f ≫ g = 0) : coker f ⟶ C :=
 { bound' := begin
-    -- Is this actually true!?
     rcases g.bound with ⟨c,hcpos,hc⟩,
     use c,
     intros v,
     rcases coker.π_surjective v with ⟨v,rfl⟩,
     change ∥ g v ∥ ≤ c * Inf {r : ℝ | ∃ y : B, coker.π _ = coker.π _ ∧ _ },
+    -- Should be in mathlib in some form?
     have : (c : ℝ) * Inf {r : ℝ | ∃ (y : B), (coker.π y : coker f) = (coker.π v : coker f) ∧ r = ∥y∥} =
       Inf {r : ℝ | ∃ (y : B), (coker.π y : coker f) = (coker.π v : coker f) ∧ r = c * ∥ y ∥ }, sorry,
     rw this,
     rw real.le_Inf,
     { rintros x ⟨b,hx,rfl⟩,
       have : g v = g b,
-      {
-        have : b - v ∈ f.range.topological_closure, sorry, -- from hx
+      { have : b - v ∈ f.range.topological_closure, sorry, -- from hx
         have : (range f).topological_closure ≤ g.ker,
-        {
-          change (closure (f.range : set B)) ⊆ (ker g : set B),
-          have : is_closed (g.ker : set B), sorry,
+        { change (closure (f.range : set B)) ⊆ (ker g : set B),
+          have : is_closed (g.ker : set B), sorry, -- should be separate lemma.
           -- there should now be a lemma saying that, given `is_closed Y`,
           -- closure X ⊆ Y ↔ X ⊆ Y
           -- Then conclude using `cond`.
-          sorry,
-        },
+          sorry },
         suffices : g (b - v) = 0, sorry, -- This must be in mathlib somewhere...
         apply this,
         assumption,
