@@ -230,7 +230,7 @@ structure is_quotient (f : normed_group_hom M N) : Prop :=
 (norm : ∀ x, ∥f x∥ = Inf {r : ℝ | ∃ y ∈ f.ker, r = ∥x + y∥ })
 
 /-- Given  `f : normed_group_hom M N` such that `f s = 0` for all `s ∈ S`, where,
-`S : add_subgroup M`, the induced morphism `normed_group_hom S.topological_closure N`. -/
+`S : add_subgroup M` is closed, the induced morphism `normed_group_hom (quotient S) N`. -/
 noncomputable
 def lift {N : Type*} [normed_group N] (S : add_subgroup M) [fact (is_closed (S : set M))]
   (f : normed_group_hom M N) (hf : ∀ s ∈ S, f s = 0) :
