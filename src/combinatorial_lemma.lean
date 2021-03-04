@@ -19,10 +19,6 @@ section lem97
 
 variables (Λ : Type*) [add_comm_group Λ]
 
-lemma le_or_le {α : Type*} [linear_order α] (a b : α) :
-  a ≤ b ∨ b ≤ a :=
-(le_or_lt a b).imp id le_of_lt
-
 lemma abs_add_eq_add_abs_iff (a b : ℤ) :
   abs (a + b) = abs a + abs b ↔ (0 ≤ a ∧ 0 ≤ b ∨ a ≤ 0 ∧ b ≤ 0) :=
 begin
@@ -68,39 +64,7 @@ variables [fintype S] [normed_group Λ] [polyhedral_lattice Λ]
 
 section
 
-variables {S}
-
--- move this
-@[simps]
-def Mbar.coeff (s : S) (n : ℕ) : Mbar r' S →+ ℤ :=
-{ to_fun := λ x, x s n,
-  map_zero' := rfl,
-  map_add' := λ x y, rfl }
-
--- move this
-@[simp] lemma pi.nat_apply {α β : Type*} [has_zero β] [has_one β] [has_add β] :
-  ∀ (n : ℕ), (n : α → β) = λ _, n
-| 0     := rfl
-| (n+1) := show (n + 1 : α → β) = λ _, n + 1, by { rw pi.nat_apply, refl }
-.
-
-variables {Λ r'}
-
-@[simps]
-def Mbar.of_mask (x : Mbar r' S) (mask : S → ℕ → Prop) [∀ s n, decidable (mask s n)] :
-  Mbar r' S :=
-{ to_fun := λ s n, if mask s n then x s n else 0,
-  coeff_zero' := λ s, by { split_ifs, { exact x.coeff_zero s }, { refl } },
-  summable' := λ s,
-  begin
-    apply nnreal.summable_of_le _ (x.summable s),
-    intro n,
-    apply mul_le_mul' _ le_rfl,
-    norm_cast,
-    split_ifs,
-    { refl },
-    { rw int.nat_abs_zero, exact zero_le' }
-  end }
+variables {S Λ r'}
 
 -- ugly name
 @[simps]
@@ -165,66 +129,7 @@ section pseudo_normed_group
 
 variables (M : Type*) [pseudo_normed_group M]
 
-def pseudo_normed_group.archimedean : Prop :=
-∀ (m : M) (c : ℝ≥0) (n : ℕ), 0 < n →
-  ((n • m) ∈ filtration M (n • c) ↔ m ∈ filtration M c)
-
-lemma Mbar.archimedean : pseudo_normed_group.archimedean (Mbar r' S) :=
-begin
-  intros x c N hN,
-  simp only [Mbar.mem_filtration_iff],
-  have hN' : 0 < (N : ℝ≥0) := by exact_mod_cast hN,
-  conv_rhs { rw ← mul_le_mul_left hN' },
-  simp only [Mbar.nnnorm_def, ← nsmul_eq_smul, nsmul_eq_mul, finset.mul_sum, finset.sum_mul,
-    Mbar.coe_nsmul, pi.mul_apply, pi.nat_apply, @pi.nat_apply ℕ ℤ _ _ _ N,
-    int.nat_abs_mul, int.nat_abs_of_nat, int.nat_cast_eq_coe_nat, nat.cast_mul],
-  convert iff.rfl,
-  ext s,
-  simp only [nnreal.coe_nat_cast, nnreal.coe_tsum, nnreal.coe_mul,
-    ← tsum_mul_left, ← mul_assoc]
-end
-
-lemma pseudo_normed_group.archimedean.add_monoid_hom
-  (h : pseudo_normed_group.archimedean M) :
-  pseudo_normed_group.archimedean (Λ →+ M) :=
-begin
-  intros f c N hN,
-  apply forall_congr, intro c,
-  apply forall_congr, intro l,
-  apply forall_congr, intro hl,
-  simp only [← nsmul_eq_smul, nsmul_eq_mul, mul_assoc],
-  simp only [nsmul_eq_smul, ← nsmul_eq_mul, add_monoid_hom.nat_smul_apply],
-  exact h _ _ N hN
-end
-
 variables {M}
-
--- move this
-lemma pseudo_normed_group.nat_smul_mem_filtration (n : ℕ) (m : M) (c : ℝ≥0)
-  (h : m ∈ filtration M c) :
-  (n • m) ∈ filtration M (n • c) :=
-begin
-  induction n with n ih, { simpa only [zero_smul] using zero_mem_filtration _ },
-  simp only [nat.succ_eq_add_one, add_smul, one_smul],
-  exact add_mem_filtration ih h,
-end
-
--- move this
-lemma pseudo_normed_group.smul_mem_filtration (n : ℤ) (m : M) (c : ℝ≥0)
-  (h : m ∈ filtration M c) :
-  (n • m) ∈ filtration M (n.nat_abs • c) :=
-begin
-  by_cases hn : 0 ≤ n,
-  { lift n to ℕ using hn,
-    simp only [int.nat_abs_of_nat, ← gsmul_eq_smul, gsmul_coe_nat, nsmul_eq_smul],
-    exact pseudo_normed_group.nat_smul_mem_filtration n m c h },
-  { push_neg at hn, rw ← neg_pos at hn,
-    lift -n to ℕ using hn.le with k hk,
-    rw [← neg_neg n, int.nat_abs_neg, ← hk, int.nat_abs_of_nat, neg_smul],
-    apply neg_mem_filtration,
-    simp only [neg_smul, ← gsmul_eq_smul, gsmul_coe_nat, nsmul_eq_smul],
-    exact pseudo_normed_group.nat_smul_mem_filtration k m c h }
-end
 
 lemma generates_norm.add_monoid_hom_mem_filtration_iff {ι : Type} [fintype ι]
   {l : ι → Λ} (hl : generates_norm l) (hM : pseudo_normed_group.archimedean M)
@@ -243,29 +148,13 @@ begin
     ... ≤ c * (d * c') : mul_le_mul' le_rfl (mul_le_mul' le_rfl hl')
     ... = d • (c * c') : by rw [← nsmul_eq_smul, nsmul_eq_mul, mul_left_comm] },
   rintro i -,
-  convert pseudo_normed_group.nat_smul_mem_filtration (cᵢ i) _ _ (H i),
-  { rw [← nsmul_eq_smul, x.map_nsmul, nsmul_eq_smul] },
-  { rw [← nsmul_eq_smul, nsmul_eq_mul, mul_left_comm, mul_assoc] }
+  rw [mul_assoc, mul_left_comm, ← nsmul_eq_smul, x.map_nsmul, nsmul_eq_smul],
+  exact pseudo_normed_group.nat_smul_mem_filtration (cᵢ i) _ _ (H i),
 end
 
 end pseudo_normed_group
 
 end
-
-@[simps]
-def Mbar.geom [fact (r' < 1)] : Mbar r' S :=
-{ to_fun := λ s n, if n = 0 then 0 else 1,
-  coeff_zero' := λ s, if_pos rfl,
-  summable' := λ s,
-  begin
-    have := (normed_ring.summable_geometric_of_norm_lt_1 (r' : ℝ) _), swap,
-    { rwa nnreal.norm_eq },
-    simp only [← nnreal.coe_pow, nnreal.summable_coe] at this,
-    apply nnreal.summable_of_le _ this,
-    intro n,
-    refine (mul_le_mul' _ le_rfl).trans (one_mul _).le,
-    split_ifs; simp
-  end }
 
 variables {Λ r' S}
 
@@ -330,8 +219,7 @@ begin
   by_cases H : l i = 0,
   { simpa only [H, a.map_zero, zero_smul] using zero_mem_filtration _ },
   rw ← nnnorm_eq_zero at H,
-  refine filtration_mono _ (pseudo_normed_group.smul_mem_filtration _ _ _ hxc),
-  rw [← nsmul_eq_smul, nsmul_eq_mul],
+  refine filtration_mono _ (pseudo_normed_group.int_smul_mem_filtration _ _ _ hxc),
   refine mul_le_mul' _ le_rfl,
   rw ← inv_inv' (nnnorm (l i)),
   apply le_mul_inv_of_mul_le (inv_ne_zero H),
@@ -557,7 +445,7 @@ begin
   intros c x hx,
   -- `x` is a homomorphism `Λ →+ Mbar r' S`
   -- we split it into pieces `Λ →+ ℤ` for all coefficients indexed by `s` and `n`
-  let x' : S → ℕ → Λ →+ ℤ := λ s n, (Mbar.coeff r' s n).comp x,
+  let x' : S → ℕ → Λ →+ ℤ := λ s n, (Mbar.coeff s n).comp x,
   have := λ s n, hA (x' s n), clear hA,
   choose x₁' hx₁' x₀' hx₀' H using this,
   have hx₀_aux : ∀ s n i, (x₀' s n (l i)).nat_abs ≤ (x (l i) s n).nat_abs :=
