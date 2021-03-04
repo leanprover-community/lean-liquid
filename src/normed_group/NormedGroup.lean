@@ -123,7 +123,7 @@ lemma coker.π_surjective {f : A ⟶ B} : function.surjective (coker.π : B ⟶ 
 open normed_group_hom
 
 noncomputable
-def lift {f : A ⟶ B} {g : B ⟶ C} (cond : f ≫ g = 0) : coker f ⟶ C :=
+def coker.lift {f : A ⟶ B} {g : B ⟶ C} (cond : f ≫ g = 0) : coker f ⟶ C :=
 normed_group_hom.lift _ g (zero_of_closure _ _ begin
   rintros _ ⟨b,rfl⟩,
   change (f ≫ g) b = 0,
@@ -132,7 +132,7 @@ end)
 
 @[simp]
 lemma lift_comp_π {f : A ⟶ B} {g : B ⟶ C} {cond : f ≫ g = 0} :
-  coker.π ≫ lift cond = g :=
+  coker.π ≫ coker.lift cond = g :=
 begin
   ext,
   rw ← normed_group_hom.lift_mk f.range.topological_closure g,
