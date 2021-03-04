@@ -30,7 +30,8 @@ end add_subgroup
 `f a = 0` for all `a ∈ A`, then `f a = 0` for all `a ∈ A.topological_closure`. -/
 lemma zero_of_closure {M N : Type*} [normed_group M] [normed_group N] (A : add_subgroup M)
   (f : normed_group_hom M N) (hf : ∀ a ∈ A, f a = 0) : ∀ m ∈ A.topological_closure, f m = 0 :=
-sorry
+show closure (A : set M) ≤ f ⁻¹' {0},
+from Inf_le ⟨is_closed.preimage (normed_group_hom.continuous f) (t1_space.t1 0), hf⟩
 
 namespace normed_group_hom -- probably needs to change
 section quotient
