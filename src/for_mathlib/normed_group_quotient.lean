@@ -240,7 +240,7 @@ def lift {N : Type*} [normed_group N] (S : add_subgroup M) (f : normed_group_hom
     rcases f.bound with ⟨c,hcpos,hc⟩,
     refine ⟨c, λ mbar, le_of_forall_pos_le_add (λ ε hε, _)⟩,
     obtain ⟨m, rfl, hmnorm⟩ := norm_mk_lt mbar (div_pos hε hcpos),
-    simp,
+    simp only [add_monoid_hom.to_fun_eq_coe],
     have h : (lift S.topological_closure f.to_add_monoid_hom _)
       ((quotient_add_group.mk' S.topological_closure) m) = f m := rfl,
     rw [h],
