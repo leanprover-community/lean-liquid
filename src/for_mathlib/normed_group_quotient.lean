@@ -253,6 +253,10 @@ def lift {N : Type*} [normed_group N] (S : add_subgroup M) (f : normed_group_hom
   .. quotient_add_group.lift S.topological_closure f.to_add_monoid_hom
     (λ m hm, zero_of_closure S f hf m hm) }
 
+@[simp]
+lemma lift_mk  {N : Type*} [normed_group N] (S : add_subgroup M) (f : normed_group_hom M N)
+  (hf : ∀ s ∈ S, f s = 0) (m : M) : lift S f hf (normed_group.mk S m) = f m := rfl
+
 /-- `normed_group.mk S` satisfies `is_quotient`. -/
 lemma is_quotient_quotient (S : add_subgroup M) :
   is_quotient (normed_group.mk S) :=
