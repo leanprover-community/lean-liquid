@@ -28,19 +28,19 @@ namespace soft_truncation'
 -- Note: the next sorry needs a `NormedGroup`, so we need to bundle.
 def X (C : cochain_complex NormedGroup) : ℤ → NormedGroup
 | -[1+n]  := 0
-| 0       := sorry -- this should be C0 modulo (the closure of the image of) C-1
+| 0       := coker (C.d (-1))
 | (n+1:ℕ) := C.X (n+1)
 
 def d (C : cochain_complex NormedGroup) :
   Π i:ℤ, X C i ⟶ X C (i+1)
 | -[1+n]  := 0
-| 0       := sorry -- some quotient.lift
+| 0       := coker.lift (sorry : C.d (-1) ≫ C.d 0 = 0) -- annoying :-(
 | (n+1:ℕ) := C.d (n+1)
 
 lemma d_squared' (C : cochain_complex NormedGroup) :
   Π i:ℤ, d C i ≫ d C (i+1) = 0
 | -[1+n]  := show 0 ≫ _ = 0, by rw zero_comp
-| 0       := sorry
+| 0       := sorry -- annoying :-(
 | (n+1:ℕ) := C.d_squared (n+1)
 
 @[simps]

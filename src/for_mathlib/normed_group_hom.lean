@@ -272,6 +272,14 @@ def range : add_subgroup V₂ := f.to_add_monoid_hom.range
 lemma mem_range (v : V₂) : v ∈ f.range ↔ ∃ w, f w = v :=
 by { rw [range, add_monoid_hom.mem_range], refl }
 
+def subtype : normed_group_hom f.range V₂ :=
+{ bound' := ⟨1,λ v, by simp⟩,
+  ..(f.range.subtype)}
+
+def to_range : normed_group_hom V₁ f.range :=
+{ bound' := f.bound',
+  ..(f.to_add_monoid_hom.to_range)}
+
 end range
 
 variables {V W V₁ V₂ V₃ : Type*}

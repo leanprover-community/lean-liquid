@@ -4,6 +4,35 @@ variables {V V₁ V₂ V₃ : Type*}
 variables [normed_group V] [normed_group V₁] [normed_group V₂] [normed_group V₃]
 variables (f g : normed_group_hom V₁ V₂)
 
+namespace add_subgroup
+
+-- TODO: generalize to topological groups and move?
+def topological_closure {M : Type*} [normed_group M] (A : add_subgroup M) : add_subgroup M :=
+{ carrier := _root_.closure A,
+  zero_mem' := _root_.subset_closure (zero_mem _),
+  add_mem' := λ a b ha hb, A.to_add_submonoid.top_closure_add_self_subset ⟨a,b,ha,hb,rfl⟩,
+  neg_mem' := begin
+    have claim := image_closure_subset_closure_image (continuous_neg : continuous (λ x : M, -x)),
+    have : (λ x : M, -x) '' A = A, by tidy,
+    intros x hx,
+    rw ← this,
+    apply claim,
+    simpa,
+  end }
+
+instance {M : Type*} [normed_group M] {A : add_subgroup M} :
+  fact (is_closed (A.topological_closure : set M)) := is_closed_closure
+
+end add_subgroup
+
+--move this somewhere
+/-- If `A` if an additive subgroup of a normed group `M` and `f : normed_group_hom M N` is such that
+`f a = 0` for all `a ∈ A`, then `f a = 0` for all `a ∈ A.topological_closure`. -/
+lemma zero_of_closure {M N : Type*} [normed_group M] [normed_group N] (A : add_subgroup M)
+  (f : normed_group_hom M N) (hf : ∀ a ∈ A, f a = 0) : ∀ m ∈ A.topological_closure, f m = 0 :=
+show closure (A : set M) ≤ f ⁻¹' {0},
+from Inf_le ⟨is_closed.preimage (normed_group_hom.continuous f) (t1_space.t1 0), hf⟩
+
 namespace normed_group_hom -- probably needs to change
 section quotient
 
@@ -102,66 +131,36 @@ begin
   simpa [norm_zero, add_monoid_hom.map_zero] using norm_mk_le S 0
 end
 
-/-- If `(m : M)` has norm equal to `0` in `quotient S` for a complete subgroup `S` of `M`, then
+/-- If `(m : M)` has norm equal to `0` in `quotient S` for a closed subgroup `S` of `M`, then
 `m ∈ S`. -/
-lemma norm_zero_eq_zero (S : add_subgroup M) [complete_space S] (m : M)
+lemma norm_zero_eq_zero (S : add_subgroup M) (hS : is_closed (↑S : set M)) (m : M)
   (h : ∥(quotient_add_group.mk' S) m∥ = 0) : m ∈ S :=
 begin
   choose g hg using λ n, (norm_mk_lt' S m (@nat.one_div_pos_of_nat ℝ _ n)),
   simp only [h, one_div, zero_add] at hg,
-  have hcauchy : cauchy_seq g,
-  { rw metric.cauchy_seq_iff,
-    intros ε hε,
-    obtain ⟨k, hk⟩ := exists_nat_ge (ε/2)⁻¹,
-    have kpos := lt_of_lt_of_le (inv_pos.mpr (half_pos hε)) hk,
-    replace hk := (inv_le_inv kpos (inv_pos.mpr (half_pos hε))).2 hk,
-    rw [inv_inv'] at hk,
-    refine ⟨k, λ a b ha hb, _⟩,
-    have apos := lt_trans (lt_of_lt_of_le kpos (nat.cast_le.2 (ge.le ha))) (lt_add_one a),
-    have bpos := lt_trans (lt_of_lt_of_le kpos (nat.cast_le.2 (ge.le hb))) (lt_add_one b),
-    replace ha : (k : ℝ ) ≤ ↑(a + 1) := nat.cast_le.2 (le_add_right ha),
-    replace hb : (k : ℝ ) ≤ ↑(b + 1) := nat.cast_le.2 (le_add_right hb),
-    have haε := le_trans ((inv_le_inv apos kpos).2 ha) hk,
-    have hbε := le_trans ((inv_le_inv bpos kpos).2 hb) hk,
-    calc dist (g a) (g b)
-        = ∥(g a) - (g b)∥ : dist_eq_norm _ _
-    ... = ∥(m + (g a)) + (-(m + (g b)))∥ : by abel
-    ... ≤ ∥m + (g a)∥ + ∥-(m + (g b))∥ : norm_add_le _ _
-    ... = ∥m + (g a)∥ + ∥m + (g b)∥ : by rw [norm_neg _]
-    ... < (↑a + 1)⁻¹ + (↑b + 1)⁻¹ : add_lt_add (hg a).2 (hg b).2
-    ... ≤ ε/2 + ε/2 : add_le_add haε hbε
-    ... = ε : add_halves ε },
-  have Scom : is_complete (S : set M) :=
-    complete_space_coe_iff_is_complete.mp (by assumption),
-  suffices : m ∈ (S : set M), by exact this,
-  obtain ⟨s, hs, hlim⟩ := cauchy_seq_tendsto_of_is_complete Scom (λ n, (hg n).1) hcauchy,
-  suffices : ∥m + s∥ = 0,
-  { rw [norm_eq_zero] at this,
-    rw [eq_neg_of_add_eq_zero this],
-    exact add_subgroup.neg_mem S hs },
-  have hlimnorm : filter.tendsto (λ n, ∥m + (g n)∥) filter.at_top (nhds 0),
-  { apply (@metric.tendsto_at_top _ _ _ ⟨0⟩ _ _ _).2,
-    intros ε hε,
-    obtain ⟨k, hk⟩ := exists_nat_ge ε⁻¹,
-    have kpos := lt_of_lt_of_le (inv_pos.mpr hε) hk,
-    replace hk := (inv_le_inv kpos (inv_pos.mpr hε)).2 hk,
-    rw [inv_inv'] at hk,
-    refine ⟨k, λ n hn, _⟩,
-    replace hn : (k : ℝ) ≤ ↑(n + 1) := nat.cast_le.2 (le_add_right hn),
-    have npos : (0 : ℝ) < ↑(n + 1) := nat.cast_lt.2 (nat.succ_pos n),
-    replace hn := le_trans ((inv_le_inv npos kpos).2 hn) hk,
-    simp only [dist_zero_right, norm_norm],
-    calc ∥m + g n∥
-        < (↑n + 1)⁻¹ : (hg n).2
-    ... ≤ ε : hn },
-  exact tendsto_nhds_unique ((continuous.to_sequentially_continuous (@continuous_norm M _))
-    (λ (n : ℕ), m + g n) (tendsto.const_add m hlim)) hlimnorm
+  have hconv : filter.tendsto (λ n, m + g n) filter.at_top (nhds 0),
+  { refine metric.tendsto_at_top.2 (λ ε hε, _),
+    obtain ⟨N, hN⟩ := exists_nat_ge ε⁻¹,
+    have Npos := lt_of_lt_of_le (inv_pos.mpr hε) hN,
+    replace hN := (inv_le_inv Npos (inv_pos.mpr hε)).2 hN,
+    rw [inv_inv'] at hN,
+    refine ⟨N, λ n hn, _⟩,
+    rw [dist_eq_norm _ _, sub_zero],
+    have npos := lt_trans (lt_of_lt_of_le Npos (nat.cast_le.2 (ge.le hn))) (lt_add_one n),
+    replace hn := lt_of_le_of_lt (ge.le hn) (lt_add_one n),
+    have hnε := lt_of_lt_of_le ((inv_lt_inv npos Npos).2 (nat.cast_lt.2 hn)) hN,
+    exact lt_trans (hg n).2 hnε },
+  replace hconv := tendsto.add_const (-m) hconv,
+  simp only [zero_add, add_neg_cancel_comm] at hconv,
+  replace hS := mem_of_is_seq_closed (is_seq_closed_iff_is_closed.2 hS) (λ n, (hg n).1) hconv,
+  simpa using hS,
 end
 
-/-- The norm on `quotient S` is actually a norm if `S` is a complete subgroup of `M`. -/
-lemma quotient.is_normed_group.core (S : add_subgroup M) [complete_space S] :
+/-- The seminorm on `quotient S` is actually a norm when S is closed. -/
+lemma quotient.is_normed_group.core (S : add_subgroup M) [hS : fact (is_closed (S : set M))] :
   normed_group.core (quotient S) :=
 begin
+  --have hS : is_closed (↑S.topological_closure : set M) := is_closed_closure,
   split,
   { intro x,
     refine ⟨λ h, _ , λ h, by simpa [h] using norm_mk_zero S⟩,
@@ -169,22 +168,22 @@ begin
     replace hm : quotient_add_group.mk' S m = x := hm,
     rw [← hm, ← add_monoid_hom.mem_ker, quotient_add_group.ker_mk],
     rw [← hm] at h,
-    exact norm_zero_eq_zero S m h },
+    exact norm_zero_eq_zero S hS m h },
   { intros x y,
     refine le_of_forall_pos_le_add (λ ε hε, _),
     replace hε := half_pos hε,
     obtain ⟨m, hm⟩ := norm_mk_lt x hε,
     obtain ⟨n, hn⟩ := norm_mk_lt y hε,
-    have H : quotient_add_group.mk' S (m + n) = x + y := by rw [add_monoid_hom.map_add, hm.1, hn.1],
+    have H : quotient_add_group.mk' _ (m + n) = x + y := by rw [add_monoid_hom.map_add, hm.1, hn.1],
     calc  ∥x + y∥
-        = ∥quotient_add_group.mk' S (m + n)∥ : by rw [← H]
+        = ∥quotient_add_group.mk' _ (m + n)∥ : by rw [← H]
     ... ≤ ∥m + n∥ : norm_mk_le _ _
     ... ≤ ∥m∥ + ∥n∥ : norm_add_le _ _
     ... ≤ (∥x∥ + ε/2) + (∥y∥ + ε/2) : add_le_add (le_of_lt hm.2) (le_of_lt hn.2)
     ... = ∥x∥ + ∥y∥ + ε : by ring },
   { intro x,
-    suffices : {r : ℝ | ∃ (y : M), quotient_add_group.mk' S y = x ∧ r = ∥y∥ } =
-      {r : ℝ | ∃ (y : M), quotient_add_group.mk' S y = -x ∧ r = ∥y∥ },
+    suffices : {r : ℝ | ∃ (y : M), quotient_add_group.mk' _ y = x ∧ r = ∥y∥ } =
+      {r : ℝ | ∃ (y : M), quotient_add_group.mk' _ y = -x ∧ r = ∥y∥ },
     { simp only [this, norm] },
     ext r,
     split,
@@ -199,30 +198,30 @@ begin
         norm_neg]⟩ } }
 end
 
-/-- An instance of `normed_group` on the quotient by a subgroup. -/
+/-- The quotient in the category of normed groups. -/
 noncomputable
-instance quotient_normed_group (S : add_subgroup M) [complete_space S] :
-  normed_group (quotient S) :=
-normed_group.of_core (quotient S) (quotient.is_normed_group.core S)
+instance normed_group_quotient (S : add_subgroup M) [hS : fact (is_closed (S : set M))] :
+  normed_group (quotient S) := normed_group.of_core (quotient S) (quotient.is_normed_group.core S)
 
-/-- The canonical morphism `M → (quotient S)` as morphism of normed groups. -/
 noncomputable
-def normed_group.mk (S : add_subgroup M) [complete_space S] : normed_group_hom M (quotient S) :=
+def normed_group.mk (S : add_subgroup M) [fact (is_closed (S : set M))] :
+  normed_group_hom M (quotient S) :=
 { bound' := ⟨1, λ m, by simpa [one_mul] using norm_mk_le _ m⟩,
   ..quotient_add_group.mk' S }
 
 /-- `normed_group.mk S` agrees with `quotient_add_group.mk' S`. -/
-lemma normed_group.mk.apply (S : add_subgroup M) [complete_space S] (m : M) :
+@[simp]
+lemma normed_group.mk.apply (S : add_subgroup M) [fact (is_closed (S : set M))] (m : M) :
   normed_group.mk S m = quotient_add_group.mk' S m := rfl
 
 /-- `normed_group.mk S` is surjective. -/
-lemma surjective_normed_group.mk (S : add_subgroup M) [complete_space S] :
+lemma surjective_normed_group.mk (S : add_subgroup M) [fact (is_closed (S : set M))] :
   function.surjective (normed_group.mk S) :=
 surjective_quot_mk _
 
 /-- The kernel of `normed_group.mk S` is `S`. -/
-lemma normed_group.mk.ker (S : add_subgroup M) [complete_space S] : (normed_group.mk S).ker = S :=
-quotient_add_group.ker_mk  _
+lemma normed_group.mk.ker (S : add_subgroup M) [fact (is_closed (S : set M))] :
+  (normed_group.mk S).ker = S := quotient_add_group.ker_mk  _
 
 /-- `is_quotient f`, for `f : M ⟶ N` means that `N` is isomorphic to the quotient of `M`
 by the kernel of `f`. -/
@@ -230,10 +229,49 @@ structure is_quotient (f : normed_group_hom M N) : Prop :=
 (surjective : function.surjective f)
 (norm : ∀ x, ∥f x∥ = Inf {r : ℝ | ∃ y ∈ f.ker, r = ∥x + y∥ })
 
+/-- Given  `f : normed_group_hom M N` such that `f s = 0` for all `s ∈ S`, where,
+`S : add_subgroup M` is closed, the induced morphism `normed_group_hom (quotient S) N`. -/
+noncomputable
+def lift {N : Type*} [normed_group N] (S : add_subgroup M) [fact (is_closed (S : set M))]
+  (f : normed_group_hom M N) (hf : ∀ s ∈ S, f s = 0) :
+  normed_group_hom (quotient S) N :=
+{ bound' :=
+  begin
+    rcases f.bound with ⟨c,hcpos,hc⟩,
+    refine ⟨c, λ mbar, le_of_forall_pos_le_add (λ ε hε, _)⟩,
+    obtain ⟨m, rfl, hmnorm⟩ := norm_mk_lt mbar (div_pos hε hcpos),
+    have h : (lift S f.to_add_monoid_hom _) ((quotient_add_group.mk' S) m) = f m := rfl,
+    rw [add_monoid_hom.to_fun_eq_coe, h],
+    refine le_trans (hc m) _,
+    suffices : ↑c * ∥m∥ ≤ ↑c * ∥quotient_add_group.mk' S m∥ + ε, {exact this},
+    replace hmnorm := mul_le_mul_of_nonneg_left (le_of_lt hmnorm) (nnreal.coe_nonneg c),
+    refine le_trans hmnorm _,
+    rw [mul_add, mul_div_cancel' ε (ne_of_gt hcpos)],
+  end,
+  .. quotient_add_group.lift S f.to_add_monoid_hom hf }
+
+@[simp]
+lemma lift_mk  {N : Type*} [normed_group N] (S : add_subgroup M) [fact (is_closed (S : set M))]
+  (f : normed_group_hom M N) (hf : ∀ s ∈ S, f s = 0) (m : M) :
+  lift S f hf (normed_group.mk S m) = f m := rfl
+
+lemma lift_unique {N : Type*} [normed_group N] (S : add_subgroup M) [fact (is_closed (S : set M))]
+  (f : normed_group_hom M N) (hf : ∀ s ∈ S, f s = 0)
+  (g : normed_group_hom (quotient S) N) :
+  g.comp (normed_group.mk S) = f → g = lift S f hf :=
+begin
+  intro h,
+  ext,
+  rcases surjective_normed_group.mk _ x with ⟨x,rfl⟩,
+  change (g.comp (normed_group.mk S) x) = _,
+  rw h,
+  refl,
+end
+
 /-- `normed_group.mk S` satisfies `is_quotient`. -/
-lemma is_quotient_quotient (S : add_subgroup M) [complete_space S] :
+lemma is_quotient_quotient (S : add_subgroup M) [fact (is_closed (S : set M))] :
   is_quotient (normed_group.mk S) :=
-⟨surjective_normed_group.mk S, λ m, by simpa [normed_group.mk.ker S] using quotient_norm_eq S m⟩
+⟨surjective_normed_group.mk S, λ m, by simpa [normed_group.mk.ker S] using quotient_norm_eq _ m⟩
 
 lemma quotient_norm_lift {f : normed_group_hom M N} (hquot : is_quotient f) {ε : ℝ} (hε : 0 < ε)
   (n : N) : ∃ (m : M), f m = n ∧ ∥m∥ < ∥n∥ + ε :=
