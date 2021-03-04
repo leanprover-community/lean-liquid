@@ -240,10 +240,8 @@ def lift {N : Type*} [normed_group N] (S : add_subgroup M) [fact (is_closed (S :
     rcases f.bound with ⟨c,hcpos,hc⟩,
     refine ⟨c, λ mbar, le_of_forall_pos_le_add (λ ε hε, _)⟩,
     obtain ⟨m, rfl, hmnorm⟩ := norm_mk_lt mbar (div_pos hε hcpos),
-    simp only [add_monoid_hom.to_fun_eq_coe],
-    have h : (lift S f.to_add_monoid_hom _)
-      ((quotient_add_group.mk' S) m) = f m := rfl,
-    rw [h],
+    have h : (lift S f.to_add_monoid_hom _) ((quotient_add_group.mk' S) m) = f m := rfl,
+    rw [add_monoid_hom.to_fun_eq_coe, h],
     refine le_trans (hc m) _,
     suffices : ↑c * ∥m∥ ≤ ↑c * ∥quotient_add_group.mk' S m∥ + ε, {exact this},
     replace hmnorm := mul_le_mul_of_nonneg_left (le_of_lt hmnorm) (nnreal.coe_nonneg c),
