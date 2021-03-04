@@ -156,19 +156,19 @@ begin
   simpa using hS,
 end
 
-/-- The seminorm on `quotient S.topological_closure` is actually a norm. -/
-lemma quotient.is_normed_group.core (S : add_subgroup M) :
-  normed_group.core (quotient S.topological_closure) :=
+/-- The seminorm on `quotient S` is actually a norm when S is closed. -/
+lemma quotient.is_normed_group.core (S : add_subgroup M) [hS : fact (is_closed (S : set M))] :
+  normed_group.core (quotient S) :=
 begin
-  have hS : is_closed (↑S.topological_closure : set M) := is_closed_closure,
+  --have hS : is_closed (↑S.topological_closure : set M) := is_closed_closure,
   split,
   { intro x,
-    refine ⟨λ h, _ , λ h, by simpa [h] using norm_mk_zero S.topological_closure⟩,
+    refine ⟨λ h, _ , λ h, by simpa [h] using norm_mk_zero S⟩,
     obtain ⟨m, hm⟩ := surjective_quot_mk _ x,
-    replace hm : quotient_add_group.mk' S.topological_closure m = x := hm,
+    replace hm : quotient_add_group.mk' S m = x := hm,
     rw [← hm, ← add_monoid_hom.mem_ker, quotient_add_group.ker_mk],
     rw [← hm] at h,
-    exact norm_zero_eq_zero S.topological_closure hS m h },
+    exact norm_zero_eq_zero S hS m h },
   { intros x y,
     refine le_of_forall_pos_le_add (λ ε hε, _),
     replace hε := half_pos hε,
@@ -200,29 +200,28 @@ end
 
 /-- The quotient in the category of normed groups. -/
 noncomputable
-instance normed_group_quotient (S : add_subgroup M) : normed_group (quotient S.topological_closure) :=
-normed_group.of_core (quotient S.topological_closure) (quotient.is_normed_group.core S)
+instance normed_group_quotient (S : add_subgroup M) [hS : fact (is_closed (S : set M))] :
+  normed_group (quotient S) := normed_group.of_core (quotient S) (quotient.is_normed_group.core S)
 
 noncomputable
-def normed_group.mk (S : add_subgroup M) :
-  normed_group_hom M (quotient S.topological_closure) :=
+def normed_group.mk (S : add_subgroup M) [fact (is_closed (S : set M))] :
+  normed_group_hom M (quotient S) :=
 { bound' := ⟨1, λ m, by simpa [one_mul] using norm_mk_le _ m⟩,
-  ..quotient_add_group.mk' S.topological_closure }
+  ..quotient_add_group.mk' S }
 
 /-- `normed_group.mk S` agrees with `quotient_add_group.mk' S`. -/
 @[simp]
-lemma normed_group.mk.apply (S : add_subgroup M) (m : M) :
-  normed_group.mk S m = quotient_add_group.mk' S.topological_closure m := rfl
+lemma normed_group.mk.apply (S : add_subgroup M) [fact (is_closed (S : set M))] (m : M) :
+  normed_group.mk S m = quotient_add_group.mk' S m := rfl
 
 /-- `normed_group.mk S` is surjective. -/
-lemma surjective_normed_group.mk (S : add_subgroup M) :
+lemma surjective_normed_group.mk (S : add_subgroup M) [fact (is_closed (S : set M))] :
   function.surjective (normed_group.mk S) :=
 surjective_quot_mk _
 
 /-- The kernel of `normed_group.mk S` is `S`. -/
-lemma normed_group.mk.ker (S : add_subgroup M) :
-  (normed_group.mk S).ker = S.topological_closure :=
-quotient_add_group.ker_mk  _
+lemma normed_group.mk.ker (S : add_subgroup M) [fact (is_closed (S : set M))] :
+  (normed_group.mk S).ker = S := quotient_add_group.ker_mk  _
 
 /-- `is_quotient f`, for `f : M ⟶ N` means that `N` is isomorphic to the quotient of `M`
 by the kernel of `f`. -/
@@ -233,32 +232,34 @@ structure is_quotient (f : normed_group_hom M N) : Prop :=
 /-- Given  `f : normed_group_hom M N` such that `f s = 0` for all `s ∈ S`, where,
 `S : add_subgroup M`, the induced morphism `normed_group_hom S.topological_closure N`. -/
 noncomputable
-def lift {N : Type*} [normed_group N] (S : add_subgroup M) (f : normed_group_hom M N)
-  (hf : ∀ s ∈ S, f s = 0) : normed_group_hom (quotient S.topological_closure) N :=
+def lift {N : Type*} [normed_group N] (S : add_subgroup M) [fact (is_closed (S : set M))]
+  (f : normed_group_hom M N) (hf : ∀ s ∈ S, f s = 0) :
+  normed_group_hom (quotient S) N :=
 { bound' :=
   begin
     rcases f.bound with ⟨c,hcpos,hc⟩,
     refine ⟨c, λ mbar, le_of_forall_pos_le_add (λ ε hε, _)⟩,
     obtain ⟨m, rfl, hmnorm⟩ := norm_mk_lt mbar (div_pos hε hcpos),
     simp only [add_monoid_hom.to_fun_eq_coe],
-    have h : (lift S.topological_closure f.to_add_monoid_hom _)
-      ((quotient_add_group.mk' S.topological_closure) m) = f m := rfl,
+    have h : (lift S f.to_add_monoid_hom _)
+      ((quotient_add_group.mk' S) m) = f m := rfl,
     rw [h],
     refine le_trans (hc m) _,
-    suffices : ↑c * ∥m∥ ≤ ↑c * ∥quotient_add_group.mk' S.topological_closure m∥ + ε, {exact this},
+    suffices : ↑c * ∥m∥ ≤ ↑c * ∥quotient_add_group.mk' S m∥ + ε, {exact this},
     replace hmnorm := mul_le_mul_of_nonneg_left (le_of_lt hmnorm) (nnreal.coe_nonneg c),
     refine le_trans hmnorm _,
     rw [mul_add, mul_div_cancel' ε (ne_of_gt hcpos)],
   end,
-  .. quotient_add_group.lift S.topological_closure f.to_add_monoid_hom
-    (λ m hm, zero_of_closure S f hf m hm) }
+  .. quotient_add_group.lift S f.to_add_monoid_hom hf }
 
 @[simp]
-lemma lift_mk  {N : Type*} [normed_group N] (S : add_subgroup M) (f : normed_group_hom M N)
-  (hf : ∀ s ∈ S, f s = 0) (m : M) : lift S f hf (normed_group.mk S m) = f m := rfl
+lemma lift_mk  {N : Type*} [normed_group N] (S : add_subgroup M) [fact (is_closed (S : set M))]
+  (f : normed_group_hom M N) (hf : ∀ s ∈ S, f s = 0) (m : M) :
+  lift S f hf (normed_group.mk S m) = f m := rfl
 
-lemma lift_unique {N : Type*} [normed_group N] (S : add_subgroup M) (f : normed_group_hom M N)
-  (hf : ∀ s ∈ S, f s = 0) (g : normed_group_hom (quotient S.topological_closure) N) :
+lemma lift_unique {N : Type*} [normed_group N] (S : add_subgroup M) [fact (is_closed (S : set M))]
+  (f : normed_group_hom M N) (hf : ∀ s ∈ S, f s = 0)
+  (g : normed_group_hom (quotient S) N) :
   g.comp (normed_group.mk S) = f → g = lift S f hf :=
 begin
   intro h,
@@ -270,7 +271,7 @@ begin
 end
 
 /-- `normed_group.mk S` satisfies `is_quotient`. -/
-lemma is_quotient_quotient (S : add_subgroup M) :
+lemma is_quotient_quotient (S : add_subgroup M) [fact (is_closed (S : set M))] :
   is_quotient (normed_group.mk S) :=
 ⟨surjective_normed_group.mk S, λ m, by simpa [normed_group.mk.ker S] using quotient_norm_eq _ m⟩
 
