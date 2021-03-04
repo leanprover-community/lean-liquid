@@ -126,7 +126,40 @@ noncomputable
 def lift {f : A ⟶ B} {g : B ⟶ C} (cond : f ≫ g = 0) : coker f ⟶ C :=
 { bound' := begin
     -- Is this actually true!?
-    sorry
+    rcases g.bound with ⟨c,hcpos,hc⟩,
+    use c,
+    intros v,
+    rcases coker.π_surjective v with ⟨v,rfl⟩,
+    change ∥ g v ∥ ≤ c * Inf {r : ℝ | ∃ y : B, coker.π _ = coker.π _ ∧ _ },
+    have : (c : ℝ) * Inf {r : ℝ | ∃ (y : B), (coker.π y : coker f) = (coker.π v : coker f) ∧ r = ∥y∥} =
+      Inf {r : ℝ | ∃ (y : B), (coker.π y : coker f) = (coker.π v : coker f) ∧ r = c * ∥ y ∥ }, sorry,
+    rw this,
+    rw real.le_Inf,
+    { rintros x ⟨b,hx,rfl⟩,
+      have : g v = g b,
+      {
+        have : b - v ∈ f.range.topological_closure, sorry, -- from hx
+        have : (range f).topological_closure ≤ g.ker,
+        {
+          change (closure (f.range : set B)) ⊆ (ker g : set B),
+          have : is_closed (g.ker : set B), sorry,
+          -- there should now be a lemma saying that, given `is_closed Y`,
+          -- closure X ⊆ Y ↔ X ⊆ Y
+          -- Then conclude using `cond`.
+          sorry,
+        },
+        suffices : g (b - v) = 0, sorry, -- This must be in mathlib somewhere...
+        apply this,
+        assumption,
+      },
+      rw this,
+      apply hc },
+    { refine ⟨c * ∥ v ∥,v,rfl, rfl⟩ },
+    { use 0,
+      intros y hy,
+      rcases hy with ⟨y,hy,rfl⟩,
+      apply mul_nonneg (le_of_lt _) (norm_nonneg _),
+      simpa },
   end,
   ..(quotient_add_group.lift _ g.to_add_monoid_hom begin
     intros b hb,
