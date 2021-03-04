@@ -257,6 +257,18 @@ def lift {N : Type*} [normed_group N] (S : add_subgroup M) (f : normed_group_hom
 lemma lift_mk  {N : Type*} [normed_group N] (S : add_subgroup M) (f : normed_group_hom M N)
   (hf : ∀ s ∈ S, f s = 0) (m : M) : lift S f hf (normed_group.mk S m) = f m := rfl
 
+lemma lift_unique {N : Type*} [normed_group N] (S : add_subgroup M) (f : normed_group_hom M N)
+  (hf : ∀ s ∈ S, f s = 0) (g : normed_group_hom (quotient S.topological_closure) N) :
+  g.comp (normed_group.mk S) = f → g = lift S f hf :=
+begin
+  intro h,
+  ext,
+  rcases surjective_normed_group.mk _ x with ⟨x,rfl⟩,
+  change (g.comp (normed_group.mk S) x) = _,
+  rw h,
+  refl,
+end
+
 /-- `normed_group.mk S` satisfies `is_quotient`. -/
 lemma is_quotient_quotient (S : add_subgroup M) :
   is_quotient (normed_group.mk S) :=
