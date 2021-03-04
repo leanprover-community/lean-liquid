@@ -148,33 +148,34 @@ begin
   simpa using hS,
 end
 
-/-- The norm on `quotient S` is actually a norm if `S` is a complete subgroup of `M`. -/
-lemma quotient.is_normed_group.core (S : add_subgroup M) (hS : is_closed (↑S : set M)) :
-  normed_group.core (quotient S) :=
+/-- The seminorm on `quotient S.topological_closure` is actually a norm. -/
+lemma quotient.is_normed_group.core (S : add_subgroup M) :
+  normed_group.core (quotient S.topological_closure) :=
 begin
+  have hS : is_closed (↑S.topological_closure : set M) := is_closed_closure,
   split,
   { intro x,
-    refine ⟨λ h, _ , λ h, by simpa [h] using norm_mk_zero S⟩,
+    refine ⟨λ h, _ , λ h, by simpa [h] using norm_mk_zero S.topological_closure⟩,
     obtain ⟨m, hm⟩ := surjective_quot_mk _ x,
-    replace hm : quotient_add_group.mk' S m = x := hm,
+    replace hm : quotient_add_group.mk' S.topological_closure m = x := hm,
     rw [← hm, ← add_monoid_hom.mem_ker, quotient_add_group.ker_mk],
     rw [← hm] at h,
-    exact norm_zero_eq_zero S hS m h },
+    exact norm_zero_eq_zero S.topological_closure hS m h },
   { intros x y,
     refine le_of_forall_pos_le_add (λ ε hε, _),
     replace hε := half_pos hε,
     obtain ⟨m, hm⟩ := norm_mk_lt x hε,
     obtain ⟨n, hn⟩ := norm_mk_lt y hε,
-    have H : quotient_add_group.mk' S (m + n) = x + y := by rw [add_monoid_hom.map_add, hm.1, hn.1],
+    have H : quotient_add_group.mk' _ (m + n) = x + y := by rw [add_monoid_hom.map_add, hm.1, hn.1],
     calc  ∥x + y∥
-        = ∥quotient_add_group.mk' S (m + n)∥ : by rw [← H]
+        = ∥quotient_add_group.mk' _ (m + n)∥ : by rw [← H]
     ... ≤ ∥m + n∥ : norm_mk_le _ _
     ... ≤ ∥m∥ + ∥n∥ : norm_add_le _ _
     ... ≤ (∥x∥ + ε/2) + (∥y∥ + ε/2) : add_le_add (le_of_lt hm.2) (le_of_lt hn.2)
     ... = ∥x∥ + ∥y∥ + ε : by ring },
   { intro x,
-    suffices : {r : ℝ | ∃ (y : M), quotient_add_group.mk' S y = x ∧ r = ∥y∥ } =
-      {r : ℝ | ∃ (y : M), quotient_add_group.mk' S y = -x ∧ r = ∥y∥ },
+    suffices : {r : ℝ | ∃ (y : M), quotient_add_group.mk' _ y = x ∧ r = ∥y∥ } =
+      {r : ℝ | ∃ (y : M), quotient_add_group.mk' _ y = -x ∧ r = ∥y∥ },
     { simp only [this, norm] },
     ext r,
     split,
@@ -191,29 +192,29 @@ end
 
 /-- An instance of `normed_group` on the quotient by a subgroup. -/
 noncomputable
-instance quotient_normed_group (S : add_subgroup M) [hS : fact (is_closed (↑S : set M))] :
-  normed_group (quotient S) :=
-normed_group.of_core (quotient S) (quotient.is_normed_group.core S hS)
+instance quotient_normed_group (S : add_subgroup M) :
+  normed_group (quotient S.topological_closure) :=
+normed_group.of_core (quotient S.topological_closure) (quotient.is_normed_group.core S)
 
 /-- The canonical morphism `M → (quotient S)` as morphism of normed groups. -/
 noncomputable
-def normed_group.mk (S : add_subgroup M) [hS : fact (is_closed (↑S : set M))] :
-  normed_group_hom M (quotient S) :=
+def normed_group.mk (S : add_subgroup M) :
+  normed_group_hom M (quotient S.topological_closure) :=
 { bound' := ⟨1, λ m, by simpa [one_mul] using norm_mk_le _ m⟩,
-  ..quotient_add_group.mk' S }
+  ..quotient_add_group.mk' S.topological_closure }
 
 /-- `normed_group.mk S` agrees with `quotient_add_group.mk' S`. -/
-lemma normed_group.mk.apply (S : add_subgroup M) [fact (is_closed (S : set M))] (m : M) :
-  normed_group.mk S m = quotient_add_group.mk' S m := rfl
+lemma normed_group.mk.apply (S : add_subgroup M) (m : M) :
+  normed_group.mk S m = quotient_add_group.mk' S.topological_closure m := rfl
 
 /-- `normed_group.mk S` is surjective. -/
-lemma surjective_normed_group.mk (S : add_subgroup M) [fact (is_closed (S : set M))] :
+lemma surjective_normed_group.mk (S : add_subgroup M) :
   function.surjective (normed_group.mk S) :=
 surjective_quot_mk _
 
 /-- The kernel of `normed_group.mk S` is `S`. -/
-lemma normed_group.mk.ker (S : add_subgroup M) [fact (is_closed (S : set M))] :
-  (normed_group.mk S).ker = S :=
+lemma normed_group.mk.ker (S : add_subgroup M) :
+  (normed_group.mk S).ker = S.topological_closure :=
 quotient_add_group.ker_mk  _
 
 /-- `is_quotient f`, for `f : M ⟶ N` means that `N` is isomorphic to the quotient of `M`
@@ -223,9 +224,9 @@ structure is_quotient (f : normed_group_hom M N) : Prop :=
 (norm : ∀ x, ∥f x∥ = Inf {r : ℝ | ∃ y ∈ f.ker, r = ∥x + y∥ })
 
 /-- `normed_group.mk S` satisfies `is_quotient`. -/
-lemma is_quotient_quotient (S : add_subgroup M) [fact (is_closed (S : set M))] :
+lemma is_quotient_quotient (S : add_subgroup M) :
   is_quotient (normed_group.mk S) :=
-⟨surjective_normed_group.mk S, λ m, by simpa [normed_group.mk.ker S] using quotient_norm_eq S m⟩
+⟨surjective_normed_group.mk S, λ m, by simpa [normed_group.mk.ker S] using quotient_norm_eq _ m⟩
 
 lemma quotient_norm_lift {f : normed_group_hom M N} (hquot : is_quotient f) {ε : ℝ} (hε : 0 < ε)
   (n : N) : ∃ (m : M), f m = n ∧ ∥m∥ < ∥n∥ + ε :=
