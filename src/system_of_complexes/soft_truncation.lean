@@ -136,22 +136,23 @@ def map_f {C₁ C₂ : cochain_complex' NormedGroup ℤ} (f : C₁ ⟶ C₂) :
 lemma map_comm {C₁ C₂ : cochain_complex' NormedGroup ℤ} (f : C₁ ⟶ C₂) :
   Π {i j:ℤ} (hij : Sc i = j), d C₁ hij ≫ map_f f j = map_f f i ≫ d C₂ hij
 |  -[1+n]       _   _ := show 0 ≫ _ = _ ≫ 0, by rw [zero_comp, comp_zero]
-|       0       1   h := sorry -- some quotient.lift or quotient.map ??
+|       0       1   h := coker.map_lift_comm (f.comm' (dtarget 1)) -- some quotient.lift or quotient.map ??
 | (n+1:ℕ) (m+1:ℕ) rfl := f.comm' rfl
 
-#exit
-def map {C₁ C₂ : cochain_complex NormedGroup} (f : C₁ ⟶ C₂) :
+def map {C₁ C₂ : cochain_complex' NormedGroup ℤ} (f : C₁ ⟶ C₂) :
   obj C₁ ⟶ obj C₂ :=
 { f := map_f f,
-  comm' := funext $ map_comm f }
+  comm' := λ _ _, map_comm f}
 
 end soft_truncation'
 
+local attribute [instance] int.has_succ
+
 @[simps]
-def soft_truncation' : cochain_complex NormedGroup ⥤ cochain_complex NormedGroup :=
+def soft_truncation' : cochain_complex' NormedGroup ℤ ⥤ cochain_complex' NormedGroup ℤ :=
 { obj := λ C, soft_truncation'.obj C,
   map := λ C₁ C₂ f, soft_truncation'.map f,
-  map_id' := sorry,
+  map_id' := λ X, by sorry,
   map_comp' := sorry }
 
 end NormedGroup
