@@ -40,7 +40,7 @@ def d (C : cochain_complex ℤ NormedGroup) :
 lemma d2 (C : cochain_complex ℤ NormedGroup) :
   Π i:ℤ, d C i ≫ d C (i+1) = 0
 | -[1+n]  := show 0 ≫ _ = 0, by rw zero_comp
-| 0       := sorry -- annoying :-(
+| 0       := coker.lift_comp_eq_zero _ (C.d_comp_d _ _ _)
 | (n+1:ℕ) := C.d_comp_d (n+1) _ _
 
 @[simps]
