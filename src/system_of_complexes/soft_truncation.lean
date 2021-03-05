@@ -15,6 +15,8 @@ Hence the two definitions agree iff `C` is exact in degree `0`.
 
 -/
 
+universes u
+
 noncomputable theory
 open_locale nnreal
 
@@ -26,43 +28,43 @@ open quotient_add_group
 namespace soft_truncation'
 
 -- Note: the next sorry needs a `NormedGroup`, so we need to bundle.
-def X (C : cochain_complex ℤ NormedGroup) : ℤ → NormedGroup
+def X (C : cochain_complex ℤ NormedGroup.{u}) : ℤ → NormedGroup.{u}
 | -[1+n]  := 0
 | 0       := coker (C.d (-1) 0)
 | (n+1:ℕ) := C.X (n+1)
 
-def d (C : cochain_complex ℤ NormedGroup) :
+def d (C : cochain_complex ℤ NormedGroup.{u}) :
   Π i:ℤ, X C i ⟶ X C (i+1)
 | -[1+n]  := 0
 | 0       := coker.lift (C.d_comp_d (-1) 0 1)
 | (n+1:ℕ) := C.d (n+1) (n+1+1)
 
-lemma d2 (C : cochain_complex ℤ NormedGroup) :
+lemma d2 (C : cochain_complex ℤ NormedGroup.{u}) :
   Π i:ℤ, d C i ≫ d C (i+1) = 0
 | -[1+n]  := show 0 ≫ _ = 0, by rw zero_comp
 | 0       := coker.lift_comp_eq_zero _ (C.d_comp_d _ _ _)
 | (n+1:ℕ) := C.d_comp_d (n+1) _ _
 
 @[simps]
-def obj (C : cochain_complex ℤ NormedGroup) :
+def obj (C : cochain_complex ℤ NormedGroup.{u}) :
   cochain_complex ℤ NormedGroup :=
 { X := X C,
   differential := d C,
   differential2 := by { dsimp, rintro i _ rfl, simpa using d2 C i } }
 
-def map_f {C₁ C₂ : cochain_complex ℤ NormedGroup} (f : C₁ ⟶ C₂) :
+def map_f {C₁ C₂ : cochain_complex ℤ NormedGroup.{u}} (f : C₁ ⟶ C₂) :
   Π i:ℤ, X C₁ i ⟶ X C₂ i
 | -[1+n]  := 0
 | 0       := coker.map (cochain_complex.hom.comm f (-1) 0)
 | (n+1:ℕ) := f.f (n+1)
 
-lemma map_comm {C₁ C₂ : cochain_complex ℤ NormedGroup} (f : C₁ ⟶ C₂) :
+lemma map_comm {C₁ C₂ : cochain_complex ℤ NormedGroup.{u}} (f : C₁ ⟶ C₂) :
   Π i:ℤ, d C₁ i ≫ map_f f (i+1) = map_f f i ≫ d C₂ i
 | -[1+n]  := show 0 ≫ _ = _ ≫ 0, by rw [zero_comp, comp_zero]
 | 0       := coker.map_lift_comm (cochain_complex.hom.comm f 0 1)
 | (n+1:ℕ) := cochain_complex.hom.comm f (n+1) _
 
-def map {C₁ C₂ : cochain_complex ℤ NormedGroup} (f : C₁ ⟶ C₂) :
+def map {C₁ C₂ : cochain_complex ℤ NormedGroup.{u}} (f : C₁ ⟶ C₂) :
   obj C₁ ⟶ obj C₂ :=
 { f := map_f f,
   comm' := map_comm f }
@@ -70,7 +72,7 @@ def map {C₁ C₂ : cochain_complex ℤ NormedGroup} (f : C₁ ⟶ C₂) :
 end soft_truncation'
 
 @[simps]
-def soft_truncation' : cochain_complex ℤ NormedGroup ⥤ cochain_complex ℤ NormedGroup :=
+def soft_truncation' : cochain_complex ℤ NormedGroup.{u} ⥤ cochain_complex ℤ NormedGroup.{u} :=
 { obj := λ C, soft_truncation'.obj C,
   map := λ C₁ C₂ f, soft_truncation'.map f,
   map_id' := λ C,
