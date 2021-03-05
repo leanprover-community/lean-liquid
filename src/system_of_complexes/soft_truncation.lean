@@ -110,7 +110,7 @@ def d (C : cochain_complex' NormedGroup ℤ) : ∀ {i j : ℤ} (h : Sc i = j), X
 | (n+1 : ℕ) (m+1 : ℕ) h := C.d h
 
 lemma d_squared' (C : cochain_complex' NormedGroup ℤ) :
-  ∀ (i j k:ℤ) (hij : Sc i = j) (hjk : Sc j = k), d C hij ≫ d C hjk = 0
+  ∀ {i j k:ℤ} (hij : Sc i = j) (hjk : Sc j = k), d C hij ≫ d C hjk = 0
 | -[1+n] _ _ _ _ := show 0 ≫ _ = 0, by rw zero_comp
 | 0 1 2 rfl rfl := show coker.lift (d_squared_right C 1) ≫ C.d (dsource 1) = 0,
 begin
@@ -118,38 +118,28 @@ begin
   convert coker.lift_zero,
   exact d_squared_middle C 1,
 end
-| (n+1:ℕ) (p+1:ℕ) (q+1:ℕ) hij hjk := C.d_squared' hij hjk
+| (n+1:ℕ) (p+1:ℕ) (q+1:ℕ) rfl rfl := C.d_squared' rfl rfl
 
 @[simps]
 def obj (C : cochain_complex' NormedGroup ℤ) :
   cochain_complex' NormedGroup ℤ :=
 { X := X C,
   d := λ _ _, d C,
-  d_squared' := d_squared' C }
+  d_squared' := λ _ _ _, d_squared' C }
 
 def map_f {C₁ C₂ : cochain_complex' NormedGroup ℤ} (f : C₁ ⟶ C₂) :
   Π i:ℤ, X C₁ i ⟶ X C₂ i
 | -[1+n]  := 0
-| 0       := begin
-    change coker _ ⟶ coker _,
-    let f0 := f.f 0,
-    let pi : C₂.X 0 ⟶ coker (C₂.d (dtarget 0)) := coker.π,
-    let g := f0 ≫ pi,
-    refine coker.lift _,
-    exact g,
-    change _ ≫ (f.f 0 ≫ pi) = 0,
-    rw ← category_theory.category.assoc,
-
-  end -- some quotient.lift or quotient.map ??
+| 0       := coker.map (f.comm' (dtarget 0))
 | (n+1:ℕ) := f.f (n+1)
 
-#exit
-lemma map_comm {C₁ C₂ : cochain_complex NormedGroup} (f : C₁ ⟶ C₂) :
-  Π i:ℤ, d C₁ i ≫ map_f f (i+1) = map_f f i ≫ d C₂ i
-| -[1+n]  := show 0 ≫ _ = _ ≫ 0, by rw [zero_comp, comp_zero]
-| 0       := sorry -- some quotient.lift or quotient.map ??
-| (n+1:ℕ) := homological_complex.comm_at f (n+1)
+lemma map_comm {C₁ C₂ : cochain_complex' NormedGroup ℤ} (f : C₁ ⟶ C₂) :
+  Π {i j:ℤ} (hij : Sc i = j), d C₁ hij ≫ map_f f j = map_f f i ≫ d C₂ hij
+|  -[1+n]       _   _ := show 0 ≫ _ = _ ≫ 0, by rw [zero_comp, comp_zero]
+|       0       1   h := sorry -- some quotient.lift or quotient.map ??
+| (n+1:ℕ) (m+1:ℕ) rfl := f.comm' rfl
 
+#exit
 def map {C₁ C₂ : cochain_complex NormedGroup} (f : C₁ ⟶ C₂) :
   obj C₁ ⟶ obj C₂ :=
 { f := map_f f,
