@@ -12,6 +12,7 @@ import pseudo_normed_group.basic
 
 import for_mathlib.tsum
 import for_mathlib.add_monoid_hom
+import for_mathlib.pi_nat_apply
 
 /-!
 
@@ -46,7 +47,7 @@ section defs
 set_option old_structure_cmd true
 
 /-- `Mbar r' S` is the set of power series
-`F_s = ∑ a_{n,s}T^n ∈ Tℤ[[T]]` such that `∑_{n,s} |a_{n,s}|r'^n` converges -/
+`F_s = ∑ a_{s,n}T^n ∈ Tℤ[[T]]` such that `∑_{s,n} |a_{s,n}|r'^n` converges -/
 structure Mbar (r' : ℝ≥0) (S : Type u) [fintype S] :=
 (to_fun : S → ℕ → ℤ)
 (coeff_zero' : ∀ s, to_fun s 0 = 0)
@@ -145,6 +146,14 @@ instance : add_comm_group (Mbar r' S) :=
   add_left_neg := by { intros, ext, simp only [coe_add, coe_neg, coe_zero, add_left_neg] },
   add_comm := by { intros, ext, simp only [coe_add, add_comm] },
   sub_eq_add_neg := by { intros, ext, simp only [coe_sub, coe_add, coe_neg, sub_eq_add_neg] } }
+
+/-- The `coeff s n` is the additive homomorphism that sends `x : Mbar r' S`
+to the coefficient `x_{s,n}`. -/
+@[simps]
+def coeff (s : S) (n : ℕ) : Mbar r' S →+ ℤ :=
+{ to_fun := λ x, x s n,
+  map_zero' := rfl,
+  map_add' := λ x y, rfl }
 
 /-- The norm of `F : Mbar r' S` as nonnegative real number.
 It is defined as `∑ s, ∑' n, (↑(F s n).nat_abs * r' ^ n)`. -/
@@ -319,6 +328,58 @@ begin
 end
 
 end Tinv
+
+lemma archimedean : pseudo_normed_group.archimedean (Mbar r' S) :=
+begin
+  intros x c N hN,
+  simp only [Mbar.mem_filtration_iff],
+  have hN' : 0 < (N : ℝ≥0) := by exact_mod_cast hN,
+  conv_rhs { rw ← mul_le_mul_left hN' },
+  simp only [nnnorm_def, ← nsmul_eq_smul, nsmul_eq_mul, finset.mul_sum, finset.sum_mul,
+    coe_nsmul, pi.mul_apply, pi.nat_apply, @pi.nat_apply ℕ ℤ _ _ _ N,
+    int.nat_abs_mul, int.nat_abs_of_nat, int.nat_cast_eq_coe_nat, nat.cast_mul],
+  convert iff.rfl,
+  ext s,
+  simp only [nnreal.coe_nat_cast, nnreal.coe_tsum, nnreal.coe_mul,
+    ← tsum_mul_left, ← mul_assoc]
+end
+
+/-- `of_mask x mask : Mbar r' S` is `∑ a_{s,n}T^n ∈ Tℤ[[T]]`,
+where `a_{s,n}` is `x_{s,n}` if `mask n s` is true and `0` otherwise. -/
+@[simps]
+def of_mask (x : Mbar r' S) (mask : S → ℕ → Prop) [∀ s n, decidable (mask s n)] :
+  Mbar r' S :=
+{ to_fun := λ s n, if mask s n then x s n else 0,
+  coeff_zero' := λ s, by { split_ifs, { exact x.coeff_zero s }, { refl } },
+  summable' := λ s,
+  begin
+    apply nnreal.summable_of_le _ (x.summable s),
+    intro n,
+    apply mul_le_mul' _ le_rfl,
+    norm_cast,
+    split_ifs,
+    { refl },
+    { rw int.nat_abs_zero, exact zero_le' }
+  end }
+
+variables (r' S)
+
+/-- `geom r' S` is `∑ T^n ∈ Tℤ[[T]]`.
+In other words, all non-constant coefficients are `1`. -/
+@[simps]
+def geom [fact (r' < 1)] : Mbar r' S :=
+{ to_fun := λ s n, if n = 0 then 0 else 1,
+  coeff_zero' := λ s, if_pos rfl,
+  summable' := λ s,
+  begin
+    have := (normed_ring.summable_geometric_of_norm_lt_1 (r' : ℝ) _), swap,
+    { rwa nnreal.norm_eq },
+    simp only [← nnreal.coe_pow, nnreal.summable_coe] at this,
+    apply nnreal.summable_of_le _ this,
+    intro n,
+    refine (mul_le_mul' _ le_rfl).trans (one_mul _).le,
+    split_ifs; simp
+  end }
 
 end Mbar
 

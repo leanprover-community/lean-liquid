@@ -7,6 +7,7 @@ import order.lexicographic
 import Mbar.basic
 import polyhedral_lattice.basic
 import normed_group.pseudo_normed_group
+import partition
 
 /-!
 In this file we state and prove lemmas 9.7 and 9.8 of [Analytic].
@@ -17,10 +18,6 @@ open_locale nnreal big_operators
 section lem97
 
 variables (Λ : Type*) [add_comm_group Λ]
-
-lemma le_or_le {α : Type*} [linear_order α] (a b : α) :
-  a ≤ b ∨ b ≤ a :=
-(le_or_lt a b).imp id le_of_lt
 
 lemma abs_add_eq_add_abs_iff (a b : ℤ) :
   abs (a + b) = abs a + abs b ↔ (0 ≤ a ∧ 0 ≤ b ∨ a ≤ 0 ∧ b ≤ 0) :=
@@ -67,39 +64,7 @@ variables [fintype S] [normed_group Λ] [polyhedral_lattice Λ]
 
 section
 
-variables {S}
-
--- move this
-@[simps]
-def Mbar.coeff (s : S) (n : ℕ) : Mbar r' S →+ ℤ :=
-{ to_fun := λ x, x s n,
-  map_zero' := rfl,
-  map_add' := λ x y, rfl }
-
--- move this
-@[simp] lemma pi.nat_apply {α β : Type*} [has_zero β] [has_one β] [has_add β] :
-  ∀ (n : ℕ), (n : α → β) = λ _, n
-| 0     := rfl
-| (n+1) := show (n + 1 : α → β) = λ _, n + 1, by { rw pi.nat_apply, refl }
-.
-
-variables {Λ r'}
-
-@[simps]
-def Mbar.of_mask (x : Mbar r' S) (mask : S → ℕ → Prop) [∀ s n, decidable (mask s n)] :
-  Mbar r' S :=
-{ to_fun := λ s n, if mask s n then x s n else 0,
-  coeff_zero' := λ s, by { split_ifs, { exact x.coeff_zero s }, { refl } },
-  summable' := λ s,
-  begin
-    apply nnreal.summable_of_le _ (x.summable s),
-    intro n,
-    apply mul_le_mul' _ le_rfl,
-    norm_cast,
-    split_ifs,
-    { refl },
-    { rw int.nat_abs_zero, exact zero_le' }
-  end }
+variables {S Λ r'}
 
 -- ugly name
 @[simps]
@@ -164,66 +129,7 @@ section pseudo_normed_group
 
 variables (M : Type*) [pseudo_normed_group M]
 
-def pseudo_normed_group.archimedean : Prop :=
-∀ (m : M) (c : ℝ≥0) (n : ℕ), 0 < n →
-  ((n • m) ∈ filtration M (n • c) ↔ m ∈ filtration M c)
-
-lemma Mbar.archimedean : pseudo_normed_group.archimedean (Mbar r' S) :=
-begin
-  intros x c N hN,
-  simp only [Mbar.mem_filtration_iff],
-  have hN' : 0 < (N : ℝ≥0) := by exact_mod_cast hN,
-  conv_rhs { rw ← mul_le_mul_left hN' },
-  simp only [Mbar.nnnorm_def, ← nsmul_eq_smul, nsmul_eq_mul, finset.mul_sum, finset.sum_mul,
-    Mbar.coe_nsmul, pi.mul_apply, pi.nat_apply, @pi.nat_apply ℕ ℤ _ _ _ N,
-    int.nat_abs_mul, int.nat_abs_of_nat, int.nat_cast_eq_coe_nat, nat.cast_mul],
-  convert iff.rfl,
-  ext s,
-  simp only [nnreal.coe_nat_cast, nnreal.coe_tsum, nnreal.coe_mul,
-    ← tsum_mul_left, ← mul_assoc]
-end
-
-lemma pseudo_normed_group.archimedean.add_monoid_hom
-  (h : pseudo_normed_group.archimedean M) :
-  pseudo_normed_group.archimedean (Λ →+ M) :=
-begin
-  intros f c N hN,
-  apply forall_congr, intro c,
-  apply forall_congr, intro l,
-  apply forall_congr, intro hl,
-  simp only [← nsmul_eq_smul, nsmul_eq_mul, mul_assoc],
-  simp only [nsmul_eq_smul, ← nsmul_eq_mul, add_monoid_hom.nat_smul_apply],
-  exact h _ _ N hN
-end
-
 variables {M}
-
--- move this
-lemma pseudo_normed_group.nat_smul_mem_filtration (n : ℕ) (m : M) (c : ℝ≥0)
-  (h : m ∈ filtration M c) :
-  (n • m) ∈ filtration M (n • c) :=
-begin
-  induction n with n ih, { simpa only [zero_smul] using zero_mem_filtration _ },
-  simp only [nat.succ_eq_add_one, add_smul, one_smul],
-  exact add_mem_filtration ih h,
-end
-
--- move this
-lemma pseudo_normed_group.smul_mem_filtration (n : ℤ) (m : M) (c : ℝ≥0)
-  (h : m ∈ filtration M c) :
-  (n • m) ∈ filtration M (n.nat_abs • c) :=
-begin
-  by_cases hn : 0 ≤ n,
-  { lift n to ℕ using hn,
-    simp only [int.nat_abs_of_nat, ← gsmul_eq_smul, gsmul_coe_nat, nsmul_eq_smul],
-    exact pseudo_normed_group.nat_smul_mem_filtration n m c h },
-  { push_neg at hn, rw ← neg_pos at hn,
-    lift -n to ℕ using hn.le with k hk,
-    rw [← neg_neg n, int.nat_abs_neg, ← hk, int.nat_abs_of_nat, neg_smul],
-    apply neg_mem_filtration,
-    simp only [neg_smul, ← gsmul_eq_smul, gsmul_coe_nat, nsmul_eq_smul],
-    exact pseudo_normed_group.nat_smul_mem_filtration k m c h }
-end
 
 lemma generates_norm.add_monoid_hom_mem_filtration_iff {ι : Type} [fintype ι]
   {l : ι → Λ} (hl : generates_norm l) (hM : pseudo_normed_group.archimedean M)
@@ -242,29 +148,13 @@ begin
     ... ≤ c * (d * c') : mul_le_mul' le_rfl (mul_le_mul' le_rfl hl')
     ... = d • (c * c') : by rw [← nsmul_eq_smul, nsmul_eq_mul, mul_left_comm] },
   rintro i -,
-  convert pseudo_normed_group.nat_smul_mem_filtration (cᵢ i) _ _ (H i),
-  { rw [← nsmul_eq_smul, x.map_nsmul, nsmul_eq_smul] },
-  { rw [← nsmul_eq_smul, nsmul_eq_mul, mul_left_comm, mul_assoc] }
+  rw [mul_assoc, mul_left_comm, ← nsmul_eq_smul, x.map_nsmul, nsmul_eq_smul],
+  exact pseudo_normed_group.nat_smul_mem_filtration (cᵢ i) _ _ (H i),
 end
 
 end pseudo_normed_group
 
 end
-
-@[simps]
-def Mbar.geom [fact (r' < 1)] : Mbar r' S :=
-{ to_fun := λ s n, if n = 0 then 0 else 1,
-  coeff_zero' := λ s, if_pos rfl,
-  summable' := λ s,
-  begin
-    have := (normed_ring.summable_geometric_of_norm_lt_1 (r' : ℝ) _), swap,
-    { rwa nnreal.norm_eq },
-    simp only [← nnreal.coe_pow, nnreal.summable_coe] at this,
-    apply nnreal.summable_of_le _ this,
-    intro n,
-    refine (mul_le_mul' _ le_rfl).trans (one_mul _).le,
-    split_ifs; simp
-  end }
 
 variables {Λ r' S}
 
@@ -329,8 +219,7 @@ begin
   by_cases H : l i = 0,
   { simpa only [H, a.map_zero, zero_smul] using zero_mem_filtration _ },
   rw ← nnnorm_eq_zero at H,
-  refine filtration_mono _ (pseudo_normed_group.smul_mem_filtration _ _ _ hxc),
-  rw [← nsmul_eq_smul, nsmul_eq_mul],
+  refine filtration_mono _ (pseudo_normed_group.int_smul_mem_filtration _ _ _ hxc),
   refine mul_le_mul' _ le_rfl,
   rw ← inv_inv' (nnnorm (l i)),
   apply le_mul_inv_of_mul_le (inv_ne_zero H),
@@ -360,22 +249,14 @@ begin
   { intro hsn, exact (hsn (hx₁' s n)).elim }
 end
 
-def mask_fun (f : ℕ → ℝ≥0) (mask : ℕ → Prop) [∀ n, decidable (mask n)] : ℕ → ℝ≥0 :=
-λ n, if mask n then f n else 0
-
-lemma exists_partition (N : ℕ) (hN : 0 < N) (f : ℕ → ℝ≥0) (hf : ∀ n, f n ≤ 1) :
-  ∃ (mask : fin N → ℕ → Prop) [∀ i n, decidable (mask i n)], by exactI
-    (∀ n, ∃! i, mask i n) ∧ (∀ i, ∑' n, mask_fun f (mask i) n ≤ (∑' n, f n) / N + 1) :=
-sorry
-
-lemma lem98_int_fin (nS : ℕ) [fact (r' < 1)] (N : ℕ) (hN : 0 < N) (c : ℝ≥0)
-  (x : Mbar r' (fin nS)) (hx : x ∈ filtration (Mbar r' (fin nS)) c)
-  (H : ∀ s n, (x s n).nat_abs ≤ 1) :
-  ∃ y : fin N → Mbar r' (fin nS), (x = ∑ i, y i) ∧
-      (∀ i, y i ∈ filtration (Mbar r' (fin nS)) (c/N + 1)) :=
-begin
-  sorry
-end
+-- lemma lem98_int_fin (nS : ℕ) [fact (r' < 1)] (N : ℕ) (hN : 0 < N) (c : ℝ≥0)
+--   (x : Mbar r' (fin nS)) (hx : x ∈ filtration (Mbar r' (fin nS)) c)
+--   (H : ∀ s n, (x s n).nat_abs ≤ 1) :
+--   ∃ y : fin N → Mbar r' (fin nS), (x = ∑ i, y i) ∧
+--       (∀ i, y i ∈ filtration (Mbar r' (fin nS)) (c/N + 1)) :=
+-- begin
+--   admit
+-- end
 
 lemma fintype_prod_nat_equiv_nat (S : Type*) [fintype S] [hS : nonempty S] :
   nonempty (S × ℕ ≃ ℕ) :=
@@ -406,44 +287,68 @@ begin
   obtain ⟨e⟩ := fintype_prod_nat_equiv_nat S,
   let f : ℕ → ℝ≥0 :=
     λ n, ↑(x (e.symm n).1 (e.symm n).2).nat_abs * r' ^ (e.symm n).2,
-  obtain ⟨mask, h0, h1, h2⟩ := exists_partition N hN f _, swap,
+  obtain ⟨mask, h0, h1, h2⟩ := exists_partition N hN f _ _, swap,
   { intro n,
     calc f n ≤ 1 * 1 : mul_le_mul' _ _
     ... = 1 : mul_one 1,
     { exact_mod_cast (H _ _) },
     { exact pow_le_one _ zero_le' (le_of_lt ‹_›) } },
-  resetI,
-  have hf : ∑ i, mask_fun f (mask i) = f,
-  { ext1 n, simp only [fintype.sum_apply, mask_fun],
-    obtain ⟨i, hi1, hi2⟩ := h1 n,
-    rw [finset.sum_eq_single i, if_pos hi1],
-    { rintro j - hj, rw if_neg, exact mt (hi2 j) hj },
-    { intro hi, exact (hi (finset.mem_univ i)).elim } },
-  let y := λ i, Mbar.of_mask x (λ s n, mask i (e (s, n))),
-  have hxy : x = ∑ i, y i,
-  { ext s n,
-    simp only [Mbar.coe_sum, if_congr, function.curry_apply, fintype.sum_apply,
-      function.comp_app, Mbar.of_mask_to_fun, finset.sum_congr],
-    obtain ⟨i, hi1, hi2⟩ := h1 (e (s, n)),
-    rw [finset.sum_eq_single i, if_pos hi1],
-    { rintro j - hj,
-      rw if_neg,
-      exact mt (hi2 j) hj },
-    { intro hi, exact (hi (finset.mem_univ i)).elim } },
-  have hxf : ∥x∥₊ = ∑' n, f n,
-  { sorry },
-  refine ⟨y, hxy, _⟩,
-  intro i,
-  rw [Mbar.mem_filtration_iff] at hx ⊢,
-  refine le_trans (le_of_eq _) ((h2 i).trans _),
-  { rw [Mbar.nnnorm_def, ← tsum_sum], swap,
-    { rintro s -, exact (y i).summable s },
-    -- now we need to massage the RHS using `e : S × ℕ ≃ ℕ`
-    sorry
-    },
-  { simp only [div_eq_mul_inv],
-    refine add_le_add (mul_le_mul' _ le_rfl) le_rfl,
-    exact hxf.ge.trans hx }
+  { sorry,
+  -- resetI,
+  -- have hf : ∑ i, mask_fun f (mask i) = f,
+  -- { ext1 n, simp only [fintype.sum_apply, mask_fun],
+  --   obtain ⟨i, hi1, hi2⟩ := h1 n,
+  --   rw [finset.sum_eq_single i, if_pos hi1],
+  --   { rintro j - hj, rw if_neg, exact mt (hi2 j) hj },
+  --   { intro hi, exact (hi (finset.mem_univ i)).elim } },
+  -- let y := λ i, Mbar.of_mask x (λ s n, mask i (e (s, n))),
+  -- have hxy : x = ∑ i, y i,
+  -- { ext s n,
+  --   simp only [Mbar.coe_sum, if_congr, function.curry_apply, fintype.sum_apply,
+  --     function.comp_app, Mbar.of_mask_to_fun, finset.sum_congr],
+  --   obtain ⟨i, hi1, hi2⟩ := h1 (e (s, n)),
+  --   rw [finset.sum_eq_single i, if_pos hi1],
+  --   { rintro j - hj,
+  --     rw if_neg,
+  --     exact mt (hi2 j) hj },
+  --   { intro hi, exact (hi (finset.mem_univ i)).elim } },
+  -- have hxf : ∥x∥₊ = ∑' n, f n,
+  -- { sorry },
+  -- refine ⟨y, hxy, _⟩,
+  -- intro i,
+  -- rw [Mbar.mem_filtration_iff] at hx ⊢,
+  -- refine le_trans (le_of_eq _) ((h2 i).trans _),
+  -- { rw [Mbar.nnnorm_def],
+  --   have aux1 : ∀ s, summable (λ n, mask_fun f (mask i) (e ((equiv.sigma_equiv_prod S ℕ) ⟨s, n⟩))),
+  --   { intro s,
+  --     refine nnreal.summable_of_le _ ((Mbar.geom r' S).summable s),
+  --     intro n,
+  --     simp only [mask_fun, f, equiv.symm_apply_apply, equiv.sigma_equiv_prod_apply],
+  --     -- split_ifs,
+  --     -- { refine mul_le_mul' _ le_rfl,
+  --     --   sorry },
+  --     { sorry }
+  --     },
+  --   have aux2 : summable (λ (p : Σ (b : S), ℕ), mask_fun f (mask i) (e ((equiv.sigma_equiv_prod S ℕ) p))),
+  --   { sorry },
+  --   -- now we need to massage the RHS using `e : S × ℕ ≃ ℕ`
+  --   calc ∑ s, ∑' n, ↑(y i s n).nat_abs * r' ^ n
+  --          = ∑' s, ∑' n, ↑(y i s n).nat_abs * r' ^ n : (tsum_fintype _).symm
+  --      ... = ∑' x, mask_fun f (mask i) (e x) : _
+  --      ... = ∑' n, mask_fun f (mask i) n : e.tsum_eq _,
+  --   rw [← (equiv.sigma_equiv_prod S ℕ).tsum_eq, tsum_sigma' aux1 aux2],
+  --   { congr' 1, ext1 s, congr' 1, ext1 n,
+  --     simp only [mask_fun, f, equiv.symm_apply_apply,
+  --       equiv.sigma_equiv_prod_apply, Mbar.of_mask_to_fun, nnreal.coe_nat_abs],
+  --     split_ifs,
+  --     { refl },
+  --     { simp only [nnnorm_zero, zero_mul] } },
+  --   { apply_instance } },
+  -- { simp only [div_eq_mul_inv],
+  --   refine add_le_add (mul_le_mul' _ le_rfl) le_rfl,
+  --   exact hxf.ge.trans hx }
+  },
+  sorry
 end
 
 lemma lem98_aux' [fact (r' < 1)] (N : ℕ)
@@ -540,7 +445,7 @@ begin
   intros c x hx,
   -- `x` is a homomorphism `Λ →+ Mbar r' S`
   -- we split it into pieces `Λ →+ ℤ` for all coefficients indexed by `s` and `n`
-  let x' : S → ℕ → Λ →+ ℤ := λ s n, (Mbar.coeff r' s n).comp x,
+  let x' : S → ℕ → Λ →+ ℤ := λ s n, (Mbar.coeff s n).comp x,
   have := λ s n, hA (x' s n), clear hA,
   choose x₁' hx₁' x₀' hx₀' H using this,
   have hx₀_aux : ∀ s n i, (x₀' s n (l i)).nat_abs ≤ (x (l i) s n).nat_abs :=

@@ -139,7 +139,7 @@ attribute [simps] differential_object.forget
 
 /-- The `p`-th row in a system of double complexes, as system of complexes.
   It has object `(C.obj c).X p`over `c`. -/
-def row (C : system_of_double_complexes) (p : ℤ) : system_of_complexes :=
+def row (C : system_of_double_complexes.{u}) (p : ℤ) : system_of_complexes.{u} :=
 C.comp ((homological_complex.forget _).comp $ pi.eval _ p)
 
 @[simp] lemma row_X (C : system_of_double_complexes) (p q : ℤ) (c : ℝ≥0) :
@@ -155,7 +155,7 @@ by refl
 by refl
 
 /-- The `q`-th column in a system of double complexes, as system of complexes. -/
-def col (C : system_of_double_complexes) (q : ℤ) : system_of_complexes :=
+def col (C : system_of_double_complexes.{u}) (q : ℤ) : system_of_complexes.{u} :=
 C.comp
   (functor.map_differential_object _
     (functor.pi $ λ n, (homological_complex.forget _).comp $ pi.eval _ q)
