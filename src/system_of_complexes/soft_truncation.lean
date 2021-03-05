@@ -53,7 +53,7 @@ def obj (C : cochain_complex ℤ NormedGroup) :
 def map_f {C₁ C₂ : cochain_complex ℤ NormedGroup} (f : C₁ ⟶ C₂) :
   Π i:ℤ, X C₁ i ⟶ X C₂ i
 | -[1+n]  := 0
-| 0       := sorry -- some quotient.lift or quotient.map ??
+| 0       := coker.map (cochain_complex.hom.comm f (-1) 0)
 | (n+1:ℕ) := f.f (n+1)
 
 lemma map_comm {C₁ C₂ : cochain_complex ℤ NormedGroup} (f : C₁ ⟶ C₂) :
