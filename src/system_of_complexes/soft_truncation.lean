@@ -46,10 +46,40 @@ structure cochain_complex' (𝒞 : Type u) [category.{v} 𝒞] [has_zero_morphis
 (d {i j : α} (h : Sc i = j) : X i ⟶ X j)
 (d_squared' {i j k : α} (hij : Sc i = j) (hjk : Sc j = k) : (d hij) ≫ (d hjk) = 0)
 
+variables {𝒞 : Type u} [category.{v} 𝒞] [has_zero_morphisms 𝒞]
+  {α : Type*} [has_succ α]
+
+structure hom (X Y : cochain_complex' 𝒞 α) :=
+(f : ∀ (i : α), X.X i ⟶ Y.X i)
+(comm' : ∀ {i j : α} (hij : Sc i = j), (X.d hij ≫ f j = f i ≫ Y.d hij))
+
+@[ext] lemma hom.ext {X Y : cochain_complex' 𝒞 α} (f g : hom X Y) : f.f = g.f → f = g :=
+begin
+  cases f, cases g,
+  simp,
+end
+
+instance : category (cochain_complex' 𝒞 α) :=
+{ hom := hom,
+  id := λ _, { f := λ _, 𝟙 _, comm' := λ _ _ _, by rw [category.id_comp, category.comp_id] },
+  comp := λ X Y Z fXY fYZ, { f := λ i, fXY.f i ≫ fYZ.f i, comm' := λ i j hij, by
+    rw [← category_theory.category.assoc, fXY.comm' hij, category_theory.category.assoc,
+        fYZ.comm' hij, category_theory.category.assoc] },
+  id_comp' := λ X Y f, begin
+    simp,
+    ext,
+    refl,
+  end,
+  comp_id' := λ X Y f, begin
+    simp,
+    ext,
+    refl,
+  end,
+  assoc' := λ W X Y Z f g h, by simp only [category.assoc] }
+
 local attribute [instance] int.has_succ
 
-variables {𝒞 : Type u} [category.{v} 𝒞] [has_zero_morphisms 𝒞]
-  (C : cochain_complex' 𝒞 ℤ)
+variable  (C : cochain_complex' 𝒞 ℤ)
 
 lemma d_squared_left (n : ℤ) : C.d (dsource n) ≫ C.d (dsource (n + 1)) = 0 :=
 C.d_squared' (dsource n) (dsource (n + 1))
@@ -84,27 +114,36 @@ lemma d_squared' (C : cochain_complex' NormedGroup ℤ) :
 | -[1+n] _ _ _ _ := show 0 ≫ _ = 0, by rw zero_comp
 | 0 1 2 rfl rfl := show coker.lift (d_squared_right C 1) ≫ C.d (dsource 1) = 0,
 begin
-
-  sorry
+  rw coker.lift_comp_eq_lift,
+  convert coker.lift_zero,
+  exact d_squared_middle C 1,
 end
 | (n+1:ℕ) (p+1:ℕ) (q+1:ℕ) hij hjk := C.d_squared' hij hjk
 
-
-#exit
-
 @[simps]
-def obj (C : cochain_complex NormedGroup) :
-  cochain_complex NormedGroup :=
+def obj (C : cochain_complex' NormedGroup ℤ) :
+  cochain_complex' NormedGroup ℤ :=
 { X := X C,
-  d := d C,
-  d_squared' := funext $ d_squared' C }
+  d := λ _ _, d C,
+  d_squared' := d_squared' C }
 
-def map_f {C₁ C₂ : cochain_complex NormedGroup} (f : C₁ ⟶ C₂) :
+def map_f {C₁ C₂ : cochain_complex' NormedGroup ℤ} (f : C₁ ⟶ C₂) :
   Π i:ℤ, X C₁ i ⟶ X C₂ i
 | -[1+n]  := 0
-| 0       := sorry -- some quotient.lift or quotient.map ??
+| 0       := begin
+    change coker _ ⟶ coker _,
+    let f0 := f.f 0,
+    let pi : C₂.X 0 ⟶ coker (C₂.d (dtarget 0)) := coker.π,
+    let g := f0 ≫ pi,
+    refine coker.lift _,
+    exact g,
+    change _ ≫ (f.f 0 ≫ pi) = 0,
+    rw ← category_theory.category.assoc,
+
+  end -- some quotient.lift or quotient.map ??
 | (n+1:ℕ) := f.f (n+1)
 
+#exit
 lemma map_comm {C₁ C₂ : cochain_complex NormedGroup} (f : C₁ ⟶ C₂) :
   Π i:ℤ, d C₁ i ≫ map_f f (i+1) = map_f f i ≫ d C₂ i
 | -[1+n]  := show 0 ≫ _ = _ ≫ 0, by rw [zero_comp, comp_zero]
