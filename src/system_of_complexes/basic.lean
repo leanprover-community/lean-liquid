@@ -1,6 +1,7 @@
-import algebra.homology.chain_complex
+-- import algebra.homology.chain_complex
 
 import for_mathlib.normed_group_quotient
+import system_of_complexes.complex
 
 import normed_group.NormedGroup
 import algebra.ordered_group
@@ -38,9 +39,9 @@ Implementation detail: `cochain_complex` assumes that the complex is indexed by 
 whereas we are interested in complexes indexed by `ℕ`.
 We therefore set all objects indexed by negative integers to `0`, in our use case. -/
 @[derive category_theory.category]
-def system_of_complexes : Type* := ℝ≥0ᵒᵖ ⥤ (cochain_complex NormedGroup)
+def system_of_complexes : Type* := ℝ≥0ᵒᵖ ⥤ (cochain_complex ℤ NormedGroup)
 
-instance : has_shift system_of_complexes := has_shift.mk $ (shift _).congr_right
+-- instance : has_shift system_of_complexes := has_shift.mk $ (shift _).congr_right
 
 variables {M M' N : system_of_complexes.{u}} (f : M ⟶ M') (g : M' ⟶ N)
 
@@ -59,7 +60,7 @@ normed_group_hom.map_sub _ _ _
 
 /-- `f.apply c i` is application of the natural isomorphism `f`: $f_c^i : M_c^i ≅ N_c^i$. -/
 def category_theory.iso.apply (f : M ≅ N) {c : ℝ≥0} {i : ℤ} : M c i ≅ N c i :=
-pi.iso_app (differential_object.iso_app $ f.app $ op c) i
+differential_object.iso_app (f.app (op c)) i
 
 namespace system_of_complexes
 
@@ -70,7 +71,7 @@ and nonnegative reals `c ≤ c'`. -/
 def res {C : system_of_complexes} {c' c : ℝ≥0} {i : ℤ} [h : fact (c ≤ c')] : C c' i ⟶ C c i :=
 (C.map (hom_of_le h).op).f i
 
-variables {c₁ c₂ c₃ : ℝ≥0} (i : ℤ)
+variables {c₁ c₂ c₃ : ℝ≥0} (i j k : ℤ)
 
 @[simp] lemma res_comp_res (h₁ : fact (c₂ ≤ c₁)) (h₂ : fact (c₃ ≤ c₂)) :
   @res C _ _ i h₁ ≫ @res C _ _ i h₂ = @res C _ _ i (le_trans h₂ h₁) :=
@@ -87,25 +88,23 @@ end
 by { rw ← (C.res_comp_res i h₁ h₂), refl }
 
 /-- `C.d` is the differential `C c i ⟶ C c (i+1)` for a system of complexes `C`. -/
-def d {C : system_of_complexes} {c : ℝ≥0} {i : ℤ} :
-  C c i ⟶ C c (i+1) :=
-(C.obj $ op c).d i
+def d (C : system_of_complexes) {c : ℝ≥0} (i j : ℤ) : C c i ⟶ C c j :=
+(C.obj $ op c).d i j
 
-lemma d_comp_d (c : ℝ≥0) (i : ℤ) :
-  (d : C c i ⟶ C c (i+1)) ≫ d = 0 :=
-(C.obj $ op c).d_squared _
+lemma d_comp_d (c : ℝ≥0) (i j k : ℤ) : C.d i j ≫ (C.d j k : C c j ⟶ _) = 0 :=
+(C.obj $ op c).d_comp_d _ _ _
 
-@[simp] lemma d_d (c : ℝ≥0) (i : ℤ) (x : C c i) :
-  d (d x) = 0 :=
-show ((d : C c i ⟶ C c (i+1)) ≫ d) x = 0, by { rw d_comp_d, refl }
+@[simp] lemma d_d (c : ℝ≥0) (i j k : ℤ) (x : C c i) :
+  C.d j k (C.d i j x) = 0 :=
+show ((C.d i j) ≫ C.d j k) x = 0, by { rw d_comp_d, refl }
 
 lemma d_comp_res (h : fact (c₂ ≤ c₁)) :
-  @d C c₁ i ≫ @res C _ _ _ h = @res C _ _ i _ ≫ @d C c₂ i :=
-homological_complex.comm_at (C.map (hom_of_le h).op) i
+  C.d i j ≫ @res C _ _ _ h = @res C _ _ _ _ ≫ C.d i j :=
+(C.map (hom_of_le h).op).comm _ _
 
 lemma d_res (h : fact (c₂ ≤ c₁)) (x) :
-  @d C c₂ i (@res C _ _ i _ x) = @res C _ _ _ h (@d C c₁ i x) :=
-show (@res C _ _ i _ ≫ @d C c₂ i) x = (@d C c₁ i ≫ @res C _ _ _ h) x,
+  C.d i j (@res C _ _ _ _ x) = @res C _ _ _ h (C.d i j x) :=
+show (@res C _ _ _ _ ≫ C.d i j) x = (C.d i j ≫ @res C _ _ _ h) x,
 by rw d_comp_res
 
 section iso
@@ -146,8 +145,8 @@ eq_to_hom $ by { subst hc, subst hi }
 
 variables (M M' N)
 
-lemma d_apply (f : M ⟶ N) {c : ℝ≥0} {i : ℤ} (m : M c i) :
-  d (f m) = f (d m) :=
+lemma d_apply (f : M ⟶ N) {c : ℝ≥0} {i j : ℤ} (m : M c i) :
+  N.d i j (f m) = f (M.d i j m) :=
 begin
   have h : ((M.obj (op c)).d i ≫ (f.app (op c)).f (i + 1)) m =
     (f.app (op c)).f (i + 1) ((M.obj (op c)).d i m),
