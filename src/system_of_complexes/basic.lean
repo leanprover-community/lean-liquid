@@ -201,14 +201,17 @@ def is_bounded_exact
   (k K : ℝ≥0) (m : ℤ) [hk : fact (1 ≤ k)] (c₀ : ℝ≥0) : Prop :=
 ∀ c ≥ c₀, ∀ i ≤ m,
 ∀ x : C (k * c) i,
-∃ y : C c (i - 1), ∥res x - C.d _ _ y∥ ≤ K * ∥C.d i (i+1) x∥
+∃ (i' j : ℤ) (hi' : i' + 1 = i) (hj : i + 1 = j)
+  (y : C c i'), ∥res x - C.d _ _ y∥ ≤ K * ∥C.d i j x∥
 
 /-- Weak version of `is_bounded_exact`. -/
 def is_weak_bounded_exact
   (k K : ℝ≥0) (m : ℤ) [hk : fact (1 ≤ k)] (c₀ : ℝ≥0) : Prop :=
 ∀ c ≥ c₀, ∀ i ≤ m,
 ∀ x : C (k * c) i,
-∀ ε > 0, ∃ y : C c (i-1), ∥res x - C.d _ _ y∥ ≤ K * ∥C.d i (i+1) x∥ + ε
+∀ ε > 0,
+∃ (i' j : ℤ) (hi' : i' + 1 = i) (hj : i + 1 = j)
+  (y : C c i'), ∥res x - C.d _ _ y∥ ≤ K * ∥C.d i j x∥ + ε
 
 namespace is_weak_bounded_exact
 
@@ -221,8 +224,8 @@ lemma of_le (hC : C.is_weak_bounded_exact k K m c₀)
 begin
   intros c hc i hi x ε ε_pos,
   haveI : fact (k ≤ k') := hk,
-  obtain ⟨y, hy⟩ := hC c (hc₀.trans hc) i (hi.trans hm) (res x) ε ε_pos,
-  use y,
+  obtain ⟨i', j, hi', hj, y, hy⟩ := hC c (hc₀.trans hc) i (hi.trans hm) (res x) ε ε_pos,
+  use [i', j, hi', hj, y],
   simp only [res_res] at hy,
   refine le_trans hy _,
   rw d_res,
@@ -243,8 +246,8 @@ lemma of_le (hC : C.is_bounded_exact k K m c₀)
 begin
   intros c hc i hi x,
   haveI : fact (k ≤ k') := hk,
-  obtain ⟨y, hy⟩ := hC c (hc₀.trans hc) i (hi.trans hm) (res x),
-  use y,
+  obtain ⟨i', j, hi', hj, y, hy⟩ := hC c (hc₀.trans hc) i (hi.trans hm) (res x),
+  use [i', j, hi', hj, y],
   simp only [res_res] at hy,
   refine le_trans hy _,
   rw d_res,
@@ -256,8 +259,8 @@ lemma of_iso (h : C₁.is_bounded_exact k K m c₀) (f : C₁ ≅ C₂)
   C₂.is_bounded_exact k K m c₀ :=
 begin
   intros c hc i hi x,
-  obtain ⟨y, hy⟩ := h c hc i hi (f.inv.apply x),
-  refine ⟨f.hom y, _⟩,
+  obtain ⟨i', j, hi', hj, y, hy⟩ := h c hc i hi (f.inv.apply x),
+  refine ⟨i', j, hi', hj, f.hom y, _⟩,
   calc  ∥res x - C₂.d _ _ (f.hom y)∥
       = ∥res x - f.hom (C₁.d _ _ y)∥ : by rw d_apply
   ... = ∥f.hom (f.inv (res x)) - f.hom (C₁.d _ _ y)∥ : by rw hom_apply_inv_apply
@@ -266,8 +269,8 @@ begin
   ... = ∥res (f.inv x) - C₁.d _ _ y∥ : by rw res_apply
   ... ≤ K * ∥C₁.d _ _ (f.inv x)∥ : hy
   ... = K * ∥C₂.d _ _ x∥ : congr_arg _ _,
-  calc  ∥C₁.d _ _ (f.inv x)∥
-      = ∥f.inv (C₂.d _ (i+1) x)∥ : by rw d_apply
+  calc  ∥C₁.d i j (f.inv x)∥
+      = ∥f.inv (C₂.d i j x)∥ : by rw d_apply
   ... = ∥f.hom (f.inv (C₂.d _ _ x))∥ : (hf _ _ _).symm
   ... = ∥C₂.d _ _ x∥ : by rw hom_apply_inv_apply
 end
@@ -281,17 +284,20 @@ variables {k k' K K' : ℝ≥0} {m m' : ℤ} {c₀ c₀' : ℝ≥0} [fact (1 ≤
 
 lemma to_exact (hC : C.is_weak_bounded_exact k K m c₀) {δ : ℝ≥0} (hδ : 0 < δ)
   (H : ∀ c ≥ c₀, ∀ i ≤ m, ∀ x : C (k * c) i,
-    C.d _ (i+1) x = 0 → ∃ y : C c (i-1), res x = C.d _ _ y) :
+    ∀ j, i+1 = j →
+    C.d _ j x = 0 → ∃ (i' : ℤ) (hi' : i'+1 = i) y : C c i', res x = C.d _ _ y) :
   C.is_bounded_exact k (K + δ) m c₀ :=
 begin
   intros c hc i hi x,
   by_cases hdx : C.d _ (i+1) x = 0,
-  { rcases H c hc i hi x hdx with ⟨y, hy⟩,
-    exact ⟨y, by simp [hy, hdx]⟩ },
-  { have : ((K + δ : ℝ≥0) : ℝ) * ∥C.d _ (i+1) x∥
+  { rcases H c hc i hi x _ rfl hdx with ⟨i', hi', y, hy⟩,
+    exact ⟨i', _, hi', rfl, y, by simp [hy, hdx]⟩ },
+  { obtain ⟨i', j, hi', rfl, y, hy⟩ :=
+      hC c hc _ hi x (δ*∥C.d _ (i+1) x∥) (mul_pos (by exact_mod_cast hδ) $ norm_pos_iff.mpr hdx),
+    refine ⟨i', _, hi', rfl, y, _⟩,
+    have : ((K + δ : ℝ≥0) : ℝ) * ∥C.d _ (i+1) x∥
       = K * ∥C.d _ (i+1) x∥ + δ * ∥C.d _ (i+1) x∥, apply_mod_cast add_mul,
-    rw this,
-    exact hC c hc _ hi x (δ*∥C.d _ (i+1) x∥) (mul_pos (by exact_mod_cast hδ) $ norm_pos_iff.mpr hdx) },
+    rwa this },
 end
 
 end is_weak_bounded_exact
