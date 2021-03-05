@@ -59,7 +59,7 @@ def map_f {C₁ C₂ : cochain_complex ℤ NormedGroup} (f : C₁ ⟶ C₂) :
 lemma map_comm {C₁ C₂ : cochain_complex ℤ NormedGroup} (f : C₁ ⟶ C₂) :
   Π i:ℤ, d C₁ i ≫ map_f f (i+1) = map_f f i ≫ d C₂ i
 | -[1+n]  := show 0 ≫ _ = _ ≫ 0, by rw [zero_comp, comp_zero]
-| 0       := sorry -- some quotient.lift or quotient.map ??
+| 0       := coker.map_lift_comm (cochain_complex.hom.comm f 0 1)
 | (n+1:ℕ) := cochain_complex.hom.comm f (n+1) _
 
 def map {C₁ C₂ : cochain_complex ℤ NormedGroup} (f : C₁ ⟶ C₂) :
