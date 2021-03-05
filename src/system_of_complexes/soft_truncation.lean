@@ -34,8 +34,6 @@ local attribute [instance] int.has_succ
 def dsource (n : ℤ) : Sc n = n + 1 := rfl
 def dtarget (n : ℤ) : Sc (n - 1) = n := sub_add_cancel n 1
 
-notation `Sc` := has_succ.succ
-
 end has_succ
 
 section cochain_complex'
@@ -84,13 +82,15 @@ def d (C : cochain_complex' NormedGroup ℤ) : ∀ {i j : ℤ} (h : Sc i = j), X
 lemma d_squared' (C : cochain_complex' NormedGroup ℤ) :
   ∀ (i j k:ℤ) (hij : Sc i = j) (hjk : Sc j = k), d C hij ≫ d C hjk = 0
 | -[1+n] _ _ _ _ := show 0 ≫ _ = 0, by rw zero_comp
-| 0 _ _ _ _ := sorry
-| (n+1:ℕ) _ _ _ _ := C.d_squared (n+1)
-#exit
+| 0 1 2 rfl rfl := show coker.lift (d_squared_right C 1) ≫ C.d (dsource 1) = 0,
+begin
 
-| -[1+n]  := show 0 ≫ _ = 0, by rw zero_comp
-| 0       := sorry -- annoying :-(
-| (n+1:ℕ) := C.d_squared (n+1)
+  sorry
+end
+| (n+1:ℕ) (p+1:ℕ) (q+1:ℕ) hij hjk := C.d_squared' hij hjk
+
+
+#exit
 
 @[simps]
 def obj (C : cochain_complex NormedGroup) :
