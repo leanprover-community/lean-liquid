@@ -500,7 +500,7 @@ variables {M : Type*} [add_comm_group M] --[semimodule ℕ M]
 
 lemma pointed_of_is_basis_is_inj {ι : Type*} {N Z : Type*} [ordered_comm_ring Z]
   [comm_semiring N] [semimodule N M] [module Z M] [algebra N Z] [is_scalar_tower N Z M]
-  (hNZ : yes_hom.is_inj_nonneg (algebra_map N Z)) (v : ι → M) (bv : is_basis Z v) :
+  (hNZ : is_inj_nonneg (algebra_map N Z)) (v : ι → M) (bv : is_basis Z v) :
   pointed Z (submodule.span N (set.range v)) :=
 begin
   obtain ⟨l, hl⟩ : ∃ l : M →ₗ[Z] Z, ∀ i : ι, l (v i) = 1 :=
@@ -538,17 +538,35 @@ begin
     exact hNZ.2 (c m) }
 end
 
+lemma pointed_of_is_basis {ι : Type*} (v : ι → M) (bv : is_basis ℤ v) :
+  pointed ℤ (submodule.span ℕ (set.range v)) :=
+pointed_of_is_basis_is_inj (is_inj_nonneg.nat ℤ) v bv
+
+--instance {R : Type*} [ordered_comm_ring R] : ordered_comm_semiring (pR R) := by apply_instance
+
 lemma pointed_pR {R : Type*} [ordered_comm_ring R] [module R M] [semimodule (pR R) M]
   [is_scalar_tower (pR R) R M] {ι : Type*} (v : ι → M) (bv : is_basis R v) :
   pointed R (submodule.span (pR R) (set.range v)) :=
 begin
   apply pointed_of_is_basis_is_inj _ v bv,
   apply_instance,
+  rotate,
+  { exact is_inj_nonneg.pR_ocr R },
+  sorry,
+/-
+  convert _inst_5 using 5,
+
+  congr,
+
   {
+    fconstructor,
+    --convert {smul_assoc := λ x y z, smul_assoc x y z},
+    intros x y z,
+    convert smul_assoc x y z,
     sorry,
     --convert _inst_5,
-     },
-  exact yes_hom.is_inj_nonneg.pR_ocr R,
+  },
+-/
 end
 
 
@@ -605,44 +623,6 @@ begin
   exact λ x hx, mem_pR_nonneg (c x)
 end
  -/
-
-/- Try to prove it with the lemma above. -/
-lemma pointed_of_is_basis {ι : Type*} (v : ι → M) (bv : is_basis ℤ v) :
-  pointed ℤ (submodule.span ℕ (set.range v)) :=
-begin
-
-  obtain ⟨l, hl⟩ : ∃ l : M →ₗ[ℤ] ℤ, ∀ i : ι, l (v i) = 1 :=
-    ⟨bv.constr (λ _, 1), λ i, constr_basis bv⟩,
-  refine Exists.intro
-  { to_fun := ⇑l,
-    map_add' := by simp only [forall_const, eq_self_iff_true, linear_map.map_add],
-    map_smul' := λ m x, by
-    { rw [algebra.id.smul_eq_mul, linear_map.map_smul],
-      refine congr _ rfl,
-      exact funext (λ (y : ℤ), by simp only [has_scalar.smul, gsmul_int_int]) } } _,
-  rintros m hm (m0 : l m = 0),
---  obtain ⟨ck, csupk, rk⟩ := mem_span_set.mp hm,
---  obtain ⟨ck, csupk, rk⟩ := @span_as_sum ℕ _ _ _ _ _ (set.range v) hm,
-  obtain ⟨c, csup, rfl⟩ := mem_span_set.mp hm,
-  change l (∑ i in c.support, c i • i) = 0 at m0,
-  simp_rw [linear_map.map_sum, linear_map.map_smul_of_tower] at m0,
-  have : ∑ (i : M) in c.support, c i • l i = ∑ (i : M) in c.support, c i,
-  { refine finset.sum_congr rfl (λ x hx, _),
-    rcases set.mem_range.mp (set.mem_of_mem_of_subset (finset.mem_coe.mpr hx) csup) with ⟨i, rfl⟩,
-    simp [hl _, (•)], },
-  rw this at m0,
-  have : ∑ (i : M) in c.support, (0 : M) = 0,
-  { rw finset.sum_eq_zero,
-    simp only [eq_self_iff_true, forall_true_iff] },
-  rw ← this,
-  refine finset.sum_congr rfl (λ x hx, _),
-  rw finset.sum_eq_zero_iff_of_nonneg at m0,
-  { convert zero_smul ℤ _,
-    obtain F := (m0 x hx),
-    exact int.coe_nat_eq_zero.mp (m0 x hx) },
-  { exact λ x hx, int.coe_nat_nonneg _ }
-end
-
 
 lemma of_non_deg {ι : Type*} {f : pairing ℤ M M ℤ} {v : ι → M}
   (nd : perfect f) (sp : submodule.span ℤ (v '' set.univ)) :
