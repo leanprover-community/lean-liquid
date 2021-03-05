@@ -499,8 +499,9 @@ variables {M : Type*} [add_comm_group M] --[semimodule ℕ M]
 
 /--  The non-negative span of a basis of a vector space is pointed.
 The typeclass assumptions allow the lemma to work in greater generality than what this doc-string
-asserts.  -/
-lemma pointed_of_is_basis_is_inj {ι : Type*} {N Z : Type*} [ordered_comm_ring Z]
+asserts.
+For instance, this lemma applies to the `ℕ`-span of an `ℝ`-basis of a real vector space. -/
+lemma pointed_of_is_basis_is_inj {N Z ι : Type*} [ordered_comm_ring Z]
   [comm_semiring N] [semimodule N M] [module Z M] [algebra N Z] [is_scalar_tower N Z M]
   (hNZ : is_inj_nonneg (algebra_map N Z)) {v : ι → M} (bv : is_basis Z v) :
   pointed Z (submodule.span N (set.range v)) :=
@@ -509,51 +510,47 @@ begin
     ⟨bv.constr (λ _, 1), λ i, constr_basis bv⟩,
   refine ⟨l, λ m hm m0, _⟩,
   obtain ⟨c, csup, rfl⟩ := mem_span_set.mp hm,
-  change l (∑ i in c.support, c i • i) = 0 at m0,
-  simp_rw [linear_map.map_sum, linear_map.map_smul_of_tower] at m0,
   rw ← @finset.sum_const_zero _ _ c.support,
   refine finset.sum_congr rfl (λ x hx, _),
-  have : ∑ (i : M) in c.support, c i • l i = ∑ (i : M) in c.support, c i • (1 : Z),
-  { refine finset.sum_congr rfl (λ x hx, _),
-    rcases set.mem_range.mp (set.mem_of_mem_of_subset (finset.mem_coe.mpr hx) csup) with ⟨i, rfl⟩,
-    exact congr_arg _ (hl _) },
-  rw [this, finset.sum_eq_zero_iff_of_nonneg] at m0,
-  { convert zero_smul N _,
-    refine hNZ.inj _,
-    rw [algebra.algebra_map_eq_smul_one, ring_hom.map_zero],
-    exact m0 x hx },
-  { exact λ m hm, by { rw ← algebra.algebra_map_eq_smul_one, exact hNZ.map_nonneg (c m) } }
+  change l (∑ i in c.support, c i • i) = 0 at m0,
+  simp_rw [linear_map.map_sum, linear_map.map_smul_of_tower] at m0,
+  obtain F := (finset.sum_eq_zero_iff_of_nonneg (λ m hx, _)).mp m0 _ hx;
+  rcases set.mem_range.mp (set.mem_of_mem_of_subset (finset.mem_coe.mpr hx) csup) with ⟨i, rfl⟩,
+  { rw [hl, ← algebra.algebra_map_eq_smul_one, ← (algebra_map N Z).map_zero] at F,
+    simp_rw [hNZ.inj F, zero_smul] },
+  { rw [hl, ← algebra.algebra_map_eq_smul_one],
+    exact hNZ.map_nonneg (c _) }
 end
 
-/-  This lemmas is an application of `pointed_of_is_basis_is_inj`: it is present just as a proof
+/-  This lemma is an application of `pointed_of_is_basis_is_inj`: it is present just as a proof
 of concept that `pointed_of_is_basis_is_inj` applies in this case. -/
 lemma pointed_pR {R : Type*} [ordered_comm_ring R] [module R M] [semimodule (pR R) M]
   [is_scalar_tower (pR R) R M] {ι : Type*} {v : ι → M} (bv : is_basis R v) :
   pointed R (submodule.span (pR R) (set.range v)) :=
 pointed_of_is_basis_is_inj (is_inj_nonneg.pR_ocr R) bv
 
-/-  This lemmas is an application of `pointed_of_is_basis_is_inj`: it is present just as a proof
+/-  This lemma is an application of `pointed_of_is_basis_is_inj`: it is present just as a proof
 of concept that `pointed_of_is_basis_is_inj` applies in this case. -/
 lemma pointed_of_integers {ι : Type*} {v : ι → M} (bv : is_basis ℤ v) :
   pointed ℤ (submodule.span ℕ (set.range v)) :=
 pointed_of_is_basis_is_inj (is_inj_nonneg.nat ℤ) bv
 
-/-  This lemmas is an application of `pointed_of_is_basis_is_inj`: it is present just as a proof
+/-  This lemma is an application of `pointed_of_is_basis_is_inj`: it is present just as a proof
 of concept that `pointed_of_is_basis_is_inj` applies in this case. -/
 lemma pointed_of_rational {ι : Type*} {v : ι → M} [module ℚ M] (bv : is_basis ℚ v) :
   pointed ℚ (submodule.span ℕ (set.range v)) :=
 pointed_of_is_basis_is_inj (is_inj_nonneg.nat ℚ) bv
 
-/-  This lemmas is an application of `pointed_of_is_basis_is_inj`: it is present just as a proof
+/-  This lemma is an application of `pointed_of_is_basis_is_inj`: it is present just as a proof
 of concept that `pointed_of_is_basis_is_inj` applies in this case. -/
 lemma pointed_of_nat {R ι : Type*} [ordered_comm_ring R] [nontrivial R] [module R M] {v : ι → M}
   (bv : is_basis R v) :
   pointed R (submodule.span ℕ (set.range v)) :=
 pointed_of_is_basis_is_inj (is_inj_nonneg.nat R) bv
 
-
 instance : algebra ℝ≥0 ℝ := nnreal.to_real_hom.to_algebra
 
+/-
 variables {N : Type*} [add_comm_monoid N]
 
 def semimodule.of_algebra (R S : Type*) [comm_semiring R] [semiring S] [algebra R S]
@@ -571,9 +568,11 @@ instance [semimodule ℝ N] : semimodule ℝ≥0 N := semimodule.of_algebra ℝ�
 
 instance ist [semimodule ℝ N] : is_scalar_tower ℝ≥0 ℝ N :=
 { smul_assoc := λ a b c, show (a.val • b) • c = a • b • c, by { rw smul_assoc a.val b c, congr } }
+-/
 
 /--  Without the instance `ist`, the proof below does not work. -/
-lemma pointed_of_nnreal {ι : Type*} [module ℝ M] {v : ι → M} (bv : is_basis ℝ v) :
+lemma pointed_of_nnreal {ι : Type*} [module ℝ M] [semimodule ℝ≥0 M] [is_scalar_tower ℝ≥0 ℝ M]
+  {v : ι → M} (bv : is_basis ℝ v) :
   pointed ℝ (submodule.span ℝ≥0 (set.range v)) :=
 pointed_of_is_basis_is_inj (is_inj_nonneg.pR_ocr ℝ) bv
 
