@@ -78,14 +78,14 @@ def soft_truncation' : cochain_complex ℤ NormedGroup.{u} ⥤ cochain_complex �
   map_id' := λ C,
   begin
     ext ((n|n)|n) : 2,
-    { dsimp, sorry },
+    { ext x, induction x, refl, refl },
     { refl },
     { ext }
   end,
   map_comp' := λ C₁ C₂ C₃ f g,
   begin
     ext ((n|n)|n) : 2,
-    { dsimp, sorry },
+    { ext x, induction x, refl, refl },
     { refl },
     { ext }
   end }
