@@ -101,7 +101,7 @@ def extremal_rays (s : submodule R₀ M) : set (submodule R₀ M) :=
 
 /-  The `is_scalar_tower R₀ R M` assumption is not needed to state `pointed`, but will likely play
 a role in the proof of `sup_extremal_rays`. -/
-variables [comm_semiring R] [semimodule R M]
+variables [semiring R] [semimodule R M]
 
 /--  A pointed submodule is a submodule `s` for which there exists a linear function `φ : M → R`,
 such that the hyperplane `ker φ` intersects `s` in just the origin.
@@ -496,6 +496,63 @@ variables {M : Type*} [add_comm_group M] --[semimodule ℕ M]
 --  [add_comm_monoid P] --[semimodule ℕ P] [semimodule ℤ P] --[is_scalar_tower ℕ ℤ P]
 --  (P₀ : submodule ℕ P)
 
+
+
+lemma pointed_of_is_basis_is_inj {ι : Type*} {N Z : Type*} [ordered_comm_ring Z]
+  [comm_semiring N] [semimodule N M] [module Z M] [algebra N Z] [is_scalar_tower N Z M]
+  (hNZ : yes_hom.is_inj_nonneg (algebra_map N Z)) (v : ι → M) (bv : is_basis Z v) :
+  pointed Z (submodule.span N (set.range v)) :=
+begin
+  obtain ⟨l, hl⟩ : ∃ l : M →ₗ[Z] Z, ∀ i : ι, l (v i) = 1 :=
+    ⟨bv.constr (λ _, 1), λ i, constr_basis bv⟩,
+  refine Exists.intro
+  { to_fun := ⇑l,
+    map_add' := by simp only [forall_const, eq_self_iff_true, linear_map.map_add],
+    map_smul' := λ m x, by
+    { rw [algebra.id.smul_eq_mul, linear_map.map_smul],
+      refine congr _ rfl,
+      exact funext (λ (y : Z), by simp only [has_scalar.smul, gsmul_int_int]) } } _,
+  rintros m hm (m0 : l m = 0),
+  obtain ⟨c, csup, rfl⟩ := mem_span_set.mp hm,
+  change l (∑ i in c.support, c i • i) = 0 at m0,
+  simp_rw [linear_map.map_sum, linear_map.map_smul_of_tower] at m0,
+  have : ∑ (i : M) in c.support, c i • l i = ∑ (i : M) in c.support, c i • (1 : Z),
+  { refine finset.sum_congr rfl (λ x hx, _),
+    rcases set.mem_range.mp (set.mem_of_mem_of_subset (finset.mem_coe.mpr hx) csup) with ⟨i, rfl⟩,
+    simp [hl _, (•)], },
+  rw this at m0,
+  have : ∑ (i : M) in c.support, (0 : M) = 0,
+  { rw finset.sum_eq_zero,
+    simp only [eq_self_iff_true, forall_true_iff] },
+  rw ← this,
+  refine finset.sum_congr rfl (λ x hx, _),
+  rw finset.sum_eq_zero_iff_of_nonneg at m0,
+  { dsimp,
+    convert zero_smul N _,
+    obtain F := (m0 x hx),
+    rw ← algebra.algebra_map_eq_smul_one at F,
+    refine hNZ.1 _,
+    rwa [ring_hom.map_zero] },
+  { refine λ m hm, _,
+    rw ← algebra.algebra_map_eq_smul_one,
+    exact hNZ.2 (c m) }
+end
+
+lemma pointed_pR {R : Type*} [ordered_comm_ring R] [module R M] [semimodule (pR R) M]
+  [is_scalar_tower (pR R) R M] {ι : Type*} (v : ι → M) (bv : is_basis R v) :
+  pointed R (submodule.span (pR R) (set.range v)) :=
+begin
+  apply pointed_of_is_basis_is_inj _ v bv,
+  apply_instance,
+  {
+    sorry,
+    --convert _inst_5,
+     },
+  exact yes_hom.is_inj_nonneg.pR_ocr R,
+end
+
+
+
 lemma speed_up_1 {M R : Type*} [add_comm_group M] [ordered_comm_ring R] [module R M]
   [semimodule ↥(pR R) M]
   (l : M →ₗ[R] R)
@@ -513,6 +570,7 @@ begin
   exact subtype.coe_injective (m0 x hx)
 end
 
+/--  Trying to prove this lemma above, using the new is_inj_nonneg
 lemma pointed_pR {R : Type*} [ordered_comm_ring R] [module R M] [semimodule (pR R) M]
   [is_scalar_tower (pR R) R M] {ι : Type*} (v : ι → M) (bv : is_basis R v) :
   pointed R (submodule.span (pR R) (set.range v)) :=
@@ -530,11 +588,13 @@ begin
   obtain ⟨c, csup, rfl⟩ := mem_span_set.mp hm,
   rw speed_up_1 at m0,
 --  change l (∑ i in c.support, c i • i) = 0 at m0, --takes some time
-  simp_rw [linear_map.map_sum, linear_map.map_smul_of_tower] at m0,
+  --simp_rw [linear_map.map_sum, linear_map.map_smul_of_tower] at m0,
   have : ∑ (i : M) in c.support, c i • l i = ∑ (i : M) in c.support, c i,
   { refine finset.sum_congr rfl (λ x hx, _),
     rcases set.mem_range.mp (set.mem_of_mem_of_subset (finset.mem_coe.mpr hx) csup) with ⟨i, rfl⟩,
-    simp only [hl _, (•), mul_one, algebra.id.smul_eq_mul], },
+    simp only [hl _, mul_one, algebra.id.smul_eq_mul],
+
+    simp_rw ← algebra.algebra_map_eq_smul_one, },
   rw this at m0,
   have : ∑ (i : M) in c.support, (0 : M) = 0,
   { rw finset.sum_eq_zero,
@@ -544,6 +604,7 @@ begin
   rwa finset.sum_eq_zero_iff_of_nonneg at m0,
   exact λ x hx, mem_pR_nonneg (c x)
 end
+ -/
 
 /- Try to prove it with the lemma above. -/
 lemma pointed_of_is_basis {ι : Type*} (v : ι → M) (bv : is_basis ℤ v) :
