@@ -8,15 +8,12 @@ import linear_algebra.finite_dimensional
 import algebra.big_operators.basic
 --import analysis.normed_space.inner_product
 
-/-- In the intended application, these are the players:
+/-! In the intended application, these are the players:
 * `R₀ = ℕ`;
 * `R = ℤ`;
 * `M`and `N` are free finitely generated `ℤ`-modules that are dual to each other;
 * `P = ℤ` is the target of the natural pairing `M ⊗ N → ℤ`.
 -/
-
--- the example is here since otherwise Lean complains that `section does not accept doc string`
-example : true := trivial
 
 open_locale big_operators classical
 
@@ -472,15 +469,15 @@ end
 
 end add_group
 
+section concrete
 
-/- In the intended application, these are the players:
+
+/-! In the intended application, these are the players:
 * `R₀ = ℕ`;
 * `R = ℤ`;
 * `M`and `N` are free finitely generated `ℤ`-modules that are dual to each other;
 * `P = ℤ` is the target of the natural pairing `M ⊗ N → ℤ`.
 -/
-
-section concrete
 
 namespace pairing
 
@@ -496,6 +493,9 @@ variables {M : Type*} [add_comm_group M] --[semimodule ℕ M]
 --  [add_comm_monoid P] --[semimodule ℕ P] [semimodule ℤ P] --[is_scalar_tower ℕ ℤ P]
 --  (P₀ : submodule ℕ P)
 
+/--  The non-negative span of a basis of a vector space is pointed.
+The typeclass assumptions allow the lemma to work in greater generality than what this doc-string
+asserts.  -/
 lemma pointed_of_is_basis_is_inj {ι : Type*} {N Z : Type*} [ordered_comm_ring Z]
   [comm_semiring N] [semimodule N M] [module Z M] [algebra N Z] [is_scalar_tower N Z M]
   (hNZ : is_inj_nonneg (algebra_map N Z)) {v : ι → M} (bv : is_basis Z v) :
@@ -503,44 +503,33 @@ lemma pointed_of_is_basis_is_inj {ι : Type*} {N Z : Type*} [ordered_comm_ring Z
 begin
   obtain ⟨l, hl⟩ : ∃ l : M →ₗ[Z] Z, ∀ i : ι, l (v i) = 1 :=
     ⟨bv.constr (λ _, 1), λ i, constr_basis bv⟩,
-  refine Exists.intro
-  { to_fun := ⇑l,
-    map_add' := by simp only [forall_const, eq_self_iff_true, linear_map.map_add],
-    map_smul' := λ m x, by
-    { rw [algebra.id.smul_eq_mul, linear_map.map_smul],
-      refine congr _ rfl,
-      exact funext (λ (y : Z), by simp only [has_scalar.smul, gsmul_int_int]) } } _,
-  rintros m hm (m0 : l m = 0),
+  refine ⟨l, λ m hm m0, _⟩,
   obtain ⟨c, csup, rfl⟩ := mem_span_set.mp hm,
   change l (∑ i in c.support, c i • i) = 0 at m0,
   simp_rw [linear_map.map_sum, linear_map.map_smul_of_tower] at m0,
+  rw ← @finset.sum_const_zero _ _ c.support,
+  refine finset.sum_congr rfl (λ x hx, _),
   have : ∑ (i : M) in c.support, c i • l i = ∑ (i : M) in c.support, c i • (1 : Z),
   { refine finset.sum_congr rfl (λ x hx, _),
     rcases set.mem_range.mp (set.mem_of_mem_of_subset (finset.mem_coe.mpr hx) csup) with ⟨i, rfl⟩,
-    simp [hl _, (•)], },
-  rw this at m0,
-  have : ∑ (i : M) in c.support, (0 : M) = 0,
-  { rw finset.sum_eq_zero,
-    simp only [eq_self_iff_true, forall_true_iff] },
-  rw ← this,
-  refine finset.sum_congr rfl (λ x hx, _),
-  rw finset.sum_eq_zero_iff_of_nonneg at m0,
-  { dsimp,
-    convert zero_smul N _,
-    obtain F := (m0 x hx),
-    rw ← algebra.algebra_map_eq_smul_one at F,
-    refine hNZ.1 _,
-    rwa [ring_hom.map_zero] },
-  { refine λ m hm, _,
-    rw ← algebra.algebra_map_eq_smul_one,
-    exact hNZ.2 (c m) }
+    exact congr_arg _ (hl _) },
+  rw [this, finset.sum_eq_zero_iff_of_nonneg] at m0,
+  { convert zero_smul N _,
+    refine hNZ.inj _,
+    rw [algebra.algebra_map_eq_smul_one, ring_hom.map_zero],
+    exact m0 x hx },
+  { exact λ m hm, by { rw ← algebra.algebra_map_eq_smul_one, exact hNZ.map_nonneg (c m) } }
 end
 
+/-  This lemmas is an application of `pointed_of_is_basis_is_inj`: it is present just as a proof
+of concept that `pointed_of_is_basis_is_inj` applies in this case. -/
 lemma pointed_pR {R : Type*} [ordered_comm_ring R] [module R M] [semimodule (pR R) M]
   [is_scalar_tower (pR R) R M] {ι : Type*} {v : ι → M} (bv : is_basis R v) :
   pointed R (submodule.span (pR R) (set.range v)) :=
 pointed_of_is_basis_is_inj (is_inj_nonneg.pR_ocr R) bv
 
+/-  This lemmas is an application of `pointed_of_is_basis_is_inj`: it is present just as a proof
+of concept that `pointed_of_is_basis_is_inj` applies in this case. -/
 lemma pointed_of_is_basis {ι : Type*} (v : ι → M) (bv : is_basis ℤ v) :
   pointed ℤ (submodule.span ℕ (set.range v)) :=
 pointed_of_is_basis_is_inj (is_inj_nonneg.nat ℤ) bv
