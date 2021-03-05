@@ -107,11 +107,13 @@ section cokernels
 
 variables {A B C : NormedGroup.{u}}
 
+/-- The cokernel of a morphism. -/
 @[simp]
 noncomputable
 def coker (f : A ⟶ B) : NormedGroup := NormedGroup.of $
   quotient_add_group.quotient f.range.topological_closure
 
+/-- The projection onto the cokernel. -/
 @[simp]
 noncomputable
 def coker.π {f : A ⟶ B} : B ⟶ coker f :=
@@ -122,6 +124,7 @@ lemma coker.π_surjective {f : A ⟶ B} : function.surjective (coker.π : B ⟶ 
 
 open normed_group_hom
 
+/-- Descend a morphism to the cokernel. -/
 noncomputable
 def coker.lift {f : A ⟶ B} {g : B ⟶ C} (cond : f ≫ g = 0) : coker f ⟶ C :=
 normed_group_hom.lift _ g (zero_of_closure _ _ begin
@@ -131,7 +134,7 @@ normed_group_hom.lift _ g (zero_of_closure _ _ begin
 end)
 
 @[simp]
-lemma lift_comp_π {f : A ⟶ B} {g : B ⟶ C} {cond : f ≫ g = 0} :
+lemma coker.lift_comp_π {f : A ⟶ B} {g : B ⟶ C} {cond : f ≫ g = 0} :
   coker.π ≫ coker.lift cond = g :=
 begin
   ext,
@@ -143,8 +146,8 @@ begin
   simp [cond],
 end
 
-lemma lift_unique {f : A ⟶ B} {g : B ⟶ C} {cond : f ≫ g = 0} {h : coker f ⟶ C} :
-  coker.π ≫ h = g → h = lift cond := lift_unique _ _ _ _
+lemma coker.lift_unique {f : A ⟶ B} {g : B ⟶ C} {cond : f ≫ g = 0} {h : coker f ⟶ C} :
+  coker.π ≫ h = g → h = coker.lift cond := lift_unique _ _ _ _
 
 end cokernels
 
