@@ -103,7 +103,7 @@ show ((C.d i j) ≫ C.d j k) x = 0, by { rw d_comp_d, refl }
 
 lemma d_comp_res (h : fact (c₂ ≤ c₁)) :
   C.d i j ≫ @res C _ _ _ h = @res C _ _ _ _ ≫ C.d i j :=
-(C.map (hom_of_le h).op).comm _ _
+cochain_complex.hom.comm (C.map (hom_of_le h).op) _ _
 
 lemma d_res (h : fact (c₂ ≤ c₁)) (x) :
   C.d i j (@res C _ _ _ _ x) = @res C _ _ _ h (C.d i j x) :=
@@ -153,7 +153,7 @@ lemma d_apply (f : M ⟶ N) {c : ℝ≥0} {i j : ℤ} (m : M c i) :
 begin
   show (_ ≫ N.d i j) m = (M.d i j ≫ _) m,
   congr' 1,
-  exact ((f.app (op c)).comm i j).symm
+  exact (cochain_complex.hom.comm (f.app (op c)) i j).symm
 end
 
 lemma res_comp_apply (f : M ⟶ N) (c c' : ℝ≥0) [h : fact (c ≤ c')] (i : ℤ) :
