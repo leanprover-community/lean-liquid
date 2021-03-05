@@ -197,6 +197,18 @@ coker (A → B) ----> E
    \/               \/
 coker (C → D) ----> F
 -/
+
+instance coker.π_epi {f : A ⟶ B} : epi (coker.π : B ⟶ coker f) :=
+begin
+  constructor,
+  intros Z g h H,
+  ext x,
+  rcases coker.π_surjective x with ⟨x,rfl⟩,
+  change (coker.π ≫ g) _ = _,
+  rw [H],
+  refl,
+end
+
 lemma coker.map_lift_comm {B' D' : NormedGroup}
   {fab : A ⟶ B} {fbd : B ⟶ D} {fac : A ⟶ C} {fcd : C ⟶ D}
   {h : fab ≫ fbd = fac ≫ fcd} {fbb' : B ⟶ B'} {fdd' : D ⟶ D'}
