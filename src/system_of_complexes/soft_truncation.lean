@@ -73,8 +73,20 @@ end soft_truncation'
 def soft_truncation' : cochain_complex ℤ NormedGroup ⥤ cochain_complex ℤ NormedGroup :=
 { obj := λ C, soft_truncation'.obj C,
   map := λ C₁ C₂ f, soft_truncation'.map f,
-  map_id' := sorry,
-  map_comp' := sorry }
+  map_id' := λ C,
+  begin
+    ext ((n|n)|n) : 2,
+    { dsimp, sorry },
+    { refl },
+    { ext }
+  end,
+  map_comp' := λ C₁ C₂ C₃ f g,
+  begin
+    ext ((n|n)|n) : 2,
+    { dsimp, sorry },
+    { refl },
+    { ext }
+  end }
 
 end NormedGroup
 
