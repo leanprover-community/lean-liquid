@@ -107,7 +107,7 @@ section cokernels
 
 variables {A B C : NormedGroup.{u}}
 
-/-- The cokernel of a morphism. -/
+/-- The cokernel of a morphism of normed groups. -/
 @[simp]
 noncomputable
 def coker (f : A ⟶ B) : NormedGroup := NormedGroup.of $
@@ -124,7 +124,7 @@ lemma coker.π_surjective {f : A ⟶ B} : function.surjective (coker.π : B ⟶ 
 
 open normed_group_hom
 
-/-- Descend a morphism to the cokernel. -/
+/-- Lift (aka descend) a morphism to the cokernel. -/
 noncomputable
 def coker.lift {f : A ⟶ B} {g : B ⟶ C} (cond : f ≫ g = 0) : coker f ⟶ C :=
 normed_group_hom.lift _ g (zero_of_closure _ _ begin

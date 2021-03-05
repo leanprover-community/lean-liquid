@@ -6,6 +6,7 @@ variables (f g : normed_group_hom V₁ V₂)
 
 namespace add_subgroup
 
+/-- The closure of a subgroup, again as a subgroup. -/
 -- TODO: generalize to topological groups and move?
 def topological_closure {M : Type*} [normed_group M] (A : add_subgroup M) : add_subgroup M :=
 { carrier := _root_.closure A,
@@ -203,6 +204,7 @@ noncomputable
 instance normed_group_quotient (S : add_subgroup M) [hS : fact (is_closed (S : set M))] :
   normed_group (quotient S) := normed_group.of_core (quotient S) (quotient.is_normed_group.core S)
 
+/-- The morphism from a norrmed group to the quotient by a closed subgroup. -/
 noncomputable
 def normed_group.mk (S : add_subgroup M) [fact (is_closed (S : set M))] :
   normed_group_hom M (quotient S) :=
@@ -250,7 +252,7 @@ def lift {N : Type*} [normed_group N] (S : add_subgroup M) [fact (is_closed (S :
   end,
   .. quotient_add_group.lift S f.to_add_monoid_hom hf }
 
-@[simp]
+--@[simp]
 lemma lift_mk  {N : Type*} [normed_group N] (S : add_subgroup M) [fact (is_closed (S : set M))]
   (f : normed_group_hom M N) (hf : ∀ s ∈ S, f s = 0) (m : M) :
   lift S f hf (normed_group.mk S m) = f m := rfl
