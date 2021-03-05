@@ -149,8 +149,16 @@ end
 lemma coker.lift_unique {f : A ⟶ B} {g : B ⟶ C} {cond : f ≫ g = 0} {h : coker f ⟶ C} :
   coker.π ≫ h = g → h = coker.lift cond := lift_unique _ _ _ _
 
-lemma coker.lift_comp_eq_lift {D : NormedGroup.{u}}
-  {f : A ⟶ B} {g : B ⟶ C} {h : C ⟶ D} {cond : f ≫ g = 0} :
+lemma coker.comp_pi_eq_zero {f : A ⟶ B} : f ≫ (coker.π : B ⟶ coker f) = 0 :=
+begin
+  ext a,
+  rw [coe_zero, pi.zero_apply, coe_comp, coker.π, ← mem_ker, normed_group.mk.ker],
+  exact subset_closure ⟨a, rfl⟩,
+end
+
+variable {D : NormedGroup.{u}}
+
+lemma coker.lift_comp_eq_lift {f : A ⟶ B} {g : B ⟶ C} {h : C ⟶ D} {cond : f ≫ g = 0} :
   coker.lift cond ≫ h = coker.lift (show f ≫ (g ≫ h) = 0,
     by rw [← category_theory.category.assoc, cond, limits.zero_comp]) :=
 coker.lift_unique $ by rw [← category_theory.category.assoc, coker.lift_comp_π]
@@ -158,6 +166,19 @@ coker.lift_unique $ by rw [← category_theory.category.assoc, coker.lift_comp_�
 lemma coker.lift_zero {f : A ⟶ B} :
   coker.lift (show f ≫ (0 : B ⟶ C) = 0, from category_theory.limits.comp_zero) = 0 :=
 eq.symm $ coker.lift_unique category_theory.limits.comp_zero
+
+/-- The downwards map between the cokernels making the diagram commute.
+
+    A ----> B ---> coker
+    |       |
+    |       |
+   \/      \/
+    C ----> D ---> coker
+ -/
+noncomputable def coker.map {fab : A ⟶ B} {fbd : B ⟶ D} {fac : A ⟶ C} {fcd : C ⟶ D}
+  (h : fab ≫ fbd = fac ≫ fcd) : coker fab ⟶ coker fcd :=
+coker.lift (show fab ≫ fbd ≫ coker.π = 0, by rw [← category_theory.category.assoc, h,
+  category_theory.category.assoc, coker.comp_pi_eq_zero, limits.comp_zero])
 
 end cokernels
 
