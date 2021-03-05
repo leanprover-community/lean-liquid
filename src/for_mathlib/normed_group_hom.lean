@@ -272,10 +272,12 @@ def range : add_subgroup V₂ := f.to_add_monoid_hom.range
 lemma mem_range (v : V₂) : v ∈ f.range ↔ ∃ w, f w = v :=
 by { rw [range, add_monoid_hom.mem_range], refl }
 
+/-- The inclusion of the range of `f` into its target, as a morphism of normed groups. -/
 def subtype : normed_group_hom f.range V₂ :=
 { bound' := ⟨1,λ v, by simp⟩,
   ..(f.range.subtype)}
 
+/-- The morphism to the range of `f` from its source, as a morphism of normed groups. -/
 def to_range : normed_group_hom V₁ f.range :=
 { bound' := f.bound',
   ..(f.to_add_monoid_hom.to_range)}
