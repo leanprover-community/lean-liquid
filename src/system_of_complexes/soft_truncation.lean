@@ -20,25 +20,74 @@ open_locale nnreal
 
 open category_theory category_theory.limits
 
+section has_succ
+
+class has_succ (α : Type*) := (succ : α → α)
+
+-- I can't find that Turkish(?) symbol on my keyboard :-(
+notation `Sc` := has_succ.succ
+
+def int.has_succ : has_succ ℤ := ⟨λ z, z + 1⟩
+
+local attribute [instance] int.has_succ
+
+def dsource (n : ℤ) : Sc n = n + 1 := rfl
+def dtarget (n : ℤ) : Sc (n - 1) = n := sub_add_cancel n 1
+
+notation `Sc` := has_succ.succ
+
+end has_succ
+
+section cochain_complex'
+
+universes v u
+
+structure cochain_complex' (𝒞 : Type u) [category.{v} 𝒞] [has_zero_morphisms 𝒞]
+  (α : Type*) [has_succ α] :=
+(X : α → 𝒞)
+(d {i j : α} (h : Sc i = j) : X i ⟶ X j)
+(d_squared' {i j k : α} (hij : Sc i = j) (hjk : Sc j = k) : (d hij) ≫ (d hjk) = 0)
+
+local attribute [instance] int.has_succ
+
+variables {𝒞 : Type u} [category.{v} 𝒞] [has_zero_morphisms 𝒞]
+  (C : cochain_complex' 𝒞 ℤ)
+
+lemma d_squared_left (n : ℤ) : C.d (dsource n) ≫ C.d (dsource (n + 1)) = 0 :=
+C.d_squared' (dsource n) (dsource (n + 1))
+
+lemma d_squared_middle (n : ℤ) : C.d (dtarget n) ≫ C.d (dsource n) = 0 :=
+C.d_squared' (dtarget n) (dsource n)
+
+lemma d_squared_right (n : ℤ) : C.d (dtarget (n - 1)) ≫ C.d (dtarget n) = 0 :=
+C.d_squared' (dtarget (n - 1)) (dtarget n)
+
+end cochain_complex'
+
 namespace NormedGroup
 open quotient_add_group
 
 namespace soft_truncation'
 
--- Note: the next sorry needs a `NormedGroup`, so we need to bundle.
-def X (C : cochain_complex NormedGroup) : ℤ → NormedGroup
+local attribute [instance] int.has_succ
+
+def X (C : cochain_complex' NormedGroup ℤ) : ℤ → NormedGroup
 | -[1+n]  := 0
-| 0       := coker (C.d (-1))
+| 0       := coker (C.d (dtarget 0))
 | (n+1:ℕ) := C.X (n+1)
 
-def d (C : cochain_complex NormedGroup) :
-  Π i:ℤ, X C i ⟶ X C (i+1)
-| -[1+n]  := 0
-| 0       := coker.lift (sorry : C.d (-1) ≫ C.d 0 = 0) -- annoying :-(
-| (n+1:ℕ) := C.d (n+1)
+def d (C : cochain_complex' NormedGroup ℤ) : ∀ {i j : ℤ} (h : Sc i = j), X C i ⟶ X C j
+| -[1+n] _ _ := 0
+| 0 1 rfl := coker.lift (d_squared_right C 1)
+| (n+1 : ℕ) (m+1 : ℕ) h := C.d h
 
-lemma d_squared' (C : cochain_complex NormedGroup) :
-  Π i:ℤ, d C i ≫ d C (i+1) = 0
+lemma d_squared' (C : cochain_complex' NormedGroup ℤ) :
+  ∀ (i j k:ℤ) (hij : Sc i = j) (hjk : Sc j = k), d C hij ≫ d C hjk = 0
+| -[1+n] _ _ _ _ := show 0 ≫ _ = 0, by rw zero_comp
+| 0 _ _ _ _ := sorry
+| (n+1:ℕ) _ _ _ _ := C.d_squared (n+1)
+#exit
+
 | -[1+n]  := show 0 ≫ _ = 0, by rw zero_comp
 | 0       := sorry -- annoying :-(
 | (n+1:ℕ) := C.d_squared (n+1)
