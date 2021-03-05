@@ -134,7 +134,7 @@ begin
     obtain ⟨S₂, -, h_mask⟩ := nnreal.exists_le_has_sum_of_le this hf'',
     rw h_mask.tsum_eq,
     rw nnreal.has_sum_iff_tendsto_nat at hf''' h_mask,
-    have := tendsto.add_const 1 hf''', -- there's a namespacing mistake here in the library
+    have := filter.tendsto.add_const 1 hf''',
     apply le_of_tendsto_of_tendsto' h_mask this,
     intros n,
     simp only [div_eq_mul_inv, finset.sum_mul] at h_sum ⊢,

@@ -151,7 +151,7 @@ begin
     replace hn := lt_of_le_of_lt (ge.le hn) (lt_add_one n),
     have hnε := lt_of_lt_of_le ((inv_lt_inv npos Npos).2 (nat.cast_lt.2 hn)) hN,
     exact lt_trans (hg n).2 hnε },
-  replace hconv := tendsto.add_const (-m) hconv,
+  replace hconv := filter.tendsto.add_const (-m) hconv,
   simp only [zero_add, add_neg_cancel_comm] at hconv,
   replace hS := mem_of_is_seq_closed (is_seq_closed_iff_is_closed.2 hS) (λ n, (hg n).1) hconv,
   simpa using hS,
