@@ -180,6 +180,15 @@ noncomputable def coker.map {fab : A ⟶ B} {fbd : B ⟶ D} {fac : A ⟶ C} {fcd
 coker.lift (show fab ≫ fbd ≫ coker.π = 0, by rw [← category_theory.category.assoc, h,
   category_theory.category.assoc, coker.comp_pi_eq_zero, limits.comp_zero])
 
+lemma coker.lift_comp_eq_zero {f : A ⟶ B} {g : B ⟶ C} {h : C ⟶ D} {cond : f ≫ g = 0}
+  {cond2 : g ≫ h = 0} : coker.lift cond ≫ h = 0 :=
+begin
+  ext x,
+  rcases coker.π_surjective x with ⟨x,rfl⟩,
+  change ((g ≫ h) _) = _,
+  simp [cond2],
+end
+
 end cokernels
 
 end NormedGroup
