@@ -5,6 +5,7 @@ import category_theory.limits.shapes.kernels
 import category_theory.limits.creates
 
 import for_mathlib.normed_group_hom
+import for_mathlib.normed_group_quotient
 
 /-!
 # The category of normed abelian groups and continuous group homomorphisms
@@ -101,6 +102,54 @@ instance : limits.has_kernels.{u (u+1)} NormedGroup :=
 by apply_instance
 
 end equalizers_and_kernels
+
+section cokernels
+
+variables {A B C : NormedGroup.{u}}
+
+/-- The cokernel of a morphism of normed groups. -/
+@[simp]
+noncomputable
+def coker (f : A ⟶ B) : NormedGroup := NormedGroup.of $
+  quotient_add_group.quotient f.range.topological_closure
+
+/-- The projection onto the cokernel. -/
+@[simp]
+noncomputable
+def coker.π {f : A ⟶ B} : B ⟶ coker f :=
+  normed_group_hom.normed_group.mk _
+
+lemma coker.π_surjective {f : A ⟶ B} : function.surjective (coker.π : B ⟶ coker f).to_add_monoid_hom :=
+  surjective_quot_mk _
+
+open normed_group_hom
+
+/-- Lift (aka descend) a morphism to the cokernel. -/
+noncomputable
+def coker.lift {f : A ⟶ B} {g : B ⟶ C} (cond : f ≫ g = 0) : coker f ⟶ C :=
+normed_group_hom.lift _ g (zero_of_closure _ _ begin
+  rintros _ ⟨b,rfl⟩,
+  change (f ≫ g) b = 0,
+  simp [cond]
+end)
+
+@[simp]
+lemma coker.lift_comp_π {f : A ⟶ B} {g : B ⟶ C} {cond : f ≫ g = 0} :
+  coker.π ≫ coker.lift cond = g :=
+begin
+  ext,
+  rw ← normed_group_hom.lift_mk f.range.topological_closure g,
+  refl,
+  apply zero_of_closure,
+  rintro _ ⟨b,rfl⟩,
+  change (f ≫ g) b = 0,
+  simp [cond],
+end
+
+lemma coker.lift_unique {f : A ⟶ B} {g : B ⟶ C} {cond : f ≫ g = 0} {h : coker f ⟶ C} :
+  coker.π ≫ h = g → h = coker.lift cond := lift_unique _ _ _ _
+
+end cokernels
 
 end NormedGroup
 #lint- only unused_arguments def_lemma doc_blame

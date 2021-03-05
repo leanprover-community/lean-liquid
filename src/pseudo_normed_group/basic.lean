@@ -114,22 +114,27 @@ begin
     { intros j hj, apply h, exact finset.mem_insert_of_mem hj } }
 end
 
-lemma smul_nat_mem_filtration (n : ℕ) (x : M) (c : ℝ≥0) (hx : x ∈ filtration M c) :
-  n • x ∈ filtration M (n * c) :=
+lemma nat_smul_mem_filtration (n : ℕ) (m : M) (c : ℝ≥0) (h : m ∈ filtration M c) :
+  (n • m) ∈ filtration M (n * c) :=
 begin
-  induction n with n ih,
-  { simpa only [nat.cast_zero, zero_mul, zero_smul] using zero_mem_filtration _ },
-  { simp only [nat.succ_eq_add_one, add_smul, one_smul, nat.cast_succ, add_mul, one_mul],
-    exact add_mem_filtration ih hx }
+  induction n with n ih, { simpa only [zero_smul] using zero_mem_filtration _ },
+  simp only [nat.succ_eq_add_one, add_smul, one_smul, nat.cast_succ, add_mul, one_mul],
+  exact add_mem_filtration ih h,
 end
 
-lemma smul_int_mem_filtration (n : ℤ) (x : M) (c : ℝ≥0) (hx : x ∈ filtration M c) :
-  n • x ∈ filtration M (n.nat_abs * c) :=
+lemma int_smul_mem_filtration (n : ℤ) (m : M) (c : ℝ≥0) (h : m ∈ filtration M c) :
+  (n • m) ∈ filtration M (n.nat_abs * c) :=
 begin
-  induction n with n n,
-  { exact smul_nat_mem_filtration n x c hx },
-  { rw [int.nat_abs_of_neg_succ_of_nat, int.neg_succ_of_nat_coe, neg_smul, neg_mem_filtration_iff],
-    exact smul_nat_mem_filtration _ _ _ hx }
+  by_cases hn : 0 ≤ n,
+  { lift n to ℕ using hn,
+    simp only [int.nat_abs_of_nat, ← gsmul_eq_smul, gsmul_coe_nat, nsmul_eq_smul],
+    exact pseudo_normed_group.nat_smul_mem_filtration n m c h },
+  { push_neg at hn, rw ← neg_pos at hn,
+    lift -n to ℕ using hn.le with k hk,
+    rw [← neg_neg n, int.nat_abs_neg, ← hk, int.nat_abs_of_nat, neg_smul],
+    apply neg_mem_filtration,
+    simp only [neg_smul, ← gsmul_eq_smul, gsmul_coe_nat, nsmul_eq_smul],
+    exact pseudo_normed_group.nat_smul_mem_filtration k m c h }
 end
 
 instance pi {ι : Type*} (M : ι → Type*) [Π i, pseudo_normed_group (M i)] :
@@ -159,6 +164,12 @@ lemma injective_cast_le (c₁ c₂ : ℝ≥0) [fact (c₁ ≤ c₂)] :
 by simpa only [coe_cast_le] using congr_arg (coe : filtration M c₂ → M) h
 
 variables (M)
+
+/-- A pseudo normed group `M` is *archimedean* if for all positive `n : ℕ`
+the condition `(n • m) ∈ filtration M (n • c) ↔ m ∈ filtration M c` holds. -/
+def archimedean : Prop :=
+∀ (m : M) (c : ℝ≥0) (n : ℕ), 0 < n →
+  ((n • m) ∈ filtration M (n • c) ↔ m ∈ filtration M c)
 
 /-- `rescale M r` is the pseudo normed group whose filtration is rescaled by `r : ℝ≥0`.
 So `filtration (rescale M r) c` is `filtration M (r * c)`-/
@@ -268,12 +279,27 @@ end
 lemma const_smul_hom_nat_mem_filtration (n : ℕ) (c : ℝ≥0) (h : ↑n ≤ c) :
   const_smul_hom M n ∈ filtration (M →+ M) c :=
 λ c' x hx, by simpa only [const_smul_hom_apply]
-  using filtration_mono (mul_le_mul_right' h c') (smul_nat_mem_filtration _ _ _ hx)
+  using filtration_mono (mul_le_mul_right' h c') (nat_smul_mem_filtration _ _ _ hx)
 
 lemma const_smul_hom_int_mem_filtration (n : ℤ) (c : ℝ≥0) (h : ↑(n.nat_abs) ≤ c) :
   const_smul_hom M n ∈ filtration (M →+ M) c :=
-λ c' x hx, by simpa only [const_smul_hom_apply]
-  using filtration_mono (mul_le_mul_right' h c') (smul_int_mem_filtration _ _ _ hx)
+λ c' x hx, by simpa only [const_smul_hom_apply, smul_eq_mul]
+  using filtration_mono (mul_le_mul_right' h c') (int_smul_mem_filtration _ _ _ hx)
 
 end add_monoid_hom
+
+lemma pseudo_normed_group.archimedean.add_monoid_hom (M : Type*) {N : Type*}
+  [pseudo_normed_group M] [pseudo_normed_group N]
+  (h : pseudo_normed_group.archimedean N) :
+  archimedean (M →+ N) :=
+begin
+  intros f c k hk,
+  apply forall_congr, intro c,
+  apply forall_congr, intro l,
+  apply forall_congr, intro hl,
+  simp only [← nsmul_eq_smul, nsmul_eq_mul, mul_assoc],
+  simp only [nsmul_eq_smul, ← nsmul_eq_mul, add_monoid_hom.nat_smul_apply],
+  exact h _ _ k hk
+end
+
 #lint- only unused_arguments def_lemma doc_blame
