@@ -122,6 +122,17 @@ def coker.π {f : A ⟶ B} : B ⟶ coker f :=
 lemma coker.π_surjective {f : A ⟶ B} : function.surjective (coker.π : B ⟶ coker f).to_add_monoid_hom :=
   surjective_quot_mk _
 
+instance coker.π_epi {f : A ⟶ B} : epi (coker.π : B ⟶ coker f) :=
+begin
+  constructor,
+  intros Z g h H,
+  ext x,
+  rcases coker.π_surjective x with ⟨x,rfl⟩,
+  change (coker.π ≫ g) _ = _,
+  rw [H],
+  refl,
+end
+
 open normed_group_hom
 
 /-- Lift (aka descend) a morphism to the cokernel. -/
@@ -198,37 +209,19 @@ coker (A → B) ----> E
 coker (C → D) ----> F
 -/
 
-instance coker.π_epi {f : A ⟶ B} : epi (coker.π : B ⟶ coker f) :=
-begin
-  constructor,
-  intros Z g h H,
-  ext x,
-  rcases coker.π_surjective x with ⟨x,rfl⟩,
-  change (coker.π ≫ g) _ = _,
-  rw [H],
-  refl,
-end
-
 lemma coker.map_lift_comm {B' D' : NormedGroup}
   {fab : A ⟶ B} {fbd : B ⟶ D} {fac : A ⟶ C} {fcd : C ⟶ D}
   {h : fab ≫ fbd = fac ≫ fcd} {fbb' : B ⟶ B'} {fdd' : D ⟶ D'}
   {condb : fab ≫ fbb' = 0} {condd : fcd ≫ fdd' = 0} {g : B' ⟶ D'}
   (h' : fbb' ≫ g = fbd ≫ fdd'):
   coker.lift condb ≫ g = coker.map h ≫ coker.lift condd :=
-begin
-  ext x,
-  rcases coker.π_surjective x with ⟨x,rfl⟩,
-  change (coker.π ≫ _ ≫ _) x = _,
-  rw [← category.assoc, coker.lift_comp_π, h'],
-  refl,
-end
+by erw [← cancel_epi (coker.π : _ ⟶ coker fab), ← category.assoc, coker.lift_comp_π, h',
+       ← category.assoc, coker.lift_comp_π, category.assoc, coker.lift_comp_π]
 
 lemma coker.lift_comp_eq_zero {f : A ⟶ B} {g : B ⟶ C} {h : C ⟶ D} (cond : f ≫ g = 0)
   (cond2 : g ≫ h = 0) : coker.lift cond ≫ h = 0 :=
 begin
-  ext x,
-  rcases coker.π_surjective x with ⟨x,rfl⟩,
-  change ((g ≫ h) _) = _,
+  rw [← cancel_epi (coker.π : _ ⟶ coker f), ← category.assoc, coker.lift_comp_π],
   simp [cond2],
 end
 
