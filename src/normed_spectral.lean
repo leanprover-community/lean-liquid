@@ -17,7 +17,7 @@ structure normed_spectral_conditions (m : ℤ) (k K : ℝ≥0) [fact (1 ≤ k)]
 (norm_h_le : ∀ (q : ℤ) [fact (q ≤ m)] (c) [fact (c₀ ≤ c)] (x : M.X (k' * c) 0 (q+1)), ​∥h x∥ ≤ H * ∥x∥)
 (cond3b : ∀ (q : ℤ) [fact (q+1 ≤ m)] (c) [fact (c₀ ≤ c)]
   (x : M.X (k' * (k' * c)) 0 (q+1)) (u1 u2 : units ℤ),
-  ​∥M.res (M.d x) + (u1:ℤ) • h (M.d' x) + (u2:ℤ) • M.d' (h x)∥ ≤ ε * ∥(res M x : M.X c 0 (q+1))∥)
+  ​∥M.res (M.d _ _ x) + (u1:ℤ) • h (M.d' _ _ x) + (u2:ℤ) • M.d' _ _ (h x)∥ ≤ ε * ∥(res M x : M.X c 0 (q+1))∥)
 .
 
 namespace normed_spectral_conditions
@@ -29,24 +29,24 @@ variables {k' : ℝ≥0} [fact (k₀ ≤ k')] [fact (1 ≤ k')] {c₀ H : ℝ≥
 
 lemma cond3bpp (NSC : normed_spectral_conditions m k K ε hε k₀ M k' c₀ H)
   (q : ℤ) [fact (q + 1 ≤ m)] (c : ℝ≥0) [fact (c₀ ≤ c)] (x : M.X (k' * (k' * c)) 0 (q+1)) :
-  ​∥M.res (M.d x) + NSC.h (M.d' x) + M.d' (NSC.h x)∥ ≤ ε * ∥(res M x : M.X c 0 (q+1))∥ :=
+  ​∥M.res (M.d _ _ x) + NSC.h (M.d' _ _ x) + M.d' _ _ (NSC.h x)∥ ≤ ε * ∥(res M x : M.X c 0 (q+1))∥ :=
 by simpa only [units.coe_one, one_smul] using NSC.cond3b q c x 1 1
 
 lemma cond3bpm (NSC : normed_spectral_conditions m k K ε hε k₀ M k' c₀ H)
   (q : ℤ) [fact (q + 1 ≤ m)] (c : ℝ≥0) [fact (c₀ ≤ c)] (x : M.X (k' * (k' * c)) 0 (q+1)) :
-  ​∥M.res (M.d x) + NSC.h (M.d' x) - M.d' (NSC.h x)∥ ≤ ε * ∥(res M x : M.X c 0 (q+1))∥ :=
+  ​∥M.res (M.d _ _ x) + NSC.h (M.d' _ _ x) - M.d' _ _ (NSC.h x)∥ ≤ ε * ∥(res M x : M.X c 0 (q+1))∥ :=
 by simpa only [units.coe_one, one_smul, neg_smul, units.coe_neg, ← sub_eq_add_neg]
   using NSC.cond3b q c x 1 (-1)
 
 lemma cond3bmp (NSC : normed_spectral_conditions m k K ε hε k₀ M k' c₀ H)
   (q : ℤ) [fact (q + 1 ≤ m)] (c : ℝ≥0) [fact (c₀ ≤ c)] (x : M.X (k' * (k' * c)) 0 (q+1)) :
-  ​∥M.res (M.d x) - NSC.h (M.d' x) + M.d' (NSC.h x)∥ ≤ ε * ∥(res M x : M.X c 0 (q+1))∥ :=
+  ​∥M.res (M.d _ _ x) - NSC.h (M.d' _ _ x) + M.d' _ _ (NSC.h x)∥ ≤ ε * ∥(res M x : M.X c 0 (q+1))∥ :=
 by simpa only [units.coe_one, one_smul, neg_smul, units.coe_neg, ← sub_eq_add_neg]
   using NSC.cond3b q c x (-1) 1
 
 lemma cond3bmm (NSC : normed_spectral_conditions m k K ε hε k₀ M k' c₀ H)
   (q : ℤ) [fact (q + 1 ≤ m)] (c : ℝ≥0) [fact (c₀ ≤ c)] (x : M.X (k' * (k' * c)) 0 (q+1)) :
-  ​∥M.res (M.d x) - NSC.h (M.d' x) - M.d' (NSC.h x)∥ ≤ ε * ∥(res M x : M.X c 0 (q+1))∥ :=
+  ​∥M.res (M.d _ _ x) - NSC.h (M.d' _ _ x) - M.d' _ _ (NSC.h x)∥ ≤ ε * ∥(res M x : M.X c 0 (q+1))∥ :=
 by simpa only [units.coe_one, one_smul, neg_smul, units.coe_neg, ← sub_eq_add_neg]
   using NSC.cond3b q c x (-1) (-1)
 
@@ -63,8 +63,8 @@ theorem analytic_9_6 (m : ℤ) :
     (k' : ℝ≥0) [fact (k₀ ≤ k')] [fact (1 ≤ k')] -- follows
     (c₀ H : ℝ≥0) [fact (0 < H)],
   ​∀ (Hneg : (M.row 0).is_bounded_exact (k' * k') (2 * k₀ * H) (-1) c₀)
-    (Hd : ∀ c q (x : M.X c (-1) q), M.d x = 0)
-    (Hd' : ∀ c p (x : M.X c p (-1)), M.d' x = 0)
+    (Hd : ∀ c q (x : M.X c (-1) q), M.d _ 0 x = 0)
+    (Hd' : ∀ c p (x : M.X c p (-1)), M.d' _ 0 x = 0)
     (cond : normed_spectral_conditions m k K ε hε k₀ M k' c₀ H),
   (M.row 0).is_bounded_exact (k' * k') (2 * k₀ * H) m c₀ :=
 begin
@@ -76,7 +76,7 @@ begin
     refine Hneg c hc i _,
     have : 0 ≤ (m : ℤ) := int.coe_zero_le m,
     rw ← zero_sub,
-    exact lt_of_lt_of_le hi (sub_le_sub (neg_le.mp this) le_rfl) },
+    exact hi.trans (sub_le_sub (neg_le.mp this) le_rfl) },
   -- induction m with m hm,
   { -- base case m = 0
     -- ε = 1/(2k) works
@@ -91,20 +91,20 @@ begin
     use (by assumption),
     introsI M hM k' _k' _1k' c₀ H _H Hneg Hd Hd' cond,
     intros c hc i hi,
-    cases lt_or_le i (-1 : ℤ) with h h,
+    cases le_or_lt i (-1 : ℤ) with h h,
     { exact Hneg c hc i h },
     -- Statement is of the form "for all x ∈ M_{0,i+1} exists y ∈ M_{0,i} such that..."
-    interval_cases i,
-    { intro x,
-      -- next sorry should be `hM.col 0`, a proof that `M.col 0` is admissible
-      have Hx1 := (cond.col_exact 0 le_rfl).of_le sorry _k' le_rfl le_rfl le_rfl c hc
-        (-1) (by linarith),
-      have Hx2 := cond.cond3bpp,
-      replace Hx2 := @Hx2 (-1) (neg_add_self 1).le c hc,
-      simp only [row_d, col_d, Hd, Hd', sub_zero, add_zero] at Hx1 Hx2 ⊢,
-      use 0,
-      obtain ⟨y1, hx1⟩ := Hx1 (system_of_complexes.res x),
-      sorry },
+    interval_cases i, clear hi h,
+    intro x,
+    -- next sorry should be `hM.col 0`, a proof that `M.col 0` is admissible
+    have Hx1 := (cond.col_exact 0 le_rfl).of_le sorry _k' le_rfl le_rfl le_rfl c hc 0 le_rfl,
+    have Hx2 := cond.cond3bpp,
+    replace Hx2 := @Hx2 (-1) (neg_add_self 1).le c hc,
+    simp only [row_d, col_d, Hd, Hd', sub_zero, add_zero] at Hx1 Hx2 ⊢,
+    refine ⟨-1, 1, rfl, rfl, 0, _⟩,
+    obtain ⟨i, j, hi, hj, y1, hx1⟩ := Hx1 (system_of_complexes.res x),
+    simp [← eq_neg_iff_add_eq_zero] at hi hj, subst i, subst j,
+    sorry,
   },
   { -- inductive step
     sorry }
