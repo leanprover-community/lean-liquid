@@ -106,11 +106,11 @@ lemma soft_truncation'_d_neg (c : ℝ≥0) (i j : ℤ) (hi : i < 0) :
 variables (k K : ℝ≥0) (m : ℤ) [hk : fact (1 ≤ k)] (c₀ : ℝ≥0)
 include hk
 
-lemma soft_truncation'_is_bounded_exact_iff (hC : C.is_bounded_exact k K m c₀) :
+lemma soft_truncation'_is_bounded_exact_iff (hC : C.is_bounded_exact k K 0 c₀) :
   (soft_truncation'.obj C).is_bounded_exact k K m c₀ ↔ C.is_bounded_exact k K m c₀ :=
 sorry
 
-lemma soft_truncation'_is_weak_bounded_exact_iff (hC : C.is_weak_bounded_exact k K m c₀) :
+lemma soft_truncation'_is_weak_bounded_exact_iff (hC : C.is_weak_bounded_exact k K 0 c₀) :
   (soft_truncation'.obj C).is_weak_bounded_exact k K m c₀ ↔ C.is_weak_bounded_exact k K m c₀ :=
 sorry
 
