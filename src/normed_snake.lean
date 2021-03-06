@@ -72,7 +72,7 @@ begin
                                                                   nnreal.coe_nonneg K''),
   obtain ⟨i', j, hi', rfl, m₀, hm₀⟩ :=
     hM _ (le_trans hc $ le_mul_of_one_le_left' hk') _ (by linarith) (res m₁) ε₁ hε₁,
-  rw [add_left_inj] at hi', cases hi',
+  rw [add_left_inj] at hi', subst i',
   replace hm₀ : ∥res m₁ - d _ _ _ m₀∥ ≤ K * K'' * ∥d _ _ (i+1+1) n∥ + K*K''*ε₁ + ε₁,
     calc ∥res m₁ - d _ _ _ m₀∥  = ∥res (res m₁) - d _ _ _ m₀∥ : by rw res_res
     ... ≤ K * ∥d _ _ _ (res m₁)∥ + ε₁ : hm₀
@@ -87,7 +87,7 @@ begin
   let mnew₁' := d _ _ _ mnew',
   have hmnew' : mnew₁' = res m₁'' + f (res m₁ - d _ _ _ m₀),
     calc mnew₁' = d _ _ _ (res m' - f m₀) : rfl
-            ... = res (d _ _ _ m') - (f (d _ _ _ m₀)) : by { rw [normed_group_hom.map_sub, d_res _, d_apply], refl }
+            ... = res (d _ _ _ m') - (f (d _ _ _ m₀)) : by rw [normed_group_hom.map_sub, d_res _, d_apply]
             ... = res (d _ _ _ m') - (f (res m₁)) + (f (res m₁) - f (d _ _ _ m₀)) : by abel
             ... = res m₁'' + f ((res m₁) - (d _ _ _ m₀)) : by
                                { rw [← system_of_complexes.map_sub, ← res_apply,
@@ -113,15 +113,12 @@ begin
     rw system_of_complexes.map_sub,
     have hker : f m₀ ∈ g.apply.ker,
     { rw [hg _ _, mem_range _ _],
-      use [m₀, rfl] },
+      exact ⟨m₀, rfl⟩ },
     replace hker : g (f m₀) = 0, { rwa mem_ker at hker },
-    -- rw [hker, sub_zero, ← res_apply, hm'],
-    sorry },
-  use nnew₀,
+    rw [hker, sub_zero, ← res_apply, hm'] },
+  refine ⟨nnew₀, _⟩,
   rw ← hmnewlift,
-  suffices : ∥res mnew' - d _ _ _ mnew₀∥ ≤ K' * (K * K'' + 1) * ∥d _ _ _ n∥ + ε,
-    from (quotient_norm_le (hgquot _ _) (res mnew' - d _ _ _ mnew₀)).trans this,
-  calc ∥res mnew' - d _ _ _ mnew₀∥ ≤ K' * ((K * K'' + 1) * ∥d _ _ _ n∥ + (K * K'' + 2) * ε₁) + ε₁ : hmnew₀
-    ... = K' * (K * K'' + 1) * ∥d _ _ _ n∥ + (K'*(K * K'' + 2) + 1)* ε₁ : by ring
-    ... = K' * (K * K'' + 1) * ∥d _ _ _ n∥ + ε : by rw hε₁_ε,
+  refine (quotient_norm_le (hgquot _ _) _).trans (hmnew₀.trans (le_of_eq _)),
+  rw ← hε₁_ε,
+  ring,
 end
