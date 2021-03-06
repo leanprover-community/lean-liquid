@@ -101,14 +101,49 @@ def soft_truncation' : system_of_complexes ⥤ system_of_complexes :=
 (whiskering_right _ _ _).obj $ NormedGroup.soft_truncation'
 
 lemma soft_truncation'_d_neg (c : ℝ≥0) (i j : ℤ) (hi : i < 0) :
-  ((soft_truncation'.obj C).d i j : (soft_truncation'.obj C) c i ⟶ _) = 0 := sorry
+  ((soft_truncation'.obj C).d i j : (soft_truncation'.obj C) c i ⟶ _) = 0 :=
+begin
+  cases i,
+  { refine (not_le.mpr hi $ int.coe_zero_le i).elim },
+  dsimp [system_of_complexes.d, cochain_complex.d, differential_object.d],
+  split_ifs with h,
+  { cases h, dsimp [differential_object.d_aux], simp only [category.comp_id], refl },
+  { refl }
+end
 
 variables (k K : ℝ≥0) (m : ℤ) [hk : fact (1 ≤ k)] (c₀ : ℝ≥0)
 include hk
 
+lemma soft_truncation'_is_bounded_exact (hC : C.is_bounded_exact k K m c₀) :
+  (soft_truncation'.obj C).is_bounded_exact k K m c₀ :=
+begin
+  rintros c hc ((i|i)|i) hi,
+  { sorry },
+  { intro x,
+    obtain ⟨i', j, hi', rfl, y, hy⟩ := hC c hc _ hi x,
+    refine ⟨i', _, hi', rfl, _⟩,
+    simp at hi', subst i',
+    cases i,
+    { sorry },
+    { refine ⟨y, _⟩,
+      dsimp at hy ⊢, sorry } },
+  { intro x,
+    refine ⟨-[1+ i.succ], _, rfl, rfl, 0, _⟩,
+    calc _ = 0 : _
+       ... ≤ _ : _,
+    { rw norm_eq_zero, ext },
+    { refine mul_nonneg K.2 (norm_nonneg _) } }
+end
+
 lemma soft_truncation'_is_bounded_exact_iff (hC : C.is_bounded_exact k K 0 c₀) :
   (soft_truncation'.obj C).is_bounded_exact k K m c₀ ↔ C.is_bounded_exact k K m c₀ :=
-sorry
+begin
+  apply forall_congr, intros c,
+  apply forall_congr, intros hc,
+  apply forall_congr, intros i,
+  apply forall_congr, intros hi,
+  sorry
+end
 
 lemma soft_truncation'_is_weak_bounded_exact_iff (hC : C.is_weak_bounded_exact k K 0 c₀) :
   (soft_truncation'.obj C).is_weak_bounded_exact k K m c₀ ↔ C.is_weak_bounded_exact k K m c₀ :=
