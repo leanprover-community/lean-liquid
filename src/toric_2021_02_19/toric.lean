@@ -1,16 +1,18 @@
-import data.polynomial.degree.lemmas
-import algebra.module.ordered
+--import data.polynomial.degree.lemmas
+--import algebra.module.ordered
 import algebra.regular
 --import ring_theory.noetherian
-import toric_2021_02_19.span_as_sum
-import linear_algebra.basic
+import toric_2021_02_19.is_inj_nonneg
+--import linear_algebra.basic
 import linear_algebra.finite_dimensional
 import algebra.big_operators.basic
 import data.real.nnreal
-import facts.nnreal
-import algebra.algebra.basic
-import topology.separation
-import topology.instances.nnreal
+--import facts.nnreal
+--import algebra.algebra.basic
+--import topology.separation
+import topology.algebra.ordered
+import toric_2021_02_19.PR_made
+import toric_2021_02_19.pointed
 --import analysis.normed_space.inner_product
 
 /-! In the intended application, these are the players:
@@ -105,38 +107,7 @@ def extremal_rays (s : submodule R₀ M) : set (submodule R₀ M) :=
 a role in the proof of `sup_extremal_rays`. -/
 variables [semiring R] [semimodule R M]
 
-/--  A pointed submodule is a submodule `s` for which there exists a linear function `φ : M → R`,
-such that the hyperplane `ker φ` intersects `s` in just the origin.
-Alternatively, the submodule `s` contains no `R` linear subspace. -/
-def pointed (s : submodule R₀ M) : Prop := ∃ φ : M →ₗ[R] R, ∀ x : M, x ∈ s → φ x = 0 → x = 0
-
-/--  A pointed subset is a submodule `s` for which there exists a linear function `φ : M → R`,
-such that the hyperplane `ker φ` intersects `s` in just the origin. -/
--- We may not need this definition.
-def pointed_subset (s : set M) : Prop := ∃ φ : M →ₗ[R] R, ∀ x : M, x ∈ s → φ x = 0 → x = 0
-
 variables [algebra R₀ R] [is_scalar_tower R₀ R M]
-
-/--  A submodule of a pointed submodule is pointed. -/
-lemma pointed_of_submodule {s t : submodule R₀ M} (st : s ≤ t) (pt : pointed R t) : pointed R s :=
-begin
-  cases pt with l hl,
-  exact ⟨l, λ m ms m0, hl m (st ms) m0⟩,
-end
-
-/-- Any `R₀`-submodule of `R` is pointed, since the identity function is a "separating hyperplane".
-This should not happen if the module is not cyclic for `R`. -/
-lemma pointed_of_sub_R {s : submodule R₀ R} : pointed R s :=
-⟨1, λ _ _ h, h⟩
-
-/-- The zero submodule of any `R`-module `M` is pointed, since the zero function is a
-"separating hyperplane". -/
-lemma pointed_of_bot : pointed R (⊥ : submodule R₀ M) :=
-⟨0, λ x xb h, xb⟩
-
-lemma fd {ι : Type*} (v : ι → R) (ind : linear_independent R v) :
-  pointed R (submodule.span R₀ (v '' set.univ)) :=
-pointed_of_sub_R R
 
 /--  Hopefully, this lemma will be easy to prove. -/
 lemma sup_extremal_rays {s : submodule R₀ M} (sp : s.pointed R) :
@@ -262,10 +233,6 @@ lemma dual_set_saturated (s : set M) (hP₀ : P₀.saturated) :
 λ r hr n hn m hm, by simpa [smul_regular_iff hP₀ hr] using hn m hm
 
 end saturated
-
--- this instance can be removed when #6331 is merged.
-instance : is_scalar_tower R₀ R (N →ₗ[R] P) :=
-{ smul_assoc := λ _ _ _, linear_map.ext $ by simp }
 
 variable {P₀}
 
@@ -413,6 +380,16 @@ begin
 end
 -/
 
+open submodule
+
+lemma of_non_deg {M : Type*} [add_comm_group M] {ι : Type*} {f : pairing ℤ M M ℤ} {v : ι → M}
+  (nd : perfect f) (sp : submodule.span ℤ (v '' set.univ)) :
+  pointed ℤ (submodule.span ℕ (v '' set.univ)) :=
+begin
+--  tidy?,
+  sorry
+end
+
 
 end pairing
 
@@ -498,88 +475,36 @@ variables {M : Type*} [add_comm_group M] --[semimodule ℕ M]
 --  [add_comm_monoid P] --[semimodule ℕ P] [semimodule ℤ P] --[is_scalar_tower ℕ ℤ P]
 --  (P₀ : submodule ℕ P)
 
-/- Kenny's proof. -/
-lemma discrete_topology.of_subset {X : Type*} [topological_space X] {s t : set X}
-  (ds : discrete_topology s) (ts : t ⊆ s) :
-  discrete_topology t :=
-begin
-  rw [← singletons_open_iff_discrete, set_coe.forall] at ⊢ ds,
-  intros a ta,
-  specialize ds a (ts ta),
-  rw is_open_induced_iff at ⊢ ds,  -- don't just unfold
-  rcases ds with ⟨sa, osa, csa⟩,
-  refine ⟨sa, osa, _⟩,
-  rw [← (function.injective.image_injective subtype.coe_injective).eq_iff,
-      set.image_preimage_eq_inter_range, subtype.range_coe, set.image_singleton,
-      subtype.coe_mk] at csa ⊢,
-  rw [← set.inter_eq_self_of_subset_right ts, ← set.inter_assoc, csa],
-  exact set.subset.antisymm (set.inter_subset_left _ _)
-    (set.singleton_subset_iff.2 ⟨rfl, ta⟩)
-end
-
-
-lemma discrete_topology.of_subset_old {X : Type*} [topological_space X] {s t : set X}
-  (ds : discrete_topology s) (ts : t ⊆ s) :
-  discrete_topology t :=
-begin
-  rw [← singletons_open_iff_discrete, set_coe.forall] at ⊢ ds,
-  intros a ta,
-  rcases ds a (ts ta) with ⟨sa, osa, csa⟩,
-  refine ⟨sa, osa, _⟩,
-  obtain F : coe '' (coe ⁻¹' sa) = coe '' _ := congr_arg (λ ss, (coe : {x // x ∈ s} → X) '' ss) csa,
-  rw [set.image_singleton, subtype.image_preimage_coe, subtype.coe_mk] at F,
-  have sat : sa ∩ t ⊆ sa ∩ s := set.inter_subset_inter_right sa ts,
-  have sata : sa ∩ t = {a},
-  { refine set.subset.antisymm (λ x hx, _) (λ x (hx : x = a), _),
-    { rw ← F,
-      exact sat hx },
-    { subst hx,
-      refine ⟨set.mem_of_mem_inter_left (_ : x ∈ sa ∩ s), ta⟩,
-      exact set.singleton_subset_iff.mp (set.subset.antisymm_iff.mp F.symm).1 } },
-  ext1 x,
-  cases x with x xt,
-  suffices : x ∈ sa ↔ x = a, by simpa only [set.mem_singleton_iff],
-  refine ⟨λ xa, _, _⟩,
-  { have : x ∈ sa ∩ t := ⟨xa, xt⟩,
-    rwa sata at this },
-  { rintros rfl,
-    refine set.singleton_subset_iff.mp (λ el elx, _),
-    exact set.mem_of_mem_inter_left ((set.subset.antisymm_iff.mp sata.symm).1 elx) }
-end
-
 /-  Kevin's proof. -/
 lemma finite.smul_of_finite {S M : Type*} [semiring S] [add_comm_monoid M] [semimodule S M]
   {G : set S} {v : set M} (fG : G.finite) (fv : v.finite) :
   (G • v).finite :=
 fG.image2 (•) fv
 
-lemma finite.pointed_of_span_pos_is_inj {R S : Type*} [semiring S]
+lemma finite.span_restrict {R S : Type*} [semiring S]
   [comm_semiring R] [semimodule R M] [semimodule S M] [algebra R S]
   [is_scalar_tower R S M] {G : set S} {v : set M}
   (fG : G.finite) (spg : submodule.span R G = ⊤)
   (fv : v.finite) (hv : submodule.span S v = ⊤) :
-  ∃ t : set M, t.finite ∧ submodule.span R (t : set M) = restrict_scalars R (span S (v : set M)) :=
-⟨G • v, finite.smul_of_finite fG fv, span_smul spg v⟩
+  ∃ t : set M, t.finite ∧ submodule.span R (t : set M) = (span S (v : set M)).restrict_scalars R :=
+⟨G • v, fG.image2 (•) fv, span_smul spg v⟩
 
-lemma finset.pointed_of_span_pos_is_inj {R S : Type*} [semiring S]
+lemma finset.span_restrict {R S : Type*} [semiring S]
   [comm_semiring R] [semimodule R M] [semimodule S M] [algebra R S]
   [is_scalar_tower R S M]
   (G : finset S) (spg : submodule.span R (G : set S) = ⊤)
   (v : finset M) (hv : submodule.span S (v : set M) = ⊤) :
-  ∃ t : finset M, submodule.span R (t : set M) = restrict_scalars R (span S (v : set M)) :=
+  ∃ t : finset M, submodule.span R (t : set M) = (span S (v : set M)).restrict_scalars R :=
 begin
-  obtain ⟨t, ft, co⟩ := finite.pointed_of_span_pos_is_inj G.finite_to_set spg v.finite_to_set hv,
+  obtain ⟨t, ft, co⟩ := finite.span_restrict G.finite_to_set spg v.finite_to_set hv,
   haveI ff : fintype t := ft.fintype,
   refine ⟨t.to_finset, by simpa only [set.coe_to_finset]⟩
 end
 
 
-
-
-
 /--  The submodule spanned by a set `s` over an `R`-algebra `S` is spanned as an `R`-module by
 `s ∪ - s`, if for every element `a ∈ S`, either `a` or `- a` is in the image of `R`. -/
-lemma pointed_of_span_pos_is_inj {R S : Type*} [ordered_semiring S] [topological_space S]
+lemma finset.restrict_inf_span {R S : Type*} [ordered_semiring S] [topological_space S]
   [order_topology S] [comm_semiring R] [semimodule R M] [semimodule S M] [algebra R S]
   [is_scalar_tower R S M]
   -- the `R`-algebra `S` is compactly generated as an `R`-module
@@ -605,70 +530,14 @@ begin
   refine ⟨this.to_finset, _⟩,
   sorry,
 /-
-  simp,
-  ext x,
-  rw mem_inf,
-  refine ⟨λ hh, ⟨_, _⟩, _⟩,
-  rintro j ⟨jj, _, rfl⟩,
-  rintro l ⟨ll, _, rfl⟩,
-  dsimp at *,
-  let Gf : finset M := pro • s,
---  {tidy?},
-  refine span_smul spg (s : set M),
-  --refine span_smul spg (s : set M),
-
-   intros hh,
-
-
-  apply finset.finite_to_set_to_finset,
-  fconstructor,
-  fconstructor,
-
-  convert this,
-  use this,
-  refine ⟨⟨GSM, this⟩, _⟩,
-  apply fintype_of_compact_of_discrete,
-
-    rw ← singletons_open_iff_discrete at ⊢ dR,
-
-    -- con questo voglio concludere la finitezza
-    --apply fintype_of_compact_of_discrete,
-  apply span_smul spg,
-  ext m,
-  refine ⟨λ hm, _, λ hm, _⟩,
-  { refine (span S (s : set M)).mem_coe.mpr _,
-    rcases mem_span_set.mp hm with ⟨c, csup, rfl⟩,
-    refine sum_mem _ (λ a as, (_ : c a • a ∈ span S s)),
-    rw ← algebra_map_smul S (c a) a,
-    obtain caS : (algebra_map R S (c a) ∈ (⊤ : submodule R S)) := mem_top,
-    rw ← spg at caS,
-    rcases mem_span_set.mp caS with ⟨d, dsup, did⟩,
-    rw [← did],
-    rw finsupp.sum_smul,
-    refine smul_mem (span S s) _ _,
-    obtain cams : a ∈ s ∪ - s := set.mem_of_mem_of_subset as csup,
-    cases (set.mem_union a s _).mp cams,
-    { exact subset_span h },
-    { refine (neg_mem_iff _).mp (subset_span h) } },
-  { rcases mem_span_set.mp hm with ⟨c, csup, rfl⟩,
-    rw [mem_carrier, mem_coe],
-    refine sum_mem _ (λ a as, (_ : c a • a ∈ span R (s ∪ - s))),
-    rcases ff (c a) with ⟨ca, cap | can⟩,
-    { rw [cap, algebra_map_smul],
-      refine smul_mem _ ca _,
-      refine subset_span (set.mem_union_left _ _),
-      exact set.mem_of_mem_of_subset (finset.mem_coe.mpr as) csup },
-    { rw [can, neg_smul, algebra_map_smul, ← smul_neg],
-      refine smul_mem _ ca _,
-      refine subset_span (set.mem_union_right _ _),
-      rw [set.mem_neg, neg_neg],
-      exact set.mem_of_mem_of_subset (finset.mem_coe.mpr as) csup } }
+  -- con questo voglio concludere la finitezza
+  --apply fintype_of_compact_of_discrete,
 -/
 end
 
 /--  The submodule spanned by a set `s` over an `R`-algebra `S` is spanned as an `R`-module by
 `s ∪ - s`, if for every element `a ∈ S`, either `a` or `- a` is in the image of `R`. -/
-lemma pointed_of_span_pos_is_inj_wrong_maybe {R S : Type*} [ordered_comm_ring S]
+lemma subset.span_union_neg_self_eq {R S : Type*} [ordered_comm_ring S]
   [comm_semiring R] [semimodule R M] [module S M] [algebra R S] [is_scalar_tower R S M]
   (ff : ∀ a : S, ∃ n : R, a = algebra_map R S n ∨ a = - algebra_map R S n) (s : set M) :
   (submodule.span R (s ∪ - s)).carrier = submodule.span S (s : set M) :=
@@ -700,7 +569,7 @@ begin
 end
 
 
-lemma pointed_of_span_pos_is_inj_2 {ι R S : Type*} [ordered_comm_ring S]
+lemma finset.span_union_neg_self_eq {ι R S : Type*} [ordered_comm_ring S]
   [comm_semiring R] [semimodule R M] [module S M] [algebra R S] [is_scalar_tower R S M]
   (ff : ∀ s : S, ∃ n : R, s = algebra_map R S n ∨ s = - algebra_map R S n)
   {v : ι → M} (bv : is_basis S v) (s : finset M) (hRS : is_inj_nonneg (algebra_map R S)) :
@@ -748,7 +617,7 @@ begin
   },
 end
 
-lemma pointed_of_span_pos_is_inj_3 {ι R S : Type*} [linear_ordered_field S]
+lemma subset.span_union_neg_self_eq_inf {ι R S : Type*} [linear_ordered_field S]
   [comm_semiring R] [semimodule R M] [module S M] [algebra R S] [is_scalar_tower R S M]
   (ff : ∀ s : S, 0 ≤ s → ∃ n d : R, s = algebra_map R S n / algebra_map R S d)
   {v : ι → M} (bv : is_basis S v) {s : finset M} (hRS : is_inj_nonneg (algebra_map R S)) :
@@ -758,132 +627,6 @@ lemma pointed_of_span_pos_is_inj_3 {ι R S : Type*} [linear_ordered_field S]
 begin
 
   sorry,
-end
-
-lemma pointed_of_span_pos_is_inj_4 {R S : Type*} [ordered_comm_ring S]
-  [comm_semiring R] [semimodule R M] [module S M] [algebra R S] [is_scalar_tower R S M]
-  [no_zero_divisors S] {s : set M} {l : M →ₗ[S] S}
-  --[ordered_add_comm_monoid N] [semimodule S N] [ordered_semimodule S N]
-  (lpos : ∀ {a : M}, a ∈ s → 0 < l a) (hRS : is_inj_nonneg (algebra_map R S)) :
-  pointed S (submodule.span R s) :=
-begin
-  refine ⟨l, λ m hm m0, _⟩,
-  obtain ⟨c, csup, rfl⟩ := mem_span_set.mp hm,
-  rw ← @finset.sum_const_zero _ _ c.support,
-  refine finset.sum_congr rfl (λ x hx, _),
-  change l (∑ i in c.support, c i • i) = 0 at m0,
-  simp_rw [linear_map.map_sum, linear_map.map_smul_of_tower] at m0,
-  obtain F := (finset.sum_eq_zero_iff_of_nonneg (λ m hx, _)).mp m0 _ hx,
-  { rw [← algebra_map_smul S (c x) (l x), smul_eq_mul, mul_eq_zero] at F,
-    rcases F with c0 | l0,
-    { convert zero_smul R x,
-      refine hRS.1 _,
-      simpa using c0 },
-    { exact ((lpos (set.mem_of_mem_of_subset (finset.mem_coe.mpr hx) csup)).ne' l0).elim } },
-  { rw [← algebra_map_smul S (c m) (l m), smul_eq_mul],
-    exact mul_nonneg (hRS.2 _) (lpos (set.mem_of_mem_of_subset (finset.mem_coe.mpr hx) csup)).le }
-end
-
-lemma span_pointed_of_pos_reg_is_inj {R S : Type*} [ordered_comm_ring S]
-  [comm_semiring R] [semimodule R M] [module S M] [algebra R S] [is_scalar_tower R S M]
-  {s : set M} (l : M →ₗ[S] S)
-  --[ordered_add_comm_monoid N] [semimodule S N] [ordered_semimodule S N]
-  (lpos : ∀ {a : M}, a ∈ s → 0 ≤ l a ∧ is_regular (l a)) (hRS : is_inj_nonneg (algebra_map R S)) :
-  pointed S (submodule.span R s) :=
-begin
-  refine ⟨l, λ m hm m0, _⟩,
-  obtain ⟨c, csup, rfl⟩ := mem_span_set.mp hm,
-  rw ← @finset.sum_const_zero _ _ c.support,
-  refine finset.sum_congr rfl (λ x hx, _),
-  change l (∑ i in c.support, c i • i) = 0 at m0,
-  simp_rw [linear_map.map_sum, linear_map.map_smul_of_tower] at m0,
-  obtain F := (finset.sum_eq_zero_iff_of_nonneg (λ m hx, _)).mp m0 _ hx,
-  { dsimp,
-    have : (algebra_map R S) (c x) = 0,
-    { refine (lpos (set.mem_of_mem_of_subset (finset.mem_coe.mpr hx) csup)).2.right _,
-      rw [← algebra_map_smul S (c x) (l x), smul_eq_mul] at F,
-      simpa only [zero_mul] },
-    rw [← algebra_map_smul S (c x) x, this, zero_smul] },
-  { rw [← algebra_map_smul S (c m) (l m), smul_eq_mul],
-    exact mul_nonneg (hRS.2 _) (lpos (set.mem_of_mem_of_subset (finset.mem_coe.mpr hx) csup)).1 }
-end
-
-/--  The non-negative span of a basis of a vector space is pointed.
-The typeclass assumptions allow the lemma to work in greater generality than what this doc-string
-asserts.
-For instance, this lemma applies to the `ℕ`-span of an `ℝ`-basis of a real vector space. -/
-lemma pointed_of_is_basis_is_inj {R S ι : Type*} [ordered_comm_ring S]
-  [comm_semiring R] [semimodule R M] [module S M] [algebra R S] [is_scalar_tower R S M]
-  {v : ι → M} (bv : is_basis S v) (hRS : is_inj_nonneg (algebra_map R S)) :
-  pointed S (submodule.span R (set.range v)) :=
-begin
-  obtain ⟨l, hl⟩ : ∃ l : M →ₗ[S] S, ∀ i : ι, l (v i) = 1 := ⟨bv.constr 1, λ i, constr_basis bv⟩,
-  refine span_pointed_of_pos_reg_is_inj l (λ a av, _) hRS,
-  rcases set.mem_range.mp av with ⟨a, rfl⟩,
-  rw hl,
-  exact ⟨zero_le_one, is_regular_one⟩,
-end
-
-/-  This lemma is an application of `pointed_of_is_basis_is_inj`: it is present just as a proof
-of concept that `pointed_of_is_basis_is_inj` applies in this case. -/
-lemma pointed_pR {R : Type*} [ordered_comm_ring R] [module R M] [semimodule (pR R) M]
-  [is_scalar_tower (pR R) R M] {ι : Type*} {v : ι → M} (bv : is_basis R v) :
-  pointed R (submodule.span (pR R) (set.range v)) :=
-pointed_of_is_basis_is_inj bv (is_inj_nonneg.pR_ocr R)
-
-/-  This lemma is an application of `pointed_of_is_basis_is_inj`: it is present just as a proof
-of concept that `pointed_of_is_basis_is_inj` applies in this case. -/
-lemma pointed_of_integers {ι : Type*} {v : ι → M} (bv : is_basis ℤ v) :
-  pointed ℤ (submodule.span ℕ (set.range v)) :=
-pointed_of_is_basis_is_inj bv (is_inj_nonneg.nat ℤ)
-
-/-  This lemma is an application of `pointed_of_is_basis_is_inj`: it is present just as a proof
-of concept that `pointed_of_is_basis_is_inj` applies in this case. -/
-lemma pointed_of_rational {ι : Type*} {v : ι → M} [module ℚ M] (bv : is_basis ℚ v) :
-  pointed ℚ (submodule.span ℕ (set.range v)) :=
-pointed_of_is_basis_is_inj bv (is_inj_nonneg.nat ℚ)
-
-/-  This lemma is an application of `pointed_of_is_basis_is_inj`: it is present just as a proof
-of concept that `pointed_of_is_basis_is_inj` applies in this case. -/
-lemma pointed_of_nat {R ι : Type*} [ordered_comm_ring R] [nontrivial R] [module R M] {v : ι → M}
-  (bv : is_basis R v) :
-  pointed R (submodule.span ℕ (set.range v)) :=
-pointed_of_is_basis_is_inj bv (is_inj_nonneg.nat R)
-
-instance : algebra ℝ≥0 ℝ := nnreal.to_real_hom.to_algebra
-
-/-
-variables {N : Type*} [add_comm_monoid N]
-
-def semimodule.of_algebra (R S : Type*) [comm_semiring R] [semiring S] [algebra R S]
-  [semimodule S N] :
-  semimodule R N :=
-{ smul := λ a b, algebra_map R S a • b,
-  one_smul := λ a, by simp only [one_smul, ring_hom.map_one],
-  mul_smul := λ x y m, by simp [(•), mul_smul ((algebra_map R S) x) ((algebra_map R S) y) m],
-  smul_add := λ r m n, smul_add ((algebra_map R S) r) m n,
-  smul_zero := λ r, smul_zero ((algebra_map R S) r),
-  add_smul := λ a b m, by simp [(•), add_smul ((algebra_map R S) a) ((algebra_map R S) b) m],
-  zero_smul := λ m, by simp only [ring_hom.map_zero, zero_smul] }
-
-instance [semimodule ℝ N] : semimodule ℝ≥0 N := semimodule.of_algebra ℝ≥0 ℝ
-
-instance ist [semimodule ℝ N] : is_scalar_tower ℝ≥0 ℝ N :=
-{ smul_assoc := λ a b c, show (a.val • b) • c = a • b • c, by { rw smul_assoc a.val b c, congr } }
--/
-
-/--  Without the instance `ist`, the proof below does not work. -/
-lemma pointed_of_nnreal {ι : Type*} [module ℝ M] [semimodule ℝ≥0 M] [is_scalar_tower ℝ≥0 ℝ M]
-  {v : ι → M} (bv : is_basis ℝ v) :
-  pointed ℝ (submodule.span ℝ≥0 (set.range v)) :=
-pointed_of_is_basis_is_inj bv (is_inj_nonneg.pR_ocr ℝ)
-
-lemma of_non_deg {ι : Type*} {f : pairing ℤ M M ℤ} {v : ι → M}
-  (nd : perfect f) (sp : submodule.span ℤ (v '' set.univ)) :
-  pointed ℤ (submodule.span ℕ (v '' set.univ)) :=
-begin
---  tidy?,
-  sorry
 end
 
 end pairing
