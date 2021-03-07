@@ -18,9 +18,9 @@ def nnR : subsemiring R :=
 
 variable {R}
 
-variables {N Z : Type*}
-
 @[simp] lemma mem_nnR_nonneg (y : (nnR R)) : 0 ≤ y := y.2
+
+variables {N Z : Type*}
 
 /--  The function `f : N → Z` is injective and its image only contains non-negative elements.
 These properties are useful for `pointed_of_is_basis_is_inj`, in order to avoid having getting

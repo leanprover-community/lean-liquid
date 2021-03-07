@@ -1,72 +1,77 @@
-import linear_algebra.finite_dimensional
---import algebra.algebra.basic
---import linear_algebra.basic
-import linear_algebra.basis
---import linear_algebra.finsupp
---import linear_algebra.linear_independent
-import toric_2021_02_19.is_inj_nonneg
 import algebra.regular
+import linear_algebra.finite_dimensional
+import linear_algebra.basis
+import toric_2021_02_19.is_inj_nonneg
 
 /-! In the intended application, these are the players:
-* `R₀ = ℕ`;
-* `R = ℤ`;
-* `M`and `N` are free finitely generated `ℤ`-modules that are dual to each other;
-* `P = ℤ` is the target of the natural pairing `M ⊗ N → ℤ`.
+* `R = ℕ`;
+* `S = ℤ`;
+* `M` is a free finitely generated `ℤ`-module.
 -/
-
 
 open_locale big_operators
 
-variables {R₀ R S M : Type*} [comm_semiring R₀] [ordered_comm_ring S]
+variables {R S M : Type*}
 
 namespace submodule
 
-section semiring_R_add_comm_monoid_M
+section semiring_S_add_comm_monoid_M
 
-/-  The `is_scalar_tower R₀ R M` assumption is not needed to state `pointed`, but will likely play
+/-  The `is_scalar_tower R S M` assumption is not needed to state `pointed`, but will likely play
 a role in the proof of `sup_extremal_rays`. -/
-variables (R) [semiring R] [add_comm_monoid M] [semimodule R₀ M] [semimodule R M]
+variables (S) [semiring S] [add_comm_monoid M] [semimodule S M]
 
-/--  A pointed submodule is a submodule `s` for which there exists a linear function `φ : M → R`,
+section semiring_R
+
+variables [semiring R] [semimodule R M]
+/--  A pointed submodule is a submodule `s` for which there exists a linear function `φ : M → S`,
 such that the hyperplane `ker φ` intersects `s` in just the origin.
-Alternatively, the submodule `s` contains no `R` linear subspace. -/
-def pointed (s : submodule R₀ M) : Prop := ∃ φ : M →ₗ[R] R, ∀ x : M, x ∈ s → φ x = 0 → x = 0
+Alternatively, the submodule `s` contains no `S` linear subspace. -/
+def pointed (s : submodule R M) : Prop := ∃ φ : M →ₗ[S] S, ∀ x : M, x ∈ s → φ x = 0 → x = 0
 
-/--  A pointed subset is a submodule `s` for which there exists a linear function `φ : M → R`,
+/--  A pointed subset is a submodule `s` for which there exists a linear function `φ : M → S`,
 such that the hyperplane `ker φ` intersects `s` in just the origin. -/
 -- We may not need this definition.
-def pointed_subset (s : set M) : Prop := ∃ φ : M →ₗ[R] R, ∀ x : M, x ∈ s → φ x = 0 → x = 0
+def pointed_subset (s : set M) : Prop := ∃ φ : M →ₗ[S] S, ∀ x : M, x ∈ s → φ x = 0 → x = 0
 
-variables [algebra R₀ R] [is_scalar_tower R₀ R M]
+end semiring_R
+
+section comm_semiring_R
+
+variables [comm_semiring R] [semimodule R M] [algebra R S] [is_scalar_tower R S M]
 
 /--  A submodule of a pointed submodule is pointed. -/
-lemma pointed_of_submodule {s t : submodule R₀ M} (st : s ≤ t) (pt : pointed R t) : pointed R s :=
+lemma pointed_of_submodule {s t : submodule R M} (st : s ≤ t) (pt : pointed S t) : pointed S s :=
 begin
   cases pt with l hl,
   exact ⟨l, λ m ms m0, hl m (st ms) m0⟩,
 end
 
-/-- Any `R₀`-submodule of `R` is pointed, since the identity function is a "separating hyperplane".
-This should not happen if the module is not cyclic for `R`. -/
-lemma pointed_of_sub_R {s : submodule R₀ R} : pointed R s :=
+/-- Any `R`-submodule of `S` is pointed, since the identity function is a "separating hyperplane".
+This should not happen if the module is not cyclic for `S`. -/
+lemma pointed_of_sub_R {s : submodule R S} : pointed S s :=
 ⟨1, λ _ _ h, h⟩
 
 /-- The zero submodule of any `R`-module `M` is pointed, since the zero function is a
 "separating hyperplane". -/
-lemma pointed_of_bot : pointed R (⊥ : submodule R₀ M) :=
+lemma pointed_of_bot : pointed S (⊥ : submodule R M) :=
 ⟨0, λ x xb h, xb⟩
 
-lemma fd {ι : Type*} (v : ι → R) (ind : linear_independent R v) :
-  pointed R (submodule.span R₀ (v '' set.univ)) :=
-pointed_of_sub_R R
+lemma fd {ι : Type*} (v : ι → S) (ind : linear_independent S v) :
+  pointed S (submodule.span R (v '' set.univ)) :=
+pointed_of_sub_R S
 
-end semiring_R_add_comm_monoid_M
+end comm_semiring_R
+
+end semiring_S_add_comm_monoid_M
 
 end submodule
 
 namespace pairing
 
 open pairing submodule
+
+variables [ordered_comm_ring S]
 
 variables [add_comm_group M] [comm_semiring R] [semimodule R M] [module S M]
 variables [algebra R S] [is_scalar_tower R S M]
