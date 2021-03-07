@@ -12,7 +12,7 @@ import toric_2021_02_19.pairing_dual_saturated
 * `P = ℤ` is the target of the natural pairing `M ⊗ N → ℤ`.
 -/
 
-open_locale big_operators classical
+--open_locale big_operators classical
 
 variables {R S M : Type*} [comm_semiring R] [add_comm_group M] [semimodule R M]
 
