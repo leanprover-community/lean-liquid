@@ -6,28 +6,28 @@ import toric_2021_02_19.pointed
 import toric_2021_02_19.pairing_dual_saturated
 
 /-! In the intended application, these are the players:
-* `R₀ = ℕ`;
-* `R = ℤ`;
+* `R = ℕ`;
+* `S = ℤ`;
 * `M`and `N` are free finitely generated `ℤ`-modules that are dual to each other;
 * `P = ℤ` is the target of the natural pairing `M ⊗ N → ℤ`.
 -/
 
 open_locale big_operators classical
 
--- Here we make the general statements that require few assumptions on the various types.
-section abstract
+variables {R S M : Type*} [comm_semiring R]
 
-variables (R₀ R M : Type*) [comm_semiring R₀]
+-- Here we make the general statements that require few assumptions on the various types.
+section add_comm_monoid_M
+
+variables [add_comm_monoid M] [semimodule R M]
 
 namespace submodule
 
-variables {R₀} {M}
-
-variables [semiring R] [algebra R₀ R]
-  [add_comm_monoid M] [semimodule R₀ M] [semimodule R M] [is_scalar_tower R₀ R M]
+variables [semiring S] [algebra R S]
+  [semimodule S M] [is_scalar_tower R S M]
 
 /--  Hopefully, this lemma will be easy to prove. -/
-lemma sup_extremal_rays {s : submodule R₀ M} (sp : s.pointed R) :
+lemma sup_extremal_rays {s : submodule R M} (sp : s.pointed S) :
   (⨆ r ∈ s.extremal_rays, r) = s :=
 begin
   refine le_antisymm (bsupr_le $ λ i hi, hi.1) _,
@@ -45,21 +45,18 @@ end submodule
 
 namespace pairing
 
-variables [comm_semiring R] [algebra R₀ R]
-  [add_comm_monoid M] [semimodule R₀ M] [semimodule R M] [is_scalar_tower R₀ R M]
+variables [comm_semiring S] [algebra R S] [semimodule S M] [is_scalar_tower R S M]
 
-variables (N P : Type*)
-  [add_comm_monoid N] [semimodule R₀ N] [semimodule R N] [is_scalar_tower R₀ R N]
-  [add_comm_monoid P] [semimodule R₀ P] [semimodule R P] [is_scalar_tower R₀ R P]
-  (P₀ : submodule R₀ P)
+variables {N P : Type*}
+  [add_comm_monoid N] [semimodule R N] [semimodule S N] [is_scalar_tower R S N]
+  [add_comm_monoid P] [semimodule R P] [semimodule S P] [is_scalar_tower R S P]
+  (P₀ : submodule R P)
 
-variables {R₀ R M N P}
-
-variables (f : pairing R M N P)
+variables (f : pairing S M N P)
 
 /--  The rays of the dual of the set `s` are the duals of the subsets of `s` that happen to be
 cyclic. -/
-def dual_set_rays (s : set M) : set (submodule R₀ N) :=
+def dual_set_rays (s : set M) : set (submodule R N) :=
 { r | r.is_cyclic ∧ ∃ s' ⊆ s, r = f.dual_set P₀ s' }
 
 /-  We may need extra assumptions for this. -/
@@ -71,12 +68,12 @@ lemma dual_set_rays_eq_extremal_rays (s : set M) :
   f.dual_set_rays P₀ s = (f.dual_set P₀ s).extremal_rays :=
 sorry
 
-lemma dual_set_pointed (s : set M) (hs : (submodule.span R₀ s).saturation) :
-  (f.dual_set P₀ s).pointed R := sorry
+lemma dual_set_pointed (s : set M) (hs : (submodule.span R s).saturation) :
+  (f.dual_set P₀ s).pointed S := sorry
 
 open submodule
 
-lemma of_non_deg {M : Type*} [add_comm_group M] {ι : Type*} {f : pairing ℤ M M ℤ} {v : ι → M}
+lemma of_non_deg {M ι : Type*} [add_comm_group M] {f : pairing ℤ M M ℤ} {v : ι → M}
   (nd : perfect f) (sp : submodule.span ℤ (v '' set.univ)) :
   pointed ℤ (submodule.span ℕ (v '' set.univ)) :=
 begin
@@ -84,13 +81,13 @@ begin
   sorry
 end
 
-lemma dual_dual_of_saturated {S : submodule R₀ M} (Ss : S.saturated) :
-  f.flip.dual_set P₀ (f.dual_set P₀ S) = S :=
+lemma dual_dual_of_saturated {s : submodule R M} (ss : s.saturated) :
+  f.flip.dual_set P₀ (f.dual_set P₀ s) = s :=
 begin
   refine le_antisymm _ (subset_dual_dual f),
   intros m hm,
 --  rw mem_dual_set at hm,
-  change ∀ (n : N), n ∈ (dual_set P₀ f ↑S) → f m n ∈ P₀ at hm,
+  change ∀ (n : N), n ∈ (dual_set P₀ f ↑s) → f m n ∈ P₀ at hm,
   simp_rw mem_dual_set at hm,
   -- is this true? I (KMB) don't know and the guru (Damiano) has left!
   -- oh wait, no way is this true, we need some nondegeneracy condition
@@ -102,41 +99,35 @@ end
 
 end pairing
 
-end abstract
+end add_comm_monoid_M
 
 -- ending the section to clear out all the assumptions
 
-section concrete
+section add_comm_group_M
 
 /-! In the intended application, these are the players:
-* `R₀ = ℕ`;
-* `R = ℤ`;
+* `R = ℕ`;
+* `S = ℤ`;
 * `M`and `N` are free finitely generated `ℤ`-modules that are dual to each other;
 * `P = ℤ` is the target of the natural pairing `M ⊗ N → ℤ`.
 -/
+
+variables [add_comm_group M]
 
 namespace pairing
 
 open pairing submodule
 
-variables {M : Type*} [add_comm_group M]
-
-/-  Kevin's proof. -/
-lemma finite.smul_of_finite {S M : Type*} [semiring S] [add_comm_monoid M] [semimodule S M]
-  {G : set S} {v : set M} (fG : G.finite) (fv : v.finite) :
-  (G • v).finite :=
-fG.image2 (•) fv
-
-lemma finite.span_restrict {R S : Type*} [semiring S]
-  [comm_semiring R] [semimodule R M] [semimodule S M] [algebra R S]
+lemma finite.span_restrict [semiring S]
+  [semimodule R M] [semimodule S M] [algebra R S]
   [is_scalar_tower R S M] {G : set S} {v : set M}
   (fG : G.finite) (spg : submodule.span R G = ⊤)
   (fv : v.finite) (hv : submodule.span S v = ⊤) :
   ∃ t : set M, t.finite ∧ submodule.span R (t : set M) = (span S (v : set M)).restrict_scalars R :=
 ⟨G • v, fG.image2 (•) fv, span_smul spg v⟩
 
-lemma finset.span_restrict {R S : Type*} [semiring S]
-  [comm_semiring R] [semimodule R M] [semimodule S M] [algebra R S]
+lemma finset.span_restrict [semiring S]
+  [semimodule R M] [semimodule S M] [algebra R S]
   [is_scalar_tower R S M]
   (G : finset S) (spg : submodule.span R (G : set S) = ⊤)
   (v : finset M) (hv : submodule.span S (v : set M) = ⊤) :
@@ -147,44 +138,10 @@ begin
   refine ⟨t.to_finset, by simpa only [set.coe_to_finset]⟩
 end
 
-
 /--  The submodule spanned by a set `s` over an `R`-algebra `S` is spanned as an `R`-module by
 `s ∪ - s`, if for every element `a ∈ S`, either `a` or `- a` is in the image of `R`. -/
-lemma finset.restrict_inf_span {R S : Type*} [ordered_semiring S] [topological_space S]
-  [order_topology S] [comm_semiring R] [semimodule R M] [semimodule S M] [algebra R S]
-  [is_scalar_tower R S M]
-  -- the `R`-algebra `S` is compactly generated as an `R`-module
-  (G : set S) (cG : is_compact G) (spg : submodule.span R G = ⊤)
-  -- `R` is discrete as an `S`-module
-  -- this works well, for instance, in the case `ℤ ⊆ ℝ`.
-  -- It does not apply in the case `ℚ ⊆ ℝ`
-  (dR : discrete_topology (set.range (algebra_map R S)))
-  -- the `R`-lattice structure on `M` is given by the span of the set `v`
-  (v : set M) (hv : submodule.span S v = ⊤)
-  -- a finitely generated `S`-submodule of `M` is also finitely generated over `R`.
-  (s : finset M) (pro : finset S) :
-  ∃ t : finset M, submodule.span R (t : set M) =
-    ((submodule.span S (s : set M)).restrict_scalars R) ⊓ submodule.span R v :=
-begin
-  let GS : set S := (set.range (algebra_map R S)) ∩ G,
-  haveI dGS : discrete_topology GS :=
-    discrete_topology.of_subset dR ((set.range ⇑(algebra_map R S)).inter_subset_left G),
-  have cGS : is_compact (set.univ : set GS), sorry,
-  have GS_finite : (set.univ : set GS).finite := finite_of_is_compact_of_discrete set.univ cGS,
-  set GSM : set M := (GS : set S) • (s : set M),
-  have : GSM.finite,sorry,
-  refine ⟨this.to_finset, _⟩,
-  sorry,
-/-
-  -- con questo voglio concludere la finitezza
-  --apply fintype_of_compact_of_discrete,
--/
-end
-
-/--  The submodule spanned by a set `s` over an `R`-algebra `S` is spanned as an `R`-module by
-`s ∪ - s`, if for every element `a ∈ S`, either `a` or `- a` is in the image of `R`. -/
-lemma subset.span_union_neg_self_eq {R S : Type*} [ordered_comm_ring S]
-  [comm_semiring R] [semimodule R M] [module S M] [algebra R S] [is_scalar_tower R S M]
+lemma subset.span_union_neg_self_eq [ordered_comm_ring S]
+  [semimodule R M] [module S M] [algebra R S] [is_scalar_tower R S M]
   (ff : ∀ a : S, ∃ n : R, a = algebra_map R S n ∨ a = - algebra_map R S n) (s : set M) :
   (submodule.span R (s ∪ - s)).carrier = submodule.span S (s : set M) :=
 begin
@@ -215,8 +172,41 @@ begin
 end
 
 
-lemma finset.span_union_neg_self_eq {ι R S : Type*} [ordered_comm_ring S]
-  [comm_semiring R] [semimodule R M] [module S M] [algebra R S] [is_scalar_tower R S M]
+/--  The submodule spanned by a set `s` over an `R`-algebra `S` is spanned as an `R`-module by
+`s ∪ - s`, if for every element `a ∈ S`, either `a` or `- a` is in the image of `R`. -/
+lemma finset.restrict_inf_span [ordered_semiring S] [topological_space S]
+  [order_topology S] [semimodule R M] [semimodule S M] [algebra R S] [is_scalar_tower R S M]
+  -- the `R`-algebra `S` is compactly generated as an `R`-module
+  (G : set S) (cG : is_compact G) (spg : submodule.span R G = ⊤)
+  -- `R` is discrete as an `S`-module
+  -- this works well, for instance, in the case `ℤ ⊆ ℝ`.
+  -- It does not apply in the case `ℚ ⊆ ℝ`
+  (dR : discrete_topology (set.range (algebra_map R S)))
+  -- the `R`-lattice structure on `M` is given by the span of the set `v`
+  (v : set M) (hv : submodule.span S v = ⊤)
+  -- a finitely generated `S`-submodule of `M` is also finitely generated over `R`.
+  (s : finset M) (pro : finset S) :
+  ∃ t : finset M, submodule.span R (t : set M) =
+    ((submodule.span S (s : set M)).restrict_scalars R) ⊓ submodule.span R v :=
+begin
+  let GS : set S := (set.range (algebra_map R S)) ∩ G,
+  haveI dGS : discrete_topology GS :=
+    discrete_topology.of_subset dR ((set.range ⇑(algebra_map R S)).inter_subset_left G),
+  have cGS : is_compact (set.univ : set GS), sorry,
+  have GS_finite : (set.univ : set GS).finite := finite_of_is_compact_of_discrete set.univ cGS,
+  set GSM : set M := (GS : set S) • (s : set M),
+  have : GSM.finite,sorry,
+  refine ⟨this.to_finset, _⟩,
+  sorry,
+/-
+  -- con questo voglio concludere la finitezza
+  --apply fintype_of_compact_of_discrete,
+-/
+end
+
+
+lemma finset.span_union_neg_self_eq {ι : Type*} [ordered_comm_ring S]
+  [semimodule R M] [module S M] [algebra R S] [is_scalar_tower R S M]
   (ff : ∀ s : S, ∃ n : R, s = algebra_map R S n ∨ s = - algebra_map R S n)
   {v : ι → M} (bv : is_basis S v) (s : finset M) (hRS : is_inj_nonneg (algebra_map R S)) :
   ∃ sR : finset M,
@@ -264,8 +254,8 @@ begin
   },
 end
 
-lemma subset.span_union_neg_self_eq_inf {ι R S : Type*} [linear_ordered_field S]
-  [comm_semiring R] [semimodule R M] [module S M] [algebra R S] [is_scalar_tower R S M]
+lemma subset.span_union_neg_self_eq_inf {ι : Type*} [linear_ordered_field S]
+  [semimodule R M] [module S M] [algebra R S] [is_scalar_tower R S M]
   (ff : ∀ s : S, 0 ≤ s → ∃ n d : R, s = algebra_map R S n / algebra_map R S d)
   {v : ι → M} (bv : is_basis S v) {s : finset M} (hRS : is_inj_nonneg (algebra_map R S)) :
   ∃ sR : finset M, (sR : set M) ⊆ (submodule.span R (set.range v ∪ set.range (λ i, - v i))) ∧
@@ -277,4 +267,4 @@ end
 
 end pairing
 
-end concrete
+end add_comm_group_M
