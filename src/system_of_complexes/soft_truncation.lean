@@ -155,23 +155,7 @@ omit hk
 
 -- move this
 def functor.has_shift (C D : Type*) [category C] [category D] [has_shift D] :
-  has_shift (C ⥤ D) :=
-{ shift :=
-  { functor := (whiskering_right C D D).obj $ (shift D).functor,
-    inverse := (whiskering_right C D D).obj $ (shift D).inverse,
-    unit_iso := nat_iso.of_components
-        (λ F, (functor.associator _ _ _ ≪≫ (iso_whisker_left F $ (shift D).unit_iso).symm
-          ≪≫ functor.right_unitor F).symm)
-      (λ F G α, by { dsimp, sorry, }),
-    counit_iso := nat_iso.of_components
-        (λ F, (functor.associator _ _ _ ≪≫ (iso_whisker_left F $ (shift D).counit_iso)
-          ≪≫ functor.right_unitor F))
-      (λ F G α, by { dsimp, sorry, }),
-    functor_unit_iso_comp' :=
-    begin
-      intros, dsimp, sorry
-    end } }
-.
+  has_shift (C ⥤ D) := ⟨(shift _).congr_right⟩
 
 instance : has_shift system_of_complexes.{u} :=
 functor.has_shift (ℝ≥0ᵒᵖ) (cochain_complex ℤ NormedGroup)
