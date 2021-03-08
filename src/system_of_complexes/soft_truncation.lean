@@ -160,10 +160,50 @@ def functor.has_shift (C D : Type*) [category C] [category D] [has_shift D] :
 instance : has_shift system_of_complexes.{u} :=
 functor.has_shift (ℝ≥0ᵒᵖ) (cochain_complex ℤ NormedGroup)
 
-/-
-TODO
+-- this is probably way too much defeq abuse
+lemma shift_d (c : ℝ≥0) (i j : ℤ) : @d (C⟦1⟧) c i j = C.d (i+1) (j+1) :=
+begin
+  by_cases h : i + 1 = j,
+  swap, { rw [d_eq_zero _ _ _ _ h, d_eq_zero], rwa [ne.def, add_left_inj] },
+  dsimp [d, cochain_complex.d, differential_object.d],
+  rw [dif_pos, dif_pos],
+  swap, { rwa ← add_left_inj (1:ℤ) at h },
+  swap, { exact h },
+  dsimp [differential_object.d_aux],
+  congr' 1,
+  sorry
+end
 
-* lemmas for how `has_shift` interacts with bounded exactness
--/
+include hk
+
+lemma shift_is_bounded_exact_aux (hC : C.is_bounded_exact k K m c₀) :
+  C⟦1⟧.is_bounded_exact k K (m - 1) c₀ :=
+begin
+  intros c hc i hi,
+  rintro (x : C (k*c) (i+1)),
+  obtain ⟨i', _, hi', rfl, y, hy⟩ := hC c hc (i + 1) (by linarith) x,
+  rw add_left_inj at hi', subst i',
+  obtain ⟨i, rfl⟩ : ∃ n, n + 1 = i := ⟨i - 1, sub_add_cancel i 1⟩,
+  refine ⟨_, _, rfl, rfl, y, _⟩,
+  simpa only [shift_d],
+end
+
+-- lemma shift_is_bounded_exact (hC : C.is_bounded_exact k K m c₀) :
+--   ∀ (n : ℤ), C⟦n⟧.is_bounded_exact k K (m - n) c₀
+-- | (0:ℕ)    := by simpa only [int.coe_nat_zero, sub_zero, equivalence.pow_zero]
+-- | (1:ℕ)    :=
+-- begin
+-- end
+-- | (n+1:ℕ)  := _
+-- | -[1+0]   := _
+-- | -[1+(n+1)] := _
+-- begin
+--   apply int.induction_on' n 0; clear n,
+--   { simpa only [functor.id_obj, sub_zero, equivalence.pow_zero, equivalence.refl_functor] },
+--   { intros n hn hC' c hc i hi x,
+--     specialize hC' c hc (i + 1) (by linarith),
+--      },
+--   -- obtain ⟨i', j, hi', hj, y, hy⟩ := hC c hc (i - n),
+-- end
 
 end system_of_complexes
