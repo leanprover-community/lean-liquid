@@ -1,7 +1,7 @@
 import algebra.regular
 import linear_algebra.finite_dimensional
 import linear_algebra.basis
-import toric_2021_02_19.is_inj_nonneg
+import toric.is_inj_nonneg
 
 /-! In the intended application, these are the players:
 * `R = ℕ`;

@@ -1,6 +1,6 @@
-import toric_2021_02_19.scattered_defs
-import toric_2021_02_19.pointed
-import toric_2021_02_19.pairing_dual_saturated
+import toric.scattered_defs
+import toric.pointed
+import toric.pairing_dual_saturated
 
 /-! In the intended application, these are the players:
 * `R = ℕ`;

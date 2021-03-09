@@ -1,4 +1,4 @@
-import toric_2021_02_19.toric
+import toric.toric
 import data.real.nnreal
 
 open_locale nnreal

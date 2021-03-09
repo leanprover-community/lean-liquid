@@ -1,6 +1,6 @@
 import algebra.regular
 import algebra.algebra.basic
-import toric_2021_02_19.pairing_dual_saturated
+import toric.pairing_dual_saturated
 
 variables {R M : Type*} [add_comm_monoid M]
 

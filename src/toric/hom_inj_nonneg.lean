@@ -1,4 +1,4 @@
-import toric_2021_02_19.is_inj_nonneg
+import toric.is_inj_nonneg
 
 open function
 
