@@ -27,16 +27,18 @@ begin
   { exact_mod_cast nnreal.zero_le_coe },
   intros c hc i hi,
   let c₁ := k'' * (k * (k' * c)),
+  obtain ⟨i, rfl⟩ : ∃ i', i = i' + 1 := ⟨i-1, by linarith⟩,
   suffices : ∀ n : N c₁ (i + 1), ∀ ε > 0,
-    ∃ y : N c i, ∥res n - d y∥ ≤ K' * (K * K'' + 1) * ∥d n∥ + ε,
+    ∃ y : N c i, ∥res n - N.d _ _ y∥ ≤ K' * (K * K'' + 1) * ∥N.d _ (i+1+1) n∥ + ε,
   { dsimp [c₁] at this,
     intros n₁ ε hε,
     haveI hc : fact (k'' * k * k' * c = c₁) := by { dsimp [fact, c₁], ring },
     let n : ↥(N c₁ (i + 1)) := res n₁,
-    rcases this n ε hε with ⟨y, hy : ∥res (res n₁) - d y∥ ≤ K' * (K * K'' + 1) * ∥d (res n₁)∥ + ε⟩,
+    rcases this n ε hε with ⟨y, hy : ∥res (res n₁) - N.d _ _ y∥ ≤ K' * (K * K'' + 1) * ∥N.d _ _ (res n₁)∥ + ε⟩,
     rw [res_res, d_res] at hy,
-    have : ∥(res (d n₁) : N (k'' * (k * (k' * c))) (i + 1 + 1))∥ ≤ ∥d n₁∥,
+    have : ∥(res (N.d _ _ n₁) : N (k'' * (k * (k' * c))) (i + 1 + 1))∥ ≤ ∥N.d _ _ n₁∥,
       by { apply (admissible_of_quotient hgquot hM'_adm).res_norm_noninc, },
+    refine ⟨_, _, rfl, rfl, _⟩,
     exact ⟨y, hy.trans (add_le_add_right (mul_le_mul_of_nonneg_left this bound_nonneg) ε)⟩ },
   intros n ε hε,
   let ε₁ := ε/(K' * (K * K'' + 2) + 1),
@@ -48,10 +50,10 @@ begin
 
   let c₁ := k''*(k*(k'*c)),
   obtain ⟨m' : M' c₁ (i + 1), hm' : g m' = n⟩ := (hgquot _ _).surjective _,
-  let m₁' := d m',
-  have hm₁' : g m₁' = d n := by simpa [hm'] using (d_apply _ _ g m').symm,
-  obtain ⟨m₁'' : M' c₁ (i + 1 + 1), hgm₁'' : g m₁'' = d n, hnorm_m₁'' : ∥m₁''∥ < ∥d n∥ + ε₁⟩ :=
-    quotient_norm_lift (hgquot _ _) hε₁ (d n),
+  let m₁' := M'.d _ (i+1+1) m',
+  have hm₁' : g m₁' = N.d _ _ n := by simpa [hm'] using (d_apply _ _ g m').symm,
+  obtain ⟨m₁'' : M' c₁ (i + 1 + 1), hgm₁'' : g m₁'' = N.d _ _ n, hnorm_m₁'' : ∥m₁''∥ < ∥N.d _ _ n∥ + ε₁⟩ :=
+    quotient_norm_lift (hgquot _ _) hε₁ (N.d _ _ n),
   obtain ⟨m₁, hm₁⟩ : ∃ m₁ : M c₁ (i + 1 + 1), f m₁ + m₁'' = m₁',
   { have hrange : m₁' - m₁'' ∈ f.apply.range,
     { rw [← hg _ _, mem_ker  _ _, normed_group_hom.map_sub],
@@ -60,63 +62,63 @@ begin
     obtain ⟨m₁, hm₁ : f m₁ = m₁' - m₁''⟩ := (mem_range _ _).1 hrange,
     exact ⟨m₁, by rw [hm₁, sub_add_cancel]⟩ },
 
-  have hm₂ : f (d m₁) = -d m₁'',
+  have hm₂ : f (M.d _ _ m₁) = -M'.d _ _ m₁'',
   { rw [← d_apply, eq_sub_of_add_eq hm₁, normed_group_hom.map_sub, ← coe_comp,
-        d, d, homological_complex.d_squared, coe_zero, ← neg_inj, pi.zero_apply, zero_sub], },
-  have hle : ∥res (d m₁)∥ ≤ K'' * ∥m₁''∥,
-    calc ∥res (d m₁)∥ ≤ K'' * ∥f (d m₁)∥ : Hf _ _ (by linarith) (d m₁)
-                  ... = K'' * ∥d m₁''∥ : by rw [hm₂, norm_neg]
-                  ... ≤ K'' * ∥m₁''∥ : (mul_le_mul_of_nonneg_left (hM'_adm.d_norm_noninc _ _ m₁'') $
+       d_comp_d, coe_zero, ← neg_inj, pi.zero_apply, zero_sub], },
+  have hle : ∥res (M.d _ (i+1+1+1) m₁)∥ ≤ K'' * ∥m₁''∥,
+    calc ∥res (d _ _ _ m₁)∥ ≤ K'' * ∥f (d _ _ _ m₁)∥ : Hf _ _ (by linarith) (d _ _ (i+1+1+1) m₁)
+                  ... = K'' * ∥d _ _ _ m₁''∥ : by rw [hm₂, norm_neg]
+                  ... ≤ K'' * ∥m₁''∥ : (mul_le_mul_of_nonneg_left (hM'_adm.d_norm_noninc _ _ _ _ m₁'') $
                                                                   nnreal.coe_nonneg K''),
-  obtain ⟨m₀ : M (k'*c) (i+1), hm₀ : ∥res (res m₁) - d m₀∥ ≤ K * ∥d (res m₁)∥ + ε₁⟩ :=
+  obtain ⟨i', j, hi', rfl, m₀, hm₀⟩ :=
     hM _ (le_trans hc $ le_mul_of_one_le_left' hk') _ (by linarith) (res m₁) ε₁ hε₁,
-  replace hm₀ : ∥res m₁ - d m₀∥ ≤ K * K'' * ∥d n∥ + K*K''*ε₁ + ε₁,
-    calc ∥res m₁ - d m₀∥  = ∥res (res m₁) - d m₀∥ : by rw res_res
-    ... ≤ K * ∥d (res m₁)∥ + ε₁ : hm₀
-    ... = K * ∥res (d m₁)∥ + ε₁ : by rw d_res
+  rw [add_left_inj] at hi', subst i',
+  replace hm₀ : ∥res m₁ - d _ _ _ m₀∥ ≤ K * K'' * ∥d _ _ (i+1+1) n∥ + K*K''*ε₁ + ε₁,
+    calc ∥res m₁ - d _ _ _ m₀∥  = ∥res (res m₁) - d _ _ _ m₀∥ : by rw res_res
+    ... ≤ K * ∥d _ _ _ (res m₁)∥ + ε₁ : hm₀
+    ... = K * ∥res (d _ _ _ m₁)∥ + ε₁ : by rw d_res
     ... ≤ K*(K'' * ∥m₁''∥) + ε₁ : add_le_add_right (mul_le_mul_of_nonneg_left hle nnreal.zero_le_coe) _
-    ... ≤ K*(K'' * (∥d n∥ + ε₁)) + ε₁ :  add_le_add_right (mul_le_mul_of_nonneg_left
+    ... ≤ K*(K'' * (∥d _ _ _ n∥ + ε₁)) + ε₁ :  add_le_add_right (mul_le_mul_of_nonneg_left
                                         (mul_le_mul_of_nonneg_left hnorm_m₁''.le nnreal.zero_le_coe)
                                          nnreal.zero_le_coe) ε₁
-    ... = K * K'' * ∥d n∥ + K*K''*ε₁ + ε₁ : by ring,
+    ... = K * K'' * ∥d _ _ _ n∥ + K*K''*ε₁ + ε₁ : by ring,
 
   let mnew' := res m' - f m₀,
-  let mnew₁' := d mnew',
-  have hmnew' : mnew₁' = res m₁'' + f (res m₁ - d m₀),
-    calc mnew₁' = d (res m' - f m₀) : rfl
-            ... = res (d m') - (f (d m₀)) : by rw [normed_group_hom.map_sub, d_res _, d_apply]
-            ... = res (d m') - (f (res m₁)) + (f (res m₁) - f (d m₀)) : by abel
-            ... = res m₁'' + f ((res m₁) - (d m₀)) : by
+  let mnew₁' := d _ _ _ mnew',
+  have hmnew' : mnew₁' = res m₁'' + f (res m₁ - d _ _ _ m₀),
+    calc mnew₁' = d _ _ _ (res m' - f m₀) : rfl
+            ... = res (d _ _ _ m') - (f (d _ _ _ m₀)) : by rw [normed_group_hom.map_sub, d_res _, d_apply]
+            ... = res (d _ _ _ m') - (f (res m₁)) + (f (res m₁) - f (d _ _ _ m₀)) : by abel
+            ... = res m₁'' + f ((res m₁) - (d _ _ _ m₀)) : by
                                { rw [← system_of_complexes.map_sub, ← res_apply,
                                      ← normed_group_hom.map_sub, ← sub_eq_of_eq_add' hm₁.symm] },
-  have hnormle : ∥mnew₁'∥ ≤ (K*K'' + 1)*∥d n∥ + (K*K'' + 2) * ε₁,
-    calc ∥mnew₁'∥ = ∥res m₁'' + f (res m₁ - d m₀)∥ : by rw [hmnew']
-              ... ≤ ∥res m₁''∥ + ∥f (res m₁ - d m₀)∥ : norm_add_le _ _
-              ... ≤ ∥m₁''∥ + ∥f (res m₁ - d m₀)∥ : add_le_add_right
+  have hnormle : ∥mnew₁'∥ ≤ (K*K'' + 1)*∥d _ _ _ n∥ + (K*K'' + 2) * ε₁,
+    calc ∥mnew₁'∥ = ∥res m₁'' + f (res m₁ - d _ _ _ m₀)∥ : by rw [hmnew']
+              ... ≤ ∥res m₁''∥ + ∥f (res m₁ - d _ _ _ m₀)∥ : norm_add_le _ _
+              ... ≤ ∥m₁''∥ + ∥f (res m₁ - d _ _ _ m₀)∥ : add_le_add_right
                                                (hM'_adm.res_norm_noninc _ _ _ infer_instance m₁'') _
-              ... = ∥m₁''∥ + ∥res m₁ - d m₀∥ : by erw hf
-              ... ≤ ∥d n∥ + ε₁ + ∥res m₁ - d m₀∥ : add_le_add_right (le_of_lt hnorm_m₁'')  _
-              ... ≤ ∥d n∥ + ε₁ + (K * K'' * ∥d n∥ + K * K'' * ε₁ + ε₁) : add_le_add_left hm₀ _
-              ... = (K*K'' + 1)*∥d n∥ + (K*K'' + 2) * ε₁ : by ring,
-  obtain ⟨mnew₀ : M' c i, hmnew₀ : ∥res mnew' - d mnew₀∥ ≤ K' * ∥d mnew'∥ + ε₁⟩ :=
-    hM' _ hc _ (hi.trans (sub_one_lt m)) mnew' _ hε₁,
-  replace hmnew₀ : ∥res mnew' - d mnew₀∥ ≤ K' * ((K * K'' + 1) * ∥d n∥ + (K * K'' + 2) * ε₁) + ε₁ :=
+              ... = ∥m₁''∥ + ∥res m₁ - d _ _ _ m₀∥ : by erw hf
+              ... ≤ ∥d _ _ _ n∥ + ε₁ + ∥res m₁ - d _ _ _ m₀∥ : add_le_add_right (le_of_lt hnorm_m₁'')  _
+              ... ≤ ∥d _ _ _ n∥ + ε₁ + (K * K'' * ∥d _ _ _ n∥ + K * K'' * ε₁ + ε₁) : add_le_add_left hm₀ _
+              ... = (K*K'' + 1)*∥d _ _ (i+1+1) n∥ + (K*K'' + 2) * ε₁ : by ring,
+  obtain ⟨i', _, hi', rfl, mnew₀, hmnew₀⟩ :=
+    hM' _ hc _ (hi.trans (sub_one_lt m).le) mnew' _ hε₁,
+  rw [add_left_inj] at hi', subst i',
+  replace hmnew₀ : ∥res mnew' - d _ _ _ mnew₀∥ ≤ K' * ((K * K'' + 1) * ∥d _ _ _ n∥ + (K * K'' + 2) * ε₁) + ε₁ :=
     hmnew₀.trans (add_le_add_right (mul_le_mul_of_nonneg_left hnormle nnreal.zero_le_coe) ε₁),
   let nnew₀ : ↥(N c i) := g mnew₀,
-  have hmnewlift : g (res mnew' - d mnew₀) = res n - d nnew₀,
+  have hmnewlift : g (res mnew' - d _ _ (i+1) mnew₀) = res n - d _ _ _ nnew₀,
   { suffices h : g mnew' = res n,
     { rw [system_of_complexes.map_sub, ← res_apply, ← d_apply, h, res_res] },
     rw system_of_complexes.map_sub,
     have hker : f m₀ ∈ g.apply.ker,
     { rw [hg _ _, mem_range _ _],
-      use [m₀, rfl] },
-    replace hker : g (f m₀) = 0, by rwa mem_ker at hker,
+      exact ⟨m₀, rfl⟩ },
+    replace hker : g (f m₀) = 0, { rwa mem_ker at hker },
     rw [hker, sub_zero, ← res_apply, hm'] },
-  use nnew₀,
+  refine ⟨nnew₀, _⟩,
   rw ← hmnewlift,
-  suffices : ∥res mnew' - d mnew₀∥ ≤ K' * (K * K'' + 1) * ∥d n∥ + ε,
-    from (quotient_norm_le (hgquot _ _) (res mnew' - d mnew₀)).trans this,
-  calc ∥res mnew' - d mnew₀∥ ≤ K' * ((K * K'' + 1) * ∥d n∥ + (K * K'' + 2) * ε₁) + ε₁ : hmnew₀
-    ... = K' * (K * K'' + 1) * ∥d n∥ + (K'*(K * K'' + 2) + 1)* ε₁ : by ring
-    ... = K' * (K * K'' + 1) * ∥d n∥ + ε : by rw hε₁_ε,
+  refine (quotient_norm_le (hgquot _ _) _).trans (hmnew₀.trans (le_of_eq _)),
+  rw ← hε₁_ε,
+  ring,
 end

@@ -10,9 +10,12 @@ import facts
 noncomputable theory
 open_locale nnreal
 
-namespace polyhedral_lattice
-
 open pseudo_normed_group normed_group
+
+lemma int.one_mem_filtration : (1 : ℤ) ∈ filtration ℤ 1 :=
+by simp only [nnnorm_one, normed_group.mem_filtration_iff]
+
+namespace polyhedral_lattice
 
 variables (Λ : Type*) (r' : ℝ≥0) (M : Type*)
 variables [normed_group Λ] [polyhedral_lattice Λ]

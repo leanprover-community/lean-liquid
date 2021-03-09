@@ -1,4 +1,3 @@
-import algebra.homology.chain_complex
 import hacks_and_tricks.by_exactI_hack
 import system_of_complexes.basic
 import normed_group.NormedGroup
@@ -30,7 +29,7 @@ whereas we are interested in complexes indexed by `ℕ`.
 We therefore set all objects indexed by negative integers to `0`, in our use case. -/
 @[derive category_theory.category]
 def system_of_double_complexes : Type (u+1) :=
-ℝ≥0ᵒᵖ ⥤ (cochain_complex (cochain_complex NormedGroup.{u}))
+ℝ≥0ᵒᵖ ⥤ (cochain_complex ℤ (cochain_complex ℤ NormedGroup.{u}))
 
 namespace system_of_double_complexes
 
@@ -46,7 +45,7 @@ def res {c' c : ℝ≥0} {p q : ℤ} [h : fact (c ≤ c')] :
   C.X c' p q ⟶ C.X c p q :=
 ((C.map (hom_of_le h).op).f p).f q
 
-variables (c : ℝ≥0) {c₁ c₂ c₃ : ℝ≥0} (p q : ℤ)
+variables (c : ℝ≥0) {c₁ c₂ c₃ : ℝ≥0} (p p' q q' : ℤ)
 
 @[simp] lemma res_refl : @res C c c p q _ = 𝟙 _ :=
 begin
@@ -67,56 +66,57 @@ end
 by { rw ← (C.res_comp_res p q h₁ h₂), refl }
 
 /-- `C.d` is the differential `C.X c p q ⟶ C.X c (p+1) q` for a system of double complexes `C`. -/
-def d {c : ℝ≥0} {p q : ℤ} :
-  C.X c p q ⟶ C.X c (p+1) q :=
-((C.obj $ op c).d p).f q
+def d {c : ℝ≥0} (p p' : ℤ) {q : ℤ} : C.X c p q ⟶ C.X c p' q :=
+((C.obj $ op c).d p p').f q
+
+lemma d_eq_zero (c : ℝ≥0) (h : p + 1 ≠ p') : (C.d p p' : C.X c p q ⟶ _) = 0 :=
+begin
+  delta d,
+  rw (C.obj $ op c).d_eq_zero p p' h,
+  refl
+end
 
 lemma d_comp_res (h : fact (c₂ ≤ c₁)) :
-  @d C c₁ p q ≫ @res C _ _ _ _ h = @res C _ _ p q _ ≫ @d C c₂ p q :=
-begin
-  have step1 := (homological_complex.comm_at (C.map (hom_of_le h).op) p),
-  have step2 := congr_arg differential_object.hom.f step1,
-  exact congr_fun step2 q
-end
+  C.d p p' ≫ @res C _ _ _ q h = @res C _ _ p q _ ≫ C.d p p' :=
+congr_fun (congr_arg differential_object.hom.f
+  (cochain_complex.hom.comm (C.map (hom_of_le h).op) p p')) q
 
 lemma d_res (h : fact (c₂ ≤ c₁)) (x) :
-  @d C c₂ p q (@res C _ _ p q _ x) = @res C _ _ _ _ h (@d C c₁ p q x) :=
-show (@res C _ _ p q _ ≫ @d C c₂ p q) x = (@d C c₁ p q ≫ @res C _ _ _ _ h) x,
+  @d C c₂ p p' q (@res C _ _ p q _ x) = @res C _ _ _ _ h (@d C c₁ p p' q x) :=
+show (@res C _ _ p q _ ≫ C.d p p') x = (C.d p p' ≫ @res C _ _ _ _ h) x,
 by rw d_comp_res
 
-@[simp] lemma d_comp_d {c : ℝ≥0} {p q : ℤ} :
-  @d C c p q ≫ C.d = 0 :=
-begin
-  have step1 := (homological_complex.d_squared (C.obj $ op c)) p,
-  have step2 := congr_arg differential_object.hom.f step1,
-  exact congr_fun step2 q
-end
+@[simp] lemma d_comp_d {c : ℝ≥0} {p p' p'' q : ℤ} :
+  @d C c p p' q ≫ C.d p' p'' = 0 :=
+congr_fun (congr_arg differential_object.hom.f ((C.obj $ op c).d_comp_d p p' p'')) q
 
-@[simp] lemma d_d {c : ℝ≥0} {p q : ℤ} (x : C.X c p q) :
-  C.d (C.d x) = 0 :=
-show (@d C c _ _ ≫ C.d) x = 0, by { rw d_comp_d, refl }
+@[simp] lemma d_d {c : ℝ≥0} {p p' p'' q : ℤ} (x : C.X c p q) :
+  C.d p' p'' (C.d p p' x) = 0 :=
+show (C.d _ _ ≫ C.d _ _) x = 0, by { rw d_comp_d, refl }
 
 /-- `C.d'` is the differential `C.X c p q ⟶ C.X c p (q+1)` for a system of double complexes `C`. -/
-def d' {c : ℝ≥0} {p q : ℤ} :
-  C.X c p q ⟶ C.X c p (q+1) :=
-((C.obj $ op c).X p).d q
+def d' {c : ℝ≥0} {p : ℤ} (q q' : ℤ) : C.X c p q ⟶ C.X c p q' :=
+((C.obj $ op c).X p).d q q'
+
+lemma d'_eq_zero (c : ℝ≥0) (h : q + 1 ≠ q') : (C.d' q q' : C.X c p q ⟶ _) = 0 :=
+((C.obj $ op c).X p).d_eq_zero q q' h
 
 lemma d'_comp_res (h : fact (c₂ ≤ c₁)) :
-  @d' C c₁ p q ≫ @res C _ _ _ _ h = @res C _ _ p q _ ≫ @d' C c₂ p q :=
-homological_complex.comm_at ((C.map (hom_of_le h).op).f p) q
+  @d' C c₁ p q q' ≫ @res C _ _ _ _ h = @res C _ _ p q _ ≫ @d' C c₂ p q q' :=
+cochain_complex.hom.comm ((C.map (hom_of_le h).op).f p) q q'
 
 lemma d'_res (h : fact (c₂ ≤ c₁)) (x) :
-  @d' C c₂ p q (@res C _ _ p q _ x) = @res C _ _ _ _ h (@d' C c₁ p q x) :=
-show (@res C _ _ p q _ ≫ @d' C c₂ p q) x = (@d' C c₁ p q ≫ @res C _ _ _ _ h) x,
+  C.d' q q' (@res C _ _ p q _ x) = @res C _ _ _ _ h (C.d' q q' x) :=
+show (@res C _ _ p q _ ≫ C.d' q q') x = (C.d' q q' ≫ @res C _ _ _ _ h) x,
 by rw d'_comp_res
 
-@[simp] lemma d'_comp_d' {c : ℝ≥0} {p q : ℤ} :
-  @d' C c p q ≫ C.d' = 0 :=
-((C.obj $ op c).X p).d_squared q
+@[simp] lemma d'_comp_d' {c : ℝ≥0} {p q q' q'' : ℤ} :
+  @d' C c p q q' ≫ C.d' q' q'' = 0 :=
+((C.obj $ op c).X p).d_comp_d q q' q''
 
-@[simp] lemma d'_d' {c : ℝ≥0} {p q : ℤ} (x : C.X c p q) :
-  C.d' (C.d' x) = 0 :=
-show (@d' C c _ _ ≫ C.d') x = 0, by { rw d'_comp_d', refl }
+@[simp] lemma d'_d' {c : ℝ≥0} {p q q' q'' : ℤ} (x : C.X c p q) :
+  C.d' q' q'' (C.d' q q' x) = 0 :=
+show (C.d' _ _ ≫ C.d' _ _) x = 0, by { rw d'_comp_d', refl }
 
 /-- Convenience definition:
 The identity morphism of an object in the system of double complexes
@@ -131,47 +131,69 @@ if all the differentials and restriction maps are norm-nonincreasing.
 
 See Definition 9.3 of [Analytic]. -/
 structure admissible (C : system_of_double_complexes) : Prop :=
-(d_norm_noninc : ∀ c p q (x : C.X c p q), ∥C.d x∥ ≤ ∥x∥)
-(d'_norm_noninc : ∀ c p q (x : C.X c p q), ∥C.d' x∥ ≤ ∥x∥)
+(d_norm_noninc' : ∀ c p p' q (h : p + 1 = p') (x : C.X c p q), ∥C.d p p' x∥ ≤ ∥x∥)
+(d'_norm_noninc' : ∀ c p q q' (h : q + 1 = q') (x : C.X c p q), ∥C.d' q q' x∥ ≤ ∥x∥)
 (res_norm_noninc : ∀ c' c p q h (x : C.X c' p q), ∥@res C c' c p q h x∥ ≤ ∥x∥)
 
-attribute [simps] differential_object.forget
+namespace admissible
+
+variables {C}
+
+lemma d_norm_noninc (hC : C.admissible) (c : ℝ≥0) (p p' q : ℤ) :
+  (C.d p p' : C.X c p q ⟶ _).norm_noninc :=
+begin
+  by_cases h : p + 1 = p',
+  { exact hC.d_norm_noninc' c p p' q h },
+  { rw C.d_eq_zero p p' q c h, intro v, simp }
+end
+
+lemma d'_norm_noninc (hC : C.admissible) (c : ℝ≥0) (p q q' : ℤ) :
+  (C.d' q q' : C.X c p q ⟶ _).norm_noninc :=
+begin
+  by_cases h : q + 1 = q',
+  { exact hC.d'_norm_noninc' c p q q' h },
+  { rw C.d'_eq_zero p q q' c h, intro v, simp }
+end
+
+end admissible
+
+-- attribute [simps] differential_object.forget
 
 /-- The `p`-th row in a system of double complexes, as system of complexes.
   It has object `(C.obj c).X p`over `c`. -/
 def row (C : system_of_double_complexes.{u}) (p : ℤ) : system_of_complexes.{u} :=
-C.comp ((homological_complex.forget _).comp $ pi.eval _ p)
+C.comp ((differential_object.forget _ _).comp $ pi.eval _ p)
 
 @[simp] lemma row_X (C : system_of_double_complexes) (p q : ℤ) (c : ℝ≥0) :
   C.row p c q = C.X c p q :=
-by refl
+rfl
 
 @[simp] lemma row_res (C : system_of_double_complexes) (p q : ℤ) {c' c : ℝ≥0} [h : fact (c ≤ c')] :
   @system_of_complexes.res (C.row p) _ _ q h  = @res C _ _ p q h :=
-by refl
+rfl
 
-@[simp] lemma row_d (C : system_of_double_complexes) (p q : ℤ) (c : ℝ≥0) :
-  @system_of_complexes.d (C.row p) _ _ = @d' C c p q :=
-by refl
+@[simp] lemma row_d (C : system_of_double_complexes) (c : ℝ≥0) (p : ℤ) :
+  (C.row p).d = @d' C c p :=
+rfl
 
 /-- The `q`-th column in a system of double complexes, as system of complexes. -/
 def col (C : system_of_double_complexes.{u}) (q : ℤ) : system_of_complexes.{u} :=
-C.comp
-  (functor.map_differential_object _
-    (functor.pi $ λ n, (homological_complex.forget _).comp $ pi.eval _ q)
-    { app := λ X, 𝟙 _, naturality' := by { intros, ext, simp } }
-    (by { intros, ext, simp }))
+C.comp (functor.map_differential_object ((differential_object.forget _ _).comp $ pi.eval _ q)
+  (by { intros, ext, refl }))
 
 @[simp] lemma col_X (C : system_of_double_complexes) (p q : ℤ) (c : ℝ≥0) :
   C.col q c p = C.X c p q :=
-by refl
+rfl
 
 @[simp] lemma col_res (C : system_of_double_complexes) (p q : ℤ) {c' c : ℝ≥0} [h : fact (c ≤ c')] :
   @system_of_complexes.res (C.col q) _ _ _ _ = @res C _ _ p q h :=
-by refl
+rfl
 
-@[simp] lemma col_d (C : system_of_double_complexes) (p q : ℤ) (c : ℝ≥0) :
-  @system_of_complexes.d (C.col q) _ _ = @d C c p q :=
-by { dsimp [system_of_complexes.d, col, d], simp }
+@[simp] lemma col_d (C : system_of_double_complexes) (c : ℝ≥0) (p p' q : ℤ) :
+  (C.col q).d p p' = @d C c p p' q :=
+begin
+  dsimp [d, system_of_complexes.d, cochain_complex.d, differential_object.d],
+  split_ifs with h; [cases h, refl]; refl
+end
 
 end system_of_double_complexes

@@ -210,5 +210,3 @@ instance int.polyhedral_lattice : polyhedral_lattice ℤ :=
       simp only [neg_mul_eq_neg_mul_symm, add_zero, one_mul],
       exact give_better_name n }
   end }
-
-
