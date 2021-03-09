@@ -19,10 +19,41 @@ section lem97
 
 variables (Λ : Type*) [add_comm_group Λ]
 
-lemma abs_add_eq_add_abs_iff (a b : ℤ) :
+lemma abs_smul {α : Type*} [linear_ordered_add_comm_group α] (n : ℕ) (a : α) :
+  abs (n • a) = n • abs a :=
+begin
+  cases le_total a 0 with hneg hpos,
+  { have h : 0 ≤ n • (-a) := nsmul_nonneg (neg_nonneg.mpr hneg) n,
+    rw [abs_of_nonpos hneg, ← abs_neg, ← smul_neg, abs_of_nonneg h] },
+  { have h : 0 ≤ n • a := nsmul_nonneg hpos n,
+    rw [abs_of_nonneg hpos, abs_of_nonneg h] }
+end
+
+lemma abs_add_eq_add_abs_iff {α : Type*} [linear_ordered_add_comm_group α]  (a b : α) :
   abs (a + b) = abs a + abs b ↔ (0 ≤ a ∧ 0 ≤ b ∨ a ≤ 0 ∧ b ≤ 0) :=
 begin
-  sorry
+  wlog hle : a ≤ b using [a b, b a],
+  { exact le_total a b },
+  cases eq_or_lt_of_le hle with heq hlt,
+  { rw [heq, and_self, ← two_smul ℕ b, ← two_smul ℕ (abs b), abs_smul],
+    simp only [true_iff, eq_self_iff_true, and_self, le_total 0 b] },
+  split,
+  { intro h,
+    rcases ⟨le_total 0 a, le_total 0 b⟩ with ⟨pa|na, pb|nb⟩,
+    { exact or.inl ⟨pa, pb⟩ },
+    { exfalso,
+      exact not_lt.2 nb (lt_of_le_of_lt pa hlt) },
+    { rw [abs_of_nonneg pb, abs_of_nonpos na] at h,
+      cases le_total (a + b) 0 with sumn sump,
+      { rw [abs_of_nonpos sumn, neg_add, add_right_inj (-a)] at h,
+        exact or.inr ⟨na, le_of_eq (eq_zero_of_neg_eq h)⟩ },
+      { rw [abs_of_nonneg sump, add_left_inj b] at h,
+        exact or.inl ⟨le_of_eq (eq_zero_of_neg_eq h.symm).symm, pb⟩ } },
+    { exact or.inr ⟨na, nb⟩ } },
+  { intro h,
+    cases h with pp nn,
+    { rw [abs_of_nonneg pp.1, abs_of_nonneg pp.2, abs_of_nonneg (add_nonneg pp.1 pp.2)] },
+    { rw [abs_of_nonpos nn.1, abs_of_nonpos nn.2, abs_of_nonpos (add_nonpos nn.1 nn.2), neg_add] } }
 end
 
 /-

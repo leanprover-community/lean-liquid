@@ -27,17 +27,17 @@ variables (f : M₁ ⟶ M₂) (g : M₂ ⟶ M₃)
 def complex (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
   (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] (M : ProFiltPseuNormGrpWithTinv r')
   (c : ℝ≥0) :
-  cochain_complex NormedGroup :=
+  cochain_complex ℤ NormedGroup :=
 { /- the objects -/
   X := int.extend_from_nat 0 $ λ i, CLCFPTinv r V r' M (c * c' i) (BD.rank i),
   /- the differentials -/
-  d := int.extend_from_nat 0 $ λ i,
+  differential := int.extend_from_nat 0 $ λ i,
     (BD.map i).eval_CLCFPTinv r V r' M (c * c' (i+1)) (c * c' i),
-  d_squared' := /- d^2 = 0 -/
+  differential2 := /- d^2 = 0 -/
   begin
-    ext1 (i|i),
+    rintros (i|i) j h; cases h,
     { dsimp,
-      simp only [pi.comp_apply, pi.zero_apply],
+      simp only [category.id_comp],
       rw ← universal_map.eval_CLCFPTinv_comp r V r' M
         _ (c * c' (i+1)) _ (BD.map i) (BD.map (i+1)),
       simp only [BD.map_comp_map, universal_map.eval_CLCFPTinv_zero],
@@ -47,15 +47,13 @@ def complex (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
 
 namespace complex
 
-@[simp] lemma d_neg_succ_of_nat (n : ℕ) : (BD.complex c' r V r' M c).d -[1+n] = 0 := rfl
-
 /-- The induced map of complexes from a homomorphism `M₁ ⟶ M₂`. -/
 @[simps]
 def map : BD.complex c' r V r' M₂ c ⟶ BD.complex c' r V r' M₁ c :=
 { f := int.extend_from_nat 0 $ λ i, CLCFPTinv.map r V r' _ _ f,
   comm' :=
   begin
-    ext1 (i|i),
+    rintro (i|i),
     { dsimp, symmetry, apply universal_map.map_comp_eval_CLCFPTinv },
     { show 0 ≫ _ = 0, rw [zero_comp] }
   end }
@@ -94,9 +92,9 @@ def system (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
       exact CLCFPTinv.res r V r' _ _ (BD.rank i) },
     comm' :=
     begin
-      ext1 (i|i),
+      rintro (i|i),
       { dsimp [int.extend_from_nat], symmetry, apply universal_map.res_comp_eval_CLCFPTinv },
-      { dsimp [int.extend_from_nat, complex.d_neg_succ_of_nat], rw [zero_comp, comp_zero], }
+      { dsimp [int.extend_from_nat], erw [zero_comp, comp_zero] }
     end },
   map_id' := /- the restriction map for `c ≤ c` is the identity -/
   begin
