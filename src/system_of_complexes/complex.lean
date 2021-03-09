@@ -4,53 +4,82 @@ import data.int.basic
 
 open category_theory category_theory.limits
 
-class has_succ (α : Type*) := (succ : α → α)
+section succ_pred
+
+variables (α : Type*)
+
+class has_succ := (succ : α → α)
+
+class has_succ_pred extends α ≃ α.
+
+instance has_succ_pred.has_succ [e : has_succ_pred α] : has_succ α :=
+⟨e.to_equiv⟩
+
+variables {α}
 
 -- fix this to something better?
-notation `Ş` := has_succ.succ
+def succ [has_succ α] (a : α) := has_succ.succ a
+def succ_equiv (α) [has_succ_pred α] : equiv.perm α := has_succ_pred.to_equiv
+def pred [has_succ_pred α] (a : α) := (succ_equiv α).symm a
+
+variables [has_succ_pred α] (a : α)
+
+@[simp] lemma coe_succ_equiv : (succ_equiv α : α → α) = succ := rfl
+
+lemma succ_equiv_apply : succ_equiv α a = succ a := rfl
+
+@[simp] lemma succ_pred : succ (pred a) = a :=
+equiv.apply_symm_apply _ a
+
+@[simp] lemma pred_succ : pred (succ a) = a :=
+equiv.symm_apply_apply _ a
 
 -- do we want this for every semiring??
 instance : has_succ ℕ := ⟨λ n, n + 1⟩
-instance : has_succ ℤ := ⟨λ n, n + 1⟩
+instance : has_succ_pred ℤ :=
+{ to_fun := λ n, n + 1,
+  inv_fun := λ n, n - 1,
+  left_inv := λ n, add_sub_cancel n 1,
+  right_inv := λ n, sub_add_cancel n 1 }
+
+@[simp] lemma succ_nat (n : ℕ) : succ n = n + 1 := rfl
+@[simp] lemma succ_int (n : ℤ) : succ n = n + 1 := rfl
+@[simp] lemma pred_int (n : ℤ) : pred n = n - 1 := rfl
+
+end succ_pred
 
 @[ext]
-structure differential_object (ι : Type) (S₀ S₁ : ι → ι) (V : Type*)
-  [category V] [has_zero_morphisms V] :=
+structure differential_object (ι : Type) (V : Type*) [category V] :=
 (X : ι → V)
-(differential : Π i, X (S₀ i) ⟶ X (S₁ i))
-(differential2 : ∀ i j (h : S₁ i = S₀ j),
-  differential i ≫ eq_to_hom (show X (S₁ i) = X (S₀ j), by rw h) ≫ differential j = 0)
+(d : Π i j, X i ⟶ X j)
 
-variables (ι : Type) (S₀ S₁ : ι → ι) (V : Type*) {cov : bool}
+variables (ι : Type) (V : Type*) {cov : bool}
 
 namespace differential_object
-variables [category V] [has_zero_morphisms V]
+variables [category V]
 
-variables (C C₁ C₂ C₃ : differential_object ι S₀ S₁ V)
+variables{ι V} (C C₁ C₂ C₃ : differential_object ι V)
 
 section category
--- technically, this can probably done in the generality of `differential_object`
-
-variables {ι S₀ S₁ V}
 
 @[ext]
 structure hom :=
 (f (i : ι) : C₁.X i ⟶ C₂.X i)
-(comm' (i : ι) : C₁.differential i ≫ f (S₁ i) = f (S₀ i) ≫ C₂.differential i)
+(comm (i j : ι) : C₁.d i j ≫ f j = f i ≫ C₂.d i j)
 
-attribute [reassoc] hom.comm'
+attribute [reassoc] hom.comm
 
 variables {C₁ C₂ C₃}
 
 protected def id : hom C C :=
 { f := λ i, 𝟙 _,
-  comm' := by { intros, simp only [category.id_comp, category.comp_id] } }
+  comm := by { intros, rw [category.id_comp, category.comp_id] } }
 
 def comp (f : hom C₁ C₂) (g : hom C₂ C₃) : hom C₁ C₃ :=
 { f := λ i, f.f i ≫ g.f i,
-  comm' := λ i, by { rw [hom.comm'_assoc, hom.comm', category.assoc] } }
+  comm := λ i j, by { rw [hom.comm_assoc, hom.comm, category.assoc] } }
 
-instance : category (differential_object ι S₀ S₁ V) :=
+instance : category (differential_object ι V) :=
 { hom := hom,
   id := differential_object.id,
   comp := λ _ _ _, comp,
@@ -69,10 +98,10 @@ lemma eq_to_hom_f (f : C₁ ⟶ C₂) (i j : ι) (h : i = j) :
 by { cases h, simp only [eq_to_hom_refl, category.id_comp, category.comp_id] }
 
 @[simp, reassoc]
-lemma eq_to_hom_differential (i j : ι) (h : i = j) :
-  eq_to_hom (congr_arg _ h) ≫ C.differential j =
-    C.differential i ≫ eq_to_hom (congr_arg _ $ by rw h) :=
-by { cases h, simp only [eq_to_hom_refl, category.id_comp, category.comp_id] }
+lemma eq_to_hom_d (i i' j j' : ι) :
+  ∀ (hi : i = i') (hj : j = j'),
+  eq_to_hom (congr_arg _ hi) ≫ C.d i' j' = C.d i j ≫ eq_to_hom (congr_arg _ hj) :=
+by { rintro rfl rfl, simp only [eq_to_hom_refl, category.id_comp, category.comp_id] }
 
 @[simps]
 def iso_app (f : C₁ ≅ C₂) (i : ι) : C₁.X i ≅ C₂.X i :=
@@ -83,291 +112,293 @@ def iso_app (f : C₁ ≅ C₂) (i : ι) : C₁.X i ≅ C₂.X i :=
 
 @[simps]
 def iso_of_components (f : Π i, C₁.X i ≅ C₂.X i)
-  (hf : ∀ i, C₁.differential i ≫ (f _).hom = (f _).hom ≫ C₂.differential i) :
+  (hf : ∀ i j, C₁.d i j ≫ (f j).hom = (f i).hom ≫ C₂.d i j) :
   C₁ ≅ C₂ :=
 { hom :=
   { f := λ i, (f i).hom,
-    comm' := hf },
+    comm := hf },
   inv :=
   { f := λ i, (f i).inv,
-    comm' := λ i,
-    calc C₂.differential i ≫ (f (S₁ i)).inv
-        = (f (S₀ i)).inv ≫ ((f (S₀ i)).hom ≫ C₂.differential i) ≫ (f (S₁ i)).inv : by simp
-    ... = (f (S₀ i)).inv ≫ (C₁.differential i ≫ (f (S₁ i)).hom) ≫ (f (S₁ i)).inv : by rw hf
-    ... = (f (S₀ i)).inv ≫ C₁.differential i : by simp },
+    comm := λ i j,
+    calc C₂.d i j ≫ (f j).inv
+        = (f i).inv ≫ ((f i).hom ≫ C₂.d i j) ≫ (f j).inv : by simp
+    ... = (f i).inv ≫ (C₁.d i j ≫ (f j).hom) ≫ (f j).inv : by rw hf
+    ... = (f i).inv ≫ C₁.d i j : by simp },
   hom_inv_id' := by { ext i, exact (f i).hom_inv_id },
   inv_hom_id' := by { ext i, exact (f i).inv_hom_id } }
 
-instance : has_zero_morphisms (differential_object ι S₀ S₁ V) :=
-{ has_zero := λ C₁ C₂, ⟨{ f := λ i, 0, comm' := λ _, by simp only [zero_comp, comp_zero] }⟩,
+instance [has_zero_morphisms V] : has_zero_morphisms (differential_object ι V) :=
+{ has_zero := λ C₁ C₂, ⟨{ f := λ i, 0, comm := λ _ _, by rw [zero_comp, comp_zero] }⟩,
   comp_zero' := by { intros, ext, rw [comp_f, comp_zero] },
   zero_comp' := by { intros, ext, rw [comp_f, zero_comp] } }
+
+section preadditive
+
+open category_theory.preadditive
+
+variables [preadditive V]
+
+instance : has_add (C₁ ⟶ C₂) :=
+⟨λ f g, { f := λ i, f.f i + g.f i, comm := λ i j, by rw [comp_add, add_comp, f.comm, g.comm] }⟩
+
+instance : has_sub (C₁ ⟶ C₂) :=
+⟨λ f g, { f := λ i, f.f i - g.f i, comm := λ i j, by rw [comp_sub, sub_comp, f.comm, g.comm] }⟩
+
+instance : has_neg (C₁ ⟶ C₂) :=
+⟨λ f, { f := λ i, -f.f i, comm := λ i j, by rw [comp_neg, neg_comp, f.comm] }⟩
+
+@[simp] lemma add_f (f g : C₁ ⟶ C₂) (i : ι) : (f + g).f i = f.f i + g.f i := rfl
+
+@[simp] lemma sub_f (f g : C₁ ⟶ C₂) (i : ι) : (f - g).f i = f.f i - g.f i := rfl
+
+@[simp] lemma neg_f (f : C₁ ⟶ C₂) (i : ι) : (-f).f i = -f.f i := rfl
+
+instance : add_comm_group (C₁ ⟶ C₂) :=
+{ add := (+),
+  zero := 0,
+  neg := has_neg.neg,
+  sub := has_sub.sub,
+  add_assoc := by { intros, ext, apply add_assoc },
+  zero_add := by { intros, ext, apply zero_add },
+  add_zero := by { intros, ext, apply add_zero },
+  sub_eq_add_neg := by {intros, ext, apply sub_eq_add_neg },
+  add_left_neg := by {intros, ext, apply add_left_neg },
+  add_comm := by {intros, ext, apply add_comm } }
+
+variables (ι V)
+
+instance : preadditive (differential_object ι V) :=
+{ hom_group := λ C₁ C₂, infer_instance,
+  add_comp' := by { intros, ext, simp only [comp_f, add_f, add_comp] },
+  comp_add' := by { intros, ext, simp only [comp_f, add_f, comp_add] } }
+
+@[simps]
+def shift [has_succ ι] :
+  differential_object ι V ⥤ differential_object ι V :=
+{ obj := λ C,
+  { X := λ i, C.X (succ i),
+    d := λ i j, -C.d _ _ },
+  map := λ C₁ C₂ f,
+  { f := λ i, f.f (succ i),
+    comm := λ i j, by simp only [neg_comp, comp_neg, neg_inj, f.comm] } }
+
+@[simps]
+def iso_shift' [has_succ ι] (C : differential_object ι V) (i : ι) :
+  ((shift ι V).obj C).X i ≅ C.X (succ i) := iso.refl _
+
+variables [has_succ_pred ι]
+
+instance : has_shift (differential_object ι V) :=
+{ shift :=
+  { functor := shift ι V,
+    inverse := @shift ι V _ _ ⟨pred⟩,
+    unit_iso := nat_iso.of_components
+      (λ C, iso_of_components (λ i, eq_to_iso $ congr_arg C.X $ (succ_pred i).symm)
+        (λ i j, by { dsimp, rw [neg_neg, eq_to_hom_d] }))
+      (λ C₁ C₂ f, by { ext i, dsimp, rw [eq_to_hom_f] }),
+    counit_iso := nat_iso.of_components
+      (λ C, iso_of_components (λ i, eq_to_iso $ congr_arg C.X $ pred_succ i)
+        (λ i j, by { dsimp, rw [neg_neg, ← eq_to_hom_d] }))
+      (λ C₁ C₂ f, by { ext i, dsimp, rw [← eq_to_hom_f] }),
+    functor_unit_iso_comp' :=
+    by { intros, ext i, dsimp, simp only [eq_to_hom_refl, eq_to_hom_trans] } } }
+.
+
+variables {ι V}
+
+@[simps] def iso_shift_zero : C⟦0⟧ ≅ C := iso.refl _
+
+@[simps] def iso_shift_one (i : ι) : C⟦1⟧.X i ≅ C.X (succ i) := iso.refl _
+
+@[simps] def iso_shift_neg_one (i : ι) : C⟦-1⟧.X i ≅ C.X (pred i) := iso.refl _
+
+-- #print equivalence.int.has_pow
+
+-- def iso_shift : ∀ (i : ι) (n : ℤ), C⟦n⟧.X i ≅ C.X (((succ_equiv ι)^n : equiv.perm ι) i)
+-- | i (0:ℕ)       := iso_app (iso_shift_zero _) i
+-- | i (1:ℕ)       := iso_shift_one _ _
+-- | i (n+2:ℕ)     :=
+--  by { simp,
+--   change (((category_theory.shift (differential_object ι V)).trans
+--    (category_theory.shift (differential_object ι V))^((n+1:ℕ) : ℤ)).functor.obj C).X i ≅ _,
+--   let f := iso_shift (succ i) (n+1),  }
+-- | i -[1+ 0]     := iso_shift_neg_one _ _
+-- | i -[1+ (n+1)] := _
+
+end preadditive
 
 variables (ι V)
 
 @[simps]
-def forget : differential_object ι S₀ S₁ V ⥤ graded_object ι V :=
+def forget : differential_object ι V ⥤ graded_object ι V :=
 { obj := λ C, C.X,
   map := λ _ _ f, f.f }
 
 end category
 
 end differential_object
-
-namespace category_theory
-
-variables {ι} {S₀ S₁} {V₁ V₂ : Type*}
-variables [category V₁] [category V₂] [has_zero_morphisms V₁] [has_zero_morphisms V₂]
-
-@[simps]
-def functor.map_differential_object (F : V₁ ⥤ V₂)
-  (hF : ∀ (x y : V₁), F.map (0 : x ⟶ y) = 0) :
-  differential_object ι S₀ S₁ V₁ ⥤ differential_object ι S₀ S₁ V₂ :=
-{ obj := λ C,
-  { X := λ i, F.obj (C.X i),
-    differential := λ i, F.map (C.differential i),
-    differential2 := λ i j h,
-    begin
-      have aux := hF (C.X (S₀ i)) (C.X (S₁ j)),
-      rw ← C.differential2 i j h at aux,
-      simpa using aux,
-    end },
-  map := λ C₁ C₂ f,
-  { f := λ i, F.map (f.f i),
-    comm' := λ i, by simp only [← F.map_comp, f.comm'] },
-  map_id' := by { intros, ext, exact F.map_id _ },
-  map_comp' := by { intros, ext, exact F.map_comp _ _ } }
-
-end category_theory
-
 namespace differential_object
 
-variables {ι V}
-variables [has_succ ι] [category V] [has_zero_morphisms V]
-
-local notation `differential_object'` cov :=
-differential_object ι (bool.rec Ş id cov) (bool.rec id Ş cov) V
+variables {ι V} [has_succ ι] [category V] [has_zero_morphisms V]
 
 def coherent_indices : Π (cov : bool) (i j : ι), Prop
-| ff i j := i = Ş j
-| tt i j := Ş i = j
+| ff i j := i = succ j
+| tt i j := succ i = j
+
+variables (ι V)
+
+set_option old_structure_cmd true
+
+structure complex_like (cov : bool) extends differential_object ι V :=
+(d_comp_d : ∀ i j k, d i j ≫ d j k = 0)
+(d_eq_zero : ∀ ⦃i j⦄, ¬ coherent_indices cov i j → d i j = 0)
+
+variables {ι V}
 
 instance coherent_indices_decidable [decidable_eq ι] (cov : bool) (i j : ι) :
   decidable (coherent_indices cov i j) :=
 by { cases cov; dsimp [coherent_indices]; apply_instance }
 
-def d_aux (i j : ι) :
-  Π (cov : bool) (C : differential_object' cov) (h : coherent_indices cov i j),
-  C.X i ⟶ C.X j
-| tt C h := C.differential i ≫ eq_to_hom (congr_arg C.X h)
-| ff C h := eq_to_hom (congr_arg C.X h) ≫ C.differential j
+instance : category (complex_like ι V cov) :=
+induced_category.category complex_like.to_differential_object
 
-variables [decidable_eq ι]
+-- generalise this to arbitrary induced categories
+instance [has_zero_morphisms V] : has_zero_morphisms (complex_like ι V cov) :=
+{ has_zero := λ C₁ C₂,
+  show has_zero (C₁.to_differential_object ⟶ C₂.to_differential_object), by apply_instance,
+  comp_zero' := λ _ _ _ _, comp_zero,
+  zero_comp' := λ _ _ _ _, zero_comp }
 
-def d {cov : bool} (C : differential_object' cov) (i j : ι) : C.X i ⟶ C.X j :=
-if h : coherent_indices cov i j then d_aux i j cov C h else 0
+-- generalise this to arbitrary induced categories
+instance [preadditive V] : preadditive (complex_like ι V cov) :=
+{ hom_group := λ C₁ C₂,
+  show add_comm_group (C₁.to_differential_object ⟶ C₂.to_differential_object), by apply_instance,
+  add_comp' := by { intros, apply preadditive.add_comp },
+  comp_add' := by { intros, apply preadditive.comp_add } }
 
-variables (C C₁ C₂ C₃ : differential_object' cov)
+variables {C₁ C₂ : complex_like ι V cov}
 
-lemma d_eq_zero (i j : ι) (h : ¬ coherent_indices cov i j) : C.d i j = 0 :=
-dif_neg h
+@[simps]
+def hom.mk' (f : Π i, C₁.X i ⟶ C₂.X i)
+  (hf : ∀ i j, coherent_indices cov i j → C₁.d i j ≫ f j = f i ≫ C₂.d i j) :
+  C₁ ⟶ C₂ :=
+{ f := f,
+  comm := λ i j,
+  begin
+    by_cases h : coherent_indices cov i j,
+    { exact hf i j h },
+    { show C₁.d i j ≫ f j = f i ≫ C₂.d i j,
+      rw [C₁.d_eq_zero h, C₂.d_eq_zero h, zero_comp, comp_zero] }
+  end }
 
-@[simp]
-lemma d_comp_d (i j k : ι) : C.d i j ≫ C.d j k = 0 :=
-begin
-  cases cov; dsimp [d]; split_ifs with h1 h2,
-  any_goals { simp only [zero_comp, comp_zero] },
-  all_goals { cases h1, cases h2, simpa [d_aux] using C.differential2 _ _ rfl }
-end
+@[simps]
+def complex_like.iso_app (f : C₁ ≅ C₂) (i : ι) : C₁.X i ≅ C₂.X i :=
+{ hom := f.hom.f i,
+  inv := f.inv.f i,
+  hom_inv_id' := by { erw [← comp_f, f.hom_inv_id, id_f], refl },
+  inv_hom_id' := by { erw [← comp_f, f.inv_hom_id, id_f], refl } }
 
-variables {C₁ C₂ C₃}
+structure is_complex_like (C : differential_object ι V) (cov : bool) : Prop :=
+(d_comp_d : ∀ i j k, C.d i j ≫ C.d j k = 0)
+(d_eq_zero : ∀ ⦃i j⦄, ¬ coherent_indices cov i j → C.d i j = 0)
 
-@[reassoc]
-lemma hom.comm (f : C₁ ⟶ C₂) (i j : ι) :
-  C₁.d i j ≫ f.f j = f.f i ≫ C₂.d i j :=
-begin
-  cases cov; dsimp [d]; split_ifs with h,
-  any_goals { simp only [zero_comp, comp_zero] },
-  all_goals { cases h, simpa [d_aux] using f.comm' _ }
-end
+abbreviation is_cochain_complex (C : differential_object ι V) :=
+C.is_complex_like tt
+
+abbreviation is_chain_complex (C : differential_object ι V) :=
+C.is_complex_like ff
 
 end differential_object
 
-section special_cases
+section
 
-variables [has_succ ι] [category V] [has_zero_morphisms V]
+variables (ι V) [has_succ ι] [category V] [has_zero_morphisms V]
 
-local notation `differential_object'` cov :=
-differential_object ι (bool.rec Ş id cov) (bool.rec id Ş cov) V
+abbreviation cochain_complex := differential_object.complex_like ι V tt
 
-abbreviation chain_complex := differential_object' ff
+abbreviation chain_complex := differential_object.complex_like ι V ff
 
-abbreviation cochain_complex := differential_object' tt
-
-variables {ι V} [decidable_eq ι]
-
-namespace chain_complex
-
-variables (C : chain_complex ι V) (i j k : ι)
-
-def d : C.X i ⟶ C.X j := @differential_object.d ι V _ _ _ _ ff C i j
-
-lemma d_eq_zero (i j : ι) (h : i ≠ Ş j) : C.d i j = 0 :=
-differential_object.d_eq_zero _ _ _ h
-
-@[simp] lemma d_comp_d : C.d i j ≫ C.d j k = 0 :=
-differential_object.d_comp_d _ _ _ _
-
-@[reassoc]
-lemma hom.comm {C₁ C₂ : chain_complex ι V} (f : C₁ ⟶ C₂) (i j : ι) :
-  C₁.d i j ≫ f.f j = f.f i ≫ C₂.d i j :=
-differential_object.hom.comm f i j
-
-end chain_complex
+end
 
 namespace cochain_complex
 
-variables (C : cochain_complex ι V) (i j k : ι)
+variables {ι V} [decidable_eq ι] [has_succ ι] [category V] [has_zero_morphisms V]
 
-def d : C.X i ⟶ C.X j := @differential_object.d ι V _ _ _ _ tt C i j
+@[simps]
+def mk' (X : ι → V) (d : Π i, X i ⟶ X (succ i)) (h : ∀ i, d i ≫ d (succ i) = 0) :
+  cochain_complex ι V :=
+{ X := X,
+  d := λ i j, if h : succ i = j then d i ≫ eq_to_hom (congr_arg _ h) else 0,
+  d_comp_d := λ i j k,
+  begin
+    split_ifs with h1 h2,
+    { subst k, subst j, simp only [category.comp_id, eq_to_hom_refl, h] },
+    all_goals { simp only [zero_comp, comp_zero] }
+  end,
+  d_eq_zero := λ i j hij, dif_neg hij }
 
-lemma d_eq_zero (i j : ι) (h : Ş i ≠ j) : C.d i j = 0 :=
-differential_object.d_eq_zero _ _ _ h
-
-@[simp] lemma d_comp_d : C.d i j ≫ C.d j k = 0 :=
-differential_object.d_comp_d _ _ _ _
-
-@[reassoc]
-lemma hom.comm {C₁ C₂ : cochain_complex ι V} (f : C₁ ⟶ C₂) (i j : ι) :
-  C₁.d i j ≫ f.f j = f.f i ≫ C₂.d i j :=
-differential_object.hom.comm f i j
+@[simp] lemma mk'_d' (X : ι → V) (d : Π i, X i ⟶ X (succ i))
+  (h : ∀ i, d i ≫ d (succ i) = 0) (i : ι) :
+  (mk' X d h).d i (succ i) = d i :=
+calc (mk' X d h).d i (succ i)
+    = d i ≫ eq_to_hom (congr_arg _ rfl) : dif_pos rfl
+... = d i : by simp only [category.comp_id, eq_to_hom_refl]
 
 end cochain_complex
-
-end special_cases
-
-namespace differential_object
-
-variables {ι V} [has_succ ι] [category V] [preadditive V]
-
-open category_theory.preadditive
-
-section general
-
-local notation `differential_object'` cov :=
-differential_object ι (bool.rec Ş id cov) (bool.rec id Ş cov) V
-
-def shift_differential : Π {cov : bool} (C : differential_object' cov) (i : ι),
-  C.X (Ş (bool.rec Ş id cov i)) ⟶ C.X (Ş (bool.rec id Ş cov i))
-| ff C i := -C.differential (Ş i)
-| tt C i := -C.differential (Ş i)
-
-@[simps]
-def shift : (differential_object' cov) ⥤ differential_object' cov :=
-{ obj := λ C,
-  { X := λ i, C.X (Ş i),
-    differential := shift_differential C,
-    differential2 := λ i j h,
-    begin
-      cases cov; cases h; dsimp only [shift_differential];
-      simp only [neg_comp, comp_neg, neg_neg];
-      apply C.differential2; refl
-    end },
-  map := λ C₁ C₂ f,
-  { f := λ i, f.f (Ş i),
-    comm' := λ i,
-    begin
-      cases cov; dsimp only [shift_differential];
-      simp only [neg_comp, comp_neg, neg_inj];
-      exact f.comm' (Ş i)
-    end } }
-
-end general
-
-section int
-
-local notation `differential_object'` cov :=
-differential_object ℤ (bool.rec Ş id cov) (bool.rec id Ş cov) V
-
-def antishift_differential : Π {cov : bool} (C : (differential_object' cov)) (i : ℤ),
-  C.X ((bool.rec Ş id cov i) - 1) ⟶ C.X ((bool.rec id Ş cov i) - 1)
-| ff C i := -eq_to_hom (congr_arg _ (sub_add_eq_add_sub i 1 1).symm) ≫ C.differential (i-1)
-| tt C i := -C.differential (i-1) ≫ eq_to_hom (congr_arg _ $ sub_add_eq_add_sub i 1 1)
-
-@[simps]
-def antishift : (differential_object' cov) ⥤ differential_object' cov :=
-{ obj := λ C,
-  { X := λ i, C.X (i-1),
-    differential := antishift_differential C,
-    differential2 := λ i j h,
-    begin
-      cases cov; cases h; dsimp [antishift_differential];
-      simp only [category.id_comp, category.comp_id, comp_neg, neg_comp, neg_neg, eq_to_hom_refl],
-      { slice_lhs 2 4 { erw C.differential2 (j+1-1) (j-1) (sub_add_eq_add_sub j 1 1).symm },
-        rw comp_zero },
-      { slice_lhs 1 3 { erw C.differential2 (i-1) (i+1-1) (sub_add_eq_add_sub i 1 1) },
-        rw zero_comp }
-    end },
-  map := λ C₁ C₂ f,
-  { f := λ i, f.f (i-1),
-    comm' := λ i,
-    begin
-      cases cov; dsimp [antishift_differential];
-      simp only [neg_comp, comp_neg, neg_inj],
-      { erw [category.assoc, f.comm' (i-1), eq_to_hom_f_assoc],
-        exact (sub_add_eq_add_sub i 1 1).symm },
-      { erw [← f.comm'_assoc (i-1), category.assoc, eq_to_hom_f], refl,
-        exact (sub_add_eq_add_sub i 1 1), },
-    end } }
-
-instance : has_shift (differential_object ℤ (bool.rec Ş id cov) (bool.rec id Ş cov) V) :=
-{ shift :=
-  { functor := shift,
-    inverse := antishift,
-    unit_iso := nat_iso.of_components
-      (λ C, iso_of_components
-        (λ i, eq_to_iso $ congr_arg _ (sub_add_cancel i 1).symm)
-        (λ i,
-        begin
-          cases cov; dsimp [shift_differential, antishift_differential];
-          simp only [neg_comp, comp_neg, neg_neg, eq_to_hom_trans_assoc],
-          { erw [eq_to_hom_differential], refl, exact (sub_add_cancel i 1).symm },
-          { erw [← category.assoc, eq_to_hom_differential, category.assoc, eq_to_hom_trans] }
-        end))
-      (λ C₁ C₂ f, by { ext i, dsimp, rw eq_to_hom_f }),
-    counit_iso := nat_iso.of_components
-      (λ C, iso_of_components
-        (λ i, eq_to_iso $ show C.X (i+1-1) = C.X i, from congr_arg _ (add_sub_cancel i 1))
-        (λ i,
-        begin
-          cases cov; dsimp [shift_differential, antishift_differential];
-          simp only [neg_comp, comp_neg, neg_neg, eq_to_hom_trans_assoc],
-          { erw [category.assoc, ← eq_to_hom_differential, eq_to_hom_trans_assoc],
-            refl, exact add_sub_cancel i 1 },
-          { erw [category.assoc, eq_to_hom_trans, eq_to_hom_differential], refl }
-        end))
-      (λ C₁ C₂ f, by { ext i, dsimp, rw ← eq_to_hom_f }),
-    functor_unit_iso_comp' :=
-    by { intros, ext i, dsimp, simp only [eq_to_hom_refl, eq_to_hom_trans] } } }
-
-end int
-
-end differential_object
 
 namespace chain_complex
 
-variables {V} [category V] [preadditive V]
+variables {ι V} [decidable_eq ι] [has_succ ι] [category V] [has_zero_morphisms V]
 
-instance : has_shift (chain_complex ℤ V) :=
-@differential_object.category_theory.has_shift V ff _ _
+@[simps]
+def mk' (X : ι → V) (d : Π i, X (succ i) ⟶ X i) (h : ∀ i, d (succ i) ≫ d i = 0) :
+  chain_complex ι V :=
+{ X := X,
+  d := λ i j, if h : i = succ j then eq_to_hom (congr_arg _ h) ≫ d j else 0,
+  d_comp_d := λ i j k,
+  begin
+    split_ifs with h1 h2,
+    { subst i, subst j, simp only [category.id_comp, eq_to_hom_refl, h] },
+    all_goals { simp only [zero_comp, comp_zero] }
+  end,
+  d_eq_zero := λ i j hij, dif_neg hij }
+
+@[simp] lemma mk'_d' (X : ι → V) (d : Π i, X (succ i) ⟶ X i)
+  (h : ∀ i, d (succ i) ≫ d i = 0) (i : ι) :
+  (mk' X d h).d (succ i) i = d i :=
+calc (mk' X d h).d (succ i) i
+    = eq_to_hom (congr_arg _ rfl) ≫ d i : dif_pos rfl
+... = d i : by simp only [category.id_comp, eq_to_hom_refl]
 
 end chain_complex
 
-namespace cochain_complex
+namespace category_theory
 
-variables {V} [category V] [preadditive V]
+variables {ι} {V₁ V₂ : Type*}
+variables [category V₁] [category V₂] [has_zero_morphisms V₁] [has_zero_morphisms V₂]
 
-instance : has_shift (cochain_complex ℤ V) :=
-@differential_object.category_theory.has_shift V tt _ _
+@[simps]
+def functor.map_differential_object (F : V₁ ⥤ V₂) :
+  differential_object ι V₁ ⥤ differential_object ι V₂ :=
+{ obj := λ C,
+  { X := λ i, F.obj (C.X i),
+    d := λ i j, F.map (C.d i j) },
+  map := λ C₁ C₂ f,
+  { f := λ i, F.map (f.f i),
+    comm := λ i j, by simp only [← F.map_comp, f.comm] },
+  map_id' := by { intros, ext, exact F.map_id _ },
+  map_comp' := by { intros, ext, exact F.map_comp _ _ } }
 
-end cochain_complex
+@[simps]
+def functor.map_complex_like [has_succ ι] (F : V₁ ⥤ V₂) (hF : ∀ x y, F.map (0 : x ⟶ y) = 0) :
+  differential_object.complex_like ι V₁ cov ⥤ differential_object.complex_like ι V₂ cov :=
+{ obj := λ C,
+  { X := λ i, F.obj (C.X i),
+    d := λ i j, F.map (C.d i j),
+    d_comp_d := λ _ _ _, by simp only [← F.map_comp, C.d_comp_d, hF],
+    d_eq_zero := λ _ _ h, by simp only [C.d_eq_zero h, hF] },
+  map := λ C₁ C₂ f, (F.map_differential_object.map f),
+  map_id' := by { intros, ext, exact F.map_id _ },
+  map_comp' := by { intros, ext, exact F.map_comp _ _ } }
+
+end category_theory
