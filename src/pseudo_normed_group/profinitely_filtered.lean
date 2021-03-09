@@ -110,6 +110,8 @@ f.to_add_monoid_hom.map_sum _ _
 
 @[simp] lemma map_neg (x) : f (-x) = -(f x) := f.to_add_monoid_hom.map_neg _
 
+@[simp] lemma map_gsmul (x) (n : ℤ) : f (n • x) = n • (f x) := f.to_add_monoid_hom.map_gsmul _ _
+
 /-- Make a profinitely filtered pseudo normed group hom
 from a group hom and a proof that it is bounded and continuous. -/
 def mk' (f : M₁ →+ M₂) (h : ∃ C, ∀ c, ∃ (H : ∀ x, x ∈ filtration M₁ c → f x ∈ filtration M₂ (C * c)),
