@@ -206,4 +206,7 @@ end
 --   -- obtain ⟨i', j, hi', hj, y, hy⟩ := hC c hc (i - n),
 -- end
 
+def shift_and_trunctate : system_of_complexes ⥤ system_of_complexes :=
+(shift _).functor ⋙ soft_truncation'
+
 end system_of_complexes

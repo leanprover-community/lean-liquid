@@ -1,9 +1,13 @@
 import system_of_complexes.double
+import system_of_complexes.soft_truncation
 
 open_locale nnreal
 open system_of_double_complexes
 
 universe variables u
+
+def shift_and_truncate : system_of_double_complexes ⥤ system_of_double_complexes :=
+sorry
 
 /-- The assumptions on `M` in Proposition 9.6 bundled into a structure. Note that in `cond3b`
   our `q` is one smaller than the `q` in the notes (so that we don't have to deal with `q - 1`). -/
