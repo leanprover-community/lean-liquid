@@ -62,7 +62,9 @@ def HomZ_iso (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] (M : Type)
     begin
       rw [polyhedral_lattice.add_monoid_hom.continuous_iff],
       intro n,
-      sorry
+      refine pfpng_ctu_smul_int M n _ _,
+      intro x,
+      refl
     end,
     map_Tinv' := λ x,
     begin
