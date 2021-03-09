@@ -1,7 +1,7 @@
 import analysis.normed_space.basic
 import ring_theory.finiteness
-import linear_algebra.direct_sum_module
--- import algebra.direct_sum
+-- import linear_algebra.direct_sum_module
+import algebra.direct_sum
 
 -- import hacks_and_tricks.by_exactI_hack
 -- import hacks_and_tricks.type_pow
