@@ -43,7 +43,7 @@ def HomZ_iso (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] (S : Type) [fintyp
     map_add' := by { intros, simp only [add_monoid_hom.coe_add, add_left_inj, pi.add_apply] },
     strict' := λ c f hf, by simpa only [mul_one] using hf int.one_mem_filtration,
     continuous' := sorry,
-    map_Tinv' := sorry },
+    map_Tinv' := λ f, rfl },
   inv :=
   { to_fun := int.cast_add_hom',
     map_zero' := by { ext1, simp only [pi.zero_apply, add_monoid_hom.coe_zero, smul_zero, int.cast_add_hom'_apply] },
