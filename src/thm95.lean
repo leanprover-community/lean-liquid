@@ -58,7 +58,12 @@ def HomZ_iso (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] (M : Type)
         exact (pseudo_normed_group.filtration_mono (mul_le_mul_left' hn c) this) },
       exact pseudo_normed_group.int_smul_mem_filtration n x c hx,
     end,
-    continuous' := sorry,
+    continuous' := λ c,
+    begin
+      rw [polyhedral_lattice.add_monoid_hom.continuous_iff],
+      intro n,
+      sorry
+    end,
     map_Tinv' := λ x,
     begin
       refine add_monoid_hom.ext (λ n, _),
