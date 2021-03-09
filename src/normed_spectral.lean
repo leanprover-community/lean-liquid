@@ -108,6 +108,7 @@ begin
     refine ⟨-1, 1, rfl, rfl, 0, _⟩,
     obtain ⟨i, j, hi, hj, y1, hx1⟩ := Hx1 (system_of_complexes.res x),
     simp [← eq_neg_iff_add_eq_zero] at hi hj, subst i, subst j,
+    simp only [Hd, Hd', sub_zero, res_res] at hx1 ⊢,
     sorry,
   },
   { -- inductive step
