@@ -1,3 +1,4 @@
+import algebra.regular
 import topology.separation
 
 -- PR #6570
@@ -56,3 +57,35 @@ begin
   rw [topological_space.subset_trans ts, ds.eq_bot],
   exact {eq_bot := induced_bot (set.inclusion_injective ts)}
 end
+
+
+
+-- merged PR
+variables {R : Type*} {a : R}
+
+/-- A left-regular element of a `nontrivial` `mul_zero_class` is non-zero. -/
+lemma is_left_regular.ne_zero [mul_zero_class R] [nontrivial R] (la : is_left_regular a) : a ≠ 0 :=
+begin
+  rintro rfl,
+  rcases exists_pair_ne R with ⟨x, y, xy⟩,
+  refine xy (la _),
+  rw [zero_mul, zero_mul]
+end
+
+/-- A right-regular element of a `nontrivial` `mul_zero_class` is non-zero. -/
+lemma is_right_regular.ne_zero [mul_zero_class R] [nontrivial R] (ra : is_right_regular a) :
+  a ≠ 0 :=
+begin
+  rintro rfl,
+  rcases exists_pair_ne R with ⟨x, y, xy⟩,
+  refine xy (ra (_ : x * 0 = y * 0)),
+  rw [mul_zero, mul_zero]
+end
+
+/-- A regular element of a `nontrivial` `mul_zero_class` is non-zero. -/
+lemma is_regular.ne_zero [nontrivial R] [mul_zero_class R] (la : is_regular a) : a ≠ 0 :=
+la.left.ne_zero
+
+/-- In a non-trivial integral domain, an element is regular iff it is non-zero. -/
+lemma is_regular_iff_ne_zero [nontrivial R] [cancel_monoid_with_zero R] : is_regular a ↔ a ≠ 0 :=
+⟨is_regular.ne_zero, is_regular_of_ne_zero⟩
