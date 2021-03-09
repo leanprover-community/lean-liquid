@@ -33,3 +33,28 @@ theorem thm95 [BD.suitable c']
   ∀ (V : NormedGroup) [normed_with_aut r V],
     ​(BD.system c' r V r' (Hom Λ (Mbar r' S))).is_bounded_exact k K m c₀ :=
 sorry
+
+noncomputable
+def HomZ_iso (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] (S : Type) [fintype S] :
+  Hom ℤ (Mbar r' S) ≅ of r' (Mbar r' S) :=
+{ hom :=
+  { to_fun := λ (f : ℤ →+ Mbar r' S), f 1,
+    map_zero' := by simp only [pi.zero_apply, eq_self_iff_true, add_monoid_hom.coe_zero],
+    map_add' := by { intros, simp only [add_monoid_hom.coe_add, add_left_inj, pi.add_apply] },
+    strict' := λ c f hf, by simpa only [mul_one] using hf int.one_mem_filtration,
+    continuous' := sorry,
+    map_Tinv' := sorry },
+  inv :=
+  { to_fun := int.cast_add_hom',
+    map_zero' := by { ext1, simp only [pi.zero_apply, add_monoid_hom.coe_zero, smul_zero, int.cast_add_hom'_apply] },
+    map_add' := by { intros, ext1, simp only [smul_add, add_monoid_hom.coe_add, add_left_inj,
+      pi.add_apply, one_smul, int.cast_add_hom'_apply] },
+    strict' := λ c x hx, sorry,
+    continuous' := sorry,
+    map_Tinv' := sorry },
+  hom_inv_id' := by { ext (f : ℤ →+ Mbar r' S) : 2,
+    calc int.cast_add_hom' (f 1) 1 = 1 • f 1 : rfl
+    ... = f 1 : one_smul _ _ },
+  inv_hom_id' := by { ext1 x,
+    calc int.cast_add_hom' x 1 = 1 • x : rfl
+    ... = x : one_smul _ _ } }

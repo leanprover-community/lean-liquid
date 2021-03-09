@@ -21,7 +21,7 @@ Once we have fixed this data, we can state the theorem.
 
 open_locale nnreal -- enable the notation `ℝ≥0` for the nonnegative real numbers.
 
-open ProFiltPseuNormGrpWithTinv
+open category_theory ProFiltPseuNormGrpWithTinv
 
 variables (BD : breen_deligne.package)
 variables (c' : ℕ → ℝ≥0)  -- implicit constants, chosen once and for all
@@ -44,8 +44,9 @@ begin
   use [k, K, hk, c₀],
   introsI S hS V hV,
   specialize H S V,
-  -- let i : Hom ℤ (Mbar r' S) ≅ of r' (Mbar r' S) := by admit,
-  -- refine H.of_iso ((BD.System c' r V r').map_iso _) _,
+  let i := (BD.System c' r V r').map_iso (HomZ_iso r' S).op,
+  refine H.of_iso i.symm _,
+  intros c n,
   sorry
 end
 
