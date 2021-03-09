@@ -58,7 +58,13 @@ def HomZ_iso (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] (S : Type) [fintyp
       exact pseudo_normed_group.int_smul_mem_filtration n x c hx,
     end,
     continuous' := sorry,
-    map_Tinv' := sorry },
+    map_Tinv' := λ x,
+    begin
+      refine add_monoid_hom.ext (λ n, _),
+      have h : (profinitely_filtered_pseudo_normed_group_with_Tinv.Tinv (int.cast_add_hom' x)) n =
+        profinitely_filtered_pseudo_normed_group_with_Tinv.Tinv (int.cast_add_hom' x n) := rfl,
+      simp only [h, int.cast_add_hom'_apply, profinitely_filtered_pseudo_normed_group_hom.map_gsmul],
+    end },
   hom_inv_id' := by { ext (f : ℤ →+ Mbar r' S) : 2,
     calc int.cast_add_hom' (f 1) 1 = 1 • f 1 : rfl
     ... = f 1 : one_smul _ _ },
