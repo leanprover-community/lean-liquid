@@ -6,8 +6,8 @@ open system_of_double_complexes
 
 universe variables u
 
-def shift_and_truncate : system_of_double_complexes ⥤ system_of_double_complexes :=
-sorry
+-- def shift_and_truncate : system_of_double_complexes ⥤ system_of_double_complexes :=
+-- sorry
 
 /-- The assumptions on `M` in Proposition 9.6 bundled into a structure. Note that in `cond3b`
   our `q` is one smaller than the `q` in the notes (so that we don't have to deal with `q - 1`). -/
@@ -108,6 +108,7 @@ begin
     refine ⟨-1, 1, rfl, rfl, 0, _⟩,
     obtain ⟨i, j, hi, hj, y1, hx1⟩ := Hx1 (system_of_complexes.res x),
     simp [← eq_neg_iff_add_eq_zero] at hi hj, subst i, subst j,
+    simp only [Hd, Hd', sub_zero, res_res] at hx1 ⊢,
     sorry,
   },
   { -- inductive step

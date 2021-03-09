@@ -70,16 +70,11 @@ def d {c : ℝ≥0} (p p' : ℤ) {q : ℤ} : C.X c p q ⟶ C.X c p' q :=
 ((C.obj $ op c).d p p').f q
 
 lemma d_eq_zero (c : ℝ≥0) (h : p + 1 ≠ p') : (C.d p p' : C.X c p q ⟶ _) = 0 :=
-begin
-  delta d,
-  rw (C.obj $ op c).d_eq_zero p p' h,
-  refl
-end
+by { delta d, rw (C.obj $ op c).d_eq_zero h, refl }
 
 lemma d_comp_res (h : fact (c₂ ≤ c₁)) :
   C.d p p' ≫ @res C _ _ _ q h = @res C _ _ p q _ ≫ C.d p p' :=
-congr_fun (congr_arg differential_object.hom.f
-  (cochain_complex.hom.comm (C.map (hom_of_le h).op) p p')) q
+congr_fun (congr_arg differential_object.hom.f ((C.map (hom_of_le h).op).comm p p')) q
 
 lemma d_res (h : fact (c₂ ≤ c₁)) (x) :
   @d C c₂ p p' q (@res C _ _ p q _ x) = @res C _ _ _ _ h (@d C c₁ p p' q x) :=
@@ -99,11 +94,11 @@ def d' {c : ℝ≥0} {p : ℤ} (q q' : ℤ) : C.X c p q ⟶ C.X c p q' :=
 ((C.obj $ op c).X p).d q q'
 
 lemma d'_eq_zero (c : ℝ≥0) (h : q + 1 ≠ q') : (C.d' q q' : C.X c p q ⟶ _) = 0 :=
-((C.obj $ op c).X p).d_eq_zero q q' h
+((C.obj $ op c).X p).d_eq_zero h
 
 lemma d'_comp_res (h : fact (c₂ ≤ c₁)) :
   @d' C c₁ p q q' ≫ @res C _ _ _ _ h = @res C _ _ p q _ ≫ @d' C c₂ p q q' :=
-cochain_complex.hom.comm ((C.map (hom_of_le h).op).f p) q q'
+((C.map (hom_of_le h).op).f p).comm q q'
 
 lemma d'_res (h : fact (c₂ ≤ c₁)) (x) :
   C.d' q q' (@res C _ _ p q _ x) = @res C _ _ _ _ h (C.d' q q' x) :=
@@ -162,7 +157,7 @@ end admissible
 /-- The `p`-th row in a system of double complexes, as system of complexes.
   It has object `(C.obj c).X p`over `c`. -/
 def row (C : system_of_double_complexes.{u}) (p : ℤ) : system_of_complexes.{u} :=
-C.comp ((differential_object.forget _ _).comp $ pi.eval _ p)
+C ⋙ induced_functor _ ⋙ differential_object.forget _ _ ⋙ pi.eval _ p
 
 @[simp] lemma row_X (C : system_of_double_complexes) (p q : ℤ) (c : ℝ≥0) :
   C.row p c q = C.X c p q :=
@@ -178,8 +173,8 @@ rfl
 
 /-- The `q`-th column in a system of double complexes, as system of complexes. -/
 def col (C : system_of_double_complexes.{u}) (q : ℤ) : system_of_complexes.{u} :=
-C.comp (functor.map_differential_object ((differential_object.forget _ _).comp $ pi.eval _ q)
-  (by { intros, ext, refl }))
+C ⋙ functor.map_complex_like (induced_functor _ ⋙ differential_object.forget _ _ ⋙ pi.eval _ q)
+  (by { intros, ext, refl })
 
 @[simp] lemma col_X (C : system_of_double_complexes) (p q : ℤ) (c : ℝ≥0) :
   C.col q c p = C.X c p q :=
@@ -191,9 +186,6 @@ rfl
 
 @[simp] lemma col_d (C : system_of_double_complexes) (c : ℝ≥0) (p p' q : ℤ) :
   (C.col q).d p p' = @d C c p p' q :=
-begin
-  dsimp [d, system_of_complexes.d, cochain_complex.d, differential_object.d],
-  split_ifs with h; [cases h, refl]; refl
-end
+rfl
 
 end system_of_double_complexes

@@ -41,7 +41,7 @@ def d (C : cochain_complex ℤ NormedGroup.{u}) :
 | 0       := coker.lift (C.d_comp_d (-1) 0 1)
 | (n+1:ℕ) := C.d (n+1) (n+1+1)
 
-lemma d2 (C : cochain_complex ℤ NormedGroup.{u}) :
+lemma d_comp_d (C : cochain_complex ℤ NormedGroup.{u}) :
   Π i:ℤ, d C i ≫ d C (i+1) = 0
 | -[1+n]  := show 0 ≫ _ = 0, by rw zero_comp
 | 0       := coker.lift_comp_eq_zero _ (C.d_comp_d _ _ _)
@@ -50,26 +50,32 @@ lemma d2 (C : cochain_complex ℤ NormedGroup.{u}) :
 @[simps]
 def obj (C : cochain_complex ℤ NormedGroup.{u}) :
   cochain_complex ℤ NormedGroup :=
-{ X := X C,
-  differential := d C,
-  differential2 := by { dsimp, rintro i _ rfl, simpa using d2 C i } }
+cochain_complex.mk' (X C) (d C) (d_comp_d C)
 
 def map_f {C₁ C₂ : cochain_complex ℤ NormedGroup.{u}} (f : C₁ ⟶ C₂) :
   Π i:ℤ, X C₁ i ⟶ X C₂ i
 | -[1+n]  := 0
-| 0       := coker.map (cochain_complex.hom.comm f (-1) 0)
+| 0       := coker.map (f.comm (-1) 0)
 | (n+1:ℕ) := f.f (n+1)
 
 lemma map_comm {C₁ C₂ : cochain_complex ℤ NormedGroup.{u}} (f : C₁ ⟶ C₂) :
   Π i:ℤ, d C₁ i ≫ map_f f (i+1) = map_f f i ≫ d C₂ i
 | -[1+n]  := show 0 ≫ _ = _ ≫ 0, by rw [zero_comp, comp_zero]
-| 0       := coker.map_lift_comm (cochain_complex.hom.comm f 0 1)
-| (n+1:ℕ) := cochain_complex.hom.comm f (n+1) _
+| 0       := coker.map_lift_comm (f.comm 0 1)
+| (n+1:ℕ) := f.comm (n+1) _
 
 def map {C₁ C₂ : cochain_complex ℤ NormedGroup.{u}} (f : C₁ ⟶ C₂) :
   obj C₁ ⟶ obj C₂ :=
 { f := map_f f,
-  comm' := map_comm f }
+  comm :=
+  begin
+    intros i j,
+    show (obj C₁).d i j ≫ map_f f j = map_f f i ≫ (obj C₂).d i j,
+    dsimp,
+    split_ifs with h,
+    { subst h, exact map_comm f _ },
+    { rw [zero_comp, comp_zero] }
+  end }
 
 end soft_truncation'
 
@@ -107,9 +113,9 @@ lemma soft_truncation'_d_neg (c : ℝ≥0) (i j : ℤ) (hi : i < 0) :
 begin
   cases i,
   { refine (not_le.mpr hi $ int.coe_zero_le i).elim },
-  dsimp [system_of_complexes.d, cochain_complex.d, differential_object.d],
+  dsimp [system_of_complexes.d],
   split_ifs with h,
-  { cases h, dsimp [differential_object.d_aux], simp only [category.comp_id], refl },
+  { subst j, simp only [eq_to_hom_refl, category.comp_id], refl },
   { refl }
 end
 
@@ -157,36 +163,36 @@ omit hk
 def functor.has_shift (C D : Type*) [category C] [category D] [has_shift D] :
   has_shift (C ⥤ D) := ⟨(shift _).congr_right⟩
 
-instance : has_shift system_of_complexes.{u} :=
-functor.has_shift (ℝ≥0ᵒᵖ) (cochain_complex ℤ NormedGroup)
+-- instance : has_shift system_of_complexes.{u} :=
+-- functor.has_shift (ℝ≥0ᵒᵖ) (cochain_complex ℤ NormedGroup)
 
--- this is probably way too much defeq abuse
-lemma shift_d (c : ℝ≥0) (i j : ℤ) : @d (C⟦1⟧) c i j = C.d (i+1) (j+1) :=
-begin
-  by_cases h : i + 1 = j,
-  swap, { rw [d_eq_zero _ _ _ _ h, d_eq_zero], rwa [ne.def, add_left_inj] },
-  dsimp [d, cochain_complex.d, differential_object.d],
-  rw [dif_pos, dif_pos],
-  swap, { rwa ← add_left_inj (1:ℤ) at h },
-  swap, { exact h },
-  dsimp [differential_object.d_aux],
-  congr' 1,
-  sorry
-end
+-- -- this is probably way too much defeq abuse
+-- lemma shift_d (c : ℝ≥0) (i j : ℤ) : @d (C⟦1⟧) c i j = C.d (i+1) (j+1) :=
+-- begin
+--   by_cases h : i + 1 = j,
+--   swap, { rw [d_eq_zero _ _ _ _ h, d_eq_zero], rwa [ne.def, add_left_inj] },
+--   dsimp [d, cochain_complex.d, differential_object.d],
+--   rw [dif_pos, dif_pos],
+--   swap, { rwa ← add_left_inj (1:ℤ) at h },
+--   swap, { exact h },
+--   dsimp [differential_object.d_aux],
+--   congr' 1,
+--   sorry
+-- end
 
-include hk
+-- include hk
 
-lemma shift_is_bounded_exact_aux (hC : C.is_bounded_exact k K m c₀) :
-  C⟦1⟧.is_bounded_exact k K (m - 1) c₀ :=
-begin
-  intros c hc i hi,
-  rintro (x : C (k*c) (i+1)),
-  obtain ⟨i', _, hi', rfl, y, hy⟩ := hC c hc (i + 1) (by linarith) x,
-  rw add_left_inj at hi', subst i',
-  obtain ⟨i, rfl⟩ : ∃ n, n + 1 = i := ⟨i - 1, sub_add_cancel i 1⟩,
-  refine ⟨_, _, rfl, rfl, y, _⟩,
-  simpa only [shift_d],
-end
+-- lemma shift_is_bounded_exact_aux (hC : C.is_bounded_exact k K m c₀) :
+--   C⟦1⟧.is_bounded_exact k K (m - 1) c₀ :=
+-- begin
+--   intros c hc i hi,
+--   rintro (x : C (k*c) (i+1)),
+--   obtain ⟨i', _, hi', rfl, y, hy⟩ := hC c hc (i + 1) (by linarith) x,
+--   rw add_left_inj at hi', subst i',
+--   obtain ⟨i, rfl⟩ : ∃ n, n + 1 = i := ⟨i - 1, sub_add_cancel i 1⟩,
+--   refine ⟨_, _, rfl, rfl, y, _⟩,
+--   simpa only [shift_d],
+-- end
 
 -- lemma shift_is_bounded_exact (hC : C.is_bounded_exact k K m c₀) :
 --   ∀ (n : ℤ), C⟦n⟧.is_bounded_exact k K (m - n) c₀
@@ -206,7 +212,7 @@ end
 --   -- obtain ⟨i', j, hi', hj, y, hy⟩ := hC c hc (i - n),
 -- end
 
-def shift_and_trunctate : system_of_complexes ⥤ system_of_complexes :=
-(shift _).functor ⋙ soft_truncation'
+-- def shift_and_trunctate : system_of_complexes ⥤ system_of_complexes :=
+-- (shift _).functor ⋙ soft_truncation'
 
 end system_of_complexes

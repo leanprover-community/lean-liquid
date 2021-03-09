@@ -60,7 +60,7 @@ normed_group_hom.map_sub _ _ _
 
 /-- `f.apply c i` is application of the natural isomorphism `f`: $f_c^i : M_c^i ≅ N_c^i$. -/
 def category_theory.iso.apply (f : M ≅ N) {c : ℝ≥0} {i : ℤ} : M c i ≅ N c i :=
-differential_object.iso_app (f.app (op c)) i
+differential_object.complex_like.iso_app (f.app (op c)) i
 
 namespace system_of_complexes
 
@@ -92,7 +92,7 @@ def d (C : system_of_complexes) {c : ℝ≥0} (i j : ℤ) : C c i ⟶ C c j :=
 (C.obj $ op c).d i j
 
 lemma d_eq_zero (c : ℝ≥0) (h : i + 1 ≠ j) : (C.d i j : C c i ⟶ C c j) = 0 :=
-differential_object.d_eq_zero _ _ _ h
+(C.obj $ op c).d_eq_zero h
 
 lemma d_comp_d (c : ℝ≥0) (i j k : ℤ) : C.d i j ≫ (C.d j k : C c j ⟶ _) = 0 :=
 (C.obj $ op c).d_comp_d _ _ _
@@ -103,7 +103,7 @@ show ((C.d i j) ≫ C.d j k) x = 0, by { rw d_comp_d, refl }
 
 lemma d_comp_res (h : fact (c₂ ≤ c₁)) :
   C.d i j ≫ @res C _ _ _ h = @res C _ _ _ _ ≫ C.d i j :=
-cochain_complex.hom.comm (C.map (hom_of_le h).op) _ _
+(C.map (hom_of_le h).op).comm _ _
 
 lemma d_res (h : fact (c₂ ≤ c₁)) (x) :
   C.d i j (@res C _ _ _ _ x) = @res C _ _ _ h (C.d i j x) :=
@@ -153,7 +153,7 @@ lemma d_apply (f : M ⟶ N) {c : ℝ≥0} {i j : ℤ} (m : M c i) :
 begin
   show (_ ≫ N.d i j) m = (M.d i j ≫ _) m,
   congr' 1,
-  exact (cochain_complex.hom.comm (f.app (op c)) i j).symm
+  exact ((f.app (op c)).comm i j).symm
 end
 
 lemma res_comp_apply (f : M ⟶ N) (c c' : ℝ≥0) [h : fact (c ≤ c')] (i : ℤ) :
