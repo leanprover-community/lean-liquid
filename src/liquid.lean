@@ -47,7 +47,9 @@ begin
   let i := (BD.System c' r V r').map_iso (HomZ_iso r' (Mbar r' S)).op,
   refine H.of_iso i.symm _,
   intros c n,
-  sorry
+  rw ← system_of_complexes.apply_hom_eq_hom_apply,
+  apply NormedGroup.iso_isometry_of_norm_noninc;
+  apply breen_deligne.package.complex.map_norm_noninc
 end
 
 /-!
