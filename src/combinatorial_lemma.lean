@@ -1,95 +1,17 @@
-import algebra.group.basic
-import analysis.convex.cone
 import normed_group.NormedGroup
 
 import Mbar.basic
-import polyhedral_lattice.basic
 import normed_group.pseudo_normed_group
 import partition
+import lem97
 
 /-!
-In this file we state and prove lemmas 9.7 and 9.8 of [Analytic].
+In this file we state and prove 9.8 of [Analytic].
 -/
 
 open_locale nnreal big_operators
 
-section lem97
-
-variables (Λ : Type*) [add_comm_group Λ]
-
-lemma abs_smul {α : Type*} [linear_ordered_add_comm_group α] (n : ℕ) (a : α) :
-  abs (n • a) = n • abs a :=
-begin
-  cases le_total a 0 with hneg hpos,
-  { have h : 0 ≤ n • (-a) := nsmul_nonneg (neg_nonneg.mpr hneg) n,
-    rw [abs_of_nonpos hneg, ← abs_neg, ← smul_neg, abs_of_nonneg h] },
-  { have h : 0 ≤ n • a := nsmul_nonneg hpos n,
-    rw [abs_of_nonneg hpos, abs_of_nonneg h] }
-end
-
-lemma abs_add_eq_add_abs {α : Type*} [linear_ordered_add_comm_group α]  {a b : α} (hle : a ≤ b) :
-  abs (a + b) = abs a + abs b ↔ (0 ≤ a ∧ 0 ≤ b ∨ a ≤ 0 ∧ b ≤ 0) :=
-begin
-  by_cases a0 : 0 ≤ a; by_cases b0 : 0 ≤ b,
-  { simp [a0, b0, abs_of_nonneg, add_nonneg a0 b0] },
-  { exact (lt_irrefl (0 : α) (a0.trans_lt (hle.trans_lt (not_le.mp b0)))).elim },
-  { obtain F := (not_le.mp a0),
-    simp [a0, b0, abs_of_neg, abs_of_nonneg, F, F.le],
-    refine ⟨λ h, _, λ h, _⟩,
-    { by_cases ba : a + b ≤ 0,
-      { rw abs_of_nonpos ba at h,
-        simp [add_comm (-a)] at h,
-        exact le_of_eq (eq_zero_of_neg_eq h) },
-      { rw [abs_of_pos (not_le.mp ba), add_left_inj] at h,
-        rw eq_zero_of_neg_eq (eq.symm h) at F,
-        exact (lt_irrefl (0 : α) F).elim } },
-    { simp [le_antisymm h b0, abs_of_neg F], } },
-  { simp [(not_le.mp a0).le, (not_le.mp b0).le, abs_of_nonpos, add_nonpos, add_comm] }
-end
-
-
-lemma abs_add_eq_add_abs_iff {α : Type*} [linear_ordered_add_comm_group α]  (a b : α) :
-  abs (a + b) = abs a + abs b ↔ (0 ≤ a ∧ 0 ≤ b ∨ a ≤ 0 ∧ b ≤ 0) :=
-begin
-  by_cases ab : a ≤ b,
-  { exact abs_add_eq_add_abs ab },
-  { rw [add_comm a, add_comm (abs _), abs_add_eq_add_abs ((not_le.mp ab).le), and.comm,
-    @and.comm (b ≤ 0 ) _] }
-end
-
-/-
-jmc: I don't know exactly which version of the two lemmas below
-will be easier to prove, `lem97` or `lem97'`.
-The first one is closer to [Analytic], but the second one is easier to use.
-Mathematically they are indistinguishable.
--/
-
-/-- Lemma 9.7 of [Analytic]. -/
-lemma lem97 (hΛ_tf : torsion_free Λ) [hΛ_fg : module.finite ℤ Λ]
-  {ι : Type*} [fintype ι]
-  (N : ℕ) (l : ι → Λ) :
-  ∃ A : finset (Λ →+ ℤ), ∀ x : Λ →+ ℤ, ∃ (x' ∈ A) (y : Λ →+ ℤ),
-    x = N • y + x' ∧
-    ∀ i, (0 ≤ x' (l i) ∧ 0 ≤ (x - x') (l i)) ∨ (x' (l i) ≤ 0 ∧ (x - x') (l i) ≤ 0) :=
-begin
-  sorry
-end
-
-/-- Lemma 9.7 of [Analytic]. -/
-lemma lem97' (hΛ_tf : torsion_free Λ) [hΛ_fg : module.finite ℤ Λ]
-  {ι : Type*} [fintype ι]
-  (N : ℕ) (l : ι → Λ) :
-  ∃ A : finset (Λ →+ ℤ), ∀ x : Λ →+ ℤ, ∃ (x' ∈ A) (y : Λ →+ ℤ),
-    x = N • y + x' ∧
-    ∀ i, (x (l i)).nat_abs = N * (y (l i)).nat_abs + (x' (l i)).nat_abs :=
-begin
-  sorry
-end
-
-end lem97
-
 open pseudo_normed_group
-
 
 variables (Λ : Type*) (r' : ℝ≥0) (S : Type*)
 variables [fintype S] [normed_group Λ] [polyhedral_lattice Λ]
