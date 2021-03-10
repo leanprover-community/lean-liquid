@@ -16,7 +16,7 @@ lemma weak_normed_snake {k k' k'' K K' K'' : ℝ≥0}
   (hM : M.is_weak_bounded_exact k K m c₀)
   (hM' : M'.is_weak_bounded_exact k' K' m c₀)
   (hM'_adm : M'.admissible)
-  (hf : ∀ c i, is_strict (f.apply : M c i ⟶ M' c i))
+  (hf : ∀ c i, @isometry (M c i) (M' c i) _ _ (f.apply : M c i ⟶ M' c i))
   (Hf : ∀ (c : ℝ≥0) (i : ℤ) (hi : i ≤ m + 1) (x : M (k'' * c) i),
     ∥(res x : M c i)∥ ≤ K'' * ∥f x∥)
   (hg : ∀ c i, (g.apply : M' c i ⟶ N c i).ker = f.apply.range)
@@ -97,7 +97,7 @@ begin
               ... ≤ ∥res m₁''∥ + ∥f (res m₁ - d _ _ _ m₀)∥ : norm_add_le _ _
               ... ≤ ∥m₁''∥ + ∥f (res m₁ - d _ _ _ m₀)∥ : add_le_add_right
                                                (hM'_adm.res_norm_noninc _ _ _ infer_instance m₁'') _
-              ... = ∥m₁''∥ + ∥res m₁ - d _ _ _ m₀∥ : by erw hf
+              ... = ∥m₁''∥ + ∥res m₁ - d _ _ _ m₀∥ : by erw norm_eq_of_isometry (hf _ _)
               ... ≤ ∥d _ _ _ n∥ + ε₁ + ∥res m₁ - d _ _ _ m₀∥ : add_le_add_right (le_of_lt hnorm_m₁'')  _
               ... ≤ ∥d _ _ _ n∥ + ε₁ + (K * K'' * ∥d _ _ _ n∥ + K * K'' * ε₁ + ε₁) : add_le_add_left hm₀ _
               ... = (K*K'' + 1)*∥d _ _ (i+1+1) n∥ + (K*K'' + 2) * ε₁ : by ring,

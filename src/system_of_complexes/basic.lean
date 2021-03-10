@@ -255,7 +255,7 @@ begin
 end
 
 lemma of_iso (h : C₁.is_bounded_exact k K m c₀) (f : C₁ ≅ C₂)
-  (hf : ∀ c i, (f.hom.apply : C₁ c i ⟶ C₂ c i).is_strict) :
+  (hf : ∀ c i, @isometry (C₁ c i) (C₂ c i) _ _ (f.hom.apply : C₁ c i ⟶ C₂ c i)) :
   C₂.is_bounded_exact k K m c₀ :=
 begin
   intros c hc i hi x,
@@ -265,13 +265,13 @@ begin
       = ∥res x - f.hom (C₁.d _ _ y)∥ : by rw d_apply
   ... = ∥f.hom (f.inv (res x)) - f.hom (C₁.d _ _ y)∥ : by rw hom_apply_inv_apply
   ... = ∥f.hom (f.inv (res x) - C₁.d _ _ y)∥ : by congr ; exact (f.hom.apply.map_sub _ _).symm
-  ... = ∥f.inv (res x) - C₁.d _ _ y∥ : hf _ _ _
+  ... = ∥f.inv (res x) - C₁.d _ _ y∥ : normed_group_hom.norm_eq_of_isometry (hf _ _) _
   ... = ∥res (f.inv x) - C₁.d _ _ y∥ : by rw res_apply
   ... ≤ K * ∥C₁.d _ _ (f.inv x)∥ : hy
   ... = K * ∥C₂.d _ _ x∥ : congr_arg _ _,
   calc  ∥C₁.d i j (f.inv x)∥
       = ∥f.inv (C₂.d i j x)∥ : by rw d_apply
-  ... = ∥f.hom (f.inv (C₂.d _ _ x))∥ : (hf _ _ _).symm
+  ... = ∥f.hom (f.inv (C₂.d _ _ x))∥ : (normed_group_hom.norm_eq_of_isometry (hf _ _) _).symm
   ... = ∥C₂.d _ _ x∥ : by rw hom_apply_inv_apply
 end
 

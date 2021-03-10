@@ -4,13 +4,14 @@ import category_theory.limits.shapes.zero
 import category_theory.limits.shapes.kernels
 import category_theory.limits.creates
 
-import for_mathlib.normed_group_hom
 import for_mathlib.normed_group_quotient
 
 /-!
 # The category of normed abelian groups and continuous group homomorphisms
 
 -/
+
+noncomputable theory
 
 universes u v
 
@@ -74,11 +75,11 @@ open category_theory.limits
 /-- The equalizer cone for a parallel pair of morphisms of normed groups. -/
 def parallel_pair_cone {V W : NormedGroup.{u}} (f g : V ⟶ W) :
   cone (parallel_pair f g) :=
-@fork.of_ι _ _ _ _ _ _ (of (f - g).ker) (normed_group_hom.ker.incl (f - g)) $
+@fork.of_ι _ _ _ _ _ _ (of (f - g).ker) (normed_group_hom.incl (f - g).ker) $
 begin
   ext v,
   have : v.1 ∈ (f - g).ker := v.2,
-  simpa only [normed_group_hom.ker.incl_to_fun, pi.zero_apply, coe_comp, normed_group_hom.coe_zero,
+  simpa only [normed_group_hom.incl_apply, pi.zero_apply, coe_comp, normed_group_hom.coe_zero,
     subtype.val_eq_coe, normed_group_hom.mem_ker,
     normed_group_hom.coe_sub, pi.sub_apply, sub_eq_zero] using this
 end

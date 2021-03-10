@@ -1,4 +1,4 @@
-import for_mathlib.normed_group_hom
+import analysis.normed_space.normed_group_hom
 
 variables {V V₁ V₂ V₃ : Type*}
 variables [normed_group V] [normed_group V₁] [normed_group V₂] [normed_group V₃]
