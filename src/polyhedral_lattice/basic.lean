@@ -1,6 +1,7 @@
 import analysis.normed_space.basic
 import ring_theory.finiteness
 import algebra.direct_sum
+import linear_algebra.direct_sum_module
 
 -- import hacks_and_tricks.by_exactI_hack
 -- import hacks_and_tricks.type_pow
@@ -110,7 +111,20 @@ normed_group.of_core _ $
 
 instance : polyhedral_lattice (⨁ i, Λ i) :=
 { fg := sorry,
-  tf := sorry,
+  tf :=
+  begin
+    intros v hv n hnv,
+    obtain ⟨i, nzv_i⟩ : ∃ (i : ι), direct_sum.component ℤ ι Λ i v ≠ 0,
+    { rw ← not_forall,
+      rwa [ne.def, direct_sum.ext_iff ℤ] at hv },
+    have tf_i : torsion_free (Λ i),
+    { suffices pl_i : polyhedral_lattice (Λ i),
+      exact pl_i.tf,
+      apply_assumption },
+    refine tf_i (direct_sum.component ℤ ι Λ i v) nzv_i n _,
+    rw ← linear_map.map_smul_of_tower,
+    convert (direct_sum.ext_iff ℤ).mp hnv i,
+  end,
   rational :=
   begin
     intro l,

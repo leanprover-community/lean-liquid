@@ -26,8 +26,7 @@ we keep track of the finiteness hypotheses.
 -/
 lemma finite.span_restrict [semiring S] [semimodule S M] [algebra R S]
   [is_scalar_tower R S M] {G : set S} {v : set M}
-  (fG : G.finite) (spg : submodule.span R G = ⊤)
-  (fv : v.finite) (hv : submodule.span S v = ⊤) :
+  (fG : G.finite) (spg : submodule.span R G = ⊤) (fv : v.finite) :
   ∃ t : set M, t.finite ∧ submodule.span R (t : set M) = (span S (v : set M)).restrict_scalars R :=
 ⟨G • v, fG.image2 (•) fv, span_smul spg v⟩
 
@@ -39,31 +38,63 @@ we keep track of the finset hypotheses.
 -/
 lemma finset.span_restrict [semiring S] [semimodule S M] [algebra R S]
   [is_scalar_tower R S M]
-  (G : finset S) (spg : submodule.span R (G : set S) = ⊤)
-  (v : finset M) (hv : submodule.span S (v : set M) = ⊤) :
+  (G : finset S) (spg : submodule.span R (G : set S) = ⊤) (v : finset M) :
   ∃ t : finset M, submodule.span R (t : set M) = (span S (v : set M)).restrict_scalars R :=
 begin
-  obtain ⟨t, ft, co⟩ := finite.span_restrict G.finite_to_set spg v.finite_to_set hv,
+  obtain ⟨t, ft, co⟩ := finite.span_restrict G.finite_to_set spg v.finite_to_set,
   haveI ff : fintype t := ft.fintype,
   refine ⟨t.to_finset, by simpa only [set.coe_to_finset]⟩
 end
 
 /-- The choices of coefficients from the set `zq` that give rise to integral elements of `M`
-contained in the rational vector subspace spanned by `s`. -/
+contained in the rational vector subspace spanned by `s`.
+Pre-linting definition:
 def generating_box (Z : Type*) {Q ι : Type*} [comm_ring Z] [field Q] [algebra Z Q]
   [semimodule Z M] [semimodule Q M] [is_scalar_tower Z Q M]
   (v : ι → M) (s : set M) (zq : set Q) : set (finsupp ι Q) :=
   { f | ∀ i : ι, (f i = 0 ∨ f i ∈ zq) ∧
-    f.sum (λ i q, q • v i) ∈
-      submodule.span Z (set.range v) ⊓ (submodule.span Q s).restrict_scalars Z }
+    f.sum (λ i q, q • v i) ∈ submodule.span Z (set.range v) ⊓
+      (submodule.span Q s).restrict_scalars Z }
+ -/
+def generating_box (Z : Type*) {Q ι : Type*} [comm_ring Z] [field Q] [algebra Z Q]
+  [semimodule Z M] [semimodule Q M] [is_scalar_tower Z Q M]
+  (v : ι → M) (s : set M) (zq : set Q) : set (finsupp ι Q) :=
+  { f | (∀ i : ι, (f i = 0 ∨ f i ∈ zq)) ∧
+    f.sum (λ i q, q • v i) ∈ submodule.span Z (set.range v) ∧
+    f.sum (λ i q, q • v i) ∈ (submodule.span Q s).restrict_scalars Z }
+
+@[simp] lemma generating_box_def {Z : Type*} {Q ι : Type*} [comm_ring Z] [field Q] [algebra Z Q]
+  [semimodule Z M] [semimodule Q M] [is_scalar_tower Z Q M]
+  {v : ι → M} {s : set M} {zq : set Q} {f : finsupp ι Q} :
+  f ∈ generating_box Z v s zq ↔
+  (∀ i : ι, (f i = 0 ∨ f i ∈ zq)) ∧
+    f.sum (λ i q, q • v i) ∈ submodule.span Z (set.range v) ∧
+    f.sum (λ i q, q • v i) ∈ submodule.span Q s :=
+begin
+  unfold generating_box,
+  simp only [iff_self, set.mem_set_of_eq, restrict_scalars_mem],
+end
 
 lemma gen_box_sum  (Z : Type*) {Q ι : Type*} [comm_ring Z] [field Q] [algebra Z Q]
   [semimodule Z M] [semimodule Q M] [is_scalar_tower Z Q M]
   (v : ι → M) (s : set M) (zq : set Q) {z : M}
   (hz : z ∈ span Z {m : M | ∃ (f : ι →₀ Q), f ∈ generating_box Z v s zq ∧
     m = f.sum (λ (i : ι) (q : Q), q • v i)}) :
-  z ∈ submodule.span Z (set.range v) ⊓ (submodule.span Q s).restrict_scalars Z :=
+  z ∈ submodule.span Z (set.range v) ∧
+  z ∈ submodule.span Q s :=
 begin
+  simp at hz,
+  refine ⟨_, _⟩,
+  rcases mem_span_set.mp hz with ⟨c, csup, rfl⟩,
+
+  refine (mem_carrier _).mp _,
+  obtain F := (mem_carrier _).mp hz,
+  simp at F,
+  rw ← (mem_carrier _) at hz,
+  refine set.mem_of_mem_of_subset ((mem_carrier _).mp hz) _,
+  simp,
+  obtain F := mem_span.mp hz,
+
 --  tidy?,
   sorry
 end
