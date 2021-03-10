@@ -30,13 +30,13 @@ def equiv.of_bijective (hf : function.bijective f)
   hom_inv_id' := by { ext x, simp [inv_of_bijective.apply x hf strict] },
   inv_hom_id' := by { ext x, simp [inv_of_bijective_symm.apply x hf strict] } }
 
---the following two are not used, but they seem very natural (in some form)
-
 def Hom {r : ℝ≥0} (Λ : Type) (M : Type u)
   [normed_group Λ] [polyhedral_lattice Λ]
   [profinitely_filtered_pseudo_normed_group_with_Tinv r M] :
   ProFiltPseuNormGrpWithTinv.{u} r :=
 of r (Λ →+ M)
+
+--the following two are not used, but they seem very natural (in some form)
 
 @[simp]
 lemma equiv.of_bijective.apply (x : M₁) (hf : function.bijective f)
