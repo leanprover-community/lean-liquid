@@ -245,10 +245,6 @@ lemma dual_dual_dual (s : set M) :
 le_antisymm (λ m hm n hn, hm _ ((subset_dual_set_iff f).mpr set.subset.rfl hn))
   (λ m hm n hn, hn m hm)
 
-variable (P₀)
-
-open submodule
-
 end pairing
 
 end pairing
