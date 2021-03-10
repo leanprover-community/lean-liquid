@@ -146,6 +146,63 @@ begin
   exact f.level_continuous c
 end
 
+/-- If the inverse of `profinitely_filtered_pseudo_normed_group_with_Tinv_hom` is strict, then it
+is a `profinitely_filtered_pseudo_normed_group_with_Tinv_hom`. -/
+noncomputable
+def inv_of_bijective (hf : function.bijective f)
+  (strict : ∀ ⦃c x⦄, x ∈ filtration M₂ c → (equiv.of_bijective f hf).symm x ∈ filtration M₁ c) :
+  profinitely_filtered_pseudo_normed_group_with_Tinv_hom r M₂ M₁ :=
+{ strict' := strict,
+  continuous' := λ c,
+  begin
+    simp only [add_equiv.coe_to_add_monoid_hom, add_monoid_hom.to_fun_eq_coe],
+    have hcont := f.continuous' c,
+    set g : (filtration M₂ c) → (filtration M₁ c) :=
+      λ x, ⟨(equiv.of_bijective f hf).symm x, strict x.2⟩ with hg,
+    set f₁ : (filtration M₁ c) → (filtration M₂ c) := λ x, ⟨f x, f.strict x.2⟩ with hf₁,
+    change continuous g,
+    have hleft : function.left_inverse g f₁ := λ x, by { rw [hg, hf₁], simp },
+    have hright : function.right_inverse g f₁,
+    { intro x; rw [hg, hf₁]; simp [equiv.of_bijective_apply_symm_apply f hf] },
+    have hinj : function.injective f₁ := function.has_left_inverse.injective ⟨g, hleft⟩,
+    rw continuous_iff_is_closed,
+    intros U hU,
+    rw [← set.image_eq_preimage_of_inverse hleft hright],
+    exact closed_embedding.is_closed_map (continuous.closed_embedding hcont hinj) U hU,
+  end,
+  map_Tinv' := λ x,
+  begin
+    simp only [add_equiv.coe_to_add_monoid_hom, add_monoid_hom.to_fun_eq_coe],
+    apply function.bijective.injective hf,
+    have h₁ : ((add_equiv.of_bijective f.to_add_monoid_hom hf).symm) (Tinv x) =
+      (equiv.of_bijective _ hf).symm (Tinv x) := rfl,
+    have h₂ : ((add_equiv.of_bijective f.to_add_monoid_hom hf).symm) x =
+      (equiv.of_bijective _ hf).symm x := rfl,
+    rw [h₁, equiv.of_bijective_apply_symm_apply _ hf _, map_Tinv, h₂,
+      equiv.of_bijective_apply_symm_apply _ hf _]
+  end,
+  ..(add_equiv.of_bijective f.to_add_monoid_hom hf).symm.to_add_monoid_hom }
+
+@[simp]
+lemma inv_of_bijective.apply (x : M₁) (hf : function.bijective f)
+  (strict : ∀ ⦃c x⦄, x ∈ filtration M₂ c → (equiv.of_bijective f hf).symm x ∈ filtration M₁ c) :
+  (inv_of_bijective hf strict) (f x) = x :=
+begin
+  have h : (add_equiv.of_bijective f.to_add_monoid_hom hf).symm (f x) =
+    (equiv.of_bijective _ hf).symm (f x) := rfl,
+  simp [inv_of_bijective, h],
+end
+
+@[simp]
+lemma inv_of_bijective_symm.apply (x : M₂) (hf : function.bijective f)
+  (strict : ∀ ⦃c x⦄, x ∈ filtration M₂ c → (equiv.of_bijective f hf).symm x ∈ filtration M₁ c) :
+  f (inv_of_bijective hf strict x) = x :=
+begin
+  have h : (add_equiv.of_bijective f.to_add_monoid_hom hf).symm x =
+    (equiv.of_bijective _ hf).symm x := rfl,
+  simp [inv_of_bijective, h, equiv.of_bijective_apply_symm_apply _ hf _]
+end
+
 end profinitely_filtered_pseudo_normed_group_with_Tinv_hom
 
 namespace punit
