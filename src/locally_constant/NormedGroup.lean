@@ -28,7 +28,7 @@ def LocallyConstant : NormedGroup ⥤ Profiniteᵒᵖ ⥤ NormedGroup :=
     naturality' := λ S₁ S₂ g,
     begin
       dsimp, ext,
-      simp only [map_hom_to_fun, comap_hom_to_fun, category_theory.coe_comp,
+      simp only [map_hom_apply, comap_hom_apply, category_theory.coe_comp,
         function.comp_app, map_apply, coe_comap, g.unop.continuous]
     end } ,
   map_id' := by { intros, ext, refl },

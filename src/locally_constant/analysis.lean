@@ -1,5 +1,5 @@
 import topology.locally_constant.algebra
-import for_mathlib.normed_group_hom
+import analysis.normed_space.normed_group_hom
 
 /-!
 # Analysis of locally constant maps
@@ -179,7 +179,6 @@ group hom between types of locally constant functions. -/
 def map_hom (f : normed_group_hom V₁ V₂) :
   normed_group_hom (locally_constant X V₁) (locally_constant X V₂) :=
 { to_fun := locally_constant.map f,
-  map_zero' := by { ext, exact f.map_zero' },
   map_add' := by { intros x y, ext s, apply f.map_add' },
   bound' :=
   begin
@@ -230,7 +229,6 @@ group hom between types of locally constant functions. -/
 def comap_hom (f : X → Y) (hf : continuous f) :
   normed_group_hom (locally_constant Y V) (locally_constant X V) :=
 { to_fun := locally_constant.comap f,
-  map_zero' := by { ext, simp only [hf, function.comp_app, coe_comap, zero_apply] },
   map_add' := by { intros, ext, simp only [hf, add_apply, function.comp_app, coe_comap] },
   bound' :=
   begin
@@ -270,7 +268,7 @@ def comap_hom (f : X → Y) (hf : continuous f) :
 @[simp] lemma comap_hom_id : @comap_hom X X V _ _ _ _ _ id continuous_id = normed_group_hom.id :=
 begin
   ext,
-  simp only [comap_id, comap_hom_to_fun, id.def, normed_group_hom.id_to_fun,
+  simp only [comap_id, comap_hom_apply, id.def, normed_group_hom.id_apply,
     add_monoid_hom.to_fun_eq_coe, add_monoid_hom.id_apply]
 end
 
@@ -281,7 +279,7 @@ begin
   -- `[simps]` is producing bad lemmas... I don't know how to trick it into creating good ones
   -- so we use `show` instead, to get into a defeq shape that is usable
   show (comap_hom f hf) ((comap_hom g hg) φ) x = _,
-  simp only [hg.comp hf, hf, hg, comap_hom_to_fun, coe_comap]
+  simp only [hg.comp hf, hf, hg, comap_hom_apply, coe_comap]
 end
 
 end comap_hom
