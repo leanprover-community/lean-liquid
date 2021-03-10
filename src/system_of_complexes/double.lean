@@ -53,6 +53,9 @@ begin
   delta res, erw this, refl
 end
 
+@[simp] lemma norm_res_of_eq (h : c₂ = c₁) (x : C.X c₁ p q) : ∥@res C _ _ p q h.le x∥ = ∥x∥ :=
+by { cases h, rw res_refl, refl }
+
 @[simp] lemma res_comp_res (h₁ : fact (c₂ ≤ c₁)) (h₂ : fact (c₃ ≤ c₂)) :
   @res C _ _ p q h₁ ≫ @res C _ _ p q h₂  = @res C _ _ p q (le_trans h₂ h₁) :=
 begin
