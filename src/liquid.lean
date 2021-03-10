@@ -57,6 +57,7 @@ end
 
 Most of the theorem should be fairly readable.
 We will now briefly explain some of the more peculiar syntax.
+The proof reduces to `thm95`, which is not proven yet. We are working on it!
 
 * `[BD.suitable c']` assumes that the nonnegative reals `c' i` satisfy some suitable conditions
   with respect to the package of Breen--Deligne data `BD`.
@@ -70,5 +71,4 @@ We will now briefly explain some of the more peculiar syntax.
 * `is_bounded_exact` is the assertion that a system of complexes
   of normed abelian groups satisfies a suitable exactness criterion of being
   `≤ k`-exact in degrees `≤ m` for `c ≥ c₀` (where `c` is an index to the system of complexes).
-* `sorry` tells Lean to accept this theorem without proof. We are working hard on removing it!
 -/
