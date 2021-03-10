@@ -1,7 +1,10 @@
 import algebra.group.basic
 import analysis.convex.cone
+import linear_algebra.dual
 
 import polyhedral_lattice.basic
+import toric.pairing_dual_saturated
+import toric.is_inj_nonneg
 
 /-!
 In this file we state and prove 9.7 of [Analytic].
@@ -24,6 +27,26 @@ lemma abs_add_eq_add_abs_iff {α : Type*} [linear_ordered_add_comm_group α]  (a
   abs (a + b) = abs a + abs b ↔ (0 ≤ a ∧ 0 ≤ b ∨ a ≤ 0 ∧ b ≤ 0) := by admit
 
 -/
+
+noncomputable theory
+
+section
+open module
+
+variables (R M : Type*) [comm_ring R] [add_comm_group M] [module R M]
+
+def dual_pairing : pairing R M (dual R M) R := dual.eval R M
+
+end
+
+-- def nat_submodule : submodule ℕ ℤ := sorry
+
+-- lemma gordan (hΛ_tf : torsion_free Λ) [hΛ_fg : module.finite ℤ Λ]
+--   (l : finset Λ) :
+--   ((dual_pairing ℤ Λ).dual_set nat_submodule (l : set Λ)).fg :=
+-- begin
+--   sorry
+-- end
 
 /-
 jmc: I don't know exactly which version of the two lemmas below
