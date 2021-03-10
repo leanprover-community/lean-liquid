@@ -2,7 +2,6 @@ import analysis.normed_space.basic
 import ring_theory.finiteness
 -- import linear_algebra.direct_sum_module
 import algebra.direct_sum
-import linear_algebra.direct_sum_module
 
 -- import hacks_and_tricks.by_exactI_hack
 -- import hacks_and_tricks.type_pow
@@ -112,7 +111,8 @@ normed_group.of_core _ $
 
 instance : polyhedral_lattice (⨁ i, Λ i) :=
 { fg := sorry,
-  tf :=
+  tf := sorry,
+/-
   begin
     intros v hv n hnv,
     obtain ⟨i, nzv_i⟩ : ∃ (i : ι), direct_sum.component ℤ ι Λ i v ≠ 0,
@@ -126,6 +126,7 @@ instance : polyhedral_lattice (⨁ i, Λ i) :=
     rw ← linear_map.map_smul_of_tower,
     convert (direct_sum.ext_iff ℤ).mp hnv i,
   end,
+-/
   rational :=
   begin
     intro l,

@@ -2,7 +2,7 @@
 import algebra.regular
 import linear_algebra.finite_dimensional
 
-variables (R S M : Type*)
+variables (R S M N P : Type*)
 variables [comm_semiring R] [add_comm_monoid M] [semimodule R M]
 
 section saturation
@@ -96,10 +96,9 @@ section pairing
 
 variables [comm_semiring S] [algebra R S] [semimodule S M] [is_scalar_tower R S M]
 
-variables (N P : Type*)
+variables
   [add_comm_monoid N] [semimodule R N] [semimodule S N] [is_scalar_tower R S N]
   [add_comm_monoid P] [semimodule R P] [semimodule S P] [is_scalar_tower R S P]
-  (P₀ : submodule R P)
 
 /-- An R-pairing on the R-modules M, N, P is an R-linear map M -> Hom_R(N,P). -/
 @[derive has_coe_to_fun] def pairing := M →ₗ[S] N →ₗ[S] P
@@ -145,6 +144,8 @@ def right_nondegenerate : Prop := ∀ m : M, (∀ n : N, f m n = 0) → m = 0
 
 /--  A pairing `M × N → P` is `perfect` if it is left and right nondegenerate. -/
 def perfect : Prop := left_nondegenerate f ∧ right_nondegenerate f
+
+variable (P₀ : submodule R P)
 
 /--  For a subset `s ⊆ M`, the `dual_set s` is the submodule consisting of all elements of `N`
 that have "positive pairing with all the elements of `s`.  "Positive" means that it lies in the
