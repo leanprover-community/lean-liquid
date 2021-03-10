@@ -24,7 +24,7 @@ variables (f : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r M₁ M�
 /-- The isomorphism induced by a bijective `profinitely_filtered_pseudo_normed_group_with_Tinv_hom`
 whose inverse is strict. -/
 noncomputable
-def equiv.of_bijective (hf : function.bijective f)
+def iso_of_equiv_of_strict (hf : function.bijective f)
   (strict : ∀ ⦃c x⦄, x ∈ filtration M₂ c → (equiv.of_bijective f hf).symm x ∈ filtration M₁ c) :
   of r M₁ ≅ of r M₂ :=
 { hom := f,
@@ -32,27 +32,26 @@ def equiv.of_bijective (hf : function.bijective f)
   hom_inv_id' := by { ext x, simp [inv_of_bijective.apply x hf strict] },
   inv_hom_id' := by { ext x, simp [inv_of_bijective_symm.apply x hf strict] } }
 
-def Hom {r' : ℝ≥0} (Λ : Type) (M : Type u)
-  [normed_group Λ] [polyhedral_lattice Λ]
-  [profinitely_filtered_pseudo_normed_group_with_Tinv r' M] :
-  ProFiltPseuNormGrpWithTinv.{u} r' :=
-of r' (Λ →+ M)
+@[simp]
+lemma iso_of_equiv_of_strict.apply (x : M₁) (hf : function.bijective f)
+  (strict : ∀ ⦃c x⦄, x ∈ filtration M₂ c → (equiv.of_bijective f hf).symm x ∈ filtration M₁ c) :
+  (iso_of_equiv_of_strict f hf strict).hom x = f x := rfl
 
 @[simp]
-lemma equiv.of_bijective.apply (x : M₁) (hf : function.bijective f)
-  (strict : ∀ ⦃c x⦄, x ∈ filtration M₂ c → (_root_.equiv.of_bijective f hf).symm x ∈ filtration M₁ c) :
-  (equiv.of_bijective f hf strict).hom x = f x := rfl
+lemma iso_of_equiv_of_strict_symm.apply (x : M₂) (hf : function.bijective f)
+  (strict : ∀ ⦃c x⦄, x ∈ filtration M₂ c → (equiv.of_bijective f hf).symm x ∈ filtration M₁ c) :
+  (iso_of_equiv_of_strict f hf strict).symm.hom x = (equiv.of_bijective f hf).symm x := rfl
 
-@[simp]
-lemma equiv.of_bijective_symm.apply (x : M₂) (hf : function.bijective f)
-  (strict : ∀ ⦃c x⦄, x ∈ filtration M₂ c → (_root_.equiv.of_bijective f hf).symm x ∈ filtration M₁ c) :
-  (equiv.of_bijective f hf strict).symm.hom x = (_root_.equiv.of_bijective f hf).symm x := rfl
+def Hom {r : ℝ≥0} (Λ : Type) (M : Type u) [normed_group Λ] [polyhedral_lattice Λ]
+  [profinitely_filtered_pseudo_normed_group_with_Tinv r M] :
+  ProFiltPseuNormGrpWithTinv.{u} r :=
+of r (Λ →+ M)
 
 /-- The morphism `M ⟶ Hom ℤ M` for `M` a `profinitely_filtered_pseudo_normed_group_with_Tinv`. -/
 noncomputable
-def HomZ_map (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] (M : Type)
-  [profinitely_filtered_pseudo_normed_group_with_Tinv r' M] :
-  profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M (Hom ℤ M) :=
+def HomZ_map (r : ℝ≥0) [fact (0 < r)] [fact (r ≤ 1)] (M : Type)
+  [profinitely_filtered_pseudo_normed_group_with_Tinv r M] :
+  profinitely_filtered_pseudo_normed_group_with_Tinv_hom r M (Hom ℤ M) :=
 { to_fun := int.cast_add_hom',
   map_zero' := by { ext1, simp only [pi.zero_apply, add_monoid_hom.coe_zero, smul_zero, int.cast_add_hom'_apply] },
   map_add' := by { intros, ext1, simp only [smul_add, add_monoid_hom.coe_add, add_left_inj,
@@ -81,61 +80,32 @@ def HomZ_map (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] (M : Type)
     simp only [h, int.cast_add_hom'_apply, profinitely_filtered_pseudo_normed_group_hom.map_gsmul],
   end }
 
-/-- The inverse of `HomZ_map` as function. -/
-noncomputable
-def HomZ_map_inv (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] (M : Type)
-  [profinitely_filtered_pseudo_normed_group_with_Tinv r' M] :
-  (Hom ℤ M) → M := λ (f : ℤ →+ M), f 1
-
-lemma left_inv_HomZ_map (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] (M : Type)
-  [profinitely_filtered_pseudo_normed_group_with_Tinv r' M] :
-  function.left_inverse (HomZ_map_inv r' M) (HomZ_map r' M) :=
-begin
-  intro x,
-  calc int.cast_add_hom' x 1 = 1 • x : rfl
-    ... = x : one_smul _ _
-end
-
-lemma right_inv_HomZ_map (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] (M : Type)
-  [profinitely_filtered_pseudo_normed_group_with_Tinv r' M] :
-  function.right_inverse (HomZ_map_inv r' M) (HomZ_map r' M) :=
-begin
-  intro f,
-  ext,
-  calc int.cast_add_hom' (f.to_fun 1) 1 = 1 • f.to_fun 1 : rfl
-  ... = f.to_fun 1 : one_smul _ _
-end
-
-/-- `HomZ_map` is bijective. -/
-lemma HomZ_map_bijective (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] (M : Type)
-  [profinitely_filtered_pseudo_normed_group_with_Tinv r' M] : function.bijective (HomZ_map r' M) :=
-begin
-  rw [function.bijective_iff_has_inverse],
-  refine ⟨λ (f : ℤ →+ M), f 1, left_inv_HomZ_map r' M, right_inv_HomZ_map r' M⟩
-end
+/-- `HomZ_map` as an equiv. -/
+@[simps]
+def HomZ_map_equiv (r : ℝ≥0) [fact (0 < r)] [fact (r ≤ 1)] (M : Type)
+  [profinitely_filtered_pseudo_normed_group_with_Tinv r M] :
+  M ≃ Hom ℤ M :=
+{ to_fun := HomZ_map r M,
+  inv_fun := λ (f : ℤ →+ M), f 1,
+  left_inv := λ x, one_smul _ _,
+  right_inv := λ f, by { ext, exact one_smul _ _ } }
 
 /-- The inverse of `HomZ_map` is strict. -/
-lemma HomZ_map_inverse_strict (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] (M : Type)
-  [profinitely_filtered_pseudo_normed_group_with_Tinv r' M] :
-  ∀ c f, f ∈ filtration ((Hom ℤ M)) c → (_root_.equiv.of_bijective (HomZ_map r' M)
-  (HomZ_map_bijective r' M)).symm f ∈ filtration M c :=
+lemma HomZ_map_inverse_strict (r : ℝ≥0) [fact (0 < r)] [fact (r ≤ 1)] (M : Type)
+  [profinitely_filtered_pseudo_normed_group_with_Tinv r M] :
+  ∀ c f, f ∈ filtration ((Hom ℤ M)) c → (HomZ_map_equiv r M).symm f ∈ filtration M c :=
 begin
   intros c f hf,
-  have h : (_root_.equiv.of_bijective (HomZ_map r' M) ((HomZ_map_bijective r' M))).symm f =
-    (HomZ_map_inv r' M) f,
-    { apply function.bijective.injective (HomZ_map_bijective r' M),
-      rw [← function.comp_app (HomZ_map r' M), right_inv_HomZ_map, function.comp_app (HomZ_map r' M)],
-      rw [equiv.of_bijective_apply_symm_apply (HomZ_map r' M) (HomZ_map_bijective r' M) _] },
-  simp [h, HomZ_map_inv],
   simpa [mul_one] using hf int.one_mem_filtration
 end
 
 /-- The isomorphism `Hom ℤ M ≅ M` for `M` a `profinitely_filtered_pseudo_normed_group_with_Tinv`. -/
 noncomputable
-def HomZ_iso (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] (M : Type)
-  [profinitely_filtered_pseudo_normed_group_with_Tinv r' M] :
-  Hom ℤ M ≅ of r' M :=
-(equiv.of_bijective (HomZ_map r' M) (HomZ_map_bijective r' M) (HomZ_map_inverse_strict r' M)).symm
+def HomZ_iso (r : ℝ≥0) [fact (0 < r)] [fact (r ≤ 1)] (M : Type)
+  [profinitely_filtered_pseudo_normed_group_with_Tinv r M] :
+  Hom ℤ M ≅ of r M :=
+(iso_of_equiv_of_strict (HomZ_map r M)
+  (HomZ_map_equiv r M).bijective (HomZ_map_inverse_strict r M)).symm
 
 
 end ProFiltPseuNormGrpWithTinv

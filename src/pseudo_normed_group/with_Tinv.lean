@@ -149,8 +149,8 @@ end
 /-- If the inverse of `profinitely_filtered_pseudo_normed_group_with_Tinv_hom` is strict, then it
 is a `profinitely_filtered_pseudo_normed_group_with_Tinv_hom`. -/
 noncomputable
-def inv_of_bijective (hf : function.bijective f)
-  (strict : ∀ ⦃c x⦄, x ∈ filtration M₂ c → (equiv.of_bijective f hf).symm x ∈ filtration M₁ c) :
+def inv_of_equiv_of_strict (e : M₁ ≃+ M₂) (he : ∀ x, f x = e x)
+  (strict : ∀ ⦃c x⦄, x ∈ filtration M₂ c → e.symm x ∈ filtration M₁ c) :
   profinitely_filtered_pseudo_normed_group_with_Tinv_hom r M₂ M₁ :=
 { strict' := strict,
   continuous' := λ c,
@@ -158,12 +158,12 @@ def inv_of_bijective (hf : function.bijective f)
     simp only [add_equiv.coe_to_add_monoid_hom, add_monoid_hom.to_fun_eq_coe],
     have hcont := f.continuous' c,
     set g : (filtration M₂ c) → (filtration M₁ c) :=
-      λ x, ⟨(equiv.of_bijective f hf).symm x, strict x.2⟩ with hg,
+      λ x, ⟨e.symm x, strict x.2⟩ with hg,
     set f₁ : (filtration M₁ c) → (filtration M₂ c) := λ x, ⟨f x, f.strict x.2⟩ with hf₁,
     change continuous g,
-    have hleft : function.left_inverse g f₁ := λ x, by { rw [hg, hf₁], simp },
+    have hleft : function.left_inverse g f₁ := λ x, by { rw [hg, hf₁], simp [he], },
     have hright : function.right_inverse g f₁,
-    { intro x; rw [hg, hf₁]; simp [equiv.of_bijective_apply_symm_apply f hf] },
+    { intro x; rw [hg, hf₁]; simp [e.apply_symm_apply, he] },
     have hinj : function.injective f₁ := function.has_left_inverse.injective ⟨g, hleft⟩,
     rw continuous_iff_is_closed,
     intros U hU,
@@ -173,15 +173,10 @@ def inv_of_bijective (hf : function.bijective f)
   map_Tinv' := λ x,
   begin
     simp only [add_equiv.coe_to_add_monoid_hom, add_monoid_hom.to_fun_eq_coe],
-    apply function.bijective.injective hf,
-    have h₁ : ((add_equiv.of_bijective f.to_add_monoid_hom hf).symm) (Tinv x) =
-      (equiv.of_bijective _ hf).symm (Tinv x) := rfl,
-    have h₂ : ((add_equiv.of_bijective f.to_add_monoid_hom hf).symm) x =
-      (equiv.of_bijective _ hf).symm x := rfl,
-    rw [h₁, equiv.of_bijective_apply_symm_apply _ hf _, map_Tinv, h₂,
-      equiv.of_bijective_apply_symm_apply _ hf _]
+    apply e.injective,
+    rw [e.apply_symm_apply, ← he, map_Tinv, he, e.apply_symm_apply],
   end,
-  ..(add_equiv.of_bijective f.to_add_monoid_hom hf).symm.to_add_monoid_hom }
+  .. e.symm.to_add_monoid_hom }
 
 @[simp]
 lemma inv_of_bijective.apply (x : M₁) (hf : function.bijective f)
