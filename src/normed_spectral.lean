@@ -9,18 +9,11 @@ universe variables u
 -- def shift_and_truncate : system_of_double_complexes ⥤ system_of_double_complexes :=
 -- sorry
 
--- move this
--- lemma exists_norm_le_norm_add_unit_smul {V : Type*} [normed_group V] (x y : V) :
---   ∃ u : units ℤ, ∥x∥ ≤ ∥x + (u:ℤ) • y∥ :=
--- begin
---   by_cases h : ∥x∥ ≤ ∥x + y∥,
---   { use 1, simpa using h },
---   push_neg at h,
---   use -1,
---   simp only [units.coe_neg_one, one_smul, neg_smul],
---   -- now we need some archimedean hypothesis
---   sorry
--- end
+-- move this, better name?
+lemma norm_le_add_norm_add {V : Type*} [normed_group V] (x y : V) :
+  ∥x∥ ≤ ∥x + y∥ + ∥y∥ :=
+calc ∥x∥ = ∥x + y - y∥ : by rw add_sub_cancel
+... ≤ ∥x + y∥ + ∥y∥ : norm_sub_le _ _
 
 /-- The assumptions on `M` in Proposition 9.6 bundled into a structure. Note that in `cond3b`
   our `q` is one smaller than the `q` in the notes (so that we don't have to deal with `q - 1`). -/
@@ -76,15 +69,15 @@ theorem analytic_9_6_base (k K : ℝ≥0) [hk : fact (1 ≤ k)] [hK : fact (1 �
   ∀ (M : system_of_double_complexes.{u}) (hM : M.admissible)
     (k' : ℝ≥0) [fact (k₀ ≤ k')] [fact (1 ≤ k')] -- follows
     (c₀ H : ℝ≥0) [fact (0 < H)],
-  ​∀ (Hneg : (M.row 0).is_bounded_exact (k' * k') (2 * k₀ * H) (-1) c₀)
+  ​∀ (Hneg : (M.row 0).is_bounded_exact (k' * k') (2 * K * H) (-1) c₀)
     (Hd : ∀ c q (x : M.X c (-1) q), M.d _ 0 x = 0)
     (Hd' : ∀ c p (x : M.X c p (-1)), M.d' _ 0 x = 0)
     (cond : normed_spectral_conditions 0 k K ε hε M k' c₀ H),
-  (M.row 0).is_bounded_exact (k' * k') (2 * k₀ * H) 0 c₀ :=
+  (M.row 0).is_bounded_exact (k' * k') (2 * K * H) 0 c₀ :=
 begin
-  let ε := (2*k)⁻¹,
+  let ε := (2*K)⁻¹,
   have hε : 0 < ε,
-  { exact nnreal.inv_pos.mpr (mul_pos zero_lt_two (lt_of_lt_of_le zero_lt_one hk)) },
+  { exact nnreal.inv_pos.mpr (mul_pos zero_lt_two (lt_of_lt_of_le zero_lt_one hK)) },
   use [ε, hε, k, hk],
   introsI M hM k' _k' _1k' c₀ H _H Hneg Hd Hd' cond,
   intros c hc i hi,
@@ -102,14 +95,15 @@ begin
   refine ⟨-1, 1, rfl, rfl, 0, _⟩,
   obtain ⟨i, j, hi, hj, y1, hx1⟩ := Hx1 (M.res x),
   simp [← eq_neg_iff_add_eq_zero] at hi hj, subst i, subst j,
-  simp only [Hd, Hd', sub_zero, nnreal.coe_mul, nnreal.coe_bit0, nnreal.coe_one, d_res] at hx1 ⊢,
+  replace Hx2 := (norm_le_add_norm_add _ _).trans (add_le_add Hx2 le_rfl),
+  simp only [Hd, Hd', sub_zero, nnreal.coe_mul, nnreal.coe_bit0, nnreal.coe_one, d_res] at hx1 Hx2 ⊢,
   erw [res_res] at hx1,
   calc _ ≤ ↑K * ∥M.res (M.d 0 1 x)∥ : hx1
-  -- ... = ↑K * ∥_∥ : _
-  -- ... ≤ ↑K * (∥_∥ + ∥_∥) : _
-  -- ... ≤ ↑k * ∥cond.h 0 (M.d' 0 1) x∥ + ↑k * ↑H * ∥(M.d' 0 1) x∥ : _
-  ... ≤ ↑k * ↑H * ∥M.d' 0 1 x∥ + k * H * ∥M.d' 0 1 x∥ : _
-  ... = 2 * ↑k * ↑H * ∥M.d' 0 1 x∥ : by simp only [← two_mul, mul_assoc],
+  ... ≤ ↑K * (2 * ↑H * ∥M.d' 0 1 x∥) : mul_le_mul_of_nonneg_left _ K.2 -- generates a new goal
+  ... = 2 * ↑K * ↑H * ∥M.d' 0 1 x∥ : by simp only [← mul_assoc, mul_comm (K:ℝ) 2],
+  calc ∥M.res (M.d 0 1 x)∥ ≤ ↑H * ∥M.d' 0 1 x∥ + ↑H * ∥M.d' 0 1 x∥ : _
+  ... = 2 * ↑H * ∥M.d' 0 1 x∥ : by simp only [mul_assoc, ← two_mul],
+  refine Hx2.trans _,
   sorry
 end
 
@@ -123,11 +117,11 @@ theorem analytic_9_6 (m : ℤ) :
   ∀ (M : system_of_double_complexes.{u}) (hM : M.admissible)
     (k' : ℝ≥0) [fact (k₀ ≤ k')] [fact (1 ≤ k')] -- follows
     (c₀ H : ℝ≥0) [fact (0 < H)],
-  ​∀ (Hneg : (M.row 0).is_bounded_exact (k' * k') (2 * k₀ * H) (-1) c₀)
+  ​∀ (Hneg : (M.row 0).is_bounded_exact (k' * k') (2 * K * H) (-1) c₀)
     (Hd : ∀ c q (x : M.X c (-1) q), M.d _ 0 x = 0)
     (Hd' : ∀ c p (x : M.X c p (-1)), M.d' _ 0 x = 0)
     (cond : normed_spectral_conditions m k K ε hε M k' c₀ H),
-  (M.row 0).is_bounded_exact (k' * k') (2 * k₀ * H) m c₀ :=
+  (M.row 0).is_bounded_exact (k' * k') (2 * K * H) m c₀ :=
 begin
   apply int.induction_on m,
   -- induction m with m hm,
