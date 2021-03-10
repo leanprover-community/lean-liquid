@@ -21,6 +21,7 @@ variables [profinitely_filtered_pseudo_normed_group_with_Tinv r M₁]
 variables [profinitely_filtered_pseudo_normed_group_with_Tinv r M₂]
 variables (f : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r M₁ M₂)
 
+--To move?
 /-- The isomorphism induced by a bijective `profinitely_filtered_pseudo_normed_group_with_Tinv_hom`
 whose inverse is strict. -/
 noncomputable
@@ -31,6 +32,8 @@ def equiv.of_bijective (hf : function.bijective f)
   inv := profinitely_filtered_pseudo_normed_group_with_Tinv_hom.inv_of_bijective hf strict,
   hom_inv_id' := by { ext x, simp [inv_of_bijective.apply x hf strict] },
   inv_hom_id' := by { ext x, simp [inv_of_bijective_symm.apply x hf strict] } }
+
+--the following two are not used, but they seem very natural (in some form)
 
 def Hom {r' : ℝ≥0} (Λ : Type) (M : Type u)
   [normed_group Λ] [polyhedral_lattice Λ]
@@ -126,8 +129,7 @@ begin
     { apply function.bijective.injective (HomZ_map_bijective r' M),
       rw [← function.comp_app (HomZ_map r' M), right_inv_HomZ_map, function.comp_app (HomZ_map r' M)],
       rw [equiv.of_bijective_apply_symm_apply (HomZ_map r' M) (HomZ_map_bijective r' M) _] },
-  simp [h, HomZ_map_inv],
-  simpa [mul_one] using hf int.one_mem_filtration
+  simpa [mul_one, h, HomZ_map_inv] using hf int.one_mem_filtration,
 end
 
 /-- The isomorphism `Hom ℤ M ≅ M` for `M` a `profinitely_filtered_pseudo_normed_group_with_Tinv`. -/
