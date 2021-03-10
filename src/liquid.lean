@@ -44,7 +44,7 @@ begin
   use [k, K, hk, c₀],
   introsI S hS V hV,
   specialize H S V,
-  let i := (BD.System c' r V r').map_iso (HomZ_iso r' S).op,
+  let i := (BD.System c' r V r').map_iso (HomZ_iso r' (Mbar r' S)).op,
   refine H.of_iso i.symm _,
   intros c n,
   sorry

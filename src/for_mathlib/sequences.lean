@@ -3,8 +3,6 @@ import topology.algebra.normed_group
 import topology.algebra.group_completion
 import topology.metric_space.completion
 
-import for_mathlib.normed_group_hom
-
 -- **TODO** Move completion.normed_group out of for_mathlib.locally_constant
 
 noncomputable theory

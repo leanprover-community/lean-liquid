@@ -1,5 +1,5 @@
 import topology.locally_constant.algebra
-import for_mathlib.normed_group_hom
+import analysis.normed_space.normed_group_hom
 
 /-!
 # Analysis of locally constant maps
@@ -14,6 +14,7 @@ This file defines the normed group of locally constant maps into a normed group.
 -/
 
 noncomputable theory
+open_locale nnreal
 
 -- move this
 section for_mathlib
@@ -179,7 +180,6 @@ group hom between types of locally constant functions. -/
 def map_hom (f : normed_group_hom V₁ V₂) :
   normed_group_hom (locally_constant X V₁) (locally_constant X V₂) :=
 { to_fun := locally_constant.map f,
-  map_zero' := by { ext, exact f.map_zero' },
   map_add' := by { intros x y, ext s, apply f.map_add' },
   bound' :=
   begin
@@ -214,6 +214,36 @@ by { ext, refl }
   (@map_hom X _ _ _ _ _ _ g).comp (map_hom f) = map_hom (g.comp f) :=
 by { ext, refl }
 
+lemma map_hom_bound_by (C : ℝ≥0) (hC : 0 < C) {f : normed_group_hom V₁ V₂} (hf : f.bound_by C) :
+  (@map_hom X _ _ _ _ _ _ f).bound_by C :=
+begin
+  rintro (g : locally_constant _ _),
+  calc Sup (set.range (λ x, ∥f (g x)∥))
+      ≤ Sup (set.range (λ x, C * ∥g x∥)) : _
+  ... = C * Sup (set.range (λ x, ∥g x∥)) : _,
+  { by_cases H : nonempty X, swap,
+    { simp only [set.range_eq_empty.mpr H, real.Sup_empty] },
+    apply real.Sup_le_ub,
+    { obtain ⟨x⟩ := H, exact ⟨_, set.mem_range_self x⟩ },
+    rintro _ ⟨x, rfl⟩,
+    calc ∥f (g x)∥ ≤ C * ∥g x∥ : hf _
+    ... ≤ Sup _ : real.le_Sup _ _ _,
+    { apply real.Sup_exists_of_finite,
+      rw [set.range_comp, set.range_comp],
+      exact (g.range_finite.image _).image _ },
+    { exact set.mem_range_self _ } },
+  { convert real.Sup_mul C _ hC using 2,
+    ext x,
+    simp only [set.mem_range, exists_prop, set.set_of_mem_eq, exists_exists_eq_and],
+    simp only [set.mem_set_of_eq] }
+end
+
+lemma map_hom_norm_noninc {f : normed_group_hom V₁ V₂} (hf : f.norm_noninc) :
+  (@map_hom X _ _ _ _ _ _ f).norm_noninc :=
+assume g,
+calc ∥map f g∥ ≤ 1 * ∥g∥ : map_hom_bound_by 1 zero_lt_one hf.bound_by_one _
+... = ∥g∥ : one_mul _
+
 end map_hom
 
 section comap_hom
@@ -229,16 +259,16 @@ group hom between types of locally constant functions. -/
 @[simps]
 def comap_hom (f : X → Y) (hf : continuous f) :
   normed_group_hom (locally_constant Y V) (locally_constant X V) :=
-{ to_fun := locally_constant.comap f,
-  map_zero' := by { ext, simp only [hf, function.comp_app, coe_comap, zero_apply] },
-  map_add' := by { intros, ext, simp only [hf, add_apply, function.comp_app, coe_comap] },
-  bound' :=
+add_monoid_hom.mk_normed_group_hom'
+  (add_monoid_hom.mk'
+    (locally_constant.comap f)
+    (by { intros, ext, simp only [hf, add_apply, function.comp_app, coe_comap] }))
+  1
   begin
-    use 1,
     assume g,
     rw one_mul,
     show Sup _ ≤ Sup _,
-    simp only [hf, function.comp_app, coe_comap],
+    simp only [hf, function.comp_app, coe_comap, add_monoid_hom.coe_mk'],
     by_cases hX : nonempty X, swap,
     { simp only [set.range_eq_empty.mpr hX, real.Sup_empty],
       by_cases hY : nonempty Y, swap,
@@ -265,12 +295,12 @@ def comap_hom (f : X → Y) (hf : continuous f) :
         apply set.finite.image,
         apply g.range_finite.subset,
         apply set.image_subset_range } }
-  end }
+  end
 
 @[simp] lemma comap_hom_id : @comap_hom X X V _ _ _ _ _ id continuous_id = normed_group_hom.id :=
 begin
   ext,
-  simp only [comap_id, comap_hom_to_fun, id.def, normed_group_hom.id_to_fun,
+  simp only [comap_id, comap_hom_apply, id.def, normed_group_hom.id_apply,
     add_monoid_hom.to_fun_eq_coe, add_monoid_hom.id_apply]
 end
 
@@ -281,8 +311,18 @@ begin
   -- `[simps]` is producing bad lemmas... I don't know how to trick it into creating good ones
   -- so we use `show` instead, to get into a defeq shape that is usable
   show (comap_hom f hf) ((comap_hom g hg) φ) x = _,
-  simp only [hg.comp hf, hf, hg, comap_hom_to_fun, coe_comap]
+  simp only [hg.comp hf, hf, hg, comap_hom_apply, coe_comap]
 end
+
+lemma comap_hom_bound_by (f : X → Y) (hf : continuous f) :
+  (@comap_hom _ _ V _ _ _ _ _ f hf).bound_by 1 :=
+normed_group_hom.mk_normed_group_hom'_bound_by _ _ _
+
+lemma comap_hom_norm_noninc (f : X → Y) (hf : continuous f) :
+  (@comap_hom _ _ V _ _ _ _ _ f hf).norm_noninc :=
+assume g,
+calc ∥comap_hom f hf g∥ ≤ 1 * ∥g∥ : comap_hom_bound_by f hf g
+... = ∥g∥ : one_mul _
 
 end comap_hom
 

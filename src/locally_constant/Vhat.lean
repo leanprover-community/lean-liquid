@@ -36,8 +36,6 @@ def Completion : NormedGroup.{u} ⥤ NormedGroup.{u} :=
         { apply hC },
         { exact f.uniform_continuous } }
     end,
-    map_zero' := by { erw [completion.map_coe], { congr' 1, exact f.map_zero' },
-      exact normed_group_hom.uniform_continuous f },
     map_add' :=
     begin
     intros x y,
@@ -72,11 +70,21 @@ end
 @[simps]
 def incl {V : NormedGroup} : V ⟶ Completion.obj V :=
 { to_fun := λ v, (v : completion V),
-  map_zero' := by simpa [completion.coe_eq],
   map_add' := completion.coe_add,
   bound' := ⟨1, λ v, by simp⟩ }
 
 @[simp] lemma norm_incl_eq {V : NormedGroup} {v : V} : ∥incl v∥ = ∥v∥ := by simp
+
+lemma Completion_map_norm_noninc {V W : NormedGroup} (f : V ⟶ W) (hf : f.norm_noninc) :
+  (Completion.map f).norm_noninc :=
+begin
+  intros v,
+  apply completion.induction_on v; clear v,
+  { refine is_closed_le (continuous_norm.comp completion.continuous_map) continuous_norm },
+  intro v,
+  simp only [completion.norm_coe, Completion_map_apply, completion.map_coe f.uniform_continuous],
+  exact hf v
+end
 
 /--
 Given a morphism of normed groups `V ⟶ W`, this defines the associated morphism
@@ -93,7 +101,7 @@ begin
     apply continuous.add; apply normed_group_hom.continuous },
   { clear v, intro v,
     simp only [normed_group_hom.coe_add, pi.add_apply,
-      Completion_map_to_fun, normed_group_hom.coe_add],
+      Completion_map_apply, normed_group_hom.coe_add],
     rw [uniform_space.completion.map_coe,
         uniform_space.completion.map_coe f.uniform_continuous,
         uniform_space.completion.map_coe g.uniform_continuous],
@@ -105,7 +113,12 @@ end
 @[simp] lemma Completion.map_zero (V W : NormedGroup) : Completion.map (0 : V ⟶ W) = 0 :=
 (Completion.map_hom V W).map_zero
 
-instance : preadditive NormedGroup.{u} := { hom_group := λ P Q, infer_instance }
+instance : preadditive NormedGroup.{u} :=
+{ hom_group := λ P Q, infer_instance,
+  add_comp' := by { intros, ext,
+    simp only [normed_group_hom.add_apply, coe_comp, normed_group_hom.map_add], },
+  comp_add' := by { intros, ext,
+    simp only [normed_group_hom.add_apply, coe_comp, normed_group_hom.map_add], } }
 
 instance : functor.additive Completion :=
 { map_zero' := Completion.map_zero,
@@ -118,11 +131,6 @@ universal property of the completion.
 -/
 def Completion.lift {V W : NormedGroup} [complete_space W] (f : V ⟶ W) : Completion.obj V ⟶ W :=
 { to_fun := completion.extension f,
-  map_zero' := begin
-    erw completion.extension_coe,
-    { simp },
-    { exact normed_group_hom.uniform_continuous _ },
-  end,
   map_add' := begin
     intros x y,
     apply completion.induction_on₂ x y; clear x y,
@@ -199,7 +207,7 @@ lemma T_hom_incl {V : NormedGroup} {r : ℝ} [normed_with_aut r V] :
   (incl : V ⟶ _) ≫ normed_with_aut.T.hom = normed_with_aut.T.hom ≫ incl :=
 begin
   ext x,
-  simp only [incl_to_fun, category_theory.coe_comp, Completion_T_inv_eq],
+  simp only [incl_apply, category_theory.coe_comp, Completion_T_inv_eq],
   change completion.map normed_with_aut.T.hom _ = _,
   rw completion.map_coe,
   exact normed_group_hom.uniform_continuous _,

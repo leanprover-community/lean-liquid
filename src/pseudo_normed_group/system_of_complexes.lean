@@ -28,35 +28,35 @@ def complex (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
   (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] (M : ProFiltPseuNormGrpWithTinv r')
   (c : ℝ≥0) :
   cochain_complex ℤ NormedGroup :=
-{ /- the objects -/
-  X := int.extend_from_nat 0 $ λ i, CLCFPTinv r V r' M (c * c' i) (BD.rank i),
+cochain_complex.mk'
+  /- the objects -/
+  (int.extend_from_nat 0 $ λ i, CLCFPTinv r V r' M (c * c' i) (BD.rank i))
   /- the differentials -/
-  differential := int.extend_from_nat 0 $ λ i,
-    (BD.map i).eval_CLCFPTinv r V r' M (c * c' (i+1)) (c * c' i),
-  differential2 := /- d^2 = 0 -/
+  (int.extend_from_nat 0 $ λ i, (BD.map i).eval_CLCFPTinv r V r' M (c * c' (i+1)) (c * c' i))
+  /- d^2 = 0 -/
   begin
-    rintros (i|i) j h; cases h,
-    { dsimp,
-      simp only [category.id_comp],
-      rw ← universal_map.eval_CLCFPTinv_comp r V r' M
-        _ (c * c' (i+1)) _ (BD.map i) (BD.map (i+1)),
+    rintros (i|i),
+    { show (BD.map i).eval_CLCFPTinv _ _ _ _ _ _ ≫ (BD.map (i+1)).eval_CLCFPTinv _ _ _ _ _ _ = 0,
+      rw [← (BD.map i).eval_CLCFPTinv_comp r V r' M _ (c * c' (i+1)) _ (BD.map (i+1))],
       simp only [BD.map_comp_map, universal_map.eval_CLCFPTinv_zero],
       apply_instance },
     { show 0 ≫ _ = 0, rw [zero_comp] }
-  end }
+  end
 
 namespace complex
 
 /-- The induced map of complexes from a homomorphism `M₁ ⟶ M₂`. -/
 @[simps]
 def map : BD.complex c' r V r' M₂ c ⟶ BD.complex c' r V r' M₁ c :=
-{ f := int.extend_from_nat 0 $ λ i, CLCFPTinv.map r V r' _ _ f,
-  comm' :=
+differential_object.hom.mk'
+  (int.extend_from_nat 0 $ λ i, CLCFPTinv.map r V r' _ _ f)
   begin
-    rintro (i|i),
-    { dsimp, symmetry, apply universal_map.map_comp_eval_CLCFPTinv },
-    { show 0 ≫ _ = 0, rw [zero_comp] }
-  end }
+    rintro (i|i) j h; dsimp only [differential_object.coherent_indices] at h; subst j,
+    { dsimp, simp only [category.comp_id, if_congr, if_true, eq_self_iff_true],
+      symmetry, apply universal_map.map_comp_eval_CLCFPTinv },
+    { dsimp, simp only [category.comp_id, if_congr, if_true, eq_self_iff_true],
+      show 0 ≫ _ = 0, rw [zero_comp] }
+  end
 
 variables (M)
 
@@ -87,31 +87,33 @@ def system (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
   obj := λ c, BD.complex c' r V r' M (unop c : ℝ≥0),
   /- the restriction maps -/
   map := λ c₂ c₁ h,
-  { f := int.extend_from_nat 0 $ λ i,
-    by { haveI : fact (((unop c₁ : ℝ≥0) : ℝ) ≤ (unop c₂ : ℝ≥0)) := h.unop.down.down,
-      exact CLCFPTinv.res r V r' _ _ (BD.rank i) },
-    comm' :=
+  differential_object.hom.mk'
+    (int.extend_from_nat 0 $ λ i,
+    by haveI : fact ((unop c₁ : ℝ≥0) ≤ (unop c₂ : ℝ≥0)) := h.unop.down.down;
+      exact CLCFPTinv.res r V r' _ _ (BD.rank i))
     begin
-      rintro (i|i),
-      { dsimp [int.extend_from_nat], symmetry, apply universal_map.res_comp_eval_CLCFPTinv },
-      { dsimp [int.extend_from_nat], erw [zero_comp, comp_zero] }
-    end },
+      rintro (i|i) j h; dsimp only [differential_object.coherent_indices] at h; subst j,
+      { dsimp, simp only [category.comp_id, if_congr, if_true, eq_self_iff_true],
+        symmetry, apply universal_map.res_comp_eval_CLCFPTinv },
+      { dsimp, simp only [category.comp_id, if_congr, if_true, eq_self_iff_true],
+        erw [zero_comp, comp_zero] }
+    end,
   map_id' := /- the restriction map for `c ≤ c` is the identity -/
   begin
     intro c,
     ext (i|i) : 2,
-    { dsimp [int.extend_from_nat], rw CLCFPTinv.res_refl r V r' _ _, },
-    { dsimp [int.extend_from_nat], ext }
+    { exact CLCFPTinv.res_refl r V r' _ _, },
+    { ext }
   end,
   map_comp' := /- composition of transition maps is a transition map -/
   begin
     intros c₃ c₂ c₁ h h',
-    haveI H' : fact (((unop c₁ : ℝ≥0) : ℝ) ≤ (unop c₂ : ℝ≥0)) := h'.unop.down.down,
-    haveI H : fact (((unop c₂ : ℝ≥0) : ℝ) ≤ (unop c₃ : ℝ≥0)) := h.unop.down.down,
-    have : fact (((unop c₁ : ℝ≥0) : ℝ) ≤ (unop c₃ : ℝ≥0)) := le_trans H' H,
+    haveI H' : fact ((unop c₁ : ℝ≥0) ≤ (unop c₂ : ℝ≥0)) := h'.unop.down.down,
+    haveI H : fact ((unop c₂ : ℝ≥0) ≤ (unop c₃ : ℝ≥0)) := h.unop.down.down,
+    haveI : fact ((unop c₁ : ℝ≥0) ≤ (unop c₃ : ℝ≥0)) := le_trans H' H,
     ext (i|i) : 2,
-    { dsimp [int.extend_from_nat], rw CLCFPTinv.res_comp_res r V r' _ _ _ _ },
-    { dsimp [int.extend_from_nat], simp only [pi.zero_apply, zero_comp], },
+    { symmetry, exact CLCFPTinv.res_comp_res r V r' _ _ _ _ },
+    { show 0 = 0 ≫ _, rw [zero_comp], },
   end }
 .
 
@@ -125,7 +127,7 @@ def map : BD.system c' r V r' M₂ ⟶ BD.system c' r V r' M₁ :=
   begin
     ext (i|i) : 2,
     { dsimp, symmetry, apply CLCFPTinv.map_comp_res },
-    { dsimp [int.extend_from_nat], rw zero_comp },
+    { dsimp [int.extend_from_nat], show 0 ≫ _ = 0, rw zero_comp },
   end }
 
 @[simp] lemma map_id : map BD c' r V r' (𝟙 M) = 𝟙 (BD.system c' r V r' M) :=

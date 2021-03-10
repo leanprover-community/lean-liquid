@@ -1,95 +1,22 @@
-import algebra.group.basic
-import analysis.convex.cone
 import normed_group.NormedGroup
 
 import Mbar.basic
-import polyhedral_lattice.basic
 import normed_group.pseudo_normed_group
 import partition
+import lem97
 
 /-!
-In this file we state and prove lemmas 9.7 and 9.8 of [Analytic].
+In this file we state and prove 9.8 of [Analytic].
 -/
 
 open_locale nnreal big_operators
 
-section lem97
-
-variables (Λ : Type*) [add_comm_group Λ]
-
-lemma abs_smul {α : Type*} [linear_ordered_add_comm_group α] (n : ℕ) (a : α) :
-  abs (n • a) = n • abs a :=
-begin
-  cases le_total a 0 with hneg hpos,
-  { have h : 0 ≤ n • (-a) := nsmul_nonneg (neg_nonneg.mpr hneg) n,
-    rw [abs_of_nonpos hneg, ← abs_neg, ← smul_neg, abs_of_nonneg h] },
-  { have h : 0 ≤ n • a := nsmul_nonneg hpos n,
-    rw [abs_of_nonneg hpos, abs_of_nonneg h] }
-end
-
-lemma abs_add_eq_add_abs {α : Type*} [linear_ordered_add_comm_group α]  {a b : α} (hle : a ≤ b) :
-  abs (a + b) = abs a + abs b ↔ (0 ≤ a ∧ 0 ≤ b ∨ a ≤ 0 ∧ b ≤ 0) :=
-begin
-  by_cases a0 : 0 ≤ a; by_cases b0 : 0 ≤ b,
-  { simp [a0, b0, abs_of_nonneg, add_nonneg a0 b0] },
-  { exact (lt_irrefl (0 : α) (a0.trans_lt (hle.trans_lt (not_le.mp b0)))).elim },
-  { obtain F := (not_le.mp a0),
-    simp [a0, b0, abs_of_neg, abs_of_nonneg, F, F.le],
-    refine ⟨λ h, _, λ h, _⟩,
-    { by_cases ba : a + b ≤ 0,
-      { rw abs_of_nonpos ba at h,
-        simp [add_comm (-a)] at h,
-        exact le_of_eq (eq_zero_of_neg_eq h) },
-      { rw [abs_of_pos (not_le.mp ba), add_left_inj] at h,
-        rw eq_zero_of_neg_eq (eq.symm h) at F,
-        exact (lt_irrefl (0 : α) F).elim } },
-    { simp [le_antisymm h b0, abs_of_neg F], } },
-  { simp [(not_le.mp a0).le, (not_le.mp b0).le, abs_of_nonpos, add_nonpos, add_comm] }
-end
-
-
-lemma abs_add_eq_add_abs_iff {α : Type*} [linear_ordered_add_comm_group α]  (a b : α) :
-  abs (a + b) = abs a + abs b ↔ (0 ≤ a ∧ 0 ≤ b ∨ a ≤ 0 ∧ b ≤ 0) :=
-begin
-  by_cases ab : a ≤ b,
-  { exact abs_add_eq_add_abs ab },
-  { rw [add_comm a, add_comm (abs _), abs_add_eq_add_abs ((not_le.mp ab).le), and.comm,
-    @and.comm (b ≤ 0 ) _] }
-end
-
-/-
-jmc: I don't know exactly which version of the two lemmas below
-will be easier to prove, `lem97` or `lem97'`.
-The first one is closer to [Analytic], but the second one is easier to use.
-Mathematically they are indistinguishable.
--/
-
-/-- Lemma 9.7 of [Analytic]. -/
-lemma lem97 (hΛ_tf : torsion_free Λ) [hΛ_fg : module.finite ℤ Λ]
-  {ι : Type*} [fintype ι]
-  (N : ℕ) (l : ι → Λ) :
-  ∃ A : finset (Λ →+ ℤ), ∀ x : Λ →+ ℤ, ∃ (x' ∈ A) (y : Λ →+ ℤ),
-    x = N • y + x' ∧
-    ∀ i, (0 ≤ x' (l i) ∧ 0 ≤ (x - x') (l i)) ∨ (x' (l i) ≤ 0 ∧ (x - x') (l i) ≤ 0) :=
-begin
-  sorry
-end
-
-/-- Lemma 9.7 of [Analytic]. -/
-lemma lem97' (hΛ_tf : torsion_free Λ) [hΛ_fg : module.finite ℤ Λ]
-  {ι : Type*} [fintype ι]
-  (N : ℕ) (l : ι → Λ) :
-  ∃ A : finset (Λ →+ ℤ), ∀ x : Λ →+ ℤ, ∃ (x' ∈ A) (y : Λ →+ ℤ),
-    x = N • y + x' ∧
-    ∀ i, (x (l i)).nat_abs = N * (y (l i)).nat_abs + (x' (l i)).nat_abs :=
-begin
-  sorry
-end
-
-end lem97
-
 open pseudo_normed_group
 
+-- -- move this
+-- @[simp] lemma apply_ite {α β : Type*} (P : Prop) [decidable P] (f : α → β) (a b : α) :
+--   f (if P then a else b) = if P then f a else f b :=
+-- by { split_ifs; refl }
 
 variables (Λ : Type*) (r' : ℝ≥0) (S : Type*)
 variables [fintype S] [normed_group Λ] [polyhedral_lattice Λ]
@@ -319,68 +246,65 @@ begin
   obtain ⟨e⟩ := fintype_prod_nat_equiv_nat S,
   let f : ℕ → ℝ≥0 :=
     λ n, ↑(x (e.symm n).1 (e.symm n).2).nat_abs * r' ^ (e.symm n).2,
-  obtain ⟨mask, h0, h1, h2⟩ := exists_partition N hN f _ _, swap,
+  have summable_f : summable f,
+  { rw [← e.summable_iff, ← (equiv.sigma_equiv_prod S ℕ).summable_iff],
+    simp only [function.comp, f, e.symm_apply_apply, nnreal.summable_sigma,
+      equiv.sigma_equiv_prod_apply],
+    -- TODO, missing lemma `fintype.summable`
+    exact ⟨x.summable, ⟨_, has_sum_fintype _⟩⟩ },
+  have f_aux : ∀ n, f n ≤ 1,
   { intro n,
     calc f n ≤ 1 * 1 : mul_le_mul' _ _
     ... = 1 : mul_one 1,
     { exact_mod_cast (H _ _) },
     { exact pow_le_one _ zero_le' (le_of_lt ‹_›) } },
-  { sorry,
-  -- resetI,
-  -- have hf : ∑ i, mask_fun f (mask i) = f,
-  -- { ext1 n, simp only [fintype.sum_apply, mask_fun],
-  --   obtain ⟨i, hi1, hi2⟩ := h1 n,
-  --   rw [finset.sum_eq_single i, if_pos hi1],
-  --   { rintro j - hj, rw if_neg, exact mt (hi2 j) hj },
-  --   { intro hi, exact (hi (finset.mem_univ i)).elim } },
-  -- let y := λ i, Mbar.of_mask x (λ s n, mask i (e (s, n))),
-  -- have hxy : x = ∑ i, y i,
-  -- { ext s n,
-  --   simp only [Mbar.coe_sum, if_congr, function.curry_apply, fintype.sum_apply,
-  --     function.comp_app, Mbar.of_mask_to_fun, finset.sum_congr],
-  --   obtain ⟨i, hi1, hi2⟩ := h1 (e (s, n)),
-  --   rw [finset.sum_eq_single i, if_pos hi1],
-  --   { rintro j - hj,
-  --     rw if_neg,
-  --     exact mt (hi2 j) hj },
-  --   { intro hi, exact (hi (finset.mem_univ i)).elim } },
-  -- have hxf : ∥x∥₊ = ∑' n, f n,
-  -- { sorry },
-  -- refine ⟨y, hxy, _⟩,
-  -- intro i,
-  -- rw [Mbar.mem_filtration_iff] at hx ⊢,
-  -- refine le_trans (le_of_eq _) ((h2 i).trans _),
-  -- { rw [Mbar.nnnorm_def],
-  --   have aux1 : ∀ s, summable (λ n, mask_fun f (mask i) (e ((equiv.sigma_equiv_prod S ℕ) ⟨s, n⟩))),
-  --   { intro s,
-  --     refine nnreal.summable_of_le _ ((Mbar.geom r' S).summable s),
-  --     intro n,
-  --     simp only [mask_fun, f, equiv.symm_apply_apply, equiv.sigma_equiv_prod_apply],
-  --     -- split_ifs,
-  --     -- { refine mul_le_mul' _ le_rfl,
-  --     --   sorry },
-  --     { sorry }
-  --     },
-  --   have aux2 : summable (λ (p : Σ (b : S), ℕ), mask_fun f (mask i) (e ((equiv.sigma_equiv_prod S ℕ) p))),
-  --   { sorry },
-  --   -- now we need to massage the RHS using `e : S × ℕ ≃ ℕ`
-  --   calc ∑ s, ∑' n, ↑(y i s n).nat_abs * r' ^ n
-  --          = ∑' s, ∑' n, ↑(y i s n).nat_abs * r' ^ n : (tsum_fintype _).symm
-  --      ... = ∑' x, mask_fun f (mask i) (e x) : _
-  --      ... = ∑' n, mask_fun f (mask i) n : e.tsum_eq _,
-  --   rw [← (equiv.sigma_equiv_prod S ℕ).tsum_eq, tsum_sigma' aux1 aux2],
-  --   { congr' 1, ext1 s, congr' 1, ext1 n,
-  --     simp only [mask_fun, f, equiv.symm_apply_apply,
-  --       equiv.sigma_equiv_prod_apply, Mbar.of_mask_to_fun, nnreal.coe_nat_abs],
-  --     split_ifs,
-  --     { refl },
-  --     { simp only [nnnorm_zero, zero_mul] } },
-  --   { apply_instance } },
-  -- { simp only [div_eq_mul_inv],
-  --   refine add_le_add (mul_le_mul' _ le_rfl) le_rfl,
-  --   exact hxf.ge.trans hx }
-  },
-  sorry
+  obtain ⟨mask, h0, h1, h2⟩ := exists_partition N hN f f_aux summable_f,
+  resetI,
+  let y := λ i, Mbar.of_mask x (λ s n, mask i (e (s, n))),
+  have hxy : x = ∑ i, y i,
+  { ext s n,
+    simp only [Mbar.coe_sum, if_congr, function.curry_apply, fintype.sum_apply,
+      function.comp_app, Mbar.of_mask_to_fun, finset.sum_congr],
+    obtain ⟨i, hi1, hi2⟩ := h1 (e (s, n)),
+    rw [finset.sum_eq_single i, if_pos hi1],
+    { rintro j - hj,
+      rw if_neg,
+      exact mt (hi2 j) hj },
+    { intro hi, exact (hi (finset.mem_univ i)).elim } },
+  refine ⟨y, hxy, _⟩,
+  intro i,
+  rw [Mbar.mem_filtration_iff] at hx ⊢,
+  suffices : ∥x∥₊ = ∑' n, f n ∧ ∥y i∥₊ = ∑' (n : ℕ), mask_fun f (mask i) n,
+  { calc ∥y i∥₊ = ∑' (n : ℕ), mask_fun f (mask i) n : this.right
+            ... ≤ (∑' (n : ℕ), f n) / N + 1         : h2 i
+            ... ≤ c / N + 1                         : _,
+    simp only [div_eq_mul_inv],
+    refine add_le_add (mul_le_mul' _ le_rfl) le_rfl,
+    exact this.left.ge.trans hx },
+  split,
+  { calc ∑ s, ∑' n, ↑(x s n).nat_abs * r' ^ n
+        = ∑' s, ∑' n, ↑(x s n).nat_abs * r' ^ n : (tsum_fintype _).symm
+    ... = _ : _
+    ... = ∑' n, f n : e.tsum_eq _,
+    rw [← (equiv.sigma_equiv_prod S ℕ).tsum_eq], swap, { apply_instance },
+    dsimp only [f, equiv.sigma_equiv_prod_apply],
+    simp only [equiv.symm_apply_apply],
+    rw [tsum_sigma'],
+    { exact x.summable },
+    { rw nnreal.summable_sigma, exact ⟨x.summable, ⟨_, has_sum_fintype _⟩⟩ } },
+  { calc ∑ s, ∑' n, ↑(y i s n).nat_abs * r' ^ n
+        = ∑' s, ∑' n, ↑(y i s n).nat_abs * r' ^ n : (tsum_fintype _).symm
+    ... = ∑' x, mask_fun f (mask i) (e x) : _
+    ... = ∑' n, mask_fun f (mask i) n : e.tsum_eq _,
+    rw [← (equiv.sigma_equiv_prod S ℕ).tsum_eq], swap, { apply_instance },
+    have aux : ∀ i s n, (if mask i (e (s, n)) then ↑(x s n).nat_abs * r' ^ n else 0) =
+      ↑(if mask i (e (s, n)) then x s n else 0).nat_abs * r' ^ n,
+    { intros, split_ifs; simp only [int.nat_abs_zero, nat.cast_zero, zero_mul, eq_self_iff_true] },
+    dsimp only [f, y, mask_fun, equiv.sigma_equiv_prod_apply],
+    simp only [equiv.symm_apply_apply, Mbar.of_mask_to_fun, aux],
+    rw [tsum_sigma'],
+    { exact (y i).summable },
+    { rw nnreal.summable_sigma, exact ⟨(y i).summable, ⟨_, has_sum_fintype _⟩⟩ } }
 end
 
 lemma lem98_aux' [fact (r' < 1)] (N : ℕ)

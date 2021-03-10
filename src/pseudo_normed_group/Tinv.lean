@@ -54,6 +54,14 @@ variables {M}
 lemma map_comp : map r V r' c n (g.comp f) = map r V r' c n g ≫ map r V r' c n f :=
 by simp only [map, equalizer.map_comp_map, CLCFP.map_comp]
 
+lemma map_isometry : @isometry (CLCFPTinv r V r' M₂ c n) (CLCFPTinv r V r' M₁ c n) _ _
+  (map r V r' c n f) :=
+begin
+  apply normed_group_hom.isometry_of_norm,
+  intro v,
+  sorry
+end
+
 def res [fact (c₁ ≤ c₂)] : CLCFPTinv r V r' M c₂ n ⟶ CLCFPTinv r V r' M c₁ n :=
 equalizer.map (CLCFP.res _ _ _ _ _) (CLCFP.res _ _ _ _ _)
 (CLCFP.res_comp_Tinv _ _ _ _ _).symm $
