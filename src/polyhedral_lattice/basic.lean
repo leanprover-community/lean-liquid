@@ -111,8 +111,7 @@ normed_group.of_core _ $
 
 instance : polyhedral_lattice (⨁ i, Λ i) :=
 { fg := sorry,
-  tf := sorry,
-/-
+  tf :=
   begin
     intros v hv n hnv,
     obtain ⟨i, nzv_i⟩ : ∃ (i : ι), direct_sum.component ℤ ι Λ i v ≠ 0,
@@ -126,7 +125,6 @@ instance : polyhedral_lattice (⨁ i, Λ i) :=
     rw ← linear_map.map_smul_of_tower,
     convert (direct_sum.ext_iff ℤ).mp hnv i,
   end,
--/
   rational :=
   begin
     intro l,
