@@ -156,23 +156,18 @@ def inv_of_equiv_of_strict (e : M₁ ≃+ M₂) (he : ∀ x, f x = e x)
   begin
     simp only [add_equiv.coe_to_add_monoid_hom, add_monoid_hom.to_fun_eq_coe],
     have hcont := f.continuous' c,
-    set g : (filtration M₂ c) → (filtration M₁ c) :=
-      λ x, ⟨e.symm x, strict x.2⟩ with hg,
-    set f₁ : (filtration M₁ c) → (filtration M₂ c) := λ x, ⟨f x, f.strict x.2⟩ with hf₁,
-    change continuous g,
-    have hleft : function.left_inverse g f₁ := λ x, by { rw [hg, hf₁], simp [he], },
-    have hright : function.right_inverse g f₁,
-    { intro x; rw [hg, hf₁]; simp [e.apply_symm_apply, he] },
-    have hinj : function.injective f₁ := function.has_left_inverse.injective ⟨g, hleft⟩,
+    let g : (filtration M₁ c) ≃ (filtration M₂ c) :=
+    ⟨λ x, ⟨f x, f.strict x.2⟩, λ x, ⟨e.symm x, strict x.2⟩, λ x, by simp [he], λ x, by simp [he]⟩,
+    change continuous g.symm,
     rw continuous_iff_is_closed,
     intros U hU,
-    rw [← set.image_eq_preimage_of_inverse hleft hright],
-    exact closed_embedding.is_closed_map (continuous.closed_embedding hcont hinj) U hU,
+    rw [← g.image_eq_preimage],
+    exact (hcont.closed_embedding g.injective).is_closed_map U hU,
   end,
   map_Tinv' := λ x,
   begin
-    simp only [add_equiv.coe_to_add_monoid_hom, add_monoid_hom.to_fun_eq_coe],
     apply e.injective,
+    simp only [add_equiv.coe_to_add_monoid_hom, add_monoid_hom.to_fun_eq_coe],
     rw [e.apply_symm_apply, ← he, map_Tinv, he, e.apply_symm_apply],
   end,
   .. e.symm.to_add_monoid_hom }

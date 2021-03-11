@@ -15,6 +15,7 @@ variables (c' : ℕ → ℝ≥0)  -- implicit constants, chosen once and for all
 namespace ProFiltPseuNormGrpWithTinv
 
 open pseudo_normed_group profinitely_filtered_pseudo_normed_group_with_Tinv_hom
+profinitely_filtered_pseudo_normed_group_with_Tinv (Tinv)
 
 variables {r : ℝ≥0} {M₁ M₂ : Type u}
 variables [profinitely_filtered_pseudo_normed_group_with_Tinv r M₁]
@@ -68,15 +69,12 @@ def HomZ_map {r : ℝ≥0} [fact (0 < r)] [fact (r ≤ 1)] (M : Type)
   begin
     rw [polyhedral_lattice.add_monoid_hom.continuous_iff],
     intro n,
-    refine pfpng_ctu_smul_int M n _ _,
-    intro x,
-    refl
+    exact pfpng_ctu_smul_int M n _ (λ x, rfl),
   end,
   map_Tinv' := λ x,
   begin
     refine add_monoid_hom.ext (λ n, _),
-    have h : (profinitely_filtered_pseudo_normed_group_with_Tinv.Tinv (int.cast_add_hom' x)) n =
-      profinitely_filtered_pseudo_normed_group_with_Tinv.Tinv (int.cast_add_hom' x n) := rfl,
+    have h : (Tinv (int.cast_add_hom' x)) n = Tinv (int.cast_add_hom' x n) := rfl,
     simp only [h, int.cast_add_hom'_apply, profinitely_filtered_pseudo_normed_group_hom.map_gsmul],
   end }
 
@@ -94,10 +92,7 @@ def HomZ_map_equiv {r : ℝ≥0} [fact (0 < r)] [fact (r ≤ 1)] (M : Type)
 lemma HomZ_map_inverse_strict {r : ℝ≥0} [fact (0 < r)] [fact (r ≤ 1)] (M : Type)
   [profinitely_filtered_pseudo_normed_group_with_Tinv r M] :
   ∀ c f, f ∈ filtration ((Hom ℤ M)) c → (HomZ_map_equiv M).symm f ∈ filtration M c :=
-begin
-  intros c f hf,
-  simpa [mul_one] using hf int.one_mem_filtration
-end
+λ c f hf, by simpa [mul_one] using hf int.one_mem_filtration
 
 /-- The isomorphism `Hom ℤ M ≅ M` for `M` a `profinitely_filtered_pseudo_normed_group_with_Tinv`. -/
 noncomputable
