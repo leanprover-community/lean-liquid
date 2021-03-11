@@ -327,7 +327,12 @@ begin
   { intros c i, exact isometry_id }
 end
 
+omit hk
 
+lemma shift_and_truncate_admissible (hC : C.admissible) :
+  (shift_and_truncate.obj C).admissible :=
+{ d_norm_noninc' := sorry,
+  res_norm_noninc := sorry }
 
 
 
@@ -337,9 +342,6 @@ end
 
 
 /- === Old cruft === -/
-
-
--- omit hk
 
 -- -- move this
 -- def functor.has_shift (C D : Type*) [category C] [category D] [has_shift D] :

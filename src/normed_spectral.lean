@@ -18,9 +18,11 @@ namespace shift_and_truncate
 variables (M : system_of_double_complexes.{u})
 
 lemma admissible (hM : M.admissible) : (shift_and_truncate.obj M).admissible :=
-{ d_norm_noninc' := sorry,
-  d'_norm_noninc' := sorry,
-  res_norm_noninc := sorry }
+{ d_norm_noninc' := λ c p' p q h x, sorry,
+  d'_norm_noninc' := λ c p,
+    ((M.row p).shift_and_truncate_admissible (hM.row p)).d_norm_noninc' c,
+  res_norm_noninc := λ c₁ c₂ p,
+    ((M.row p).shift_and_truncate_admissible (hM.row p)).res_norm_noninc c₁ c₂ }
 
 -- defeq abuse for the win!!!
 lemma row (p : ℤ) :
