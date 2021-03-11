@@ -1,6 +1,6 @@
 import analysis.normed_space.basic
 import ring_theory.finiteness
--- import linear_algebra.direct_sum_module
+import linear_algebra.direct_sum_module
 import algebra.direct_sum
 
 -- import hacks_and_tricks.by_exactI_hack
@@ -111,28 +111,20 @@ normed_group.of_core _ $
 
 instance : polyhedral_lattice (⨁ i, Λ i) :=
 { fg := sorry,
-  tf := sorry,
-  --   begin
-  --   intros v hv n hnv,
-  --   have hnv_comp : ∀ (i : ι), direct_sum.component ℤ ι Λ i (n • v) = 0,
-  --   { convert (direct_sum.ext_iff ℤ).mp hnv,
-  --     ext,
-  --     split,
-  --     all_goals { intros hi i,
-  --                 specialize hi i,
-  --                 convert hi, } },
-  --   obtain ⟨i, nzv_i⟩ : ∃ (i : ι), direct_sum.component ℤ ι Λ i v ≠ 0,
-  --   { rw [ne.def, direct_sum.ext_iff ℤ] at hv,
-  --     rw ← not_forall,
-  --     exact hv },
-  --   have tf_i : torsion_free (Λ i),
-  --   { suffices pl_i : polyhedral_lattice (Λ i),
-  --     exact pl_i.tf,
-  --     apply_assumption },
-  --   specialize hnv_comp i,
-  --   have : n • (direct_sum.component ℤ ι Λ i) v = 0 := by rwa linear_map.map_smul_of_tower at hnv_comp,
-  --   exact tf_i (direct_sum.component ℤ ι Λ i v) nzv_i n this,
-  -- end,
+  tf :=
+  begin
+    intros v hv n hnv,
+    obtain ⟨i, nzv_i⟩ : ∃ (i : ι), direct_sum.component ℤ ι Λ i v ≠ 0,
+    { rw ← not_forall,
+      rwa [ne.def, direct_sum.ext_iff ℤ] at hv },
+    have tf_i : torsion_free (Λ i),
+    { suffices pl_i : polyhedral_lattice (Λ i),
+      exact pl_i.tf,
+      apply_assumption },
+    refine tf_i (direct_sum.component ℤ ι Λ i v) nzv_i n _,
+    rw ← linear_map.map_smul_of_tower,
+    convert (direct_sum.ext_iff ℤ).mp hnv i,
+  end,
   rational :=
   begin
     intro l,
@@ -156,11 +148,17 @@ instance : polyhedral_lattice (⨁ i, Λ i) :=
     { sorry },
     refine ⟨∏ i, d i, _, λ j, d' j.1 * c j.1 j.2, _, _⟩,
     sorry,
-    { rw [hl, finset.smul_sum, ← finset.univ_sigma_univ, finset.sum_sigma],
+    { rw [hl], -- the weirdness hese is not really clear to me: it works as a simple `rw`
+               -- without the linear_algebra.direct_sum_module import.
+    have : (∏ (i : ι), d i) • ∑ (i : ι), (direct_sum.of (λ (i : ι), Λ i) i) (l i) =
+        ∑ (x : ι), (∏ (i : ι), d i) • (direct_sum.of (λ (i : ι), Λ i) x) (l x) :=
+        finset.smul_sum,
+    convert this.trans _,
+    rw[ ← finset.univ_sigma_univ, finset.sum_sigma],
       apply fintype.sum_congr,
       intro i,
       dsimp,
-      simp only [mul_smul, ← finset.smul_sum], sorry },
+      sorry }, --simp only [mul_smul, ← finset.smul_sum] },
     sorry
   end }
 

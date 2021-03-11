@@ -43,6 +43,9 @@ variables {M}
 lemma map_comp : map V r' c n (g.comp f) = map V r' c n g ≫ map V r' c n f :=
 by { delta map, rw LCFP.map_comp, apply category_theory.functor.map_comp }
 
+lemma map_norm_noninc : (map V r' c n f).norm_noninc :=
+Completion_map_norm_noninc _ $ LCFP.map_norm_noninc _ _ _ _ _
+
 @[simps]
 def res [fact (c₁ ≤ c₂)] : CLCFP V r' M c₂ n ⟶ CLCFP V r' M c₁ n :=
 Completion.map (LCFP.res V r' c₁ c₂ n)
@@ -53,6 +56,9 @@ by { delta res, rw LCFP.res_refl, apply category_theory.functor.map_id }
 lemma res_comp_res [fact (c₁ ≤ c₂)] [fact (c₂ ≤ c₃)] [fact (c₁ ≤ c₃)] :
   res V r' c₂ c₃ n ≫ res V r' c₁ c₂ n = @res V r' M _ c₁ c₃ n _ :=
 by simp only [res, ← category_theory.functor.map_comp, ← op_comp, LCFP.res_comp_res]
+
+lemma res_norm_noninc [fact (c₁ ≤ c₂)] : (@res V r' M _ c₁ c₂ n _).norm_noninc :=
+Completion_map_norm_noninc _ $ LCFP.res_norm_noninc _ _ _ _ _
 
 lemma map_comp_res [fact (c₁ ≤ c₂)] :
   map V r' c₂ n f ≫ res V r' c₁ c₂ n = res V r' c₁ c₂ n ≫ map V r' c₁ n f :=

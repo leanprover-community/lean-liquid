@@ -44,6 +44,9 @@ variables {M}
 lemma map_comp : map V r' c n (g.comp f) = map V r' c n g ≫ map V r' c n f :=
 by { delta map, rw [FiltrationPow.map_comp, op_comp], apply category_theory.functor.map_comp }
 
+lemma map_norm_noninc : (map V r' c n f).norm_noninc :=
+locally_constant.comap_hom_norm_noninc _ _
+
 @[simps]
 def res [fact (c₁ ≤ c₂)] : LCFP V r' M c₂ n ⟶ LCFP V r' M c₁ n :=
 (LocallyConstant.obj V).map (FiltrationPow.cast_le r' c₁ c₂ n).op
@@ -54,6 +57,9 @@ by { delta res, rw FiltrationPow.cast_le_refl, apply category_theory.functor.map
 lemma res_comp_res [fact (c₁ ≤ c₂)] [fact (c₂ ≤ c₃)] [fact (c₁ ≤ c₃)] :
   res V r' c₂ c₃ n ≫ res V r' c₁ c₂ n = @res V r' M _ c₁ c₃ n _ :=
 by simp only [res, ← category_theory.functor.map_comp, ← op_comp, FiltrationPow.cast_le_trans]
+
+lemma res_norm_noninc [fact (c₁ ≤ c₂)] : (@res V r' M _ c₁ c₂ n _).norm_noninc :=
+locally_constant.comap_hom_norm_noninc _ _
 
 lemma map_comp_res [fact (c₁ ≤ c₂)] :
   map V r' c₂ n f ≫ res V r' c₁ c₂ n = res V r' c₁ c₂ n ≫ map V r' c₁ n f :=
@@ -86,6 +92,11 @@ begin
   refl
 end
 
+lemma Tinv_norm_noninc : (@Tinv V r' M _ c n _).norm_noninc :=
+normed_group_hom.norm_noninc.comp
+  (locally_constant.comap_hom_norm_noninc _ _)
+  (res_norm_noninc V r' _ _ n)
+
 end Tinv
 
 section normed_with_aut
@@ -102,6 +113,14 @@ lemma T_inv_eq [fact (0 < r)] :
   T_inv r V r' c n =
     (LocallyConstant.map (normed_with_aut.T.inv : V ⟶ V)).app (op $ FiltrationPow r' M c n) :=
 rfl
+
+-- This does not apply to our situation
+-- lemma T_inv_norm_noninc [fact (0 < r)] : (@T_inv r V r' M _ c n _ _).norm_noninc :=
+-- begin
+--   refine locally_constant.map_hom_norm_noninc _,
+--   -- factor this out
+--   intro v,
+-- end
 
 variables [fact (0 < r)]
 

@@ -53,6 +53,9 @@ begin
   delta res, erw this, refl
 end
 
+@[simp] lemma norm_res_of_eq (h : c₂ = c₁) (x : C.X c₁ p q) : ∥@res C _ _ p q h.le x∥ = ∥x∥ :=
+by { cases h, rw res_refl, refl }
+
 @[simp] lemma res_comp_res (h₁ : fact (c₂ ≤ c₁)) (h₂ : fact (c₃ ≤ c₂)) :
   @res C _ _ p q h₁ ≫ @res C _ _ p q h₂  = @res C _ _ p q (le_trans h₂ h₁) :=
 begin
@@ -121,37 +124,6 @@ def congr {c c' : ℝ≥0} {p p' q q' : ℤ} (hc : c = c') (hp : p = p') (hq : q
   C.X c p q ⟶ C.X c' p' q' :=
 eq_to_hom $ by { subst hc, subst hp, subst hq, }
 
-/-- A system of double complexes is *admissible*
-if all the differentials and restriction maps are norm-nonincreasing.
-
-See Definition 9.3 of [Analytic]. -/
-structure admissible (C : system_of_double_complexes) : Prop :=
-(d_norm_noninc' : ∀ c p p' q (h : p + 1 = p') (x : C.X c p q), ∥C.d p p' x∥ ≤ ∥x∥)
-(d'_norm_noninc' : ∀ c p q q' (h : q + 1 = q') (x : C.X c p q), ∥C.d' q q' x∥ ≤ ∥x∥)
-(res_norm_noninc : ∀ c' c p q h (x : C.X c' p q), ∥@res C c' c p q h x∥ ≤ ∥x∥)
-
-namespace admissible
-
-variables {C}
-
-lemma d_norm_noninc (hC : C.admissible) (c : ℝ≥0) (p p' q : ℤ) :
-  (C.d p p' : C.X c p q ⟶ _).norm_noninc :=
-begin
-  by_cases h : p + 1 = p',
-  { exact hC.d_norm_noninc' c p p' q h },
-  { rw C.d_eq_zero p p' q c h, intro v, simp }
-end
-
-lemma d'_norm_noninc (hC : C.admissible) (c : ℝ≥0) (p q q' : ℤ) :
-  (C.d' q q' : C.X c p q ⟶ _).norm_noninc :=
-begin
-  by_cases h : q + 1 = q',
-  { exact hC.d'_norm_noninc' c p q q' h },
-  { rw C.d'_eq_zero p q q' c h, intro v, simp }
-end
-
-end admissible
-
 -- attribute [simps] differential_object.forget
 
 /-- The `p`-th row in a system of double complexes, as system of complexes.
@@ -187,5 +159,44 @@ rfl
 @[simp] lemma col_d (C : system_of_double_complexes) (c : ℝ≥0) (p p' q : ℤ) :
   (C.col q).d p p' = @d C c p p' q :=
 rfl
+
+/-- A system of double complexes is *admissible*
+if all the differentials and restriction maps are norm-nonincreasing.
+
+See Definition 9.3 of [Analytic]. -/
+structure admissible (C : system_of_double_complexes) : Prop :=
+(d_norm_noninc' : ∀ c p p' q (h : p + 1 = p') (x : C.X c p q), ∥C.d p p' x∥ ≤ ∥x∥)
+(d'_norm_noninc' : ∀ c p q q' (h : q + 1 = q') (x : C.X c p q), ∥C.d' q q' x∥ ≤ ∥x∥)
+(res_norm_noninc : ∀ c' c p q h (x : C.X c' p q), ∥@res C c' c p q h x∥ ≤ ∥x∥)
+
+namespace admissible
+
+variables {C}
+
+lemma d_norm_noninc (hC : C.admissible) (c : ℝ≥0) (p p' q : ℤ) :
+  (C.d p p' : C.X c p q ⟶ _).norm_noninc :=
+begin
+  by_cases h : p + 1 = p',
+  { exact hC.d_norm_noninc' c p p' q h },
+  { rw C.d_eq_zero p p' q c h, intro v, simp }
+end
+
+lemma d'_norm_noninc (hC : C.admissible) (c : ℝ≥0) (p q q' : ℤ) :
+  (C.d' q q' : C.X c p q ⟶ _).norm_noninc :=
+begin
+  by_cases h : q + 1 = q',
+  { exact hC.d'_norm_noninc' c p q q' h },
+  { rw C.d'_eq_zero p q q' c h, intro v, simp }
+end
+
+lemma col (hC : C.admissible) (q : ℤ) : (C.col q).admissible :=
+{ d_norm_noninc' := λ c i j h, hC.d_norm_noninc _ _ _ _,
+  res_norm_noninc := λ c i j h, hC.res_norm_noninc _ _ _ _ _ }
+
+lemma row (hC : C.admissible) (p : ℤ) : (C.row p).admissible :=
+{ d_norm_noninc' := λ c i j h, hC.d'_norm_noninc _ _ _ _,
+  res_norm_noninc := λ c i j h, hC.res_norm_noninc _ _ _ _ _ }
+
+end admissible
 
 end system_of_double_complexes
