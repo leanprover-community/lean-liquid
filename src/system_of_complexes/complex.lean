@@ -250,6 +250,7 @@ variables (ι V)
 
 set_option old_structure_cmd true
 
+@[ext]
 structure complex_like (cov : bool) extends differential_object ι V :=
 (d_comp_d : ∀ i j k, d i j ≫ d j k = 0)
 (d_eq_zero : ∀ ⦃i j⦄, ¬ coherent_indices cov i j → d i j = 0)

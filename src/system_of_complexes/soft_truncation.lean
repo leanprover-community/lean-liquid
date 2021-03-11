@@ -329,10 +329,25 @@ end
 
 omit hk
 
+-- maybe we should prove this using `admissible.iff_of_iso` (doesn't exist yet)
+-- analogous to the proof of `shift_and_truncate_is_weak_bounded_exact_iff` above
 lemma shift_and_truncate_admissible (hC : C.admissible) :
   (shift_and_truncate.obj C).admissible :=
-{ d_norm_noninc' := sorry,
-  res_norm_noninc := sorry }
+{ d_norm_noninc' :=
+  begin
+    rintro c ((i|i)|i) j rfl x,
+    { -- is this even true? I guess we need some sort of `lift_norm_noninc` lemma for quotients
+      sorry },
+    { sorry },
+    { sorry }
+  end,
+  res_norm_noninc :=
+  begin
+    rintro c₁ c₂ ((i|i)|i) h x,
+    { sorry },
+    { sorry },
+    { sorry }
+  end, }
 
 
 

@@ -17,16 +17,26 @@ namespace shift_and_truncate
 
 variables (M : system_of_double_complexes.{u})
 
+-- defeq abuse for the win!!!
+lemma row (p : ℤ) :
+  (shift_and_truncate.obj M).row p = system_of_complexes.shift_and_truncate.obj (M.row p) := rfl
+
+-- is this provable?? if it is, it will make our life a lot easier (but defeq abuse :oops:)
+-- i'm not convinced that we should go down this road
+lemma col_pos (q : ℕ) :
+  (shift_and_truncate.obj M).col (q+1) = M.col (q+1+1) :=
+begin
+  apply category_theory.functor.ext, swap,
+  { intros, sorry },
+  { intros c₁ c₂ h, ext p x, sorry },
+end
+
 lemma admissible (hM : M.admissible) : (shift_and_truncate.obj M).admissible :=
 { d_norm_noninc' := λ c p' p q h x, sorry,
   d'_norm_noninc' := λ c p,
     ((M.row p).shift_and_truncate_admissible (hM.row p)).d_norm_noninc' c,
   res_norm_noninc := λ c₁ c₂ p,
     ((M.row p).shift_and_truncate_admissible (hM.row p)).res_norm_noninc c₁ c₂ }
-
--- defeq abuse for the win!!!
-lemma row (p : ℤ) :
-  (shift_and_truncate.obj M).row p = system_of_complexes.shift_and_truncate.obj (M.row p) := rfl
 
 end shift_and_truncate
 
