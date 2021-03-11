@@ -129,10 +129,15 @@ def coker (f : A ⟶ B) : NormedGroup := NormedGroup.of $
 @[simp]
 noncomputable
 def coker.π {f : A ⟶ B} : B ⟶ coker f :=
-  normed_group_hom.normed_group.mk _
+normed_group_hom.normed_group.mk _
 
-lemma coker.π_surjective {f : A ⟶ B} : function.surjective (coker.π : B ⟶ coker f).to_add_monoid_hom :=
-  surjective_quot_mk _
+lemma coker.π_surjective {f : A ⟶ B} :
+  function.surjective (coker.π : B ⟶ coker f).to_add_monoid_hom :=
+surjective_quot_mk _
+
+lemma coker.π_is_quotient {f : A ⟶ B} :
+  (coker.π : B ⟶ coker f).is_quotient :=
+normed_group_hom.is_quotient_quotient _
 
 instance coker.π_epi {f : A ⟶ B} : epi (coker.π : B ⟶ coker f) :=
 begin

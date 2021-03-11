@@ -167,19 +167,25 @@ lemma soft_truncation'_is_weak_bounded_exact (hC : C.is_weak_bounded_exact k K m
   (soft_truncation'.obj C).is_weak_bounded_exact k K m c₀
 | c hc (0:ℕ)   hi x ε hε :=
 begin
-  obtain ⟨x, rfl⟩ := NormedGroup.coker.π_surjective x,
+  let π := λ c, @NormedGroup.coker.π _ _ (@d C c (-1) 0),
+  obtain ⟨x, rfl⟩ : ∃ x', π _ x' = x := NormedGroup.coker.π_surjective x,
   obtain ⟨i', j, hi', rfl, y, hy⟩ := hC c hc _ hi x ε hε,
   obtain rfl : i' = -1, { rwa ← eq_sub_iff_add_eq at hi' },
   refine ⟨-1, _, rfl, rfl, 0, _⟩,
-  simp only [normed_group_hom.map_zero, sub_zero],
-  sorry
+  simp only [normed_group_hom.map_zero, sub_zero, normed_group_hom.coe_to_add_monoid_hom],
+  calc _ = ∥π c (res x - C.d (-1) 0 y)∥ : _
+  ... ≤ ∥res x - C.d _ 0 y∥ : normed_group_hom.quotient_norm_le (NormedGroup.coker.π_is_quotient) _
+  ... ≤ _ : hy,
+  congr' 1,
+  have hπy : π c (C.d _ 0 y) = 0,
+  { show (C.d _ 0 ≫ π c) y = 0, rw [NormedGroup.coker.comp_pi_eq_zero], refl },
+  simp only [normed_group_hom.map_sub, hπy, sub_zero], refl,
 end
 | c hc (1:ℕ)   hi x ε hε :=
 begin
   obtain ⟨i', j, hi', rfl, y, hy⟩ := hC c hc _ hi x ε hε,
   simp at hi', subst i',
-  refine ⟨0, _, rfl, rfl, NormedGroup.coker.π y, _⟩,
-  sorry
+  exact ⟨0, _, rfl, rfl, NormedGroup.coker.π y, hy⟩
 end
 | c hc (i+2:ℕ) hi x ε hε :=
 begin
