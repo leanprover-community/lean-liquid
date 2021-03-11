@@ -219,21 +219,25 @@ lemma is_weak_bounded_exact_of_soft_truncation'
 begin
   let π := λ c, @NormedGroup.coker.π _ _ (@d C c (-1) 0),
   let δ := ε / 2,
-  have hεδ : δ + δ = ε, { dsimp [δ], rw [← add_div, half_add_self] },
+  have hδε : δ + δ = ε, { dsimp [δ], rw [← add_div, half_add_self] },
   have hδ : 0 < δ := div_pos hε zero_lt_two,
-  obtain ⟨x', Hxx', Hx'⟩ : ∃ x', π c x' = π c (res x) ∧ ∥x'∥ < ∥π c (res x)∥ + δ :=
-    normed_group_hom.quotient_norm_lift (NormedGroup.coker.π_is_quotient) hδ _,
-  obtain ⟨y, hy⟩ : ∃ y : C c (-1), C.d _ ↑0 y = res x - x',
-  { -- is this even true? if the range of `d` is not closed,
-    -- we can only get close, but not an equality...
-    sorry },
+  let γ := δ / 2,
+  have hγδ : γ + γ = δ, { dsimp [γ], rw [← add_div, half_add_self] },
+  have hγ : 0 < γ := div_pos hδ zero_lt_two,
+  obtain ⟨x', Hxx', Hx'⟩ : ∃ x', π c x' = π c (res x) ∧ ∥x'∥ < ∥π c (res x)∥ + γ :=
+    normed_group_hom.quotient_norm_lift (NormedGroup.coker.π_is_quotient) hγ _,
+  obtain ⟨y, hy⟩ : ∃ y : C c (-1), ∥res x - (C.d (-1) ↑0) y∥ ≤ ∥x'∥ + γ,
+  { sorry },
   obtain ⟨i', j, hi', rfl, y', H⟩ := hC c hc _ hi (π _ x) δ hδ,
   obtain rfl : i' = -1, { rwa ← eq_sub_iff_add_eq at hi' },
   obtain rfl : y' = 0, { cases y', refl },
   refine ⟨-1, 1, rfl, rfl, y, _⟩,
-  simp only [hy, normed_group_hom.map_zero, sub_zero, sub_sub_cancel, ← hεδ, ← add_assoc] at H ⊢,
-  calc ∥x'∥ ≤ ∥π c (res x)∥ + δ : Hx'.le
+  simp only [normed_group_hom.map_zero, sub_zero] at H ⊢,
+  calc ∥res x - (C.d (-1) ↑0) y∥ ≤ ∥x'∥ + γ : hy
+  ... ≤ ∥π c (res x)∥ + γ + γ : add_le_add_right Hx'.le _
+  ... ≤ ∥π c (res x)∥ + δ : by rw [add_assoc, hγδ]
   ... ≤ ↑K * ∥C.d ↑0 1 x∥ + δ + δ : add_le_add_right H _
+  ... ≤ ↑K * ∥C.d ↑0 1 x∥ + ε : by rw [add_assoc, hδε]
 end
 | c hc (1:ℕ)   hi x ε hε :=
 begin

@@ -34,14 +34,31 @@ structure normed_spectral_conditions (m : ℤ) (k K : ℝ≥0) [fact (1 ≤ k)]
   (x : M.X (k' * (k' * c)) 0 q') (u1 u2 : units ℤ),
   ​∥M.res (M.d 0 1 x) + (u1:ℤ) • h q' (M.d' q' q'' x) + (u2:ℤ) • M.d' q q' (h q x)∥ ≤
     ε * ∥(res M x : M.X c 0 q')∥)
+-- the following 3 conditions are automatic in [Analytic.pdf],
+-- but we need them, because our complexes are indexed by `ℤ`
+(Hneg : (M.row 0).is_weak_bounded_exact (k' * k') (2 * K * H) (-1) c₀)
+(Hd : ∀ c q (x : M.X c (-1) q), M.d _ 0 x = 0)
+(Hd' : ∀ c p (x : M.X c p (-1)), M.d' _ 0 x = 0)
+
 .
 
 namespace normed_spectral_conditions
 
-variables {m : ℤ} {k K : ℝ≥0} [fact (1 ≤ k)]
+variables {m' m : ℤ} {k K : ℝ≥0} [fact (1 ≤ k)]
 variables {ε : ℝ} {hε : 0 < ε} {k₀ : ℝ≥0} [fact (1 ≤ k₀)]
 variables {M : system_of_double_complexes.{u}}
 variables {k' : ℝ≥0} [fact (k₀ ≤ k')] [fact (1 ≤ k')] {c₀ H : ℝ≥0} [fact (0 < H)]
+
+lemma shift_and_truncate (cond : normed_spectral_conditions m k K ε hε M k' c₀ H) (h : m' + 1 = m) :
+  normed_spectral_conditions m' (k*k*k) (K*(K*K+1)) ε hε (shift_and_truncate.{u u}.obj M) k' c₀ H :=
+{ col_exact := sorry,
+  row_exact := sorry,
+  h := sorry,
+  norm_h_le := sorry,
+  cond3b := sorry,
+  Hneg := sorry,
+  Hd := sorry,
+  Hd' := sorry }
 
 end normed_spectral_conditions
 
@@ -51,20 +68,17 @@ theorem analytic_9_6_base (k K : ℝ≥0) [hk : fact (1 ≤ k)] [hK : fact (1 �
   ∀ (M : system_of_double_complexes.{u}) (hM : M.admissible)
     (k' : ℝ≥0) [fact (k₀ ≤ k')] [fact (1 ≤ k')] -- follows
     (c₀ H : ℝ≥0) [fact (0 < H)],
-  ​∀ (Hneg : (M.row 0).is_weak_bounded_exact (k' * k') (2 * K * H) (-1) c₀)
-    (Hd : ∀ c q (x : M.X c (-1) q), M.d _ 0 x = 0)
-    (Hd' : ∀ c p (x : M.X c p (-1)), M.d' _ 0 x = 0)
-    (cond : normed_spectral_conditions 0 k K ε hε M k' c₀ H),
+  ​∀ (cond : normed_spectral_conditions 0 k K ε hε M k' c₀ H),
   (M.row 0).is_weak_bounded_exact (k' * k') (2 * K * H) 0 c₀ :=
 begin
   let ε := (2*K)⁻¹,
   have hε : 0 < ε,
   { exact nnreal.inv_pos.mpr (mul_pos zero_lt_two (lt_of_lt_of_le zero_lt_one hK)) },
   use [ε, hε, k, hk],
-  introsI M hM k' _k' _1k' c₀ H _H Hneg Hd Hd' cond,
+  introsI M hM k' _k' _1k' c₀ H _H cond,
   intros c hc i hi,
   cases le_or_lt i (-1 : ℤ) with h h,
-  { exact Hneg c hc i h },
+  { exact cond.Hneg c hc i h },
   -- Statement is of the form "for all x ∈ M_{0,i+1} exists y ∈ M_{0,i} such that..."
   interval_cases i, clear hi h,
   intros x δ hδ,
@@ -72,7 +86,7 @@ begin
   have Hx1 := (cond.col_exact 0 le_rfl).of_le (hM.col 0) _k' le_rfl le_rfl le_rfl c hc 0 le_rfl,
   have Hx2 := cond.cond3b,
   replace Hx2 := @Hx2 1 0 (-1) rfl rfl le_rfl c hc (M.res x) 1 1,
-  simp only [row_d, col_d, Hd, Hd', sub_zero, add_zero, smul_zero, d_res, d'_res,
+  simp only [row_d, col_d, cond.Hd, cond.Hd', sub_zero, add_zero, smul_zero, d_res, d'_res,
     res_res, one_div, row_res, units.coe_one, one_smul] at Hx1 Hx2 ⊢,
   refine ⟨-1, 1, rfl, rfl, 0, _⟩,
   let φ : ℝ := δ / 2,
@@ -80,7 +94,8 @@ begin
   have hδφ : δ = φ + φ, { dsimp [φ], rw [← add_div, half_add_self] },
   obtain ⟨i, j, hi, hj, y1, hx1⟩ := Hx1 (M.res x) φ hφ,
   simp [← eq_neg_iff_add_eq_zero] at hi hj, subst i, subst j,
-  simp only [Hd, Hd', sub_zero, nnreal.coe_mul, nnreal.coe_bit0, nnreal.coe_one, d_res] at hx1 ⊢,
+  simp only [cond.Hd, cond.Hd', sub_zero,
+    nnreal.coe_mul, nnreal.coe_bit0, nnreal.coe_one, d_res] at hx1 ⊢,
   erw [res_res] at hx1,
   clear y1 Hx1,
   replace Hx1 := mul_le_mul_of_nonneg_left hx1 ε.coe_nonneg,
@@ -117,10 +132,7 @@ theorem analytic_9_6 (m : ℤ) :
   ∀ (M : system_of_double_complexes.{u}) (hM : M.admissible)
     (k' : ℝ≥0) [fact (k₀ ≤ k')] [fact (1 ≤ k')] -- follows
     (c₀ H : ℝ≥0) [fact (0 < H)],
-  ​∀ (Hneg : (M.row 0).is_weak_bounded_exact (k' * k') (2 * K * H) (-1) c₀)
-    (Hd : ∀ c q (x : M.X c (-1) q), M.d _ 0 x = 0)
-    (Hd' : ∀ c p (x : M.X c p (-1)), M.d' _ 0 x = 0)
-    (cond : normed_spectral_conditions m k K ε hε M k' c₀ H),
+  ​∀ (cond : normed_spectral_conditions m k K ε hε M k' c₀ H),
   (M.row 0).is_weak_bounded_exact (k' * k') (2 * K * H) m c₀ :=
 begin
   apply int.induction_on m,
@@ -131,7 +143,7 @@ begin
   { intro m, intros, refine ⟨1, zero_lt_one, 1, le_rfl, _⟩,
     introsI,
     intros c hc i hi,
-    refine Hneg c hc i _,
+    refine cond.Hneg c hc i _,
     have : 0 ≤ (m : ℤ) := int.coe_zero_le m,
     rw ← zero_sub,
     exact hi.trans (sub_le_sub (neg_le.mp this) le_rfl) },
