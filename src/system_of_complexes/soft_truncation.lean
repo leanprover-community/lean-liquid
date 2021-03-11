@@ -119,11 +119,31 @@ end NormedGroup
 
 namespace system_of_complexes
 
-variables (C : system_of_complexes)
+open differential_object category_theory
+
+variables (C : system_of_complexes.{u})
 
 @[simps]
 def soft_truncation' : system_of_complexes ⥤ system_of_complexes :=
 (whiskering_right _ _ _).obj $ NormedGroup.soft_truncation'
+
+@[simps]
+def shift : system_of_complexes ⥤ system_of_complexes :=
+(whiskering_right _ _ _).obj $ (complex_like.shift _ _)
+
+@[simps]
+def shift_and_truncate : system_of_complexes ⥤ system_of_complexes :=
+(whiskering_right _ _ _).obj $ NormedGroup.shift_and_truncate
+
+@[simps]
+def shift_comp_soft_truncation' : shift ⋙ soft_truncation' ≅ shift_and_truncate :=
+nat_iso.of_components (λ X, nat_iso.of_components (λ c, eq_to_iso rfl) $
+  by { intros c₁ c₂ h, dsimp, simp only [category.id_comp, category.comp_id], refl }) $
+  by { intros X Y f, ext, dsimp, simp only [category.id_comp, category.comp_id], refl }
+.
+
+lemma shift_d (c : ℝ≥0) (i j : ℤ) : (shift.obj C).d i j = -@d C c (i + 1) (j + 1) :=
+rfl
 
 lemma soft_truncation'_d_neg (c : ℝ≥0) (i j : ℤ) (hi : i < 0) :
   ((soft_truncation'.obj C).d i j : (soft_truncation'.obj C) c i ⟶ _) = 0 :=
@@ -136,23 +156,76 @@ begin
   { refl }
 end
 
-@[simps]
-def shift_and_truncate : system_of_complexes ⥤ system_of_complexes :=
-(whiskering_right _ _ _).obj $ NormedGroup.shift_and_truncate
+variables (k K : ℝ≥0) (m' m : ℤ) [hk : fact (1 ≤ k)] (c₀ : ℝ≥0)
+include hk
 
-lemma shift_and_truncate_d_neg (c : ℝ≥0) (i j : ℤ) (hi : i < 0) :
-  ((shift_and_truncate.obj C).d i j : (shift_and_truncate.obj C) c i ⟶ _) = 0 :=
+lemma soft_truncation'_is_weak_bounded_exact_iff (hC : C.is_weak_bounded_exact k K (-1) c₀) :
+  (soft_truncation'.obj C).is_weak_bounded_exact k K m c₀ ↔ C.is_weak_bounded_exact k K m c₀ :=
+sorry
+
+lemma shift_is_weak_bounded_exact_iff (h : m' + 1 = m) :
+  (shift.obj C).is_weak_bounded_exact k K m' c₀ ↔ C.is_weak_bounded_exact k K m c₀ :=
 begin
-  cases i,
-  { refine (not_le.mpr hi $ int.coe_zero_le i).elim },
-  dsimp [system_of_complexes.d],
-  split_ifs with h,
-  { subst j, simp only [eq_to_hom_refl, category.comp_id], refl },
-  { refl }
+  apply forall_congr, intros c,
+  apply forall_congr, intros hc,
+  subst m,
+  have aux : ∀ P : ℤ → Prop, (∀ i, i ≤ m' + 1 → P i) ↔ (∀ i, i ≤ m' → P (i+1)),
+  { intro P, split; intros H i hi,
+    { apply H, rwa add_le_add_iff_right },
+    { rw ← sub_add_cancel i 1, apply H, rwa sub_le_iff_le_add } },
+  rw aux, clear aux,
+  apply forall_congr, intros i,
+  have aux : ∀ P : ℤ → ℤ → Prop,
+    (∃ (i' j : ℤ) (hi' : i' + 1 = i + 1) (hj : i + 1 + 1 = j), P i' j) ↔
+    (∃ (i' j : ℤ) (hi' : i' + 1 = i) (hj : i + 1 = j), P (i' + 1) (j + 1)),
+  { intro P,
+    simp only [exists_prop, add_left_inj, exists_eq_left, exists_and_distrib_left, exists_eq_left'],
+    split, { intro h, use [i-1], simpa using h }, { rintro ⟨_, rfl, h⟩, exact h } },
+  simp only [aux], clear aux,
+  simp only [exists_prop, exists_and_distrib_left, exists_eq_left'],
+  apply forall_congr, intros hi,
+  apply forall_congr, intros x,
+  apply forall_congr, intros ε,
+  apply forall_congr, intros hε,
+  apply exists_congr, intros i',
+  apply and_congr iff.rfl,
+  simp only [shift_d],
+  sorry,
+  -- apply exists_congr, intros y,
+  -- convert iff.rfl using 4,
+  -- { sorry },
+  -- { congr' 1, }
 end
 
-variables (k K : ℝ≥0) (m : ℤ) [hk : fact (1 ≤ k)] (c₀ : ℝ≥0)
-include hk
+lemma shift_and_truncate_is_weak_bounded_exact_iff
+  (hC : C.is_weak_bounded_exact k K 0 c₀) (h : m' + 1 = m) :
+  (shift_and_truncate.obj C).is_weak_bounded_exact k K m' c₀ ↔ C.is_weak_bounded_exact k K m c₀ :=
+begin
+  rw ← is_weak_bounded_exact.iff_of_iso (shift_comp_soft_truncation'.{u u}.app C),
+  { dsimp,
+    rw soft_truncation'_is_weak_bounded_exact_iff,
+    { apply shift_is_weak_bounded_exact_iff, exact h },
+    { rwa shift_is_weak_bounded_exact_iff, refl } },
+  { intros c i, exact isometry_id }
+end
+
+
+
+
+
+
+
+
+
+
+/- === Old cruft === -/
+
+
+-- omit hk
+
+-- -- move this
+-- def functor.has_shift (C D : Type*) [category C] [category D] [has_shift D] :
+--   has_shift (C ⥤ D) := ⟨(shift _).congr_right⟩
 
 /- === We only care about weak exactness. So the following code can probably be deleted. === -/
 
@@ -186,16 +259,6 @@ include hk
 --   apply forall_congr, intros hi,
 --   admit
 -- end
-
-lemma soft_truncation'_is_weak_bounded_exact_iff (hC : C.is_weak_bounded_exact k K 0 c₀) :
-  (soft_truncation'.obj C).is_weak_bounded_exact k K m c₀ ↔ C.is_weak_bounded_exact k K m c₀ :=
-sorry
-
-omit hk
-
--- move this
-def functor.has_shift (C D : Type*) [category C] [category D] [has_shift D] :
-  has_shift (C ⥤ D) := ⟨(shift _).congr_right⟩
 
 -- don't think we want to use this
 -- instance : has_shift system_of_complexes.{u} :=

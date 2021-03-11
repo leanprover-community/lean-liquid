@@ -341,9 +341,12 @@ def mk_complex_like_iso (C : differential_object ι V) (hC : C.is_complex_like c
   (induced_functor complex_like.to_differential_object).obj (C.mk_complex_like hC) ≅ C :=
 eq_to_iso $ by { cases C, refl }
 
+section lift_functor
+
+variables {C : Type*} [category C] (F : C ⥤ differential_object ι V)
+
 @[simps]
-def lift_functor {C : Type*} [category C]
-  (F : C ⥤ differential_object ι V) (h : ∀ X, (F.obj X).is_complex_like cov) :
+def lift_functor (h : ∀ X, (F.obj X).is_complex_like cov) :
   C ⥤ complex_like ι V cov :=
 { obj := λ X, (F.obj X).mk_complex_like (h X),
   map := λ X Y f, show ((F.obj X).mk_complex_like (h X)).to_differential_object ⟶ _,
@@ -360,11 +363,16 @@ def lift_functor {C : Type*} [category C]
   end }
 
 @[simps]
-def lift_functor_nat_iso {C : Type*} [category C]
-  (F : C ⥤ differential_object ι V) (h : ∀ X, (F.obj X).is_complex_like cov) :
+def lift_functor_nat_iso (h : ∀ X, (F.obj X).is_complex_like cov) :
   (lift_functor F h) ⋙ (induced_functor complex_like.to_differential_object) ≅ F :=
 nat_iso.of_components (λ X, mk_complex_like_iso _ _) $ λ X Y f,
 by { rw [← iso.eq_comp_inv, category.assoc], refl }
+
+lemma lift_functor_d (h : ∀ X, (F.obj X).is_complex_like cov) (x : C) (i j : ι) :
+  ((lift_functor F h).obj x).d i j = (F.obj x).d i j :=
+rfl
+
+end lift_functor
 
 -- this is a major pain, but we might not need it
 -- def lift_equivalence (F : differential_object ι V ≌ differential_object ι V)
@@ -399,6 +407,10 @@ begin
     intro H, apply hij,
     cases cov; dsimp [coherent_indices] at H ⊢; apply (succ_equiv ι).injective; exact H }
 end
+
+lemma shift_d (C : complex_like ι V cov) (i j : ι) :
+  ((shift _ _).obj C).d i j = -C.d (succ i) (succ j) :=
+rfl
 
 instance shift.additive : (shift ι V : complex_like ι V cov ⥤ complex_like ι V cov).additive :=
 { map_zero' :=

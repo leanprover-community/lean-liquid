@@ -233,6 +233,41 @@ begin
   exact mul_le_mul hK (hC_adm.res_norm_noninc _ _ _ _ (C.d _ _ x)) (norm_nonneg _) ((zero_le K).trans hK)
 end
 
+lemma of_iso (h : C₁.is_weak_bounded_exact k K m c₀) (f : C₁ ≅ C₂)
+  (hf : ∀ c i, @isometry (C₁ c i) (C₂ c i) _ _ (f.hom.apply : C₁ c i ⟶ C₂ c i)) :
+  C₂.is_weak_bounded_exact k K m c₀ :=
+begin
+  intros c hc i hi x ε hε,
+  obtain ⟨i', j, hi', hj, y, hy⟩ := h c hc i hi (f.inv.apply x) ε hε,
+  refine ⟨i', j, hi', hj, f.hom y, _⟩,
+  calc  ∥res x - C₂.d _ _ (f.hom y)∥
+      = ∥res x - f.hom (C₁.d _ _ y)∥ : by rw d_apply
+  ... = ∥f.hom (f.inv (res x)) - f.hom (C₁.d _ _ y)∥ : by rw hom_apply_inv_apply
+  ... = ∥f.hom (f.inv (res x) - C₁.d _ _ y)∥ : by congr ; exact (f.hom.apply.map_sub _ _).symm
+  ... = ∥f.inv (res x) - C₁.d _ _ y∥ : normed_group_hom.norm_eq_of_isometry (hf _ _) _
+  ... = ∥res (f.inv x) - C₁.d _ _ y∥ : by rw res_apply
+  ... ≤ K * ∥C₁.d _ _ (f.inv x)∥ + ε : hy
+  ... = K * ∥C₂.d _ _ x∥ + ε : _,
+  congr' 2,
+  calc  ∥C₁.d i j (f.inv x)∥
+      = ∥f.inv (C₂.d i j x)∥ : by rw d_apply
+  ... = ∥f.hom (f.inv (C₂.d _ _ x))∥ : (normed_group_hom.norm_eq_of_isometry (hf _ _) _).symm
+  ... = ∥C₂.d _ _ x∥ : by rw hom_apply_inv_apply
+end
+
+lemma iff_of_iso (f : C₁ ≅ C₂)
+  (hf : ∀ c i, @isometry (C₁ c i) (C₂ c i) _ _ (f.hom.apply : C₁ c i ⟶ C₂ c i)) :
+  C₁.is_weak_bounded_exact k K m c₀ ↔ C₂.is_weak_bounded_exact k K m c₀ :=
+begin
+  refine ⟨λ h, h.of_iso f hf, λ h, h.of_iso f.symm _⟩,
+  -- TODO: factor this out into a lemma
+  intros c n,
+  apply normed_group_hom.isometry_of_norm,
+  intro v,
+  rw ← normed_group_hom.norm_eq_of_isometry (hf c n),
+  simp only [←apply_hom_eq_hom_apply, ←apply_inv_eq_inv_apply, iso.symm_hom, coe_inv_hom_id],
+end
+
 end is_weak_bounded_exact
 
 namespace is_bounded_exact
