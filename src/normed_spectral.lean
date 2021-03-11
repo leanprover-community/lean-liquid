@@ -20,8 +20,8 @@ calc ∥x∥ = ∥x + y - y∥ : by rw add_sub_cancel
 structure normed_spectral_conditions (m : ℤ) (k K : ℝ≥0) [fact (1 ≤ k)]
   (ε : ℝ) (hε : 0 < ε) (M : system_of_double_complexes.{u})
   (k' : ℝ≥0) [fact (1 ≤ k')] (c₀ H : ℝ≥0) [fact (0 < H)] :=
-(col_exact : ∀ j ≤ m, (M.col j).is_bounded_exact k K m c₀)
-(row_exact : ∀ i ≤ m + 1, (M.row i).is_bounded_exact k K (m-1) c₀)
+(col_exact : ∀ j ≤ m, (M.col j).is_weak_bounded_exact k K m c₀)
+(row_exact : ∀ i ≤ m + 1, (M.row i).is_weak_bounded_exact k K (m-1) c₀)
 (h : Π (q : ℤ) {q' : ℤ} {c}, M.X (k' * c) 0 q' ⟶ M.X c 1 q)
 (norm_h_le : ∀ (q' q : ℤ) (hq : q ≤ m) (hq' : q+1 = q') (c) (hc : c₀ ≤ c)
   (x : M.X (k' * c) 0 q'), ​∥h q x∥ ≤ H * ∥x∥)
@@ -69,11 +69,11 @@ theorem analytic_9_6_base (k K : ℝ≥0) [hk : fact (1 ≤ k)] [hK : fact (1 �
   ∀ (M : system_of_double_complexes.{u}) (hM : M.admissible)
     (k' : ℝ≥0) [fact (k₀ ≤ k')] [fact (1 ≤ k')] -- follows
     (c₀ H : ℝ≥0) [fact (0 < H)],
-  ​∀ (Hneg : (M.row 0).is_bounded_exact (k' * k') (2 * K * H) (-1) c₀)
+  ​∀ (Hneg : (M.row 0).is_weak_bounded_exact (k' * k') (2 * K * H) (-1) c₀)
     (Hd : ∀ c q (x : M.X c (-1) q), M.d _ 0 x = 0)
     (Hd' : ∀ c p (x : M.X c p (-1)), M.d' _ 0 x = 0)
     (cond : normed_spectral_conditions 0 k K ε hε M k' c₀ H),
-  (M.row 0).is_bounded_exact (k' * k') (2 * K * H) 0 c₀ :=
+  (M.row 0).is_weak_bounded_exact (k' * k') (2 * K * H) 0 c₀ :=
 begin
   let ε := (2*K)⁻¹,
   have hε : 0 < ε,
@@ -85,7 +85,7 @@ begin
   { exact Hneg c hc i h },
   -- Statement is of the form "for all x ∈ M_{0,i+1} exists y ∈ M_{0,i} such that..."
   interval_cases i, clear hi h,
-  intro x,
+  intros x δ hδ,
   haveI : fact (k' * (k' * c) ≤ k' * k' * c) := by { rw mul_assoc, exact le_rfl },
   have Hx1 := (cond.col_exact 0 le_rfl).of_le (hM.col 0) _k' le_rfl le_rfl le_rfl c hc 0 le_rfl,
   have Hx2 := cond.cond3b,
@@ -93,21 +93,30 @@ begin
   simp only [row_d, col_d, Hd, Hd', sub_zero, add_zero, smul_zero, d_res, d'_res,
     res_res, one_div, row_res, units.coe_one, one_smul] at Hx1 Hx2 ⊢,
   refine ⟨-1, 1, rfl, rfl, 0, _⟩,
-  obtain ⟨i, j, hi, hj, y1, hx1⟩ := Hx1 (M.res x),
+  let φ : ℝ := δ / 2,
+  have hφ : 0 < φ := div_pos hδ zero_lt_two,
+  have hδφ : δ = φ + φ, { dsimp [φ], rw [← add_div, half_add_self] },
+  obtain ⟨i, j, hi, hj, y1, hx1⟩ := Hx1 (M.res x) φ hφ,
   simp [← eq_neg_iff_add_eq_zero] at hi hj, subst i, subst j,
   simp only [Hd, Hd', sub_zero, nnreal.coe_mul, nnreal.coe_bit0, nnreal.coe_one, d_res] at hx1 ⊢,
   erw [res_res] at hx1,
   clear y1 Hx1,
-  refine hx1.trans _,
-  simp only [mul_comm (2:ℝ) K, mul_assoc],
-  refine mul_le_mul_of_nonneg_left _ K.coe_nonneg,
-  replace hx1 := mul_le_mul_of_nonneg_left hx1 ε.coe_nonneg,
-  replace Hx2 := (norm_le_add_norm_add _ _).trans (add_le_add (Hx2.trans hx1) le_rfl),
+  replace Hx1 := mul_le_mul_of_nonneg_left hx1 ε.coe_nonneg,
+  replace Hx2 := (norm_le_add_norm_add _ _).trans (add_le_add (Hx2.trans Hx1) le_rfl),
   dsimp [ε] at Hx2,
   have K0 : (K:ℝ) ≠ 0 := ne_of_gt (lt_of_lt_of_le zero_lt_one hK),
-  simp only [← sub_le_iff_le_add', mul_inv', mul_assoc, inv_mul_cancel_left' K0] at Hx2,
-  simp only [← div_eq_inv_mul, sub_half, div_le_iff' (zero_lt_two : (0:ℝ) < 2)] at Hx2,
-  refine Hx2.trans (mul_le_mul_of_nonneg_left _ zero_le_two),
+  simp only [mul_add, add_assoc, mul_inv', mul_assoc, inv_mul_cancel_left' K0] at Hx2,
+  simp only [← div_eq_inv_mul, sub_half, ← sub_le_iff_le_add'] at Hx2,
+  simp only [sub_le_iff_le_add', div_le_iff' (zero_lt_two : (0:ℝ) < 2)] at Hx2,
+  replace Hx2 := mul_le_mul_of_nonneg_left Hx2 K.coe_nonneg,
+  simp only [mul_add, div_eq_inv_mul, add_comm φ,
+    mul_inv_cancel_left' (two_ne_zero : (2:ℝ) ≠ 0), mul_inv_cancel_left' K0] at Hx2,
+  refine hx1.trans _,
+  simp only [mul_comm (2:ℝ) K, mul_assoc, hδφ, ← add_assoc, ← mul_add, add_le_add_iff_right],
+  refine Hx2.trans _,
+  simp only [add_le_add_iff_right],
+  refine (mul_le_mul_of_nonneg_left _ K.coe_nonneg),
+  refine (mul_le_mul_of_nonneg_left _ zero_le_two),
   refine le_trans (cond.norm_h_le _ _ le_rfl rfl _ _ _) _,
   { calc c₀ = 1 * c₀ : (one_mul c₀).symm
     ... ≤ k' * c : mul_le_mul' _1k' hc },
@@ -126,11 +135,11 @@ theorem analytic_9_6 (m : ℤ) :
   ∀ (M : system_of_double_complexes.{u}) (hM : M.admissible)
     (k' : ℝ≥0) [fact (k₀ ≤ k')] [fact (1 ≤ k')] -- follows
     (c₀ H : ℝ≥0) [fact (0 < H)],
-  ​∀ (Hneg : (M.row 0).is_bounded_exact (k' * k') (2 * K * H) (-1) c₀)
+  ​∀ (Hneg : (M.row 0).is_weak_bounded_exact (k' * k') (2 * K * H) (-1) c₀)
     (Hd : ∀ c q (x : M.X c (-1) q), M.d _ 0 x = 0)
     (Hd' : ∀ c p (x : M.X c p (-1)), M.d' _ 0 x = 0)
     (cond : normed_spectral_conditions m k K ε hε M k' c₀ H),
-  (M.row 0).is_bounded_exact (k' * k') (2 * K * H) m c₀ :=
+  (M.row 0).is_weak_bounded_exact (k' * k') (2 * K * H) m c₀ :=
 begin
   apply int.induction_on m,
   -- induction m with m hm,
