@@ -36,24 +36,28 @@ def X (C : cochain_complex ℤ NormedGroup.{u}) : ℤ → NormedGroup.{u}
 | 0       := coker (C.d (-1) 0)
 | (n+1:ℕ) := C.X (n+1)
 
-def d (C : cochain_complex ℤ NormedGroup.{u}) :
+def d (C : cochain_complex ℤ NormedGroup) :
   Π i:ℤ, X C i ⟶ X C (i+1)
 | -[1+n]  := 0
 | 0       := coker.lift (C.d_comp_d (-1) 0 1)
 | (n+1:ℕ) := C.d (n+1) (n+1+1)
 
-lemma d_comp_d (C : cochain_complex ℤ NormedGroup.{u}) :
+lemma d_comp_d (C : cochain_complex ℤ NormedGroup) :
   Π i:ℤ, d C i ≫ d C (i+1) = 0
 | -[1+n]  := show 0 ≫ _ = 0, by rw zero_comp
 | 0       := coker.lift_comp_eq_zero _ (C.d_comp_d _ _ _)
 | (n+1:ℕ) := C.d_comp_d (n+1) _ _
 
 @[simps]
-def obj (C : cochain_complex ℤ NormedGroup.{u}) :
+def obj (C : cochain_complex ℤ NormedGroup) :
   cochain_complex ℤ NormedGroup :=
 cochain_complex.mk' (X C) (d C) (d_comp_d C)
 
-def map_f {C₁ C₂ : cochain_complex ℤ NormedGroup.{u}} (f : C₁ ⟶ C₂) :
+lemma obj_d_add_one (C : cochain_complex ℤ NormedGroup) (i : ℤ) :
+  (obj C).d i (i + 1) = d C i :=
+cochain_complex.mk'_d' _ _ _ _
+
+def map_f {C₁ C₂ : cochain_complex ℤ NormedGroup} (f : C₁ ⟶ C₂) :
   Π i:ℤ, X C₁ i ⟶ X C₂ i
 | -[1+n]  := 0
 | 0       := coker.map (f.comm (-1) 0)
@@ -159,9 +163,72 @@ end
 variables (k K : ℝ≥0) (m' m : ℤ) [hk : fact (1 ≤ k)] (c₀ : ℝ≥0)
 include hk
 
-lemma soft_truncation'_is_weak_bounded_exact_iff (hC : C.is_weak_bounded_exact k K (-1) c₀) :
+lemma soft_truncation'_is_weak_bounded_exact (hC : C.is_weak_bounded_exact k K m c₀) :
+  (soft_truncation'.obj C).is_weak_bounded_exact k K m c₀
+| c hc (0:ℕ)   hi x ε hε :=
+begin
+  obtain ⟨x, rfl⟩ := NormedGroup.coker.π_surjective x,
+  obtain ⟨i', j, hi', rfl, y, hy⟩ := hC c hc _ hi x ε hε,
+  obtain rfl : i' = -1, { rwa ← eq_sub_iff_add_eq at hi' },
+  refine ⟨-1, _, rfl, rfl, 0, _⟩,
+  simp only [normed_group_hom.map_zero, sub_zero],
+  sorry
+end
+| c hc (1:ℕ)   hi x ε hε :=
+begin
+  obtain ⟨i', j, hi', rfl, y, hy⟩ := hC c hc _ hi x ε hε,
+  simp at hi', subst i',
+  refine ⟨0, _, rfl, rfl, NormedGroup.coker.π y, _⟩,
+  sorry
+end
+| c hc (i+2:ℕ) hi x ε hε :=
+begin
+  obtain ⟨i', j, hi', rfl, y, hy⟩ := hC c hc _ hi x ε hε,
+  simp at hi', subst i',
+  refine ⟨i+1, _, rfl, rfl, y, _⟩, dsimp [d, soft_truncation'],
+  simpa only [if_true, eq_self_iff_true, category.comp_id] using hy
+end
+| c hc -[1+i]  hi x ε hε :=
+begin
+  refine ⟨-[1+ i.succ], _, rfl, rfl, 0, _⟩,
+  transitivity' 0,
+  { apply le_of_eq, rw norm_eq_zero, ext },
+  { refine add_nonneg (mul_nonneg K.2 (norm_nonneg _)) (le_of_lt hε) }
+end
+
+lemma is_weak_bounded_exact_of_soft_truncation'
+  (hC : (soft_truncation'.obj C).is_weak_bounded_exact k K m c₀)
+  (hneg : C.is_weak_bounded_exact k K (-1) c₀) :
+  C.is_weak_bounded_exact k K m c₀
+| c hc (0:ℕ)   hi x ε hε :=
+begin
+  refine ⟨-1, 1, rfl, rfl, _⟩,
+  sorry
+end
+| c hc (1:ℕ)   hi x ε hε := sorry
+| c hc (i+2:ℕ) hi x ε hε :=
+begin
+  obtain ⟨i', j, hi', rfl, y, hy⟩ := hC c hc _ hi x ε hε,
+  simp at hi', subst i',
+  refine ⟨i+1, _, rfl, rfl, y, _⟩, dsimp [d, soft_truncation'] at hy,
+  simpa only [if_true, eq_self_iff_true, category.comp_id] using hy
+end
+| c hc -[1+i]  hi x ε hε :=
+begin
+  refine hneg c hc _ _ x ε hε,
+  show -(i+1:ℤ) ≤ -1,
+  apply neg_le_neg,
+  simp only [int.coe_nat_nonneg, le_add_iff_nonneg_left]
+end
+
+lemma soft_truncation'_is_weak_bounded_exact_iff
+  (hneg : C.is_weak_bounded_exact k K (-1) c₀) :
   (soft_truncation'.obj C).is_weak_bounded_exact k K m c₀ ↔ C.is_weak_bounded_exact k K m c₀ :=
-sorry
+begin
+  split,
+  { intro H, apply is_weak_bounded_exact_of_soft_truncation'; assumption },
+  { intro H, apply soft_truncation'_is_weak_bounded_exact, exact H }
+end
 
 lemma shift_is_weak_bounded_exact_iff (h : m' + 1 = m) :
   (shift.obj C).is_weak_bounded_exact k K m' c₀ ↔ C.is_weak_bounded_exact k K m c₀ :=
@@ -190,15 +257,14 @@ begin
   apply exists_congr, intros i',
   apply and_congr iff.rfl,
   simp only [shift_d],
-  sorry,
-  -- apply exists_congr, intros y,
-  -- convert iff.rfl using 4,
-  -- { sorry },
-  -- { congr' 1, }
+  split;
+  { rintro ⟨y, hy⟩, refine ⟨-y, _⟩,
+    simpa only [sub_neg_eq_add, normed_group_hom.map_neg, normed_group_hom.coe_neg, pi.neg_apply,
+      norm_neg, sub_neg_eq_add, ← sub_eq_add_neg] using hy }
 end
 
 lemma shift_and_truncate_is_weak_bounded_exact_iff
-  (hC : C.is_weak_bounded_exact k K 0 c₀) (h : m' + 1 = m) :
+  (h0 : C.is_weak_bounded_exact k K 0 c₀) (h : m' + 1 = m) :
   (shift_and_truncate.obj C).is_weak_bounded_exact k K m' c₀ ↔ C.is_weak_bounded_exact k K m c₀ :=
 begin
   rw ← is_weak_bounded_exact.iff_of_iso (shift_comp_soft_truncation'.{u u}.app C),
