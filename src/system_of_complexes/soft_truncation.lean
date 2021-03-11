@@ -57,6 +57,9 @@ lemma obj_d_add_one (C : cochain_complex ℤ NormedGroup) (i : ℤ) :
   (obj C).d i (i + 1) = d C i :=
 cochain_complex.mk'_d' _ _ _ _
 
+@[simp] lemma obj_X_neg_one (C : cochain_complex ℤ NormedGroup) :
+  (obj C).X (-1) = 0 := rfl
+
 def map_f {C₁ C₂ : cochain_complex ℤ NormedGroup} (f : C₁ ⟶ C₂) :
   Π i:ℤ, X C₁ i ⟶ X C₂ i
 | -[1+n]  := 0
@@ -105,6 +108,9 @@ def soft_truncation' : cochain_complex ℤ NormedGroup.{u} ⥤ cochain_complex �
   end }
 .
 
+@[simp] lemma soft_truncation'_obj_X_neg_one (C : cochain_complex ℤ NormedGroup) :
+  (soft_truncation'.obj C).X (-1) = 0 := rfl
+
 instance soft_truncation'.additive : soft_truncation'.additive :=
 { map_zero' := by { intros, ext ((n|n)|n) : 2, { ext ⟨⟩, refl }, { refl }, { refl } },
   map_add' := by { intros, ext ((n|n)|n) : 2, { ext ⟨⟩, refl }, { refl }, { refl } } }
@@ -149,6 +155,9 @@ nat_iso.of_components (λ X, nat_iso.of_components (λ c, eq_to_iso rfl) $
 lemma shift_d (c : ℝ≥0) (i j : ℤ) : (shift.obj C).d i j = -@d C c (i + 1) (j + 1) :=
 rfl
 
+@[simp] lemma soft_truncation'_X_neg_one (c : ℝ≥0) :
+  (soft_truncation'.obj C) c (-1) = 0 := rfl
+
 lemma soft_truncation'_d_neg (c : ℝ≥0) (i j : ℤ) (hi : i < 0) :
   ((soft_truncation'.obj C).d i j : (soft_truncation'.obj C) c i ⟶ _) = 0 :=
 begin
@@ -172,7 +181,7 @@ begin
   obtain ⟨i', j, hi', rfl, y, hy⟩ := hC c hc _ hi x ε hε,
   obtain rfl : i' = -1, { rwa ← eq_sub_iff_add_eq at hi' },
   refine ⟨-1, _, rfl, rfl, 0, _⟩,
-  simp only [normed_group_hom.map_zero, sub_zero, normed_group_hom.coe_to_add_monoid_hom],
+  simp only [normed_group_hom.map_zero, sub_zero],
   calc _ = ∥π c (res x - C.d (-1) 0 y)∥ : _
   ... ≤ ∥res x - C.d _ 0 y∥ : normed_group_hom.quotient_norm_le (NormedGroup.coker.π_is_quotient) _
   ... ≤ _ : hy,
@@ -208,10 +217,32 @@ lemma is_weak_bounded_exact_of_soft_truncation'
   C.is_weak_bounded_exact k K m c₀
 | c hc (0:ℕ)   hi x ε hε :=
 begin
-  refine ⟨-1, 1, rfl, rfl, _⟩,
-  sorry
+  let π := λ c, @NormedGroup.coker.π _ _ (@d C c (-1) 0),
+  let δ := ε / 2,
+  have hεδ : δ + δ = ε, { dsimp [δ], rw [← add_div, half_add_self] },
+  have hδ : 0 < δ := div_pos hε zero_lt_two,
+  obtain ⟨x', Hxx', Hx'⟩ : ∃ x', π c x' = π c (res x) ∧ ∥x'∥ < ∥π c (res x)∥ + δ :=
+    normed_group_hom.quotient_norm_lift (NormedGroup.coker.π_is_quotient) hδ _,
+  obtain ⟨y, hy⟩ : ∃ y : C c (-1), C.d _ ↑0 y = res x - x',
+  { -- is this even true? if the range of `d` is not closed,
+    -- we can only get close, but not an equality...
+    sorry },
+  obtain ⟨i', j, hi', rfl, y', H⟩ := hC c hc _ hi (π _ x) δ hδ,
+  obtain rfl : i' = -1, { rwa ← eq_sub_iff_add_eq at hi' },
+  obtain rfl : y' = 0, { cases y', refl },
+  refine ⟨-1, 1, rfl, rfl, y, _⟩,
+  simp only [hy, normed_group_hom.map_zero, sub_zero, sub_sub_cancel, ← hεδ, ← add_assoc] at H ⊢,
+  calc ∥x'∥ ≤ ∥π c (res x)∥ + δ : Hx'.le
+  ... ≤ ↑K * ∥C.d ↑0 1 x∥ + δ + δ : add_le_add_right H _
 end
-| c hc (1:ℕ)   hi x ε hε := sorry
+| c hc (1:ℕ)   hi x ε hε :=
+begin
+  obtain ⟨i', j, hi', rfl, y, hy⟩ := hC c hc _ hi x ε hε,
+  simp at hi', subst i',
+  let π := λ c, @NormedGroup.coker.π _ _ (@d C c (-1) 0),
+  obtain ⟨y, rfl⟩ : ∃ y', π _ y' = y := NormedGroup.coker.π_surjective y,
+  exact ⟨0, _, rfl, rfl, y, hy⟩
+end
 | c hc (i+2:ℕ) hi x ε hε :=
 begin
   obtain ⟨i', j, hi', rfl, y, hy⟩ := hC c hc _ hi x ε hε,
