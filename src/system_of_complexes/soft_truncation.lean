@@ -1,4 +1,5 @@
 import for_mathlib.normed_group_quotient
+import for_mathlib.additive_functor
 
 import system_of_complexes.basic
 import locally_constant.Vhat -- preadditive category NormedGroup
@@ -64,6 +65,7 @@ lemma map_comm {C₁ C₂ : cochain_complex ℤ NormedGroup.{u}} (f : C₁ ⟶ C
 | 0       := coker.map_lift_comm (f.comm 0 1)
 | (n+1:ℕ) := f.comm (n+1) _
 
+@[simps]
 def map {C₁ C₂ : cochain_complex ℤ NormedGroup.{u}} (f : C₁ ⟶ C₂) :
   obj C₁ ⟶ obj C₂ :=
 { f := map_f f,
@@ -97,6 +99,21 @@ def soft_truncation' : cochain_complex ℤ NormedGroup.{u} ⥤ cochain_complex �
     { refl },
     { ext }
   end }
+.
+
+instance soft_truncation'.additive : soft_truncation'.additive :=
+{ map_zero' := by { intros, ext ((n|n)|n) : 2, { ext ⟨⟩, refl }, { refl }, { refl } },
+  map_add' := by { intros, ext ((n|n)|n) : 2, { ext ⟨⟩, refl }, { refl }, { refl } } }
+
+open differential_object
+
+@[simps]
+def shift_and_truncate : cochain_complex ℤ NormedGroup ⥤ cochain_complex ℤ NormedGroup :=
+(complex_like.shift _ _) ⋙ soft_truncation'
+
+instance shift_and_truncate.additive : shift_and_truncate.additive :=
+@functor.additive.comp _ _ _ _ _ _ _ _ _ _ _ _ soft_truncation'.additive
+-- TODO: why can Lean not find `soft_truncation'.additive` via TC?
 
 end NormedGroup
 
@@ -119,39 +136,56 @@ begin
   { refl }
 end
 
+@[simps]
+def shift_and_truncate : system_of_complexes ⥤ system_of_complexes :=
+(whiskering_right _ _ _).obj $ NormedGroup.shift_and_truncate
+
+lemma shift_and_truncate_d_neg (c : ℝ≥0) (i j : ℤ) (hi : i < 0) :
+  ((shift_and_truncate.obj C).d i j : (shift_and_truncate.obj C) c i ⟶ _) = 0 :=
+begin
+  cases i,
+  { refine (not_le.mpr hi $ int.coe_zero_le i).elim },
+  dsimp [system_of_complexes.d],
+  split_ifs with h,
+  { subst j, simp only [eq_to_hom_refl, category.comp_id], refl },
+  { refl }
+end
+
 variables (k K : ℝ≥0) (m : ℤ) [hk : fact (1 ≤ k)] (c₀ : ℝ≥0)
 include hk
 
-lemma soft_truncation'_is_bounded_exact (hC : C.is_bounded_exact k K m c₀) :
-  (soft_truncation'.obj C).is_bounded_exact k K m c₀ :=
-begin
-  rintros c hc ((i|i)|i) hi,
-  { sorry },
-  { intro x,
-    obtain ⟨i', j, hi', rfl, y, hy⟩ := hC c hc _ hi x,
-    refine ⟨i', _, hi', rfl, _⟩,
-    simp at hi', subst i',
-    cases i,
-    { sorry },
-    { refine ⟨y, _⟩,
-      dsimp at hy ⊢, sorry } },
-  { intro x,
-    refine ⟨-[1+ i.succ], _, rfl, rfl, 0, _⟩,
-    calc _ = 0 : _
-       ... ≤ _ : _,
-    { rw norm_eq_zero, ext },
-    { refine mul_nonneg K.2 (norm_nonneg _) } }
-end
+/- === We only care about weak exactness. So the following code can probably be deleted. === -/
 
-lemma soft_truncation'_is_bounded_exact_iff (hC : C.is_bounded_exact k K 0 c₀) :
-  (soft_truncation'.obj C).is_bounded_exact k K m c₀ ↔ C.is_bounded_exact k K m c₀ :=
-begin
-  apply forall_congr, intros c,
-  apply forall_congr, intros hc,
-  apply forall_congr, intros i,
-  apply forall_congr, intros hi,
-  sorry
-end
+-- lemma soft_truncation'_is_bounded_exact (hC : C.is_bounded_exact k K m c₀) :
+--   (soft_truncation'.obj C).is_bounded_exact k K m c₀ :=
+-- begin
+--   rintros c hc ((i|i)|i) hi,
+--   { admit },
+--   { intro x,
+--     obtain ⟨i', j, hi', rfl, y, hy⟩ := hC c hc _ hi x,
+--     refine ⟨i', _, hi', rfl, _⟩,
+--     simp at hi', subst i',
+--     cases i,
+--     { admit },
+--     { refine ⟨y, _⟩,
+--       dsimp at hy ⊢, admit } },
+--   { intro x,
+--     refine ⟨-[1+ i.succ], _, rfl, rfl, 0, _⟩,
+--     calc _ = 0 : _
+--        ... ≤ _ : _,
+--     { rw norm_eq_zero, ext },
+--     { refine mul_nonneg K.2 (norm_nonneg _) } }
+-- end
+
+-- lemma soft_truncation'_is_bounded_exact_iff (hC : C.is_bounded_exact k K 0 c₀) :
+--   (soft_truncation'.obj C).is_bounded_exact k K m c₀ ↔ C.is_bounded_exact k K m c₀ :=
+-- begin
+--   apply forall_congr, intros c,
+--   apply forall_congr, intros hc,
+--   apply forall_congr, intros i,
+--   apply forall_congr, intros hi,
+--   admit
+-- end
 
 lemma soft_truncation'_is_weak_bounded_exact_iff (hC : C.is_weak_bounded_exact k K 0 c₀) :
   (soft_truncation'.obj C).is_weak_bounded_exact k K m c₀ ↔ C.is_weak_bounded_exact k K m c₀ :=
@@ -163,6 +197,7 @@ omit hk
 def functor.has_shift (C D : Type*) [category C] [category D] [has_shift D] :
   has_shift (C ⥤ D) := ⟨(shift _).congr_right⟩
 
+-- don't think we want to use this
 -- instance : has_shift system_of_complexes.{u} :=
 -- functor.has_shift (ℝ≥0ᵒᵖ) (cochain_complex ℤ NormedGroup)
 
@@ -211,8 +246,5 @@ def functor.has_shift (C D : Type*) [category C] [category D] [has_shift D] :
 --      },
 --   -- obtain ⟨i', j, hi', hj, y, hy⟩ := hC c hc (i - n),
 -- end
-
--- def shift_and_trunctate : system_of_complexes ⥤ system_of_complexes :=
--- (shift _).functor ⋙ soft_truncation'
 
 end system_of_complexes

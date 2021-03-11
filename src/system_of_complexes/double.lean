@@ -145,7 +145,7 @@ rfl
 
 /-- The `q`-th column in a system of double complexes, as system of complexes. -/
 def col (C : system_of_double_complexes.{u}) (q : ℤ) : system_of_complexes.{u} :=
-C ⋙ functor.map_complex_like (induced_functor _ ⋙ differential_object.forget _ _ ⋙ pi.eval _ q)
+C ⋙ functor.map_complex_like' (induced_functor _ ⋙ differential_object.forget _ _ ⋙ pi.eval _ q)
   (by { intros, ext, refl })
 
 @[simp] lemma col_X (C : system_of_double_complexes) (p q : ℤ) (c : ℝ≥0) :

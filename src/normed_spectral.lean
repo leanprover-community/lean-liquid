@@ -1,13 +1,17 @@
 import system_of_complexes.double
 import system_of_complexes.soft_truncation
 
+noncomputable theory
 open_locale nnreal
-open system_of_double_complexes
+open system_of_double_complexes category_theory
 
 universe variables u
 
--- def shift_and_truncate : system_of_double_complexes ⥤ system_of_double_complexes :=
--- sorry
+@[simps]
+def shift_and_truncate : system_of_double_complexes ⥤ system_of_double_complexes :=
+(whiskering_right _ _ _).obj $
+  @functor.map_complex_like _ _ _ _ _ _ _ _ _ _ NormedGroup.shift_and_truncate.additive
+-- TODO: why do I need to give the instance manually? ↑ ↑ ↑
 
 -- move this, better name?
 lemma norm_le_add_norm_add {V : Type*} [normed_group V] (x y : V) :
@@ -25,6 +29,7 @@ structure normed_spectral_conditions (m : ℤ) (k K : ℝ≥0) [fact (1 ≤ k)]
 (h : Π (q : ℤ) {q' : ℤ} {c}, M.X (k' * c) 0 q' ⟶ M.X c 1 q)
 (norm_h_le : ∀ (q' q : ℤ) (hq : q ≤ m) (hq' : q+1 = q') (c) (hc : c₀ ≤ c)
   (x : M.X (k' * c) 0 q'), ​∥h q x∥ ≤ H * ∥x∥)
+-- do we have a better name for the following condition?
 (cond3b : ∀ (q'' q' q : ℤ) (hq'' : q'+1 = q'') (hq' : q+1 = q') (hq : q+1 ≤ m) (c) [fact (c₀ ≤ c)]
   (x : M.X (k' * (k' * c)) 0 q') (u1 u2 : units ℤ),
   ​∥M.res (M.d 0 1 x) + (u1:ℤ) • h q' (M.d' q' q'' x) + (u2:ℤ) • M.d' q q' (h q x)∥ ≤
@@ -37,29 +42,6 @@ variables {m : ℤ} {k K : ℝ≥0} [fact (1 ≤ k)]
 variables {ε : ℝ} {hε : 0 < ε} {k₀ : ℝ≥0} [fact (1 ≤ k₀)]
 variables {M : system_of_double_complexes.{u}}
 variables {k' : ℝ≥0} [fact (k₀ ≤ k')] [fact (1 ≤ k')] {c₀ H : ℝ≥0} [fact (0 < H)]
-
--- lemma cond3bpp (NSC : normed_spectral_conditions m k K ε hε k₀ M k' c₀ H)
---   (q : ℤ) [fact (q + 1 ≤ m)] (c : ℝ≥0) [fact (c₀ ≤ c)] (x : M.X (k' * (k' * c)) 0 (q+1)) :
---   ​∥M.res (M.d _ _ x) + NSC.h (M.d' _ _ x) + M.d' _ _ (NSC.h x)∥ ≤ ε * ∥(res M x : M.X c 0 (q+1))∥ :=
--- by simpa only [units.coe_one, one_smul] using NSC.cond3b q c x 1 1
-
--- lemma cond3bpm (NSC : normed_spectral_conditions m k K ε hε k₀ M k' c₀ H)
---   (q : ℤ) [fact (q + 1 ≤ m)] (c : ℝ≥0) [fact (c₀ ≤ c)] (x : M.X (k' * (k' * c)) 0 (q+1)) :
---   ​∥M.res (M.d _ _ x) + NSC.h (M.d' _ _ x) - M.d' _ _ (NSC.h x)∥ ≤ ε * ∥(res M x : M.X c 0 (q+1))∥ :=
--- by simpa only [units.coe_one, one_smul, neg_smul, units.coe_neg, ← sub_eq_add_neg]
---   using NSC.cond3b q c x 1 (-1)
-
--- lemma cond3bmp (NSC : normed_spectral_conditions m k K ε hε k₀ M k' c₀ H)
---   (q : ℤ) [fact (q + 1 ≤ m)] (c : ℝ≥0) [fact (c₀ ≤ c)] (x : M.X (k' * (k' * c)) 0 (q+1)) :
---   ​∥M.res (M.d _ _ x) - NSC.h (M.d' _ _ x) + M.d' _ _ (NSC.h x)∥ ≤ ε * ∥(res M x : M.X c 0 (q+1))∥ :=
--- by simpa only [units.coe_one, one_smul, neg_smul, units.coe_neg, ← sub_eq_add_neg]
---   using NSC.cond3b q c x (-1) 1
-
--- lemma cond3bmm (NSC : normed_spectral_conditions m k K ε hε k₀ M k' c₀ H)
---   (q : ℤ) [fact (q + 1 ≤ m)] (c : ℝ≥0) [fact (c₀ ≤ c)] (x : M.X (k' * (k' * c)) 0 (q+1)) :
---   ​∥M.res (M.d _ _ x) - NSC.h (M.d' _ _ x) - M.d' _ _ (NSC.h x)∥ ≤ ε * ∥(res M x : M.X c 0 (q+1))∥ :=
--- by simpa only [units.coe_one, one_smul, neg_smul, units.coe_neg, ← sub_eq_add_neg]
---   using NSC.cond3b q c x (-1) (-1)
 
 end normed_spectral_conditions
 
