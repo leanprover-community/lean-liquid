@@ -1,7 +1,6 @@
 import topology.algebra.ordered
 import toric.scattered_defs
 import toric.is_inj_nonneg
-import toric.PR_made
 import toric.pointed
 import toric.pairing_dual_saturated
 
