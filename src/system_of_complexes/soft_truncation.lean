@@ -30,7 +30,6 @@ open quotient_add_group
 
 namespace soft_truncation'
 
--- Note: the next sorry needs a `NormedGroup`, so we need to bundle.
 def X (C : cochain_complex ℤ NormedGroup.{u}) : ℤ → NormedGroup.{u}
 | -[1+n]  := 0
 | 0       := coker (C.d (-1) 0)
@@ -410,7 +409,7 @@ lemma shift_and_truncate_admissible (hC : C.admissible) :
 --   swap, { exact h },
 --   dsimp [differential_object.d_aux],
 --   congr' 1,
---   sorry
+--   admit
 -- end
 
 -- include hk
