@@ -8,10 +8,25 @@ open system_of_double_complexes category_theory
 universe variables u
 
 @[simps]
-def shift_and_truncate : system_of_double_complexes ⥤ system_of_double_complexes :=
+def shift_and_truncate : system_of_double_complexes.{u} ⥤ system_of_double_complexes.{u} :=
 (whiskering_right _ _ _).obj $
-  @functor.map_complex_like _ _ _ _ _ _ _ _ _ _ NormedGroup.shift_and_truncate.additive
+  @functor.map_complex_like _ _ _ _ _ _ _ _ _ _ NormedGroup.shift_and_truncate.additive.{u u}
 -- TODO: why do I need to give the instance manually? ↑ ↑ ↑
+
+namespace shift_and_truncate
+
+variables (M : system_of_double_complexes.{u})
+
+lemma admissible (hM : M.admissible) : (shift_and_truncate.obj M).admissible :=
+{ d_norm_noninc' := sorry,
+  d'_norm_noninc' := sorry,
+  res_norm_noninc := sorry }
+
+-- defeq abuse for the win!!!
+lemma row (p : ℤ) :
+  (shift_and_truncate.obj M).row p = system_of_complexes.shift_and_truncate.obj (M.row p) := rfl
+
+end shift_and_truncate
 
 -- move this, better name?
 lemma norm_le_add_norm_add {V : Type*} [normed_group V] (x y : V) :
@@ -34,6 +49,8 @@ structure normed_spectral_conditions (m : ℤ) (k K : ℝ≥0) [fact (1 ≤ k)]
   (x : M.X (k' * (k' * c)) 0 q') (u1 u2 : units ℤ),
   ​∥M.res (M.d 0 1 x) + (u1:ℤ) • h q' (M.d' q' q'' x) + (u2:ℤ) • M.d' q q' (h q x)∥ ≤
     ε * ∥(res M x : M.X c 0 q')∥)
+-- ergonomics: we bundle this assumption, instead of passing it around separately
+(admissible : M.admissible)
 -- the following 3 conditions are automatic in [Analytic.pdf],
 -- but we need them, because our complexes are indexed by `ℤ`
 (Hneg : (M.row 0).is_weak_bounded_exact (k' * k') (2 * K * H) (-1) c₀)
@@ -49,13 +66,31 @@ variables {ε : ℝ} {hε : 0 < ε} {k₀ : ℝ≥0} [fact (1 ≤ k₀)]
 variables {M : system_of_double_complexes.{u}}
 variables {k' : ℝ≥0} [fact (k₀ ≤ k')] [fact (1 ≤ k')] {c₀ H : ℝ≥0} [fact (0 < H)]
 
-lemma shift_and_truncate (cond : normed_spectral_conditions m k K ε hε M k' c₀ H) (h : m' + 1 = m) :
-  normed_spectral_conditions m' (k*k*k) (K*(K*K+1)) ε hε (shift_and_truncate.{u u}.obj M) k' c₀ H :=
+lemma shift_and_truncate_admissible (cond : normed_spectral_conditions m k K ε hε M k' c₀ H) :
+  (shift_and_truncate.obj M).admissible :=
+shift_and_truncate.admissible _ cond.admissible
+
+def shift_and_truncate (cond : normed_spectral_conditions m k K ε hε M k' c₀ H) (h : m' + 1 = m) :
+  normed_spectral_conditions m' (k*k*k) (K*(K*K+1)) ε hε (shift_and_truncate.obj M) k' c₀ H :=
 { col_exact := sorry,
-  row_exact := sorry,
+  row_exact :=
+  begin
+    intros i hi,
+    suffices : ((shift_and_truncate.obj M).row i).is_weak_bounded_exact k K (m' - 1) c₀,
+    { apply this.of_le _ _ _ le_rfl le_rfl,
+      { exact cond.shift_and_truncate_admissible.row i },
+      { show fact (k ≤ k * k * k), apply_instance },
+      { show fact (K ≤ K * (K * K + 1)), sorry } },
+    rw ← eq_sub_iff_add_eq at h, subst m', rw sub_add_cancel at hi,
+    rw shift_and_truncate.row,
+    apply (M.row i).shift_and_truncate_is_weak_bounded_exact,
+    { exact cond.row_exact i (int.le_add_one hi) },
+    { exact sub_add_cancel _ _ }
+  end,
   h := sorry,
   norm_h_le := sorry,
   cond3b := sorry,
+  admissible := cond.shift_and_truncate_admissible,
   Hneg := sorry,
   Hd := sorry,
   Hd' := sorry }
@@ -65,7 +100,7 @@ end normed_spectral_conditions
 /-- Base case of the induction for Proposition 9.6. -/
 theorem analytic_9_6_base (k K : ℝ≥0) [hk : fact (1 ≤ k)] [hK : fact (1 ≤ K)] :
   ∃ (ε : ℝ) (hε : ε > 0) (k₀ : ℝ≥0) [fact (1 ≤ k₀)],
-  ∀ (M : system_of_double_complexes.{u}) (hM : M.admissible)
+  ∀ (M : system_of_double_complexes.{u})
     (k' : ℝ≥0) [fact (k₀ ≤ k')] [fact (1 ≤ k')] -- follows
     (c₀ H : ℝ≥0) [fact (0 < H)],
   ​∀ (cond : normed_spectral_conditions 0 k K ε hε M k' c₀ H),
@@ -75,7 +110,7 @@ begin
   have hε : 0 < ε,
   { exact nnreal.inv_pos.mpr (mul_pos zero_lt_two (lt_of_lt_of_le zero_lt_one hK)) },
   use [ε, hε, k, hk],
-  introsI M hM k' _k' _1k' c₀ H _H cond,
+  introsI M k' _k' _1k' c₀ H _H cond,
   intros c hc i hi,
   cases le_or_lt i (-1 : ℤ) with h h,
   { exact cond.Hneg c hc i h },
@@ -83,7 +118,8 @@ begin
   interval_cases i, clear hi h,
   intros x δ hδ,
   haveI : fact (k' * (k' * c) ≤ k' * k' * c) := by { rw mul_assoc, exact le_rfl },
-  have Hx1 := (cond.col_exact 0 le_rfl).of_le (hM.col 0) _k' le_rfl le_rfl le_rfl c hc 0 le_rfl,
+  have Hx1 := (cond.col_exact 0 le_rfl).of_le
+    (cond.admissible.col 0) _k' le_rfl le_rfl le_rfl c hc 0 le_rfl,
   have Hx2 := cond.cond3b,
   replace Hx2 := @Hx2 1 0 (-1) rfl rfl le_rfl c hc (M.res x) 1 1,
   simp only [row_d, col_d, cond.Hd, cond.Hd', sub_zero, add_zero, smul_zero, d_res, d'_res,
@@ -129,7 +165,7 @@ We need to investigate the consequences of the k Zeeman effect here.
 theorem analytic_9_6 (m : ℤ) :
   ∀ (k K : ℝ≥0) [fact (1 ≤ k)] [hK : fact (1 ≤ K)],
   ∃ (ε : ℝ) (hε : ε > 0) (k₀ : ℝ≥0) [fact (1 ≤ k₀)],
-  ∀ (M : system_of_double_complexes.{u}) (hM : M.admissible)
+  ∀ (M : system_of_double_complexes.{u})
     (k' : ℝ≥0) [fact (k₀ ≤ k')] [fact (1 ≤ k')] -- follows
     (c₀ H : ℝ≥0) [fact (0 < H)],
   ​∀ (cond : normed_spectral_conditions m k K ε hε M k' c₀ H),

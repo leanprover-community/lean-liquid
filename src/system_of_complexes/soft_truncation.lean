@@ -169,7 +169,7 @@ begin
   { refl }
 end
 
-variables (k K : ℝ≥0) (m' m : ℤ) [hk : fact (1 ≤ k)] (c₀ : ℝ≥0)
+variables {k K : ℝ≥0} (m' m : ℤ) [hk : fact (1 ≤ k)] (c₀ : ℝ≥0)
 include hk
 
 lemma soft_truncation'_is_weak_bounded_exact (hC : C.is_weak_bounded_exact k K m c₀) :
@@ -302,6 +302,17 @@ begin
   { rintro ⟨y, hy⟩, refine ⟨-y, _⟩,
     simpa only [sub_neg_eq_add, normed_group_hom.map_neg, normed_group_hom.coe_neg, pi.neg_apply,
       norm_neg, sub_neg_eq_add, ← sub_eq_add_neg] using hy }
+end
+
+lemma shift_and_truncate_is_weak_bounded_exact
+  (hC : C.is_weak_bounded_exact k K m c₀) (h : m' + 1 = m) :
+  (shift_and_truncate.obj C).is_weak_bounded_exact k K m' c₀ :=
+begin
+  rw ← is_weak_bounded_exact.iff_of_iso (shift_comp_soft_truncation'.{u u}.app C),
+  { dsimp,
+    apply soft_truncation'_is_weak_bounded_exact,
+    rwa shift_is_weak_bounded_exact_iff _ _ _ _ h },
+  { intros c i, exact isometry_id }
 end
 
 lemma shift_and_truncate_is_weak_bounded_exact_iff
