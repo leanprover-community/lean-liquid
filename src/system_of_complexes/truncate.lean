@@ -141,13 +141,15 @@ lemma truncate_admissible (hC : C.admissible) :
     rintro c (i|i) j rfl x,
     { -- is this even true? I guess we need some sort of `lift_norm_noninc` lemma for quotients
       sorry },
-    { sorry }
+    { rw [truncate_obj_d_succ_succ, norm_neg],
+      exact hC.d_norm_noninc _ _ (i+2) (i+3) x }
   end,
   res_norm_noninc :=
   begin
     rintro c₁ c₂ (i|i) h x,
-    { sorry },
-    { sorry }
+    { -- is this even true? I guess we need some sort of `lift_norm_noninc` lemma for quotients
+      sorry },
+    { exact hC.res_norm_noninc _ _ _ _ x }
   end, }
 
 variables {k K : ℝ≥0} (m' m : ℕ) [hk : fact (1 ≤ k)] (c₀ : ℝ≥0)
