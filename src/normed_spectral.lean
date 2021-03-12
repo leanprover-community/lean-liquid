@@ -29,7 +29,7 @@ lemma admissible (hM : M.admissible) : (truncate.obj M).admissible :=
 { d_norm_noninc' := λ c p' p q h x,
   begin
     cases q,
-    { sorry },
+    { sorry /- this needs `lift_norm_noninc` again -/ },
     { exact hM.d_norm_noninc c p' p _ _ }
   end,
   d'_norm_noninc' := λ c p,
