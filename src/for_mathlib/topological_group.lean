@@ -1,4 +1,7 @@
 import analysis.normed_space.basic
+
+import for_mathlib.topology
+
 open_locale nnreal big_operators
 
 section
@@ -15,5 +18,18 @@ begin
   simp only [mul_one, set.preimage_mul_left_singleton, eq_self_iff_true,
     inv_inv, set.singleton_eq_singleton_iff],
 end
+
+variables {G}
+
+@[to_additive]
+def subgroup.topological_closure (H : subgroup G) : subgroup G :=
+{ carrier := _root_.closure H,
+  one_mem' := _root_.subset_closure H.one_mem,
+  mul_mem' := λ a b ha hb, H.to_submonoid.top_closure_mul_self_subset ⟨a, b, ha, hb, rfl⟩,
+  inv_mem' := begin
+    change closure (H : set G) ⊆ (λ x : G, x⁻¹) ⁻¹' (closure H),
+    conv_rhs { rw show (H : set G) = (λ x : G, x⁻¹) '' H, by ext ; simp },
+    exact closure_subset_preimage_closure_image (continuous_inv : continuous (λ x : G, _)),
+  end }
 
 end
