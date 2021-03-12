@@ -17,8 +17,7 @@ theorem first_target [BD.suitable c']
   ∃ c₀ : ℝ≥0,
   ∀ (S : Type) [fintype S],
   ∀ (V : NormedGroup) [normed_with_aut r V],​
-    (Mbar_system V S r r' BD c').is_bounded_exact k m c₀ :=
-sorry
+    (Mbar_system V S r r' BD c').is_bounded_exact k m c₀ := _
 ```
 
 See [`src/liquid.lean`](https://github.com/leanprover-community/lean-liquid/blob/master/src/liquid.lean#40)

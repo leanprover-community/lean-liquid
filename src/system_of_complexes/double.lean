@@ -53,6 +53,9 @@ begin
   delta res, erw this, refl
 end
 
+@[simp] lemma norm_res_of_eq (h : c₂ = c₁) (x : C.X c₁ p q) : ∥@res C _ _ p q h.le x∥ = ∥x∥ :=
+by { cases h, rw res_refl, refl }
+
 @[simp] lemma res_comp_res (h₁ : fact (c₂ ≤ c₁)) (h₂ : fact (c₃ ≤ c₂)) :
   @res C _ _ p q h₁ ≫ @res C _ _ p q h₂  = @res C _ _ p q (le_trans h₂ h₁) :=
 begin
@@ -121,6 +124,42 @@ def congr {c c' : ℝ≥0} {p p' q q' : ℤ} (hc : c = c') (hp : p = p') (hq : q
   C.X c p q ⟶ C.X c' p' q' :=
 eq_to_hom $ by { subst hc, subst hp, subst hq, }
 
+-- attribute [simps] differential_object.forget
+
+/-- The `p`-th row in a system of double complexes, as system of complexes.
+  It has object `(C.obj c).X p`over `c`. -/
+def row (C : system_of_double_complexes.{u}) (p : ℤ) : system_of_complexes.{u} :=
+C ⋙ induced_functor _ ⋙ differential_object.forget _ _ ⋙ pi.eval _ p
+
+@[simp] lemma row_X (C : system_of_double_complexes) (p q : ℤ) (c : ℝ≥0) :
+  C.row p c q = C.X c p q :=
+rfl
+
+@[simp] lemma row_res (C : system_of_double_complexes) (p q : ℤ) {c' c : ℝ≥0} [h : fact (c ≤ c')] :
+  @system_of_complexes.res (C.row p) _ _ q h  = @res C _ _ p q h :=
+rfl
+
+@[simp] lemma row_d (C : system_of_double_complexes) (c : ℝ≥0) (p : ℤ) :
+  (C.row p).d = @d' C c p :=
+rfl
+
+/-- The `q`-th column in a system of double complexes, as system of complexes. -/
+def col (C : system_of_double_complexes.{u}) (q : ℤ) : system_of_complexes.{u} :=
+C ⋙ functor.map_complex_like' (induced_functor _ ⋙ differential_object.forget _ _ ⋙ pi.eval _ q)
+  (by { intros, ext, refl })
+
+@[simp] lemma col_X (C : system_of_double_complexes) (p q : ℤ) (c : ℝ≥0) :
+  C.col q c p = C.X c p q :=
+rfl
+
+@[simp] lemma col_res (C : system_of_double_complexes) (p q : ℤ) {c' c : ℝ≥0} [h : fact (c ≤ c')] :
+  @system_of_complexes.res (C.col q) _ _ _ _ = @res C _ _ p q h :=
+rfl
+
+@[simp] lemma col_d (C : system_of_double_complexes) (c : ℝ≥0) (p p' q : ℤ) :
+  (C.col q).d p p' = @d C c p p' q :=
+rfl
+
 /-- A system of double complexes is *admissible*
 if all the differentials and restriction maps are norm-nonincreasing.
 
@@ -150,42 +189,14 @@ begin
   { rw C.d'_eq_zero p q q' c h, intro v, simp }
 end
 
+lemma col (hC : C.admissible) (q : ℤ) : (C.col q).admissible :=
+{ d_norm_noninc' := λ c i j h, hC.d_norm_noninc _ _ _ _,
+  res_norm_noninc := λ c i j h, hC.res_norm_noninc _ _ _ _ _ }
+
+lemma row (hC : C.admissible) (p : ℤ) : (C.row p).admissible :=
+{ d_norm_noninc' := λ c i j h, hC.d'_norm_noninc _ _ _ _,
+  res_norm_noninc := λ c i j h, hC.res_norm_noninc _ _ _ _ _ }
+
 end admissible
-
--- attribute [simps] differential_object.forget
-
-/-- The `p`-th row in a system of double complexes, as system of complexes.
-  It has object `(C.obj c).X p`over `c`. -/
-def row (C : system_of_double_complexes.{u}) (p : ℤ) : system_of_complexes.{u} :=
-C ⋙ induced_functor _ ⋙ differential_object.forget _ _ ⋙ pi.eval _ p
-
-@[simp] lemma row_X (C : system_of_double_complexes) (p q : ℤ) (c : ℝ≥0) :
-  C.row p c q = C.X c p q :=
-rfl
-
-@[simp] lemma row_res (C : system_of_double_complexes) (p q : ℤ) {c' c : ℝ≥0} [h : fact (c ≤ c')] :
-  @system_of_complexes.res (C.row p) _ _ q h  = @res C _ _ p q h :=
-rfl
-
-@[simp] lemma row_d (C : system_of_double_complexes) (c : ℝ≥0) (p : ℤ) :
-  (C.row p).d = @d' C c p :=
-rfl
-
-/-- The `q`-th column in a system of double complexes, as system of complexes. -/
-def col (C : system_of_double_complexes.{u}) (q : ℤ) : system_of_complexes.{u} :=
-C ⋙ functor.map_complex_like (induced_functor _ ⋙ differential_object.forget _ _ ⋙ pi.eval _ q)
-  (by { intros, ext, refl })
-
-@[simp] lemma col_X (C : system_of_double_complexes) (p q : ℤ) (c : ℝ≥0) :
-  C.col q c p = C.X c p q :=
-rfl
-
-@[simp] lemma col_res (C : system_of_double_complexes) (p q : ℤ) {c' c : ℝ≥0} [h : fact (c ≤ c')] :
-  @system_of_complexes.res (C.col q) _ _ _ _ = @res C _ _ p q h :=
-rfl
-
-@[simp] lemma col_d (C : system_of_double_complexes) (c : ℝ≥0) (p p' q : ℤ) :
-  (C.col q).d p p' = @d C c p p' q :=
-rfl
 
 end system_of_double_complexes

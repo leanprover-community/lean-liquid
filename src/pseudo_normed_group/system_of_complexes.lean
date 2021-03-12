@@ -74,6 +74,13 @@ begin
   { dsimp [int.extend_from_nat], ext, },
 end
 
+lemma map_norm_noninc (n : ℤ) : ((map BD c' r V r' c f).f n).norm_noninc :=
+begin
+  rcases n with (n|n),
+  { exact CLCFPTinv.map_norm_noninc _ _ _ _ _ _ },
+  { intro v, exact norm_zero.le.trans (norm_nonneg _) }
+end
+
 end complex
 
 /-- The system of complexes

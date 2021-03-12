@@ -1,5 +1,6 @@
 import category_theory.graded_object
 import category_theory.preadditive
+import category_theory.abelian.additive_functor
 import data.int.basic
 
 open category_theory category_theory.limits
@@ -249,6 +250,7 @@ variables (ι V)
 
 set_option old_structure_cmd true
 
+@[ext]
 structure complex_like (cov : bool) extends differential_object ι V :=
 (d_comp_d : ∀ i j k, d i j ≫ d j k = 0)
 (d_eq_zero : ∀ ⦃i j⦄, ¬ coherent_indices cov i j → d i j = 0)
@@ -302,11 +304,129 @@ structure is_complex_like (C : differential_object ι V) (cov : bool) : Prop :=
 (d_comp_d : ∀ i j k, C.d i j ≫ C.d j k = 0)
 (d_eq_zero : ∀ ⦃i j⦄, ¬ coherent_indices cov i j → C.d i j = 0)
 
-abbreviation is_cochain_complex (C : differential_object ι V) :=
-C.is_complex_like tt
+abbreviation is_cochain_complex (C : differential_object ι V) := C.is_complex_like tt
+abbreviation is_chain_complex (C : differential_object ι V) := C.is_complex_like ff
 
-abbreviation is_chain_complex (C : differential_object ι V) :=
-C.is_complex_like ff
+lemma complex_like.is_complex_like (X : complex_like ι V cov) :
+  X.to_differential_object.is_complex_like cov :=
+{ .. X }
+
+lemma is_complex_like.iso {C₁ C₂ : differential_object ι V}
+  (h : C₁.is_complex_like cov) (f : C₁ ≅ C₂) :
+  C₂.is_complex_like cov :=
+{ d_comp_d := λ i j k,
+  begin
+    calc C₂.d i j ≫ C₂.d j k
+        = C₂.d i j ≫ C₂.d j k ≫ f.inv.f k ≫ f.hom.f k : _
+    ... = f.inv.f i ≫ C₁.d i j ≫ C₁.d j k ≫ f.hom.f k : _
+    ... = 0 : _,
+    { rw [← comp_f, f.inv_hom_id, id_f, category.comp_id] },
+    { simp only [f.inv.comm_assoc] },
+    { slice_lhs 2 3 { rw h.d_comp_d }, rw [zero_comp, comp_zero] }
+  end,
+  d_eq_zero := λ i j hij,
+  begin
+    calc C₂.d i j = C₂.d i j ≫ f.inv.f j ≫ f.hom.f j : _
+    ... = 0 : _,
+    { rw [← comp_f, f.inv_hom_id, id_f, category.comp_id] },
+    { rw [f.inv.comm_assoc, h.d_eq_zero hij, zero_comp, comp_zero] }
+  end }
+
+@[simps]
+def mk_complex_like (C : differential_object ι V) (hC : C.is_complex_like cov) :
+  complex_like ι V cov :=
+{ .. C, .. hC }
+
+@[simps]
+def mk_complex_like_iso (C : differential_object ι V) (hC : C.is_complex_like cov) :
+  (induced_functor complex_like.to_differential_object).obj (C.mk_complex_like hC) ≅ C :=
+eq_to_iso $ by { cases C, refl }
+
+section lift_functor
+
+variables {C : Type*} [category C] (F : C ⥤ differential_object ι V)
+
+@[simps]
+def lift_functor (h : ∀ X, (F.obj X).is_complex_like cov) :
+  C ⥤ complex_like ι V cov :=
+{ obj := λ X, (F.obj X).mk_complex_like (h X),
+  map := λ X Y f, show ((F.obj X).mk_complex_like (h X)).to_differential_object ⟶ _,
+    from ((F.obj X).mk_complex_like_iso (h X)).hom ≫ F.map f ≫
+         ((F.obj Y).mk_complex_like_iso (h Y)).inv,
+  map_id' := λ X,
+  by { dsimp, simp only [category.id_comp, category_theory.functor.map_id,
+    eq_to_hom_refl, eq_to_hom_trans], refl },
+  map_comp' := λ X Y Z f g,
+  begin
+    dsimp,
+    erw [category.assoc, category.assoc, eq_to_hom_trans_assoc, eq_to_hom_refl,
+      category.id_comp, category_theory.functor.map_comp, category.assoc]
+  end }
+
+@[simps]
+def lift_functor_nat_iso (h : ∀ X, (F.obj X).is_complex_like cov) :
+  (lift_functor F h) ⋙ (induced_functor complex_like.to_differential_object) ≅ F :=
+nat_iso.of_components (λ X, mk_complex_like_iso _ _) $ λ X Y f,
+by { rw [← iso.eq_comp_inv, category.assoc], refl }
+
+lemma lift_functor_d (h : ∀ X, (F.obj X).is_complex_like cov) (x : C) (i j : ι) :
+  ((lift_functor F h).obj x).d i j = (F.obj x).d i j :=
+rfl
+
+end lift_functor
+
+-- this is a major pain, but we might not need it
+-- def lift_equivalence (F : differential_object ι V ≌ differential_object ι V)
+--   (h : ∀ X, (F.functor.obj X).is_complex_like cov ↔ X.is_complex_like cov) :
+--   complex_like ι V cov ≌ complex_like ι V cov :=
+-- { functor := lift_functor ((induced_functor complex_like.to_differential_object) ⋙ F.functor) $
+--     by { intro X, dsimp, rw h, exact X.is_complex_like },
+--   inverse := lift_functor ((induced_functor complex_like.to_differential_object) ⋙ F.inverse) $
+--     by { intro X, dsimp, rw ← h, apply X.is_complex_like.iso, exact (F.counit_iso.app _).symm },
+--   unit_iso := nat_iso.of_components admit admit,
+--   counit_iso := admit,
+--   functor_unit_iso_comp' := admit }
+
+end differential_object
+
+namespace differential_object
+
+namespace complex_like
+
+variables [has_succ_pred ι] [category V] [preadditive V]
+
+open category_theory.preadditive
+
+@[simps]
+def shift : complex_like ι V cov ⥤ complex_like ι V cov :=
+lift_functor ((induced_functor complex_like.to_differential_object) ⋙ shift ι V)
+begin
+  rintro ⟨X, d, h1, h2⟩,
+  split; dsimp,
+  { intros i j k, simp only [neg_comp, comp_neg, neg_neg], apply h1 },
+  { intros i j hij, rw neg_eq_zero, apply h2,
+    intro H, apply hij,
+    cases cov; dsimp [coherent_indices] at H ⊢; apply (succ_equiv ι).injective; exact H }
+end
+
+lemma shift_d (C : complex_like ι V cov) (i j : ι) :
+  ((shift _ _).obj C).d i j = -C.d (succ i) (succ j) :=
+rfl
+
+instance shift.additive : (shift ι V : complex_like ι V cov ⥤ complex_like ι V cov).additive :=
+{ map_zero' :=
+  by { rintro ⟨⟩ ⟨⟩, ext, dsimp [shift], simp only [category.id_comp, category.comp_id], refl },
+  map_add' :=
+  by { rintro ⟨⟩ ⟨⟩ f g, ext, dsimp [shift], simp only [category.id_comp, category.comp_id] } }
+
+-- this is a major pain, but we might not need it
+-- instance : has_shift (differential_object.complex_like ι V cov) :=
+-- { shift := differential_object.lift_equivalence (category_theory.shift _) $ λ X,
+--   begin
+--     admit
+--   end }
+
+end complex_like
 
 end differential_object
 
@@ -315,7 +435,6 @@ section
 variables (ι V) [has_succ ι] [category V] [has_zero_morphisms V]
 
 abbreviation cochain_complex := differential_object.complex_like ι V tt
-
 abbreviation chain_complex := differential_object.complex_like ι V ff
 
 end
@@ -374,8 +493,10 @@ end chain_complex
 
 namespace category_theory
 
-variables {ι} {V₁ V₂ : Type*}
-variables [category V₁] [category V₂] [has_zero_morphisms V₁] [has_zero_morphisms V₂]
+variables {ι} {V₁ V₂ : Type*} [category V₁] [category V₂]
+
+section has_zero_morphisms
+variables [has_zero_morphisms V₁] [has_zero_morphisms V₂]
 
 @[simps]
 def functor.map_differential_object (F : V₁ ⥤ V₂) :
@@ -390,7 +511,7 @@ def functor.map_differential_object (F : V₁ ⥤ V₂) :
   map_comp' := by { intros, ext, exact F.map_comp _ _ } }
 
 @[simps]
-def functor.map_complex_like [has_succ ι] (F : V₁ ⥤ V₂) (hF : ∀ x y, F.map (0 : x ⟶ y) = 0) :
+def functor.map_complex_like' [has_succ ι] (F : V₁ ⥤ V₂) (hF : ∀ x y, F.map (0 : x ⟶ y) = 0) :
   differential_object.complex_like ι V₁ cov ⥤ differential_object.complex_like ι V₂ cov :=
 { obj := λ C,
   { X := λ i, F.obj (C.X i),
@@ -400,5 +521,17 @@ def functor.map_complex_like [has_succ ι] (F : V₁ ⥤ V₂) (hF : ∀ x y, F.
   map := λ C₁ C₂ f, (F.map_differential_object.map f),
   map_id' := by { intros, ext, exact F.map_id _ },
   map_comp' := by { intros, ext, exact F.map_comp _ _ } }
+
+end has_zero_morphisms
+
+section preadditive
+variables [preadditive V₁] [preadditive V₂]
+
+@[simps]
+def functor.map_complex_like [has_succ ι] (F : V₁ ⥤ V₂) [F.additive] :
+  differential_object.complex_like ι V₁ cov ⥤ differential_object.complex_like ι V₂ cov :=
+F.map_complex_like' $ λ x y, functor.additive.map_zero
+
+end preadditive
 
 end category_theory

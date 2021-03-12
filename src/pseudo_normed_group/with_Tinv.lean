@@ -146,6 +146,42 @@ begin
   exact f.level_continuous c
 end
 
+/-- If the inverse of `profinitely_filtered_pseudo_normed_group_with_Tinv_hom` is strict, then it
+is a `profinitely_filtered_pseudo_normed_group_with_Tinv_hom`. -/
+def inv_of_equiv_of_strict (e : M₁ ≃+ M₂) (he : ∀ x, f x = e x)
+  (strict : ∀ ⦃c x⦄, x ∈ filtration M₂ c → e.symm x ∈ filtration M₁ c) :
+  profinitely_filtered_pseudo_normed_group_with_Tinv_hom r M₂ M₁ :=
+{ strict' := strict,
+  continuous' := λ c,
+  begin
+    simp only [add_equiv.coe_to_add_monoid_hom, add_monoid_hom.to_fun_eq_coe],
+    have hcont := f.continuous' c,
+    let g : (filtration M₁ c) ≃ (filtration M₂ c) :=
+    ⟨λ x, ⟨f x, f.strict x.2⟩, λ x, ⟨e.symm x, strict x.2⟩, λ x, by simp [he], λ x, by simp [he]⟩,
+    change continuous g.symm,
+    rw continuous_iff_is_closed,
+    intros U hU,
+    rw [← g.image_eq_preimage],
+    exact (hcont.closed_embedding g.injective).is_closed_map U hU,
+  end,
+  map_Tinv' := λ x,
+  begin
+    apply e.injective,
+    simp only [add_equiv.coe_to_add_monoid_hom, add_monoid_hom.to_fun_eq_coe],
+    rw [e.apply_symm_apply, ← he, map_Tinv, he, e.apply_symm_apply],
+  end,
+  .. e.symm.to_add_monoid_hom }
+
+@[simp]
+lemma inv_of_equiv_of_strict.apply (x : M₁) (e : M₁ ≃+ M₂) (he : ∀ x, f x = e x)
+  (strict : ∀ ⦃c x⦄, x ∈ filtration M₂ c → e.symm x ∈ filtration M₁ c) :
+  (inv_of_equiv_of_strict e he strict) (f x) = x := by simp [inv_of_equiv_of_strict, he]
+
+@[simp]
+lemma inv_of_equiv_of_strict_symm.apply (x : M₂) (e : M₁ ≃+ M₂) (he : ∀ x, f x = e x)
+  (strict : ∀ ⦃c x⦄, x ∈ filtration M₂ c → e.symm x ∈ filtration M₁ c) :
+  f (inv_of_equiv_of_strict e he strict x) = x := by simp [inv_of_equiv_of_strict, he]
+
 end profinitely_filtered_pseudo_normed_group_with_Tinv_hom
 
 namespace punit

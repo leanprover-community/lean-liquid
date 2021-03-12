@@ -44,10 +44,12 @@ begin
   use [k, K, hk, c₀],
   introsI S hS V hV,
   specialize H S V,
-  let i := (BD.System c' r V r').map_iso (HomZ_iso r' (Mbar r' S)).op,
+  let i := (BD.System c' r V r').map_iso (HomZ_iso (Mbar r' S)).op,
   refine H.of_iso i.symm _,
   intros c n,
-  sorry
+  rw ← system_of_complexes.apply_hom_eq_hom_apply,
+  apply NormedGroup.iso_isometry_of_norm_noninc;
+  apply breen_deligne.package.complex.map_norm_noninc
 end
 
 /-!
@@ -55,6 +57,7 @@ end
 
 Most of the theorem should be fairly readable.
 We will now briefly explain some of the more peculiar syntax.
+The proof reduces to `thm95`, which is not proven yet. We are working on it!
 
 * `[BD.suitable c']` assumes that the nonnegative reals `c' i` satisfy some suitable conditions
   with respect to the package of Breen--Deligne data `BD`.
@@ -68,5 +71,4 @@ We will now briefly explain some of the more peculiar syntax.
 * `is_bounded_exact` is the assertion that a system of complexes
   of normed abelian groups satisfies a suitable exactness criterion of being
   `≤ k`-exact in degrees `≤ m` for `c ≥ c₀` (where `c` is an index to the system of complexes).
-* `sorry` tells Lean to accept this theorem without proof. We are working hard on removing it!
 -/

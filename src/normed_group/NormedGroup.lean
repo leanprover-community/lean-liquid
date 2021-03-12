@@ -68,6 +68,17 @@ instance : limits.has_zero_morphisms.{u (u+1)} NormedGroup :=
 { comp_zero' := by { intros, apply normed_group_hom.zero_comp },
   zero_comp' := by { intros, apply normed_group_hom.comp_zero } }
 
+lemma iso_isometry_of_norm_noninc {V W : NormedGroup} (i : V ≅ W)
+  (h1 : i.hom.norm_noninc) (h2 : i.inv.norm_noninc) :
+  isometry i.hom :=
+begin
+  apply normed_group_hom.isometry_of_norm,
+  intro v,
+  apply le_antisymm (h1 v),
+  calc ∥v∥ = ∥i.inv (i.hom v)∥ : by rw [coe_hom_inv_id]
+  ... ≤ ∥i.hom v∥ : h2 _,
+end
+
 section equalizers_and_kernels
 
 open category_theory.limits
@@ -118,10 +129,15 @@ def coker (f : A ⟶ B) : NormedGroup := NormedGroup.of $
 @[simp]
 noncomputable
 def coker.π {f : A ⟶ B} : B ⟶ coker f :=
-  normed_group_hom.normed_group.mk _
+normed_group_hom.normed_group.mk _
 
-lemma coker.π_surjective {f : A ⟶ B} : function.surjective (coker.π : B ⟶ coker f).to_add_monoid_hom :=
-  surjective_quot_mk _
+lemma coker.π_surjective {f : A ⟶ B} :
+  function.surjective (coker.π : B ⟶ coker f).to_add_monoid_hom :=
+surjective_quot_mk _
+
+lemma coker.π_is_quotient {f : A ⟶ B} :
+  (coker.π : B ⟶ coker f).is_quotient :=
+normed_group_hom.is_quotient_quotient _
 
 instance coker.π_epi {f : A ⟶ B} : epi (coker.π : B ⟶ coker f) :=
 begin
