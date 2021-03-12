@@ -187,6 +187,12 @@ lemma is_weak_bounded_exact_of_truncate (hC : (truncate.obj C).is_weak_bounded_e
   C.is_weak_bounded_exact k K (m+1) c₀
 | c hc 0 hi x ε hε :=
 begin
+  refine ⟨0, 1, rfl, rfl, _⟩,
+  simp only [d_self_apply, sub_zero, exists_const],
+  sorry,
+end
+| c hc 1 hi x ε hε :=
+begin
   let π := λ c, @NormedGroup.coker.π _ _ (@d C c 0 1),
   let δ := ε / 2,
   have hδε : δ + δ = ε, { dsimp [δ], rw [← add_div, half_add_self] },
@@ -194,31 +200,19 @@ begin
   let γ := δ / 2,
   have hγδ : γ + γ = δ, { dsimp [γ], rw [← add_div, half_add_self] },
   have hγ : 0 < γ := div_pos hδ zero_lt_two,
-  sorry
-  -- obtain ⟨x', Hxx', Hx'⟩ : ∃ x', π c x' = π c (res x) ∧ ∥x'∥ < ∥π c (res x)∥ + γ :=
-  --   normed_group_hom.quotient_norm_lift (NormedGroup.coker.π_is_quotient) hγ _,
-  -- obtain ⟨y, hy⟩ : ∃ y : C c (-1), ∥res x - (C.d (-1) ↑0) y∥ ≤ ∥x'∥ + γ,
-  -- { sorry },
-  -- obtain ⟨i', j, hi', rfl, y', H⟩ := hC c hc _ hi (π _ x) δ hδ,
-  -- obtain rfl : i' = -1, { rwa ← eq_sub_iff_add_eq at hi' },
-  -- obtain rfl : y' = 0, { cases y', refl },
-  -- refine ⟨-1, 1, rfl, rfl, y, _⟩,
-  -- simp only [normed_group_hom.map_zero, sub_zero] at H ⊢,
-  -- calc ∥res x - (C.d (-1) ↑0) y∥ ≤ ∥x'∥ + γ : hy
-  -- ... ≤ ∥π c (res x)∥ + γ + γ : add_le_add_right Hx'.le _
-  -- ... ≤ ∥π c (res x)∥ + δ : by rw [add_assoc, hγδ]
-  -- ... ≤ ↑K * ∥C.d ↑0 1 x∥ + δ + δ : add_le_add_right H _
-  -- ... ≤ ↑K * ∥C.d ↑0 1 x∥ + ε : by rw [add_assoc, hδε]
-end
-| c hc 1 hi x ε hε :=
-begin
-  refine ⟨0, _, rfl, rfl, _⟩,
-  sorry,
-  -- obtain ⟨i', j, hi', rfl, y, hy⟩ := hC c hc _ hi x ε hε,
-  -- simp at hi', subst i',
-  -- let π := λ c, @NormedGroup.coker.π _ _ (@d C c (-1) 0),
-  -- obtain ⟨y, rfl⟩ : ∃ y', π _ y' = y := NormedGroup.coker.π_surjective y,
-  -- exact ⟨0, _, rfl, rfl, y, hy⟩
+  obtain ⟨x', Hxx', Hx'⟩ : ∃ x', π c x' = π c (res x) ∧ ∥x'∥ < ∥π c (res x)∥ + γ :=
+    normed_group_hom.quotient_norm_lift (NormedGroup.coker.π_is_quotient) hγ _,
+  obtain ⟨y, hy⟩ : ∃ y : C c 0, ∥res x - (C.d 0 1) y∥ ≤ ∥x'∥ + γ,
+  { sorry },
+  obtain ⟨_, _, rfl, rfl, y', H⟩ := hC c hc _ (nat.zero_le m) (π _ x) δ hδ,
+  refine ⟨0, 2, rfl, rfl, y, _⟩,
+  simp only [d_self_apply, normed_group_hom.map_zero, sub_zero,
+    truncate_obj_d_zero_one, norm_neg] at H ⊢,
+  calc ∥res x - (C.d 0 1) y∥ ≤ ∥x'∥ + γ : hy
+  ... ≤ ∥π c (res x)∥ + γ + γ : add_le_add_right Hx'.le _
+  ... ≤ ∥π c (res x)∥ + δ : by rw [add_assoc, hγδ]
+  ... ≤ ↑K * ∥C.d 1 2 x∥ + δ + δ : add_le_add_right H _
+  ... ≤ ↑K * ∥C.d 1 2 x∥ + ε : by rw [add_assoc, hδε]
 end
 | c hc (i+2) hi x ε hε :=
 begin
