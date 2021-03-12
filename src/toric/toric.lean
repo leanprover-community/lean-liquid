@@ -61,7 +61,7 @@ def generating_box (Z : Type*) {Q ι : Type*} [comm_ring Z] [field Q] [algebra Z
   (v : ι → M) (s : set M) (zq : set Q) : set (finsupp ι Q) :=
   { f | (∀ i : ι, (f i = 0 ∨ f i ∈ zq)) ∧
     f.sum (λ i q, q • v i) ∈ submodule.span Z (set.range v) ∧
-    f.sum (λ i q, q • v i) ∈ (submodule.span Q s).restrict_scalars Z }
+    f.sum (λ i q, q • v i) ∈ submodule.span Q s }
 
 @[simp] lemma generating_box_def {Z : Type*} {Q ι : Type*} [comm_ring Z] [field Q] [algebra Z Q]
   [semimodule Z M] [semimodule Q M] [is_scalar_tower Z Q M]
@@ -70,34 +70,58 @@ def generating_box (Z : Type*) {Q ι : Type*} [comm_ring Z] [field Q] [algebra Z
   (∀ i : ι, (f i = 0 ∨ f i ∈ zq)) ∧
     f.sum (λ i q, q • v i) ∈ submodule.span Z (set.range v) ∧
     f.sum (λ i q, q • v i) ∈ submodule.span Q s :=
-begin
-  unfold generating_box,
-  simp only [iff_self, set.mem_set_of_eq, restrict_scalars_mem],
-end
+by simp only [generating_box, set.mem_set_of_eq]
 
 lemma gen_box_sum  (Z : Type*) {Q ι : Type*} [comm_ring Z] [field Q] [algebra Z Q]
   [semimodule Z M] [semimodule Q M] [is_scalar_tower Z Q M]
   (v : ι → M) (s : set M) (zq : set Q) {z : M}
-  (hz : z ∈ span Z {m : M | ∃ (f : ι →₀ Q), f ∈ generating_box Z v s zq ∧
-    m = f.sum (λ (i : ι) (q : Q), q • v i)}) :
+  (hz : z ∈ span Z {m : M |
+    ∃ (f : ι →₀ Q), f ∈ generating_box Z v s zq ∧ m = f.sum (λ (i : ι) (q : Q), q • v i)}) :
   z ∈ submodule.span Z (set.range v) ∧
   z ∈ submodule.span Q s :=
 begin
-  simp at hz,
-  refine ⟨_, _⟩,
-  rcases mem_span_set.mp hz with ⟨c, csup, rfl⟩,
-
-  refine (mem_carrier _).mp _,
-  obtain F := (mem_carrier _).mp hz,
-  simp at F,
-  rw ← (mem_carrier _) at hz,
-  refine set.mem_of_mem_of_subset ((mem_carrier _).mp hz) _,
-  simp,
-  obtain F := mem_span.mp hz,
-
---  tidy?,
-  sorry
+  refine span_induction hz _ (by simp) _ _,
+  { rintros x ⟨c, cgb, rfl⟩,
+    exact cgb.right },
+  { exact λ x y ⟨hx1, hx2⟩ ⟨hy1, hy2⟩, ⟨add_mem _ hx1 hy1, add_mem _ hx2 hy2⟩ },
+  { rintros z m ⟨hm1, hm2⟩,
+    refine ⟨smul_mem _ _ hm1, _⟩,
+    rw ← is_scalar_tower.algebra_map_smul Q z m,
+    exact smul_mem _ _ hm2 }
 end
+
+lemma gen_box_sum_other_direction  (Z : Type*) {Q ι : Type*} [comm_ring Z] [field Q] [algebra Z Q]
+  [semimodule Z M] [semimodule Q M] [is_scalar_tower Z Q M]
+  (v : ι → M) (s : set M) (sZ : ∀ i : M, i ∈ s → i ∈ submodule.span Z (set.range v))
+  (zq : set Q) {z : M}
+  (zZv : z ∈ submodule.span Z (set.range v)) (zQs : z ∈ submodule.span Q s) :
+  ∃ (f : ι →₀ Q), f ∈ generating_box Z v s zq ∧ z = f.sum (λ (i : ι) (q : Q), q • v i) :=
+begin
+  refine span_induction zQs _ _ _ _,
+  { intros x hx,
+    rcases mem_span_set.mp zZv with ⟨cz, czsup, rfl⟩,
+    simp,
+  },
+
+  rcases mem_span_set.mp zZv with ⟨cz, czsup, rfl⟩,
+
+  rcases mem_span_set.mp zQs with ⟨cQ, cQsup, Qide⟩,
+
+  rw ← Qide,
+
+  refine ⟨c, _⟩,
+  refine span_induction hz _ (by simp) _ _,
+  { rintros x ⟨c, cgb, rfl⟩,
+    exact cgb.right },
+  { exact λ x y ⟨hx1, hx2⟩ ⟨hy1, hy2⟩, ⟨add_mem _ hx1 hy1, add_mem _ hx2 hy2⟩ },
+  { rintros z m ⟨hm1, hm2⟩,
+    refine ⟨smul_mem _ _ hm1, _⟩,
+    rw ← is_scalar_tower.algebra_map_smul Q z m,
+    exact smul_mem _ _ hm2 }
+end
+
+
+
 
 lemma sets {α : Type*} {a b c : set α} (hc : c ⊆ a ∪ b) : c = (c ∩ a) ∪ (c ∩ b) :=
 begin
@@ -124,7 +148,8 @@ lemma saturated_generation {Z Q ι : Type*} [comm_ring Z] [field Q] [algebra Z Q
   {v : ι → M} (bv : is_basis Q v) (s : set M) (hs : s ⊆ submodule.span Z (set.range v))
   {zq : set Q} (hzq : submodule.span Z zq = ⊤) :
   submodule.span Z (s ∪
-    { m : M | ∃ f : finsupp ι Q, (f ∈ generating_box Z v s zq) ∧ m = f.sum (λ i q, q • v i) }) =    submodule.span Z (set.range v) ⊓ (submodule.span Q s).restrict_scalars Z :=
+    { m : M | ∃ f : finsupp ι Q, (f ∈ generating_box Z v s zq) ∧ m = f.sum (λ i q, q • v i) }) =
+      submodule.span Z (set.range v) ⊓ (submodule.span Q s).restrict_scalars Z :=
 begin
   rw span_union,
   ext a,
