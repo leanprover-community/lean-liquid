@@ -183,14 +183,10 @@ begin
     truncate_obj_d_succ_succ, norm_neg] using hy
 end
 
-lemma is_weak_bounded_exact_of_truncate (hC : (truncate.obj C).is_weak_bounded_exact k K m c₀) :
+lemma is_weak_bounded_exact_of_truncate (IH : C.is_weak_bounded_exact k K m c₀)
+  (hC : (truncate.obj C).is_weak_bounded_exact k K m c₀) :
   C.is_weak_bounded_exact k K (m+1) c₀
-| c hc 0 hi x ε hε :=
-begin
-  refine ⟨0, 1, rfl, rfl, _⟩,
-  simp only [d_self_apply, sub_zero, exists_const],
-  sorry,
-end
+| c hc 0 hi x ε hε := IH c hc 0 (nat.zero_le _) x ε hε
 | c hc 1 hi x ε hε :=
 begin
   let π := λ c, @NormedGroup.coker.π _ _ (@d C c 0 1),
@@ -229,9 +225,9 @@ begin
       truncate_obj_d_succ_succ, norm_neg] using hy }
 end
 
-lemma truncate_is_weak_bounded_exact_iff :
+lemma truncate_is_weak_bounded_exact_iff (hC : C.is_weak_bounded_exact k K m c₀) :
   (truncate.obj C).is_weak_bounded_exact k K m c₀ ↔ C.is_weak_bounded_exact k K (m+1) c₀ :=
-⟨is_weak_bounded_exact_of_truncate C m c₀, truncate_is_weak_bounded_exact C m c₀⟩
+⟨is_weak_bounded_exact_of_truncate C m c₀ hC, truncate_is_weak_bounded_exact C m c₀⟩
 
 omit hk
 

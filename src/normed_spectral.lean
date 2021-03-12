@@ -21,15 +21,9 @@ variables (M : system_of_double_complexes.{u})
 lemma row (p : ℕ) :
   (truncate.obj M).row p = system_of_complexes.truncate.obj (M.row p) := rfl
 
--- is this provable?? if it is, it will make our life a lot easier (but defeq abuse :oops:)
--- i'm not convinced that we should go down this road
 lemma col_pos (q : ℕ) :
   (truncate.obj M).col (q+1) = M.col (q+1+1) :=
-begin
-  apply category_theory.functor.ext, swap,
-  { intros, sorry },
-  { intros c₁ c₂ h, ext p x, sorry },
-end
+rfl
 
 lemma admissible (hM : M.admissible) : (truncate.obj M).admissible :=
 { d_norm_noninc' := λ c p' p q h x, sorry,
@@ -102,7 +96,7 @@ end normed_spectral_conditions
 
 /-- Base case of the induction for Proposition 9.6. -/
 theorem analytic_9_6_base (k K : ℝ≥0) [hk : fact (1 ≤ k)] [hK : fact (1 ≤ K)] :
-  ∃ (ε : ℝ) (hε : ε > 0) (k₀ K₀ : ℝ≥0) [fact (1 ≤ k₀)] [fact (1 ≤ K₀)],
+  ∃ (ε : ℝ) (hε : 0 < ε) (k₀ K₀ : ℝ≥0) [fact (1 ≤ k₀)] [fact (1 ≤ K₀)],
   ∀ (M : system_of_double_complexes.{u})
     (k' : ℝ≥0) [fact (k₀ ≤ k')] [fact (1 ≤ k')] -- follows
     (c₀ H : ℝ≥0) [fact (0 < H)],
@@ -166,7 +160,7 @@ We need to investigate the consequences of the k Zeeman effect here.
 -/
 theorem analytic_9_6 (m : ℕ) :
   ∀ (k K : ℝ≥0) [fact (1 ≤ k)] [hK : fact (1 ≤ K)],
-  ∃ (ε : ℝ) (hε : ε > 0) (k₀ K₀ : ℝ≥0) [fact (1 ≤ k₀)] [fact (1 ≤ K₀)],
+  ∃ (ε : ℝ) (hε : 0 < ε) (k₀ K₀ : ℝ≥0) [fact (1 ≤ k₀)] [fact (1 ≤ K₀)],
   ∀ (M : system_of_double_complexes.{u})
     (k' : ℝ≥0) [fact (k₀ ≤ k')] [fact (1 ≤ k')] -- follows
     (c₀ H : ℝ≥0) [fact (0 < H)],
@@ -179,5 +173,10 @@ begin
   refine ⟨ε, hε, k₀, K₀, hk₀, hK₀, _⟩,
   introsI,
   rw ← system_of_complexes.truncate_is_weak_bounded_exact_iff,
-  exact ih (truncate.obj M) k' c₀ H cond.truncate
+  { exact ih (truncate.obj M) k' c₀ H cond.truncate },
+  { clear IH ih,
+    refine (cond.row_exact (nat.zero_lt_succ _) _ (nat.zero_le _)).of_le
+      (cond.admissible.row 0) _ _ le_rfl le_rfl,
+    sorry,
+    sorry }
 end
