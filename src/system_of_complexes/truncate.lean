@@ -135,7 +135,6 @@ def truncate : system_of_complexes ⥤ system_of_complexes :=
   (truncate.obj C).d (i+1) (j+1) x = -C.d (i+2) (j+2) x := rfl
 
 -- maybe we should prove this using `admissible.iff_of_iso` (doesn't exist yet)
--- analogous to the proof of `truncate_is_weak_bounded_exact_iff` above
 lemma truncate_admissible (hC : C.admissible) :
   (truncate.obj C).admissible :=
 { d_norm_noninc' :=
