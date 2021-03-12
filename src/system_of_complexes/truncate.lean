@@ -164,15 +164,15 @@ begin
   obtain ⟨i₀, -, hi₀, rfl, y, hy⟩ := hC c hc _ (nat.succ_le_succ hi) x ε hε,
   obtain rfl : i₀ = 0, { rwa nat.sub_self at hi₀ }, clear hi,
   refine ⟨0, _, rfl, rfl, 0, _⟩,
-  simp only [normed_group_hom.map_zero, sub_zero],
-  sorry
-  -- calc _ = ∥π c (res x - C.d 0 1 y)∥ : _
-  -- ... ≤ ∥res x - C.d 0 1 y∥ : normed_group_hom.quotient_norm_le (NormedGroup.coker.π_is_quotient) _
-  -- ... ≤ _ : hy,
-  -- congr' 1,
-  -- have hπy : π c (C.d 0 1 y) = 0,
-  -- { show (C.d 0 1 ≫ π c) y = 0, rw [NormedGroup.coker.comp_pi_eq_zero], refl },
-  -- simp only [normed_group_hom.map_sub, hπy, sub_zero], refl,
+  simp only [normed_group_hom.map_zero, sub_zero,
+    normed_group_hom.map_neg, truncate_obj_d_zero_one, norm_neg],
+  calc _ = ∥π c (res x - C.d 0 1 y)∥ : _
+  ... ≤ ∥res x - C.d 0 1 y∥ : normed_group_hom.quotient_norm_le (NormedGroup.coker.π_is_quotient) _
+  ... ≤ _ : hy,
+  congr' 1,
+  have hπy : π c (C.d 0 1 y) = 0,
+  { show (C.d 0 1 ≫ π c) y = 0, rw [NormedGroup.coker.comp_pi_eq_zero], refl },
+  simp only [normed_group_hom.map_sub, hπy, sub_zero], refl,
 end
 | c hc (i+1) hi x ε hε :=
 begin

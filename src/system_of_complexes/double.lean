@@ -71,6 +71,12 @@ def d {c : ℝ≥0} (p p' : ℕ) {q : ℕ} : C.X c p q ⟶ C.X c p' q :=
 lemma d_eq_zero (c : ℝ≥0) (h : p + 1 ≠ p') : (C.d p p' : C.X c p q ⟶ _) = 0 :=
 by { have : (C.obj (op c)).d p p' = 0 := (C.obj $ op c).d_eq_zero h, rw [d, this], refl }
 
+lemma d_eq_zero_apply (c : ℝ≥0) (h : p + 1 ≠ p') (x : C.X c p q) : (C.d p p' x) = 0 :=
+by { rw [d_eq_zero C p p' q c h], refl }
+
+@[simp] lemma d_self_apply (c : ℝ≥0) (x : C.X c p q) : (C.d p p x) = 0 :=
+d_eq_zero_apply _ _ _ _ _ p.succ_ne_self _
+
 lemma d_comp_res (h : fact (c₂ ≤ c₁)) :
   C.d p p' ≫ @res C _ _ _ q h = @res C _ _ p q _ ≫ C.d p p' :=
 congr_fun (congr_arg differential_object.hom.f ((C.map (hom_of_le h).op).comm p p')) q
@@ -94,6 +100,12 @@ def d' {c : ℝ≥0} {p : ℕ} (q q' : ℕ) : C.X c p q ⟶ C.X c p q' :=
 
 lemma d'_eq_zero (c : ℝ≥0) (h : q + 1 ≠ q') : (C.d' q q' : C.X c p q ⟶ _) = 0 :=
 ((C.obj $ op c).X p).d_eq_zero h
+
+lemma d'_eq_zero_apply (c : ℝ≥0) (h : q + 1 ≠ q') (x : C.X c p q) : (C.d' q q' x) = 0 :=
+by { rw [d'_eq_zero C p q q' c h], refl }
+
+@[simp] lemma d'_self_apply (c : ℝ≥0) (x : C.X c p q) : (C.d' q q x) = 0 :=
+d'_eq_zero_apply _ _ _ _ _ q.succ_ne_self _
 
 lemma d'_comp_res (h : fact (c₂ ≤ c₁)) :
   @d' C c₁ p q q' ≫ @res C _ _ _ _ h = @res C _ _ p q _ ≫ @d' C c₂ p q q' :=

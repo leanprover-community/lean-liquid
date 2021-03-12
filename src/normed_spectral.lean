@@ -54,10 +54,10 @@ structure normed_spectral_conditions (m : ℕ) (k K : ℝ≥0) [fact (1 ≤ k)]
 (col_exact : ∀ j ≤ m, (M.col j).is_weak_bounded_exact k K m c₀)
 (row_exact : ∀ i ≤ m + 1, (M.row i).is_weak_bounded_exact k K (m-1) c₀)
 (h : Π (q : ℕ) {q' : ℕ} {c}, M.X (k' * c) 0 q' ⟶ M.X c 1 q)
-(norm_h_le : ∀ (q' q : ℕ) (hq : q ≤ m) (hq' : q+1 = q') (c) (hc : c₀ ≤ c)
+(norm_h_le : ∀ (q' q : ℕ) (hq : q ≤ m) (hq' : q = q'-1) (c) (hc : c₀ ≤ c)
   (x : M.X (k' * c) 0 q'), ​∥h q x∥ ≤ H * ∥x∥)
 -- do we have a better name for the following condition?
-(cond3b : ∀ (q'' q' q : ℕ) (hq'' : q'+1 = q'') (hq' : q+1 = q') (hq : q+1 ≤ m) (c) [fact (c₀ ≤ c)]
+(cond3b : ∀ (q'' q' q : ℕ) (hq' : q = q'-1) (hq'' : q'+1 = q'') (hq : q ≤ m) (c) [fact (c₀ ≤ c)]
   (x : M.X (k' * (k' * c)) 0 q') (u1 u2 : units ℕ),
   ​∥M.res (M.d 0 1 x) + (u1:ℕ) • h q' (M.d' q' q'' x) + (u2:ℕ) • M.d' q q' (h q x)∥ ≤
     ε * ∥(res M x : M.X c 0 q')∥)
@@ -124,42 +124,41 @@ begin
   have Hx1 := (cond.col_exact 0 le_rfl).of_le
     (cond.admissible.col 0) _k' le_rfl le_rfl le_rfl c hc 0 le_rfl,
   have Hx2 := cond.cond3b,
-  sorry
-  -- replace Hx2 := @Hx2 1 0 (-1) rfl rfl le_rfl c hc (M.res x) 1 1,
-  -- simp only [row_d, col_d, cond.Hd, cond.Hd', sub_zero, add_zero, smul_zero, d_res, d'_res,
-  --   res_res, one_div, row_res, units.coe_one, one_smul] at Hx1 Hx2 ⊢,
-  -- refine ⟨-1, 1, rfl, rfl, 0, _⟩,
-  -- let φ : ℝ := δ / 2,
-  -- have hφ : 0 < φ := div_pos hδ zero_lt_two,
-  -- have hδφ : δ = φ + φ, { dsimp [φ], rw [← add_div, half_add_self] },
-  -- obtain ⟨i, j, hi, hj, y1, hx1⟩ := Hx1 (M.res x) φ hφ,
-  -- simp [← eq_neg_iff_add_eq_zero] at hi hj, subst i, subst j,
-  -- simp only [cond.Hd, cond.Hd', sub_zero,
-  --   nnreal.coe_mul, nnreal.coe_bit0, nnreal.coe_one, d_res] at hx1 ⊢,
-  -- erw [res_res] at hx1,
-  -- clear y1 Hx1,
-  -- replace Hx1 := mul_le_mul_of_nonneg_left hx1 ε.coe_nonneg,
-  -- replace Hx2 := (norm_le_add_norm_add _ _).trans (add_le_add (Hx2.trans Hx1) le_rfl),
-  -- dsimp [ε] at Hx2,
-  -- have K0 : (K:ℝ) ≠ 0 := ne_of_gt (lt_of_lt_of_le zero_lt_one hK),
-  -- simp only [mul_add, add_assoc, mul_inv', mul_assoc, inv_mul_cancel_left' K0] at Hx2,
-  -- simp only [← div_eq_inv_mul, sub_half, ← sub_le_iff_le_add'] at Hx2,
-  -- simp only [sub_le_iff_le_add', div_le_iff' (zero_lt_two : (0:ℝ) < 2)] at Hx2,
-  -- replace Hx2 := mul_le_mul_of_nonneg_left Hx2 K.coe_nonneg,
-  -- simp only [mul_add, div_eq_inv_mul, add_comm φ,
-  --   mul_inv_cancel_left' (two_ne_zero : (2:ℝ) ≠ 0), mul_inv_cancel_left' K0] at Hx2,
-  -- refine hx1.trans _,
-  -- simp only [mul_comm (2:ℝ) K, mul_assoc, hδφ, ← add_assoc, ← mul_add, add_le_add_iff_right],
-  -- refine Hx2.trans _,
-  -- simp only [add_le_add_iff_right],
-  -- refine (mul_le_mul_of_nonneg_left _ K.coe_nonneg),
-  -- refine (mul_le_mul_of_nonneg_left _ zero_le_two),
-  -- refine le_trans (cond.norm_h_le _ _ le_rfl rfl _ _ _) _,
-  -- { calc c₀ = 1 * c₀ : (one_mul c₀).symm
-  --   ... ≤ k' * c : mul_le_mul' _1k' hc },
-  -- refine mul_le_mul_of_nonneg_left (le_of_eq _) H.coe_nonneg,
-  -- apply norm_res_of_eq,
-  -- rw mul_assoc
+  replace Hx2 := @Hx2 1 0 0 rfl rfl le_rfl c hc (M.res x) 1 1,
+  simp only [row_d, col_d, d_self_apply, d'_self_apply, sub_zero, add_zero, smul_zero,
+    d_res, d'_res, res_res, one_div, row_res, units.coe_one, one_smul] at Hx1 Hx2 ⊢,
+  refine ⟨0, 1, rfl, rfl, 0, _⟩,
+  let φ : ℝ := δ / 2,
+  have hφ : 0 < φ := div_pos hδ zero_lt_two,
+  have hδφ : δ = φ + φ, { dsimp [φ], rw [← add_div, half_add_self] },
+  obtain ⟨i, j, hi, hj, y1, hx1⟩ := Hx1 (M.res x) φ hφ,
+  simp [← eq_neg_iff_add_eq_zero] at hi hj, subst i, subst j,
+  simp only [d_self_apply, d'_self_apply, sub_zero,
+    nnreal.coe_mul, nnreal.coe_bit0, nnreal.coe_one, d_res] at hx1 ⊢,
+  erw [res_res] at hx1,
+  clear y1 Hx1,
+  replace Hx1 := mul_le_mul_of_nonneg_left hx1 ε.coe_nonneg,
+  replace Hx2 := (norm_le_add_norm_add _ _).trans (add_le_add (Hx2.trans Hx1) le_rfl),
+  dsimp [ε] at Hx2,
+  have K0 : (K:ℝ) ≠ 0 := ne_of_gt (lt_of_lt_of_le zero_lt_one hK),
+  simp only [mul_add, add_assoc, mul_inv', mul_assoc, inv_mul_cancel_left' K0] at Hx2,
+  simp only [← div_eq_inv_mul, sub_half, ← sub_le_iff_le_add'] at Hx2,
+  simp only [sub_le_iff_le_add', div_le_iff' (zero_lt_two : (0:ℝ) < 2)] at Hx2,
+  replace Hx2 := mul_le_mul_of_nonneg_left Hx2 K.coe_nonneg,
+  simp only [mul_add, div_eq_inv_mul, add_comm φ,
+    mul_inv_cancel_left' (two_ne_zero : (2:ℝ) ≠ 0), mul_inv_cancel_left' K0] at Hx2,
+  refine hx1.trans _,
+  simp only [mul_comm (2:ℝ) K, mul_assoc, hδφ, ← add_assoc, ← mul_add, add_le_add_iff_right],
+  refine Hx2.trans _,
+  simp only [add_le_add_iff_right],
+  refine (mul_le_mul_of_nonneg_left _ K.coe_nonneg),
+  refine (mul_le_mul_of_nonneg_left _ zero_le_two),
+  refine le_trans (cond.norm_h_le _ _ le_rfl rfl _ _ _) _,
+  { calc c₀ = 1 * c₀ : (one_mul c₀).symm
+    ... ≤ k' * c : mul_le_mul' _1k' hc },
+  refine mul_le_mul_of_nonneg_left (le_of_eq _) H.coe_nonneg,
+  apply norm_res_of_eq,
+  rw mul_assoc
 end
 
 /-- Proposition 9.6 in [Analytic]

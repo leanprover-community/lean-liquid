@@ -93,6 +93,9 @@ lemma d_eq_zero (c : ℝ≥0) (h : i + 1 ≠ j) : (C.d i j : C c i ⟶ C c j) = 
 lemma d_eq_zero_apply (c : ℝ≥0) (h : i + 1 ≠ j) (x : C c i) : (C.d i j x) = 0 :=
 by { rw [d_eq_zero C i j c h], refl }
 
+@[simp] lemma d_self_apply (c : ℝ≥0) (x : C c i) : (C.d i i x) = 0 :=
+d_eq_zero_apply _ _ _ _ i.succ_ne_self _
+
 lemma d_comp_d (c : ℝ≥0) (i j k : ℕ) : C.d i j ≫ (C.d j k : C c j ⟶ _) = 0 :=
 (C.obj $ op c).d_comp_d _ _ _
 
