@@ -204,14 +204,14 @@ Implementation details:
   This is a hack around an inconvenience known as dependent type theory hell. -/
 def is_bounded_exact
   (k K : ℝ≥0) (m : ℕ) [hk : fact (1 ≤ k)] (c₀ : ℝ≥0) : Prop :=
-∀ c (hc : c₀ ≤ c) i (hi : i ≤ m) (x : C (k * c) i),
+∀ c (hc : fact (c₀ ≤ c)) i (hi : i ≤ m) (x : C (k * c) i),
 ∃ (i₀ j : ℕ) (hi₀ : i₀ = i - 1) (hj : i + 1 = j)
   (y : C c i₀), ∥res x - C.d _ _ y∥ ≤ K * ∥C.d i j x∥
 
 /-- Weak version of `is_bounded_exact`. -/
 def is_weak_bounded_exact
   (k K : ℝ≥0) (m : ℕ) [hk : fact (1 ≤ k)] (c₀ : ℝ≥0) : Prop :=
-∀ c (hc : c₀ ≤ c) i (hi : i ≤ m) (x : C (k * c) i) (ε : ℝ) (hε : 0 < ε),
+∀ c (hc : fact (c₀ ≤ c)) i (hi : i ≤ m) (x : C (k * c) i) (ε : ℝ) (hε : 0 < ε),
 ∃ (i₀ j : ℕ) (hi₀ : i₀ = i - 1) (hj : i + 1 = j)
   (y : C c i₀), ∥res x - C.d _ _ y∥ ≤ K * ∥C.d i j x∥ + ε
 
@@ -220,13 +220,13 @@ namespace is_weak_bounded_exact
 variables {C C₁ C₂}
 variables {k k' K K' : ℝ≥0} {m m' : ℕ} {c₀ c₀' : ℝ≥0} [fact (1 ≤ k)] [fact (1 ≤ k')]
 
-lemma of_le (hC : C.is_weak_bounded_exact k K m c₀)
-  (hC_adm : C.admissible) (hk : k ≤ k') (hK : K ≤ K') (hm : m' ≤ m) (hc₀ : c₀ ≤ c₀') :
+lemma of_le (hC : C.is_weak_bounded_exact k K m c₀) (hC_adm : C.admissible)
+  (hk : fact (k ≤ k')) (hK : fact (K ≤ K')) (hm : m' ≤ m) (hc₀ : fact (c₀ ≤ c₀')) :
   C.is_weak_bounded_exact k' K' m' c₀' :=
 begin
   intros c hc i hi x ε ε_pos,
   haveI : fact (k ≤ k') := hk,
-  obtain ⟨i', j, hi', hj, y, hy⟩ := hC c (hc₀.trans hc) i (hi.trans hm) (res x) ε ε_pos,
+  obtain ⟨i', j, hi', hj, y, hy⟩ := hC c (le_trans hc₀ hc) i (hi.trans hm) (res x) ε ε_pos,
   use [i', j, hi', hj, y],
   simp only [res_res] at hy,
   refine le_trans hy _,

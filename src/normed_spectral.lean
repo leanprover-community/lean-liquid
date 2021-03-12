@@ -26,7 +26,12 @@ lemma col_pos (q : ℕ) :
 rfl
 
 lemma admissible (hM : M.admissible) : (truncate.obj M).admissible :=
-{ d_norm_noninc' := λ c p' p q h x, sorry,
+{ d_norm_noninc' := λ c p' p q h x,
+  begin
+    cases q,
+    { sorry },
+    { exact hM.d_norm_noninc c p' p _ _ }
+  end,
   d'_norm_noninc' := λ c p,
     ((M.row p).truncate_admissible (hM.row p)).d_norm_noninc' c,
   res_norm_noninc := λ c₁ c₂ p,
@@ -48,10 +53,10 @@ structure normed_spectral_conditions (m : ℕ) (k K : ℝ≥0) [fact (1 ≤ k)]
 (col_exact : ∀ j ≤ m, (M.col j).is_weak_bounded_exact k K m c₀)
 (row_exact : 0 < m → ∀ i ≤ m + 1, (M.row i).is_weak_bounded_exact k K (m-1) c₀)
 (h : Π (q : ℕ) {q' : ℕ} {c}, M.X (k' * c) 0 q' ⟶ M.X c 1 q)
-(norm_h_le : ∀ (q' q : ℕ) (hq : q ≤ m) (hq' : q = q'-1) (c) (hc : c₀ ≤ c)
+(norm_h_le : ∀ (q q' : ℕ) (hq : q ≤ m) (hq' : q = q'-1) (c) (hc : c₀ ≤ c)
   (x : M.X (k' * c) 0 q'), ​∥h q x∥ ≤ H * ∥x∥)
 -- do we have a better name for the following condition?
-(cond3b : ∀ (q'' q' q : ℕ) (hq' : q = q'-1) (hq'' : q'+1 = q'') (hq : q ≤ m) (c) [fact (c₀ ≤ c)]
+(cond3b : ∀ (q q' q'' : ℕ) (hq' : q = q'-1) (hq'' : q'+1 = q'') (hq : q ≤ m) (c) [fact (c₀ ≤ c)]
   (x : M.X (k' * (k' * c)) 0 q') (u1 u2 : units ℕ),
   ​∥M.res (M.d 0 1 x) + (u1:ℕ) • h q' (M.d' q' q'' x) + (u2:ℕ) • M.d' q q' (h q x)∥ ≤
     ε * ∥(res M x : M.X c 0 q')∥)
@@ -71,9 +76,49 @@ lemma truncate_admissible (cond : normed_spectral_conditions m k K ε hε M k' c
   (truncate.obj M).admissible :=
 truncate.admissible _ cond.admissible
 
+lemma col_zero_exact (cond : normed_spectral_conditions (m+1) k K ε hε M k' c₀ H) :
+  ((truncate.obj M).col 0).is_weak_bounded_exact (k * k * k) (K * (K * K + 1)) m c₀ :=
+sorry -- use `normed_snake`
+
+-- morally `q'` is `q + 1`
+def h_truncate (cond : normed_spectral_conditions (m+1) k K ε hε M k' c₀ H) :
+  Π (q : ℕ) {q' : ℕ} {c : ℝ≥0}, (truncate.obj M).X (k' * c) 0 q' ⟶ (truncate.obj M).X c 1 q
+| 0     0      c := 0
+| 0     1      c := sorry
+| (q+1) (q'+1) c := cond.h _
+| _     _      _ := 0
+
+lemma norm_h_truncate_le (cond : normed_spectral_conditions (m+1) k K ε hε M k' c₀ H) :
+  ∀ (q q' : ℕ), q ≤ m → q = q' - 1 → ∀ (c : ℝ≥0), c₀ ≤ c →
+    ∀ (x : ((truncate.obj M).X (k' * c) 0 q')), ∥cond.h_truncate q x∥ ≤ H * ∥x∥
+| 0     0      hq rfl := by intros; simpa [h_truncate] using mul_nonneg H.coe_nonneg (norm_nonneg x)
+| 0     1      hq rfl := sorry
+| (q+1) (q'+1) hq rfl := cond.norm_h_le _ _ (nat.succ_le_succ hq)
+  (by { simp only [add_zero, nat.add_def, nat.succ_add_sub_one] })
+
+lemma cond3b_truncate (cond : normed_spectral_conditions (m+1) k K ε hε M k' c₀ H) :
+  ∀ (q q' q'' : ℕ), q = q' - 1 → q' + 1 = q'' → q ≤ m →
+    ∀ (c : ℝ≥0) [hc : fact (c₀ ≤ c)] (x : (truncate.obj M).X (k' * (k' * c)) 0 q')
+      (u1 u2 : units ℕ), by exactI
+        ∥res _ (d _ 0 1 x) +
+         (u1:ℤ) • (cond.h_truncate q') (d' _ q' q'' x) +
+         (u2:ℤ) • (d' _ q q') ((cond.h_truncate q) x)∥ ≤ ε * ∥@res _ _ c _ _ _ x∥
+| 0 0      1 rfl rfl hq := sorry
+| 0 1      2 rfl rfl hq := sorry
+| _ (q'+1) _ rfl rfl hq := sorry
+
 def truncate (cond : normed_spectral_conditions (m+1) k K ε hε M k' c₀ H) :
   normed_spectral_conditions m (k*k*k) (K*(K*K+1)) ε hε (truncate.obj M) k' c₀ H :=
-{ col_exact := sorry,
+{ col_exact :=
+  begin
+    rintro (j|j) hj,
+    { exact cond.col_zero_exact },
+    { rw truncate.col_pos,
+      refine (cond.col_exact (j+2) (nat.succ_le_succ hj)).of_le
+        (cond.admissible.col (j+2)) _ _ m.le_succ le_rfl,
+      { apply_instance },
+      { apply_instance } }
+  end,
   row_exact :=
   begin
     intros hm i hi,
@@ -81,15 +126,15 @@ def truncate (cond : normed_spectral_conditions (m+1) k K ε hε M k' c₀ H) :
     suffices : ((truncate.obj M).row i).is_weak_bounded_exact k K m c₀,
     { apply this.of_le _ _ _ le_rfl le_rfl,
       { exact cond.truncate_admissible.row i },
-      { show fact (k ≤ k * k * k), apply_instance },
-      { show fact (K ≤ K * (K * K + 1)), apply_instance } },
+      { apply_instance },
+      { apply_instance } },
     rw truncate.row,
     apply (M.row i).truncate_is_weak_bounded_exact,
     { refine cond.row_exact (nat.zero_lt_succ _) i (hi.trans (nat.le_succ _)), }
   end,
-  h := sorry,
-  norm_h_le := sorry,
-  cond3b := sorry,
+  h := cond.h_truncate,
+  norm_h_le := cond.norm_h_truncate_le,
+  cond3b := cond.cond3b_truncate,
   admissible := cond.truncate_admissible }
 
 end normed_spectral_conditions
@@ -107,16 +152,15 @@ begin
   have hε : 0 < ε,
   { exact nnreal.inv_pos.mpr (mul_pos zero_lt_two (lt_of_lt_of_le zero_lt_one hK)) },
   use [ε, hε, k, K, hk, hK],
-  introsI M k' _k' _1k' c₀ H _H cond,
-  intros c hc i hi,
+  intros M k' _k' _1k' c₀ H _H cond,
+  introsI c hc i hi,
   -- Statement is of the form "for all x ∈ M_{0,i+1} exists y ∈ M_{0,i} such that..."
   interval_cases i, clear hi,
   intros x δ hδ,
   haveI : fact (k' * (k' * c) ≤ k' * k' * c) := by { rw mul_assoc, exact le_rfl },
   have Hx1 := (cond.col_exact 0 le_rfl).of_le
     (cond.admissible.col 0) _k' le_rfl le_rfl le_rfl c hc 0 le_rfl,
-  have Hx2 := cond.cond3b,
-  replace Hx2 := @Hx2 1 0 0 rfl rfl le_rfl c hc (M.res x) 1 1,
+  have Hx2 := cond.cond3b 0 0 1 rfl rfl le_rfl c (M.res x) 1 1,
   simp only [row_d, col_d, d_self_apply, d'_self_apply, sub_zero, add_zero, smul_zero,
     d_res, d'_res, res_res, one_div, row_res, units.coe_one, one_smul] at Hx1 Hx2 ⊢,
   refine ⟨0, 1, rfl, rfl, 0, _⟩,
