@@ -170,11 +170,14 @@ begin
   induction m with m IH, { exact analytic_9_6_base },
   introsI,
   obtain ⟨ε, hε, k₀, K₀, hk₀, hK₀, ih⟩ := IH (k*k*k) (K*(K*K+1)),
+  clear IH,
   refine ⟨ε, hε, k₀, K₀, hk₀, hK₀, _⟩,
   introsI,
+  -- the induction argument isn't setup completely right
+  -- the sorry's below aren't provable
   rw ← system_of_complexes.truncate_is_weak_bounded_exact_iff,
   { exact ih (truncate.obj M) k' c₀ H cond.truncate },
-  { clear IH ih,
+  { clear ih,
     refine (cond.row_exact (nat.zero_lt_succ _) _ (nat.zero_le _)).of_le
       (cond.admissible.row 0) _ _ le_rfl le_rfl,
     sorry,
