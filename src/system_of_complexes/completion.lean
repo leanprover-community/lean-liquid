@@ -9,11 +9,10 @@ namespace system_of_complexes
 
 universe variables u
 variables (C C₁ C₂ : system_of_complexes.{u})
-variables {k k' K K' : ℝ≥0} {m m' : ℤ} {c₀ c₀' : ℝ≥0} [fact (1 ≤ k)] [fact (1 ≤ k')]
+variables {k k' K K' : ℝ≥0} {m m' : ℕ} {c₀ c₀' : ℝ≥0} [fact (1 ≤ k)] [fact (1 ≤ k')]
 
 noncomputable def completion (C : system_of_complexes) : system_of_complexes :=
-sorry
--- C ⋙ NormedGroup.Completion.pushforward_homological_complex
+C ⋙ NormedGroup.Completion.map_complex_like
 
 namespace is_weak_bounded_exact
 
@@ -33,27 +32,27 @@ lemma strong_of_complete (hC : C.is_weak_bounded_exact k K m c₀)
   ∀ δ > 0, C.is_bounded_exact (k^2) (K + δ) m c₀ :=
 begin
   intros δ hδ,
-  -- suffices : ∀ c ≥ c₀, ∀ i < m - 1, ∀ x : C (k * (k * c)) (i + 1 + 1), C.d _ _ x = 0 → ∃ y : C c (i + 1), res x = C.d _ _ y,
-  -- { apply is_weak_bounded_exact.to_exact _ hδ,
-  --   intros c hc i hi x hx,
-  --   haveI : fact (k * (k * c) ≤ k ^ 2 * c) := by { show _ ≤ _, convert le_refl _ using 1, ring},
-  --   rcases this c hc i hi (res x) _ with ⟨y, hy⟩,
-  --   use [y, by simpa using hy],
-  --   simp [C.d_res, hx],
-  --   apply hC.of_le hC' _ (le_refl _) (le_refl _) (le_refl _),
-  --   -- nnreal hell now
-  --   have : (1 : ℝ) ≤ k, assumption,
-  --   suffices : (k : ℝ) ≤ k^2, exact_mod_cast this,
-  --   rw pow_two,
-  --   conv_lhs { rw ← mul_one (k : ℝ) },
-  --   apply mul_le_mul ; linarith },
   refine (hC.of_le hC' _ le_rfl le_rfl le_rfl).to_exact hδ _,
   { calc k = k * 1 : by rw mul_one
     ... ≤ k * k : mul_le_mul' le_rfl ‹_›
     ... = k ^ 2 : by rw pow_two },
   rintros c hc i hi x _ rfl hx,
   haveI : fact (k * c ≤ k ^ 2 * c) := by { rw [pow_two, mul_assoc], apply_instance },
-  have fact₁ : k * c ≥ c₀,
+  haveI : fact (k * (k * c) ≤ k ^ 2 * c) := by { rw [pow_two, mul_assoc], exact le_rfl },
+  -- we need to consider the case `i = 0` separately
+  obtain (rfl|⟨i,rfl⟩) : i = 0 ∨ ∃ i', i = i' + 1,
+  { cases i, { left, refl }, { right, exact ⟨_, rfl⟩ } },
+  { refine ⟨0, rfl, 0, _⟩,
+    rw [normed_group_hom.map_zero, ← norm_le_zero_iff],
+    apply le_of_forall_pos_le_add,
+    intros γ hγ,
+    rw zero_add,
+    obtain ⟨_, _, rfl, rfl, y, hy⟩ := hC c hc 0 (nat.zero_le m) (res x) γ hγ,
+    rwa [res_res, d_eq_zero_apply, sub_zero,
+        d_res, hx, normed_group_hom.map_zero, norm_zero, mul_zero, zero_add] at hy,
+    dec_trivial },
+  -- we continue with the case `i + 1`
+  have hc₀kc : k * c ≥ c₀,
   calc c₀ ≤ c : hc
   ... ≤ 1*c : by rw one_mul
   ... ≤ k*c : mul_le_mul' _inst_1 (le_refl _),
@@ -76,20 +75,16 @@ begin
     norm_num [hK', pow_succ],
     calc (2 : ℝ)^j = 1*2^j : (one_mul _).symm
        ... ≤ 2*2^j : mul_le_mul_of_nonneg_right one_le_two (pow_nonneg zero_le_two _) },
-  obtain ⟨i, rfl⟩ : ∃ i', i = i' + 1 := ⟨i-1, by linarith⟩,
   have seq : ∀ j : ℕ, ∃ w : C (k*c) i, ∥res x - C.d i (i+1) w∥ ≤ ε j,
   { intro j,
     haveI : fact (k * (k * c) ≤ k ^ 2 * c) := by { show _ ≤ _, convert le_refl _ using 1, ring},
-    specialize hC (k*c) fact₁ _ hi (res x) (ε j) (ε_pos j),
-    obtain ⟨i', -, hi', rfl, y, hy⟩ := hC,
+    specialize hC (k*c) hc₀kc _ hi (res x) (ε j) (ε_pos j),
+    obtain ⟨_, _, rfl, rfl, y, hy⟩ := hC,
     simp only [d_res, res_res, normed_group_hom.map_zero, hx, norm_zero, zero_add, mul_zero] at hy,
-    rw [add_left_inj] at hi',
-    cases hi',
     refine ⟨y, hy⟩ },
   choose w hw using seq,
   let δ : ℕ → ℝ := λ j, 1/2*(1/2) ^ j,
-  have δ_pos : ∀ j, 0 < δ j,
-    by norm_num [δ],
+  have δ_pos : ∀ j, 0 < δ j, { norm_num [δ] },
   have hεδ : ∀ j, (K : ℝ) * (2 * ε j) + δ j ≤ 1 * (1 / 2) ^ j,
   { intro j,
     dsimp [ε, δ],
@@ -106,19 +101,20 @@ begin
       simp only [K', if_neg hK],
       rw [mul_div_cancel' _ (two_ne_zero : (2 : ℝ) ≠ 0),
           mul_div_cancel' _ (nnreal.coe_ne_zero.mpr hK)]} },
-  obtain ⟨i, rfl⟩ : ∃ i', i = i' + 1 := ⟨i-1, by linarith⟩,
-  have seq : ∀ j : ℕ, ∃ z : C c i, ∥res (w (j+1) - w j) - C.d _ _ z∥
-                      ≤ K*∥C.d _ (i+1+1) (w (j+1) - w j)∥ + δ j,
+  set i₀ := i - 1 with hi₀,
+  have seq : ∀ j : ℕ, ∃ z : C c i₀, ∥res (w (j+1) - w j) - C.d i₀ i z∥
+                      ≤ K*∥C.d i (i+1) (w (j+1) - w j)∥ + δ j,
   { intro j,
-    obtain ⟨i', -, hi', rfl, hy⟩ := hC c hc (i+1) (by linarith) (w (j+1) - w j) _ (δ_pos j),
-    rw [add_left_inj] at hi', cases hi', exact hy },
+    have : i ≤ m, { exact i.le_succ.trans hi },
+    obtain ⟨i', -, hi', rfl, hy⟩ := hC c hc i this (w (j+1) - w j) _ (δ_pos j),
+    rw [← hi₀] at hi', subst i', exact hy },
   choose z hz using seq,
-  let y : ℕ → C c (i+1) := λ j, res (w j) - ∑ l in range j, C.d _ _ (z l),
+  let y : ℕ → C c i := λ j, res (w j) - ∑ l in range j, C.d _ _ (z l),
   have cau_y : cauchy_seq y,
   { apply cauchy_seq_of_le_geometric (1/(2 : ℝ)) 1 (half_lt_self zero_lt_one),
     intros j,
-    have fact : ∥C.d _ (i+1+1) (w (j + 1) - w j)∥ ≤ 2*ε j :=
-    calc ∥C.d _ (i+1+1) (w (j + 1) - w j)∥
+    have fact : ∥C.d _ (i+1) (w (j + 1) - w j)∥ ≤ 2*ε j :=
+    calc ∥C.d _ (i+1) (w (j + 1) - w j)∥
         = ∥(C.d _ _ (w (j + 1)) - res x) + (res x - C.d _ _ (w j))∥ : by {congr' 1, rw normed_group_hom.map_sub, abel}
     ... ≤ ∥C.d _ _ (w (j + 1)) - res x∥ + ∥res x - C.d _ _ (w j)∥ : norm_add_le _ _
     ... = ∥res x - C.d _ _ (w (j + 1))∥ + ∥res x - C.d _ _ (w j)∥ : by { rw norm_sub_rev }
@@ -133,14 +129,14 @@ begin
     ... ≤ 1 * (1 / 2) ^ j : hεδ j },
   have hdyj : ∀ j, C.d _ _ (y j) = res (C.d _ _ $ w j),
   { intro j,
-    calc C.d _ _ (y j) = C.d _ _ (res (w j) - ∑ l in range j, C.d _ (i+1) (z l)) : rfl
-    ... = C.d _ _ (res (w j)) - ∑ l in range j, C.d (i+1) (i+1+1) (C.d _ _ (z l)) : by rw [normed_group_hom.map_sub, normed_group_hom.map_sum]
+    calc C.d _ _ (y j) = C.d _ _ (res (w j) - ∑ l in range j, C.d _ i (z l)) : rfl
+    ... = C.d _ _ (res (w j)) - ∑ l in range j, C.d i (i+1) (C.d _ _ (z l)) : by rw [normed_group_hom.map_sub, normed_group_hom.map_sum]
     ... = res (C.d _ _ (w j))  : by simp only [d_res, d_d, sum_const_zero, sub_zero] },
 
   have hblop : ∀ j, ∥res x - C.d _ _ (y j)∥  ≤ ε j,
   { intro j,
     calc ∥res x - C.d _ _ (y j)∥ = ∥res x - res (C.d _ _ $ w j)∥ : by rw hdyj
-    ... = ∥(res (res x : C (k*c) (i+1+1)) - res (C.d _ _ $ w j) : C c _)∥ : by { rw  C.res_res }
+    ... = ∥(res (res x : C (k*c) (i+1)) - res (C.d _ _ $ w j) : C c _)∥ : by { rw  C.res_res }
     ... = ∥res (res x - (C.d _ _ $ w j))∥ : by rw res.map_sub
     ... ≤ ∥res x - C.d _ _ (w j)∥ : by apply hC'.res_norm_noninc
     ... ≤ ε j : hw _},
@@ -149,7 +145,7 @@ begin
   refine ⟨_, rfl, y₀, _⟩,
   apply eq_of_norm_sub_le_zero,
   have lim_norm : tendsto (λ j, ∥res x - C.d _ _ (y j)∥) at_top (𝓝 ∥res x - C.d _ _ y₀∥),
-  { have cont : continuous (λ y : C c (i+1), ∥res x - C.d _ _ y∥),
+  { have cont : continuous (λ y : C c i, ∥res x - C.d _ _ y∥),
       from continuous_norm.comp (continuous_const.sub $ normed_group_hom.continuous _),
     exact (cont.tendsto y₀).comp hy₀ },
   have lim_ε : tendsto ε at_top (𝓝 0),

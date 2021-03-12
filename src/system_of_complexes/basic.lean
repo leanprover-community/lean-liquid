@@ -90,6 +90,9 @@ def d (C : system_of_complexes) {c : ℝ≥0} (i j : ℕ) : C c i ⟶ C c j :=
 lemma d_eq_zero (c : ℝ≥0) (h : i + 1 ≠ j) : (C.d i j : C c i ⟶ C c j) = 0 :=
 (C.obj $ op c).d_eq_zero h
 
+lemma d_eq_zero_apply (c : ℝ≥0) (h : i + 1 ≠ j) (x : C c i) : (C.d i j x) = 0 :=
+by { rw [d_eq_zero C i j c h], refl }
+
 lemma d_comp_d (c : ℝ≥0) (i j k : ℕ) : C.d i j ≫ (C.d j k : C c j ⟶ _) = 0 :=
 (C.obj $ op c).d_comp_d _ _ _
 
@@ -192,8 +195,8 @@ Implementation details:
   we automatically take care of the parenthetical condition about `i = 0`.
 * We phrase the condition in a somewhat roundabout way, as
   ```
-  ∃ (i' j : ℤ) (hi' : i' + 1 = i) (hj : i + 1 = j)
-  (y : C c i'), ∥res x - C.d _ _ y∥ ≤ K * ∥C.d i j x∥ + ε
+  ∃ (i₀ j : ℕ) (hi₀ : i₀ = i - 1) (hj : i + 1 = j)
+    (y : C c i₀), ∥res x - C.d _ _ y∥ ≤ K * ∥C.d i j x∥
   ```
   This is a hack around an inconvenience known as dependent type theory hell. -/
 def is_bounded_exact
