@@ -31,7 +31,7 @@ variables (C : cochain_complex ℕ NormedGroup.{u})
 open category_theory.preadditive
 
 def X : ℕ → NormedGroup.{u}
-| 0       := coker (C.d 0 1)
+| 0     := coker (C.d 0 1)
 | (n+1) := C.X (n+2)
 
 def d : Π i j, X C i ⟶ X C j
@@ -134,7 +134,6 @@ def truncate : system_of_complexes ⥤ system_of_complexes :=
 @[simp] lemma truncate_obj_d_succ_succ (c : ℝ≥0) (i j : ℕ) (x: truncate.obj C c (i+1)) :
   (truncate.obj C).d (i+1) (j+1) x = -C.d (i+2) (j+2) x := rfl
 
--- maybe we should prove this using `admissible.iff_of_iso` (doesn't exist yet)
 lemma truncate_admissible (hC : C.admissible) :
   (truncate.obj C).admissible :=
 { d_norm_noninc' :=
