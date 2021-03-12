@@ -5,6 +5,8 @@ import normed_group.pseudo_normed_group
 import partition
 import lem97
 
+import hacks_and_tricks.by_exactI_hack
+
 /-!
 In this file we state and prove 9.8 of [Analytic].
 -/
@@ -203,15 +205,6 @@ begin
   { intro hsn, exact (hsn (hx₁' s n)).elim }
 end
 
--- lemma lem98_int_fin (nS : ℕ) [fact (r' < 1)] (N : ℕ) (hN : 0 < N) (c : ℝ≥0)
---   (x : Mbar r' (fin nS)) (hx : x ∈ filtration (Mbar r' (fin nS)) c)
---   (H : ∀ s n, (x s n).nat_abs ≤ 1) :
---   ∃ y : fin N → Mbar r' (fin nS), (x = ∑ i, y i) ∧
---       (∀ i, y i ∈ filtration (Mbar r' (fin nS)) (c/N + 1)) :=
--- begin
---   admit
--- end
-
 lemma fintype_prod_nat_equiv_nat (S : Type*) [fintype S] [hS : nonempty S] :
   nonempty (S × ℕ ≃ ℕ) :=
 begin
@@ -380,10 +373,10 @@ begin
       if_congr, and_congr, eq_self_iff_true, if_false, false_and] },
 end
 
--- the `d` below doesn't and musn't depend on `S`
--- in the future we may want to reformulate to make this explicit
-lemma lem98 [fact (r' < 1)] (N : ℕ) (hN : 0 < N) :
-  ∃ d, ∀ c (x : Λ →+ Mbar r' S) (hx : x ∈ filtration (Λ →+ Mbar r' S) c),
+lemma lem98 (Λ : Type*) [normed_group Λ] [polyhedral_lattice Λ]
+  [fact (r' < 1)] (N : ℕ) (hN : 0 < N) :
+  ∃ d, ∀ (S : Type*) [fintype S],
+    ​∀ c (x : Λ →+ Mbar r' S) (hx : x ∈ filtration (Λ →+ Mbar r' S) c),
     ∃ y : fin N → (Λ →+ Mbar r' S),
       (x = ∑ i, y i) ∧
       (∀ i, y i ∈ filtration (Λ →+ Mbar r' S) (c/N + d)) :=
@@ -393,7 +386,7 @@ begin
   obtain ⟨A, hA⟩ := lem97' Λ polyhedral_lattice.tf N l,
   let d : ℝ≥0 := finset.univ.sup (λ i, ∑ a in A, nnnorm (a (l i)) / nnnorm (l i)),
   use d,
-  intros c x hx,
+  introsI S hS c x hx,
   -- `x` is a homomorphism `Λ →+ Mbar r' S`
   -- we split it into pieces `Λ →+ ℤ` for all coefficients indexed by `s` and `n`
   let x' : S → ℕ → Λ →+ ℤ := λ s n, (Mbar.coeff s n).comp x,
