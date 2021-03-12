@@ -33,33 +33,29 @@ along the lines of Definition 9.3 of [Analytic].
 -- But I don't think that is relevant for this project.
 
 /-- A system of complexes of normed abelian groups, indexed by `ℝ≥0`.
-See also Definition 9.3 of [Analytic].
-
-Implementation detail: `cochain_complex` assumes that the complex is indexed by `ℤ`,
-whereas we are interested in complexes indexed by `ℕ`.
-We therefore set all objects indexed by negative integers to `0`, in our use case. -/
+See also Definition 9.3 of [Analytic]. -/
 @[derive category_theory.category]
-def system_of_complexes : Type* := ℝ≥0ᵒᵖ ⥤ (cochain_complex ℤ NormedGroup)
+def system_of_complexes : Type* := ℝ≥0ᵒᵖ ⥤ (cochain_complex ℕ NormedGroup)
 
 -- instance : has_shift system_of_complexes := has_shift.mk $ (shift _).congr_right
 
 variables {M M' N : system_of_complexes.{u}} (f : M ⟶ M') (g : M' ⟶ N)
 
 instance : has_coe_to_fun system_of_complexes :=
-⟨λ C, ℝ≥0 → ℤ → NormedGroup, λ C c i, (C.obj $ op c).X i⟩
+⟨λ C, ℝ≥0 → ℕ → NormedGroup, λ C c i, (C.obj $ op c).X i⟩
 
 /-- `f.apply c i` is application of the natural transformation `f`: $f_c^i : M_c^i ⟶ N_c^i$. -/
-def category_theory.has_hom.hom.apply (f : M ⟶ N) {c : ℝ≥0} {i : ℤ} : M c i ⟶ N c i :=
+def category_theory.has_hom.hom.apply (f : M ⟶ N) {c : ℝ≥0} {i : ℕ} : M c i ⟶ N c i :=
 (f.app (op c)).f i
 
 instance hom_to_fun : has_coe_to_fun (M ⟶ N) :=
-⟨λ f, Π {c : ℝ≥0} {i : ℤ}, M c i → N c i, λ f {c} {i} x, f.apply x⟩
+⟨λ f, Π {c : ℝ≥0} {i : ℕ}, M c i → N c i, λ f {c} {i} x, f.apply x⟩
 
 lemma system_of_complexes.map_sub (f : M ⟶ N) {c i} (m m' : M c i) : f (m-m') = f m - f m' :=
 normed_group_hom.map_sub _ _ _
 
 /-- `f.apply c i` is application of the natural isomorphism `f`: $f_c^i : M_c^i ≅ N_c^i$. -/
-def category_theory.iso.apply (f : M ≅ N) {c : ℝ≥0} {i : ℤ} : M c i ≅ N c i :=
+def category_theory.iso.apply (f : M ≅ N) {c : ℝ≥0} {i : ℕ} : M c i ≅ N c i :=
 differential_object.complex_like.iso_app (f.app (op c)) i
 
 namespace system_of_complexes
@@ -68,10 +64,10 @@ variables (C C₁ C₂ : system_of_complexes.{u})
 
 /-- `res` is the restriction map `C c' i ⟶ C c i` for a system of complexes `C`,
 and nonnegative reals `c ≤ c'`. -/
-def res {C : system_of_complexes} {c' c : ℝ≥0} {i : ℤ} [h : fact (c ≤ c')] : C c' i ⟶ C c i :=
+def res {C : system_of_complexes} {c' c : ℝ≥0} {i : ℕ} [h : fact (c ≤ c')] : C c' i ⟶ C c i :=
 (C.map (hom_of_le h).op).f i
 
-variables {c₁ c₂ c₃ : ℝ≥0} (i j : ℤ)
+variables {c₁ c₂ c₃ : ℝ≥0} (i j : ℕ)
 
 @[simp] lemma res_comp_res (h₁ : fact (c₂ ≤ c₁)) (h₂ : fact (c₃ ≤ c₂)) :
   @res C _ _ i h₁ ≫ @res C _ _ i h₂ = @res C _ _ i (le_trans h₂ h₁) :=
@@ -88,16 +84,16 @@ end
 by { rw ← (C.res_comp_res i h₁ h₂), refl }
 
 /-- `C.d` is the differential `C c i ⟶ C c (i+1)` for a system of complexes `C`. -/
-def d (C : system_of_complexes) {c : ℝ≥0} (i j : ℤ) : C c i ⟶ C c j :=
+def d (C : system_of_complexes) {c : ℝ≥0} (i j : ℕ) : C c i ⟶ C c j :=
 (C.obj $ op c).d i j
 
 lemma d_eq_zero (c : ℝ≥0) (h : i + 1 ≠ j) : (C.d i j : C c i ⟶ C c j) = 0 :=
 (C.obj $ op c).d_eq_zero h
 
-lemma d_comp_d (c : ℝ≥0) (i j k : ℤ) : C.d i j ≫ (C.d j k : C c j ⟶ _) = 0 :=
+lemma d_comp_d (c : ℝ≥0) (i j k : ℕ) : C.d i j ≫ (C.d j k : C c j ⟶ _) = 0 :=
 (C.obj $ op c).d_comp_d _ _ _
 
-@[simp] lemma d_d (c : ℝ≥0) (i j k : ℤ) (x : C c i) :
+@[simp] lemma d_d (c : ℝ≥0) (i j k : ℕ) (x : C c i) :
   C.d j k (C.d i j x) = 0 :=
 show ((C.d i j) ≫ C.d j k) x = 0, by { rw d_comp_d, refl }
 
@@ -142,13 +138,13 @@ end iso
 The identity morphism of an object in the system of complexes
 when it is given by different indices that are not
 definitionally equal. -/
-def congr {c c' : ℝ≥0} {i i' : ℤ} (hc : c = c') (hi : i = i') :
+def congr {c c' : ℝ≥0} {i i' : ℕ} (hc : c = c') (hi : i = i') :
   C c i ⟶ C c' i' :=
 eq_to_hom $ by { subst hc, subst hi }
 
 variables (M M' N)
 
-lemma d_apply (f : M ⟶ N) {c : ℝ≥0} {i j : ℤ} (m : M c i) :
+lemma d_apply (f : M ⟶ N) {c : ℝ≥0} {i j : ℕ} (m : M c i) :
   N.d i j (f m) = f (M.d i j m) :=
 begin
   show (_ ≫ N.d i j) m = (M.d i j ≫ _) m,
@@ -156,11 +152,11 @@ begin
   exact ((f.app (op c)).comm i j).symm
 end
 
-lemma res_comp_apply (f : M ⟶ N) (c c' : ℝ≥0) [h : fact (c ≤ c')] (i : ℤ) :
+lemma res_comp_apply (f : M ⟶ N) (c c' : ℝ≥0) [h : fact (c ≤ c')] (i : ℕ) :
   @res M c' c i _ ≫ f.apply = f.apply ≫ res :=
 congr_fun (congr_arg differential_object.hom.f (f.naturality (hom_of_le h).op)) i
 
-lemma res_apply (f : M ⟶ N) (c c' : ℝ≥0) [h : fact (c ≤ c')] {i : ℤ} (m : M c' i) :
+lemma res_apply (f : M ⟶ N) (c c' : ℝ≥0) [h : fact (c ≤ c')] {i : ℕ} (m : M c' i) :
   @res N c' c _ _ (f m) = f (res m) :=
 show (f.apply ≫ (@res N c' c _ _)) m = (@res M c' c _ _ ≫ (f.apply)) m,
 by rw res_comp_apply
@@ -173,7 +169,7 @@ structure admissible (C : system_of_complexes) : Prop :=
 (d_norm_noninc' : ∀ c i j (h : i + 1 = j), (C.d i j : C c i ⟶ C c j).norm_noninc)
 (res_norm_noninc : ∀ c' c i h, (@res C c' c i h).norm_noninc)
 
-lemma admissible.d_norm_noninc (hC : C.admissible) (c : ℝ≥0) (i j : ℤ) :
+lemma admissible.d_norm_noninc (hC : C.admissible) (c : ℝ≥0) (i j : ℕ) :
   (C.d i j : C c i ⟶ _).norm_noninc :=
 begin
   by_cases h : i + 1 = j,
@@ -191,32 +187,32 @@ For all `c ≥ c₀` and all `x : C (k * c) i` with `i ≤ m` there is some `y :
 See Definition 9.3 of [Analytic] (which coalesces the roles of `k` and `K`).
 
 Implementation details:
-* Because our chain complexes are indexed by `ℤ` instead of `ℕ`,
-  and we make sure that objects indexed by negative integers are `0`,
+* Because we have a differential `d i j : C c i ⟶ C c j` for all `i` and `j`,
+  and because `d 0 0 = 0` and `0 - 1 = 0` in Lean's natural numbers,
   we automatically take care of the parenthetical condition about `i = 0`.
-* The original text bounds `i` as `i ≤ m`, and then requires `y : C c (i-1)`.
-  We change this to `i < m` and `y : C c i`, because this has better definitional properties.
-  (This is a hack around an inconvenience known as dependent type theory hell.) -/
+* We phrase the condition in a somewhat roundabout way, as
+  ```
+  ∃ (i' j : ℤ) (hi' : i' + 1 = i) (hj : i + 1 = j)
+  (y : C c i'), ∥res x - C.d _ _ y∥ ≤ K * ∥C.d i j x∥ + ε
+  ```
+  This is a hack around an inconvenience known as dependent type theory hell. -/
 def is_bounded_exact
-  (k K : ℝ≥0) (m : ℤ) [hk : fact (1 ≤ k)] (c₀ : ℝ≥0) : Prop :=
-∀ c ≥ c₀, ∀ i ≤ m,
-∀ x : C (k * c) i,
-∃ (i' j : ℤ) (hi' : i' + 1 = i) (hj : i + 1 = j)
-  (y : C c i'), ∥res x - C.d _ _ y∥ ≤ K * ∥C.d i j x∥
+  (k K : ℝ≥0) (m : ℕ) [hk : fact (1 ≤ k)] (c₀ : ℝ≥0) : Prop :=
+∀ c (hc : c₀ ≤ c) i (hi : i ≤ m) (x : C (k * c) i),
+∃ (i₀ j : ℕ) (hi₀ : i₀ = i - 1) (hj : i + 1 = j)
+  (y : C c i₀), ∥res x - C.d _ _ y∥ ≤ K * ∥C.d i j x∥
 
 /-- Weak version of `is_bounded_exact`. -/
 def is_weak_bounded_exact
-  (k K : ℝ≥0) (m : ℤ) [hk : fact (1 ≤ k)] (c₀ : ℝ≥0) : Prop :=
-∀ c ≥ c₀, ∀ i ≤ m,
-∀ x : C (k * c) i,
-∀ ε > 0,
-∃ (i' j : ℤ) (hi' : i' + 1 = i) (hj : i + 1 = j)
-  (y : C c i'), ∥res x - C.d _ _ y∥ ≤ K * ∥C.d i j x∥ + ε
+  (k K : ℝ≥0) (m : ℕ) [hk : fact (1 ≤ k)] (c₀ : ℝ≥0) : Prop :=
+∀ c (hc : c₀ ≤ c) i (hi : i ≤ m) (x : C (k * c) i) (ε : ℝ) (hε : 0 < ε),
+∃ (i₀ j : ℕ) (hi₀ : i₀ = i - 1) (hj : i + 1 = j)
+  (y : C c i₀), ∥res x - C.d _ _ y∥ ≤ K * ∥C.d i j x∥ + ε
 
 namespace is_weak_bounded_exact
 
 variables {C C₁ C₂}
-variables {k k' K K' : ℝ≥0} {m m' : ℤ} {c₀ c₀' : ℝ≥0} [fact (1 ≤ k)] [fact (1 ≤ k')]
+variables {k k' K K' : ℝ≥0} {m m' : ℕ} {c₀ c₀' : ℝ≥0} [fact (1 ≤ k)] [fact (1 ≤ k')]
 
 lemma of_le (hC : C.is_weak_bounded_exact k K m c₀)
   (hC_adm : C.admissible) (hk : k ≤ k') (hK : K ≤ K') (hm : m' ≤ m) (hc₀ : c₀ ≤ c₀') :
@@ -273,7 +269,7 @@ end is_weak_bounded_exact
 namespace is_bounded_exact
 
 variables {C C₁ C₂}
-variables {k k' K K' : ℝ≥0} {m m' : ℤ} {c₀ c₀' : ℝ≥0} [fact (1 ≤ k)] [fact (1 ≤ k')]
+variables {k k' K K' : ℝ≥0} {m m' : ℕ} {c₀ c₀' : ℝ≥0} [fact (1 ≤ k)] [fact (1 ≤ k')]
 
 lemma of_le (hC : C.is_bounded_exact k K m c₀)
   (hC_adm : C.admissible) (hk : k ≤ k') (hK : K ≤ K') (hm : m' ≤ m) (hc₀ : c₀ ≤ c₀') :
@@ -315,18 +311,17 @@ end is_bounded_exact
 namespace is_weak_bounded_exact
 
 variables {C C₁ C₂}
-variables {k k' K K' : ℝ≥0} {m m' : ℤ} {c₀ c₀' : ℝ≥0} [fact (1 ≤ k)] [fact (1 ≤ k')]
+variables {k k' K K' : ℝ≥0} {m m' : ℕ} {c₀ c₀' : ℝ≥0} [fact (1 ≤ k)] [fact (1 ≤ k')]
 
 lemma to_exact (hC : C.is_weak_bounded_exact k K m c₀) {δ : ℝ≥0} (hδ : 0 < δ)
-  (H : ∀ c ≥ c₀, ∀ i ≤ m, ∀ x : C (k * c) i,
-    ∀ j, i+1 = j →
-    C.d _ j x = 0 → ∃ (i' : ℤ) (hi' : i'+1 = i) y : C c i', res x = C.d _ _ y) :
+  (H : ∀ c ≥ c₀, ∀ i ≤ m, ∀ x : C (k * c) i, ∀ j, i+1 = j →
+    C.d _ j x = 0 → ∃ (i₀ : ℕ) (hi₀ : i₀ = i - 1) (y : C c i₀), res x = C.d _ _ y) :
   C.is_bounded_exact k (K + δ) m c₀ :=
 begin
   intros c hc i hi x,
   by_cases hdx : C.d _ (i+1) x = 0,
-  { rcases H c hc i hi x _ rfl hdx with ⟨i', hi', y, hy⟩,
-    exact ⟨i', _, hi', rfl, y, by simp [hy, hdx]⟩ },
+  { rcases H c hc i hi x _ rfl hdx with ⟨i₀, hi₀, y, hy⟩,
+    exact ⟨i₀, _, hi₀, rfl, y, by simp [hy, hdx]⟩ },
   { obtain ⟨i', j, hi', rfl, y, hy⟩ :=
       hC c hc _ hi x (δ*∥C.d _ (i+1) x∥) (mul_pos (by exact_mod_cast hδ) $ norm_pos_iff.mpr hdx),
     refine ⟨i', _, hi', rfl, y, _⟩,
