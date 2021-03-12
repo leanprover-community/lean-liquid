@@ -11,10 +11,18 @@ instance fact_le_mul_of_one_le_left [hk : fact (1 ≤ k)] [hc : fact (c₁ ≤ c
 calc c₁ = 1 * c₁ : (one_mul _).symm
     ... ≤ k * c₂ : mul_le_mul' hk hc
 
+instance fact_le_mul_of_one_le_right [hc : fact (c₁ ≤ c₂)] [hk : fact (1 ≤ k)] :
+  fact (c₁ ≤ c₂ * k) :=
+calc c₁ = c₁ * 1 : (mul_one _).symm
+    ... ≤ c₂ * k : mul_le_mul' hc hk
+
 instance fact_mul_le_of_le_one_left [hk : fact (k ≤ 1)] [hc : fact (c₁ ≤ c₂)] :
   fact (k * c₁ ≤ c₂) :=
 calc k * c₁ ≤ 1 * c₂ : mul_le_mul' hk hc
         ... = c₂     : one_mul _
+
+instance fact_one_le_add_one : fact (1 ≤ k + 1) :=
+self_le_add_left 1 k
 
 instance fact_le_refl : fact (c ≤ c) := le_rfl
 

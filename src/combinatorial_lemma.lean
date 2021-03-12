@@ -13,11 +13,6 @@ open_locale nnreal big_operators
 
 open pseudo_normed_group
 
--- -- move this
--- @[simp] lemma apply_ite {α β : Type*} (P : Prop) [decidable P] (f : α → β) (a b : α) :
---   f (if P then a else b) = if P then f a else f b :=
--- by { split_ifs; refl }
-
 variables (Λ : Type*) (r' : ℝ≥0) (S : Type*)
 variables [fintype S] [normed_group Λ] [polyhedral_lattice Λ]
 

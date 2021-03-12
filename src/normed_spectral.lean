@@ -52,7 +52,7 @@ structure normed_spectral_conditions (m : ℕ) (k K : ℝ≥0) [fact (1 ≤ k)]
   (ε : ℝ) (hε : 0 < ε) (M : system_of_double_complexes.{u})
   (k' : ℝ≥0) [fact (1 ≤ k')] (c₀ H : ℝ≥0) [fact (0 < H)] :=
 (col_exact : ∀ j ≤ m, (M.col j).is_weak_bounded_exact k K m c₀)
-(row_exact : ∀ i ≤ m + 1, (M.row i).is_weak_bounded_exact k K (m-1) c₀)
+(row_exact : 0 < m → ∀ i ≤ m + 1, (M.row i).is_weak_bounded_exact k K (m-1) c₀)
 (h : Π (q : ℕ) {q' : ℕ} {c}, M.X (k' * c) 0 q' ⟶ M.X c 1 q)
 (norm_h_le : ∀ (q' q : ℕ) (hq : q ≤ m) (hq' : q = q'-1) (c) (hc : c₀ ≤ c)
   (x : M.X (k' * c) 0 q'), ​∥h q x∥ ≤ H * ∥x∥)
@@ -68,7 +68,7 @@ structure normed_spectral_conditions (m : ℕ) (k K : ℝ≥0) [fact (1 ≤ k)]
 
 namespace normed_spectral_conditions
 
-variables {m' m : ℕ} {k K : ℝ≥0} [fact (1 ≤ k)]
+variables {m : ℕ} {k K : ℝ≥0} [fact (1 ≤ k)]
 variables {ε : ℝ} {hε : 0 < ε} {k₀ : ℝ≥0} [fact (1 ≤ k₀)]
 variables {M : system_of_double_complexes.{u}}
 variables {k' : ℝ≥0} [fact (k₀ ≤ k')] [fact (1 ≤ k')] {c₀ H : ℝ≥0} [fact (0 < H)]
@@ -77,23 +77,21 @@ lemma truncate_admissible (cond : normed_spectral_conditions m k K ε hε M k' c
   (truncate.obj M).admissible :=
 truncate.admissible _ cond.admissible
 
-def truncate (cond : normed_spectral_conditions m k K ε hε M k' c₀ H) (h : m' + 1 = m) :
-  normed_spectral_conditions m' (k*k*k) (K*(K*K+1)) ε hε (truncate.obj M) k' c₀ H :=
+def truncate (cond : normed_spectral_conditions (m+1) k K ε hε M k' c₀ H) :
+  normed_spectral_conditions m (k*k*k) (K*(K*K+1)) ε hε (truncate.obj M) k' c₀ H :=
 { col_exact := sorry,
   row_exact :=
   begin
-    sorry
-    -- intros i hi,
-    -- suffices : ((truncate.obj M).row i).is_weak_bounded_exact k K (m' - 1) c₀,
-    -- { apply this.of_le _ _ _ le_rfl le_rfl,
-    --   { exact cond.truncate_admissible.row i },
-    --   { show fact (k ≤ k * k * k), apply_instance },
-    --   { show fact (K ≤ K * (K * K + 1)), sorry } },
-    -- rw ← eq_sub_iff_add_eq at h, subst m', rw sub_add_cancel at hi,
-    -- rw truncate.row,
-    -- apply (M.row i).truncate_is_weak_bounded_exact,
-    -- { exact cond.row_exact i (int.le_add_one hi) },
-    -- { exact sub_add_cancel _ _ }
+    intros hm i hi,
+    cases m, { exact (nat.not_lt_zero _ hm).elim },
+    suffices : ((truncate.obj M).row i).is_weak_bounded_exact k K m c₀,
+    { apply this.of_le _ _ _ le_rfl le_rfl,
+      { exact cond.truncate_admissible.row i },
+      { show fact (k ≤ k * k * k), apply_instance },
+      { show fact (K ≤ K * (K * K + 1)), apply_instance } },
+    rw truncate.row,
+    apply (M.row i).truncate_is_weak_bounded_exact,
+    { refine cond.row_exact (nat.zero_lt_succ _) i (hi.trans (nat.le_succ _)), }
   end,
   h := sorry,
   norm_h_le := sorry,
@@ -104,17 +102,17 @@ end normed_spectral_conditions
 
 /-- Base case of the induction for Proposition 9.6. -/
 theorem analytic_9_6_base (k K : ℝ≥0) [hk : fact (1 ≤ k)] [hK : fact (1 ≤ K)] :
-  ∃ (ε : ℝ) (hε : ε > 0) (k₀ : ℝ≥0) [fact (1 ≤ k₀)],
+  ∃ (ε : ℝ) (hε : ε > 0) (k₀ K₀ : ℝ≥0) [fact (1 ≤ k₀)] [fact (1 ≤ K₀)],
   ∀ (M : system_of_double_complexes.{u})
     (k' : ℝ≥0) [fact (k₀ ≤ k')] [fact (1 ≤ k')] -- follows
     (c₀ H : ℝ≥0) [fact (0 < H)],
   ​∀ (cond : normed_spectral_conditions 0 k K ε hε M k' c₀ H),
-  (M.row 0).is_weak_bounded_exact (k' * k') (2 * K * H) 0 c₀ :=
+    (M.row 0).is_weak_bounded_exact (k' * k') (2 * K₀ * H) 0 c₀ :=
 begin
   let ε := (2*K)⁻¹,
   have hε : 0 < ε,
   { exact nnreal.inv_pos.mpr (mul_pos zero_lt_two (lt_of_lt_of_le zero_lt_one hK)) },
-  use [ε, hε, k, hk],
+  use [ε, hε, k, K, hk, hK],
   introsI M k' _k' _1k' c₀ H _H cond,
   intros c hc i hi,
   -- Statement is of the form "for all x ∈ M_{0,i+1} exists y ∈ M_{0,i} such that..."
@@ -160,6 +158,7 @@ begin
   apply norm_res_of_eq,
   rw mul_assoc
 end
+.
 
 /-- Proposition 9.6 in [Analytic]
 Constants (max (k' * k') (2 * k₀ * H)) and K in the statement are not the right ones.
@@ -167,16 +166,18 @@ We need to investigate the consequences of the k Zeeman effect here.
 -/
 theorem analytic_9_6 (m : ℕ) :
   ∀ (k K : ℝ≥0) [fact (1 ≤ k)] [hK : fact (1 ≤ K)],
-  ∃ (ε : ℝ) (hε : ε > 0) (k₀ : ℝ≥0) [fact (1 ≤ k₀)],
+  ∃ (ε : ℝ) (hε : ε > 0) (k₀ K₀ : ℝ≥0) [fact (1 ≤ k₀)] [fact (1 ≤ K₀)],
   ∀ (M : system_of_double_complexes.{u})
     (k' : ℝ≥0) [fact (k₀ ≤ k')] [fact (1 ≤ k')] -- follows
     (c₀ H : ℝ≥0) [fact (0 < H)],
   ​∀ (cond : normed_spectral_conditions m k K ε hε M k' c₀ H),
-  (M.row 0).is_weak_bounded_exact (k' * k') (2 * K * H) m c₀ :=
+    (M.row 0).is_weak_bounded_exact (k' * k') (2 * K₀ * H) m c₀ :=
 begin
-  induction m with m IH,
-  { -- base case m = 0
-    exact analytic_9_6_base },
-  { -- inductive step
-    sorry }
+  induction m with m IH, { exact analytic_9_6_base },
+  introsI,
+  obtain ⟨ε, hε, k₀, K₀, hk₀, hK₀, ih⟩ := IH (k*k*k) (K*(K*K+1)),
+  refine ⟨ε, hε, k₀, K₀, hk₀, hK₀, _⟩,
+  introsI,
+  rw ← system_of_complexes.truncate_is_weak_bounded_exact_iff,
+  exact ih (truncate.obj M) k' c₀ H cond.truncate
 end
