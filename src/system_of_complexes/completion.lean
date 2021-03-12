@@ -16,16 +16,18 @@ C ⋙ NormedGroup.Completion.map_complex_like
 
 namespace is_weak_bounded_exact
 
-lemma controlled_y (hC : C.is_weak_bounded_exact k K m c₀) :
-∀ c ≥ c₀, ∀ i < m,
-∀ x : C (k^2 * c) (i+1),
-∀ (ε > 0) (δ > 0), ∃ y : C c i, ∥res x - C.d _ _ y∥
-                   ≤ K * ∥C.d _ (i+1) x∥ + ε ∧ ∥y∥ ≤ K*(K + 1)*∥x∥ + δ :=
-sorry
+-- === We don't need the following two lemmas anytime soon
 
-lemma completion (hC : C.is_weak_bounded_exact k K m c₀) :
-  C.completion.is_weak_bounded_exact (k^2) K m c₀ :=
-sorry
+-- lemma controlled_y (hC : C.is_weak_bounded_exact k K m c₀) :
+-- ∀ c ≥ c₀, ∀ i < m,
+-- ∀ x : C (k^2 * c) (i+1),
+-- ∀ (ε > 0) (δ > 0), ∃ y : C c i, ∥res x - C.d _ _ y∥
+--                    ≤ K * ∥C.d _ (i+1) x∥ + ε ∧ ∥y∥ ≤ K*(K + 1)*∥x∥ + δ :=
+-- by admit
+
+-- lemma completion (hC : C.is_weak_bounded_exact k K m c₀) :
+--   C.completion.is_weak_bounded_exact (k^2) K m c₀ :=
+-- by admit
 
 lemma strong_of_complete (hC : C.is_weak_bounded_exact k K m c₀)
   (hC' : admissible C) [∀ c i, complete_space (C c i)] :
