@@ -86,17 +86,24 @@ sorry -- use `normed_snake`
 def h_truncate (cond : normed_spectral_conditions (m+1) k K ε M k' c₀ H) :
   Π (q : ℕ) {q' : ℕ} {c : ℝ≥0}, (truncate.obj M).X (k' * c) 0 q' ⟶ (truncate.obj M).X c 1 q
 | 0     0      c := 0
-| 0     1      c := sorry
-| (q+1) (q'+1) c := cond.h _
+| 0     1      c := cond.h 1 ≫ NormedGroup.coker.π
+| (q+1) (q'+1) c := cond.h (q+2)
 | _     _      _ := 0
 
 lemma norm_h_truncate_le (cond : normed_spectral_conditions (m+1) k K ε M k' c₀ H) :
-  ∀ (q q' : ℕ), q ≤ m → q = q' - 1 → ∀ (c : ℝ≥0), c₀ ≤ c →
+  ∀ (q q' : ℕ), q ≤ m → q = q' - 1 → ∀ (c : ℝ≥0), fact (c₀ ≤ c) →
     ∀ (x : ((truncate.obj M).X (k' * c) 0 q')), ∥cond.h_truncate q x∥ ≤ H * ∥x∥
-| 0     0      hq rfl := by intros; simpa [h_truncate] using mul_nonneg H.coe_nonneg (norm_nonneg x)
-| 0     1      hq rfl := sorry
+| 0     0      hq rfl := by intros; simpa only [h_truncate, norm_zero, normed_group_hom.zero_apply]
+                                    using mul_nonneg H.coe_nonneg (norm_nonneg x)
 | (q+1) (q'+1) hq rfl := cond.norm_h_le _ _ (nat.succ_le_succ hq)
-  (by { simp only [add_zero, nat.add_def, nat.succ_add_sub_one] })
+                                    (by simp only [nat.add_def, nat.succ_add_sub_one])
+| 0     1      hq rfl :=
+begin
+  introsI c hc x,
+  calc ∥NormedGroup.coker.π (cond.h 1 x)∥
+      ≤ ∥cond.h 1 x∥ : normed_group_hom.quotient_norm_le (NormedGroup.coker.π_is_quotient) _
+  ... ≤ H * ∥x∥ : cond.norm_h_le 1 2 dec_trivial rfl c x
+end
 
 lemma cond3b_truncate (cond : normed_spectral_conditions (m+1) k K ε M k' c₀ H) :
   ∀ (q q' q'' : ℕ), q = q' - 1 → q' + 1 = q'' → q ≤ m →
