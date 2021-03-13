@@ -1,5 +1,6 @@
 import system_of_complexes.double
 import system_of_complexes.truncate
+import normed_snake
 
 noncomputable theory
 open_locale nnreal
@@ -26,6 +27,15 @@ lemma row (p : ℕ) :
 lemma col_pos (q : ℕ) :
   (truncate.obj M).col (q+1) = M.col (q+1+1) :=
 rfl
+
+def quotient_map : M.col 1 ⟶ (truncate.obj M).col 0 :=
+{ app := λ c,
+  { f := λ p, NormedGroup.coker.π,
+    comm := λ p p',
+    begin
+      sorry
+    end },
+  naturality' := sorry }
 
 lemma admissible (hM : M.admissible) : (truncate.obj M).admissible :=
 { d_norm_noninc' := λ c p' p q h,
@@ -76,7 +86,6 @@ variables {ε : ℝ} {k₀ : ℝ≥0} [fact (1 ≤ k₀)]
 variables {M : system_of_double_complexes.{u}}
 variables {k' : ℝ≥0} [fact (k₀ ≤ k')] [fact (1 ≤ k')] {c₀ H : ℝ≥0} [fact (0 < H)]
 
-
 lemma truncate_admissible (cond : M.normed_spectral_conditions m k K k' ε c₀ H) :
   (truncate.obj M).admissible :=
 truncate.admissible _ cond.admissible
@@ -86,7 +95,16 @@ variables (cond : M.normed_spectral_conditions (m+1) k K k' ε c₀ H)
 include cond
 
 lemma col_zero_exact : ((truncate.obj M).col 0).is_weak_bounded_exact (k*k*k) (K*(K*K+1)) m c₀ :=
-sorry -- use `normed_snake`
+begin
+  apply weak_normed_snake (M.col 0) (M.col 1) ((truncate.obj M).col 0)
+    (M.col_map 0 1) (truncate.quotient_map M)
+    (cond.col_exact 0 dec_trivial) (cond.col_exact 1 dec_trivial)
+    (cond.admissible.col 1),
+  { intros c p, exact cond.admissible.d'_norm_noninc c p 0 1 },
+  { sorry },
+  { sorry },
+  { intros c p, exact NormedGroup.coker.π_is_quotient }
+end
 
 -- morally `q'` is `q + 1`
 def h_truncate : Π (q : ℕ) {q' : ℕ} {c : ℝ≥0},

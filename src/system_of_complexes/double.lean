@@ -124,6 +124,15 @@ by rw d'_comp_res
   C.d' q' q'' (C.d' q q' x) = 0 :=
 show (C.d' _ _ ≫ C.d' _ _) x = 0, by { rw d'_comp_d', refl }
 
+lemma d'_comp_d (c : ℝ≥0) (p p' q q' : ℕ) :
+  C.d' q q' ≫ C.d p p' = C.d p p' ≫ (C.d' q q' : C.X c p' q ⟶ _) :=
+((C.obj $ op c).d p p').comm q q'
+
+lemma d'_d (c : ℝ≥0) (p p' q q' : ℕ) (x : C.X c p q) :
+  C.d' q q' (C.d p p' x) = C.d p p' (C.d' q q' x) :=
+show (C.d p p' ≫ C.d' q q') x = (C.d' q q' ≫ C.d p p') x,
+by rw [d'_comp_d]
+
 /-- Convenience definition:
 The identity morphism of an object in the system of double complexes
 when it is given by different indices that are not
@@ -167,6 +176,15 @@ rfl
 @[simp] lemma col_d (C : system_of_double_complexes) (c : ℝ≥0) (p p' q : ℕ) :
   (C.col q).d p p' = @d C c p p' q :=
 rfl
+
+/-- The differential between columns in a system of double complexes,
+as map of system of complexes. -/
+def col_map (C : system_of_double_complexes.{u}) (q q' : ℕ) :
+  C.col q ⟶ C.col q' :=
+{ app := λ c,
+  { f := λ p, (C.d' q q' : C.X c.unop p q ⟶ C.X c.unop p q'),
+    comm := λ p p', (C.d'_comp_d _ p p' q q').symm },
+  naturality' := λ c₁ c₂ h, by { ext p : 2, exact (((C.map h).f p).comm q q').symm } }
 
 /-- A system of double complexes is *admissible*
 if all the differentials and restriction maps are norm-nonincreasing.
