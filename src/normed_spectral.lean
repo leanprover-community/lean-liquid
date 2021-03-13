@@ -31,11 +31,8 @@ rfl
 def quotient_map : M.col 1 ⟶ (truncate.obj M).col 0 :=
 { app := λ c,
   { f := λ p, NormedGroup.coker.π,
-    comm := λ p p',
-    begin
-      sorry
-    end },
-  naturality' := sorry }
+    comm := λ p p', by { ext, refl } },
+  naturality' := by { intros, ext, refl } }
 
 lemma admissible (hM : M.admissible) : (truncate.obj M).admissible :=
 { d_norm_noninc' := λ c p' p q h,
