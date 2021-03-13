@@ -50,7 +50,6 @@ variables {M M₁ M₂ M₃ : ProFiltPseuNormGrpWithTinv.{u} r'} (c : ℝ≥0)
 variables (f : M₁ ⟶ M₂) (g : M₂ ⟶ M₃)
 
 /-- The complex of normed groups `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …` -/
-@[simps]
 def complex (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
   (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] (M : ProFiltPseuNormGrpWithTinv r') (c : ℝ≥0) :
   cochain_complex ℕ NormedGroup :=
@@ -68,7 +67,7 @@ differential_object.hom.mk'
   (λ i, CLCFPTinv.map r V r' _ _ f)
   begin
     rintro i j h, dsimp only [differential_object.coherent_indices] at h, subst j,
-    dsimp, simp only [category.comp_id, if_congr, if_true, eq_self_iff_true],
+    dsimp [complex], simp only [category.comp_id, if_congr, if_true, eq_self_iff_true],
     symmetry, apply universal_map.map_comp_eval_CLCFPTinv
   end
 
@@ -102,7 +101,7 @@ def system (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
       exact CLCFPTinv.res r V r' _ _ (BD.rank i))
     begin
       rintro i j h, dsimp only [differential_object.coherent_indices] at h, subst j,
-      dsimp, simp only [category.comp_id, if_congr, if_true, eq_self_iff_true],
+      dsimp [complex], simp only [category.comp_id, if_congr, if_true, eq_self_iff_true],
       symmetry, apply universal_map.res_comp_eval_CLCFPTinv
     end,
   map_id' := /- the restriction map for `c ≤ c` is the identity -/

@@ -5,7 +5,7 @@ open_locale nnreal -- enable the notation `ℝ≥0` for the nonnegative real num
 
 variables (BD : breen_deligne.package)
 variables (c' : ℕ → ℝ≥0)  -- implicit constants, chosen once and for all
-                          -- see the sentence after that statement of Thm 9.5
+                          -- see the sentence after the statement of Thm 9.5
 
 open ProFiltPseuNormGrpWithTinv
 
