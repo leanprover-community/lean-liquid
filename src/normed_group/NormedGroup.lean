@@ -232,8 +232,11 @@ lemma coker.map_lift_comm {B' D' : NormedGroup}
   {condb : fab ≫ fbb' = 0} {condd : fcd ≫ fdd' = 0} {g : B' ⟶ D'}
   (h' : fbb' ≫ g = fbd ≫ fdd'):
   coker.lift condb ≫ g = coker.map h ≫ coker.lift condd :=
-by erw [← cancel_epi (coker.π : _ ⟶ coker fab), ← category.assoc, coker.lift_comp_π, h',
-       ← category.assoc, coker.lift_comp_π, category.assoc, coker.lift_comp_π]
+begin
+  delta coker.map,
+  simp only [← cancel_epi (coker.π : _ ⟶ coker fab), ← category.assoc, coker.lift_comp_π, h'],
+  rw [category.assoc, coker.lift_comp_π]
+end
 
 lemma coker.lift_comp_eq_zero {f : A ⟶ B} {g : B ⟶ C} {h : C ⟶ D} (cond : f ≫ g = 0)
   (cond2 : g ≫ h = 0) : coker.lift cond ≫ h = 0 :=
