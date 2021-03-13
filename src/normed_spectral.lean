@@ -3,9 +3,11 @@ import system_of_complexes.truncate
 
 noncomputable theory
 open_locale nnreal
-open system_of_double_complexes category_theory
+open category_theory
 
 universe variables u
+
+namespace system_of_double_complexes
 
 @[simps]
 def truncate : system_of_double_complexes.{u} ⥤ system_of_double_complexes.{u} :=
@@ -48,9 +50,8 @@ calc ∥x∥ = ∥x + y - y∥ : by rw add_sub_cancel
 
 /-- The assumptions on `M` in Proposition 9.6 bundled into a structure. Note that in `cond3b`
   our `q` is one smaller than the `q` in the notes (so that we don't have to deal with `q - 1`). -/
-structure normed_spectral_conditions (m : ℕ) (k K : ℝ≥0) [fact (1 ≤ k)]
-  (ε : ℝ) (M : system_of_double_complexes.{u})
-  (k' : ℝ≥0) [fact (1 ≤ k')] (c₀ H : ℝ≥0) [fact (0 < H)] :=
+structure normed_spectral_conditions (M : system_of_double_complexes.{u})
+  (m : ℕ) (k K k' : ℝ≥0) (ε : ℝ) [fact (1 ≤ k)] [fact (1 ≤ k')] (c₀ H : ℝ≥0) [fact (0 < H)] :=
 (col_exact : ∀ j ≤ m, (M.col j).is_weak_bounded_exact k K m c₀)
 (row_exact : 0 < m → ∀ i ≤ m + 1, (M.row i).is_weak_bounded_exact k K (m-1) c₀)
 (h : Π (q : ℕ) {q' : ℕ} {c}, M.X (k' * c) 0 q' ⟶ M.X c 1 q)
@@ -75,25 +76,28 @@ variables {ε : ℝ} {k₀ : ℝ≥0} [fact (1 ≤ k₀)]
 variables {M : system_of_double_complexes.{u}}
 variables {k' : ℝ≥0} [fact (k₀ ≤ k')] [fact (1 ≤ k')] {c₀ H : ℝ≥0} [fact (0 < H)]
 
-lemma truncate_admissible (cond : normed_spectral_conditions m k K ε M k' c₀ H) :
+
+lemma truncate_admissible (cond : M.normed_spectral_conditions m k K k' ε c₀ H) :
   (truncate.obj M).admissible :=
 truncate.admissible _ cond.admissible
 
-lemma col_zero_exact (cond : normed_spectral_conditions (m+1) k K ε M k' c₀ H) :
-  ((truncate.obj M).col 0).is_weak_bounded_exact (k * k * k) (K * (K * K + 1)) m c₀ :=
+variables (cond : M.normed_spectral_conditions (m+1) k K k' ε c₀ H)
+
+include cond
+
+lemma col_zero_exact : ((truncate.obj M).col 0).is_weak_bounded_exact (k*k*k) (K*(K*K+1)) m c₀ :=
 sorry -- use `normed_snake`
 
 -- morally `q'` is `q + 1`
-def h_truncate (cond : normed_spectral_conditions (m+1) k K ε M k' c₀ H) :
-  Π (q : ℕ) {q' : ℕ} {c : ℝ≥0}, (truncate.obj M).X (k' * c) 0 q' ⟶ (truncate.obj M).X c 1 q
+def h_truncate : Π (q : ℕ) {q' : ℕ} {c : ℝ≥0},
+  (truncate.obj M).X (k' * c) 0 q' ⟶ (truncate.obj M).X c 1 q
 | 0     0      c := 0
 | 0     1      c := cond.h 1 ≫ NormedGroup.coker.π
 | (q+1) (q'+1) c := cond.h (q+2)
 | _     _      _ := 0
 
-lemma norm_h_truncate_le (cond : normed_spectral_conditions (m+1) k K ε M k' c₀ H) :
-  ∀ (q q' : ℕ), q ≤ m → q = q' - 1 → ∀ (c : ℝ≥0), fact (c₀ ≤ c) →
-    ∀ (x : ((truncate.obj M).X (k' * c) 0 q')), ∥cond.h_truncate q x∥ ≤ H * ∥x∥
+lemma norm_h_truncate_le : ∀ (q q' : ℕ), q ≤ m → q = q' - 1 → ∀ (c : ℝ≥0), fact (c₀ ≤ c) →
+  ∀ (x : ((truncate.obj M).X (k' * c) 0 q')), ∥cond.h_truncate q x∥ ≤ H * ∥x∥
 | 0     0      hq rfl := by intros; simpa only [h_truncate, norm_zero, normed_group_hom.zero_apply]
                                     using mul_nonneg H.coe_nonneg (norm_nonneg x)
 | (q+1) (q'+1) hq rfl := cond.norm_h_le _ _ (nat.succ_le_succ hq)
@@ -106,19 +110,17 @@ begin
   ... ≤ H * ∥x∥ : cond.norm_h_le 1 2 dec_trivial rfl c x
 end
 
-lemma cond3b_truncate (cond : normed_spectral_conditions (m+1) k K ε M k' c₀ H) :
-  ∀ (q q' q'' : ℕ), q = q' - 1 → q' + 1 = q'' → q ≤ m →
-    ∀ (c : ℝ≥0) [hc : fact (c₀ ≤ c)] (x : (truncate.obj M).X (k' * (k' * c)) 0 q')
-      (u1 u2 : units ℕ), by exactI
-        ∥res _ (d _ 0 1 x) +
-         (u1:ℤ) • (cond.h_truncate q') (d' _ q' q'' x) +
-         (u2:ℤ) • (d' _ q q') ((cond.h_truncate q) x)∥ ≤ ε * ∥@res _ _ c _ _ _ x∥
+lemma cond3b_truncate : ∀ (q q' q'' : ℕ), q = q' - 1 → q' + 1 = q'' → q ≤ m →
+  ∀ (c : ℝ≥0) [hc : fact (c₀ ≤ c)] (x : (truncate.obj M).X (k' * (k' * c)) 0 q')
+    (u1 u2 : units ℕ), by exactI
+      ∥res _ (d _ 0 1 x) +
+        (u1:ℤ) • (cond.h_truncate q') (d' _ q' q'' x) +
+        (u2:ℤ) • (d' _ q q') ((cond.h_truncate q) x)∥ ≤ ε * ∥@res _ _ c _ _ _ x∥
 | 0 0      1 rfl rfl hq := sorry
 | 0 1      2 rfl rfl hq := sorry
 | _ (q'+1) _ rfl rfl hq := sorry
 
-def truncate (cond : normed_spectral_conditions (m+1) k K ε M k' c₀ H) :
-  normed_spectral_conditions m (k*k*k) (K*(K*K+1)) ε (truncate.obj M) k' c₀ H :=
+def truncate : (truncate.obj M).normed_spectral_conditions m (k*k*k) (K*(K*K+1)) k' ε c₀ H :=
 { col_exact :=
   begin
     rintro (j|j) hj,
@@ -145,14 +147,16 @@ def truncate (cond : normed_spectral_conditions (m+1) k K ε M k' c₀ H) :
   h_zero_zero := λ c, rfl,
   admissible := cond.truncate_admissible }
 
+omit cond
+
 variables {m_ : ℕ} {k_ K_ : ℝ≥0} [fact (1 ≤ k_)]
 variables {ε_ : ℝ} {k₀_ : ℝ≥0} [fact (1 ≤ k₀_)]
 variables [fact (k₀_ ≤ k')] [fact (1 ≤ k')] {c₀_ H_ : ℝ≥0} [fact (0 < H_)]
 
-def of_le (cond : normed_spectral_conditions m k K ε M k' c₀ H)
+def of_le (cond : M.normed_spectral_conditions m k K k' ε c₀ H)
   (hm : m_ ≤ m) (hk : fact (k ≤ k_)) (hK : fact (K ≤ K_)) (hε : ε ≤ ε_)
   (hc₀ : fact (c₀ ≤ c₀_)) (hH : H ≤ H_) :
-  normed_spectral_conditions m_ k_ K_ ε_ M k' c₀_ H_ :=
+  M.normed_spectral_conditions m_ k_ K_ k' ε_ c₀_ H_ :=
 { col_exact := λ j hj, (cond.col_exact j (hj.trans hm)).of_le (cond.admissible.col j) hk hK hm hc₀,
   row_exact := λ hm_ i hi,
     (cond.row_exact (hm_.trans_le hm) i (hi.trans $ nat.succ_le_succ hm)).of_le
@@ -205,10 +209,9 @@ instance one_le_K₀ : ∀ m K [fact (1 ≤ K)], fact (1 ≤ K₀ m K)
 | (m+1) K hK := by { dsimp [K₀], exactI one_le_K₀ m _ }
 
 /-- Base case of the induction for Proposition 9.6. -/
-theorem base (c₀ H : ℝ≥0) [fact (0 < H)]
-  (k K k' : ℝ≥0) (M : system_of_double_complexes.{u})
-   [hk : fact (1 ≤ k)] [hK : fact (1 ≤ K)] [fact (k₀ 0 k ≤ k')] [fact (1 ≤ k')] -- follows
-  (cond : normed_spectral_conditions 0 k K (ε 0 K) M k' c₀ H) :
+theorem base (c₀ H : ℝ≥0) [fact (0 < H)] (M : system_of_double_complexes.{u})
+  (k K k' : ℝ≥0) [hk : fact (1 ≤ k)] [hK : fact (1 ≤ K)] [fact (k₀ 0 k ≤ k')] [fact (1 ≤ k')]
+  (cond : M.normed_spectral_conditions 0 k K k' (ε 0 K) c₀ H) :
   (M.row 0).is_weak_bounded_exact (k' * k') (2 * K₀ 0 K * H) 0 c₀ :=
 begin
   dsimp [k₀, K₀],
@@ -263,19 +266,20 @@ open normed_spectral
 Constants (max (k' * k') (2 * k₀ * H)) and K in the statement are not the right ones.
 We need to investigate the consequences of the k Zeeman effect here.
 -/
-theorem analytic_9_6 (m : ℕ) (k K : ℝ≥0) [fact (1 ≤ k)] [hK : fact (1 ≤ K)]
-  (M : system_of_double_complexes.{u})
-  (k' : ℝ≥0) [fact (k₀ m k ≤ k')] [fact (1 ≤ k')] -- follows
-  (c₀ H : ℝ≥0) [fact (0 < H)]
-  (cond : normed_spectral_conditions m k K (ε m K) M k' c₀ H) :
+theorem normed_spectral (m : ℕ) (c₀ H : ℝ≥0) [fact (0 < H)]
+  (M : system_of_double_complexes.{u}) (k K k' : ℝ≥0)
+  [fact (1 ≤ k)] [hK : fact (1 ≤ K)] [fact (k₀ m k ≤ k')] [fact (1 ≤ k')]
+  (cond : M.normed_spectral_conditions m k K k' (ε m K) c₀ H) :
   (M.row 0).is_weak_bounded_exact (k' * k') (2 * K₀ m K * H) m c₀ :=
 begin
-  unfreezingI { revert k K k' M },
+  unfreezingI { revert M k K k' },
   induction m with m IH, { exact base c₀ H },
   dsimp [ε, k₀, K₀],
-  intros k K k' M, introsI,
+  introsI M k K k' _ _ _ _ cond,
   rw ← system_of_complexes.truncate_is_weak_bounded_exact_iff,
-  { exact IH (k*k*k) (K*(K*K+1)) k' (truncate.obj M) cond.truncate },
-  { refine IH (k*k*k) _ k' M (cond.of_le (m.le_succ) _ _ le_rfl le_rfl le_rfl);
+  { exact IH (truncate.obj M) (k*k*k) (K*(K*K+1)) k' cond.truncate },
+  { refine IH M (k*k*k) (K*(K*K+1)) k' (cond.of_le (m.le_succ) _ _ le_rfl le_rfl le_rfl);
     apply_instance }
 end
+
+end system_of_double_complexes
