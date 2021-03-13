@@ -216,7 +216,6 @@ theorem base (c₀ H : ℝ≥0) [fact (0 < H)] (M : system_of_double_complexes.{
 begin
   dsimp [k₀, K₀],
   introsI c hc i hi,
-  -- Statement is of the form "for all x ∈ M_{0,i+1} exists y ∈ M_{0,i} such that..."
   interval_cases i, clear hi,
   intros x δ hδ,
   haveI : fact (k' * (k' * c) ≤ k' * k' * c) := by { rw mul_assoc, exact le_rfl },
@@ -262,10 +261,7 @@ end normed_spectral
 
 open normed_spectral
 
-/-- Proposition 9.6 in [Analytic]
-Constants (max (k' * k') (2 * k₀ * H)) and K in the statement are not the right ones.
-We need to investigate the consequences of the k Zeeman effect here.
--/
+/-- Proposition 9.6 in [Analytic] -/
 theorem normed_spectral (m : ℕ) (c₀ H : ℝ≥0) [fact (0 < H)]
   (M : system_of_double_complexes.{u}) (k K k' : ℝ≥0)
   [fact (1 ≤ k)] [hK : fact (1 ≤ K)] [fact (k₀ m k ≤ k')] [fact (1 ≤ k')]
