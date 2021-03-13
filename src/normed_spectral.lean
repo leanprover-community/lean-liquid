@@ -94,14 +94,22 @@ variables (cond : M.normed_spectral_conditions (m+1) k K k' ε c₀ H)
 
 include cond
 
-lemma col_zero_exact : ((truncate.obj M).col 0).is_weak_bounded_exact (k*k*k) (K*(K*K+1)) m c₀ :=
+lemma col_zero_exact :
+  ((truncate.obj M).col 0).is_weak_bounded_exact (k*k*k) (K*(K*K+1)) m c₀ :=
 begin
   apply weak_normed_snake (M.col 0) (M.col 1) ((truncate.obj M).col 0)
     (M.col_map 0 1) (truncate.quotient_map M)
     (cond.col_exact 0 dec_trivial) (cond.col_exact 1 dec_trivial)
     (cond.admissible.col 1),
   { intros c p, exact cond.admissible.d'_norm_noninc c p 0 1 },
-  { sorry },
+  { intros c i hi x,
+    apply le_of_forall_pos_le_add,
+    intros δ hδ,
+    -- should we factor out a dedicated `weak_bounded_in_degrees_le_zero` lemma?
+    simpa only [exists_prop, row_res, d'_self_apply, exists_eq_left, sub_zero,
+      exists_and_distrib_left, zero_add, row_d, exists_eq_left', exists_const]
+      using cond.row_exact (nat.zero_lt_succ _) i hi c _ 0 (nat.zero_le _) x δ hδ,
+    sorry /- fix `weak_normed_snake` -/ },
   { sorry },
   { intros c p, exact NormedGroup.coker.π_is_quotient }
 end
@@ -138,7 +146,8 @@ lemma cond3b_truncate : ∀ (q q' q'' : ℕ), q = q' - 1 → q' + 1 = q'' → q 
 | 0 1      2 rfl rfl hq := sorry
 | _ (q'+1) _ rfl rfl hq := sorry
 
-def truncate : (truncate.obj M).normed_spectral_conditions m (k*k*k) (K*(K*K+1)) k' ε c₀ H :=
+def truncate :
+  (truncate.obj M).normed_spectral_conditions m (k*k*k) (K*(K*K+1)) k' ε c₀ H :=
 { col_exact :=
   begin
     rintro (j|j) hj,
