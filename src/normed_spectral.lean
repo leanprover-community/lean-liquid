@@ -102,14 +102,13 @@ begin
     (cond.col_exact 0 dec_trivial) (cond.col_exact 1 dec_trivial)
     (cond.admissible.col 1),
   { intros c p, exact cond.admissible.d'_norm_noninc c p 0 1 },
-  { intros c i hi x,
+  { intros c hc i hi x,
     apply le_of_forall_pos_le_add,
     intros δ hδ,
     -- should we factor out a dedicated `weak_bounded_in_degrees_le_zero` lemma?
     simpa only [exists_prop, row_res, d'_self_apply, exists_eq_left, sub_zero,
       exists_and_distrib_left, zero_add, row_d, exists_eq_left', exists_const]
-      using cond.row_exact (nat.zero_lt_succ _) i hi c _ 0 (nat.zero_le _) x δ hδ,
-    sorry /- fix `weak_normed_snake` -/ },
+      using cond.row_exact (nat.zero_lt_succ _) i hi c hc 0 (nat.zero_le _) x δ hδ },
   { sorry },
   { intros c p, exact NormedGroup.coker.π_is_quotient }
 end

@@ -17,7 +17,7 @@ lemma weak_normed_snake {k k' k'' K K' K'' : ℝ≥0}
   (hM' : M'.is_weak_bounded_exact k' K' (m+1) c₀)
   (hM'_adm : M'.admissible)
   (hf : ∀ c i, (f.apply : M c i ⟶ M' c i).norm_noninc)
-  (Hf : ∀ (c : ℝ≥0) (i : ℕ) (hi : i ≤ m+1+1) (x : M (k'' * c) i),
+  (Hf : ∀ (c : ℝ≥0) [fact (c₀ ≤ c)] (i : ℕ) (hi : i ≤ m+1+1) (x : M (k'' * c) i),
     ∥(res x : M c i)∥ ≤ K'' * ∥f x∥)
   (hg : ∀ c i, (g.apply : M' c i ⟶ N c i).ker = f.apply.range)
   (hgquot : system_of_complexes.is_quotient g) :
@@ -25,7 +25,7 @@ lemma weak_normed_snake {k k' k'' K K' K'' : ℝ≥0}
 begin
   have bound_nonneg : (0 : ℝ) ≤ K' * (K * K'' + 1),
   { exact_mod_cast nnreal.zero_le_coe },
-  intros c hc i hi,
+  introsI c hc i hi,
   let c₁ := k'' * (k * (k' * c)),
   suffices : ∀ n : N c₁ i, ∀ ε > 0,
     ∃ i₀ (hi₀ : i₀ = i - 1) (y : N c i₀),
@@ -72,8 +72,8 @@ begin
   { calc ∥res (M.d (i+1) (i+2) m₁)∥
         ≤ K'' * ∥f (M.d (i+1) (i+2) m₁)∥ : Hf _ _ him _
     ... = K'' * ∥M'.d (i+1) (i+2) m₁''∥ : by rw [hm₂, norm_neg]
-    ... ≤ K'' * ∥m₁''∥ : (mul_le_mul_of_nonneg_left (hM'_adm.d_norm_noninc _ _ _ _ m₁'') $
-                                                                  nnreal.coe_nonneg K'') },
+    ... ≤ K'' * ∥m₁''∥ : (mul_le_mul_of_nonneg_left
+                           (hM'_adm.d_norm_noninc _ _ _ _ m₁'') $ nnreal.coe_nonneg K'') },
   obtain ⟨i', j, hi', rfl, m₀, hm₀⟩ :=
     hM _ (le_trans hc $ le_mul_of_one_le_left' hk') _ (by linarith) (res m₁) ε₁ hε₁,
   rw [nat.add_sub_cancel] at hi', subst i',
