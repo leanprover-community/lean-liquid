@@ -69,50 +69,20 @@ begin
   rwa ← @is_open_induced_iff X Y _ _ f
 end
 
+open filter
+open_locale filter topological_space
+
 lemma is_compact {f : X → Y} (hf : inducing f) (s : set X) (hs : is_compact (f '' s)) :
   is_compact s :=
 begin
-  apply compact_of_finite_subcover,
-  intros ι U hU hsU,
-  have : ∀ i, ∃ V, is_open V ∧ f ⁻¹' V = (U i),
-  { intro i, apply hf.exists_open (hU i) },
-  choose V hV₁ hV₂ using this,
-  have : f '' s ⊆ ⋃ (i : ι), V i,
-  { rw [set.image_subset_iff, set.preimage_Union],
-    refine set.subset.trans hsU (set.Union_subset_Union _),
-    intro i, rw hV₂ },
-  obtain ⟨t, ht⟩ := hs.elim_finite_subcover V hV₁ this,
-  refine ⟨t, _⟩,
-  simp only [set.image_subset_iff, set.preimage_Union] at ht,
-  refine set.subset.trans ht (set.Union_subset_Union _),
-  intro i,
-  refine set.Union_subset_Union _,
-  rintro -,
-  rw hV₂
+  introsI F F_ne_bot F_le,
+  obtain ⟨_, ⟨x, x_in : x ∈ s, rfl⟩, hx : cluster_pt (f x) (map f F)⟩ :=
+    hs (calc map f F ≤ map f (𝓟 s) : map_mono F_le
+                 ... = 𝓟 (f '' s) : map_principal),
+  use [x, x_in],
+  suffices : (map f (𝓝 x ⊓ F)).ne_bot, by simpa [filter.map_ne_bot_iff],
+  rwa calc map f (𝓝 x ⊓ F) = map f ((comap f $ 𝓝 $ f x) ⊓ F) : by rw hf.nhds_eq_comap
+                        ... = 𝓝 (f x) ⊓ map f F : filter.push_pull' _ _ _,
 end
-
--- -- is there a short proof using filters? jmc couldn't find it
--- lemma is_compact {f : X → Y} (hf : inducing f) (s : set X) (hs : is_compact (f '' s)) :
---   is_compact s :=
--- begin
---   intros F hF hFs,
---   have : (F.map f) ≤ filter.principal (f '' s),
---   { rw filter.map_le_iff_le_comap,
---     simp only [filter.le_principal_iff, filter.comap_principal] at hFs ⊢,
---     apply filter.mem_sets_of_superset hFs,
---     exact set.subset_preimage_image f s },
---   haveI : (F.map f).ne_bot := _,
---   obtain ⟨-, ⟨x, hxs, rfl⟩, hx⟩ := hs this,
---   refine ⟨x, hxs, _⟩,
---   rw cluster_pt_iff at hx ⊢,
---   intros U hU V hV,
---   rw [hf.nhds_eq_comap, filter.mem_comap_sets] at hU,
---   rcases hU with ⟨U', hU', hfU'⟩,
---   specialize hx hU',
---   have : f '' V ∈ F.map f,
---   { rw filter.mem_map, },
---   admit,
---   admit
--- end
 
 end inducing
