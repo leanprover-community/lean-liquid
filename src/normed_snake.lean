@@ -16,7 +16,7 @@ lemma weak_normed_snake {k k' k'' K K' K'' : ℝ≥0}
   (hM : M.is_weak_bounded_exact k K (m+1) c₀)
   (hM' : M'.is_weak_bounded_exact k' K' (m+1) c₀)
   (hM'_adm : M'.admissible)
-  (hf : ∀ c i, @isometry (M c i) (M' c i) _ _ (f.apply : M c i ⟶ M' c i))
+  (hf : ∀ c i, (f.apply : M c i ⟶ M' c i).norm_noninc)
   (Hf : ∀ (c : ℝ≥0) (i : ℕ) (hi : i ≤ m+1+1) (x : M (k'' * c) i),
     ∥(res x : M c i)∥ ≤ K'' * ∥f x∥)
   (hg : ∀ c i, (g.apply : M' c i ⟶ N c i).ker = f.apply.range)
@@ -69,42 +69,44 @@ begin
   { rw [← d_apply, eq_sub_of_add_eq hm₁, normed_group_hom.map_sub, ← coe_comp,
        d_comp_d, coe_zero, ← neg_inj, pi.zero_apply, zero_sub], },
   have hle : ∥res (M.d (i+1) (i+2) m₁)∥ ≤ K'' * ∥m₁''∥,
-  calc ∥res (M.d (i+1) (i+2) m₁)∥
-      ≤ K'' * ∥f (M.d (i+1) (i+2) m₁)∥ : Hf _ _ him _
-  ... = K'' * ∥M'.d (i+1) (i+2) m₁''∥ : by rw [hm₂, norm_neg]
-  ... ≤ K'' * ∥m₁''∥ : (mul_le_mul_of_nonneg_left (hM'_adm.d_norm_noninc _ _ _ _ m₁'') $
-                                                                nnreal.coe_nonneg K''),
+  { calc ∥res (M.d (i+1) (i+2) m₁)∥
+        ≤ K'' * ∥f (M.d (i+1) (i+2) m₁)∥ : Hf _ _ him _
+    ... = K'' * ∥M'.d (i+1) (i+2) m₁''∥ : by rw [hm₂, norm_neg]
+    ... ≤ K'' * ∥m₁''∥ : (mul_le_mul_of_nonneg_left (hM'_adm.d_norm_noninc _ _ _ _ m₁'') $
+                                                                  nnreal.coe_nonneg K'') },
   obtain ⟨i', j, hi', rfl, m₀, hm₀⟩ :=
     hM _ (le_trans hc $ le_mul_of_one_le_left' hk') _ (by linarith) (res m₁) ε₁ hε₁,
   rw [nat.add_sub_cancel] at hi', subst i',
   replace hm₀ : ∥res m₁ - M.d i (i+1) m₀∥ ≤ K * K'' * ∥N.d i (i+1) n∥ + K*K''*ε₁ + ε₁,
-    calc ∥res m₁ - M.d i (i+1) m₀∥  = ∥res (res m₁) - M.d i (i+1) m₀∥ : by rw res_res
+  { calc ∥res m₁ - M.d i (i+1) m₀∥  = ∥res (res m₁) - M.d i (i+1) m₀∥ : by rw res_res
     ... ≤ K * ∥M.d (i+1) (i+2) (res m₁)∥ + ε₁ : hm₀
     ... = K * ∥res (M.d (i+1) (i+2) m₁)∥ + ε₁ : by rw d_res
     ... ≤ K*(K'' * ∥m₁''∥) + ε₁ : add_le_add_right (mul_le_mul_of_nonneg_left hle nnreal.zero_le_coe) _
     ... ≤ K*(K'' * (∥N.d i (i+1) n∥ + ε₁)) + ε₁ :  add_le_add_right (mul_le_mul_of_nonneg_left
                                         (mul_le_mul_of_nonneg_left hnorm_m₁''.le nnreal.zero_le_coe)
                                          nnreal.zero_le_coe) ε₁
-    ... = K * K'' * ∥N.d i (i+1) n∥ + K*K''*ε₁ + ε₁ : by ring,
+    ... = K * K'' * ∥N.d i (i+1) n∥ + K*K''*ε₁ + ε₁ : by ring },
 
   let mnew' := res m' - f m₀,
   let mnew₁' := M'.d i (i+1) mnew',
   have hmnew' : mnew₁' = res m₁'' + f (res m₁ - M.d i (i+1) m₀),
-    calc mnew₁' = M'.d i (i+1) (res m' - f m₀) : rfl
-            ... = res (M'.d i (i+1) m') - (f (M.d i (i+1) m₀)) : by rw [normed_group_hom.map_sub, d_res _, d_apply]
-            ... = res (M'.d i (i+1) m') - (f (res m₁)) + (f (res m₁) - f (M.d i (i+1) m₀)) : by abel
-            ... = res m₁'' + f ((res m₁) - (M.d i (i+1) m₀)) : by
-                               { rw [← system_of_complexes.map_sub, ← res_apply,
-                                     ← normed_group_hom.map_sub, ← sub_eq_of_eq_add' hm₁.symm] },
+  { calc mnew₁'
+        = M'.d i (i+1) (res m' - f m₀) : rfl
+    ... = res (M'.d i (i+1) m') - (f (M.d i (i+1) m₀)) : by rw [normed_group_hom.map_sub, d_res _, d_apply]
+    ... = res (M'.d i (i+1) m') - (f (res m₁)) + (f (res m₁) - f (M.d i (i+1) m₀)) : by abel
+    ... = res m₁'' + f ((res m₁) - (M.d i (i+1) m₀)) : by
+                        { rw [← system_of_complexes.map_sub, ← res_apply,
+                              ← normed_group_hom.map_sub, ← sub_eq_of_eq_add' hm₁.symm] } },
   have hnormle : ∥mnew₁'∥ ≤ (K*K'' + 1)*∥N.d i (i+1) n∥ + (K*K'' + 2) * ε₁,
-    calc ∥mnew₁'∥ = ∥res m₁'' + f (res m₁ - M.d i (i+1) m₀)∥ : by rw [hmnew']
-              ... ≤ ∥res m₁''∥ + ∥f (res m₁ - M.d i (i+1) m₀)∥ : norm_add_le _ _
-              ... ≤ ∥m₁''∥ + ∥f (res m₁ - M.d i (i+1) m₀)∥ : add_le_add_right
-                                               (hM'_adm.res_norm_noninc _ _ _ infer_instance m₁'') _
-              ... = ∥m₁''∥ + ∥res m₁ - M.d i (i+1) m₀∥ : by erw norm_eq_of_isometry (hf _ _)
-              ... ≤ ∥N.d i (i+1) n∥ + ε₁ + ∥res m₁ - M.d i (i+1) m₀∥ : add_le_add_right (le_of_lt hnorm_m₁'')  _
-              ... ≤ ∥N.d i (i+1) n∥ + ε₁ + (K * K'' * ∥N.d i (i+1) n∥ + K * K'' * ε₁ + ε₁) : add_le_add_left hm₀ _
-              ... = (K*K'' + 1)*∥d _ _ (i+1) n∥ + (K*K'' + 2) * ε₁ : by ring,
+  { calc ∥mnew₁'∥
+        = ∥res m₁'' + f (res m₁ - M.d i (i+1) m₀)∥ : by rw [hmnew']
+    ... ≤ ∥res m₁''∥ + ∥f (res m₁ - M.d i (i+1) m₀)∥ : norm_add_le _ _
+    ... ≤ ∥m₁''∥ + ∥f (res m₁ - M.d i (i+1) m₀)∥ : add_le_add_right
+                                      (hM'_adm.res_norm_noninc _ _ _ infer_instance m₁'') _
+    ... ≤ ∥m₁''∥ + ∥res m₁ - M.d i (i+1) m₀∥ : add_le_add_left (hf _ _ _) _
+    ... ≤ ∥N.d i (i+1) n∥ + ε₁ + ∥res m₁ - M.d i (i+1) m₀∥ : add_le_add_right (le_of_lt hnorm_m₁'')  _
+    ... ≤ ∥N.d i (i+1) n∥ + ε₁ + (K * K'' * ∥N.d i (i+1) n∥ + K * K'' * ε₁ + ε₁) : add_le_add_left hm₀ _
+    ... = (K*K'' + 1)*∥d _ _ (i+1) n∥ + (K*K'' + 2) * ε₁ : by ring },
   obtain ⟨i₀, _, hi₀, rfl, mnew₀, hmnew₀⟩ := hM' _ hc _ (hi.trans m.le_succ) mnew' _ hε₁,
   replace hmnew₀ : ∥res mnew' - d _ _ _ mnew₀∥ ≤ K' * ((K * K'' + 1) * ∥N.d i (i+1) n∥ + (K * K'' + 2) * ε₁) + ε₁ :=
     hmnew₀.trans (add_le_add_right (mul_le_mul_of_nonneg_left hnormle nnreal.zero_le_coe) ε₁),
