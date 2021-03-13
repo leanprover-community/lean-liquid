@@ -8,6 +8,7 @@ section
 
 variables (G : Type*) [topological_space G] [group G] [topological_group G]
 
+-- PRed in #6669
 @[to_additive]
 lemma discrete_topology_of_open_singleton_one (h : is_open ({1} : set G)) : discrete_topology G :=
 begin
@@ -21,6 +22,7 @@ end
 
 variables {G}
 
+-- PRed in #6669
 @[to_additive]
 def subgroup.topological_closure (H : subgroup G) : subgroup G :=
 { carrier := _root_.closure H,

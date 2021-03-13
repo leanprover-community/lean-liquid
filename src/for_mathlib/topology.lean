@@ -3,7 +3,7 @@ import topology.subset_properties
 
 variables {X Y : Type*} [topological_space X] [topological_space Y]
 
--- Move this right after image_closure_subset_closure_image in topology.basic
+-- PRed in #6669
 lemma closure_subset_preimage_closure_image {f : X → Y} {s : set X} (h : continuous f) :
   closure s ⊆ f ⁻¹' (closure (f '' s)) :=
 by { rw ← set.image_subset_iff, exact image_closure_subset_closure_image h }
@@ -11,8 +11,7 @@ by { rw ← set.image_subset_iff, exact image_closure_subset_closure_image h }
 lemma is_totally_disconnected_of_totally_disconnected_space
   [totally_disconnected_space X] (s : set X) :
   is_totally_disconnected s :=
-λ t hts ht,
-totally_disconnected_space.is_totally_disconnected_univ _ (set.subset_univ t) ht
+λ t hts ht, totally_disconnected_space.is_totally_disconnected_univ _ t.subset_univ ht
 
 lemma is_preconnected.subsingleton [totally_disconnected_space X] {s : set X}
   (hs : is_preconnected s) :
