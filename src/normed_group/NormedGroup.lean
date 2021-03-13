@@ -132,12 +132,16 @@ def coker.π {f : A ⟶ B} : B ⟶ coker f :=
 normed_group_hom.normed_group.mk _
 
 lemma coker.π_surjective {f : A ⟶ B} :
-  function.surjective (coker.π : B ⟶ coker f).to_add_monoid_hom :=
+  function.surjective ⇑(coker.π : B ⟶ coker f) :=
 surjective_quot_mk _
 
 lemma coker.π_is_quotient {f : A ⟶ B} :
   (coker.π : B ⟶ coker f).is_quotient :=
 normed_group_hom.is_quotient_quotient _
+
+lemma coker.π_norm_noninc {f : A ⟶ B} :
+  (coker.π : B ⟶ coker f).norm_noninc :=
+normed_group_hom.quotient_norm_le (NormedGroup.coker.π_is_quotient)
 
 instance coker.π_epi {f : A ⟶ B} : epi (coker.π : B ⟶ coker f) :=
 begin
@@ -174,6 +178,11 @@ begin
   simp [cond],
 end
 
+@[simp]
+lemma coker.lift_comp_π_apply {f : A ⟶ B} {g : B ⟶ C} {cond : f ≫ g = 0} (x : B) :
+  coker.lift cond (coker.π x) = g x :=
+show (coker.π ≫ coker.lift cond) x = g x, by rw coker.lift_comp_π
+
 lemma coker.lift_unique {f : A ⟶ B} {g : B ⟶ C} {cond : f ≫ g = 0} {h : coker f ⟶ C} :
   coker.π ≫ h = g → h = coker.lift cond := lift_unique _ _ _ _
 
@@ -194,6 +203,24 @@ coker.lift_unique $ by rw [← category_theory.category.assoc, coker.lift_comp_�
 lemma coker.lift_zero {f : A ⟶ B} :
   coker.lift (show f ≫ (0 : B ⟶ C) = 0, from category_theory.limits.comp_zero) = 0 :=
 eq.symm $ coker.lift_unique category_theory.limits.comp_zero
+
+-- maybe prove this for `normed_group_hom` first, without the category lib
+lemma coker.lift_norm_noninc {f : A ⟶ B} {g : B ⟶ C} {cond : f ≫ g = 0}
+  (hg : g.norm_noninc) :
+  (coker.lift cond).norm_noninc :=
+begin
+  intros x,
+  apply le_of_forall_pos_le_add,
+  intros ε hε,
+  obtain ⟨x, rfl, Hx⟩ : ∃ x', coker.π x' = x ∧ ∥x'∥ < ∥x∥ + ε :=
+    normed_group_hom.quotient_norm_lift (NormedGroup.coker.π_is_quotient) hε _,
+  rw coker.lift_comp_π_apply,
+  exact (hg x).trans Hx.le
+end
+
+-- maybe prove this for `normed_group_hom` first, without the category lib
+lemma neg_norm_noninc (f : A ⟶ B) (hf : f.norm_noninc) : (-f).norm_noninc :=
+λ x, (norm_neg (f x)).le.trans (hf x)
 
 /-- The downwards map between the cokernels making the diagram commute.
 

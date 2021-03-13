@@ -26,11 +26,12 @@ lemma col_pos (q : ℕ) :
 rfl
 
 lemma admissible (hM : M.admissible) : (truncate.obj M).admissible :=
-{ d_norm_noninc' := λ c p' p q h x,
+{ d_norm_noninc' := λ c p' p q h,
   begin
     cases q,
-    { sorry /- this needs `lift_norm_noninc` again -/ },
-    { exact hM.d_norm_noninc c p' p _ _ }
+    { apply NormedGroup.coker.lift_norm_noninc,
+      exact NormedGroup.coker.π_norm_noninc.comp (hM.d_norm_noninc _ _ _ _) },
+    { exact hM.d_norm_noninc c p' p _ }
   end,
   d'_norm_noninc' := λ c p,
     ((M.row p).truncate_admissible (hM.row p)).d_norm_noninc' c,

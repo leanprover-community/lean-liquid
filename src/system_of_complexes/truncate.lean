@@ -138,19 +138,18 @@ lemma truncate_admissible (hC : C.admissible) :
   (truncate.obj C).admissible :=
 { d_norm_noninc' :=
   begin
-    rintro c (i|i) j rfl x,
-    { -- is this even true? I guess we need some sort of `lift_norm_noninc` lemma for quotients
-      sorry },
-    { rw [truncate_obj_d_succ_succ, norm_neg],
-      exact hC.d_norm_noninc _ _ (i+2) (i+3) x }
+    rintro c (i|i) j rfl; apply NormedGroup.neg_norm_noninc,
+    { apply NormedGroup.coker.lift_norm_noninc,
+      exact hC.d_norm_noninc _ _ 1 2 },
+    { exact hC.d_norm_noninc _ _ (i+2) (i+3) }
   end,
   res_norm_noninc :=
   begin
     rintro c₁ c₂ (i|i) h x,
-    { -- is this even true? I guess we need some sort of `lift_norm_noninc` lemma for quotients
-      sorry },
+    { apply NormedGroup.coker.lift_norm_noninc,
+      exact NormedGroup.coker.π_norm_noninc.comp (hC.res_norm_noninc _ _ _ _) },
     { exact hC.res_norm_noninc _ _ _ _ x }
-  end, }
+  end }
 
 variables {k K : ℝ≥0} (m' m : ℕ) [hk : fact (1 ≤ k)] (c₀ : ℝ≥0)
 include hk
@@ -167,12 +166,11 @@ begin
   simp only [normed_group_hom.map_zero, sub_zero,
     normed_group_hom.map_neg, truncate_obj_d_zero_one, norm_neg],
   calc _ = ∥π c (res x - C.d 0 1 y)∥ : _
-  ... ≤ ∥res x - C.d 0 1 y∥ : normed_group_hom.quotient_norm_le (NormedGroup.coker.π_is_quotient) _
+  ... ≤ ∥res x - C.d 0 1 y∥ : NormedGroup.coker.π_norm_noninc _
   ... ≤ _ : hy,
-  congr' 1,
   have hπy : π c (C.d 0 1 y) = 0,
   { show (C.d 0 1 ≫ π c) y = 0, rw [NormedGroup.coker.comp_pi_eq_zero], refl },
-  simp only [normed_group_hom.map_sub, hπy, sub_zero], refl,
+  simp only [normed_group_hom.map_sub, hπy, sub_zero], refl
 end
 | c hc (i+1) hi x ε hε :=
 begin
