@@ -18,6 +18,9 @@ element `a ∈ R` such that the function `m ↦ a • m` is injective.
 -/
 
 --should it be in the module namespace?
+-- jmc: I am placing this in the `module` for now, because `is_regular` already exists in `_root_`.
+
+namespace module
 
 variables {R : Type*} {a b : R} (M : Type*)
 
@@ -162,6 +165,8 @@ begin
 end
 
 end monoid
+
+end module
 
 /-
 Should there be an action of a monoid (with zero) on an add_monoid with the property that
