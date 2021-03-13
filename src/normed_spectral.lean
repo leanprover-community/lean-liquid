@@ -106,7 +106,9 @@ begin
     simpa only [exists_prop, row_res, d'_self_apply, exists_eq_left, sub_zero,
       exists_and_distrib_left, zero_add, row_d, exists_eq_left', exists_const]
       using cond.row_exact (nat.zero_lt_succ _) i hi c hc 0 (nat.zero_le _) x δ hδ },
-  { sorry },
+  { -- we probably need to weaken this assumption in `weak_normed_snake`
+    -- currently this is not provable, because `ker` is only the topological closure of `range`
+    sorry },
   { intros c p, exact NormedGroup.coker.π_is_quotient }
 end
 
