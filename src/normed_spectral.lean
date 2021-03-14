@@ -83,29 +83,29 @@ variables {ε : ℝ} {k₀ : ℝ≥0} [fact (1 ≤ k₀)]
 variables {M : system_of_double_complexes.{u}}
 variables {k' : ℝ≥0} [fact (k₀ ≤ k')] [fact (1 ≤ k')] {c₀ H : ℝ≥0} [fact (0 < H)]
 
-lemma truncate_admissible (cond : M.normed_spectral_conditions m k K k' ε c₀ H) :
+lemma truncate_admissible (condM : M.normed_spectral_conditions m k K k' ε c₀ H) :
   (truncate.obj M).admissible :=
-truncate.admissible _ cond.admissible
+truncate.admissible _ condM.admissible
 
-variables (cond : M.normed_spectral_conditions (m+1) k K k' ε c₀ H)
+variables (condM : M.normed_spectral_conditions (m+1) k K k' ε c₀ H)
 
-include cond
+include condM
 
 lemma col_zero_exact :
   ((truncate.obj M).col 0).is_weak_bounded_exact (k*k*k) (K*(K*K+1)) m c₀ :=
 begin
   apply weak_normed_snake (M.col 0) (M.col 1) ((truncate.obj M).col 0)
     (M.col_map 0 1) (truncate.quotient_map M)
-    (cond.col_exact 0 dec_trivial) (cond.col_exact 1 dec_trivial)
-    (cond.admissible.col 1),
-  { intros c p, exact cond.admissible.d'_norm_noninc c p 0 1 },
+    (condM.col_exact 0 dec_trivial) (condM.col_exact 1 dec_trivial)
+    (condM.admissible.col 1),
+  { intros c p, exact condM.admissible.d'_norm_noninc c p 0 1 },
   { intros c hc i hi x,
     apply le_of_forall_pos_le_add,
     intros δ hδ,
     -- should we factor out a dedicated `weak_bounded_in_degrees_le_zero` lemma?
     simpa only [exists_prop, row_res, d'_self_apply, exists_eq_left, sub_zero,
       exists_and_distrib_left, zero_add, row_d, exists_eq_left', exists_const]
-      using cond.row_exact (nat.zero_lt_succ _) i hi c hc 0 (nat.zero_le _) x δ hδ },
+      using condM.row_exact (nat.zero_lt_succ _) i hi c hc 0 (nat.zero_le _) x δ hδ },
   { -- we probably need to weaken this assumption in `weak_normed_snake`
     -- currently this is not provable, because `ker` is only the topological closure of `range`
     sorry },
@@ -116,43 +116,49 @@ end
 def h_truncate : Π (q : ℕ) {q' : ℕ} {c : ℝ≥0},
   (truncate.obj M).X (k' * c) 0 q' ⟶ (truncate.obj M).X c 1 q
 | 0     0      c := 0
-| 0     1      c := cond.h 1 ≫ NormedGroup.coker.π
-| (q+1) (q'+1) c := cond.h (q+2)
+| 0     1      c := condM.h 1 ≫ NormedGroup.coker.π
+| (q+1) (q'+1) c := condM.h (q+2)
 | _     _      _ := 0
 
 lemma norm_h_truncate_le : ∀ (q q' : ℕ), q ≤ m → q = q' - 1 → ∀ (c : ℝ≥0), fact (c₀ ≤ c) →
-  ∀ (x : ((truncate.obj M).X (k' * c) 0 q')), ∥cond.h_truncate q x∥ ≤ H * ∥x∥
+  ∀ (x : ((truncate.obj M).X (k' * c) 0 q')), ∥condM.h_truncate q x∥ ≤ H * ∥x∥
 | 0     0      hq rfl := by intros; simpa only [h_truncate, norm_zero, normed_group_hom.zero_apply]
                                     using mul_nonneg H.coe_nonneg (norm_nonneg x)
-| (q+1) (q'+1) hq rfl := cond.norm_h_le _ _ (nat.succ_le_succ hq)
+| (q+1) (q'+1) hq rfl := condM.norm_h_le _ _ (nat.succ_le_succ hq)
                                     (by simp only [nat.add_def, nat.succ_add_sub_one])
 | 0     1      hq rfl :=
 begin
   introsI c hc x,
-  calc ∥NormedGroup.coker.π (cond.h 1 x)∥
-      ≤ ∥cond.h 1 x∥ : normed_group_hom.quotient_norm_le (NormedGroup.coker.π_is_quotient) _
-  ... ≤ H * ∥x∥ : cond.norm_h_le 1 2 dec_trivial rfl c x
+  calc ∥NormedGroup.coker.π (condM.h 1 x)∥
+      ≤ ∥condM.h 1 x∥ : normed_group_hom.quotient_norm_le (NormedGroup.coker.π_is_quotient) _
+  ... ≤ H * ∥x∥ : condM.norm_h_le 1 2 dec_trivial rfl c x
 end
 
 lemma cond3b_truncate : ∀ (q q' q'' : ℕ), q = q' - 1 → q' + 1 = q'' → q ≤ m →
   ∀ (c : ℝ≥0) [hc : fact (c₀ ≤ c)] (x : (truncate.obj M).X (k' * (k' * c)) 0 q')
     (u1 u2 : units ℤ), by exactI
       ∥res _ (d _ 0 1 x) +
-        (u1:ℤ) • (cond.h_truncate q') (d' _ q' q'' x) +
-        (u2:ℤ) • (d' _ q q') ((cond.h_truncate q) x)∥ ≤ ε * ∥@res _ _ c _ _ _ x∥
-| 0 0      1 rfl rfl hq := sorry
-| 0 1      2 rfl rfl hq := sorry
-| _ (q'+1) _ rfl rfl hq := sorry
+        (u1:ℤ) • (condM.h_truncate q') (d' _ q' q'' x) +
+        (u2:ℤ) • (d' _ q q') ((condM.h_truncate q) x)∥ ≤ ε * ∥@res _ _ c _ _ _ x∥
+| 0 0      1 rfl rfl hq :=
+begin
+  intros c hc,
+  resetI,
+  let ZZZ := condM.cond3b 0 1 2 rfl rfl (zero_le _) c,
+  sorry
+end
+| 0 1      2 rfl rfl hq := condM.cond3b 1 2 3 rfl rfl $ nat.succ_le_succ hq
+| _ (q'+2) _ rfl rfl hq := condM.cond3b (q' + 2) (q' + 3) (q' + 4) rfl rfl $ nat.succ_le_succ hq
 
 def truncate :
   (truncate.obj M).normed_spectral_conditions m (k*k*k) (K*(K*K+1)) k' ε c₀ H :=
 { col_exact :=
   begin
     rintro (j|j) hj,
-    { exact cond.col_zero_exact },
+    { exact condM.col_zero_exact },
     { rw truncate.col_pos,
-      refine (cond.col_exact (j+2) (nat.succ_le_succ hj)).of_le
-        (cond.admissible.col (j+2)) _ _ m.le_succ le_rfl;
+      refine (condM.col_exact (j+2) (nat.succ_le_succ hj)).of_le
+        (condM.admissible.col (j+2)) _ _ m.le_succ le_rfl;
       apply_instance }
   end,
   row_exact :=
@@ -160,19 +166,19 @@ def truncate :
     intros hm i hi,
     cases m, { exact (nat.not_lt_zero _ hm).elim },
     suffices : ((truncate.obj M).row i).is_weak_bounded_exact k K m c₀,
-    { apply this.of_le (cond.truncate_admissible.row i) _ _ le_rfl le_rfl;
+    { apply this.of_le (condM.truncate_admissible.row i) _ _ le_rfl le_rfl;
       apply_instance },
     rw truncate.row,
     apply (M.row i).truncate_is_weak_bounded_exact,
-    { refine cond.row_exact (nat.zero_lt_succ _) i (hi.trans (nat.le_succ _)), }
+    { refine condM.row_exact (nat.zero_lt_succ _) i (hi.trans (nat.le_succ _)), }
   end,
-  h := cond.h_truncate,
-  norm_h_le := cond.norm_h_truncate_le,
-  cond3b := cond.cond3b_truncate,
+  h := condM.h_truncate,
+  norm_h_le := condM.norm_h_truncate_le,
+  cond3b := condM.cond3b_truncate,
   h_zero_zero := λ c, rfl,
-  admissible := cond.truncate_admissible }
+  admissible := condM.truncate_admissible }
 
-omit cond
+omit condM
 
 variables {m_ : ℕ} {k_ K_ : ℝ≥0} [fact (1 ≤ k_)]
 variables {ε_ : ℝ} {k₀_ : ℝ≥0} [fact (1 ≤ k₀_)]
