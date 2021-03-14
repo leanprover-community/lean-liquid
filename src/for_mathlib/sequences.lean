@@ -2,6 +2,7 @@ import topology.sequences
 import topology.algebra.normed_group
 import topology.algebra.group_completion
 import topology.metric_space.completion
+import analysis.normed_space.normed_group_hom
 
 -- **TODO** Move completion.normed_group out of for_mathlib.locally_constant
 
@@ -183,3 +184,70 @@ lemma completion.controlled_sum (h : completion G)
                ∥j (g 0) - h∥ < b 0 ∧ ∀ n > 0, ∥g n∥ < b n :=
 let ⟨g, sum_g, hg₀, H⟩ := controlled_sum_of_mem_closure_range (j_dense h) b_pos in
 ⟨g, sum_g, hg₀, by simpa [j] using H⟩
+
+
+def normed_group_hom.completion (f : normed_group_hom G H) : normed_group_hom (completion G) (completion H) :=
+{ to_fun := completion.map f,
+  map_add' := by { intros x y,
+                   apply completion.induction_on₂ x y,
+                   apply is_closed_eq,
+                   exact completion.continuous_map.comp continuous_add,
+                   exact (completion.continuous_map.comp  continuous_fst).add (completion.continuous_map.comp continuous_snd),
+                   intros a b,
+                   have : uniform_continuous f, sorry,
+                   norm_cast,
+                   simp [completion.map_coe this],
+                   norm_cast },
+  bound' := sorry }
+
+lemma toto {M M₁ M₂ : Type*} [normed_group M] [normed_group M₁] [normed_group M₂]
+  {f : normed_group_hom M₁ M} {C : ℝ} (hC : 0 < C)
+  {g : normed_group_hom M M₂} (hfg : g.comp f = 0)
+  (h : ∀ m ∈ g.ker, ∃ m' : M₁, f m' = m ∧ ∥m'∥ ≤ C*∥m∥) :
+  ∀ m ∈ g.completion.ker, ∀ ε > 0, ∃ m' : completion M₁, f.completion m' = m ∧ ∥m'∥ ≤ (C + ε)*∥m∥ :=
+begin
+  intros hatm hatm_in ε ε_pos,
+  set hatf := f.completion with def_hatf,
+  set i := (normed_group_hom.incl g.ker).to_add_monoid_hom with def_i,
+  have : hatm ∈ closure ((j.comp i).range : set $ completion M),
+  sorry,
+
+  set b : ℕ → ℝ := λ i, if i = 0 then ε*∥hatm∥/C else ε*∥hatm∥/2^i,
+  have b_pos : ∀ i, 0 < b i,
+  {
+    sorry },
+  rcases controlled_sum_of_mem_closure_range this b_pos with ⟨m, lim_m, hm₀, hm⟩,
+  have : ∀ n, ∃ m' : M₁, f m' = m n ∧ ∥m'∥ ≤ C * ∥m n∥,
+  { intros n, apply h, exact (m n).property },
+  choose m' hfm' hnorm_m' using this,
+  set s : ℕ → completion M₁ := λ n, ∑ k in range (n+1), j (m' k),
+  have : cauchy_seq s,
+  {
+    sorry },
+  obtain ⟨hatm' : completion M₁, hhatm'⟩ := cauchy_seq_tendsto_of_complete this,
+  refine ⟨hatm', _, _⟩,
+  { have limhat : tendsto (hatf ∘ s) at_top (𝓝 $ hatf hatm'),
+    {
+      sorry },
+    have limhat' : tendsto (λ (n : ℕ), ∑ k in range (n+1), j.comp i (m k)) at_top (𝓝 $ hatf hatm'),
+    {
+      sorry },
+    apply tendsto_nhds_unique limhat' lim_m },
+  { apply le_of_tendsto' (continuous_norm.continuous_at.tendsto.comp hhatm'),
+    have norm_j_comp_i : ∀ x, ∥j.comp i x∥ = ∥x∥,
+    {
+      sorry },
+    have norm_j : ∀ x : M₁, ∥j x∥ = ∥x∥,
+    /- { intro x,
+      apply completion.extension_coe,
+      exact uniform_continuous_norm } -/sorry,
+    simp only [norm_j_comp_i] at hm,
+    intros n,
+    calc ∥s n∥ ≤ ∑ k in range (n+1), ∥j (m' k)∥ : norm_sum_le _ _
+    ... = ∑ k in range n, ∥j (m' (k + 1))∥ + ∥j (m' 0)∥ : finset.sum_range_succ' _ _
+    ... = ∑ k in range n, ∥m' (k + 1)∥ + ∥j (m' 0)∥ : by simp only [norm_j]
+    ... ≤ ∑ k in range n, C*∥m (k + 1)∥ + ∥j (m' 0)∥ : add_le_add_right (finset.sum_le_sum (λ _ _, hnorm_m' _)) _
+    ... ≤ (C+ε)*∥hatm∥ : _,
+    exact
+    sorry },
+end
