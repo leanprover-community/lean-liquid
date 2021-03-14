@@ -66,8 +66,8 @@ structure normed_spectral_conditions (M : system_of_double_complexes.{u})
   (x : M.X (k' * c) 0 q'), ​∥h q x∥ ≤ H * ∥x∥)
 -- do we have a better name for the following condition?
 (cond3b : ∀ (q q' q'' : ℕ) (hq' : q = q'-1) (hq'' : q'+1 = q'') (hq : q ≤ m) (c) [fact (c₀ ≤ c)]
-  (x : M.X (k' * (k' * c)) 0 q') (u1 u2 : units ℕ),
-  ​∥M.res (M.d 0 1 x) + (u1:ℕ) • h q' (M.d' q' q'' x) + (u2:ℕ) • M.d' q q' (h q x)∥ ≤
+  (x : M.X (k' * (k' * c)) 0 q') (u1 u2 : units ℤ),
+  ​∥M.res (M.d 0 1 x) + (u1:ℤ) • h q' (M.d' q' q'' x) + (u2:ℤ) • M.d' q q' (h q x)∥ ≤
     ε * ∥(res M x : M.X c 0 q')∥)
 -- wacky condition to deal with `q - 1` when `q = 0` in `cond3b`
 (h_zero_zero : ∀ c, @h 0 0 c = 0)
@@ -136,7 +136,7 @@ end
 
 lemma cond3b_truncate : ∀ (q q' q'' : ℕ), q = q' - 1 → q' + 1 = q'' → q ≤ m →
   ∀ (c : ℝ≥0) [hc : fact (c₀ ≤ c)] (x : (truncate.obj M).X (k' * (k' * c)) 0 q')
-    (u1 u2 : units ℕ), by exactI
+    (u1 u2 : units ℤ), by exactI
       ∥res _ (d _ 0 1 x) +
         (u1:ℤ) • (cond.h_truncate q') (d' _ q' q'' x) +
         (u2:ℤ) • (d' _ q q') ((cond.h_truncate q) x)∥ ≤ ε * ∥@res _ _ c _ _ _ x∥
