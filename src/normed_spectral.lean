@@ -145,6 +145,13 @@ begin
   intros c hc,
   resetI,
   let ZZZ := condM.cond3b 0 1 2 rfl rfl (zero_le _) c,
+  clear cond3b_truncate, -- silly equation compiler
+  intro x,
+  apply quotient_add_group.induction_on x, clear x, -- silly induction principle
+  intros z u1 u2,
+  change ↥(M.X (k' * (k' * c)) 0 1) at z,
+  specialize ZZZ z u1 u2,
+  -- silly Kevin is math-stuck
   sorry
 end
 | 0 1      2 rfl rfl hq := condM.cond3b 1 2 3 rfl rfl $ nat.succ_le_succ hq
