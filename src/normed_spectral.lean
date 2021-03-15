@@ -72,19 +72,18 @@ open opposite
 /-- The assumptions on `M` in Proposition 9.6 bundled into a structure. Note that in `cond3b`
   our `q` is one smaller than the `q` in the notes (so that we don't have to deal with `q - 1`). -/
 structure normed_spectral_conditions (M : system_of_double_complexes.{u})
-  (m : ℕ) (k K k' : ℝ≥0) (ε : ℝ) [fact (1 ≤ k)] [fact (1 ≤ k')] (c₀ H : ℝ≥0) [fact (0 < H)] :=
+  (m : ℕ) (k K k' ε : ℝ≥0) [fact (1 ≤ k)] [fact (1 ≤ k')] (c₀ H : ℝ≥0) [fact (0 < H)] :=
 (col_exact : ∀ j ≤ m, (M.col j).is_weak_bounded_exact k K m c₀)
 (row_exact : 0 < m → ∀ i ≤ m + 1, (M.row i).is_weak_bounded_exact k K (m-1) c₀)
 (h : Π (q : ℕ) {q' : ℕ} {c}, M.X (k' * c) 0 q' ⟶ M.X c 1 q)
-(norm_h_le : ∀ (q q' : ℕ) (hq : q ≤ m) (hq' : q+1 = q') (c) [fact (c₀ ≤ c)]
-  (x : M.X (k' * c) 0 q'), ​∥h q x∥ ≤ H * ∥x∥)
+(h_bound_by : ∀ (q q' : ℕ) (hq : q ≤ m) (hq' : q+1 = q') (c) [fact (c₀ ≤ c)],
+  (h q : M.X (k' * c) 0 q' ⟶ M.X c 1 q).bound_by H)
 -- `δ` only needs to be a map of complexes in degrees `≤ m`; we might need to weaken this
 (δ : Π (c : ℝ≥0), (M.row 0).obj (op $ c) ⟶ (M.row 1).obj (op $ k' * c))
 (hδ : ∀ (c : ℝ≥0) [fact (c₀ ≤ c)] (q : ℕ) (hq : q ≤ m) (x : M.X (k' * (k' * c)) 0 q),
   (δ c).f q (M.res x) = M.res (M.d 0 1 x) + h q (M.d' q (q+1) x) + M.d' (q-1) q (h (q-1) x))
-(norm_δ_le : ∀ (c : ℝ≥0) [fact (c₀ ≤ c)] (q : ℕ) (hq : q ≤ m) (x : M.X c 0 q),
-  ∥(δ c).f q x∥ ≤ ε * ∥x∥)
--- wacky condition to deal with `q - 1` when `q = 0` in `cond3b`
+(δ_bound_by : ∀ (c : ℝ≥0) [fact (c₀ ≤ c)] (q : ℕ) (hq : q ≤ m), ((δ c).f q).bound_by ε)
+-- wacky condition to deal with `q - 1` when `q = 0` in `hδ`
 (h_zero_zero : ∀ c, @h 0 0 c = 0)
 -- ergonomics: we bundle this assumption, instead of passing it around separately
 (admissible : M.admissible)
@@ -93,10 +92,10 @@ structure normed_spectral_conditions (M : system_of_double_complexes.{u})
 
 namespace normed_spectral_conditions
 
-variables {m : ℕ} {k K : ℝ≥0} [fact (1 ≤ k)]
-variables {ε : ℝ} {k₀ : ℝ≥0} [fact (1 ≤ k₀)]
 variables {M : system_of_double_complexes.{u}}
-variables {k' : ℝ≥0} [fact (k₀ ≤ k')] [fact (1 ≤ k')] {c₀ H : ℝ≥0} [fact (0 < H)]
+variables {m : ℕ} {k K k' ε k₀ : ℝ≥0}
+variables [fact (1 ≤ k)] [fact (1 ≤ k₀)] [fact (k₀ ≤ k')] [fact (1 ≤ k')]
+variables {c₀ H : ℝ≥0} [fact (0 < H)]
 
 lemma truncate_admissible (condM : M.normed_spectral_conditions m k K k' ε c₀ H) :
   (truncate.obj M).admissible :=
@@ -139,67 +138,50 @@ def h_truncate : Π (q : ℕ) {q' : ℕ} {c : ℝ≥0},
 lemma h_truncate_zero {c : ℝ≥0} (x : (truncate.obj M).X (k' * c) 0 1) :
   condM.h_truncate 0 x = NormedGroup.coker.π (condM.h 1 x) := rfl
 
-lemma norm_h_truncate_le : ∀ (q q' : ℕ), q ≤ m → q+1 = q' → ∀ (c : ℝ≥0), fact (c₀ ≤ c) →
-  ∀ (x : ((truncate.obj M).X (k' * c) 0 q')), ∥condM.h_truncate q x∥ ≤ H * ∥x∥
-| (q+1) (q'+1) hq rfl := condM.norm_h_le _ _ (nat.succ_le_succ hq)
+lemma h_truncate_bound_by : ∀ (q q' : ℕ), q ≤ m → q+1 = q' → ∀ (c : ℝ≥0), fact (c₀ ≤ c) →
+  (condM.h_truncate q : (truncate.obj M).X (k' * c) 0 q' ⟶ _).bound_by H
+| (q+1) (q'+1) hq rfl := condM.h_bound_by _ _ (nat.succ_le_succ hq)
                                     (by simp only [nat.add_def, add_zero])
 | 0     1      hq rfl :=
 begin
   introsI c hc x,
   calc ∥NormedGroup.coker.π (condM.h 1 x)∥
       ≤ ∥condM.h 1 x∥ : normed_group_hom.quotient_norm_le (NormedGroup.coker.π_is_quotient) _
-  ... ≤ H * ∥x∥ : condM.norm_h_le 1 2 dec_trivial rfl c x
+  ... ≤ H * ∥x∥ : condM.h_bound_by 1 2 dec_trivial rfl c x
 end
 
 def δ_truncate (c : ℝ≥0) :
   ((truncate.obj M).row 0).obj (op $ c) ⟶ ((truncate.obj M).row 1).obj (op $ k' * c) :=
-sorry
+NormedGroup.truncate.map (condM.δ c)
 
-lemma hδ_truncate (c : ℝ≥0) [fact (c₀ ≤ c)] (q : ℕ) (hq : q ≤ m) (x) :
+lemma hδ_truncate (c : ℝ≥0) [fact (c₀ ≤ c)] : ∀ (q : ℕ) (hq : q ≤ m) (x),
   (condM.δ_truncate c).f q (res _ x) = (truncate.obj M).res (d _ 0 1 x) +
-    condM.h_truncate q (d' _ q (q+1) x) + d' _ (q-1) q (condM.h_truncate (q-1) x) :=
-sorry
+    condM.h_truncate q (d' _ q (q+1) x) + d' _ (q-1) q (condM.h_truncate (q-1) x)
+| 1     h := condM.hδ _ _ (nat.succ_le_succ h)
+| (q+2) h := condM.hδ _ _ (nat.succ_le_succ h)
+| 0     h :=
+begin
+  clear hδ_truncate,
+  intro x,
+  let π := λ c p, @NormedGroup.coker.π _ _ (@d' M c p 0 1),
+  obtain ⟨x, rfl⟩ : ∃ x', π _ _ x' = x := NormedGroup.coker.π_surjective x,
+  have := condM.hδ _ _ (nat.succ_le_succ h) x,
+  transitivity π _ _ ((condM.δ c).f 1 (M.res x)), { refl },
+  simp only [nat.zero_sub, d'_self_apply, add_zero,
+    truncate.d_π, truncate.res_π, truncate.d'_zero_one, h_truncate_zero,
+    this, normed_group_hom.map_add, NormedGroup.coker.pi_apply_dom_eq_zero]
+end
 
-lemma norm_δ_truncate_le (c : ℝ≥0) [fact (c₀ ≤ c)] (q : ℕ) (hq : q ≤ m) (x) :
-  ∥(condM.δ_truncate c).f q x∥ ≤ ε * ∥x∥ :=
-sorry
-
--- lemma cond3b_truncate : ∀ (q₀ q q' : ℕ), q₀ = q - 1 → q + 1 = q' → 0 < q → q ≤ m →
---   ∀ (c : ℝ≥0) [hc : fact (c₀ ≤ c)] (x : (truncate.obj M).X (k' * (k' * c)) 0 q)
---     (u1 u2 : units ℤ), by exactI
---       ∥res _ (d _ 0 1 x) +
---         (u1:ℤ) • (condM.h_truncate q) (d' _ q q' x) +
---         (u2:ℤ) • (d' _ q₀ q) ((condM.h_truncate q₀) x)∥ ≤ ε * ∥@res _ _ c _ _ _ x∥
--- | 0 0      1 rfl rfl h0 hq := (nat.not_lt_zero _ h0).elim
--- | 0 1      2 rfl rfl h0 hq := condM.cond3b 1 2 3 rfl rfl zero_lt_two $ nat.succ_le_succ hq
--- | _ (q'+2) _ rfl rfl h0 hq :=
--- condM.cond3b (q'+2) (q'+3) (q'+4) rfl rfl dec_trivial $ nat.succ_le_succ hq
-
--- begin
---   clear cond3b_truncate, -- silly equation compiler
---   let π := λ c p, @NormedGroup.coker.π _ _ (@d' M c p 0 1),
---   introsI c hc x u1 u2,
---   apply le_of_forall_pos_le_add,
---   intros δ hδ,
---   rw [d'_self_apply, smul_zero, add_zero],
---   obtain ⟨x, rfl⟩ : ∃ x', π _ _ x' = x := NormedGroup.coker.π_surjective x,
---   simp only [truncate.d_π, truncate.res_π, truncate.d'_zero_one, h_truncate_zero],
---   let z := res _ (M.d 0 1 x) + (u1:ℤ) • condM.h 1 (M.d' 1 2 x),
---   calc _
---       = ∥π _ _ z∥ : _
---   ... ≤ ∥_∥ : NormedGroup.coker.π_norm_noninc _
---   ... ≤ _ : _,
---   { rw [normed_group_hom.map_add],
---     congr' 2,
---     -- now we need `normed_group_hom.map_int_smul`
---     sorry },
---   have aux := condM.cond3b 0 1 2 rfl rfl dec_trivial _ x u1 u2,
---   dsimp only [z],
---   obtain ⟨x', hxx', hx'⟩ :=
---     normed_group_hom.quotient_norm_lift (NormedGroup.coker.π_is_quotient) hδ (π _ _ x),
---   -- silly Kevin and Johan are math-stuck
---   sorry
--- end
+lemma δ_truncate_bound_by (c : ℝ≥0) [fact (c₀ ≤ c)] :
+  ∀ (q : ℕ) (hq : q ≤ m) (x), ∥(condM.δ_truncate c).f q x∥ ≤ ε * ∥x∥
+| (q+1) h := condM.δ_bound_by c (q+2) (nat.succ_le_succ h)
+| 0     h :=
+begin
+  refine NormedGroup.coker.lift_bound_by _,
+  intro x,
+  refine (NormedGroup.coker.π_norm_noninc _).trans _,
+  exact condM.δ_bound_by c _ (nat.succ_le_succ h) _
+end
 
 def truncate :
   (truncate.obj M).normed_spectral_conditions m (k*k*k) (K*(K*K+1)) k' ε c₀ H :=
@@ -224,17 +206,17 @@ def truncate :
     { refine condM.row_exact (nat.zero_lt_succ _) i (hi.trans (nat.le_succ _)), }
   end,
   h := condM.h_truncate,
-  norm_h_le := condM.norm_h_truncate_le,
+  h_bound_by := condM.h_truncate_bound_by,
   δ := condM.δ_truncate,
   hδ := condM.hδ_truncate,
-  norm_δ_le := condM.norm_δ_truncate_le,
+  δ_bound_by := condM.δ_truncate_bound_by,
   h_zero_zero := λ c, rfl,
   admissible := condM.truncate_admissible }
 
 omit condM
 
 variables {m_ : ℕ} {k_ K_ : ℝ≥0} [fact (1 ≤ k_)]
-variables {ε_ : ℝ} {k₀_ : ℝ≥0} [fact (1 ≤ k₀_)]
+variables {ε_ : ℝ≥0} {k₀_ : ℝ≥0} [fact (1 ≤ k₀_)]
 variables [fact (k₀_ ≤ k')] [fact (1 ≤ k')] {c₀_ H_ : ℝ≥0} [fact (0 < H_)]
 
 def of_le (cond : M.normed_spectral_conditions m k K k' ε c₀ H)
@@ -246,24 +228,14 @@ def of_le (cond : M.normed_spectral_conditions m k K k' ε c₀ H)
     (cond.row_exact (hm_.trans_le hm) i (hi.trans $ nat.succ_le_succ hm)).of_le
       (cond.admissible.row i) hk hK (nat.pred_le_pred hm) hc₀,
   h := cond.h,
-  norm_h_le := λ q q' hq hq' c hc x,
-  begin
-    haveI : fact (c₀ ≤ c) := le_trans hc₀ hc,
-    calc ∥cond.h q x∥ ≤ H * ∥x∥  : cond.norm_h_le q q' (hq.trans hm) hq' c x
-                  ... ≤ H_ * ∥x∥ : mul_le_mul_of_nonneg_right hH (norm_nonneg x)
-  end,
+  h_bound_by := λ q q' hq hq' c hc x, have fact (c₀ ≤ c) := le_trans hc₀ hc, by exactI
+  calc ∥cond.h q x∥ ≤ H * ∥x∥  : cond.h_bound_by q q' (hq.trans hm) hq' c x
+                  ... ≤ H_ * ∥x∥ : mul_le_mul_of_nonneg_right hH (norm_nonneg x),
   δ := cond.δ,
-  hδ :=
-  begin
-    sorry
-  end,
-  norm_δ_le := sorry,
-  -- cond3b := λ q₀ q q' hq₀ hq' h0 hq c hc x u1 u2,
-  -- begin
-  --   haveI : fact (c₀ ≤ c) := le_trans hc₀ hc,
-  --   exact le_trans (cond.cond3b q₀ q q' hq₀ hq' h0 (hq.trans hm) c x u1 u2)
-  --     (mul_le_mul_of_nonneg_right hε (norm_nonneg _)),
-  -- end,
+  hδ := λ c hc q hq, have fact (c₀ ≤ c) := le_trans hc₀ hc,
+    by exactI cond.hδ c q (hq.trans hm),
+  δ_bound_by := λ c hc q hq x, have fact (c₀ ≤ c) := le_trans hc₀ hc, by exactI
+    (cond.δ_bound_by c q (hq.trans hm) x).trans (mul_le_mul_of_nonneg_right hε (norm_nonneg _)),
   h_zero_zero := cond.h_zero_zero,
   admissible := cond.admissible }
 
@@ -272,7 +244,7 @@ end normed_spectral_conditions
 namespace normed_spectral
 
 noncomputable
-def ε : Π (m : ℕ) (K : ℝ≥0), ℝ
+def ε : Π (m : ℕ) (K : ℝ≥0), ℝ≥0
 | 0     K := (2 * K)⁻¹
 | (m+1) K := ε m (K * (K * K + 1))
 
@@ -314,7 +286,7 @@ begin
   haveI : fact (k' * (k' * c) ≤ k' * k' * c) := by { rw mul_assoc, exact le_rfl },
   have Hx1 := (cond.col_exact 0 le_rfl).of_le
     (cond.admissible.col 0) ‹_› le_rfl le_rfl le_rfl c hc 0 le_rfl,
-  have Hx2 := cond.norm_δ_le c 0 le_rfl (M.res x),
+  have Hx2 := cond.δ_bound_by c 0 le_rfl (M.res x),
   have aux := cond.hδ c 0 le_rfl (M.res x),
   rw [res_res] at aux,
   rw aux at Hx2,
@@ -343,7 +315,7 @@ begin
   simp only [add_le_add_iff_right],
   refine (mul_le_mul_of_nonneg_left _ K.coe_nonneg),
   refine (mul_le_mul_of_nonneg_left _ zero_le_two),
-  refine le_trans (cond.norm_h_le _ _ le_rfl rfl _ _) _,
+  refine le_trans (cond.h_bound_by _ _ le_rfl rfl _ _) _,
   refine mul_le_mul_of_nonneg_left (le_of_eq _) H.coe_nonneg,
   apply norm_res_of_eq,
   rw mul_assoc
