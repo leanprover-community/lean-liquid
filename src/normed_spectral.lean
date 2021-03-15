@@ -28,6 +28,18 @@ lemma col_pos (q : ℕ) :
   (truncate.obj M).col (q+1) = M.col (q+1+1) :=
 rfl
 
+@[simp]
+lemma d'_zero_one (c : ℝ≥0) (p : ℕ) (x : M.X c p 1) :
+  (truncate.obj M).d' 0 1 (NormedGroup.coker.π x) = M.d' 1 2 x := rfl
+
+@[simp]
+lemma d_π (c : ℝ≥0) (p p' : ℕ) (x : M.X c p 1) :
+  @d (truncate.obj M) _ p p' 0 (NormedGroup.coker.π x) = NormedGroup.coker.π (M.d p p' x) := rfl
+
+@[simp]
+lemma res_π (c₁ c₂ : ℝ≥0) (p : ℕ) (h : fact (c₁ ≤ c₂)) (x : M.X c₂ p 1) :
+  @res (truncate.obj M) _ _ p 0 h (NormedGroup.coker.π x) = NormedGroup.coker.π (M.res x) := rfl
+
 def quotient_map : M.col 1 ⟶ (truncate.obj M).col 0 :=
 { app := λ c,
   { f := λ p, NormedGroup.coker.π,
@@ -120,6 +132,10 @@ def h_truncate : Π (q : ℕ) {q' : ℕ} {c : ℝ≥0},
 | (q+1) (q'+1) c := condM.h (q+2)
 | _     _      _ := 0
 
+@[simp]
+lemma h_truncate_zero {c : ℝ≥0} (x : (truncate.obj M).X (k' * c) 0 1) :
+  condM.h_truncate 0 x = NormedGroup.coker.π (condM.h 1 x) := rfl
+
 lemma norm_h_truncate_le : ∀ (q q' : ℕ), q ≤ m → q = q' - 1 → ∀ (c : ℝ≥0), fact (c₀ ≤ c) →
   ∀ (x : ((truncate.obj M).X (k' * c) 0 q')), ∥condM.h_truncate q x∥ ≤ H * ∥x∥
 | 0     0      hq rfl := by intros; simpa only [h_truncate, norm_zero, normed_group_hom.zero_apply]
@@ -140,22 +156,34 @@ lemma cond3b_truncate : ∀ (q q' q'' : ℕ), q = q' - 1 → q' + 1 = q'' → q 
       ∥res _ (d _ 0 1 x) +
         (u1:ℤ) • (condM.h_truncate q') (d' _ q' q'' x) +
         (u2:ℤ) • (d' _ q q') ((condM.h_truncate q) x)∥ ≤ ε * ∥@res _ _ c _ _ _ x∥
-| 0 0      1 rfl rfl hq :=
-begin
-  intros c hc,
-  resetI,
-  let ZZZ := condM.cond3b 0 1 2 rfl rfl (zero_le _) c,
-  clear cond3b_truncate, -- silly equation compiler
-  intro x,
-  apply quotient_add_group.induction_on x, clear x, -- silly induction principle
-  intros z u1 u2,
-  change ↥(M.X (k' * (k' * c)) 0 1) at z,
-  specialize ZZZ z u1 u2,
-  -- silly Kevin is math-stuck
-  sorry
-end
 | 0 1      2 rfl rfl hq := condM.cond3b 1 2 3 rfl rfl $ nat.succ_le_succ hq
 | _ (q'+2) _ rfl rfl hq := condM.cond3b (q' + 2) (q' + 3) (q' + 4) rfl rfl $ nat.succ_le_succ hq
+| 0 0      1 rfl rfl hq :=
+begin
+  clear cond3b_truncate, -- silly equation compiler
+  let π := λ c p, @NormedGroup.coker.π _ _ (@d' M c p 0 1),
+  introsI c hc x u1 u2,
+  apply le_of_forall_pos_le_add,
+  intros δ hδ,
+  rw [d'_self_apply, smul_zero, add_zero],
+  obtain ⟨x, rfl⟩ : ∃ x', π _ _ x' = x := NormedGroup.coker.π_surjective x,
+  simp only [truncate.d_π, truncate.res_π, truncate.d'_zero_one, h_truncate_zero],
+  let z := res _ (M.d 0 1 x) + (u1:ℤ) • condM.h 1 (M.d' 1 2 x),
+  calc _
+      = ∥π _ _ z∥ : _
+  ... ≤ ∥_∥ : NormedGroup.coker.π_norm_noninc _
+  ... ≤ _ : _,
+  { rw [normed_group_hom.map_add],
+    congr' 2,
+    -- now we need `normed_group_hom.map_int_smul`
+    sorry },
+  have aux := condM.cond3b 0 1 2 rfl rfl (zero_le _) _ x u1 u2,
+  dsimp only [z],
+  obtain ⟨x', hxx', hx'⟩ :=
+    normed_group_hom.quotient_norm_lift (NormedGroup.coker.π_is_quotient) hδ (π _ _ x),
+  -- silly Kevin and Johan are math-stuck
+  sorry
+end
 
 def truncate :
   (truncate.obj M).normed_spectral_conditions m (k*k*k) (K*(K*K+1)) k' ε c₀ H :=

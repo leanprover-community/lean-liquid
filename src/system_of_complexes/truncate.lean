@@ -47,16 +47,8 @@ lemma d_eq_zero : ∀ ⦃i j : ℕ⦄, ¬differential_object.coherent_indices tt
 | (i+1) (j+1) h := C.d_eq_zero $ λ H, h $ nat.succ_injective $ H
 
 lemma d_comp_d : Π i j k, d C i j ≫ d C j k = 0
-| 0     1     2     :=
-begin
-  dsimp [d],
-  exact coker.lift_comp_eq_zero _ (C.d_comp_d _ _ _)
-end
-| (i+1) (j+1) (k+1) :=
-begin
-  dsimp [d],
-  exact C.d_comp_d _ _ _
-end
+| 0     1     2     := coker.lift_comp_eq_zero _ (C.d_comp_d _ _ _)
+| (i+1) (j+1) (k+1) := C.d_comp_d _ _ _
 | 0     0     _     := zero_comp
 | 0     (j+2) _     := zero_comp
 | (i+1) 0     _     := zero_comp
@@ -83,16 +75,8 @@ def map_f {C₁ C₂ : cochain_complex ℕ NormedGroup} (f : C₁ ⟶ C₂) :
 
 lemma map_comm {C₁ C₂ : cochain_complex ℕ NormedGroup.{u}} (f : C₁ ⟶ C₂) :
   Π i j, d C₁ i j ≫ map_f f j = map_f f i ≫ d C₂ i j
-| 0     1     :=
-begin
-  dsimp [d],
-  exact coker.map_lift_comm (f.comm 1 2),
-end
-| (i+1) (j+1) :=
-begin
-  dsimp [d],
-  exact f.comm (i+2) (j+2)
-end
+| 0     1     := coker.map_lift_comm (f.comm 1 2)
+| (i+1) (j+1) := f.comm (i+2) (j+2)
 | 0     0     := by { rw [d_eq_zero, d_eq_zero, zero_comp, comp_zero]; dec_trivial }
 | 0     (j+2) := by { rw [d_eq_zero, d_eq_zero, zero_comp, comp_zero]; dec_trivial }
 | (i+1) 0     := by { rw [d_eq_zero, d_eq_zero, zero_comp, comp_zero]; dec_trivial }
