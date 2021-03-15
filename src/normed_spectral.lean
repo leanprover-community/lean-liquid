@@ -80,9 +80,9 @@ structure normed_spectral_conditions (M : system_of_double_complexes.{u})
   (x : M.X (k' * c) 0 q'), ​∥h q x∥ ≤ H * ∥x∥)
 -- `δ` only needs to be a map of complexes in degrees `≤ m`; we might need to weaken this
 (δ : Π (c : ℝ≥0), (M.row 0).obj (op $ c) ⟶ (M.row 1).obj (op $ k' * c))
-(hδ : ∀ (c : ℝ≥0) [fact (c₀ ≤ c)] (q : ℕ) (hq : q ≤ m) (x : M.X _ 0 q),
+(hδ : ∀ (c : ℝ≥0) [fact (c₀ ≤ c)] (q : ℕ) (hq : q ≤ m) (x : M.X (k' * (k' * c)) 0 q),
   (δ c).f q (M.res x) = M.res (M.d 0 1 x) + h q (M.d' q (q+1) x) + M.d' (q-1) q (h (q-1) x))
-(norm_δ_le : ∀ (c : ℝ≥0) [fact (c₀ ≤ c)] (q : ℕ) (hq : q ≤ m) (x : M.X _ 0 q),
+(norm_δ_le : ∀ (c : ℝ≥0) [fact (c₀ ≤ c)] (q : ℕ) (hq : q ≤ m) (x : M.X c 0 q),
   ∥(δ c).f q x∥ ≤ ε * ∥x∥)
 -- wacky condition to deal with `q - 1` when `q = 0` in `cond3b`
 (h_zero_zero : ∀ c, @h 0 0 c = 0)
@@ -307,17 +307,20 @@ begin
   dsimp [k₀, K₀],
   introsI c hc i hi,
   interval_cases i, clear hi,
-  intros x δ hδ,
+  intros x ε' hε',
+  let φ : ℝ := ε' / 2,
+  have hφ : 0 < φ := div_pos hε' zero_lt_two,
+  have hδφ : ε' = φ + φ, { dsimp [φ], rw [← add_div, half_add_self] },
   haveI : fact (k' * (k' * c) ≤ k' * k' * c) := by { rw mul_assoc, exact le_rfl },
   have Hx1 := (cond.col_exact 0 le_rfl).of_le
     (cond.admissible.col 0) ‹_› le_rfl le_rfl le_rfl c hc 0 le_rfl,
-  have Hx2 := cond.cond3b 0 0 1 rfl rfl le_rfl c (M.res x) 1 1,
+  have Hx2 := cond.norm_δ_le c 0 le_rfl (M.res x),
+  have aux := cond.hδ c 0 le_rfl (M.res x),
+  rw [res_res] at aux,
+  rw aux at Hx2,
   simp only [row_d, col_d, d_self_apply, d'_self_apply, sub_zero, add_zero, smul_zero,
     d_res, d'_res, res_res, one_div, row_res, units.coe_one, one_smul] at Hx1 Hx2 ⊢,
   refine ⟨0, 1, rfl, rfl, 0, _⟩,
-  let φ : ℝ := δ / 2,
-  have hφ : 0 < φ := div_pos hδ zero_lt_two,
-  have hδφ : δ = φ + φ, { dsimp [φ], rw [← add_div, half_add_self] },
   obtain ⟨i, j, hi, hj, y1, hx1⟩ := Hx1 (M.res x) φ hφ,
   simp [← eq_neg_iff_add_eq_zero] at hi hj, subst i, subst j,
   simp only [d_self_apply, d'_self_apply, sub_zero,
