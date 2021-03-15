@@ -7,7 +7,7 @@ variables (BD : breen_deligne.package)
 variables (c' : ℕ → ℝ≥0)  -- implicit constants, chosen once and for all
                           -- see the sentence after the statement of Thm 9.5
 
-open ProFiltPseuNormGrpWithTinv
+open polyhedral_lattice
 
 /-- Theorem 9.5 in [Analytic] -/
 theorem thm95 [BD.suitable c']

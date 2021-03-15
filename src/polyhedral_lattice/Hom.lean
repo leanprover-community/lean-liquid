@@ -1,4 +1,5 @@
 import polyhedral_lattice.pseudo_normed_group
+import polyhedral_lattice.int
 import pseudo_normed_group.category
 
 import for_mathlib.add_monoid_hom
@@ -12,10 +13,12 @@ open_locale nnreal -- enable the notation `ℝ≥0` for the nonnegative real num
 variables (c' : ℕ → ℝ≥0)  -- implicit constants, chosen once and for all
                           -- see the sentence after that statement of Thm 9.5
 
-namespace ProFiltPseuNormGrpWithTinv
+namespace polyhedral_lattice
 
 open pseudo_normed_group profinitely_filtered_pseudo_normed_group_with_Tinv_hom
-profinitely_filtered_pseudo_normed_group_with_Tinv (Tinv)
+open ProFiltPseuNormGrpWithTinv (of)
+
+notation `Tinv` := profinitely_filtered_pseudo_normed_group_with_Tinv.Tinv
 
 variables {r : ℝ≥0} {M₁ M₂ : Type u}
 variables [profinitely_filtered_pseudo_normed_group_with_Tinv r M₁]
@@ -74,7 +77,7 @@ def HomZ_map {r : ℝ≥0} [fact (0 < r)] [fact (r ≤ 1)] (M : Type)
   map_Tinv' := λ x,
   begin
     refine add_monoid_hom.ext (λ n, _),
-    have h : (Tinv (int.cast_add_hom' x)) n = Tinv (int.cast_add_hom' x n) := rfl,
+    have h : Tinv (int.cast_add_hom' x) n = Tinv (int.cast_add_hom' x n) := rfl,
     simp only [h, int.cast_add_hom'_apply, profinitely_filtered_pseudo_normed_group_hom.map_gsmul],
   end }
 
@@ -101,5 +104,4 @@ def HomZ_iso {r : ℝ≥0} [fact (0 < r)] [fact (r ≤ 1)] (M : Type)
   Hom ℤ M ≅ of r M :=
 (iso_of_equiv_of_strict (HomZ_map_equiv M) (λ x, rfl) (HomZ_map_inverse_strict M)).symm
 
-
-end ProFiltPseuNormGrpWithTinv
+end polyhedral_lattice
