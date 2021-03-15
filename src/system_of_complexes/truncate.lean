@@ -178,8 +178,8 @@ begin
   have hγ : 0 < γ := div_pos hδ zero_lt_two,
   obtain ⟨x', Hxx', Hx'⟩ : ∃ x', π c x' = π c (res x) ∧ ∥x'∥ < ∥π c (res x)∥ + γ :=
     normed_group_hom.quotient_norm_lift (NormedGroup.coker.π_is_quotient) hγ _,
-  obtain ⟨y, hy⟩ : ∃ y : C c 0, ∥res x - (C.d 0 1) y∥ ≤ ∥x'∥ + γ,
-  { sorry },
+  obtain ⟨y, hy⟩ : ∃ y : C c 0, ∥res x - (C.d 0 1) y∥ ≤ ∥x'∥ + γ :=
+    NormedGroup.coker.exists_norm_le _ _ Hxx'.symm γ hγ,
   obtain ⟨_, _, rfl, rfl, y', H⟩ := hC c hc _ (nat.zero_le m) (π _ x) δ hδ,
   refine ⟨0, 2, rfl, rfl, y, _⟩,
   simp only [d_self_apply, normed_group_hom.map_zero, sub_zero,

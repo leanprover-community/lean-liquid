@@ -61,12 +61,6 @@ lemma admissible (hM : M.admissible) : (truncate.obj M).admissible :=
 
 end truncate
 
--- move this, better name?
-lemma norm_le_add_norm_add {V : Type*} [normed_group V] (x y : V) :
-  ∥x∥ ≤ ∥x + y∥ + ∥y∥ :=
-calc ∥x∥ = ∥x + y - y∥ : by rw add_sub_cancel
-... ≤ ∥x + y∥ + ∥y∥ : norm_sub_le _ _
-
 open opposite
 
 /-- The assumptions on `M` in Proposition 9.6 bundled into a structure. Note that in `cond3b`
@@ -113,11 +107,11 @@ begin
   { intros c p, exact condM.admissible.d'_norm_noninc c p 0 1 },
   { intros c hc i hi x,
     apply le_of_forall_pos_le_add,
-    intros δ hδ,
+    intros ε' hε',
     -- should we factor out a dedicated `weak_bounded_in_degrees_le_zero` lemma?
     simpa only [exists_prop, row_res, d'_self_apply, exists_eq_left, sub_zero,
       exists_and_distrib_left, zero_add, row_d, exists_eq_left', exists_const]
-      using condM.row_exact (nat.zero_lt_succ _) i hi c hc 0 (nat.zero_le _) x δ hδ },
+      using condM.row_exact (nat.zero_lt_succ _) i hi c hc 0 (nat.zero_le _) x ε' hε' },
   { -- we probably need to weaken this assumption in `weak_normed_snake`
     -- currently this is not provable, because `ker` is only the topological closure of `range`
     sorry },
@@ -158,7 +152,6 @@ lemma hδ_truncate (c : ℝ≥0) [fact (c₀ ≤ c)] : ∀ (q : ℕ) (hq : q ≤
 | (q+2) h := condM.hδ _ _ (nat.succ_le_succ h)
 | 0     h :=
 begin
-  clear hδ_truncate,
   intro x,
   let π := λ c p, @NormedGroup.coker.π _ _ (@d' M c p 0 1),
   obtain ⟨x, rfl⟩ : ∃ x', π _ _ x' = x := NormedGroup.coker.π_surjective x,
@@ -170,7 +163,7 @@ begin
 end
 
 lemma δ_truncate_bound_by (c : ℝ≥0) [fact (c₀ ≤ c)] :
-  ∀ (q : ℕ) (hq : q ≤ m) (x), ∥(condM.δ_truncate c).f q x∥ ≤ ε * ∥x∥
+  ∀ (q : ℕ) (hq : q ≤ m), ((condM.δ_truncate c).f q).bound_by ε
 | (q+1) h := condM.δ_bound_by c (q+2) (nat.succ_le_succ h)
 | 0     h :=
 begin
