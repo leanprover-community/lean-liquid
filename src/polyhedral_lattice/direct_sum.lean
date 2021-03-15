@@ -63,16 +63,6 @@ instance : polyhedral_lattice (⨁ i, Λ i) :=
     rw ← linear_map.map_smul_of_tower,
     convert (direct_sum.ext_iff ℤ).mp hnv i,
   end,
-  rational :=
-  begin
-    intro l,
-    have := λ i, polyhedral_lattice.rational (l i),
-    choose q hq using this,
-    use ∑ i, q i,
-    simp only [direct_sum_norm_def, hq],
-    change ∑ i, algebra_map ℚ ℝ (q i) = algebra_map ℚ ℝ (∑ i, q i),
-    rw ring_hom.map_sum,
-  end,
   polyhedral :=
   begin
     have := λ i, polyhedral_lattice.polyhedral (Λ i),

@@ -57,7 +57,6 @@ end generates_norm
 class polyhedral_lattice (Λ : Type*) [normed_group Λ] :=
 [fg : module.finite ℤ Λ]
 (tf : torsion_free Λ)
-(rational : ∀ l : Λ, ∃ q : ℚ, ∥l∥ = q)
 (polyhedral [] : ∃ (ι : Type) [fintype ι] (x : ι → Λ), generates_norm x)
 
 attribute [instance] polyhedral_lattice.fg

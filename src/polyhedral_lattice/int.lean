@@ -55,11 +55,6 @@ instance int.polyhedral_lattice : polyhedral_lattice ℤ :=
     rw [← nsmul_eq_smul, nsmul_eq_mul, mul_eq_zero] at h,
     simpa only [hm, int.coe_nat_eq_zero, or_false, int.nat_cast_eq_coe_nat] using h
   end,
-  rational :=
-  begin
-    intro n, refine ⟨abs n, _⟩,
-    simpa only [rat.cast_abs, rat.cast_coe_int] using rfl
-  end,
   polyhedral :=
   begin
     refine ⟨units ℤ, infer_instance, coe, _⟩,
