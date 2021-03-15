@@ -2,6 +2,8 @@ import polyhedral_lattice.basic
 
 noncomputable theory
 
+open_locale big_operators
+
 -- move this
 lemma int.norm_coe_units (e : units ℤ) : ∥(e : ℤ)∥ = 1 :=
 begin
