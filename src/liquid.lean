@@ -21,7 +21,7 @@ Once we have fixed this data, we can state the theorem.
 
 open_locale nnreal -- enable the notation `ℝ≥0` for the nonnegative real numbers.
 
-open category_theory ProFiltPseuNormGrpWithTinv
+open category_theory ProFiltPseuNormGrpWithTinv polyhedral_lattice
 
 variables (BD : breen_deligne.package)
 variables (c' : ℕ → ℝ≥0)  -- implicit constants, chosen once and for all
@@ -39,8 +39,7 @@ theorem first_target [BD.suitable c']
 begin
   intro m,
   obtain ⟨k, K, hk, H⟩ := thm95 BD c' r r' m,
-  specialize H ℤ,
-  obtain ⟨c₀, H⟩ := H,
+  obtain ⟨c₀, H⟩ := H ℤ,
   use [k, K, hk, c₀],
   introsI S hS V hV,
   specialize H S V,
