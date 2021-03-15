@@ -83,8 +83,6 @@ structure normed_spectral_conditions (M : system_of_double_complexes.{u})
 (hδ : ∀ (c : ℝ≥0) [fact (c₀ ≤ c)] (q : ℕ) (hq : q ≤ m) (x : M.X (k' * (k' * c)) 0 q),
   (δ c).f q (M.res x) = M.res (M.d 0 1 x) + h q (M.d' q (q+1) x) + M.d' (q-1) q (h (q-1) x))
 (δ_bound_by : ∀ (c : ℝ≥0) [fact (c₀ ≤ c)] (q : ℕ) (hq : q ≤ m), ((δ c).f q).bound_by ε)
--- wacky condition to deal with `q - 1` when `q = 0` in `hδ`
-(h_zero_zero : ∀ c, @h 0 0 c = 0)
 -- ergonomics: we bundle this assumption, instead of passing it around separately
 (admissible : M.admissible)
 
@@ -129,7 +127,6 @@ end
 -- morally `q'` is `q + 1`
 def h_truncate : Π (q : ℕ) {q' : ℕ} {c : ℝ≥0},
   (truncate.obj M).X (k' * c) 0 q' ⟶ (truncate.obj M).X c 1 q
-| 0     0      c := 0
 | 0     1      c := condM.h 1 ≫ NormedGroup.coker.π
 | (q+1) (q'+1) c := condM.h (q+2)
 | _     _      _ := 0
@@ -210,7 +207,6 @@ def truncate :
   δ := condM.δ_truncate,
   hδ := condM.hδ_truncate,
   δ_bound_by := condM.δ_truncate_bound_by,
-  h_zero_zero := λ c, rfl,
   admissible := condM.truncate_admissible }
 
 omit condM
@@ -236,7 +232,6 @@ def of_le (cond : M.normed_spectral_conditions m k K k' ε c₀ H)
     by exactI cond.hδ c q (hq.trans hm),
   δ_bound_by := λ c hc q hq x, have fact (c₀ ≤ c) := le_trans hc₀ hc, by exactI
     (cond.δ_bound_by c q (hq.trans hm) x).trans (mul_le_mul_of_nonneg_right hε (norm_nonneg _)),
-  h_zero_zero := cond.h_zero_zero,
   admissible := cond.admissible }
 
 end normed_spectral_conditions
