@@ -1,7 +1,17 @@
 import analysis.specific_limits
 import system_of_complexes.basic
 import locally_constant.Vhat
+/-
 
+# A technical lemma
+
+This file has the definition of the completion of a system of
+complexes of normed groups, and it proves a technical lemma
+saying that a system of complexes of normed groups is admissible
+and weak bounded exact, and if the groups in the complex are complete,
+then it's bounded exact.
+
+-/
 open finset filter
 open_locale nnreal big_operators topological_space
 
