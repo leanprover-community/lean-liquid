@@ -1,6 +1,6 @@
 import analysis.normed_space.normed_group_hom
 
-import .topological_group .quotient_group .real_Inf
+import .quotient_group .real_Inf
 
 open_locale nnreal
 

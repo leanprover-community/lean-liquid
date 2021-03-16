@@ -2,8 +2,6 @@ import polyhedral_lattice.basic
 import normed_group.pseudo_normed_group
 import pseudo_normed_group.profinitely_filtered
 
-import for_mathlib.topological_group
-import for_mathlib.topology
 
 noncomputable theory
 open_locale nnreal
@@ -22,7 +20,7 @@ end
 open metric
 
 instance : discrete_topology Λ :=
-discrete_topology_of_open_singleton_zero _ $
+discrete_topology_of_open_singleton_zero $
 begin
   classical,
   have aux := filtration_finite Λ 1,
