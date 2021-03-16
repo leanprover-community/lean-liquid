@@ -10,7 +10,7 @@ open_locale direct_sum big_operators classical
 namespace polyhedral_lattice
 
 variables {ι : Type} [fintype ι] (Λ : ι → Type*)
-variables [Π i, normed_group (Λ i)] [Π i, polyhedral_lattice (Λ i)]
+variables [Π i, polyhedral_lattice (Λ i)]
 
 instance : has_norm (⨁ i, Λ i) :=
 ⟨λ x, ∑ i, ∥x i∥⟩
@@ -55,10 +55,7 @@ instance : polyhedral_lattice (⨁ i, Λ i) :=
     obtain ⟨i, nzv_i⟩ : ∃ (i : ι), direct_sum.component ℤ ι Λ i v ≠ 0,
     { rw ← not_forall,
       rwa [ne.def, direct_sum.ext_iff ℤ] at hv },
-    have tf_i : torsion_free (Λ i),
-    { suffices pl_i : polyhedral_lattice (Λ i),
-      exact pl_i.tf,
-      apply_assumption },
+    have tf_i : torsion_free (Λ i) := polyhedral_lattice.tf,
     refine tf_i (direct_sum.component ℤ ι Λ i v) nzv_i n _,
     rw ← linear_map.map_smul_of_tower,
     convert (direct_sum.ext_iff ℤ).mp hnv i,

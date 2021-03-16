@@ -54,7 +54,7 @@ lemma generates_norm_of_generates_nnnorm {x : ι → Λ}
 
 end generates_norm
 
-class polyhedral_lattice (Λ : Type*) [normed_group Λ] :=
+class polyhedral_lattice (Λ : Type*) extends normed_group Λ :=
 [fg : module.finite ℤ Λ]
 (tf : torsion_free Λ)
 (polyhedral [] : ∃ (ι : Type) [fintype ι] (x : ι → Λ), generates_norm x)
