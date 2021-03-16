@@ -35,8 +35,8 @@ def X : ℕ → NormedGroup.{u}
 | (n+1) := C.X (n+2)
 
 def d : Π i j, X C i ⟶ X C j
-| 0     1     := -coker.lift (C.d_comp_d 0 1 2)
-| (i+1) (j+1) := -C.d (i+2) (j+2)
+| 0     1     := coker.lift (C.d_comp_d 0 1 2)
+| (i+1) (j+1) := C.d (i+2) (j+2)
 | _     _     := 0
 
 lemma d_eq_zero : ∀ ⦃i j : ℕ⦄, ¬differential_object.coherent_indices tt i j → d C i j = 0
@@ -44,19 +44,11 @@ lemma d_eq_zero : ∀ ⦃i j : ℕ⦄, ¬differential_object.coherent_indices tt
 | 0     (j+2) h := rfl
 | (i+1) 0     h := rfl
 | 0     1     h := (h dec_trivial).elim
-| (i+1) (j+1) h := neg_eq_zero.mpr $ C.d_eq_zero $ λ H, h $ nat.succ_injective $ H
+| (i+1) (j+1) h := C.d_eq_zero $ λ H, h $ nat.succ_injective $ H
 
 lemma d_comp_d : Π i j k, d C i j ≫ d C j k = 0
-| 0     1     2     :=
-begin
-  dsimp [d], rw [comp_neg, neg_comp, neg_neg],
-  exact coker.lift_comp_eq_zero _ (C.d_comp_d _ _ _)
-end
-| (i+1) (j+1) (k+1) :=
-begin
-  dsimp [d], rw [comp_neg, neg_comp, neg_neg],
-  exact C.d_comp_d _ _ _
-end
+| 0     1     2     := coker.lift_comp_eq_zero _ (C.d_comp_d _ _ _)
+| (i+1) (j+1) (k+1) := C.d_comp_d _ _ _
 | 0     0     _     := zero_comp
 | 0     (j+2) _     := zero_comp
 | (i+1) 0     _     := zero_comp
@@ -83,16 +75,8 @@ def map_f {C₁ C₂ : cochain_complex ℕ NormedGroup} (f : C₁ ⟶ C₂) :
 
 lemma map_comm {C₁ C₂ : cochain_complex ℕ NormedGroup.{u}} (f : C₁ ⟶ C₂) :
   Π i j, d C₁ i j ≫ map_f f j = map_f f i ≫ d C₂ i j
-| 0     1     :=
-begin
-  dsimp [d], rw [comp_neg, neg_comp, neg_inj],
-  exact coker.map_lift_comm (f.comm 1 2),
-end
-| (i+1) (j+1) :=
-begin
-  dsimp [d], rw [comp_neg, neg_comp, neg_inj],
-  exact f.comm (i+2) (j+2)
-end
+| 0     1     := coker.map_lift_comm (f.comm 1 2)
+| (i+1) (j+1) := f.comm (i+2) (j+2)
 | 0     0     := by { rw [d_eq_zero, d_eq_zero, zero_comp, comp_zero]; dec_trivial }
 | 0     (j+2) := by { rw [d_eq_zero, d_eq_zero, zero_comp, comp_zero]; dec_trivial }
 | (i+1) 0     := by { rw [d_eq_zero, d_eq_zero, zero_comp, comp_zero]; dec_trivial }
@@ -129,16 +113,16 @@ def truncate : system_of_complexes ⥤ system_of_complexes :=
 (whiskering_right _ _ _).obj $ NormedGroup.truncate
 
 @[simp] lemma truncate_obj_d_zero_one (c : ℝ≥0) (y : C c 1) :
-  (truncate.obj C).d 0 1 (NormedGroup.coker.π y) = -C.d 1 2 y := rfl
+  (truncate.obj C).d 0 1 (NormedGroup.coker.π y) = C.d 1 2 y := rfl
 
 @[simp] lemma truncate_obj_d_succ_succ (c : ℝ≥0) (i j : ℕ) (x: truncate.obj C c (i+1)) :
-  (truncate.obj C).d (i+1) (j+1) x = -C.d (i+2) (j+2) x := rfl
+  (truncate.obj C).d (i+1) (j+1) x = C.d (i+2) (j+2) x := rfl
 
 lemma truncate_admissible (hC : C.admissible) :
   (truncate.obj C).admissible :=
 { d_norm_noninc' :=
   begin
-    rintro c (i|i) j rfl; apply NormedGroup.neg_norm_noninc,
+    rintro c (i|i) j rfl,
     { apply NormedGroup.coker.lift_norm_noninc,
       exact hC.d_norm_noninc _ _ 1 2 },
     { exact hC.d_norm_noninc _ _ (i+2) (i+3) }
@@ -176,9 +160,7 @@ end
 begin
   obtain ⟨_, _, rfl, rfl, y, hy⟩ := hC c hc _ (nat.succ_le_succ hi) x ε hε,
   refine ⟨i, _, rfl, rfl, _⟩,
-  cases i; [refine ⟨-NormedGroup.coker.π y, _⟩, refine ⟨-y, _⟩];
-  simpa only [normed_group_hom.map_neg, truncate_obj_d_zero_one, neg_neg,
-    truncate_obj_d_succ_succ, norm_neg] using hy
+  cases i; [exact ⟨NormedGroup.coker.π y, hy⟩, exact ⟨y, hy⟩],
 end
 
 lemma is_weak_bounded_exact_of_truncate (IH : C.is_weak_bounded_exact k K m c₀)
@@ -196,8 +178,8 @@ begin
   have hγ : 0 < γ := div_pos hδ zero_lt_two,
   obtain ⟨x', Hxx', Hx'⟩ : ∃ x', π c x' = π c (res x) ∧ ∥x'∥ < ∥π c (res x)∥ + γ :=
     normed_group_hom.quotient_norm_lift (NormedGroup.coker.π_is_quotient) hγ _,
-  obtain ⟨y, hy⟩ : ∃ y : C c 0, ∥res x - (C.d 0 1) y∥ ≤ ∥x'∥ + γ,
-  { sorry },
+  obtain ⟨y, hy⟩ : ∃ y : C c 0, ∥res x - (C.d 0 1) y∥ ≤ ∥x'∥ + γ :=
+    NormedGroup.coker.exists_norm_le _ _ Hxx'.symm γ hγ,
   obtain ⟨_, _, rfl, rfl, y', H⟩ := hC c hc _ (nat.zero_le m) (π _ x) δ hδ,
   refine ⟨0, 2, rfl, rfl, y, _⟩,
   simp only [d_self_apply, normed_group_hom.map_zero, sub_zero,
@@ -215,12 +197,8 @@ begin
   cases i,
   { let π := λ c, @NormedGroup.coker.π _ _ (@d C c 0 1),
     obtain ⟨y, rfl⟩ : ∃ y', π _ y' = y := NormedGroup.coker.π_surjective y,
-    refine ⟨-y, _⟩,
-    simpa only [normed_group_hom.map_neg, truncate_obj_d_zero_one, neg_neg,
-      truncate_obj_d_succ_succ, norm_neg] using hy },
-  { refine ⟨-y, _⟩,
-    simpa only [normed_group_hom.map_neg, truncate_obj_d_zero_one, neg_neg,
-      truncate_obj_d_succ_succ, norm_neg] using hy }
+    exact ⟨y, hy⟩ },
+  { exact ⟨y, hy⟩ },
 end
 
 lemma truncate_is_weak_bounded_exact_iff (hC : C.is_weak_bounded_exact k K m c₀) :

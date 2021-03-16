@@ -16,7 +16,7 @@ open_locale nnreal big_operators
 open pseudo_normed_group
 
 variables (Λ : Type*) (r' : ℝ≥0) (S : Type*)
-variables [fintype S] [normed_group Λ] [polyhedral_lattice Λ]
+variables [fintype S] [polyhedral_lattice Λ]
 
 section
 
@@ -373,7 +373,7 @@ begin
       if_congr, and_congr, eq_self_iff_true, if_false, false_and] },
 end
 
-lemma lem98 (Λ : Type*) [normed_group Λ] [polyhedral_lattice Λ]
+lemma lem98 (Λ : Type*) [polyhedral_lattice Λ]
   [fact (r' < 1)] (N : ℕ) (hN : 0 < N) :
   ∃ d, ∀ (S : Type*) [fintype S],
     ​∀ c (x : Λ →+ Mbar r' S) (hx : x ∈ filtration (Λ →+ Mbar r' S) c),

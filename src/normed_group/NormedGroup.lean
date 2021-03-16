@@ -35,6 +35,12 @@ instance punit.normed_group : normed_group punit :=
   dist_eq := λ _ _, rfl,
   .. punit.add_comm_group, .. punit.metric_space }
 
+-- move this, better name?
+lemma norm_le_add_norm_add {V : Type*} [normed_group V] (x y : V) :
+  ∥x∥ ≤ ∥x + y∥ + ∥y∥ :=
+calc ∥x∥ = ∥x + y - y∥ : by rw add_sub_cancel
+... ≤ ∥x + y∥ + ∥y∥ : norm_sub_le _ _
+
 end for_mathlib
 
 open category_theory
@@ -193,6 +199,10 @@ begin
   exact subset_closure ⟨a, rfl⟩,
 end
 
+@[simp]
+lemma coker.pi_apply_dom_eq_zero {f : A ⟶ B} (x : A) : (coker.π : B ⟶ coker f) (f x) = 0 :=
+show (f ≫ (coker.π : B ⟶ coker f)) x = 0, by { rw [coker.comp_pi_eq_zero], refl }
+
 variable {D : NormedGroup.{u}}
 
 lemma coker.lift_comp_eq_lift {f : A ⟶ B} {g : B ⟶ C} {h : C ⟶ D} {cond : f ≫ g = 0} :
@@ -204,18 +214,57 @@ lemma coker.lift_zero {f : A ⟶ B} :
   coker.lift (show f ≫ (0 : B ⟶ C) = 0, from category_theory.limits.comp_zero) = 0 :=
 eq.symm $ coker.lift_unique category_theory.limits.comp_zero
 
+-- better name? better form?
+lemma coker.exists_norm_le {f : A ⟶ B} (y₁ y₂ : B)
+  (h : (coker.π y₁ : coker f) = coker.π y₂) (ε : ℝ) (hε : 0 < ε) :
+  ∃ x, ∥y₁ - f x∥ ≤ ∥y₂∥ + ε :=
+begin
+  erw [quotient_add_group.mk'_eq_mk'_iff, metric.mem_closure_range_iff] at h,
+  obtain ⟨x, hx⟩ := h ε hε,
+  use x,
+  rw dist_eq_norm at hx,
+  calc ∥y₁ - f x∥ ≤ ∥y₁ - f x + -y₂∥ + ∥-y₂∥ : norm_le_add_norm_add _ _
+  ... = ∥y₂∥ + ∥y₁ - y₂ - f x∥ : _
+  ... ≤ ∥y₂∥ + ε : add_le_add_left hx.le _,
+  simp only [sub_eq_add_neg, add_comm, add_left_comm, norm_neg],
+end
+
+section
+open_locale nnreal
+
+-- maybe prove this for `normed_group_hom` first, without the category lib
+lemma coker.lift_bound_by {f : A ⟶ B} {g : B ⟶ C} {cond : f ≫ g = 0} {c : ℝ≥0}
+  (hg : g.bound_by c) :
+  (coker.lift cond).bound_by c :=
+begin
+  intros x,
+  by_cases hc : c = 0,
+  { simp only [hc, nnreal.coe_zero, zero_mul, norm_le_zero_iff] at hg ⊢,
+    obtain ⟨x, rfl⟩ := coker.π_surjective x,
+    show g x = 0,
+    rw ← norm_le_zero_iff,
+    calc ∥g x∥ ≤ 0 * ∥x∥ : hg x
+    ... = 0 : zero_mul _ },
+  { replace hc : 0 < c := pos_iff_ne_zero.mpr hc,
+    apply le_of_forall_pos_le_add,
+    intros ε hε,
+    have aux : 0 < (ε / c) := div_pos hε hc,
+    obtain ⟨x, rfl, Hx⟩ : ∃ x', coker.π x' = x ∧ ∥x'∥ < ∥x∥ + (ε / c) :=
+      normed_group_hom.quotient_norm_lift (coker.π_is_quotient) aux _,
+    rw coker.lift_comp_π_apply,
+    calc ∥g x∥ ≤ c * ∥x∥ : hg x
+    ... ≤ c * (∥coker.π x∥ + ε / c) : (mul_le_mul_left _).mpr Hx.le
+    ... = c * _ + ε : _,
+    { exact_mod_cast hc },
+    { rw [mul_add, mul_div_cancel'], exact_mod_cast hc.ne' } },
+end
+
 -- maybe prove this for `normed_group_hom` first, without the category lib
 lemma coker.lift_norm_noninc {f : A ⟶ B} {g : B ⟶ C} {cond : f ≫ g = 0}
   (hg : g.norm_noninc) :
   (coker.lift cond).norm_noninc :=
-begin
-  intros x,
-  apply le_of_forall_pos_le_add,
-  intros ε hε,
-  obtain ⟨x, rfl, Hx⟩ : ∃ x', coker.π x' = x ∧ ∥x'∥ < ∥x∥ + ε :=
-    normed_group_hom.quotient_norm_lift (NormedGroup.coker.π_is_quotient) hε _,
-  rw coker.lift_comp_π_apply,
-  exact (hg x).trans Hx.le
+λ x, by simpa only [one_mul, nnreal.coe_one] using coker.lift_bound_by hg.bound_by_one x
+
 end
 
 -- maybe prove this for `normed_group_hom` first, without the category lib

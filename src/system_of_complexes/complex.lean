@@ -7,6 +7,15 @@ open category_theory category_theory.limits
 
 section succ_pred
 
+/-
+=== ATTENTION ===
+
+Consider using `has_succ_rel` which should be a relation
+that says that `i` and `j` are a "successive pair".
+That way, we can even put a `has_succ_rel` on types like `fin n`,
+where there is a last element, that doesn't have a proper successor.
+-/
+
 variables (α : Type*)
 
 class has_succ := (succ : α → α)
