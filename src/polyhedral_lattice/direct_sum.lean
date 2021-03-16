@@ -48,18 +48,7 @@ normed_group.of_core _ $
   end }
 
 instance : polyhedral_lattice (⨁ i, Λ i) :=
-{ fg := sorry,
-  tf :=
-  begin
-    intros v hv n hnv,
-    obtain ⟨i, nzv_i⟩ : ∃ (i : ι), direct_sum.component ℤ ι Λ i v ≠ 0,
-    { rw ← not_forall,
-      rwa [ne.def, direct_sum.ext_iff ℤ] at hv },
-    have tf_i : torsion_free (Λ i) := polyhedral_lattice.tf,
-    refine tf_i (direct_sum.component ℤ ι Λ i v) nzv_i n _,
-    rw ← linear_map.map_smul_of_tower,
-    convert (direct_sum.ext_iff ℤ).mp hnv i,
-  end,
+{ finite_free := sorry,
   polyhedral :=
   begin
     have := λ i, polyhedral_lattice.polyhedral (Λ i),
@@ -73,7 +62,7 @@ instance : polyhedral_lattice (⨁ i, Λ i) :=
     { sorry },
     refine ⟨∏ i, d i, _, λ j, d' j.1 * c j.1 j.2, _, _⟩,
     sorry,
-    { rw [hl], -- the weirdness hese is not really clear to me: it works as a simple `rw`
+    { rw [hl], -- the weirdness here is not really clear to me: it works as a simple `rw`
                -- without the linear_algebra.direct_sum_module import.
     have : (∏ (i : ι), d i) • ∑ (i : ι), (direct_sum.of (λ (i : ι), Λ i) i) (l i) =
         ∑ (x : ι), (∏ (i : ι), d i) • (direct_sum.of (λ (i : ι), Λ i) x) (l x) :=

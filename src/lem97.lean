@@ -39,12 +39,12 @@ def explicit_dual_set {ι : Type*} (l : ι → Λ) : submodule ℕ (Λ →+ ℤ)
   add_mem' := λ x y hx hy i, add_nonneg (hx i) (hy i),
   smul_mem' := λ n x hx i, by { rw [add_monoid_hom.nat_smul_apply], exact nsmul_nonneg (hx i) n } }
 
-lemma explicit_gordan (hΛ_tf : torsion_free Λ) [hΛ_fg : module.finite ℤ Λ]
-  {ι : Type*} [fintype ι] (l : ι → Λ) : (explicit_dual_set l).fg :=
+lemma explicit_gordan (hΛ : finite_free Λ) {ι : Type*} [fintype ι] (l : ι → Λ) :
+  (explicit_dual_set l).fg :=
 sorry
 
-lemma lem97_pos {hΛ_tf : torsion_free Λ} {hΛ_fg : module.finite ℤ Λ}
-  {ι : Type*} [fintype ι] {N : ℕ} (l : ι → Λ) : ∃ B : finset (explicit_dual_set l), ∀ x : Λ →+ ℤ,
+lemma lem97_pos (hΛ : finite_free Λ) {ι : Type*} [fintype ι] {N : ℕ} (l : ι → Λ) :
+  ∃ B : finset (explicit_dual_set l), ∀ x : Λ →+ ℤ,
   x ∈ (explicit_dual_set l) → ∃ (x' ∈ B) (y : explicit_dual_set l),
   x = N • y + x' ∧ ∀ i, x' (l i) ≤ x (l i) :=
 begin
@@ -105,7 +105,7 @@ variables (Λ)
 requirements of Lemma 9.7 of [Analytic] with respect to all functionals which are positive on all ((ε • l) i)'s.
 Its existence is established in lem97_pos.
 -/
-def pos_A (ι : Type*) [fintype ι] (hΛ_tf : torsion_free Λ) (hΛ_fg : module.finite ℤ Λ) (N : ℕ)
+def pos_A (ι : Type*) [fintype ι] (hΛ : finite_free Λ) (N : ℕ)
   (l : ι → Λ) (ε : sign_vectors ι) : finset (Λ →+ ℤ) := by { apply choice, apply_instance}
 
 /-
@@ -118,17 +118,16 @@ fae: I am going for the first, `lem97`. I left `lem97'` there, at any rate.
 
 
 /-- Lemma 9.7 of [Analytic]. -/
-lemma lem97 (hΛ_tf : torsion_free Λ) [hΛ_fg : module.finite ℤ Λ]
-  {ι : Type*} [fintype ι] (N : ℕ) (l : ι → Λ) :
+lemma lem97 (hΛ : finite_free Λ) {ι : Type*} [fintype ι] (N : ℕ) (l : ι → Λ) :
   ∃ A : finset (Λ →+ ℤ), ∀ x : Λ →+ ℤ, ∃ (x' ∈ A) (y : Λ →+ ℤ),
     x = N • y + x' ∧
     ∀ i, (0 ≤ x' (l i) ∧ 0 ≤ (x - x') (l i)) ∨ (x' (l i) ≤ 0 ∧ (x - x') (l i) ≤ 0) :=
 begin
-  let A := finset.bUnion (@finset.univ (sign_vectors ι) (fintype_sign_vectors _)) (pos_A Λ ι hΛ_tf hΛ_fg N l),
+  let A := finset.bUnion (@finset.univ (sign_vectors ι) (fintype_sign_vectors _)) (pos_A Λ ι hΛ N l),
   use A,
   intro x,
   have : x ∈ (explicit_dual_set ((pos_vector l x).1 • l)) := smul_to_explicit_dual_set l x,
-  obtain ⟨B, hB⟩ := lem97_pos ((pos_vector l x).1 • l),
+  obtain ⟨B, hB⟩ := lem97_pos hΛ ((pos_vector l x).1 • l),
   specialize hB x this,
   sorry,
 
@@ -136,7 +135,7 @@ begin
 end
 
 /-- Lemma 9.7 of [Analytic]. -/
-lemma lem97' (hΛ_tf : torsion_free Λ) [hΛ_fg : module.finite ℤ Λ]
+lemma lem97' (hΛ : finite_free Λ)
   {ι : Type*} [fintype ι] (N : ℕ) (l : ι → Λ) :
   ∃ A : finset (Λ →+ ℤ), ∀ x : Λ →+ ℤ, ∃ (x' ∈ A) (y : Λ →+ ℤ),
     x = N • y + x' ∧

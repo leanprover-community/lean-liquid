@@ -11,11 +11,8 @@ section move_this
 def torsion_free (A : Type*) [add_comm_group A] : Prop :=
 ∀ (a : A) (ha : a ≠ 0) (n : ℕ), n • a = 0 → n = 0
 
-variables {R ι : Type*} [comm_ring R] [fintype ι]
-variables (M : ι → Type*) [Π i, add_comm_group (M i)] [Π i, module R (M i)]
-
--- instance module.finite.pi : module.finite R (Π i, M i) :=
--- sorry
+def finite_free (A : Type*) [add_comm_group A] : Prop :=
+∃ (ι : Type) [fintype ι] (x : ι → A), is_basis ℤ x
 
 end move_this
 
@@ -55,11 +52,8 @@ lemma generates_norm_of_generates_nnnorm {x : ι → Λ}
 end generates_norm
 
 class polyhedral_lattice (Λ : Type*) extends normed_group Λ :=
-[fg : module.finite ℤ Λ]
-(tf : torsion_free Λ)
-(polyhedral [] : ∃ (ι : Type) [fintype ι] (x : ι → Λ), generates_norm x)
-
-attribute [instance] polyhedral_lattice.fg
+(finite_free : finite_free Λ)
+(polyhedral [] : ∃ (ι : Type) [fintype ι] (l : ι → Λ), generates_norm l)
 
 /-- A morphism of polyhedral lattices is a norm-nonincreasing group homomorphism. -/
 structure polyhedral_lattice_hom (Λ₁ Λ₂ : Type*) [polyhedral_lattice Λ₁] [polyhedral_lattice Λ₂] :=

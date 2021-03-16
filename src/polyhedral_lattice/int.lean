@@ -49,11 +49,12 @@ lemma give_better_name : ∀ (n : ℤ), ∥n∥ = ↑(n.to_nat) + ↑((-n).to_na
 | -[1+ n]   := show ∥-↑(n+1:ℕ)∥ = 0 + (n+1), by rw [zero_add, norm_neg, int.norm_coe_nat, nat.cast_succ]
 
 instance int.polyhedral_lattice : polyhedral_lattice ℤ :=
-{ fg := by convert module.finite.self _,
-  tf := λ m hm n h,
+{ finite_free :=
   begin
-    rw [← nsmul_eq_smul, nsmul_eq_mul, mul_eq_zero] at h,
-    simpa only [hm, int.coe_nat_eq_zero, or_false, int.nat_cast_eq_coe_nat] using h
+    refine ⟨unit, infer_instance, λ _, 1, _⟩,
+    have oops : add_comm_group.int_module = semiring.to_semimodule := subsingleton.elim _ _,
+    rw oops,
+    exact is_basis_singleton_one ℤ
   end,
   polyhedral :=
   begin

@@ -383,7 +383,7 @@ lemma lem98 (Λ : Type*) [polyhedral_lattice Λ]
 begin
   classical,
   obtain ⟨ι, _ftι, l, hl⟩ := polyhedral_lattice.polyhedral Λ, resetI,
-  obtain ⟨A, hA⟩ := lem97' Λ polyhedral_lattice.tf N l,
+  obtain ⟨A, hA⟩ := lem97' Λ polyhedral_lattice.finite_free N l,
   let d : ℝ≥0 := finset.univ.sup (λ i, ∑ a in A, nnnorm (a (l i)) / nnnorm (l i)),
   use d,
   introsI S hS c x hx,
