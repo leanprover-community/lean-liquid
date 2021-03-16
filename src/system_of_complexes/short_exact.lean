@@ -42,9 +42,10 @@ A little API for short exact sequences.
 -/
 namespace is_short_exact
 
-instance exact [h : is_short_exact f g] : exact f g := h.is_exact
-instance mono [h : is_short_exact f g] : mono f := h.is_mono
-instance epi [h : is_short_exact f g] : epi g := h.is_epi
+-- weird remark : if I do not name these instances then type class inference breaks for `glue` below
+instance foo [h : is_short_exact f g] : exact f g := h.is_exact
+instance bar [h : is_short_exact f g] : mono f := h.is_mono
+instance baz [h : is_short_exact f g] : epi g := h.is_epi
 
 theorem w [is_short_exact f g] : f ≫ g = 0 := category_theory.exact.w
 
