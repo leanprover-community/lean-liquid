@@ -2,7 +2,15 @@ import category_theory.graded_object
 import category_theory.preadditive
 import category_theory.abelian.additive_functor
 import data.int.basic
+/-!
 
+# Contents
+
+1) technical `succ` stuff -- `has_succ` class
+
+2) eq_to_hom -- technical rewrite hack
+
+-/
 open category_theory category_theory.limits
 
 section succ_pred
@@ -49,6 +57,54 @@ instance : has_succ_pred ℤ :=
 
 end succ_pred
 
+/-
+
+## Differential Objects
+
+A differential object is a "lawless complex".
+
+When we write
+
+```
+structure group (G : Type) [has_mul G] [has_one G] [has_inv G]
+(mul_one : ∀ g, g * 1 = g)
+(whatever the other actual axioms are in the chosen definition)
+```
+
+we see that mathematicians are very quick to
+want to fix and use our *interface* (in particular
+infix `*` notation -- infix is some form
+of Curry-Howard? ) for their definitions,
+but don't care about
+which of the standard group-theoretic
+facts are axioms and which were proved
+as theorems (the difference between
+propositional and definitional equality),
+we just want the `group.foo` interface
+
+A differential object seems to be the same
+kind of thing but one level up. If `V` is
+a category (for example the category of abelian groups)
+and `ι` is a type (for example the integers), then
+an `ι`-graded differential `V`-object has at its
+heart a "function from `ι` to `V`" (there are set-theoretic issues here).
+Mathematicians often write "a collection of objects `Xₙ` for `n in ι`",
+in a passing nod to the issues. We also want to talk
+about maps between these objects, and sometimes they go
+from `X_i` to `X_{i+1}` but sometimes some of them go from `X_{i,j}`
+to `X_{i,j-1}` or there are several things all called variants
+of `d` forming a grid of commuting squares or anticommuting
+squares. The thing which we are proposing in to model this
+situation is a `differential_object`, which comes equipped
+a map called `d` once and for all, which is maps $$X_i\to X_j$$
+for all $$i$$ and $$j$$ in `ι`.
+
+The trick we will use later when working with complexes is
+that all of the `d`s other than the ones we're interested in
+are simply defined to be `0`. We have this option because
+we are working in a preadditive category.
+
+-/
 @[ext]
 structure differential_object (ι : Type) (V : Type*) [category V] :=
 (X : ι → V)
@@ -62,7 +118,11 @@ variables [category V]
 variables{ι V} (C C₁ C₂ C₃ : differential_object ι V)
 
 section category
-
+/-!
+A morphism between differential objects $$X=((X_n)_{n\in i},d)$$ and $Y$
+is a collection of morphisms `f n : X n ⟶ Y n` which commute with `d`
+in the obvious way.
+-/
 @[ext]
 structure hom :=
 (f (i : ι) : C₁.X i ⟶ C₂.X i)
@@ -72,14 +132,17 @@ attribute [reassoc] hom.comm
 
 variables {C₁ C₂ C₃}
 
+/-! The identity differential object -/
 protected def id : hom C C :=
 { f := λ i, 𝟙 _,
   comm := by { intros, rw [category.id_comp, category.comp_id] } }
 
+/-! Composition of differential objects the "right-action" way -/
 def comp (f : hom C₁ C₂) (g : hom C₂ C₃) : hom C₁ C₃ :=
 { f := λ i, f.f i ≫ g.f i,
   comm := λ i j, by { rw [hom.comm_assoc, hom.comm, category.assoc] } }
 
+/-! Differential objects are a category. -/
 instance : category (differential_object ι V) :=
 { hom := hom,
   id := differential_object.id,
@@ -93,11 +156,27 @@ instance : category (differential_object ι V) :=
 @[simp] lemma comp_f (f : C₁ ⟶ C₂) (g : C₂ ⟶ C₃) (i : ι) :
   (f ≫ g).f i = f.f i ≫ g.f i := rfl
 
+/-!
+X₁ i --h=-> X₁ j
+ |            |
+ | fᵢ         | fⱼ
+ \/           \/
+ X₂ i --h=-> X₂ j
+-/
 @[simp, reassoc]
 lemma eq_to_hom_f (f : C₁ ⟶ C₂) (i j : ι) (h : i = j) :
   eq_to_hom (congr_arg _ h) ≫ f.f j = f.f i ≫ eq_to_hom (congr_arg _ h) :=
 by { cases h, simp only [eq_to_hom_refl, category.id_comp, category.comp_id] }
 
+/-!
+Ask on Zulip : Should we have a "simp lemma order" for commutative squares?
+
+       X i -hi⟶ X i'
+       |          |
+       | d        | d
+      \/         \/
+      X j -hj-> X j'
+-/
 @[simp, reassoc]
 lemma eq_to_hom_d (i i' j j' : ι) :
   ∀ (hi : i = i') (hj : j = j'),
@@ -168,10 +247,35 @@ instance : add_comm_group (C₁ ⟶ C₂) :=
 
 variables (ι V)
 
+/-! If `V` is pre-additive, the differential object category is pre-additive. -/
 instance : preadditive (differential_object ι V) :=
 { hom_group := λ C₁ C₂, infer_instance,
   add_comp' := by { intros, ext, simp only [comp_f, add_f, add_comp] },
   comp_add' := by { intros, ext, simp only [comp_f, add_f, comp_add] } }
+
+/-
+
+## succ and differential objects
+
+This is the pushforward
+-/
+def comap (V : Type*) [category V] [preadditive V] {ι1 ι2 : Type}
+  (g : ι1 → ι2) : differential_object ι2 V ⥤ differential_object ι1 V :=
+{ obj := λ C,
+  { X := λ i, C.X (g i),
+    d := λ i j, C.d _ _ }, -- no sign shift
+  map := λ C₁ C₂ f,
+  { f := λ i, f.f (g i),
+    comm := λ i j, by simp only [f.comm]} }
+
+def neg_d (V : Type*) [category V] [preadditive V] {ι : Type}
+  : differential_object ι V ⥤ differential_object ι V :=
+{ obj := λ C,
+  { X := λ i, C.X i,
+    d := λ i j, -C.d _ _ },
+  map := λ C₁ C₂ f,
+  { f := λ i, f.f i,
+    comm := λ i j, by simp [neg_comp, f.comm] } }
 
 @[simps]
 def shift [has_succ ι] :
@@ -183,13 +287,19 @@ def shift [has_succ ι] :
   { f := λ i, f.f (succ i),
     comm := λ i j, by simp only [neg_comp, comp_neg, neg_inj, f.comm] } }
 
+-- example [has_succ ι] : shift ι V = neg_d V ⋙ comap V has_succ.succ :=
+-- by tidy -- fast
+
+--example [has_succ ι] : shift ι V = comap V has_succ.succ ⋙ neg_d V :=
+-- by tidy -- fast
+
 @[simps]
 def iso_shift' [has_succ ι] (C : differential_object ι V) (i : ι) :
   ((shift ι V).obj C).X i ≅ C.X (succ i) := iso.refl _
 
 variables [has_succ_pred ι]
 
-instance : has_shift (differential_object ι V) :=
+instance fo : has_shift (differential_object ι V) :=
 { shift :=
   { functor := shift ι V,
     inverse := @shift ι V _ _ ⟨pred⟩,
@@ -204,7 +314,6 @@ instance : has_shift (differential_object ι V) :=
     functor_unit_iso_comp' :=
     by { intros, ext i, dsimp, simp only [eq_to_hom_refl, eq_to_hom_trans] } } }
 .
-
 variables {ι V}
 
 @[simps] def iso_shift_zero : C⟦0⟧ ≅ C := iso.refl _
@@ -242,6 +351,12 @@ namespace differential_object
 
 variables {ι V} [has_succ ι] [category V] [has_zero_morphisms V]
 
+/-
+
+We need to start turning our lawless complexes into sensible
+things like complexes
+-/
+/-- -/
 def coherent_indices : Π (cov : bool) (i j : ι), Prop
 | ff i j := i = succ j
 | tt i j := succ i = j
@@ -249,12 +364,36 @@ def coherent_indices : Π (cov : bool) (i j : ι), Prop
 variables (ι V)
 
 set_option old_structure_cmd true
+/-
+Imagine a usual complex of abelian groups, indexed by the naturals or
+integers. Now add 0 maps between each pair of abelian groups which
+didn't have a map between them before. I claim that d^2=0, where d
+is that crazy map defined above.
+Indeed, the only way d itself can't be zero is if it's one of the
+maps in the original complex, and the composition of any two such
+maps is zero whenever it is defined.
 
+If furthermore ι has a `succ` then there are two conventions,
+one with `d : X_i → X_{succ i}` and one with `d : X_{succ i} → X_i`.
+
+The below definition makes me wonder whether `d_comp_d = 0`
+should be added as a `single_complex_like` axiom.
+-/
 @[ext]
 structure complex_like (cov : bool) extends differential_object ι V :=
 (d_comp_d : ∀ i j k, d i j ≫ d j k = 0)
 (d_eq_zero : ∀ ⦃i j⦄, ¬ coherent_indices cov i j → d i j = 0)
 
+/-
+
+## main definitions for `complex_like`
+
+The key one is that if `V` is preadditive then so is `complex_like ι V`
+if `ι` just means "a type, a succ-structure, and a sign convention"
+  I will just call them complexes of V's, with ι = ℤ or ℕ and the
+  usual succ and an arbitrary convention for whether d's go up or down.
+
+-/
 variables {ι V}
 
 instance coherent_indices_decidable [decidable_eq ι] (cov : bool) (i j : ι) :
@@ -279,7 +418,8 @@ instance [preadditive V] : preadditive (complex_like ι V cov) :=
   comp_add' := by { intros, apply preadditive.comp_add } }
 
 variables {C₁ C₂ : complex_like ι V cov}
-
+/-! Constructor for morphisms of complexes which chases all the diagrams
+  with zero in it so you don't have to -/
 @[simps]
 def hom.mk' (f : Π i, C₁.X i ⟶ C₂.X i)
   (hf : ∀ i j, coherent_indices cov i j → C₁.d i j ≫ f j = f i ≫ C₂.d i j) :
@@ -443,6 +583,11 @@ namespace cochain_complex
 
 variables {ι V} [decidable_eq ι] [has_succ ι] [category V] [has_zero_morphisms V]
 
+/-
+Constructor of a `cochain_complex` from the usual data which a mathematician
+would regard as giving a cochain complex (maps Xᵢ → X_{i+1}) with d^2=0)
+to what Lean regards as a cochain complex internally (which is of no relevance).
+-/
 @[simps]
 def mk' (X : ι → V) (d : Π i, X i ⟶ X (succ i)) (h : ∀ i, d i ≫ d (succ i) = 0) :
   cochain_complex ι V :=
@@ -458,13 +603,20 @@ def mk' (X : ι → V) (d : Π i, X i ⟶ X (succ i)) (h : ∀ i, d i ≫ d (suc
 
 @[simp] lemma mk'_d' (X : ι → V) (d : Π i, X i ⟶ X (succ i))
   (h : ∀ i, d i ≫ d (succ i) = 0) (i : ι) :
-  (mk' X d h).d i (succ i) = d i :=
+  (mk' X d h).d i (succ i) = d i := -- not `rfl` -- hard luck.
+  -- Our `d i j` function needs a proof that `j = succ i`
+  -- so and we need to run a `dif_pos` on it.
 calc (mk' X d h).d i (succ i)
     = d i ≫ eq_to_hom (congr_arg _ rfl) : dif_pos rfl
 ... = d i : by simp only [category.comp_id, eq_to_hom_refl]
 
 end cochain_complex
+/-
 
+It's limits v colimits round two, and this time it's equally tedious.
+All the constructions we just did for cochain complexes we will now
+do again for chain complexes.
+-/
 namespace chain_complex
 
 variables {ι V} [decidable_eq ι] [has_succ ι] [category V] [has_zero_morphisms V]
