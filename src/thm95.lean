@@ -14,7 +14,7 @@ theorem thm95 [BD.suitable c']
   (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)] :
   ∀ m : ℕ,
   ∃ (k K : ℝ≥0) [fact (1 ≤ k)],
-  ∀ (Λ : Type) [normed_group Λ],​ ∀ [polyhedral_lattice Λ],
+  ∀ (Λ : Type) [polyhedral_lattice Λ],
   ∃ c₀ : ℝ≥0,
   ∀ (S : Type) [fintype S],
   ∀ (V : NormedGroup) [normed_with_aut r V],

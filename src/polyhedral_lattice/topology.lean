@@ -1,6 +1,6 @@
 import polyhedral_lattice.basic
 import normed_group.pseudo_normed_group
-import pseudo_normed_group.profinitely_filtered 
+import pseudo_normed_group.profinitely_filtered
 
 import for_mathlib.topological_group
 import for_mathlib.topology
@@ -12,8 +12,7 @@ namespace polyhedral_lattice
 
 open pseudo_normed_group normed_group
 
-variables (Λ : Type*)
-variables [normed_group Λ] [polyhedral_lattice Λ]
+variables (Λ : Type*) [polyhedral_lattice Λ]
 
 lemma filtration_finite (c : ℝ≥0) : (filtration Λ c).finite :=
 begin
