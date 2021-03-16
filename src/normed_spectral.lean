@@ -63,8 +63,7 @@ end truncate
 
 open opposite
 
-/-- The assumptions on `M` in Proposition 9.6 bundled into a structure. Note that in `cond3b`
-  our `q` is one smaller than the `q` in the notes (so that we don't have to deal with `q - 1`). -/
+/-- The assumptions on `M` in Proposition 9.6 bundled into a structure. -/
 structure normed_spectral_conditions (M : system_of_double_complexes.{u})
   (m : ℕ) (k K k' ε : ℝ≥0) [fact (1 ≤ k)] [fact (1 ≤ k')] (c₀ H : ℝ≥0) [fact (0 < H)] :=
 (col_exact : ∀ j ≤ m, (M.col j).is_weak_bounded_exact k K m c₀)
@@ -287,7 +286,7 @@ begin
     nnreal.coe_mul, nnreal.coe_bit0, nnreal.coe_one, d_res] at hx1 ⊢,
   erw [res_res] at hx1,
   clear y1 Hx1,
-  replace Hx1 := mul_le_mul_of_nonneg_left hx1 (ε_pos 0 K).le,
+  replace Hx1 := mul_le_mul_of_nonneg_left hx1 (ε 0 K).coe_nonneg,
   replace Hx2 := (norm_le_add_norm_add _ _).trans (add_le_add (Hx2.trans Hx1) le_rfl),
   dsimp [ε] at Hx2,
   have K0 : (K:ℝ) ≠ 0 := ne_of_gt (lt_of_lt_of_le zero_lt_one hK),
