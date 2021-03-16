@@ -2,6 +2,9 @@ import category_theory.graded_object
 import category_theory.preadditive
 import category_theory.abelian.additive_functor
 import data.int.basic
+
+-- remove this
+import tactic
 /-!
 
 # Contents
@@ -345,6 +348,113 @@ def forget : differential_object ι V ⥤ graded_object ι V :=
   map := λ _ _ f, f.f }
 
 end category
+
+/-
+failed to synthesize type class instance for
+V : Type uV,
+_inst_1 : category V,
+_inst_2 : has_zero_morphisms V,
+_inst_3 : has_equalizers V,
+_inst_4 : has_images V,
+A B B' C : V,
+f : A ⟶ B,
+g : B ⟶ C,
+g' : B' ⟶ C,
+ι : Type,
+P Q R : differential_object ι V,
+φ : P ⟶ Q,
+ψ : Q ⟶ R
+⊢ has_images (differential_object ι V)
+-/
+--#check is_image -- this is data :-/
+--#check has_image -- Prop which says "there exists an image_factorisation"
+--#check image_factorisation
+-- Data exhibiting that a morphism `f` has an image. -/
+-- it's a type whose terms hold two pieces of data,
+-- `F : mono_factorisation f` and `is_image : is_image F`
+/-
+-- need image_factorisation φ for the below
+structure image_factorisation (f : X ⟶ Y) :=
+(F : mono_factorisation f)
+(is_image : is_image F)
+-/
+--#check classical.choice
+--#where
+--#check mono_factorisation -- structure, needs I, m and e
+--#print mono_factorisation
+variable (D : differential_object ι V)
+def thing (φ : C ⟶ D) (h : ∀ (i : ι), mono_factorisation (φ.f i)) :
+  mono_factorisation φ :=
+{ I -- ⊢ differential_object ι V
+    := { X := λ a, (h a).I,
+         d := λ a b,
+         begin
+           cases (h a) with aI am ahm_mono ae afac,
+           dsimp,
+           dsimp at afac,
+           cases (h b) with bI bm bhm_mono be bfac,
+           dsimp,
+           dsimp at bfac,
+           have phi_tofun_a := φ.f a,
+           have phi_tofun_b := φ.f b,
+           have phithing1 := φ.comm a b,
+           have phithing2 := φ.comm a a,
+           have phithing3 := φ.comm b a,
+           have phithing4 := φ.comm b b,
+           cases ahm_mono,
+           cases bhm_mono,
+           -- hey Bhavik what do you think
+           -- of this?
+           clear h, -- TODO -- DID I BREAK IT
+
+           sorry
+         end
+         },
+  m := sorry,
+  m_mono := sorry,
+  e := sorry,
+  fac' := sorry }
+
+instance foo [has_images V] : has_images (differential_object ι V) :=
+{ has_image := λ X Y φ, begin
+    unfreezingI {
+      obtain ⟨(h : ∀ {A B : V} (f : A ⟶ B), category_theory.limits.has_image f)⟩ := _inst_2 },
+    -- grr
+    -- this second unfreezing is just for notational reasons
+    -- and might be a bug
+    unfreezingI {
+    change ∀ {A B : V} (f : A ⟶ B), category_theory.limits.has_image f at h },
+    -- hooray
+    -- ⊢ has_image φ
+    constructor,
+    existsi _,
+    -- ⊢ image_factorisation φ
+    exact {
+      F -- : mono_factorisation φ
+        :=
+      { I := (
+        { X := λ i, (classical.choice (h (φ.f i)).1).F.1,
+          d := begin
+            intros i j,
+            have h2 := h (X.d i j),
+--        apply differential_object.d,
+        -- previous line doesn't work
+        sorry
+      end } : differential_object ι V),
+        m -- : I ⟶ Y
+          :=
+          (sorry : _ ⟶ Y),
+        e := (sorry : X ⟶ _),
+        -- } next line should be infer_instance
+        m_mono := sorry },
+      is_image := sorry
+    },
+  end }
+
+/-
+⊢ has_equalizers (differential_object ι V)
+-/
+instance bar [has_equalizers V] : has_equalizers (differential_object ι V) := sorry
 
 end differential_object
 namespace differential_object
