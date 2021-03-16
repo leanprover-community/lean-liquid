@@ -334,14 +334,14 @@ begin
 end
 
 instance : totally_disconnected_space (Mbar_le r' S c) :=
-begin
-  constructor,
-  rintros A - hA,
-  suffices subsing : subsingleton (homeo '' A),
-  { apply set.subsingleton_of_image (homeo.injective) _ subsing },
-  obtain ⟨h⟩ := (by apply_instance : totally_disconnected_space (Mbar_bdd.limit r' ⟨S⟩ c)),
-  exact h _ (by tauto) (is_preconnected.image hA _ homeo.continuous.continuous_on),
-end
+{ is_totally_disconnected_univ :=
+  begin
+    rintros A - hA,
+    suffices subsing : (homeo '' A).subsingleton,
+    { intros x hx y hy, apply_rules [homeo.injective, subsing, set.mem_image_of_mem] },
+    obtain ⟨h⟩ := (by apply_instance : totally_disconnected_space (Mbar_bdd.limit r' ⟨S⟩ c)),
+    exact h _ (by tauto) (is_preconnected.image hA _ homeo.continuous.continuous_on)
+  end }
 
 lemma continuous_iff {α : Type*} [topological_space α] (f : α → Mbar_le r' S c) :
   continuous f ↔ (∀ M, continuous ((truncate M) ∘ f)) :=
