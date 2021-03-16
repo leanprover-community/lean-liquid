@@ -2,8 +2,7 @@ import polyhedral_lattice.basic
 import normed_group.pseudo_normed_group
 import pseudo_normed_group.with_Tinv
 
-import for_mathlib.topological_group
-import for_mathlib.topology
+import topology.connected
 
 import facts
 
@@ -59,7 +58,8 @@ instance : t2_space (filtration (Λ →+ M) c) :=
 (incl_embedding Λ r' M c).t2_space
 
 instance : totally_disconnected_space (filtration (Λ →+ M) c) :=
-(incl_embedding Λ r' M c).totally_disconnected_space
+{ is_totally_disconnected_univ := (incl_embedding Λ r' M c).is_totally_disconnected $
+    is_totally_disconnected_of_totally_disconnected_space _ }
 
 lemma incl_range_eq :
   (set.range (@incl Λ r' M _ _ c)) =
@@ -98,7 +98,7 @@ end
 instance : compact_space (filtration (Λ →+ M) c) :=
 { compact_univ :=
   begin
-    apply (incl_inducing Λ r' M c).is_compact _,
+    rw ← (incl_inducing Λ r' M c).is_compact_iff,
     apply is_closed.compact,
     rw set.image_univ,
     exact incl_range_is_closed _ _ _ _
