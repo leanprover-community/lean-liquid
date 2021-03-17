@@ -100,16 +100,19 @@ begin
   { intros x hx,
     rcases mem_span_set.mp zZv with ⟨cz, czsup, rfl⟩,
     simp,
+    sorry,
   },
 
   rcases mem_span_set.mp zZv with ⟨cz, czsup, rfl⟩,
 
   rcases mem_span_set.mp zQs with ⟨cQ, cQsup, Qide⟩,
+sorry,
+--  rw ← Qide,
+sorry,sorry,
+--  refine ⟨c, _⟩,
+--  refine span_induction hz _ (by simp) _ _,
 
-  rw ← Qide,
-
-  refine ⟨c, _⟩,
-  refine span_induction hz _ (by simp) _ _,
+/-
   { rintros x ⟨c, cgb, rfl⟩,
     exact cgb.right },
   { exact λ x y ⟨hx1, hx2⟩ ⟨hy1, hy2⟩, ⟨add_mem _ hx1 hy1, add_mem _ hx2 hy2⟩ },
@@ -117,6 +120,7 @@ begin
     refine ⟨smul_mem _ _ hm1, _⟩,
     rw ← is_scalar_tower.algebra_map_smul Q z m,
     exact smul_mem _ _ hm2 }
+-/
 end
 
 
