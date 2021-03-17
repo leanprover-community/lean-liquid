@@ -60,7 +60,7 @@ instance : has_succ_pred ℤ :=
 
 end succ_pred
 
-/-
+/-!
 
 ## Differential Objects
 
@@ -108,6 +108,7 @@ are simply defined to be `0`. We have this option because
 we are working in a preadditive category.
 
 -/
+
 @[ext]
 structure differential_object (ι : Type) (V : Type*) [category V] :=
 (X : ι → V)
@@ -118,34 +119,33 @@ variables (ι : Type) (V : Type*) {cov : bool}
 namespace differential_object
 variables [category V]
 
-variables{ι V} (C C₁ C₂ C₃ : differential_object ι V)
+variables {ι V} (C C₁ C₂ C₃ : differential_object ι V)
 
 section category
-/-!
+/--
 A morphism between differential objects $$X=((X_n)_{n\in i},d)$$ and $Y$
 is a collection of morphisms `f n : X n ⟶ Y n` which commute with `d`
 in the obvious way.
 -/
 @[ext]
 structure hom :=
-(f (i : ι) : C₁.X i ⟶ C₂.X i)
-(comm (i j : ι) : C₁.d i j ≫ f j = f i ≫ C₂.d i j)
+(f : Π i, C₁.X i ⟶ C₂.X i)
+(comm' : ∀ (i j : ι), C₁.d i j ≫ f j = f i ≫ C₂.d i j . obviously)
 
-attribute [reassoc] hom.comm
+restate_axiom hom.comm'
+attribute [simp,reassoc] hom.comm
 
 variables {C₁ C₂ C₃}
 
-/-! The identity differential object -/
+/-- The identity differential object -/
 protected def id : hom C C :=
-{ f := λ i, 𝟙 _,
-  comm := by { intros, rw [category.id_comp, category.comp_id] } }
+{ f := λ i, 𝟙 _, }
 
-/-! Composition of differential objects the "right-action" way -/
+/-- Composition of differential objects the "right-action" way -/
 def comp (f : hom C₁ C₂) (g : hom C₂ C₃) : hom C₁ C₃ :=
-{ f := λ i, f.f i ≫ g.f i,
-  comm := λ i j, by { rw [hom.comm_assoc, hom.comm, category.assoc] } }
+{ f := λ i, f.f i ≫ g.f i, }
 
-/-! Differential objects are a category. -/
+/-- Differential objects are a category. -/
 instance : category (differential_object ι V) :=
 { hom := hom,
   id := differential_object.id,
@@ -159,19 +159,24 @@ instance : category (differential_object ι V) :=
 @[simp] lemma comp_f (f : C₁ ⟶ C₂) (g : C₂ ⟶ C₃) (i : ι) :
   (f ≫ g).f i = f.f i ≫ g.f i := rfl
 
-/-!
+/--
+The commutative square corresponding to following `f`,
+transporting along an equation in the indices.
+
 X₁ i --h=-> X₁ j
  |            |
  | fᵢ         | fⱼ
  \/           \/
  X₂ i --h=-> X₂ j
+
+For simp normal form, we prefer to push `eq_to_hom` to the right.
 -/
 @[simp, reassoc]
 lemma eq_to_hom_f (f : C₁ ⟶ C₂) (i j : ι) (h : i = j) :
   eq_to_hom (congr_arg _ h) ≫ f.f j = f.f i ≫ eq_to_hom (congr_arg _ h) :=
 by { cases h, simp only [eq_to_hom_refl, category.id_comp, category.comp_id] }
 
-/-!
+/--
 Ask on Zulip : Should we have a "simp lemma order" for commutative squares?
 
        X i -hi⟶ X i'
@@ -199,10 +204,10 @@ def iso_of_components (f : Π i, C₁.X i ≅ C₂.X i)
   C₁ ≅ C₂ :=
 { hom :=
   { f := λ i, (f i).hom,
-    comm := hf },
+    comm' := hf },
   inv :=
   { f := λ i, (f i).inv,
-    comm := λ i j,
+    comm' := λ i j,
     calc C₂.d i j ≫ (f j).inv
         = (f i).inv ≫ ((f i).hom ≫ C₂.d i j) ≫ (f j).inv : by simp
     ... = (f i).inv ≫ (C₁.d i j ≫ (f j).hom) ≫ (f j).inv : by rw hf
@@ -211,7 +216,7 @@ def iso_of_components (f : Π i, C₁.X i ≅ C₂.X i)
   inv_hom_id' := by { ext i, exact (f i).inv_hom_id } }
 
 instance [has_zero_morphisms V] : has_zero_morphisms (differential_object ι V) :=
-{ has_zero := λ C₁ C₂, ⟨{ f := λ i, 0, comm := λ _ _, by rw [zero_comp, comp_zero] }⟩,
+{ has_zero := λ C₁ C₂, ⟨{ f := λ i, 0, comm' := λ _ _, by rw [zero_comp, comp_zero] }⟩,
   comp_zero' := by { intros, ext, rw [comp_f, comp_zero] },
   zero_comp' := by { intros, ext, rw [comp_f, zero_comp] } }
 
@@ -222,13 +227,13 @@ open category_theory.preadditive
 variables [preadditive V]
 
 instance : has_add (C₁ ⟶ C₂) :=
-⟨λ f g, { f := λ i, f.f i + g.f i, comm := λ i j, by rw [comp_add, add_comp, f.comm, g.comm] }⟩
+⟨λ f g, { f := λ i, f.f i + g.f i, comm' := λ i j, by rw [comp_add, add_comp, f.comm, g.comm] }⟩
 
 instance : has_sub (C₁ ⟶ C₂) :=
-⟨λ f g, { f := λ i, f.f i - g.f i, comm := λ i j, by rw [comp_sub, sub_comp, f.comm, g.comm] }⟩
+⟨λ f g, { f := λ i, f.f i - g.f i, comm' := λ i j, by rw [comp_sub, sub_comp, f.comm, g.comm] }⟩
 
 instance : has_neg (C₁ ⟶ C₂) :=
-⟨λ f, { f := λ i, -f.f i, comm := λ i j, by rw [comp_neg, neg_comp, f.comm] }⟩
+⟨λ f, { f := λ i, -f.f i, comm' := λ i j, by rw [comp_neg, neg_comp, f.comm] }⟩
 
 @[simp] lemma add_f (f g : C₁ ⟶ C₂) (i : ι) : (f + g).f i = f.f i + g.f i := rfl
 
@@ -269,7 +274,7 @@ def comap (V : Type*) [category V] [preadditive V] {ι1 ι2 : Type}
     d := λ i j, C.d _ _ }, -- no sign shift
   map := λ C₁ C₂ f,
   { f := λ i, f.f (g i),
-    comm := λ i j, by simp only [f.comm]} }
+    comm' := λ i j, by simp only [f.comm]} }
 
 def neg_d (V : Type*) [category V] [preadditive V] {ι : Type}
   : differential_object ι V ⥤ differential_object ι V :=
@@ -278,7 +283,7 @@ def neg_d (V : Type*) [category V] [preadditive V] {ι : Type}
     d := λ i j, -C.d _ _ },
   map := λ C₁ C₂ f,
   { f := λ i, f.f i,
-    comm := λ i j, by simp [neg_comp, f.comm] } }
+    comm' := λ i j, by simp [neg_comp, f.comm] } }
 
 @[simps]
 def shift [has_succ ι] :
@@ -288,7 +293,7 @@ def shift [has_succ ι] :
     d := λ i j, -C.d _ _ },
   map := λ C₁ C₂ f,
   { f := λ i, f.f (succ i),
-    comm := λ i j, by simp only [neg_comp, comp_neg, neg_inj, f.comm] } }
+    comm' := λ i j, by simp only [neg_comp, comp_neg, neg_inj, f.comm] } }
 
 -- example [has_succ ι] : shift ι V = neg_d V ⋙ comap V has_succ.succ :=
 -- by tidy -- fast
@@ -426,13 +431,13 @@ noncomputable def mono_factorisation.of_image_maps (φ : C ⟶ D) [has_images V]
 { I -- ⊢ differential_object ι V
     := image_factorisation.I φ,
   m := { f := λ i, image.ι (φ.f i),
-  comm := begin
+  comm' := begin
     intros,
     apply image_map.map_ι,
   end },
   m_mono := mono_of_parts_mono _ infer_instance,
   e := { f := λ i, factor_thru_image (φ.f i),
-    comm := λ i j, (image_map.factor_map (arrow.hom_mk' (φ.comm i j)) _).symm },
+    comm' := λ i j, (image_map.factor_map (arrow.hom_mk' (φ.comm i j)) _).symm },
   fac' := by { ext, simp } }
 
 -- theorem mono_iff_factors_mono (φ : C ⟶ D)
@@ -480,7 +485,7 @@ instance foo [has_images V] [has_image_maps V] : has_images (differential_object
                 rw yyy,
               end }),
         sorry end,
-          comm := sorry },
+          comm' := sorry },
         lift_fac' := sorry }
     },
   end }
@@ -510,7 +515,7 @@ instance bar [has_equalizers V] : has_equalizers (differential_object ι V) :=
               exact (equalizer.ι (f.f i) (g.f i)),
             --simp,
             exact (equalizer.ι (f.f i) (g.f i)) ≫ f.f i end,
-            comm := λ i j, begin
+            comm' := λ i j, begin
               dsimp,
               cases WPP,
                 simp only [equalizer.lift_ι],
@@ -538,7 +543,7 @@ instance bar [has_equalizers V] : has_equalizers (differential_object ι V) :=
            erw ← s.π.naturality' walking_parallel_pair_hom.left,
            erw ← s.π.naturality' walking_parallel_pair_hom.right,
            simp only [functor.const.obj_map] end,
-         comm := λ i j, begin ext1, simp only [equalizer.lift_ι, equalizer.lift_ι_assoc, category.assoc],
+         comm' := λ i j, begin ext1, simp only [equalizer.lift_ι, equalizer.lift_ι_assoc, category.assoc],
            exact (s.π.app walking_parallel_pair.zero).comm i j,
         end})
          (λ s, begin ext, simp only [equalizer.lift_ι, comp_f] end)
@@ -625,7 +630,7 @@ def hom.mk' (f : Π i, C₁.X i ⟶ C₂.X i)
   (hf : ∀ i j, coherent_indices cov i j → C₁.d i j ≫ f j = f i ≫ C₂.d i j) :
   C₁ ⟶ C₂ :=
 { f := f,
-  comm := λ i j,
+  comm' := λ i j,
   begin
     by_cases h : coherent_indices cov i j,
     { exact hf i j h },
@@ -858,7 +863,7 @@ def functor.map_differential_object (F : V₁ ⥤ V₂) :
     d := λ i j, F.map (C.d i j) },
   map := λ C₁ C₂ f,
   { f := λ i, F.map (f.f i),
-    comm := λ i j, by simp only [← F.map_comp, f.comm] },
+    comm' := λ i j, by simp only [← F.map_comp, f.comm] },
   map_id' := by { intros, ext, exact F.map_id _ },
   map_comp' := by { intros, ext, exact F.map_comp _ _ } }
 
