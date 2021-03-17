@@ -24,6 +24,8 @@ noncomputable theory
 
 open_locale big_operators
 
+local attribute [-instance] add_comm_monoid.nat_semimodule add_comm_group.int_module
+
 namespace polyhedral_lattice
 
 variables {Λ Λ' : Type*} [polyhedral_lattice Λ] [polyhedral_lattice Λ']
@@ -55,9 +57,27 @@ normed_group_hom.normed_group_quotient _
 instance : polyhedral_lattice (obj f m) :=
 { nat_semimodule := add_comm_monoid.nat_semimodule,
   int_semimodule := add_comm_group.int_module,
-  is_scalar_tower := add_comm_monoid.nat_is_scalar_tower,
-  finite_free := sorry,
-  polyhedral := sorry }
+  is_scalar_tower := by convert add_comm_monoid.nat_is_scalar_tower,
+  finite_free := sorry, -- we will need some sort of torsion-free condition on the cokernel of `f`
+  polyhedral :=
+  begin
+    obtain ⟨ι, _inst_ι, l, hl⟩ := polyhedral_lattice.polyhedral (fin m →₀ Λ'),
+    refine ⟨ι, _inst_ι, (λ i, quotient_add_group.mk (l i)), _⟩,
+    intros x,
+    apply quotient_add_group.induction_on x; clear x,
+    intro x,
+    obtain ⟨d, hd, c, H1, H2⟩ := hl x,
+    refine ⟨d, hd, c, _, _⟩,
+    { show d • quotient_add_group.mk' _ x = _,
+      rw [← nsmul_eq_smul, ← add_monoid_hom.map_nsmul, nsmul_eq_smul, H1,
+        add_monoid_hom.map_sum],
+      apply fintype.sum_congr,
+      intro i,
+      rw [← nsmul_eq_smul, add_monoid_hom.map_nsmul],
+      exact @nsmul_eq_smul _ _ add_comm_monoid.nat_semimodule _ _ },
+    { dsimp,
+      sorry }
+  end }
 
 end objects
 
