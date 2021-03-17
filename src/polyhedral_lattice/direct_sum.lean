@@ -7,6 +7,8 @@ noncomputable theory
 
 open_locale direct_sum big_operators classical
 
+local attribute [-instance] add_comm_monoid.nat_semimodule add_comm_group.int_module
+
 namespace polyhedral_lattice
 
 variables {ι : Type} [fintype ι] (Λ : ι → Type*)
@@ -61,19 +63,27 @@ instance : polyhedral_lattice (⨁ i, Λ i) :=
     have hl : l = ∑ i, direct_sum.of _ i (l i),
     { sorry },
     refine ⟨∏ i, d i, _, λ j, d' j.1 * c j.1 j.2, _, _⟩,
-    sorry,
-    { rw [hl], -- the weirdness here is not really clear to me: it works as a simple `rw`
-               -- without the linear_algebra.direct_sum_module import.
-    have : (∏ (i : ι), d i) • ∑ (i : ι), (direct_sum.of (λ (i : ι), Λ i) i) (l i) =
-        ∑ (x : ι), (∏ (i : ι), d i) • (direct_sum.of (λ (i : ι), Λ i) x) (l x) :=
-        finset.smul_sum,
-    convert this.trans _,
-    rw[ ← finset.univ_sigma_univ, finset.sum_sigma],
+    { apply nat.pos_of_ne_zero,
+      rw finset.prod_ne_zero_iff,
+      rintro i - hi,
+      exact nat.not_lt_zero 0 (hi.subst $ hd i) },
+    { rw [hl, finset.smul_sum, ← finset.univ_sigma_univ, finset.sum_sigma],
+      apply fintype.sum_congr,
+      intro i,
+      rw [← finset.insert_erase (finset.mem_univ i), finset.prod_insert (finset.not_mem_erase _ _),
+        mul_comm, mul_smul, ← nsmul_eq_smul (d i), ← add_monoid_hom.map_nsmul, nsmul_eq_smul, H1,
+        add_monoid_hom.map_sum, finset.smul_sum],
+      apply fintype.sum_congr,
+      intro j,
+      rw [mul_smul, ← nsmul_eq_smul (c i j), add_monoid_hom.map_nsmul, nsmul_eq_smul] },
+    { rw [direct_sum_norm_def, ← finset.univ_sigma_univ, finset.sum_sigma, finset.mul_sum],
       apply fintype.sum_congr,
       intro i,
       dsimp,
-      sorry }, --simp only [mul_smul, ← finset.smul_sum] },
-    sorry
+      rw [← finset.insert_erase (finset.mem_univ i), finset.prod_insert (finset.not_mem_erase _ _),
+        nat.cast_mul, mul_right_comm, H2],
+      -- now use H2
+      sorry }
   end }
 
 end polyhedral_lattice
