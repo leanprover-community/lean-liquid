@@ -173,7 +173,7 @@ lemma norm_zero_eq_zero (S : add_subgroup M) (hS : is_closed (↑S : set M)) (m 
 by rwa [quotient_norm_eq_zero_iff, hS.closure_eq] at h
 
 /-- The seminorm on `quotient S` is actually a norm when S is closed. -/
-lemma quotient.is_normed_group.core (S : add_subgroup M) [hS : fact (is_closed (S : set M))] :
+lemma quotient.is_normed_group.core (S : add_subgroup M) [hS : is_closed (S : set M)] :
   normed_group.core (quotient S) :=
 begin
   split,
@@ -186,28 +186,28 @@ end
 
 /-- The quotient in the category of normed groups. -/
 noncomputable
-instance normed_group_quotient (S : add_subgroup M) [hS : fact (is_closed (S : set M))] :
+instance normed_group_quotient (S : add_subgroup M) [hS : is_closed (S : set M)] :
   normed_group (quotient S) := normed_group.of_core (quotient S) (quotient.is_normed_group.core S)
 
 /-- The morphism from a norrmed group to the quotient by a closed subgroup. -/
 noncomputable
-def normed_group.mk (S : add_subgroup M) [fact (is_closed (S : set M))] :
+def normed_group.mk (S : add_subgroup M) [is_closed (S : set M)] :
   normed_group_hom M (quotient S) :=
 { bound' := ⟨1, λ m, by simpa [one_mul] using quotient_norm_mk_le  _ m⟩,
   ..quotient_add_group.mk' S }
 
 /-- `normed_group.mk S` agrees with `quotient_add_group.mk' S`. -/
 @[simp]
-lemma normed_group.mk.apply (S : add_subgroup M) [fact (is_closed (S : set M))] (m : M) :
+lemma normed_group.mk.apply (S : add_subgroup M) [is_closed (S : set M)] (m : M) :
   normed_group.mk S m = quotient_add_group.mk' S m := rfl
 
 /-- `normed_group.mk S` is surjective. -/
-lemma surjective_normed_group.mk (S : add_subgroup M) [fact (is_closed (S : set M))] :
+lemma surjective_normed_group.mk (S : add_subgroup M) [is_closed (S : set M)] :
   function.surjective (normed_group.mk S) :=
 surjective_quot_mk _
 
 /-- The kernel of `normed_group.mk S` is `S`. -/
-lemma normed_group.mk.ker (S : add_subgroup M) [fact (is_closed (S : set M))] :
+lemma normed_group.mk.ker (S : add_subgroup M) [is_closed (S : set M)] :
   (normed_group.mk S).ker = S := quotient_add_group.ker_mk  _
 
 /-- `is_quotient f`, for `f : M ⟶ N` means that `N` is isomorphic to the quotient of `M`
@@ -219,7 +219,7 @@ structure is_quotient (f : normed_group_hom M N) : Prop :=
 /-- Given  `f : normed_group_hom M N` such that `f s = 0` for all `s ∈ S`, where,
 `S : add_subgroup M` is closed, the induced morphism `normed_group_hom (quotient S) N`. -/
 noncomputable
-def lift {N : Type*} [normed_group N] (S : add_subgroup M) [fact (is_closed (S : set M))]
+def lift {N : Type*} [normed_group N] (S : add_subgroup M) [is_closed (S : set M)]
   (f : normed_group_hom M N) (hf : ∀ s ∈ S, f s = 0) :
   normed_group_hom (quotient S) N :=
 { bound' :=
@@ -235,11 +235,11 @@ def lift {N : Type*} [normed_group N] (S : add_subgroup M) [fact (is_closed (S :
   .. quotient_add_group.lift S f.to_add_monoid_hom hf }
 
 --@[simp]
-lemma lift_mk  {N : Type*} [normed_group N] (S : add_subgroup M) [fact (is_closed (S : set M))]
+lemma lift_mk  {N : Type*} [normed_group N] (S : add_subgroup M) [is_closed (S : set M)]
   (f : normed_group_hom M N) (hf : ∀ s ∈ S, f s = 0) (m : M) :
   lift S f hf (normed_group.mk S m) = f m := rfl
 
-lemma lift_unique {N : Type*} [normed_group N] (S : add_subgroup M) [fact (is_closed (S : set M))]
+lemma lift_unique {N : Type*} [normed_group N] (S : add_subgroup M) [is_closed (S : set M)]
   (f : normed_group_hom M N) (hf : ∀ s ∈ S, f s = 0)
   (g : normed_group_hom (quotient S) N) :
   g.comp (normed_group.mk S) = f → g = lift S f hf :=
@@ -253,7 +253,7 @@ begin
 end
 
 /-- `normed_group.mk S` satisfies `is_quotient`. -/
-lemma is_quotient_quotient (S : add_subgroup M) [fact (is_closed (S : set M))] :
+lemma is_quotient_quotient (S : add_subgroup M) [is_closed (S : set M)] :
   is_quotient (normed_group.mk S) :=
 ⟨surjective_normed_group.mk S, λ m, by simpa [normed_group.mk.ker S] using quotient_norm_mk_eq _ m⟩
 
