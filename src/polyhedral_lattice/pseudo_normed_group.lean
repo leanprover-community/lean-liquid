@@ -2,8 +2,7 @@ import polyhedral_lattice.basic
 import normed_group.pseudo_normed_group
 import pseudo_normed_group.with_Tinv
 
-import for_mathlib.topological_group
-import for_mathlib.topology
+import topology.connected
 
 import facts
 
@@ -17,8 +16,7 @@ by simp only [nnnorm_one, normed_group.mem_filtration_iff]
 
 namespace polyhedral_lattice
 
-variables (Λ : Type*) (r' : ℝ≥0) (M : Type*)
-variables [normed_group Λ] [polyhedral_lattice Λ]
+variables (Λ : Type*) (r' : ℝ≥0) (M : Type*) [polyhedral_lattice Λ]
 variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M]
 
 include r'
@@ -36,7 +34,7 @@ rfl
 
 variables (Λ r' M)
 
-lemma incl_injective : function.injective (@incl Λ r' M _ _ _ c) :=
+lemma incl_injective : function.injective (@incl Λ r' M _ _ c) :=
 begin
   intros f g h,
   ext l,
@@ -47,23 +45,24 @@ end
 instance : topological_space (filtration (Λ →+ M) c) :=
 topological_space.induced (incl c) infer_instance
 
-lemma incl_embedding : embedding (@incl Λ r' M _ _ _ c) :=
+lemma incl_embedding : embedding (@incl Λ r' M _ _ c) :=
 { induced := rfl,
   inj := incl_injective Λ r' M c }
 
-lemma incl_inducing : inducing (@incl Λ r' M _ _ _ c) := ⟨rfl⟩
+lemma incl_inducing : inducing (@incl Λ r' M _ _ c) := ⟨rfl⟩
 
-lemma incl_continuous : continuous (@incl Λ r' M _ _ _ c) :=
+lemma incl_continuous : continuous (@incl Λ r' M _ _ c) :=
 (incl_inducing _ _ _ _).continuous
 
 instance : t2_space (filtration (Λ →+ M) c) :=
 (incl_embedding Λ r' M c).t2_space
 
 instance : totally_disconnected_space (filtration (Λ →+ M) c) :=
-(incl_embedding Λ r' M c).totally_disconnected_space
+{ is_totally_disconnected_univ := (incl_embedding Λ r' M c).is_totally_disconnected $
+    is_totally_disconnected_of_totally_disconnected_space _ }
 
 lemma incl_range_eq :
-  (set.range (@incl Λ r' M _ _ _ c)) =
+  (set.range (@incl Λ r' M _ _ c)) =
     ⋂ l₁ l₂, {f | (cast_le (f (l₁ + l₂)) : filtration M (c * (nnnorm l₁ + nnnorm l₂))) =
     cast_le (add' (f l₁, f l₂))} :=
 begin
@@ -83,7 +82,7 @@ end
 
 open profinitely_filtered_pseudo_normed_group
 
-lemma incl_range_is_closed : (is_closed (set.range (@incl Λ r' M _ _ _ c))) :=
+lemma incl_range_is_closed : (is_closed (set.range (@incl Λ r' M _ _ c))) :=
 begin
   rw incl_range_eq,
   apply is_closed_Inter,
@@ -99,7 +98,7 @@ end
 instance : compact_space (filtration (Λ →+ M) c) :=
 { compact_univ :=
   begin
-    apply (incl_inducing Λ r' M c).is_compact _,
+    rw ← (incl_inducing Λ r' M c).is_compact_iff,
     apply is_closed.compact,
     rw set.image_univ,
     exact incl_range_is_closed _ _ _ _

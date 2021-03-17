@@ -1,9 +1,7 @@
 import polyhedral_lattice.basic
 import normed_group.pseudo_normed_group
-import pseudo_normed_group.profinitely_filtered 
+import pseudo_normed_group.profinitely_filtered
 
-import for_mathlib.topological_group
-import for_mathlib.topology
 
 noncomputable theory
 open_locale nnreal
@@ -12,8 +10,7 @@ namespace polyhedral_lattice
 
 open pseudo_normed_group normed_group
 
-variables (Λ : Type*)
-variables [normed_group Λ] [polyhedral_lattice Λ]
+variables (Λ : Type*) [polyhedral_lattice Λ]
 
 lemma filtration_finite (c : ℝ≥0) : (filtration Λ c).finite :=
 begin
@@ -23,7 +20,7 @@ end
 open metric
 
 instance : discrete_topology Λ :=
-discrete_topology_of_open_singleton_zero _ $
+discrete_topology_of_open_singleton_zero $
 begin
   classical,
   have aux := filtration_finite Λ 1,

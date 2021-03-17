@@ -1,9 +1,9 @@
 [package]
 name = "lean-liquid"
 version = "0.1"
-lean_version = "leanprover-community/lean:3.27.0"
+lean_version = "leanprover-community/lean:3.28.0"
 path = "src"
 
 [dependencies]
-mathlib = {git = "https://github.com/leanprover-community/mathlib", rev = "2dabe5af7ee219673ea62df34e0199ee6d3c6585"}
+mathlib = {git = "https://github.com/leanprover-community/mathlib", rev = "d292fd7e9bbf1e01a38ccbbdcbc64aa4c8a35b36"}
 lean-gptf = {git = "https://github.com/jesse-michael-han/lean-gptf", rev = "3e20785d65604744e9e2dc9d710a695a7355fd2c"}
