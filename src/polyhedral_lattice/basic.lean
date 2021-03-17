@@ -4,21 +4,23 @@ import ring_theory.finiteness
 noncomputable theory
 open_locale big_operators classical nnreal
 
+local attribute [-instance] add_comm_monoid.nat_semimodule add_comm_group.int_module
+
 section move_this
 
 -- rewrite to include multiplicative version
 -- also write version for modules, glue to version for groups
-def torsion_free (A : Type*) [add_comm_group A] : Prop :=
+def torsion_free (A : Type*) [add_comm_group A] [semimodule ℕ A] : Prop :=
 ∀ (a : A) (ha : a ≠ 0) (n : ℕ), n • a = 0 → n = 0
 
-def finite_free (A : Type*) [add_comm_group A] : Prop :=
+def finite_free (A : Type*) [add_comm_group A] [semimodule ℤ A] : Prop :=
 ∃ (ι : Type) [fintype ι] (x : ι → A), is_basis ℤ x
 
 end move_this
 
 section generates_norm
 
-variables {Λ ι : Type*} [normed_group Λ] [fintype ι]
+variables {Λ ι : Type*} [normed_group Λ] [semimodule ℕ Λ] [fintype ι]
 
 /-- A finite family `x : ι → Λ` generates the norm on `Λ`
 if for every `l : Λ`,
@@ -52,8 +54,16 @@ lemma generates_norm_of_generates_nnnorm {x : ι → Λ}
 end generates_norm
 
 class polyhedral_lattice (Λ : Type*) extends normed_group Λ :=
+-- unfortunately, we need the following assumptions, for technical reasons
+[nat_semimodule : semimodule ℕ Λ]
+[int_semimodule : semimodule ℤ Λ]
+[is_scalar_tower : is_scalar_tower ℕ ℤ Λ]
+-- now we get to the actual definition
 (finite_free : finite_free Λ)
 (polyhedral [] : ∃ (ι : Type) [fintype ι] (l : ι → Λ), generates_norm l)
+
+attribute [instance] polyhedral_lattice.nat_semimodule polyhedral_lattice.int_semimodule
+                     polyhedral_lattice.is_scalar_tower
 
 /-- A morphism of polyhedral lattices is a norm-nonincreasing group homomorphism. -/
 structure polyhedral_lattice_hom (Λ₁ Λ₂ : Type*) [polyhedral_lattice Λ₁] [polyhedral_lattice Λ₂] :=

@@ -6,6 +6,8 @@ noncomputable theory
 
 open_locale big_operators classical
 
+local attribute [-instance] add_comm_monoid.nat_semimodule add_comm_group.int_module
+
 namespace polyhedral_lattice
 
 variables (ι : Type*) (Λ : Type*) [fintype ι] [polyhedral_lattice Λ]
@@ -33,16 +35,13 @@ normed_group.of_core _ $
   end,
   norm_neg := λ x, by simp only [finsupp_norm_def, norm_neg, finsupp.neg_apply] }
 
+-- set_option pp.implicit true
+
 instance {ι : Type} [fintype ι] : polyhedral_lattice (ι →₀ Λ) :=
 { finite_free :=
   begin
     obtain ⟨J, _instJ, l, hl⟩ := @polyhedral_lattice.finite_free Λ _, resetI,
-    delta finite_free,
-    have oops : add_comm_group.int_module = finsupp.semimodule ι Λ := subsingleton.elim _ _,
-    rw oops,
-    have := @finsupp.is_basis_single ℤ Λ ι _ _ _ _ (λ i, l) (λ i, hl),
-    refine ⟨_, _, _, this⟩,
-    apply_instance
+    exact ⟨_, infer_instance, _, @finsupp.is_basis_single ℤ Λ ι _ _ _ _ (λ i, l) (λ i, hl)⟩
   end,
   polyhedral :=
   begin
@@ -63,17 +62,12 @@ instance {ι : Type} [fintype ι] : polyhedral_lattice (ι →₀ Λ) :=
       rw finset.prod_ne_zero_iff,
       rintro i - hi,
       exact nat.not_lt_zero 0 (hi.subst $ hd i) },
-    { rw [hl, ← finset.univ_product_univ, finset.sum_product],
-      have : (∏ (i : ι), d i) • ∑ (i : ι), (finsupp.single i (l i)) =
-        ∑ (x : ι), (∏ (i : ι), d i) • (finsupp.single x (l x)) :=
-        finset.smul_sum,
-    convert this.trans _ using 2,
-    { sorry },
-    apply fintype.sum_congr,
-    intro i,
-    dsimp,
-    -- simp only [mul_smul, ← finset.smul_sum],
-    sorry },
+    { rw [hl, ← finset.univ_product_univ, finset.sum_product, finset.smul_sum],
+      apply fintype.sum_congr,
+      intro i,
+      dsimp,
+      simp only [mul_smul, ← finset.smul_sum],
+      sorry },
     { rw [finsupp_norm_def, ← finset.univ_product_univ, finset.sum_product,
         finset.mul_sum],
       apply fintype.sum_congr,
