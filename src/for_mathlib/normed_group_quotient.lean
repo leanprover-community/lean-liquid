@@ -11,7 +11,7 @@ variables (f g : normed_group_hom V₁ V₂)
 namespace add_subgroup
 
 instance {M : Type*} [normed_group M] {A : add_subgroup M} :
-  fact (is_closed (A.topological_closure : set M)) := is_closed_closure
+  is_closed (A.topological_closure : set M) := is_closed_closure
 
 end add_subgroup
 
