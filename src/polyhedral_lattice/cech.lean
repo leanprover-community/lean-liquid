@@ -128,11 +128,11 @@ begin
   { rw finset.sum_comm,
     apply finset.sum_le_sum,
     rintro j -,
-    simp only [single_apply, norm_ite, norm_zero, finset.sum_ite, finset.sum_const_zero, add_zero],
-    simp only [finset.sum_const, nsmul_eq_mul, finset.filter_congr_decidable],
-    classical,
-    rw [finset.filter_eq],
-    simp only [finset.mem_univ, if_true, finset.card_singleton, nat.cast_one, one_mul] }
+    simp only [single_apply, norm_ite, norm_zero],
+    apply le_of_eq,
+    have := @finset.sum_ite_eq _ ℝ _ _ finset.univ (g j) (λ _, ∥x j∥),
+    simp only [finset.mem_univ, if_true] at this,
+    convert this, ext, split_ifs; refl, }
 end
 
 lemma map_add_hom_strict (x : obj f (n+1)) : ∥map_add_hom f g x∥ ≤ ∥x∥ :=

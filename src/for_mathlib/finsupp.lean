@@ -36,4 +36,9 @@ finset.sum_subset (finset.subset_univ _) $ λ a _ ha,
 calc g a (f a) = g a 0 : congr_arg _ $ not_mem_support_iff.mp ha
 ... = 0 : h a
 
+-- open_locale big_operators
+
+-- def const [fintype α] [has_zero β] (b : β) : α →₀ β :=
+-- ∑ a, single a b
+
 end finsupp
