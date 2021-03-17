@@ -24,7 +24,8 @@ section The_Main_Definition
 
 namespace category_theory
 open category_theory.limits
-universe uV variables {V : Type uV} [category V] [has_zero_morphisms V] [has_equalizers V] [has_images V]
+universe uV variables {V : Type uV} [category V] [has_zero_morphisms V] [has_equalizers V]
+  [has_images V]
 variables {A B B' C : V} (f : A ⟶ B) (g : B ⟶ C) (g' : B' ⟶ C)
 --variable (hₑ : category_theory.exact f g)
 

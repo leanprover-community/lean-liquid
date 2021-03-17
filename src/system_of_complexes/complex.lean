@@ -366,95 +366,185 @@ P Q R : differential_object ι V,
 ψ : Q ⟶ R
 ⊢ has_images (differential_object ι V)
 -/
---#check is_image -- this is data :-/
---#check has_image -- Prop which says "there exists an image_factorisation"
---#check image_factorisation
--- Data exhibiting that a morphism `f` has an image. -/
--- it's a type whose terms hold two pieces of data,
--- `F : mono_factorisation f` and `is_image : is_image F`
-/-
--- need image_factorisation φ for the below
-structure image_factorisation (f : X ⟶ Y) :=
-(F : mono_factorisation f)
-(is_image : is_image F)
--/
---#check classical.choice
---#where
---#check mono_factorisation -- structure, needs I, m and e
---#print mono_factorisation
 variable (D : differential_object ι V)
-def thing (φ : C ⟶ D) (h : ∀ (i : ι), mono_factorisation (φ.f i)) :
+--
+variables {C D}
+
+-- def image_factorisation.arrow (φ : C ⟶ D) [has_images V] [has_image_maps V] (i j : ι)
+-- := arrow.hom_mk' (φ.comm i j)
+
+open_locale classical
+
+noncomputable def single (i : ι) (A : V) [has_zero V] [has_zero_morphisms V] :
+  differential_object ι V :=
+{ X := λ j, if i = j then A else 0,
+  d := λ j k, 0 }
+
+-- only seems to be true if we demand C.d i i = 0
+-- noncomputable def single_morphism (i : ι) (A : V) [has_zero V] [has_zero_morphisms V]
+--   (C : differential_object ι V) (f : A ⟶ C.X i) :
+--   single i A ⟶ C :=
+-- { f := λ j, show (if i = j then A else 0) ⟶ C.X j, begin
+
+--     by_cases h : i = j,
+--     rw if_pos h,
+--     rw ←h,
+--     exact f,
+--     rw if_neg h,
+--     exact 0,
+-- end,
+--   comm := begin
+--     intros j k,
+--     dsimp,
+--     split_ifs,
+--       subst h,
+--       by_cases h : i = j,
+--         subst h,
+--         simp [single i A],
+--         change 0 ≫ _ ≫ f = _,
+--         simp,
+--         repeat {sorry },
+--   end
+--    }
+
+@[simps] noncomputable def image_factorisation.I (φ : C ⟶ D) [has_images V] [has_image_maps V] :
+  differential_object ι V :=
+{ X := λ i, image (φ.f i),
+  d := λ i j, image.map (arrow.hom_mk' (φ.comm i j)) }
+
+lemma mono_of_parts_mono (φ : C ⟶ D) (hφ : ∀ i, mono (φ.f i)) : mono φ :=
+⟨λ Z g h h1, begin
+  ext i,
+  apply (hφ i).1,
+  change (g ≫ φ).f i = _,
+  rw h1,
+  refl,
+end⟩
+
+noncomputable def mono_factorisation.of_image_maps (φ : C ⟶ D) [has_images V] [has_image_maps V] :
   mono_factorisation φ :=
 { I -- ⊢ differential_object ι V
-    := { X := λ a, (h a).I,
-         d := λ a b,
-         begin
-           cases (h a) with aI am ahm_mono ae afac,
-           dsimp,
-           dsimp at afac,
-           cases (h b) with bI bm bhm_mono be bfac,
-           dsimp,
-           dsimp at bfac,
-           have phi_tofun_a := φ.f a,
-           have phi_tofun_b := φ.f b,
-           have phithing1 := φ.comm a b,
-           have phithing2 := φ.comm a a,
-           have phithing3 := φ.comm b a,
-           have phithing4 := φ.comm b b,
-           cases ahm_mono,
-           cases bhm_mono,
-           -- hey Bhavik what do you think
-           -- of this?
-           clear h, -- TODO -- DID I BREAK IT
+    := image_factorisation.I φ,
+  m := { f := λ i, image.ι (φ.f i),
+  comm := begin
+    intros,
+    apply image_map.map_ι,
+  end },
+  m_mono := mono_of_parts_mono _ infer_instance,
+  e := { f := λ i, factor_thru_image (φ.f i),
+    comm := λ i j, (image_map.factor_map (arrow.hom_mk' (φ.comm i j)) _).symm },
+  fac' := by { ext, simp } }
 
-           sorry
-         end
-         },
-  m := sorry,
-  m_mono := sorry,
-  e := sorry,
-  fac' := sorry }
+-- theorem mono_iff_factors_mono (φ : C ⟶ D)
 
-instance foo [has_images V] : has_images (differential_object ι V) :=
+-- def mono_factorisation_on_factors (φ : C ⟶ D) (F : mono_factorisation φ) (i : ι) :
+--   mono_factorisation (φ.f i) :=
+-- { I := (F.I).X i,
+--   m := (F.m).f i,
+--   m_mono := ⟨λ Z G H h, begin
+--     have ZZZ := F.m_mono,
+--     cases ZZZ,
+--   end⟩,
+--   e := (F.e).f i,
+--   fac' := sorry }
+
+
+instance foo [has_images V] [has_image_maps V] : has_images (differential_object ι V) :=
 { has_image := λ X Y φ, begin
     unfreezingI {
-      obtain ⟨(h : ∀ {A B : V} (f : A ⟶ B), category_theory.limits.has_image f)⟩ := _inst_2 },
-    -- grr
-    -- this second unfreezing is just for notational reasons
-    -- and might be a bug
-    unfreezingI {
-    change ∀ {A B : V} (f : A ⟶ B), category_theory.limits.has_image f at h },
-    -- hooray
-    -- ⊢ has_image φ
+      have h : ∀ {A B : V} (f : A ⟶ B), category_theory.limits.has_image f := _inst_2.1 },
     constructor,
     existsi _,
     -- ⊢ image_factorisation φ
     exact {
       F -- : mono_factorisation φ
-        :=
-      { I := (
-        { X := λ i, (classical.choice (h (φ.f i)).1).F.1,
-          d := begin
-            intros i j,
-            have h2 := h (X.d i j),
---        apply differential_object.d,
-        -- previous line doesn't work
-        sorry
-      end } : differential_object ι V),
-        m -- : I ⟶ Y
-          :=
-          (sorry : _ ⟶ Y),
-        e := (sorry : X ⟶ _),
-        -- } next line should be infer_instance
-        m_mono := sorry },
-      is_image := sorry
+        := mono_factorisation.of_image_maps φ,
+      is_image :=
+      { lift := λ F',
+        { f := λ i, begin
+            have h2 := h (φ.f i),
+            cases h2 with h3,
+            let F := (classical.choice h3).1,
+            let hF := (classical.choice h3).2,
+            delta mono_factorisation.of_image_maps,
+            dsimp,
+            let ZZZ := hF.lift,
+            let YYY := (ZZZ {
+              I := F'.I.X i,
+              m := (F'.m).f i,
+              m_mono := begin sorry end,
+              e := (F'.e).f i,
+              fac' := begin
+                have yyy := F'.fac,
+                change (F'.e ≫ F'.m).f i = _,
+                rw yyy,
+              end }),
+        sorry end,
+          comm := sorry },
+        lift_fac' := sorry }
     },
   end }
 
 /-
-⊢ has_equalizers (differential_object ι V)
+
+To talk about short exact sequences in the differential object category, we need to pull
+a bunch of structure over from V to the lawless complexes over V. Here's another example.
 -/
-instance bar [has_equalizers V] : has_equalizers (differential_object ι V) := sorry
+instance bar [has_equalizers V] : has_equalizers (differential_object ι V) :=
+@has_equalizers_of_has_limit_parallel_pair (differential_object ι V) _ (λ X Y f g, has_limit.mk
+    { cone :=
+      { X :=
+        { X := λ i, equalizer (f.f i) (g.f i),
+          d := begin
+            intros i j,
+            apply equalizer.lift _ _,
+            exact (equalizer.ι (f.f i) (g.f i)) ≫ (X.d i j),
+            simp [f.comm i j, g.comm i j],
+            rw [← category_theory.category.assoc, ← category.assoc, equalizer.condition],
+          end },
+        π -- : `limit_cone (parallel_pair f g)`
+          :=
+        { app := λ WPP,
+          { f := λ i, begin --simp,
+            cases WPP,
+              exact (equalizer.ι (f.f i) (g.f i)),
+            --simp,
+            exact (equalizer.ι (f.f i) (g.f i)) ≫ f.f i end,
+            comm := λ i j, begin
+              dsimp,
+              cases WPP,
+                simp only [equalizer.lift_ι],
+                refl,
+              simp only [equalizer.lift_ι_assoc, category.assoc],
+              rw f.comm i j,
+              refl,
+             end },
+          naturality' := sorry } },
+--            naturality' := λ A B φ, begin
+--             cases A; cases B;
+--             cases φ,
+--             { simp only [category_theory.category.comp_id,
+--  category_theory.limits.walking_parallel_pair_hom_id,
+--  category_theory.functor.map_id,
+--  category_theory.functor.const.obj_map], dsimp, simp only [category.id_comp]},
+--             { dsimp, simp only [category.id_comp], refl},
+--             { ext, dsimp, simp only [category.id_comp], apply equalizer.condition},
+--             { simp, dsimp, simp only [category.id_comp]}
+--            end } },
+--          is_limit := sorry
+      is_limit := fork.is_limit.mk _ (λ s,
+       { f := λ i, equalizer.lift ((s.2.1 walking_parallel_pair.zero).f i) begin
+           change (s.π.app walking_parallel_pair.zero ≫ f).f i = (s.π.app walking_parallel_pair.zero ≫ g).f i,
+           erw ← s.π.naturality' walking_parallel_pair_hom.left,
+           erw ← s.π.naturality' walking_parallel_pair_hom.right,
+           simp only [functor.const.obj_map] end,
+         comm := λ i j, begin ext1, simp only [equalizer.lift_ι, equalizer.lift_ι_assoc, category.assoc],
+           exact (s.π.app walking_parallel_pair.zero).comm i j,
+        end})
+         (λ s, begin ext, simp only [equalizer.lift_ι, comp_f] end)
+         (λ s m w, begin ext, simp only [equalizer.lift_ι, ← w walking_parallel_pair.zero], refl, end),
+       }
+)
 
 end differential_object
 namespace differential_object
