@@ -1,6 +1,8 @@
-import polyhedral_lattice.basic
-
 import linear_algebra.finsupp_vector_space
+
+import for_mathlib.finsupp
+
+import polyhedral_lattice.basic
 
 noncomputable theory
 
@@ -10,43 +12,41 @@ local attribute [-instance] add_comm_monoid.nat_semimodule add_comm_group.int_mo
 
 namespace finsupp
 
-variables (ι : Type*) (Λ : Type*) [fintype ι]
+variables (ι Λ : Type*) [fintype ι]
 
 section normed_group
 
 variables [normed_group Λ]
 
-instance : has_norm (ι →₀ Λ) := ⟨λ x, ∑ i, ∥x i∥⟩
+instance : has_norm (ι →₀ Λ) := ⟨λ x, x.sum $ λ _, norm⟩
 
-lemma norm_def (x : ι →₀ Λ) : ∥x∥ = ∑ i, ∥x i∥ := rfl
+lemma norm_def (x : ι →₀ Λ) : ∥x∥ = x.sum (λ _, norm) := rfl
 
 @[simp] lemma norm_single (i : ι) (l : Λ) : ∥single i l∥ = ∥l∥ :=
-begin
-  simp only [norm_def, single_apply],
-  rw finset.sum_eq_single i,
-  { rw if_pos rfl },
-  { intros _ j hj, rw [if_neg hj.symm, norm_zero], },
-  { intro H, exact (H $ finset.mem_univ _).elim }
-end
+by simp only [norm_def, sum_single_index, norm_zero]
 
 instance : normed_group (ι →₀ Λ) :=
 normed_group.of_core _ $
 { norm_eq_zero_iff :=
   begin
     intros x,
-    simp only [norm_def, ← coe_nnnorm, ← nnreal.coe_sum, finset.mem_univ,
-      nnreal.coe_eq_zero, finset.sum_eq_zero_iff, nnnorm_eq_zero, forall_prop_of_true,
-      finsupp.ext_iff, zero_apply],
+    simp only [norm_def, sum, ← coe_nnnorm, ← nnreal.coe_sum, nnreal.coe_eq_zero,
+      finset.sum_eq_zero_iff, nnnorm_eq_zero, zero_apply, not_imp_self, mem_support_iff, ext_iff],
   end,
   triangle :=
   begin
     intros x y,
-    simp only [norm_def, ← finset.sum_add_distrib, add_apply],
+    have aux := @sum_eq_sum_fintype ι Λ _ _ _ _ (λ i, norm) (λ i, norm_zero),
+    simp only [norm_def, aux, ← finset.sum_add_distrib, add_apply],
     apply finset.sum_le_sum,
     rintro i -,
     apply norm_add_le,
   end,
-  norm_neg := λ x, by simp only [norm_def, norm_neg, neg_apply] }
+  norm_neg := λ x,
+  begin
+    have aux := @sum_eq_sum_fintype ι Λ _ _ _ _ (λ i, norm) (λ i, norm_zero),
+    simp only [norm_def, aux, norm_neg, neg_apply]
+  end }
 
 end normed_group
 
@@ -88,8 +88,8 @@ instance {ι : Type} [fintype ι] : polyhedral_lattice (ι →₀ Λ) :=
       intro j,
       rw [mul_smul, ← nsmul_eq_smul (c i j), add_monoid_hom.map_nsmul, nsmul_eq_smul],
       refl },
-    { rw [norm_def, ← finset.univ_product_univ, finset.sum_product,
-        finset.mul_sum],
+    { have aux := @sum_eq_sum_fintype ι Λ _ _ _ _ (λ i, norm) (λ i, norm_zero),
+      rw [norm_def, aux, ← finset.univ_product_univ, finset.sum_product, finset.mul_sum],
       apply fintype.sum_congr,
       intro i,
       dsimp,
