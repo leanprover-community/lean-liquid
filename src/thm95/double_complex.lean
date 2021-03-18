@@ -19,10 +19,12 @@ open category_theory opposite simplex_category polyhedral_lattice
 
 namespace thm95
 
+universe variables u v w
+
 variables (BD : breen_deligne.package) (c' : ℕ → ℝ≥0) [BD.suitable c']
 variables (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)]
-variables (V : NormedGroup) [normed_with_aut r V]
-variables (Λ : PolyhedralLattice) (M : ProFiltPseuNormGrpWithTinv r')
+variables (V : NormedGroup.{v}) [normed_with_aut r V]
+variables (Λ : PolyhedralLattice.{u}) (M : ProFiltPseuNormGrpWithTinv.{w} r')
 variables (N : ℕ) [fact (0 < N)]
 
 def Cech_nerve : simplex_category ⥤ (ProFiltPseuNormGrpWithTinv r')ᵒᵖ :=
@@ -41,7 +43,25 @@ def augmentation_map :
   (cosimplicial_system_of_complexes BD c' r r' V Λ M N).obj (mk 0) :=
 (BD.System c' r V r').map (Cech_augmentation_map r' Λ M N)
 
-def double_complex : @cochain_complex ℕ system_of_complexes _ _ _ :=
+set_option pp.universes true
+
+def double_complex_aux : cochain_complex ℕ system_of_complexes :=
 alt_face_map_cocomplex (augmentation_map BD c' r r' V Λ M N) sorry
+
+-- we now have a `cochain_complex` of `system_of_complexes`
+-- so we need to reorganize the data, to get a `system_of_double_complexes`
+-- this is what `.as_functor` does
+
+def double_complex : system_of_double_complexes :=
+(double_complex_aux BD c' r r' V Λ M N).as_functor ℕ _
+
+lemma double_complex.row (i : ℕ) :
+  (double_complex BD c' r r' V Λ M N).row (i+1) =
+  (BD.system c' r V r'
+    (Hom (polyhedral_lattice.conerve.obj
+    (PolyhedralLattice.diagonal_embedding Λ N) (i+1)) M)) := rfl
+
+lemma double_complex.row_zero :
+  (double_complex BD c' r r' V Λ M N).row 0 = (BD.system c' r V r' (Hom Λ M)) := rfl
 
 end thm95

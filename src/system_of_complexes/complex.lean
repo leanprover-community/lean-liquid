@@ -3,6 +3,8 @@ import category_theory.preadditive
 import category_theory.abelian.additive_functor
 import data.int.basic
 
+import for_mathlib.preadditive_category
+
 open category_theory category_theory.limits
 
 section succ_pred
@@ -401,6 +403,34 @@ end differential_object
 namespace differential_object
 
 namespace complex_like
+
+/-- A complex of functors gives a functor to complexes
+
+jmc: This is functorial, but I'm getting timeouts, and I think this is all we need -/
+def as_functor {T : Type*} [has_succ ι] [category V] [preadditive V] [category T]
+  (C : complex_like ι (T ⥤ V) cov) :
+  T ⥤ complex_like ι V cov :=
+{ obj := λ t,
+  { X := λ i, (C.X i).obj t,
+    d := λ i j, (C.d i j).app t,
+    d_comp_d := λ i j k,
+    begin
+      have := C.d_comp_d i j k,
+      rw [nat_trans.ext_iff, function.funext_iff] at this,
+      exact this t
+    end,
+    d_eq_zero := λ i j h,
+    begin
+      have := C.d_eq_zero h,
+      rw [nat_trans.ext_iff, function.funext_iff] at this,
+      exact this t
+    end },
+  map := λ t₁ t₂ h,
+  { f := λ i, (C.X i).map h,
+    comm := λ i j, show (C.d i j).app t₁ ≫ (C.X j).map h = (C.X i).map h ≫ (C.d i j).app t₂,
+      by rw [nat_trans.naturality] },
+  map_id' := λ t, by { ext i, dsimp, rw (C.X i).map_id, refl },
+  map_comp' := λ t₁ t₂ t₃ h₁ h₂, by { ext i, dsimp, rw functor.map_comp, refl } }
 
 variables [has_succ_pred ι] [category V] [preadditive V]
 

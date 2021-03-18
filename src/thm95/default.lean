@@ -1,6 +1,9 @@
 import polyhedral_lattice.Hom
 import Mbar.pseudo_normed_group
 
+import thm95.double_complex
+import thm95.constants
+
 open_locale nnreal -- enable the notation `ℝ≥0` for the nonnegative real numbers.
 
 variables (BD : breen_deligne.package)
@@ -19,4 +22,9 @@ theorem thm95 [BD.suitable c']
   ∀ (S : Type) [fintype S],
   ∀ (V : NormedGroup) [normed_with_aut r V],
     ​(BD.system c' r V r' (Hom Λ (Mbar r' S))).is_bounded_exact k K m c₀ :=
-sorry
+begin
+  intro m,
+  apply nat.strong_induction_on m; clear m,
+  intros m IH,
+  sorry
+end
