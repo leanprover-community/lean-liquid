@@ -74,5 +74,8 @@ end
 instance fact_le_mul_add : fact (c * c₁ + c * c₂ ≤ c * (c₁ + c₂)) :=
 by { rw mul_add, exact le_rfl }
 
+instance fact_nat_cast_pos (N : ℕ) [hN: fact (0 < N)] : fact (0 < (N:ℝ≥0)) :=
+nat.cast_pos.mpr hN
+
 end nnreal
 #lint- only unused_arguments def_lemma doc_blame

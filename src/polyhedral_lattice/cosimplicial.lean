@@ -1,6 +1,8 @@
 import polyhedral_lattice.rescale
 import polyhedral_lattice.cech
 
+import facts.nnreal
+
 /-!
 # The cosimplicial polyhedral lattice attached to `Λ → Λ'`
 
@@ -27,7 +29,7 @@ open category_theory finsupp
 
 namespace PolyhedralLattice
 
-variables (Λ : PolyhedralLattice.{u}) (N : ℕ) [fact (0 < (N:ℝ≥0))]
+variables (Λ : PolyhedralLattice.{u}) (N : ℕ) [fact (0 < N)]
 
 def rescaled_power : PolyhedralLattice :=
 @of (rescale N (fin N) →₀ Λ) $ @rescale.polyhedral_lattice N (fin N →₀ Λ) _ _
@@ -42,7 +44,7 @@ def diagonal_embedding : Λ ⟶ rescaled_power Λ N :=
     swap, { intro, exact norm_zero },
     apply le_of_eq,
     rw div_eq_iff, swap,
-    { have x : 0 < (N:ℝ≥0), assumption, norm_cast at x ⊢, exact x.ne' },
+    { norm_cast, apply ne_of_gt, assumption },
     simp only [← apply_add_hom_apply, add_monoid_hom.map_sum],
     simp only [apply_add_hom_apply, single_add_hom_apply, single_apply],
     convert finset.sum_const (∥l∥ : ℝ),
@@ -53,8 +55,12 @@ def diagonal_embedding : Λ ⟶ rescaled_power Λ N :=
     rw [mul_comm, nsmul_eq_mul, finset.card_univ, fintype.card_fin],
   end }
 
-def cosimplicial (Λ : PolyhedralLattice.{u}) (N : ℕ) [fact (0 < (N:ℝ≥0))] :
-  simplex_category ⥤ PolyhedralLattice.{u} :=
-PolyhedralLattice.Cech_conerve $ diagonal_embedding Λ N
+def cosimplicial : simplex_category ⥤ PolyhedralLattice.{u} :=
+Cech_conerve $ diagonal_embedding Λ N
+
+open simplex_category
+
+def cosimplicial_augmentation_map : Λ ⟶ (cosimplicial Λ N).obj (mk 0) :=
+Cech_augmentation_map _
 
 end PolyhedralLattice

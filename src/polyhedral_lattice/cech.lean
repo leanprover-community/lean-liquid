@@ -182,7 +182,7 @@ namespace PolyhedralLattice
 
 universe variables u
 
-open polyhedral_lattice
+open polyhedral_lattice simplex_category
 
 variables {Λ Λ' : PolyhedralLattice.{u}} (f : Λ ⟶ Λ')
 
@@ -192,5 +192,8 @@ def Cech_conerve : simplex_category ⥤ PolyhedralLattice :=
   map := λ n m g, conerve.map f g,
   map_id' := λ m, conerve.map_id f,
   map_comp' := λ _ _ _ g g', conerve.map_comp f _ _ }
+
+def Cech_augmentation_map : Λ ⟶ (Cech_conerve f).obj (mk 0) :=
+sorry
 
 end PolyhedralLattice
