@@ -182,18 +182,108 @@ namespace PolyhedralLattice
 
 universe variables u
 
-open polyhedral_lattice simplex_category
+open polyhedral_lattice simplex_category category_theory
 
 variables {Λ Λ' : PolyhedralLattice.{u}} (f : Λ ⟶ Λ')
 
+namespace Cech_conerve
+
+def obj : ℕ → PolyhedralLattice
+| 0     := Λ'
+| (m+1) := of (conerve.obj f (m+2))
+
+def map_zero_succ (n : ℕ) (g : fin 1 →ₘ fin (n+2)) : obj f 0 ⟶ obj f (n+1) :=
+{ strict' := λ l,
+  begin
+    calc _ ≤ ∥(finsupp.single (g 0)) l∥ : normed_group_hom.quotient_norm_mk_le _ _
+    ... ≤ ∥l∥ : _,
+    rw [finsupp.norm_def, finsupp.sum_single_index],
+    exact norm_zero
+  end,
+  .. (quotient_add_group.mk' $ conerve.L _ _).comp (finsupp.single_add_hom (g 0)) }
+
+def map_succ_zero_aux (m : ℕ) (g : fin (m+2) →ₘ fin 1) : obj f (m+1) →+ obj f 0 :=
+(finsupp.apply_add_hom (0 : fin 1)).comp $
+quotient_add_group.lift _ (finsupp.map_domain_hom g)
+begin
+  intros x hx,
+  rw ← add_monoid_hom.mem_ker,
+  revert hx x,
+  apply (add_subgroup.closure_le _).mpr _,
+  rintro _ ⟨l, c, hc, rfl⟩,
+  dsimp,
+  rw [add_subgroup.mem_coe, add_monoid_hom.mem_ker, ← finsupp.map_range_hom_apply,
+    ← add_monoid_hom.comp_apply, ← finsupp.map_range_hom_map_domain_hom, add_monoid_hom.comp_apply],
+  suffices : finsupp.map_domain g c = 0,
+  { rw [finsupp.map_domain_hom_apply, this, add_monoid_hom.map_zero] },
+  ext i,
+  simp only [finsupp.map_domain, finsupp.sum_apply, finsupp.single_apply],
+  convert hc,
+  ext,
+  rw if_pos, { refl },
+  exact subsingleton.elim _ _
+end
+
+def map_succ_zero (m : ℕ) (g : fin (m+2) →ₘ fin 1) : obj f (m+1) ⟶ obj f 0 :=
+{ strict' :=
+  begin
+    intro x,
+    apply le_of_forall_pos_le_add,
+    intros ε hε,
+    obtain ⟨x, rfl, h⟩ := normed_group_hom.norm_mk_lt x hε,
+    calc ∥finsupp.map_domain_hom g x 0∥
+        ≤ ∥finsupp.map_domain_hom g x∥ : _
+    ... ≤ ∥x∥ : conerve.map_domain_hom_strict g x
+    ... ≤ _ : h.le,
+    rw [finsupp.norm_def, finsupp.sum_eq_sum_fintype, fin.sum_univ_succ, fin.sum_univ_zero, add_zero],
+    intro, exact norm_zero
+  end,
+  .. map_succ_zero_aux f m g }
+
+def map : Π ⦃m n : ℕ⦄ (g : fin (m+1) →ₘ fin (n+1)), obj f m ⟶ obj f n
+| 0     0     g := 𝟙 _
+| 0     (n+1) g := map_zero_succ f n g
+| (m+1) 0     g := map_succ_zero f m g
+| (m+1) (n+1) g := conerve.map f g
+
+-- move this, generalize to arbitrary subsingletons
+lemma preorder_hom_eq_id (g : fin 1 →ₘ fin 1) : g = preorder_hom.id :=
+by { ext1, exact subsingleton.elim _ _ }
+
+@[simp] lemma map_zero_zero (g : fin 1 →ₘ fin 1) : map f g = 𝟙 _ := rfl
+
+lemma map_id : ∀ m, map f (preorder_hom.id : fin (m+1) →ₘ fin (m+1)) = 𝟙 _
+| 0     := rfl
+| (m+1) := conerve.map_id f
+
+lemma map_comp : ∀ k m n (g : fin (k+1) →ₘ fin (m+1)) (g' : fin (m+1) →ₘ fin (n+1)),
+  map f (g'.comp g) = map f g ≫ map f g'
+| 0     0     0     g g' := (category.id_comp _).symm
+| 0     0     (n+1) g g' := by { rw [preorder_hom_eq_id g], refl }
+| 0     (m+1) 0     g g' := by { rw [preorder_hom_eq_id (g'.comp g), map_id], sorry }
+| 0     (m+1) (n+1) g g' := by { sorry }
+| (k+1) 0     0     g g' := by { rw [preorder_hom_eq_id g'], refl }
+| (k+1) 0     (n+1) g g' :=
+begin
+  ext x, apply quotient_add_group.induction_on x; clear x,
+  intro x, sorry
+end
+| (k+1) (m+1) 0     g g' :=
+begin
+  ext x, apply quotient_add_group.induction_on x; clear x,
+  intro x, sorry
+end
+| (k+1) (m+1) (n+1) g g' := conerve.map_comp f _ _
+
+end Cech_conerve
+
 @[simps]
 def Cech_conerve : simplex_category ⥤ PolyhedralLattice :=
-{ obj := λ m, of (conerve.obj f (m+1)),
-  map := λ n m g, conerve.map f g,
-  map_id' := λ m, conerve.map_id f,
-  map_comp' := λ _ _ _ g g', conerve.map_comp f _ _ }
+{ obj := Cech_conerve.obj f,
+  map := λ n m g, Cech_conerve.map f g,
+  map_id' := Cech_conerve.map_id f,
+  map_comp' := Cech_conerve.map_comp f }
 
-def Cech_augmentation_map : Λ ⟶ (Cech_conerve f).obj (mk 0) :=
-sorry
+def Cech_augmentation_map : Λ ⟶ (Cech_conerve f).obj (mk 0) := f
 
 end PolyhedralLattice

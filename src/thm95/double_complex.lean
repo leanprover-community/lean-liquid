@@ -21,6 +21,8 @@ namespace thm95
 
 universe variables u v w
 
+open PolyhedralLattice
+
 variables (BD : breen_deligne.package) (c' : ℕ → ℝ≥0) [BD.suitable c']
 variables (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)]
 variables (V : NormedGroup.{v}) [normed_with_aut r V]
@@ -43,8 +45,6 @@ def augmentation_map :
   (cosimplicial_system_of_complexes BD c' r r' V Λ M N).obj (mk 0) :=
 (BD.System c' r V r').map (Cech_augmentation_map r' Λ M N)
 
-set_option pp.universes true
-
 def double_complex_aux : cochain_complex ℕ system_of_complexes :=
 alt_face_map_cocomplex (augmentation_map BD c' r r' V Λ M N) sorry
 
@@ -55,13 +55,17 @@ alt_face_map_cocomplex (augmentation_map BD c' r r' V Λ M N) sorry
 def double_complex : system_of_double_complexes :=
 (double_complex_aux BD c' r r' V Λ M N).as_functor ℕ _
 
-lemma double_complex.row (i : ℕ) :
-  (double_complex BD c' r r' V Λ M N).row (i+1) =
-  (BD.system c' r V r'
-    (Hom (polyhedral_lattice.conerve.obj
-    (PolyhedralLattice.diagonal_embedding Λ N) (i+1)) M)) := rfl
-
 lemma double_complex.row_zero :
   (double_complex BD c' r r' V Λ M N).row 0 = (BD.system c' r V r' (Hom Λ M)) := rfl
+
+lemma double_complex.row_one :
+  (double_complex BD c' r r' V Λ M N).row 1 =
+  (BD.system c' r V r' (Hom (of $ rescale N (fin N →₀ Λ)) M)) := rfl
+
+lemma double_complex.row (i : ℕ) :
+  (double_complex BD c' r r' V Λ M N).row (i+2) =
+  (BD.system c' r V r'
+    (Hom (polyhedral_lattice.conerve.obj
+    (PolyhedralLattice.diagonal_embedding Λ N) (i+2)) M)) := rfl
 
 end thm95
