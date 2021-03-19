@@ -201,12 +201,6 @@ def normed_group_hom.completion (f : normed_group_hom G H) : normed_group_hom (c
                    norm_cast },
   bound' := sorry }
 
-lemma normed_group_hom.norm_completion_le (f : normed_group_hom G H) : ∥f.completion∥ ≤ ∥f∥ :=
-begin
-  apply normed_group_hom.op_norm_le_bound,
-  sorry
-end
-
 def normed_group.to_compl : normed_group_hom G (completion G) :=
 { to_fun := coe,
   map_add' := by { intros x y,
@@ -214,6 +208,9 @@ def normed_group.to_compl : normed_group_hom G (completion G) :=
   bound' := sorry }
 
 abbreviation j := (normed_group.to_compl : normed_group_hom G $ completion G)
+
+lemma normed_group.dense_range_to_compl : dense_range (j : G → completion G) :=
+completion.dense_inducing_coe.dense
 
 lemma normed_group_hom.is_closed_ker (f : normed_group_hom G H) : is_closed (f.ker : set G) :=
 begin
@@ -237,6 +234,17 @@ begin
   ext x,
   change f.completion x = _,
   simpa
+end
+
+lemma normed_group_hom.norm_completion_le (f : normed_group_hom G H) : ∥f.completion∥ ≤ ∥f∥ :=
+begin
+  apply f.completion.op_norm_le_bound (norm_nonneg _),
+  intro x,
+  apply completion.induction_on x,
+  { apply is_closed_le,
+    continuity },
+  { intro g,
+    simp [f.le_op_norm  g] },
 end
 
 open normed_group_hom
@@ -293,26 +301,77 @@ end
 lemma normed_group.mem_closure_iff {s : set G} {x : G} : x ∈ closure s ↔ ∀ ε > 0, ∃ y ∈ s, ∥x - y∥ < ε :=
 by simp [metric.mem_closure_iff, dist_eq_norm]
 
+@[simp]
+lemma normed_group_hom.ker_zero : (0 : normed_group_hom G H).ker = ⊤ :=
+by { ext, simp [normed_group_hom.mem_ker] }
+
+@[simp]
+lemma normed_group_hom.zero_completion : (0 : normed_group_hom G H).completion = 0 :=
+begin
+  ext,
+  apply completion.induction_on x,
+  { apply is_closed_eq,
+    continuity },
+  { simp [normed_group_hom.mem_ker, completion.coe_zero] }
+end
+
+@[simp]
+lemma normed_group_hom.range_comp_incl_top {f : normed_group_hom G H} :
+(f.comp (incl (⊤ : add_subgroup G))).range = f.range :=
+begin
+  ext x,
+  simp [normed_group_hom.mem_range],
+  sorry
+end
+
 lemma normed_group_hom.ker_completion {f : normed_group_hom G H} {C : ℝ}
   (h : ∀ h ∈ f.range, ∃ g, f g = h ∧ ∥g∥ ≤ C*∥h∥) :
   (f.completion.ker : set $ completion G) = closure (j.comp $ incl f.ker).range :=
 begin
-  apply le_antisymm,
+  by_cases Hf : ∀ x, f x = 0, -- This is a bit silly, we simply avoid assuming C ≥ 0
+    { have : f = 0,
+      { ext, apply Hf },
+      subst this,
+      rw normed_group_hom.ker_zero,
+      have : closure ((j : normed_group_hom G _).range : set $ completion G) = univ,
+      { rw ← normed_group.dense_range_to_compl.closure_range,
+        refl },
+      simp [this], },
+  have hC : 0 ≤ C,
+  { push_neg at Hf,
+    cases Hf with x hx,
+    rcases h (f x) (f.mem_range_self x) with ⟨y, hy, hy'⟩,
+    rw ← hy at hy' hx,
+    exact nonneg_of_mul_nonneg_right ((norm_nonneg y).trans hy') (norm_pos_iff.mpr hx) },
+  apply le_antisymm, -- Now start the actual proof
   { intros hatg hatg_in,
     rw normed_group.mem_closure_iff,
     intros ε ε_pos,
-    have hCf : 0 ≤ C*∥f∥, sorry,
-    have ineq : 0 < 1 + C*∥f∥, sorry,
+    have hCf : 0 ≤ C*∥f∥ := mul_nonneg hC (norm_nonneg _),
+    have ineq : 0 < 1 + C*∥f∥, by linarith,
     set δ := ε/(1 + C*∥f∥),
-    have δ_pos : δ > 0, sorry,
+    have δ_pos : δ > 0, from div_pos ε_pos ineq,
     obtain ⟨_, ⟨g : G, rfl⟩, hg : ∥hatg - g∥ < δ⟩ :=
       normed_group.mem_closure_iff.mp (completion.dense_inducing_coe.dense hatg) δ δ_pos,
     obtain ⟨g' : G, hgg' : f g' = f g, hfg : ∥g'∥ ≤ C * ∥f g∥⟩ :=
       h (f g) (mem_range_self g),
     have mem_ker : g - g' ∈ f.ker,
       by rw [f.mem_ker, f.map_sub, sub_eq_zero.mpr hgg'.symm],
+    have : ∥f g∥ ≤ ∥f∥*∥hatg - g∥,
+    calc
+      ∥f g∥ = ∥f.completion g∥ : by rw [f.completion_coe, completion.norm_coe]
+        ... = ∥f.completion (g - hatg)∥ : by simp [f.completion.map_sub, (f.completion.mem_ker _).mp hatg_in]
+        ... ≤ ∥f.completion∥ * ∥(g :completion G) - hatg∥ : f.completion.le_op_norm _
+        ... = ∥f.completion∥ * ∥hatg - g∥ : by rw norm_sub_rev
+        ... ≤ ∥f∥ * ∥hatg - g∥ : mul_le_mul_of_nonneg_right (norm_completion_le f) (norm_nonneg _),
     have : ∥(g' : completion G)∥ ≤ C*∥f∥*∥hatg - g∥,
-    sorry,
+    calc
+    ∥(g' : completion G)∥ = ∥g'∥ : completion.norm_coe _
+                      ... ≤ C * ∥f g∥ : hfg
+                      ... ≤ C * ∥f∥ * ∥hatg - g∥ : by { rw mul_assoc,
+                                                        exact mul_le_mul_of_nonneg_left this hC},
+
+
     refine ⟨g - g', _, _⟩,
     { norm_cast,
       rw normed_group_hom.comp_range,
@@ -325,7 +384,7 @@ begin
       ... = (1 + C*∥f∥)*δ : by ring
       ... = ε :mul_div_cancel' _ ineq.ne.symm } },
   { rw ← f.completion.is_closed_ker.closure_eq,
-   exact closure_mono f.ker_le_ker_completion, }
+    exact closure_mono f.ker_le_ker_completion }
 end
 
 lemma norm_le_insert' (a b : G) : ∥a∥ ≤ ∥b∥ + ∥a - b∥ :=
@@ -336,32 +395,80 @@ end
 
 open finset
 
+
+lemma normed_group.cauchy_seq_of_le_geometric {C : ℝ} {r : ℝ} (hr : r < 1)
+    {u : ℕ → G} (h : ∀ n, ∥u n - u (n + 1)∥ ≤ C*r^n) : cauchy_seq u :=
+begin
+  apply cauchy_seq_of_le_geometric _ C hr,
+  simpa [dist_eq_norm] using h
+end
+
+lemma normed_group.cauchy_series_of_le_geometric {C : ℝ} {u : ℕ → G}
+  {r : ℝ} (hr : r < 1)
+  (h : ∀ n, ∥u n∥ ≤ C*r^n) : cauchy_seq (λ n, ∑ k in range n, u k) :=
+begin
+  apply normed_group.cauchy_seq_of_le_geometric hr,
+  intro n,
+  rw [show ∑ k in range n, u k - ∑ k in range (n + 1), u k = - u n,
+        by { simp only [finset.sum_range_succ], abel}, norm_neg],
+  apply h
+end
+
+lemma normed_group.cauchy_series_of_le_geometric' {C : ℝ} {u : ℕ → G} {r : ℝ} (hr : r < 1)
+  (h : ∀ n, ∥u n∥ ≤ C*r^n) : cauchy_seq (λ n, ∑ k in range (n + 1), u k) :=
+begin
+  simp_rw finset.sum_range_succ',
+  sorry,
+end
+
+lemma normed_group.cauchy_series_of_le_geometric'' {C : ℝ} {u : ℕ → G} {N : ℕ} {r : ℝ} (hr : r < 1)
+  (h : ∀ n ≥ N, ∥u n∥ ≤ C*r^n) : cauchy_seq (λ n, ∑ k in range (n + 1), u k) :=
+begin
+
+  sorry,
+end
+
 lemma toto {M M₁ M₂ : Type*} [normed_group M] [normed_group M₁] [normed_group M₂]
-  {f : normed_group_hom M₁ M} {C : ℝ} (hC : 0 < C)
+  {f : normed_group_hom M₁ M} {C : ℝ} (hC : 0 < C) {D : ℝ} (hD : 0 < D)
   {g : normed_group_hom M M₂} (hfg : g.comp f = 0)
-  (h : ∀ m ∈ g.ker, ∃ m' : M₁, f m' = m ∧ ∥m'∥ ≤ C*∥m∥) :
+  (h : ∀ m ∈ g.ker, ∃ m' : M₁, f m' = m ∧ ∥m'∥ ≤ C*∥m∥)
+  (h' : ∀ x ∈ g.range, ∃ y, g y = x ∧ ∥y∥ ≤ C * ∥x∥) :
   ∀ m ∈ g.completion.ker, ∀ ε > 0, ∃ m' : completion M₁, f.completion m' = m ∧ ∥m'∥ ≤ (C + ε)*∥m∥ :=
 begin
   intros hatm hatm_in ε ε_pos,
   set hatf := f.completion with def_hatf,
   set i := incl g.ker with def_i,
+
+  have norm_j_comp_i : ∀ x, ∥j.comp i x∥ = ∥x∥,
+  {
+   sorry },
+  have norm_j : ∀ x : M₁, ∥j x∥ = ∥x∥, -- TODO: factor me
+  /- { intro x,
+    apply completion.extension_coe,
+    exact uniform_continuous_norm } -/sorry,
+
   have : hatm ∈ closure ((j.comp i).range : set $ completion M),
-    by rwa g.ker_completion,
+    by rwa ← normed_group_hom.ker_completion h',
 
   set b : ℕ → ℝ := λ i, (1/2)^i*(ε*∥hatm∥/2)/C,
   have b_pos : ∀ i, 0 < b i,
   {
     sorry },
-  rcases controlled_sum_of_mem_closure_range this b_pos with ⟨m, lim_m, hm₀ : ∥j.comp i (m 0) - hatm∥ < b 0, hm⟩,
+  rcases controlled_sum_of_mem_closure_range this b_pos with
+    ⟨m, lim_m, hm₀ : ∥j.comp i (m 0) - hatm∥ < b 0, hm : ∀ n > 0, ∥(j.comp i) (m n)∥ < b n⟩,
   have : ∀ n, ∃ m' : M₁, f m' = m n ∧ ∥m'∥ ≤ C * ∥m n∥,
   { intros n, apply h, exact (m n).property },
   choose m' hfm' hnorm_m' using this,
   set s : ℕ → completion M₁ := λ n, ∑ k in range (n+1), j (m' k),
   have : cauchy_seq s,
-  { apply cauchy_seq_of_edist_le_geometric_two,
-    intro n,
-    change ∥_∥ ≤ _,
-    sorry },
+  /- { apply normed_group.cauchy_series_of_le_geometric'' one_half_lt_one,
+    rintro n (hn : n ≥ 1),
+    calc ∥j (m' n)∥ = ∥m' n∥ : norm_j _
+    ... ≤ C*∥m n∥ : hnorm_m' n
+    ... = C*∥j.comp i (m n)∥ : by rw norm_j_comp_i
+    ... ≤ C * b n : mul_le_mul_of_nonneg_left (hm _ $ nat.succ_le_iff.mp hn).le hC.le
+    ... = (1/2)^n * (ε * ∥hatm∥/2) : by simp [b, mul_div_cancel' _ hC.ne.symm]
+    ... = (ε * ∥hatm∥/2) * (1/2)^n : mul_comm _ _ } -/sorry,
   obtain ⟨hatm' : completion M₁, hhatm'⟩ := cauchy_seq_tendsto_of_complete this,
   refine ⟨hatm', _, _⟩,
   { have limhat : tendsto (hatf ∘ s) at_top (𝓝 $ hatf hatm'),
@@ -372,13 +479,7 @@ begin
       sorry },
     apply tendsto_nhds_unique limhat' lim_m },
   { apply le_of_tendsto' (continuous_norm.continuous_at.tendsto.comp hhatm'),
-    have norm_j_comp_i : ∀ x, ∥j.comp i x∥ = ∥x∥,
-    {
-      sorry },
-    /- have norm_j : ∀ x : M₁, ∥j x∥ = ∥x∥, -- TODO: factor me
-    { intro x,
-      apply completion.extension_coe,
-      exact uniform_continuous_norm },
+    /-
     simp only [norm_j_comp_i] at hm,
     have hnorm₀ : ∥j (m' 0)∥ ≤ C*b 0 + C*∥hatm∥,
     { have := calc
