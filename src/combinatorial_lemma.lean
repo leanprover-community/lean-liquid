@@ -390,7 +390,7 @@ begin
   have oops : @polyhedral_lattice.int_semimodule Λ _ = @add_comm_group.int_module Λ _,
   { exact subsingleton.elim _ _ },
   rw oops at ffΛ,
-  obtain ⟨A, hA⟩ := lem97' Λ ffΛ N l,
+  obtain ⟨A, hA⟩ := lem97'' ffΛ N l,
   let d : ℝ≥0 := finset.univ.sup (λ i, ∑ a in A, nnnorm (a (l i)) / nnnorm (l i)),
   use d,
   introsI S hS c x hx,
