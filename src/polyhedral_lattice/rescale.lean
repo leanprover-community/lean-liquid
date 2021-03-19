@@ -40,6 +40,9 @@ normed_group.of_core (rescale N V)
   end,
   norm_neg := λ v, by { simp only [norm_def], congr' 1, exact norm_neg _ /- defeq abuse -/ } }
 
+lemma nnnorm_def [hN : fact (0 < N)] [normed_group V] (v : rescale N V) :
+  nnnorm v = nnnorm (of.symm v) / N := rfl
+
 end normed_group
 
 section polyhedral_lattice

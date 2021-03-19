@@ -1,9 +1,11 @@
 import polyhedral_lattice.cosimplicial
 import polyhedral_lattice.Hom
 import pseudo_normed_group.system_of_complexes
+import system_of_complexes.rescale
 
 import simplicial.alternating_face_map
 
+import thm95.modify_complex
 import thm95.constants
 
 .
@@ -70,6 +72,7 @@ section
 
 open polyhedral_lattice
 open PolyhedralLattice (of)
+open_locale nat
 
 -- we now have a `cochain_complex` of `system_of_complexes`
 -- so we need to reorganize the data, to get a `system_of_double_complexes`
@@ -77,8 +80,14 @@ open PolyhedralLattice (of)
 -- but before we do this, we need to rescale the norms in all the rows,
 -- so that the vertical differentials become norm-nonincreasing
 
+
+def double_complex_aux_rescaled : cochain_complex ℕ system_of_complexes :=
+(double_complex_aux BD c' r r' V Λ M N ).modify
+  system_of_complexes.rescale_functor
+  system_of_complexes.rescale_nat_trans
+
 def double_complex : system_of_double_complexes :=
-(double_complex_aux BD c' r r' V Λ M N).as_functor ℕ _
+(double_complex_aux_rescaled BD c' r r' V Λ M N).as_functor ℕ _
 
 lemma double_complex.row_zero :
   (double_complex BD c' r r' V Λ M N).row 0 = (BD.system c' r V r' (Hom Λ M)) := rfl
@@ -87,11 +96,12 @@ lemma double_complex.row_one :
   (double_complex BD c' r r' V Λ M N).row 1 =
   (BD.system c' r V r' (Hom (of $ rescale N (fin N →₀ Λ)) M)) := rfl
 
-lemma double_complex.row (i : ℕ) :
-  (double_complex BD c' r r' V Λ M N).row (i+2) =
+lemma double_complex.row (m : ℕ) :
+  (double_complex BD c' r r' V Λ M N).row (m+2) =
+  (system_of_complexes.rescale_functor (m+2)).obj
   (BD.system c' r V r'
     (Hom (polyhedral_lattice.conerve.obj
-    (PolyhedralLattice.diagonal_embedding Λ N) (i+2)) M)) := rfl
+    (PolyhedralLattice.diagonal_embedding Λ N) (m+2)) M)) := rfl
 
 end
 
