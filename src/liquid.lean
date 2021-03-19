@@ -38,7 +38,7 @@ theorem first_target [BD.suitable c']
     ​(BD.system c' r V r' (of r' (Mbar r' S))).is_bounded_exact k K m c₀ :=
 begin
   intro m,
-  obtain ⟨k, K, hk, H⟩ := thm95 BD c' r r' m,
+  obtain ⟨k, K, hk, H⟩ := thm95' BD c' r r' m,
   obtain ⟨c₀, H⟩ := H ℤ,
   use [k, K, hk, c₀],
   introsI S hS V hV,

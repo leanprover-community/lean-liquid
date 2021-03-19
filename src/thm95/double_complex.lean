@@ -2,6 +2,7 @@ import polyhedral_lattice.cosimplicial
 import polyhedral_lattice.Hom
 import pseudo_normed_group.system_of_complexes
 import system_of_complexes.rescale
+import normed_spectral
 
 import simplicial.alternating_face_map
 
@@ -90,11 +91,11 @@ def double_complex : system_of_double_complexes :=
 (double_complex_aux_rescaled BD c' r r' V Λ M N).as_functor ℕ _
 
 lemma double_complex.row_zero :
-  (double_complex BD c' r r' V Λ M N).row 0 = (BD.system c' r V r' (Hom Λ M)) := rfl
+  (double_complex BD c' r r' V Λ M N).row 0 = BD.system c' r V r' (Hom Λ M) := rfl
 
 lemma double_complex.row_one :
   (double_complex BD c' r r' V Λ M N).row 1 =
-  (BD.system c' r V r' (Hom (of $ rescale N (fin N →₀ Λ)) M)) := rfl
+  BD.system c' r V r' (Hom (of $ rescale N (fin N →₀ Λ)) M) := rfl
 
 lemma double_complex.row (m : ℕ) :
   (double_complex BD c' r r' V Λ M N).row (m+2) =
@@ -102,6 +103,19 @@ lemma double_complex.row (m : ℕ) :
   (BD.system c' r V r'
     (Hom (polyhedral_lattice.conerve.obj
     (PolyhedralLattice.diagonal_embedding Λ N) (m+2)) M)) := rfl
+
+variables {BD c' r r' V Λ M}
+
+-- the following two lemmas are currently not provable,
+-- we need a stronger assumption than `[BD.suitable c']`
+-- this is WIP
+lemma system_admissible : (BD.system c' r V r' (Hom Λ M)).admissible :=
+sorry
+
+-- see above: currently we can only prove this for the columns
+lemma double_complex_admissible :
+  (double_complex BD c' r r' V Λ M N).admissible :=
+sorry
 
 end
 
