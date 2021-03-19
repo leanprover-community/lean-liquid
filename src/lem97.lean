@@ -222,11 +222,19 @@ end
 
 
 /-- Lemma 9.7 of [Analytic]. -/
-lemma lem97'' (hΛ : finite_free Λ)
-  [fintype ι] (N : ℕ) (l : ι → Λ) :
+lemma lem97' [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (l : ι → Λ) :
   ∃ A : finset (Λ →+ ℤ), ∀ x : Λ →+ ℤ, ∃ (x' ∈ A) (y : Λ →+ ℤ),
     x = N • y + x' ∧
     ∀ i, (x (l i)).nat_abs = N * (y (l i)).nat_abs + (x' (l i)).nat_abs :=
 begin
+  obtain ⟨A, hA⟩ := lem97 hΛ N l,
+  use A,
+  intro x,
+  specialize hA x,
+  rcases hA with ⟨x', hx', y, hy⟩,
+  use [x', hx', y],
+  apply and.intro hy.1,
+  intro i,
   sorry,
+  -- by_cases,
 end
