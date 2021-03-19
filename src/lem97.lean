@@ -44,7 +44,16 @@ def explicit_dual_set (l : ι → Λ) : submodule ℕ (Λ →+ ℤ) :=
 
 
 lemma explicit_dual_set_of_neg (l : ι → Λ) (x : Λ →+ℤ) :
-  x ∈ (explicit_dual_set (- l)) ↔ ∀ i, 0 ≥ x (l i) := sorry
+  x ∈ (explicit_dual_set (- l)) ↔ ∀ i, 0 ≥ x (l i) :=
+begin
+  split,
+  { intros hx i,
+    rw [ge_iff_le, ← neg_nonneg, ← add_monoid_hom.map_neg],
+    tauto, },
+  { intros hx i,
+    erw [add_monoid_hom.map_neg, neg_nonneg, ← ge_iff_le],
+    tauto },
+end
 
 lemma explicit_gordan (hΛ : finite_free Λ) [fintype ι] (l : ι → Λ) :
   (explicit_dual_set l).fg :=
@@ -96,13 +105,33 @@ begin
 end
 
 lemma smul_to_explicit_dual_set [fintype ι] (l : ι → Λ) (x : Λ →+ ℤ) :
-  x ∈ (explicit_dual_set ((pos_vector l x).val • l)) := sorry
+  x ∈ (explicit_dual_set ((pos_vector l x).val • l)) :=
+begin
+  intro,
+  dsimp [pos_vector, nonzero_sign],
+  by_cases h_pos : x(l i) ≥ 0,
+  { rw [if_pos h_pos, one_smul], exact h_pos },
+  { rw [if_neg h_pos, neg_smul, one_smul, add_monoid_hom.map_neg, neg_nonneg],
+    rw not_le at h_pos,
+    exact le_of_lt h_pos },
+end
 
-lemma pos_vector_id_if_pos [fintype ι] (l : ι → Λ) (x : Λ →+ ℤ) (i : ι) : x (l i) ≥ 0 →
-    ((pos_vector l x).val • l) i = l i := sorry
+lemma pos_vector_id_if_nonneg [fintype ι] (l : ι → Λ) (x : Λ →+ ℤ) (i : ι) : x (l i) ≥ 0 →
+    ((pos_vector l x).val • l) i = l i :=
+begin
+  intro hx,
+  dsimp [pos_vector, nonzero_sign],
+  rw [if_pos hx, one_smul],
+end
 
-lemma pos_vector_neg_if_neg [fintype ι] (l : ι → Λ) (x : Λ →+ ℤ) (i : ι) : x (l i) ≤ 0 →
-    ((pos_vector l x).val • l) i = - l i := sorry
+lemma pos_vector_neg_if_neg [fintype ι] (l : ι → Λ) (x : Λ →+ ℤ) (i : ι) : x (l i) < 0 →
+    ((pos_vector l x).val • l) i = - l i :=
+begin
+  intro hx,
+  { dsimp [pos_vector, nonzero_sign],
+    rw lt_iff_not_ge at hx,
+    rw [if_neg hx, neg_smul, one_smul] },
+end
 
 
 
@@ -126,7 +155,7 @@ end
 variables [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (l : ι → Λ) (ε : sign_vectors ι)
   (x : Λ →+ ℤ) (H : x ∈ (explicit_dual_set (ε.1 • l)))
 
-lemma produce_due [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (l : ι → Λ) (ε : sign_vectors ι)
+lemma exists_good_pair [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (l : ι → Λ) (ε : sign_vectors ι)
   (x : Λ →+ ℤ) (H : x ∈ (explicit_dual_set (ε.1 • l))) : ∃ x' y : (Λ →+ ℤ),
   x' ∈ pos_A hΛ N l ε ∧ x = N • y + x' ∧ ∀ i, x' ((ε.1 • l) i) ≤ x ((ε.1 • l) i) :=
 begin
@@ -154,7 +183,7 @@ begin
   use A,
   intro,
   have hx : x ∈ (explicit_dual_set ((pos_vector l x).1 • l)) := smul_to_explicit_dual_set l x,
-  obtain ⟨x', y, mem_x', hy, hx'⟩ := produce_due hΛ N l (pos_vector l x) x hx,
+  obtain ⟨x', y, mem_x', hy, hx'⟩ := exists_good_pair hΛ N l (pos_vector l x) x hx,
   use x',
   split,
   { apply finset.mem_bUnion.mpr,
@@ -170,14 +199,14 @@ begin
     replace h_pos' : x' (((pos_vector l x).val • l) i) ≥ 0 := by apply h_pos',
     by_cases h_pos : x (l i) ≥ 0,
     { specialize hx' i,
-      have h_posvect_id : ((pos_vector l x).val • l) i = l i := pos_vector_id_if_pos l x i h_pos,
+      have h_posvect_id : ((pos_vector l x).val • l) i = l i := pos_vector_id_if_nonneg l x i h_pos,
       replace h_pos' : 0 ≤ x' (l i),
       { rw h_posvect_id at h_pos', exact h_pos' },
       rw h_posvect_id at hx',
       apply or.inl,
       apply and.intro h_pos',
       simp only [sub_nonneg, add_monoid_hom.sub_apply, hx'] },
-    { replace h_pos: x (l i) ≤ 0 := by {rw not_le at h_pos, exact le_of_lt h_pos},
+    { replace h_pos: x (l i) < 0 := by { rw lt_iff_not_ge, exact h_pos },
       specialize hx' i,
       have h_posvect_neg : ((pos_vector l x).val • l) i = - l i := pos_vector_neg_if_neg l x i h_pos,
       replace h_pos' : 0 ≥ x' (l i),
