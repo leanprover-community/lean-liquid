@@ -15,13 +15,11 @@ import thm95.constants
 noncomputable theory
 
 open_locale nnreal
-open category_theory opposite simplex_category polyhedral_lattice
+open category_theory opposite simplex_category
 
 namespace thm95
 
 universe variables u v w
-
-open PolyhedralLattice
 
 variables (BD : breen_deligne.package) (c' : ℕ → ℝ≥0) [BD.suitable c']
 variables (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)]
@@ -29,28 +27,55 @@ variables (V : NormedGroup.{v}) [normed_with_aut r V]
 variables (Λ : PolyhedralLattice.{u}) (M : ProFiltPseuNormGrpWithTinv.{w} r')
 variables (N : ℕ) [fact (0 < N)]
 
+section
+
+open PolyhedralLattice
+
 def Cech_nerve : simplex_category ⥤ (ProFiltPseuNormGrpWithTinv r')ᵒᵖ :=
-PolyhedralLattice.cosimplicial Λ N ⋙ PolyhedralLattice.Hom M
+cosimplicial Λ N ⋙ Hom M
 
 /-- Warning: this is a map in the *opposite* category. -/
-def Cech_augmentation_map :
-  (PolyhedralLattice.Hom M).obj Λ ⟶ (Cech_nerve r' Λ M N).obj (mk 0) :=
-(PolyhedralLattice.Hom M).map (PolyhedralLattice.cosimplicial_augmentation_map Λ N)
+def Cech_augmentation_map : (Hom M).obj Λ ⟶ (Cech_nerve r' Λ M N).obj (mk 0) :=
+(Hom M).map (cosimplicial_augmentation_map Λ N)
 
 def cosimplicial_system_of_complexes : simplex_category ⥤ system_of_complexes :=
 Cech_nerve r' Λ M N ⋙ BD.System c' r V r'
 
 def augmentation_map :
-  (BD.System c' r V r').obj (op $ Hom Λ M) ⟶
+  (BD.System c' r V r').obj (op $ polyhedral_lattice.Hom Λ M) ⟶
   (cosimplicial_system_of_complexes BD c' r r' V Λ M N).obj (mk 0) :=
 (BD.System c' r V r').map (Cech_augmentation_map r' Λ M N)
 
 def double_complex_aux : cochain_complex ℕ system_of_complexes :=
-alt_face_map_cocomplex (augmentation_map BD c' r r' V Λ M N) sorry
+alt_face_map_cocomplex (augmentation_map BD c' r r' V Λ M N)
+begin
+  show (BD.System c' r V r').map (Cech_augmentation_map r' Λ M N) ≫
+        (BD.System c' r V r').map ((Cech_nerve r' Λ M N).map (δ 0)) =
+       (BD.System c' r V r').map (Cech_augmentation_map r' Λ M N) ≫
+        (BD.System c' r V r').map ((Cech_nerve r' Λ M N).map (δ 1)),
+  simp only [← (BD.System c' r V r').map_comp],
+  congr' 1,
+  show (Hom M).map (cosimplicial_augmentation_map Λ N) ≫
+        (Hom M).map ((Λ.cosimplicial N).map (δ 0)) =
+       (Hom M).map (cosimplicial_augmentation_map Λ N) ≫
+        (Hom M).map ((Λ.cosimplicial N).map (δ 1)),
+  simp only [← (Hom M).map_comp],
+  congr' 1,
+  apply augmentation_map_equalizes
+end
+
+end
+
+section
+
+open polyhedral_lattice
+open PolyhedralLattice (of)
 
 -- we now have a `cochain_complex` of `system_of_complexes`
 -- so we need to reorganize the data, to get a `system_of_double_complexes`
--- this is what `.as_functor` does
+-- this is what `.as_functor` does, in the definition `double_complex` below
+-- but before we do this, we need to rescale the norms in all the rows,
+-- so that the vertical differentials become norm-nonincreasing
 
 def double_complex : system_of_double_complexes :=
 (double_complex_aux BD c' r r' V Λ M N).as_functor ℕ _
@@ -67,5 +92,7 @@ lemma double_complex.row (i : ℕ) :
   (BD.system c' r V r'
     (Hom (polyhedral_lattice.conerve.obj
     (PolyhedralLattice.diagonal_embedding Λ N) (i+2)) M)) := rfl
+
+end
 
 end thm95

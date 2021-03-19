@@ -192,6 +192,7 @@ def obj : ℕ → PolyhedralLattice
 | 0     := Λ'
 | (m+1) := of (conerve.obj f (m+2))
 
+@[simps]
 def map_zero_succ (n : ℕ) (g : fin 1 →ₘ fin (n+2)) : obj f 0 ⟶ obj f (n+1) :=
 { strict' := λ l,
   begin
@@ -285,5 +286,27 @@ def Cech_conerve : simplex_category ⥤ PolyhedralLattice :=
   map_comp' := Cech_conerve.map_comp f }
 
 def Cech_augmentation_map : Λ ⟶ (Cech_conerve f).obj (mk 0) := f
+
+lemma augmentation_map_equalizes :
+  Cech_augmentation_map f ≫ (Cech_conerve f).map (δ 0) =
+  Cech_augmentation_map f ≫ (Cech_conerve f).map (δ 1) :=
+begin
+  ext l,
+  show Cech_conerve.map_zero_succ f 0 (δ 0) (f l) = Cech_conerve.map_zero_succ f 0 (δ 1) (f l),
+  simp only [Cech_conerve.map_zero_succ_apply, add_monoid_hom.coe_comp,
+    add_monoid_hom.to_fun_eq_coe, finsupp.single_add_hom_apply, function.comp_app,
+    quotient_add_group.mk'_eq_mk'_iff],
+  apply add_subgroup.subset_closure,
+  refine ⟨l, finsupp.single 1 1 - finsupp.single 0 1, _, _⟩,
+  { rw [finsupp.sum_eq_sum_fintype],
+    swap, { intro, refl },
+    simp only [fin.sum_univ_succ, fin.sum_univ_zero, add_zero, finsupp.sub_apply,
+      add_monoid_hom.id_apply, finsupp.single_apply, fin.one_eq_zero_iff,
+      if_true, zero_sub, fin.zero_eq_one_iff, eq_self_iff_true, sub_zero, fin.succ_zero_eq_one,
+      add_left_neg, if_false, one_ne_zero] },
+  { simp only [add_monoid_hom.map_sub],
+    simp only [finsupp.map_range_hom_apply, finsupp.map_range_single, int.cast_add_hom'_one],
+    refl }
+end
 
 end PolyhedralLattice
