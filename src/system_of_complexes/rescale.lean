@@ -61,7 +61,7 @@ lemma rescale_admissible (r : ℝ≥0) [fact (0 < r)] (C : system_of_complexes) 
     rintro (v : _root_.rescale r (C c i)), -- rw rescale_obj gives motive issues
     rw [rescale_d, rescale.norm_def, rescale.norm_def, equiv.symm_apply_apply],
     refine div_le_div_of_le_of_nonneg _ _,
-    { exact hC.d_norm_noninc' c i j h ((rescale.of.symm) v) },
+    { apply hC.d_norm_noninc' c i j h},
     { exact nnreal.coe_nonneg r },
   end,
   res_norm_noninc := begin
