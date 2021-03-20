@@ -12,7 +12,8 @@ def rescale (r : ℝ≥0) [fact (0 < r)] : system_of_complexes ⥤ system_of_com
 (whiskering_right _ _ _).obj $ functor.map_complex_like $ NormedGroup.rescale r
 
 instance rescale.additive (r : ℝ≥0) [fact (0 < r)] : (rescale r).additive :=
-sorry
+{ map_zero' := λ X Y, by { ext, refl }, -- ext can be removed but it makes the proof longer
+  map_add' := λ X Y f g, by { ext, refl } } -- a heavy refl
 
 -- can we golf this? speed it up?
 def to_rescale (r : ℝ≥0) [fact (0 < r)] : 𝟭 system_of_complexes ⟶ rescale r :=
