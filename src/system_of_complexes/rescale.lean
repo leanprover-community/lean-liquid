@@ -52,7 +52,6 @@ begin
   { assumption },
 end
 .
-
 /-- `rescale C` is admissible if `C` is. -/
 lemma rescale_admissible (r : ℝ≥0) [fact (0 < r)] (C : system_of_complexes) (hC : C.admissible) :
   ((rescale r).obj C).admissible :=
@@ -67,9 +66,8 @@ lemma rescale_admissible (r : ℝ≥0) [fact (0 < r)] (C : system_of_complexes) 
   res_norm_noninc := begin
     intros c' c i h,
     rintro (v : _root_.rescale r (C c' i)),
-    have := hC.res_norm_noninc c' c i h,
-    delta normed_group_hom.norm_noninc at this,
-    change ∥(res v : _)∥ ≤ _,
+    -- ⊢ ∥(res v : ↥(⇑((rescale r).obj C) c i))∥ ≤ ...
+    change ∥(res v : _)∥ ≤ _, -- now `res v : rescale r (C c i)`
     rw [rescale.norm_def, rescale.norm_def],
     refine div_le_div_of_le_of_nonneg _ _,
     { apply hC.res_norm_noninc c' c i h },
