@@ -66,8 +66,14 @@ lemma rescale_admissible (r : ℝ≥0) [fact (0 < r)] (C : system_of_complexes) 
   end,
   res_norm_noninc := begin
     intros c' c i h,
-    delta normed_group_hom.norm_noninc,
-    sorry
+    rintro (v : _root_.rescale r (C c' i)),
+    have := hC.res_norm_noninc c' c i h,
+    delta normed_group_hom.norm_noninc at this,
+    change ∥(res v : _)∥ ≤ _,
+    rw [rescale.norm_def, rescale.norm_def],
+    refine div_le_div_of_le_of_nonneg _ _,
+    { apply hC.res_norm_noninc c' c i h },
+    { exact nnreal.coe_nonneg r },
   end }
 
 end exact_and_admissible
