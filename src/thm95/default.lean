@@ -47,8 +47,9 @@ begin
     refine (IH (m-1) hm' Λ).of_le thm95.system_admissible _ _ le_rfl le_rfl,
     all_goals { apply_instance } },
   { rw thm95.double_complex.row_one,
-    refine (IH (m-1) hm' (PolyhedralLattice.of (rescale (N c' r r' m) (fin (N c' r r' m) →₀ ↥Λ))))
-      .of_le thm95.system_admissible _ _ le_rfl _,
+    refine (IH (m-1) hm'
+      (PolyhedralLattice.of $ conerve.obj (Λ.diagonal_embedding (N c' r r' m)) 1)).of_le
+      thm95.system_admissible _ _ le_rfl _,
     swap 3, { /- turn this into an instance somewhere -/ sorry },
     all_goals { apply_instance } },
   { rw thm95.double_complex.row,

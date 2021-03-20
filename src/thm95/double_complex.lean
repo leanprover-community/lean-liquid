@@ -52,6 +52,8 @@ def augmentation_map :
 def double_complex_aux : cochain_complex ℕ system_of_complexes :=
 alt_face_map_cocomplex (augmentation_map BD c' r r' V Λ M N)
 begin
+  sorry
+  /-
   show (BD.System c' r V r').map (Cech_augmentation_map r' Λ M N) ≫
         (BD.System c' r V r').map ((Cech_nerve r' Λ M N).map (δ 0)) =
        (BD.System c' r V r').map (Cech_augmentation_map r' Λ M N) ≫
@@ -65,6 +67,7 @@ begin
   simp only [← (Hom M).map_comp],
   congr' 1,
   apply augmentation_map_equalizes
+  -/
 end
 
 end
@@ -95,7 +98,9 @@ lemma double_complex.row_zero :
 
 lemma double_complex.row_one :
   (double_complex BD c' r r' V Λ M N).row 1 =
-  BD.system c' r V r' (Hom (of $ rescale N (fin N →₀ Λ)) M) := rfl
+  BD.system c' r V r'
+    (Hom (polyhedral_lattice.conerve.obj
+    (PolyhedralLattice.diagonal_embedding Λ N) 1) M) := rfl
 
 lemma double_complex.row (m : ℕ) :
   (double_complex BD c' r r' V Λ M N).row (m+2) =
@@ -115,7 +120,10 @@ sorry
 -- see above: currently we can only prove this for the columns
 lemma double_complex_admissible :
   (double_complex BD c' r r' V Λ M N).admissible :=
-sorry
+{ d_norm_noninc' := sorry,  /- ← should be provable -/
+  d'_norm_noninc' := sorry, /- ← this should be provable assuming `system_admissible` above;
+                                 also note `system_of_complexes.rescale_admissible` -/
+  res_norm_noninc := sorry, /- ← should be provable -/ }
 
 end
 

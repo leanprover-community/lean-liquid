@@ -25,7 +25,7 @@ def scale (i j : ℝ≥0) [fact (0 < i)] [fact (0 < j)] : rescale i ⟶ rescale 
 (whiskering_right _ _ _).map $ functor.map_complex_like_nat_trans _ _ $
   NormedGroup.scale i j
 
-section exactness
+section exact_and_admissible
 
 variables {k K : ℝ≥0} [fact (1 ≤ k)] {m : ℕ} {c₀ : ℝ≥0}
 
@@ -43,7 +43,12 @@ begin
   { assumption },
 end
 
-end exactness
+-- TODO: we need a lemma that says that `rescale C` is admissible if `C` is
+lemma rescale_admissible (r : ℝ≥0) [fact (0 < r)] (C : system_of_complexes) (hC : C.admissible) :
+  ((rescale r).obj C).admissible :=
+sorry
+
+end exact_and_admissible
 
 instance (m : ℕ) : fact (0 < m!) :=
 nat.factorial_pos _
