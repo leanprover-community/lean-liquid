@@ -11,6 +11,14 @@ open_locale nat nnreal
 def rescale (r : ℝ≥0) [fact (0 < r)] : system_of_complexes ⥤ system_of_complexes :=
 (whiskering_right _ _ _).obj $ functor.map_complex_like $ NormedGroup.rescale r
 
+lemma rescale_obj (r c : ℝ≥0) [fact (0 < r)] (C : system_of_complexes) (i : ℕ) :
+  ↥(((rescale r).obj C) c i) = _root_.rescale r (C c i) := rfl
+
+lemma rescale_d (r c : ℝ≥0) [fact (0 < r)] (C : system_of_complexes) (i j : ℕ)
+  (v : (((rescale r).obj C) c i)) :
+  (((rescale r).obj C).d i j) v = @rescale.of r _ ((C.d i j) (((@rescale.of r _).symm) v)) :=
+rfl
+
 instance rescale.additive (r : ℝ≥0) [fact (0 < r)] : (rescale r).additive :=
 { map_zero' := λ X Y, by { ext, refl }, -- ext can be removed but it makes the proof longer
   map_add' := λ X Y f g, by { ext, refl } } -- a heavy refl
@@ -45,31 +53,22 @@ begin
 end
 .
 
--- lemma useful_rw1 (r c : ℝ≥0) [fact (0 < r)] (C : system_of_complexes) (i : ℕ) :
---   ↥(((rescale r).obj C) c i) = _root_.rescale r (C c i) := rfl
-
--- lemma useful_rw2 (r c : ℝ≥0) [fact (0 < r)] (C : system_of_complexes) (i j : ℕ)
---   (v : (((rescale r).obj C) c i)) :
---   (((rescale r).obj C).d i j) v =
---   @rescale.of r _ ((C.d i j) (((@rescale.of r _).symm) v)) :=
--- begin
---   refl,
--- end
-
 /-- `rescale C` is admissible if `C` is. -/
 lemma rescale_admissible (r : ℝ≥0) [fact (0 < r)] (C : system_of_complexes) (hC : C.admissible) :
   ((rescale r).obj C).admissible :=
 { d_norm_noninc' := begin
     rintro c i j h,
-    intro v,
-    change ∥rescale.of ((C.d i j) ((rescale.of.symm) v))∥ ≤ ∥v∥,
-    change _root_.rescale r (C c i) at v,
-    rw [rescale.norm_def, rescale.norm_def, equiv.symm_apply_apply],
+    rintro (v : _root_.rescale r (C c i)), -- rw rescale_obj gives motive issues
+    rw [rescale_d, rescale.norm_def, rescale.norm_def, equiv.symm_apply_apply],
     refine div_le_div_of_le_of_nonneg _ _,
     { exact hC.d_norm_noninc' c i j h ((rescale.of.symm) v) },
     { exact nnreal.coe_nonneg r },
   end,
-  res_norm_noninc := sorry }
+  res_norm_noninc := begin
+    intros c' c i h,
+    delta normed_group_hom.norm_noninc,
+    sorry
+  end }
 
 end exact_and_admissible
 
