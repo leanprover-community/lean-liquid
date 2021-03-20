@@ -195,17 +195,24 @@ def normed_group_hom.completion (f : normed_group_hom G H) : normed_group_hom (c
                    exact completion.continuous_map.comp continuous_add,
                    exact (completion.continuous_map.comp  continuous_fst).add (completion.continuous_map.comp continuous_snd),
                    intros a b,
-                   have : uniform_continuous f, sorry,
                    norm_cast,
-                   simp [completion.map_coe this],
+                   simp [completion.map_coe f.uniform_continuous],
                    norm_cast },
-  bound' := sorry }
+  bound' := begin
+    use ∥f∥,
+    intro y,
+    apply completion.induction_on y,
+    exact is_closed_le (continuous_norm.comp completion.continuous_map) (continuous_const.mul continuous_norm),
+    intro x,
+    rw completion.map_coe f.uniform_continuous,
+    simp only [f.le_op_norm x, completion.norm_coe]
+  end }
 
 def normed_group.to_compl : normed_group_hom G (completion G) :=
 { to_fun := coe,
   map_add' := by { intros x y,
                    exact is_add_hom.map_add coe x y },
-  bound' := sorry }
+  bound' := ⟨1, by simp [le_refl]⟩ }
 
 abbreviation j := (normed_group.to_compl : normed_group_hom G $ completion G)
 
@@ -455,11 +462,59 @@ begin
   exact this.add (normed_group.cauchy_series_of_le_geometric hr h),
 end
 
-lemma normed_group.cauchy_series_of_le_geometric'' {C : ℝ} {u : ℕ → G} {N : ℕ} {r : ℝ} (hr : r < 1)
+lemma youpla {G : Type*} [add_comm_monoid G] {u : ℕ → G} {N : ℕ} (hu : ∀ n ≥ N, u n = 0) {n : ℕ}
+  (hn : n ≥ N) : ∑ k in range (n + 1), u k = ∑ k in range (N + 1), u k :=
+begin
+  obtain ⟨m, rfl : n = N + m⟩ := le_iff_exists_add.mp hn,
+  clear hn,
+  induction m with m hm,
+  { simp },
+  erw [sum_range_succ, hm],
+  simp [hu]
+end
+
+lemma titi {u v : ℕ → G} {N : ℕ} (huv : ∀ n ≥ N, u n = v n) (hv : cauchy_seq (λ n, ∑ k in range (n+1), v k)) :
+  cauchy_seq (λ n, ∑ k in range (n + 1), u k) :=
+begin
+  have : (λ n, ∑ k in range (n + 1), u k) = (λ n, ∑ k in range (n + 1), (u k - v k)) + (λ n, ∑ k in range (n + 1), v k),
+  { ext n,
+    simp },
+  rw this, clear this,
+  apply cauchy_seq.add _ hv,
+  apply tendsto.cauchy_seq,
+  have : ∀ n ≥ N, ∑ (k : ℕ) in range (n + 1), (u k - v k) = ∑ (k : ℕ) in range (N + 1), (u k - v k),
+  { intros n hn,
+    rw youpla _ hn,
+    intros m hm,
+    simp [huv m hm] },
+  apply tendsto.congr',
+  apply eventually_eq.symm,
+  change ∀ᶠ n in at_top, _,
+  rw eventually_at_top,
+  use N,
+  exact this,
+  exact tendsto_const_nhds
+end
+
+lemma normed_group.cauchy_series_of_le_geometric'' {C : ℝ} {u : ℕ → G} {N : ℕ} {r : ℝ}
+  (hr₀ : 0 < r) (hr₁ : r < 1)
   (h : ∀ n ≥ N, ∥u n∥ ≤ C*r^n) : cauchy_seq (λ n, ∑ k in range (n + 1), u k) :=
 begin
   set v : ℕ → G := λ n, if n < N then 0 else u n,
-  sorry,
+  have hC : 0 ≤ C,
+    from (zero_le_mul_right $ pow_pos hr₀ N).mp ((norm_nonneg _).trans $ h N $ le_refl N),
+  have : ∀ n ≥ N, u n = v n,
+  { intros n hn,
+    simp [v, hn, if_neg (not_lt.mpr hn)] },
+  refine titi this (normed_group.cauchy_series_of_le_geometric' hr₁ _),
+  { exact C },
+  intro n,
+  dsimp [v],
+  split_ifs with H H,
+  { rw norm_zero,
+    exact mul_nonneg hC (pow_nonneg hr₀.le _) },
+  { push_neg at H,
+    exact h _ H }
 end
 
 lemma normed_group.norm_to_compl (x : G) : ∥j x∥ = ∥x∥ :=
@@ -474,7 +529,7 @@ lemma controlled_exactness {M M₁ M₂ : Type*} [normed_group M] [normed_group 
   {f : normed_group_hom M₁ M} {C : ℝ} (hC : 0 < C) {D : ℝ}
   {g : normed_group_hom M M₂}
   (h : ∀ m ∈ g.ker, ∃ m' : M₁, f m' = m ∧ ∥m'∥ ≤ C*∥m∥)
-  (h' : ∀ x ∈ g.range, ∃ y, g y = x ∧ ∥y∥ ≤ C * ∥x∥) :
+  (h' : ∀ x ∈ g.range, ∃ y, g y = x ∧ ∥y∥ ≤ D * ∥x∥) :
   ∀ m ∈ g.completion.ker, ∀ ε > 0, ∃ m' : completion M₁, f.completion m' = m ∧ ∥m'∥ ≤ (C + ε)*∥m∥ :=
 begin
   intros hatm hatm_in ε ε_pos,
@@ -503,7 +558,7 @@ begin
   choose m' hfm' hnorm_m' using this,
   set s : ℕ → completion M₁ := λ n, ∑ k in range (n+1), j (m' k),
   have : cauchy_seq s,
-  { apply normed_group.cauchy_series_of_le_geometric'' one_half_lt_one,
+  { apply normed_group.cauchy_series_of_le_geometric'' (by norm_num) one_half_lt_one,
     rintro n (hn : n ≥ 1),
     calc ∥j (m' n)∥ = ∥m' n∥ : norm_to_compl _
     ... ≤ C*∥m n∥ : hnorm_m' n
