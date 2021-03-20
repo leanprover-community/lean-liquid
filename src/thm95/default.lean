@@ -52,9 +52,12 @@ begin
     swap 3, { /- turn this into an instance somewhere -/ sorry },
     all_goals { apply_instance } },
   { rw thm95.double_complex.row,
-    have := IH (m-1) hm'
-      (PolyhedralLattice.of $ conerve.obj (Λ.diagonal_embedding (N c' r r' m)) (i + 2)),
-    sorry }
+    apply system_of_complexes.rescale_is_weak_bounded_exact,
+    refine (IH (m-1) hm'
+      (PolyhedralLattice.of $ conerve.obj (Λ.diagonal_embedding (N c' r r' m)) (i + 2))).of_le
+      thm95.system_admissible _ _ le_rfl _,
+    swap 3, { /- turn this into an instance somewhere -/ sorry },
+    all_goals { apply_instance } }
 end
 
 def NSC (IH : ∀ m' < m, thm95.IH BD c' r r' M V m') :

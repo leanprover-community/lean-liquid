@@ -33,7 +33,7 @@ def rescale (r : ℝ≥0) [fact (0 < r)] : NormedGroup ⥤ NormedGroup :=
   map_id' := λ V, rfl, -- defeq abuse
   map_comp' := λ V₁ V₂ V₃ f g, rfl /- defeq abuse -/ }
 
-lemma rescale.additive : (rescale r).additive :=
+instance rescale.additive : (rescale r).additive :=
 { map_zero' := λ V W, rfl, -- defeq abuse
   map_add' := λ V W f g, rfl /- defeq abuse -/ }
 
@@ -67,27 +67,5 @@ def scale : rescale r₁ ⟶ rescale r₂ :=
 
 lemma scale_bound_by (V : NormedGroup) : ((scale r₁ r₂).app V).bound_by (r₁ / r₂) :=
 normed_group_hom.mk_normed_group_hom'_bound_by _ _ _
-
-open category_theory
-open_locale nat
-
-instance (m : ℕ) : fact (0 < m!) :=
-nat.factorial_pos _
-
-def rescale_functor : ℕ → (NormedGroup ⥤ NormedGroup)
-| 0     := 𝟭 _
-| 1     := 𝟭 _
-| (m+2) := rescale (m+2)!
-
-instance rescale_functor.additive : Π m, (rescale_functor m).additive
-| 0     := functor.id.additive
-| 1     := functor.id.additive
-| (m+2) := show (rescale (m+2)!).additive, from rescale.additive _
-
-def rescale_nat_trans : Π i j, rescale_functor i ⟶ rescale_functor j
-| 0     1     := 𝟙 _
-| 1     (j+2) := to_rescale (j+2)!
-| (i+2) (j+2) := scale (i+2)! (j+2)!
-| _     _     := 0
 
 end NormedGroup
