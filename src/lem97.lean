@@ -65,7 +65,15 @@ lemma lem97_pos (hΛ : finite_free Λ) [fintype ι] (N : ℕ) (l : ι → Λ) :
     ∀ x : Λ →+ ℤ, x ∈ (explicit_dual_set l) → ∃ (x' ∈ B) (y : Λ →+ ℤ),
       x = N • y + x' ∧ ∀ i, x' (l i) ≤ x (l i) :=
 begin
-  sorry
+  obtain ⟨S, hS⟩ := explicit_gordan hΛ l,
+  use S,--this is wrong, I am just testing the first statement
+  split,
+  { intros b hb,
+    rw ← hS,
+    apply submodule.subset_span,
+    exact hb },
+  { intros x hx,
+    sorry },
 end
 
 section sign_vectors
@@ -231,10 +239,15 @@ begin
   use A,
   intro x,
   specialize hA x,
-  rcases hA with ⟨x', hx', y, hy⟩,
-  use [x', hx', y],
-  apply and.intro hy.1,
+  rcases hA with ⟨x', mem_x', y, hy, hx'⟩,
+  use [x', mem_x', y],
+  apply and.intro hy,
   intro i,
+  specialize hx' i,
+  zify,
+  rw [← int.abs_eq_nat_abs, ← int.abs_eq_nat_abs, ← int.abs_eq_nat_abs,
+    ← int.coe_nat_abs, ← gsmul_int_int, ← abs_gsmul, gsmul_int_int, ← smul_eq_mul],
+  simp only [*, gsmul_int_int, add_sub_cancel,
+    add_monoid_hom.add_apply, add_monoid_hom.nat_smul_apply],
   sorry,
-  -- by_cases,
 end
