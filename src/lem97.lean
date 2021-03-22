@@ -249,5 +249,12 @@ begin
     ← int.coe_nat_abs, ← gsmul_int_int, ← abs_gsmul, gsmul_int_int, ← smul_eq_mul],
   simp only [*, gsmul_int_int, add_sub_cancel,
     add_monoid_hom.add_apply, add_monoid_hom.nat_smul_apply],
-  sorry,
+  convert_to abs (N • y (l i) + x' (l i)) = abs (N • y (l i)) + abs (x' (l i)),
+  { rw [add_left_inj, smul_eq_mul, ← nsmul_eq_smul, nsmul_eq_mul,
+    int.nat_cast_eq_coe_nat] },
+  { apply (abs_add_eq_add_abs_iff (N • y (l i)) (x' (l i))).mpr,
+    rw [hy, add_sub_cancel, add_monoid_hom.nat_smul_apply] at hx',
+    cases hx',
+    {apply or.inl (and.intro hx'.2 hx'.1) },
+    {apply or.inr (and.intro hx'.2 hx'.1) } },
 end
