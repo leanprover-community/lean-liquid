@@ -269,8 +269,8 @@ open Cech_conerve
 
 @[simps]
 def Cech_conerve : simplex_category ⥤ PolyhedralLattice :=
-{ obj := obj f,
-  map := λ n m g, conerve.map f g,
+{ obj := λ n, obj f n.len,
+  map := λ n m g, conerve.map f g.to_preorder_hom,
   map_id' := λ _, conerve.map_id f,
   map_comp' := λ _ _ _ _ _, conerve.map_comp f _ _ }
 
