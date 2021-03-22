@@ -75,7 +75,7 @@ end
 section
 
 open polyhedral_lattice
-open PolyhedralLattice (of)
+open PolyhedralLattice (of cosimplicial)
 open_locale nat
 
 -- we now have a `cochain_complex` of `system_of_complexes`
@@ -83,7 +83,6 @@ open_locale nat
 -- this is what `.as_functor` does, in the definition `double_complex` below
 -- but before we do this, we need to rescale the norms in all the rows,
 -- so that the vertical differentials become norm-nonincreasing
-
 
 def double_complex_aux_rescaled : cochain_complex ℕ system_of_complexes :=
 (double_complex_aux BD c' r r' V Λ M N ).modify
@@ -98,16 +97,12 @@ lemma double_complex.row_zero :
 
 lemma double_complex.row_one :
   (double_complex BD c' r r' V Λ M N).row 1 =
-  BD.system c' r V r'
-    (Hom (polyhedral_lattice.conerve.obj
-    (PolyhedralLattice.diagonal_embedding Λ N) 1) M) := rfl
+  BD.system c' r V r' (Hom ((cosimplicial Λ N).obj (mk 0)) M) := rfl
 
 lemma double_complex.row (m : ℕ) :
   (double_complex BD c' r r' V Λ M N).row (m+2) =
   (system_of_complexes.rescale_functor (m+2)).obj
-  (BD.system c' r V r'
-    (Hom (polyhedral_lattice.conerve.obj
-    (PolyhedralLattice.diagonal_embedding Λ N) (m+2)) M)) := rfl
+    (BD.system c' r V r' (Hom ((cosimplicial Λ N).obj (mk (m+1))) M)) := rfl
 
 variables {BD c' r r' V Λ M}
 
