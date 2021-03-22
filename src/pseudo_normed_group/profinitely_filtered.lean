@@ -434,3 +434,50 @@ end
 end pfpng_ctu'
 
 end continuity
+
+namespace profinitely_filtered_pseudo_normed_group
+
+/-! ## Powers -/
+
+variables {ι : Type*} (M : ι → Type*) [Π i, profinitely_filtered_pseudo_normed_group (M i)]
+
+instance pi_topology (c : ℝ≥0) : topological_space (filtration (Π i, M i) c) :=
+topological_space.induced (filtration_pi_equiv M c) $ infer_instance
+
+instance pi_t2 (c : ℝ≥0) : t2_space (filtration (Π i, M i) c) := sorry
+
+instance pi_td (c : ℝ≥0) : totally_disconnected_space (filtration (Π i, M i) c) := sorry
+
+instance pi_compact (c : ℝ≥0) : compact_space (filtration (Π i, M i) c) := sorry
+
+instance pi : profinitely_filtered_pseudo_normed_group (Π i, M i) :=
+{ continuous_add' := sorry,
+  continuous_neg' := sorry,
+  continuous_cast_le := sorry,
+  .. pseudo_normed_group.pi M }
+
+variables {M}
+
+/-- Universal property of the product of profinitely filtered pseudo normed groups -/
+def pi_lift {N : Type*} [profinitely_filtered_pseudo_normed_group N]
+  (f : Π i, profinitely_filtered_pseudo_normed_group_hom N (M i)) :
+  profinitely_filtered_pseudo_normed_group_hom N (Π i, M i) :=
+{ bound' :=
+  begin
+    have := λ i, (f i).bound,
+    choose C hC using this,
+    -- now use the sup of the `C i`
+    sorry
+  end,
+  continuous' := sorry,
+  .. add_monoid_hom.mk_to_pi (λ i, (f i).to_add_monoid_hom) }
+
+def pi_map (f : Π i, profinitely_filtered_pseudo_normed_group_hom (M i) (M i)) :
+  profinitely_filtered_pseudo_normed_group_hom (Π i, M i) (Π i, M i) :=
+{ to_fun := λ x i, f i (x i),
+  map_zero' := by { ext i, exact (f i).map_zero },
+  map_add' := λ x y, by { ext i, exact (f i).map_add (x i) (y i) },
+  bound' := sorry,
+  continuous' := sorry }
+
+end profinitely_filtered_pseudo_normed_group

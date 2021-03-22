@@ -193,3 +193,17 @@ instance profinitely_filtered_pseudo_normed_group_with_Tinv (r : ℝ≥0) :
   .. punit.profinitely_filtered_pseudo_normed_group }
 
 end punit
+
+namespace profinitely_filtered_pseudo_normed_group_with_Tinv
+
+/-! ## Powers -/
+
+variables (r' : ℝ≥0) {ι : Type*} (M : ι → Type*)
+variables [Π i, profinitely_filtered_pseudo_normed_group_with_Tinv r' (M i)]
+
+instance : profinitely_filtered_pseudo_normed_group_with_Tinv r' (Π i, M i) :=
+{ Tinv := profinitely_filtered_pseudo_normed_group.pi_map $ λ i, Tinv,
+  Tinv_mem_filtration := λ c x hx i, Tinv_mem_filtration _ _ (hx i),
+  .. profinitely_filtered_pseudo_normed_group.pi _ }
+
+end profinitely_filtered_pseudo_normed_group_with_Tinv

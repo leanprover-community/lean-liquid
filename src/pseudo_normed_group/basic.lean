@@ -149,6 +149,15 @@ lemma mem_filtration_pi {ι : Type*} (M : ι → Type*) [Π i, pseudo_normed_gro
   (c : ℝ≥0) (x : Π i, M i) :
   x ∈ filtration (Π i, M i) c ↔ ∀ i, x i ∈ filtration (M i) c := iff.rfl
 
+/-- The equivalence between `(Π i, M i)_c` and `Π i, (M i)_c`. -/
+@[simps]
+def filtration_pi_equiv {ι : Type*} (M : ι → Type*) [Π i, pseudo_normed_group (M i)] (c : ℝ≥0) :
+  filtration (Π i, M i) c ≃ Π i, filtration (M i) c :=
+{ to_fun := λ x i, ⟨x.1 i, x.2 i⟩,
+  inv_fun := λ x, ⟨λ i, x i, λ i, (x i).2⟩,
+  left_inv := by { rintro ⟨x, hx⟩, refl },
+  right_inv := by { intro x, ext, refl } }
+
 /-- The natural inclusion `filtration M c₁ → filtration M c₂`,
 for a pseudo normed group `M`, and `c₁ ≤ c₂`. -/
 def cast_le {c₁ c₂ : ℝ≥0} [h : fact (c₁ ≤ c₂)] (x : filtration M c₁) :
