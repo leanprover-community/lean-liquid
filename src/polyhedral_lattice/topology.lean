@@ -2,6 +2,9 @@ import polyhedral_lattice.basic
 import normed_group.pseudo_normed_group
 import pseudo_normed_group.profinitely_filtered
 
+/-
+
+jmc: I don't think we need any of this
 
 noncomputable theory
 open_locale nnreal
@@ -14,7 +17,7 @@ variables (Λ : Type*) [polyhedral_lattice Λ]
 
 lemma filtration_finite (c : ℝ≥0) : (filtration Λ c).finite :=
 begin
-  sorry
+  admit
 end
 
 open metric
@@ -76,3 +79,5 @@ instance : profinitely_filtered_pseudo_normed_group Λ :=
   .. (show pseudo_normed_group Λ, by apply_instance) }
 
 end polyhedral_lattice
+
+-/

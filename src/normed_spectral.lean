@@ -2,6 +2,8 @@ import system_of_complexes.double
 import system_of_complexes.truncate
 import normed_snake
 
+import thm95.constants
+
 noncomputable theory
 open_locale nnreal
 open category_theory
@@ -230,33 +232,6 @@ end normed_spectral_conditions
 
 namespace normed_spectral
 
-noncomputable
-def ε : Π (m : ℕ) (K : ℝ≥0), ℝ≥0
-| 0     K := (2 * K)⁻¹
-| (m+1) K := ε m (K * (K * K + 1))
-
-lemma ε_pos : ∀ m K [fact (1 ≤ K)], 0 < ε m K
-| 0     K hK := nnreal.inv_pos.mpr (mul_pos zero_lt_two (lt_of_lt_of_le zero_lt_one hK))
-| (m+1) K hK := by { dsimp [ε], exactI ε_pos m _ }
-
-noncomputable
-def k₀ : Π (m : ℕ) (k : ℝ≥0), ℝ≥0
-| 0     k := k
-| (m+1) k := k₀ m (k * k * k)
-
-instance one_le_k₀ : ∀ m k [fact (1 ≤ k)], fact (1 ≤ k₀ m k)
-| 0     k hk := hk
-| (m+1) k hk := by { dsimp [k₀], exactI one_le_k₀ m _ }
-
-noncomputable
-def K₀ : Π (m : ℕ) (K : ℝ≥0), ℝ≥0
-| 0     K := K
-| (m+1) K := K₀ m (K * (K * K + 1))
-
-instance one_le_K₀ : ∀ m K [fact (1 ≤ K)], fact (1 ≤ K₀ m K)
-| 0     K hK := hK
-| (m+1) K hK := by { dsimp [K₀], exactI one_le_K₀ m _ }
-
 /-- Base case of the induction for Proposition 9.6. -/
 theorem base (c₀ H : ℝ≥0) [fact (0 < H)] (M : system_of_double_complexes.{u})
   (k K k' : ℝ≥0) [hk : fact (1 ≤ k)] [hK : fact (1 ≤ K)] [fact (k₀ 0 k ≤ k')] [fact (1 ≤ k')]
@@ -314,8 +289,8 @@ end normed_spectral
 open normed_spectral
 
 /-- Proposition 9.6 in [Analytic] -/
-theorem normed_spectral (m : ℕ) (c₀ H : ℝ≥0) [fact (0 < H)]
-  (M : system_of_double_complexes.{u}) (k K k' : ℝ≥0)
+theorem normed_spectral {m : ℕ} {c₀ H : ℝ≥0} [fact (0 < H)]
+  {M : system_of_double_complexes.{u}} {k K k' : ℝ≥0}
   [fact (1 ≤ k)] [hK : fact (1 ≤ K)] [fact (k₀ m k ≤ k')] [fact (1 ≤ k')]
   (cond : M.normed_spectral_conditions m k K k' (ε m K) c₀ H) :
   (M.row 0).is_weak_bounded_exact (k' * k') (2 * K₀ m K * H) m c₀ :=
@@ -325,9 +300,9 @@ begin
   dsimp [ε, k₀, K₀],
   introsI M k K k' _ _ _ _ cond,
   rw ← system_of_complexes.truncate_is_weak_bounded_exact_iff,
-  { exact IH (truncate.obj M) (k*k*k) (K*(K*K+1)) k' cond.truncate },
-  { refine IH M (k*k*k) (K*(K*K+1)) k' (cond.of_le (m.le_succ) _ _ le_rfl le_rfl le_rfl);
-    apply_instance }
+  { exact IH cond.truncate },
+  { refine @IH M (k*k*k) (K*(K*K+1)) k' _ _ _ _ (cond.of_le (m.le_succ) _ _ le_rfl le_rfl le_rfl),
+    all_goals { apply_instance } }
 end
 
 end system_of_double_complexes

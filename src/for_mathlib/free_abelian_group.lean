@@ -22,12 +22,19 @@ namespace int
 
 variables {A : Type*} [add_comm_group A]
 
+-- TODO: should this use `•ℤ` instead? I find the notation a lot uglier
+-- But from a Lean point of view it is maybe a lot better.
+
 /-- `int.cast_add_hom' a` is the additive group homomorphism `ℤ → A`
 that sends `1 : ℤ` to `a : A`. -/
 def cast_add_hom' (a : A) : ℤ →+ A :=
 add_monoid_hom.mk' (λ n, n • a) $ λ m n, add_smul _ _ _
 
-@[simp] lemma cast_add_hom'_apply (a : A) (n : ℤ) : cast_add_hom' a n = n • a := rfl
+@[simp, priority 900]
+lemma cast_add_hom'_apply (a : A) (n : ℤ) : cast_add_hom' a n = n • a := rfl
+
+@[simp] lemma cast_add_hom'_one (a : A) : cast_add_hom' a 1 = a :=
+by rw [cast_add_hom'_apply, ← gsmul_eq_smul, one_gsmul]
 
 end int
 

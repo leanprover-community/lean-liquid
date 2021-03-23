@@ -3,6 +3,8 @@ import category_theory.preadditive
 import category_theory.abelian.additive_functor
 import data.int.basic
 
+import for_mathlib.preadditive_category
+
 open category_theory category_theory.limits
 
 section succ_pred
@@ -402,6 +404,34 @@ namespace differential_object
 
 namespace complex_like
 
+/-- A complex of functors gives a functor to complexes
+
+jmc: This is functorial, but I'm getting timeouts, and I think this is all we need -/
+def as_functor {T : Type*} [has_succ ι] [category V] [preadditive V] [category T]
+  (C : complex_like ι (T ⥤ V) cov) :
+  T ⥤ complex_like ι V cov :=
+{ obj := λ t,
+  { X := λ i, (C.X i).obj t,
+    d := λ i j, (C.d i j).app t,
+    d_comp_d := λ i j k,
+    begin
+      have := C.d_comp_d i j k,
+      rw [nat_trans.ext_iff, function.funext_iff] at this,
+      exact this t
+    end,
+    d_eq_zero := λ i j h,
+    begin
+      have := C.d_eq_zero h,
+      rw [nat_trans.ext_iff, function.funext_iff] at this,
+      exact this t
+    end },
+  map := λ t₁ t₂ h,
+  { f := λ i, (C.X i).map h,
+    comm := λ i j, show (C.d i j).app t₁ ≫ (C.X j).map h = (C.X i).map h ≫ (C.d i j).app t₂,
+      by rw [nat_trans.naturality] },
+  map_id' := λ t, by { ext i, dsimp, rw (C.X i).map_id, refl },
+  map_comp' := λ t₁ t₂ t₃ h₁ h₂, by { ext i, dsimp, rw functor.map_comp, refl } }
+
 variables [has_succ_pred ι] [category V] [preadditive V]
 
 open category_theory.preadditive
@@ -502,6 +532,8 @@ end chain_complex
 
 namespace category_theory
 
+open differential_object (complex_like)
+
 variables {ι} {V₁ V₂ : Type*} [category V₁] [category V₂]
 
 section has_zero_morphisms
@@ -521,7 +553,7 @@ def functor.map_differential_object (F : V₁ ⥤ V₂) :
 
 @[simps]
 def functor.map_complex_like' [has_succ ι] (F : V₁ ⥤ V₂) (hF : ∀ x y, F.map (0 : x ⟶ y) = 0) :
-  differential_object.complex_like ι V₁ cov ⥤ differential_object.complex_like ι V₂ cov :=
+  complex_like ι V₁ cov ⥤ complex_like ι V₂ cov :=
 { obj := λ C,
   { X := λ i, F.obj (C.X i),
     d := λ i j, F.map (C.d i j),
@@ -531,6 +563,16 @@ def functor.map_complex_like' [has_succ ι] (F : V₁ ⥤ V₂) (hF : ∀ x y, F
   map_id' := by { intros, ext, exact F.map_id _ },
   map_comp' := by { intros, ext, exact F.map_comp _ _ } }
 
+@[simps]
+def functor.map_complex_like_nat_trans' [has_succ ι]
+  (F G : V₁ ⥤ V₂) (hF : ∀ x y, F.map (0 : x ⟶ y) = 0) (hG : ∀ x y, G.map (0 : x ⟶ y) = 0)
+  (α : F ⟶ G) :
+  F.map_complex_like' hF ⟶ (G.map_complex_like' hG : complex_like ι V₁ cov ⥤ _) :=
+{ app := λ C,
+  { f := λ i, α.app _,
+    comm := λ i j, α.naturality _ },
+  naturality' := λ C₁ C₂ f, by { ext i, exact α.naturality _ } }
+
 end has_zero_morphisms
 
 section preadditive
@@ -538,8 +580,14 @@ variables [preadditive V₁] [preadditive V₂]
 
 @[simps]
 def functor.map_complex_like [has_succ ι] (F : V₁ ⥤ V₂) [F.additive] :
-  differential_object.complex_like ι V₁ cov ⥤ differential_object.complex_like ι V₂ cov :=
+  complex_like ι V₁ cov ⥤ complex_like ι V₂ cov :=
 F.map_complex_like' $ λ x y, functor.additive.map_zero
+
+@[simps]
+def functor.map_complex_like_nat_trans [has_succ ι] (F G : V₁ ⥤ V₂) [F.additive] [G.additive]
+  (α : F ⟶ G) :
+  F.map_complex_like ⟶ (G.map_complex_like : complex_like ι V₁ cov ⥤ _) :=
+functor.map_complex_like_nat_trans' _ _ _ _ α
 
 end preadditive
 

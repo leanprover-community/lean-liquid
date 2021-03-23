@@ -149,6 +149,15 @@ lemma mem_filtration_pi {ι : Type*} (M : ι → Type*) [Π i, pseudo_normed_gro
   (c : ℝ≥0) (x : Π i, M i) :
   x ∈ filtration (Π i, M i) c ↔ ∀ i, x i ∈ filtration (M i) c := iff.rfl
 
+/-- The equivalence between `(Π i, M i)_c` and `Π i, (M i)_c`. -/
+@[simps]
+def filtration_pi_equiv {ι : Type*} (M : ι → Type*) [Π i, pseudo_normed_group (M i)] (c : ℝ≥0) :
+  filtration (Π i, M i) c ≃ Π i, filtration (M i) c :=
+{ to_fun := λ x i, ⟨x.1 i, x.2 i⟩,
+  inv_fun := λ x, ⟨λ i, x i, λ i, (x i).2⟩,
+  left_inv := by { rintro ⟨x, hx⟩, refl },
+  right_inv := by { intro x, ext, refl } }
+
 /-- The natural inclusion `filtration M c₁ → filtration M c₂`,
 for a pseudo normed group `M`, and `c₁ ≤ c₂`. -/
 def cast_le {c₁ c₂ : ℝ≥0} [h : fact (c₁ ≤ c₂)] (x : filtration M c₁) :
@@ -170,25 +179,6 @@ the condition `(n • m) ∈ filtration M (n • c) ↔ m ∈ filtration M c` ho
 def archimedean : Prop :=
 ∀ (m : M) (c : ℝ≥0) (n : ℕ), 0 < n →
   ((n • m) ∈ filtration M (n • c) ↔ m ∈ filtration M c)
-
-/-- `rescale M r` is the pseudo normed group whose filtration is rescaled by `r : ℝ≥0`.
-So `filtration (rescale M r) c` is `filtration M (r * c)`-/
-@[nolint unused_arguments, derive add_comm_group]
-def rescale (r : ℝ≥0) := M
-
-namespace rescale
-
-variable (r : ℝ≥0)
-
-instance : pseudo_normed_group (rescale M r) :=
-{ filtration := λ c, show set M, from filtration M (r * c),
-  filtration_mono := λ c₁ c₂ h, filtration_mono (mul_le_mul' le_rfl h),
-  zero_mem_filtration := λ c, @zero_mem_filtration M _ _,
-  neg_mem_filtration := λ c, @neg_mem_filtration M _ _,
-  add_mem_filtration := λ c₁ c₂,
-    by { dsimp, rw mul_add, apply add_mem_filtration } }
-
-end rescale
 
 end pseudo_normed_group
 

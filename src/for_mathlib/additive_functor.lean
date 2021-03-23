@@ -29,6 +29,10 @@ F.map_add_hom.map_sub f g
 
 lemma additive.comp : additive (F ⋙ G) := {}
 
+instance id.additive : (𝟭 C).additive :=
+{ map_zero' := λ X Y, rfl,
+  map_add' := λ X Y f g, rfl }
+
 end functor
 
 end category_theory

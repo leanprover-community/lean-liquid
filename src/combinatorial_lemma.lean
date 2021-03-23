@@ -13,6 +13,8 @@ In this file we state and prove 9.8 of [Analytic].
 
 open_locale nnreal big_operators
 
+local attribute [instance, priority 0] add_comm_monoid.nat_semimodule add_comm_group.int_module
+
 open pseudo_normed_group
 
 variables (Λ : Type*) (r' : ℝ≥0) (S : Type*)
@@ -383,7 +385,12 @@ lemma lem98 (Λ : Type*) [polyhedral_lattice Λ]
 begin
   classical,
   obtain ⟨ι, _ftι, l, hl⟩ := polyhedral_lattice.polyhedral Λ, resetI,
-  obtain ⟨A, hA⟩ := lem97' Λ polyhedral_lattice.tf N l,
+  -- the next 4 lines are quite unfortunate, and it would be great to get rid of them
+  have ffΛ : finite_free Λ := polyhedral_lattice.finite_free,
+  have oops : @polyhedral_lattice.int_semimodule Λ _ = @add_comm_group.int_module Λ _,
+  { exact subsingleton.elim _ _ },
+  rw oops at ffΛ,
+  obtain ⟨A, hA⟩ := lem97' ffΛ N l,
   let d : ℝ≥0 := finset.univ.sup (λ i, ∑ a in A, nnnorm (a (l i)) / nnnorm (l i)),
   use d,
   introsI S hS c x hx,

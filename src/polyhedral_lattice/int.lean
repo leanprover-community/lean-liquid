@@ -4,6 +4,8 @@ noncomputable theory
 
 open_locale big_operators
 
+local attribute [-instance] add_comm_monoid.nat_semimodule add_comm_group.int_module
+
 -- move this
 lemma int.norm_coe_units (e : units ℤ) : ∥(e : ℤ)∥ = 1 :=
 begin
@@ -49,12 +51,7 @@ lemma give_better_name : ∀ (n : ℤ), ∥n∥ = ↑(n.to_nat) + ↑((-n).to_na
 | -[1+ n]   := show ∥-↑(n+1:ℕ)∥ = 0 + (n+1), by rw [zero_add, norm_neg, int.norm_coe_nat, nat.cast_succ]
 
 instance int.polyhedral_lattice : polyhedral_lattice ℤ :=
-{ fg := by convert module.finite.self _,
-  tf := λ m hm n h,
-  begin
-    rw [← nsmul_eq_smul, nsmul_eq_mul, mul_eq_zero] at h,
-    simpa only [hm, int.coe_nat_eq_zero, or_false, int.nat_cast_eq_coe_nat] using h
-  end,
+{ finite_free := ⟨unit, infer_instance, λ _, 1, is_basis_singleton_one ℤ⟩,
   polyhedral :=
   begin
     refine ⟨units ℤ, infer_instance, coe, _⟩,

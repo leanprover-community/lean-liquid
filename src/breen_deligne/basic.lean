@@ -320,6 +320,17 @@ structure homotopy (BD : data) :=
 (is_homotopy_zero : σ_add (BD.rank 0) - σ_proj (BD.rank 0) = universal_map.comp (BD.map 0) (map 0))
 -- TODO! Is ↑ the thing we want?
 
+
+/-- `BD.double` is the Breen--Deligne data whose `n`-th rank is `2 * BD.rank n`. -/
+@[simps] def data.double (BD : data) : data :=
+{ rank := λ n, BD.rank n + BD.rank n,
+  map := λ n, (BD.map n).double }
+
+/-- `BD.pow N` is the Breen--Deligne data whose `n`-th rank is `2^N * BD.rank n`. -/
+def data.pow (BD : data) : ℕ → data
+| 0     := BD
+| (n+1) := (data.pow n).double
+
 /-- A Breen--Deligne `package` consists of Breen--Deligne `data`
 that forms a complex, together with a `homotopy`
 between the two universal maps `σ_add` and `σ_proj`. -/
