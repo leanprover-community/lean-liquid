@@ -465,6 +465,82 @@ instance shift.additive : (shift ι V : complex_like ι V cov ⥤ complex_like �
 --     admit
 --   end }
 
+variables {ι V}
+
+structure homotopy {C₁ C₂ : complex_like ι V cov} (f g : C₁ ⟶ C₂) :=
+(h : Π j i, C₁.X j ⟶ C₂.X i)
+(h_eq_zero : ∀ i j, ¬ coherent_indices cov i j → h j i = 0)
+(comm : ∀ i j k, coherent_indices cov i j → coherent_indices cov j k →
+  h j i ≫ C₂.d i j + C₁.d j k ≫ h k j = f.f j - g.f j)
+
+variables {C₁ C₂ C₃ : complex_like ι V cov} {f g f₁ g₁ f' f'' : C₁ ⟶ C₂} {f₂ g₂ : C₂ ⟶ C₃}
+
+@[reassoc] lemma h_comp_d (h : homotopy f g) (i j k : ι)
+  (hij: coherent_indices cov i j) (hjk: coherent_indices cov j k) :
+  h.h j i ≫ C₂.d i j = f.f j - g.f j - C₁.d j k ≫ h.h k j :=
+begin
+  rw eq_sub_iff_add_eq,
+  exact h.comm i j k hij hjk
+end
+
+@[reassoc] lemma d_comp_h (h : homotopy f g) (i j k : ι)
+  (hij: coherent_indices cov i j) (hjk: coherent_indices cov j k) :
+  C₁.d j k ≫ h.h k j = f.f j - g.f j - h.h j i ≫ C₂.d i j :=
+begin
+  rw [eq_sub_iff_add_eq, add_comm],
+  exact h.comm i j k hij hjk
+end
+
+@[simps]
+def homotopy.trans (h : homotopy f f') (h' : homotopy f' f'') : homotopy f f'' :=
+{ h := λ j i, h.h j i + h'.h j i,
+  h_eq_zero := λ i j hij, by rw [h.h_eq_zero i j hij, h'.h_eq_zero i j hij, add_zero],
+  comm :=
+  begin
+    intros i j k hij hjk,
+    calc (h.h j i + h'.h j i) ≫ C₂.d i j + C₁.d j k ≫ (h.h k j + h'.h k j)
+        = h.h j i ≫ C₂.d i j + h'.h j i ≫ C₂.d i j +
+            (C₁.d j k ≫ h.h k j + C₁.d j k ≫ h'.h k j) : by rw [add_comp, comp_add]
+    ... = h.h j i ≫ C₂.d i j + C₁.d j k ≫ h.h k j +
+            (h'.h j i ≫ C₂.d i j + C₁.d j k ≫ h'.h k j) : by abel
+    ... = f.f j - f'.f j + (f'.f j - f''.f j) : by rw [h.comm i j k hij hjk, h'.comm i j k hij hjk]
+    ... = f.f j - f''.f j : by abel
+  end }
+
+@[simps]
+def homotopy.comp_const (h : homotopy f₁ g₁) (f₂ : C₂ ⟶ C₃) : homotopy (f₁ ≫ f₂) (g₁ ≫ f₂) :=
+{ h := λ j i, h.h j i ≫ f₂.f i,
+  h_eq_zero := λ i j hij, by rw [h.h_eq_zero i j hij, zero_comp],
+  comm :=
+  begin
+    intros i j k hij hjk,
+    calc (h.h j i ≫ f₂.f i) ≫ C₃.d i j + C₁.d j k ≫ h.h k j ≫ f₂.f j
+        = (h.h j i ≫ C₂.d i j + C₁.d j k ≫ h.h k j) ≫ f₂.f j : _
+    ... = (f₁.f j - g₁.f j) ≫ f₂.f j : by rw [h.comm i j k hij hjk]
+    ... = (f₁ ≫ f₂).f j - (g₁ ≫ f₂).f j : by erw [comp_f, comp_f, sub_comp],
+    simp only [add_comp, category.assoc],
+    erw [f₂.comm]; refl
+  end }
+
+@[simps]
+def homotopy.const_comp (f₁ : C₁ ⟶ C₂) (h : homotopy f₂ g₂) : homotopy (f₁ ≫ f₂) (f₁ ≫ g₂) :=
+{ h := λ j i, f₁.f j ≫ h.h j i,
+  h_eq_zero := λ i j hij, by rw [h.h_eq_zero i j hij, comp_zero],
+  comm :=
+  begin
+    intros i j k hij hjk,
+    calc (f₁.f j ≫ h.h j i) ≫ C₃.d i j + C₁.d j k ≫ f₁.f k ≫ h.h k j
+        = f₁.f j ≫ (h.h j i ≫ C₃.d i j + C₂.d j k ≫ h.h k j) : _
+    ... = f₁.f j ≫ (f₂.f j - g₂.f j) : by rw [h.comm i j k hij hjk]
+    ... = (f₁ ≫ f₂).f j - (f₁ ≫ g₂).f j : by erw [comp_f, comp_f, comp_sub],
+    simp only [comp_add, ← category.assoc],
+    erw [f₁.comm]; refl
+  end }
+
+@[simps]
+def homotopy.comp (h₁ : homotopy f₁ g₁) (h₂ : homotopy f₂ g₂) : homotopy (f₁ ≫ f₂) (g₁ ≫ g₂) :=
+(h₁.comp_const _).trans (h₂.const_comp _)
+
 end complex_like
 
 end differential_object
