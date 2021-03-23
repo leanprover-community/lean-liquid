@@ -15,19 +15,6 @@ open_locale nnreal big_operators
 
 variables {Λ : Type*} [add_comm_group Λ]
 variable {ι : Type*}
-/-
-### These are now all in mathlib, I think
-
-lemma abs_smul {α : Type*} [linear_ordered_add_comm_group α] (n : ℕ) (a : α) :
-  abs (n • a) = n • abs a := by admit
-
-lemma abs_add_eq_add_abs {α : Type*} [linear_ordered_add_comm_group α]  {a b : α} (hle : a ≤ b) :
-  abs (a + b) = abs a + abs b ↔ (0 ≤ a ∧ 0 ≤ b ∨ a ≤ 0 ∧ b ≤ 0) := by admit
-
-lemma abs_add_eq_add_abs_iff {α : Type*} [linear_ordered_add_comm_group α]  (a b : α) :
-  abs (a + b) = abs a + abs b ↔ (0 ≤ a ∧ 0 ≤ b ∨ a ≤ 0 ∧ b ≤ 0) := by admit
-
--/
 
 noncomputable theory
 
@@ -78,39 +65,31 @@ end
 
 section sign_vectors
 
-def nonzero_sign : ℤ → ℤ := λ n, if n ≥ 0 then 1 else -1
+def nonzero_sign : ℤ → units ℤ := λ n, if n ≥ 0 then 1 else -1
 
-@[simp] def is_sign : ℤ → Prop
-| (1 : ℤ) := true
-| (-1 : ℤ) := true
-| (n : ℤ) := false
+-- @[simp] def is_sign : ℤ → Prop
+-- | (1 : ℤ) := true
+-- | (-1 : ℤ) := true
+-- | (n : ℤ) := false
 
-lemma is_sign_sign : ∀ (i : ℤ), is_sign (nonzero_sign i) :=
-begin
-  intro i,
-  by_cases hi : i ≥ 0,
-  simp [nonzero_sign, if_pos hi],
-  simp [nonzero_sign, if_neg hi],
-end
+-- lemma is_sign_sign : ∀ (i : ℤ), is_sign (nonzero_sign i) :=
+-- begin
+--   intro i,
+--   by_cases hi : i ≥ 0,
+--   simp [nonzero_sign, if_pos hi],
+--   simp [nonzero_sign, if_neg hi],
+-- end
 
-def sign_vectors (ι : Type*) := { ε : ι → ℤ // ∀ i : ι, is_sign (ε i) }
+def sign_vectors (ι : Type*) := (ι → units ℤ)
 
-lemma fintype_sign_vectors : fintype ι → fintype (sign_vectors ι) := sorry
+lemma fintype_sign_vectors [fintype ι] : fintype (sign_vectors ι) := pi.fintype
 
 end sign_vectors
 
 /--Given a list l of elements of Λ and a functional x, (pos_vector l x) is the sign-vector of
 the values of x (l i).
 -/
-def pos_vector [fintype ι] (l : ι → Λ) (x : Λ →+ ℤ) : sign_vectors ι :=
-begin
-  let ε_0 := λ i : ι, nonzero_sign (x (l i)),
-  have hε : ∀ i, is_sign (ε_0 i),
-  { intro i,
-    dsimp [ε_0],
-    apply is_sign_sign },
-  use ⟨ε_0, hε⟩,
-end
+def [fintype ι] (l : ι → Λ) (x : Λ →+ ℤ) : sign_vectors ι := (λ i, nonzero_sign (x (l i)))
 
 lemma smul_to_explicit_dual_set [fintype ι] (l : ι → Λ) (x : Λ →+ ℤ) :
   x ∈ (explicit_dual_set ((pos_vector l x).val • l)) :=
