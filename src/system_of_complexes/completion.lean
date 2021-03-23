@@ -89,7 +89,7 @@ begin
        ... ≤ 2*2^j : mul_le_mul_of_nonneg_right one_le_two (pow_nonneg zero_le_two _) },
   have seq : ∀ j : ℕ, ∃ w : C (k*c) i, ∥res x - C.d i (i+1) w∥ ≤ ε j,
   { intro j,
-    haveI : fact (k * (k * c) ≤ k ^ 2 * c) := by { show _ ≤ _, convert le_refl _ using 1, ring},
+    haveI : fact (k * (k * c) ≤ k ^ 2 * c) := by { rw [pow_two, mul_assoc], exact le_rfl },
     specialize hC (k*c) hc₀kc _ hi (res x) (ε j) (ε_pos j),
     obtain ⟨_, _, rfl, rfl, y, hy⟩ := hC,
     simp only [d_res, res_res, normed_group_hom.map_zero, hx, norm_zero, zero_add, mul_zero] at hy,
