@@ -1,4 +1,4 @@
-import breen_deligne.basic
+import breen_deligne.category
 
 namespace breen_deligne
 

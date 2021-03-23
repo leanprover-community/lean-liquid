@@ -1,4 +1,4 @@
-import breen_deligne.basic
+import breen_deligne.category
 import data.real.nnreal
 
 import for_mathlib.free_abelian_group
