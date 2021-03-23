@@ -145,9 +145,9 @@ by { simp only [eval_CLCFPTinv, eval_CLCFP_zero, equalizer.map_ι], ext, refl }
 
 open category_theory.limits
 
-lemma eval_CLCFPTinv_comp (g : universal_map m n) (f : universal_map l m)
+lemma eval_CLCFPTinv_comp {l m n : FreeMat} (g : m ⟶ n) (f : l ⟶ m)
   [hg : g.suitable c₂ c₃] [hf : f.suitable c₁ c₂] [(comp g f).suitable c₁ c₃] :
-  (comp g f).eval_CLCFPTinv r V r' M c₁ c₃ =
+  (f ≫ g).eval_CLCFPTinv r V r' M c₁ c₃ =
     g.eval_CLCFPTinv r V r' M c₂ c₃ ≫ f.eval_CLCFPTinv r V r' M c₁ c₂ :=
 calc _ = _ : by { delta eval_CLCFPTinv, congr' 1; apply eval_CLCFP_comp }
    ... = _ : (equalizer.map_comp_map _ _ _ _).symm

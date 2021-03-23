@@ -202,68 +202,34 @@ double.map_zero
 
 end
 
-end universal_map
-
-/-- Roughly speaking, this is a collection of formal finite sums of matrices
-that encode that data that rolls out of the Breen--Deligne resolution. -/
-structure data :=
-(rank : ℕ → ℕ)
-(map  : Π n, universal_map (rank (n+1)) (rank n))
-
-/-- Breen--Deligne data is a complex
-if the composition of all pairs of two subsequent maps in the data is `0`. -/
-def is_complex (BD : data) : Prop :=
-∀ n, universal_map.comp (BD.map n) (BD.map (n+1)) = 0
-
 /-
 We use a small hack: mathlib only has block matrices with 4 blocks.
-So we add two zero-width blocks in the definition of `σ_add` and `σ_proj`.
+So we add two zero-width blocks in the definition of `σ`, `π₁`, and `π₂`.
 -/
 
-/-- The universal map `ℤ[A^n ⊕ A^n] → ℤ[A^n]`
-induced by the addition on `A^n`. -/
-def σ_add (n : ℕ) : universal_map (n + n) n :=
+/-- The universal map `ℤ[A^n ⊕ A^n] → ℤ[A^n]` induced by the addition on `A^n`. -/
+def σ (n : ℕ) : universal_map (n + n) n :=
 of $ matrix.reindex_linear_equiv (equiv.sum_empty _) sum_fin_sum_equiv $
 matrix.from_blocks 1 1 0 0
 
-/-- The universal map `ℤ[A^n ⊕ A^n] → ℤ[A^n]`
-that is the formal sum of the two projection maps. -/
-def σ_proj (n : ℕ) : universal_map (n + n) n :=
+/-- The universal map `ℤ[A^n ⊕ A^n] → ℤ[A^n]` that is first projection map. -/
+def π₁ (n : ℕ) : universal_map (n + n) n :=
 (of $ matrix.reindex_linear_equiv (equiv.sum_empty _) sum_fin_sum_equiv $
-matrix.from_blocks 1 0 0 0) +
+matrix.from_blocks 1 0 0 0)
+
+/-- The universal map `ℤ[A^n ⊕ A^n] → ℤ[A^n]` that is second projection map. -/
+def π₂ (n : ℕ) : universal_map (n + n) n :=
 (of $ matrix.reindex_linear_equiv (equiv.sum_empty _) sum_fin_sum_equiv $
 matrix.from_blocks 0 1 0 0)
 
-/-- The universal map `ℤ[A^n ⊕ A^n] → ℤ[A^n]`
-that is the difference between `σ_diff` (induced by the addition on `A^n`)
-and `σ_proj` (the formal sum of the two projections). -/
-def σ_diff (n : ℕ) := σ_add n - σ_proj n
-
-section
-universe variables u
-open universal_map
-variables {m n : ℕ} (A : Type u) [add_comm_group A] (f : universal_map m n)
-
--- lemma eval_σ_add (n : ℕ) : eval A (σ_add n) = map (λ x, x.left + x.right) :=
--- begin
---   ext x, apply lift.ext; clear x, intro x,
---   delta σ_add,
---   rw [eval_of, basic_universal_map.eval_of],
---   congr' 1,
---   ext i,
---   simp only [pi.add_apply],
---   rw (sum_fin_sum_equiv.sum_comp _).symm,
---   swap, { apply_instance },
---   admit
--- end
-
-lemma σ_add_comp_double : comp (σ_add n) (double f) = comp f (σ_add m) :=
-show add_monoid_hom.comp_hom ((@comp (m+m) (n+n) n) (σ_add _)) (double) f =
-  (@comp (m+m) m n).flip (σ_add _) f,
+lemma σ_comp_double (f : universal_map m n) :
+  comp (σ n) (double f) = comp f (σ m) :=
+show add_monoid_hom.comp_hom ((@comp (m+m) (n+n) n) (σ _)) (double) f =
+  (@comp (m+m) m n).flip (σ _) f,
 begin
   congr' 1, clear f, ext1 f,
-  show comp (σ_add n) (double (of f)) = comp (of f) (σ_add m),
-  dsimp only [double_of, σ_add],
+  show comp (σ n) (double (of f)) = comp (of f) (σ m),
+  dsimp only [double_of, σ],
   simp only [comp_of],
   conv_rhs {
     rw ← (matrix.reindex_linear_equiv (equiv.sum_empty _) (equiv.sum_empty _)).apply_symm_apply f },
@@ -272,27 +238,14 @@ begin
     matrix.reindex_linear_equiv_sum_empty_symm]
 end
 
--- lemma eval_σ_proj (n : ℕ) : eval A (σ_proj n) = map tuple.left + map tuple.right :=
--- begin
---   ext x, apply lift.ext; clear x, intro x,
---   delta σ_proj,
---   simp only [add_monoid_hom.map_add, add_monoid_hom.add_apply,
---     eval_of, basic_universal_map.eval_of],
---   congr' 2,
---   { ext i,
---     rw [(sum_fin_sum_equiv.sum_comp _).symm, finset.sum_eq_single (sum.inl i)],
---     { dsimp, admit },
---     all_goals { admit } },
---   admit
--- end
-
-lemma σ_proj_comp_double : comp (σ_proj n) (double f) = comp f (σ_proj m) :=
-show add_monoid_hom.comp_hom ((@comp (m+m) (n+n) n) (σ_proj _)) (double) f =
-  (@comp (m+m) m n).flip (σ_proj _) f,
+lemma π₁_comp_double (f : universal_map m n) :
+  comp (π₁ n) (double f) = comp f (π₁ m) :=
+show add_monoid_hom.comp_hom ((@comp (m+m) (n+n) n) (π₁ _)) (double) f =
+  (@comp (m+m) m n).flip (π₁ _) f,
 begin
   congr' 1, clear f, ext1 f,
-  show comp (σ_proj n) (double (of f)) = comp (of f) (σ_proj m),
-  dsimp only [double_of, σ_proj],
+  show comp (π₁ n) (double (of f)) = comp (of f) (π₁ m),
+  dsimp only [double_of, π₁],
   simp only [add_monoid_hom.map_add, add_monoid_hom.add_apply, comp_of],
   conv_rhs {
     rw ← (matrix.reindex_linear_equiv (equiv.sum_empty _) (equiv.sum_empty _)).apply_symm_apply f },
@@ -301,132 +254,101 @@ begin
     matrix.reindex_linear_equiv_sum_empty_symm],
 end
 
-lemma σ_diff_comp_double : comp (σ_diff n) (double f) = comp f (σ_diff m) :=
+lemma π₂_comp_double (f : universal_map m n) :
+  comp (π₂ n) (double f) = comp f (π₂ m) :=
+show add_monoid_hom.comp_hom ((@comp (m+m) (n+n) n) (π₂ _)) (double) f =
+  (@comp (m+m) m n).flip (π₂ _) f,
 begin
-  simp only [σ_diff, add_monoid_hom.map_sub, ← σ_add_comp_double, ← σ_proj_comp_double],
-  simp only [sub_eq_add_neg, ← add_monoid_hom.neg_apply, ← add_monoid_hom.add_apply]
+  congr' 1, clear f, ext1 f,
+  show comp (π₂ n) (double (of f)) = comp (of f) (π₂ m),
+  dsimp only [double_of, π₂],
+  simp only [add_monoid_hom.map_add, add_monoid_hom.add_apply, comp_of],
+  conv_rhs {
+    rw ← (matrix.reindex_linear_equiv (equiv.sum_empty _) (equiv.sum_empty _)).apply_symm_apply f },
+  simp only [basic_universal_map.comp, matrix.reindex_mul, matrix.from_blocks_multiply,
+    add_zero, matrix.one_mul, matrix.mul_one, matrix.zero_mul, matrix.mul_zero, zero_add,
+    matrix.reindex_linear_equiv_sum_empty_symm],
 end
 
-end
+section move_this
+variables {A}
 
-/-- A `homotopy` for Breen--Deligne data `BD` consists of maps `map n`,
-for each natural number `n`, that constitute a homotopy between
-the two universal maps `σ_add` and `σ_proj`. -/
-structure homotopy (BD : data) :=
-(map         : Π n, universal_map (BD.rank n + BD.rank n) (BD.rank (n+1)))
-(is_homotopy : ∀ n, σ_diff (BD.rank (n+1)) =
-                universal_map.comp (BD.map (n+1)) (map (n+1)) +
-                universal_map.comp (map n) (BD.map n).double)
-(is_homotopy_zero : σ_add (BD.rank 0) - σ_proj (BD.rank 0) = universal_map.comp (BD.map 0) (map 0))
--- TODO! Is ↑ the thing we want?
+def L {m n : ℕ} (x : A ^ (m+n)) : A ^ m := λ i, x $ sum_fin_sum_equiv $ sum.inl i
 
+def R {m n : ℕ} (x : A ^ (m+n)) : A ^ n := λ i, x $ sum_fin_sum_equiv $ sum.inr i
 
-/-- `BD.double` is the Breen--Deligne data whose `n`-th rank is `2 * BD.rank n`. -/
-@[simps] def data.double (BD : data) : data :=
-{ rank := λ n, BD.rank n + BD.rank n,
-  map := λ n, (BD.map n).double }
+end move_this
 
-/-- `BD.pow N` is the Breen--Deligne data whose `n`-th rank is `2^N * BD.rank n`. -/
-def data.pow (BD : data) : ℕ → data
-| 0     := BD
-| (n+1) := (data.pow n).double
-
-/-- A Breen--Deligne `package` consists of Breen--Deligne `data`
-that forms a complex, together with a `homotopy`
-between the two universal maps `σ_add` and `σ_proj`. -/
-structure package :=
-(data       : data)
-(is_complex : is_complex data)
-(homotopy   : homotopy data)
-
-namespace package
-
-/-- `BD.rank i` is the rank of the `i`th entry in the Breen--Deligne resolution described by `BD`. -/
-def rank (BD : package) := BD.data.rank
-
-/-- `BD.map i` is the `i`-th universal mapin the Breen--Deligne resolution described by `BD`. -/
-def map (BD : package) := BD.data.map
-
-@[simp] lemma map_comp_map (BD : package) (n : ℕ) :
-  universal_map.comp (BD.map n) (BD.map (n+1)) = 0 :=
-BD.is_complex n
-
-end package
-
-namespace eg
-/-! ## An explicit nontrivial example -/
-
-open universal_map
-
-/-- The `i`-th rank of this BD package is `2^i`. -/
-def rank : ℕ → ℕ
-| 0     := 1
-| (n+1) := rank n + rank n
-
-lemma rank_eq : ∀ n, rank n = 2 ^ n
-| 0     := rfl
-| (n+1) := by rw [pow_succ, two_mul, rank, rank_eq]
-
-/-- The `i`-th map of this BD package is inductively defined
-as the simplest solution to the homotopy condition,
-so that the homotopy will consist of identity maps. -/
-def map : Π n, universal_map (rank (n+1)) (rank n)
-| 0     := σ_diff 1
-| (n+1) := (σ_diff (rank (n+1))) - (map n).double
-
-/-- The Breen--Deligne data for the example BD package. -/
-@[simps]
-def data : data := ⟨rank, map⟩
-
-/-- The `n`-th homotopy map for the example BD package is the identity. -/
-def hmap (n : ℕ) : universal_map (rank n + rank n) (rank (n+1)) :=
-universal_map.id _
-
-lemma hmap_is_homotopy :
-  ∀ n, σ_diff (rank (n+1)) =
-  comp (map (n+1)) (hmap (n+1)) + comp (hmap n) (map n).double
-| _ := by { simp only [hmap, id_comp, comp_id, map], simp only [sub_add_cancel], }
-
-lemma hmap_is_homotopy_zero :
-  σ_diff (rank 0) = universal_map.comp (map 0) (hmap 0) :=
+lemma eval_σ (n : ℕ) : eval A (σ n) = map (λ x, L x + R x) :=
 begin
-  simp only [hmap, id_comp, comp_id, map, σ_diff, σ_add, σ_proj, sub_sub],
-  congr' 3;
-  { ext (j : fin 1) (i : fin 2),
-    fin_cases j, fin_cases i; refl }
+  ext x,
+  delta σ,
+  rw [eval_of, basic_universal_map.eval_of],
+  congr' 1,
+  ext i,
+  simp only [pi.add_apply],
+  rw (sum_fin_sum_equiv.sum_comp _).symm,
+  swap, { apply_instance },
+  rw [← finset.insert_erase (finset.mem_univ $ sum.inl i)],
+  swap, { apply_instance },
+  rw [finset.sum_insert (finset.not_mem_erase _ _)],
+  simp only [equiv.symm_apply_apply, matrix.coe_reindex_linear_equiv],
+  dsimp [equiv.sum_empty],
+  simp only [one_smul, matrix.one_apply_eq, L, add_right_inj],
+  rw finset.sum_eq_single (sum.inr i),
+  { dsimp, simpa only [one_smul, matrix.one_apply_eq] using rfl, },
+  { rintro (j|j) hj_mem hj; dsimp,
+    { rw [matrix.one_apply_ne, zero_smul], rintro rfl,
+      exact finset.not_mem_erase _ _ hj_mem },
+    { rw [matrix.one_apply_ne, zero_smul], rintro rfl, exact hj rfl } },
+  { intro h, refine (h _).elim, rw finset.mem_erase,
+    exact ⟨sum.inl_ne_inr.symm, finset.mem_univ _⟩, }
 end
 
-/-- The homotopy for the example BD package. -/
-@[simps]
-def homotopy : homotopy data := ⟨hmap, hmap_is_homotopy, hmap_is_homotopy_zero⟩
-
-lemma is_complex_zero :
-  comp (map 0) (map 1) = 0 :=
+lemma eval_π₁ (n : ℕ) : eval A (π₁ n) = map (λ x, L x) :=
 begin
-  show comp (σ_diff 1) (σ_diff (1+1) - double (σ_diff 1)) = 0,
-  rw [add_monoid_hom.map_sub, σ_diff_comp_double, sub_self],
+  ext x,
+  delta π₁,
+  rw [eval_of, basic_universal_map.eval_of],
+  congr' 1,
+  ext i,
+  simp only [pi.add_apply, matrix.coe_reindex_linear_equiv],
+  dsimp [equiv.sum_empty],
+  rw (sum_fin_sum_equiv.sum_comp _).symm,
+  swap, { apply_instance },
+  rw finset.sum_eq_single (sum.inl i),
+  { simp only [equiv.symm_apply_apply], dsimp,
+    simpa only [one_smul, matrix.one_apply_eq] using rfl, },
+  { rintro (j|j) - hj;
+    simp only [equiv.symm_apply_apply]; dsimp,
+    { rw [matrix.one_apply_ne, zero_smul], rintro rfl, exact hj rfl },
+    { rw zero_smul } },
+  { intro h, exact (h (finset.mem_univ _)).elim }
 end
 
-lemma is_complex_succ (n : ℕ) (ih : (comp (map n)) (map (n + 1)) = 0) :
-  comp (map (n+1)) (map (n+1+1)) = 0 :=
+lemma eval_π₂ (n : ℕ) : eval A (π₂ n) = map (λ x, R x) :=
 begin
-  have H := hmap_is_homotopy n,
-  simp only [hmap, comp_id, id_comp] at H,
-  show comp (map (n+1)) ((σ_diff (rank $ n+1+1)) - double (map (n+1))) = 0,
-  simp only [add_monoid_hom.map_sub, ← σ_diff_comp_double, H],
-  simp only [add_monoid_hom.map_add, add_monoid_hom.add_apply],
-  simp only [comp_double_double, ih, double_zero, add_zero, sub_self],
+  ext x,
+  delta π₂,
+  rw [eval_of, basic_universal_map.eval_of],
+  congr' 1,
+  ext i,
+  simp only [pi.add_apply, matrix.coe_reindex_linear_equiv],
+  dsimp [equiv.sum_empty],
+  rw (sum_fin_sum_equiv.sum_comp _).symm,
+  swap, { apply_instance },
+  rw finset.sum_eq_single (sum.inr i),
+  { simp only [equiv.symm_apply_apply], dsimp,
+    simpa only [one_smul, matrix.one_apply_eq] using rfl, },
+  { rintro (j|j) - hj;
+    simp only [equiv.symm_apply_apply]; dsimp,
+    { rw zero_smul },
+    { rw [matrix.one_apply_ne, zero_smul], rintro rfl, exact hj rfl } },
+  { intro h, exact (h (finset.mem_univ _)).elim }
 end
 
-lemma is_complex : is_complex data
-| 0     := is_complex_zero
-| (n+1) := is_complex_succ n (is_complex n)
-
-end eg
-
-/-- An example of a Breen--Deligne data coming from a nontrivial complex. -/
-def eg : package := ⟨eg.data, eg.is_complex, eg.homotopy⟩
+end universal_map
 
 end breen_deligne
 
-#lint- only unused_arguments def_lemma doc_blame
+-- #lint- only unused_arguments def_lemma doc_blame

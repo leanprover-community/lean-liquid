@@ -1,6 +1,6 @@
 -- n©
 
-import breen_deligne.basic
+import breen_deligne.universal_map
 
 /-!
 

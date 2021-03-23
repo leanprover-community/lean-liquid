@@ -36,7 +36,7 @@ lemma complex_d_comp_d (i : ℕ) :
   BD.complex_d c' r V M c i ≫ BD.complex_d c' r V M c (i+1) = 0 :=
 begin
   dsimp only [complex_d, complex_X],
-  rw [← (BD.map i).eval_CLCFPTinv_comp r V r' M _ (c * c' (i+1)) _ (BD.map (i+1))],
+  rw [← universal_map.eval_CLCFPTinv_comp r V r' M _ (c * c' (i+1)) _ (BD.map i) (BD.map (i+1))],
   simp only [BD.map_comp_map, universal_map.eval_CLCFPTinv_zero],
   apply_instance
 end
