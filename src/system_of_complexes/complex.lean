@@ -432,6 +432,8 @@ def as_functor {T : Type*} [has_succ ι] [category V] [preadditive V] [category 
   map_id' := λ t, by { ext i, dsimp, rw (C.X i).map_id, refl },
   map_comp' := λ t₁ t₂ t₃ h₁ h₂, by { ext i, dsimp, rw functor.map_comp, refl } }
 
+section shift
+
 variables [has_succ_pred ι] [category V] [preadditive V]
 
 open category_theory.preadditive
@@ -465,7 +467,11 @@ instance shift.additive : (shift ι V : complex_like ι V cov ⥤ complex_like �
 --     admit
 --   end }
 
-variables {ι V}
+end shift
+
+open category_theory.preadditive
+
+variables {ι V} [has_succ ι] [category V] [preadditive V]
 
 structure homotopy {C₁ C₂ : complex_like ι V cov} (f g : C₁ ⟶ C₂) :=
 (h : Π j i, C₁.X j ⟶ C₂.X i)

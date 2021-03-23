@@ -202,8 +202,153 @@ double.map_zero
 
 end
 
+/-
+We use a small hack: mathlib only has block matrices with 4 blocks.
+So we add two zero-width blocks in the definition of `σ`, `π₁`, and `π₂`.
+-/
+
+/-- The universal map `ℤ[A^n ⊕ A^n] → ℤ[A^n]` induced by the addition on `A^n`. -/
+def σ (n : ℕ) : universal_map (n + n) n :=
+of $ matrix.reindex_linear_equiv (equiv.sum_empty _) sum_fin_sum_equiv $
+matrix.from_blocks 1 1 0 0
+
+/-- The universal map `ℤ[A^n ⊕ A^n] → ℤ[A^n]` that is first projection map. -/
+def π₁ (n : ℕ) : universal_map (n + n) n :=
+(of $ matrix.reindex_linear_equiv (equiv.sum_empty _) sum_fin_sum_equiv $
+matrix.from_blocks 1 0 0 0)
+
+/-- The universal map `ℤ[A^n ⊕ A^n] → ℤ[A^n]` that is second projection map. -/
+def π₂ (n : ℕ) : universal_map (n + n) n :=
+(of $ matrix.reindex_linear_equiv (equiv.sum_empty _) sum_fin_sum_equiv $
+matrix.from_blocks 0 1 0 0)
+
+lemma σ_comp_double (f : universal_map m n) :
+  comp (σ n) (double f) = comp f (σ m) :=
+show add_monoid_hom.comp_hom ((@comp (m+m) (n+n) n) (σ _)) (double) f =
+  (@comp (m+m) m n).flip (σ _) f,
+begin
+  congr' 1, clear f, ext1 f,
+  show comp (σ n) (double (of f)) = comp (of f) (σ m),
+  dsimp only [double_of, σ],
+  simp only [comp_of],
+  conv_rhs {
+    rw ← (matrix.reindex_linear_equiv (equiv.sum_empty _) (equiv.sum_empty _)).apply_symm_apply f },
+  simp only [basic_universal_map.comp, matrix.reindex_mul, matrix.from_blocks_multiply,
+    add_zero, matrix.one_mul, matrix.mul_one, matrix.zero_mul, zero_add,
+    matrix.reindex_linear_equiv_sum_empty_symm]
+end
+
+lemma π₁_comp_double (f : universal_map m n) :
+  comp (π₁ n) (double f) = comp f (π₁ m) :=
+show add_monoid_hom.comp_hom ((@comp (m+m) (n+n) n) (π₁ _)) (double) f =
+  (@comp (m+m) m n).flip (π₁ _) f,
+begin
+  congr' 1, clear f, ext1 f,
+  show comp (π₁ n) (double (of f)) = comp (of f) (π₁ m),
+  dsimp only [double_of, π₁],
+  simp only [add_monoid_hom.map_add, add_monoid_hom.add_apply, comp_of],
+  conv_rhs {
+    rw ← (matrix.reindex_linear_equiv (equiv.sum_empty _) (equiv.sum_empty _)).apply_symm_apply f },
+  simp only [basic_universal_map.comp, matrix.reindex_mul, matrix.from_blocks_multiply,
+    add_zero, matrix.one_mul, matrix.mul_one, matrix.zero_mul, matrix.mul_zero, zero_add,
+    matrix.reindex_linear_equiv_sum_empty_symm],
+end
+
+lemma π₂_comp_double (f : universal_map m n) :
+  comp (π₂ n) (double f) = comp f (π₂ m) :=
+show add_monoid_hom.comp_hom ((@comp (m+m) (n+n) n) (π₂ _)) (double) f =
+  (@comp (m+m) m n).flip (π₂ _) f,
+begin
+  congr' 1, clear f, ext1 f,
+  show comp (π₂ n) (double (of f)) = comp (of f) (π₂ m),
+  dsimp only [double_of, π₂],
+  simp only [add_monoid_hom.map_add, add_monoid_hom.add_apply, comp_of],
+  conv_rhs {
+    rw ← (matrix.reindex_linear_equiv (equiv.sum_empty _) (equiv.sum_empty _)).apply_symm_apply f },
+  simp only [basic_universal_map.comp, matrix.reindex_mul, matrix.from_blocks_multiply,
+    add_zero, matrix.one_mul, matrix.mul_one, matrix.zero_mul, matrix.mul_zero, zero_add,
+    matrix.reindex_linear_equiv_sum_empty_symm],
+end
+
+section move_this
+variables {A}
+
+def L {m n : ℕ} (x : A ^ (m+n)) : A ^ m := λ i, x $ sum_fin_sum_equiv $ sum.inl i
+
+def R {m n : ℕ} (x : A ^ (m+n)) : A ^ n := λ i, x $ sum_fin_sum_equiv $ sum.inr i
+
+end move_this
+
+lemma eval_σ (n : ℕ) : eval A (σ n) = map (λ x, L x + R x) :=
+begin
+  ext x,
+  delta σ,
+  rw [eval_of, basic_universal_map.eval_of],
+  congr' 1,
+  ext i,
+  simp only [pi.add_apply],
+  rw (sum_fin_sum_equiv.sum_comp _).symm,
+  swap, { apply_instance },
+  rw [← finset.insert_erase (finset.mem_univ $ sum.inl i)],
+  swap, { apply_instance },
+  rw [finset.sum_insert (finset.not_mem_erase _ _)],
+  simp only [equiv.symm_apply_apply, matrix.coe_reindex_linear_equiv],
+  dsimp [equiv.sum_empty],
+  simp only [one_smul, matrix.one_apply_eq, L, add_right_inj],
+  rw finset.sum_eq_single (sum.inr i),
+  { dsimp, simpa only [one_smul, matrix.one_apply_eq] using rfl, },
+  { rintro (j|j) hj_mem hj; dsimp,
+    { rw [matrix.one_apply_ne, zero_smul], rintro rfl,
+      exact finset.not_mem_erase _ _ hj_mem },
+    { rw [matrix.one_apply_ne, zero_smul], rintro rfl, exact hj rfl } },
+  { intro h, refine (h _).elim, rw finset.mem_erase,
+    exact ⟨sum.inl_ne_inr.symm, finset.mem_univ _⟩, }
+end
+
+lemma eval_π₁ (n : ℕ) : eval A (π₁ n) = map (λ x, L x) :=
+begin
+  ext x,
+  delta π₁,
+  rw [eval_of, basic_universal_map.eval_of],
+  congr' 1,
+  ext i,
+  simp only [pi.add_apply, matrix.coe_reindex_linear_equiv],
+  dsimp [equiv.sum_empty],
+  rw (sum_fin_sum_equiv.sum_comp _).symm,
+  swap, { apply_instance },
+  rw finset.sum_eq_single (sum.inl i),
+  { simp only [equiv.symm_apply_apply], dsimp,
+    simpa only [one_smul, matrix.one_apply_eq] using rfl, },
+  { rintro (j|j) - hj;
+    simp only [equiv.symm_apply_apply]; dsimp,
+    { rw [matrix.one_apply_ne, zero_smul], rintro rfl, exact hj rfl },
+    { rw zero_smul } },
+  { intro h, exact (h (finset.mem_univ _)).elim }
+end
+
+lemma eval_π₂ (n : ℕ) : eval A (π₂ n) = map (λ x, R x) :=
+begin
+  ext x,
+  delta π₂,
+  rw [eval_of, basic_universal_map.eval_of],
+  congr' 1,
+  ext i,
+  simp only [pi.add_apply, matrix.coe_reindex_linear_equiv],
+  dsimp [equiv.sum_empty],
+  rw (sum_fin_sum_equiv.sum_comp _).symm,
+  swap, { apply_instance },
+  rw finset.sum_eq_single (sum.inr i),
+  { simp only [equiv.symm_apply_apply], dsimp,
+    simpa only [one_smul, matrix.one_apply_eq] using rfl, },
+  { rintro (j|j) - hj;
+    simp only [equiv.symm_apply_apply]; dsimp,
+    { rw zero_smul },
+    { rw [matrix.one_apply_ne, zero_smul], rintro rfl, exact hj rfl } },
+  { intro h, exact (h (finset.mem_univ _)).elim }
+end
+
 end universal_map
 
 end breen_deligne
 
-#lint- only unused_arguments def_lemma doc_blame
+-- #lint- only unused_arguments def_lemma doc_blame
