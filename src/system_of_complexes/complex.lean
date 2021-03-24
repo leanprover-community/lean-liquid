@@ -525,6 +525,21 @@ begin
 end
 
 @[simps]
+def homotopy.of_eq (h : f = g) : homotopy f g :=
+{ h := 0,
+  h_eq_zero := λ _ _ _, rfl,
+  comm := by { intros, simp only [add_zero, zero_comp, pi.zero_apply, comp_zero, sub_self, h] } }
+
+@[simps] def homotopy.refl : homotopy f f := homotopy.of_eq rfl
+
+@[simps]
+def homotopy.symm (h : homotopy f g) : homotopy g f :=
+{ h := λ j i, -h.h j i,
+  h_eq_zero := λ i j hij, by rw [h.h_eq_zero i j hij, neg_zero],
+  comm := λ i j k hij hjk,
+    by simp only [neg_comp, comp_neg, ← neg_add, h.comm i j k hij hjk, neg_sub] }
+
+@[simps]
 def homotopy.trans (h : homotopy f f') (h' : homotopy f' f'') : homotopy f f'' :=
 { h := λ j i, h.h j i + h'.h j i,
   h_eq_zero := λ i j hij, by rw [h.h_eq_zero i j hij, h'.h_eq_zero i j hij, add_zero],

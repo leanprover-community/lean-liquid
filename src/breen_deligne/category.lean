@@ -1,4 +1,5 @@
 import breen_deligne.universal_map
+import breen_deligne.functorial_map
 import system_of_complexes.complex
 
 namespace breen_deligne
@@ -25,6 +26,16 @@ instance : preadditive FreeMat :=
   add_comp' := λ l m n f g h, add_monoid_hom.map_add _ _ _,
   comp_add' := λ l m n f g h, show universal_map.comp (g + h) f = _,
     by { rw [add_monoid_hom.map_add, add_monoid_hom.add_apply], refl } }
+
+open universal_map
+
+lemma double_comp_double {l m n : FreeMat} (f : l ⟶ m) (g : m ⟶ n) :
+  (f.double ≫ g.double : l+l ⟶ n+n) = (f ≫ g).double :=
+comp_double_double _ _
+
+lemma double_add {m n : FreeMat} (f g : m ⟶ n) :
+  ((f + g).double : m+m ⟶ n+n) = f.double + g.double :=
+add_monoid_hom.map_add _ _ _
 
 end FreeMat
 
@@ -63,6 +74,65 @@ def pow : ℕ → data
 { f := λ n, universal_map.π₂ _,
   comm := λ m n, universal_map.π₂_comp_double _ }
 
+def π : BD.double ⟶ BD := BD.π₁ + BD.π₂
+
+def σ_pow : Π N, BD.pow N ⟶ BD
+| 0     := 𝟙 _
+| (n+1) := σ _ ≫ σ_pow _
+
+def π_pow : Π N, BD.pow N ⟶ BD
+| 0     := 𝟙 _
+| (n+1) := π _ ≫ π_pow _
+
+open differential_object.complex_like FreeMat
+
+@[simps]
+def hom_double {BD₁ BD₂ : data} (f : BD₁ ⟶ BD₂) : BD₁.double ⟶ BD₂.double :=
+{ f := λ i, (f.f i).double,
+  comm := λ i j,
+  calc BD₁.double.d i j ≫ (f.f j).double
+      = (BD₁.d i j ≫ f.f j).double : double_comp_double _ _
+  ... = (f.f i ≫ BD₂.d i j).double : congr_arg _ (f.comm i j)
+  ... = (f.f i).double ≫ BD₂.double.d i j : (double_comp_double _ _).symm }
+
+-- lemma hom_double_σ : hom_double BD.σ = BD.double.σ :=
+-- begin
+--   ext i A hA : 6, resetI,
+--   ext x,
+--   dsimp,
+--   -- rw [universal_map.eval_of A],
+--   rw universal_map.eval_σ A (BD.X i + BD.X i),
+--   -- show _ = L x + R x,
+--   -- dsimp [universal_map.σ],
+--   -- rw universal_map.double_of,
+--   -- congr' 1,
+--   -- dsimp,
+--   -- simp,
+-- end
+
+@[simps]
+def homotopy_double {BD₁ BD₂ : data} (f g : BD₁ ⟶ BD₂) (h : homotopy f g) :
+  homotopy (hom_double f) (hom_double g) :=
+{ h := λ j i, (h.h j i).double,
+  h_eq_zero := λ i j hij, by rw [h.h_eq_zero i j hij, universal_map.double_zero],
+  comm := λ i j k hij hjk,
+  begin
+    simp only [double_d, double_comp_double, ← double_add, h.comm i j k hij hjk],
+    exact add_monoid_hom.map_sub _ _ _
+  end }
+
+def homotopy_pow₁ (h : homotopy BD.σ BD.π) :
+  Π N, homotopy (BD.pow N).σ (BD.pow N).π
+| 0     := h
+| (n+1) := sorry -- homotopy_double _ _ (homotopy_pow₁ n)
+
+def homotopy_pow₂ (h : homotopy BD.σ BD.π) :
+  Π N, homotopy (BD.σ_pow N) (BD.π_pow N)
+| 0     := homotopy.refl
+| (n+1) := (homotopy_pow₁ BD h n).comp (homotopy_pow₂ _)
+
+-- h.comp (homotopy_pow n)
+
 end data
 
 section
@@ -79,7 +149,7 @@ that forms a complex, together with a `homotopy`
 between the two universal maps `σ_add` and `σ_proj`. -/
 structure package :=
 (data       : data)
-(homotopy   : @homotopy ℕ FreeMat ff _ _ _ data.double data data.σ (data.π₁ + data.π₂))
+(homotopy   : @homotopy ℕ FreeMat ff _ _ _ data.double data data.σ data.π)
 
 namespace package
 

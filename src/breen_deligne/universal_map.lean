@@ -31,6 +31,16 @@ local notation `ℤ[` A `]` := free_abelian_group A
 namespace breen_deligne
 open free_abelian_group
 
+
+section move_this
+variables {A : Type*}
+
+def L {m n : ℕ} (x : A ^ (m+n)) : A ^ m := λ i, x $ sum_fin_sum_equiv $ sum.inl i
+
+def R {m n : ℕ} (x : A ^ (m+n)) : A ^ n := λ i, x $ sum_fin_sum_equiv $ sum.inr i
+
+end move_this
+
 /-!
 Suppose you have an abelian group `A`.
 What data do you need to specify a "universal" map `f : ℤ[A^m] → ℤ[A^n]`?
@@ -61,10 +71,13 @@ namespace basic_universal_map
 variables {k l m n : ℕ} (g : basic_universal_map m n) (f : basic_universal_map l m)
 variables (A : Type*) [add_comm_group A]
 
+def pre_eval : A^m → A^n :=
+λ x i, ∑ j, g i j • (x : fin _ → A) j
+
 /-- `f.eval A` for a `f : basic_universal_map m n`
 is the homomorphism `ℤ[A^m] →+ ℤ[A^n]` induced by matrix multiplication. -/
 def eval : ℤ[A^m] →+ ℤ[A^n] :=
-map $ λ x i, ∑ j, g i j • (x : fin _ → A) j
+map $ pre_eval g A
 
 @[simp] lemma eval_of (x : A^m) :
   g.eval A (of x) = (of $ λ i, ∑ j, g i j • x j) :=
@@ -97,6 +110,19 @@ by simp only [comp, id, matrix.one_mul]
 
 @[simp] lemma comp_id : g.comp (id _) = g :=
 by simp only [comp, id, matrix.mul_one]
+
+/-- `double f` is the `universal_map` from `ℤ[A^m ⊕ A^m]` to `ℤ[A^n ⊕ A^n]`
+given by applying `f` on both "components". -/
+def double : basic_universal_map m n →+ basic_universal_map (m + m) (n + n) :=
+add_monoid_hom.mk'
+  (λ f, matrix.reindex_linear_equiv sum_fin_sum_equiv sum_fin_sum_equiv $
+    matrix.from_blocks f 0 0 f)
+  (λ f g, by rw [← linear_equiv.map_add, matrix.from_blocks_add, add_zero])
+
+lemma comp_double_double (g : basic_universal_map m n) (f : basic_universal_map l m) :
+  comp (double g) (double f) = double (comp g f) :=
+by simp only [double, comp, add_monoid_hom.coe_mk', matrix.reindex_mul, matrix.from_blocks_multiply,
+    matrix.zero_mul, matrix.mul_zero, add_zero, zero_add]
 
 end basic_universal_map
 
@@ -176,12 +202,10 @@ end
 /-- `double f` is the `universal_map` from `ℤ[A^m ⊕ A^m]` to `ℤ[A^n ⊕ A^n]`
 given by applying `f` on both "components". -/
 def double : universal_map m n →+ universal_map (m + m) (n + n) :=
-map $ λ f, matrix.reindex_linear_equiv sum_fin_sum_equiv sum_fin_sum_equiv $
-matrix.from_blocks f 0 0 f
+map $ basic_universal_map.double
 
 lemma double_of (f : basic_universal_map m n) :
-  double (of f) =
-  of (matrix.reindex_linear_equiv sum_fin_sum_equiv sum_fin_sum_equiv $ matrix.from_blocks f 0 0 f) :=
+  double (of f) = of (basic_universal_map.double f) :=
 rfl
 
 lemma comp_double_double (g : universal_map m n) (f : universal_map l m) :
@@ -191,14 +215,21 @@ show comp_hom (comp_hom (comp_hom.flip (@double l m)) ((@comp (l+l) (m+m) (n+n))
 begin
   congr' 2, clear g f, ext g f : 2,
   show comp (double (of g)) (double (of f)) = double (comp (of g) (of f)),
-  simp only [double_of, comp_of, basic_universal_map.comp],
-  rw [matrix.reindex_mul, matrix.from_blocks_multiply],
-  congr' 2,
-  simp only [add_zero, matrix.zero_mul, zero_add, matrix.mul_zero],
+  simp only [double_of, comp_of, basic_universal_map.comp_double_double]
 end
 
 lemma double_zero : double (0 : universal_map m n) = 0 :=
 double.map_zero
+
+open basic_universal_map
+
+-- lemma eval_double :
+--   eval A (double f) = (free_abelian_group.lift $ λ g, map $
+--       λ x (j : fin (m + m)),
+--       sum.elim (λ i, pre_eval g A (L x i)) (λ i, pre_eval g A (R x i))
+--         (sum_fin_sum_equiv.symm j)) f :=
+-- begin
+-- end
 
 end
 
@@ -233,9 +264,11 @@ begin
   simp only [comp_of],
   conv_rhs {
     rw ← (matrix.reindex_linear_equiv (equiv.sum_empty _) (equiv.sum_empty _)).apply_symm_apply f },
-  simp only [basic_universal_map.comp, matrix.reindex_mul, matrix.from_blocks_multiply,
+  simp only [basic_universal_map.double, add_monoid_hom.coe_mk', equiv.apply_symm_apply,
+    basic_universal_map.comp, matrix.reindex_mul, matrix.from_blocks_multiply,
     add_zero, matrix.one_mul, matrix.mul_one, matrix.zero_mul, zero_add,
-    matrix.reindex_linear_equiv_sum_empty_symm]
+    matrix.reindex_linear_equiv_sum_empty_symm,
+    basic_universal_map.double, add_monoid_hom.coe_mk'],
 end
 
 lemma π₁_comp_double (f : universal_map m n) :
@@ -249,7 +282,8 @@ begin
   simp only [add_monoid_hom.map_add, add_monoid_hom.add_apply, comp_of],
   conv_rhs {
     rw ← (matrix.reindex_linear_equiv (equiv.sum_empty _) (equiv.sum_empty _)).apply_symm_apply f },
-  simp only [basic_universal_map.comp, matrix.reindex_mul, matrix.from_blocks_multiply,
+  simp only [basic_universal_map.double, add_monoid_hom.coe_mk', equiv.apply_symm_apply,
+    basic_universal_map.comp, matrix.reindex_mul, matrix.from_blocks_multiply,
     add_zero, matrix.one_mul, matrix.mul_one, matrix.zero_mul, matrix.mul_zero, zero_add,
     matrix.reindex_linear_equiv_sum_empty_symm],
 end
@@ -265,19 +299,11 @@ begin
   simp only [add_monoid_hom.map_add, add_monoid_hom.add_apply, comp_of],
   conv_rhs {
     rw ← (matrix.reindex_linear_equiv (equiv.sum_empty _) (equiv.sum_empty _)).apply_symm_apply f },
-  simp only [basic_universal_map.comp, matrix.reindex_mul, matrix.from_blocks_multiply,
+  simp only [basic_universal_map.double, add_monoid_hom.coe_mk', equiv.apply_symm_apply,
+    basic_universal_map.comp, matrix.reindex_mul, matrix.from_blocks_multiply,
     add_zero, matrix.one_mul, matrix.mul_one, matrix.zero_mul, matrix.mul_zero, zero_add,
     matrix.reindex_linear_equiv_sum_empty_symm],
 end
-
-section move_this
-variables {A}
-
-def L {m n : ℕ} (x : A ^ (m+n)) : A ^ m := λ i, x $ sum_fin_sum_equiv $ sum.inl i
-
-def R {m n : ℕ} (x : A ^ (m+n)) : A ^ n := λ i, x $ sum_fin_sum_equiv $ sum.inr i
-
-end move_this
 
 lemma eval_σ (n : ℕ) : eval A (σ n) = map (λ x, L x + R x) :=
 begin
