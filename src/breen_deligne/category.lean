@@ -2,6 +2,8 @@ import breen_deligne.universal_map
 import breen_deligne.functorial_map
 import system_of_complexes.complex
 
+import for_mathlib.free_abelian_group
+
 namespace breen_deligne
 
 open free_abelian_group category_theory
@@ -76,14 +78,6 @@ def pow : ℕ → data
 
 def π : BD.double ⟶ BD := BD.π₁ + BD.π₂
 
-def σ_pow : Π N, BD.pow N ⟶ BD
-| 0     := 𝟙 _
-| (n+1) := σ _ ≫ σ_pow _
-
-def π_pow : Π N, BD.pow N ⟶ BD
-| 0     := 𝟙 _
-| (n+1) := π _ ≫ π_pow _
-
 open differential_object.complex_like FreeMat
 
 @[simps]
@@ -95,23 +89,16 @@ def hom_double {BD₁ BD₂ : data} (f : BD₁ ⟶ BD₂) : BD₁.double ⟶ BD�
   ... = (f.f i ≫ BD₂.d i j).double : congr_arg _ (f.comm i j)
   ... = (f.f i).double ≫ BD₂.double.d i j : (double_comp_double _ _).symm }
 
--- lemma hom_double_σ : hom_double BD.σ = BD.double.σ :=
--- begin
---   ext i A hA : 6, resetI,
---   ext x,
---   dsimp,
---   -- rw [universal_map.eval_of A],
---   rw universal_map.eval_σ A (BD.X i + BD.X i),
---   -- show _ = L x + R x,
---   -- dsimp [universal_map.σ],
---   -- rw universal_map.double_of,
---   -- congr' 1,
---   -- dsimp,
---   -- simp,
--- end
+def σ_pow : Π N, BD.pow N ⟶ BD
+| 0     := 𝟙 _
+| (n+1) := hom_double (σ_pow n) ≫ BD.σ
+
+def π_pow : Π N, BD.pow N ⟶ BD
+| 0     := 𝟙 _
+| (n+1) := hom_double (π_pow n) ≫ BD.π
 
 @[simps]
-def homotopy_double {BD₁ BD₂ : data} (f g : BD₁ ⟶ BD₂) (h : homotopy f g) :
+def homotopy_double {BD₁ BD₂ : data} {f g : BD₁ ⟶ BD₂} (h : homotopy f g) :
   homotopy (hom_double f) (hom_double g) :=
 { h := λ j i, (h.h j i).double,
   h_eq_zero := λ i j hij, by rw [h.h_eq_zero i j hij, universal_map.double_zero],
@@ -121,17 +108,10 @@ def homotopy_double {BD₁ BD₂ : data} (f g : BD₁ ⟶ BD₂) (h : homotopy f
     exact add_monoid_hom.map_sub _ _ _
   end }
 
-def homotopy_pow₁ (h : homotopy BD.σ BD.π) :
-  Π N, homotopy (BD.pow N).σ (BD.pow N).π
-| 0     := h
-| (n+1) := sorry -- homotopy_double _ _ (homotopy_pow₁ n)
-
-def homotopy_pow₂ (h : homotopy BD.σ BD.π) :
+def homotopy_pow (h : homotopy BD.σ BD.π) :
   Π N, homotopy (BD.σ_pow N) (BD.π_pow N)
 | 0     := homotopy.refl
-| (n+1) := (homotopy_pow₁ BD h n).comp (homotopy_pow₂ _)
-
--- h.comp (homotopy_pow n)
+| (n+1) := (homotopy_double (homotopy_pow n)).comp h
 
 end data
 

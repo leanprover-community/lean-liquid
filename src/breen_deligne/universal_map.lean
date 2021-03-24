@@ -39,6 +39,27 @@ def L {m n : ℕ} (x : A ^ (m+n)) : A ^ m := λ i, x $ sum_fin_sum_equiv $ sum.i
 
 def R {m n : ℕ} (x : A ^ (m+n)) : A ^ n := λ i, x $ sum_fin_sum_equiv $ sum.inr i
 
+@[simps]
+def split {m n : ℕ} : A ^ (m + n) ≃ A ^ m × A ^ n :=
+{ to_fun := λ x, (L x, R x),
+  inv_fun := λ x j, sum.elim x.1 x.2 (sum_fin_sum_equiv.symm j),
+  left_inv := λ x, by { ext j, dsimp [L, R, sum_fin_sum_equiv], split_ifs with h h,
+    { dsimp, cases j, refl, },
+    { dsimp, cases j, congr, push_neg at h, rw nat.add_sub_cancel' h, refl } },
+  right_inv := λ x,
+  by { ext j; dsimp [L, R]; simp only [sum.elim_inl, sum.elim_inr, equiv.symm_apply_apply] } }
+
+@[ext] lemma map_to_pi_add_ext
+  {A B : Type*} {m n : ℕ} (f g : A → B ^ (m + n))
+  (h1 : L ∘ f = L ∘ g) (h2 : R ∘ f = R ∘ g) :
+  f = g :=
+begin
+  ext1 x, apply split.injective,
+  revert x, rw [← function.funext_iff],
+  rw [function.funext_iff] at h1 h2,
+  ext1 x, ext1, { exact h1 x }, { exact h2 x }
+end
+
 end move_this
 
 /-!
@@ -123,6 +144,24 @@ lemma comp_double_double (g : basic_universal_map m n) (f : basic_universal_map 
   comp (double g) (double f) = double (comp g f) :=
 by simp only [double, comp, add_monoid_hom.coe_mk', matrix.reindex_mul, matrix.from_blocks_multiply,
     matrix.zero_mul, matrix.mul_zero, add_zero, zero_add]
+
+lemma pre_eval_double (f : basic_universal_map m n) :
+  pre_eval (double f) A = (split.symm ∘ prod.map (f.pre_eval A) (f.pre_eval A) ∘ split) :=
+begin
+  ext1; ext x j; dsimp only [function.comp, L, R, double, pre_eval];
+  rw [← sum_fin_sum_equiv.sum_comp, fintype.sum_sum_type];
+  simp only [equiv.symm_apply_apply, sum.elim_inl, sum.elim_inr,
+    split_symm_apply, split_apply, prod.map_mk,
+    matrix.coe_reindex_linear_equiv, add_monoid_hom.coe_mk',
+    matrix.from_blocks_apply₁₁, matrix.from_blocks_apply₁₂,
+    matrix.from_blocks_apply₂₁, matrix.from_blocks_apply₂₂,
+    pi.zero_apply, zero_smul, finset.sum_const_zero, add_zero, zero_add];
+  refl
+end
+
+lemma eval_double (f : basic_universal_map m n) :
+  eval (double f) A = (map $ split.symm ∘ prod.map (f.pre_eval A) (f.pre_eval A) ∘ split) :=
+by rw [eval, pre_eval_double]
 
 end basic_universal_map
 
@@ -223,13 +262,19 @@ double.map_zero
 
 open basic_universal_map
 
--- lemma eval_double :
---   eval A (double f) = (free_abelian_group.lift $ λ g, map $
---       λ x (j : fin (m + m)),
---       sum.elim (λ i, pre_eval g A (L x i)) (λ i, pre_eval g A (R x i))
---         (sum_fin_sum_equiv.symm j)) f :=
--- begin
--- end
+lemma eval_comp_double :
+  (eval A).comp (@double m n) = (free_abelian_group.lift $ λ g,
+    map $ split.symm ∘ prod.map (pre_eval g A) (pre_eval g A) ∘ split) :=
+begin
+  rw [double, eval],
+  simp only [← basic_universal_map.eval_double],
+  ext1 g, refl
+end
+
+lemma eval_double :
+  eval A (double f) = (free_abelian_group.lift $ λ g,
+    map $ split.symm ∘ prod.map (pre_eval g A) (pre_eval g A) ∘ split) f :=
+by rw [← add_monoid_hom.comp_apply, eval_comp_double]
 
 end
 
