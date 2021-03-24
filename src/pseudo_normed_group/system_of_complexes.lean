@@ -13,37 +13,38 @@ open opposite pseudo_normed_group category_theory category_theory.limits breen_d
 universe variable u
 
 namespace breen_deligne
-namespace package
+namespace data
 
 section
-variables (BD : breen_deligne.package) (c' : ℕ → ℝ≥0)
+variables (BD : breen_deligne.data) (c' : ℕ → ℝ≥0)
 variables (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
 variables {r' : ℝ≥0} [fact (0 < r')] [fact (r' ≤ 1)]
 variables (M : ProFiltPseuNormGrpWithTinv.{u} r') (c : ℝ≥0)
 
 /-- The object for the complex of normed groups
 `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …` -/
-def complex_X (i : ℕ) : NormedGroup := CLCFPTinv r V r' M (c * c' i) (BD.rank i)
+def complex_X (i : ℕ) : NormedGroup := CLCFPTinv r V r' M (c * c' i) (BD.X i)
 
 variables [BD.suitable c']
 
 /-- The differential for the complex of normed groups
 `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …` -/
 def complex_d (i : ℕ) : BD.complex_X c' r V M c i ⟶ BD.complex_X c' r V M c (i+1) :=
-(BD.map i).eval_CLCFPTinv r V r' M (c * c' (i+1)) (c * c' i)
+(BD.d (i+1) i).eval_CLCFPTinv r V r' M (c * c' (i+1)) (c * c' i)
 
 lemma complex_d_comp_d (i : ℕ) :
   BD.complex_d c' r V M c i ≫ BD.complex_d c' r V M c (i+1) = 0 :=
 begin
   dsimp only [complex_d, complex_X],
-  rw [← universal_map.eval_CLCFPTinv_comp r V r' M _ (c * c' (i+1)) _ (BD.map i) (BD.map (i+1))],
-  simp only [BD.map_comp_map, universal_map.eval_CLCFPTinv_zero],
+  rw [← universal_map.eval_CLCFPTinv_comp
+    r V r' M _ (c * c' (i+1)) _ (BD.d (i+1) i) (BD.d (i+1+1) (i+1))],
+  simp only [BD.d_comp_d, universal_map.eval_CLCFPTinv_zero],
   apply_instance
 end
 
 end
 
-variables (BD : breen_deligne.package) (c' : ℕ → ℝ≥0) [BD.suitable c']
+variables (BD : breen_deligne.data) (c' : ℕ → ℝ≥0) [BD.suitable c']
 variables (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
 variables (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)]
 variables {M M₁ M₂ M₃ : ProFiltPseuNormGrpWithTinv.{u} r'} (c : ℝ≥0)
@@ -98,7 +99,7 @@ def system (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
   differential_object.hom.mk'
     (λ i,
     by haveI : fact ((unop c₁ : ℝ≥0) ≤ (unop c₂ : ℝ≥0)) := h.unop.down.down;
-      exact CLCFPTinv.res r V r' _ _ (BD.rank i))
+      exact CLCFPTinv.res r V r' _ _ (BD.X i))
     begin
       rintro i j h, dsimp only [differential_object.coherent_indices] at h, subst j,
       dsimp [complex], simp only [category.comp_id, if_congr, if_true, eq_self_iff_true],
@@ -146,7 +147,8 @@ def System (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
   map_id' := λ M, by apply system.map_id,
   map_comp' := λ M₁ M₂ M₃ f g, by apply system.map_comp }
 
-end package
+end data
+
 end breen_deligne
 
 #lint- only unused_arguments def_lemma doc_blame

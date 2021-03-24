@@ -10,7 +10,7 @@ noncomputable theory
 
 open_locale nnreal -- enable the notation `ℝ≥0` for the nonnegative real numbers.
 
-variables (BD : breen_deligne.package)
+variables (BD : breen_deligne.data)
 variables (c' : ℕ → ℝ≥0)  -- implicit constants, chosen once and for all
                           -- see the sentence after the statement of Thm 9.5
 

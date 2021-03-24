@@ -11,7 +11,7 @@ noncomputable theory
 
 open_locale nnreal
 
-variables (BD : breen_deligne.package) (c' : ℕ → ℝ≥0) [BD.suitable c']
+variables (BD : breen_deligne.data) (c' : ℕ → ℝ≥0) [BD.suitable c']
 variables (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)]
 variables (V : NormedGroup)
 variables (Λ : PolyhedralLattice) -- (M : ProFiltPseuNormGrpWithTinv r')

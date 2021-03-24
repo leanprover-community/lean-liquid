@@ -266,6 +266,8 @@ structure complex_like (cov : bool) extends differential_object ι V :=
 (d_comp_d : ∀ i j k, d i j ≫ d j k = 0)
 (d_eq_zero : ∀ ⦃i j⦄, ¬ coherent_indices cov i j → d i j = 0)
 
+attribute [reassoc] complex_like.d_comp_d
+
 variables {ι V}
 
 instance coherent_indices_decidable [decidable_eq ι] (cov : bool) (i j : ι) :
@@ -472,6 +474,23 @@ end shift
 open category_theory.preadditive
 
 variables {ι V} [has_succ ι] [category V] [preadditive V]
+
+@[simps]
+def iso_of_components {C₁ C₂ : complex_like ι V cov} (f : Π i, C₁.X i ≅ C₂.X i)
+  (hf : ∀ i j, C₁.d i j ≫ (f j).hom = (f i).hom ≫ C₂.d i j) :
+  C₁ ≅ C₂ :=
+{ hom :=
+  { f := λ i, (f i).hom,
+    comm := hf },
+  inv :=
+  { f := λ i, (f i).inv,
+    comm := λ i j,
+    calc C₂.d i j ≫ (f j).inv
+        = (f i).inv ≫ ((f i).hom ≫ C₂.d i j) ≫ (f j).inv : by simp
+    ... = (f i).inv ≫ (C₁.d i j ≫ (f j).hom) ≫ (f j).inv : by rw hf
+    ... = (f i).inv ≫ C₁.d i j : by simp },
+  hom_inv_id' := by { ext i, exact (f i).hom_inv_id },
+  inv_hom_id' := by { ext i, exact (f i).inv_hom_id } }
 
 def htpy_idx_rel₁ (cov : bool) (i j : ι) :=
 (coherent_indices cov i j) ∨ ((∀ k, ¬ coherent_indices cov j k) ∧ i = j)

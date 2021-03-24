@@ -64,6 +64,10 @@ def pow : ℕ → data
 | 0     := BD
 | (n+1) := (pow n).double
 
+lemma BD_pow_X : ∀ N i, (BD.pow N).X i = 2^N * BD.X i
+| 0     i := by { rw [pow_zero, one_mul], refl }
+| (N+1) i := by { rw [pow_succ, two_mul, add_mul, ← BD_pow_X N], refl }
+
 @[simps] def σ : BD.double ⟶ BD :=
 { f := λ n, universal_map.σ _,
   comm := λ m n, universal_map.σ_comp_double _ }
@@ -112,6 +116,33 @@ def homotopy_pow (h : homotopy BD.σ BD.π) :
   Π N, homotopy (BD.σ_pow N) (BD.π_pow N)
 | 0     := homotopy.refl
 | (n+1) := (homotopy_double (homotopy_pow n)).comp h
+
+open category_theory.limits
+
+/-
+=== jmc: I don't think that `reindex` is actually useful
+-/
+
+@[simps]
+def reindex (rank : ℕ → ℕ) (hr : ∀ i, BD.X i = rank i) :
+  data :=
+{ X := rank,
+  d := λ i j, (eq_to_iso (hr i)).inv ≫ BD.d i j ≫ (eq_to_iso (hr j)).hom,
+  d_comp_d := λ i j k,
+  by simp only [category.assoc, iso.hom_inv_id_assoc, BD.d_comp_d_assoc, zero_comp, comp_zero],
+  d_eq_zero := λ i j hij,
+  by simp only [BD.d_eq_zero hij, zero_comp, comp_zero] }
+
+@[simps]
+def reindex_iso (rank : ℕ → ℕ) (hr : ∀ i, BD.X i = rank i) :
+  BD ≅ BD.reindex rank hr :=
+differential_object.complex_like.iso_of_components (λ i, eq_to_iso (hr i)) $
+by { intros i j, rw [reindex_d, iso.hom_inv_id_assoc] }
+
+open universal_map
+
+-- lemma eval_σ_pow (A : Type*) [add_comm_group A] (N i : ℕ) :
+--   eval A ((BD.σ_pow N).f i) = _
 
 end data
 

@@ -194,28 +194,58 @@ end
 
 end universal_map
 
-namespace package
+namespace data
 
 /-- A sequence of nonnegative real numbers `c' 0`, `c' 1`, ...
-is *suitable* with respect to a Breen--Deligne package `BD`,
+is *suitable* with respect to a Breen--Deligne data `BD`,
 if for all `i : ℕ`, the constants `c' (i+1)` and `c' i` are
-suitable with respect to the universal map `BD.map i`.
+suitable with respect to the universal map `BD.d (i+1) i`.
 
 This definition ensures that we get a well-defined complex
 of normed groups `LCC_Mbar_pow V S r' (c' i) (BD.rank i)`,
-induced by the maps `BD.map i`. -/
-class suitable (BD : package) (c' : ℕ → ℝ≥0) : Prop :=
-(universal_suitable : ∀ i, (BD.map i).suitable (c' (i+1)) (c' i))
+induced by the maps `BD.d (i+1) i`. -/
+class suitable (BD : data) (c' : ℕ → ℝ≥0) : Prop :=
+(universal_suitable : ∀ i, (BD.d (i+1) i).suitable (c' (i+1)) (c' i))
 
-variables (BD : package) (c' : ℕ → ℝ≥0) (i : ℕ) [BD.suitable c']
+variables (BD : data) (c' : ℕ → ℝ≥0) (i : ℕ) [BD.suitable c']
 
-instance basic_suitable_of_suitable : ((BD.map i).suitable (c' (i+1)) (c' i)) :=
+instance basic_suitable_of_suitable : ((BD.d (i+1) i).suitable (c' (i+1)) (c' i)) :=
 suitable.universal_suitable i
 
 instance suitable_of_suitable :
-  ((universal_map.comp (BD.map i) (BD.map (i+1))).suitable (c' (i+2)) (c' i)) :=
+  ((universal_map.comp (BD.d (i+1) i) (BD.d (i+1+1) (i+1))).suitable (c' (i+2)) (c' i)) :=
 universal_map.suitable.comp (c' (i + 1))
 
-end package
+end data
+
+/-
+===
+TODO: Unify what follows with `data.suitable` above
+===
+-/
+
+-- namespace package
+
+-- /-- A sequence of nonnegative real numbers `c' 0`, `c' 1`, ...
+-- is *suitable* with respect to a Breen--Deligne package `BD`,
+-- if for all `i : ℕ`, the constants `c' (i+1)` and `c' i` are
+-- suitable with respect to the universal map `BD.map i`.
+
+-- This definition ensures that we get a well-defined complex
+-- of normed groups `LCC_Mbar_pow V S r' (c' i) (BD.rank i)`,
+-- induced by the maps `BD.map i`. -/
+-- class suitable (BD : package) (c' : ℕ → ℝ≥0) : Prop :=
+-- (universal_suitable : ∀ i, (BD.map i).suitable (c' (i+1)) (c' i))
+
+-- variables (BD : package) (c' : ℕ → ℝ≥0) (i : ℕ) [BD.suitable c']
+
+-- instance basic_suitable_of_suitable : ((BD.map i).suitable (c' (i+1)) (c' i)) :=
+-- suitable.universal_suitable i
+
+-- instance suitable_of_suitable :
+--   ((universal_map.comp (BD.map i) (BD.map (i+1))).suitable (c' (i+2)) (c' i)) :=
+-- universal_map.suitable.comp (c' (i + 1))
+
+-- end package
 
 end breen_deligne

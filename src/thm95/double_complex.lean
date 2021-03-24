@@ -24,7 +24,7 @@ namespace thm95
 
 universe variables u v w
 
-variables (BD : breen_deligne.package) (c' : ℕ → ℝ≥0) [BD.suitable c']
+variables (BD : breen_deligne.data) (c' : ℕ → ℝ≥0) [BD.suitable c']
 variables (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)]
 variables (V : NormedGroup.{v}) [normed_with_aut r V]
 variables (Λ : PolyhedralLattice.{u}) (M : ProFiltPseuNormGrpWithTinv.{w} r')
