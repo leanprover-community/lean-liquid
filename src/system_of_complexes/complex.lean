@@ -519,6 +519,25 @@ begin
   simp only [← not_exists, exists_eq, not_true, or_false, false_and],
 end
 
+@[simp] lemma htpy_idx_rel₁_tt_nat (i j : ℕ) :
+  htpy_idx_rel₁ tt i j ↔ i + 1 = j :=
+begin
+  dsimp [htpy_idx_rel₁, coherent_indices, succ_nat],
+  simp only [← not_exists, exists_eq', not_true, or_false, false_and],
+end
+
+@[simp] lemma htpy_idx_rel₂_tt_nat (i j : ℕ) :
+  htpy_idx_rel₂ tt i j ↔ i + 1= j ∨ (i = 0 ∧ j = 0) :=
+begin
+  dsimp [htpy_idx_rel₂, coherent_indices, succ_nat],
+  refine or_congr iff.rfl ⟨_, _⟩,
+  { rintro ⟨hij, rfl⟩,
+    rw and_self,
+    cases i, { refl },
+    exact (hij i rfl).elim },
+  { rintro ⟨rfl, rfl⟩, exact ⟨nat.succ_ne_zero, rfl⟩ }
+end
+
 structure homotopy {C₁ C₂ : complex_like ι V cov} (f g : C₁ ⟶ C₂) :=
 (h : Π j i, C₁.X j ⟶ C₂.X i)
 (h_eq_zero : ∀ i j, ¬ coherent_indices cov i j → h j i = 0)
