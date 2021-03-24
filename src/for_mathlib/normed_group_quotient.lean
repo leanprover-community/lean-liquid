@@ -189,7 +189,7 @@ noncomputable
 instance normed_group_quotient (S : add_subgroup M) [hS : is_closed (S : set M)] :
   normed_group (quotient S) := normed_group.of_core (quotient S) (quotient.is_normed_group.core S)
 
-/-- The morphism from a norrmed group to the quotient by a closed subgroup. -/
+/-- The morphism from a normed group to the quotient by a closed subgroup. -/
 noncomputable
 def normed_group.mk (S : add_subgroup M) [is_closed (S : set M)] :
   normed_group_hom M (quotient S) :=
@@ -209,6 +209,59 @@ surjective_quot_mk _
 /-- The kernel of `normed_group.mk S` is `S`. -/
 lemma normed_group.mk.ker (S : add_subgroup M) [is_closed (S : set M)] :
   (normed_group.mk S).ker = S := quotient_add_group.ker_mk  _
+
+/-- The operator norm of the projection is at most `1`. -/
+lemma norm_quotient_mk_le (S : add_subgroup M) [is_closed (S : set M)] : ∥normed_group.mk S∥ ≤ 1 :=
+op_norm_le_bound _ zero_le_one (λ m, by simp [quotient_norm_mk_le])
+
+--TODO replace S = M by S dense when we have seminormed groups
+/-- The operator norm of the projection is `1` if the subspace is not the whole space. -/
+lemma norm_quotient_mk (S : add_subgroup M) [is_closed (S : set M)] (h : (S : set M) ≠ set.univ) :
+  ∥normed_group.mk S∥ = 1 :=
+begin
+  obtain ⟨x, hx⟩ := set.nonempty_compl.2 h,
+  let y := (normed_group.mk S) x,
+  have hy : ∥y∥ ≠ 0,
+  { intro h0,
+    rw [norm_eq_zero, (normed_group_hom.mem_ker _ x).symm, normed_group.mk.ker S] at h0,
+    exact set.not_mem_of_mem_compl hx h0 },
+  refine le_antisymm (norm_quotient_mk_le S) (le_of_forall_pos_le_add (λ ε hε, _)),
+  suffices : 1 ≤ ∥normed_group.mk S∥ + min ε ((1 : ℝ)/2),
+  { exact le_add_of_le_add_left this (min_le_left ε ((1 : ℝ)/2)) },
+  have hδ := sub_pos.mpr (lt_of_le_of_lt (min_le_right ε ((1 : ℝ)/2)) one_half_lt_one),
+  have hδpos : 0 < min ε ((1 : ℝ)/2) := lt_min hε one_half_pos,
+  have hδnorm := mul_pos (div_pos hδpos hδ) (lt_of_le_of_ne (norm_nonneg y) hy.symm),
+  obtain ⟨m, hm, hlt⟩ := norm_mk_lt y hδnorm,
+  have hrw : ∥y∥ + min ε (1 / 2) / (1 - min ε (1 / 2)) * ∥y∥ =
+    ∥y∥ * (1 + min ε (1 / 2) / (1 - min ε (1 / 2))) := by ring,
+  rw [hrw] at hlt,
+  have hm0 : ∥m∥ ≠ 0,
+  { intro h0,
+    rw [norm_eq_zero] at h0,
+    rw [h0, add_monoid_hom.map_zero] at hm,
+    simpa [hm] using hy },
+  replace hlt := (div_lt_div_right (lt_of_le_of_ne (norm_nonneg m) hm0.symm)).2 hlt,
+  simp only [hm0, div_self, ne.def, not_false_iff] at hlt,
+  have hrw₁ : ∥y∥ * (1 + min ε (1 / 2) / (1 - min ε (1 / 2))) / ∥m∥ =
+    (∥y∥ / ∥m∥) * (1 + min ε (1 / 2) / (1 - min ε (1 / 2))) := by ring,
+  rw [hrw₁] at hlt,
+  replace hlt := (inv_pos_lt_iff_one_lt_mul (lt_trans (div_pos hδpos hδ) (lt_one_add _))).2 hlt,
+  suffices : ∥normed_group.mk S∥ ≥ 1 - min ε (1 / 2),
+  { exact sub_le_iff_le_add.mp this },
+  calc ∥normed_group.mk S∥ ≥ ∥(normed_group.mk S) m∥ / ∥m∥ : ratio_le_op_norm (normed_group.mk S) m
+  ...  = ∥y∥ / ∥m∥ : by rw [normed_group.mk.apply, hm]
+  ... ≥ (1 + min ε (1 / 2) / (1 - min ε (1 / 2)))⁻¹ : le_of_lt hlt
+  ... = 1 - min ε (1 / 2) : by field_simp [(ne_of_lt hδ).symm]
+end
+
+/-- The operator norm of the projection is `0` if the subspace is the whole space. -/
+lemma norm_trivial_quotient_mk (S : add_subgroup M) [is_closed (S : set M)]
+  (h : (S : set M) = set.univ) : ∥normed_group.mk S∥ = 0 :=
+begin
+  refine le_antisymm (op_norm_le_bound _ (le_refl _) (λ x, _)) (norm_nonneg _),
+  rw [zero_mul, norm_le_zero_iff, (normed_group_hom.mem_ker _ x).symm, normed_group.mk.ker S],
+  exact set.mem_of_eq_of_mem h trivial
+end
 
 /-- `is_quotient f`, for `f : M ⟶ N` means that `N` is isomorphic to the quotient of `M`
 by the kernel of `f`. -/
