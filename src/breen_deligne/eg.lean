@@ -57,7 +57,7 @@ begin
 end
 
 open differential_object differential_object.complex_like
-open category_theory
+open category_theory category_theory.limits category_theory.preadditive
 
 /-- The `n`-th homotopy map for the example BD package is the identity. -/
 def hmap : Π (j i : ℕ) (h : i = j+1), (BD.double.X j) ⟶ (BD.X i)
@@ -68,13 +68,16 @@ def h : homotopy BD.σ (BD.π₁ + BD.π₂) :=
   h_eq_zero := λ i j h, dif_neg h,
   comm :=
   begin
-    intros i j k hij hjk,
-    erw [dif_pos hij, dif_pos hjk],
-    dsimp only [coherent_indices] at hij hjk, substs i j,
-    dsimp [hmap],
-    rw [category.id_comp, category.comp_id],
-    erw [chain_complex.mk'_d', map, chain_complex.mk'_d', sub_add_cancel],
-    refl
+    intros i j k,
+    simp only [htpy_idx_rel₁_ff_nat, htpy_idx_rel₂_ff_nat],
+    rintro (rfl|⟨rfl,rfl⟩),
+    { rintro rfl,
+      rw [dif_pos rfl, dif_pos rfl],
+      dsimp [hmap],
+      rw [category.id_comp, category.comp_id],
+      erw [chain_complex.mk'_d', map, chain_complex.mk'_d', sub_add_cancel],
+      refl },
+    { rintro ⟨⟩ }
   end }
 
 end eg

@@ -473,16 +473,43 @@ open category_theory.preadditive
 
 variables {ι V} [has_succ ι] [category V] [preadditive V]
 
+def htpy_idx_rel₁ (cov : bool) (i j : ι) :=
+(coherent_indices cov i j) ∨ ((∀ k, ¬ coherent_indices cov j k) ∧ i = j)
+
+def htpy_idx_rel₂ (cov : bool) (i j : ι) :=
+(coherent_indices cov i j) ∨ ((∀ k, ¬ coherent_indices cov k j) ∧ i = j)
+
+@[simp] lemma htpy_idx_rel₁_ff_nat (i j : ℕ) :
+  htpy_idx_rel₁ ff i j ↔ i = j + 1 ∨ (i = 0 ∧ j = 0) :=
+begin
+  dsimp [htpy_idx_rel₁, coherent_indices, succ_nat],
+  refine or_congr iff.rfl ⟨_, _⟩,
+  { rintro ⟨hij, rfl⟩,
+    rw and_self,
+    cases i, { refl },
+    exact (hij i rfl).elim },
+  { rintro ⟨rfl, rfl⟩,
+    refine ⟨_, rfl⟩,
+    intro k, exact (nat.succ_ne_zero k).symm }
+end
+
+@[simp] lemma htpy_idx_rel₂_ff_nat (i j : ℕ) :
+  htpy_idx_rel₂ ff i j ↔ i = j + 1 :=
+begin
+  dsimp [htpy_idx_rel₂, coherent_indices, succ_nat],
+  simp only [← not_exists, exists_eq, not_true, or_false, false_and],
+end
+
 structure homotopy {C₁ C₂ : complex_like ι V cov} (f g : C₁ ⟶ C₂) :=
 (h : Π j i, C₁.X j ⟶ C₂.X i)
 (h_eq_zero : ∀ i j, ¬ coherent_indices cov i j → h j i = 0)
-(comm : ∀ i j k, coherent_indices cov i j → coherent_indices cov j k →
+(comm : ∀ i j k, htpy_idx_rel₁ cov i j → htpy_idx_rel₂ cov j k →
   h j i ≫ C₂.d i j + C₁.d j k ≫ h k j = f.f j - g.f j)
 
 variables {C₁ C₂ C₃ : complex_like ι V cov} {f g f₁ g₁ f' f'' : C₁ ⟶ C₂} {f₂ g₂ : C₂ ⟶ C₃}
 
 @[reassoc] lemma h_comp_d (h : homotopy f g) (i j k : ι)
-  (hij: coherent_indices cov i j) (hjk: coherent_indices cov j k) :
+  (hij: htpy_idx_rel₁ cov i j) (hjk: htpy_idx_rel₂ cov j k) :
   h.h j i ≫ C₂.d i j = f.f j - g.f j - C₁.d j k ≫ h.h k j :=
 begin
   rw eq_sub_iff_add_eq,
@@ -490,7 +517,7 @@ begin
 end
 
 @[reassoc] lemma d_comp_h (h : homotopy f g) (i j k : ι)
-  (hij: coherent_indices cov i j) (hjk: coherent_indices cov j k) :
+  (hij: htpy_idx_rel₁ cov i j) (hjk: htpy_idx_rel₂ cov j k) :
   C₁.d j k ≫ h.h k j = f.f j - g.f j - h.h j i ≫ C₂.d i j :=
 begin
   rw [eq_sub_iff_add_eq, add_comm],
