@@ -3,13 +3,15 @@ import algebra.regular
 import linear_algebra.finite_dimensional
 
 variables (R S M N P : Type*)
-variables [comm_semiring R] [add_comm_monoid M] [semimodule R M]
 
 section saturation
 
 namespace submodule
 
 section comm_semiring
+
+variables [add_comm_monoid M]
+variables [comm_semiring R] [add_comm_monoid M] [semimodule R M]
 
 variables {R} {M}
 
@@ -78,21 +80,32 @@ end
 
 end comm_semiring
 
+section field
+
+variables [add_comm_monoid M]
+
 lemma saturated_of_field [field S] [semimodule S M] (s : submodule S M) : saturated s :=
 begin
   intros r hr m rms,
   rw [← one_smul S m, ← @inv_mul_cancel _ _ r, ← smul_eq_mul, smul_assoc],
-  exact smul_mem s r⁻¹ rms,
-  rintro rfl,
-  haveI nt : nontrivial S := by apply_instance,
-  exact (not_nontrivial_iff_subsingleton.mpr (is_left_regular_zero_iff_subsingleton.mp hr.left)) nt,
+  { exact smul_mem s r⁻¹ rms },
+  { rintro rfl,
+    exact (not_nontrivial_iff_subsingleton.mpr (is_left_regular_zero_iff_subsingleton.mp hr.left))
+      (field.to_nontrivial S) }
 end
+
+end field
 
 end submodule
 
 end saturation
 
 section pairing
+
+section comm_semiring
+
+variables [add_comm_monoid M]
+variables [comm_semiring R] [semimodule R M]
 
 variables [comm_semiring S] [algebra R S] [semimodule S M] [is_scalar_tower R S M]
 
@@ -145,9 +158,9 @@ def right_nondegenerate : Prop := ∀ m : M, (∀ n : N, f m n = 0) → m = 0
 /--  A pairing `M × N → P` is `perfect` if it is left and right nondegenerate. -/
 def perfect : Prop := left_nondegenerate f ∧ right_nondegenerate f
 
-/--  For a subset `s ⊆ M`, the `dual_set s` is the submodule consisting of all elements of `N`
-that have "positive pairing with all the elements of `s`.  "Positive" means that it lies in the
-`R`-submodule `P₀` of `P`. -/
+/--  For a subset `s ⊆ M`, the `dual_set s` is the submodule of `N` consisting of all the elements
+of `N` that have "positive" pairing with all the elements of `s`.
+"Positive" means that it lies in the `R`-submodule `P₀` of `P`. -/
 def dual_set (s : set M) : submodule R N :=
 { carrier := { n : N | ∀ m ∈ s, f m n ∈ P₀ },
   zero_mem' := λ m hm, by simp only [linear_map.map_zero, P₀.zero_mem],
@@ -237,7 +250,7 @@ lemma le_dual_set_iff {s : submodule R M} {t : submodule R N} :
   s ≤ f.flip.dual_set P₀ t ↔ t ≤ f.dual_set P₀ s :=
 subset_dual_set_iff _
 
-/- This lemma is a weakining of `dual_dual_of_saturated`.
+/- This lemma is a weakening of `dual_dual_of_saturated`.
 It has the advantage that we can prove it in this level of generality!  ;) -/
 lemma dual_dual_dual (s : set M) :
   f.dual_set P₀ (f.flip.dual_set P₀ (f.dual_set P₀ s)) = f.dual_set P₀ s :=
@@ -245,5 +258,39 @@ le_antisymm (λ m hm n hn, hm _ ((subset_dual_set_iff f).mpr set.subset.rfl hn))
   (λ m hm n hn, hn m hm)
 
 end pairing
+
+end comm_semiring
+
+variables [add_comm_group M] [add_comm_monoid N] [linear_ordered_add_comm_group P]
+variables [comm_semiring R] [semimodule R M] [semimodule R N] [semimodule R P]
+
+open pairing
+
+variables {R M N P} (f : pairing R M N P) (P₀ : submodule R P)
+
+lemma dual_set_insert_plus_minus {s : set M}
+  (v : M) (h0 : ∀ (m : M) (n : N), 0 ≤ (f m) n ↔ (f m) n ∈ P₀) :
+  dual_set P₀ f (insert v s) ⊔ dual_set P₀ f (insert (- v) s) = dual_set P₀ f s :=
+begin
+  ext n,
+  refine ⟨_, _⟩; intros hn,
+  { rcases submodule.mem_sup.mp hn with ⟨y, hy, z, hz, rfl⟩,
+    refine submodule.add_mem (dual_set P₀ f s) _ _;
+    exact dual_subset f (set.subset_insert _ s) ‹_› },
+  { refine submodule.mem_sup.mpr _,
+    by_cases f0 : 0 ≤ f v n,
+    { refine ⟨n, _, 0, submodule.zero_mem _, add_zero _⟩,
+      refine (mem_dual_set P₀ f _ _).mpr (λ m hm, _),
+      rcases hm with ⟨rfl, ms⟩,
+      { exact (h0 _ _).mp f0 },
+      { exact hn m hm } },
+    { refine ⟨0, submodule.zero_mem _, n, _, zero_add _⟩,
+      refine (mem_dual_set P₀ f _ _).mpr (λ m hm, _),
+      rcases hm with ⟨rfl, ms⟩,
+      { refine (h0 _ _).mp (_ : 0 ≤ (f (- v)) n),
+        rw [f.map_neg, (f v).neg_apply],
+        exact (neg_pos.mpr (not_le.mp f0)).le },
+      { exact hn m hm } } }
+end
 
 end pairing

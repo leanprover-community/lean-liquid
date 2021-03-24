@@ -13,6 +13,8 @@ import toric.pairing_dual_saturated
 
 --open_locale big_operators classical
 
+section generating_box
+
 variables {R S M : Type*} [comm_semiring R] [add_comm_group M] [semimodule R M]
 
 open pairing submodule
@@ -92,9 +94,12 @@ end
 lemma gen_box_sum_other_direction  (Z : Type*) {Q ι : Type*} [comm_ring Z] [field Q] [algebra Z Q]
   [semimodule Z M] [semimodule Q M] [is_scalar_tower Z Q M]
   (v : ι → M) (s : set M) (sZ : ∀ i : M, i ∈ s → i ∈ submodule.span Z (set.range v))
-  (zq : set Q) {z : M}
+  (zq : set Q) {z : M} (hzq : submodule.span Z zq = ⊤)
   (zZv : z ∈ submodule.span Z (set.range v)) (zQs : z ∈ submodule.span Q s) :
-  ∃ (f : ι →₀ Q), f ∈ generating_box Z v s zq ∧ z = f.sum (λ (i : ι) (q : Q), q • v i) :=
+  ∃ (x : M) (f : ι →₀ Q),
+    x ∈ submodule.span Z (set.range v) ∧
+    f ∈ generating_box Z v s zq ∧
+    z = x + f.sum (λ (i : ι) (q : Q), q • v i) :=
 begin
   refine span_induction zQs _ _ _ _,
   { intros x hx,
@@ -123,8 +128,38 @@ sorry,sorry,
 -/
 end
 
+end generating_box
+
+section connect_to_dual
+
+variables {R S M N P : Type*} [comm_semiring R] [add_comm_monoid M] [semimodule R M]
+
+variables [comm_semiring S] [algebra R S] [semimodule S M] [is_scalar_tower R S M]
+
+variables
+  [add_comm_monoid N] [semimodule R N] [semimodule S N] [is_scalar_tower R S N]
+  [add_comm_monoid P] [semimodule R P] [semimodule S P] [is_scalar_tower R S P]
+  (P₀ : submodule R P)
+
+variables (f : pairing S M N P)
+
+/-
+lemma gen_box_sum_dual {s : set M}
+
+ (Z : Type*) {Q ι : Type*} [comm_ring Z] [field Q] [algebra Z Q]
+  [semimodule Z M] [semimodule Q M] [is_scalar_tower Z Q M]
+  (v : ι → M) (s : set M) (sZ : ∀ i : M, i ∈ s → i ∈ submodule.span Z (set.range v))
+  (zq : set Q) {z : M} (hzq : submodule.span Z zq = ⊤)
+  (zZv : z ∈ submodule.span Z (set.range v)) (zQs : z ∈ submodule.span Q s) :
+  ∃ (x : M) (f : ι →₀ Q),
+    x ∈ submodule.span Z (set.range v) ∧
+    f ∈ generating_box Z v s zq ∧
+    z = x + f.sum (λ (i : ι) (q : Q), q • v i) :=
+sorry
+-/
 
 
+end connect_to_dual
 
 lemma sets {α : Type*} {a b c : set α} (hc : c ⊆ a ∪ b) : c = (c ∩ a) ∪ (c ∩ b) :=
 begin
@@ -145,7 +180,7 @@ set.finite.subset fa ba
 lemma sets_finite_inter {α : Type*} {a b : set α} (fa : a.finite) : (a ∩ b).finite :=
 set.finite.subset fa (set.inter_subset_left a b)
 
-
+/-
 lemma saturated_generation {Z Q ι : Type*} [comm_ring Z] [field Q] [algebra Z Q]
   [semimodule Z M] [semimodule Q M] [is_scalar_tower Z Q M]
   {v : ι → M} (bv : is_basis Q v) (s : set M) (hs : s ⊆ submodule.span Z (set.range v))
@@ -167,6 +202,7 @@ sorry,sorry,
   },
   sorry,
 end
+-/
 
 #exit
   classical,

@@ -36,6 +36,9 @@ def nnR : subsemiring R :=
 
 @[simp] lemma mem_nnR_nonneg (y : (nnR R)) : 0 ≤ y := y.2
 
+@[simp] lemma mem_nnR_iff_nonneg {S : Type*} [ordered_semiring S] {c : S} : c ∈ nnR S ↔ 0 ≤ c :=
+iff.rfl
+
 /--  The function `f : N → Z` is injective and its image only contains non-negative elements.
 These properties are useful for `pointed_of_is_basis_is_inj`, in order to avoid having getting
 entangled into statements such as "the subtype of the non-negative terms in ℤ is the type of ℕ". -/
@@ -61,6 +64,11 @@ lemma nnR_ocr [ordered_comm_semiring Z] : is_inj_nonneg (algebra_map (nnR Z) Z) 
 consists of non-negative elements. -/
 lemma nnR_int_int : is_inj_nonneg (algebra_map (nnR ℤ) ℤ) :=
 by convert nnR_ocr ℤ
+
+lemma mem_nnR_of_is_inj_nonneg {R S : Type*} [ordered_semiring S] {f : R → S}
+  (iRS : is_inj_nonneg f) (c : R) :
+  f c ∈ nnR S :=
+iRS.map_nonneg _
 
 end is_inj_nonneg
 
