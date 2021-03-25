@@ -132,13 +132,14 @@ variables (BD)
 
 open ProFiltPseuNormGrpWithTinv (of)
 
+open category_theory
+
 instance double_suitable : BD.double.suitable c' :=
 sorry
 
 -- === !!! warning, the instance for `M × M` has sorry'd data
 def double_iso_prod :
-  BD.double.complex c' r V r' M c ≅
-  BD.complex c' r V r' (of r' $ M × M) c :=
+  BD.double.complex c' r V r' M c ≅ BD.complex c' r V r' (of r' $ M × M) c :=
 sorry
 
 example (N : ℝ≥0) :
