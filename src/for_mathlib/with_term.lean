@@ -1,18 +1,21 @@
 import category_theory.limits.shapes.terminal
 import category_theory.limits.preserves.shapes.terminal
+import category_theory.fin_category
 
 namespace category_theory
 
-def with_term (C : Type*) [category C] := option C
+universes v u
+
+def with_term (C : Type u) [category.{v} C] := option C
 
 namespace with_term
 
-variables {C : Type*} [category C]
+variables {C : Type u} [category.{v} C]
 
 def star : with_term C := none
 
 @[simp]
-def hom : with_term C → with_term C → Type*
+def hom : with_term C → with_term C → Type v
 | (some X) (some Y) := X ⟶ Y
 | none (some X) := pempty
 | _ none := punit
@@ -38,6 +41,23 @@ instance : category (with_term C) :=
   id_comp' := by {rintro ⟨X|X⟩ ⟨Y|Y⟩, tidy},
   comp_id' := by {rintro ⟨X|X⟩ ⟨Y|Y⟩, tidy},
   assoc' := by {rintro ⟨X|X⟩ ⟨Y|Y⟩ ⟨Z|Z⟩ ⟨W|W⟩, tidy} }
+
+instance {D : Type*} [small_category D] [fin_category D] :
+  fin_category (with_term D) :=
+{ fintype_obj := by {change fintype (option _), apply_instance},
+  decidable_eq_hom := λ x y, begin
+    cases x;
+    cases y,
+    any_goals {change (decidable_eq punit), apply_instance},
+    any_goals {change (decidable_eq pempty), apply_instance},
+    change decidable_eq (x ⟶ y), apply_instance,
+  end,
+  fintype_hom := λ X Y, begin
+    cases X; cases Y,
+    any_goals {change fintype pempty, apply_instance},
+    any_goals {change fintype punit, apply_instance},
+    change fintype (X ⟶ Y), apply_instance
+  end }
 
 @[simps]
 def incl : C ⥤ with_term C :=
