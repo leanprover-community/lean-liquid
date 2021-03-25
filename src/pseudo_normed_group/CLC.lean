@@ -20,10 +20,15 @@ variables (f : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M�
 variables (g : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₂ M₃)
 
 /-- The "functor" that sends `M` and `c` to `V-hat((filtration M c)^n)` -/
+def CLCFP₂ (V : NormedGroup) (n : ℕ) : Profiniteᵒᵖ ⥤ NormedGroup :=
+LCFP₂ V n ⋙ Completion
+
+/-- The "functor" that sends `M` and `c` to `V-hat((filtration M c)^n)` -/
 def CLCFP (V : NormedGroup) (r' : ℝ≥0) (M : Type*) (c : ℝ≥0) (n : ℕ)
   [profinitely_filtered_pseudo_normed_group_with_Tinv r' M] :
   NormedGroup :=
-Completion.obj (LCFP V r' M c n)
+(CLCFP₂ V n).obj (op (Profinite.of (filtration M c)))
+-- Completion.obj (LCFP V r' M c n)
 
 namespace CLCFP
 
@@ -70,7 +75,8 @@ variables [fact (0 < r')]
 
 @[simps]
 def Tinv : CLCFP V r' M c n ⟶ CLCFP V r' M (r' * c) n :=
-Completion.map (LCFP.Tinv V r' c n)
+(CLCFP₂ V n).map (has_hom.hom.op ⟨Tinv₀' (r' * c) c, Tinv₀'_continuous (r' * c) c⟩)
+-- Completion.map (LCFP.Tinv V r' c n)
 
 lemma map_comp_Tinv :
   map V r' c n f ≫ Tinv V r' c n = Tinv V r' c n ≫ map V r' (r' * c) n f :=
@@ -86,9 +92,12 @@ section T_inv
 
 variables [normed_with_aut r V] [fact (0 < r)]
 
+def T_inv' (A : Profiniteᵒᵖ) : (CLCFP₂ V n).obj A ⟶ (CLCFP₂ V n).obj A :=
+Completion.map (LCFP.T_inv' r V n A)
+
 @[simps]
 def T_inv : CLCFP V r' M c n ⟶ CLCFP V r' M c n :=
-Completion.map (LCFP.T_inv r V r' c n)
+T_inv' r V n (op (of (filtration M c)))
 
 lemma map_comp_T_inv :
   map V r' c n f ≫ T_inv r V r' c n = T_inv r V r' c n ≫ map V r' c n f :=

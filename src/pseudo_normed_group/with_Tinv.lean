@@ -25,11 +25,13 @@ variables [profinitely_filtered_pseudo_normed_group_with_Tinv r M₂]
 variables [profinitely_filtered_pseudo_normed_group_with_Tinv r M₃]
 
 @[simps]
-def Tinv₀ (c : ℝ≥0) (x : filtration M c) : filtration M (r⁻¹ * c) :=
-⟨Tinv (x : M), Tinv_mem_filtration _ _ x.2⟩
+def Tinv₀ (c c₂ : ℝ≥0) [h : fact (r⁻¹ * c ≤ c₂)] (x : filtration M c) : filtration M c₂ :=
+⟨Tinv (x : M), filtration_mono h.1 (Tinv_mem_filtration _ _ x.2)⟩
 
-lemma Tinv₀_continuous (c : ℝ≥0) : continuous (@Tinv₀ r M _ c) :=
+lemma Tinv₀_continuous (c c₂ : ℝ≥0) [fact (r⁻¹ * c ≤ c₂)] :
+  continuous (@Tinv₀ r M _ c c₂ _) :=
 Tinv.continuous _ $ λ x, rfl
+
 end profinitely_filtered_pseudo_normed_group_with_Tinv
 
 section

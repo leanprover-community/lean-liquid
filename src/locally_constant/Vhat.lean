@@ -239,13 +239,14 @@ by { rw LCC_obj_map', refl }
 variables (S : Type*) [topological_space S] [compact_space S]
 
 @[simps]
-instance normed_with_aut_LocallyConstant (V : NormedGroup) (S : Profinite) (r : ℝ≥0)
+instance normed_with_aut_LocallyConstant (V : NormedGroup) (S : Profiniteᵒᵖ) (r : ℝ≥0)
   [normed_with_aut r V] [hr : fact (0 < r)] :
-  normed_with_aut r ((LocallyConstant.obj V).obj (op S)) :=
-{ T := (LocallyConstant.map_iso normed_with_aut.T).app (op S),
+  normed_with_aut r ((LocallyConstant.obj V).obj S) :=
+{ T := (LocallyConstant.map_iso normed_with_aut.T).app S,
   norm_T :=
   begin
-    rintro (f : locally_constant S V),
+    rw ← op_unop S,
+    rintro (f : locally_constant (unop S : Profinite) V),
     show Sup _ = ↑r * Sup _,
     dsimp,
     simp only [normed_with_aut.norm_T],
@@ -254,10 +255,10 @@ instance normed_with_aut_LocallyConstant (V : NormedGroup) (S : Profinite) (r : 
     simp only [exists_prop, set.mem_range, exists_exists_eq_and, set.mem_set_of_eq]
   end }
 
-instance normed_with_aut_LCC (V : NormedGroup) (S : Profinite) (r : ℝ≥0)
+instance normed_with_aut_LCC (V : NormedGroup) (S : Profiniteᵒᵖ) (r : ℝ≥0)
   [normed_with_aut r V] [hr : fact (0 < r)] :
-  normed_with_aut r ((LCC.obj V).obj (op S)) :=
-show normed_with_aut r (Completion.obj $ (LocallyConstant.obj V).obj (op S)), by apply_instance
+  normed_with_aut r ((LCC.obj V).obj S) :=
+show normed_with_aut r (Completion.obj $ (LocallyConstant.obj V).obj S), by apply_instance
 
 end NormedGroup
 

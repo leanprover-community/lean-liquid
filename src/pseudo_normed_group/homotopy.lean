@@ -124,6 +124,62 @@ begin
   sorry
 end
 
+variable (N : ℝ≥0)
+open pseudo_normed_group
+
+set_option pp.implicit true
+example : (filtration (rescale N M) c : Type*) = filtration M (c * N⁻¹) := rfl
+theorem foo (n) : CLCFP V r' (rescale N M) c n = CLCFP V r' M (c * N⁻¹) n := rfl
+theorem bar (n) :
+  (CLCFP.Tinv V r' c n : CLCFP V r' (rescale N M) c n ⟶ CLCFP V r' M (r' * c * N⁻¹) n) =
+  ((CLCFP.Tinv V r' (c * N⁻¹) n : CLCFP V r' M (c * N⁻¹) n ⟶ CLCFP V r' M (r' * (c * N⁻¹)) n) ≫
+    (CLCFP.res _ _ _ _ _ : CLCFP V r' M (r' * (c * N⁻¹)) n ⟶ CLCFP V r' M (r' * c * N⁻¹) n)) :=
+begin
+  dsimp [CLCFP.Tinv_def],
+  have := (CLCFP.Tinv'_of_hom V r' c M _ _).symm,
+
+end
+
+-- theorem baz (n) :
+--   (CLCFP.Tinv' V r' c n : CLCFP V r' (rescale N M) c n ⟶ CLCFP V r' M (r' * c * N⁻¹) n) =
+--   ((CLCFP.Tinv' V r' (c * N⁻¹) n : CLCFP V r' M (c * N⁻¹) n ⟶ CLCFP V r' M (r' * (c * N⁻¹)) n) ≫
+--     (eq_to_hom (by rw mul_assoc) : CLCFP V r' M (r' * (c * N⁻¹)) n ⟶ CLCFP V r' M (r' * c * N⁻¹) n)) :=
+-- _.
+
+-- begin
+--   suffices :
+--     (CLCFP.Tinv' V r' c n : CLCFP V r' (rescale N M) c n ⟶ CLCFP V r' M (r' * c * N⁻¹) n) =
+--     ((CLCFP.Tinv V r' (c * N⁻¹) n : CLCFP V r' M (c * N⁻¹) n ⟶ CLCFP V r' M (r' * (c * N⁻¹)) n) ≫
+--       (eq_to_hom (by rw mul_assoc) : CLCFP V r' M (r' * (c * N⁻¹)) n ⟶ CLCFP V r' M (r' * c * N⁻¹) n)),
+
+
+-- end
+-- theorem bar (n) :
+--   (LCFP.Tinv V r' c n : LCFP V r' (rescale N M) c n ⟶ LCFP V r' M (r' * c * N⁻¹) n) =
+--   ((LCFP.Tinv V r' (c * N⁻¹) n : LCFP V r' M (c * N⁻¹) n ⟶ LCFP V r' M (r' * (c * N⁻¹)) n) ≫
+--     (eq_to_hom (by rw mul_assoc) : LCFP V r' M (r' * (c * N⁻¹)) n ⟶ LCFP V r' M (r' * c * N⁻¹) n)) :=
+-- begin
+-- end
+
+example (n) : CLCFPTinv r V r' (rescale N M) c n ≅ CLCFPTinv r V r' M (c * N⁻¹) n :=
+begin
+  unfold CLCFPTinv,
+  dsimp only [foo],
+  apply eq_to_iso,
+  -- congr,
+end
+
+example (n) :
+  BD.complex_X (rescale_constants c' N) r V r' M c n ≅
+  BD.complex_X c' r V r' (of r' $ rescale N M) c n :=
+begin
+
+end
+
+#print rescale.pseudo_normed_group
+#check (by apply_instance : pseudo_normed_group (rescale N M))
+#print Tx
+
 end rescale
 
 section double

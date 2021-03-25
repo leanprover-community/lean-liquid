@@ -14,12 +14,37 @@ def Profinite.of (X : Type*)
   is_t2 := ‹_›,
   is_totally_disconnected := ‹_› }
 
+@[simps]
+def pseudo_normed_group.filtration_obj
+  (M) [profinitely_filtered_pseudo_normed_group M] (c) : Profinite :=
+Profinite.of (pseudo_normed_group.filtration M c)
+
+@[simps]
+def ProFiltPseuNormGrpWithTinv.level
+  (c : ℝ≥0) : ProFiltPseuNormGrpWithTinv c ⥤ Profinite :=
+{ obj := λ M, pseudo_normed_group.filtration_obj M c,
+  map := λ M N f, ⟨f.level c, f.level_continuous c⟩ }
+
 open NormedGroup opposite Profinite pseudo_normed_group category_theory breen_deligne
 open profinitely_filtered_pseudo_normed_group
 open profinitely_filtered_pseudo_normed_group_with_Tinv
 
+/-- The "functor" that sends `M` and `c` to `(filtration M c)^n` -/
+@[simps]
+def Pow (n : ℕ) : Profinite ⥤ Profinite :=
+{ obj := λ A, of (A^n),
+  map := λ A B f, {
+    to_fun := λ x j, f (x j),
+    continuous_to_fun :=
+    begin
+      -- factor this into a separate lemma `continuous.pi_map`?
+      apply continuous_pi,
+      intro j,
+      exact f.2.comp (continuous_apply j),
+    end } }
+
 universe variable u
-variables (r' : ℝ≥0) {M M₁ M₂ M₃ : Type u}
+variables {r' : ℝ≥0} {M M₁ M₂ M₃ : Type u}
 variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M]
 variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₁]
 variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₂]
@@ -28,46 +53,23 @@ variables (c c₁ c₂ c₃ c₄ : ℝ≥0) (l m n : ℕ) (ϕ : basic_universal_
 variables (f : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂)
 variables (g : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₂ M₃)
 
+@[simps]
+def profinitely_filtered_pseudo_normed_group_with_Tinv.Tinv₀_hom
+  (c c₂ : ℝ≥0) [fact (r'⁻¹ * c ≤ c₂)] : filtration_obj M c ⟶ filtration_obj M c₂ :=
+by exact ⟨Tinv₀ c c₂, Tinv₀_continuous _ _⟩
+
+open profinitely_filtered_pseudo_normed_group_with_Tinv
+
 /-- The "functor" that sends `M` and `c` to `(filtration M c)^n` -/
-def FiltrationPow (r' : ℝ≥0) (M : Type*) (c : ℝ≥0) (n : ℕ) [profinitely_filtered_pseudo_normed_group_with_Tinv r' M] :
-  Profinite :=
-of ((filtration M c : Type*)^n)
+def FiltrationPow (r' : ℝ≥0) (c : ℝ≥0) (n : ℕ) :
+  ProFiltPseuNormGrpWithTinv c ⥤ Profinite :=
+ProFiltPseuNormGrpWithTinv.level c ⋙ Pow n
 
 namespace FiltrationPow
 
 @[simps]
-def map : FiltrationPow r' M₁ c n ⟶ FiltrationPow r' M₂ c n :=
-{ to_fun := λ x j, f.level c (x j),
-  continuous_to_fun :=
-  begin
-    -- factor this into a separate lemma `continuous.pi_map`?
-    apply continuous_pi,
-    intro j,
-    exact (f.level_continuous c).comp (continuous_apply j),
-  end }
-
-variables (M)
-
-@[simp] lemma map_id :
-  map r' c n (profinitely_filtered_pseudo_normed_group_with_Tinv_hom.id) =
-    𝟙 (FiltrationPow r' M c n) :=
-by { ext, refl }
-
-variables {M}
-
-lemma map_comp : map r' c n (g.comp f) = map r' c n f ≫ map r' c n g :=
-by { ext, refl }
-
-@[simps]
-def cast_le [fact (c₁ ≤ c₂)] : FiltrationPow r' M c₁ n ⟶ FiltrationPow r' M c₂ n :=
-{ to_fun := λ x j, cast_le (x j),
-  continuous_to_fun :=
-  begin
-    -- factor this into a separate lemma `continuous.pi_map`?
-    apply continuous_pi,
-    intro j,
-    exact (embedding_cast_le c₁ c₂).continuous.comp (continuous_apply j),
-  end }
+def cast_le [fact (c₁ ≤ c₂)] : (FiltrationPow r' c₁ n).obj M ⟶ (FiltrationPow r' c₂ n).obj M :=
+(Pow n).map ⟨cast_le, (embedding_cast_le c₁ c₂).continuous⟩
 
 @[simp] lemma cast_le_refl : cast_le r' c c n = 𝟙 (FiltrationPow r' M c n) := by { ext, refl }
 
@@ -81,18 +83,11 @@ by { ext, refl }
 
 @[simps]
 def Tinv : FiltrationPow r' M c n ⟶ FiltrationPow r' M (r'⁻¹ * c) n :=
-{ to_fun := λ x j, Tinv₀ c (x j),
-  continuous_to_fun :=
-  begin
-    -- factor this into a separate lemma `continuous.pi_map`?
-    apply continuous_pi,
-    intro j,
-    exact (Tinv₀_continuous c).comp (continuous_apply j),
-  end }
+(Pow n).map (Tinv₀_hom _ c (r'⁻¹ * c))
 
 lemma map_comp_Tinv :
   map r' c n f ≫ Tinv r' c n = Tinv r' c n ≫ map r' (r'⁻¹ * c) n f :=
-by { ext x j, exact (f.map_Tinv (x j)).symm }
+by { ext x j, exact (f.map_Tinv (x j).1).symm }
 
 lemma cast_le_comp_Tinv [fact (c₁ ≤ c₂)] :
   cast_le r' c₁ c₂ n ≫ (@Tinv r' M _ c₂ n) =
@@ -158,7 +153,8 @@ begin
   ext j,
   dsimp only [eval_png₀],
   simp only [eval_png_apply, map_to_fun, subtype.coe_mk, pow_incl_apply,
-    Tinv_to_fun, Tinv₀_coe, profinitely_filtered_pseudo_normed_group_hom.map_sum],
+    FiltrationPow.Tinv, Pow_map_to_fun, Tinv₀_hom_to_fun, Tinv₀_coe,
+    profinitely_filtered_pseudo_normed_group_hom.map_sum],
   apply fintype.sum_congr,
   intro i,
   simp only [← gsmul_eq_smul],

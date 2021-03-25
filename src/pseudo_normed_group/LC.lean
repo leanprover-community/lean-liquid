@@ -20,11 +20,16 @@ variables (c c₁ c₂ c₃ c₄ : ℝ≥0) (l m n : ℕ)
 variables (f : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂)
 variables (g : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₂ M₃)
 
+/-- The functor that sends `A` to `V(A^n)` -/
+def LCP (V : NormedGroup) (n : ℕ) : Profiniteᵒᵖ ⥤ NormedGroup :=
+(Pow n).op ⋙ LocallyConstant.obj V
+
 /-- The "functor" that sends `M` and `c` to `V((filtration M c)^n)` -/
 def LCFP (V : NormedGroup) (r' : ℝ≥0) (M : Type*) (c : ℝ≥0) (n : ℕ)
   [profinitely_filtered_pseudo_normed_group_with_Tinv r' M] :
   NormedGroup :=
-(LocallyConstant.obj V).obj (op $ FiltrationPow r' M c n)
+(LCP V n).obj (op (Profinite.of (filtration M c)))
+-- (LocallyConstant.obj V).obj (op $ FiltrationPow r' M c n)
 
 namespace LCFP
 
@@ -72,7 +77,7 @@ variables [fact (0 < r')]
 
 @[simps]
 def Tinv : LCFP V r' M c n ⟶ LCFP V r' M (r' * c) n :=
-res V r' _ _ n ≫ (LocallyConstant.obj V).map (FiltrationPow.Tinv r' (r' * c) n).op
+(LCP V n).map (Tinv₀_hom _ _ c).op
 
 lemma map_comp_Tinv :
   map V r' c n f ≫ Tinv V r' c n = Tinv V r' c n ≫ map V r' (r' * c) n f :=
@@ -106,8 +111,14 @@ variables [normed_with_aut r V]
 instance [fact (0 < r)] : normed_with_aut r (LCFP V r' M c n) :=
 NormedGroup.normed_with_aut_LocallyConstant _ _ _
 
-def T_inv [fact (0 < r)] : LCFP V r' M c n ⟶ LCFP V r' M c n :=
+instance (A : Profiniteᵒᵖ) [fact (0 < r)] : normed_with_aut r ((LCP V n).obj A) :=
+NormedGroup.normed_with_aut_LocallyConstant _ _ _
+
+def T_inv' [fact (0 < r)] (A : Profiniteᵒᵖ) : (LCP V n).obj A ⟶ (LCP V n).obj A :=
 normed_with_aut.T.inv
+
+def T_inv [fact (0 < r)] : LCFP V r' M c n ⟶ LCFP V r' M c n :=
+T_inv' r V n (op (of (filtration M c)))
 
 lemma T_inv_eq [fact (0 < r)] :
   T_inv r V r' c n =
