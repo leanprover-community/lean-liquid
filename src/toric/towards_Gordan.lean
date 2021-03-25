@@ -117,49 +117,14 @@ lemma fg_with_basis (vm : ι → M) (hf : is_full_on f v vm) {s : set M} (hs : (
   ∃ g : finset N, dual_set nat_submodule f s = submodule.span ℕ g :=
 sorry
 
+/-- The proof of `Gordan` should be doable assuming `fg_with_basis`.
+First, for each element `i` of a basis of `M`, add either `i` or `- i` to the set `s`, taking
+advantage of `half_space_split`.
+Second, use that changing the signs of a basis, produces a basis.
+Third, on each piece, use `fg_with_basis`. -/
 lemma Gordan (vm : ι → M) (hf : is_full_on f v vm) {s : set M} (bv : is_basis ℤ v) :
   ∃ g : finset N, dual_set nat_submodule f s = submodule.span ℕ g :=
-begin
-  generalize' he : fintype.card ι = e,
---  generalize' he : ℕ = ι.card,
-  tactic.unfreeze_local_instances,
-  revert ι,
-  induction e with e he,
-  intros ι hi v vm fvm bv i0,
-  { refine ⟨∅, _⟩,
-    rw [finset.coe_empty, submodule.span_empty],
-    cases bv with bvi bvs,
-    have : ι ≃ pempty := fintype.card_eq_zero_equiv_equiv_pempty.to_fun i0,
-    rw pempty
-    simp at i0,
-    rw [set.range_eq_empty.mpr i0, submodule.span_empty] at bvs,
-    ext x,
-    refine ⟨λ hx, (submodule.mem_bot ℤ).mp _, _⟩,
-    { rw bvs,
-      exact submodule.mem_top },
-    { rw submodule.mem_bot,
-      rintro rfl,
-      exact submodule.zero_mem _ } }
-
-
-
-  by_cases i0 : nonempty ι,
-  { cases classical.inhabited_of_nonempty i0 with i,
-    rw ← half_space_split f (vm i),
-    sorry },
-  { refine ⟨∅, _⟩,
-    rw [finset.coe_empty, submodule.span_empty],
-    cases bv with bvi bvs,
-    rw [set.range_eq_empty.mpr i0, submodule.span_empty] at bvs,
-    ext x,
-    refine ⟨λ hx, (submodule.mem_bot ℤ).mp _, _⟩,
-    { rw bvs,
-      exact submodule.mem_top },
-    { rw submodule.mem_bot,
-      rintro rfl,
-      exact submodule.zero_mem _ } }
-end
-
+sorry
 
 
 
