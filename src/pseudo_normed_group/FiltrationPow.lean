@@ -51,13 +51,7 @@ def Pow (n : ℕ) : Profinite ⥤ Profinite :=
 { obj := λ A, of (A^n),
   map := λ A B f, {
     to_fun := λ x j, f (x j),
-    continuous_to_fun :=
-    begin
-      -- factor this into a separate lemma `continuous.pi_map`?
-      apply continuous_pi,
-      intro j,
-      exact f.2.comp (continuous_apply j),
-    end } }
+    continuous_to_fun := continuous_pi $ λ j, f.2.comp (continuous_apply j) } }
 
 @[simps]
 def profinitely_filtered_pseudo_normed_group_with_Tinv.Tinv₀_hom
