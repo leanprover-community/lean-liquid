@@ -127,7 +127,7 @@ instance profinitely_filtered_pseudo_normed_group :
     have step2 := (continuous_add' (c₁ * nnnorm l) (c₂ * nnnorm l)),
     have := step2.comp step1,
     refine (@continuous_cast_le _ _ _ _ (id _)).comp this,
-    rw add_mul, exact le_rfl
+    rw add_mul, exact ⟨le_rfl⟩
   end,
   continuous_neg' :=
   begin
@@ -180,7 +180,7 @@ begin
   refine (@continuous_cast_le _ _ _ _ (id _)).comp
     ((@Tinv₀_continuous r' M _ (c * nnnorm l)).comp
     ((continuous_apply l).comp (add_monoid_hom.incl_continuous Λ r' M c))),
-  rw mul_assoc, exact le_rfl
+  rw mul_assoc, exact ⟨le_rfl⟩
 end
 
 instance : profinitely_filtered_pseudo_normed_group_with_Tinv r' (Λ →+ M) :=

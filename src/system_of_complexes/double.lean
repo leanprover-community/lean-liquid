@@ -39,7 +39,7 @@ def X (c : ℝ≥0) (p q : ℕ) : NormedGroup :=
 and nonnegative reals `c ≤ c'`. -/
 def res {c' c : ℝ≥0} {p q : ℕ} [h : fact (c ≤ c')] :
   C.X c' p q ⟶ C.X c p q :=
-((C.map (hom_of_le h).op).f p).f q
+((C.map (hom_of_le h.out).op).f p).f q
 
 variables (c : ℝ≥0) {c₁ c₂ c₃ : ℝ≥0} (p p' q q' : ℕ)
 
@@ -49,19 +49,19 @@ begin
   delta res, erw this, refl
 end
 
-@[simp] lemma norm_res_of_eq (h : c₂ = c₁) (x : C.X c₁ p q) : ∥@res C _ _ p q h.le x∥ = ∥x∥ :=
+@[simp] lemma norm_res_of_eq (h : c₂ = c₁) (x : C.X c₁ p q) : ∥@res C _ _ p q ⟨h.le⟩ x∥ = ∥x∥ :=
 by { cases h, rw res_refl, refl }
 
 @[simp] lemma res_comp_res (h₁ : fact (c₂ ≤ c₁)) (h₂ : fact (c₃ ≤ c₂)) :
-  @res C _ _ p q h₁ ≫ @res C _ _ p q h₂  = @res C _ _ p q (le_trans h₂ h₁) :=
+  @res C _ _ p q h₁ ≫ @res C _ _ p q h₂  = @res C _ _ p q ⟨h₂.out.trans h₁.out⟩ :=
 begin
-  have := (category_theory.functor.map_comp C (hom_of_le h₁).op (hom_of_le h₂).op),
+  have := (category_theory.functor.map_comp C (hom_of_le h₁.out).op (hom_of_le h₂.out).op),
   rw [← op_comp] at this,
   delta res, erw this, refl,
 end
 
 @[simp] lemma res_res (h₁ : fact (c₂ ≤ c₁)) (h₂ : fact (c₃ ≤ c₂)) (x : C.X c₁ p q) :
-  @res C _ _ p q h₂ (@res C _ _ p q h₁ x) = @res C _ _ p q (le_trans h₂ h₁) x :=
+  @res C _ _ p q h₂ (@res C _ _ p q h₁ x) = @res C _ _ p q ⟨h₂.out.trans h₁.out⟩ x :=
 by { rw ← (C.res_comp_res p q h₁ h₂), refl }
 
 /-- `C.d` is the differential `C.X c p q ⟶ C.X c (p+1) q` for a system of double complexes `C`. -/
@@ -79,7 +79,7 @@ d_eq_zero_apply _ _ _ _ _ p.succ_ne_self _
 
 lemma d_comp_res (h : fact (c₂ ≤ c₁)) :
   C.d p p' ≫ @res C _ _ _ q h = @res C _ _ p q _ ≫ C.d p p' :=
-congr_fun (congr_arg differential_object.hom.f ((C.map (hom_of_le h).op).comm p p')) q
+congr_fun (congr_arg differential_object.hom.f ((C.map (hom_of_le h.out).op).comm p p')) q
 
 lemma d_res (h : fact (c₂ ≤ c₁)) (x) :
   @d C c₂ p p' q (@res C _ _ p q _ x) = @res C _ _ _ _ h (@d C c₁ p p' q x) :=
@@ -109,7 +109,7 @@ d'_eq_zero_apply _ _ _ _ _ q.succ_ne_self _
 
 lemma d'_comp_res (h : fact (c₂ ≤ c₁)) :
   @d' C c₁ p q q' ≫ @res C _ _ _ _ h = @res C _ _ p q _ ≫ @d' C c₂ p q q' :=
-((C.map (hom_of_le h).op).f p).comm q q'
+((C.map (hom_of_le h.out).op).f p).comm q q'
 
 lemma d'_res (h : fact (c₂ ≤ c₁)) (x) :
   C.d' q q' (@res C _ _ p q _ x) = @res C _ _ _ _ h (C.d' q q' x) :=

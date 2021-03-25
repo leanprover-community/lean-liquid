@@ -61,12 +61,12 @@ by { simp only [map, CLCFP.map_comp], symmetry, apply equalizer.map_comp_map }
 lemma map_norm_noninc : (map r V r' c n f).norm_noninc :=
 equalizer.map_norm_noninc _ _ $ CLCFP.map_norm_noninc _ _ _ _ _
 
-def res [fact (c₁ ≤ c₂)] : CLCFPTinv r V r' M c₂ n ⟶ CLCFPTinv r V r' M c₁ n :=
+def res [hc: fact (c₁ ≤ c₂)] : CLCFPTinv r V r' M c₂ n ⟶ CLCFPTinv r V r' M c₁ n :=
 equalizer.map (CLCFP.res _ _ _ _ _) (CLCFP.res _ _ _ _ _)
 (CLCFP.res_comp_Tinv _ _ _ _ _).symm $
 begin
   haveI : fact (r' * c₁ ≤ c₂) :=
-    le_trans (show fact (r' * c₁ ≤ c₁), by apply_instance) ‹c₁ ≤ c₂›,
+    ⟨(infer_instance : fact (r' * c₁ ≤ c₁)).out.trans hc.out⟩,
   show (CLCFP.T_inv r V r' c₂ n ≫ CLCFP.res V r' (r' * c₂) c₂ n) ≫ (CLCFP.res V r' (r' * c₁) (r' * c₂) n) =
     (CLCFP.res V r' c₁ c₂ n) ≫ (CLCFP.T_inv r V r' c₁ n ≫ CLCFP.res V r' (r' * c₁) c₁ n),
   rw [← category.assoc],

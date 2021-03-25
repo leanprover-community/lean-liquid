@@ -29,14 +29,14 @@ instance [hN : fact (0 < N)] [normed_group V] : normed_group (rescale N V) :=
 normed_group.of_core (rescale N V)
 { norm_eq_zero_iff := λ v,
   begin
-    have aux : (N:ℝ) ≠ 0 := ne_of_gt hN,
+    have aux : (N:ℝ) ≠ 0 := ne_of_gt hN.out,
     simp only [norm_def, div_eq_zero_iff, aux, or_false],
     exact norm_eq_zero -- defeq abuse
   end,
   triangle := λ v w,
   begin
     simp only [norm_def, ← add_div],
-    exact div_le_div_of_le (le_of_lt hN) (norm_add_le _ _), -- defeq abuse
+    exact div_le_div_of_le hN.out.le (norm_add_le _ _), -- defeq abuse
   end,
   norm_neg := λ v, by { simp only [norm_def], congr' 1, exact norm_neg _ /- defeq abuse -/ } }
 

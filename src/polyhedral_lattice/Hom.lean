@@ -48,7 +48,7 @@ def Hom (M : ProFiltPseuNormGrpWithTinv r') :
     begin
       rw [add_monoid_hom.continuous_iff],
       intro l,
-      haveI : fact (nnnorm (f l) ≤ nnnorm l) := f.strict_nnnorm l,
+      haveI : fact (nnnorm (f l) ≤ nnnorm l) := ⟨f.strict_nnnorm l⟩,
       have aux := (continuous_apply (f l)).comp
         (add_monoid_hom.incl_continuous Λ₂ r' M c),
       rw (embedding_cast_le (c * nnnorm (f l)) (c * nnnorm l)).continuous_iff at aux,

@@ -72,14 +72,14 @@ variables (C C₁ C₂ : system_of_complexes.{u})
 /-- `res` is the restriction map `C c' i ⟶ C c i` for a system of complexes `C`,
 and nonnegative reals `c ≤ c'`. -/
 def res {C : system_of_complexes} {c' c : ℝ≥0} {i : ℕ} [h : fact (c ≤ c')] : C c' i ⟶ C c i :=
-(C.map (hom_of_le h).op).f i
+(C.map (hom_of_le h.out).op).f i
 
 variables {c₁ c₂ c₃ : ℝ≥0} (i j : ℕ)
 
 @[simp] lemma res_comp_res (h₁ : fact (c₂ ≤ c₁)) (h₂ : fact (c₃ ≤ c₂)) :
-  @res C _ _ i h₁ ≫ @res C _ _ i h₂ = @res C _ _ i (le_trans h₂ h₁) :=
+  @res C _ _ i h₁ ≫ @res C _ _ i h₂ = @res C _ _ i ⟨h₂.out.trans h₁.out⟩ :=
 begin
-  have := (category_theory.functor.map_comp C (hom_of_le h₁).op (hom_of_le h₂).op),
+  have := (category_theory.functor.map_comp C (hom_of_le h₁.out).op (hom_of_le h₂.out).op),
   rw [← op_comp] at this,
   delta res,
   erw this,
@@ -87,7 +87,7 @@ begin
 end
 
 @[simp] lemma res_res (h₁ : fact (c₂ ≤ c₁)) (h₂ : fact (c₃ ≤ c₂)) (x : C c₁ i) :
-  @res C _ _ i h₂ (@res C _ _ i h₁ x) = @res C _ _ i (le_trans h₂ h₁) x :=
+  @res C _ _ i h₂ (@res C _ _ i h₁ x) = @res C _ _ i ⟨h₂.out.trans h₁.out⟩ x :=
 by { rw ← (C.res_comp_res i h₁ h₂), refl }
 
 /-- `C.d` is the differential `C c i ⟶ C c (i+1)` for a system of complexes `C`. -/
@@ -112,7 +112,7 @@ show ((C.d i j) ≫ C.d j k) x = 0, by { rw d_comp_d, refl }
 
 lemma d_comp_res (h : fact (c₂ ≤ c₁)) :
   C.d i j ≫ @res C _ _ _ h = @res C _ _ _ _ ≫ C.d i j :=
-(C.map (hom_of_le h).op).comm _ _
+(C.map (hom_of_le h.out).op).comm _ _
 
 lemma d_res (h : fact (c₂ ≤ c₁)) (x) :
   C.d i j (@res C _ _ _ _ x) = @res C _ _ _ h (C.d i j x) :=
@@ -167,7 +167,7 @@ end
 
 lemma res_comp_apply (f : M ⟶ N) (c c' : ℝ≥0) [h : fact (c ≤ c')] (i : ℕ) :
   @res M c' c i _ ≫ f.apply = f.apply ≫ res :=
-congr_fun (congr_arg differential_object.hom.f (f.naturality (hom_of_le h).op)) i
+congr_fun (congr_arg differential_object.hom.f (f.naturality (hom_of_le h.out).op)) i
 
 lemma res_apply (f : M ⟶ N) (c c' : ℝ≥0) [h : fact (c ≤ c')] {i : ℕ} (m : M c' i) :
   @res N c' c _ _ (f m) = f (res m) :=
@@ -233,13 +233,14 @@ lemma of_le (hC : C.is_weak_bounded_exact k K m c₀) (hC_adm : C.admissible)
 begin
   intros c hc i hi x ε ε_pos,
   haveI : fact (k ≤ k') := hk,
-  obtain ⟨i', j, hi', hj, y, hy⟩ := hC c (le_trans hc₀ hc) i (hi.trans hm) (res x) ε ε_pos,
+  obtain ⟨i', j, hi', hj, y, hy⟩ := hC c ⟨hc₀.out.trans hc.out⟩ i (hi.trans hm) (res x) ε ε_pos,
   use [i', j, hi', hj, y],
   simp only [res_res] at hy,
   refine le_trans hy _,
   rw d_res,
   apply add_le_add_right,
-  exact mul_le_mul hK (hC_adm.res_norm_noninc _ _ _ _ (C.d _ _ x)) (norm_nonneg _) ((zero_le K).trans hK)
+  exact mul_le_mul hK.out (hC_adm.res_norm_noninc _ _ _ _ (C.d _ _ x))
+    (norm_nonneg _) ((zero_le K).trans hK.out)
 end
 
 lemma of_iso (h : C₁.is_weak_bounded_exact k K m c₀) (f : C₁ ≅ C₂)
@@ -289,8 +290,8 @@ lemma of_le (hC : C.is_bounded_exact k K m c₀)
   C.is_bounded_exact k' K' m' c₀' :=
 begin
   intros c hc i hi x,
-  haveI : fact (k ≤ k') := hk,
-  obtain ⟨i', j, hi', hj, y, hy⟩ := hC c (hc₀.trans hc) i (hi.trans hm) (res x),
+  haveI : fact (k ≤ k') := ⟨hk⟩,
+  obtain ⟨i', j, hi', hj, y, hy⟩ := hC c ⟨hc₀.trans hc.out⟩ i (hi.trans hm) (res x),
   use [i', j, hi', hj, y],
   simp only [res_res] at hy,
   refine le_trans hy _,
@@ -333,7 +334,7 @@ lemma to_exact (hC : C.is_weak_bounded_exact k K m c₀) {δ : ℝ≥0} (hδ : 0
 begin
   intros c hc i hi x,
   by_cases hdx : C.d _ (i+1) x = 0,
-  { rcases H c hc i hi x _ rfl hdx with ⟨i₀, hi₀, y, hy⟩,
+  { rcases H c hc.out i hi x _ rfl hdx with ⟨i₀, hi₀, y, hy⟩,
     exact ⟨i₀, _, hi₀, rfl, y, by simp [hy, hdx]⟩ },
   { obtain ⟨i', j, hi', rfl, y, hy⟩ :=
       hC c hc _ hi x (δ*∥C.d _ (i+1) x∥) (mul_pos (by exact_mod_cast hδ) $ norm_pos_iff.mpr hdx),

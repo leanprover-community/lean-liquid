@@ -162,7 +162,7 @@ def filtration_pi_equiv {ι : Type*} (M : ι → Type*) [Π i, pseudo_normed_gro
 for a pseudo normed group `M`, and `c₁ ≤ c₂`. -/
 def cast_le {c₁ c₂ : ℝ≥0} [h : fact (c₁ ≤ c₂)] (x : filtration M c₁) :
   filtration M c₂ :=
-⟨x, filtration_mono h x.2⟩
+⟨x, filtration_mono h.out x.2⟩
 
 @[simp] lemma coe_cast_le {c₁ c₂ : ℝ≥0} [h : fact (c₁ ≤ c₂)] (x : filtration M c₁) :
   ((cast_le x : filtration M c₂) : M) = x := rfl

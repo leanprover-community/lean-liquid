@@ -15,7 +15,7 @@ namespace NormedGroup
 variables (r r₁ r₂ : ℝ≥0) [fact (0 < r)] [fact (0 < r₁)] [fact (0 < r₂)]
 
 @[simps]
-def rescale (r : ℝ≥0) [fact (0 < r)] : NormedGroup ⥤ NormedGroup :=
+def rescale (r : ℝ≥0) [hr : fact (0 < r)] : NormedGroup ⥤ NormedGroup :=
 { obj := λ V, of $ rescale r V,
   map := λ V₁ V₂ f,
   { to_fun := λ v, @rescale.of r V₂ $ f ((@rescale.of r V₁).symm v),
@@ -27,7 +27,7 @@ def rescale (r : ℝ≥0) [fact (0 < r)] : NormedGroup ⥤ NormedGroup :=
       dsimp,
       intro v,
       rw [rescale.norm_def, rescale.norm_def, ← mul_div_assoc, div_le_div_right],
-      swap, { assumption },
+      swap, { exact hr.out },
       exact hC _,
     end },
   map_id' := λ V, rfl, -- defeq abuse
@@ -61,7 +61,7 @@ def scale : rescale r₁ ⟶ rescale r₂ :=
     intro v,
     simp only [rescale.nnnorm_def, add_monoid_hom.coe_mk', div_eq_inv_mul, equiv.symm_apply_apply],
     rw [mul_assoc, mul_inv_cancel_left'],
-    have : 0 < r₁, assumption, exact this.ne'
+    have : fact (0 < r₁), assumption, exact this.out.ne'
   end,
   naturality' := λ V W f, rfl /- defeq abuse -/ }
 

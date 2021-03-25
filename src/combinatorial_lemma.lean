@@ -247,7 +247,7 @@ begin
     calc f n ≤ 1 * 1 : mul_le_mul' _ _
     ... = 1 : mul_one 1,
     { exact_mod_cast (H _ _) },
-    { exact pow_le_one _ zero_le' (le_of_lt ‹_›) } },
+    { have : fact (r' < 1) := ‹_›, exact pow_le_one _ zero_le' this.out.le } },
   obtain ⟨mask, h0, h1, h2⟩ := exists_partition N hN f f_aux summable_f,
   resetI,
   let y := λ i, Mbar.of_mask x (λ s n, mask i (e (s, n))),

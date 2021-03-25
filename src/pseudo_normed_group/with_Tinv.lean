@@ -141,7 +141,7 @@ profinitely_filtered_pseudo_normed_group_hom.mk' f.to_add_monoid_hom
 begin
   refine ⟨1, λ c, ⟨_, _⟩⟩,
   { rw one_mul, intros x h, exact f.strict h },
-  haveI : fact (1 * c ≤ c) := by { apply le_of_eq, rw one_mul },
+  haveI : fact (1 * c ≤ c) := by { rw one_mul, exact ⟨le_rfl⟩ },
   rw (embedding_cast_le (1 * c) c).continuous_iff,
   exact f.level_continuous c
 end

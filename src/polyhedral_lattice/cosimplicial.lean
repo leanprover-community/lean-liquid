@@ -29,7 +29,9 @@ open category_theory finsupp
 
 namespace PolyhedralLattice
 
-variables (Λ : PolyhedralLattice.{u}) (N : ℕ) [fact (0 < N)]
+variables (Λ : PolyhedralLattice.{u}) (N : ℕ) [hN : fact (0 < N)]
+
+include hN
 
 def rescaled_power : PolyhedralLattice :=
 @of (rescale N (fin N) →₀ Λ) $ @rescale.polyhedral_lattice N (fin N →₀ Λ) _ _
@@ -44,7 +46,7 @@ def diagonal_embedding : Λ ⟶ rescaled_power Λ N :=
     swap, { intro, exact norm_zero },
     apply le_of_eq,
     rw div_eq_iff, swap,
-    { norm_cast, apply ne_of_gt, assumption },
+    { norm_cast, exact hN.out.ne' },
     simp only [← apply_add_hom_apply, add_monoid_hom.map_sum],
     simp only [apply_add_hom_apply, single_add_hom_apply, single_apply],
     convert finset.sum_const (∥l∥ : ℝ),

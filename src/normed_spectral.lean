@@ -182,7 +182,7 @@ def truncate :
     { exact condM.col_zero_exact },
     { rw truncate.col_pos,
       refine (condM.col_exact (j+2) (nat.succ_le_succ hj)).of_le
-        (condM.admissible.col (j+2)) _ _ m.le_succ le_rfl;
+        (condM.admissible.col (j+2)) _ _ m.le_succ ⟨le_rfl⟩;
       apply_instance }
   end,
   row_exact :=
@@ -190,7 +190,7 @@ def truncate :
     intros hm i hi,
     cases m, { exact (nat.not_lt_zero _ hm).elim },
     suffices : ((truncate.obj M).row i).is_weak_bounded_exact k K m c₀,
-    { apply this.of_le (condM.truncate_admissible.row i) _ _ le_rfl le_rfl;
+    { apply this.of_le (condM.truncate_admissible.row i) _ _ le_rfl ⟨le_rfl⟩;
       apply_instance },
     rw truncate.row,
     apply (M.row i).truncate_is_weak_bounded_exact,
@@ -218,13 +218,13 @@ def of_le (cond : M.normed_spectral_conditions m k K k' ε c₀ H)
     (cond.row_exact (hm_.trans_le hm) i (hi.trans $ nat.succ_le_succ hm)).of_le
       (cond.admissible.row i) hk hK (nat.pred_le_pred hm) hc₀,
   h := cond.h,
-  h_bound_by := λ q q' hq hq' c hc x, have fact (c₀ ≤ c) := le_trans hc₀ hc, by exactI
+  h_bound_by := λ q q' hq hq' c hc x, have fact (c₀ ≤ c) := ⟨hc₀.out.trans hc.out⟩, by exactI
   calc ∥cond.h q x∥ ≤ H * ∥x∥  : cond.h_bound_by q q' (hq.trans hm) hq' c x
                   ... ≤ H_ * ∥x∥ : mul_le_mul_of_nonneg_right hH (norm_nonneg x),
   δ := cond.δ,
-  hδ := λ c hc q hq, have fact (c₀ ≤ c) := le_trans hc₀ hc,
+  hδ := λ c hc q hq, have fact (c₀ ≤ c) := ⟨hc₀.out.trans hc.out⟩,
     by exactI cond.hδ c q (hq.trans hm),
-  δ_bound_by := λ c hc q hq x, have fact (c₀ ≤ c) := le_trans hc₀ hc, by exactI
+  δ_bound_by := λ c hc q hq x, have fact (c₀ ≤ c) := ⟨hc₀.out.trans hc.out⟩, by exactI
     (cond.δ_bound_by c q (hq.trans hm) x).trans (mul_le_mul_of_nonneg_right hε (norm_nonneg _)),
   admissible := cond.admissible }
 
@@ -245,9 +245,9 @@ begin
   let φ : ℝ := ε' / 2,
   have hφ : 0 < φ := div_pos hε' zero_lt_two,
   have hδφ : ε' = φ + φ, { dsimp [φ], rw [← add_div, half_add_self] },
-  haveI : fact (k' * (k' * c) ≤ k' * k' * c) := by { rw mul_assoc, exact le_rfl },
+  haveI : fact (k' * (k' * c) ≤ k' * k' * c) := by { rw mul_assoc, exact ⟨le_rfl⟩ },
   have Hx1 := (cond.col_exact 0 le_rfl).of_le
-    (cond.admissible.col 0) ‹_› le_rfl le_rfl le_rfl c hc 0 le_rfl,
+    (cond.admissible.col 0) ‹_› ⟨le_rfl⟩ le_rfl ⟨le_rfl⟩ c hc 0 le_rfl,
   have Hx2 := cond.δ_bound_by c 0 le_rfl (M.res x),
   have aux := cond.hδ c 0 le_rfl (M.res x),
   rw [res_res] at aux,
@@ -264,7 +264,7 @@ begin
   replace Hx1 := mul_le_mul_of_nonneg_left hx1 (ε 0 K).coe_nonneg,
   replace Hx2 := (norm_le_add_norm_add _ _).trans (add_le_add (Hx2.trans Hx1) le_rfl),
   dsimp [ε] at Hx2,
-  have K0 : (K:ℝ) ≠ 0 := ne_of_gt (lt_of_lt_of_le zero_lt_one hK),
+  have K0 : (K:ℝ) ≠ 0 := ne_of_gt (lt_of_lt_of_le zero_lt_one hK.out),
   simp only [mul_add, add_assoc, mul_inv', mul_assoc, inv_mul_cancel_left' K0] at Hx2,
   simp only [← div_eq_inv_mul, sub_half, ← sub_le_iff_le_add'] at Hx2,
   simp only [sub_le_iff_le_add', div_le_iff' (zero_lt_two : (0:ℝ) < 2)] at Hx2,
@@ -301,7 +301,7 @@ begin
   introsI M k K k' _ _ _ _ cond,
   rw ← system_of_complexes.truncate_is_weak_bounded_exact_iff,
   { exact IH cond.truncate },
-  { refine @IH M (k*k*k) (K*(K*K+1)) k' _ _ _ _ (cond.of_le (m.le_succ) _ _ le_rfl le_rfl le_rfl),
+  { refine @IH M (k*k*k) (K*(K*K+1)) k' _ _ _ _ (cond.of_le (m.le_succ) _ _ le_rfl ⟨le_rfl⟩ le_rfl),
     all_goals { apply_instance } }
 end
 

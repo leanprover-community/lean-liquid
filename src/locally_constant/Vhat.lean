@@ -249,7 +249,7 @@ instance normed_with_aut_LocallyConstant (V : NormedGroup) (S : Profinite) (r : 
     show Sup _ = ↑r * Sup _,
     dsimp,
     simp only [normed_with_aut.norm_T],
-    convert real.Sup_mul r _ hr,
+    convert real.Sup_mul r _ hr.out,
     ext,
     simp only [exists_prop, set.mem_range, exists_exists_eq_and, set.mem_set_of_eq]
   end }
@@ -260,4 +260,5 @@ instance normed_with_aut_LCC (V : NormedGroup) (S : Profinite) (r : ℝ≥0)
 show normed_with_aut r (Completion.obj $ (LocallyConstant.obj V).obj (op S)), by apply_instance
 
 end NormedGroup
+
 #lint- only unused_arguments def_lemma doc_blame

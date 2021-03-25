@@ -44,7 +44,7 @@ begin
   have hm' : m - 1 < m := nat.pred_lt h0m.ne',
   rcases i with (i|i|i),
   { rw thm95.double_complex.row_zero,
-    refine (IH (m-1) hm' Λ).of_le thm95.system_admissible _ _ le_rfl le_rfl,
+    refine (IH (m-1) hm' Λ).of_le thm95.system_admissible _ _ le_rfl ⟨le_rfl⟩,
     all_goals { apply_instance } },
   { rw thm95.double_complex.row_one,
     refine (IH (m-1) hm'

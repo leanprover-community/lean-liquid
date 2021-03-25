@@ -98,7 +98,7 @@ def system (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
   map := λ c₂ c₁ h,
   differential_object.hom.mk'
     (λ i,
-    by haveI : fact ((unop c₁ : ℝ≥0) ≤ (unop c₂ : ℝ≥0)) := h.unop.down.down;
+    by haveI : fact ((unop c₁ : ℝ≥0) ≤ (unop c₂ : ℝ≥0)) := ⟨h.unop.down.down⟩;
       exact CLCFPTinv.res r V r' _ _ (BD.X i))
     begin
       rintro i j h, dsimp only [differential_object.coherent_indices] at h, subst j,
@@ -110,9 +110,9 @@ def system (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
   map_comp' := /- composition of transition maps is a transition map -/
   begin
     intros c₃ c₂ c₁ h h',
-    haveI H' : fact ((unop c₁ : ℝ≥0) ≤ (unop c₂ : ℝ≥0)) := h'.unop.down.down,
-    haveI H : fact ((unop c₂ : ℝ≥0) ≤ (unop c₃ : ℝ≥0)) := h.unop.down.down,
-    haveI : fact ((unop c₁ : ℝ≥0) ≤ (unop c₃ : ℝ≥0)) := le_trans H' H,
+    haveI H' : fact ((unop c₁ : ℝ≥0) ≤ (unop c₂ : ℝ≥0)) := ⟨h'.unop.down.down⟩,
+    haveI H : fact ((unop c₂ : ℝ≥0) ≤ (unop c₃ : ℝ≥0)) := ⟨h.unop.down.down⟩,
+    haveI : fact ((unop c₁ : ℝ≥0) ≤ (unop c₃ : ℝ≥0)) := ⟨H'.out.trans H.out⟩,
     ext i : 2, symmetry, exact CLCFPTinv.res_comp_res r V r' _ _ _ _,
   end }
 .

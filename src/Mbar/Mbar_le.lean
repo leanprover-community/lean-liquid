@@ -48,7 +48,7 @@ protected lemma mem_filtration (x : Mbar_le r' S c) :
 
 /-- The inclusion map `Mbar_le r' S c₁ → Mbar_le r' S c₂` for `c₁ ≤ c₂`. -/
 protected def cast_le [hc : fact (c₁ ≤ c₂)] (x : Mbar_le r' S c₁) : Mbar_le r' S c₂ :=
-⟨⟨x, x.coeff_zero, x.summable⟩, filtration_mono hc x.mem_filtration⟩
+⟨⟨x, x.coeff_zero, x.summable⟩, filtration_mono hc.out x.mem_filtration⟩
 
 @[simp] lemma coe_cast_le [hc : fact (c₁ ≤ c₂)] (x : Mbar_le r' S c₁) :
   ((x.cast_le : Mbar_le r' S c₂) : Mbar r' S) = x :=
@@ -103,7 +103,7 @@ for `c₁ + c₂ ≤ c₃`. -/
 def Mbar_le.add [h : fact (c₁ + c₂ ≤ c₃)]
   (F : Mbar_le r' S c₁) (G : Mbar_le r' S c₂) :
   Mbar_le r' S c₃ :=
-subtype.mk (F + G) $ filtration_mono h $ add_mem_filtration F.mem_filtration G.mem_filtration
+subtype.mk (F + G) $ filtration_mono h.out $ add_mem_filtration F.mem_filtration G.mem_filtration
 
 /-- An uncurried version of addition on `Mbar_le`,
 meaning that it takes only 1 input, coming from a product type. -/
@@ -447,7 +447,7 @@ def hom_of_normed_group_hom {C : ℝ≥0} (c₁ c₂ : ℝ≥0) [hc : fact (C * 
 ⟨{ to_fun := λ s i, f F s i,
   coeff_zero' := Mbar.coeff_zero _,
   summable' := Mbar.summable _ },
-  filtration_mono hc (h F.mem_filtration)⟩
+  filtration_mono hc.out (h F.mem_filtration)⟩
 
 lemma continuous_hom_of_normed_group_hom {C : ℝ≥0} (c₁ c₂ : ℝ≥0)
   [hc : fact (C * c₁ ≤ c₂)]
