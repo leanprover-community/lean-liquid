@@ -21,7 +21,7 @@ Profinite.of (pseudo_normed_group.filtration M c)
 
 @[simps]
 def ProFiltPseuNormGrpWithTinv.level
-  (c : ℝ≥0) : ProFiltPseuNormGrpWithTinv c ⥤ Profinite :=
+  (r' c : ℝ≥0) : ProFiltPseuNormGrpWithTinv r' ⥤ Profinite :=
 { obj := λ M, pseudo_normed_group.filtration_obj M c,
   map := λ M N f, ⟨f.level c, f.level_continuous c⟩ }
 
@@ -61,9 +61,9 @@ by exact ⟨Tinv₀ c c₂, Tinv₀_continuous _ _⟩
 open profinitely_filtered_pseudo_normed_group_with_Tinv
 
 /-- The "functor" that sends `M` and `c` to `(filtration M c)^n` -/
-def FiltrationPow (r' : ℝ≥0) (c : ℝ≥0) (n : ℕ) :
-  ProFiltPseuNormGrpWithTinv c ⥤ Profinite :=
-ProFiltPseuNormGrpWithTinv.level c ⋙ Pow n
+def FiltrationPow (r' c : ℝ≥0) (n : ℕ) :
+  ProFiltPseuNormGrpWithTinv r' ⥤ Profinite :=
+ProFiltPseuNormGrpWithTinv.level r' c ⋙ Pow n
 
 namespace FiltrationPow
 
