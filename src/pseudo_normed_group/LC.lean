@@ -2,6 +2,16 @@ import pseudo_normed_group.FiltrationPow
 import locally_constant.NormedGroup
 import locally_constant.Vhat
 
+namespace category_theory
+namespace nat_trans
+
+@[simp] lemma op_comp {C D} [category C] [category D]
+  {F G H : C ⥤ D} {α : F ⟶ G} {β : G ⟶ H} :
+  nat_trans.op (α ≫ β) = nat_trans.op β ≫ nat_trans.op α := rfl
+
+end nat_trans
+end category_theory
+
 open_locale classical nnreal big_operators
 noncomputable theory
 local attribute [instance] type_pow
@@ -25,51 +35,32 @@ def LCP (V : NormedGroup) (n : ℕ) : Profiniteᵒᵖ ⥤ NormedGroup :=
 (Pow n).op ⋙ LocallyConstant.obj V
 
 /-- The "functor" that sends `M` and `c` to `V((filtration M c)^n)` -/
-def LCFP (V : NormedGroup) (r' : ℝ≥0) (M : Type*) (c : ℝ≥0) (n : ℕ)
-  [profinitely_filtered_pseudo_normed_group_with_Tinv r' M] :
-  NormedGroup :=
-(LCP V n).obj (op (Profinite.of (filtration M c)))
--- (LocallyConstant.obj V).obj (op $ FiltrationPow r' M c n)
+def LCFP (V : NormedGroup) (r' : ℝ≥0) (c : ℝ≥0) (n : ℕ) :
+  (ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup :=
+(ProFiltPseuNormGrpWithTinv.level r' c).op ⋙ LCP V n
+
+theorem LCFP_def (V : NormedGroup) (r' : ℝ≥0) (c : ℝ≥0) (n : ℕ) :
+  LCFP V r' c n = (FiltrationPow r' c n).op ⋙ LocallyConstant.obj V := rfl
 
 namespace LCFP
 
-@[simps]
-def map : LCFP V r' M₂ c n ⟶ LCFP V r' M₁ c n :=
-(LocallyConstant.obj V).map (FiltrationPow.map r' c n f).op
-
-variables (M)
-
-@[simp] lemma map_id :
-  map V r' c n (profinitely_filtered_pseudo_normed_group_with_Tinv_hom.id) =
-    𝟙 (LCFP V r' M c n) :=
-by { delta map, rw FiltrationPow.map_id, apply category_theory.functor.map_id, }
-
-variables {M}
-
-lemma map_comp : map V r' c n (g.comp f) = map V r' c n g ≫ map V r' c n f :=
-by { delta map, rw [FiltrationPow.map_comp, op_comp], apply category_theory.functor.map_comp }
-
-lemma map_norm_noninc : (map V r' c n f).norm_noninc :=
+lemma map_norm_noninc {M₁ M₂} (f : M₁ ⟶ M₂) :
+  ((LCFP V r' c n).map f).norm_noninc :=
 locally_constant.comap_hom_norm_noninc _ _
 
 @[simps]
-def res [fact (c₁ ≤ c₂)] : LCFP V r' M c₂ n ⟶ LCFP V r' M c₁ n :=
-(LocallyConstant.obj V).map (FiltrationPow.cast_le r' c₁ c₂ n).op
+def res (r' : ℝ≥0) (c₁ c₂ : ℝ≥0) [fact (c₁ ≤ c₂)] (n : ℕ) : LCFP V r' c₂ n ⟶ LCFP V r' c₁ n :=
+(whisker_right (nat_trans.op (FiltrationPow.cast_le r' c₁ c₂ n)) (LocallyConstant.obj V) : _)
 
-@[simp] lemma res_refl : res V r' c c n = 𝟙 (LCFP V r' M c n) :=
-by { delta res, rw FiltrationPow.cast_le_refl, apply category_theory.functor.map_id }
+@[simp] lemma res_refl : res V r' c c n = 𝟙 _ :=
+by { simp [res, FiltrationPow.cast_le_refl], refl }
 
-lemma res_comp_res [fact (c₁ ≤ c₂)] [fact (c₂ ≤ c₃)] [fact (c₁ ≤ c₃)] :
-  res V r' c₂ c₃ n ≫ res V r' c₁ c₂ n = @res V r' M _ c₁ c₃ n _ :=
-by simp only [res, ← category_theory.functor.map_comp, ← op_comp, FiltrationPow.cast_le_trans]
+lemma res_comp_res [h₁ : fact (c₁ ≤ c₂)] [h₂ : fact (c₂ ≤ c₃)] :
+  res V r' c₂ c₃ n ≫ res V r' c₁ c₂ n = @res V r' c₁ c₃ ⟨le_trans h₁.1 h₂.1⟩ n :=
+by simp only [res, ← whisker_right_comp, ← nat_trans.op_comp, FiltrationPow.cast_le_comp]
 
-lemma res_norm_noninc [fact (c₁ ≤ c₂)] : (@res V r' M _ c₁ c₂ n _).norm_noninc :=
+lemma res_norm_noninc [fact (c₁ ≤ c₂)] (M) : ((@res V r' c₁ c₂ _ n).app M).norm_noninc :=
 locally_constant.comap_hom_norm_noninc _ _
-
-lemma map_comp_res [fact (c₁ ≤ c₂)] :
-  map V r' c₂ n f ≫ res V r' c₁ c₂ n = res V r' c₁ c₂ n ≫ map V r' c₁ n f :=
-by simp only [map, res, ← category_theory.functor.map_comp, ← op_comp,
-    FiltrationPow.map_comp_cast_le]
 
 section Tinv
 open profinitely_filtered_pseudo_normed_group_with_Tinv
