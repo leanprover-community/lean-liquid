@@ -1,5 +1,5 @@
 import thm95.double_complex
-import pseudo_normed_group.rescale
+import pseudo_normed_group.homotopy
 
 /-!
 # A complex canonically isomorphic to `row 1` of the double complex

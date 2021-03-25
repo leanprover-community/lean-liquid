@@ -206,4 +206,12 @@ instance pi : profinitely_filtered_pseudo_normed_group_with_Tinv r' (Π i, M i) 
   Tinv_mem_filtration := λ c x hx i, Tinv_mem_filtration _ _ (hx i),
   .. profinitely_filtered_pseudo_normed_group.pi _ }
 
+
+variables (M₁ M₂ : Type*)
+variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₁]
+variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₂]
+
+instance prod : profinitely_filtered_pseudo_normed_group_with_Tinv r' (M₁ × M₂) :=
+sorry
+
 end profinitely_filtered_pseudo_normed_group_with_Tinv
