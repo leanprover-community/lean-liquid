@@ -5,6 +5,10 @@ open_locale classical nnreal
 noncomputable theory
 local attribute [instance] type_pow
 
+universe variable u
+
+set_option pp.universes true
+
 -- move this
 def Profinite.of (X : Type*)
   [topological_space X] [t2_space X] [totally_disconnected_space X] [compact_space X] :
@@ -21,9 +25,21 @@ Profinite.of (pseudo_normed_group.filtration M c)
 
 @[simps]
 def ProFiltPseuNormGrpWithTinv.level
-  (r c : ℝ≥0) : ProFiltPseuNormGrpWithTinv r ⥤ Profinite :=
+  (r' c : ℝ≥0) : ProFiltPseuNormGrpWithTinv.{u} r' ⥤ Profinite.{u} :=
 { obj := λ M, pseudo_normed_group.filtration_obj M c,
   map := λ M N f, ⟨f.level c, f.level_continuous c⟩ }
+
+open profinitely_filtered_pseudo_normed_group category_theory
+
+@[simps]
+def Filtration (r' : ℝ≥0) : ProFiltPseuNormGrpWithTinv.{u} r' ⥤ (ℝ≥0 ⥤ Profinite.{u}) :=
+{ obj := λ M,
+  { obj := λ c, Profinite.of (pseudo_normed_group.filtration M c),
+    map := λ c₁ c₂ h, ⟨_, @continuous_cast_le M _ c₁ c₂ ⟨le_of_hom h⟩⟩ },
+  map := λ M₁ M₂ f,
+  { app := λ c, ⟨f.level c, f.level_continuous c⟩ },
+  map_id' := by { intros, ext, refl },
+  map_comp' := by { intros, ext, refl } }
 
 open NormedGroup opposite Profinite pseudo_normed_group category_theory breen_deligne
 open profinitely_filtered_pseudo_normed_group
@@ -80,7 +96,6 @@ end FiltrationPow
 namespace breen_deligne
 namespace basic_universal_map
 
-universe variable u
 variables (r c c₁ c₂ c₃ c₄ : ℝ≥0) {l m n : ℕ} (ϕ : basic_universal_map m n)
 
 open FiltrationPow
