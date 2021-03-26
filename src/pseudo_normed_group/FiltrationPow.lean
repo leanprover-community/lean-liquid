@@ -4,9 +4,8 @@ import normed_group.NormedGroup
 open_locale classical nnreal
 noncomputable theory
 local attribute [instance] type_pow
-universe u
 
-universe variable u
+universe variables u
 
 set_option pp.universes true
 
@@ -57,7 +56,7 @@ def Pow (n : ℕ) : Profinite ⥤ Profinite :=
 @[simps]
 def profinitely_filtered_pseudo_normed_group_with_Tinv.Tinv₀_hom
   {r' : ℝ≥0} (M : Type*) [profinitely_filtered_pseudo_normed_group_with_Tinv r' M]
-  (c c₂ : ℝ≥0) [fact (r'⁻¹ * c ≤ c₂)] : filtration_obj M c ⟶ filtration_obj M c₂ :=
+  (c c₂ : ℝ≥0) [fact (c ≤ r' * c₂)] : filtration_obj M c ⟶ filtration_obj M c₂ :=
 by exact ⟨Tinv₀ c c₂, Tinv₀_continuous _ _⟩
 
 open profinitely_filtered_pseudo_normed_group_with_Tinv
@@ -84,13 +83,13 @@ theorem cast_le_comp (r' c₁ c₂ c₃ : ℝ≥0) [h₁ : fact (c₁ ≤ c₂)]
 by { ext, refl }
 
 @[simps]
-def Tinv (r' : ℝ≥0) (c c₂) [fact (r'⁻¹ * c ≤ c₂)] (n) :
+def Tinv (r' : ℝ≥0) (c c₂) [fact (c ≤ r' * c₂)] (n) :
   FiltrationPow r' c n ⟶ FiltrationPow r' c₂ n :=
 { app := λ M, (Pow n).map (Tinv₀_hom M c c₂),
   naturality' := λ M N f, by { ext x j, exact (f.map_Tinv (x j).1).symm } }
 
 lemma cast_le_vcomp_Tinv (r' c₁ c₂ c₃ : ℝ≥0)
-  [fact (c₁ ≤ c₂)] [fact (c₂ ≤ c₃)] [fact (r'⁻¹ * c₁ ≤ c₂)] [fact (r'⁻¹ * c₂ ≤ c₃)] (n : ℕ) :
+  [fact (c₁ ≤ c₂)] [fact (c₂ ≤ c₃)] [fact (c₁ ≤ r' * c₂)] [fact (c₂ ≤ r' * c₃)] (n : ℕ) :
   cast_le r' c₁ c₂ n ≫ Tinv r' c₂ c₃ n = Tinv r' c₁ c₂ n ≫ cast_le r' c₂ c₃ n :=
 by { ext, refl }
 
@@ -142,7 +141,7 @@ by { ext, refl }
 open FiltrationPow
 
 lemma Tinv_comp_eval_FP (r' c₁ c₂ c₃ : ℝ≥0)
-  [fact (r'⁻¹ * c₁ ≤ c₂)] [fact (r'⁻¹ * c₂ ≤ c₃)] [ϕ.suitable c₁ c₂] [ϕ.suitable c₂ c₃] :
+  [fact (c₁ ≤ r' * c₂)] [fact (c₂ ≤ r' * c₃)] [ϕ.suitable c₁ c₂] [ϕ.suitable c₂ c₃] :
   Tinv r' c₁ c₂ m ≫ ϕ.eval_FP r' c₂ c₃ = ϕ.eval_FP r' c₁ c₂ ≫ Tinv r' c₂ c₃ n :=
 begin
   ext M x : 3,

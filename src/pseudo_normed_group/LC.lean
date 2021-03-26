@@ -67,8 +67,9 @@ open profinitely_filtered_pseudo_normed_group_with_Tinv
 variables [fact (0 < r')]
 
 @[simps]
-def Tinv : LCFP V r' M c n ⟶ LCFP V r' M (r' * c) n :=
-(LCP V n).map (Tinv₀_hom _ _ c).op
+def Tinv (c c₂ : ℝ≥0) [fact (c₂ ≤ r' * c)] (M) :
+  (LCFP V r' c n).obj M ⟶ (LCFP V r' c₂ n).obj M :=
+(LCP V n).map (Tinv₀_hom _ _ _).op
 
 lemma map_comp_Tinv :
   map V r' c n f ≫ Tinv V r' c n = Tinv V r' c n ≫ map V r' (r' * c) n f :=
