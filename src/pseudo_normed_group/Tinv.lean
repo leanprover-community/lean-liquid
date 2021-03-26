@@ -53,7 +53,9 @@ def CLCFPTinv₂ (r : ℝ≥0) (V : NormedGroup) (r' : ℝ≥0) (M : Type*) (c :
   (c₂ : ℝ≥0) [h : fact (c₂ ≤ r' * c)] :
   NormedGroup :=
 by haveI : fact (c₂ ≤ c) := ⟨h.1.trans $ (mul_le_mul' r1.1 le_rfl).trans (by simp)⟩; exact
-CLCPTinv r V n (filtration_obj.Tinv₀_hom M c₂ c).op (filtration_obj.cast_le _ _ _).op
+CLCPTinv r V n
+  (profinitely_filtered_pseudo_normed_group_with_Tinv.Tinv₀_hom M c₂ c).op
+  (Filtration.cast_le _ _ _).op
 
 /-- The "functor" that sends `M` and `c` to `V-hat((filtration M c)^n)^{T⁻¹}`,
 defined by taking `T⁻¹`-invariants
