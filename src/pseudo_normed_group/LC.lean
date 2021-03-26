@@ -59,7 +59,12 @@ lemma res_comp_res [h₁ : fact (c₁ ≤ c₂)] [h₂ : fact (c₂ ≤ c₃)] :
   res V r' c₂ c₃ n ≫ res V r' c₁ c₂ n = @res V r' c₁ c₃ ⟨le_trans h₁.1 h₂.1⟩ n :=
 by simp only [res, ← whisker_right_comp, ← nat_trans.op_comp, FiltrationPow.cast_le_comp]
 
-lemma res_norm_noninc [fact (c₁ ≤ c₂)] (M) : ((@res V r' c₁ c₂ _ n).app M).norm_noninc :=
+lemma res_app [fact (c₁ ≤ c₂)] (M) :
+  (res V r' c₁ c₂ n).app M =
+    (LCP V n).map (Filtration.cast_le c₁ c₂ (unop M : ProFiltPseuNormGrpWithTinv r')).op :=
+rfl
+
+lemma res_norm_noninc [fact (c₁ ≤ c₂)] (M) : ((res V r' c₁ c₂ n).app M).norm_noninc :=
 locally_constant.comap_hom_norm_noninc _ _
 
 section Tinv
@@ -86,14 +91,9 @@ lemma res_comp_Tinv
   (res V r' c₁ c₂ n).app M ≫ Tinv V r' n c₁ c₃ M =
     Tinv V r' n c₂ c₄ M ≫ (res V r' c₃ c₄ n).app M :=
 begin
-  dsimp only [Tinv, res, whisker_right_app],
-  -- the following `show` fails
-  -- I think we should find a design so that it doesn't
-
-  -- show (LCP V n).map _ ≫ _ = _,
-
-  -- simp only [← category_theory.functor.map_comp, ← op_comp],
-  -- refl
+  dsimp only [Tinv, res_app],
+  simp only [← (LCP V n).map_comp, ← op_comp],
+  refl
 end
 
 lemma Tinv_norm_noninc : (@Tinv V r' M _ c n _).norm_noninc :=
