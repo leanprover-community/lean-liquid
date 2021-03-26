@@ -44,26 +44,22 @@ lemma res_norm_noninc [fact (c₂ ≤ c₁)] (M) :
   ((res V r' c₁ c₂ n).app M).norm_noninc :=
 Completion_map_norm_noninc _ $ LCFP.res_norm_noninc _ _ _ _ _ _
 
-lemma map_comp_res [fact (c₁ ≤ c₂)] :
-  map V r' c₂ n f ≫ res V r' c₁ c₂ n = res V r' c₁ c₂ n ≫ map V r' c₁ n f :=
-by simp only [map, res, ← category_theory.functor.map_comp, ← op_comp, LCFP.map_comp_res]
-
 section Tinv
 open profinitely_filtered_pseudo_normed_group_with_Tinv
 variables [fact (0 < r')]
 
 @[simps]
-def Tinv : CLCFP V r' M c n ⟶ CLCFP V r' M (r' * c) n :=
-(CLCFP₂ V n).map (has_hom.hom.op ⟨Tinv₀' (r' * c) c, Tinv₀'_continuous (r' * c) c⟩)
--- Completion.map (LCFP.Tinv V r' c n)
+def Tinv [fact (c₂ ≤ r' * c₁)] : CLCFP V r' c₁ n ⟶ CLCFP V r' c₂ n :=
+@whisker_right _ _ Profiniteᵒᵖ _ _ _ _ _
+ (nat_trans.op $ FiltrationPow.Tinv r' c₂ c₁ n) (LocallyConstant.obj V ⋙ Completion)
+.
 
-lemma map_comp_Tinv :
-  map V r' c n f ≫ Tinv V r' c n = Tinv V r' c n ≫ map V r' (r' * c) n f :=
-by simp only [Tinv, map, ← category_theory.functor.map_comp, ← op_comp, LCFP.map_comp_Tinv]
-
-lemma res_comp_Tinv [fact (c₁ ≤ c₂)] :
-  res V r' c₁ c₂ n ≫ (@Tinv V r' M _ c₁ n _) = Tinv V r' c₂ n ≫ res V r' (r' * c₁) (r' * c₂) n :=
-by simp only [Tinv, res, ← category_theory.functor.map_comp, ← op_comp, LCFP.res_comp_Tinv]
+lemma res_comp_Tinv [fact (c₂ ≤ c₁)] [fact (c₃ ≤ c₂)] [fact (c₂ ≤ r' * c₁)] [fact (c₃ ≤ r' * c₂)] :
+  res V r' c₁ c₂ n ≫ Tinv V r' c₂ c₃ n = Tinv V r' c₁ c₂ n ≫ res V r' c₂ c₃ n :=
+begin
+  simp only [Tinv, res, LCFP.res, whisker_right_twice, ← whisker_right_comp, ← nat_trans.op_comp],
+  refl
+end
 
 end Tinv
 
@@ -71,22 +67,24 @@ section T_inv
 
 variables [normed_with_aut r V] [fact (0 < r)]
 
-def T_inv' (A : Profiniteᵒᵖ) : (CLCFP₂ V n).obj A ⟶ (CLCFP₂ V n).obj A :=
-Completion.map (LCFP.T_inv' r V n A)
+def T_inv' : CLCP V n ⟶ CLCP V n :=
+whisker_right (LCFP.T_inv' r V n) Completion
 
 @[simps]
-def T_inv : CLCFP V r' M c n ⟶ CLCFP V r' M c n :=
-T_inv' r V n (op (of (filtration M c)))
+def T_inv : CLCFP V r' c n ⟶ CLCFP V r' c n :=
+whisker_left _ (T_inv' r V n)
+.
 
-lemma map_comp_T_inv :
-  map V r' c n f ≫ T_inv r V r' c n = T_inv r V r' c n ≫ map V r' c n f :=
-by simp only [T_inv, map, ← category_theory.functor.map_comp, ← op_comp, LCFP.map_comp_T_inv]
-
-lemma res_comp_T_inv [fact (c₁ ≤ c₂)] :
-  res V r' c₁ c₂ n ≫ (@T_inv r V r' M _ c₁ n _ _) =
-    T_inv r V r' c₂ n ≫ res V r' c₁ c₂ n :=
-by simp only [T_inv, res, ← category_theory.functor.map_comp, ← op_comp, LCFP.res_comp_T_inv]
-
+lemma res_comp_T_inv [fact (c₂ ≤ c₁)] :
+  res V r' c₁ c₂ n ≫ (T_inv r V r' c₂ n) =
+    T_inv r V r' c₁ n ≫ res V r' c₁ c₂ n :=
+begin
+  ext M : 2,
+  simp only [nat_trans.comp_app, res_app, T_inv_app],
+  exact (T_inv' r V n).naturality _,
+  refl,
+  simp only [T_inv, res, LCFP.res, whisker_right_twice, ← whisker_right_comp, ← nat_trans.op_comp],
+end
 end T_inv
 
 end CLCFP

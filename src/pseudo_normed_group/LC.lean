@@ -66,9 +66,9 @@ open profinitely_filtered_pseudo_normed_group_with_Tinv
 variables [fact (0 < r')]
 
 -- @[simps]
-def Tinv (c c₂ : ℝ≥0) [fact (c₂ ≤ r' * c)] : LCFP V r' c n ⟶ LCFP V r' c₂ n :=
+def Tinv [fact (c₂ ≤ r' * c₁)] : LCFP V r' c₁ n ⟶ LCFP V r' c₂ n :=
 @whisker_right _ _ Profiniteᵒᵖ _ _ _ _ _
- (nat_trans.op $ FiltrationPow.Tinv r' c₂ c n) (LocallyConstant.obj V)
+ (nat_trans.op $ FiltrationPow.Tinv r' c₂ c₁ n) (LocallyConstant.obj V)
 
 -- lemma map_comp_Tinv (c c₂ : ℝ≥0) [fact (c₂ ≤ r' * c)] {M₁ M₂} (f : M₁ ⟶ M₂) :
 --   (LCFP V r' c n).map f ≫ Tinv V r' n c c₂ _ = Tinv V r' n c c₂ _ ≫ (LCFP V r' c₂ n).map f :=
@@ -82,13 +82,13 @@ def Tinv (c c₂ : ℝ≥0) [fact (c₂ ≤ r' * c)] : LCFP V r' c n ⟶ LCFP V 
 
 lemma res_comp_Tinv
   [fact (c₂ ≤ c₁)] [fact (c₃ ≤ c₂)] [fact (c₂ ≤ r' * c₁)] [fact (c₃ ≤ r' * c₂)] :
-  res V r' c₁ c₂ n ≫ Tinv V r' n c₂ c₃ = Tinv V r' n c₁ c₂ ≫ res V r' c₂ c₃ n :=
+  res V r' c₁ c₂ n ≫ Tinv V r' c₂ c₃ n = Tinv V r' c₁ c₂ n ≫ res V r' c₂ c₃ n :=
 begin
   simp only [Tinv, res, ← whisker_right_comp, ← nat_trans.op_comp],
   refl
 end
 
-lemma Tinv_norm_noninc [fact (c₂ ≤ r' * c₁)] (M) : ((Tinv V r' n c₁ c₂).app M).norm_noninc :=
+lemma Tinv_norm_noninc [fact (c₂ ≤ r' * c₁)] (M) : ((Tinv V r' c₁ c₂ n).app M).norm_noninc :=
 locally_constant.comap_hom_norm_noninc _ _
 
 end Tinv
@@ -184,7 +184,7 @@ by simp only [res, eval_LCFP_def, ← whisker_right_comp,
 
 lemma Tinv_comp_eval_LCFP [fact (0 < r')] [fact (c₂ ≤ r' * c₁)] [fact (c₄ ≤ r' * c₃)]
   [ϕ.suitable c₄ c₂] [ϕ.suitable c₃ c₁] :
-  Tinv V r' n c₁ c₂ ≫ ϕ.eval_LCFP V r' c₂ c₄ = ϕ.eval_LCFP V r' c₁ c₃ ≫ Tinv V r' m c₃ c₄ :=
+  Tinv V r' c₁ c₂ n ≫ ϕ.eval_LCFP V r' c₂ c₄ = ϕ.eval_LCFP V r' c₁ c₃ ≫ Tinv V r' c₃ c₄ m :=
 by simp only [Tinv, eval_LCFP_def, ← whisker_right_comp,
     ← nat_trans.op_comp, Tinv_comp_eval_FP _ _ c₄ c₃ c₂ c₁]
 
@@ -312,7 +312,7 @@ end
 
 lemma Tinv_comp_eval_LCFP [fact (0 < r')] [fact (c₂ ≤ r' * c₁)] [fact (c₄ ≤ r' * c₃)]
   [ϕ.suitable c₃ c₁] [ϕ.suitable c₄ c₂] :
-  Tinv V r' n c₁ c₂ ≫ ϕ.eval_LCFP V r' c₂ c₄ = ϕ.eval_LCFP V r' c₁ c₃ ≫ Tinv V r' m c₃ c₄ :=
+  Tinv V r' c₁ c₂ n ≫ ϕ.eval_LCFP V r' c₂ c₄ = ϕ.eval_LCFP V r' c₁ c₃ ≫ Tinv V r' c₃ c₄ m :=
 begin
   simp only [eval_LCFP, comp_sum, sum_comp],
   apply finset.sum_congr rfl,
