@@ -21,9 +21,9 @@ abbreviation ufin.map {m n : ℕ} (h : fin m → fin n) : ufin m → ufin n :=
 abbreviation Cech.diagram (a : simplex_category.{v}) : fan (ufin.{v} (a.len+1)) ⥤ C :=
 fan.mk (λ i, X) (λ i, f)
 
-abbreviation Cech.map_cone {a b : simplex_category.{v}ᵒᵖ} : Π (h : a ⟶ b)
-  (C : limits.cone (Cech.diagram f a.unop)), limits.cone (Cech.diagram f b.unop) :=
-λ h C, fan.map_cone (ufin.map h.unop.to_preorder_hom) _ _ C
+abbreviation Cech.map_cone {a b : simplex_category.{v}ᵒᵖ} (h : a ⟶ b)
+  (CC : limits.cone (Cech.diagram f a.unop)) : limits.cone (Cech.diagram f b.unop) :=
+fan.map_cone (ufin.map h.unop.to_preorder_hom) _ _ CC
 
 abbreviation Cech.obj_aux [limits.has_limits C] (a : simplex_category.{v}ᵒᵖ) : C :=
 limits.limit (Cech.diagram f a.unop)
