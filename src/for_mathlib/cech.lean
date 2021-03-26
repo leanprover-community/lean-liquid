@@ -25,14 +25,14 @@ abbreviation Cech.map_cone {a b : simplex_category.{v}ᵒᵖ} (h : a ⟶ b)
   (CC : limits.cone (Cech.diagram f a.unop)) : limits.cone (Cech.diagram f b.unop) :=
 fan.map_cone (ufin.map h.unop.to_preorder_hom) _ _ CC
 
-abbreviation Cech.obj_aux [limits.has_limits C] (a : simplex_category.{v}ᵒᵖ) : C :=
-limits.limit (Cech.diagram f a.unop)
+abbreviation Cech.obj_aux [∀ x : simplex_category.{v}, limits.has_limit (Cech.diagram f x)]
+  (a : simplex_category.{v}ᵒᵖ) : C := limits.limit (Cech.diagram f a.unop)
 
-abbreviation Cech.map_aux [limits.has_limits C] {a b : simplex_category.{v}ᵒᵖ} (h : a ⟶ b) :
-  Cech.obj_aux f a ⟶ Cech.obj_aux f b :=
+abbreviation Cech.map_aux [∀ x : simplex_category.{v}, limits.has_limit (Cech.diagram f x)]
+{a b : simplex_category.{v}ᵒᵖ} (h : a ⟶ b) : Cech.obj_aux f a ⟶ Cech.obj_aux f b :=
 limits.limit.lift (Cech.diagram f b.unop) (Cech.map_cone _ h _)
 
-def Cech [limits.has_limits C] : simplicial_object C :=
+def Cech [∀ x : simplex_category.{v}, limits.has_limit (Cech.diagram f x)] : simplicial_object C :=
 { obj := λ a, Cech.obj_aux f a,
   map := λ a b g, Cech.map_aux f g,
   map_comp' := begin
