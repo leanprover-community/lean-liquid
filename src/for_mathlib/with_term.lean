@@ -111,7 +111,11 @@ def lift_unique {D : Type*} [category D] [limits.has_terminal D] {F : C ⥤ D}
   {G : with_term C ⥤ D} [limits.preserves_limit (functor.empty _) G]
   (cond : incl ⋙ G ≅ F) : G ≅ lift F :=
 { hom :=
-  { app := λ X, option.rec_on X (limits.terminal.from _) cond.hom.app,
+  { app := λ X,
+      match X with
+      | none := (limits.terminal.from _)
+      | some x := cond.hom.app x
+      end,
     naturality' := begin
       rintro ⟨X|X⟩ ⟨Y|Y⟩,
       swap 4,
@@ -120,10 +124,14 @@ def lift_unique {D : Type*} [category D] [limits.has_terminal D] {F : C ⥤ D}
       tidy
     end },
   inv :=
-  { app := λ X, option.rec_on X (
-      let AA := (G.map_iso star_iso).symm.hom,
-          BB := (limits.preserves_terminal.iso G).symm.hom in
-      limits.terminal.from _ ≫ BB ≫ AA ) $ λ x, cond.symm.hom.app x,
+  { app := λ X,
+      match X with
+      | none :=
+          let AA := (G.map_iso star_iso).symm.hom,
+              BB := (limits.preserves_terminal.iso G).symm.hom in
+          limits.terminal.from _ ≫ BB ≫ AA
+      | some x := cond.symm.hom.app x
+      end,
     naturality' := begin
       dsimp,
       rintro ⟨X|X⟩ ⟨Y|Y⟩,
@@ -145,6 +153,26 @@ def lift_unique {D : Type*} [category D] [limits.has_terminal D] {F : C ⥤ D}
     exact is_terminal_star
   end,
   inv_hom_id' := by {ext ⟨X|X⟩, tidy} }
+
+section
+
+local attribute [tidy] tactic.case_bash
+
+def map {D E : Type*} [category D] [category E] (F : D ⥤ E) :
+  with_term D ⥤ with_term E :=
+{ obj := λ X,
+    match X with
+    | none := none
+    | some x := some (F.obj x)
+    end,
+  map := λ X Y f,
+    match X, Y, f with
+    | none, none, punit.star := punit.star
+    | some x, none, punit.star := punit.star
+    | some x, some y, f := F.map f
+    end }
+
+end
 
 end with_term
 
