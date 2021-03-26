@@ -170,6 +170,7 @@ end
 variables (Λ r' M)
 
 open profinitely_filtered_pseudo_normed_group
+variables [fact (0 < r')]
 
 def Tinv : profinitely_filtered_pseudo_normed_group_hom (Λ →+ M) (Λ →+ M) :=
 profinitely_filtered_pseudo_normed_group_hom.mk' Tinv'
@@ -177,8 +178,10 @@ begin
   refine ⟨r'⁻¹, λ c, ⟨Tinv'_mem_filtration c, _⟩⟩,
   rw add_monoid_hom.continuous_iff,
   intro l,
+  haveI : ∀ a, fact (a ≤ r' * (r'⁻¹ * a)) :=
+    λ a, ⟨by simp [mul_inv_cancel_left' (ne_of_gt (fact.out _ : 0 < r'))]⟩,
   refine (@continuous_cast_le _ _ _ _ (id _)).comp
-    ((@Tinv₀_continuous r' M _ (c * nnnorm l)).comp
+    ((@Tinv₀_continuous r' M _ (c * nnnorm l) (r'⁻¹ * (c * nnnorm l)) _).comp
     ((continuous_apply l).comp (add_monoid_hom.incl_continuous Λ r' M c))),
   rw mul_assoc, exact ⟨le_rfl⟩
 end
