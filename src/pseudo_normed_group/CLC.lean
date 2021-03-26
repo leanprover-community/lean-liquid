@@ -35,7 +35,7 @@ def res [fact (c₂ ≤ c₁)] : CLCFP V r' c₁ n ⟶ CLCFP V r' c₂ n :=
 
 lemma res_app' [fact (c₂ ≤ c₁)] (M) :
   (res V r' c₁ c₂ n).app M =
-    (CLCP V n).map (Filtration.cast_le c₂ c₁ (unop M : ProFiltPseuNormGrpWithTinv r')).op :=
+    (CLCP V n).map (Filtration.cast_le (unop M : ProFiltPseuNormGrpWithTinv r') c₂ c₁).op :=
 rfl
 
 @[simp] lemma res_refl : res V r' c c n = 𝟙 _ :=

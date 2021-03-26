@@ -55,7 +55,7 @@ by simp only [res, ← whisker_right_comp, ← nat_trans.op_comp, FiltrationPow.
 
 lemma res_app [fact (c₂ ≤ c₁)] (M) :
   (res V r' c₁ c₂ n).app M =
-    (LCP V n).map (Filtration.cast_le c₂ c₁ (unop M : ProFiltPseuNormGrpWithTinv r')).op :=
+    (LCP V n).map (Filtration.cast_le (unop M : ProFiltPseuNormGrpWithTinv r') c₂ c₁).op :=
 rfl
 
 lemma res_norm_noninc [fact (c₂ ≤ c₁)] (M) : ((res V r' c₁ c₂ n).app M).norm_noninc :=

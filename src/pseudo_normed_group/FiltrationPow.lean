@@ -31,18 +31,27 @@ def ProFiltPseuNormGrpWithTinv.level
 
 open profinitely_filtered_pseudo_normed_group category_theory
 
+namespace Filtration
+variables (M : Type u) [profinitely_filtered_pseudo_normed_group M]
 @[simps]
-def Filtration.cast_le (c₁ c₂ : ℝ≥0) [h : fact (c₁ ≤ c₂)] (M : Type u)
-  [profinitely_filtered_pseudo_normed_group M] :
+def cast_le (c₁ c₂ : ℝ≥0) [h : fact (c₁ ≤ c₂)] :
   pseudo_normed_group.filtration_obj.{u} M c₁ ⟶ pseudo_normed_group.filtration_obj.{u} M c₂ :=
 { to_fun := pseudo_normed_group.cast_le,
   continuous_to_fun := continuous_cast_le c₁ c₂ }
+
+theorem cast_le_refl (c : ℝ≥0) : cast_le M c c = 𝟙 _ := by { ext, refl }
+
+theorem cast_le_comp (c₁ c₂ c₃ : ℝ≥0) [h₁ : fact (c₁ ≤ c₂)] [h₂ : fact (c₂ ≤ c₃)] :
+  cast_le M c₁ c₂ ≫ cast_le M c₂ c₃ = @cast_le M _ c₁ c₃ ⟨le_trans h₁.1 h₂.1⟩ :=
+by { ext, refl }
+
+end Filtration
 
 @[simps]
 def Filtration (r' : ℝ≥0) : ProFiltPseuNormGrpWithTinv.{u} r' ⥤ (ℝ≥0 ⥤ Profinite.{u}) :=
 { obj := λ M,
   { obj := λ c, Profinite.of (pseudo_normed_group.filtration M c),
-    map := λ c₁ c₂ h, @Filtration.cast_le c₁ c₂ ⟨le_of_hom h⟩ _ _ },
+    map := λ c₁ c₂ h, @Filtration.cast_le _ _ c₁ c₂ ⟨le_of_hom h⟩ },
   map := λ M₁ M₂ f,
   { app := λ c, ⟨f.level c, f.level_continuous c⟩ },
   map_id' := by { intros, ext, refl },
@@ -78,7 +87,7 @@ namespace FiltrationPow
 @[simps]
 def cast_le (r' c₁ c₂ : ℝ≥0) [fact (c₁ ≤ c₂)] (n : ℕ) :
   FiltrationPow.{u} r' c₁ n ⟶ FiltrationPow r' c₂ n :=
-{ app := λ M, (Pow n).map (Filtration.cast_le c₁ c₂ M),
+{ app := λ M, (Pow n).map (Filtration.cast_le M c₁ c₂),
   naturality' := λ M N f, by { ext, refl } }
 
 theorem cast_le_refl (r' c : ℝ≥0) (n : ℕ) : cast_le r' c c n = 𝟙 _ :=
