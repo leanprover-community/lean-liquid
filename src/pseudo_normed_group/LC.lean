@@ -127,7 +127,7 @@ lemma res_comp_T_inv [fact (c₂ ≤ c₁)] :
   res V r' c₁ c₂ n ≫ T_inv r V r' c₂ n = T_inv r V r' c₁ n ≫ res V r' c₁ c₂ n :=
 begin
   ext M : 2,
-  simp only [nat_trans.comp_app, res_app_apply, T_inv_app],
+  simp only [nat_trans.comp_app, res_app, T_inv_app],
   exact (T_inv' r V n).naturality _,
 end
 
