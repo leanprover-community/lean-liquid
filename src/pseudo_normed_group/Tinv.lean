@@ -30,12 +30,12 @@ for two different actions by `T⁻¹`:
 We take the equalizer of those two actions.
 
 See the lines just above Definition 9.3 of [Analytic]. -/
-def CLCFPTinv' (r : ℝ≥0) (V : NormedGroup) (n : ℕ)
-  [normed_with_aut r V] [fact (0 < r)] (A B : Profiniteᵒᵖ) (f g : A ⟶ B) :
+def CLCPTinv (r : ℝ≥0) (V : NormedGroup) (n : ℕ)
+  [normed_with_aut r V] [fact (0 < r)] {A B : Profiniteᵒᵖ} (f g : A ⟶ B) :
   NormedGroup :=
 NormedGroup.of $ normed_group_hom.equalizer
-  ((CLCFP₂ V n).map f)
-  (CLCFP.T_inv' r V n A ≫ (CLCFP₂ V n).map g)
+  ((CLCP V n).map f)
+  ((CLCFP.T_inv' r V n).app A ≫ (CLCP V n).map g)
 
 /-- The "functor" that sends `M` and `c` to `V-hat((filtration M c)^n)^{T⁻¹}`,
 defined by taking `T⁻¹`-invariants
@@ -48,18 +48,12 @@ We take the equalizer of those two actions.
 
 See the lines just above Definition 9.3 of [Analytic]. -/
 def CLCFPTinv₂ (r : ℝ≥0) (V : NormedGroup) (r' : ℝ≥0) (M : Type*) (c : ℝ≥0) (n : ℕ)
-  [normed_with_aut r V] [fact (0 < r)] [fact (0 < r')] [fact (r' ≤ 1)]
+  [normed_with_aut r V] [fact (0 < r)] [fact (0 < r')] [r1 : fact (r' ≤ 1)]
   [profinitely_filtered_pseudo_normed_group_with_Tinv r' M]
-  (c₂ : ℝ≥0) [h : fact (r'⁻¹ * c₂ ≤ c)] :
+  (c₂ : ℝ≥0) [h : fact (c₂ ≤ r' * c)] :
   NormedGroup :=
-by haveI : fact (c₂ ≤ c) := sorry; exact
-CLCFPTinv' r V n
-  (op (Profinite.of (filtration M c)))
-  (op (Profinite.of (filtration M c₂)))
-  (has_hom.hom.op ⟨
-      profinitely_filtered_pseudo_normed_group_with_Tinv.Tinv₀' c₂ c,
-      profinitely_filtered_pseudo_normed_group_with_Tinv.Tinv₀'_continuous c₂ c⟩)
-  (has_hom.hom.op ⟨cast_le, (embedding_cast_le _ _).continuous⟩)
+by haveI : fact (c₂ ≤ c) := ⟨h.1.trans $ (mul_le_mul' r1.1 le_rfl).trans (by simp)⟩; exact
+CLCPTinv r V n (filtration_obj.Tinv₀_hom M c₂ c).op (filtration_obj.cast_le _ _ _).op
 
 /-- The "functor" that sends `M` and `c` to `V-hat((filtration M c)^n)^{T⁻¹}`,
 defined by taking `T⁻¹`-invariants
