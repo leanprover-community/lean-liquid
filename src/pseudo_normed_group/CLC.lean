@@ -31,7 +31,7 @@ Completion_map_norm_noninc _ $ LCFP.map_norm_noninc _ _ _ _ _
 
 @[simps app]
 def res [fact (c₂ ≤ c₁)] : CLCFP V r' c₁ n ⟶ CLCFP V r' c₂ n :=
-@whisker_right _ _ NormedGroup _ _ _ _ _ (LCFP.res V r' c₁ c₂ n) Completion
+(whisker_right (LCFP.res V r' c₁ c₂ n) Completion : _)
 
 lemma res_app' [fact (c₂ ≤ c₁)] (M) :
   (res V r' c₁ c₂ n).app M =
@@ -55,8 +55,8 @@ variables [fact (0 < r')]
 
 @[simps {fully_applied := ff}]
 def Tinv [fact (c₂ ≤ r' * c₁)] : CLCFP V r' c₁ n ⟶ CLCFP V r' c₂ n :=
-@whisker_right _ _ Profiniteᵒᵖ _ _ _ _ _
- (nat_trans.op $ FiltrationPow.Tinv r' c₂ c₁ n) (LocallyConstant.obj V ⋙ Completion)
+(whisker_right (nat_trans.op $ FiltrationPow.Tinv r' c₂ c₁ n)
+  (LocallyConstant.obj V ⋙ Completion) : _)
 .
 
 lemma Tinv_def [fact (c₂ ≤ r' * c₁)] : Tinv V r' c₁ c₂ n =
@@ -76,11 +76,11 @@ section T_inv
 variables [normed_with_aut r V] [fact (0 < r)]
 
 def T_inv' : CLCP V n ⟶ CLCP V n :=
-whisker_right (LCFP.T_inv' r V n) Completion
+(whisker_right (LCFP.T_inv' r V n) Completion : _)
 
 @[simps app_apply {fully_applied := ff}]
 def T_inv : CLCFP V r' c n ⟶ CLCFP V r' c n :=
-whisker_left _ (T_inv' r V n)
+(whisker_left _ (T_inv' r V n) : _)
 .
 
 lemma T_inv_def : T_inv r V r' c n = (whisker_right (LCFP.T_inv r V r' c n) Completion : _) :=

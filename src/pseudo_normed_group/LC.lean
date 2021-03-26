@@ -67,8 +67,7 @@ variables [fact (0 < r')]
 
 @[simps {fully_applied := ff}]
 def Tinv [fact (c₂ ≤ r' * c₁)] : LCFP V r' c₁ n ⟶ LCFP V r' c₂ n :=
-@whisker_right _ _ Profiniteᵒᵖ _ _ _ _ _
- (nat_trans.op $ FiltrationPow.Tinv r' c₂ c₁ n) (LocallyConstant.obj V)
+(whisker_right (nat_trans.op $ FiltrationPow.Tinv r' c₂ c₁ n) (LocallyConstant.obj V) : _)
 
 lemma res_comp_Tinv
   [fact (c₂ ≤ c₁)] [fact (c₃ ≤ c₂)] [fact (c₂ ≤ r' * c₁)] [fact (c₃ ≤ r' * c₂)] :
@@ -96,16 +95,15 @@ LCP.obj.normed_with_aut _ _ _ _
 
 @[simps {fully_applied := ff}]
 def T_inv' [fact (0 < r)] : LCP V n ⟶ LCP V n :=
-whisker_left _ (LocallyConstant.map (normed_with_aut.T.inv : V ⟶ V))
+(whisker_left _ (LocallyConstant.map (normed_with_aut.T.inv : V ⟶ V)) : _)
 
 @[simps app_apply {fully_applied := ff}]
 def T_inv [fact (0 < r)] : LCFP V r' c n ⟶ LCFP V r' c n :=
-whisker_left _ (T_inv' r V n)
+(whisker_left _ (T_inv' r V n) : _)
 
 lemma T_inv_def [fact (0 < r)] :
-  T_inv r V r' c n =
-  @whisker_left _ _ Profiniteᵒᵖ _ _ _ (FiltrationPow r' c n).op
-  _ _ (LocallyConstant.map (normed_with_aut.T.inv : V ⟶ V)) :=
+  T_inv r V r' c n = (whisker_left  (FiltrationPow r' c n).op
+      (LocallyConstant.map (normed_with_aut.T.inv : V ⟶ V)) : _) :=
 rfl
 
 lemma T_inv_app [fact (0 < r)] (M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ) :
@@ -147,12 +145,12 @@ variables (ϕ : basic_universal_map m n)
 
 def eval_LCFP (c₁ c₂ : ℝ≥0) : LCFP V r' c₁ n ⟶ LCFP V r' c₂ m :=
 if H : ϕ.suitable c₂ c₁
-then by exactI whisker_right (nat_trans.op $ ϕ.eval_FP r' c₂ c₁) (LocallyConstant.obj V)
+then by exactI (whisker_right (nat_trans.op $ ϕ.eval_FP r' c₂ c₁) (LocallyConstant.obj V) : _)
 else 0
 
 lemma eval_LCFP_def [h : ϕ.suitable c₂ c₁] :
   ϕ.eval_LCFP V r' c₁ c₂ =
-    whisker_right (nat_trans.op $ ϕ.eval_FP r' c₂ c₁) (LocallyConstant.obj V) :=
+    (whisker_right (nat_trans.op $ ϕ.eval_FP r' c₂ c₁) (LocallyConstant.obj V) : _) :=
 dif_pos h
 
 lemma eval_LCFP_not_suitable (h : ¬ ϕ.suitable c₂ c₁) :

@@ -11,14 +11,10 @@ open normed_group_hom
 
 universe variable u
 variables (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
-variables (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] {M M₁ M₂ M₃ : Type u}
-variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M]
-variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₁]
-variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₂]
-variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₃]
+variables (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)]
+variables (M M₁ M₂ M₃ : ProFiltPseuNormGrpWithTinv.{u} r')
 variables (c c₁ c₂ c₃ c₄ : ℝ≥0) (l m n : ℕ)
-variables (f : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂)
-variables (g : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₂ M₃)
+variables (f : M₁ ⟶ M₂) (g : M₂ ⟶ M₃)
 
 /-- The "functor" that sends `M` and `c` to `V-hat((filtration M c)^n)^{T⁻¹}`,
 defined by taking `T⁻¹`-invariants
@@ -47,9 +43,8 @@ for two different actions by `T⁻¹`:
 We take the equalizer of those two actions.
 
 See the lines just above Definition 9.3 of [Analytic]. -/
-def CLCFPTinv₂ (r : ℝ≥0) (V : NormedGroup) (r' : ℝ≥0) (M : Type*) (c : ℝ≥0) (n : ℕ)
-  [normed_with_aut r V] [fact (0 < r)] [fact (0 < r')] [r1 : fact (r' ≤ 1)]
-  [profinitely_filtered_pseudo_normed_group_with_Tinv r' M]
+def CLCFPTinv₂ (r : ℝ≥0) (V : NormedGroup) (r' : ℝ≥0) (M : ProFiltPseuNormGrpWithTinv r')
+  (c : ℝ≥0) (n : ℕ) [normed_with_aut r V] [fact (0 < r)] [fact (0 < r')] [r1 : fact (r' ≤ 1)]
   (c₂ : ℝ≥0) [h : fact (c₂ ≤ r' * c)] :
   NormedGroup :=
 by haveI : fact (c₂ ≤ c) := ⟨h.1.trans $ (mul_le_mul' r1.1 le_rfl).trans (by simp)⟩; exact
@@ -67,20 +62,20 @@ for two different actions by `T⁻¹`:
 We take the equalizer of those two actions.
 
 See the lines just above Definition 9.3 of [Analytic]. -/
-def CLCFPTinv (r : ℝ≥0) (V : NormedGroup) (r' : ℝ≥0) (M : Type*) (c : ℝ≥0) (n : ℕ)
-  [normed_with_aut r V] [fact (0 < r)] [fact (0 < r')] [fact (r' ≤ 1)]
-  [profinitely_filtered_pseudo_normed_group_with_Tinv r' M] :
+def CLCFPTinv (r : ℝ≥0) (V : NormedGroup) (r' : ℝ≥0) (M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ)
+  (c : ℝ≥0) (n : ℕ) [normed_with_aut r V] [fact (0 < r)] [fact (0 < r')] [fact (r' ≤ 1)] :
   NormedGroup :=
-CLCFPTinv₂ r V r' M c n (r' * c)
+CLCFPTinv₂ r V r' (unop M) c n (r' * c)
 
 namespace CLCFPTinv
 
-def map : CLCFPTinv r V r' M₂ c n ⟶ CLCFPTinv r V r' M₁ c n :=
-equalizer.map (CLCFP.map _ _ _ _ f) (CLCFP.map _ _ _ _ f)
-(CLCFP.map_comp_Tinv _ _ _ _ _).symm $
-show (CLCFP.T_inv r V r' c n ≫ CLCFP.res V r' (r' * c) c n) ≫ (CLCFP.map V r' (r' * c) n f) =
-     (CLCFP.map V r' c n f) ≫ (CLCFP.T_inv r V r' c n ≫ CLCFP.res V r' (r' * c) c n),
-by rw [← category.assoc, CLCFP.map_comp_T_inv, category.assoc, category.assoc, CLCFP.map_comp_res]
+def map {M₁ M₂} (f : M₁ ⟶ M₂) : CLCFPTinv r V r' M₁ c n ⟶ CLCFPTinv r V r' M₂ c n :=
+equalizer.map ((CLCFP V r' c n).map f) ((CLCFP V r' c n).map f)
+_ _
+-- (CLCFP.map_comp_Tinv _ _ _ _ _).symm $
+-- show (CLCFP.T_inv r V r' c n ≫ CLCFP.res V r' (r' * c) c n) ≫ (CLCFP.map V r' (r' * c) n f) =
+--      (CLCFP.map V r' c n f) ≫ (CLCFP.T_inv r V r' c n ≫ CLCFP.res V r' (r' * c) c n),
+-- by rw [← category.assoc, CLCFP.map_comp_T_inv, category.assoc, category.assoc, CLCFP.map_comp_res]
 
 variables (M)
 
