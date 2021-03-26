@@ -49,57 +49,53 @@ lemma map_norm_noninc {M₁ M₂} (f : M₁ ⟶ M₂) :
 locally_constant.comap_hom_norm_noninc _ _
 
 @[simps]
-def res (r' : ℝ≥0) (c₁ c₂ : ℝ≥0) [fact (c₁ ≤ c₂)] (n : ℕ) : LCFP V r' c₂ n ⟶ LCFP V r' c₁ n :=
-(whisker_right (nat_trans.op (FiltrationPow.cast_le r' c₁ c₂ n)) (LocallyConstant.obj V) : _)
+def res (r' : ℝ≥0) (c₁ c₂ : ℝ≥0) [fact (c₂ ≤ c₁)] (n : ℕ) : LCFP V r' c₁ n ⟶ LCFP V r' c₂ n :=
+(whisker_right (nat_trans.op (FiltrationPow.cast_le r' c₂ c₁ n)) (LocallyConstant.obj V) : _)
 
 @[simp] lemma res_refl : res V r' c c n = 𝟙 _ :=
 by { simp [res, FiltrationPow.cast_le_refl], refl }
 
-lemma res_comp_res [h₁ : fact (c₁ ≤ c₂)] [h₂ : fact (c₂ ≤ c₃)] :
-  res V r' c₂ c₃ n ≫ res V r' c₁ c₂ n = @res V r' c₁ c₃ ⟨le_trans h₁.1 h₂.1⟩ n :=
+lemma res_comp_res [h₁ : fact (c₃ ≤ c₂)] [h₂ : fact (c₂ ≤ c₁)] :
+  res V r' c₁ c₂ n ≫ res V r' c₂ c₃ n = @res V r' c₁ c₃ ⟨le_trans h₁.1 h₂.1⟩ n :=
 by simp only [res, ← whisker_right_comp, ← nat_trans.op_comp, FiltrationPow.cast_le_comp]
 
-lemma res_app [fact (c₁ ≤ c₂)] (M) :
+lemma res_app [fact (c₂ ≤ c₁)] (M) :
   (res V r' c₁ c₂ n).app M =
-    (LCP V n).map (Filtration.cast_le c₁ c₂ (unop M : ProFiltPseuNormGrpWithTinv r')).op :=
+    (LCP V n).map (Filtration.cast_le c₂ c₁ (unop M : ProFiltPseuNormGrpWithTinv r')).op :=
 rfl
 
-lemma res_norm_noninc [fact (c₁ ≤ c₂)] (M) : ((res V r' c₁ c₂ n).app M).norm_noninc :=
+lemma res_norm_noninc [fact (c₂ ≤ c₁)] (M) : ((res V r' c₁ c₂ n).app M).norm_noninc :=
 locally_constant.comap_hom_norm_noninc _ _
 
 section Tinv
 open profinitely_filtered_pseudo_normed_group_with_Tinv
 variables [fact (0 < r')]
 
-@[simps]
-def Tinv (c c₂ : ℝ≥0) [fact (c₂ ≤ r' * c)] (M) :
-  (LCFP V r' c n).obj M ⟶ (LCFP V r' c₂ n).obj M :=
-(LCP V n).map (Tinv₀_hom _ _ _).op
+-- @[simps]
+def Tinv (c c₂ : ℝ≥0) [fact (c₂ ≤ r' * c)] : LCFP V r' c n ⟶ LCFP V r' c₂ n :=
+@whisker_right _ _ Profiniteᵒᵖ _ _ _ _ _
+ (nat_trans.op $ FiltrationPow.Tinv r' c₂ c n) (LocallyConstant.obj V)
 
-lemma map_comp_Tinv (c c₂ : ℝ≥0) [fact (c₂ ≤ r' * c)] {M₁ M₂} (f : M₁ ⟶ M₂) :
-  (LCFP V r' c n).map f ≫ Tinv V r' n c c₂ _ = Tinv V r' n c c₂ _ ≫ (LCFP V r' c₂ n).map f :=
-begin
-  dsimp [Tinv, LCFP],
-  simp only [← (LCP V n).map_comp, ← op_comp],
-  congr' 2,
-  ext ⟨x, hx⟩,
-  exact f.unop.map_Tinv x
-end
+-- lemma map_comp_Tinv (c c₂ : ℝ≥0) [fact (c₂ ≤ r' * c)] {M₁ M₂} (f : M₁ ⟶ M₂) :
+--   (LCFP V r' c n).map f ≫ Tinv V r' n c c₂ _ = Tinv V r' n c c₂ _ ≫ (LCFP V r' c₂ n).map f :=
+-- begin
+--   dsimp [Tinv, LCFP],
+--   simp only [← (LCP V n).map_comp, ← op_comp],
+--   congr' 2,
+--   ext ⟨x, hx⟩,
+--   exact f.unop.map_Tinv x
+-- end
 
 lemma res_comp_Tinv
-  [fact (c₁ ≤ c₂)] [fact (c₃ ≤ c₄)] [fact (c₃ ≤ r' * c₁)] [fact (c₄ ≤ r' * c₂)] (M) :
-  (res V r' c₁ c₂ n).app M ≫ Tinv V r' n c₁ c₃ M =
-    Tinv V r' n c₂ c₄ M ≫ (res V r' c₃ c₄ n).app M :=
+  [fact (c₂ ≤ c₁)] [fact (c₃ ≤ c₂)] [fact (c₂ ≤ r' * c₁)] [fact (c₃ ≤ r' * c₂)] :
+  res V r' c₁ c₂ n ≫ Tinv V r' n c₂ c₃ = Tinv V r' n c₁ c₂ ≫ res V r' c₂ c₃ n :=
 begin
-  dsimp only [Tinv, res_app],
-  simp only [← (LCP V n).map_comp, ← op_comp],
+  simp only [Tinv, res, ← whisker_right_comp, ← nat_trans.op_comp],
   refl
 end
 
-lemma Tinv_norm_noninc : (@Tinv V r' M _ c n _).norm_noninc :=
-normed_group_hom.norm_noninc.comp
-  (locally_constant.comap_hom_norm_noninc _ _)
-  (res_norm_noninc V r' _ _ n)
+lemma Tinv_norm_noninc [fact (c₂ ≤ r' * c₁)] (M) : ((Tinv V r' n c₁ c₂).app M).norm_noninc :=
+locally_constant.comap_hom_norm_noninc _ _
 
 end Tinv
 
@@ -107,21 +103,28 @@ section normed_with_aut
 
 variables [normed_with_aut r V]
 
-instance [fact (0 < r)] : normed_with_aut r (LCFP V r' M c n) :=
+instance _root_.LCP.obj.normed_with_aut (A : Profiniteᵒᵖ) [fact (0 < r)] :
+  normed_with_aut r ((LCP V n).obj A) :=
 NormedGroup.normed_with_aut_LocallyConstant _ _ _
 
-instance (A : Profiniteᵒᵖ) [fact (0 < r)] : normed_with_aut r ((LCP V n).obj A) :=
-NormedGroup.normed_with_aut_LocallyConstant _ _ _
+instance [fact (0 < r)] (M) : normed_with_aut r ((LCFP V r' c n).obj M) :=
+LCP.obj.normed_with_aut _ _ _ _
 
-def T_inv' [fact (0 < r)] (A : Profiniteᵒᵖ) : (LCP V n).obj A ⟶ (LCP V n).obj A :=
-normed_with_aut.T.inv
+def T_inv' [fact (0 < r)] : LCP V n ⟶ LCP V n :=
+whisker_left _ (LocallyConstant.map (normed_with_aut.T.inv : V ⟶ V))
 
-def T_inv [fact (0 < r)] : LCFP V r' M c n ⟶ LCFP V r' M c n :=
-T_inv' r V n (op (of (filtration M c)))
+def T_inv [fact (0 < r)] : LCFP V r' c n ⟶ LCFP V r' c n :=
+whisker_left _ (T_inv' r V n)
 
-lemma T_inv_eq [fact (0 < r)] :
+lemma T_inv_def [fact (0 < r)] :
   T_inv r V r' c n =
-    (LocallyConstant.map (normed_with_aut.T.inv : V ⟶ V)).app (op $ FiltrationPow r' M c n) :=
+  @whisker_left _ _ Profiniteᵒᵖ _ _ _ (FiltrationPow r' c n).op
+  _ _ (LocallyConstant.map (normed_with_aut.T.inv : V ⟶ V)) :=
+rfl
+
+lemma T_inv_app [fact (0 < r)] (M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ) :
+  (T_inv r V r' c n).app M =
+    (T_inv' r V n).app ((ProFiltPseuNormGrpWithTinv.level r' c).op.obj M) :=
 rfl
 
 -- This does not apply to our situation
@@ -134,13 +137,13 @@ rfl
 
 variables [fact (0 < r)]
 
-lemma map_comp_T_inv :
-  map V r' c n f ≫ T_inv r V r' c n = T_inv r V r' c n ≫ map V r' c n f :=
-(LocallyConstant.map (normed_with_aut.T.inv : V ⟶ V)).naturality _
-
-lemma res_comp_T_inv [fact (c₁ ≤ c₂)] :
-  res V r' c₁ c₂ n ≫ (@T_inv r V r' M _ c₁ n _ _) = T_inv r V r' c₂ n ≫ res V r' c₁ c₂ n :=
-(LocallyConstant.map (normed_with_aut.T.inv : V ⟶ V)).naturality _
+lemma res_comp_T_inv [fact (c₂ ≤ c₁)] :
+  res V r' c₁ c₂ n ≫ T_inv r V r' c₂ n = T_inv r V r' c₁ n ≫ res V r' c₁ c₂ n :=
+begin
+  ext M : 2,
+  simp only [nat_trans.comp_app, res_app, T_inv_app],
+  exact (T_inv' r V n).naturality _,
+end
 
 end normed_with_aut
 
@@ -156,59 +159,44 @@ namespace basic_universal_map
 
 variables (ϕ : basic_universal_map m n)
 
-def eval_LCFP : LCFP V r' M c₂ n ⟶ LCFP V r' M c₁ m :=
-if H : ϕ.suitable c₁ c₂
-then by exactI (LocallyConstant.obj V).map (ϕ.eval_FP r' M c₁ c₂).op
+def eval_LCFP (c₁ c₂ : ℝ≥0) : LCFP V r' c₁ n ⟶ LCFP V r' c₂ m :=
+if H : ϕ.suitable c₂ c₁
+then by exactI whisker_right (nat_trans.op $ ϕ.eval_FP r' c₂ c₁) (LocallyConstant.obj V)
 else 0
 
-lemma eval_LCFP_def [h : ϕ.suitable c₁ c₂] :
-  ϕ.eval_LCFP V r' M c₁ c₂ = (LocallyConstant.obj V).map (ϕ.eval_FP r' M c₁ c₂).op :=
+lemma eval_LCFP_def [h : ϕ.suitable c₂ c₁] :
+  ϕ.eval_LCFP V r' c₁ c₂ =
+    whisker_right (nat_trans.op $ ϕ.eval_FP r' c₂ c₁) (LocallyConstant.obj V) :=
 dif_pos h
 
-lemma eval_LCFP_comp (g : basic_universal_map m n) (f : basic_universal_map l m)
-  [hg : g.suitable c₂ c₃] [hf : f.suitable c₁ c₂] :
-  (g.comp f).eval_LCFP V r' M c₁ c₃ =
-  g.eval_LCFP V r' M c₂ c₃ ≫ f.eval_LCFP V r' M c₁ c₂ :=
+lemma eval_LCFP_comp (f : basic_universal_map m n) (g : basic_universal_map l m)
+  [hf : f.suitable c₂ c₁] [hg : g.suitable c₃ c₂] :
+  (f.comp g).eval_LCFP V r' c₁ c₃ =
+  f.eval_LCFP V r' c₁ c₂ ≫ g.eval_LCFP V r' c₂ c₃ :=
 begin
-  haveI : (g.comp f).suitable c₁ c₃ := suitable_comp c₂,
-  simp only [eval_LCFP_def],
-  rw [← category_theory.functor.map_comp, ← op_comp],
-  congr' 2,
-  simp [eval_FP_comp r' M _ c₂],
-end
-
-lemma map_comp_eval_LCFP [ϕ.suitable c₁ c₂] :
-  map V r' c₂ n f ≫ ϕ.eval_LCFP V r' M₁ c₁ c₂ = ϕ.eval_LCFP V r' M₂ c₁ c₂ ≫ map V r' c₁ m f :=
-begin
-  delta map,
-  simp only [eval_LCFP_def, ← category_theory.functor.map_comp, ← op_comp, map_comp_eval_FP]
+  haveI : (f.comp g).suitable c₃ c₁ := suitable_comp c₂,
+  simp only [eval_LCFP_def, eval_FP_comp r' _ c₂, nat_trans.op_comp, whisker_right_comp]
 end
 
 lemma res_comp_eval_LCFP
-  [fact (c₁ ≤ c₂)] [ϕ.suitable c₂ c₄] [ϕ.suitable c₁ c₃] [fact (c₃ ≤ c₄)] :
-  res V r' c₃ c₄ n ≫ ϕ.eval_LCFP V r' M c₁ c₃ = ϕ.eval_LCFP V r' M c₂ c₄ ≫ res V r' c₁ c₂ m :=
-begin
-  delta res,
-  simp only [eval_LCFP_def, ← category_theory.functor.map_comp, ← op_comp,
-    cast_le_comp_eval_FP _ _ c₁ c₂ c₃ c₄]
-end
+  [fact (c₂ ≤ c₁)] [fact (c₄ ≤ c₃)] [ϕ.suitable c₄ c₂] [ϕ.suitable c₃ c₁] :
+  res V r' c₁ c₂ n ≫ ϕ.eval_LCFP V r' c₂ c₄ = ϕ.eval_LCFP V r' c₁ c₃ ≫ res V r' c₃ c₄ m :=
+by simp only [res, eval_LCFP_def, ← whisker_right_comp,
+  ← nat_trans.op_comp, cast_le_comp_eval_FP _ c₄ c₃ c₂ c₁]
 
-lemma Tinv_comp_eval_LCFP [fact (0 < r')] [ϕ.suitable c₁ c₂] :
-  Tinv V r' c₂ n ≫ ϕ.eval_LCFP V r' M (r' * c₁) (r' * c₂) = ϕ.eval_LCFP V r' M c₁ c₂ ≫ Tinv V r' c₁ m :=
-begin
-  dsimp only [Tinv],
-  rw [← category.assoc, ← res_comp_eval_LCFP V _ _ (r'⁻¹ * (r' * c₁)) c₁ (r'⁻¹ * (r' * c₂)) c₂,
-    category.assoc, category.assoc],
-  simp only [eval_LCFP_def, res, ← category_theory.functor.map_comp, ← op_comp,
-    ← category.assoc, Tinv_comp_eval_FP _ _ (r' * c₁) (r' * c₂)],
-end
+lemma Tinv_comp_eval_LCFP [fact (0 < r')] [fact (c₂ ≤ r' * c₁)] [fact (c₄ ≤ r' * c₃)]
+  [ϕ.suitable c₄ c₂] [ϕ.suitable c₃ c₁] :
+  Tinv V r' n c₁ c₂ ≫ ϕ.eval_LCFP V r' c₂ c₄ = ϕ.eval_LCFP V r' c₁ c₃ ≫ Tinv V r' m c₃ c₄ :=
+by simp only [Tinv, eval_LCFP_def, ← whisker_right_comp,
+    ← nat_trans.op_comp, Tinv_comp_eval_FP _ _ c₄ c₃ c₂ c₁]
 
-lemma T_inv_comp_eval_LCFP [normed_with_aut r V] [fact (0 < r)] [ϕ.suitable c₁ c₂] :
-  T_inv r V r' c₂ n ≫ ϕ.eval_LCFP V r' M₁ c₁ c₂ =
-    ϕ.eval_LCFP V r' M₁ c₁ c₂ ≫ T_inv r V r' c₁ m :=
+lemma T_inv_comp_eval_LCFP [normed_with_aut r V] [fact (0 < r)] [ϕ.suitable c₂ c₁] :
+  T_inv r V r' c₁ n ≫ ϕ.eval_LCFP V r' c₁ c₂ =
+    ϕ.eval_LCFP V r' c₁ c₂ ≫ T_inv r V r' c₂ m :=
 begin
-  simp only [eval_LCFP_def],
-  exact ((LocallyConstant.map (normed_with_aut.T.inv : V ⟶ V)).naturality _).symm
+  ext M : 2,
+  simp only [T_inv_def, eval_LCFP_def, nat_trans.comp_app,
+    whisker_right_app, whisker_left_app, nat_trans.naturality]
 end
 
 end basic_universal_map
@@ -219,42 +207,26 @@ open free_abelian_group
 
 variables (ϕ : universal_map m n)
 
-def eval_LCFP : LCFP V r' M c₂ n ⟶ LCFP V r' M c₁ m :=
-if H : (ϕ.suitable c₁ c₂)
-then by exactI
-  ∑ g in ϕ.support, coeff g ϕ • (g.eval_LCFP V r' M c₁ c₂)
-else 0
+def eval_LCFP : LCFP V r' c₁ n ⟶ LCFP V r' c₂ m :=
+∑ g in ϕ.support, coeff g ϕ • (g.eval_LCFP V r' c₁ c₂)
 
-lemma eval_LCFP_def {m n : ℕ} (f : universal_map m n) [H : f.suitable c₁ c₂] :
-  f.eval_LCFP V r' M c₁ c₂ = ∑ g in f.support, coeff g f • (g.eval_LCFP V r' M c₁ c₂) :=
-dif_pos H
-
-@[simp] lemma eval_LCFP_of (f : basic_universal_map m n) [f.suitable c₁ c₂] :
-  eval_LCFP V r' M c₁ c₂ (of f) = f.eval_LCFP V r' M c₁ c₂ :=
-by simp only [eval_LCFP_def, support_of, coeff_of_self, one_smul, finset.sum_singleton]
+@[simp] lemma eval_LCFP_of (f : basic_universal_map m n) :
+  eval_LCFP V r' c₁ c₂ (of f) = f.eval_LCFP V r' c₁ c₂ :=
+by simp only [eval_LCFP, support_of, coeff_of_self, one_smul, finset.sum_singleton]
 
 @[simp] lemma eval_LCFP_zero :
-  (0 : universal_map m n).eval_LCFP V r' M c₁ c₂ = 0 :=
-by rw [eval_LCFP_def, support_zero, finset.sum_empty]
+  (0 : universal_map m n).eval_LCFP V r' c₁ c₂ = 0 :=
+by rw [eval_LCFP, support_zero, finset.sum_empty]
 
 @[simp] lemma eval_LCFP_neg (f : universal_map m n) :
-  eval_LCFP V r' M c₁ c₂ (-f) = -f.eval_LCFP V r' M c₁ c₂ :=
-begin
-  rw eval_LCFP,
-  split_ifs,
-  { rw suitable_neg_iff at h,
-    rw [eval_LCFP, dif_pos h],
-    simp only [add_monoid_hom.map_neg, finset.sum_neg_distrib, neg_smul, support_neg] },
-  { rw suitable_neg_iff at h,
-    rw [eval_LCFP, dif_neg h, neg_zero] }
-end
+  eval_LCFP V r' c₁ c₂ (-f) = -f.eval_LCFP V r' c₁ c₂ :=
+by simp only [eval_LCFP, add_monoid_hom.map_neg, finset.sum_neg_distrib, neg_smul, support_neg]
 
-lemma eval_LCFP_add (f g : universal_map m n)
-  [hf : f.suitable c₁ c₂] [hg : g.suitable c₁ c₂] :
-  eval_LCFP V r' M c₁ c₂ (f + g) =
-    f.eval_LCFP V r' M c₁ c₂ + g.eval_LCFP V r' M c₁ c₂ :=
+lemma eval_LCFP_add (f g : universal_map m n) :
+  eval_LCFP V r' c₁ c₂ (f + g) =
+    f.eval_LCFP V r' c₁ c₂ + g.eval_LCFP V r' c₁ c₂ :=
 begin
-  simp only [eval_LCFP_def],
+  simp only [eval_LCFP],
   rw finset.sum_subset (support_add f g), -- two goals
   simp only [add_monoid_hom.map_add _ f g, add_smul],
   convert finset.sum_add_distrib using 2, -- three goals
@@ -264,52 +236,48 @@ begin
 end
 
 lemma eval_LCFP_comp_of (g : basic_universal_map m n) (f : basic_universal_map l m)
-  [hg : g.suitable c₂ c₃] [hf : f.suitable c₁ c₂] :
-  eval_LCFP V r' M c₁ c₃ ((comp (of g)) (of f)) =
-    eval_LCFP V r' M c₂ c₃ (of g) ≫ eval_LCFP V r' M c₁ c₂ (of f) :=
+  [hg : g.suitable c₂ c₁] [hf : f.suitable c₃ c₂] :
+  eval_LCFP V r' c₁ c₃ ((comp (of g)) (of f)) =
+    eval_LCFP V r' c₁ c₂ (of g) ≫ eval_LCFP V r' c₂ c₃ (of f) :=
 begin
-  haveI hfg : (g.comp f).suitable c₁ c₃ := basic_universal_map.suitable_comp c₂,--hg.comp hf,
   simp only [comp_of, eval_LCFP_of],
+  haveI hfg : (g.comp f).suitable c₃ c₁ := basic_universal_map.suitable_comp c₂,
   rw ← basic_universal_map.eval_LCFP_comp,
 end
 
 open category_theory.limits
 
 lemma eval_LCFP_comp (g : universal_map m n) (f : universal_map l m)
-  [hg : g.suitable c₂ c₃] [hf : f.suitable c₁ c₂] :
-  (comp g f).eval_LCFP V r' M c₁ c₃ =
-    g.eval_LCFP V r' M c₂ c₃ ≫ f.eval_LCFP V r' M c₁ c₂ :=
+  [hg : g.suitable c₂ c₁] [hf : f.suitable c₃ c₂] :
+  (comp g f).eval_LCFP V r' c₁ c₃ =
+    g.eval_LCFP V r' c₁ c₂ ≫ f.eval_LCFP V r' c₂ c₃ :=
 begin
   unfreezingI { revert hf },
   apply free_abelian_group.induction_on_free_predicate
-    (suitable c₂ c₃) (suitable_free_predicate c₂ c₃) g hg; unfreezingI { clear_dependent g },
+    (suitable c₂ c₁) (suitable_free_predicate c₂ c₁) g hg; unfreezingI { clear_dependent g },
   { intros h₂,
     simp only [eval_LCFP_zero, zero_comp, pi.zero_apply,
       add_monoid_hom.coe_zero, add_monoid_hom.map_zero] },
   { intros g hg hf,
     -- now do another nested induction on `f`
     apply free_abelian_group.induction_on_free_predicate
-      (suitable c₁ c₂) (suitable_free_predicate c₁ c₂) f hf; unfreezingI { clear_dependent f },
+      (suitable c₃ c₂) (suitable_free_predicate c₃ c₂) f hf; unfreezingI { clear_dependent f },
     { simp only [eval_LCFP_zero, comp_zero, add_monoid_hom.map_zero] },
     { intros f hf,
       rw suitable_of_iff at hf,
       resetI,
       apply eval_LCFP_comp_of },
     { intros f hf IH,
-      show _ = normed_group_hom.comp_hom _ _,
-      simp only [IH, pi.neg_apply, add_monoid_hom.map_neg, eval_LCFP_neg,
-        add_monoid_hom.coe_neg, neg_inj],
+      simp only [IH, eval_LCFP_neg, add_monoid_hom.map_neg],
       refl },
     { rintros (f₁ : universal_map l m) (f₂ : universal_map l m) hf₁ hf₂ IH₁ IH₂, resetI,
-      haveI Hg₁f : (comp (of g) f₁).suitable c₁ c₃ := suitable.comp c₂,
-      haveI Hg₂f : (comp (of g) f₂).suitable c₁ c₃ := suitable.comp c₂,
-      simp only [add_monoid_hom.map_add, add_monoid_hom.add_apply, eval_LCFP_add, IH₁, IH₂],
-      show _ = normed_group_hom.comp_hom _ _,
-      simpa [add_monoid_hom.map_add] } },
+      haveI Hg₁f : (comp (of g) f₁).suitable c₃ c₁ := suitable.comp c₂,
+      haveI Hg₂f : (comp (of g) f₂).suitable c₃ c₁ := suitable.comp c₂,
+      simp only [add_monoid_hom.map_add, eval_LCFP_add, IH₁, IH₂],
+      refl } },
   { intros g hg IH hf, resetI, specialize IH,
-    show _ = normed_group_hom.comp_hom _ _,
-    simp only [IH, pi.neg_apply, add_monoid_hom.map_neg, eval_LCFP_neg,
-      add_monoid_hom.coe_neg, neg_inj],
+    simp only [IH, add_monoid_hom.map_neg, eval_LCFP_neg,
+      add_monoid_hom.neg_apply, neg_inj],
     refl },
   { rintros (g₁ : universal_map m n) (g₂ : universal_map m n) hg₁ hg₂ IH₁ IH₂ hf, resetI,
     haveI Hg₁f : (comp g₁ f).suitable c₁ c₃ := suitable.comp c₂,

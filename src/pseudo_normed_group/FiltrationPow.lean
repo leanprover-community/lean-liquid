@@ -147,13 +147,13 @@ by { ext, refl }
 
 open FiltrationPow
 
-lemma Tinv_comp_eval_FP (r' c₁ c₂ c₃ : ℝ≥0)
-  [fact (c₁ ≤ r' * c₂)] [fact (c₂ ≤ r' * c₃)] [ϕ.suitable c₁ c₂] [ϕ.suitable c₂ c₃] :
-  Tinv r' c₁ c₂ m ≫ ϕ.eval_FP r' c₂ c₃ = ϕ.eval_FP r' c₁ c₂ ≫ Tinv r' c₂ c₃ n :=
+lemma Tinv_comp_eval_FP (r' c₁ c₂ c₃ c₄ : ℝ≥0)
+  [fact (c₁ ≤ r' * c₂)] [fact (c₃ ≤ r' * c₄)] [ϕ.suitable c₁ c₃] [ϕ.suitable c₂ c₄] :
+  Tinv r' c₁ c₂ m ≫ ϕ.eval_FP r' c₂ c₄ = ϕ.eval_FP r' c₁ c₃ ≫ Tinv r' c₃ c₄ n :=
 begin
   ext M x : 3,
-  change ϕ.eval_png₀ M c₂ c₃ ((Tinv r' c₁ c₂ m).app M x) =
-    (Tinv r' c₂ c₃ n).app M (ϕ.eval_png₀ M c₁ c₂ x),
+  change ϕ.eval_png₀ M c₂ c₄ ((Tinv r' c₁ c₂ m).app M x) =
+    (Tinv r' c₃ c₄ n).app M (ϕ.eval_png₀ M c₁ c₃ x),
   ext j,
   dsimp only [eval_png₀],
   simp only [eval_png_apply, subtype.coe_mk, pow_incl_apply,
