@@ -42,7 +42,7 @@ lemma map_norm_noninc {M₁ M₂} (f : M₁ ⟶ M₂) :
   ((LCFP V r' c n).map f).norm_noninc :=
 locally_constant.comap_hom_norm_noninc _ _
 
-@[simps]
+@[simps {fully_applied := ff}]
 def res (r' : ℝ≥0) (c₁ c₂ : ℝ≥0) [fact (c₂ ≤ c₁)] (n : ℕ) : LCFP V r' c₁ n ⟶ LCFP V r' c₂ n :=
 (whisker_right (nat_trans.op (FiltrationPow.cast_le r' c₂ c₁ n)) (LocallyConstant.obj V) : _)
 
@@ -65,20 +65,10 @@ section Tinv
 open profinitely_filtered_pseudo_normed_group_with_Tinv
 variables [fact (0 < r')]
 
--- @[simps]
+@[simps {fully_applied := ff}]
 def Tinv [fact (c₂ ≤ r' * c₁)] : LCFP V r' c₁ n ⟶ LCFP V r' c₂ n :=
 @whisker_right _ _ Profiniteᵒᵖ _ _ _ _ _
  (nat_trans.op $ FiltrationPow.Tinv r' c₂ c₁ n) (LocallyConstant.obj V)
-
--- lemma map_comp_Tinv (c c₂ : ℝ≥0) [fact (c₂ ≤ r' * c)] {M₁ M₂} (f : M₁ ⟶ M₂) :
---   (LCFP V r' c n).map f ≫ Tinv V r' n c c₂ _ = Tinv V r' n c c₂ _ ≫ (LCFP V r' c₂ n).map f :=
--- begin
---   dsimp [Tinv, LCFP],
---   simp only [← (LCP V n).map_comp, ← op_comp],
---   congr' 2,
---   ext ⟨x, hx⟩,
---   exact f.unop.map_Tinv x
--- end
 
 lemma res_comp_Tinv
   [fact (c₂ ≤ c₁)] [fact (c₃ ≤ c₂)] [fact (c₂ ≤ r' * c₁)] [fact (c₃ ≤ r' * c₂)] :
@@ -104,9 +94,11 @@ NormedGroup.normed_with_aut_LocallyConstant _ _ _
 instance [fact (0 < r)] (M) : normed_with_aut r ((LCFP V r' c n).obj M) :=
 LCP.obj.normed_with_aut _ _ _ _
 
+@[simps {fully_applied := ff}]
 def T_inv' [fact (0 < r)] : LCP V n ⟶ LCP V n :=
 whisker_left _ (LocallyConstant.map (normed_with_aut.T.inv : V ⟶ V))
 
+@[simps app_apply {fully_applied := ff}]
 def T_inv [fact (0 < r)] : LCFP V r' c n ⟶ LCFP V r' c n :=
 whisker_left _ (T_inv' r V n)
 
@@ -135,7 +127,7 @@ lemma res_comp_T_inv [fact (c₂ ≤ c₁)] :
   res V r' c₁ c₂ n ≫ T_inv r V r' c₂ n = T_inv r V r' c₁ n ≫ res V r' c₁ c₂ n :=
 begin
   ext M : 2,
-  simp only [nat_trans.comp_app, res_app, T_inv_app],
+  simp only [nat_trans.comp_app, res_app_apply, T_inv_app],
   exact (T_inv' r V n).naturality _,
 end
 
