@@ -71,7 +71,7 @@ namespace FiltrationPow
 @[simps]
 def cast_le (r' c₁ c₂ : ℝ≥0) [fact (c₁ ≤ c₂)] (n : ℕ) :
   FiltrationPow.{u} r' c₁ n ⟶ FiltrationPow r' c₂ n :=
-{ app := λ M, (Pow n).map ⟨cast_le, (embedding_cast_le c₁ c₂).continuous⟩,
+{ app := λ M, (Pow n).map ⟨cast_le, continuous_cast_le c₁ c₂⟩,
   naturality' := λ M N f, by { ext, refl } }
 
 theorem cast_le_refl (r' c : ℝ≥0) (n : ℕ) : cast_le r' c c n = 𝟙 _ :=

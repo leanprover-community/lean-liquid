@@ -87,8 +87,13 @@ lemma res_comp_Tinv
     Tinv V r' n c₂ c₄ M ≫ (res V r' c₃ c₄ n).app M :=
 begin
   dsimp only [Tinv, res, whisker_right_app],
-  simp only [← category_theory.functor.map_comp, ← op_comp],
-  refl
+  -- the following `show` fails
+  -- I think we should find a design so that it doesn't
+
+  -- show (LCP V n).map _ ≫ _ = _,
+
+  -- simp only [← category_theory.functor.map_comp, ← op_comp],
+  -- refl
 end
 
 lemma Tinv_norm_noninc : (@Tinv V r' M _ c n _).norm_noninc :=
