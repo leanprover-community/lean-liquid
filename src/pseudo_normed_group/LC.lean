@@ -1,6 +1,7 @@
 import pseudo_normed_group.FiltrationPow
 import locally_constant.NormedGroup
 import locally_constant.Vhat
+import for_mathlib.preadditive_category
 
 namespace category_theory
 namespace nat_trans
@@ -169,6 +170,10 @@ lemma eval_LCFP_def [h : ϕ.suitable c₂ c₁] :
     whisker_right (nat_trans.op $ ϕ.eval_FP r' c₂ c₁) (LocallyConstant.obj V) :=
 dif_pos h
 
+lemma eval_LCFP_not_suitable (h : ¬ ϕ.suitable c₂ c₁) :
+  ϕ.eval_LCFP V r' c₁ c₂ = 0 :=
+dif_neg h
+
 lemma eval_LCFP_comp (f : basic_universal_map m n) (g : basic_universal_map l m)
   [hf : f.suitable c₂ c₁] [hg : g.suitable c₃ c₂] :
   (f.comp g).eval_LCFP V r' c₁ c₃ =
@@ -245,7 +250,7 @@ begin
   rw ← basic_universal_map.eval_LCFP_comp,
 end
 
-open category_theory.limits
+open category_theory category_theory.limits category_theory.preadditive
 
 lemma eval_LCFP_comp (g : universal_map m n) (f : universal_map l m)
   [hg : g.suitable c₂ c₁] [hf : f.suitable c₃ c₂] :
@@ -268,76 +273,77 @@ begin
       resetI,
       apply eval_LCFP_comp_of },
     { intros f hf IH,
-      simp only [IH, eval_LCFP_neg, add_monoid_hom.map_neg],
-      refl },
+      simp only [IH, eval_LCFP_neg, add_monoid_hom.map_neg, comp_neg] },
     { rintros (f₁ : universal_map l m) (f₂ : universal_map l m) hf₁ hf₂ IH₁ IH₂, resetI,
       haveI Hg₁f : (comp (of g) f₁).suitable c₃ c₁ := suitable.comp c₂,
       haveI Hg₂f : (comp (of g) f₂).suitable c₃ c₁ := suitable.comp c₂,
-      simp only [add_monoid_hom.map_add, eval_LCFP_add, IH₁, IH₂],
-      refl } },
+      simp only [add_monoid_hom.map_add, eval_LCFP_add, IH₁, IH₂, comp_add] } },
   { intros g hg IH hf, resetI, specialize IH,
     simp only [IH, add_monoid_hom.map_neg, eval_LCFP_neg,
-      add_monoid_hom.neg_apply, neg_inj],
-    refl },
+      add_monoid_hom.neg_apply, neg_inj, neg_comp] },
   { rintros (g₁ : universal_map m n) (g₂ : universal_map m n) hg₁ hg₂ IH₁ IH₂ hf, resetI,
-    haveI Hg₁f : (comp g₁ f).suitable c₁ c₃ := suitable.comp c₂,
-    haveI Hg₂f : (comp g₂ f).suitable c₁ c₃ := suitable.comp c₂,
-    simp only [add_monoid_hom.map_add, add_monoid_hom.add_apply, eval_LCFP_add, IH₁, IH₂],
-    show _ = normed_group_hom.comp_hom _ _,
-    simpa [add_monoid_hom.map_add] }
+    haveI Hg₁f : (comp g₁ f).suitable c₃ c₁ := suitable.comp c₂,
+    haveI Hg₂f : (comp g₂ f).suitable c₃ c₁ := suitable.comp c₂,
+    simp only [add_monoid_hom.map_add, add_monoid_hom.add_apply, eval_LCFP_add, IH₁, IH₂, add_comp] }
 end
 
-lemma map_comp_eval_LCFP [ϕ.suitable c₁ c₂] :
-  map V r' c₂ n f ≫ ϕ.eval_LCFP V r' M₁ c₁ c₂ = ϕ.eval_LCFP V r' M₂ c₁ c₂ ≫ map V r' c₁ m f :=
+-- lemma map_comp_eval_LCFP [ϕ.suitable c₁ c₂] :
+--   map V r' c₂ n f ≫ ϕ.eval_LCFP V r' M₁ c₁ c₂ = ϕ.eval_LCFP V r' M₂ c₁ c₂ ≫ map V r' c₁ m f :=
+-- begin
+--   show normed_group_hom.comp_hom _ _ = normed_group_hom.comp_hom _ _,
+--   simp only [eval_LCFP_def, add_monoid_hom.map_sum, add_monoid_hom.sum_apply],
+--   apply finset.sum_congr rfl,
+--   intros g hg,
+--   haveI : g.suitable c₁ c₂ := suitable_of_mem_support ϕ c₁ c₂ g hg,
+--   simp only [← gsmul_eq_smul, add_monoid_hom.map_gsmul, add_monoid_hom.gsmul_apply],
+--   congr' 1,
+--   exact g.map_comp_eval_LCFP V r' _ _ _
+-- end
+
+lemma res_comp_eval_LCFP [fact (c₂ ≤ c₁)] [fact (c₄ ≤ c₃)] [ϕ.suitable c₃ c₁] [ϕ.suitable c₄ c₂] :
+  res V r' c₁ c₂ n ≫ ϕ.eval_LCFP V r' c₂ c₄ = ϕ.eval_LCFP V r' c₁ c₃ ≫ res V r' c₃ c₄ m :=
 begin
-  show normed_group_hom.comp_hom _ _ = normed_group_hom.comp_hom _ _,
-  simp only [eval_LCFP_def, add_monoid_hom.map_sum, add_monoid_hom.sum_apply],
+  simp only [eval_LCFP, comp_sum, sum_comp],
   apply finset.sum_congr rfl,
   intros g hg,
-  haveI : g.suitable c₁ c₂ := suitable_of_mem_support ϕ c₁ c₂ g hg,
+  -- instead of this crazy `show`, we shoul prove `comp_gsmul` and `gsmul_comp`
+  -- for preadditive categories
+  show @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup) _ _ _ _ _ _ _ =
+    @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup) _ _ _ _ _ _ _,
   simp only [← gsmul_eq_smul, add_monoid_hom.map_gsmul, add_monoid_hom.gsmul_apply],
+  haveI : g.suitable c₃ c₁ := suitable_of_mem_support ϕ _ _ g hg,
+  haveI : g.suitable c₄ c₂ := suitable_of_mem_support ϕ _ _ g hg,
   congr' 1,
-  exact g.map_comp_eval_LCFP V r' _ _ _
+  exact g.res_comp_eval_LCFP V r' c₁ c₂ c₃ c₄
 end
 
-lemma res_comp_eval_LCFP
-  [fact (c₁ ≤ c₂)] [ϕ.suitable c₂ c₄] [ϕ.suitable c₁ c₃] [fact (c₃ ≤ c₄)] :
-  res V r' c₃ c₄ n ≫ ϕ.eval_LCFP V r' M c₁ c₃ = ϕ.eval_LCFP V r' M c₂ c₄ ≫ res V r' c₁ c₂ m :=
+lemma Tinv_comp_eval_LCFP [fact (0 < r')] [fact (c₂ ≤ r' * c₁)] [fact (c₄ ≤ r' * c₃)]
+  [ϕ.suitable c₃ c₁] [ϕ.suitable c₄ c₂] :
+  Tinv V r' n c₁ c₂ ≫ ϕ.eval_LCFP V r' c₂ c₄ = ϕ.eval_LCFP V r' c₁ c₃ ≫ Tinv V r' m c₃ c₄ :=
 begin
-  show normed_group_hom.comp_hom _ _ = normed_group_hom.comp_hom _ _,
-  simp only [eval_LCFP_def, add_monoid_hom.map_sum, add_monoid_hom.sum_apply],
+  simp only [eval_LCFP, comp_sum, sum_comp],
   apply finset.sum_congr rfl,
   intros g hg,
+  show @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup) _ _ _ _ _ _ _ =
+    @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup) _ _ _ _ _ _ _,
   simp only [← gsmul_eq_smul, add_monoid_hom.map_gsmul, add_monoid_hom.gsmul_apply],
-  haveI : g.suitable c₂ c₄ := suitable_of_mem_support ϕ _ _ g hg,
-  haveI : g.suitable c₁ c₃ := suitable_of_mem_support ϕ _ _ g hg,
+  haveI : g.suitable c₃ c₁ := suitable_of_mem_support ϕ _ _ g hg,
+  haveI : g.suitable c₄ c₂ := suitable_of_mem_support ϕ _ _ g hg,
   congr' 1,
-  exact g.res_comp_eval_LCFP V r' M c₁ c₂ c₃ c₄
+  exact g.Tinv_comp_eval_LCFP V r' _ _ _ _
 end
 
-lemma Tinv_comp_eval_LCFP [fact (0 < r')] [ϕ.suitable c₁ c₂] :
-  Tinv V r' c₂ n ≫ ϕ.eval_LCFP V r' M (r' * c₁) (r' * c₂) = ϕ.eval_LCFP V r' M c₁ c₂ ≫ Tinv V r' c₁ m :=
+lemma T_inv_comp_eval_LCFP [normed_with_aut r V] [fact (0 < r)] [ϕ.suitable c₂ c₁] :
+  T_inv r V r' c₁ n ≫ ϕ.eval_LCFP V r' c₁ c₂ =
+    ϕ.eval_LCFP V r' c₁ c₂ ≫ T_inv r V r' c₂ m :=
 begin
-  show normed_group_hom.comp_hom _ _ = normed_group_hom.comp_hom _ _,
-  simp only [eval_LCFP_def, add_monoid_hom.map_sum, add_monoid_hom.sum_apply],
+  simp only [eval_LCFP, comp_sum, sum_comp],
   apply finset.sum_congr rfl,
   intros g hg,
-  haveI : g.suitable c₁ c₂ := suitable_of_mem_support ϕ c₁ c₂ g hg,
+  show @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup) _ _ _ _ _ _ _ =
+    @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup) _ _ _ _ _ _ _,
   simp only [← gsmul_eq_smul, add_monoid_hom.map_gsmul, add_monoid_hom.gsmul_apply],
-  congr' 1,
-  exact g.Tinv_comp_eval_LCFP V r' _ _ _
-end
-
-lemma T_inv_comp_eval_LCFP [normed_with_aut r V] [fact (0 < r)] [ϕ.suitable c₁ c₂] :
-  T_inv r V r' c₂ n ≫ ϕ.eval_LCFP V r' M₁ c₁ c₂ =
-    ϕ.eval_LCFP V r' M₁ c₁ c₂ ≫ T_inv r V r' c₁ m :=
-begin
-  show normed_group_hom.comp_hom _ _ = normed_group_hom.comp_hom _ _,
-  simp only [eval_LCFP_def, add_monoid_hom.map_sum, add_monoid_hom.sum_apply],
-  apply finset.sum_congr rfl,
-  intros g hg,
-  haveI : g.suitable c₁ c₂ := suitable_of_mem_support ϕ c₁ c₂ g hg,
-  simp only [← gsmul_eq_smul, add_monoid_hom.map_gsmul, add_monoid_hom.gsmul_apply],
+  haveI : g.suitable c₂ c₁ := suitable_of_mem_support ϕ _ _ g hg,
   congr' 1,
   exact g.T_inv_comp_eval_LCFP r V r' _ _
 end
