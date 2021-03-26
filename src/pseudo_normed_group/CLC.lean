@@ -1,5 +1,4 @@
 import pseudo_normed_group.LC
-import locally_constant.Vhat
 
 open_locale classical nnreal
 noncomputable theory
@@ -9,61 +8,41 @@ open NormedGroup opposite Profinite pseudo_normed_group category_theory breen_de
 open profinitely_filtered_pseudo_normed_group
 
 universe variable u
-variables (r : ℝ≥0) (V : NormedGroup)
-variables (r' : ℝ≥0) {M M₁ M₂ M₃ : Type u}
-variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M]
-variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₁]
-variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₂]
-variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₃]
+variables (r : ℝ≥0) (V : NormedGroup) (r' : ℝ≥0)
 variables (c c₁ c₂ c₃ c₄ : ℝ≥0) (l m n : ℕ)
-variables (f : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂)
-variables (g : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₂ M₃)
 
 /-- The "functor" that sends `M` and `c` to `V-hat((filtration M c)^n)` -/
-def CLCFP₂ (V : NormedGroup) (n : ℕ) : Profiniteᵒᵖ ⥤ NormedGroup :=
-LCFP₂ V n ⋙ Completion
+def CLCP (V : NormedGroup) (n : ℕ) : Profiniteᵒᵖ ⥤ NormedGroup :=
+LCP V n ⋙ Completion
 
 /-- The "functor" that sends `M` and `c` to `V-hat((filtration M c)^n)` -/
-def CLCFP (V : NormedGroup) (r' : ℝ≥0) (M : Type*) (c : ℝ≥0) (n : ℕ)
-  [profinitely_filtered_pseudo_normed_group_with_Tinv r' M] :
-  NormedGroup :=
-(CLCFP₂ V n).obj (op (Profinite.of (filtration M c)))
--- Completion.obj (LCFP V r' M c n)
+def CLCFP (V : NormedGroup) (r' : ℝ≥0) (c : ℝ≥0) (n : ℕ) :
+  (ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup :=
+  (ProFiltPseuNormGrpWithTinv.level r' c).op ⋙ CLCP V n
+
+theorem CLCFP_def (V : NormedGroup) (r' : ℝ≥0) (c : ℝ≥0) (n : ℕ) :
+  CLCFP V r' c n = LCFP V r' c n ⋙ Completion := rfl
 
 namespace CLCFP
 
-@[simps]
-def map : CLCFP V r' M₂ c n ⟶ CLCFP V r' M₁ c n :=
-Completion.map (LCFP.map V r' c n f)
-
-variables (M)
-
-@[simp] lemma map_id :
-  map V r' c n (profinitely_filtered_pseudo_normed_group_with_Tinv_hom.id) =
-    𝟙 (CLCFP V r' M c n) :=
-by { delta map, rw LCFP.map_id, apply category_theory.functor.map_id }
-
-variables {M}
-
-lemma map_comp : map V r' c n (g.comp f) = map V r' c n g ≫ map V r' c n f :=
-by { delta map, rw LCFP.map_comp, apply category_theory.functor.map_comp }
-
-lemma map_norm_noninc : (map V r' c n f).norm_noninc :=
+lemma map_norm_noninc {M₁ M₂} (f : M₁ ⟶ M₂) :
+  ((CLCFP V r' c n).map f).norm_noninc :=
 Completion_map_norm_noninc _ $ LCFP.map_norm_noninc _ _ _ _ _
 
 @[simps]
-def res [fact (c₁ ≤ c₂)] : CLCFP V r' M c₂ n ⟶ CLCFP V r' M c₁ n :=
-Completion.map (LCFP.res V r' c₁ c₂ n)
+def res [fact (c₂ ≤ c₁)] : CLCFP V r' c₁ n ⟶ CLCFP V r' c₂ n :=
+@whisker_right _ _ NormedGroup _ _ _ _ _ (LCFP.res V r' c₁ c₂ n) Completion
 
-@[simp] lemma res_refl : @res V r' M _ c c n _ = 𝟙 _ :=
-by { delta res, rw LCFP.res_refl, apply category_theory.functor.map_id }
+@[simp] lemma res_refl : res V r' c c n = 𝟙 _ :=
+by { simp only [res, LCFP.res_refl, whisker_right_id'], refl }
 
-lemma res_comp_res [fact (c₁ ≤ c₂)] [fact (c₂ ≤ c₃)] [fact (c₁ ≤ c₃)] :
-  res V r' c₂ c₃ n ≫ res V r' c₁ c₂ n = @res V r' M _ c₁ c₃ n _ :=
-by simp only [res, ← category_theory.functor.map_comp, ← op_comp, LCFP.res_comp_res]
+lemma res_comp_res [fact (c₂ ≤ c₁)] [fact (c₃ ≤ c₂)] [fact (c₃ ≤ c₁)] :
+  res V r' c₁ c₂ n ≫ res V r' c₂ c₃ n = res V r' c₁ c₃ n :=
+by simp only [res, ← whisker_right_comp, LCFP.res_comp_res]
 
-lemma res_norm_noninc [fact (c₁ ≤ c₂)] : (@res V r' M _ c₁ c₂ n _).norm_noninc :=
-Completion_map_norm_noninc _ $ LCFP.res_norm_noninc _ _ _ _ _
+lemma res_norm_noninc [fact (c₂ ≤ c₁)] (M) :
+  ((res V r' c₁ c₂ n).app M).norm_noninc :=
+Completion_map_norm_noninc _ $ LCFP.res_norm_noninc _ _ _ _ _ _
 
 lemma map_comp_res [fact (c₁ ≤ c₂)] :
   map V r' c₂ n f ≫ res V r' c₁ c₂ n = res V r' c₁ c₂ n ≫ map V r' c₁ n f :=

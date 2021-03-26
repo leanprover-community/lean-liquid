@@ -21,15 +21,8 @@ open NormedGroup opposite Profinite pseudo_normed_group category_theory breen_de
 open profinitely_filtered_pseudo_normed_group
 
 universe variable u
-variables (r : ℝ≥0) (V : NormedGroup)
-variables (r' : ℝ≥0) {M M₁ M₂ M₃ : Type u}
-variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M]
-variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₁]
-variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₂]
-variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₃]
+variables (r : ℝ≥0) (V : NormedGroup) (r' : ℝ≥0)
 variables (c c₁ c₂ c₃ c₄ : ℝ≥0) (l m n : ℕ)
-variables (f : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂)
-variables (g : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₂ M₃)
 
 /-- The functor that sends `A` to `V(A^n)` -/
 def LCP (V : NormedGroup) (n : ℕ) : Profiniteᵒᵖ ⥤ NormedGroup :=
@@ -154,7 +147,7 @@ namespace breen_deligne
 
 open LCFP
 
-variables (M) {l m n}
+variables {l m n}
 
 namespace basic_universal_map
 
