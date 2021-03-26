@@ -71,20 +71,22 @@ def Tinv (c c₂ : ℝ≥0) [fact (c₂ ≤ r' * c)] (M) :
   (LCFP V r' c n).obj M ⟶ (LCFP V r' c₂ n).obj M :=
 (LCP V n).map (Tinv₀_hom _ _ _).op
 
-lemma map_comp_Tinv :
-  map V r' c n f ≫ Tinv V r' c n = Tinv V r' c n ≫ map V r' (r' * c) n f :=
+lemma map_comp_Tinv (c c₂ : ℝ≥0) [fact (c₂ ≤ r' * c)] {M₁ M₂} (f : M₁ ⟶ M₂) :
+  (LCFP V r' c n).map f ≫ Tinv V r' n c c₂ _ = Tinv V r' n c c₂ _ ≫ (LCFP V r' c₂ n).map f :=
 begin
-  delta Tinv,
-  rw [← category.assoc, map_comp_res, category.assoc, category.assoc],
-  delta map,
-  simp only [← category_theory.functor.map_comp, ← op_comp, FiltrationPow.map_comp_Tinv]
+  dsimp [Tinv, LCFP],
+  simp only [← (LCP V n).map_comp, ← op_comp],
+  congr' 2,
+  ext ⟨x, hx⟩,
+  exact f.unop.map_Tinv x
 end
 
-lemma res_comp_Tinv [fact (c₁ ≤ c₂)] :
-  res V r' c₁ c₂ n ≫ (@Tinv V r' M _ c₁ n _) =
-    Tinv V r' c₂ n ≫ res V r' (r' * c₁) (r' * c₂) n :=
+lemma res_comp_Tinv
+  [fact (c₁ ≤ c₂)] [fact (c₃ ≤ c₄)] [fact (c₃ ≤ r' * c₁)] [fact (c₄ ≤ r' * c₂)] (M) :
+  (res V r' c₁ c₂ n).app M ≫ Tinv V r' n c₁ c₃ M =
+    Tinv V r' n c₂ c₄ M ≫ (res V r' c₃ c₄ n).app M :=
 begin
-  delta Tinv res,
+  dsimp only [Tinv, res, whisker_right_app],
   simp only [← category_theory.functor.map_comp, ← op_comp],
   refl
 end
