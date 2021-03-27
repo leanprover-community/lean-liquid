@@ -23,7 +23,7 @@ variables (M : ProFiltPseuNormGrpWithTinv.{u} r') (c : ℝ≥0)
 
 /-- The object for the complex of normed groups
 `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …` -/
-def complex_X (i : ℕ) : NormedGroup := CLCFPTinv r V r' M (c * c' i) (BD.X i)
+def complex_X (i : ℕ) : NormedGroup := (CLCFPTinv r V r' (c * c' i) (BD.X i)).obj (op M)
 
 -- CLCFPTinv' r V n
 --   (op (Profinite.of (filtration M c)))
@@ -33,14 +33,15 @@ def complex_X (i : ℕ) : NormedGroup := CLCFPTinv r V r' M (c * c' i) (BD.X i)
 --       profinitely_filtered_pseudo_normed_group_with_Tinv.Tinv₀'_continuous (r' * c) c⟩)
 --   (has_hom.hom.op ⟨cast_le, (embedding_cast_le _ _).continuous⟩)
 
-theorem complex_X_hom_of_eq' (c₂' : ℕ → ℝ≥0) (i : ℕ) (h : c * c' i = c₂ * c₂' i) :
+-- theorem complex_X_hom_of_eq' (c₂' : ℕ → ℝ≥0) (i : ℕ) (h : c * c' i = c₂ * c₂' i) :
 
 variables [BD.suitable c']
 
 /-- The differential for the complex of normed groups
 `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …` -/
-def complex_d (i : ℕ) : BD.complex_X c' r V M c i ⟶ BD.complex_X c' r V M c (i+1) :=
-(BD.d (i+1) i).eval_CLCFPTinv r V r' M (c * c' (i+1)) (c * c' i)
+def complex_d (i j : ℕ) : BD.complex_X c' r V M c i ⟶ BD.complex_X c' r V M c j :=
+_
+-- ((BD.d j i).eval_CLCFPTinv r V r' (c * c' j) (c * c' i)).app M
 
 lemma complex_d_comp_d (i : ℕ) :
   BD.complex_d c' r V M c i ≫ BD.complex_d c' r V M c (i+1) = 0 :=
