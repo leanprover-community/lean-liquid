@@ -7,8 +7,6 @@ local attribute [instance] type_pow
 
 universe variables u
 
-set_option pp.universes true
-
 -- move this
 def Profinite.of (X : Type*)
   [topological_space X] [t2_space X] [totally_disconnected_space X] [compact_space X] :
@@ -22,12 +20,6 @@ def Profinite.of (X : Type*)
 def pseudo_normed_group.filtration_obj
   (M) [profinitely_filtered_pseudo_normed_group M] (c) : Profinite :=
 Profinite.of (pseudo_normed_group.filtration M c)
-
-@[simps]
-def ProFiltPseuNormGrpWithTinv.level
-  (r' c : ℝ≥0) : ProFiltPseuNormGrpWithTinv.{u} r' ⥤ Profinite.{u} :=
-{ obj := λ M, pseudo_normed_group.filtration_obj M c,
-  map := λ M N f, ⟨f.level c, f.level_continuous c⟩ }
 
 open profinitely_filtered_pseudo_normed_group category_theory
 
@@ -47,13 +39,15 @@ by { ext, refl }
 
 end Filtration
 
-@[simps]
-def Filtration (r' : ℝ≥0) : ProFiltPseuNormGrpWithTinv.{u} r' ⥤ (ℝ≥0 ⥤ Profinite.{u}) :=
-{ obj := λ M,
-  { obj := λ c, Profinite.of (pseudo_normed_group.filtration M c),
-    map := λ c₁ c₂ h, @Filtration.cast_le _ _ c₁ c₂ ⟨le_of_hom h⟩ },
-  map := λ M₁ M₂ f,
-  { app := λ c, ⟨f.level c, f.level_continuous c⟩ },
+@[simps obj_obj obj_map_to_fun map_app {fully_applied := ff}]
+def Filtration (r' : ℝ≥0) : ℝ≥0 ⥤ ProFiltPseuNormGrpWithTinv.{u} r' ⥤ Profinite.{u} :=
+{ obj := λ c,
+  { obj := λ M, pseudo_normed_group.filtration_obj M c,
+    map := λ M N f, ⟨f.level c, f.level_continuous c⟩,
+    map_id' := by { intros, ext, refl },
+    map_comp' := by { intros, ext, refl } },
+  map := λ c₁ c₂ h,
+  { app := λ M, @Filtration.cast_le _ _ c₁ c₂ ⟨le_of_hom h⟩ },
   map_id' := by { intros, ext, refl },
   map_comp' := by { intros, ext, refl } }
 
@@ -77,10 +71,35 @@ by exact ⟨Tinv₀ c c₂, Tinv₀_continuous _ _⟩
 
 open profinitely_filtered_pseudo_normed_group_with_Tinv
 
+namespace Filtration
+
+@[simps]
+def res (r' c₁ c₂ : ℝ≥0) [h : fact (c₁ ≤ c₂)] :
+  (Filtration r').obj c₁ ⟶ (Filtration r').obj c₂ :=
+(Filtration r').map (hom_of_le h.1)
+
+theorem res_refl (r' c : ℝ≥0) : res r' c c = 𝟙 _ := by { ext, refl }
+
+theorem res_comp (r' c₁ c₂ c₃ : ℝ≥0) [h₁ : fact (c₁ ≤ c₂)] [h₂ : fact (c₂ ≤ c₃)] :
+  res r' c₁ c₂ ≫ res r' c₂ c₃ = @res r' c₁ c₃ ⟨le_trans h₁.1 h₂.1⟩ :=
+by { ext, refl }
+
+@[simps] def Tinv₀ {r' : ℝ≥0} (c c₂ : ℝ≥0) [fact (c ≤ r' * c₂)] :
+  (Filtration.{u} r').obj c ⟶ (Filtration r').obj c₂ :=
+{ app := λ M, Tinv₀_hom M c c₂,
+  naturality' := λ M₁ M₂ f, by { ext x, exact (f.map_Tinv _).symm } }
+
+theorem Tinv₀_comp_res {r' : ℝ≥0} (c₁ c₂ c₃ c₄ : ℝ≥0)
+  [fact (c₁ ≤ r' * c₂)] [fact (c₃ ≤ r' * c₄)] [fact (c₂ ≤ c₄)] [fact (c₁ ≤ c₃)] :
+  Tinv₀ c₁ c₂ ≫ res r' c₂ c₄ = res r' c₁ c₃ ≫ Tinv₀ c₃ c₄ := rfl
+
+end Filtration
+
+
 /-- The "functor" that sends `M` and `c` to `(filtration M c)^n` -/
 @[simps] def FiltrationPow (r' : ℝ≥0) (c : ℝ≥0) (n : ℕ) :
   ProFiltPseuNormGrpWithTinv r' ⥤ Profinite :=
-ProFiltPseuNormGrpWithTinv.level r' c ⋙ Pow n
+(Filtration r').obj c ⋙ Pow n
 
 namespace FiltrationPow
 
@@ -101,8 +120,10 @@ by { ext, refl }
 @[simps]
 def Tinv (r' : ℝ≥0) (c c₂) [fact (c ≤ r' * c₂)] (n) :
   FiltrationPow r' c n ⟶ FiltrationPow r' c₂ n :=
-{ app := λ M, (Pow n).map (Tinv₀_hom M c c₂),
-  naturality' := λ M N f, by { ext x j, exact (f.map_Tinv (x j).1).symm } }
+whisker_right (Filtration.Tinv₀ c c₂) (Pow n)
+
+lemma Tinv_app (r' : ℝ≥0) (c c₂) [fact (c ≤ r' * c₂)] (n M) :
+  (Tinv r' c c₂ n).app M = (Pow n).map (Tinv₀_hom M c c₂) := rfl
 
 lemma cast_le_vcomp_Tinv (r' c₁ c₂ c₃ : ℝ≥0)
   [fact (c₁ ≤ c₂)] [fact (c₂ ≤ c₃)] [fact (c₁ ≤ r' * c₂)] [fact (c₂ ≤ r' * c₃)] (n : ℕ) :
@@ -166,8 +187,8 @@ begin
   ext j,
   dsimp only [eval_png₀],
   simp only [eval_png_apply, subtype.coe_mk, pow_incl_apply,
-    FiltrationPow.Tinv, FiltrationPow_map_to_fun_coe, Pow_map_to_fun, Tinv₀_hom_to_fun, Tinv₀_coe,
-    profinitely_filtered_pseudo_normed_group_hom.map_sum],
+    FiltrationPow.Tinv_app, FiltrationPow_map_to_fun_coe, Pow_map_to_fun, Tinv₀_hom_to_fun,
+    Tinv₀_coe, profinitely_filtered_pseudo_normed_group_hom.map_sum],
   apply fintype.sum_congr,
   intro i,
   simp only [← gsmul_eq_smul],
