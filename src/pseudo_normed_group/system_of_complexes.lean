@@ -23,7 +23,7 @@ variables (M : ProFiltPseuNormGrpWithTinv.{u} r') (c : ℝ≥0)
 
 /-- The object for the complex of normed groups
 `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …` -/
-def complex_X (i : ℕ) : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup :=
+def complex_X (i : ℕ) : (ProFiltPseuNormGrpWithTinv.{u} r')ᵒᵖ ⥤ NormedGroup :=
 CLCFPTinv r V r' (c * c' i) (BD.X i)
 
 -- CLCFPTinv' r V n
@@ -60,7 +60,7 @@ variables (f : M₁ ⟶ M₂) (g : M₂ ⟶ M₃)
 
 /-- The complex of normed groups `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …` -/
 def complex (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
-  (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] (M : ProFiltPseuNormGrpWithTinv r') (c : ℝ≥0) :
+  (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] (M : ProFiltPseuNormGrpWithTinv.{u} r') (c : ℝ≥0) :
   cochain_complex ℕ NormedGroup :=
 { X := λ i, (BD.complex_X c' r V r' c i).obj (op M),
   d := λ i j, (BD.complex_d c' r V r' c i j).app (op M),
@@ -79,7 +79,7 @@ namespace complex
 @[simps]
 def map : BD.complex c' r V r' M₂ c ⟶ BD.complex c' r V r' M₁ c :=
 differential_object.hom.mk'
-  (λ i, CLCFPTinv.map r V r' _ _ f)
+  (λ i, (CLCFPTinv r V r' _ _).map f)
   begin
     rintro i j h, dsimp only [differential_object.coherent_indices] at h, subst j,
     dsimp [complex], simp only [category.comp_id, if_congr, if_true, eq_self_iff_true],
