@@ -145,6 +145,20 @@ def map_nat {J} [category J] {A₁ B₁ A₂ B₂ : J ⥤ Profiniteᵒᵖ} (f₁
     (by rw [← nat_trans.comp_app, h₂, nat_trans.comp_app]),
   naturality' := λ X Y α, by simp only [CLCPTinv.F_map, map_comp_map, ϕ.naturality, ψ.naturality] }
 
+theorem map_nat_def {J} [category J] {A₁ B₁ A₂ B₂ : J ⥤ Profiniteᵒᵖ} (f₁ g₁ : A₁ ⟶ B₁) (f₂ g₂ : A₂ ⟶ B₂)
+  (ϕ : A₁ ⟶ A₂) (ψ : B₁ ⟶ B₂) (h₁ : ϕ ≫ f₂ = f₁ ≫ ψ) (h₂ : ϕ ≫ g₂ = g₁ ≫ ψ) :
+  map_nat r V n f₁ g₁ f₂ g₂ ϕ ψ h₁ h₂ = begin
+    dsimp only [F_def],
+    refine NormedGroup.equalizer.map_nat
+      (whisker_right ϕ (CLCP V n))
+      (whisker_right ψ (CLCP V n))
+      (by rw [← whisker_right_comp, ← whisker_right_comp, h₁])
+      (comm_sq₂ _ (by rw [← whisker_right_comp, ← whisker_right_comp, h₂])).symm,
+    ext x : 2,
+    simp only [nat_trans.comp_app, whisker_left_app, whisker_right_app,
+      (CLCP.T_inv _ _ _).naturality],
+  end := rfl
+
 end CLCPTinv
 
 def aux (r' c c₂ : ℝ≥0) [r1 : fact (r' ≤ 1)] [h : fact (c₂ ≤ r' * c)] : fact (c₂ ≤ c) :=
@@ -278,11 +292,12 @@ lemma res_comp_eval_CLCFPTinv₂
   [ϕ.suitable c₇ c₃] [ϕ.suitable c₈ c₄] :
   CLCFPTinv₂.res r V r' c₁ c₂ c₃ c₄ n ≫ ϕ.eval_CLCFPTinv₂ r V r' c₃ c₄ c₇ c₈ =
     ϕ.eval_CLCFPTinv₂ r V r' c₁ c₂ c₅ c₆ ≫ CLCFPTinv₂.res r V r' c₅ c₆ c₇ c₈ m :=
-sorry
--- calc _ = _ : equalizer.map_comp_map _ _ _ _
---    ... = _ : by { congr' 1; apply res_comp_eval_CLCFP }
---    ... = _ : (equalizer.map_comp_map _ _ _ _).symm
-
+begin
+  dsimp only [CLCFPTinv₂.res, eval_CLCFPTinv₂, CLCFPTinv₂_def,
+    CLCPTinv.map_nat_def], delta id,
+  simp only [NormedGroup.equalizer.map_nat_comp_map_nat],
+  congr' 1; { simp only [← CLCFP.res_def], apply res_comp_eval_CLCFP },
+end
 
 def eval_CLCFPTinv [ϕ.suitable c₂ c₁] :
   CLCFPTinv r V r' c₁ n ⟶ CLCFPTinv r V r' c₂ m :=
