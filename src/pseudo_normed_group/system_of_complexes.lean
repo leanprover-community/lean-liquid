@@ -45,15 +45,12 @@ def complex_d (i j : ℕ) : BD.complex_X c' r V r' c i ⟶ BD.complex_X c' r V r
 
 lemma complex_d_comp_d (i j k : ℕ) :
   BD.complex_d c' r V r' c i j ≫ BD.complex_d c' r V r' c j k = 0 :=
-begin
-  simp only [complex_d, ← universal_map.eval_CLCFPTinv_comp, BD.d_comp_d],
-  refine @universal_map.eval_CLCFPTinv_zero _ _ _ _ _ _ _ _ _ _ _ _ (id _),
-  -- why does unification not figure this out?
-  exact 0,
-  apply_instance
-end
+by simp only [complex_d, ← universal_map.eval_CLCFPTinv_comp, BD.d_comp_d,
+    universal_map.eval_CLCFPTinv_zero]
 
 end
+
+open differential_object
 
 variables (BD : breen_deligne.data) (c' : ℕ → ℝ≥0) [BD.suitable c']
 variables (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
@@ -65,10 +62,16 @@ variables (f : M₁ ⟶ M₂) (g : M₂ ⟶ M₃)
 def complex (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
   (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] (M : ProFiltPseuNormGrpWithTinv r') (c : ℝ≥0) :
   cochain_complex ℕ NormedGroup :=
-cochain_complex.mk'
-  (BD.complex_X c' r V M c)
-  (BD.complex_d c' r V M c)
-  (BD.complex_d_comp_d c' r V M c)
+{ X := λ i, (BD.complex_X c' r V r' c i).obj (op M),
+  d := λ i j, (BD.complex_d c' r V r' c i j).app (op M),
+  d_comp_d := λ i j k, by { rw ← nat_trans.comp_app _ _ (op M), rw complex_d_comp_d, refl },
+  d_eq_zero := λ i j hij,
+  begin
+    have : ¬ differential_object.coherent_indices ff j i := ne.symm hij,
+    simp only [complex_d, ← universal_map.eval_CLCFPTinv_comp, BD.d_eq_zero this,
+      universal_map.eval_CLCFPTinv_zero],
+    refl
+  end }
 
 namespace complex
 
