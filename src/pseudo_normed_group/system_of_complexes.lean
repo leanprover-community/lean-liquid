@@ -18,12 +18,13 @@ namespace data
 section
 variables (BD : breen_deligne.data) (c' : ℕ → ℝ≥0)
 variables (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
-variables {r' : ℝ≥0} [fact (0 < r')] [fact (r' ≤ 1)]
+variables (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)]
 variables (M : ProFiltPseuNormGrpWithTinv.{u} r') (c : ℝ≥0)
 
 /-- The object for the complex of normed groups
 `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …` -/
-def complex_X (i : ℕ) : NormedGroup := (CLCFPTinv r V r' (c * c' i) (BD.X i)).obj (op M)
+def complex_X (i : ℕ) : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup :=
+CLCFPTinv r V r' (c * c' i) (BD.X i)
 
 -- CLCFPTinv' r V n
 --   (op (Profinite.of (filtration M c)))
@@ -39,17 +40,16 @@ variables [BD.suitable c']
 
 /-- The differential for the complex of normed groups
 `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …` -/
-def complex_d (i j : ℕ) : BD.complex_X c' r V M c i ⟶ BD.complex_X c' r V M c j :=
-_
--- ((BD.d j i).eval_CLCFPTinv r V r' (c * c' j) (c * c' i)).app M
+def complex_d (i j : ℕ) : BD.complex_X c' r V r' c i ⟶ BD.complex_X c' r V r' c j :=
+(BD.d j i).eval_CLCFPTinv r V r' (c * c' i) (c * c' j)
 
-lemma complex_d_comp_d (i : ℕ) :
-  BD.complex_d c' r V M c i ≫ BD.complex_d c' r V M c (i+1) = 0 :=
+lemma complex_d_comp_d (i j k : ℕ) :
+  BD.complex_d c' r V r' c i j ≫ BD.complex_d c' r V r' c j k = 0 :=
 begin
-  dsimp only [complex_d, complex_X],
-  rw [← universal_map.eval_CLCFPTinv_comp
-    r V r' M _ (c * c' (i+1)) _ (BD.d (i+1) i) (BD.d (i+1+1) (i+1))],
-  simp only [BD.d_comp_d, universal_map.eval_CLCFPTinv_zero],
+  simp only [complex_d, ← universal_map.eval_CLCFPTinv_comp, BD.d_comp_d],
+  refine @universal_map.eval_CLCFPTinv_zero _ _ _ _ _ _ _ _ _ _ _ _ (id _),
+  -- why does unification not figure this out?
+  exact 0,
   apply_instance
 end
 
