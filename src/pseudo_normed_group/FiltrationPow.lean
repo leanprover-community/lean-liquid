@@ -140,7 +140,7 @@ variables (r' c c₁ c₂ c₃ c₄ : ℝ≥0) {l m n : ℕ} (ϕ : basic_univers
 open FiltrationPow
 
 @[simps]
-def eval_FP [ϕ.suitable c₁ c₂] : FiltrationPow r' c₁ m ⟶ FiltrationPow r' c₂ n :=
+def eval_FP [ϕ.suitable c₁ c₂] : FiltrationPow.{u} r' c₁ m ⟶ FiltrationPow r' c₂ n :=
 { app := λ M,
   { to_fun := ϕ.eval_png₀ M c₁ c₂,
     continuous_to_fun := ϕ.eval_png₀_continuous M c₁ c₂ },

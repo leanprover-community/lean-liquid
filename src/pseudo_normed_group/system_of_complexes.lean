@@ -23,7 +23,7 @@ variables (M : ProFiltPseuNormGrpWithTinv.{u} r') (c : ℝ≥0)
 
 /-- The object for the complex of normed groups
 `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …` -/
-def complex_X (i : ℕ) : (ProFiltPseuNormGrpWithTinv.{u} r')ᵒᵖ ⥤ NormedGroup :=
+def complex_X (i : ℕ) : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup :=
 CLCFPTinv r V r' (c * c' i) (BD.X i)
 
 -- CLCFPTinv' r V n
