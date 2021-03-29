@@ -76,23 +76,18 @@ def complex (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
 namespace complex
 
 /-- The induced map of complexes from a homomorphism `M₁ ⟶ M₂`. -/
-@[simps]
+-- @[simps] -- this is slow :sad:
 def map : BD.complex c' r V r' M₂ c ⟶ BD.complex c' r V r' M₁ c :=
 differential_object.hom.mk'
-  (λ i, (CLCFPTinv r V r' _ _).map f)
-  begin
-    rintro i j h, dsimp only [differential_object.coherent_indices] at h, subst j,
-    dsimp [complex], simp only [category.comp_id, if_congr, if_true, eq_self_iff_true],
-    symmetry, apply universal_map.map_comp_eval_CLCFPTinv
-  end
+  (λ i, (CLCFPTinv r V r' _ _).map f.op) $ λ _ _ _, (nat_trans.naturality _ _).symm
 
 variables (M)
 
 @[simp] lemma map_id : map BD c' r V r' c (𝟙 M) = 𝟙 (BD.complex c' r V r' M c) :=
-by { ext i : 2, apply CLCFPTinv.map_id }
+by { ext i : 2, apply category_theory.functor.map_id, }
 
 lemma map_comp : map BD c' r V r' c (f ≫ g) = map BD c' r V r' c g ≫ map BD c' r V r' c f :=
-by { ext i : 2, apply CLCFPTinv.map_comp }
+by { ext i : 2, dsimp [map], apply category_theory.functor.map_comp }
 
 lemma map_norm_noninc (n : ℕ) : ((map BD c' r V r' c f).f n).norm_noninc :=
 CLCFPTinv.map_norm_noninc _ _ _ _ _ _
@@ -113,11 +108,15 @@ def system (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
   differential_object.hom.mk'
     (λ i,
     by haveI : fact ((unop c₁ : ℝ≥0) ≤ (unop c₂ : ℝ≥0)) := ⟨h.unop.down.down⟩;
-      exact CLCFPTinv.res r V r' _ _ (BD.X i))
+      exact (CLCFPTinv.res r V r' _ _ (BD.X i)).app _)
     begin
-      rintro i j h, dsimp only [differential_object.coherent_indices] at h, subst j,
-      dsimp [complex], simp only [category.comp_id, if_congr, if_true, eq_self_iff_true],
-      symmetry, apply universal_map.res_comp_eval_CLCFPTinv
+      rintro i j hij,
+      dsimp [complex, complex_d],
+      simp only [← nat_trans.comp_app],
+    haveI H' : fact ((unop c₁ : ℝ≥0) ≤ (unop c₂ : ℝ≥0)) := ⟨h.unop.down.down⟩,
+      have := universal_map.res_comp_eval_CLCFPTinv r V r'
+        (unop c₂ * c' i) _ (unop c₁ * c' i) _ (BD.d j i),
+      -- congr' 1,
     end,
   map_id' := /- the restriction map for `c ≤ c` is the identity -/
   by { intro c, ext i : 2, exact CLCFPTinv.res_refl r V r' _ _ },
