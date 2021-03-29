@@ -113,13 +113,12 @@ def system (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
       rintro i j hij,
       dsimp [complex, complex_d],
       simp only [← nat_trans.comp_app],
-    haveI H' : fact ((unop c₁ : ℝ≥0) ≤ (unop c₂ : ℝ≥0)) := ⟨h.unop.down.down⟩,
-      have := universal_map.res_comp_eval_CLCFPTinv r V r'
-        (unop c₂ * c' i) _ (unop c₁ * c' i) _ (BD.d j i),
-      -- congr' 1,
+      haveI H : fact ((unop c₁ : ℝ≥0) ≤ (unop c₂ : ℝ≥0)) := ⟨h.unop.down.down⟩,
+      rw universal_map.res_comp_eval_CLCFPTinv r V r'
+        (unop c₂ * c' i) (unop c₁ * c' i) (unop c₂ * c' j) (unop c₁ * c' j) (BD.d j i)
     end,
   map_id' := /- the restriction map for `c ≤ c` is the identity -/
-  by { intro c, ext i : 2, exact CLCFPTinv.res_refl r V r' _ _ },
+  by { intro c, ext i : 2, exact (CLCFPTinv.res_refl r V r' _ _).app _ },
   map_comp' := /- composition of transition maps is a transition map -/
   begin
     intros c₃ c₂ c₁ h h',
