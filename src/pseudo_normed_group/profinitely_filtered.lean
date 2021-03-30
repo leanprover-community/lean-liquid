@@ -439,6 +439,8 @@ namespace profinitely_filtered_pseudo_normed_group
 
 /-! ## Powers -/
 
+section pi
+
 variables {ι : Type*} (M : ι → Type*) [Π i, profinitely_filtered_pseudo_normed_group (M i)]
 
 instance pi_topology (c : ℝ≥0) : topological_space (filtration (Π i, M i) c) :=
@@ -479,5 +481,32 @@ def pi_map (f : Π i, profinitely_filtered_pseudo_normed_group_hom (M i) (M i)) 
   map_add' := λ x y, by { ext i, exact (f i).map_add (x i) (y i) },
   bound' := sorry,
   continuous' := sorry }
+
+end pi
+
+section prod
+
+variables (M₁ M₂ : Type*)
+variables [profinitely_filtered_pseudo_normed_group M₁]
+variables [profinitely_filtered_pseudo_normed_group M₂]
+
+instance prod_topology (c : ℝ≥0) : topological_space (filtration (M₁ × M₂) c) :=
+topological_space.induced (filtration_prod_equiv M₁ M₂ c) $ infer_instance
+
+instance prod_t2 (c : ℝ≥0) : t2_space (filtration (M₁ × M₂) c) := sorry
+
+instance prod_td (c : ℝ≥0) : totally_disconnected_space (filtration (M₁ × M₂) c) := sorry
+
+instance prod_compact (c : ℝ≥0) : compact_space (filtration (M₁ × M₂) c) := sorry
+
+
+instance prod :
+  profinitely_filtered_pseudo_normed_group (M₁ × M₂) :=
+{ continuous_add' := sorry,
+  continuous_neg' := sorry,
+  continuous_cast_le := sorry,
+  .. pseudo_normed_group.prod M₁ M₂ }
+
+end prod
 
 end profinitely_filtered_pseudo_normed_group
