@@ -68,8 +68,8 @@ open opposite
 /-- The assumptions on `M` in Proposition 9.6 bundled into a structure. -/
 structure normed_spectral_conditions (M : system_of_double_complexes.{u})
   (m : ℕ) (k K k' ε : ℝ≥0) [fact (1 ≤ k)] [fact (1 ≤ k')] (c₀ H : ℝ≥0) [fact (0 < H)] :=
-(col_exact : ∀ j ≤ m, (M.col j).is_weak_bounded_exact k K m c₀)
 (row_exact : 0 < m → ∀ i ≤ m + 1, (M.row i).is_weak_bounded_exact k K (m-1) c₀)
+(col_exact : ∀ j ≤ m, (M.col j).is_weak_bounded_exact k K m c₀)
 (h : Π (q : ℕ) {q' : ℕ} {c}, M.X (k' * c) 0 q' ⟶ M.X c 1 q)
 (h_bound_by : ∀ (q q' : ℕ) (hq : q ≤ m) (hq' : q+1 = q') (c) [fact (c₀ ≤ c)],
   (h q : M.X (k' * c) 0 q' ⟶ M.X c 1 q).bound_by H)
