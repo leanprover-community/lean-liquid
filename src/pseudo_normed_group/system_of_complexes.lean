@@ -118,14 +118,15 @@ def system (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
         (unop c₂ * c' i) (unop c₁ * c' i) (unop c₂ * c' j) (unop c₁ * c' j) (BD.d j i)
     end,
   map_id' := /- the restriction map for `c ≤ c` is the identity -/
-  by { intro c, ext i : 2, exact (CLCFPTinv.res_refl r V r' _ _).app _ },
+  by { intro c, ext i : 2, dsimp, rw CLCFPTinv.res_refl r V r' _ _, refl },
   map_comp' := /- composition of transition maps is a transition map -/
   begin
     intros c₃ c₂ c₁ h h',
     haveI H' : fact ((unop c₁ : ℝ≥0) ≤ (unop c₂ : ℝ≥0)) := ⟨h'.unop.down.down⟩,
     haveI H : fact ((unop c₂ : ℝ≥0) ≤ (unop c₃ : ℝ≥0)) := ⟨h.unop.down.down⟩,
     haveI : fact ((unop c₁ : ℝ≥0) ≤ (unop c₃ : ℝ≥0)) := ⟨H'.out.trans H.out⟩,
-    ext i : 2, symmetry, exact CLCFPTinv.res_comp_res r V r' _ _ _ _,
+    ext i : 2, symmetry,
+    exact nat_trans.congr_app (CLCFPTinv.res_comp_res r V r' _ _ _ _) _,
   end }
 .
 
@@ -135,7 +136,8 @@ namespace system
 @[simps]
 def map : BD.system c' r V r' M₂ ⟶ BD.system c' r V r' M₁ :=
 { app := λ c, complex.map BD c' r V r' (unop c) f,
-  naturality' := λ M₁ M₂ f, by { ext i : 2, symmetry, apply CLCFPTinv.map_comp_res } }
+  naturality' := λ M₁ M₂ f,
+    by { ext i : 2, symmetry, apply (CLCFPTinv.res _ _ _ _ _ _).naturality _ } }
 
 @[simp] lemma map_id : map BD c' r V r' (𝟙 M) = 𝟙 (BD.system c' r V r' M) :=
 by { ext c : 2, apply complex.map_id }
