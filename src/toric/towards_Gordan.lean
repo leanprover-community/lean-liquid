@@ -120,7 +120,6 @@ two generators of the extremal rays.
 def pre_generators (s : set M) : set N := { c : N | c ∈ dual_set nat_submodule f s ∧ ∃ t ⊆ s,
   dual_set nat_submodule f (({1, -1} : set ℤ) • t) = submodule.span ℕ {c} }
 
-
 /-- A pairing `f` is `full_on` a function `vm : ι → M` if, for each element `i ∈ ι`,
 the linear function `f (vm i)` is non-negative on all the basis elements and it is strictly
 positive on `v i` alone.
