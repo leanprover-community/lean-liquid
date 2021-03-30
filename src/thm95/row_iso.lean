@@ -52,7 +52,7 @@ noncomputable def conerve_obj_one_iso :
   hom_inv_id' := sorry,
   inv_hom_id' := sorry }
 
-def Hom_rescale_iso :
+def Hom_rescale_iso [fact (0 < r')] :
   polyhedral_lattice.Hom (rescale N Λ) M ≅
   (ProFiltPseuNormGrpWithTinv.of r' $ (rescale N (polyhedral_lattice.Hom Λ M))) :=
 sorry
@@ -61,7 +61,7 @@ sorry
 instance : profinitely_filtered_pseudo_normed_group_with_Tinv r' (M ^ N) :=
 profinitely_filtered_pseudo_normed_group_with_Tinv.pi _ _
 
-def Hom_finsupp_iso :
+def Hom_finsupp_iso [fact (0 < r')] :
   polyhedral_lattice.Hom (fin N →₀ Λ) M ≅
   (ProFiltPseuNormGrpWithTinv.of r' $ ((polyhedral_lattice.Hom Λ M) ^ N)) :=
 sorry

@@ -11,6 +11,8 @@ open_locale nnreal
 
 open differential_object.complex_like
 
+/-
+
 variables {BD BD₁ BD₂ : breen_deligne.data} (f g : BD₁ ⟶ BD₂)
 variables (h : homotopy f g)
 
@@ -28,7 +30,7 @@ open differential_object differential_object.complex_like
 
 def BD_map [∀ i, (f.f i).suitable (c₁' i) (c₂' i)] :
   BD₂.complex c₂' r V r' M c ⟶ BD₁.complex c₁' r V r' M c :=
-hom.mk' (λ i, (f.f i).eval_CLCFPTinv r V r' M (c * c₁' i) (c * c₂' i))
+hom.mk' (λ i, ((f.f i).eval_CLCFPTinv r V r' (c * c₁' i) (c * c₂' i)).app _)
 begin
   dsimp [coherent_indices],
   intros i j hij, subst j,
@@ -206,3 +208,5 @@ example (N : ℝ≥0) :
 end double
 
 end breen_deligne
+
+-/
