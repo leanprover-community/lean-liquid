@@ -79,7 +79,14 @@ def rescale_constants (c' : ℕ → ℝ≥0) (N : ℝ≥0) : ℕ → ℝ≥0 :=
 -- warning: this might need `[fact (0 < N)]`
 instance rescale_constants_suitable (N : ℝ≥0) :
   BD.suitable (rescale_constants c' N) :=
-sorry
+begin
+  dsimp [rescale_constants],
+  constructor,
+  intros,
+  -- there's a missing instance
+  rw [mul_comm _ N⁻¹, mul_comm _ N⁻¹],
+  apply_instance
+end
 
 variables (BD)
 
