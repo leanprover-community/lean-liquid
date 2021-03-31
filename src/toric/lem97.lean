@@ -43,7 +43,7 @@ def explicit_dual_set (l : ι → Λ) : submodule ℕ (Λ →+ ℤ) :=
   smul_mem' := λ n x hx i, by { rw [add_monoid_hom.nat_smul_apply], exact nsmul_nonneg (hx i) n } }
 
 
-lemma explicit_dual_set_of_neg (l : ι → Λ) (x : Λ →+ℤ) :
+lemma explicit_dual_set_of_neg (l : ι → Λ) (x : Λ →+ ℤ) :
   x ∈ (explicit_dual_set (- l)) ↔ ∀ i, 0 ≥ x (l i) :=
 begin
   split,
@@ -59,21 +59,84 @@ lemma explicit_gordan (hΛ : finite_free Λ) [fintype ι] (l : ι → Λ) :
   (explicit_dual_set l).fg :=
 sorry
 
-lemma lem97_pos (hΛ : finite_free Λ) [fintype ι] (N : ℕ) (l : ι → Λ) :
-  ∃ B : finset (Λ →+ ℤ),
-    (∀ b ∈ B, b ∈ (explicit_dual_set l)) ∧
-    ∀ x : Λ →+ ℤ, x ∈ (explicit_dual_set l) → ∃ (x' ∈ B) (y : Λ →+ ℤ),
-      x = N • y + x' ∧ ∀ i, x' (l i) ≤ x (l i) :=
+lemma lem97_pos (hΛ : finite_free Λ) [fintype ι] (N : ℕ) (hN : 0 < N) (l : ι → Λ) :
+  ∃ B : finset (Λ →+ ℤ), (∀ b ∈ B, b ∈ (explicit_dual_set l)) ∧
+   ∀ x : Λ →+ ℤ, x ∈ (explicit_dual_set l) → ∃ (x' ∈ B) (y : Λ →+ ℤ),
+   x = N • y + x' ∧ ∀ i, x' (l i) ≤ x (l i) :=
 begin
-  obtain ⟨S, hS⟩ := explicit_gordan hΛ l,
-  use S,--this is wrong, I am just testing the first statement
+  obtain ⟨S₀, hS₀⟩ := explicit_gordan hΛ l,
+  let S:= { x // x ∈ S₀},
+  let Y := S → (fin N),
+  let ψ := (λ y : Y, ∑ s in finset.attach S₀, (y s).1 • s.val),--modification?
+  let B := finset.image ψ finset.univ,
+  use B,
   split,
   { intros b hb,
-    rw ← hS,
-    apply submodule.subset_span,
-    exact hb },
+    rw finset.mem_image at hb,
+    rcases hb with ⟨y, ⟨hy₁, h_yb⟩⟩,
+    dsimp [ψ] at h_yb,
+    rw [← hS₀, ← h_yb],
+    apply mem_span_finset.mpr,
+    let φ := λ x : (Λ →+ ℤ), if H: x ∈ S₀ then (y ⟨x, H⟩ : ℕ) else 0,
+    use φ,
+    dsimp [φ],
+    rw ← finset.sum_attach,
+    apply finset.sum_congr,
+    { tauto },
+    intros s hs,
+    simp only [dite_eq_ite, if_true, finset.coe_mem, finset.mk_coe] },
   { intros x hx,
-    sorry },
+    rw [← hS₀, mem_span_finset] at hx,
+    rcases hx with ⟨f, hx⟩,
+    let g : (Λ →+ ℤ) → (fin N) := (λ i, ⟨f i % N, nat.mod_lt (f i) hN⟩),
+    obtain ⟨r, hr⟩ : ∃ (r : (Λ →+ ℤ) → ℕ), f = ↑g + N • r,
+    { set r := λ x, (f x - g x) / N with hr,
+      use r,
+      funext z,
+      dsimp [g],
+      simp only [*, algebra.id.smul_eq_mul, pi.add_apply, eq_self_iff_true, pi.smul_apply],
+      exact nat.self_sub_mod_div (f z) N },
+    set x' := ∑ (i : Λ →+ ℤ) in S₀, (g i).val • i with hx',
+    have H : x' ∈ B,
+    { rw finset.mem_image,
+      dsimp [ψ],
+      rw hx',
+      use g ∘ val,
+      apply and.intro (finset.mem_univ _),
+      let g₁ := λ i, (g i).val • i,
+      change' (∑ (s : {x // x ∈ S₀}) in S₀.attach, (f ↑s % N) • ↑s) =
+        (∑ (i : Λ →+ ℤ) in S₀, g₁ i),
+      conv_rhs {rw [← finset.sum_attach] }},
+    let y := ∑ (i : Λ →+ ℤ) in S₀, r i • i,
+    use [x', H, y],
+    split,
+    { ext s,
+      rw [← hx, hr],
+      dsimp [y, x'],
+      rw [finset.smul_sum, ← finset.sum_add_distrib],
+      simp_rw [← smul_assoc, ← add_smul, add_comm],
+      rw finset.sum_congr,
+      refl,
+      intros z hz,
+      refl },
+    intro i,
+    dsimp [x'],
+    rw [← hx, sub_nonpos.symm, sub_eq_add_neg, ← add_monoid_hom.neg_apply, ← finset.sum_neg_distrib,
+      add_monoid_hom.finset_sum_apply, add_monoid_hom.finset_sum_apply, ← finset.sum_add_distrib],
+    simp_rw [← add_monoid_hom.add_apply, ← nat.neg_smul, ← nsmul_eq_smul, ← gsmul_coe_nat,
+      gsmul_eq_smul, ← add_smul],
+    apply finset.sum_nonpos,
+    intros z hz,
+    replace hz : z ∈ explicit_dual_set l,
+    { rw [← submodule.span_singleton_le_iff_mem, ← hS₀],
+      apply submodule.span_mono,
+      exact set.singleton_subset_iff.mpr hz },
+    replace hz : 0 ≤ z (l i) := rfl.mpr hz i,
+    rw [add_monoid_hom.int_smul_apply, ← gsmul_eq_smul, gsmul_eq_mul],
+    apply mul_nonpos_of_nonpos_of_nonneg _ hz,
+    simp only [add_zero, int.cast_id, int.coe_nat_mod, add_neg_le_iff_le_add'],
+    rw [← int.coe_nat_mod, int.coe_nat_le_coe_nat_iff],
+    apply nat.mod_le },
 end
 
 section sign_vectors
@@ -140,26 +203,27 @@ end
 
 end sign_vectors
 
-/-- Given a list l, a vector of signs ε (and an integer N), (pos_A l ε) is a finite set of functionals satisfying the
+/-- Given a list l, a vector of signs ε (and a positive integer N), (pos_A l ε) is a finite set of functionals satisfying the
 requirements of Lemma 9.7 of [Analytic] with respect to all functionals which are positive on all ((ε • l) i)'s.
 Its existence is established in lem97_pos.
 -/
-def pos_A [fintype ι] (hΛ : finite_free Λ) (N : ℕ)
+def pos_A [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (hN : 0 < N)
   (l : ι → Λ) (ε : sign_vectors ι) : finset (Λ →+ ℤ) :=
 begin
-  obtain B := some (lem97_pos hΛ N (ε • l)),
+  obtain B := some (lem97_pos hΛ N hN (ε • l)),
   use B,
 end
 
-lemma posA_to_explicit [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (l : ι → Λ) (ε : sign_vectors ι)
-  (x' : Λ →+ ℤ) (H : x' ∈ pos_A hΛ N l ε) : x' ∈ explicit_dual_set (ε • l):= (some_spec (lem97_pos hΛ N (ε • l))).1 x' H
+lemma posA_to_explicit [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (hN : 0 < N)
+  (l : ι → Λ) (ε : sign_vectors ι) (x' : Λ →+ ℤ) (H : x' ∈ pos_A hΛ N hN l ε) : x' ∈ explicit_dual_set (ε • l)
+  := (some_spec (lem97_pos hΛ N hN (ε • l))).1 x' H
 
 
-lemma exists_good_pair [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (l : ι → Λ) (ε : sign_vectors ι)
+lemma exists_good_pair [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (hN : 0 < N) (l : ι → Λ) (ε : sign_vectors ι)
   (x : Λ →+ ℤ) (H : x ∈ (explicit_dual_set (ε • l))) : ∃ x' y : (Λ →+ ℤ),
-  x' ∈ pos_A hΛ N l ε ∧ x = N • y + x' ∧ ∀ i, x' ((ε • l) i) ≤ x ((ε • l) i) :=
+  x' ∈ pos_A hΛ N hN l ε ∧ x = N • y + x' ∧ ∀ i, x' ((ε • l) i) ≤ x ((ε • l) i) :=
 begin
-  obtain ⟨x', hx', ⟨y, hy⟩⟩ := (some_spec (lem97_pos hΛ N (ε • l))).2 x H,
+  obtain ⟨x', hx', ⟨y, hy⟩⟩ := (some_spec (lem97_pos hΛ N hN (ε • l))).2 x H,
   use [x', y],
   exact ⟨hx', hy⟩,
 end
@@ -174,16 +238,16 @@ fae: I am going for the first, `lem97`. I left `lem97'` there, at any rate.
 
 
 /-- Lemma 9.7 of [Analytic]. -/
-lemma lem97 [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (l : ι → Λ) :
+lemma lem97 [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (hN : 0 <N) (l : ι → Λ) :
   ∃ A : finset (Λ →+ ℤ), ∀ x : Λ →+ ℤ, ∃ (x' ∈ A) (y : Λ →+ ℤ),
     x = N • y + x' ∧
     ∀ i, (0 ≤ x' (l i) ∧ 0 ≤ (x - x') (l i)) ∨ (x' (l i) ≤ 0 ∧ (x - x') (l i) ≤ 0) :=
 begin
-  let A := finset.bUnion (@finset.univ (sign_vectors ι) (fintype_sign_vectors)) (pos_A hΛ N l),
+  let A := finset.bUnion (@finset.univ (sign_vectors ι) (fintype_sign_vectors)) (pos_A hΛ N hN l),
   use A,
   intro,
   have hx : x ∈ (explicit_dual_set ((pos_vector l x) • l)) := smul_to_explicit_dual_set l x,
-  obtain ⟨x', y, mem_x', hy, hx'⟩ := exists_good_pair hΛ N l (pos_vector l x) x hx,
+  obtain ⟨x', y, mem_x', hy, hx'⟩ := exists_good_pair hΛ N hN l (pos_vector l x) x hx,
   use x',
   split,
   { apply finset.mem_bUnion.mpr,
@@ -195,7 +259,7 @@ begin
     apply and.intro hy,
     intro,
     have h_pos' : x' ∈ explicit_dual_set ((pos_vector l x) • l) :=
-        by apply posA_to_explicit hΛ N l (pos_vector l x) x' mem_x',
+        by apply posA_to_explicit hΛ N hN l (pos_vector l x) x' mem_x',
     replace h_pos' : x' (((pos_vector l x) • l) i) ≥ 0 := by apply h_pos',
     by_cases h_pos : x (l i) ≥ 0,
     { specialize hx' i,
@@ -221,12 +285,12 @@ end
 
 
 /-- Lemma 9.7 of [Analytic]. -/
-lemma lem97' [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (l : ι → Λ) :
+lemma lem97' [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (hN : 0 <N) (l : ι → Λ) :
   ∃ A : finset (Λ →+ ℤ), ∀ x : Λ →+ ℤ, ∃ (x' ∈ A) (y : Λ →+ ℤ),
     x = N • y + x' ∧
     ∀ i, (x (l i)).nat_abs = N * (y (l i)).nat_abs + (x' (l i)).nat_abs :=
 begin
-  obtain ⟨A, hA⟩ := lem97 hΛ N l,
+  obtain ⟨A, hA⟩ := lem97 hΛ N hN l,
   use A,
   intro x,
   specialize hA x,
