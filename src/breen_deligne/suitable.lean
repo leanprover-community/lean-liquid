@@ -196,6 +196,8 @@ end universal_map
 
 namespace data
 
+open differential_object
+
 /-- A sequence of nonnegative real numbers `c' 0`, `c' 1`, ...
 is *suitable* with respect to a Breen--Deligne data `BD`,
 if for all `i : ℕ`, the constants `c' (i+1)` and `c' i` are
@@ -207,14 +209,18 @@ induced by the maps `BD.d (i+1) i`. -/
 class suitable (BD : data) (c' : ℕ → ℝ≥0) : Prop :=
 (universal_suitable : ∀ i, (BD.d (i+1) i).suitable (c' (i+1)) (c' i))
 
-variables (BD : data) (c' : ℕ → ℝ≥0) (i : ℕ) [BD.suitable c']
+variables (BD : data) (c' : ℕ → ℝ≥0) [BD.suitable c'] (i j j' : ℕ)
 
-instance basic_suitable_of_suitable : ((BD.d (i+1) i).suitable (c' (i+1)) (c' i)) :=
-suitable.universal_suitable i
+instance basic_suitable_of_suitable : ((BD.d j i).suitable (c' j) (c' i)) :=
+begin
+  by_cases hij : coherent_indices ff j i,
+  { dsimp [coherent_indices] at hij, subst j, exact suitable.universal_suitable i },
+  { rw BD.d_eq_zero hij, apply_instance }
+end
 
 instance suitable_of_suitable :
-  ((universal_map.comp (BD.d (i+1) i) (BD.d (i+1+1) (i+1))).suitable (c' (i+2)) (c' i)) :=
-universal_map.suitable.comp (c' (i + 1))
+  ((universal_map.comp (BD.d j i) (BD.d j' j)).suitable (c' j') (c' i)) :=
+universal_map.suitable.comp (c' j)
 
 end data
 

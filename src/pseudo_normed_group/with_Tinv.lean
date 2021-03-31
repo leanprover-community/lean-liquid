@@ -18,18 +18,27 @@ class profinitely_filtered_pseudo_normed_group_with_Tinv (r' : out_param $ ℝ�
 
 namespace profinitely_filtered_pseudo_normed_group_with_Tinv
 
-variables {r : ℝ≥0} {M M₁ M₂ M₃ : Type*}
-variables [profinitely_filtered_pseudo_normed_group_with_Tinv r M]
-variables [profinitely_filtered_pseudo_normed_group_with_Tinv r M₁]
-variables [profinitely_filtered_pseudo_normed_group_with_Tinv r M₂]
-variables [profinitely_filtered_pseudo_normed_group_with_Tinv r M₃]
+variables {r' : ℝ≥0} {M M₁ M₂ M₃ : Type*}
+variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M]
+variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₁]
+variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₂]
+variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₃]
+
+lemma aux {r' c c₂ : ℝ≥0} (h : c ≤ r' * c₂) : r'⁻¹ * c ≤ c₂ :=
+begin
+  by_cases hr' : r' = 0,
+  { subst r', rw [inv_zero, zero_mul], exact zero_le' },
+  { rwa [nnreal.mul_le_iff_le_inv, inv_inv'], exact inv_ne_zero hr' }
+end
 
 @[simps]
-def Tinv₀ (c : ℝ≥0) (x : filtration M c) : filtration M (r⁻¹ * c) :=
-⟨Tinv (x : M), Tinv_mem_filtration _ _ x.2⟩
+def Tinv₀ (c c₂ : ℝ≥0) [h : fact (c ≤ r' * c₂)] (x : filtration M c) : filtration M c₂ :=
+⟨Tinv (x : M), filtration_mono (aux h.1) (Tinv_mem_filtration _ _ x.2)⟩
 
-lemma Tinv₀_continuous (c : ℝ≥0) : continuous (@Tinv₀ r M _ c) :=
+lemma Tinv₀_continuous (c c₂ : ℝ≥0) [fact (c ≤ r' * c₂)] :
+  continuous (@Tinv₀ r' M _ c c₂ _) :=
 Tinv.continuous _ $ λ x, rfl
+
 end profinitely_filtered_pseudo_normed_group_with_Tinv
 
 section
@@ -37,9 +46,9 @@ set_option old_structure_cmd true
 
 open profinitely_filtered_pseudo_normed_group_with_Tinv
 
-structure profinitely_filtered_pseudo_normed_group_with_Tinv_hom (r : ℝ≥0) (M₁ M₂ : Type*)
-  [profinitely_filtered_pseudo_normed_group_with_Tinv r M₁]
-  [profinitely_filtered_pseudo_normed_group_with_Tinv r M₂]
+structure profinitely_filtered_pseudo_normed_group_with_Tinv_hom (r' : ℝ≥0) (M₁ M₂ : Type*)
+  [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₁]
+  [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₂]
   extends M₁ →+ M₂ :=
 (strict' : ∀ ⦃c x⦄, x ∈ filtration M₁ c → to_fun x ∈ filtration M₂ c)
 (continuous' : ∀ c, @continuous (filtration M₁ c) (filtration M₂ c) _ _ $
@@ -55,23 +64,23 @@ namespace profinitely_filtered_pseudo_normed_group_with_Tinv_hom
 
 open profinitely_filtered_pseudo_normed_group_with_Tinv
 
-variables {r : ℝ≥0} {M M₁ M₂ M₃ : Type*}
-variables [profinitely_filtered_pseudo_normed_group_with_Tinv r M]
-variables [profinitely_filtered_pseudo_normed_group_with_Tinv r M₁]
-variables [profinitely_filtered_pseudo_normed_group_with_Tinv r M₂]
-variables [profinitely_filtered_pseudo_normed_group_with_Tinv r M₃]
-variables (f g : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r M₁ M₂)
+variables {r' : ℝ≥0} {M M₁ M₂ M₃ : Type*}
+variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M]
+variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₁]
+variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₂]
+variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₃]
+variables (f g : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂)
 
-instance : has_coe_to_fun (profinitely_filtered_pseudo_normed_group_with_Tinv_hom r M₁ M₂) :=
+instance : has_coe_to_fun (profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂) :=
 ⟨_, profinitely_filtered_pseudo_normed_group_with_Tinv_hom.to_fun⟩
 
 @[simp] lemma coe_mk (f) (h₁) (h₂) (h₃) (h₄) (h₅) :
-  ⇑(⟨f, h₁, h₂, h₃, h₄, h₅⟩ : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r M₁ M₂) = f :=
+  ⇑(⟨f, h₁, h₂, h₃, h₄, h₅⟩ : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂) = f :=
 rfl
 
 @[simp] lemma mk_to_monoid_hom (f) (h₁) (h₂) (h₃) (h₄) (h₅) :
   (⟨f, h₁, h₂, h₃, h₄, h₅⟩ :
-    profinitely_filtered_pseudo_normed_group_with_Tinv_hom r M₁ M₂).to_add_monoid_hom =
+    profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂).to_add_monoid_hom =
     ⟨f, h₁, h₂⟩ := rfl
 
 @[simp] lemma map_zero : f 0 = 0 := f.to_add_monoid_hom.map_zero
@@ -101,21 +110,21 @@ variables {f g}
 @[ext] theorem ext (H : ∀ x, f x = g x) : f = g :=
 by cases f; cases g; congr'; exact funext H
 
-instance : has_zero (profinitely_filtered_pseudo_normed_group_with_Tinv_hom r M₁ M₂) :=
+instance : has_zero (profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂) :=
 ⟨{ strict' := λ c x h, zero_mem_filtration _,
    continuous' := λ c, @continuous_const _ (filtration M₂ c) _ _ 0,
    map_Tinv' := λ x, show 0 = Tinv (0 : M₂), from Tinv.map_zero.symm,
    .. (0 : M₁ →+ M₂) }⟩
 
-instance : inhabited (profinitely_filtered_pseudo_normed_group_with_Tinv_hom r M₁ M₂) := ⟨0⟩
+instance : inhabited (profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂) := ⟨0⟩
 
-lemma coe_inj ⦃f g : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r M₁ M₂⦄
+lemma coe_inj ⦃f g : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂⦄
   (h : (f : M₁ → M₂) = g) :
   f = g :=
 by cases f; cases g; cases h; refl
 
 /-- The identity function as `profinitely_filtered_pseudo_normed_group_with_Tinv_hom`. -/
-@[simps] def id : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r M M :=
+@[simps] def id : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M M :=
 { strict' := λ c x, id,
   continuous' := λ c, by { convert continuous_id, ext, refl },
   map_Tinv' := λ x, rfl,
@@ -123,9 +132,9 @@ by cases f; cases g; cases h; refl
 
 /-- The composition of `profinitely_filtered_pseudo_normed_group_with_Tinv_hom`s. -/
 @[simps] def comp
-  (g : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r M₂ M₃)
-  (f : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r M₁ M₂) :
-  profinitely_filtered_pseudo_normed_group_with_Tinv_hom r M₁ M₃ :=
+  (g : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₂ M₃)
+  (f : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂) :
+  profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₃ :=
 { strict' := λ c x hx, g.strict (f.strict hx),
   continuous' := λ c, (g.level_continuous c).comp (f.level_continuous c),
   map_Tinv' := λ x,
@@ -150,7 +159,7 @@ end
 is a `profinitely_filtered_pseudo_normed_group_with_Tinv_hom`. -/
 def inv_of_equiv_of_strict (e : M₁ ≃+ M₂) (he : ∀ x, f x = e x)
   (strict : ∀ ⦃c x⦄, x ∈ filtration M₂ c → e.symm x ∈ filtration M₁ c) :
-  profinitely_filtered_pseudo_normed_group_with_Tinv_hom r M₂ M₁ :=
+  profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₂ M₁ :=
 { strict' := strict,
   continuous' := λ c,
   begin
@@ -186,8 +195,8 @@ end profinitely_filtered_pseudo_normed_group_with_Tinv_hom
 
 namespace punit
 
-instance profinitely_filtered_pseudo_normed_group_with_Tinv (r : ℝ≥0) :
-  profinitely_filtered_pseudo_normed_group_with_Tinv r punit :=
+instance profinitely_filtered_pseudo_normed_group_with_Tinv (r' : ℝ≥0) :
+  profinitely_filtered_pseudo_normed_group_with_Tinv r' punit :=
 { Tinv := profinitely_filtered_pseudo_normed_group_hom.id,
   Tinv_mem_filtration := λ c x h, set.mem_univ _,
   .. punit.profinitely_filtered_pseudo_normed_group }
@@ -205,5 +214,13 @@ instance pi : profinitely_filtered_pseudo_normed_group_with_Tinv r' (Π i, M i) 
 { Tinv := profinitely_filtered_pseudo_normed_group.pi_map $ λ i, Tinv,
   Tinv_mem_filtration := λ c x hx i, Tinv_mem_filtration _ _ (hx i),
   .. profinitely_filtered_pseudo_normed_group.pi _ }
+
+
+variables (M₁ M₂ : Type*)
+variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₁]
+variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₂]
+
+instance prod : profinitely_filtered_pseudo_normed_group_with_Tinv r' (M₁ × M₂) :=
+sorry
 
 end profinitely_filtered_pseudo_normed_group_with_Tinv

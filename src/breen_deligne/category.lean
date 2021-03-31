@@ -93,13 +93,9 @@ def hom_double {BD₁ BD₂ : data} (f : BD₁ ⟶ BD₂) : BD₁.double ⟶ BD�
   ... = (f.f i ≫ BD₂.d i j).double : congr_arg _ (f.comm i j)
   ... = (f.f i).double ≫ BD₂.double.d i j : (double_comp_double _ _).symm }
 
-def σ_pow : Π N, BD.pow N ⟶ BD
+def hom_pow {BD : data} (f : BD.double ⟶ BD) : Π N, BD.pow N ⟶ BD
 | 0     := 𝟙 _
-| (n+1) := hom_double (σ_pow n) ≫ BD.σ
-
-def π_pow : Π N, BD.pow N ⟶ BD
-| 0     := 𝟙 _
-| (n+1) := hom_double (π_pow n) ≫ BD.π
+| (n+1) := hom_double (hom_pow n) ≫ f
 
 @[simps]
 def homotopy_double {BD₁ BD₂ : data} {f g : BD₁ ⟶ BD₂} (h : homotopy f g) :
@@ -113,7 +109,7 @@ def homotopy_double {BD₁ BD₂ : data} {f g : BD₁ ⟶ BD₂} (h : homotopy f
   end }
 
 def homotopy_pow (h : homotopy BD.σ BD.π) :
-  Π N, homotopy (BD.σ_pow N) (BD.π_pow N)
+  Π N, homotopy (hom_pow BD.σ N) (hom_pow BD.π N)
 | 0     := homotopy.refl
 | (n+1) := (homotopy_double (homotopy_pow n)).comp h
 
