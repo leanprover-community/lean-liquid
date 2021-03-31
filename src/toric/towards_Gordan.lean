@@ -124,11 +124,32 @@ def pre_generators (s : set M) : set N := { c : N | c ∈ dual_set nat_submodule
 `dual_set` of `s` is also finite.
 
 ## Reason
-Each `pre_generator` is uniquely determined by a subset of `s`.  Thus, finiteness of
-`pre_generators` should be a direct consequence of finiteness of `s`. -/
+Each `pre_generator` is uniquely determined by a subset of `s` (but not conversely!).
+Thus, finiteness of `pre_generators` should be a direct consequence of finiteness of `s`. -/
 lemma pre_generators_finite (s : set M) [fintype s] : fintype (pre_generators f s) :=
 sorry
 
+/-- Rational linear combinations of basis elements, with coefficients in `[0, 1]` and that are
+contained in the `ℤ`-lattice spanned by the basis elements. -/
+def in_box (v : ι → N) (s : set N) [semimodule ℚ N] : set N := { n : N |
+  ∃ (c : N →₀ ℚ),
+    (∀ {n0 : N}, 0 ≤ c n0 ∧ c n0 ≤ 1 ∧ n0 ∉ s → c n0 = 0) ∧
+    n = c.sum (λ i q, q • i) ∧
+    n ∈ (submodule.span ℤ (set.range v)).restrict_scalars ℤ }
+
+/-- The required finiteness should be a consequence of the fact that the vectors in `in_box` are
+contained simultaneously in a (pre-)compact set `[0,1] × s` and in the discrete set `ℤ-span (im v)`.
+It may be that the proof will be easier going via real coefficients.  For this, it may be easier to
+redefine `in_box`.  The reason for trying to avoid `ℝ`-coefficients is that I am trying to avoid
+the example below.
+
+## Example to keep in mind
+The vectors with integral coordinates in the cone spanned by `(1,0), (1, √2)`
+do not admit a finite generating set.  Still, there are only finitely many vectors with integers
+coordinates in the "fundamental parallelogram" `[0,1] × (1,0) + [0,1] × (1, √2)`.
+-/
+lemma in_box_finite (v : ι → N) (s : set N) [fintype s] [semimodule ℚ N] : fintype (in_box v s) :=
+sorry
 
 /-- A pairing `f` is `full_on` a function `vm : ι → M` if, for each element `i ∈ ι`,
 the linear function `f (vm i)` is non-negative on all the basis elements and it is strictly
