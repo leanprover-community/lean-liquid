@@ -3,7 +3,7 @@ import normed_group.NormedGroup
 import Mbar.basic
 import normed_group.pseudo_normed_group
 import partition
-import lem97
+import toric.lem97
 
 import hacks_and_tricks.by_exactI_hack
 
@@ -390,7 +390,7 @@ begin
   have oops : @polyhedral_lattice.int_semimodule Λ _ = @add_comm_group.int_module Λ _,
   { exact subsingleton.elim _ _ },
   rw oops at ffΛ,
-  obtain ⟨A, hA⟩ := lem97' ffΛ N l,
+  obtain ⟨A, hA⟩ := lem97' ffΛ N hN l,
   let d : ℝ≥0 := finset.univ.sup (λ i, ∑ a in A, nnnorm (a (l i)) / nnnorm (l i)),
   use d,
   introsI S hS c x hx,
@@ -465,7 +465,7 @@ begin
   { simp only [div_eq_mul_inv, add_mul, finset.sum_mul, ← nsmul_eq_smul, nsmul_eq_mul],
     congr' 2,
     rw [mul_comm, inv_mul_cancel_left'],
-    exact_mod_cast hN.ne' },
+    exact_mod_cast hN.1.ne' },
   { simp only [add_mul, div_eq_mul_inv],
     refine add_le_add _ le_rfl,
     rw [mul_right_comm],
