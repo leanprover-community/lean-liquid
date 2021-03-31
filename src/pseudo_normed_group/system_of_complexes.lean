@@ -23,20 +23,26 @@ variables (M : ProFiltPseuNormGrpWithTinv.{u} r') (c : ℝ≥0)
 
 /-- The object for the complex of normed groups
 `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …` -/
+def complex₂_X (a b : ℕ → ℝ≥0) [∀ i, fact (b i ≤ r' * a i)] (i : ℕ) : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup :=
+CLCFPTinv₂ r V r' (a i) (b i) (BD.X i)
+
+/-- The object for the complex of normed groups
+`V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …` -/
 def complex_X (i : ℕ) : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup :=
-CLCFPTinv r V r' (c * c' i) (BD.X i)
-
--- CLCFPTinv' r V n
---   (op (Profinite.of (filtration M c)))
---   (op (Profinite.of (filtration M (r' * c))))
---   (has_hom.hom.op ⟨
---       profinitely_filtered_pseudo_normed_group_with_Tinv.Tinv₀' (r' * c) c,
---       profinitely_filtered_pseudo_normed_group_with_Tinv.Tinv₀'_continuous (r' * c) c⟩)
---   (has_hom.hom.op ⟨cast_le, (embedding_cast_le _ _).continuous⟩)
-
--- theorem complex_X_hom_of_eq' (c₂' : ℕ → ℝ≥0) (i : ℕ) (h : c * c' i = c₂ * c₂' i) :
+complex₂_X BD r V r' (λ i, c * c' i) (λ i, r' * (c * c' i)) i
+-- CLCFPTinv r V r' (c * c' i) (BD.X i)
 
 variables [BD.suitable c']
+
+class suitable₂ (a b : ℕ → ℝ≥0) :=
+(le : ∀ i j, universal_map.suitable (a i) (a j) (BD.d i j))
+
+/-- The differential for the complex of normed groups
+`V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …` -/
+def complex₂_d (a b : ℕ → ℝ≥0) [∀ i, fact (b i ≤ r' * a i)]
+  [BD.suitable a] [BD.suitable b] (i j : ℕ) :
+  BD.complex₂_X r V r' a b i ⟶ BD.complex₂_X r V r' a b j :=
+(BD.d j i).eval_CLCFPTinv₂ r V r' _ _ _ _
 
 /-- The differential for the complex of normed groups
 `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …` -/

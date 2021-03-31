@@ -207,16 +207,18 @@ This definition ensures that we get a well-defined complex
 of normed groups `LCC_Mbar_pow V S r' (c' i) (BD.rank i)`,
 induced by the maps `BD.d (i+1) i`. -/
 class suitable (BD : data) (c' : ℕ → ℝ≥0) : Prop :=
-(universal_suitable : ∀ i, (BD.d (i+1) i).suitable (c' (i+1)) (c' i))
+(universal_suitable : ∀ i j, (BD.d i j).suitable (c' i) (c' j))
+
+attribute [instance] suitable.universal_suitable
 
 variables (BD : data) (c' : ℕ → ℝ≥0) [BD.suitable c'] (i j j' : ℕ)
 
-instance basic_suitable_of_suitable : ((BD.d j i).suitable (c' j) (c' i)) :=
-begin
+def suitable.of_basic (H : ∀ i, (BD.d (i+1) i).suitable (c' (i+1)) (c' i)) : BD.suitable c' :=
+⟨λ j i, begin
   by_cases hij : coherent_indices ff j i,
-  { dsimp [coherent_indices] at hij, subst j, exact suitable.universal_suitable i },
+  { dsimp [coherent_indices] at hij, subst j, exact H i },
   { rw BD.d_eq_zero hij, apply_instance }
-end
+end⟩
 
 instance suitable_of_suitable :
   ((universal_map.comp (BD.d j i) (BD.d j' j)).suitable (c' j') (c' i)) :=

@@ -11,8 +11,6 @@ open_locale nnreal
 
 open differential_object.complex_like
 
-/-
-
 variables {BD BD₁ BD₂ : breen_deligne.data} (f g : BD₁ ⟶ BD₂)
 variables (h : homotopy f g)
 
@@ -28,47 +26,47 @@ section homotopy
 
 open differential_object differential_object.complex_like
 
-def BD_map [∀ i, (f.f i).suitable (c₁' i) (c₂' i)] :
-  BD₂.complex c₂' r V r' M c ⟶ BD₁.complex c₁' r V r' M c :=
-hom.mk' (λ i, ((f.f i).eval_CLCFPTinv r V r' (c * c₁' i) (c * c₂' i)).app _)
-begin
-  dsimp [coherent_indices],
-  intros i j hij, subst j,
-  erw [cochain_complex.mk'_d', cochain_complex.mk'_d'],
-  dsimp only [data.complex_d],
-  erw [← universal_map.eval_CLCFPTinv_comp r V r' M _ _ _ _ _,
-       ← universal_map.eval_CLCFPTinv_comp r V r' M _ _ _ _ _],
-  { congr' 1, have := f.comm (i+1) i, exact this.symm },
-  { exact universal_map.suitable.comp (c * c₁' i) },
-  { exact universal_map.suitable.comp (c * c₂' (i+1)) }
-end
+-- def BD_map [∀ i, (f.f i).suitable (c₁' i) (c₂' i)] :
+--   BD₂.complex c₂' r V r' M c ⟶ BD₁.complex c₁' r V r' M c :=
+-- hom.mk' (λ i, ((f.f i).eval_CLCFPTinv r V r' (c * c₁' i) (c * c₂' i)).app _)
+-- begin
+--   dsimp [coherent_indices],
+--   intros i j hij, subst j,
+--   erw [cochain_complex.mk'_d', cochain_complex.mk'_d'],
+--   dsimp only [data.complex_d],
+--   erw [← universal_map.eval_CLCFPTinv_comp r V r' M _ _ _ _ _,
+--        ← universal_map.eval_CLCFPTinv_comp r V r' M _ _ _ _ _],
+--   { congr' 1, have := f.comm (i+1) i, exact this.symm },
+--   { exact universal_map.suitable.comp (c * c₁' i) },
+--   { exact universal_map.suitable.comp (c * c₂' (i+1)) }
+-- end
 
 variables {f g}
 
-def homotopy [∀ i, (f.f i).suitable (c₁' i) (c₂' i)] [∀ i, (g.f i).suitable (c₁' i) (c₂' i)]
-  [∀ j i, (h.h j i).suitable (c₁' j) (c₂' i)] :
-  homotopy (BD_map f c₁' c₂' r V M c) (BD_map g c₁' c₂' r V M c) :=
-{ h := λ j i, (h.h i j).eval_CLCFPTinv r V r' M (c * c₁' i) (c * c₂' j),
-  h_eq_zero := λ i j hij,
-  begin
-    convert universal_map.eval_CLCFPTinv_zero r V r' M _ _,
-    rw h.h_eq_zero,
-    exact ne.symm hij
-  end,
-  comm :=
-  begin
-    simp only [htpy_idx_rel₁_tt_nat, htpy_idx_rel₂_tt_nat],
-    rintro i j k rfl,
-    simp only [nat.succ_ne_zero i, nat.succ_eq_add_one, false_and, or_false],
-    rintro rfl,
-    erw [cochain_complex.mk'_d', cochain_complex.mk'_d'],
-    dsimp only [data.complex_d],
-    erw [← universal_map.eval_CLCFPTinv_comp r V r' M _ _ _ _ _,
-        ← universal_map.eval_CLCFPTinv_comp r V r' M _ _ _ _ _],
-    swap, { exact universal_map.suitable.comp (c * c₂' (i+1+1)) },
-    swap, { exact universal_map.suitable.comp (c * c₁' i) },
-    sorry
-  end }
+-- def homotopy [∀ i, (f.f i).suitable (c₁' i) (c₂' i)] [∀ i, (g.f i).suitable (c₁' i) (c₂' i)]
+--   [∀ j i, (h.h j i).suitable (c₁' j) (c₂' i)] :
+--   homotopy (BD_map f c₁' c₂' r V M c) (BD_map g c₁' c₂' r V M c) :=
+-- { h := λ j i, (h.h i j).eval_CLCFPTinv r V r' M (c * c₁' i) (c * c₂' j),
+--   h_eq_zero := λ i j hij,
+--   begin
+--     convert universal_map.eval_CLCFPTinv_zero r V r' M _ _,
+--     rw h.h_eq_zero,
+--     exact ne.symm hij
+--   end,
+--   comm :=
+--   begin
+--     simp only [htpy_idx_rel₁_tt_nat, htpy_idx_rel₂_tt_nat],
+--     rintro i j k rfl,
+--     simp only [nat.succ_ne_zero i, nat.succ_eq_add_one, false_and, or_false],
+--     rintro rfl,
+--     erw [cochain_complex.mk'_d', cochain_complex.mk'_d'],
+--     dsimp only [data.complex_d],
+--     erw [← universal_map.eval_CLCFPTinv_comp r V r' M _ _ _ _ _,
+--         ← universal_map.eval_CLCFPTinv_comp r V r' M _ _ _ _ _],
+--     swap, { exact universal_map.suitable.comp (c * c₂' (i+1+1)) },
+--     swap, { exact universal_map.suitable.comp (c * c₁' i) },
+--     sorry
+--   end }
 
 end homotopy
 
@@ -98,31 +96,141 @@ by simpa only [mul_assoc] using nnreal.fact_le_refl _
 
 local attribute [instance] aux₀ aux₀'
 
-def rescale_hom (c c' N : ℝ≥0) (n : ℕ) :
-  CLCFPTinv r V r' M (c * (c' * N⁻¹)) n ⟶ CLCFPTinv r V r' (rescale N M) (c * c') n :=
-equalizer.map (CLCFP.res V r' _ _ _) (CLCFP.res V r' _ _ _)
-sorry
-begin
-  sorry
-end
+-- def rescale_hom (c c' N : ℝ≥0) (n : ℕ) :
+--   CLCFPTinv r V r' M (c * (c' * N⁻¹)) n ⟶ CLCFPTinv r V r' (rescale N M) (c * c') n :=
+-- equalizer.map (CLCFP.res V r' _ _ _) (CLCFP.res V r' _ _ _)
+-- sorry
+-- begin
+--   sorry
+-- end
+
+def foo (a b : ℕ → ℝ≥0) [∀ i, fact (a i ≤ r' * b i)] [∀ i, fact (a i ≤ b i)] (i) :=
+(CLCFPTinv₂ r V r' (b i) (a i) (BD.X i)).obj (opposite.op M)
+
+def foo_d (a b : ℕ → ℝ≥0) [∀ i, fact (a i ≤ r' * b i)] [∀ i, fact (a i ≤ b i)]
+  (_ :∀ i j, universal_map.suitable (a j) (a i) (BD.d j i))
+  (_ :∀ i j, universal_map.suitable (b j) (b i) (BD.d j i))
+  (i j) :
+  foo BD r V M a b i ⟶ foo BD r V M a b j :=
+(universal_map.eval_CLCFPTinv₂ r V r' (b i) (a i) (b j) (a j) (BD.d j i)).app
+  (opposite.op M)
+
+def cochain_complex.mk (X d d_comp_d d_eq_zero) : cochain_complex ℕ NormedGroup :=
+{ X := X,
+  d := d,
+  d_comp_d := d_comp_d,
+  d_eq_zero := d_eq_zero }
+
+def bar (a b : ℕ → ℝ≥0) [∀ i, fact (a i ≤ r' * b i)] [∀ i, fact (a i ≤ b i)]
+  (_ : ∀ i j, universal_map.suitable (a j) (a i) (BD.d j i))
+  (_ : ∀ i j, universal_map.suitable (b j) (b i) (BD.d j i))
+  (h1 h2) : cochain_complex ℕ NormedGroup :=
+cochain_complex.mk (foo BD r V M a b)
+  (foo_d BD r V M a b (by apply_instance) (by apply_instance))
+  h1 h2
 
 -- this is not `iso.refl` -- so close, and yet so far away
 -- the difference is `M_{(c * c_i) * N⁻¹}` vs `M_{c * (c_i * N⁻¹)}`
 def complex_rescale_iso_X (N : ℝ≥0) (i : ℕ) :
   (BD.complex (rescale_constants c' N) r V r' M c).X i ≅
   (BD.complex c' r V r' (of r' $ rescale N M) c).X i :=
-{ hom := rescale_hom _ _ _ _ _ _ _,
-  inv := sorry,
-  hom_inv_id' := sorry,
-  inv_hom_id' := sorry }
+eq_to_iso $ begin
+  dsimp only [data.complex, data.complex_X, CLCFPTinv],
+  change foo BD r V M (λ i, r' * (c * (c' i * N⁻¹))) (λ i, c * (c' i * N⁻¹)) i =
+         foo BD r V M (λ i, r' * (c * c' i) * N⁻¹) (λ i, c * c' i * N⁻¹) i,
+  simp only [mul_assoc],
+end
 
+-- set_option pp.notation false
+-- set_option pp.implicit true
+-- #print foo_d
 -- this is not `iso.refl` -- so close, and yet so far away
 -- the difference is `M_{(c * c_i) * N⁻¹}` vs `M_{c * (c_i * N⁻¹)}`
 def complex_rescale_iso (N : ℝ≥0) :
   BD.complex (rescale_constants c' N) r V r' M c ≅
   BD.complex c' r V r' (of r' $ rescale N M) c :=
-iso_of_components (complex_rescale_iso_X _ _ _ _ _ _ _)
-begin
+-- iso_of_components (complex_rescale_iso_X _ _ _ _ _ _ _)
+eq_to_iso $ begin
+  -- intros,
+  change cochain_complex.mk _ _ _ _ = cochain_complex.mk _ _ _ _,
+  dsimp only [data.complex, data.complex_X, data.complex_d, CLCFPTinv,
+    universal_map.eval_CLCFPTinv, rescale_constants],
+  -- letI : ∀ (i j : ℕ), (BD.d j i).suitable (r' * (c * (c' j * N⁻¹))) (r' * (c * (c' i * N⁻¹))) := _,
+  -- letI : ∀ (i j : ℕ), (BD.d j i).suitable (c * (c' j * N⁻¹)) (c * (c' i * N⁻¹)) := _,
+  -- letI : ∀ (i j : ℕ), (BD.d j i).suitable (r' * (c * c' j) * N⁻¹) (r' * (c * c' i) * N⁻¹) := _,
+  -- letI : ∀ (i j : ℕ), (BD.d j i).suitable (c * c' j * N⁻¹) (c * c' i * N⁻¹) := _,
+  transitivity,
+  suffices : bar BD r V M (λ i, r' * (c * (c' i * N⁻¹))) (λ i, c * (c' i * N⁻¹)) _ _ _ _ = _,
+  { exact this },
+  simp only [mul_assoc],
+
+end.
+  have : ∀ i j,
+    (CLCFPTinv₂ r V r' (c * (c' i * N⁻¹)) (r' * (c * (c' i * N⁻¹))) (BD.X i)).obj (opposite.op M) =
+    foo BD r V M (λ i, r' * (c * (c' i * N⁻¹))) (λ i, c * (c' i * N⁻¹)) i := λ _ _, rfl,
+
+  change @eq
+    (∀ (i j : ℕ),
+      foo BD r V M (λ i, r' * (c * (c' i * N⁻¹))) (λ i, c * (c' i * N⁻¹)) i  ⟶
+      (CLCFPTinv₂ r V r' (c * (c' j * N⁻¹)) (r' * (c * (c' j * N⁻¹))) (BD.X j)).obj (opposite.op M))
+    (λ (i j : ℕ),
+      (universal_map.eval_CLCFPTinv₂ r V r' (c * (c' i * N⁻¹)) (r' * (c * (c' i * N⁻¹))) (c * (c' j * N⁻¹))
+        (r' * (c * (c' j * N⁻¹)))
+        (BD.d j i)).app
+        (opposite.op M)) _,
+
+  -- change foo_d BD r V M (λ i, r' * (c * (c' i * N⁻¹))) (λ i, c * (c' i * N⁻¹)) _ _ == _,
+
+  change
+    -- bar BD r V M (λ i, r' * (c * (c' i * N⁻¹))) (λ i, c * (c' i * N⁻¹)) _ _ =
+    -- bar BD r V M (λ i, r' * (c * c' i) * N⁻¹) (λ i, c * c' i * N⁻¹) _
+    _,
+
+end.
+  -- dsimp only [data.complex, data.complex_X, complex_rescale_iso_X, data.complex_d,
+  --   CLCFPTinv, universal_map.eval_CLCFPTinv, CLCFPTinv₂, rescale_constants,
+  --   CLCPTinv.F_obj],
+  -- change (_ ≫ _ : foo BD r V M _ _ i ⟶ foo BD r V M _ _ j) =
+  --       _ --  foo BD r V M (λ i, r' * (c * c' i) * N⁻¹) (λ i, c * c' i * N⁻¹) i
+  --        ,
+
+  generalize_proofs,
+  -- ext i,
+  { dsimp only [data.complex, data.complex_X, CLCFPTinv, CLCFPTinv₂, rescale_constants,
+      CLCPTinv.F_obj],
+    change foo BD r V M (λ i, r' * (c * (c' i * N⁻¹))) (λ i, c * (c' i * N⁻¹)) i =
+           foo BD r V M (λ i, r' * (c * c' i) * N⁻¹) (λ i, c * c' i * N⁻¹) i,
+    simp only [mul_assoc] },
+  dsimp only [data.complex, data.complex_X, data.complex_d,
+    CLCFPTinv, universal_map.eval_CLCFPTinv, CLCFPTinv₂, rescale_constants,
+    CLCPTinv.F_obj],
+  -- letI : ∀ (i j : ℕ), (BD.d j i).suitable (r' * (c * (c' j * N⁻¹))) (r' * (c * (c' i * N⁻¹))) := _,
+  -- letI : ∀ (i j : ℕ), (BD.d j i).suitable (c * (c' j * N⁻¹)) (c * (c' i * N⁻¹)) := _,
+  -- letI : ∀ (i j : ℕ), (BD.d j i).suitable (r' * (c * c' j) * N⁻¹) (r' * (c * c' i) * N⁻¹) := _,
+  -- letI : ∀ (i j : ℕ), (BD.d j i).suitable (c * c' j * N⁻¹) (c * c' i * N⁻¹) := _,
+  -- change foo_d BD r V M (λ i, r' * (c * (c' i * N⁻¹))) (λ i, c * (c' i * N⁻¹)) _ _ ==
+  --        foo_d BD r V M (λ i, r' * (c * c' i) * N⁻¹) (λ i, c * c' i * N⁻¹) _ _,
+  change @heq (∀ i j, foo BD r V M (λ i, r' * (c * (c' i * N⁻¹))) (λ i, c * (c' i * N⁻¹)) i ⟶
+     foo BD r V M (λ i, r' * (c * (c' i * N⁻¹))) (λ i, c * (c' i * N⁻¹)) j) _ _ _,
+  -- change foo_d BD r V M (λ i, r' * (c * (c' i * N⁻¹))) (λ i, c * (c' i * N⁻¹)) _ _ == _,
+  -- suffices h1, suffices h2,
+end.
+  change
+  @eq (@cochain_complex.{(max u u_1)+1 (max u u_1)} nat NormedGroup.{(max u u_1)} nat.has_succ
+       NormedGroup.large_category.{(max u u_1)}
+       NormedGroup.category_theory.limits.has_zero_morphisms.{(max u u_1)})
+  (@differential_object.complex_like.mk _ _ _ _ _ _ _ _ _ _) _,
+
+    -- _,
+    -- -- foo BD r V M (λ i, r' * (c * (c' i * N⁻¹))) (λ i, c * (c' i * N⁻¹)),
+    -- d := _,
+    -- d_comp_d := _,
+    -- d_eq_zero := _ }
+    -- _,
+  --   -- bar BD r V M (λ i, r' * (c * (c' i * N⁻¹))) (λ i, c * (c' i * N⁻¹)) _
+  --       --  bar BD r V M (λ i, r' * (c * c' i) * N⁻¹) (λ i, c * c' i * N⁻¹) _
+  --        _,
+  -- simp only [mul_assoc],
   sorry
 end
 
@@ -172,7 +280,7 @@ begin
 end
 
 example (n) :
-  BD.complex_X (rescale_constants c' N) r V r' M c n ≅
+  (BD.complex_X (rescale_constants c' N) r V r' c n).obj M ≅
   BD.complex_X c' r V r' (of r' $ rescale N M) c n :=
 begin
 
@@ -208,5 +316,3 @@ example (N : ℝ≥0) :
 end double
 
 end breen_deligne
-
--/
