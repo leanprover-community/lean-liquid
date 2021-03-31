@@ -23,7 +23,8 @@ variables (M : ProFiltPseuNormGrpWithTinv.{u} r') (c : ℝ≥0)
 
 /-- The object for the complex of normed groups
 `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …` -/
-def complex₂_X (a b : ℕ → ℝ≥0) [∀ i, fact (b i ≤ r' * a i)] (i : ℕ) : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup :=
+def complex₂_X (a b : ℕ → ℝ≥0) [∀ i, fact (b i ≤ r' * a i)] (i : ℕ) :
+  (ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup :=
 CLCFPTinv₂ r V r' (a i) (b i) (BD.X i)
 
 /-- The object for the complex of normed groups
@@ -63,6 +64,34 @@ variables (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
 variables (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)]
 variables {M M₁ M₂ M₃ : ProFiltPseuNormGrpWithTinv.{u} r'} (c : ℝ≥0)
 variables (f : M₁ ⟶ M₂) (g : M₂ ⟶ M₃)
+
+/-- The complex of normed groups `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …` -/
+def complex₂ (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
+  (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)]
+   (a b : ℕ → ℝ≥0) [∀ i, fact (b i ≤ r' * a i)] [BD.suitable a] [BD.suitable b] (c : ℝ≥0) :
+  (ProFiltPseuNormGrpWithTinv.{u} r')ᵒᵖ ⥤ cochain_complex ℕ NormedGroup :=
+{ obj := λ M,
+  { X := λ i, (BD.complex₂_X r V r' a b i).obj M,
+    d := λ i j, (BD.complex₂_d r V r' a b i j).app M,
+    d_comp_d := λ i j k,
+    begin
+      rw [← nat_trans.comp_app],
+      simp only [complex₂_d, ← universal_map.eval_CLCFPTinv₂_comp, BD.d_comp_d,
+        universal_map.eval_CLCFPTinv₂_zero],
+      refl
+    end,
+    d_eq_zero := λ i j hij,
+    begin
+      have : ¬ differential_object.coherent_indices ff j i := ne.symm hij,
+      simp only [complex₂_d, ← universal_map.eval_CLCFPTinv₂_comp, BD.d_eq_zero this,
+        universal_map.eval_CLCFPTinv₂_zero],
+      refl
+    end },
+  map := λ M₁ M₂ f,
+  { f := λ i, ((CLCFPTinv₂ r V r' (a i) (b i) (BD.X i)).map f : _),
+    comm := λ i j, (nat_trans.naturality _ _).symm },
+  map_id' := λ M, by { ext i : 2, apply category_theory.functor.map_id, },
+  map_comp' := λ M₁ M₂ M₃ f g, by { ext i : 2, apply category_theory.functor.map_comp } }
 
 /-- The complex of normed groups `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …` -/
 def complex (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
