@@ -465,7 +465,7 @@ begin
   { simp only [div_eq_mul_inv, add_mul, finset.sum_mul, ← nsmul_eq_smul, nsmul_eq_mul],
     congr' 2,
     rw [mul_comm, inv_mul_cancel_left'],
-    exact_mod_cast hN.1.ne' },
+    exact_mod_cast hN.ne' },
   { simp only [add_mul, div_eq_mul_inv],
     refine add_le_add _ le_rfl,
     rw [mul_right_comm],
