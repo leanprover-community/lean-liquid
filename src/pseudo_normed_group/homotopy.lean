@@ -79,14 +79,7 @@ def rescale_constants (c' : ℕ → ℝ≥0) (N : ℝ≥0) : ℕ → ℝ≥0 :=
 -- warning: this might need `[fact (0 < N)]`
 instance rescale_constants_suitable (N : ℝ≥0) :
   BD.suitable (rescale_constants c' N) :=
-begin
-  dsimp [rescale_constants],
-  constructor,
-  intros,
-  -- there's a missing instance
-  rw [mul_comm _ N⁻¹, mul_comm _ N⁻¹],
-  apply_instance
-end
+by { delta rescale_constants, apply_instance }
 
 variables (BD)
 
@@ -136,13 +129,15 @@ cochain_complex.mk (foo BD r V M a b)
   (foo_d BD r V M a b (by apply_instance) (by apply_instance))
   h1 h2
 
+open opposite
+
 -- this is not `iso.refl` -- so close, and yet so far away
 -- the difference is `M_{(c * c_i) * N⁻¹}` vs `M_{c * (c_i * N⁻¹)}`
 def complex_rescale_iso_X (N : ℝ≥0) (i : ℕ) :
-  (BD.complex (rescale_constants c' N) r V r' M c).X i ≅
-  (BD.complex c' r V r' (of r' $ rescale N M) c).X i :=
+  ((BD.complex (rescale_constants c' N) r V r' c).obj (op M)).X i ≅
+  ((BD.complex c' r V r' c).obj (op $ of r' $ rescale N M)).X i :=
 eq_to_iso $ begin
-  dsimp only [data.complex, data.complex_X, CLCFPTinv],
+  dsimp only [data.complex, data.complex₂, data.complex₂_X, CLCFPTinv₂, rescale_constants],
   change foo BD r V M (λ i, r' * (c * (c' i * N⁻¹))) (λ i, c * (c' i * N⁻¹)) i =
          foo BD r V M (λ i, r' * (c * c' i) * N⁻¹) (λ i, c * c' i * N⁻¹) i,
   simp only [mul_assoc],
@@ -154,21 +149,21 @@ end
 -- this is not `iso.refl` -- so close, and yet so far away
 -- the difference is `M_{(c * c_i) * N⁻¹}` vs `M_{c * (c_i * N⁻¹)}`
 def complex_rescale_iso (N : ℝ≥0) :
-  BD.complex (rescale_constants c' N) r V r' M c ≅
-  BD.complex c' r V r' (of r' $ rescale N M) c :=
+  (BD.complex (rescale_constants c' N) r V r' c).obj (op M) ≅
+  (BD.complex c' r V r' c).obj (op $ of r' $ rescale N M) :=
 -- iso_of_components (complex_rescale_iso_X _ _ _ _ _ _ _)
 eq_to_iso $ begin
   -- intros,
-  change cochain_complex.mk _ _ _ _ = cochain_complex.mk _ _ _ _,
-  dsimp only [data.complex, data.complex_X, data.complex_d, CLCFPTinv,
+  -- change cochain_complex.mk _ _ _ _ = cochain_complex.mk _ _ _ _,
+  dsimp only [data.complex, data.complex₂, -- data.complex_X, data.complex_d, CLCFPTinv,
     universal_map.eval_CLCFPTinv, rescale_constants],
   -- letI : ∀ (i j : ℕ), (BD.d j i).suitable (r' * (c * (c' j * N⁻¹))) (r' * (c * (c' i * N⁻¹))) := _,
   -- letI : ∀ (i j : ℕ), (BD.d j i).suitable (c * (c' j * N⁻¹)) (c * (c' i * N⁻¹)) := _,
   -- letI : ∀ (i j : ℕ), (BD.d j i).suitable (r' * (c * c' j) * N⁻¹) (r' * (c * c' i) * N⁻¹) := _,
   -- letI : ∀ (i j : ℕ), (BD.d j i).suitable (c * c' j * N⁻¹) (c * c' i * N⁻¹) := _,
-  transitivity,
-  suffices : bar BD r V M (λ i, r' * (c * (c' i * N⁻¹))) (λ i, c * (c' i * N⁻¹)) _ _ _ _ = _,
-  { exact this },
+  -- transitivity,
+  -- suffices : bar BD r V M (λ i, r' * (c * (c' i * N⁻¹))) (λ i, c * (c' i * N⁻¹)) _ _ _ _ = _,
+  -- { exact this },
   simp only [mul_assoc],
 
 end.

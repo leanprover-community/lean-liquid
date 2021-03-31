@@ -38,6 +38,10 @@ instance suitable_of_mul_left (f : basic_universal_map m n) [h : f.suitable c₁
   f.suitable (c * c₁) (c * c₂) :=
 λ i, by { rw mul_left_comm, exact mul_le_mul' le_rfl (h i) }
 
+instance suitable_of_mul_right (f : basic_universal_map m n) [h : f.suitable c₁ c₂] :
+  f.suitable (c₁ * c) (c₂ * c) :=
+by { rw [mul_comm _ c, mul_comm _ c], exact basic_universal_map.suitable_of_mul_left _ _ _ _ }
+
 -- move this
 lemma nat_abs_sum_le_sum_nat_abs {ι : Type*} (s : finset ι) (f : ι → ℤ) :
   (∑ i in s, f i).nat_abs ≤ ∑ i in s, (f i).nat_abs :=
@@ -163,6 +167,10 @@ instance suitable_of_mul_left (f : universal_map m n) [h : f.suitable c₁ c₂]
   f.suitable (c * c₁) (c * c₂) :=
 λ g hg, @basic_universal_map.suitable_of_mul_left _ _ _ _ _ _ (h g hg)
 
+instance suitable_of_mul_right (f : universal_map m n) [h : f.suitable c₁ c₂] :
+  f.suitable (c₁ * c) (c₂ * c) :=
+by { rw [mul_comm _ c, mul_comm _ c], exact universal_map.suitable_of_mul_left _ _ _ _ }
+
 -- this cannot be an instance, because c₂ cannot be inferred
 lemma suitable.comp {g : universal_map m n} {f : universal_map l m} {c₁ : ℝ≥0} (c₂ : ℝ≥0)
   {c₃ : ℝ≥0} [hg : g.suitable c₂ c₃] [hf : f.suitable c₁ c₂] :
@@ -223,6 +231,14 @@ end⟩
 instance suitable_of_suitable :
   ((universal_map.comp (BD.d j i) (BD.d j' j)).suitable (c' j') (c' i)) :=
 universal_map.suitable.comp (c' j)
+
+instance suitable_of_mul_left (c : ℝ≥0) :
+  BD.suitable (λ i, c * c' i) :=
+⟨λ i j, by apply_instance⟩
+
+instance suitable_of_mul_right (c : ℝ≥0) :
+  BD.suitable (λ i, c' i * c) :=
+⟨λ i j, by apply_instance⟩
 
 end data
 

@@ -95,36 +95,39 @@ def complex₂ (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < 
 
 /-- The complex of normed groups `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …` -/
 def complex (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
-  (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] (M : ProFiltPseuNormGrpWithTinv.{u} r') (c : ℝ≥0) :
-  cochain_complex ℕ NormedGroup :=
-{ X := λ i, (BD.complex_X c' r V r' c i).obj (op M),
-  d := λ i j, (BD.complex_d c' r V r' c i j).app (op M),
-  d_comp_d := λ i j k, by { rw ← nat_trans.comp_app _ _ (op M), rw complex_d_comp_d, refl },
-  d_eq_zero := λ i j hij,
-  begin
-    have : ¬ differential_object.coherent_indices ff j i := ne.symm hij,
-    simp only [complex_d, ← universal_map.eval_CLCFPTinv_comp, BD.d_eq_zero this,
-      universal_map.eval_CLCFPTinv_zero],
-    refl
-  end }
+  (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] (c : ℝ≥0) :
+  (ProFiltPseuNormGrpWithTinv.{u} r')ᵒᵖ ⥤ cochain_complex ℕ NormedGroup :=
+BD.complex₂ r V r' (λ i, c * c' i) (λ i, r' * (c * c' i)) c
+-- .
+-- { X := λ i, (BD.complex_X c' r V r' c i).obj (op M),
+--   d := λ i j, (BD.complex_d c' r V r' c i j).app (op M),
+--   d_comp_d := λ i j k, by { rw ← nat_trans.comp_app _ _ (op M), rw complex_d_comp_d, refl },
+--   d_eq_zero := λ i j hij,
+--   begin
+--     have : ¬ differential_object.coherent_indices ff j i := ne.symm hij,
+--     simp only [complex_d, ← universal_map.eval_CLCFPTinv_comp, BD.d_eq_zero this,
+--       universal_map.eval_CLCFPTinv_zero],
+--     refl
+--   end }
 
 namespace complex
 
 /-- The induced map of complexes from a homomorphism `M₁ ⟶ M₂`. -/
 -- @[simps] -- this is slow :sad:
-def map : BD.complex c' r V r' M₂ c ⟶ BD.complex c' r V r' M₁ c :=
-differential_object.hom.mk'
-  (λ i, (CLCFPTinv r V r' _ _).map f.op) $ λ _ _ _, (nat_trans.naturality _ _).symm
+-- def map : BD.complex c' r V r' M₂ c ⟶ BD.complex c' r V r' M₁ c :=
+-- differential_object.hom.mk'
+--   (λ i, (CLCFPTinv r V r' _ _).map f.op) $ λ _ _ _, (nat_trans.naturality _ _).symm
 
-variables (M)
+-- variables (M)
 
-@[simp] lemma map_id : map BD c' r V r' c (𝟙 M) = 𝟙 (BD.complex c' r V r' M c) :=
-by { ext i : 2, apply category_theory.functor.map_id, }
+-- @[simp] lemma map_id : map BD c' r V r' c (𝟙 M) = 𝟙 (BD.complex c' r V r' M c) :=
+-- by { ext i : 2, apply category_theory.functor.map_id, }
 
-lemma map_comp : map BD c' r V r' c (f ≫ g) = map BD c' r V r' c g ≫ map BD c' r V r' c f :=
-by { ext i : 2, dsimp [map], apply category_theory.functor.map_comp }
+-- lemma map_comp : map BD c' r V r' c (f ≫ g) = map BD c' r V r' c g ≫ map BD c' r V r' c f :=
+-- by { ext i : 2, dsimp [map], apply category_theory.functor.map_comp }
 
-lemma map_norm_noninc (n : ℕ) : ((map BD c' r V r' c f).f n).norm_noninc :=
+lemma map_norm_noninc {M₁ M₂} (f : M₁ ⟶ M₂) (n : ℕ) :
+  (((BD.complex c' r V r' c).map f).f n).norm_noninc :=
 CLCFPTinv.map_norm_noninc _ _ _ _ _ _
 
 end complex
