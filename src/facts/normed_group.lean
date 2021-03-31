@@ -5,4 +5,4 @@ variables {V : Type*} [normed_group V]
 -- move this
 instance fact_nnnorm_add_le (v w : V) :
   fact (nnnorm (v + w) ≤ nnnorm v + nnnorm w) :=
-nnnorm_add_le _ _
+⟨nnnorm_add_le _ _⟩

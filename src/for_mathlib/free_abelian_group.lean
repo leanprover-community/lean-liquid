@@ -41,6 +41,9 @@ end int
 namespace free_abelian_group
 variables (X : Type*)
 
+@[simp] lemma map_of' {X Y : Type*} (f : X → Y) (x : X) :
+  map f (of x) = of (f x) := rfl
+
 /-- The group homomorphism `free_abelian_group X →+ (X →₀ ℤ)`. -/
 def to_finsupp : free_abelian_group X →+ (X →₀ ℤ) :=
 free_abelian_group.lift $ λ x, finsupp.single x (1 : ℤ)

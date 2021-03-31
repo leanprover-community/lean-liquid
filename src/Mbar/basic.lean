@@ -265,7 +265,7 @@ lemma Tinv_aux_summable [h0r : fact (0 < r')] (F : Mbar r' S) (s : S) :
   summable (λ n, (↑(Tinv_aux (F s) n).nat_abs * r' ^ n)) :=
 begin
   have : ∀ n:ℕ, r' ^ n = r' ^ n * r' * r'⁻¹,
-  { intro, rw [mul_inv_cancel_right' (ne_of_gt h0r)] },
+  { intro, rw [mul_inv_cancel_right' h0r.out.ne'] },
   conv { congr, funext, rw [this, ← mul_assoc] },
   apply summable.mul_right,
   refine nnreal.summable_of_le _ (nnreal.summable_nat_add _ (F.summable s) 1),
@@ -311,7 +311,7 @@ begin
   simp only [Tinv, add_monoid_hom.coe_mk'],
   change _ ≤ _ at hF,
   rw mul_comm,
-  apply le_mul_inv_of_mul_le (ne_of_gt h0r),
+  apply le_mul_inv_of_mul_le h0r.out.ne',
   rw [nnnorm_def, finset.sum_mul],
   apply le_trans _ hF,
   apply finset.sum_le_sum,
@@ -367,13 +367,13 @@ variables (r' S)
 /-- `geom r' S` is `∑ T^n ∈ Tℤ[[T]]`.
 In other words, all non-constant coefficients are `1`. -/
 @[simps]
-def geom [fact (r' < 1)] : Mbar r' S :=
+def geom [hr' : fact (r' < 1)] : Mbar r' S :=
 { to_fun := λ s n, if n = 0 then 0 else 1,
   coeff_zero' := λ s, if_pos rfl,
   summable' := λ s,
   begin
     have := (normed_ring.summable_geometric_of_norm_lt_1 (r' : ℝ) _), swap,
-    { rwa nnreal.norm_eq },
+    { rw nnreal.norm_eq, exact hr'.out },
     simp only [← nnreal.coe_pow, nnreal.summable_coe] at this,
     apply nnreal.summable_of_le _ this,
     intro n,

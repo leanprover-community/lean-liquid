@@ -18,13 +18,14 @@ open_locale nnreal big_operators topological_space
 namespace system_of_complexes
 
 universe variables u
-variables (C C₁ C₂ : system_of_complexes.{u})
-variables {k k' K K' : ℝ≥0} {m m' : ℕ} {c₀ c₀' : ℝ≥0} [fact (1 ≤ k)] [fact (1 ≤ k')]
 
 noncomputable def completion (C : system_of_complexes) : system_of_complexes :=
 C ⋙ NormedGroup.Completion.map_complex_like
 
 namespace is_weak_bounded_exact
+
+variables (C C₁ C₂ : system_of_complexes.{u})
+variables {k k' K K' : ℝ≥0} {m m' : ℕ} {c₀ c₀' : ℝ≥0}
 
 -- === We don't need the following two lemmas anytime soon
 
@@ -39,18 +40,20 @@ namespace is_weak_bounded_exact
 --   C.completion.is_weak_bounded_exact (k^2) K m c₀ :=
 -- by admit
 
-lemma strong_of_complete (hC : C.is_weak_bounded_exact k K m c₀)
+lemma strong_of_complete [hk : fact (1 ≤ k)] [hk' : fact (1 ≤ k')]
+  (hC : C.is_weak_bounded_exact k K m c₀)
   (hC' : admissible C) [∀ c i, complete_space (C c i)] :
   ∀ δ > 0, C.is_bounded_exact (k^2) (K + δ) m c₀ :=
 begin
   intros δ hδ,
-  refine (hC.of_le hC' _ le_rfl le_rfl le_rfl).to_exact hδ _,
-  { calc k = k * 1 : by rw mul_one
-    ... ≤ k * k : mul_le_mul' le_rfl ‹_›
+  refine (hC.of_le hC' _ ⟨le_rfl⟩ le_rfl ⟨le_rfl⟩).to_exact hδ _,
+  { constructor,
+    calc k = k * 1 : by rw mul_one
+    ... ≤ k * k : mul_le_mul' le_rfl hk.out
     ... = k ^ 2 : by rw pow_two },
   rintros c hc i hi x _ rfl hx,
   haveI : fact (k * c ≤ k ^ 2 * c) := by { rw [pow_two, mul_assoc], apply_instance },
-  haveI : fact (k * (k * c) ≤ k ^ 2 * c) := by { rw [pow_two, mul_assoc], exact le_rfl },
+  haveI : fact (k * (k * c) ≤ k ^ 2 * c) := by { rw [pow_two, mul_assoc], exact ⟨le_rfl⟩ },
   -- we need to consider the case `i = 0` separately
   obtain (rfl|⟨i,rfl⟩) : i = 0 ∨ ∃ i', i = i' + 1,
   { cases i, { left, refl }, { right, exact ⟨_, rfl⟩ } },
@@ -59,7 +62,7 @@ begin
     apply le_of_forall_pos_le_add,
     intros γ hγ,
     rw zero_add,
-    obtain ⟨_, _, rfl, rfl, y, hy⟩ := hC c hc 0 (nat.zero_le m) (res x) γ hγ,
+    obtain ⟨_, _, rfl, rfl, y, hy⟩ := hC c ⟨hc⟩ 0 (nat.zero_le m) (res x) γ hγ,
     rwa [res_res, d_eq_zero_apply, sub_zero,
         d_res, hx, normed_group_hom.map_zero, norm_zero, mul_zero, zero_add] at hy,
     dec_trivial },
@@ -67,7 +70,7 @@ begin
   have hc₀kc : k * c ≥ c₀,
   calc c₀ ≤ c : hc
   ... ≤ 1*c : by rw one_mul
-  ... ≤ k*c : mul_le_mul' _inst_1 (le_refl _),
+  ... ≤ k*c : mul_le_mul' hk.out (le_refl _),
   let K' := if K = 0 then 1 else K,
   have hK' : (0 : ℝ) < K',
   { dsimp [K'],
@@ -89,8 +92,7 @@ begin
        ... ≤ 2*2^j : mul_le_mul_of_nonneg_right one_le_two (pow_nonneg zero_le_two _) },
   have seq : ∀ j : ℕ, ∃ w : C (k*c) i, ∥res x - C.d i (i+1) w∥ ≤ ε j,
   { intro j,
-    haveI : fact (k * (k * c) ≤ k ^ 2 * c) := by { show _ ≤ _, convert le_refl _ using 1, ring},
-    specialize hC (k*c) hc₀kc _ hi (res x) (ε j) (ε_pos j),
+    specialize hC (k*c) ⟨hc₀kc⟩ _ hi (res x) (ε j) (ε_pos j),
     obtain ⟨_, _, rfl, rfl, y, hy⟩ := hC,
     simp only [d_res, res_res, normed_group_hom.map_zero, hx, norm_zero, zero_add, mul_zero] at hy,
     refine ⟨y, hy⟩ },
@@ -118,7 +120,7 @@ begin
                       ≤ K*∥C.d i (i+1) (w (j+1) - w j)∥ + δ j,
   { intro j,
     have : i ≤ m, { exact i.le_succ.trans hi },
-    obtain ⟨i', -, hi', rfl, hy⟩ := hC c hc i this (w (j+1) - w j) _ (δ_pos j),
+    obtain ⟨i', -, hi', rfl, hy⟩ := hC c ⟨hc⟩ i this (w (j+1) - w j) _ (δ_pos j),
     rw [← hi₀] at hi', subst i', exact hy },
   choose z hz using seq,
   let y : ℕ → C c i := λ j, res (w j) - ∑ l in range j, C.d _ _ (z l),

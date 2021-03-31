@@ -16,7 +16,7 @@ variables (c' : ℕ → ℝ≥0)  -- implicit constants, chosen once and for all
 
 open ProFiltPseuNormGrpWithTinv (of)
 
-def polyhedral_lattice.Hom {r' : ℝ≥0} (Λ M : Type*) [polyhedral_lattice Λ]
+def polyhedral_lattice.Hom {r' : ℝ≥0} [fact (0 < r')] (Λ M : Type*) [polyhedral_lattice Λ]
   [profinitely_filtered_pseudo_normed_group_with_Tinv r' M] :
   ProFiltPseuNormGrpWithTinv r' :=
 of r' (Λ →+ M)
@@ -25,7 +25,7 @@ namespace PolyhedralLattice
 open opposite pseudo_normed_group polyhedral_lattice profinitely_filtered_pseudo_normed_group
 open category_theory
 
-variables {r' : ℝ≥0}
+variables {r' : ℝ≥0} [fact (0 < r')]
 
 /-- Like `polyhedral_lattice.Hom` but functorial in the first entry.
 Unfortunately, this means that the entries are now swapped.
@@ -48,7 +48,7 @@ def Hom (M : ProFiltPseuNormGrpWithTinv r') :
     begin
       rw [add_monoid_hom.continuous_iff],
       intro l,
-      haveI : fact (nnnorm (f l) ≤ nnnorm l) := f.strict_nnnorm l,
+      haveI : fact (nnnorm (f l) ≤ nnnorm l) := ⟨f.strict_nnnorm l⟩,
       have aux := (continuous_apply (f l)).comp
         (add_monoid_hom.incl_continuous Λ₂ r' M c),
       rw (embedding_cast_le (c * nnnorm (f l)) (c * nnnorm l)).continuous_iff at aux,
@@ -97,6 +97,8 @@ lemma iso_of_equiv_of_strict_symm.apply (e : M₁ ≃+ M₂) (he : ∀ x, f x = 
 
 variables (M)
 
+include h0r'
+
 /-- The morphism `M ⟶ Hom ℤ M` for `M` a `profinitely_filtered_pseudo_normed_group_with_Tinv`. -/
 noncomputable
 def HomZ_map : M ⟶ (Hom ℤ M) :=
@@ -125,7 +127,7 @@ def HomZ_map : M ⟶ (Hom ℤ M) :=
     simp only [h, int.cast_add_hom'_apply, profinitely_filtered_pseudo_normed_group_hom.map_gsmul],
   end }
 
-include h0r' hr'1
+include hr'1
 
 /-- `HomZ_map` as an equiv. -/
 @[simps]

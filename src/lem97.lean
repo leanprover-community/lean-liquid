@@ -15,19 +15,6 @@ open_locale nnreal big_operators
 
 variables {Λ : Type*} [add_comm_group Λ]
 variable {ι : Type*}
-/-
-### These are now all in mathlib, I think
-
-lemma abs_smul {α : Type*} [linear_ordered_add_comm_group α] (n : ℕ) (a : α) :
-  abs (n • a) = n • abs a := by admit
-
-lemma abs_add_eq_add_abs {α : Type*} [linear_ordered_add_comm_group α]  {a b : α} (hle : a ≤ b) :
-  abs (a + b) = abs a + abs b ↔ (0 ≤ a ∧ 0 ≤ b ∨ a ≤ 0 ∧ b ≤ 0) := by admit
-
-lemma abs_add_eq_add_abs_iff {α : Type*} [linear_ordered_add_comm_group α]  (a b : α) :
-  abs (a + b) = abs a + abs b ↔ (0 ≤ a ∧ 0 ≤ b ∨ a ≤ 0 ∧ b ≤ 0) := by admit
-
--/
 
 noncomputable theory
 
@@ -78,70 +65,67 @@ end
 
 section sign_vectors
 
-def nonzero_sign : ℤ → ℤ := λ n, if n ≥ 0 then 1 else -1
+def nonzero_sign : ℤ → units ℤ := λ n, if n ≥ 0 then 1 else -1
 
-@[simp] def is_sign : ℤ → Prop
-| (1 : ℤ) := true
-| (-1 : ℤ) := true
-| (n : ℤ) := false
+def sign_vectors (ι : Type*) := (ι → units ℤ)
 
-lemma is_sign_sign : ∀ (i : ℤ), is_sign (nonzero_sign i) :=
-begin
-  intro i,
-  by_cases hi : i ≥ 0,
-  simp [nonzero_sign, if_pos hi],
-  simp [nonzero_sign, if_neg hi],
-end
+lemma fintype_sign_vectors [fintype ι] : fintype (sign_vectors ι) := pi.fintype
 
-def sign_vectors (ι : Type*) := { ε : ι → ℤ // ∀ i : ι, is_sign (ε i) }
-
-lemma fintype_sign_vectors : fintype ι → fintype (sign_vectors ι) := sorry
-
-end sign_vectors
 
 /--Given a list l of elements of Λ and a functional x, (pos_vector l x) is the sign-vector of
 the values of x (l i).
 -/
 def pos_vector [fintype ι] (l : ι → Λ) (x : Λ →+ ℤ) : sign_vectors ι :=
 begin
-  let ε_0 := λ i : ι, nonzero_sign (x (l i)),
-  have hε : ∀ i, is_sign (ε_0 i),
-  { intro i,
-    dsimp [ε_0],
-    apply is_sign_sign },
-  use ⟨ε_0, hε⟩,
+  intro i,
+  use nonzero_sign (x (l i)),
 end
 
-lemma smul_to_explicit_dual_set [fintype ι] (l : ι → Λ) (x : Λ →+ ℤ) :
-  x ∈ (explicit_dual_set ((pos_vector l x).val • l)) :=
+def coe_to_signs : (sign_vectors ι) → (ι → ℤ) :=
 begin
-  intro,
-  dsimp [pos_vector, nonzero_sign],
-  by_cases h_pos : x(l i) ≥ 0,
-  { rw [if_pos h_pos, one_smul], exact h_pos },
-  { rw [if_neg h_pos, neg_smul, one_smul, add_monoid_hom.map_neg, neg_nonneg],
+  intros x i,
+  use x i,
+end
+
+instance coe_signs : has_coe (sign_vectors ι) (ι → ℤ) := ⟨ coe_to_signs ⟩
+
+instance smul_signs : has_scalar (sign_vectors ι) (ι → Λ) :=
+{smul := λ ε l i, (ε i : ℤ) • l i }
+
+lemma smul_to_explicit_dual_set [fintype ι] (l : ι → Λ) (x : Λ →+ ℤ) :
+  x ∈ (explicit_dual_set ((pos_vector l x) • l)) :=
+begin
+  intro j,
+  simp only [pos_vector, nonzero_sign, has_scalar.smul, id.def,
+    ge_iff_le, add_monoid_hom.map_gsmul, gsmul_int_int],
+  by_cases h_pos : x(l j) ≥ 0,
+  { rwa [if_pos h_pos, units.coe_one, one_mul], },
+  { rw [if_neg h_pos, units.coe_neg, units.coe_one, neg_mul_eq_neg_mul_symm,
+      one_mul, neg_nonneg],
     rw not_le at h_pos,
     exact le_of_lt h_pos },
 end
 
 lemma pos_vector_id_if_nonneg [fintype ι] (l : ι → Λ) (x : Λ →+ ℤ) (i : ι) : x (l i) ≥ 0 →
-    ((pos_vector l x).val • l) i = l i :=
+    (pos_vector l x • l) i = l i :=
 begin
   intro hx,
-  dsimp [pos_vector, nonzero_sign],
-  rw [if_pos hx, one_smul],
+  simp only [pos_vector, nonzero_sign, has_scalar.smul, id.def, ge_iff_le],
+  rw [if_pos hx, units.coe_one, one_gsmul],
 end
 
 lemma pos_vector_neg_if_neg [fintype ι] (l : ι → Λ) (x : Λ →+ ℤ) (i : ι) : x (l i) < 0 →
-    ((pos_vector l x).val • l) i = - l i :=
+    ((pos_vector l x) • l) i = - l i :=
 begin
   intro hx,
-  { dsimp [pos_vector, nonzero_sign],
-    rw lt_iff_not_ge at hx,
-    rw [if_neg hx, neg_smul, one_smul] },
+  simp only [pos_vector, nonzero_sign, has_scalar.smul, id.def, ge_iff_le],
+  dsimp [pos_vector, nonzero_sign],
+  rw lt_iff_not_ge at hx,
+  rw [if_neg hx, units.coe_neg, units.coe_one, neg_gsmul, one_gsmul],
 end
 
 
+end sign_vectors
 
 /-- Given a list l, a vector of signs ε (and an integer N), (pos_A l ε) is a finite set of functionals satisfying the
 requirements of Lemma 9.7 of [Analytic] with respect to all functionals which are positive on all ((ε • l) i)'s.
@@ -150,24 +134,19 @@ Its existence is established in lem97_pos.
 def pos_A [fintype ι] (hΛ : finite_free Λ) (N : ℕ)
   (l : ι → Λ) (ε : sign_vectors ι) : finset (Λ →+ ℤ) :=
 begin
-  obtain B := some (lem97_pos hΛ N (ε.1 • l)),
+  obtain B := some (lem97_pos hΛ N (ε • l)),
   use B,
 end
 
 lemma posA_to_explicit [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (l : ι → Λ) (ε : sign_vectors ι)
-  (x' : Λ →+ ℤ) (H : x' ∈ pos_A hΛ N l ε) : x' ∈ explicit_dual_set (ε.1 • l):=
-begin
-  exact (some_spec (lem97_pos hΛ N (ε.1 • l))).1 x' H,
-end
+  (x' : Λ →+ ℤ) (H : x' ∈ pos_A hΛ N l ε) : x' ∈ explicit_dual_set (ε • l):= (some_spec (lem97_pos hΛ N (ε • l))).1 x' H
 
-variables [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (l : ι → Λ) (ε : sign_vectors ι)
-  (x : Λ →+ ℤ) (H : x ∈ (explicit_dual_set (ε.1 • l)))
 
 lemma exists_good_pair [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (l : ι → Λ) (ε : sign_vectors ι)
-  (x : Λ →+ ℤ) (H : x ∈ (explicit_dual_set (ε.1 • l))) : ∃ x' y : (Λ →+ ℤ),
-  x' ∈ pos_A hΛ N l ε ∧ x = N • y + x' ∧ ∀ i, x' ((ε.1 • l) i) ≤ x ((ε.1 • l) i) :=
+  (x : Λ →+ ℤ) (H : x ∈ (explicit_dual_set (ε • l))) : ∃ x' y : (Λ →+ ℤ),
+  x' ∈ pos_A hΛ N l ε ∧ x = N • y + x' ∧ ∀ i, x' ((ε • l) i) ≤ x ((ε • l) i) :=
 begin
-  obtain ⟨x', hx', ⟨y, hy⟩⟩ := (some_spec (lem97_pos hΛ N (ε.1 • l))).2 x H,
+  obtain ⟨x', hx', ⟨y, hy⟩⟩ := (some_spec (lem97_pos hΛ N (ε • l))).2 x H,
   use [x', y],
   exact ⟨hx', hy⟩,
 end
@@ -187,10 +166,10 @@ lemma lem97 [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (l : ι → Λ) :
     x = N • y + x' ∧
     ∀ i, (0 ≤ x' (l i) ∧ 0 ≤ (x - x') (l i)) ∨ (x' (l i) ≤ 0 ∧ (x - x') (l i) ≤ 0) :=
 begin
-  let A := finset.bUnion (@finset.univ (sign_vectors ι) (fintype_sign_vectors _)) (pos_A hΛ N l),
+  let A := finset.bUnion (@finset.univ (sign_vectors ι) (fintype_sign_vectors)) (pos_A hΛ N l),
   use A,
   intro,
-  have hx : x ∈ (explicit_dual_set ((pos_vector l x).1 • l)) := smul_to_explicit_dual_set l x,
+  have hx : x ∈ (explicit_dual_set ((pos_vector l x) • l)) := smul_to_explicit_dual_set l x,
   obtain ⟨x', y, mem_x', hy, hx'⟩ := exists_good_pair hΛ N l (pos_vector l x) x hx,
   use x',
   split,
@@ -202,12 +181,12 @@ begin
   {  use y,
     apply and.intro hy,
     intro,
-    have h_pos' : x' ∈ explicit_dual_set ((pos_vector l x).val • l) :=
+    have h_pos' : x' ∈ explicit_dual_set ((pos_vector l x) • l) :=
         by apply posA_to_explicit hΛ N l (pos_vector l x) x' mem_x',
-    replace h_pos' : x' (((pos_vector l x).val • l) i) ≥ 0 := by apply h_pos',
+    replace h_pos' : x' (((pos_vector l x) • l) i) ≥ 0 := by apply h_pos',
     by_cases h_pos : x (l i) ≥ 0,
     { specialize hx' i,
-      have h_posvect_id : ((pos_vector l x).val • l) i = l i := pos_vector_id_if_nonneg l x i h_pos,
+      have h_posvect_id : ((pos_vector l x) • l) i = l i := pos_vector_id_if_nonneg l x i h_pos,
       replace h_pos' : 0 ≤ x' (l i),
       { rw h_posvect_id at h_pos', exact h_pos' },
       rw h_posvect_id at hx',
@@ -216,7 +195,7 @@ begin
       simp only [sub_nonneg, add_monoid_hom.sub_apply, hx'] },
     { replace h_pos: x (l i) < 0 := by { rw lt_iff_not_ge, exact h_pos },
       specialize hx' i,
-      have h_posvect_neg : ((pos_vector l x).val • l) i = - l i := pos_vector_neg_if_neg l x i h_pos,
+      have h_posvect_neg : ((pos_vector l x) • l) i = - l i := pos_vector_neg_if_neg l x i h_pos,
       replace h_pos' : 0 ≥ x' (l i),
       { rw h_posvect_neg at h_pos',
         simp only [ge_iff_le, add_monoid_hom.map_neg, coe_fn_coe_base, neg_nonneg] at h_pos',
@@ -225,7 +204,6 @@ begin
         apply or.inr,
         apply and.intro h_pos',
         simp [*] at *, }},
-    assumption,
 end
 
 

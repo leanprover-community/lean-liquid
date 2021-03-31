@@ -122,8 +122,8 @@ def mk' (f : M₁ →+ M₂) (h : ∃ C, ∀ c, ∃ (H : ∀ x, x ∈ filtration
   begin
     obtain ⟨C, hC⟩ := h,
     obtain ⟨_, H⟩ := hC c₁,
-    haveI : fact ((C * c₁) ≤ max (C * c₁) c₂) := le_max_left _ _,
-    haveI : fact (c₂ ≤ max (C * c₁) c₂) := le_max_right _ _,
+    haveI : fact ((C * c₁) ≤ max (C * c₁) c₂) := ⟨le_max_left _ _⟩,
+    haveI : fact (c₂ ≤ max (C * c₁) c₂) := ⟨le_max_right _ _⟩,
     rw (embedding_cast_le c₂ (max (C * c₁) c₂)).continuous_iff,
     rw (embedding_cast_le (C * c₁) (max (C * c₁) c₂)).continuous_iff at H,
     convert H using 1,
@@ -164,7 +164,7 @@ mk' (add_monoid_hom.id _) $
 begin
   refine ⟨1, λ c, ⟨_, _⟩⟩,
   { intros, rwa one_mul },
-  haveI : fact (1 * c ≤ c) := by { apply le_of_eq, rw one_mul },
+  haveI : fact (1 * c ≤ c) := by { rw one_mul, exact ⟨le_rfl⟩ },
   rw (embedding_cast_le (1 * c) c).continuous_iff,
   convert continuous_id, ext, refl
 end
@@ -184,7 +184,7 @@ begin
   have hf₀ : continuous f₀ := f.continuous _ (λ x, rfl),
   let g₀ : filtration M₂ (Cf * c) → filtration M₃ (Cg * (Cf * c)) := λ x, ⟨g x, hCg x.2⟩,
   have hg₀ : continuous g₀ := g.continuous _ (λ x, rfl),
-  haveI : fact (Cg * Cf * c ≤ Cg * (Cf * c)) := by { apply le_of_eq, rw mul_assoc },
+  haveI : fact (Cg * Cf * c ≤ Cg * (Cf * c)) := by { rw mul_assoc, exact ⟨le_rfl⟩ },
   rw (embedding_cast_le (Cg * Cf * c) (Cg * (Cf * c))).continuous_iff,
   exact hg₀.comp hf₀
 end
@@ -287,8 +287,8 @@ begin
   have f₀_ctu : continuous f₀ := hf f₀ hf₀,
   let cg := cf + c₂,
   haveI : fact (c₂ ≤ cf + cg) :=
-    calc c₂ ≤ cf + c₂        : self_le_add_left _ _
-        ... ≤ cf + (cf + c₂) : self_le_add_left _ _,
+    ⟨calc c₂ ≤ cf + c₂        : self_le_add_left _ _
+         ... ≤ cf + (cf + c₂) : self_le_add_left _ _⟩,
   have hcg : ∀ x : filtration M₁ c₁, g x ∈ filtration M₂ cg,
   { intros x,
     have : g x = -(f x) + (f + g) x,
@@ -311,8 +311,8 @@ variables (M)
 lemma pfpng_ctu_id : pfpng_ctu (@id M) :=
 begin
   intros c₁ c₂ f₀ h,
-  haveI : fact (c₁ ≤ max c₁ c₂) := le_max_left _ _,
-  haveI : fact (c₂ ≤ max c₁ c₂) := le_max_right _ _,
+  haveI : fact (c₁ ≤ max c₁ c₂) := ⟨le_max_left _ _⟩,
+  haveI : fact (c₂ ≤ max c₁ c₂) := ⟨le_max_right _ _⟩,
   have : @cast_le M _ c₂ (max c₁ c₂) _ ∘ f₀ = cast_le, { ext, dsimp, rw ← h, refl },
   rw [(embedding_cast_le c₂ (max c₁ c₂)).continuous_iff, this],
   exact (embedding_cast_le _ _).continuous
@@ -387,8 +387,8 @@ begin
   have f₀_ctu : continuous f₀ := hf f₀ hf₀,
   let cg := cf + c₂,
   haveI : fact (c₂ ≤ cf + cg) :=
-    calc c₂ ≤ cf + c₂        : self_le_add_left _ _
-        ... ≤ cf + (cf + c₂) : self_le_add_left _ _,
+    ⟨calc c₂ ≤ cf + c₂        : self_le_add_left _ _
+         ... ≤ cf + (cf + c₂) : self_le_add_left _ _⟩,
   have hcg : ∀ (x : (filtration M₁ c₁ : Type*)^m) j, g (pow_incl x) j ∈ filtration M₂ cg,
   { intros x j,
     have : g (pow_incl x) j = -(f (pow_incl x) j) + (f + g) (pow_incl x) j,
@@ -439,6 +439,8 @@ namespace profinitely_filtered_pseudo_normed_group
 
 /-! ## Powers -/
 
+section pi
+
 variables {ι : Type*} (M : ι → Type*) [Π i, profinitely_filtered_pseudo_normed_group (M i)]
 
 instance pi_topology (c : ℝ≥0) : topological_space (filtration (Π i, M i) c) :=
@@ -479,5 +481,32 @@ def pi_map (f : Π i, profinitely_filtered_pseudo_normed_group_hom (M i) (M i)) 
   map_add' := λ x y, by { ext i, exact (f i).map_add (x i) (y i) },
   bound' := sorry,
   continuous' := sorry }
+
+end pi
+
+section prod
+
+variables (M₁ M₂ : Type*)
+variables [profinitely_filtered_pseudo_normed_group M₁]
+variables [profinitely_filtered_pseudo_normed_group M₂]
+
+instance prod_topology (c : ℝ≥0) : topological_space (filtration (M₁ × M₂) c) :=
+topological_space.induced (filtration_prod_equiv M₁ M₂ c) $ infer_instance
+
+instance prod_t2 (c : ℝ≥0) : t2_space (filtration (M₁ × M₂) c) := sorry
+
+instance prod_td (c : ℝ≥0) : totally_disconnected_space (filtration (M₁ × M₂) c) := sorry
+
+instance prod_compact (c : ℝ≥0) : compact_space (filtration (M₁ × M₂) c) := sorry
+
+
+instance prod :
+  profinitely_filtered_pseudo_normed_group (M₁ × M₂) :=
+{ continuous_add' := sorry,
+  continuous_neg' := sorry,
+  continuous_cast_le := sorry,
+  .. pseudo_normed_group.prod M₁ M₂ }
+
+end prod
 
 end profinitely_filtered_pseudo_normed_group

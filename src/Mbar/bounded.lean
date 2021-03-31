@@ -50,7 +50,7 @@ protected lemma sum_le (x : Mbar_bdd r S c M) :
 
 /-- The obvious map from `Mbar_bdd r S c₁ M` to `Mbar_bdd r S c₂ M`, for `c₁ ≤ c₂`. -/
 protected def cast_le [hc : fact (c₁ ≤ c₂)] (x : Mbar_bdd r S c₁ M) : Mbar_bdd r S c₂ M :=
-⟨x.1, x.coeff_zero, x.sum_le.trans hc⟩
+⟨x.1, x.coeff_zero, x.sum_le.trans hc.out⟩
 
 /-- Make a term of type `Mbar_bdd r S c M`, given the two defining hypotheses. -/
 def mk' (x : S → fin (M + 1) → ℤ)
@@ -77,12 +77,12 @@ lemma coeff_bound [h0r : fact (0 < r)] (F : S → fin (M + 1) → ℤ)
   ↑(F s n).nat_abs ≤ c / min (r ^ M) 1 :=
 begin
   rw [div_eq_mul_inv],
-  apply le_mul_inv_of_mul_le ((lt_min (pow_pos h0r _) zero_lt_one).ne.symm),
+  apply le_mul_inv_of_mul_le ((lt_min (pow_pos h0r.out _) zero_lt_one).ne.symm),
   calc ↑(F s n).nat_abs * min (r ^ M) 1 ≤ ↑(F s n).nat_abs * r ^ (n:ℕ) : begin
     refine mul_le_mul_of_nonneg_left _ (subtype.property (_ : ℝ≥0)),
     cases le_or_lt r 1 with hr1 hr1,
     { refine le_trans (min_le_left _ _) _,
-      exact pow_le_pow_of_le_one (le_of_lt h0r) hr1 (nat.lt_add_one_iff.1 n.2) },
+      exact pow_le_pow_of_le_one h0r.out.le hr1 (nat.lt_add_one_iff.1 n.2) },
     { exact le_trans (min_le_right _ _) (one_le_pow_of_one_le (le_of_lt hr1) _) },
   end
   -- ... = (↑(F s n).nat_abs * r ^ (n:ℕ)) : by {  } --rw [abs_mul, abs_of_pos (pow_pos h0r _)]

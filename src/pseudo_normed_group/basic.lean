@@ -137,9 +137,13 @@ begin
     exact pseudo_normed_group.nat_smul_mem_filtration k m c h }
 end
 
+section pi
+
+variables
+
 instance pi {ι : Type*} (M : ι → Type*) [Π i, pseudo_normed_group (M i)] :
   pseudo_normed_group (Π i, M i) :=
-{ filtration := λ c, { x | ∀ i, x i ∈ filtration (M i) c }, -- TODO: check with Peter
+{ filtration := λ c, { x | ∀ i, x i ∈ filtration (M i) c },
   filtration_mono := λ c₁ c₂ h x hx i, filtration_mono h (hx i),
   zero_mem_filtration := λ c i, zero_mem_filtration _,
   neg_mem_filtration := λ c x h i, neg_mem_filtration (h i),
@@ -158,11 +162,40 @@ def filtration_pi_equiv {ι : Type*} (M : ι → Type*) [Π i, pseudo_normed_gro
   left_inv := by { rintro ⟨x, hx⟩, refl },
   right_inv := by { intro x, ext, refl } }
 
+end pi
+
+section prod
+
+variables (M₁ M₂ : Type*) [pseudo_normed_group M₁] [pseudo_normed_group M₂]
+
+instance prod :
+  pseudo_normed_group (M₁ × M₂) :=
+{ filtration := λ c, { x | x.1 ∈ filtration M₁ c ∧ x.2 ∈ filtration M₂ c },
+  filtration_mono := λ c₁ c₂ h x hx, ⟨filtration_mono h hx.1, filtration_mono h hx.2⟩,
+  zero_mem_filtration := λ c, ⟨zero_mem_filtration _, zero_mem_filtration _⟩,
+  neg_mem_filtration := λ c x h, ⟨neg_mem_filtration h.1, neg_mem_filtration h.2⟩,
+  add_mem_filtration := λ c₁ c₂ x₁ x₂ h₁ h₂,
+    ⟨add_mem_filtration h₁.1 h₂.1, add_mem_filtration h₁.2 h₂.2⟩ }
+
+lemma mem_filtration_prod (c : ℝ≥0) (x : M₁ × M₂) :
+  x ∈ filtration (M₁ × M₂) c ↔ x.1 ∈ filtration M₁ c ∧ x.2 ∈ filtration M₂ c := iff.rfl
+
+/-- The equivalence between `(M₁ × M₂)_c` and `(M₁)_c × (M₂)_c`. -/
+@[simps]
+def filtration_prod_equiv (c : ℝ≥0) :
+  filtration (M₁ × M₂) c ≃ filtration M₁ c × filtration M₂ c :=
+{ to_fun := λ x, (⟨x.1.1,  x.2.1⟩, ⟨x.1.2, x.2.2⟩),
+  inv_fun := λ x, ⟨(x.1, x.2), ⟨x.1.2, x.2.2⟩⟩,
+  left_inv := by { rintro ⟨⟨x₁, x₂⟩, hx⟩, refl },
+  right_inv := by { rintro ⟨x₁, x₂⟩, ext; refl } }
+
+end prod
+
 /-- The natural inclusion `filtration M c₁ → filtration M c₂`,
 for a pseudo normed group `M`, and `c₁ ≤ c₂`. -/
 def cast_le {c₁ c₂ : ℝ≥0} [h : fact (c₁ ≤ c₂)] (x : filtration M c₁) :
   filtration M c₂ :=
-⟨x, filtration_mono h x.2⟩
+⟨x, filtration_mono h.out x.2⟩
 
 @[simp] lemma coe_cast_le {c₁ c₂ : ℝ≥0} [h : fact (c₁ ≤ c₂)] (x : filtration M c₁) :
   ((cast_le x : filtration M c₂) : M) = x := rfl

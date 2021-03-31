@@ -42,7 +42,7 @@ instance : profinitely_filtered_pseudo_normed_group (rescale r M) :=
   continuous_add' :=
   begin
     intros c₁ c₂,
-    haveI : fact ((c₁ + c₂) * r⁻¹ ≤ c₁ * r⁻¹ + c₂ * r⁻¹) := le_of_eq (add_mul _ _ _),
+    haveI : fact ((c₁ + c₂) * r⁻¹ ≤ c₁ * r⁻¹ + c₂ * r⁻¹) := ⟨(add_mul _ _ _).le⟩,
     rw (embedding_cast_le ((c₁ + c₂) * r⁻¹) (c₁ * r⁻¹ + c₂ * r⁻¹)).continuous_iff,
     exact (continuous_add' (c₁ * r⁻¹) (c₂ * r⁻¹))
   end,
@@ -72,15 +72,16 @@ lemma Tinv'_mem_filtration (c : ℝ≥0) (x : rescale r M) (hx : x ∈ filtratio
 by simpa only [mem_filtration, Tinv'_apply, equiv.symm_apply_apply, mul_assoc]
   using Tinv_mem_filtration _ _ hx
 
+variable [fact (0 < r')]
+
 @[simps]
 def Tinv : profinitely_filtered_pseudo_normed_group_hom (rescale r M) (rescale r M) :=
 profinitely_filtered_pseudo_normed_group_hom.mk' (Tinv' r r' M)
 begin
   refine ⟨r'⁻¹, λ c, ⟨Tinv'_mem_filtration r r' M c, _⟩⟩,
-  haveI : fact (r'⁻¹ * (c * r⁻¹) ≤ r'⁻¹ * c * r⁻¹) := ge_of_eq (mul_assoc _ _ _),
-  have := @Tinv₀_continuous r' M _ (c * r⁻¹),
-  rw (embedding_cast_le (r'⁻¹ * (c * r⁻¹)) (r'⁻¹ * c * r⁻¹)).continuous_iff at this,
-  exact this
+  haveI :  fact (c * r⁻¹ ≤ r' * (r'⁻¹ * c * r⁻¹)) :=
+    ⟨by rw [mul_assoc, mul_inv_cancel_left' ‹fact (0 < r')›.1.ne.symm]⟩,
+  apply Tinv₀_continuous,
 end
 
 instance : profinitely_filtered_pseudo_normed_group_with_Tinv r' (rescale r M) :=

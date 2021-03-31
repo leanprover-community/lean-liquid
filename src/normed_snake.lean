@@ -32,7 +32,7 @@ begin
       ∥res n - N.d _ _ y∥ ≤ K' * (K * K'' + 1) * ∥N.d i (i+1) n∥ + ε,
   { dsimp [c₁] at this,
     intros n₁ ε hε,
-    haveI hc : fact (k'' * k * k' * c = c₁) := by { dsimp [fact, c₁], ring },
+    haveI hc : fact (k'' * k * k' * c = c₁) := by { constructor, simp [mul_assoc, c₁] },
     let n : ↥(N c₁ i) := res n₁,
     rcases this n ε hε with ⟨i₀, hi₀, y, hy⟩,
     rw [res_res, d_res] at hy,
@@ -45,8 +45,8 @@ begin
 
   have honele : fact (1 ≤ K' * (K * K'' + 2) + 1), { apply_instance },
   have hε₁_ε : (K' * (K * K'' + 2) + 1 : ℝ)*ε₁ = ε,
-    from mul_div_cancel' _ (by exact_mod_cast ne_of_gt (lt_of_lt_of_le zero_lt_one honele)),
-  have hε₁ : 0 < ε₁, from div_pos hε (lt_of_lt_of_le zero_lt_one honele),
+    from mul_div_cancel' _ (by exact_mod_cast ne_of_gt (lt_of_lt_of_le zero_lt_one honele.out)),
+  have hε₁ : 0 < ε₁, from div_pos hε (lt_of_lt_of_le zero_lt_one honele.out),
 
   let c₁ := k''*(k*(k'*c)),
   obtain ⟨m' : M' c₁ i, hm' : g m' = n⟩ := (hgquot _ _).surjective _,
@@ -75,7 +75,7 @@ begin
     ... ≤ K'' * ∥m₁''∥ : (mul_le_mul_of_nonneg_left
                            (hM'_adm.d_norm_noninc _ _ _ _ m₁'') $ nnreal.coe_nonneg K'') },
   obtain ⟨i', j, hi', rfl, m₀, hm₀⟩ :=
-    hM _ (le_trans hc $ le_mul_of_one_le_left' hk') _ (by linarith) (res m₁) ε₁ hε₁,
+    hM _ ⟨hc.out.trans $ le_mul_of_one_le_left' hk'.out⟩ _ (by linarith) (res m₁) ε₁ hε₁,
   rw [nat.add_sub_cancel] at hi', subst i',
   replace hm₀ : ∥res m₁ - M.d i (i+1) m₀∥ ≤ K * K'' * ∥N.d i (i+1) n∥ + K*K''*ε₁ + ε₁,
   { calc ∥res m₁ - M.d i (i+1) m₀∥  = ∥res (res m₁) - M.d i (i+1) m₀∥ : by rw res_res

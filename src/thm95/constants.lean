@@ -11,7 +11,7 @@ noncomputable theory
 
 open_locale nnreal
 
-variables (BD : breen_deligne.package) (c' : ℕ → ℝ≥0) [BD.suitable c']
+variables (BD : breen_deligne.data) (c' : ℕ → ℝ≥0) [BD.suitable c']
 variables (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)]
 variables (V : NormedGroup)
 variables (Λ : PolyhedralLattice) -- (M : ProFiltPseuNormGrpWithTinv r')
@@ -26,7 +26,7 @@ def ε : Π (m : ℕ) (K : ℝ≥0), ℝ≥0
 | (m+1) K := ε m (K * (K * K + 1))
 
 lemma ε_pos : ∀ m K [fact (1 ≤ K)], 0 < ε m K
-| 0     K hK := nnreal.inv_pos.mpr (mul_pos zero_lt_two (lt_of_lt_of_le zero_lt_one hK))
+| 0     K hK := nnreal.inv_pos.mpr (mul_pos zero_lt_two (lt_of_lt_of_le zero_lt_one hK.out))
 | (m+1) K hK := by { dsimp [ε], exactI ε_pos m _ }
 
 noncomputable
@@ -78,7 +78,7 @@ def k₁ : ℕ → ℝ≥0
 | (m+1) := sorry
 
 instance one_le_k₁ : ∀ m, fact (1 ≤ k₁ m)
-| 0     := one_le_two
+| 0     := ⟨one_le_two⟩
 | (m+1) := sorry
 
 def K₁ : ℕ → ℝ≥0
@@ -86,7 +86,7 @@ def K₁ : ℕ → ℝ≥0
 | (m+1) := sorry
 
 instance one_le_K₁ : ∀ m, fact (1 ≤ K₁ m)
-| 0     := one_le_two
+| 0     := ⟨one_le_two⟩
 | (m+1) := sorry
 
 -- === jmc: I'm not completely convinced that the next three abbreviations are correct
@@ -106,7 +106,7 @@ def k' : ℝ≥0 := max (k₀ m) $ (finset.range (m+1)).sup c'
 
 instance one_le_k' : fact (1 ≤ k' c' m) := sorry
 
-instance k₀_le_k' : fact (normed_spectral.k₀ m (k₁ m) ≤ k' c' m) := le_max_left _ _
+instance k₀_le_k' : fact (normed_spectral.k₀ m (k₁ m) ≤ k' c' m) := ⟨le_max_left _ _⟩
 
 -- in the PDF `b` is *positive*, we might need to make that explicit
 lemma b_exists : ∃ b : ℕ, 2 * (k' c' m) * (r / r') ^ b ≤ (ε m) :=
@@ -126,7 +126,7 @@ def N₂ : ℕ := nat.find (N₂_exists c' r r' m)
 `(k' c' m) / N ≤ r' ^ (b c' r r' m)` -/
 def N : ℕ := 2 ^ N₂ c' r r' m
 
-instance N_pos : fact (0 < N c' r r' m) := pow_pos zero_lt_two _
+instance N_pos : fact (0 < N c' r r' m) := ⟨pow_pos zero_lt_two _⟩
 
 lemma r_pow_b_mul_N_le :
   r ^ (b c' r r' m) * (N c' r r' m) ≤ (2 / k' c' m) * (r / r') ^ (b c' r r' m) :=

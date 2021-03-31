@@ -23,7 +23,7 @@ open_locale nnreal -- enable the notation `ℝ≥0` for the nonnegative real num
 
 open category_theory ProFiltPseuNormGrpWithTinv polyhedral_lattice
 
-variables (BD : breen_deligne.package)
+variables (BD : breen_deligne.data)
 variables (c' : ℕ → ℝ≥0)  -- implicit constants, chosen once and for all
                           -- see the sentence after that statement of Thm 9.5
 
@@ -48,7 +48,7 @@ begin
   intros c n,
   rw ← system_of_complexes.apply_hom_eq_hom_apply,
   apply NormedGroup.iso_isometry_of_norm_noninc;
-  apply breen_deligne.package.complex.map_norm_noninc
+  apply breen_deligne.data.complex.map_norm_noninc
 end
 
 /-!

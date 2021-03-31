@@ -40,6 +40,12 @@ instance (M : ProFiltPseuNormGrp) : profinitely_filtered_pseudo_normed_group M :
 
 @[simp] lemma coe_id (V : ProFiltPseuNormGrp) : ⇑(𝟙 V) = id := rfl
 
+@[simp] lemma coe_comp {A B C : ProFiltPseuNormGrp} (f : A ⟶ B) (g : B ⟶ C) :
+  ⇑(f ≫ g) = g ∘ f := rfl
+
+@[simp] lemma coe_comp_apply {A B C : ProFiltPseuNormGrp} (f : A ⟶ B) (g : B ⟶ C) (x : A) :
+  (f ≫ g) x = g (f x) := rfl
+
 open pseudo_normed_group
 
 section
@@ -84,6 +90,11 @@ instance (M : ProFiltPseuNormGrpWithTinv r) :
 
 @[simp] lemma coe_id (V : ProFiltPseuNormGrpWithTinv r) : ⇑(𝟙 V) = id := rfl
 
+@[simp] lemma coe_comp {A B C : ProFiltPseuNormGrpWithTinv r} (f : A ⟶ B) (g : B ⟶ C) :
+  ⇑(f ≫ g) = g ∘ f := rfl
+
+@[simp] lemma coe_comp_apply {A B C : ProFiltPseuNormGrpWithTinv r} (f : A ⟶ B) (g : B ⟶ C) (x : A) :
+  (f ≫ g) x = g (f x) := rfl
 open pseudo_normed_group
 
 section

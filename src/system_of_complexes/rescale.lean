@@ -38,18 +38,18 @@ section exact_and_admissible
 
 variables {k K : ℝ≥0} [fact (1 ≤ k)] {m : ℕ} {c₀ : ℝ≥0}
 
-lemma rescale_is_weak_bounded_exact (r : ℝ≥0) [fact (0 < r)] (C : system_of_complexes)
+lemma rescale_is_weak_bounded_exact (r : ℝ≥0) [hr : fact (0 < r)] (C : system_of_complexes)
   (hC : C.is_weak_bounded_exact k K m c₀) :
   ((rescale r).obj C).is_weak_bounded_exact k K m c₀ :=
 begin
   intros c hc i hi x ε hε,
   obtain ⟨_, _, rfl, rfl, y, hy⟩ := hC c hc i hi ((@rescale.of r _).symm x) (ε * r) _,
-  swap, { exact mul_pos hε ‹_› },
+  swap, { exact mul_pos hε hr.out },
   refine ⟨_, _, rfl, rfl, (@rescale.of r _) y, _⟩,
   erw [rescale.norm_def, rescale.norm_def],
   rwa [div_le_iff, add_mul, mul_assoc, div_mul_cancel],
-  { apply ne_of_gt, assumption },
-  { assumption },
+  { apply ne_of_gt, exact hr.out },
+  { exact hr.out },
 end
 .
 /-- `rescale C` is admissible if `C` is. -/
@@ -69,7 +69,7 @@ lemma rescale_admissible (r : ℝ≥0) [fact (0 < r)] (C : system_of_complexes) 
 end exact_and_admissible
 
 instance (m : ℕ) : fact (0 < m!) :=
-nat.factorial_pos _
+⟨nat.factorial_pos _⟩
 
 def rescale_functor : ℕ → (system_of_complexes ⥤ system_of_complexes)
 | 0     := 𝟭 _

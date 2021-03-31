@@ -266,6 +266,8 @@ structure complex_like (cov : bool) extends differential_object ι V :=
 (d_comp_d : ∀ i j k, d i j ≫ d j k = 0)
 (d_eq_zero : ∀ ⦃i j⦄, ¬ coherent_indices cov i j → d i j = 0)
 
+attribute [reassoc] complex_like.d_comp_d
+
 variables {ι V}
 
 instance coherent_indices_decidable [decidable_eq ι] (cov : bool) (i j : ι) :
@@ -432,6 +434,8 @@ def as_functor {T : Type*} [has_succ ι] [category V] [preadditive V] [category 
   map_id' := λ t, by { ext i, dsimp, rw (C.X i).map_id, refl },
   map_comp' := λ t₁ t₂ t₃ h₁ h₂, by { ext i, dsimp, rw functor.map_comp, refl } }
 
+section shift
+
 variables [has_succ_pred ι] [category V] [preadditive V]
 
 open category_theory.preadditive
@@ -464,6 +468,164 @@ instance shift.additive : (shift ι V : complex_like ι V cov ⥤ complex_like �
 --   begin
 --     admit
 --   end }
+
+end shift
+
+open category_theory.preadditive
+
+variables {ι V} [has_succ ι] [category V] [preadditive V]
+
+@[simps]
+def iso_of_components {C₁ C₂ : complex_like ι V cov} (f : Π i, C₁.X i ≅ C₂.X i)
+  (hf : ∀ i j, C₁.d i j ≫ (f j).hom = (f i).hom ≫ C₂.d i j) :
+  C₁ ≅ C₂ :=
+{ hom :=
+  { f := λ i, (f i).hom,
+    comm := hf },
+  inv :=
+  { f := λ i, (f i).inv,
+    comm := λ i j,
+    calc C₂.d i j ≫ (f j).inv
+        = (f i).inv ≫ ((f i).hom ≫ C₂.d i j) ≫ (f j).inv : by simp
+    ... = (f i).inv ≫ (C₁.d i j ≫ (f j).hom) ≫ (f j).inv : by rw hf
+    ... = (f i).inv ≫ C₁.d i j : by simp },
+  hom_inv_id' := by { ext i, exact (f i).hom_inv_id },
+  inv_hom_id' := by { ext i, exact (f i).inv_hom_id } }
+
+def htpy_idx_rel₁ (cov : bool) (i j : ι) :=
+(coherent_indices cov i j) ∨ ((∀ k, ¬ coherent_indices cov j k) ∧ i = j)
+
+def htpy_idx_rel₂ (cov : bool) (i j : ι) :=
+(coherent_indices cov i j) ∨ ((∀ k, ¬ coherent_indices cov k j) ∧ i = j)
+
+@[simp] lemma htpy_idx_rel₁_ff_nat (i j : ℕ) :
+  htpy_idx_rel₁ ff i j ↔ i = j + 1 ∨ (i = 0 ∧ j = 0) :=
+begin
+  dsimp [htpy_idx_rel₁, coherent_indices, succ_nat],
+  refine or_congr iff.rfl ⟨_, _⟩,
+  { rintro ⟨hij, rfl⟩,
+    rw and_self,
+    cases i, { refl },
+    exact (hij i rfl).elim },
+  { rintro ⟨rfl, rfl⟩,
+    refine ⟨_, rfl⟩,
+    intro k, exact (nat.succ_ne_zero k).symm }
+end
+
+@[simp] lemma htpy_idx_rel₂_ff_nat (i j : ℕ) :
+  htpy_idx_rel₂ ff i j ↔ i = j + 1 :=
+begin
+  dsimp [htpy_idx_rel₂, coherent_indices, succ_nat],
+  simp only [← not_exists, exists_eq, not_true, or_false, false_and],
+end
+
+@[simp] lemma htpy_idx_rel₁_tt_nat (i j : ℕ) :
+  htpy_idx_rel₁ tt i j ↔ i + 1 = j :=
+begin
+  dsimp [htpy_idx_rel₁, coherent_indices, succ_nat],
+  simp only [← not_exists, exists_eq', not_true, or_false, false_and],
+end
+
+@[simp] lemma htpy_idx_rel₂_tt_nat (i j : ℕ) :
+  htpy_idx_rel₂ tt i j ↔ i + 1= j ∨ (i = 0 ∧ j = 0) :=
+begin
+  dsimp [htpy_idx_rel₂, coherent_indices, succ_nat],
+  refine or_congr iff.rfl ⟨_, _⟩,
+  { rintro ⟨hij, rfl⟩,
+    rw and_self,
+    cases i, { refl },
+    exact (hij i rfl).elim },
+  { rintro ⟨rfl, rfl⟩, exact ⟨nat.succ_ne_zero, rfl⟩ }
+end
+
+structure homotopy {C₁ C₂ : complex_like ι V cov} (f g : C₁ ⟶ C₂) :=
+(h : Π j i, C₁.X j ⟶ C₂.X i)
+(h_eq_zero : ∀ i j, ¬ coherent_indices cov i j → h j i = 0)
+(comm : ∀ i j k, htpy_idx_rel₁ cov i j → htpy_idx_rel₂ cov j k →
+  h j i ≫ C₂.d i j + C₁.d j k ≫ h k j = f.f j - g.f j)
+
+variables {C₁ C₂ C₃ : complex_like ι V cov} {f g f₁ g₁ f' f'' : C₁ ⟶ C₂} {f₂ g₂ : C₂ ⟶ C₃}
+
+@[reassoc] lemma h_comp_d (h : homotopy f g) (i j k : ι)
+  (hij: htpy_idx_rel₁ cov i j) (hjk: htpy_idx_rel₂ cov j k) :
+  h.h j i ≫ C₂.d i j = f.f j - g.f j - C₁.d j k ≫ h.h k j :=
+begin
+  rw eq_sub_iff_add_eq,
+  exact h.comm i j k hij hjk
+end
+
+@[reassoc] lemma d_comp_h (h : homotopy f g) (i j k : ι)
+  (hij: htpy_idx_rel₁ cov i j) (hjk: htpy_idx_rel₂ cov j k) :
+  C₁.d j k ≫ h.h k j = f.f j - g.f j - h.h j i ≫ C₂.d i j :=
+begin
+  rw [eq_sub_iff_add_eq, add_comm],
+  exact h.comm i j k hij hjk
+end
+
+@[simps]
+def homotopy.of_eq (h : f = g) : homotopy f g :=
+{ h := 0,
+  h_eq_zero := λ _ _ _, rfl,
+  comm := by { intros, simp only [add_zero, zero_comp, pi.zero_apply, comp_zero, sub_self, h] } }
+
+@[simps] def homotopy.refl : homotopy f f := homotopy.of_eq rfl
+
+@[simps]
+def homotopy.symm (h : homotopy f g) : homotopy g f :=
+{ h := λ j i, -h.h j i,
+  h_eq_zero := λ i j hij, by rw [h.h_eq_zero i j hij, neg_zero],
+  comm := λ i j k hij hjk,
+    by simp only [neg_comp, comp_neg, ← neg_add, h.comm i j k hij hjk, neg_sub] }
+
+@[simps]
+def homotopy.trans (h : homotopy f f') (h' : homotopy f' f'') : homotopy f f'' :=
+{ h := λ j i, h.h j i + h'.h j i,
+  h_eq_zero := λ i j hij, by rw [h.h_eq_zero i j hij, h'.h_eq_zero i j hij, add_zero],
+  comm :=
+  begin
+    intros i j k hij hjk,
+    calc (h.h j i + h'.h j i) ≫ C₂.d i j + C₁.d j k ≫ (h.h k j + h'.h k j)
+        = h.h j i ≫ C₂.d i j + h'.h j i ≫ C₂.d i j +
+            (C₁.d j k ≫ h.h k j + C₁.d j k ≫ h'.h k j) : by rw [add_comp, comp_add]
+    ... = h.h j i ≫ C₂.d i j + C₁.d j k ≫ h.h k j +
+            (h'.h j i ≫ C₂.d i j + C₁.d j k ≫ h'.h k j) : by abel
+    ... = f.f j - f'.f j + (f'.f j - f''.f j) : by rw [h.comm i j k hij hjk, h'.comm i j k hij hjk]
+    ... = f.f j - f''.f j : by abel
+  end }
+
+@[simps]
+def homotopy.comp_const (h : homotopy f₁ g₁) (f₂ : C₂ ⟶ C₃) : homotopy (f₁ ≫ f₂) (g₁ ≫ f₂) :=
+{ h := λ j i, h.h j i ≫ f₂.f i,
+  h_eq_zero := λ i j hij, by rw [h.h_eq_zero i j hij, zero_comp],
+  comm :=
+  begin
+    intros i j k hij hjk,
+    calc (h.h j i ≫ f₂.f i) ≫ C₃.d i j + C₁.d j k ≫ h.h k j ≫ f₂.f j
+        = (h.h j i ≫ C₂.d i j + C₁.d j k ≫ h.h k j) ≫ f₂.f j : _
+    ... = (f₁.f j - g₁.f j) ≫ f₂.f j : by rw [h.comm i j k hij hjk]
+    ... = (f₁ ≫ f₂).f j - (g₁ ≫ f₂).f j : by erw [comp_f, comp_f, sub_comp],
+    simp only [add_comp, category.assoc],
+    erw [f₂.comm]; refl
+  end }
+
+@[simps]
+def homotopy.const_comp (f₁ : C₁ ⟶ C₂) (h : homotopy f₂ g₂) : homotopy (f₁ ≫ f₂) (f₁ ≫ g₂) :=
+{ h := λ j i, f₁.f j ≫ h.h j i,
+  h_eq_zero := λ i j hij, by rw [h.h_eq_zero i j hij, comp_zero],
+  comm :=
+  begin
+    intros i j k hij hjk,
+    calc (f₁.f j ≫ h.h j i) ≫ C₃.d i j + C₁.d j k ≫ f₁.f k ≫ h.h k j
+        = f₁.f j ≫ (h.h j i ≫ C₃.d i j + C₂.d j k ≫ h.h k j) : _
+    ... = f₁.f j ≫ (f₂.f j - g₂.f j) : by rw [h.comm i j k hij hjk]
+    ... = (f₁ ≫ f₂).f j - (f₁ ≫ g₂).f j : by erw [comp_f, comp_f, comp_sub],
+    simp only [comp_add, ← category.assoc],
+    erw [f₁.comm]; refl
+  end }
+
+@[simps]
+def homotopy.comp (h₁ : homotopy f₁ g₁) (h₂ : homotopy f₂ g₂) : homotopy (f₁ ≫ f₂) (g₁ ≫ g₂) :=
+(h₁.comp_const _).trans (h₂.const_comp _)
 
 end complex_like
 
