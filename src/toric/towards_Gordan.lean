@@ -120,6 +120,16 @@ two generators of the extremal rays.
 def pre_generators (s : set M) : set N := { c : N | c ∈ dual_set nat_submodule f s ∧ ∃ t ⊆ s,
   dual_set nat_submodule f (({1, -1} : set ℤ) • t) = submodule.span ℕ {c} }
 
+/-- If we start with a finite set `s` of elements in `M`, then the set of `pre_generators` of the
+`dual_set` of `s` is also finite.
+
+## Reason
+Each `pre_generator` is uniquely determined by a subset of `s`.  Thus, finiteness of
+`pre_generators` should be a direct consequence of finiteness of `s`. -/
+lemma pre_generators_finite (s : set M) [fintype s] : fintype (pre_generators f s) :=
+sorry
+
+
 /-- A pairing `f` is `full_on` a function `vm : ι → M` if, for each element `i ∈ ι`,
 the linear function `f (vm i)` is non-negative on all the basis elements and it is strictly
 positive on `v i` alone.
