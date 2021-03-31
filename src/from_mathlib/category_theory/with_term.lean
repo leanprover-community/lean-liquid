@@ -133,9 +133,7 @@ def lift {D : Type*} [category D] {Z : D} (F : C ⥤ D) (M : Π (x : C), F.obj x
     | of x, of y, f := F.map f
     | of x, star, punit.star := M x
     | star, star, punit.star := 𝟙 Z
-    end,
-  map_id' := by {rintros (X|X), tidy},
-  map_comp' := by {rintros (X|X) (Y|Y) (Z|Z) f g, tidy}, }
+    end }
 
 /-- The isomorphism between `incl ⋙ lift F _ _` with `F`. -/
 @[simps]
@@ -199,6 +197,9 @@ def lift_to_terminal_unique {D : Type*} [category D] {Z : D} (F : C ⥤ D) (hZ :
   (G : with_terminal C ⥤ D) (h : incl ⋙ G ≅ F) (hG : G.obj star ≅ Z) :
   G ≅ lift_to_terminal F hZ :=
 lift_unique F (λ z, hZ.from _) (λ x y f, hZ.hom_ext _ _) G h hG (λ x, hZ.hom_ext _ _)
+
+@[simp]
+def hom_from (X : C) : incl.obj X ⟶ star := star_terminal.from _
 
 end with_terminal
 
@@ -285,9 +286,7 @@ def lift {D : Type*} [category D] {Z : D} (F : C ⥤ D) (M : Π (x : C), Z ⟶ F
     | of x, of y, f := F.map f
     | star, of x, punit.star := M _
     | star, star, punit.star := 𝟙 _
-    end,
-  map_id' := by {rintros (X|X), tidy},
-  map_comp' := by {rintros (X|X) (Y|Y) (Z|Z) f g, tidy} }
+    end }
 
 /-- The isomorphism between `incl ⋙ lift F _ _` with `F`. -/
 @[simps]
@@ -356,6 +355,9 @@ def lift_to_initial_unique {D : Type*} [category D] {Z : D} (F : C ⥤ D) (hZ : 
   (G : with_initial C ⥤ D) (h : incl ⋙ G ≅ F) (hG : G.obj star ≅ Z) :
   G ≅ lift_to_initial F hZ :=
 lift_unique F (λ z, hZ.to _) (λ x y f, hZ.hom_ext _ _) G h hG (λ x, hZ.hom_ext _ _)
+
+@[simp]
+def hom_to (X : C) : star ⟶ incl.obj X := star_initial.to _
 
 end with_initial
 
