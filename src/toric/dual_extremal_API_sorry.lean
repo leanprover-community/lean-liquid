@@ -24,7 +24,7 @@ begin
   refine le_antisymm (bsupr_le $ λ i hi, hi.1) _,
   intros m ms t ht,
   rcases ht with ⟨y, rfl⟩,
-  simp only [forall_apply_eq_imp_iff', supr_le_iff, set.mem_range, mem_coe, set.mem_Inter,
+  simp only [forall_apply_eq_imp_iff', supr_le_iff, set.mem_range, set_like.mem_coe, set.mem_Inter,
     set.mem_set_of_eq, exists_imp_distrib],
   intros a,
   rcases sp with ⟨el, lo⟩,

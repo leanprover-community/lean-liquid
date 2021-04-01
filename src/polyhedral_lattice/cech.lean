@@ -95,7 +95,7 @@ lemma L_le_comap : (L f (n+1)) ≤ (L f (m+1)).comap (map_domain_hom g) :=
 begin
   rw [L, add_subgroup.closure_le],
   rintros _ ⟨l, c, hc, rfl⟩,
-  rw [add_subgroup.mem_coe, add_subgroup.mem_comap],
+  rw [set_like.mem_coe, add_subgroup.mem_comap],
   apply add_subgroup.subset_closure,
   refine ⟨l, c.map_domain g, _, _⟩,
   { rwa sum_map_domain_index_add_monoid_hom },
@@ -200,7 +200,7 @@ begin
   apply (add_subgroup.closure_le _).mpr _,
   rintro _ ⟨l, c, hc, rfl⟩,
   dsimp,
-  rw [add_subgroup.mem_coe, add_monoid_hom.mem_ker, ← finsupp.map_range_hom_apply,
+  rw [set_like.mem_coe, add_monoid_hom.mem_ker, ← finsupp.map_range_hom_apply,
     ← add_monoid_hom.comp_apply, ← finsupp.map_range_hom_map_domain_hom, add_monoid_hom.comp_apply],
   suffices : finsupp.map_domain g c = 0,
   { rw [finsupp.map_domain_hom_apply, this, add_monoid_hom.map_zero] },

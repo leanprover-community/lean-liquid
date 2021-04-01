@@ -192,7 +192,7 @@ instance normed_with_aut_Completion (V : NormedGroup.{u}) (r : ℝ) [normed_with
     rw ← function.funext_iff,
     refine abstract_completion.funext completion.cpkg _ _ _,
     { apply continuous_norm.comp _, exact completion.continuous_map },
-    { apply continuous_const.mul continuous_norm },
+    { exact (continuous_const.mul continuous_norm : _) },
     intro v,
     calc _ = _ : congr_arg norm (completion.map_coe _ _)
        ... = _ : _,
