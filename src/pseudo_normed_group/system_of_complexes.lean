@@ -68,7 +68,7 @@ variables (f : M₁ ⟶ M₂) (g : M₂ ⟶ M₃)
 /-- The complex of normed groups `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …` -/
 def complex₂ (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
   (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)]
-   (a b : ℕ → ℝ≥0) [∀ i, fact (b i ≤ r' * a i)] [BD.suitable a] [BD.suitable b] (c : ℝ≥0) :
+   (a b : ℕ → ℝ≥0) [∀ i, fact (b i ≤ r' * a i)] [BD.suitable a] [BD.suitable b] :
   (ProFiltPseuNormGrpWithTinv.{u} r')ᵒᵖ ⥤ cochain_complex ℕ NormedGroup :=
 { obj := λ M,
   { X := λ i, (BD.complex₂_X r V r' a b i).obj M,
@@ -97,7 +97,7 @@ def complex₂ (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < 
 def complex (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
   (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] (c : ℝ≥0) :
   (ProFiltPseuNormGrpWithTinv.{u} r')ᵒᵖ ⥤ cochain_complex ℕ NormedGroup :=
-BD.complex₂ r V r' (λ i, c * c' i) (λ i, r' * (c * c' i)) c
+BD.complex₂ r V r' (λ i, c * c' i) (λ i, r' * (c * c' i))
 -- .
 -- { X := λ i, (BD.complex_X c' r V r' c i).obj (op M),
 --   d := λ i j, (BD.complex_d c' r V r' c i j).app (op M),
