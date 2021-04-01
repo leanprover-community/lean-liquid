@@ -35,19 +35,25 @@ open free_abelian_group
 section move_this
 variables {A : Type*}
 
-def L {m n : ℕ} (x : A ^ (m+n)) : A ^ m := λ i, x $ sum_fin_sum_equiv $ sum.inl i
+def L {m n : ℕ} (x : A ^ (m+n)) : A ^ m := λ i, x $ fin_sum_fin_equiv $ sum.inl i
 
-def R {m n : ℕ} (x : A ^ (m+n)) : A ^ n := λ i, x $ sum_fin_sum_equiv $ sum.inr i
+def R {m n : ℕ} (x : A ^ (m+n)) : A ^ n := λ i, x $ fin_sum_fin_equiv $ sum.inr i
 
 @[simps]
 def split {m n : ℕ} : A ^ (m + n) ≃ A ^ m × A ^ n :=
 { to_fun := λ x, (L x, R x),
-  inv_fun := λ x j, sum.elim x.1 x.2 (sum_fin_sum_equiv.symm j),
-  left_inv := λ x, by { ext j, dsimp [L, R, sum_fin_sum_equiv], split_ifs with h h,
+  inv_fun := λ x j, sum.elim x.1 x.2 (fin_sum_fin_equiv.symm j),
+  left_inv := λ x, by { ext j, dsimp [L, R, fin_sum_fin_equiv], split_ifs with h h,
     { dsimp, cases j, refl, },
     { dsimp, cases j, congr, push_neg at h, rw nat.add_sub_cancel' h, refl } },
   right_inv := λ x,
-  by { ext j; dsimp [L, R]; simp only [sum.elim_inl, sum.elim_inr, equiv.symm_apply_apply] } }
+  begin
+    ext j; dsimp [L, R],
+    { rw fin_sum_fin_equiv_symm_apply_left, swap, exact j.2, simp only [sum.elim_inl, fin.eta] },
+    { ext j, rw fin_sum_fin_equiv_symm_apply_right, swap,
+      { simp only [le_add_iff_nonneg_right, zero_le', fin.coe_mk] },
+      { simp only [nat.add_sub_cancel_left, sum.elim_inr, fin.eta] } }
+  end }
 
 @[ext] lemma map_to_pi_add_ext
   {A B : Type*} {m n : ℕ} (f g : A → B ^ (m + n))
@@ -136,7 +142,7 @@ by simp only [comp, id, matrix.mul_one]
 given by applying `f` on both "components". -/
 def double : basic_universal_map m n →+ basic_universal_map (m + m) (n + n) :=
 add_monoid_hom.mk'
-  (λ f, matrix.reindex_linear_equiv sum_fin_sum_equiv sum_fin_sum_equiv $
+  (λ f, matrix.reindex_linear_equiv fin_sum_fin_equiv fin_sum_fin_equiv $
     matrix.from_blocks f 0 0 f)
   (λ f g, by rw [← linear_equiv.map_add, matrix.from_blocks_add, add_zero])
 
@@ -149,7 +155,7 @@ lemma pre_eval_double (f : basic_universal_map m n) :
   pre_eval (double f) A = (split.symm ∘ prod.map (f.pre_eval A) (f.pre_eval A) ∘ split) :=
 begin
   ext1; ext x j; dsimp only [function.comp, L, R, double, pre_eval];
-  rw [← sum_fin_sum_equiv.sum_comp, fintype.sum_sum_type];
+  rw [← fin_sum_fin_equiv.sum_comp, fintype.sum_sum_type];
   simp only [equiv.symm_apply_apply, sum.elim_inl, sum.elim_inr,
     split_symm_apply, split_apply, prod.map_mk,
     matrix.coe_reindex_linear_equiv, add_monoid_hom.coe_mk',
@@ -285,17 +291,17 @@ So we add two zero-width blocks in the definition of `σ`, `π₁`, and `π₂`.
 
 /-- The universal map `ℤ[A^n ⊕ A^n] → ℤ[A^n]` induced by the addition on `A^n`. -/
 def σ (n : ℕ) : universal_map (n + n) n :=
-of $ matrix.reindex_linear_equiv (equiv.sum_empty _) sum_fin_sum_equiv $
+of $ matrix.reindex_linear_equiv (equiv.sum_empty _) fin_sum_fin_equiv $
 matrix.from_blocks 1 1 0 0
 
 /-- The universal map `ℤ[A^n ⊕ A^n] → ℤ[A^n]` that is first projection map. -/
 def π₁ (n : ℕ) : universal_map (n + n) n :=
-(of $ matrix.reindex_linear_equiv (equiv.sum_empty _) sum_fin_sum_equiv $
+(of $ matrix.reindex_linear_equiv (equiv.sum_empty _) fin_sum_fin_equiv $
 matrix.from_blocks 1 0 0 0)
 
 /-- The universal map `ℤ[A^n ⊕ A^n] → ℤ[A^n]` that is second projection map. -/
 def π₂ (n : ℕ) : universal_map (n + n) n :=
-(of $ matrix.reindex_linear_equiv (equiv.sum_empty _) sum_fin_sum_equiv $
+(of $ matrix.reindex_linear_equiv (equiv.sum_empty _) fin_sum_fin_equiv $
 matrix.from_blocks 0 1 0 0)
 
 lemma σ_comp_double (f : universal_map m n) :
@@ -358,7 +364,7 @@ begin
   congr' 1,
   ext i,
   simp only [pi.add_apply],
-  rw (sum_fin_sum_equiv.sum_comp _).symm,
+  rw (fin_sum_fin_equiv.sum_comp _).symm,
   swap, { apply_instance },
   rw [← finset.insert_erase (finset.mem_univ $ sum.inl i)],
   swap, { apply_instance },
@@ -385,7 +391,7 @@ begin
   ext i,
   simp only [pi.add_apply, matrix.coe_reindex_linear_equiv],
   dsimp [equiv.sum_empty],
-  rw (sum_fin_sum_equiv.sum_comp _).symm,
+  rw (fin_sum_fin_equiv.sum_comp _).symm,
   swap, { apply_instance },
   rw finset.sum_eq_single (sum.inl i),
   { simp only [equiv.symm_apply_apply], dsimp,
@@ -406,7 +412,7 @@ begin
   ext i,
   simp only [pi.add_apply, matrix.coe_reindex_linear_equiv],
   dsimp [equiv.sum_empty],
-  rw (sum_fin_sum_equiv.sum_comp _).symm,
+  rw (fin_sum_fin_equiv.sum_comp _).symm,
   swap, { apply_instance },
   rw finset.sum_eq_single (sum.inr i),
   { simp only [equiv.symm_apply_apply], dsimp,
