@@ -20,8 +20,8 @@ end
 #exit
 -/
 
+import linear_algebra.free_module
 import toric.toric
-
 
 /-!
 Let `V` be a `ℚ`-vector space and let `ι` be an indexing set.  Assume that `v : ι → V` is a
@@ -32,10 +32,24 @@ statements about elements of vector subspaces of `V` that are also in the `ℤ`-
 of the basis.
  -/
 
+
+-- PR #6993
+lemma algebra_map.injective.linear_independent {R S M ι : Type*} [comm_semiring R] [semiring S]
+  [add_comm_monoid M] [algebra R S] [semimodule R M] [semimodule S M] [is_scalar_tower R S M]
+  (hinj : function.injective (algebra_map R S)) {v : ι → M} (li : linear_independent S v) :
+  linear_independent R v :=
+begin
+  refine linear_independent_iff'.mpr (λ s g hg i hi, hinj (eq.trans _ (ring_hom.map_zero _).symm)),
+  refine (((@linear_independent_iff' _ _ _ v _ _ _).mp li) _ _ _) i hi,
+  simp_rw algebra_map_smul,
+  exact hg,
+end
+
 section reduction_from_ℚ_to_ℤ
 
 variables {V ι : Type*} [add_comm_group V] [semimodule ℚ V] [fintype ι] {v : ι → V}
   (bv : is_basis ℚ v)
+
 
 /-- The vectors with integer coordinates in a `ℚ`-vector subspace `s ⊆ V` admit a finite basis.
 # Important: we transport finite generation of `V` to finite generation of `ℤ ^ N ∩ s`
@@ -49,10 +63,24 @@ A more general result with `ℤ`and `ℚ` replaced by a subring `R` of a field `
 and possibly useful to play around with the tower `ℤ ⊂ ℚ ⊂ ℝ`, though it may not be strictly
 needed in what follows.
  -/
-lemma reduction_to_lattice (s : submodule ℚ V) :
+
+lemma reduction_to_lattice (s : submodule ℚ V) (bv : is_basis ℚ v) :
   ∃ (n : ℕ) (vn : fin n → s.restrict_scalars ℤ ⊓ submodule.span ℤ (set.range v)),
   is_basis ℤ vn :=
-sorry
+begin
+  obtain ⟨n, b, hb⟩ :=
+    submodule.exists_is_basis_of_le_span (_ : linear_independent ℤ v) inf_le_right,
+  { refine ⟨n, b, _, by convert hb.2⟩,
+    replace hb := hb.1,
+    refine linear_independent_iff'.mpr (λ t g hg i hi, _),
+    rw [linear_independent_iff'] at hb,
+    refine hb t g _ i hi,
+    convert hg,
+    ext i,
+    erw [submodule.coe_smul_of_tower, submodule.coe_smul_of_tower, algebra_map_smul] },
+  { refine algebra_map.injective.linear_independent _ bv.1,
+    exact λ a b ab, int.cast_inj.mp ab }
+end
 
 end reduction_from_ℚ_to_ℤ
 
@@ -126,7 +154,7 @@ def pre_generators (s : set M) : set N := { c : N | c ∈ dual_set nat_submodule
 ## Reason
 Each `pre_generator` is uniquely determined by a subset of `s` (but not conversely!).
 Thus, finiteness of `pre_generators` should be a direct consequence of finiteness of `s`. -/
-lemma pre_generators_finite (s : set M) [fintype s] : fintype (pre_generators f s) :=
+lemma pre_generators_finite (s : set M) (fs : set.finite s) : set.finite (pre_generators f s) :=
 sorry
 
 /-- Rational linear combinations of basis elements, with coefficients in `[0, 1]` and that are
@@ -148,7 +176,8 @@ The vectors with integral coordinates in the cone spanned by `(1,0), (1, √2)`
 do not admit a finite generating set.  Still, there are only finitely many vectors with integers
 coordinates in the "fundamental parallelogram" `[0,1] × (1,0) + [0,1] × (1, √2)`.
 -/
-lemma in_box_finite (v : ι → N) (s : set N) [fintype s] [semimodule ℚ N] : fintype (in_box v s) :=
+lemma in_box_finite (v : ι → N) (s : set N) (fs : set.finite s) [semimodule ℚ N] :
+  set.finite (in_box v s) :=
 sorry
 
 /-- A pairing `f` is `full_on` a function `vm : ι → M` if, for each element `i ∈ ι`,
@@ -167,7 +196,7 @@ def is_full : Prop :=
 
 /-- The main case of Gordan's lemma, assuming that the inequalities corner us in an octant. -/
 lemma fg_with_basis (vm : ι → M) (hf : is_full_on f v vm) {s : set M} (hs : (set.range vm) ⊆ s) :
-  ∃ g : finset N, dual_set nat_submodule f s = submodule.span ℕ g :=
+  ∃ g : set N, set.finite g ∧ dual_set nat_submodule f s = submodule.span ℕ g :=
 sorry
 
 /-- The proof of `Gordan` should be doable assuming `fg_with_basis`.
