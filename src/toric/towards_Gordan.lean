@@ -157,9 +157,8 @@ Thus, finiteness of `pre_generators` should be a direct consequence of finitenes
 lemma pre_generators_finite (bv : is_basis ℤ v) (s : set M) (fs : set.finite s) :
   set.finite (pre_generators f s) :=
 begin
-  let i : N → set M :=
+  let i : N → set M := λ p,
   begin
-    intro p,
     by_cases h : p ∈ (pre_generators f s),
     { exact classical.some h.2 },
     exact ∅
