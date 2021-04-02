@@ -154,8 +154,52 @@ def pre_generators (s : set M) : set N := { c : N | c ∈ dual_set nat_submodule
 ## Reason
 Each `pre_generator` is uniquely determined by a subset of `s` (but not conversely!).
 Thus, finiteness of `pre_generators` should be a direct consequence of finiteness of `s`. -/
-lemma pre_generators_finite (s : set M) (fs : set.finite s) : set.finite (pre_generators f s) :=
-sorry
+lemma pre_generators_finite (bv : is_basis ℤ v) (s : set M) (fs : set.finite s) :
+  set.finite (pre_generators f s) :=
+begin
+  let i : N → set M :=
+  begin
+    intro p,
+    by_cases h : p ∈ (pre_generators f s),
+    { exact classical.some h.2 },
+    exact ∅
+  end,
+  have Hincl : ∀ g ∈ (pre_generators f s), i g ⊆ s,
+  { intros g hg,
+    obtain ⟨A, B⟩ := classical.some_spec hg.2,
+    convert A,
+    simp only [i, hg, dif_pos] },
+  have Hspec : ∀ g ∈ (pre_generators f s),
+    dual_set nat_submodule f (({1, -1} : set ℤ) • (i g)) = submodule.span ℕ {g},
+  { intros g hg,
+    obtain ⟨A, B⟩ := classical.some_spec hg.2,
+    convert B,
+    simp only [i, hg, dif_pos] },
+  have hi : set.inj_on i (pre_generators f s),
+  { intros g₁ hg₁ g₂ hg₂ h,
+    suffices : submodule.span ℕ {g₁} = submodule.span ℕ {g₂},
+    { have ht₁ : g₁ ∈ ↑(submodule.span ℕ {g₁}) := submodule.subset_span (set.mem_singleton g₁),
+      have ht₂ : g₂ ∈ ↑(submodule.span ℕ {g₂}) := submodule.subset_span (set.mem_singleton g₂),
+      obtain ⟨a, ha⟩ := submodule.le_span_singleton_iff.1 this.le g₁ ht₁,
+      obtain ⟨b, hb⟩ := submodule.le_span_singleton_iff.1 this.symm.le g₂ ht₂,
+      have hint : a • b • g₁ = (a : ℤ) • (b : ℤ) • g₁,
+      { rw [← gsmul_eq_smul, ← gsmul_eq_smul, ← nsmul_eq_smul, ← nsmul_eq_smul, gsmul_coe_nat,
+        gsmul_coe_nat] },
+      rw [← hb, hint] at ha,
+      nth_rewrite 1 [← one_smul ℤ g₁] at ha,
+      replace ha := sub_eq_zero.2 ha,
+      rw [← smul_assoc, ← sub_smul] at ha,
+      cases (is_basis.smul_eq_zero bv).1 ha with H Hzero,
+      { rw [algebra.id.smul_eq_mul, sub_eq_zero] at H,
+      norm_cast at H,
+      rwa [nat.dvd_one.1 (dvd.intro_left a H), one_smul] at hb },
+      { rwa [Hzero, smul_zero, ← Hzero] at hb } },
+    rw [← Hspec g₁ hg₁, ← Hspec g₂ hg₂, h] },
+  apply set.finite_of_finite_image hi,
+  refine set.finite.subset (set.finite.finite_subsets fs) (λ t ht, _),
+  obtain ⟨g, hg, hig⟩ := (set.mem_image _ _ _).1 ht,
+  simpa [hig] using Hincl g hg,
+end
 
 /-- Rational linear combinations of basis elements, with coefficients in `[0, 1]` and that are
 contained in the `ℤ`-lattice spanned by the basis elements. -/
