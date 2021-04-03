@@ -317,12 +317,13 @@ lemma pseudo_normed_group.archimedean.add_monoid_hom (M : Type*) {N : Type*}
   archimedean (M →+ N) :=
 begin
   intros f c k hk,
-  apply forall_congr, intro c,
+  apply forall_congr, intro c',
   apply forall_congr, intro l,
   apply forall_congr, intro hl,
-  simp only [← nsmul_eq_smul, nsmul_eq_mul, mul_assoc],
-  simp only [nsmul_eq_smul, ← nsmul_eq_mul, add_monoid_hom.nat_smul_apply],
-  exact h _ _ k hk
+  have := h (f l) (c * c') k hk,
+  simp only [← nsmul_eq_smul, nsmul_eq_mul, mul_assoc] at this ⊢,
+  simp only [nsmul_eq_smul, ← nsmul_eq_mul, ← add_monoid_hom.nat_smul_apply] at this ⊢,
+  convert this
 end
 
-#lint- only unused_arguments def_lemma doc_blame
+-- #lint- only unused_arguments def_lemma doc_blame
