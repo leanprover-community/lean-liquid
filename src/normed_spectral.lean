@@ -85,11 +85,11 @@ def normed_spectral_homotopy.of_iso {row₀ row₁ : system_of_complexes.{u}} {d
   (hφ₁ : ∀ c i (x : row₁ c i), ∥φ₁.hom x∥ = ∥x∥)
   (hcomm : d' = φ₀.inv ≫ d ≫ φ₁.hom) :
   normed_spectral_homotopy row'₀ row'₁ d' m k' ε c₀ H :=
-{ h := λ q q' c, (φ₀.inv.app (op $ k' * c)).f q' ≫ NSH.h q ≫ (φ₁.hom.app (op $ c)).f q,
+{ h := λ q q' c, φ₀.inv.apply ≫ NSH.h q ≫ φ₁.hom.apply,
   δ := λ c, φ₀.inv.app (op $ c) ≫ NSH.δ c ≫ φ₁.hom.app (op $ k' * c),
-  h_bound_by := λ q q' hqm hq' c hc x,
+  h_bound_by :=
   begin
-    resetI,
+    introsI q q' hqm hq' c hc x,
     calc  ∥φ₁.hom (NSH.h q (φ₀.inv x))∥
         = ∥NSH.h q (φ₀.inv x)∥ : hφ₁ _ _ _
     ... ≤ ↑H * ∥φ₀.inv x∥ : NSH.h_bound_by _ _ hqm hq' _ (φ₀.inv x)
@@ -98,8 +98,18 @@ def normed_spectral_homotopy.of_iso {row₀ row₁ : system_of_complexes.{u}} {d
   hδ :=
   begin
     introsI c hc q hq x,
-    have := NSH.hδ c q hq (φ₀.inv x),
-    sorry
+    have := congr_arg (λ x, φ₁.hom x) (NSH.hδ c q hq (φ₀.inv x)),
+    simp only [coe_comp, hcomm, system_of_complexes.res_apply, system_of_complexes.d_apply] at this ⊢,
+    refine this.trans _, clear this,
+    calc φ₁.hom (d (φ₀.inv (system_of_complexes.res x)) + (NSH.h q) (φ₀.inv (row'₀.d q (q+1) x)) +
+          (row₁.d (q - 1) q) (NSH.h (q - 1) (φ₀.inv x)))
+        = φ₁.hom (d (φ₀.inv (system_of_complexes.res x)) + (NSH.h q) (φ₀.inv (row'₀.d q (q+1) x))) +
+          φ₁.hom ((row₁.d (q - 1) q) (NSH.h (q - 1) (φ₀.inv x))) : _
+    ... = _ : _,
+    { apply normed_group_hom.map_add },
+    congr' 1,
+    { apply normed_group_hom.map_add },
+    { erw [system_of_complexes.d_apply], refl }
   end,
   δ_bound_by := λ c hc q hq,
   begin
