@@ -64,13 +64,14 @@ end
 def NSC (IH : ∀ m' < m, thm95.IH BD c' r r' M V m') :
   normed_spectral_conditions (thm95.double_complex BD c' r r' V Λ M (N c' r r' m)) m
     (k₁ m) (K₁ m) (k' c' m) (ε m) (c₀ Λ) (H BD c' r r' m) :=
-{ col_exact := sorry,
-  row_exact := NSC_row_exact _ _ _ _ _ _ _ _ IH,
-  h := sorry,
-  h_bound_by := sorry,
-  δ := sorry,
-  hδ := sorry,
-  δ_bound_by := sorry,
+{ row_exact := NSC_row_exact _ _ _ _ _ _ _ _ IH,
+  col_exact := sorry,
+  htpy :=
+  { h := sorry,
+    h_bound_by := sorry,
+    δ := sorry,
+    hδ := sorry,
+    δ_bound_by := sorry },
   admissible := thm95.double_complex_admissible _ }
 
 include BD c' r r' M V m

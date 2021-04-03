@@ -160,6 +160,19 @@ rfl
   (C.row p).d = @d' C c p :=
 rfl
 
+/-- The differential between rows in a system of double complexes,
+as map of system of complexes. -/
+def row_map (C : system_of_double_complexes.{u}) (p p' : ℕ) :
+  C.row p ⟶ C.row p' :=
+{ app := λ c,
+  { f := λ q, (C.d p p' : C.X c.unop p q ⟶ C.X c.unop p' q),
+    comm := λ q q', (C.d'_comp_d _ p p' q q') },
+  naturality' := λ c₁ c₂ h, ((C.map h).comm p p').symm }
+
+@[simp] lemma row_map_apply (C : system_of_double_complexes.{u})
+  (c : ℝ≥0) (p p' q : ℕ) (x : C.X c p q) :
+  C.row_map p p' x = C.d p p' x := rfl
+
 /-- The `q`-th column in a system of double complexes, as system of complexes. -/
 def col (C : system_of_double_complexes.{u}) (q : ℕ) : system_of_complexes.{u} :=
 C ⋙ functor.map_complex_like' (induced_functor _ ⋙ differential_object.forget _ _ ⋙ pi.eval _ q)
