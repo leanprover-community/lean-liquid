@@ -155,6 +155,28 @@ def complex_rescale_iso (N : ℝ≥0) :
 eq_to_iso $ begin
   -- intros,
   -- change cochain_complex.mk _ _ _ _ = cochain_complex.mk _ _ _ _,
+  dsimp only [data.complex, rescale_constants],
+  transitivity
+    (BD.complex₂ r V r' (λ (i : ℕ), c * c' i * N⁻¹) (λ (i : ℕ), r' * (c * c' i) * N⁻¹)).obj (op M),
+  swap,
+  dsimp only [data.complex₂, rescale_constants],
+  ext i,
+  { refl },
+  { apply heq_of_eq,
+    ext i j : 2,
+    have :
+      (universal_map.eval_CLCFP V r' (c * c' i * N⁻¹) (c * c' j * N⁻¹) (BD.d j i)).app (op M) ==
+      (universal_map.eval_CLCFP V r' (c * c' i) (c * c' j) (BD.d j i)).app (op (of r' (rescale N ↥M))),
+    {
+
+    }
+
+    --  dsimp only [data.complex₂_d, universal_map.eval_CLCFPTinv₂, _root_.id],
+    -- dsimp only [NormedGroup.equalizer.map_nat_app],
+    -- congr' 1,
+    -- refl,
+     }
+end.
   dsimp only [data.complex, data.complex₂, -- data.complex_X, data.complex_d, CLCFPTinv,
     universal_map.eval_CLCFPTinv, rescale_constants],
   -- letI : ∀ (i j : ℕ), (BD.d j i).suitable (r' * (c * (c' j * N⁻¹))) (r' * (c * (c' i * N⁻¹))) := _,

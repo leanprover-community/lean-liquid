@@ -152,6 +152,9 @@ namespace basic_universal_map
 
 variables (ϕ : basic_universal_map m n)
 
+def eval_LCFP' (c₁ c₂ : ℝ≥0) [ϕ.suitable c₂ c₁] : LCFP V r' c₁ n ⟶ LCFP V r' c₂ m :=
+(whisker_right (nat_trans.op $ ϕ.eval_FP r' c₂ c₁) (LocallyConstant.obj V) : _)
+
 def eval_LCFP (c₁ c₂ : ℝ≥0) : LCFP V r' c₁ n ⟶ LCFP V r' c₂ m :=
 if H : ϕ.suitable c₂ c₁
 then by exactI (whisker_right (nat_trans.op $ ϕ.eval_FP r' c₂ c₁) (LocallyConstant.obj V) : _)
@@ -203,6 +206,13 @@ namespace universal_map
 open free_abelian_group
 
 variables (ϕ : universal_map m n)
+
+def eval_LCFP' [ϕ.suitable c₂ c₁] : LCFP V r' c₁ n ⟶ LCFP V r' c₂ m :=
+∑ g : {g : basic_universal_map m n // g ∈ ϕ.support},
+  begin
+    haveI : g.1.suitable c₂ c₁ := suitable_of_mem_support ϕ _ _ g g.2,
+    exact coeff g.1 ϕ • (g.1.eval_LCFP' V r' c₁ c₂)
+  end
 
 def eval_LCFP : LCFP V r' c₁ n ⟶ LCFP V r' c₂ m :=
 ∑ g in ϕ.support, coeff g ϕ • (g.eval_LCFP V r' c₁ c₂)

@@ -44,6 +44,7 @@ protected def F {J} [category J] {V W : J ⥤ NormedGroup} (f g : V ⟶ W) : J �
     exact (map_comp_map _ _ _ _).symm
   end }
 
+@[simps]
 def map_nat {J} [category J] {V₁ V₂ W₁ W₂ : J ⥤ NormedGroup}
   {f₁ f₂ g₁ g₂} (φ : V₁ ⟶ V₂) (ψ : W₁ ⟶ W₂)
   (hf : φ ≫ f₂ = f₁ ≫ ψ) (hg : φ ≫ g₂ = g₁ ≫ ψ) :
