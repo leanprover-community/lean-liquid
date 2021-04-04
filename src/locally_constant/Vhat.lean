@@ -8,6 +8,26 @@ import topology.metric_space.completion
 import locally_constant.NormedGroup
 import normed_group.normed_with_aut
 
+/-
+
+# Completions of normed groups
+
+This file contains an API for completions of normed groups (basic facts about
+objects and morphisms), and also a variant: completions for normed groups equipped with
+an automorphism which scales norms by a constant factor `r`.
+
+## Main definitions
+
+- `Completion` : the completion of a normed group (defined as a functor on `NormedGroup`)
+- `Completion.lift` : a normed group hom from `V` to complete `W` extends ("lifts")
+  to a normed group from the completion of `V` to `W`.
+- `normed_with_aut_Completion` : if `V` is equipped with an automorphism changing norms
+  by a factor `r` then the completion also has such an automorphism.
+- `LCC : NormedGroup ⥤ Profiniteᵒᵖ ⥤ NormedGroup` : `LCC V S` is the normed group completion of the
+  locally constant functions from `S` to `V`.
+
+-/
+
 noncomputable theory
 open_locale nnreal
 

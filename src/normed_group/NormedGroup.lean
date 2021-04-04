@@ -13,6 +13,10 @@ import for_mathlib.normed_group_quotient
 This file in particular contains a robust API for cokernels of morphisms
 of normed groups.
 
+## TODO
+
+This file would sit well in mathlib.
+
 -/
 
 noncomputable theory

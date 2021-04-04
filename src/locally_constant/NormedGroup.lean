@@ -3,6 +3,19 @@ import topology.category.Profinite
 import locally_constant.analysis
 import normed_group.NormedGroup
 
+/-!
+
+# The functor of locally constant maps
+
+The functor sending a normed group `V` and a profinite type `S` to the normed group
+of locally constant maps from `S` to `V` (with the sup norm).
+
+## Main definition
+
+- `LocallyConstant : NormedGroup ⥤ Profiniteᵒᵖ ⥤ NormedGroup` : the functor.
+
+-/
+
 noncomputable theory
 
 set_option pp.proofs true
