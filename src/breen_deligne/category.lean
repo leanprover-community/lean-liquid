@@ -3,7 +3,14 @@ import breen_deligne.functorial_map
 import system_of_complexes.complex
 
 import for_mathlib.free_abelian_group
+/-!
 
+# The category of Breen-Deligne data
+
+This file defines the category whose objects are the natural numbers
+and whose morphisms `m ⟶ n` are functorial maps `φ_A : ℤ[A^m] → ℤ[A^n]`.
+
+-/
 namespace breen_deligne
 
 open free_abelian_group category_theory

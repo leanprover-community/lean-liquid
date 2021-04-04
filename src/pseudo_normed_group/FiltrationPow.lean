@@ -1,6 +1,16 @@
 import pseudo_normed_group.breen_deligne
 import normed_group.NormedGroup
+/-!
 
+# The categorical filtration on a profinitely filtered pseudo-normed abelian group
+
+## Main definitions
+
+Things like
+
+- `Filtration (r' : ℝ≥0) : ℝ≥0 ⥤ ProFiltPseuNormGrpWithTinv.{u} r' ⥤ Profinite.{u}`
+
+-/
 open_locale classical nnreal
 noncomputable theory
 local attribute [instance] type_pow

@@ -3,7 +3,19 @@ import pseudo_normed_group.category
 import breen_deligne.suitable
 
 import for_mathlib.add_monoid_hom
+/-
 
+# Universal maps and pseudo-normed groups
+
+This file contains the definition of the action of a basic universal map
+powers of a pseudo-normed group and related types.
+
+## Main definitions
+
+- `f.eval_png : (M^m) →+ (M^n)` : the group homomorphism induced by a basic universal map.
+- `f.eval_png₀ : M_{c₁}^m → M_{c₂}^n` : the induced map if `f` is (c₁, c₂)-suitable.
+
+-/
 noncomputable theory
 
 local attribute [instance] type_pow

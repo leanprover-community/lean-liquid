@@ -3,6 +3,14 @@ import topology.category.Profinite
 
 import pseudo_normed_group.with_Tinv
 
+/-
+
+# The category of profinitely filtered pseudo normed groups.
+
+The category of profinite pseudo-normed groups, and the category of
+profinitely filtered pseudo-normed groups equipped with an action of T⁻¹.
+
+-/
 universe variables u
 
 open category_theory

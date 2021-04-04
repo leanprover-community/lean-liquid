@@ -9,7 +9,7 @@ This file has the definition of the completion of a system of
 complexes of normed groups, and it proves a technical lemma
 saying that a system of complexes of normed groups is admissible
 and weak bounded exact, and if the groups in the complex are complete,
-then it's bounded exact.
+then it's bounded exact (for some slightly different constants).
 
 -/
 open finset filter

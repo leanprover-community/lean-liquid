@@ -4,7 +4,23 @@ import category_theory.abelian.additive_functor
 import data.int.basic
 
 import for_mathlib.preadditive_category
+/-
 
+# Complexes of objects in a category
+
+This file contains an experimental definition of a complex of objects
+in a category. There is a "lawless" version `differential_object` (which
+Scott says should be called something else) and an extension
+of this called `complex_like` (assuming the underlying category is
+preadditive) which contains the hypothesis d^2=0.
+One rather strange thing to note here is that these complexes
+have maps d : X_i → X_j for all i and j, and these maps are assumed
+to be zero if i ≠ j + 1 (resp. j ≠ i + 1, depending on a boolean
+input which says which way the maps are going). The concept of a
+homotopy is also defined.
+
+
+-/
 open category_theory category_theory.limits
 
 section succ_pred

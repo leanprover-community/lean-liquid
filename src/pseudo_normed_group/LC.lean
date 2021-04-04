@@ -2,7 +2,12 @@ import pseudo_normed_group.FiltrationPow
 import locally_constant.NormedGroup
 import locally_constant.Vhat
 import for_mathlib.preadditive_category
+/-
 
+# Locally constant maps
+
+
+-/
 namespace category_theory
 namespace nat_trans
 
