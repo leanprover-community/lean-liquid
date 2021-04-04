@@ -4,6 +4,25 @@ import data.real.nnreal
 import for_mathlib.free_abelian_group
 import for_mathlib.add_monoid_hom
 
+/-
+
+# "suitability" of a universal map
+
+If `f` is a universal map then a pair `(c₁, c₂)` of non-negative reals is
+`f`-suitable, if (morally) `f` sends things of norm at most `c₁` to things
+of norm at most `c₂`. The formal definition is in definitions 1.11 and 1.12
+of the blueprint.
+
+## Main definitions
+
+- `breen_deligne.basic_univeral_map.suitable` :  see blueprint definition 1.11.
+- `breen_deligne.universal_map.suitable` : see blueprint definition 1.12.
+- `breen_deligne.data.suitable` : see blueprint definition 1.13.
+
+These are all precise ways of controlling the norm on maps between normed
+objects induced by `f`.
+-/
+
 open_locale nnreal big_operators
 
 namespace breen_deligne

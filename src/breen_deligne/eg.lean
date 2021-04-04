@@ -3,7 +3,15 @@ import breen_deligne.category
 namespace breen_deligne
 
 namespace eg
-/-! ## An explicit nontrivial example -/
+
+/-!
+
+# An explicit nontrivial example of Breen-Deligne data
+
+This example is explained in Definition 1.10 of
+the blueprint https://leanprover-community.github.io/liquid/ .
+
+-/
 
 open universal_map
 
