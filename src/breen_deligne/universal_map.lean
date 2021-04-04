@@ -19,6 +19,11 @@ We formalize the notion of `breen_deligne_data`.
 Roughly speaking, this is a collection of formal finite sums of matrices
 that encode that data that rolls out of the Breen--Deligne resolution.
 
+## Main definitions
+
+- `breen_deligne.basic_universal_map` : the map corresponding to a matrix
+- `breen_deligne.universal_map` : a formal linear combination of basic universal maps.
+
 -/
 noncomputable theory
 
