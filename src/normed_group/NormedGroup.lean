@@ -7,7 +7,11 @@ import category_theory.limits.creates
 import for_mathlib.normed_group_quotient
 
 /-!
+
 # The category of normed abelian groups and continuous group homomorphisms
+
+This file in particular contains a robust API for cokernels of morphisms
+of normed groups.
 
 -/
 

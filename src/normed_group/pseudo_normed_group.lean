@@ -1,6 +1,12 @@
 import pseudo_normed_group.basic
 import analysis.normed_space.basic
+/-!
 
+# A normed group is pseudo-normed
+
+This file contains the construction of a pseudo-normed group from a normed group.
+
+-/
 open_locale nnreal
 
 namespace normed_group
