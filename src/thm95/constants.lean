@@ -101,22 +101,51 @@ abbreviation K₀ : ℝ≥0 := normed_spectral.K₀ m (K₁ m)
 /-- `ε m` is the constant `ε m (K m)` used in the proof of `normed_spectral` -/
 abbreviation ε : ℝ≥0 := normed_spectral.ε m (K₁ m)
 
+instance ε_pos : fact (0 < ε m) := ⟨normed_spectral.ε_pos _ _⟩
+
 /-- `k' c' m` is the maximum of `k₀ m` and the constants `c' 0`, `c' 1`, ..., `c' m` -/
 def k' : ℝ≥0 := max (k₀ m) $ (finset.range (m+1)).sup c'
 
-instance one_le_k' : fact (1 ≤ k' c' m) := sorry
+instance one_le_k' : fact (1 ≤ k' c' m) :=
+⟨le_trans (fact.out _) $ le_max_left _ _⟩
 
 instance k₀_le_k' : fact (normed_spectral.k₀ m (k₁ m) ≤ k' c' m) := ⟨le_max_left _ _⟩
 
 -- in the PDF `b` is *positive*, we might need to make that explicit
 lemma b_exists : ∃ b : ℕ, 2 * (k' c' m) * (r / r') ^ b ≤ (ε m) :=
-sorry
+begin
+  have : 0 < 2 * (k' c' m) := mul_pos zero_lt_two (fact.out _),
+  simp only [nnreal.mul_le_iff_le_inv this.ne'],
+  have h₁ : 0 < ((2 * k' c' m)⁻¹ * ε m : ℝ),
+  { refine mul_pos (inv_pos.mpr this) _,
+    rw [nnreal.coe_pos],
+    exact fact.out _ },
+  have h₂ : (r / r' : ℝ) < 1,
+  { rw div_lt_iff,
+    { rw [one_mul, nnreal.coe_lt_coe], exact fact.out _ },
+    { rw [nnreal.coe_pos], exact fact.out _ } },
+  obtain ⟨b, hb⟩ := exists_pow_lt_of_lt_one h₁ h₂,
+  use b,
+  exact_mod_cast hb.le,
+end
 
 /-- `b c' r r' m` is the smallest `b` such that `2 * (k' c' m) * (r / r') ^ b ≤ (ε m)` -/
 def b : ℕ := nat.find (b_exists c' r r' m)
 
 lemma N₂_exists : ∃ N₂ : ℕ, (k' c' m) / (2 ^ N₂) ≤ r' ^ (b c' r r' m) :=
-sorry
+begin
+  suffices : ∃ N₂ : ℕ, ((2⁻¹ : ℝ≥0) ^ N₂ : ℝ) < (k' c' m)⁻¹ * r' ^ (b c' r r' m),
+  { rcases this with ⟨N₂, h⟩,
+    use N₂,
+    rw [← div_lt_iff', ← nnreal.coe_pow, inv_pow', nnreal.coe_inv, inv_div_left, mul_inv',
+      inv_inv', ← div_eq_mul_inv] at h,
+    { exact_mod_cast h.le },
+    { rw [inv_pos, nnreal.coe_pos], exact fact.out _ } },
+  refine exists_pow_lt_of_lt_one (mul_pos _ _) _,
+  { rw [inv_pos, nnreal.coe_pos], exact fact.out _ },
+  { apply pow_pos, rw [nnreal.coe_pos], exact fact.out _ },
+  { norm_num }
+end
 
 /-- `N₂ c' r r' m` is the smallest `N₂` such that `N = 2 ^ N₂` satisfies
 `(k' c' m) / N ≤ r' ^ (b c' r r' m)` -/

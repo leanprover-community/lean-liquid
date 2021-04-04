@@ -4,21 +4,7 @@ import linear_algebra.dual
 
 import polyhedral_lattice.basic
 import toric.is_inj_nonneg
--- import toric.pairing_dual_saturated -- fae: I have commented this `import`, it gives an error
-
-
-section move
-
-variables [α  : Type*] [add_comm_group α]
-theorem nat.neg_smul (k : ℕ) (x : α) : - (k : ℤ) • x = - (k • x) :=
-eq_neg_of_add_eq_zero (by rw [← nsmul_eq_smul, ← gsmul_coe_nat, gsmul_eq_smul,
-  ← add_smul, add_left_neg, zero_smul])
-
-lemma nat.self_sub_mod_div (n k : ℕ) : n = n % k + k * ((n - n %k)/k) :=
-by rw [mul_comm, nat.div_mul_cancel (nat.dvd_sub_mod n), ← nat.add_sub_assoc (nat.mod_le n k),
-    add_comm, nat.add_sub_cancel]
-
-end move
+import toric.pairing_dual_saturated
 
 /-!
 In this file we state and prove 9.7 of [Analytic].
@@ -95,7 +81,10 @@ begin
       funext z,
       dsimp [g],
       simp only [*, algebra.id.smul_eq_mul, pi.add_apply, eq_self_iff_true, pi.smul_apply],
-      exact nat.self_sub_mod_div (f z) N },
+      have : ∀ (n k : ℕ), n = n % k + k * ((n - n %k)/k) := λ n k, by rw [mul_comm,
+        nat.div_mul_cancel (nat.dvd_sub_mod n), ← nat.add_sub_assoc (nat.mod_le n k),
+        add_comm, nat.add_sub_cancel],
+      exact this (f z) N },
     set x' := ∑ (i : Λ →+ ℤ) in S₀, (g i).val • i with hx',
     have H : x' ∈ B,
     { rw finset.mem_image,
@@ -118,12 +107,14 @@ begin
       rw finset.sum_congr,
       refl,
       intros z hz,
+      rw [pi.add_apply, add_comm],
+      dsimp [g],
       refl },
     intro i,
     dsimp [x'],
     rw [← hx, sub_nonpos.symm, sub_eq_add_neg, ← add_monoid_hom.neg_apply, ← finset.sum_neg_distrib,
       add_monoid_hom.finset_sum_apply, add_monoid_hom.finset_sum_apply, ← finset.sum_add_distrib],
-    simp_rw [← add_monoid_hom.add_apply, ← nat.neg_smul, ← nsmul_eq_smul, ← gsmul_coe_nat,
+    simp_rw [← add_monoid_hom.add_apply, ← nsmul_eq_smul, ← gsmul_coe_nat, ← neg_gsmul,
       gsmul_eq_smul, ← add_smul],
     apply finset.sum_nonpos,
     intros z hz,
