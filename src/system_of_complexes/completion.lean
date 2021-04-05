@@ -1,6 +1,5 @@
 import analysis.specific_limits
 import system_of_complexes.basic
-import locally_constant.Vhat
 /-
 
 # A technical lemma

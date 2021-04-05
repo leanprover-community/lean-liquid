@@ -1,6 +1,15 @@
 import system_of_complexes.basic
 import normed_group.rescale
+/-!
 
+# rescaling norms on a system of complexes
+
+Note: My (kmb) understanding is that this file is being moved and refactored.
+
+This file defines the `rescale` functor which will take a system of complexes of normed groups
+and systematically rescale all the norms on all the normed groups by a constant factor.
+
+-/
 noncomputable theory
 
 namespace system_of_complexes

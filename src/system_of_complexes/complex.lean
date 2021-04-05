@@ -4,7 +4,7 @@ import category_theory.abelian.additive_functor
 import data.int.basic
 
 import for_mathlib.preadditive_category
-/-
+/-!
 
 # Complexes of objects in a category
 
@@ -19,8 +19,8 @@ to be zero if i ≠ j + 1 (resp. j ≠ i + 1, depending on a boolean
 input which says which way the maps are going). The concept of a
 homotopy is also defined.
 
-
 -/
+
 open category_theory category_theory.limits
 
 section succ_pred

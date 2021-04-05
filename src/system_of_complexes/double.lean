@@ -9,6 +9,7 @@ open opposite category_theory
 open_locale nnreal
 
 /-!
+
 # Systems of double complexes of normed abelian groups
 
 In this file we define systems of double complexes of normed abelian groups,
@@ -19,6 +20,7 @@ as needed for Definition 9.6 of [Analytic].
 * `system_of_double_complexes`: a system of complexes of normed abelian groups.
 * `admissible`: such a system is *admissible* if all maps that occur in the system
     are norm-nonincreasing.
+
 -/
 
 /-- A system of double complexes of normed abelian groups, indexed by `ℝ≥0`.

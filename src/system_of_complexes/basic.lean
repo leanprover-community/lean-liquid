@@ -19,18 +19,28 @@ open opposite category_theory
 open_locale nnreal
 
 /-!
+
 # Systems of complexes of normed abelian groups
 
 In this file we define systems of complexes of normed abelian groups,
-along the lines of Definition 9.3 of [Analytic].
+as in of Definition 9.3 of [Analytic].
 
 ## Main declarations
 
-* `system_of_complexes`: a system of complexes of normed abelian groups.
-* `is_bounded_exact`: an exactness criterion for such systems,
-    requiring a suitable interplay between the norms and the algebraic properties of the system.
+* `system_of_complexes`: a system of complexes of normed abelian groups. See Definition 4.1
+  of the blueprint.
 * `admissible`: such a system is *admissible* if all maps that occur in the system
-    are norm-nonincreasing.
+    are norm-nonincreasing. See Definition 4.2 of the blueprint.
+* `is_bounded_exact`: an exactness criterion for such systems, See Definition 4.3 of the
+  blueprint. It asks for a suitable interplay between the norms and the algebraic properties
+  of the system.
+* `is_weak_bounded_exact` : another exactness criterion for such systems. See Definition 4.4
+   of the blueprint.
+
+## TODO
+
+It seems a bit ridiculous that this file has to import `locally_constant.Vhat`.
+
 -/
 
 -- TODO: at some point we can abstract the following definition over `NormedGroup` and `ℝ≥0`.

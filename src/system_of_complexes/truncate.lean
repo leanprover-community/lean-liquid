@@ -2,15 +2,18 @@ import for_mathlib.normed_group_quotient
 import for_mathlib.additive_functor
 
 import system_of_complexes.basic
-import locally_constant.Vhat -- preadditive category NormedGroup
 
 /-!
+
 # Truncation
 
 In this file we define a truncation functors for (systems of) complexes of normed groups.
 This operation takes a complex `C` indexed by `ℕ`, and creates a new complex whose objects are
 * in degree `0`:   the cokernel of `d : C 0 ⟶ C 1`
 * in degree `n+1`: the object `C (n+2)`
+
+Various lemmas are proved about how this construction preserves or reflects
+various notions of bounded exactness.
 
 -/
 
