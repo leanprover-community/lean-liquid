@@ -11,3 +11,14 @@ of a complex of such maps is given in `eg.lean`. The file `suitable.lean`
 defines the notions of "suitability" explained in definitions 1.11-1.13
 of the blueprint. Everything is ported to a category-theoretic language
 in `category.lean`.
+
+Note that right now this directory does _not_ contain a proof of the
+Breen-Deligne theorem, either in the traditional form which allows
+ℤ[A^m1]⊕ℤ[A^m2] etc, or in the stronger form which demands that every
+object in the resolution is of the form ℤ[A^m].
+
+## TODO
+
+Prove the Breen-Deligne theorem! However this is rather
+a long-term goal at the minute, and is not something
+which is being worked on.
