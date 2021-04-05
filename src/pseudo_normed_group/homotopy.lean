@@ -1,5 +1,5 @@
 import pseudo_normed_group.system_of_complexes
-import pseudo_normed_group.rescale
+import rescale.CLC
 
 .
 
@@ -151,31 +151,26 @@ end
 def complex_rescale_iso (N : ℝ≥0) :
   (BD.complex (rescale_constants c' N) r V r' c).obj (op M) ≅
   (BD.complex c' r V r' c).obj (op $ of r' $ rescale N M) :=
--- iso_of_components (complex_rescale_iso_X _ _ _ _ _ _ _)
 eq_to_iso $ begin
-  -- intros,
-  -- change cochain_complex.mk _ _ _ _ = cochain_complex.mk _ _ _ _,
   dsimp only [data.complex, rescale_constants],
   transitivity
-    (BD.complex₂ r V r' (λ (i : ℕ), c * c' i * N⁻¹) (λ (i : ℕ), r' * (c * c' i) * N⁻¹)).obj (op M),
-  swap,
+    (BD.complex₂ r V r' (λ (i : ℕ), c * c' i * N⁻¹) (λ (i : ℕ), r' * (c * c' i) * N⁻¹)).obj (op $ of r' M),
+  { simp only [mul_assoc, ProFiltPseuNormGrpWithTinv.of_coe] },
   dsimp only [data.complex₂, rescale_constants],
   ext i,
   { refl },
   { apply heq_of_eq,
     ext i j : 2,
-    have :
-      (universal_map.eval_CLCFP V r' (c * c' i * N⁻¹) (c * c' j * N⁻¹) (BD.d j i)).app (op M) ==
-      (universal_map.eval_CLCFP V r' (c * c' i) (c * c' j) (BD.d j i)).app (op (of r' (rescale N ↥M))),
-    {
-
-    }
-
-    --  dsimp only [data.complex₂_d, universal_map.eval_CLCFPTinv₂, _root_.id],
-    -- dsimp only [NormedGroup.equalizer.map_nat_app],
-    -- congr' 1,
+    dsimp only [data.complex₂_d, universal_map.eval_CLCFPTinv₂, _root_.id,
+      NormedGroup.equalizer.map_nat_app],
+    simp only [universal_map.eval_CLCFP_rescale V r' (c * c' i) (c * c' j) _ _ (BD.d j i) N M,
+      universal_map.eval_CLCFP_rescale V r' (r' * (c * c' i)) (r' * (c * c' j)) _ _ (BD.d j i) N M],
+    -- congr' 3,
     -- refl,
-     }
+    congr' 3; symmetry,
+    apply ProFiltPseuNormGrpWithTinv.of_coe,
+    -- cases M, refl,
+     },
 end.
   dsimp only [data.complex, data.complex₂, -- data.complex_X, data.complex_d, CLCFPTinv,
     universal_map.eval_CLCFPTinv, rescale_constants],
