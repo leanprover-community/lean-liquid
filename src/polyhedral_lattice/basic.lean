@@ -1,6 +1,18 @@
 import analysis.normed_space.normed_group_hom
 import ring_theory.finiteness
+/-!
 
+# Polyhedral lattices
+
+A polyhedral lattice is a finite free ℤ-module with a real-valued norm
+making it into a normed group, such that the closed unit ball of
+the Banach space obtained by tensoring everything up to ℝ is a rational polyhedron.
+
+## Implementation issues
+
+The condition on the norm actually used is `generates_norm` below.
+
+-/
 noncomputable theory
 open_locale big_operators classical nnreal
 

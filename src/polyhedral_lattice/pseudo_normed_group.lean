@@ -5,6 +5,14 @@ import pseudo_normed_group.with_Tinv
 import topology.connected
 
 import facts
+/-!
+
+# If M is a profinitely filtered pseudo-normed group with T⁻¹ then so is Hom(Λ, M)
+
+Here Λ is a polyhedral lattice, and the T⁻¹ is in the sense
+of `pseudo_normed_group.with_Tinv`.
+
+-/
 
 noncomputable theory
 open_locale nnreal

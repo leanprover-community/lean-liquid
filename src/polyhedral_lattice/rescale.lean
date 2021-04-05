@@ -1,5 +1,14 @@
 import polyhedral_lattice.basic
 
+/-!
+
+# Rescaling the norm on a polyhedral lattice.
+
+Rescaling the norm on a polyhedral lattice by a positive real factor gives a
+polyhedral lattice (at least for us -- Scholze seem to demand a rationality
+condition which we are missing).
+
+-/
 noncomputable theory
 open_locale big_operators classical nnreal
 

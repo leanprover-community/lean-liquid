@@ -7,6 +7,16 @@ import for_mathlib.add_monoid_hom
 import for_mathlib.free_abelian_group -- for int.cast_add_hom', which should move
 import Mbar.basic -- for nnreal.coe_nat_abs, which should move
 
+/-!
+
+# Category-theoretic Hom(Λ, M)
+
+If Λ is a polyhedral lattice then Hom(Λ, -) is a functor from profinitely filtered
+pseudo-normed groups equipped with T⁻¹ to itself. Furthermore, if Λ = ℤ then this
+functor is isomorphic to the identity functor.
+
+-/
+
 noncomputable theory
 universe variables u
 open_locale nnreal -- enable the notation `ℝ≥0` for the nonnegative real numbers.

@@ -1,5 +1,11 @@
 import polyhedral_lattice.basic
+/-!
 
+# The integers are a polyhedral lattice.
+
+The integers, with its usual norm, are a polyhedral lattice.
+
+-/
 noncomputable theory
 
 open_locale big_operators

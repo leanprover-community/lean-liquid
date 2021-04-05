@@ -2,7 +2,19 @@ import polyhedral_lattice.basic
 
 import linear_algebra.direct_sum_module
 import algebra.direct_sum
+/-!
 
+# Direct sums of polyhedral lattices
+
+A finite direct sum of polyhedral lattices is...a normed group.
+
+## TODO
+
+Find out why the unfinished proof that a finite direct sum of polyhedral lattices
+is a polyhedral lattice has been commented out. Right now this file does not seem to
+be used in the project at all.
+
+-/
 noncomputable theory
 
 open_locale direct_sum big_operators classical

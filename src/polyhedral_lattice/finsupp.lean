@@ -3,7 +3,17 @@ import linear_algebra.finsupp_vector_space
 import for_mathlib.finsupp
 
 import polyhedral_lattice.basic
+/-!
 
+# Hom(ι, Λ) for Λ a polyhedral lattice
+
+If Λ is a polyhedral lattice and ι is a finite type, then ι → Λ is a polyhedral lattice.
+
+## Implementation issue
+
+We use `ι →₀ Λ` rather than `ι → Λ` to make life easier with sums.
+
+-/
 noncomputable theory
 
 open_locale big_operators classical
