@@ -26,6 +26,11 @@ an automorphism which scales norms by a constant factor `r`.
 - `LCC : NormedGroup ⥤ Profiniteᵒᵖ ⥤ NormedGroup` : `LCC V S` is the normed group completion of the
   locally constant functions from `S` to `V`.
 
+## TODO
+
+Pull off the stuff about completions and put it into `normed_group/NormedGroup`?
+Then `system_of_complexes.basic` would not have to import this file.
+
 -/
 
 noncomputable theory
