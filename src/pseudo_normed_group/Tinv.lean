@@ -26,6 +26,17 @@ def map {V₁ V₂ W₁ W₂ : NormedGroup} {f₁ f₂ g₁ g₂} (φ : V₁ ⟶
   of (f₁.equalizer g₁) ⟶ of (f₂.equalizer g₂) :=
 normed_group_hom.equalizer.map _ _ hf.symm hg.symm
 
+theorem map_congr
+  {V₁ V₂ W₁ W₂ : NormedGroup} {f₁ f₂ g₁ g₂} {φ : V₁ ⟶ V₂} {ψ : W₁ ⟶ W₂}
+  {V₁' V₂' W₁' W₂' : NormedGroup} {f₁' f₂' g₁' g₂'} {φ' : V₁' ⟶ V₂'} {ψ' : W₁' ⟶ W₂'}
+  {hf : φ ≫ f₂ = f₁ ≫ ψ} {hg : φ ≫ g₂ = g₁ ≫ ψ}
+  {hf' : φ' ≫ f₂' = f₁' ≫ ψ'} {hg' : φ' ≫ g₂' = g₁' ≫ ψ'}
+  (Hφ : arrow.mk φ = arrow.mk φ') (Hψ : arrow.mk ψ = arrow.mk ψ')
+  (Hf₁ : arrow.mk f₁ = arrow.mk f₁') (Hf₂ : arrow.mk f₂ = arrow.mk f₂')
+  (Hg₁ : arrow.mk g₁ = arrow.mk g₁') (Hg₂ : arrow.mk g₂ = arrow.mk g₂') :
+  arrow.mk (map φ ψ hf hg) = arrow.mk (map φ' ψ' hf' hg') :=
+by { cases Hφ, cases Hψ, cases Hf₁, cases Hf₂, cases Hg₁, cases Hg₂, refl }
+
 lemma map_comp_map {V₁ V₂ V₃ W₁ W₂ W₃ : NormedGroup} {f₁ f₂ f₃ g₁ g₂ g₃}
   {φ : V₁ ⟶ V₂} {ψ : W₁ ⟶ W₂} {φ' : V₂ ⟶ V₃} {ψ' : W₂ ⟶ W₃}
   (hf : φ ≫ f₂ = f₁ ≫ ψ) (hg : φ ≫ g₂ = g₁ ≫ ψ)
