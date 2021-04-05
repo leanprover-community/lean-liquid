@@ -28,19 +28,12 @@ theorem eval_FP_rescale [ϕ.suitable c₁ c₂]
   (eval_FP r' c₁ c₂ ϕ).app (of r' (rescale N M)) =
   ((eval_FP r' (c₁ * N⁻¹) (c₂ * N⁻¹) ϕ).app (of r' M)) := rfl
 
-theorem eval_LCFP'_rescale [ϕ.suitable c₂ c₁]
-  (N : ℝ≥0)
-  (M) [profinitely_filtered_pseudo_normed_group_with_Tinv r' M] :
-  (eval_LCFP' V r' ϕ c₁ c₂).app (op (of r' (rescale N M))) =
-  by clean @_root_.id _ ((eval_LCFP' V r' ϕ (c₁ * N⁻¹) (c₂ * N⁻¹)).app (op (of r' M))) :=
-rfl
-
-theorem eval_LCFP_rescale [ϕ.suitable c₁ c₂]
+theorem eval_LCFP_rescale [ϕ.suitable c₂ c₁]
   (N : ℝ≥0)
   (M) [profinitely_filtered_pseudo_normed_group_with_Tinv r' M] :
   (eval_LCFP V r' ϕ c₁ c₂).app (op (of r' (rescale N M))) =
   by clean @_root_.id _ ((eval_LCFP V r' ϕ (c₁ * N⁻¹) (c₂ * N⁻¹)).app (op (of r' M))) :=
-sorry
+rfl
 
 end basic_universal_map
 
@@ -48,15 +41,15 @@ namespace universal_map
 
 variables (ϕ : universal_map m n)
 
-theorem eval_LCFP_rescale
+theorem eval_LCFP_rescale [ϕ.suitable c₂ c₁]
   (N : ℝ≥0)
   (M) [profinitely_filtered_pseudo_normed_group_with_Tinv r' M] :
   (eval_LCFP V r' c₁ c₂ ϕ).app (op (of r' (rescale N M))) =
   (by clean @_root_.id _ ((eval_LCFP V r' (c₁ * N⁻¹) (c₂ * N⁻¹) ϕ).app (op (of r' M)))) :=
 begin
-  dsimp only [eval_LCFP],
-  congr' 1;
-  sorry,
+  simp only [eval_LCFP, ← nat_trans.app_hom_apply,
+    add_monoid_hom.map_sum, add_monoid_hom.map_int_module_smul],
+  simp only [nat_trans.app_hom_apply, basic_universal_map.eval_LCFP_rescale]
 end
 
 end universal_map

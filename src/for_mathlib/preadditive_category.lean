@@ -35,4 +35,17 @@ instance : preadditive (D ⥤ C) :=
 
 end preadditive
 
+namespace nat_trans
+
+variables {C D : Type*} [category C] [category D] [preadditive D]
+variables {F G : C ⥤ D}
+
+@[simps]
+def app_hom (X : C) : (F ⟶ G) →+ (F.obj X ⟶ G.obj X) :=
+{ to_fun := λ α, α.app X,
+  map_zero' := rfl,
+  map_add' := λ _ _, rfl }
+
+end nat_trans
+
 end category_theory

@@ -309,8 +309,8 @@ def eval_CLCFPTinv [ϕ.suitable c₂ c₁] :
 by apply eval_CLCFPTinv₂_zero
 
 lemma eval_CLCFPTinv_comp {l m n : FreeMat} (f : l ⟶ m) (g : m ⟶ n)
-  [hg : g.suitable c₂ c₁] [hf : f.suitable c₃ c₂] [(f ≫ g).suitable c₃ c₁] :
-  (f ≫ g).eval_CLCFPTinv r V r' c₁ c₃ =
+  [hg : g.suitable c₂ c₁] [hf : f.suitable c₃ c₂] :
+  @eval_CLCFPTinv r V _ _ r' _ _ c₁ c₃ _ _ (f ≫ g) (suitable.comp c₂) =
     g.eval_CLCFPTinv r V r' c₁ c₂ ≫ f.eval_CLCFPTinv r V r' c₂ c₃ :=
 by apply eval_CLCFPTinv₂_comp
 

@@ -1,4 +1,4 @@
-import rescale.pseudo_normed_group
+import rescale.LC
 import pseudo_normed_group.CLC
 
 open_locale classical nnreal
@@ -22,12 +22,12 @@ namespace universal_map
 
 variables (ϕ : universal_map m n)
 
-theorem eval_CLCFP_rescale
+theorem eval_CLCFP_rescale [ϕ.suitable c₂ c₁]
   (N : ℝ≥0)
   (M) [profinitely_filtered_pseudo_normed_group_with_Tinv r' M] :
   (eval_CLCFP V r' c₁ c₂ ϕ).app (op (of r' (rescale N M))) ==
   (eval_CLCFP V r' (c₁ * N⁻¹) (c₂ * N⁻¹) ϕ).app (op (of r' M)) :=
-_
+by { dsimp [eval_CLCFP], rw eval_LCFP_rescale }
 
 end universal_map
 
