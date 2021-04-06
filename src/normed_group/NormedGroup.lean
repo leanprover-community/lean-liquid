@@ -7,7 +7,7 @@ import category_theory.limits.creates
 import for_mathlib.normed_group_quotient
 
 /-!
-# The category of normed abelian groups and continuous group homomorphisms
+# The category of seminormed abelian groups and continuous group homomorphisms
 
 -/
 
@@ -36,7 +36,7 @@ instance punit.normed_group : normed_group punit :=
   .. punit.add_comm_group, .. punit.metric_space }
 
 -- move this, better name?
-lemma norm_le_add_norm_add {V : Type*} [normed_group V] (x y : V) :
+lemma norm_le_add_norm_add {V : Type*} [semi_normed_group V] (x y : V) :
   ∥x∥ ≤ ∥x + y∥ + ∥y∥ :=
 calc ∥x∥ = ∥x + y - y∥ : by rw add_sub_cancel
 ... ≤ ∥x + y∥ + ∥y∥ : norm_sub_le _ _
@@ -46,7 +46,7 @@ end for_mathlib
 open category_theory
 
 /-- The category of normed abelian groups and bounded group homomorphisms. -/
-def NormedGroup : Type (u+1) := bundled normed_group
+def NormedGroup : Type (u+1) := bundled semi_normed_group
 
 namespace NormedGroup
 
@@ -56,7 +56,7 @@ instance bundled_hom : bundled_hom @normed_group_hom :=
 attribute [derive [has_coe_to_sort, large_category, concrete_category]] NormedGroup
 
 /-- Construct a bundled `NormedGroup` from the underlying type and typeclass. -/
-def of (M : Type u) [normed_group M] : NormedGroup := bundled.of M
+def of (M : Type u) [semi_normed_group M] : NormedGroup := bundled.of M
 
 noncomputable
 instance : has_zero NormedGroup := ⟨of punit⟩
@@ -64,7 +64,7 @@ instance : has_zero NormedGroup := ⟨of punit⟩
 noncomputable
 instance : inhabited NormedGroup := ⟨0⟩
 
-instance (M : NormedGroup) : normed_group M := M.str
+instance (M : NormedGroup) : semi_normed_group M := M.str
 
 @[simp] lemma coe_of (V : Type u) [normed_group V] : (NormedGroup.of V : Type u) = V := rfl
 
@@ -129,7 +129,7 @@ variables {A B C : NormedGroup.{u}}
 @[simp]
 noncomputable
 def coker (f : A ⟶ B) : NormedGroup := NormedGroup.of $
-  quotient_add_group.quotient f.range.topological_closure
+  quotient_add_group.quotient f.range
 
 /-- The projection onto the cokernel. -/
 @[simp]
@@ -165,7 +165,7 @@ open normed_group_hom
 /-- Lift (aka descend) a morphism to the cokernel. -/
 noncomputable
 def coker.lift {f : A ⟶ B} {g : B ⟶ C} (cond : f ≫ g = 0) : coker f ⟶ C :=
-normed_group_hom.lift _ g (zero_of_closure _ _ begin
+normed_group_hom.lift _ g (begin
   rintros _ ⟨b,rfl⟩,
   change (f ≫ g) b = 0,
   simp [cond]
@@ -176,9 +176,8 @@ lemma coker.lift_comp_π {f : A ⟶ B} {g : B ⟶ C} {cond : f ≫ g = 0} :
   coker.π ≫ coker.lift cond = g :=
 begin
   ext,
-  rw ← normed_group_hom.lift_mk f.range.topological_closure g,
+  rw ← normed_group_hom.lift_mk f.range g,
   refl,
-  apply zero_of_closure,
   rintro _ ⟨b,rfl⟩,
   change (f ≫ g) b = 0,
   simp [cond],
@@ -196,7 +195,7 @@ lemma coker.comp_pi_eq_zero {f : A ⟶ B} : f ≫ (coker.π : B ⟶ coker f) = 0
 begin
   ext a,
   rw [coe_zero, pi.zero_apply, coe_comp, coker.π, ← mem_ker, normed_group.mk.ker],
-  exact subset_closure ⟨a, rfl⟩,
+  exact set.mem_range_self a
 end
 
 @[simp]
@@ -214,21 +213,6 @@ lemma coker.lift_zero {f : A ⟶ B} :
   coker.lift (show f ≫ (0 : B ⟶ C) = 0, from category_theory.limits.comp_zero) = 0 :=
 eq.symm $ coker.lift_unique category_theory.limits.comp_zero
 
--- better name? better form?
-lemma coker.exists_norm_le {f : A ⟶ B} (y₁ y₂ : B)
-  (h : (coker.π y₁ : coker f) = coker.π y₂) (ε : ℝ) (hε : 0 < ε) :
-  ∃ x, ∥y₁ - f x∥ ≤ ∥y₂∥ + ε :=
-begin
-  erw [quotient_add_group.mk'_eq_mk'_iff, metric.mem_closure_range_iff] at h,
-  obtain ⟨x, hx⟩ := h ε hε,
-  use x,
-  rw dist_eq_norm at hx,
-  calc ∥y₁ - f x∥ ≤ ∥y₁ - f x + -y₂∥ + ∥-y₂∥ : norm_le_add_norm_add _ _
-  ... = ∥y₂∥ + ∥y₁ - y₂ - f x∥ : _
-  ... ≤ ∥y₂∥ + ε : add_le_add_left hx.le _,
-  simp only [sub_eq_add_neg, add_comm, add_left_comm, norm_neg],
-end
-
 section
 open_locale nnreal
 
@@ -239,10 +223,9 @@ lemma coker.lift_bound_by {f : A ⟶ B} {g : B ⟶ C} {cond : f ≫ g = 0} {c : 
 begin
   intros x,
   by_cases hc : c = 0,
-  { simp only [hc, nnreal.coe_zero, zero_mul, norm_le_zero_iff] at hg ⊢,
+  { simp only [hc, nnreal.coe_zero, zero_mul] at hg ⊢,
     obtain ⟨x, rfl⟩ := coker.π_surjective x,
-    show g x = 0,
-    rw ← norm_le_zero_iff,
+    show ∥g x∥ ≤ 0,
     calc ∥g x∥ ≤ 0 * ∥x∥ : hg x
     ... = 0 : zero_mul _ },
   { replace hc : 0 < c := pos_iff_ne_zero.mpr hc,

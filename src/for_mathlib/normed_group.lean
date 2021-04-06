@@ -7,8 +7,8 @@ import for_mathlib.big_operators_basic
 open_locale big_operators topological_space uniformity
 open finset filter
 
-variables {G : Type*} [normed_group G]
-          {H : Type*} [normed_group H]
+variables {G : Type*} [semi_normed_group G]
+          {H : Type*} [semi_normed_group H]
 
 lemma norm_le_insert' (a b : G) : ∥a∥ ≤ ∥b∥ + ∥a - b∥ :=
 begin
