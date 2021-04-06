@@ -1,4 +1,4 @@
-import ..from_mathlib.category_theory.limits.kan_extension
+import category_theory.limits.kan_extension
 import category_theory.with_terminal
 import algebraic_topology.simplicial_object
 import category_theory.arrow

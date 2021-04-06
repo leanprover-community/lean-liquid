@@ -2,6 +2,15 @@ import .Profinite
 import category_theory.Fintype
 import topology.locally_constant.basic
 
+/-!
+This file proves that every profinite set 
+can be expressed as a limit of finite sets in a
+*functorial* way.
+
+Some of the code in this file was inspired by the 
+`Profinite2` branch of mathlib by C. Sönne and B. Mehta.
+-/
+
 universes v u
 
 open category_theory
