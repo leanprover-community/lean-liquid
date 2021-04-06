@@ -1,4 +1,4 @@
-import category_theory.abelian.additive_functor -- minimize this
+import category_theory.preadditive.additive_functor
 
 namespace category_theory
 

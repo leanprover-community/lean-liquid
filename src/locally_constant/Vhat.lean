@@ -1,5 +1,5 @@
 import category_theory.currying
-import category_theory.abelian.additive_functor
+import category_theory.preadditive.additive_functor
 import topology.category.Profinite
 import topology.algebra.normed_group
 import topology.algebra.group_completion

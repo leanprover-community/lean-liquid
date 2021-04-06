@@ -1,6 +1,6 @@
 import category_theory.graded_object
 import category_theory.preadditive
-import category_theory.abelian.additive_functor
+import category_theory.preadditive.additive_functor
 import data.int.basic
 
 import for_mathlib.preadditive_category
