@@ -57,17 +57,24 @@ begin
     all_goals { apply_instance } }
 end
 
+def NSC_htpy :
+  normed_spectral_homotopy
+    ((thm95.double_complex BD c' r r' V Λ M (N c' r r' m)).row 0)
+    ((thm95.double_complex BD c' r r' V Λ M (N c' r r' m)).row 1)
+    ((thm95.double_complex BD c' r r' V Λ M (N c' r r' m)).row_map 0 1)
+      m (k' c' m) (ε m) (c₀ Λ) (H BD c' r r' m) :=
+{ h := sorry,
+  h_bound_by := sorry,
+  δ := sorry,
+  hδ := sorry,
+  δ_bound_by := sorry }
+
 def NSC (IH : ∀ m' < m, thm95.IH BD c' r r' M V m') :
   normed_spectral_conditions (thm95.double_complex BD c' r r' V Λ M (N c' r r' m)) m
     (k₁ m) (K₁ m) (k' c' m) (ε m) (c₀ Λ) (H BD c' r r' m) :=
 { row_exact := NSC_row_exact _ _ _ _ _ _ _ _ IH,
   col_exact := sorry,
-  htpy :=
-  { h := sorry,
-    h_bound_by := sorry,
-    δ := sorry,
-    hδ := sorry,
-    δ_bound_by := sorry },
+  htpy := NSC_htpy BD c' r r' M V m Λ,
   admissible := thm95.double_complex_admissible _ }
 
 include BD c' r r' M V m
