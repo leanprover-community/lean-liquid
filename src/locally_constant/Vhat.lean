@@ -5,6 +5,8 @@ import topology.algebra.normed_group
 import topology.algebra.group_completion
 import topology.metric_space.completion
 
+import for_mathlib.normed_group
+
 import locally_constant.NormedGroup
 import normed_group.normed_with_aut
 
@@ -19,7 +21,7 @@ open uniform_space opposite category_theory
 /-- The completion of a normed group, as an endofunctor on `NormedGroup`. -/
 @[simps]
 def Completion : NormedGroup.{u} ⥤ NormedGroup.{u} :=
-{ obj := λ V, NormedGroup.of (completion V),
+{ obj := λ V, @NormedGroup.of (completion V) (@normed_group.to_semi_normed_group _ $ uniform_space.completion.remove_me_soon.{u u} (V : Type u)),
   map := λ V W f,
   { to_fun := completion.map f,
     bound' :=
@@ -32,7 +34,7 @@ def Completion : NormedGroup.{u} ⥤ NormedGroup.{u} :=
         { exact continuous_norm.comp completion.continuous_map },
         { exact continuous_const.mul continuous_norm } },
       { intro v,
-        rw [completion.map_coe, completion.norm_coe, completion.norm_coe],
+        rw [completion.map_coe, completion.norm_coe', completion.norm_coe'],
         { apply hC },
         { exact f.uniform_continuous } }
     end,
@@ -82,7 +84,7 @@ begin
   apply completion.induction_on v; clear v,
   { refine is_closed_le (continuous_norm.comp completion.continuous_map) continuous_norm },
   intro v,
-  simp only [completion.norm_coe, Completion_map_apply, completion.map_coe f.uniform_continuous],
+  simp only [completion.norm_coe', Completion_map_apply, completion.map_coe f.uniform_continuous],
   exact hf v
 end
 
