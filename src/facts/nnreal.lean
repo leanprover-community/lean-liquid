@@ -6,6 +6,9 @@ namespace nnreal
 
 variables (r' k c c₁ c₂ c₃ : ℝ≥0)
 
+instance fact_pos_of_one_le [hk : fact (1 ≤ c)] : fact (0 < c) :=
+⟨lt_of_lt_of_le zero_lt_one hk.out⟩
+
 instance fact_le_mul_of_one_le_left [hk : fact (1 ≤ k)] [hc : fact (c₁ ≤ c₂)] :
   fact (c₁ ≤ k * c₂) :=
 ⟨calc c₁ = 1 * c₁ : (one_mul _).symm
