@@ -402,4 +402,34 @@ def lift_iso : X.cone.X ≅ (limit_cone (diagram : X.clopen_cover ⥤ _)).X :=
     simp,
   end }
 
+lemma lift_iso_comm (I : X.clopen_cover) : lift_iso.hom ≫ (limit_cone _).π.app _ = proj I :=
+by refl
+
+lemma lift_iso_inv (I : X.clopen_cover) : lift_iso.inv ≫ proj I = (limit_cone _).π.app _ :=
+begin
+  symmetry,
+  rw iso.eq_inv_comp,
+  apply lift_iso_comm,
+end
+
+def is_limit : is_limit X.cone :=
+{ lift := λ S, (is_limit_limit_cone _).lift S ≫ lift_iso.symm.hom,
+  fac' := begin
+    intros S j,
+    simp only [category.assoc],
+    erw lift_iso_inv,
+    simp,
+  end,
+  uniq' := begin
+    intros S m h,
+    dsimp,
+    rw iso.eq_comp_inv,
+    ext1 x,
+    ext1,
+    ext1 j,
+    change (m ≫ X.cone.π.app j) x = _,
+    rw h,
+    refl,
+  end }
+
 end Profinite
