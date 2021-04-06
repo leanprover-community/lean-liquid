@@ -17,12 +17,13 @@ variables (h : homotopy f g)
 variables (c' c₁' c₂' : ℕ → ℝ≥0)
 variables [BD.suitable c'] [BD₁.suitable c₁'] [BD₂.suitable c₂']
 variables (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
-variables {r' : ℝ≥0} [fact (0 < r')] [fact (r' ≤ 1)]
-variables (M : ProFiltPseuNormGrpWithTinv.{u} r') (c : ℝ≥0)
+variables {r' : ℝ≥0} [fact (0 < r')] [fact (r' ≤ 1)] (c : ℝ≥0)
 
 namespace breen_deligne
 
 section homotopy
+
+variables (M : (ProFiltPseuNormGrpWithTinv.{u} r')ᵒᵖ)
 
 open differential_object differential_object.complex_like
 
@@ -49,27 +50,16 @@ def BD_map₂ (a₁ a₂ b₁ b₂ : ℕ → ℝ≥0)
     sorry
     } }
 .
--- def BD_map [∀ i, (f.f i).suitable (c₁' i) (c₂' i)] :
---   BD₂.complex c₂' r V r' c ⟶ BD₁.complex c₁' r V r' c :=
--- { app := λ M,
---   { f := λ i, ((f.f i).eval_CLCFPTinv₂ _ _ _ _ _ _ _).app _,
---     comm :=
---     begin
---       intros i j,
---       show ((BD₂.complex c₂' r V r' c).obj M).d i j ≫ _ =
---         _ ≫ ((BD₁.complex c₁' r V r' c).obj M).d i j,
---       dsimp [data.complex, data.complex₂_obj_d, data.complex₂_d],
---       have : BD₁.d j i ≫ f.f i = f.f j ≫ BD₂.d j i := f.comm j i,
---       simp only [← nat_trans.comp_app, ← universal_map.eval_CLCFPTinv₂_comp r V r', this]
---     end },
---   naturality' := by { intros, ext i : 2, exact ((f.f i).eval_CLCFPTinv₂ _ _ _ _ _ _ _).naturality _ } }
+def BD_map [∀ i, (f.f i).suitable (c₁' i) (c₂' i)] :
+  BD₂.complex c₂' r V r' c ⟶ BD₁.complex c₁' r V r' c :=
+BD_map₂ f r V _ _ _ _
 .
 
 variables {f g}
 
 -- def homotopy [∀ i, (f.f i).suitable (c₁' i) (c₂' i)] [∀ i, (g.f i).suitable (c₁' i) (c₂' i)]
 --   [∀ j i, (h.h j i).suitable (c₁' j) (c₂' i)] :
---   homotopy (BD_map f c₁' c₂' r V M c) (BD_map g c₁' c₂' r V M c) :=
+--   homotopy ((BD_map f c₁' c₂' r V c).app M) ((BD_map g c₁' c₂' r V c).app M) :=
 -- { h := λ j i, (h.h i j).eval_CLCFPTinv r V r' M (c * c₁' i) (c * c₂' j),
 --   h_eq_zero := λ i j hij,
 --   begin
@@ -95,6 +85,8 @@ variables {f g}
 end homotopy
 
 section rescale
+
+variables (M : ProFiltPseuNormGrpWithTinv.{u} r')
 
 -- move this
 def rescale_constants (c' : ℕ → ℝ≥0) (N : ℝ≥0) : ℕ → ℝ≥0 :=
