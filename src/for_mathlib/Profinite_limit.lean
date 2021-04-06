@@ -96,7 +96,7 @@ instance : preorder X.clopen_cover :=
     exact ⟨W, le_trans hV hW⟩
   end }
 
-def map_aux_obj (f : X ⟶ Y) : Y.clopen_cover → X.clopen_cover := λ I,
+def pullback_obj (f : X ⟶ Y) : Y.clopen_cover → X.clopen_cover := λ I,
 { sets := { U | (∃ V : I, f⁻¹' V = U) ∧ (U : set X).nonempty },
   clopen := begin
     rintro ⟨U,⟨V,rfl⟩,h⟩,
@@ -116,16 +116,19 @@ def map_aux_obj (f : X ⟶ Y) : Y.clopen_cover → X.clopen_cover := λ I,
     exact ⟨f ⁻¹' V,⟨⟨⟨V,hV⟩,rfl⟩,⟨x,hx⟩⟩,hx⟩,
   end }.
 
-def map (f : X ⟶ Y) : Y.clopen_cover ⥤ X.clopen_cover :=
-{ obj := map_aux_obj _,
-  map := λ I J g, hom_of_le $ begin
-    rintro ⟨U,⟨U,rfl⟩,h⟩,
-    replace g := le_of_hom g U,
-    rcases g with ⟨V,hV⟩,
-    use f ⁻¹' V,
-    { exact ⟨⟨V,rfl⟩, set.nonempty.mono (set.preimage_mono hV) h⟩ },
-    { exact set.preimage_mono hV, },
-  end }
+lemma pullback_mono (f : X ⟶ Y) : monotone (pullback_obj f) :=
+begin
+  intros I J hh,
+  rintro ⟨U,⟨U,rfl⟩,h⟩,
+  rcases hh U with ⟨V,h1⟩,
+  use f ⁻¹' (V : set Y),
+  { exact ⟨⟨V,rfl⟩, set.nonempty.mono (set.preimage_mono h1) h⟩ },
+  { exact set.preimage_mono h1, },
+end
+
+def pullback (f : X ⟶ Y) : Y.clopen_cover ⥤ X.clopen_cover :=
+{ obj := pullback_obj f,
+  map := λ I J g, hom_of_le $ pullback_mono _ (le_of_hom g) }
 
 def of_clopen (U : set X) (h1 : U.nonempty) (h2 : Uᶜ.nonempty) (h : is_clopen U) :
   X.clopen_cover :=
@@ -166,7 +169,7 @@ def of_clopen (U : set X) (h1 : U.nonempty) (h2 : Uᶜ.nonempty) (h : is_clopen 
     exact ⟨Uᶜ, or.inr rfl, h⟩,
   end}.
 
-def of_clopen.term {U : set X} {h1 : U.nonempty} {h2 : Uᶜ.nonempty} {h : is_clopen U} :
+def of_clopen.mk {U : set X} {h1 : U.nonempty} {h2 : Uᶜ.nonempty} {h : is_clopen U} :
   of_clopen U h1 h2 h := ⟨U, or.inl rfl⟩
 
 def common_refinement (I J : X.clopen_cover) : X.clopen_cover :=
@@ -195,58 +198,76 @@ def common_refinement (I J : X.clopen_cover) : X.clopen_cover :=
     refine ⟨A ∩ B,⟨⟨x,hxA,hxB⟩, ⟨A, B, rfl⟩⟩,hxA,hxB⟩,
   end }
 
-def common_refinement.fst {I J : X.clopen_cover} : common_refinement I J ⟶ I :=
-hom_of_le $
+lemma common_refinement.le_left {I J : X.clopen_cover} : common_refinement I J ≤ I :=
 begin
   rintros ⟨U,⟨h1,⟨A,B,rfl⟩⟩⟩,
   exact ⟨A,set.inter_subset_left _ _⟩,
 end
 
-def common_refinement.snd {I J : X.clopen_cover} : common_refinement I J ⟶ J :=
-hom_of_le $
+lemma common_refinement.le_right {I J : X.clopen_cover} : common_refinement I J ≤ J :=
 begin
   rintros ⟨U,⟨h1,⟨A,B,rfl⟩⟩⟩,
   exact ⟨B,set.inter_subset_right _ _⟩,
 end
 
+def common_refinement.fst {I J : X.clopen_cover} : common_refinement I J ⟶ I :=
+hom_of_le $ common_refinement.le_left
+
+def common_refinement.snd {I J : X.clopen_cover} : common_refinement I J ⟶ J :=
+hom_of_le $ common_refinement.le_right
+
 end clopen_cover
 
-def refines {I J : X.clopen_cover} (f : I ⟶ J) (U : I) : J := classical.some (le_of_hom f U)
+def refines {I J : X.clopen_cover} (f : I ≤ J) (U : I) : J := classical.some $ f U
 
-lemma refines_spec {I J : X.clopen_cover} (f : I ⟶ J) (U : I) : (U : set X) ≤ refines f U :=
-  classical.some_spec (le_of_hom f U)
+lemma refines_spec {I J : X.clopen_cover} (f : I ≤ J) (U : I) : (U : set X) ≤ refines f U :=
+  classical.some_spec (f U)
 
-lemma refines_unique {I J : X.clopen_cover} (f : I ⟶ J) (U : I) (V : J) :
+lemma refines_unique {I J : X.clopen_cover} (f : I ≤ J) (U : I) (V : J) :
   (U : set X) ≤ V → V = refines f U :=
 λ h, J.disjoint _ _ (set.nonempty.mono (set.subset_inter h (refines_spec _ _)) (I.nonempty U))
 
 @[simp]
-lemma refines_id (I : X.clopen_cover) (U : I) : refines (𝟙 I) U = U :=
-(refines_unique (𝟙 _) U U $ le_refl _).symm
+lemma refines_refl (I : X.clopen_cover) (U : I) : refines (le_refl _) U = U :=
+(refines_unique (le_refl _) U U $ le_refl _).symm
 
 @[simp]
-lemma refines_comp {I J K : X.clopen_cover} (f : I ⟶ J) (g : J ⟶ K) (U : I) :
-  refines (f ≫ g) U = refines g (refines f U) := eq.symm $
+lemma refines_trans {I J K : X.clopen_cover} (f : I ≤ J) (g : J ≤ K) (U : I) :
+  refines (le_trans f g) U = refines g (refines f U) := eq.symm $
 refines_unique _ _ _ $ le_trans (refines_spec f U) (refines_spec _ _)
 
 def diagram : X.clopen_cover ⥤ Profinite :=
 { obj := λ I, ⟨⟨I⟩⟩,
-  map := λ I J f, ⟨λ U, refines f U, continuous_of_discrete_topology⟩ }
+  map := λ I J f, ⟨λ U, refines (le_of_hom f) U, continuous_of_discrete_topology⟩,
+  map_id' := begin
+    intros I,
+    ext1,
+    dsimp,
+    erw refines_refl,
+    refl,
+  end,
+  map_comp' := begin
+    rintros I J K h1 h2,
+    ext1,
+    dsimp,
+    erw refines_trans,
+    refl,
+  end }
 
-lemma mem (x : X) (I : X.clopen_cover) : ∃! U : I, x ∈ (U : set X) :=
+lemma exists_unique_mem (x : X) (I : X.clopen_cover) : ∃! U : I, x ∈ (U : set X) :=
 begin
   have : x ∈ ⋃₀ I.sets, by simp [I.cover'],
   rcases this with ⟨U,hU,hx⟩,
   exact ⟨⟨U,hU⟩,hx, λ V hV, I.disjoint _ _ ⟨x,hV,hx⟩⟩,
 end
 
-def proj_fun (I : X.clopen_cover) : X → diagram.obj I := λ x, classical.some $ mem x I
+def proj_fun (I : X.clopen_cover) : X → diagram.obj I := λ x, classical.some $ exists_unique_mem x I
 
 @[simp]
 lemma proj_fun_spec (I : X.clopen_cover) (x : X) (U : I) :
   proj_fun I x = U ↔ x ∈ (U : set X) :=
 begin
-  cases classical.some_spec (mem x I) with h1 h2,
+  cases classical.some_spec (exists_unique_mem x I) with h1 h2,
   refine ⟨_,λ h, (h2 _ h).symm⟩,
   intro h,
   dsimp at h2,
@@ -263,7 +284,7 @@ begin
   tidy,
 end
 
-def proj_map (I : X.clopen_cover) : locally_constant X I :=
+def proj_locally_constant (I : X.clopen_cover) : locally_constant X I :=
 { to_fun := proj_fun I,
   is_locally_constant := begin
     intros U,
@@ -273,7 +294,8 @@ def proj_map (I : X.clopen_cover) : locally_constant X I :=
     exact (I.clopen i).1,
   end }
 
-def proj (I : X.clopen_cover) : X ⟶ ⟨⟨I⟩⟩ := ⟨proj_map I, (proj_map I).continuous⟩
+def proj (I : X.clopen_cover) : X ⟶ ⟨⟨I⟩⟩ :=
+  ⟨proj_locally_constant I, (proj_locally_constant I).continuous⟩
 
 @[simp]
 lemma proj_comp_map {I J : X.clopen_cover} (f : I ⟶ J) :
@@ -301,14 +323,14 @@ begin
   have : Uᶜ.nonempty, by rwa set.nonempty_compl,
   let J := clopen_cover.of_clopen U ⟨y,hU2⟩ this hU1,
   specialize h J,
-  suffices : proj J y = clopen_cover.of_clopen.term,
+  suffices : proj J y = clopen_cover.of_clopen.mk,
   { erw [proj_fun_spec, this] at h, assumption },
   erw proj_fun_spec,
   assumption,
 end
 
 theorem exists_of_compat (is : Π (I : X.clopen_cover), I)
-  (compat : ∀ (I J : X.clopen_cover) (f : I ⟶ J), refines f (is _) = is _) :
+  (compat : ∀ (I J : X.clopen_cover) (f : I ≤ J), refines f (is _) = is _) :
   ∃ x : X, ∀ I, proj I x = is _ :=
 begin
   have := @is_compact.nonempty_Inter_of_directed_nonempty_compact_closed X _ X.clopen_cover _
@@ -321,8 +343,8 @@ begin
   { intros I J,
     dsimp,
     let K := I.common_refinement J,
-    let f : K ⟶ I := clopen_cover.common_refinement.fst,
-    let g : K ⟶ J := clopen_cover.common_refinement.snd,
+    let f : K ≤ I := clopen_cover.common_refinement.le_left,
+    let g : K ≤ J := clopen_cover.common_refinement.le_right,
     have hf := refines_spec f,
     have hg := refines_spec g,
     refine ⟨K, _, _⟩,
@@ -366,7 +388,7 @@ begin
   rcases a with ⟨a,ha⟩,
   dsimp [limit_cone],
   dsimp at ha,
-  change (diagram.map f) (a I) = _,
+  change (diagram.map (hom_of_le f)) (a I) = _,
   rw ha,
 end
 
