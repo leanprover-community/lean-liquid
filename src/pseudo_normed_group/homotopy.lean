@@ -125,7 +125,7 @@ end rescale
 
 section double
 
-variables (BD)
+variables (BD) (M : ProFiltPseuNormGrpWithTinv.{u} r')
 
 open ProFiltPseuNormGrpWithTinv (of)
 
@@ -143,7 +143,7 @@ sorry
 example (N : ℝ≥0) :
   (BD.double.complex (rescale_constants c' N) r V r' c).obj (op M) ≅
   (BD.complex c' r V r' c).obj (op $ of r' $ rescale N (M × M)) :=
-(double_iso_prod BD _ r V _ c) ≪≫ (eq_to_iso $ complex_rescale_eq _ _ _ _ _ _ _)
+(double_iso_prod BD _ r V c _) ≪≫ (eq_to_iso $ complex_rescale_eq _ _ _ _ _ _ _)
 
 end double
 
