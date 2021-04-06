@@ -42,12 +42,12 @@ def Cech_augmentation_map : (Hom M).obj Λ ⟶ (Cech_nerve r' Λ M N).obj (mk 0)
 (Hom M).map (cosimplicial_augmentation_map Λ N)
 
 def cosimplicial_system_of_complexes : simplex_category ⥤ system_of_complexes :=
-Cech_nerve r' Λ M N ⋙ BD.System c' r V r'
+Cech_nerve r' Λ M N ⋙ BD.system c' r V r'
 
 def augmentation_map :
-  (BD.System c' r V r').obj (op $ polyhedral_lattice.Hom Λ M) ⟶
+  (BD.system c' r V r').obj (op $ polyhedral_lattice.Hom Λ M) ⟶
   (cosimplicial_system_of_complexes BD c' r r' V Λ M N).obj (mk 0) :=
-(BD.System c' r V r').map (Cech_augmentation_map r' Λ M N)
+(BD.system c' r V r').map (Cech_augmentation_map r' Λ M N)
 
 def double_complex_aux : cochain_complex ℕ system_of_complexes :=
 alt_face_map_cocomplex (augmentation_map BD c' r r' V Λ M N)
@@ -93,23 +93,24 @@ def double_complex : system_of_double_complexes :=
 (double_complex_aux_rescaled BD c' r r' V Λ M N).as_functor ℕ _
 
 lemma double_complex.row_zero :
-  (double_complex BD c' r r' V Λ M N).row 0 = BD.system c' r V r' (Hom Λ M) := rfl
+  (double_complex BD c' r r' V Λ M N).row 0 =
+  (BD.system c' r V r').obj (op $ Hom Λ M) := rfl
 
 lemma double_complex.row_one :
   (double_complex BD c' r r' V Λ M N).row 1 =
-  BD.system c' r V r' (Hom ((cosimplicial Λ N).obj (mk 0)) M) := rfl
+  (BD.system c' r V r').obj (op $ Hom ((cosimplicial Λ N).obj (mk 0)) M) := rfl
 
 lemma double_complex.row (m : ℕ) :
   (double_complex BD c' r r' V Λ M N).row (m+2) =
   (system_of_complexes.rescale_functor (m+2)).obj
-    (BD.system c' r V r' (Hom ((cosimplicial Λ N).obj (mk (m+1))) M)) := rfl
+    ((BD.system c' r V r').obj (op $ Hom ((cosimplicial Λ N).obj (mk (m+1))) M)) := rfl
 
 variables {BD c' r r' V Λ M}
 
 -- the following two lemmas are currently not provable,
 -- we need a stronger assumption than `[BD.suitable c']`
 -- this is WIP
-lemma system_admissible : (BD.system c' r V r' (Hom Λ M)).admissible :=
+lemma system_admissible : ((BD.system c' r V r').obj (op $ Hom Λ M)).admissible :=
 sorry
 
 -- see above: currently we can only prove this for the columns

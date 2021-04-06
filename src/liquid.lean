@@ -21,7 +21,7 @@ Once we have fixed this data, we can state the theorem.
 
 open_locale nnreal -- enable the notation `ℝ≥0` for the nonnegative real numbers.
 
-open category_theory ProFiltPseuNormGrpWithTinv polyhedral_lattice
+open category_theory ProFiltPseuNormGrpWithTinv polyhedral_lattice opposite
 
 variables (BD : breen_deligne.data)
 variables (c' : ℕ → ℝ≥0)  -- implicit constants, chosen once and for all
@@ -35,7 +35,7 @@ theorem first_target [BD.suitable c']
   ∃ c₀ : ℝ≥0,
   ∀ (S : Type) [fintype S],
   ∀ (V : NormedGroup) [normed_with_aut r V],
-    ​(BD.system c' r V r' (of r' (Mbar r' S))).is_bounded_exact k K m c₀ :=
+    ​((BD.system c' r V r').obj (op $ of r' (Mbar r' S))).is_bounded_exact k K m c₀ :=
 begin
   intro m,
   obtain ⟨k, K, hk, H⟩ := thm95' BD c' r r' m,
@@ -43,7 +43,7 @@ begin
   use [k, K, hk, c₀],
   introsI S hS V hV,
   specialize H S V,
-  let i := (BD.System c' r V r').map_iso (HomZ_iso (of r' $ Mbar r' S)).op,
+  let i := (BD.system c' r V r').map_iso (HomZ_iso (of r' $ Mbar r' S)).op,
   refine H.of_iso i.symm _,
   intros c n,
   rw ← system_of_complexes.apply_hom_eq_hom_apply,

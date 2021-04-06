@@ -1,5 +1,5 @@
 import system_of_complexes.basic
-import normed_group.rescale
+import rescale.normed_group
 
 noncomputable theory
 

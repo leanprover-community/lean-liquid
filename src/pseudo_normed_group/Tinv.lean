@@ -284,15 +284,21 @@ by { simp only [eval_CLCFPTinv₂, eval_CLCFP_zero], ext, refl }
 
 lemma eval_CLCFPTinv₂_comp {l m n : FreeMat} (f : l ⟶ m) (g : m ⟶ n)
   [fact (c₂ ≤ r' * c₁)] [fact (c₄ ≤ r' * c₃)] [fact (c₆ ≤ r' * c₅)]
-  [f.suitable c₅ c₃] [f.suitable c₆ c₄] [g.suitable c₃ c₁] [g.suitable c₄ c₂]
-  [(f ≫ g).suitable c₅ c₁] [(f ≫ g).suitable c₆ c₂] :
-  (f ≫ g).eval_CLCFPTinv₂ r V r' c₁ c₂ c₅ c₆ =
+  [f.suitable c₅ c₃] [f.suitable c₆ c₄] [g.suitable c₃ c₁] [g.suitable c₄ c₂] :
+  @eval_CLCFPTinv₂ r V _ _ r' _ _ c₁ c₂ c₅ c₆ _ _ (f ≫ g)
+    _ _ (suitable.comp c₃) (suitable.comp c₄) =
   g.eval_CLCFPTinv₂ r V r' c₁ c₂ c₃ c₄ ≫ f.eval_CLCFPTinv₂ r V r' c₃ c₄ c₅ c₆ :=
 begin
   dsimp only [eval_CLCFPTinv₂, CLCFPTinv₂_def], delta id,
-  simp only [NormedGroup.equalizer.map_nat_comp_map_nat,
-    ← eval_CLCFP_comp],
-  refl,
+  simp only [NormedGroup.equalizer.map_nat_comp_map_nat],
+  generalize_proofs h1 h2 h3 h4 h5 h6 h7 h8,
+  revert h5 h6 h7 h8, resetI,
+  have H1 : eval_CLCFP V r' c₁ c₅ (f ≫ g) = eval_CLCFP V r' c₁ c₃ g ≫ eval_CLCFP V r' c₃ c₅ f :=
+    eval_CLCFP_comp V r' c₁ c₃ c₅ g f,
+  have H2 : eval_CLCFP V r' c₂ c₆ (f ≫ g) = eval_CLCFP V r' c₂ c₄ g ≫ eval_CLCFP V r' c₄ c₆ f :=
+    eval_CLCFP_comp V r' c₂ c₄ c₆ g f,
+  rw [H1, H2],
+  intros, refl,
 end
 
 lemma res_comp_eval_CLCFPTinv₂
