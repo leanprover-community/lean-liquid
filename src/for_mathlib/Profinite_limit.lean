@@ -416,14 +416,12 @@ def is_limit : is_limit X.cone :=
 { lift := λ S, (is_limit_limit_cone _).lift S ≫ lift_iso.symm.hom,
   fac' := begin
     intros S j,
-    simp only [category.assoc],
-    erw lift_iso_inv,
+    erw [category.assoc, lift_iso_inv],
     simp,
   end,
   uniq' := begin
     intros S m h,
-    dsimp,
-    rw iso.eq_comp_inv,
+    erw iso.eq_comp_inv,
     ext1 x,
     ext1,
     ext1 j,
