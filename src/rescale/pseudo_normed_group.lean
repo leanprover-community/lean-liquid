@@ -1,5 +1,5 @@
 import pseudo_normed_group.with_Tinv
-import polyhedral_lattice.rescale -- for the definition of `rescale`, maybe move that?
+import rescale.basic
 
 noncomputable theory
 

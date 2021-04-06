@@ -157,7 +157,7 @@ namespace universal_map
 
 variables (ϕ : universal_map m n)
 
-def eval_CLCFP : CLCFP V r' c₁ n ⟶ CLCFP V r' c₂ m :=
+def eval_CLCFP [ϕ.suitable c₂ c₁] : CLCFP V r' c₁ n ⟶ CLCFP V r' c₂ m :=
 (whisker_right (ϕ.eval_LCFP V r' c₁ c₂) Completion : _)
 
 @[simp] lemma eval_CLCFP_zero :
@@ -172,7 +172,7 @@ open category_theory.limits
 
 lemma eval_CLCFP_comp (g : universal_map m n) (f : universal_map l m)
   [hg : g.suitable c₂ c₁] [hf : f.suitable c₃ c₂] :
-  (comp g f).eval_CLCFP V r' c₁ c₃ =
+  @eval_CLCFP V r' c₁ c₃ _ _ (comp g f) (suitable.comp c₂) =
     g.eval_CLCFP V r' c₁ c₂ ≫ f.eval_CLCFP V r' c₂ c₃ :=
 by simp only [eval_CLCFP, ← whisker_right_comp, eval_LCFP_comp V r' c₁ c₂ c₃]
 

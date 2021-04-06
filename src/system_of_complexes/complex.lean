@@ -286,6 +286,22 @@ attribute [reassoc] complex_like.d_comp_d
 
 variables {ι V}
 
+theorem complex_like.ext' {C D : complex_like ι V cov}
+  (H : ∀ i j, coherent_indices cov i j → arrow.mk (C.d i j) = arrow.mk (D.d i j)) : C = D :=
+begin
+  cases C,
+  cases D,
+  cases show C_X = D_X, by {
+    ext i,
+    cases cov,
+    { exact congr_arg comma.right (H _ i rfl) },
+    { exact congr_arg comma.left (H i _ rfl) } },
+  congr, ext i j,
+  by_cases coherent_indices cov i j,
+  { injection H i j h, exact eq_of_heq h_3 },
+  { simp only [C_d_eq_zero h, D_d_eq_zero h] }
+end
+
 instance coherent_indices_decidable [decidable_eq ι] (cov : bool) (i j : ι) :
   decidable (coherent_indices cov i j) :=
 by { cases cov; dsimp [coherent_indices]; apply_instance }
@@ -680,6 +696,10 @@ calc (mk' X d h).d i (succ i)
     = d i ≫ eq_to_hom (congr_arg _ rfl) : dif_pos rfl
 ... = d i : by simp only [category.comp_id, eq_to_hom_refl]
 
+theorem ext {C D : cochain_complex ι V}
+  (H : ∀ i, arrow.mk (C.d i (succ i)) = arrow.mk (D.d i (succ i))) : C = D :=
+differential_object.complex_like.ext' $ by rintro _ _ ⟨⟩; apply H
+
 end cochain_complex
 
 namespace chain_complex
@@ -705,6 +725,10 @@ def mk' (X : ι → V) (d : Π i, X (succ i) ⟶ X i) (h : ∀ i, d (succ i) ≫
 calc (mk' X d h).d (succ i) i
     = eq_to_hom (congr_arg _ rfl) ≫ d i : dif_pos rfl
 ... = d i : by simp only [category.id_comp, eq_to_hom_refl]
+
+theorem ext {C D : chain_complex ι V}
+  (H : ∀ i, arrow.mk (C.d (succ i) i) = arrow.mk (D.d (succ i) i)) : C = D :=
+differential_object.complex_like.ext' $ by rintro _ _ ⟨⟩; apply H
 
 end chain_complex
 

@@ -26,6 +26,17 @@ def map {V₁ V₂ W₁ W₂ : NormedGroup} {f₁ f₂ g₁ g₂} (φ : V₁ ⟶
   of (f₁.equalizer g₁) ⟶ of (f₂.equalizer g₂) :=
 normed_group_hom.equalizer.map _ _ hf.symm hg.symm
 
+theorem map_congr
+  {V₁ V₂ W₁ W₂ : NormedGroup} {f₁ f₂ g₁ g₂} {φ : V₁ ⟶ V₂} {ψ : W₁ ⟶ W₂}
+  {V₁' V₂' W₁' W₂' : NormedGroup} {f₁' f₂' g₁' g₂'} {φ' : V₁' ⟶ V₂'} {ψ' : W₁' ⟶ W₂'}
+  {hf : φ ≫ f₂ = f₁ ≫ ψ} {hg : φ ≫ g₂ = g₁ ≫ ψ}
+  {hf' : φ' ≫ f₂' = f₁' ≫ ψ'} {hg' : φ' ≫ g₂' = g₁' ≫ ψ'}
+  (Hφ : arrow.mk φ = arrow.mk φ') (Hψ : arrow.mk ψ = arrow.mk ψ')
+  (Hf₁ : arrow.mk f₁ = arrow.mk f₁') (Hf₂ : arrow.mk f₂ = arrow.mk f₂')
+  (Hg₁ : arrow.mk g₁ = arrow.mk g₁') (Hg₂ : arrow.mk g₂ = arrow.mk g₂') :
+  arrow.mk (map φ ψ hf hg) = arrow.mk (map φ' ψ' hf' hg') :=
+by { cases Hφ, cases Hψ, cases Hf₁, cases Hf₂, cases Hg₁, cases Hg₂, refl }
+
 lemma map_comp_map {V₁ V₂ V₃ W₁ W₂ W₃ : NormedGroup} {f₁ f₂ f₃ g₁ g₂ g₃}
   {φ : V₁ ⟶ V₂} {ψ : W₁ ⟶ W₂} {φ' : V₂ ⟶ V₃} {ψ' : W₂ ⟶ W₃}
   (hf : φ ≫ f₂ = f₁ ≫ ψ) (hg : φ ≫ g₂ = g₁ ≫ ψ)
@@ -44,6 +55,7 @@ protected def F {J} [category J] {V W : J ⥤ NormedGroup} (f g : V ⟶ W) : J �
     exact (map_comp_map _ _ _ _).symm
   end }
 
+@[simps]
 def map_nat {J} [category J] {V₁ V₂ W₁ W₂ : J ⥤ NormedGroup}
   {f₁ f₂ g₁ g₂} (φ : V₁ ⟶ V₂) (ψ : W₁ ⟶ W₂)
   (hf : φ ≫ f₂ = f₁ ≫ ψ) (hg : φ ≫ g₂ = g₁ ≫ ψ) :
@@ -272,15 +284,21 @@ by { simp only [eval_CLCFPTinv₂, eval_CLCFP_zero], ext, refl }
 
 lemma eval_CLCFPTinv₂_comp {l m n : FreeMat} (f : l ⟶ m) (g : m ⟶ n)
   [fact (c₂ ≤ r' * c₁)] [fact (c₄ ≤ r' * c₃)] [fact (c₆ ≤ r' * c₅)]
-  [f.suitable c₅ c₃] [f.suitable c₆ c₄] [g.suitable c₃ c₁] [g.suitable c₄ c₂]
-  [(f ≫ g).suitable c₅ c₁] [(f ≫ g).suitable c₆ c₂] :
-  (f ≫ g).eval_CLCFPTinv₂ r V r' c₁ c₂ c₅ c₆ =
+  [f.suitable c₅ c₃] [f.suitable c₆ c₄] [g.suitable c₃ c₁] [g.suitable c₄ c₂] :
+  @eval_CLCFPTinv₂ r V _ _ r' _ _ c₁ c₂ c₅ c₆ _ _ (f ≫ g)
+    _ _ (suitable.comp c₃) (suitable.comp c₄) =
   g.eval_CLCFPTinv₂ r V r' c₁ c₂ c₃ c₄ ≫ f.eval_CLCFPTinv₂ r V r' c₃ c₄ c₅ c₆ :=
 begin
   dsimp only [eval_CLCFPTinv₂, CLCFPTinv₂_def], delta id,
-  simp only [NormedGroup.equalizer.map_nat_comp_map_nat,
-    ← eval_CLCFP_comp],
-  refl,
+  simp only [NormedGroup.equalizer.map_nat_comp_map_nat],
+  generalize_proofs h1 h2 h3 h4 h5 h6 h7 h8,
+  revert h5 h6 h7 h8, resetI,
+  have H1 : eval_CLCFP V r' c₁ c₅ (f ≫ g) = eval_CLCFP V r' c₁ c₃ g ≫ eval_CLCFP V r' c₃ c₅ f :=
+    eval_CLCFP_comp V r' c₁ c₃ c₅ g f,
+  have H2 : eval_CLCFP V r' c₂ c₆ (f ≫ g) = eval_CLCFP V r' c₂ c₄ g ≫ eval_CLCFP V r' c₄ c₆ f :=
+    eval_CLCFP_comp V r' c₂ c₄ c₆ g f,
+  rw [H1, H2],
+  intros, refl,
 end
 
 lemma res_comp_eval_CLCFPTinv₂
@@ -308,8 +326,8 @@ def eval_CLCFPTinv [ϕ.suitable c₂ c₁] :
 by apply eval_CLCFPTinv₂_zero
 
 lemma eval_CLCFPTinv_comp {l m n : FreeMat} (f : l ⟶ m) (g : m ⟶ n)
-  [hg : g.suitable c₂ c₁] [hf : f.suitable c₃ c₂] [(f ≫ g).suitable c₃ c₁] :
-  (f ≫ g).eval_CLCFPTinv r V r' c₁ c₃ =
+  [hg : g.suitable c₂ c₁] [hf : f.suitable c₃ c₂] :
+  @eval_CLCFPTinv r V _ _ r' _ _ c₁ c₃ _ _ (f ≫ g) (suitable.comp c₂) =
     g.eval_CLCFPTinv r V r' c₁ c₂ ≫ f.eval_CLCFPTinv r V r' c₂ c₃ :=
 by apply eval_CLCFPTinv₂_comp
 

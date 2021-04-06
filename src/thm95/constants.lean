@@ -57,21 +57,9 @@ namespace universal_constants
 open system_of_double_complexes
 
 -- this should be a constant roughly determined by `combinatorial_lemma.lean` (`lem98`)
+-- it should probably also depend on an `N : ℕ`
 def c₀ (Λ : PolyhedralLattice) : ℝ≥0 :=
 sorry
-
-include BD c' r r' m
-
-/-- `H BD c' r r' m` is the universal bound on the norm of the `N`th Breen--Deligne homotopy
-in the first `m` degrees.
-
-Here `N = thm95.N c' r r' m` (or it's `log_2`, depending on how you count). -/
-def H : ℝ≥0 :=
-sorry
-
-omit BD c' r r' m
-
-instance H_pos : fact (0 < H BD c' r r' m) := sorry
 
 def k₁ : ℕ → ℝ≥0
 | 0     := 2 -- should be anything > 1
@@ -164,6 +152,17 @@ sorry
 lemma two_div_k'_mul_r_div_r'_pow_b_le :
   (2 / k' c' m) * (r / r') ^ (b c' r r' m) ≤ ε m :=
 sorry
+
+include BD c' r r' m
+
+/-- `H BD c' r r' m` is the universal bound on the norm of the `N₂`th Breen--Deligne homotopy
+in the first `m` degrees. Here `N₂ = thm95.N₂ c' r r' m`. -/
+def H : ℝ≥0 :=
+sorry
+
+omit BD c' r r' m
+
+instance H_pos : fact (0 < H BD c' r r' m) := sorry
 
 def k : ℝ≥0 := k' c' m * k' c' m
 
