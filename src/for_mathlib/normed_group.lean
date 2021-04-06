@@ -130,6 +130,41 @@ begin
   exact tendsto_const_nhds
 end
 
+
+
+lemma norm_le_zero_iff' {G : Type*} [semi_normed_group G] [separated_space G] {g : G} :
+  ∥g∥ ≤ 0 ↔ g = 0 :=
+begin
+  have : g = 0 ↔ g ∈ closure ({0} : set G),
+  by simpa only [separated_space.out, mem_id_rel, sub_zero] using group_separation_rel g (0 : G),
+  rw [this, normed_group.mem_closure_iff],
+  simp [forall_lt_iff_le']
+end
+
+lemma norm_eq_zero_iff' {G : Type*} [semi_normed_group G] [separated_space G] {g : G} :
+  ∥g∥ = 0 ↔ g = 0 :=
+begin
+  conv_rhs { rw ← norm_le_zero_iff' },
+  split ; intro h,
+  { rw h },
+  { exact le_antisymm h (norm_nonneg g) }
+end
+
+lemma norm_pos_iff' {G : Type*} [semi_normed_group G] [separated_space G] {g : G} :
+  0 < ∥g∥ ↔ g ≠ 0 :=
+begin
+  rw lt_iff_le_and_ne,
+  simp only [norm_nonneg, true_and],
+  rw [ne_comm],
+  exact not_iff_not_of_iff (norm_eq_zero_iff'),
+end
+
+
+
+
+
+
+
 section PR7066
 noncomputable theory
 

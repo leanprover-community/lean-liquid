@@ -327,7 +327,9 @@ namespace is_weak_bounded_exact
 variables {C C₁ C₂}
 variables {k k' K K' : ℝ≥0} {m m' : ℕ} {c₀ c₀' : ℝ≥0} [fact (1 ≤ k)] [fact (1 ≤ k')]
 
-lemma to_exact (hC : C.is_weak_bounded_exact k K m c₀) {δ : ℝ≥0} (hδ : 0 < δ)
+lemma to_exact (hC : C.is_weak_bounded_exact k K m c₀)
+  [∀ c i, separated_space (C c i)]
+  {δ : ℝ≥0} (hδ : 0 < δ)
   (H : ∀ c ≥ c₀, ∀ i ≤ m, ∀ x : C (k * c) i, ∀ j, i+1 = j →
     C.d _ j x = 0 → ∃ (i₀ : ℕ) (hi₀ : i₀ = i - 1) (y : C c i₀), res x = C.d _ _ y) :
   C.is_bounded_exact k (K + δ) m c₀ :=
@@ -337,7 +339,7 @@ begin
   { rcases H c hc.out i hi x _ rfl hdx with ⟨i₀, hi₀, y, hy⟩,
     exact ⟨i₀, _, hi₀, rfl, y, by simp [hy, hdx]⟩ },
   { obtain ⟨i', j, hi', rfl, y, hy⟩ :=
-      hC c hc _ hi x (δ*∥C.d _ (i+1) x∥) (mul_pos (by exact_mod_cast hδ) $ norm_pos_iff.mpr hdx),
+      hC c hc _ hi x (δ*∥C.d _ (i+1) x∥) (mul_pos (by exact_mod_cast hδ) $ norm_pos_iff'.mpr hdx),
     refine ⟨i', _, hi', rfl, y, _⟩,
     have : ((K + δ : ℝ≥0) : ℝ) * ∥C.d _ (i+1) x∥
       = K * ∥C.d _ (i+1) x∥ + δ * ∥C.d _ (i+1) x∥, apply_mod_cast add_mul,

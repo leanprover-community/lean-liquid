@@ -41,6 +41,7 @@ variables {k k' K K' : ℝ≥0} {m m' : ℕ} {c₀ c₀' : ℝ≥0}
 -- by admit
 
 lemma strong_of_complete [hk : fact (1 ≤ k)] [hk' : fact (1 ≤ k')]
+  [∀ c i, separated_space (C c i)]
   (hC : C.is_weak_bounded_exact k K m c₀)
   (hC' : admissible C) [∀ c i, complete_space (C c i)] :
   ∀ δ > 0, C.is_bounded_exact (k^2) (K + δ) m c₀ :=
@@ -58,7 +59,7 @@ begin
   obtain (rfl|⟨i,rfl⟩) : i = 0 ∨ ∃ i', i = i' + 1,
   { cases i, { left, refl }, { right, exact ⟨_, rfl⟩ } },
   { refine ⟨0, rfl, 0, _⟩,
-    rw [normed_group_hom.map_zero, ← norm_le_zero_iff],
+    rw [normed_group_hom.map_zero, ← norm_le_zero_iff'],
     apply le_of_forall_pos_le_add,
     intros γ hγ,
     rw zero_add,
