@@ -48,12 +48,16 @@ begin
     all_goals { apply_instance } },
   { rw thm95.double_complex.row_one,
     refine (IH (m-1) hm' _).of_le thm95.system_admissible _ _ le_rfl _,
-    swap 3, { /- turn this into an instance somewhere -/ sorry },
+    swap 3,
+    { /- turn this into an instance somewhere,
+         we need to make the definition of `c₀` depend on `m` -/ sorry },
     all_goals { apply_instance } },
   { rw thm95.double_complex.row,
     apply system_of_complexes.rescale_is_weak_bounded_exact,
     refine (IH (m-1) hm' _).of_le thm95.system_admissible _ _ le_rfl _,
-    swap 3, { /- turn this into an instance somewhere -/ sorry },
+    swap 3,
+    { /- turn this into an instance somewhere,
+         we need to make the definition of `c₀` depend on `m` -/ sorry },
     all_goals { apply_instance } }
 end
 
