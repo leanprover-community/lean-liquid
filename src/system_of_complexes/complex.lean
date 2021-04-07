@@ -1,6 +1,6 @@
 import category_theory.graded_object
 import category_theory.preadditive
-import category_theory.abelian.additive_functor
+import category_theory.preadditive.additive_functor
 import data.int.basic
 
 import for_mathlib.preadditive_category
@@ -281,6 +281,14 @@ set_option old_structure_cmd true
 structure complex_like (cov : bool) extends differential_object ι V :=
 (d_comp_d : ∀ i j k, d i j ≫ d j k = 0)
 (d_eq_zero : ∀ ⦃i j⦄, ¬ coherent_indices cov i j → d i j = 0)
+
+@[simp]
+lemma complex_like.to_differential_object_X {cov : bool} (BD : complex_like ι V cov) :
+  (complex_like.to_differential_object BD).X = BD.X := rfl
+
+@[simp]
+lemma complex_like.to_differential_object_d {cov : bool} (BD : complex_like ι V cov) :
+  (complex_like.to_differential_object BD).d = BD.d := rfl
 
 attribute [reassoc] complex_like.d_comp_d
 
@@ -783,7 +791,7 @@ variables [preadditive V₁] [preadditive V₂]
 @[simps]
 def functor.map_complex_like [has_succ ι] (F : V₁ ⥤ V₂) [F.additive] :
   complex_like ι V₁ cov ⥤ complex_like ι V₂ cov :=
-F.map_complex_like' $ λ x y, functor.additive.map_zero
+F.map_complex_like' $ λ x y, functor.additive.map_zero'
 
 @[simps]
 def functor.map_complex_like_nat_trans [has_succ ι] (F G : V₁ ⥤ V₂) [F.additive] [G.additive]

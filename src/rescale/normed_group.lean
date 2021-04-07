@@ -20,7 +20,16 @@ instance [has_norm V] : has_norm (rescale N V) :=
 
 lemma norm_def [has_norm V] (v : rescale N V) : ∥v∥ = ∥of.symm v∥/N := rfl
 
--- remove the `fact` once we have `seminormed_group`
+instance [hN : fact (0 < N)] [semi_normed_group V] : semi_normed_group (rescale N V) :=
+semi_normed_group.of_core (rescale N V)
+{ norm_zero := show ∥(0 : V)∥/N = 0, by rw [norm_zero, zero_div],
+  triangle := λ v w,
+  begin
+    simp only [norm_def, ← add_div],
+    exact div_le_div_of_le hN.out.le (norm_add_le _ _), -- defeq abuse
+  end,
+  norm_neg := λ v, by { simp only [norm_def], congr' 1, exact norm_neg _ /- defeq abuse -/ } }
+
 instance [hN : fact (0 < N)] [normed_group V] : normed_group (rescale N V) :=
 normed_group.of_core (rescale N V)
 { norm_eq_zero_iff := λ v,
@@ -36,7 +45,7 @@ normed_group.of_core (rescale N V)
   end,
   norm_neg := λ v, by { simp only [norm_def], congr' 1, exact norm_neg _ /- defeq abuse -/ } }
 
-lemma nnnorm_def [hN : fact (0 < N)] [normed_group V] (v : rescale N V) :
+lemma nnnorm_def [hN : fact (0 < N)] [semi_normed_group V] (v : rescale N V) :
   nnnorm v = nnnorm (of.symm v) / N := rfl
 
 end rescale
@@ -55,11 +64,10 @@ def rescale (r : ℝ≥0) [hr : fact (0 < r)] : NormedGroup ⥤ NormedGroup :=
     begin
       obtain ⟨C, C_pos, hC⟩ := f.bound,
       use C,
-      dsimp,
       intro v,
-      rw [rescale.norm_def, rescale.norm_def, ← mul_div_assoc, div_le_div_right],
-      swap, { exact hr.out },
-      exact hC _,
+      have := hC ((@rescale.of r V₁).symm v),
+      rw [← div_le_div_right (show 0 < (r:ℝ), from hr.1), mul_div_assoc] at this,
+      exact this,
     end },
   map_id' := λ V, rfl, -- defeq abuse
   map_comp' := λ V₁ V₂ V₃ f g, rfl /- defeq abuse -/ }
@@ -73,8 +81,7 @@ def to_rescale : 𝟭 _ ⟶ rescale r :=
   add_monoid_hom.mk_normed_group_hom' (add_monoid_hom.mk' (@rescale.of r V) $ λ _ _, rfl) r⁻¹
   begin
     intro v,
-    dsimp,
-    rw [rescale.nnnorm_def, div_eq_inv_mul],
+    rw ← div_eq_inv_mul,
     refl
   end,
   naturality' := λ V W f, rfl /- defeq abuse -/ }
@@ -90,9 +97,11 @@ def scale : rescale r₁ ⟶ rescale r₂ :=
   begin
     dsimp,
     intro v,
-    simp only [rescale.nnnorm_def, add_monoid_hom.coe_mk', div_eq_inv_mul, equiv.symm_apply_apply],
-    rw [mul_assoc, mul_inv_cancel_left'],
-    have : fact (0 < r₁), assumption, exact this.out.ne'
+    apply le_of_eq,
+    show _ = r₁ / r₂ * (nnnorm ((@rescale.of r₁ V).symm v) / r₁),
+    simp only [add_monoid_hom.coe_mk', div_eq_inv_mul, rescale.nnnorm_def],
+    rw [mul_assoc, mul_inv_cancel_left' (show r₁ ≠ 0, from ne_of_gt $ fact.out _)],
+    refl,
   end,
   naturality' := λ V W f, rfl /- defeq abuse -/ }
 

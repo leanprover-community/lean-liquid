@@ -27,13 +27,16 @@ instance (Λ : Type*) [hN : fact (0 < N)] [polyhedral_lattice Λ] :
   finite_free := by { delta rescale, exact polyhedral_lattice.finite_free },
   polyhedral :=
   begin
-    obtain ⟨ι, _inst_ι, l, hl⟩ := polyhedral_lattice.polyhedral Λ,
-    refine ⟨ι, _inst_ι, l, _⟩,
-    intro x,
-    obtain ⟨d, hd, c, H1, H2⟩ := hl x,
-    refine ⟨d, hd, c, H1, _⟩,
-    simp only [norm_def, ← mul_div_assoc, ← finset.sum_div],
-    congr' 1, -- defeq abuse
+    obtain ⟨ι, _inst_ι, l, hl, hl'⟩ := polyhedral_lattice.polyhedral Λ,
+    refine ⟨ι, _inst_ι, l, _, _⟩,
+    { intro x,
+      obtain ⟨d, hd, c, H1, H2⟩ := hl x,
+      refine ⟨d, hd, c, H1, _⟩,
+      simp only [norm_def, ← mul_div_assoc, ← finset.sum_div],
+      congr' 1, }, -- defeq abuse
+    { intro i,
+      simp only [nnnorm_def, ← pos_iff_ne_zero] at hl' ⊢,
+      apply nnreal.div_pos (hl' i) hN.1, }
   end }
 
 end rescale

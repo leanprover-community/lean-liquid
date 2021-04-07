@@ -178,6 +178,11 @@ instance suitable_add {f g : universal_map m n} {c₁ c₂ : ℝ≥0}
   suitable c₁ c₂ (f + g) :=
 (suitable_free_predicate c₁ c₂).add hf hg
 
+instance suitable_sub {f g : universal_map m n} {c₁ c₂ : ℝ≥0}
+  [hf : f.suitable c₁ c₂] [hg : g.suitable c₁ c₂] :
+  suitable c₁ c₂ (f - g) :=
+by rw sub_eq_add_neg; apply_instance
+
 lemma suitable_smul_iff (k : ℤ) (hk : k ≠ 0) (f : universal_map m n) (c₁ c₂ : ℝ≥0) :
   suitable c₁ c₂ (k • f) ↔ f.suitable c₁ c₂ :=
 (suitable_free_predicate c₁ c₂).smul_iff k hk

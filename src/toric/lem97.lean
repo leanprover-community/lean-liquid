@@ -99,15 +99,14 @@ begin
     let y := ∑ (i : Λ →+ ℤ) in S₀, r i • i,
     use [x', H, y],
     split,
-    { ext s,
-      rw [← hx, hr],
+    { rw [← hx, hr],
       dsimp [y, x'],
       rw [finset.smul_sum, ← finset.sum_add_distrib],
       simp_rw [← smul_assoc, ← add_smul, add_comm],
       rw finset.sum_congr,
       refl,
       intros z hz,
-      rw [pi.add_apply, add_comm],
+      rw add_comm,
       dsimp [g],
       refl },
     intro i,
@@ -143,16 +142,10 @@ lemma fintype_sign_vectors [fintype ι] : fintype (sign_vectors ι) := pi.fintyp
 the values of x (l i).
 -/
 def pos_vector [fintype ι] (l : ι → Λ) (x : Λ →+ ℤ) : sign_vectors ι :=
-begin
-  intro i,
-  use nonzero_sign (x (l i)),
-end
+λ i, nonzero_sign (x (l i))
 
 def coe_to_signs : (sign_vectors ι) → (ι → ℤ) :=
-begin
-  intros x i,
-  use x i,
-end
+λ x i, x i
 
 instance coe_signs : has_coe (sign_vectors ι) (ι → ℤ) := ⟨ coe_to_signs ⟩
 
@@ -229,7 +222,7 @@ fae: I am going for the first, `lem97`. I left `lem97'` there, at any rate.
 
 
 /-- Lemma 9.7 of [Analytic]. -/
-lemma lem97 [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (hN : 0 <N) (l : ι → Λ) :
+lemma lem97 [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (hN : 0 < N) (l : ι → Λ) :
   ∃ A : finset (Λ →+ ℤ), ∀ x : Λ →+ ℤ, ∃ (x' ∈ A) (y : Λ →+ ℤ),
     x = N • y + x' ∧
     ∀ i, (0 ≤ x' (l i) ∧ 0 ≤ (x - x') (l i)) ∨ (x' (l i) ≤ 0 ∧ (x - x') (l i) ≤ 0) :=
@@ -276,7 +269,7 @@ end
 
 
 /-- Lemma 9.7 of [Analytic]. -/
-lemma lem97' [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (hN : 0 <N) (l : ι → Λ) :
+lemma lem97' [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (hN : 0 < N) (l : ι → Λ) :
   ∃ A : finset (Λ →+ ℤ), ∀ x : Λ →+ ℤ, ∃ (x' ∈ A) (y : Λ →+ ℤ),
     x = N • y + x' ∧
     ∀ i, (x (l i)).nat_abs = N * (y (l i)).nat_abs + (x' (l i)).nat_abs :=
@@ -284,23 +277,15 @@ begin
   obtain ⟨A, hA⟩ := lem97 hΛ N hN l,
   use A,
   intro x,
-  specialize hA x,
-  rcases hA with ⟨x', mem_x', y, hy, hx'⟩,
-  use [x', mem_x', y],
-  apply and.intro hy,
+  rcases hA x with ⟨x', mem_x', y, hy, hx'⟩,
+  use [x', mem_x', y, hy],
   intro i,
   specialize hx' i,
   zify,
-  rw [← int.abs_eq_nat_abs, ← int.abs_eq_nat_abs, ← int.abs_eq_nat_abs,
-    ← int.coe_nat_abs, ← gsmul_int_int, ← abs_gsmul, gsmul_int_int, ← smul_eq_mul],
-  simp only [*, gsmul_int_int, add_sub_cancel,
-    add_monoid_hom.add_apply, add_monoid_hom.nat_smul_apply],
-  convert_to abs (N • y (l i) + x' (l i)) = abs (N • y (l i)) + abs (x' (l i)),
-  { rw [add_left_inj, smul_eq_mul, ← nsmul_eq_smul, nsmul_eq_mul,
-    int.nat_cast_eq_coe_nat] },
-  { apply (abs_add_eq_add_abs_iff (N • y (l i)) (x' (l i))).mpr,
-    rw [hy, add_sub_cancel, add_monoid_hom.nat_smul_apply] at hx',
-    cases hx',
-    {apply or.inl (and.intro hx'.2 hx'.1) },
-    {apply or.inr (and.intro hx'.2 hx'.1) } },
+  simp only [← int.abs_eq_nat_abs, hy, add_monoid_hom.add_apply, add_monoid_hom.nat_smul_apply],
+  convert_to abs (N • y (l i) + x' (l i)) = abs (N • y (l i)) + abs (x' (l i)) using 2,
+  { rw [← nsmul_eq_smul, nsmul_eq_mul, int.nat_cast_eq_coe_nat, abs_mul, int.coe_nat_abs], },
+  rw [abs_add_eq_add_abs_iff (N • y (l i)) (x' (l i))],
+  rw [← sub_eq_iff_eq_add] at hy,
+  simpa only [hy, add_monoid_hom.nat_smul_apply, and_comm] using hx',
 end

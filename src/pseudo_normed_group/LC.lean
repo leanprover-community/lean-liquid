@@ -277,6 +277,10 @@ lemma eval_LCFP_add (f g : universal_map m n) [f.suitable c₂ c₁] [g.suitable
   eval_LCFP V r' c₁ c₂ (f + g) = f.eval_LCFP V r' c₁ c₂ + g.eval_LCFP V r' c₁ c₂ :=
 by simp only [eval_LCFP_eq_eval_LCFP', eval_LCFP'_add]
 
+lemma eval_LCFP_sub (f g : universal_map m n) [f.suitable c₂ c₁] [g.suitable c₂ c₁] :
+  eval_LCFP V r' c₁ c₂ (f - g) = f.eval_LCFP V r' c₁ c₂ - g.eval_LCFP V r' c₁ c₂ :=
+by simp only [sub_eq_add_neg, eval_LCFP_add, eval_LCFP_neg]
+
 lemma eval_LCFP'_comp_of (g : basic_universal_map m n) (f : basic_universal_map l m)
   [hg : g.suitable c₂ c₁] [hf : f.suitable c₃ c₂] :
   eval_LCFP' V r' c₁ c₃ ((comp (of g)) (of f)) =

@@ -261,7 +261,7 @@ variables (M) {l m n}
 
 namespace universal_map
 
-variables (ϕ : universal_map m n)
+variables (ϕ ψ : universal_map m n)
 
 def eval_CLCFPTinv₂
   [fact (c₂ ≤ r' * c₁)] [fact (c₄ ≤ r' * c₃)]
@@ -281,6 +281,22 @@ end
   [fact (c₂ ≤ r' * c₁)] [fact (c₄ ≤ r' * c₃)] :
   (0 : universal_map m n).eval_CLCFPTinv₂ r V r' c₁ c₂ c₃ c₄ = 0 :=
 by { simp only [eval_CLCFPTinv₂, eval_CLCFP_zero], ext, refl }
+
+@[simp] lemma eval_CLCFPTinv₂_add
+  [fact (c₂ ≤ r' * c₁)] [fact (c₄ ≤ r' * c₃)]
+  [ϕ.suitable c₃ c₁] [ϕ.suitable c₄ c₂]
+  [ψ.suitable c₃ c₁] [ψ.suitable c₄ c₂] :
+  (ϕ + ψ : universal_map m n).eval_CLCFPTinv₂ r V r' c₁ c₂ c₃ c₄ =
+  ϕ.eval_CLCFPTinv₂ r V r' c₁ c₂ c₃ c₄ + ψ.eval_CLCFPTinv₂ r V r' c₁ c₂ c₃ c₄ :=
+by { simp only [eval_CLCFPTinv₂, eval_CLCFP_add], ext, refl }
+
+@[simp] lemma eval_CLCFPTinv₂_sub
+  [fact (c₂ ≤ r' * c₁)] [fact (c₄ ≤ r' * c₃)]
+  [ϕ.suitable c₃ c₁] [ϕ.suitable c₄ c₂]
+  [ψ.suitable c₃ c₁] [ψ.suitable c₄ c₂] :
+  (ϕ - ψ : universal_map m n).eval_CLCFPTinv₂ r V r' c₁ c₂ c₃ c₄ =
+  ϕ.eval_CLCFPTinv₂ r V r' c₁ c₂ c₃ c₄ - ψ.eval_CLCFPTinv₂ r V r' c₁ c₂ c₃ c₄ :=
+by { simp only [eval_CLCFPTinv₂, eval_CLCFP_sub], ext, refl }
 
 lemma eval_CLCFPTinv₂_comp {l m n : FreeMat} (f : l ⟶ m) (g : m ⟶ n)
   [fact (c₂ ≤ r' * c₁)] [fact (c₄ ≤ r' * c₃)] [fact (c₆ ≤ r' * c₅)]
@@ -340,3 +356,6 @@ by apply res_comp_eval_CLCFPTinv₂
 end universal_map
 
 end breen_deligne
+
+attribute [irreducible] CLCFPTinv₂ CLCFPTinv₂.res
+  breen_deligne.universal_map.eval_CLCFPTinv₂
