@@ -11,6 +11,8 @@ open_locale nnreal
 
 open category_theory differential_object.complex_like
 
+namespace breen_deligne
+
 variables {BD BD₁ BD₂ : breen_deligne.data} (f g : BD₁ ⟶ BD₂)
 variables (h : homotopy f g)
 
@@ -18,8 +20,6 @@ variables (c' c₁' c₂' : ℕ → ℝ≥0)
 variables [BD.suitable c'] [BD₁.suitable c₁'] [BD₂.suitable c₂']
 variables (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
 variables {r' : ℝ≥0} [fact (0 < r')] [fact (r' ≤ 1)] (c : ℝ≥0)
-
-namespace breen_deligne
 
 section homotopy
 
@@ -100,10 +100,6 @@ section rescale
 
 variables (M : ProFiltPseuNormGrpWithTinv.{u} r')
 
--- move this
-def rescale_constants (c' : ℕ → ℝ≥0) (N : ℝ≥0) : ℕ → ℝ≥0 :=
-λ i, (c' i) * N⁻¹
-
 -- warning: this might need `[fact (0 < N)]`
 instance rescale_constants_suitable (N : ℝ≥0) :
   BD.suitable (rescale_constants c' N) :=
@@ -140,9 +136,6 @@ open ProFiltPseuNormGrpWithTinv (of)
 
 open category_theory opposite
 
-instance double_suitable : BD.double.suitable c' :=
-sorry
-
 -- -- === !!! warning, the instance for `M × M` has sorry'd data
 def double_iso_prod :
   (BD.double.complex c' r V r' c).obj (op M) ≅
@@ -155,5 +148,41 @@ example (N : ℝ≥0) :
 (double_iso_prod BD _ r V c _) ≪≫ (eq_to_iso $ complex_rescale_eq _ _ _ _ _ _ _)
 
 end double
+
+end breen_deligne
+
+namespace breen_deligne
+
+universe variables v
+
+variables (BD : breen_deligne.package)
+
+variables (c' c₁' c₂' : ℕ → ℝ≥0)
+variables [BD.data.suitable c']
+variables (r : ℝ≥0) (V : NormedGroup.{v}) [normed_with_aut r V] [fact (0 < r)]
+variables {r' : ℝ≥0} [fact (0 < r')] [fact (r' ≤ 1)] (c : ℝ≥0)
+variables (M : (ProFiltPseuNormGrpWithTinv.{u} r')ᵒᵖ)
+variables (k' : ℝ≥0) (N : ℕ) [fact (1 ≤ k')] [fact (k' ≤ 2 ^ N)]
+
+-- crappy definition, assumes unprovable instance (for arbitrary `breen_deligne.package`s)
+-- but for `breen_deligne.eg` it works
+def homotopy_σπ
+  -- we can only find `k'` that satisfies the following assumption
+  -- for the first `m` maps of the homotopy
+  -- so we need to define `h i` to be `0` for `i > m`.
+  [∀ (j i : ℕ), ((BD.data.homotopy_pow BD.homotopy N).h j i).suitable
+    (c' j) (k' * rescale_constants c' 2 i)] :=
+homotopy.{u v} (data.homotopy_pow BD.data BD.homotopy N)
+  c' (λ i, k' * rescale_constants c' 2 i) r V c M
+
+
+-- section check
+
+-- variables [∀ (j i : ℕ), ((BD.data.homotopy_pow BD.homotopy N).h j i).suitable
+--     (c' j) (k' * rescale_constants c' 2 i)]
+
+-- #check homotopy_σπ BD c' r V c M k' N
+
+-- end check
 
 end breen_deligne
