@@ -266,6 +266,14 @@ structure complex_like (cov : bool) extends differential_object ι V :=
 (d_comp_d : ∀ i j k, d i j ≫ d j k = 0)
 (d_eq_zero : ∀ ⦃i j⦄, ¬ coherent_indices cov i j → d i j = 0)
 
+@[simp]
+lemma complex_like.to_differential_object_X {cov : bool} (BD : complex_like ι V cov) :
+  (complex_like.to_differential_object BD).X = BD.X := rfl
+
+@[simp]
+lemma complex_like.to_differential_object_d {cov : bool} (BD : complex_like ι V cov) :
+  (complex_like.to_differential_object BD).d = BD.d := rfl
+
 attribute [reassoc] complex_like.d_comp_d
 
 variables {ι V}
