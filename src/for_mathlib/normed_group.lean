@@ -289,7 +289,7 @@ begin
       have : ((a, b), (a, a)) ∈ set.prod t1 t2 := ⟨hab, refl_mem_uniformity ht2⟩,
       have I := ht this,
       simp [completion.dist_self', real.dist_eq, completion.dist_comm'] at I,
-      exact lt_of_le_of_lt (le_abs_self _) I },
+      exact I },
     show t1 ⊆ s,
     { rintros ⟨a, b⟩ hp,
       have : dist a b < ε := A a b hp,
