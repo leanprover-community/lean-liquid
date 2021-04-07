@@ -1,6 +1,6 @@
 import category_theory.graded_object
 import category_theory.preadditive
-import category_theory.abelian.additive_functor
+import category_theory.preadditive.additive_functor
 import data.int.basic
 
 import for_mathlib.preadditive_category
@@ -767,7 +767,7 @@ variables [preadditive V₁] [preadditive V₂]
 @[simps]
 def functor.map_complex_like [has_succ ι] (F : V₁ ⥤ V₂) [F.additive] :
   complex_like ι V₁ cov ⥤ complex_like ι V₂ cov :=
-F.map_complex_like' $ λ x y, functor.additive.map_zero
+F.map_complex_like' $ λ x y, functor.additive.map_zero'
 
 @[simps]
 def functor.map_complex_like_nat_trans [has_succ ι] (F G : V₁ ⥤ V₂) [F.additive] [G.additive]

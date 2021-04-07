@@ -1,6 +1,7 @@
 import analysis.specific_limits
 import system_of_complexes.basic
 import locally_constant.Vhat
+import for_mathlib.pseudo_metric
 /-
 
 # A technical lemma
@@ -41,6 +42,7 @@ variables {k k' K K' : ℝ≥0} {m m' : ℕ} {c₀ c₀' : ℝ≥0}
 -- by admit
 
 lemma strong_of_complete [hk : fact (1 ≤ k)] [hk' : fact (1 ≤ k')]
+  [∀ c i, separated_space (C c i)]
   (hC : C.is_weak_bounded_exact k K m c₀)
   (hC' : admissible C) [∀ c i, complete_space (C c i)] :
   ∀ δ > 0, C.is_bounded_exact (k^2) (K + δ) m c₀ :=
@@ -58,7 +60,7 @@ begin
   obtain (rfl|⟨i,rfl⟩) : i = 0 ∨ ∃ i', i = i' + 1,
   { cases i, { left, refl }, { right, exact ⟨_, rfl⟩ } },
   { refine ⟨0, rfl, 0, _⟩,
-    rw [normed_group_hom.map_zero, ← norm_le_zero_iff],
+    rw [normed_group_hom.map_zero, ← norm_le_zero_iff'],
     apply le_of_forall_pos_le_add,
     intros γ hγ,
     rw zero_add,
@@ -125,7 +127,7 @@ begin
   choose z hz using seq,
   let y : ℕ → C c i := λ j, res (w j) - ∑ l in range j, C.d _ _ (z l),
   have cau_y : cauchy_seq y,
-  { apply cauchy_seq_of_le_geometric (1/(2 : ℝ)) 1 (half_lt_self zero_lt_one),
+  { apply cauchy_seq_of_le_geometric_pseudo (1/(2 : ℝ)) 1 (half_lt_self zero_lt_one),
     intros j,
     have fact : ∥C.d _ (i+1) (w (j + 1) - w j)∥ ≤ 2*ε j :=
     calc ∥C.d _ (i+1) (w (j + 1) - w j)∥
@@ -157,7 +159,7 @@ begin
 
   rcases cauchy_seq_tendsto_of_complete cau_y with ⟨y₀, hy₀⟩,
   refine ⟨_, rfl, y₀, _⟩,
-  apply eq_of_norm_sub_le_zero,
+  refine sub_eq_zero.1 (norm_le_zero_iff'.1 _),
   have lim_norm : tendsto (λ j, ∥res x - C.d _ _ (y j)∥) at_top (𝓝 ∥res x - C.d _ _ y₀∥),
   { have cont : continuous (λ y : C c i, ∥res x - C.d _ _ y∥),
       from continuous_norm.comp (continuous_const.sub $ normed_group_hom.continuous _),

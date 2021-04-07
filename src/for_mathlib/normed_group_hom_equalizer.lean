@@ -3,8 +3,9 @@ import analysis.normed_space.normed_group_hom
 noncomputable theory
 
 variables {V V₁ V₂ V₃ V₄ W W₁ W₂ W₃ : Type*}
-variables [normed_group V] [normed_group V₁] [normed_group V₂] [normed_group V₃] [normed_group V₄]
-variables [normed_group W] [normed_group W₁] [normed_group W₂] [normed_group W₃]
+variables [semi_normed_group V] [semi_normed_group V₁] [semi_normed_group V₂]
+[semi_normed_group V₃] [semi_normed_group V₄]
+variables [semi_normed_group W] [semi_normed_group W₁] [semi_normed_group W₂] [semi_normed_group W₃]
 variables (f g : normed_group_hom V W)
 variables {f₁ g₁ : normed_group_hom V₁ W₁}
 variables {f₂ g₂ : normed_group_hom V₂ W₂}

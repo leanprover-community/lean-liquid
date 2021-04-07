@@ -5,12 +5,12 @@ import .quotient_group .real_Inf
 open_locale nnreal
 
 variables {V V₁ V₂ V₃ : Type*}
-variables [normed_group V] [normed_group V₁] [normed_group V₂] [normed_group V₃]
+variables [semi_normed_group V] [semi_normed_group V₁] [semi_normed_group V₂] [semi_normed_group V₃]
 variables (f g : normed_group_hom V₁ V₂)
 
 namespace add_subgroup
 
-instance {M : Type*} [normed_group M] {A : add_subgroup M} :
+instance {M : Type*} [semi_normed_group M] {A : add_subgroup M} :
   is_closed (A.topological_closure : set M) := is_closed_closure
 
 end add_subgroup
@@ -18,7 +18,7 @@ end add_subgroup
 --move this somewhere
 /-- If `A` if an additive subgroup of a normed group `M` and `f : normed_group_hom M N` is such that
 `f a = 0` for all `a ∈ A`, then `f a = 0` for all `a ∈ A.topological_closure`. -/
-lemma zero_of_closure {M N : Type*} [normed_group M] [normed_group N] (A : add_subgroup M)
+lemma zero_of_closure {M N : Type*} [semi_normed_group M] [normed_group N] (A : add_subgroup M)
   (f : normed_group_hom M N) (hf : ∀ a ∈ A, f a = 0) : ∀ m ∈ A.topological_closure, f m = 0 :=
 show closure (A : set M) ≤ f ⁻¹' {0},
 from Inf_le ⟨is_closed.preimage (normed_group_hom.continuous f) (t1_space.t1 0), hf⟩
@@ -28,7 +28,8 @@ section quotient
 
 open quotient_add_group
 
-variables {M N : Type*} [normed_group M] [normed_group N]
+variables {M N : Type*} [semi_normed_group M] [semi_normed_group N]
+variables {M₁ N₁ : Type*} [normed_group M₁] [normed_group N₁]
 
 /-- The definition of the norm on the quotient by an additive subgroup. -/
 noncomputable
@@ -172,6 +173,16 @@ lemma norm_zero_eq_zero (S : add_subgroup M) (hS : is_closed (↑S : set M)) (m 
   (h : ∥(quotient_add_group.mk' S) m∥ = 0) : m ∈ S :=
 by rwa [quotient_norm_eq_zero_iff, hS.closure_eq] at h
 
+/-- The seminorm on `quotient S` is actually a seminorm. -/
+lemma quotient.is_semi_normed_group.core (S : add_subgroup M) :
+  semi_normed_group.core (quotient S) :=
+begin
+  split,
+  { exact norm_mk_zero S },
+  { exact quotient_norm_add_le S },
+  { simp [quotient_norm_neg] }
+end
+
 /-- The seminorm on `quotient S` is actually a norm when S is closed. -/
 lemma quotient.is_normed_group.core (S : add_subgroup M) [hS : is_closed (S : set M)] :
   normed_group.core (quotient S) :=
@@ -184,40 +195,46 @@ begin
   { simp [quotient_norm_neg] }
 end
 
+/-- The quotient in the category of seminormed groups. -/
+noncomputable
+instance semi_normed_group_quotient (S : add_subgroup M) :
+  semi_normed_group (quotient S) :=
+semi_normed_group.of_core (quotient S) (quotient.is_semi_normed_group.core S)
+
 /-- The quotient in the category of normed groups. -/
 noncomputable
 instance normed_group_quotient (S : add_subgroup M) [hS : is_closed (S : set M)] :
   normed_group (quotient S) := normed_group.of_core (quotient S) (quotient.is_normed_group.core S)
 
-/-- The morphism from a normed group to the quotient by a closed subgroup. -/
+/-- The morphism from a seminormed group to the quotient by a subgroup. -/
 noncomputable
-def normed_group.mk (S : add_subgroup M) [is_closed (S : set M)] :
+def normed_group.mk (S : add_subgroup M) :
   normed_group_hom M (quotient S) :=
 { bound' := ⟨1, λ m, by simpa [one_mul] using quotient_norm_mk_le  _ m⟩,
   ..quotient_add_group.mk' S }
 
 /-- `normed_group.mk S` agrees with `quotient_add_group.mk' S`. -/
 @[simp]
-lemma normed_group.mk.apply (S : add_subgroup M) [is_closed (S : set M)] (m : M) :
+lemma normed_group.mk.apply (S : add_subgroup M) (m : M) :
   normed_group.mk S m = quotient_add_group.mk' S m := rfl
 
 /-- `normed_group.mk S` is surjective. -/
-lemma surjective_normed_group.mk (S : add_subgroup M) [is_closed (S : set M)] :
+lemma surjective_normed_group.mk (S : add_subgroup M) :
   function.surjective (normed_group.mk S) :=
 surjective_quot_mk _
 
 /-- The kernel of `normed_group.mk S` is `S`. -/
-lemma normed_group.mk.ker (S : add_subgroup M) [is_closed (S : set M)] :
+lemma normed_group.mk.ker (S : add_subgroup M) :
   (normed_group.mk S).ker = S := quotient_add_group.ker_mk  _
 
 /-- The operator norm of the projection is at most `1`. -/
-lemma norm_quotient_mk_le (S : add_subgroup M) [is_closed (S : set M)] : ∥normed_group.mk S∥ ≤ 1 :=
+lemma norm_quotient_mk_le (S : add_subgroup M) : ∥normed_group.mk S∥ ≤ 1 :=
 op_norm_le_bound _ zero_le_one (λ m, by simp [quotient_norm_mk_le])
 
 --TODO replace S = M by S dense when we have seminormed groups
 /-- The operator norm of the projection is `1` if the subspace is not the whole space. -/
-lemma norm_quotient_mk (S : add_subgroup M) [is_closed (S : set M)] (h : (S : set M) ≠ set.univ) :
-  ∥normed_group.mk S∥ = 1 :=
+lemma norm_quotient_mk (S : add_subgroup M₁) [is_closed (S : set M₁)]
+  (h : (S : set M₁) ≠ set.univ) : ∥normed_group.mk S∥ = 1 :=
 begin
   obtain ⟨x, hx⟩ := set.nonempty_compl.2 h,
   let y := (normed_group.mk S) x,
@@ -255,12 +272,15 @@ begin
 end
 
 /-- The operator norm of the projection is `0` if the subspace is the whole space. -/
-lemma norm_trivial_quotient_mk (S : add_subgroup M) [is_closed (S : set M)]
-  (h : (S : set M) = set.univ) : ∥normed_group.mk S∥ = 0 :=
+lemma norm_trivial_quotient_mk (S : add_subgroup M) (h : (S : set M) = set.univ) :
+  ∥normed_group.mk S∥ = 0 :=
 begin
   refine le_antisymm (op_norm_le_bound _ (le_refl _) (λ x, _)) (norm_nonneg _),
-  rw [zero_mul, norm_le_zero_iff, (normed_group_hom.mem_ker _ x).symm, normed_group.mk.ker S],
-  exact set.mem_of_eq_of_mem h trivial
+  have hker : x ∈ (normed_group.mk S).ker,
+  { rw [normed_group.mk.ker S],
+    exact set.mem_of_eq_of_mem h trivial },
+  rw [normed_group_hom.mem_ker _ x] at hker,
+  rw [hker, zero_mul, norm_zero]
 end
 
 /-- `is_quotient f`, for `f : M ⟶ N` means that `N` is isomorphic to the quotient of `M`
@@ -272,7 +292,7 @@ structure is_quotient (f : normed_group_hom M N) : Prop :=
 /-- Given  `f : normed_group_hom M N` such that `f s = 0` for all `s ∈ S`, where,
 `S : add_subgroup M` is closed, the induced morphism `normed_group_hom (quotient S) N`. -/
 noncomputable
-def lift {N : Type*} [normed_group N] (S : add_subgroup M) [is_closed (S : set M)]
+def lift {N : Type*} [semi_normed_group N] (S : add_subgroup M)
   (f : normed_group_hom M N) (hf : ∀ s ∈ S, f s = 0) :
   normed_group_hom (quotient S) N :=
 { bound' :=
@@ -287,12 +307,11 @@ def lift {N : Type*} [normed_group N] (S : add_subgroup M) [is_closed (S : set M
   end,
   .. quotient_add_group.lift S f.to_add_monoid_hom hf }
 
---@[simp]
-lemma lift_mk  {N : Type*} [normed_group N] (S : add_subgroup M) [is_closed (S : set M)]
+lemma lift_mk  {N : Type*} [semi_normed_group N] (S : add_subgroup M)
   (f : normed_group_hom M N) (hf : ∀ s ∈ S, f s = 0) (m : M) :
   lift S f hf (normed_group.mk S m) = f m := rfl
 
-lemma lift_unique {N : Type*} [normed_group N] (S : add_subgroup M) [is_closed (S : set M)]
+lemma lift_unique {N : Type*} [semi_normed_group N] (S : add_subgroup M)
   (f : normed_group_hom M N) (hf : ∀ s ∈ S, f s = 0)
   (g : normed_group_hom (quotient S) N) :
   g.comp (normed_group.mk S) = f → g = lift S f hf :=
@@ -306,7 +325,7 @@ begin
 end
 
 /-- `normed_group.mk S` satisfies `is_quotient`. -/
-lemma is_quotient_quotient (S : add_subgroup M) [is_closed (S : set M)] :
+lemma is_quotient_quotient (S : add_subgroup M) :
   is_quotient (normed_group.mk S) :=
 ⟨surjective_normed_group.mk S, λ m, by simpa [normed_group.mk.ker S] using quotient_norm_mk_eq _ m⟩
 

@@ -10,7 +10,7 @@ set_option pp.proofs true
 namespace NormedGroup
 open opposite locally_constant
 
-local attribute [instance] locally_constant.normed_group locally_constant.metric_space
+local attribute [instance] locally_constant.semi_normed_group locally_constant.pseudo_metric_space
 
 /-- The bifunctor of locally constant maps from profinite spaces to normed groups.
     The effects on homs of groups or space are defined in terms of push-forward
