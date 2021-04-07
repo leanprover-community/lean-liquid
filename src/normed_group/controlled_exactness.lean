@@ -8,7 +8,8 @@ noncomputable theory
 open filter set function normed_group uniform_space normed_group_hom finset
 open_locale topological_space big_operators
 
-lemma controlled_exactness {M M₁ M₂ : Type*} [normed_group M] [normed_group M₁] [normed_group M₂]
+lemma controlled_exactness {M M₁ M₂ : Type*} [semi_normed_group M] [semi_normed_group M₁]
+  [semi_normed_group M₂]
   {f : normed_group_hom M₁ M} {C : ℝ} (hC : 0 < C) {D : ℝ}
   {g : normed_group_hom M M₂}
   (h : ∀ m ∈ g.ker, ∃ m' : M₁, f m' = m ∧ ∥m'∥ ≤ C*∥m∥)
