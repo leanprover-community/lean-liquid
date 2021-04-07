@@ -21,7 +21,7 @@ open uniform_space opposite category_theory
 /-- The completion of a normed group, as an endofunctor on `NormedGroup`. -/
 @[simps]
 def Completion : NormedGroup.{u} ⥤ NormedGroup.{u} :=
-{ obj := λ V, @NormedGroup.of (completion V) (@normed_group.to_semi_normed_group _ $ uniform_space.completion.remove_me_soon.{u u} (V : Type u)),
+{ obj := λ V, NormedGroup.of (completion V),
   map := λ V W f,
   { to_fun := completion.map f,
     bound' :=
