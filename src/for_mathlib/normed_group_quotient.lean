@@ -1,4 +1,5 @@
 import analysis.normed_space.normed_group_hom
+import for_mathlib.normed_group
 
 import .quotient_group .real_Inf
 
@@ -231,17 +232,15 @@ lemma normed_group.mk.ker (S : add_subgroup M) :
 lemma norm_quotient_mk_le (S : add_subgroup M) : ∥normed_group.mk S∥ ≤ 1 :=
 op_norm_le_bound _ zero_le_one (λ m, by simp [quotient_norm_mk_le])
 
---TODO replace S = M by S dense when we have seminormed groups
-/-- The operator norm of the projection is `1` if the subspace is not the whole space. -/
-lemma norm_quotient_mk (S : add_subgroup M₁) [is_closed (S : set M₁)]
-  (h : (S : set M₁) ≠ set.univ) : ∥normed_group.mk S∥ = 1 :=
+/-- The operator norm of the projection is `1` if the subspace is not dense. -/
+lemma norm_quotient_mk (S : add_subgroup M)
+  (h : (S.topological_closure : set M) ≠ set.univ) : ∥normed_group.mk S∥ = 1 :=
 begin
   obtain ⟨x, hx⟩ := set.nonempty_compl.2 h,
   let y := (normed_group.mk S) x,
   have hy : ∥y∥ ≠ 0,
   { intro h0,
-    rw [norm_eq_zero, (normed_group_hom.mem_ker _ x).symm, normed_group.mk.ker S] at h0,
-    exact set.not_mem_of_mem_compl hx h0 },
+    exact set.not_mem_of_mem_compl hx ((quotient_norm_eq_zero_iff S x).1 h0) },
   refine le_antisymm (norm_quotient_mk_le S) (le_of_forall_pos_le_add (λ ε hε, _)),
   suffices : 1 ≤ ∥normed_group.mk S∥ + min ε ((1 : ℝ)/2),
   { exact le_add_of_le_add_left this (min_le_left ε ((1 : ℝ)/2)) },
@@ -254,9 +253,10 @@ begin
   rw [hrw] at hlt,
   have hm0 : ∥m∥ ≠ 0,
   { intro h0,
-    rw [norm_eq_zero] at h0,
-    rw [h0, add_monoid_hom.map_zero] at hm,
-    simpa [hm] using hy },
+    have hnorm := quotient_norm_mk_le S m,
+    rw [h0, hm] at hnorm,
+    replace hnorm := le_antisymm hnorm (norm_nonneg _),
+    simpa [hnorm] using hy },
   replace hlt := (div_lt_div_right (lt_of_le_of_ne (norm_nonneg m) hm0.symm)).2 hlt,
   simp only [hm0, div_self, ne.def, not_false_iff] at hlt,
   have hrw₁ : ∥y∥ * (1 + min ε (1 / 2) / (1 - min ε (1 / 2))) / ∥m∥ =
