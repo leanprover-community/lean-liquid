@@ -12,7 +12,8 @@ variables {G : Type*} [semi_normed_group G]
 variables {H : Type*} [semi_normed_group H]
 variables {K : Type*} [semi_normed_group K]
 
-def normed_group_hom.completion (f : normed_group_hom G H) : normed_group_hom (completion G) (completion H) :=
+def normed_group_hom.completion (f : normed_group_hom G H) :
+  normed_group_hom (completion G) (completion H) :=
 { to_fun := completion.map f,
   map_add' := by { intros x y,
                    apply completion.induction_on₂ x y,
@@ -30,7 +31,7 @@ def normed_group_hom.completion (f : normed_group_hom G H) : normed_group_hom (c
     exact is_closed_le (continuous_norm.comp completion.continuous_map) (continuous_const.mul continuous_norm),
     intro x,
     rw completion.map_coe f.uniform_continuous,
-    simp only [f.le_op_norm x, completion.norm_coe']
+    simp only [f.le_op_norm x, completion.norm_coe]
   end }
 
 @[simp]
@@ -47,7 +48,7 @@ abbreviation j := (normed_group.to_compl : normed_group_hom G $ completion G)
 
 
 lemma normed_group.norm_to_compl (x : G) : ∥j x∥ = ∥x∥ :=
-completion.norm_coe' x
+completion.norm_coe x
 
 @[simp]
 lemma normed_group_hom.zero_completion : (0 : normed_group_hom G H).completion = 0 :=
@@ -115,7 +116,7 @@ begin
         simp [mem_ker, hgg'] },
       { calc ∥hatg - (g - g')∥ = ∥hatg - g + g'∥ : by abel
       ... ≤ ∥hatg - g∥ + ∥(g' : completion G)∥ : norm_add_le _ _
-      ... = ∥hatg - g∥ + ∥g'∥ : by rw [completion.norm_coe']
+      ... = ∥hatg - g∥ + ∥g'∥ : by rw [completion.norm_coe]
       ... ≤ ∥hatg - g∥ : add_le_iff_nonpos_right.2 hfg
       ... < ε : hg } },
     { rw ← f.completion.is_closed_ker.closure_eq,
@@ -143,7 +144,7 @@ begin
       by rw [f.mem_ker, f.map_sub, sub_eq_zero.mpr hgg'.symm],
     have : ∥f g∥ ≤ ∥f∥*∥hatg - g∥,
     calc
-      ∥f g∥ = ∥f.completion g∥ : by rw [f.completion_coe, completion.norm_coe']
+      ∥f g∥ = ∥f.completion g∥ : by rw [f.completion_coe, completion.norm_coe]
         ... = ∥f.completion g - 0∥ : by rw [sub_zero _]
         ... = ∥f.completion g - (f.completion hatg)∥ : by rw [(f.completion.mem_ker _).mp hatg_in]
         ... = ∥f.completion (g - hatg)∥ : by rw [f.completion.map_sub]
@@ -152,7 +153,7 @@ begin
         ... ≤ ∥f∥ * ∥hatg - g∥ : mul_le_mul_of_nonneg_right (norm_completion_le f) (norm_nonneg _),
     have : ∥(g' : completion G)∥ ≤ C*∥f∥*∥hatg - g∥,
     calc
-    ∥(g' : completion G)∥ = ∥g'∥ : completion.norm_coe' _
+    ∥(g' : completion G)∥ = ∥g'∥ : completion.norm_coe _
                       ... ≤ C * ∥f g∥ : hfg
                       ... ≤ C * ∥f∥ * ∥hatg - g∥ : by { rw mul_assoc,
                                                         exact mul_le_mul_of_nonneg_left this hC},

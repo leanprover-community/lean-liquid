@@ -34,7 +34,7 @@ def Completion : NormedGroup.{u} ⥤ NormedGroup.{u} :=
         { exact continuous_norm.comp completion.continuous_map },
         { exact continuous_const.mul continuous_norm } },
       { intro v,
-        rw [completion.map_coe, completion.norm_coe', completion.norm_coe'],
+        rw [completion.map_coe, completion.norm_coe, completion.norm_coe],
         { apply hC },
         { exact f.uniform_continuous } }
     end,
@@ -84,7 +84,7 @@ begin
   apply completion.induction_on v; clear v,
   { refine is_closed_le (continuous_norm.comp completion.continuous_map) continuous_norm },
   intro v,
-  simp only [completion.norm_coe', Completion_map_apply, completion.map_coe f.uniform_continuous],
+  simp only [completion.norm_coe, Completion_map_apply, completion.map_coe f.uniform_continuous],
   exact hf v
 end
 
@@ -205,7 +205,7 @@ instance normed_with_aut_Completion (V : NormedGroup.{u}) (r : ℝ) [normed_with
     calc _ = _ : congr_arg norm (completion.map_coe _ _)
        ... = _ : _,
     { exact normed_group_hom.uniform_continuous _ },
-    { erw [completion.norm_coe', normed_with_aut.norm_T, completion.norm_coe'] }
+    { erw [completion.norm_coe, normed_with_aut.norm_T, completion.norm_coe] }
   end }
 
 @[simp] lemma Completion_T_inv_eq (V : NormedGroup.{u}) (r : ℝ) [normed_with_aut r V] :
