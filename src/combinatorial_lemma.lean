@@ -172,26 +172,6 @@ lemma Mbar.mk_tensor (a : Λ →+ ℤ) (x : Mbar r' S) :
   Λ →+ Mbar r' S :=
 add_monoid_hom.mk' (λ l, a l • x) $ λ l₁ l₂, by rw [a.map_add, add_smul]
 
-lemma Mbar.mk_tensor_mem_filtration {ι : Type} [fintype ι] {l : ι → Λ}
-  (hl : generates_norm l) (a : Λ →+ ℤ) (x : Mbar r' S) (c : ℝ≥0)
-  (hxc : x ∈ filtration (Mbar r' S) c) :
-  Mbar.mk_tensor a x ∈ filtration (Λ →+ Mbar r' S)
-    ((finset.univ.sup $ λ i, (a (l i)).nat_abs / nnnorm (l i)) * c) :=
-begin
-  rw hl.add_monoid_hom_mem_filtration_iff Mbar.archimedean,
-  intro i,
-  rw [Mbar.mk_tensor_apply, mul_right_comm],
-  by_cases H : l i = 0,
-  { simpa only [H, a.map_zero, zero_smul] using zero_mem_filtration _ },
-  rw ← nnnorm_eq_zero at H,
-  refine filtration_mono _ (pseudo_normed_group.int_smul_mem_filtration _ _ _ hxc),
-  refine mul_le_mul' _ le_rfl,
-  rw ← inv_inv' (nnnorm (l i)),
-  apply le_mul_inv_of_mul_le (inv_ne_zero H),
-  rw ← div_eq_mul_inv,
-  exact finset.le_sup (finset.mem_univ i),
-end
-
 -- better name?
 lemma lem_98_aux [fact (r' < 1)] (A : finset (Λ →+ ℤ))
   (x₁' : S → ℕ → Λ →+ ℤ) [∀ s n a, decidable (x₁' s n = a)]
@@ -391,7 +371,7 @@ lemma lem98 (Λ : Type*) [polyhedral_lattice Λ]
       (∀ i, y i ∈ filtration (Λ →+ Mbar r' S) (c/N + d)) :=
 begin
   classical,
-  obtain ⟨ι, _ftι, l, hl⟩ := polyhedral_lattice.polyhedral Λ, resetI,
+  obtain ⟨ι, _ftι, l, hl, hl'⟩ := polyhedral_lattice.polyhedral Λ, resetI,
   -- the next 4 lines are quite unfortunate, and it would be great to get rid of them
   have ffΛ : finite_free Λ := polyhedral_lattice.finite_free,
   have oops : @polyhedral_lattice.int_semimodule Λ _ = @add_comm_group.int_module Λ _,
@@ -423,8 +403,8 @@ begin
   -- we first decompose the `xₐ a` into `N` pieces
   have hxₐ : ∀ a s n, (xₐ a s n).nat_abs ≤ 1,
   { intros a s n, dsimp [xₐ, Mbar.mk_of_add_monoid_hom_to_fun], split_ifs; simp },
-  have := λ a, lem98_int N hN _ (xₐ a) _ (hxₐ a),
-  swap 3, { rw Mbar.mem_filtration_iff },
+  have := λ a, lem98_int N hN ∥xₐ a∥₊ (xₐ a) _ (hxₐ a),
+  swap 2, { rw Mbar.mem_filtration_iff },
   choose y' hy'1 hy'2 using this,
   -- the candidate `y` combines `x₀` together with the pieces `y'` of `xₐ a`
   let y : fin N → Λ →+ Mbar r' S := λ j, x₀ + ∑ a in A, Mbar.mk_tensor a (y' a j),
@@ -441,9 +421,9 @@ begin
   { apply lem98_crux hl N hN A x x₀ x₁ x' x₀' x₁' xₐ,
     all_goals { intros, refl <|> apply_assumption } },
   calc ∥y j (l i)∥₊
-      ≤ ∥x₀ (l i)∥₊ + ∑ a in A, nnnorm (a (l i)) * ∥xₐ a∥₊ / N + d * (nnnorm (l i)) : _
-  ... = (N • ∥x₀ (l i)∥₊ + ∑ a in A, nnnorm (a (l i)) * ∥xₐ a∥₊) / N + d * (nnnorm (l i)) : _
-  ... = ∥x (l i)∥₊ / N + d * (nnnorm (l i)) : by rw Hx
+      ≤ ∥x₀ (l i)∥₊ + ∑ a in A, nnnorm (a (l i)) * ∥xₐ a∥₊ / N + d * nnnorm (l i) : _
+  ... = (N • ∥x₀ (l i)∥₊ + ∑ a in A, nnnorm (a (l i)) * ∥xₐ a∥₊) / N + d * nnnorm (l i) : _
+  ... = ∥x (l i)∥₊ / N + d * nnnorm (l i) : by rw Hx
   ... ≤ _ : _,
   { simp only [add_monoid_hom.add_apply, add_assoc, add_monoid_hom.sum_apply,
          Mbar.mk_tensor_apply],
@@ -462,12 +442,7 @@ begin
     { calc ∑ a in A, nnnorm (a (l i))
           = (∑ a in A, nnnorm (a (l i)) / nnnorm (l i)) * nnnorm (l i) : _
       ... ≤ finset.univ.sup (λ i, ∑ a in A, nnnorm (a (l i)) / nnnorm (l i)) * nnnorm (l i) : _,
-      { by_cases hli : l i = 0,
-        { simp only [hli, nnnorm_zero, add_monoid_hom.map_zero, zero_div,
-               finset.sum_const_zero, zero_mul] },
-        rw ← nnnorm_eq_zero at hli,
-        simp only [div_eq_mul_inv, ← finset.sum_mul],
-        rw [inv_mul_cancel_right' hli] },
+      { simp only [div_eq_mul_inv, ← finset.sum_mul, inv_mul_cancel_right' (hl' i)] },
       { exact mul_le_mul' (finset.le_sup (finset.mem_univ i)) le_rfl } } },
   { simp only [div_eq_mul_inv, add_mul, finset.sum_mul, ← nsmul_eq_smul, nsmul_eq_mul],
     congr' 2,

@@ -131,6 +131,11 @@ begin
 end
 
 
+-- move this
+@[simp] lemma norm_ite {V : Type*} [semi_normed_group V] (P : Prop) {hP : decidable P} (x y : V) :
+  ∥(if P then x else y)∥ = if P then ∥x∥ else ∥y∥ :=
+by split_ifs; refl
+
 
 lemma norm_le_zero_iff' {G : Type*} [semi_normed_group G] [separated_space G] {g : G} :
   ∥g∥ ≤ 0 ↔ g = 0 :=

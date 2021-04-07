@@ -108,7 +108,7 @@ def HomZ_map : M ⟶ (Hom ℤ M) :=
     pi.add_apply, one_smul, int.cast_add_hom'_apply] },
   strict' := λ c x hx c₁ n hn,
   begin
-    rw [normed_group.mem_filtration_iff] at hn,
+    rw [semi_normed_group.mem_filtration_iff] at hn,
     suffices : n • x ∈ pseudo_normed_group.filtration M (n.nat_abs * c),
     { rw [← int.cast_add_hom'_apply, nnreal.coe_nat_abs, mul_comm] at this,
       exact (pseudo_normed_group.filtration_mono (mul_le_mul_left' hn c) this) },

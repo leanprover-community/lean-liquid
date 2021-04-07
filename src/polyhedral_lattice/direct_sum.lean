@@ -19,16 +19,13 @@ instance : has_norm (⨁ i, Λ i) :=
 
 lemma direct_sum_norm_def (x : ⨁ i, Λ i) : ∥x∥ = ∑ i, ∥x i∥ := rfl
 
-instance : normed_group (⨁ i, Λ i) :=
-normed_group.of_core _ $
-{ norm_eq_zero_iff :=
+instance : semi_normed_group (⨁ i, Λ i) :=
+semi_normed_group.of_core _ $
+{ norm_zero :=
   begin
-    intros x,
-    simp only [direct_sum_norm_def, ← coe_nnnorm, ← nnreal.coe_sum, finset.mem_univ,
-      nnreal.coe_eq_zero, finset.sum_eq_zero_iff, nnnorm_eq_zero, forall_prop_of_true],
-    split,
-    { intro h, ext, rw direct_sum.zero_apply, apply h, },
-    { rintro rfl, intro, rw direct_sum.zero_apply, }
+    simp only [direct_sum_norm_def, ← coe_nnnorm, ← nnreal.coe_sum, finset.mem_univ, nnnorm_zero,
+      nnreal.coe_eq_zero, finset.sum_eq_zero_iff, forall_prop_of_true, direct_sum.zero_apply,
+      eq_self_iff_true, imp_true_iff],
   end,
   triangle :=
   begin

@@ -20,7 +20,7 @@ end move_this
 
 section generates_norm
 
-variables {Λ ι : Type*} [normed_group Λ] [semimodule ℕ Λ] [fintype ι]
+variables {Λ ι : Type*} [semi_normed_group Λ] [semimodule ℕ Λ] [fintype ι]
 
 /-- A finite family `x : ι → Λ` generates the norm on `Λ`
 if for every `l : Λ`,
@@ -53,14 +53,17 @@ lemma generates_norm_of_generates_nnnorm {x : ι → Λ}
 
 end generates_norm
 
-class polyhedral_lattice (Λ : Type*) extends normed_group Λ :=
+class polyhedral_lattice (Λ : Type*) extends semi_normed_group Λ :=
 -- unfortunately, we need the following assumptions, for technical reasons
 [nat_semimodule : semimodule ℕ Λ]
 [int_semimodule : semimodule ℤ Λ]
 [is_scalar_tower : is_scalar_tower ℕ ℤ Λ]
 -- now we get to the actual definition
 (finite_free : finite_free Λ)
-(polyhedral [] : ∃ (ι : Type) [fintype ι] (l : ι → Λ), generates_norm l)
+(polyhedral [] : ∃ (ι : Type) [fintype ι] (l : ι → Λ),
+  generates_norm l ∧ ∀ i, nnnorm (l i) ≠ 0)
+  -- this final condition ↑ ↑ ↑ ↑ effectively means that we have a `normed_group`
+  -- but this condition is easier to check when forming quotients
 
 attribute [instance] polyhedral_lattice.nat_semimodule polyhedral_lattice.int_semimodule
                      polyhedral_lattice.is_scalar_tower
