@@ -10,6 +10,8 @@ open finset filter
 variables {G : Type*} [semi_normed_group G]
           {H : Type*} [semi_normed_group H]
 
+universe u
+
 lemma norm_le_insert' (a b : G) : ∥a∥ ≤ ∥b∥ + ∥a - b∥ :=
 begin
   rw norm_sub_rev,
@@ -338,7 +340,7 @@ namespace completion
   ∥(v : completion V)∥ = ∥v∥ :=
 completion.extension_coe uniform_continuous_norm v
 
-instance remove_me_soon (V : Type*) [semi_normed_group V] : normed_group (completion V) :=
+instance remove_me_soon (V : Type u) [semi_normed_group V] : normed_group (completion V) :=
 { dist_eq :=
   begin
     intros x y,
