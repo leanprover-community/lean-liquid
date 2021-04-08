@@ -477,6 +477,20 @@ begin
   apply cl.proj_fun_spec,
 end
 
+lemma hom_cone_id : hom_cone (𝟙 X) ≅ X.Fincone :=
+limits.cones.ext (eq_to_iso rfl)
+begin
+  intros I,
+  ext1,
+  dsimp [hom_cone, Fincone] at *,
+  change _ = I.proj x,
+  apply cl.proj_fun_unique,
+  have : (cl.map ((cl.pullback (𝟙 X) I).proj x) : set X) = (𝟙 X) ⁻¹' cl.map ((cl.pullback (𝟙 X) I).proj x),
+    by erw set.preimage_id,
+  rw [this, ← cl.map_spec],
+  apply cl.proj_fun_spec,
+end
+
 end categorical
 
 end Profinite
