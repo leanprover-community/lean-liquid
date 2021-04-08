@@ -444,7 +444,8 @@ limits.is_limit.of_iso_limit (limit_cone_is_limit _) X.Fincone_iso.symm
 
 variables {X} {Y : Profinite.{u}} (f : Y ⟶ X)
 
-def hom_cone : limits.cone (X.diagram ⋙ of_Fintype) :=
+-- Don't use  this -- use change_cone instead.
+def hom_cone' : limits.cone (X.diagram ⋙ of_Fintype) :=
 { X := Y,
   π :=
   { app := λ I,
@@ -464,6 +465,36 @@ def hom_cone : limits.cone (X.diagram ⋙ of_Fintype) :=
       apply cl.proj_fun_spec,
     end } }
 
+def cl.change : X.cl ⥤ Y.cl :=
+{ obj := cl.pullback f,
+  map := λ I J f, hom_of_le $ cl.pullback_mono $ le_of_hom f }
+
+-- TODO: Move this and clean up proofs above
+@[simp]
+lemma comp_apply {X Y Z : Profinite.{u}} (f : X ⟶ Y) (g : Y ⟶ Z) (x : X) :
+  (f ≫ g) x = g (f x) := rfl
+
+-- TODO: Move this and clean up proofs above
+@[simp]
+lemma id_apply {X : Profinite.{u}} (x : X) : (𝟙 X : X ⟶ X) x = x := rfl
+
+def change_cone (f : Y ⟶ X) (C : limits.cone (Y.diagram ⋙ of_Fintype)) :
+  limits.cone (X.diagram ⋙ of_Fintype) :=
+{ X := C.X,
+  π :=
+  { app := λ I, C.π.app (cl.pullback f I) ≫ ⟨cl.map⟩,
+    naturality' := begin
+      intros I J g,
+      ext1,
+      dsimp at *,
+      have h : cl.pullback f _ ≤ _ := cl.pullback_mono (le_of_hom g),
+      erw [← cl.map_refined_comm, ← C.w (hom_of_le h)],
+      refl,
+    end } }
+
+def hom_cone : limits.cone (X.diagram ⋙ of_Fintype) :=
+  change_cone f Y.Fincone
+
 theorem lift_hom_cone_eq : f = X.Fincone_is_limit.lift (hom_cone f) :=
 begin
   refine X.Fincone_is_limit.uniq (hom_cone f) f _,
@@ -482,14 +513,17 @@ limits.cones.ext (eq_to_iso rfl)
 begin
   intros I,
   ext1,
-  dsimp [hom_cone, Fincone] at *,
+  dsimp [change_cone, hom_cone, Fincone] at *,
   change _ = I.proj x,
   apply cl.proj_fun_unique,
-  have : (cl.map ((cl.pullback (𝟙 X) I).proj x) : set X) = (𝟙 X) ⁻¹' cl.map ((cl.pullback (𝟙 X) I).proj x),
-    by erw set.preimage_id,
+  have : (cl.map ((cl.pullback (𝟙 X) I).proj x) : set X) =
+    (𝟙 X) ⁻¹' cl.map ((cl.pullback (𝟙 X) I).proj x), by erw set.preimage_id,
   rw [this, ← cl.map_spec],
   apply cl.proj_fun_spec,
 end
+
+--def hom_cone_comp {Z : Profinite.{u}} (g : Z ⟶ Y) :
+--  hom_cone (g ≫ f) ≅ _
 
 end categorical
 
