@@ -6,6 +6,7 @@ import polyhedral_lattice.category
 import for_mathlib.free_abelian_group
 import for_mathlib.normed_group_quotient
 import for_mathlib.finsupp
+import for_mathlib.normed_group
 
 /-!
 # The Čech conerve attached to `Λ → Λ'`
@@ -48,11 +49,8 @@ add_subgroup.closure $
 
 def obj := quotient_add_group.quotient (L f m)
 
--- we can remove this as soon as we have `seminormed_group`
-instance : is_closed (L f m : set (fin m →₀ Λ')) := sorry
-
-instance : normed_group (obj f m) :=
-normed_group_hom.normed_group_quotient _
+instance : semi_normed_group (obj f m) :=
+normed_group_hom.semi_normed_group_quotient _
 
 instance : polyhedral_lattice (obj f m) :=
 { nat_semimodule := add_comm_monoid.nat_semimodule,
@@ -61,22 +59,23 @@ instance : polyhedral_lattice (obj f m) :=
   finite_free := sorry, -- we will need some sort of torsion-free condition on the cokernel of `f`
   polyhedral :=
   begin
-    obtain ⟨ι, _inst_ι, l, hl⟩ := polyhedral_lattice.polyhedral (fin m →₀ Λ'),
-    refine ⟨ι, _inst_ι, (λ i, quotient_add_group.mk (l i)), _⟩,
-    intros x,
-    apply quotient_add_group.induction_on x; clear x,
-    intro x,
-    obtain ⟨d, hd, c, H1, H2⟩ := hl x,
-    refine ⟨d, hd, c, _, _⟩,
-    { show d • quotient_add_group.mk' _ x = _,
-      rw [← nsmul_eq_smul, ← add_monoid_hom.map_nsmul, nsmul_eq_smul, H1,
-        add_monoid_hom.map_sum],
-      apply fintype.sum_congr,
-      intro i,
-      rw [← nsmul_eq_smul, add_monoid_hom.map_nsmul],
-      exact @nsmul_eq_smul _ _ add_comm_monoid.nat_semimodule _ _ },
-    { dsimp,
-      sorry }
+    obtain ⟨ι, _inst_ι, l, hl, hl'⟩ := polyhedral_lattice.polyhedral (fin m →₀ Λ'),
+    refine ⟨ι, _inst_ι, (λ i, quotient_add_group.mk (l i)), _, _⟩,
+    { intros x,
+      apply quotient_add_group.induction_on x; clear x,
+      intro x,
+      obtain ⟨d, hd, c, H1, H2⟩ := hl x,
+      refine ⟨d, hd, c, _, _⟩,
+      { show d • quotient_add_group.mk' _ x = _,
+        rw [← nsmul_eq_smul, ← add_monoid_hom.map_nsmul, nsmul_eq_smul, H1,
+          add_monoid_hom.map_sum],
+        apply fintype.sum_congr,
+        intro i,
+        rw [← nsmul_eq_smul, add_monoid_hom.map_nsmul],
+        exact @nsmul_eq_smul _ _ add_comm_monoid.nat_semimodule _ _ },
+      { dsimp,
+        sorry } },
+    { sorry }
   end }
 
 end objects
@@ -105,11 +104,6 @@ end
 -- the underlying morphism of additive groups
 def map_add_hom : obj f (n+1) →+ obj f (m+1) :=
 quotient_add_group.map _ _ (map_domain_hom g) (L_le_comap f g)
-
--- move this
-@[simp] lemma norm_ite {V : Type*} [normed_group V] (P : Prop) {hP : decidable P} (x y : V) :
-  ∥(if P then x else y)∥ = if P then ∥x∥ else ∥y∥ :=
-by split_ifs; refl
 
 lemma map_domain_hom_strict (x : fin (n+1) →₀ Λ) : ∥map_domain_hom g x∥ ≤ ∥x∥ :=
 begin

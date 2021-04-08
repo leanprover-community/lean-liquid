@@ -14,7 +14,7 @@ variables (BD : breen_deligne.data)
 variables (c' : ℕ → ℝ≥0)  -- implicit constants, chosen once and for all
                           -- see the sentence after the statement of Thm 9.5
 
-open polyhedral_lattice
+open polyhedral_lattice opposite
 
 /- === Warning: with `BD.suitable` the rows are not admissible, we need `BD.very_suitable` === -/
 
@@ -32,7 +32,7 @@ variables (Λ : PolyhedralLattice.{0})
 include BD c' r r' M V
 
 def thm95.IH (m : ℕ) : Prop := ∀ Λ : PolyhedralLattice.{0},
-  ​(BD.system c' r V r' (Hom Λ M)).is_weak_bounded_exact (k c' m) (K BD c' r r' m) m (c₀ Λ)
+  ​((BD.system c' r V r').obj (op $ Hom Λ M)).is_weak_bounded_exact (k c' m) (K BD c' r r' m) m (c₀ Λ)
 
 omit BD c' r r' M V
 
@@ -47,31 +47,38 @@ begin
     refine (IH (m-1) hm' Λ).of_le thm95.system_admissible _ _ le_rfl ⟨le_rfl⟩,
     all_goals { apply_instance } },
   { rw thm95.double_complex.row_one,
-    refine (IH (m-1) hm'
-      (PolyhedralLattice.of $ conerve.obj (Λ.diagonal_embedding (N c' r r' m)) 1)).of_le
-      thm95.system_admissible _ _ le_rfl _,
-    swap 3, { /- turn this into an instance somewhere -/ sorry },
+    refine (IH (m-1) hm' _).of_le thm95.system_admissible _ _ le_rfl _,
+    swap 3,
+    { /- turn this into an instance somewhere,
+         we need to make the definition of `c₀` depend on `m` -/ sorry },
     all_goals { apply_instance } },
   { rw thm95.double_complex.row,
     apply system_of_complexes.rescale_is_weak_bounded_exact,
-    refine (IH (m-1) hm'
-      (PolyhedralLattice.of $ conerve.obj (Λ.diagonal_embedding (N c' r r' m)) (i + 2))).of_le
-      thm95.system_admissible _ _ le_rfl _,
-    swap 3, { /- turn this into an instance somewhere -/ sorry },
+    refine (IH (m-1) hm' _).of_le thm95.system_admissible _ _ le_rfl _,
+    swap 3,
+    { /- turn this into an instance somewhere,
+         we need to make the definition of `c₀` depend on `m` -/ sorry },
     all_goals { apply_instance } }
 end
+
+def NSC_htpy :
+  normed_spectral_homotopy
+    ((thm95.double_complex BD c' r r' V Λ M (N c' r r' m)).row 0)
+    ((thm95.double_complex BD c' r r' V Λ M (N c' r r' m)).row 1)
+    ((thm95.double_complex BD c' r r' V Λ M (N c' r r' m)).row_map 0 1)
+      m (k' c' m) (ε m) (c₀ Λ) (H BD c' r r' m) :=
+{ h := sorry,
+  h_bound_by := sorry,
+  δ := sorry,
+  hδ := sorry,
+  δ_bound_by := sorry }
 
 def NSC (IH : ∀ m' < m, thm95.IH BD c' r r' M V m') :
   normed_spectral_conditions (thm95.double_complex BD c' r r' V Λ M (N c' r r' m)) m
     (k₁ m) (K₁ m) (k' c' m) (ε m) (c₀ Λ) (H BD c' r r' m) :=
 { row_exact := NSC_row_exact _ _ _ _ _ _ _ _ IH,
   col_exact := sorry,
-  htpy :=
-  { h := sorry,
-    h_bound_by := sorry,
-    δ := sorry,
-    hδ := sorry,
-    δ_bound_by := sorry },
+  htpy := NSC_htpy BD c' r r' M V m Λ,
   admissible := thm95.double_complex_admissible _ }
 
 include BD c' r r' M V m
@@ -79,7 +86,7 @@ include BD c' r r' M V m
 /-- Theorem 9.5 in [Analytic] -/
 theorem thm95 : ∀ (Λ : PolyhedralLattice.{0}) (S : Type) [fintype S]
   (V : NormedGroup) [normed_with_aut r V],
-  ​(BD.system c' r V r' (Hom Λ (Mbar r' S))).is_weak_bounded_exact
+  ​((BD.system c' r V r').obj (op $ Hom Λ (Mbar r' S))).is_weak_bounded_exact
     (k c' m) (K BD c' r r' m) m (c₀ Λ) :=
 begin
   apply nat.strong_induction_on m; clear m,
@@ -111,7 +118,8 @@ theorem thm95' [BD.suitable c']
   ∃ c₀ : ℝ≥0,
   ∀ (S : Type) [fintype S],
   ∀ (V : NormedGroup) [normed_with_aut r V],
-    ​(BD.system c' r V r' (Hom Λ (Mbar r' S))).is_bounded_exact k K m c₀ :=
+    by exactI system_of_complexes.is_bounded_exact
+    (​(BD.system c' r V r').obj (op $ Hom Λ (Mbar r' S))) k K m c₀ :=
 begin
   intro m,
   apply nat.strong_induction_on m; clear m,

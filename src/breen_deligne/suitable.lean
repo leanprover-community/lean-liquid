@@ -53,9 +53,13 @@ begin
   apply h
 end
 
-instance suitable_of_mul_left (f : basic_universal_map m n) [h : f.suitable c₁ c₂] :
+instance suitable_mul_left (f : basic_universal_map m n) [h : f.suitable c₁ c₂] :
   f.suitable (c * c₁) (c * c₂) :=
 λ i, by { rw mul_left_comm, exact mul_le_mul' le_rfl (h i) }
+
+instance suitable_mul_right (f : basic_universal_map m n) [h : f.suitable c₁ c₂] :
+  f.suitable (c₁ * c) (c₂ * c) :=
+by { rw [mul_comm _ c, mul_comm _ c], exact basic_universal_map.suitable_mul_left _ _ _ _ }
 
 -- move this
 lemma nat_abs_sum_le_sum_nat_abs {ι : Type*} (s : finset ι) (f : ι → ℤ) :
@@ -174,13 +178,22 @@ instance suitable_add {f g : universal_map m n} {c₁ c₂ : ℝ≥0}
   suitable c₁ c₂ (f + g) :=
 (suitable_free_predicate c₁ c₂).add hf hg
 
+instance suitable_sub {f g : universal_map m n} {c₁ c₂ : ℝ≥0}
+  [hf : f.suitable c₁ c₂] [hg : g.suitable c₁ c₂] :
+  suitable c₁ c₂ (f - g) :=
+by rw sub_eq_add_neg; apply_instance
+
 lemma suitable_smul_iff (k : ℤ) (hk : k ≠ 0) (f : universal_map m n) (c₁ c₂ : ℝ≥0) :
   suitable c₁ c₂ (k • f) ↔ f.suitable c₁ c₂ :=
 (suitable_free_predicate c₁ c₂).smul_iff k hk
 
-instance suitable_of_mul_left (f : universal_map m n) [h : f.suitable c₁ c₂] :
+instance suitable_mul_left (f : universal_map m n) [h : f.suitable c₁ c₂] :
   f.suitable (c * c₁) (c * c₂) :=
-λ g hg, @basic_universal_map.suitable_of_mul_left _ _ _ _ _ _ (h g hg)
+λ g hg, @basic_universal_map.suitable_mul_left _ _ _ _ _ _ (h g hg)
+
+instance suitable_mul_right (f : universal_map m n) [h : f.suitable c₁ c₂] :
+  f.suitable (c₁ * c) (c₂ * c) :=
+by { rw [mul_comm _ c, mul_comm _ c], exact universal_map.suitable_mul_left _ _ _ _ }
 
 -- this cannot be an instance, because c₂ cannot be inferred
 lemma suitable.comp {g : universal_map m n} {f : universal_map l m} {c₁ : ℝ≥0} (c₂ : ℝ≥0)
@@ -226,20 +239,30 @@ This definition ensures that we get a well-defined complex
 of normed groups `LCC_Mbar_pow V S r' (c' i) (BD.rank i)`,
 induced by the maps `BD.d (i+1) i`. -/
 class suitable (BD : data) (c' : ℕ → ℝ≥0) : Prop :=
-(universal_suitable : ∀ i, (BD.d (i+1) i).suitable (c' (i+1)) (c' i))
+(universal_suitable : ∀ i j, (BD.d i j).suitable (c' i) (c' j))
+
+attribute [instance] suitable.universal_suitable
 
 variables (BD : data) (c' : ℕ → ℝ≥0) [BD.suitable c'] (i j j' : ℕ)
 
-instance basic_suitable_of_suitable : ((BD.d j i).suitable (c' j) (c' i)) :=
-begin
+def suitable.of_basic (H : ∀ i, (BD.d (i+1) i).suitable (c' (i+1)) (c' i)) : BD.suitable c' :=
+⟨λ j i, begin
   by_cases hij : coherent_indices ff j i,
-  { dsimp [coherent_indices] at hij, subst j, exact suitable.universal_suitable i },
+  { dsimp [coherent_indices] at hij, subst j, exact H i },
   { rw BD.d_eq_zero hij, apply_instance }
-end
+end⟩
 
-instance suitable_of_suitable :
-  ((universal_map.comp (BD.d j i) (BD.d j' j)).suitable (c' j') (c' i)) :=
+instance comp_suitable :
+  (universal_map.comp (BD.d j i) (BD.d j' j)).suitable (c' j') (c' i) :=
 universal_map.suitable.comp (c' j)
+
+instance suitable_mul_left (c : ℝ≥0) :
+  BD.suitable (λ i, c * c' i) :=
+⟨λ i j, by apply_instance⟩
+
+instance suitable_mul_right (c : ℝ≥0) :
+  BD.suitable (λ i, c' i * c) :=
+⟨λ i j, by apply_instance⟩
 
 end data
 

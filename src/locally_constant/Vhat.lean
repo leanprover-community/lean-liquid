@@ -1,9 +1,11 @@
 import category_theory.currying
-import category_theory.abelian.additive_functor
+import category_theory.preadditive.additive_functor
 import topology.category.Profinite
 import topology.algebra.normed_group
 import topology.algebra.group_completion
 import topology.metric_space.completion
+
+import for_mathlib.normed_group
 
 import locally_constant.NormedGroup
 import normed_group.normed_with_aut
@@ -154,7 +156,9 @@ Given a morphism of normed groups `f : V → W` with `W` complete, this provides
 the completion of `V`. The lemmas `lift_unique` and `lift_comp_incl` provide the api for the
 universal property of the completion.
 -/
-def Completion.lift {V W : NormedGroup} [complete_space W] (f : V ⟶ W) : Completion.obj V ⟶ W :=
+def Completion.lift {V W : NormedGroup} [complete_space W]
+  [t2_space W] [separated_space W] -- these should be redundant
+  (f : V ⟶ W) : Completion.obj V ⟶ W :=
 { to_fun := completion.extension f,
   map_add' := begin
     intros x y,
@@ -187,7 +191,9 @@ def Completion.lift {V W : NormedGroup} [complete_space W] (f : V ⟶ W) : Compl
       { exact normed_group_hom.uniform_continuous _ }}
   end }
 
-lemma lift_comp_incl {V W : NormedGroup} [complete_space W] (f : V ⟶ W) : incl ≫ (Completion.lift f) = f :=
+lemma lift_comp_incl {V W : NormedGroup} [complete_space W]
+  [t2_space W] [separated_space W] -- these should be redundant
+  (f : V ⟶ W) : incl ≫ (Completion.lift f) = f :=
 begin
   ext,
   change completion.extension f x = _,
@@ -195,7 +201,9 @@ begin
   exact normed_group_hom.uniform_continuous _,
 end
 
-lemma lift_unique {V W : NormedGroup} [complete_space W] (f : V ⟶ W) (g : Completion.obj V ⟶ W) :
+lemma lift_unique {V W : NormedGroup} [complete_space W]
+  [t2_space W] [separated_space W] -- these should be redundant
+  (f : V ⟶ W) (g : Completion.obj V ⟶ W) :
   incl ≫ g = f → g = Completion.lift f :=
 begin
   intros h,

@@ -1,4 +1,4 @@
-import category_theory.abelian.additive_functor -- minimize this
+import category_theory.preadditive.additive_functor
 
 namespace category_theory
 
@@ -34,5 +34,21 @@ instance : preadditive (D ⥤ C) :=
   comp_add' := by { intros, ext, apply comp_add } }
 
 end preadditive
+
+namespace nat_trans
+
+variables {C D : Type*} [category C] [category D] [preadditive D]
+variables {F G : C ⥤ D}
+
+@[simp]
+theorem app_add (X : C) (α β : F ⟶ G) : (α + β).app X = α.app X + β.app X := rfl
+
+@[simps]
+def app_hom (X : C) : (F ⟶ G) →+ (F.obj X ⟶ G.obj X) :=
+{ to_fun := λ α, α.app X,
+  map_zero' := rfl,
+  map_add' := λ _ _, rfl }
+
+end nat_trans
 
 end category_theory

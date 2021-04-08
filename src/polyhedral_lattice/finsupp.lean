@@ -26,22 +26,25 @@ variables (ι Λ : Type*) [fintype ι]
 
 section normed_group
 
-variables [normed_group Λ]
+variables [semi_normed_group Λ]
 
 instance : has_norm (ι →₀ Λ) := ⟨λ x, x.sum $ λ _, norm⟩
+
+variables {ι Λ}
 
 lemma norm_def (x : ι →₀ Λ) : ∥x∥ = x.sum (λ _, norm) := rfl
 
 @[simp] lemma norm_single (i : ι) (l : Λ) : ∥single i l∥ = ∥l∥ :=
 by simp only [norm_def, sum_single_index, norm_zero]
 
-instance : normed_group (ι →₀ Λ) :=
-normed_group.of_core _ $
-{ norm_eq_zero_iff :=
+variables (ι Λ)
+
+instance : semi_normed_group (ι →₀ Λ) :=
+semi_normed_group.of_core _ $
+{ norm_zero :=
   begin
-    intros x,
-    simp only [norm_def, sum, ← coe_nnnorm, ← nnreal.coe_sum, nnreal.coe_eq_zero,
-      finset.sum_eq_zero_iff, nnnorm_eq_zero, zero_apply, not_imp_self, mem_support_iff, ext_iff],
+    simp only [norm_def, sum, ← coe_nnnorm, ← nnreal.coe_sum, nnreal.coe_eq_zero, eq_self_iff_true,
+      finset.sum_eq_zero_iff, nnnorm_zero, zero_apply, mem_support_iff, ext_iff, imp_true_iff],
   end,
   triangle :=
   begin
@@ -58,6 +61,14 @@ normed_group.of_core _ $
     simp only [norm_def, aux, norm_neg, neg_apply]
   end }
 
+variables {ι Λ}
+
+lemma nnnorm_def (x : ι →₀ Λ) : nnnorm x = x.sum (λ _, nnnorm) :=
+begin
+  ext,
+  simpa only [coe_nnnorm, finsupp.sum, nnreal.coe_sum] using norm_def x,
+end
+
 end normed_group
 
 variables [polyhedral_lattice Λ]
@@ -70,8 +81,13 @@ instance {ι : Type} [fintype ι] : polyhedral_lattice (ι →₀ Λ) :=
   end,
   polyhedral :=
   begin
-    obtain ⟨J, _instJ, x, hx⟩ := polyhedral_lattice.polyhedral Λ, resetI,
-    refine ⟨ι × J, infer_instance, λ j, single j.1 (x j.2), _⟩,
+    obtain ⟨J, _instJ, x, hx, hx'⟩ := polyhedral_lattice.polyhedral Λ, resetI,
+    refine ⟨ι × J, infer_instance, λ j, single j.1 (x j.2), _, _⟩,
+    swap,
+    { rintro ⟨i, j⟩,
+      rw [finsupp.nnnorm_def, finsupp.sum_single_index],
+      { apply hx' },
+      { exact nnnorm_zero } },
     intro l,
     have := λ i, hx (l i),
     choose d hd c H1 H2 using this,

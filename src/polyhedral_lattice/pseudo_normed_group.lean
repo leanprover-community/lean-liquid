@@ -17,10 +17,10 @@ of `pseudo_normed_group.with_Tinv`.
 noncomputable theory
 open_locale nnreal
 
-open pseudo_normed_group normed_group
+open pseudo_normed_group semi_normed_group
 
 lemma int.one_mem_filtration : (1 : ℤ) ∈ filtration ℤ 1 :=
-by simp only [nnnorm_one, normed_group.mem_filtration_iff]
+by simp only [nnnorm_one, mem_filtration_iff]
 
 namespace polyhedral_lattice
 
@@ -34,7 +34,7 @@ namespace add_monoid_hom
 variables {Λ r' M} (c : ℝ≥0)
 
 def incl (c : ℝ≥0) : filtration (Λ →+ M) c → Π l : Λ, filtration M (c * nnnorm l) :=
-λ f l, ⟨f l, f.2 $ normed_group.mem_filtration_nnnorm _⟩
+λ f l, ⟨f l, f.2 $ mem_filtration_nnnorm _⟩
 
 @[simp] lemma coe_incl_apply (f : filtration (Λ →+ M) c) (l : Λ) :
   (incl c f l : M) = f l :=

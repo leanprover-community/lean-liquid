@@ -1,4 +1,4 @@
-import category_theory.abelian.additive_functor
+import category_theory.preadditive.additive_functor
 
 namespace category_theory
 
@@ -11,27 +11,7 @@ namespace functor
 
 variables (F : C ⥤ D) (G : D ⥤ E) [additive F] [additive G] {X Y : C}
 
-@[simp] lemma map_zero (X Y : C) :
-  F.map (0 : X ⟶ Y) = 0 :=
-F.map_add_hom.map_zero
-
-@[simp] lemma map_neg (f : X ⟶ Y) :
-  F.map (-f) = -F.map f :=
-F.map_add_hom.map_neg f
-
-@[simp] lemma map_add (f g : X ⟶ Y) :
-  F.map (f + g) = F.map f + F.map g :=
-F.map_add_hom.map_add f g
-
-@[simp] lemma map_sub (f g : X ⟶ Y) :
-  F.map (f - g) = F.map f - F.map g :=
-F.map_add_hom.map_sub f g
-
 lemma additive.comp : additive (F ⋙ G) := {}
-
-instance id.additive : (𝟭 C).additive :=
-{ map_zero' := λ X Y, rfl,
-  map_add' := λ X Y f g, rfl }
 
 end functor
 

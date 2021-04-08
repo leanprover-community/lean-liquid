@@ -410,7 +410,7 @@ begin
   convert (continuous_add' cf cg).comp aux' using 1,
   ext x,
   replace hfg₀ := congr_fun (hfg₀ x) j,
-  dsimp at hfg₀ ⊢, rw [← hfg₀], refl
+  dsimp at hfg₀ ⊢, rw [← hfg₀]
 end
 
 lemma pfpng_ctu'_sum {ι : Type*} (s : finset ι)
