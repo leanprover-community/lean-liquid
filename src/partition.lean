@@ -72,7 +72,7 @@ let I := (finset.univ : finset (fin N)).exists_min_image
       simp only [div_eq_mul_inv, fin.sum_univ_eq_sum_range],
       refine mul_le_mul' _ le_rfl,
       simp only [finset.sum_range_succ],
-      exact self_le_add_left _ _ }
+      exact self_le_add_right _ _ }
   end }
 
 noncomputable def partition (N : ℕ) (hN : 0 < N) (f : ℕ → ℝ≥0) (hf : ∀ n, f n ≤ 1) :
@@ -95,7 +95,7 @@ lemma partition_sums (k : ℕ) (N : ℕ) (hN : 0 < N) (f : ℕ → ℝ≥0) (hf 
 begin
   induction k with k IH,
   { dsimp [partition, mask_fun], simp, dsimp [partition, recursion_data_zero], congr },
-  rw [partition_sums_aux, IH, sum_range_succ _ k.succ, add_comm],
+  rw [partition_sums_aux, IH, sum_range_succ _ k.succ],
   congr' 1
 end
 
