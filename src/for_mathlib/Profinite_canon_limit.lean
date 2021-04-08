@@ -4,6 +4,16 @@ import topology.locally_constant.basic
 import category_theory.Fintype
 import category_theory.limits.creates
 
+/-!
+This file proves that a profinite set is a limit of finite sets.
+Some portions of this file were inspired by code in the `Profinite2` branch of mathlib,
+due to C. Sönne and B. Mehta.
+
+TODO: Prove that this presentation is actually functorial.
+All the ingredients for functoriality are in this file, it's just a matter of 
+assembling these ingredients in the right way.
+-/
+
 noncomputable theory
 
 namespace Profinite
