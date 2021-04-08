@@ -1,6 +1,6 @@
 import pseudo_normed_group.system_of_complexes
 import Mbar.Mbar_le
-/-
+/-!
 
 # Mbar_r(S) is a profinitely filtered pseudo-normed group with T⁻¹
 
