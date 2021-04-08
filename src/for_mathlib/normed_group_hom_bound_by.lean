@@ -39,6 +39,15 @@ begin
   ... ≤ Cf * ∥v∥ + Cg * ∥v∥ : add_le_add (hf _) (hg _),
 end
 
+lemma bound_by.neg {f : normed_group_hom V₁ V₂} {Cf : ℝ≥0}
+  (hf : f.bound_by Cf) :
+  (-f).bound_by (Cf) :=
+begin
+  intro v,
+  calc ∥(-f) v∥ = ∥f v∥ : norm_neg _
+  ... ≤ Cf * ∥v∥ : hf _,
+end
+
 lemma bound_by.sum {ι : Type*} (s : finset ι)
   (f : ι → normed_group_hom V₁ V₂) (C : ι → ℝ≥0) (h : ∀ i ∈ s, (f i).bound_by (C i)) :
   (∑ i in s, f i).bound_by (∑ i in s, C i) :=
@@ -51,14 +60,27 @@ begin
     exact (h i $ s.mem_insert_self _).add (IH $ λ i hi, h i $ finset.mem_insert_of_mem hi) }
 end
 
+@[simp] lemma bound_by.nat_smul {C : ℝ≥0} (hf : f.bound_by C) (n : ℕ) :
+  (n • f).bound_by (n * C) :=
+begin
+  induction n with n ih,
+  { simp only [nat.cast_zero, zero_mul, zero_smul], exact zero_bound_by _ },
+  simp only [nat.succ_eq_add_one, add_smul, add_mul, nat.cast_add, nat.cast_one, one_mul, one_smul],
+  exact ih.add hf
+end
+
 @[simp] lemma bound_by.int_smul {C : ℝ≥0} (hf : f.bound_by C) (n : ℤ) :
   (n • f).bound_by (n.nat_abs * C) :=
 begin
-  intro v,
-  sorry
-  -- simp only [nnreal.coe_nat_cast, nnreal.coe_mul],
+  rw ← gsmul_eq_smul,
+  induction n,
+  { simp only [int.nat_abs_of_nat, int.of_nat_eq_coe, gsmul_coe_nat, nsmul_eq_smul],
+    apply bound_by.nat_smul, exact hf },
+  { apply bound_by.neg,
+    show (↑(n+1) •ℤ f).bound_by (↑(-[1+ n].nat_abs) * C),
+    simp only [gsmul_coe_nat, int.nat_abs, nsmul_eq_smul],
+    apply bound_by.nat_smul, exact hf }
 end
-
 
 end normed_group_hom
 
