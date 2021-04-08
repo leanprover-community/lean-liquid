@@ -8,19 +8,32 @@ import category_theory.limits.creates
 This file proves that a profinite set is a limit of finite sets.
 Some portions of this file were inspired by code in the `Profinite2` branch of mathlib,
 due to C. Sönne and B. Mehta.
-
-TODO: Prove that this presentation is actually functorial.
-All the ingredients for functoriality are in this file, it's just a matter of 
-assembling these ingredients in the right way.
 -/
+
+universe u
+open category_theory
 
 noncomputable theory
 
 namespace Profinite
 
-open category_theory
+section move_me
 
-universe u
+-- TODO: Move this and clean up proofs above
+@[simp]
+lemma comp_apply {X Y Z : Profinite.{u}} (f : X ⟶ Y) (g : Y ⟶ Z) (x : X) :
+  (f ≫ g) x = g (f x) := rfl
+
+-- TODO: Move this and clean up proofs above
+@[simp]
+lemma id_apply {X : Profinite.{u}} (x : X) : (𝟙 X : X ⟶ X) x = x := rfl
+
+-- TODO: Move this!
+@[simp]
+lemma comp_to_fun {X Y Z : Profinite.{u}} (f : X ⟶ Y) (g : Y ⟶ Z) :
+  (f ≫ g : X → Z) = g ∘ f := rfl
+
+end move_me
 
 variables (X : Profinite.{u})
 
@@ -466,7 +479,7 @@ limits.is_limit.of_iso_limit (limit_cone_is_limit _) X.Fincone_iso.symm
 variables {X} {Y : Profinite.{u}} (f : Y ⟶ X)
 
 -- Don't use  this -- use change_cone instead.
-def hom_cone' : limits.cone (X.diagram ⋙ of_Fintype) :=
+def hom_cone : limits.cone (X.diagram ⋙ of_Fintype) :=
 { X := Y,
   π :=
   { app := λ I,
@@ -486,18 +499,10 @@ def hom_cone' : limits.cone (X.diagram ⋙ of_Fintype) :=
       apply cl.proj_fun_spec,
     end } }
 
+-- Is this needed?
 def cl.change : X.cl ⥤ Y.cl :=
 { obj := cl.pullback f,
   map := λ I J f, hom_of_le $ cl.pullback_mono $ le_of_hom f }
-
--- TODO: Move this and clean up proofs above
-@[simp]
-lemma comp_apply {X Y Z : Profinite.{u}} (f : X ⟶ Y) (g : Y ⟶ Z) (x : X) :
-  (f ≫ g) x = g (f x) := rfl
-
--- TODO: Move this and clean up proofs above
-@[simp]
-lemma id_apply {X : Profinite.{u}} (x : X) : (𝟙 X : X ⟶ X) x = x := rfl
 
 def change_cone (f : Y ⟶ X) (C : limits.cone (Y.diagram ⋙ of_Fintype)) :
   limits.cone (X.diagram ⋙ of_Fintype) :=
@@ -513,12 +518,9 @@ def change_cone (f : Y ⟶ X) (C : limits.cone (Y.diagram ⋙ of_Fintype)) :
       refl,
     end } }
 
-def hom_cone : limits.cone (X.diagram ⋙ of_Fintype) :=
-  change_cone f Y.Fincone
-
-theorem lift_hom_cone_eq : f = X.Fincone_is_limit.lift (hom_cone f) :=
+theorem lift_hom_cone_eq : f = X.Fincone_is_limit.lift (change_cone f Y.Fincone) :=
 begin
-  refine X.Fincone_is_limit.uniq (hom_cone f) f _,
+  refine X.Fincone_is_limit.uniq (change_cone f Y.Fincone) f _,
   intros I,
   ext1 y,
   change I.proj (f y) = cl.map _,
@@ -529,7 +531,7 @@ begin
   apply cl.proj_fun_spec,
 end
 
-def hom_cone_id : hom_cone (𝟙 X) ≅ X.Fincone :=
+def hom_cone_id : change_cone (𝟙 X) X.Fincone ≅ X.Fincone :=
 limits.cones.ext (eq_to_iso rfl)
 begin
   intros I,
@@ -543,12 +545,8 @@ begin
   apply cl.proj_fun_spec,
 end
 
-@[simp]
-lemma comp_to_fun {X Y Z : Profinite.{u}} (f : X ⟶ Y) (g : Y ⟶ Z) :
-  (f ≫ g : X → Z) = g ∘ f := rfl
-
 def hom_cone_comp {Z : Profinite.{u}} (g : Z ⟶ Y) :
-  hom_cone (g ≫ f) ≅ change_cone f (change_cone g Z.Fincone) :=
+  change_cone (g ≫ f) Z.Fincone ≅ change_cone f (change_cone g Z.Fincone) :=
 limits.cones.ext (eq_to_iso rfl)
 begin
   intros I,
