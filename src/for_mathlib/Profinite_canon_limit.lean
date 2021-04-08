@@ -477,7 +477,7 @@ begin
   apply cl.proj_fun_spec,
 end
 
-lemma hom_cone_id : hom_cone (𝟙 X) ≅ X.Fincone :=
+def hom_cone_id : hom_cone (𝟙 X) ≅ X.Fincone :=
 limits.cones.ext (eq_to_iso rfl)
 begin
   intros I,
