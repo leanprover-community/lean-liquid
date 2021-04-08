@@ -518,7 +518,7 @@ def change_cone (f : Y ⟶ X) (C : limits.cone (Y.diagram ⋙ of_Fintype)) :
       refl,
     end } }
 
-theorem lift_hom_cone_eq : f = X.Fincone_is_limit.lift (change_cone f Y.Fincone) :=
+theorem change_cone_lift : f = X.Fincone_is_limit.lift (change_cone f Y.Fincone) :=
 begin
   refine X.Fincone_is_limit.uniq (change_cone f Y.Fincone) f _,
   intros I,
@@ -531,7 +531,7 @@ begin
   apply cl.proj_fun_spec,
 end
 
-def hom_cone_id : change_cone (𝟙 X) X.Fincone ≅ X.Fincone :=
+def change_cone_id : change_cone (𝟙 X) X.Fincone ≅ X.Fincone :=
 limits.cones.ext (eq_to_iso rfl)
 begin
   intros I,
@@ -545,7 +545,7 @@ begin
   apply cl.proj_fun_spec,
 end
 
-def hom_cone_comp {Z : Profinite.{u}} (g : Z ⟶ Y) :
+def change_cone_comp {Z : Profinite.{u}} (g : Z ⟶ Y) :
   change_cone (g ≫ f) Z.Fincone ≅ change_cone f (change_cone g Z.Fincone) :=
 limits.cones.ext (eq_to_iso rfl)
 begin
