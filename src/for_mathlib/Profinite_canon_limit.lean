@@ -55,8 +55,7 @@ def of_clopen {U : set X} : is_clopen U → U.nonempty → Uᶜ.nonempty → X.c
       ext1,
       dsimp at hhV,
       rw hV at hhV,
-      exact false.elim (hhV hx),
-    },
+      exact false.elim (hhV hx) },
     { refine ⟨⟨Uᶜ, or.inr rfl⟩, hx, _⟩,
       rintros ⟨V,rfl|hV⟩ hhV,
       { exact false.elim (hx hhV) },
@@ -207,6 +206,17 @@ begin
   rw [hh U h, hh (proj_fun I x) (proj_fun_spec _ _)],
 end
 
+lemma proj_fun_mem (I : X.cl) (x y : X) :
+  x ∈ (proj_fun I y : set X) ↔ proj_fun I y = proj_fun I x :=
+begin
+  split,
+  { intro h,
+    exact proj_fun_unique _ _ _ h },
+  { intro h,
+    rw h,
+    apply proj_fun_spec }
+end
+
 -- A description of the preimage of a set w.r.t. proj_fun
 lemma proj_fun_preimage (I : X.cl) (S : set I) :
   proj_fun I ⁻¹' S = ⋃ (i : I) (hi : i ∈ S), (i : set X) :=
@@ -328,6 +338,17 @@ begin
   have hy' := hy,
   rw hW at hy,
   rw [hA2 W hy, hA2 V hy'],
+end
+
+lemma pullback_proj {I : X.cl} (y : Y) : ((pullback f I).proj y : set Y) = f ⁻¹' (I.proj (f y)) :=
+begin
+  rcases pullback_spec ((pullback f I).proj y) with ⟨V,h1,h2⟩,
+  erw h1,
+  congr,
+  apply proj_fun_unique,
+  change y ∈ f ⁻¹' V,
+  rw ← h1,
+  apply proj_fun_spec,
 end
 
 def map {I : X.cl} : pullback f I → I := λ U, classical.some (pullback_spec U)
@@ -522,8 +543,23 @@ begin
   apply cl.proj_fun_spec,
 end
 
---def hom_cone_comp {Z : Profinite.{u}} (g : Z ⟶ Y) :
---  hom_cone (g ≫ f) ≅ _
+@[simp]
+lemma comp_to_fun {X Y Z : Profinite.{u}} (f : X ⟶ Y) (g : Y ⟶ Z) :
+  (f ≫ g : X → Z) = g ∘ f := rfl
+
+def hom_cone_comp {Z : Profinite.{u}} (g : Z ⟶ Y) :
+  hom_cone (g ≫ f) ≅ change_cone f (change_cone g Z.Fincone) :=
+limits.cones.ext (eq_to_iso rfl)
+begin
+  intros I,
+  ext1 z,
+  dsimp [hom_cone, change_cone] at *,
+  symmetry,
+  apply cl.map_unique,
+  rwa [comp_to_fun, set.preimage_comp, ← cl.map_spec, ← cl.map_spec],
+  simp_rw [cl.pullback_proj, ← set.preimage_comp, ← comp_to_fun],
+  refl,
+end
 
 end categorical
 
