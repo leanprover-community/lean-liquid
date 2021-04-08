@@ -362,19 +362,33 @@ end
 
 def cone (X : Profinite) : limits.cone (diagram : X.clopen_cover ⥤ _) := ⟨X,⟨proj⟩⟩
 
-lemma lift_injective : function.injective ((is_limit_limit_cone _).lift X.cone) :=
+def limit_cone (X : Profinite) : limits.cone (diagram : X .clopen_cover ⥤ _) :=
+lift_limit (Top.limit_cone_is_limit $ diagram ⋙ Profinite_to_Top)
+
+def limit_cone_is_limit_cone (X : Profinite) : limits.is_limit X.limit_cone :=
+lifted_limit_is_limit _
+
+def limit_cone_iso (X : Profinite) :
+  Profinite_to_Top.map_cone X.limit_cone ≅ Top.limit_cone _ := lifted_limit_maps_to_original _
+
+lemma lift_injective : function.injective ((limit_cone_is_limit_cone _).lift X.cone) :=
 begin
+  suffices : function.injective
+    ((Top.limit_cone_is_limit ((diagram : X.clopen_cover ⥤ _) ⋙ Profinite_to_Top)).lift
+    (Profinite_to_Top.map_cone X.cone)), sorry,
   intros x y he,
   apply eq_of_proj_eq,
   intros I,
-  apply_fun (limit_cone _).π.app I at he,
-  change ((is_limit_limit_cone _).lift X.cone ≫ (limit_cone _).π.app I) x =
-    ((is_limit_limit_cone _).lift X.cone ≫ (limit_cone _).π.app I) y at he,
+  apply_fun (Top.limit_cone _).π.app I at he,
+  change ((Top.limit_cone_is_limit _).lift _ ≫ (Top.limit_cone _).π.app I) x =
+    ((Top.limit_cone_is_limit _).lift _ ≫ (Top.limit_cone _).π.app I) y at he,
   simpa using he,
 end
 
-lemma lift_surjective : function.surjective ((is_limit_limit_cone _).lift X.cone) :=
+lemma lift_surjective : function.surjective ((limit_cone_is_limit_cone _).lift X.cone) :=
 begin
+  sorry,
+  /-
   intros a,
   have := exists_of_compat (λ I, (limit_cone _).π.app I a) _,
   rcases a with ⟨a,ha⟩,
@@ -390,21 +404,22 @@ begin
   dsimp at ha,
   change (diagram.map (hom_of_le f)) (a I) = _,
   rw ha,
+  -/
 end
 
-lemma lift_closed : is_closed_map ((is_limit_limit_cone _).lift X.cone) :=
+lemma lift_closed : is_closed_map ((limit_cone_is_limit_cone _).lift X.cone) :=
 begin
   intros U hU,
   apply is_compact.is_closed,
-  apply is_compact.image _ ((is_limit_limit_cone _).lift X.cone).2,
+  apply is_compact.image _ ((limit_cone_is_limit_cone _).lift X.cone).2,
   apply is_closed.compact hU,
 end
 
-def lift_equiv : X.cone.X ≃ (limit_cone (diagram : X.clopen_cover ⥤ _)).X :=
-equiv.of_bijective ((is_limit_limit_cone _).lift X.cone) ⟨lift_injective , lift_surjective⟩
+def lift_equiv : X.cone.X ≃ (limit_cone X).X :=
+equiv.of_bijective ((limit_cone_is_limit_cone _).lift X.cone) ⟨lift_injective , lift_surjective⟩
 
-def lift_iso : X.cone.X ≅ (limit_cone (diagram : X.clopen_cover ⥤ _)).X :=
-{ hom := (is_limit_limit_cone _).lift X.cone,
+def lift_iso : X.cone.X ≅ (limit_cone X).X :=
+{ hom := (limit_cone_is_limit_cone _).lift X.cone,
   inv :=
   { to_fun := lift_equiv.symm,
     continuous_to_fun := begin
@@ -425,7 +440,7 @@ def lift_iso : X.cone.X ≅ (limit_cone (diagram : X.clopen_cover ⥤ _)).X :=
   end }
 
 lemma lift_iso_comm (I : X.clopen_cover) : lift_iso.hom ≫ (limit_cone _).π.app _ = proj I :=
-by refl
+by sorry
 
 lemma lift_iso_inv (I : X.clopen_cover) : lift_iso.inv ≫ proj I = (limit_cone _).π.app _ :=
 begin
@@ -435,7 +450,7 @@ begin
 end
 
 def is_limit : is_limit X.cone :=
-{ lift := λ S, (is_limit_limit_cone _).lift S ≫ lift_iso.symm.hom,
+{ lift := λ S, (limit_cone_is_limit_cone _).lift S ≫ lift_iso.symm.hom,
   fac' := begin
     intros S j,
     erw [category.assoc, lift_iso_inv],
@@ -445,11 +460,12 @@ def is_limit : is_limit X.cone :=
     intros S m h,
     erw iso.eq_comp_inv,
     ext1 x,
-    ext1,
-    ext1 j,
-    change (m ≫ X.cone.π.app j) x = _,
-    rw h,
-    refl,
+    sorry,
+    --ext1,
+    --ext1 j,
+    --change (m ≫ X.cone.π.app j) x = _,
+    --rw h,
+    --refl,
   end }
 
 end Profinite
