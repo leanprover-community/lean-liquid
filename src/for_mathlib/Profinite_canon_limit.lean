@@ -401,19 +401,36 @@ def Fincone : limits.cone (X.diagram ⋙ of_Fintype) :=
       apply cl.proj_fun_spec
     end } }
 
-/-
-def Fincone_limit : limits.is_limit X.Fincone :=
+instance is_iso_lift : is_iso ((limit_cone_is_limit (X.diagram ⋙ of_Fintype)).lift X.Fincone) :=
+is_iso_of_bijective _
 begin
-  let F := (X.diagram ⋙ of_Fintype) ⋙ Profinite_to_Top,
-  let C := Top.limit_cone F,
-  let C_is_limit : limits.is_limit C := Top.limit_cone_is_limit F,
-  let D := lift_limit C_is_limit,
-  let D_is_limit : limits.is_limit D := lifted_limit_is_limit _,
-  let E : Profinite_to_Top.map_cone D ≅ C := lifted_limit_maps_to_original _,
-  have ii : X.Fincone ≅ D, sorry,
-  exact limits.is_limit.of_iso_limit D_is_limit ii.symm,
+  split,
+  { intros x y h,
+    apply cl.eq_of_forall_proj_eq,
+    intros I,
+    apply_fun subtype.val at h,
+    apply_fun (λ u, u I) at h,
+    exact h },
+  { let C := limit_cone (X.diagram ⋙ of_Fintype),
+    rintros (x : C.X.to_Top),
+    have := cl.exists_of_compat (λ i : X.cl, x.val i)
+      (λ I J f, _),
+    { rcases this with ⟨x,hx⟩,
+      refine ⟨x,_⟩,
+      ext1,
+      ext1 I,
+      exact hx I },
+    { change _ = C.π.app J _,
+      erw ← C.w (hom_of_le f),
+      refl } }
 end
--/
+
+def Fincone_iso : X.Fincone ≅ limit_cone _ :=
+limits.cones.ext
+(as_iso $ (limit_cone_is_limit (X.diagram ⋙ of_Fintype)).lift X.Fincone) (λ I, rfl)
+
+def Fincone_is_limit : limits.is_limit X.Fincone :=
+limits.is_limit.of_iso_limit (limit_cone_is_limit _) X.Fincone_iso.symm
 
 end categorical
 

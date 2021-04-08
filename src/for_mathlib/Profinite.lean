@@ -33,7 +33,21 @@ def limit_cone' {J : Type u} [small_category J] (F : J ⥤ Top.{u}) :
       continuous_to_fun := begin
         change continuous ((λ u : Π j : J, F.obj j, u j) ∘ subtype.val),
         continuity,
-      end } } }
+      end } } }.
+
+def limit_cone'_is_limit {J : Type u} [small_category J] (F : J ⥤ Top.{u}) :
+  limits.is_limit (limit_cone' F) :=
+{ lift := λ S,
+  { to_fun := λ x, ⟨λ j, S.π.app _ x, λ i j f, by {dsimp, erw ← S.w f, refl}⟩ },
+  uniq' := begin
+    intros S m h,
+    ext1 x,
+    ext1,
+    ext1 j,
+    dsimp,
+    erw ← h,
+    refl,
+  end }.
 
 end Top
 
@@ -76,5 +90,30 @@ lemma is_iso_of_bijective {X Y : Profinite.{u}}
   (f : X ⟶ Y) (h : function.bijective f) : is_iso f :=
 let E := iso_of_bijective f h in
 is_iso.mk $ ⟨E.inv, by erw E.hom_inv_id, by erw E.inv_hom_id⟩
+
+def limit_cone {J : Type u} [small_category J] (F : J ⥤ Profinite.{u}) :
+  limits.cone F :=
+{ X :=
+  { to_Top := (Top.limit_cone' (F ⋙ Profinite_to_Top)).X,
+    is_compact := begin
+      dsimp [Top.limit_cone'],
+      erw ← compact_iff_compact_space,
+      apply is_closed.compact,
+      have : {u : Π (j : J), (F.obj j) | ∀ {i j : J} (f : i ⟶ j), (F.map f) (u i) = u j} =
+        ⋂ (i j : J) (f : i ⟶ j), { u | F.map f (u i) = u j }, by tidy,
+      rw this,
+      apply is_closed_Inter, intros i, apply is_closed_Inter, intros j,
+      apply is_closed_Inter, intros f,
+      apply is_closed_eq,
+      continuity,
+    end,
+    is_t2 := by {dsimp [Top.limit_cone'], apply_instance},
+    is_totally_disconnected := by {dsimp [Top.limit_cone'], apply_instance} },
+  π := { app := λ j, (Top.limit_cone' $ F ⋙ Profinite_to_Top).π.app j } }.
+
+def limit_cone_is_limit {J : Type u} [small_category J] (F : J ⥤ Profinite.{u}) :
+  limits.is_limit (limit_cone F) :=
+{ lift := λ S, (Top.limit_cone'_is_limit _).lift (Profinite_to_Top.map_cone S),
+  uniq' := λ S m h, (Top.limit_cone'_is_limit _).uniq (Profinite_to_Top.map_cone S) _ h }
 
 end Profinite
