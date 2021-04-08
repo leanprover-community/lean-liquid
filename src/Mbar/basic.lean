@@ -18,7 +18,8 @@ import for_mathlib.pi_nat_apply
 
 ## $\overline{\mathcal{M}}_{r'}(S)$
 
-This file contains a definition of ℳ-barᵣ'(S) as defined on p57 of Analytic.pdf .
+This file contains a definition of ℳ-barᵣ'(S) as defined at the very beginning
+of section 9 of `analytic.pdf` (p57), and its action of `T⁻¹`.
 
 ## Implementation issues
 
