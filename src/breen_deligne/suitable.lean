@@ -302,11 +302,11 @@ instance π_suitable (i : ℕ) :
 sorry
 
 instance σ_suitable' (k' : ℝ≥0) (N : ℕ) [fact (1 ≤ k')] [fact (k' ≤ 2^N)] (i : ℕ) :
-  ((data.hom_pow BD.data.σ N).f i).suitable (c' i) (k' * rescale_constants c' 2 i) :=
+  ((data.hom_pow BD.data.σ N).f i).suitable (c' i) (k' * rescale_constants c' (2^N) i) :=
 sorry
 
 instance π_suitable' (k' : ℝ≥0) (N : ℕ) [fact (1 ≤ k')] [fact (k' ≤ 2^N)] (i : ℕ) :
-  ((data.hom_pow BD.data.π N).f i).suitable (c' i) (k' * rescale_constants c' 2 i) :=
+  ((data.hom_pow BD.data.π N).f i).suitable (c' i) (k' * rescale_constants c' (2^N) i) :=
 sorry
 
 end σπ

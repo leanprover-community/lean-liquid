@@ -171,9 +171,9 @@ def homotopy_σπ
   -- for the first `m` maps of the homotopy
   -- so we need to define `h i` to be `0` for `i > m`.
   [∀ (j i : ℕ), ((BD.data.homotopy_pow BD.homotopy N).h j i).suitable
-    (c' j) (k' * rescale_constants c' 2 i)] :=
+    (c' j) (k' * rescale_constants c' (2^N) i)] :=
 homotopy.{u v} (data.homotopy_pow BD.data BD.homotopy N)
-  c' (λ i, k' * rescale_constants c' 2 i) r V c M
+  c' (λ i, k' * rescale_constants c' (2^N) i) r V c M
 
 
 -- section check
