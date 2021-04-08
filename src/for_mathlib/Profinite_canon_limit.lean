@@ -442,6 +442,41 @@ limits.cones.ext
 def Fincone_is_limit : limits.is_limit X.Fincone :=
 limits.is_limit.of_iso_limit (limit_cone_is_limit _) X.Fincone_iso.symm
 
+variables {X} {Y : Profinite.{u}} (f : Y ⟶ X)
+
+def hom_cone : limits.cone (X.diagram ⋙ of_Fintype) :=
+{ X := Y,
+  π :=
+  { app := λ I,
+    { to_fun := cl.map ∘ (cl.pullback f I).proj,
+      continuous_to_fun :=
+        continuous.comp continuous_of_discrete_topology (locally_constant.continuous _) },
+    naturality' := begin
+      intros I J g,
+      ext1 y,
+      change cl.map ((cl.pullback f J).proj y) = cl.refined (le_of_hom g) _,
+      dsimp at *,
+      erw ← cl.map_refined_comm,
+      symmetry,
+      congr,
+      apply cl.proj_fun_unique,
+      apply cl.refined_le,
+      apply cl.proj_fun_spec,
+    end } }
+
+theorem lift_hom_cone_eq : f = X.Fincone_is_limit.lift (hom_cone f) :=
+begin
+  refine X.Fincone_is_limit.uniq (hom_cone f) f _,
+  intros I,
+  ext1 y,
+  change I.proj (f y) = cl.map _,
+  symmetry,
+  apply cl.proj_fun_unique,
+  change _ ∈ f ⁻¹' ↑(cl.map (((cl.pullback f I).proj) y)),
+  rw ← cl.map_spec,
+  apply cl.proj_fun_spec,
+end
+
 end categorical
 
 end Profinite
