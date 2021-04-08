@@ -3,7 +3,7 @@ import pseudo_normed_group.category
 import breen_deligne.suitable
 
 import for_mathlib.add_monoid_hom
-/-
+/-!
 
 # Universal maps and pseudo-normed groups
 

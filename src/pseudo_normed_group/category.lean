@@ -3,7 +3,7 @@ import topology.category.Profinite
 
 import pseudo_normed_group.with_Tinv
 
-/-
+/-!
 
 # The category of profinitely filtered pseudo normed groups.
 
