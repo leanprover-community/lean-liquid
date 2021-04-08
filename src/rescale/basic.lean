@@ -1,5 +1,11 @@
 import polyhedral_lattice.basic
+/-!
 
+# rescaling the norm on a type
+
+This file is little more than the definition of the type alias.
+
+-/
 noncomputable theory
 open_locale big_operators classical nnreal
 
