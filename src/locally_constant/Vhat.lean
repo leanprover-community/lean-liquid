@@ -77,6 +77,18 @@ def incl {V : NormedGroup} : V ⟶ Completion.obj V :=
 
 @[simp] lemma norm_incl_eq {V : NormedGroup} {v : V} : ∥incl v∥ = ∥v∥ := by simp
 
+lemma Completion_map_bound_by {V W : NormedGroup} (f : V ⟶ W) (C : ℝ≥0) (hf : f.bound_by C) :
+  (Completion.map f).bound_by C :=
+begin
+  intros v,
+  apply completion.induction_on v; clear v,
+  { exact is_closed_le (continuous_norm.comp completion.continuous_map)
+      (continuous_const.mul continuous_norm), },
+  intro v,
+  simp only [completion.norm_coe, Completion_map_apply, completion.map_coe f.uniform_continuous],
+  exact hf v
+end
+
 lemma Completion_map_norm_noninc {V W : NormedGroup} (f : V ⟶ W) (hf : f.norm_noninc) :
   (Completion.map f).norm_noninc :=
 begin

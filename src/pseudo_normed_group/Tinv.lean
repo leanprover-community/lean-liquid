@@ -29,6 +29,10 @@ def ι {V W : NormedGroup} (f g : V ⟶ W) :
   equalizer f g ⟶ V :=
 normed_group_hom.equalizer.ι _ _
 
+@[reassoc] lemma condition {V W : NormedGroup} (f g : V ⟶ W) :
+  ι f g ≫ f = ι f g ≫ g :=
+normed_group_hom.equalizer.condition _ _
+
 def map {V₁ V₂ W₁ W₂ : NormedGroup} {f₁ f₂ g₁ g₂} (φ : V₁ ⟶ V₂) (ψ : W₁ ⟶ W₂)
   (hf : φ ≫ f₂ = f₁ ≫ ψ) (hg : φ ≫ g₂ = g₁ ≫ ψ) :
   equalizer f₁ g₁ ⟶ equalizer f₂ g₂ :=
@@ -264,7 +268,14 @@ lemma res_bound_by [fact (c₂ ≤ r' * c₁)] [fact (c₂ ≤ c₁)] [fact (c�
 begin
   apply CLCPTinv.map_bound_by,
   rw [← category.comp_id ((CLCP V n).map ((nat_trans.op (Filtration.res r' c₃ c₁)).app M))],
-  sorry
+  have := nat_trans.congr_app (CLCP.T r V n).inv_hom_id (((Filtration r').obj c₃).op.obj M),
+  dsimp only [nat_trans.id_app] at this,
+  rw [← this, CLCP.T_inv_eq, nat_trans.comp_app, ← category.assoc ((CLCP V n).map _)],
+  unfreezingI { subst c₃ },
+  rw [← NormedGroup.equalizer.condition_assoc, ← category.assoc],
+  refine normed_group_hom.bound_by.comp' 1 r r (mul_one r).symm _ _,
+  { apply CLCP.T_bound_by },
+  { exact ((CLCP.map_norm_noninc V n _).comp equalizer.ι_norm_noninc).bound_by_one }
 end
 
 end CLCFPTinv₂
@@ -283,6 +294,25 @@ CLCFPTinv₂.res_refl _ _ _ _ _ _
 lemma res_comp_res [fact (c₃ ≤ c₁)] [fact (c₅ ≤ c₃)] [fact (c₅ ≤ c₁)] :
   res r V r' c₁ c₃ n ≫ res r V r' c₃ c₅ n = res r V r' c₁ c₅ n :=
 CLCFPTinv₂.res_comp_res _ _ _ _ _ _ _ _ _ _
+
+lemma res_bound_by [fact (c₂ ≤ c₁)] [fact (c₂ ≤ r' * c₁)] (M) :
+  ((res r V r' c₁ c₂ n).app M).bound_by r :=
+begin
+  rw ← res_comp_res r V r' c₁ (r' * c₁) c₂,
+  refine bound_by.comp' _ _ _ (one_mul r).symm _ (CLCFPTinv₂.res_bound_by r V r' _ _ _ _ n rfl M),
+  exact (CLCPTinv.map_norm_noninc r V _ _ _ _ _ _ _ _ _).bound_by_one
+end
+
+lemma res_bound_by_pow (N : ℕ) [fact (c₂ ≤ c₁)] [h : fact (c₂ ≤ r' ^ N * c₁)] (M) :
+  ((res r V r' c₁ c₂ n).app M).bound_by (r ^ N) :=
+begin
+  unfreezingI { induction N with N ih generalizing c₁ c₂ },
+  { rw pow_zero, exact (CLCPTinv.map_norm_noninc r V _ _ _ _ _ _ _ _ _).bound_by_one },
+  haveI : fact (c₂ ≤ r' ^ N * c₁) := nnreal.fact_le_pow_mul_of_le_pow_succ_mul _ _ _,
+  rw [pow_succ, mul_assoc] at h, resetI,
+  rw [← res_comp_res r V r' c₁ (r' ^ N * c₁) c₂],
+  refine bound_by.comp' _ _ _ (pow_succ _ _) (res_bound_by r V r' _ _ n M) (ih _ _)
+end
 
 end CLCFPTinv
 
@@ -367,6 +397,16 @@ begin
   congr' 1; { simp only [← CLCFP.res_def], apply res_comp_eval_CLCFP },
 end
 
+lemma eval_CLCFPTinv₂_bound_by [fact (c₂ ≤ r' * c₁)] [fact (c₄ ≤ r' * c₃)]
+  [ϕ.suitable c₃ c₁] [ϕ.suitable c₄ c₂] (N : ℕ) (h : ϕ.bound_by N) (M) :
+  ((ϕ.eval_CLCFPTinv₂ r V r' c₁ c₂ c₃ c₄).app M).bound_by N :=
+begin
+  apply NormedGroup.equalizer.map_bound_by,
+  refine normed_group_hom.bound_by.comp' _ _ _ (mul_one _).symm _ _,
+  { apply eval_CLCFP_bound_by, exact h },
+  { exact equalizer.ι_norm_noninc.bound_by_one }
+end
+
 def eval_CLCFPTinv [ϕ.suitable c₂ c₁] :
   CLCFPTinv r V r' c₁ n ⟶ CLCFPTinv r V r' c₂ m :=
 ϕ.eval_CLCFPTinv₂ r V r' c₁ _ c₂ _
@@ -386,6 +426,11 @@ lemma res_comp_eval_CLCFPTinv
   res r V r' c₁ c₂ n ≫ ϕ.eval_CLCFPTinv r V r' c₂ c₄ =
     ϕ.eval_CLCFPTinv r V r' c₁ c₃ ≫ res r V r' c₃ c₄ m :=
 by apply res_comp_eval_CLCFPTinv₂
+
+lemma eval_CLCFPTinv_bound_by [normed_with_aut r V] [fact (0 < r)] [ϕ.suitable c₂ c₁]
+  (N : ℕ) (h : ϕ.bound_by N) (M) :
+  ((ϕ.eval_CLCFPTinv r V r' c₁ c₂).app M).bound_by N :=
+eval_CLCFPTinv₂_bound_by r V r' _ _ _ _ _ N h M
 
 end universal_map
 

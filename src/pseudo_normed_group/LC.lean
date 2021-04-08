@@ -1,7 +1,9 @@
 import pseudo_normed_group.FiltrationPow
 import locally_constant.NormedGroup
 import locally_constant.Vhat
+
 import for_mathlib.preadditive_category
+import for_mathlib.normed_group_hom_bound_by
 
 namespace category_theory
 namespace nat_trans
@@ -33,9 +35,26 @@ namespace LCP
 lemma map_norm_noninc {M₁ M₂} (f : M₁ ⟶ M₂) : ((LCP V n).map f).norm_noninc :=
 locally_constant.comap_hom_norm_noninc _ _
 
+instance obj.normed_with_aut [normed_with_aut r V] [fact (0 < r)] (A : Profiniteᵒᵖ) :
+  normed_with_aut r ((LCP V n).obj A) :=
+NormedGroup.normed_with_aut_LocallyConstant _ _ _
+
+@[simps {fully_applied := ff}]
+def T [normed_with_aut r V] : LCP V n ≅ LCP V n :=
+((whiskering_left _ _ _).obj _).map_iso $ LocallyConstant.map_iso normed_with_aut.T
+
+lemma T_eq [normed_with_aut r V] [fact (0 < r)]  (A) :
+  (LCP.T r V n).hom.app A = normed_with_aut.T.hom := rfl
+
+lemma T_bound_by [normed_with_aut r V] [fact (0 < r)] (A) :
+  normed_group_hom.bound_by ((LCP.T r V n).hom.app A) r :=
+by { rw T_eq, intro v, exact (normed_with_aut.norm_T v).le }
+
 @[simps {fully_applied := ff}]
 def T_inv [normed_with_aut r V] [fact (0 < r)] : LCP V n ⟶ LCP V n :=
 (whisker_left _ (LocallyConstant.map (normed_with_aut.T.inv : V ⟶ V)) : _)
+
+lemma T_inv_eq [normed_with_aut r V] [fact (0 < r)] : (T r V n).inv = T_inv r V n := rfl
 
 end LCP
 
@@ -99,16 +118,18 @@ section normed_with_aut
 
 variables [normed_with_aut r V]
 
-instance _root_.LCP.obj.normed_with_aut (A : Profiniteᵒᵖ) [fact (0 < r)] :
-  normed_with_aut r ((LCP V n).obj A) :=
-NormedGroup.normed_with_aut_LocallyConstant _ _ _
-
 instance [fact (0 < r)] (M) : normed_with_aut r ((LCFP V r' c n).obj M) :=
 LCP.obj.normed_with_aut _ _ _ _
+
+@[simps {fully_applied := ff}]
+def T [fact (0 < r)] : LCFP V r' c n ≅ LCFP V r' c n :=
+((whiskering_left _ _ _).obj _).map_iso $ LCP.T _ _ _
 
 @[simps app_apply {fully_applied := ff}]
 def T_inv [fact (0 < r)] : LCFP V r' c n ⟶ LCFP V r' c n :=
 (whisker_left _ (LCP.T_inv r V n) : _)
+
+lemma T_inv_eq [fact (0 < r)] : (T r V r' c n).inv = T_inv r V r' c n := rfl
 
 lemma T_inv_def [fact (0 < r)] :
   T_inv r V r' c n = (whisker_left  (FiltrationPow r' c n).op
@@ -119,14 +140,6 @@ lemma T_inv_app [fact (0 < r)] (M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ) :
   (T_inv r V r' c n).app M =
     (LCP.T_inv r V n).app (((Filtration r').obj c).op.obj M) :=
 rfl
-
--- This does not apply to our situation
--- lemma T_inv_norm_noninc [fact (0 < r)] : (@T_inv r V r' M _ c n _ _).norm_noninc :=
--- begin
---   refine locally_constant.map_hom_norm_noninc _,
---   -- factor this out
---   intro v,
--- end
 
 variables [fact (0 < r)]
 
@@ -328,19 +341,6 @@ lemma eval_LCFP_comp (g : universal_map m n) (f : universal_map l m)
     g.eval_LCFP V r' c₁ c₂ ≫ f.eval_LCFP V r' c₂ c₃ :=
 by { simp only [eval_LCFP_eq_eval_LCFP'], apply eval_LCFP'_comp }
 
--- lemma map_comp_eval_LCFP [ϕ.suitable c₁ c₂] :
---   map V r' c₂ n f ≫ ϕ.eval_LCFP V r' M₁ c₁ c₂ = ϕ.eval_LCFP V r' M₂ c₁ c₂ ≫ map V r' c₁ m f :=
--- begin
---   show normed_group_hom.comp_hom _ _ = normed_group_hom.comp_hom _ _,
---   simp only [eval_LCFP_def, add_monoid_hom.map_sum, add_monoid_hom.sum_apply],
---   apply finset.sum_congr rfl,
---   intros g hg,
---   haveI : g.suitable c₁ c₂ := suitable_of_mem_support ϕ c₁ c₂ g hg,
---   simp only [← gsmul_eq_smul, add_monoid_hom.map_gsmul, add_monoid_hom.gsmul_apply],
---   congr' 1,
---   exact g.map_comp_eval_LCFP V r' _ _ _
--- end
-
 lemma res_comp_eval_LCFP [fact (c₂ ≤ c₁)] [fact (c₄ ≤ c₃)] [ϕ.suitable c₃ c₁] [ϕ.suitable c₄ c₂] :
   res V r' c₁ c₂ n ≫ ϕ.eval_LCFP V r' c₂ c₄ = ϕ.eval_LCFP V r' c₁ c₃ ≫ res V r' c₃ c₄ m :=
 begin
@@ -387,6 +387,22 @@ begin
   haveI : g.suitable c₂ c₁ := suitable_of_mem_support ϕ _ _ g hg,
   congr' 1,
   apply basic_universal_map.T_inv_comp_eval_LCFP r V r'
+end
+
+lemma eval_LCFP_bound_by [normed_with_aut r V] [fact (0 < r)] [ϕ.suitable c₂ c₁]
+  (N : ℕ) (h : ϕ.bound_by N) (M) :
+  ((ϕ.eval_LCFP V r' c₁ c₂).app M).bound_by N :=
+begin
+  rw [eval_LCFP_eq_eval_LCFP', eval_LCFP'],
+  have : (∑ (g : basic_universal_map m n) in support ϕ, (coeff g ϕ).nat_abs : ℝ≥0) ≤ N,
+  { exact_mod_cast h },
+  simp only [← nat_trans.app_hom_apply, add_monoid_hom.map_sum, add_monoid_hom.map_int_module_smul],
+  refine (normed_group_hom.bound_by.sum ϕ.support _ _ _).le this,
+  intros g hg,
+  have aux := ϕ.suitable_of_mem_support c₂ c₁ g hg,
+  refine ((normed_group_hom.norm_noninc.bound_by_one _).int_smul _).le (mul_one _).le,
+  rw [← g.eval_LCFP_eq_eval_LCFP' V r' c₁ c₂, basic_universal_map.eval_LCFP],
+  { refine locally_constant.comap_hom_norm_noninc _ _, exact aux },
 end
 
 end universal_map
