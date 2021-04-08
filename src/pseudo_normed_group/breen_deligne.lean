@@ -8,7 +8,7 @@ import for_mathlib.add_monoid_hom
 # Universal maps and pseudo-normed groups
 
 This file contains the definition of the action of a basic universal map
-powers of a pseudo-normed group and related types.
+on powers of a pseudo-normed group and related types.
 
 ## Main definitions
 

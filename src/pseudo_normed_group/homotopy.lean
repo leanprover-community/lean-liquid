@@ -1,7 +1,11 @@
 import pseudo_normed_group.system_of_complexes
 import rescale.Tinv
+/-!
 
-.
+*TODO*: find someone who can explain what is going on in this file. There
+are no docstrings, sorried data and false assumptions.
+
+-/
 
 noncomputable theory
 

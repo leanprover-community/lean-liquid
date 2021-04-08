@@ -1,6 +1,23 @@
 import for_mathlib.normed_group_hom_equalizer
 import pseudo_normed_group.CLC
+/-!
 
+# V-hat((M_c)^n)^{T⁻¹}
+
+This file defines a fundamental construction defined just above Definition 9.3
+in `analytic.pdf`: the subspac of V-hat(M_c^n) where the two actions of T⁻¹ coincide.
+
+## Main definition
+
+Here `M` is a profinitely filtered pseudo-normed group with T⁻¹ scaling things by `r'`,
+`V` is a normed group with `T⁻¹` scaling norms by `r`, `c` is a real (a filtration coefficient)
+and `n` is a natural.
+
+- `CLCFPTinv r V r' c n M`: the normed group defined as the subgroup of `V-hat(M_c^n)` where
+  the two actions of `T⁻¹` (one coming from the action on M, the other coming from the
+  action on V) coincide.
+
+-/
 open_locale classical nnreal
 noncomputable theory
 local attribute [instance] type_pow

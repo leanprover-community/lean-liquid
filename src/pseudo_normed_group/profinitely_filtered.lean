@@ -5,7 +5,14 @@ import pseudo_normed_group.basic
 
 import hacks_and_tricks.type_pow
 import facts
+/-!
 
+# profinitely_filtered_pseudo_normed_group
+
+The definition of a profinitely_filtered_pseudo_normed_group, and an API for this
+definition.
+
+-/
 open pseudo_normed_group
 open_locale nnreal big_operators
 

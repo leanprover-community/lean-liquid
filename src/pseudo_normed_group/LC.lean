@@ -7,7 +7,16 @@ import for_mathlib.normed_group_hom_bound_by
 
 /-!
 
-# Locally constant maps
+# The category of locally constant maps
+
+Various constructions of pseudo-normed groups of locally constant functions.
+
+## Main definitions
+
+- `LCP V n`: the functor sending a profinite set `S` to the locally constant
+  functions from `S^n` to `V`
+- `LCFP V r' c n`: the functor sending a profinitely filtered pseudo-normed
+  group with T⁻¹ to V(M_c^n), the locally constant functions from M_c^n to V.
 
 -/
 namespace category_theory
@@ -31,7 +40,7 @@ universe variable u
 variables (r : ℝ≥0) (V : NormedGroup) (r' : ℝ≥0)
 variables (c c₁ c₂ c₃ c₄ : ℝ≥0) (l m n : ℕ)
 
-/-- The functor that sends `A` to `V(A^n)` -/
+/-- `LCP V n` is the functor that sends a profinite set `S` to `V(S^n)` -/
 def LCP (V : NormedGroup) (n : ℕ) : Profiniteᵒᵖ ⥤ NormedGroup :=
 (Pow n).op ⋙ LocallyConstant.obj V
 

@@ -2,13 +2,12 @@ import pseudo_normed_group.breen_deligne
 import normed_group.NormedGroup
 /-!
 
-# The categorical filtration on a profinitely filtered pseudo-normed abelian group
+# Constructions on the filtration on a profinitely filtered pseudo-normed abelian group
 
 ## Main definitions
 
-Things like
-
-- `Filtration (r' : ℝ≥0) : ℝ≥0 ⥤ ProFiltPseuNormGrpWithTinv.{u} r' ⥤ Profinite.{u}`
+- `FiltrationPow r' c n`: the functor sending a profinitely filtered `M` to `M_c^n`.
+- `φ.eval_FP r' c₁ c₂`: The map M_c₁^m → M_c₂^n induced by a (c₁, c₂)-suitable φ.
 
 -/
 open_locale classical nnreal
@@ -106,7 +105,7 @@ theorem Tinv₀_comp_res {r' : ℝ≥0} (c₁ c₂ c₃ c₄ : ℝ≥0)
 end Filtration
 
 
-/-- The "functor" that sends `M` and `c` to `(filtration M c)^n` -/
+/-- `FiltrationPow r' c n` is the functor sending a profinitely filtered `M` to `M_c^n`. -/
 @[simps] def FiltrationPow (r' : ℝ≥0) (c : ℝ≥0) (n : ℕ) :
   ProFiltPseuNormGrpWithTinv r' ⥤ Profinite :=
 (Filtration r').obj c ⋙ Pow n

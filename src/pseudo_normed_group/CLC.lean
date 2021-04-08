@@ -1,5 +1,18 @@
 import pseudo_normed_group.LC
+/-!
 
+# V-hat(M_c^n)
+
+One of the key players in the proof of the main theorem of this repo is
+the normed group V-hat(M-bar_r'(S)_{≤c}^n). This file constructs
+
+## Key defintions
+
+- `CLCP V n`: the functor that sends a profinite set `S` to `V-hat(S^n)`
+- `CLFCP v r' c n`: the functor sending a profinitely-filtered `T⁻¹`-module `M`
+   to `V-hat((M_c)^n)`
+
+-/
 open_locale classical nnreal
 noncomputable theory
 local attribute [instance] type_pow
@@ -11,7 +24,7 @@ universe variable u
 variables (r : ℝ≥0) (V : NormedGroup) (r' : ℝ≥0)
 variables (c c₁ c₂ c₃ c₄ : ℝ≥0) (l m n : ℕ)
 
-/-- The "functor" that sends `M` and `c` to `V-hat((filtration M c)^n)` -/
+/-- `CLCP V n` is the functor that sends a profinite set `S` to `V-hat(S^n)` -/
 def CLCP (V : NormedGroup) (n : ℕ) : Profiniteᵒᵖ ⥤ NormedGroup :=
 LCP V n ⋙ Completion
 
@@ -34,7 +47,8 @@ lemma T_inv_eq [normed_with_aut r V] [fact (0 < r)] : (T r V n).inv = T_inv r V 
 
 end CLCP
 
-/-- The "functor" that sends `M` and `c` to `V-hat((filtration M c)^n)` -/
+/-- `CLFCP v r' c n` is the functor sending a profinitely-filtered `T⁻¹`-module `M`
+   to `V-hat((M_c)^n)` -/
 def CLCFP (V : NormedGroup) (r' : ℝ≥0) (c : ℝ≥0) (n : ℕ) :
   (ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup :=
 ((Filtration r').obj c).op ⋙ CLCP V n
@@ -71,7 +85,8 @@ lemma res_norm_noninc [fact (c₂ ≤ c₁)] (M) :
 Completion_map_norm_noninc _ $ LCFP.res_norm_noninc _ _ _ _ _ _
 
 section Tinv
-open profinitely_filtered_pseudo_normed_group_with_Tinv
+-- kmb commented out the next line
+--open profinitely_filtered_pseudo_normed_group_with_Tinv
 variables [fact (0 < r')] [fact (c₂ ≤ r' * c₁)]
 
 -- @[simps obj {fully_applied := ff}]

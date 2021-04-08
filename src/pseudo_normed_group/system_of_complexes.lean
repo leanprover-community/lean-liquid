@@ -4,7 +4,30 @@ import system_of_complexes.basic
 import pseudo_normed_group.Tinv
 import pseudo_normed_group.category
 import for_mathlib.arrow
+/-!
 
+# The system of complexes in Theorem 9.4 of `analytic.pdf`
+
+Theorem 9.4 is about a system of complexes built from Breen-Deligne data,
+a normed group `V` with `T⁻¹` (scaling by `r`) and a (certain explicit) profinitely filtered
+pseudo-normed group `M` with `T⁻¹` (scaling by `r'`). We do not specialise to Scholze's
+`𝓜-bar_r'(S)` in this file, but allow general profinitely filtered `M`. This file
+contains the construction of the system of complexes from this data.
+
+## Main definitions
+
+Let `BD = (n₁ ⟶ n₂ ⟶ …)` be Breen-Deligne data, `c'` a sequence of non-negative reals which are
+suitable for `BD`, and say `r,c≥0` and `V` is a normed group with `T⁻¹` scaling by `r`.
+
+- `BD.complex c' r V r' c`: the functor taking a profinitely filtered pseudo-normed abelian
+group `M` to the cochain complex `V-hat(M_{≤c}^n₁)^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^n₂)^{T⁻¹} ⟶ …`
+induced by the data.
+
+- `BD.system c' r V r'`: the functor sending a profinitely filtered pseudo-normed abelian
+  group `M` to the system of complexes whose component at `c`
+  is `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …`
+
+-/
 open_locale classical nnreal
 noncomputable theory
 
@@ -115,7 +138,7 @@ theorem comm_sq_app {C D} [category C] [category D]
 by rw [← nat_trans.comp_app, ← nat_trans.comp_app, hf]
 
 /-- The system of complexes
-`V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ ...`
+`V-hat(M_{≤c}^{n₁})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^{n₂})^{T⁻¹} ⟶ ...`
 occurring in Theorems 9.4 and 9.5 of [Analytic], as a functor in `M`. -/
 -- @[simps]
 def system (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
