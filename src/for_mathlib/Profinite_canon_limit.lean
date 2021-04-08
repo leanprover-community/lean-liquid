@@ -401,6 +401,10 @@ def Fincone : limits.cone (X.diagram ⋙ of_Fintype) :=
       apply cl.proj_fun_spec
     end } }
 
+def Fincone_iso : (Profinite_to_Top.obj X) ≅
+  (Top.limit_cone ((X.diagram ⋙ of_Fintype) ⋙ Profinite_to_Top)).X :=
+sorry
+
 def Fincone_limit : limits.is_limit X.Fincone :=
 begin
   let F := (X.diagram ⋙ of_Fintype) ⋙ Profinite_to_Top,
@@ -409,7 +413,8 @@ begin
   let D := lift_limit C_is_limit,
   let D_is_limit : limits.is_limit D := lifted_limit_is_limit _,
   let E : Profinite_to_Top.map_cone D ≅ C := lifted_limit_maps_to_original _,
-  sorry,
+  have ii : X.Fincone ≅ D, sorry,
+  exact limits.is_limit.of_iso_limit D_is_limit ii.symm,
 end
 
 end categorical
