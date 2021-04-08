@@ -266,34 +266,68 @@ instance suitable_mul_right (c : ℝ≥0) :
 
 end data
 
-/-
-===
-TODO: Unify what follows with `data.suitable` above
-===
--/
+section double
 
--- namespace package
+instance basic_universal_map.double_suitable (f : basic_universal_map m n) [f.suitable c₁ c₂] :
+  (basic_universal_map.double f).suitable c₁ c₂ :=
+begin
+  intros i,
+  -- now use that `double` is a block matrix, so every row/column is just a row/column of `f`
+  -- with a whole bunch of extra `0`s
+  sorry
+end
 
--- /-- A sequence of nonnegative real numbers `c' 0`, `c' 1`, ...
--- is *suitable* with respect to a Breen--Deligne package `BD`,
--- if for all `i : ℕ`, the constants `c' (i+1)` and `c' i` are
--- suitable with respect to the universal map `BD.map i`.
+-- move this
+lemma universal_map.mem_support_double (f : universal_map m n) (g) :
+  g ∈ (universal_map.double f).support ↔ ∃ g', g' ∈ f.support ∧ g = basic_universal_map.double g' :=
+sorry
 
--- This definition ensures that we get a well-defined complex
--- of normed groups `LCC_Mbar_pow V S r' (c' i) (BD.rank i)`,
--- induced by the maps `BD.map i`. -/
--- class suitable (BD : package) (c' : ℕ → ℝ≥0) : Prop :=
--- (universal_suitable : ∀ i, (BD.map i).suitable (c' (i+1)) (c' i))
+instance universal_map.double_suitable (f : universal_map m n) [f.suitable c₁ c₂] :
+  (universal_map.double f).suitable c₁ c₂ :=
+begin
+  intros g hg,
+  simp only [data.double_d, universal_map.mem_support_double] at hg,
+  rcases hg with ⟨g, hg, rfl⟩,
+  haveI := universal_map.suitable_of_mem_support f c₁ c₂ g hg,
+  apply_instance
+end
 
--- variables (BD : package) (c' : ℕ → ℝ≥0) (i : ℕ) [BD.suitable c']
+instance data.double_suitable (BD : data) (c' : ℕ → ℝ≥0) [BD.suitable c'] :
+  BD.double.suitable c' :=
+{ universal_suitable := λ i j, universal_map.double_suitable _ _ _ }
 
--- instance basic_suitable_of_suitable : ((BD.map i).suitable (c' (i+1)) (c' i)) :=
--- suitable.universal_suitable i
+instance data.pow_suitable  (BD : data) (c' : ℕ → ℝ≥0) [BD.suitable c'] :
+  ∀ N, (BD.pow N).suitable c'
+| 0     := sorry
+| (N+1) := sorry
 
--- instance suitable_of_suitable :
---   ((universal_map.comp (BD.map i) (BD.map (i+1))).suitable (c' (i+2)) (c' i)) :=
--- universal_map.suitable.comp (c' (i + 1))
+end double
 
--- end package
+-- move this??
+noncomputable
+def rescale_constants (c' : ℕ → ℝ≥0) (N : ℝ≥0) : ℕ → ℝ≥0 :=
+λ i, (c' i) * N⁻¹
+
+section σπ
+
+variables (BD : package) (c' : ℕ → ℝ≥0)
+
+instance σ_suitable (i : ℕ) :
+  (BD.data.σ.f i).suitable (c' i) (rescale_constants c' 2 i) :=
+sorry
+
+instance π_suitable (i : ℕ) :
+  (BD.data.π.f i).suitable (c' i) (c' i) :=
+sorry
+
+instance σ_suitable' (k' : ℝ≥0) (N : ℕ) [fact (1 ≤ k')] [fact (k' ≤ 2^N)] (i : ℕ) :
+  ((data.hom_pow BD.data.σ N).f i).suitable (c' i) (k' * rescale_constants c' (2^N) i) :=
+sorry
+
+instance π_suitable' (k' : ℝ≥0) (N : ℕ) [fact (1 ≤ k')] [fact (k' ≤ 2^N)] (i : ℕ) :
+  ((data.hom_pow BD.data.π N).f i).suitable (c' i) (k' * rescale_constants c' (2^N) i) :=
+sorry
+
+end σπ
 
 end breen_deligne

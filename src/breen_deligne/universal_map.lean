@@ -4,6 +4,7 @@ import algebra.direct_sum
 import algebra.big_operators.finsupp
 
 import for_mathlib.linear_algebra
+import for_mathlib.free_abelian_group
 
 import hacks_and_tricks.type_pow
 import hacks_and_tricks.by_exactI_hack
@@ -248,6 +249,9 @@ begin
   show comp (of g) (id _) = (of g),
   simp only [id, comp_of, id_apply, basic_universal_map.comp_id]
 end
+
+def bound_by (N : ℕ) : Prop :=
+∑ g in f.support, (free_abelian_group.coeff g f).nat_abs ≤ N
 
 /-- `double f` is the `universal_map` from `ℤ[A^m ⊕ A^m]` to `ℤ[A^n ⊕ A^n]`
 given by applying `f` on both "components". -/

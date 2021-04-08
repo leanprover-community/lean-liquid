@@ -41,7 +41,7 @@ begin
   { have := (norm_nonneg _).trans (h 1),
     rw pow_one at this,
     exact (zero_le_mul_left hC).mp this },
-  simp_rw finset.sum_range_succ,
+  simp_rw finset.sum_range_succ_comm,
   have : cauchy_seq u,
   { apply tendsto.cauchy_seq,
     apply squeeze_zero_norm h,
