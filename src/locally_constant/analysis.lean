@@ -4,7 +4,8 @@ import analysis.normed_space.normed_group_hom
 /-!
 # Analysis of locally constant maps
 
-This file defines the normed group of locally constant maps into a normed group.
+This file defines the normed group of locally constant maps from a compact topological
+space into a normed group (with the sup norm).
 
 ## Main construction
 
