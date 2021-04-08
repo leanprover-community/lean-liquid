@@ -20,10 +20,18 @@ open profinitely_filtered_pseudo_normed_group category_theory.limits
 open normed_group_hom
 
 namespace NormedGroup
+
+def equalizer {V W : NormedGroup} (f g : V ⟶ W) := of (f.equalizer g)
+
 namespace equalizer
+
+def ι {V W : NormedGroup} (f g : V ⟶ W) :
+  equalizer f g ⟶ V :=
+normed_group_hom.equalizer.ι _ _
+
 def map {V₁ V₂ W₁ W₂ : NormedGroup} {f₁ f₂ g₁ g₂} (φ : V₁ ⟶ V₂) (ψ : W₁ ⟶ W₂)
   (hf : φ ≫ f₂ = f₁ ≫ ψ) (hg : φ ≫ g₂ = g₁ ≫ ψ) :
-  of (f₁.equalizer g₁) ⟶ of (f₂.equalizer g₂) :=
+  equalizer f₁ g₁ ⟶ equalizer f₂ g₂ :=
 normed_group_hom.equalizer.map _ _ hf.symm hg.symm
 
 theorem map_congr
@@ -44,6 +52,11 @@ lemma map_comp_map {V₁ V₂ V₃ W₁ W₂ W₃ : NormedGroup} {f₁ f₂ f₃
   map φ ψ hf hg ≫ map φ' ψ' hf' hg' =
   map (φ ≫ φ') (ψ ≫ ψ') (comm_sq₂ hf hf') (comm_sq₂ hg hg') :=
 by { ext, refl }
+
+lemma map_bound_by {V₁ V₂ W₁ W₂ : NormedGroup} {f₁ f₂ g₁ g₂} {φ : V₁ ⟶ V₂} {ψ : W₁ ⟶ W₂}
+  (hf : φ ≫ f₂ = f₁ ≫ ψ) (hg : φ ≫ g₂ = g₁ ≫ ψ) (C : ℝ≥0) (hφ : (ι f₁ g₁ ≫ φ).bound_by C) :
+  (map φ ψ hf hg).bound_by C :=
+normed_group_hom.equalizer.map_bound_by _ _ C hφ
 
 @[simps obj map]
 protected def F {J} [category J] {V W : J ⥤ NormedGroup} (f g : V ⟶ W) : J ⥤ NormedGroup :=
@@ -88,7 +101,7 @@ def CLCPTinv (r : ℝ≥0) (V : NormedGroup) (n : ℕ)
   NormedGroup :=
 NormedGroup.of $ normed_group_hom.equalizer
   ((CLCP V n).map f)
-  ((CLCP.T_inv r V n).app A ≫ (CLCP V n).map g)
+  ((CLCP V n).map g ≫ (CLCP.T_inv r V n).app B)
 
 namespace CLCPTinv
 
@@ -97,13 +110,22 @@ def map {A₁ B₁ A₂ B₂ : Profiniteᵒᵖ} (f₁ g₁ : A₁ ⟶ B₁) (f�
   CLCPTinv r V n f₁ g₁ ⟶ CLCPTinv r V n f₂ g₂ :=
 NormedGroup.equalizer.map ((CLCP V n).map ϕ) ((CLCP V n).map ψ)
   (by rw [← functor.map_comp, ← functor.map_comp, h₁]) $
-by rw [← category.assoc, (CLCP.T_inv _ _ _).naturality,
-  category.assoc, category.assoc, ← functor.map_comp, ← functor.map_comp, h₂]
+by rw [← category.assoc, ← functor.map_comp, h₂, functor.map_comp,
+  category.assoc, (CLCP.T_inv _ _ _).naturality, category.assoc]
 
 lemma map_norm_noninc {A₁ B₁ A₂ B₂ : Profiniteᵒᵖ} (f₁ g₁ : A₁ ⟶ B₁) (f₂ g₂ : A₂ ⟶ B₂)
   (ϕ : A₁ ⟶ A₂) (ψ : B₁ ⟶ B₂) (h₁ h₂) :
   (CLCPTinv.map r V n f₁ g₁ f₂ g₂ ϕ ψ h₁ h₂).norm_noninc :=
 equalizer.map_norm_noninc _ _ $ CLCP.map_norm_noninc _ _ _
+
+lemma map_bound_by {A₁ B₁ A₂ B₂ : Profiniteᵒᵖ} (f₁ g₁ : A₁ ⟶ B₁) (f₂ g₂ : A₂ ⟶ B₂)
+  (ϕ : A₁ ⟶ A₂) (ψ : B₁ ⟶ B₂) (h₁ h₂) (C : ℝ≥0)
+  (H : (NormedGroup.equalizer.ι
+         ((CLCP V n).map f₁)
+         ((CLCP V n).map g₁ ≫ (CLCP.T_inv r V n).app B₁) ≫
+       (CLCP V n).map ϕ).bound_by C) :
+  (CLCPTinv.map r V n f₁ g₁ f₂ g₂ ϕ ψ h₁ h₂).bound_by C :=
+NormedGroup.equalizer.map_bound_by _ _ C H
 
 @[simp] lemma map_id {A B : Profiniteᵒᵖ} (f g : A ⟶ B) :
   map r V n f g f g (𝟙 A) (𝟙 B) rfl rfl = 𝟙 _ :=
@@ -146,7 +168,7 @@ theorem F_def {J} [category J] (r : ℝ≥0) (V : NormedGroup) (n : ℕ)
   [normed_with_aut r V] [fact (0 < r)] {A B : J ⥤ Profiniteᵒᵖ} (f g : A ⟶ B) :
   CLCPTinv.F r V n f g = NormedGroup.equalizer.F
     (whisker_right f (CLCP V n))
-    (whisker_left A (CLCP.T_inv r V n) ≫ whisker_right g (CLCP V n)) := rfl
+    (whisker_right g (CLCP V n) ≫ whisker_left B (CLCP.T_inv r V n)) := rfl
 
 @[simp]
 def map_nat {J} [category J] {A₁ B₁ A₂ B₂ : J ⥤ Profiniteᵒᵖ} (f₁ g₁ : A₁ ⟶ B₁) (f₂ g₂ : A₂ ⟶ B₂)
@@ -165,7 +187,9 @@ theorem map_nat_def {J} [category J] {A₁ B₁ A₂ B₂ : J ⥤ Profiniteᵒ�
       (whisker_right ϕ (CLCP V n))
       (whisker_right ψ (CLCP V n))
       (by rw [← whisker_right_comp, ← whisker_right_comp, h₁])
-      (comm_sq₂ _ (by rw [← whisker_right_comp, ← whisker_right_comp, h₂])).symm,
+      (comm_sq₂ _ _).symm,
+    { exact whisker_right ψ _ },
+    { rw [← whisker_right_comp, ← whisker_right_comp, h₂] },
     ext x : 2,
     simp only [nat_trans.comp_app, whisker_left_app, whisker_right_app,
       (CLCP.T_inv _ _ _).naturality],
@@ -190,7 +214,7 @@ theorem CLCFPTinv₂_def (r : ℝ≥0) (V : NormedGroup)
   (c c₂ : ℝ≥0) [fact (c₂ ≤ r' * c)] (n : ℕ) :
   CLCFPTinv₂ r V r' c c₂ n = NormedGroup.equalizer.F
     (CLCFP.Tinv V r' c c₂ n)
-    (CLCFP.T_inv r V r' c n ≫ @CLCFP.res V r' c c₂ n (aux r' c c₂)) := rfl
+    (@CLCFP.res V r' c c₂ n (aux r' c c₂) ≫ CLCFP.T_inv r V r' c₂ n) := rfl
 
 /-- The functor that sends `M` and `c` to `V-hat((filtration M c)^n)^{T⁻¹}`,
 defined by taking `T⁻¹`-invariants for two different actions by `T⁻¹`:
@@ -234,6 +258,15 @@ begin
   exact (CLCPTinv.map_comp _ _ _ _ _ _ _ _ _ _ _ _ _).symm
 end
 
+lemma res_bound_by [fact (c₂ ≤ r' * c₁)] [fact (c₂ ≤ c₁)] [fact (c₄ ≤ r' * c₃)] [fact (c₄ ≤ c₃)]
+  [fact (c₃ ≤ c₁)] [fact (c₄ ≤ c₂)] (h₂₃ : c₂ = c₃) (M) :
+  ((res r V r' c₁ c₂ c₃ c₄ n).app M).bound_by r :=
+begin
+  apply CLCPTinv.map_bound_by,
+  rw [← category.comp_id ((CLCP V n).map ((nat_trans.op (Filtration.res r' c₃ c₁)).app M))],
+  sorry
+end
+
 end CLCFPTinv₂
 
 namespace CLCFPTinv
@@ -271,10 +304,11 @@ begin
   dsimp only [CLCFPTinv₂_def],
   refine NormedGroup.equalizer.map_nat (ϕ.eval_CLCFP _ _ _ _) (ϕ.eval_CLCFP _ _ _ _)
     (Tinv_comp_eval_CLCFP V r' c₁ c₂ c₃ c₄ ϕ).symm _,
-  have h₁ := T_inv_comp_eval_CLCFP r V r' c₁ c₃ ϕ,
   haveI : fact (c₂ ≤ c₁) := aux r' _ _, haveI : fact (c₄ ≤ c₃) := aux r' _ _,
-  have h₂ := res_comp_eval_CLCFP V r' c₁ c₂ c₃ c₄ ϕ,
-  exact (comm_sq₂ h₁ h₂).symm,
+  have h₁ := res_comp_eval_CLCFP V r' c₁ c₂ c₃ c₄ ϕ,
+  have h₂ := T_inv_comp_eval_CLCFP r V r' c₂ c₄ ϕ,
+  have := comm_sq₂ h₁ h₂,
+  exact this.symm
 end
 
 @[simp] lemma eval_CLCFPTinv₂_zero
