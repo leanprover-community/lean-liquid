@@ -93,7 +93,7 @@ end
 lemma suitable_comp {g : basic_universal_map m n} {f : basic_universal_map l m}
   {c₁ : ℝ≥0} (c₂ : ℝ≥0) {c₃ : ℝ≥0}
   [hg : g.suitable c₂ c₃] [hf : f.suitable c₁ c₂] :
-  (g.comp f).suitable c₁ c₃ :=
+  (comp g f).suitable c₁ c₃ :=
 begin
   intro i,
   simp only [← nat.coe_cast_ring_hom, ← ring_hom.map_sum, comp, matrix.mul_apply],
@@ -127,6 +127,50 @@ lemma suitable.le (hf : f.suitable c₂ c₃) (h1 : c₁ ≤ c₂) (h2 : c₃ �
 lemma suitable_of_le [hf : f.suitable c₂ c₃] (h1 : c₁ ≤ c₂) (h2 : c₃ ≤ c₄) :
   f.suitable c₁ c₄ :=
 hf.le _ _ _ _ _ h1 h2
+
+instance π₁_suitable (c : ℝ≥0) :
+  (π₁ n).suitable c c :=
+begin
+  intro i,
+  apply le_of_eq,
+  rw [π₁, finset.sum_eq_single (fin_sum_fin_equiv (sum.inl i))],
+  { simp only [matrix.reindex_linear_equiv_apply, equiv.symm_apply_apply],
+    dsimp [equiv.sum_empty],
+    simp only [matrix.one_apply_eq, nat.cast_one, int.nat_abs_one, one_mul] },
+  { rintro j - hj,
+    simp only [matrix.reindex_linear_equiv_apply, equiv.symm_apply_apply],
+    dsimp [equiv.sum_empty],
+    generalize hj' : fin_sum_fin_equiv.symm j = j',
+    cases j' with j' j',
+    { dsimp,
+      suffices : i ≠ j',
+      { simp only [this, matrix.one_apply_ne, ne.def, not_false_iff, nat.cast_zero, int.nat_abs_zero] },
+      rintro rfl, apply hj, rw [← hj', equiv.apply_symm_apply] },
+    { dsimp, refl } },
+  { intro h, exact (h $ finset.mem_univ _).elim }
+end
+
+instance π₂_suitable (c : ℝ≥0) :
+  (π₂ n).suitable c c :=
+begin
+  intro i,
+  apply le_of_eq,
+  rw [π₂, finset.sum_eq_single (fin_sum_fin_equiv (sum.inr i))],
+  { simp only [matrix.reindex_linear_equiv_apply, equiv.symm_apply_apply],
+    dsimp [equiv.sum_empty],
+    simp only [matrix.one_apply_eq, nat.cast_one, int.nat_abs_one, one_mul] },
+  { rintro j - hj,
+    simp only [matrix.reindex_linear_equiv_apply, equiv.symm_apply_apply],
+    dsimp [equiv.sum_empty],
+    generalize hj' : fin_sum_fin_equiv.symm j = j',
+    cases j' with j' j',
+    { dsimp, refl },
+    { dsimp,
+      suffices : i ≠ j',
+      { simp only [this, matrix.one_apply_ne, ne.def, not_false_iff, nat.cast_zero, int.nat_abs_zero] },
+      rintro rfl, apply hj, rw [← hj', equiv.apply_symm_apply] } },
+  { intro h, exact (h $ finset.mem_univ _).elim }
+end
 
 end basic_universal_map
 
@@ -172,15 +216,7 @@ end universal_map
 namespace basic_universal_map
 open free_abelian_group
 
-instance suitable_of (f : basic_universal_map m n) (c₁ c₂ : ℝ≥0) [f.suitable c₁ c₂] :
-  universal_map.suitable c₁ c₂ (of f) :=
-begin
-  intros g hg,
-  rw [support_of, finset.mem_singleton] at hg,
-  rwa hg
-end
-
-instance suitable_of_suitable_of (f : basic_universal_map m n) (c₁ c₂ : ℝ≥0)
+lemma suitable_of_suitable_of (f : basic_universal_map m n) (c₁ c₂ : ℝ≥0)
   [h : universal_map.suitable c₁ c₂ (of f)] :
   f.suitable c₁ c₂ :=
 h f $ by simp only [finset.mem_singleton, support_of]
@@ -190,9 +226,17 @@ end basic_universal_map
 namespace universal_map
 open free_abelian_group
 
+instance suitable_of (f : basic_universal_map m n) (c₁ c₂ : ℝ≥0) [f.suitable c₁ c₂] :
+  suitable c₁ c₂ (of f) :=
+begin
+  intros g hg,
+  rw [support_of, finset.mem_singleton] at hg,
+  rwa hg
+end
+
 @[simp] lemma suitable_of_iff (f : basic_universal_map m n) (c₁ c₂ : ℝ≥0) :
   suitable c₁ c₂ (of f) ↔ f.suitable c₁ c₂ :=
-⟨by {introI h, apply_instance}, by {introI h, apply_instance}⟩
+⟨by {introI h, apply basic_universal_map.suitable_of_suitable_of }, by {introI h, apply_instance}⟩
 
 instance suitable_zero : (0 : universal_map m n).suitable c₁ c₂ :=
 (suitable_free_predicate c₁ c₂).zero
@@ -255,6 +299,22 @@ begin
     simp only [add_monoid_hom.coe_add, add_monoid_hom.map_add, pi.add_apply],
     resetI, apply_instance }
 end
+
+instance σ_suitable (c : ℝ≥0) (n : ℕ) :
+  (σ n).suitable (c * 2⁻¹) c :=
+begin
+  refine @basic_universal_map.suitable_of _ _ _ _ _ (id _),
+  intro i,
+  apply le_of_eq,
+  have : ∀ x, x = 2 → x * (c * 2⁻¹) = c,
+  { rintro - rfl, rw [mul_left_comm, mul_inv_cancel, mul_one], exact two_ne_zero },
+  apply this, clear this,
+  sorry
+end
+
+instance π_suitable (c : ℝ≥0) (n : ℕ) :
+  (π n).suitable c c :=
+universal_map.suitable_add
 
 end universal_map
 
@@ -394,67 +454,9 @@ section σπ
 
 variables (BD : package) (c_ : ℕ → ℝ≥0)
 
-instance σ_suitable (c : ℝ≥0) (n : ℕ) :
-  (universal_map.σ n).suitable (c * 2⁻¹) c :=
-begin
-  refine @basic_universal_map.suitable_of _ _ _ _ _ (id _),
-  intro i,
-  apply le_of_eq,
-  have : ∀ x, x = 2 → x * (c * 2⁻¹) = c,
-  { rintro - rfl, rw [mul_left_comm, mul_inv_cancel, mul_one], exact two_ne_zero },
-  apply this, clear this,
-  sorry
-end
-
-instance σ_suitable' (i : ℕ) :
+instance σ_suitable (i : ℕ) :
   (BD.data.σ.f i).suitable (rescale_constants c_ 2 i) (c_ i) :=
 by { dsimp [rescale_constants], apply_instance }
-
-instance π₁_suitable (c : ℝ≥0) :
-  (universal_map.π₁ n).suitable c c :=
-begin
-  refine @basic_universal_map.suitable_of _ _ _ _ _ (id _),
-  intro i,
-  apply le_of_eq,
-  rw finset.sum_eq_single (fin_sum_fin_equiv (sum.inl i)),
-  { simp only [matrix.reindex_linear_equiv_apply, equiv.symm_apply_apply],
-    dsimp [equiv.sum_empty],
-    simp only [matrix.one_apply_eq, nat.cast_one, int.nat_abs_one, one_mul] },
-  { rintro j - hj,
-    simp only [matrix.reindex_linear_equiv_apply, equiv.symm_apply_apply],
-    dsimp [equiv.sum_empty],
-    generalize hj' : fin_sum_fin_equiv.symm j = j',
-    cases j' with j' j',
-    { dsimp,
-      suffices : i ≠ j',
-      { simp only [this, matrix.one_apply_ne, ne.def, not_false_iff, nat.cast_zero, int.nat_abs_zero] },
-      rintro rfl, apply hj, rw [← hj', equiv.apply_symm_apply] },
-    { dsimp, refl } },
-  { intro h, exact (h $ finset.mem_univ _).elim }
-end
-
-instance π₂_suitable (c : ℝ≥0) :
-  (universal_map.π₂ n).suitable c c :=
-begin
-  refine @basic_universal_map.suitable_of _ _ _ _ _ (id _),
-  intro i,
-  apply le_of_eq,
-  rw finset.sum_eq_single (fin_sum_fin_equiv (sum.inr i)),
-  { simp only [matrix.reindex_linear_equiv_apply, equiv.symm_apply_apply],
-    dsimp [equiv.sum_empty],
-    simp only [matrix.one_apply_eq, nat.cast_one, int.nat_abs_one, one_mul] },
-  { rintro j - hj,
-    simp only [matrix.reindex_linear_equiv_apply, equiv.symm_apply_apply],
-    dsimp [equiv.sum_empty],
-    generalize hj' : fin_sum_fin_equiv.symm j = j',
-    cases j' with j' j',
-    { dsimp, refl },
-    { dsimp,
-      suffices : i ≠ j',
-      { simp only [this, matrix.one_apply_ne, ne.def, not_false_iff, nat.cast_zero, int.nat_abs_zero] },
-      rintro rfl, apply hj, rw [← hj', equiv.apply_symm_apply] } },
-  { intro h, exact (h $ finset.mem_univ _).elim }
-end
 
 instance π_suitable (c : ℝ≥0) (i : ℕ) :
   (BD.data.π.f i).suitable c c :=

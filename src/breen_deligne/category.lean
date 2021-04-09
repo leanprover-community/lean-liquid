@@ -81,15 +81,9 @@ lemma BD_pow_X : ∀ N i, (BD.pow N).X i = 2^N * BD.X i
 { f := λ n, universal_map.σ _,
   comm := λ m n, universal_map.σ_comp_double _ }
 
-@[simps] def π₁ : BD.double ⟶ BD :=
-{ f := λ n, universal_map.π₁ _,
-  comm := λ m n, universal_map.π₁_comp_double _ }
-
-@[simps] def π₂ : BD.double ⟶ BD :=
-{ f := λ n, universal_map.π₂ _,
-  comm := λ m n, universal_map.π₂_comp_double _ }
-
-def π : BD.double ⟶ BD := BD.π₁ + BD.π₂
+@[simps] def π : BD.double ⟶ BD :=
+{ f := λ n, universal_map.π _,
+  comm := λ m n, universal_map.π_comp_double _ }
 
 open differential_object.complex_like FreeMat
 
