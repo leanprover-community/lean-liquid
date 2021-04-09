@@ -28,6 +28,9 @@ lemma comp_apply {X Y Z : Profinite.{u}} (f : X ⟶ Y) (g : Y ⟶ Z) (x : X) :
 @[simp]
 lemma id_apply {X : Profinite.{u}} (x : X) : (𝟙 X : X ⟶ X) x = x := rfl
 
+@[simp]
+lemma id_to_fun {X : Profinite.{u}} : (𝟙 X : X → X) = id := rfl
+
 -- TODO: Move this!
 @[simp]
 lemma comp_to_fun {X Y Z : Profinite.{u}} (f : X ⟶ Y) (g : Y ⟶ Z) :
@@ -37,6 +40,7 @@ end move_me
 
 variables (X : Profinite.{u})
 
+@[ext]
 structure cl :=
 (sets : set (set X))
 (clopen : ∀ S : sets, is_clopen (S : set X))
@@ -364,6 +368,40 @@ begin
   apply proj_fun_spec,
 end
 
+lemma pullback_id {I : X.cl} : pullback (𝟙 X) I = I :=
+begin
+  ext S,
+  dsimp [pullback],
+  split,
+  { rintro ⟨⟨z,hz⟩,⟨U,hU⟩⟩,
+    simp [hU] },
+  { intro h,
+    refine ⟨I.nonempty ⟨S,h⟩, ⟨S,h⟩, rfl⟩ }
+end
+
+lemma pullback_comp {X Y Z : Profinite.{u}} {I : Z.cl} (f : X ⟶ Y) (g : Y ⟶ Z) :
+  pullback (f ≫ g) I = pullback f (pullback g I) :=
+begin
+  ext S,
+  dsimp [pullback],
+  split,
+  { rintro ⟨h1,U,hU⟩,
+    refine ⟨h1,_⟩,
+    rcases h1 with ⟨x,hx⟩,
+    use g ⁻¹' (U : set Z),
+    dsimp,
+    refine ⟨_,_⟩,
+    { rw hU at hx,
+      simp at hx,
+      refine ⟨f x, hx⟩ },
+    { use U },
+    { simpa using hU, } },
+  { rintro ⟨⟨x,hx⟩,⟨U,hU1,⟨V,rfl⟩⟩,rfl⟩,
+    refine ⟨⟨x,hx⟩,_⟩,
+    refine ⟨V,_⟩,
+    refl }
+end
+
 def map {I : X.cl} : pullback f I → I := λ U, classical.some (pullback_spec U)
 
 lemma map_spec {I : X.cl} (U : pullback f I) : (U : set Y) = f ⁻¹' map U  :=
@@ -531,33 +569,38 @@ begin
   apply cl.proj_fun_spec,
 end
 
-def change_cone_id : change_cone (𝟙 X) X.Fincone ≅ X.Fincone :=
+def change_cone_id (C : limits.cone (X.diagram ⋙ of_Fintype)) :
+  change_cone (𝟙 X) C ≅ C :=
 limits.cones.ext (eq_to_iso rfl)
 begin
   intros I,
   ext1,
-  dsimp [change_cone, hom_cone, Fincone] at *,
-  change _ = I.proj x,
-  apply cl.proj_fun_unique,
-  have : (cl.map ((cl.pullback (𝟙 X) I).proj x) : set X) =
-    (𝟙 X) ⁻¹' cl.map ((cl.pullback (𝟙 X) I).proj x), by erw set.preimage_id,
-  rw [this, ← cl.map_spec],
-  apply cl.proj_fun_spec,
+  dsimp [change_cone] at *,
+  symmetry,
+  apply cl.map_unique,
+  change _ = id ⁻¹' _,
+  dsimp,
+  rw cl.pullback_id,
 end
 
-def change_cone_comp {Z : Profinite.{u}} (g : Z ⟶ Y) :
-  change_cone (g ≫ f) Z.Fincone ≅ change_cone f (change_cone g Z.Fincone) :=
+def change_cone_id_Fincone : change_cone (𝟙 X) X.Fincone ≅ X.Fincone :=
+change_cone_id _
+
+def change_cone_comp {Z : Profinite.{u}} (g : Z ⟶ Y) (C : limits.cone (Z.diagram ⋙ of_Fintype)) :
+  change_cone (g ≫ f) C ≅ change_cone f (change_cone g C) :=
 limits.cones.ext (eq_to_iso rfl)
 begin
   intros I,
   ext1 z,
-  dsimp [hom_cone, change_cone] at *,
+  dsimp [change_cone] at *,
   symmetry,
   apply cl.map_unique,
-  rwa [comp_to_fun, set.preimage_comp, ← cl.map_spec, ← cl.map_spec],
-  simp_rw [cl.pullback_proj, ← set.preimage_comp, ← comp_to_fun],
-  refl,
+  erw [set.preimage_comp, ← cl.map_spec, ← cl.map_spec, cl.pullback_comp],
 end
+
+def change_cone_comp_Fincone {Z : Profinite.{u}} (g : Z ⟶ Y) :
+  change_cone (g ≫ f) Z.Fincone ≅ change_cone f (change_cone g Z.Fincone) :=
+change_cone_comp _ _ _
 
 end categorical
 
