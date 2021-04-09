@@ -76,6 +76,16 @@ instance rescale.additive : (rescale r).additive :=
 { map_zero' := λ V W, rfl, -- defeq abuse
   map_add' := λ V W f g, rfl /- defeq abuse -/ }
 
+lemma rescale_map_bound_by {V₁ V₂ : NormedGroup} {f : V₁ ⟶ V₂} {C : ℝ≥0} (hf : f.bound_by C) :
+  ((rescale r).map f).bound_by C :=
+begin
+  intro v,
+  dsimp,
+  erw [rescale.norm_def, rescale.norm_def, equiv.symm_apply_apply, ← mul_div_assoc],
+  refine div_le_div (mul_nonneg C.coe_nonneg (norm_nonneg _)) (hf _) _ le_rfl,
+  rw nnreal.coe_pos, apply fact.out
+end
+
 def to_rescale : 𝟭 _ ⟶ rescale r :=
 { app := λ V,
   add_monoid_hom.mk_normed_group_hom' (add_monoid_hom.mk' (@rescale.of r V) $ λ _ _, rfl) r⁻¹
