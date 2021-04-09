@@ -3,6 +3,7 @@ import topology.category.Profinite
 import topology.locally_constant.basic
 import category_theory.Fintype
 import category_theory.limits.creates
+import category_theory.arrow
 
 /-!
 This file proves that a profinite set is a limit of finite sets.
@@ -122,6 +123,14 @@ begin
   { refine ⟨⟨∅, by simp, by simp, λ x, false.elim (h ⟨x⟩)⟩⟩ }
 end
 
+lemma eq_of_le {I : X.cl} (U V : I) : (U : set X) ≤ V → U = V :=
+begin
+  intro h,
+  rcases (I.nonempty U) with ⟨y,hy⟩,
+  rcases I.cover y with ⟨W,h1,h2⟩,
+  rw [h2 U hy, h2 V (h hy)],
+end
+
 -- Discrete topology
 instance {I : X.cl} : topological_space I := ⊥
 
@@ -168,6 +177,66 @@ begin
   rintro ⟨U, ⟨U, A, B, rfl⟩⟩,
   refine ⟨B, set.inter_subset_right _ _⟩,
 end
+
+lemma le_common_of_le_right {I J K : X.cl} (h : J ≤ K) :
+  common I J ≤ common I K :=
+begin
+  rintro ⟨U,⟨hU,V,W,rfl⟩⟩,
+  rcases h W with ⟨R,hR⟩,
+  have : (V : set X) ⊓ W ≤ V ⊓ R := λ x ⟨h1,hx⟩, ⟨h1,hR hx⟩,
+  refine ⟨⟨V ⊓ R, ⟨set.nonempty.mono this hU, V, R, rfl⟩⟩, this⟩,
+end
+
+lemma le_common_of_le_left {I J K : X.cl} (h : J ≤ K) :
+  common J I ≤ common K I :=
+begin
+  rintro ⟨U,⟨hU,V,W,rfl⟩⟩,
+  rcases h V with ⟨R,hR⟩,
+  have : (V : set X) ⊓ W ≤ R ⊓ W := λ x ⟨hx,h1⟩, ⟨hR hx, h1⟩,
+  refine ⟨⟨R ⊓ W, ⟨set.nonempty.mono this hU, _, _,rfl⟩⟩, this⟩,
+end
+
+instance : semilattice_inf X.cl :=
+{ inf := common,
+  le_antisymm := begin
+    intros I J h1 h2,
+    ext S,
+    split,
+    { intro hS,
+      rcases h1 ⟨S,hS⟩ with ⟨V,hV⟩,
+      have : S = V,
+      { apply le_antisymm hV,
+        rcases h2 V with ⟨W,hW⟩,
+        have : W = ⟨S,hS⟩,
+        { symmetry,
+          apply eq_of_le,
+          refine le_trans hV hW },
+        rwa ← this },
+      rw this,
+      exact V.2 },
+    { intro hS,
+      rcases h2 ⟨S,hS⟩ with ⟨V,hV⟩,
+      have : S = V,
+      { apply le_antisymm hV,
+        rcases h1 V with ⟨W,hW⟩,
+        have : W = ⟨S,hS⟩,
+        { symmetry,
+          apply eq_of_le,
+          refine le_trans hV hW },
+        rwa ← this },
+      rw this,
+      exact V.2 }
+  end,
+  inf_le_left := λ _ _, common_le_left,
+  inf_le_right := λ _ _, common_le_right,
+  le_inf := begin
+    intros I J K h1 h2 U,
+    rcases h1 U with ⟨A,hA⟩,
+    rcases h2 U with ⟨B,hB⟩,
+    have : (U : set X) ≤ A ⊓ B := le_inf hA hB,
+    refine ⟨⟨A ⊓ B,set.nonempty.mono this (I.nonempty U),A,B,rfl⟩, this⟩,
+  end,
+  ..(infer_instance : preorder _)}
 
 section refined
 
@@ -603,5 +672,17 @@ def change_cone_comp_Fincone {Z : Profinite.{u}} (g : Z ⟶ Y) :
 change_cone_comp _ _ _
 
 end categorical
+
+section arrow
+
+def refine_with {X : Profinite} (I : X.cl) : X.cl ⥤ over I :=
+{ obj := λ J,
+  { left := cl.common I J,
+    hom := hom_of_le $ cl.common_le_left },
+  map := λ J K f, { left := hom_of_le $ cl.le_common_of_le $ le_of_hom f } }
+
+variables (f : arrow Profinite)
+
+end arrow
 
 end Profinite
