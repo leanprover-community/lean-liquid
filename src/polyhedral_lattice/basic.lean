@@ -120,7 +120,7 @@ initialize_simps_projections polyhedral_lattice_hom (to_fun → apply)
 lemma coe_inj (H : ⇑f = g) : f = g :=
 by cases f; cases g; congr'; exact funext H
 
-lemma coe_injectiΛe : @function.injective (polyhedral_lattice_hom Λ₁ Λ₂) (Λ₁ → Λ₂) coe_fn :=
+lemma coe_injective : @function.injective (polyhedral_lattice_hom Λ₁ Λ₂) (Λ₁ → Λ₂) coe_fn :=
 by apply coe_inj
 
 lemma coe_inj_iff : f = g ↔ ⇑f = g := ⟨congr_arg _, coe_inj⟩
