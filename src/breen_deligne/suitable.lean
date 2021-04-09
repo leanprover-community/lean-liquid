@@ -4,6 +4,8 @@ import data.real.nnreal
 import for_mathlib.free_abelian_group
 import for_mathlib.add_monoid_hom
 
+import facts.nnreal
+
 /-
 
 # "suitability" of a universal map
@@ -28,7 +30,7 @@ open_locale nnreal big_operators
 namespace breen_deligne
 
 variables {k l m n : ℕ}
-variables (r' : ℝ≥0) (S : Type*) (c c₁ c₂ c₃ : ℝ≥0) [fintype S]
+variables (r r' : ℝ≥0) (S : Type*) (c c₁ c₂ c₃ c₄ : ℝ≥0) [fintype S]
 
 namespace basic_universal_map
 
@@ -104,6 +106,14 @@ instance zero_suitable : (0 : basic_universal_map m n).suitable c₁ c₂ :=
 λ i, by simp only [nat.cast_zero, zero_mul, zero_le', finset.sum_const_zero,
           matrix.zero_apply, int.nat_abs_zero]
 
+lemma suitable.le (hf : f.suitable c₂ c₃) (h1 : c₁ ≤ c₂) (h2 : c₃ ≤ c₄) :
+  f.suitable c₁ c₄ :=
+λ j, (mul_le_mul' le_rfl h1).trans ((hf j).trans h2)
+
+lemma suitable_of_le [hf : f.suitable c₂ c₃] (h1 : c₁ ≤ c₂) (h2 : c₃ ≤ c₄) :
+  f.suitable c₁ c₄ :=
+hf.le _ _ _ _ _ h1 h2
+
 end basic_universal_map
 
 namespace universal_map
@@ -134,6 +144,14 @@ by { intro x, simp only [suitable, forall_eq, finset.mem_singleton, support_of] 
 lemma suitable_congr (f g : universal_map m n) (c₁ c₂ : ℝ≥0) (h : f = g) :
   f.suitable c₁ c₂ ↔ g.suitable c₁ c₂ :=
 by subst h
+
+lemma suitable.le {f : universal_map m n} (hf : f.suitable c₂ c₃) (h1 : c₁ ≤ c₂) (h2 : c₃ ≤ c₄) :
+  f.suitable c₁ c₄ :=
+λ g hg, (suitable_of_mem_support f _ _ _ hg).le _ _ _ _ _ h1 h2
+
+lemma suitable_of_le (f : universal_map m n) [hf : f.suitable c₂ c₃] (h1 : c₁ ≤ c₂) (h2 : c₃ ≤ c₄) :
+  f.suitable c₁ c₄ :=
+hf.le _ _ _ _ h1 h2
 
 end universal_map
 
@@ -329,5 +347,62 @@ instance π_suitable' (k' : ℝ≥0) (N : ℕ) [fact (1 ≤ k')] [fact (k' ≤ 2
 sorry
 
 end σπ
+
+section very_suitable
+
+namespace universal_map
+
+def very_suitable (f : universal_map m n) (r r' : out_param ℝ≥0) (c₁ c₂ : ℝ≥0) : Prop :=
+∃ (N k : ℕ) (c' : ℝ≥0), f.bound_by N ∧ f.suitable c₁ c' ∧ r ^ k * N ≤ 1 ∧ c' ≤ r' ^ k * c₂
+
+attribute [class] very_suitable
+
+namespace very_suitable
+
+variables (f : universal_map m n)
+
+instance suitable [hr' : fact (r' ≤ 1)] [hf : f.very_suitable r r' c₁ c₂] : f.suitable c₁ c₂ :=
+begin
+  unfreezingI { rcases hf with ⟨N, k, c', hN, hf, hr, H⟩ },
+  exact hf.le _ _ _ _ le_rfl (H.trans $ fact.out _)
+end
+
+instance mul_left (f : universal_map m n) [h : f.very_suitable r r' c₁ c₂] :
+  f.very_suitable r r' (c * c₁) (c * c₂) :=
+begin
+  unfreezingI { rcases h with ⟨N, k, c', hN, hf, hr, H⟩ },
+  refine ⟨N, k, c * c', hN, infer_instance, hr, _⟩,
+  rw mul_left_comm,
+  exact mul_le_mul' le_rfl H
+end
+
+instance mul_right (f : universal_map m n) [h : f.very_suitable r r' c₁ c₂] :
+  f.very_suitable r r' (c₁ * c) (c₂ * c) :=
+by { rw [mul_comm _ c, mul_comm _ c], apply universal_map.very_suitable.mul_left }
+
+end very_suitable
+
+end universal_map
+
+namespace data
+
+class very_suitable (BD : data) (r r' : out_param ℝ≥0) (c_ : ℕ → ℝ≥0) : Prop :=
+(universal_very_suitable : ∀ i j, (BD.d i j).very_suitable r r' (c_ i) (c_ j))
+
+attribute [instance] very_suitable.universal_very_suitable
+
+namespace very_suitable
+
+variables (BD : data) (c_ : ℕ → ℝ≥0)
+
+instance suitable [hr' : fact (r' ≤ 1)] [h : BD.very_suitable r r' c_] :
+  BD.suitable c_ :=
+{ universal_suitable := λ i j, by apply_instance }
+
+end very_suitable
+
+end data
+
+end very_suitable
 
 end breen_deligne

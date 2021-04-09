@@ -8,6 +8,9 @@ namespace normed_group_hom
 variables {V₁ V₂ V₃ : Type*} [semi_normed_group V₁] [semi_normed_group V₂] [semi_normed_group V₃]
 variables {f : normed_group_hom V₁ V₂} {g : normed_group_hom V₂ V₃}
 
+lemma bound_by.norm_noninc (hf : f.bound_by 1) : f.norm_noninc :=
+λ v, (hf v).trans $ by rw [nnreal.coe_one, one_mul]
+
 lemma bound_by.comp {C₁ C₂ : ℝ≥0} (hg : g.bound_by C₂) (hf : f.bound_by C₁) :
   (g.comp f).bound_by (C₂ * C₁) :=
 λ v,

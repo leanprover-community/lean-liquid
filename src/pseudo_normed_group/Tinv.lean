@@ -279,6 +279,11 @@ begin
   exact (CLCPTinv.map_comp _ _ _ _ _ _ _ _ _ _ _ _ _).symm
 end
 
+lemma res_norm_noninc [fact (c₂ ≤ r' * c₁)] [fact (c₂ ≤ c₁)] [fact (c₄ ≤ r' * c₃)] [fact (c₄ ≤ c₃)]
+  [fact (c₃ ≤ c₁)] [fact (c₄ ≤ c₂)] (M) :
+  ((res r V r' c₁ c₂ c₃ c₄ n).app M).norm_noninc :=
+CLCPTinv.map_norm_noninc _ _ _ _ _ _ _ _ _ _ _
+
 lemma res_bound_by [fact (c₂ ≤ r' * c₁)] [fact (c₂ ≤ c₁)] [fact (c₄ ≤ r' * c₃)] [fact (c₄ ≤ c₃)]
   [fact (c₃ ≤ c₁)] [fact (c₄ ≤ c₂)] (h₂₃ : c₂ = c₃) (M) :
   ((res r V r' c₁ c₂ c₃ c₄ n).app M).bound_by r :=
@@ -311,6 +316,10 @@ CLCFPTinv₂.res_refl _ _ _ _ _ _
 lemma res_comp_res [fact (c₃ ≤ c₁)] [fact (c₅ ≤ c₃)] [fact (c₅ ≤ c₁)] :
   res r V r' c₁ c₃ n ≫ res r V r' c₃ c₅ n = res r V r' c₁ c₅ n :=
 CLCFPTinv₂.res_comp_res _ _ _ _ _ _ _ _ _ _
+
+lemma res_norm_noninc {_ : fact (c₂ ≤ c₁)} (M) :
+  ((res r V r' c₁ c₂ n).app M).norm_noninc :=
+CLCFPTinv₂.res_norm_noninc r V r' _ _ _ _ _ _
 
 lemma res_bound_by [fact (c₂ ≤ c₁)] [fact (c₂ ≤ r' * c₁)] (M) :
   ((res r V r' c₁ c₂ n).app M).bound_by r :=
@@ -448,6 +457,24 @@ lemma eval_CLCFPTinv_bound_by [normed_with_aut r V] [fact (0 < r)] [ϕ.suitable 
   (N : ℕ) (h : ϕ.bound_by N) (M) :
   ((ϕ.eval_CLCFPTinv r V r' c₁ c₂).app M).bound_by N :=
 eval_CLCFPTinv₂_bound_by r V r' _ _ _ _ _ N h M
+
+lemma eval_CLCFPTinv_norm_noninc [normed_with_aut r V] [fact (0 < r)]
+  [h : ϕ.very_suitable r r' c₂ c₁] (M) :
+  ((ϕ.eval_CLCFPTinv r V r' c₁ c₂).app M).norm_noninc :=
+begin
+  apply normed_group_hom.bound_by.norm_noninc,
+  have h' := h,
+  unfreezingI { rcases h with ⟨N, k, c', hN, hϕ, hr, H⟩ },
+  haveI : fact (c' ≤ c₁) := ⟨H.trans $ fact.out _⟩,
+  have aux := res_comp_eval_CLCFPTinv r V r' c₁ c' c₂ c₂ ϕ,
+  rw [res_refl, category.comp_id] at aux,
+  rw ← aux,
+  apply normed_group_hom.bound_by.le _ hr,
+  rw mul_comm,
+  apply normed_group_hom.bound_by.comp,
+  { apply eval_CLCFPTinv_bound_by, exact hN },
+  { haveI : fact (c' ≤ r' ^ k * c₁) := ⟨H⟩, apply res_bound_by_pow },
+end
 
 end universal_map
 

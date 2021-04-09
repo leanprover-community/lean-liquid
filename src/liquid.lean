@@ -24,26 +24,26 @@ open_locale nnreal -- enable the notation `ℝ≥0` for the nonnegative real num
 open category_theory ProFiltPseuNormGrpWithTinv polyhedral_lattice opposite
 
 variables (BD : breen_deligne.data)
-variables (c' : ℕ → ℝ≥0)  -- implicit constants, chosen once and for all
+variables (c_ : ℕ → ℝ≥0)  -- implicit constants, chosen once and for all
                           -- see the sentence after that statement of Thm 9.5
 
 /-- A mix of Theorems 9.4 and 9.5 in [Analytic] -/
-theorem first_target [BD.suitable c']
-  (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)] :
+theorem first_target (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)]
+  [BD.very_suitable r r' c_] :
   ∀ m : ℕ,
   ∃ (k K : ℝ≥0) [fact (1 ≤ k)],
   ∃ c₀ : ℝ≥0,
   ∀ (S : Type) [fintype S],
   ∀ (V : NormedGroup) [normed_with_aut r V],
-    ​((BD.system c' r V r').obj (op $ of r' (Mbar r' S))).is_bounded_exact k K m c₀ :=
+    ​((BD.system c_ r V r').obj (op $ of r' (Mbar r' S))).is_bounded_exact k K m c₀ :=
 begin
   intro m,
-  obtain ⟨k, K, hk, H⟩ := thm95' BD c' r r' m,
+  obtain ⟨k, K, hk, H⟩ := thm95' BD r r' c_ m,
   obtain ⟨c₀, H⟩ := H ℤ,
   use [k, K, hk, c₀],
   introsI S hS V hV,
   specialize H S V,
-  let i := (BD.system c' r V r').map_iso (HomZ_iso (of r' $ Mbar r' S)).op,
+  let i := (BD.system c_ r V r').map_iso (HomZ_iso (of r' $ Mbar r' S)).op,
   refine H.of_iso i.symm _,
   intros c n,
   rw ← system_of_complexes.apply_hom_eq_hom_apply,
@@ -58,7 +58,7 @@ Most of the theorem should be fairly readable.
 We will now briefly explain some of the more peculiar syntax.
 The proof reduces to `thm95`, which is not proven yet. We are working on it!
 
-* `[BD.suitable c']` assumes that the nonnegative reals `c' i` satisfy some suitable conditions
+* `[BD.suitable c_]` assumes that the nonnegative reals `c_ i` satisfy some suitable conditions
   with respect to the package of Breen--Deligne data `BD`.
 * `[fact (0 < r)]` records the "fact" `0 < r` as an assumption to whatever comes later.
 * `(S : Type) [fintype S]` is Lean's way of saying "`S` is a finite set".

@@ -206,9 +206,9 @@ if all the differentials and restriction maps are norm-nonincreasing.
 
 See Definition 9.3 of [Analytic]. -/
 structure admissible (C : system_of_double_complexes) : Prop :=
-(d_norm_noninc' : ∀ c p p' q (h : p + 1 = p') (x : C.X c p q), ∥C.d p p' x∥ ≤ ∥x∥)
-(d'_norm_noninc' : ∀ c p q q' (h : q + 1 = q') (x : C.X c p q), ∥C.d' q q' x∥ ≤ ∥x∥)
-(res_norm_noninc : ∀ c' c p q h (x : C.X c' p q), ∥@res C c' c p q h x∥ ≤ ∥x∥)
+(d_norm_noninc' : ∀ c p p' q (h : p + 1 = p'), (@d C c p p' q).norm_noninc)
+(d'_norm_noninc' : ∀ c p q q' (h : q + 1 = q'), (@d' C c p q q').norm_noninc)
+(res_norm_noninc : ∀ c' c p q h, (@res C c' c p q h).norm_noninc)
 
 namespace admissible
 
@@ -237,6 +237,13 @@ lemma col (hC : C.admissible) (q : ℕ) : (C.col q).admissible :=
 lemma row (hC : C.admissible) (p : ℕ) : (C.row p).admissible :=
 { d_norm_noninc' := λ c i j h, hC.d'_norm_noninc _ _ _ _,
   res_norm_noninc := λ c i j h, hC.res_norm_noninc _ _ _ _ _ }
+
+lemma mk' (h : ∀ p, (C.row p).admissible)
+  (hd : ∀ c p p' q (h : p + 1 = p'), (@d C c p p' q).norm_noninc) :
+  C.admissible :=
+{ d_norm_noninc' := λ c p p' q h', hd c p p' q h',
+  d'_norm_noninc' := λ c p q q' h', (h p).d_norm_noninc' _ _ _ h',
+  res_norm_noninc := λ c₁ c₂ p q h', by { resetI, apply (h p).res_norm_noninc } }
 
 end admissible
 

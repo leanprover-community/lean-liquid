@@ -55,12 +55,8 @@ CLCFPTinv₂ r V r' (a i) (b i) (BD.X i)
 `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …` -/
 def complex_X (i : ℕ) : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup :=
 complex₂_X BD r V r' (λ i, c * c' i) (λ i, r' * (c * c' i)) i
--- CLCFPTinv r V r' (c * c' i) (BD.X i)
 
 variables [BD.suitable c']
-
--- class suitable₂ (a b : ℕ → ℝ≥0) :=
--- (le : ∀ i j, universal_map.suitable (a i) (a j) (BD.d i j))
 
 /-- The differential for the complex of normed groups
 `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …` -/
@@ -81,13 +77,13 @@ by simp only [complex_d, ← universal_map.eval_CLCFPTinv_comp, BD.d_comp_d,
 
 end
 
+section
+
 open differential_object
 
 variables (BD : breen_deligne.data) (c' : ℕ → ℝ≥0) [BD.suitable c']
 variables (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
-variables (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)]
-variables {M M₁ M₂ M₃ : ProFiltPseuNormGrpWithTinv.{u} r'} (c : ℝ≥0)
-variables (f : M₁ ⟶ M₂) (g : M₂ ⟶ M₃)
+variables (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] (c : ℝ≥0)
 
 /-- The complex of normed groups `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …` -/
 @[simps]
@@ -170,6 +166,29 @@ functor.flip {
     ext M i : 4, symmetry,
     exact nat_trans.congr_app (CLCFPTinv₂.res_comp_res r V r' _ _ _ _ _ _ _) _,
   end }
+.
+
+end
+
+section
+
+variables (BD : breen_deligne.data)
+variables (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
+variables (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)]
+variables (c_ : ℕ → ℝ≥0) [BD.very_suitable r r' c_]
+
+variables {r V r' c_}
+
+lemma system_admissible {M} : ((BD.system c_ r V r').obj M).admissible :=
+{ d_norm_noninc' := λ c i j hij,
+  begin
+    haveI : universal_map.very_suitable (BD.d j i) r r' (unop (op c) * c_ j) (unop (op c) * c_ i) :=
+    by { dsimp only [unop_op], apply_instance },
+    exact universal_map.eval_CLCFPTinv_norm_noninc _ _ _ _ _ _ _,
+  end,
+  res_norm_noninc := λ c₁ c₂ i h, CLCFPTinv.res_norm_noninc _ _ _ _ _ _ _, }
+
+end
 
 end data
 

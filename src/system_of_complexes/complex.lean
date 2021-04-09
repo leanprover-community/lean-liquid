@@ -516,6 +516,10 @@ open category_theory.preadditive
 variables {ι V} [has_succ ι] [category V] [preadditive V]
 
 @[simps]
+def f_hom {C₁ C₂ : complex_like ι V cov} (i : ι) : (C₁ ⟶ C₂) →+ (C₁.X i ⟶ C₂.X i) :=
+add_monoid_hom.mk' (λ f, differential_object.hom.f f i) (λ _ _, rfl)
+
+@[simps]
 def iso_of_components {C₁ C₂ : complex_like ι V cov} (f : Π i, C₁.X i ≅ C₂.X i)
   (hf : ∀ i j, C₁.d i j ≫ (f j).hom = (f i).hom ≫ C₂.d i j) :
   C₁ ≅ C₂ :=
