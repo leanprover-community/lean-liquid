@@ -16,14 +16,14 @@ contains the construction of the system of complexes from this data.
 
 ## Main definitions
 
-Let `BD = (n₁ ⟶ n₂ ⟶ …)` be Breen-Deligne data, `c'` a sequence of non-negative reals which are
+Let `BD = (n₁ ⟶ n₂ ⟶ …)` be Breen-Deligne data, `c_` a sequence of non-negative reals which are
 suitable for `BD`, and say `r,c≥0` and `V` is a normed group with `T⁻¹` scaling by `r`.
 
-- `BD.complex c' r V r' c`: the functor taking a profinitely filtered pseudo-normed abelian
+- `BD.complex c_ r V r' c`: the functor taking a profinitely filtered pseudo-normed abelian
 group `M` to the cochain complex `V-hat(M_{≤c}^n₁)^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^n₂)^{T⁻¹} ⟶ …`
 induced by the data.
 
-- `BD.system c' r V r'`: the functor sending a profinitely filtered pseudo-normed abelian
+- `BD.system c_ r V r'`: the functor sending a profinitely filtered pseudo-normed abelian
   group `M` to the system of complexes whose component at `c`
   is `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …`
 
@@ -40,7 +40,7 @@ namespace breen_deligne
 namespace data
 
 section
-variables (BD : breen_deligne.data) (c' : ℕ → ℝ≥0)
+variables (BD : breen_deligne.data) (c_ : ℕ → ℝ≥0)
 variables (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
 variables (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)]
 variables (M : ProFiltPseuNormGrpWithTinv.{u} r') (c : ℝ≥0)
@@ -54,9 +54,9 @@ CLCFPTinv₂ r V r' (a i) (b i) (BD.X i)
 /-- The object for the complex of normed groups
 `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …` -/
 def complex_X (i : ℕ) : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup :=
-complex₂_X BD r V r' (λ i, c * c' i) (λ i, r' * (c * c' i)) i
+complex₂_X BD r V r' (λ i, c * c_ i) (λ i, r' * (c * c_ i)) i
 
-variables [BD.suitable c']
+variables [BD.suitable c_]
 
 /-- The differential for the complex of normed groups
 `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …` -/
@@ -67,11 +67,11 @@ def complex₂_d (a b : ℕ → ℝ≥0) [∀ i, fact (b i ≤ r' * a i)]
 
 /-- The differential for the complex of normed groups
 `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …` -/
-def complex_d (i j : ℕ) : BD.complex_X c' r V r' c i ⟶ BD.complex_X c' r V r' c j :=
-(BD.d j i).eval_CLCFPTinv r V r' (c * c' i) (c * c' j)
+def complex_d (i j : ℕ) : BD.complex_X c_ r V r' c i ⟶ BD.complex_X c_ r V r' c j :=
+(BD.d j i).eval_CLCFPTinv r V r' (c * c_ i) (c * c_ j)
 
 lemma complex_d_comp_d (i j k : ℕ) :
-  BD.complex_d c' r V r' c i j ≫ BD.complex_d c' r V r' c j k = 0 :=
+  BD.complex_d c_ r V r' c i j ≫ BD.complex_d c_ r V r' c j k = 0 :=
 by simp only [complex_d, ← universal_map.eval_CLCFPTinv_comp, BD.d_comp_d,
     universal_map.eval_CLCFPTinv_zero]
 
@@ -81,7 +81,7 @@ section
 
 open differential_object
 
-variables (BD : breen_deligne.data) (c' : ℕ → ℝ≥0) [BD.suitable c']
+variables (BD : breen_deligne.data) (c_ : ℕ → ℝ≥0) [BD.suitable c_]
 variables (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
 variables (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] (c : ℝ≥0)
 
@@ -118,12 +118,12 @@ def complex₂ (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < 
 def complex (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
   (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] (c : ℝ≥0) :
   (ProFiltPseuNormGrpWithTinv.{u} r')ᵒᵖ ⥤ cochain_complex ℕ NormedGroup :=
-BD.complex₂ r V r' (λ i, c * c' i) (λ i, r' * (c * c' i))
+BD.complex₂ r V r' (λ i, c * c_ i) (λ i, r' * (c * c_ i))
 
 namespace complex
 
 lemma map_norm_noninc {M₁ M₂} (f : M₁ ⟶ M₂) (n : ℕ) :
-  (((BD.complex c' r V r' c).map f).f n).norm_noninc :=
+  (((BD.complex c_ r V r' c).map f).f n).norm_noninc :=
 CLCFPTinv.map_norm_noninc _ _ _ _ _ _
 
 end complex
@@ -141,7 +141,7 @@ def system (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
   (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] :
   (ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ system_of_complexes :=
 functor.flip {
-  obj := λ c, BD.complex c' r V r' (unop c),
+  obj := λ c, BD.complex c_ r V r' (unop c),
   map := λ c₂ c₁ h,
     { app := λ M, begin
         haveI : fact ((unop c₁ : ℝ≥0) ≤ (unop c₂ : ℝ≥0)) := ⟨h.unop.down.down⟩,
