@@ -17,7 +17,7 @@ open category_theory differential_object.complex_like
 
 namespace breen_deligne
 
-variables {BD BD₁ BD₂ : breen_deligne.data} (f g : BD₁ ⟶ BD₂)
+variables {BD BD₁ BD₂ : breen_deligne.data} (f g : BD₂ ⟶ BD₁)
 variables (h : homotopy f g)
 
 variables (c_ c₁' c₂' : ℕ → ℝ≥0)
@@ -34,25 +34,25 @@ open differential_object differential_object.complex_like
 def BD_map₂ (a₁ a₂ b₁ b₂ : ℕ → ℝ≥0)
   [∀ (i : ℕ), fact (b₁ i ≤ r' * a₁ i)] [∀ (i : ℕ), fact (b₂ i ≤ r' * a₂ i)]
   [BD₁.suitable a₁] [BD₂.suitable a₂] [BD₁.suitable b₁] [BD₂.suitable b₂]
-  [∀ i, (f.f i).suitable (a₁ i) (a₂ i)]
-  [∀ i, (f.f i).suitable (b₁ i) (b₂ i)] :
-  BD₂.complex₂ r V r' a₂ b₂ ⟶ BD₁.complex₂ r V r' a₁ b₁ :=
+  [∀ i, (f.f i).suitable (a₂ i) (a₁ i)]
+  [∀ i, (f.f i).suitable (b₂ i) (b₁ i)] :
+  BD₁.complex₂ r V r' a₁ b₁ ⟶ BD₂.complex₂ r V r' a₂ b₂ :=
 { app := λ M,
-  { f := λ i, ((f.f i).eval_CLCFPTinv₂ r V r' (a₂ i) (b₂ i) (a₁ i) (b₁ i)).app M,
+  { f := λ i, ((f.f i).eval_CLCFPTinv₂ r V r' (a₁ i) (b₁ i) (a₂ i) (b₂ i)).app M,
     comm := begin
       intros i j,
-      show ((BD₂.complex₂ r V r' a₂ b₂).obj M).d i j ≫ _ =
-        _ ≫ ((BD₁.complex₂ r V r' a₁ b₁).obj M).d i j,
+      show ((BD₁.complex₂ r V r' a₁ b₁).obj M).d i j ≫ _ =
+        _ ≫ ((BD₂.complex₂ r V r' a₂ b₂).obj M).d i j,
       dsimp [data.complex₂_obj_d, data.complex₂_d],
-      have : BD₁.d j i ≫ f.f i = f.f j ≫ BD₂.d j i := f.comm j i,
+      have : BD₂.d j i ≫ f.f i = f.f j ≫ BD₁.d j i := f.comm j i,
       simp only [← nat_trans.comp_app, ← universal_map.eval_CLCFPTinv₂_comp r V r', this]
     end },
   naturality' := by { intros M₁ M₂ g, ext i : 2,
-    exact ((f.f i).eval_CLCFPTinv₂ r V r' (a₂ i) (b₂ i) (a₁ i) (b₁ i)).naturality g,
+    exact ((f.f i).eval_CLCFPTinv₂ r V r' (a₁ i) (b₁ i) (a₂ i) (b₂ i)).naturality g,
     } }
 .
-def BD_map [∀ i, (f.f i).suitable (c₁' i) (c₂' i)] :
-  BD₂.complex c₂' r V r' c ⟶ BD₁.complex c₁' r V r' c :=
+def BD_map [∀ i, (f.f i).suitable (c₂' i) (c₁' i)] :
+  BD₁.complex c₁' r V r' c ⟶ BD₂.complex c₂' r V r' c :=
 BD_map₂ f r V _ _ _ _
 .
 
@@ -61,12 +61,12 @@ variables {f g}
 def homotopy₂ (a₁ a₂ b₁ b₂ : ℕ → ℝ≥0)
   [∀ (i : ℕ), fact (b₁ i ≤ r' * a₁ i)] [∀ (i : ℕ), fact (b₂ i ≤ r' * a₂ i)]
   [BD₁.suitable a₁] [BD₂.suitable a₂] [BD₁.suitable b₁] [BD₂.suitable b₂]
-  [∀ i, (f.f i).suitable (a₁ i) (a₂ i)]
-  [∀ i, (f.f i).suitable (b₁ i) (b₂ i)]
-  [∀ i, (g.f i).suitable (a₁ i) (a₂ i)]
-  [∀ i, (g.f i).suitable (b₁ i) (b₂ i)]
-  [∀ j i, (h.h j i).suitable (a₁ j) (a₂ i)]
-  [∀ j i, (h.h j i).suitable (b₁ j) (b₂ i)] :
+  [∀ i, (f.f i).suitable (a₂ i) (a₁ i)]
+  [∀ i, (f.f i).suitable (b₂ i) (b₁ i)]
+  [∀ i, (g.f i).suitable (a₂ i) (a₁ i)]
+  [∀ i, (g.f i).suitable (b₂ i) (b₁ i)]
+  [∀ j i, (h.h j i).suitable (a₂ j) (a₁ i)]
+  [∀ j i, (h.h j i).suitable (b₂ j) (b₁ i)] :
   homotopy ((BD_map₂ f r V a₁ a₂ b₁ b₂).app M) ((BD_map₂ g r V a₁ a₂ b₁ b₂).app M) :=
 { h := λ j i, ((h.h i j).eval_CLCFPTinv₂ r V r' _ _ _ _).app M,
   h_eq_zero := λ i j hij,
@@ -93,8 +93,8 @@ def homotopy₂ (a₁ a₂ b₁ b₂ : ℕ → ℝ≥0)
     refl,
   end }
 
-def homotopy [∀ i, (f.f i).suitable (c₁' i) (c₂' i)] [∀ i, (g.f i).suitable (c₁' i) (c₂' i)]
-  [∀ j i, (h.h j i).suitable (c₁' j) (c₂' i)] :
+def homotopy [∀ i, (f.f i).suitable (c₂' i) (c₁' i)] [∀ i, (g.f i).suitable (c₂' i) (c₁' i)]
+  [∀ j i, (h.h j i).suitable (c₂' j) (c₁' i)] :
   homotopy ((BD_map f c₁' c₂' r V c).app M) ((BD_map g c₁' c₂' r V c).app M) :=
 homotopy₂ h r V M _ _ _ _
 
@@ -161,32 +161,20 @@ universe variables v
 
 variables (BD : breen_deligne.package)
 
-variables (c_ : ℕ → ℝ≥0)
+variables (c_ c' : ℕ → ℝ≥0)
 variables [BD.data.suitable c_]
 variables (r : ℝ≥0) (V : NormedGroup.{v}) [normed_with_aut r V] [fact (0 < r)]
 variables {r' : ℝ≥0} [fact (0 < r')] [fact (r' ≤ 1)] (c : ℝ≥0)
 variables (M : (ProFiltPseuNormGrpWithTinv.{u} r')ᵒᵖ)
 variables (k' : ℝ≥0) (N : ℕ) [fact (1 ≤ k')] [fact (k' ≤ 2 ^ N)]
 
--- crappy definition, assumes unprovable instance (for arbitrary `breen_deligne.package`s)
--- but for `breen_deligne.eg` it works
 def homotopy_σπ
-  -- we can only find `k'` that satisfies the following assumption
-  -- for the first `m` maps of the homotopy
-  -- so we need to define `h i` to be `0` for `i > m`.
-  [∀ (j i : ℕ), ((BD.data.homotopy_pow BD.homotopy N).h j i).suitable
-    (c_ j) (k' * rescale_constants c_ (2^N) i)] :=
+  [BD.data.suitable (c' * c_)]
+  [∀ (j i : ℕ), ((BD.data.homotopy_pow BD.homotopy N).h j i).suitable (rescale_constants c_ (2 ^ N) j) ((c' * c_) i)]
+  [∀ (i : ℕ), ((data.hom_pow BD.data.σ N).f i).suitable (rescale_constants c_ (2 ^ N) i) ((c' * c_) i)]
+  [∀ (i : ℕ), ((data.hom_pow BD.data.π N).f i).suitable (rescale_constants c_ (2 ^ N) i) ((c' * c_) i)]
+ :=
 homotopy.{u v} (data.homotopy_pow BD.data BD.homotopy N)
-  c_ (λ i, k' * rescale_constants c_ (2^N) i) r V c M
-
-
--- section check
-
--- variables [∀ (j i : ℕ), ((BD.data.homotopy_pow BD.homotopy N).h j i).suitable
---     (c_ j) (k' * rescale_constants c_ 2 i)]
-
--- #check homotopy_σπ BD c_ r V c M k' N
-
--- end check
+  (c' * c_) (rescale_constants c_ (2^N)) r V c M
 
 end breen_deligne
