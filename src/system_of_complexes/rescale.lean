@@ -4,8 +4,6 @@ import rescale.normed_group
 
 # rescaling norms on a system of complexes
 
-Note: My (kmb) understanding is that this file is being moved and refactored.
-
 This file defines the `rescale` functor which will take a system of complexes of normed groups
 and systematically rescale all the norms on all the normed groups by a constant factor.
 

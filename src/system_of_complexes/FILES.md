@@ -18,5 +18,5 @@ maps. A good reference for this is section 4 of the blueprint.
 - `truncate.lean` truncates a complex of normed groups (and a system of complexes)
   by sending `C₀ → C₁ → C₂ → ...` to `(coker (C₀ → C₁)) → C₂ → C₃ → ...`
 
-- `rescale.lean` (imports `normed_group.rescale`) : a to-be-refactored file which rescales
-  the norms on a system of complexes by a constant factor.
+- `rescale.lean` (imports `rescale.normed_group`) : rescales the norms on
+  a system of complexes by a constant factor.
