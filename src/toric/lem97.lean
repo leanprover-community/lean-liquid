@@ -30,11 +30,11 @@ def explicit_dual_set (l : ι → Λ) : submodule ℕ (Λ →+ ℤ) :=
 
 
 lemma explicit_dual_set_of_neg (l : ι → Λ) (x : Λ →+ ℤ) :
-  x ∈ (explicit_dual_set (- l)) ↔ ∀ i, 0 ≥ x (l i) :=
+  x ∈ (explicit_dual_set (- l)) ↔ ∀ i, x (l i) ≤ 0 :=
 begin
   split,
   { intros hx i,
-    rw [ge_iff_le, ← neg_nonneg, ← add_monoid_hom.map_neg],
+    rw [← neg_nonneg, ← add_monoid_hom.map_neg],
     tauto, },
   { intros hx i,
     erw [add_monoid_hom.map_neg, neg_nonneg, ← ge_iff_le],
