@@ -1,9 +1,11 @@
+import .PartialOrder
 import .Profinite
 import topology.category.Profinite
 import topology.locally_constant.basic
 import category_theory.Fintype
 import category_theory.limits.creates
 import category_theory.arrow
+import order.category.PartialOrder
 
 /-!
 This file proves that a profinite set is a limit of finite sets.
@@ -178,23 +180,6 @@ begin
   refine ⟨B, set.inter_subset_right _ _⟩,
 end
 
-lemma le_common_of_le_right {I J K : X.cl} (h : J ≤ K) :
-  common I J ≤ common I K :=
-begin
-  rintro ⟨U,⟨hU,V,W,rfl⟩⟩,
-  rcases h W with ⟨R,hR⟩,
-  have : (V : set X) ⊓ W ≤ V ⊓ R := λ x ⟨h1,hx⟩, ⟨h1,hR hx⟩,
-  refine ⟨⟨V ⊓ R, ⟨set.nonempty.mono this hU, V, R, rfl⟩⟩, this⟩,
-end
-
-lemma le_common_of_le_left {I J K : X.cl} (h : J ≤ K) :
-  common J I ≤ common K I :=
-begin
-  rintro ⟨U,⟨hU,V,W,rfl⟩⟩,
-  rcases h V with ⟨R,hR⟩,
-  have : (V : set X) ⊓ W ≤ R ⊓ W := λ x ⟨hx,h1⟩, ⟨hR hx, h1⟩,
-  refine ⟨⟨R ⊓ W, ⟨set.nonempty.mono this hU, _, _,rfl⟩⟩, this⟩,
-end
 
 instance : semilattice_inf X.cl :=
 { inf := common,
@@ -237,6 +222,23 @@ instance : semilattice_inf X.cl :=
     refine ⟨⟨A ⊓ B,set.nonempty.mono this (I.nonempty U),A,B,rfl⟩, this⟩,
   end,
   ..(infer_instance : preorder _)}
+
+lemma inf_mono_right {I : X.cl} : monotone (λ J : X.cl, I ⊓ J) :=
+begin
+  intros J K h,
+  rintro ⟨U,⟨hU,V,W,rfl⟩⟩,
+  rcases h W with ⟨R,hR⟩,
+  have : (V : set X) ⊓ W ≤ V ⊓ R := λ x ⟨h1,hx⟩, ⟨h1,hR hx⟩,
+  refine ⟨⟨V ⊓ R, ⟨set.nonempty.mono this hU, V, R, rfl⟩⟩, this⟩,
+end
+
+lemma inf_mono_left {I : X.cl} : monotone (λ J : X.cl, J ⊓ I) :=
+begin
+  intros J K h,
+  dsimp,
+  simp_rw inf_comm,
+  exact inf_mono_right h,
+end
 
 section refined
 
@@ -677,12 +679,53 @@ section arrow
 
 def refine_with {X : Profinite} (I : X.cl) : X.cl ⥤ over I :=
 { obj := λ J,
-  { left := cl.common I J,
-    hom := hom_of_le $ cl.common_le_left },
-  map := λ J K f, { left := hom_of_le $ cl.le_common_of_le $ le_of_hom f } }
+  { left := I ⊓ J,
+    hom := hom_of_le $ inf_le_left },
+  map := λ J K f, { left := hom_of_le $ cl.inf_mono_right $ le_of_hom f } }.
+
+def diagram_over (X : Profinite) (I : X.cl) : over I ⥤ Fintype :=
+over.forget _ ⋙ X.diagram
+
+def Fincone_over {X : Profinite} (I : X.cl) : limits.cone (X.diagram_over I ⋙ of_Fintype) :=
+limits.cone.whisker (over.forget I) X.Fincone
 
 variables (f : arrow Profinite)
 
 end arrow
+
+namespace ham
+
+variables {J : Type u} [small_category J] (F : J ⥤ Profinite.{u})
+
+def CL : Jᵒᵖ ⥤ PartialOrder.{u} :=
+{ obj := λ j, PartialOrder.of $ (F.obj j.unop).cl,
+  map := λ i j f,
+  { to_fun := cl.pullback (F.map f.unop),
+    monotone' := λ I J, cl.pullback_mono },
+  map_id' := begin
+    intros j,
+    simp,
+    ext1,
+    dsimp,
+    erw cl.pullback_id,
+    refl,
+  end,
+  map_comp' := begin
+    intros i j k f g,
+    simp,
+    ext1,
+    dsimp,
+    erw cl.pullback_comp,
+    refl,
+  end }.
+
+abbreviation indexcat := PartialOrder.Grothendieck (CL F)
+
+-- sanity check
+example : small_category (indexcat F) := by apply_instance
+
+
+
+end ham
 
 end Profinite
