@@ -1,4 +1,13 @@
 import normed_group.NormedGroup
+/-!
+
+# Normed groups with an extra automorphism
+
+This file contains definition 8.13 of `analytic.pdf`, a category-theoretic
+definition of a normed group eqipped with an automorphism which scales
+norms by a fixed factor `r`.
+
+-/
 
 /-- A `normed_with_aut r V` structure on a normed abelian group `V`
 consists of an automorphism `T` satisfying `∥T v∥ = r * ∥v∥`.

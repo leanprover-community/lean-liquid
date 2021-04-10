@@ -1,5 +1,11 @@
 import polyhedral_lattice.basic
+/-!
 
+# The integers are a polyhedral lattice.
+
+The integers, with its usual norm, are a polyhedral lattice.
+
+-/
 noncomputable theory
 
 open_locale big_operators
@@ -7,11 +13,15 @@ open_locale big_operators
 local attribute [-instance] add_comm_monoid.nat_semimodule add_comm_group.int_module
 
 -- move this
-lemma int.norm_coe_units (e : units ℤ) : ∥(e : ℤ)∥ = 1 :=
+lemma int.nnnorm_coe_units (e : units ℤ) : nnnorm (e : ℤ) = 1 :=
 begin
   obtain (rfl|rfl) := int.units_eq_one_or e;
-  simp only [units.coe_neg_one, units.coe_one, norm_neg, norm_one_class.norm_one]
+  simp only [units.coe_neg_one, units.coe_one, nnnorm_neg, nnnorm_one],
 end
+
+-- move this
+lemma int.norm_coe_units (e : units ℤ) : ∥(e : ℤ)∥ = 1 :=
+by rw [← coe_nnnorm, int.nnnorm_coe_units, nnreal.coe_one]
 
 --move this
 @[simp]
@@ -54,7 +64,8 @@ instance int.polyhedral_lattice : polyhedral_lattice ℤ :=
 { finite_free := ⟨unit, infer_instance, λ _, 1, is_basis_singleton_one ℤ⟩,
   polyhedral :=
   begin
-    refine ⟨units ℤ, infer_instance, coe, _⟩,
+    refine ⟨units ℤ, infer_instance, coe, _, _⟩,
+    swap, { simp only [int.nnnorm_coe_units, forall_const, ne.def, not_false_iff, one_ne_zero] },
     intro n,
     refine ⟨1, zero_lt_one, (λ e, int.to_nat (e * n)), _, _⟩,
     { rw [int.sum_units_to_nat, one_smul] },

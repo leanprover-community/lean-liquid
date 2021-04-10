@@ -1,7 +1,11 @@
 import polyhedral_lattice.basic
 import category_theory.concrete_category.bundled_hom
 import normed_group.NormedGroup
+/-
 
+# The category of polyhedral lattices
+
+-/
 universe variables u
 
 open category_theory

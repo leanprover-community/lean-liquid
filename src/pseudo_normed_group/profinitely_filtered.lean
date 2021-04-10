@@ -5,7 +5,14 @@ import pseudo_normed_group.basic
 
 import hacks_and_tricks.type_pow
 import facts
+/-!
 
+# profinitely_filtered_pseudo_normed_group
+
+The definition of a profinitely_filtered_pseudo_normed_group, and an API for this
+definition.
+
+-/
 open pseudo_normed_group
 open_locale nnreal big_operators
 
@@ -410,7 +417,7 @@ begin
   convert (continuous_add' cf cg).comp aux' using 1,
   ext x,
   replace hfg₀ := congr_fun (hfg₀ x) j,
-  dsimp at hfg₀ ⊢, rw [← hfg₀], refl
+  dsimp at hfg₀ ⊢, rw [← hfg₀]
 end
 
 lemma pfpng_ctu'_sum {ι : Type*} (s : finset ι)
@@ -437,7 +444,7 @@ end continuity
 
 namespace profinitely_filtered_pseudo_normed_group
 
-/-! ## Powers -/
+/-! ## Products -/
 
 section pi
 
@@ -446,11 +453,52 @@ variables {ι : Type*} (M : ι → Type*) [Π i, profinitely_filtered_pseudo_nor
 instance pi_topology (c : ℝ≥0) : topological_space (filtration (Π i, M i) c) :=
 topological_space.induced (filtration_pi_equiv M c) $ infer_instance
 
-instance pi_t2 (c : ℝ≥0) : t2_space (filtration (Π i, M i) c) := sorry
+def filtration_pi_homeo (c : ℝ≥0) :
+  filtration (Π i, M i) c ≃ₜ Π i, filtration (M i) c :=
+{ to_fun := λ x i, ⟨x.1 i, x.2 i⟩,
+  inv_fun := λ x, ⟨λ i, x i, λ i, (x i).2⟩,
+  left_inv := by { rintro ⟨x, hx⟩, refl },
+  right_inv := by { intro x, ext, refl },
+  continuous_to_fun :=
+    begin
+      rw continuous_def,
+      intros U hU,
+      rw is_open_induced_iff,
+      refine ⟨U, hU, _⟩,
+      refl,
+    end,
+  continuous_inv_fun :=
+    begin
+      rw continuous_def,
+      rintros s ⟨t, ht, s_eq⟩,
+      simpa [← s_eq] using continuous_def.1 _ t ht,
+      { rw [filtration_pi_equiv, continuous_def],
+        intros U hU,
+        simp only [*, equiv.coe_fn_mk, set.preimage_id',
+        subtype.coe_eta, subtype.coe_mk] },
+    end
+    }
 
-instance pi_td (c : ℝ≥0) : totally_disconnected_space (filtration (Π i, M i) c) := sorry
+instance pi_t2 (c : ℝ≥0) : t2_space (filtration (Π i, M i) c) :=
+begin
+  have : t2_space (Π i, filtration (M i) c) := infer_instance,
+  apply @embedding.t2_space _ _ _ _ this (filtration_pi_homeo M c) (filtration_pi_homeo M c).embedding,
+end
 
-instance pi_compact (c : ℝ≥0) : compact_space (filtration (Π i, M i) c) := sorry
+instance pi_td (c : ℝ≥0) : totally_disconnected_space (filtration (Π i, M i) c) :=
+begin
+  obtain ⟨H⟩ : totally_disconnected_space (Π i, filtration (M i) c) := infer_instance,
+  rw [← homeomorph.range_coe (filtration_pi_homeo M c), ← set.image_univ] at H,
+  exact ⟨embedding.is_totally_disconnected (filtration_pi_homeo M c).embedding H⟩,
+end
+
+instance pi_compact (c : ℝ≥0) : compact_space (filtration (Π i, M i) c) :=
+begin
+  obtain ⟨H⟩ : compact_space (Π i, filtration (M i) c) := infer_instance,
+  rw [← (homeomorph.compact_image (filtration_pi_homeo M c).symm), set.image_univ,
+    homeomorph.range_coe] at H,
+  exact ⟨H⟩,
+end
 
 instance pi : profinitely_filtered_pseudo_normed_group (Π i, M i) :=
 { continuous_add' := sorry,

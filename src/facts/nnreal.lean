@@ -6,6 +6,9 @@ namespace nnreal
 
 variables (r' k c c₁ c₂ c₃ : ℝ≥0)
 
+instance fact_pos_of_one_le [hk : fact (1 ≤ c)] : fact (0 < c) :=
+⟨lt_of_lt_of_le zero_lt_one hk.out⟩
+
 instance fact_le_mul_of_one_le_left [hk : fact (1 ≤ k)] [hc : fact (c₁ ≤ c₂)] :
   fact (c₁ ≤ k * c₂) :=
 ⟨calc c₁ = 1 * c₁ : (one_mul _).symm
@@ -68,12 +71,27 @@ instance one_le_add {a b : ℝ≥0} [ha : fact (1 ≤ a)] : fact (1 ≤ a + b) :
 instance one_le_add' {a b : ℝ≥0} [hb : fact (1 ≤ b)] : fact (1 ≤ a + b) :=
 ⟨le_trans hb.out $ by simp⟩
 
-instance one_le_pow {n : ℕ} {a : ℝ≥0} [h : fact (1 ≤ a)] : fact (1 ≤ a^n) :=
+instance fact_one_le_pow {n : ℕ} {a : ℝ≥0} [h : fact (1 ≤ a)] : fact (1 ≤ a^n) :=
 begin
   cases n,
   { simpa only [pow_zero] using nnreal.fact_le_refl _ },
-  { rwa one_le_pow_iff,
-    apply nat.succ_ne_zero }
+  { rwa one_le_pow_iff, apply nat.succ_ne_zero }
+end
+
+instance fact_pow_le_one {n : ℕ} {a : ℝ≥0} [h : fact (a ≤ 1)] : fact (a^n ≤ 1) :=
+begin
+  cases n,
+  { simpa only [pow_zero] using nnreal.fact_le_refl _ },
+  { rwa pow_le_one_iff, apply nat.succ_ne_zero }
+end
+
+lemma fact_le_pow_mul_of_le_pow_succ_mul {n : ℕ} (r : ℝ≥0)
+  [fact (r ≤ 1)] [h : fact (c₂ ≤ r ^ (n+1) * c₁)] :
+  fact (c₂ ≤ r ^ n * c₁) :=
+begin
+  refine ⟨h.out.trans _⟩,
+  rw [pow_succ, mul_assoc],
+  apply fact.out
 end
 
 instance fact_le_mul_add : fact (c * c₁ + c * c₂ ≤ c * (c₁ + c₂)) :=

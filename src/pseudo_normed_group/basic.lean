@@ -6,6 +6,26 @@ import topology.basic
 
 import hacks_and_tricks.type_pow
 
+/-!
+
+# Pseudo-normed groups
+
+This file contains definitions and basic properties of pseudo-normed (abelian additive) groups.
+See for example the comments after the proof of Proposition 9.10 of `analytic.pdf`, although we do
+not work in an arbitrary topos.
+
+## Main definitions
+
+`pseudo_normed_group` -- a pseudo-normed abelian additive group
+`archimedean` -- a predicate saying m ∈ M_c ↔ n•m ∈ M_{nc} for all positive naturals `n`.
+
+## Implementation issues
+
+Right now we let the M_c be subsets of M. An alternative approach would be to have
+them all as types; this is more convenient for some parts of the argument.
+
+-/
+
 noncomputable theory
 
 open_locale nnreal big_operators
@@ -17,7 +37,7 @@ together with an increasing filtration indexed by `ℝ≥0` of subsets `M_{≤c}
 containing `0` and closed under negation,
 and such that if `x₁ ∈ M_{≤c₁}` and `x₂ ∈ M_{c₂}`, then `x₁ + x₂ ∈ M_{≤c₁ + c₂}`.
 
-See also the top of p66 in [Analytic].
+See also the comments after Proposition 9.10 on p66 in [Analytic].
 
 Implementation details:
 * In [Analytic], the filtration is indexed by *positive* real numbers (excluding) `0`,
@@ -317,12 +337,13 @@ lemma pseudo_normed_group.archimedean.add_monoid_hom (M : Type*) {N : Type*}
   archimedean (M →+ N) :=
 begin
   intros f c k hk,
-  apply forall_congr, intro c,
+  apply forall_congr, intro c',
   apply forall_congr, intro l,
   apply forall_congr, intro hl,
-  simp only [← nsmul_eq_smul, nsmul_eq_mul, mul_assoc],
-  simp only [nsmul_eq_smul, ← nsmul_eq_mul, add_monoid_hom.nat_smul_apply],
-  exact h _ _ k hk
+  have := h (f l) (c * c') k hk,
+  simp only [← nsmul_eq_smul, nsmul_eq_mul, mul_assoc] at this ⊢,
+  simp only [nsmul_eq_smul, ← nsmul_eq_mul, ← add_monoid_hom.nat_smul_apply] at this ⊢,
+  convert this
 end
 
-#lint- only unused_arguments def_lemma doc_blame
+-- #lint- only unused_arguments def_lemma doc_blame

@@ -57,21 +57,9 @@ namespace universal_constants
 open system_of_double_complexes
 
 -- this should be a constant roughly determined by `combinatorial_lemma.lean` (`lem98`)
+-- it should probably also depend on an `N : ℕ`
 def c₀ (Λ : PolyhedralLattice) : ℝ≥0 :=
 sorry
-
-include BD c' r r' m
-
-/-- `H BD c' r r' m` is the universal bound on the norm of the `N`th Breen--Deligne homotopy
-in the first `m` degrees.
-
-Here `N = thm95.N c' r r' m` (or it's `log_2`, depending on how you count). -/
-def H : ℝ≥0 :=
-sorry
-
-omit BD c' r r' m
-
-instance H_pos : fact (0 < H BD c' r r' m) := sorry
 
 def k₁ : ℕ → ℝ≥0
 | 0     := 2 -- should be anything > 1
@@ -101,22 +89,51 @@ abbreviation K₀ : ℝ≥0 := normed_spectral.K₀ m (K₁ m)
 /-- `ε m` is the constant `ε m (K m)` used in the proof of `normed_spectral` -/
 abbreviation ε : ℝ≥0 := normed_spectral.ε m (K₁ m)
 
+instance ε_pos : fact (0 < ε m) := ⟨normed_spectral.ε_pos _ _⟩
+
 /-- `k' c' m` is the maximum of `k₀ m` and the constants `c' 0`, `c' 1`, ..., `c' m` -/
 def k' : ℝ≥0 := max (k₀ m) $ (finset.range (m+1)).sup c'
 
-instance one_le_k' : fact (1 ≤ k' c' m) := sorry
+instance one_le_k' : fact (1 ≤ k' c' m) :=
+⟨le_trans (fact.out _) $ le_max_left _ _⟩
 
 instance k₀_le_k' : fact (normed_spectral.k₀ m (k₁ m) ≤ k' c' m) := ⟨le_max_left _ _⟩
 
 -- in the PDF `b` is *positive*, we might need to make that explicit
 lemma b_exists : ∃ b : ℕ, 2 * (k' c' m) * (r / r') ^ b ≤ (ε m) :=
-sorry
+begin
+  have : 0 < 2 * (k' c' m) := mul_pos zero_lt_two (fact.out _),
+  simp only [nnreal.mul_le_iff_le_inv this.ne'],
+  have h₁ : 0 < ((2 * k' c' m)⁻¹ * ε m : ℝ),
+  { refine mul_pos (inv_pos.mpr this) _,
+    rw [nnreal.coe_pos],
+    exact fact.out _ },
+  have h₂ : (r / r' : ℝ) < 1,
+  { rw div_lt_iff,
+    { rw [one_mul, nnreal.coe_lt_coe], exact fact.out _ },
+    { rw [nnreal.coe_pos], exact fact.out _ } },
+  obtain ⟨b, hb⟩ := exists_pow_lt_of_lt_one h₁ h₂,
+  use b,
+  exact_mod_cast hb.le,
+end
 
 /-- `b c' r r' m` is the smallest `b` such that `2 * (k' c' m) * (r / r') ^ b ≤ (ε m)` -/
 def b : ℕ := nat.find (b_exists c' r r' m)
 
 lemma N₂_exists : ∃ N₂ : ℕ, (k' c' m) / (2 ^ N₂) ≤ r' ^ (b c' r r' m) :=
-sorry
+begin
+  suffices : ∃ N₂ : ℕ, ((2⁻¹ : ℝ≥0) ^ N₂ : ℝ) < (k' c' m)⁻¹ * r' ^ (b c' r r' m),
+  { rcases this with ⟨N₂, h⟩,
+    use N₂,
+    rw [← div_lt_iff', ← nnreal.coe_pow, inv_pow', nnreal.coe_inv, inv_div_left, mul_inv',
+      inv_inv', ← div_eq_mul_inv] at h,
+    { exact_mod_cast h.le },
+    { rw [inv_pos, nnreal.coe_pos], exact fact.out _ } },
+  refine exists_pow_lt_of_lt_one (mul_pos _ _) _,
+  { rw [inv_pos, nnreal.coe_pos], exact fact.out _ },
+  { apply pow_pos, rw [nnreal.coe_pos], exact fact.out _ },
+  { norm_num }
+end
 
 /-- `N₂ c' r r' m` is the smallest `N₂` such that `N = 2 ^ N₂` satisfies
 `(k' c' m) / N ≤ r' ^ (b c' r r' m)` -/
@@ -135,6 +152,17 @@ sorry
 lemma two_div_k'_mul_r_div_r'_pow_b_le :
   (2 / k' c' m) * (r / r') ^ (b c' r r' m) ≤ ε m :=
 sorry
+
+include BD c' r r' m
+
+/-- `H BD c' r r' m` is the universal bound on the norm of the `N₂`th Breen--Deligne homotopy
+in the first `m` degrees. Here `N₂ = thm95.N₂ c' r r' m`. -/
+def H : ℝ≥0 :=
+sorry
+
+omit BD c' r r' m
+
+instance H_pos : fact (0 < H BD c' r r' m) := sorry
 
 def k : ℝ≥0 := k' c' m * k' c' m
 
