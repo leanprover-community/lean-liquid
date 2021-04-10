@@ -1,5 +1,5 @@
 import toric.scattered_defs
-import toric.pointed_flaw
+import toric.flaw.pointed_flaw
 import toric.pairing_dual_saturated
 
 /-! In the intended application, these are the players:

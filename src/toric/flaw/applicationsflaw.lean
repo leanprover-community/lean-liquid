@@ -1,5 +1,5 @@
 import toric.toric
-import toric.pointed_flaw
+import toric.flaw.pointed_flaw
 import data.real.nnreal
 
 open_locale nnreal
