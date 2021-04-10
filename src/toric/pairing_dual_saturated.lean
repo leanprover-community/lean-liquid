@@ -1,7 +1,33 @@
 --import toric_2021_02_19.toric
 import algebra.regular
 import linear_algebra.finite_dimensional
+/-!
 
+# Saturations and pairings
+
+This file does two things: it sets up the theory of saturations and saturated
+modules, and it also sets up the theory of "dual sets".
+It could probably be split into two files.
+
+## Saturations
+
+A submodule `s` of an `R`-module `M` is *saturated* if for all regular `r : R`,
+`r • m ∈ s → m ∈ s`. Recall that `r : R` is *regular* if multiplication by `r` is
+injective on `R`. The *saturation* of a submodule is the smallest saturated
+submodule containing the submodule.
+
+## dual sets
+
+The set-up: `S` is an `R`-algebra, `M`, `N` and `P` are `S`-modules,
+`f : M →ₗ[S] N →ₗ[S] P` is a pairing, and `P₀` is an `R`-submodule of `P` (the
+"nonnegative elements"). If `s : set M` then `f.dual_set P₀ s` is the subset
+of `N` consisting of the elements which pair into `P₀` for every element of `s`.
+For fixed `f`, this sets up a "Galois coconnection" between `set M` and `set N`,
+and also between `submodule R M` and `submodule R N`, but as far as I know we don't
+have Galois coconnections in mathlib, so a lot of the theory is set up by hand.
+
+If furthermore `P₀` is `R`-saturated, then dual sets are also saturated submodules.
+-/
 variables (R S M N P : Type*)
 
 section saturation
@@ -15,8 +41,7 @@ variables [comm_semiring R] [add_comm_monoid M] [semimodule R M]
 
 variables {R} {M}
 
-/-- This definition does not assume that `R` injects into `S`.  If the map `R → S` has a
-non-trivial kernel, this might not be the definition you think. -/
+/-- An `R`-submodule `s` of `M` is saturated if `r•m ∈ s → m ∈ s` for all regular `r : R`.  -/
 def saturated (s : submodule R M) : Prop :=
 ∀ (r : R) (hr : is_regular r) (m : M), r • m ∈ s → m ∈ s
 
@@ -38,7 +63,7 @@ def saturation (s : submodule R M) : submodule R M :=
   smul_mem' := λ c m ⟨r, hrreg, hrm⟩,
     ⟨r, hrreg, by {rw smul_algebra_smul_comm, exact s.smul_mem _ hrm}⟩ }
 
-/--  The saturation of `s` contains `s`. -/
+/-- The saturation of `s` contains `s`. -/
 lemma le_saturation (s : submodule R M) : s ≤ saturation s :=
 λ m hm, ⟨1, is_regular_one, by rwa one_smul⟩
 
@@ -113,7 +138,7 @@ variables
   [add_comm_monoid N] [semimodule R N] [semimodule S N] [is_scalar_tower R S N]
   [add_comm_monoid P] [semimodule R P] [semimodule S P] [is_scalar_tower R S P]
   (P₀ : submodule R P)
-/-- An R-pairing on the R-modules M, N, P is an R-linear map M -> Hom_R(N,P). -/
+/-- An S-pairing on the S-modules M, N, P is an S-linear map M -> Hom_S(N,P). -/
 @[derive has_coe_to_fun] def pairing := M →ₗ[S] N →ₗ[S] P
 
 namespace pairing
@@ -129,23 +154,22 @@ def flip : pairing S M N P → pairing S N M P := linear_map.flip
 
 variables (f : pairing S M N P)
 
-/-- For a given pairing `<_, _> : M × N → P` and an element `m ∈ M`, `mul_left` is the linear map
-`n ↦ <m, n>`.
--- Left multiplication may not be needed.
-def mul_left (m : M) : N →ₗ[R] P :=
-{ to_fun := λ n, f m n,
-  map_add' := λ x y, by simp only [linear_map.add_apply, linear_map.map_add],
-  map_smul' := λ x y, by simp only [linear_map.smul_apply, linear_map.map_smul] }
+-- kmb commented this out because before it was a large docstring for an example.
+-- /-- For a given pairing `<_, _> : M × N → P` and an element `m ∈ M`, `mul_left` is the linear map
+-- `n ↦ <m, n>`.
+-- -- Left multiplication may not be needed.
+-- def mul_left (m : M) : N →ₗ[R] P :=
+-- { to_fun := λ n, f m n,
+--   map_add' := λ x y, by simp only [linear_map.add_apply, linear_map.map_add],
+--   map_smul' := λ x y, by simp only [linear_map.smul_apply, linear_map.map_smul] }
 
-/-- For a given pairing `<_, _> : M × N → P` and an element `n ∈ N`, `mul_right` is the linear map
-`m ↦ <m, n>`. -/
-def mul_right (n : N) : M →ₗ[R] P :=
-{ to_fun := λ m, f m n,
-  map_add' := λ x y, by simp only [linear_map.add_apply, linear_map.map_add],
-  map_smul' := λ x y, by simp only [linear_map.smul_apply, linear_map.map_smul] }
--/
-
-example {n : N} : f.flip n = f.flip n := rfl
+-- /-- For a given pairing `<_, _> : M × N → P` and an element `n ∈ N`, `mul_right` is the linear map
+-- `m ↦ <m, n>`. -/
+-- def mul_right (n : N) : M →ₗ[R] P :=
+-- { to_fun := λ m, f m n,
+--   map_add' := λ x y, by simp only [linear_map.add_apply, linear_map.map_add],
+--   map_smul' := λ x y, by simp only [linear_map.smul_apply, linear_map.map_smul] }
+-- -/
 
 /--  A pairing `M × N → P` is `left_nondegenerate` if `0 ∈ N` is the only element of `N` pairing
 to `0` with all elements of `M`. -/
@@ -236,11 +260,11 @@ begin
   simpa using hn (r • m) hrm
 end
 
-/- flip the inequalities assuming saturatedness -/
-lemma le_dual_set_of_le_dual_set_satu {s : submodule R M} {t : submodule R N}
-  (st : s ≤ f.flip.dual_set P₀ t) :
-  t ≤ f.dual_set P₀ s :=
-subset_dual_set_of_subset_dual_set _ st
+-- this is the same as `le_dual_set_of_le_dual_set` above
+-- lemma le_dual_set_of_le_dual_set_satu {s : submodule R M} {t : submodule R N}
+--   (st : s ≤ f.flip.dual_set P₀ t) :
+--   t ≤ f.dual_set P₀ s :=
+-- subset_dual_set_of_subset_dual_set _ st
 
 lemma subset_dual_set_iff {s : set M} {t : set N} :
   s ⊆ f.flip.dual_set P₀ t ↔ t ⊆ f.dual_set P₀ s :=
