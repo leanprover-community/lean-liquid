@@ -1,18 +1,16 @@
 import algebra.algebra.basic
 
 /-!
-This file introduces two definitions:
 
-* `nnR`, defining the subsemiring of non-negative elements of an `ordered_semiring`;
-* `is_inj_nonneg`, a predicate on functions `f : N → Z`;
+# Non-negative elements of an ordered semiring
 
-and contains a minimal API for them.
+## Main definitions
 
-Let `N, Z` be two Types.  Assume that the Type `Z` has a zero element and a relation `≤`.
-Thus, it makes sense to talk about non-negative elements of `Z`.
+* `nnR R`: the subsemiring of non-negative elements of an ordered semiring `R`.
+* `is_inj_nonneg (f : N → Z)`: the predicate asserting that `f` is injective and
+  has range contained within the non-negative elements of `Z`.
 
-The predicate `is_inj_nonneg` on functions `f : N → Z` is satisfied if and only if
-the function `f` is injective and the image of `f` consists of non-negative elements.
+## Main theorems
 
 There are proofs that the coercions `ℕ → R`, `(nnR R) → R` and `(nnR ℤ) → ℤ`
 satisfy `is_inj_nonneg` (with the appropriate non-triviality/order assumptions).

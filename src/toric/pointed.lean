@@ -3,7 +3,19 @@ import linear_algebra.finite_dimensional
 import linear_algebra.basis
 import toric.is_inj_nonneg
 
-/-! In the intended application, these are the players:
+/-!
+
+# Pointed submodules
+
+Let `S` be an `R`-algebra and `M` an `S`-module.
+
+A *pointed submodule* `s` of `M` is an `R`-submodule for which there's a linear function `φ : M → S`
+whose kernel intersects `s` in just one point. A comment claims that this is equivalent
+to asking that `s` contains no `S`-linear subspace, but this doesn't seem to be true
+(e.g. R=ℕ, S=ℤ, M=ℤ², s=ℤ×{0} and ker(φ)={0}×ℤ).
+
+
+In the intended application, these are the players:
 * `R = ℕ`;
 * `S = ℤ`;
 * `M` is a free finitely generated `ℤ`-module.
@@ -29,7 +41,7 @@ such that the hyperplane `ker φ` intersects `s` in just the origin.
 Alternatively, the submodule `s` contains no `S` linear subspace. -/
 def pointed (s : submodule R M) : Prop := ∃ φ : M →ₗ[S] S, ∀ x : M, x ∈ s → φ x = 0 → x = 0
 
-/--  A pointed subset is a submodule `s` for which there exists a linear function `φ : M → S`,
+/--  A pointed subset is a subset `s` for which there exists a linear function `φ : M → S`,
 such that the hyperplane `ker φ` intersects `s` in just the origin. -/
 -- We may not need this definition.
 def pointed_subset (s : set M) : Prop := ∃ φ : M →ₗ[S] S, ∀ x : M, x ∈ s → φ x = 0 → x = 0

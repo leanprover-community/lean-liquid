@@ -90,7 +90,7 @@ begin
     rw ← is_scalar_tower.algebra_map_smul Q z m,
     exact smul_mem _ _ hm2 }
 end
-
+#exit
 lemma gen_box_sum_other_direction  (Z : Type*) {Q ι : Type*} [comm_ring Z] [field Q] [algebra Z Q]
   [semimodule Z M] [semimodule Q M] [is_scalar_tower Z Q M]
   (v : ι → M) (s : set M) (sZ : ∀ i : M, i ∈ s → i ∈ submodule.span Z (set.range v))
