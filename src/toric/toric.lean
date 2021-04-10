@@ -1,7 +1,7 @@
 import topology.algebra.ordered
 import toric.scattered_defs
 import toric.is_inj_nonneg
-import toric.pointed
+--import toric.pointed
 import toric.pairing_dual_saturated
 
 /-! In the intended application, these are the players:
