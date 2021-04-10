@@ -9,6 +9,7 @@ open opposite category_theory
 open_locale nnreal
 
 /-!
+
 # Systems of double complexes of normed abelian groups
 
 In this file we define systems of double complexes of normed abelian groups,
@@ -19,6 +20,7 @@ as needed for Definition 9.6 of [Analytic].
 * `system_of_double_complexes`: a system of complexes of normed abelian groups.
 * `admissible`: such a system is *admissible* if all maps that occur in the system
     are norm-nonincreasing.
+
 -/
 
 /-- A system of double complexes of normed abelian groups, indexed by `ℝ≥0`.
@@ -160,6 +162,19 @@ rfl
   (C.row p).d = @d' C c p :=
 rfl
 
+/-- The differential between rows in a system of double complexes,
+as map of system of complexes. -/
+def row_map (C : system_of_double_complexes.{u}) (p p' : ℕ) :
+  C.row p ⟶ C.row p' :=
+{ app := λ c,
+  { f := λ q, (C.d p p' : C.X c.unop p q ⟶ C.X c.unop p' q),
+    comm := λ q q', (C.d'_comp_d _ p p' q q') },
+  naturality' := λ c₁ c₂ h, ((C.map h).comm p p').symm }
+
+@[simp] lemma row_map_apply (C : system_of_double_complexes.{u})
+  (c : ℝ≥0) (p p' q : ℕ) (x : C.X c p q) :
+  C.row_map p p' x = C.d p p' x := rfl
+
 /-- The `q`-th column in a system of double complexes, as system of complexes. -/
 def col (C : system_of_double_complexes.{u}) (q : ℕ) : system_of_complexes.{u} :=
 C ⋙ functor.map_complex_like' (induced_functor _ ⋙ differential_object.forget _ _ ⋙ pi.eval _ q)
@@ -191,9 +206,9 @@ if all the differentials and restriction maps are norm-nonincreasing.
 
 See Definition 9.3 of [Analytic]. -/
 structure admissible (C : system_of_double_complexes) : Prop :=
-(d_norm_noninc' : ∀ c p p' q (h : p + 1 = p') (x : C.X c p q), ∥C.d p p' x∥ ≤ ∥x∥)
-(d'_norm_noninc' : ∀ c p q q' (h : q + 1 = q') (x : C.X c p q), ∥C.d' q q' x∥ ≤ ∥x∥)
-(res_norm_noninc : ∀ c' c p q h (x : C.X c' p q), ∥@res C c' c p q h x∥ ≤ ∥x∥)
+(d_norm_noninc' : ∀ c p p' q (h : p + 1 = p'), (@d C c p p' q).norm_noninc)
+(d'_norm_noninc' : ∀ c p q q' (h : q + 1 = q'), (@d' C c p q q').norm_noninc)
+(res_norm_noninc : ∀ c' c p q h, (@res C c' c p q h).norm_noninc)
 
 namespace admissible
 
@@ -222,6 +237,13 @@ lemma col (hC : C.admissible) (q : ℕ) : (C.col q).admissible :=
 lemma row (hC : C.admissible) (p : ℕ) : (C.row p).admissible :=
 { d_norm_noninc' := λ c i j h, hC.d'_norm_noninc _ _ _ _,
   res_norm_noninc := λ c i j h, hC.res_norm_noninc _ _ _ _ _ }
+
+lemma mk' (h : ∀ p, (C.row p).admissible)
+  (hd : ∀ c p p' q (h : p + 1 = p'), (@d C c p p' q).norm_noninc) :
+  C.admissible :=
+{ d_norm_noninc' := λ c p p' q h', hd c p p' q h',
+  d'_norm_noninc' := λ c p q q' h', (h p).d_norm_noninc' _ _ _ h',
+  res_norm_noninc := λ c₁ c₂ p q h', by { resetI, apply (h p).res_norm_noninc } }
 
 end admissible
 

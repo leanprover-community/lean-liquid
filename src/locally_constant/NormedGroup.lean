@@ -3,6 +3,19 @@ import topology.category.Profinite
 import locally_constant.analysis
 import normed_group.NormedGroup
 
+/-!
+
+# The functor of locally constant maps
+
+The functor sending a normed group `V` and a profinite type `S` to the normed group
+of locally constant maps from `S` to `V` (with the sup norm).
+
+## Main definition
+
+- `LocallyConstant : NormedGroup ⥤ Profiniteᵒᵖ ⥤ NormedGroup` : the functor.
+
+-/
+
 noncomputable theory
 
 set_option pp.proofs true
@@ -10,7 +23,7 @@ set_option pp.proofs true
 namespace NormedGroup
 open opposite locally_constant
 
-local attribute [instance] locally_constant.normed_group locally_constant.metric_space
+local attribute [instance] locally_constant.semi_normed_group locally_constant.pseudo_metric_space
 
 /-- The bifunctor of locally constant maps from profinite spaces to normed groups.
     The effects on homs of groups or space are defined in terms of push-forward

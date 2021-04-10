@@ -1,9 +1,25 @@
 import category_theory.graded_object
 import category_theory.preadditive
-import category_theory.abelian.additive_functor
+import category_theory.preadditive.additive_functor
 import data.int.basic
 
 import for_mathlib.preadditive_category
+/-!
+
+# Complexes of objects in a category
+
+This file contains an experimental definition of a complex of objects
+in a category. There is a "lawless" version `differential_object` (which
+Scott says should be called something else) and an extension
+of this called `complex_like` (assuming the underlying category is
+preadditive) which contains the hypothesis d^2=0.
+One rather strange thing to note here is that these complexes
+have maps d : X_i → X_j for all i and j, and these maps are assumed
+to be zero if i ≠ j + 1 (resp. j ≠ i + 1, depending on a boolean
+input which says which way the maps are going). The concept of a
+homotopy is also defined.
+
+-/
 
 open category_theory category_theory.limits
 
@@ -266,9 +282,33 @@ structure complex_like (cov : bool) extends differential_object ι V :=
 (d_comp_d : ∀ i j k, d i j ≫ d j k = 0)
 (d_eq_zero : ∀ ⦃i j⦄, ¬ coherent_indices cov i j → d i j = 0)
 
+@[simp]
+lemma complex_like.to_differential_object_X {cov : bool} (BD : complex_like ι V cov) :
+  (complex_like.to_differential_object BD).X = BD.X := rfl
+
+@[simp]
+lemma complex_like.to_differential_object_d {cov : bool} (BD : complex_like ι V cov) :
+  (complex_like.to_differential_object BD).d = BD.d := rfl
+
 attribute [reassoc] complex_like.d_comp_d
 
 variables {ι V}
+
+theorem complex_like.ext' {C D : complex_like ι V cov}
+  (H : ∀ i j, coherent_indices cov i j → arrow.mk (C.d i j) = arrow.mk (D.d i j)) : C = D :=
+begin
+  cases C,
+  cases D,
+  cases show C_X = D_X, by {
+    ext i,
+    cases cov,
+    { exact congr_arg comma.right (H _ i rfl) },
+    { exact congr_arg comma.left (H i _ rfl) } },
+  congr, ext i j,
+  by_cases coherent_indices cov i j,
+  { injection H i j h, exact eq_of_heq h_3 },
+  { simp only [C_d_eq_zero h, D_d_eq_zero h] }
+end
 
 instance coherent_indices_decidable [decidable_eq ι] (cov : bool) (i j : ι) :
   decidable (coherent_indices cov i j) :=
@@ -476,6 +516,10 @@ open category_theory.preadditive
 variables {ι V} [has_succ ι] [category V] [preadditive V]
 
 @[simps]
+def f_hom {C₁ C₂ : complex_like ι V cov} (i : ι) : (C₁ ⟶ C₂) →+ (C₁.X i ⟶ C₂.X i) :=
+add_monoid_hom.mk' (λ f, differential_object.hom.f f i) (λ _ _, rfl)
+
+@[simps]
 def iso_of_components {C₁ C₂ : complex_like ι V cov} (f : Π i, C₁.X i ≅ C₂.X i)
   (hf : ∀ i j, C₁.d i j ≫ (f j).hom = (f i).hom ≫ C₂.d i j) :
   C₁ ≅ C₂ :=
@@ -664,6 +708,10 @@ calc (mk' X d h).d i (succ i)
     = d i ≫ eq_to_hom (congr_arg _ rfl) : dif_pos rfl
 ... = d i : by simp only [category.comp_id, eq_to_hom_refl]
 
+theorem ext {C D : cochain_complex ι V}
+  (H : ∀ i, arrow.mk (C.d i (succ i)) = arrow.mk (D.d i (succ i))) : C = D :=
+differential_object.complex_like.ext' $ by rintro _ _ ⟨⟩; apply H
+
 end cochain_complex
 
 namespace chain_complex
@@ -689,6 +737,10 @@ def mk' (X : ι → V) (d : Π i, X (succ i) ⟶ X i) (h : ∀ i, d (succ i) ≫
 calc (mk' X d h).d (succ i) i
     = eq_to_hom (congr_arg _ rfl) ≫ d i : dif_pos rfl
 ... = d i : by simp only [category.id_comp, eq_to_hom_refl]
+
+theorem ext {C D : chain_complex ι V}
+  (H : ∀ i, arrow.mk (C.d (succ i) i) = arrow.mk (D.d (succ i) i)) : C = D :=
+differential_object.complex_like.ext' $ by rintro _ _ ⟨⟩; apply H
 
 end chain_complex
 
@@ -743,7 +795,7 @@ variables [preadditive V₁] [preadditive V₂]
 @[simps]
 def functor.map_complex_like [has_succ ι] (F : V₁ ⥤ V₂) [F.additive] :
   complex_like ι V₁ cov ⥤ complex_like ι V₂ cov :=
-F.map_complex_like' $ λ x y, functor.additive.map_zero
+F.map_complex_like' $ λ x y, functor.additive.map_zero'
 
 @[simps]
 def functor.map_complex_like_nat_trans [has_succ ι] (F G : V₁ ⥤ V₂) [F.additive] [G.additive]

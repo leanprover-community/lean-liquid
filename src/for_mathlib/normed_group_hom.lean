@@ -14,9 +14,10 @@ lemma subgroup.mem_map_of_mem {G H : Type*} [group G] [group H] {G' : subgroup G
   f x ∈ subgroup.map f G' :=
 subgroup.mem_map.mpr ⟨x, hx, rfl⟩
 
-variables {G : Type*} [normed_group G]
-variables {H : Type*} [normed_group H]
-variables {K : Type*} [normed_group K]
+variables {G : Type*} [semi_normed_group G]
+variables {H : Type*} [semi_normed_group H]
+variables {H₁ : Type*} [normed_group H₁]
+variables {K : Type*} [semi_normed_group K]
 
 lemma normed_group.norm_incl {G' : add_subgroup G} (x : G') : ∥incl _ x∥ = ∥x∥ :=
 rfl
@@ -67,5 +68,5 @@ lemma normed_group_hom.ker_eq_preimage (f : normed_group_hom G H) :
   (f.ker : set G) = (f : G → H) ⁻¹' {0} :=
 by { ext, erw f.mem_ker }
 
-lemma normed_group_hom.is_closed_ker (f : normed_group_hom G H) : is_closed (f.ker : set G) :=
+lemma normed_group_hom.is_closed_ker (f : normed_group_hom G H₁) : is_closed (f.ker : set G) :=
 f.ker_eq_preimage ▸ is_closed.preimage f.continuous (t1_space.t1 0)

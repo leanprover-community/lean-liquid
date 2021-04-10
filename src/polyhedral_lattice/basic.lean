@@ -1,6 +1,18 @@
 import analysis.normed_space.normed_group_hom
 import ring_theory.finiteness
+/-!
 
+# Polyhedral lattices
+
+A polyhedral lattice is a finite free ℤ-module with a real-valued norm
+making it into a normed group, such that the closed unit ball of
+the Banach space obtained by tensoring everything up to ℝ is a rational polyhedron.
+
+## Implementation issues
+
+The condition on the norm actually used is `generates_norm` below.
+
+-/
 noncomputable theory
 open_locale big_operators classical nnreal
 
@@ -20,7 +32,7 @@ end move_this
 
 section generates_norm
 
-variables {Λ ι : Type*} [normed_group Λ] [semimodule ℕ Λ] [fintype ι]
+variables {Λ ι : Type*} [semi_normed_group Λ] [semimodule ℕ Λ] [fintype ι]
 
 /-- A finite family `x : ι → Λ` generates the norm on `Λ`
 if for every `l : Λ`,
@@ -53,14 +65,17 @@ lemma generates_norm_of_generates_nnnorm {x : ι → Λ}
 
 end generates_norm
 
-class polyhedral_lattice (Λ : Type*) extends normed_group Λ :=
+class polyhedral_lattice (Λ : Type*) extends semi_normed_group Λ :=
 -- unfortunately, we need the following assumptions, for technical reasons
 [nat_semimodule : semimodule ℕ Λ]
 [int_semimodule : semimodule ℤ Λ]
 [is_scalar_tower : is_scalar_tower ℕ ℤ Λ]
 -- now we get to the actual definition
 (finite_free : finite_free Λ)
-(polyhedral [] : ∃ (ι : Type) [fintype ι] (l : ι → Λ), generates_norm l)
+(polyhedral [] : ∃ (ι : Type) [fintype ι] (l : ι → Λ),
+  generates_norm l ∧ ∀ i, nnnorm (l i) ≠ 0)
+  -- this final condition ↑ ↑ ↑ ↑ effectively means that we have a `normed_group`
+  -- but this condition is easier to check when forming quotients
 
 attribute [instance] polyhedral_lattice.nat_semimodule polyhedral_lattice.int_semimodule
                      polyhedral_lattice.is_scalar_tower
@@ -105,7 +120,7 @@ initialize_simps_projections polyhedral_lattice_hom (to_fun → apply)
 lemma coe_inj (H : ⇑f = g) : f = g :=
 by cases f; cases g; congr'; exact funext H
 
-lemma coe_injectiΛe : @function.injective (polyhedral_lattice_hom Λ₁ Λ₂) (Λ₁ → Λ₂) coe_fn :=
+lemma coe_injective : @function.injective (polyhedral_lattice_hom Λ₁ Λ₂) (Λ₁ → Λ₂) coe_fn :=
 by apply coe_inj
 
 lemma coe_inj_iff : f = g ↔ ⇑f = g := ⟨congr_arg _, coe_inj⟩

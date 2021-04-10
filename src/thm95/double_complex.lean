@@ -17,12 +17,12 @@ import thm95.constants
 
 noncomputable theory
 
-open_locale nnreal
+open_locale nnreal big_operators
 open category_theory opposite simplex_category
 
-namespace thm95
-
 universe variables u v w
+
+namespace thm95
 
 variables (BD : breen_deligne.data) (c' : ℕ → ℝ≥0) [BD.suitable c']
 variables (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)]
@@ -42,12 +42,12 @@ def Cech_augmentation_map : (Hom M).obj Λ ⟶ (Cech_nerve r' Λ M N).obj (mk 0)
 (Hom M).map (cosimplicial_augmentation_map Λ N)
 
 def cosimplicial_system_of_complexes : simplex_category ⥤ system_of_complexes :=
-Cech_nerve r' Λ M N ⋙ BD.System c' r V r'
+Cech_nerve r' Λ M N ⋙ BD.system c' r V r'
 
 def augmentation_map :
-  (BD.System c' r V r').obj (op $ polyhedral_lattice.Hom Λ M) ⟶
+  (BD.system c' r V r').obj (op $ polyhedral_lattice.Hom Λ M) ⟶
   (cosimplicial_system_of_complexes BD c' r r' V Λ M N).obj (mk 0) :=
-(BD.System c' r V r').map (Cech_augmentation_map r' Λ M N)
+(BD.system c' r V r').map (Cech_augmentation_map r' Λ M N)
 
 def double_complex_aux : cochain_complex ℕ system_of_complexes :=
 alt_face_map_cocomplex (augmentation_map BD c' r r' V Λ M N)
@@ -93,33 +93,95 @@ def double_complex : system_of_double_complexes :=
 (double_complex_aux_rescaled BD c' r r' V Λ M N).as_functor ℕ _
 
 lemma double_complex.row_zero :
-  (double_complex BD c' r r' V Λ M N).row 0 = BD.system c' r V r' (Hom Λ M) := rfl
+  (double_complex BD c' r r' V Λ M N).row 0 =
+  (BD.system c' r V r').obj (op $ Hom Λ M) := rfl
 
 lemma double_complex.row_one :
   (double_complex BD c' r r' V Λ M N).row 1 =
-  BD.system c' r V r' (Hom ((cosimplicial Λ N).obj (mk 0)) M) := rfl
+  (BD.system c' r V r').obj (op $ Hom ((cosimplicial Λ N).obj (mk 0)) M) := rfl
 
 lemma double_complex.row (m : ℕ) :
   (double_complex BD c' r r' V Λ M N).row (m+2) =
   (system_of_complexes.rescale_functor (m+2)).obj
-    (BD.system c' r V r' (Hom ((cosimplicial Λ N).obj (mk (m+1))) M)) := rfl
+    ((BD.system c' r V r').obj (op $ Hom ((cosimplicial Λ N).obj (mk (m+1))) M)) := rfl
 
-variables {BD c' r r' V Λ M}
+end
 
--- the following two lemmas are currently not provable,
--- we need a stronger assumption than `[BD.suitable c']`
--- this is WIP
-lemma system_admissible : (BD.system c' r V r' (Hom Λ M)).admissible :=
-sorry
+end thm95
+
+namespace thm95
+
+variables (BD : breen_deligne.data)
+variables (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)]
+variables (V : NormedGroup.{v}) [normed_with_aut r V]
+variables (c_ : ℕ → ℝ≥0) [BD.very_suitable r r' c_]
+variables (Λ : PolyhedralLattice.{u}) (M : ProFiltPseuNormGrpWithTinv.{w} r')
+variables (N : ℕ) [fact (0 < N)]
+
+variables {r r' V c_ Λ M N}
+
+lemma double_complex.row_admissible :
+  ∀ m, ((double_complex BD c_ r r' V Λ M N).row m).admissible
+| 0     := BD.system_admissible
+| 1     := BD.system_admissible
+| (m+2) := system_of_complexes.rescale_admissible _ _ BD.system_admissible
+
+lemma double_complex.d_one_norm_noninc (c : ℝ≥0) (q : ℕ) :
+  (@system_of_double_complexes.d (double_complex BD c_ r r' V Λ M N) c 1 2 q).norm_noninc :=
+begin
+  refine ((NormedGroup.to_rescale_bound_by _ _).comp' 2 _ 1 _ _).norm_noninc,
+  { norm_num },
+  have : (2 : ℝ≥0) = ∑ i : fin 2, 1,
+  { simp only [finset.card_fin, mul_one, nat.cast_bit0, finset.sum_const, nsmul_eq_mul, nat.cast_one] },
+  dsimp [system_of_complexes.rescale_functor, double_complex_aux, alt_face_map_cocomplex],
+  rw [if_pos rfl, category.comp_id],
+  dsimp [alt_face_map_cocomplex.d, alt_face_map_cocomplex.coboundary],
+  simp only [← nat_trans.app_hom_apply, add_monoid_hom.map_sum, add_monoid_hom.map_gsmul,
+    ← differential_object.complex_like.f_hom_apply, this],
+  apply normed_group_hom.bound_by.sum,
+  rintro i -,
+  simp only [gsmul_eq_smul],
+  refine (normed_group_hom.bound_by.int_smul _ ((-1) ^ ↑i : ℤ)).le (_ : _ * 1 ≤ 1),
+  { apply normed_group_hom.norm_noninc.bound_by_one,
+    apply breen_deligne.data.complex.map_norm_noninc },
+  { simp only [mul_one, int.nat_abs_pow, int.nat_abs_neg, int.nat_abs_one, one_pow, nat.cast_one] },
+end
+.
+lemma double_complex.d_two_norm_noninc (c : ℝ≥0) (p q : ℕ) :
+  (@system_of_double_complexes.d (double_complex BD c_ r r' V Λ M N) c (p+2) (p+3) q).norm_noninc :=
+begin
+  refine ((NormedGroup.scale_bound_by _ _ _).comp' (p+3:ℕ) _ 1 _ _).norm_noninc,
+  { simp only [add_zero, nat.add_def, ← nat.cast_succ],
+    rw [mul_comm, ← mul_div_assoc, eq_comm, ← nat.cast_mul, nat.factorial_succ], apply div_self,
+    norm_cast, norm_num [nat.factorial_ne_zero] },
+  apply NormedGroup.rescale_map_bound_by,
+  have : (p+1+1+1 : ℝ≥0) = ∑ i : fin (p+1+1+1), 1,
+  { simp only [finset.card_fin, mul_one, finset.sum_const, nsmul_eq_mul, nat.cast_id,
+      nat.cast_bit1, nat.cast_add, nat.cast_one] },
+  dsimp [system_of_complexes.rescale_functor, double_complex_aux, alt_face_map_cocomplex],
+  rw [if_pos rfl, category.comp_id],
+  dsimp [alt_face_map_cocomplex.d, alt_face_map_cocomplex.coboundary],
+  simp only [← nat_trans.app_hom_apply, add_monoid_hom.map_sum, add_monoid_hom.map_gsmul,
+    ← differential_object.complex_like.f_hom_apply, this],
+  apply normed_group_hom.bound_by.sum,
+  rintro i -,
+  simp only [gsmul_eq_smul],
+  refine (normed_group_hom.bound_by.int_smul _ ((-1) ^ ↑i : ℤ)).le (_ : _ * 1 ≤ 1),
+  { apply normed_group_hom.norm_noninc.bound_by_one,
+    apply breen_deligne.data.complex.map_norm_noninc },
+  { simp only [mul_one, int.nat_abs_pow, int.nat_abs_neg, int.nat_abs_one, one_pow, nat.cast_one] },
+end
+
+lemma double_complex.d_norm_noninc (c : ℝ≥0) (q : ℕ) :
+  ∀ p, (@system_of_double_complexes.d (double_complex BD c_ r r' V Λ M N) c p (p+1) q).norm_noninc
+| 0     := breen_deligne.data.complex.map_norm_noninc _ _ _ _ _ _ _ _
+| 1     := double_complex.d_one_norm_noninc _ _ _
+| (p+2) := double_complex.d_two_norm_noninc _ _ _ _
 
 -- see above: currently we can only prove this for the columns
 lemma double_complex_admissible :
-  (double_complex BD c' r r' V Λ M N).admissible :=
-{ d_norm_noninc' := sorry,  /- ← should be provable -/
-  d'_norm_noninc' := sorry, /- ← this should be provable assuming `system_admissible` above;
-                                 also note `system_of_complexes.rescale_admissible` -/
-  res_norm_noninc := sorry, /- ← should be provable -/ }
-
-end
+  (double_complex BD c_ r r' V Λ M N).admissible :=
+system_of_double_complexes.admissible.mk' (double_complex.row_admissible _)
+  (by { rintro _ _ _ _ rfl, apply double_complex.d_norm_noninc })
 
 end thm95
