@@ -1,4 +1,4 @@
-import .PartialOrder
+--import .PartialOrder
 import .Profinite
 import topology.category.Profinite
 import topology.locally_constant.basic
@@ -554,7 +554,7 @@ def Fincone : limits.cone (X.diagram ⋙ of_Fintype) :=
       apply cl.proj_fun_spec
     end } }
 
-instance is_iso_lift : is_iso ((limit_cone_is_limit (X.diagram ⋙ of_Fintype)).lift X.Fincone) :=
+instance is_iso_lift : is_iso ((limit_cone_cone_is_limit (X.diagram ⋙ of_Fintype)).lift X.Fincone) :=
 is_iso_of_bijective _
 begin
   split,
@@ -564,7 +564,7 @@ begin
     apply_fun subtype.val at h,
     apply_fun (λ u, u I) at h,
     exact h },
-  { let C := limit_cone (X.diagram ⋙ of_Fintype),
+  { let C := limit_cone_cone (X.diagram ⋙ of_Fintype),
     rintros (x : C.X.to_Top),
     have := cl.exists_of_compat (λ i : X.cl, x.val i)
       (λ I J f, _),
@@ -578,12 +578,12 @@ begin
       refl } }
 end
 
-def Fincone_iso : X.Fincone ≅ limit_cone _ :=
+def Fincone_iso : X.Fincone ≅ limit_cone_cone _ :=
 limits.cones.ext
-(as_iso $ (limit_cone_is_limit (X.diagram ⋙ of_Fintype)).lift X.Fincone) (λ I, rfl)
+(as_iso $ (limit_cone_cone_is_limit (X.diagram ⋙ of_Fintype)).lift X.Fincone) (λ I, rfl)
 
 def Fincone_is_limit : limits.is_limit X.Fincone :=
-limits.is_limit.of_iso_limit (limit_cone_is_limit _) X.Fincone_iso.symm
+limits.is_limit.of_iso_limit (limit_cone_cone_is_limit _) X.Fincone_iso.symm
 
 variables {X} {Y : Profinite.{u}} (f : Y ⟶ X)
 
@@ -674,58 +674,5 @@ def change_cone_comp_Fincone {Z : Profinite.{u}} (g : Z ⟶ Y) :
 change_cone_comp _ _ _
 
 end categorical
-
-section arrow
-
-def refine_with {X : Profinite} (I : X.cl) : X.cl ⥤ over I :=
-{ obj := λ J,
-  { left := I ⊓ J,
-    hom := hom_of_le $ inf_le_left },
-  map := λ J K f, { left := hom_of_le $ cl.inf_mono_right $ le_of_hom f } }.
-
-def diagram_over (X : Profinite) (I : X.cl) : over I ⥤ Fintype :=
-over.forget _ ⋙ X.diagram
-
-def Fincone_over {X : Profinite} (I : X.cl) : limits.cone (X.diagram_over I ⋙ of_Fintype) :=
-limits.cone.whisker (over.forget I) X.Fincone
-
-variables (f : arrow Profinite)
-
-end arrow
-
-namespace ham
-
-variables {J : Type u} [small_category J] (F : J ⥤ Profinite.{u})
-
-def CL : Jᵒᵖ ⥤ PartialOrder.{u} :=
-{ obj := λ j, PartialOrder.of $ (F.obj j.unop).cl,
-  map := λ i j f,
-  { to_fun := cl.pullback (F.map f.unop),
-    monotone' := λ I J, cl.pullback_mono },
-  map_id' := begin
-    intros j,
-    simp,
-    ext1,
-    dsimp,
-    erw cl.pullback_id,
-    refl,
-  end,
-  map_comp' := begin
-    intros i j k f g,
-    simp,
-    ext1,
-    dsimp,
-    erw cl.pullback_comp,
-    refl,
-  end }.
-
-abbreviation indexcat := PartialOrder.Grothendieck (CL F)
-
--- sanity check
-example : small_category (indexcat F) := by apply_instance
-
-
-
-end ham
 
 end Profinite

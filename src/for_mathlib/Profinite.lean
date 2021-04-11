@@ -91,7 +91,7 @@ lemma is_iso_of_bijective {X Y : Profinite.{u}}
 let E := iso_of_bijective f h in
 is_iso.mk $ ⟨E.inv, by erw E.hom_inv_id, by erw E.inv_hom_id⟩
 
-def limit_cone {J : Type u} [small_category J] (F : J ⥤ Profinite.{u}) :
+def limit_cone_cone {J : Type u} [small_category J] (F : J ⥤ Profinite.{u}) :
   limits.cone F :=
 { X :=
   { to_Top := (Top.limit_cone' (F ⋙ Profinite_to_Top)).X,
@@ -111,9 +111,14 @@ def limit_cone {J : Type u} [small_category J] (F : J ⥤ Profinite.{u}) :
     is_totally_disconnected := by {dsimp [Top.limit_cone'], apply_instance} },
   π := { app := λ j, (Top.limit_cone' $ F ⋙ Profinite_to_Top).π.app j } }.
 
-def limit_cone_is_limit {J : Type u} [small_category J] (F : J ⥤ Profinite.{u}) :
-  limits.is_limit (limit_cone F) :=
+def limit_cone_cone_is_limit {J : Type u} [small_category J] (F : J ⥤ Profinite.{u}) :
+  limits.is_limit (limit_cone_cone F) :=
 { lift := λ S, (Top.limit_cone'_is_limit _).lift (Profinite_to_Top.map_cone S),
   uniq' := λ S m h, (Top.limit_cone'_is_limit _).uniq (Profinite_to_Top.map_cone S) _ h }
+
+def limit_cone {J : Type u} [small_category J] (F : J ⥤ Profinite.{u}) :
+  limits.limit_cone F :=
+{ cone := limit_cone_cone _,
+  is_limit := limit_cone_cone_is_limit _ }
 
 end Profinite
