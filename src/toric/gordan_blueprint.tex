@@ -8,6 +8,8 @@
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\Z}{\mathbb{Z}}
 
+\newcommand{\nnreal}{\mathbb{R}_{\geq 0}}
+
 \DeclareMathOperator{\Hom}{Hom}
 
 \usepackage{amsthm}
@@ -29,6 +31,27 @@ What we are going for is the following. Let $\Lambda$ be a finite free $\Z$-modu
 \begin{theorem}If $S$ is finite then $S^\vee$ is a finitely-generated additive monoid.
 \end{theorem}
 
+\begin{definition}
+A \emph{cone} in a real vector space~$V$ is convex subset that is closed under multiplication by
+non-negative reals.
+\end{definition}
+
+Equivalently, a cone is a $\nnreal$-subsemimodule of a real vector space.
+
+We will be only interested in finite-dimensional vector spaces. For the most part, we will also be
+only interested in \emph{closed} cones, that is, cones that are closed with respect to the
+underlying topological space structure.
+
+
+
+
+
+  \begin{definition}
+A face of a
+\end{definition}
+
+
+
 \section{Stuff in the {\tt toric} branch I don't understand}
 
 ``The {\tt pregenerators} are elements of the dual set of $S$ that generate a 1-dimensional subcone of the dual set.  They should be exactly the extremal rays and any generating set of the dual set of $S$ should contain them.''
@@ -37,7 +60,7 @@ Q) what is a 1-dimensional subcone (and how can an element of $S^\vee$ \emph{not
 
 ``Implicit in this definition is that we only consider subsets $T\subseteq S$ that produce a ray (a 1-dimensional subcone) contained in the dual cone of $S$.  Thus, not all maximal independent subsets `t ⊆ s` give rise to a {\tt pregenerator}.''
 
-Q) What does ``produce'' mean here? 
+Q) What does ``produce'' mean here?
 
 ``Besides the pregenerators, we will have to "fill in" the holes.  Here is an example:''
 
