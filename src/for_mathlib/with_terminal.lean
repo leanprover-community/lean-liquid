@@ -3,6 +3,8 @@ import category_theory.with_terminal
 
 namespace category_theory
 
+namespace with_terminal
+
 universes v u
 
 variables {C : Type u} [category.{v} C]
@@ -117,4 +119,5 @@ def arrow_equiv : arrow C ≌ ((with_terminal (discrete (punit : Type v))) ⥤ C
       refl},
   end }
 
+end with_terminal
 end category_theory
