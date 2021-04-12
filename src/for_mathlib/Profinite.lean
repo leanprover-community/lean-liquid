@@ -1,3 +1,4 @@
+import .Fintype
 import topology.category.Profinite
 import category_theory.limits.creates
 import category_theory.monad.limits
@@ -5,22 +6,6 @@ import category_theory.monad.limits
 open category_theory
 
 universe u
-
-noncomputable
-instance Profinite.to_Top.reflective : reflective.{u u} Profinite_to_Top :=
-begin
-  -- The mathlib PR fixes the universes in the correct place.
-  haveI : reflective.{u u} (CompHaus_to_Top : CompHaus.{u} ⥤ Top.{u}) :=
-    CompHaus_to_Top.reflective.{u u},
-  exact reflective.comp Profinite.to_CompHaus CompHaus_to_Top
-end
-
-noncomputable
-instance Profinite.to_Top.creates_limits : creates_limits Profinite_to_Top :=
-monadic_creates_limits _
-
-instance Profinite.has_limits : limits.has_limits Profinite :=
-has_limits_of_has_limits_creates_limits Profinite_to_Top
 
 namespace Top
 
@@ -52,6 +37,30 @@ def limit_cone'_is_limit {J : Type u} [small_category J] (F : J ⥤ Top.{u}) :
 end Top
 
 namespace Profinite
+
+instance {A : Fintype} : topological_space A := ⊥
+
+def of_Fintype : Fintype ⥤ Profinite :=
+{ obj := λ A, ⟨⟨A⟩⟩,
+  map := λ A B f, ⟨f⟩ }
+
+-- TODO: Move this and clean up proofs above
+@[simp]
+lemma comp_apply {X Y Z : Profinite.{u}} (f : X ⟶ Y) (g : Y ⟶ Z) (x : X) :
+  (f ≫ g) x = g (f x) := rfl
+
+-- TODO: Move this and clean up proofs above
+@[simp]
+lemma id_apply {X : Profinite.{u}} (x : X) : (𝟙 X : X ⟶ X) x = x := rfl
+
+@[simp]
+lemma id_to_fun {X : Profinite.{u}} : (𝟙 X : X → X) = id := rfl
+
+-- TODO: Move this!
+@[simp]
+lemma comp_to_fun {X Y Z : Profinite.{u}} (f : X ⟶ Y) (g : Y ⟶ Z) :
+  (f ≫ g : X → Z) = g ∘ f := rfl
+
 
 lemma hom_closed {X Y : Profinite.{u}} (f : X ⟶ Y) :
   is_closed_map f :=

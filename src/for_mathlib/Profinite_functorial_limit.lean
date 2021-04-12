@@ -1,4 +1,5 @@
 import .arrow
+import .Fintype
 import .Profinite
 import topology.locally_constant.basic
 import category_theory.Fintype
@@ -11,49 +12,7 @@ open category_theory
 
 noncomputable theory
 
-section move_me
-
-namespace Fintype
-
-@[simp]
-lemma id_apply {A : Fintype} (a : A) : (𝟙 A : A → A) a = a := rfl
-
-@[simp]
-lemma comp_apply {A B C : Fintype} (f : A ⟶ B) (g : B ⟶ C) (a : A) :
-  (f ≫ g) a = g (f a) := rfl
-
-end Fintype
-
-end move_me
-
 namespace Profinite
-
-section move_me
-
-instance {A : Fintype} : topological_space A := ⊥
-
-def of_Fintype : Fintype ⥤ Profinite :=
-{ obj := λ A, ⟨⟨A⟩⟩,
-  map := λ A B f, ⟨f⟩ }
-
--- TODO: Move this and clean up proofs above
-@[simp]
-lemma comp_apply {X Y Z : Profinite.{u}} (f : X ⟶ Y) (g : Y ⟶ Z) (x : X) :
-  (f ≫ g) x = g (f x) := rfl
-
--- TODO: Move this and clean up proofs above
-@[simp]
-lemma id_apply {X : Profinite.{u}} (x : X) : (𝟙 X : X ⟶ X) x = x := rfl
-
-@[simp]
-lemma id_to_fun {X : Profinite.{u}} : (𝟙 X : X → X) = id := rfl
-
--- TODO: Move this!
-@[simp]
-lemma comp_to_fun {X Y Z : Profinite.{u}} (f : X ⟶ Y) (g : Y ⟶ Z) :
-  (f ≫ g : X → Z) = g ∘ f := rfl
-
-end move_me
 
 @[ext]
 structure clopen_cover (X : Profinite.{u}) :=
