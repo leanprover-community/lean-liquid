@@ -2,6 +2,7 @@ import category_theory.limits.kan_extension
 import category_theory.with_terminal
 import algebraic_topology.simplicial_object
 import category_theory.arrow
+import category_theory.adjunction.limits
 import .with_terminal
 
 namespace simplicial_object
@@ -59,6 +60,11 @@ noncomputable
 def adjunction [∀ x, has_limits_of_shape (structured_arrow x arrow_diagram.incl) C] :
   to_arrow ⊣ (cech : arrow C ⥤ _) :=
 adjunction.comp _ _ (Ran.adjunction _ _) with_terminal.arrow_equiv.symm.to_adjunction
+
+noncomputable
+def cech_preserves_limits [∀ x, has_limits_of_shape (structured_arrow x arrow_diagram.incl) C] :
+  limits.preserves_limits (cech : arrow C ⥤ _) :=
+adjunction.right_adjoint_preserves_limits adjunction
 
 /-
 /-- Make a functor from `arr` to `C` associated to an arrow. -/
