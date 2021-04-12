@@ -279,6 +279,36 @@ begin
   rw [matrix.reindex_linear_equiv_mul_reindex_linear_equiv, ← matrix.kronecker_mul, matrix.one_mul],
 end
 
+def one_mul_hom (n) : basic_universal_map (1 * n) n :=
+matrix.reindex_linear_equiv
+  ((equiv.prod_congr_left $ λ _, fin_one_equiv).trans $ equiv.punit_prod _)
+  fin_prod_fin_equiv
+  (1 : matrix (fin 1 × fin n) _ ℤ)
+
+def one_mul_inv (n) : basic_universal_map n (1 * n) :=
+matrix.reindex_linear_equiv
+  fin_prod_fin_equiv
+  ((equiv.prod_congr_left $ λ _, fin_one_equiv).trans $ equiv.punit_prod _)
+  (1 : matrix (fin 1 × fin n) _ ℤ)
+
+lemma one_mul_hom_inv : comp (one_mul_hom n) (one_mul_inv n) = id n :=
+begin
+  ext i j,
+  dsimp only [comp, one_mul_hom, one_mul_inv, add_monoid_hom.coe_mk', id],
+  rw [matrix.reindex_linear_equiv_mul_reindex_linear_equiv, matrix.one_mul],
+  simp only [matrix.one_apply, matrix.reindex_linear_equiv_apply, equiv.apply_eq_iff_eq],
+  convert rfl
+end
+
+lemma one_mul_inv_hom : comp (one_mul_inv n) (one_mul_hom n) = id _ :=
+begin
+  ext i j,
+  dsimp only [comp, one_mul_hom, one_mul_inv, add_monoid_hom.coe_mk', id],
+  rw [matrix.reindex_linear_equiv_mul_reindex_linear_equiv, matrix.one_mul],
+  simp only [matrix.one_apply, matrix.reindex_linear_equiv_apply, equiv.apply_eq_iff_eq],
+  convert rfl
+end
+
 def proj_aux {N : ℕ} (k : fin N) : matrix punit.{1} (fin N) ℤ :=
 λ i j, if j = k then 1 else 0
 

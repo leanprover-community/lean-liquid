@@ -66,6 +66,32 @@ instance mul_functor.additive (N : ℕ) : (mul_functor N).additive :=
 { map_zero' := λ m n, add_monoid_hom.map_zero _,
   map_add' := λ m n f g, add_monoid_hom.map_add _ _ _ }
 
+def one_mul_iso : mul_functor 1 ≅ 𝟭 _ :=
+nat_iso.of_components (λ n,
+  { hom := of $ basic_universal_map.one_mul_hom _,
+    inv := of $ basic_universal_map.one_mul_inv _,
+    hom_inv_id' := (comp_of _ _).trans $ congr_arg _ $ basic_universal_map.one_mul_inv_hom,
+    inv_hom_id' := (comp_of _ _).trans $ congr_arg _ $ basic_universal_map.one_mul_hom_inv })
+begin
+  intros m n f,
+  dsimp,
+  show universal_map.comp _ _ = universal_map.comp _ _,
+  rw [← add_monoid_hom.comp_apply, ← add_monoid_hom.comp_hom_apply_apply,
+    ← add_monoid_hom.flip_apply _ f],
+  congr' 1, clear f, ext1 f,
+  dsimp,
+  simp only [comp_of, mul_of, basic_universal_map.comp, add_monoid_hom.coe_mk',
+    basic_universal_map.mul, basic_universal_map.one_mul_hom],
+  have : f = matrix.reindex_linear_equiv
+     ((equiv.prod_congr_left (λ _, fin_one_equiv)).trans (equiv.punit_prod (fin n)))
+     ((equiv.prod_congr_left (λ _, fin_one_equiv)).trans (equiv.punit_prod (fin m)))
+     (matrix.kronecker 1 f),
+  { ext i j, dsimp [matrix.kronecker, matrix.one_apply, equiv.prod_congr_left],
+    simp only [one_mul, if_true, eq_iff_true_of_subsingleton], },
+  conv_rhs { rw this },
+  simp only [matrix.reindex_linear_equiv_mul_reindex_linear_equiv, matrix.one_mul, matrix.mul_one],
+end
+
 end FreeMat
 
 /-- Roughly speaking, this is a collection of formal finite sums of matrices
@@ -112,19 +138,8 @@ def mul (N : ℕ) : data ⥤ data :=
 (FreeMat.mul_functor N).map_complex_like
 
 def mul_one_iso : (mul 1).obj BD ≅ BD :=
-differential_object.complex_like.iso_of_components (λ i, eq_to_iso $ one_mul _)
-begin
-  intros i j,
-  rw mul_obj_d,
-  generalize : BD.d i j = f,
-  show universal_map.comp _ _ = universal_map.comp _ _,
-  rw [← add_monoid_hom.comp_apply, ← add_monoid_hom.comp_hom_apply_apply,
-    ← add_monoid_hom.flip_apply _ f],
-  congr' 1, clear f, ext1 f,
-  simp only [add_monoid_hom.comp_apply, add_monoid_hom.flip_apply, eq_to_iso.hom,
-    add_monoid_hom.comp_hom_apply_apply, universal_map.mul_of],
-  sorry
-end
+differential_object.complex_like.iso_of_components (λ i, FreeMat.one_mul_iso.app _) $
+λ i j, FreeMat.one_mul_iso.hom.naturality (BD.d i j)
 
 end mul
 
