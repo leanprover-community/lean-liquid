@@ -128,6 +128,22 @@ lemma suitable_of_le [hf : f.suitable c₂ c₃] (h1 : c₁ ≤ c₂) (h2 : c₃
   f.suitable c₁ c₄ :=
 hf.le _ _ _ _ _ h1 h2
 
+lemma suitable_add (f g : basic_universal_map m n) (c cf cg : ℝ≥0)
+  [hf : f.suitable c cf] [hg : g.suitable c cg] :
+  (f + g).suitable c (cf + cg) :=
+begin
+  intro i,
+  calc (∑ (j : fin m), ↑(((f + g) i j).nat_abs)) * c
+      ≤ (∑ (j : fin m), ↑((f i j).nat_abs) + ∑ (j : fin m), ↑((g i j).nat_abs)) * c : _
+  ... ≤ cf + cg : _,
+  { rw ← finset.sum_add_distrib,
+    refine mul_le_mul' (finset.sum_le_sum _) le_rfl,
+    rintro j -,
+    rw [← nat.cast_add, nat.cast_le],
+    apply int.nat_abs_add_le, },
+  { rw add_mul, apply add_le_add (hf i) (hg i) }
+end
+
 instance π₁_suitable (c : ℝ≥0) :
   (π₁ n).suitable c c :=
 begin
@@ -303,13 +319,13 @@ end
 instance σ_suitable (c : ℝ≥0) (n : ℕ) :
   (σ n).suitable (c * 2⁻¹) c :=
 begin
-  refine @basic_universal_map.suitable_of _ _ _ _ _ (id _),
-  intro i,
-  apply le_of_eq,
-  have : ∀ x, x = 2 → x * (c * 2⁻¹) = c,
-  { rintro - rfl, rw [mul_left_comm, mul_inv_cancel, mul_one], exact two_ne_zero },
-  apply this, clear this,
-  sorry
+  refine @universal_map.suitable_of _ _ _ _ _ (_root_.id _),
+  have : c = c * 2⁻¹ + c * 2⁻¹,
+  { rw [← mul_add], convert_to c = c * 1 using 2,
+    { ext, norm_num },
+    { rw mul_one } },
+  conv { congr, skip, skip, rw this },
+  apply basic_universal_map.suitable_add
 end
 
 instance π_suitable (c : ℝ≥0) (n : ℕ) :
@@ -460,12 +476,7 @@ by { dsimp [rescale_constants], apply_instance }
 
 instance π_suitable (c : ℝ≥0) (i : ℕ) :
   (BD.data.π.f i).suitable c c :=
-begin
-  delta data.π,
-  rw [← differential_object.complex_like.f_hom_apply, add_monoid_hom.map_add],
-  dsimp,
-  exact universal_map.suitable_add
-end
+by { dsimp, apply_instance }
 
 instance π_suitable' (i : ℕ) :
   (BD.data.π.f i).suitable (rescale_constants c_ 2 i) (c_ i) :=

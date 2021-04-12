@@ -24,13 +24,11 @@ lemma rank_eq : ∀ n, rank n = 2 ^ n
 | 0     := rfl
 | (n+1) := by rw [pow_succ, two_mul, rank, rank_eq]
 
-def σπ (n : ℕ) := σ n - (π₁ + π₂) n
+def σπ (n : ℕ) := σ n - π n
 
 lemma σπ_comp_double {m n} (f : universal_map m n) :
   comp (σπ n) (double f) = comp f (σπ m) :=
-by simp only [σπ, add_monoid_hom.map_add, add_monoid_hom.map_sub,
-    add_monoid_hom.sub_apply, add_monoid_hom.add_apply,
-    pi.add_apply, σ_comp_double, π₁_comp_double, π₂_comp_double]
+by simp only [σπ, add_monoid_hom.map_sub, add_monoid_hom.sub_apply, σ_comp_double, π_comp_double]
 
 /-- The `i`-th map of this BD package is inductively defined
 as the simplest solution to the homotopy condition,
@@ -71,7 +69,7 @@ open category_theory category_theory.limits category_theory.preadditive
 def hmap : Π (j i : ℕ) (h : i = j+1), (BD.double.X j) ⟶ (BD.X i)
 | j i rfl := 𝟙 _
 
-def h : homotopy BD.σ (BD.π₁ + BD.π₂) :=
+def h : homotopy BD.σ BD.π :=
 { h := λ j i, if h : i = j+1 then hmap j i h else 0,
   h_eq_zero := λ i j h, dif_neg h,
   comm :=

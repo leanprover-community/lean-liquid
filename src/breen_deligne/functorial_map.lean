@@ -192,10 +192,8 @@ def to_functorial_map {m n : ℕ} (U : universal_map m n) :
       -- commutes with the matrix action A^m → A^n
       ext i,
       -- and this just boils down to trivialities
-      rw [pow_eval, add_monoid_hom.map_sum],
-      apply finset.sum_congr rfl,
-      rintros j -,
-      rw [pow_eval, map_int_module_smul] },
+      simp only [basic_universal_map.pre_eval_apply, pow_eval, add_monoid_hom.map_sum,
+        map_int_module_smul], },
       -- the rest is just checking that the question about universal maps was linear
       -- so the reduction to the basic case was OK.
     { intros F hF,
@@ -253,7 +251,7 @@ begin
       rw free_abelian_group.map_of,
       convert free_abelian_group.map_of _ _,
       ext i,
-      simp only [φ, pow_hom, add_monoid_hom.pow],
+      simp only [φ, pow_hom, add_monoid_hom.pow, basic_universal_map.pre_eval_apply],
       apply finset.sum_congr rfl,
       rintro j -,
       apply lift_smul_eq_lift },
@@ -281,7 +279,8 @@ begin
   { simp only [map_zero, zero_apply] },
   { intro b,
     -- so let b be a basic universal map. Now unravel everything
-    simp only [free_abelian_group.lift.of, basic_universal_map.eval_of, eval_of],
+    simp only [free_abelian_group.lift.of, basic_universal_map.eval_of, eval_of,
+      basic_universal_map.pre_eval_apply],
     congr',
     ext i j',
     -- and it boils down to checking that a sum over j of `b i j` times `delta j j'`

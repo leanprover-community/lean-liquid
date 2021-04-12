@@ -140,8 +140,18 @@ by { intros i j, rw [reindex_d, iso.hom_inv_id_assoc] }
 
 open universal_map
 
--- lemma eval_σ_pow (A : Type*) [add_comm_group A] (N i : ℕ) :
---   eval A ((BD.σ_pow N).f i) = _
+section mul
+
+def mul (BD : data) (N : ℕ) : data :=
+{ X := λ i, BD.X i * N,
+  d := λ i j, universal_map.mul N (BD.d i j),
+  d_comp_d := λ i j k,
+  calc _
+      = mul N (BD.d i j ≫ BD.d j k) : (mul_comp N (BD.d j k) (BD.d i j)).symm
+  ... = 0 : by rw [BD.d_comp_d, add_monoid_hom.map_zero],
+  d_eq_zero := λ i j hij, by rw [BD.d_eq_zero hij, add_monoid_hom.map_zero] }
+
+end mul
 
 end data
 

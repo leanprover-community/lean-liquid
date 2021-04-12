@@ -168,8 +168,9 @@ def eval_FP [ϕ.suitable c₁ c₂] : FiltrationPow.{u} r' c₁ m ⟶ Filtration
   end }
 
 lemma eval_FP_comp (g : basic_universal_map m n) (f : basic_universal_map l m)
-  [hg : g.suitable c₂ c₃] [hf : f.suitable c₁ c₂] [(g.comp f).suitable c₁ c₃] :
-  (g.comp f).eval_FP r' c₁ c₃ = f.eval_FP r' c₁ c₂ ≫ g.eval_FP r' c₂ c₃ :=
+  [hg : g.suitable c₂ c₃] [hf : f.suitable c₁ c₂]
+  [(basic_universal_map.comp g f).suitable c₁ c₃] :
+  (basic_universal_map.comp g f).eval_FP r' c₁ c₃ = f.eval_FP r' c₁ c₂ ≫ g.eval_FP r' c₂ c₃ :=
 begin
   ext j s i,
   dsimp,

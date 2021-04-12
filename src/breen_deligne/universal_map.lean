@@ -5,6 +5,7 @@ import algebra.big_operators.finsupp
 
 import for_mathlib.linear_algebra
 import for_mathlib.free_abelian_group
+import for_mathlib.kronecker
 
 import hacks_and_tricks.type_pow
 import hacks_and_tricks.by_exactI_hack
@@ -113,6 +114,8 @@ begin
   ext x i,
   simp only [matrix.add_apply, pi.add_apply, add_smul, finset.sum_add_distrib],
 end
+
+lemma pre_eval_apply : pre_eval A g = λ x i, ∑ j, g i j • (x : fin _ → A) j := rfl
 
 /-- `f.eval A` for a `f : basic_universal_map m n`
 is the homomorphism `ℤ[A^m] →+ ℤ[A^n]` induced by matrix multiplication. -/
@@ -223,8 +226,8 @@ end
 
 lemma pre_eval_π₁ (n : ℕ) : pre_eval A (π₁ n) = L :=
 begin
-  dsimp only [pre_eval, π₁, add_monoid_hom.coe_mk'],
   ext x i,
+  dsimp only [pre_eval, π₁, add_monoid_hom.coe_mk'],
   rw finset.sum_eq_single (fin_sum_fin_equiv $ sum.inl i),
   { rw [matrix.reindex_linear_equiv_apply, equiv.symm_apply_apply],
     dsimp only [equiv.sum_empty_symm_apply, matrix.from_blocks_apply₁₁],
@@ -245,8 +248,8 @@ by rw [eval, pre_eval_π₁]
 
 lemma pre_eval_π₂ (n : ℕ) : pre_eval A (π₂ n) = R :=
 begin
-  dsimp only [pre_eval, π₂, add_monoid_hom.coe_mk'],
   ext x i,
+  dsimp only [pre_eval, π₂, add_monoid_hom.coe_mk'],
   rw finset.sum_eq_single (fin_sum_fin_equiv $ sum.inr i),
   { rw [matrix.reindex_linear_equiv_apply, equiv.symm_apply_apply],
     dsimp only [equiv.sum_empty_symm_apply, matrix.from_blocks_apply₁₂],
@@ -264,6 +267,17 @@ end
 
 lemma eval_π₂ (n : ℕ) : eval A (π₂ n) = map R :=
 by rw [eval, pre_eval_π₂]
+
+def mul (N : ℕ) (f : basic_universal_map m n) : basic_universal_map (m * N) (n * N) :=
+matrix.reindex_linear_equiv fin_prod_fin_equiv fin_prod_fin_equiv $ matrix.kronecker f 1
+
+lemma mul_comp (N : ℕ) (g : basic_universal_map m n) (f : basic_universal_map l m) :
+  mul N (comp g f) = comp (mul N g) (mul N f) :=
+begin
+  ext1 i j,
+  dsimp only [mul, comp, add_monoid_hom.coe_mk'],
+  rw [matrix.reindex_linear_equiv_mul_reindex_linear_equiv, matrix.kronecker_mul],
+end
 
 end basic_universal_map
 
@@ -425,6 +439,34 @@ begin
   simp only [π, add_monoid_hom.map_add, map_of', add_monoid_hom.add_apply, eval_of,
     basic_universal_map.eval_π₁, basic_universal_map.eval_π₂],
 end
+
+section mul
+open add_monoid_hom
+
+def mul (N : ℕ) : universal_map m n →+ universal_map (m * N) (n * N) :=
+map (basic_universal_map.mul N)
+
+lemma mul_of (N : ℕ) (f : basic_universal_map m n) :
+  mul N (of f) = of (basic_universal_map.mul N f) :=
+map_of' _ _
+
+lemma mul_comp (N : ℕ) (g : universal_map m n) (f : universal_map l m) :
+  mul N (comp g f) = comp (mul N g) (mul N f) :=
+begin
+  simp only [← add_monoid_hom.comp_apply],
+  rw [← add_monoid_hom.comp_hom_apply_apply, ← add_monoid_hom.comp_hom_apply_apply,
+    ← add_monoid_hom.comp_hom_apply_apply,
+    ← add_monoid_hom.flip_apply _ _ (mul N)],
+  simp only [← add_monoid_hom.comp_apply],
+  rw [← add_monoid_hom.comp_hom_apply_apply, ← add_monoid_hom.comp_hom_apply_apply],
+  congr' 2,
+  clear f g,
+  ext g f,
+  dsimp,
+  simp only [comp_of, mul_of, basic_universal_map.mul_comp],
+end
+
+end mul
 
 end universal_map
 
