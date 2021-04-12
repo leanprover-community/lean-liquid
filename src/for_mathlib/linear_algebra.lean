@@ -16,7 +16,7 @@ begin
   { cases i }
 end
 
-end section
+end
 .
 section
 
@@ -33,7 +33,6 @@ begin
   rw ← e2.sum_comp,
   simp only [equiv.symm_apply_apply],
 end
-
 
 end
 
