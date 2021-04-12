@@ -42,7 +42,7 @@ open free_abelian_group
 section move_this
 variables {A : Type*}
 
-attribute [simps] equiv.sum_empty
+attribute [simps] equiv.sum_empty equiv.prod_punit equiv.punit_prod
 
 def L {m n : ℕ} (x : A ^ (m+n)) : A ^ m := λ i, x $ fin_sum_fin_equiv $ sum.inl i
 
@@ -268,15 +268,37 @@ end
 lemma eval_π₂ (n : ℕ) : eval A (π₂ n) = map R :=
 by rw [eval, pre_eval_π₂]
 
-def mul (N : ℕ) (f : basic_universal_map m n) : basic_universal_map (m * N) (n * N) :=
-matrix.reindex_linear_equiv fin_prod_fin_equiv fin_prod_fin_equiv $ matrix.kronecker f 1
+def mul (N : ℕ) (f : basic_universal_map m n) : basic_universal_map (N * m) (N * n) :=
+matrix.reindex_linear_equiv fin_prod_fin_equiv fin_prod_fin_equiv $ matrix.kronecker 1 f
 
 lemma mul_comp (N : ℕ) (g : basic_universal_map m n) (f : basic_universal_map l m) :
   mul N (comp g f) = comp (mul N g) (mul N f) :=
 begin
   ext1 i j,
   dsimp only [mul, comp, add_monoid_hom.coe_mk'],
-  rw [matrix.reindex_linear_equiv_mul_reindex_linear_equiv, matrix.kronecker_mul],
+  rw [matrix.reindex_linear_equiv_mul_reindex_linear_equiv, ← matrix.kronecker_mul, matrix.one_mul],
+end
+
+def proj_aux {N : ℕ} (k : fin N) : matrix punit.{1} (fin N) ℤ :=
+λ i j, if j = k then 1 else 0
+
+def proj (n : ℕ) {N : ℕ} (k : fin N) : basic_universal_map (N * n) n :=
+matrix.reindex_linear_equiv (equiv.punit_prod _) fin_prod_fin_equiv $
+matrix.kronecker (proj_aux k) 1
+
+lemma proj_comp_mul {N : ℕ} (k : fin N) (f : basic_universal_map m n) :
+  comp (proj n k) (mul N f) = comp f (proj m k) :=
+begin
+  dsimp only [comp, proj, mul, add_monoid_hom.coe_mk'],
+  have : f = (matrix.reindex_linear_equiv
+    (equiv.punit_prod (fin n)) (equiv.punit_prod (fin m)))
+    (matrix.kronecker (1 : matrix punit.{1} punit.{1} ℤ) f),
+  { ext i j,
+    simp only [matrix.reindex_linear_equiv_apply, equiv.punit_prod_symm_apply, matrix.kronecker,
+      matrix.one_apply_eq, one_mul] },
+  conv_rhs { rw this },
+  simp only [matrix.reindex_linear_equiv_mul_reindex_linear_equiv, ← matrix.kronecker_mul,
+    matrix.one_mul, matrix.mul_one],
 end
 
 end basic_universal_map
@@ -443,7 +465,7 @@ end
 section mul
 open add_monoid_hom
 
-def mul (N : ℕ) : universal_map m n →+ universal_map (m * N) (n * N) :=
+def mul (N : ℕ) : universal_map m n →+ universal_map (N * m) (N * n) :=
 map (basic_universal_map.mul N)
 
 lemma mul_of (N : ℕ) (f : basic_universal_map m n) :
@@ -459,14 +481,42 @@ begin
     ← add_monoid_hom.flip_apply _ _ (mul N)],
   simp only [← add_monoid_hom.comp_apply],
   rw [← add_monoid_hom.comp_hom_apply_apply, ← add_monoid_hom.comp_hom_apply_apply],
-  congr' 2,
-  clear f g,
-  ext g f,
-  dsimp,
+  congr' 2, clear f g, ext g f,
+  show (mul N) ((comp (of g)) (of f)) = (comp ((mul N) (of g))) ((mul N) (of f)),
   simp only [comp_of, mul_of, basic_universal_map.mul_comp],
 end
 
 end mul
+
+def sum (n N : ℕ) : universal_map (N * n) n :=
+of (∑ i, basic_universal_map.proj n i)
+
+def proj (n N : ℕ) : universal_map (N * n) n :=
+∑ i, of (basic_universal_map.proj n i)
+
+lemma sum_comp_mul (N : ℕ) (f : universal_map m n) :
+  comp (sum n N) (mul N f) = comp f (sum m N) :=
+begin
+  simp only [← add_monoid_hom.comp_apply],
+  rw [← add_monoid_hom.comp_hom_apply_apply, ← add_monoid_hom.flip_apply _ _ (sum m N)],
+  simp only [← add_monoid_hom.comp_apply],
+  congr' 1, clear f, ext f,
+  show (comp (sum n N)) ((mul N) (of f)) = (comp (of f)) (sum m N),
+  simp only [sum, mul_of, comp_of, add_monoid_hom.map_sum,
+    add_monoid_hom.finset_sum_apply, basic_universal_map.proj_comp_mul],
+end
+
+lemma proj_comp_mul (N : ℕ) (f : universal_map m n) :
+  comp (proj n N) (mul N f) = comp f (proj m N) :=
+begin
+  simp only [← add_monoid_hom.comp_apply],
+  rw [← add_monoid_hom.comp_hom_apply_apply, ← add_monoid_hom.flip_apply _ _ (proj m N)],
+  simp only [← add_monoid_hom.comp_apply],
+  congr' 1, clear f, ext f,
+  show (comp (proj n N)) ((mul N) (of f)) = (comp (of f)) (proj m N),
+  simp only [proj, mul_of, comp_of, add_monoid_hom.map_sum,
+    add_monoid_hom.finset_sum_apply, basic_universal_map.proj_comp_mul],
+end
 
 end universal_map
 

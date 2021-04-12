@@ -12,26 +12,23 @@ open_locale big_operators
 
 namespace matrix
 
-variables {m n o m' n' R: Type*}
-variables [fintype n] [fintype m] [fintype o] [fintype n'] [fintype m']
+variables {m n o m' n' o' R: Type*}
+variables [fintype m] [fintype n] [fintype o] [fintype m'] [fintype n'] [fintype o']
 
 def kronecker [has_mul R] (f : matrix m n R) (f' : matrix m' n' R) :
   matrix (m × m') (n × n') R :=
 λ i j, f i.1 j.1 * f' i.2 j.2
 
-lemma kronecker_mul [decidable_eq n'] [semiring R] (f : matrix m n R) (g : matrix n o R) :
-  (f.mul g).kronecker (1 : matrix n' n' R) =
-    (f.kronecker (1 : matrix n' n' R)).mul (g.kronecker 1) :=
+lemma kronecker_mul [decidable_eq n'] [comm_semiring R]
+  (f : matrix m n R) (g : matrix n o R) (f' : matrix m' n' R) (g' : matrix n' o' R) :
+  (f.mul g).kronecker (f'.mul g') =
+    (f.kronecker f').mul (g.kronecker g') :=
 begin
   ext ⟨i, i'⟩ ⟨j, j'⟩,
   dsimp [mul_apply, kronecker],
-  rw [← finset.univ_product_univ, finset.sum_product, finset.sum_comm,
-    finset.sum_eq_single j'],
-  { simp only [one_apply, if_pos rfl, mul_one, finset.sum_mul],
-    split_ifs; simp only [mul_one, mul_zero, zero_mul] },
-  { rintro x - hx,
-    simp only [one_apply_ne hx, mul_zero, finset.sum_const_zero] },
-  { intro h, exact (h $ finset.mem_univ _).elim }
+  simp only [finset.sum_mul, finset.mul_sum],
+  rw [← finset.univ_product_univ, finset.sum_product, finset.sum_comm],
+  simp only [mul_assoc, mul_left_comm (g _ j)],
 end
 
 

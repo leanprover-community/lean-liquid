@@ -59,62 +59,7 @@ namespace data
 
 variable (BD : data)
 
-/-- `BD.double` is the Breen--Deligne data whose `n`-th rank is `2 * BD.rank n`. -/
-@[simps] def double : data :=
-{ X := λ n, BD.X n + BD.X n,
-  d := λ m n, (BD.d m n).double,
-  d_eq_zero := λ m n h, by { rw [BD.d_eq_zero h, universal_map.double_zero] },
-  d_comp_d := λ l m n,
-    calc _ = (BD.d l m ≫ BD.d m n).double : universal_map.comp_double_double _ _
-    ... = 0 : by { rw [BD.d_comp_d, universal_map.double_zero] } }
-
-/-- `BD.pow N` is the Breen--Deligne data whose `n`-th rank is `2^N * BD.rank n`. -/
-def pow : ℕ → data
-| 0     := BD
-| (n+1) := (pow n).double
-
-lemma BD_pow_X : ∀ N i, (BD.pow N).X i = 2^N * BD.X i
-| 0     i := by { rw [pow_zero, one_mul], refl }
-| (N+1) i := by { rw [pow_succ, two_mul, add_mul, ← BD_pow_X N], refl }
-
-@[simps] def σ : BD.double ⟶ BD :=
-{ f := λ n, universal_map.σ _,
-  comm := λ m n, universal_map.σ_comp_double _ }
-
-@[simps] def π : BD.double ⟶ BD :=
-{ f := λ n, universal_map.π _,
-  comm := λ m n, universal_map.π_comp_double _ }
-
-open differential_object.complex_like FreeMat
-
-@[simps]
-def hom_double {BD₁ BD₂ : data} (f : BD₁ ⟶ BD₂) : BD₁.double ⟶ BD₂.double :=
-{ f := λ i, (f.f i).double,
-  comm := λ i j,
-  calc BD₁.double.d i j ≫ (f.f j).double
-      = (BD₁.d i j ≫ f.f j).double : double_comp_double _ _
-  ... = (f.f i ≫ BD₂.d i j).double : congr_arg _ (f.comm i j)
-  ... = (f.f i).double ≫ BD₂.double.d i j : (double_comp_double _ _).symm }
-
-def hom_pow {BD : data} (f : BD.double ⟶ BD) : Π N, BD.pow N ⟶ BD
-| 0     := 𝟙 _
-| (n+1) := hom_double (hom_pow n) ≫ f
-
-@[simps]
-def homotopy_double {BD₁ BD₂ : data} {f g : BD₁ ⟶ BD₂} (h : homotopy f g) :
-  homotopy (hom_double f) (hom_double g) :=
-{ h := λ j i, (h.h j i).double,
-  h_eq_zero := λ i j hij, by rw [h.h_eq_zero i j hij, universal_map.double_zero],
-  comm := λ i j k hij hjk,
-  begin
-    simp only [double_d, double_comp_double, ← double_add, h.comm i j k hij hjk],
-    exact add_monoid_hom.map_sub _ _ _
-  end }
-
-def homotopy_pow (h : homotopy BD.σ BD.π) :
-  Π N, homotopy (hom_pow BD.σ N) (hom_pow BD.π N)
-| 0     := homotopy.refl
-| (n+1) := (homotopy_double (homotopy_pow n)).comp h
+section reindex
 
 open category_theory.limits
 
@@ -138,20 +83,139 @@ def reindex_iso (rank : ℕ → ℕ) (hr : ∀ i, BD.X i = rank i) :
 differential_object.complex_like.iso_of_components (λ i, eq_to_iso (hr i)) $
 by { intros i j, rw [reindex_d, iso.hom_inv_id_assoc] }
 
-open universal_map
+end reindex
 
 section mul
 
+open universal_map
+
+@[simps]
 def mul (BD : data) (N : ℕ) : data :=
-{ X := λ i, BD.X i * N,
+{ X := λ i, N * BD.X i,
   d := λ i j, universal_map.mul N (BD.d i j),
   d_comp_d := λ i j k,
-  calc _
-      = mul N (BD.d i j ≫ BD.d j k) : (mul_comp N (BD.d j k) (BD.d i j)).symm
-  ... = 0 : by rw [BD.d_comp_d, add_monoid_hom.map_zero],
+  calc _ = mul N (BD.d i j ≫ BD.d j k) : (mul_comp N (BD.d j k) (BD.d i j)).symm
+     ... = 0 : by rw [BD.d_comp_d, add_monoid_hom.map_zero],
   d_eq_zero := λ i j hij, by rw [BD.d_eq_zero hij, add_monoid_hom.map_zero] }
 
+def mul_one_iso : BD.mul 1 ≅ BD :=
+differential_object.complex_like.iso_of_components (λ i, eq_to_iso $ one_mul _)
+begin
+  intros i j,
+  rw mul_d,
+  sorry
+end
+
 end mul
+
+/-- `BD.double` is the Breen--Deligne data whose `n`-th rank is `2 * BD.rank n`. -/
+@[simps] def double : data :=
+{ X := λ n, BD.X n + BD.X n,
+  d := λ m n, (BD.d m n).double,
+  d_eq_zero := λ m n h, by { rw [BD.d_eq_zero h, universal_map.double_zero] },
+  d_comp_d := λ l m n,
+    calc _ = (BD.d l m ≫ BD.d m n).double : universal_map.comp_double_double _ _
+    ... = 0 : by { rw [BD.d_comp_d, universal_map.double_zero] } }
+
+/-- `BD.pow N` is the Breen--Deligne data whose `n`-th rank is `2^N * BD.rank n`. -/
+def pow : ℕ → data
+| 0     := BD
+| (n+1) := (pow n).double
+
+/-- `BD.pow N` is the Breen--Deligne data whose `n`-th rank is `2^N * BD.rank n`. -/
+def pow' : ℕ → data
+| 0     := BD
+| (n+1) := (pow' n).mul 2
+
+lemma BD_pow_X : ∀ N i, (BD.pow N).X i = 2^N * BD.X i
+| 0     i := by { rw [pow_zero, one_mul], refl }
+| (N+1) i := by { rw [pow_succ, two_mul, add_mul, ← BD_pow_X N], refl }
+
+@[simps] def σ : BD.double ⟶ BD :=
+{ f := λ n, universal_map.σ _,
+  comm := λ m n, universal_map.σ_comp_double _ }
+
+@[simps] def π : BD.double ⟶ BD :=
+{ f := λ n, universal_map.π _,
+  comm := λ m n, universal_map.π_comp_double _ }
+
+def sum (BD : data) (N : ℕ) : BD.mul N ⟶ BD :=
+{ f := λ n, universal_map.sum _ _,
+  comm := λ m n, universal_map.sum_comp_mul _ _ }
+
+def proj (BD : data) (N : ℕ) : BD.mul N ⟶ BD :=
+{ f := λ n, universal_map.proj _ _,
+  comm := λ m n, universal_map.proj_comp_mul _ _ }
+
+open differential_object.complex_like FreeMat
+
+@[simps]
+def hom_double {BD₁ BD₂ : data} (f : BD₁ ⟶ BD₂) : BD₁.double ⟶ BD₂.double :=
+{ f := λ i, (f.f i).double,
+  comm := λ i j,
+  calc BD₁.double.d i j ≫ (f.f j).double
+      = (BD₁.d i j ≫ f.f j).double : double_comp_double _ _
+  ... = (f.f i ≫ BD₂.d i j).double : congr_arg _ (f.comm i j)
+  ... = (f.f i).double ≫ BD₂.double.d i j : (double_comp_double _ _).symm }
+
+@[simps]
+def hom_mul_two {BD₁ BD₂ : data} (f : BD₁ ⟶ BD₂) : BD₁.mul 2 ⟶ BD₂.mul 2 :=
+{ f := λ i, universal_map.mul 2 (f.f i),
+  comm := λ i j,
+  calc (BD₁.mul 2).d i j ≫ universal_map.mul 2 (f.f j)
+      = universal_map.mul 2 (BD₁.d i j ≫ f.f j) : (universal_map.mul_comp _ _ _).symm
+  ... = universal_map.mul 2 (f.f i ≫ BD₂.d i j) : congr_arg _ (f.comm i j)
+  ... = universal_map.mul 2 (f.f i) ≫ (BD₂.mul 2).d i j : universal_map.mul_comp _ _ _ }
+
+def hom_pow {BD : data} (f : BD.double ⟶ BD) : Π N, BD.pow N ⟶ BD
+| 0     := 𝟙 _
+| (n+1) := hom_double (hom_pow n) ≫ f
+
+def hom_pow' {BD : data} (f : BD.mul 2 ⟶ BD) : Π N, BD.pow' N ⟶ BD
+| 0     := 𝟙 _
+| (n+1) := hom_mul_two (hom_pow' n) ≫ f
+
+@[simps]
+def homotopy_double {BD₁ BD₂ : data} {f g : BD₁ ⟶ BD₂} (h : homotopy f g) :
+  homotopy (hom_double f) (hom_double g) :=
+{ h := λ j i, (h.h j i).double,
+  h_eq_zero := λ i j hij, by rw [h.h_eq_zero i j hij, universal_map.double_zero],
+  comm := λ i j k hij hjk,
+  begin
+    simp only [double_d, double_comp_double, ← double_add, h.comm i j k hij hjk],
+    exact add_monoid_hom.map_sub _ _ _
+  end }
+
+@[simps]
+def homotopy_two_mul {BD₁ BD₂ : data} {f g : BD₁ ⟶ BD₂} (h : homotopy f g) :
+  homotopy (hom_mul_two f) (hom_mul_two g) :=
+{ h := λ j i, universal_map.mul 2 (h.h j i),
+  h_eq_zero := λ i j hij, by rw [h.h_eq_zero i j hij, add_monoid_hom.map_zero],
+  comm := λ i j k hij hjk,
+  begin
+    simp only [mul_d, hom_mul_two_f, ← add_monoid_hom.map_sub],
+    rw [← h.comm i j k hij hjk, add_monoid_hom.map_add],
+    erw [universal_map.mul_comp, universal_map.mul_comp],
+    refl
+  end }
+
+def homotopy_pow (h : homotopy BD.σ BD.π) :
+  Π N, homotopy (hom_pow BD.σ N) (hom_pow BD.π N)
+| 0     := homotopy.refl
+| (n+1) := (homotopy_double (homotopy_pow n)).comp h
+
+def homotopy_pow' (h : homotopy (BD.sum 2) (BD.proj 2)) :
+  Π N, homotopy (hom_pow' (BD.sum 2) N) (hom_pow' (BD.proj 2) N)
+| 0     := homotopy.refl
+| (N+1) := (homotopy_two_mul (homotopy_pow' N)).comp h
+
+def pow'_iso_mul : Π N, BD.pow' N ≅ BD.mul (2^N)
+| 0     := BD.mul_one_iso.symm
+| (N+1) := show (BD.pow' N).mul 2 ≅ BD.mul (2 * 2 ^ N), from sorry
+
+lemma hom_pow'_sum : ∀ N, (hom_pow' (BD.sum 2) N) == BD.sum (2^N)
+| 0     := sorry
+| (N+1) := sorry
 
 end data
 
