@@ -16,41 +16,32 @@ the blueprint https://leanprover-community.github.io/liquid/ .
 open universal_map
 
 /-- The `i`-th rank of this BD package is `2^i`. -/
-def rank : ℕ → FreeMat
-| 0     := 1
-| (n+1) := rank n + rank n
+def rank (i : ℕ) : FreeMat := 2 ^ i
 
-lemma rank_eq : ∀ n, rank n = 2 ^ n
-| 0     := rfl
-| (n+1) := by rw [pow_succ, two_mul, rank, rank_eq]
+def σπ (n : ℕ) := universal_map.sum n 2 - universal_map.proj n 2
 
-def σπ (n : ℕ) := σ n - π n
-
-lemma σπ_comp_double {m n} (f : universal_map m n) :
-  comp (σπ n) (double f) = comp f (σπ m) :=
-by simp only [σπ, add_monoid_hom.map_sub, add_monoid_hom.sub_apply, σ_comp_double, π_comp_double]
+lemma σπ_comp_mul_two {m n} (f : universal_map m n) :
+  comp (σπ n) (mul 2 f) = comp f (σπ m) :=
+by simp only [σπ, add_monoid_hom.map_sub, add_monoid_hom.sub_apply, sum_comp_mul, proj_comp_mul]
 
 /-- The `i`-th map of this BD package is inductively defined
 as the simplest solution to the homotopy condition,
 so that the homotopy will consist of identity maps. -/
 def map : Π n, rank (n+1) ⟶ rank n
 | 0     := σπ 1
-| (n+1) := (σπ (rank (n+1))) - (map n).double
+| (n+1) := σπ (rank (n+1)) - mul 2 (map n)
 
-lemma is_complex_zero :
-  map 1 ≫ map 0 = 0 :=
-show comp (σπ 1) (σπ 2 - double (σπ 1)) = 0,
-by rw [add_monoid_hom.map_sub, σπ_comp_double, sub_self]
+lemma map_succ (n : ℕ) : map (n+1) = σπ (rank (n+1)) - mul 2 (map n) := rfl
+
+lemma is_complex_zero : map 1 ≫ map 0 = 0 :=
+show comp (σπ 1) (σπ 2 - mul 2 (σπ 1)) = 0,
+by { rw [add_monoid_hom.map_sub, σπ_comp_mul_two, sub_eq_zero], refl }
 
 lemma is_complex_succ (n : ℕ) (ih : (comp (map n)) (map (n + 1)) = 0) :
   comp (map (n+1)) (map (n+1+1)) = 0 :=
-begin
-  show comp (map (n+1)) ((σπ (rank $ n+1+1)) - double (map (n+1))) = 0,
-  simp only [add_monoid_hom.map_sub, ← σπ_comp_double,
-    ← add_monoid_hom.sub_apply],
-  simp only [← add_monoid_hom.map_sub, map, sub_sub_cancel],
-  erw [comp_double_double, ih, double_zero]
-end
+by rw [map_succ (n+1), add_monoid_hom.map_sub, ← σπ_comp_mul_two, ← add_monoid_hom.sub_apply,
+    ← add_monoid_hom.map_sub, map_succ n, sub_sub_cancel, ← mul_comp, ← map_succ, ih,
+    add_monoid_hom.map_zero]
 
 /-- The Breen--Deligne data for the example BD package. -/
 def BD : data :=
@@ -66,10 +57,10 @@ open differential_object differential_object.complex_like
 open category_theory category_theory.limits category_theory.preadditive
 
 /-- The `n`-th homotopy map for the example BD package is the identity. -/
-def hmap : Π (j i : ℕ) (h : i = j+1), (BD.double.X j) ⟶ (BD.X i)
+def hmap : Π (j i : ℕ) (h : i = j+1), (((data.mul 2).obj BD).X j) ⟶ (BD.X i)
 | j i rfl := 𝟙 _
 
-def h : homotopy BD.σ BD.π :=
+def h : homotopy (BD.sum 2) (BD.proj 2) :=
 { h := λ j i, if h : i = j+1 then hmap j i h else 0,
   h_eq_zero := λ i j h, dif_neg h,
   comm :=

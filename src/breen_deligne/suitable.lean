@@ -501,7 +501,7 @@ namespace adept
 variables (BD : package) (c_ c' : ℕ → ℝ≥0) [adept BD c_ c']
 
 instance homotopy_pow_suitable (j i : ℕ) :
-  Π N, ((BD.data.homotopy_pow BD.homotopy N).h j i).suitable
+  Π N, ((BD.data.homotopy_pow' BD.homotopy N).h j i).suitable
     (rescale_constants c_ (2 ^ N) j) ((c' * c_) i)
 | 0     :=
 by simpa only [pi.mul_apply, pow_zero, rescale_constants.one] using universal_map.suitable_zero _ _

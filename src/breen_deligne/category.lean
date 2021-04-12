@@ -48,6 +48,24 @@ lemma double_add {m n : FreeMat} (f g : m ⟶ n) :
   ((f + g).double : m+m ⟶ n+n) = f.double + g.double :=
 add_monoid_hom.map_add _ _ _
 
+@[simps]
+def mul_functor (N : ℕ) : FreeMat ⥤ FreeMat :=
+{ obj := λ n, N * n,
+  map := λ m n f, mul N f,
+  map_id' := λ n, (free_abelian_group.map_of _ _).trans $ congr_arg _ $
+  begin
+    dsimp [basic_universal_map.mul, basic_universal_map.id],
+    ext i j,
+    rw matrix.kronecker_one_one,
+    simp only [matrix.one_apply, equiv.apply_eq_iff_eq, eq_self_iff_true],
+    split_ifs; refl
+  end,
+  map_comp' := λ l m n f g, mul_comp _ _ _ }
+.
+instance mul_functor.additive (N : ℕ) : (mul_functor N).additive :=
+{ map_zero' := λ m n, add_monoid_hom.map_zero _,
+  map_add' := λ m n f g, add_monoid_hom.map_add _ _ _ }
+
 end FreeMat
 
 /-- Roughly speaking, this is a collection of formal finite sums of matrices
@@ -90,19 +108,21 @@ section mul
 open universal_map
 
 @[simps]
-def mul (BD : data) (N : ℕ) : data :=
-{ X := λ i, N * BD.X i,
-  d := λ i j, universal_map.mul N (BD.d i j),
-  d_comp_d := λ i j k,
-  calc _ = mul N (BD.d i j ≫ BD.d j k) : (mul_comp N (BD.d j k) (BD.d i j)).symm
-     ... = 0 : by rw [BD.d_comp_d, add_monoid_hom.map_zero],
-  d_eq_zero := λ i j hij, by rw [BD.d_eq_zero hij, add_monoid_hom.map_zero] }
+def mul (N : ℕ) : data ⥤ data :=
+(FreeMat.mul_functor N).map_complex_like
 
-def mul_one_iso : BD.mul 1 ≅ BD :=
+def mul_one_iso : (mul 1).obj BD ≅ BD :=
 differential_object.complex_like.iso_of_components (λ i, eq_to_iso $ one_mul _)
 begin
   intros i j,
-  rw mul_d,
+  rw mul_obj_d,
+  generalize : BD.d i j = f,
+  show universal_map.comp _ _ = universal_map.comp _ _,
+  rw [← add_monoid_hom.comp_apply, ← add_monoid_hom.comp_hom_apply_apply,
+    ← add_monoid_hom.flip_apply _ f],
+  congr' 1, clear f, ext1 f,
+  simp only [add_monoid_hom.comp_apply, add_monoid_hom.flip_apply, eq_to_iso.hom,
+    add_monoid_hom.comp_hom_apply_apply, universal_map.mul_of],
   sorry
 end
 
@@ -125,7 +145,7 @@ def pow : ℕ → data
 /-- `BD.pow N` is the Breen--Deligne data whose `n`-th rank is `2^N * BD.rank n`. -/
 def pow' : ℕ → data
 | 0     := BD
-| (n+1) := (pow' n).mul 2
+| (n+1) := (mul 2).obj (pow' n)
 
 lemma BD_pow_X : ∀ N i, (BD.pow N).X i = 2^N * BD.X i
 | 0     i := by { rw [pow_zero, one_mul], refl }
@@ -139,11 +159,11 @@ lemma BD_pow_X : ∀ N i, (BD.pow N).X i = 2^N * BD.X i
 { f := λ n, universal_map.π _,
   comm := λ m n, universal_map.π_comp_double _ }
 
-def sum (BD : data) (N : ℕ) : BD.mul N ⟶ BD :=
+def sum (BD : data) (N : ℕ) : (mul N).obj BD ⟶ BD :=
 { f := λ n, universal_map.sum _ _,
   comm := λ m n, universal_map.sum_comp_mul _ _ }
 
-def proj (BD : data) (N : ℕ) : BD.mul N ⟶ BD :=
+def proj (BD : data) (N : ℕ) : (mul N).obj BD ⟶ BD :=
 { f := λ n, universal_map.proj _ _,
   comm := λ m n, universal_map.proj_comp_mul _ _ }
 
@@ -158,22 +178,13 @@ def hom_double {BD₁ BD₂ : data} (f : BD₁ ⟶ BD₂) : BD₁.double ⟶ BD�
   ... = (f.f i ≫ BD₂.d i j).double : congr_arg _ (f.comm i j)
   ... = (f.f i).double ≫ BD₂.double.d i j : (double_comp_double _ _).symm }
 
-@[simps]
-def hom_mul_two {BD₁ BD₂ : data} (f : BD₁ ⟶ BD₂) : BD₁.mul 2 ⟶ BD₂.mul 2 :=
-{ f := λ i, universal_map.mul 2 (f.f i),
-  comm := λ i j,
-  calc (BD₁.mul 2).d i j ≫ universal_map.mul 2 (f.f j)
-      = universal_map.mul 2 (BD₁.d i j ≫ f.f j) : (universal_map.mul_comp _ _ _).symm
-  ... = universal_map.mul 2 (f.f i ≫ BD₂.d i j) : congr_arg _ (f.comm i j)
-  ... = universal_map.mul 2 (f.f i) ≫ (BD₂.mul 2).d i j : universal_map.mul_comp _ _ _ }
-
 def hom_pow {BD : data} (f : BD.double ⟶ BD) : Π N, BD.pow N ⟶ BD
 | 0     := 𝟙 _
 | (n+1) := hom_double (hom_pow n) ≫ f
 
-def hom_pow' {BD : data} (f : BD.mul 2 ⟶ BD) : Π N, BD.pow' N ⟶ BD
+def hom_pow' {BD : data} (f : (mul 2).obj BD ⟶ BD) : Π N, BD.pow' N ⟶ BD
 | 0     := 𝟙 _
-| (n+1) := hom_mul_two (hom_pow' n) ≫ f
+| (n+1) := (mul 2).map (hom_pow' n) ≫ f
 
 @[simps]
 def homotopy_double {BD₁ BD₂ : data} {f g : BD₁ ⟶ BD₂} (h : homotopy f g) :
@@ -188,12 +199,12 @@ def homotopy_double {BD₁ BD₂ : data} {f g : BD₁ ⟶ BD₂} (h : homotopy f
 
 @[simps]
 def homotopy_two_mul {BD₁ BD₂ : data} {f g : BD₁ ⟶ BD₂} (h : homotopy f g) :
-  homotopy (hom_mul_two f) (hom_mul_two g) :=
+  homotopy ((mul 2).map f) ((mul 2).map g) :=
 { h := λ j i, universal_map.mul 2 (h.h j i),
   h_eq_zero := λ i j hij, by rw [h.h_eq_zero i j hij, add_monoid_hom.map_zero],
   comm := λ i j k hij hjk,
   begin
-    simp only [mul_d, hom_mul_two_f, ← add_monoid_hom.map_sub],
+    simp only [mul_obj_d, mul_map_f, ← add_monoid_hom.map_sub],
     rw [← h.comm i j k hij hjk, add_monoid_hom.map_add],
     erw [universal_map.mul_comp, universal_map.mul_comp],
     refl
@@ -209,13 +220,23 @@ def homotopy_pow' (h : homotopy (BD.sum 2) (BD.proj 2)) :
 | 0     := homotopy.refl
 | (N+1) := (homotopy_two_mul (homotopy_pow' N)).comp h
 
-def pow'_iso_mul : Π N, BD.pow' N ≅ BD.mul (2^N)
+def pow'_iso_mul : Π N, BD.pow' N ≅ (mul (2^N)).obj BD
 | 0     := BD.mul_one_iso.symm
-| (N+1) := show (BD.pow' N).mul 2 ≅ BD.mul (2 * 2 ^ N), from sorry
+| (N+1) := show (mul 2).obj (BD.pow' N) ≅ (mul (2 * 2 ^ N)).obj BD, from sorry
 
-lemma hom_pow'_sum : ∀ N, (hom_pow' (BD.sum 2) N) == BD.sum (2^N)
+lemma hom_pow'_sum : ∀ N, (BD.pow'_iso_mul N).inv ≫ hom_pow' (BD.sum 2) N = BD.sum (2^N)
+| 0     := by { ext i : 2, simp only [hom_pow', category.comp_id], sorry }
+| (N+1) := sorry
+
+lemma hom_pow'_proj : ∀ N, (BD.pow'_iso_mul N).inv ≫ hom_pow' (BD.proj 2) N = BD.proj (2^N)
 | 0     := sorry
 | (N+1) := sorry
+
+def homotopy_mul (h : homotopy (BD.sum 2) (BD.proj 2)) (N : ℕ) :
+  homotopy (BD.sum (2^N)) (BD.proj (2^N)) :=
+(homotopy.of_eq $ BD.hom_pow'_sum N).symm.trans $
+  ((BD.homotopy_pow' h N).const_comp (BD.pow'_iso_mul N).inv).trans $
+  (homotopy.of_eq $ BD.hom_pow'_proj N)
 
 end data
 
@@ -233,7 +254,7 @@ that forms a complex, together with a `homotopy`
 between the two universal maps `σ_add` and `σ_proj`. -/
 structure package :=
 (data       : data)
-(homotopy   : @homotopy ℕ FreeMat ff _ _ _ data.double data data.σ data.π)
+(homotopy   : homotopy (data.sum 2) (data.proj 2))
 
 namespace package
 

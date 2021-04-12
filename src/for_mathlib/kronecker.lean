@@ -31,5 +31,12 @@ begin
   simp only [mul_assoc, mul_left_comm (g _ j)],
 end
 
+lemma kronecker_one_one [decidable_eq m] [decidable_eq n] [semiring R] :
+  kronecker (1 : matrix m m R) (1 : matrix n n R) = 1 :=
+begin
+  ext ⟨i, i'⟩ ⟨j, j'⟩,
+  simp only [kronecker, one_apply, boole_mul, prod.mk.inj_iff],
+  convert (@ite_and _ (i = j) (i' = j') _ _ (1 : R) (0 : R)).symm
+end
 
 end matrix
