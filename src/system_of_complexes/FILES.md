@@ -7,7 +7,8 @@ maps. A good reference for this is section 4 of the blueprint.
 
 ## Files
 
-- `complex.lean` : complexes of objects in a category
+- `complex.lean` : contains basic definitions of complexes, maps between complexes, and
+  what it means for two maps to be homotopic.
 - `basic.lean` : systems of complexes of normed abelian groups, admissible systems
   and concepts of bounded exactness (see Definition 9.3 of
   Scholze's `analytic.pdf`, or Definitions 4.1 to 4.4 of the blueprint).

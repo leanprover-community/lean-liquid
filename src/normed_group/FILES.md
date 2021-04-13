@@ -1,5 +1,9 @@
 # normed_group
 
+This directory contains a development of the theory of normed abelian (additive) groups.
+
+## Files
+
 - `controlled_exactness.lean`: the proof of Proposition 8.17 of `analytic.pdf`,
   stating that the completion of a complex with some boundedness properties
   also has some boundedness properties.
