@@ -59,7 +59,7 @@ def mul_functor (N : ℕ) : FreeMat ⥤ FreeMat :=
     dsimp [basic_universal_map.mul, basic_universal_map.id],
     ext i j,
     rw matrix.kronecker_one_one,
-    simp only [matrix.one_apply, equiv.apply_eq_iff_eq, eq_self_iff_true],
+    simp only [matrix.minor_apply, matrix.one_apply, equiv.apply_eq_iff_eq, eq_self_iff_true],
     split_ifs; refl
   end,
   map_comp' := λ l m n f g, mul_comp _ _ _ }
@@ -99,7 +99,7 @@ begin
   simp only [comp_of, mul_of, basic_universal_map.comp, add_monoid_hom.coe_mk',
     basic_universal_map.mul, basic_universal_map.one_mul_hom,
     add_monoid_hom.comp_hom_apply_apply, add_monoid_hom.comp_apply, add_monoid_hom.flip_apply,
-    matrix.reindex_mul, matrix.one_mul, matrix.mul_one, iso_mk'_hom],
+    matrix.reindex_linear_equiv_mul, matrix.one_mul, matrix.mul_one, iso_mk'_hom],
 end
 .
 
@@ -116,11 +116,11 @@ begin
     ← add_monoid_hom.comp_apply],
   congr' 1, clear f, ext1 f,
   simp only [comp_of, mul_of, basic_universal_map.comp, add_monoid_hom.coe_mk',
-    basic_universal_map.mul, basic_universal_map.mul_mul_hom, matrix.reindex_mul,
+    basic_universal_map.mul, basic_universal_map.mul_mul_hom, matrix.reindex_linear_equiv_mul,
     add_monoid_hom.comp_hom_apply_apply, add_monoid_hom.comp_apply, add_monoid_hom.flip_apply,
-    matrix.one_mul, matrix.mul_reindex_one],
+    matrix.one_mul, matrix.mul_reindex_linear_equiv_one],
   rw [matrix.kronecker_reindex_right, matrix.kronecker_assoc', matrix.kronecker_one_one,
-    ← matrix.reindex_one (@fin_prod_fin_equiv m n), matrix.kronecker_reindex_left],
+    ← matrix.reindex_linear_equiv_one (@fin_prod_fin_equiv m n), matrix.kronecker_reindex_left],
   simp only [matrix.reindex_reindex],
   congr' 3,
   { ext ⟨⟨a, b⟩, c⟩ : 1, dsimp, simp only [equiv.symm_apply_apply], },

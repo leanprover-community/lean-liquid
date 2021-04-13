@@ -11,7 +11,7 @@ lemma reindex_linear_equiv_sum_empty_symm :
   (reindex_linear_equiv (sum_empty _) (sum_empty _)).symm M = from_blocks M 0 0 0 :=
 begin
   ext (i|i) (j|j),
-  { simp only [sum_empty_apply_inl, reindex_linear_equiv_symm_apply, from_blocks_apply₁₁] },
+  { simp only [reindex_linear_equiv_symm, from_blocks_apply₁₁], refl },
   { cases j },
   { cases i }
 end
@@ -25,11 +25,7 @@ variables [fintype m] [fintype n] [fintype o] [fintype m'] [fintype n'] [fintype
 variables [fintype m''] [fintype n'']
 variables [semiring R]
 
-lemma reindex_symm (e1 : m ≃ m') (e2 : n ≃ n') :
-  (@reindex_linear_equiv _ _ _ _ _ _ _ _ R _ e1 e2).symm = reindex_linear_equiv e1.symm e2.symm :=
-by { ext, dsimp, refl }
-
-lemma reindex_trans (e1 : m ≃ m') (e2 : n ≃ n') (e1' : m' ≃ m'') (e2' : n' ≃ n'') :
+lemma reindex_linear_equiv_trans (e1 : m ≃ m') (e2 : n ≃ n') (e1' : m' ≃ m'') (e2' : n' ≃ n'') :
   (reindex_linear_equiv e1 e2).trans (reindex_linear_equiv e1' e2') =
   @reindex_linear_equiv _ _ _ _ _ _ _ _ R _ (e1.trans e1') (e2.trans e2') :=
 by { ext, dsimp, refl }
@@ -38,24 +34,32 @@ lemma reindex_reindex (e1 : m ≃ m') (e2 : n ≃ n') (e1' : m' ≃ m'') (e2' : 
   (M : matrix m n R) :
   (reindex_linear_equiv e1' e2') (reindex_linear_equiv e1 e2 M) =
   reindex_linear_equiv (e1.trans e1') (e2.trans e2') M :=
-by { rw [← reindex_trans], refl }
+by { rw [← reindex_linear_equiv_trans], refl }
 
-@[simp] lemma reindex_one [decidable_eq m] [decidable_eq m'] (e1 : m ≃ m') :
+@[simp] lemma reindex_linear_equiv_one [decidable_eq m] [decidable_eq m'] (e1 : m ≃ m') :
   (reindex_linear_equiv e1 e1 (1 : matrix m m R)) = 1 :=
 begin
   ext i j,
-  dsimp only [reindex_linear_equiv_apply, one_apply],
+  dsimp only [reindex_linear_equiv_apply, reindex_apply, minor_apply, one_apply],
   simp only [eq_self_iff_true, apply_eq_iff_eq],
   convert rfl
 end
 
-lemma mul_reindex_one [decidable_eq o] (e1 : o ≃ n) (e2 : o ≃ n') (M : matrix m n R) :
+lemma reindex_linear_equiv_mul (e1 : m ≃ m') (e2 : n ≃ n') (e3 : o ≃ o')
+  (M : matrix m n R) (N : matrix n o R) :
+  (reindex_linear_equiv e1 e2 M).mul (reindex_linear_equiv e2 e3 N) =
+  reindex_linear_equiv e1 e3 (M.mul N) :=
+begin
+  dsimp, symmetry, apply minor_mul, exact e2.symm.bijective
+end
+
+lemma mul_reindex_linear_equiv_one [decidable_eq o] (e1 : o ≃ n) (e2 : o ≃ n') (M : matrix m n R) :
   M.mul (reindex_linear_equiv e1 e2 1) = reindex_linear_equiv (equiv.refl _) (e1.symm.trans e2) M :=
 begin
   have : M = reindex_linear_equiv (equiv.refl _) e1 (reindex_linear_equiv (equiv.refl _) e1.symm M),
-  { rw [reindex_reindex, equiv.symm_trans, equiv.refl_trans, reindex_linear_equiv_refl_refl] },
+  { rw [reindex_reindex, equiv.symm_trans, equiv.refl_trans, reindex_linear_equiv_refl_refl], refl },
   conv_lhs { rw this },
-  rw [reindex_mul, matrix.mul_one, reindex_reindex, equiv.refl_trans]
+  rw [reindex_linear_equiv_mul, matrix.mul_one, reindex_reindex, equiv.refl_trans]
 end
 
 end
