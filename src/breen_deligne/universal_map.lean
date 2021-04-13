@@ -268,8 +268,17 @@ end
 lemma eval_π₂ (n : ℕ) : eval A (π₂ n) = map R :=
 by rw [eval, pre_eval_π₂]
 
-def mul (N : ℕ) (f : basic_universal_map m n) : basic_universal_map (N * m) (N * n) :=
-matrix.reindex_linear_equiv fin_prod_fin_equiv fin_prod_fin_equiv $ matrix.kronecker 1 f
+def mul (N : ℕ) : basic_universal_map m n →+ basic_universal_map (N * m) (N * n) :=
+add_monoid_hom.mk'
+ (λ f, matrix.reindex_linear_equiv fin_prod_fin_equiv fin_prod_fin_equiv (matrix.kronecker 1 f))
+begin
+  intros f g,
+  simp only [← matrix.kroneckerₗ_apply_apply, linear_map.map_add, linear_equiv.map_add],
+end
+
+lemma mul_apply (N : ℕ) (f : basic_universal_map m n) :
+  mul N f = matrix.reindex_linear_equiv fin_prod_fin_equiv fin_prod_fin_equiv (matrix.kronecker 1 f) :=
+rfl
 
 lemma mul_comp (N : ℕ) (g : basic_universal_map m n) (f : basic_universal_map l m) :
   mul N (comp g f) = comp (mul N g) (mul N f) :=
@@ -281,32 +290,56 @@ end
 
 def one_mul_hom (n) : basic_universal_map (1 * n) n :=
 matrix.reindex_linear_equiv
-  ((equiv.prod_congr_left $ λ _, fin_one_equiv).trans $ equiv.punit_prod _)
+  ((fin_one_equiv.prod_congr $ equiv.refl _).trans $ equiv.punit_prod _)
   fin_prod_fin_equiv
   (1 : matrix (fin 1 × fin n) _ ℤ)
 
 def one_mul_inv (n) : basic_universal_map n (1 * n) :=
 matrix.reindex_linear_equiv
   fin_prod_fin_equiv
-  ((equiv.prod_congr_left $ λ _, fin_one_equiv).trans $ equiv.punit_prod _)
+  ((fin_one_equiv.prod_congr $ equiv.refl _).trans $ equiv.punit_prod _)
   (1 : matrix (fin 1 × fin n) _ ℤ)
 
 lemma one_mul_hom_inv : comp (one_mul_hom n) (one_mul_inv n) = id n :=
 begin
-  ext i j,
   dsimp only [comp, one_mul_hom, one_mul_inv, add_monoid_hom.coe_mk', id],
-  rw [matrix.reindex_mul, matrix.one_mul],
-  simp only [matrix.one_apply, matrix.reindex_linear_equiv_apply, equiv.apply_eq_iff_eq],
-  convert rfl
+  rw [matrix.reindex_mul, matrix.one_mul, matrix.reindex_one],
 end
 
 lemma one_mul_inv_hom : comp (one_mul_inv n) (one_mul_hom n) = id _ :=
 begin
-  ext i j,
   dsimp only [comp, one_mul_hom, one_mul_inv, add_monoid_hom.coe_mk', id],
-  rw [matrix.reindex_mul, matrix.one_mul],
-  simp only [matrix.one_apply, matrix.reindex_linear_equiv_apply, equiv.apply_eq_iff_eq],
-  convert rfl
+  rw [matrix.reindex_mul, matrix.one_mul, matrix.reindex_one],
+end
+
+def mul_mul_hom (m n i : ℕ) : basic_universal_map (m * (n * i)) ((m * n) * i) :=
+matrix.reindex_linear_equiv
+  -- (fin_prod_fin_equiv.trans $ (fin.cast $ (mul_assoc _ _ _).symm).to_equiv)
+  (((equiv.refl _).prod_congr fin_prod_fin_equiv.symm).trans $
+    (equiv.prod_assoc _ _ _).symm.trans $ (fin_prod_fin_equiv.prod_congr $ equiv.refl _).trans
+      fin_prod_fin_equiv)
+  fin_prod_fin_equiv
+  (1 : matrix (fin m × fin (n * i)) (fin m × fin (n * i)) ℤ)
+
+def mul_mul_inv (m n i : ℕ) : basic_universal_map ((m * n) * i) (m * (n * i)) :=
+matrix.reindex_linear_equiv
+  fin_prod_fin_equiv
+  -- (fin_prod_fin_equiv.trans $ (fin.cast $ (mul_assoc _ _ _).symm).to_equiv)
+  (((equiv.refl _).prod_congr fin_prod_fin_equiv.symm).trans $
+    (equiv.prod_assoc _ _ _).symm.trans $ (fin_prod_fin_equiv.prod_congr $ equiv.refl _).trans
+      fin_prod_fin_equiv)
+  (1 : matrix (fin m × fin (n * i)) (fin m × fin (n * i)) ℤ)
+
+lemma mul_mul_hom_inv {m n i : ℕ} : comp (mul_mul_hom m n i) (mul_mul_inv m n i) = id _ :=
+begin
+  dsimp only [comp, mul_mul_hom, mul_mul_inv, add_monoid_hom.coe_mk', id],
+  rw [matrix.reindex_mul, matrix.one_mul, matrix.reindex_one],
+end
+
+lemma mul_mul_inv_hom {m n i : ℕ} : comp (mul_mul_inv m n i) (mul_mul_hom m n i) = id _ :=
+begin
+  dsimp only [comp, mul_mul_hom, mul_mul_inv, add_monoid_hom.coe_mk', id],
+  rw [matrix.reindex_mul, matrix.one_mul, matrix.reindex_one],
 end
 
 def proj_aux {N : ℕ} (k : fin N) : matrix punit.{1} (fin N) ℤ :=
@@ -343,6 +376,40 @@ begin
   simp only [true_and, mul_boole, if_true, prod.mk.inj_iff,
     eq_self_iff_true, eq_iff_true_of_subsingleton],
   convert rfl
+end
+.
+
+lemma proj_aux_kronecker_proj_aux (a :fin m) (b : fin n) :
+  (proj_aux a).kronecker (proj_aux b) =
+  matrix.reindex_linear_equiv (equiv.prod_punit _).symm fin_prod_fin_equiv.symm
+    (proj_aux (fin_prod_fin_equiv (a,b))) :=
+begin
+  ext ⟨i, i'⟩ ⟨j, j'⟩ : 2,
+  dsimp [matrix.reindex_linear_equiv_apply, matrix.kronecker, proj_aux],
+  simp only [equiv.apply_eq_iff_eq, boole_mul, prod.mk.inj_iff],
+  symmetry,
+  convert ite_and
+end
+
+-- -- move this
+-- lemma prod.mk_fst_snd {α β : Type*} (x : α × β) : (x.1, x.2) = x :=
+-- by squeeze_simp
+
+lemma comp_proj_mul_proj (n N : ℕ) (j : fin (2 * 2 ^ N)) :
+  (comp (proj n ((fin_prod_fin_equiv.symm) j).fst)) (mul 2 (proj n ((fin_prod_fin_equiv.symm) j).snd)) =
+  (comp (proj n j)) (mul_mul_hom 2 (2 ^ N) n) :=
+begin
+  dsimp only [mul_mul_hom, proj, comp, mul_apply, add_monoid_hom.coe_mk'],
+  rw [matrix.reindex_mul, ← matrix.kronecker_mul, matrix.one_mul,
+    matrix.kronecker_reindex_right, matrix.mul_one,
+    matrix.kronecker_assoc', matrix.mul_reindex_one, proj_aux_kronecker_proj_aux,
+    matrix.kronecker_reindex_left],
+  simp only [matrix.reindex_reindex],
+  congr' 2,
+  ext ⟨x, y⟩,
+  dsimp,
+  simp only [equiv.symm_apply_apply],
+  rw [prod.mk.eta, equiv.apply_symm_apply],
 end
 
 end basic_universal_map

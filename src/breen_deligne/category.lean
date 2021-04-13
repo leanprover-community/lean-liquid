@@ -68,12 +68,20 @@ instance mul_functor.additive (N : ℕ) : (mul_functor N).additive :=
 { map_zero' := λ m n, add_monoid_hom.map_zero _,
   map_add' := λ m n f g, add_monoid_hom.map_add _ _ _ }
 
+@[simps] def iso_mk' {m n : FreeMat}
+  (f : basic_universal_map m n) (g : basic_universal_map n m)
+  (hfg : basic_universal_map.comp g f = basic_universal_map.id _)
+  (hgf : basic_universal_map.comp f g = basic_universal_map.id _) :
+  m ≅ n :=
+{ hom := of f,
+  inv := of g,
+  hom_inv_id' := (comp_of _ _).trans $ congr_arg _ $ hfg,
+  inv_hom_id' := (comp_of _ _).trans $ congr_arg _ $ hgf }
+
 def one_mul_iso : mul_functor 1 ≅ 𝟭 _ :=
-nat_iso.of_components (λ n,
-  { hom := of $ basic_universal_map.one_mul_hom _,
-    inv := of $ basic_universal_map.one_mul_inv _,
-    hom_inv_id' := (comp_of _ _).trans $ congr_arg _ $ basic_universal_map.one_mul_inv_hom,
-    inv_hom_id' := (comp_of _ _).trans $ congr_arg _ $ basic_universal_map.one_mul_hom_inv })
+nat_iso.of_components (λ n, iso_mk'
+  (basic_universal_map.one_mul_hom _) (basic_universal_map.one_mul_inv _)
+  basic_universal_map.one_mul_inv_hom basic_universal_map.one_mul_hom_inv)
 begin
   intros m n f,
   dsimp,
@@ -81,17 +89,42 @@ begin
   rw [← add_monoid_hom.comp_apply, ← add_monoid_hom.comp_hom_apply_apply,
     ← add_monoid_hom.flip_apply _ f],
   congr' 1, clear f, ext1 f,
-  dsimp,
-  simp only [comp_of, mul_of, basic_universal_map.comp, add_monoid_hom.coe_mk',
-    basic_universal_map.mul, basic_universal_map.one_mul_hom],
   have : f = matrix.reindex_linear_equiv
-     ((equiv.prod_congr_left (λ _, fin_one_equiv)).trans (equiv.punit_prod (fin n)))
-     ((equiv.prod_congr_left (λ _, fin_one_equiv)).trans (equiv.punit_prod (fin m)))
-     (matrix.kronecker 1 f),
-  { ext i j, dsimp [matrix.kronecker, matrix.one_apply, equiv.prod_congr_left],
+      ((fin_one_equiv.prod_congr $ equiv.refl _).trans $ equiv.punit_prod _)
+      ((fin_one_equiv.prod_congr $ equiv.refl _).trans $ equiv.punit_prod _)
+      (matrix.kronecker 1 f),
+  { ext i j, dsimp [matrix.kronecker, matrix.one_apply],
     simp only [one_mul, if_true, eq_iff_true_of_subsingleton], },
   conv_rhs { rw this },
-  simp only [matrix.reindex_mul, matrix.one_mul, matrix.mul_one],
+  simp only [comp_of, mul_of, basic_universal_map.comp, add_monoid_hom.coe_mk',
+    basic_universal_map.mul, basic_universal_map.one_mul_hom,
+    add_monoid_hom.comp_hom_apply_apply, add_monoid_hom.comp_apply, add_monoid_hom.flip_apply,
+    matrix.reindex_mul, matrix.one_mul, matrix.mul_one, iso_mk'_hom],
+end
+.
+
+def mul_mul_iso (m n : ℕ) : mul_functor n ⋙ mul_functor m ≅ mul_functor (m * n) :=
+nat_iso.of_components (λ i, iso_mk'
+  (basic_universal_map.mul_mul_hom m n i) (basic_universal_map.mul_mul_inv m n i)
+  basic_universal_map.mul_mul_inv_hom basic_universal_map.mul_mul_hom_inv)
+begin
+  intros i j f,
+  dsimp,
+  show universal_map.comp _ _ = universal_map.comp _ _,
+  rw [← add_monoid_hom.comp_apply, ← add_monoid_hom.comp_apply,
+    ← add_monoid_hom.flip_apply _ (mul (m * n) f),
+    ← add_monoid_hom.comp_apply],
+  congr' 1, clear f, ext1 f,
+  simp only [comp_of, mul_of, basic_universal_map.comp, add_monoid_hom.coe_mk',
+    basic_universal_map.mul, basic_universal_map.mul_mul_hom, matrix.reindex_mul,
+    add_monoid_hom.comp_hom_apply_apply, add_monoid_hom.comp_apply, add_monoid_hom.flip_apply,
+    matrix.one_mul, matrix.mul_reindex_one],
+  rw [matrix.kronecker_reindex_right, matrix.kronecker_assoc', matrix.kronecker_one_one,
+    ← matrix.reindex_one (@fin_prod_fin_equiv m n), matrix.kronecker_reindex_left],
+  simp only [matrix.reindex_reindex],
+  congr' 3,
+  { ext ⟨⟨a, b⟩, c⟩ : 1, dsimp, simp only [equiv.symm_apply_apply], },
+  { ext ⟨⟨a, b⟩, c⟩ : 1, dsimp, simp only [equiv.symm_apply_apply], },
 end
 
 end FreeMat
@@ -142,6 +175,10 @@ def mul (N : ℕ) : data ⥤ data :=
 def mul_one_iso : (mul 1).obj BD ≅ BD :=
 differential_object.complex_like.iso_of_components (λ i, FreeMat.one_mul_iso.app _) $
 λ i j, FreeMat.one_mul_iso.hom.naturality (BD.d i j)
+
+def mul_mul_iso (m n : ℕ) : (mul m).obj ((mul n).obj BD) ≅ (mul (m * n)).obj BD :=
+differential_object.complex_like.iso_of_components (λ i, (FreeMat.mul_mul_iso _ _).app _) $
+λ i j, (FreeMat.mul_mul_iso _ _).hom.naturality (BD.d i j)
 
 end mul
 
@@ -239,7 +276,8 @@ def homotopy_pow' (h : homotopy (BD.sum 2) (BD.proj 2)) :
 
 def pow'_iso_mul : Π N, BD.pow' N ≅ (mul (2^N)).obj BD
 | 0     := BD.mul_one_iso.symm
-| (N+1) := show (mul 2).obj (BD.pow' N) ≅ (mul (2 * 2 ^ N)).obj BD, from sorry
+| (N+1) := show (mul 2).obj (BD.pow' N) ≅ (mul (2 * 2 ^ N)).obj BD, from
+   (mul 2).map_iso (pow'_iso_mul N) ≪≫ mul_mul_iso _ _ _
 
 lemma hom_pow'_sum : ∀ N, (BD.pow'_iso_mul N).inv ≫ hom_pow' (BD.sum 2) N = BD.sum (2^N)
 | 0     :=
@@ -251,7 +289,23 @@ begin
   refine congr_arg of _,
   apply basic_universal_map.one_mul_hom_eq_proj,
 end
-| (N+1) := sorry
+| (N+1) :=
+begin
+  dsimp [pow'_iso_mul, hom_pow'],
+  slice_lhs 2 3 { rw [← functor.map_comp, hom_pow'_sum] },
+  rw iso.inv_comp_eq,
+  ext i : 2,
+  iterate 2 { erw [differential_object.comp_f] },
+  dsimp [mul_mul_iso, FreeMat.mul_mul_iso, universal_map.sum],
+  rw [universal_map.mul_of],
+  show universal_map.comp _ _ = universal_map.comp _ _,
+  simp only [universal_map.comp_of, add_monoid_hom.map_sum, add_monoid_hom.finset_sum_apply],
+  congr' 1,
+  rw [← finset.sum_product', finset.univ_product_univ, ← fin_prod_fin_equiv.symm.sum_comp],
+  apply fintype.sum_congr,
+  apply basic_universal_map.comp_proj_mul_proj,
+end
+.
 
 lemma hom_pow'_proj : ∀ N, (BD.pow'_iso_mul N).inv ≫ hom_pow' (BD.proj 2) N = BD.proj (2^N)
 | 0     :=
@@ -263,7 +317,24 @@ begin
   refine congr_arg of _,
   apply basic_universal_map.one_mul_hom_eq_proj,
 end
-| (N+1) := sorry
+| (N+1) :=
+begin
+  dsimp [pow'_iso_mul, hom_pow'],
+  slice_lhs 2 3 { rw [← functor.map_comp, hom_pow'_proj] },
+  rw iso.inv_comp_eq,
+  ext i : 2,
+  iterate 2 { erw [differential_object.comp_f] },
+  dsimp [mul_mul_iso, FreeMat.mul_mul_iso, universal_map.proj],
+  simp only [add_monoid_hom.map_sum, add_monoid_hom.finset_sum_apply,
+    preadditive.comp_sum, preadditive.sum_comp],
+  rw [← finset.sum_comm, ← finset.sum_product', finset.univ_product_univ,
+      ← fin_prod_fin_equiv.symm.sum_comp],
+  apply fintype.sum_congr,
+  intros j,
+  rw [universal_map.mul_of],
+  show universal_map.comp _ _ = universal_map.comp _ _,
+  simp only [universal_map.comp_of, basic_universal_map.comp_proj_mul_proj],
+end
 
 def homotopy_mul (h : homotopy (BD.sum 2) (BD.proj 2)) (N : ℕ) :
   homotopy (BD.sum (2^N)) (BD.proj (2^N)) :=
