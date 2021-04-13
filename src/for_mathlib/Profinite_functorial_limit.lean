@@ -5,6 +5,14 @@ import topology.locally_constant.basic
 import category_theory.Fintype
 import category_theory.limits.functor_category
 
+/-!
+Let `X` and `Y` be profinite sets and `f : X ⟶ Y` a morphism.
+We show:
+1. That `X` is a limit of finite sets.
+2. That `f` is a limit of morphisms of finite sets, 
+  when considered as an object in the arrow category.
+-/
+
 open_locale classical
 
 universe u
