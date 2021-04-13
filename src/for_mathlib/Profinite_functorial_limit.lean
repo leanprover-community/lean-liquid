@@ -526,6 +526,122 @@ end proj
 
 end clopen_cover
 
+section limit_rep
+
+variables (X : Profinite.{u})
+
+def diagram : X.clopen_cover ⥤ Fintype.{u} :=
+{ obj := λ I, Fintype.of I,
+  map := λ I J h, clopen_cover.map $ le_of_hom h,
+  map_id' := λ I, by {ext1, erw [clopen_cover.map_id], simp },
+  map_comp' := λ I J K f g,
+    by {ext1, simp only [Fintype.comp_apply], erw ← clopen_cover.map_comp, refl, } }
+
+def Fincone : limits.cone (X.diagram ⋙ of_Fintype) :=
+{ X := X,
+  π :=
+  { app := λ I, I.π,
+    naturality' := begin
+      intros I J j,
+      ext1 x,
+      symmetry,
+      apply clopen_cover.proj_fun_unique,
+      simp,
+      apply clopen_cover.map_spec,
+      apply clopen_cover.proj_fun_spec,
+    end } }
+
+instance is_iso_lift : is_iso ((limit_cone (X.diagram ⋙ of_Fintype)).is_limit.lift X.Fincone) :=
+is_iso_of_bijective _
+begin
+  split,
+  { intros x y h,
+    apply clopen_cover.eq_of_forall_proj_eq,
+    intros I,
+    apply_fun (λ u, u.val I) at h,
+    exact h },
+  { let C := (limit_cone (X.diagram ⋙ of_Fintype)).cone,
+    rintros (x : C.X.to_Top),
+    have := clopen_cover.exists_of_compat (λ I : X.clopen_cover, x.val I) (λ I J f, _),
+    { rcases this with ⟨x,hx⟩,
+      refine ⟨x,_⟩,
+      ext1, ext1 I,
+      exact hx I },
+    { change _ = C.π.app J _,
+      erw ← C.w (hom_of_le f),
+      refl } }
+end
+
+def Fincone_iso : X.Fincone ≅ (limit_cone _).cone :=
+limits.cones.ext (as_iso $ (limit_cone _).is_limit.lift _) (λ _, rfl)
+
+def Fincone_is_limit : limits.is_limit X.Fincone :=
+limits.is_limit.of_iso_limit (limit_cone_cone_is_limit _) X.Fincone_iso.symm
+
+variables {X} {Y : Profinite.{u}}
+
+def change_cone (f : Y ⟶ X) (C : limits.cone (Y.diagram ⋙ of_Fintype)) :
+  limits.cone (X.diagram ⋙ of_Fintype) :=
+{ X := C.X,
+  π :=
+  { app := λ I, C.π.app (clopen_cover.pullback f I) ≫
+      ⟨clopen_cover.map (clopen_cover.pullback_le_rel _)⟩,
+    naturality' := begin
+      intros I J g,
+      ext1,
+      dsimp [diagram] at *,
+      have h : clopen_cover.pullback f _ ≤ _ := clopen_cover.pullback_mono (le_of_hom g),
+      erw [← C.w (hom_of_le h)],
+      dsimp [of_Fintype],
+      simp_rw [← clopen_cover.map_comp],
+      refl,
+    end } }
+
+theorem change_cone_lift (f : Y ⟶ X) : f = X.Fincone_is_limit.lift (change_cone f Y.Fincone) :=
+begin
+  apply X.Fincone_is_limit.uniq (change_cone f Y.Fincone) f,
+  intros I,
+  ext1 y,
+  change I.proj (f y) = _,
+  dsimp [change_cone],
+  symmetry,
+  apply clopen_cover.proj_fun_unique,
+  apply clopen_cover.map_spec,
+  apply clopen_cover.proj_fun_spec,
+end
+
+def change_cone_id (C : limits.cone (X.diagram ⋙ of_Fintype)) :
+  change_cone (𝟙 X) C ≅ C :=
+limits.cones.ext (eq_to_iso rfl)
+begin
+  intros I,
+  ext1,
+  dsimp [change_cone] at *,
+  symmetry,
+  apply clopen_cover.map_unique,
+  erw clopen_cover.pullback_id,
+  simp,
+end
+
+def change_cone_comp {Z : Profinite.{u}} (g : Z ⟶ Y) (f : Y ⟶ X)
+  (C : limits.cone (Z.diagram ⋙ of_Fintype)) :
+  change_cone (g ≫ f) C ≅ change_cone f (change_cone g C) :=
+limits.cones.ext (eq_to_iso rfl)
+begin
+  intros I,
+  ext1,
+  dsimp [change_cone] at *,
+  symmetry,
+  apply clopen_cover.map_unique,
+  rw clopen_cover.pullback_comp,
+  refine le_trans (clopen_cover.map_spec (clopen_cover.pullback_le_rel _) _) _,
+  nth_rewrite 1 set.preimage_comp,
+  apply set.preimage_mono,
+  apply clopen_cover.map_spec,
+end
+
+end limit_rep
+
 namespace arrow
 
 variable (f : arrow Profinite.{u})
