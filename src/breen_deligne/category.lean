@@ -13,6 +13,8 @@ and whose morphisms `m ⟶ n` are functorial maps `φ_A : ℤ[A^m] → ℤ[A^n]`
 
 -/
 
+open_locale big_operators
+
 namespace breen_deligne
 
 open free_abelian_group category_theory
@@ -89,7 +91,7 @@ begin
   { ext i j, dsimp [matrix.kronecker, matrix.one_apply, equiv.prod_congr_left],
     simp only [one_mul, if_true, eq_iff_true_of_subsingleton], },
   conv_rhs { rw this },
-  simp only [matrix.reindex_linear_equiv_mul_reindex_linear_equiv, matrix.one_mul, matrix.mul_one],
+  simp only [matrix.reindex_mul, matrix.one_mul, matrix.mul_one],
 end
 
 end FreeMat
@@ -174,11 +176,11 @@ lemma BD_pow_X : ∀ N i, (BD.pow N).X i = 2^N * BD.X i
 { f := λ n, universal_map.π _,
   comm := λ m n, universal_map.π_comp_double _ }
 
-def sum (BD : data) (N : ℕ) : (mul N).obj BD ⟶ BD :=
+@[simps] def sum (BD : data) (N : ℕ) : (mul N).obj BD ⟶ BD :=
 { f := λ n, universal_map.sum _ _,
   comm := λ m n, universal_map.sum_comp_mul _ _ }
 
-def proj (BD : data) (N : ℕ) : (mul N).obj BD ⟶ BD :=
+@[simps] def proj (BD : data) (N : ℕ) : (mul N).obj BD ⟶ BD :=
 { f := λ n, universal_map.proj _ _,
   comm := λ m n, universal_map.proj_comp_mul _ _ }
 
@@ -240,11 +242,27 @@ def pow'_iso_mul : Π N, BD.pow' N ≅ (mul (2^N)).obj BD
 | (N+1) := show (mul 2).obj (BD.pow' N) ≅ (mul (2 * 2 ^ N)).obj BD, from sorry
 
 lemma hom_pow'_sum : ∀ N, (BD.pow'_iso_mul N).inv ≫ hom_pow' (BD.sum 2) N = BD.sum (2^N)
-| 0     := by { ext i : 2, simp only [hom_pow', category.comp_id], sorry }
+| 0     :=
+begin
+  ext n : 2,
+  simp only [hom_pow', category.comp_id, sum_f, universal_map.sum],
+  dsimp [pow_zero],
+  rw [finset.sum_singleton],
+  refine congr_arg of _,
+  apply basic_universal_map.one_mul_hom_eq_proj,
+end
 | (N+1) := sorry
 
 lemma hom_pow'_proj : ∀ N, (BD.pow'_iso_mul N).inv ≫ hom_pow' (BD.proj 2) N = BD.proj (2^N)
-| 0     := sorry
+| 0     :=
+begin
+  ext n : 2,
+  simp only [hom_pow', category.comp_id, proj_f, universal_map.proj],
+  dsimp [pow_zero],
+  rw [finset.sum_singleton],
+  refine congr_arg of _,
+  apply basic_universal_map.one_mul_hom_eq_proj,
+end
 | (N+1) := sorry
 
 def homotopy_mul (h : homotopy (BD.sum 2) (BD.proj 2)) (N : ℕ) :

@@ -276,7 +276,7 @@ lemma mul_comp (N : ℕ) (g : basic_universal_map m n) (f : basic_universal_map 
 begin
   ext1 i j,
   dsimp only [mul, comp, add_monoid_hom.coe_mk'],
-  rw [matrix.reindex_linear_equiv_mul_reindex_linear_equiv, ← matrix.kronecker_mul, matrix.one_mul],
+  rw [matrix.reindex_mul, ← matrix.kronecker_mul, matrix.one_mul],
 end
 
 def one_mul_hom (n) : basic_universal_map (1 * n) n :=
@@ -295,7 +295,7 @@ lemma one_mul_hom_inv : comp (one_mul_hom n) (one_mul_inv n) = id n :=
 begin
   ext i j,
   dsimp only [comp, one_mul_hom, one_mul_inv, add_monoid_hom.coe_mk', id],
-  rw [matrix.reindex_linear_equiv_mul_reindex_linear_equiv, matrix.one_mul],
+  rw [matrix.reindex_mul, matrix.one_mul],
   simp only [matrix.one_apply, matrix.reindex_linear_equiv_apply, equiv.apply_eq_iff_eq],
   convert rfl
 end
@@ -304,7 +304,7 @@ lemma one_mul_inv_hom : comp (one_mul_inv n) (one_mul_hom n) = id _ :=
 begin
   ext i j,
   dsimp only [comp, one_mul_hom, one_mul_inv, add_monoid_hom.coe_mk', id],
-  rw [matrix.reindex_linear_equiv_mul_reindex_linear_equiv, matrix.one_mul],
+  rw [matrix.reindex_mul, matrix.one_mul],
   simp only [matrix.one_apply, matrix.reindex_linear_equiv_apply, equiv.apply_eq_iff_eq],
   convert rfl
 end
@@ -327,8 +327,22 @@ begin
     simp only [matrix.reindex_linear_equiv_apply, equiv.punit_prod_symm_apply, matrix.kronecker,
       matrix.one_apply_eq, one_mul] },
   conv_rhs { rw this },
-  simp only [matrix.reindex_linear_equiv_mul_reindex_linear_equiv, ← matrix.kronecker_mul,
-    matrix.one_mul, matrix.mul_one],
+  simp only [matrix.reindex_mul, ← matrix.kronecker_mul, matrix.one_mul, matrix.mul_one],
+end
+
+lemma one_mul_hom_eq_proj : basic_universal_map.one_mul_hom n = basic_universal_map.proj n 0 :=
+begin
+  dsimp only [basic_universal_map.one_mul_hom, basic_universal_map.proj],
+  rw [← linear_equiv.symm_apply_eq, matrix.reindex_symm, matrix.reindex_reindex,
+    equiv.trans_symm, equiv.trans_assoc, equiv.trans_symm, equiv.trans_refl],
+  ext ⟨i, i'⟩ ⟨j, j'⟩ : 2,
+  change fin 1 at j,
+  dsimp only [matrix.reindex_linear_equiv_apply, matrix.kronecker],
+  dsimp [fin_one_equiv, equiv.prod_congr_left, basic_universal_map.proj_aux],
+  simp only [matrix.one_apply, prod.mk.inj_iff, @eq_comm _ _ j],
+  simp only [true_and, mul_boole, if_true, prod.mk.inj_iff,
+    eq_self_iff_true, eq_iff_true_of_subsingleton],
+  convert rfl
 end
 
 end basic_universal_map

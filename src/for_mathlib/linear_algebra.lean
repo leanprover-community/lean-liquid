@@ -20,19 +20,26 @@ end
 .
 section
 
-variables {m n o m' n' o' R : Type*}
-variables [fintype m] [fintype n] [fintype o] [fintype m'] [fintype n'] [fintype o'] [semiring R]
+variables {m n o m' n' o' m'' n'' R : Type*}
+variables [fintype m] [fintype n] [fintype o] [fintype m'] [fintype n'] [fintype o']
+variables [fintype m''] [fintype n'']
+variables [semiring R]
 
-lemma reindex_linear_equiv_mul_reindex_linear_equiv
-  (e1 : m ≃ m') (e2 : n ≃ n') (e3 : o ≃ o') (M : matrix m n R) (M') :
-  (reindex_linear_equiv e1 e2 M).mul (reindex_linear_equiv e2 e3 M') =
-  reindex_linear_equiv e1 e3 (M.mul M') :=
-begin
-  ext i j,
-  simp only [coe_reindex_linear_equiv, matrix.mul_apply],
-  rw ← e2.sum_comp,
-  simp only [equiv.symm_apply_apply],
-end
+lemma reindex_symm (e1 : m ≃ m') (e2 : n ≃ n') :
+  (@reindex_linear_equiv _ _ _ _ _ _ _ _ R _ e1 e2).symm = reindex_linear_equiv e1.symm e2.symm :=
+by { ext, dsimp, refl }
+
+lemma reindex_trans
+  (e1 : m ≃ m') (e2 : n ≃ n') (e1' : m' ≃ m'') (e2' : n' ≃ n'') :
+  (reindex_linear_equiv e1 e2).trans (reindex_linear_equiv e1' e2') =
+  @reindex_linear_equiv _ _ _ _ _ _ _ _ R _ (e1.trans e1') (e2.trans e2') :=
+by { ext, dsimp, refl }
+
+lemma reindex_reindex
+  (e1 : m ≃ m') (e2 : n ≃ n') (e1' : m' ≃ m'') (e2' : n' ≃ n'') (M : matrix m n R) :
+  (reindex_linear_equiv e1' e2') (reindex_linear_equiv e1 e2 M) =
+  reindex_linear_equiv (e1.trans e1') (e2.trans e2') M :=
+by { rw [← reindex_trans], refl }
 
 end
 
