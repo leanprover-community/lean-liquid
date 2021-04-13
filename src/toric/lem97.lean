@@ -58,28 +58,23 @@ begin
   use B,
   split,
   { intros b hb,
-    rw finset.mem_image at hb,
-    rcases hb with ⟨y, ⟨hy₁, h_yb⟩⟩,
-    dsimp [ψ] at h_yb,
-    rw [← hS₀, ← h_yb],
+    --rw finset.mem_image at hb,
+    rcases finset.mem_image.mp hb with ⟨y, ⟨hy₁, rfl⟩⟩,
+    rw [← hS₀],
     apply mem_span_finset.mpr,
     let φ := λ x : (Λ →+ ℤ), if H: x ∈ S₀ then (y ⟨x, H⟩ : ℕ) else 0,
     use φ,
-    dsimp [φ],
     rw ← finset.sum_attach,
-    apply finset.sum_congr,
-    { tauto },
-    intros s hs,
-    simp only [dite_eq_ite, if_true, finset.coe_mem, finset.mk_coe] },
+    refine finset.sum_congr rfl (λ s hs, _),
+    simp only [*, dif_pos, dite_eq_ite, val_eq_coe, if_true, finset.coe_mem, finset.mk_coe] },
   { intros x hx,
     rw [← hS₀, mem_span_finset] at hx,
-    rcases hx with ⟨f, hx⟩,
+    rcases hx with ⟨f, rfl⟩,
     let g : (Λ →+ ℤ) → (fin N) := (λ i, ⟨f i % N, nat.mod_lt (f i) hN⟩),
     obtain ⟨r, hr⟩ : ∃ (r : (Λ →+ ℤ) → ℕ), f = ↑g + N • r,
     { set r := λ x, (f x - g x) / N with hr,
       use r,
       funext z,
-      dsimp [g],
       simp only [*, algebra.id.smul_eq_mul, pi.add_apply, eq_self_iff_true, pi.smul_apply],
       have : ∀ (n k : ℕ), n = n % k + k * ((n - n %k)/k) := λ n k, by rw [mul_comm,
         nat.div_mul_cancel (nat.dvd_sub_mod n), ← nat.add_sub_assoc (nat.mod_le n k),
@@ -99,19 +94,17 @@ begin
     let y := ∑ (i : Λ →+ ℤ) in S₀, r i • i,
     use [x', H, y],
     split,
-    { rw [← hx, hr],
+    {
+      rw [hr],
       dsimp [y, x'],
       rw [finset.smul_sum, ← finset.sum_add_distrib],
       simp_rw [← smul_assoc, ← add_smul, add_comm],
-      rw finset.sum_congr,
-      refl,
-      intros z hz,
+      apply finset.sum_congr rfl (λ z hz, _),
       rw add_comm,
-      dsimp [g],
       refl },
     intro i,
     dsimp [x'],
-    rw [← hx, sub_nonpos.symm, sub_eq_add_neg, ← add_monoid_hom.neg_apply, ← finset.sum_neg_distrib,
+    rw [sub_nonpos.symm, sub_eq_add_neg, ← add_monoid_hom.neg_apply, ← finset.sum_neg_distrib,
       add_monoid_hom.finset_sum_apply, add_monoid_hom.finset_sum_apply, ← finset.sum_add_distrib],
     simp_rw [← add_monoid_hom.add_apply, ← nsmul_eq_smul, ← gsmul_coe_nat, ← neg_gsmul,
       gsmul_eq_smul, ← add_smul],
@@ -119,14 +112,13 @@ begin
     intros z hz,
     replace hz : z ∈ explicit_dual_set l,
     { rw [← submodule.span_singleton_le_iff_mem, ← hS₀],
-      apply submodule.span_mono,
-      exact set.singleton_subset_iff.mpr hz },
+      exact submodule.span_mono (set.singleton_subset_iff.mpr hz) },
     replace hz : 0 ≤ z (l i) := rfl.mpr hz i,
     rw [add_monoid_hom.int_smul_apply, ← gsmul_eq_smul, gsmul_eq_mul],
     apply mul_nonpos_of_nonpos_of_nonneg _ hz,
     simp only [add_zero, int.cast_id, int.coe_nat_mod, add_neg_le_iff_le_add'],
     rw [← int.coe_nat_mod, int.coe_nat_le_coe_nat_iff],
-    apply nat.mod_le },
+    exact nat.mod_le _ _ },
 end
 
 section sign_vectors
@@ -178,10 +170,8 @@ lemma pos_vector_neg_if_neg [fintype ι] (l : ι → Λ) (x : Λ →+ ℤ) (i : 
     ((pos_vector l x) • l) i = - l i :=
 begin
   intro hx,
-  simp only [pos_vector, nonzero_sign, has_scalar.smul, id.def, ge_iff_le],
-  dsimp [pos_vector, nonzero_sign],
-  rw lt_iff_not_ge at hx,
-  rw [if_neg hx, units.coe_neg, units.coe_one, neg_gsmul, one_gsmul],
+  simp only [pos_vector, nonzero_sign, has_scalar.smul, id.def],
+  rw [if_neg (not_le.mpr hx), units.coe_neg, units.coe_one, neg_gsmul, one_gsmul],
 end
 
 
@@ -193,10 +183,7 @@ Its existence is established in lem97_pos.
 -/
 def pos_A [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (hN : 0 < N)
   (l : ι → Λ) (ε : sign_vectors ι) : finset (Λ →+ ℤ) :=
-begin
-  obtain B := some (lem97_pos hΛ N hN (ε • l)),
-  use B,
-end
+some (lem97_pos hΛ N hN (ε • l))
 
 lemma posA_to_explicit [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (hN : 0 < N)
   (l : ι → Λ) (ε : sign_vectors ι) (x' : Λ →+ ℤ) (H : x' ∈ pos_A hΛ N hN l ε) : x' ∈ explicit_dual_set (ε • l)
@@ -208,8 +195,7 @@ lemma exists_good_pair [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (hN : 0 < N
   x' ∈ pos_A hΛ N hN l ε ∧ x = N • y + x' ∧ ∀ i, x' ((ε • l) i) ≤ x ((ε • l) i) :=
 begin
   obtain ⟨x', hx', ⟨y, hy⟩⟩ := (some_spec (lem97_pos hΛ N hN (ε • l))).2 x H,
-  use [x', y],
-  exact ⟨hx', hy⟩,
+  exact ⟨x', y, hx', hy⟩,
 end
 
 /-
@@ -285,7 +271,7 @@ begin
   simp only [← int.abs_eq_nat_abs, hy, add_monoid_hom.add_apply, add_monoid_hom.nat_smul_apply],
   convert_to abs (N • y (l i) + x' (l i)) = abs (N • y (l i)) + abs (x' (l i)) using 2,
   { rw [← nsmul_eq_smul, nsmul_eq_mul, int.nat_cast_eq_coe_nat, abs_mul, int.coe_nat_abs], },
-  rw [abs_add_eq_add_abs_iff (N • y (l i)) (x' (l i))],
+  apply (abs_add_eq_add_abs_iff (N • y (l i)) (x' (l i))).mpr,
   rw [← sub_eq_iff_eq_add] at hy,
   simpa only [hy, add_monoid_hom.nat_smul_apply, and_comm] using hx',
 end
