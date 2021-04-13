@@ -140,16 +140,18 @@ open ProFiltPseuNormGrpWithTinv (of)
 
 open category_theory opposite
 
--- -- === !!! warning, the instance for `M × M` has sorry'd data
-def double_iso_prod :
-  (BD.double.complex c_ r V r' c).obj (op M) ≅
-  (BD.complex c_ r V r' c).obj (op $ of r' $ M × M) :=
-sorry
+-- === !!! We probably don't need the following two decls
 
-example (N : ℝ≥0) :
-  (BD.double.complex (rescale_constants c_ N) r V r' c).obj (op M) ≅
-  (BD.complex c_ r V r' c).obj (op $ of r' $ rescale N (M × M)) :=
-(double_iso_prod BD _ r V c _) ≪≫ (eq_to_iso $ complex_rescale_eq _ _ _ _ _ _ _)
+-- -- === !!! warning, the instance for `M × M` has sorry'd data
+-- def double_iso_prod :
+--   (BD.double.complex c_ r V r' c).obj (op M) ≅
+--   (BD.complex c_ r V r' c).obj (op $ of r' $ M × M) :=
+-- by admit
+
+-- example (N : ℝ≥0) :
+--   (BD.double.complex (rescale_constants c_ N) r V r' c).obj (op M) ≅
+--   (BD.complex c_ r V r' c).obj (op $ of r' $ rescale N (M × M)) :=
+-- (double_iso_prod BD _ r V c _) ≪≫ (eq_to_iso $ complex_rescale_eq _ _ _ _ _ _ _)
 
 end double
 
@@ -168,11 +170,8 @@ variables {r' : ℝ≥0} [fact (0 < r')] [fact (r' ≤ 1)] (c : ℝ≥0)
 variables (M : (ProFiltPseuNormGrpWithTinv.{u} r')ᵒᵖ)
 variables (k' : ℝ≥0) (N : ℕ) [fact (1 ≤ k')] [fact (k' ≤ 2 ^ N)]
 
-def homotopy_σπ
-  [BD.data.suitable (c' * c_)]
-  -- the following 4 assumptions ought to be global instances in `suitable.lean`
-  [∀ (j i : ℕ), ((BD.data.homotopy_mul BD.homotopy N).h j i).suitable (rescale_constants c_ (2 ^ N) j) ((c' * c_) i)]
-  [((data.mul (2 ^ N)).obj BD.data).suitable (rescale_constants c_ (2 ^ N))]
+def homotopy_σπ [BD.data.suitable (c' * c_)] [package.adept BD c_ c']
+  -- the following 2 assumptions ought to be global instances in `suitable.lean`
   [∀ (i : ℕ), universal_map.suitable (rescale_constants c_ (2 ^ N) i) ((c' * c_) i) ((BD.data.sum (2 ^ N)).f i)]
   [∀ (i : ℕ), universal_map.suitable (rescale_constants c_ (2 ^ N) i) ((c' * c_) i) ((BD.data.proj (2 ^ N)).f i)]
  :=

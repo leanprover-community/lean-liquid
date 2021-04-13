@@ -189,6 +189,17 @@ begin
       rintro rfl, apply hj, rw [← hj', equiv.apply_symm_apply] } },
   { intro h, exact (h $ finset.mem_univ _).elim }
 end
+.
+
+instance basic_universal_map.mul_suitable (N : ℕ) (f : basic_universal_map m n) [f.suitable c₁ c₂] :
+  (basic_universal_map.mul N f).suitable c₁ c₂ :=
+begin
+  intros i,
+  -- now use that `mul` is a kronecker product with `1`,
+  -- so every row/column is just a row/column of `f`
+  -- with a whole bunch of extra `0`s
+  sorry
+end
 
 end basic_universal_map
 
@@ -334,6 +345,21 @@ instance π_suitable (c : ℝ≥0) (n : ℕ) :
   (π n).suitable c c :=
 universal_map.suitable_add
 
+-- move this
+lemma universal_map.mem_support_mul (N : ℕ) (f : universal_map m n) (g) :
+  g ∈ (universal_map.mul N f).support ↔ ∃ g', g' ∈ f.support ∧ g = basic_universal_map.mul N g' :=
+sorry
+
+instance mul_suitable (f : universal_map m n) [h : f.suitable c₁ c₂] (N : ℕ) :
+  (mul N f).suitable c₁ c₂ :=
+begin
+  intros g hg,
+  rw [universal_map.mem_support_mul] at hg,
+  rcases hg with ⟨g, hg, rfl⟩,
+  haveI := universal_map.suitable_of_mem_support f c₁ c₂ g hg,
+  apply_instance
+end
+
 end universal_map
 
 namespace data
@@ -366,52 +392,24 @@ instance comp_suitable :
   (universal_map.comp (BD.d j i) (BD.d j' j)).suitable (c_ j') (c_ i) :=
 universal_map.suitable.comp (c_ j)
 
-instance suitable_mul_left (c : ℝ≥0) :
-  BD.suitable (λ i, c * c_ i) :=
+instance suitable_mul_left (c : ℝ≥0) : BD.suitable (λ i, c * c_ i) :=
 ⟨λ i j, by apply_instance⟩
 
-instance suitable_mul_right (c : ℝ≥0) :
-  BD.suitable (λ i, c_ i * c) :=
+instance suitable_mul_right (c : ℝ≥0) : BD.suitable (λ i, c_ i * c) :=
 ⟨λ i j, by apply_instance⟩
 
-end data
+instance suitable_rescale_constants (N : ℝ≥0) : BD.suitable (rescale_constants c_ N) :=
+data.suitable_mul_right _ _ _
 
-section double
-
-instance basic_universal_map.double_suitable (f : basic_universal_map m n) [f.suitable c₁ c₂] :
-  (basic_universal_map.double f).suitable c₁ c₂ :=
+instance mul_obj_suitable (N : ℕ) : ((mul N).obj BD).suitable c_ :=
 begin
-  intros i,
-  -- now use that `double` is a block matrix, so every row/column is just a row/column of `f`
-  -- with a whole bunch of extra `0`s
-  sorry
-end
-
--- move this
-lemma universal_map.mem_support_double (f : universal_map m n) (g) :
-  g ∈ (universal_map.double f).support ↔ ∃ g', g' ∈ f.support ∧ g = basic_universal_map.double g' :=
-sorry
-
-instance universal_map.double_suitable (f : universal_map m n) [f.suitable c₁ c₂] :
-  (universal_map.double f).suitable c₁ c₂ :=
-begin
-  intros g hg,
-  simp only [data.double_d, universal_map.mem_support_double] at hg,
-  rcases hg with ⟨g, hg, rfl⟩,
-  haveI := universal_map.suitable_of_mem_support f c₁ c₂ g hg,
+  constructor,
+  intros i j,
+  dsimp [mul_obj_d],
   apply_instance
 end
 
-instance data.double_suitable (BD : data) (c_ : ℕ → ℝ≥0) [BD.suitable c_] :
-  BD.double.suitable c_ :=
-{ universal_suitable := λ i j, universal_map.double_suitable _ _ _ }
-
-instance data.pow_suitable (BD : data) (c_ : ℕ → ℝ≥0) [H : BD.suitable c_] :
-  ∀ N, (BD.pow N).suitable c_
-| 0     := H
-| (N+1) := @data.double_suitable _ _ $ data.pow_suitable _
-
-end double
+end data
 
 namespace universal_map
 
@@ -517,8 +515,7 @@ variables (BD : package) (c_ c' : ℕ → ℝ≥0) [adept BD c_ c']
 instance homotopy_mul_suitable (j i : ℕ) :
   Π N, ((BD.data.homotopy_mul BD.homotopy N).h j i).suitable
     (rescale_constants c_ (2 ^ N) j) ((c' * c_) i)
-| 0     :=
-by simpa only [pi.mul_apply, pow_zero, rescale_constants.one] using universal_map.suitable_zero _ _
+| 0     := by simpa only [pow_zero, rescale_constants.one] using universal_map.suitable_zero _ _
 | (N+1) :=
 begin
   sorry
