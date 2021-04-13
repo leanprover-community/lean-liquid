@@ -66,27 +66,4 @@ def cech_preserves_limits [∀ x, has_limits_of_shape (structured_arrow x arrow_
   limits.preserves_limits (cech : arrow C ⥤ _) :=
 adjunction.right_adjoint_preserves_limits adjunction
 
-/-
-/-- Make a functor from `arr` to `C` associated to an arrow. -/
-def arr_mk {X Y : C} (f : X ⟶ Y) : arrow_diagram ⥤ C :=
-with_terminal.lift (discrete.functor $ λ _, X) (λ _, f) (by tidy)
-
-@[simps]
-def to_arrow : augmented C ⥤ (arrow_diagram.{v} ⥤ C) :=
-(whiskering_left _ _ _).obj arrow_diagram.incl
-
--- TODO: unfold what it means for the Ran.diagram to have a limit.
-noncomputable
-def cech_nerve {X Y : C} (f : X ⟶ Y)
-  [∀ x : with_terminal (simplex_category.{v}ᵒᵖ),
-    has_limit (Ran.diagram arrow_diagram.incl (arr_mk f) x)] :
-  augmented C := Ran.loc arrow_diagram.incl (arr_mk f)
-
--- TODO: unfold what it means for C to have limits of this shape.
--- TODO: Replace `arrow_diagram ⥤ C` with `arrow C` when we have the equivalence mentioned above?
-noncomputable
-def cech [∀ x, has_limits_of_shape (structured_arrow x arrow_diagram.incl) C] :
-  (arrow_diagram.{v} ⥤ C) ⥤ augmented C := Ran arrow_diagram.incl
--/
-
 end simplicial_object
