@@ -168,13 +168,15 @@ variables {r' : ℝ≥0} [fact (0 < r')] [fact (r' ≤ 1)] (c : ℝ≥0)
 variables (M : (ProFiltPseuNormGrpWithTinv.{u} r')ᵒᵖ)
 variables (k' : ℝ≥0) (N : ℕ) [fact (1 ≤ k')] [fact (k' ≤ 2 ^ N)]
 
--- def homotopy_σπ
---   [BD.data.suitable (c' * c_)]
---   [∀ (j i : ℕ), ((BD.data.homotopy_pow BD.homotopy N).h j i).suitable (rescale_constants c_ (2 ^ N) j) ((c' * c_) i)]
---   [∀ (i : ℕ), ((data.hom_pow BD.data.σ N).f i).suitable (rescale_constants c_ (2 ^ N) i) ((c' * c_) i)]
---   [∀ (i : ℕ), ((data.hom_pow BD.data.π N).f i).suitable (rescale_constants c_ (2 ^ N) i) ((c' * c_) i)]
---  :=
--- homotopy.{u v} (data.homotopy_pow BD.data BD.homotopy N)
---   (c' * c_) (rescale_constants c_ (2^N)) r V c M
+def homotopy_σπ
+  [BD.data.suitable (c' * c_)]
+  -- the following 4 assumptions ought to be global instances in `suitable.lean`
+  [∀ (j i : ℕ), ((BD.data.homotopy_mul BD.homotopy N).h j i).suitable (rescale_constants c_ (2 ^ N) j) ((c' * c_) i)]
+  [((data.mul (2 ^ N)).obj BD.data).suitable (rescale_constants c_ (2 ^ N))]
+  [∀ (i : ℕ), universal_map.suitable (rescale_constants c_ (2 ^ N) i) ((c' * c_) i) ((BD.data.sum (2 ^ N)).f i)]
+  [∀ (i : ℕ), universal_map.suitable (rescale_constants c_ (2 ^ N) i) ((c' * c_) i) ((BD.data.proj (2 ^ N)).f i)]
+ :=
+homotopy.{u v} (data.homotopy_mul BD.data BD.homotopy N)
+  (c' * c_) (rescale_constants c_ (2^N)) r V c M
 
 end breen_deligne

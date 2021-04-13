@@ -502,15 +502,25 @@ namespace adept
 
 variables (BD : package) (c_ c' : ℕ → ℝ≥0) [adept BD c_ c']
 
-instance homotopy_pow_suitable (j i : ℕ) :
-  Π N, ((BD.data.homotopy_pow' BD.homotopy N).h j i).suitable
+-- instance homotopy_pow'_suitable (j i : ℕ) :
+--   Π N, ((BD.data.homotopy_pow' BD.homotopy N).h j i).suitable
+--     (rescale_constants c_ (2 ^ N) j) ((c' * c_) i)
+-- | 0     :=
+-- by simpa only [pi.mul_apply, pow_zero, rescale_constants.one] using universal_map.suitable_zero _ _
+-- | (N+1) :=
+-- begin
+--   refine @universal_map.suitable_add _ _ _ _ _ _ (id _) (id _),
+--   sorry,
+--   sorry
+-- end
+
+instance homotopy_mul_suitable (j i : ℕ) :
+  Π N, ((BD.data.homotopy_mul BD.homotopy N).h j i).suitable
     (rescale_constants c_ (2 ^ N) j) ((c' * c_) i)
 | 0     :=
 by simpa only [pi.mul_apply, pow_zero, rescale_constants.one] using universal_map.suitable_zero _ _
 | (N+1) :=
 begin
-  refine @universal_map.suitable_add _ _ _ _ _ _ (id _) (id _),
-  sorry,
   sorry
 end
 
@@ -519,9 +529,10 @@ end adept
 /-
 Instances that we need:
 
-  [∀ (j i : ℕ), ((BD.data.homotopy_pow BD.homotopy N).h j i).suitable (rescale_constants c_ (2 ^ N) j) ((c' * c_) i)]
-  [∀ (i : ℕ), ((data.hom_pow BD.data.σ N).f i).suitable (rescale_constants c_ (2 ^ N) i) ((c' * c_) i)]
-  [∀ (i : ℕ), ((data.hom_pow BD.data.π N).f i).suitable (rescale_constants c_ (2 ^ N) i) ((c' * c_) i)]
+  [∀ (j i : ℕ), ((BD.data.homotopy_mul BD.homotopy N).h j i).suitable (rescale_constants c_ (2 ^ N) j) ((c' * c_) i)]
+  [((data.mul (2 ^ N)).obj BD.data).suitable (rescale_constants c_ (2 ^ N))]
+  [∀ (i : ℕ), universal_map.suitable (rescale_constants c_ (2 ^ N) i) ((c' * c_) i) ((BD.data.sum (2 ^ N)).f i)]
+  [∀ (i : ℕ), universal_map.suitable (rescale_constants c_ (2 ^ N) i) ((c' * c_) i) ((BD.data.proj (2 ^ N)).f i)]
 
 -/
 
