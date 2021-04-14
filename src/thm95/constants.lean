@@ -92,8 +92,11 @@ abbreviation ε : ℝ≥0 := normed_spectral.ε m (K₁ m)
 
 instance ε_pos : fact (0 < ε m) := ⟨normed_spectral.ε_pos _ _⟩
 
-/-- `k' c' m` is the maximum of `k₀ m` and the constants `c' 0`, `c' 1`, ..., `c' m` -/
-def k' : ℝ≥0 := max (k₀ m) $ (finset.range (m+1)).sup c'
+/-- `k' c' m` is the maximum of `k₀ m` and the constants `c' 0`, `c' 1`, ..., `c' m`, `c' (m+1)` -/
+def k' : ℝ≥0 := max (k₀ m) $ (finset.range (m+2)).sup c'
+
+lemma c'_le_k' {i : ℕ} (hi : i ≤ m+1) : c' i ≤ k' c' m :=
+le_max_iff.mpr $ or.inr $ finset.le_sup $ finset.mem_range.mpr $ nat.lt_succ_iff.mpr hi
 
 instance one_le_k' : fact (1 ≤ k' c' m) :=
 ⟨le_trans (fact.out _) $ le_max_left _ _⟩
@@ -153,6 +156,8 @@ sorry
 lemma two_div_k'_mul_r_div_r'_pow_b_le :
   (2 / k' c' m) * (r / r') ^ (b c_ r r' m) ≤ ε m :=
 sorry
+
+instance k'_le_two_pow_N : fact (k' c' m ≤ 2 ^ N₂ c_ c' r r' m) := sorry
 
 include BD c_ r r' m
 

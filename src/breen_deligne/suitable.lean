@@ -564,6 +564,10 @@ instance sum_suitable (i N : ℕ) (N' : ℝ≥0) [hN' : fact (N'⁻¹ ≤ N⁻¹
 instance fact_two_pow_inv_le_one (N : ℕ) : fact ((2 ^ N : ℝ≥0)⁻¹ ≤ 1) :=
 ⟨le_trans (data.fact_two_pow_inv_le_two_pow_inv N).1 $ fact.out _⟩
 
+instance proj_suitable_strict (i N : ℕ) :
+  universal_map.suitable c c ((BD.proj N).f i) :=
+universal_map.proj_suitable _ _ _
+
 instance proj_suitable (i N : ℕ) (N' : ℝ≥0) [fact (N'⁻¹ ≤ 1)] :
   universal_map.suitable (rescale_constants c_ N' i) (c_ i) ((BD.proj N).f i) :=
 begin

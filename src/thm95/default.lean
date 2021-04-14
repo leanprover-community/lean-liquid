@@ -17,15 +17,15 @@ open polyhedral_lattice opposite
 
 /- === Warning: with `BD.suitable` the rows are not admissible, we need `BD.very_suitable` === -/
 
-open thm95.universal_constants system_of_double_complexes category_theory
+open thm95.universal_constants system_of_double_complexes category_theory breen_deligne
 open ProFiltPseuNormGrpWithTinv (of)
 
 section
 
-variables (BD : breen_deligne.package)
+variables (BD : package)
 variables (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)]
 variables (V : NormedGroup) [normed_with_aut r V]
-variables (c_ c' : ℕ → ℝ≥0) [BD.data.very_suitable r r' c_] [breen_deligne.package.adept BD c_ c']
+variables (c_ c' : ℕ → ℝ≥0) [BD.data.very_suitable r r' c_] [package.adept BD c_ c']
 variables (M : ProFiltPseuNormGrpWithTinv r')
 variables (m : ℕ)
 variables (Λ : PolyhedralLattice.{0})
@@ -64,30 +64,69 @@ begin
 end
 .
 
-/-
-#check breen_deligne.homotopy_σπ
-
-(BD : breen_deligne.package) (c_ c' : ℕ → ℝ≥0)
- [_inst_1 : BD.data.suitable c_] [_inst_2 : breen_deligne.package.adept BD c_ c']
-  (r : ℝ≥0) (V : NormedGroup) [_inst_3 : normed_with_aut ↑r V]
-   [_inst_4 : fact (0 < r)] {r' : ℝ≥0} [_inst_5 : fact (0 < r')] [_inst_6 : fact (r' ≤ 1)]
- (c : ℝ≥0) (M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ) (N : ℕ)
--/
-
--- this seems to be instant
--- #check λ (N : ℕ), (breen_deligne.BD_system_map (BD.data.sum (2 ^ N))
---       (λ i, (k' c' m) * c_ i) (rescale_constants c_ (2 ^ N)) r V)
-
 def NSH_aux_type (N : ℕ) (M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ) :=
 normed_spectral_homotopy
-  ((breen_deligne.BD_system_map (BD.data.sum (2^N)) c_ (rescale_constants c_ (2^N)) r V).app M)
+  ((BD_system_map (BD.data.sum (2^N)) c_ (rescale_constants c_ (2^N)) r V).app M)
   m (k' c' m) (ε m) (c₀ Λ) (H BD c_ r r' m)
 
-def NSH_aux (N : ℕ) (M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ) :
+section
+
+variables {BD r r' V c_ c' m}
+
+lemma NSH_h_res' {c x : ℝ≥0} {q' : ℕ} (hqm : q' ≤ m+1) :
+  c * (c' q' * x) ≤ k' c' m * c * x :=
+calc c * (c' q' * x)
+    = c' q' * (c * x) : mul_left_comm _ _ _
+... ≤ k' c' m * (c * x) : mul_le_mul' (c'_le_k' _ _ hqm) le_rfl
+... = k' c' m * c * x : (mul_assoc _ _ _).symm
+
+def NSH_h_res {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ} (c : ℝ≥0) {q' : ℕ} (hqm : q' ≤ m+1) :
+  ((BD.data.complex c_ r V r' (k' c' m * c)).obj M).X q' ⟶
+    ((BD.data.complex (c' * c_) r V r' c).obj M).X q' :=
+(@CLCFPTinv.res r V _ _ r' _ _ _ _ _ ⟨NSH_h_res' hqm⟩).app M
+
+instance NSH_δ_res' (N i : ℕ) (c : ℝ≥0) [hN : fact (k' c' m ≤ 2 ^ N)] :
+  fact (k' c' m * c * rescale_constants c_ (2 ^ N) i ≤ c * c_ i) :=
+begin
+  refine ⟨_⟩,
+  calc k' c' m * c * (c_ i * (2 ^ N)⁻¹)
+     = (k' c' m * (2 ^ N)⁻¹) * (c * c_ i) : by ring1
+  ... ≤ 1 * (c * c_ i) : mul_le_mul' _ le_rfl
+  ... = c * c_ i : one_mul _,
+  apply mul_inv_le_of_le_mul (pow_ne_zero _ $ @two_ne_zero ℝ≥0 _ _),
+  rw one_mul,
+  exact hN.1
+end
+
+def NSH_δ_res {BD : data} [BD.suitable c_]
+  (N : ℕ) [fact (k' c' m ≤ 2 ^ N)] (c : ℝ≥0) {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ} :
+  ((BD.system c_ r V r').obj M).obj (op c) ⟶
+    ((BD.system (rescale_constants c_ (2 ^ N)) r V r').obj M).obj (op (k' c' m * c)) :=
+{ f := λ i, (@CLCFPTinv.res r V _ _ r' _ _ _ _ _ (NSH_δ_res' _ _ _)).app M,
+  comm :=
+  begin
+    intros i j, symmetry,
+    dsimp [data.system_obj, data.complex],
+    refine nat_trans.congr_app (universal_map.res_comp_eval_CLCFPTinv r V r' _ _ _ _ _) M,
+  end }
+
+end
+
+def NSH_aux (N : ℕ) [fact (k' c' m ≤ 2 ^ N)] (M) :
   NSH_aux_type BD r r' V c_ c' m Λ N M :=
-{ h := sorry,
-  h_bound_by := sorry,
-  δ := sorry,
+{ h := λ q q' c,
+    if hqm : q' ≤ m + 1
+    then NSH_h_res c hqm ≫ (homotopy_σπ BD c_ c' r V c M N).h q' q
+    else 0,
+  h_bound_by :=
+  begin
+    rintro q q' hqm rfl c hc,
+    rw [dif_pos (nat.succ_le_succ hqm)],
+    refine normed_group_hom.bound_by.comp' 1 _ _ (mul_one _).symm _ _,
+    swap, { exact (CLCFPTinv₂.res_norm_noninc r V r' _ _ _ _ _ _).bound_by_one },
+    sorry
+  end,
+  δ := λ c, ((BD_system_map (BD.data.proj (2^N)) c_ c_ r V).app M).app (op c) ≫ NSH_δ_res N c,
   hδ := sorry,
   δ_bound_by := sorry }
 .
@@ -96,7 +135,7 @@ def NSC_htpy :
   normed_spectral_homotopy
     ((thm95.double_complex BD.data c_ r r' V Λ M (N c_ c' r r' m)).row_map 0 1)
       m (k' c' m) (ε m) (c₀ Λ) (H BD c_ r r' m) :=
-(NSH_aux BD r r' V c_ c' m Λ (N c_ c' r r' m) (op $ (Hom ↥Λ ↥M))).of_iso _ _ _
+(NSH_aux BD r r' V c_ c' m Λ (N₂ c_ c' r r' m) (op $ (Hom ↥Λ ↥M))).of_iso _ _ _
   (iso.refl _) sorry (λ _ _ _, rfl) sorry sorry
 
 def NSC (IH : ∀ m' < m, thm95.IH BD r r' V c_ c' M m') :
