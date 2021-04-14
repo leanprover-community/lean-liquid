@@ -65,7 +65,7 @@ end truncate
 
 open opposite
 
-structure normed_spectral_homotopy (row₀ row₁ : system_of_complexes.{u}) (d : row₀ ⟶ row₁)
+structure normed_spectral_homotopy {row₀ row₁ : system_of_complexes.{u}} (d : row₀ ⟶ row₁)
   (m : ℕ) (k' ε : ℝ≥0) [fact (1 ≤ k')] (c₀ H : ℝ≥0) [fact (0 < H)] :=
 (h : Π (q : ℕ) {q' : ℕ} {c}, row₀ (k' * c) q' ⟶ row₁ c q)
 (h_bound_by : ∀ (q q' : ℕ) (hq : q ≤ m) (hq' : q+1 = q') (c) [fact (c₀ ≤ c)],
@@ -78,13 +78,13 @@ structure normed_spectral_homotopy (row₀ row₁ : system_of_complexes.{u}) (d 
 
 def normed_spectral_homotopy.of_iso {row₀ row₁ : system_of_complexes.{u}} {d : row₀ ⟶ row₁}
   {m : ℕ} {k' ε : ℝ≥0} [fact (1 ≤ k')] {c₀ H : ℝ≥0} [fact (0 < H)]
-  (NSH : normed_spectral_homotopy row₀ row₁ d m k' ε c₀ H)
+  (NSH : normed_spectral_homotopy d m k' ε c₀ H)
   (row'₀ row'₁ : system_of_complexes.{u}) (d' : row'₀ ⟶ row'₁)
   (φ₀ : row₀ ≅ row'₀) (φ₁ : row₁ ≅ row'₁)
   (hφ₀ : ∀ c i (x : row'₀ c i), ∥φ₀.inv x∥ = ∥x∥)
   (hφ₁ : ∀ c i (x : row₁ c i), ∥φ₁.hom x∥ = ∥x∥)
   (hcomm : d' = φ₀.inv ≫ d ≫ φ₁.hom) :
-  normed_spectral_homotopy row'₀ row'₁ d' m k' ε c₀ H :=
+  normed_spectral_homotopy d' m k' ε c₀ H :=
 { h := λ q q' c, φ₀.inv.apply ≫ NSH.h q ≫ φ₁.hom.apply,
   δ := λ c, φ₀.inv.app (op $ c) ≫ NSH.δ c ≫ φ₁.hom.app (op $ k' * c),
   h_bound_by :=
@@ -126,7 +126,7 @@ structure normed_spectral_conditions (M : system_of_double_complexes.{u})
   (m : ℕ) (k K k' ε : ℝ≥0) [fact (1 ≤ k)] [fact (1 ≤ k')] (c₀ H : ℝ≥0) [fact (0 < H)] :=
 (row_exact : 0 < m → ∀ i ≤ m + 1, (M.row i).is_weak_bounded_exact k K (m-1) c₀)
 (col_exact : ∀ j ≤ m, (M.col j).is_weak_bounded_exact k K m c₀)
-(htpy      : normed_spectral_homotopy (M.row 0) (M.row 1) (M.row_map 0 1) m k' ε c₀ H)
+(htpy      : normed_spectral_homotopy (M.row_map 0 1) m k' ε c₀ H)
 -- ergonomics: we bundle this assumption, instead of passing it around separately
 (admissible : M.admissible)
 

@@ -144,6 +144,26 @@ lemma suitable_of_le [hf : f.suitable c₂ c₃] (h1 : c₁ ≤ c₂) (h2 : c₃
   f.suitable c₁ c₄ :=
 hf.le _ _ _ _ _ h1 h2
 
+instance suitable_mul_left_one_le (f : basic_universal_map m n)
+  [h : f.suitable c₁ c₂] [fact (1 ≤ c)] :
+  f.suitable c₁ (c * c₂) :=
+h.le _ _ _ _ _ le_rfl $ fact.out _
+
+instance suitable_mul_right_one_le (f : basic_universal_map m n)
+  [h : f.suitable c₁ c₂] [fact (1 ≤ c)] :
+  f.suitable c₁ (c₂ * c) :=
+h.le _ _ _ _ _ le_rfl $ fact.out _
+
+instance suitable_mul_left_le_one (f : basic_universal_map m n)
+  [h : f.suitable c₁ c₂] [fact (c ≤ 1)] :
+  f.suitable (c * c₁) c₂ :=
+h.le _ _ _ _ _ (fact.out _) le_rfl
+
+instance suitable_mul_right_le_one (f : basic_universal_map m n)
+  [h : f.suitable c₁ c₂] [fact (c ≤ 1)] :
+  f.suitable (c₁ * c) c₂ :=
+h.le _ _ _ _ _ (fact.out _) le_rfl
+
 instance suitable_add (f g : basic_universal_map m n) (c cf cg : ℝ≥0)
   [hf : f.suitable c cf] [hg : g.suitable c cg] :
   (f + g).suitable c (cf + cg) :=
@@ -388,6 +408,26 @@ instance suitable_mul_left (f : universal_map m n) [h : f.suitable c₁ c₂] :
 instance suitable_mul_right (f : universal_map m n) [h : f.suitable c₁ c₂] :
   f.suitable (c₁ * c) (c₂ * c) :=
 by { rw [mul_comm _ c, mul_comm _ c], exact universal_map.suitable_mul_left _ _ _ _ }
+
+instance suitable_mul_left_one_le (f : universal_map m n)
+  [h : f.suitable c₁ c₂] [fact (1 ≤ c)] :
+  f.suitable c₁ (c * c₂) :=
+h.le _ _ _ _ le_rfl $ fact.out _
+
+instance suitable_mul_right_one_le (f : universal_map m n)
+  [h : f.suitable c₁ c₂] [fact (1 ≤ c)] :
+  f.suitable c₁ (c₂ * c) :=
+h.le _ _ _ _ le_rfl $ fact.out _
+
+instance suitable_mul_left_le_one (f : universal_map m n)
+  [h : f.suitable c₁ c₂] [fact (c ≤ 1)] :
+  f.suitable (c * c₁) c₂ :=
+h.le _ _ _ _ (fact.out _) le_rfl
+
+instance suitable_mul_right_le_one (f : universal_map m n)
+  [h : f.suitable c₁ c₂] [fact (c ≤ 1)] :
+  f.suitable (c₁ * c) c₂ :=
+h.le _ _ _ _ (fact.out _) le_rfl
 
 instance suitable_id : (id n).suitable c c :=
 λ g hg, by { simp only [id, finset.mem_singleton, support_of] at hg, subst g, apply_instance }
