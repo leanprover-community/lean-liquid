@@ -291,18 +291,10 @@ begin
   norm_cast,
 end
 
-lemma nat_abs_add_eq_add_nat_abs_iff (a b : ℤ) :
+lemma nat_abs_add_eq_iff (a b : ℤ) :
   int.nat_abs (a + b) = int.nat_abs a + int.nat_abs b ↔ (0 ≤ a ∧ 0 ≤ b ∨ a ≤ 0 ∧ b ≤ 0) :=
 nat_abs_add_eq_iff_nat_abs_mul_eq.trans ((int.nat_abs_eq_self _).trans mul_nonneg_iff)
 --  rw [nat_abs_add_eq_iff_nat_abs_mul_eq, int.nat_abs_eq_self],exact mul_nonneg_iff,
-
-lemma nat_smul_old (a b : ℕ) : a • (b : ℤ) = ((a • b : ℕ) : ℤ) :=
-by simp [(•)]
-
-/-
-lemma nat_smul (a b : ℕ) : a • (b : ℤ) = ((a • b : ℕ) : ℤ) :=
-by simp only [has_scalar.smul, nsmul_eq_mul, int.nat_cast_eq_coe_nat, int.coe_nat_mul]
--/
 
 lemma nat_smul_nat_abs (a : ℕ) (b : ℤ) : a • b.nat_abs = (a • b).nat_abs :=
 begin
@@ -320,15 +312,10 @@ lemma lem97' [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (hN : 0 < N) (l : ι 
 begin
   obtain ⟨A, hA⟩ := lem97 hΛ N hN l,
   refine ⟨A, λ x, _⟩,
-  rcases hA x with ⟨x', mem_x', y, hy, hx'⟩,
-  use [x', mem_x', y, hy],
-  intro i,
+  rcases hA x with ⟨x', mem_x', y, rfl, hx'⟩,
+  refine ⟨x', mem_x', y, rfl, λ i, _⟩,
   specialize hx' i,
-  subst hy,
-  rw ← nat_abs_add_eq_add_nat_abs_iff at hx',
-  simp at ⊢ hx',
-  rw [add_comm, hx', add_comm],
-  simp only [add_left_inj, int.coe_nat_add],
-  rw ← nat_smul_nat_abs,
-  refl,
+  rw [← nat_abs_add_eq_iff, add_sub_cancel, add_monoid_hom.coe_smul, pi.smul_apply] at hx',
+  rw [add_monoid_hom.add_apply, add_monoid_hom.coe_smul, pi.smul_apply, add_comm, hx', add_comm,
+    add_left_inj, ← nat_smul_nat_abs, smul_eq_mul],
 end
