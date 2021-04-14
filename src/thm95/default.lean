@@ -78,10 +78,13 @@ end
 -- #check λ (N : ℕ), (breen_deligne.BD_system_map (BD.data.sum (2 ^ N))
 --       (λ i, (k' c' m) * c_ i) (rescale_constants c_ (2 ^ N)) r V)
 
+def NSH_aux_type (N : ℕ) (M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ) :=
+normed_spectral_homotopy
+  ((breen_deligne.BD_system_map (BD.data.sum (2^N)) c_ (rescale_constants c_ (2^N)) r V).app M)
+  m (k' c' m) (ε m) (c₀ Λ) (H BD c_ r r' m)
+
 def NSH_aux (N : ℕ) (M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ) :
-  normed_spectral_homotopy
-    ((breen_deligne.BD_system_map (BD.data.sum (2^N)) c_ (rescale_constants c_ (2^N)) r V).app M)
-    m (k' c' m) (ε m) (c₀ Λ) (H BD c_ r r' m) :=
+  NSH_aux_type BD r r' V c_ c' m Λ N M :=
 { h := sorry,
   h_bound_by := sorry,
   δ := sorry,
@@ -93,11 +96,8 @@ def NSC_htpy :
   normed_spectral_homotopy
     ((thm95.double_complex BD.data c_ r r' V Λ M (N c_ c' r r' m)).row_map 0 1)
       m (k' c' m) (ε m) (c₀ Λ) (H BD c_ r r' m) :=
-(NSH_aux BD r r' V c_ c' m Λ (N c_ c' r r' m) (op $ M)).of_iso _ _ _
-begin
-  sorry
-end
-sorry sorry sorry sorry
+(NSH_aux BD r r' V c_ c' m Λ (N c_ c' r r' m) (op $ (Hom ↥Λ ↥M))).of_iso _ _ _
+  (iso.refl _) sorry (λ _ _ _, rfl) sorry sorry
 
 def NSC (IH : ∀ m' < m, thm95.IH BD r r' V c_ c' M m') :
   normed_spectral_conditions (thm95.double_complex BD.data c_ r r' V Λ M (N c_ c' r r' m)) m
