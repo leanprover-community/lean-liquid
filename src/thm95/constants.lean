@@ -95,17 +95,17 @@ instance ε_pos : fact (0 < ε m) := ⟨normed_spectral.ε_pos _ _⟩
 /-- `k' c' m` is the maximum of `k₀ m` and the constants `c' 0`, `c' 1`, ..., `c' m` -/
 def k' : ℝ≥0 := max (k₀ m) $ (finset.range (m+1)).sup c'
 
-instance one_le_k' : fact (1 ≤ k' c_ m) :=
+instance one_le_k' : fact (1 ≤ k' c' m) :=
 ⟨le_trans (fact.out _) $ le_max_left _ _⟩
 
-instance k₀_le_k' : fact (normed_spectral.k₀ m (k₁ m) ≤ k' c_ m) := ⟨le_max_left _ _⟩
+instance k₀_le_k' : fact (normed_spectral.k₀ m (k₁ m) ≤ k' c' m) := ⟨le_max_left _ _⟩
 
 -- in the PDF `b` is *positive*, we might need to make that explicit
-lemma b_exists : ∃ b : ℕ, 2 * (k' c_ m) * (r / r') ^ b ≤ (ε m) :=
+lemma b_exists : ∃ b : ℕ, 2 * (k' c' m) * (r / r') ^ b ≤ (ε m) :=
 begin
-  have : 0 < 2 * (k' c_ m) := mul_pos zero_lt_two (fact.out _),
+  have : 0 < 2 * (k' c' m) := mul_pos zero_lt_two (fact.out _),
   simp only [nnreal.mul_le_iff_le_inv this.ne'],
-  have h₁ : 0 < ((2 * k' c_ m)⁻¹ * ε m : ℝ),
+  have h₁ : 0 < ((2 * k' c' m)⁻¹ * ε m : ℝ),
   { refine mul_pos (inv_pos.mpr this) _,
     rw [nnreal.coe_pos],
     exact fact.out _ },
@@ -118,12 +118,12 @@ begin
   exact_mod_cast hb.le,
 end
 
-/-- `b c_ r r' m` is the smallest `b` such that `2 * (k' c_ m) * (r / r') ^ b ≤ (ε m)` -/
+/-- `b c_ r r' m` is the smallest `b` such that `2 * (k' c' m) * (r / r') ^ b ≤ (ε m)` -/
 def b : ℕ := nat.find (b_exists c_ r r' m)
 
-lemma N₂_exists : ∃ N₂ : ℕ, (k' c_ m) / (2 ^ N₂) ≤ r' ^ (b c_ r r' m) :=
+lemma N₂_exists : ∃ N₂ : ℕ, (k' c' m) / (2 ^ N₂) ≤ r' ^ (b c_ r r' m) :=
 begin
-  suffices : ∃ N₂ : ℕ, ((2⁻¹ : ℝ≥0) ^ N₂ : ℝ) < (k' c_ m)⁻¹ * r' ^ (b c_ r r' m),
+  suffices : ∃ N₂ : ℕ, ((2⁻¹ : ℝ≥0) ^ N₂ : ℝ) < (k' c' m)⁻¹ * r' ^ (b c_ r r' m),
   { rcases this with ⟨N₂, h⟩,
     use N₂,
     rw [← div_lt_iff', ← nnreal.coe_pow, inv_pow', nnreal.coe_inv, inv_div_left, mul_inv',
@@ -137,21 +137,21 @@ begin
 end
 
 /-- `N₂ c_ r r' m` is the smallest `N₂` such that `N = 2 ^ N₂` satisfies
-`(k' c_ m) / N ≤ r' ^ (b c_ r r' m)` -/
-def N₂ : ℕ := nat.find (N₂_exists c_ r r' m)
+`(k' c' m) / N ≤ r' ^ (b c_ r r' m)` -/
+def N₂ : ℕ := nat.find (N₂_exists c_ c' r r' m)
 
 /-- `N c_ r r' m = 2 ^ N₂ c_ r r' m` is the smallest `N` that satisfies
-`(k' c_ m) / N ≤ r' ^ (b c_ r r' m)` -/
-def N : ℕ := 2 ^ N₂ c_ r r' m
+`(k' c' m) / N ≤ r' ^ (b c_ r r' m)` -/
+def N : ℕ := 2 ^ N₂ c_ c' r r' m
 
-instance N_pos : fact (0 < N c_ r r' m) := ⟨pow_pos zero_lt_two _⟩
+instance N_pos : fact (0 < N c_ c' r r' m) := ⟨pow_pos zero_lt_two _⟩
 
 lemma r_pow_b_mul_N_le :
-  r ^ (b c_ r r' m) * (N c_ r r' m) ≤ (2 / k' c_ m) * (r / r') ^ (b c_ r r' m) :=
+  r ^ (b c_ r r' m) * (N c_ c' r r' m) ≤ (2 / k' c' m) * (r / r') ^ (b c_ r r' m) :=
 sorry
 
 lemma two_div_k'_mul_r_div_r'_pow_b_le :
-  (2 / k' c_ m) * (r / r') ^ (b c_ r r' m) ≤ ε m :=
+  (2 / k' c' m) * (r / r') ^ (b c_ r r' m) ≤ ε m :=
 sorry
 
 include BD c_ r r' m
@@ -165,15 +165,15 @@ omit BD c_ r r' m
 
 instance H_pos : fact (0 < H BD c_ r r' m) := sorry
 
-def k : ℝ≥0 := k' c_ m * k' c_ m
+def k : ℝ≥0 := k' c' m * k' c' m
 
-instance one_le_k : fact (1 ≤ k c_ m) := by { delta k, apply_instance }
+instance one_le_k : fact (1 ≤ k c' m) := by { delta k, apply_instance }
 
 def K : ℝ≥0 := 2 * normed_spectral.K₀ m (K₁ m) * H BD c_ r r' m
 
 instance one_le_K : fact (1 ≤ K BD c_ r r' m) := sorry
 
-instance k_le_k₁ : fact (k c_ (m - 1) ≤ k₁ m) := sorry
+instance k_le_k₁ : fact (k c' (m - 1) ≤ k₁ m) := sorry
 
 instance K_le_K₁ : fact (K BD c_ r r' (m - 1) ≤ K₁ m) := sorry
 
