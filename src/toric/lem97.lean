@@ -1,6 +1,7 @@
 import algebra.group.basic
 import analysis.convex.cone
 import linear_algebra.dual
+import algebra.ordered_ring
 
 import polyhedral_lattice.basic
 import toric.is_inj_nonneg
@@ -261,8 +262,13 @@ begin
         using hx' } }
 end
 
+lemma os.monotone_pow {R : Type*} [ordered_semiring R] (k : ℕ) (R0 : ∀ r : R, 0 ≤ r) :
+  monotone (λ n : R, n ^ k) :=
+λ x y xy, pow_le_pow_of_le_left (R0 _) xy k
+
 lemma nat.monotone_pow (k : ℕ) : monotone (λ n : ℕ, n ^ k) :=
-λ x y xy, pow_le_pow_of_le_left (nat.zero_le x) xy k
+os.monotone_pow k nat.zero_le
+--λ x y xy, pow_le_pow_of_le_left x.zero_le xy k
 
 lemma nat.strict_mono_pow {k : ℕ} (k0 : 0 < k) : strict_mono (λ n : ℕ, n ^ k) :=
 λ x y xy, pow_lt_pow_of_lt_left xy x.zero_le k0
