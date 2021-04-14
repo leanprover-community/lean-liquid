@@ -89,6 +89,19 @@ begin
     exact (int.nat_abs_add_le _ _).trans (add_le_add le_rfl IH) }
 end
 
+instance suitable_id : (id n).suitable c c :=
+begin
+  intro i,
+  calc _ ≤ 1 * c : mul_le_mul' (le_of_eq _) le_rfl
+     ... = c : one_mul c,
+  simp only [id, int.nat_abs],
+  rw [finset.sum_eq_single i],
+  { simp only [matrix.one_apply_eq, nat.cast_one, int.nat_abs_one] },
+  { rintro j - hj,
+    simp only [int.nat_abs_eq_zero, matrix.one_apply_ne' hj, nat.cast_eq_zero, one_ne_zero] },
+  { intro h, exact (h $ finset.mem_univ _).elim }
+end
+
 -- this cannot be an instance, because c₂ cannot be inferred
 lemma suitable_comp {g : basic_universal_map m n} {f : basic_universal_map l m}
   {c₁ : ℝ≥0} (c₂ : ℝ≥0) {c₃ : ℝ≥0}
@@ -120,6 +133,9 @@ instance zero_suitable : (0 : basic_universal_map m n).suitable c₁ c₂ :=
 λ i, by simp only [nat.cast_zero, zero_mul, zero_le', finset.sum_const_zero,
           matrix.zero_apply, int.nat_abs_zero]
 
+instance suitable_zero_left (f : basic_universal_map m n) (c : ℝ≥0) : f.suitable 0 c :=
+λ j, by { rw [mul_zero], exact zero_le' }
+
 lemma suitable.le (hf : f.suitable c₂ c₃) (h1 : c₁ ≤ c₂) (h2 : c₃ ≤ c₄) :
   f.suitable c₁ c₄ :=
 λ j, (mul_le_mul' le_rfl h1).trans ((hf j).trans h2)
@@ -128,7 +144,7 @@ lemma suitable_of_le [hf : f.suitable c₂ c₃] (h1 : c₁ ≤ c₂) (h2 : c₃
   f.suitable c₁ c₄ :=
 hf.le _ _ _ _ _ h1 h2
 
-lemma suitable_add (f g : basic_universal_map m n) (c cf cg : ℝ≥0)
+instance suitable_add (f g : basic_universal_map m n) (c cf cg : ℝ≥0)
   [hf : f.suitable c cf] [hg : g.suitable c cg] :
   (f + g).suitable c (cf + cg) :=
 begin
@@ -142,6 +158,18 @@ begin
     rw [← nat.cast_add, nat.cast_le],
     apply int.nat_abs_add_le, },
   { rw add_mul, apply add_le_add (hf i) (hg i) }
+end
+
+instance suitable_sum {ι : Type*} (s : finset ι) (f : ι → basic_universal_map m n)
+  {c : ℝ≥0} {c' : ι → ℝ≥0}
+  [hf : ∀ i, (f i).suitable c (c' i)] :
+  (∑ i in s, f i).suitable c (∑ i in s, c' i) :=
+begin
+  classical,
+  apply finset.induction_on s,
+  { simp only [finset.sum_empty], apply_instance },
+  { intros i s his IH,
+    simp only [finset.sum_insert his], resetI, apply_instance }
 end
 
 instance π₁_suitable (c : ℝ≥0) :
@@ -191,14 +219,61 @@ begin
 end
 .
 
-instance basic_universal_map.mul_suitable (N : ℕ) (f : basic_universal_map m n) [f.suitable c₁ c₂] :
+instance proj_suitable (N : ℕ) (k : fin N) (c : ℝ≥0) : (proj n k).suitable c c :=
+begin
+  intro i,
+  apply le_of_eq,
+  dsimp [proj, matrix.kronecker, proj_aux],
+  rw [finset.sum_eq_single (fin_prod_fin_equiv (k, i))],
+  { simp only [equiv.symm_apply_apply, if_pos rfl, matrix.one_apply_eq,
+      nat.cast_one, int.nat_abs_one, one_mul] },
+  { rintro j - hj,
+    generalize hj' : fin_prod_fin_equiv.symm j = j',
+    rw [equiv.symm_apply_eq] at hj', subst j,
+    cases j' with a b,
+    rw [matrix.one_apply, boole_mul, ← ite_and],
+    simpa only [int.nat_abs_eq_zero, ite_eq_right_iff, nat.cast_eq_zero, one_ne_zero,
+      equiv.apply_eq_iff_eq, prod.mk.inj_iff, ne.def, @eq_comm _ b] using hj },
+  { intro h, exact (h $ finset.mem_univ _).elim }
+end
+
+instance mul_suitable (N : ℕ) (f : basic_universal_map m n) [hf : f.suitable c₁ c₂] :
   (basic_universal_map.mul N f).suitable c₁ c₂ :=
 begin
   intros i,
-  -- now use that `mul` is a kronecker product with `1`,
-  -- so every row/column is just a row/column of `f`
-  -- with a whole bunch of extra `0`s
-  sorry
+  refine (le_of_eq _).trans (hf $ (fin_prod_fin_equiv.symm i).2),
+  congr' 1,
+  rw [← fin_prod_fin_equiv.sum_comp, ← finset.univ_product_univ, finset.sum_product,
+    finset.sum_comm],
+  apply fintype.sum_congr,
+  intro j,
+  dsimp [mul, matrix.kronecker],
+  rw finset.sum_eq_single (fin_prod_fin_equiv.symm i).1,
+  { congr' 2,
+    simp only [one_mul, equiv.symm_apply_apply, matrix.one_apply_eq] },
+  { rintro k - hk,
+    simp only [equiv.symm_apply_apply, int.nat_abs_eq_zero, nat.cast_eq_zero, mul_eq_zero,
+      matrix.one_apply_ne' hk, eq_self_iff_true, true_or] },
+  { intro h, exact (h $ finset.mem_univ _).elim }
+end
+.
+
+instance one_mul_hom_suitable : (one_mul_hom n).suitable c c :=
+by { rw one_mul_hom_eq_proj, apply_instance }
+
+instance mul_mul_inv_suitable (k : ℕ) : (mul_mul_inv m n k).suitable c c :=
+begin
+  intro i,
+  calc _ ≤ 1 * c : mul_le_mul' (le_of_eq _) le_rfl
+     ... = c : one_mul c,
+  dsimp only [mul_mul_inv],
+  simp only [matrix.reindex_linear_equiv_apply, matrix.reindex_apply, matrix.minor_apply,
+    matrix.one_apply, equiv.eq_symm_apply],
+  rw [finset.sum_eq_single, if_pos rfl, int.nat_abs_one, nat.cast_one],
+  { rintro j - hj,
+    rw [if_neg, int.nat_abs_zero, nat.cast_zero],
+    exact hj.symm },
+  { intro h, exact (h $ finset.mem_univ _).elim }
 end
 
 end basic_universal_map
@@ -270,6 +345,9 @@ end
 instance suitable_zero : (0 : universal_map m n).suitable c₁ c₂ :=
 (suitable_free_predicate c₁ c₂).zero
 
+instance suitable_zero_left (f : universal_map m n) (c : ℝ≥0) : f.suitable 0 c :=
+λ g hg, by apply_instance
+
 instance suitable_neg (f : universal_map m n) (c₁ c₂ : ℝ≥0) [h : f.suitable c₁ c₂] :
   suitable c₁ c₂ (-f) :=
 (suitable_free_predicate c₁ c₂).neg h
@@ -282,6 +360,17 @@ instance suitable_add {f g : universal_map m n} {c₁ c₂ : ℝ≥0}
   [hf : f.suitable c₁ c₂] [hg : g.suitable c₁ c₂] :
   suitable c₁ c₂ (f + g) :=
 (suitable_free_predicate c₁ c₂).add hf hg
+
+instance suitable_sum {ι : Type*} (s : finset ι) (f : ι → universal_map m n) {c₁ c₂ : ℝ≥0}
+  [hf : ∀ i, (f i).suitable c₁ c₂] :
+  (∑ i in s, f i).suitable c₁ c₂ :=
+begin
+  classical,
+  apply finset.induction_on s,
+  { simp only [finset.sum_empty], apply_instance },
+  { intros i s his IH,
+    simp only [finset.sum_insert his], resetI, apply_instance }
+end
 
 instance suitable_sub {f g : universal_map m n} {c₁ c₂ : ℝ≥0}
   [hf : f.suitable c₁ c₂] [hg : g.suitable c₁ c₂] :
@@ -299,6 +388,9 @@ instance suitable_mul_left (f : universal_map m n) [h : f.suitable c₁ c₂] :
 instance suitable_mul_right (f : universal_map m n) [h : f.suitable c₁ c₂] :
   f.suitable (c₁ * c) (c₂ * c) :=
 by { rw [mul_comm _ c, mul_comm _ c], exact universal_map.suitable_mul_left _ _ _ _ }
+
+instance suitable_id : (id n).suitable c c :=
+λ g hg, by { simp only [id, finset.mem_singleton, support_of] at hg, subst g, apply_instance }
 
 -- this cannot be an instance, because c₂ cannot be inferred
 lemma suitable.comp {g : universal_map m n} {f : universal_map l m} {c₁ : ℝ≥0} (c₂ : ℝ≥0)
@@ -329,8 +421,7 @@ begin
     resetI, apply_instance }
 end
 
-instance σ_suitable (c : ℝ≥0) (n : ℕ) :
-  (σ n).suitable (c * 2⁻¹) c :=
+instance σ_suitable (c : ℝ≥0) (n : ℕ) : (σ n).suitable (c * 2⁻¹) c :=
 begin
   refine @universal_map.suitable_of _ _ _ _ _ (_root_.id _),
   have : c = c * 2⁻¹ + c * 2⁻¹,
@@ -341,20 +432,32 @@ begin
   apply basic_universal_map.suitable_add
 end
 
-instance π_suitable (c : ℝ≥0) (n : ℕ) :
-  (π n).suitable c c :=
+instance π_suitable (c : ℝ≥0) (n : ℕ) : (π n).suitable c c :=
 universal_map.suitable_add
 
--- move this
-lemma universal_map.mem_support_mul (N : ℕ) (f : universal_map m n) (g) :
-  g ∈ (universal_map.mul N f).support ↔ ∃ g', g' ∈ f.support ∧ g = basic_universal_map.mul N g' :=
-sorry
+instance sum_suitable (c : ℝ≥0) (n N : ℕ) : (sum n N).suitable (c * N⁻¹) c :=
+begin
+  by_cases hN : N = 0,
+  { subst N, simp only [nat.cast_zero, inv_zero, mul_zero], apply_instance },
+  refine @universal_map.suitable_of _ _ _ _ _ (_root_.id _),
+  suffices : c = ∑ i : fin N, c * N⁻¹,
+  { conv { congr, skip, skip, rw this },
+    apply_instance },
+  rw [finset.sum_const, finset.card_fin, nsmul_eq_mul, mul_left_comm, mul_inv_cancel, mul_one],
+  exact_mod_cast hN
+end
 
-instance mul_suitable (f : universal_map m n) [h : f.suitable c₁ c₂] (N : ℕ) :
+instance sum_two_suitable (c : ℝ≥0) (n : ℕ) : (sum n 2).suitable (c * 2⁻¹) c :=
+by { convert universal_map.sum_suitable c n 2, norm_num }
+
+instance proj_suitable (c : ℝ≥0) (n N : ℕ) : (proj n N).suitable c c :=
+universal_map.suitable_sum _ _
+
+instance mul_suitable (f : universal_map m n) [h : f.suitable c₁ c₂] (N : ℕ) [hN : fact (0 < N)] :
   (mul N f).suitable c₁ c₂ :=
 begin
   intros g hg,
-  rw [universal_map.mem_support_mul] at hg,
+  rw [universal_map.mem_support_mul N hN.out] at hg,
   rcases hg with ⟨g, hg, rfl⟩,
   haveI := universal_map.suitable_of_mem_support f c₁ c₂ g hg,
   apply_instance
@@ -401,12 +504,44 @@ instance suitable_mul_right (c : ℝ≥0) : BD.suitable (λ i, c_ i * c) :=
 instance suitable_rescale_constants (N : ℝ≥0) : BD.suitable (rescale_constants c_ N) :=
 data.suitable_mul_right _ _ _
 
-instance mul_obj_suitable (N : ℕ) : ((mul N).obj BD).suitable c_ :=
+instance mul_obj_suitable (N : ℕ) [fact (0 < N)] : ((mul N).obj BD).suitable c_ :=
 begin
   constructor,
   intros i j,
   dsimp [mul_obj_d],
   apply_instance
+end
+
+-- move this
+instance fact_two_pow_inv_le_two_pow_inv (N : ℕ) : fact ((2 ^ N : ℝ≥0)⁻¹ ≤ (2 ^ N : ℕ)⁻¹) :=
+⟨le_of_eq $ by norm_cast⟩
+
+instance sum_suitable (i N : ℕ) (N' : ℝ≥0) [hN' : fact (N'⁻¹ ≤ N⁻¹)] :
+  universal_map.suitable (rescale_constants c_ N' i) (c_ i) ((BD.sum N).f i) :=
+(universal_map.sum_suitable _ _ _).le _ _ _ _ (mul_le_mul' le_rfl hN'.1) le_rfl
+
+-- move this
+instance fact_two_pow_inv_le_one (N : ℕ) : fact ((2 ^ N : ℝ≥0)⁻¹ ≤ 1) :=
+⟨le_trans (data.fact_two_pow_inv_le_two_pow_inv N).1 $ fact.out _⟩
+
+instance proj_suitable (i N : ℕ) (N' : ℝ≥0) [fact (N'⁻¹ ≤ 1)] :
+  universal_map.suitable (rescale_constants c_ N' i) (c_ i) ((BD.proj N).f i) :=
+begin
+  refine (universal_map.proj_suitable _ _ _).le _ _ _ _ _ le_rfl,
+  dsimp [rescale_constants],
+  apply fact.out,
+end
+
+instance hom_pow'_suitable_strict
+  (f : (mul 2).obj BD ⟶ BD) (i : ℕ) [universal_map.suitable c c (f.f i)] :
+  Π N, ((hom_pow' f N).f i).suitable c c
+| 0     := by { dsimp [hom_pow'], exact universal_map.suitable_id _ }
+| (N+1) :=
+begin
+  dsimp [hom_pow'],
+  refine @universal_map.suitable.comp _ _ _ _ _ _ c _ _ (id _),
+  refine @universal_map.mul_suitable _ _ _ _ _ (id _) _ _,
+  apply_assumption
 end
 
 end data
@@ -492,46 +627,72 @@ end σπ
 class adept (BD : out_param package) (c_ : out_param $ ℕ → ℝ≥0) (c' : ℕ → ℝ≥0) : Prop :=
 (one_le : ∀ i, fact (1 ≤ c' i))
 (suitable : BD.data.suitable (c' * c_)) -- do we need `very_suitable` here?
-(htpy_suitable : ∀ j i, (BD.homotopy.h j i).suitable (c' j * c_ j) (rescale_constants c_ 2 i))
+(htpy_suitable : ∀ j i, (BD.homotopy.h j i).suitable (rescale_constants c_ 2 j) (c' i * c_ i))
 
 attribute [instance] adept.one_le adept.suitable adept.htpy_suitable
 
 namespace adept
 
+open category_theory
+
 variables (BD : package) (c_ c' : ℕ → ℝ≥0) [adept BD c_ c']
 
--- instance homotopy_pow'_suitable (j i : ℕ) :
---   Π N, ((BD.data.homotopy_pow' BD.homotopy N).h j i).suitable
---     (rescale_constants c_ (2 ^ N) j) ((c' * c_) i)
--- | 0     :=
--- by simpa only [pi.mul_apply, pow_zero, rescale_constants.one] using universal_map.suitable_zero _ _
--- | (N+1) :=
--- begin
---   refine @universal_map.suitable_add _ _ _ _ _ _ (id _) (id _),
---   sorry,
---   sorry
--- end
+instance mul_adept_suitable (N : ℕ) (f : (data.mul N).obj BD.data ⟶ BD.data) (i : ℕ) (c₁ : ℝ≥0)
+  [hf : universal_map.suitable c₁ (c_ i) (f.f i)] :
+  universal_map.suitable c₁ ((c' * c_) i) (f.f i) :=
+begin
+  refine hf.le _ _ _ _ le_rfl _,
+  dsimp,
+  apply fact.out
+end
 
-instance homotopy_mul_suitable (j i : ℕ) :
-  Π N, ((BD.data.homotopy_mul BD.homotopy N).h j i).suitable
+instance homotopy_pow'_suitable (j i : ℕ) :
+  Π N, ((BD.data.homotopy_pow' BD.homotopy N).h j i).suitable
     (rescale_constants c_ (2 ^ N) j) ((c' * c_) i)
-| 0     := by simpa only [pow_zero, rescale_constants.one] using universal_map.suitable_zero _ _
+| 0     := universal_map.suitable_zero _ _
 | (N+1) :=
 begin
-  sorry
+  dsimp [data.homotopy_pow'],
+  refine @universal_map.suitable_add _ _ _ _ _ _ (id _) (id _),
+  { refine @universal_map.suitable.comp
+      _ _ _ _ _ _ (c' i * rescale_constants c_ 2 i) _ (id _) (id _),
+    { dsimp [rescale_constants], apply_instance },
+    { refine @universal_map.mul_suitable _ _ _ _ _ (id _) _ _,
+      convert @universal_map.suitable_mul_right _ _ (2⁻¹) _ _ _ (homotopy_pow'_suitable N) using 0,
+      simp only [rescale_constants, mul_assoc, pow_succ, mul_inv',
+        pi.mul_apply, mul_comm (2⁻¹ : ℝ≥0)] } },
+  { refine @universal_map.suitable.comp
+      _ _ _ _ _ _ (rescale_constants c_ 2 j) _ _ (id _),
+    refine @universal_map.mul_suitable _ _ _ _ _ (id _) 2 ⟨zero_lt_two⟩,
+    refine @universal_map.suitable.le _ _ _ (rescale_constants c_ 2 j) _ _ _ (id _) _ le_rfl,
+    swap, { simp only [rescale_constants, pow_succ, mul_inv'], apply fact.out },
+    refine @data.hom_pow'_suitable_strict _ _ _ _ (id _) _,
+    dsimp [data.proj_f],
+    apply_instance }
+end
+
+instance homotopy_mul_suitable (j i N : ℕ) :
+  ((BD.data.homotopy_mul BD.homotopy N).h j i).suitable
+    (rescale_constants c_ (2 ^ N) j) ((c' * c_) i) :=
+begin
+  dsimp [data.homotopy_mul],
+  simp only [add_zero, zero_add, neg_zero],
+  refine @universal_map.suitable.comp _ _ _ _ _ _ (rescale_constants c_ (2 ^ N) j) _ _ (id _),
+  generalize : (rescale_constants c_ (2 ^ N) j) = c,
+  induction N with N IH,
+  { dsimp [data.pow'_iso_mul, data.mul_one_iso, FreeMat.one_mul_iso],
+    -- jmc: I don't understand why TC doesn't find the following instance...
+    exact @universal_map.suitable_of _ _ _ _ _ (basic_universal_map.one_mul_hom_suitable _), },
+  { dsimp [data.pow'_iso_mul],
+    resetI,
+    refine @universal_map.suitable.comp _ _ _ _ _ _ c _ (id _) (id _),
+    { dsimp, apply_instance },
+    { dsimp [data.mul_mul_iso, FreeMat.mul_mul_iso],
+      erw [nat_iso.of_components.inv_app, FreeMat.iso_mk'_inv],
+      apply_instance } }
 end
 
 end adept
-
-/-
-Instances that we need:
-
-  [∀ (j i : ℕ), ((BD.data.homotopy_mul BD.homotopy N).h j i).suitable (rescale_constants c_ (2 ^ N) j) ((c' * c_) i)]
-  [((data.mul (2 ^ N)).obj BD.data).suitable (rescale_constants c_ (2 ^ N))]
-  [∀ (i : ℕ), universal_map.suitable (rescale_constants c_ (2 ^ N) i) ((c' * c_) i) ((BD.data.sum (2 ^ N)).f i)]
-  [∀ (i : ℕ), universal_map.suitable (rescale_constants c_ (2 ^ N) i) ((c' * c_) i) ((BD.data.proj (2 ^ N)).f i)]
-
--/
 
 end package
 

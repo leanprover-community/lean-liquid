@@ -162,19 +162,15 @@ namespace breen_deligne
 universe variables v
 
 variables (BD : breen_deligne.package)
-
 variables (c_ c' : ℕ → ℝ≥0)
-variables [BD.data.suitable c_]
+variables [BD.data.suitable c_] [package.adept BD c_ c']
 variables (r : ℝ≥0) (V : NormedGroup.{v}) [normed_with_aut r V] [fact (0 < r)]
 variables {r' : ℝ≥0} [fact (0 < r')] [fact (r' ≤ 1)] (c : ℝ≥0)
 variables (M : (ProFiltPseuNormGrpWithTinv.{u} r')ᵒᵖ)
-variables (k' : ℝ≥0) (N : ℕ) [fact (1 ≤ k')] [fact (k' ≤ 2 ^ N)]
+variables (N : ℕ)
+-- variables (k' : ℝ≥0) [fact (1 ≤ k')] [fact (k' ≤ 2 ^ N)]
 
-def homotopy_σπ [BD.data.suitable (c' * c_)] [package.adept BD c_ c']
-  -- the following 2 assumptions ought to be global instances in `suitable.lean`
-  [∀ (i : ℕ), universal_map.suitable (rescale_constants c_ (2 ^ N) i) ((c' * c_) i) ((BD.data.sum (2 ^ N)).f i)]
-  [∀ (i : ℕ), universal_map.suitable (rescale_constants c_ (2 ^ N) i) ((c' * c_) i) ((BD.data.proj (2 ^ N)).f i)]
- :=
+def homotopy_σπ :=
 homotopy.{u v} (data.homotopy_mul BD.data BD.homotopy N)
   (c' * c_) (rescale_constants c_ (2^N)) r V c M
 

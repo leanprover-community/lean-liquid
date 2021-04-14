@@ -336,6 +336,9 @@ begin
   simp only [universal_map.comp_of, basic_universal_map.comp_proj_mul_proj],
 end
 
+lemma hom_pow'_proj' (N : ℕ) : hom_pow' (BD.proj 2) N = (BD.pow'_iso_mul N).hom ≫ BD.proj (2^N) :=
+by { rw ← iso.inv_comp_eq, apply hom_pow'_proj }
+
 def homotopy_mul (h : homotopy (BD.sum 2) (BD.proj 2)) (N : ℕ) :
   homotopy (BD.sum (2^N)) (BD.proj (2^N)) :=
 (homotopy.of_eq $ BD.hom_pow'_sum N).symm.trans $

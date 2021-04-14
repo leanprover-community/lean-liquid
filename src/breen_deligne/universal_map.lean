@@ -595,6 +595,21 @@ begin
   simp only [comp_of, mul_of, basic_universal_map.mul_comp],
 end
 
+lemma mem_support_mul (N : ℕ) (hN : 0 < N) (f : universal_map m n) (g) :
+  g ∈ (mul N f).support ↔ ∃ g', g' ∈ f.support ∧ g = basic_universal_map.mul N g' :=
+begin
+  apply free_abelian_group.mem_support_map,
+  clear f g,
+  intros f g H,
+  ext i j,
+  rw function.funext_iff at H,
+  specialize H (fin_prod_fin_equiv (⟨0, hN⟩, i)),
+  rw function.funext_iff at H,
+  specialize H (fin_prod_fin_equiv (⟨0, hN⟩, j)),
+  dsimp [basic_universal_map.mul, matrix.kronecker] at H,
+  simpa only [one_mul, equiv.symm_apply_apply, matrix.one_apply_eq] using H,
+end
+
 end mul
 
 def sum (n N : ℕ) : universal_map (N * n) n :=
