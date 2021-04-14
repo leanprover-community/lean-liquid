@@ -41,10 +41,10 @@ lemma explicit_gordan (hΛ : finite_free Λ) [fintype ι] (l : ι → Λ) :
   (explicit_dual_set l).fg :=
 sorry
 
+/-- The `aux_i` lemmas are extracted from a larger proof in order to improve performance. -/
 lemma aux_1 {N : ℕ} {l : ι → Λ} {S₀ : finset (Λ →+ ℤ)}
   (hS₀ : submodule.span ℕ ↑S₀ = explicit_dual_set l) :
-  let
-      ψ : ({x // x ∈ S₀} → fin N) → Λ →+ ℤ :=
+  let ψ : ({x // x ∈ S₀} → fin N) → Λ →+ ℤ :=
         λ (y : {x // x ∈ S₀} → fin N), ∑ (s : {x // x ∈ S₀}) in S₀.attach, (y s).val • s.val,
       B : finset (Λ →+ ℤ) := finset.image ψ finset.univ
   in ∀ (b : Λ →+ ℤ), b ∈ B → b ∈ explicit_dual_set l :=
@@ -53,26 +53,22 @@ begin
   rcases finset.mem_image.mp hb with ⟨y, ⟨hy₁, rfl⟩⟩,
   rw [← hS₀],
   apply mem_span_finset.mpr,
-  let φ := λ x : (Λ →+ ℤ), if H: x ∈ S₀ then (y ⟨x, H⟩ : ℕ) else 0,
-  use φ,
+  refine ⟨λ x : (Λ →+ ℤ), if H: x ∈ S₀ then (y ⟨x, H⟩ : ℕ) else 0, _⟩,
   rw ← finset.sum_attach,
   refine finset.sum_congr rfl (λ s hs, _),
   simp only [*, dif_pos, dite_eq_ite, val_eq_coe, if_true, finset.coe_mem, finset.mk_coe]
 end
 
+/-- The `aux_i` lemmas are extracted from a larger proof in order to improve performance. -/
 lemma aux_2 {N : ℕ} (hN : 0 < N) {l : ι → Λ} {S₀ : finset (Λ →+ ℤ)}
   (hS₀ : submodule.span ℕ ↑S₀ = explicit_dual_set l) {f r : (Λ →+ ℤ) → ℕ} :
   let Y : Type u_1 := {x // x ∈ S₀} → fin N,
-      ψ : Y → Λ →+ ℤ :=
-        λ (y : Y), ∑ (s : {x // x ∈ S₀}) in S₀.attach, (y s).val • s.val,
+      ψ : Y → Λ →+ ℤ := λ (y : Y), ∑ (s : {x // x ∈ S₀}) in S₀.attach, (y s).val • s.val,
       B : finset (Λ →+ ℤ) := finset.image ψ finset.univ,
       g : (Λ →+ ℤ) → fin N := λ (i : Λ →+ ℤ), ⟨f i % N, nat.mod_lt _ hN⟩,
       x' : Λ →+ ℤ := ∑ (i : Λ →+ ℤ) in S₀, (g i).val • i
-  in f = ↑g + N • r →
-     x' = ∑ (i : Λ →+ ℤ) in S₀, (g i).val • i →
-     x' ∈ B →
-     ∀ (i : ι),
-       x' (l i) ≤ (⇑∑ (i : Λ →+ ℤ) in S₀, f i • i) (l i) :=
+  in f = ↑g + N • r → x' = ∑ (i : Λ →+ ℤ) in S₀, (g i).val • i → x' ∈ B →
+    ∀ (i : ι), x' (l i) ≤ (⇑∑ (i : Λ →+ ℤ) in S₀, f i • i) (l i) :=
 begin
   intros Y ψ B g x' hr hx' H i,
   dsimp [x'],
@@ -88,20 +84,19 @@ begin
   replace hz : 0 ≤ z (l i) := rfl.mpr hz i,
   rw [add_monoid_hom.int_smul_apply, ← gsmul_eq_smul, gsmul_eq_mul],
   apply mul_nonpos_of_nonpos_of_nonneg _ hz,
-  simp only [add_zero, int.cast_id, int.coe_nat_mod, add_neg_le_iff_le_add'],
-  rw [← int.coe_nat_mod, int.coe_nat_le_coe_nat_iff],
+  rw [int.cast_id, int.coe_nat_mod, add_neg_le_iff_le_add', add_zero, ← int.coe_nat_mod,
+    int.coe_nat_le_coe_nat_iff],
   exact nat.mod_le _ _
 end
 
+/-- The `aux_i` lemmas are extracted from a larger proof in order to improve performance. -/
 lemma aux_3 {N : ℕ} (hN : 0 < N) {l : ι → Λ} {S₀ : finset (Λ →+ ℤ)}
   (hS₀ : submodule.span ℕ ↑S₀ = explicit_dual_set l) :
   let Y : Type u_1 := {x // x ∈ S₀} → fin N,
       ψ : Y → Λ →+ ℤ := λ (y : Y), ∑ (s : {x // x ∈ S₀}) in S₀.attach, (y s).val • s.val,
       B : finset (Λ →+ ℤ) := finset.image ψ finset.univ
-  in ∀ (x : Λ →+ ℤ),
-       x ∈ explicit_dual_set l →
-       (∃ (x' : Λ →+ ℤ) (H : x' ∈ B) (y : Λ →+ ℤ),
-          x = N • y + x' ∧ ∀ (i : ι), x' (l i) ≤ x (l i)) :=
+  in ∀ (x : Λ →+ ℤ), x ∈ explicit_dual_set l → (∃ (x' : Λ →+ ℤ) (H : x' ∈ B) (y : Λ →+ ℤ),
+      x = N • y + x' ∧ ∀ (i : ι), x' (l i) ≤ x (l i)) :=
 begin
   intros Y ψ B x hx,
   rw [← hS₀, mem_span_finset] at hx,
@@ -171,7 +166,6 @@ begin
   { rw [units.coe_neg_one, neg_one_mul],
     refine (neg_pos.mpr (not_le.mp h)).le }
 end
-
 
 lemma smul_to_explicit_dual_set (l : ι → Λ) (x : Λ →+ ℤ) :
   x ∈ (explicit_dual_set ((pos_vector l x) • l)) :=
