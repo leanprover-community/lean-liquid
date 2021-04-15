@@ -194,7 +194,6 @@ instance N_pos : fact (0 < N c' r r' m) := ⟨pow_pos zero_lt_two _⟩
 lemma r_pow_b_mul_N_le :
   r ^ (b c' r r' m) * (N c' r r' m) ≤ (2 / k' c' m) * (r / r') ^ (b c' r r' m) :=
 begin
---  have F : 1 ≤ k' c' m := (universal_constants.one_le_k' c' m).1,
   have k0 : k' c' m ≠ 0 := ne_of_gt (zero_lt_one.trans_le (universal_constants.one_le_k' c' m).1),
   rw [N, mul_comm ((2 : ℝ≥0) / _), div_pow, nat.cast_pow, nat.cast_two, div_mul_eq_mul_div_comm],
   repeat { rw mul_comm (r ^ b c' r r' m) },
@@ -214,7 +213,6 @@ nat.find_spec (b_exists c' r r' m)
 instance k'_le_two_pow_N : fact (k' c' m ≤ 2 ^ N₂ c' r r' m) :=
 {out := begin
   obtain F := N₂_spec c' r r' m,
---  obtain F := N₂_spec c_ c' r r' m rfl.le,
   rw [← mul_one ((2 : ℝ≥0) ^ _)],
   rw [nnreal.div_le_iff (pow_pos zero_lt_two _).ne', mul_comm] at F,
   refine F.trans (mul_le_mul rfl.le _ _ _),
