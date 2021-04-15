@@ -107,8 +107,22 @@ def NSH_δ_res {BD : data} [BD.suitable c_]
   begin
     intros i j, symmetry,
     dsimp [data.system_obj, data.complex],
-    refine nat_trans.congr_app (universal_map.res_comp_eval_CLCFPTinv r V r' _ _ _ _ _) M,
+    exact nat_trans.congr_app (universal_map.res_comp_eval_CLCFPTinv r V r' _ _ _ _ _) M,
   end }
+.
+
+include BD c_ c' r V
+
+-- make this a lemma for arbitrary homotopies
+lemma comm_aux {c : ℝ≥0} {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ} {N : ℕ} (i k : ℕ) : true :=
+begin
+  have := (homotopy_σπ BD c_ c' r V c M N).comm i (i+1) (i+1+1),
+  rw [differential_object.complex_like.htpy_idx_rel₁_tt_nat,
+    differential_object.complex_like.htpy_idx_rel₂_tt_nat] at this,
+  specialize this rfl (or.inl rfl),
+  rw [eq_comm, sub_eq_iff_eq_add'] at this,
+  sorry,
+end
 
 end
 
@@ -128,7 +142,7 @@ def NSH_aux (N : ℕ) (M) :
     apply universal_map.eval_CLCFPTinv₂_bound_by,
     exact (bound_by_H BD c' r r' _ hqm),
   end,
-  δ := λ c, ((BD_system_map (BD.data.proj _) c_ c_ r V).app M).app (op c) ≫ NSH_δ_res _ c,
+  δ := λ c, (BD_map (BD.data.proj (2 ^ N₂ c' r r' m)) c_ c_ r V c).app M ≫ NSH_δ_res _ c,
   hδ :=
   begin
     introsI c hc q hqm x,

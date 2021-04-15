@@ -60,6 +60,7 @@ BD_map₂ f r V _ _ _ _
 
 open opposite
 
+@[simps app_app]
 def BD_system_map [∀ i, (f.f i).suitable (c₂' i) (c₁' i)] :
   BD₁.system c₁' r V r' ⟶ BD₂.system c₂' r V r' :=
 { app := λ M,
