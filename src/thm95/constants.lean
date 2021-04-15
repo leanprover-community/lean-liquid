@@ -149,15 +149,19 @@ def N : ℕ := 2 ^ N₂ c_ c' r r' m
 
 instance N_pos : fact (0 < N c_ c' r r' m) := ⟨pow_pos zero_lt_two _⟩
 
+-- should be doable now
 lemma r_pow_b_mul_N_le :
   r ^ (b c_ r r' m) * (N c_ c' r r' m) ≤ (2 / k' c' m) * (r / r') ^ (b c_ r r' m) :=
 sorry
 
+-- should be doable now
 lemma two_div_k'_mul_r_div_r'_pow_b_le :
   (2 / k' c' m) * (r / r') ^ (b c_ r r' m) ≤ ε m :=
 sorry
 
-instance k'_le_two_pow_N : fact (k' c' m ≤ 2 ^ N₂ c_ c' r r' m) := sorry
+-- should be doable now
+instance k'_le_two_pow_N : fact (k' c' m ≤ 2 ^ N₂ c_ c' r r' m) :=
+sorry
 
 include BD c_ r r' m
 
