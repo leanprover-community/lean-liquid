@@ -161,9 +161,6 @@ begin
     exact cb }
 end
 
-lemma mul_mono {a b c : ℝ≥0} (c00 : 0 < c) (ab : c * a ≤ c * b) : a ≤ b :=
-(mul_le_mul_left c00).mp ab
-
 lemma pow_mono_decr_exp {a : ℝ≥0} (m n : ℕ) (mn : m ≤ n) (a1 : a ≤ 1) :
   a ^ n ≤ a ^ m :=
 begin
