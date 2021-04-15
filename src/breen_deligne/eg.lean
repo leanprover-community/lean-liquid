@@ -1,4 +1,6 @@
-import breen_deligne.category
+import breen_deligne.suitable
+
+open_locale nnreal
 
 namespace breen_deligne
 
@@ -79,7 +81,27 @@ def h : homotopy (BD.sum 2) (BD.proj 2) :=
 
 end eg
 
-/-- An example of a Breen--Deligne data coming from a nontrivial complex. -/
+/-- An example of a Breen--Deligne package coming from a nontrivial complex. -/
 def eg : package := ⟨eg.BD, eg.h⟩
+
+namespace eg
+
+variables (r r' : ℝ≥0)
+
+/-- Very suitable sequence of constants for the example Breen--Deligne package -/
+def c_ (r r' : ℝ≥0) : ℕ → ℝ≥0 :=
+sorry
+
+instance very_suitable : eg.data.very_suitable r r' (c_ r r') :=
+sorry
+
+/-- Adept sequence of constants for the example Breen--Deligne package -/
+def c' (c_ : ℕ → ℝ≥0) : ℕ → ℝ≥0 :=
+sorry
+
+instance adept (c_ : ℕ → ℝ≥0) : package.adept eg c_ (c' c_) :=
+sorry
+
+end eg
 
 end breen_deligne
