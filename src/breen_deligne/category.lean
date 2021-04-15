@@ -283,9 +283,10 @@ lemma hom_pow'_sum : ∀ N, (BD.pow'_iso_mul N).inv ≫ hom_pow' (BD.sum 2) N = 
 | 0     :=
 begin
   ext n : 2,
-  simp only [hom_pow', category.comp_id, sum_f, universal_map.sum],
-  dsimp [pow_zero],
-  rw [finset.sum_singleton],
+  simp only [hom_pow', category.comp_id],
+  show (BD.pow'_iso_mul 0).inv.f n = (BD.sum 1).f n,
+  dsimp only [sum_f, universal_map.sum],
+  simp only [fin.default_eq_zero, univ_unique, finset.sum_singleton],
   refine congr_arg of _,
   apply basic_universal_map.one_mul_hom_eq_proj,
 end
@@ -311,9 +312,9 @@ lemma hom_pow'_proj : ∀ N, (BD.pow'_iso_mul N).inv ≫ hom_pow' (BD.proj 2) N 
 | 0     :=
 begin
   ext n : 2,
-  simp only [hom_pow', category.comp_id, proj_f, universal_map.proj],
-  dsimp [pow_zero],
-  rw [finset.sum_singleton],
+  simp only [hom_pow', category.comp_id],
+  show (BD.pow'_iso_mul 0).inv.f n = (BD.proj 1).f n,
+  dsimp only [proj_f, universal_map.proj],
   refine congr_arg of _,
   apply basic_universal_map.one_mul_hom_eq_proj,
 end

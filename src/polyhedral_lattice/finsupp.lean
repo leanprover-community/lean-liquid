@@ -18,7 +18,7 @@ noncomputable theory
 
 open_locale big_operators classical
 
-local attribute [-instance] add_comm_monoid.nat_semimodule add_comm_group.int_module
+local attribute [-instance] add_comm_group.int_module
 
 namespace finsupp
 
@@ -107,12 +107,11 @@ instance {ι : Type} [fintype ι] : polyhedral_lattice (ι →₀ Λ) :=
       apply fintype.sum_congr,
       intro i,
       rw [← finset.insert_erase (finset.mem_univ i), finset.prod_insert (finset.not_mem_erase _ _),
-        mul_comm, mul_smul, ← nsmul_eq_smul (d i), ← single_add_hom_apply,
-        ← add_monoid_hom.map_nsmul, nsmul_eq_smul, H1,
+        mul_comm, mul_smul, ← single_add_hom_apply, ← add_monoid_hom.map_nsmul, H1,
         add_monoid_hom.map_sum, finset.smul_sum],
       apply fintype.sum_congr,
       intro j,
-      rw [mul_smul, ← nsmul_eq_smul (c i j), add_monoid_hom.map_nsmul, nsmul_eq_smul],
+      rw [mul_smul, add_monoid_hom.map_nsmul],
       refl },
     { have aux := @sum_eq_sum_fintype ι Λ _ _ _ _ (λ i, norm) (λ i, norm_zero),
       rw [norm_def, aux, ← finset.univ_product_univ, finset.sum_product, finset.mul_sum],

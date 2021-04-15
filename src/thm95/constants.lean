@@ -55,7 +55,7 @@ namespace thm95
 
 namespace universal_constants
 
-open system_of_double_complexes
+open system_of_double_complexes breen_deligne
 
 -- this should be a constant roughly determined by `combinatorial_lemma.lean` (`lem98`)
 -- it should probably also depend on an `N : ℕ`
@@ -260,28 +260,39 @@ end
 instance k'_le_two_pow_N : fact (k' c' m ≤ 2 ^ N₂ c_ c' r r' m) :=
 sorry
 
-include BD c_ r r' m
-
 /-- `H BD c_ r r' m` is the universal bound on the norm of the `N₂`th Breen--Deligne homotopy
-in the first `m` degrees. Here `N₂ = thm95.N₂ c_ r r' m`. -/
-def H : ℝ≥0 :=
-sorry
+in the first `m` degrees. Here `N₂ = thm95.N₂ c_ c' r r' m`. -/
+def H : ℕ :=
+max 1 $ (finset.range (m+1)).sup $ λ q,
+  ((BD.data.homotopy_mul BD.homotopy (N₂ c_ c' r r' m)).h q (q + 1)).bound
 
-omit BD c_ r r' m
+lemma bound_by_H {q : ℕ} (h : q ≤ m) :
+  ((BD.data.homotopy_mul BD.homotopy (N₂ c_ c' r r' m)).h q (q + 1)).bound_by (H BD c_ c' r r' m) :=
+begin
+  rw [H, universal_map.bound_by, le_max_iff],
+  right,
+  refine @finset.le_sup _ _ _ (finset.range (m+1))
+    (λ q, ((BD.data.homotopy_mul BD.homotopy (N₂ c_ c' r r' m)).h q (q + 1)).bound) _ _,
+  rwa [finset.mem_range, nat.lt_succ_iff],
+end
 
-instance H_pos : fact (0 < H BD c_ r r' m) := sorry
+instance H_pos : fact (0 < H BD c_ c' r r' m) :=
+⟨lt_max_iff.mpr $ or.inl zero_lt_one⟩
+
+instance H_pos' : fact ((0:ℝ≥0) < H BD c_ c' r r' m) :=
+by { norm_cast, apply_instance }
 
 def k : ℝ≥0 := k' c' m * k' c' m
 
 instance one_le_k : fact (1 ≤ k c' m) := by { delta k, apply_instance }
 
-def K : ℝ≥0 := 2 * normed_spectral.K₀ m (K₁ m) * H BD c_ r r' m
+def K : ℝ≥0 := 2 * normed_spectral.K₀ m (K₁ m) * H BD c_ c' r r' m
 
-instance one_le_K : fact (1 ≤ K BD c_ r r' m) := sorry
+instance one_le_K : fact (1 ≤ K BD c_ c' r r' m) := sorry
 
 instance k_le_k₁ : fact (k c' (m - 1) ≤ k₁ m) := sorry
 
-instance K_le_K₁ : fact (K BD c_ r r' (m - 1) ≤ K₁ m) := sorry
+instance K_le_K₁ : fact (K BD c_ c' r r' (m - 1) ≤ K₁ m) := sorry
 
 end universal_constants
 

@@ -10,7 +10,7 @@ noncomputable theory
 
 open_locale big_operators
 
-local attribute [-instance] add_comm_monoid.nat_semimodule add_comm_group.int_module
+local attribute [-instance] add_comm_group.int_module
 
 -- move this
 lemma int.nnnorm_coe_units (e : units ℤ) : nnnorm (e : ℤ) = 1 :=

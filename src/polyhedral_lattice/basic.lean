@@ -16,13 +16,13 @@ The condition on the norm actually used is `generates_norm` below.
 noncomputable theory
 open_locale big_operators classical nnreal
 
-local attribute [-instance] add_comm_monoid.nat_semimodule add_comm_group.int_module
+local attribute [-instance] add_comm_group.int_module
 
 section move_this
 
 -- rewrite to include multiplicative version
 -- also write version for modules, glue to version for groups
-def torsion_free (A : Type*) [add_comm_group A] [semimodule ℕ A] : Prop :=
+def torsion_free (A : Type*) [add_comm_group A] : Prop :=
 ∀ (a : A) (ha : a ≠ 0) (n : ℕ), n • a = 0 → n = 0
 
 def finite_free (A : Type*) [add_comm_group A] [semimodule ℤ A] : Prop :=
@@ -32,7 +32,7 @@ end move_this
 
 section generates_norm
 
-variables {Λ ι : Type*} [semi_normed_group Λ] [semimodule ℕ Λ] [fintype ι]
+variables {Λ ι : Type*} [semi_normed_group Λ] [fintype ι]
 
 /-- A finite family `x : ι → Λ` generates the norm on `Λ`
 if for every `l : Λ`,
@@ -67,7 +67,6 @@ end generates_norm
 
 class polyhedral_lattice (Λ : Type*) extends semi_normed_group Λ :=
 -- unfortunately, we need the following assumptions, for technical reasons
-[nat_semimodule : semimodule ℕ Λ]
 [int_semimodule : semimodule ℤ Λ]
 [is_scalar_tower : is_scalar_tower ℕ ℤ Λ]
 -- now we get to the actual definition
@@ -77,7 +76,7 @@ class polyhedral_lattice (Λ : Type*) extends semi_normed_group Λ :=
   -- this final condition ↑ ↑ ↑ ↑ effectively means that we have a `normed_group`
   -- but this condition is easier to check when forming quotients
 
-attribute [instance] polyhedral_lattice.nat_semimodule polyhedral_lattice.int_semimodule
+attribute [instance] polyhedral_lattice.int_semimodule
                      polyhedral_lattice.is_scalar_tower
 
 /-- A morphism of polyhedral lattices is a norm-nonincreasing group homomorphism. -/

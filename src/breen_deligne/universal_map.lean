@@ -485,8 +485,9 @@ begin
   simp only [id, comp_of, id_apply, basic_universal_map.comp_id]
 end
 
-def bound_by (N : ℕ) : Prop :=
-∑ g in f.support, (free_abelian_group.coeff g f).nat_abs ≤ N
+def bound : ℕ := ∑ g in f.support, (free_abelian_group.coeff g f).nat_abs
+
+def bound_by (N : ℕ) : Prop := f.bound ≤ N
 
 /-- `double f` is the `universal_map` from `ℤ[A^m ⊕ A^m]` to `ℤ[A^n ⊕ A^n]`
 given by applying `f` on both "components". -/
