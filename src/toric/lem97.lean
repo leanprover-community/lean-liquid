@@ -48,17 +48,6 @@ lemma explicit_gordan (hΛ : finite_free Λ) [fintype ι] (l : ι → Λ) :
 sorry
 
 -- -- TODO: remove this once a bug in mathlib is fixed
--- /-- All `ℕ`-semimodule structures are equal. -/
--- instance add_comm_monoid.nat_semimodule.subsingleton
---   (M : Type*) [add_comm_monoid M] :
---   subsingleton (semimodule ℕ M) :=
--- ⟨λ P Q, by {
---   ext n, induction n with n ih,
---   { rw [@zero_smul ℕ M _ _ (id _) m, @zero_smul ℕ M _ _ (id _) m], },
---   { simp only [nat.succ_eq_add_one, @add_smul ℕ M _ _ (id _), ih, @one_smul ℕ M _ (id _)], } }⟩
-
--- set_option pp.implicit true
-
 lemma hack : mul_action_with_zero.to_smul_with_zero ℕ (Λ →+ ℤ) =
   add_monoid.to_smul_with_zero (Λ →+ ℤ) :=
 begin
