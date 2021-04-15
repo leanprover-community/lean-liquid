@@ -98,6 +98,7 @@ begin
   exact hN.1
 end
 
+@[simps f]
 def NSH_δ_res {BD : data} [BD.suitable c_]
   (N : ℕ) [fact (k' c' m ≤ 2 ^ N)] (c : ℝ≥0) {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ} :
   ((BD.system c_ r V r').obj M).obj (op c) ⟶
@@ -111,22 +112,24 @@ def NSH_δ_res {BD : data} [BD.suitable c_]
   end }
 .
 
-include BD c_ c' r V
+include BD c_ c' r V m
 
 -- make this a lemma for arbitrary homotopies
-lemma comm_aux {c : ℝ≥0} {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ} {N : ℕ} (i k : ℕ) : true :=
+lemma comm_aux {c : ℝ≥0} {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ} {N : ℕ} (i : ℕ) : true :=
 begin
-  have := (homotopy_σπ BD c_ c' r V c M N).comm i (i+1) (i+1+1),
+  have := (homotopy_σπ BD c_ c' r V (k' c' m * c) M N).comm i (i+1) (i+1+1),
   rw [differential_object.complex_like.htpy_idx_rel₁_tt_nat,
     differential_object.complex_like.htpy_idx_rel₂_tt_nat] at this,
   specialize this rfl (or.inl rfl),
-  rw [eq_comm, sub_eq_iff_eq_add'] at this,
+  rw [eq_comm, sub_eq_iff_eq_add', BD_map_app_f, ← universal_map.eval_CLCFPTinv_def] at this,
   sorry,
 end
 
 end
 
-def NSH_aux (N : ℕ) (M) :
+open differential_object differential_object.complex_like
+
+def NSH_aux (M) :
   NSH_aux_type BD r r' V c_ c' m Λ (N₂ c' r r' m) M :=
 { h := λ q q' c,
     if hqm : q' ≤ m + 1
@@ -144,19 +147,35 @@ def NSH_aux (N : ℕ) (M) :
   end,
   δ := λ c, (BD_map (BD.data.proj (2 ^ N₂ c' r r' m)) c_ c_ r V c).app M ≫ NSH_δ_res _ c,
   hδ :=
-  begin
+  by sorry; begin
     introsI c hc q hqm x,
     rw [dif_pos (nat.succ_le_succ hqm), dif_pos (hqm.trans (nat.le_succ _))],
+    erw [comp_f, BD_map_app_f, NSH_δ_res_f, ← universal_map.eval_CLCFPTinv_def],
+    dsimp only [unop_op],
     sorry
   end,
-  δ_bound_by := sorry }
+  δ_bound_by :=
+  begin
+    introsI c hc q hq,
+    refine (normed_group_hom.bound_by.comp' (N c' r r' m) (r ^ (b c' r r' m)) _ rfl _ _).le _,
+    { refine @CLCFPTinv.res_bound_by_pow r V _ _ r' _ _ _ _ _ _ _ ⟨_⟩ _,
+      dsimp only [unop_op, rescale_constants],
+      simp only [← mul_assoc, mul_right_comm _ c],
+      simp only [mul_right_comm _ (c_ q)],
+      apply mul_le_mul' _ le_rfl,
+      apply mul_le_mul' _ le_rfl,
+      apply N₂_spec },
+    { apply universal_map.eval_CLCFPTinv₂_bound_by,
+      apply universal_map.proj_bound_by },
+    { sorry }
+  end }
 .
 
 def NSC_htpy :
   normed_spectral_homotopy
     ((thm95.double_complex BD.data c_ r r' V Λ M (N c' r r' m)).row_map 0 1)
       m (k' c' m) (ε m) (c₀ Λ) (H BD c' r r' m) :=
-(NSH_aux BD r r' V c_ c' m Λ (N₂ c' r r' m) (op $ (Hom ↥Λ ↥M))).of_iso _ _ _
+(NSH_aux BD r r' V c_ c' m Λ (op $ (Hom ↥Λ ↥M))).of_iso _ _ _
   (iso.refl _) sorry (λ _ _ _, rfl) sorry sorry
 
 def NSC (IH : ∀ m' < m, thm95.IH BD r r' V c_ c' M m') :

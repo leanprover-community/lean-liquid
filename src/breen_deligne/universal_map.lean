@@ -489,6 +489,67 @@ def bound : ℕ := ∑ g in f.support, (free_abelian_group.coeff g f).nat_abs
 
 def bound_by (N : ℕ) : Prop := f.bound ≤ N
 
+lemma of_bound_by (f : basic_universal_map m n) : bound_by (of f) 1 :=
+begin
+  simp only [bound_by, bound, coeff_of_self, int.nat_abs_one, finset.sum_singleton, support_of],
+end
+
+lemma zero_bound_by (N : ℕ) : (0 : universal_map m n).bound_by N :=
+by simp only [bound_by, bound, zero_le', finset.sum_const_zero,
+    add_monoid_hom.map_zero, int.nat_abs_zero]
+
+lemma zero_bound_by_zero : (0 : universal_map m n).bound_by 0 :=
+zero_bound_by _
+
+lemma bound_by.random_index {f : universal_map m n} {N : ℕ}
+  (hf : f.bound_by N) (s : finset (basic_universal_map m n)) :
+  ∑ g in s, (free_abelian_group.coeff g f).nat_abs ≤ N :=
+begin
+  calc ∑ g in s, (free_abelian_group.coeff g f).nat_abs
+      = ∑ g in s ∩ f.support, (free_abelian_group.coeff g f).nat_abs +
+        ∑ g in s \ f.support, (free_abelian_group.coeff g f).nat_abs : _
+  ... = ∑ g in s ∩ f.support, (free_abelian_group.coeff g f).nat_abs : _
+  ... ≤ ∑ g in f.support ∩ s, (free_abelian_group.coeff g f).nat_abs +
+        ∑ g in f.support \ s, (free_abelian_group.coeff g f).nat_abs : _
+  ... ≤ ∑ g in f.support, (free_abelian_group.coeff g f).nat_abs : _
+  ... ≤ N : hf,
+  { rw finset.sum_inter_add_sum_diff },
+  { simp only [and_imp, add_right_eq_self, int.nat_abs_eq_zero, imp_self, imp_true_iff,
+      finset.mem_sdiff, finset.sum_eq_zero_iff, free_abelian_group.not_mem_support_iff] },
+  { rw finset.inter_comm, simp only [le_add_iff_nonneg_right, zero_le'], },
+  { rw finset.sum_inter_add_sum_diff },
+end
+
+lemma bound_by.add {f₁ f₂ : universal_map m n} {N₁ N₂ : ℕ}
+  (h₁ : f₁.bound_by N₁) (h₂ : f₂.bound_by N₂) :
+  (f₁ + f₂).bound_by (N₁ + N₂) :=
+begin
+  calc (f₁ + f₂).bound ≤
+      ∑ (g : basic_universal_map m n) in support (f₁ + f₂),
+        ((coeff g f₁).nat_abs + (coeff g f₂).nat_abs) : finset.sum_le_sum _
+  ... ≤ N₁ + N₂ : _,
+  { intros g hg,
+    rw add_monoid_hom.map_add,
+    apply int.nat_abs_add_le },
+  { rw finset.sum_add_distrib,
+    exact add_le_add (h₁.random_index _) (h₂.random_index _) }
+end
+
+lemma bound_by_sum {ι : Type*} (s : finset ι) (f : ι → universal_map m n) (N : ι → ℕ)
+  (h : ∀ i ∈ s, (f i).bound_by (N i)) :
+  (∑ i in s, f i).bound_by (∑ i in s, N i) :=
+begin
+  classical,
+  revert h,
+  apply finset.induction_on s; clear s,
+  { simp only [finset.not_mem_empty, forall_false_left, finset.sum_empty,
+      implies_true_iff, forall_true_left],
+    exact zero_bound_by_zero },
+  { intros i s his IH h,
+    simp only [finset.sum_insert his],
+    exact (h i $ s.mem_insert_self i).add (IH $ λ j hj, h j $ finset.mem_insert_of_mem hj) }
+end
+
 /-- `double f` is the `universal_map` from `ℤ[A^m ⊕ A^m]` to `ℤ[A^n ⊕ A^n]`
 given by applying `f` on both "components". -/
 def double : universal_map m n →+ universal_map (m + m) (n + n) :=
@@ -642,6 +703,11 @@ begin
   simp only [proj, mul_of, comp_of, add_monoid_hom.map_sum,
     add_monoid_hom.finset_sum_apply, basic_universal_map.proj_comp_mul],
 end
+.
+
+lemma proj_bound_by (n N : ℕ) : (proj n N).bound_by N :=
+le_trans (bound_by_sum _ _ _ $ λ i _, of_bound_by _) $
+by simp only [finset.card_fin, mul_one, algebra.id.smul_eq_mul, finset.sum_const]
 
 end universal_map
 

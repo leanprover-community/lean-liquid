@@ -437,6 +437,9 @@ def eval_CLCFPTinv [ϕ.suitable c₂ c₁] :
   CLCFPTinv r V r' c₁ n ⟶ CLCFPTinv r V r' c₂ m :=
 ϕ.eval_CLCFPTinv₂ r V r' c₁ _ c₂ _
 
+lemma eval_CLCFPTinv_def [ϕ.suitable c₂ c₁] :
+  ϕ.eval_CLCFPTinv r V r' c₁ c₂ = ϕ.eval_CLCFPTinv₂ r V r' c₁ _ c₂ _ := rfl
+
 @[simp] lemma eval_CLCFPTinv_zero :
   (0 : universal_map m n).eval_CLCFPTinv r V r' c₁ c₂ = 0 :=
 by apply eval_CLCFPTinv₂_zero

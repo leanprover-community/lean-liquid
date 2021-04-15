@@ -20,8 +20,8 @@ namespace breen_deligne
 variables {BD BD₁ BD₂ : breen_deligne.data} (f g : BD₂ ⟶ BD₁)
 variables (h : homotopy f g)
 
-variables (c_ c₁' c₂' : ℕ → ℝ≥0)
-variables [BD.suitable c_] [BD₁.suitable c₁'] [BD₂.suitable c₂']
+variables (c_ c_₁ c_₂ : ℕ → ℝ≥0)
+variables [BD.suitable c_] [BD₁.suitable c_₁] [BD₂.suitable c_₂]
 variables (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
 variables {r' : ℝ≥0} [fact (0 < r')] [fact (r' ≤ 1)] (c : ℝ≥0)
 
@@ -53,18 +53,24 @@ def BD_map₂ (a₁ a₂ b₁ b₂ : ℕ → ℝ≥0)
     } }
 .
 
-def BD_map [∀ i, (f.f i).suitable (c₂' i) (c₁' i)] :
-  BD₁.complex c₁' r V r' c ⟶ BD₂.complex c₂' r V r' c :=
+@[simps app_f]
+def BD_map [∀ i, (f.f i).suitable (c_₂ i) (c_₁ i)] :
+  BD₁.complex c_₁ r V r' c ⟶ BD₂.complex c_₂ r V r' c :=
 BD_map₂ f r V _ _ _ _
 .
+
+-- @[simp] lemma BD_map_app_f [∀ i, (f.f i).suitable (c_₂ i) (c_₁ i)] (i : ℕ)
+--   (M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ) :
+--   ((BD_map f c_₁ c_₂ r V c).app M).f i =
+--     ((f.f i).eval_CLCFPTinv r V r' (c_₁ i) (c_₂ i)).app M := _
 
 open opposite
 
 @[simps app_app]
-def BD_system_map [∀ i, (f.f i).suitable (c₂' i) (c₁' i)] :
-  BD₁.system c₁' r V r' ⟶ BD₂.system c₂' r V r' :=
+def BD_system_map [∀ i, (f.f i).suitable (c_₂ i) (c_₁ i)] :
+  BD₁.system c_₁ r V r' ⟶ BD₂.system c_₂ r V r' :=
 { app := λ M,
-  { app := λ c, (BD_map f c₁' c₂' r V c.unop).app M,
+  { app := λ c, (BD_map f c_₁ c_₂ r V c.unop).app M,
     naturality' := λ x y hxy,
     begin
       ext i : 2,
@@ -77,7 +83,7 @@ def BD_system_map [∀ i, (f.f i).suitable (c₂' i) (c₁' i)] :
   naturality' := λ M₁ M₂ g,
   begin
     ext c : 2,
-    exact (BD_map f c₁' c₂' r V c.unop).naturality _
+    exact (BD_map f c_₁ c_₂ r V c.unop).naturality _
   end }
 .
 
@@ -118,9 +124,9 @@ def homotopy₂ (a₁ a₂ b₁ b₂ : ℕ → ℝ≥0)
     refl,
   end }
 
-def homotopy [∀ i, (f.f i).suitable (c₂' i) (c₁' i)] [∀ i, (g.f i).suitable (c₂' i) (c₁' i)]
-  [∀ j i, (h.h j i).suitable (c₂' j) (c₁' i)] :
-  homotopy ((BD_map f c₁' c₂' r V c).app M) ((BD_map g c₁' c₂' r V c).app M) :=
+def homotopy [∀ i, (f.f i).suitable (c_₂ i) (c_₁ i)] [∀ i, (g.f i).suitable (c_₂ i) (c_₁ i)]
+  [∀ j i, (h.h j i).suitable (c_₂ j) (c_₁ i)] :
+  homotopy ((BD_map f c_₁ c_₂ r V c).app M) ((BD_map g c_₁ c_₂ r V c).app M) :=
 homotopy₂ h r V M _ _ _ _
 
 end homotopy
