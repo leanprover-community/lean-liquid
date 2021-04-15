@@ -211,13 +211,14 @@ lemma two_div_k'_mul_r_div_r'_pow_b_le :
 nat.find_spec (b_exists c' r r' m)
 
 -- should be doable now
-instance k'_le_two_pow_N : fact (k' c' m ≤ 2 ^ N₂ c_ c' r r' m) :=
+instance k'_le_two_pow_N : fact (k' c' m ≤ 2 ^ N₂ c' r r' m) :=
 {out := begin
-  obtain F := N₂_le c_ c' r r' m rfl.le,
+  obtain F := N₂_spec c' r r' m,
+--  obtain F := N₂_spec c_ c' r r' m rfl.le,
   rw [← mul_one ((2 : ℝ≥0) ^ _)],
   rw [nnreal.div_le_iff (pow_pos zero_lt_two _).ne', mul_comm] at F,
   refine F.trans (mul_le_mul rfl.le _ _ _),
-  { exact pow_le_one (b c_ r r' m) (zero_le r') _inst_6.1 },
+  { exact pow_le_one _ (zero_le r') _inst_6.1 },
   repeat { exact pow_nonneg (zero_le _) _ }
 end }
 
