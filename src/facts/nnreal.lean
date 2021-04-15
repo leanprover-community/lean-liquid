@@ -111,6 +111,15 @@ begin
     exact ⟨nat.pos_of_ne_zero hN⟩, }
 end
 
+instance fact_inv_le_one [H : fact (1 ≤ c)] : fact (c⁻¹ ≤ 1) :=
+begin
+  by_cases hc : c = 0,
+  { rw hc at H, exact (not_le_of_lt zero_lt_one H.1).elim },
+  rwa [inv_le hc, mul_one]
+end
+
+instance fact_one_le_two : fact ((1:ℝ≥0) ≤ 2) := ⟨one_le_two⟩
+
 end nnreal
 
 #lint- only unused_arguments def_lemma doc_blame

@@ -121,12 +121,12 @@ begin
   exact_mod_cast hb.le,
 end
 
-/-- `b c_ r r' m` is the smallest `b` such that `2 * (k' c' m) * (r / r') ^ b ≤ (ε m)` -/
-def b : ℕ := nat.find (b_exists c_ r r' m)
+/-- `b c' r r' m` is the smallest `b` such that `2 * (k' c' m) * (r / r') ^ b ≤ (ε m)` -/
+def b : ℕ := nat.find (b_exists c' r r' m)
 
-lemma N₂_exists : ∃ N₂ : ℕ, (k' c' m) / (2 ^ N₂) ≤ r' ^ (b c_ r r' m) :=
+lemma N₂_exists : ∃ N₂ : ℕ, (k' c' m) / (2 ^ N₂) ≤ r' ^ (b c' r r' m) :=
 begin
-  suffices : ∃ N₂ : ℕ, ((2⁻¹ : ℝ≥0) ^ N₂ : ℝ) < (k' c' m)⁻¹ * r' ^ (b c_ r r' m),
+  suffices : ∃ N₂ : ℕ, ((2⁻¹ : ℝ≥0) ^ N₂ : ℝ) < (k' c' m)⁻¹ * r' ^ (b c' r r' m),
   { rcases this with ⟨N₂, h⟩,
     use N₂,
     rw [← div_lt_iff', ← nnreal.coe_pow, inv_pow', nnreal.coe_inv, inv_div_left, mul_inv',
@@ -139,7 +139,10 @@ begin
   { norm_num }
 end
 
-/--  DT: I added the lemmas from here... -/
+/-  DT: I added the lemmas from here... -/
+
+section move_this
+
 lemma _root_.nnreal.div_r'_lt_one : r / r' < 1 :=
 by rw [nnreal.div_lt_iff (ne_of_gt _), one_mul]; exact fact.out _
 
@@ -170,40 +173,31 @@ begin
   exact pow_nonneg (zero_le _) _,
 end
 
-/--  ... up to and including the next one, `b_le`. -/
-lemma b_le {n : ℕ} (hn : b c' r r' m ≤ n) : 2 * (k' c' m) * (r / r') ^ n ≤ (ε m) :=
-begin
-  rcases (nat.find_le_iff _ _).mp hn with ⟨n0, ni, g⟩,
-  refine le_trans ((mul_le_mul_left _).mpr (pow_mono_decr_exp n0 n ni (r.div_r'_lt_one r').le)) g,
-  exact mul_pos zero_lt_two (zero_lt_one.trans_le (universal_constants.one_le_k' c' m).1),
-end
+end move_this
 
+/- ... up to here. -/
 
-/-- `N₂ c_ r r' m` is the smallest `N₂` such that `N = 2 ^ N₂` satisfies
-`(k' c' m) / N ≤ r' ^ (b c_ r r' m)` -/
-def N₂ : ℕ := nat.find (N₂_exists c_ c' r r' m)
+/-- `N₂ c' r r' m` is the smallest `N₂` such that `N = 2 ^ N₂` satisfies
+`(k' c' m) / N ≤ r' ^ (b c' r r' m)` -/
+def N₂ : ℕ := nat.find (N₂_exists c' r r' m)
 
-lemma N₂_le {n : ℕ} (hn : (N₂ c_ c' r r' m) ≤ n) : (k' c' m) / 2 ^ n ≤ r' ^ b c_ r r' m :=
-begin
-  rcases (nat.find_le_iff _ _).mp hn with ⟨n0, ni, g⟩,
-  refine (preal.div_le_div_left_of_le _ _ (pow_mono one_le_two ni)).trans g;
-  exact pow_pos zero_lt_two _,
-end
+lemma N₂_spec : (k' c' m) / (2 ^ (N₂ c' r r' m)) ≤ r' ^ b c' r r' m :=
+nat.find_spec (N₂_exists c' r r' m)
 
-/-- `N c_ r r' m = 2 ^ N₂ c_ r r' m` is the smallest `N` that satisfies
-`(k' c' m) / N ≤ r' ^ (b c_ r r' m)` -/
-def N : ℕ := 2 ^ N₂ c_ c' r r' m
+/-- `N c' r r' m = 2 ^ N₂ c' r r' m` is the smallest `N` that satisfies
+`(k' c' m) / N ≤ r' ^ (b c' r r' m)` -/
+def N : ℕ := 2 ^ N₂ c' r r' m
 
-instance N_pos : fact (0 < N c_ c' r r' m) := ⟨pow_pos zero_lt_two _⟩
+instance N_pos : fact (0 < N c' r r' m) := ⟨pow_pos zero_lt_two _⟩
 
 -- should be doable now
 lemma r_pow_b_mul_N_le :
-  r ^ (b c_ r r' m) * (N c_ c' r r' m) ≤ (2 / k' c' m) * (r / r') ^ (b c_ r r' m) :=
+  r ^ (b c' r r' m) * (N c' r r' m) ≤ (2 / k' c' m) * (r / r') ^ (b c' r r' m) :=
 begin
 --  have F : 1 ≤ k' c' m := (universal_constants.one_le_k' c' m).1,
   have k0 : k' c' m ≠ 0 := ne_of_gt (zero_lt_one.trans_le (universal_constants.one_le_k' c' m).1),
   rw [N, mul_comm ((2 : ℝ≥0) / _), div_pow, nat.cast_pow, nat.cast_two, div_mul_eq_mul_div_comm],
-  repeat { rw mul_comm (r ^ b c_ r r' m) },
+  repeat { rw mul_comm (r ^ b c' r r' m) },
   refine mul_mono_nonneg (zero_le _) _,
   rw [div_div_eq_div_mul, mul_comm, ← div_div_eq_div_mul],
   rw nnreal.le_div_iff_mul_le k0,
@@ -212,20 +206,9 @@ begin
   -- there seems to be an exchange between `b` and `1 / b`
 end
 
--- should be doable now
 lemma two_div_k'_mul_r_div_r'_pow_b_le :
-  (2 * k' c' m) * (r / r') ^ (b c_ r r' m) ≤ ε m :=
-begin
-  refine le_trans _ (b_le c' r r' m rfl.le),
-  have := (zero_lt_one.trans_le (universal_constants.one_le_k' c' m).1),
-  refine (mul_le_mul_left _).mpr _,
-  { apply this.trans _,
-    nth_rewrite 0 ← one_mul (k' c' m),
-    exact (mul_lt_mul_right this).mpr one_lt_two},
-  { refine pow_mono_decr_exp _ _ _ _,
-    { sorry }, -- `b c' r r' m ≤ b c_ r r' m`: what is the relationship between `c_` and `c'`?
-    { exact (r.div_r'_lt_one r').le } }
-end
+  (2 * k' c' m) * (r / r') ^ (b c' r r' m) ≤ ε m :=
+nat.find_spec (b_exists c' r r' m)
 
 -- should be doable now
 instance k'_le_two_pow_N : fact (k' c' m ≤ 2 ^ N₂ c_ c' r r' m) :=
@@ -239,38 +222,38 @@ instance k'_le_two_pow_N : fact (k' c' m ≤ 2 ^ N₂ c_ c' r r' m) :=
 end }
 
 /-- `H BD c_ r r' m` is the universal bound on the norm of the `N₂`th Breen--Deligne homotopy
-in the first `m` degrees. Here `N₂ = thm95.N₂ c_ c' r r' m`. -/
+in the first `m` degrees. Here `N₂ = thm95.N₂ c' r r' m`. -/
 def H : ℕ :=
 max 1 $ (finset.range (m+1)).sup $ λ q,
-  ((BD.data.homotopy_mul BD.homotopy (N₂ c_ c' r r' m)).h q (q + 1)).bound
+  ((BD.data.homotopy_mul BD.homotopy (N₂ c' r r' m)).h q (q + 1)).bound
 
 lemma bound_by_H {q : ℕ} (h : q ≤ m) :
-  ((BD.data.homotopy_mul BD.homotopy (N₂ c_ c' r r' m)).h q (q + 1)).bound_by (H BD c_ c' r r' m) :=
+  ((BD.data.homotopy_mul BD.homotopy (N₂ c' r r' m)).h q (q + 1)).bound_by (H BD c' r r' m) :=
 begin
   rw [H, universal_map.bound_by, le_max_iff],
   right,
   refine @finset.le_sup _ _ _ (finset.range (m+1))
-    (λ q, ((BD.data.homotopy_mul BD.homotopy (N₂ c_ c' r r' m)).h q (q + 1)).bound) _ _,
+    (λ q, ((BD.data.homotopy_mul BD.homotopy (N₂ c' r r' m)).h q (q + 1)).bound) _ _,
   rwa [finset.mem_range, nat.lt_succ_iff],
 end
 
-instance H_pos : fact (0 < H BD c_ c' r r' m) :=
+instance H_pos : fact (0 < H BD c' r r' m) :=
 ⟨lt_max_iff.mpr $ or.inl zero_lt_one⟩
 
-instance H_pos' : fact ((0:ℝ≥0) < H BD c_ c' r r' m) :=
+instance H_pos' : fact ((0:ℝ≥0) < H BD c' r r' m) :=
 by { norm_cast, apply_instance }
 
 def k : ℝ≥0 := k' c' m * k' c' m
 
 instance one_le_k : fact (1 ≤ k c' m) := by { delta k, apply_instance }
 
-def K : ℝ≥0 := 2 * normed_spectral.K₀ m (K₁ m) * H BD c_ c' r r' m
+def K : ℝ≥0 := 2 * normed_spectral.K₀ m (K₁ m) * H BD c' r r' m
 
-instance one_le_K : fact (1 ≤ K BD c_ c' r r' m) := sorry
+instance one_le_K : fact (1 ≤ K BD c' r r' m) := sorry
 
 instance k_le_k₁ : fact (k c' (m - 1) ≤ k₁ m) := sorry
 
-instance K_le_K₁ : fact (K BD c_ c' r r' (m - 1) ≤ K₁ m) := sorry
+instance K_le_K₁ : fact (K BD c' r r' (m - 1) ≤ K₁ m) := sorry
 
 end universal_constants
 

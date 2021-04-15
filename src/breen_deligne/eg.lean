@@ -20,7 +20,7 @@ open universal_map
 /-- The `i`-th rank of this BD package is `2^i`. -/
 def rank (i : ℕ) : FreeMat := 2 ^ i
 
-def σπ (n : ℕ) := universal_map.sum n 2 - universal_map.proj n 2
+def σπ (n : ℕ) := universal_map.proj n 2 - universal_map.sum n 2
 
 lemma σπ_comp_mul_two {m n} (f : universal_map m n) :
   comp (σπ n) (mul 2 f) = comp f (σπ m) :=
@@ -62,7 +62,7 @@ open category_theory category_theory.limits category_theory.preadditive
 def hmap : Π (j i : ℕ) (h : i = j+1), (((data.mul 2).obj BD).X j) ⟶ (BD.X i)
 | j i rfl := 𝟙 _
 
-def h : homotopy (BD.sum 2) (BD.proj 2) :=
+def h : homotopy (BD.proj 2) (BD.sum 2) :=
 { h := λ j i, if h : i = j+1 then hmap j i h else 0,
   h_eq_zero := λ i j h, dif_neg h,
   comm :=
