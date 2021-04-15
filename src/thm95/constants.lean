@@ -1,4 +1,4 @@
-import polyhedral_lattice.category
+import polyhedral_lattice.cosimplicial
 import breen_deligne.suitable
 
 import facts.nnreal
@@ -56,11 +56,6 @@ namespace thm95
 namespace universal_constants
 
 open system_of_double_complexes breen_deligne
-
--- this should be a constant roughly determined by `combinatorial_lemma.lean` (`lem98`)
--- it should probably also depend on an `N : ℕ`
-def c₀ (Λ : PolyhedralLattice) : ℝ≥0 :=
-sorry
 
 def k₁ : ℕ → ℝ≥0
 | 0     := 2 -- should be anything > 1
@@ -123,6 +118,10 @@ end
 
 /-- `b c' r r' m` is the smallest `b` such that `2 * (k' c' m) * (r / r') ^ b ≤ (ε m)` -/
 def b : ℕ := nat.find (b_exists c' r r' m)
+
+lemma b_spec :
+  (2 * k' c' m) * (r / r') ^ (b c' r r' m) ≤ ε m :=
+nat.find_spec (b_exists c' r r' m)
 
 lemma N₂_exists : ∃ N₂ : ℕ, (k' c' m) / (2 ^ N₂) ≤ r' ^ (b c' r r' m) :=
 begin
@@ -187,9 +186,8 @@ def N : ℕ := 2 ^ N₂ c' r r' m
 
 instance N_pos : fact (0 < N c' r r' m) := ⟨pow_pos zero_lt_two _⟩
 
--- should be doable now
 instance k'_le_two_pow_N : fact (k' c' m ≤ 2 ^ N₂ c' r r' m) :=
-{out := begin
+{ out := begin
   obtain F := N₂_spec c' r r' m,
   rw [← mul_one ((2 : ℝ≥0) ^ _)],
   rw [nnreal.div_le_iff (pow_pos zero_lt_two _).ne', mul_comm] at F,
@@ -198,31 +196,21 @@ instance k'_le_two_pow_N : fact (k' c' m ≤ 2 ^ N₂ c' r r' m) :=
   repeat { exact pow_nonneg (zero_le _) _ }
 end }
 
-lemma could_this_be_what_we_want : r ^ b c' r r' m * ↑(N c' r r' m) ≤ ε m :=
-sorry
-
--- should be doable now
 lemma r_pow_b_mul_N_le :
-  r ^ (b c' r r' m) * (N c' r r' m) ≤ (2 / k' c' m) * (r / r') ^ (b c' r r' m) :=
+  r ^ (b c' r r' m) * (N c' r r' m) ≤ 2 * k' c' m * (r / r') ^ (b c' r r' m) :=
 begin
-  have k0 : k' c' m ≠ 0 := ne_of_gt (zero_lt_one.trans_le (universal_constants.one_le_k' c' m).1),
-  rw [N, mul_comm ((2 : ℝ≥0) / _), div_pow, nat.cast_pow, nat.cast_two, div_mul_eq_mul_div_comm],
-  repeat { rw mul_comm (r ^ b c' r r' m) },
-  refine mul_mono_nonneg (zero_le _) _,
-  rw [div_div_eq_div_mul, mul_comm, ← div_div_eq_div_mul],
-  rw nnreal.le_div_iff_mul_le k0,
+  have := (N₂_spec c' r r' m),
+  --  we will need to case split on `N₂ = 0` and `0 < N₂`
   sorry,
   -- something strange with the inequalities: in the pdf, at the bottom of page 62,
   -- there seems to be an exchange between `b` and `1 / b`
 end
 
+lemma r_pow_b_le_ε : r ^ b c' r r' m * N c' r r' m ≤ ε m :=
+(r_pow_b_mul_N_le _ _ _ _).trans (b_spec _ _ _ _)
+
 lemma N₂_spec' : k' c' m * (2 ^ N₂ c' r r' m)⁻¹ ≤ r' ^ b c' r r' m :=
 by { rw [inv_eq_one_div, mul_one_div], exact N₂_spec c' r r' m }
-
-lemma two_div_k'_mul_r_div_r'_pow_b_le :
-  (2 * k' c' m) * (r / r') ^ (b c' r r' m) ≤ ε m :=
-nat.find_spec (b_exists c' r r' m)
-
 /-- `H BD c_ r r' m` is the universal bound on the norm of the `N₂`th Breen--Deligne homotopy
 in the first `m` degrees. Here `N₂ = thm95.N₂ c' r r' m`. -/
 def H : ℕ :=
@@ -256,6 +244,22 @@ instance one_le_K : fact (1 ≤ K BD c' r r' m) := sorry
 instance k_le_k₁ : fact (k c' (m - 1) ≤ k₁ m) := sorry
 
 instance K_le_K₁ : fact (K BD c' r r' (m - 1) ≤ K₁ m) := sorry
+
+-- include c' r r' m
+include m
+
+-- this should be a constant roughly determined by `combinatorial_lemma.lean` (`lem98`)
+-- it should probably also depend on an `N : ℕ`
+def c₀ (Λ : PolyhedralLattice) : ℝ≥0 :=
+sorry
+
+lemma c₀_pred_le (hm : 0 < m) :
+  fact (c₀ (m - 1) ((Λ.cosimplicial (N c' r r' m)).obj (simplex_category.mk 0)) ≤ c₀ m Λ) :=
+sorry
+
+lemma c₀_pred_le_of_le (i : ℕ) (hi : i + 2 ≤ m + 1) :
+  fact (c₀ (m - 1) ((Λ.cosimplicial (N c' r r' m)).obj (simplex_category.mk (i + 1))) ≤ c₀ m Λ) :=
+sorry
 
 end universal_constants
 

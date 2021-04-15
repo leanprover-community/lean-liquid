@@ -34,14 +34,14 @@ include BD c_ c' r r' M V
 
 def thm95.IH (m : ℕ) : Prop := ∀ Λ : PolyhedralLattice.{0},
   ​((BD.data.system c_ r V r').obj (op $ Hom Λ M)).is_weak_bounded_exact
-    (k c' m) (K BD c' r r' m) m (c₀ Λ)
+    (k c' m) (K BD c' r r' m) m (c₀ m Λ)
 
 omit BD c_ c' r r' M V
 
 lemma NSC_row_exact (IH : ∀ m' < m, thm95.IH BD r r' V c_ c' M m')
   (h0m : 0 < m) (i : ℕ) (hi : i ≤ m + 1) :
   ((thm95.double_complex BD.data c_ r r' V Λ M (N c' r r' m)).row i).is_weak_bounded_exact
-    (k₁ m) (K₁ m) (m - 1) (c₀ Λ) :=
+    (k₁ m) (K₁ m) (m - 1) (c₀ m Λ) :=
 begin
   have hm' : m - 1 < m := nat.pred_lt h0m.ne',
   rcases i with (i|i|i),
@@ -51,15 +51,13 @@ begin
   { rw thm95.double_complex.row_one,
     refine (IH (m-1) hm' _).of_le BD.data.system_admissible _ _ le_rfl _,
     swap 3,
-    { /- turn this into an instance somewhere,
-         we need to make the definition of `c₀` depend on `m` -/ sorry },
+    { apply c₀_pred_le c' r r' Λ m h0m },
     all_goals { apply_instance } },
   { rw thm95.double_complex.row,
     apply system_of_complexes.rescale_is_weak_bounded_exact,
     refine (IH (m-1) hm' _).of_le BD.data.system_admissible _ _ le_rfl _,
     swap 3,
-    { /- turn this into an instance somewhere,
-         we need to make the definition of `c₀` depend on `m` -/ sorry },
+    { apply c₀_pred_le_of_le c' r r' Λ m i hi },
     all_goals { apply_instance } }
 end
 .
@@ -67,7 +65,7 @@ end
 def NSH_aux_type (N : ℕ) (M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ) :=
 normed_spectral_homotopy
   ((BD_system_map (BD.data.sum (2^N)) c_ (rescale_constants c_ (2^N)) r V).app M)
-  m (k' c' m) (ε m) (c₀ Λ) (H BD c' r r' m)
+  m (k' c' m) (ε m) (c₀ m Λ) (H BD c' r r' m)
 
 section
 
@@ -136,7 +134,7 @@ def NSH_aux (M) :
     then NSH_h_res c hqm ≫ (homotopy_σπ BD c_ c' r V c M _).h q' q
     else 0,
   h_bound_by :=
-  by sorry; begin
+  begin
     rintro q q' hqm rfl c hc,
     rw [dif_pos (nat.succ_le_succ hqm)],
     refine normed_group_hom.bound_by.comp' 1 _ _ (mul_one _).symm _ _,
@@ -147,7 +145,7 @@ def NSH_aux (M) :
   end,
   δ := λ c, (BD_map (BD.data.proj (2 ^ N₂ c' r r' m)) c_ c_ r V c).app M ≫ NSH_δ_res _ c,
   hδ :=
-  by sorry; begin
+  begin
     introsI c hc q hqm x,
     rw [dif_pos (nat.succ_le_succ hqm), dif_pos (hqm.trans (nat.le_succ _))],
     erw [comp_f, BD_map_app_f, NSH_δ_res_f, ← universal_map.eval_CLCFPTinv_def],
@@ -167,20 +165,20 @@ def NSH_aux (M) :
       apply N₂_spec },
     { apply universal_map.eval_CLCFPTinv₂_bound_by,
       apply universal_map.proj_bound_by },
-    { sorry }
+    { apply r_pow_b_le_ε }
   end }
 .
 
 def NSC_htpy :
   normed_spectral_homotopy
     ((thm95.double_complex BD.data c_ r r' V Λ M (N c' r r' m)).row_map 0 1)
-      m (k' c' m) (ε m) (c₀ Λ) (H BD c' r r' m) :=
+      m (k' c' m) (ε m) (c₀ m Λ) (H BD c' r r' m) :=
 (NSH_aux BD r r' V c_ c' m Λ (op $ (Hom ↥Λ ↥M))).of_iso _ _ _
   (iso.refl _) sorry (λ _ _ _, rfl) sorry sorry
 
 def NSC (IH : ∀ m' < m, thm95.IH BD r r' V c_ c' M m') :
   normed_spectral_conditions (thm95.double_complex BD.data c_ r r' V Λ M (N c' r r' m)) m
-    (k₁ m) (K₁ m) (k' c' m) (ε m) (c₀ Λ) (H BD c' r r' m) :=
+    (k₁ m) (K₁ m) (k' c' m) (ε m) (c₀ m Λ) (H BD c' r r' m) :=
 { row_exact := NSC_row_exact _ _ _ _ _ _ _ _ _ IH,
   col_exact := sorry,
   htpy := NSC_htpy BD r r' V c_ c' M m Λ,
@@ -192,7 +190,7 @@ include BD c_ c' r r' M V m
 theorem thm95 : ∀ (Λ : PolyhedralLattice.{0}) (S : Type) [fintype S]
   (V : NormedGroup) [normed_with_aut r V],
   ​((BD.data.system c_ r V r').obj (op $ Hom Λ (Mbar r' S))).is_weak_bounded_exact
-    (k c' m) (K BD c' r r' m) m (c₀ Λ) :=
+    (k c' m) (K BD c' r r' m) m (c₀ m Λ) :=
 begin
   apply nat.strong_induction_on m; clear m,
   introsI m IH Λ S _S_fin V _V_r,
