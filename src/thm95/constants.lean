@@ -139,20 +139,9 @@ begin
   { norm_num }
 end
 
-/-
-def preal : Type := { a : ℝ≥0 // 0 < a }
-
-instance preal_inhabited : inhabited preal :=
-{default := ⟨(1 : ℝ≥0), zero_lt_one⟩}
-
-instance : ordered_comm_group (units ℝ≥0) := by apply_instance
-
-lemma preal.div_le_div_left {a b c : ℝ≥0} (a0 : 0 < a) (b0 : 0 < b) (c0 : 0 < c) :
-  a / b ≤ a / c ↔ c ≤ b :=
-by rw [nnreal.div_le_iff b0.ne.symm, div_mul_eq_mul_div, nnreal.le_div_iff_mul_le c0.ne.symm,
-    mul_le_mul_left a0]
--/
-
+/--  DT: I added the lemmas from here... -/
+lemma _root_.nnreal.div_r'_lt_one : r / r' < 1 :=
+by rw [nnreal.div_lt_iff (ne_of_gt _), one_mul]; exact fact.out _
 
 lemma preal.div_le_div_left_of_le {a b c : ℝ≥0} (b0 : 0 < b) (c0 : 0 < c) :
   c ≤ b → a / b ≤ a / c :=
@@ -172,6 +161,24 @@ end
 lemma mul_mono {a b c : ℝ≥0} (c00 : 0 < c) (ab : c * a ≤ c * b) : a ≤ b :=
 (mul_le_mul_left c00).mp ab
 
+lemma pow_mono_decr_exp {a : ℝ≥0} (m n : ℕ) (mn : m ≤ n) (a1 : a ≤ 1) :
+  a ^ n ≤ a ^ m :=
+begin
+  rcases le_iff_exists_add.mp mn with ⟨k, rfl⟩,
+  rw [← mul_one (a ^ m), pow_add],
+  refine mul_le_mul rfl.le (pow_le_one _ (zero_le a) a1) _ _;
+  exact pow_nonneg (zero_le _) _,
+end
+
+/--  ... up to and including the next one, `b_le`. -/
+lemma b_le {n : ℕ} (hn : b c' r r' m ≤ n) : 2 * (k' c' m) * (r / r') ^ n ≤ (ε m) :=
+begin
+  rcases (nat.find_le_iff _ _).mp hn with ⟨n0, ni, g⟩,
+  refine le_trans ((mul_le_mul_left _).mpr (pow_mono_decr_exp n0 n ni (r.div_r'_lt_one r').le)) g,
+  exact mul_pos zero_lt_two (zero_lt_one.trans_le (universal_constants.one_le_k' c' m).1),
+end
+
+
 /-- `N₂ c_ r r' m` is the smallest `N₂` such that `N = 2 ^ N₂` satisfies
 `(k' c' m) / N ≤ r' ^ (b c_ r r' m)` -/
 def N₂ : ℕ := nat.find (N₂_exists c_ c' r r' m)
@@ -189,13 +196,6 @@ def N : ℕ := 2 ^ N₂ c_ c' r r' m
 
 instance N_pos : fact (0 < N c_ c' r r' m) := ⟨pow_pos zero_lt_two _⟩
 
---instance : ordered_semiring ℝ≥0 := by apply_instance
-/-
-lemma N_le {n : ℕ} (hn : (N₂ c_ c' r r' m) ≤ n) :
-  (N c_ c' r r' m) = 2 ^ N₂ c_ r r' m ≤ 2 :=
-sorry
--/
-
 -- should be doable now
 lemma r_pow_b_mul_N_le :
   r ^ (b c_ r r' m) * (N c_ c' r r' m) ≤ (2 / k' c' m) * (r / r') ^ (b c_ r r' m) :=
@@ -210,25 +210,6 @@ begin
   sorry,
   -- something strange with the inequalities: in the pdf, at the bottom of page 62,
   -- there seems to be an exchange between `b` and `1 / b`
-end
-
-lemma pow_mono_decr_exp {a : ℝ≥0} (m n : ℕ) (mn : m ≤ n) (a1 : a ≤ 1) :
-  a ^ n ≤ a ^ m :=
-begin
-  rcases le_iff_exists_add.mp mn with ⟨k, rfl⟩,
-  rw [← mul_one (a ^ m), pow_add],
-  refine mul_le_mul rfl.le (pow_le_one _ (zero_le a) a1) _ _;
-  exact pow_nonneg (zero_le _) _,
-end
-
-lemma _root_.nnreal.div_r'_lt_one : r / r' < 1 :=
-by rw [nnreal.div_lt_iff (ne_of_gt _), one_mul]; exact fact.out _
-
-lemma b_le {n : ℕ} (hn : b c' r r' m ≤ n) : 2 * (k' c' m) * (r / r') ^ n ≤ (ε m) :=
-begin
-  rcases (nat.find_le_iff _ _).mp hn with ⟨n0, ni, g⟩,
-  refine le_trans ((mul_le_mul_left _).mpr (pow_mono_decr_exp n0 n ni (r.div_r'_lt_one r').le)) g,
-  exact mul_pos zero_lt_two (zero_lt_one.trans_le (universal_constants.one_le_k' c' m).1),
 end
 
 -- should be doable now
