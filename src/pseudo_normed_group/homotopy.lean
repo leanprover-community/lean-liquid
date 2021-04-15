@@ -31,6 +31,7 @@ variables (M : (ProFiltPseuNormGrpWithTinv.{u} r')ᵒᵖ)
 
 open differential_object differential_object.complex_like
 
+@[simps app_f]
 def BD_map₂ (a₁ a₂ b₁ b₂ : ℕ → ℝ≥0)
   [∀ (i : ℕ), fact (b₁ i ≤ r' * a₁ i)] [∀ (i : ℕ), fact (b₂ i ≤ r' * a₂ i)]
   [BD₁.suitable a₁] [BD₂.suitable a₂] [BD₁.suitable b₁] [BD₂.suitable b₂]
@@ -51,9 +52,32 @@ def BD_map₂ (a₁ a₂ b₁ b₂ : ℕ → ℝ≥0)
     exact ((f.f i).eval_CLCFPTinv₂ r V r' (a₁ i) (b₁ i) (a₂ i) (b₂ i)).naturality g,
     } }
 .
+
 def BD_map [∀ i, (f.f i).suitable (c₂' i) (c₁' i)] :
   BD₁.complex c₁' r V r' c ⟶ BD₂.complex c₂' r V r' c :=
 BD_map₂ f r V _ _ _ _
+.
+
+open opposite
+
+def BD_system_map [∀ i, (f.f i).suitable (c₂' i) (c₁' i)] :
+  BD₁.system c₁' r V r' ⟶ BD₂.system c₂' r V r' :=
+{ app := λ M,
+  { app := λ c, (BD_map f c₁' c₂' r V c.unop).app M,
+    naturality' := λ x y hxy,
+    begin
+      ext i : 2,
+      erw [comp_f, comp_f],
+      dsimp only [data.system_obj, BD_map, BD_map₂_app_f, hom.mk'_f],
+      haveI : fact (y.unop ≤ x.unop) := ⟨le_of_hom hxy.unop⟩,
+      exact nat_trans.congr_app
+        (universal_map.res_comp_eval_CLCFPTinv₂ r V r' _ _ _ _ _ _ _ _ _) M,
+    end },
+  naturality' := λ M₁ M₂ g,
+  begin
+    ext c : 2,
+    exact (BD_map f c₁' c₂' r V c.unop).naturality _
+  end }
 .
 
 variables {f g}
@@ -104,7 +128,7 @@ section rescale
 
 variables (M : ProFiltPseuNormGrpWithTinv.{u} r')
 
--- warning: this might need `[fact (0 < N)]`
+-- move this
 instance rescale_constants_suitable (N : ℝ≥0) :
   BD.suitable (rescale_constants c_ N) :=
 by { delta rescale_constants, apply_instance }
@@ -132,27 +156,6 @@ end
 
 end rescale
 
-section double
-
-variables (BD) (M : ProFiltPseuNormGrpWithTinv.{u} r')
-
-open ProFiltPseuNormGrpWithTinv (of)
-
-open category_theory opposite
-
--- -- === !!! warning, the instance for `M × M` has sorry'd data
-def double_iso_prod :
-  (BD.double.complex c_ r V r' c).obj (op M) ≅
-  (BD.complex c_ r V r' c).obj (op $ of r' $ M × M) :=
-sorry
-
-example (N : ℝ≥0) :
-  (BD.double.complex (rescale_constants c_ N) r V r' c).obj (op M) ≅
-  (BD.complex c_ r V r' c).obj (op $ of r' $ rescale N (M × M)) :=
-(double_iso_prod BD _ r V c _) ≪≫ (eq_to_iso $ complex_rescale_eq _ _ _ _ _ _ _)
-
-end double
-
 end breen_deligne
 
 namespace breen_deligne
@@ -160,21 +163,15 @@ namespace breen_deligne
 universe variables v
 
 variables (BD : breen_deligne.package)
-
 variables (c_ c' : ℕ → ℝ≥0)
-variables [BD.data.suitable c_]
+variables [BD.data.suitable c_] [package.adept BD c_ c']
 variables (r : ℝ≥0) (V : NormedGroup.{v}) [normed_with_aut r V] [fact (0 < r)]
 variables {r' : ℝ≥0} [fact (0 < r')] [fact (r' ≤ 1)] (c : ℝ≥0)
 variables (M : (ProFiltPseuNormGrpWithTinv.{u} r')ᵒᵖ)
-variables (k' : ℝ≥0) (N : ℕ) [fact (1 ≤ k')] [fact (k' ≤ 2 ^ N)]
+variables (N : ℕ)
 
-def homotopy_σπ
-  [BD.data.suitable (c' * c_)]
-  [∀ (j i : ℕ), ((BD.data.homotopy_pow BD.homotopy N).h j i).suitable (rescale_constants c_ (2 ^ N) j) ((c' * c_) i)]
-  [∀ (i : ℕ), ((data.hom_pow BD.data.σ N).f i).suitable (rescale_constants c_ (2 ^ N) i) ((c' * c_) i)]
-  [∀ (i : ℕ), ((data.hom_pow BD.data.π N).f i).suitable (rescale_constants c_ (2 ^ N) i) ((c' * c_) i)]
- :=
-homotopy.{u v} (data.homotopy_pow BD.data BD.homotopy N)
+def homotopy_σπ :=
+homotopy.{u v} (data.homotopy_mul BD.data BD.homotopy N)
   (c' * c_) (rescale_constants c_ (2^N)) r V c M
 
 end breen_deligne

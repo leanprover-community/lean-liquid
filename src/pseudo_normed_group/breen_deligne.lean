@@ -81,11 +81,11 @@ def eval_png₀ (c₁ c₂ : ℝ≥0) [h : f.suitable c₁ c₂] (x : (filtratio
   eval_png_mem_filtration' f M c₁ c₂ _ (λ i, (x i).2) j⟩ : (filtration M c₂ : Type*))
 
 lemma eval_png_comp {l m n} (g : basic_universal_map m n) (f : basic_universal_map l m) :
-  (g.comp f).eval_png M = (g.eval_png M).comp (f.eval_png M) :=
+  (basic_universal_map.comp g f).eval_png M = (g.eval_png M).comp (f.eval_png M) :=
 begin
   ext x j,
   simp only [eval_png_apply, function.comp_app, coe_comp, basic_universal_map.comp,
-    matrix.mul_apply, finset.smul_sum, finset.sum_smul, mul_smul],
+    matrix.mul_apply, finset.smul_sum, finset.sum_smul, mul_smul, add_monoid_hom.coe_mk'],
   rw finset.sum_comm
 end
 

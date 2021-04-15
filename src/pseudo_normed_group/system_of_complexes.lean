@@ -136,7 +136,7 @@ by rw [← nat_trans.comp_app, ← nat_trans.comp_app, hf]
 /-- The system of complexes
 `V-hat(M_{≤c}^{n₁})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^{n₂})^{T⁻¹} ⟶ ...`
 occurring in Theorems 9.4 and 9.5 of [Analytic], as a functor in `M`. -/
--- @[simps]
+@[simps obj map]
 def system (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
   (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] :
   (ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ system_of_complexes :=

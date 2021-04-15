@@ -500,10 +500,54 @@ begin
   exact ⟨H⟩,
 end
 
+def prod_pi_homeo_pi_prod [Π i, profinitely_filtered_pseudo_normed_group (M i)]
+(c₁ c₂ : ℝ≥0) :
+ filtration (Π i, M i) c₁ × filtration (Π i, M i) c₂ ≃ₜ Π i, (filtration (M i) c₁ × filtration (M i) c₂) := --sorry
+{ to_fun := λ x i, ⟨⟨x.1.1 i, x.1.2 i⟩, ⟨x.2.1 i, x.2.2 i⟩⟩,
+  inv_fun := λ x, ⟨⟨λ i, (x i).1.1, λ i, (x i).1.2⟩, ⟨λ i, (x i).2.1, λ i, (x i).2.2⟩⟩,
+  left_inv := by {rintro ⟨x, hx⟩, simp only [subtype.coe_eta, subtype.val_eq_coe]},
+  right_inv := by { intro x, ext; refl},
+  continuous_to_fun :=
+  begin
+      rw continuous_def,
+      intros U hU,
+      simp only [subtype.val_eq_coe],
+      rw is_open_prod_iff,
+      rintros ⟨a, ha⟩ ⟨b, hb⟩,
+      sorry,
+    end,
+  continuous_inv_fun := sorry, }
+
+
 instance pi : profinitely_filtered_pseudo_normed_group (Π i, M i) :=
-{ continuous_add' := sorry,
-  continuous_neg' := sorry,
-  continuous_cast_le := sorry,
+{ continuous_add' :=
+    begin
+      intros c₁ c₂,
+      rw [← homeomorph.comp_continuous_iff (filtration_pi_homeo M (c₁ + c₂)),
+        ← homeomorph.comp_continuous_iff' (prod_pi_homeo_pi_prod M c₁ c₂).symm],
+      apply continuous_pi,
+      intro i,
+      exact (continuous_add' c₁ c₂).comp (continuous_apply i),
+    end,
+  continuous_neg' :=
+    begin
+      intro c,
+      rw [← homeomorph.comp_continuous_iff (filtration_pi_homeo M c),
+        ← homeomorph.comp_continuous_iff' (filtration_pi_homeo M c).symm],
+      apply continuous_pi,
+      intro i,
+      exact (continuous_neg' c).comp (continuous_apply i),
+    end,
+  continuous_cast_le :=
+    begin
+      intros c₁ c₂ h,
+      rw [← homeomorph.comp_continuous_iff (filtration_pi_homeo M c₂),
+        ← homeomorph.comp_continuous_iff' (filtration_pi_homeo M c₁).symm],
+      apply continuous_pi,
+      intro i,
+      have := @continuous_cast_le _ _ _ _ h,
+      exact this.comp (continuous_apply i),
+    end,
   .. pseudo_normed_group.pi M }
 
 variables {M}

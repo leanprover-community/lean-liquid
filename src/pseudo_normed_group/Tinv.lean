@@ -279,8 +279,8 @@ begin
   exact (CLCPTinv.map_comp _ _ _ _ _ _ _ _ _ _ _ _ _).symm
 end
 
-lemma res_norm_noninc [fact (c₂ ≤ r' * c₁)] [fact (c₂ ≤ c₁)] [fact (c₄ ≤ r' * c₃)] [fact (c₄ ≤ c₃)]
-  [fact (c₃ ≤ c₁)] [fact (c₄ ≤ c₂)] (M) :
+lemma res_norm_noninc {_ : fact (c₂ ≤ r' * c₁)} {_ : fact (c₂ ≤ c₁)}
+  {_ : fact (c₄ ≤ r' * c₃)} {_ : fact (c₄ ≤ c₃)} {_ : fact (c₃ ≤ c₁)} {_ : fact (c₄ ≤ c₂)} (M) :
   ((res r V r' c₁ c₂ c₃ c₄ n).app M).norm_noninc :=
 CLCPTinv.map_norm_noninc _ _ _ _ _ _ _ _ _ _ _
 

@@ -202,15 +202,15 @@ dif_neg h
 
 lemma eval_LCFP'_comp (f : basic_universal_map m n) (g : basic_universal_map l m)
   [hf : f.suitable c₂ c₁] [hg : g.suitable c₃ c₂] :
-  (f.comp g).eval_LCFP' V r' c₁ c₃ = f.eval_LCFP' V r' c₁ c₂ ≫ g.eval_LCFP' V r' c₂ c₃ :=
+  (basic_universal_map.comp f g).eval_LCFP' V r' c₁ c₃ = f.eval_LCFP' V r' c₁ c₂ ≫ g.eval_LCFP' V r' c₂ c₃ :=
 begin
-  haveI : (f.comp g).suitable c₃ c₁ := suitable_comp c₂,
+  haveI : (basic_universal_map.comp f g).suitable c₃ c₁ := suitable_comp c₂,
   simp only [eval_LCFP'_def, eval_FP_comp r' _ c₂, nat_trans.op_comp, whisker_right_comp]
 end
 
 lemma eval_LCFP_comp (f : basic_universal_map m n) (g : basic_universal_map l m)
   [hf : f.suitable c₂ c₁] [hg : g.suitable c₃ c₂] :
-  @eval_LCFP V r' _ _ (f.comp g) c₁ c₃ (suitable_comp c₂) =
+  @eval_LCFP V r' _ _ (basic_universal_map.comp f g) c₁ c₃ (suitable_comp c₂) =
     f.eval_LCFP V r' c₁ c₂ ≫ g.eval_LCFP V r' c₂ c₃ :=
 by { simp only [eval_LCFP_eq_eval_LCFP'], apply eval_LCFP'_comp }
 
@@ -309,7 +309,7 @@ lemma eval_LCFP'_comp_of (g : basic_universal_map m n) (f : basic_universal_map 
     eval_LCFP' V r' c₁ c₂ (of g) ≫ eval_LCFP' V r' c₂ c₃ (of f) :=
 begin
   simp only [comp_of, eval_LCFP'_of],
-  haveI hfg : (g.comp f).suitable c₃ c₁ := basic_universal_map.suitable_comp c₂,
+  haveI hfg : (basic_universal_map.comp g f).suitable c₃ c₁ := basic_universal_map.suitable_comp c₂,
   rw ← basic_universal_map.eval_LCFP'_comp,
 end
 
@@ -331,7 +331,7 @@ begin
       (suitable c₃ c₂) (suitable_free_predicate c₃ c₂) f hf; unfreezingI { clear_dependent f },
     { simp only [eval_LCFP'_zero, comp_zero, add_monoid_hom.map_zero] },
     { intros f hf,
-      rw suitable_of_iff at hf,
+      rw suitable_of_iff at hf hg,
       resetI,
       apply eval_LCFP'_comp_of },
     { intros f hf IH,

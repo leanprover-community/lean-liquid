@@ -368,5 +368,36 @@ begin
     exact hadd _ _ hQa (hQ.smul n hQx) (IH1 hQa) (IH2 n (hQ.smul n hQx)) }
 end
 
+lemma mem_support_map {X Y : Type*} (f : X → Y) (hf : function.injective f)
+  (a : free_abelian_group X) (y : Y) :
+  y ∈ (map f a).support ↔ ∃ x, x ∈ a.support ∧ y = f x :=
+begin
+  revert y,
+  apply free_abelian_group.induction_on'' a; clear a,
+  { intro y,
+    simp only [finset.not_mem_empty, exists_false, support_zero,
+      add_monoid_hom.map_zero, false_and], },
+  { intros n hn x y,
+    simp only [hn, add_monoid_hom.map_int_module_smul, map_of', support_smul, support_of,
+      exists_eq_left, ne.def, not_false_iff, finset.mem_singleton], },
+  { rintro a n hn x hx IH - y,
+    simp only [add_monoid_hom.map_int_module_smul, add_monoid_hom.map_add, map_of',
+      support_add_smul_of _ _ hn _ hx],
+    rw support_add_smul_of _ _ hn,
+    { simp only [IH, finset.mem_insert],
+      split,
+      { rintro (rfl|⟨x', h, rfl⟩),
+        { exact ⟨x, or.inl rfl, rfl⟩, },
+        { exact ⟨x', or.inr h, rfl⟩ } },
+      { rintro ⟨x', (rfl|h), rfl⟩,
+        { exact or.inl rfl },
+        { exact or.inr ⟨x', h, rfl⟩ } } },
+    { simp only [IH, not_exists, not_and],
+      intros x' hx',
+      apply hf.ne,
+      rintro rfl,
+      exact hx hx' } }
+end
+
 end free_abelian_group
 #lint- only unused_arguments def_lemma doc_blame
