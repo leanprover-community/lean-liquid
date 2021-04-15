@@ -175,25 +175,14 @@ end
 
 end move_this
 
-/--  ... up to and including the next one, `b_le`. -/
-lemma b_le {n : ℕ} (hn : b c' r r' m ≤ n) : 2 * (k' c' m) * (r / r') ^ n ≤ (ε m) :=
-begin
-  rcases (nat.find_le_iff _ _).mp hn with ⟨n0, ni, g⟩,
-  refine le_trans ((mul_le_mul_left _).mpr (pow_mono_decr_exp n0 n ni (r.div_r'_lt_one r').le)) g,
-  exact mul_pos zero_lt_two (zero_lt_one.trans_le (universal_constants.one_le_k' c' m).1),
-end
-
+/- ... up to here. -/
 
 /-- `N₂ c' r r' m` is the smallest `N₂` such that `N = 2 ^ N₂` satisfies
 `(k' c' m) / N ≤ r' ^ (b c' r r' m)` -/
 def N₂ : ℕ := nat.find (N₂_exists c' r r' m)
 
-lemma N₂_le {n : ℕ} (hn : (N₂ c' r r' m) ≤ n) : (k' c' m) / 2 ^ n ≤ r' ^ b c' r r' m :=
-begin
-  rcases (nat.find_le_iff _ _).mp hn with ⟨n0, ni, g⟩,
-  refine (preal.div_le_div_left_of_le _ _ (pow_mono one_le_two ni)).trans g;
-  exact pow_pos zero_lt_two _,
-end
+lemma N₂_spec : (k' c' m) / (2 ^ (N₂ c' r r' m)) ≤ r' ^ b c' r r' m :=
+nat.find_spec (N₂_exists c' r r' m)
 
 /-- `N c' r r' m = 2 ^ N₂ c' r r' m` is the smallest `N` that satisfies
 `(k' c' m) / N ≤ r' ^ (b c' r r' m)` -/
@@ -219,7 +208,7 @@ end
 
 lemma two_div_k'_mul_r_div_r'_pow_b_le :
   (2 * k' c' m) * (r / r') ^ (b c' r r' m) ≤ ε m :=
-b_le c' r r' m le_rfl
+nat.find_spec (b_exists c' r r' m)
 
 -- should be doable now
 instance k'_le_two_pow_N : fact (k' c' m ≤ 2 ^ N₂ c' r r' m) :=
