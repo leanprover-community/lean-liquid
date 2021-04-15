@@ -96,7 +96,7 @@ lemma is_regular.pow (n : ℕ) (ra : is_regular M a) : is_regular M (a ^ n) :=
 begin
   induction n with n hn,
   { simp },
-  { exact (mul_is_regular_iff M (a ^ n) ra).mpr hn }
+  { rw pow_succ, exact (mul_is_regular_iff M (a ^ n) ra).mpr hn }
 end
 
 /--  An element `a` is `M`-regular if and only if a positive power of `a` is `M`-regular. -/

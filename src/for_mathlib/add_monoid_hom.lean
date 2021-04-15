@@ -5,10 +5,11 @@ open_locale big_operators
 
 section for_mathlib
 
+-- can be removed, I guess
 @[simp] lemma function.nsmul_apply {X M : Type*} [add_comm_monoid M]
   (n : ℕ) (f : X → M) (x : X) :
-  (n •ℕ f) x = n •ℕ (f x) :=
-by rw [nsmul_eq_smul, nsmul_eq_smul, pi.smul_apply]
+  (n • f) x = n • (f x) :=
+by rw [pi.smul_apply]
 
 @[simp, to_additive] lemma monoid_hom.coe_one {M₁ M₂ : Type*} [monoid M₁] [monoid M₂] :
   ⇑(1 : M₁ →* M₂) = 1 := rfl
@@ -27,7 +28,7 @@ by rw [nsmul_eq_smul, nsmul_eq_smul, pi.smul_apply]
 
 @[simp] lemma add_monoid_hom.coe_nsmul {M₁ M₂ : Type*} [add_monoid M₁] [add_comm_monoid M₂]
   (n : ℕ) (f : M₁ →+ M₂) :
-  ⇑(n •ℕ f) = n •ℕ (f : M₁ → M₂) :=
+  ⇑(n • f) = n • (f : M₁ → M₂) :=
 begin
   induction n with n ih,
   { simp only [add_monoid_hom.zero_apply, zero_nsmul, add_monoid_hom.coe_zero], },
@@ -43,7 +44,7 @@ begin
   { simp only [add_gsmul, function.nsmul_apply, forall_const, pi.add_apply,
       one_gsmul, eq_self_iff_true, gsmul_coe_nat] },
   { intro, simp only [sub_gsmul, neg_gsmul, forall_prop_of_true, function.nsmul_apply,
-      pi.neg_apply, one_gsmul, gsmul_coe_nat, pi.sub_apply (-(i •ℕ f)) f x] }
+      pi.neg_apply, one_gsmul, gsmul_coe_nat, pi.sub_apply (-(i • f)) f x] }
 end
 
 @[simp] lemma add_monoid_hom.coe_gsmul {M₁ M₂ : Type*} [add_monoid M₁] [add_comm_group M₂]

@@ -6,6 +6,8 @@ import polyhedral_lattice.basic
 import toric.is_inj_nonneg
 import toric.pairing_dual_saturated
 
+import for_mathlib.add_monoid_hom
+
 /-!
 In this file we state and prove 9.7 of [Analytic].
 -/
@@ -19,14 +21,14 @@ noncomputable theory
 
 open classical subtype function embedding
 
-local attribute [instance] prop_decidable
-
+-- local attribute [instance] prop_decidable
 
 def explicit_dual_set (l : ι → Λ) : submodule ℕ (Λ →+ ℤ) :=
 { carrier := {x | ∀ i, 0 ≤ x (l i)},
   zero_mem' := λ i, le_rfl,
   add_mem' := λ x y hx hy i, add_nonneg (hx i) (hy i),
-  smul_mem' := λ n x hx i, by { rw [add_monoid_hom.nat_smul_apply], exact nsmul_nonneg (hx i) n } }
+  smul_mem' := λ n x hx i,
+    by { simp only [add_monoid_hom.coe_smul, pi.smul_apply], exact nsmul_nonneg (hx i) n } }
 
 
 lemma explicit_dual_set_of_neg (l : ι → Λ) (x : Λ →+ ℤ) :
@@ -45,6 +47,24 @@ lemma explicit_gordan (hΛ : finite_free Λ) [fintype ι] (l : ι → Λ) :
   (explicit_dual_set l).fg :=
 sorry
 
+-- -- TODO: remove this once a bug in mathlib is fixed
+-- /-- All `ℕ`-semimodule structures are equal. -/
+-- instance add_comm_monoid.nat_semimodule.subsingleton
+--   (M : Type*) [add_comm_monoid M] :
+--   subsingleton (semimodule ℕ M) :=
+-- ⟨λ P Q, by {
+--   ext n, induction n with n ih,
+--   { rw [@zero_smul ℕ M _ _ (id _) m, @zero_smul ℕ M _ _ (id _) m], },
+--   { simp only [nat.succ_eq_add_one, @add_smul ℕ M _ _ (id _), ih, @one_smul ℕ M _ (id _)], } }⟩
+
+-- set_option pp.implicit true
+
+lemma hack : mul_action_with_zero.to_smul_with_zero ℕ (Λ →+ ℤ) =
+  add_monoid.to_smul_with_zero (Λ →+ ℤ) :=
+begin
+  sorry
+end
+
 lemma lem97_pos (hΛ : finite_free Λ) [fintype ι] (N : ℕ) (hN : 0 < N) (l : ι → Λ) :
   ∃ B : finset (Λ →+ ℤ), (∀ b ∈ B, b ∈ (explicit_dual_set l)) ∧
    ∀ x : Λ →+ ℤ, x ∈ (explicit_dual_set l) → ∃ (x' ∈ B) (y : Λ →+ ℤ),
@@ -54,6 +74,7 @@ begin
   let S:= { x // x ∈ S₀},
   let Y := S → (fin N),
   let ψ := (λ y : Y, ∑ s in finset.attach S₀, (y s).1 • s.val),--modification?
+  classical,
   let B := finset.image ψ finset.univ,
   use B,
   split,
@@ -70,7 +91,9 @@ begin
     apply finset.sum_congr,
     { tauto },
     intros s hs,
-    simp only [dite_eq_ite, if_true, finset.coe_mem, finset.mk_coe] },
+    simp only [dite_eq_ite, if_true, finset.coe_mem, finset.mk_coe],
+    -- this is an extremely ugly hack, the proof ought to be done already
+    congr, rw hack, refl, },
   { intros x hx,
     rw [← hS₀, mem_span_finset] at hx,
     rcases hx with ⟨f, hx⟩,
@@ -100,21 +123,22 @@ begin
     use [x', H, y],
     split,
     { rw [← hx, hr],
-      dsimp [y, x'],
-      rw [finset.smul_sum, ← finset.sum_add_distrib],
-      simp_rw [← smul_assoc, ← add_smul, add_comm],
-      rw finset.sum_congr,
-      refl,
-      intros z hz,
+      dsimp [y, x', g],
+      simp only [add_smul, finset.sum_add_distrib],
       rw add_comm,
-      dsimp [g],
-      refl },
+      congr, swap, { funext, congr, rw hack, refl },
+      simp only [← smul_eq_mul, smul_assoc, ← finset.smul_sum],
+      -- proof ought to be done, but there is a bug in mathlib
+      clear_except,
+      simp only [← nsmul_eq_smul],
+      induction N with N ih,
+      { simp only [add_monoid.nsmul_zero', finset.sum_const_zero], },
+      { simp only [add_monoid.nsmul_succ', finset.sum_add_distrib, ih],
+        congr, funext, rw nsmul_eq_smul, congr, rw hack, refl } },
     intro i,
     dsimp [x'],
-    rw [← hx, sub_nonpos.symm, sub_eq_add_neg, ← add_monoid_hom.neg_apply, ← finset.sum_neg_distrib,
-      add_monoid_hom.finset_sum_apply, add_monoid_hom.finset_sum_apply, ← finset.sum_add_distrib],
-    simp_rw [← add_monoid_hom.add_apply, ← nsmul_eq_smul, ← gsmul_coe_nat, ← neg_gsmul,
-      gsmul_eq_smul, ← add_smul],
+    rw [← hx, ← sub_nonpos, ← add_monoid_hom.sub_apply, ← finset.sum_sub_distrib,
+      add_monoid_hom.finset_sum_apply],
     apply finset.sum_nonpos,
     intros z hz,
     replace hz : z ∈ explicit_dual_set l,
@@ -122,9 +146,10 @@ begin
       apply submodule.span_mono,
       exact set.singleton_subset_iff.mpr hz },
     replace hz : 0 ≤ z (l i) := rfl.mpr hz i,
-    rw [add_monoid_hom.int_smul_apply, ← gsmul_eq_smul, gsmul_eq_mul],
+    rw [← gsmul_coe_nat, hack, ← gsmul_coe_nat, ← sub_gsmul,
+      add_monoid_hom.gsmul_apply, gsmul_eq_mul],
     apply mul_nonpos_of_nonpos_of_nonneg _ hz,
-    simp only [add_zero, int.cast_id, int.coe_nat_mod, add_neg_le_iff_le_add'],
+    simp only [add_zero, int.cast_id, int.coe_nat_mod, sub_nonpos],
     rw [← int.coe_nat_mod, int.coe_nat_le_coe_nat_iff],
     apply nat.mod_le },
 end
@@ -135,7 +160,8 @@ def nonzero_sign : ℤ → units ℤ := λ n, if n ≥ 0 then 1 else -1
 
 def sign_vectors (ι : Type*) := (ι → units ℤ)
 
-lemma fintype_sign_vectors [fintype ι] : fintype (sign_vectors ι) := pi.fintype
+instance fintype_sign_vectors [decidable_eq ι] [fintype ι] :
+  fintype (sign_vectors ι) := pi.fintype
 
 
 /--Given a list l of elements of Λ and a functional x, (pos_vector l x) is the sign-vector of
@@ -227,7 +253,8 @@ lemma lem97 [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (hN : 0 < N) (l : ι �
     x = N • y + x' ∧
     ∀ i, (0 ≤ x' (l i) ∧ 0 ≤ (x - x') (l i)) ∨ (x' (l i) ≤ 0 ∧ (x - x') (l i) ≤ 0) :=
 begin
-  let A := finset.bUnion (@finset.univ (sign_vectors ι) (fintype_sign_vectors)) (pos_A hΛ N hN l),
+  classical,
+  let A := finset.bUnion (@finset.univ (sign_vectors ι) _) (pos_A hΛ N hN l),
   use A,
   intro,
   have hx : x ∈ (explicit_dual_set ((pos_vector l x) • l)) := smul_to_explicit_dual_set l x,
@@ -255,16 +282,19 @@ begin
       apply and.intro h_pos',
       simp only [sub_nonneg, add_monoid_hom.sub_apply, hx'] },
     { replace h_pos: x (l i) < 0 := by { rw lt_iff_not_ge, exact h_pos },
-      specialize hx' i,
       have h_posvect_neg : ((pos_vector l x) • l) i = - l i := pos_vector_neg_if_neg l x i h_pos,
-      replace h_pos' : 0 ≥ x' (l i),
+      replace h_pos' : x' (l i) ≤ 0,
       { rw h_posvect_neg at h_pos',
         simp only [ge_iff_le, add_monoid_hom.map_neg, coe_fn_coe_base, neg_nonneg] at h_pos',
         exact h_pos' },
-        rw h_posvect_neg at hx',
-        apply or.inr,
-        apply and.intro h_pos',
-        simp [*] at *, }},
+      specialize hx' i,
+      rw h_posvect_neg at hx',
+      refine or.inr ⟨h_pos', _⟩,
+      simp only [*, add_monoid_hom.coe_nsmul, add_monoid_hom.coe_add, nsmul_apply, pi.add_apply,
+        add_monoid_hom.map_neg, nsmul_eq_mul, pi.mul_apply, mul_neg_eq_neg_mul_symm,
+        add_sub_cancel, le_add_iff_nonneg_left, int.nat_cast_eq_coe_nat, neg_nonneg] at hx' ⊢,
+      simp only [le_add_iff_nonneg_right, neg_add_rev, neg_nonneg] at hx',
+      exact hx' } },
 end
 
 
@@ -284,7 +314,7 @@ begin
   zify,
   simp only [← int.abs_eq_nat_abs, hy, add_monoid_hom.add_apply, add_monoid_hom.nat_smul_apply],
   convert_to abs (N • y (l i) + x' (l i)) = abs (N • y (l i)) + abs (x' (l i)) using 2,
-  { rw [← nsmul_eq_smul, nsmul_eq_mul, int.nat_cast_eq_coe_nat, abs_mul, int.coe_nat_abs], },
+  { rw [nsmul_eq_mul, int.nat_cast_eq_coe_nat, abs_mul, int.coe_nat_abs], },
   rw [abs_add_eq_add_abs_iff (N • y (l i)) (x' (l i))],
   rw [← sub_eq_iff_eq_add] at hy,
   simpa only [hy, add_monoid_hom.nat_smul_apply, and_comm] using hx',

@@ -13,7 +13,7 @@ condition which we are missing).
 noncomputable theory
 open_locale big_operators classical nnreal
 
-local attribute [-instance] add_comm_monoid.nat_semimodule add_comm_group.int_module
+local attribute [-instance] add_comm_group.int_module
 
 namespace rescale
 
@@ -21,8 +21,7 @@ variables {N : ℝ≥0} {V : Type*}
 
 instance (Λ : Type*) [hN : fact (0 < N)] [polyhedral_lattice Λ] :
   polyhedral_lattice (rescale N Λ) :=
-{ nat_semimodule := by { delta rescale, apply_instance },
-  int_semimodule := by { delta rescale, apply_instance },
+{ int_semimodule := by { delta rescale, apply_instance },
   is_scalar_tower := by { delta rescale, apply_instance },
   finite_free := by { delta rescale, exact polyhedral_lattice.finite_free },
   polyhedral :=

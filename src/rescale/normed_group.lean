@@ -9,7 +9,7 @@ import facts.nnreal
 noncomputable theory
 open_locale big_operators classical nnreal
 
-local attribute [-instance] add_comm_monoid.nat_semimodule add_comm_group.int_module
+local attribute [-instance] add_comm_group.int_module
 
 namespace rescale
 
