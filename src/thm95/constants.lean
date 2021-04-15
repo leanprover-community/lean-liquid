@@ -229,7 +229,14 @@ end
 
 -- should be doable now
 instance k'_le_two_pow_N : fact (k' c' m ≤ 2 ^ N₂ c_ c' r r' m) :=
-sorry
+{out := begin
+  obtain F := N₂_le c_ c' r r' m rfl.le,
+  rw [← mul_one ((2 : ℝ≥0) ^ _)],
+  rw [nnreal.div_le_iff (pow_pos zero_lt_two _).ne', mul_comm] at F,
+  refine F.trans (mul_le_mul rfl.le _ _ _),
+  { exact pow_le_one (b c_ r r' m) (zero_le r') _inst_6.1 },
+  repeat { exact pow_nonneg (zero_le _) _ }
+end }
 
 /-- `H BD c_ r r' m` is the universal bound on the norm of the `N₂`th Breen--Deligne homotopy
 in the first `m` degrees. Here `N₂ = thm95.N₂ c_ c' r r' m`. -/
