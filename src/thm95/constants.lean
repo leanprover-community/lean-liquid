@@ -139,9 +139,50 @@ begin
   { norm_num }
 end
 
+/-
+def preal : Type := { a : ℝ≥0 // 0 < a }
+
+instance preal_inhabited : inhabited preal :=
+{default := ⟨(1 : ℝ≥0), zero_lt_one⟩}
+
+instance : ordered_comm_group (units ℝ≥0) := by apply_instance
+
+lemma preal.div_le_div_left {a b c : ℝ≥0} (a0 : 0 < a) (b0 : 0 < b) (c0 : 0 < c) :
+  a / b ≤ a / c ↔ c ≤ b :=
+by rw [nnreal.div_le_iff b0.ne.symm, div_mul_eq_mul_div, nnreal.le_div_iff_mul_le c0.ne.symm,
+    mul_le_mul_left a0]
+-/
+
+
+lemma preal.div_le_div_left_of_le {a b c : ℝ≥0} (b0 : 0 < b) (c0 : 0 < c) :
+  c ≤ b → a / b ≤ a / c :=
+begin
+  by_cases a0 : a = 0,
+  { exact λ _, by rw [a0, zero_div, zero_div] },
+  { have ai : 0 < a := zero_lt_iff.mpr a0,
+    cases a with a ha,
+    cases b with b hb,
+    cases c with c hc,
+    have a00 : 0 < a := lt_of_le_of_ne ha (ne_of_lt ai),
+    intros cb,
+    erw [div_le_div_left a00 b0 c0],
+    exact cb }
+end
+
+lemma mul_mono {a b c : ℝ≥0} (c00 : 0 < c) (ab : c * a ≤ c * b) : a ≤ b :=
+(mul_le_mul_left c00).mp ab
+
 /-- `N₂ c_ r r' m` is the smallest `N₂` such that `N = 2 ^ N₂` satisfies
 `(k' c' m) / N ≤ r' ^ (b c_ r r' m)` -/
 def N₂ : ℕ := nat.find (N₂_exists c_ c' r r' m)
+
+lemma N₂_le {n : ℕ} (hn : (N₂ c_ c' r r' m) ≤ n) : (k' c' m) / 2 ^ n ≤ r' ^ b c_ r r' m :=
+begin
+  rw [N₂, nat.find_le_iff] at hn,
+  rcases hn with ⟨n0, ni, g⟩,
+  refine (preal.div_le_div_left_of_le _ _ (pow_mono one_le_two ni)).trans g;
+  exact pow_pos zero_lt_two _,
+end
 
 /-- `N c_ r r' m = 2 ^ N₂ c_ r r' m` is the smallest `N` that satisfies
 `(k' c' m) / N ≤ r' ^ (b c_ r r' m)` -/
@@ -149,15 +190,71 @@ def N : ℕ := 2 ^ N₂ c_ c' r r' m
 
 instance N_pos : fact (0 < N c_ c' r r' m) := ⟨pow_pos zero_lt_two _⟩
 
+--instance : ordered_semiring ℝ≥0 := by apply_instance
+/-
+lemma N_le {n : ℕ} (hn : (N₂ c_ c' r r' m) ≤ n) :
+  (N c_ c' r r' m) = 2 ^ N₂ c_ r r' m ≤ 2 :=
+sorry
+-/
+
 -- should be doable now
 lemma r_pow_b_mul_N_le :
   r ^ (b c_ r r' m) * (N c_ c' r r' m) ≤ (2 / k' c' m) * (r / r') ^ (b c_ r r' m) :=
+begin
+--  have F : 1 ≤ k' c' m := (universal_constants.one_le_k' c' m).1,
+  have k0 : k' c' m ≠ 0 := ne_of_gt (zero_lt_one.trans_le (universal_constants.one_le_k' c' m).1),
+  rw [N, mul_comm ((2 : ℝ≥0) / _), div_pow, nat.cast_pow, nat.cast_two, div_mul_eq_mul_div_comm],
+  repeat { rw mul_comm (r ^ b c_ r r' m) },
+  refine mul_mono_nonneg (zero_le _) _,
+  rw [div_div_eq_div_mul, mul_comm, ← div_div_eq_div_mul],
+  rw nnreal.le_div_iff_mul_le k0,
+  sorry,
+
+  simp [N₂],
+  apply congr_arg (λ f, ),
 sorry
+end
+
+lemma pow_mono_decr_exp {a : ℝ≥0} (m n : ℕ) (mn : m ≤ n) (a1 : a ≤ 1) :
+  a ^ n ≤ a ^ m :=
+begin
+  by_cases a0 : a = 0,
+  { rw [a0],
+    by_cases mm0 : m = 0,
+      simpa [mm0] using pow_le_one _ rfl.le zero_le_one,
+    have m0 : 0 < m := zero_lt_iff.mpr mm0,
+    rw [zero_pow (m0.trans_le mn), zero_pow m0] },
+  rw [← one_div_one_div a, one_div_pow, one_div_pow, nnreal.div_le_iff (one_div_ne_zero _)],
+  rcases le_iff_exists_add.mp mn with ⟨k, rfl⟩,
+  simp only [one_div, inv_inv'],
+  rw [pow_add, mul_inv', ← mul_assoc, mul_inv_cancel, one_mul, ← one_div, nnreal.le_div_iff_mul_le,
+    one_mul, ← one_pow k],
+  refine pow_le_pow_of_le_left (zero_le a) a1 _,
+  repeat { exact pow_ne_zero _ a0 },
+end
+
+lemma pow_mono_decr {a b : ℝ≥0} (n : ℕ) (ab : a ≤ b) : a ^ n ≤ b ^ n :=
+begin
+  exact canonically_ordered_semiring.pow_le_pow_of_le_left ab n,
+end
+
+lemma b_le {n : ℕ} (hn : b c' r r' m ≤ n) : 2 * (k' c' m) * (r / r') ^ n ≤ (ε m) :=
+begin
+  rcases (nat.find_le_iff _ _).mp hn with ⟨n0, ni, g⟩,
+  refine le_trans ((mul_le_mul_left _).mpr (pow_mono_decr_exp n0 n ni (le_of_lt _))) g,
+  { exact mul_pos zero_lt_two (zero_lt_one.trans_le (universal_constants.one_le_k' c' m).1) },
+  { rw [nnreal.div_lt_iff (ne_of_gt _), one_mul];
+    exact fact.out _ }
+end
 
 -- should be doable now
 lemma two_div_k'_mul_r_div_r'_pow_b_le :
-  (2 / k' c' m) * (r / r') ^ (b c_ r r' m) ≤ ε m :=
-sorry
+  (2 * k' c' m) * (r / r') ^ (b c_ r r' m) ≤ ε m :=
+begin
+  apply le_trans _ (b_le c' r r' m rfl.le),
+  apply le_of_eq,congr,
+  sorry
+end
 
 -- should be doable now
 instance k'_le_two_pow_N : fact (k' c' m ≤ 2 ^ N₂ c_ c' r r' m) :=
