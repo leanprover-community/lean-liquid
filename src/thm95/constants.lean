@@ -178,8 +178,7 @@ def N₂ : ℕ := nat.find (N₂_exists c_ c' r r' m)
 
 lemma N₂_le {n : ℕ} (hn : (N₂ c_ c' r r' m) ≤ n) : (k' c' m) / 2 ^ n ≤ r' ^ b c_ r r' m :=
 begin
-  rw [N₂, nat.find_le_iff] at hn,
-  rcases hn with ⟨n0, ni, g⟩,
+  rcases (nat.find_le_iff _ _).mp hn with ⟨n0, ni, g⟩,
   refine (preal.div_le_div_left_of_le _ _ (pow_mono one_le_two ni)).trans g;
   exact pow_pos zero_lt_two _,
 end
@@ -209,51 +208,42 @@ begin
   rw [div_div_eq_div_mul, mul_comm, ← div_div_eq_div_mul],
   rw nnreal.le_div_iff_mul_le k0,
   sorry,
-
-  simp [N₂],
-  apply congr_arg (λ f, ),
-sorry
+  -- something strange with the inequalities: in the pdf, at the bottom of page 62,
+  -- there seems to be an exchange between `b` and `1 / b`
 end
 
 lemma pow_mono_decr_exp {a : ℝ≥0} (m n : ℕ) (mn : m ≤ n) (a1 : a ≤ 1) :
   a ^ n ≤ a ^ m :=
 begin
-  by_cases a0 : a = 0,
-  { rw [a0],
-    by_cases mm0 : m = 0,
-      simpa [mm0] using pow_le_one _ rfl.le zero_le_one,
-    have m0 : 0 < m := zero_lt_iff.mpr mm0,
-    rw [zero_pow (m0.trans_le mn), zero_pow m0] },
-  rw [← one_div_one_div a, one_div_pow, one_div_pow, nnreal.div_le_iff (one_div_ne_zero _)],
   rcases le_iff_exists_add.mp mn with ⟨k, rfl⟩,
-  simp only [one_div, inv_inv'],
-  rw [pow_add, mul_inv', ← mul_assoc, mul_inv_cancel, one_mul, ← one_div, nnreal.le_div_iff_mul_le,
-    one_mul, ← one_pow k],
-  refine pow_le_pow_of_le_left (zero_le a) a1 _,
-  repeat { exact pow_ne_zero _ a0 },
+  rw [← mul_one (a ^ m), pow_add],
+  refine mul_le_mul rfl.le (pow_le_one _ (zero_le a) a1) _ _;
+  exact pow_nonneg (zero_le _) _,
 end
 
-lemma pow_mono_decr {a b : ℝ≥0} (n : ℕ) (ab : a ≤ b) : a ^ n ≤ b ^ n :=
-begin
-  exact canonically_ordered_semiring.pow_le_pow_of_le_left ab n,
-end
+lemma _root_.nnreal.div_r'_lt_one : r / r' < 1 :=
+by rw [nnreal.div_lt_iff (ne_of_gt _), one_mul]; exact fact.out _
 
 lemma b_le {n : ℕ} (hn : b c' r r' m ≤ n) : 2 * (k' c' m) * (r / r') ^ n ≤ (ε m) :=
 begin
   rcases (nat.find_le_iff _ _).mp hn with ⟨n0, ni, g⟩,
-  refine le_trans ((mul_le_mul_left _).mpr (pow_mono_decr_exp n0 n ni (le_of_lt _))) g,
-  { exact mul_pos zero_lt_two (zero_lt_one.trans_le (universal_constants.one_le_k' c' m).1) },
-  { rw [nnreal.div_lt_iff (ne_of_gt _), one_mul];
-    exact fact.out _ }
+  refine le_trans ((mul_le_mul_left _).mpr (pow_mono_decr_exp n0 n ni (r.div_r'_lt_one r').le)) g,
+  exact mul_pos zero_lt_two (zero_lt_one.trans_le (universal_constants.one_le_k' c' m).1),
 end
 
 -- should be doable now
 lemma two_div_k'_mul_r_div_r'_pow_b_le :
   (2 * k' c' m) * (r / r') ^ (b c_ r r' m) ≤ ε m :=
 begin
-  apply le_trans _ (b_le c' r r' m rfl.le),
-  apply le_of_eq,congr,
-  sorry
+  refine le_trans _ (b_le c' r r' m rfl.le),
+  have := (zero_lt_one.trans_le (universal_constants.one_le_k' c' m).1),
+  refine (mul_le_mul_left _).mpr _,
+  { apply this.trans _,
+    nth_rewrite 0 ← one_mul (k' c' m),
+    exact (mul_lt_mul_right this).mpr one_lt_two},
+  { refine pow_mono_decr_exp _ _ _ _,
+    { sorry }, -- `b c' r r' m ≤ b c_ r r' m`: what is the relationship between `c_` and `c'`?
+    { exact (r.div_r'_lt_one r').le } }
 end
 
 -- should be doable now
