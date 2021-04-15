@@ -119,7 +119,7 @@ def NSH_aux (N : ℕ) (M) :
     then NSH_h_res c hqm ≫ (homotopy_σπ BD c_ c' r V c M _).h q' q
     else 0,
   h_bound_by :=
-  begin
+  by sorry; begin
     rintro q q' hqm rfl c hc,
     rw [dif_pos (nat.succ_le_succ hqm)],
     refine normed_group_hom.bound_by.comp' 1 _ _ (mul_one _).symm _ _,
@@ -129,7 +129,12 @@ def NSH_aux (N : ℕ) (M) :
     exact (bound_by_H BD c_ c' r r' _ hqm),
   end,
   δ := λ c, ((BD_system_map (BD.data.proj _) c_ c_ r V).app M).app (op c) ≫ NSH_δ_res _ c,
-  hδ := sorry,
+  hδ :=
+  begin
+    introsI c hc q hqm x,
+    rw [dif_pos (nat.succ_le_succ hqm), dif_pos (hqm.trans (nat.le_succ _))],
+    sorry
+  end,
   δ_bound_by := sorry }
 .
 

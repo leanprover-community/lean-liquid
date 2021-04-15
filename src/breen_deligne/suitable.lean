@@ -588,6 +588,19 @@ begin
   apply_assumption
 end
 
+instance hom_pow'_sum_suitable (i N : ℕ) :
+  ((data.hom_pow' (BD.sum 2) N).f i).suitable (c * (2 ^ N)⁻¹) c :=
+begin
+  induction N with N ih,
+  { simp only [hom_pow', rescale_constants, pow_zero, inv_one, mul_one],
+    exact universal_map.suitable_id _ },
+  simp only [hom_pow', rescale_constants, pow_succ, mul_inv'] at ih ⊢, resetI,
+  refine @universal_map.suitable.comp _ _ _ _ _ _ (c * 2⁻¹) _ (id _) (id _),
+  { apply universal_map.sum_two_suitable },
+  { rw [← mul_assoc, mul_right_comm],
+    apply universal_map.mul_suitable }
+end
+
 end data
 
 namespace universal_map
@@ -699,20 +712,19 @@ begin
   dsimp [data.homotopy_pow'],
   refine @universal_map.suitable_add _ _ _ _ _ _ (id _) (id _),
   { refine @universal_map.suitable.comp
-      _ _ _ _ _ _ (c' i * rescale_constants c_ 2 i) _ (id _) (id _),
-    { dsimp [rescale_constants], apply_instance },
-    { refine @universal_map.mul_suitable _ _ _ _ _ (id _) _ _,
-      convert @universal_map.suitable_mul_right _ _ (2⁻¹) _ _ _ (homotopy_pow'_suitable N) using 0,
-      simp only [rescale_constants, mul_assoc, pow_succ, mul_inv',
-        pi.mul_apply, mul_comm (2⁻¹ : ℝ≥0)] } },
+      _ _ _ _ _ _ (c' i * c_ i) _ _ (id _),
+    refine @universal_map.mul_suitable _ _ _ _ _ (id _) _ _,
+    refine (homotopy_pow'_suitable N).le _ _ _ _ _ le_rfl,
+    calc rescale_constants c_ (2 ^ (N + 1)) j
+        = c_ j * (2⁻¹ * (2 ^ N)⁻¹) : by simp only [rescale_constants, pow_succ, mul_inv']
+    ... ≤ c_ j * (1 * (2 ^ N)⁻¹)   : mul_le_mul' le_rfl (mul_le_mul' (by norm_num) le_rfl)
+    ... = c_ j * (2 ^ N)⁻¹         : by rw one_mul, },
   { refine @universal_map.suitable.comp
       _ _ _ _ _ _ (rescale_constants c_ 2 j) _ _ (id _),
     refine @universal_map.mul_suitable _ _ _ _ _ (id _) 2 ⟨zero_lt_two⟩,
-    refine @universal_map.suitable.le _ _ _ (rescale_constants c_ 2 j) _ _ _ (id _) _ le_rfl,
-    swap, { simp only [rescale_constants, pow_succ, mul_inv'], apply fact.out },
-    refine @data.hom_pow'_suitable_strict _ _ _ _ (id _) _,
-    dsimp [data.proj_f],
-    apply_instance }
+    simp only [rescale_constants, pow_succ, mul_inv'],
+    rw [← mul_assoc, mul_right_comm],
+    exact @universal_map.suitable_mul_right _ _ _ _ _ _ _ }
 end
 
 instance homotopy_mul_suitable (j i N : ℕ) :
