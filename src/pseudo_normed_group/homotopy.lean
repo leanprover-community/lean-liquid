@@ -109,17 +109,17 @@ def homotopy₂ (a₁ a₂ b₁ b₂ : ℕ → ℝ≥0)
   comm :=
   begin
     simp only [htpy_idx_rel₁_tt_nat, htpy_idx_rel₂_tt_nat],
-    rintro i j k rfl,
-    simp only [nat.succ_ne_zero i, nat.succ_eq_add_one, false_and, or_false],
-    rintro rfl,
+    rintro i j k hij hjk,
     dsimp only [data.complex₂, data.complex₂_d],
     erw [← nat_trans.comp_app, ← nat_trans.comp_app],
     erw [← universal_map.eval_CLCFPTinv₂_comp r V r',
         ← universal_map.eval_CLCFPTinv₂_comp r V r'],
     rw [← nat_trans.app_add, ← universal_map.eval_CLCFPTinv₂_add],
-    simp only [(add_comm _ _).trans (h.comm (i+1+1) (i+1) i
-      (by simp only [htpy_idx_rel₁_ff_nat]; exact or.inl rfl)
-      (by simp only [htpy_idx_rel₂_ff_nat]; exact or.inl rfl)),
+    rw eq_comm at hij hjk,
+    rw and_comm at hij,
+    simp only [(add_comm _ _).trans (h.comm k j i
+      (by simp only [htpy_idx_rel₁_ff_nat]; exact hjk)
+      (by simp only [htpy_idx_rel₂_ff_nat]; exact hij)),
       universal_map.eval_CLCFPTinv₂_sub],
     refl,
   end }

@@ -164,17 +164,19 @@ include BD c_ c' r V m
 -- make this a lemma for arbitrary homotopies
 lemma comm_aux {c : ℝ≥0} {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ} {N : ℕ} (i : ℕ) : true :=
 begin
-  have := (homotopy_σπ BD c_ c' r V (k' c' m * c) M N).comm i (i+1) (i+1+1),
+  have := (homotopy_σπ BD c_ c' r V (k' c' m * c) M N).comm (i-1) i (i+1),
   rw [differential_object.complex_like.htpy_idx_rel₁_tt_nat,
-    differential_object.complex_like.htpy_idx_rel₂_tt_nat] at this,
-  specialize this rfl (or.inl rfl),
-  rw [eq_comm, sub_eq_iff_eq_add', BD_map_app_f, ← universal_map.eval_CLCFPTinv_def] at this,
+      differential_object.complex_like.htpy_idx_rel₂_tt_nat] at this,
+  -- specialize this rfl (or.inl rfl),
+  -- rw [eq_comm, sub_eq_iff_eq_add', BD_map_app_f, ← universal_map.eval_CLCFPTinv_def] at this,
   sorry,
 end
 
 omit BD c_ c' r V m
 
 variables (V c' m)
+
+open differential_object differential_object.complex_like
 
 lemma NSH_hδ (M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ)
   (c : ℝ≥0) (hc : fact (c₀ m Λ ≤ c)) (q : ℕ) (hqm : q ≤ m) :
@@ -186,19 +188,19 @@ lemma NSH_hδ (M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ)
       ((((data.mul (2 ^ N₂ c' r r' m)).obj BD.data).system
         (rescale_constants c_ (2 ^ N₂ c' r r' m)) r V r').obj M).d (q - 1) q :=
 begin
-  sorry
-  -- introsI c hc q hqm x,
-  -- rw [NSH_h, NSH_h, dif_pos (nat.succ_le_succ hqm), dif_pos (hqm.trans (nat.le_succ _))],
-  -- erw [comp_f, BD_map_app_f, NSH_δ_res_f, ← universal_map.eval_CLCFPTinv_def],
-  -- dsimp only [unop_op],
+  rw [NSH_δ, NSH_h, NSH_h, dif_pos (nat.succ_le_succ hqm), dif_pos (hqm.trans (nat.le_succ _))],
+  erw [comp_f, BD_map_app_f, NSH_δ_res_f, ← universal_map.eval_CLCFPTinv_def],
+  dsimp only [unop_op, NSH_h_res, data.system_res_def],
+  simp only [← nat_trans.comp_app],
+  rw [universal_map.res_comp_eval_CLCFPTinv_absorb,
+      universal_map.res_comp_eval_CLCFPTinv_absorb],
+  all_goals { sorry }
 end
 .
 
 -- #check NSH_hδ V c' m Λ (op M)
 
 end
-
-open differential_object differential_object.complex_like
 
 def NSH_aux (M) : NSH_aux_type BD r r' V c_ c' m Λ (N₂ c' r r' m) M :=
 { h := λ q q' c, NSH_h q q' c,
