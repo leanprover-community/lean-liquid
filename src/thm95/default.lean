@@ -159,24 +159,6 @@ begin
   { apply r_pow_b_le_ε }
 end
 
-include BD c_ c' r V m
-
--- make this a lemma for arbitrary homotopies
-lemma comm_aux {c : ℝ≥0} {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ} {N : ℕ} (i : ℕ) : true :=
-begin
-  have := (homotopy_σπ BD c_ c' r V (k' c' m * c) M N).comm (i-1) i (i+1),
-  rw [differential_object.complex_like.htpy_idx_rel₁_tt_nat,
-      differential_object.complex_like.htpy_idx_rel₂_tt_nat] at this,
-  specialize this _ rfl,
-  { cases i,
-    { simp only [nat.one_ne_zero, false_or, and_self] },
-    { simp only [nat.succ_sub_succ_eq_sub, nat.succ_ne_zero, or_false, nat.sub_zero, and_false] } },
-  rw [eq_comm, sub_eq_iff_eq_add', BD_map_app_f, ← universal_map.eval_CLCFPTinv_def] at this,
-  sorry,
-end
-
-omit BD c_ c' r V m
-
 variables (V c' m)
 
 -- move this, and rename (all of these?)
@@ -270,7 +252,6 @@ def NSH_aux' (M) (help_me) : NSH_aux_type BD r r' V c_ c' m Λ (N₂ c' r r' m) 
   hδ := help_me,
   δ_bound_by := λ c hc q hqm, by apply NSH_δ_bound_by }
 .
-
 
 open differential_object differential_object.complex_like category_theory.preadditive
 

@@ -37,6 +37,17 @@ open simplex_category polyhedral_lattice (conerve.L conerve.obj)
 variables (N : ℕ) [fact (0 < N)] (Λ : PolyhedralLattice)
 variables (r' : ℝ≥0) (M : ProFiltPseuNormGrpWithTinv r')
 
+/-!
+The goal for this file:
+
+```
+(((data.mul (2 ^ N₂ c' r r' m)).obj BD.data).system
+  (rescale_constants c_ (2 ^ N₂ c' r r' m)) r V r').obj (op (Hom ↥Λ ↥M)) ≅
+  (thm95.double_complex BD.data c_ r r' V Λ M (N c' r r' m)).row 1
+```
+
+-/
+
 -- TODO: we probably want some efficient constructor for these isomorphisms,
 -- because the default has a lot of redundancy in the proof obligations
 
@@ -69,3 +80,42 @@ sorry
 end
 
 end PolyhedralLattice
+
+section rescale
+universe variables u
+
+variables {BD : breen_deligne.data}
+
+variables (c_ c_₁ c_₂ : ℕ → ℝ≥0)
+variables [BD.suitable c_]
+variables (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
+variables {r' : ℝ≥0} [fact (0 < r')] [fact (r' ≤ 1)] (c : ℝ≥0)
+variables (M : ProFiltPseuNormGrpWithTinv.{u} r')
+
+-- move this
+instance rescale_constants_suitable (N : ℝ≥0) :
+  BD.suitable (rescale_constants c_ N) :=
+by { delta rescale_constants, apply_instance }
+
+variables (BD)
+
+open breen_deligne opposite ProFiltPseuNormGrpWithTinv (of)
+
+-- this is not `iso.refl` -- so close, and yet so far away
+-- the difference is `M_{(c * c_i) * N⁻¹}` vs `M_{c * (c_i * N⁻¹)}`
+theorem complex_rescale_eq (N : ℝ≥0) :
+  (BD.complex (rescale_constants c_ N) r V r' c).obj (op M) =
+  (BD.complex c_ r V r' c).obj (op $ of r' $ rescale N M) :=
+begin
+  dsimp only [data.complex, rescale_constants],
+  haveI : ∀ c c_, fact (c * c_ * N⁻¹ ≤ c * (c_ * N⁻¹)) :=
+    λ c c_, by simpa only [mul_assoc] using nnreal.fact_le_refl _,
+  transitivity
+    (BD.complex₂ r V r' (λ (i : ℕ), c * c_ i * N⁻¹) (λ (i : ℕ), r' * (c * c_ i) * N⁻¹)).obj (op $ of r' M),
+  { simp only [mul_assoc, ProFiltPseuNormGrpWithTinv.of_coe] },
+  refine cochain_complex.ext (λ i, _),
+  dsimp only [data.complex₂, rescale_constants, data.complex₂_d],
+  rw ← universal_map.eval_CLCFPTinv₂_rescale,
+end
+
+end rescale
