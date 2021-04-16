@@ -131,38 +131,6 @@ homotopy₂ h r V M _ _ _ _
 
 end homotopy
 
-section rescale
-
-variables (M : ProFiltPseuNormGrpWithTinv.{u} r')
-
--- move this
-instance rescale_constants_suitable (N : ℝ≥0) :
-  BD.suitable (rescale_constants c_ N) :=
-by { delta rescale_constants, apply_instance }
-
-variables (BD)
-
-open opposite ProFiltPseuNormGrpWithTinv (of)
-
--- this is not `iso.refl` -- so close, and yet so far away
--- the difference is `M_{(c * c_i) * N⁻¹}` vs `M_{c * (c_i * N⁻¹)}`
-theorem complex_rescale_eq (N : ℝ≥0) :
-  (BD.complex (rescale_constants c_ N) r V r' c).obj (op M) =
-  (BD.complex c_ r V r' c).obj (op $ of r' $ rescale N M) :=
-begin
-  dsimp only [data.complex, rescale_constants],
-  haveI : ∀ c c_, fact (c * c_ * N⁻¹ ≤ c * (c_ * N⁻¹)) :=
-    λ c c_, by simpa only [mul_assoc] using nnreal.fact_le_refl _,
-  transitivity
-    (BD.complex₂ r V r' (λ (i : ℕ), c * c_ i * N⁻¹) (λ (i : ℕ), r' * (c * c_ i) * N⁻¹)).obj (op $ of r' M),
-  { simp only [mul_assoc, ProFiltPseuNormGrpWithTinv.of_coe] },
-  refine cochain_complex.ext (λ i, _),
-  dsimp only [data.complex₂, rescale_constants, data.complex₂_d],
-  rw ← universal_map.eval_CLCFPTinv₂_rescale,
-end
-
-end rescale
-
 end breen_deligne
 
 namespace breen_deligne
