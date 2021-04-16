@@ -456,6 +456,12 @@ lemma res_comp_eval_CLCFPTinv
     ϕ.eval_CLCFPTinv r V r' c₁ c₃ ≫ res r V r' c₃ c₄ m :=
 by apply res_comp_eval_CLCFPTinv₂
 
+lemma res_comp_eval_CLCFPTinv_absorb
+  [fact (c₂ ≤ c₁)] [ϕ.suitable c₃ c₂] (h : ϕ.suitable c₃ c₁) :
+  res r V r' c₁ c₂ n ≫ ϕ.eval_CLCFPTinv r V r' c₂ c₃ =
+    ϕ.eval_CLCFPTinv r V r' c₁ c₃ :=
+by rw [@res_comp_eval_CLCFPTinv r V _ _ r' _ _ c₁ c₂ c₃ c₃ _ _ ϕ, res_refl, category.comp_id]
+
 lemma eval_CLCFPTinv_bound_by [normed_with_aut r V] [fact (0 < r)] [ϕ.suitable c₂ c₁]
   (N : ℕ) (h : ϕ.bound_by N) (M) :
   ((ϕ.eval_CLCFPTinv r V r' c₁ c₂).app M).bound_by N :=

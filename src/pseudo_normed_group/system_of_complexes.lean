@@ -168,6 +168,18 @@ functor.flip {
   end }
 .
 
+-- move this
+instance fact_unop_op {c₁ c₂ : ℝ≥0} [fact (c₂ ≤ c₁)] :
+  fact ((unop (op c₂)) ≤ (unop (op c₁))) :=
+by { dsimp, apply_assumption }
+
+lemma system_res_def (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
+  (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] {M}
+  {c₁ c₂ : ℝ≥0} {i : ℕ} [h : fact (c₂ ≤ c₁)] :
+  @system_of_complexes.res ((BD.system c_ r V r').obj M) c₁ c₂ i _ =
+    (CLCFPTinv.res r V r' _ _ _).app M :=
+rfl
+
 end
 
 section
