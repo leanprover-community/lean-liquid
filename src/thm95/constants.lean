@@ -2,7 +2,7 @@ import polyhedral_lattice.cosimplicial
 import breen_deligne.suitable
 
 import facts.nnreal
-
+set_option profiler true
 /-!
 # Explicit formulas for the constants in theorem 9.5
 -/
@@ -136,7 +136,7 @@ begin
   refine exists_pow_lt_of_lt_one (mul_pos _ _) _,
   { rw [inv_pos, nnreal.coe_pos], exact fact.out _ },
   { apply pow_pos, rw [nnreal.coe_pos], exact fact.out _ },
-  { norm_num }
+  { refine lt_of_le_of_lt (one_div _).symm.le one_half_lt_one }
 end
 
 /-- `N₂ c' r r' m` is the smallest `N₂` such that `N = 2 ^ N₂` satisfies
@@ -153,7 +153,7 @@ lemma N₂_spec_of_pos' (h : 0 < N₂ c' r r' m) :
   r' ^ b c' r r' m < 2 * k' c' m / 2 ^ N₂ c' r r' m :=
 begin
   obtain (F : r' ^ b c' r r' m < (k' c' m) / (2 ^ (N₂ c' r r' m - 1))) :=
-    not_le.mp (nat.find_min (N₂_exists c' r r' m) (nat.pred_lt (zero_lt_iff.mp h))),
+    not_le.mp (nat.find_min (N₂_exists c' r r' m) (nat.pred_lt (zero_lt_iff.mp h) : _ - 1 < _)),
   rwa [pow_sub' _ (@two_ne_zero ℝ≥0 _ _) h, pow_one, mul_comm, ← div_div_eq_div_mul,
     div_eq_mul_one_div _ ((2 : ℝ≥0)⁻¹), inv_eq_one_div, one_div_one_div, mul_comm] at F,
 end
@@ -210,6 +210,7 @@ lemma r_pow_b_le_ε : r ^ b c' r r' m * N c' r r' m ≤ ε m :=
 
 lemma N₂_spec' : k' c' m * (2 ^ N₂ c' r r' m)⁻¹ ≤ r' ^ b c' r r' m :=
 by { rw [inv_eq_one_div, mul_one_div], exact N₂_spec c' r r' m }
+
 /-- `H BD c_ r r' m` is the universal bound on the norm of the `N₂`th Breen--Deligne homotopy
 in the first `m` degrees. Here `N₂ = thm95.N₂ c' r r' m`. -/
 def H : ℕ :=
