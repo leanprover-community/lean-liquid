@@ -183,16 +183,21 @@ lemma N₂_spec : (k' c' m) / (2 ^ (N₂ c' r r' m)) ≤ r' ^ b c' r r' m :=
 nat.find_spec (N₂_exists c' r r' m)
 
 variables {c' r r' m}
-lemma N₂_spec_of_pos (h : 0 < N₂ c' r r' m) :
-  r' ^ b c' r r' m < (k' c' m) / (2 ^ (N₂ c' r r' m - 1)) :=
-not_le.mp (nat.find_min (N₂_exists c' r r' m) (nat.pred_lt (zero_lt_iff.mp h)))
+/--  This lemma is not just the line with `nat.find_min` since, when we apply it in
+`r_pow_b_mul_N_le`, it is a little smoother if we massage the inequality first a bit. -/
+lemma N₂_spec_of_pos' (h : 0 < N₂ c' r r' m) :
+  r' ^ b c' r r' m < 2 * k' c' m / 2 ^ N₂ c' r r' m :=
+begin
+  obtain (F : r' ^ b c' r r' m < (k' c' m) / (2 ^ (N₂ c' r r' m - 1))) :=
+    not_le.mp (nat.find_min (N₂_exists c' r r' m) (nat.pred_lt (zero_lt_iff.mp h))),
+  rwa [pow_sub' _ (@two_ne_zero ℝ≥0 _ _) h, pow_one, mul_comm, ← div_div_eq_div_mul,
+    div_eq_mul_one_div _ ((2 : ℝ≥0)⁻¹), inv_eq_one_div, one_div_one_div, mul_comm] at F,
+end
 
+/-  This lemma may no longer be needed. -/
 lemma N₂_spec_of_eq_zero (h : N₂ c' r r' m = 0) :
   k' c' m ≤ r' ^ b c' r r' m :=
-begin
-  obtain F := N₂_spec c' r r' m,
-  simpa only [h, div_one, pow_zero] using F,
-end
+by simpa only [h, div_one, pow_zero] using N₂_spec c' r r' m
 
 lemma k'_eq_one_of_N₂_spec_eq_zero (h : N₂ c' r r' m = 0) :
   k' c' m = 1 :=
@@ -201,7 +206,8 @@ begin
   obtain F := N₂_spec c' r r' m,
   rw [h, pow_zero, div_one] at F,
   refine F.trans (pow_le_one (b c' r r' m) (le_of_lt _) _);
-  { apply fact.out _, assumption }
+  { apply fact.out _,
+    assumption }
 end
 
 variables (c' r r' m)
@@ -213,37 +219,29 @@ instance N_pos : fact (0 < N c' r r' m) := ⟨pow_pos zero_lt_two _⟩
 
 instance k'_le_two_pow_N : fact (k' c' m ≤ 2 ^ N₂ c' r r' m) :=
 { out := begin
-  obtain F := N₂_spec c' r r' m,
   rw [← mul_one ((2 : ℝ≥0) ^ _)],
+  obtain F := N₂_spec c' r r' m,
   rw [nnreal.div_le_iff (pow_pos zero_lt_two _).ne', mul_comm] at F,
   refine F.trans (mul_le_mul rfl.le _ _ _),
-  { exact pow_le_one _ (zero_le r') _inst_6.1 },
+  { refine pow_le_one _ (zero_le r') _,
+    apply fact.out _,
+    assumption },
   repeat { exact pow_nonneg (zero_le _) _ }
 end }
 
 lemma r_pow_b_mul_N_le :
   r ^ (b c' r r' m) * (N c' r r' m) ≤ 2 * k' c' m * (r / r') ^ (b c' r r' m) :=
 begin
-  --  we will need to case split on `N₂ = 0` and `0 < N₂`
-  by_cases N0 : N₂ c' r r' m = 0,
-  { rw [k'_eq_one_of_N₂_spec_eq_zero N0, mul_one, N, N0, pow_zero, nat.cast_one, mul_one, mul_comm,
-      div_pow, div_eq_mul_one_div, mul_assoc, div_mul_comm', mul_one],
-    rw [← mul_one (r ^ _)] { occs := occurrences.pos [1] },
-    refine mul_le_mul_left' (nnreal.coe_le_coe.mp _) _,
-    rw [nnreal.coe_div, nnreal.coe_one, nnreal.coe_pow, one_le_div],
-    { refine (pow_le_one _ (nnreal.coe_nonneg _) _).trans one_le_two,
-      apply fact.out _,
-      assumption },
-    { exact pow_pos (nnreal.coe_pos.mpr (fact.out (0 < r'))) _ } },
-  replace N0 : 0 < N₂ c' r r' m := zero_lt_iff.mpr N0,
-  obtain F := N₂_spec_of_pos N0,
-  rw [pow_sub' _ (@two_ne_zero ℝ≥0 _ _) N0, pow_one, mul_comm, ← div_div_eq_div_mul,
-    div_eq_mul_one_div _ ((2 : ℝ≥0)⁻¹), inv_eq_one_div, one_div_one_div, mul_comm] at F,
   rw [mul_comm _ (_ ^ _), N, div_pow, nat.cast_pow, nat.cast_bit0, nat.cast_one, div_eq_mul_one_div,
     mul_assoc, div_mul_comm', mul_one],
   refine mul_le_mul_left' _ _,
   rw [nnreal.le_div_iff_mul_le, mul_comm, ← nnreal.le_div_iff_mul_le],
-  { exact le_of_lt F },
+  { by_cases N0 : N₂ c' r r' m = 0,
+    { rw [k'_eq_one_of_N₂_spec_eq_zero N0, mul_one, N0, pow_zero, div_one],
+      refine le_trans (pow_le_one _ (nnreal.coe_nonneg _) _) one_le_two,
+      apply fact.out _,
+      assumption },
+    { exact le_of_lt (N₂_spec_of_pos' (zero_lt_iff.mpr N0)) } },
   { exact pow_ne_zero _ two_ne_zero },
   { exact pow_ne_zero _ (ne_of_gt (fact.out _)) }
 end
