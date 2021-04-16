@@ -43,6 +43,7 @@ lemma NSC_row_exact (IH : ∀ m' < m, thm95.IH BD r r' V c_ c' M m')
   ((thm95.double_complex BD.data c_ r r' V Λ M (N c' r r' m)).row i).is_weak_bounded_exact
     (k₁ m) (K₁ m) (m - 1) (c₀ m Λ) :=
 begin
+  haveI h0m_ : fact (0 < m) := ⟨h0m⟩,
   have hm' : m - 1 < m := nat.pred_lt h0m.ne',
   rcases i with (i|i|i),
   { rw thm95.double_complex.row_zero,

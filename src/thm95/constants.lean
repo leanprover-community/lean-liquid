@@ -240,9 +240,9 @@ def K : ℝ≥0 := 2 * normed_spectral.K₀ m (K₁ m) * H BD c' r r' m
 
 instance one_le_K : fact (1 ≤ K BD c' r r' m) := sorry
 
-instance k_le_k₁ : fact (k c' (m - 1) ≤ k₁ m) := sorry
+instance k_le_k₁ [fact (0 < m)] : fact (k c' (m - 1) ≤ k₁ m) := sorry
 
-instance K_le_K₁ : fact (K BD c' r r' (m - 1) ≤ K₁ m) := sorry
+instance K_le_K₁ [fact (0 < m)] : fact (K BD c' r r' (m - 1) ≤ K₁ m) := sorry
 
 -- include c' r r' m
 include m

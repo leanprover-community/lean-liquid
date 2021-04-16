@@ -14,12 +14,18 @@ lemma double_complex.row_one :
 We want to "rewrite" this row in such a way that it is the target
 of the homotopies that will be constructed formally from `BD.homotopy`.
 
+Concretely, we want:
+```
+(((data.mul N).obj BD.data).system (rescale_constants c_ N) r V r').obj (op (Hom ↥Λ ↥M)) ≅
+  (thm95.double_complex BD.data c_ r r' V Λ M N).row 1
+```
+
 This means that we need to multiply `BD` by `N`,
 and then take the system associated with `rescale N (Hom Λ M)`.
 
 We need the following isomorphisms
 
-* `BD.system M^N = (BD.mul N).system M` (Warning: `BD.mul` is not yet defined)
+* `BD.system M^N = (BD.mul N).system M`
 * `Hom (rescale N (Λ^N)) M = (rescale N (Hom Λ M)^N` (2 steps?)
 * `(cosimplicial Λ N).obj (mk 0) = rescale N (Λ^N)`
 
@@ -37,16 +43,6 @@ open simplex_category polyhedral_lattice (conerve.L conerve.obj)
 variables (N : ℕ) [fact (0 < N)] (Λ : PolyhedralLattice)
 variables (r' : ℝ≥0) (M : ProFiltPseuNormGrpWithTinv r')
 
-/-!
-The goal for this file:
-
-```
-(((data.mul (2 ^ N₂ c' r r' m)).obj BD.data).system
-  (rescale_constants c_ (2 ^ N₂ c' r r' m)) r V r').obj (op (Hom ↥Λ ↥M)) ≅
-  (thm95.double_complex BD.data c_ r r' V Λ M (N c' r r' m)).row 1
-```
-
--/
 
 -- TODO: we probably want some efficient constructor for these isomorphisms,
 -- because the default has a lot of redundancy in the proof obligations
