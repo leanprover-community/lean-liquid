@@ -157,11 +157,6 @@ begin
     div_eq_mul_one_div _ ((2 : ℝ≥0)⁻¹), inv_eq_one_div, one_div_one_div, mul_comm] at F,
 end
 
-/-  This lemma may no longer be needed. -/
-lemma N₂_spec_of_eq_zero (h : N₂ c' r r' m = 0) :
-  k' c' m ≤ r' ^ b c' r r' m :=
-by simpa only [h, div_one, pow_zero] using N₂_spec c' r r' m
-
 lemma k'_eq_one_of_N₂_spec_eq_zero (h : N₂ c' r r' m = 0) :
   k' c' m = 1 :=
 begin
