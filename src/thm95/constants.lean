@@ -2,7 +2,6 @@ import polyhedral_lattice.cosimplicial
 import breen_deligne.suitable
 
 import facts.nnreal
-set_option profiler true
 /-!
 # Explicit formulas for the constants in theorem 9.5
 -/
