@@ -47,13 +47,6 @@ lemma explicit_gordan (hΛ : finite_free Λ) [fintype ι] (l : ι → Λ) :
   (explicit_dual_set l).fg :=
 sorry
 
--- -- TODO: remove this once a bug in mathlib is fixed
-lemma hack : mul_action_with_zero.to_smul_with_zero ℕ (Λ →+ ℤ) =
-  add_monoid.to_smul_with_zero (Λ →+ ℤ) :=
-begin
-  sorry
-end
-
 lemma lem97_pos (hΛ : finite_free Λ) [fintype ι] (N : ℕ) (hN : 0 < N) (l : ι → Λ) :
   ∃ B : finset (Λ →+ ℤ), (∀ b ∈ B, b ∈ (explicit_dual_set l)) ∧
    ∀ x : Λ →+ ℤ, x ∈ (explicit_dual_set l) → ∃ (x' ∈ B) (y : Λ →+ ℤ),
@@ -80,9 +73,7 @@ begin
     apply finset.sum_congr,
     { tauto },
     intros s hs,
-    simp only [dite_eq_ite, if_true, finset.coe_mem, finset.mk_coe],
-    -- this is an extremely ugly hack, the proof ought to be done already
-    congr, rw hack, refl, },
+    simp only [dite_eq_ite, if_true, finset.coe_mem, finset.mk_coe] },
   { intros x hx,
     rw [← hS₀, mem_span_finset] at hx,
     rcases hx with ⟨f, hx⟩,
@@ -113,17 +104,8 @@ begin
     split,
     { rw [← hx, hr],
       dsimp [y, x', g],
-      simp only [add_smul, finset.sum_add_distrib],
-      rw add_comm,
-      congr, swap, { funext, congr, rw hack, refl },
-      simp only [← smul_eq_mul, smul_assoc, ← finset.smul_sum],
-      -- proof ought to be done, but there is a bug in mathlib
-      clear_except,
-      simp only [← nsmul_eq_smul],
-      induction N with N ih,
-      { simp only [add_monoid.nsmul_zero', finset.sum_const_zero], },
-      { simp only [add_monoid.nsmul_succ', finset.sum_add_distrib, ih],
-        congr, funext, rw nsmul_eq_smul, congr, rw hack, refl } },
+      simp only [add_smul, finset.sum_add_distrib, ← smul_eq_mul, smul_assoc, ← finset.smul_sum],
+      rw add_comm, refl },
     intro i,
     dsimp [x'],
     rw [← hx, ← sub_nonpos, ← add_monoid_hom.sub_apply, ← finset.sum_sub_distrib,
@@ -135,8 +117,7 @@ begin
       apply submodule.span_mono,
       exact set.singleton_subset_iff.mpr hz },
     replace hz : 0 ≤ z (l i) := rfl.mpr hz i,
-    rw [← gsmul_coe_nat, hack, ← gsmul_coe_nat, ← sub_gsmul,
-      add_monoid_hom.gsmul_apply, gsmul_eq_mul],
+    rw [← gsmul_coe_nat, ← gsmul_coe_nat, ← sub_gsmul, add_monoid_hom.gsmul_apply, gsmul_eq_mul],
     apply mul_nonpos_of_nonpos_of_nonneg _ hz,
     simp only [add_zero, int.cast_id, int.coe_nat_mod, sub_nonpos],
     rw [← int.coe_nat_mod, int.coe_nat_le_coe_nat_iff],
@@ -301,10 +282,10 @@ begin
   intro i,
   specialize hx' i,
   zify,
-  simp only [← int.abs_eq_nat_abs, hy, add_monoid_hom.add_apply, add_monoid_hom.nat_smul_apply],
+  simp only [← int.abs_eq_nat_abs, hy, add_monoid_hom.add_apply, add_monoid_hom.smul_apply],
   convert_to abs (N • y (l i) + x' (l i)) = abs (N • y (l i)) + abs (x' (l i)) using 2,
   { rw [nsmul_eq_mul, int.nat_cast_eq_coe_nat, abs_mul, int.coe_nat_abs], },
   rw [abs_add_eq_add_abs_iff (N • y (l i)) (x' (l i))],
   rw [← sub_eq_iff_eq_add] at hy,
-  simpa only [hy, add_monoid_hom.nat_smul_apply, and_comm] using hx',
+  simpa only [hy, add_monoid_hom.smul_apply, and_comm] using hx',
 end
