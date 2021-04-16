@@ -102,7 +102,6 @@ instance k₀_le_k' : fact (normed_spectral.k₀ m (k₁ m) ≤ k' c' m) := ⟨l
 lemma b_exists : ∃ b : ℕ, 2 * (k' c' m) * (r / r') ^ b ≤ (ε m) :=
 begin
   have : 0 < 2 * (k' c' m) := mul_pos zero_lt_two (fact.out _),
-  simp only [nnreal.mul_le_iff_le_inv this.ne'],
   have h₁ : 0 < ((2 * k' c' m)⁻¹ * ε m : ℝ),
   { refine mul_pos (inv_pos.mpr this) _,
     rw [nnreal.coe_pos],
@@ -112,8 +111,10 @@ begin
     { rw [one_mul, nnreal.coe_lt_coe], exact fact.out _ },
     { rw [nnreal.coe_pos], exact fact.out _ } },
   obtain ⟨b, hb⟩ := exists_pow_lt_of_lt_one h₁ h₂,
-  use b,
-  exact_mod_cast hb.le,
+  refine ⟨b, (nnreal.mul_le_iff_le_inv this.ne').mpr _⟩,
+  refine nnreal.coe_le_coe.mp _,
+  rw [nnreal.coe_pow],
+  exact hb.le,
 end
 
 /-- `b c' r r' m` is the smallest `b` such that `2 * (k' c' m) * (r / r') ^ b ≤ (ε m)` -/
