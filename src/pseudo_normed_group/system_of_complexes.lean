@@ -128,6 +128,12 @@ CLCFPTinv.map_norm_noninc _ _ _ _ _ _
 
 end complex
 
+lemma complex_obj_d (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
+  (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] (c : ℝ≥0) (i j : ℕ) (M) :
+  ((BD.complex c_ r V r' c).obj M).d i j =
+    ((BD.d j i).eval_CLCFPTinv r V r' _ _).app M :=
+rfl
+
 theorem comm_sq_app {C D} [category C] [category D]
   {X₁ X₂ Y₁ Y₂ : C ⥤ D} {f₁ : X₁ ⟶ Y₁} {f₂ : X₂ ⟶ Y₂} {φ : X₁ ⟶ X₂} {ψ : Y₁ ⟶ Y₂}
   (hf : f₁ ≫ ψ = φ ≫ f₂) (c : C) : f₁.app c ≫ ψ.app c = φ.app c ≫ f₂.app c :=
@@ -178,6 +184,13 @@ lemma system_res_def (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact
   {c₁ c₂ : ℝ≥0} {i : ℕ} [h : fact (c₂ ≤ c₁)] :
   @system_of_complexes.res ((BD.system c_ r V r').obj M) c₁ c₂ i _ =
     (CLCFPTinv.res r V r' _ _ _).app M :=
+rfl
+
+lemma system_obj_d (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
+  (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] {M}
+  (c : ℝ≥0) (i j : ℕ) :
+  @system_of_complexes.d ((BD.system c_ r V r').obj M) c i j =
+    ((BD.d j i).eval_CLCFPTinv r V r' _ _).app M :=
 rfl
 
 end

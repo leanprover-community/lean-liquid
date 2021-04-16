@@ -457,7 +457,7 @@ lemma res_comp_eval_CLCFPTinv
 by apply res_comp_eval_CLCFPTinv₂
 
 lemma res_comp_eval_CLCFPTinv_absorb
-  [fact (c₂ ≤ c₁)] [ϕ.suitable c₃ c₂] (h : ϕ.suitable c₃ c₁) :
+  [fact (c₂ ≤ c₁)] [ϕ.suitable c₃ c₂] [ϕ.suitable c₃ c₁] :
   res r V r' c₁ c₂ n ≫ ϕ.eval_CLCFPTinv r V r' c₂ c₃ =
     ϕ.eval_CLCFPTinv r V r' c₁ c₃ :=
 by rw [@res_comp_eval_CLCFPTinv r V _ _ r' _ _ c₁ c₂ c₃ c₃ _ _ ϕ, res_refl, category.comp_id]
