@@ -83,6 +83,28 @@ def NSH_h_res {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ} (c : ℝ≥0) {q' : �
     ((BD.data.complex (c' * c_) r V r' c).obj M).X q' :=
 (@CLCFPTinv.res r V _ _ r' _ _ _ _ _ ⟨NSH_h_res' hqm⟩).app M
 
+def NSH_h {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ} (q q' : ℕ) (c : ℝ≥0) :
+  ((BD.data.system c_ r V r').obj M) (k' c' m * c) q' ⟶
+    ((((data.mul (2 ^ N₂ c' r r' m)).obj BD.data).system
+      (rescale_constants c_ (2 ^ N₂ c' r r' m)) r V r').obj M) c q :=
+if hqm : q' ≤ m + 1
+  then NSH_h_res c hqm ≫ (homotopy_σπ BD c_ c' r V c M _).h q' q
+  else 0
+
+lemma NSH_h_bound_by {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ}
+  (q : ℕ) (hqm : q ≤ m) (c : ℝ≥0) [fact (c₀ m Λ ≤ c)] :
+  normed_group_hom.bound_by
+    (@NSH_h BD r r' _ _ _ _ V _ c_ c' _ _ m M q (q+1) c)
+    (H BD c' r r' m) :=
+begin
+  rw [NSH_h, dif_pos (nat.succ_le_succ hqm)],
+  refine normed_group_hom.bound_by.comp' 1 _ _ (mul_one _).symm _ _,
+  swap, { exact (CLCFPTinv₂.res_norm_noninc r V r' _ _ _ _ _ _).bound_by_one },
+  dsimp only [homotopy_σπ, breen_deligne.homotopy, homotopy₂],
+  apply universal_map.eval_CLCFPTinv₂_bound_by,
+  exact (bound_by_H BD c' r r' _ hqm),
+end
+
 instance NSH_δ_res' (N i : ℕ) (c : ℝ≥0) [hN : fact (k' c' m ≤ 2 ^ N)] :
   fact (k' c' m * c * rescale_constants c_ (2 ^ N) i ≤ c * c_ i) :=
 begin
@@ -110,6 +132,28 @@ def NSH_δ_res {BD : data} [BD.suitable c_]
   end }
 .
 
+def NSH_δ {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ} (c : ℝ≥0) :
+  ((BD.data.system c_ r V r').obj M).obj (op c) ⟶
+    ((((data.mul (2 ^ N₂ c' r r' m)).obj BD.data).system
+      (rescale_constants c_ (2 ^ N₂ c' r r' m)) r V r').obj M).obj (op (k' c' m * c)) :=
+(BD_map (BD.data.proj (2 ^ N₂ c' r r' m)) c_ c_ r V c).app M ≫ NSH_δ_res _ c
+
+lemma NSH_δ_bound_by {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ} (c : ℝ≥0) (q : ℕ) :
+  normed_group_hom.bound_by ((@NSH_δ BD r r' _ _ _ _ V _ c_ c' _ _ m M c).f q) (ε m) :=
+begin
+  refine (normed_group_hom.bound_by.comp' (N c' r r' m) (r ^ (b c' r r' m)) _ rfl _ _).le _,
+  { refine @CLCFPTinv.res_bound_by_pow r V _ _ r' _ _ _ _ _ _ _ ⟨_⟩ _,
+    dsimp only [unop_op, rescale_constants],
+    simp only [← mul_assoc, mul_right_comm _ c],
+    simp only [mul_right_comm _ (c_ q)],
+    apply mul_le_mul' _ le_rfl,
+    apply mul_le_mul' _ le_rfl,
+    apply N₂_spec },
+  { apply universal_map.eval_CLCFPTinv₂_bound_by,
+    apply universal_map.proj_bound_by },
+  { apply r_pow_b_le_ε }
+end
+
 include BD c_ c' r V m
 
 -- make this a lemma for arbitrary homotopies
@@ -127,46 +171,19 @@ end
 
 open differential_object differential_object.complex_like
 
-def NSH_aux (M) :
-  NSH_aux_type BD r r' V c_ c' m Λ (N₂ c' r r' m) M :=
-{ h := λ q q' c,
-    if hqm : q' ≤ m + 1
-    then NSH_h_res c hqm ≫ (homotopy_σπ BD c_ c' r V c M _).h q' q
-    else 0,
-  h_bound_by :=
-  begin
-    rintro q q' hqm rfl c hc,
-    rw [dif_pos (nat.succ_le_succ hqm)],
-    refine normed_group_hom.bound_by.comp' 1 _ _ (mul_one _).symm _ _,
-    swap, { exact (CLCFPTinv₂.res_norm_noninc r V r' _ _ _ _ _ _).bound_by_one },
-    dsimp only [homotopy_σπ, breen_deligne.homotopy, homotopy₂],
-    apply universal_map.eval_CLCFPTinv₂_bound_by,
-    exact (bound_by_H BD c' r r' _ hqm),
-  end,
-  δ := λ c, (BD_map (BD.data.proj (2 ^ N₂ c' r r' m)) c_ c_ r V c).app M ≫ NSH_δ_res _ c,
+def NSH_aux (M) : NSH_aux_type BD r r' V c_ c' m Λ (N₂ c' r r' m) M :=
+{ h := λ q q' c, NSH_h q q' c,
+  h_bound_by := by { rintro q q' hqm rfl, apply NSH_h_bound_by Λ q hqm },
+  δ := NSH_δ,
   hδ :=
   begin
-    introsI c hc q hqm x,
-    rw [dif_pos (nat.succ_le_succ hqm), dif_pos (hqm.trans (nat.le_succ _))],
-    erw [comp_f, BD_map_app_f, NSH_δ_res_f, ← universal_map.eval_CLCFPTinv_def],
-    dsimp only [unop_op],
+    -- introsI c hc q hqm x,
+    -- rw [NSH_h, NSH_h, dif_pos (nat.succ_le_succ hqm), dif_pos (hqm.trans (nat.le_succ _))],
+    -- erw [comp_f, BD_map_app_f, NSH_δ_res_f, ← universal_map.eval_CLCFPTinv_def],
+    -- dsimp only [unop_op],
     sorry
   end,
-  δ_bound_by :=
-  begin
-    introsI c hc q hq,
-    refine (normed_group_hom.bound_by.comp' (N c' r r' m) (r ^ (b c' r r' m)) _ rfl _ _).le _,
-    { refine @CLCFPTinv.res_bound_by_pow r V _ _ r' _ _ _ _ _ _ _ ⟨_⟩ _,
-      dsimp only [unop_op, rescale_constants],
-      simp only [← mul_assoc, mul_right_comm _ c],
-      simp only [mul_right_comm _ (c_ q)],
-      apply mul_le_mul' _ le_rfl,
-      apply mul_le_mul' _ le_rfl,
-      apply N₂_spec },
-    { apply universal_map.eval_CLCFPTinv₂_bound_by,
-      apply universal_map.proj_bound_by },
-    { apply r_pow_b_le_ε }
-  end }
+  δ_bound_by := λ c hc q hqm, by apply NSH_δ_bound_by }
 .
 
 def NSC_htpy :
