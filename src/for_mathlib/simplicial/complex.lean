@@ -3,11 +3,35 @@ import for_mathlib.add_monoid_hom
 import system_of_complexes.complex
 import .augmented
 
-namespace cosimplicial_object
-
 open category_theory
 
 variables {C : Type*} [category C] [preadditive C] (M : cosimplicial_object C)
+
+namespace cochain_complex
+
+variables [limits.has_zero_object C]
+
+local attribute [instance] limits.has_zero_object.has_zero
+local attribute [tidy] tactic.case_bash
+
+def const : C ⥤ cochain_complex ℕ C :=
+{ obj := λ X, cochain_complex.mk' (λ i,
+    match i with
+    | 0 := X
+    | n+1 := 0
+    end ) (λ i, 0) (by simp),
+  map := λ X Y f,
+  { f := λ i,
+      match i with
+      | 0 := f
+      | n+1 := 0
+      end,
+    -- should we add an auto_param?
+    comm := by tidy } }
+
+end cochain_complex
+
+namespace cosimplicial_object
 
 open simplex_category finset add_monoid_hom category_theory.preadditive
 open_locale simplicial big_operators
@@ -93,5 +117,28 @@ def cocomplex : cosimplicial_object C ⥤ cochain_complex ℕ C :=
         category_theory.eq_to_hom_refl, coboundary,
         preadditive.sum_comp, preadditive.comp_sum],
     end } }
+
+section has_zero_objects
+
+variable [limits.has_zero_object C]
+
+-- TODO: Add some small API to obtain the distinguished object for an augmented cosimplicial object.
+def augmentation (M : augmented C) :
+  cochain_complex.const.obj (M.obj with_initial.star) ⟶ cocomplex.obj (augmented.drop.obj M) :=
+{ f := λ i,
+  match i with
+  | 0 := M.map (with_initial.hom_to _)
+  | n+1 := 0
+  end,
+  comm := begin
+    rintro ⟨_|i⟩ ⟨_|j⟩,
+    any_goals {change 0 ≫ _ = _ ≫ 0, simp},
+    { change _ ≫ 0 = (M.map (with_initial.hom_to _)) ≫ _,
+      -- here one has to use an analogue of coboundary_zero
+      sorry },
+    {change _ ≫ 0 = 0 ≫ _, simp},
+  end }
+
+end has_zero_objects
 
 end cosimplicial_object
