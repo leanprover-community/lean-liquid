@@ -118,6 +118,8 @@ begin
   exact hN.1
 end
 
+variables (c')
+
 @[simps f]
 def NSH_δ_res {BD : data} [BD.suitable c_]
   (N : ℕ) [fact (k' c' m ≤ 2 ^ N)] (c : ℝ≥0) {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ} :
@@ -132,16 +134,21 @@ def NSH_δ_res {BD : data} [BD.suitable c_]
   end }
 .
 
+variables {c'}
+
 def NSH_δ {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ} (c : ℝ≥0) :
   ((BD.data.system c_ r V r').obj M).obj (op c) ⟶
     ((((data.mul (2 ^ N₂ c' r r' m)).obj BD.data).system
       (rescale_constants c_ (2 ^ N₂ c' r r' m)) r V r').obj M).obj (op (k' c' m * c)) :=
-(BD_map (BD.data.proj (2 ^ N₂ c' r r' m)) c_ c_ r V c).app M ≫ NSH_δ_res _ c
+NSH_δ_res c' (N₂ c' r r' m) _ ≫ (BD_map (BD.data.proj (2 ^ N₂ c' r r' m)) _ _ r V _).app M
 
 lemma NSH_δ_bound_by {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ} (c : ℝ≥0) (q : ℕ) :
   normed_group_hom.bound_by ((@NSH_δ BD r r' _ _ _ _ V _ c_ c' _ _ m M c).f q) (ε m) :=
 begin
-  refine (normed_group_hom.bound_by.comp' (N c' r r' m) (r ^ (b c' r r' m)) _ rfl _ _).le _,
+  refine (normed_group_hom.bound_by.comp'
+    (r ^ (b c' r r' m)) (N c' r r' m) _ (mul_comm _ _) _ _).le _,
+  { apply universal_map.eval_CLCFPTinv₂_bound_by,
+    apply universal_map.proj_bound_by },
   { refine @CLCFPTinv.res_bound_by_pow r V _ _ r' _ _ _ _ _ _ _ ⟨_⟩ _,
     dsimp only [unop_op, rescale_constants],
     simp only [← mul_assoc, mul_right_comm _ c],
@@ -149,8 +156,6 @@ begin
     apply mul_le_mul' _ le_rfl,
     apply mul_le_mul' _ le_rfl,
     apply N₂_spec },
-  { apply universal_map.eval_CLCFPTinv₂_bound_by,
-    apply universal_map.proj_bound_by },
   { apply r_pow_b_le_ε }
 end
 
@@ -167,6 +172,30 @@ begin
   sorry,
 end
 
+omit BD c_ c' r V m
+
+variables (V c' m)
+
+lemma NSH_hδ (M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ)
+  (c : ℝ≥0) (hc : fact (c₀ m Λ ≤ c)) (q : ℕ) (hqm : q ≤ m) :
+  system_of_complexes.res ≫ (NSH_δ c).f q =
+    ((BD_system_map (BD.data.sum (2 ^ N₂ c' r r' m))
+      c_ (rescale_constants c_ (2 ^ N₂ c' r r' m)) r V).app M).apply ≫ system_of_complexes.res +
+    ((BD.data.system c_ r V r').obj M).d q (q + 1) ≫ NSH_h q (q + 1) (k' c' m * c) +
+    NSH_h (q - 1) q (k' c' m * c) ≫
+      ((((data.mul (2 ^ N₂ c' r r' m)).obj BD.data).system
+        (rescale_constants c_ (2 ^ N₂ c' r r' m)) r V r').obj M).d (q - 1) q :=
+begin
+  sorry
+  -- introsI c hc q hqm x,
+  -- rw [NSH_h, NSH_h, dif_pos (nat.succ_le_succ hqm), dif_pos (hqm.trans (nat.le_succ _))],
+  -- erw [comp_f, BD_map_app_f, NSH_δ_res_f, ← universal_map.eval_CLCFPTinv_def],
+  -- dsimp only [unop_op],
+end
+.
+
+-- #check NSH_hδ V c' m Λ (op M)
+
 end
 
 open differential_object differential_object.complex_like
@@ -175,14 +204,7 @@ def NSH_aux (M) : NSH_aux_type BD r r' V c_ c' m Λ (N₂ c' r r' m) M :=
 { h := λ q q' c, NSH_h q q' c,
   h_bound_by := by { rintro q q' hqm rfl, apply NSH_h_bound_by Λ q hqm },
   δ := NSH_δ,
-  hδ :=
-  begin
-    -- introsI c hc q hqm x,
-    -- rw [NSH_h, NSH_h, dif_pos (nat.succ_le_succ hqm), dif_pos (hqm.trans (nat.le_succ _))],
-    -- erw [comp_f, BD_map_app_f, NSH_δ_res_f, ← universal_map.eval_CLCFPTinv_def],
-    -- dsimp only [unop_op],
-    sorry
-  end,
+  hδ := λ c hc q hqm, sorry, -- NSH_hδ V c' m Λ M c hc q hqm,
   δ_bound_by := λ c hc q hqm, by apply NSH_δ_bound_by }
 .
 
