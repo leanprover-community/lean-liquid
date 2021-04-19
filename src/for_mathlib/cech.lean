@@ -57,13 +57,21 @@ def cech [∀ x, has_limits_of_shape (structured_arrow x arrow_diagram.incl) C] 
 with_terminal.arrow_equiv.functor ⋙ Ran arrow_diagram.incl
 
 noncomputable
-def adjunction [∀ x, has_limits_of_shape (structured_arrow x arrow_diagram.incl) C] :
+def cech_adjunction [∀ x, has_limits_of_shape (structured_arrow x arrow_diagram.incl) C] :
   to_arrow ⊣ (cech : arrow C ⥤ _) :=
 adjunction.comp _ _ (Ran.adjunction _ _) with_terminal.arrow_equiv.symm.to_adjunction
 
 noncomputable
+abbreviation cech_unit [∀ x, has_limits_of_shape (structured_arrow x arrow_diagram.incl) C]
+  (M : augmented C) : M ⟶ cech.obj (to_arrow.obj M) := cech_adjunction.unit.app M
+
+noncomputable
+abbreviation cech_counit [∀ x, has_limits_of_shape (structured_arrow x arrow_diagram.incl) C]
+  (M : arrow C) : to_arrow.obj (cech.obj M) ⟶ M := cech_adjunction.counit.app M
+
+noncomputable
 def cech_preserves_limits [∀ x, has_limits_of_shape (structured_arrow x arrow_diagram.incl) C] :
   limits.preserves_limits (cech : arrow C ⥤ _) :=
-adjunction.right_adjoint_preserves_limits adjunction
+adjunction.right_adjoint_preserves_limits cech_adjunction
 
 end simplicial_object
