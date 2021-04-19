@@ -5,5 +5,5 @@ lean_version = "leanprover-community/lean:3.28.0"
 path = "src"
 
 [dependencies]
-mathlib = {git = "https://github.com/leanprover-community/mathlib", rev = "108b9235c04304a689b1da8e498f808fcc925478"}
+mathlib = {git = "https://github.com/leanprover-community/mathlib", rev = "dbc6574cb88592ecd873a86b0fbe66db66a6c3ae"}
 lean-gptf = {git = "https://github.com/jesse-michael-han/lean-gptf", rev = "3e20785d65604744e9e2dc9d710a695a7355fd2c"}

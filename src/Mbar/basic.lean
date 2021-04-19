@@ -309,7 +309,7 @@ lemma Tinv_mem_filtration [h0r : fact (0 < r')] :
   Tinv ∈ filtration (Mbar r' S →+ Mbar r' S) (r'⁻¹) :=
 begin
   intros c F hF,
-  simp only [Tinv, add_monoid_hom.coe_mk'],
+  simp only [Tinv, add_monoid_hom.mk'_apply],
   change _ ≤ _ at hF,
   rw mul_comm,
   apply le_mul_inv_of_mul_le h0r.out.ne',
