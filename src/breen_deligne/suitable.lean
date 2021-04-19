@@ -131,7 +131,7 @@ end
 @[priority 1001]
 instance zero_suitable : (0 : basic_universal_map m n).suitable c₁ c₂ :=
 λ i, by simp only [nat.cast_zero, zero_mul, zero_le', finset.sum_const_zero,
-          matrix.zero_apply, int.nat_abs_zero]
+          dmatrix.zero_apply, int.nat_abs_zero]
 
 instance suitable_zero_left (f : basic_universal_map m n) (c : ℝ≥0) : f.suitable 0 c :=
 λ j, by { rw [mul_zero], exact zero_le' }
