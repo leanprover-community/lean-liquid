@@ -39,6 +39,13 @@ open_locale simplicial big_operators
 def coboundary (n : ℕ) : M.obj [n] ⟶ M.obj [n+1] :=
 ∑ i : fin (n+2), (-1)^(i:ℕ) •ℤ (M.map $ δ i)
 
+lemma coboundary_zero : coboundary M 0 = (M.map $ δ 0) - (M.map $ δ 1) :=
+begin
+  simp only [coboundary, fin.sum_univ_succ, fin.default_eq_zero, fin.coe_zero, one_gsmul,
+    fin.coe_succ, univ_unique, neg_gsmul, pow_one, fin.succ_zero_eq_one, sum_singleton,
+    pow_zero, sub_eq_add_neg]
+end
+
 @[reassoc]
 lemma coboundary_coboundary (n : ℕ) : coboundary M n ≫ coboundary M (n+1) = 0 :=
 begin
@@ -122,7 +129,6 @@ section has_zero_objects
 
 variable [limits.has_zero_object C]
 
--- TODO: Add some small API to obtain the distinguished object for an augmented cosimplicial object.
 def augmentation (M : augmented C) :
   cochain_complex.const.obj (M.obj with_initial.star) ⟶ cocomplex.obj (augmented.drop.obj M) :=
 { f := λ i,
@@ -134,9 +140,16 @@ def augmentation (M : augmented C) :
     rintro ⟨_|i⟩ ⟨_|j⟩,
     any_goals {change 0 ≫ _ = _ ≫ 0, simp},
     { change _ ≫ 0 = (M.map (with_initial.hom_to _)) ≫ _,
-      -- here one has to use an analogue of coboundary_zero
-      sorry },
-    {change _ ≫ 0 = 0 ≫ _, simp},
+      simp,
+      dsimp [cocomplex],
+      change 0 = _ ≫ dite _ _ _,
+      split_ifs, swap, {simp},
+      simp only [coboundary_zero, category_theory.preadditive.comp_sub,
+        category_theory.preadditive.sub_comp],
+      simp_rw [← category.assoc],
+      dsimp [augmented.drop],
+      simp [← M.map_comp], },
+    { change _ ≫ 0 = 0 ≫ _, simp },
   end }
 
 end has_zero_objects
