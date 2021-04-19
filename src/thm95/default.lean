@@ -266,8 +266,8 @@ def NSC_htpy :
   normed_spectral_homotopy
     ((thm95.double_complex BD.data c_ r r' V Λ M (N c' r r' m)).row_map 0 1)
       m (k' c' m) (ε m) (c₀ m Λ) (H BD c' r r' m) :=
-(NSH_aux BD r r' V c_ c' m Λ (op $ (Hom ↥Λ ↥M))).of_iso _ _ _
-  (iso.refl _) sorry -- (thm95.mul_rescale_iso_row_one BD.data c_ r V _ Λ M) -- timeout :sad:
+(NSH_aux BD r r' V c_ c' m Λ (op (Hom Λ M))).of_iso _ _ _
+  (iso.refl _) (thm95.mul_rescale_iso_row_one BD.data c_ r V _ Λ _ (by norm_cast) M)
   (λ _ _ _, rfl) sorry sorry
 
 def NSC (IH : ∀ m' < m, thm95.IH BD r r' V c_ c' M m') :
