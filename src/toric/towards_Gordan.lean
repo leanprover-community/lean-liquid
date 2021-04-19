@@ -69,7 +69,7 @@ lemma reduction_to_lattice (s : submodule ℚ V) (bv : is_basis ℚ v) :
   is_basis ℤ vn :=
 begin
   sorry,
-/-
+/-  this proof used to work, with difficulty.  Now, I, DT, am no longer able to fix it.
  obtain ⟨n, b, hb⟩ :=
     submodule.exists_is_basis_of_le_span (_ : linear_independent ℤ v) inf_le_right,
   { refine ⟨n, b, _, by convert hb.2⟩,
