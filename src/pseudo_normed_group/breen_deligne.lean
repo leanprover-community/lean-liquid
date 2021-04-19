@@ -55,7 +55,7 @@ begin
 end
 
 @[simp] lemma eval_png_zero : (0 : basic_universal_map m n).eval_png M = 0 :=
-by { ext, simp only [eval_png_apply, zero_smul, finset.sum_const_zero, matrix.zero_apply], refl }
+by { ext, simp only [eval_png_apply, zero_smul, finset.sum_const_zero, dmatrix.zero_apply], refl }
 
 lemma eval_png_mem_filtration :
   (f.eval_png M) ∈ filtration ((M^m) →+ (M^n)) (finset.univ.sup $ λ i, ∑ j, (f i j).nat_abs) :=
@@ -85,7 +85,7 @@ lemma eval_png_comp {l m n} (g : basic_universal_map m n) (f : basic_universal_m
 begin
   ext x j,
   simp only [eval_png_apply, function.comp_app, coe_comp, basic_universal_map.comp,
-    matrix.mul_apply, finset.smul_sum, finset.sum_smul, mul_smul, add_monoid_hom.coe_mk'],
+    matrix.mul_apply, finset.smul_sum, finset.sum_smul, mul_smul, add_monoid_hom.mk'_apply],
   rw finset.sum_comm
 end
 

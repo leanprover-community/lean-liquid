@@ -303,7 +303,7 @@ add_monoid_hom.mk_normed_group_hom'
     assume g,
     rw one_mul,
     show Sup _ ≤ Sup _,
-    simp only [hf, function.comp_app, coe_comap, add_monoid_hom.coe_mk'],
+    simp only [hf, function.comp_app, coe_comap, add_monoid_hom.mk'_apply],
     by_cases hX : nonempty X, swap,
     { simp only [set.range_eq_empty.mpr hX, real.Sup_empty],
       by_cases hY : nonempty Y, swap,

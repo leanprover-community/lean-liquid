@@ -112,7 +112,7 @@ add_monoid_hom.mk' (λ f x i, ∑ j, f i j • (x : fin _ → A) j)
 begin
   intros f₁ f₂,
   ext x i,
-  simp only [matrix.add_apply, pi.add_apply, add_smul, finset.sum_add_distrib],
+  simp only [pi.add_apply, dmatrix.add_apply, add_smul, finset.sum_add_distrib],
 end
 
 lemma pre_eval_apply : pre_eval A g = λ x i, ∑ j, g i j • (x : fin _ → A) j := rfl
@@ -136,7 +136,7 @@ lemma eval_comp : (comp g f).eval A = (g.eval A).comp (f.eval A) :=
 begin
   ext1 x,
   simp only [add_monoid_hom.coe_comp, function.comp_app, eval_of, pre_eval, comp, finset.smul_sum,
-    matrix.mul_apply, finset.sum_smul, mul_smul, add_monoid_hom.coe_mk'],
+    matrix.mul_apply, finset.sum_smul, mul_smul, add_monoid_hom.mk'_apply],
   congr' 1,
   ext1 i,
   exact finset.sum_comm
@@ -166,16 +166,16 @@ add_monoid_hom.mk'
 
 lemma comp_double_double (g : basic_universal_map m n) (f : basic_universal_map l m) :
   comp (double g) (double f) = double (comp g f) :=
-by simp only [double, comp, add_monoid_hom.coe_mk', matrix.reindex_linear_equiv_mul, matrix.from_blocks_multiply,
+by simp only [double, comp, add_monoid_hom.mk'_apply, matrix.reindex_linear_equiv_mul, matrix.from_blocks_multiply,
     matrix.zero_mul, matrix.mul_zero, add_zero, zero_add]
 
 lemma pre_eval_double (f : basic_universal_map m n) :
   pre_eval A (double f) = (split.symm ∘ prod.map (pre_eval A f) (pre_eval A f) ∘ split) :=
 begin
-  ext1; ext x j; dsimp only [function.comp, L, R, double, pre_eval, add_monoid_hom.coe_mk'];
+  ext1; ext x j; dsimp only [function.comp, L, R, double, pre_eval, add_monoid_hom.mk'_apply];
   rw [← fin_sum_fin_equiv.sum_comp, fintype.sum_sum_type];
   simp only [equiv.symm_apply_apply, sum.elim_inl, sum.elim_inr,
-    split_symm_apply, split_apply, prod.map_mk, add_monoid_hom.coe_mk',
+    split_symm_apply, split_apply, prod.map_mk, add_monoid_hom.mk'_apply,
     matrix.reindex_linear_equiv_apply, matrix.reindex_apply, matrix.minor_apply,
     matrix.from_blocks_apply₁₁, matrix.from_blocks_apply₁₂,
     matrix.from_blocks_apply₂₁, matrix.from_blocks_apply₂₂,
@@ -207,7 +207,7 @@ matrix.from_blocks 0 1 0 0
 begin
   conv_rhs {
     rw ← (matrix.reindex_linear_equiv (equiv.sum_empty _) (equiv.sum_empty _)).apply_symm_apply f },
-  dsimp only [π₁, double, comp, add_monoid_hom.coe_mk'],
+  dsimp only [π₁, double, comp, add_monoid_hom.mk'_apply],
   simp only [equiv.apply_symm_apply, matrix.reindex_linear_equiv_mul, matrix.from_blocks_multiply,
     add_zero, matrix.one_mul, matrix.mul_one, matrix.zero_mul, matrix.mul_zero, zero_add,
     matrix.reindex_linear_equiv_sum_empty_symm],
@@ -218,7 +218,7 @@ end
 begin
   conv_rhs {
     rw ← (matrix.reindex_linear_equiv (equiv.sum_empty _) (equiv.sum_empty _)).apply_symm_apply f },
-  dsimp only [π₂, double, comp, add_monoid_hom.coe_mk'],
+  dsimp only [π₂, double, comp, add_monoid_hom.mk'_apply],
   simp only [equiv.apply_symm_apply, matrix.reindex_linear_equiv_mul, matrix.from_blocks_multiply,
     add_zero, matrix.one_mul, matrix.mul_one, matrix.zero_mul, matrix.mul_zero, zero_add,
     matrix.reindex_linear_equiv_sum_empty_symm],
@@ -227,7 +227,7 @@ end
 lemma pre_eval_π₁ (n : ℕ) : pre_eval A (π₁ n) = L :=
 begin
   ext x i,
-  dsimp only [pre_eval, π₁, add_monoid_hom.coe_mk'],
+  dsimp only [pre_eval, π₁, add_monoid_hom.mk'_apply],
   rw finset.sum_eq_single (fin_sum_fin_equiv $ sum.inl i),
   { rw [matrix.reindex_linear_equiv_apply, matrix.reindex_apply, matrix.minor_apply,
       equiv.symm_apply_apply],
@@ -241,7 +241,7 @@ begin
     cases j' with j' j',
     { have : i ≠ j', { rintro rfl, apply hj, rw [← hj', equiv.apply_symm_apply] },
       simp only [matrix.from_blocks_apply₁₁, matrix.one_apply_ne this, zero_smul] },
-    { simp only [matrix.from_blocks_apply₁₂, matrix.zero_apply, zero_smul] } },
+    { simp only [matrix.from_blocks_apply₁₂, dmatrix.zero_apply, zero_smul] } },
   { intro h, exact (h (finset.mem_univ _)).elim }
 end
 
@@ -251,7 +251,7 @@ by rw [eval, pre_eval_π₁]
 lemma pre_eval_π₂ (n : ℕ) : pre_eval A (π₂ n) = R :=
 begin
   ext x i,
-  dsimp only [pre_eval, π₂, add_monoid_hom.coe_mk'],
+  dsimp only [pre_eval, π₂, add_monoid_hom.mk'_apply],
   rw finset.sum_eq_single (fin_sum_fin_equiv $ sum.inr i),
   { rw [matrix.reindex_linear_equiv_apply, matrix.reindex_apply, matrix.minor_apply,
     equiv.symm_apply_apply],
@@ -263,7 +263,7 @@ begin
     dsimp only [equiv.sum_empty_symm_apply],
     generalize hj' : fin_sum_fin_equiv.symm j = j',
     cases j' with j' j',
-    { simp only [matrix.from_blocks_apply₁₁, matrix.zero_apply, zero_smul] },
+    { simp only [matrix.from_blocks_apply₁₁, dmatrix.zero_apply, zero_smul] },
     { have : i ≠ j', { rintro rfl, apply hj, rw [← hj', equiv.apply_symm_apply] },
       simp only [matrix.from_blocks_apply₁₂, matrix.one_apply_ne this, zero_smul] } },
   { intro h, exact (h (finset.mem_univ _)).elim }
@@ -288,7 +288,7 @@ lemma mul_comp (N : ℕ) (g : basic_universal_map m n) (f : basic_universal_map 
   mul N (comp g f) = comp (mul N g) (mul N f) :=
 begin
   ext1 i j,
-  dsimp only [mul, comp, add_monoid_hom.coe_mk'],
+  dsimp only [mul, comp, add_monoid_hom.mk'_apply],
   rw [matrix.reindex_linear_equiv_mul, ← matrix.kronecker_mul, matrix.one_mul],
 end
 
@@ -306,13 +306,13 @@ matrix.reindex_linear_equiv
 
 lemma one_mul_hom_inv : comp (one_mul_hom n) (one_mul_inv n) = id n :=
 begin
-  dsimp only [comp, one_mul_hom, one_mul_inv, add_monoid_hom.coe_mk', id],
+  dsimp only [comp, one_mul_hom, one_mul_inv, add_monoid_hom.mk'_apply, id],
   rw [matrix.reindex_linear_equiv_mul, matrix.one_mul, matrix.reindex_linear_equiv_one],
 end
 
 lemma one_mul_inv_hom : comp (one_mul_inv n) (one_mul_hom n) = id _ :=
 begin
-  dsimp only [comp, one_mul_hom, one_mul_inv, add_monoid_hom.coe_mk', id],
+  dsimp only [comp, one_mul_hom, one_mul_inv, add_monoid_hom.mk'_apply, id],
   rw [matrix.reindex_linear_equiv_mul, matrix.one_mul, matrix.reindex_linear_equiv_one],
 end
 
@@ -334,13 +334,13 @@ matrix.reindex_linear_equiv
 
 lemma mul_mul_hom_inv {m n i : ℕ} : comp (mul_mul_hom m n i) (mul_mul_inv m n i) = id _ :=
 begin
-  dsimp only [comp, mul_mul_hom, mul_mul_inv, add_monoid_hom.coe_mk', id],
+  dsimp only [comp, mul_mul_hom, mul_mul_inv, add_monoid_hom.mk'_apply, id],
   rw [matrix.reindex_linear_equiv_mul, matrix.one_mul, matrix.reindex_linear_equiv_one],
 end
 
 lemma mul_mul_inv_hom {m n i : ℕ} : comp (mul_mul_inv m n i) (mul_mul_hom m n i) = id _ :=
 begin
-  dsimp only [comp, mul_mul_hom, mul_mul_inv, add_monoid_hom.coe_mk', id],
+  dsimp only [comp, mul_mul_hom, mul_mul_inv, add_monoid_hom.mk'_apply, id],
   rw [matrix.reindex_linear_equiv_mul, matrix.one_mul, matrix.reindex_linear_equiv_one],
 end
 
@@ -354,7 +354,7 @@ matrix.kronecker (proj_aux k) 1
 lemma proj_comp_mul {N : ℕ} (k : fin N) (f : basic_universal_map m n) :
   comp (proj n k) (mul N f) = comp f (proj m k) :=
 begin
-  dsimp only [comp, proj, mul, add_monoid_hom.coe_mk'],
+  dsimp only [comp, proj, mul, add_monoid_hom.mk'_apply],
   have : f = (matrix.reindex_linear_equiv
     (equiv.punit_prod (fin n)) (equiv.punit_prod (fin m)))
     (matrix.kronecker (1 : matrix punit.{1} punit.{1} ℤ) f),
@@ -397,7 +397,7 @@ lemma comp_proj_mul_proj (n N : ℕ) (j : fin (2 * 2 ^ N)) :
   (comp (proj n ((fin_prod_fin_equiv.symm) j).fst)) (mul 2 (proj n ((fin_prod_fin_equiv.symm) j).snd)) =
   (comp (proj n j)) (mul_mul_hom 2 (2 ^ N) n) :=
 begin
-  dsimp only [mul_mul_hom, proj, comp, mul_apply, add_monoid_hom.coe_mk'],
+  dsimp only [mul_mul_hom, proj, comp, mul_apply, add_monoid_hom.mk'_apply],
   rw [matrix.reindex_linear_equiv_mul, ← matrix.kronecker_mul, matrix.one_mul,
     matrix.kronecker_reindex_right, matrix.mul_one,
     matrix.kronecker_assoc', matrix.mul_reindex_linear_equiv_one, proj_aux_kronecker_proj_aux,
