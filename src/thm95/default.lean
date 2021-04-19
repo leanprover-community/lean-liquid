@@ -43,6 +43,7 @@ lemma NSC_row_exact (IH : ∀ m' < m, thm95.IH BD r r' V c_ c' M m')
   ((thm95.double_complex BD.data c_ r r' V Λ M (N c' r r' m)).row i).is_weak_bounded_exact
     (k₁ m) (K₁ m) (m - 1) (c₀ m Λ) :=
 begin
+  haveI h0m_ : fact (0 < m) := ⟨h0m⟩,
   have hm' : m - 1 < m := nat.pred_lt h0m.ne',
   rcases i with (i|i|i),
   { rw thm95.double_complex.row_zero,
@@ -257,39 +258,7 @@ open differential_object differential_object.complex_like category_theory.preadd
 
 def NSH_aux (M) : NSH_aux_type BD r r' V c_ c' m Λ (N₂ c' r r' m) M :=
 NSH_aux' BD r r' V c_ c' m Λ M $ λ c hc q hqm,
--- NSH_hδ V c' m Λ M c hc q hqm
-begin
-  haveI hqm_ : fact (q ≤ m) := ⟨hqm⟩,
-  rw [NSH_δ, NSH_h, NSH_h, dif_pos (nat.succ_le_succ hqm), dif_pos (hqm.trans (nat.le_succ _))],
-  erw [comp_f, BD_map_app_f, NSH_δ_res_f, ← universal_map.eval_CLCFPTinv_def],
-  dsimp only [unop_op, NSH_h_res, data.system_res_def],
-  simp only [← nat_trans.comp_app],
-  rw [universal_map.res_comp_eval_CLCFPTinv_absorb,
-      universal_map.res_comp_eval_CLCFPTinv_absorb,
-      ← universal_map.res_comp_eval_CLCFPTinv_absorb _ _ _ _ (k' c' m * c * (c' * c_) q)],
-  have hcomm := (homotopy_σπ BD c_ c' r V (k' c' m * c) M (N₂ c' r r' m)).comm (q-1) q (q+1),
-  rw [differential_object.complex_like.htpy_idx_rel₁_tt_nat,
-      differential_object.complex_like.htpy_idx_rel₂_tt_nat] at hcomm,
-  specialize hcomm _ rfl,
-  { unfreezingI { cases q },
-    { simp only [nat.one_ne_zero, false_or, and_self] },
-    { simp only [nat.succ_sub_succ_eq_sub, nat.succ_ne_zero, or_false, nat.sub_zero, and_false] } },
-  rw [eq_comm, sub_eq_iff_eq_add', BD_map_app_f,
-      ← universal_map.eval_CLCFPTinv_def] at hcomm,
-  rw [nat_trans.comp_app, hcomm, add_assoc],
-  clear hcomm,
-  -- simp only [comp_add],
-  -- congr' 1,
-  -- { dsimp only [category_theory.has_hom.hom.apply, BD_system_map_app_app, BD_map_app_f],
-  --   exact nat_trans.congr_app (universal_map.res_comp_eval_CLCFPTinv₂ _ _ _ _ _ _ _ _ _ _ _ _) M },
-  -- rw add_comm,
-  -- congr' 1,
-  -- { simp only [← category.assoc],
-  --   congr' 1,
-  --   dsimp only [data.system_obj_d, data.complex_obj_d],
-  --   exact nat_trans.congr_app (universal_map.res_comp_eval_CLCFPTinv _ _ _ _ _ _ _ _) M },
-  sorry
-end
+by convert NSH_hδ V c' m Λ M c hc q hqm
 .
 
 def NSC_htpy :
