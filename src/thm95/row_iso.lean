@@ -54,16 +54,26 @@ variables (r' : ℝ≥0) (M : ProFiltPseuNormGrpWithTinv r')
 -- because the default has a lot of redundancy in the proof obligations
 
 def finsupp_fin_one_iso : of (fin 1 →₀ Λ) ≅ Λ :=
-sorry
-
+iso.symm $ PolyhedralLattice.iso_mk
+({ to_fun := finsupp.single 0,
+   map_add' := λ l₁ l₂, finsupp.single_add,
+   strict' := λ l, by { rw finsupp.norm_def, simp only [norm_zero, finsupp.sum_single_index] } })
+  (λ l, by { dsimp [finsupp.norm_def], simp only [norm_zero, finsupp.sum_single_index] })
+  (finsupp.apply_add_hom 0) (by { ext l, dsimp, simp only [finsupp.single_eq_same] })
+  (by { ext f x, fin_cases x, dsimp, simp only [finsupp.single_eq_same] })
+.
 -- the left hand side is by definition the quotient of the right hand side
 -- by a subgroup that is provably trivial
-noncomputable def conerve_obj_one_iso :
+noncomputable def conerve_obj_one_iso' :
   of (conerve.obj (diagonal_embedding Λ N) 1) ≅ of (fin 1 →₀ (rescale N (fin N →₀ Λ))) :=
-{ hom := sorry,
-  inv := sorry,
-  hom_inv_id' := sorry,
-  inv_hom_id' := sorry }
+iso.symm $ PolyhedralLattice.iso_mk
+({ to_fun := normed_group_hom.normed_group.mk _,
+   map_add' := λ l₁ l₂, normed_group_hom.map_add _ _ _,
+   strict' := λ l, normed_group_hom.quotient_norm_mk_le _ _ })
+   sorry
+   (quotient_add_group.lift _ (add_monoid_hom.id _)
+     (by { intros x hx, rwa [polyhedral_lattice.conerve.L_one, add_subgroup.mem_bot] at hx }))
+   (by ext; refl) (by ext ⟨x⟩; refl)
 
 def Hom_rescale_iso [fact (0 < r')] :
   polyhedral_lattice.Hom (rescale N Λ) M ≅
