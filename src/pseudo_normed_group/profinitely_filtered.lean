@@ -326,8 +326,9 @@ begin
 end
 
 lemma pfpng_ctu_smul_nat : ∀ (n : ℕ), pfpng_ctu (λ x : M, n • x)
-| 0     := pfpng_ctu_const 0
-| (n+1) := (pfpng_ctu_id M).add (pfpng_ctu_smul_nat n) (λ c, ⟨c, λ x, x.2⟩)
+| 0     := by { simp only [zero_smul], exact pfpng_ctu_const 0 }
+| (n+1) := by { simp only [add_smul, one_smul, add_comm],
+                exact (pfpng_ctu_id M).add (pfpng_ctu_smul_nat n) (λ c, ⟨c, λ x, x.2⟩) }
 
 lemma pfpng_ctu_smul_int : ∀ (n : ℤ), pfpng_ctu (λ x : M, n • x)
 | (n:ℕ)  := pfpng_ctu_smul_nat M n

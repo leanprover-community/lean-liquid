@@ -269,8 +269,8 @@ def homotopy_pow (h : homotopy BD.σ BD.π) :
 | 0     := homotopy.refl
 | (n+1) := (homotopy_double (homotopy_pow n)).comp h
 
-def homotopy_pow' (h : homotopy (BD.sum 2) (BD.proj 2)) :
-  Π N, homotopy (hom_pow' (BD.sum 2) N) (hom_pow' (BD.proj 2) N)
+def homotopy_pow' (h : homotopy (BD.proj 2) (BD.sum 2)) :
+  Π N, homotopy (hom_pow' (BD.proj 2) N) (hom_pow' (BD.sum 2) N)
 | 0     := homotopy.refl
 | (N+1) := (homotopy_two_mul (homotopy_pow' N)).comp h
 
@@ -283,9 +283,10 @@ lemma hom_pow'_sum : ∀ N, (BD.pow'_iso_mul N).inv ≫ hom_pow' (BD.sum 2) N = 
 | 0     :=
 begin
   ext n : 2,
-  simp only [hom_pow', category.comp_id, sum_f, universal_map.sum],
-  dsimp [pow_zero],
-  rw [finset.sum_singleton],
+  simp only [hom_pow', category.comp_id],
+  show (BD.pow'_iso_mul 0).inv.f n = (BD.sum 1).f n,
+  dsimp only [sum_f, universal_map.sum],
+  simp only [fin.default_eq_zero, univ_unique, finset.sum_singleton],
   refine congr_arg of _,
   apply basic_universal_map.one_mul_hom_eq_proj,
 end
@@ -307,13 +308,16 @@ begin
 end
 .
 
+lemma hom_pow'_sum' (N : ℕ) : hom_pow' (BD.sum 2) N = (BD.pow'_iso_mul N).hom ≫ BD.sum (2^N) :=
+by { rw ← iso.inv_comp_eq, apply hom_pow'_sum }
+
 lemma hom_pow'_proj : ∀ N, (BD.pow'_iso_mul N).inv ≫ hom_pow' (BD.proj 2) N = BD.proj (2^N)
 | 0     :=
 begin
   ext n : 2,
-  simp only [hom_pow', category.comp_id, proj_f, universal_map.proj],
-  dsimp [pow_zero],
-  rw [finset.sum_singleton],
+  simp only [hom_pow', category.comp_id],
+  show (BD.pow'_iso_mul 0).inv.f n = (BD.proj 1).f n,
+  dsimp only [proj_f, universal_map.proj],
   refine congr_arg of _,
   apply basic_universal_map.one_mul_hom_eq_proj,
 end
@@ -339,11 +343,11 @@ end
 lemma hom_pow'_proj' (N : ℕ) : hom_pow' (BD.proj 2) N = (BD.pow'_iso_mul N).hom ≫ BD.proj (2^N) :=
 by { rw ← iso.inv_comp_eq, apply hom_pow'_proj }
 
-def homotopy_mul (h : homotopy (BD.sum 2) (BD.proj 2)) (N : ℕ) :
-  homotopy (BD.sum (2^N)) (BD.proj (2^N)) :=
-(homotopy.of_eq $ BD.hom_pow'_sum N).symm.trans $
+def homotopy_mul (h : homotopy (BD.proj 2) (BD.sum 2)) (N : ℕ) :
+  homotopy (BD.proj (2^N)) (BD.sum (2^N)) :=
+(homotopy.of_eq $ BD.hom_pow'_proj N).symm.trans $
   ((BD.homotopy_pow' h N).const_comp (BD.pow'_iso_mul N).inv).trans $
-  (homotopy.of_eq $ BD.hom_pow'_proj N)
+  (homotopy.of_eq $ BD.hom_pow'_sum N)
 
 end data
 
@@ -361,7 +365,7 @@ that forms a complex, together with a `homotopy`
 between the two universal maps `σ_add` and `σ_proj`. -/
 structure package :=
 (data       : data)
-(homotopy   : homotopy (data.sum 2) (data.proj 2))
+(homotopy   : homotopy (data.proj 2) (data.sum 2))
 
 namespace package
 

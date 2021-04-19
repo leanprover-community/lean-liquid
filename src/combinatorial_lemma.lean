@@ -13,7 +13,7 @@ In this file we state and prove 9.8 of [Analytic].
 
 open_locale nnreal big_operators
 
-local attribute [instance, priority 0] add_comm_monoid.nat_semimodule add_comm_group.int_module
+local attribute [instance, priority 0] add_comm_group.int_module
 
 open pseudo_normed_group
 
@@ -37,13 +37,13 @@ add_monoid_hom.mk' (λ l',
   begin
     obtain ⟨d, hd, c, h1, h2⟩ := hl l',
     suffices : y s 0 (d • l') = 0,
-    { rw [← nsmul_eq_smul, add_monoid_hom.map_nsmul, nsmul_eq_mul,
+    { rw [add_monoid_hom.map_nsmul, nsmul_eq_mul,
         mul_eq_zero, int.nat_cast_eq_coe_nat, int.coe_nat_eq_zero] at this,
       exact this.resolve_left hd.ne' },
     rw [h1, add_monoid_hom.map_sum, finset.sum_eq_zero],
     rintro i -,
     suffices : y s 0 (l i) = 0,
-    { rw [← nsmul_eq_smul, add_monoid_hom.map_nsmul, this, nsmul_zero] },
+    { rw [add_monoid_hom.map_nsmul, this, nsmul_zero] },
     specialize h s 0 i,
     simpa only [int.nat_abs_eq_zero, Mbar.coeff_zero, le_zero_iff, int.nat_abs_zero] using h
   end,
@@ -55,7 +55,7 @@ add_monoid_hom.mk' (λ l',
     { refine nnreal.summable_of_le _ this,
       intro n,
       refine mul_le_mul' _ le_rfl,
-      rw [← nsmul_eq_smul, add_monoid_hom.map_nsmul, nsmul_eq_mul,
+      rw [add_monoid_hom.map_nsmul, nsmul_eq_mul,
         int.nat_abs_mul, int.nat_cast_eq_coe_nat, int.nat_abs_of_nat],
       norm_cast,
       exact nat.le_mul_of_pos_left hd },
@@ -65,8 +65,7 @@ add_monoid_hom.mk' (λ l',
       intro n,
       rw ← finset.sum_mul,
       refine mul_le_mul' _ le_rfl,
-      simp only [add_monoid_hom.map_sum, ← nsmul_eq_smul, nnreal.coe_nat_abs,
-        add_monoid_hom.map_nsmul],
+      simp only [add_monoid_hom.map_sum, nnreal.coe_nat_abs, add_monoid_hom.map_nsmul],
       refine le_trans (nnnorm_sum_le _ _) (le_of_eq (fintype.sum_congr _ _ _)),
       intro i,
       simp only [nsmul_eq_mul, int.nat_cast_eq_coe_nat, ← nnreal.coe_nat_abs,
@@ -76,9 +75,9 @@ add_monoid_hom.mk' (λ l',
     apply nnreal.summable_of_le _ ((c i • x (l i)).summable s),
     intro n,
     apply mul_le_mul' _ le_rfl,
-    simp only [← nsmul_eq_smul, nsmul_eq_mul, int.nat_cast_eq_coe_nat,
-      ← nnreal.coe_nat_abs, int.nat_abs_mul, int.nat_abs_of_nat, ← nat.cast_mul,
-        Mbar.coe_nsmul, pi.mul_apply, pi.nat_apply, @pi.nat_apply ℕ ℤ _ _ _ (c i)],
+    simp only [nsmul_eq_mul, int.nat_cast_eq_coe_nat, ← nnreal.coe_nat_abs, int.nat_abs_mul,
+        int.nat_abs_of_nat, ← nat.cast_mul, Mbar.coe_nsmul, pi.mul_apply, pi.nat_apply,
+        @pi.nat_apply ℕ ℤ _ _ _ (c i)],
     norm_cast,
     exact nat.mul_le_mul le_rfl (h _ _ _)
   end }) $ λ l₁ l₂, by { ext s n, exact (y s n).map_add l₁ l₂ }
@@ -98,15 +97,15 @@ begin
   refine ⟨λ H i, H (le_refl (nnnorm (l i))), _⟩,
   intros H c' l' hl',
   obtain ⟨d, hd, cᵢ, h1, h2⟩ := hl.generates_nnnorm l',
-  rw [← hM _ _ d hd, ← nsmul_eq_smul, ← x.map_nsmul, nsmul_eq_smul, h1, x.map_sum],
+  rw [← hM _ _ d hd, ← x.map_nsmul, h1, x.map_sum],
   refine filtration_mono _ (sum_mem_filtration _ (λ i, c * cᵢ i * nnnorm (l i)) _ _),
   { calc ∑ i, c * cᵢ i * nnnorm (l i)
         = c * ∑ i, cᵢ i * nnnorm (l i) : by simp only [mul_assoc, ← finset.mul_sum]
     ... = c * (d * nnnorm l') : by rw h2
     ... ≤ c * (d * c') : mul_le_mul' le_rfl (mul_le_mul' le_rfl hl')
-    ... = d • (c * c') : by rw [← nsmul_eq_smul, nsmul_eq_mul, mul_left_comm] },
+    ... = d • (c * c') : by rw [nsmul_eq_mul, mul_left_comm] },
   rintro i -,
-  rw [mul_assoc, mul_left_comm, ← nsmul_eq_smul, x.map_nsmul, nsmul_eq_smul],
+  rw [mul_assoc, mul_left_comm, x.map_nsmul],
   exact pseudo_normed_group.nat_smul_mem_filtration (cᵢ i) _ _ (H i),
 end
 
@@ -139,7 +138,7 @@ begin
   set x₀ := Mbar.mk_aux hl x x₀' H',
   refine (Mbar.archimedean.add_monoid_hom _ _ _ _ hN).mp _,
   have aux : N • (c / N) = c,
-  { rw [← nsmul_eq_smul, nsmul_eq_mul, mul_comm, div_mul_cancel],
+  { rw [nsmul_eq_mul, mul_comm, div_mul_cancel],
     exact_mod_cast hN.ne' },
   rw aux,
   rw hl.add_monoid_hom_mem_filtration_iff Mbar.archimedean at hx ⊢,
@@ -155,15 +154,15 @@ begin
   convert le_trans (le_add_right le_rfl) (H s n i).ge,
   swap, { apply hx' },
   rw [← int.nat_abs_of_nat N, ← int.nat_abs_mul, int.nat_abs_of_nat,
-    ← int.nat_cast_eq_coe_nat, ← nsmul_eq_mul, nsmul_eq_smul],
+    ← int.nat_cast_eq_coe_nat, ← nsmul_eq_mul],
   congr' 1,
   show _ = N • (x₀ (l i) s n),
-  have := add_monoid_hom.nat_smul_apply N x₀ (l i),
+  have := add_monoid_hom.smul_apply N x₀ (l i),
   rw Mbar.ext_iff at this,
   replace := congr_fun this s,
   replace := congr_fun this n,
   convert this,
-  simp only [← nsmul_eq_smul, Mbar.coe_nsmul, nsmul_eq_mul,
+  simp only [Mbar.coe_nsmul, nsmul_eq_mul,
     pi.mul_apply, pi.nat_apply, @pi.nat_apply ℕ ℤ _ _ _ N],
 end
 
@@ -304,10 +303,10 @@ begin
   simp only [hx, H, hy, ← hx₁, Hx₁, hy', Mbar.coe_add,
     finset.sum_apply, add_monoid_hom.coe_add, Mbar.coe_sum,
     pi.add_apply, Mbar.mk_tensor_apply, fintype.sum_apply, finset.sum_congr,
-    add_monoid_hom.nat_smul_apply, pi.smul_apply, add_monoid_hom.sum_apply,
+    add_monoid_hom.smul_apply, pi.smul_apply, add_monoid_hom.sum_apply,
     add_monoid_hom.sum_apply, finset.smul_sum, Mbar.mk_tensor_apply],
   rw [finset.sum_add_distrib, finset.sum_const, finset.card_univ,
-    fintype.card_fin, nsmul_eq_smul, finset.sum_comm, ← hx₀],
+    fintype.card_fin, finset.sum_comm, ← hx₀],
 end
 
 lemma lem98_crux [fact (r' < 1)] {ι : Type} [fintype ι] {l : ι → Λ}
@@ -328,7 +327,7 @@ lemma lem98_crux [fact (r' < 1)] {ι : Type} [fintype ι] {l : ι → Λ}
   ∥x (l i)∥₊ = N • ∥x₀ (l i)∥₊ + ∑ a in A, nnnorm (a (l i)) * ∥xₐ a∥₊ :=
 begin
   simp only [hx, H, ← hx₀, ← hx₁, Mbar.nnnorm_def,
-    ← nsmul_eq_smul, nsmul_eq_mul, mul_assoc,
+    nsmul_eq_mul, mul_assoc,
     finset.smul_sum, finset.mul_sum, nat.cast_add, nat.cast_mul, add_mul],
   rw [finset.sum_comm, ← finset.sum_add_distrib],
   apply fintype.sum_congr,
@@ -444,7 +443,7 @@ begin
       ... ≤ finset.univ.sup (λ i, ∑ a in A, nnnorm (a (l i)) / nnnorm (l i)) * nnnorm (l i) : _,
       { simp only [div_eq_mul_inv, ← finset.sum_mul, inv_mul_cancel_right' (hl' i)] },
       { exact mul_le_mul' (finset.le_sup (finset.mem_univ i)) le_rfl } } },
-  { simp only [div_eq_mul_inv, add_mul, finset.sum_mul, ← nsmul_eq_smul, nsmul_eq_mul],
+  { simp only [div_eq_mul_inv, add_mul, finset.sum_mul, nsmul_eq_mul],
     congr' 2,
     rw [mul_comm, inv_mul_cancel_left'],
     exact_mod_cast hN.ne' },

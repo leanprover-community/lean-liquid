@@ -19,7 +19,7 @@ noncomputable theory
 
 open_locale direct_sum big_operators classical
 
-local attribute [-instance] add_comm_monoid.nat_semimodule add_comm_group.int_module
+local attribute [-instance] add_comm_group.int_module
 
 namespace polyhedral_lattice
 

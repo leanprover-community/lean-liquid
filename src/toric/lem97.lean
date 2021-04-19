@@ -7,6 +7,8 @@ import polyhedral_lattice.basic
 import toric.is_inj_nonneg
 import toric.pairing_dual_saturated
 
+import for_mathlib.add_monoid_hom
+
 /-!
 In this file we state and prove 9.7 of [Analytic].
 -/
@@ -20,14 +22,14 @@ noncomputable theory
 
 open classical subtype function embedding
 
-local attribute [instance] prop_decidable
-
+-- local attribute [instance] prop_decidable
 
 def explicit_dual_set (l : ι → Λ) : submodule ℕ (Λ →+ ℤ) :=
 { carrier := {x | ∀ i, 0 ≤ x (l i)},
   zero_mem' := λ i, le_rfl,
   add_mem' := λ x y hx hy i, add_nonneg (hx i) (hy i),
-  smul_mem' := λ n x hx i, by { rw [add_monoid_hom.nat_smul_apply], exact nsmul_nonneg (hx i) n } }
+  smul_mem' := λ n x hx i,
+    by { simp only [add_monoid_hom.coe_smul, pi.smul_apply], exact nsmul_nonneg (hx i) n } }
 
 
 lemma explicit_dual_set_of_neg (l : ι → Λ) (x : Λ →+ ℤ) :

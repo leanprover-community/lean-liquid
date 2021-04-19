@@ -342,7 +342,7 @@ begin
   apply forall_congr, intro hl,
   have := h (f l) (c * c') k hk,
   simp only [← nsmul_eq_smul, nsmul_eq_mul, mul_assoc] at this ⊢,
-  simp only [nsmul_eq_smul, ← nsmul_eq_mul, ← add_monoid_hom.nat_smul_apply] at this ⊢,
+  simp only [nsmul_eq_smul, ← nsmul_eq_mul, ← add_monoid_hom.smul_apply] at this ⊢,
   convert this
 end
 

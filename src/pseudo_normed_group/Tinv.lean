@@ -437,6 +437,9 @@ def eval_CLCFPTinv [ϕ.suitable c₂ c₁] :
   CLCFPTinv r V r' c₁ n ⟶ CLCFPTinv r V r' c₂ m :=
 ϕ.eval_CLCFPTinv₂ r V r' c₁ _ c₂ _
 
+lemma eval_CLCFPTinv_def [ϕ.suitable c₂ c₁] :
+  ϕ.eval_CLCFPTinv r V r' c₁ c₂ = ϕ.eval_CLCFPTinv₂ r V r' c₁ _ c₂ _ := rfl
+
 @[simp] lemma eval_CLCFPTinv_zero :
   (0 : universal_map m n).eval_CLCFPTinv r V r' c₁ c₂ = 0 :=
 by apply eval_CLCFPTinv₂_zero
@@ -452,6 +455,12 @@ lemma res_comp_eval_CLCFPTinv
   res r V r' c₁ c₂ n ≫ ϕ.eval_CLCFPTinv r V r' c₂ c₄ =
     ϕ.eval_CLCFPTinv r V r' c₁ c₃ ≫ res r V r' c₃ c₄ m :=
 by apply res_comp_eval_CLCFPTinv₂
+
+lemma res_comp_eval_CLCFPTinv_absorb
+  [fact (c₂ ≤ c₁)] [ϕ.suitable c₃ c₂] [ϕ.suitable c₃ c₁] :
+  res r V r' c₁ c₂ n ≫ ϕ.eval_CLCFPTinv r V r' c₂ c₃ =
+    ϕ.eval_CLCFPTinv r V r' c₁ c₃ :=
+by rw [@res_comp_eval_CLCFPTinv r V _ _ r' _ _ c₁ c₂ c₃ c₃ _ _ ϕ, res_refl, category.comp_id]
 
 lemma eval_CLCFPTinv_bound_by [normed_with_aut r V] [fact (0 < r)] [ϕ.suitable c₂ c₁]
   (N : ℕ) (h : ϕ.bound_by N) (M) :
