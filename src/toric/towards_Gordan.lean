@@ -122,7 +122,9 @@ def nat_submodule : submodule ℕ ℤ :=
 { carrier := nnR ℤ,
   zero_mem' := (nnR ℤ).zero_mem,
   add_mem' := λ a b, (nnR ℤ).add_mem,
-  smul_mem' := λ c x h, by simpa [(•)] using mul_nonneg (int.coe_zero_le c) h }
+  smul_mem' := λ c x h, begin
+    simpa only [nsmul_eq_mul, int.nat_cast_eq_coe_nat] using mul_nonneg (int.coe_zero_le c) h,
+  end }
 
 lemma half_space_split {s : set M} (v : M) :
   dual_set nat_submodule f (insert v s) ⊔ dual_set nat_submodule f (insert (- v) s)
@@ -186,7 +188,8 @@ begin
       obtain ⟨b, hb⟩ := submodule.le_span_singleton_iff.1 this.symm.le g₂ ht₂,
       have hint : a • b • g₁ = (a : ℤ) • (b : ℤ) • g₁,
       { rw [← gsmul_eq_smul, ← gsmul_eq_smul, ← nsmul_eq_smul, ← nsmul_eq_smul, gsmul_coe_nat,
-        gsmul_coe_nat] },
+        gsmul_coe_nat],
+        simp only [nsmul_eq_smul] },
       rw [← hb, hint] at ha,
       nth_rewrite 1 [← one_smul ℤ g₁] at ha,
       replace ha := sub_eq_zero.2 ha,
