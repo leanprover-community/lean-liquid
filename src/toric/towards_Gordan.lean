@@ -68,8 +68,8 @@ lemma reduction_to_lattice (s : submodule ℚ V) (bv : is_basis ℚ v) :
   ∃ (n : ℕ) (vn : fin n → s.restrict_scalars ℤ ⊓ submodule.span ℤ (set.range v)),
   is_basis ℤ vn :=
 begin
-  sorry,
-/-  this proof used to work, with difficulty.  Now, I, DT, am no longer able to fix it.
+--  sorry,
+--/-  this proof used to work, with difficulty.  Now, I, DT, am no longer able to fix it.
  obtain ⟨n, b, hb⟩ :=
     submodule.exists_is_basis_of_le_span (_ : linear_independent ℤ v) inf_le_right,
   { refine ⟨n, b, _, by convert hb.2⟩,
@@ -82,7 +82,7 @@ begin
     erw [submodule.coe_smul_of_tower, submodule.coe_smul_of_tower, algebra_map_smul] },
   { refine algebra_map.injective.linear_independent _ bv.1,
     exact λ a b ab, int.cast_inj.mp ab }
--/
+--/
 end
 
 end reduction_from_ℚ_to_ℤ
