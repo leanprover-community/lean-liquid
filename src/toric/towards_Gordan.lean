@@ -64,26 +64,17 @@ and possibly useful to play around with the tower `ℤ ⊂ ℚ ⊂ ℝ`, though 
 needed in what follows.
  -/
 
+-- This is Sébastien's great idea for speeding up the proof of `reduction_to_lattice`!
+local attribute [instance, priority 99] algebra_int
+
 lemma reduction_to_lattice (s : submodule ℚ V) (bv : is_basis ℚ v) :
   ∃ (n : ℕ) (vn : fin n → s.restrict_scalars ℤ ⊓ submodule.span ℤ (set.range v)),
   is_basis ℤ vn :=
-sorry/-  the commented proof builds locally, but is very slow.  CI does not process it.
--- try uncommenting once #7255 gets into master and bumped to lean-liquid.
 begin
- obtain ⟨n, b, hb⟩ :=
-    submodule.exists_is_basis_of_le_span (_ : linear_independent ℤ v) inf_le_right,
-  { refine ⟨n, b, _, by convert hb.2⟩,
-    replace hb := hb.1,
-    refine linear_independent_iff'.mpr (λ t g hg i hi, _),
-    rw [linear_independent_iff'] at hb,
-    refine hb t g _ i hi,
-    convert hg,
-    ext i,
-    erw [submodule.coe_smul_of_tower, submodule.coe_smul_of_tower, algebra_map_smul] },
-  { refine algebra_map.injective.linear_independent _ bv.1,
-    exact λ a b ab, int.cast_inj.mp ab }
+  apply submodule.exists_is_basis_of_le_span (_ : linear_independent ℤ v) inf_le_right,
+  refine linear_independent.restrict_scalars_algebras _ bv.1,
+  exact λ a b ab, int.cast_inj.mp ab
 end
---/
 
 end reduction_from_ℚ_to_ℤ
 
