@@ -68,6 +68,7 @@ lemma reduction_to_lattice (s : submodule ℚ V) (bv : is_basis ℚ v) :
   ∃ (n : ℕ) (vn : fin n → s.restrict_scalars ℤ ⊓ submodule.span ℤ (set.range v)),
   is_basis ℤ vn :=
 sorry/-  the commented proof builds locally, but is very slow.  CI does not process it.
+-- try uncommenting once #7255 gets into master and bumped to lean-liquid.
 begin
  obtain ⟨n, b, hb⟩ :=
     submodule.exists_is_basis_of_le_span (_ : linear_independent ℤ v) inf_le_right,
