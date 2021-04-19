@@ -13,7 +13,7 @@ import for_mathlib.add_monoid_hom
 In this file we state and prove 9.7 of [Analytic].
 -/
 
-open_locale nnreal big_operators
+open_locale nnreal big_operators classical
 
 variables {Λ : Type*} [add_comm_group Λ]
 variable {ι : Type*}
@@ -30,7 +30,6 @@ def explicit_dual_set (l : ι → Λ) : submodule ℕ (Λ →+ ℤ) :=
   add_mem' := λ x y hx hy i, add_nonneg (hx i) (hy i),
   smul_mem' := λ n x hx i,
     by { simp only [add_monoid_hom.coe_smul, pi.smul_apply], exact nsmul_nonneg (hx i) n } }
-
 
 lemma explicit_dual_set_of_neg (l : ι → Λ) (x : Λ →+ ℤ) :
   x ∈ (explicit_dual_set (- l)) ↔ ∀ i, x (l i) ≤ 0 :=
@@ -76,7 +75,7 @@ begin
   dsimp [x'],
   rw [sub_nonpos.symm, sub_eq_add_neg, ← add_monoid_hom.neg_apply, ← finset.sum_neg_distrib,
     add_monoid_hom.finset_sum_apply, add_monoid_hom.finset_sum_apply, ← finset.sum_add_distrib],
-  simp_rw [← add_monoid_hom.add_apply, ← nsmul_eq_smul, ← gsmul_coe_nat, ← neg_gsmul,
+  simp [← add_monoid_hom.add_apply, ← nsmul_eq_smul, ← gsmul_coe_nat, ← neg_gsmul,
     gsmul_eq_smul, ← add_smul],
   apply finset.sum_nonpos,
   intros z hz,
@@ -84,11 +83,10 @@ begin
   { rw [← submodule.span_singleton_le_iff_mem, ← hS₀],
     exact submodule.span_mono (set.singleton_subset_iff.mpr hz) },
   replace hz : 0 ≤ z (l i) := rfl.mpr hz i,
-  rw [add_monoid_hom.int_smul_apply, ← gsmul_eq_smul, gsmul_eq_mul],
-  apply mul_nonpos_of_nonpos_of_nonneg _ hz,
-  rw [int.cast_id, int.coe_nat_mod, add_neg_le_iff_le_add', add_zero, ← int.coe_nat_mod,
-    int.coe_nat_le_coe_nat_iff],
-  exact nat.mod_le _ _
+  simp only [- add_neg_le_iff_le_add', tactic.ring.add_neg_eq_sub, smul_sub],
+  rw [← int.coe_nat_mod, sub_le_iff_le_add, zero_add],
+  simp only [has_scalar.smul, gsmul_int_int],
+  exact (mul_le_mul_of_nonneg_right (int.coe_nat_le.mpr (nat.mod_le (f z) N)) hz),
 end
 
 /-- The `aux_i` lemmas are extracted from a larger proof in order to improve performance. -/
@@ -303,7 +301,7 @@ begin
   nth_rewrite 0 [← int.nat_abs_of_nat a],
   rw [smul_eq_mul, ← int.nat_abs_mul, ← smul_eq_mul],
   apply congr_arg,
-  simp [(•)],
+  rw [algebra.id.smul_eq_mul, nsmul_eq_mul, int.nat_cast_eq_coe_nat],
 end
 
 /-- Lemma 9.7 of [Analytic]. -/
