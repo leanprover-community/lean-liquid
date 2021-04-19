@@ -46,4 +46,20 @@ instance : limits.has_zero_morphisms.{u (u+1)} PolyhedralLattice :=
 { comp_zero' := by { intros, ext, refl },
   zero_comp' := by { intros _ _ _ f, ext, exact f.map_zero } }
 
+def iso_mk (Λ₁ Λ₂ : PolyhedralLattice) (f : Λ₁ ⟶ Λ₂) (hf : isometry f)
+  (g : Λ₂ → Λ₁) (hfg : g ∘ f = id) (hgf : f ∘ g = id) : Λ₁ ≅ Λ₂ :=
+{ hom := f,
+  inv :=
+  { strict' := λ l,
+    calc ∥g l∥ = ∥f (g l)∥ :
+      (@normed_group_hom.norm_eq_of_isometry _ _ _ _ f.to_normed_group_hom hf _).symm
+    ... ≤ ∥l∥ : le_of_eq $ congr_arg norm $ congr_fun hgf l,
+    .. add_equiv.symm
+    { inv_fun := g,
+      left_inv := congr_fun hfg,
+      right_inv := congr_fun hgf,
+      .. f } },
+  hom_inv_id' := by { ext x, exact congr_fun hfg x },
+  inv_hom_id' := by { ext x, exact congr_fun hgf x } }
+
 end PolyhedralLattice
