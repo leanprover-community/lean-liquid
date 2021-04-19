@@ -577,29 +577,31 @@ def pi_map (f : Π i, profinitely_filtered_pseudo_normed_group_hom (M i) (M i)) 
 
 end pi
 
-section prod
+-- section prod
 
-variables (M₁ M₂ : Type*)
-variables [profinitely_filtered_pseudo_normed_group M₁]
-variables [profinitely_filtered_pseudo_normed_group M₂]
+-- -- jmc: I don't think we need binary products
 
-instance prod_topology (c : ℝ≥0) : topological_space (filtration (M₁ × M₂) c) :=
-topological_space.induced (filtration_prod_equiv M₁ M₂ c) $ infer_instance
+-- variables (M₁ M₂ : Type*)
+-- variables [profinitely_filtered_pseudo_normed_group M₁]
+-- variables [profinitely_filtered_pseudo_normed_group M₂]
 
-instance prod_t2 (c : ℝ≥0) : t2_space (filtration (M₁ × M₂) c) := sorry
+-- instance prod_topology (c : ℝ≥0) : topological_space (filtration (M₁ × M₂) c) :=
+-- topological_space.induced (filtration_prod_equiv M₁ M₂ c) $ infer_instance
 
-instance prod_td (c : ℝ≥0) : totally_disconnected_space (filtration (M₁ × M₂) c) := sorry
+-- instance prod_t2 (c : ℝ≥0) : t2_space (filtration (M₁ × M₂) c) := by admit
 
-instance prod_compact (c : ℝ≥0) : compact_space (filtration (M₁ × M₂) c) := sorry
+-- instance prod_td (c : ℝ≥0) : totally_disconnected_space (filtration (M₁ × M₂) c) := by admit
+
+-- instance prod_compact (c : ℝ≥0) : compact_space (filtration (M₁ × M₂) c) := by admit
 
 
-instance prod :
-  profinitely_filtered_pseudo_normed_group (M₁ × M₂) :=
-{ continuous_add' := sorry,
-  continuous_neg' := sorry,
-  continuous_cast_le := sorry,
-  .. pseudo_normed_group.prod M₁ M₂ }
+-- instance prod :
+--   profinitely_filtered_pseudo_normed_group (M₁ × M₂) :=
+-- { continuous_add' := by admit,
+--   continuous_neg' := by admit,
+--   continuous_cast_le := by admit,
+--   .. pseudo_normed_group.prod M₁ M₂ }
 
-end prod
+-- end prod
 
 end profinitely_filtered_pseudo_normed_group
