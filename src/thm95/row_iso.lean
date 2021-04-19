@@ -31,6 +31,8 @@ We need the following isomorphisms
 
 -/
 
+universe variables u
+
 open_locale nnreal
 
 local attribute [instance] type_pow
@@ -78,10 +80,8 @@ end
 end PolyhedralLattice
 
 section rescale
-universe variables u
 
 variables {BD : breen_deligne.data}
-
 variables (c_ c_₁ c_₂ : ℕ → ℝ≥0)
 variables [BD.suitable c_]
 variables (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
@@ -115,3 +115,27 @@ begin
 end
 
 end rescale
+
+namespace thm95
+
+variables (BD : breen_deligne.data)
+variables (c_ : ℕ → ℝ≥0)
+variables [BD.suitable c_]
+variables (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
+variables {r' : ℝ≥0} [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)] (c : ℝ≥0)
+variables (N : ℕ) [fact (0 < N)] (Λ : PolyhedralLattice)
+variables (M : ProFiltPseuNormGrpWithTinv.{u} r')
+
+open breen_deligne polyhedral_lattice opposite
+
+-- === jmc: without this aux def'n, we get stupid timeouts! :sad: :crying:
+
+def the_iso_we_want :=
+  ((((data.mul N).obj BD).system (rescale_constants c_ N) r V r').obj (op (Hom ↥Λ ↥M)) : _) ≅
+    ((thm95.double_complex BD c_ r r' V Λ M N).row 1 : _)
+
+def mul_rescale_iso_row_one :
+  the_iso_we_want BD c_ r V N Λ M :=
+sorry
+
+end thm95
