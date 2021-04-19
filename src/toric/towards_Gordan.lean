@@ -32,19 +32,6 @@ statements about elements of vector subspaces of `V` that are also in the `ℤ`-
 of the basis.
  -/
 
-
--- PR #6993
-lemma algebra_map.injective.linear_independent {R S M ι : Type*} [comm_semiring R] [semiring S]
-  [add_comm_monoid M] [algebra R S] [semimodule R M] [semimodule S M] [is_scalar_tower R S M]
-  (hinj : function.injective (algebra_map R S)) {v : ι → M} (li : linear_independent S v) :
-  linear_independent R v :=
-begin
-  refine linear_independent_iff'.mpr (λ s g hg i hi, hinj (eq.trans _ (ring_hom.map_zero _).symm)),
-  refine (((@linear_independent_iff' _ _ _ v _ _ _).mp li) _ _ _) i hi,
-  simp_rw algebra_map_smul,
-  exact hg,
-end
-
 section reduction_from_ℚ_to_ℤ
 
 variables {V ι : Type*} [add_comm_group V] [semimodule ℚ V] [fintype ι] {v : ι → V}
