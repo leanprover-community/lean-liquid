@@ -47,12 +47,12 @@ instance : limits.has_zero_morphisms.{u (u+1)} PolyhedralLattice :=
   zero_comp' := by { intros _ _ _ f, ext, exact f.map_zero } }
 
 def iso_mk {Λ₁ Λ₂ : PolyhedralLattice.{u}}
-  (f : Λ₁ ⟶ Λ₂) (hf : ∀ l, ∥l∥ ≤ ∥f l∥) (g : Λ₂ → Λ₁) (hfg : g ∘ f = id) (hgf : f ∘ g = id) :
+  (f : Λ₁ →+ Λ₂) (g : Λ₂ → Λ₁) (hf : ∀ l, ∥f l∥ = ∥l∥) (hfg : g ∘ f = id) (hgf : f ∘ g = id) :
   Λ₁ ≅ Λ₂ :=
-{ hom := f,
+{ hom := { strict' := λ l, le_of_eq (hf l), ..f },
   inv :=
   { strict' := λ l,
-    calc ∥g l∥ ≤ ∥f (g l)∥ : hf _
+    calc ∥g l∥ ≤ ∥f (g l)∥ : le_of_eq $ (hf _).symm
     ... = ∥l∥ : congr_arg norm $ congr_fun hgf l,
     .. add_equiv.symm
     { inv_fun := g,
