@@ -875,7 +875,6 @@ lemma surjective_of_surjective (surj : function.surjective f.hom) (I : index_cat
   function.surjective ((diagram f).obj I).hom :=
 begin
   intros U,
-  dsimp [diagram] at U,
   change ↥I.right at U,
   rcases I.right.nonempty U with ⟨x,hx⟩,
   rcases surj x with ⟨y,rfl⟩,
