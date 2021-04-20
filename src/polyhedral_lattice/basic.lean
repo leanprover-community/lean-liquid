@@ -16,7 +16,8 @@ The condition on the norm actually used is `generates_norm` below.
 noncomputable theory
 open_locale big_operators classical nnreal
 
-local attribute [-instance] add_comm_group.int_module
+-- no longer necessary after big mathlib refactor?
+--local attribute [-instance] add_comm_group.int_module
 
 section move_this
 
@@ -25,8 +26,13 @@ section move_this
 def torsion_free (A : Type*) [add_comm_group A] : Prop :=
 ∀ (a : A) (ha : a ≠ 0) (n : ℕ), n • a = 0 → n = 0
 
-def finite_free (A : Type*) [add_comm_group A] [semimodule ℤ A] : Prop :=
+/-- `finite_free M` is the statement that the abelian group `M` is free of finite rank (over `ℤ`).-/
+def finite_free (A : Type*) [add_comm_group A] : Prop :=
 ∃ (ι : Type) [fintype ι] (x : ι → A), is_basis ℤ x
+
+/-- The rank of a finite free abelian group. -/
+def finite_free.rank {A : Type*} [add_comm_group A] (ha : finite_free A) : ℕ :=
+@fintype.card (classical.some ha) (classical.some (classical.some_spec ha))
 
 end move_this
 
