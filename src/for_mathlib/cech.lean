@@ -70,7 +70,7 @@ abbreviation cech_counit [∀ x, has_limits_of_shape (structured_arrow x arrow_d
   (M : arrow C) : to_arrow.obj (cech.obj M) ⟶ M := cech_adjunction.counit.app M
 
 noncomputable
-def cech_preserves_limits [∀ x, has_limits_of_shape (structured_arrow x arrow_diagram.incl) C] :
+instance cech_preserves_limits [∀ x, has_limits_of_shape (structured_arrow x arrow_diagram.incl) C] :
   limits.preserves_limits (cech : arrow C ⥤ _) :=
 adjunction.right_adjoint_preserves_limits cech_adjunction
 
