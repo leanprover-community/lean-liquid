@@ -36,16 +36,29 @@ begin
   suffices : ∀ n : ℕ, hΛ.rank = n → (explicit_dual_set l).fg,
   { exact this _ rfl},
   intro n,
-  tactic.unfreeze_local_instances,
-  revert Λ ι,
-  induction n with d hd,
+  unfreezingI {induction n with d hd generalizing Λ ι},
   -- (There might be a slicker way to do that).
   { -- base case, rank of Λ = 0.
-    sorry
-  },
-  { -- inductive step
-    introsI Λ ι _inst_1 hΛ _inst_2 l,
+    intros hl,
+    haveI hs := finite_free.rank_zero hl,
+    use ∅,
+    ext φ,
+    have hφ : φ = 0,
+    { ext l,
+      convert φ.map_zero },
+    subst hφ,
+    simp },
+  { -- inductive step, assume result for Λ of rank d, and deduce it for rank d+1
     rintro (hl : hΛ.rank = d + 1),
-    sorry
-  }
+    suffices : ∀ n : ℕ, fintype.card ι = n → (explicit_dual_set l).fg,
+    { exact this _ rfl},
+    -- Second induction, this time on size of ι.
+    intro n,
+    unfreezingI {induction n with d hd generalizing l ι},
+    { -- base case, ι empty
+      -- this is going to be `top_fg` in `polyhedral_lattice.basic`
+      sorry
+    },
+    { -- inductive step
+    sorry } }
 end
