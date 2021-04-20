@@ -16,6 +16,7 @@ The condition on the norm actually used is `generates_norm` below.
 noncomputable theory
 open_locale big_operators classical nnreal
 
+-- no longer necessary after big mathlib refactor?
 local attribute [-instance] add_comm_group.int_module
 
 section move_this
@@ -25,8 +26,69 @@ section move_this
 def torsion_free (A : Type*) [add_comm_group A] : Prop :=
 ∀ (a : A) (ha : a ≠ 0) (n : ℕ), n • a = 0 → n = 0
 
+-- TODO: remove [semimodule ℤ A]
+-- TODO: multiplicative version once this is removed
+-- TODO: `is_basis` is being bundled by Anne so there's no point filling in proofs right now :-/
+
+/-- `finite_free M` is the statement that the abelian group `M` is free of finite rank (over `ℤ`).-/
 def finite_free (A : Type*) [add_comm_group A] [semimodule ℤ A] : Prop :=
 ∃ (ι : Type) [fintype ι] (x : ι → A), is_basis ℤ x
+
+namespace finite_free
+
+variables {A : Type*} [add_comm_group A] [semimodule ℤ A] (ha : finite_free A)
+
+/-- If `ha : finite_free Λ` then `ha.basis_type` is the `ι` which indexes the basis
+  `ha.basis : ι → Λ`. -/
+def basis_type : Type := classical.some ha
+
+instance : fintype (basis_type ha) := classical.some $ classical.some_spec ha
+
+/-- If `ha : finite_free Λ` then `ha.basis : ι → Λ` is the basis. Here `ι := ha.basis_type`. -/
+def basis : ha.basis_type → A := classical.some $ classical.some_spec $ classical.some_spec ha
+
+theorem is_basis : is_basis ℤ ha.basis :=
+classical.some_spec $ classical.some_spec $ classical.some_spec ha
+
+theorem top_fg (ha : finite_free A) : (⊤ : submodule ℕ A).fg :=
+begin
+  use (finset.image (ha.basis) finset.univ) ∪ (finset.image (-ha.basis) finset.univ),
+  rw eq_top_iff,
+  rintro a -,
+  have hA := ha.is_basis,
+  rw ← hA.total_repr a,
+  generalize haA : (hA.repr) a = f,
+  apply finsupp.induction f,
+  { exact submodule.zero_mem _ },
+  { intros i z f hif hz hf,
+    -- eew
+    have hhh : (finsupp.total ha.basis_type A ℤ ha.basis) (finsupp.single i z + f) = _ :=
+      (finsupp.total ha.basis_type A ℤ ha.basis).to_add_monoid_hom.map_add
+        (finsupp.single i z)
+        f,
+    rw hhh, clear hhh,
+    refine submodule.add_mem _ _ hf, clear hf,
+    simp only [set.image_univ, finset.coe_union, pi.neg_apply, finsupp.total_single, linear_map.to_add_monoid_hom_coe,
+      finset.coe_univ, finset.coe_image],
+    -- nearly there
+    sorry
+  },
+end
+
+/-- The rank of a finite free abelian group. -/
+def rank (ha : finite_free A) : ℕ := fintype.card ha.basis_type
+
+variable {ha}
+
+/-- A rank zero abelian group has at most one element (yeah I know...). -/
+lemma rank_zero (h0 : ha.rank = 0) : subsingleton A := subsingleton.intro
+begin
+  -- do this after the basis refactor
+  sorry
+end
+
+
+end finite_free
 
 end move_this
 

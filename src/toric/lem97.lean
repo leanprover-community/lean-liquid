@@ -6,6 +6,7 @@ import algebra.ordered_ring
 import polyhedral_lattice.basic
 import toric.is_inj_nonneg
 import toric.pairing_dual_saturated
+import toric.Gordan
 
 import for_mathlib.add_monoid_hom
 
@@ -22,27 +23,7 @@ noncomputable theory
 
 open classical subtype function embedding
 
--- local attribute [instance] prop_decidable
-
-def explicit_dual_set (l : ι → Λ) : submodule ℕ (Λ →+ ℤ) :=
-{ carrier := {x | ∀ i, 0 ≤ x (l i)},
-  zero_mem' := λ i, le_rfl,
-  add_mem' := λ x y hx hy i, add_nonneg (hx i) (hy i),
-  smul_mem' := λ n x hx i,
-    by { simp only [add_monoid_hom.coe_smul, pi.smul_apply], exact nsmul_nonneg (hx i) n } }
-
-lemma explicit_dual_set_of_neg (l : ι → Λ) (x : Λ →+ ℤ) :
-  x ∈ (explicit_dual_set (- l)) ↔ ∀ i, x (l i) ≤ 0 :=
-begin
-  simp_rw [← neg_nonneg, ← add_monoid_hom.map_neg],
-  exact iff.rfl,
-end
-
-lemma explicit_gordan (hΛ : finite_free Λ) [fintype ι] (l : ι → Λ) :
-  (explicit_dual_set l).fg :=
-sorry
-
-/-- The `aux_i` lemmas are extracted from a larger proof in order to improve performance. -/
+/-- A technical auxiliary lemma used in the proof of `lem97_pos`. -/
 lemma aux_1 {N : ℕ} {l : ι → Λ} {S₀ : finset (Λ →+ ℤ)}
   (hS₀ : submodule.span ℕ ↑S₀ = explicit_dual_set l) :
   let ψ : ({x // x ∈ S₀} → fin N) → Λ →+ ℤ :=
@@ -60,7 +41,7 @@ begin
   simp only [*, dif_pos, dite_eq_ite, val_eq_coe, if_true, finset.coe_mem, finset.mk_coe]
 end
 
-/-- The `aux_i` lemmas are extracted from a larger proof in order to improve performance. -/
+/-- A technical auxiliary lemma used in the proof of `lem97_pos`. -/
 lemma aux_2 {N : ℕ} (hN : 0 < N) {l : ι → Λ} {S₀ : finset (Λ →+ ℤ)}
   (hS₀ : submodule.span ℕ ↑S₀ = explicit_dual_set l) {f r : (Λ →+ ℤ) → ℕ} :
   let Y : Type u_1 := {x // x ∈ S₀} → fin N,
@@ -89,7 +70,7 @@ begin
   exact (mul_le_mul_of_nonneg_right (int.coe_nat_le.mpr (nat.mod_le (f z) N)) hz),
 end
 
-/-- The `aux_i` lemmas are extracted from a larger proof in order to improve performance. -/
+/-- A technical auxiliary lemma used in the proof of `lem97_pos`. -/
 lemma aux_3 {N : ℕ} (hN : 0 < N) {l : ι → Λ} {S₀ : finset (Λ →+ ℤ)}
   (hS₀ : submodule.span ℕ ↑S₀ = explicit_dual_set l) :
   let Y : Type u_1 := {x // x ∈ S₀} → fin N,
@@ -122,6 +103,8 @@ begin
   exact aux_2 hN hS₀ hr hx' H,
 end
 
+/-- The proof of Lemma 9.7 of `Analytic.pdf` under the additional assumption
+that (in the notation of the paper) λᵢ(x)≥0 for all i. -/
 lemma lem97_pos (hΛ : finite_free Λ) [fintype ι] (N : ℕ) (hN : 0 < N) (l : ι → Λ) :
   ∃ B : finset (Λ →+ ℤ), (∀ b ∈ B, b ∈ (explicit_dual_set l)) ∧
    ∀ x : Λ →+ ℤ, x ∈ (explicit_dual_set l) → ∃ (x' ∈ B) (y : Λ →+ ℤ),
@@ -190,9 +173,9 @@ end
 
 end sign_vectors
 
-/-- Given a list l, a vector of signs ε (and a positive integer N), (pos_A l ε) is a finite set of functionals satisfying the
-requirements of Lemma 9.7 of [Analytic] with respect to all functionals which are positive on all ((ε • l) i)'s.
-Its existence is established in lem97_pos.
+/-- Given a list l, a vector of signs ε (and a positive integer N), (pos_A l ε) is a finite set of
+functionals satisfying the requirements of Lemma 9.7 of [Analytic] with respect to all functionals
+which are positive on all ((ε • l) i)'s. Its existence is established in lem97_pos.
 -/
 def pos_A [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (hN : 0 < N)
   (l : ι → Λ) (ε : sign_vectors ι) : finset (Λ →+ ℤ) :=
@@ -222,7 +205,7 @@ fae: I am going for the first, `lem97`. I left `lem97'` there, at any rate.
 -/
 
 
-/-- Lemma 9.7 of [Analytic]. -/
+/-- Lemma 9.7 of [Analytic]. See also the (mathematically indistinguishable) variant `lem97'`. -/
 lemma lem97 [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (hN : 0 < N) (l : ι → Λ) :
   ∃ A : finset (Λ →+ ℤ), ∀ x : Λ →+ ℤ, ∃ (x' ∈ A) (y : Λ →+ ℤ),
     x = N • y + x' ∧
@@ -304,7 +287,7 @@ begin
   rw [algebra.id.smul_eq_mul, nsmul_eq_mul, int.nat_cast_eq_coe_nat],
 end
 
-/-- Lemma 9.7 of [Analytic]. -/
+/-- Lemma 9.7 of [Analytic]. See also the (mathematically indistinguishable) variant `lem97`. -/
 lemma lem97' [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (hN : 0 < N) (l : ι → Λ) :
   ∃ A : finset (Λ →+ ℤ), ∀ x : Λ →+ ℤ, ∃ (x' ∈ A) (y : Λ →+ ℤ),
     x = N • y + x' ∧

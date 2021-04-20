@@ -47,6 +47,11 @@ add_subgroup.closure $
 {x | ∃ (l : Λ) (n : fin m →₀ ℤ) (hn : n.sum (λ _, add_monoid_hom.id _) = 0),
      x = finsupp.map_range_hom (int.cast_add_hom' (f l)) n}
 
+-- jmc : I don't think we need this one
+lemma L_zero : L f 0 = ⊥ := sorry
+
+lemma L_one : L f 1 = ⊥ := sorry
+
 def obj := quotient_add_group.quotient (L f m)
 
 instance : semi_normed_group (obj f m) :=
