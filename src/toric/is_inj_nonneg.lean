@@ -1,18 +1,16 @@
 import algebra.algebra.basic
 
 /-!
-This file introduces two definitions:
 
-* `nnR`, defining the subsemiring of non-negative elements of an `ordered_semiring`;
-* `is_inj_nonneg`, a predicate on functions `f : N → Z`;
+# Non-negative elements of an ordered semiring
 
-and contains a minimal API for them.
+## Main definitions
 
-Let `N, Z` be two Types.  Assume that the Type `Z` has a zero element and a relation `≤`.
-Thus, it makes sense to talk about non-negative elements of `Z`.
+* `nnR R`: the subsemiring of non-negative elements of an ordered semiring `R`.
+* `is_inj_nonneg (f : N → Z)`: the predicate asserting that `f` is injective and
+  has range contained within the non-negative elements of `Z`.
 
-The predicate `is_inj_nonneg` on functions `f : N → Z` is satisfied if and only if
-the function `f` is injective and the image of `f` consists of non-negative elements.
+## Main theorems
 
 There are proofs that the coercions `ℕ → R`, `(nnR R) → R` and `(nnR ℤ) → ℤ`
 satisfy `is_inj_nonneg` (with the appropriate non-triviality/order assumptions).
@@ -35,6 +33,9 @@ def nnR : subsemiring R :=
   add_mem' := λ x y (x0 : 0 ≤ x) (y0 : 0 ≤ y), add_nonneg x0 y0 }
 
 @[simp] lemma mem_nnR_nonneg (y : (nnR R)) : 0 ≤ y := y.2
+
+@[simp] lemma mem_nnR_iff_nonneg {S : Type*} [ordered_semiring S] {c : S} : c ∈ nnR S ↔ 0 ≤ c :=
+iff.rfl
 
 /--  The function `f : N → Z` is injective and its image only contains non-negative elements.
 These properties are useful for `pointed_of_is_basis_is_inj`, in order to avoid having getting
@@ -61,6 +62,11 @@ lemma nnR_ocr [ordered_comm_semiring Z] : is_inj_nonneg (algebra_map (nnR Z) Z) 
 consists of non-negative elements. -/
 lemma nnR_int_int : is_inj_nonneg (algebra_map (nnR ℤ) ℤ) :=
 by convert nnR_ocr ℤ
+
+lemma mem_nnR_of_is_inj_nonneg {R S : Type*} [ordered_semiring S] {f : R → S}
+  (iRS : is_inj_nonneg f) (c : R) :
+  f c ∈ nnR S :=
+iRS.map_nonneg _
 
 end is_inj_nonneg
 

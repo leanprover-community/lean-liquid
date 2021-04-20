@@ -1,6 +1,7 @@
 import algebra.group.basic
 import analysis.convex.cone
 import linear_algebra.dual
+import algebra.ordered_ring
 
 import polyhedral_lattice.basic
 import toric.is_inj_nonneg
@@ -12,7 +13,7 @@ import for_mathlib.add_monoid_hom
 In this file we state and prove 9.7 of [Analytic].
 -/
 
-open_locale nnreal big_operators
+open_locale nnreal big_operators classical
 
 variables {Λ : Type*} [add_comm_group Λ]
 variable {ι : Type*}
@@ -30,28 +31,95 @@ def explicit_dual_set (l : ι → Λ) : submodule ℕ (Λ →+ ℤ) :=
   smul_mem' := λ n x hx i,
     by { simp only [add_monoid_hom.coe_smul, pi.smul_apply], exact nsmul_nonneg (hx i) n } }
 
-
 lemma explicit_dual_set_of_neg (l : ι → Λ) (x : Λ →+ ℤ) :
   x ∈ (explicit_dual_set (- l)) ↔ ∀ i, x (l i) ≤ 0 :=
 begin
-  split,
-  { intros hx i,
-    rw [← neg_nonneg, ← add_monoid_hom.map_neg],
-    tauto, },
-  { intros hx i,
-    erw [add_monoid_hom.map_neg, neg_nonneg, ← ge_iff_le],
-    tauto },
+  simp_rw [← neg_nonneg, ← add_monoid_hom.map_neg],
+  exact iff.rfl,
 end
 
 lemma explicit_gordan (hΛ : finite_free Λ) [fintype ι] (l : ι → Λ) :
   (explicit_dual_set l).fg :=
 sorry
 
--- -- TODO: remove this once a bug in mathlib is fixed
-lemma hack : mul_action_with_zero.to_smul_with_zero ℕ (Λ →+ ℤ) =
-  add_monoid.to_smul_with_zero (Λ →+ ℤ) :=
+/-- The `aux_i` lemmas are extracted from a larger proof in order to improve performance. -/
+lemma aux_1 {N : ℕ} {l : ι → Λ} {S₀ : finset (Λ →+ ℤ)}
+  (hS₀ : submodule.span ℕ ↑S₀ = explicit_dual_set l) :
+  let ψ : ({x // x ∈ S₀} → fin N) → Λ →+ ℤ :=
+        λ (y : {x // x ∈ S₀} → fin N), ∑ (s : {x // x ∈ S₀}) in S₀.attach, (y s).val • s.val,
+      B : finset (Λ →+ ℤ) := finset.image ψ finset.univ
+  in ∀ (b : Λ →+ ℤ), b ∈ B → b ∈ explicit_dual_set l :=
 begin
-  sorry
+  intros ψ B b hb,
+  rcases finset.mem_image.mp hb with ⟨y, ⟨hy₁, rfl⟩⟩,
+  rw [← hS₀],
+  apply mem_span_finset.mpr,
+  refine ⟨λ x : (Λ →+ ℤ), if H: x ∈ S₀ then (y ⟨x, H⟩ : ℕ) else 0, _⟩,
+  rw ← finset.sum_attach,
+  refine finset.sum_congr rfl (λ s hs, _),
+  simp only [*, dif_pos, dite_eq_ite, val_eq_coe, if_true, finset.coe_mem, finset.mk_coe]
+end
+
+/-- The `aux_i` lemmas are extracted from a larger proof in order to improve performance. -/
+lemma aux_2 {N : ℕ} (hN : 0 < N) {l : ι → Λ} {S₀ : finset (Λ →+ ℤ)}
+  (hS₀ : submodule.span ℕ ↑S₀ = explicit_dual_set l) {f r : (Λ →+ ℤ) → ℕ} :
+  let Y : Type u_1 := {x // x ∈ S₀} → fin N,
+      ψ : Y → Λ →+ ℤ := λ (y : Y), ∑ (s : {x // x ∈ S₀}) in S₀.attach, (y s).val • s.val,
+      B : finset (Λ →+ ℤ) := finset.image ψ finset.univ,
+      g : (Λ →+ ℤ) → fin N := λ (i : Λ →+ ℤ), ⟨f i % N, nat.mod_lt _ hN⟩,
+      x' : Λ →+ ℤ := ∑ (i : Λ →+ ℤ) in S₀, (g i).val • i
+  in f = ↑g + N • r → x' = ∑ (i : Λ →+ ℤ) in S₀, (g i).val • i → x' ∈ B →
+    ∀ (i : ι), x' (l i) ≤ (⇑∑ (i : Λ →+ ℤ) in S₀, f i • i) (l i) :=
+begin
+  intros Y ψ B g x' hr hx' H i,
+  dsimp [x'],
+  rw [sub_nonpos.symm, sub_eq_add_neg, ← add_monoid_hom.neg_apply, ← finset.sum_neg_distrib,
+    add_monoid_hom.finset_sum_apply, add_monoid_hom.finset_sum_apply, ← finset.sum_add_distrib],
+  simp [← add_monoid_hom.add_apply, ← nsmul_eq_smul, ← gsmul_coe_nat, ← neg_gsmul,
+    gsmul_eq_smul, ← add_smul],
+  apply finset.sum_nonpos,
+  intros z hz,
+  replace hz : z ∈ explicit_dual_set l,
+  { rw [← submodule.span_singleton_le_iff_mem, ← hS₀],
+    exact submodule.span_mono (set.singleton_subset_iff.mpr hz) },
+  replace hz : 0 ≤ z (l i) := rfl.mpr hz i,
+  simp only [- add_neg_le_iff_le_add', tactic.ring.add_neg_eq_sub, smul_sub],
+  rw [← int.coe_nat_mod, sub_le_iff_le_add, zero_add],
+  simp only [has_scalar.smul, gsmul_int_int],
+  exact (mul_le_mul_of_nonneg_right (int.coe_nat_le.mpr (nat.mod_le (f z) N)) hz),
+end
+
+/-- The `aux_i` lemmas are extracted from a larger proof in order to improve performance. -/
+lemma aux_3 {N : ℕ} (hN : 0 < N) {l : ι → Λ} {S₀ : finset (Λ →+ ℤ)}
+  (hS₀ : submodule.span ℕ ↑S₀ = explicit_dual_set l) :
+  let Y : Type u_1 := {x // x ∈ S₀} → fin N,
+      ψ : Y → Λ →+ ℤ := λ (y : Y), ∑ (s : {x // x ∈ S₀}) in S₀.attach, (y s).val • s.val,
+      B : finset (Λ →+ ℤ) := finset.image ψ finset.univ
+  in ∀ (x : Λ →+ ℤ), x ∈ explicit_dual_set l → (∃ (x' : Λ →+ ℤ) (H : x' ∈ B) (y : Λ →+ ℤ),
+      x = N • y + x' ∧ ∀ (i : ι), x' (l i) ≤ x (l i)) :=
+begin
+  intros Y ψ B x hx,
+  rw [← hS₀, mem_span_finset] at hx,
+  rcases hx with ⟨f, rfl⟩,
+  let g : (Λ →+ ℤ) → (fin N) := (λ i, ⟨f i % N, nat.mod_lt (f i) hN⟩),
+  obtain ⟨r, hr⟩ : ∃ (r : (Λ →+ ℤ) → ℕ), f = ↑g + N • r,
+  { use λ x, (f x - g x) / N,
+    refine funext (λ z, (_ : f z = g z + N * ((f z - f z % N) / N))),
+    rw [nat.mul_div_cancel' (nat.dvd_sub_mod _)],
+    exact (nat.add_sub_cancel' (nat.mod_le _ _)).symm },
+  set x' := ∑ (i : Λ →+ ℤ) in S₀, (g i).val • i with hx',
+  have H : x' ∈ B,
+  { refine finset.mem_image.mpr ⟨g ∘ val, finset.mem_univ _, _⟩,
+    convert finset.sum_attach,
+    refl },
+  refine ⟨x', _, ∑ (i : Λ →+ ℤ) in S₀, r i • i, _, _⟩,
+  { refine finset.mem_image.mpr ⟨g ∘ val, finset.mem_univ _, _⟩,
+    convert finset.sum_attach,
+    refl },
+  { rw [hr, finset.smul_sum, ← finset.sum_add_distrib],
+    simp_rw [← smul_assoc, ← add_smul, add_comm (N • _) _],
+    refl },
+  exact aux_2 hN hS₀ hr hx' H,
 end
 
 lemma lem97_pos (hΛ : finite_free Λ) [fintype ι] (N : ℕ) (hN : 0 < N) (l : ι → Λ) :
@@ -60,103 +128,24 @@ lemma lem97_pos (hΛ : finite_free Λ) [fintype ι] (N : ℕ) (hN : 0 < N) (l : 
    x = N • y + x' ∧ ∀ i, x' (l i) ≤ x (l i) :=
 begin
   obtain ⟨S₀, hS₀⟩ := explicit_gordan hΛ l,
-  let S:= { x // x ∈ S₀},
-  let Y := S → (fin N),
+  let Y := { x // x ∈ S₀ } → (fin N),
   let ψ := (λ y : Y, ∑ s in finset.attach S₀, (y s).1 • s.val),--modification?
-  classical,
-  let B := finset.image ψ finset.univ,
-  use B,
-  split,
-  { intros b hb,
-    rw finset.mem_image at hb,
-    rcases hb with ⟨y, ⟨hy₁, h_yb⟩⟩,
-    dsimp [ψ] at h_yb,
-    rw [← hS₀, ← h_yb],
-    apply mem_span_finset.mpr,
-    let φ := λ x : (Λ →+ ℤ), if H: x ∈ S₀ then (y ⟨x, H⟩ : ℕ) else 0,
-    use φ,
-    dsimp [φ],
-    rw ← finset.sum_attach,
-    apply finset.sum_congr,
-    { tauto },
-    intros s hs,
-    simp only [dite_eq_ite, if_true, finset.coe_mem, finset.mk_coe],
-    -- this is an extremely ugly hack, the proof ought to be done already
-    congr, rw hack, refl, },
-  { intros x hx,
-    rw [← hS₀, mem_span_finset] at hx,
-    rcases hx with ⟨f, hx⟩,
-    let g : (Λ →+ ℤ) → (fin N) := (λ i, ⟨f i % N, nat.mod_lt (f i) hN⟩),
-    obtain ⟨r, hr⟩ : ∃ (r : (Λ →+ ℤ) → ℕ), f = ↑g + N • r,
-    { set r := λ x, (f x - g x) / N with hr,
-      use r,
-      funext z,
-      dsimp [g],
-      simp only [*, algebra.id.smul_eq_mul, pi.add_apply, eq_self_iff_true, pi.smul_apply],
-      have : ∀ (n k : ℕ), n = n % k + k * ((n - n %k)/k) := λ n k, by rw [mul_comm,
-        nat.div_mul_cancel (nat.dvd_sub_mod n), ← nat.add_sub_assoc (nat.mod_le n k),
-        add_comm, nat.add_sub_cancel],
-      exact this (f z) N },
-    set x' := ∑ (i : Λ →+ ℤ) in S₀, (g i).val • i with hx',
-    have H : x' ∈ B,
-    { rw finset.mem_image,
-      dsimp [ψ],
-      rw hx',
-      use g ∘ val,
-      apply and.intro (finset.mem_univ _),
-      let g₁ := λ i, (g i).val • i,
-      change' (∑ (s : {x // x ∈ S₀}) in S₀.attach, (f ↑s % N) • ↑s) =
-        (∑ (i : Λ →+ ℤ) in S₀, g₁ i),
-      conv_rhs {rw [← finset.sum_attach] }},
-    let y := ∑ (i : Λ →+ ℤ) in S₀, r i • i,
-    use [x', H, y],
-    split,
-    { rw [← hx, hr],
-      dsimp [y, x', g],
-      simp only [add_smul, finset.sum_add_distrib],
-      rw add_comm,
-      congr, swap, { funext, congr, rw hack, refl },
-      simp only [← smul_eq_mul, smul_assoc, ← finset.smul_sum],
-      -- proof ought to be done, but there is a bug in mathlib
-      clear_except,
-      simp only [← nsmul_eq_smul],
-      induction N with N ih,
-      { simp only [add_monoid.nsmul_zero', finset.sum_const_zero], },
-      { simp only [add_monoid.nsmul_succ', finset.sum_add_distrib, ih],
-        congr, funext, rw nsmul_eq_smul, congr, rw hack, refl } },
-    intro i,
-    dsimp [x'],
-    rw [← hx, ← sub_nonpos, ← add_monoid_hom.sub_apply, ← finset.sum_sub_distrib,
-      add_monoid_hom.finset_sum_apply],
-    apply finset.sum_nonpos,
-    intros z hz,
-    replace hz : z ∈ explicit_dual_set l,
-    { rw [← submodule.span_singleton_le_iff_mem, ← hS₀],
-      apply submodule.span_mono,
-      exact set.singleton_subset_iff.mpr hz },
-    replace hz : 0 ≤ z (l i) := rfl.mpr hz i,
-    rw [← gsmul_coe_nat, hack, ← gsmul_coe_nat, ← sub_gsmul,
-      add_monoid_hom.gsmul_apply, gsmul_eq_mul],
-    apply mul_nonpos_of_nonpos_of_nonneg _ hz,
-    simp only [add_zero, int.cast_id, int.coe_nat_mod, sub_nonpos],
-    rw [← int.coe_nat_mod, int.coe_nat_le_coe_nat_iff],
-    apply nat.mod_le },
+  exact ⟨finset.image ψ finset.univ, aux_1 hS₀, aux_3 hN hS₀⟩,
 end
 
 section sign_vectors
 
-def nonzero_sign : ℤ → units ℤ := λ n, if n ≥ 0 then 1 else -1
+def nonzero_sign : ℤ → units ℤ := λ n, if 0 ≤ n then 1 else -1
 
 def sign_vectors (ι : Type*) := (ι → units ℤ)
 
-instance fintype_sign_vectors [decidable_eq ι] [fintype ι] :
-  fintype (sign_vectors ι) := pi.fintype
+instance sign_vectors_inhabited : inhabited (sign_vectors ι) := ⟨(λ i, 1)⟩
 
+def fintype_sign_vectors [fintype ι] : fintype (sign_vectors ι) := pi.fintype
 
-/--Given a list l of elements of Λ and a functional x, (pos_vector l x) is the sign-vector of
-the values of x (l i).
--/
-def pos_vector [fintype ι] (l : ι → Λ) (x : Λ →+ ℤ) : sign_vectors ι :=
+/-- Given a list l of elements of Λ and a functional x, (pos_vector l x) is the sign-vector of
+the values of x (l i). -/
+def pos_vector (l : ι → Λ) (x : Λ →+ ℤ) : sign_vectors ι :=
 λ i, nonzero_sign (x (l i))
 
 def coe_to_signs : (sign_vectors ι) → (ι → ℤ) :=
@@ -165,38 +154,37 @@ def coe_to_signs : (sign_vectors ι) → (ι → ℤ) :=
 instance coe_signs : has_coe (sign_vectors ι) (ι → ℤ) := ⟨ coe_to_signs ⟩
 
 instance smul_signs : has_scalar (sign_vectors ι) (ι → Λ) :=
-{smul := λ ε l i, (ε i : ℤ) • l i }
+{ smul := λ ε l i, (ε i : ℤ) • l i }
 
-lemma smul_to_explicit_dual_set [fintype ι] (l : ι → Λ) (x : Λ →+ ℤ) :
-  x ∈ (explicit_dual_set ((pos_vector l x) • l)) :=
+lemma pos_vector_nonneg (l : ι → Λ) (x : Λ →+ ℤ) (j : ι) :
+  0 ≤ x ((pos_vector l x • l) j) :=
 begin
-  intro j,
-  simp only [pos_vector, nonzero_sign, has_scalar.smul, id.def,
-    ge_iff_le, add_monoid_hom.map_gsmul, gsmul_int_int],
-  by_cases h_pos : x(l j) ≥ 0,
-  { rwa [if_pos h_pos, units.coe_one, one_mul], },
-  { rw [if_neg h_pos, units.coe_neg, units.coe_one, neg_mul_eq_neg_mul_symm,
-      one_mul, neg_nonneg],
-    rw not_le at h_pos,
-    exact le_of_lt h_pos },
+  rw [pos_vector, nonzero_sign],
+  simp only [has_scalar.smul, add_monoid_hom.map_gsmul, gsmul_int_int],
+  split_ifs,
+  { rwa [units.coe_one, one_mul] },
+  { rw [units.coe_neg_one, neg_one_mul],
+    refine (neg_pos.mpr (not_le.mp h)).le }
 end
 
-lemma pos_vector_id_if_nonneg [fintype ι] (l : ι → Λ) (x : Λ →+ ℤ) (i : ι) : x (l i) ≥ 0 →
+lemma smul_to_explicit_dual_set (l : ι → Λ) (x : Λ →+ ℤ) :
+  x ∈ (explicit_dual_set ((pos_vector l x) • l)) :=
+λ j, pos_vector_nonneg l x j
+
+lemma pos_vector_id_if_nonneg (l : ι → Λ) (x : Λ →+ ℤ) (i : ι) : 0 ≤ x (l i) →
     (pos_vector l x • l) i = l i :=
 begin
   intro hx,
-  simp only [pos_vector, nonzero_sign, has_scalar.smul, id.def, ge_iff_le],
+  simp only [pos_vector, nonzero_sign, has_scalar.smul, id.def],
   rw [if_pos hx, units.coe_one, one_gsmul],
 end
 
-lemma pos_vector_neg_if_neg [fintype ι] (l : ι → Λ) (x : Λ →+ ℤ) (i : ι) : x (l i) < 0 →
+lemma pos_vector_neg_if_neg (l : ι → Λ) (x : Λ →+ ℤ) (i : ι) : x (l i) < 0 →
     ((pos_vector l x) • l) i = - l i :=
 begin
   intro hx,
-  simp only [pos_vector, nonzero_sign, has_scalar.smul, id.def, ge_iff_le],
-  dsimp [pos_vector, nonzero_sign],
-  rw lt_iff_not_ge at hx,
-  rw [if_neg hx, units.coe_neg, units.coe_one, neg_gsmul, one_gsmul],
+  simp only [pos_vector, nonzero_sign, has_scalar.smul, id.def],
+  rw [if_neg (not_le.mpr hx), units.coe_neg, units.coe_one, neg_gsmul, one_gsmul],
 end
 
 
@@ -208,23 +196,21 @@ Its existence is established in lem97_pos.
 -/
 def pos_A [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (hN : 0 < N)
   (l : ι → Λ) (ε : sign_vectors ι) : finset (Λ →+ ℤ) :=
-begin
-  obtain B := some (lem97_pos hΛ N hN (ε • l)),
-  use B,
-end
+some (lem97_pos hΛ N hN (ε • l))
 
-lemma posA_to_explicit [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (hN : 0 < N)
-  (l : ι → Λ) (ε : sign_vectors ι) (x' : Λ →+ ℤ) (H : x' ∈ pos_A hΛ N hN l ε) : x' ∈ explicit_dual_set (ε • l)
-  := (some_spec (lem97_pos hΛ N hN (ε • l))).1 x' H
+lemma posA_to_explicit [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (hN : 0 < N) (l : ι → Λ)
+  (ε : sign_vectors ι) (x' : Λ →+ ℤ) (H : x' ∈ pos_A hΛ N hN l ε) :
+  x' ∈ explicit_dual_set (ε • l) :=
+(some_spec (lem97_pos hΛ N hN (ε • l))).1 x' H
 
 
-lemma exists_good_pair [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (hN : 0 < N) (l : ι → Λ) (ε : sign_vectors ι)
-  (x : Λ →+ ℤ) (H : x ∈ (explicit_dual_set (ε • l))) : ∃ x' y : (Λ →+ ℤ),
-  x' ∈ pos_A hΛ N hN l ε ∧ x = N • y + x' ∧ ∀ i, x' ((ε • l) i) ≤ x ((ε • l) i) :=
+lemma exists_good_pair [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (hN : 0 < N) (l : ι → Λ)
+  (ε : sign_vectors ι) (x : Λ →+ ℤ) (H : x ∈ (explicit_dual_set (ε • l))) :
+  ∃ x' y : (Λ →+ ℤ),
+    x' ∈ pos_A hΛ N hN l ε ∧ x = N • y + x' ∧ ∀ i, x' ((ε • l) i) ≤ x ((ε • l) i) :=
 begin
   obtain ⟨x', hx', ⟨y, hy⟩⟩ := (some_spec (lem97_pos hΛ N hN (ε • l))).2 x H,
-  use [x', y],
-  exact ⟨hx', hy⟩,
+  exact ⟨x', y, hx', hy⟩,
 end
 
 /-
@@ -242,50 +228,81 @@ lemma lem97 [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (hN : 0 < N) (l : ι �
     x = N • y + x' ∧
     ∀ i, (0 ≤ x' (l i) ∧ 0 ≤ (x - x') (l i)) ∨ (x' (l i) ≤ 0 ∧ (x - x') (l i) ≤ 0) :=
 begin
-  classical,
-  let A := finset.bUnion (@finset.univ (sign_vectors ι) _) (pos_A hΛ N hN l),
-  use A,
-  intro,
+  refine ⟨(@finset.univ (sign_vectors ι) (fintype_sign_vectors)).bUnion (pos_A hΛ N hN l), λ x, _⟩,
   have hx : x ∈ (explicit_dual_set ((pos_vector l x) • l)) := smul_to_explicit_dual_set l x,
   obtain ⟨x', y, mem_x', hy, hx'⟩ := exists_good_pair hΛ N hN l (pos_vector l x) x hx,
-  use x',
-  split,
-  { apply finset.mem_bUnion.mpr,
-    use (pos_vector l x),
-    split,
-    simp only [true_and, finset.mem_univ],
-    exact mem_x', },
-  {  use y,
-    apply and.intro hy,
-    intro,
+  refine ⟨x', _, _⟩,
+  { refine finset.mem_bUnion.mpr ⟨pos_vector l x, _, mem_x'⟩,
+    simp only [finset.mem_univ] },
+  { refine ⟨y, hy, λ i, _⟩,
     have h_pos' : x' ∈ explicit_dual_set ((pos_vector l x) • l) :=
-        by apply posA_to_explicit hΛ N hN l (pos_vector l x) x' mem_x',
-    replace h_pos' : x' (((pos_vector l x) • l) i) ≥ 0 := by apply h_pos',
-    by_cases h_pos : x (l i) ≥ 0,
-    { specialize hx' i,
-      have h_posvect_id : ((pos_vector l x) • l) i = l i := pos_vector_id_if_nonneg l x i h_pos,
-      replace h_pos' : 0 ≤ x' (l i),
-      { rw h_posvect_id at h_pos', exact h_pos' },
-      rw h_posvect_id at hx',
-      apply or.inl,
-      apply and.intro h_pos',
+      posA_to_explicit hΛ N hN l (pos_vector l x) x' mem_x',
+    replace h_pos' : 0 ≤ x' (((pos_vector l x) • l) i) := h_pos' _,
+    by_cases h_pos : 0 ≤ x (l i),
+    { have h_posvect_id : ((pos_vector l x) • l) i = l i := pos_vector_id_if_nonneg l x i h_pos,
+      replace h_pos' : 0 ≤ x' (l i) := h_pos'.trans (le_of_eq (congr_arg x' h_posvect_id)),
+      refine or.inl ⟨h_pos', _⟩,
+      rw ← h_posvect_id,
       simp only [sub_nonneg, add_monoid_hom.sub_apply, hx'] },
-    { replace h_pos: x (l i) < 0 := by { rw lt_iff_not_ge, exact h_pos },
-      have h_posvect_neg : ((pos_vector l x) • l) i = - l i := pos_vector_neg_if_neg l x i h_pos,
+    { specialize hx' i,
+      have h_posvect_neg : ((pos_vector l x) • l) i = - l i :=
+        pos_vector_neg_if_neg l x i (not_le.mp h_pos),
+      rw [h_posvect_neg] at *,
       replace h_pos' : x' (l i) ≤ 0,
-      { rw h_posvect_neg at h_pos',
-        simp only [ge_iff_le, add_monoid_hom.map_neg, coe_fn_coe_base, neg_nonneg] at h_pos',
-        exact h_pos' },
-      specialize hx' i,
-      rw h_posvect_neg at hx',
+      { rw [x'.map_neg] at h_pos',
+        exact neg_nonneg.mp h_pos' },
       refine or.inr ⟨h_pos', _⟩,
-      simp only [*, add_monoid_hom.coe_nsmul, add_monoid_hom.coe_add, nsmul_apply, pi.add_apply,
-        add_monoid_hom.map_neg, nsmul_eq_mul, pi.mul_apply, mul_neg_eq_neg_mul_symm,
-        add_sub_cancel, le_add_iff_nonneg_left, int.nat_cast_eq_coe_nat, neg_nonneg] at hx' ⊢,
-      simp only [le_add_iff_nonneg_right, neg_add_rev, neg_nonneg] at hx',
-      exact hx' } },
+      simpa only [neg_le_neg_iff, add_monoid_hom.sub_apply, add_monoid_hom.map_neg, sub_nonpos]
+        using hx' } }
 end
 
+lemma os.monotone_pow {R : Type*} [ordered_semiring R] (k : ℕ) (R0 : ∀ r : R, 0 ≤ r) :
+  monotone (λ n : R, n ^ k) :=
+λ x y xy, pow_le_pow_of_le_left (R0 _) xy k
+
+lemma nat.monotone_pow (k : ℕ) : monotone (λ n : ℕ, n ^ k) :=
+os.monotone_pow k nat.zero_le
+--λ x y xy, pow_le_pow_of_le_left x.zero_le xy k
+
+lemma nat.strict_mono_pow {k : ℕ} (k0 : 0 < k) : strict_mono (λ n : ℕ, n ^ k) :=
+λ x y xy, pow_lt_pow_of_lt_left xy x.zero_le k0
+
+lemma nat.injective_pow {k : ℕ} (k0 : 0 < k) : function.injective (λ n : ℕ, n ^ k) :=
+injective_of_increasing (<) (<) _ (nat.strict_mono_pow k0)
+
+lemma int.nat_abs_eq_self (a : ℤ) : (a.nat_abs : ℤ) = a ↔ 0 ≤ a :=
+⟨λ h, by { rw ← h, exact int.coe_zero_le a.nat_abs }, λ h, int.nat_abs_of_nonneg h⟩
+
+lemma abs_add_eq_iff_abs_mul_eq {R : Type*} [linear_ordered_comm_ring R] {a b : R} :
+  abs (a + b) = abs a + abs b ↔ abs (a * b) = a * b :=
+begin
+  refine ⟨λ h, _, λ h, _⟩,
+  { simpa [abs_mul, eq_comm, add_pow_two, mul_assoc] using (congr_arg (λ x : R, x ^ 2) h) },
+  { rcases (mul_nonneg_iff.mp (abs_eq_self.mp h)) with ⟨a0, b0⟩ | ⟨a0, b0⟩,
+    { rw [abs_of_nonneg a0, abs_of_nonneg b0, abs_of_nonneg (add_nonneg a0 b0)] },
+    { rw [abs_of_nonpos a0, abs_of_nonpos b0, abs_of_nonpos (add_nonpos a0 b0), neg_add] } }
+end
+
+lemma nat_abs_add_eq_iff_nat_abs_mul_eq {a b : ℤ} :
+  int.nat_abs (a + b) = a.nat_abs + b.nat_abs ↔ ((a * b).nat_abs : ℤ) = a * b :=
+begin
+  rw [← int.abs_eq_nat_abs, ← abs_add_eq_iff_abs_mul_eq, int.abs_eq_nat_abs, int.abs_eq_nat_abs,
+    int.abs_eq_nat_abs],
+  norm_cast,
+end
+
+lemma nat_abs_add_eq_iff (a b : ℤ) :
+  int.nat_abs (a + b) = int.nat_abs a + int.nat_abs b ↔ (0 ≤ a ∧ 0 ≤ b ∨ a ≤ 0 ∧ b ≤ 0) :=
+nat_abs_add_eq_iff_nat_abs_mul_eq.trans ((int.nat_abs_eq_self _).trans mul_nonneg_iff)
+--  rw [nat_abs_add_eq_iff_nat_abs_mul_eq, int.nat_abs_eq_self],exact mul_nonneg_iff,
+
+lemma nat_smul_nat_abs (a : ℕ) (b : ℤ) : a • b.nat_abs = (a • b).nat_abs :=
+begin
+  nth_rewrite 0 [← int.nat_abs_of_nat a],
+  rw [smul_eq_mul, ← int.nat_abs_mul, ← smul_eq_mul],
+  apply congr_arg,
+  rw [algebra.id.smul_eq_mul, nsmul_eq_mul, int.nat_cast_eq_coe_nat],
+end
 
 /-- Lemma 9.7 of [Analytic]. -/
 lemma lem97' [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (hN : 0 < N) (l : ι → Λ) :
@@ -294,17 +311,11 @@ lemma lem97' [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (hN : 0 < N) (l : ι 
     ∀ i, (x (l i)).nat_abs = N * (y (l i)).nat_abs + (x' (l i)).nat_abs :=
 begin
   obtain ⟨A, hA⟩ := lem97 hΛ N hN l,
-  use A,
-  intro x,
-  rcases hA x with ⟨x', mem_x', y, hy, hx'⟩,
-  use [x', mem_x', y, hy],
-  intro i,
+  refine ⟨A, λ x, _⟩,
+  rcases hA x with ⟨x', mem_x', y, rfl, hx'⟩,
+  refine ⟨x', mem_x', y, rfl, λ i, _⟩,
   specialize hx' i,
-  zify,
-  simp only [← int.abs_eq_nat_abs, hy, add_monoid_hom.add_apply, add_monoid_hom.nat_smul_apply],
-  convert_to abs (N • y (l i) + x' (l i)) = abs (N • y (l i)) + abs (x' (l i)) using 2,
-  { rw [nsmul_eq_mul, int.nat_cast_eq_coe_nat, abs_mul, int.coe_nat_abs], },
-  rw [abs_add_eq_add_abs_iff (N • y (l i)) (x' (l i))],
-  rw [← sub_eq_iff_eq_add] at hy,
-  simpa only [hy, add_monoid_hom.nat_smul_apply, and_comm] using hx',
+  rw [← nat_abs_add_eq_iff, add_sub_cancel, add_monoid_hom.coe_smul, pi.smul_apply] at hx',
+  rw [add_monoid_hom.add_apply, add_monoid_hom.coe_smul, pi.smul_apply, add_comm, hx', add_comm,
+    add_left_inj, ← nat_smul_nat_abs, smul_eq_mul],
 end

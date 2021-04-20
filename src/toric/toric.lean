@@ -1,7 +1,7 @@
 import topology.algebra.ordered
 import toric.scattered_defs
 import toric.is_inj_nonneg
-import toric.pointed
+--import toric.pointed
 import toric.pairing_dual_saturated
 
 /-! In the intended application, these are the players:
@@ -12,6 +12,8 @@ import toric.pairing_dual_saturated
 -/
 
 --open_locale big_operators classical
+
+section generating_box
 
 variables {R S M : Type*} [comm_semiring R] [add_comm_group M] [semimodule R M]
 
@@ -25,8 +27,7 @@ we keep track of the finiteness hypotheses.
 -/
 lemma finite.span_restrict [semiring S] [semimodule S M] [algebra R S]
   [is_scalar_tower R S M] {G : set S} {v : set M}
-  (fG : G.finite) (spg : submodule.span R G = ⊤)
-  (fv : v.finite) (hv : submodule.span S v = ⊤) :
+  (fG : G.finite) (spg : submodule.span R G = ⊤) (fv : v.finite) :
   ∃ t : set M, t.finite ∧ submodule.span R (t : set M) = (span S (v : set M)).restrict_scalars R :=
 ⟨G • v, fG.image2 (•) fv, span_smul spg v⟩
 
@@ -38,34 +39,127 @@ we keep track of the finset hypotheses.
 -/
 lemma finset.span_restrict [semiring S] [semimodule S M] [algebra R S]
   [is_scalar_tower R S M]
-  (G : finset S) (spg : submodule.span R (G : set S) = ⊤)
-  (v : finset M) (hv : submodule.span S (v : set M) = ⊤) :
+  (G : finset S) (spg : submodule.span R (G : set S) = ⊤) (v : finset M) :
   ∃ t : finset M, submodule.span R (t : set M) = (span S (v : set M)).restrict_scalars R :=
 begin
-  obtain ⟨t, ft, co⟩ := finite.span_restrict G.finite_to_set spg v.finite_to_set hv,
+  obtain ⟨t, ft, co⟩ := finite.span_restrict G.finite_to_set spg v.finite_to_set,
   haveI ff : fintype t := ft.fintype,
   refine ⟨t.to_finset, by simpa only [set.coe_to_finset]⟩
 end
 
 /-- The choices of coefficients from the set `zq` that give rise to integral elements of `M`
-contained in the rational vector subspace spanned by `s`. -/
+contained in the rational vector subspace spanned by `s`.
+Pre-linting definition:
 def generating_box (Z : Type*) {Q ι : Type*} [comm_ring Z] [field Q] [algebra Z Q]
   [semimodule Z M] [semimodule Q M] [is_scalar_tower Z Q M]
   (v : ι → M) (s : set M) (zq : set Q) : set (finsupp ι Q) :=
   { f | ∀ i : ι, (f i = 0 ∨ f i ∈ zq) ∧
-    f.sum (λ i q, q • v i) ∈
-      submodule.span Z (set.range v) ⊓ (submodule.span Q s).restrict_scalars Z }
+    f.sum (λ i q, q • v i) ∈ submodule.span Z (set.range v) ⊓
+      (submodule.span Q s).restrict_scalars Z }
+ -/
+def generating_box (Z : Type*) {Q ι : Type*} [comm_ring Z] [field Q] [algebra Z Q]
+  [semimodule Z M] [semimodule Q M] [is_scalar_tower Z Q M]
+  (v : ι → M) (s : set M) (zq : set Q) : set (finsupp ι Q) :=
+  { f | (∀ i : ι, (f i = 0 ∨ f i ∈ zq)) ∧
+    f.sum (λ i q, q • v i) ∈ submodule.span Z (set.range v) ∧
+    f.sum (λ i q, q • v i) ∈ submodule.span Q s }
+
+@[simp] lemma generating_box_def {Z : Type*} {Q ι : Type*} [comm_ring Z] [field Q] [algebra Z Q]
+  [semimodule Z M] [semimodule Q M] [is_scalar_tower Z Q M]
+  {v : ι → M} {s : set M} {zq : set Q} {f : finsupp ι Q} :
+  f ∈ generating_box Z v s zq ↔
+  (∀ i : ι, (f i = 0 ∨ f i ∈ zq)) ∧
+    f.sum (λ i q, q • v i) ∈ submodule.span Z (set.range v) ∧
+    f.sum (λ i q, q • v i) ∈ submodule.span Q s :=
+by simp only [generating_box, set.mem_set_of_eq]
 
 lemma gen_box_sum  (Z : Type*) {Q ι : Type*} [comm_ring Z] [field Q] [algebra Z Q]
   [semimodule Z M] [semimodule Q M] [is_scalar_tower Z Q M]
   (v : ι → M) (s : set M) (zq : set Q) {z : M}
-  (hz : z ∈ span Z {m : M | ∃ (f : ι →₀ Q), f ∈ generating_box Z v s zq ∧
-    m = f.sum (λ (i : ι) (q : Q), q • v i)}) :
-  z ∈ submodule.span Z (set.range v) ⊓ (submodule.span Q s).restrict_scalars Z :=
+  (hz : z ∈ span Z {m : M |
+    ∃ (f : ι →₀ Q), f ∈ generating_box Z v s zq ∧ m = f.sum (λ (i : ι) (q : Q), q • v i)}) :
+  z ∈ submodule.span Z (set.range v) ∧
+  z ∈ submodule.span Q s :=
 begin
---  tidy?,
-  sorry
+  refine span_induction hz _ (by simp) _ _,
+  { rintros x ⟨c, cgb, rfl⟩,
+    exact cgb.right },
+  { exact λ x y ⟨hx1, hx2⟩ ⟨hy1, hy2⟩, ⟨add_mem _ hx1 hy1, add_mem _ hx2 hy2⟩ },
+  { rintros z m ⟨hm1, hm2⟩,
+    refine ⟨smul_mem _ _ hm1, _⟩,
+    rw ← is_scalar_tower.algebra_map_smul Q z m,
+    exact smul_mem _ _ hm2 }
 end
+#exit
+lemma gen_box_sum_other_direction  (Z : Type*) {Q ι : Type*} [comm_ring Z] [field Q] [algebra Z Q]
+  [semimodule Z M] [semimodule Q M] [is_scalar_tower Z Q M]
+  (v : ι → M) (s : set M) (sZ : ∀ i : M, i ∈ s → i ∈ submodule.span Z (set.range v))
+  (zq : set Q) {z : M} (hzq : submodule.span Z zq = ⊤)
+  (zZv : z ∈ submodule.span Z (set.range v)) (zQs : z ∈ submodule.span Q s) :
+  ∃ (x : M) (f : ι →₀ Q),
+    x ∈ submodule.span Z (set.range v) ∧
+    f ∈ generating_box Z v s zq ∧
+    z = x + f.sum (λ (i : ι) (q : Q), q • v i) :=
+begin
+  refine span_induction zQs _ _ _ _,
+  { intros x hx,
+    rcases mem_span_set.mp zZv with ⟨cz, czsup, rfl⟩,
+    simp,
+    sorry,
+  },
+
+  rcases mem_span_set.mp zZv with ⟨cz, czsup, rfl⟩,
+
+  rcases mem_span_set.mp zQs with ⟨cQ, cQsup, Qide⟩,
+sorry,
+--  rw ← Qide,
+sorry,sorry,
+--  refine ⟨c, _⟩,
+--  refine span_induction hz _ (by simp) _ _,
+
+/-
+  { rintros x ⟨c, cgb, rfl⟩,
+    exact cgb.right },
+  { exact λ x y ⟨hx1, hx2⟩ ⟨hy1, hy2⟩, ⟨add_mem _ hx1 hy1, add_mem _ hx2 hy2⟩ },
+  { rintros z m ⟨hm1, hm2⟩,
+    refine ⟨smul_mem _ _ hm1, _⟩,
+    rw ← is_scalar_tower.algebra_map_smul Q z m,
+    exact smul_mem _ _ hm2 }
+-/
+end
+
+end generating_box
+
+section connect_to_dual
+
+variables {R S M N P : Type*} [comm_semiring R] [add_comm_monoid M] [semimodule R M]
+
+variables [comm_semiring S] [algebra R S] [semimodule S M] [is_scalar_tower R S M]
+
+variables
+  [add_comm_monoid N] [semimodule R N] [semimodule S N] [is_scalar_tower R S N]
+  [add_comm_monoid P] [semimodule R P] [semimodule S P] [is_scalar_tower R S P]
+  (P₀ : submodule R P)
+
+variables (f : pairing S M N P)
+
+/-
+lemma gen_box_sum_dual {s : set M}
+
+ (Z : Type*) {Q ι : Type*} [comm_ring Z] [field Q] [algebra Z Q]
+  [semimodule Z M] [semimodule Q M] [is_scalar_tower Z Q M]
+  (v : ι → M) (s : set M) (sZ : ∀ i : M, i ∈ s → i ∈ submodule.span Z (set.range v))
+  (zq : set Q) {z : M} (hzq : submodule.span Z zq = ⊤)
+  (zZv : z ∈ submodule.span Z (set.range v)) (zQs : z ∈ submodule.span Q s) :
+  ∃ (x : M) (f : ι →₀ Q),
+    x ∈ submodule.span Z (set.range v) ∧
+    f ∈ generating_box Z v s zq ∧
+    z = x + f.sum (λ (i : ι) (q : Q), q • v i) :=
+sorry
+-/
+
+
+end connect_to_dual
 
 lemma sets {α : Type*} {a b c : set α} (hc : c ⊆ a ∪ b) : c = (c ∩ a) ∪ (c ∩ b) :=
 begin
@@ -86,13 +180,14 @@ set.finite.subset fa ba
 lemma sets_finite_inter {α : Type*} {a b : set α} (fa : a.finite) : (a ∩ b).finite :=
 set.finite.subset fa (set.inter_subset_left a b)
 
-
+/-
 lemma saturated_generation {Z Q ι : Type*} [comm_ring Z] [field Q] [algebra Z Q]
   [semimodule Z M] [semimodule Q M] [is_scalar_tower Z Q M]
   {v : ι → M} (bv : is_basis Q v) (s : set M) (hs : s ⊆ submodule.span Z (set.range v))
   {zq : set Q} (hzq : submodule.span Z zq = ⊤) :
   submodule.span Z (s ∪
-    { m : M | ∃ f : finsupp ι Q, (f ∈ generating_box Z v s zq) ∧ m = f.sum (λ i q, q • v i) }) =    submodule.span Z (set.range v) ⊓ (submodule.span Q s).restrict_scalars Z :=
+    { m : M | ∃ f : finsupp ι Q, (f ∈ generating_box Z v s zq) ∧ m = f.sum (λ i q, q • v i) }) =
+      submodule.span Z (set.range v) ⊓ (submodule.span Q s).restrict_scalars Z :=
 begin
   rw span_union,
   ext a,
@@ -107,6 +202,7 @@ sorry,sorry,
   },
   sorry,
 end
+-/
 
 #exit
   classical,

@@ -537,49 +537,49 @@ def iso_of_components {C₁ C₂ : complex_like ι V cov} (f : Π i, C₁.X i �
   inv_hom_id' := by { ext i, exact (f i).inv_hom_id } }
 
 def htpy_idx_rel₁ (cov : bool) (i j : ι) :=
-(coherent_indices cov i j) ∨ ((∀ k, ¬ coherent_indices cov j k) ∧ i = j)
-
-def htpy_idx_rel₂ (cov : bool) (i j : ι) :=
 (coherent_indices cov i j) ∨ ((∀ k, ¬ coherent_indices cov k j) ∧ i = j)
 
+def htpy_idx_rel₂ (cov : bool) (i j : ι) :=
+(coherent_indices cov i j) ∨ ((∀ k, ¬ coherent_indices cov j k) ∧ i = j)
+
 @[simp] lemma htpy_idx_rel₁_ff_nat (i j : ℕ) :
-  htpy_idx_rel₁ ff i j ↔ i = j + 1 ∨ (i = 0 ∧ j = 0) :=
+  htpy_idx_rel₁ ff i j ↔ i = j + 1 :=
 begin
   dsimp [htpy_idx_rel₁, coherent_indices, succ_nat],
-  refine or_congr iff.rfl ⟨_, _⟩,
-  { rintro ⟨hij, rfl⟩,
-    rw and_self,
-    cases i, { refl },
-    exact (hij i rfl).elim },
-  { rintro ⟨rfl, rfl⟩,
-    refine ⟨_, rfl⟩,
-    intro k, exact (nat.succ_ne_zero k).symm }
-end
-
-@[simp] lemma htpy_idx_rel₂_ff_nat (i j : ℕ) :
-  htpy_idx_rel₂ ff i j ↔ i = j + 1 :=
-begin
-  dsimp [htpy_idx_rel₂, coherent_indices, succ_nat],
   simp only [← not_exists, exists_eq, not_true, or_false, false_and],
 end
 
-@[simp] lemma htpy_idx_rel₁_tt_nat (i j : ℕ) :
-  htpy_idx_rel₁ tt i j ↔ i + 1 = j :=
-begin
-  dsimp [htpy_idx_rel₁, coherent_indices, succ_nat],
-  simp only [← not_exists, exists_eq', not_true, or_false, false_and],
-end
-
-@[simp] lemma htpy_idx_rel₂_tt_nat (i j : ℕ) :
-  htpy_idx_rel₂ tt i j ↔ i + 1= j ∨ (i = 0 ∧ j = 0) :=
+@[simp] lemma htpy_idx_rel₂_ff_nat (j k : ℕ) :
+  htpy_idx_rel₂ ff j k ↔ j = k + 1 ∨ (j = 0 ∧ k = 0) :=
 begin
   dsimp [htpy_idx_rel₂, coherent_indices, succ_nat],
+  refine or_congr iff.rfl ⟨_, _⟩,
+  { rintro ⟨hjk, rfl⟩,
+    rw and_self,
+    cases j, { refl },
+    exact (hjk j rfl).elim },
+  { rintro ⟨rfl, rfl⟩,
+    refine ⟨_, rfl⟩,
+    intro i, exact (nat.succ_ne_zero i).symm }
+end
+
+@[simp] lemma htpy_idx_rel₁_tt_nat (i j : ℕ) :
+  htpy_idx_rel₁ tt i j ↔ i + 1 = j ∨ (i = 0 ∧ j = 0) :=
+begin
+  dsimp [htpy_idx_rel₁, coherent_indices, succ_nat],
   refine or_congr iff.rfl ⟨_, _⟩,
   { rintro ⟨hij, rfl⟩,
     rw and_self,
     cases i, { refl },
     exact (hij i rfl).elim },
   { rintro ⟨rfl, rfl⟩, exact ⟨nat.succ_ne_zero, rfl⟩ }
+end
+
+@[simp] lemma htpy_idx_rel₂_tt_nat (j k : ℕ) :
+  htpy_idx_rel₂ tt j k ↔ j + 1 = k :=
+begin
+  dsimp [htpy_idx_rel₂, coherent_indices, succ_nat],
+  simp only [← not_exists, exists_eq', not_true, or_false, false_and],
 end
 
 structure homotopy {C₁ C₂ : complex_like ι V cov} (f g : C₁ ⟶ C₂) :=

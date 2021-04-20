@@ -69,14 +69,13 @@ def h : homotopy (BD.proj 2) (BD.sum 2) :=
   begin
     intros i j k,
     simp only [htpy_idx_rel₁_ff_nat, htpy_idx_rel₂_ff_nat],
-    rintro (rfl|⟨rfl,rfl⟩),
-    { rintro rfl,
-      rw [dif_pos rfl, dif_pos rfl],
-      dsimp [hmap],
-      rw [category.id_comp, category.comp_id],
-      erw [chain_complex.mk'_d', map, chain_complex.mk'_d', sub_add_cancel],
-      refl },
-    { rintro ⟨⟩ }
+    rintro rfl (rfl | ⟨rfl,rfl⟩),
+    { simp only [dif_pos rfl, hmap, category.id_comp, category.comp_id],
+      erw [chain_complex.mk'_d', map, data.mul_obj_d, chain_complex.mk'_d'],
+      apply sub_add_cancel },
+    { simp only [hmap, add_zero, data.sum_f, data.proj_f, comp_zero, category.id_comp,
+        nat.zero_ne_one, dif_neg, not_false_iff, eq_self_iff_true, dif_pos],
+      erw [chain_complex.mk'_d'], refl },
   end }
 
 end eg
