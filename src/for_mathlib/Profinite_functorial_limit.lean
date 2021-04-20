@@ -868,6 +868,28 @@ limits.cones.ext (as_iso ((limit_cone f).is_limit.lift (Fincone f))) (λ I, rfl)
 def Fincone_is_limit : limits.is_limit (Fincone f) :=
 limits.is_limit.of_iso_limit (limit_cone f).is_limit (Fincone_iso f).symm
 
+/--
+If `f` is a cover, then the terms in the diagram whose limit is `f` are all covers as well.
+-/
+lemma surjective_of_surjective (surj : function.surjective f.hom) (I : index_cat f) :
+  function.surjective ((diagram f).obj I).hom :=
+begin
+  intros U,
+  dsimp [diagram] at U,
+  change ↥I.right at U,
+  rcases I.right.nonempty U with ⟨x,hx⟩,
+  rcases surj x with ⟨y,rfl⟩,
+  let V : ↥(clopen_cover.pullback f.hom I.right) :=
+    ⟨f.hom ⁻¹' (U : set f.right),⟨y,hx⟩,_,rfl⟩,
+  rcases clopen_cover.nonempty _ V with ⟨z,hz⟩,
+  use clopen_cover.proj _ z,
+  dsimp [diagram],
+  erw clopen_cover.proj_map_comm,
+  symmetry,
+  apply clopen_cover.proj_fun_unique,
+  exact hz,
+end
+
 end arrow
 
 end Profinite
