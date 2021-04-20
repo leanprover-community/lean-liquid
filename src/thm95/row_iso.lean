@@ -122,24 +122,59 @@ def Hom_rescale_iso [fact (0 < r')] :
 instance : profinitely_filtered_pseudo_normed_group_with_Tinv r' (M ^ N) :=
 profinitely_filtered_pseudo_normed_group_with_Tinv.pi _ _
 
-def Hom_finsupp_iso_hom [fact (0 < r')] :
-  polyhedral_lattice.Hom (fin N →₀ Λ) M ⟶
+@[simps]
+def Hom_finsupp_iso_hom' [fact (0 < r')] :
+  polyhedral_lattice.Hom (fin N →₀ Λ) M →+
   (ProFiltPseuNormGrpWithTinv.of r' $ ((polyhedral_lattice.Hom Λ M) ^ N)) :=
 { to_fun := λ (f : (fin N →₀ ↥Λ) →+ ↥M) i,
   { to_fun := λ l, f (finsupp.single i l),
     map_zero' := by rw [finsupp.single_zero, f.map_zero],
     map_add' := λ l₁ l₂, by rw [finsupp.single_add, f.map_add] },
   map_zero' := by { ext i l, simp only [pi.zero_apply, add_monoid_hom.coe_zero, add_monoid_hom.coe_mk] },
-  map_add' := λ f g, by { ext i l, simp only [add_monoid_hom.coe_add, add_monoid_hom.coe_mk, pi.add_apply] },
-  strict' := sorry,
-  continuous' := sorry,
-  map_Tinv' := sorry }
+  map_add' := λ f g, by { ext i l, simp only [add_monoid_hom.coe_add, add_monoid_hom.coe_mk, pi.add_apply] } }
+.
 
+@[simps]
+def Hom_finsupp_iso_hom [fact (0 < r')] :
+  polyhedral_lattice.Hom (fin N →₀ Λ) M ⟶
+  (ProFiltPseuNormGrpWithTinv.of r' $ ((polyhedral_lattice.Hom Λ M) ^ N)) :=
+{ strict' := sorry,
+  continuous' := sorry,
+  map_Tinv' := sorry,
+  .. Hom_finsupp_iso_hom' Λ N r' M }
+.
+
+@[simps]
+def Hom_finsupp_equiv [fact (0 < r')] :
+  polyhedral_lattice.Hom (fin N →₀ Λ) M ≃+
+  (ProFiltPseuNormGrpWithTinv.of r' $ ((polyhedral_lattice.Hom Λ M) ^ N)) :=
+{ inv_fun := λ (f : (Λ →+ M) ^ N),
+  { to_fun := λ x, x.sum $ λ i l, f i l,
+    map_zero' := by rw [finsupp.sum_zero_index],
+    map_add' := λ x y, by simp only [finsupp.sum_add_index'] },
+  left_inv := λ f,
+  begin
+    ext i l,
+    simp only [add_monoid_hom.coe_comp, add_monoid_hom.coe_mk, add_monoid_hom.to_fun_eq_coe,
+     finsupp.single_add_hom_apply, function.comp_app, finsupp.sum_single_index,
+     add_monoid_hom.map_zero],
+    refl
+  end,
+  right_inv := λ f,
+  begin
+    ext i l,
+    simp only [add_monoid_hom.to_fun_eq_coe, add_monoid_hom.coe_mk, Hom_finsupp_iso_hom'_apply_apply,
+      finsupp.sum_single_index, add_monoid_hom.map_zero],
+  end,
+  .. Hom_finsupp_iso_hom' Λ N r' M }
+.
+
+@[simps]
 def Hom_finsupp_iso [fact (0 < r')] :
   polyhedral_lattice.Hom (fin N →₀ Λ) M ≅
   (ProFiltPseuNormGrpWithTinv.of r' $ ((polyhedral_lattice.Hom Λ M) ^ N)) :=
 @polyhedral_lattice.iso_of_equiv_of_strict _ _ _
-  (Hom_finsupp_iso_hom _ _ _ _) sorry sorry sorry
+  (Hom_finsupp_iso_hom _ _ _ _) (Hom_finsupp_equiv _ _ _ _) (λ _, rfl) sorry
 
 end
 
