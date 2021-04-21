@@ -117,7 +117,10 @@ add_monoid_hom.to_add_equiv
   (finsupp.lift_add_hom $ λ n,
     (direct_sum.of (λ i, monomial.submonoid R i) n).comp (monomial.to_submonoid R n))
   (begin
-    ext i ⟨x, r, _, rfl⟩ : 2,
+    apply direct_sum.add_hom_ext',
+    rintro i,
+    apply add_monoid_hom.ext,
+    rintro ⟨x, r, rfl⟩,
     dsimp,
     simp [monomial],
     refl,
@@ -167,7 +170,7 @@ add_monoid_hom.to_add_equiv
   (finsupp.lift_add_hom $ λ n,
     (direct_sum.of (λ i, monomial.submonoid R M i) n).comp (monomial.to_submonoid R M n))
   (begin
-    ext i ⟨x, r, _, rfl⟩ : 2,
+    ext i ⟨x, r, rfl⟩ : 2,
     simpa [Mm],
   end)
   (begin

@@ -1,5 +1,6 @@
 import analysis.normed_space.normed_group_hom
 import ring_theory.finiteness
+import data.int.basic
 /-!
 
 # Polyhedral lattices
@@ -57,22 +58,40 @@ begin
   rintro a -,
   have hA := ha.is_basis,
   rw ← hA.total_repr a,
-  generalize haA : (hA.repr) a = f,
-  apply finsupp.induction f,
+  generalize : (hA.repr) a = f, clear a,
+  apply finsupp.induction f; clear f,
   { exact submodule.zero_mem _ },
   { intros i z f hif hz hf,
-    -- eew
-    have hhh : (finsupp.total ha.basis_type A ℤ ha.basis) (finsupp.single i z + f) = _ :=
-      (finsupp.total ha.basis_type A ℤ ha.basis).to_add_monoid_hom.map_add
-        (finsupp.single i z)
-        f,
-    rw hhh, clear hhh,
-    refine submodule.add_mem _ _ hf, clear hf,
+    rw linear_map.map_add,
+    refine submodule.add_mem _ _ hf,
     simp only [set.image_univ, finset.coe_union, pi.neg_apply, finsupp.total_single, linear_map.to_add_monoid_hom_coe,
       finset.coe_univ, finset.coe_image],
+    -- next 6 lines -- what am I missing? I rewrite this twice later.
+    have should_be_easy : ∀ (n : ℕ) (b : A), (n : ℤ) • b = n • b,
+    { intros,
+      induction n with n hn,
+        simp,
+      rw [nat.succ_eq_add_one, add_smul, ←hn],
+      simp [add_smul] },
+    let n := z.nat_abs,
+    by_cases hz2 : z ≤ 0,
     -- nearly there
-    sorry
-  },
+    { -- messy z≤0 case
+      have hn2 : (n : ℤ) = - z := int.of_nat_nat_abs_of_nonpos hz2,
+      rw [eq_neg_iff_eq_neg, ← mul_neg_one] at hn2,
+      rw [hn2, mul_smul, neg_one_smul, should_be_easy],
+      refine submodule.smul_mem _ n (submodule.subset_span (or.inr ⟨i, rfl⟩)) },
+    { push_neg at hz2,
+      rw [← int.of_nat_nat_abs_eq_of_nonneg (le_of_lt hz2)],
+      change (n : ℤ) • _ ∈ _,
+      rw should_be_easy,
+      refine submodule.smul_mem _ n (submodule.subset_span (or.inl ⟨i, rfl⟩)) } },
+end
+
+theorem dual : finite_free (A →+ ℤ) :=
+begin
+  -- do this after is_basis refactor?
+  sorry
 end
 
 /-- The rank of a finite free abelian group. -/
@@ -83,7 +102,7 @@ variable {ha}
 /-- A rank zero abelian group has at most one element (yeah I know...). -/
 lemma rank_zero (h0 : ha.rank = 0) : subsingleton A := subsingleton.intro
 begin
-  -- do this after the basis refactor
+  -- do this after is_basis refactor
   sorry
 end
 

@@ -57,6 +57,8 @@ begin
     unfreezingI {induction n with d hd generalizing l ι},
     { -- base case, ι empty
       -- this is going to be `top_fg` in `polyhedral_lattice.basic`
+      intro hι,
+--      convert hΛ.top_fg,
       sorry
     },
     { -- inductive step
