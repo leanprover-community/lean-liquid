@@ -2,15 +2,18 @@ import for_mathlib.normed_group_quotient
 import for_mathlib.additive_functor
 
 import system_of_complexes.basic
-import locally_constant.Vhat -- preadditive category NormedGroup
 
 /-!
+
 # Truncation
 
 In this file we define a truncation functors for (systems of) complexes of normed groups.
 This operation takes a complex `C` indexed by `ℕ`, and creates a new complex whose objects are
 * in degree `0`:   the cokernel of `d : C 0 ⟶ C 1`
 * in degree `n+1`: the object `C (n+2)`
+
+Various lemmas are proved about how this construction preserves or reflects
+various notions of bounded exactness.
 
 -/
 
@@ -173,20 +176,17 @@ begin
   let δ := ε / 2,
   have hδε : δ + δ = ε, { dsimp [δ], rw [← add_div, half_add_self] },
   have hδ : 0 < δ := div_pos hε zero_lt_two,
-  let γ := δ / 2,
-  have hγδ : γ + γ = δ, { dsimp [γ], rw [← add_div, half_add_self] },
-  have hγ : 0 < γ := div_pos hδ zero_lt_two,
-  obtain ⟨x', Hxx', Hx'⟩ : ∃ x', π c x' = π c (res x) ∧ ∥x'∥ < ∥π c (res x)∥ + γ :=
-    normed_group_hom.quotient_norm_lift (NormedGroup.coker.π_is_quotient) hγ _,
-  obtain ⟨y, hy⟩ : ∃ y : C c 0, ∥res x - (C.d 0 1) y∥ ≤ ∥x'∥ + γ :=
-    NormedGroup.coker.exists_norm_le _ _ Hxx'.symm γ hγ,
+  obtain ⟨x', Hxx', Hx'⟩ : ∃ x', π c x' = π c (res x) ∧ ∥x'∥ < ∥π c (res x)∥ + δ :=
+    normed_group_hom.quotient_norm_lift (NormedGroup.coker.π_is_quotient) hδ _,
+  obtain ⟨y, hy⟩ : ∃ y : C c 0, C.d 0 1 y = res x - x',
+  { erw [quotient_add_group.eq, add_comm, ← sub_eq_add_neg, set.mem_range] at Hxx',
+    exact Hxx' },
   obtain ⟨_, _, rfl, rfl, y', H⟩ := hC c hc _ (nat.zero_le m) (π _ x) δ hδ,
   refine ⟨0, 2, rfl, rfl, y, _⟩,
   simp only [d_self_apply, normed_group_hom.map_zero, sub_zero,
     truncate_obj_d_zero_one, norm_neg] at H ⊢,
-  calc ∥res x - (C.d 0 1) y∥ ≤ ∥x'∥ + γ : hy
-  ... ≤ ∥π c (res x)∥ + γ + γ : add_le_add_right Hx'.le _
-  ... ≤ ∥π c (res x)∥ + δ : by rw [add_assoc, hγδ]
+  calc ∥res x - (C.d 0 1) y∥ ≤ ∥x'∥ : by rw [hy, sub_sub_cancel]
+  ... ≤ ∥π c (res x)∥ + δ : Hx'.le
   ... ≤ ↑K * ∥C.d 1 2 x∥ + δ + δ : add_le_add_right H _
   ... ≤ ↑K * ∥C.d 1 2 x∥ + ε : by rw [add_assoc, hδε]
 end

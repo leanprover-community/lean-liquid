@@ -562,8 +562,8 @@ begin
   intros M,
   use M+1,
   rintro F hF s (_|i) hi,
-  { simp only [Mbar.Tinv, add_monoid_hom.coe_mk', Mbar.coe_mk, Mbar.Tinv_aux_zero] },
-  { simp only [Mbar.Tinv, Mbar.Tinv_aux_succ, add_monoid_hom.coe_mk', Mbar.coe_mk],
+  { simp only [Mbar.Tinv, add_monoid_hom.mk'_apply, Mbar.coe_mk, Mbar.Tinv_aux_zero] },
+  { simp only [Mbar.Tinv, Mbar.Tinv_aux_succ, add_monoid_hom.mk'_apply, Mbar.coe_mk],
     apply hF,
     exact nat.succ_lt_succ hi },
 end

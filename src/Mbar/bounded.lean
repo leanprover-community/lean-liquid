@@ -7,7 +7,26 @@ import topology.order
 import topology.separation
 import topology.subset_properties
 import data.real.nnreal
+/-!
 
+# \overline{\mathcal{M}}_r(S)_{\leq c}
+
+Throughout, `S` is finite (not profinite).
+
+ℳ-barᵣ'(S)_{≤c} is the filtration on ℳ-barᵣ'(S) by profinite subsets described
+at the beginning of section 9 of `analytic.pdf`. It's defined not as a subset
+of `ℳ-barᵣ'(S)` but as an independent type. It's a projective limit of
+types `Mbar_bdd r S c M` which have an additional hypothesis that the power
+series involved are actually polynomials of degree at most `M`.
+
+## Main definitions
+
+- `Mbar_bdd r S c M`: the subset of `S → Tℤ[[T]]/(T^{M+1})` consisting of
+  elements `F_s = ∑_{n=1}^M a_{n,s} T^n` such that `∑_{s,n} |a_{n,s}| r^n ≤ c`.
+- `Mbar_bdd.limit r S c`: the projective limit of `Mbar_bdd r S c M`, as a subtype
+  of the product.
+
+-/
 noncomputable theory
 open_locale big_operators classical nnreal
 

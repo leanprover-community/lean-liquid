@@ -1,6 +1,15 @@
 import pseudo_normed_group.breen_deligne
 import normed_group.NormedGroup
+/-!
 
+# Constructions on the filtration on a profinitely filtered pseudo-normed abelian group
+
+## Main definitions
+
+- `FiltrationPow r' c n`: the functor sending a profinitely filtered `M` to `M_c^n`.
+- `φ.eval_FP r' c₁ c₂`: The map M_c₁^m → M_c₂^n induced by a (c₁, c₂)-suitable φ.
+
+-/
 open_locale classical nnreal
 noncomputable theory
 local attribute [instance] type_pow
@@ -96,7 +105,7 @@ theorem Tinv₀_comp_res {r' : ℝ≥0} (c₁ c₂ c₃ c₄ : ℝ≥0)
 end Filtration
 
 
-/-- The "functor" that sends `M` and `c` to `(filtration M c)^n` -/
+/-- `FiltrationPow r' c n` is the functor sending a profinitely filtered `M` to `M_c^n`. -/
 @[simps] def FiltrationPow (r' : ℝ≥0) (c : ℝ≥0) (n : ℕ) :
   ProFiltPseuNormGrpWithTinv r' ⥤ Profinite :=
 (Filtration r').obj c ⋙ Pow n
@@ -159,8 +168,9 @@ def eval_FP [ϕ.suitable c₁ c₂] : FiltrationPow.{u} r' c₁ m ⟶ Filtration
   end }
 
 lemma eval_FP_comp (g : basic_universal_map m n) (f : basic_universal_map l m)
-  [hg : g.suitable c₂ c₃] [hf : f.suitable c₁ c₂] [(g.comp f).suitable c₁ c₃] :
-  (g.comp f).eval_FP r' c₁ c₃ = f.eval_FP r' c₁ c₂ ≫ g.eval_FP r' c₂ c₃ :=
+  [hg : g.suitable c₂ c₃] [hf : f.suitable c₁ c₂]
+  [(basic_universal_map.comp g f).suitable c₁ c₃] :
+  (basic_universal_map.comp g f).eval_FP r' c₁ c₃ = f.eval_FP r' c₁ c₂ ≫ g.eval_FP r' c₂ c₃ :=
 begin
   ext j s i,
   dsimp,

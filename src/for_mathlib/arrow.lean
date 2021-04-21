@@ -80,4 +80,7 @@ end
 
 end arrow
 
+theorem arrow.mk_inj {T} [category T] (A B : T) (f g : A ⟶ B) : arrow.mk f = arrow.mk g → f = g :=
+by rintro ⟨⟩; refl
+
 end category_theory

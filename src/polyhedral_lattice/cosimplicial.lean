@@ -1,4 +1,4 @@
-import polyhedral_lattice.rescale
+import rescale.polyhedral_lattice
 import polyhedral_lattice.cech
 
 import facts.nnreal

@@ -5,7 +5,14 @@ import pseudo_normed_group.basic
 
 import hacks_and_tricks.type_pow
 import facts
+/-!
 
+# profinitely_filtered_pseudo_normed_group
+
+The definition of a profinitely_filtered_pseudo_normed_group, and an API for this
+definition.
+
+-/
 open pseudo_normed_group
 open_locale nnreal big_operators
 
@@ -319,8 +326,9 @@ begin
 end
 
 lemma pfpng_ctu_smul_nat : ∀ (n : ℕ), pfpng_ctu (λ x : M, n • x)
-| 0     := pfpng_ctu_const 0
-| (n+1) := (pfpng_ctu_id M).add (pfpng_ctu_smul_nat n) (λ c, ⟨c, λ x, x.2⟩)
+| 0     := by { simp only [zero_smul], exact pfpng_ctu_const 0 }
+| (n+1) := by { simp only [add_smul, one_smul, add_comm],
+                exact (pfpng_ctu_id M).add (pfpng_ctu_smul_nat n) (λ c, ⟨c, λ x, x.2⟩) }
 
 lemma pfpng_ctu_smul_int : ∀ (n : ℤ), pfpng_ctu (λ x : M, n • x)
 | (n:ℕ)  := pfpng_ctu_smul_nat M n
@@ -410,7 +418,7 @@ begin
   convert (continuous_add' cf cg).comp aux' using 1,
   ext x,
   replace hfg₀ := congr_fun (hfg₀ x) j,
-  dsimp at hfg₀ ⊢, rw [← hfg₀], refl
+  dsimp at hfg₀ ⊢, rw [← hfg₀]
 end
 
 lemma pfpng_ctu'_sum {ι : Type*} (s : finset ι)
@@ -437,7 +445,7 @@ end continuity
 
 namespace profinitely_filtered_pseudo_normed_group
 
-/-! ## Powers -/
+/-! ## Products -/
 
 section pi
 
@@ -446,16 +454,123 @@ variables {ι : Type*} (M : ι → Type*) [Π i, profinitely_filtered_pseudo_nor
 instance pi_topology (c : ℝ≥0) : topological_space (filtration (Π i, M i) c) :=
 topological_space.induced (filtration_pi_equiv M c) $ infer_instance
 
-instance pi_t2 (c : ℝ≥0) : t2_space (filtration (Π i, M i) c) := sorry
+def filtration_pi_homeo (c : ℝ≥0) :
+  filtration (Π i, M i) c ≃ₜ Π i, filtration (M i) c :=
+{ to_fun := λ x i, ⟨x.1 i, x.2 i⟩,
+  inv_fun := λ x, ⟨λ i, x i, λ i, (x i).2⟩,
+  left_inv := by { rintro ⟨x, hx⟩, refl },
+  right_inv := by { intro x, ext, refl },
+  continuous_to_fun :=
+    begin
+      rw continuous_def,
+      intros U hU,
+      rw is_open_induced_iff,
+      refine ⟨U, hU, _⟩,
+      refl,
+    end,
+  continuous_inv_fun :=
+    begin
+      rw continuous_def,
+      rintros s ⟨t, ht, s_eq⟩,
+      simpa [← s_eq] using continuous_def.1 _ t ht,
+      { rw [filtration_pi_equiv, continuous_def],
+        intros U hU,
+        simp only [*, equiv.coe_fn_mk, set.preimage_id',
+        subtype.coe_eta, subtype.coe_mk] },
+    end
+    }
 
-instance pi_td (c : ℝ≥0) : totally_disconnected_space (filtration (Π i, M i) c) := sorry
+instance pi_t2 (c : ℝ≥0) : t2_space (filtration (Π i, M i) c) :=
+begin
+  have : t2_space (Π i, filtration (M i) c) := infer_instance,
+  apply @embedding.t2_space _ _ _ _ this (filtration_pi_homeo M c) (filtration_pi_homeo M c).embedding,
+end
 
-instance pi_compact (c : ℝ≥0) : compact_space (filtration (Π i, M i) c) := sorry
+instance pi_td (c : ℝ≥0) : totally_disconnected_space (filtration (Π i, M i) c) :=
+begin
+  obtain ⟨H⟩ : totally_disconnected_space (Π i, filtration (M i) c) := infer_instance,
+  rw [← homeomorph.range_coe (filtration_pi_homeo M c), ← set.image_univ] at H,
+  exact ⟨embedding.is_totally_disconnected (filtration_pi_homeo M c).embedding H⟩,
+end
+
+instance pi_compact (c : ℝ≥0) : compact_space (filtration (Π i, M i) c) :=
+begin
+  obtain ⟨H⟩ : compact_space (Π i, filtration (M i) c) := infer_instance,
+  rw [← (homeomorph.compact_image (filtration_pi_homeo M c).symm), set.image_univ,
+    homeomorph.range_coe] at H,
+  exact ⟨H⟩,
+end
+
+def prod_pi_homeo_pi_prod [Π i, profinitely_filtered_pseudo_normed_group (M i)]
+(c₁ c₂ : ℝ≥0) :
+ filtration (Π i, M i) c₁ × filtration (Π i, M i) c₂ ≃ₜ Π i, (filtration (M i) c₁ × filtration (M i) c₂) :=
+{ to_fun := λ x i, ⟨⟨x.1.1 i, x.1.2 i⟩, ⟨x.2.1 i, x.2.2 i⟩⟩,
+  inv_fun := λ x, ⟨⟨λ i, (x i).1.1, λ i, (x i).1.2⟩, ⟨λ i, (x i).2.1, λ i, (x i).2.2⟩⟩,
+  left_inv := by {rintro ⟨x, hx⟩, simp only [subtype.coe_eta, subtype.val_eq_coe]},
+  right_inv := by { intro x, ext; refl},
+  continuous_to_fun :=
+  begin
+      apply continuous_pi,
+      intro i,
+      apply continuous.prod_mk,
+      have h₁ := (homeomorph.comp_continuous_iff (filtration_pi_homeo M c₁)).mpr continuous_fst,
+      exact (continuous_apply i).comp h₁,
+      have h₂ := (homeomorph.comp_continuous_iff (filtration_pi_homeo M c₂)).mpr continuous_snd,
+      exact (continuous_apply i).comp h₂,
+    end,
+  continuous_inv_fun :=
+    begin
+      apply continuous.prod_mk,
+      let f₁ : (Π i, (filtration (M i) c₁) × (filtration (M i) c₂)) → (filtration (Π i, M i) c₁)
+        := λ x, ⟨λ (i : ι), (x i).fst.val, λ i, (x i).fst.prop⟩,
+      have : continuous ((filtration_pi_homeo M c₁) ∘ f₁),
+      { apply continuous_pi,
+        intro i,
+        dsimp [filtration_pi_homeo, f₁],
+        simp only [subtype.coe_eta],
+        exact continuous_fst.comp (continuous_apply i), },
+      exact (homeomorph.comp_continuous_iff (filtration_pi_homeo M c₁)).mp this,
+      let f₂ : (Π i, (filtration (M i) c₁) × (filtration (M i) c₂)) → (filtration (Π i, M i) c₂)
+        := λ x, ⟨λ (i : ι), (x i).snd.val, λ i, (x i).snd.prop⟩,
+      have : continuous ((filtration_pi_homeo M c₂) ∘ f₂),
+      { apply continuous_pi,
+        intro i,
+        dsimp [filtration_pi_homeo, f₂],
+        simp only [subtype.coe_eta],
+        exact continuous_snd.comp (continuous_apply i), },
+      exact (homeomorph.comp_continuous_iff (filtration_pi_homeo M c₂)).mp this,
+    end,}
+
 
 instance pi : profinitely_filtered_pseudo_normed_group (Π i, M i) :=
-{ continuous_add' := sorry,
-  continuous_neg' := sorry,
-  continuous_cast_le := sorry,
+{ continuous_add' :=
+    begin
+      intros c₁ c₂,
+      rw [← homeomorph.comp_continuous_iff (filtration_pi_homeo M (c₁ + c₂)),
+        ← homeomorph.comp_continuous_iff' (prod_pi_homeo_pi_prod M c₁ c₂).symm],
+      apply continuous_pi,
+      intro i,
+      exact (continuous_add' c₁ c₂).comp (continuous_apply i),
+    end,
+  continuous_neg' :=
+    begin
+      intro c,
+      rw [← homeomorph.comp_continuous_iff (filtration_pi_homeo M c),
+        ← homeomorph.comp_continuous_iff' (filtration_pi_homeo M c).symm],
+      apply continuous_pi,
+      intro i,
+      exact (continuous_neg' c).comp (continuous_apply i),
+    end,
+  continuous_cast_le :=
+    begin
+      intros c₁ c₂ h,
+      rw [← homeomorph.comp_continuous_iff (filtration_pi_homeo M c₂),
+        ← homeomorph.comp_continuous_iff' (filtration_pi_homeo M c₁).symm],
+      apply continuous_pi,
+      intro i,
+      have := @continuous_cast_le _ _ _ _ h,
+      exact this.comp (continuous_apply i),
+    end,
   .. pseudo_normed_group.pi M }
 
 variables {M}
@@ -484,29 +599,31 @@ def pi_map (f : Π i, profinitely_filtered_pseudo_normed_group_hom (M i) (M i)) 
 
 end pi
 
-section prod
+-- section prod
 
-variables (M₁ M₂ : Type*)
-variables [profinitely_filtered_pseudo_normed_group M₁]
-variables [profinitely_filtered_pseudo_normed_group M₂]
+-- -- jmc: I don't think we need binary products
 
-instance prod_topology (c : ℝ≥0) : topological_space (filtration (M₁ × M₂) c) :=
-topological_space.induced (filtration_prod_equiv M₁ M₂ c) $ infer_instance
+-- variables (M₁ M₂ : Type*)
+-- variables [profinitely_filtered_pseudo_normed_group M₁]
+-- variables [profinitely_filtered_pseudo_normed_group M₂]
 
-instance prod_t2 (c : ℝ≥0) : t2_space (filtration (M₁ × M₂) c) := sorry
+-- instance prod_topology (c : ℝ≥0) : topological_space (filtration (M₁ × M₂) c) :=
+-- topological_space.induced (filtration_prod_equiv M₁ M₂ c) $ infer_instance
 
-instance prod_td (c : ℝ≥0) : totally_disconnected_space (filtration (M₁ × M₂) c) := sorry
+-- instance prod_t2 (c : ℝ≥0) : t2_space (filtration (M₁ × M₂) c) := by admit
 
-instance prod_compact (c : ℝ≥0) : compact_space (filtration (M₁ × M₂) c) := sorry
+-- instance prod_td (c : ℝ≥0) : totally_disconnected_space (filtration (M₁ × M₂) c) := by admit
+
+-- instance prod_compact (c : ℝ≥0) : compact_space (filtration (M₁ × M₂) c) := by admit
 
 
-instance prod :
-  profinitely_filtered_pseudo_normed_group (M₁ × M₂) :=
-{ continuous_add' := sorry,
-  continuous_neg' := sorry,
-  continuous_cast_le := sorry,
-  .. pseudo_normed_group.prod M₁ M₂ }
+-- instance prod :
+--   profinitely_filtered_pseudo_normed_group (M₁ × M₂) :=
+-- { continuous_add' := by admit,
+--   continuous_neg' := by admit,
+--   continuous_cast_le := by admit,
+--   .. pseudo_normed_group.prod M₁ M₂ }
 
-end prod
+-- end prod
 
 end profinitely_filtered_pseudo_normed_group

@@ -1,26 +1,119 @@
 import analysis.normed_space.normed_group_hom
 import ring_theory.finiteness
+import data.int.basic
+/-!
 
+# Polyhedral lattices
+
+A polyhedral lattice is a finite free ℤ-module with a real-valued norm
+making it into a normed group, such that the closed unit ball of
+the Banach space obtained by tensoring everything up to ℝ is a rational polyhedron.
+
+## Implementation issues
+
+The condition on the norm actually used is `generates_norm` below.
+
+-/
 noncomputable theory
 open_locale big_operators classical nnreal
 
-local attribute [-instance] add_comm_monoid.nat_semimodule add_comm_group.int_module
+-- no longer necessary after big mathlib refactor?
+local attribute [-instance] add_comm_group.int_module
 
 section move_this
 
 -- rewrite to include multiplicative version
 -- also write version for modules, glue to version for groups
-def torsion_free (A : Type*) [add_comm_group A] [semimodule ℕ A] : Prop :=
+def torsion_free (A : Type*) [add_comm_group A] : Prop :=
 ∀ (a : A) (ha : a ≠ 0) (n : ℕ), n • a = 0 → n = 0
 
+-- TODO: remove [semimodule ℤ A]
+-- TODO: multiplicative version once this is removed
+-- TODO: `is_basis` is being bundled by Anne so there's no point filling in proofs right now :-/
+
+/-- `finite_free M` is the statement that the abelian group `M` is free of finite rank (over `ℤ`).-/
 def finite_free (A : Type*) [add_comm_group A] [semimodule ℤ A] : Prop :=
 ∃ (ι : Type) [fintype ι] (x : ι → A), is_basis ℤ x
+
+namespace finite_free
+
+variables {A : Type*} [add_comm_group A] [semimodule ℤ A] (ha : finite_free A)
+
+/-- If `ha : finite_free Λ` then `ha.basis_type` is the `ι` which indexes the basis
+  `ha.basis : ι → Λ`. -/
+def basis_type : Type := classical.some ha
+
+instance : fintype (basis_type ha) := classical.some $ classical.some_spec ha
+
+/-- If `ha : finite_free Λ` then `ha.basis : ι → Λ` is the basis. Here `ι := ha.basis_type`. -/
+def basis : ha.basis_type → A := classical.some $ classical.some_spec $ classical.some_spec ha
+
+theorem is_basis : is_basis ℤ ha.basis :=
+classical.some_spec $ classical.some_spec $ classical.some_spec ha
+
+theorem top_fg (ha : finite_free A) : (⊤ : submodule ℕ A).fg :=
+begin
+  use (finset.image (ha.basis) finset.univ) ∪ (finset.image (-ha.basis) finset.univ),
+  rw eq_top_iff,
+  rintro a -,
+  have hA := ha.is_basis,
+  rw ← hA.total_repr a,
+  generalize : (hA.repr) a = f, clear a,
+  apply finsupp.induction f; clear f,
+  { exact submodule.zero_mem _ },
+  { intros i z f hif hz hf,
+    rw linear_map.map_add,
+    refine submodule.add_mem _ _ hf,
+    simp only [set.image_univ, finset.coe_union, pi.neg_apply, finsupp.total_single, linear_map.to_add_monoid_hom_coe,
+      finset.coe_univ, finset.coe_image],
+    -- next 6 lines -- what am I missing? I rewrite this twice later.
+    have should_be_easy : ∀ (n : ℕ) (b : A), (n : ℤ) • b = n • b,
+    { intros,
+      induction n with n hn,
+        simp,
+      rw [nat.succ_eq_add_one, add_smul, ←hn],
+      simp [add_smul] },
+    let n := z.nat_abs,
+    by_cases hz2 : z ≤ 0,
+    -- nearly there
+    { -- messy z≤0 case
+      have hn2 : (n : ℤ) = - z := int.of_nat_nat_abs_of_nonpos hz2,
+      rw [eq_neg_iff_eq_neg, ← mul_neg_one] at hn2,
+      rw [hn2, mul_smul, neg_one_smul, should_be_easy],
+      refine submodule.smul_mem _ n (submodule.subset_span (or.inr ⟨i, rfl⟩)) },
+    { push_neg at hz2,
+      rw [← int.of_nat_nat_abs_eq_of_nonneg (le_of_lt hz2)],
+      change (n : ℤ) • _ ∈ _,
+      rw should_be_easy,
+      refine submodule.smul_mem _ n (submodule.subset_span (or.inl ⟨i, rfl⟩)) } },
+end
+
+theorem dual : finite_free (A →+ ℤ) :=
+begin
+  -- do this after is_basis refactor?
+  sorry
+end
+
+/-- The rank of a finite free abelian group. -/
+def rank (ha : finite_free A) : ℕ := fintype.card ha.basis_type
+
+variable {ha}
+
+/-- A rank zero abelian group has at most one element (yeah I know...). -/
+lemma rank_zero (h0 : ha.rank = 0) : subsingleton A := subsingleton.intro
+begin
+  -- do this after is_basis refactor
+  sorry
+end
+
+
+end finite_free
 
 end move_this
 
 section generates_norm
 
-variables {Λ ι : Type*} [normed_group Λ] [semimodule ℕ Λ] [fintype ι]
+variables {Λ ι : Type*} [semi_normed_group Λ] [fintype ι]
 
 /-- A finite family `x : ι → Λ` generates the norm on `Λ`
 if for every `l : Λ`,
@@ -53,16 +146,18 @@ lemma generates_norm_of_generates_nnnorm {x : ι → Λ}
 
 end generates_norm
 
-class polyhedral_lattice (Λ : Type*) extends normed_group Λ :=
+class polyhedral_lattice (Λ : Type*) extends semi_normed_group Λ :=
 -- unfortunately, we need the following assumptions, for technical reasons
-[nat_semimodule : semimodule ℕ Λ]
 [int_semimodule : semimodule ℤ Λ]
 [is_scalar_tower : is_scalar_tower ℕ ℤ Λ]
 -- now we get to the actual definition
 (finite_free : finite_free Λ)
-(polyhedral [] : ∃ (ι : Type) [fintype ι] (l : ι → Λ), generates_norm l)
+(polyhedral [] : ∃ (ι : Type) [fintype ι] (l : ι → Λ),
+  generates_norm l ∧ ∀ i, nnnorm (l i) ≠ 0)
+  -- this final condition ↑ ↑ ↑ ↑ effectively means that we have a `normed_group`
+  -- but this condition is easier to check when forming quotients
 
-attribute [instance] polyhedral_lattice.nat_semimodule polyhedral_lattice.int_semimodule
+attribute [instance] polyhedral_lattice.int_semimodule
                      polyhedral_lattice.is_scalar_tower
 
 /-- A morphism of polyhedral lattices is a norm-nonincreasing group homomorphism. -/
@@ -105,7 +200,7 @@ initialize_simps_projections polyhedral_lattice_hom (to_fun → apply)
 lemma coe_inj (H : ⇑f = g) : f = g :=
 by cases f; cases g; congr'; exact funext H
 
-lemma coe_injectiΛe : @function.injective (polyhedral_lattice_hom Λ₁ Λ₂) (Λ₁ → Λ₂) coe_fn :=
+lemma coe_injective : @function.injective (polyhedral_lattice_hom Λ₁ Λ₂) (Λ₁ → Λ₂) coe_fn :=
 by apply coe_inj
 
 lemma coe_inj_iff : f = g ↔ ⇑f = g := ⟨congr_arg _, coe_inj⟩

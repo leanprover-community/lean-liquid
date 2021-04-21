@@ -3,7 +3,19 @@ import pseudo_normed_group.category
 import breen_deligne.suitable
 
 import for_mathlib.add_monoid_hom
+/-!
 
+# Universal maps and pseudo-normed groups
+
+This file contains the definition of the action of a basic universal map
+on powers of a pseudo-normed group and related types.
+
+## Main definitions
+
+- `f.eval_png : (M^m) →+ (M^n)` : the group homomorphism induced by a basic universal map.
+- `f.eval_png₀ : M_{c₁}^m → M_{c₂}^n` : the induced map if `f` is (c₁, c₂)-suitable.
+
+-/
 noncomputable theory
 
 local attribute [instance] type_pow
@@ -43,7 +55,7 @@ begin
 end
 
 @[simp] lemma eval_png_zero : (0 : basic_universal_map m n).eval_png M = 0 :=
-by { ext, simp only [eval_png_apply, zero_smul, finset.sum_const_zero, matrix.zero_apply], refl }
+by { ext, simp only [eval_png_apply, zero_smul, finset.sum_const_zero, dmatrix.zero_apply], refl }
 
 lemma eval_png_mem_filtration :
   (f.eval_png M) ∈ filtration ((M^m) →+ (M^n)) (finset.univ.sup $ λ i, ∑ j, (f i j).nat_abs) :=
@@ -69,11 +81,11 @@ def eval_png₀ (c₁ c₂ : ℝ≥0) [h : f.suitable c₁ c₂] (x : (filtratio
   eval_png_mem_filtration' f M c₁ c₂ _ (λ i, (x i).2) j⟩ : (filtration M c₂ : Type*))
 
 lemma eval_png_comp {l m n} (g : basic_universal_map m n) (f : basic_universal_map l m) :
-  (g.comp f).eval_png M = (g.eval_png M).comp (f.eval_png M) :=
+  (basic_universal_map.comp g f).eval_png M = (g.eval_png M).comp (f.eval_png M) :=
 begin
   ext x j,
   simp only [eval_png_apply, function.comp_app, coe_comp, basic_universal_map.comp,
-    matrix.mul_apply, finset.smul_sum, finset.sum_smul, mul_smul],
+    matrix.mul_apply, finset.smul_sum, finset.sum_smul, mul_smul, add_monoid_hom.mk'_apply],
   rw finset.sum_comm
 end
 

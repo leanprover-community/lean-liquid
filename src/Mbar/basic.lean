@@ -18,7 +18,8 @@ import for_mathlib.pi_nat_apply
 
 ## $\overline{\mathcal{M}}_{r'}(S)$
 
-This file contains a definition of ℳ-barᵣ'(S) as defined on p57 of Analytic.pdf .
+This file contains a definition of ℳ-barᵣ'(S) as defined at the very beginning
+of section 9 of `analytic.pdf` (p57), and its action of `T⁻¹`.
 
 ## Implementation issues
 
@@ -230,7 +231,7 @@ begin
   simp only [pi.smul_apply, function.gsmul_apply, smul_eq_mul, gsmul_int_int]
 end
 
-@[simp] lemma coe_nsmul (n : ℕ) (F : Mbar r' S) : ⇑(n •ℕ F) = n •ℕ F :=
+@[simp] lemma coe_nsmul (n : ℕ) (F : Mbar r' S) : ⇑(n • F) = n • F :=
 coe_gsmul n F
 
 @[simp] lemma nnnorm_smul (N : ℤ) (F : Mbar r' S) : ∥N • F∥₊ = nnnorm N * ∥F∥₊ :=
@@ -308,7 +309,7 @@ lemma Tinv_mem_filtration [h0r : fact (0 < r')] :
   Tinv ∈ filtration (Mbar r' S →+ Mbar r' S) (r'⁻¹) :=
 begin
   intros c F hF,
-  simp only [Tinv, add_monoid_hom.coe_mk'],
+  simp only [Tinv, add_monoid_hom.mk'_apply],
   change _ ≤ _ at hF,
   rw mul_comm,
   apply le_mul_inv_of_mul_le h0r.out.ne',
@@ -335,13 +336,12 @@ begin
   simp only [Mbar.mem_filtration_iff],
   have hN' : 0 < (N : ℝ≥0) := by exact_mod_cast hN,
   conv_rhs { rw ← mul_le_mul_left hN' },
-  simp only [nnnorm_def, ← nsmul_eq_smul, nsmul_eq_mul, finset.mul_sum, finset.sum_mul,
+  simp only [nnnorm_def, nsmul_eq_mul, finset.mul_sum, finset.sum_mul,
     coe_nsmul, pi.mul_apply, pi.nat_apply, @pi.nat_apply ℕ ℤ _ _ _ N,
     int.nat_abs_mul, int.nat_abs_of_nat, int.nat_cast_eq_coe_nat, nat.cast_mul],
   convert iff.rfl,
   ext s,
-  simp only [nnreal.coe_nat_cast, nnreal.coe_tsum, nnreal.coe_mul,
-    ← tsum_mul_left, ← mul_assoc]
+  simp only [nnreal.coe_nat_cast, nnreal.coe_tsum, nnreal.coe_mul, ← tsum_mul_left, ← mul_assoc]
 end
 
 /-- `of_mask x mask : Mbar r' S` is `∑ a_{s,n}T^n ∈ Tℤ[[T]]`,

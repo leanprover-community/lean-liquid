@@ -1,12 +1,39 @@
 import category_theory.currying
-import category_theory.abelian.additive_functor
+import category_theory.preadditive.additive_functor
 import topology.category.Profinite
 import topology.algebra.normed_group
 import topology.algebra.group_completion
 import topology.metric_space.completion
 
+import for_mathlib.normed_group
+
 import locally_constant.NormedGroup
 import normed_group.normed_with_aut
+
+/-
+
+# Completions of normed groups
+
+This file contains an API for completions of normed groups (basic facts about
+objects and morphisms), and also a variant: completions for normed groups equipped with
+an automorphism which scales norms by a constant factor `r`.
+
+## Main definitions
+
+- `Completion` : the completion of a normed group (defined as a functor on `NormedGroup`)
+- `Completion.lift` : a normed group hom from `V` to complete `W` extends ("lifts")
+  to a normed group from the completion of `V` to `W`.
+- `normed_with_aut_Completion` : if `V` is equipped with an automorphism changing norms
+  by a factor `r` then the completion also has such an automorphism.
+- `LCC : NormedGroup ⥤ Profiniteᵒᵖ ⥤ NormedGroup` : `LCC V S` is the normed group completion of the
+  locally constant functions from `S` to `V`.
+
+## TODO
+
+Pull off the stuff about completions and put it into `normed_group/NormedGroup`?
+Then `system_of_complexes.basic` would not have to import this file.
+
+-/
 
 noncomputable theory
 open_locale nnreal
@@ -75,6 +102,18 @@ def incl {V : NormedGroup} : V ⟶ Completion.obj V :=
 
 @[simp] lemma norm_incl_eq {V : NormedGroup} {v : V} : ∥incl v∥ = ∥v∥ := by simp
 
+lemma Completion_map_bound_by {V W : NormedGroup} (f : V ⟶ W) (C : ℝ≥0) (hf : f.bound_by C) :
+  (Completion.map f).bound_by C :=
+begin
+  intros v,
+  apply completion.induction_on v; clear v,
+  { exact is_closed_le (continuous_norm.comp completion.continuous_map)
+      (continuous_const.mul continuous_norm), },
+  intro v,
+  simp only [completion.norm_coe, Completion_map_apply, completion.map_coe f.uniform_continuous],
+  exact hf v
+end
+
 lemma Completion_map_norm_noninc {V W : NormedGroup} (f : V ⟶ W) (hf : f.norm_noninc) :
   (Completion.map f).norm_noninc :=
 begin
@@ -129,7 +168,9 @@ Given a morphism of normed groups `f : V → W` with `W` complete, this provides
 the completion of `V`. The lemmas `lift_unique` and `lift_comp_incl` provide the api for the
 universal property of the completion.
 -/
-def Completion.lift {V W : NormedGroup} [complete_space W] (f : V ⟶ W) : Completion.obj V ⟶ W :=
+def Completion.lift {V W : NormedGroup} [complete_space W]
+  [t2_space W] [separated_space W] -- these should be redundant
+  (f : V ⟶ W) : Completion.obj V ⟶ W :=
 { to_fun := completion.extension f,
   map_add' := begin
     intros x y,
@@ -162,7 +203,9 @@ def Completion.lift {V W : NormedGroup} [complete_space W] (f : V ⟶ W) : Compl
       { exact normed_group_hom.uniform_continuous _ }}
   end }
 
-lemma lift_comp_incl {V W : NormedGroup} [complete_space W] (f : V ⟶ W) : incl ≫ (Completion.lift f) = f :=
+lemma lift_comp_incl {V W : NormedGroup} [complete_space W]
+  [t2_space W] [separated_space W] -- these should be redundant
+  (f : V ⟶ W) : incl ≫ (Completion.lift f) = f :=
 begin
   ext,
   change completion.extension f x = _,
@@ -170,7 +213,9 @@ begin
   exact normed_group_hom.uniform_continuous _,
 end
 
-lemma lift_unique {V W : NormedGroup} [complete_space W] (f : V ⟶ W) (g : Completion.obj V ⟶ W) :
+lemma lift_unique {V W : NormedGroup} [complete_space W]
+  [t2_space W] [separated_space W] -- these should be redundant
+  (f : V ⟶ W) (g : Completion.obj V ⟶ W) :
   incl ≫ g = f → g = Completion.lift f :=
 begin
   intros h,

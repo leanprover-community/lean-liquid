@@ -1,6 +1,7 @@
 import system_of_complexes.double
 import system_of_complexes.truncate
 import normed_snake
+import category_theory.concrete_category
 
 import thm95.constants
 
@@ -65,26 +66,39 @@ end truncate
 
 open opposite
 
-structure normed_spectral_homotopy (row₀ row₁ : system_of_complexes.{u}) (d : row₀ ⟶ row₁)
+structure normed_spectral_homotopy {row₀ row₁ : system_of_complexes.{u}} (d : row₀ ⟶ row₁)
   (m : ℕ) (k' ε : ℝ≥0) [fact (1 ≤ k')] (c₀ H : ℝ≥0) [fact (0 < H)] :=
 (h : Π (q : ℕ) {q' : ℕ} {c}, row₀ (k' * c) q' ⟶ row₁ c q)
 (h_bound_by : ∀ (q q' : ℕ) (hq : q ≤ m) (hq' : q+1 = q') (c) [fact (c₀ ≤ c)],
   (h q : row₀ (k' * c) q' ⟶ row₁ c q).bound_by H)
 (δ : Π (c : ℝ≥0), row₀.obj (op $ c) ⟶ row₁.obj (op $ k' * c))
-(hδ : ∀ (c : ℝ≥0) [fact (c₀ ≤ c)] (q : ℕ) (hq : q ≤ m) (x : row₀ (k' * (k' * c)) q),
-  (δ c).f q (system_of_complexes.res x) =
-    system_of_complexes.res (d x) + h q (row₀.d q (q+1) x) + row₁.d (q-1) q (h (q-1) x))
+(hδ : ∀ (c : ℝ≥0) [fact (c₀ ≤ c)] (q : ℕ) (hq : q ≤ m),
+  (system_of_complexes.res : row₀ (k' * (k' * c)) q ⟶ _) ≫ (δ c).f q =
+    d.apply ≫ system_of_complexes.res + row₀.d q (q+1) ≫ h q + h (q-1) ≫ row₁.d (q-1) q)
 (δ_bound_by : ∀ (c : ℝ≥0) [fact (c₀ ≤ c)] (q : ℕ) (hq : q ≤ m), ((δ c).f q).bound_by ε)
+.
+
+lemma normed_spectral_homotopy.hδ_apply {row₀ row₁ : system_of_complexes.{u}} {d : row₀ ⟶ row₁}
+  {m : ℕ} {k' ε : ℝ≥0} [fact (1 ≤ k')] {c₀ H : ℝ≥0} [fact (0 < H)]
+  (NSH : normed_spectral_homotopy d m k' ε c₀ H)
+  (c : ℝ≥0) [fact (c₀ ≤ c)] (q : ℕ) (hq : q ≤ m) (x : row₀ (k' * (k' * c)) q) :
+  (NSH.δ c).f q (system_of_complexes.res x) =
+    system_of_complexes.res (d x) + NSH.h q (row₀.d q (q+1) x) + row₁.d (q-1) q (NSH.h (q-1) x) :=
+begin
+  show ((system_of_complexes.res : row₀ (k' * (k' * c)) q ⟶ _) ≫ (NSH.δ c).f q) x = _,
+  rw NSH.hδ c q hq,
+  dsimp, refl
+end
 
 def normed_spectral_homotopy.of_iso {row₀ row₁ : system_of_complexes.{u}} {d : row₀ ⟶ row₁}
   {m : ℕ} {k' ε : ℝ≥0} [fact (1 ≤ k')] {c₀ H : ℝ≥0} [fact (0 < H)]
-  (NSH : normed_spectral_homotopy row₀ row₁ d m k' ε c₀ H)
+  (NSH : normed_spectral_homotopy d m k' ε c₀ H)
   (row'₀ row'₁ : system_of_complexes.{u}) (d' : row'₀ ⟶ row'₁)
   (φ₀ : row₀ ≅ row'₀) (φ₁ : row₁ ≅ row'₁)
   (hφ₀ : ∀ c i (x : row'₀ c i), ∥φ₀.inv x∥ = ∥x∥)
   (hφ₁ : ∀ c i (x : row₁ c i), ∥φ₁.hom x∥ = ∥x∥)
   (hcomm : d' = φ₀.inv ≫ d ≫ φ₁.hom) :
-  normed_spectral_homotopy row'₀ row'₁ d' m k' ε c₀ H :=
+  normed_spectral_homotopy d' m k' ε c₀ H :=
 { h := λ q q' c, φ₀.inv.apply ≫ NSH.h q ≫ φ₁.hom.apply,
   δ := λ c, φ₀.inv.app (op $ c) ≫ NSH.δ c ≫ φ₁.hom.app (op $ k' * c),
   h_bound_by :=
@@ -97,18 +111,21 @@ def normed_spectral_homotopy.of_iso {row₀ row₁ : system_of_complexes.{u}} {d
   end,
   hδ :=
   begin
-    introsI c hc q hq x,
-    have := congr_arg (λ x, φ₁.hom x) (NSH.hδ c q hq (φ₀.inv x)),
+    introsI c hc q hq,
+    ext1 x,
+    have := congr_arg (λ x, φ₁.hom x) (NSH.hδ_apply c q hq (φ₀.inv x)),
     simp only [coe_comp, hcomm, system_of_complexes.res_apply, system_of_complexes.d_apply] at this ⊢,
     refine this.trans _, clear this,
-    calc φ₁.hom (d (φ₀.inv (system_of_complexes.res x)) + (NSH.h q) (φ₀.inv (row'₀.d q (q+1) x)) +
+    calc φ₁.hom (d (φ₀.inv (system_of_complexes.res x)) +
+          (NSH.h q) (φ₀.inv (row'₀.d q (q+1) x)) +
           (row₁.d (q - 1) q) (NSH.h (q - 1) (φ₀.inv x)))
-        = φ₁.hom (d (φ₀.inv (system_of_complexes.res x)) + (NSH.h q) (φ₀.inv (row'₀.d q (q+1) x))) +
+        = φ₁.hom (d (φ₀.inv (system_of_complexes.res x)) +
+          (NSH.h q) (φ₀.inv (row'₀.d q (q+1) x))) +
           φ₁.hom ((row₁.d (q - 1) q) (NSH.h (q - 1) (φ₀.inv x))) : _
     ... = _ : _,
     { apply normed_group_hom.map_add },
     congr' 1,
-    { apply normed_group_hom.map_add },
+    { dsimp, rw ← system_of_complexes.res_comp_apply, apply normed_group_hom.map_add },
     { erw [system_of_complexes.d_apply], refl }
   end,
   δ_bound_by := λ c hc q hq,
@@ -126,7 +143,7 @@ structure normed_spectral_conditions (M : system_of_double_complexes.{u})
   (m : ℕ) (k K k' ε : ℝ≥0) [fact (1 ≤ k)] [fact (1 ≤ k')] (c₀ H : ℝ≥0) [fact (0 < H)] :=
 (row_exact : 0 < m → ∀ i ≤ m + 1, (M.row i).is_weak_bounded_exact k K (m-1) c₀)
 (col_exact : ∀ j ≤ m, (M.col j).is_weak_bounded_exact k K m c₀)
-(htpy      : normed_spectral_homotopy (M.row 0) (M.row 1) (M.row_map 0 1) m k' ε c₀ H)
+(htpy      : normed_spectral_homotopy (M.row_map 0 1) m k' ε c₀ H)
 -- ergonomics: we bundle this assumption, instead of passing it around separately
 (admissible : M.admissible)
 
@@ -162,9 +179,7 @@ begin
     simpa only [exists_prop, row_res, d'_self_apply, exists_eq_left, sub_zero,
       exists_and_distrib_left, zero_add, row_d, exists_eq_left', exists_const]
       using condM.row_exact (nat.zero_lt_succ _) i hi c hc 0 (nat.zero_le _) x ε' hε' },
-  { -- we probably need to weaken this assumption in `weak_normed_snake`
-    -- currently this is not provable, because `ker` is only the topological closure of `range`
-    sorry },
+  { intros c i, apply quotient_add_group.ker_mk },
   { intros c p, exact NormedGroup.coker.π_is_quotient }
 end
 
@@ -195,18 +210,18 @@ def δ_truncate (c : ℝ≥0) :
   ((truncate.obj M).row 0).obj (op $ c) ⟶ ((truncate.obj M).row 1).obj (op $ k' * c) :=
 NormedGroup.truncate.map (condM.htpy.δ c)
 
-lemma hδ_truncate (c : ℝ≥0) [fact (c₀ ≤ c)] : ∀ (q : ℕ) (hq : q ≤ m) (x),
-  (condM.δ_truncate c).f q (res _ x) = (truncate.obj M).res (d _ 0 1 x) +
-    condM.h_truncate q (d' _ q (q+1) x) + d' _ (q-1) q (condM.h_truncate (q-1) x)
+lemma hδ_truncate (c : ℝ≥0) [fact (c₀ ≤ c)] : ∀ (q : ℕ) (hq : q ≤ m),
+  (truncate.obj M).res ≫ (condM.δ_truncate c).f q = (d _ 0 1) ≫ (truncate.obj M).res +
+    (d' _ q (q+1)) ≫ condM.h_truncate q + (condM.h_truncate (q-1)) ≫ d' _ (q-1) q
 | 1     h := condM.htpy.hδ _ _ (nat.succ_le_succ h)
 | (q+2) h := condM.htpy.hδ _ _ (nat.succ_le_succ h)
 | 0     h :=
 begin
-  intro x,
+  ext1 x, dsimp, iterate 5 { erw [category_theory.coe_comp] },
   let π := λ c p, @NormedGroup.coker.π _ _ (@d' M c p 0 1),
   obtain ⟨x, rfl⟩ : ∃ x', π _ _ x' = x := NormedGroup.coker.π_surjective x,
   transitivity π _ _ ((condM.htpy.δ c).f 1 (M.res x)), { refl },
-  erw condM.htpy.hδ _ _ (nat.succ_le_succ h) x,
+  erw condM.htpy.hδ_apply _ _ (nat.succ_le_succ h) x,
   simp only [nat.zero_sub, d'_self_apply, add_zero, row_d,
     truncate.d_π, truncate.res_π, truncate.d'_zero_one, h_truncate_zero,
     normed_group_hom.map_add, NormedGroup.coker.pi_apply_dom_eq_zero],
@@ -301,7 +316,7 @@ begin
   have Hx1 := (cond.col_exact 0 le_rfl).of_le
     (cond.admissible.col 0) ‹_› ⟨le_rfl⟩ le_rfl ⟨le_rfl⟩ c hc 0 le_rfl,
   have Hx2 := cond.htpy.δ_bound_by c 0 le_rfl (M.res x),
-  have aux := cond.htpy.hδ c 0 le_rfl (M.res x),
+  have aux := cond.htpy.hδ_apply c 0 le_rfl (M.res x),
   erw [res_res] at aux,
   rw aux at Hx2,
   simp only [row_d, col_d, d_self_apply, d'_self_apply, sub_zero, add_zero, smul_zero,

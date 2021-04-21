@@ -1,5 +1,12 @@
 import pseudo_normed_group.profinitely_filtered
+/-!
 
+# Profinitely filtered pseudo-normed groups with T⁻¹
+
+The definition of `profinitely_filtered_pseudo_normed_group_with_Tinv`,
+and morphisms between them.
+
+-/
 open pseudo_normed_group profinitely_filtered_pseudo_normed_group
 open_locale nnreal big_operators
 

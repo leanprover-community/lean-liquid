@@ -4,7 +4,8 @@ import analysis.normed_space.normed_group_hom
 /-!
 # Analysis of locally constant maps
 
-This file defines the normed group of locally constant maps into a normed group.
+This file defines the normed group of locally constant maps from a compact topological
+space into a normed group (with the sup norm).
 
 ## Main construction
 
@@ -129,6 +130,32 @@ real.le_Sup _ (exists_ub_range_dist _ _) (set.mem_range_self x)
 
 -- consider giving the `edist` and the `uniform_space` explicitly
 /-- The metric space on locally constant functions on a compact space, with sup distance. -/
+protected def pseudo_metric_space [pseudo_metric_space Y] :
+  pseudo_metric_space (locally_constant X Y) :=
+{ dist_self := λ f, show (⨆ x, dist (f x) (f x)) = 0,
+    begin
+      simp only [dist_self, supr],
+      by_cases H : nonempty X, swap,
+      { rwa [set.range_eq_empty.mpr H, real.Sup_empty] },
+      resetI,
+      simp only [set.range_const, cSup_singleton]
+    end,
+  dist_comm := λ f g, show Sup _ = Sup _, by { simp only [dist_comm] },
+  dist_triangle :=
+  begin
+    intros f g h,
+    by_cases H : nonempty X, swap,
+    { show Sup _ ≤ Sup _ + Sup _, simp only [set.range_eq_empty.mpr H, real.Sup_empty, add_zero] },
+    refine (real.Sup_le _ _ (exists_ub_range_dist _ _)).mpr _,
+    { obtain ⟨x⟩ := H, exact ⟨_, set.mem_range_self x⟩ },
+    rintro r ⟨x, rfl⟩,
+    calc dist (f x) (h x) ≤ dist (f x) (g x) + dist (g x) (h x) : dist_triangle _ _ _
+    ... ≤ dist f g + dist g h : add_le_add (dist_apply_le _ _ _) (dist_apply_le _ _ _)
+  end,
+  .. locally_constant.has_dist }
+
+-- consider giving the `edist` and the `uniform_space` explicitly
+/-- The metric space on locally constant functions on a compact space, with sup distance. -/
 protected def metric_space [metric_space Y] : metric_space (locally_constant X Y) :=
 { dist_self := λ f, show (⨆ x, dist (f x) (f x)) = 0,
     begin
@@ -168,11 +195,19 @@ protected def normed_group {G : Type*} [normed_group G] : normed_group (locally_
   .. locally_constant.has_norm, .. locally_constant.add_comm_group,
   .. locally_constant.metric_space }
 
-local attribute [instance] locally_constant.normed_group
+/-- The metric space on locally constant functions on a compact space, with sup distance. -/
+protected def semi_normed_group {G : Type*} [semi_normed_group G] :
+  semi_normed_group (locally_constant X G) :=
+{ dist_eq := λ f g, show Sup _ = Sup _,
+  by simp only [semi_normed_group.dist_eq, locally_constant.sub_apply],
+  .. locally_constant.has_norm, .. locally_constant.add_comm_group,
+  .. locally_constant.pseudo_metric_space }
+
+local attribute [instance] locally_constant.semi_normed_group
 
 section map_hom
 
-variables [normed_group V] [normed_group V₁] [normed_group V₂] [normed_group V₃]
+variables [semi_normed_group V] [semi_normed_group V₁] [semi_normed_group V₂] [semi_normed_group V₃]
 
 /-- Push-forward of locally constant maps under a normed group hom, as a normed
 group hom between types of locally constant functions. -/
@@ -252,7 +287,7 @@ section comap_hom
 -/
 
 variables [topological_space Y] [compact_space Y] [topological_space Z] [compact_space Z]
-variables [normed_group V]
+variables [semi_normed_group V]
 
 /-- Pull-back of locally constant maps under a normed group hom, as a normed
 group hom between types of locally constant functions. -/
@@ -268,7 +303,7 @@ add_monoid_hom.mk_normed_group_hom'
     assume g,
     rw one_mul,
     show Sup _ ≤ Sup _,
-    simp only [hf, function.comp_app, coe_comap, add_monoid_hom.coe_mk'],
+    simp only [hf, function.comp_app, coe_comap, add_monoid_hom.mk'_apply],
     by_cases hX : nonempty X, swap,
     { simp only [set.range_eq_empty.mpr hX, real.Sup_empty],
       by_cases hY : nonempty Y, swap,
