@@ -38,6 +38,13 @@ def explicit_dual_set (l : ι → Λ) : submodule ℕ (Λ →+ ℤ) :=
 def dual_finset (S : finset Λ) : submodule ℕ (Λ →+ ℤ) :=
 explicit_dual_set (coe : (S : set Λ) → Λ)
 
+lemma dual_finset_antimono {S T : finset Λ} (hST : S ⊆ T) :
+  dual_finset T ≤ dual_finset S :=
+begin
+  rintro φ hφ ⟨i, (his : i ∈ S)⟩,
+  exact hφ ⟨i, hST his⟩,
+end
+
 lemma explicit_dual_set_eq_dual_finset [decidable_eq Λ] [fintype ι] (l : ι → Λ) :
   explicit_dual_set l = dual_finset (finset.image l finset.univ) :=
 begin
@@ -53,7 +60,28 @@ begin
     exact ⟨i, finset.mem_univ _, rfl⟩ }
 end
 
---set_option pp.all true
+universe u
+/-- The key inductive step in the proof of Gordan's Lemma -/
+lemma Gordan_inductive_step (d : ℕ) {Λ : Type u}
+  (hd : ∀ {{Γ : Type u}} (S : finset Γ) [add_comm_group Γ], by exactI ∀
+        [semimodule ℤ Γ], by exactI ∀
+        (hΓ : finite_free Γ)
+        [_inst_3 : decidable_eq Γ], hΓ.rank = d → (dual_finset S).fg)
+  [add_comm_group Λ]
+  [semimodule ℤ Λ]
+  (hΛ : finite_free Λ)
+  [decidable_eq Λ]
+  (hl : hΛ.rank = d + 1)
+  ⦃l : Λ⦄
+  {S : finset Λ}
+  (hfg : (dual_finset S).fg)
+  (hl : ¬l = 0) :
+  (dual_finset (insert l S)).fg :=
+begin
+  admit,
+end
+
+/-- A finset version of Gordan's Lemma. -/
 lemma finset_Gordan [semimodule ℤ Λ] (hΛ : finite_free Λ) [decidable_eq Λ] (S : finset Λ) :
   (dual_finset S).fg :=
 begin
@@ -82,10 +110,20 @@ begin
     { -- inductive step
       -- this is the main work in the proof.
       rintro l S - hfg,
-
-      sorry } }
+      by_cases hl0 : l = 0,
+      { convert hfg using 1,
+        refine le_antisymm (dual_finset_antimono (S.subset_insert _)) _,
+        rintro φ hφ ⟨i, (hilS : i ∈ insert l S)⟩,
+        rw finset.mem_insert at hilS,
+        rcases hilS with (rfl | hiS),
+        { subst hl0,
+          convert le_refl _,
+          exact φ.map_zero },
+        { refine hφ ⟨i, hiS⟩ } },
+      { exact Gordan_inductive_step d @hd hΛ hl hfg hl0 } } }
 end
 
+/-- A fintype version of Gordan's Lemma. -/
 lemma explicit_gordan [semimodule ℤ Λ] (hΛ : finite_free Λ) [fintype ι] (l : ι → Λ) :
   (explicit_dual_set l).fg :=
 begin
