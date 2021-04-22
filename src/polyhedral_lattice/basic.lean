@@ -106,7 +106,12 @@ begin
   sorry
 end
 
+lemma rank_dual (ha : finite_free A) : ha.dual.rank = ha.rank :=
+begin
+  sorry
+end
 
+-- theorem ker (ha : finite_free A) (φ : A →+ ℤ) : finite_free φ.ker -- semimodule ℤ issues
 end finite_free
 
 end move_this
