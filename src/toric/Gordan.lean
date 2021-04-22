@@ -66,7 +66,7 @@ lemma Gordan_inductive_step (d : ℕ) {Λ : Type u}
   (hd : ∀ {{Γ : Type u}} (S : finset Γ) [add_comm_group Γ], by exactI ∀
         [semimodule ℤ Γ], by exactI ∀
         (hΓ : finite_free Γ)
-        [_inst_3 : decidable_eq Γ], hΓ.rank = d → (dual_finset S).fg)
+        [decidable_eq Γ], hΓ.rank = d → (dual_finset S).fg)
   [add_comm_group Λ]
   [semimodule ℤ Λ]
   (hΛ : finite_free Λ)
