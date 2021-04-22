@@ -75,13 +75,15 @@ begin
   { -- inductive step, assume result for Λ of rank d, and deduce it for rank d+1
     rintro (hl : hΛ.rank = d + 1),
     -- now induct on the finset
-    apply S.induction_on,
+    apply S.induction_on; clear S,
     { convert finite_free.top_fg hΛ.dual,
       rw eq_top_iff,
       rintro φ - ⟨i, -, hi⟩ },
     { -- inductive step
       -- this is the main work in the proof.
-    sorry } }
+      rintro l S - hfg,
+
+      sorry } }
 end
 
 lemma explicit_gordan [semimodule ℤ Λ] (hΛ : finite_free Λ) [fintype ι] (l : ι → Λ) :
