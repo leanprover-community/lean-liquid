@@ -77,6 +77,10 @@ lemma Gordan_inductive_step (d : ℕ) {Λ : Type u}
   (hfg : (dual_finset S).fg)
   (hl : ¬l = 0) :
   (dual_finset (insert l S)).fg :=
+let L : (Λ →+ ℤ) →+ ℤ :=
+{ to_fun := λ φ, φ l,
+  map_zero' := rfl,
+  map_add' := λ _ _, rfl } in
 begin
   admit,
 end
