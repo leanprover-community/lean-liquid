@@ -88,7 +88,7 @@ begin
       refine submodule.smul_mem _ n (submodule.subset_span (or.inl ⟨i, rfl⟩)) } },
 end
 
-theorem dual : finite_free (A →+ ℤ) :=
+theorem dual (ha : finite_free A) : finite_free (A →+ ℤ) :=
 begin
   -- do this after is_basis refactor?
   sorry
@@ -102,7 +102,7 @@ variable {ha}
 /-- A rank zero abelian group has at most one element (yeah I know...). -/
 lemma rank_zero (h0 : ha.rank = 0) : subsingleton A := subsingleton.intro
 begin
-  -- do this after is_basis refactor
+  -- do this after is_basis refactor?
   sorry
 end
 
