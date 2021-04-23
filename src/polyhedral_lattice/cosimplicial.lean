@@ -50,10 +50,7 @@ def diagonal_embedding : Λ ⟶ rescaled_power Λ N :=
     simp only [← apply_add_hom_apply, add_monoid_hom.map_sum],
     simp only [apply_add_hom_apply, single_add_hom_apply, single_apply],
     convert finset.sum_const (∥l∥ : ℝ),
-    { ext i, congr' 1,
-      have := @finset.sum_ite_eq' _ Λ _ _ finset.univ i (λ _, l),
-      simp only [finset.mem_univ, if_true] at this,
-      convert this, ext, split_ifs; refl },
+    { ext i, simp only [finset.sum_ite_eq', finset.mem_univ, if_true] },
     rw [mul_comm, nsmul_eq_mul, finset.card_univ, fintype.card_fin],
   end }
 

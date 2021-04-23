@@ -299,9 +299,7 @@ begin
     change b i j' • free_abelian_group.of punit.star =
       ∑ (c : fin m), b i c • ite (c = j') (free_abelian_group.of punit.star) 0,
     -- Now we're over that hump it is as easy as it sounded 10 lines ago.
-    simp_rw [smul_ite, smul_zero],
-    rw finset.sum_ite_eq',
-    rw if_pos (finset.mem_univ _) },
+    simp_rw [smul_ite, smul_zero, finset.sum_ite_eq', finset.mem_univ, if_true] },
   { simp },
   { intros u v hu hv,
     simp * at * }

@@ -59,7 +59,7 @@ instance : has_coe_to_fun system_of_complexes :=
 ⟨λ C, ℝ≥0 → ℕ → NormedGroup, λ C c i, (C.obj $ op c).X i⟩
 
 /-- `f.apply c i` is application of the natural transformation `f`: $f_c^i : M_c^i ⟶ N_c^i$. -/
-def category_theory.has_hom.hom.apply (f : M ⟶ N) {c : ℝ≥0} {i : ℕ} : M c i ⟶ N c i :=
+def quiver.hom.apply (f : M ⟶ N) {c : ℝ≥0} {i : ℕ} : M c i ⟶ N c i :=
 (f.app (op c)).f i
 
 instance hom_to_fun : has_coe_to_fun (M ⟶ N) :=
