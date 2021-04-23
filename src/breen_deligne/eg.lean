@@ -1,4 +1,4 @@
-import breen_deligne.suitable
+import breen_deligne.constants
 
 open_locale nnreal
 
@@ -88,18 +88,18 @@ namespace eg
 variables (r r' : ℝ≥0)
 
 /-- Very suitable sequence of constants for the example Breen--Deligne package -/
-def c_ (r r' : ℝ≥0) : ℕ → ℝ≥0 :=
-sorry
+def c_ : ℕ → ℝ≥0 :=
+eg.data.c_ r r'
 
 instance very_suitable : eg.data.very_suitable r r' (c_ r r') :=
-sorry
+eg.data.c_very_suitable _ _
 
 /-- Adept sequence of constants for the example Breen--Deligne package -/
-def c' (c_ : ℕ → ℝ≥0) : ℕ → ℝ≥0 :=
-sorry
+def c' : ℕ → ℝ≥0 :=
+eg.c' (eg.c_ r r')
 
-instance adept (c_ : ℕ → ℝ≥0) : package.adept eg c_ (c' c_) :=
-sorry
+instance adept : package.adept eg (c_ r r') (c' r r') :=
+eg.c'_adept _
 
 end eg
 
