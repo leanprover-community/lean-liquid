@@ -4,6 +4,7 @@ import algebraic_topology.simplicial_object
 import category_theory.arrow
 import category_theory.adjunction.limits
 import .with_terminal
+import .simplicial.augmented
 
 namespace simplicial_object
 
@@ -33,8 +34,8 @@ instance : unique (simplex_category.truncated 0)ᵒᵖ :=
 /--
 Augmented simplicial objects.
 -/
-@[derive category]
-def augmented := (with_terminal simplex_category.{v}ᵒᵖ) ⥤ C
+--@[derive category]
+--def augmented := (with_terminal simplex_category.{v}ᵒᵖ) ⥤ C
 
 variable {C}
 
