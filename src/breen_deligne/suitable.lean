@@ -606,7 +606,7 @@ end data
 namespace universal_map
 
 def very_suitable (f : universal_map m n) (r r' : out_param ℝ≥0) (c₁ c₂ : ℝ≥0) : Prop :=
-∃ (N k : ℕ) (c_ : ℝ≥0), f.bound_by N ∧ f.suitable c₁ c_ ∧ r ^ k * N ≤ 1 ∧ c_ ≤ r' ^ k * c₂
+∃ (N b : ℕ) (c_ : ℝ≥0), f.bound_by N ∧ f.suitable c₁ c_ ∧ r ^ b * N ≤ 1 ∧ c_ ≤ r' ^ b * c₂
 
 attribute [class] very_suitable
 
@@ -616,15 +616,15 @@ variables (f : universal_map m n)
 
 instance suitable [hr' : fact (r' ≤ 1)] [hf : f.very_suitable r r' c₁ c₂] : f.suitable c₁ c₂ :=
 begin
-  unfreezingI { rcases hf with ⟨N, k, c_, hN, hf, hr, H⟩ },
+  unfreezingI { rcases hf with ⟨N, b, c_, hN, hf, hr, H⟩ },
   exact hf.le _ _ _ _ le_rfl (H.trans $ fact.out _)
 end
 
 instance mul_left (f : universal_map m n) [h : f.very_suitable r r' c₁ c₂] :
   f.very_suitable r r' (c * c₁) (c * c₂) :=
 begin
-  unfreezingI { rcases h with ⟨N, k, c_, hN, hf, hr, H⟩ },
-  refine ⟨N, k, c * c_, hN, infer_instance, hr, _⟩,
+  unfreezingI { rcases h with ⟨N, b, c_, hN, hf, hr, H⟩ },
+  refine ⟨N, b, c * c_, hN, infer_instance, hr, _⟩,
   rw mul_left_comm,
   exact mul_le_mul' le_rfl H
 end
@@ -632,6 +632,24 @@ end
 instance mul_right (f : universal_map m n) [h : f.very_suitable r r' c₁ c₂] :
   f.very_suitable r r' (c₁ * c) (c₂ * c) :=
 by { rw [mul_comm _ c, mul_comm _ c], apply universal_map.very_suitable.mul_left }
+
+lemma zero : (0 : universal_map m n).very_suitable r r' c₁ c₂ :=
+begin
+  refine ⟨0, 0, c₂, zero_bound_by 0, infer_instance, _, _⟩,
+  { simp only [nat.cast_zero, zero_le', mul_zero] },
+  { simp only [one_mul, pow_zero] }
+end
+
+lemma comp (g : universal_map m n) (f : universal_map l m)
+  [hg: g.very_suitable r r' c₁ c₂] [hf : f.very_suitable r r' c₂ c₃] :
+  (comp g f).very_suitable r r' c₁ c₃ :=
+begin
+  unfreezingI {
+    rcases hg with ⟨Ng, bg, c_g, hNg, hg, hrg, Hg⟩,
+    rcases hf with ⟨Nf, bf, c_f, hNf, hf, hrf, Hf⟩ },
+  refine ⟨Ng * Nf, bg + bf, c_g * c_f * c₂⁻¹, _, _, _, _⟩,
+  all_goals { sorry }
+end
 
 end very_suitable
 
@@ -651,6 +669,17 @@ variables (BD : data) (c_ : ℕ → ℝ≥0)
 instance suitable [hr' : fact (r' ≤ 1)] [h : BD.very_suitable r r' c_] :
   BD.suitable c_ :=
 { universal_suitable := λ i j, by apply_instance }
+
+lemma of_succ (h : ∀ i, universal_map.very_suitable (BD.d (i + 1) i) r r' (c_ (i + 1)) (c_ i)) :
+  BD.very_suitable r r' c_ :=
+{ universal_very_suitable :=
+  begin
+    intros i j,
+    by_cases hij : i = j + 1,
+    { rw hij, exact h _ },
+    { rw BD.d_eq_zero, swap, exact hij,
+      exact universal_map.very_suitable.zero r r' (c_ i) (c_ j) }
+  end }
 
 end very_suitable
 

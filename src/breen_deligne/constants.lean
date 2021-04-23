@@ -14,11 +14,12 @@ def c_ (BD : data) (r r' : ℝ≥0) : ℕ → ℝ≥0
 | (n+1) := sorry
 
 instance c_very_suitable : BD.very_suitable r r' (BD.c_ r r') :=
-{ universal_very_suitable :=
-  begin
-    intros i j,
-    sorry
-  end }
+very_suitable.of_succ _ _ _ _
+begin
+  intro i,
+  refine ⟨_, _, _, le_rfl, _, _, _⟩,
+  all_goals { sorry },
+end
 
 end data
 
@@ -28,11 +29,14 @@ variables (BD : package) (r r' : ℝ≥0)
 
 /-- Example of an adept sequence of constants for
 a given Breen--Deligne package `BD` and constants `c_`. -/
-def c' (BD : package) (c_ : ℕ → ℝ≥0) : ℕ → ℝ≥0 :=
-sorry
+def c' (BD : package) (c_ : ℕ → ℝ≥0) : ℕ → ℝ≥0
+| 0     := 1
+| (n+1) := sorry
 
 instance c'_adept (c_ : ℕ → ℝ≥0) : package.adept BD c_ (c' BD c_) :=
-sorry
+{ one_le := sorry,
+  suitable := sorry,
+  htpy_suitable := sorry }
 
 end package
 
