@@ -85,7 +85,9 @@ def eg : package := ⟨eg.BD, eg.h⟩
 
 namespace eg
 
-variables (r r' : ℝ≥0)
+noncomputable theory
+
+variables (r r' : ℝ≥0) [fact (r < 1)]
 
 /-- Very suitable sequence of constants for the example Breen--Deligne package -/
 def c_ : ℕ → ℝ≥0 :=
@@ -98,7 +100,7 @@ eg.data.c_very_suitable _ _
 def c' : ℕ → ℝ≥0 :=
 eg.c' (eg.c_ r r')
 
-instance adept : package.adept eg (c_ r r') (c' r r') :=
+instance adept [fact (r' ≤ 1)] : package.adept eg (c_ r r') (c' r r') :=
 eg.c'_adept _
 
 end eg
