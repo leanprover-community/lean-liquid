@@ -120,11 +120,13 @@ end graded_pieces
 
 variables {M : Type*} [monoid M] [decidable_eq M] {R : Type*} [ring R]
 
+example (A : Type) [add_comm_group A] (x y : A) : x + y = 0 → -x = y := neg_eq_of_add_eq_zero
+
 def grading (g : monoid_grading M R) (m : M) : add_subgroup R :=
 { neg_mem' := λ x hx, begin
-  change -x ∈ g.pieces m,
-    convert direct_sum.add_submonoid_to_finsupp_mem
-      (g.decomposition (-x)) m,
+    change -x ∈ g.pieces m,
+    convert direct_sum.add_submonoid_to_finsupp_mem (g.decomposition (-x)) m,
+    apply neg_eq_of_add_eq_zero,
     sorry
   end,
   ..g.pieces m}
