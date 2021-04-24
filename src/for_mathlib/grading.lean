@@ -6,20 +6,18 @@ Authors: Kevin Buzzard
 import algebra.direct_sum
 import algebra.monoid_algebra -- to check we can grade a monoid algebra
 import data.polynomial -- to check we can grade a polynomial ring
+import ring_theory.noetherian -- for the lemma we need for Gordan
 /-!
 
 # Grading of a ring by a monoid
 
-Following an idea of Eric Wieser we introduce the concept of a grading
-of a ring by a module, and prove that our definition is workable
-by showing that the polynomial ring `R[X]` is graded by ℕ and the
-monoid algebra `R[M]` is graded by `M`.
-
-Most of the hard work was done by Eric and Damiano.
+A grading of a ring `R` by a monoid `M` is a decomposition R ≃ ⨁ Rₘ as an internal
+direct sum of subgroups indexed by `m`, satisfying 1 ∈ R₀ and RₘRₙ⊆R_{m+n}
 
 -/
 
 /-
+
 The below is in PR #7190 by Eric to algebra.direct_sum
 
 -/
@@ -52,6 +50,22 @@ lemma add_subgroup_is_internal.to_add_submonoid
     add_submonoid_is_internal (λ i, (A i).to_add_submonoid) :=
 iff.rfl
 
+-- that's the end of Eric's PR but we seem to need more: we don't have the projections!
+
+variables {M : Type*} [decidable_eq ι] [add_comm_monoid M] (A : ι → add_submonoid M)
+
+def projection (j : ι) : (⨁ i, A i) →+ A j :=
+{ to_fun := λ f, f j,
+  map_zero' := rfl,
+  map_add' := λ x y, x.add_apply y j }
+
+lemma projection_of_same (j : ι) (aj : A j) : projection A j (of (λ i, A i) j aj) = aj :=
+@dfinsupp.single_eq_same _ _ _ _ j _
+
+lemma projection_of_ne {i j : ι} (h : i ≠ j) (ai : A i) :
+  projection A j (of (λ i, A i) i ai) = 0 :=
+dfinsupp.single_eq_of_ne h
+
 end direct_sum
 
 end Eric_PR
@@ -60,23 +74,56 @@ end Eric_PR
     an internal direct sum `R = ⨁Rₘ` into submonoids indexed by `m : M`, where the decomposition
     respects `1` and `*`, in the sense that `1 ∈ R₀` and `Rₘ*Rₙ ⊆ R_{m+n}` -/
 structure add_monoid_grading (M : Type*) [add_monoid M] [decidable_eq M] (R : Type*) [semiring R] :=
-(graded_piece : M → add_submonoid R)
-(direct_sum : direct_sum.add_submonoid_is_internal graded_piece)
-(grading_one : (1 : R) ∈ graded_piece 0)
+(add_submonoid_grading : M → add_submonoid R)
+(direct_sum : direct_sum.add_submonoid_is_internal add_submonoid_grading)
+(grading_one : (1 : R) ∈ add_submonoid_grading 0)
 (grading_mul : ∀ (m n : M) (r s : R),
-  r ∈ graded_piece m → s ∈ graded_piece n → r * s ∈ graded_piece (m + n))
+  r ∈ add_submonoid_grading m → s ∈ add_submonoid_grading n → r * s ∈ add_submonoid_grading (m + n))
 
 /-- If `M` is a monoid, then an `M`-grading on a ring `R` is a decomposition of `R` as
     an internal direct sum `R = ⨁Rₘ` into submonoids indexed by `m : M`, where the decomposition
     respects `1` and `*`, in the sense that `1 ∈ R₁` and `Rₘ*Rₙ ⊆ R_{m*n}` -/
 structure monoid_grading (M : Type*) [monoid M] [decidable_eq M] (R : Type*) [semiring R] :=
-(graded_piece : M → add_submonoid R)
-(grading_one : (1 : R) ∈ graded_piece 1)
+(add_submonoid_grading : M → add_submonoid R)
+(direct_sum : direct_sum.add_submonoid_is_internal add_submonoid_grading)
+(grading_one : (1 : R) ∈ add_submonoid_grading 1)
 (grading_mul : ∀ (m n : M) (r s : R),
-  r ∈ graded_piece m → s ∈ graded_piece n → r * s ∈ graded_piece (m * n))
-(direct : direct_sum.add_submonoid_is_internal graded_piece)
+  r ∈ add_submonoid_grading m → s ∈ add_submonoid_grading n → r * s ∈ add_submonoid_grading (m * n))
 
 attribute [to_additive] monoid_grading
+
+namespace monoid_grading
+
+/-! ## graded pieces -/
+
+section graded_pieces
+
+variables {M : Type*} [monoid M] [decidable_eq M] {R : Type*} [semiring R]
+
+--def decomposition (g : monoid_grading M R) (r : R) : M →₀ R :=
+--((equiv.of_bijective _ g.direct_sum).symm r)
+
+-- we should get the finsupp really, not just the piece.
+/-- If r : R and R is graded by M then `piece r m` is the element rₘ of Rₘ such that ∑ₘ rₘ = r.  -/
+@[to_additive
+  "If r : R and R is graded by M then `piece r m` is the element rₘ of Rₘ such that ∑ₘ rₘ = r."]
+noncomputable def piece (g : monoid_grading M R) (r : R) (m : M) : R :=
+direct_sum.projection g.add_submonoid_grading m ((equiv.of_bijective _ g.direct_sum).symm r)
+
+end graded_pieces
+
+/-! ## rings are graded by subgroups -/
+
+variables {M : Type*} [monoid M] [decidable_eq M] {R : Type*} [ring R]
+
+def grading (g : monoid_grading M R) (m : M) : add_subgroup R :=
+{ neg_mem' := λ x hx, begin
+
+    sorry
+  end,
+  ..g.add_submonoid_grading m}
+
+end monoid_grading
 
 open_locale direct_sum
 -- should be in algebra.direct_sum
@@ -179,3 +226,26 @@ add_monoid_hom.to_add_equiv
   end).
 
 end add_monoid_algebra
+
+/-
+
+## The theorem we need for Gordan and hence LTE
+
+If A is ℤ-graded and Noetherian then A_{≥0} is a finitely-generated A₀-algebra
+
+-/
+
+def add_monoid_grading.zero_piece_subsemiring (A : Type*) [semiring A] (M : Type*) [add_monoid M]
+  [decidable_eq M] (g : add_monoid_grading M A) : subsemiring A :=
+{
+  one_mem' := g.grading_one,
+  mul_mem' := λ r s, begin
+    convert g.grading_mul 0 0 r s,
+    rw add_zero,
+    refl,
+  end,
+  ..g.add_submonoid_grading 0
+}
+
+-- theorem nonnegative_subalgebra_fg_over_zero_subalgebra_of_int_grading_of_noeth
+--   (A : Type*) [comm_ring A] [is_noetherian_ring A] (g : add_monoid_grading ℤ A) :
