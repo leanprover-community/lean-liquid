@@ -7,6 +7,7 @@ import algebra.direct_sum
 import algebra.monoid_algebra -- to check we can grade a monoid algebra
 import data.polynomial -- to check we can grade a polynomial ring
 import ring_theory.noetherian -- for the lemma we need for Gordan
+import for_mathlib.dfinsupp -- finsupp <-> dfinsupp
 /-!
 
 # Grading of a ring by a monoid
@@ -74,21 +75,21 @@ end Eric_PR
     an internal direct sum `R = ⨁Rₘ` into submonoids indexed by `m : M`, where the decomposition
     respects `1` and `*`, in the sense that `1 ∈ R₀` and `Rₘ*Rₙ ⊆ R_{m+n}` -/
 structure add_monoid_grading (M : Type*) [add_monoid M] [decidable_eq M] (R : Type*) [semiring R] :=
-(add_submonoid_grading : M → add_submonoid R)
-(direct_sum : direct_sum.add_submonoid_is_internal add_submonoid_grading)
-(grading_one : (1 : R) ∈ add_submonoid_grading 0)
+(pieces : M → add_submonoid R)
+(direct_sum : direct_sum.add_submonoid_is_internal pieces)
+(grading_one : (1 : R) ∈ pieces 0)
 (grading_mul : ∀ (m n : M) (r s : R),
-  r ∈ add_submonoid_grading m → s ∈ add_submonoid_grading n → r * s ∈ add_submonoid_grading (m + n))
+  r ∈ pieces m → s ∈ pieces n → r * s ∈ pieces (m + n))
 
 /-- If `M` is a monoid, then an `M`-grading on a ring `R` is a decomposition of `R` as
     an internal direct sum `R = ⨁Rₘ` into submonoids indexed by `m : M`, where the decomposition
     respects `1` and `*`, in the sense that `1 ∈ R₁` and `Rₘ*Rₙ ⊆ R_{m*n}` -/
 structure monoid_grading (M : Type*) [monoid M] [decidable_eq M] (R : Type*) [semiring R] :=
-(add_submonoid_grading : M → add_submonoid R)
-(direct_sum : direct_sum.add_submonoid_is_internal add_submonoid_grading)
-(grading_one : (1 : R) ∈ add_submonoid_grading 1)
+(pieces : M → add_submonoid R)
+(direct_sum : direct_sum.add_submonoid_is_internal pieces)
+(grading_one : (1 : R) ∈ pieces 1)
 (grading_mul : ∀ (m n : M) (r s : R),
-  r ∈ add_submonoid_grading m → s ∈ add_submonoid_grading n → r * s ∈ add_submonoid_grading (m * n))
+  r ∈ pieces m → s ∈ pieces n → r * s ∈ pieces (m * n))
 
 attribute [to_additive] monoid_grading
 
@@ -100,15 +101,18 @@ section graded_pieces
 
 variables {M : Type*} [monoid M] [decidable_eq M] {R : Type*} [semiring R]
 
---def decomposition (g : monoid_grading M R) (r : R) : M →₀ R :=
---((equiv.of_bijective _ g.direct_sum).symm r)
+open_locale direct_sum
 
--- we should get the finsupp really, not just the piece.
+/-- The equivalence between R and ⨁ m, Rₘ if R is a graded (semi)ring. -/
+@[to_additive "The equivalence between R and ⨁ m, Rₘ if R is a graded (semi)ring."]
+noncomputable def decomposition (g : monoid_grading M R) :
+  R ≃ _root_.direct_sum M (λ m, g.pieces m) :=
+((equiv.of_bijective _ g.direct_sum).symm)
+
 /-- If r : R and R is graded by M then `piece r m` is the element rₘ of Rₘ such that ∑ₘ rₘ = r.  -/
-@[to_additive
-  "If r : R and R is graded by M then `piece r m` is the element rₘ of Rₘ such that ∑ₘ rₘ = r."]
+@[to_additive "If r : R and R is graded by M then `piece r m` is the element rₘ of Rₘ such that ∑ₘ rₘ = r."]
 noncomputable def piece (g : monoid_grading M R) (r : R) (m : M) : R :=
-direct_sum.projection g.add_submonoid_grading m ((equiv.of_bijective _ g.direct_sum).symm r)
+direct_sum.projection g.pieces m (decomposition g r)
 
 end graded_pieces
 
@@ -118,10 +122,12 @@ variables {M : Type*} [monoid M] [decidable_eq M] {R : Type*} [ring R]
 
 def grading (g : monoid_grading M R) (m : M) : add_subgroup R :=
 { neg_mem' := λ x hx, begin
-
+  change -x ∈ g.pieces m,
+    convert direct_sum.add_submonoid_to_finsupp_mem
+      ((equiv.of_bijective _ g.direct_sum).symm (-x)) m,
     sorry
   end,
-  ..g.add_submonoid_grading m}
+  ..g.pieces m}
 
 end monoid_grading
 
@@ -134,7 +140,7 @@ lemma direct_sum.to_add_monoid_apply {ι : Type*} [decidable_eq ι]
   (f : Π (i : ι), β i →+ γ) (b : ⨁ i, β i):
   direct_sum.to_add_monoid f b = dfinsupp.sum b (λ i, f i) :=
 dfinsupp.sum_add_hom_apply _ _
-
+#exit
 /-!
 
 ## test : grading a polynomial ring
@@ -244,7 +250,7 @@ def add_monoid_grading.zero_piece_subsemiring (A : Type*) [semiring A] (M : Type
     rw add_zero,
     refl,
   end,
-  ..g.add_submonoid_grading 0
+  ..g.pieces 0
 }
 
 -- theorem nonnegative_subalgebra_fg_over_zero_subalgebra_of_int_grading_of_noeth
