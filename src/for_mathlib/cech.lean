@@ -42,12 +42,11 @@ variable {C}
 /--
 The category of functors from `arr` to `C` is equivalent to `arrow C`.
 -/
-@[derive category]
 abbreviation arrow_diagram := with_terminal (discrete punit)
 
 @[simps]
 def arrow_diagram.incl : arrow_diagram.{v} ⥤ with_terminal simplex_category.{v}ᵒᵖ :=
-  with_terminal.map $ discrete.functor $ λ _, default _
+  with_terminal.map $ discrete.functor $ λ _, (opposite.op [0])
 
 def to_arrow : augmented C ⥤ arrow C :=
 (whiskering_left _ _ _).obj arrow_diagram.incl ⋙ with_terminal.arrow_equiv.inverse
