@@ -124,7 +124,7 @@ def grading (g : monoid_grading M R) (m : M) : add_subgroup R :=
 { neg_mem' := λ x hx, begin
   change -x ∈ g.pieces m,
     convert direct_sum.add_submonoid_to_finsupp_mem
-      ((equiv.of_bijective _ g.direct_sum).symm (-x)) m,
+      (g.decomposition (-x)) m,
     sorry
   end,
   ..g.pieces m}
