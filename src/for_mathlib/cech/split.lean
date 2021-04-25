@@ -92,11 +92,29 @@ lemma fin_helper_4 {n} (a b : fin (n+2)) (ha : a ≠ 0) (hb : b ≠ 0) :
   ((fin.cast_succ a).succ_above b).pred (λ c, hb $ by {rwa ← fin_helper_1, rwa fin_helper_3}) =
   (fin.cast_succ (a.pred ha)).succ_above (b.pred hb) :=
 begin
-  sorry,
+  by_cases h : b < a,
+  { have : a.cast_succ.succ_above b = b.cast_succ, by rwa fin.succ_above_below,
+    conv_lhs {
+      congr,
+      rw this },
+    symmetry,
+    rw fin.succ_above_below,
+    { cases a, cases b, refl },
+    exact fin.pred_lt_pred_iff.mpr h },
+  { have : a.cast_succ.succ_above b = b.succ,
+    { rw fin.succ_above_above,
+      exact not_lt.mp h },
+    conv_lhs {
+      congr,
+      rw this },
+    symmetry,
+    rw fin.succ_above_above,
+    simp only [fin.succ_pred, fin.pred_succ],
+    mono,
+    rwa [fin.pred_le_pred_iff, ← not_lt] },
 end
---(⇑((⇑fin.cast_succ j).succ_above) k.down).pred _ =
---    ⇑((⇑fin.cast_succ (j.pred hj)).succ_above) (k.down.pred _)
 
+-- TODO: This proof could be cleaned up a bit...
 @[simp]
 lemma cech_splitting_face {X B : C} (f : X ⟶ B) (g : B ⟶ X) (splitting : g ≫ f = 𝟙 B)
   [∀ (n : ℕ), limits.has_wide_pullback B (λ (i : ufin (n+1)), X) (λ i, f)] (n : ℕ)
