@@ -9,7 +9,7 @@ variables {ι : Type*}
 -- **WARNING** Sorried data. Eric PR'ed this in #7311
 def dfinsupp.to_finsupp : (Π₀ (i : ι), B) → (ι →₀ B) := sorry
 
--- defining property
+-- defining property; should be rfl hopefully.
 theorem dfinsupp.to_finsupp_apply (f : Π₀ (i : ι), B) (j : ι) : f.to_finsupp j = f j := sorry
 
 -- monoid variant
