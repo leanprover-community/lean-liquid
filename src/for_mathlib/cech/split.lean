@@ -38,9 +38,7 @@ lemma face_zero_π {X B : C} (f : X ⟶ B)
   [∀ (n : ℕ), limits.has_wide_pullback B (λ (i : ufin (n+1)), X) (λ i, f)] (n : ℕ) (i : ufin (n+1)) :
   ((cech_obj f).δ 0 : (cech_obj f) _[n+1] ⟶ (cech_obj f) _[n]) ≫ (limits.wide_pullback.π i) =
   limits.wide_pullback.π (ufin.succ i) :=
-begin
-  sorry
-end
+by {change limits.wide_pullback.lift _ _ _ ≫ _ = _, simpa}
 
 @[simp]
 lemma cech_splitting_face_zero {X B : C} (f : X ⟶ B) (g : B ⟶ X) (splitting : g ≫ f = 𝟙 B)
