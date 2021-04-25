@@ -82,6 +82,23 @@ begin
     erw cech_splitting_face_zero },
   { apply helper.sum_eq_zero_of_zeros,
     intros i,
+    simp only [category_theory.category.comp_id,
+      category_theory.preadditive.comp_gsmul,
+      category_theory.preadditive.gsmul_comp,
+      category_theory.eq_to_hom_refl,
+      category_theory.functor.comp_map,
+      --category_theory.cech_obj_map,
+      fin.coe_succ,
+      category_theory.functor.right_op_map],
+    delta contracting_homotopy,
+    simp_rw ← M.map_comp,
+    suffices :
+      ((cech_obj f).map (simplex_category.δ i.succ).op).op ≫ (cech_splitting f g splitting (n + 1)).op =
+      (cech_splitting f g splitting n).op ≫ ((cech_obj f).map (simplex_category.δ i).op).op,
+    { rw [this, pow_succ], simp },
+    simp_rw ← helper.op_comp,
+    congr' 1,
+    -- TODO: use cech_splitting_face
     sorry }
 end
 
