@@ -9,9 +9,11 @@ namespace category_theory
 
 namespace cech
 
-universes v u
+-- TODO: make sure the universe levels work for the necessary applications
 
-variables {P : Type v} {C : Type u} [small_category P] [category.{v} C] [preadditive C]
+universes u
+
+variables {P : Type (u+1)} {C : Type (u+1)} [large_category P] [large_category C] [preadditive C]
 variables {X B : P} (f : X ⟶ B) [∀ (n : ℕ), limits.has_wide_pullback B (λ (i : ufin (n+1)), X) (λ i, f)]
 variables (M : Pᵒᵖ ⥤ C)
 variables (g : B ⟶ X) (splitting : g ≫ f = 𝟙 B)
