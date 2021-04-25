@@ -339,7 +339,7 @@ def zero_piece_subring (A : Type*) [ring A] (M : Type*) [add_monoid M]
   ..g.add_subgroup_pieces 0
 }
 
-theorem zero_piece_subring_eq_decomposition_support_zero :
+--theorem zero_piece_subring_eq_decomposition_support_zero :
 
 
 def nonneg_piece_subring_of_int_grading (A : Type*) [ring A]
