@@ -3,6 +3,7 @@ import category_theory.limits.shapes.wide_pullbacks
 import algebraic_topology.simplicial_object
 import category_theory.products.basic
 import category_theory.arrow
+import for_mathlib.simplicial.constant
 
 noncomputable theory
 
@@ -87,17 +88,20 @@ begin
   tidy,
 end
 
-
 end limits
-
-namespace cech
 
 abbreviation ufin (n : ℕ) := ulift (fin n)
 abbreviation ufin.up {n} : fin n → ufin n := _root_.ulift.up
 abbreviation ufin.map {m n} (f : fin m → fin n) : ufin m → ufin n :=
 λ i, ufin.up $ f i.down
+abbreviation ufin.succ {n} : ufin n → ufin (n+1) := ufin.map fin.succ
 
-local attribute [semireducible] simplex_category.hom
+instance {n} : has_zero (ufin (n+1)) := ⟨ufin.up 0⟩
+
+abbreviation ufin.pred {n} (x : ufin (n+1)) (hx : x ≠ 0) : ufin n :=
+ufin.up $ fin.pred x.down (λ c, hx $ equiv.ulift.injective c)
+
+--local attribute [semireducible] simplex_category.hom
 
 @[simps]
 def cech_obj {X B : C} (f : X ⟶ B)
@@ -131,6 +135,11 @@ def cech [∀ (n : ℕ) (B X : C) (f : X ⟶ B), limits.has_wide_pullback B (λ 
       simp [wide_pullback_shape.mk_cone] },
     { simp [wide_pullback_shape.mk_cone] }
   end }.
+
+namespace cech
+
+def augmentation [∀ (n : ℕ) (B X : C) (f : X ⟶ B), limits.has_wide_pullback B (λ i : ufin (n+1), X) (λ i, f)]
+  (F : arrow C) : cech.obj F ⟶ simplicial_object.const.obj F.right := { app := λ x, limits.wide_pullback.base }
 
 end cech
 
