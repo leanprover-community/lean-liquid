@@ -101,7 +101,12 @@ instance {n} : has_zero (ufin (n+1)) := ⟨ufin.up 0⟩
 abbreviation ufin.pred {n} (x : ufin (n+1)) (hx : x ≠ 0) : ufin n :=
 ufin.up $ fin.pred x.down (λ c, hx $ equiv.ulift.injective c)
 
---local attribute [semireducible] simplex_category.hom
+lemma ufin.succ_ne_zero {n} (x : ufin n) : x.succ ≠ 0 :=
+λ c, fin.succ_ne_zero _ (equiv.ulift.symm.injective c)
+
+@[simp]
+lemma ufin.succ_pred {n} (x : ufin n) : x.succ.pred (ufin.succ_ne_zero _) = x :=
+equiv.ulift.injective (by simp)
 
 @[simps]
 def cech_obj {X B : C} (f : X ⟶ B)
