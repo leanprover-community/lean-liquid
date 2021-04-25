@@ -33,7 +33,6 @@ limits.wide_pullback.lift limits.wide_pullback.base
 (λ i, if hi : i = 0 then limits.wide_pullback.base ≫ g else limits.wide_pullback.π $ ufin.pred i hi) $
 by {intros i, split_ifs, all_goals {simp [splitting]}}
 
-@[simp]
 lemma face_zero_π {X B : C} (f : X ⟶ B)
   [∀ (n : ℕ), limits.has_wide_pullback B (λ (i : ufin (n+1)), X) (λ i, f)] (n : ℕ) (i : ufin (n+1)) :
   ((cech_obj f).δ 0 : (cech_obj f) _[n+1] ⟶ (cech_obj f) _[n]) ≫ (limits.wide_pullback.π i) =
@@ -55,6 +54,87 @@ begin
   { erw ufin.succ_pred },
   change (_ ≫ (cech_obj f).map _) ≫ _ = _,
   simp,
+end
+
+@[simp]
+lemma face_π {X B : C} (f : X ⟶ B)
+  [∀ (n : ℕ), limits.has_wide_pullback B (λ (i : ufin (n+1)), X) (λ i, f)]
+  (n : ℕ) (i : ufin (n+1)) (j : fin (n+2)) :
+  ((cech_obj f).δ j : (cech_obj f) _[n+1] ⟶ _) ≫ (limits.wide_pullback.π i) =
+  limits.wide_pullback.π (ufin.map (fin.succ_above j) i) :=
+begin
+  change limits.wide_pullback.lift _ _ _ ≫ _ = _,
+  simpa,
+end
+
+lemma fin_helper_1 {n} (a : fin (n+1)) (b : fin (n+2)) (hb : b ≠ 0) : b.succ_above a = 0 ↔ a = 0 :=
+begin
+  split,
+  { intro h,
+    have : (0 : fin (n+2)) = b.succ_above 0,
+    { rw fin.succ_above_below,
+      refl,
+      exact bot_lt_iff_ne_bot.mpr hb },
+    rw this at h,
+    exact (fin.succ_above _).injective h },
+  { rintro ⟨rfl⟩,
+    rw fin.succ_above_below,
+    refl,
+    change 0 < b,
+    exact bot_lt_iff_ne_bot.mpr hb }
+end
+
+lemma fin_helper_2 {n} (a : fin (n+1)) : a.cast_succ = 0 ↔ a = 0 := by tidy
+
+lemma fin_helper_3 {n} (a : fin (n+1)) : a.cast_succ ≠ 0 ↔ a ≠ 0 := by simp [not_iff_not, fin_helper_2]
+
+lemma fin_helper_4 {n} (a b : fin (n+2)) (ha : a ≠ 0) (hb : b ≠ 0) :
+  ((fin.cast_succ a).succ_above b).pred (λ c, hb $ by {rwa ← fin_helper_1, rwa fin_helper_3}) =
+  (fin.cast_succ (a.pred ha)).succ_above (b.pred hb) :=
+begin
+  sorry,
+end
+--(⇑((⇑fin.cast_succ j).succ_above) k.down).pred _ =
+--    ⇑((⇑fin.cast_succ (j.pred hj)).succ_above) (k.down.pred _)
+
+@[simp]
+lemma cech_splitting_face {X B : C} (f : X ⟶ B) (g : B ⟶ X) (splitting : g ≫ f = 𝟙 B)
+  [∀ (n : ℕ), limits.has_wide_pullback B (λ (i : ufin (n+1)), X) (λ i, f)] (n : ℕ)
+  (j : fin (n+2)) (hj : j ≠ 0) :
+  cech_splitting f g splitting (n+1) ≫ (cech_obj f).δ j =
+  (cech_obj f).δ (j.pred hj) ≫ cech_splitting f g splitting n :=
+begin
+  ext k,
+  simp,
+  split_ifs with h1 h2,
+  { rw ← category.assoc,
+    congr' 1,
+    change _ = limits.wide_pullback.lift _ _ _ ≫ _,
+    simp },
+  { exfalso,
+    apply h2,
+    replace h1 := equiv.ulift.symm.injective h1,
+    rw fin_helper_1 at h1,
+    ext1,
+    erw h1,
+    refl,
+    rwa fin_helper_3 },
+  { exfalso,
+    apply h1,
+    rw h,
+    apply_fun equiv.ulift,
+    erw fin_helper_1,
+    refl,
+    rwa fin_helper_3 },
+  { change _ = limits.wide_pullback.lift _ _ _ ≫ _,
+    simp only [category_theory.limits.wide_pullback.lift_π],
+    congr,
+    ext1,
+    dsimp,
+    change _ = (fin.cast_succ (j.pred hj)).succ_above _,
+    erw fin_helper_4 },
+  { change (_ ≫ (cech_obj f).map _) ≫ _ = ((cech_obj f).map _ ≫ _) ≫ _,
+    simp },
 end
 
 end cech
