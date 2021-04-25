@@ -90,38 +90,41 @@ lemma fin_helper_2 {n} (a : fin (n+1)) : a.cast_succ = 0 ↔ a = 0 := by tidy
 
 lemma fin_helper_3 {n} (a : fin (n+1)) : a.cast_succ ≠ 0 ↔ a ≠ 0 := by simp [not_iff_not, fin_helper_2]
 
-lemma fin_helper_4 {n} (a b : fin (n+2)) (ha : a ≠ 0) (hb : b ≠ 0) :
-  ((fin.cast_succ a).succ_above b).pred (λ c, hb $ by {rwa ← fin_helper_1, rwa fin_helper_3}) =
-  (fin.cast_succ (a.pred ha)).succ_above (b.pred hb) :=
+lemma fin_helper_4 {n} (a : fin (n+1+2)) (b : fin (n+2)) (ha : a ≠ 0) (hb : b ≠ 0) :
+  (a.succ_above b).pred (λ c, hb $ by {rw fin_helper_1 at c, assumption'}) =
+  (a.pred ha).succ_above (b.pred hb) :=
 begin
-  by_cases h : b < a,
-  { have : a.cast_succ.succ_above b = b.cast_succ, by rwa fin.succ_above_below,
-    conv_lhs {
-      congr,
-      rw this },
-    symmetry,
+  by_cases h : b.cast_succ < a,
+  { symmetry,
+    have hbc : b.cast_succ ≠ 0, by rwa fin_helper_3,
+    have : (b.pred hb).cast_succ = b.cast_succ.pred hbc, by {cases b, refl},
     rw fin.succ_above_below,
-    { cases a, cases b, refl },
-    exact fin.pred_lt_pred_iff.mpr h },
-  { have : a.cast_succ.succ_above b = b.succ,
-    { rw fin.succ_above_above,
-      exact not_lt.mp h },
-    conv_lhs {
-      congr,
-      rw this },
-    symmetry,
+    rw this,
+    rw fin.pred_inj,
+    rwa fin.succ_above_below,
+    rw this,
+    rwa fin.pred_lt_pred_iff },
+  { symmetry,
+    have : (b.pred hb).succ = b.succ.pred (fin.succ_ne_zero _), by tidy,
     rw fin.succ_above_above,
-    simp only [fin.succ_pred, fin.pred_succ],
-    mono,
-    rwa [fin.pred_le_pred_iff, ← not_lt] },
+    rw this,
+    rw fin.pred_inj,
+    rw fin.succ_above_above,
+    exact not_lt.mp h,
+    have hbc : b.cast_succ ≠ 0, by rwa fin_helper_3,
+    have : (b.pred hb).cast_succ = b.cast_succ.pred hbc, by {cases b, refl},
+    rw this,
+    rw fin.pred_le_pred_iff,
+    exact not_lt.mp h }
 end
+
 end fin_helpers
 
 -- TODO: This proof could be cleaned up a bit...
 @[simp]
 lemma cech_splitting_face {X B : C} (f : X ⟶ B) (g : B ⟶ X) (splitting : g ≫ f = 𝟙 B)
   [∀ (n : ℕ), limits.has_wide_pullback B (λ (i : ufin (n+1)), X) (λ i, f)] (n : ℕ)
-  (j : fin (n+2)) (hj : j ≠ 0) :
+  (j : fin (n+1+2)) (hj : j ≠ 0) :
   cech_splitting f g splitting (n+1) ≫ (cech_obj f).δ j =
   (cech_obj f).δ (j.pred hj) ≫ cech_splitting f g splitting n :=
 begin
@@ -139,21 +142,21 @@ begin
     ext1,
     erw h1,
     refl,
-    rwa fin_helper_3 },
+    assumption },
   { exfalso,
     apply h1,
     rw h,
     apply_fun equiv.ulift,
     erw fin_helper_1,
     refl,
-    rwa fin_helper_3 },
+    assumption },
   { change _ = limits.wide_pullback.lift _ _ _ ≫ _,
     simp only [category_theory.limits.wide_pullback.lift_π],
     congr,
     ext1,
-    dsimp,
-    change _ = (fin.cast_succ (j.pred hj)).succ_above _,
-    erw fin_helper_4 },
+    dsimp [simplex_category.δ],
+    change (j.succ_above k.down).pred _ = (j.pred hj).succ_above _,
+    erw fin_helper_4 j },
   { change (_ ≫ (cech_obj f).map _) ≫ _ = ((cech_obj f).map _ ≫ _) ≫ _,
     simp },
 end

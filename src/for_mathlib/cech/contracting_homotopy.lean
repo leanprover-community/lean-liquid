@@ -98,8 +98,10 @@ begin
     { rw [this, pow_succ], simp },
     simp_rw ← helper.op_comp,
     congr' 1,
-    -- TODO: use cech_splitting_face
-    sorry }
+    change _ ≫ (cech_obj f).δ _ = (cech_obj f).δ _ ≫ _,
+    convert cech_splitting_face f g splitting n _ _,
+    simp,
+    exact fin.succ_ne_zero _ }
 end
 
 end cech
