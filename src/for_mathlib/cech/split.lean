@@ -67,6 +67,8 @@ begin
   simpa,
 end
 
+-- TODO: Golf + move?
+section fin_helpers
 lemma fin_helper_1 {n} (a : fin (n+1)) (b : fin (n+2)) (hb : b ≠ 0) : b.succ_above a = 0 ↔ a = 0 :=
 begin
   split,
@@ -113,6 +115,7 @@ begin
     mono,
     rwa [fin.pred_le_pred_iff, ← not_lt] },
 end
+end fin_helpers
 
 -- TODO: This proof could be cleaned up a bit...
 @[simp]
