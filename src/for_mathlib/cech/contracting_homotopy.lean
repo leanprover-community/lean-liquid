@@ -40,7 +40,12 @@ lemma helper.op_id {E : Type*} [category E] {a : E} :
   (𝟙 a).op = 𝟙 (opposite.op a) := rfl
 
 lemma helper.op_eq_id {E : Type*} [category E] {a : E} (h : a ⟶ a) :
-  h.op = 𝟙 _ ↔ h = 𝟙 _ := by sorry
+  h.op = 𝟙 _ ↔ h = 𝟙 _ :=
+begin
+  split,
+  { intro h, apply quiver.hom.op_inj, exact h },
+  { intro h, rw h, refl }
+end
 
 end finset_sum_helpers
 
@@ -75,7 +80,9 @@ begin
     rw ← helper.op_comp,
     erw helper.op_eq_id,
     erw cech_splitting_face_zero },
-  { sorry }
+  { apply helper.sum_eq_zero_of_zeros,
+    intros i,
+    sorry }
 end
 
 end cech
