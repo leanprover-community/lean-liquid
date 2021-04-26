@@ -146,6 +146,31 @@ namespace cech
 def augmentation [∀ (n : ℕ) (B X : C) (f : X ⟶ B), limits.has_wide_pullback B (λ i : ufin (n+1), X) (λ i, f)]
   (F : arrow C) : cech.obj F ⟶ simplicial_object.const.obj F.right := { app := λ x, limits.wide_pullback.base }
 
+def augmentation_obj {B X : C} (f : X ⟶ B)
+  [∀ (n : ℕ), limits.has_wide_pullback B (λ i : ufin (n+1), X) (λ i, f)] :
+  cech_obj f ⟶ simplicial_object.const.obj B := { app := λ x, limits.wide_pullback.base }
+
+open_locale simplicial
+
+def augmentation_obj_iso  {B X : C} (f : X ⟶ B)
+  [∀ (n : ℕ), limits.has_wide_pullback B (λ i : ufin (n+1), X) (λ i, f)] :
+  (cech_obj f) _[0] ≅ X :=
+{ hom := limits.wide_pullback.π 0,
+  inv := limits.wide_pullback.lift f (λ x, 𝟙 _) (by simp),
+  hom_inv_id' := begin
+    ext,
+    { have : j = 0,
+      { dsimp at j,
+        ext,
+        rcases j with ⟨⟨j,hj⟩⟩,
+        change j = 0,
+        rw zero_add at hj,
+        linarith },
+      rw this,
+      simp, },
+    { simp }
+  end }
+
 end cech
 
 end category_theory

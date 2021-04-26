@@ -106,6 +106,10 @@ begin
     exact fin.succ_ne_zero _ }
 end
 
+theorem is_contracting_homotopy_zero :
+  (conerve_complex f M).d 0 1 ≫ contracting_homotopy f M g splitting 0 +
+  _ = 𝟙 _ := sorry
+
 end cech
 
 end category_theory
