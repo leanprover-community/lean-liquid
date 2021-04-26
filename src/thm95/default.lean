@@ -81,8 +81,8 @@ calc c * (c' q' * x)
 ... = k' c' m * c * x : (mul_assoc _ _ _).symm
 
 def NSH_h_res {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ} (c : ℝ≥0) {q' : ℕ} (hqm : q' ≤ m+1) :
-  ((BD.data.complex c_ r V r' (k' c' m * c)).obj M).X q' ⟶
-    ((BD.data.complex (c' * c_) r V r' c).obj M).X q' :=
+  (CLCFPTinv r V r' (k' c' m * c * c_ q') (BD.data.X q')).obj M ⟶
+    (CLCFPTinv r V r' (c * (c' q' * c_ q')) (BD.data.X q')).obj M :=
 (@CLCFPTinv.res r V _ _ r' _ _ _ _ _ ⟨NSH_h_res' hqm⟩).app M
 
 def NSH_h {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ} (q q' : ℕ) (c : ℝ≥0) :
@@ -90,8 +90,15 @@ def NSH_h {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ} (q q' : ℕ) (c : ℝ≥0)
     ((((data.mul (2 ^ N₂ c' r r' m)).obj BD.data).system
       (rescale_constants c_ (2 ^ N₂ c' r r' m)) r V r').obj M) c q :=
 if hqm : q' ≤ m + 1
-  then NSH_h_res c hqm ≫ (homotopy_σπ BD c_ c' r V c M _).h q' q
-  else 0
+then
+begin
+  refine (universal_map.eval_CLCFPTinv _ _ _ _ _ _).app _,
+  { exact (data.homotopy_mul BD.data BD.homotopy (N₂ c' r r' m)).h q q' },
+  { dsimp,
+    exact universal_map.suitable.le _ _ (c * (c' q' * c_ q')) _
+      infer_instance le_rfl (NSH_h_res' hqm), }
+end
+else 0
 
 lemma NSH_h_bound_by {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ}
   (q : ℕ) (hqm : q ≤ m) (c : ℝ≥0) [fact (c₀ m Λ ≤ c)] :
@@ -100,9 +107,6 @@ lemma NSH_h_bound_by {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ}
     (H BD c' r r' m) :=
 begin
   rw [NSH_h, dif_pos (nat.succ_le_succ hqm)],
-  refine normed_group_hom.bound_by.comp' 1 _ _ (mul_one _).symm _ _,
-  swap, { exact (CLCFPTinv₂.res_norm_noninc r V r' _ _ _ _ _ _).bound_by_one },
-  dsimp only [homotopy_σπ, breen_deligne.homotopy, homotopy₂],
   apply universal_map.eval_CLCFPTinv₂_bound_by,
   exact (bound_by_H BD c' r r' _ hqm),
 end
@@ -213,37 +217,24 @@ lemma NSH_hδ (M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ)
 begin
   haveI hqm_ : fact (q ≤ m) := ⟨hqm⟩,
   rw [NSH_δ, NSH_h, NSH_h, dif_pos (nat.succ_le_succ hqm), dif_pos (hqm.trans (nat.le_succ _))],
-  erw [comp_f, BD_map_app_f, NSH_δ_res_f, ← universal_map.eval_CLCFPTinv_def],
-  dsimp only [unop_op, NSH_h_res, data.system_res_def],
-  simp only [← nat_trans.comp_app],
-  rw [universal_map.res_comp_eval_CLCFPTinv_absorb,
-      universal_map.res_comp_eval_CLCFPTinv_absorb,
-      ← universal_map.res_comp_eval_CLCFPTinv_absorb _ _ _ _ (k' c' m * c * (c' * c_) q)],
-  have hcomm := (homotopy_σπ BD c_ c' r V (k' c' m * c) M (N₂ c' r r' m)).comm (q-1) q (q+1),
-  rw [differential_object.complex_like.htpy_idx_rel₁_tt_nat,
-      differential_object.complex_like.htpy_idx_rel₂_tt_nat] at hcomm,
-  specialize hcomm _ rfl,
+  erw [comp_f],
+  dsimp only [unop_op, NSH_h_res, NSH_δ_res_f, data.system_res_def, quiver.hom.apply,
+    BD_system_map_app_app, BD_map_app_f, data.system_obj_d],
+  simp only [← universal_map.eval_CLCFPTinv_def],
+  have hcomm := (data.homotopy_mul BD.data BD.homotopy (N₂ c' r r' m)).comm (q+1) q (q-1),
+  rw [differential_object.complex_like.htpy_idx_rel₁_ff_nat,
+      differential_object.complex_like.htpy_idx_rel₂_ff_nat] at hcomm,
+  specialize hcomm rfl _,
   { unfreezingI { cases q },
-    { simp only [nat.one_ne_zero, false_or, and_self] },
-    { simp only [nat.succ_sub_succ_eq_sub, nat.succ_ne_zero, or_false, nat.sub_zero, and_false] } },
-  rw [eq_comm, sub_eq_iff_eq_add', BD_map_app_f,
-      ← universal_map.eval_CLCFPTinv_def] at hcomm,
-  rw [nat_trans.comp_app, hcomm, add_assoc],
-  clear hcomm,
-  simp only [comp_add],
-  congr' 1,
-  { dsimp only [quiver.hom.apply, BD_system_map_app_app, BD_map_app_f],
-    exact nat_trans.congr_app (universal_map.res_comp_eval_CLCFPTinv₂ _ _ _ _ _ _ _ _ _ _ _ _) M },
-  rw add_comm,
-  congr' 1,
-  { simp only [← category.assoc],
-    congr' 1,
-    dsimp only [data.system_obj_d, data.complex_obj_d],
-    exact nat_trans.congr_app (universal_map.res_comp_eval_CLCFPTinv _ _ _ _ _ _ _ _) M },
+    { simp only [false_or, nat.zero_ne_one, and_self] },
+    { simp only [nat.succ_sub_succ_eq_sub, nat.succ_ne_zero, or_false, nat.sub_zero, false_and] } },
+  rw [eq_comm, sub_eq_iff_eq_add'] at hcomm,
+  simp only [universal_map.res_comp_eval_CLCFPTinv_absorb, hcomm, ← nat_trans.app_add, add_assoc,
+    ← nat_trans.comp_app, ← nat_trans.comp_app, ← category.assoc, ← universal_map.eval_CLCFPTinv_comp,
+    universal_map.eval_CLCFPTinv_comp_res_absorb, universal_map.res_comp_eval_CLCFPTinv_absorb,
+      ← universal_map.eval_CLCFPTinv_add],
 end
 .
-
--- #check NSH_hδ V c' m Λ (op M)
 
 end
 

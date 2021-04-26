@@ -370,6 +370,22 @@ begin
   apply hf _ hg,
 end
 
+@[simp] lemma factor_neg (f : universal_map m n) : (-f).factor = f.factor :=
+by simp only [factor, support_neg]
+
+lemma factor_add (f₁ f₂ : universal_map m n) : factor (f₁ + f₂) ≤ max f₁.factor f₂.factor :=
+begin
+  refine finset.sup_le _,
+  simp only [prod.forall, and_true, finset.mem_univ, finset.mem_product, le_max_iff],
+  intros g i hg,
+  replace hg := support_add f₁ f₂ hg,
+  simp only [finset.mem_union] at hg,
+  refine hg.imp _ _; { intro h, apply le_factor, exact h },
+end
+
+lemma factor_sub (f₁ f₂ : universal_map m n) : factor (f₁ - f₂) ≤ max f₁.factor f₂.factor :=
+by simpa only [factor_neg, sub_eq_add_neg] using factor_add f₁ (-f₂)
+
 end universal_map
 
 namespace basic_universal_map
@@ -675,17 +691,6 @@ begin
   { simp only [one_mul, pow_zero] }
 end
 
-lemma comp (g : universal_map m n) (f : universal_map l m)
-  [hg: g.very_suitable r r' c₁ c₂] [hf : f.very_suitable r r' c₂ c₃] :
-  (comp g f).very_suitable r r' c₁ c₃ :=
-begin
-  unfreezingI {
-    rcases hg with ⟨Ng, bg, c_g, hNg, hg, hrg, Hg⟩,
-    rcases hf with ⟨Nf, bf, c_f, hNf, hf, hrf, Hf⟩ },
-  refine ⟨Ng * Nf, bg + bf, c_g * c_f * c₂⁻¹, _, _, _, _⟩,
-  all_goals { sorry }
-end
-
 end very_suitable
 
 end universal_map
@@ -746,12 +751,8 @@ end
 end σπ
 
 class adept (BD : out_param package) (c_ : out_param $ ℕ → ℝ≥0) (c' : ℕ → ℝ≥0) : Prop :=
-(one_le : ∀ i, fact (1 ≤ c' i))
-(suitable : BD.data.suitable (c' * c_)) -- do we need `very_suitable` here?
 (htpy_suitable' :
   ∀ i, (BD.homotopy.h i (i+1)).suitable (rescale_constants c_ 2 i) (c' (i+1) * c_ (i+1)))
-
-attribute [instance] adept.one_le adept.suitable
 
 instance adept.htpy_suitable (BD : package) (c_ c' : ℕ → ℝ≥0) [adept BD c_ c'] (j i : ℕ) :
   (BD.homotopy.h j i).suitable (rescale_constants c_ 2 j) (c' i * c_ i) :=
@@ -769,14 +770,14 @@ open category_theory
 
 variables (BD : package) (c_ c' : ℕ → ℝ≥0) [adept BD c_ c']
 
-instance mul_adept_suitable (N : ℕ) (f : (data.mul N).obj BD.data ⟶ BD.data) (i : ℕ) (c₁ : ℝ≥0)
-  [hf : universal_map.suitable c₁ (c_ i) (f.f i)] :
-  universal_map.suitable c₁ ((c' * c_) i) (f.f i) :=
-begin
-  refine hf.le _ _ _ _ le_rfl _,
-  dsimp,
-  apply fact.out
-end
+-- instance mul_adept_suitable (N : ℕ) (f : (data.mul N).obj BD.data ⟶ BD.data) (i : ℕ) (c₁ : ℝ≥0)
+--   [hf : universal_map.suitable c₁ (c_ i) (f.f i)] :
+--   universal_map.suitable c₁ ((c' * c_) i) (f.f i) :=
+-- begin
+--   refine hf.le _ _ _ _ le_rfl _,
+--   dsimp,
+--   apply fact.out
+-- end
 
 instance homotopy_pow'_suitable (j i : ℕ) :
   Π N, ((BD.data.homotopy_pow' BD.homotopy N).h j i).suitable

@@ -77,25 +77,35 @@ begin
 end
 .
 
--- section
+section
 
--- attribute [reducible] CLCFPTinv₂ CLCFPTinv₂.res
---   breen_deligne.universal_map.eval_CLCFPTinv₂
+attribute [reducible] CLCFPTinv₂ CLCFPTinv₂.res
+  breen_deligne.universal_map.eval_CLCFPTinv₂
 
--- def complex_rescale_iso (N : ℝ≥0) :
---   (BD.complex (rescale_constants c_ N) r V r' c).obj (op M) ≅
---   (BD.complex c_ r V r' c).obj (op $ of r' $ rescale N M) :=
--- differential_object.complex_like.iso_of_components
---   (λ i, (CLCPTinv.map_nat _ _ _ _ _ _ _ _ _ _ _).app _) _
+def complex_rescale_iso (N : ℝ≥0) :
+  (BD.complex (rescale_constants c_ N) r V r' c).obj (op M) ≅
+  (BD.complex c_ r V r' c).obj (op $ of r' $ rescale N M) :=
+differential_object.complex_like.iso_of_components
+begin
+  intro i,
+  refine CLCTinv.map_iso r V _ _ _ _ _ _ _ _,
+  { refine ((Pow $ BD.X i).map_iso _).op, sorry },
+  { refine ((Pow $ BD.X i).map_iso _).op, sorry },
+  sorry, sorry
+end
+begin
+  sorry
+end
 
--- end
+end
 
 noncomputable
 def system_rescale_iso (N : ℝ≥0) :
   (BD.system (rescale_constants c_ N) r V r').obj (op M) ≅
   (BD.system c_ r V r').obj (op $ of r' $ rescale N M) :=
-nat_iso.of_components (λ c, eq_to_iso $ complex_rescale_eq BD c_ r V c.unop _ _)
+nat_iso.of_components (λ c, complex_rescale_iso BD c_ r V c.unop _ _)
 begin
+  intros c₁ c₂ h,
   sorry
 end
 
@@ -117,7 +127,16 @@ attribute [reducible] CLCFPTinv₂ CLCFPTinv₂.res
 def mul_complex_iso (N : ℕ) [fact (0 < N)] (M : ProFiltPseuNormGrpWithTinv.{u} r') (c : ℝ≥0) :
   (((data.mul N).obj BD).complex c_ r V r' c).obj (op M) ≅
   (BD.complex c_ r V r' c).obj (op (ProFiltPseuNormGrpWithTinv.of r' $ M^N)) :=
-differential_object.complex_like.iso_of_components (λ i, sorry)
+differential_object.complex_like.iso_of_components
+begin
+  intro i,
+  refine CLCTinv.map_iso r V _ _ _ _ _ _ _ _,
+  { dsimp only [unop_op, functor.op_obj],
+    refine iso.op _, sorry },
+  { dsimp only [unop_op, functor.op_obj],
+    refine iso.op _, sorry },
+  sorry, sorry
+end
 begin
   sorry
 end

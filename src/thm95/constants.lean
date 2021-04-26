@@ -92,6 +92,9 @@ def k' : ℝ≥0 := max (k₀ m) $ (finset.range (m+2)).sup c'
 lemma c'_le_k' {i : ℕ} (hi : i ≤ m+1) : c' i ≤ k' c' m :=
 le_max_iff.mpr $ or.inr $ finset.le_sup $ finset.mem_range.mpr $ nat.lt_succ_iff.mpr hi
 
+instance fact_c'_le_k' {i : ℕ} (hi : fact (i ≤ m+1)) : fact (c' i ≤ k' c' m) :=
+⟨c'_le_k' _ _ hi.1⟩
+
 instance one_le_k' : fact (1 ≤ k' c' m) :=
 ⟨le_trans (fact.out _) $ le_max_left _ _⟩
 

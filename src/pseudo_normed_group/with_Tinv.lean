@@ -223,11 +223,13 @@ instance pi : profinitely_filtered_pseudo_normed_group_with_Tinv r' (Π i, M i) 
   .. profinitely_filtered_pseudo_normed_group.pi _ }
 
 
-variables (M₁ M₂ : Type*)
-variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₁]
-variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₂]
+-- === jmc: I think we don't need binary products
 
-instance prod : profinitely_filtered_pseudo_normed_group_with_Tinv r' (M₁ × M₂) :=
-sorry
+-- variables (M₁ M₂ : Type*)
+-- variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₁]
+-- variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₂]
+
+-- instance prod : profinitely_filtered_pseudo_normed_group_with_Tinv r' (M₁ × M₂) :=
+-- by admit
 
 end profinitely_filtered_pseudo_normed_group_with_Tinv

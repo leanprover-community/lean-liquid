@@ -96,11 +96,14 @@ eg.data.c_ r r'
 instance very_suitable : eg.data.very_suitable r r' (c_ r r') :=
 eg.data.c_very_suitable _ _
 
+instance [fact (0 < r')] (n : ℕ) : fact (0 < c_ r r' n) :=
+data.c__pos _ _ _ _
+
 /-- Adept sequence of constants for the example Breen--Deligne package -/
 def c' : ℕ → ℝ≥0 :=
 eg.c' (eg.c_ r r')
 
-instance adept [fact (r' ≤ 1)] : package.adept eg (c_ r r') (c' r r') :=
+instance adept [fact (0 < r')] [fact (r' ≤ 1)] : package.adept eg (c_ r r') (c' r r') :=
 eg.c'_adept _
 
 end eg
