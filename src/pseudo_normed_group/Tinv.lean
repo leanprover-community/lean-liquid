@@ -444,6 +444,16 @@ lemma eval_CLCFPTinv_def [ϕ.suitable c₂ c₁] :
   (0 : universal_map m n).eval_CLCFPTinv r V r' c₁ c₂ = 0 :=
 by apply eval_CLCFPTinv₂_zero
 
+@[simp] lemma eval_CLCFPTinv_add [ϕ.suitable c₂ c₁] [ψ.suitable c₂ c₁] :
+  (ϕ + ψ : universal_map m n).eval_CLCFPTinv r V r' c₁ c₂ =
+  ϕ.eval_CLCFPTinv r V r' c₁ c₂ + ψ.eval_CLCFPTinv r V r' c₁ c₂ :=
+eval_CLCFPTinv₂_add _ _ _ _ _ _ _ _ _
+
+@[simp] lemma eval_CLCFPTinv_sub [ϕ.suitable c₂ c₁] [ψ.suitable c₂ c₁] :
+  (ϕ - ψ : universal_map m n).eval_CLCFPTinv r V r' c₁ c₂ =
+  ϕ.eval_CLCFPTinv r V r' c₁ c₂ - ψ.eval_CLCFPTinv r V r' c₁ c₂ :=
+eval_CLCFPTinv₂_sub _ _ _ _ _ _ _ _ _
+
 lemma eval_CLCFPTinv_comp {l m n : FreeMat} (f : l ⟶ m) (g : m ⟶ n)
   [hg : g.suitable c₂ c₁] [hf : f.suitable c₃ c₂] :
   @eval_CLCFPTinv r V _ _ r' _ _ c₁ c₃ _ _ (f ≫ g) (suitable.comp c₂) =
@@ -457,10 +467,20 @@ lemma res_comp_eval_CLCFPTinv
 by apply res_comp_eval_CLCFPTinv₂
 
 lemma res_comp_eval_CLCFPTinv_absorb
-  [fact (c₂ ≤ c₁)] [ϕ.suitable c₃ c₂] [ϕ.suitable c₃ c₁] :
+  [fact (c₂ ≤ c₁)] [hϕ : ϕ.suitable c₃ c₂] :
   res r V r' c₁ c₂ n ≫ ϕ.eval_CLCFPTinv r V r' c₂ c₃ =
-    ϕ.eval_CLCFPTinv r V r' c₁ c₃ :=
-by rw [@res_comp_eval_CLCFPTinv r V _ _ r' _ _ c₁ c₂ c₃ c₃ _ _ ϕ, res_refl, category.comp_id]
+    @eval_CLCFPTinv r V _ _ r' _ _ c₁ c₃ _ _ ϕ (hϕ.le _ _ _ _ le_rfl (fact.out _)) :=
+by rw [@res_comp_eval_CLCFPTinv r V _ _ r' _ _ c₁ c₂ c₃ c₃ _ _ ϕ
+      (_root_.id _) (_root_.id _) (_root_.id _) (_root_.id _),
+    res_refl, category.comp_id]
+
+lemma eval_CLCFPTinv_comp_res_absorb
+  {_: fact (c₃ ≤ c₂)} [hϕ : ϕ.suitable c₂ c₁] :
+  ϕ.eval_CLCFPTinv r V r' c₁ c₂ ≫ res r V r' c₂ c₃ m =
+    @eval_CLCFPTinv r V _ _ r' _ _ c₁ c₃ _ _ ϕ (hϕ.le _ _ _ _ (fact.out _) le_rfl) :=
+by rw [← @res_comp_eval_CLCFPTinv r V _ _ r' _ _ c₁ c₁ c₂ c₃ _ _ ϕ
+      (_root_.id _) (_root_.id _) (_root_.id _) (_root_.id _),
+    res_refl, category.id_comp]
 
 lemma eval_CLCFPTinv_bound_by [normed_with_aut r V] [fact (0 < r)] [ϕ.suitable c₂ c₁]
   (N : ℕ) (h : ϕ.bound_by N) (M) :
