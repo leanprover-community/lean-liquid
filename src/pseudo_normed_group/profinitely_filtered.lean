@@ -582,9 +582,19 @@ def pi_lift {N : Type*} [profinitely_filtered_pseudo_normed_group N]
 { bound' :=
   begin
     have := λ i, (f i).bound,
-    choose C hC using this,
-    -- now use the sup of the `C i`
-    sorry
+    choose Cᵢ hC₀ using this,
+    use supr Cᵢ,
+    intros c x hx,
+    rw forall_swap at hC₀,
+    replace hC₀ := hC₀ c,
+    rw forall_swap at hC₀,
+    replace hC₀ := hC₀ x,
+    rw forall_swap at hC₀,
+    replace hC₀ := hC₀ hx,
+    rename_var x i at hC₀,
+    dsimp,
+    change (λ i, (f i) x) ∈  filtration (Π (i : ι), M i) (supr Cᵢ * c),
+    sorry,
   end,
   continuous' := sorry,
   .. add_monoid_hom.mk_to_pi (λ i, (f i).to_add_monoid_hom) }
