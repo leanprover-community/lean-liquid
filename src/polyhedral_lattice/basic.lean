@@ -104,6 +104,7 @@ end
 
 lemma rank_dual (ha : finite_free A) : ha.dual.rank = ha.rank :=
 begin
+  -- do this after is_basis refactor?
   sorry
 end
 
