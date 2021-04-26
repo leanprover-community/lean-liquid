@@ -63,16 +63,27 @@ def c' (BD : package) (c_ : ℕ → ℝ≥0) : ℕ → ℝ≥0
 | 0     := 1
 | (n+1) := (BD.homotopy.h n (n + 1)).factor * rescale_constants c_ 2 n * (c_ (n + 1))⁻¹
 
+/-
+=== There's a mistake here. jmc knows how to fix it.
+-/
+
 lemma c'_monotone (c_ : ℕ → ℝ≥0) : monotone (c' BD c_) :=
 sorry -- is this provable?? We might need to tweak the defn a bit
 
-instance c'_adept (c_ : ℕ → ℝ≥0) [BD.data.suitable c_] :
+instance c'_adept (c_ : ℕ → ℝ≥0) [BD.data.suitable c_] : -- [∀ i, fact (0 < c_ i)] :
   package.adept BD c_ (c' BD c_) :=
 { one_le := sorry,
   suitable :=
   begin
     constructor,
-    intros n,
+    intros i j,
+    by_cases hij : i = j + 1,
+    swap, { rw BD.data.d_eq_zero; [apply_instance, exact hij] },
+    subst i,
+    have aux1 : BD.c' c_ j ≤ BD.c' c_ (j+1) := c'_monotone BD c_ (nat.le_succ j),
+    -- have aux2 := universal_map.factor_le_of_suitable (c_ (j+1)) (c_ j) (BD.data.d (j+1) j),
+    apply universal_map.suitable_of_factor_le,
+    dsimp,
     sorry, -- now use monotonicity
   end,
   htpy_suitable' :=

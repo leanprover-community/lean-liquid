@@ -360,6 +360,16 @@ begin
   exact (le_factor _ _ hg _).trans hf
 end
 
+lemma factor_le_of_suitable (f : universal_map m n) [hf : f.suitable c₁ c₂] [h : fact (0 < c₁)] :
+  f.factor ≤ c₂ * c₁⁻¹ :=
+begin
+  refine finset.sup_le _,
+  simp only [and_true, finset.mem_univ, finset.mem_product],
+  rintro ⟨g, i⟩ hg,
+  rw [mul_comm, ← nnreal.mul_le_iff_le_inv h.1.ne', mul_comm],
+  apply hf _ hg,
+end
+
 end universal_map
 
 namespace basic_universal_map
