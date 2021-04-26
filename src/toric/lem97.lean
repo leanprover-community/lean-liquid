@@ -4,8 +4,8 @@ import linear_algebra.dual
 import algebra.ordered_ring
 
 import polyhedral_lattice.basic
-import toric.is_inj_nonneg
-import toric.pairing_dual_saturated
+-- import toric.is_inj_nonneg
+-- import toric.pairing_dual_saturated
 import toric.Gordan
 
 import for_mathlib.add_monoid_hom
