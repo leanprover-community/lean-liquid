@@ -35,21 +35,14 @@ lemma nhds_of_homeo {X Y : Type*} [topological_space X] [topological_space Y]
 
 lemma nhds_eq_infi (a : X) : nhds a = ⨅ (I : X.clopen_cover), filter.comap I.proj (nhds $ I.proj a) :=
 begin
-  haveI := X.is_iso_lift,
-  let : X ≅ (limit_cone $ X.diagram ⋙ of_Fintype).cone.X :=
-    as_iso ((limit_cone (X.diagram ⋙ of_Fintype)).is_limit.lift X.Fincone),
-  let f := homeo_of_iso this,
+  let f := homeo_of_iso (as_iso ((limit_cone (X.diagram ⋙ of_Fintype)).is_limit.lift X.Fincone)),
   have := nhds_of_limit (X.diagram ⋙ of_Fintype) (f a),
-  rw nhds_of_homeo f,
-  rw this,
-  simp,
+  rw [nhds_of_homeo f, this, filter.comap_infi],
   congr,
   funext i,
   let P := Π (I : X.clopen_cover), I,
   have : (λ x : P, x i) ∘ subtype.val ∘ f = i.proj, refl,
-  rw ← this,
-  simp [filter.comap_comap],
-  refl,
+  simpa [← this, filter.comap_comap],
 end
 
 lemma nhds_basis (a : X) : (nhds a).has_basis (λ S, a ∈ S ∧ is_clopen S) id :=
