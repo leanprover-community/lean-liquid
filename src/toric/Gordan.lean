@@ -12,7 +12,6 @@ perhaps go into the blueprint.
 -/
 
 -- solves a diamond
-local attribute [-instance] add_comm_group.int_module
 
 variables {Λ : Type*} [add_comm_group Λ]
 variable {ι : Type*}

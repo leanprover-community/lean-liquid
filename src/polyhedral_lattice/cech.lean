@@ -25,8 +25,6 @@ noncomputable theory
 
 open_locale big_operators
 
-local attribute [-instance] add_comm_group.int_module
-
 namespace polyhedral_lattice
 
 variables {Λ Λ' : Type*} [polyhedral_lattice Λ] [polyhedral_lattice Λ']
@@ -58,9 +56,7 @@ instance : semi_normed_group (obj f m) :=
 normed_group_hom.semi_normed_group_quotient _
 
 instance : polyhedral_lattice (obj f m) :=
-{ int_semimodule := add_comm_group.int_module,
-  is_scalar_tower := by convert add_comm_monoid.nat_is_scalar_tower,
-  finite_free := sorry, -- we will need some sort of torsion-free condition on the cokernel of `f`
+{ finite_free := sorry, -- we will need some sort of torsion-free condition on the cokernel of `f`
   polyhedral :=
   begin
     obtain ⟨ι, _inst_ι, l, hl, hl'⟩ := polyhedral_lattice.polyhedral (fin m →₀ Λ'),
@@ -184,8 +180,10 @@ def obj (m : ℕ) : PolyhedralLattice := of (conerve.obj f (m+1))
 
 def map_succ_zero_aux (m : ℕ) (g : fin (m+2) →ₘ fin 1) : obj f (m+1) →+ Λ' :=
 (finsupp.apply_add_hom (0 : fin 1)).comp $
-quotient_add_group.lift _ (finsupp.map_domain_hom g)
 begin
+  -- TODO: this is very ugly
+  let foo := quotient_add_group.lift (conerve.L f (m + 1 + 1)) (finsupp.map_domain_hom g),
+  refine foo _,
   intros x hx,
   rw ← add_monoid_hom.mem_ker,
   revert hx x,
