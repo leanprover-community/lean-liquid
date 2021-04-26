@@ -106,9 +106,9 @@ begin
     exact fin.succ_ne_zero _ }
 end
 
-theorem is_contracting_homotopy_zero :
-  (conerve_complex f M).d 0 1 ≫ contracting_homotopy f M g splitting 0 +
-  _ = 𝟙 _ := sorry
+--theorem is_contracting_homotopy_zero :
+--  (conerve_complex f M).d 0 1 ≫ contracting_homotopy f M g splitting 0 + -- THE NEXT LINE NEEDS FIXING
+  --M.map (augmentation_obj_iso f).inv.op ≫ M.map f.op ≫ M.map _ = 𝟙 _ := sorry
 
 end cech
 
