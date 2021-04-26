@@ -53,7 +53,6 @@ begin
   refl,
 end
 
-/-
 lemma nhds_basis (a : X) : (nhds a).has_basis (λ S, a ∈ S ∧ is_clopen S) id :=
 begin
   rw nhds_eq_infi,
@@ -103,10 +102,40 @@ begin
   { intro h,
     rw filter.mem_infi_iff,
     rcases h with ⟨T,⟨hT1,hT2⟩,hT3⟩,
-    sorry,
-  }
+    by_cases h : T = ⊤,
+    { use ∅,
+      simp,
+      refine ⟨λ i hi, false.elim i.2, _⟩,
+      erw h at hT3,
+      intros x hx,
+      apply hT3,
+      tauto },
+    { have : Tᶜ.nonempty := set.nonempty_compl.mpr h,
+      let TT := clopen_cover.of_clopen hT2 ⟨a,hT1⟩ this,
+      refine ⟨{TT},by simp, λ a, T, _, _⟩,
+      rintros ⟨U,hU⟩,
+      --simp at hU,
+      rw filter.mem_comap_sets,
+      dsimp,
+      refine ⟨{U.proj a}, _,_⟩,
+      rw mem_nhds_sets_iff,
+      refine ⟨{U.proj a}, by tauto, by tauto , by tauto⟩,
+      intros b hb,
+      simp at hb,
+      { simp at hU,
+        rw hU at hb,
+        let TTT : ↥TT := clopen_cover.of_clopen.mk,
+        have : TTT = TT.proj a, apply clopen_cover.proj_fun_unique,
+        convert hT1,
+        change b ∈ (TTT : set X),
+        rw this,
+        erw clopen_cover.proj_fun_mem,
+        exact hb.symm },
+      intros b hb,
+      simp at hb,
+      apply hT3,
+      exact hb } }
 end
--/
 
 lemma pullback_map_injective (I : B.clopen_cover) :
   function.injective (clopen_cover.map I.pullback_le_rel : I.pullback f → I) :=
