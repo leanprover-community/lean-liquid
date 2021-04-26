@@ -13,10 +13,8 @@ lemma nhds_of_limit {J : Type u} [small_category J] (F : J ⥤ Profinite.{u})
   ⨅ (i : J), filter.comap ((limit_cone F).cone.π.app i) (nhds $ (limit_cone F).cone.π.app i a) :=
 begin
   let P := Π (j : J), F.obj j,
-  have : nhds (a.val : P) = ⨅ (i : J), filter.comap (λ x, x i) (nhds (a.val i)),
-  apply nhds_pi,
-  erw [nhds_subtype, this],
-  rw filter.comap_infi,
+  have : nhds (a.val : P) = ⨅ (i : J), filter.comap (λ x, x i) (nhds (a.val i)), by apply nhds_pi,
+  erw [nhds_subtype, this, filter.comap_infi],
   congr, funext i,
   have : (λ X : P, X i) ∘ subtype.val = (limit_cone F).cone.π.app i, refl,
   simpa [← this, filter.comap_comap],
