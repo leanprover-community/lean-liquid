@@ -4,8 +4,6 @@ import linear_algebra.dual
 import algebra.ordered_ring
 
 import polyhedral_lattice.basic
--- import toric.is_inj_nonneg
--- import toric.pairing_dual_saturated
 import toric.Gordan
 
 import for_mathlib.add_monoid_hom
@@ -56,14 +54,6 @@ begin
   dsimp [x'],
   rw [sub_nonpos.symm, sub_eq_add_neg, ← add_monoid_hom.neg_apply, ← finset.sum_neg_distrib,
     add_monoid_hom.finset_sum_apply, add_monoid_hom.finset_sum_apply, ← finset.sum_add_distrib],
-  --   -- ⊢ ∑ (x : Λ →+ ℤ) in S₀, (⇑((f x % N) • x) (l i) + (⇑-(f x • x)) (l i)) ≤ 0
-  -- suffices : ∑ (x : Λ →+ ℤ) in S₀, ((↑(f x) % ↑N) • x (l i) + -(↑(f x) • x (l i))) ≤ 0,
-  -- { simp only [← add_monoid_hom.add_apply, ← nsmul_eq_smul, ← gsmul_coe_nat, ← neg_gsmul,
-  --   gsmul_eq_smul, ← add_smul],
-  --   -- ⊢ ∑ (x : Λ →+ ℤ) in S₀, ⇑(↑(f x % N) • x + -(↑(f x) • x)) (l i) ≤ 0
-  --   simp only [add_monoid_hom.coe_add, add_monoid_hom.coe_smul, pi.add_apply, pi.neg_apply,
-  --   int.coe_nat_mod, pi.smul_apply, add_monoid_hom.coe_neg],
-  --   exact this },
   simp only [← add_monoid_hom.add_apply, ← nsmul_eq_smul, ← gsmul_coe_nat, ← neg_gsmul,
      gsmul_eq_smul, ← add_smul],
   simp only [add_monoid_hom.coe_add, add_monoid_hom.coe_smul, pi.add_apply, pi.neg_apply,
