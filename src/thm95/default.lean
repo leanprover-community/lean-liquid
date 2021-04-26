@@ -92,8 +92,7 @@ def NSH_h {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ} (q q' : ℕ) (c : ℝ≥0)
 if hqm : q' ≤ m + 1
 then
 begin
-  refine --NSH_h_res c hqm ≫
-   (universal_map.eval_CLCFPTinv _ _ _ _ _ _).app _,
+  refine (universal_map.eval_CLCFPTinv _ _ _ _ _ _).app _,
   { exact (data.homotopy_mul BD.data BD.homotopy (N₂ c' r r' m)).h q q' },
   { dsimp,
     exact universal_map.suitable.le _ _ (c * (c' q' * c_ q')) _
