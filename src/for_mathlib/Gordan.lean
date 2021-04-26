@@ -5,13 +5,11 @@ import for_mathlib.grading
 
 # Gordan's Lemma
 
-We formalise the algebraic proof of Gordan's lemma on Wikipedia.
+The algebraic proof of Gordan's lemma on Wikipedia.
 See also `src/toric/gordan_algebraic_blueprint.tex`; this should
-perhaps go into the blueprint.
+perhaps go into the LTE blueprint.
 
 -/
-
--- solves a diamond
 
 variables {Λ : Type*} [add_comm_group Λ]
 variable {ι : Type*}
@@ -25,14 +23,6 @@ def explicit_dual_set (l : ι → Λ) : submodule ℕ (Λ →+ ℤ) :=
   add_mem' := λ x y hx hy i, add_nonneg (hx i) (hy i),
   smul_mem' := λ n x hx i,
     by { simp only [add_monoid_hom.coe_smul, pi.smul_apply], exact nsmul_nonneg (hx i) n } }
-
--- -- not sure we need this
--- lemma explicit_dual_set_of_neg (l : ι → Λ) (x : Λ →+ ℤ) :
---   x ∈ (explicit_dual_set (- l)) ↔ ∀ i, x (l i) ≤ 0 :=
--- begin
---   simp_rw [← neg_nonneg, ← add_monoid_hom.map_neg],
---   exact iff.rfl,
--- end
 
 def dual_finset (S : finset Λ) : submodule ℕ (Λ →+ ℤ) :=
 explicit_dual_set (coe : (S : set Λ) → Λ)
@@ -81,7 +71,15 @@ let L : (Λ →+ ℤ) →+ ℤ :=
   map_zero' := rfl,
   map_add' := λ _ _, rfl } in
 begin
-  admit,
+  sorry
+  /- TODO. This is the main mathematical work left. The two key points missing:
+
+  (1) If Γ is finite free of rank d+1 and l : Γ → ℤ is non-zero then ker(l) is
+  finite free of rank d. kmb has not begun to think about this (in the application Γ = Λ →+ ℤ)
+
+  (2) If A is a Noetherian ℤ-graded ring then A_{≥0} is finitely-generated
+  as a ring over A_0. kmb is working on this in `for_mathlib/grading`.
+  -/
 end
 
 /-- A finset version of Gordan's Lemma. -/
@@ -123,7 +121,8 @@ begin
           convert le_refl _,
           exact φ.map_zero },
         { refine hφ ⟨i, hiS⟩ } },
-      { exact Gordan_inductive_step d @hd hΛ hl hfg hl0 } } }
+      { -- We factor the hard work out into another lemma
+        exact Gordan_inductive_step d @hd hΛ hl hfg hl0 } } }
 end
 
 /-- A fintype version of Gordan's Lemma. -/

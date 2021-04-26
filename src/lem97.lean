@@ -4,12 +4,18 @@ import linear_algebra.dual
 import algebra.ordered_ring
 
 import polyhedral_lattice.basic
-import toric.Gordan
+import for_mathlib.Gordan
 
 import for_mathlib.add_monoid_hom
 
 /-!
-In this file we state and prove 9.7 of [Analytic].
+
+# Lemma 9.7 of [Analytic]
+
+In this file we state and prove 9.7 of [Analytic]. The proof in the pdf is short, but
+combinatorics can be fiddly. However it is almost certain that this file could be
+a lot shorter.
+
 -/
 
 open_locale nnreal big_operators classical
@@ -198,11 +204,10 @@ begin
 end
 
 /-
-jmc: I don't know exactly which version of the two lemmas below
-will be easier to prove, `lem97` or `lem97'`.
-The first one is closer to [Analytic], but the second one is easier to use.
-Mathematically they are indistinguishable.
-fae: I am going for the first, `lem97`. I left `lem97'` there, at any rate.
+
+The remainder of this file is proofs of two versions of Lemma 9.7, namely
+`lem97` and `lem97'`.
+
 -/
 
 
