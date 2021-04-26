@@ -11,9 +11,9 @@ import hacks_and_tricks.by_exactI_hack
 In this file we state and prove 9.8 of [Analytic].
 -/
 
-open_locale nnreal big_operators
+noncomputable theory
 
-local attribute [instance, priority 0] add_comm_group.int_module
+open_locale nnreal big_operators
 
 open pseudo_normed_group
 
@@ -156,17 +156,9 @@ begin
   rw [← int.nat_abs_of_nat N, ← int.nat_abs_mul, int.nat_abs_of_nat,
     ← int.nat_cast_eq_coe_nat, ← nsmul_eq_mul],
   congr' 1,
-  show _ = N • (x₀ (l i) s n),
-  have := add_monoid_hom.smul_apply N x₀ (l i),
-  rw Mbar.ext_iff at this,
-  replace := congr_fun this s,
-  replace := congr_fun this n,
-  convert this,
-  simp only [Mbar.coe_nsmul, nsmul_eq_mul,
-    pi.mul_apply, pi.nat_apply, @pi.nat_apply ℕ ℤ _ _ _ N],
 end
 
-@[simps]
+@[simps apply]
 lemma Mbar.mk_tensor (a : Λ →+ ℤ) (x : Mbar r' S) :
   Λ →+ Mbar r' S :=
 add_monoid_hom.mk' (λ l, a l • x) $ λ l₁ l₂, by rw [a.map_add, add_smul]
