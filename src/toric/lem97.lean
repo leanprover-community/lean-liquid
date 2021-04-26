@@ -52,22 +52,23 @@ lemma aux_2 {N : ℕ} (hN : 0 < N) {l : ι → Λ} {S₀ : finset (Λ →+ ℤ)}
   in f = ↑g + N • r → x' = ∑ (i : Λ →+ ℤ) in S₀, (g i).val • i → x' ∈ B →
     ∀ (i : ι), x' (l i) ≤ (⇑∑ (i : Λ →+ ℤ) in S₀, f i • i) (l i) :=
 begin
-  intros Y ψ B g x' hr hx' H i,
-  dsimp [x'],
-  rw [sub_nonpos.symm, sub_eq_add_neg, ← add_monoid_hom.neg_apply, ← finset.sum_neg_distrib,
-    add_monoid_hom.finset_sum_apply, add_monoid_hom.finset_sum_apply, ← finset.sum_add_distrib],
-  simp [← add_monoid_hom.add_apply, ← nsmul_eq_smul, ← gsmul_coe_nat, ← neg_gsmul,
-    gsmul_eq_smul, ← add_smul],
-  apply finset.sum_nonpos,
-  intros z hz,
-  replace hz : z ∈ explicit_dual_set l,
-  { rw [← submodule.span_singleton_le_iff_mem, ← hS₀],
-    exact submodule.span_mono (set.singleton_subset_iff.mpr hz) },
-  replace hz : 0 ≤ z (l i) := rfl.mpr hz i,
-  simp only [- add_neg_le_iff_le_add', tactic.ring.add_neg_eq_sub, smul_sub],
-  rw [← int.coe_nat_mod, sub_le_iff_le_add, zero_add],
-  simp only [has_scalar.smul, gsmul_int_int],
-  exact (mul_le_mul_of_nonneg_right (int.coe_nat_le.mpr (nat.mod_le (f z) N)) hz),
+  sorry
+  -- intros Y ψ B g x' hr hx' H i,
+  -- dsimp [x'],
+  -- rw [sub_nonpos.symm, sub_eq_add_neg, ← add_monoid_hom.neg_apply, ← finset.sum_neg_distrib,
+  --   add_monoid_hom.finset_sum_apply, add_monoid_hom.finset_sum_apply, ← finset.sum_add_distrib],
+  -- simp [← add_monoid_hom.add_apply, ← nsmul_eq_smul, ← gsmul_coe_nat, ← neg_gsmul,
+  --   gsmul_eq_smul, ← add_smul],
+  -- apply finset.sum_nonpos,
+  -- intros z hz,
+  -- replace hz : z ∈ explicit_dual_set l,
+  -- { rw [← submodule.span_singleton_le_iff_mem, ← hS₀],
+  --   exact submodule.span_mono (set.singleton_subset_iff.mpr hz) },
+  -- replace hz : 0 ≤ z (l i) := rfl.mpr hz i,
+  -- simp only [- add_neg_le_iff_le_add', tactic.ring.add_neg_eq_sub, smul_sub],
+  -- rw [← int.coe_nat_mod, sub_le_iff_le_add, zero_add],
+  -- simp only [has_scalar.smul, gsmul_int_int],
+  -- exact (mul_le_mul_of_nonneg_right (int.coe_nat_le.mpr (nat.mod_le (f z) N)) hz),
 end
 
 /-- A technical auxiliary lemma used in the proof of `lem97_pos`. -/
@@ -145,9 +146,8 @@ begin
   rw [pos_vector, nonzero_sign],
   simp only [has_scalar.smul, add_monoid_hom.map_gsmul, gsmul_int_int],
   split_ifs,
-  { rwa [units.coe_one, one_mul] },
-  { rw [units.coe_neg_one, neg_one_mul],
-    refine (neg_pos.mpr (not_le.mp h)).le }
+  { convert h, simp },
+  { simp, linarith }
 end
 
 lemma smul_to_explicit_dual_set (l : ι → Λ) (x : Λ →+ ℤ) :
@@ -159,7 +159,8 @@ lemma pos_vector_id_if_nonneg (l : ι → Λ) (x : Λ →+ ℤ) (i : ι) : 0 ≤
 begin
   intro hx,
   simp only [pos_vector, nonzero_sign, has_scalar.smul, id.def],
-  rw [if_pos hx, units.coe_one, one_gsmul],
+  rw [if_pos hx],-- units.coe_one, one_gsmul],
+  simp,
 end
 
 lemma pos_vector_neg_if_neg (l : ι → Λ) (x : Λ →+ ℤ) (i : ι) : x (l i) < 0 →
@@ -167,7 +168,7 @@ lemma pos_vector_neg_if_neg (l : ι → Λ) (x : Λ →+ ℤ) (i : ι) : x (l i)
 begin
   intro hx,
   simp only [pos_vector, nonzero_sign, has_scalar.smul, id.def],
-  rw [if_neg (not_le.mpr hx), units.coe_neg, units.coe_one, neg_gsmul, one_gsmul],
+  rw [if_neg (not_le.mpr hx)], simp,
 end
 
 

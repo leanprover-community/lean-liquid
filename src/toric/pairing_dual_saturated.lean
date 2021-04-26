@@ -37,7 +37,7 @@ namespace submodule
 section comm_semiring
 
 variables [add_comm_monoid M]
-variables [comm_semiring R] [add_comm_monoid M] [semimodule R M]
+variables [comm_semiring R] [add_comm_monoid M] [module R M]
 
 variables {R} {M}
 
@@ -109,7 +109,7 @@ section field
 
 variables [add_comm_monoid M]
 
-lemma saturated_of_field [field S] [semimodule S M] (s : submodule S M) : saturated s :=
+lemma saturated_of_field [field S] [module S M] (s : submodule S M) : saturated s :=
 begin
   intros r hr m rms,
   rw [← one_smul S m, ← @inv_mul_cancel _ _ r, ← smul_eq_mul, smul_assoc],
@@ -130,13 +130,13 @@ section pairing
 section comm_semiring
 
 variables [add_comm_monoid M]
-variables [comm_semiring R] [semimodule R M]
+variables [comm_semiring R] [module R M]
 
-variables [comm_semiring S] [algebra R S] [semimodule S M] [is_scalar_tower R S M]
+variables [comm_semiring S] [algebra R S] [module S M] [is_scalar_tower R S M]
 
 variables
-  [add_comm_monoid N] [semimodule R N] [semimodule S N] [is_scalar_tower R S N]
-  [add_comm_monoid P] [semimodule R P] [semimodule S P] [is_scalar_tower R S P]
+  [add_comm_monoid N] [module R N] [module S N] [is_scalar_tower R S N]
+  [add_comm_monoid P] [module R P] [module S P] [is_scalar_tower R S P]
   (P₀ : submodule R P)
 /-- An S-pairing on the S-modules M, N, P is an S-linear map M -> Hom_S(N,P). -/
 @[derive has_coe_to_fun] def pairing := M →ₗ[S] N →ₗ[S] P
@@ -286,7 +286,7 @@ end pairing
 end comm_semiring
 
 variables [add_comm_group M] [add_comm_monoid N] [linear_ordered_add_comm_group P]
-variables [comm_semiring R] [semimodule R M] [semimodule R N] [semimodule R P]
+variables [comm_semiring R] [module R M] [module R N] [module R P]
 
 open pairing
 
