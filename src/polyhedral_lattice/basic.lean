@@ -17,9 +17,6 @@ The condition on the norm actually used is `generates_norm` below.
 noncomputable theory
 open_locale big_operators classical nnreal
 
--- no longer necessary after big mathlib refactor?
-local attribute [-instance] add_comm_group.int_module
-
 section move_this
 
 -- rewrite to include multiplicative version
@@ -27,17 +24,16 @@ section move_this
 def torsion_free (A : Type*) [add_comm_group A] : Prop :=
 ∀ (a : A) (ha : a ≠ 0) (n : ℕ), n • a = 0 → n = 0
 
--- TODO: remove [semimodule ℤ A]
--- TODO: multiplicative version once this is removed
+-- TODO: multiplicative version
 -- TODO: `is_basis` is being bundled by Anne so there's no point filling in proofs right now :-/
 
 /-- `finite_free M` is the statement that the abelian group `M` is free of finite rank (over `ℤ`).-/
-def finite_free (A : Type*) [add_comm_group A] [semimodule ℤ A] : Prop :=
+def finite_free (A : Type*) [add_comm_group A] : Prop :=
 ∃ (ι : Type) [fintype ι] (x : ι → A), is_basis ℤ x
 
 namespace finite_free
 
-variables {A : Type*} [add_comm_group A] [semimodule ℤ A] (ha : finite_free A)
+variables {A : Type*} [add_comm_group A] (ha : finite_free A)
 
 /-- If `ha : finite_free Λ` then `ha.basis_type` is the `ι` which indexes the basis
   `ha.basis : ι → Λ`. -/
@@ -152,18 +148,12 @@ lemma generates_norm_of_generates_nnnorm {x : ι → Λ}
 end generates_norm
 
 class polyhedral_lattice (Λ : Type*) extends semi_normed_group Λ :=
--- unfortunately, we need the following assumptions, for technical reasons
-[int_semimodule : semimodule ℤ Λ]
-[is_scalar_tower : is_scalar_tower ℕ ℤ Λ]
 -- now we get to the actual definition
 (finite_free : finite_free Λ)
 (polyhedral [] : ∃ (ι : Type) [fintype ι] (l : ι → Λ),
   generates_norm l ∧ ∀ i, nnnorm (l i) ≠ 0)
   -- this final condition ↑ ↑ ↑ ↑ effectively means that we have a `normed_group`
   -- but this condition is easier to check when forming quotients
-
-attribute [instance] polyhedral_lattice.int_semimodule
-                     polyhedral_lattice.is_scalar_tower
 
 /-- A morphism of polyhedral lattices is a norm-nonincreasing group homomorphism. -/
 structure polyhedral_lattice_hom (Λ₁ Λ₂ : Type*) [polyhedral_lattice Λ₁] [polyhedral_lattice Λ₂] :=

@@ -75,13 +75,12 @@ end
 @[simp] lemma bound_by.int_smul {C : ℝ≥0} (hf : f.bound_by C) (n : ℤ) :
   (n • f).bound_by (n.nat_abs * C) :=
 begin
-  rw ← gsmul_eq_smul,
   induction n,
   { simp only [int.nat_abs_of_nat, int.of_nat_eq_coe, gsmul_coe_nat, nsmul_eq_smul],
     apply bound_by.nat_smul, exact hf },
   { apply bound_by.neg,
-    show (↑(n+1) •ℤ f).bound_by (↑(-[1+ n].nat_abs) * C),
-    simp only [gsmul_coe_nat, int.nat_abs, nsmul_eq_smul],
+    show ((n+1) • f).bound_by (↑(-[1+ n].nat_abs) * C),
+    simp only [int.nat_abs, nsmul_eq_smul],
     apply bound_by.nat_smul, exact hf }
 end
 

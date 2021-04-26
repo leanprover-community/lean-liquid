@@ -152,11 +152,12 @@ begin
   apply int.induction_on d,
   { simp },
   { intros i hi,
-    simp [add_smul, ←hi],
-  },
+    simp only [add_smul, ←hi, free_abelian_group.lift.of,
+      add_monoid_hom.map_add, add_left_inj, one_gsmul], },
   { intros i hi,
-    simp at *,
-    simp [sub_smul, ←hi] }
+    simp only [add_monoid_hom.map_neg, neg_inj, int.cast_neg, neg_smul, int.cast_sub] at *,
+    simp only [sub_smul, ←hi, free_abelian_group.lift.of, one_gsmul,
+      add_monoid_hom.map_neg, add_monoid_hom.map_sub, neg_inj, neg_smul, sub_left_inj] }
 end
 
 namespace universal_map
@@ -269,6 +270,8 @@ begin
     split_ifs; simp },
 end
 
+-- set_option pp.universes true
+
 lemma from_functorial_map_to_functorial_map
   {m n : ℕ} (U : universal_map m n) :
   from_functorial_map (to_functorial_map U) = U :=
@@ -283,23 +286,14 @@ begin
       basic_universal_map.pre_eval_apply],
     congr',
     ext i j',
-    -- and it boils down to checking that a sum over j of `b i j` times `delta j j'`
-    -- is b i j'. Because of universe issues and typeclass issues this is a bit
-    -- bumpier than expected.
+    -- and it boils down to checking that a sum over j of `b i j` times `delta j j'` is b i j'.
     convert punit_equiv.right_inv (b i j'),
     apply _root_.congr_arg,
     change _ = (b i j') • _,
-    -- next 8 lines = hack to get around pi.has_scalar != smul_with_zero.to_has_scalar
-    convert fintype.sum_apply j' (λ (j : fin m),
-      @has_scalar.smul _ _ (smul_with_zero.to_has_scalar)
-      (b i j) (λ (j_1 : fin m), ite (j = j_1) (free_abelian_group.of punit.star) 0 : (ℤ[punit]^m))),
-    { ext j,
-      apply _root_.congr_fun,
-      congr' },
-    change b i j' • free_abelian_group.of punit.star =
-      ∑ (c : fin m), b i c • ite (c = j') (free_abelian_group.of punit.star) 0,
-    -- Now we're over that hump it is as easy as it sounded 10 lines ago.
-    simp_rw [smul_ite, smul_zero, finset.sum_ite_eq', finset.mem_univ, if_true] },
+    rw @fintype.sum_apply (fin m) _ (fin m) _ _ j'
+      (λ j, b i j • (λ (j_1 : fin m), ite (j = j_1) (free_abelian_group.of punit.star) 0)),
+    dsimp,
+    simp only [finset.mem_univ, if_true, finset.sum_ite_eq', gsmul_eq_mul, mul_ite, mul_zero], },
   { simp },
   { intros u v hu hv,
     simp * at * }
