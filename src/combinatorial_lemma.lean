@@ -3,7 +3,7 @@ import normed_group.NormedGroup
 import Mbar.basic
 import normed_group.pseudo_normed_group
 import partition
-import toric.lem97
+import lem97
 
 import hacks_and_tricks.by_exactI_hack
 
