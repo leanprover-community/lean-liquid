@@ -365,7 +365,7 @@ begin
   -- for preadditive categories
   show @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup) _ _ _ _ _ _ _ =
     @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup) _ _ _ _ _ _ _,
-  simp only [← gsmul_eq_smul, add_monoid_hom.map_gsmul, add_monoid_hom.gsmul_apply],
+  simp only [add_monoid_hom.map_gsmul, add_monoid_hom.gsmul_apply],
   haveI : g.suitable c₃ c₁ := suitable_of_mem_support ϕ _ _ g hg,
   haveI : g.suitable c₄ c₂ := suitable_of_mem_support ϕ _ _ g hg,
   congr' 1,
@@ -381,7 +381,7 @@ begin
   rintros ⟨g, hg⟩ -,
   show @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup) _ _ _ _ _ _ _ =
     @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup) _ _ _ _ _ _ _,
-  simp only [← gsmul_eq_smul, add_monoid_hom.map_gsmul, add_monoid_hom.gsmul_apply],
+  simp only [add_monoid_hom.map_gsmul, add_monoid_hom.gsmul_apply],
   haveI : g.suitable c₃ c₁ := suitable_of_mem_support ϕ _ _ g hg,
   haveI : g.suitable c₄ c₂ := suitable_of_mem_support ϕ _ _ g hg,
   congr' 1,
@@ -397,7 +397,7 @@ begin
   rintros ⟨g, hg⟩ -,
   show @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup) _ _ _ _ _ _ _ =
     @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup) _ _ _ _ _ _ _,
-  simp only [← gsmul_eq_smul, add_monoid_hom.map_gsmul, add_monoid_hom.gsmul_apply],
+  simp only [add_monoid_hom.map_gsmul, add_monoid_hom.gsmul_apply],
   haveI : g.suitable c₂ c₁ := suitable_of_mem_support ϕ _ _ g hg,
   congr' 1,
   apply basic_universal_map.T_inv_comp_eval_LCFP r V r'

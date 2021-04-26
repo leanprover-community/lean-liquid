@@ -232,7 +232,7 @@ begin
   clear hcomm,
   simp only [comp_add],
   congr' 1,
-  { dsimp only [category_theory.has_hom.hom.apply, BD_system_map_app_app, BD_map_app_f],
+  { dsimp only [quiver.hom.apply, BD_system_map_app_app, BD_map_app_f],
     exact nat_trans.congr_app (universal_map.res_comp_eval_CLCFPTinv₂ _ _ _ _ _ _ _ _ _ _ _ _) M },
   rw add_comm,
   congr' 1,

@@ -37,7 +37,7 @@ end
 
 @[simp] lemma function.gsmul_apply {X M : Type*} [add_comm_group M]
   (n : ℤ) (f : X → M) (x : X) :
-  (n •ℤ f) x = n •ℤ (f x) :=
+  (n • f) x = n • (f x) :=
 begin
   apply int.induction_on n,
   { simp only [zero_gsmul, pi.zero_apply] },
@@ -49,7 +49,7 @@ end
 
 @[simp] lemma add_monoid_hom.coe_gsmul {M₁ M₂ : Type*} [add_monoid M₁] [add_comm_group M₂]
   (n : ℤ) (f : M₁ →+ M₂) :
-  ⇑(n •ℤ f) = n •ℤ (f : M₁ → M₂) :=
+  ⇑(n • f) = n • (f : M₁ → M₂) :=
 begin
   apply int.induction_on n,
   { simp only [zero_gsmul, add_monoid_hom.coe_zero] },
@@ -84,8 +84,8 @@ section
 variables [add_monoid M₁] [add_comm_group M₂]
 
 @[simp] lemma gsmul_apply (n : ℤ) (f : (M₁ →+ M₂)) (m : M₁) :
-  (n •ℤ f) m = n •ℤ (f m) :=
-show eval m (n •ℤ f) = n •ℤ eval m f, from add_monoid_hom.map_gsmul _ _ _
+  (n • f) m = n • (f m) :=
+show eval m (n • f) = n • eval m f, from add_monoid_hom.map_gsmul _ _ _
 
 end
 

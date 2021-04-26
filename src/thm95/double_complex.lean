@@ -140,13 +140,13 @@ begin
     ← differential_object.complex_like.f_hom_apply, this],
   apply normed_group_hom.bound_by.sum,
   rintro i -,
-  simp only [gsmul_eq_smul],
   refine (normed_group_hom.bound_by.int_smul _ ((-1) ^ ↑i : ℤ)).le (_ : _ * 1 ≤ 1),
   { apply normed_group_hom.norm_noninc.bound_by_one,
     apply breen_deligne.data.complex.map_norm_noninc },
   { simp only [mul_one, int.nat_abs_pow, int.nat_abs_neg, int.nat_abs_one, one_pow, nat.cast_one] },
 end
 .
+
 lemma double_complex.d_two_norm_noninc (c : ℝ≥0) (p q : ℕ) :
   (@system_of_double_complexes.d (double_complex BD c_ r r' V Λ M N) c (p+2) (p+3) q).norm_noninc :=
 begin
@@ -165,7 +165,6 @@ begin
     ← differential_object.complex_like.f_hom_apply, this],
   apply normed_group_hom.bound_by.sum,
   rintro i -,
-  simp only [gsmul_eq_smul],
   refine (normed_group_hom.bound_by.int_smul _ ((-1) ^ ↑i : ℤ)).le (_ : _ * 1 ≤ 1),
   { apply normed_group_hom.norm_noninc.bound_by_one,
     apply breen_deligne.data.complex.map_norm_noninc },

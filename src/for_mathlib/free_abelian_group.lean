@@ -22,9 +22,6 @@ namespace int
 
 variables {A : Type*} [add_comm_group A]
 
--- TODO: should this use `•ℤ` instead? I find the notation a lot uglier
--- But from a Lean point of view it is maybe a lot better.
-
 /-- `int.cast_add_hom' a` is the additive group homomorphism `ℤ → A`
 that sends `1 : ℤ` to `a : A`. -/
 def cast_add_hom' (a : A) : ℤ →+ A :=
@@ -34,7 +31,7 @@ add_monoid_hom.mk' (λ n, n • a) $ λ m n, add_smul _ _ _
 lemma cast_add_hom'_apply (a : A) (n : ℤ) : cast_add_hom' a n = n • a := rfl
 
 @[simp] lemma cast_add_hom'_one (a : A) : cast_add_hom' a 1 = a :=
-by rw [cast_add_hom'_apply, ← gsmul_eq_smul, one_gsmul]
+by rw [cast_add_hom'_apply, one_smul]
 
 end int
 
@@ -133,7 +130,7 @@ by simp only [support, to_finsupp_of, finsupp.support_single_ne_zero (one_ne_zer
 by simp only [support, add_monoid_hom.map_neg, finsupp.support_neg]
 
 @[simp] lemma support_gsmul (k : ℤ) (h : k ≠ 0) (a : free_abelian_group X) :
-  support (k •ℤ a) = support a :=
+  support (k • a) = support a :=
 begin
   ext x,
   simp only [mem_support_iff, add_monoid_hom.map_gsmul],
@@ -142,7 +139,7 @@ end
 
 @[simp] lemma support_smul (k : ℤ) (h : k ≠ 0) (a : free_abelian_group X) :
   support (k • a) = support a :=
-by rw [← gsmul_eq_smul, support_gsmul k h]
+by rw [support_gsmul k h]
 
 @[simp] lemma support_smul_nat (k : ℕ) (h : k ≠ 0) (a : free_abelian_group X) :
   support (k • a) = support a :=
@@ -172,7 +169,7 @@ begin
       simp only [coeff, add_monoid_hom.coe_comp, finsupp.apply_add_hom_apply,
         function.comp_app] at hxa,
       simp only [support, add_monoid_hom.map_add, pi.add_apply, finsupp.mem_support_iff,
-        ne.def, finsupp.coe_add, hxa, zero_add, ← gsmul_eq_smul, add_monoid_hom.map_gsmul,
+        ne.def, finsupp.coe_add, hxa, zero_add, add_monoid_hom.map_gsmul,
         to_finsupp_of],
       rw [← finsupp.single_add_hom_apply, ← add_monoid_hom.map_gsmul, gsmul_one],
       simpa only [int.cast_id, finsupp.single_eq_same, finsupp.single_add_hom_apply] },
@@ -181,7 +178,7 @@ begin
       simp only [coeff, add_monoid_hom.coe_comp, finsupp.apply_add_hom_apply,
         function.comp_app, ne.def] at hxa hya,
       simp only [support, add_monoid_hom.map_add, pi.add_apply, finsupp.mem_support_iff,
-        ne.def, finsupp.coe_add, ← gsmul_eq_smul, add_monoid_hom.map_gsmul, to_finsupp_of],
+        ne.def, finsupp.coe_add, add_monoid_hom.map_gsmul, to_finsupp_of],
       rwa [← finsupp.single_add_hom_apply, ← add_monoid_hom.map_gsmul, gsmul_one,
         finsupp.single_add_hom_apply, finsupp.single_apply, if_neg, add_zero],
       rintro rfl, contradiction } }
@@ -216,7 +213,7 @@ begin
   apply (equiv_finsupp X).injective,
   simp only [equiv_finsupp_apply],
   rw [← finsupp.sum_single (to_finsupp X a), finsupp.sum],
-  simp only [(to_finsupp X).map_sum, ← gsmul_eq_smul, add_monoid_hom.map_gsmul, to_finsupp_of],
+  simp only [(to_finsupp X).map_sum, add_monoid_hom.map_gsmul, to_finsupp_of],
   apply finset.sum_congr rfl,
   intros x hx,
   simp only [← finsupp.single_add_hom_apply, ← add_monoid_hom.map_gsmul, gsmul_one, coeff,
@@ -291,20 +288,20 @@ def add_subgroup (h : free_predicate Q) : add_subgroup (free_abelian_group X) :=
   add_mem' := λ a b ha hb, h.add ha hb,
   neg_mem' := λ a ha, h.neg ha }
 
-lemma gsmul (h : free_predicate Q) (n : ℤ) (ha : Q a) : Q (n •ℤ a) :=
+lemma gsmul (h : free_predicate Q) (n : ℤ) (ha : Q a) : Q (n • a) :=
 add_subgroup.gsmul_mem h.add_subgroup ha n
 
-lemma of_gsmul (h : free_predicate Q) (n : ℤ) (hn : n ≠ 0) (ha : Q (n •ℤ a)) : Q a :=
+lemma of_gsmul (h : free_predicate Q) (n : ℤ) (hn : n ≠ 0) (ha : Q (n • a)) : Q a :=
 by { rw h at ha ⊢, simpa only [support_gsmul n hn] using ha }
 
-lemma gsmul_iff (h : free_predicate Q) (n : ℤ) (hn : n ≠ 0) : Q (n •ℤ a) ↔ Q a :=
+lemma gsmul_iff (h : free_predicate Q) (n : ℤ) (hn : n ≠ 0) : Q (n • a) ↔ Q a :=
 ⟨h.of_gsmul n hn, h.gsmul n⟩
 
 lemma smul (h : free_predicate Q) (n : ℤ) (ha : Q a) : Q (n • a) :=
 by { rw ← gsmul_eq_smul, apply h.gsmul _ ha }
 
 lemma of_smul (h : free_predicate Q) (n : ℤ) (hn : n ≠ 0) (ha : Q (n • a)) : Q a :=
-by rwa [← gsmul_eq_smul, h.gsmul_iff n hn] at ha
+by rwa [h.gsmul_iff n hn] at ha
 
 lemma smul_iff (h : free_predicate Q) (n : ℤ) (hn : n ≠ 0) : Q (n • a) ↔ Q a :=
 ⟨h.of_smul n hn, h.smul n⟩

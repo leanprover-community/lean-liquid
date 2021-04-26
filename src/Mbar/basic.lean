@@ -222,17 +222,14 @@ add_monoid_hom.mk' coe_fn $ coe_add
   ⇑(∑ i in s, F i) = ∑ i in s, (F i) :=
 show coe_hom (∑ i in s, F i) = ∑ i in s, coe_hom (F i), from add_monoid_hom.map_sum _ _ _
 
-@[simp] lemma coe_gsmul (n : ℤ) (F : Mbar r' S) : ⇑(n •ℤ F) = n •ℤ F :=
-show coe_hom (n •ℤ F) = n •ℤ coe_hom F, from add_monoid_hom.map_gsmul _ _ _
+@[simp] lemma coe_gsmul (n : ℤ) (F : Mbar r' S) : ⇑(n • F) = n • F :=
+show coe_hom (n • F) = n • coe_hom F, from add_monoid_hom.map_gsmul _ _ _
 
 @[simp] lemma coe_smul (n : ℤ) (F : Mbar r' S) : ⇑(n • F) = n • F :=
-begin
-  rw [← gsmul_eq_smul, coe_gsmul], ext,
-  simp only [pi.smul_apply, function.gsmul_apply, smul_eq_mul, gsmul_int_int]
-end
+coe_gsmul _ _
 
 @[simp] lemma coe_nsmul (n : ℕ) (F : Mbar r' S) : ⇑(n • F) = n • F :=
-coe_gsmul n F
+by simpa only [gsmul_coe_nat] using coe_gsmul ↑n F
 
 @[simp] lemma nnnorm_smul (N : ℤ) (F : Mbar r' S) : ∥N • F∥₊ = nnnorm N * ∥F∥₊ :=
 begin

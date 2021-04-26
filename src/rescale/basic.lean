@@ -9,8 +9,6 @@ This file is little more than the definition of the type alias.
 noncomputable theory
 open_locale big_operators classical nnreal
 
-local attribute [-instance] add_comm_group.int_module
-
 @[nolint unused_arguments]
 def rescale (N : ℝ≥0) (V : Type*) := V
 

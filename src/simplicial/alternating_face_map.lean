@@ -21,13 +21,13 @@ namespace alt_face_map_cocomplex
 
 def coboundary (n : ℕ) :
   M.obj (mk n) ⟶ M.obj (mk $ n+1) :=
-∑ i : fin (n+2), (-1)^(i:ℕ) •ℤ (M.map $ δ i)
+∑ i : fin (n+2), (-1:ℤ)^(i:ℕ) • (M.map $ δ i)
 
 lemma coboundary_zero :
   coboundary M 0 = (M.map $ δ 0) - (M.map $ δ 1) :=
 begin
-  simp only [coboundary, fin.sum_univ_succ, fin.default_eq_zero, fin.coe_zero, one_gsmul,
-    fin.coe_succ, univ_unique, neg_gsmul, pow_one, fin.succ_zero_eq_one, sum_singleton,
+  simp only [coboundary, fin.sum_univ_succ, fin.default_eq_zero, fin.coe_zero, one_smul,
+    fin.coe_succ, univ_unique, neg_smul, pow_one, fin.succ_zero_eq_one, sum_singleton,
     pow_zero, sub_eq_add_neg]
 end
 
@@ -36,17 +36,17 @@ lemma coboundary_coboundary (n : ℕ) : coboundary M n ≫ coboundary M (n+1) = 
 begin
   let s : finset (fin (n+2) × fin (n+3)) := univ.filter (λ ij, (ij.2:ℕ) ≤ ij.1),
   calc coboundary M n ≫ coboundary M (n+1)
-      = comp_hom (∑ (i:fin (n+2)), (-1)^(i:ℕ) •ℤ (M.map $ δ i))
-                 (∑ (i:fin (n+3)), (-1)^(i:ℕ) •ℤ (M.map $ δ i)) : rfl
-  ... = ∑ (i : fin (n+2)) (j : fin (n+3)), (-1)^(i+j:ℕ) •ℤ ((M.map $ δ i) ≫ (M.map $ δ j)) : _
-  ... = ∑ ij : fin (n+2) × fin (n+3), (-1)^(ij.1+ij.2:ℕ) •ℤ ((M.map $ δ ij.1) ≫ (M.map $ δ ij.2)) :
+      = comp_hom (∑ (i:fin (n+2)), (-1:ℤ)^(i:ℕ) • (M.map $ δ i))
+                 (∑ (i:fin (n+3)), (-1:ℤ)^(i:ℕ) • (M.map $ δ i)) : rfl
+  ... = ∑ (i : fin (n+2)) (j : fin (n+3)), (-1:ℤ)^(i+j:ℕ) • ((M.map $ δ i) ≫ (M.map $ δ j)) : _
+  ... = ∑ ij : fin (n+2) × fin (n+3), (-1:ℤ)^(ij.1+ij.2:ℕ) • ((M.map $ δ ij.1) ≫ (M.map $ δ ij.2)) :
         by rw [← univ_product_univ, sum_product]
-  ... =   (∑ ij in s,  (-1:ℤ)^(ij.1+ij.2:ℕ) •ℤ ((M.map $ δ ij.1) ≫ (M.map $ δ ij.2)))
-        + (∑ ij in sᶜ, (-1:ℤ)^(ij.1+ij.2:ℕ) •ℤ ((M.map $ δ ij.1) ≫ (M.map $ δ ij.2))) :
+  ... =   (∑ ij in s,  (-1:ℤ)^(ij.1+ij.2:ℕ) • ((M.map $ δ ij.1) ≫ (M.map $ δ ij.2)))
+        + (∑ ij in sᶜ, (-1:ℤ)^(ij.1+ij.2:ℕ) • ((M.map $ δ ij.1) ≫ (M.map $ δ ij.2))) :
         by rw sum_add_sum_compl
   ... = 0 : _,
   { simp only [map_sum, map_gsmul, add_monoid_hom.sum_apply, gsmul_apply,
-      ← gsmul_mul, gsmul_sum, ← pow_add],
+      smul_sum, pow_add, mul_smul],
     refl, },
   erw [← eq_neg_iff_add_eq_zero, ← finset.sum_neg_distrib],
   -- The sums are equal because we can give a bijection

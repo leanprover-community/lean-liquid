@@ -19,8 +19,6 @@ noncomputable theory
 
 open_locale direct_sum big_operators classical
 
-local attribute [-instance] add_comm_group.int_module
-
 namespace polyhedral_lattice
 
 variables {ι : Type} [fintype ι] (Λ : ι → Type*)
