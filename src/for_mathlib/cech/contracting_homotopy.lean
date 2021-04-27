@@ -106,9 +106,71 @@ begin
     exact fin.succ_ne_zero _ }
 end
 
---theorem is_contracting_homotopy_zero :
---  (conerve_complex f M).d 0 1 ≫ contracting_homotopy f M g splitting 0 + -- THE NEXT LINE NEEDS FIXING
-  --M.map (augmentation_obj_iso f).inv.op ≫ M.map f.op ≫ M.map _ = 𝟙 _ := sorry
+-- The contracting homotopy in degree -1
+theorem is_contracting_homotopy_zero :
+  (conerve_complex f M).d 0 1 ≫ contracting_homotopy f M g splitting 0 +
+  M.map ((augmentation_obj_iso f).hom ≫ f ≫ g ≫ (augmentation_obj_iso f).inv).op = 𝟙 _ :=
+begin
+  delta conerve_complex,
+  dsimp only [cosimplicial_object.cocomplex, cosimplicial_object.to_cocomplex, cochain_complex.mk'],
+  split_ifs,
+  swap, finish,
+  dsimp only [cosimplicial_object.coboundary],
+  simp only [preadditive.sum_comp, fin.sum_univ_succ, fin.default_eq_zero],
+  simp only [category_theory.category.comp_id,
+    add_zero,
+    fin.coe_zero,
+    fin.sum_univ_zero,
+    fin.coe_one,
+    one_gsmul,
+    category_theory.eq_to_hom_refl,
+    category_theory.functor.comp_map,
+    --category_theory.cech_obj_map,
+    fin.coe_succ,
+    category_theory.op_comp,
+    neg_gsmul,
+    pow_one,
+    fin.succ_zero_eq_one,
+    category_theory.category.assoc,
+    category_theory.functor.right_op_map,
+    category_theory.functor.map_comp,
+    pow_zero,
+    finset.sum_congr,
+    category_theory.preadditive.add_comp,
+    category_theory.preadditive.neg_comp],
+  delta contracting_homotopy,
+  simp_rw ← M.map_comp,
+  rw ← add_zero (𝟙 _),
+  swap, apply_instance,
+  rw add_assoc,
+  congr' 1,
+  { erw ← M.map_id,
+    congr' 1,
+    simp_rw ← helper.op_comp,
+    dsimp only [functor.right_op],
+    change _ = (𝟙 _).op,
+    congr' 1,
+    tidy
+    },
+  { rw neg_add_eq_zero,
+    congr' 1,
+    simp_rw ← helper.op_comp,
+    congr' 1,
+    dsimp only [augmentation_obj_iso],
+    ext,
+    simp,
+    split_ifs,
+    { refl },
+    { exfalso,
+      apply h_1,
+      apply_fun equiv.ulift,
+      change fin.succ_above _ j.down = 0,
+      rw fin.succ_above_below,
+      sorry,
+      sorry },
+    simp [splitting],
+  }
+end
 
 end cech
 
