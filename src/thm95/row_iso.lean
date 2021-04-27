@@ -254,8 +254,14 @@ lemma mul_rescale_iso_row_one_strict
   (x : (((data.mul N).obj BD).system (rescale_constants c_ N') r V r').obj (op (Hom Λ M)) c i) :
   ∥(mul_rescale_iso_row_one BD c_ r V N N' h Λ M).hom x∥ = ∥x∥ :=
 begin
-  sorry
+  apply normed_group_hom.norm_eq_of_isometry,
+  refine isometry.comp (isometry.comp _ _) _,
+  { sorry; apply NormedGroup.iso_isometry_of_norm_noninc, },
+  { dsimp only,
+    apply CLCTinv.map_iso_isometry, },
+  { apply CLCTinv.map_iso_isometry, },
 end
+.
 
 lemma row_map_eq_sum_comp
   (N : ℕ) [fact (0 < N)] (N' : ℝ≥0) (h : N' = N)
@@ -270,6 +276,7 @@ begin
   unfreezingI { subst h },
   dsimp only [iso.refl_inv],
   erw category.id_comp,
+  ext i : 2,
   sorry
 end
 
