@@ -6,7 +6,7 @@ open category_theory
 
 universe u
 
-variables (X B : Profinite.{u}) (f : X ⟶ B)
+variables (X : Profinite.{u})
 
 lemma nhds_of_limit {J : Type u} [small_category J] (F : J ⥤ Profinite.{u})
   (a : (limit_cone F).cone.X) : nhds a =
@@ -20,22 +20,13 @@ begin
   simpa [← this, filter.comap_comap],
 end
 
-def homeo_of_iso {X Y : Profinite} (f : X ≅ Y) : X ≃ₜ Y :=
-{ to_fun := f.hom,
-  inv_fun := f.inv,
-  left_inv := λ x, by {change (f.hom ≫ f.inv) x = x, simp},
-  right_inv := λx, by {change (f.inv ≫ f.hom) x = x, simp},
-  continuous_to_fun := f.hom.continuous,
-  continuous_inv_fun := f.inv.continuous }
-
-lemma nhds_of_homeo {X Y : Type*} [topological_space X] [topological_space Y]
-  (f : X ≃ₜ Y) (a : X) : nhds a = filter.comap f (nhds $ f a) := by simp
-
 lemma nhds_eq_infi (a : X) : nhds a = ⨅ (I : X.clopen_cover), filter.comap I.proj (nhds $ I.proj a) :=
 begin
-  let f := homeo_of_iso (as_iso ((limit_cone (X.diagram ⋙ of_Fintype)).is_limit.lift X.Fincone)),
-  have := nhds_of_limit (X.diagram ⋙ of_Fintype) (f a),
-  rw [nhds_of_homeo f, this, filter.comap_infi],
+  let f := homeo_of_iso
+    (as_iso ((limit_cone (X.diagram ⋙ Fintype_to_Profinite)).is_limit.lift X.Fincone)),
+  have := nhds_of_limit (X.diagram ⋙ Fintype_to_Profinite) (f a),
+  have hf : nhds a = filter.comap f (nhds $ f a), by simp,
+  rw [hf, this, filter.comap_infi],
   congr,
   funext i,
   let P := Π (I : X.clopen_cover), I,
@@ -71,21 +62,6 @@ begin
   { rintro ⟨V, ⟨hxV, V_op, -⟩, hUV : V ⊆ S⟩,
     rw mem_nhds_sets_iff,
     exact ⟨V, hUV, V_op, hxV⟩ }
-end
-
-lemma pullback_map_injective (I : B.clopen_cover) :
-  function.injective (clopen_cover.map I.pullback_le_rel : I.pullback f → I) :=
-begin
-  intros U V h,
-  apply clopen_cover.eq_of_le,
-  intros a ha,
-  have hU := clopen_cover.map_spec (I.pullback_le_rel : clopen_cover.le_rel f _ _) U ha,
-  rw h at hU,
-  rcases (clopen_cover.pullback_spec V) with ⟨W,h1,h2⟩,
-  rw h1,
-  convert hU,
-  apply clopen_cover.map_unique,
-  refine le_of_eq h1,
 end
 
 end Profinite

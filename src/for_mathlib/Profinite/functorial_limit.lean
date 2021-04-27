@@ -1,8 +1,9 @@
 import for_mathlib.arrow
 import for_mathlib.Fintype.basic
 import for_mathlib.Profinite.limits
+import for_mathlib.Profinite.basic
+import for_mathlib.Fintype.basic
 import topology.locally_constant.basic
-import category_theory.Fintype
 import category_theory.limits.functor_category
 
 /-!
@@ -22,6 +23,13 @@ noncomputable theory
 
 namespace Profinite
 
+/--
+This is the type whose terms are decompositions of `X` into
+disjoint unions of nonempty clopen sets.
+This is endowed with a coercion to type, so one can write
+`U : I` given `I : X.clopen_cover`, meaning that `U` is one of the sets
+appearing in the clopen cover `I`.
+-/
 @[ext]
 structure clopen_cover (X : Profinite.{u}) :=
 (sets : set (set X))
@@ -33,6 +41,10 @@ namespace clopen_cover
 
 variable {X : Profinite.{u}}
 
+/-- 
+Construct a term of `X.clopen_cover` given a nonempty clopen set of `X` whose
+complement is nonempty.
+-/
 def of_clopen {U : set X} :
   is_clopen U → U.nonempty → Uᶜ.nonempty → X.clopen_cover := λ h1 h2 h3,
 { sets := {U,Uᶜ},
@@ -103,6 +115,7 @@ begin
   rw [hh U hx, hh W h2],
 end
 
+/-- The "trivial" clopen cover. -/
 def top : X.clopen_cover :=
 if h : _root_.nonempty X then
 ⟨{⊤},by simp,begin
@@ -130,9 +143,13 @@ else
 instance : has_top X.clopen_cover := ⟨top⟩
 instance : inhabited X.clopen_cover := ⟨⊤⟩
 
+/-- 
+The "canonical" term of `clopen_cover.of_clopen`, whose underlying set is the given clopen set. 
+-/
 def of_clopen.mk {U : set X} {h1 : _root_.is_clopen U} {h2 : U.nonempty} {h3 : Uᶜ.nonempty} :
   of_clopen h1 h2 h3 := ⟨U, or.inl rfl⟩
 
+/-- The coarsest common refinement of two clopen covers. -/
 def common (I J : X.clopen_cover) : X.clopen_cover :=
 { sets := { U | (U : set X).nonempty ∧ ∃ (A : I) (B : J), (U : set X) = A ⊓ B },
   clopen := begin
@@ -156,6 +173,11 @@ def common (I J : X.clopen_cover) : X.clopen_cover :=
     subst this,
   end }
 
+/-- 
+`le_rel f I J`, where `f : X ⟶ Y`, `I : X.clopen_cover` and
+`J : Y.clopen_cover` means, mathematically, that
+`I` refines the pullback of `J` with respect to `f`.
+-/
 def le_rel {X Y : Profinite.{u}} (f : X ⟶ Y)
   (I : X.clopen_cover) (J : Y.clopen_cover) : Prop :=
 ∀ U : I, ∃ V : J, (U : set X) ≤ f ⁻¹' V
@@ -173,6 +195,9 @@ begin
   exact false.elim (h ⟨f x⟩),
 end
 
+/-- 
+Given `h : le_refl f I J`, this provides the canonical map `I → J`.
+-/
 def map {X Y : Profinite.{u}} {f : X ⟶ Y} {I : X.clopen_cover}
   {J : Y.clopen_cover} (h : le_rel f I J) : I → J :=
 λ U, classical.some (h U)
@@ -317,6 +342,7 @@ section pullback
 
 variables {Y : Profinite.{u}} (f : Y ⟶ X)
 
+/-- The pullback of a clopen cover w.r.t. a morphism. -/
 def pullback : X.clopen_cover → Y.clopen_cover := λ I,
 { sets := { A | A.nonempty ∧ ∃ U : I, A = f ⁻¹' U },
   clopen := begin
@@ -411,6 +437,21 @@ begin
   refine ⟨V,le_refl _⟩,
 end
 
+lemma pullback_map_injective {B : Profinite} (f : X ⟶ B) (I : B.clopen_cover) :
+  function.injective (clopen_cover.map I.pullback_le_rel : I.pullback f → I) :=
+begin
+  intros U V h,
+  apply clopen_cover.eq_of_le,
+  intros a ha,
+  have hU := clopen_cover.map_spec (I.pullback_le_rel : clopen_cover.le_rel f _ _) U ha,
+  rw h at hU,
+  rcases (clopen_cover.pullback_spec V) with ⟨W,h1,h2⟩,
+  rw h1,
+  convert hU,
+  apply clopen_cover.map_unique,
+  refine le_of_eq h1,
+end
+
 end pullback
 
 section proj
@@ -420,6 +461,7 @@ Given `I : X.cl`, `proj I` is the function `X → I` sending `x` to the unique
 memeber of `I` in which it's contained.
 -/
 
+/-- The function underlying the canonical projection `X ⟶ I` for `I : X.clopen_cover`. -/
 def proj_fun (I : X.clopen_cover) : X → I := λ x, classical.some (I.cover x)
 
 lemma proj_fun_spec (I : X.clopen_cover) (x : X) : x ∈ (proj_fun I x : set X) :=
@@ -463,7 +505,7 @@ begin
     simp [proj_fun_spec] }
 end
 
--- A locally constant version of proj_fun
+/-- A locally constant version of proj_fun -/
 def proj (I : X.clopen_cover) : locally_constant X I :=
 { to_fun := proj_fun _,
   is_locally_constant := begin
@@ -484,12 +526,12 @@ begin
   apply proj_fun_spec,
 end
 
-def π (I : X.clopen_cover) : X ⟶ of_Fintype.obj (Fintype.of I) :=
+/-- A version of `I.proj` as a morphism in `Profinite`. -/
+def π (I : X.clopen_cover) : X ⟶ Fintype_to_Profinite.obj (Fintype.of I) :=
 { to_fun := proj _,
   continuous_to_fun := locally_constant.continuous _ }
 
--- This shows the injectivity of the map
--- x ↦ (proj I x)_I
+/-- This lemma shows the injectivity of the map `x ↦ (proj I x)_I` -/
 lemma eq_of_forall_proj_eq {x y : X} :
   (∀ I : X.clopen_cover, proj I x = proj I y) → x = y :=
 begin
@@ -513,6 +555,7 @@ begin
   exact hU2,
 end
 
+/-- This lemma shows the surjectivity of the map from `X` to the limit of `I : X.clopen_cover`. -/
 lemma exists_of_compat (Us : Π (I : X.clopen_cover), I)
   (compat : ∀ {I J : X.clopen_cover} (h : I ≤ J), map h (Us I) = (Us J)) :
   ∃ x : X, ∀ I : X.clopen_cover, proj I x = Us I :=
@@ -538,6 +581,7 @@ section limit_rep
 
 variables (X : Profinite.{u})
 
+/-- The diagram indexed by `X.clopen_cover` whose limit is isomorphic to `X`. -/
 def diagram : X.clopen_cover ⥤ Fintype.{u} :=
 { obj := λ I, Fintype.of I,
   map := λ I J h, clopen_cover.map $ le_of_hom h,
@@ -545,7 +589,8 @@ def diagram : X.clopen_cover ⥤ Fintype.{u} :=
   map_comp' := λ I J K f g,
     by {ext1, simp only [Fintype.comp_apply], erw ← clopen_cover.map_comp, refl, } }
 
-def Fincone : limits.cone (X.diagram ⋙ of_Fintype) :=
+/-- The limit cone exhibiting `X` as a limit of `X.diagram`. -/
+def Fincone : limits.cone (X.diagram ⋙ Fintype_to_Profinite) :=
 { X := X,
   π :=
   { app := λ I, I.π,
@@ -559,7 +604,8 @@ def Fincone : limits.cone (X.diagram ⋙ of_Fintype) :=
       apply clopen_cover.proj_fun_spec,
     end } }
 
-instance is_iso_lift : is_iso ((limit_cone (X.diagram ⋙ of_Fintype)).is_limit.lift X.Fincone) :=
+instance is_iso_lift :
+  is_iso ((limit_cone (X.diagram ⋙ Fintype_to_Profinite)).is_limit.lift X.Fincone) :=
 is_iso_of_bijective _
 begin
   split,
@@ -568,7 +614,7 @@ begin
     intros I,
     apply_fun (λ u, u.val I) at h,
     exact h },
-  { let C := (limit_cone (X.diagram ⋙ of_Fintype)).cone,
+  { let C := (limit_cone (X.diagram ⋙ Fintype_to_Profinite)).cone,
     rintros (x : C.X.to_Top),
     have := clopen_cover.exists_of_compat (λ I : X.clopen_cover, x.val I) (λ I J f, _),
     { rcases this with ⟨x,hx⟩,
@@ -580,16 +626,28 @@ begin
       refl } }
 end
 
+/-- 
+The isomorphism of cones between `X.Fincone` and 
+`limit_cone (X.diagram ⋙ Fintype_to_Profinite)`. 
+-/
 def Fincone_iso : X.Fincone ≅ (limit_cone _).cone :=
 limits.cones.ext (as_iso $ (limit_cone _).is_limit.lift _) (λ _, rfl)
 
+/-- 
+`X.Fincone` is indeed a limit cone. 
+-/
 def Fincone_is_limit : limits.is_limit X.Fincone :=
 limits.is_limit.of_iso_limit (limit_cone_cone_is_limit _) X.Fincone_iso.symm
 
 variables {X} {Y : Profinite.{u}}
 
-def change_cone (f : Y ⟶ X) (C : limits.cone (Y.diagram ⋙ of_Fintype)) :
-  limits.cone (X.diagram ⋙ of_Fintype) :=
+/-- 
+Change a cone over `Y.diagram ⋙ Fintype_to_Profinite` 
+with respect to a morphism `f : X ⟶ Y`.
+This is used to obtain the functorial properties of the `X.Fincone` constructions.
+-/
+def change_cone (f : Y ⟶ X) (C : limits.cone (Y.diagram ⋙ Fintype_to_Profinite)) :
+  limits.cone (X.diagram ⋙ Fintype_to_Profinite) :=
 { X := C.X,
   π :=
   { app := λ I, C.π.app (clopen_cover.pullback f I) ≫
@@ -600,7 +658,7 @@ def change_cone (f : Y ⟶ X) (C : limits.cone (Y.diagram ⋙ of_Fintype)) :
       dsimp [diagram] at *,
       have h : clopen_cover.pullback f _ ≤ _ := clopen_cover.pullback_mono (le_of_hom g),
       erw [← C.w (hom_of_le h)],
-      dsimp [of_Fintype],
+      dsimp [Fintype_to_Profinite],
       simp_rw [← clopen_cover.map_comp],
       refl,
     end } }
@@ -618,7 +676,8 @@ begin
   apply clopen_cover.proj_fun_spec,
 end
 
-def change_cone_id (C : limits.cone (X.diagram ⋙ of_Fintype)) :
+/-- Changing a cone by an identity morphism results in a cone isomorphic to the given one. -/
+def change_cone_id (C : limits.cone (X.diagram ⋙ Fintype_to_Profinite)) :
   change_cone (𝟙 X) C ≅ C :=
 limits.cones.ext (eq_to_iso rfl)
 begin
@@ -631,8 +690,9 @@ begin
   simp,
 end
 
+/-- The compatibility of `change_cone` with respect to composition of morphisms. -/
 def change_cone_comp {Z : Profinite.{u}} (g : Z ⟶ Y) (f : Y ⟶ X)
-  (C : limits.cone (Z.diagram ⋙ of_Fintype)) :
+  (C : limits.cone (Z.diagram ⋙ Fintype_to_Profinite)) :
   change_cone (g ≫ f) C ≅ change_cone f (change_cone g C) :=
 limits.cones.ext (eq_to_iso rfl)
 begin
@@ -654,6 +714,12 @@ namespace arrow
 
 variable (f : arrow Profinite.{u})
 
+/-- 
+A gadget used to show that any arrow in `Profinite` can be expressed as a 
+limit of arrows of `Fintype`s. 
+This will be used as the category indexing the limit.
+-/
+@[nolint has_inhabited_instance]
 structure index_cat : Type u :=
 (left : f.left.clopen_cover)
 (right : f.right.clopen_cover)
@@ -663,6 +729,8 @@ namespace index_cat
 
 variable {f}
 
+/-- Morphisms for `index_cat`. -/
+@[nolint has_inhabited_instance]
 structure hom (A B : index_cat f) : Type u :=
 (left : A.left ≤ B.left)
 (right : A.right ≤ B.right)
@@ -675,6 +743,10 @@ instance : category (index_cat f) :=
   comp_id' := λ A B f, by {cases f, refl},
   assoc' := λ A B C D f g h, by {cases f, cases g, cases h, refl} }
 
+/-- 
+Make a term of `index_cat` given a clopen cover of a target of the arrow.
+This is done fuunctorially.
+-/
 def mk_right : f.right.clopen_cover ⥤ index_cat f :=
 { obj := λ I,
   { left := clopen_cover.pullback f.hom I,
@@ -684,6 +756,10 @@ def mk_right : f.right.clopen_cover ⥤ index_cat f :=
   { left := clopen_cover.pullback_mono $ le_of_hom f,
     right := le_of_hom f } }
 
+/-- 
+Make a term of `index_cat` given a clopen cover of a source of the arrow.
+This is done fuunctorially.
+-/
 def mk_left : f.left.clopen_cover ⥤ index_cat f :=
 { obj := λ I,
   { left := I,
@@ -693,6 +769,9 @@ def mk_left : f.left.clopen_cover ⥤ index_cat f :=
   { left := le_of_hom f,
     right := clopen_cover.le_rel_top _ _ } }
 
+/-- 
+A combination of `mk_left` and `mk_right`.
+-/
 def make : f.left.clopen_cover ⥤ f.right.clopen_cover ⥤ index_cat f :=
 { obj := λ I,
   { obj := λ J,
@@ -717,6 +796,9 @@ def make : f.left.clopen_cover ⥤ f.right.clopen_cover ⥤ index_cat f :=
 
 end index_cat
 
+/-- 
+The diagram whose limit is a given arrow in `Profinite`.
+-/
 def diagram : index_cat f ⥤ arrow Fintype.{u} :=
 { obj := λ A,
   { left := Fintype.of A.left,
@@ -750,15 +832,23 @@ def diagram : index_cat f ⥤ arrow Fintype.{u} :=
       refl },
   end }
 
-abbreviation diagram' : index_cat f ⥤ arrow Profinite := diagram f ⋙ of_Fintype.map_arrow
+/-- An abbreviation for `diagram f ⋙ Fintype_to_Profinite.map_arrow`. -/
+abbreviation diagram' : index_cat f ⥤ arrow Profinite := diagram f ⋙ Fintype_to_Profinite.map_arrow
 
+/-- The diagram of profinite sets obtained from the sources of `diagram'`. -/
 abbreviation left_diagram : index_cat f ⥤ Profinite := diagram' f ⋙ arrow.left_func
 
+/-- The diagram of profinite sets obtained from the targets of `diagram'`. -/
 abbreviation right_diagram : index_cat f ⥤ Profinite := diagram' f ⋙ arrow.right_func
 
+/-- The usual limit cone over `diagram' f`. -/
 def limit_cone : limits.limit_cone (diagram' f) :=
 arrow.limit_cone _ (limit_cone $ left_diagram _) (limit_cone $ right_diagram _)
 
+/-- 
+The cone which we want to show is a limit cone of `diagram' f`.
+Its cone point is the given arrow `f`.
+-/
 def Fincone : limits.cone (diagram' f) :=
 { X := f,
   π :=
@@ -767,17 +857,17 @@ def Fincone : limits.cone (diagram' f) :=
       right := clopen_cover.π _,
       w' := begin
         ext1 x,
-        dsimp [diagram, clopen_cover.π, of_Fintype],
+        dsimp [diagram, clopen_cover.π, Fintype_to_Profinite],
         erw clopen_cover.proj_map_comm,
       end },
     naturality' := begin
       intros Is Js f,
       ext1;
       ext1 x,
-      { dsimp [clopen_cover.π, diagram, of_Fintype],
+      { dsimp [clopen_cover.π, diagram, Fintype_to_Profinite],
         erw clopen_cover.proj_map_comm,
         refl },
-      { dsimp [clopen_cover.π, diagram, of_Fintype],
+      { dsimp [clopen_cover.π, diagram, Fintype_to_Profinite],
         erw clopen_cover.proj_map_comm,
         refl }
     end } }.
@@ -793,7 +883,7 @@ begin
     let II := index_cat.mk_left.obj I,
     apply_fun (λ f, f II) at h,
     exact h },
-  { intros x,
+ { intros x,
     cases x with x hx,
     dsimp at *,
     let Us : Π (I : f.left.clopen_cover), I := λ U, x (index_cat.mk_left.obj U),
@@ -862,14 +952,16 @@ end
 -- sanity check
 example : is_iso ((limit_cone f).is_limit.lift (Fincone f)) := by apply_instance
 
+/-- The isomorphism between `Fincone f` and the cone of the limit cone `(limit_cone f)`. -/
 def Fincone_iso : Fincone f ≅ (limit_cone f).cone :=
 limits.cones.ext (as_iso ((limit_cone f).is_limit.lift (Fincone f))) (λ I, rfl)
 
+/-- `Fincone f` is indeed a limit cone. -/
 def Fincone_is_limit : limits.is_limit (Fincone f) :=
 limits.is_limit.of_iso_limit (limit_cone f).is_limit (Fincone_iso f).symm
 
 /--
-If `f` is a cover, then the terms in the diagram whose limit is `f` are all covers as well.
+If `f` is surjective, then the terms in the diagram whose limit is `f` are all surjective as well.
 -/
 lemma surjective_of_surjective (surj : function.surjective f.hom) (I : index_cat f) :
   function.surjective ((diagram f).obj I).hom :=
