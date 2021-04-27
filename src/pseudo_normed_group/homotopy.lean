@@ -2,6 +2,8 @@ import pseudo_normed_group.system_of_complexes
 import rescale.Tinv
 /-!
 
+=== jmc: I think we can delete this entire file
+
 *TODO*: find someone who can explain what is going on in this file. There
 are no docstrings, sorried data and false assumptions.
 
@@ -87,6 +89,7 @@ def BD_system_map [∀ i, (f.f i).suitable (c_₂ i) (c_₁ i)] :
   end }
 .
 
+/-
 variables {f g}
 
 def homotopy₂ (a₁ a₂ b₁ b₂ : ℕ → ℝ≥0)
@@ -129,24 +132,26 @@ def homotopy [∀ i, (f.f i).suitable (c_₂ i) (c_₁ i)] [∀ i, (g.f i).suita
   homotopy ((BD_map f c_₁ c_₂ r V c).app M) ((BD_map g c_₁ c_₂ r V c).app M) :=
 homotopy₂ h r V M _ _ _ _
 
+-/
+
 end homotopy
 
 end breen_deligne
 
-namespace breen_deligne
+-- namespace breen_deligne
 
-universe variables v
+-- universe variables v
 
-variables (BD : breen_deligne.package)
-variables (c_ c' : ℕ → ℝ≥0)
-variables [BD.data.suitable c_] [package.adept BD c_ c']
-variables (r : ℝ≥0) (V : NormedGroup.{v}) [normed_with_aut r V] [fact (0 < r)]
-variables {r' : ℝ≥0} [fact (0 < r')] [fact (r' ≤ 1)] (c : ℝ≥0)
-variables (M : (ProFiltPseuNormGrpWithTinv.{u} r')ᵒᵖ)
-variables (N : ℕ)
+-- variables (BD : breen_deligne.package)
+-- variables (c_ c' : ℕ → ℝ≥0)
+-- variables [BD.data.suitable c_] [package.adept BD c_ c']
+-- variables (r : ℝ≥0) (V : NormedGroup.{v}) [normed_with_aut r V] [fact (0 < r)]
+-- variables {r' : ℝ≥0} [fact (0 < r')] [fact (r' ≤ 1)] (c : ℝ≥0)
+-- variables (M : (ProFiltPseuNormGrpWithTinv.{u} r')ᵒᵖ)
+-- variables (N : ℕ)
 
-def homotopy_σπ :=
-homotopy.{u v} (data.homotopy_mul BD.data BD.homotopy N)
-  (c' * c_) (rescale_constants c_ (2^N)) r V c M
+-- def homotopy_σπ :=
+-- homotopy.{u v} (data.homotopy_mul BD.data BD.homotopy N)
+--   (c' * c_) (rescale_constants c_ (2^N)) r V c M
 
-end breen_deligne
+-- end breen_deligne

@@ -335,6 +335,57 @@ lemma suitable_of_le (f : universal_map m n) [hf : f.suitable c₂ c₃] (h1 : c
   f.suitable c₁ c₄ :=
 hf.le _ _ _ _ h1 h2
 
+noncomputable
+def factor (f : universal_map m n) : ℝ≥0 :=
+(f.support.product finset.univ).sup (λ gi, (∑ j, ↑(gi.1 gi.2 j).nat_abs))
+
+lemma le_factor (f : universal_map m n) (g : basic_universal_map m n)
+  (hg : g ∈ f.support) (i : fin n) :
+  (∑ j, ↑(g i j).nat_abs) ≤ f.factor :=
+begin
+  transitivity, swap,
+  refine @finset.le_sup _ _ _ (f.support.product (finset.univ : finset (fin n)))
+     (λ gi, (∑ j, ↑(gi.1 gi.2 j).nat_abs)) (g, i) _,
+  { simp only [and_true, finset.mem_univ, finset.mem_product, hg] },
+  { exact le_rfl }
+end
+
+lemma suitable_of_factor_le (f : universal_map m n) (hf : f.factor ≤ c₂ * c₁⁻¹) :
+  f.suitable c₁ c₂ :=
+begin
+  intros g hg i,
+  by_cases h : c₁ = 0,
+  { simp only [h, zero_le', mul_zero] },
+  rw [mul_comm, nnreal.mul_le_iff_le_inv h, mul_comm],
+  exact (le_factor _ _ hg _).trans hf
+end
+
+lemma factor_le_of_suitable (f : universal_map m n) [hf : f.suitable c₁ c₂] [h : fact (0 < c₁)] :
+  f.factor ≤ c₂ * c₁⁻¹ :=
+begin
+  refine finset.sup_le _,
+  simp only [and_true, finset.mem_univ, finset.mem_product],
+  rintro ⟨g, i⟩ hg,
+  rw [mul_comm, ← nnreal.mul_le_iff_le_inv h.1.ne', mul_comm],
+  apply hf _ hg,
+end
+
+@[simp] lemma factor_neg (f : universal_map m n) : (-f).factor = f.factor :=
+by simp only [factor, support_neg]
+
+lemma factor_add (f₁ f₂ : universal_map m n) : factor (f₁ + f₂) ≤ max f₁.factor f₂.factor :=
+begin
+  refine finset.sup_le _,
+  simp only [prod.forall, and_true, finset.mem_univ, finset.mem_product, le_max_iff],
+  intros g i hg,
+  replace hg := support_add f₁ f₂ hg,
+  simp only [finset.mem_union] at hg,
+  refine hg.imp _ _; { intro h, apply le_factor, exact h },
+end
+
+lemma factor_sub (f₁ f₂ : universal_map m n) : factor (f₁ - f₂) ≤ max f₁.factor f₂.factor :=
+by simpa only [factor_neg, sub_eq_add_neg] using factor_add f₁ (-f₂)
+
 end universal_map
 
 namespace basic_universal_map
@@ -606,7 +657,7 @@ end data
 namespace universal_map
 
 def very_suitable (f : universal_map m n) (r r' : out_param ℝ≥0) (c₁ c₂ : ℝ≥0) : Prop :=
-∃ (N k : ℕ) (c_ : ℝ≥0), f.bound_by N ∧ f.suitable c₁ c_ ∧ r ^ k * N ≤ 1 ∧ c_ ≤ r' ^ k * c₂
+∃ (N b : ℕ) (c_ : ℝ≥0), f.bound_by N ∧ f.suitable c₁ c_ ∧ r ^ b * N ≤ 1 ∧ c_ ≤ r' ^ b * c₂
 
 attribute [class] very_suitable
 
@@ -616,15 +667,15 @@ variables (f : universal_map m n)
 
 instance suitable [hr' : fact (r' ≤ 1)] [hf : f.very_suitable r r' c₁ c₂] : f.suitable c₁ c₂ :=
 begin
-  unfreezingI { rcases hf with ⟨N, k, c_, hN, hf, hr, H⟩ },
+  unfreezingI { rcases hf with ⟨N, b, c_, hN, hf, hr, H⟩ },
   exact hf.le _ _ _ _ le_rfl (H.trans $ fact.out _)
 end
 
 instance mul_left (f : universal_map m n) [h : f.very_suitable r r' c₁ c₂] :
   f.very_suitable r r' (c * c₁) (c * c₂) :=
 begin
-  unfreezingI { rcases h with ⟨N, k, c_, hN, hf, hr, H⟩ },
-  refine ⟨N, k, c * c_, hN, infer_instance, hr, _⟩,
+  unfreezingI { rcases h with ⟨N, b, c_, hN, hf, hr, H⟩ },
+  refine ⟨N, b, c * c_, hN, infer_instance, hr, _⟩,
   rw mul_left_comm,
   exact mul_le_mul' le_rfl H
 end
@@ -632,6 +683,13 @@ end
 instance mul_right (f : universal_map m n) [h : f.very_suitable r r' c₁ c₂] :
   f.very_suitable r r' (c₁ * c) (c₂ * c) :=
 by { rw [mul_comm _ c, mul_comm _ c], apply universal_map.very_suitable.mul_left }
+
+lemma zero : (0 : universal_map m n).very_suitable r r' c₁ c₂ :=
+begin
+  refine ⟨0, 0, c₂, zero_bound_by 0, infer_instance, _, _⟩,
+  { simp only [nat.cast_zero, zero_le', mul_zero] },
+  { simp only [one_mul, pow_zero] }
+end
 
 end very_suitable
 
@@ -651,6 +709,17 @@ variables (BD : data) (c_ : ℕ → ℝ≥0)
 instance suitable [hr' : fact (r' ≤ 1)] [h : BD.very_suitable r r' c_] :
   BD.suitable c_ :=
 { universal_suitable := λ i j, by apply_instance }
+
+lemma of_succ (h : ∀ i, universal_map.very_suitable (BD.d (i + 1) i) r r' (c_ (i + 1)) (c_ i)) :
+  BD.very_suitable r r' c_ :=
+{ universal_very_suitable :=
+  begin
+    intros i j,
+    by_cases hij : i = j + 1,
+    { rw hij, exact h _ },
+    { rw BD.d_eq_zero, swap, exact hij,
+      exact universal_map.very_suitable.zero r r' (c_ i) (c_ j) }
+  end }
 
 end very_suitable
 
@@ -682,11 +751,18 @@ end
 end σπ
 
 class adept (BD : out_param package) (c_ : out_param $ ℕ → ℝ≥0) (c' : ℕ → ℝ≥0) : Prop :=
-(one_le : ∀ i, fact (1 ≤ c' i))
-(suitable : BD.data.suitable (c' * c_)) -- do we need `very_suitable` here?
-(htpy_suitable : ∀ j i, (BD.homotopy.h j i).suitable (rescale_constants c_ 2 j) (c' i * c_ i))
+(htpy_suitable' :
+  ∀ i, (BD.homotopy.h i (i+1)).suitable (rescale_constants c_ 2 i) (c' (i+1) * c_ (i+1)))
 
-attribute [instance] adept.one_le adept.suitable adept.htpy_suitable
+instance adept.htpy_suitable (BD : package) (c_ c' : ℕ → ℝ≥0) [adept BD c_ c'] (j i : ℕ) :
+  (BD.homotopy.h j i).suitable (rescale_constants c_ 2 j) (c' i * c_ i) :=
+begin
+  by_cases hij : i = j + 1,
+  { rw hij, apply adept.htpy_suitable' },
+  { rw BD.homotopy.h_eq_zero,
+    { apply_instance },
+    { exact hij } }
+end
 
 namespace adept
 
@@ -694,14 +770,14 @@ open category_theory
 
 variables (BD : package) (c_ c' : ℕ → ℝ≥0) [adept BD c_ c']
 
-instance mul_adept_suitable (N : ℕ) (f : (data.mul N).obj BD.data ⟶ BD.data) (i : ℕ) (c₁ : ℝ≥0)
-  [hf : universal_map.suitable c₁ (c_ i) (f.f i)] :
-  universal_map.suitable c₁ ((c' * c_) i) (f.f i) :=
-begin
-  refine hf.le _ _ _ _ le_rfl _,
-  dsimp,
-  apply fact.out
-end
+-- instance mul_adept_suitable (N : ℕ) (f : (data.mul N).obj BD.data ⟶ BD.data) (i : ℕ) (c₁ : ℝ≥0)
+--   [hf : universal_map.suitable c₁ (c_ i) (f.f i)] :
+--   universal_map.suitable c₁ ((c' * c_) i) (f.f i) :=
+-- begin
+--   refine hf.le _ _ _ _ le_rfl _,
+--   dsimp,
+--   apply fact.out
+-- end
 
 instance homotopy_pow'_suitable (j i : ℕ) :
   Π N, ((BD.data.homotopy_pow' BD.homotopy N).h j i).suitable

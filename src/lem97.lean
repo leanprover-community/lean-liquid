@@ -4,14 +4,18 @@ import linear_algebra.dual
 import algebra.ordered_ring
 
 import polyhedral_lattice.basic
-import toric.is_inj_nonneg
-import toric.pairing_dual_saturated
-import toric.Gordan
+import for_mathlib.Gordan
 
 import for_mathlib.add_monoid_hom
 
 /-!
-In this file we state and prove 9.7 of [Analytic].
+
+# Lemma 9.7 of [Analytic]
+
+In this file we state and prove 9.7 of [Analytic]. The proof in the pdf is short, but
+combinatorics can be fiddly. However it is almost certain that this file could be
+a lot shorter.
+
 -/
 
 open_locale nnreal big_operators classical
@@ -56,8 +60,10 @@ begin
   dsimp [x'],
   rw [sub_nonpos.symm, sub_eq_add_neg, ← add_monoid_hom.neg_apply, ← finset.sum_neg_distrib,
     add_monoid_hom.finset_sum_apply, add_monoid_hom.finset_sum_apply, ← finset.sum_add_distrib],
-  simp [← add_monoid_hom.add_apply, ← nsmul_eq_smul, ← gsmul_coe_nat, ← neg_gsmul,
-    gsmul_eq_smul, ← add_smul],
+  simp only [← add_monoid_hom.add_apply, ← nsmul_eq_smul, ← gsmul_coe_nat, ← neg_gsmul,
+     gsmul_eq_smul, ← add_smul],
+  simp only [add_monoid_hom.coe_add, add_monoid_hom.coe_smul, pi.add_apply, pi.neg_apply,
+     int.coe_nat_mod, pi.smul_apply, add_monoid_hom.coe_neg],
   apply finset.sum_nonpos,
   intros z hz,
   replace hz : z ∈ explicit_dual_set l,
@@ -65,6 +71,7 @@ begin
     exact submodule.span_mono (set.singleton_subset_iff.mpr hz) },
   replace hz : 0 ≤ z (l i) := rfl.mpr hz i,
   simp only [- add_neg_le_iff_le_add', tactic.ring.add_neg_eq_sub, smul_sub],
+  rw sub_smul,
   rw [← int.coe_nat_mod, sub_le_iff_le_add, zero_add],
   simp only [has_scalar.smul, gsmul_int_int],
   exact (mul_le_mul_of_nonneg_right (int.coe_nat_le.mpr (nat.mod_le (f z) N)) hz),
@@ -145,9 +152,8 @@ begin
   rw [pos_vector, nonzero_sign],
   simp only [has_scalar.smul, add_monoid_hom.map_gsmul, gsmul_int_int],
   split_ifs,
-  { rwa [units.coe_one, one_mul] },
-  { rw [units.coe_neg_one, neg_one_mul],
-    refine (neg_pos.mpr (not_le.mp h)).le }
+  { convert h, simp },
+  { simp, linarith }
 end
 
 lemma smul_to_explicit_dual_set (l : ι → Λ) (x : Λ →+ ℤ) :
@@ -159,7 +165,8 @@ lemma pos_vector_id_if_nonneg (l : ι → Λ) (x : Λ →+ ℤ) (i : ι) : 0 ≤
 begin
   intro hx,
   simp only [pos_vector, nonzero_sign, has_scalar.smul, id.def],
-  rw [if_pos hx, units.coe_one, one_gsmul],
+  rw [if_pos hx],-- units.coe_one, one_gsmul],
+  simp,
 end
 
 lemma pos_vector_neg_if_neg (l : ι → Λ) (x : Λ →+ ℤ) (i : ι) : x (l i) < 0 →
@@ -167,7 +174,7 @@ lemma pos_vector_neg_if_neg (l : ι → Λ) (x : Λ →+ ℤ) (i : ι) : x (l i)
 begin
   intro hx,
   simp only [pos_vector, nonzero_sign, has_scalar.smul, id.def],
-  rw [if_neg (not_le.mpr hx), units.coe_neg, units.coe_one, neg_gsmul, one_gsmul],
+  rw [if_neg (not_le.mpr hx)], simp,
 end
 
 
@@ -197,11 +204,10 @@ begin
 end
 
 /-
-jmc: I don't know exactly which version of the two lemmas below
-will be easier to prove, `lem97` or `lem97'`.
-The first one is closer to [Analytic], but the second one is easier to use.
-Mathematically they are indistinguishable.
-fae: I am going for the first, `lem97`. I left `lem97'` there, at any rate.
+
+The remainder of this file is proofs of two versions of Lemma 9.7, namely
+`lem97` and `lem97'`.
+
 -/
 
 

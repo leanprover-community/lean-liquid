@@ -1,4 +1,4 @@
-import breen_deligne.suitable
+import breen_deligne.constants
 
 open_locale nnreal
 
@@ -85,21 +85,26 @@ def eg : package := ⟨eg.BD, eg.h⟩
 
 namespace eg
 
-variables (r r' : ℝ≥0)
+noncomputable theory
+
+variables (r r' : ℝ≥0) [fact (r < 1)]
 
 /-- Very suitable sequence of constants for the example Breen--Deligne package -/
-def c_ (r r' : ℝ≥0) : ℕ → ℝ≥0 :=
-sorry
+def c_ : ℕ → ℝ≥0 :=
+eg.data.c_ r r'
 
 instance very_suitable : eg.data.very_suitable r r' (c_ r r') :=
-sorry
+eg.data.c_very_suitable _ _
+
+instance [fact (0 < r')] (n : ℕ) : fact (0 < c_ r r' n) :=
+data.c__pos _ _ _ _
 
 /-- Adept sequence of constants for the example Breen--Deligne package -/
-def c' (c_ : ℕ → ℝ≥0) : ℕ → ℝ≥0 :=
-sorry
+def c' : ℕ → ℝ≥0 :=
+eg.c' (eg.c_ r r')
 
-instance adept (c_ : ℕ → ℝ≥0) : package.adept eg c_ (c' c_) :=
-sorry
+instance adept [fact (0 < r')] [fact (r' ≤ 1)] : package.adept eg (c_ r r') (c' r r') :=
+eg.c'_adept _
 
 end eg
 

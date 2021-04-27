@@ -331,8 +331,8 @@ lemma pfpng_ctu_smul_nat : ∀ (n : ℕ), pfpng_ctu (λ x : M, n • x)
                 exact (pfpng_ctu_id M).add (pfpng_ctu_smul_nat n) (λ c, ⟨c, λ x, x.2⟩) }
 
 lemma pfpng_ctu_smul_int : ∀ (n : ℤ), pfpng_ctu (λ x : M, n • x)
-| (n:ℕ)  := pfpng_ctu_smul_nat M n
-| -[1+n] := (pfpng_ctu_smul_nat M (n+1)).neg
+| (n:ℕ)  := by simpa only [gsmul_coe_nat] using pfpng_ctu_smul_nat M n
+| -[1+n] := by simpa only [gsmul_neg_succ_of_nat] using (pfpng_ctu_smul_nat M (n + 1)).neg
 
 end pfpng_ctu
 
@@ -454,6 +454,7 @@ variables {ι : Type*} (M : ι → Type*) [Π i, profinitely_filtered_pseudo_nor
 instance pi_topology (c : ℝ≥0) : topological_space (filtration (Π i, M i) c) :=
 topological_space.induced (filtration_pi_equiv M c) $ infer_instance
 
+@[simps apply symm_apply]
 def filtration_pi_homeo (c : ℝ≥0) :
   filtration (Π i, M i) c ≃ₜ Π i, filtration (M i) c :=
 { to_fun := λ x i, ⟨x.1 i, x.2 i⟩,
@@ -582,9 +583,19 @@ def pi_lift {N : Type*} [profinitely_filtered_pseudo_normed_group N]
 { bound' :=
   begin
     have := λ i, (f i).bound,
-    choose C hC using this,
-    -- now use the sup of the `C i`
-    sorry
+    choose Cᵢ hC₀ using this,
+    use supr Cᵢ,
+    intros c x hx,
+    rw forall_swap at hC₀,
+    replace hC₀ := hC₀ c,
+    rw forall_swap at hC₀,
+    replace hC₀ := hC₀ x,
+    rw forall_swap at hC₀,
+    replace hC₀ := hC₀ hx,
+    rename_var x i at hC₀,
+    dsimp,
+    change (λ i, (f i) x) ∈  filtration (Π (i : ι), M i) (supr Cᵢ * c),
+    sorry,
   end,
   continuous' := sorry,
   .. add_monoid_hom.mk_to_pi (λ i, (f i).to_add_monoid_hom) }

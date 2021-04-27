@@ -42,10 +42,10 @@ theorem eval_CLCFPTinv₂_rescale
   [fact (c₂ ≤ r' * c₁)] [fact (c₄ ≤ r' * c₃)]
   [ϕ.suitable c₃ c₁] [ϕ.suitable c₄ c₂]
   (N : ℝ≥0) [fact (c₂ * N⁻¹ ≤ r' * (c₁ * N⁻¹))] [fact (c₄ * N⁻¹ ≤ r' * (c₃ * N⁻¹))]
-  (M) [profinitely_filtered_pseudo_normed_group_with_Tinv r' M] :
+  (M : ProFiltPseuNormGrpWithTinv r') :
   arrow.mk ((eval_CLCFPTinv₂ r V r' c₁ c₂ c₃ c₄ ϕ).app (op (of r' (rescale N M)))) =
   arrow.mk ((eval_CLCFPTinv₂ r V r' (c₁ * N⁻¹) (c₂ * N⁻¹) (c₃ * N⁻¹) (c₄ * N⁻¹) ϕ).app
-    (op (of r' M))) :=
+    (op M)) :=
 begin
   dsimp only [universal_map.eval_CLCFPTinv₂, _root_.id, NormedGroup.equalizer.map_nat_app],
   refine NormedGroup.equalizer.map_congr _ _ rfl rfl rfl rfl,

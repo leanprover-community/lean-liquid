@@ -12,7 +12,7 @@ def comp_hom : (X ⟶ Y) →+ (Y ⟶ Z) →+ (X ⟶ Z) :=
 add_monoid_hom.mk' (λ f, left_comp _ f) $
   λ f₁ f₂, add_monoid_hom.ext $ λ g, (right_comp _ g).map_add f₁ f₂
 
-@[simp] lemma gsmul_comp (f : X ⟶ Y) (g : Y ⟶ Z) (n : ℤ) : (n •ℤ f) ≫ g = n •ℤ (f ≫ g) :=
+@[simp] lemma gsmul_comp (f : X ⟶ Y) (g : Y ⟶ Z) (n : ℤ) : (n • f) ≫ g = n • (f ≫ g) :=
 begin
   apply n.induction_on,
   { simp },
@@ -22,7 +22,7 @@ begin
     simpa [sub_gsmul] using hi }
 end
 
-@[simp] lemma comp_gsmul (f : X ⟶ Y) (g : Y ⟶ Z) (n : ℤ) : f ≫ (n •ℤ g) = n •ℤ (f ≫ g) :=
+@[simp] lemma comp_gsmul (f : X ⟶ Y) (g : Y ⟶ Z) (n : ℤ) : f ≫ (n • g) = n • (f ≫ g) :=
 begin
    apply n.induction_on,
   { simp },

@@ -9,8 +9,6 @@ import facts.nnreal
 noncomputable theory
 open_locale big_operators classical nnreal
 
-local attribute [-instance] add_comm_group.int_module
-
 namespace rescale
 
 variables {N : ℝ≥0} {V : Type*}

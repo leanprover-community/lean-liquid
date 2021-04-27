@@ -49,7 +49,7 @@ such as `thm95.Cech_nerve` and `breen_deligne.package.System`. -/
 def Hom (M : ProFiltPseuNormGrpWithTinv r') :
   PolyhedralLattice ⥤ (ProFiltPseuNormGrpWithTinv r')ᵒᵖ :=
 { obj := λ Λ, op (Hom Λ M),
-  map := λ Λ₁ Λ₂ f, has_hom.hom.op $
+  map := λ Λ₁ Λ₂ f, quiver.hom.op $
   { to_fun := λ g, g.comp f.to_add_monoid_hom,
     map_zero' := add_monoid_hom.zero_comp _,
     map_add' := λ g₁ g₂, add_monoid_hom.add_comp _ _ _,
@@ -65,8 +65,8 @@ def Hom (M : ProFiltPseuNormGrpWithTinv r') :
       exact aux
     end,
     map_Tinv' := λ g, by { ext l, refl } },
-  map_id' := λ Λ, by { rw [← op_id, has_hom.hom.op_inj.eq_iff], ext, refl },
-  map_comp' := by { intros, rw [← op_comp, has_hom.hom.op_inj.eq_iff], ext, refl } }
+  map_id' := λ Λ, by { rw [← op_id, quiver.hom.op_inj.eq_iff], ext, refl },
+  map_comp' := by { intros, rw [← op_comp, quiver.hom.op_inj.eq_iff], ext, refl } }
 
 end PolyhedralLattice
 

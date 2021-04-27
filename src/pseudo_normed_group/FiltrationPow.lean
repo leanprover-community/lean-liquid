@@ -1,5 +1,9 @@
 import pseudo_normed_group.breen_deligne
 import normed_group.NormedGroup
+
+import for_mathlib.Profinite
+import for_mathlib.curry
+
 /-!
 
 # Constructions on the filtration on a profinitely filtered pseudo-normed abelian group
@@ -65,12 +69,42 @@ open profinitely_filtered_pseudo_normed_group
 open profinitely_filtered_pseudo_normed_group_with_Tinv
 
 /-- The functor that sends `A` to `A^n` -/
-@[simps]
+@[simps obj map]
 def Pow (n : ℕ) : Profinite ⥤ Profinite :=
 { obj := λ A, of (A^n),
   map := λ A B f, {
     to_fun := λ x j, f (x j),
     continuous_to_fun := continuous_pi $ λ j, f.2.comp (continuous_apply j) } }
+
+@[simps]
+def Pow_Pow_X (N n : ℕ) (X) : (Pow N ⋙ Pow n).obj X ≅ (Pow (N * n)).obj X :=
+Profinite.iso_of_homeo _ _ $
+{ to_equiv := (equiv.curry _ _ _).symm.trans (((equiv.prod_comm _ _).trans fin_prod_fin_equiv).arrow_congr (equiv.refl X)),
+  continuous_to_fun :=
+  begin
+    apply continuous_pi,
+    intro ij,
+    let k := ((equiv.prod_comm _ _).trans fin_prod_fin_equiv).symm ij,
+    convert (@continuous_apply _ (λ i, X) _ k.2).comp (@continuous_apply _ (λ i, (X^N)) _ k.1),
+  end,
+  continuous_inv_fun :=
+  begin
+    apply continuous_pi,
+    intro i,
+    refine continuous_pi _,
+    intro j,
+    exact continuous_apply _,
+  end }
+.
+
+@[simps hom inv]
+def Pow_mul (N n : ℕ) : Pow (N * n) ≅ Pow N ⋙ Pow n :=
+nat_iso.of_components (λ X, (Pow_Pow_X N n X).symm)
+begin
+  intros X Y f,
+  ext x i j,
+  refl,
+end
 
 @[simps]
 def profinitely_filtered_pseudo_normed_group_with_Tinv.Tinv₀_hom
@@ -101,6 +135,10 @@ by { ext, refl }
 theorem Tinv₀_comp_res {r' : ℝ≥0} (c₁ c₂ c₃ c₄ : ℝ≥0)
   [fact (c₁ ≤ r' * c₂)] [fact (c₃ ≤ r' * c₄)] [fact (c₂ ≤ c₄)] [fact (c₁ ≤ c₃)] :
   Tinv₀ c₁ c₂ ≫ res r' c₂ c₄ = res r' c₁ c₃ ≫ Tinv₀ c₃ c₄ := rfl
+
+def pi_iso (r' c : ℝ≥0) (M : ProFiltPseuNormGrpWithTinv r') (N : ℕ) :
+  Profinite.of (filtration (M^N) c) ≅ Profinite.of ((filtration M c)^N) :=
+Profinite.iso_of_homeo _ _ $ filtration_pi_homeo _ _
 
 end Filtration
 
@@ -138,6 +176,12 @@ lemma cast_le_vcomp_Tinv (r' c₁ c₂ c₃ : ℝ≥0)
   [fact (c₁ ≤ c₂)] [fact (c₂ ≤ c₃)] [fact (c₁ ≤ r' * c₂)] [fact (c₂ ≤ r' * c₃)] (n : ℕ) :
   cast_le r' c₁ c₂ n ≫ Tinv r' c₂ c₃ n = Tinv r' c₁ c₂ n ≫ cast_le r' c₂ c₃ n :=
 by { ext, refl }
+
+@[simps hom inv]
+def mul_iso (r' c : ℝ≥0) (M : ProFiltPseuNormGrpWithTinv r') (N n : ℕ) :
+  (FiltrationPow r' c n).obj (ProFiltPseuNormGrpWithTinv.of r' (↥M ^ N)) ≅
+  (FiltrationPow r' c (N * n)).obj M :=
+(Pow n).map_iso (Filtration.pi_iso r' c M N) ≪≫ ((Pow_mul N n).symm.app $ ((Filtration r').obj c).obj _)
 
 end FiltrationPow
 
@@ -196,16 +240,42 @@ begin
     (Tinv r' c₃ c₄ n).app M (ϕ.eval_png₀ M c₁ c₃ x),
   ext j,
   dsimp only [eval_png₀],
-  simp only [eval_png_apply, subtype.coe_mk, pow_incl_apply,
-    FiltrationPow.Tinv_app, FiltrationPow_map_to_fun_coe, Pow_map_to_fun, Tinv₀_hom_to_fun,
+  simp only [eval_png_apply, subtype.coe_mk, pow_incl_apply, continuous_map.coe_mk,
+    FiltrationPow.Tinv_app, FiltrationPow_map_to_fun_coe, Pow_map, Tinv₀_hom_to_fun,
     Tinv₀_coe, profinitely_filtered_pseudo_normed_group_hom.map_sum],
   apply fintype.sum_congr,
   intro i,
   simp only [← gsmul_eq_smul],
   exact ((profinitely_filtered_pseudo_normed_group_hom.to_add_monoid_hom _).map_gsmul _ _).symm
 end
+.
+
+lemma mul_iso_eval_FP (N : ℕ) [ϕ.suitable c₂ c₁] (M) :
+  (FiltrationPow.mul_iso.{u u} r' c₂ M N m).inv ≫
+    (basic_universal_map.eval_FP r' c₂ c₁ ϕ).app (ProFiltPseuNormGrpWithTinv.of r' (M ^ N)) =
+  (basic_universal_map.eval_FP r' c₂ c₁ ((basic_universal_map.mul N) ϕ)).app M ≫
+    (FiltrationPow.mul_iso.{u u} r' c₁ M N n).inv :=
+begin
+  ext x i j,
+  iterate 4 { erw [@coe_comp Profinite.{u} _ Profinite.category_theory.concrete_category] },
+  dsimp only [mul_iso_inv, eval_FP, mul, eval_png₀, continuous_map.coe_mk,
+    functor.map_iso_inv, add_monoid_hom.mk'_apply, matrix.reindex_linear_equiv_apply,
+    matrix.reindex_apply, nat_iso.app_inv, iso.symm_inv, Pow_mul_hom, Pow_Pow_X_inv_to_fun,
+    Filtration.pi_iso, iso_of_homeo, Pow_map, filtration_pi_homeo_symm_apply, pow_incl],
+  simp only [equiv.curry_apply, function.curry, equiv.arrow_congr_apply, subtype.coe_mk,
+    equiv.coe_refl, function.comp, _root_.id, equiv.symm_symm, equiv.trans_apply,
+    equiv.prod_comm_apply, prod.swap, eval_png, add_monoid_hom.mk_to_pi,
+    add_monoid_hom.coe_mk, matrix.minor_apply, equiv.symm_apply_apply, matrix.kronecker],
+  simp only [add_monoid_hom.coe_comp, equiv.symm_apply_apply, add_monoid_hom.apply_apply,
+    function.comp_app, const_smul_hom_apply, add_monoid_hom.mk_from_pi,
+    add_monoid_hom.finset_sum_apply],
+  rw [← fin_prod_fin_equiv.sum_comp, ← finset.univ_product_univ, finset.sum_product,
+      finset.sum_comm],
+  simp only [equiv.symm_apply_apply, matrix.one_apply, boole_mul, ite_smul, zero_smul,
+    finset.sum_ite_eq, finset.mem_univ, if_true],
+  convert finset.sum_apply j (finset.univ : finset (fin m)) _,
+end
 
 end basic_universal_map
-end breen_deligne
 
-open breen_deligne
+end breen_deligne

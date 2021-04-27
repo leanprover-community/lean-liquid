@@ -284,6 +284,18 @@ lemma mul_apply (N : ℕ) (f : basic_universal_map m n) :
   mul N f = matrix.reindex_linear_equiv fin_prod_fin_equiv fin_prod_fin_equiv (matrix.kronecker 1 f) :=
 rfl
 
+lemma mul_injective (N : ℕ) (hN : 0 < N) : function.injective (@mul m n N) :=
+begin
+  intros f g H,
+  ext i j,
+  rw function.funext_iff at H,
+  specialize H (fin_prod_fin_equiv (⟨0, hN⟩, i)),
+  rw function.funext_iff at H,
+  specialize H (fin_prod_fin_equiv (⟨0, hN⟩, j)),
+  dsimp [basic_universal_map.mul, matrix.kronecker] at H,
+  simpa only [one_mul, equiv.symm_apply_apply, matrix.one_apply_eq] using H,
+end
+
 lemma mul_comp (N : ℕ) (g : basic_universal_map m n) (f : basic_universal_map l m) :
   mul N (comp g f) = comp (mul N g) (mul N f) :=
 begin
@@ -661,15 +673,20 @@ lemma mem_support_mul (N : ℕ) (hN : 0 < N) (f : universal_map m n) (g) :
   g ∈ (mul N f).support ↔ ∃ g', g' ∈ f.support ∧ g = basic_universal_map.mul N g' :=
 begin
   apply free_abelian_group.mem_support_map,
-  clear f g,
-  intros f g H,
-  ext i j,
-  rw function.funext_iff at H,
-  specialize H (fin_prod_fin_equiv (⟨0, hN⟩, i)),
-  rw function.funext_iff at H,
-  specialize H (fin_prod_fin_equiv (⟨0, hN⟩, j)),
-  dsimp [basic_universal_map.mul, matrix.kronecker] at H,
-  simpa only [one_mul, equiv.symm_apply_apply, matrix.one_apply_eq] using H,
+  exact basic_universal_map.mul_injective N hN
+end
+
+@[simp]
+lemma coeff_mul (N : ℕ) (hN : 0 < N) (f : universal_map m n) (g : basic_universal_map m n) :
+  coeff (basic_universal_map.mul N g) (mul N f) = coeff g f :=
+begin
+  simp only [← add_monoid_hom.comp_apply],
+  rw [← add_monoid_hom.comp_hom_apply_apply],
+  congr' 1, clear f, ext f,
+  simp only [comp_hom_apply_apply, function.comp_app, coe_comp, mul, coeff, to_finsupp_of,
+    map_of', finsupp.apply_add_hom_apply, finsupp.single_apply,
+    (basic_universal_map.mul_injective N hN).eq_iff],
+  convert rfl
 end
 
 end mul

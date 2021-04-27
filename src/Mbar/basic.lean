@@ -139,14 +139,69 @@ instance : has_neg (Mbar r' S) := ⟨neg⟩
 @[simp] lemma coe_sub (F G : Mbar r' S) : ⇑(F - G : Mbar r' S) = F - G := rfl
 @[simp] lemma coe_neg (F : Mbar r' S) : ⇑(-F : Mbar r' S) = -F := rfl
 
+/-- Tailored scalar multiplication by natural numbers. -/
+def nsmul (N : ℕ) (F : Mbar r' S) : Mbar r' S :=
+{ to_fun := λ s n, N • F s n,
+  coeff_zero' := λ s, by simp only [F.coeff_zero, smul_zero],
+  summable' := λ s,
+  begin
+    simp only [nsmul_eq_mul, int.nat_abs_mul, nat.cast_mul, mul_assoc, int.nat_abs_of_nat,
+      int.nat_cast_eq_coe_nat, nnreal.coe_nat_abs],
+    by_cases hN : N = 0,
+    { simpa only [hN, nat.cast_zero, zero_mul] using summable_zero },
+    simp only [← nnreal.summable_coe, nnreal.coe_mul],
+    rw [← summable_mul_left_iff],
+    { simp only [coe_nnnorm, nnreal.coe_nat_abs, nnreal.coe_pow], exact F.summable_coe_real s },
+    { exact_mod_cast hN }
+  end }
+
+/-- Tailored scalar multiplication by integers. -/
+def gsmul (N : ℤ) (F : Mbar r' S) : Mbar r' S :=
+{ to_fun := λ s n, N • F s n,
+  coeff_zero' := λ s, by simp only [F.coeff_zero, smul_zero],
+  summable' := λ s,
+  begin
+    simp only [gsmul_eq_mul, int.nat_abs_mul, int.cast_id, nat.cast_mul, mul_assoc],
+    by_cases hN : N.nat_abs = 0,
+    { simpa only [hN, nat.cast_zero, zero_mul] using summable_zero },
+    simp only [← nnreal.summable_coe, nnreal.coe_mul],
+    rw [← summable_mul_left_iff],
+    { simp only [coe_nnnorm, nnreal.coe_nat_abs, nnreal.coe_pow], exact F.summable_coe_real s },
+    { exact_mod_cast hN }
+  end }
+.
+
 instance : add_comm_group (Mbar r' S) :=
 { zero := 0, add := (+), sub := has_sub.sub, neg := has_neg.neg,
   zero_add := by { intros, ext, simp only [coe_zero, zero_add, coe_add] },
   add_zero := by { intros, ext, simp only [coe_zero, add_zero, coe_add] },
   add_assoc := by { intros, ext, simp only [add_assoc, coe_add] },
-  add_left_neg := by { intros, ext, simp only [coe_add, coe_neg, coe_zero, add_left_neg] },
+  add_left_neg := by { intros, ext,
+    simp only [coe_add, coe_neg, coe_zero, pi.add_apply, pi.zero_apply, pi.neg_apply, add_left_neg] },
   add_comm := by { intros, ext, simp only [coe_add, add_comm] },
-  sub_eq_add_neg := by { intros, ext, simp only [coe_sub, coe_add, coe_neg, sub_eq_add_neg] } }
+  sub_eq_add_neg := by { intros, ext, simp only [coe_sub, coe_add, coe_neg, sub_eq_add_neg] },
+  nsmul := λ n F, F.nsmul n,
+  nsmul_zero' := λ F, by { ext, simp only [nsmul, zero_smul], refl },
+  nsmul_succ' := λ n F,
+  begin
+    ext,
+    simp only [nsmul, nat.succ_eq_add_one, add_smul, one_smul, add_comm, coe_mk, coe_add,
+      pi.add_apply],
+  end,
+  gsmul := λ n F, F.gsmul n,
+  gsmul_zero' := λ F, by { ext, simp only [gsmul, zero_smul], refl },
+  gsmul_succ' := λ n F,
+  begin
+    ext,
+    simp only [gsmul, nat.succ_eq_add_one, algebra.id.smul_eq_mul, coe_mk, pi.add_apply,
+      int.coe_nat_succ, int.of_nat_eq_coe, coe_add, add_mul, one_mul, add_comm],
+  end,
+  gsmul_neg' := λ n F,
+  begin
+    ext,
+    simp only [gsmul, algebra.id.smul_eq_mul, coe_mk, pi.neg_apply, int.coe_nat_succ, coe_neg,
+      add_mul, one_mul, neg_add_rev, int.neg_succ_of_nat_coe, neg_mul_eq_neg_mul_symm, one_mul],
+  end }
 
 /-- The `coeff s n` is the additive homomorphism that sends `x : Mbar r' S`
 to the coefficient `x_{s,n}`. -/
@@ -222,17 +277,14 @@ add_monoid_hom.mk' coe_fn $ coe_add
   ⇑(∑ i in s, F i) = ∑ i in s, (F i) :=
 show coe_hom (∑ i in s, F i) = ∑ i in s, coe_hom (F i), from add_monoid_hom.map_sum _ _ _
 
-@[simp] lemma coe_gsmul (n : ℤ) (F : Mbar r' S) : ⇑(n •ℤ F) = n •ℤ F :=
-show coe_hom (n •ℤ F) = n •ℤ coe_hom F, from add_monoid_hom.map_gsmul _ _ _
+@[simp] lemma coe_gsmul (n : ℤ) (F : Mbar r' S) : ⇑(n • F) = n • F :=
+show coe_hom (n • F) = n • coe_hom F, from add_monoid_hom.map_gsmul _ _ _
 
 @[simp] lemma coe_smul (n : ℤ) (F : Mbar r' S) : ⇑(n • F) = n • F :=
-begin
-  rw [← gsmul_eq_smul, coe_gsmul], ext,
-  simp only [pi.smul_apply, function.gsmul_apply, smul_eq_mul, gsmul_int_int]
-end
+coe_gsmul _ _
 
 @[simp] lemma coe_nsmul (n : ℕ) (F : Mbar r' S) : ⇑(n • F) = n • F :=
-coe_gsmul n F
+by simpa only [gsmul_coe_nat] using coe_gsmul ↑n F
 
 @[simp] lemma nnnorm_smul (N : ℤ) (F : Mbar r' S) : ∥N • F∥₊ = nnnorm N * ∥F∥₊ :=
 begin
