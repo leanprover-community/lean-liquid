@@ -1,11 +1,6 @@
 import for_mathlib.Profinite.functorial_limit
 import locally_constant.NormedGroup
 
-namespace locally_constant
--- TODO: Move this section
-
-end locally_constant
-
 namespace NormedGroup
 
 open opposite locally_constant
