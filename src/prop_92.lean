@@ -149,7 +149,7 @@ begin
   { rw hf.to_inducing.induced at hU,
     exact is_open_induced_iff.mp hU },
   obtain ⟨ι, Z : ι → set Y, hWZ : W = ⋃ i, Z i, hZ : ∀ i, is_clopen $ Z i⟩ :=
-    Union_basis_of_is_open is_topological_basis_clopen W_op,
+    is_topological_basis_clopen.open_eq_Union W_op,
   have : f '' U ⊆ ⋃ i, Z i,
   { rw [image_subset_iff, ← hWZ, hfW] },
   obtain ⟨I, hI⟩ : ∃ I : finset ι, f '' U ⊆ ⋃ i ∈ I, Z i,
