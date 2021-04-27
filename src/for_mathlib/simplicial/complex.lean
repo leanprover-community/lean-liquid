@@ -1,7 +1,7 @@
 import for_mathlib.preadditive_category
 import for_mathlib.add_monoid_hom
 import system_of_complexes.complex
-import .augmented
+import for_mathlib.simplicial.augmented
 
 open category_theory
 
