@@ -1,5 +1,3 @@
-import tactic
-import category_theory.limits.has_limits
 import category_theory.arrow
 import category_theory.limits.has_limits
 
