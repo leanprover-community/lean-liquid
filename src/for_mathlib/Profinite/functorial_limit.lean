@@ -74,6 +74,7 @@ def of_clopen {U : set X} :
       { simpa using hV } }
   end }
 
+/-- Construct a clopen cover from an open cover. -/
 def of_open_cover (Us : set (set X))
   (Us_open : ∀ U ∈ Us,  is_open U)
   (nonempty : ∀ U ∈ Us, (U : set X).nonempty)
