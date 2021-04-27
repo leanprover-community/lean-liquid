@@ -1,11 +1,15 @@
 import for_mathlib.Profinite.functorial_limit
 import locally_constant.NormedGroup
 
+noncomputable theory
+
 namespace NormedGroup
 
-open opposite locally_constant
+open opposite locally_constant category_theory
 
-variables (X : Profinite) (M : NormedGroup)
+universes u
+
+variables (M : NormedGroup.{u}) (X : Profinite.{u})
 
 lemma locally_constant_factors_fun (f : locally_constant X M) :
   ∃ (I : X.clopen_cover) (g : locally_constant I M), g ∘ I.proj = f :=
@@ -43,5 +47,23 @@ begin
   rw ← h1,
   refl,
 end
+
+abbreviation diagram : NormedGroup ⥤ X.clopen_coverᵒᵖ ⥤ NormedGroup :=
+LocallyConstant ⋙ (whiskering_left _ _ _).obj (X.diagram ⋙ Fintype_to_Profinite).op
+
+def cocone : limits.cocone ((diagram X).obj M) :=
+{ X := (LocallyConstant.obj M).obj (op X),
+  ι :=
+  { app := λ I, (LocallyConstant.obj M).map I.unop.π.op,
+    naturality' := begin
+      intros I J f,
+      change normed_group_hom.comp _ _ = _,
+      erw [category.comp_id, comap_hom_comp],
+      congr' 1,
+      ext1 x,
+      dsimp [Profinite.diagram, Fintype_to_Profinite, Profinite.clopen_cover.π],
+      erw Profinite.clopen_cover.proj_map_comm,
+      refl,
+    end } }
 
 end NormedGroup
