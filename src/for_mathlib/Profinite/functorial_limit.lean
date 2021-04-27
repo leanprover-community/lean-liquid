@@ -74,6 +74,53 @@ def of_clopen {U : set X} :
       { simpa using hV } }
   end }
 
+def of_open_cover (Us : set (set X))
+  (Us_open : ∀ U ∈ Us,  is_open U)
+  (nonempty : ∀ U ∈ Us, (U : set X).nonempty)
+  (cover : ∀ x : X, ∃ U ∈ Us, x ∈ U)
+  (disjoint : ∀ (U V ∈ Us), (U ∩ V : set X).nonempty → U = V) : X.clopen_cover :=
+{ sets := Us,
+  clopen :=
+  begin
+    intros S,
+    refine ⟨Us_open _ S.2, _⟩,
+    constructor,
+    have : (S : set X)ᶜ = ⋃₀ {W | W ∈ Us ∧ W ≠ S},
+    { ext,
+      split,
+      { intro h,
+        obtain ⟨V,hV1,hV2⟩ := cover x,
+        refine ⟨V,⟨hV1,_⟩,hV2⟩,
+        intros c,
+        rw c at hV2,
+        exact h hV2 },
+      { intro h,
+        rcases h with ⟨V,⟨hV1,hV2⟩,hV3⟩,
+        intro c,
+        refine hV2 (disjoint _ _ hV1 S.2 ⟨x,hV3,c⟩) } },
+    rw this,
+    apply is_open_sUnion,
+    intros V hV,
+    apply Us_open,
+    exact hV.1,
+  end,
+  nonempty := λ U, nonempty _ U.2,
+  cover := begin
+    intros x,
+    obtain ⟨U,h1,h2⟩ := cover x,
+    refine ⟨⟨U,h1⟩,h2,λ V hV, _⟩,
+    ext1,
+    refine disjoint _ _ V.2 h1 ⟨x,hV,h2⟩,
+  end }
+
+@[simp]
+lemma of_open_cover_def (Us : set (set X))
+  (Us_open : ∀ U ∈ Us,  is_open U)
+  (nonempty : ∀ U ∈ Us, (U : set X).nonempty)
+  (cover : ∀ x : X, ∃ U ∈ Us, x ∈ U)
+  (disjoint : ∀ (U V ∈ Us), (U ∩ V : set X).nonempty → U = V) :
+  (of_open_cover Us Us_open nonempty cover disjoint).sets = Us := rfl
+
 instance : has_coe_to_sort X.clopen_cover := ⟨Type*, λ I, I.sets⟩
 
 instance {I : X.clopen_cover} : topological_space I := ⊥
