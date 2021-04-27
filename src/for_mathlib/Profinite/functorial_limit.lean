@@ -118,7 +118,7 @@ end
 /-- The "trivial" clopen cover. -/
 def top : X.clopen_cover :=
 if h : _root_.nonempty X then
-⟨{⊤},by simp,begin
+⟨{⊤}, by simp, begin
   rcases h with ⟨x⟩,
   rintro ⟨h,hh⟩,
   refine ⟨x,_⟩,
@@ -126,19 +126,19 @@ if h : _root_.nonempty X then
   simp [hh]
 end,by tidy⟩
 else
-⟨∅,by simp,by simp, λ x, false.elim (h ⟨x⟩)⟩
+⟨∅,by simp, by simp, λ x, false.elim (h ⟨x⟩)⟩
 
 lemma top_def : (top : X.clopen_cover) =
 if h : _root_.nonempty X then
-⟨{⊤},by simp,begin
+⟨{⊤}, by simp, begin
   rcases h with ⟨x⟩,
   rintro ⟨h,hh⟩,
   refine ⟨x,_⟩,
   simp only [set.mem_singleton_iff] at hh,
   simp [hh]
-end,by tidy⟩
+end, by tidy⟩
 else
-⟨∅,by simp,by simp, λ x, false.elim (h ⟨x⟩)⟩ := rfl
+⟨∅, by simp, by simp, λ x, false.elim (h ⟨x⟩)⟩ := rfl
 
 instance : has_top X.clopen_cover := ⟨top⟩
 instance : inhabited X.clopen_cover := ⟨⊤⟩
@@ -191,8 +191,8 @@ begin
   rw top_def,
   refine ⟨⟨⊤,_⟩,λ x, by tauto⟩,
   split_ifs,
-  simp,
-  exact false.elim (h ⟨f x⟩),
+  { simp },
+  { exact false.elim (h ⟨f x⟩) },
 end
 
 /-- 
@@ -308,7 +308,7 @@ instance : semilattice_inf X.clopen_cover :=
     intros I J K h1 h2 U,
     rcases h1 U with ⟨A,hA⟩,
     rcases h2 U with ⟨B,hB⟩,
-    simp at hA hB,
+    simp only [set.preimage_id, Profinite.id_to_fun, set.le_eq_subset] at hA hB,
     obtain ⟨x,hx⟩ := I.nonempty U,
     refine ⟨⟨A ⊓ B, ⟨x, hA hx, hB hx⟩, A, B, rfl⟩, _⟩,
     simp only [set.preimage_id,
@@ -324,7 +324,7 @@ lemma inf_mono_left {I J K : X.clopen_cover} : J ≤ K → J ⊓ I ≤ K ⊓ I :
 begin
   rintros h ⟨U,⟨hU,A,B,rfl⟩⟩,
   rcases h A with ⟨AA,hAA⟩,
-  simp at *,
+  simp only [set.preimage_id, Profinite.id_to_fun, set.le_eq_subset] at *,
   have : (A : set X) ⊓ B ≤ AA ⊓ B := λ x ⟨h1,h2⟩, ⟨hAA h1,h2⟩,
   refine ⟨⟨AA ⊓ B,set.nonempty.mono this hU, AA, B, rfl⟩,this⟩,
 end
@@ -333,7 +333,7 @@ lemma inf_mono_right {I J K : X.clopen_cover} : J ≤ K → I ⊓ J ≤ I ⊓ K 
 begin
   rintros h ⟨U,⟨hU,A,B,rfl⟩⟩,
   rcases h B with ⟨BB,hBB⟩,
-  simp at *,
+  simp only [set.preimage_id, Profinite.id_to_fun, set.le_eq_subset] at *,
   have : (A : set X) ⊓ B ≤ A ⊓ BB := λ x ⟨h1,h2⟩, ⟨h1, hBB h2⟩,
   refine ⟨⟨A ⊓ BB, set.nonempty.mono this hU, A, BB, rfl⟩, this⟩
 end
@@ -421,7 +421,7 @@ begin
     dsimp,
     refine ⟨_,_⟩,
     { rw hU at hx,
-      simp at hx,
+      simp only [set.mem_preimage, function.comp_app] at hx,
       refine ⟨f x, hx⟩ },
     { use U },
     { simpa using hU, } },
@@ -599,7 +599,12 @@ def Fincone : limits.cone (X.diagram ⋙ Fintype_to_Profinite) :=
       ext1 x,
       symmetry,
       apply clopen_cover.proj_fun_unique,
-      simp,
+      simp only [Profinite.id_to_fun,
+        id.def,
+        category_theory.functor.comp_map,
+        Profinite.comp_to_fun,
+        function.comp_app,
+        category_theory.functor.const.obj_map],
       apply clopen_cover.map_spec,
       apply clopen_cover.proj_fun_spec,
     end } }
@@ -782,7 +787,7 @@ def make : f.left.clopen_cover ⥤ f.right.clopen_cover ⥤ index_cat f :=
         have : f.hom = 𝟙 _ ≫ f.hom, by simp,
         rw this,
         refine clopen_cover.le_rel_comp _ (clopen_cover.pullback_le_rel _),
-        simp,
+        simp only [category_theory.category.id_comp],
         dsimp,
         exact (inf_le_right : I ⊓ clopen_cover.pullback f.hom J ≤ _)
       end },
@@ -889,8 +894,7 @@ begin
     let Us : Π (I : f.left.clopen_cover), I := λ U, x (index_cat.mk_left.obj U),
     rcases clopen_cover.exists_of_compat Us _ with ⟨y,hy⟩,
     { refine ⟨y,_⟩,
-      ext1,
-      ext1 Is,
+      ext Is : 2,
       dsimp at *,
       change clopen_cover.proj _ _ = _,
       have : x Is = Us Is.left,
@@ -925,8 +929,7 @@ begin
     let Us : Π (I : f.right.clopen_cover), I := λ U, x (index_cat.mk_right.obj U),
     rcases clopen_cover.exists_of_compat Us _ with ⟨y,hy⟩,
     { refine ⟨y,_⟩,
-      ext1,
-      ext1 Is,
+      ext Is : 2,
       dsimp at *,
       change clopen_cover.proj _ _ = _,
       have : x Is = Us Is.right,
@@ -934,7 +937,7 @@ begin
         dsimp [Us],
         rw ← hx ff,
         apply clopen_cover.map_unique,
-        simp,
+        simp only [set.preimage_id, Profinite.id_to_fun, set.le_eq_subset],
         dsimp [index_cat.mk_right],
         intros U,
         rcases Is.compat U with ⟨V,hV⟩,
