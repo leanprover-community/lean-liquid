@@ -9,13 +9,17 @@ universes v u
 
 variables {C : Type u} [category.{v} C]
 
+/-- The functor sending an arrow to its source. -/
 abbreviation left_func : arrow C ⥤ C := comma.fst _ _
 
+/-- The functor sending an arrow to its target. -/
 abbreviation right_func : arrow C ⥤ C := comma.snd _ _
 
+/-- The natural transformation from `left_func` to `right_func`, given by the arrow itself. -/
 def left_to_right : (left_func : arrow C ⥤ C) ⟶ right_func :=
 { app := λ f, f.hom }
 
+/-- Make a limit cone for a diagram of arrows, given limit cones for the left and right. -/
 def limit_cone {J : Type v} [small_category J] (F : J ⥤ arrow C)
   (CL : limits.limit_cone (F ⋙ left_func))
   (CR : limits.limit_cone (F ⋙ right_func)) :
