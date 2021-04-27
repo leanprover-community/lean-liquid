@@ -1,4 +1,4 @@
-import .basic
+import for_mathlib.cech.basic
 
 noncomputable theory
 
