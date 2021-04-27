@@ -1,4 +1,4 @@
-import .split
+import for_mathlib.cech.split
 import for_mathlib.simplicial.complex
 
 open_locale big_operators
