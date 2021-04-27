@@ -86,10 +86,15 @@ CLC.map_norm_noninc _ _
 
 @[simps app]
 def res [fact (c₂ ≤ c₁)] : CLCFP V r' c₁ n ⟶ CLCFP V r' c₂ n :=
-(whisker_right (LCFP.res V r' c₁ c₂ n) Completion : _)
+(whisker_right (nat_trans.op $ FiltrationPow.cast_le r' c₂ c₁ n) (CLC V) : _)
 
 lemma res_def [fact (c₂ ≤ c₁)] :
   res V r' c₁ c₂ n = whisker_right (nat_trans.op (FiltrationPow.cast_le r' c₂ c₁ n)) (CLC V) :=
+rfl
+
+lemma res_def' [fact (c₂ ≤ c₁)] (M : ProFiltPseuNormGrpWithTinv r') :
+  (res V r' c₁ c₂ n).app (op M) =
+  (CLC V).map ((Pow n).map $ (Filtration.cast_le M c₂ c₁)).op :=
 rfl
 
 lemma res_app' [fact (c₂ ≤ c₁)] (M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ) :
@@ -97,11 +102,11 @@ lemma res_app' [fact (c₂ ≤ c₁)] (M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ
 rfl
 
 @[simp] lemma res_refl : res V r' c c n = 𝟙 _ :=
-by { simp only [res, LCFP.res_refl, whisker_right_id'], refl }
+by { rw [res, FiltrationPow.cast_le_refl, nat_trans.op_id, whisker_right_id'], refl }
 
 lemma res_comp_res [fact (c₂ ≤ c₁)] [fact (c₃ ≤ c₂)] [fact (c₃ ≤ c₁)] :
   res V r' c₁ c₂ n ≫ res V r' c₂ c₃ n = res V r' c₁ c₃ n :=
-by simp only [res, ← whisker_right_comp, LCFP.res_comp_res]
+by simp only [res, ← whisker_right_comp, FiltrationPow.cast_le_comp, ← nat_trans.op_comp]
 
 lemma res_norm_noninc [fact (c₂ ≤ c₁)] (M) :
   ((res V r' c₁ c₂ n).app M).norm_noninc :=
@@ -127,7 +132,8 @@ lemma Tinv_def' : Tinv V r' c₁ c₂ n =
 lemma res_comp_Tinv [fact (c₂ ≤ c₁)] [fact (c₃ ≤ c₂)] [fact (c₃ ≤ r' * c₂)] :
   res V r' c₁ c₂ n ≫ Tinv V r' c₂ c₃ n = Tinv V r' c₁ c₂ n ≫ res V r' c₂ c₃ n :=
 begin
-  simp only [Tinv, res, LCFP.res, whisker_right_twice, ← whisker_right_comp, ← nat_trans.op_comp],
+  dsimp only [Tinv, res, CLC, LC],
+  simp only [← whisker_right_comp, ← nat_trans.op_comp],
   refl
 end
 
@@ -218,7 +224,8 @@ lemma res_comp_eval_CLCFP
   [fact (c₂ ≤ c₁)] [ϕ.suitable c₄ c₂] [ϕ.suitable c₃ c₁] [fact (c₄ ≤ c₃)] :
   res V r' c₁ c₂ n ≫ ϕ.eval_CLCFP V r' c₂ c₄ =
     ϕ.eval_CLCFP V r' c₁ c₃ ≫ res V r' c₃ c₄ m :=
-by simp only [eval_CLCFP, res, ← whisker_right_comp]; congr' 1; apply res_comp_eval_LCFP
+by { dsimp only [CLC, res], simp only [eval_CLCFP, ← whisker_right_comp, ← whisker_right_twice],
+     congr' 1, apply res_comp_eval_LCFP }
 
 lemma Tinv_comp_eval_CLCFP [fact (0 < r')] [fact (c₂ ≤ r' * c₁)] [fact (c₄ ≤ r' * c₃)]
   [ϕ.suitable c₃ c₁] [ϕ.suitable c₄ c₂] :

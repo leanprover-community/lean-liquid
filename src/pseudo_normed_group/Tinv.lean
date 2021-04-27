@@ -210,7 +210,7 @@ theorem F_def {J} [category J] (r : ℝ≥0) (V : NormedGroup)
     (whisker_right f (CLC V))
     (whisker_right g (CLC V) ≫ whisker_left B (CLC.T_inv r V)) := rfl
 
-@[simp]
+@[simps]
 def map_nat {J} [category J] {A₁ B₁ A₂ B₂ : J ⥤ Profiniteᵒᵖ} (f₁ g₁ : A₁ ⟶ B₁) (f₂ g₂ : A₂ ⟶ B₂)
   (ϕ : A₁ ⟶ A₂) (ψ : B₁ ⟶ B₂) (h₁ : ϕ ≫ f₂ = f₁ ≫ ψ) (h₂ : ϕ ≫ g₂ = g₁ ≫ ψ) :
   CLCTinv.F r V f₁ g₁ ⟶ CLCTinv.F r V f₂ g₂ :=

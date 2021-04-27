@@ -1,5 +1,6 @@
 import thm95.polyhedral_iso
 import pseudo_normed_group.homotopy
+import rescale.FiltrationPow
 
 /-!
 # A complex canonically isomorphic to `row 1` of the double complex
@@ -69,11 +70,11 @@ begin
   haveI : ∀ c c_, fact (c * c_ * N⁻¹ ≤ c * (c_ * N⁻¹)) :=
     λ c c_, by simpa only [mul_assoc] using nnreal.fact_le_refl _,
   transitivity
-    (BD.complex₂ r V r' (λ (i : ℕ), c * c_ i * N⁻¹) (λ (i : ℕ), r' * (c * c_ i) * N⁻¹)).obj (op $ of r' M),
+    (BD.complex₂ r V r' (λ (i : ℕ), c * c_ i * N⁻¹) (λ (i : ℕ), r' * (c * c_ i) * N⁻¹)).obj (op M),
   { simp only [mul_assoc, ProFiltPseuNormGrpWithTinv.of_coe] },
   refine cochain_complex.ext (λ i, _),
   dsimp only [data.complex₂, rescale_constants, data.complex₂_d],
-  rw ← universal_map.eval_CLCFPTinv₂_rescale,
+  rw universal_map.eval_CLCFPTinv₂_rescale,
 end
 .
 
@@ -89,15 +90,35 @@ differential_object.complex_like.iso_of_components
 begin
   intro i,
   refine CLCTinv.map_iso r V _ _ _ _ _ _ _ _,
-  { refine ((Pow $ BD.X i).map_iso _).op, sorry },
-  { refine ((Pow $ BD.X i).map_iso _).op, sorry },
-  sorry, sorry
+  { refine ((Pow $ BD.X i).map_iso _).op, exact Filtration_cast_eq r' _ _ (mul_assoc _ _ _) M, },
+  { refine ((Pow $ BD.X i).map_iso _).op,
+    exact (Filtration_cast_eq _ (r' * (c * c_ i) * N⁻¹) (r' * (c * (c_ i * N⁻¹)))
+      (by simp only [mul_assoc]) _) },
+  { refl },
+  { refl }
 end
 begin
-  sorry
+  intros i j,
+  apply arrow.mk_inj,
+  dsimp only [data.complex_obj_d, universal_map.eval_CLCFPTinv, universal_map.eval_CLCFPTinv₂],
+  dsimp [CLCTinv.map],
+  simp only [NormedGroup.equalizer.map_comp_map, nat_trans.comp_app,
+    universal_map.eval_CLCFP_rescale, ← CLCFP.res_def'],
+  simp only [← nat_trans.comp_app],
+  apply NormedGroup.equalizer.map_congr,
+  { have := @universal_map.res_comp_eval_CLCFP V r'
+      (c * (c_ i * N⁻¹)) (c * c_ i * N⁻¹) (c * (c_ j * N⁻¹)) (c * c_ j * N⁻¹)
+      (BD.X j) (BD.X i) (BD.d j i) ⟨(mul_assoc _ _ _).le⟩ _ _ ⟨(mul_assoc _ _ _).le⟩,
+    replace := nat_trans.congr_app this.symm (op M),
+    exact congr_arg arrow.mk this },
+  { have := @universal_map.res_comp_eval_CLCFP V r'
+      (r' * (c * (c_ i * N⁻¹))) (r' * (c * c_ i) * N⁻¹) (r' * (c * (c_ j * N⁻¹))) (r' * (c * c_ j) * N⁻¹)
+      (BD.X j) (BD.X i) (BD.d j i) ⟨le_of_eq $ by simp only [mul_assoc]⟩ _ _ ⟨le_of_eq $ by simp only [mul_assoc]⟩,
+    replace := nat_trans.congr_app this.symm (op M),
+    exact congr_arg arrow.mk this },
+  any_goals { refl },
 end
-
-end
+.
 
 noncomputable
 def system_rescale_iso (N : ℝ≥0) :
@@ -106,7 +127,15 @@ def system_rescale_iso (N : ℝ≥0) :
 nat_iso.of_components (λ c, complex_rescale_iso BD c_ r V c.unop _ _)
 begin
   intros c₁ c₂ h,
-  sorry
+  ext i : 2,
+  apply arrow.mk_inj,
+  erw [differential_object.comp_f, differential_object.comp_f],
+  dsimp only [data.system_obj, differential_object.hom.mk'_f, CLCFPTinv₂.res, complex_rescale_iso,
+    differential_object.complex_like.iso_of_components, CLCTinv.map_iso_hom, CLCTinv.map_nat_app],
+  simp only [CLCTinv.map_comp_map],
+  refl,
+end
+
 end
 
 end rescale
