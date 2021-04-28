@@ -63,38 +63,13 @@ The below is in PR #7190 by Eric to algebra.direct_sum
 
 -/
 
-section Eric_PR
+section unused_in_this_file
 
 namespace direct_sum
 
 variables {ι : Type*}
 
 open_locale direct_sum
-
-/-- The `direct_sum` formed by a collection of `add_submonoid`s of `M` is said to be internal if the
-canonical map `(⨁ i, A i) →+ M` is bijective.
-See `direct_sum.add_subgroup_is_internal` for the same statement about `add_subgroup`s. -/
-def add_submonoid_is_internal {M : Type*} [decidable_eq ι] [add_comm_monoid M]
-  (A : ι → add_submonoid M) : Prop :=
-function.bijective (direct_sum.to_add_monoid (λ i, (A i).subtype) : (⨁ i, A i) →+ M)
-
-/-- The `direct_sum` formed by a collection of `add_subgroup`s of `M` is said to be internal if the
-canonical map `(⨁ i, A i) →+ M` is bijective.
-See `direct_sum.submodule_is_internal` for the same statement about `submodules`s. -/
-def add_subgroup_is_internal {M : Type*} [decidable_eq ι] [add_comm_group M]
-  (A : ι → add_subgroup M) : Prop :=
-function.bijective (direct_sum.to_add_monoid (λ i, (A i).subtype) : (⨁ i, A i) →+ M)
-
-lemma add_subgroup_is_internal.to_add_submonoid
-  {M : Type*} [decidable_eq ι] [add_comm_group M] (A : ι → add_subgroup M) :
-  add_subgroup_is_internal A ↔
-    add_submonoid_is_internal (λ i, (A i).to_add_submonoid) :=
-iff.rfl
-
--- that's the end of Eric's PR but we seem to need more: we don't have the projections
--- as monoid homs
-
-section unused_in_this_file
 
 variables {M : Type*} [decidable_eq ι] [add_comm_monoid M] (A : ι → Type*)
   [∀ i, add_comm_monoid (A i)]
@@ -111,11 +86,9 @@ lemma projection_of_ne {i j : ι} (h : i ≠ j) (ai : A i) :
   projection A j (of (λ i, A i) i ai) = 0 :=
 dfinsupp.single_eq_of_ne h
 
-end unused_in_this_file
-
 end direct_sum
 
-end Eric_PR
+end unused_in_this_file
 
 /-- If `M` is an additive monoid, then an `M`-grading on a ring `R` is a decomposition of `R` as
     an internal direct sum `R = ⨁Rₘ` into submonoids indexed by `m : M`, where the decomposition
