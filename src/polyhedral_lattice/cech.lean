@@ -142,6 +142,13 @@ by convert quotient_add_group.mk'_eq_zero_iff
 lemma π_surjective : function.surjective (π f m) :=
 quotient.surjective_quotient_mk'
 
+lemma norm_π_one_eq (l : fin 1 →₀ Λ') : ∥(π f 1) l∥ = ∥l∥ :=
+begin
+  delta π, dsimp,
+  rw normed_group_hom.quotient_norm_mk_eq (L f 1) l,
+  simp only [L_one, set.image_singleton, add_zero, cInf_singleton, add_subgroup.coe_bot],
+end
+
 instance : no_zero_smul_divisors ℤ (obj f m) :=
 { eq_zero_or_eq_zero_of_smul_eq_zero :=
   begin
