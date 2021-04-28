@@ -46,9 +46,23 @@ add_subgroup.closure $
      x = finsupp.map_range_hom (int.cast_add_hom' (f l)) n}
 
 -- jmc : I don't think we need this one
-lemma L_zero : L f 0 = ⊥ := sorry
+-- lemma L_zero : L f 0 = ⊥ := by admit
 
-lemma L_one : L f 1 = ⊥ := sorry
+@[simp] lemma L_one : L f 1 = ⊥ :=
+begin
+  refine add_subgroup.closure_eq_of_le ⊥ _ bot_le,
+  simp only [and_imp, exists_prop, set.subset_singleton_iff, finsupp.map_range_hom_apply,
+    add_subgroup.coe_bot, set.mem_set_of_eq, exists_imp_distrib, finsupp.sum,
+    add_monoid_hom.id_apply],
+  rintro _ l n hn rfl,
+  suffices : n = 0, { simp only [this, finsupp.map_range_zero] },
+  ext i, fin_cases i,
+  simp only [finsupp.coe_zero, pi.zero_apply, ← hn],
+  have aux : ∀ s : finset (fin 1), s = ∅ ∨ s = {0}, { dec_trivial },
+  cases aux n.support with h' h',
+  { simp only [h', finset.sum_empty, ← finsupp.not_mem_support_iff, finset.not_mem_empty, not_false_iff] },
+  { simp only [h', finset.sum_singleton], }
+end
 
 def obj := quotient_add_group.quotient (L f m)
 
