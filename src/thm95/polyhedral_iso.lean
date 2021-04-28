@@ -30,25 +30,16 @@ iso.symm $ PolyhedralLattice.iso_mk
   (by { ext f x, fin_cases x, dsimp, simp only [finsupp.single_eq_same] })
 .
 
--- === for some reason the next def is now timing out :sad:
-
-noncomputable def trivial_quotient_hom (L : add_subgroup Λ) (hL : L = ⊥) :
-  Λ →+ (quotient_add_group.quotient L) :=
-quotient_add_group.mk' L
-
 /-- the left hand side is by definition the quotient of the right hand side
 by a subgroup that is provably trivial -/
 noncomputable def conerve_obj_one_iso' :
   of (conerve.obj (diagonal_embedding Λ N) 1) ≅ of (fin 1 →₀ (rescale N (fin N →₀ Λ))) :=
-PolyhedralLattice.iso_mk
-  (by { dsimp [conerve.obj], sorry })
-  -- (quotient_add_group.mk' _)
-  sorry
-  -- (quotient_add_group.lift _ (add_monoid_hom.id _)
-  --   (by { intros x hx, rwa [polyhedral_lattice.conerve.L_one, add_subgroup.mem_bot] at hx }))
-  sorry
-  sorry sorry
-  -- (by ext; refl) (by ext ⟨x⟩; refl)
+iso.symm $ PolyhedralLattice.iso_mk
+  (polyhedral_lattice.conerve.π _ _)
+  (quotient_add_group.lift _ (add_monoid_hom.id _)
+    (by { intros x hx, rwa [polyhedral_lattice.conerve.L_one, add_subgroup.mem_bot] at hx }))
+  (polyhedral_lattice.conerve.norm_π_one_eq _)
+  (by ext; refl) (by ext ⟨x⟩; refl)
 
 noncomputable def conerve_obj_one_iso :
   of (conerve.obj (diagonal_embedding Λ N) 1) ≅ of (rescale N (fin N →₀ Λ)) :=
@@ -57,7 +48,7 @@ conerve_obj_one_iso' Λ N ≪≫ finsupp_fin_one_iso (of (rescale N (fin N →�
 lemma augmentation_eq_diagonal :
   cosimplicial_augmentation_map Λ N ≫ (conerve_obj_one_iso Λ N).hom =
   diagonal_embedding Λ N :=
-by { rw ← iso.eq_comp_inv, sorry;refl }
+by { rw ← iso.eq_comp_inv, refl }
 
 def Hom_rescale_iso [fact (0 < r')] :
   polyhedral_lattice.Hom (rescale N Λ) M ≅
