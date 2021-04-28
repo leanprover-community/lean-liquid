@@ -82,7 +82,11 @@ def Hom_rescale_iso [fact (0 < r')] :
     { exact ↑N * c' },
     { simp only [semi_normed_group.mem_filtration_iff] at hl ⊢,
       erw [rescale.nnnorm_def, div_eq_mul_inv] at hl,
-      sorry },
+      rwa [← inv_inv' (N : ℝ≥0), ← nnreal.mul_le_iff_le_inv, mul_comm],
+      apply ne_of_gt,
+      rw [nnreal.inv_pos],
+      have hN : 0 < N := fact.out _,
+      exact_mod_cast hN },
     { rw [mul_assoc, inv_mul_cancel_left'],
       have hN : 0 < N := fact.out _,
       exact_mod_cast hN.ne' }
