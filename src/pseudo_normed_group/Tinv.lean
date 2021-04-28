@@ -195,6 +195,14 @@ def map_iso {A₁ B₁ A₂ B₂ : Profiniteᵒᵖ} (f₁ g₁ : A₁ ⟶ B₁) 
   hom_inv_id' := by { simp only [map_comp_map, iso.hom_inv_id], apply map_id },
   inv_hom_id' := by { simp only [map_comp_map, iso.inv_hom_id], apply map_id } }
 
+lemma map_iso_isometry {A₁ B₁ A₂ B₂ : Profiniteᵒᵖ} (f₁ g₁ : A₁ ⟶ B₁) (f₂ g₂ : A₂ ⟶ B₂)
+  (ϕ : A₁ ≅ A₂) (ψ : B₁ ≅ B₂) (h₁ : ϕ.hom ≫ f₂ = f₁ ≫ ψ.hom) (h₂ : ϕ.hom ≫ g₂ = g₁ ≫ ψ.hom) :
+  isometry (map_iso r V f₁ g₁ f₂ g₂ ϕ ψ h₁ h₂).hom :=
+begin
+  apply NormedGroup.iso_isometry_of_norm_noninc;
+  apply map_norm_noninc
+end
+
 @[simps]
 protected def F {J} [category J] (r : ℝ≥0) (V : NormedGroup)
   [normed_with_aut r V] [fact (0 < r)] {A B : J ⥤ Profiniteᵒᵖ} (f g : A ⟶ B) :

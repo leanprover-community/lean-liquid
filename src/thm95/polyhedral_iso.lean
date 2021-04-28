@@ -13,10 +13,9 @@ open category_theory
 
 namespace PolyhedralLattice
 
-section
 open simplex_category polyhedral_lattice (conerve.L conerve.obj)
 
-variables  (Λ : PolyhedralLattice) (N : ℕ) [fact (0 < N)]
+variables (Λ : PolyhedralLattice) (N : ℕ) [fact (0 < N)]
 variables (r' : ℝ≥0) (M : ProFiltPseuNormGrpWithTinv r')
 
 
@@ -33,25 +32,32 @@ iso.symm $ PolyhedralLattice.iso_mk
 
 -- === for some reason the next def is now timing out :sad:
 
--- /-- the left hand side is by definition the quotient of the right hand side
--- by a subgroup that is provably trivial -/
--- noncomputable def conerve_obj_one_iso' :
---   of (conerve.obj (diagonal_embedding Λ N) 1) ≅ of (fin 1 →₀ (rescale N (fin N →₀ Λ))) :=
--- iso.symm $ PolyhedralLattice.iso_mk
---   (quotient_add_group.mk' _)
---   (quotient_add_group.lift _ (add_monoid_hom.id _)
---     (by { intros x hx, rwa [polyhedral_lattice.conerve.L_one, add_subgroup.mem_bot] at hx }))
---   sorry
---   (by ext; refl) (by ext ⟨x⟩; refl)
+noncomputable def trivial_quotient_hom (L : add_subgroup Λ) (hL : L = ⊥) :
+  Λ →+ (quotient_add_group.quotient L) :=
+quotient_add_group.mk' L
 
--- noncomputable def conerve_obj_one_iso :
---   of (conerve.obj (diagonal_embedding Λ N) 1) ≅ of (rescale N (fin N →₀ Λ)) :=
--- conerve_obj_one_iso' Λ N ≪≫ finsupp_fin_one_iso (of (rescale N (fin N →₀ Λ)))
+/-- the left hand side is by definition the quotient of the right hand side
+by a subgroup that is provably trivial -/
+noncomputable def conerve_obj_one_iso' :
+  of (conerve.obj (diagonal_embedding Λ N) 1) ≅ of (fin 1 →₀ (rescale N (fin N →₀ Λ))) :=
+PolyhedralLattice.iso_mk
+  (by { dsimp [conerve.obj], sorry })
+  -- (quotient_add_group.mk' _)
+  sorry
+  -- (quotient_add_group.lift _ (add_monoid_hom.id _)
+  --   (by { intros x hx, rwa [polyhedral_lattice.conerve.L_one, add_subgroup.mem_bot] at hx }))
+  sorry
+  sorry sorry
+  -- (by ext; refl) (by ext ⟨x⟩; refl)
 
--- lemma augmentation_eq_diagonal :
---   cosimplicial_augmentation_map Λ N ≫ (conerve_obj_one_iso Λ N).hom =
---   diagonal_embedding Λ N :=
--- by { rw ← iso.eq_comp_inv, refl }
+noncomputable def conerve_obj_one_iso :
+  of (conerve.obj (diagonal_embedding Λ N) 1) ≅ of (rescale N (fin N →₀ Λ)) :=
+conerve_obj_one_iso' Λ N ≪≫ finsupp_fin_one_iso (of (rescale N (fin N →₀ Λ)))
+
+lemma augmentation_eq_diagonal :
+  cosimplicial_augmentation_map Λ N ≫ (conerve_obj_one_iso Λ N).hom =
+  diagonal_embedding Λ N :=
+by { rw ← iso.eq_comp_inv, sorry;refl }
 
 def Hom_rescale_iso [fact (0 < r')] :
   polyhedral_lattice.Hom (rescale N Λ) M ≅
@@ -90,10 +96,6 @@ def Hom_rescale_iso [fact (0 < r')] :
       have hN : 0 < N := fact.out _,
       exact_mod_cast hN.ne' }
   end
-
--- move this
-instance : profinitely_filtered_pseudo_normed_group_with_Tinv r' (M ^ N) :=
-profinitely_filtered_pseudo_normed_group_with_Tinv.pi _ _
 
 @[simps]
 def Hom_finsupp_iso_hom' [fact (0 < r')] :
@@ -148,6 +150,18 @@ def Hom_finsupp_iso [fact (0 < r')] :
   (ProFiltPseuNormGrpWithTinv.of r' $ ((polyhedral_lattice.Hom Λ M) ^ N)) :=
 @polyhedral_lattice.iso_of_equiv_of_strict _ _ _
   (Hom_finsupp_iso_hom _ _ _ _) (Hom_finsupp_equiv _ _ _ _) (λ _, rfl) sorry
+.
+
+open opposite
+
+section
+
+variables [fact (0 < r')] (N' : ℝ≥0)
+
+-- def foo (h : N' = N) :
+--   polyhedral_lattice.Hom ((Λ.cosimplicial N).obj (simplex_category.mk 0)) M ≅
+--   (ProFiltPseuNormGrpWithTinv.of r' (rescale N' ((polyhedral_lattice.Hom Λ M) ^ N))) :=
+-- _ ≪≫ _
 
 end
 

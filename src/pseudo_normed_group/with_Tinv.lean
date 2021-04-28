@@ -222,6 +222,9 @@ instance pi : profinitely_filtered_pseudo_normed_group_with_Tinv r' (Π i, M i) 
   Tinv_mem_filtration := λ c x hx i, Tinv_mem_filtration _ _ (hx i),
   .. profinitely_filtered_pseudo_normed_group.pi _ }
 
+instance pi' (M : Type*) [profinitely_filtered_pseudo_normed_group_with_Tinv r' M] (N : ℕ) :
+  profinitely_filtered_pseudo_normed_group_with_Tinv r' (M^N) :=
+profinitely_filtered_pseudo_normed_group_with_Tinv.pi r' (λ i, M)
 
 -- === jmc: I think we don't need binary products
 

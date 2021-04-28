@@ -34,7 +34,7 @@ variables (Λ : PolyhedralLattice.{u}) (N : ℕ) [hN : fact (0 < N)]
 include hN
 
 def rescaled_power : PolyhedralLattice :=
-@of (rescale N (fin N) →₀ Λ) $ @rescale.polyhedral_lattice N (fin N →₀ Λ) _ _
+of (rescale N $ fin N →₀ Λ)
 
 def diagonal_embedding : Λ ⟶ rescaled_power Λ N :=
 { to_fun := λ l, @rescale.of N (fin N →₀ Λ) $ ∑ i, single_add_hom i l,
@@ -53,6 +53,20 @@ def diagonal_embedding : Λ ⟶ rescaled_power Λ N :=
     { ext i, simp only [finset.sum_ite_eq', finset.mem_univ, if_true] },
     rw [mul_comm, nsmul_eq_mul, finset.card_univ, fintype.card_fin],
   end }
+
+instance : fact (polyhedral_lattice_hom.to_add_monoid_hom (Λ.diagonal_embedding N)).range.saturated :=
+begin
+  refine ⟨λ n l' h, _⟩,
+  by_cases hn : n = 0, { exact or.inl hn },
+  have h0N : 0 < N := fact.out _,
+  let l₀ : ↥Λ := ((@rescale.of N ((fin N) →₀ Λ)).symm l' : fin N →₀ Λ) ⟨0, h0N⟩,
+  refine or.inr ⟨l₀, _⟩,
+  simp only [polyhedral_lattice_hom.coe_to_add_monoid_hom, add_monoid_hom.mem_range] at h ⊢,
+  rw gsmul_eq_smul at h,
+  obtain ⟨l, hl⟩ := h,
+  ext i,
+  sorry
+end
 
 def cosimplicial : simplex_category ⥤ PolyhedralLattice.{u} :=
 Cech_conerve $ diagonal_embedding Λ N

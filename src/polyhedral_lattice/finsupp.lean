@@ -74,7 +74,7 @@ variables [polyhedral_lattice Λ]
 instance {ι : Type} [fintype ι] : polyhedral_lattice (ι →₀ Λ) :=
 { finite_free :=
   begin
-    obtain ⟨J, _instJ, l, hl⟩ := @polyhedral_lattice.finite_free Λ _, resetI,
+    obtain ⟨J, _instJ, l, hl⟩ := polyhedral_lattice.finite_free Λ, resetI,
     exact ⟨_, infer_instance, _, @is_basis_single ℤ Λ ι _ _ _ _ (λ i, l) (λ i, hl)⟩
   end,
   polyhedral :=

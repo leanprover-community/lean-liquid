@@ -1,4 +1,5 @@
 import topology.category.Profinite
+import category_theory.filtered
 
 import locally_constant.analysis
 import normed_group.NormedGroup
@@ -50,6 +51,14 @@ def LocallyConstant : NormedGroup ⥤ Profiniteᵒᵖ ⥤ NormedGroup :=
 lemma LocallyConstant_obj_map_norm_noninc (V : NormedGroup) (X Y : Profiniteᵒᵖ) (φ : X ⟶ Y) :
   ((LocallyConstant.obj V).map φ).norm_noninc :=
 comap_hom_norm_noninc _ _
+
+open category_theory
+
+universe u
+
+@[nolint unused_arguments]
+instance {M : NormedGroup.{u}} {J : Type u} [small_category J] [is_filtered J] :
+  limits.preserves_colimits_of_shape J (LocallyConstant.obj M) := sorry
 
 end NormedGroup
 #lint- only unused_arguments def_lemma doc_blame

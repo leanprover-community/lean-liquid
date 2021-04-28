@@ -1,4 +1,6 @@
 import algebraic_topology.simplicial_object
+import linear_algebra.free_module
+import ring_theory.int.basic
 
 import polyhedral_lattice.finsupp
 import polyhedral_lattice.category
@@ -7,6 +9,7 @@ import for_mathlib.free_abelian_group
 import for_mathlib.normed_group_quotient
 import for_mathlib.finsupp
 import for_mathlib.normed_group
+
 
 /-!
 # The Čech conerve attached to `Λ → Λ'`
@@ -25,10 +28,29 @@ noncomputable theory
 
 open_locale big_operators
 
+namespace subgroup -- move this section
+
+variables {G : Type*} [group G]
+
+@[to_additive]
+def saturated (H : subgroup G) : Prop := ∀ ⦃n g⦄, gpow n g ∈ H → n = 0 ∨ g ∈ H
+
+@[to_additive]
+lemma closure_saturated (s : set G) (H : ∀ n g, gpow n g ∈ s → n = 0 ∨ g ∈ closure s) :
+  (closure s).saturated :=
+begin
+  intros n g h,
+  rw or_iff_not_imp_left,
+  intro hn,
+  sorry
+end
+
+end subgroup
+
 namespace polyhedral_lattice
 
 variables {Λ Λ' : Type*} [polyhedral_lattice Λ] [polyhedral_lattice Λ']
-variables (f : polyhedral_lattice_hom Λ Λ')
+variables (f : polyhedral_lattice_hom Λ Λ') [fact f.to_add_monoid_hom.range.saturated]
 
 namespace conerve
 
@@ -40,23 +62,108 @@ section objects
 
 variables (m : ℕ)
 
-def L : add_subgroup (fin m →₀ Λ') :=
-add_subgroup.closure $
+def Lset : set (fin m →₀ Λ') :=
 {x | ∃ (l : Λ) (n : fin m →₀ ℤ) (hn : n.sum (λ _, add_monoid_hom.id _) = 0),
      x = finsupp.map_range_hom (int.cast_add_hom' (f l)) n}
 
--- jmc : I don't think we need this one
-lemma L_zero : L f 0 = ⊥ := sorry
+def L : add_subgroup (fin m →₀ Λ') := add_subgroup.closure $ Lset f m
 
-lemma L_one : L f 1 = ⊥ := sorry
+-- jmc : I don't think we need this one
+-- lemma L_zero : L f 0 = ⊥ := by admit
+
+@[simp] lemma L_one : L f 1 = ⊥ :=
+begin
+  refine add_subgroup.closure_eq_of_le ⊥ _ bot_le,
+  simp only [and_imp, exists_prop, set.subset_singleton_iff, finsupp.map_range_hom_apply,
+    add_subgroup.coe_bot, set.mem_set_of_eq, exists_imp_distrib, finsupp.sum,
+    add_monoid_hom.id_apply, Lset],
+  rintro _ l n hn rfl,
+  suffices : n = 0, { simp only [this, finsupp.map_range_zero] },
+  ext i, fin_cases i,
+  simp only [finsupp.coe_zero, pi.zero_apply, ← hn],
+  have aux : ∀ s : finset (fin 1), s = ∅ ∨ s = {0}, { dec_trivial },
+  cases aux n.support with h' h',
+  { simp only [h', finset.sum_empty, ← finsupp.not_mem_support_iff, finset.not_mem_empty, not_false_iff] },
+  { simp only [h', finset.sum_singleton], }
+end
+
+lemma int.div_eq_zero (d n : ℤ) (h : d ∣ n) (H : n / d = 0) : n = 0 :=
+begin
+  rw [← int.mul_div_cancel' h, H, mul_zero]
+end
+
+-- === WARNING: we will need some sort of torsion-free condition on the cokernel of `f`
+lemma L_saturated : (L f m).saturated :=
+begin
+  have key : f.to_add_monoid_hom.range.saturated := fact.out _,
+  classical,
+  apply add_subgroup.closure_saturated,
+  rintro n g ⟨l, N, hN, H⟩,
+  rw [gsmul_eq_smul] at H,
+  let d : ℤ := int.gcd n (N.support.gcd N),
+  have hdn : d ∣ n := int.gcd_dvd_left _ _,
+  let e := n / d,
+  have hde : e * d = n := int.div_mul_cancel hdn,
+  have hen : e ∣ n := ⟨d, hde.symm⟩,
+  let N' := N.map_range (λ x, x / d) (int.zero_div _),
+  have hN' : N = d • N',
+  { sorry },
+  suffices : ∃ fl', e • fl' = f l,
+  { obtain ⟨fl', hfl'⟩ := this,
+    have : f l ∈ f.to_add_monoid_hom.range,
+    { simp only [polyhedral_lattice_hom.coe_to_add_monoid_hom, add_monoid_hom.mem_range, exists_apply_eq_apply], },
+    rw ← hfl' at this,
+    obtain (he|⟨l', hl'⟩) := key this,
+    { dsimp [e] at he, rw [← int.mul_div_cancel' hdn],
+      simp only [he, mul_zero, eq_self_iff_true, true_or] },
+    { rw or_iff_not_imp_left,
+      intro hn,
+      refine add_subgroup.subset_closure _,
+      refine ⟨l', N', _, _⟩,
+      { sorry },
+      { rw polyhedral_lattice_hom.coe_to_add_monoid_hom at hl',
+        apply @smul_injective ℤ (fin m →₀ Λ') _ _ _ _ n hn,
+        dsimp only,
+        sorry } } },
+  sorry
+end
 
 def obj := quotient_add_group.quotient (L f m)
 
 instance : semi_normed_group (obj f m) :=
 normed_group_hom.semi_normed_group_quotient _
 
+def π : (fin m →₀ Λ') →+ obj f m :=
+by convert quotient_add_group.mk' (L f m)
+
+lemma π_apply_eq_zero_iff (x : fin m →₀ Λ') : π f m x = 0 ↔ x ∈ L f m :=
+by convert quotient_add_group.mk'_eq_zero_iff
+
+lemma π_surjective : function.surjective (π f m) :=
+quotient.surjective_quotient_mk'
+
+instance : no_zero_smul_divisors ℤ (obj f m) :=
+{ eq_zero_or_eq_zero_of_smul_eq_zero :=
+  begin
+    intros n x h,
+    obtain ⟨x, rfl⟩ := π_surjective f m x,
+    simp only [← add_monoid_hom.map_gsmul, π_apply_eq_zero_iff] at h ⊢,
+    exact L_saturated _ _ h
+  end }
+
+lemma obj_finite_free : _root_.finite_free (obj f m) :=
+begin
+  obtain ⟨ι, _inst_ι, b, hb⟩ := polyhedral_lattice.finite_free (fin m →₀ Λ'), resetI,
+  let φ := (π f m).to_int_linear_map,
+  suffices : submodule.span ℤ (set.range (φ ∘ b)) = ⊤,
+  { obtain ⟨n, b, hb⟩ := module.free_of_finite_type_torsion_free this,
+    exact ⟨fin n, infer_instance, b, hb⟩ },
+  rw [set.range_comp, ← submodule.map_span, hb.2, submodule.map_top, linear_map.range_eq_top],
+  exact π_surjective f m
+end
+
 instance : polyhedral_lattice (obj f m) :=
-{ finite_free := sorry, -- we will need some sort of torsion-free condition on the cokernel of `f`
+{ finite_free := obj_finite_free _ _,
   polyhedral :=
   begin
     obtain ⟨ι, _inst_ι, l, hl, hl'⟩ := polyhedral_lattice.polyhedral (fin m →₀ Λ'),
@@ -172,7 +279,7 @@ universe variables u
 
 open polyhedral_lattice simplex_category category_theory
 
-variables {Λ Λ' : PolyhedralLattice.{u}} (f : Λ ⟶ Λ')
+variables {Λ Λ' : PolyhedralLattice.{u}} (f : Λ ⟶ Λ') [fact f.to_add_monoid_hom.range.saturated]
 
 namespace Cech_conerve
 

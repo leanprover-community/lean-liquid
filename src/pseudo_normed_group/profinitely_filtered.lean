@@ -454,6 +454,7 @@ variables {ι : Type*} (M : ι → Type*) [Π i, profinitely_filtered_pseudo_nor
 instance pi_topology (c : ℝ≥0) : topological_space (filtration (Π i, M i) c) :=
 topological_space.induced (filtration_pi_equiv M c) $ infer_instance
 
+@[simps apply symm_apply]
 def filtration_pi_homeo (c : ℝ≥0) :
   filtration (Π i, M i) c ≃ₜ Π i, filtration (M i) c :=
 { to_fun := λ x i, ⟨x.1 i, x.2 i⟩,
