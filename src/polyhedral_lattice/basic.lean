@@ -156,6 +156,13 @@ class polyhedral_lattice (Λ : Type*) extends semi_normed_group Λ :=
   -- this final condition ↑ ↑ ↑ ↑ effectively means that we have a `normed_group`
   -- but this condition is easier to check when forming quotients
 
+namespace polyhedral_lattice
+
+instance (Λ : Type*) [polyhedral_lattice Λ] : no_zero_smul_divisors ℤ Λ :=
+sorry
+
+end polyhedral_lattice
+
 /-- A morphism of polyhedral lattices is a norm-nonincreasing group homomorphism. -/
 structure polyhedral_lattice_hom (Λ₁ Λ₂ : Type*) [polyhedral_lattice Λ₁] [polyhedral_lattice Λ₂] :=
 (to_fun : Λ₁ → Λ₂)
@@ -241,6 +248,8 @@ f.to_add_monoid_hom.map_sum _ _
 @[simp] lemma map_sub (x y) : f (x - y) = f x - f y := f.to_add_monoid_hom.map_sub _ _
 
 @[simp] lemma map_neg (x) : f (-x) = -(f x) := f.to_add_monoid_hom.map_neg _
+
+@[simp] lemma map_gsmul (n : ℤ) (x) : f (n • x) = n • (f x) := f.to_add_monoid_hom.map_gsmul _ _
 
 instance : has_zero (polyhedral_lattice_hom Λ₁ Λ₂) :=
 ⟨(0 : Λ₁ →+ Λ₂).mk_polyhedral_lattice_hom (by simp [le_refl])⟩
