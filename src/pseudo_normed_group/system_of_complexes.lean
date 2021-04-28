@@ -193,6 +193,15 @@ lemma system_obj_d (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (
     ((BD.d j i).eval_CLCFPTinv r V r' _ _).app M :=
 rfl
 
+lemma system_map_iso_isometry {M₁ M₂ : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ}
+  (f : M₁ ≅ M₂) (i : ℕ) :
+  isometry ((((BD.system c_ r V r').map_iso f).hom.app (op c)).f i) :=
+begin
+  simp only [← iso.app_hom, ← complex_like.iso_app_hom],
+  apply NormedGroup.iso_isometry_of_norm_noninc;
+  apply complex.map_norm_noninc,
+end
+
 end
 
 section

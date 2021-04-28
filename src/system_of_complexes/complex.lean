@@ -520,6 +520,14 @@ def f_hom {C₁ C₂ : complex_like ι V cov} (i : ι) : (C₁ ⟶ C₂) →+ (C
 add_monoid_hom.mk' (λ f, differential_object.hom.f f i) (λ _ _, rfl)
 
 @[simps]
+def complex_like.iso_app
+  {C₁ C₂ : complex_like ι V cov} (f : C₁ ≅ C₂) (i : ι) : C₁.X i ≅ C₂.X i :=
+{ hom := f.hom.f i,
+  inv := f.inv.f i,
+  hom_inv_id' := by { erw [← comp_f, f.hom_inv_id, id_f], refl },
+  inv_hom_id' := by { erw [← comp_f, f.inv_hom_id, id_f], refl } }
+
+@[simps]
 def iso_of_components {C₁ C₂ : complex_like ι V cov} (f : Π i, C₁.X i ≅ C₂.X i)
   (hf : ∀ i j, C₁.d i j ≫ (f j).hom = (f i).hom ≫ C₂.d i j) :
   C₁ ≅ C₂ :=

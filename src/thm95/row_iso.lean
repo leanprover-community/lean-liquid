@@ -245,7 +245,8 @@ def mul_rescale_iso_row_one
     ((thm95.double_complex BD c_ r r' V Λ M N).row 1) :=
 (mul_system_iso BD _ r V N _) ≪≫
 (system_rescale_iso BD c_ r V _ _) ≪≫
-((BD.system c_ r V r').map_iso $ sorry)
+((BD.system c_ r V r').map_iso $
+  by { dsimp [thm95.Cech_nerve], refine iso.op _, sorry })
 
 lemma mul_rescale_iso_row_one_strict
   (N : ℕ) [fact (0 < N)] (N' : ℝ≥0) (h : N' = N)
@@ -256,9 +257,8 @@ lemma mul_rescale_iso_row_one_strict
 begin
   apply normed_group_hom.norm_eq_of_isometry,
   refine isometry.comp (isometry.comp _ _) _,
-  { sorry; apply NormedGroup.iso_isometry_of_norm_noninc, },
-  { dsimp only,
-    apply CLCTinv.map_iso_isometry, },
+  { apply data.system_map_iso_isometry, },
+  { dsimp only, apply CLCTinv.map_iso_isometry, },
   { apply CLCTinv.map_iso_isometry, },
 end
 .
