@@ -53,19 +53,31 @@ def diagonal_embedding : Λ ⟶ rescaled_power Λ N :=
     { ext i, simp only [finset.sum_ite_eq', finset.mem_univ, if_true] },
     rw [mul_comm, nsmul_eq_mul, finset.card_univ, fintype.card_fin],
   end }
+.
+
+lemma diagonal_embedding_apply (l : Λ) (i : fin N) :
+  ((@rescale.of N ((fin N) →₀ Λ)).symm (Λ.diagonal_embedding N l) : fin N →₀ Λ) i = l :=
+by simp only [diagonal_embedding, single_add_hom_apply, finset.sum_apply',
+    polyhedral_lattice_hom.coe_mk, equiv.symm_apply_apply, finsupp.single_apply,
+    finset.sum_ite_eq', finset.mem_univ, if_true]
+
+lemma gsmul_rescaled_power (n : ℤ) (l : Λ.rescaled_power N) :
+  n • (@rescale.of N ((fin N) →₀ Λ)).symm l = (@rescale.of N ((fin N) →₀ Λ)).symm (n • l) :=
+rfl
 
 instance : fact (polyhedral_lattice_hom.to_add_monoid_hom (Λ.diagonal_embedding N)).range.saturated :=
 begin
   refine ⟨λ n l' h, _⟩,
   by_cases hn : n = 0, { exact or.inl hn },
-  have h0N : 0 < N := fact.out _,
-  let l₀ : ↥Λ := ((@rescale.of N ((fin N) →₀ Λ)).symm l' : fin N →₀ Λ) ⟨0, h0N⟩,
+  let l₀ : ↥Λ := ((@rescale.of N ((fin N) →₀ Λ)).symm l' : fin N →₀ Λ) ⟨0, hN.1⟩,
   refine or.inr ⟨l₀, _⟩,
   simp only [polyhedral_lattice_hom.coe_to_add_monoid_hom, add_monoid_hom.mem_range] at h ⊢,
   rw gsmul_eq_smul at h,
   obtain ⟨l, hl⟩ := h,
-  ext i,
-  sorry
+  refine @smul_injective ℤ _ _ _ _ _ n hn _ _ _, dsimp,
+  rw [← hl, ← polyhedral_lattice_hom.map_gsmul],
+  dsimp only [l₀],
+  rw [← finsupp.smul_apply, gsmul_rescaled_power _ _ n l', ← hl, diagonal_embedding_apply],
 end
 
 def cosimplicial : simplex_category ⥤ PolyhedralLattice.{u} :=
