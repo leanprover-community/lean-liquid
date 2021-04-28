@@ -1,4 +1,5 @@
 import rescale.normed_group
+import polyhedral_lattice.category
 
 /-!
 
@@ -35,3 +36,20 @@ instance (Λ : Type*) [hN : fact (0 < N)] [polyhedral_lattice Λ] :
   end }
 
 end rescale
+
+namespace PolyhedralLattice
+
+@[simps] protected def rescale (N : ℝ≥0) [hN : fact (0 < N)] :
+  PolyhedralLattice ⥤ PolyhedralLattice :=
+{ obj := λ Λ, of (rescale N Λ),
+  map := λ Λ₁ Λ₂ f,
+  { to_fun := λ l, @rescale.of N Λ₂ (f ((@rescale.of N Λ₁).symm l)),
+    map_add' := f.map_add, -- defeq abuse
+    strict' := λ l,
+    begin
+      simp only [← coe_nnnorm, nnreal.coe_le_coe],
+      erw [rescale.nnnorm_def, rescale.nnnorm_def], simp only [div_eq_mul_inv],
+      exact mul_le_mul' (f.strict l) le_rfl
+    end } }
+
+end PolyhedralLattice

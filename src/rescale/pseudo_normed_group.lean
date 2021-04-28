@@ -1,4 +1,4 @@
-import pseudo_normed_group.with_Tinv
+import pseudo_normed_group.category
 import rescale.basic
 
 noncomputable theory
@@ -92,3 +92,25 @@ instance : profinitely_filtered_pseudo_normed_group_with_Tinv r' (rescale r M) :
 end profinitely_filtered_pseudo_normed_group_with_Tinv
 
 end rescale
+
+namespace ProFiltPseuNormGrpWithTinv
+
+variables (r' : ℝ≥0) [fact (0 < r')]
+
+@[simps]
+def rescale (N : ℝ≥0) : ProFiltPseuNormGrpWithTinv r' ⥤ ProFiltPseuNormGrpWithTinv r' :=
+{ obj := λ M, of r' $ rescale N M,
+  map := λ M₁ M₂ f,
+  { to_fun := λ x, @rescale.of N M₂ (f ((@rescale.of N M₁).symm x)),
+    map_zero' := f.map_zero,
+    map_add' := f.map_add,
+    strict' := λ c x hx,
+    begin
+      erw rescale.mem_filtration at hx ⊢,
+      rw [equiv.symm_apply_apply],
+      exact f.strict hx,
+    end,
+    continuous' := λ c, sorry,
+    map_Tinv' := f.map_Tinv } }
+
+end ProFiltPseuNormGrpWithTinv

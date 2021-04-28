@@ -243,10 +243,10 @@ def mul_rescale_iso_row_one
   (Λ : PolyhedralLattice) (M : ProFiltPseuNormGrpWithTinv.{u} r') :
   (((data.mul N).obj BD).system (rescale_constants c_ N') r V r').obj (op (Hom Λ M)) ≅
     ((thm95.double_complex BD c_ r r' V Λ M N).row 1) :=
-(mul_system_iso BD _ r V N _) ≪≫
-(system_rescale_iso BD c_ r V _ _) ≪≫
+(mul_system_iso _ _ r V N _) ≪≫
+(system_rescale_iso _ c_ r V _ _) ≪≫
 ((BD.system c_ r V r').map_iso $
-  by { dsimp [thm95.Cech_nerve], refine iso.op _, sorry })
+  (PolyhedralLattice.Hom_cosimplicial_zero_iso Λ N r' M N' h).op)
 
 lemma mul_rescale_iso_row_one_strict
   (N : ℕ) [fact (0 < N)] (N' : ℝ≥0) (h : N' = N)

@@ -1,6 +1,8 @@
 import thm95.double_complex
 import rescale.Tinv
 
+import for_mathlib.category
+
 universe variables u
 
 noncomputable theory
@@ -153,10 +155,32 @@ section
 
 variables [fact (0 < r')] (N' : ℝ≥0)
 
--- def foo (h : N' = N) :
---   polyhedral_lattice.Hom ((Λ.cosimplicial N).obj (simplex_category.mk 0)) M ≅
---   (ProFiltPseuNormGrpWithTinv.of r' (rescale N' ((polyhedral_lattice.Hom Λ M) ^ N))) :=
--- _ ≪≫ _
+def Hom_cosimplicial_zero_iso' :
+  (Hom M).obj (of $ rescale N (of (fin N →₀ Λ))) ≅
+  (Hom M).obj ((Λ.cosimplicial N).obj (mk 0)) :=
+(Hom M).map_iso $ (conerve_obj_one_iso _ _).symm
+
+def Hom_cosimplicial_zero_iso_aux (h : N' = N) :
+  ProFiltPseuNormGrpWithTinv.of r' (rescale N (polyhedral_lattice.Hom Λ M)) ≅
+  (ProFiltPseuNormGrpWithTinv.rescale r' N').obj (polyhedral_lattice.Hom Λ M) :=
+begin
+  rw h, exact iso.refl _
+end
+
+/-- jmc is not very proud of this -/
+def aahrg :
+  unop ((Hom M).obj (of (rescale ↑N ↥(of (fin N →₀ ↥Λ))))) ≅
+  polyhedral_lattice.Hom (rescale ↑N ↥(of (fin N →₀ ↥Λ))) ↥M :=
+iso.refl _
+
+def Hom_cosimplicial_zero_iso (h : N' = N) :
+  polyhedral_lattice.Hom ((Λ.cosimplicial N).obj (simplex_category.mk 0)) M ≅
+  (ProFiltPseuNormGrpWithTinv.of r' (rescale N' ((polyhedral_lattice.Hom Λ M) ^ N))) :=
+(Hom_cosimplicial_zero_iso' Λ N r' M).unop ≪≫
+aahrg _ _ _ _ ≪≫
+(Hom_rescale_iso (of (fin N →₀ ↥Λ)) N r' M) ≪≫
+Hom_cosimplicial_zero_iso_aux _ _ _ _ _ h ≪≫
+(ProFiltPseuNormGrpWithTinv.rescale r' N').map_iso (Hom_finsupp_iso Λ N r' M)
 
 end
 
