@@ -41,10 +41,12 @@ section objects
 
 variables (m : ℕ)
 
-def L : add_subgroup (fin m →₀ Λ') :=
-add_subgroup.closure $
+def Lset : set (fin m →₀ Λ') :=
 {x | ∃ (l : Λ) (n : fin m →₀ ℤ) (hn : n.sum (λ _, add_monoid_hom.id _) = 0),
      x = finsupp.map_range_hom (int.cast_add_hom' (f l)) n}
+
+def L : add_subgroup (fin m →₀ Λ') :=
+add_subgroup.closure $ Lset f m
 
 -- jmc : I don't think we need this one
 -- lemma L_zero : L f 0 = ⊥ := by admit
@@ -54,7 +56,7 @@ begin
   refine add_subgroup.closure_eq_of_le ⊥ _ bot_le,
   simp only [and_imp, exists_prop, set.subset_singleton_iff, finsupp.map_range_hom_apply,
     add_subgroup.coe_bot, set.mem_set_of_eq, exists_imp_distrib, finsupp.sum,
-    add_monoid_hom.id_apply],
+    add_monoid_hom.id_apply, Lset],
   rintro _ l n hn rfl,
   suffices : n = 0, { simp only [this, finsupp.map_range_zero] },
   ext i, fin_cases i,
@@ -65,6 +67,14 @@ begin
   { simp only [h', finset.sum_singleton], }
 end
 
+-- === WARNING: we will need some sort of torsion-free condition on the cokernel of `f`
+lemma L_saturated (n : ℤ) (x : fin m →₀ Λ') (h : n • x ∈ L f m) : n = 0 ∨ x ∈ L f m :=
+begin
+  dsimp only [L] at h ⊢,
+  rw [← submodule.span_int_eq_add_subgroup_closure] at h ⊢,
+  sorry
+end
+
 def obj := quotient_add_group.quotient (L f m)
 
 instance : semi_normed_group (obj f m) :=
@@ -73,9 +83,20 @@ normed_group_hom.semi_normed_group_quotient _
 def π : (fin m →₀ Λ') →+ obj f m :=
 by convert quotient_add_group.mk' (L f m)
 
--- === WARNING: we will need some sort of torsion-free condition on the cokernel of `f`
+lemma π_apply_eq_zero_iff (x : fin m →₀ Λ') : π f m x = 0 ↔ x ∈ L f m :=
+by convert quotient_add_group.mk'_eq_zero_iff
+
+lemma π_surjective : function.surjective (π f m) :=
+quotient.surjective_quotient_mk'
+
 instance : no_zero_smul_divisors ℤ (obj f m) :=
-sorry
+{ eq_zero_or_eq_zero_of_smul_eq_zero :=
+  begin
+    intros n x h,
+    obtain ⟨x, rfl⟩ := π_surjective f m x,
+    simp only [← add_monoid_hom.map_gsmul, π_apply_eq_zero_iff] at h ⊢,
+    exact L_saturated _ _ _ _ h
+  end }
 
 lemma obj_finite_free : _root_.finite_free (obj f m) :=
 begin
@@ -85,7 +106,7 @@ begin
   { obtain ⟨n, b, hb⟩ := module.free_of_finite_type_torsion_free this,
     exact ⟨fin n, infer_instance, b, hb⟩ },
   rw [set.range_comp, ← submodule.map_span, hb.2, submodule.map_top, linear_map.range_eq_top],
-  exact quotient.surjective_quotient_mk'
+  exact π_surjective f m
 end
 
 instance : polyhedral_lattice (obj f m) :=
