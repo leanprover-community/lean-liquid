@@ -51,5 +51,7 @@ lemma LocallyConstant_obj_map_norm_noninc (V : NormedGroup) (X Y : Profiniteᵒ�
   ((LocallyConstant.obj V).map φ).norm_noninc :=
 comap_hom_norm_noninc _ _
 
+instance {M} : category_theory.limits.preserves_colimits (LocallyConstant.obj M) := sorry
+
 end NormedGroup
 #lint- only unused_arguments def_lemma doc_blame
