@@ -123,8 +123,8 @@ end Eric_PR
 structure add_monoid_grading (M : Type*) [add_monoid M] [decidable_eq M] (R : Type*) [semiring R] :=
 (pieces : M → add_submonoid R)
 (direct_sum : direct_sum.add_submonoid_is_internal pieces)
-(grading_one : (1 : R) ∈ pieces 0)
-(grading_mul : ∀ (m n : M) (r s : R),
+(one_mem : (1 : R) ∈ pieces 0)
+(mul_mem : ∀ (m n : M) (r s : R),
   r ∈ pieces m → s ∈ pieces n → r * s ∈ pieces (m + n))
 
 /-- If `M` is a monoid, then an `M`-grading on a ring `R` is a decomposition of `R` as
@@ -133,8 +133,8 @@ structure add_monoid_grading (M : Type*) [add_monoid M] [decidable_eq M] (R : Ty
 structure monoid_grading (M : Type*) [monoid M] [decidable_eq M] (R : Type*) [semiring R] :=
 (pieces : M → add_submonoid R)
 (is_direct_sum : direct_sum.add_submonoid_is_internal pieces)
-(grading_one : (1 : R) ∈ pieces 1)
-(grading_mul : ∀ (m n : M) (r s : R),
+(one_mem : (1 : R) ∈ pieces 1)
+(mul_mem : ∀ (m n : M) (r s : R),
   r ∈ pieces m → s ∈ pieces n → r * s ∈ pieces (m * n))
 
 attribute [to_additive] monoid_grading
@@ -156,6 +156,7 @@ noncomputable def decomposition (g : monoid_grading M R) :
 (add_equiv.of_bijective _ g.is_direct_sum).symm
 
 /-- Decomposing `r` into `(rₘ)ₘ : ⨁ m, g.pieces m` and then adding the pieces gives `r` again. -/
+@[to_additive]
 lemma sum_decomposition (g : monoid_grading M R) (r : R) :
   (direct_sum.to_add_monoid (λ m, (g.pieces m).subtype) : (⨁ m, g.pieces m) →+ R)
     (g.decomposition r) = r :=
@@ -208,9 +209,10 @@ If `g : monoid_grading M R` and `r : R` then its `m`th component `rₘ` is `g.de
 -/
 
 -- let's test the API for grading
+@[to_additive]
 lemma mem_piece_iff_single_support {R : Type*} [semiring R] {M : Type*} [monoid M]
   [decidable_eq M] (g : monoid_grading M R) (r : R) (m : M) :
-  r ∈ g.pieces m ↔ ∀ n, n ≠ m → g.decomposition r n = 0 :=
+  r ∈ g.pieces m ↔ ∀ ⦃n⦄, n ≠ m → g.decomposition r n = 0 :=
 begin
   split,
   { intros hrm n hn,
