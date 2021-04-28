@@ -1,4 +1,5 @@
 import algebraic_topology.simplicial_object
+import linear_algebra.free_module
 
 import polyhedral_lattice.finsupp
 import polyhedral_lattice.category
@@ -69,8 +70,26 @@ def obj := quotient_add_group.quotient (L f m)
 instance : semi_normed_group (obj f m) :=
 normed_group_hom.semi_normed_group_quotient _
 
+def π : (fin m →₀ Λ') →+ obj f m :=
+by convert quotient_add_group.mk' (L f m)
+
+-- === WARNING: we will need some sort of torsion-free condition on the cokernel of `f`
+instance : no_zero_smul_divisors ℤ (obj f m) :=
+sorry
+
+lemma obj_finite_free : _root_.finite_free (obj f m) :=
+begin
+  obtain ⟨ι, _inst_ι, b, hb⟩ := polyhedral_lattice.finite_free (fin m →₀ Λ'), resetI,
+  let φ := (π f m).to_int_linear_map,
+  suffices : submodule.span ℤ (set.range (φ ∘ b)) = ⊤,
+  { obtain ⟨n, b, hb⟩ := module.free_of_finite_type_torsion_free this,
+    exact ⟨fin n, infer_instance, b, hb⟩ },
+  rw [set.range_comp, ← submodule.map_span, hb.2, submodule.map_top, linear_map.range_eq_top],
+  exact quotient.surjective_quotient_mk'
+end
+
 instance : polyhedral_lattice (obj f m) :=
-{ finite_free := sorry, -- we will need some sort of torsion-free condition on the cokernel of `f`
+{ finite_free := obj_finite_free _ _,
   polyhedral :=
   begin
     obtain ⟨ι, _inst_ι, l, hl, hl'⟩ := polyhedral_lattice.polyhedral (fin m →₀ Λ'),

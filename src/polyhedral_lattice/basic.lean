@@ -150,7 +150,7 @@ end generates_norm
 
 class polyhedral_lattice (Λ : Type*) extends semi_normed_group Λ :=
 -- now we get to the actual definition
-(finite_free : finite_free Λ)
+(finite_free [] : finite_free Λ)
 (polyhedral [] : ∃ (ι : Type) [fintype ι] (l : ι → Λ),
   generates_norm l ∧ ∀ i, nnnorm (l i) ≠ 0)
   -- this final condition ↑ ↑ ↑ ↑ effectively means that we have a `normed_group`
