@@ -1,4 +1,3 @@
-#exit
 import for_mathlib.grading
 import algebra.monoid_algebra
 
@@ -6,6 +5,8 @@ import algebra.monoid_algebra
 
 ## Map to the monoid algebra
 
+Not sure if I'll ever need this. If `int_grading_lemma` becomes sorry-free and this
+isn't imported, I don't!
 -/
 
 namespace add_monoid_grading
