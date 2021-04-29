@@ -191,52 +191,6 @@ begin
   { intros i s his IH,
     simp only [finset.sum_insert his], resetI, apply_instance }
 end
-
-instance π₁_suitable (c : ℝ≥0) :
-  (π₁ n).suitable c c :=
-begin
-  intro i,
-  apply le_of_eq,
-  rw [π₁, finset.sum_eq_single (fin_sum_fin_equiv (sum.inl i))],
-  { simp only [matrix.reindex_linear_equiv_apply, matrix.reindex_apply, matrix.minor_apply,
-      equiv.symm_apply_apply],
-    dsimp [equiv.sum_empty],
-    simp only [matrix.one_apply_eq, nat.cast_one, int.nat_abs_one, one_mul] },
-  { rintro j - hj,
-    simp only [matrix.reindex_linear_equiv_apply, equiv.symm_apply_apply],
-    dsimp [equiv.sum_empty],
-    generalize hj' : fin_sum_fin_equiv.symm j = j',
-    cases j' with j' j',
-    { dsimp,
-      suffices : i ≠ j',
-      { simp only [this, matrix.one_apply_ne, ne.def, not_false_iff, nat.cast_zero, int.nat_abs_zero] },
-      rintro rfl, apply hj, rw [← hj', equiv.apply_symm_apply] },
-    { dsimp, refl } },
-  { intro h, exact (h $ finset.mem_univ _).elim }
-end
-
-instance π₂_suitable (c : ℝ≥0) :
-  (π₂ n).suitable c c :=
-begin
-  intro i,
-  apply le_of_eq,
-  rw [π₂, finset.sum_eq_single (fin_sum_fin_equiv (sum.inr i))],
-  { simp only [matrix.reindex_linear_equiv_apply, matrix.reindex_apply, matrix.minor_apply,
-      equiv.symm_apply_apply],
-    dsimp [equiv.sum_empty],
-    simp only [matrix.one_apply_eq, nat.cast_one, int.nat_abs_one, one_mul] },
-  { rintro j - hj,
-    simp only [matrix.reindex_linear_equiv_apply, equiv.symm_apply_apply],
-    dsimp [equiv.sum_empty],
-    generalize hj' : fin_sum_fin_equiv.symm j = j',
-    cases j' with j' j',
-    { dsimp, refl },
-    { dsimp,
-      suffices : i ≠ j',
-      { simp only [this, matrix.one_apply_ne, ne.def, not_false_iff, nat.cast_zero, int.nat_abs_zero] },
-      rintro rfl, apply hj, rw [← hj', equiv.apply_symm_apply] } },
-  { intro h, exact (h $ finset.mem_univ _).elim }
-end
 .
 
 instance proj_suitable (N : ℕ) (k : fin N) (c : ℝ≥0) : (proj n k).suitable c c :=
@@ -511,20 +465,6 @@ begin
     simp only [add_monoid_hom.coe_add, add_monoid_hom.map_add, pi.add_apply],
     resetI, apply_instance }
 end
-
-instance σ_suitable (c : ℝ≥0) (n : ℕ) : (σ n).suitable (c * 2⁻¹) c :=
-begin
-  refine @universal_map.suitable_of _ _ _ _ _ (_root_.id _),
-  have : c = c * 2⁻¹ + c * 2⁻¹,
-  { rw [← mul_add], convert_to c = c * 1 using 2,
-    { ext, norm_num },
-    { rw mul_one } },
-  conv { congr, skip, skip, rw this },
-  apply basic_universal_map.suitable_add
-end
-
-instance π_suitable (c : ℝ≥0) (n : ℕ) : (π n).suitable c c :=
-universal_map.suitable_add
 
 instance sum_suitable (c : ℝ≥0) (n N : ℕ) : (sum n N).suitable (c * N⁻¹) c :=
 begin

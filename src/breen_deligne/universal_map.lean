@@ -40,40 +40,8 @@ open free_abelian_group
 
 
 section move_this
-variables {A : Type*}
 
 attribute [simps] equiv.sum_empty equiv.prod_punit equiv.punit_prod
-
-def L {m n : ℕ} (x : A ^ (m+n)) : A ^ m := λ i, x $ fin_sum_fin_equiv $ sum.inl i
-
-def R {m n : ℕ} (x : A ^ (m+n)) : A ^ n := λ i, x $ fin_sum_fin_equiv $ sum.inr i
-
-@[simps]
-def split {m n : ℕ} : A ^ (m + n) ≃ A ^ m × A ^ n :=
-{ to_fun := λ x, (L x, R x),
-  inv_fun := λ x j, sum.elim x.1 x.2 (fin_sum_fin_equiv.symm j),
-  left_inv := λ x, by { ext j, dsimp [L, R, fin_sum_fin_equiv], split_ifs with h h,
-    { dsimp, cases j, refl, },
-    { dsimp, cases j, congr, push_neg at h, rw nat.add_sub_cancel' h, refl } },
-  right_inv := λ x,
-  begin
-    ext j; dsimp [L, R],
-    { rw fin_sum_fin_equiv_symm_apply_left, swap, exact j.2, simp only [sum.elim_inl, fin.eta] },
-    { ext j, rw fin_sum_fin_equiv_symm_apply_right, swap,
-      { simp only [le_add_iff_nonneg_right, zero_le', fin.coe_mk] },
-      { simp only [nat.add_sub_cancel_left, sum.elim_inr, fin.eta] } }
-  end }
-
-@[ext] lemma map_to_pi_add_ext
-  {A B : Type*} {m n : ℕ} (f g : A → B ^ (m + n))
-  (h1 : L ∘ f = L ∘ g) (h2 : R ∘ f = R ∘ g) :
-  f = g :=
-begin
-  ext1 x, apply split.injective,
-  revert x, rw [← function.funext_iff],
-  rw [function.funext_iff] at h1 h2,
-  ext1 x, ext1, { exact h1 x }, { exact h2 x }
-end
 
 end move_this
 
@@ -155,68 +123,6 @@ matrix.one_mul f
 
 @[simp] lemma comp_id : comp g (id _) = g :=
 matrix.mul_one g
-/-
-We use a small hack: mathlib only has block matrices with 4 blocks.
-So we add two zero-width blocks in the definition of `σ`, `π₁`, and `π₂`.
--/
-
-/-- The basic universal map `ℤ[A^n ⊕ A^n] → ℤ[A^n]` that is first projection map. -/
-def π₁ (n : ℕ) : basic_universal_map (n + n) n :=
-matrix.reindex_linear_equiv (equiv.sum_empty _) fin_sum_fin_equiv $
-matrix.from_blocks 1 0 0 0
-
-/-- The basic universal map `ℤ[A^n ⊕ A^n] → ℤ[A^n]` that is second projection map. -/
-def π₂ (n : ℕ) : basic_universal_map (n + n) n :=
-matrix.reindex_linear_equiv (equiv.sum_empty _) fin_sum_fin_equiv $
-matrix.from_blocks 0 1 0 0
-
-lemma pre_eval_π₁ (n : ℕ) : pre_eval A (π₁ n) = L :=
-begin
-  ext x i,
-  dsimp only [pre_eval, π₁, add_monoid_hom.mk'_apply],
-  rw finset.sum_eq_single (fin_sum_fin_equiv $ sum.inl i),
-  { rw [matrix.reindex_linear_equiv_apply, matrix.reindex_apply, matrix.minor_apply,
-      equiv.symm_apply_apply],
-    dsimp only [equiv.sum_empty_symm_apply, matrix.from_blocks_apply₁₁],
-    simp only [one_smul, matrix.one_apply_eq, L] },
-  { rintro j - hj,
-    simp only [matrix.reindex_linear_equiv_apply, matrix.reindex_apply, matrix.minor_apply,
-      equiv.symm_apply_apply],
-    dsimp only [equiv.sum_empty_symm_apply],
-    generalize hj' : fin_sum_fin_equiv.symm j = j',
-    cases j' with j' j',
-    { have : i ≠ j', { rintro rfl, apply hj, rw [← hj', equiv.apply_symm_apply] },
-      simp only [matrix.from_blocks_apply₁₁, matrix.one_apply_ne this, zero_smul] },
-    { simp only [matrix.from_blocks_apply₁₂, dmatrix.zero_apply, zero_smul] } },
-  { intro h, exact (h (finset.mem_univ _)).elim }
-end
-
-lemma eval_π₁ (n : ℕ) : eval A (π₁ n) = map L :=
-by rw [eval, pre_eval_π₁]
-
-lemma pre_eval_π₂ (n : ℕ) : pre_eval A (π₂ n) = R :=
-begin
-  ext x i,
-  dsimp only [pre_eval, π₂, add_monoid_hom.mk'_apply],
-  rw finset.sum_eq_single (fin_sum_fin_equiv $ sum.inr i),
-  { rw [matrix.reindex_linear_equiv_apply, matrix.reindex_apply, matrix.minor_apply,
-    equiv.symm_apply_apply],
-    dsimp only [equiv.sum_empty_symm_apply, matrix.from_blocks_apply₁₂],
-    simp only [one_smul, matrix.one_apply_eq, R] },
-  { rintro j - hj,
-    simp only [matrix.reindex_linear_equiv_apply, matrix.reindex_apply, matrix.minor_apply,
-      equiv.symm_apply_apply],
-    dsimp only [equiv.sum_empty_symm_apply],
-    generalize hj' : fin_sum_fin_equiv.symm j = j',
-    cases j' with j' j',
-    { simp only [matrix.from_blocks_apply₁₁, dmatrix.zero_apply, zero_smul] },
-    { have : i ≠ j', { rintro rfl, apply hj, rw [← hj', equiv.apply_symm_apply] },
-      simp only [matrix.from_blocks_apply₁₂, matrix.one_apply_ne this, zero_smul] } },
-  { intro h, exact (h (finset.mem_univ _)).elim }
-end
-
-lemma eval_π₂ (n : ℕ) : eval A (π₂ n) = map R :=
-by rw [eval, pre_eval_π₂]
 
 def mul (N : ℕ) : basic_universal_map m n →+ basic_universal_map (N * m) (N * n) :=
 add_monoid_hom.mk'
@@ -508,25 +414,6 @@ begin
     exact (h i $ s.mem_insert_self i).add (IH $ λ j hj, h j $ finset.mem_insert_of_mem hj) }
 end
 
-end
-
-/-- The universal map `ℤ[A^n ⊕ A^n] → ℤ[A^n]` induced by the addition on `A^n`. -/
-def σ (n : ℕ) : universal_map (n + n) n :=
-of $ basic_universal_map.π₁ n + basic_universal_map.π₂ n
-
-/-- The universal map `ℤ[A^n ⊕ A^n] → ℤ[A^n]` that is the sum of the projection maps. -/
-def π (n : ℕ) : universal_map (n + n) n :=
-(of $ basic_universal_map.π₁ n) + (of $ basic_universal_map.π₂ n)
-
-lemma eval_σ (n : ℕ) : eval A (σ n) = map (L + R) :=
-by simp only [σ, eval_of, basic_universal_map.eval, add_monoid_hom.map_add,
-    basic_universal_map.pre_eval_π₁, basic_universal_map.pre_eval_π₂]
-
-lemma eval_π (n : ℕ) : eval A (π n) = map L + map R :=
-begin
-  ext x,
-  simp only [π, add_monoid_hom.map_add, map_of', add_monoid_hom.add_apply, eval_of,
-    basic_universal_map.eval_π₁, basic_universal_map.eval_π₂],
 end
 
 section mul
