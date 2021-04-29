@@ -47,10 +47,6 @@ lemma T_inv_eq [normed_with_aut r V] [fact (0 < r)] : (T r V).inv = T_inv r V :=
 
 end CLC
 
-/-- `CLCP V n` is the functor that sends a profinite set `S` to `V-hat(S^n)` -/
-def CLCP (V : NormedGroup) (n : ℕ) : Profiniteᵒᵖ ⥤ NormedGroup :=
-LCP V n ⋙ Completion
-
 /-- `CLFCP v r' c n` is the functor sending a profinitely-filtered `T⁻¹`-module `M`
    to `V-hat((M_c)^n)` -/
 def CLCFP (V : NormedGroup) (r' : ℝ≥0) (c : ℝ≥0) (n : ℕ) :
