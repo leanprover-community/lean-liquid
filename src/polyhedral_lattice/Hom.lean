@@ -78,32 +78,11 @@ In the remainder of the file, we show that `Hom(ℤ, M)` is isomorphic to `M`.
 
 open pseudo_normed_group profinitely_filtered_pseudo_normed_group_with_Tinv_hom
 
-notation `Tinv` := profinitely_filtered_pseudo_normed_group_with_Tinv.Tinv
+local notation `Tinv` := profinitely_filtered_pseudo_normed_group_with_Tinv.Tinv
 
 variables {r' : ℝ≥0} [h0r' : fact (0 < r')] [hr'1 : fact (r' ≤ 1)]
 variables {M M₁ M₂ : ProFiltPseuNormGrpWithTinv.{u} r'}
 variables {f : M₁ ⟶ M₂}
-
-/-- The isomorphism induced by a bijective `profinitely_filtered_pseudo_normed_group_with_Tinv_hom`
-whose inverse is strict. -/
-noncomputable
-def iso_of_equiv_of_strict (e : M₁ ≃+ M₂) (he : ∀ x, f x = e x)
-  (strict : ∀ ⦃c x⦄, x ∈ filtration M₂ c → e.symm x ∈ filtration M₁ c) :
-  M₁ ≅ M₂ :=
-{ hom := f,
-  inv := inv_of_equiv_of_strict e he strict,
-  hom_inv_id' := by { ext x, simp [inv_of_equiv_of_strict, he] },
-  inv_hom_id' := by { ext x, simp [inv_of_equiv_of_strict, he] } }
-
-@[simp]
-lemma iso_of_equiv_of_strict.apply (e : M₁ ≃+ M₂) (he : ∀ x, f x = e x)
-  (strict : ∀ ⦃c x⦄, x ∈ filtration M₂ c → e.symm x ∈ filtration M₁ c) (x : M₁) :
-  (iso_of_equiv_of_strict e he strict).hom x = f x := rfl
-
-@[simp]
-lemma iso_of_equiv_of_strict_symm.apply (e : M₁ ≃+ M₂) (he : ∀ x, f x = e x)
-  (strict : ∀ ⦃c x⦄, x ∈ filtration M₂ c → e.symm x ∈ filtration M₁ c) (x : M₂) :
-  (iso_of_equiv_of_strict e he strict).symm.hom x = e.symm x := rfl
 
 variables (M)
 
@@ -155,6 +134,8 @@ by simpa [mul_one] using hf int.one_mem_filtration
 /-- The isomorphism `Hom ℤ M ≅ M` for `M` a `profinitely_filtered_pseudo_normed_group_with_Tinv`. -/
 noncomputable
 def HomZ_iso : Hom ℤ M ≅ M :=
-(iso_of_equiv_of_strict (HomZ_map_equiv M) (λ x, rfl) (HomZ_map_inverse_strict M)).symm
+(ProFiltPseuNormGrpWithTinv.iso_of_equiv_of_strict'
+  (HomZ_map_equiv M) (HomZ_map M).strict' (HomZ_map M).continuous' (HomZ_map M).map_Tinv'
+  (HomZ_map_inverse_strict M)).symm
 
 end polyhedral_lattice

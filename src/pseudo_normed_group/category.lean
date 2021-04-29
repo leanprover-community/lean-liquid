@@ -126,4 +126,47 @@ end
 --   map_comp' := by { intros, ext, refl } }
 
 
+open pseudo_normed_group profinitely_filtered_pseudo_normed_group_with_Tinv_hom
+
+open profinitely_filtered_pseudo_normed_group_with_Tinv (Tinv)
+
+variables {r'}
+variables {M M₁ M₂ : ProFiltPseuNormGrpWithTinv.{u} r'}
+variables {f : M₁ ⟶ M₂}
+
+/-- The isomorphism induced by a bijective `profinitely_filtered_pseudo_normed_group_with_Tinv_hom`
+whose inverse is strict. -/
+def iso_of_equiv_of_strict (e : M₁ ≃+ M₂) (he : ∀ x, f x = e x)
+  (strict : ∀ ⦃c x⦄, x ∈ filtration M₂ c → e.symm x ∈ filtration M₁ c) :
+  M₁ ≅ M₂ :=
+{ hom := f,
+  inv := inv_of_equiv_of_strict e he strict,
+  hom_inv_id' := by { ext x, simp [inv_of_equiv_of_strict, he] },
+  inv_hom_id' := by { ext x, simp [inv_of_equiv_of_strict, he] } }
+
+@[simp]
+lemma iso_of_equiv_of_strict.apply (e : M₁ ≃+ M₂) (he : ∀ x, f x = e x)
+  (strict : ∀ ⦃c x⦄, x ∈ filtration M₂ c → e.symm x ∈ filtration M₁ c) (x : M₁) :
+  (iso_of_equiv_of_strict e he strict).hom x = f x := rfl
+
+@[simp]
+lemma iso_of_equiv_of_strict_symm.apply (e : M₁ ≃+ M₂) (he : ∀ x, f x = e x)
+  (strict : ∀ ⦃c x⦄, x ∈ filtration M₂ c → e.symm x ∈ filtration M₁ c) (x : M₂) :
+  (iso_of_equiv_of_strict e he strict).symm.hom x = e.symm x := rfl
+
+def iso_of_equiv_of_strict'
+  (e : M₁ ≃+ M₂)
+  (strict' : ∀ ⦃c x⦄, x ∈ filtration M₁ c → e x ∈ filtration M₂ c)
+  (continuous' : ∀ c, @continuous (filtration M₁ c) (filtration M₂ c) _ _ $
+    λ x, ⟨e x, strict' x.2⟩)
+  (map_Tinv' : ∀ x, e (Tinv x) = Tinv (e x))
+  (strict : ∀ ⦃c x⦄, x ∈ filtration M₂ c → e.symm x ∈ filtration M₁ c) :
+  M₁ ≅ M₂ :=
+@iso_of_equiv_of_strict r' M₁ M₂
+ {to_fun := e,
+  strict' := strict',
+  continuous' := continuous',
+  map_Tinv' := map_Tinv',
+  ..e.to_add_monoid_hom } e (λ _, rfl) strict
+
 end ProFiltPseuNormGrpWithTinv

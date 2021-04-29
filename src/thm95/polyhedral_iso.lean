@@ -52,33 +52,27 @@ lemma augmentation_eq_diagonal :
   diagonal_embedding Λ N :=
 by { rw ← iso.eq_comp_inv, refl }
 
-def Hom_rescale_iso [fact (0 < r')] :
-  polyhedral_lattice.Hom (rescale N Λ) M ≅
+def Hom_rescale_hom [fact (0 < r')] :
+  polyhedral_lattice.Hom (rescale N Λ) M ≃+
   (ProFiltPseuNormGrpWithTinv.of r' $ (rescale N (polyhedral_lattice.Hom Λ M))) :=
-@polyhedral_lattice.iso_of_equiv_of_strict _
-  (polyhedral_lattice.Hom (rescale N Λ) M)
-  (ProFiltPseuNormGrpWithTinv.of r' (rescale N (polyhedral_lattice.Hom Λ M)))
-  ({to_fun := λ f, f,
-    map_zero' := rfl,
-    map_add' := λ f g, rfl,
-    strict' :=
-    begin
-      intros c f hf c' l hl,
-      apply pseudo_normed_group.filtration_mono (ge_of_eq $ mul_assoc _ _ _),
-      convert hf _,
-      simp only [semi_normed_group.mem_filtration_iff],
-      erw [rescale.nnnorm_def, mul_comm, div_eq_mul_inv],
-      refine mul_le_mul' _ le_rfl,
-      exact hl,
-    end,
-    continuous' :=
-    begin
-      intros c, sorry
-    end,
-    map_Tinv' := λ x, rfl })
-  (add_equiv.refl _) (λ x, rfl)
-  begin
-    intros c f hf c' l hl,
+add_equiv.refl _
+
+lemma foo [fact (0 < r')] (c : ℝ≥0) (f : polyhedral_lattice.Hom (rescale ↑N ↥Λ) ↥M) :
+    f ∈ pseudo_normed_group.filtration ↥(polyhedral_lattice.Hom (rescale ↑N ↥Λ) ↥M) c ↔
+    f ∈
+      pseudo_normed_group.filtration
+        ↥(ProFiltPseuNormGrpWithTinv.of r' (rescale ↑N ↥(polyhedral_lattice.Hom ↥Λ ↥M)))
+        c :=
+begin
+  split,
+  { intros hf c' l hl,
+    rw mul_assoc,
+    refine hf _,
+    simp only [semi_normed_group.mem_filtration_iff],
+    erw [rescale.nnnorm_def, mul_comm, div_eq_mul_inv],
+    refine mul_le_mul' _ le_rfl,
+    exact hl },
+  { intros  hf c' l hl,
     apply pseudo_normed_group.filtration_mono (le_of_eq _),
     convert hf _,
     { exact ↑N * c' },
@@ -91,8 +85,22 @@ def Hom_rescale_iso [fact (0 < r')] :
       exact_mod_cast hN },
     { rw [mul_assoc, inv_mul_cancel_left'],
       have hN : 0 < N := fact.out _,
-      exact_mod_cast hN.ne' }
-  end
+      exact_mod_cast hN.ne' } }
+end
+
+lemma bar [fact (0 < r')] (c : ℝ≥0) :
+  continuous (pseudo_normed_group.level (Hom_rescale_hom Λ N r' M) (λ c f, (foo Λ N r' M c f).1) c) := sorry
+
+def Hom_rescale_iso [fact (0 < r')] :
+  polyhedral_lattice.Hom (rescale N Λ) M ≅
+  (ProFiltPseuNormGrpWithTinv.of r' $ (rescale N (polyhedral_lattice.Hom Λ M))) :=
+@ProFiltPseuNormGrpWithTinv.iso_of_equiv_of_strict' _
+  (polyhedral_lattice.Hom (rescale N Λ) M)
+  (ProFiltPseuNormGrpWithTinv.of r' (rescale N (polyhedral_lattice.Hom Λ M)))
+  (Hom_rescale_hom Λ N r' M)
+  (by exact λ c f, (foo Λ N r' M c f).1)
+  (bar Λ N r' M) (λ x, rfl)
+  (by exact λ c f, (foo Λ N r' M c f).2)
 
 @[simps]
 def Hom_finsupp_iso_hom' [fact (0 < r')] :
@@ -145,7 +153,7 @@ def Hom_finsupp_equiv [fact (0 < r')] :
 def Hom_finsupp_iso [fact (0 < r')] :
   polyhedral_lattice.Hom (fin N →₀ Λ) M ≅
   (ProFiltPseuNormGrpWithTinv.of r' $ ((polyhedral_lattice.Hom Λ M) ^ N)) :=
-@polyhedral_lattice.iso_of_equiv_of_strict _ _ _
+@ProFiltPseuNormGrpWithTinv.iso_of_equiv_of_strict _ _ _
   (Hom_finsupp_iso_hom _ _ _ _) (Hom_finsupp_equiv _ _ _ _) (λ _, rfl) sorry
 .
 
@@ -167,17 +175,12 @@ begin
   rw h, exact iso.refl _
 end
 
-/-- jmc is not very proud of this -/
-def aahrg :
-  unop ((Hom M).obj (of (rescale ↑N ↥(of (fin N →₀ ↥Λ))))) ≅
-  polyhedral_lattice.Hom (rescale ↑N ↥(of (fin N →₀ ↥Λ))) ↥M :=
-iso.refl _
-
 def Hom_cosimplicial_zero_iso (h : N' = N) :
   polyhedral_lattice.Hom ((Λ.cosimplicial N).obj (simplex_category.mk 0)) M ≅
   (ProFiltPseuNormGrpWithTinv.of r' (rescale N' ((polyhedral_lattice.Hom Λ M) ^ N))) :=
 (Hom_cosimplicial_zero_iso' Λ N r' M).unop ≪≫
-aahrg _ _ _ _ ≪≫
+/- jmc is not very proud of this -/
+(by exact iso.refl _ : _) ≪≫
 (Hom_rescale_iso (of (fin N →₀ ↥Λ)) N r' M) ≪≫
 Hom_cosimplicial_zero_iso_aux _ _ _ _ _ h ≪≫
 (ProFiltPseuNormGrpWithTinv.rescale r' N').map_iso (Hom_finsupp_iso Λ N r' M)

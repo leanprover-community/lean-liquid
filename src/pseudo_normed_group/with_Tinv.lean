@@ -58,8 +58,7 @@ structure profinitely_filtered_pseudo_normed_group_with_Tinv_hom (r' : ℝ≥0) 
   [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₂]
   extends M₁ →+ M₂ :=
 (strict' : ∀ ⦃c x⦄, x ∈ filtration M₁ c → to_fun x ∈ filtration M₂ c)
-(continuous' : ∀ c, @continuous (filtration M₁ c) (filtration M₂ c) _ _ $
-  λ x, ⟨to_fun x, strict' x.2⟩)
+(continuous' : ∀ c, continuous (pseudo_normed_group.level to_fun strict' c))
 (map_Tinv' : ∀ x, to_fun (Tinv x) = Tinv (to_fun x))
 
 end
@@ -106,7 +105,8 @@ lemma strict : ∀ ⦃c x⦄, x ∈ filtration M₁ c → f x ∈ filtration M�
 
 /-- `f.level c` is the function `filtration M₁ c → filtration M₂ c`
 induced by a `profinitely_filtered_pseudo_normed_group_with_Tinv_hom M₁ M₂`. -/
-@[simps] def level (c : ℝ≥0) (x : filtration M₁ c) : filtration M₂ c := ⟨f x, f.strict x.2⟩
+@[simps] def level : ∀ (c : ℝ≥0), filtration M₁ c → filtration M₂ c :=
+pseudo_normed_group.level f f.strict
 
 lemma level_continuous (c : ℝ≥0) : continuous (f.level c) := f.continuous' c
 
