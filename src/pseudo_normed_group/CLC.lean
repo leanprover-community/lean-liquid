@@ -51,25 +51,6 @@ end CLC
 def CLCP (V : NormedGroup) (n : ℕ) : Profiniteᵒᵖ ⥤ NormedGroup :=
 LCP V n ⋙ Completion
 
-namespace CLCP
-
-lemma map_norm_noninc {M₁ M₂} (f : M₁ ⟶ M₂) : ((CLCP V n).map f).norm_noninc :=
-Completion_map_norm_noninc _ $ LCP.map_norm_noninc _ _ _
-
-def T [normed_with_aut r V] [fact (0 < r)] : CLCP V n ≅ CLCP V n :=
-((whiskering_right _ _ _).obj _).map_iso (LCP.T r V n)
-
-lemma T_bound_by [normed_with_aut r V] [fact (0 < r)] (A) :
-  ((T r V n).hom.app A).bound_by r :=
-Completion_map_bound_by _ _ $ LCP.T_bound_by _ _ _ _
-
-def T_inv [normed_with_aut r V] [fact (0 < r)] : CLCP V n ⟶ CLCP V n :=
-whisker_right (LCP.T_inv r V n) Completion
-
-lemma T_inv_eq [normed_with_aut r V] [fact (0 < r)] : (T r V n).inv = T_inv r V n := rfl
-
-end CLCP
-
 /-- `CLFCP v r' c n` is the functor sending a profinitely-filtered `T⁻¹`-module `M`
    to `V-hat((M_c)^n)` -/
 def CLCFP (V : NormedGroup) (r' : ℝ≥0) (c : ℝ≥0) (n : ℕ) :
