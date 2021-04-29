@@ -6,7 +6,7 @@ namespace category_theory
 
 namespace functor
 
-class bounded {C D : Type*} [category C] [category D] [semi_normed_category C] [semi_normed_category D]
+class bounded_additive {C D : Type*} [category C] [category D] [semi_normed_category C] [semi_normed_category D]
   (F : C ⥤ D) extends functor.additive F : Prop :=
 (bounded : ∃ c : ℝ, ∀ {X Y : C} (f : X ⟶ Y), ∥ F.map f ∥ ≤ c * ∥ f ∥)
 
