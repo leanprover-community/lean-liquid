@@ -40,6 +40,9 @@ open_locale nnreal
 
 local attribute [instance] type_pow
 
+local attribute [reducible] CLCFPTinv₂ CLCFPTinv₂.res
+  breen_deligne.universal_map.eval_CLCFPTinv₂
+
 open category_theory
 
 section rescale
@@ -79,9 +82,6 @@ end
 .
 
 section
-
-attribute [reducible] CLCFPTinv₂ CLCFPTinv₂.res
-  breen_deligne.universal_map.eval_CLCFPTinv₂
 
 def complex_rescale_iso (N : ℝ≥0) :
   (BD.complex (rescale_constants c_ N) r V r' c).obj (op M) ≅
@@ -148,9 +148,6 @@ variables (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
 variables {r' : ℝ≥0} [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)] (c : ℝ≥0)
 
 section
-
-attribute [reducible] CLCFPTinv₂ CLCFPTinv₂.res
-  breen_deligne.universal_map.eval_CLCFPTinv₂
 
 variables {m n : ℕ} (ϕ : universal_map m n) (g : basic_universal_map m n)
 variables (c₁ c₂ : ℝ≥0) (N : ℕ) [fact (0 < N)]

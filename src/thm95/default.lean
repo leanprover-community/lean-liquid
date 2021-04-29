@@ -7,7 +7,7 @@ import pseudo_normed_group.homotopy
 
 import thm95.constants
 import thm95.double_complex
--- import thm95.row_iso
+import thm95.row_iso
 
 noncomputable theory
 
@@ -217,10 +217,9 @@ def NSC_htpy :
     ((thm95.double_complex BD.data c_ r r' V Λ M (N c' r r' m)).row_map 0 1)
       m (k' c' m) (ε m) (c₀ m Λ) (H BD c' r r' m) :=
 (NSH_aux BD r r' V c_ c' m Λ (op (Hom Λ M))).of_iso _ _ _
-(iso.refl _) sorry (λ _ _ _, rfl) sorry sorry -- the code below times out :sad:
-  -- (iso.refl _) (thm95.mul_rescale_iso_row_one BD.data c_ r V _ _ (by norm_cast) Λ M)
-  -- (λ _ _ _, rfl) (thm95.mul_rescale_iso_row_one_strict BD.data c_ r V _ _ (by norm_cast) Λ M)
-  -- (by apply thm95.row_map_eq_sum_comp)
+  (iso.refl _) (thm95.mul_rescale_iso_row_one BD.data c_ r V _ _ (by norm_cast) Λ M)
+  (λ _ _ _, rfl) (thm95.mul_rescale_iso_row_one_strict BD.data c_ r V _ _ (by norm_cast) Λ M)
+  (by apply thm95.row_map_eq_sum_comp)
 
 def NSC (IH : ∀ m' < m, thm95.IH BD r r' V c_ c' M m') :
   normed_spectral_conditions (thm95.double_complex BD.data c_ r r' V Λ M (N c' r r' m)) m
