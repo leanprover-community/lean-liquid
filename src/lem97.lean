@@ -138,11 +138,6 @@ the values of x (l i). -/
 def pos_vector (l : ι → Λ) (x : Λ →+ ℤ) : sign_vectors ι :=
 λ i, nonzero_sign (x (l i))
 
-def coe_to_signs : (sign_vectors ι) → (ι → ℤ) :=
-λ x i, x i
-
-instance coe_signs : has_coe (sign_vectors ι) (ι → ℤ) := ⟨ coe_to_signs ⟩
-
 instance smul_signs : has_scalar (sign_vectors ι) (ι → Λ) :=
 { smul := λ ε l i, (ε i : ℤ) • l i }
 
