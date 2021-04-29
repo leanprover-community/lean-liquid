@@ -267,7 +267,7 @@ def map_nat_iso {J} [category J] {A₁ B₁ A₂ B₂ : J ⥤ Profiniteᵒᵖ} (
 
 end CLCTinv
 
-def aux (r' c c₂ : ℝ≥0) [r1 : fact (r' ≤ 1)] [h : fact (c₂ ≤ r' * c)] : fact (c₂ ≤ c) :=
+lemma aux (r' c c₂ : ℝ≥0) [r1 : fact (r' ≤ 1)] [h : fact (c₂ ≤ r' * c)] : fact (c₂ ≤ c) :=
 ⟨h.1.trans $ (mul_le_mul' r1.1 le_rfl).trans (by simp)⟩
 
 @[simps obj]
