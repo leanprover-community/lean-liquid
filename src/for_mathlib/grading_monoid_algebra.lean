@@ -1,3 +1,4 @@
+#exit
 import for_mathlib.grading
 import algebra.monoid_algebra
 
