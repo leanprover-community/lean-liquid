@@ -167,42 +167,6 @@ end
 
 variables (V c' m)
 
--- move this, and rename (all of these?)
-instance aux0 (q : ℕ) [hq : fact (q ≤ m)] :
-  fact (c' q ≤ k' c' m) :=
-⟨c'_le_k' _ _ $ hq.1.trans $ nat.le_succ _⟩
-
-instance aux1 (c : ℝ≥0) (q : ℕ) [fact (q ≤ m)] :
-  ((BD.data.proj (2 ^ N₂ c' r r' m)).f q).suitable
-    (k' c' m * c * rescale_constants c_ (2 ^ N₂ c' r r' m) q) (c * c_ q) :=
-begin
-  refine universal_map.suitable.le _ (c * c_ q) (c * c_ q) (c * c_ q) _ _ le_rfl,
-  { apply_instance },
-  have : k' c' m / 2 ^ N₂ c' r r' m ≤ r' ^ b c' r r' m := N₂_spec c' r r' m,
-  calc k' c' m * c * (c_ q * (2 ^ N₂ c' r r' m)⁻¹)
-     = (k' c' m * (2 ^ N₂ c' r r' m)⁻¹) * (c * c_ q) : by ring1
-  ... ≤ 1 * (c * c_ q) : mul_le_mul' (this.trans $ fact.out _) le_rfl
-  ... = c * c_ q : one_mul _
-end
-
-instance aux2 (c : ℝ≥0) (q : ℕ) [fact (q ≤ m)] :
-  ((BD.data.proj (2 ^ N₂ c' r r' m)).f q).suitable
-    (k' c' m * c * rescale_constants c_ (2 ^ N₂ c' r r' m) q) (k' c' m * (k' c' m * c) * c_ q) :=
-(aux1 c' m c q).le _ _ _ _ le_rfl (fact.out _)
-
-/- use `q ≤ m` and the def'n of `k'` -/
-instance aux3 (c : ℝ≥0) (q : ℕ) [fact (q ≤ m)] :
-  fact ((k' c' m * c * (c' * c_) q) ≤ (k' c' m * (k' c' m * c) * c_ q)) :=
-by { simp only [mul_assoc, mul_left_comm _ c, pi.mul_apply], apply_instance }
-
-instance aux4 (c : ℝ≥0) (q : ℕ) [hq : fact (q ≤ m)] :
-  fact (k' c' m * c * (c' (q + 1) * c_ (q + 1)) ≤ k' c' m * (k' c' m * c) * c_ (q + 1)) :=
-begin
-  simp only [mul_assoc, mul_left_comm _ c],
-  haveI : fact (c' (q+1) ≤ k' c' m) := ⟨c'_le_k' _ _ $ nat.succ_le_succ hq.1⟩,
-  apply_instance
-end
-
 open differential_object differential_object.complex_like category_theory.preadditive
 
 lemma NSH_hδ (M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ)
