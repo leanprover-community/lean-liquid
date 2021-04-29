@@ -76,34 +76,6 @@ lemma T_inv_eq [normed_with_aut r V] [fact (0 < r)] : (T r V).inv = T_inv r V :=
 
 end LC
 
-namespace LCP
-
-lemma map_norm_noninc {M₁ M₂} (f : M₁ ⟶ M₂) : ((LCP V n).map f).norm_noninc :=
-locally_constant.comap_hom_norm_noninc _ _
-
-instance obj.normed_with_aut [normed_with_aut r V] [fact (0 < r)] (A : Profiniteᵒᵖ) :
-  normed_with_aut r ((LCP V n).obj A) :=
-NormedGroup.normed_with_aut_LocallyConstant _ _ _
-
-@[simps {fully_applied := ff}]
-def T [normed_with_aut r V] : LCP V n ≅ LCP V n :=
-((whiskering_left _ _ _).obj _).map_iso $ LocallyConstant.map_iso normed_with_aut.T
-
-lemma T_eq [normed_with_aut r V] [fact (0 < r)] (A) :
-  (LCP.T r V n).hom.app A = normed_with_aut.T.hom := rfl
-
-lemma T_bound_by [normed_with_aut r V] [fact (0 < r)] (A) :
-  normed_group_hom.bound_by ((LCP.T r V n).hom.app A) r :=
-by { rw T_eq, intro v, exact (normed_with_aut.norm_T v).le }
-
-@[simps {fully_applied := ff}]
-def T_inv [normed_with_aut r V] [fact (0 < r)] : LCP V n ⟶ LCP V n :=
-(whisker_left _ (LocallyConstant.map (normed_with_aut.T.inv : V ⟶ V)) : _)
-
-lemma T_inv_eq [normed_with_aut r V] [fact (0 < r)] : (T r V n).inv = T_inv r V n := rfl
-
-end LCP
-
 /-- The "functor" that sends `M` and `c` to `V((filtration M c)^n)` -/
 def LCFP (V : NormedGroup) (r' : ℝ≥0) (c : ℝ≥0) (n : ℕ) :
   (ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup :=
@@ -181,21 +153,6 @@ lemma T_inv_def [fact (0 < r)] :
   T_inv r V r' c n = (whisker_left  (FiltrationPow r' c n).op
       (LocallyConstant.map (normed_with_aut.T.inv : V ⟶ V)) : _) :=
 rfl
-
-lemma T_inv_app [fact (0 < r)] (M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ) :
-  (T_inv r V r' c n).app M =
-    (LCP.T_inv r V n).app (((Filtration r').obj c).op.obj M) :=
-rfl
-
-variables [fact (0 < r)]
-
-lemma res_comp_T_inv [fact (c₂ ≤ c₁)] :
-  res V r' c₁ c₂ n ≫ T_inv r V r' c₂ n = T_inv r V r' c₁ n ≫ res V r' c₁ c₂ n :=
-begin
-  ext M : 2,
-  simp only [nat_trans.comp_app, res_app, T_inv_app],
-  exact (LCP.T_inv r V n).naturality _,
-end
 
 end normed_with_aut
 
