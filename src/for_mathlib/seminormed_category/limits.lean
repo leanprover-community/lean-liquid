@@ -16,34 +16,59 @@ namespace limits
 namespace cone
 
 def bounded_by {F : J ⥤ C} (S : cone F) (c : ℝ) : Prop :=
-∀ j : J, ∥ S.π.app j ∥ ≤ c
+0 ≤ c ∧ ∀ j : J, ∥ S.π.app j ∥ ≤ c
 
 end cone
 
 structure bounded_cone (F : J ⥤ C) :=
 (cone : cone F)
-(bounded : ∃ c, cone.bounded_by c)
+(bounded : ∃ c, 0 ≤ c ∧ cone.bounded_by c)
 
 namespace bounded_cone
 
 noncomputable instance {F : J ⥤ C} : has_norm (bounded_cone F) := has_norm.mk $
-λ S, Inf { a | S.cone.bounded_by a }
+λ S, Inf { a | 0 ≤ a ∧ S.cone.bounded_by a }
 
 lemma norm_le {F : J ⥤ C} (S : bounded_cone F) (j : J) :
-  ∥ S.cone.π.app j ∥ ≤ ∥ S ∥ := real.lb_le_Inf _ S.bounded (λ c hc, hc j)
+  ∥ S.cone.π.app j ∥ ≤ ∥ S ∥ := real.lb_le_Inf _ S.bounded (λ c hc, hc.2.2 _)
+
+lemma norm_le_of_bounded_by {F : J ⥤ C} (S : bounded_cone F) (a : ℝ)
+  (h : S.cone.bounded_by a) : ∥ S ∥ ≤ a :=
+begin
+  apply real.Inf_le,
+  use 0,
+  intros c hc, exact hc.1,
+  refine ⟨h.1, h⟩,
+end
 
 lemma norm_nonneg {F : J ⥤ C} (S : bounded_cone F) : 0 ≤ ∥ S ∥ :=
 begin
-  by_cases h : nonempty J,
-  { rcases h with ⟨j⟩,
-    refine real.lb_le_Inf _ S.bounded (λ c hc, le_trans (norm_nonneg _) (hc j)) },
-  suffices : ∥ S ∥ = 0, by simp [this],
-  suffices : {a | S.cone.bounded_by a} = set.univ,
-  { change Inf _ = _,
-    simp [this, real.Inf_def, real.Sup_univ] },
-  rw set.eq_univ_iff_forall,
-  intros c j,
-  exact false.elim (h ⟨j⟩),
+  apply real.lb_le_Inf,
+  exact S.bounded,
+  intros c hc, exact hc.1,
+end
+
+structure is_limit {F : J ⥤ C} (t : bounded_cone F) :=
+(lift  : Π (s : bounded_cone F), s.cone.X ⟶ t.cone.X)
+(fac'  : ∀ (s : bounded_cone F) (j : J), lift s ≫ t.cone.π.app j = s.cone.π.app j . obviously)
+(uniq' : ∀ (s : bounded_cone F) (m : s.cone.X ⟶ t.cone.X)
+  (w : ∀ j : J, m ≫ t.cone.π.app j = s.cone.π.app j), m = lift s . obviously)
+
+restate_axiom is_limit.fac'
+attribute [simp, reassoc] is_limit.fac
+restate_axiom is_limit.uniq'
+
+lemma lift_norm_le {F : J ⥤ C} {t s : bounded_cone F}
+  (h : t.is_limit) : ∥ s ∥ ≤ ∥ h.lift s ∥ * ∥ t ∥ :=
+begin
+  refine real.Inf_le _ ⟨0,λ c hc, hc.1⟩ ⟨mul_nonneg (_root_.norm_nonneg _) (norm_nonneg _),_⟩,
+  refine ⟨mul_nonneg (_root_.norm_nonneg _) (norm_nonneg _),λ j, _⟩,
+  rw [← h.fac],
+  refine le_trans (semi_normed_category.norm_comp _ _ _ _ _) _,
+  suffices : ∥ t.cone.π.app j ∥ ≤ ∥ t ∥,
+  { have hh : 0 ≤ ∥ h.lift s ∥ := _root_.norm_nonneg _,
+    exact mul_le_mul_of_nonneg_left this hh },
+  apply norm_le,
 end
 
 end bounded_cone
@@ -57,7 +82,7 @@ def map_bounded_cone {F : J ⥤ C} (S : limits.bounded_cone F) :
 { cone := G.map_cone S.cone,
   bounded := begin
     use ∥ S ∥,
-    intros j,
+    refine ⟨S.norm_nonneg, S.norm_nonneg, _⟩,
     simp [S.norm_le],
   end }
 
