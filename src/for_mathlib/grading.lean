@@ -1,17 +1,19 @@
 /-
 Copyright (c) 2021 Kevin Buzzard. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Kevin Buzzard
+Authors: Kevin Buzzard, Eric Wieser
 -/
 import algebra.direct_sum
 import group_theory.subgroup
+import algebra.direct_sum_graded
+import group_theory.submonoid.operations
 
 /-!
 
-# Grading of a ring by a monoid
+# Grading of a semiring by an add_monoid
 
-A grading of a ring `R` by a monoid `M` is a decomposition R ≃ ⨁ Rₘ as an internal
-direct sum of subgroups indexed by `m`, satisfying `1 ∈ R₀` and `RₘRₙ⊆R_{m+n}`
+A grading of a semiring `R` by an add_monoid `A` is a decomposition R ≃ ⨁ Rₐ as an internal
+direct sum of subgroups indexed by `A`, satisfying `1 ∈ R₀` and `RₘRₙ⊆R_{m+n}`
 
 -/
 -- MOVE
@@ -57,12 +59,6 @@ sum_single_index (h i).map_zero
 
 end dfinsupp
 
-/-
-
-The below is in PR #7190 by Eric to algebra.direct_sum
-
--/
-
 section unused_in_this_file
 
 namespace direct_sum
@@ -90,102 +86,193 @@ end direct_sum
 
 end unused_in_this_file
 
-/-- If `M` is an additive monoid, then an `M`-grading on a ring `R` is a decomposition of `R` as
-    an internal direct sum `R = ⨁Rₘ` into submonoids indexed by `m : M`, where the decomposition
-    respects `1` and `*`, in the sense that `1 ∈ R₀` and `Rₘ*Rₙ ⊆ R_{m+n}` -/
-structure add_monoid_grading (M : Type*) [add_monoid M] [decidable_eq M] (R : Type*) [semiring R] :=
-(pieces : M → add_submonoid R)
-(direct_sum : direct_sum.add_submonoid_is_internal pieces)
-(one_mem : (1 : R) ∈ pieces 0)
-(mul_mem : ∀ (m n : M) (r s : R),
-  r ∈ pieces m → s ∈ pieces n → r * s ∈ pieces (m + n))
+open_locale direct_sum
+open function
 
-/-- If `M` is a monoid, then an `M`-grading on a ring `R` is a decomposition of `R` as
-    an internal direct sum `R = ⨁Rₘ` into submonoids indexed by `m : M`, where the decomposition
-    respects `1` and `*`, in the sense that `1 ∈ R₁` and `Rₘ*Rₙ ⊆ R_{m*n}` -/
-structure monoid_grading (M : Type*) [monoid M] [decidable_eq M] (R : Type*) [semiring R] :=
-(pieces : M → add_submonoid R)
-(is_direct_sum : direct_sum.add_submonoid_is_internal pieces)
-(one_mem : (1 : R) ∈ pieces 1)
-(mul_mem : ∀ (m n : M) (r s : R),
-  r ∈ pieces m → s ∈ pieces n → r * s ∈ pieces (m * n))
+namespace direct_sum
 
-attribute [to_additive] monoid_grading
+/-!
+### Collections of `add_submonoids`
+-/
+section add_submonoid
 
-namespace monoid_grading
+/-!
+#### `add_submonoid`s over an `add_comm_monoid`
+-/
+section add_comm_monoid
+
+variables {ι M : Type*} [decidable_eq ι] [add_comm_monoid M] (Mᵢ : ι → add_submonoid M)
+
+/-- The canonical map from a direct sum of `add_submonoid`s to their carrier type-/
+abbreviation to_add_monoid_carrier : (⨁ i, Mᵢ i) →+ M :=
+(to_add_monoid $ λ i, (Mᵢ i).subtype)
+
+/-- A class to indicate that the collection of submonoids `Mᵢ` make up an internal direct
+sum. -/
+class has_add_submonoid_decomposition :=
+(components : M → ⨁ i, Mᵢ i)
+(left_inv : left_inverse (to_add_monoid_carrier Mᵢ) components)
+(right_inv : right_inverse (to_add_monoid_carrier Mᵢ) components)
+
+/- The decomposition provided by a `has_add_submonoid_decomposition` as an `add_equiv`. -/
+def add_submonoid_decomposition [has_add_submonoid_decomposition Mᵢ] : M ≃+ ⨁ i, Mᵢ i :=
+add_equiv.symm {
+  inv_fun := (direct_sum.has_add_submonoid_decomposition.components : M → ⨁ i, Mᵢ i),
+  left_inv := has_add_submonoid_decomposition.right_inv,
+  right_inv := has_add_submonoid_decomposition.left_inv,
+  ..(to_add_monoid_carrier Mᵢ) }
+
+/-- By definition a `add_submonoid_decomposition` makes up an internal direct sum. -/
+lemma add_submonoid_decomposition.is_internal [has_add_submonoid_decomposition Mᵢ] :
+  add_submonoid_is_internal Mᵢ :=
+(add_submonoid_decomposition Mᵢ).symm.bijective
+
+/-- Noncomputably construct a decomposition from a proof the direct sum is an internal direct
+sum. -/
+noncomputable def add_submonoid_is_internal.has_decomposition (h : add_submonoid_is_internal Mᵢ) :
+  has_add_submonoid_decomposition Mᵢ :=
+{ components := (equiv.of_bijective _ h).symm,
+  ..(equiv.of_bijective _ h).symm}
+
+end add_comm_monoid
+
+/-!
+#### `add_submonoid`s over a `semiring`
+-/
+section semiring
+
+variables {A R : Type*} [decidable_eq A] [add_monoid A] [semiring R] (Mᵢ : A → add_submonoid R)
+
+/-- A class to indicate that a collection of `add_submonoid`s meet the requirements of
+`direct_sum.gmonoid`. -/
+class add_submonoid.is_gmonoid : Prop :=
+(grading_one : (1 : R) ∈ Mᵢ 0)
+(grading_mul : ∀ {m n : A} {r s : R},
+  r ∈ Mᵢ m → s ∈ Mᵢ n → r * s ∈ Mᵢ (m + n))
+
+/-- TODO: perhaps `gmonoid.of_add_submonoids` should be merged with this. -/
+instance add_submonoid.is_gmonoid.gmonoid [add_submonoid.is_gmonoid Mᵢ] : gmonoid (λ i, Mᵢ i) :=
+gmonoid.of_add_submonoids _ add_submonoid.is_gmonoid.grading_one $
+  λ i j ⟨a, ha⟩ ⟨b, hb⟩, add_submonoid.is_gmonoid.grading_mul ha hb
+
+/-- A decomposition of submonoids of a ring preserves multiplication. -/
+lemma to_add_monoid_carrier_mul [has_add_submonoid_decomposition Mᵢ] [add_submonoid.is_gmonoid Mᵢ]
+  (x y : ⨁ i, Mᵢ i) :
+  to_add_monoid_carrier Mᵢ (x * y) =
+    to_add_monoid_carrier Mᵢ x * to_add_monoid_carrier Mᵢ y :=
+begin
+    -- nasty `change` tricks to get things to a point where we can use `ext`. `induction` on `f`
+  -- and `g` may be easier.
+  change (to_add_monoid_carrier Mᵢ).comp (add_monoid_hom.mul_left x) y =
+    (add_monoid_hom.mul_left $
+      (to_add_monoid_carrier Mᵢ) x).comp (to_add_monoid_carrier Mᵢ) y,
+  apply add_monoid_hom.congr_fun,
+  ext yi yv : 2,
+  let y' := direct_sum.of _ yi yv,
+  change (to_add_monoid_carrier Mᵢ).comp (add_monoid_hom.mul_right y') x =
+    (add_monoid_hom.mul_right $
+      (to_add_monoid_carrier Mᵢ) y').comp (to_add_monoid_carrier Mᵢ) x,
+  apply add_monoid_hom.congr_fun,
+  ext xi xv : 2,
+  let x' := direct_sum.of _ xi xv,
+  change to_add_monoid_carrier Mᵢ (x' * y') =
+    to_add_monoid_carrier Mᵢ x' * to_add_monoid_carrier Mᵢ y',
+  dsimp only [x', y'],
+  dunfold to_add_monoid_carrier,
+  rw of_mul_of,
+  simp only [to_add_monoid_of],
+  refl,
+end
+
+/-- `direct_sum.add_submonoid_decomposition` as a `ring_equiv`. -/
+def add_submonoid_decomposition_ring_equiv
+  [has_add_submonoid_decomposition Mᵢ] [add_submonoid.is_gmonoid Mᵢ] :
+  R ≃+* ⨁ i, Mᵢ i :=
+ring_equiv.symm
+{ map_mul' := to_add_monoid_carrier_mul Mᵢ,
+  ..(add_submonoid_decomposition Mᵢ).symm}
+
+end semiring
+
+section comm_semiring
+
+variables {A R : Type*} [decidable_eq A] [add_comm_monoid A] [comm_semiring R] (Mᵢ : A → add_submonoid R)
+
+/-- TODO: perhaps `gcomm_monoid.of_add_submonoids` should be merged with this. -/
+instance add_submonoid.is_gmonoid.gcomm_monoid [add_submonoid.is_gmonoid Mᵢ] : gcomm_monoid (λ i, Mᵢ i) :=
+gcomm_monoid.of_add_submonoids _ add_submonoid.is_gmonoid.grading_one $
+  λ i j ⟨a, ha⟩ ⟨b, hb⟩, add_submonoid.is_gmonoid.grading_mul ha hb
+end comm_semiring
+
+end add_submonoid
+
+/-!
+### Collections of `add_subgroups`
+TODO
+### Collections of `add_submodules`
+TODO
+-/
+
+end direct_sum
+
+namespace add_monoid_grading
 
 /-! ## graded pieces -/
 
 section graded_pieces
 
-variables {M : Type*} [monoid M] [decidable_eq M] {R : Type*} [semiring R]
-
 open_locale direct_sum
 
-/-- The equivalence between R and ⨁ m, Rₘ if R is a graded (semi)ring. -/
-@[to_additive "The equivalence between R and ⨁ m, Rₘ if R is a graded (semi)ring."]
-noncomputable def decomposition (g : monoid_grading M R) :
-  R ≃+ ⨁ m, g.pieces m :=
-(add_equiv.of_bijective _ g.is_direct_sum).symm
+open direct_sum
 
-/-- Decomposing `r` into `(rₘ)ₘ : ⨁ m, g.pieces m` and then adding the pieces gives `r` again. -/
-@[to_additive]
-lemma sum_decomposition (g : monoid_grading M R) (r : R) :
-  (direct_sum.to_add_monoid (λ m, (g.pieces m).subtype) : (⨁ m, g.pieces m) →+ R)
-    (g.decomposition r) = r :=
-g.decomposition.symm_apply_apply r
+variables {A : Type*} [add_monoid A] [decidable_eq A] {R : Type*} [semiring R] (Mᵢ : A → add_submonoid R)
+  [has_add_submonoid_decomposition Mᵢ] [add_submonoid.is_gmonoid Mᵢ]
+
+/-- Decomposing `r` into `(rᵢ)ᵢ : ⨁ i, Mᵢ i` and then adding the pieces gives `r` again. -/
+lemma sum_decomposition  (r : R) :
+  (direct_sum.to_add_monoid (λ i, (Mᵢ i).subtype) : (⨁ i, Mᵢ i) →+ R)
+    (add_submonoid_decomposition_ring_equiv Mᵢ r) = r :=
+(add_submonoid_decomposition_ring_equiv Mᵢ).symm_apply_apply r
+
+variable {Mᵢ}
 
 /-- If `r ∈ Rₘ` then the element of `R` which is `r` at `m` and zero elsewhere, is `r`. -/
-@[to_additive]
-lemma eq_decomposition_of_mem_piece''' {g : monoid_grading M R} {r : R} {m : M}
-  (hr : r ∈ g.pieces m) :
-  (g.decomposition).symm (direct_sum.of (λ m, g.pieces m) m ⟨r, hr⟩) = r :=
+lemma eq_decomposition_of_mem_piece''' {r : R} {i : A}
+  (hr : r ∈ Mᵢ i) :
+  (add_submonoid_decomposition_ring_equiv Mᵢ).symm (direct_sum.of (λ i, Mᵢ i) i ⟨r, hr⟩) = r :=
 begin
-  change (direct_sum.to_add_monoid (λ m, (g.pieces m).subtype) : (⨁ m, (g.pieces m)) →+ R)
-    (direct_sum.of (λ m, g.pieces m) m ⟨r, hr⟩) = r,
+  change (direct_sum.to_add_monoid (λ i, (Mᵢ i).subtype) : (⨁ i, (Mᵢ i)) →+ R)
+    (direct_sum.of (λ i, Mᵢ i) i ⟨r, hr⟩) = r,
   rw direct_sum.to_add_monoid_of,
   refl,
 end
 
 /-- If `r ∈ Rₘ` then `r` is the element of `⨁Rₘ` which is `r` at `m` and `0` elsewhere. -/
-@[to_additive]
-lemma eq_decomposition_of_mem_piece'' {g : monoid_grading M R} {r : R} {m : M}
-  (hr : r ∈ g.pieces m) :
-  (g.decomposition) r = (direct_sum.of (λ m, g.pieces m) m ⟨r, hr⟩) :=
-g.decomposition.eq_symm_apply.mp (eq_decomposition_of_mem_piece''' hr).symm
+lemma eq_decomposition_of_mem_piece'' {r : R} {i : A}
+  (hr : r ∈ Mᵢ i) :
+  add_submonoid_decomposition_ring_equiv Mᵢ r = (direct_sum.of (λ i, Mᵢ i) i ⟨r, hr⟩) :=
+(add_submonoid_decomposition_ring_equiv Mᵢ).to_equiv.eq_symm_apply.mp
+  (eq_decomposition_of_mem_piece''' hr).symm
 
 /-- If `r ∈ Rₘ` then `rₘ`, the `m`'th component of `r`, considered as an element of `Rₘ`, is `r`. -/
-@[to_additive]
-lemma eq_decomposition_of_mem_piece' {g : monoid_grading M R} {r : R} {m : M}
-  (hr : r ∈ g.pieces m) :
-  (g.decomposition) r m = ⟨r, hr⟩ :=
+lemma eq_decomposition_of_mem_piece' {r : R} {i : A} (hr : r ∈ Mᵢ i) :
+  add_submonoid_decomposition_ring_equiv Mᵢ r i = ⟨r, hr⟩ :=
 begin
   rw eq_decomposition_of_mem_piece'' hr,
   apply dfinsupp.single_eq_same,
 end
 
 /-- If `r ∈ Rₘ` then `rₘ`, the `m`'th component of `r`, considered as an element of `R`, is `r`. -/
-@[to_additive]
-lemma eq_decomposition_of_mem_piece {g : monoid_grading M R} {r : R} {m : M} (hr : r ∈ g.pieces m) :
-  ((g.decomposition) r m : R) = r :=
+lemma eq_decomposition_of_mem_piece {r : R} {i : A} (hr : r ∈ Mᵢ i) :
+  (add_submonoid_decomposition_ring_equiv Mᵢ r i : R) = r :=
 begin
   rw eq_decomposition_of_mem_piece' hr,
   refl,
 end
 
-/-
-
-## A note on decomposition
-
-If `g : monoid_grading M R` and `r : R` then its `m`th component `rₘ` is `g.decomposition r m`
-
--/
-
 -- let's test the API for grading
-@[to_additive]
-lemma mem_piece_iff_single_support {R : Type*} [semiring R] {M : Type*} [monoid M]
-  [decidable_eq M] (g : monoid_grading M R) (r : R) (m : M) :
-  r ∈ g.pieces m ↔ ∀ ⦃n⦄, n ≠ m → g.decomposition r n = 0 :=
+lemma mem_piece_iff_single_support (r : R) (i : A) :
+  r ∈ Mᵢ i ↔ ∀ ⦃j⦄, j ≠ i → add_submonoid_decomposition_ring_equiv Mᵢ r j = 0 :=
 begin
   split,
   { intros hrm n hn,
@@ -194,10 +281,10 @@ begin
   { intro h,
     rw dfinsupp.eq_single_iff at h,
     -- can't use `classical` because `decidable_eq M` gets lost
-    letI : ∀ n, decidable_eq (g.pieces n) := λ _, classical.dec_eq _,
-    rw [← g.sum_decomposition r, direct_sum.to_add_monoid_apply, ← h,
+    letI : ∀ n, decidable_eq (Mᵢ n) := λ _, classical.dec_eq _,
+    rw [← sum_decomposition Mᵢ r, direct_sum.to_add_monoid_apply, ← h,
         dfinsupp.add_monoid_hom_sum_single_index],
-    exact (g.decomposition r m).2 }
+    exact (add_submonoid_decomposition_ring_equiv Mᵢ r i).2 }
 end
 
 end graded_pieces
@@ -211,46 +298,29 @@ then they're all add_subgroups.
 
 -/
 
-variables {M : Type*} [monoid M] [decidable_eq M] {R : Type*} [ring R]
+open direct_sum
+
+-- R is a ring not a semiring
+
+variables {A : Type*} [add_monoid A] [decidable_eq A] {R : Type*} [ring R] (Mᵢ : A → add_submonoid R)
+  [has_add_submonoid_decomposition Mᵢ] [add_submonoid.is_gmonoid Mᵢ]
 
 -- to_additive can't handle this for some reason so I need to prove it twice
 /-- A monoid_grading on a ring be add_submonoids is in fact by add_subgroups -/
-def add_subgroup_pieces (g : monoid_grading M R) (m : M) : add_subgroup R :=
+def add_subgroup_pieces (i : A) : add_subgroup R :=
 { neg_mem' := λ x hx, begin
-    change -x ∈ g.pieces m,
-    convert (g.decomposition (-x) m).2,
+    change -x ∈ Mᵢ i,
+    convert (add_submonoid_decomposition_ring_equiv Mᵢ (-x) i).2,
     apply neg_eq_of_add_eq_zero,
-    --  x ∈ Rₘ so (g.decomposition x).to_finsupp m = x.
+    --  x ∈ Rₘ so (add_submonoid_decomposition_ring_equiv Mᵢ).to_finsupp m = x.
     nth_rewrite 0 ← eq_decomposition_of_mem_piece hx,
     rw subtype.val_eq_coe,
     norm_cast,
-    suffices : (g.decomposition x + g.decomposition (-x)) m  = 0,
+    suffices : (add_submonoid_decomposition_ring_equiv Mᵢ x +
+      add_submonoid_decomposition_ring_equiv Mᵢ (-x)) i  = 0,
       simp only [*, add_submonoid.coe_zero, direct_sum.add_apply] at *,
-    simp [← (g.decomposition).map_add],
+    simp [← (add_submonoid_decomposition_ring_equiv Mᵢ).map_add],
   end,
-  ..g.pieces m}
-
-end monoid_grading
-
-namespace add_monoid_grading
-
-def add_subgroup_pieces {M : Type*} [add_monoid M] [decidable_eq M]
-  {R : Type*} [ring R]  (g : add_monoid_grading M R) (m : M) : add_subgroup R :=
-{ neg_mem' := λ x hx, begin
--- same proof as above :-(
-    change -x ∈ g.pieces m,
-    convert (g.decomposition (-x) m).2,
-    apply neg_eq_of_add_eq_zero,
-    --  x ∈ Rₘ so (g.decomposition x).to_finsupp m = x.
-    nth_rewrite 0 ← eq_decomposition_of_mem_piece hx,
-    rw subtype.val_eq_coe,
-    norm_cast,
-    suffices : (g.decomposition x + g.decomposition (-x)) m  = 0,
-      simp only [*, add_submonoid.coe_zero, direct_sum.add_apply] at *,
-    simp [← (g.decomposition).map_add],
-  end,
-  ..g.pieces m}
-
-attribute [to_additive monoid_grading.add_subgroup_pieces] add_subgroup_pieces
+  ..Mᵢ i}
 
 end add_monoid_grading
