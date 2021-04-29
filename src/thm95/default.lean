@@ -73,17 +73,12 @@ section
 
 variables {BD r r' V c_ c' m}
 
-lemma NSH_h_res' {c x : ℝ≥0} {q' : ℕ} (hqm : q' ≤ m+1) :
+lemma NSH_h_aux {c x : ℝ≥0} {q' : ℕ} (hqm : q' ≤ m+1) :
   c * (c' q' * x) ≤ k' c' m * c * x :=
 calc c * (c' q' * x)
     = c' q' * (c * x) : mul_left_comm _ _ _
 ... ≤ k' c' m * (c * x) : mul_le_mul' (c'_le_k' _ _ hqm) le_rfl
 ... = k' c' m * c * x : (mul_assoc _ _ _).symm
-
-def NSH_h_res {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ} (c : ℝ≥0) {q' : ℕ} (hqm : q' ≤ m+1) :
-  (CLCFPTinv r V r' (k' c' m * c * c_ q') (BD.data.X q')).obj M ⟶
-    (CLCFPTinv r V r' (c * (c' q' * c_ q')) (BD.data.X q')).obj M :=
-(@CLCFPTinv.res r V _ _ r' _ _ _ _ _ ⟨NSH_h_res' hqm⟩).app M
 
 def NSH_h {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ} (q q' : ℕ) (c : ℝ≥0) :
   ((BD.data.system c_ r V r').obj M) (k' c' m * c) q' ⟶
@@ -96,7 +91,7 @@ begin
   { exact (data.homotopy_mul BD.data BD.homotopy (N₂ c' r r' m)).h q q' },
   { dsimp,
     exact universal_map.suitable.le _ _ (c * (c' q' * c_ q')) _
-      infer_instance le_rfl (NSH_h_res' hqm), }
+      infer_instance le_rfl (NSH_h_aux hqm), }
 end
 else 0
 
@@ -182,7 +177,7 @@ begin
   haveI hqm_ : fact (q ≤ m) := ⟨hqm⟩,
   rw [NSH_δ, NSH_h, NSH_h, dif_pos (nat.succ_le_succ hqm), dif_pos (hqm.trans (nat.le_succ _))],
   erw [comp_f],
-  dsimp only [unop_op, NSH_h_res, NSH_δ_res_f, data.system_res_def, quiver.hom.apply,
+  dsimp only [unop_op, NSH_δ_res_f, data.system_res_def, quiver.hom.apply,
     BD_system_map_app_app, BD_map_app_f, data.system_obj_d],
   simp only [← universal_map.eval_CLCFPTinv_def],
   have hcomm := (data.homotopy_mul BD.data BD.homotopy (N₂ c' r r' m)).comm (q+1) q (q-1),
