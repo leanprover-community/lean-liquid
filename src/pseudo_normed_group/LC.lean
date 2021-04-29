@@ -13,8 +13,8 @@ Various constructions of pseudo-normed groups of locally constant functions.
 
 ## Main definitions
 
-- `LCP V n`: the functor sending a profinite set `S` to the locally constant
-  functions from `S^n` to `V`
+- `LC V`: the functor sending a profinite set `S` to the locally constant
+  functions from `S` to `V`
 - `LCFP V r' c n`: the functor sending a profinitely filtered pseudo-normed
   group with T⁻¹ to V(M_c^n), the locally constant functions from M_c^n to V.
 
@@ -43,10 +43,6 @@ variables (c c₁ c₂ c₃ c₄ : ℝ≥0) (l m n : ℕ)
 /-- `LC V n` is the functor that sends a profinite set `S` to `V(S)` -/
 def LC (V : NormedGroup) : Profiniteᵒᵖ ⥤ NormedGroup :=
 LocallyConstant.obj V
-
-/-- `LCP V n` is the functor that sends a profinite set `S` to `V(S^n)` -/
-def LCP (V : NormedGroup) (n : ℕ) : Profiniteᵒᵖ ⥤ NormedGroup :=
-(Pow n).op ⋙ LocallyConstant.obj V
 
 namespace LC
 
@@ -99,11 +95,6 @@ by { simp [res, FiltrationPow.cast_le_refl], refl }
 lemma res_comp_res [h₁ : fact (c₃ ≤ c₂)] [h₂ : fact (c₂ ≤ c₁)] :
   res V r' c₁ c₂ n ≫ res V r' c₂ c₃ n = @res V r' c₁ c₃ ⟨le_trans h₁.1 h₂.1⟩ n :=
 by simp only [res, ← whisker_right_comp, ← nat_trans.op_comp, FiltrationPow.cast_le_comp]
-
-lemma res_app [fact (c₂ ≤ c₁)] (M) :
-  (res V r' c₁ c₂ n).app M =
-    (LCP V n).map (Filtration.cast_le (unop M : ProFiltPseuNormGrpWithTinv r') c₂ c₁).op :=
-rfl
 
 lemma res_norm_noninc [fact (c₂ ≤ c₁)] (M) : ((res V r' c₁ c₂ n).app M).norm_noninc :=
 locally_constant.comap_hom_norm_noninc _ _
