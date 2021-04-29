@@ -727,29 +727,6 @@ end data
 
 namespace package
 
-section σπ
-
-variables (BD : package) (c_ : ℕ → ℝ≥0)
-
-instance σ_suitable (i : ℕ) :
-  (BD.data.σ.f i).suitable (rescale_constants c_ 2 i) (c_ i) :=
-by { dsimp [rescale_constants], apply_instance }
-
-instance π_suitable (c : ℝ≥0) (i : ℕ) :
-  (BD.data.π.f i).suitable c c :=
-by { dsimp, apply_instance }
-
-instance π_suitable' (i : ℕ) :
-  (BD.data.π.f i).suitable (rescale_constants c_ 2 i) (c_ i) :=
-begin
-  refine universal_map.suitable.le _ _ (c_ i) _ (package.π_suitable _ _ i) _ le_rfl,
-  dsimp [rescale_constants],
-  rw [← div_eq_mul_inv, ← nnreal.coe_le_coe],
-  exact half_le_self (c_ i).coe_nonneg,
-end
-
-end σπ
-
 class adept (BD : out_param package) (c_ : out_param $ ℕ → ℝ≥0) (c' : ℕ → ℝ≥0) : Prop :=
 (htpy_suitable' :
   ∀ i, (BD.homotopy.h i (i+1)).suitable (rescale_constants c_ 2 i) (c' (i+1) * c_ (i+1)))

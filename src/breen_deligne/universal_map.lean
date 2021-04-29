@@ -155,38 +155,6 @@ matrix.one_mul f
 
 @[simp] lemma comp_id : comp g (id _) = g :=
 matrix.mul_one g
-
-/-- `double f` is the `universal_map` from `ℤ[A^m ⊕ A^m]` to `ℤ[A^n ⊕ A^n]`
-given by applying `f` on both "components". -/
-def double : basic_universal_map m n →+ basic_universal_map (m + m) (n + n) :=
-add_monoid_hom.mk'
-  (λ f, matrix.reindex_linear_equiv fin_sum_fin_equiv fin_sum_fin_equiv $
-    matrix.from_blocks f 0 0 f)
-  (λ f g, by rw [← linear_equiv.map_add, matrix.from_blocks_add, add_zero])
-
-lemma comp_double_double (g : basic_universal_map m n) (f : basic_universal_map l m) :
-  comp (double g) (double f) = double (comp g f) :=
-by simp only [double, comp, add_monoid_hom.mk'_apply, matrix.reindex_linear_equiv_mul, matrix.from_blocks_multiply,
-    matrix.zero_mul, matrix.mul_zero, add_zero, zero_add]
-
-lemma pre_eval_double (f : basic_universal_map m n) :
-  pre_eval A (double f) = (split.symm ∘ prod.map (pre_eval A f) (pre_eval A f) ∘ split) :=
-begin
-  ext1; ext x j; dsimp only [function.comp, L, R, double, pre_eval, add_monoid_hom.mk'_apply];
-  rw [← fin_sum_fin_equiv.sum_comp, fintype.sum_sum_type];
-  simp only [equiv.symm_apply_apply, sum.elim_inl, sum.elim_inr,
-    split_symm_apply, split_apply, prod.map_mk, add_monoid_hom.mk'_apply,
-    matrix.reindex_linear_equiv_apply, matrix.reindex_apply, matrix.minor_apply,
-    matrix.from_blocks_apply₁₁, matrix.from_blocks_apply₁₂,
-    matrix.from_blocks_apply₂₁, matrix.from_blocks_apply₂₂,
-    pi.zero_apply, zero_smul, finset.sum_const_zero, add_zero, zero_add];
-  refl
-end
-
-lemma eval_double (f : basic_universal_map m n) :
-  eval A (double f) = (map $ split.symm ∘ prod.map (pre_eval A f) (pre_eval A f) ∘ split) :=
-by rw [eval, pre_eval_double]
-
 /-
 We use a small hack: mathlib only has block matrices with 4 blocks.
 So we add two zero-width blocks in the definition of `σ`, `π₁`, and `π₂`.
@@ -201,28 +169,6 @@ matrix.from_blocks 1 0 0 0
 def π₂ (n : ℕ) : basic_universal_map (n + n) n :=
 matrix.reindex_linear_equiv (equiv.sum_empty _) fin_sum_fin_equiv $
 matrix.from_blocks 0 1 0 0
-
-@[simp] lemma π₁_comp_double (f : basic_universal_map m n) :
-  comp (π₁ n) (double f) = comp f (π₁ m) :=
-begin
-  conv_rhs {
-    rw ← (matrix.reindex_linear_equiv (equiv.sum_empty _) (equiv.sum_empty _)).apply_symm_apply f },
-  dsimp only [π₁, double, comp, add_monoid_hom.mk'_apply],
-  simp only [equiv.apply_symm_apply, matrix.reindex_linear_equiv_mul, matrix.from_blocks_multiply,
-    add_zero, matrix.one_mul, matrix.mul_one, matrix.zero_mul, matrix.mul_zero, zero_add,
-    matrix.reindex_linear_equiv_sum_empty_symm],
-end
-
-@[simp] lemma π₂_comp_double (f : basic_universal_map m n) :
-  comp (π₂ n) (double f) = comp f (π₂ m) :=
-begin
-  conv_rhs {
-    rw ← (matrix.reindex_linear_equiv (equiv.sum_empty _) (equiv.sum_empty _)).apply_symm_apply f },
-  dsimp only [π₂, double, comp, add_monoid_hom.mk'_apply],
-  simp only [equiv.apply_symm_apply, matrix.reindex_linear_equiv_mul, matrix.from_blocks_multiply,
-    add_zero, matrix.one_mul, matrix.mul_one, matrix.zero_mul, matrix.mul_zero, zero_add,
-    matrix.reindex_linear_equiv_sum_empty_symm],
-end
 
 lemma pre_eval_π₁ (n : ℕ) : pre_eval A (π₁ n) = L :=
 begin
@@ -562,44 +508,6 @@ begin
     exact (h i $ s.mem_insert_self i).add (IH $ λ j hj, h j $ finset.mem_insert_of_mem hj) }
 end
 
-/-- `double f` is the `universal_map` from `ℤ[A^m ⊕ A^m]` to `ℤ[A^n ⊕ A^n]`
-given by applying `f` on both "components". -/
-def double : universal_map m n →+ universal_map (m + m) (n + n) :=
-map $ basic_universal_map.double
-
-lemma double_of (f : basic_universal_map m n) :
-  double (of f) = of (basic_universal_map.double f) :=
-rfl
-
-lemma comp_double_double (g : universal_map m n) (f : universal_map l m) :
-  comp (double g) (double f) = double (comp g f) :=
-show comp_hom (comp_hom (comp_hom.flip (@double l m)) ((@comp (l+l) (m+m) (n+n)))) (double) g f =
-     comp_hom (comp_hom (@double l n)) (@comp l m n) g f,
-begin
-  congr' 2, clear g f, ext g f : 2,
-  show comp (double (of g)) (double (of f)) = double (comp (of g) (of f)),
-  simp only [double_of, comp_of, basic_universal_map.comp_double_double]
-end
-
-lemma double_zero : double (0 : universal_map m n) = 0 :=
-double.map_zero
-
-open basic_universal_map
-
-lemma eval_comp_double :
-  (eval A).comp (@double m n) = (free_abelian_group.lift $ λ g,
-    map $ split.symm ∘ prod.map (pre_eval A g) (pre_eval A g) ∘ split) :=
-begin
-  rw [double, eval],
-  simp only [← basic_universal_map.eval_double],
-  ext1 g, refl
-end
-
-lemma eval_double :
-  eval A (double f) = (free_abelian_group.lift $ λ g,
-    map $ split.symm ∘ prod.map (pre_eval A g) (pre_eval A g) ∘ split) f :=
-by rw [← add_monoid_hom.comp_apply, eval_comp_double]
-
 end
 
 /-- The universal map `ℤ[A^n ⊕ A^n] → ℤ[A^n]` induced by the addition on `A^n`. -/
@@ -609,30 +517,6 @@ of $ basic_universal_map.π₁ n + basic_universal_map.π₂ n
 /-- The universal map `ℤ[A^n ⊕ A^n] → ℤ[A^n]` that is the sum of the projection maps. -/
 def π (n : ℕ) : universal_map (n + n) n :=
 (of $ basic_universal_map.π₁ n) + (of $ basic_universal_map.π₂ n)
-
-lemma σ_comp_double (f : universal_map m n) :
-  comp (σ n) (double f) = comp f (σ m) :=
-show add_monoid_hom.comp_hom ((@comp (m+m) (n+n) n) (σ _)) (double) f =
-  (@comp (m+m) m n).flip (σ _) f,
-begin
-  congr' 1, clear f, ext1 f,
-  show comp (σ n) (double (of f)) = comp (of f) (σ m),
-  dsimp only [double_of, σ],
-  simp only [comp_of, add_monoid_hom.map_add, add_monoid_hom.add_apply,
-    basic_universal_map.π₁_comp_double, basic_universal_map.π₂_comp_double],
-end
-
-lemma π_comp_double (f : universal_map m n) :
-  comp (π n) (double f) = comp f (π m) :=
-show add_monoid_hom.comp_hom ((@comp (m+m) (n+n) n) (π _)) (double) f =
-  (@comp (m+m) m n).flip (π _) f,
-begin
-  congr' 1, clear f, ext1 f,
-  show comp (π n) (double (of f)) = comp (of f) (π m),
-  dsimp only [double_of, π],
-  simp only [comp_of, add_monoid_hom.map_add, add_monoid_hom.add_apply,
-    basic_universal_map.π₁_comp_double, basic_universal_map.π₂_comp_double],
-end
 
 lemma eval_σ (n : ℕ) : eval A (σ n) = map (L + R) :=
 by simp only [σ, eval_of, basic_universal_map.eval, add_monoid_hom.map_add,
