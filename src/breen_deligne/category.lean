@@ -130,32 +130,6 @@ namespace data
 
 variable (BD : data)
 
-section reindex
-
-open category_theory.limits
-
-/-
-=== jmc: I don't think that `reindex` is actually useful
--/
-
-@[simps]
-def reindex (rank : ℕ → ℕ) (hr : ∀ i, BD.X i = rank i) :
-  data :=
-{ X := rank,
-  d := λ i j, (eq_to_iso (hr i)).inv ≫ BD.d i j ≫ (eq_to_iso (hr j)).hom,
-  d_comp_d := λ i j k,
-  by simp only [category.assoc, iso.hom_inv_id_assoc, BD.d_comp_d_assoc, zero_comp, comp_zero],
-  d_eq_zero := λ i j hij,
-  by simp only [BD.d_eq_zero hij, zero_comp, comp_zero] }
-
-@[simps]
-def reindex_iso (rank : ℕ → ℕ) (hr : ∀ i, BD.X i = rank i) :
-  BD ≅ BD.reindex rank hr :=
-differential_object.complex_like.iso_of_components (λ i, eq_to_iso (hr i)) $
-by { intros i j, rw [reindex_d, iso.hom_inv_id_assoc] }
-
-end reindex
-
 section mul
 
 open universal_map
