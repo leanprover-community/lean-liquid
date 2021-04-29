@@ -5,7 +5,7 @@ import ring_theory.noetherian -- for the lemma we need for Gordan
 
 ## A technical lemma about Noetherian ℤ-graded rings
 
-The theorem we need for Gordan and hence LTE
+We need the following theorem for Gordan's Lemma:
 
 If A is ℤ-graded and Noetherian then A_{≥0} is a finitely-generated A₀-algebra
 
@@ -13,16 +13,19 @@ If A is ℤ-graded and Noetherian then A_{≥0} is a finitely-generated A₀-alg
 
 namespace add_monoid_grading
 
-def zero_piece_subsemiring (A : Type*) [semiring A] (M : Type*) [add_monoid M]
-  [decidable_eq M] (g : add_monoid_grading M A) : subsemiring A :=
+open direct_sum
+
+def zero_piece_subsemiring (R : Type*) [semiring R] (A : Type*) [add_monoid A]
+  [decidable_eq A] (Mᵢ : A → add_submonoid R)
+  [has_add_submonoid_decomposition Mᵢ] [add_submonoid.is_gmonoid Mᵢ] : subsemiring R :=
 {
-  one_mem' := g.one_mem,
+  one_mem' := add_submonoid.is_gmonoid.grading_one,
   mul_mem' := λ r s, begin
-    convert g.mul_mem 0 0 r s,
-    rw add_zero,
-    refl,
+    suffices : r ∈ Mᵢ 0 → s ∈ Mᵢ 0 → r * s ∈ Mᵢ (0 + 0),
+      simpa,
+    exact add_submonoid.is_gmonoid.grading_mul,
   end,
-  ..g.pieces 0
+  ..Mᵢ 0
 }
 
 def zero_piece_subring {A : Type*} [ring A] {M : Type*} [add_monoid M]

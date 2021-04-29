@@ -7,36 +7,46 @@ import algebra.monoid_algebra
 
 -/
 
-namespace monoid_grading
+namespace add_monoid_grading
 
-variables {M : Type*} [monoid M] [decidable_eq M] {R : Type*} [ring R]
+open direct_sum
 
-noncomputable def to_monoid_algebra (g : monoid_grading M R) :
-  R →+* monoid_algebra R M :=
+variables {A : Type*} [add_monoid A] [decidable_eq A] [decidable_eq A] {R : Type*} [ring R]
+  (Mᵢ : A → add_submonoid R)
+  [has_add_submonoid_decomposition Mᵢ] [add_submonoid.is_gmonoid Mᵢ]
+
+
+noncomputable def to_monoid_algebra (Mᵢ : A → add_submonoid R)
+  [has_add_submonoid_decomposition Mᵢ] [add_submonoid.is_gmonoid Mᵢ] :
+  R →+* add_monoid_algebra R A :=
 { to_fun := λ r,
   { support := sorry,
-    to_fun := λ m, g.decomposition r m,
+    to_fun := λ m, add_submonoid_decomposition_ring_equiv Mᵢ r m,
     mem_support_to_fun := sorry },
   map_one' := sorry,
   map_mul' := sorry,
   map_zero' := sorry,
   map_add' := sorry }
 
-end monoid_grading
+end add_monoid_grading
 
 section augmentation
 
-namespace monoid_algebra
+namespace add_monoid_algebra
 
-variables {M : Type*} [monoid M] [decidable_eq M] {R : Type*} [ring R]
+open direct_sum
 
-def aug : monoid_algebra R M → R := λ f, finsupp.sum f (λ r m, m)
+variables {A : Type*} [add_monoid A] [decidable_eq A] {R : Type*} [ring R] (Mᵢ : A → add_submonoid R)
+  [has_add_submonoid_decomposition Mᵢ] [add_submonoid.is_gmonoid Mᵢ]
 
-lemma aug_left_inverse (g : monoid_grading M R) (r : R) : aug (g.to_monoid_algebra r) = r :=
+
+def aug : add_monoid_algebra R A → R := λ f, finsupp.sum f (λ r m, m)
+
+lemma aug_left_inverse (r : R) : aug (add_monoid_grading.to_monoid_algebra Mᵢ r) = r :=
 begin
   sorry
 end
 
-end monoid_algebra
+end add_monoid_algebra
 
 end augmentation
