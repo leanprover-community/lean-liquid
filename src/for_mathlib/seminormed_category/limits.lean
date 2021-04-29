@@ -8,7 +8,7 @@ namespace category_theory
 universes v u
 variables {C : Type u} [category.{v} C] [semi_normed_category C]
 variables {D : Type*} [category.{v} D] [semi_normed_category D] (G : C ⥤ D)
-  [functor.bounded_additive G]
+  [functor.norm_compat G]
 variables {J : Type v} [small_category J]
 
 namespace limits
@@ -56,12 +56,9 @@ def map_bounded_cone {F : J ⥤ C} (S : limits.bounded_cone F) :
   limits.bounded_cone (F ⋙ G) :=
 { cone := G.map_cone S.cone,
   bounded := begin
-    use G.norm * ∥ S ∥,
+    use ∥ S ∥,
     intros j,
-    refine le_trans (G.le_norm _) _,
-    have h : 0 ≤ G.norm := G.norm_nonneg,
-    have h2 : ∥ S.cone.π.app j ∥ ≤ ∥ S ∥ := S.norm_le _,
-    exact mul_le_mul_of_nonneg_left h2 h
+    simp [S.norm_le],
   end }
 
 end functor
