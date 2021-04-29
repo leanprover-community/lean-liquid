@@ -1,3 +1,4 @@
+#exit
 import for_mathlib.grading
 import ring_theory.noetherian -- for the lemma we need for Gordan
 
