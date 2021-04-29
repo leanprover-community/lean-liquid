@@ -278,16 +278,4 @@ structure package :=
 (data       : data)
 (homotopy   : homotopy (data.proj 2) (data.sum 2))
 
-namespace package
-
-/-- `BD.rank i` is the rank of the `i`th entry in the Breen--Deligne resolution described by `BD`. -/
-def rank (BD : package) := BD.data.X
-
-def map (BD : package) (i : ℕ) := BD.data.d (i+1) i
-
-@[simp] lemma map_comp_map (BD : package) (i : ℕ) : BD.map _ ≫ BD.map i = 0 :=
-BD.data.d_comp_d _ _ _
-
-end package
-
 end breen_deligne
