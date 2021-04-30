@@ -208,16 +208,123 @@ end add_submonoid
 
 /-!
 ### Collections of `add_subgroups`
-TODO
-### Collections of `add_submodules`
-TODO
 -/
+section add_subgroup
+
+/-!
+#### `add_subgroup`s over an `add_comm_group`
+-/
+section add_comm_group
+
+variables {ι G : Type*} [decidable_eq ι] [add_comm_group G] (Gᵢ : ι → add_subgroup G)
+
+/-- The canonical map from a direct sum of `add_submonoid`s to their carrier type-/
+abbreviation to_add_group_carrier : (⨁ i, Gᵢ i) →+ G :=
+(to_add_monoid $ λ i, (Gᵢ i).subtype)
+
+/-- A class to indicate that the collection of submonoids `Mᵢ` make up an internal direct
+sum. -/
+class has_add_subgroup_decomposition :=
+(components : G → ⨁ i, Gᵢ i)
+(left_inv : left_inverse (to_add_group_carrier Gᵢ) components)
+(right_inv : right_inverse (to_add_group_carrier Gᵢ) components)
+
+/- The decomposition provided by a `has_add_subgroup_decomposition` as an `add_equiv`. -/
+def add_subgroup_decomposition [has_add_subgroup_decomposition Gᵢ] : G ≃+ ⨁ i, Gᵢ i :=
+add_equiv.symm {
+  inv_fun := (direct_sum.has_add_subgroup_decomposition.components : G → ⨁ i, Gᵢ i),
+  left_inv := has_add_subgroup_decomposition.right_inv,
+  right_inv := has_add_subgroup_decomposition.left_inv,
+  ..(to_add_group_carrier Gᵢ) }
+
+/-- By definition a `add_subgroup_decomposition` makes up an internal direct sum. -/
+lemma add_subgroup_decomposition.is_internal [has_add_subgroup_decomposition Gᵢ] :
+  add_subgroup_is_internal Gᵢ :=
+(add_subgroup_decomposition Gᵢ).symm.bijective
+
+/-- Noncomputably construct a decomposition from a proof the direct sum is an internal direct
+sum. -/
+noncomputable def add_subgroup_is_internal.has_decomposition (h : add_subgroup_is_internal Gᵢ) :
+  has_add_subgroup_decomposition Gᵢ :=
+{ components := (equiv.of_bijective _ h).symm,
+  ..(equiv.of_bijective _ h).symm}
+
+end add_comm_group
+
+/-!
+#### `add_subgroup`s over a `ring`
+-/
+section ring
+
+variables {A R : Type*} [decidable_eq A] [add_monoid A] [ring R] (Gᵢ : A → add_subgroup R)
+
+/-- A class to indicate that a collection of `add_subgroup`s meet the requirements of
+`direct_sum.gmonoid`. -/
+class add_subgroup.is_gmonoid : Prop :=
+(grading_one : (1 : R) ∈ Gᵢ 0)
+(grading_mul : ∀ {m n : A} {r s : R},
+  r ∈ Gᵢ m → s ∈ Gᵢ n → r * s ∈ Gᵢ (m + n))
+
+instance add_subgroup.is_gmonoid.gmonoid [add_subgroup.is_gmonoid Gᵢ] : gmonoid (λ i, Gᵢ i) :=
+gmonoid.of_add_subgroups _ add_subgroup.is_gmonoid.grading_one $
+  λ i j ⟨a, ha⟩ ⟨b, hb⟩, add_subgroup.is_gmonoid.grading_mul ha hb
+
+/-- A decomposition of submonoids of a ring preserves multiplication. -/
+lemma to_add_group_carrier_mul [has_add_subgroup_decomposition Gᵢ] [add_subgroup.is_gmonoid Gᵢ]
+  (x y : ⨁ i, Gᵢ i) :
+  to_add_group_carrier Gᵢ (x * y) =
+    to_add_group_carrier Gᵢ x * to_add_group_carrier Gᵢ y :=
+begin
+    -- nasty `change` tricks to get things to a point where we can use `ext`. `induction` on `f`
+  -- and `g` may be easier.
+  change (to_add_group_carrier Gᵢ).comp (add_monoid_hom.mul_left x) y =
+    (add_monoid_hom.mul_left $
+      (to_add_group_carrier Gᵢ) x).comp (to_add_group_carrier Gᵢ) y,
+  apply add_monoid_hom.congr_fun,
+  ext yi yv : 2,
+  let y' := direct_sum.of _ yi yv,
+  change (to_add_group_carrier Gᵢ).comp (add_monoid_hom.mul_right y') x =
+    (add_monoid_hom.mul_right $
+      (to_add_group_carrier Gᵢ) y').comp (to_add_group_carrier Gᵢ) x,
+  apply add_monoid_hom.congr_fun,
+  ext xi xv : 2,
+  let x' := direct_sum.of _ xi xv,
+  change to_add_group_carrier Gᵢ (x' * y') =
+    to_add_group_carrier Gᵢ x' * to_add_group_carrier Gᵢ y',
+  dsimp only [x', y'],
+  dunfold to_add_group_carrier,
+  rw of_mul_of,
+  simp only [to_add_monoid_of],
+  refl,
+end
+
+/-- `direct_sum.add_subgroup_decomposition` as a `ring_equiv`. -/
+def add_subgroup_decomposition_ring_equiv
+  [has_add_subgroup_decomposition Gᵢ] [add_subgroup.is_gmonoid Gᵢ] :
+  R ≃+* ⨁ i, Gᵢ i :=
+ring_equiv.symm
+{ map_mul' := to_add_group_carrier_mul Gᵢ,
+  ..(add_subgroup_decomposition Gᵢ).symm}
+
+end ring
+
+section comm_ring
+
+variables {A R : Type*} [decidable_eq A] [add_comm_monoid A] [comm_ring R] (Mᵢ : A → add_subgroup R)
+
+instance add_subgroup.is_gmonoid.gcomm_monoid [add_subgroup.is_gmonoid Mᵢ] : gcomm_monoid (λ i, Mᵢ i) :=
+gcomm_monoid.of_add_subgroups _ add_subgroup.is_gmonoid.grading_one $
+  λ i j ⟨a, ha⟩ ⟨b, hb⟩, add_subgroup.is_gmonoid.grading_mul ha hb
+
+end comm_ring
+
+end add_subgroup
 
 end direct_sum
 
 namespace add_monoid_grading
 
-/-! ## graded pieces -/
+/-! ## graded pieces for add_monoids -/
 
 section graded_pieces
 
@@ -270,7 +377,6 @@ begin
   refl,
 end
 
--- let's test the API for grading
 lemma mem_piece_iff_single_support (r : R) (i : A) :
   r ∈ Mᵢ i ↔ ∀ ⦃j⦄, j ≠ i → add_submonoid_decomposition Mᵢ r j = 0 :=
 begin
