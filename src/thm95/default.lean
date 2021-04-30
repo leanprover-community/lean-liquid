@@ -5,6 +5,8 @@ import normed_spectral
 
 import pseudo_normed_group.homotopy
 
+import breen_deligne.constants
+
 import thm95.constants
 import thm95.double_complex
 import thm95.row_iso
@@ -258,20 +260,22 @@ and not be troubled with fixing the proof of the implication.
 === -/
 
 /-- Theorem 9.5 in [Analytic] -/
-theorem thm95' (BD : breen_deligne.data)
+theorem thm95' (BD : package)
   (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)]
-  (c_ : ℕ → ℝ≥0) [BD.very_suitable r r' c_] :
+  (c_ : ℕ → ℝ≥0) [BD.data.very_suitable r r' c_] [∀ (i : ℕ), fact (0 < c_ i)] :
   ∀ m : ℕ,
   ∃ (k K : ℝ≥0) [fact (1 ≤ k)],
   ∀ (Λ : Type) [polyhedral_lattice Λ],
   ∃ c₀ : ℝ≥0,
   ∀ (S : Type) [fintype S],
   ∀ (V : NormedGroup) [normed_with_aut r V],
-    by exactI system_of_complexes.is_bounded_exact
-    (​(BD.system c_ r V r').obj (op $ Hom Λ (Mbar r' S))) k K m c₀ :=
+    by exactI system_of_complexes.is_weak_bounded_exact
+    (​(BD.data.system c_ r V r').obj (op $ Hom Λ (Mbar r' S))) k K m c₀ :=
 begin
   intro m,
-  apply nat.strong_induction_on m; clear m,
-  intros m IH,
-  sorry
+  let c' := package.c' BD c_,
+  haveI _inst_c' : package.adept BD c_ c' := package.c'_adept BD c_,
+  refine ⟨(k c' m), (K BD c' r r' m), infer_instance, λ Λ _inst_Λ, _⟩,
+  refine ⟨c₀ m (@PolyhedralLattice.of Λ _inst_Λ), λ S _inst_S V _inst_V, _⟩,
+  apply @thm95 BD r r' _ _ _ _ V _inst_V c_ c' _ _ (@Hom _ _ Λ (@Mbar r' S _inst_S)  _inst_Λ _)
 end
