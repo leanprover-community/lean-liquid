@@ -110,7 +110,7 @@ def rescale (N : ℝ≥0) : ProFiltPseuNormGrpWithTinv r' ⥤ ProFiltPseuNormGrp
       rw [equiv.symm_apply_apply],
       exact f.strict hx,
     end,
-    continuous' := λ c, sorry,
+    continuous' := λ c, f.continuous' (c * N⁻¹),
     map_Tinv' := f.map_Tinv } }
 
 end ProFiltPseuNormGrpWithTinv
