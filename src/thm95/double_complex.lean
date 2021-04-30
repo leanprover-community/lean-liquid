@@ -52,22 +52,11 @@ def augmentation_map :
 def double_complex_aux : cochain_complex ℕ system_of_complexes :=
 alt_face_map_cocomplex (augmentation_map BD c' r r' V Λ M N)
 begin
-  sorry
-  /-
-  show (BD.System c' r V r').map (Cech_augmentation_map r' Λ M N) ≫
-        (BD.System c' r V r').map ((Cech_nerve r' Λ M N).map (δ 0)) =
-       (BD.System c' r V r').map (Cech_augmentation_map r' Λ M N) ≫
-        (BD.System c' r V r').map ((Cech_nerve r' Λ M N).map (δ 1)),
-  simp only [← (BD.System c' r V r').map_comp],
-  congr' 1,
-  show (Hom M).map (cosimplicial_augmentation_map Λ N) ≫
-        (Hom M).map ((Λ.cosimplicial N).map (δ 0)) =
-       (Hom M).map (cosimplicial_augmentation_map Λ N) ≫
-        (Hom M).map ((Λ.cosimplicial N).map (δ 1)),
-  simp only [← (Hom M).map_comp],
-  congr' 1,
-  apply augmentation_map_equalizes
-  -/
+  dsimp only [augmentation_map, cosimplicial_system_of_complexes,
+    category_theory.functor.comp_map, Cech_augmentation_map, Cech_nerve,
+    cosimplicial_augmentation_map, cosimplicial],
+  simp only [← (BD.system c' r V r').map_comp, ← (Hom M).map_comp],
+  rw augmentation_map_equalizes (diagonal_embedding Λ N),
 end
 
 end
