@@ -28,29 +28,30 @@ noncomputable theory
 
 open_locale big_operators
 
-namespace subgroup -- move this section
+section saturated
 
-variables {G : Type*} [group G]
+variables {G G₁ G₂ : Type*} [group G] [add_comm_group G₁] [add_comm_group G₂]
+
+namespace subgroup -- move this section
 
 @[to_additive]
 def saturated (H : subgroup G) : Prop := ∀ ⦃n g⦄, gpow n g ∈ H → n = 0 ∨ g ∈ H
 
-@[to_additive]
-lemma closure_saturated (s : set G) (H : ∀ n g, gpow n g ∈ s → n = 0 ∨ g ∈ closure s) :
-  (closure s).saturated :=
+end subgroup
+
+lemma add_subgroup.ker_saturated [no_zero_smul_divisors ℤ G₂] (f : G₁ →+ G₂) :
+  (f.ker).saturated :=
 begin
-  intros n g h,
-  rw or_iff_not_imp_left,
-  intro hn,
-  sorry
+  intros n g hg,
+  simpa only [f.mem_ker, gsmul_eq_smul, f.map_gsmul, smul_eq_zero] using hg
 end
 
-end subgroup
+end saturated
 
 namespace polyhedral_lattice
 
 variables {Λ Λ' : Type*} [polyhedral_lattice Λ] [polyhedral_lattice Λ']
-variables (f : polyhedral_lattice_hom Λ Λ') [fact f.to_add_monoid_hom.range.saturated]
+variables (f : polyhedral_lattice_hom Λ Λ') (f' : polyhedral_lattice_hom Λ' Λ)
 
 namespace conerve
 
@@ -62,70 +63,88 @@ section objects
 
 variables (m : ℕ)
 
-def Lset : set (fin m →₀ Λ') :=
-{x | ∃ (l : Λ) (n : fin m →₀ ℤ) (hn : n.sum (λ _, add_monoid_hom.id _) = 0),
-     x = finsupp.map_range_hom (int.cast_add_hom' (f l)) n}
+def L : add_subgroup (fin m →₀ Λ') :=
+{ carrier := { l' | ∑ i, l' i = 0 ∧ ∀ i, ∃ l, f l = l' i},
+  zero_mem' := ⟨finset.sum_const_zero, λ i, ⟨0, f.map_zero⟩⟩,
+  add_mem' :=
+  begin
+    rintro l'₁ l'₂ ⟨hl'₁, Hl'₁⟩ ⟨hl'₂, Hl'₂⟩,
+    refine ⟨_, _⟩,
+    { simp only [finsupp.add_apply, finset.sum_add_distrib, hl'₁, hl'₂, add_zero] },
+    { intro i,
+      obtain ⟨l₁, hl₁⟩ := Hl'₁ i,
+      obtain ⟨l₂, hl₂⟩ := Hl'₂ i,
+      refine ⟨l₁ + l₂, _⟩,
+      rw [f.map_add, hl₁, hl₂, finsupp.add_apply] }
+  end,
+  neg_mem' :=
+  begin
+    rintro l' ⟨hl', Hl'⟩,
+    refine ⟨_, _⟩,
+    { simp only [finsupp.neg_apply, finset.sum_neg_distrib, hl', neg_zero] },
+    { intro i,
+      obtain ⟨l, hl⟩ := Hl' i,
+      refine ⟨-l, _⟩,
+      rw [f.map_neg, hl, finsupp.neg_apply] }
+  end }
 
-def L : add_subgroup (fin m →₀ Λ') := add_subgroup.closure $ Lset f m
+lemma L_saturated [hf : fact f.to_add_monoid_hom.range.saturated] :
+  (L f m).saturated :=
+begin
+  rintro n l' ⟨hl', Hl'⟩,
+  simp only [gsmul_eq_smul, finsupp.smul_apply, ← finset.smul_sum, smul_eq_zero] at hl' Hl',
+  rw or_iff_not_imp_left,
+  intro hn,
+  refine ⟨hl'.resolve_left hn, λ i, _⟩,
+  obtain ⟨li, hli⟩ := Hl' i,
+  have hl'i : n • l' i ∈ f.to_add_monoid_hom.range,
+  { rw [← hli, add_monoid_hom.mem_range], refine ⟨li, rfl⟩ },
+  have Hf := hf.1,
+  exact (Hf hl'i).resolve_left hn,
+end
 
--- jmc : I don't think we need this one
--- lemma L_zero : L f 0 = ⊥ := by admit
+section open finsupp
+
+lemma L_le_comap {n} (g : fin (n+1) → fin (m+1)) :
+  (L f (n+1)) ≤ (L f (m+1)).comap (map_domain_hom g) :=
+begin
+  rintro l' ⟨hl', Hl'⟩,
+  rw add_subgroup.mem_comap,
+  refine ⟨_, _⟩,
+  { have aux1 : l'.sum (λ _, add_monoid_hom.id _) = ∑ i, l' i,
+    { exact finsupp.sum_eq_sum_fintype _ (λ _, rfl) _ },
+    have aux2 := @sum_map_domain_index_add_monoid_hom _ _ _ _ _ _ g l' (λ _, add_monoid_hom.id _),
+    dsimp only at aux2,
+    rw [aux1, finsupp.sum_eq_sum_fintype, hl'] at aux2,
+    { simpa only [add_monoid_hom.id_apply] using aux2 },
+    { intro, refl } },
+  { intro i,
+    choose l hl using Hl',
+    simp only [map_domain_hom_apply, map_domain],
+    refine ⟨∑ j, if g j = i then (l j) else 0, _⟩,
+    rw [finsupp.sum_apply, finsupp.sum_eq_sum_fintype],
+    swap, { intro, simp only [coe_zero, pi.zero_apply, single_zero] },
+    simp only [f.map_sum, single_apply, ← hl],
+    apply fintype.sum_congr,
+    intro j, split_ifs,
+    { refl },
+    { exact f.map_zero } }
+end
 
 @[simp] lemma L_one : L f 1 = ⊥ :=
 begin
-  refine add_subgroup.closure_eq_of_le ⊥ _ bot_le,
-  simp only [and_imp, exists_prop, set.subset_singleton_iff, finsupp.map_range_hom_apply,
-    add_subgroup.coe_bot, set.mem_set_of_eq, exists_imp_distrib, finsupp.sum,
-    add_monoid_hom.id_apply, Lset],
-  rintro _ l n hn rfl,
-  suffices : n = 0, { simp only [this, finsupp.map_range_zero] },
-  ext i, fin_cases i,
-  simp only [finsupp.coe_zero, pi.zero_apply, ← hn],
-  have aux : ∀ s : finset (fin 1), s = ∅ ∨ s = {0}, { dec_trivial },
-  cases aux n.support with h' h',
-  { simp only [h', finset.sum_empty, ← finsupp.not_mem_support_iff, finset.not_mem_empty, not_false_iff] },
-  { simp only [h', finset.sum_singleton], }
+  rw eq_bot_iff,
+  rintro l' ⟨hl', Hl'⟩,
+  simp only [fin.default_eq_zero, univ_unique, finset.sum_singleton] at hl',
+  simp only [add_subgroup.mem_bot, finsupp.ext_iff, coe_zero, pi.zero_apply],
+  intro i, fin_cases i, exact hl'
+end
+
 end
 
 lemma int.div_eq_zero (d n : ℤ) (h : d ∣ n) (H : n / d = 0) : n = 0 :=
 begin
   rw [← int.mul_div_cancel' h, H, mul_zero]
-end
-
--- === WARNING: we will need some sort of torsion-free condition on the cokernel of `f`
-lemma L_saturated : (L f m).saturated :=
-begin
-  have key : f.to_add_monoid_hom.range.saturated := fact.out _,
-  classical,
-  apply add_subgroup.closure_saturated,
-  rintro n g ⟨l, N, hN, H⟩,
-  rw [gsmul_eq_smul] at H,
-  let d : ℤ := int.gcd n (N.support.gcd N),
-  have hdn : d ∣ n := int.gcd_dvd_left _ _,
-  let e := n / d,
-  have hde : e * d = n := int.div_mul_cancel hdn,
-  have hen : e ∣ n := ⟨d, hde.symm⟩,
-  let N' := N.map_range (λ x, x / d) (int.zero_div _),
-  have hN' : N = d • N',
-  { sorry },
-  suffices : ∃ fl', e • fl' = f l,
-  { obtain ⟨fl', hfl'⟩ := this,
-    have : f l ∈ f.to_add_monoid_hom.range,
-    { simp only [polyhedral_lattice_hom.coe_to_add_monoid_hom, add_monoid_hom.mem_range, exists_apply_eq_apply], },
-    rw ← hfl' at this,
-    obtain (he|⟨l', hl'⟩) := key this,
-    { dsimp [e] at he, rw [← int.mul_div_cancel' hdn],
-      simp only [he, mul_zero, eq_self_iff_true, true_or] },
-    { rw or_iff_not_imp_left,
-      intro hn,
-      refine add_subgroup.subset_closure _,
-      refine ⟨l', N', _, _⟩,
-      { sorry },
-      { rw polyhedral_lattice_hom.coe_to_add_monoid_hom at hl',
-        apply @smul_injective ℤ (fin m →₀ Λ') _ _ _ _ n hn,
-        dsimp only,
-        sorry } } },
-  sorry
 end
 
 def obj := quotient_add_group.quotient (L f m)
@@ -149,7 +168,10 @@ begin
   simp only [L_one, set.image_singleton, add_zero, cInf_singleton, add_subgroup.coe_bot],
 end
 
-instance : no_zero_smul_divisors ℤ (obj f m) :=
+variables [fact f.to_add_monoid_hom.range.saturated]
+
+instance :
+  no_zero_smul_divisors ℤ (obj f m) :=
 { eq_zero_or_eq_zero_of_smul_eq_zero :=
   begin
     intros n x h,
@@ -200,20 +222,9 @@ open finsupp
 
 variables {n m k : ℕ} (g : fin (n+1) → fin (m+1)) (g' : fin (m+1) → fin (k+1))
 
-lemma L_le_comap : (L f (n+1)) ≤ (L f (m+1)).comap (map_domain_hom g) :=
-begin
-  rw [L, add_subgroup.closure_le],
-  rintros _ ⟨l, c, hc, rfl⟩,
-  rw [set_like.mem_coe, add_subgroup.mem_comap],
-  apply add_subgroup.subset_closure,
-  refine ⟨l, c.map_domain g, _, _⟩,
-  { rwa sum_map_domain_index_add_monoid_hom },
-  { simp only [← add_monoid_hom.comp_apply, ← map_range_hom_map_domain_hom], refl }
-end
-
 -- the underlying morphism of additive groups
 def map_add_hom : obj f (n+1) →+ obj f (m+1) :=
-quotient_add_group.map _ _ (map_domain_hom g) (L_le_comap f g)
+quotient_add_group.map _ _ (map_domain_hom g) (L_le_comap f _ g)
 
 lemma map_domain_hom_strict (x : fin (n+1) →₀ Λ) : ∥map_domain_hom g x∥ ≤ ∥x∥ :=
 begin
@@ -250,6 +261,12 @@ end
 lemma map_add_hom_mk (x : fin (n+1) →₀ Λ') :
   (map_add_hom f g) (quotient_add_group.mk x) = quotient_add_group.mk (map_domain_hom g x) :=
 rfl
+
+@[simp] lemma map_add_hom_π (x : fin (n+1) →₀ Λ') :
+  (map_add_hom f g) (π _ _ x) = π _ _ (map_domain_hom g x) :=
+rfl
+
+variables [fact f.to_add_monoid_hom.range.saturated]
 
 @[simps]
 def map : polyhedral_lattice_hom (obj f (n+1)) (obj f (m+1)) :=
@@ -292,28 +309,23 @@ namespace Cech_conerve
 
 def obj (m : ℕ) : PolyhedralLattice := of (conerve.obj f (m+1))
 
+section open finsupp
+
 def map_succ_zero_aux (m : ℕ) (g : fin (m+2) →ₘ fin 1) : obj f (m+1) →+ Λ' :=
-(finsupp.apply_add_hom (0 : fin 1)).comp $
+(apply_add_hom (0 : fin 1)).comp $
 begin
   -- TODO: this is very ugly
-  let foo := quotient_add_group.lift (conerve.L f (m + 1 + 1)) (finsupp.map_domain_hom g),
+  let foo := quotient_add_group.lift (conerve.L f (m + 1 + 1)) (map_domain_hom g),
   refine foo _,
-  intros x hx,
-  rw ← add_monoid_hom.mem_ker,
-  revert hx x,
-  apply (add_subgroup.closure_le _).mpr _,
-  rintro _ ⟨l, c, hc, rfl⟩,
-  dsimp,
-  rw [set_like.mem_coe, add_monoid_hom.mem_ker, ← finsupp.map_range_hom_apply,
-    ← add_monoid_hom.comp_apply, ← finsupp.map_range_hom_map_domain_hom, add_monoid_hom.comp_apply],
-  suffices : finsupp.map_domain g c = 0,
-  { rw [finsupp.map_domain_hom_apply, this, add_monoid_hom.map_zero] },
+  rintro l' ⟨hl', Hl'⟩,
   ext i,
-  simp only [finsupp.map_domain, finsupp.sum_apply, finsupp.single_apply],
-  convert hc,
-  ext,
-  rw if_pos, { refl },
-  exact subsingleton.elim _ _
+  simp only [map_domain_hom_apply, map_domain, sum_apply, single_apply, zero_apply],
+  rw [finsupp.sum_eq_sum_fintype],
+  swap, { simp only [forall_const, if_true, eq_iff_true_of_subsingleton] },
+  convert hl',
+  ext, rw if_pos, exact subsingleton.elim _ _
+end
+
 end
 
 def map_succ_zero (m : ℕ) (g : fin (m+2) →ₘ fin 1) : obj f (m+1) ⟶ Λ' :=
@@ -332,90 +344,82 @@ def map_succ_zero (m : ℕ) (g : fin (m+2) →ₘ fin 1) : obj f (m+1) ⟶ Λ' :
   end,
   .. map_succ_zero_aux f m g }
 
--- def map : Π ⦃m n : ℕ⦄ (g : fin (m+1) →ₘ fin (n+1)), obj f m ⟶ obj f n
--- | 0     0     g := 𝟙 _
--- | 0     (n+1) g := map_zero_succ f n g
--- | (m+1) 0     g := map_succ_zero f m g
--- | (m+1) (n+1) g := conerve.map f g
-
 -- move this, generalize to arbitrary subsingletons
-lemma preorder_hom_eq_id (g : fin 1 →ₘ fin 1) : g = preorder_hom.id :=
+@[simp] lemma preorder_hom_eq_id (g : fin 1 →ₘ fin 1) : g = preorder_hom.id :=
 by { ext1, exact subsingleton.elim _ _ }
 
--- @[simp] lemma map_zero_zero (g : fin 1 →ₘ fin 1) : map f g = 𝟙 _ := rfl
+def finsupp_fin_one_iso : of (fin 1 →₀ Λ') ≅ Λ' :=
+iso.symm $ PolyhedralLattice.iso_mk
+  (finsupp.single_add_hom 0) (finsupp.apply_add_hom 0)
+  (λ l, by { dsimp [finsupp.norm_def], simp only [norm_zero, finsupp.sum_single_index] })
+  (by { ext l, dsimp, simp only [finsupp.single_eq_same] })
+  (by { ext f x, fin_cases x, dsimp, simp only [finsupp.single_eq_same] })
+.
 
--- lemma map_id : ∀ m, map f (preorder_hom.id : fin (m+1) →ₘ fin (m+1)) = 𝟙 _
--- | 0     := rfl
--- | (m+1) := conerve.map_id f
+@[simp] lemma finsupp_fin_one_iso_hom (l') :
+  (@finsupp_fin_one_iso Λ').hom l' = finsupp.apply_add_hom (0 : fin 1) l':= rfl
 
--- lemma map_comp : ∀ k m n (g : fin (k+1) →ₘ fin (m+1)) (g' : fin (m+1) →ₘ fin (n+1)),
---   map f (g'.comp g) = map f g ≫ map f g'
--- | 0     0     0     g g' := (category.id_comp _).symm
--- | 0     0     (n+1) g g' := by { rw [preorder_hom_eq_id g], refl }
--- | 0     (m+1) 0     g g' := by { rw [preorder_hom_eq_id (g'.comp g), map_id], admit }
--- | 0     (m+1) (n+1) g g' := by { admit }
--- | (k+1) 0     0     g g' := by { rw [preorder_hom_eq_id g'], refl }
--- | (k+1) 0     (n+1) g g' :=
--- begin
---   ext x, apply quotient_add_group.induction_on x; clear x,
---   intro x, admit
--- end
--- | (k+1) (m+1) 0     g g' :=
--- begin
---   ext x, apply quotient_add_group.induction_on x; clear x,
---   intro x, admit
--- end
--- | (k+1) (m+1) (n+1) g g' := conerve.map_comp f _ _
+@[simp] lemma finsupp_fin_one_iso_inv (l') :
+  (@finsupp_fin_one_iso Λ').inv l' = finsupp.single_add_hom (0 : fin 1) l':= rfl
+
+/-- the left hand side is by definition the quotient of the right hand side
+by a subgroup that is provably trivial -/
+def obj_zero_iso' : obj f 0 ≅ of (fin 1 →₀ Λ') :=
+iso.symm $ PolyhedralLattice.iso_mk
+  (polyhedral_lattice.conerve.π _ _)
+  (quotient_add_group.lift _ (add_monoid_hom.id _)
+    (by { intros x hx, rwa [polyhedral_lattice.conerve.L_one, add_subgroup.mem_bot] at hx }))
+  (polyhedral_lattice.conerve.norm_π_one_eq _)
+  (by ext; refl) (by ext ⟨x⟩; refl)
+
+-- @[simp] lemma obj_zero_iso'_hom (l') :
+--   (obj_zero_iso' f).hom l' = _ := rfl
+
+@[simp] lemma obj_zero_iso'_inv (l') :
+  (obj_zero_iso' f).inv l' = polyhedral_lattice.conerve.π _ _ l':= rfl
+
+def obj_zero_iso : obj f 0 ≅ Λ' := obj_zero_iso' _ ≪≫ finsupp_fin_one_iso
 
 end Cech_conerve
 
 open Cech_conerve
 
-@[simps]
-def Cech_conerve : simplex_category ⥤ PolyhedralLattice :=
+variables [fact f.to_add_monoid_hom.range.saturated]
+
+@[simps] def Cech_conerve : simplex_category ⥤ PolyhedralLattice :=
 { obj := λ n, obj f n.len,
   map := λ n m g, conerve.map f g.to_preorder_hom,
   map_id' := λ _, conerve.map_id f,
   map_comp' := λ _ _ _ _ _, conerve.map_comp f _ _ }
 
-
-@[simps]
-def augmentation_map_aux (n : ℕ) (g : fin 1 →ₘ fin (n+1)) : Λ' ⟶ obj f n :=
-{ strict' := λ l,
-  begin
-    calc _ ≤ ∥(finsupp.single (g 0)) l∥ : normed_group_hom.quotient_norm_mk_le _ _
-    ... ≤ ∥l∥ : _,
-    rw [finsupp.norm_def, finsupp.sum_single_index],
-    exact norm_zero
-  end,
-  .. (quotient_add_group.mk' $ conerve.L _ _).comp (finsupp.single_add_hom (g 0)) }
-
-def Cech_augmentation_map : Λ ⟶ (Cech_conerve f).obj (mk 0) :=
-f ≫ augmentation_map_aux f 0 preorder_hom.id
+@[simps] def Cech_augmentation_map : Λ ⟶ (Cech_conerve f).obj (mk 0) :=
+f ≫ (obj_zero_iso f).inv
 
 lemma augmentation_map_equalizes :
   Cech_augmentation_map f ≫ (Cech_conerve f).map (δ 0) =
   Cech_augmentation_map f ≫ (Cech_conerve f).map (δ 1) :=
 begin
-  sorry
-  /-
   ext l,
-  show augmentation_map_aux f 1 (δ 0) (f l) = augmentation_map_aux f 1 (δ 1) (f l),
-  simp only [Cech_conerve.map_zero_succ_apply, add_monoid_hom.coe_comp,
-    add_monoid_hom.to_fun_eq_coe, finsupp.single_add_hom_apply, function.comp_app,
-    quotient_add_group.mk'_eq_mk'_iff],
-  apply add_subgroup.subset_closure,
-  refine ⟨l, finsupp.single 1 1 - finsupp.single 0 1, _, _⟩,
-  { rw [finsupp.sum_eq_sum_fintype],
-    swap, { intro, refl },
-    simp only [fin.sum_univ_succ, fin.sum_univ_zero, add_zero, finsupp.sub_apply,
-      add_monoid_hom.id_apply, finsupp.single_apply, fin.one_eq_zero_iff,
-      if_true, zero_sub, fin.zero_eq_one_iff, eq_self_iff_true, sub_zero, fin.succ_zero_eq_one,
-      add_left_neg, if_false, one_ne_zero] },
-  { simp only [add_monoid_hom.map_sub],
-    simp only [finsupp.map_range_hom_apply, finsupp.map_range_single, int.cast_add_hom'_one],
-    refl }
-  -/
+  simp only [conerve.map_apply, add_monoid_hom.to_fun_eq_coe, Cech_augmentation_map_apply,
+    Cech_conerve_map, coe_comp, finsupp.single_add_hom_apply, obj_zero_iso, iso.trans_inv,
+    finsupp_fin_one_iso_inv, obj_zero_iso'_inv],
+  have H1 := conerve.map_add_hom_π f (@hom.to_preorder_hom (mk 0) _ (δ 0)) (finsupp.single 0 (f l)),
+  have H2 := conerve.map_add_hom_π f (@hom.to_preorder_hom (mk 0) _ (δ 1)) (finsupp.single 0 (f l)),
+  refine H1.trans (eq.trans _ H2.symm), clear H1 H2,
+  show (conerve.π f 2) _ = (conerve.π f 2) _,
+  simp only [finsupp.map_domain_single, finsupp.map_domain_hom_apply],
+  rw [← sub_eq_zero, ← add_monoid_hom.map_sub, conerve.π_apply_eq_zero_iff],
+  have hδ0 : hom.to_preorder_hom (δ (0 : fin 2)) 0 = 1 := rfl,
+  have hδ1 : hom.to_preorder_hom (δ (1 : fin 2)) 0 = 0 := rfl,
+  erw [hδ0, hδ1],
+  refine ⟨_, λ i, _⟩,
+  { simp only [fin.sum_univ_succ, fin.sum_univ_zero, add_zero, finsupp.sub_apply,
+      len_mk, finsupp.single_apply, fin.one_eq_zero_iff, if_true, zero_sub, fin.zero_eq_one_iff,
+      eq_self_iff_true, sub_zero, fin.succ_zero_eq_one, add_left_neg, if_false, one_ne_zero] },
+  fin_cases i;
+  simp only [finsupp.sub_apply, len_mk, finsupp.single_apply, eq_self_iff_true, if_true, if_false,
+    fin.one_eq_zero_iff, fin.zero_eq_one_iff, fin.succ_zero_eq_one, one_ne_zero,
+    sub_zero, zero_sub, ← f.map_neg, exists_apply_eq_apply],
 end
 
 end PolyhedralLattice

@@ -24,31 +24,8 @@ variables (r' : ℝ≥0) (M : ProFiltPseuNormGrpWithTinv r')
 -- TODO: we probably want some efficient constructor for these isomorphisms,
 -- because the default has a lot of redundancy in the proof obligations
 
-def finsupp_fin_one_iso : of (fin 1 →₀ Λ) ≅ Λ :=
-iso.symm $ PolyhedralLattice.iso_mk
-  (finsupp.single_add_hom 0) (finsupp.apply_add_hom 0)
-  (λ l, by { dsimp [finsupp.norm_def], simp only [norm_zero, finsupp.sum_single_index] })
-  (by { ext l, dsimp, simp only [finsupp.single_eq_same] })
-  (by { ext f x, fin_cases x, dsimp, simp only [finsupp.single_eq_same] })
-.
-
-/-- the left hand side is by definition the quotient of the right hand side
-by a subgroup that is provably trivial -/
-noncomputable def conerve_obj_one_iso' :
-  of (conerve.obj (diagonal_embedding Λ N) 1) ≅ of (fin 1 →₀ (rescale N (fin N →₀ Λ))) :=
-iso.symm $ PolyhedralLattice.iso_mk
-  (polyhedral_lattice.conerve.π _ _)
-  (quotient_add_group.lift _ (add_monoid_hom.id _)
-    (by { intros x hx, rwa [polyhedral_lattice.conerve.L_one, add_subgroup.mem_bot] at hx }))
-  (polyhedral_lattice.conerve.norm_π_one_eq _)
-  (by ext; refl) (by ext ⟨x⟩; refl)
-
-noncomputable def conerve_obj_one_iso :
-  of (conerve.obj (diagonal_embedding Λ N) 1) ≅ of (rescale N (fin N →₀ Λ)) :=
-conerve_obj_one_iso' Λ N ≪≫ finsupp_fin_one_iso (of (rescale N (fin N →₀ Λ)))
-
 lemma augmentation_eq_diagonal :
-  cosimplicial_augmentation_map Λ N ≫ (conerve_obj_one_iso Λ N).hom =
+  cosimplicial_augmentation_map Λ N ≫ (Cech_conerve.obj_zero_iso _).hom =
   diagonal_embedding Λ N :=
 by { rw ← iso.eq_comp_inv, refl }
 
@@ -166,7 +143,7 @@ variables [fact (0 < r')] (N' : ℝ≥0)
 def Hom_cosimplicial_zero_iso' :
   (Hom M).obj (of $ rescale N (of (fin N →₀ Λ))) ≅
   (Hom M).obj ((Λ.cosimplicial N).obj (mk 0)) :=
-(Hom M).map_iso $ (conerve_obj_one_iso _ _).symm
+(Hom M).map_iso $ (Cech_conerve.obj_zero_iso _).symm
 
 def Hom_cosimplicial_zero_iso_aux (h : N' = N) :
   ProFiltPseuNormGrpWithTinv.of r' (rescale N (polyhedral_lattice.Hom Λ M)) ≅
