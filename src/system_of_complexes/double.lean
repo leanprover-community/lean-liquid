@@ -164,6 +164,7 @@ rfl
 
 /-- The differential between rows in a system of double complexes,
 as map of system of complexes. -/
+@[simps app_f]
 def row_map (C : system_of_double_complexes.{u}) (p p' : ℕ) :
   C.row p ⟶ C.row p' :=
 { app := λ c,
