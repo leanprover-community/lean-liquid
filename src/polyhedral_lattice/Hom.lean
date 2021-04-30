@@ -61,8 +61,7 @@ def Hom (M : ProFiltPseuNormGrpWithTinv r') :
       haveI : fact (nnnorm (f l) ≤ nnnorm l) := ⟨f.strict_nnnorm l⟩,
       have aux := (continuous_apply (f l)).comp
         (add_monoid_hom.incl_continuous Λ₂ r' M c),
-      rw (embedding_cast_le (c * nnnorm (f l)) (c * nnnorm l)).continuous_iff at aux,
-      exact aux
+      rwa (embedding_cast_le (c * nnnorm (f l)) (c * nnnorm l)).continuous_iff at aux
     end,
     map_Tinv' := λ g, by { ext l, refl } },
   map_id' := λ Λ, by { rw [← op_id, quiver.hom.op_inj.eq_iff], ext, refl },
@@ -78,64 +77,46 @@ In the remainder of the file, we show that `Hom(ℤ, M)` is isomorphic to `M`.
 
 open pseudo_normed_group profinitely_filtered_pseudo_normed_group_with_Tinv_hom
 
-local notation `Tinv` := profinitely_filtered_pseudo_normed_group_with_Tinv.Tinv
-
-variables {r' : ℝ≥0} [h0r' : fact (0 < r')] [hr'1 : fact (r' ≤ 1)]
-variables {M M₁ M₂ : ProFiltPseuNormGrpWithTinv.{u} r'}
-variables {f : M₁ ⟶ M₂}
-
-variables (M)
-
-include h0r'
-
-/-- The morphism `M ⟶ Hom ℤ M` for `M` a `profinitely_filtered_pseudo_normed_group_with_Tinv`. -/
-noncomputable
-def HomZ_map : M ⟶ (Hom ℤ M) :=
-{ to_fun := int.cast_add_hom',
-  map_zero' := by { ext1, simp only [pi.zero_apply, add_monoid_hom.coe_zero, smul_zero, int.cast_add_hom'_apply] },
-  map_add' := by { intros, ext1, simp only [smul_add, add_monoid_hom.coe_add, add_left_inj,
-    pi.add_apply, one_smul, int.cast_add_hom'_apply] },
-  strict' := λ c x hx c₁ n hn,
-  begin
-    rw [semi_normed_group.mem_filtration_iff] at hn,
-    suffices : n • x ∈ pseudo_normed_group.filtration M (n.nat_abs * c),
-    { rw [← int.cast_add_hom'_apply, nnreal.coe_nat_abs, mul_comm] at this,
-      exact (pseudo_normed_group.filtration_mono (mul_le_mul_left' hn c) this) },
-    exact pseudo_normed_group.int_smul_mem_filtration n x c hx,
-  end,
-  continuous' := λ c,
-  begin
-    rw [polyhedral_lattice.add_monoid_hom.continuous_iff],
-    intro n,
-    exact pfpng_ctu_smul_int M n _ (λ x, rfl),
-  end,
-  map_Tinv' := λ x,
-  begin
-    refine add_monoid_hom.ext (λ n, _),
-    have h : Tinv (int.cast_add_hom' x) n = Tinv (int.cast_add_hom' x n) := rfl,
-    simp only [h, int.cast_add_hom'_apply, profinitely_filtered_pseudo_normed_group_hom.map_gsmul],
-  end }
-
-include hr'1
+variables {r' : ℝ≥0} [fact (0 < r')] [fact (r' ≤ 1)]
+variables (M  : ProFiltPseuNormGrpWithTinv.{u} r')
 
 /-- `HomZ_map` as an equiv. -/
-@[simps]
-def HomZ_map_equiv : M ≃+ Hom ℤ M :=
-{ inv_fun := λ (f : ℤ →+ M), f 1,
-  left_inv := λ x, one_smul _ _,
-  right_inv := λ f, by { ext, exact one_smul _ _ },
-  .. HomZ_map M }
+@[simps] def HomZ_map_equiv : Hom ℤ M ≃+ M :=
+{ to_fun := add_monoid_hom.eval 1,
+  inv_fun := int.cast_add_hom',
+  map_add' := add_monoid_hom.map_add _,
+  left_inv := λ f, by { ext, exact one_smul _ _ },
+  right_inv := λ x, one_smul _ _ }
 
-/-- The inverse of `HomZ_map` is strict. -/
-lemma HomZ_map_inverse_strict (c) (f) (hf : f ∈ filtration ((Hom ℤ M)) c) :
-  (HomZ_map_equiv M).symm f ∈ filtration M c :=
-by simpa [mul_one] using hf int.one_mem_filtration
+lemma HomZ_map_equiv_strict (c : ℝ≥0) (f : (Hom ℤ M)) :
+  f ∈ filtration (Hom ℤ M) c ↔ (HomZ_map_equiv M) f ∈ filtration M c :=
+begin
+  split,
+  { intro hf, simpa only [mul_one] using hf int.one_mem_filtration },
+  { intros hx c₁ n hn,
+    rw [semi_normed_group.mem_filtration_iff] at hn,
+    have aux := pseudo_normed_group.int_smul_mem_filtration n _ c hx,
+    rw [nnreal.coe_nat_abs] at aux,
+    rw [← (HomZ_map_equiv M).symm_apply_apply f, HomZ_map_equiv_symm_apply,
+      int.cast_add_hom'_apply, mul_comm],
+    exact pseudo_normed_group.filtration_mono (mul_le_mul_right' hn c) aux }
+end
+
+lemma HomZ_map_equiv_ctu (c : ℝ≥0) :
+  continuous (level (HomZ_map_equiv M) (λ c x , (HomZ_map_equiv_strict M c x).1) c) :=
+begin
+  haveI : fact (c * nnnorm (1:ℤ) ≤ c) := ⟨by rw [nnnorm_one, mul_one]⟩,
+  have aux := add_monoid_hom.incl_continuous ℤ r' M c,
+  have aux2 := (continuous_apply 1).comp aux,
+  rwa (profinitely_filtered_pseudo_normed_group.embedding_cast_le
+    (c * nnnorm (1 : ℤ)) c).continuous_iff at aux2
+end
 
 /-- The isomorphism `Hom ℤ M ≅ M` for `M` a `profinitely_filtered_pseudo_normed_group_with_Tinv`. -/
 noncomputable
 def HomZ_iso : Hom ℤ M ≅ M :=
-(ProFiltPseuNormGrpWithTinv.iso_of_equiv_of_strict'
-  (HomZ_map_equiv M) (HomZ_map M).strict' (HomZ_map M).continuous' (HomZ_map M).map_Tinv'
-  (HomZ_map_inverse_strict M)).symm
+ProFiltPseuNormGrpWithTinv.iso_of_equiv_of_strict'
+  (HomZ_map_equiv M) (HomZ_map_equiv_strict M) (HomZ_map_equiv_ctu M) $
+  λ x, by { simp only [add_monoid_hom.eval_apply_apply, HomZ_map_equiv_apply], refl }
 
 end polyhedral_lattice

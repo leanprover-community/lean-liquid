@@ -156,17 +156,16 @@ lemma iso_of_equiv_of_strict_symm.apply (e : M₁ ≃+ M₂) (he : ∀ x, f x = 
 
 def iso_of_equiv_of_strict'
   (e : M₁ ≃+ M₂)
-  (strict' : ∀ ⦃c x⦄, x ∈ filtration M₁ c → e x ∈ filtration M₂ c)
-  (continuous' : ∀ c, @continuous (filtration M₁ c) (filtration M₂ c) _ _ $
-    λ x, ⟨e x, strict' x.2⟩)
-  (map_Tinv' : ∀ x, e (Tinv x) = Tinv (e x))
-  (strict : ∀ ⦃c x⦄, x ∈ filtration M₂ c → e.symm x ∈ filtration M₁ c) :
+  (strict' : ∀ c x, x ∈ filtration M₁ c ↔ e x ∈ filtration M₂ c)
+  (continuous' : ∀ c, continuous (pseudo_normed_group.level e (λ c x, (strict' c x).1) c))
+  (map_Tinv' : ∀ x, e (Tinv x) = Tinv (e x)) :
   M₁ ≅ M₂ :=
 @iso_of_equiv_of_strict r' M₁ M₂
  {to_fun := e,
-  strict' := strict',
+  strict' := λ c x, (strict' c x).1,
   continuous' := continuous',
   map_Tinv' := map_Tinv',
-  ..e.to_add_monoid_hom } e (λ _, rfl) strict
+  ..e.to_add_monoid_hom } e (λ _, rfl)
+  (by { intros c x hx, rwa [strict', e.apply_symm_apply] })
 
 end ProFiltPseuNormGrpWithTinv

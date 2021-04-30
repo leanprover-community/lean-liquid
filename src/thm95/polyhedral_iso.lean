@@ -74,8 +74,7 @@ begin
   haveI : fact (c * (nnnorm l * N⁻¹) ≤ c * N⁻¹ * nnnorm l) := ⟨le_of_eq $ by ring⟩,
   have aux1 := add_monoid_hom.incl_continuous (rescale N Λ) r' M c,
   have aux2 := (continuous_apply (rescale.of l)).comp aux1,
-  rw (embedding_cast_le (c * (nnnorm l * N⁻¹)) (c * N⁻¹ * nnnorm l)).continuous_iff at aux2,
-  exact aux2,
+  rwa (embedding_cast_le (c * (nnnorm l * N⁻¹)) (c * N⁻¹ * nnnorm l)).continuous_iff at aux2
 end
 
 end
@@ -87,63 +86,95 @@ def Hom_rescale_iso [fact (0 < r')] :
   (polyhedral_lattice.Hom (rescale N Λ) M)
   (ProFiltPseuNormGrpWithTinv.of r' (rescale N (polyhedral_lattice.Hom Λ M)))
   (Hom_rescale_hom Λ N r' M)
-  (by exact λ c f, (Hom_rescale_hom_strict Λ N r' M c f).1)
+  (by exact λ c f, Hom_rescale_hom_strict Λ N r' M c f)
   (Hom_rescale_hom_ctu Λ N r' M) (λ x, rfl)
-  (by exact λ c f, (Hom_rescale_hom_strict Λ N r' M c f).2)
 
-@[simps]
-def Hom_finsupp_iso_hom' [fact (0 < r')] :
-  polyhedral_lattice.Hom (fin N →₀ Λ) M →+
+
+@[simps apply symm_apply {fully_applied := ff}]
+def Hom_finsupp_equiv [fact (0 < r')] :
+  polyhedral_lattice.Hom (fin N →₀ Λ) M ≃+
   (ProFiltPseuNormGrpWithTinv.of r' $ ((polyhedral_lattice.Hom Λ M) ^ N)) :=
 { to_fun := λ (f : (fin N →₀ ↥Λ) →+ ↥M) i,
   { to_fun := λ l, f (finsupp.single i l),
     map_zero' := by rw [finsupp.single_zero, f.map_zero],
     map_add' := λ l₁ l₂, by rw [finsupp.single_add, f.map_add] },
-  map_zero' := by { ext i l, simp only [pi.zero_apply, add_monoid_hom.coe_zero, add_monoid_hom.coe_mk] },
-  map_add' := λ f g, by { ext i l, simp only [add_monoid_hom.coe_add, add_monoid_hom.coe_mk, pi.add_apply] } }
-.
-
-@[simps]
-def Hom_finsupp_iso_hom [fact (0 < r')] :
-  polyhedral_lattice.Hom (fin N →₀ Λ) M ⟶
-  (ProFiltPseuNormGrpWithTinv.of r' $ ((polyhedral_lattice.Hom Λ M) ^ N)) :=
-{ strict' := sorry,
-  continuous' := sorry,
-  map_Tinv' := sorry,
-  .. Hom_finsupp_iso_hom' Λ N r' M }
-.
-
-@[simps]
-def Hom_finsupp_equiv [fact (0 < r')] :
-  polyhedral_lattice.Hom (fin N →₀ Λ) M ≃+
-  (ProFiltPseuNormGrpWithTinv.of r' $ ((polyhedral_lattice.Hom Λ M) ^ N)) :=
-{ inv_fun := λ (f : (Λ →+ M) ^ N),
+  map_add' := λ f g, by { ext i l, simp only [add_monoid_hom.coe_add, add_monoid_hom.coe_mk, pi.add_apply] },
+  inv_fun := λ (f : (Λ →+ M) ^ N),
   { to_fun := λ x, x.sum $ λ i l, f i l,
     map_zero' := by rw [finsupp.sum_zero_index],
     map_add' := λ x y, by simp only [finsupp.sum_add_index'] },
   left_inv := λ f,
   begin
-    ext i l,
+    ext i l, dsimp only,
     simp only [add_monoid_hom.coe_comp, add_monoid_hom.coe_mk, add_monoid_hom.to_fun_eq_coe,
-     finsupp.single_add_hom_apply, function.comp_app, finsupp.sum_single_index,
-     add_monoid_hom.map_zero],
-    refl
+      finsupp.single_add_hom_apply, function.comp_app, add_monoid_hom.map_zero,
+      finsupp.sum_single_index],
+    erw [finsupp.sum_single_index],
+    rw [finsupp.single_zero, add_monoid_hom.map_zero],
   end,
   right_inv := λ f,
   begin
-    ext i l,
-    simp only [add_monoid_hom.to_fun_eq_coe, add_monoid_hom.coe_mk, Hom_finsupp_iso_hom'_apply_apply,
+    ext i l, dsimp only,
+    simp only [add_monoid_hom.to_fun_eq_coe, add_monoid_hom.coe_mk,
       finsupp.sum_single_index, add_monoid_hom.map_zero],
-  end,
-  .. Hom_finsupp_iso_hom' Λ N r' M }
+  end }
 .
+
+section open profinitely_filtered_pseudo_normed_group polyhedral_lattice pseudo_normed_group
+
+lemma Hom_finsupp_equiv_strict [fact (0 < r')]
+  (c : ℝ≥0) (f : (polyhedral_lattice.Hom (fin N →₀ Λ) M)) :
+  f ∈ filtration (polyhedral_lattice.Hom (fin N →₀ ↥Λ) M) c ↔
+  (Λ.Hom_finsupp_equiv N r' M) f ∈ filtration
+    (ProFiltPseuNormGrpWithTinv.of r' ((polyhedral_lattice.Hom Λ M) ^ N)) c :=
+begin
+  split,
+  { intros hf i c' l hl,
+    refine hf _,
+    rw [semi_normed_group.mem_filtration_iff, finsupp.nnnorm_def, finsupp.sum_single_index],
+    { exact hl },
+    { exact nnnorm_zero } },
+  { intros hf c' l hl,
+    let g := (Λ.Hom_finsupp_equiv N r' M) f,
+    have hg : (Λ.Hom_finsupp_equiv N r' M).symm g = f := add_equiv.symm_apply_apply _ _,
+    rw [semi_normed_group.mem_filtration_iff, finsupp.nnnorm_def, finsupp.sum_eq_sum_fintype] at hl,
+    swap, { intro, exact nnnorm_zero },
+    rw [← hg, Hom_finsupp_equiv_symm_apply, add_monoid_hom.coe_mk, finsupp.sum_eq_sum_fintype],
+    swap, { intro, exact add_monoid_hom.map_zero _ },
+    apply filtration_mono (mul_le_mul' le_rfl hl),
+    rw [finset.mul_sum],
+    apply sum_mem_filtration,
+    rintro i hi,
+    apply hf _,
+    rw semi_normed_group.mem_filtration_iff, }
+end
+
+lemma Hom_finsupp_equiv_ctu [fact (0 < r')] (c : ℝ≥0) :
+  continuous (level (Λ.Hom_finsupp_equiv N r' M)
+    (λ c x, (Hom_finsupp_equiv_strict Λ N r' M c x).1) c) :=
+begin
+  apply continuous_induced_rng,
+  rw continuous_pi_iff,
+  intro i,
+  dsimp only [function.comp],
+  rw add_monoid_hom.continuous_iff,
+  intro l,
+  haveI : fact (c * nnnorm (finsupp.single i l) ≤ c * nnnorm l) := ⟨mul_le_mul' le_rfl $ le_of_eq _⟩,
+  { have aux1 := add_monoid_hom.incl_continuous (fin N →₀ Λ) r' M c,
+    have aux2 := (continuous_apply (finsupp.single i l)).comp aux1,
+    rwa (embedding_cast_le (c * nnnorm (finsupp.single i l)) (c * nnnorm l)).continuous_iff at aux2 },
+  { rw [finsupp.nnnorm_def, finsupp.sum_single_index], exact nnnorm_zero }
+end
+
+end
 
 @[simps]
 def Hom_finsupp_iso [fact (0 < r')] :
   polyhedral_lattice.Hom (fin N →₀ Λ) M ≅
   (ProFiltPseuNormGrpWithTinv.of r' $ ((polyhedral_lattice.Hom Λ M) ^ N)) :=
-@ProFiltPseuNormGrpWithTinv.iso_of_equiv_of_strict _ _ _
-  (Hom_finsupp_iso_hom _ _ _ _) (Hom_finsupp_equiv _ _ _ _) (λ _, rfl) sorry
+ProFiltPseuNormGrpWithTinv.iso_of_equiv_of_strict' (Hom_finsupp_equiv _ _ _ _)
+  (Hom_finsupp_equiv_strict Λ N r' M) (Hom_finsupp_equiv_ctu Λ N r' M)
+  (by { intro, ext1, refl })
 .
 
 open opposite
