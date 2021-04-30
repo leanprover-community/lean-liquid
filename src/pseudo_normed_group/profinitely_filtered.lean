@@ -121,13 +121,13 @@ f.to_add_monoid_hom.map_sum _ _
 
 /-- Make a profinitely filtered pseudo normed group hom
 from a group hom and a proof that it is bounded and continuous. -/
-def mk' (f : M₁ →+ M₂) (h : ∃ C, ∀ c, ∃ (H : ∀ x, x ∈ filtration M₁ c → f x ∈ filtration M₂ (C * c)),
+def mk_of_bound (f : M₁ →+ M₂) (C : ℝ≥0)
+  (hC : ∀ c, ∃ (H : ∀ x, x ∈ filtration M₁ c → f x ∈ filtration M₂ (C * c)),
     @continuous (filtration M₁ c) (filtration M₂ (C * c)) _ _ (λ x, ⟨f x, H x x.2⟩)) :
   profinitely_filtered_pseudo_normed_group_hom M₁ M₂ :=
-{ bound' := by { obtain ⟨C, hC⟩ := h, refine ⟨C, λ c, (hC c).some⟩ },
+{ bound' := ⟨C, λ c, (hC c).some⟩,
   continuous' := λ c₁ c₂ f₀ hf₀,
   begin
-    obtain ⟨C, hC⟩ := h,
     obtain ⟨_, H⟩ := hC c₁,
     haveI : fact ((C * c₁) ≤ max (C * c₁) c₂) := ⟨le_max_left _ _⟩,
     haveI : fact (c₂ ≤ max (C * c₁) c₂) := ⟨le_max_right _ _⟩,
@@ -138,9 +138,24 @@ def mk' (f : M₁ →+ M₂) (h : ∃ C, ∀ c, ∃ (H : ∀ x, x ∈ filtration
   end,
   .. f }
 
+/-- Make a profinitely filtered pseudo normed group hom
+from a group hom and a proof that it is bounded and continuous. -/
+noncomputable
+def mk' (f : M₁ →+ M₂) (h : ∃ C, ∀ c, ∃ (H : ∀ x, x ∈ filtration M₁ c → f x ∈ filtration M₂ (C * c)),
+    @continuous (filtration M₁ c) (filtration M₂ (C * c)) _ _ (λ x, ⟨f x, H x x.2⟩)) :
+  profinitely_filtered_pseudo_normed_group_hom M₁ M₂ :=
+mk_of_bound f h.some h.some_spec
+
+@[simp] lemma coe_mk_of_bound (f : M₁ →+ M₂) (C) (h) : ⇑(mk_of_bound f C h) = f := rfl
+
 @[simp] lemma coe_mk' (f : M₁ →+ M₂) (h) : ⇑(mk' f h) = f := rfl
 
-lemma bound : ∃ C, ∀ ⦃c x⦄, x ∈ filtration M₁ c → f x ∈ filtration M₂ (C * c) := f.bound'
+def bound_by (C : ℝ≥0) : Prop := ∀ ⦃c x⦄, x ∈ filtration M₁ c → f x ∈ filtration M₂ (C * c)
+
+lemma bound : ∃ C, f.bound_by C := f.bound'
+
+lemma mk_of_bound_bound_by (f : M₁ →+ M₂) (C) (h) : (mk_of_bound f C h).bound_by C :=
+λ c, (h c).some
 
 protected lemma continuous ⦃c₁ c₂⦄ (f₀ : filtration M₁ c₁ → filtration M₂ c₂) (h : ∀ x, f ↑x = f₀ x) :
   continuous f₀ := f.continuous' f₀ h
@@ -157,7 +172,7 @@ variables {f g}
 by cases f; cases g; congr'; exact funext H
 
 instance : has_zero (profinitely_filtered_pseudo_normed_group_hom M₁ M₂) :=
-⟨mk' (0 : M₁ →+ M₂) ⟨0, λ c, ⟨λ _ _, zero_mem_filtration _, @continuous_const _ _ _ _ 0⟩⟩⟩
+⟨mk_of_bound (0 : M₁ →+ M₂) 0 (λ c, ⟨λ _ _, zero_mem_filtration _, @continuous_const _ _ _ _ 0⟩)⟩
 
 instance : inhabited (profinitely_filtered_pseudo_normed_group_hom M₁ M₂) := ⟨0⟩
 
@@ -167,9 +182,9 @@ by cases f; cases g; cases h; refl
 
 /-- The identity function as `profinitely_filtered_pseudo_normed_group_hom`. -/
 @[simps] def id : profinitely_filtered_pseudo_normed_group_hom M M :=
-mk' (add_monoid_hom.id _) $
+mk_of_bound (add_monoid_hom.id _) 1 $
 begin
-  refine ⟨1, λ c, ⟨_, _⟩⟩,
+  refine λ c, ⟨_, _⟩,
   { intros, rwa one_mul },
   haveI : fact (1 * c ≤ c) := by { rw one_mul, exact ⟨le_rfl⟩ },
   rw (embedding_cast_le (1 * c) c).continuous_iff,
@@ -177,7 +192,7 @@ begin
 end
 
 /-- The composition of `profinitely_filtered_pseudo_normed_group_hom`s. -/
-@[simps] def comp
+@[simps] noncomputable def comp
   (g : profinitely_filtered_pseudo_normed_group_hom M₂ M₃)
   (f : profinitely_filtered_pseudo_normed_group_hom M₁ M₂) :
   profinitely_filtered_pseudo_normed_group_hom M₁ M₃ :=
@@ -576,65 +591,50 @@ instance pi : profinitely_filtered_pseudo_normed_group (Π i, M i) :=
 
 variables {M}
 
+def pi_proj (i : ι) : profinitely_filtered_pseudo_normed_group_hom (Π i, M i) (M i) :=
+profinitely_filtered_pseudo_normed_group_hom.mk_of_bound (add_monoid_hom.apply M i) 1 $
+begin
+  refine λ c, ⟨λ x hx, by { rw one_mul, exact hx i }, _⟩,
+  have := ((continuous_apply i).comp (filtration_pi_homeo M c).continuous),
+  haveI : fact (c ≤ 1 * c) := by { rw one_mul, exact ⟨le_rfl⟩ },
+  rw (embedding_cast_le c (1 * c)).continuous_iff at this,
+  convert this using 0,
+end
+
+lemma pi_proj_bound_by (i : ι) : (@pi_proj _ M _ i).bound_by 1 :=
+profinitely_filtered_pseudo_normed_group_hom.mk_of_bound_bound_by _ _ _
+
 /-- Universal property of the product of profinitely filtered pseudo normed groups -/
 def pi_lift {N : Type*} [profinitely_filtered_pseudo_normed_group N]
-  (f : Π i, profinitely_filtered_pseudo_normed_group_hom N (M i)) :
+  (f : Π i, profinitely_filtered_pseudo_normed_group_hom N (M i))
+  (hf : ∃ C, ∀ i, (f i).bound_by C) :
   profinitely_filtered_pseudo_normed_group_hom N (Π i, M i) :=
-{ bound' :=
+{ bound' := by { obtain ⟨C, hC⟩ := hf, refine ⟨C, λ c x hx i, hC i hx⟩ },
+  continuous' :=
   begin
-    have := λ i, (f i).bound,
-    choose Cᵢ hC₀ using this,
-    use supr Cᵢ,
-    intros c x hx,
-    rw forall_swap at hC₀,
-    replace hC₀ := hC₀ c,
-    rw forall_swap at hC₀,
-    replace hC₀ := hC₀ x,
-    rw forall_swap at hC₀,
-    replace hC₀ := hC₀ hx,
-    rename_var x i at hC₀,
-    dsimp,
-    change (λ i, (f i) x) ∈  filtration (Π (i : ι), M i) (supr Cᵢ * c),
-    sorry,
+    intros c₁ c₂ f₀ hf₀,
+    apply continuous_induced_rng,
+    apply continuous_pi,
+    intro i,
+    let g := function.eval i ∘ filtration_pi_homeo M c₂ ∘ f₀,
+    refine (f i).continuous g (λ x, _),
+    specialize hf₀ x, rw function.funext_iff at hf₀,
+    exact hf₀ i
   end,
-  continuous' := sorry,
   .. add_monoid_hom.mk_to_pi (λ i, (f i).to_add_monoid_hom) }
 
-def pi_map (f : Π i, profinitely_filtered_pseudo_normed_group_hom (M i) (M i)) :
-  profinitely_filtered_pseudo_normed_group_hom (Π i, M i) (Π i, M i) :=
-{ to_fun := λ x i, f i (x i),
-  map_zero' := by { ext i, exact (f i).map_zero },
-  map_add' := λ x y, by { ext i, exact (f i).map_add (x i) (y i) },
-  bound' := sorry,
-  continuous' := sorry }
+noncomputable def pi_map {N : ι → Type*} [Π i, profinitely_filtered_pseudo_normed_group (N i)]
+  (f : Π i, profinitely_filtered_pseudo_normed_group_hom (M i) (N i))
+  (hf : ∃ C, ∀ i, (f i).bound_by C) :
+  profinitely_filtered_pseudo_normed_group_hom (Π i, M i) (Π i, N i) :=
+pi_lift (λ i, (f i).comp (pi_proj i))
+begin
+  obtain ⟨C, hC⟩ := hf,
+  refine ⟨C, λ i c x hx, hC i _⟩,
+  have := pi_proj_bound_by i hx,
+  rwa one_mul at this,
+end
 
 end pi
-
--- section prod
-
--- -- jmc: I don't think we need binary products
-
--- variables (M₁ M₂ : Type*)
--- variables [profinitely_filtered_pseudo_normed_group M₁]
--- variables [profinitely_filtered_pseudo_normed_group M₂]
-
--- instance prod_topology (c : ℝ≥0) : topological_space (filtration (M₁ × M₂) c) :=
--- topological_space.induced (filtration_prod_equiv M₁ M₂ c) $ infer_instance
-
--- instance prod_t2 (c : ℝ≥0) : t2_space (filtration (M₁ × M₂) c) := by admit
-
--- instance prod_td (c : ℝ≥0) : totally_disconnected_space (filtration (M₁ × M₂) c) := by admit
-
--- instance prod_compact (c : ℝ≥0) : compact_space (filtration (M₁ × M₂) c) := by admit
-
-
--- instance prod :
---   profinitely_filtered_pseudo_normed_group (M₁ × M₂) :=
--- { continuous_add' := by admit,
---   continuous_neg' := by admit,
---   continuous_cast_le := by admit,
---   .. pseudo_normed_group.prod M₁ M₂ }
-
--- end prod
 
 end profinitely_filtered_pseudo_normed_group

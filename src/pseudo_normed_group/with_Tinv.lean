@@ -46,6 +46,8 @@ lemma Tinv₀_continuous (c c₂ : ℝ≥0) [fact (c ≤ r' * c₂)] :
   continuous (@Tinv₀ r' M _ c c₂ _) :=
 Tinv.continuous _ $ λ x, rfl
 
+lemma Tinv_bound_by : (@Tinv _ M _).bound_by (r'⁻¹) := Tinv_mem_filtration
+
 end profinitely_filtered_pseudo_normed_group_with_Tinv
 
 section
@@ -153,9 +155,9 @@ by cases f; cases g; cases h; refl
 `profinitely_filtered_pseudo_normed_group_with_Tinv_hom`. -/
 def to_profinitely_filtered_pseudo_normed_group_hom :
   profinitely_filtered_pseudo_normed_group_hom M₁ M₂ :=
-profinitely_filtered_pseudo_normed_group_hom.mk' f.to_add_monoid_hom
+profinitely_filtered_pseudo_normed_group_hom.mk_of_bound f.to_add_monoid_hom 1
 begin
-  refine ⟨1, λ c, ⟨_, _⟩⟩,
+  refine λ c, ⟨_, _⟩,
   { rw one_mul, intros x h, exact f.strict h },
   haveI : fact (1 * c ≤ c) := by { rw one_mul, exact ⟨le_rfl⟩ },
   rw (embedding_cast_le (1 * c) c).continuous_iff,
@@ -214,11 +216,14 @@ namespace profinitely_filtered_pseudo_normed_group_with_Tinv
 
 /-! ## Powers -/
 
+noncomputable theory
+
 variables (r' : ℝ≥0) {ι : Type*} (M : ι → Type*)
 variables [Π i, profinitely_filtered_pseudo_normed_group_with_Tinv r' (M i)]
 
 instance pi : profinitely_filtered_pseudo_normed_group_with_Tinv r' (Π i, M i) :=
-{ Tinv := profinitely_filtered_pseudo_normed_group.pi_map $ λ i, Tinv,
+{ Tinv := profinitely_filtered_pseudo_normed_group.pi_map (λ i, Tinv)
+    ⟨r'⁻¹, λ i, Tinv_bound_by⟩,
   Tinv_mem_filtration := λ c x hx i, Tinv_mem_filtration _ _ (hx i),
   .. profinitely_filtered_pseudo_normed_group.pi _ }
 
@@ -226,13 +231,5 @@ instance pi' (M : Type*) [profinitely_filtered_pseudo_normed_group_with_Tinv r' 
   profinitely_filtered_pseudo_normed_group_with_Tinv r' (M^N) :=
 profinitely_filtered_pseudo_normed_group_with_Tinv.pi r' (λ i, M)
 
--- === jmc: I think we don't need binary products
-
--- variables (M₁ M₂ : Type*)
--- variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₁]
--- variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₂]
-
--- instance prod : profinitely_filtered_pseudo_normed_group_with_Tinv r' (M₁ × M₂) :=
--- by admit
 
 end profinitely_filtered_pseudo_normed_group_with_Tinv

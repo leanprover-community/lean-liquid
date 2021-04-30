@@ -16,6 +16,8 @@ universe variables u
 open category_theory
 open_locale nnreal
 
+noncomputable theory
+
 /-- The category of profinitely filtered pseudo normed groups. -/
 def ProFiltPseuNormGrp : Type (u+1) :=
 bundled profinitely_filtered_pseudo_normed_group
