@@ -34,12 +34,10 @@ def Hom_rescale_hom [fact (0 < r')] :
   (ProFiltPseuNormGrpWithTinv.of r' $ (rescale N (polyhedral_lattice.Hom Λ M))) :=
 add_equiv.refl _
 
-lemma foo [fact (0 < r')] (c : ℝ≥0) (f : polyhedral_lattice.Hom (rescale ↑N ↥Λ) ↥M) :
+lemma Hom_rescale_hom_strict [fact (0 < r')] (c : ℝ≥0) (f : polyhedral_lattice.Hom (rescale ↑N ↥Λ) ↥M) :
     f ∈ pseudo_normed_group.filtration ↥(polyhedral_lattice.Hom (rescale ↑N ↥Λ) ↥M) c ↔
-    f ∈
-      pseudo_normed_group.filtration
-        ↥(ProFiltPseuNormGrpWithTinv.of r' (rescale ↑N ↥(polyhedral_lattice.Hom ↥Λ ↥M)))
-        c :=
+    f ∈ pseudo_normed_group.filtration
+        ↥(ProFiltPseuNormGrpWithTinv.of r' (rescale ↑N ↥(polyhedral_lattice.Hom ↥Λ ↥M))) c :=
 begin
   split,
   { intros hf c' l hl,
@@ -65,8 +63,22 @@ begin
       exact_mod_cast hN.ne' } }
 end
 
-lemma bar [fact (0 < r')] (c : ℝ≥0) :
-  continuous (pseudo_normed_group.level (Hom_rescale_hom Λ N r' M) (λ c f, (foo Λ N r' M c f).1) c) := sorry
+section open profinitely_filtered_pseudo_normed_group polyhedral_lattice
+
+lemma Hom_rescale_hom_ctu [fact (0 < r')] (c : ℝ≥0) :
+  continuous (pseudo_normed_group.level (Hom_rescale_hom Λ N r' M)
+    (λ c f, (Hom_rescale_hom_strict Λ N r' M c f).1) c) :=
+begin
+  rw [add_monoid_hom.continuous_iff],
+  intro l,
+  haveI : fact (c * (nnnorm l * N⁻¹) ≤ c * N⁻¹ * nnnorm l) := ⟨le_of_eq $ by ring⟩,
+  have aux1 := add_monoid_hom.incl_continuous (rescale N Λ) r' M c,
+  have aux2 := (continuous_apply (rescale.of l)).comp aux1,
+  rw (embedding_cast_le (c * (nnnorm l * N⁻¹)) (c * N⁻¹ * nnnorm l)).continuous_iff at aux2,
+  exact aux2,
+end
+
+end
 
 def Hom_rescale_iso [fact (0 < r')] :
   polyhedral_lattice.Hom (rescale N Λ) M ≅
@@ -75,9 +87,9 @@ def Hom_rescale_iso [fact (0 < r')] :
   (polyhedral_lattice.Hom (rescale N Λ) M)
   (ProFiltPseuNormGrpWithTinv.of r' (rescale N (polyhedral_lattice.Hom Λ M)))
   (Hom_rescale_hom Λ N r' M)
-  (by exact λ c f, (foo Λ N r' M c f).1)
-  (bar Λ N r' M) (λ x, rfl)
-  (by exact λ c f, (foo Λ N r' M c f).2)
+  (by exact λ c f, (Hom_rescale_hom_strict Λ N r' M c f).1)
+  (Hom_rescale_hom_ctu Λ N r' M) (λ x, rfl)
+  (by exact λ c f, (Hom_rescale_hom_strict Λ N r' M c f).2)
 
 @[simps]
 def Hom_finsupp_iso_hom' [fact (0 < r')] :
