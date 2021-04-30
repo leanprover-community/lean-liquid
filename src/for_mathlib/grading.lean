@@ -225,21 +225,21 @@ open_locale direct_sum
 
 open direct_sum
 
-variables {A : Type*} [add_monoid A] [decidable_eq A] {R : Type*} [semiring R] (Mᵢ : A → add_submonoid R)
-  [has_add_submonoid_decomposition Mᵢ] [add_submonoid.is_gmonoid Mᵢ]
+variables {A : Type*} [decidable_eq A] {R : Type*} [add_comm_monoid R]
+  (Mᵢ : A → add_submonoid R) [has_add_submonoid_decomposition Mᵢ] --[add_submonoid.is_gmonoid Mᵢ]
 
 /-- Decomposing `r` into `(rᵢ)ᵢ : ⨁ i, Mᵢ i` and then adding the pieces gives `r` again. -/
 lemma sum_decomposition  (r : R) :
   (direct_sum.to_add_monoid (λ i, (Mᵢ i).subtype) : (⨁ i, Mᵢ i) →+ R)
-    (add_submonoid_decomposition_ring_equiv Mᵢ r) = r :=
-(add_submonoid_decomposition_ring_equiv Mᵢ).symm_apply_apply r
+    (add_submonoid_decomposition Mᵢ r) = r :=
+(add_submonoid_decomposition Mᵢ).symm_apply_apply r
 
 variable {Mᵢ}
 
 /-- If `r ∈ Rₘ` then the element of `R` which is `r` at `m` and zero elsewhere, is `r`. -/
 lemma eq_decomposition_of_mem_piece''' {r : R} {i : A}
   (hr : r ∈ Mᵢ i) :
-  (add_submonoid_decomposition_ring_equiv Mᵢ).symm (direct_sum.of (λ i, Mᵢ i) i ⟨r, hr⟩) = r :=
+  (add_submonoid_decomposition Mᵢ).symm (direct_sum.of (λ i, Mᵢ i) i ⟨r, hr⟩) = r :=
 begin
   change (direct_sum.to_add_monoid (λ i, (Mᵢ i).subtype) : (⨁ i, (Mᵢ i)) →+ R)
     (direct_sum.of (λ i, Mᵢ i) i ⟨r, hr⟩) = r,
@@ -250,13 +250,13 @@ end
 /-- If `r ∈ Rₘ` then `r` is the element of `⨁Rₘ` which is `r` at `m` and `0` elsewhere. -/
 lemma eq_decomposition_of_mem_piece'' {r : R} {i : A}
   (hr : r ∈ Mᵢ i) :
-  add_submonoid_decomposition_ring_equiv Mᵢ r = (direct_sum.of (λ i, Mᵢ i) i ⟨r, hr⟩) :=
-(add_submonoid_decomposition_ring_equiv Mᵢ).to_equiv.eq_symm_apply.mp
+  add_submonoid_decomposition Mᵢ r = (direct_sum.of (λ i, Mᵢ i) i ⟨r, hr⟩) :=
+(add_submonoid_decomposition Mᵢ).to_equiv.eq_symm_apply.mp
   (eq_decomposition_of_mem_piece''' hr).symm
 
 /-- If `r ∈ Rₘ` then `rₘ`, the `m`'th component of `r`, considered as an element of `Rₘ`, is `r`. -/
 lemma eq_decomposition_of_mem_piece' {r : R} {i : A} (hr : r ∈ Mᵢ i) :
-  add_submonoid_decomposition_ring_equiv Mᵢ r i = ⟨r, hr⟩ :=
+  add_submonoid_decomposition Mᵢ r i = ⟨r, hr⟩ :=
 begin
   rw eq_decomposition_of_mem_piece'' hr,
   apply dfinsupp.single_eq_same,
@@ -264,7 +264,7 @@ end
 
 /-- If `r ∈ Rₘ` then `rₘ`, the `m`'th component of `r`, considered as an element of `R`, is `r`. -/
 lemma eq_decomposition_of_mem_piece {r : R} {i : A} (hr : r ∈ Mᵢ i) :
-  (add_submonoid_decomposition_ring_equiv Mᵢ r i : R) = r :=
+  (add_submonoid_decomposition Mᵢ r i : R) = r :=
 begin
   rw eq_decomposition_of_mem_piece' hr,
   refl,
@@ -272,7 +272,7 @@ end
 
 -- let's test the API for grading
 lemma mem_piece_iff_single_support (r : R) (i : A) :
-  r ∈ Mᵢ i ↔ ∀ ⦃j⦄, j ≠ i → add_submonoid_decomposition_ring_equiv Mᵢ r j = 0 :=
+  r ∈ Mᵢ i ↔ ∀ ⦃j⦄, j ≠ i → add_submonoid_decomposition Mᵢ r j = 0 :=
 begin
   split,
   { intros hrm n hn,
@@ -284,7 +284,7 @@ begin
     letI : ∀ n, decidable_eq (Mᵢ n) := λ _, classical.dec_eq _,
     rw [← sum_decomposition Mᵢ r, direct_sum.to_add_monoid_apply, ← h,
         dfinsupp.add_monoid_hom_sum_single_index],
-    exact (add_submonoid_decomposition_ring_equiv Mᵢ r i).2 }
+    exact (add_submonoid_decomposition Mᵢ r i).2 }
 end
 
 end graded_pieces
@@ -300,27 +300,24 @@ then they're all add_subgroups.
 
 open direct_sum
 
--- R is a ring not a semiring
+-- M is an add_comm_group now, not an add_comm_monoid
 
-variables {A : Type*} [add_monoid A] [decidable_eq A] {R : Type*} [ring R] (Mᵢ : A → add_submonoid R)
-  [has_add_submonoid_decomposition Mᵢ] [add_submonoid.is_gmonoid Mᵢ]
+variables {ι : Type*} [decidable_eq ι] {M : Type*} [add_comm_group M]
+  (Mᵢ : ι → add_submonoid M) [has_add_submonoid_decomposition Mᵢ]
 
--- to_additive can't handle this for some reason so I need to prove it twice
-/-- A monoid_grading on a ring be add_submonoids is in fact by add_subgroups -/
-def add_subgroup_pieces (i : A) : add_subgroup R :=
-{ neg_mem' := λ x hx, begin
-    change -x ∈ Mᵢ i,
-    convert (add_submonoid_decomposition_ring_equiv Mᵢ (-x) i).2,
+def neg_mem {i : ι} {x : M}
+  (hx : x ∈ Mᵢ i) : -x ∈ Mᵢ i :=
+begin
+    convert (add_submonoid_decomposition Mᵢ (-x) i).2,
     apply neg_eq_of_add_eq_zero,
-    --  x ∈ Rₘ so (add_submonoid_decomposition_ring_equiv Mᵢ).to_finsupp m = x.
+    --  x ∈ Rₘ so (add_submonoid_decomposition Mᵢ).to_finsupp m = x.
     nth_rewrite 0 ← eq_decomposition_of_mem_piece hx,
     rw subtype.val_eq_coe,
     norm_cast,
-    suffices : (add_submonoid_decomposition_ring_equiv Mᵢ x +
-      add_submonoid_decomposition_ring_equiv Mᵢ (-x)) i  = 0,
+    suffices : (add_submonoid_decomposition Mᵢ x +
+      add_submonoid_decomposition Mᵢ (-x)) i  = 0,
       simp only [*, add_submonoid.coe_zero, direct_sum.add_apply] at *,
-    simp [← (add_submonoid_decomposition_ring_equiv Mᵢ).map_add],
-  end,
-  ..Mᵢ i}
+    simp [← (add_submonoid_decomposition Mᵢ).map_add],
+end
 
 end add_monoid_grading
