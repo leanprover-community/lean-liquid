@@ -273,7 +273,14 @@ begin
   unfreezingI { subst h },
   dsimp only [iso.refl_inv],
   erw category.id_comp,
-  ext i : 2,
+  rw [← iso.comp_inv_eq],
+  rw [thm95.double_complex.row_map_zero_one],
+  dsimp only [mul_rescale_iso_row_one, iso.trans_inv, nat_trans.comp_app, functor.map_iso_inv],
+  simp only [← category.assoc, ← (BD.system c_ r V r').map_comp, ← nat_trans.comp_app,
+    PolyhedralLattice.Cech_augmentation_map_eq_Hom_sum],
+  rw [iso.comp_inv_eq],
+  ext c : 2,
+  -- dsimp only [BD_system_map_app_app, BD_map_app_f, data.sum_f],
   sorry
 end
 

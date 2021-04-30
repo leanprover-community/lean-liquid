@@ -89,6 +89,22 @@ lemma double_complex.row_one :
   (double_complex BD c' r r' V Λ M N).row 1 =
   (BD.system c' r V r').obj (op $ Hom ((cosimplicial Λ N).obj (mk 0)) M) := rfl
 
+lemma double_complex.row_map_zero_one :
+  (double_complex BD c' r r' V Λ M N).row_map 0 1 =
+  (BD.system c' r V r').map (Cech_augmentation_map r' Λ M N) :=
+begin
+  ext c i : 4,
+  dsimp only [double_complex, differential_object.complex_like.as_functor,
+    system_of_double_complexes.row_map_app_f, system_of_double_complexes.d,
+    double_complex_aux_rescaled, differential_object.complex_like.modify,
+    system_of_complexes.rescale_nat_trans, nat_trans.id_app,
+    system_of_complexes.rescale_functor, functor.id_map,
+    double_complex_aux, alt_face_map_cocomplex],
+  rw [category.comp_id, cochain_complex.mk'_d, dif_pos, eq_to_hom_refl, category.comp_id],
+  refl,
+  refl
+end
+
 lemma double_complex.row (m : ℕ) :
   (double_complex BD c' r r' V Λ M N).row (m+2) =
   (system_of_complexes.rescale_functor (m+2)).obj
