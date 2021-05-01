@@ -217,50 +217,51 @@ variables [fact (0 < r')] [fact (r' ≤ 1)]
 
 open_locale big_operators
 
-def Hom_sum' :
-  (rescale N ((Λ →+ M) ^ N)) →+ (Λ →+ M) :=
-∑ i, add_monoid_hom.apply _ i
-
-lemma Hom_sum'_apply (x) : Hom_sum' Λ N r' M x = ∑ i, x i :=
-add_monoid_hom.finset_sum_apply _ _ _
-
-lemma Hom_sum'_strict ⦃c : ℝ≥0⦄ ⦃x : rescale N ((Λ →+ M) ^ N)⦄
-  (hx : x ∈ pseudo_normed_group.filtration (rescale N ((Λ →+ M) ^ N)) c) :
-  (Λ.Hom_sum' N r' M) x ∈ pseudo_normed_group.filtration (Λ →+ M) c :=
+def unrescale (N : ℝ≥0) (M : Type*) [profinitely_filtered_pseudo_normed_group M] :
+  profinitely_filtered_pseudo_normed_group_hom (rescale N M) M :=
+profinitely_filtered_pseudo_normed_group_hom.mk_of_bound (add_monoid_hom.id _) N⁻¹
 begin
-  intros c' l hl,
-  rw rescale.mem_filtration at hx,
-  have : c * c' = ∑ i : fin N, c * N⁻¹ * c',
-  { rw [finset.sum_const, finset.card_univ, fintype.card_fin, nsmul_eq_mul],
-    -- golf and speedup please
-    have hN : (N:ℝ≥0) ≠ 0, { apply ne_of_gt, norm_cast, exact fact.out _ },
-    field_simp [hN], ring },
-  rw [this, Hom_sum'_apply, add_monoid_hom.finset_sum_apply],
-  apply pseudo_normed_group.sum_mem_filtration,
-  rintro i -, exact hx i hl,
+  intro c,
+  refine ⟨λ x hx, _, _⟩,
+  { rwa mul_comm },
+  { haveI : fact (c * N⁻¹ ≤ N⁻¹ * c) := ⟨(mul_comm _ _).le⟩,
+    exact profinitely_filtered_pseudo_normed_group.continuous_cast_le (c * N⁻¹) (N⁻¹ * c) },
 end
 
-lemma Hom_sum'_ctu (c : ℝ≥0) :
-  continuous (pseudo_normed_group.level (Λ.Hom_sum' N r' M) (Hom_sum'_strict Λ N r' M) c) :=
-begin
-  rw polyhedral_lattice.add_monoid_hom.continuous_iff,
-  intro l,
-  sorry
-end
+def rescale_proj (N : ℕ) (M : Type*) [profinitely_filtered_pseudo_normed_group M] (i : fin N) :
+  profinitely_filtered_pseudo_normed_group_hom (rescale N (M ^ N)) M :=
+(profinitely_filtered_pseudo_normed_group.pi_proj i).comp (unrescale N _)
+
+lemma rescale_proj_bound_by
+  (N : ℕ) (M : Type*) [profinitely_filtered_pseudo_normed_group M] (i : fin N) :
+  (rescale_proj N M i).bound_by N⁻¹ :=
+by { intros c x hx, rw [rescale.mem_filtration, mul_comm] at hx, exact hx i }
 
 def Hom_sum :
   ProFiltPseuNormGrpWithTinv.of r' (rescale N ((Λ →+ M) ^ N)) ⟶
   ProFiltPseuNormGrpWithTinv.of r' (Λ →+ M) :=
-{ to_fun := Hom_sum' Λ N r' M,
-  strict' := Hom_sum'_strict Λ N r' M,
-  continuous' := by exact λ c, Hom_sum'_ctu Λ N r' M c,
-  map_Tinv' := λ x,
-    by { simp only [Hom_sum'_apply, profinitely_filtered_pseudo_normed_group_hom.map_sum], refl },
-  .. Hom_sum' Λ N r' M }
+profinitely_filtered_pseudo_normed_group_with_Tinv_hom.mk'
+  (∑ i, rescale_proj N _ i)
+  (begin
+    have := profinitely_filtered_pseudo_normed_group_hom.sum_bound_by finset.univ
+      (rescale_proj N (Λ →+ M)) (λ i, N⁻¹) (λ i _, rescale_proj_bound_by N (Λ →+ M) i),
+    dsimp at this,
+    simp only [finset.sum_const, finset.card_univ, fintype.card_fin, nsmul_eq_mul] at this,
+    rwa [mul_inv_cancel] at this,
+    apply ne_of_gt,
+    norm_cast,
+    exact fact.out _
+  end)
+  (λ x, by { simp only [profinitely_filtered_pseudo_normed_group_hom.sum_apply,
+    profinitely_filtered_pseudo_normed_group_hom.map_sum], refl })
 .
 
 lemma Hom_sum_apply (x) : Hom_sum Λ N r' M x = ∑ i, x i :=
-Hom_sum'_apply _ _ _ _ _
+begin
+  dsimp only [Hom_sum, profinitely_filtered_pseudo_normed_group_with_Tinv_hom.mk'_apply],
+  rw [profinitely_filtered_pseudo_normed_group_hom.sum_apply],
+  refl
+end
 
 lemma finsupp_sum_diagonal_embedding (f : (Λ →+ M) ^ N) (l : Λ) :
   finsupp.sum ((Λ.diagonal_embedding N) l) (λ i, (f i)) =

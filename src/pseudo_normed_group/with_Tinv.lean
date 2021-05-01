@@ -164,6 +164,19 @@ begin
   exact f.level_continuous c
 end
 
+def mk' (f : profinitely_filtered_pseudo_normed_group_hom M₁ M₂)
+  (hf1 : f.bound_by 1) (hfT) :
+  profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂ :=
+{ to_fun := f,
+  strict' := λ c x hx, by simpa only [one_mul] using hf1 hx,
+  continuous' := λ c, f.continuous _ (λ x, rfl),
+  map_Tinv' := hfT,
+  .. f }
+
+@[simp] lemma mk'_apply
+  (f : profinitely_filtered_pseudo_normed_group_hom M₁ M₂) (hf1) (hfT) (x : M₁) :
+  @mk' r' _ _ _ _ f hf1 hfT x = f x := rfl
+
 /-- If the inverse of `profinitely_filtered_pseudo_normed_group_with_Tinv_hom` is strict, then it
 is a `profinitely_filtered_pseudo_normed_group_with_Tinv_hom`. -/
 def inv_of_equiv_of_strict (e : M₁ ≃+ M₂) (he : ∀ x, f x = e x)

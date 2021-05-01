@@ -176,6 +176,9 @@ instance : has_zero (profinitely_filtered_pseudo_normed_group_hom M₁ M₂) :=
 
 instance : inhabited (profinitely_filtered_pseudo_normed_group_hom M₁ M₂) := ⟨0⟩
 
+lemma zero_bound_by_zero : (0 : profinitely_filtered_pseudo_normed_group_hom M₁ M₂).bound_by 0 :=
+mk_of_bound_bound_by _ _ _
+
 lemma coe_inj ⦃f g : profinitely_filtered_pseudo_normed_group_hom M₁ M₂⦄ (h : (f : M₁ → M₂) = g) :
   f = g :=
 by cases f; cases g; cases h; refl
@@ -328,6 +331,11 @@ begin
   ext, dsimp, rw [← hfg₀, pi.add_apply]
 end
 
+lemma pfpng_ctu.sub {f g : M₁ → M₂} (hf : pfpng_ctu f) (hg : pfpng_ctu g)
+  (H : ∀ c₁, ∃ c₂, ∀ x : filtration M₁ c₁, f x ∈ filtration M₂ c₂) :
+  pfpng_ctu (f - g) :=
+by { rw [sub_eq_add_neg], exact hf.add (hg.neg) H }
+
 variables (M)
 
 lemma pfpng_ctu_id : pfpng_ctu (@id M) :=
@@ -457,6 +465,109 @@ end
 end pfpng_ctu'
 
 end continuity
+
+namespace profinitely_filtered_pseudo_normed_group_hom
+
+variables {M M₁ M₂ : Type*}
+variables [profinitely_filtered_pseudo_normed_group M]
+variables [profinitely_filtered_pseudo_normed_group M₁]
+variables [profinitely_filtered_pseudo_normed_group M₂]
+
+def add (f g : profinitely_filtered_pseudo_normed_group_hom M₁ M₂) :
+  profinitely_filtered_pseudo_normed_group_hom M₁ M₂ :=
+{ to_fun := f + g,
+  bound' :=
+  begin
+    obtain ⟨Cf, hCf⟩ := f.bound,
+    obtain ⟨Cg, hCg⟩ := g.bound,
+    refine ⟨Cf + Cg, λ c x hx, _⟩,
+    rw add_mul,
+    apply add_mem_filtration (hCf hx) (hCg hx),
+  end,
+  continuous' :=
+  begin
+    apply pfpng_ctu.add f.continuous g.continuous,
+    obtain ⟨Cf, hCf⟩ := f.bound,
+    intro c₁,
+    refine ⟨Cf * c₁, λ x, hCf x.2⟩,
+  end,
+  .. f.to_add_monoid_hom + g.to_add_monoid_hom }
+
+def sub (f g : profinitely_filtered_pseudo_normed_group_hom M₁ M₂) :
+  profinitely_filtered_pseudo_normed_group_hom M₁ M₂ :=
+{ to_fun := f - g,
+  bound' :=
+  begin
+    obtain ⟨Cf, hCf⟩ := f.bound,
+    obtain ⟨Cg, hCg⟩ := g.bound,
+    refine ⟨Cf + Cg, λ c x hx, _⟩,
+    rw add_mul,
+    apply sub_mem_filtration (hCf hx) (hCg hx),
+  end,
+  continuous' :=
+  begin
+    apply pfpng_ctu.sub f.continuous g.continuous,
+    obtain ⟨Cf, hCf⟩ := f.bound,
+    intro c₁,
+    refine ⟨Cf * c₁, λ x, hCf x.2⟩,
+  end,
+  .. f.to_add_monoid_hom - g.to_add_monoid_hom }
+
+def neg (f : profinitely_filtered_pseudo_normed_group_hom M₁ M₂) :
+  profinitely_filtered_pseudo_normed_group_hom M₁ M₂ :=
+{ to_fun := -f,
+  bound' :=
+  begin
+    obtain ⟨Cf, hCf⟩ := f.bound,
+    refine ⟨Cf, λ c x hx, _⟩,
+    apply neg_mem_filtration (hCf hx),
+  end,
+  continuous' := pfpng_ctu.neg f.continuous,
+  .. -f.to_add_monoid_hom }
+
+instance : has_add (profinitely_filtered_pseudo_normed_group_hom M₁ M₂) := ⟨add⟩
+
+instance : has_sub (profinitely_filtered_pseudo_normed_group_hom M₁ M₂) := ⟨sub⟩
+
+instance : has_neg (profinitely_filtered_pseudo_normed_group_hom M₁ M₂) := ⟨neg⟩
+
+instance : add_comm_group (profinitely_filtered_pseudo_normed_group_hom M₁ M₂) :=
+function.injective.add_comm_group
+  profinitely_filtered_pseudo_normed_group_hom.to_add_monoid_hom
+  (λ f g h, by { ext, rw add_monoid_hom.ext_iff at h, exact h x })
+  rfl (λ _ _, rfl) (λ _, rfl) (λ _ _, rfl)
+
+lemma bound_by.add {f g : profinitely_filtered_pseudo_normed_group_hom M₁ M₂} {Cf Cg : ℝ≥0}
+  (hf : f.bound_by Cf) (hg : g.bound_by Cg) :
+  (f + g).bound_by (Cf + Cg) :=
+λ c x hx, by { rw add_mul, exact add_mem_filtration (hf hx) (hg hx) }
+
+@[simp] lemma add_apply (f g : profinitely_filtered_pseudo_normed_group_hom M₁ M₂) (x : M₁) :
+  (f + g) x = f x + g x := rfl
+
+@[simp] lemma sum_apply {ι : Type*} (s : finset ι)
+  (f : ι → profinitely_filtered_pseudo_normed_group_hom M₁ M₂) (x : M₁) :
+  (∑ i in s, f i) x = ∑ i in s, (f i x) :=
+begin
+  classical, apply finset.induction_on s,
+  { simp only [finset.sum_empty], refl },
+  { intros i s his IH,
+    simp only [finset.sum_insert his, add_apply, IH] }
+end
+
+lemma sum_bound_by {ι : Type*} (s : finset ι)
+  (f : ι → profinitely_filtered_pseudo_normed_group_hom M₁ M₂)
+  (C : ι → ℝ≥0) (hf : ∀ i ∈ s, (f i).bound_by (C i)) :
+  (∑ i in s, f i).bound_by (∑ i in s, C i) :=
+begin
+  classical, revert hf, apply finset.induction_on s,
+  { intro, simp only [finset.sum_empty], exact zero_bound_by_zero },
+  { intros i s his IH hf,
+    simp only [finset.sum_insert his],
+    apply (hf _ (s.mem_insert_self i)).add (IH $ λ j hj, hf _ $ finset.mem_insert_of_mem hj) }
+end
+
+end profinitely_filtered_pseudo_normed_group_hom
 
 namespace profinitely_filtered_pseudo_normed_group
 
