@@ -352,16 +352,16 @@ begin
     differential_object.comp_f, differential_object.comp_f],
   dsimp only [BD_system_map_app_app, BD_map_app_f, data.sum_f, data.system_map, data.complex,
     data.complex₂_map_f, mul_system_iso, system_rescale_iso, complex_rescale_iso, mul_complex_iso],
-  erw [nat_iso.of_components.hom_app, nat_iso.of_components.inv_app,
-    differential_object.iso_of_components_hom_f, differential_object.iso_of_components_inv_f],
+  erw [nat_iso.of_components.hom_app, nat_iso.of_components.inv_app],
+  dsimp only [differential_object.complex_like.iso_of_components_hom_f,
+    differential_object.complex_like.iso_of_components_inv_f],
   dsimp only [CLCFPTinv₂, universal_map.eval_CLCFPTinv₂, CLCTinv.map_iso_hom, CLCTinv.map_iso_inv,
     CLCTinv.F_map, _root_.id, CLCTinv.map, NormedGroup.equalizer.map_nat_app],
   rw [NormedGroup.equalizer.map_comp_map, NormedGroup.equalizer.map_comp_map],
   apply NormedGroup.equalizer.map_congr,
   { rw foo, refl },
   { rw foo, refl },
-  swap 5, { sorry },
-  any_goals { refl },
+  all_goals { refl },
 end
 
 end thm95
