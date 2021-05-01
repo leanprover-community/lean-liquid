@@ -141,9 +141,12 @@ instance (R : Type*) [comm_ring R] (Gᵢ : ℤ → add_subgroup R)
 ring_hom.to_algebra $ subring.incl R (zero_piece_subring Gᵢ) (nonneg_piece_subring_of_int_grading Gᵢ)
 begin
   intros r hr n hn,
+  change r ∈ Gᵢ 0 at hr,
   change ¬0 ≤ n at hn,
---  rw mem_piece_iff_single_support,
-  sorry
+  rw mem_piece_iff_single_support at hr,
+  apply hr,
+  apply ne_of_lt,
+  exact not_le.mp hn,
 end
 
 -- Brasca lemma
