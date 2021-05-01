@@ -90,7 +90,7 @@ subring_of_add_subgroup ℤ R Gᵢ
   zero_mem' := le_refl (0 : ℤ),
   add_mem' := @add_nonneg ℤ _ }
 
-instance (R : Type*) [comm_ring R] (Gᵢ : ℤ → add_subgroup R)
+instance foo (R : Type*) [comm_ring R] (Gᵢ : ℤ → add_subgroup R)
   [has_add_subgroup_decomposition Gᵢ] [add_subgroup.is_gmonoid Gᵢ] :
   algebra (zero_piece_subring Gᵢ) (nonneg_piece_subring_of_int_grading Gᵢ) :=
 ring_hom.to_algebra $ subring.incl R (zero_piece_subring Gᵢ) (nonneg_piece_subring_of_int_grading Gᵢ)
@@ -106,9 +106,14 @@ lemma ft_iff_fg {R : Type*} {M : Type*} [comm_ring R] [add_comm_monoid M] [nontr
   add_monoid.fg M ↔ algebra.finite_type R (add_monoid_algebra R M) := sorry
 
 theorem nonnegative_subalgebra_fg_over_zero_subalgebra_of_int_grading_of_noeth
-  (A : Type*) [comm_ring A] [is_noetherian_ring A] (Mᵢ : ℤ → add_submonoid A)
-  [has_add_submonoid_decomposition Mᵢ] [add_submonoid.is_gmonoid Mᵢ] :
-1+1=2:=sorry
+  (A : Type*) [comm_ring A] [is_noetherian_ring A] (Gᵢ : ℤ → add_subgroup A)
+  [has_add_subgroup_decomposition Gᵢ] [add_subgroup.is_gmonoid Gᵢ] :
+@algebra.finite_type (zero_piece_subring Gᵢ) (nonneg_piece_subring_of_int_grading Gᵢ) _ _
+(add_monoid_grading.foo A Gᵢ) :=
+begin
+  sorry
+end
+
 
 
 
