@@ -67,7 +67,26 @@ lemma add_monoid_hom_sum_single_index {ι : Type*} {β : ι → Type*} [decidabl
   (dfinsupp.single i b).sum (λ i, h i) = h i b :=
 sum_single_index (h i).map_zero
 
+lemma sum_eq_zero {ι : Type*} {M : ι → Type*} {N : Type*}
+  [decidable_eq ι] [has_add ι] [Π (i : ι), add_comm_monoid (M i)] [add_comm_monoid N]
+  [Π (i : ι) (x : M i), decidable (x ≠ 0)]
+  (x : Π₀ i, M i)
+  (f : Π (i : ι), M i → N) (h : ∀ i, x i ≠ 0 → f i (x i) = 0) :
+  x.sum f = 0 :=
+finset.sum_eq_zero $ λ i hi, h _ $ (x.mem_support_iff i).1 hi
+
 end dfinsupp
+
+-- If we add this lemma, we should add it for all subobjects
+lemma add_submonoid.not_mem_or_of_add_not_mem
+  {M : Type*} [add_monoid M] (S : add_submonoid M) {x y : M} :
+  x + y ∉ S → x ∉ S ∨ y ∉ S :=
+begin
+  rw ←not_and_distrib,
+  exact mt (λ h, S.add_mem h.1 h.2),
+end
+
+
 
 section unused_in_this_file
 
@@ -102,12 +121,12 @@ open function
 namespace direct_sum
 
 /-!
-### Collections of `add_submonoids`
+### Gradings by `add_submonoid`s
 -/
 section add_submonoid
 
 /-!
-#### `add_submonoid`s over an `add_comm_monoid`
+#### `add_submonoid`s of an `add_comm_monoid` indexed by a type
 -/
 section add_comm_monoid
 
@@ -147,7 +166,9 @@ noncomputable def add_submonoid_is_internal.has_decomposition (h : add_submonoid
 end add_comm_monoid
 
 /-!
-#### `add_submonoid`s over a `semiring`
+#### `add_submonoid`s of a `semiring` indexed by an `add_monoid`
+
+Remark: should probably also index them by `monoid`s
 -/
 section semiring
 
@@ -218,12 +239,12 @@ end comm_semiring
 end add_submonoid
 
 /-!
-### Collections of `add_subgroups`
+### Gradings by `add_subgroup`s
 -/
 section add_subgroup
 
 /-!
-#### `add_subgroup`s over an `add_comm_group`
+#### `add_subgroups`s of an `add_comm_group` indexed by a type
 -/
 section add_comm_group
 
@@ -239,6 +260,13 @@ class has_add_subgroup_decomposition :=
 (components : G → ⨁ i, Gᵢ i)
 (left_inv : left_inverse (to_add_group_carrier Gᵢ) components)
 (right_inv : right_inverse (to_add_group_carrier Gᵢ) components)
+
+instance add_subgroup.has_add_subgroup_decomposition_to_has_add_submonoid_decomposition
+  [i : has_add_subgroup_decomposition Gᵢ] :
+  has_add_submonoid_decomposition (λ (a : ι), (Gᵢ a).to_add_submonoid) :=
+{ components := i.components,
+  left_inv := by convert i.left_inv,
+  right_inv := by convert i.right_inv }
 
 /- The decomposition provided by a `has_add_subgroup_decomposition` as an `add_equiv`. -/
 def add_subgroup_decomposition [has_add_subgroup_decomposition Gᵢ] : G ≃+ ⨁ i, Gᵢ i :=
@@ -263,7 +291,9 @@ noncomputable def add_subgroup_is_internal.has_decomposition (h : add_subgroup_i
 end add_comm_group
 
 /-!
-#### `add_subgroup`s over a `ring`
+#### `add_subgroups`s of a `ring` indexed by an add_monoid
+
+Remark: should probably also index them by `monoid`s
 -/
 section ring
 
@@ -281,34 +311,17 @@ instance add_subgroup.is_gmonoid.gmonoid [add_subgroup.is_gmonoid Gᵢ] : gmonoi
 gmonoid.of_add_subgroups _ add_subgroup.is_gmonoid.grading_one $
   λ i j ⟨a, ha⟩ ⟨b, hb⟩, add_subgroup.is_gmonoid.grading_mul ha hb
 
+instance add_subgroup.is_gmonoid_to_add_submonoid.is_gmonoid [add_subgroup.is_gmonoid Gᵢ] :
+  add_submonoid.is_gmonoid (λ (a : A), (Gᵢ a).to_add_submonoid) :=
+{ grading_one := add_subgroup.is_gmonoid.grading_one ,
+  grading_mul := λ _ _ _ _, add_subgroup.is_gmonoid.grading_mul }
+
 /-- A decomposition of submonoids of a ring preserves multiplication. -/
 lemma to_add_group_carrier_mul [has_add_subgroup_decomposition Gᵢ] [add_subgroup.is_gmonoid Gᵢ]
   (x y : ⨁ i, Gᵢ i) :
   to_add_group_carrier Gᵢ (x * y) =
     to_add_group_carrier Gᵢ x * to_add_group_carrier Gᵢ y :=
-begin
-    -- nasty `change` tricks to get things to a point where we can use `ext`. `induction` on `f`
-  -- and `g` may be easier.
-  change (to_add_group_carrier Gᵢ).comp (add_monoid_hom.mul_left x) y =
-    (add_monoid_hom.mul_left $
-      (to_add_group_carrier Gᵢ) x).comp (to_add_group_carrier Gᵢ) y,
-  apply add_monoid_hom.congr_fun,
-  ext yi yv : 2,
-  let y' := direct_sum.of _ yi yv,
-  change (to_add_group_carrier Gᵢ).comp (add_monoid_hom.mul_right y') x =
-    (add_monoid_hom.mul_right $
-      (to_add_group_carrier Gᵢ) y').comp (to_add_group_carrier Gᵢ) x,
-  apply add_monoid_hom.congr_fun,
-  ext xi xv : 2,
-  let x' := direct_sum.of _ xi xv,
-  change to_add_group_carrier Gᵢ (x' * y') =
-    to_add_group_carrier Gᵢ x' * to_add_group_carrier Gᵢ y',
-  dsimp only [x', y'],
-  dunfold to_add_group_carrier,
-  rw of_mul_of,
-  simp only [to_add_monoid_of],
-  refl,
-end
+by convert to_add_monoid_carrier_mul (λ (a : A), (Gᵢ a).to_add_submonoid) x y
 
 /-- `direct_sum.add_subgroup_decomposition` as a `ring_equiv`. -/
 def add_subgroup_decomposition_ring_equiv
@@ -334,11 +347,9 @@ end comm_ring
 
 end add_subgroup
 
-end direct_sum
+/-! ## graded pieces for a grading by `add_submonoid`s -/
 
-/-! ## graded pieces for add_monoids -/
-
-namespace add_monoid_grading
+namespace has_add_submonoid_decomposition
 
 open_locale direct_sum
 
@@ -405,9 +416,11 @@ begin
     exact (add_submonoid_decomposition Mᵢ r i).2 }
 end
 
-end add_monoid_grading
+end has_add_submonoid_decomposition
 
-namespace add_group_grading
+/-! ## graded pieces for a grading by `add_group`s -/
+
+namespace has_add_subgroup_decomposition
 
 open_locale direct_sum
 
@@ -460,32 +473,22 @@ end
 
 lemma mem_piece_iff_single_support (r : R) (i : A) :
   r ∈ Gᵢ i ↔ ∀ ⦃j⦄, j ≠ i → add_subgroup_decomposition Gᵢ r j = 0 :=
-begin
-  split,
-  { intros hrm n hn,
-    rw eq_decomposition_of_mem_piece'' hrm,
-    exact direct_sum.projection_of_ne _ hn.symm _ },
-  { intro h,
-    rw dfinsupp.eq_single_iff at h,
-    -- can't use `classical` because `decidable_eq M` gets lost
-    letI : ∀ n, decidable_eq (Gᵢ n) := λ _, classical.dec_eq _,
-    rw [← sum_decomposition Gᵢ r, direct_sum.to_add_monoid_apply, ← h,
-        dfinsupp.add_monoid_hom_sum_single_index],
-    exact (add_subgroup_decomposition Gᵢ r i).2 }
-end
+show r ∈ (Gᵢ i).to_add_submonoid ↔ ∀ ⦃j⦄, j ≠ i → add_submonoid_decomposition (λ i, (Gᵢ i).to_add_submonoid) r j = 0,
+by convert has_add_submonoid_decomposition.mem_piece_iff_single_support r i
 
-end add_group_grading
+end has_add_subgroup_decomposition
 
 /-!
 
-## rings are graded by subgroups
+## A grading of an `add_comm_group` by `add_submonoid`s is in fact a grading by `add_subgroup`s.
 
-If a ring (or even an add_comm_group) is an internal direct sum of add_submonoids
-then they're all add_subgroups.
+If an `add_comm_group` is an internal direct sum of `add_submonoid`s
+then they're all `add_subgroup`s. Possibly useful for filling in the `neg_mem` field
+when grading an `add_comm_group` by `add_subgroup`s?
 
 -/
 
-namespace add_monoid_grading
+namespace has_add_submonoid_decomposition
 
 open direct_sum
 
@@ -494,7 +497,9 @@ open direct_sum
 variables {ι : Type*} [decidable_eq ι] {M : Type*} [add_comm_group M]
   (Mᵢ : ι → add_submonoid M) [has_add_submonoid_decomposition Mᵢ]
 
-def neg_mem {i : ι} {x : M}
+/-- If an `add_comm_group` is graded by `add_submonoid`s, they're all closed
+  under negation. -/
+theorem neg_mem {i : ι} {x : M}
   (hx : x ∈ Mᵢ i) : -x ∈ Mᵢ i :=
 begin
     convert (add_submonoid_decomposition Mᵢ (-x) i).2,
@@ -509,4 +514,28 @@ begin
     simp [← (add_submonoid_decomposition Mᵢ).map_add],
 end
 
-end add_monoid_grading
+open_locale direct_sum big_operators
+
+-- TODO: does this unfold too far or not enough?
+lemma direct_sum.mul_apply {ι : Type*} {A : ι → Type*}
+  [decidable_eq ι] [has_add ι] [Π (i : ι), add_comm_monoid (A i)] [direct_sum.ghas_mul A]
+  [Π (i : ι) (x : A i), decidable (x ≠ 0)]
+  (x y : ⨁ i, A i) (i : ι) :
+    (x * y) i = x.sum (λ xi xv, y.sum (λ yi yv,
+      if h : xi + yi = i then cast (congr_arg _ h) (ghas_mul.mul xv yv) else 0 )) :=
+begin
+  dsimp[(*), direct_sum.mul_hom, to_add_monoid_apply],
+  simp only [add_monoid_hom.dfinsupp_sum_apply, to_add_monoid_apply, dfinsupp.sum_apply,
+    add_monoid_hom.flip_apply, add_monoid_hom.comp_apply, add_monoid_hom.comp_hom_apply_apply],
+  congr' with xi xv,
+  congr' with yi yv,
+  dsimp [direct_sum.of],
+  rw dfinsupp.single_apply,
+  congr' with h,
+  cases h,
+  refl,
+end
+
+end has_add_submonoid_decomposition
+
+end direct_sum
