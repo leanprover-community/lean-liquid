@@ -34,6 +34,9 @@ def Hom_rescale_hom [fact (0 < r')] :
   (ProFiltPseuNormGrpWithTinv.of r' $ (rescale N (polyhedral_lattice.Hom Λ M))) :=
 add_equiv.refl _
 
+lemma Hom_rescale_hom_symm_apply [fact (0 < r')] (x) :
+  (Hom_rescale_hom Λ N r' M).symm x = x := rfl
+
 lemma Hom_rescale_hom_strict [fact (0 < r')] (c : ℝ≥0) (f : polyhedral_lattice.Hom (rescale ↑N Λ) M) :
     f ∈ pseudo_normed_group.filtration (polyhedral_lattice.Hom (rescale ↑N Λ) M) c ↔
     f ∈ pseudo_normed_group.filtration
@@ -195,6 +198,9 @@ begin
   rw h, exact iso.refl _
 end
 
+@[simp] lemma Hom_cosimplicial_zero_iso_aux_rfl :
+  Hom_cosimplicial_zero_iso_aux Λ N r' M N rfl = iso.refl _ := rfl
+
 def Hom_cosimplicial_zero_iso (h : N' = N) :
   polyhedral_lattice.Hom ((Λ.cosimplicial N).obj (simplex_category.mk 0)) M ≅
   (ProFiltPseuNormGrpWithTinv.of r' (rescale N' ((polyhedral_lattice.Hom Λ M) ^ N))) :=
@@ -253,11 +259,37 @@ def Hom_sum :
   .. Hom_sum' Λ N r' M }
 .
 
+lemma Hom_sum_apply (x) : Hom_sum Λ N r' M x = ∑ i, x i :=
+Hom_sum'_apply _ _ _ _ _
+
+lemma finsupp_sum_diagonal_embedding (f : (Λ →+ M) ^ N) (l : Λ) :
+  finsupp.sum ((Λ.diagonal_embedding N) l) (λ i, (f i)) =
+  (show Λ → M, from show Λ →+ M, from Λ.Hom_sum N r' M f) l :=
+begin
+  simp only [add_monoid_hom.coe_mk, Hom_sum_apply],
+  rw [finsupp.sum_eq_sum_fintype, add_monoid_hom.finset_sum_apply, fintype.sum_congr],
+  { intro i,
+    dsimp only [diagonal_embedding, polyhedral_lattice_hom.coe_mk, finsupp.single_add_hom_apply,
+      rescale.of, equiv.coe_refl, id],
+    simp only [finset.sum_apply', finsupp.single_apply, finset.sum_ite_eq', finset.mem_univ, if_true], },
+  { intro i, exact (f i).map_zero }
+end
+
 lemma Cech_augmentation_map_eq_Hom_sum :
   (thm95.Cech_augmentation_map r' Λ M N ≫ (Λ.Hom_cosimplicial_zero_iso N r' M ↑N rfl).op.inv) =
   (Hom_sum Λ N r' M).op :=
 begin
-  sorry
+  dsimp only [thm95.Cech_augmentation_map, Hom_cosimplicial_zero_iso,
+    Hom_cosimplicial_zero_iso_aux_rfl, Hom_cosimplicial_zero_iso'],
+  rw [iso.refl_trans, iso.refl_trans, iso.op_inv],
+  dsimp only [iso.trans_inv, functor.map_iso_inv, iso.unop_inv, op_comp, iso.symm_inv],
+  simp only [quiver.hom.op_unop, ← category.assoc, ← (Hom M).map_comp,
+    augmentation_eq_diagonal],
+  dsimp only [Hom_rescale_iso, Hom_finsupp_iso],
+  dsimp only [Hom_map],
+  simp only [iso.op_inv, ← op_comp, quiver.hom.op_inj.eq_iff],
+  ext f l : 2,
+  exact finsupp_sum_diagonal_embedding Λ N r' M f l,
 end
 
 end PolyhedralLattice
