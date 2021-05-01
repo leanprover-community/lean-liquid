@@ -163,6 +163,11 @@ variables (ϕ ψ : universal_map m n)
 def eval_CLCFP [ϕ.suitable c₂ c₁] : CLCFP V r' c₁ n ⟶ CLCFP V r' c₂ m :=
 (whisker_right (ϕ.eval_LCFP V r' c₁ c₂) Completion : _)
 
+lemma eval_CLCFP_of (f : basic_universal_map m n) [f.suitable c₂ c₁] :
+  eval_CLCFP V r' c₁ c₂ (free_abelian_group.of f) =
+  (whisker_right (nat_trans.op $ f.eval_FP r' c₂ c₁) (CLC V)) :=
+by { rw [eval_CLCFP, eval_LCFP_of, basic_universal_map.eval_LCFP, whisker_right_twice], refl }
+
 @[simp] lemma eval_CLCFP_zero :
   (0 : universal_map m n).eval_CLCFP V r' c₁ c₂ = 0 :=
 begin

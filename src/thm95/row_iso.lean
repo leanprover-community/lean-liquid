@@ -17,7 +17,7 @@ of the homotopies that will be constructed formally from `BD.homotopy`.
 
 Concretely, we want:
 ```
-(((data.mul N).obj BD.data).system (rescale_constants c_ N) r V r').obj (op (Hom ↥Λ ↥M)) ≅
+(((data.mul N).obj BD.data).system (rescale_constants c_ N) r V r').obj (op (Hom Λ M)) ≅
   (thm95.double_complex BD.data c_ r r' V Λ M N).row 1
 ```
 
@@ -260,6 +260,73 @@ begin
 end
 .
 
+lemma quux (N : ℕ) [fact (0 < N)] (M : ProFiltPseuNormGrpWithTinv.{u} r') (c₁ c₂ : ℝ≥0) (i : ℕ)
+  [(universal_map.sum i N).suitable c₂ c₁] {_ : ((finset.univ : finset (fin N)).sum (basic_universal_map.proj i)).suitable c₂ c₁} :
+  (universal_map.eval_CLCFP V r' c₁ c₂ (universal_map.sum i N)).app (op M) =
+  (CLC V).map ((basic_universal_map.eval_FP r' c₂ c₁ ((finset.univ : finset (fin N)).sum (basic_universal_map.proj i))).app M).op :=
+begin
+  dsimp only [universal_map.sum],
+  rw [@universal_map.eval_CLCFP_of _ _ _ _ _ _ _ _, whisker_right_app, nat_trans.op_app],
+  refl
+end
+
+lemma bar (N : ℕ) [fact (0 < N)] (Λ : PolyhedralLattice) (M : ProFiltPseuNormGrpWithTinv.{u} r')
+  (c₁ c₂ : ℝ≥0) (hc : c₁ * N⁻¹ = c₂) (n : ℕ)
+  {_ : ((finset.univ : finset (fin N)).sum (basic_universal_map.proj n)).suitable c₂ c₁} :
+  (Pow n).map (((Filtration r').map (eq_to_iso hc).inv).app (ProFiltPseuNormGrpWithTinv.of r' (↥(Hom ↥Λ ↥M) ^ N)) ≫ ((Filtration r').obj c₁).map (Λ.Hom_sum N r' M).op.unop) =
+  (FiltrationPow.mul_iso r' c₂ (Hom ↥Λ ↥M) N n).hom ≫ (basic_universal_map.eval_FP r' c₂ c₁ (finset.univ.sum (basic_universal_map.proj n))).app (Hom ↥Λ ↥M) :=
+begin
+  ext x i : 3,
+  dsimp only [Pow_obj, Filtration_obj_obj, Profinite.of, Top.coe_of, Hom,
+    ProFiltPseuNormGrpWithTinv.coe_of] at x,
+  erw [coe_comp, (Pow n).map_comp, coe_comp],
+  dsimp [FiltrationPow.mul_iso_hom],
+  erw [coe_comp],
+  dsimp only [Pow_map, continuous_map.coe_mk, quiver.hom.unop_op, Filtration_map_app,
+    profinitely_filtered_pseudo_normed_group_with_Tinv_hom.level, pseudo_normed_group.level,
+    Filtration_obj_map_to_fun, subtype.coe_mk, Filtration.cast_le_to_fun,
+    pseudo_normed_group.coe_cast_le, basic_universal_map.eval_png₀],
+  rw [basic_universal_map.eval_png_sum, PolyhedralLattice.Hom_sum_apply,
+      add_monoid_hom.finset_sum_apply, finset.sum_apply],
+  apply fintype.sum_congr,
+  intro j,
+  rw [basic_universal_map.eval_png_apply, Pow_Pow_X_hom_to_fun, Filtration.pi_iso],
+  erw [Profinite.iso_of_homeo_hom],
+  dsimp only [function.uncurry, continuous_map.coe_mk, equiv.arrow_congr_apply,
+    pseudo_normed_group.pow_incl_apply, basic_universal_map.proj, function.comp,
+    profinitely_filtered_pseudo_normed_group.filtration_pi_homeo_apply],
+  rw [← fin_prod_fin_equiv.sum_comp], swap, { apply_instance },
+  simp only [
+    matrix.reindex_linear_equiv_apply, matrix.reindex_apply, matrix.minor_apply,
+    equiv.punit_prod_symm_apply, matrix.kronecker, matrix.one_apply,
+    basic_universal_map.proj_aux, equiv.symm_apply_apply,
+    boole_mul, ← ite_and, @eq_comm _ i],
+  simp only [← prod.mk.inj_iff, ite_smul, one_smul, zero_smul, prod.mk.eta],
+  simp only [equiv.arrow_congr_apply, equiv.refl_apply, subtype.coe_mk,
+    equiv.symm_trans_apply,  equiv.symm_apply_apply],
+  convert (finset.sum_ite_eq' finset.univ (j, i) (λ p, (x p.2).val p.1)).symm using 1,
+  { simp only [finset.mem_univ, if_true, subtype.val_eq_coe], },
+  { apply fintype.sum_congr,
+    rintro ⟨a, b⟩,
+    simp only [equiv.prod_comm_symm, equiv.prod_comm_apply, prod.fst_swap, prod.snd_swap],
+    split_ifs; refl }
+end
+
+lemma foo (N : ℕ) [fact (0 < N)] (Λ : PolyhedralLattice) (M : ProFiltPseuNormGrpWithTinv.{u} r')
+  (c₁ c₂ : ℝ≥0) (hc : c₁ * N⁻¹ = c₂) (i : ℕ) [H : universal_map.suitable c₂ c₁ (universal_map.sum i N)] :
+  ((CLC V).map ((FiltrationPow r' c₁ i).op.map (Λ.Hom_sum N r' M).op) ≫ (CLC V).map ((Pow i).map_iso (Filtration_cast_eq r' (c₁ * N⁻¹) c₂ hc (ProFiltPseuNormGrpWithTinv.of r' ((Hom Λ M) ^ N)))).op.inv) =
+  ((universal_map.eval_CLCFP V r' c₁ c₂ (universal_map.sum i N)).app (op (Hom Λ M)) ≫ (CLC V).map (FiltrationPow.mul_iso r' c₂ (Hom Λ M) N i).op.hom) :=
+begin
+  rw [← (CLC V).map_comp],
+  dsimp only [FiltrationPow, category_theory.functor.op_map, category_theory.functor.comp_map,
+    Filtration_cast_eq],
+  rw [iso.op_inv, ← op_comp, functor.map_iso_inv, ← (Pow i).map_comp, nat_iso.app_inv,
+    functor.map_iso_inv, quux, ← (CLC V).map_comp, iso.op_hom, ← op_comp],
+  swap, { exact @basic_universal_map.suitable_of_suitable_of _ _ _ _ _ H },
+  congr' 2,
+  apply bar,
+end
+
 lemma row_map_eq_sum_comp
   (N : ℕ) [fact (0 < N)] (N' : ℝ≥0) (h : N' = N)
   [∀ (i : ℕ), universal_map.suitable (rescale_constants c_ N' i) (c_ i) ((BD.sum N).f i)]
@@ -279,9 +346,22 @@ begin
   simp only [← category.assoc, ← (BD.system c_ r V r').map_comp, ← nat_trans.comp_app,
     PolyhedralLattice.Cech_augmentation_map_eq_Hom_sum],
   rw [iso.comp_inv_eq],
-  ext c : 2,
-  -- dsimp only [BD_system_map_app_app, BD_map_app_f, data.sum_f],
-  sorry
+  ext c i : 4,
+  apply arrow.mk_inj,
+  erw [nat_trans.comp_app, nat_trans.comp_app,
+    differential_object.comp_f, differential_object.comp_f],
+  dsimp only [BD_system_map_app_app, BD_map_app_f, data.sum_f, data.system_map, data.complex,
+    data.complex₂_map_f, mul_system_iso, system_rescale_iso, complex_rescale_iso, mul_complex_iso],
+  erw [nat_iso.of_components.hom_app, nat_iso.of_components.inv_app,
+    differential_object.iso_of_components_hom_f, differential_object.iso_of_components_inv_f],
+  dsimp only [CLCFPTinv₂, universal_map.eval_CLCFPTinv₂, CLCTinv.map_iso_hom, CLCTinv.map_iso_inv,
+    CLCTinv.F_map, _root_.id, CLCTinv.map, NormedGroup.equalizer.map_nat_app],
+  rw [NormedGroup.equalizer.map_comp_map, NormedGroup.equalizer.map_comp_map],
+  apply NormedGroup.equalizer.map_congr,
+  { rw foo, refl },
+  { rw foo, refl },
+  swap 5, { sorry },
+  any_goals { refl },
 end
 
 end thm95

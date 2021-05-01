@@ -57,6 +57,23 @@ end
 @[simp] lemma eval_png_zero : (0 : basic_universal_map m n).eval_png M = 0 :=
 by { ext, simp only [eval_png_apply, zero_smul, finset.sum_const_zero, dmatrix.zero_apply], refl }
 
+lemma eval_png_sum {ι : Type*} (f : ι → basic_universal_map m n) (s : finset ι) :
+  eval_png (∑ i in s, f i) M = ∑ i in s, (eval_png (f i) M) :=
+begin
+  ext x j,
+  simp only [add_monoid_hom.finset_sum_apply, finset.sum_apply, eval_png_apply],
+  rw finset.sum_comm,
+  apply fintype.sum_congr,
+  intro i,
+  rw [← finset.sum_smul],
+  congr' 1,
+  classical,
+  -- this should be factored out
+  apply finset.induction_on s,
+  { simp only [finset.sum_empty, pi.zero_apply], },
+  { intros a s has IH, simp only [finset.sum_insert has, pi.add_apply, IH] }
+end
+
 lemma eval_png_mem_filtration :
   (f.eval_png M) ∈ filtration ((M^m) →+ (M^n)) (finset.univ.sup $ λ i, ∑ j, (f i j).nat_abs) :=
 begin

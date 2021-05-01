@@ -243,9 +243,11 @@ end
 
 @[simp] lemma eval_LCFP'_of (f : basic_universal_map m n) :
   eval_LCFP' V r' c₁ c₂ (of f) = f.eval_LCFP' V r' c₁ c₂ :=
-begin
-  simp only [eval_LCFP', support_of, coeff_of_self, one_smul, finset.sum_singleton]
-end
+by simp only [eval_LCFP', support_of, coeff_of_self, one_smul, finset.sum_singleton]
+
+@[simp] lemma eval_LCFP_of (f : basic_universal_map m n) [f.suitable c₂ c₁] :
+  eval_LCFP V r' c₁ c₂ (of f) = f.eval_LCFP V r' c₁ c₂ :=
+by rw [eval_LCFP_eq_eval_LCFP', eval_LCFP'_of, basic_universal_map.eval_LCFP_eq_eval_LCFP']
 
 @[simp] lemma eval_LCFP'_zero :
   (0 : universal_map m n).eval_LCFP' V r' c₁ c₂ = 0 :=

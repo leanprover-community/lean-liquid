@@ -11,11 +11,8 @@ universe variables u
   ((Filtration r').obj c).obj (of r' (rescale N M)) =
   ((Filtration r').obj (c * N⁻¹)).obj (of r' M) := rfl
 
-@[simps]
+@[simps hom inv]
 noncomputable def Filtration_cast_eq (r' c₁ c₂ : ℝ≥0) (h : c₁ = c₂) [fact (0 < r')] (M) :
   ((Filtration r').obj c₁).obj M ≅
   ((Filtration r').obj c₂).obj M :=
-{ hom := @Filtration.cast_le _ _ _ _ ⟨h.le⟩,
-  inv := @Filtration.cast_le _ _ _ _ ⟨h.ge⟩,
-  hom_inv_id' := by { rw [Filtration.cast_le_comp, Filtration.cast_le_refl], refl },
-  inv_hom_id' := by { rw [Filtration.cast_le_comp, Filtration.cast_le_refl], refl } }
+((Filtration r').map_iso $ category_theory.eq_to_iso h).app M
