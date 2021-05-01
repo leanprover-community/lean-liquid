@@ -24,6 +24,10 @@ Variants:
 * `R` is a `ring` and `Gᵢ : ι → add_subgroup R` and `ι` is an add_monoid
   such that `Gᵢ i * Gᵢ j ⊆ Gᵢ (i + j)`.
 
+## TODO
+
+list main definitions etc
+
 -/
 
 -- MOVE -- not sure I use it
@@ -58,7 +62,7 @@ begin
   exact single_eq_of_ne h.symm,
 end⟩
 
-/-- A version of `dfinsupp.sum_single_index` which takes monoids homomorphisms. Useful for
+/-- A version of `dfinsupp.sum_single_index` which takes monoid homomorphisms. Useful for
   sometimes avoiding `@sum_single_index _ _ _ _ …`. -/
 lemma add_monoid_hom_sum_single_index {ι : Type*} {β : ι → Type*} [decidable_eq ι]
   [_inst_1 : Π (i : ι), add_monoid (β i)]
@@ -85,8 +89,6 @@ begin
   rw ←not_and_distrib,
   exact mt (λ h, S.add_mem h.1 h.2),
 end
-
-
 
 section unused_in_this_file
 
@@ -116,6 +118,7 @@ end direct_sum
 end unused_in_this_file
 
 open_locale direct_sum
+
 open function
 
 namespace direct_sum
