@@ -19,6 +19,7 @@ lemma comp_apply {X Y Z : Profinite.{u}} (f : X ⟶ Y) (g : Y ⟶ Z) (x : X) :
 
 lemma id_apply {X : Profinite.{u}} (x : X) : (𝟙 X : X ⟶ X) x = x := rfl
 
+/-
 lemma hom_closed {X Y : Profinite.{u}} (f : X ⟶ Y) :
   is_closed_map f :=
 begin
@@ -57,7 +58,7 @@ lemma is_iso_of_bijective {X Y : Profinite.{u}}
   (f : X ⟶ Y) (h : function.bijective f) : is_iso f :=
 let E := iso_of_bijective f h in
 is_iso.mk $ ⟨E.inv, by erw E.hom_inv_id, by erw E.inv_hom_id⟩
-
+-/
 
 /-- Construct a homeomorphism from an isomorphism. -/
 def homeo_of_iso {X Y : Profinite} (f : X ≅ Y) : X ≃ₜ Y :=

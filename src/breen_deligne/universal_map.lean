@@ -419,6 +419,11 @@ end
 section mul
 open add_monoid_hom
 
+/-
+TODO: refactor `mul` to be a functor
+TODO: put a monoidal structure on `FreeMat`, so that this is just `N ⊗ _`.
+-/
+
 def mul (N : ℕ) : universal_map m n →+ universal_map (N * m) (N * n) :=
 map (basic_universal_map.mul N)
 
@@ -461,6 +466,10 @@ begin
 end
 
 end mul
+
+/-
+TODO: refactor `sum` and `proj` to be natural transformations from `mul n` to `𝟭 _`.
+-/
 
 def sum (n N : ℕ) : universal_map (N * n) n :=
 of (∑ i, basic_universal_map.proj n i)
