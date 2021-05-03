@@ -50,7 +50,7 @@ def subsemiring_of_add_submonoid (A : Type*) [decidable_eq A] [add_monoid A] (R 
   --   change ((add_submonoid_decomposition_ring_equiv Mᵢ) (a * b)) n = 0,
   --   rw ring_equiv.map_mul,
   --   -- several ways to go here, not sure which is best
-  --   sorry
+  --   by admit
     mul_mem' := λ a b,
     let a' := add_submonoid_decomposition Mᵢ a in
     let b' := add_submonoid_decomposition Mᵢ b in
