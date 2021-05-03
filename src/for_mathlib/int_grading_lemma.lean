@@ -149,7 +149,7 @@ begin
   exact not_le.mp hn,
 end
 
--- Brasca lemma
+-- Brasca lemma, PRed in #7445
 lemma ft_iff_fg {R : Type*} {M : Type*} [comm_ring R] [add_comm_monoid M] [nontrivial R] :
   add_monoid.fg M ↔ algebra.finite_type R (add_monoid_algebra R M) := sorry
 
