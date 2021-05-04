@@ -29,6 +29,31 @@ def const : C ⥤ cochain_complex ℕ C :=
     -- should we add an auto_param?
     comm := by tidy } }
 
+def shift_and_attach {A : C} {As : cochain_complex ℕ C}
+  (g : const.obj A ⟶ As) : cochain_complex ℕ C :=
+cochain_complex.mk'
+(λ n,
+match n with
+| 0 := A
+| n+1 := As.X n
+end)
+(λ n,
+match n with
+| 0 := g.f 0
+| n+1 := As.d _ _
+end)
+(λ n,
+match n with
+| 0 := begin
+    erw ← g.comm,
+    dsimp [const],
+    split_ifs,
+    { simp },
+    { finish }
+  end
+| n+1 := by erw differential_object.complex_like.d_comp_d
+end)
+
 end cochain_complex
 
 namespace cosimplicial_object
