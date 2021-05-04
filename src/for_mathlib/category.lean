@@ -1,6 +1,8 @@
 import category_theory.isomorphism
 import category_theory.opposites
 
+-- this file is mathlib PR: #7400
+
 namespace category_theory
 
 open opposite
