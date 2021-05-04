@@ -28,7 +28,7 @@ def lc_desc (f : locally_constant X M) :
 lemma lc_factors (f : locally_constant X M) : (lc_desc f) ∘
   (lc_to_discrete_quotient f).proj = f := rfl
 
-abbreviation diagram : NormedGroup ⥤ (discrete_quotient X)ᵒᵖ ⥤ NormedGroup :=
-LocallyConstant ⋙ (whiskering_left _ _ _).obj (X.diagram ⋙ Fintype_to_Profinite).op
+--abbreviation diagram : NormedGroup ⥤ (discrete_quotient X)ᵒᵖ ⥤ NormedGroup :=
+--LocallyConstant ⋙ (whiskering_left _ _ _).obj (X.diagram ⋙ Fintype_to_Profinite).op
 
 end NormedGroup
