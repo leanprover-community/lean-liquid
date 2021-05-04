@@ -19,9 +19,11 @@ variables {H : Type*} [semi_normed_group H]
 variables {H₁ : Type*} [normed_group H₁]
 variables {K : Type*} [semi_normed_group K]
 
+-- #7474
 lemma normed_group.norm_incl {G' : add_subgroup G} (x : G') : ∥incl _ x∥ = ∥x∥ :=
 rfl
 
+-- #7474
 lemma normed_group_hom.comp_range (f : normed_group_hom G H) (g : normed_group_hom H K) :
 (g.comp f).range = add_subgroup.map g.to_add_monoid_hom f.range :=
 begin
@@ -29,6 +31,7 @@ begin
   refl,
 end
 
+-- #7474
 lemma normed_group_hom.mem_comp_range (f : normed_group_hom G H) (g : normed_group_hom H K) (x : G) :
   g (f x) ∈ (g.comp f).range :=
 begin
@@ -36,6 +39,7 @@ begin
   exact add_subgroup.mem_map_of_mem g.to_add_monoid_hom (mem_range_self x),
 end
 
+-- #7474
 @[simp]
 lemma normed_group.mem_range_incl (G' : add_subgroup G) (x : G) : x ∈ (incl G').range ↔ x ∈ G' :=
 begin
@@ -52,6 +56,7 @@ end
 lemma normed_group_hom.ker_zero : (0 : normed_group_hom G H).ker = ⊤ :=
 by { ext, simp [normed_group_hom.mem_ker] }
 
+-- #7474
 @[simp]
 lemma normed_group_hom.range_comp_incl_top {f : normed_group_hom G H} :
 (f.comp (incl (⊤ : add_subgroup G))).range = f.range :=
