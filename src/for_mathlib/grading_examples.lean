@@ -5,6 +5,10 @@ import for_mathlib.grading
 
 # Examples to show how to use `grading`
 
+These are not logically necessary for anything in lean-liquid, however if we end up happy with
+the `grading` API then they would be natural things to PR into mathlib. I moved them
+into their own file because they take ages to compile :-)
+
 -/
 
 /-!
