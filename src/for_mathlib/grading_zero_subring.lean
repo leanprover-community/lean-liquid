@@ -1,6 +1,7 @@
 import for_mathlib.grading
 import ring_theory.noetherian -- for the lemma we need for Gordan
 import ring_theory.finiteness
+import linear_algebra.finsupp
 
 /-!
 
@@ -55,9 +56,10 @@ variables {A : Type*} [decidable_eq A] [add_monoid A]
   (R : Type*) [ring R]
   (Gᵢ : A → add_subgroup R) [has_add_subgroup_decomposition Gᵢ] [add_subgroup.is_gmonoid Gᵢ]
 
--- would love to deduce this from `subsemiring_of_add_submonoid` but it's all too much
+-- would love to deduce this from the obvious `subsemiring_of_add_submonoid` but it's all too much
 -- for `convert` because an external direct sum of `Gᵢ i` is syntactically different to
--- an external direct sum of `(Gᵢ i).to_add_submonoid` and this can cause problems.
+-- an external direct sum of `(Gᵢ i).to_add_submonoid` and this caused me problems.
+-- In the end I've just stuck to the case we need.
 def subring_of_add_subgroup
     (S : add_submonoid A) : subring R :=
  { carrier := {r : R | ∀ ⦃a : A⦄, a ∉ S → add_subgroup_decomposition Gᵢ r a = 0 },
@@ -103,7 +105,7 @@ def zero_component_subring : subring R :=
   ..Gᵢ 0
 }
 
--- instance : ring (zero_component_subring R Gᵢ) := infer_instance
+instance : ring (Gᵢ 0) := subring.to_ring (zero_component_subring R Gᵢ)
 
 end ring
 
@@ -115,8 +117,12 @@ variables {A : Type*} [decidable_eq A] [add_monoid A]
   (R : Type*) [comm_ring R]
   (Gᵢ : A → add_subgroup R) [has_add_subgroup_decomposition Gᵢ] [add_subgroup.is_gmonoid Gᵢ]
 
+instance : comm_ring (Gᵢ 0) := subring.to_comm_ring (zero_component_subring R Gᵢ)
+instance : algebra (Gᵢ 0) R := algebra.of_subring (zero_component_subring R Gᵢ)
+
+/-- Rₐ considered as an R₀-submodule of R. -/
 def component_submodule_for_zero_component_subring (a : A) :
-  submodule (zero_component_subring R Gᵢ) R :=
+  submodule (Gᵢ 0) R :=
 { carrier := Gᵢ a,
   zero_mem' := (Gᵢ a).zero_mem,
   add_mem' := λ _ _, (Gᵢ a).add_mem,
@@ -127,27 +133,83 @@ def component_submodule_for_zero_component_subring (a : A) :
     rw zero_add,
   end }
 
+/-- Rₐ considered as an absract R₀-module -/
+instance (a : A) : module (Gᵢ 0) (Gᵢ a) :=
+submodule.module' (component_submodule_for_zero_component_subring R Gᵢ a)
 
 namespace component_submodule -- some technical lemmas
 
-def map (a : A) (M : submodule
-  (zero_component_subring R Gᵢ) (component_submodule_for_zero_component_subring R Gᵢ a)) :
+/-- Extension of an `R₀`-submodule of `Rₐ` to an `R`-submodule of `R`, sending `M` to `MR`. -/
+def map (a : A) (M : submodule (Gᵢ 0) (Gᵢ a)) :
   submodule R R := submodule.span R {r : R | ∃ m : M, r = m.1}
 
+/-- Construction of an `R₀`-submodule of `R` from an `R`-submodule of `R`. -/
 def res (a : A) (I : submodule R R) : submodule (zero_component_subring R Gᵢ) R :=
-sorry
---{! !} doesn't work for me??
+{ carrier := I,
+  zero_mem' := I.zero_mem,
+  add_mem' := λ _ _, I.add_mem,
+  smul_mem' := λ c _ hx, I.smul_mem c hx }
 
-theorem comap (a : A) (I : submodule R R) : submodule
-  (zero_component_subring R Gᵢ) (component_submodule_for_zero_component_subring R Gᵢ a) :=
-sorry
+/-- Construction of an `R₀`-submodule of `Rₐ` from an `R`-submodule of `R`, given
+  by intersection. -/
+def comap (a : A) (I : submodule R R) : submodule (Gᵢ 0) (Gᵢ a) :=
+submodule.comap (component_submodule_for_zero_component_subring R Gᵢ a).subtype (res R Gᵢ a I)
+
+/-- Given an `R₀`-submodule `M` of `Rₐ`, pushing forward to `MR`, an ideal of `R`, and then
+  intersecting with `Rₐ` gives back `M`.  -/
+lemma comap_map_id (a : A)
+  (M : submodule (Gᵢ 0) (Gᵢ a)) :
+  comap R Gᵢ a (map R Gᵢ a M) = M :=
+begin
+  ext ⟨m, hm⟩,
+  change m ∈ Gᵢ a at hm,
+  -- goal: m ∈ R-span of M ↔ m ∈ M
+  change m ∈ map R Gᵢ a M ↔ _,
+  split,
+  { rintro (h : m ∈ submodule.span R {r : R | ∃ (m : ↥M), r = ↑(m.val)}),
+    -- M' is (the image of) M considered as a submodule of R
+    let M' : submodule (Gᵢ 0) R :=
+      submodule.map (component_submodule_for_zero_component_subring R Gᵢ a).subtype M,
+    -- rewrite goal in terms of M'
+    suffices : m ∈ M',
+    { rcases this with ⟨t, ht, rfl⟩,
+      cases M, simp only [set_like.eta, submodule.subtype_apply], exact ht },
+    -- change hypothesis h to a form where we can rewrite finsupp.span_eq_map_total
+    have h' : m ∈ submodule.span R (set.image (Gᵢ a).subtype (M : set (Gᵢ a))),
+    { convert h,
+      ext t,
+      split,
+      { rintro ⟨⟨s, hs⟩, hs2, rfl⟩,
+        exact ⟨⟨⟨s, hs⟩, hs2⟩, rfl⟩ },
+      { rintro ⟨⟨⟨s, hs⟩, hs2⟩, rfl⟩,
+        exact ⟨⟨s, hs⟩, hs2, rfl⟩ } },
+    clear h,
+    rw finsupp.span_eq_map_total at h',
+    rcases h' with ⟨f, hf, rfl⟩,
+    -- hm says some element of r is in Rₐ
+    -- so it's equal to its projection onto Rₐ
+    have hm' := hm,
+    rw mem_piece_iff_projection_eq' at hm',
+    conv at hm' begin
+      to_lhs,
+      rw finsupp.total_apply,
+    end,
+    change ↑(((add_subgroup_decomposition_ring_equiv Gᵢ).to_add_monoid_hom _) a) =
+      (finsupp.total ↥(Gᵢ a) R R ⇑((Gᵢ a).subtype)) f at hm',
+    rw add_monoid_hom.map_finsupp_sum (add_subgroup_decomposition_ring_equiv Gᵢ).to_add_monoid_hom at hm',
+    change ↑(projection _ a (f.sum (λ (m : ↥(Gᵢ a)) (b : R),
+      (add_subgroup_decomposition_ring_equiv Gᵢ) (b * m.1)))) =
+      (finsupp.total ↥(Gᵢ a) R R ⇑((Gᵢ a).subtype)) f at hm',
+    rw add_monoid_hom.map_finsupp_sum (projection (λ i, Gᵢ i) a) at hm',
+    simp_rw (add_subgroup_decomposition_ring_equiv Gᵢ).map_mul at hm',
+    sorry },
+  { -- easy way
+    intro h,
+    apply submodule.subset_span,
+    refine ⟨⟨⟨m, hm⟩, h⟩, rfl⟩ }
+end
 
 end component_submodule
-
-/--
-Pushing forward an R₀-submodule of Rₐ to an R-submodule of R, and then intersecting with R₀
-again gives you the submodule you started with.
--/
 
 theorem component_submodule_noetherian {R : Type*} [comm_ring R] [is_noetherian_ring R]
   {A : Type*} [add_monoid A] [decidable_eq A]

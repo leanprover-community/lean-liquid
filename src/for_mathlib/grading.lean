@@ -12,7 +12,7 @@ import group_theory.submonoid.operations
 
 # Gradings
 
-The general set-up: we have an `add_comm_monoid R` and an indexed family
+The simplest example of the set-up: we have an `add_comm_monoid R` and an indexed family
 `Mᵢ : ι → add_submonoid R`. The function `Mᵢ` is a *grading* of `R`
 if the induced map `⨁ Mᵢ i →+ R` is an isomorphism.
 
@@ -20,9 +20,9 @@ Variants:
 
 * `R` is an `add_comm_group` and `Gᵢ : ι → add_subgroup R`
 * `R` is a `semiring` and `Mᵢ : ι → add_submonoid R` and `ι` is itself an add_monoid,
-  such that `Mᵢ i * Mᵢ j ⊆ Mᵢ (i + j)`
+  such that `1 ∈ Mᵢ 0` and `Mᵢ i * Mᵢ j ⊆ Mᵢ (i + j)`
 * `R` is a `ring` and `Gᵢ : ι → add_subgroup R` and `ι` is an add_monoid
-  such that `Gᵢ i * Gᵢ j ⊆ Gᵢ (i + j)`.
+  such that `1 ∈ Gᵢ 0` and `Gᵢ i * Gᵢ j ⊆ Gᵢ (i + j)`.
 
 ## TODO
 
@@ -90,8 +90,6 @@ begin
   exact mt (λ h, S.add_mem h.1 h.2),
 end
 
-section unused_in_this_file
-
 namespace direct_sum
 
 variables {ι : Type*}
@@ -101,6 +99,7 @@ open_locale direct_sum
 variables {M : Type*} [decidable_eq ι] [add_comm_monoid M] (A : ι → Type*)
   [∀ i, add_comm_monoid (A i)]
 
+/-- Add_monoid_hom version of the projection from a direct sum to a factor. -/
 def projection (j : ι) : (⨁ i, A i) →+ A j :=
 { to_fun := λ f, f j,
   map_zero' := rfl,
@@ -109,13 +108,61 @@ def projection (j : ι) : (⨁ i, A i) →+ A j :=
 lemma projection_of_same (j : ι) (aj : A j) : projection A j (of (λ i, A i) j aj) = aj :=
 @dfinsupp.single_eq_same _ _ _ _ j _
 
+lemma eval_of_same (j : ι) (aj : A j) : (of (λ i, A i) j aj) j = aj :=
+@dfinsupp.single_eq_same _ _ _ _ j _
+
 lemma projection_of_ne {i j : ι} (h : i ≠ j) (ai : A i) :
   projection A j (of (λ i, A i) i ai) = 0 :=
 dfinsupp.single_eq_of_ne h
 
-end direct_sum
+open_locale direct_sum big_operators
 
-end unused_in_this_file
+-- TODO: does this unfold too far or not enough?
+lemma mul_apply {ι : Type*} {A : ι → Type*}
+  [decidable_eq ι] [has_add ι] [Π (i : ι), add_comm_monoid (A i)] [direct_sum.ghas_mul A]
+  [Π (i : ι) (x : A i), decidable (x ≠ 0)]
+  (x y : ⨁ i, A i) (i : ι) :
+    (x * y) i = x.sum (λ xi xv, y.sum (λ yi yv,
+      if h : xi + yi = i then cast (congr_arg _ h) (ghas_mul.mul xv yv) else 0 )) :=
+begin
+  dsimp[(*), direct_sum.mul_hom, to_add_monoid_apply],
+  simp only [add_monoid_hom.dfinsupp_sum_apply, to_add_monoid_apply, dfinsupp.sum_apply,
+    add_monoid_hom.flip_apply, add_monoid_hom.comp_apply, add_monoid_hom.comp_hom_apply_apply],
+  congr' with xi xv,
+  congr' with yi yv,
+  dsimp [direct_sum.of],
+  rw dfinsupp.single_apply,
+  congr' with h,
+  cases h,
+  refl,
+end
+
+-- ring stuff
+theorem mul_single_component [add_right_cancel_monoid ι] [gmonoid A]
+  (b : ⨁ i, A i) (i j : ι) (m : A j) :
+  of A (i + j) ((b * (of A j m)) (i + j)) = of A i (b i) * of A j m :=
+begin
+  ext k,
+  by_cases hk : k = i + j,
+  { subst hk,
+    rw eval_of_same,
+    classical,
+    rw mul_apply,
+    rw mul_apply,
+    unfold of dfinsupp.single_add_hom,
+    dsimp,
+    rw dfinsupp.sum_single_index, swap,
+    rw dfinsupp.sum_single_index,
+    rw dif_pos,
+    sorry, refl, sorry, -- cast goals,
+    rw dfinsupp.sum_single_index,
+    rw dif_pos,
+    -- this is hopeless
+    sorry, sorry, sorry },
+  { sorry }
+end
+
+end direct_sum
 
 open_locale direct_sum
 
@@ -419,6 +466,14 @@ begin
     exact (add_submonoid_decomposition Mᵢ r i).2 }
 end
 
+lemma mem_piece_iff_projection_eq (r : R) (i : A) :
+  r ∈ Mᵢ i ↔ (add_submonoid_decomposition Mᵢ r i : R) = r :=
+⟨eq_decomposition_of_mem_piece, begin
+  intro h,
+  rw ←h,
+  exact (((add_submonoid_decomposition Mᵢ) r) i).2,
+end⟩
+
 end has_add_submonoid_decomposition
 
 /-! ## graded pieces for a grading by `add_group`s -/
@@ -479,6 +534,23 @@ lemma mem_piece_iff_single_support (r : R) (i : A) :
 show r ∈ (Gᵢ i).to_add_submonoid ↔ ∀ ⦃j⦄, j ≠ i → add_submonoid_decomposition (λ i, (Gᵢ i).to_add_submonoid) r j = 0,
 by convert has_add_submonoid_decomposition.mem_piece_iff_single_support r i
 
+lemma mem_piece_iff_projection_eq (r : R) (i : A) :
+  r ∈ Gᵢ i ↔ (add_subgroup_decomposition Gᵢ r i : R) = r :=
+⟨eq_decomposition_of_mem_piece, begin
+  intro h,
+  rw ←h,
+  exact (((add_subgroup_decomposition Gᵢ) r) i).2,
+end⟩
+
+-- ring_equiv version
+lemma mem_piece_iff_projection_eq'
+  {A : Type u_1} [decidable_eq A] [add_monoid A]
+  {R : Type u_2} [ring R]
+  {Gᵢ : A → add_subgroup R} [has_add_subgroup_decomposition Gᵢ] [add_subgroup.is_gmonoid Gᵢ]
+(r : R) (i : A) :
+  r ∈ Gᵢ i ↔ (add_subgroup_decomposition_ring_equiv Gᵢ r i : R) = r :=
+mem_piece_iff_projection_eq r i
+
 end has_add_subgroup_decomposition
 
 /-!
@@ -516,7 +588,6 @@ begin
       simp only [*, add_submonoid.coe_zero, direct_sum.add_apply] at *,
     simp [← (add_submonoid_decomposition Mᵢ).map_add],
 end
-
 open_locale direct_sum big_operators
 
 -- TODO: does this unfold too far or not enough?
