@@ -9,6 +9,10 @@ universes v u
 
 variables {C : Type u} [category.{v} C]
 
+-- mathlib PR: #7456
+theorem mk_inj {T} [category T] (A B : T) (f g : A ⟶ B) : arrow.mk f = arrow.mk g → f = g :=
+by rintro ⟨⟩; refl
+
 /-- The functor sending an arrow to its source. -/
 abbreviation left_func : arrow C ⥤ C := comma.fst _ _
 
@@ -28,22 +32,18 @@ def limit_cone {J : Type v} [small_category J] (F : J ⥤ arrow C)
   { X :=
     { left := CL.cone.X,
       right := CR.cone.X,
-      hom := CR.is_limit.lift ⟨_,CL.cone.π ≫ whisker_left _ left_to_right⟩ },
+      hom := CR.is_limit.lift ⟨_, CL.cone.π ≫ whisker_left _ left_to_right⟩ },
     π :=
     { app := λ j,
       { left := CL.cone.π.app _,
         right := CR.cone.π.app _ },
-      naturality' := begin
+      naturality' :=
+      begin
         intros i j f,
         ext1,
-        { dsimp,
-          rw [category.id_comp, ← CL.cone.w],
-          refl },
-        { dsimp,
-          rw [category.id_comp, ← CR.cone.w],
-          refl },
-      end
-      } },
+        { dsimp, rw [category.id_comp, ← CL.cone.w], refl },
+        { dsimp, rw [category.id_comp, ← CR.cone.w], refl },
+      end } },
   is_limit :=
   { lift := λ S,
     { left := CL.is_limit.lift (left_func.map_cone _),
@@ -56,9 +56,9 @@ def limit_cone {J : Type v} [small_category J] (F : J ⥤ arrow C)
           comma.fst_map, nat_trans.comp_app, category.assoc],
         erw left_to_right.naturality,
         refl,
-      end
-      },
-    --fac' := _,
+      end },
+    fac' := by { intros, ext; dsimp;
+        simp only [functor.map_cone_π_app, limits.is_limit.fac, comma.fst_map, comma.snd_map] },
     uniq' := begin
       intros S m w,
       ext1,
@@ -74,16 +74,10 @@ def limit_cone {J : Type v} [small_category J] (F : J ⥤ arrow C)
 
 instance {f g : arrow C} (ff : f ⟶ g) [is_iso ff.left] [is_iso ff.right] :
   is_iso ff :=
-begin
-  constructor,
-  refine ⟨_,_,_⟩,
-  refine ⟨inv ff.left, inv ff.right, _⟩,
-  tidy,
-end
+{ out := ⟨⟨inv ff.left, inv ff.right⟩,
+          by { ext; dsimp; simp only [is_iso.hom_inv_id] },
+          by { ext; dsimp; simp only [is_iso.inv_hom_id] }⟩ }
 
 end arrow
-
-theorem arrow.mk_inj {T} [category T] (A B : T) (f g : A ⟶ B) : arrow.mk f = arrow.mk g → f = g :=
-by rintro ⟨⟩; refl
 
 end category_theory
