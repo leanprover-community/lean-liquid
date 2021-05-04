@@ -18,7 +18,7 @@ noncomputable theory
 
 open_locale big_operators
 
-namespace int
+namespace int -- mathlib PR: #7461
 
 variables {A : Type*} [add_comm_group A]
 
