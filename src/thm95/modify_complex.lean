@@ -1,6 +1,6 @@
 import system_of_complexes.complex
 
-import for_mathlib.additive_functor
+import category_theory.preadditive.additive_functor
 
 namespace differential_object
 
