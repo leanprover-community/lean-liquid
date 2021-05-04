@@ -56,4 +56,4 @@ theorem prop_819
   (surj : function.surjective f) (n : ℕ) (g : (main_cochain_complex f M).X (n+1))
   (hf : (main_cochain_complex f M).d (n+1) (n+2) g = 0) (c : ℝ) (hc : ∥ g ∥ ≤ c)
   (ε : ℝ) (hε : 0 < ε) : ∃ gg : (main_cochain_complex f M).X n,
-  ∥ g ∥ ≤ (1+ε) * ∥ g ∥ ∧ (main_cochain_complex f M).d n (n+1) gg = g := sorry
+  ∥ gg ∥ ≤ (1+ε) * c ∧ (main_cochain_complex f M).d n (n+1) gg = g := sorry
