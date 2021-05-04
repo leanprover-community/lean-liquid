@@ -81,7 +81,7 @@ def subring_of_add_subgroup
       rw ring_equiv.map_mul,
       change (a' * b') n = 0,
       classical,
-      rw has_add_submonoid_decomposition.direct_sum.mul_apply,
+      rw mul_apply,
       apply dfinsupp.sum_eq_zero,
       intros ai hai,
       apply dfinsupp.sum_eq_zero,
@@ -136,6 +136,18 @@ def component_submodule_for_zero_component_subring (a : A) :
 /-- Rₐ considered as an absract R₀-module -/
 instance (a : A) : module (Gᵢ 0) (Gᵢ a) :=
 submodule.module' (component_submodule_for_zero_component_subring R Gᵢ a)
+
+
+--variables {A : Type*} [decidable_eq A] [add_monoid A] {R : Type*} [comm_ring R]
+--  (Gᵢ : A → add_subgroup R) [has_add_subgroup_decomposition Gᵢ] [add_subgroup.is_gmonoid Gᵢ]
+
+def projection_R₀_hom (a : A) : R →ₗ[Gᵢ 0] (Gᵢ a) :=
+{ to_fun := (apply_add_monoid_hom (λ i, Gᵢ i) a).comp (add_subgroup_decomposition Gᵢ).to_add_monoid_hom,
+  map_add' := ((apply_add_monoid_hom (λ i, Gᵢ i) a).comp (add_subgroup_decomposition Gᵢ).to_add_monoid_hom).map_add,
+  map_smul' := λ r0 x, begin
+    sorry,
+  end
+}
 
 namespace component_submodule -- some technical lemmas
 
@@ -202,6 +214,8 @@ begin
       (finsupp.total ↥(Gᵢ a) R R ⇑((Gᵢ a).subtype)) f at hm',
     rw add_monoid_hom.map_finsupp_sum (projection (λ i, Gᵢ i) a) at hm',
     simp_rw (add_subgroup_decomposition_ring_equiv Gᵢ).map_mul at hm',
+    change (Gᵢ a).subtype _ = _ at hm',
+    rw add_monoid_hom.map_finsupp_sum at hm',
     sorry },
   { -- easy way
     intro h,

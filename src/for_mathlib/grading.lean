@@ -137,31 +137,6 @@ begin
   refl,
 end
 
--- ring stuff
-theorem mul_single_component [add_right_cancel_monoid ι] [gmonoid A]
-  (b : ⨁ i, A i) (i j : ι) (m : A j) :
-  of A (i + j) ((b * (of A j m)) (i + j)) = of A i (b i) * of A j m :=
-begin
-  ext k,
-  by_cases hk : k = i + j,
-  { subst hk,
-    rw eval_of_same,
-    classical,
-    rw mul_apply,
-    rw mul_apply,
-    unfold of dfinsupp.single_add_hom,
-    dsimp,
-    rw dfinsupp.sum_single_index, swap,
-    rw dfinsupp.sum_single_index,
-    rw dif_pos,
-    sorry, refl, sorry, -- cast goals,
-    rw dfinsupp.sum_single_index,
-    rw dif_pos,
-    -- this is hopeless
-    sorry, sorry, sorry },
-  { sorry }
-end
-
 end direct_sum
 
 open_locale direct_sum
@@ -553,6 +528,56 @@ mem_piece_iff_projection_eq r i
 
 end has_add_subgroup_decomposition
 
+section external_stuff
+
+open_locale direct_sum
+
+variables {ι : Type*} [decidable_eq ι]
+  {M : Type*} [add_comm_monoid M]
+  (A : ι → Type*) [Π (i : ι), add_comm_monoid (A i)]
+
+@[simps apply]
+def apply_add_monoid_hom (i) : (⨁ i, A i) →+ A i :=
+{ to_fun := λ f, f i,
+  map_add' := λ f g, begin rw dfinsupp.coe_add, refl, end,
+  map_zero' := rfl}
+
+lemma of_mul_apply [add_left_cancel_monoid ι] [gmonoid A] (b : ⨁ i, A i) (i j : ι) (m : A i) :
+  (mul_hom A (of A i m) b) (i + j) = ghas_mul.mul m (b j) :=
+begin
+  -- direct_sum has no good induction tactics, so the game is to rearrange to a point that `ext` can apply
+  change direct_sum.apply_add_monoid_hom A (i + j) (mul_hom A (of A i m) b) =
+    ghas_mul.mul m (direct_sum.apply_add_monoid_hom A j b),
+  repeat { rw ←add_monoid_hom.comp_apply},
+  refine add_monoid_hom.congr_fun _ b,
+  ext bi bx,
+  let b := direct_sum.of A bi bx,
+  change (mul_hom A (of A i m) b) (i + j) = ghas_mul.mul m (b j),
+  dsimp only [b],
+
+  -- ok, now we just have to clean up
+  rw mul_hom_of_of,
+  simp only [direct_sum.of, dfinsupp.single_add_hom_apply] at ⊢ b,
+  by_cases h : bi = j,
+  { subst h,
+    rw [dfinsupp.single_eq_same, dfinsupp.single_eq_same] },
+  rw dfinsupp.single_eq_of_ne h,
+  rw dfinsupp.single_eq_of_ne (λ h', h $ add_left_cancel h'),
+  rw add_monoid_hom.map_zero,
+end
+
+theorem mul_single_component [add_left_cancel_monoid ι] [gmonoid A]
+  (b : ⨁ i, A i) (i j : ι) (m : A i) :
+  of A (i + j) (((of A i m) * b) (i + j)) = of A i m * of A j (b j) :=
+begin
+  rw of_mul_of,
+  dsimp only,
+  congr,
+  exact of_mul_apply A b i j m,
+end
+
+end external_stuff
+
 /-!
 
 ## A grading of an `add_comm_group` by `add_submonoid`s is in fact a grading by `add_subgroup`s.
@@ -588,27 +613,7 @@ begin
       simp only [*, add_submonoid.coe_zero, direct_sum.add_apply] at *,
     simp [← (add_submonoid_decomposition Mᵢ).map_add],
 end
-open_locale direct_sum big_operators
 
--- TODO: does this unfold too far or not enough?
-lemma direct_sum.mul_apply {ι : Type*} {A : ι → Type*}
-  [decidable_eq ι] [has_add ι] [Π (i : ι), add_comm_monoid (A i)] [direct_sum.ghas_mul A]
-  [Π (i : ι) (x : A i), decidable (x ≠ 0)]
-  (x y : ⨁ i, A i) (i : ι) :
-    (x * y) i = x.sum (λ xi xv, y.sum (λ yi yv,
-      if h : xi + yi = i then cast (congr_arg _ h) (ghas_mul.mul xv yv) else 0 )) :=
-begin
-  dsimp[(*), direct_sum.mul_hom, to_add_monoid_apply],
-  simp only [add_monoid_hom.dfinsupp_sum_apply, to_add_monoid_apply, dfinsupp.sum_apply,
-    add_monoid_hom.flip_apply, add_monoid_hom.comp_apply, add_monoid_hom.comp_hom_apply_apply],
-  congr' with xi xv,
-  congr' with yi yv,
-  dsimp [direct_sum.of],
-  rw dfinsupp.single_apply,
-  congr' with h,
-  cases h,
-  refl,
-end
 
 end has_add_submonoid_decomposition
 
