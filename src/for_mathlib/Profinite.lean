@@ -7,9 +7,10 @@ namespace Profinite
 
 universe variables u
 
-instance : concrete_category.{u u (u+1)} Profinite.{u} :=
-{ forget := { obj := λ X, X, map := λ X Y f, f },
-  forget_faithful := by { fsplit, intros X Y a₁ a₂ h, dsimp at *, ext1, rw h } }
+-- Now in mathlib
+--example : concrete_category.{u u (u+1)} Profinite.{u} :=
+--{ forget := { obj := λ X, X, map := λ X Y f, f },
+--  forget_faithful := by { fsplit, intros X Y a₁ a₂ h, dsimp at *, ext1, rw h } }
 
 @[simps hom inv]
 def iso_of_homeo (X Y : Profinite) (f : X ≃ₜ Y) : X ≅ Y :=
