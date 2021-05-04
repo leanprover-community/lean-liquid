@@ -536,6 +536,7 @@ variables {ι : Type*} [decidable_eq ι]
   {M : Type*} [add_comm_monoid M]
   (A : ι → Type*) [Π (i : ι), add_comm_monoid (A i)]
 
+
 @[simps apply]
 def apply_add_monoid_hom (i) : (⨁ i, A i) →+ A i :=
 { to_fun := λ f, f i,

@@ -142,10 +142,43 @@ submodule.module' (component_submodule_for_zero_component_subring R Gᵢ a)
 --  (Gᵢ : A → add_subgroup R) [has_add_subgroup_decomposition Gᵢ] [add_subgroup.is_gmonoid Gᵢ]
 
 def projection_R₀_hom (a : A) : R →ₗ[Gᵢ 0] (Gᵢ a) :=
-{ to_fun := (apply_add_monoid_hom (λ i, Gᵢ i) a).comp (add_subgroup_decomposition Gᵢ).to_add_monoid_hom,
-  map_add' := ((apply_add_monoid_hom (λ i, Gᵢ i) a).comp (add_subgroup_decomposition Gᵢ).to_add_monoid_hom).map_add,
+{ to_fun := (apply_add_monoid_hom (λ i, Gᵢ i) a).comp
+    (add_subgroup_decomposition Gᵢ).to_add_monoid_hom,
+  map_add' := ((apply_add_monoid_hom (λ i, Gᵢ i) a).comp
+    (add_subgroup_decomposition Gᵢ).to_add_monoid_hom).map_add,
   map_smul' := λ r0 x, begin
-    sorry,
+    cases r0 with r0 hr0,
+    change (apply_add_monoid_hom (λ (i : A), ↥(Gᵢ i)) a)
+      ((add_subgroup_decomposition_ring_equiv Gᵢ)
+    (r0 * x)) =
+  _ •
+    ((apply_add_monoid_hom (λ (i : A), ↥(Gᵢ i)) a)
+      ((add_subgroup_decomposition_ring_equiv Gᵢ) x)),
+  rw ring_equiv.map_mul,
+  generalize : (add_subgroup_decomposition_ring_equiv Gᵢ) x = y, clear x,
+  apply direct_sum.induction_on y,
+  { simp only [apply_add_monoid_hom_apply, mul_zero, smul_zero, zero_apply]},
+  { rintros i ⟨x, hx⟩,
+    change _ = _ • ((of (λ (i : A), ↥(Gᵢ i)) i) ⟨x, hx⟩) a,
+    have hr0' : add_subgroup_decomposition_ring_equiv Gᵢ r0 = of (λ i, Gᵢ i) 0 ⟨r0, hr0⟩,
+      exact eq_decomposition_of_mem_piece'' _,
+    rw hr0',
+    have hr0x : r0 * x ∈ Gᵢ (0 + i),
+      exact add_subgroup.is_gmonoid.grading_mul hr0 hx,
+    rw of_mul_of,
+    change (of (λ (i : A), ↥(Gᵢ i)) (0 + i)) ⟨r0 * x, hr0x⟩ a = _,
+    apply set_like.coe_eq_coe.mp,
+    change _ = r0 * _,
+    by_cases hia : i = a,
+    { subst hia,
+      -- I am surely close
+      sorry
+    },
+    { sorry }
+  },
+  {
+    sorry
+  },
   end
 }
 
