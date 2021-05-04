@@ -1,5 +1,7 @@
 import data.equiv.basic
 
+-- this is mathlib PR: #7458
+
 @[simps {fully_applied := ff}]
 def equiv.curry (α β γ : Type*) :
   (α × β → γ) ≃ (α → β → γ) :=
