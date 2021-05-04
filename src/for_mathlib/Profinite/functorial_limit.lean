@@ -33,6 +33,7 @@ def diagram : discrete_quotient X ⥤ Fintype.{u} :=
 { obj := λ I, Fintype.of I,
   map := λ I J h, discrete_quotient.of_le $ le_of_hom h }
 
+/-- An abbreviation for `X.diagram ⋙ Fintype_to_Profinite`. -/
 abbreviation diagram' : discrete_quotient X ⥤ Profinite :=
   X.diagram ⋙ Fintype_to_Profinite
 
@@ -326,3 +327,4 @@ end
 end arrow
 
 end Profinite
+#lint
