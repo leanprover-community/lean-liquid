@@ -51,13 +51,16 @@ def cosimplicial_object := simplex_category.{v} ⥤ C
 
 namespace cosimplicial_object
 
+
 /-- Augmented cosimplicial objects. -/
 @[derive category]
 def augmented := (with_initial simplex_category.{v}) ⥤ C
 
-namespace augmented
-
 variable {C}
+
+abbreviation const : C ⥤ cosimplicial_object C := category_theory.functor.const _
+
+namespace augmented
 
 /-- The forgetful functor from augmented cosimplicial objects to simplicial objects. -/
 def drop : augmented C ⥤ cosimplicial_object C :=

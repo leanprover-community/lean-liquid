@@ -154,6 +154,51 @@ section has_zero_objects
 
 variable [limits.has_zero_object C]
 
+def augmentation' {X : C} {M : cosimplicial_object C}
+  (f : cosimplicial_object.const.obj X ⟶ M) : cochain_complex.const.obj X ⟶ M.to_cocomplex :=
+{ f := λ i,
+  match i with
+  | 0 := f.app _
+  | n+1 := 0
+  end,
+  comm := λ i j,
+  match i, j with
+  | 0, 0 := begin
+    dsimp [cochain_complex.const, to_cocomplex],
+    split_ifs, {exfalso, finish},
+    simp,
+  end
+  | n+1, 0 := begin
+    dsimp [cochain_complex.const, to_cocomplex],
+    split_ifs, {exfalso, finish},
+    simp,
+  end
+  | 0, 0+1 := begin
+    dsimp [cochain_complex.const, to_cocomplex],
+    split_ifs, swap, {exfalso, finish},
+    simp [coboundary_zero],
+    change 0 = f.app _ ≫ _ - f.app _ ≫ _,
+    simp_rw ← f.naturality,
+    symmetry,
+    rw sub_eq_zero,
+    suffices : (const.obj X).map (δ 0) = (const.obj X).map (δ 1), by rw this,
+    refl,
+  end
+  | 0, n+1+1 := begin
+    dsimp [cochain_complex.const, to_cocomplex],
+    split_ifs,
+    any_goals {simp},
+    exfalso, finish,
+  end
+  | n+1, m+1 := begin
+    dsimp [cochain_complex.const, to_cocomplex],
+    split_ifs,
+    any_goals {simp},
+    change 0 = 0 ≫ _ ≫ _,
+    simp,
+  end
+  end }
+
 def augmentation (M : augmented C) :
   cochain_complex.const.obj (M.obj with_initial.star) ⟶ cocomplex.obj (augmented.drop.obj M) :=
 { f := λ i,
