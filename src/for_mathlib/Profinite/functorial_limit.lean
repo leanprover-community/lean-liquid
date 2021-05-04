@@ -88,14 +88,15 @@ def change_cone (f : Y ⟶ X) (C : limits.cone Y.diagram') :
 { X := C.X,
   π :=
   { app := λ I, C.π.app (I.comap f.continuous) ≫
-    ⟨discrete_quotient.map f.continuous (le_refl _), continuous_of_discrete_topology⟩,
+    ⟨discrete_quotient.map (le_refl _), discrete_quotient.map_continuous _⟩,
     naturality' := begin
       intros I J g,
       ext1,
       have h : I.comap f.continuous ≤ J.comap f.continuous, by tidy,
       rw [← C.w (hom_of_le h)],
       dsimp [Fintype_to_Profinite, diagram] at *,
-      simp,
+      erw [← discrete_quotient.map_of_le_apply, ← discrete_quotient.of_le_map_apply],
+      refl,
     end } }
 
 theorem change_cone_lift (f : Y ⟶ X) : f = X.fincone_is_limit.lift (change_cone f Y.fincone) :=
@@ -110,7 +111,7 @@ begin
   ext1,
   dsimp [change_cone] at *,
   suffices : C.π.app (I.comap continuous_id) x = C.π.app I x,
-    by erw [this, discrete_quotient.map_id, discrete_quotient.of_le_refl_apply],
+    by {erw [this, discrete_quotient.map_id], refl},
   congr, simp,
 end
 
@@ -125,7 +126,8 @@ begin
   dsimp [change_cone] at *,
   rw (show C.π.app ((I.comap f.continuous).comap g.continuous) =
     C.π.app (I.comap (g ≫ f).continuous), by refl),
-  rw ← discrete_quotient.map_comp_apply,
+  change _ = (discrete_quotient.map _ ∘ discrete_quotient.map _) _,
+  rw ← discrete_quotient.map_comp,
   refl,
 end
 
@@ -144,7 +146,7 @@ This will be used as the category indexing the limit.
 structure index_cat : Type u :=
 (left : discrete_quotient f.left)
 (right : discrete_quotient f.right)
-(compat : left ≤ right.comap f.hom.continuous)
+(compat : discrete_quotient.le_rel f.hom.continuous left right)
 
 namespace index_cat
 
@@ -197,10 +199,10 @@ def diagram : index_cat f ⥤ arrow Fintype.{u} :=
 { obj := λ A,
   { left := Fintype.of A.left,
     right := Fintype.of A.right,
-    hom := discrete_quotient.map _ A.compat },
+    hom := discrete_quotient.map A.compat },
   map := λ A B g,
-  { left := discrete_quotient.map continuous_id g.left,
-    right := discrete_quotient.map continuous_id g.right } }
+  { left := discrete_quotient.of_le g.left,
+    right := discrete_quotient.of_le g.right } }
 
 /-- An abbreviation for `diagram f ⋙ Fintype_to_Profinite.map_arrow`. -/
 abbreviation diagram' : index_cat f ⥤ arrow Profinite := diagram f ⋙ Fintype_to_Profinite.map_arrow
@@ -301,12 +303,12 @@ end
 example : is_iso ((limit_cone f).is_limit.lift (fincone f)) := by apply_instance
 
 /-- The isomorphism between `Fincone f` and the cone of the limit cone `(limit_cone f)`. -/
-def Fincone_iso : fincone f ≅ (limit_cone f).cone :=
+def fincone_iso : fincone f ≅ (limit_cone f).cone :=
 limits.cones.ext (as_iso ((limit_cone f).is_limit.lift (fincone f))) (λ I, rfl)
 
 /-- `Fincone f` is indeed a limit cone. -/
-def Fincone_is_limit : limits.is_limit (fincone f) :=
-limits.is_limit.of_iso_limit (limit_cone f).is_limit (Fincone_iso f).symm
+def fincone_is_limit : limits.is_limit (fincone f) :=
+limits.is_limit.of_iso_limit (limit_cone f).is_limit (fincone_iso f).symm
 
 /--
 If `f` is surjective, then the terms in the diagram whose limit is `f` are all surjective as well.
