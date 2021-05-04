@@ -1,8 +1,9 @@
-import breen_deligne.category
 import data.real.nnreal
+import algebra.module.hom
+
+import breen_deligne.category
 
 import for_mathlib.free_abelian_group
-import for_mathlib.add_monoid_hom
 
 import facts.nnreal
 
@@ -444,7 +445,7 @@ lemma suitable.comp {g : universal_map m n} {f : universal_map l m} {c₁ : ℝ�
 begin
   apply free_abelian_group.induction_on_free_predicate
     (suitable c₂ c₃) (suitable_free_predicate c₂ c₃) g hg; unfreezingI { clear_dependent g },
-  { simpa only [pi.zero_apply, add_monoid_hom.coe_zero, add_monoid_hom.map_zero]
+  { simpa only [pi.zero_apply, add_monoid_hom.zero_apply, add_monoid_hom.map_zero]
       using breen_deligne.universal_map.suitable_zero _ _ },
   { intros g hg,
     apply free_abelian_group.induction_on_free_predicate
@@ -460,9 +461,9 @@ begin
         simp only [add_monoid_hom.map_add],
         resetI, apply_instance } },
   { intros f hf H,
-    simpa only [pi.neg_apply, add_monoid_hom.map_neg, suitable_neg_iff, add_monoid_hom.coe_neg] },
+    simpa only [pi.neg_apply, add_monoid_hom.map_neg, suitable_neg_iff, add_monoid_hom.neg_apply] },
   { intros f₁ f₂ hf₁ hf₂ H₁ H₂,
-    simp only [add_monoid_hom.coe_add, add_monoid_hom.map_add, pi.add_apply],
+    simp only [add_monoid_hom.add_apply, add_monoid_hom.map_add, pi.add_apply],
     resetI, apply_instance }
 end
 

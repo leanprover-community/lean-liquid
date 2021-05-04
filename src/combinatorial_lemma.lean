@@ -292,7 +292,7 @@ lemma lem98_aux' [fact (r' < 1)] (N : ℕ)
 begin
   intros,
   ext l s n,
-  simp only [hx, H, hy, ← hx₁, Hx₁, hy', Mbar.coe_add, finset.sum_apply, add_monoid_hom.coe_add,
+  simp only [hx, H, hy, ← hx₁, Hx₁, hy', Mbar.coe_add, finset.sum_apply, add_monoid_hom.add_apply,
     Mbar.coe_sum, pi.add_apply, Mbar.mk_tensor_apply, finset.sum_congr,
     add_monoid_hom.smul_apply, pi.smul_apply, add_monoid_hom.finset_sum_apply, finset.smul_sum],
   rw [finset.sum_add_distrib, finset.sum_const, finset.card_univ,
