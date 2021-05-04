@@ -41,7 +41,7 @@ namespace clopen_cover
 
 variable {X : Profinite.{u}}
 
-/-- 
+/--
 Construct a term of `X.clopen_cover` given a nonempty clopen set of `X` whose
 complement is nonempty.
 -/
@@ -191,8 +191,8 @@ else
 instance : has_top X.clopen_cover := ⟨top⟩
 instance : inhabited X.clopen_cover := ⟨⊤⟩
 
-/-- 
-The "canonical" term of `clopen_cover.of_clopen`, whose underlying set is the given clopen set. 
+/--
+The "canonical" term of `clopen_cover.of_clopen`, whose underlying set is the given clopen set.
 -/
 def of_clopen.mk {U : set X} {h1 : _root_.is_clopen U} {h2 : U.nonempty} {h3 : Uᶜ.nonempty} :
   of_clopen h1 h2 h3 := ⟨U, or.inl rfl⟩
@@ -221,7 +221,7 @@ def common (I J : X.clopen_cover) : X.clopen_cover :=
     subst this,
   end }
 
-/-- 
+/--
 `le_rel f I J`, where `f : X ⟶ Y`, `I : X.clopen_cover` and
 `J : Y.clopen_cover` means, mathematically, that
 `I` refines the pullback of `J` with respect to `f`.
@@ -243,7 +243,7 @@ begin
   { exact false.elim (h ⟨f x⟩) },
 end
 
-/-- 
+/--
 Given `h : le_refl f I J`, this provides the canonical map `I → J`.
 -/
 def map {X Y : Profinite.{u}} {f : X ⟶ Y} {I : X.clopen_cover}
@@ -356,14 +356,10 @@ instance : semilattice_inf X.clopen_cover :=
     intros I J K h1 h2 U,
     rcases h1 U with ⟨A,hA⟩,
     rcases h2 U with ⟨B,hB⟩,
-    simp only [set.preimage_id, Profinite.id_to_fun, set.le_eq_subset] at hA hB,
+    simp only [set.preimage_id, coe_id, set.le_eq_subset] at hA hB,
     obtain ⟨x,hx⟩ := I.nonempty U,
     refine ⟨⟨A ⊓ B, ⟨x, hA hx, hB hx⟩, A, B, rfl⟩, _⟩,
-    simp only [set.preimage_id,
-      Profinite.id_to_fun,
-      set.subset_inter_iff,
-      subtype.coe_mk,
-      set.le_eq_subset,
+    simp only [set.preimage_id, coe_id, set.subset_inter_iff, subtype.coe_mk, set.le_eq_subset,
       set.inf_eq_inter],
     refine ⟨hA,hB⟩,
   end }
@@ -372,7 +368,7 @@ lemma inf_mono_left {I J K : X.clopen_cover} : J ≤ K → J ⊓ I ≤ K ⊓ I :
 begin
   rintros h ⟨U,⟨hU,A,B,rfl⟩⟩,
   rcases h A with ⟨AA,hAA⟩,
-  simp only [set.preimage_id, Profinite.id_to_fun, set.le_eq_subset] at *,
+  simp only [set.preimage_id, coe_id, set.le_eq_subset] at *,
   have : (A : set X) ⊓ B ≤ AA ⊓ B := λ x ⟨h1,h2⟩, ⟨hAA h1,h2⟩,
   refine ⟨⟨AA ⊓ B,set.nonempty.mono this hU, AA, B, rfl⟩,this⟩,
 end
@@ -381,7 +377,7 @@ lemma inf_mono_right {I J K : X.clopen_cover} : J ≤ K → I ⊓ J ≤ I ⊓ K 
 begin
   rintros h ⟨U,⟨hU,A,B,rfl⟩⟩,
   rcases h B with ⟨BB,hBB⟩,
-  simp only [set.preimage_id, Profinite.id_to_fun, set.le_eq_subset] at *,
+  simp only [set.preimage_id, coe_id, set.le_eq_subset] at *,
   have : (A : set X) ⊓ B ≤ A ⊓ BB := λ x ⟨h1,h2⟩, ⟨h1, hBB h2⟩,
   refine ⟨⟨A ⊓ BB, set.nonempty.mono this hU, A, BB, rfl⟩, this⟩
 end
@@ -647,12 +643,8 @@ def Fincone : limits.cone (X.diagram ⋙ Fintype_to_Profinite) :=
       ext1 x,
       symmetry,
       apply clopen_cover.proj_fun_unique,
-      simp only [Profinite.id_to_fun,
-        id.def,
-        category_theory.functor.comp_map,
-        Profinite.comp_to_fun,
-        function.comp_app,
-        category_theory.functor.const.obj_map],
+      simp only [coe_id, id.def, category_theory.functor.comp_map, coe_comp,
+        function.comp_app, category_theory.functor.const.obj_map],
       apply clopen_cover.map_spec,
       apply clopen_cover.proj_fun_spec,
     end } }
@@ -679,23 +671,23 @@ begin
       refl } }
 end
 
-/-- 
-The isomorphism of cones between `X.Fincone` and 
-`limit_cone (X.diagram ⋙ Fintype_to_Profinite)`. 
+/--
+The isomorphism of cones between `X.Fincone` and
+`limit_cone (X.diagram ⋙ Fintype_to_Profinite)`.
 -/
 def Fincone_iso : X.Fincone ≅ (limit_cone _).cone :=
 limits.cones.ext (as_iso $ (limit_cone _).is_limit.lift _) (λ _, rfl)
 
-/-- 
-`X.Fincone` is indeed a limit cone. 
+/--
+`X.Fincone` is indeed a limit cone.
 -/
 def Fincone_is_limit : limits.is_limit X.Fincone :=
 limits.is_limit.of_iso_limit (limit_cone_cone_is_limit _) X.Fincone_iso.symm
 
 variables {X} {Y : Profinite.{u}}
 
-/-- 
-Change a cone over `Y.diagram ⋙ Fintype_to_Profinite` 
+/--
+Change a cone over `Y.diagram ⋙ Fintype_to_Profinite`
 with respect to a morphism `f : X ⟶ Y`.
 This is used to obtain the functorial properties of the `X.Fincone` constructions.
 -/
@@ -767,9 +759,9 @@ namespace arrow
 
 variable (f : arrow Profinite.{u})
 
-/-- 
-A gadget used to show that any arrow in `Profinite` can be expressed as a 
-limit of arrows of `Fintype`s. 
+/--
+A gadget used to show that any arrow in `Profinite` can be expressed as a
+limit of arrows of `Fintype`s.
 This will be used as the category indexing the limit.
 -/
 @[nolint has_inhabited_instance]
@@ -796,7 +788,7 @@ instance : category (index_cat f) :=
   comp_id' := λ A B f, by {cases f, refl},
   assoc' := λ A B C D f g h, by {cases f, cases g, cases h, refl} }
 
-/-- 
+/--
 Make a term of `index_cat` given a clopen cover of a target of the arrow.
 This is done fuunctorially.
 -/
@@ -809,7 +801,7 @@ def mk_right : f.right.clopen_cover ⥤ index_cat f :=
   { left := clopen_cover.pullback_mono $ le_of_hom f,
     right := le_of_hom f } }
 
-/-- 
+/--
 Make a term of `index_cat` given a clopen cover of a source of the arrow.
 This is done fuunctorially.
 -/
@@ -822,7 +814,7 @@ def mk_left : f.left.clopen_cover ⥤ index_cat f :=
   { left := le_of_hom f,
     right := clopen_cover.le_rel_top _ _ } }
 
-/-- 
+/--
 A combination of `mk_left` and `mk_right`.
 -/
 def make : f.left.clopen_cover ⥤ f.right.clopen_cover ⥤ index_cat f :=
@@ -849,7 +841,7 @@ def make : f.left.clopen_cover ⥤ f.right.clopen_cover ⥤ index_cat f :=
 
 end index_cat
 
-/-- 
+/--
 The diagram whose limit is a given arrow in `Profinite`.
 -/
 def diagram : index_cat f ⥤ arrow Fintype.{u} :=
@@ -898,7 +890,7 @@ abbreviation right_diagram : index_cat f ⥤ Profinite := diagram' f ⋙ arrow.r
 def limit_cone : limits.limit_cone (diagram' f) :=
 arrow.limit_cone _ (limit_cone $ left_diagram _) (limit_cone $ right_diagram _)
 
-/-- 
+/--
 The cone which we want to show is a limit cone of `diagram' f`.
 Its cone point is the given arrow `f`.
 -/
@@ -985,7 +977,7 @@ begin
         dsimp [Us],
         rw ← hx ff,
         apply clopen_cover.map_unique,
-        simp only [set.preimage_id, Profinite.id_to_fun, set.le_eq_subset],
+        simp only [set.preimage_id, coe_id, set.le_eq_subset],
         dsimp [index_cat.mk_right],
         intros U,
         rcases Is.compat U with ⟨V,hV⟩,
