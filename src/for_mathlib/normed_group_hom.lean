@@ -8,7 +8,7 @@ noncomputable theory
 open set normed_group_hom uniform_space
 
 
--- PR to group_theory.subgroup, next to subgroup.mem_map
+-- #7459
 @[to_additive]
 lemma subgroup.mem_map_of_mem {G H : Type*} [group G] [group H] {G' : subgroup G} (f : G →* H) {x : G} (hx : x ∈ G') :
   f x ∈ subgroup.map f G' :=
