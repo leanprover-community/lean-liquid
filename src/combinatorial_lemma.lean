@@ -292,11 +292,9 @@ lemma lem98_aux' [fact (r' < 1)] (N : ℕ)
 begin
   intros,
   ext l s n,
-  simp only [hx, H, hy, ← hx₁, Hx₁, hy', Mbar.coe_add,
-    finset.sum_apply, add_monoid_hom.coe_add, Mbar.coe_sum,
-    pi.add_apply, Mbar.mk_tensor_apply, fintype.sum_apply, finset.sum_congr,
-    add_monoid_hom.smul_apply, pi.smul_apply, add_monoid_hom.sum_apply,
-    add_monoid_hom.sum_apply, finset.smul_sum, Mbar.mk_tensor_apply],
+  simp only [hx, H, hy, ← hx₁, Hx₁, hy', Mbar.coe_add, finset.sum_apply, add_monoid_hom.add_apply,
+    Mbar.coe_sum, pi.add_apply, Mbar.mk_tensor_apply, finset.sum_congr,
+    add_monoid_hom.smul_apply, pi.smul_apply, add_monoid_hom.finset_sum_apply, finset.smul_sum],
   rw [finset.sum_add_distrib, finset.sum_const, finset.card_univ,
     fintype.card_fin, finset.sum_comm, ← hx₀],
 end
@@ -413,7 +411,7 @@ begin
   ... = (N • ∥x₀ (l i)∥₊ + ∑ a in A, nnnorm (a (l i)) * ∥xₐ a∥₊) / N + d * nnnorm (l i) : _
   ... = ∥x (l i)∥₊ / N + d * nnnorm (l i) : by rw Hx
   ... ≤ _ : _,
-  { simp only [add_monoid_hom.add_apply, add_assoc, add_monoid_hom.sum_apply,
+  { simp only [add_monoid_hom.add_apply, add_assoc, add_monoid_hom.finset_sum_apply,
          Mbar.mk_tensor_apply],
     refine (Mbar.nnnorm_add_le _ _).trans (add_le_add le_rfl _),
     refine (Mbar.nnnorm_sum_le _ _).trans _,

@@ -2,7 +2,6 @@ import pseudo_normed_group.basic
 import pseudo_normed_group.category
 import breen_deligne.suitable
 
-import for_mathlib.add_monoid_hom
 /-!
 
 # Universal maps and pseudo-normed groups
@@ -50,7 +49,7 @@ lemma eval_png_apply (x : M^m) : f.eval_png M x = λ j, ∑ i, f j i • (x i) :
 begin
   ext j,
   simp only [eval_png, coe_mk_from_pi, add_monoid_hom.apply_apply, mk_to_pi_apply,
-    add_monoid_hom.to_fun_eq_coe, fintype.sum_apply, function.comp_app, coe_gsmul,
+    add_monoid_hom.to_fun_eq_coe, fintype.sum_apply, function.comp_app, coe_smul,
     @mk_from_pi_apply M _ (fin m) _ (λ _, M) _ _ x, const_smul_hom_apply]
 end
 

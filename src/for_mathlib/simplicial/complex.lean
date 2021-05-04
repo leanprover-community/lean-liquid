@@ -1,5 +1,7 @@
+import algebra.module.hom
+import algebra.big_operators
+
 import for_mathlib.preadditive_category
-import for_mathlib.add_monoid_hom
 import system_of_complexes.complex
 import .augmented
 
@@ -60,8 +62,7 @@ begin
         + (∑ ij in sᶜ, (-1:ℤ)^(ij.1+ij.2:ℕ) • ((M.map $ δ ij.1) ≫ (M.map $ δ ij.2))) :
         by rw sum_add_sum_compl
   ... = 0 : _,
-  { simp only [map_sum, map_gsmul, add_monoid_hom.sum_apply, gsmul_apply,
-      smul_sum, pow_add, mul_smul],
+  { simp only [map_sum, map_gsmul, finset_sum_apply, smul_apply, smul_sum, pow_add, mul_smul],
     refl, },
   erw [← eq_neg_iff_add_eq_zero, ← finset.sum_neg_distrib],
   -- The sums are equal because we can give a bijection

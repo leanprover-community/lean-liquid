@@ -306,7 +306,7 @@ begin
     (suitable c₂ c₁) (suitable_free_predicate c₂ c₁) g hg; unfreezingI { clear_dependent g },
   { intros h₂,
     simp only [eval_LCFP'_zero, zero_comp, pi.zero_apply,
-      add_monoid_hom.coe_zero, add_monoid_hom.map_zero] },
+      add_monoid_hom.zero_apply, add_monoid_hom.map_zero] },
   { intros g hg hf,
     -- now do another nested induction on `f`
     apply free_abelian_group.induction_on_free_predicate
@@ -347,7 +347,7 @@ begin
   -- for preadditive categories
   show @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup) _ _ _ _ _ _ _ =
     @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup) _ _ _ _ _ _ _,
-  simp only [add_monoid_hom.map_gsmul, add_monoid_hom.gsmul_apply],
+  simp only [add_monoid_hom.map_gsmul, add_monoid_hom.smul_apply],
   haveI : g.suitable c₃ c₁ := suitable_of_mem_support ϕ _ _ g hg,
   haveI : g.suitable c₄ c₂ := suitable_of_mem_support ϕ _ _ g hg,
   congr' 1,
@@ -363,7 +363,7 @@ begin
   rintros ⟨g, hg⟩ -,
   show @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup) _ _ _ _ _ _ _ =
     @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup) _ _ _ _ _ _ _,
-  simp only [add_monoid_hom.map_gsmul, add_monoid_hom.gsmul_apply],
+  simp only [add_monoid_hom.map_gsmul, add_monoid_hom.smul_apply],
   haveI : g.suitable c₃ c₁ := suitable_of_mem_support ϕ _ _ g hg,
   haveI : g.suitable c₄ c₂ := suitable_of_mem_support ϕ _ _ g hg,
   congr' 1,
@@ -379,7 +379,7 @@ begin
   rintros ⟨g, hg⟩ -,
   show @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup) _ _ _ _ _ _ _ =
     @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup) _ _ _ _ _ _ _,
-  simp only [add_monoid_hom.map_gsmul, add_monoid_hom.gsmul_apply],
+  simp only [add_monoid_hom.map_gsmul, add_monoid_hom.smul_apply],
   haveI : g.suitable c₂ c₁ := suitable_of_mem_support ϕ _ _ g hg,
   congr' 1,
   apply basic_universal_map.T_inv_comp_eval_LCFP r V r'

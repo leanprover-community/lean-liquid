@@ -8,7 +8,7 @@ noncomputable theory
 open set normed_group_hom uniform_space
 
 
--- PR to group_theory.subgroup, next to subgroup.mem_map
+-- #7459
 @[to_additive]
 lemma subgroup.mem_map_of_mem {G H : Type*} [group G] [group H] {G' : subgroup G} (f : G →* H) {x : G} (hx : x ∈ G') :
   f x ∈ subgroup.map f G' :=
@@ -19,9 +19,11 @@ variables {H : Type*} [semi_normed_group H]
 variables {H₁ : Type*} [normed_group H₁]
 variables {K : Type*} [semi_normed_group K]
 
+-- #7474
 lemma normed_group.norm_incl {G' : add_subgroup G} (x : G') : ∥incl _ x∥ = ∥x∥ :=
 rfl
 
+-- #7474
 lemma normed_group_hom.comp_range (f : normed_group_hom G H) (g : normed_group_hom H K) :
 (g.comp f).range = add_subgroup.map g.to_add_monoid_hom f.range :=
 begin
@@ -29,6 +31,7 @@ begin
   refl,
 end
 
+-- #7474
 lemma normed_group_hom.mem_comp_range (f : normed_group_hom G H) (g : normed_group_hom H K) (x : G) :
   g (f x) ∈ (g.comp f).range :=
 begin
@@ -36,6 +39,7 @@ begin
   exact add_subgroup.mem_map_of_mem g.to_add_monoid_hom (mem_range_self x),
 end
 
+-- #7474
 @[simp]
 lemma normed_group.mem_range_incl (G' : add_subgroup G) (x : G) : x ∈ (incl G').range ↔ x ∈ G' :=
 begin
@@ -47,10 +51,12 @@ begin
     exact ⟨⟨x, x_in⟩, rfl⟩ },
 end
 
+--#7468
 @[simp]
 lemma normed_group_hom.ker_zero : (0 : normed_group_hom G H).ker = ⊤ :=
 by { ext, simp [normed_group_hom.mem_ker] }
 
+-- #7474
 @[simp]
 lemma normed_group_hom.range_comp_incl_top {f : normed_group_hom G H} :
 (f.comp (incl (⊤ : add_subgroup G))).range = f.range :=
@@ -64,9 +70,11 @@ begin
     exact ⟨⟨y, trivial⟩, rfl⟩ },
 end
 
+--#7468
 lemma normed_group_hom.ker_eq_preimage (f : normed_group_hom G H) :
   (f.ker : set G) = (f : G → H) ⁻¹' {0} :=
 by { ext, erw f.mem_ker }
 
+--#7468
 lemma normed_group_hom.is_closed_ker (f : normed_group_hom G H₁) : is_closed (f.ker : set G) :=
 f.ker_eq_preimage ▸ is_closed.preimage f.continuous (t1_space.t1 0)

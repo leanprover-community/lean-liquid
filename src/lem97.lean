@@ -6,8 +6,6 @@ import algebra.ordered_ring
 import polyhedral_lattice.basic
 import for_mathlib.Gordan
 
-import for_mathlib.add_monoid_hom
-
 /-!
 
 # Lemma 9.7 of [Analytic]
@@ -62,8 +60,8 @@ begin
     add_monoid_hom.finset_sum_apply, add_monoid_hom.finset_sum_apply, ← finset.sum_add_distrib],
   simp only [← add_monoid_hom.add_apply, ← nsmul_eq_smul, ← gsmul_coe_nat, ← neg_gsmul,
      gsmul_eq_smul, ← add_smul],
-  simp only [add_monoid_hom.coe_add, add_monoid_hom.coe_smul, pi.add_apply, pi.neg_apply,
-     int.coe_nat_mod, pi.smul_apply, add_monoid_hom.coe_neg],
+  simp only [add_monoid_hom.add_apply, add_monoid_hom.smul_apply, pi.add_apply, pi.neg_apply,
+     int.coe_nat_mod, pi.smul_apply, add_monoid_hom.neg_apply],
   apply finset.sum_nonpos,
   intros z hz,
   replace hz : z ∈ explicit_dual_set l,
