@@ -108,7 +108,37 @@ begin
   sorry
 end
 
--- theorem ker (ha : finite_free A) (φ : A →+ ℤ) : finite_free φ.ker -- semimodule ℤ issues
+lemma congr_iso {B : Type} [add_comm_group B] (hab : A ≃+ B) (ha : finite_free A) :
+  finite_free B :=
+begin
+  -- do this after is_basis refactor?
+  sorry
+end
+
+#check congr_iso
+
+lemma rank_iso {B : Type} [add_comm_group B] (hab : A ≃+ B) (ha : finite_free A) :
+  (congr_iso hab ha).rank = ha.rank :=
+begin
+  -- do this after is_basis refactor?
+  sorry
+end
+
+theorem ker (ha : finite_free A) (φ : A →+ ℤ) : finite_free φ.ker :=
+begin
+  -- submodule of Noetherian Z-module is f.g.,
+  -- submodule of torsion-free is torsion-free,
+  -- f.g. torsion-free => free
+  sorry
+end
+
+theorem rank_ker (ha : finite_free A) (φ : A →+ ℤ) (hφ : φ ≠ 0) :
+  (ker ha φ).rank + 1 = ha.rank :=
+begin
+  -- I don't know the best way of doing this
+  sorry
+end
+
 end finite_free
 
 end move_this
