@@ -29,7 +29,9 @@ def limit_cone_cone {J : Type u} [small_category J] (F : J ⥤ Profinite.{u}) :
     end,
     is_t2 := by {dsimp [Top.limit_cone'], apply_instance},
     is_totally_disconnected := by {dsimp [Top.limit_cone'], apply_instance} },
-  π := { app := λ j, (Top.limit_cone' $ F ⋙ Profinite_to_Top).π.app j } }.
+  π :=
+  { app := λ j, (Top.limit_cone' $ F ⋙ Profinite_to_Top).π.app j,
+    naturality' := by { intros _ _ _, ext, tidy } } }.
 
 /-- `limit_cone_cone` is indeed a limit cone. -/
 def limit_cone_cone_is_limit {J : Type u} [small_category J] (F : J ⥤ Profinite.{u}) :
