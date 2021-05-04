@@ -47,6 +47,7 @@ begin
     exact ⟨⟨x, x_in⟩, rfl⟩ },
 end
 
+--#7468
 @[simp]
 lemma normed_group_hom.ker_zero : (0 : normed_group_hom G H).ker = ⊤ :=
 by { ext, simp [normed_group_hom.mem_ker] }
@@ -64,9 +65,11 @@ begin
     exact ⟨⟨y, trivial⟩, rfl⟩ },
 end
 
+--#7468
 lemma normed_group_hom.ker_eq_preimage (f : normed_group_hom G H) :
   (f.ker : set G) = (f : G → H) ⁻¹' {0} :=
 by { ext, erw f.mem_ker }
 
+--#7468
 lemma normed_group_hom.is_closed_ker (f : normed_group_hom G H₁) : is_closed (f.ker : set G) :=
 f.ker_eq_preimage ▸ is_closed.preimage f.continuous (t1_space.t1 0)
