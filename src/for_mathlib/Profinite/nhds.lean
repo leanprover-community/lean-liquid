@@ -20,16 +20,16 @@ begin
   simpa [← this, filter.comap_comap],
 end
 
-lemma nhds_eq_infi (a : X) : nhds a = ⨅ (I : X.clopen_cover), filter.comap I.proj (nhds $ I.proj a) :=
+lemma nhds_eq_infi (a : X) : nhds a = ⨅ (I : discrete_quotient X), filter.comap I.proj (nhds $ I.proj a) :=
 begin
   let f := homeo_of_iso
-    (as_iso ((limit_cone (X.diagram ⋙ Fintype_to_Profinite)).is_limit.lift X.Fincone)),
+    (as_iso ((limit_cone (X.diagram ⋙ Fintype_to_Profinite)).is_limit.lift X.fincone)),
   have := nhds_of_limit (X.diagram ⋙ Fintype_to_Profinite) (f a),
   have hf : nhds a = filter.comap f (nhds $ f a), by simp,
   rw [hf, this, filter.comap_infi],
   congr,
   funext i,
-  let P := Π (I : X.clopen_cover), I,
+  let P := Π (I : discrete_quotient X), I,
   have : (λ x : P, x i) ∘ subtype.val ∘ f = i.proj, refl,
   simpa [← this, filter.comap_comap],
 end
@@ -53,8 +53,8 @@ begin
       rcases h1 with ⟨Q,hQ,h1,h3⟩,
       apply hQ h3 },
     { refine @is_clopen_Inter X _ T hT.fintype (λ i, i.val.proj ⁻¹' (Vs i)) (λ i, _),
-      refine ⟨i.val.proj.continuous.is_open_preimage _ trivial,
-        is_closed.preimage i.val.proj.continuous ⟨trivial⟩⟩ },
+      refine ⟨i.val.proj_continuous.is_open_preimage _ trivial,
+        is_closed.preimage i.val.proj_continuous ⟨trivial⟩⟩ },
     { apply hT2,
       rintros i ⟨i,rfl⟩,
       rcases hVs i with ⟨h1,h2⟩,
