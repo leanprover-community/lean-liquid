@@ -586,6 +586,36 @@ begin
   exact of_mul_apply A b i j m,
 end
 
+-- let's try this one with induction
+theorem mul_single_component' [add_right_cancel_monoid ι] [gmonoid A]
+  (b : ⨁ i, A i) (i j : ι) (m : A j) :
+  of A (i + j) ((b * (of A j m)) (i + j)) = of A i (b i) * of A j m :=
+begin
+  apply direct_sum.induction_on b,
+  { simp },
+  { intros k ak,
+    rw of_mul_of,
+    by_cases h : i = k,
+    { subst h,
+      rw eval_of_same,
+      rw of_mul_of,
+      rw eval_of_same },
+    { have h2 : i + j ≠ k + j,
+        intro h3, apply h, apply add_right_cancel h3,
+      rw eval_of_ne A h2.symm,
+      rw eval_of_ne A (ne.symm h),
+      simp } },
+  { intros x y hx hy,
+    rw add_mul,
+    change (of A (i + j)) (apply_add_monoid_hom A (i + j) (x * (of A j) m + y * (of A j) m)) = _,
+    rw add_monoid_hom.map_add,
+    rw add_monoid_hom.map_add,
+    change (of A (i + j)) ((x * (of A j) m) (i + j)) +
+  (of A (i + j)) ((y * (of A j) m) (i + j)) = _,
+    rw [hx, hy],
+    simp [add_mul] }
+end
+
 end external_stuff
 
 /-!

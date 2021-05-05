@@ -138,9 +138,6 @@ instance (a : A) : module (Gᵢ 0) (Gᵢ a) :=
 submodule.module' (component_submodule_for_zero_component_subring R Gᵢ a)
 
 
---variables {A : Type*} [decidable_eq A] [add_monoid A] {R : Type*} [comm_ring R]
---  (Gᵢ : A → add_subgroup R) [has_add_subgroup_decomposition Gᵢ] [add_subgroup.is_gmonoid Gᵢ]
-
 def projection_R₀_hom (a : A) : R →ₗ[Gᵢ 0] (Gᵢ a) :=
 { to_fun := (apply_add_monoid_hom (λ i, Gᵢ i) a).comp
     (add_subgroup_decomposition Gᵢ).to_add_monoid_hom,
@@ -186,7 +183,14 @@ def projection_R₀_hom (a : A) : R →ₗ[Gᵢ 0] (Gᵢ a) :=
   end
 }
 
-namespace component_submodule -- some technical lemmas
+end comm_ring
+
+namespace component_submodule -- some technical lemmas under the added hypothesis
+-- that A is a group
+variables {A : Type*} [decidable_eq A] [add_group A]
+(R : Type*) [comm_ring R]
+(Gᵢ : A → add_subgroup R)
+ [has_add_subgroup_decomposition Gᵢ] [add_subgroup.is_gmonoid Gᵢ]
 
 /-- Extension of an `R₀`-submodule of `Rₐ` to an `R`-submodule of `R`, sending `M` to `MR`. -/
 def map (a : A) (M : submodule (Gᵢ 0) (Gᵢ a)) :
@@ -203,6 +207,28 @@ def res (a : A) (I : submodule R R) : submodule (zero_component_subring R Gᵢ) 
   by intersection. -/
 def comap (a : A) (I : submodule R R) : submodule (Gᵢ 0) (Gᵢ a) :=
 submodule.comap (component_submodule_for_zero_component_subring R Gᵢ a).subtype (res R Gᵢ a I)
+
+-- move!
+lemma finsupp.sum_congr {α M N : Type*} [has_zero M] [add_comm_monoid N] (f : α →₀ M)
+  (g h : α → M → N)  (hyp : ∀ a : α, a ∈ f.support → g a (f a) = h a (f a)) : f.sum g = f.sum h :=
+finset.sum_congr rfl hyp
+
+open_locale direct_sum
+
+-- move!
+lemma aux (a : A) (x : ⨁ i, Gᵢ i) (m : Gᵢ a): (projection (λ (i : A), ↥(Gᵢ i)) a)
+  (x * (of (λ (i : A), ↥(Gᵢ i)) a) m) =
+  (projection (λ (i : A), ↥(Gᵢ i)) a)
+    ((of (λ (i : A), ↥(Gᵢ i)) 0) ((projection (λ (i : A), ↥(Gᵢ i)) 0) x) *
+       (of (λ (i : A), ↥(Gᵢ i)) a) m) :=
+begin
+  apply direct_sum.induction_on x; clear x,
+  { simp },
+  { intros i x,
+    sorry },
+  { sorry }
+end
+
 
 /-- Given an `R₀`-submodule `M` of `Rₐ`, pushing forward to `MR`, an ideal of `R`, and then
   intersecting with `Rₐ` gives back `M`.  -/
@@ -253,15 +279,50 @@ begin
     simp_rw (add_subgroup_decomposition_ring_equiv Gᵢ).map_mul at hm',
     change (Gᵢ a).subtype _ = _ at hm',
     rw add_monoid_hom.map_finsupp_sum at hm',
-    -- nb this goal probably isnt provable without some assumption
-    -- that A is cancellative, which is OK because in the application
-    -- it's ℤ
+    have h37 : f.sum
+      (λ (m : ↥(Gᵢ a)) (b : R),
+      ((Gᵢ a).subtype)
+      ((projection (λ (i : A), ↥(Gᵢ i)) a)
+        ((add_subgroup_decomposition_ring_equiv Gᵢ) b *
+          (add_subgroup_decomposition_ring_equiv Gᵢ) m.val))) = f.sum
+      (λ (m : ↥(Gᵢ a)) (b : R),
+      ((Gᵢ a).subtype)
+      ((projection (λ (i : A), ↥(Gᵢ i)) a)
+        ( of (λ i, Gᵢ i) 0 ((projection (λ (i : A), ↥(Gᵢ i)) 0) ((add_subgroup_decomposition_ring_equiv Gᵢ) b)) *
+          (add_subgroup_decomposition_ring_equiv Gᵢ) m.val))),
+    { apply finsupp.sum_congr,
+      rintro ⟨m, hma⟩ hmf,
+      congr' 1,
+      change (projection (λ (i : A), ↥(Gᵢ i)) a)
+    ((add_subgroup_decomposition_ring_equiv Gᵢ) (f ⟨m, hma⟩) *
+       (add_subgroup_decomposition Gᵢ) m) =
+  (projection (λ (i : A), ↥(Gᵢ i)) a)
+    ((of (λ (i : A), ↥(Gᵢ i)) 0)
+         ((projection (λ (i : A), ↥(Gᵢ i)) 0)
+            ((add_subgroup_decomposition_ring_equiv Gᵢ) (f ⟨m, hma⟩))) *
+       (add_subgroup_decomposition Gᵢ) m),
+      rw eq_decomposition_of_mem_piece'' hma,
+      generalize : (add_subgroup_decomposition_ring_equiv Gᵢ) (f ⟨m, hma⟩) = x,
+      -- goal now purely external
+      rw of_mul_of,
+      change _ = ((of (λ (i : A), ↥(Gᵢ i)) (0 + a))
+     ((ghas_mul.mul ((projection (λ (i : A), ↥(Gᵢ i)) 0) x)) ⟨m, hma⟩)) a,
+     rw eval_of_same' (λ i, Gᵢ i) (0 + a) a (by simp),
+      sorry
+    },
+    rw h37 at hm', clear h37,
     sorry },
   { -- easy way
     intro h,
     apply submodule.subset_span,
     refine ⟨⟨⟨m, hm⟩, h⟩, rfl⟩ }
 end
+
+/-
+theorem mul_single_component' [add_right_cancel_monoid ι] [gmonoid A]
+  (b : ⨁ i, A i) (i j : ι) (m : A j) :
+  of A (i + j) ((b * (of A j m)) (i + j)) = of A i (b i) * of A j m :=
+-/
 
 end component_submodule
 
@@ -273,8 +334,6 @@ theorem component_submodule_noetherian {R : Type*} [comm_ring R] [is_noetherian_
 begin
   sorry
 end
-
-end comm_ring
 
 end has_add_subgroup_decomposition
 
