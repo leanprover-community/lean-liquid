@@ -82,7 +82,7 @@ variables (M  : ProFiltPseuNormGrpWithTinv.{u} r')
 /-- `HomZ_map` as an equiv. -/
 @[simps] def HomZ_map_equiv : Hom ℤ M ≃+ M :=
 { to_fun := add_monoid_hom.eval 1,
-  inv_fun := int.cast_add_hom',
+  inv_fun := (smul_add_hom ℤ M).flip,
   map_add' := add_monoid_hom.map_add _,
   left_inv := λ f, by { ext, exact one_smul _ _ },
   right_inv := λ x, one_smul _ _ }
@@ -97,7 +97,7 @@ begin
     have aux := pseudo_normed_group.int_smul_mem_filtration n _ c hx,
     rw [nnreal.coe_nat_abs] at aux,
     rw [← (HomZ_map_equiv M).symm_apply_apply f, HomZ_map_equiv_symm_apply,
-      int.cast_add_hom'_apply, mul_comm],
+      add_monoid_hom.flip_apply, smul_add_hom_apply, mul_comm],
     exact pseudo_normed_group.filtration_mono (mul_le_mul_right' hn c) aux }
 end
 

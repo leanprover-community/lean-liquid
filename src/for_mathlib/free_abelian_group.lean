@@ -18,22 +18,10 @@ noncomputable theory
 
 open_locale big_operators
 
-namespace int -- mathlib PR: #7461
-
-variables {A : Type*} [add_comm_group A]
-
-/-- `int.cast_add_hom' a` is the additive group homomorphism `ℤ → A`
-that sends `1 : ℤ` to `a : A`. -/
-def cast_add_hom' (a : A) : ℤ →+ A :=
-add_monoid_hom.mk' (λ n, n • a) $ λ m n, add_smul _ _ _
-
-@[simp, priority 900]
-lemma cast_add_hom'_apply (a : A) (n : ℤ) : cast_add_hom' a n = n • a := rfl
-
-@[simp] lemma cast_add_hom'_one (a : A) : cast_add_hom' a 1 = a :=
-by rw [cast_add_hom'_apply, one_smul]
-
-end int
+-- PR #7461
+@[simp] lemma smul_add_hom_one {R M : Type*} [semiring R] [add_comm_monoid M] [module R M] :
+  smul_add_hom R M 1 = add_monoid_hom.id _ :=
+by { ext, rw [smul_add_hom_apply, one_smul, add_monoid_hom.id_apply] }
 
 namespace free_abelian_group
 variables (X : Type*)
@@ -47,15 +35,15 @@ free_abelian_group.lift $ λ x, finsupp.single x (1 : ℤ)
 
 /-- The group homomorphism `(X →₀ ℤ) →+ free_abelian_group X`. -/
 def from_finsupp : (X →₀ ℤ) →+ free_abelian_group X :=
-finsupp.lift_add_hom $ λ x, @int.cast_add_hom' (free_abelian_group X) _ (of x)
+finsupp.lift_add_hom $ λ x, (smul_add_hom ℤ (free_abelian_group X)).flip (of x)
 
 @[simp] lemma from_finsupp_comp_single_add_hom (x : X) :
   (from_finsupp X).comp (finsupp.single_add_hom x) =
-    @int.cast_add_hom' (free_abelian_group X) _ (of x) :=
+    (smul_add_hom ℤ (free_abelian_group X)).flip (of x) :=
 begin
   ext,
   simp only [add_monoid_hom.coe_comp, finsupp.single_add_hom_apply, function.comp_app,
-    one_smul, int.cast_add_hom'_apply, from_finsupp, finsupp.lift_add_hom_apply_single]
+    one_smul, from_finsupp, finsupp.lift_add_hom_apply_single]
 end
 
 @[simp] lemma to_finsupp_comp_from_finsupp :
@@ -64,7 +52,8 @@ begin
   ext x y, simp only [add_monoid_hom.id_comp],
   rw [add_monoid_hom.comp_assoc, from_finsupp_comp_single_add_hom],
   simp only [to_finsupp, add_monoid_hom.coe_comp, finsupp.single_add_hom_apply,
-    function.comp_app, one_smul, lift.of, int.cast_add_hom'_apply],
+    function.comp_app, one_smul, lift.of, add_monoid_hom.flip_apply,
+    smul_add_hom_one, add_monoid_hom.id_apply],
 end
 
 @[simp] lemma from_finsupp_comp_to_finsupp :
@@ -72,7 +61,8 @@ end
 begin
   ext,
   simp only [from_finsupp, to_finsupp, finsupp.lift_add_hom_apply_single, add_monoid_hom.coe_comp,
-    function.comp_app, one_smul, add_monoid_hom.id_apply, lift.of, int.cast_add_hom'_apply]
+    function.comp_app, one_smul, add_monoid_hom.id_apply, lift.of, add_monoid_hom.flip_apply,
+    smul_add_hom_one],
 end
 
 variable {X}
