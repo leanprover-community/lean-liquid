@@ -14,6 +14,7 @@ namespace cosimplicial_object
 open simplex_category finset add_monoid_hom category_theory.preadditive
 open_locale simplicial big_operators
 
+/-- The coboundary map in the alternating face map cochain complex. -/
 def coboundary (n : ℕ) : M.obj [n] ⟶ M.obj [n+1] :=
 ∑ i : fin (n+2), (-1:ℤ)^(i:ℕ) • (M.map $ δ i)
 
@@ -85,9 +86,11 @@ begin
     { ext; simp only [fin.succ_pred, fin.pred_succ, fin.cast_lt_cast_succ], }, },
 end
 
+/-- Make a cochain complex from a cosimplicial object. -/
 def to_cocomplex : cochain_complex ℕ C := cochain_complex.mk'
 (λ n, M.obj [n]) (λ n, M.coboundary n) M.coboundary_coboundary
 
+/-- A functorial version of `to_cocomplex`. -/
 def cocomplex : cosimplicial_object C ⥤ cochain_complex ℕ C :=
 { obj := to_cocomplex,
   map := λ M N f,
@@ -104,14 +107,18 @@ def cocomplex : cosimplicial_object C ⥤ cochain_complex ℕ C :=
 
 namespace augmented
 
+/-- The objects defining the cochain complex associated to an augmented cosimplicial object. -/
+@[nolint unused_arguments]
 def to_cocomplex_obj (M : augmented C) : ℕ → C
 | 0 := augmented.point.obj M
 | (n+1) := (augmented.drop.obj M).obj [n]
 
+/-- The boundary maps defining the cochain complex associated to an augmented cosimplicial object.-/
 def to_cocomplex_d {M : augmented C} : Π (n : ℕ), to_cocomplex_obj M n ⟶ to_cocomplex_obj M (n+1)
 | 0 := M.hom.app _
 | (n+1) := (augmented.drop.obj M).coboundary _
 
+/-- The cochain complex associated to an augmented cosimplicial object. -/
 @[simps]
 def to_cocomplex (M : augmented C) : cochain_complex ℕ C := cochain_complex.mk'
 (to_cocomplex_obj M) to_cocomplex_d
@@ -124,6 +131,7 @@ begin
   { apply coboundary_coboundary }
 end
 
+/-- A functorial version of to_cocomplex. -/
 def cocomplex : augmented C ⥤ cochain_complex ℕ C :=
 { obj := to_cocomplex,
   map := λ M N f,

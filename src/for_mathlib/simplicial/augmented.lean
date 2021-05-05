@@ -24,7 +24,7 @@ def const : C ⥤ simplicial_object C := category_theory.functor.const _
 variable (C)
 
 /-- Augmented simplicial objects. -/
-@[derive category]
+@[derive category, nolint has_inhabited_instance]
 def augmented := comma (𝟭 (simplicial_object C)) const
 
 variable {C}
@@ -44,7 +44,7 @@ end augmented
 end simplicial_object
 
 /-- Cosimplicial objects. -/
-@[derive category]
+@[derive category, nolint has_inhabited_instance]
 def cosimplicial_object := simplex_category.{v} ⥤ C
 
 namespace cosimplicial_object
@@ -56,7 +56,7 @@ def const : C ⥤ cosimplicial_object C := category_theory.functor.const _
 variable (C)
 
 /-- Augmented cosimplicial objects. -/
-@[derive category]
+@[derive category, nolint has_inhabited_instance]
 def augmented := comma const (𝟭 (cosimplicial_object C))
 
 variable {C}
