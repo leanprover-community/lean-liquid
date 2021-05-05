@@ -189,7 +189,7 @@ lemma fintype_prod_nat_equiv_nat (S : Type*) [fintype S] [hS : nonempty S] :
   nonempty (S × ℕ ≃ ℕ) :=
 begin
   classical,
-  obtain ⟨e'⟩ := fintype.equiv_fin S,
+  obtain e' := fintype.equiv_fin S,
   refine nonempty.intro _,
   calc S × ℕ ≃ fin (fintype.card S) × ℕ : equiv.prod_congr_left (λ _, e')
          ... ≃ ℕ : classical.choice $ cardinal.eq.1 _,
