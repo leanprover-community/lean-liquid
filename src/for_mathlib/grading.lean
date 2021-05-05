@@ -111,9 +111,18 @@ lemma projection_of_same (j : ι) (aj : A j) : projection A j (of (λ i, A i) j 
 lemma eval_of_same (j : ι) (aj : A j) : (of (λ i, A i) j aj) j = aj :=
 @dfinsupp.single_eq_same _ _ _ _ j _
 
+lemma eval_of_same' (j k : ι) (h : j = k) (aj : A j) : (of (λ i, A i) j aj) k = cast (show A j = A k, by rw h) aj :=
+begin
+  subst h,
+  convert eval_of_same A j _,
+end
+
 lemma projection_of_ne {i j : ι} (h : i ≠ j) (ai : A i) :
   projection A j (of (λ i, A i) i ai) = 0 :=
 dfinsupp.single_eq_of_ne h
+
+lemma eval_of_ne {i j : ι} (h : i ≠ j) (ai : A i) : (of (λ i, A i) i ai) j = 0 :=
+projection_of_ne _ h ai
 
 open_locale direct_sum big_operators
 
@@ -384,7 +393,7 @@ variables {A : Type*} [decidable_eq A] {R : Type*} [add_comm_monoid R]
   (Mᵢ : A → add_submonoid R) [has_add_submonoid_decomposition Mᵢ]
 
 /-- Decomposing `r` into `(rᵢ)ᵢ : ⨁ i, Mᵢ i` and then adding the pieces gives `r` again. -/
-lemma sum_decomposition  (r : R) :
+lemma sum_decomposition (r : R) :
   (direct_sum.to_add_monoid (λ i, (Mᵢ i).subtype) : (⨁ i, Mᵢ i) →+ R)
     (add_submonoid_decomposition Mᵢ r) = r :=
 (add_submonoid_decomposition Mᵢ).symm_apply_apply r

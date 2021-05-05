@@ -171,14 +171,18 @@ def projection_R₀_hom (a : A) : R →ₗ[Gᵢ 0] (Gᵢ a) :=
     change _ = r0 * _,
     by_cases hia : i = a,
     { subst hia,
-      -- I am surely close
-      sorry
-    },
-    { sorry }
-  },
-  {
-    sorry
-  },
+      rw eval_of_same,
+      change _ = r0 * x,
+      rw eval_of_same' _ _ _ (show 0 + i = i, from zero_add i),
+      simp only [zero_add, set_coe_cast, add_subgroup.coe_mk] },
+    { rw eval_of_ne (λ i, Gᵢ i) (show 0 + i ≠ a, by rwa zero_add),
+      rw eval_of_ne (λ i, Gᵢ i) (hia),
+      simp } },
+  { intros x y hx hy,
+    rw mul_add,
+    rw add_monoid_hom.map_add,
+    rw [hx, hy],
+    simp },
   end
 }
 
@@ -249,6 +253,9 @@ begin
     simp_rw (add_subgroup_decomposition_ring_equiv Gᵢ).map_mul at hm',
     change (Gᵢ a).subtype _ = _ at hm',
     rw add_monoid_hom.map_finsupp_sum at hm',
+    -- nb this goal probably isnt provable without some assumption
+    -- that A is cancellative, which is OK because in the application
+    -- it's ℤ
     sorry },
   { -- easy way
     intro h,
