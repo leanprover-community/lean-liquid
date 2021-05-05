@@ -16,8 +16,11 @@ variables (C : Type u) [category.{v} C]
 namespace simplicial_object
 
 variable {C}
+
+/-- The constant simplicial object. -/
 @[simps]
 def const : C ⥤ simplicial_object C := category_theory.functor.const _
+
 variable (C)
 
 /-- Augmented simplicial objects. -/
@@ -28,9 +31,11 @@ variable {C}
 
 namespace augmented
 
+/-- Drop the augmentation. -/
 @[simps]
 def drop : augmented C ⥤ simplicial_object C := comma.fst _ _
 
+/-- The point of the augmentation. -/
 @[simps]
 def point : augmented C ⥤ C := comma.snd _ _
 
@@ -45,6 +50,7 @@ def cosimplicial_object := simplex_category.{v} ⥤ C
 namespace cosimplicial_object
 
 variable {C}
+/-- The constant cosimplicial object. -/
 @[simps]
 def const : C ⥤ cosimplicial_object C := category_theory.functor.const _
 variable (C)
@@ -57,10 +63,11 @@ variable {C}
 
 namespace augmented
 
-/-- The forgetful functor from augmented cosimplicial objects to simplicial objects. -/
+/-- Drop the augmentation. -/
 @[simps]
 def drop : augmented C ⥤ cosimplicial_object C := comma.snd _ _
 
+/-- The point of the augmentation. -/
 @[simps]
 def point : augmented C ⥤ C := comma.fst _ _
 
