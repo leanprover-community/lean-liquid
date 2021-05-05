@@ -9,30 +9,6 @@ open category_theory
 
 variables {C : Type*} [category C] [preadditive C] (M : cosimplicial_object C)
 
-namespace cochain_complex
-
-variables [limits.has_zero_object C]
-
-local attribute [instance] limits.has_zero_object.has_zero
-local attribute [tidy] tactic.case_bash
-
-def const : C ⥤ cochain_complex ℕ C :=
-{ obj := λ X, cochain_complex.mk' (λ i,
-    match i with
-    | 0 := X
-    | n+1 := 0
-    end ) (λ i, 0) (by simp),
-  map := λ X Y f,
-  { f := λ i,
-      match i with
-      | 0 := f
-      | n+1 := 0
-      end,
-    -- should we add an auto_param?
-    comm := by tidy } }
-
-end cochain_complex
-
 namespace cosimplicial_object
 
 open simplex_category finset add_monoid_hom category_theory.preadditive
@@ -126,33 +102,56 @@ def cocomplex : cosimplicial_object C ⥤ cochain_complex ℕ C :=
         preadditive.sum_comp, preadditive.comp_sum],
     end } }
 
-section has_zero_objects
+namespace augmented
 
-variable [limits.has_zero_object C]
+def to_cocomplex_obj (M : augmented C) : ℕ → C
+| 0 := augmented.point.obj M
+| (n+1) := (augmented.drop.obj M).obj [n]
 
-def augmentation (M : augmented C) :
-  cochain_complex.const.obj (M.obj with_initial.star) ⟶ cocomplex.obj (augmented.drop.obj M) :=
-{ f := λ i,
-  match i with
-  | 0 := M.map (with_initial.hom_to _)
-  | n+1 := 0
-  end,
-  comm := begin
-    rintro ⟨_|i⟩ ⟨_|j⟩,
-    any_goals {change 0 ≫ _ = _ ≫ 0, simp},
-    { change _ ≫ 0 = (M.map (with_initial.hom_to _)) ≫ _,
-      simp,
-      dsimp [cocomplex],
-      change 0 = _ ≫ dite _ _ _,
-      split_ifs, swap, {simp},
-      simp only [coboundary_zero, category_theory.preadditive.comp_sub,
-        category_theory.preadditive.sub_comp],
-      simp_rw [← category.assoc],
-      dsimp [augmented.drop],
-      simp [← M.map_comp], },
-    { change _ ≫ 0 = 0 ≫ _, simp },
-  end }
+def to_cocomplex_d {M : augmented C} : Π (n : ℕ), to_cocomplex_obj M n ⟶ to_cocomplex_obj M (n+1)
+| 0 := M.hom.app _
+| (n+1) := (augmented.drop.obj M).coboundary _
 
-end has_zero_objects
+@[simps]
+def to_cocomplex (M : augmented C) : cochain_complex ℕ C := cochain_complex.mk'
+(to_cocomplex_obj M) to_cocomplex_d
+begin
+  rintros (_|_),
+  { dsimp [to_cocomplex_d],
+    erw [coboundary_zero, preadditive.comp_sub, sub_eq_zero,
+      ← M.hom.naturality, ← M.hom.naturality],
+    refl },
+  { apply coboundary_coboundary }
+end
+
+def cocomplex : augmented C ⥤ cochain_complex ℕ C :=
+{ obj := to_cocomplex,
+  map := λ M N f,
+  { f := λ i,
+    match i with
+    | 0 := point.map f
+    | (n+1) := (drop.map f).app _
+    end,
+    comm := begin
+      intros i j,
+      dsimp [to_cocomplex],
+      split_ifs, swap, simp,
+      subst h,
+      cases i,
+      { dsimp [to_cocomplex_d],
+        simp only [to_cocomplex_d, category_theory.category.comp_id],
+        erw [← nat_trans.comp_app, ← f.w],
+        refl },
+      { dsimp [to_cocomplex_d, coboundary],
+        simp [preadditive.sum_comp, preadditive.comp_sum],
+        apply finset.sum_congr rfl,
+        intros i _,
+        erw (drop.map f).naturality,
+        refl }
+    end },
+  map_id' := λ M, by { ext (_|_), tidy },
+  map_comp' := λ M N K f g, by { ext (_|_), tidy } }
+
+end augmented
 
 end cosimplicial_object
