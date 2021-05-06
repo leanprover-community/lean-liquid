@@ -3,6 +3,8 @@ import topology.uniform_space.cauchy
 
 import for_mathlib.order_basic
 
+--  PRed in #7528
+
 open filter
 open_locale uniformity
 
@@ -36,3 +38,6 @@ begin
     strict_mono_forall_of_eventually' this,
   exact ⟨φ, φ_extr, λ n, hφ _ _ (φ_extr $lt_add_one n).le⟩,
 end
+
+lemma cauchy_seq_const {X : Type*} [uniform_space X] (x : X) : cauchy_seq (λ n : ℕ, x) :=
+tendsto.cauchy_seq tendsto_const_nhds

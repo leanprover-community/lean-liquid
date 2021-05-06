@@ -69,8 +69,6 @@ begin
           by simpa [hg] using hv_pos n hn⟩
 end
 
-
-
 lemma normed_group.cauchy_seq_iff {u : ℕ → G} :
   cauchy_seq u ↔ ∀ ε > 0, ∃ N, ∀ m n, m ≥ N → n ≥ N → ∥u m - u n∥ < ε :=
 by simp [metric.cauchy_seq_iff, dist_eq_norm]
@@ -91,10 +89,6 @@ begin
   ... ≤ ∥u m - u n∥ + ∥v m - v n∥ : norm_add_le _ _
   ... < ε : by linarith [hNu m n hm.1 hn.1, hNv m n hm.2 hn.2]
 end
-
-lemma cauchy_seq_const (x : G) : cauchy_seq (λ n : ℕ, x) :=
-tendsto.cauchy_seq tendsto_const_nhds
-
 
 lemma eventually_constant_sum {G : Type*} [add_comm_monoid G] {u : ℕ → G} {N : ℕ}
   (hu : ∀ n ≥ N, u n = 0) {n : ℕ} (hn : n ≥ N) :
