@@ -1,6 +1,7 @@
 import tactic
 import topology.uniform_space.cauchy
-import for_mathlib.filter_at_top_bot
+
+import for_mathlib.order_basic
 
 open filter
 open_locale uniformity

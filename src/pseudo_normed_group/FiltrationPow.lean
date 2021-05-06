@@ -20,15 +20,6 @@ local attribute [instance] type_pow
 
 universe variables u
 
--- move this
-def Profinite.of (X : Type*)
-  [topological_space X] [t2_space X] [totally_disconnected_space X] [compact_space X] :
-  Profinite :=
-{ to_Top := Top.of X,
-  is_compact := ‹_›,
-  is_t2 := ‹_›,
-  is_totally_disconnected := ‹_› }
-
 @[simps]
 def pseudo_normed_group.filtration_obj
   (M) [profinitely_filtered_pseudo_normed_group M] (c) : Profinite :=

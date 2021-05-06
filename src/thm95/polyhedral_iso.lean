@@ -1,8 +1,6 @@
 import thm95.double_complex
 import rescale.Tinv
 
-import for_mathlib.category
-
 universe variables u
 
 noncomputable theory
