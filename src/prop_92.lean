@@ -1,140 +1,82 @@
 import topology.separation
 import topology.locally_constant.basic
+import topology.discrete_quotient
+import data.setoid.partition
 
-/-
-**TODO**: In mathlib, rename is_closed_inter to isclosed.inter and same with is_clopen
-to allow dot notation.
--/
+import for_mathlib.data_set_lattice
+import for_mathlib.data_setoid_partition
+import for_mathlib.topology
 
-namespace set -- Next two lemmas are not needed in the end, but still missing from mathlib
-
-lemma bInter_inter {ι α : Type*} {s : set ι} (hs : s.nonempty) (f : ι → set α) (t : set α) :
-(⋂ i ∈ s, f i ∩ t) = (⋂ i ∈ s, f i) ∩ t :=
-begin
-  haveI : nonempty s := hs.to_subtype,
-  simp [bInter_eq_Inter, ← Inter_inter]
-end
-
-lemma inter_bInter {ι α : Type*} {s : set ι} (hs : s.nonempty) (f : ι → set α) (t : set α) :
-(⋂ i ∈ s, t ∩ f i) = t ∩ ⋂ i ∈ s, f i :=
-begin
-  rw [inter_comm, ← bInter_inter hs],
-  simp [inter_comm]
-end
-
-end set
-
-open set topological_space
-open_locale topological_space
-
-section
-variables {α : Type*} [topological_space α]
-
-lemma is_clopen_Union {β : Type*} [fintype β] {s : β → set α}
-  (h : ∀ i, is_clopen (s i)) : is_clopen (⋃ i, s i) :=
-⟨(is_open_Union (forall_and_distrib.1 h).1), (is_closed_Union (forall_and_distrib.1 h).2)⟩
-
-lemma is_clopen_bUnion {β : Type*} {s : finset β} {f : β → set α} (h : ∀i∈s, is_clopen (f i)) :
-  is_clopen (⋃i∈s, f i) :=
-⟨is_open_bUnion (λ i hi, (h i hi).1),
- by {show is_closed (⋃ (i : β) (H : i ∈ (↑s : set β)), f i), rw bUnion_eq_Union,
-    apply is_closed_Union, rintro ⟨i, hi⟩, exact (h i hi).2}⟩
-
-end
-
+noncomputable theory
 
 variables {X : Type*} [topological_space X]
 
-lemma exists_open_set_nhds {s U : set X} (h : ∀ x ∈ s, U ∈ 𝓝 x) :
-  ∃ V : set X, s ⊆ V ∧ is_open V ∧ V ⊆ U :=
-begin
-  have := λ x hx, (nhds_basis_opens x).mem_iff.1 (h x hx),
-  choose! Z hZ hZ'  using this,
-  refine ⟨⋃ x ∈ s, Z x, _, _, bUnion_subset hZ'⟩,
-  { intros x hx,
-    simp only [mem_Union],
-    exact ⟨x, hx, (hZ x hx).1⟩ },
-  { apply is_open_Union,
-    intros x,
-    by_cases hx : x ∈ s ; simp [hx],
-    exact (hZ x hx).2 }
-end
-
-lemma toto {ι : Type*} [nonempty ι] {V : ι → set X} (hV : directed (⊇) V)
-  (hV_cpct : ∀ i, is_compact (V i)) (hV_closed : ∀ i, is_closed (V i))
-  {U : set X} (hU : ∀ x ∈ ⋂ i, V i, U ∈ 𝓝 x) :
-  ∃ i, V i ⊆ U :=
-begin
-  set Y := ⋂ i, V i,
-  obtain ⟨W, hsubW, W_op, hWU⟩ : ∃ W, Y ⊆ W ∧ is_open W ∧ W ⊆ U,
-    from exists_open_set_nhds hU,
-  suffices : ∃ i, V i ⊆ W,
-  { rcases this with ⟨i, hi⟩,
-    refine ⟨i, set.subset.trans hi hWU⟩ },
-  by_contradiction H,
-  push_neg at H,
-  replace H : ∀ i, (V i ∩ Wᶜ).nonempty := λ i, set.inter_compl_nonempty_iff.mpr (H i),
-  have : (⋂ i, V i ∩ Wᶜ).nonempty,
-  { apply is_compact.nonempty_Inter_of_directed_nonempty_compact_closed _ _ H,
-    { intro i,
-      exact (hV_cpct i).inter_right W_op.is_closed_compl },
-    { intro i,
-      apply is_closed_inter (hV_closed i) W_op.is_closed_compl },
-    { intros i j,
-      rcases hV i j with ⟨k, hki, hkj⟩,
-      use k,
-      split ; intro x ; simp only [and_imp, mem_inter_eq, mem_compl_eq] ; tauto  } },
-  have : ¬ (⋂ (i : ι), V i) ⊆ W,
-    by simpa [← Inter_inter, inter_compl_nonempty_iff],
-  contradiction,
-end
-
-lemma toto' [compact_space X] {ι : Type*} [nonempty ι] {V : ι → set X} (hV : directed (⊇) V)
-  (hV_closed : ∀ i, is_closed (V i))
-  {U : set X} (hU : ∀ x ∈ ⋂ i, V i, U ∈ 𝓝 x) :
-  ∃ i, V i ⊆ U :=
-toto hV (λ i, (hV_closed i).compact) hV_closed hU
+open set
 
 section
-variables [compact_space X] [t2_space X] [totally_disconnected_space X]
 
-lemma nhds_basis_clopen (x : X) : (𝓝 x).has_basis (λ s : set X, x ∈ s ∧ is_clopen s) id :=
-⟨λ U, begin
-  split,
-  { have : connected_component x = {x},
-      from totally_disconnected_space_iff_connected_component_singleton.mp ‹_› x,
-    rw connected_component_eq_Inter_clopen at this,
-    intros hU,
-    let N := {Z // is_clopen Z ∧ x ∈ Z},
-    suffices : ∃ Z : N, Z.val ⊆ U,
-    { rcases this with ⟨⟨s, hs, hs'⟩, hs''⟩,
-      exact ⟨s, ⟨hs', hs⟩, hs''⟩ },
-    haveI : nonempty N := ⟨⟨univ, is_clopen_univ, mem_univ x⟩⟩,
-    have hNcl : ∀ Z : N, is_closed Z.val := (λ Z, Z.property.1.2),
-    have hdir : directed superset (λ Z : N, Z.val),
-    { rintros ⟨s, hs, hxs⟩ ⟨t, ht, hxt⟩,
-    exact ⟨⟨s ∩ t, is_clopen_inter hs ht, ⟨hxs, hxt⟩⟩, inter_subset_left s t, inter_subset_right s t⟩ },
-    have h_nhd: ∀ y ∈ (⋂ Z : N, Z.val), U ∈ 𝓝 y,
-    { intros y y_in,
-      erw [this, mem_singleton_iff] at y_in,
-      rwa y_in },
-    exact toto' hdir hNcl h_nhd },
-  { rintro ⟨V, ⟨hxV, V_op, -⟩, hUV : V ⊆ U⟩,
-    rw mem_nhds_sets_iff,
-    exact ⟨V, hUV, V_op, hxV⟩ }
-end⟩
+lemma is_locally_constant.is_closed_fiber {X Y : Type*} [topological_space X] [topological_space Y]
+  [t1_space Y] {f : X → Y} (h : is_locally_constant f) (y : Y) : is_closed (f ⁻¹' {y}) :=
+is_closed_singleton.preimage h.continuous
 
-lemma is_topological_basis_clopen : is_topological_basis {s : set X | is_clopen s} :=
-begin
-  apply is_topological_basis_of_open_of_nhds (λ U (hU : is_clopen U), hU.1),
-  intros x U hxU U_op,
-  have : U ∈ 𝓝 x,
-  from mem_nhds_sets U_op hxU,
-  rcases (nhds_basis_clopen x).mem_iff.mp this with ⟨V, ⟨hxV, hV⟩, hVU : V ⊆ U⟩,
-  use V,
-  tauto
+lemma is_locally_constant.is_clopen_fiber {X Y : Type*} [topological_space X] [topological_space Y]
+  [t1_space Y] {f : X → Y} (h : is_locally_constant f) (y : Y) : is_clopen (f ⁻¹' {y}) :=
+⟨h.is_open_fiber y, h.is_closed_fiber y⟩
+
 end
+
+section
+variables {Y : Type*} [topological_space Y]  [t1_space Y]
+
+/-- The discrete quotient of `X` associated to a locally constant `f : X → Y` is associated
+to the relation `x ∼ x'` if `f x' = f x`. The weird ordering guarantees that
+`{x' | x ∼ x'} = f ⁻¹' {x}`.
+-/
+def is_locally_constant.discrete_quotient {f : X → Y} (hf : is_locally_constant f) :
+  discrete_quotient X :=
+{ rel := λ x x', f x' = f x,
+  equiv := ⟨λ _, rfl, λ x x', eq.symm, λ x₁ x₂ x₃ h h', by rwa h'⟩,
+  clopen := λ x, hf.is_clopen_fiber (f x) }
+
+/-- The map induced by a locally constant map `f : X → Y` from the associated discrete quotient
+to `Y`. -/
+def is_locally_constant.discrete_quotient_map {f : X → Y} (hf : is_locally_constant f) :
+  hf.discrete_quotient → Y :=
+@quotient.lift _ _ hf.discrete_quotient.setoid f (λ x x', eq.symm)
+
+@[simp]
+lemma is_locally_constant.discrete_quotient_map_proj_apply {f : X → Y} (hf : is_locally_constant f) (x : X) :
+hf.discrete_quotient_map (hf.discrete_quotient.proj x) = f x := rfl
+
+@[simp]
+lemma is_locally_constant.discrete_quotient_map_proj {f : X → Y} (hf : is_locally_constant f) :
+hf.discrete_quotient_map ∘ hf.discrete_quotient.proj = f := funext (λ x, rfl)
+
+
+def indexed_partition.discrete_quotient {ι : Type*} {s : ι → set X} (h_part : indexed_partition s)
+  (h_cl : ∀ i, is_clopen $ s i) : discrete_quotient X :=
+{ rel := h_part.setoid.rel,
+  equiv := h_part.setoid.iseqv,
+  clopen := begin
+    intro x,
+    rw h_part.class_of,
+    apply h_cl
+  end }
+
+variables {ι : Type*} {s : ι → set X} (h_cl : ∀ i, is_clopen $ s i)
+(h_part : indexed_partition s)
+
+def indexed_partition.discrete_quotient_equiv : ι ≃ h_part.discrete_quotient h_cl :=
+h_part.equiv_quotient
+
+
+lemma indexed_partition.discrete_quotient_fiber (x : h_part.discrete_quotient h_cl) :
+  (h_part.discrete_quotient h_cl).proj ⁻¹' {x} = s ((h_part.discrete_quotient_equiv h_cl).symm x) :=
+h_part.proj_fiber _
+
 end
+
+section
 
 variables [compact_space X]
   {Y : Type*} [topological_space Y] [t2_space Y] [compact_space Y] [totally_disconnected_space Y]
@@ -163,4 +105,165 @@ begin
       from bUnion_subset_Union _ _,
     rw [← hfW, hWZ],
     mono },
+end
+
+lemma embedding.ex_discrete_quotient [nonempty X] {f : X → Y} (hf : embedding f) (S : discrete_quotient X) :
+  ∃ (S' : discrete_quotient Y) (g : S ≃ S'), S'.proj ∘ f = g ∘ S.proj :=
+begin
+  classical,
+  inhabit X,
+  haveI : fintype S := discrete_quotient.fintype S,
+  have : ∀ s : S, ∃ V : set Y, is_clopen V ∧ S.proj ⁻¹' {s} = f ⁻¹' V,
+    from λ s, hf.preimage_clopen (S.fiber_clopen {s}),
+  choose V hV using this,
+  rw forall_and_distrib at hV,
+  cases hV with V_cl hV,
+  let s₀ := S.proj (default X),
+  let W : S → set Y := λ s, (V s) \ (⋃ s' (h : s' ≠ s), V s'),
+  have W_dis : ∀ {s s'}, s ≠ s' → disjoint (W s) (W s'),
+  { rintros s s' hss x ⟨⟨hxs_in, hxs_out⟩, ⟨hxs'_in, hxs'_out⟩⟩,
+    apply hxs'_out,
+    rw mem_bUnion_iff',
+    exact ⟨s, hss, hxs_in⟩ },
+  have hfW : ∀ x, f x ∈ W (S.proj x),
+  { intro x,
+    split,
+    { change x ∈ f ⁻¹' (V $ S.proj x),
+      rw ← hV (S.proj x),
+      exact mem_singleton _ },
+    { intro h,
+      rcases (mem_bUnion_iff' _ _).mp h with ⟨s', hss', hfx : x ∈ f ⁻¹' (V s')⟩,
+      rw ← hV s' at hfx,
+      exact hss' hfx.symm } },
+  have W_nonempty : ∀ s, (W s).nonempty,
+  { intro s,
+    obtain ⟨x, hx : S.proj x = s⟩ := S.proj_surjective s,
+    use f x,
+    rw ← hx,
+    apply hfW,
+     },
+  let R : S → set Y := λ s, if s = s₀ then W s₀ ∪ (⋃ s, W s)ᶜ else W s,
+  have W_cl : ∀ s, is_clopen (W s),
+  { intro s,
+    apply is_clopen_diff (V_cl s),
+    apply is_clopen_Union,
+    intro s',
+    by_cases h : s' = s,
+    simp [h, is_clopen_empty],
+    simp [h, V_cl s'] },
+  have R_cl : ∀ s, is_clopen (R s),
+  { intro s,
+    dsimp [R],
+    split_ifs,
+    { apply is_clopen_union (W_cl s₀),
+      apply is_clopen_compl,
+      exact is_clopen_Union W_cl },
+    { exact W_cl _ }, },
+  let R_part : indexed_partition R,
+  { apply indexed_partition.mk',
+    { rintros s s' hss x ⟨hxs, hxs'⟩,
+      dsimp [R] at hxs hxs',
+      split_ifs at hxs hxs' with hs hs',
+      { exact (hss (hs.symm ▸ hs' : s = s')).elim },
+      { cases hxs' with hx hx,
+        { exact W_dis hs' ⟨hxs, hx⟩ },
+        { apply hx,
+          rw mem_Union,
+          exact ⟨s, hxs⟩ } },
+      { cases hxs with hx hx,
+        { exact W_dis hs ⟨hxs', hx⟩ },
+        { apply hx,
+          rw mem_Union,
+          exact ⟨s', hxs'⟩ } },
+      { exact W_dis hss ⟨hxs, hxs'⟩ } },
+    { intro s,
+      dsimp [R],
+      split_ifs,
+      { use (W_nonempty s₀).some,
+        left,
+        exact (W_nonempty s₀).some_mem },
+      { apply W_nonempty } },
+    { intro y,
+      by_cases hy : ∃ s, y ∈ W s,
+      { cases hy with s hys,
+        use s,
+        dsimp [R],
+        split_ifs,
+        { left,
+          rwa h at hys },
+        { exact hys } },
+      { use s₀,
+        simp only [R, if_pos rfl],
+        right,
+        rwa [mem_compl_iff, mem_Union] } } },
+  let S' := R_part.discrete_quotient R_cl,
+  let g := R_part.discrete_quotient_equiv R_cl,
+  have hR : ∀ x, f x ∈ R (S.proj x),
+  { intros x,
+    by_cases hx : S.proj x = s₀,
+    { simp only [hx, R, if_pos rfl],
+      left,
+      rw ← hx,
+      apply hfW },
+    { simp only [R, if_neg hx],
+      apply hfW }, },
+  use [S', g],
+  ext x,
+  change f x ∈ S'.proj ⁻¹' {g (S.proj x)},
+  rw R_part.discrete_quotient_fiber R_cl,
+  simpa using hR x,
+end
+
+def embedding.discrete_quotient_map [nonempty X] {f : X → Y} (hf : embedding f) (S : discrete_quotient X) :
+discrete_quotient Y := (hf.ex_discrete_quotient S).some
+
+def embedding.discrete_quotient_equiv [nonempty X] {f : X → Y} (hf : embedding f) (S : discrete_quotient X) :
+  S ≃ hf.discrete_quotient_map S :=
+(hf.ex_discrete_quotient S).some_spec.some
+
+lemma embedding.discrete_quotient_spec [nonempty X] {f : X → Y} (hf : embedding f) (S : discrete_quotient X) :
+(hf.discrete_quotient_map S).proj ∘ f = (hf.discrete_quotient_equiv S) ∘ S.proj :=
+(hf.ex_discrete_quotient S).some_spec.some_spec
+
+variables {Z : Type*} [topological_space Z]  [t1_space Z] [nonempty X]
+
+open_locale classical
+
+def embedding.extend
+  {e : X → Y} (he : embedding e) (f : X → Z)
+   : Y → Z :=
+if hf : is_locally_constant f then
+(hf.discrete_quotient_map) ∘ (he.discrete_quotient_equiv hf.discrete_quotient).symm ∘ (he.discrete_quotient_map hf.discrete_quotient).proj
+else λ y, f (classical.arbitrary X)
+
+lemma embedding.extend_eq {e : X → Y} (he : embedding e) {f : X → Z} (hf : is_locally_constant f) :
+  he.extend f = (hf.discrete_quotient_map) ∘ (he.discrete_quotient_equiv hf.discrete_quotient).symm ∘ (he.discrete_quotient_map hf.discrete_quotient).proj
+  := dif_pos hf
+
+
+lemma embedding.extend_extends {e : X → Y} (he : embedding e) {f : X → Z} (hf : is_locally_constant f) :
+∀ x, he.extend f (e x) = f x :=
+begin
+  intro x,
+  let S := hf.discrete_quotient,
+  let S' := he.discrete_quotient_map hf.discrete_quotient,
+  let barf : S → Z := hf.discrete_quotient_map,
+  let g : S ≃ S' := he.discrete_quotient_equiv hf.discrete_quotient,
+  rw he.extend_eq hf,
+  change (barf ∘ g.symm ∘ (S'.proj ∘ e)) x = f x,
+  suffices : (barf ∘ S.proj) x = f x, by simpa [he.discrete_quotient_spec],
+  simp
+end
+
+lemma embedding.is_locally_constant_extend {e : X → Y} (he : embedding e) {f : X → Z} :
+  is_locally_constant (he.extend f) :=
+begin
+  unfold embedding.extend,
+  split_ifs,
+  { apply is_locally_constant.comp,
+    apply is_locally_constant.comp,
+    exact discrete_quotient.proj_is_locally_constant _ },
+  { apply is_locally_constant.const },
+end
+
 end
