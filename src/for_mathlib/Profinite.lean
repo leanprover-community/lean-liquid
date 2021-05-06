@@ -7,9 +7,12 @@ namespace Profinite
 
 universe variables u
 
+-- this is already in mathlib, so it should be fine to remove it
 instance : concrete_category.{u u (u+1)} Profinite.{u} :=
 { forget := { obj := λ X, X, map := λ X Y f, f },
   forget_faithful := by { fsplit, intros X Y a₁ a₂ h, dsimp at *, ext1, rw h } }
+
+-- the rest is mathlib PR: #7529
 
 @[simps hom inv]
 def iso_of_homeo (X Y : Profinite) (f : X ≃ₜ Y) : X ≅ Y :=

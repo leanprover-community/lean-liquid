@@ -3,6 +3,8 @@ import topology.category.Profinite
 
 namespace Fintype
 
+-- The next two lemmas can be dropped after mathlib PR #7530 hits
+
 @[simp]
 lemma id_to_fun {A : Fintype} : (𝟙 A : A → A) = id := rfl
 
