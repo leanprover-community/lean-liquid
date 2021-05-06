@@ -1,5 +1,7 @@
 import category_theory.preadditive.additive_functor
 
+-- All of this file is in mathlib PR #7533
+
 namespace category_theory
 
 namespace preadditive
