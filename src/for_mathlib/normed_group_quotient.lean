@@ -1,7 +1,7 @@
 import analysis.normed_space.normed_group_hom
 import for_mathlib.normed_group
 
-import .quotient_group .real_Inf
+import .quotient_group
 
 open_locale nnreal
 
