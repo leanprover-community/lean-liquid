@@ -99,7 +99,7 @@ begin
 end
 begin
   intros i j,
-  apply arrow.mk_inj,
+  apply arrow.mk_injective,
   dsimp only [data.complex_obj_d, universal_map.eval_CLCFPTinv, universal_map.eval_CLCFPTinv₂,
     _root_.id, NormedGroup.equalizer.map_nat_app, CLCTinv.map_iso_hom, CLCTinv.map],
   simp only [NormedGroup.equalizer.map_comp_map,
@@ -127,7 +127,7 @@ nat_iso.of_components (λ c, complex_rescale_iso BD c_ r V c.unop _ _)
 begin
   intros c₁ c₂ h,
   ext i : 2,
-  apply arrow.mk_inj,
+  apply arrow.mk_injective,
   erw [differential_object.comp_f, differential_object.comp_f],
   dsimp only [data.system_obj, differential_object.hom.mk'_f, CLCFPTinv₂.res, complex_rescale_iso,
     differential_object.complex_like.iso_of_components, CLCTinv.map_iso_hom, CLCTinv.map_nat_app],
@@ -207,7 +207,7 @@ begin
 end
 begin
   intros i j,
-  apply arrow.mk_inj,
+  apply arrow.mk_injective,
   dsimp only [data.complex_obj_d, universal_map.eval_CLCFPTinv, universal_map.eval_CLCFPTinv₂,
     _root_.id, NormedGroup.equalizer.map_nat_app, CLCTinv.map_iso_hom, CLCTinv.map,
     data.mul_obj_d],
@@ -227,7 +227,7 @@ nat_iso.of_components (λ c, mul_complex_iso BD c_ r V N M c.unop)
 begin
   intros c₁ c₂ hc,
   ext i : 2,
-  apply arrow.mk_inj,
+  apply arrow.mk_injective,
   erw [differential_object.comp_f, differential_object.comp_f],
   dsimp only [data.system_obj, differential_object.hom.mk'_f, CLCFPTinv₂.res, mul_complex_iso,
     differential_object.complex_like.iso_of_components, CLCTinv.map_iso_hom, CLCTinv.map_nat_app],
@@ -347,7 +347,7 @@ begin
     PolyhedralLattice.Cech_augmentation_map_eq_Hom_sum],
   rw [iso.comp_inv_eq],
   ext c i : 4,
-  apply arrow.mk_inj,
+  apply arrow.mk_injective,
   erw [nat_trans.comp_app, nat_trans.comp_app,
     differential_object.comp_f, differential_object.comp_f],
   dsimp only [BD_system_map_app_app, BD_map_app_f, data.sum_f, data.system_map, data.complex,

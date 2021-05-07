@@ -18,11 +18,6 @@ noncomputable theory
 
 open_locale big_operators
 
--- PR #7461
-@[simp] lemma smul_add_hom_one {R M : Type*} [semiring R] [add_comm_monoid M] [module R M] :
-  smul_add_hom R M 1 = add_monoid_hom.id _ :=
-by { ext, rw [smul_add_hom_apply, one_smul, add_monoid_hom.id_apply] }
-
 namespace free_abelian_group
 variables (X : Type*)
 

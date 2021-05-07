@@ -32,27 +32,27 @@ abbreviation monomial.submonoid (R : Type) [semiring R] (i : ℕ) : add_submonoi
 abbreviation monomial.to_submonoid (R : Type) [semiring R] (i : ℕ) : R →+ monomial.submonoid R i :=
 (monomial i : R →ₗ polynomial R).to_add_monoid_hom.mrange_restrict
 
-def polynomial_equiv (R : Type) [semiring R] :
-  (⨁ i, monomial.submonoid R i) ≃+ polynomial R :=
-add_monoid_hom.to_add_equiv
-  (direct_sum.to_add_monoid $ λ i,
-    (monomial.submonoid R i).subtype)
-  (finsupp.lift_add_hom $ λ n,
-    (direct_sum.of (λ i, monomial.submonoid R i) n).comp (monomial.to_submonoid R n))
-  (begin
-    apply direct_sum.add_hom_ext',
-    rintro i,
-    apply add_monoid_hom.ext,
-    rintro ⟨x, r, rfl⟩,
-    dsimp,
-    simp [monomial],
-    refl,
-  end)
-  (begin
-    ext i r : 2,
-    dsimp,
-    simp [monomial],
-  end).
+-- def polynomial_equiv (R : Type) [semiring R] :
+--   (⨁ i, monomial.submonoid R i) ≃+ polynomial R :=
+-- add_monoid_hom.to_add_equiv
+--   (direct_sum.to_add_monoid $ λ i,
+--     (monomial.submonoid R i).subtype)
+--   (finsupp.lift_add_hom $ λ n,
+--     (direct_sum.of (λ i, monomial.submonoid R i) n).comp (monomial.to_submonoid R n))
+--   (begin
+--     apply direct_sum.add_hom_ext',
+--     rintro i,
+--     apply add_monoid_hom.ext,
+--     rintro ⟨x, r, rfl⟩,
+--     dsimp,
+--     simp [monomial],
+--     refl,
+--   end)
+--   (begin
+--     ext i r : 2,
+--     dsimp,
+--     simp [monomial],
+--   end).
 
 end polynomials
 

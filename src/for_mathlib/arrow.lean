@@ -9,11 +9,6 @@ universes v u
 
 variables {C : Type u} [category.{v} C]
 
--- mathlib PR: #7456
-theorem mk_inj {T} [category T] (A B : T) (f g : A ⟶ B) : arrow.mk f = arrow.mk g → f = g :=
-by rintro ⟨⟩; refl
-
-
 -- the rest of this file is mathlib PR: #7457
 
 /-- The functor sending an arrow to its source. -/
