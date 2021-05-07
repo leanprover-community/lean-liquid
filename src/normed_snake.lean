@@ -66,7 +66,7 @@ begin
 
   have him : i+2 ≤ m+2 := add_le_add_right hi _,
   have hm₂ : f (M.d (i+1) (i+2) m₁) = -M'.d (i+1) (i+2) m₁'',
-  { rw [← d_apply, eq_sub_of_add_eq hm₁, normed_group_hom.map_sub, ← coe_comp,
+  { rw [← d_apply, eq_sub_of_add_eq hm₁, normed_group_hom.map_sub, ← category_theory.comp_apply,
        d_comp_d, coe_zero, ← neg_inj, pi.zero_apply, zero_sub], },
   have hle : ∥res (M.d (i+1) (i+2) m₁)∥ ≤ K'' * ∥m₁''∥,
   { calc ∥res (M.d (i+1) (i+2) m₁)∥

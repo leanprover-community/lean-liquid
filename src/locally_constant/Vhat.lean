@@ -155,9 +155,9 @@ end
 instance : preadditive NormedGroup.{u} :=
 { hom_group := λ P Q, infer_instance,
   add_comp' := by { intros, ext,
-    simp only [normed_group_hom.add_apply, coe_comp, normed_group_hom.map_add], },
+    simp only [normed_group_hom.add_apply, comp_apply, normed_group_hom.map_add], },
   comp_add' := by { intros, ext,
-    simp only [normed_group_hom.add_apply, coe_comp, normed_group_hom.map_add], } }
+    simp only [normed_group_hom.add_apply, comp_apply, normed_group_hom.map_add], } }
 
 instance : functor.additive Completion :=
 { map_zero' := Completion.map_zero,
@@ -252,7 +252,7 @@ lemma T_hom_incl {V : NormedGroup} {r : ℝ} [normed_with_aut r V] :
   (incl : V ⟶ _) ≫ normed_with_aut.T.hom = normed_with_aut.T.hom ≫ incl :=
 begin
   ext x,
-  simp only [incl_apply, category_theory.coe_comp, Completion_T_inv_eq],
+  simp only [incl_apply, category_theory.comp_apply, Completion_T_inv_eq],
   change completion.map normed_with_aut.T.hom _ = _,
   rw completion.map_coe,
   exact normed_group_hom.uniform_continuous _,

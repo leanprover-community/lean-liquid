@@ -217,7 +217,7 @@ lemma hδ_truncate (c : ℝ≥0) [fact (c₀ ≤ c)] : ∀ (q : ℕ) (hq : q ≤
 | (q+2) h := condM.htpy.hδ _ _ (nat.succ_le_succ h)
 | 0     h :=
 begin
-  ext1 x, dsimp, iterate 5 { erw [category_theory.coe_comp] },
+  ext1 x, dsimp, iterate 5 { erw [category_theory.comp_apply] },
   let π := λ c p, @NormedGroup.coker.π _ _ (@d' M c p 0 1),
   obtain ⟨x, rfl⟩ : ∃ x', π _ _ x' = x := NormedGroup.coker.π_surjective x,
   transitivity π _ _ ((condM.htpy.δ c).f 1 (M.res x)), { refl },

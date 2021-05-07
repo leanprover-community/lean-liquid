@@ -401,7 +401,7 @@ lemma augmentation_map_equalizes :
 begin
   ext l,
   simp only [conerve.map_apply, add_monoid_hom.to_fun_eq_coe, Cech_augmentation_map_apply,
-    Cech_conerve_map, coe_comp, finsupp.single_add_hom_apply, obj_zero_iso, iso.trans_inv,
+    Cech_conerve_map, comp_apply, finsupp.single_add_hom_apply, obj_zero_iso, iso.trans_inv,
     finsupp_fin_one_iso_inv, obj_zero_iso'_inv],
   have H1 := conerve.map_add_hom_π f (@hom.to_preorder_hom (mk 0) _ (δ 0)) (finsupp.single 0 (f l)),
   have H2 := conerve.map_add_hom_π f (@hom.to_preorder_hom (mk 0) _ (δ 1)) (finsupp.single 0 (f l)),

@@ -248,7 +248,7 @@ lemma mul_iso_eval_FP (N : ℕ) [ϕ.suitable c₂ c₁] (M) :
     (FiltrationPow.mul_iso.{u u} r' c₁ M N n).inv :=
 begin
   ext x i j,
-  iterate 4 { erw [category_theory.coe_comp] },
+  iterate 4 { erw [category_theory.comp_apply] },
   dsimp only [mul_iso_inv, eval_FP, mul, eval_png₀, continuous_map.coe_mk,
     functor.map_iso_inv, add_monoid_hom.mk'_apply, matrix.reindex_linear_equiv_apply,
     matrix.reindex_apply, nat_iso.app_inv, iso.symm_inv, Pow_mul_hom, Pow_Pow_X_inv_to_fun,
