@@ -6,6 +6,8 @@ import topology.algebra.monoid
 open_locale nnreal big_operators
 open finset
 
+namespace combinatorial_lemma
+
 def mask_fun {α : Type*} (f : α → ℝ≥0) (mask : α → Prop) [∀ n, decidable (mask n)] : α → ℝ≥0 :=
 λ n, if mask n then f n else 0
 
@@ -140,3 +142,5 @@ begin
     simp only [div_eq_mul_inv, finset.sum_mul] at h_sum ⊢,
     exact h_sum n i }
 end
+
+end combinatorial_lemma

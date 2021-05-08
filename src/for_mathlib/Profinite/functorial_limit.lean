@@ -1,6 +1,5 @@
 import for_mathlib.arrow
 import for_mathlib.Fintype.basic
-import for_mathlib.Profinite.limits
 import for_mathlib.Profinite
 import for_mathlib.Fintype.basic
 import topology.locally_constant.basic

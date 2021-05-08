@@ -15,7 +15,7 @@ noncomputable theory
 
 open_locale nnreal big_operators
 
-open pseudo_normed_group
+open pseudo_normed_group combinatorial_lemma
 
 variables (Λ : Type*) (r' : ℝ≥0) (S : Type*)
 variables [fintype S] [polyhedral_lattice Λ]
