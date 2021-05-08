@@ -52,7 +52,17 @@ lemma finsupp.sum_mem_submodule_of_mem_submodule {α M N : Type*}
   {f : α →₀ M} {g : α → M → N} (h : ∀ a ∈ f.support, g a (f a) ∈ N'):
   f.sum g ∈ N' :=
 begin
-  sorry
+  unfold finsupp.sum,
+  revert h,
+  generalize : f.support = S,
+  classical,
+  apply finset.induction_on S,
+  { intro h, simp },
+  { clear S,
+    intros a S haS IH h,
+    rw finset.sum_insert haS,
+    refine N'.add_mem (h a $ finset.mem_insert_self _ _)
+      (IH $ λ s hs, h s $ finset.mem_insert_of_mem hs) },
 end
 
 namespace direct_sum
@@ -195,8 +205,8 @@ def projection_R₀_hom (a : A) : R →ₗ[Gᵢ 0] (Gᵢ a) :=
 end comm_ring
 
 namespace component_submodule -- some technical lemmas under the added hypothesis
--- that A is a group
-variables {A : Type*} [decidable_eq A] [add_group A]
+-- that A is a cancellative monoid
+variables {A : Type*} [decidable_eq A] [add_right_cancel_monoid A]
 (R : Type*) [comm_ring R]
 (Gᵢ : A → add_subgroup R)
  [has_add_subgroup_decomposition Gᵢ] [add_subgroup.is_gmonoid Gᵢ]
@@ -216,6 +226,16 @@ def res (a : A) (I : submodule R R) : submodule (zero_component_subring R Gᵢ) 
   by intersection. -/
 def comap (a : A) (I : submodule R R) : submodule (Gᵢ 0) (Gᵢ a) :=
 submodule.comap (component_submodule_for_zero_component_subring R Gᵢ a).subtype (res R Gᵢ a I)
+
+variables {R} {Gᵢ}
+
+theorem map_mono {a : A} {M N : submodule (Gᵢ 0) (Gᵢ a)} (h : M ≤ N) :
+  map R Gᵢ a M ≤ map R Gᵢ a N :=
+begin
+  refine submodule.span_mono _,
+  rintro - ⟨⟨m, hm⟩, rfl⟩,
+  exact ⟨⟨m, h hm⟩, rfl⟩
+end
 
 -- move!
 lemma finsupp.sum_congr {α M N : Type*} [has_zero M] [add_comm_monoid N] (f : α →₀ M)
@@ -263,9 +283,13 @@ begin
 end
 
 -- this needs tidying up!
+-- (1) come up with a consistent name for evaluating a finsupp
+-- (right now we can just evaluate, or use projection, or apply_add_monoid_hom)
+-- (2) shorter names?
+-- (3) remove _all_ `change`s?
 
 /-- Given an `R₀`-submodule `M` of `Rₐ`, pushing forward to `MR`, an ideal of `R`, and then
-  intersecting with `Rₐ` gives back `M`.  -/
+  intersecting with `Rₐ` gives back `M`. This needs that the indexing monoid `A` is  -/
 lemma comap_map_id (a : A)
   (M : submodule (Gᵢ 0) (Gᵢ a)) :
   comap R Gᵢ a (map R Gᵢ a M) = M :=
@@ -408,23 +432,31 @@ begin
     apply submodule.subset_span,
     refine ⟨⟨⟨m, hm⟩, h⟩, rfl⟩ }
 end
+.
 
-/-
-theorem mul_single_component' [add_right_cancel_monoid ι] [gmonoid A]
-  (b : ⨁ i, A i) (i j : ι) (m : A j) :
-  of A (i + j) ((b * (of A j m)) (i + j)) = of A i (b i) * of A j m :=
--/
+variable (Gᵢ)
 
-end component_submodule
+def to_ring.order_embedding (a : A) : submodule ↥(Gᵢ 0) ↥(Gᵢ a) ↪o submodule R R :=
+{ to_fun := map R Gᵢ a,
+  inj' := function.left_inverse.injective (comap_map_id a),
+  map_rel_iff' := λ M N, ⟨λ h, begin
+    rw [← comap_map_id a M, ← comap_map_id a N],
+    exact submodule.comap_mono h,
+  end,
+  map_mono⟩ }
 
 theorem component_submodule_noetherian {R : Type*} [comm_ring R] [is_noetherian_ring R]
-  {A : Type*} [add_monoid A] [decidable_eq A]
+  {A : Type*} [add_right_cancel_monoid A] [decidable_eq A]
   (Gᵢ : A → add_subgroup R) [has_add_subgroup_decomposition Gᵢ] [add_subgroup.is_gmonoid Gᵢ]
-  (a : A) : is_noetherian (zero_component_subring R Gᵢ)
-    (component_submodule_for_zero_component_subring R Gᵢ a) :=
+  (a : A) : is_noetherian (Gᵢ 0) (Gᵢ a) :=
 begin
-  sorry
+  have : is_noetherian R R,
+  { rwa ← is_noetherian_ring_iff },
+  rw is_noetherian_iff_well_founded at ⊢ this,
+  exact order_embedding.well_founded (component_submodule.to_ring.order_embedding Gᵢ a).dual this,
 end
+
+end component_submodule
 
 end has_add_subgroup_decomposition
 
