@@ -46,6 +46,15 @@ def subring.incl (R : Type) [comm_ring R] (A B : subring R) (h : A ≤ B) : A �
   map_one' := rfl,
   map_mul' := λ _ _, rfl }
 
+-- finsupp lemma I need -- move this
+lemma finsupp.sum_mem_submodule_of_mem_submodule {α M N : Type*}
+  [has_zero M] [add_comm_group N] (R : Type*) [ring R] [module R N] (N' : submodule R N)
+  {f : α →₀ M} {g : α → M → N} (h : ∀ a ∈ f.support, g a (f a) ∈ N'):
+  f.sum g ∈ N' :=
+begin
+  sorry
+end
+
 namespace direct_sum
 
 namespace has_add_subgroup_decomposition
@@ -215,7 +224,7 @@ finset.sum_congr rfl hyp
 
 open_locale direct_sum
 
--- move!
+-- move and rename
 lemma aux (a : A) (x : ⨁ i, Gᵢ i) (m : Gᵢ a): (projection (λ (i : A), ↥(Gᵢ i)) a)
   (x * (of (λ (i : A), ↥(Gᵢ i)) a) m) =
   (projection (λ (i : A), ↥(Gᵢ i)) a)
@@ -225,10 +234,35 @@ begin
   apply direct_sum.induction_on x; clear x,
   { simp },
   { intros i x,
-    sorry },
-  { sorry }
+    by_cases hi0 : i = 0,
+    { subst hi0,
+      rw projection_of_same },
+    { rw projection_of_ne (λ j, Gᵢ j) hi0,
+      rw of_mul_of,
+      have hia : i + a ≠ a,
+        suffices : i + a ≠ 0 + a,
+          simpa,
+        intro ht, apply hi0, exact (add_left_inj a).mp ht,
+      rw projection_of_ne (λ j, Gᵢ j) hia,
+      convert (add_monoid_hom.map_zero _).symm,
+      rw of_mul_of,
+      convert (add_monoid_hom.map_zero _),
+      simp } },
+  { intros x y hx hy,
+    simp [hx, hy, add_mul] }
 end
 
+-- dependent type hell helper
+lemma subtype_heq {α : Type*} (p q : α → Prop) (h : p = q)
+  (x : α) (hp : p x) (hq : q x) :
+  (⟨x, hp⟩ : subtype p) == (⟨x, hq⟩ : subtype q) :=
+begin
+  cases h,
+  apply heq_of_eq,
+  simp
+end
+
+-- this needs tidying up!
 
 /-- Given an `R₀`-submodule `M` of `Rₐ`, pushing forward to `MR`, an ideal of `R`, and then
   intersecting with `Rₐ` gives back `M`.  -/
@@ -306,12 +340,69 @@ begin
       -- goal now purely external
       rw of_mul_of,
       change _ = ((of (λ (i : A), ↥(Gᵢ i)) (0 + a))
-     ((ghas_mul.mul ((projection (λ (i : A), ↥(Gᵢ i)) 0) x)) ⟨m, hma⟩)) a,
-     rw eval_of_same' (λ i, Gᵢ i) (0 + a) a (by simp),
-      sorry
-    },
+        ((ghas_mul.mul ((projection (λ (i : A), ↥(Gᵢ i)) 0) x)) ⟨m, hma⟩)) a,
+      rw eval_of_same' (λ i, Gᵢ i) (0 + a) a (by simp),
+      rw aux,
+      rw of_mul_of,
+      rw projection_of_same' },
     rw h37 at hm', clear h37,
-    sorry },
+    have foo : f.sum
+      (λ (m : ↥(Gᵢ a)) (b : R),
+      ((Gᵢ a).subtype)
+        ((projection (λ (i : A), ↥(Gᵢ i)) a)
+          ((of (λ (i : A), ↥(Gᵢ i)) 0)
+            ((projection (λ (i : A), ↥(Gᵢ i)) 0) ((add_subgroup_decomposition_ring_equiv Gᵢ) b)) *
+            (add_subgroup_decomposition_ring_equiv Gᵢ) m.val))) = f.sum
+      (λ (m : ↥(Gᵢ a)) (b : R),
+      ((Gᵢ a).subtype)
+        ((projection (λ (i : A), ↥(Gᵢ i)) a)
+          ((of (λ (i : A), ↥(Gᵢ i)) 0)
+            ((projection (λ (i : A), ↥(Gᵢ i)) 0) ((add_subgroup_decomposition_ring_equiv Gᵢ) b)) *
+            (of (λ (i : A), ↥(Gᵢ i)) a m)))),
+    { apply finsupp.sum_congr,
+      rintro m hm,
+      congr',
+      cases m with m1 hm1,
+      exact eq_decomposition_of_mem_piece'' hm1 },
+    rw foo at hm', clear foo,
+    rw ← hm',
+    -- need "if all in submodule, sum in submodule"
+    apply finsupp.sum_mem_submodule_of_mem_submodule,
+    intros m hm,
+    change f ∈ finsupp.supported R R (M : set (Gᵢ a)) at hf,
+    rw finsupp.mem_supported at hf,
+    rw submodule.mem_map,
+    existsi ((projection (λ (i : A), ↥(Gᵢ i)) 0) ((add_subgroup_decomposition_ring_equiv Gᵢ) (f m))) • m,
+    split,
+    { convert @submodule.smul_mem _ _ _ _ _ M m ((projection (λ (i : A), ↥(Gᵢ i)) 0) ((add_subgroup_decomposition_ring_equiv Gᵢ) (f m))) _,
+      { unfold grade_zero.has_scalar,
+        unfold smul_with_zero.to_has_scalar mul_action.to_has_scalar,
+        congr',
+        ext x y,
+        cases x, cases y,
+        simp,
+        have h : 0 + a = a := by simp,
+        change ((eq.rec (⟨x_val * y_val, _⟩ : Gᵢ (0 + a)) h) : Gᵢ a) = ⟨x_val * y_val, _⟩,
+        apply eq_of_heq,
+        apply heq.trans (eq_rec_heq _ _),
+        apply subtype_heq,
+        ext,
+        simp },
+      { exact hf hm } },
+    { change ((Gᵢ a).subtype)
+        ((projection (λ (i : A), ↥(Gᵢ i)) 0) ((add_subgroup_decomposition_ring_equiv Gᵢ) (f m)) • m) = _,
+      congr',
+      rw of_mul_of,
+      rw projection_of_same' _ _ _ (show 0 + a = a, by simp),
+      cases m,
+      simp,
+      unfold has_scalar.smul,
+      apply eq_of_heq,
+      apply heq.trans (eq_rec_heq _ _),
+        apply subtype_heq,
+        ext,
+        simp,
+      refl } },
   { -- easy way
     intro h,
     apply submodule.subset_span,

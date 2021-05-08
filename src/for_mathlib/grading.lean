@@ -108,6 +108,11 @@ def projection (j : ι) : (⨁ i, A i) →+ A j :=
 lemma projection_of_same (j : ι) (aj : A j) : projection A j (of (λ i, A i) j aj) = aj :=
 @dfinsupp.single_eq_same _ _ _ _ j _
 
+lemma projection_of_same' (j k : ι) (h : j = k) (aj : A j) : projection A k (of (λ i, A i) j aj) = cast (show A j = A k, by rw h) aj :=
+begin
+  subst h,
+  convert projection_of_same A j _,
+end
 lemma eval_of_same (j : ι) (aj : A j) : (of (λ i, A i) j aj) j = aj :=
 @dfinsupp.single_eq_same _ _ _ _ j _
 
