@@ -9,27 +9,28 @@ universe u
 variables (X : Profinite.{u})
 
 lemma nhds_of_limit {J : Type u} [small_category J] (F : J ⥤ Profinite.{u})
-  (a : (limit_cone F).cone.X) : nhds a =
-  ⨅ (i : J), filter.comap ((limit_cone F).cone.π.app i) (nhds $ (limit_cone F).cone.π.app i a) :=
+  (a : (limit_cone F).X) : nhds a =
+  ⨅ (i : J), filter.comap ((limit_cone F).π.app i) (nhds $ (limit_cone F).π.app i a) :=
 begin
   let P := Π (j : J), F.obj j,
   have : nhds (a.val : P) = ⨅ (i : J), filter.comap (λ x, x i) (nhds (a.val i)), by apply nhds_pi,
   erw [nhds_subtype, this, filter.comap_infi],
   congr, funext i,
-  have : (λ X : P, X i) ∘ subtype.val = (limit_cone F).cone.π.app i, refl,
+  have : (λ X : P, X i) ∘ subtype.val = (limit_cone F).π.app i, refl,
   simpa [← this, filter.comap_comap],
 end
 
-lemma nhds_eq_infi (a : X) : nhds a = ⨅ (I : X.clopen_cover), filter.comap I.proj (nhds $ I.proj a) :=
+lemma nhds_eq_infi (a : X) :
+  nhds a = ⨅ (I : discrete_quotient X), filter.comap I.proj (nhds $ I.proj a) :=
 begin
   let f := homeo_of_iso
-    (as_iso ((limit_cone (X.diagram ⋙ Fintype_to_Profinite)).is_limit.lift X.Fincone)),
-  have := nhds_of_limit (X.diagram ⋙ Fintype_to_Profinite) (f a),
+    (as_iso ((limit_cone_is_limit X.diagram).lift X.as_limit_cone)),
+  have := nhds_of_limit X.diagram (f a),
   have hf : nhds a = filter.comap f (nhds $ f a), by simp,
   rw [hf, this, filter.comap_infi],
   congr,
   funext i,
-  let P := Π (I : X.clopen_cover), I,
+  let P := Π (I : discrete_quotient X), I,
   have : (λ x : P, x i) ∘ subtype.val ∘ f = i.proj, refl,
   simpa [← this, filter.comap_comap],
 end
@@ -53,8 +54,8 @@ begin
       rcases h1 with ⟨Q,hQ,h1,h3⟩,
       apply hQ h3 },
     { refine @is_clopen_Inter X _ T hT.fintype (λ i, i.val.proj ⁻¹' (Vs i)) (λ i, _),
-      refine ⟨i.val.proj.continuous.is_open_preimage _ trivial,
-        is_closed.preimage i.val.proj.continuous ⟨trivial⟩⟩ },
+      refine ⟨i.val.proj_continuous.is_open_preimage _ trivial,
+        is_closed.preimage i.val.proj_continuous ⟨trivial⟩⟩ },
     { apply hT2,
       rintros i ⟨i,rfl⟩,
       rcases hVs i with ⟨h1,h2⟩,

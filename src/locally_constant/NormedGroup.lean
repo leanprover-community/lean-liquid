@@ -56,9 +56,10 @@ open category_theory
 
 universe u
 
-@[nolint unused_arguments]
-instance {M : NormedGroup.{u}} {J : Type u} [small_category J] [is_filtered J] :
-  limits.preserves_colimits_of_shape J (LocallyConstant.obj M) := sorry
+-- TODO: Fix the statement below using bounded colimits.
+--@[nolint unused_arguments]
+--instance {M : NormedGroup.{u}} {J : Type u} [small_category J] [is_filtered J] :
+--  limits.preserves_colimits_of_shape J (LocallyConstant.obj M) := sorry
 
 end NormedGroup
 #lint- only unused_arguments def_lemma doc_blame
