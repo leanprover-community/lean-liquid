@@ -365,7 +365,7 @@ variables {M M'}
 
 /-- The quotient of a system of complexes. -/
 def is_quotient (f : M ⟶ M') : Prop :=
-∀ c i, normed_group_hom.is_quotient (f.apply : M c i ⟶ M' c i)
+∀ c i, add_subgroup.is_quotient (f.apply : M c i ⟶ M' c i)
 
 -- The next three lemmas restate lemmas about normed_group_hom.is_quotient in terms of the coercion
 -- of `M ⟶ M'` to functions.
@@ -375,10 +375,10 @@ lemma is_quotient.surjective {f : M ⟶ M'} (h : is_quotient f) {c i} (m' : M' c
 
 lemma is_quotient.norm_lift {f : M ⟶ M'} (h : is_quotient f) {ε : ℝ} (hε : 0 < ε) {c i}
   (n : M' c i) : ∃ (m : M c i), f m = n ∧ ∥m∥ < ∥n∥ + ε :=
-quotient_norm_lift (h c i) hε n
+(h c i).norm_lift hε n
 
 lemma is_quotient.norm_le {f : M ⟶ M'} (h : is_quotient f) {c i} (m : M c i) : ∥f m∥ ≤ ∥m∥ :=
-quotient_norm_le (h c i) _
+(h c i).norm_le _
 
 /-- The quotient of an admissible system of complexes is admissible. -/
 lemma admissible_of_quotient {f : M ⟶ M'} (hquot : is_quotient f) (hadm : M.admissible) :

@@ -177,7 +177,7 @@ begin
   have hδε : δ + δ = ε, { dsimp [δ], rw [← add_div, half_add_self] },
   have hδ : 0 < δ := div_pos hε zero_lt_two,
   obtain ⟨x', Hxx', Hx'⟩ : ∃ x', π c x' = π c (res x) ∧ ∥x'∥ < ∥π c (res x)∥ + δ :=
-    normed_group_hom.quotient_norm_lift (NormedGroup.coker.π_is_quotient) hδ _,
+    NormedGroup.coker.π_is_quotient.norm_lift hδ _,
   obtain ⟨y, hy⟩ : ∃ y : C c 0, C.d 0 1 y = res x - x',
   { erw [quotient_add_group.eq, add_comm, ← sub_eq_add_neg, set.mem_range] at Hxx',
     exact Hxx' },

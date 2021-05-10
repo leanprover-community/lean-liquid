@@ -142,19 +142,19 @@ def coker (f : A ⟶ B) : NormedGroup := NormedGroup.of $
 @[simp]
 noncomputable
 def coker.π {f : A ⟶ B} : B ⟶ coker f :=
-normed_group_hom.normed_group.mk _
+f.range.normed_mk
 
 lemma coker.π_surjective {f : A ⟶ B} :
-  function.surjective ⇑(coker.π : B ⟶ coker f) :=
+  function.surjective (coker.π : B → coker f) :=
 surjective_quot_mk _
 
 lemma coker.π_is_quotient {f : A ⟶ B} :
-  (coker.π : B ⟶ coker f).is_quotient :=
-normed_group_hom.is_quotient_quotient _
+  add_subgroup.is_quotient (coker.π : B ⟶ coker f) :=
+add_subgroup.is_quotient_quotient _
 
 lemma coker.π_norm_noninc {f : A ⟶ B} :
   (coker.π : B ⟶ coker f).norm_noninc :=
-normed_group_hom.quotient_norm_le (NormedGroup.coker.π_is_quotient)
+NormedGroup.coker.π_is_quotient.norm_le
 
 instance coker.π_epi {f : A ⟶ B} : epi (coker.π : B ⟶ coker f) :=
 begin
@@ -172,7 +172,7 @@ open normed_group_hom
 /-- Lift (aka descend) a morphism to the cokernel. -/
 noncomputable
 def coker.lift {f : A ⟶ B} {g : B ⟶ C} (cond : f ≫ g = 0) : coker f ⟶ C :=
-normed_group_hom.lift _ g (begin
+add_subgroup.lift _ g (begin
   rintros _ ⟨b,rfl⟩,
   change (f ≫ g) b = 0,
   simp [cond]
@@ -183,7 +183,7 @@ lemma coker.lift_comp_π {f : A ⟶ B} {g : B ⟶ C} {cond : f ≫ g = 0} :
   coker.π ≫ coker.lift cond = g :=
 begin
   ext,
-  rw ← normed_group_hom.lift_mk f.range g,
+  rw ← f.range.lift_mk g,
   refl,
   rintro _ ⟨b,rfl⟩,
   change (f ≫ g) b = 0,
@@ -196,12 +196,12 @@ lemma coker.lift_comp_π_apply {f : A ⟶ B} {g : B ⟶ C} {cond : f ≫ g = 0} 
 show (coker.π ≫ coker.lift cond) x = g x, by rw coker.lift_comp_π
 
 lemma coker.lift_unique {f : A ⟶ B} {g : B ⟶ C} {cond : f ≫ g = 0} {h : coker f ⟶ C} :
-  coker.π ≫ h = g → h = coker.lift cond := lift_unique _ _ _ _
+  coker.π ≫ h = g → h = coker.lift cond := add_subgroup.lift_unique _ _ _ _
 
 lemma coker.comp_pi_eq_zero {f : A ⟶ B} : f ≫ (coker.π : B ⟶ coker f) = 0 :=
 begin
   ext a,
-  rw [coe_zero, pi.zero_apply, coe_comp, coker.π, ← mem_ker, normed_group.mk.ker],
+  rw [coe_zero, pi.zero_apply, coe_comp, coker.π, ← mem_ker, f.range.ker_normed_mk],
   exact set.mem_range_self a
 end
 
@@ -240,7 +240,7 @@ begin
     intros ε hε,
     have aux : 0 < (ε / c) := div_pos hε hc,
     obtain ⟨x, rfl, Hx⟩ : ∃ x', coker.π x' = x ∧ ∥x'∥ < ∥x∥ + (ε / c) :=
-      normed_group_hom.quotient_norm_lift (coker.π_is_quotient) aux _,
+      coker.π_is_quotient.norm_lift aux _,
     rw coker.lift_comp_π_apply,
     calc ∥g x∥ ≤ c * ∥x∥ : hg x
     ... ≤ c * (∥coker.π x∥ + ε / c) : (mul_le_mul_left _).mpr Hx.le

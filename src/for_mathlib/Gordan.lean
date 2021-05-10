@@ -183,7 +183,7 @@ begin
 end
 
 /-- A fintype version of Gordan's Lemma. -/
-lemma explicit_gordan [module ℤ Λ] (hΛ : finite_free Λ) [fintype ι] (l : ι → Λ) :
+lemma explicit_gordan (hΛ : finite_free Λ) [fintype ι] (l : ι → Λ) :
   (explicit_dual_set l).fg :=
 begin
   classical,

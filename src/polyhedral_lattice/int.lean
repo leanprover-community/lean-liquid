@@ -59,7 +59,7 @@ lemma give_better_name : ∀ (n : ℤ), ∥n∥ = ↑(n.to_nat) + ↑((-n).to_na
 | -[1+ n]   := show ∥-↑(n+1:ℕ)∥ = 0 + (n+1), by rw [zero_add, norm_neg, int.norm_coe_nat, nat.cast_succ]
 
 instance int.polyhedral_lattice : polyhedral_lattice ℤ :=
-{ finite_free := ⟨unit, infer_instance, λ _, 1, is_basis_singleton_one ℤ⟩,
+{ finite_free := ⟨unit, infer_instance, ⟨basis.singleton _ _⟩⟩,
   polyhedral :=
   begin
     refine ⟨units ℤ, infer_instance, coe, _, _⟩,

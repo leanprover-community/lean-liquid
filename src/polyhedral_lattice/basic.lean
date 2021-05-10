@@ -64,9 +64,7 @@ class polyhedral_lattice (Λ : Type*) extends semi_normed_group Λ :=
 namespace polyhedral_lattice
 
 instance (Λ : Type*) [polyhedral_lattice Λ] : no_zero_smul_divisors ℤ Λ :=
-is_basis.no_zero_smul_divisors $ classical.some_spec $ classical.some_spec $ classical.some_spec $
-polyhedral_lattice.finite_free Λ
-
+(polyhedral_lattice.finite_free Λ).basis.no_zero_smul_divisors
 
 end polyhedral_lattice
 

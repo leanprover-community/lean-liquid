@@ -20,7 +20,7 @@ def torsion_free (A : Type*) [add_comm_group A] : Prop :=
 
 /-- `finite_free M` is the statement that the abelian group `M` is free of finite rank (over `ℤ`).-/
 def finite_free (A : Type*) [add_comm_group A] : Prop :=
-∃ (ι : Type) [fintype ι] (x : ι → A), is_basis ℤ x
+∃ (ι : Type) [fintype ι], nonempty (basis ι ℤ A)
 
 namespace finite_free
 
@@ -33,11 +33,8 @@ def basis_type : Type := classical.some ha
 noncomputable instance : fintype (basis_type ha) := classical.some $ classical.some_spec ha
 
 /-- If `ha : finite_free Λ` then `ha.basis : ι → Λ` is the basis. Here `ι := ha.basis_type`. -/
-noncomputable def basis : ha.basis_type → A :=
-classical.some $ classical.some_spec $ classical.some_spec ha
-
-theorem is_basis : is_basis ℤ ha.basis :=
-classical.some_spec $ classical.some_spec $ classical.some_spec ha
+noncomputable def basis : basis ha.basis_type ℤ A :=
+(classical.some_spec $ classical.some_spec ha).some
 
 noncomputable def its_basically_zn : A ≃ₗ[ℤ] (basis_type ha → ℤ) :=
 ha.is_basis.equiv_fun
@@ -48,9 +45,8 @@ begin
   use (finset.image (ha.basis) finset.univ) ∪ (finset.image (-ha.basis) finset.univ),
   rw eq_top_iff,
   rintro a -,
-  have hA := ha.is_basis,
-  rw ← hA.total_repr a,
-  generalize : (hA.repr) a = f, clear a,
+  rw ← ha.basis.total_repr a,
+  generalize : (ha.basis.repr) a = f, clear a,
   apply finsupp.induction f; clear f,
   { exact submodule.zero_mem _ },
   { intros i z f hif hz hf,

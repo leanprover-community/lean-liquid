@@ -45,6 +45,10 @@ whisker_right (LC.T_inv r V) Completion
 
 lemma T_inv_eq [normed_with_aut r V] [fact (0 < r)] : (T r V).inv = T_inv r V := rfl
 
+lemma T_inv_bound_by [normed_with_aut r V] [fact (0 < r)] (A) :
+  ((T_inv r V).app A).bound_by r⁻¹ :=
+Completion_map_bound_by _ _ $ LC.T_inv_bound_by _ _ _
+
 end CLC
 
 /-- `CLFCP v r' c n` is the functor sending a profinitely-filtered `T⁻¹`-module `M`

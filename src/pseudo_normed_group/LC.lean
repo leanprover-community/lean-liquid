@@ -53,12 +53,12 @@ instance obj.normed_with_aut [normed_with_aut r V] [fact (0 < r)] (A : Profinite
   normed_with_aut r ((LC V).obj A) :=
 NormedGroup.normed_with_aut_LocallyConstant _ _ _
 
-@[simps {fully_applied := ff}]
+@[simps hom_app_apply inv_app_apply {fully_applied := ff}]
 def T [normed_with_aut r V] : LC V ≅ LC V :=
 LocallyConstant.map_iso normed_with_aut.T
 
 lemma T_eq [normed_with_aut r V] [fact (0 < r)] (A) :
-  (LC.T r V).hom.app A = normed_with_aut.T.hom := rfl
+  (T r V).hom.app A = normed_with_aut.T.hom := rfl
 
 lemma T_bound_by [normed_with_aut r V] [fact (0 < r)] (A) :
   normed_group_hom.bound_by ((LC.T r V).hom.app A) r :=
@@ -69,6 +69,13 @@ def T_inv [normed_with_aut r V] [fact (0 < r)] : LC V ⟶ LC V :=
 (LocallyConstant.map (normed_with_aut.T.inv : V ⟶ V) : _)
 
 lemma T_inv_eq [normed_with_aut r V] [fact (0 < r)] : (T r V).inv = T_inv r V := rfl
+
+lemma T_inv_eq' [normed_with_aut r V] [fact (0 < r)] (A) :
+  (T_inv r V).app A = normed_with_aut.T.inv := rfl
+
+lemma T_inv_bound_by [normed_with_aut r V] [fact (0 < r)] (A) :
+  ((T_inv r V).app A).bound_by r⁻¹ :=
+by { rw T_inv_eq', intro v, exact (normed_with_aut.norm_T_inv _ v).le }
 
 end LC
 

@@ -150,13 +150,13 @@ end
 def obj := quotient_add_group.quotient (L f m)
 
 instance : semi_normed_group (obj f m) :=
-normed_group_hom.semi_normed_group_quotient _
+add_subgroup.semi_normed_group_quotient _
 
 def π : (fin m →₀ Λ') →+ obj f m :=
 by convert quotient_add_group.mk' (L f m)
 
 lemma π_apply_eq_zero_iff (x : fin m →₀ Λ') : π f m x = 0 ↔ x ∈ L f m :=
-by convert quotient_add_group.mk'_eq_zero_iff
+quotient_add_group.eq_zero_iff _
 
 lemma π_surjective : function.surjective (π f m) :=
 quotient.surjective_quotient_mk'
@@ -164,7 +164,7 @@ quotient.surjective_quotient_mk'
 lemma norm_π_one_eq (l : fin 1 →₀ Λ') : ∥(π f 1) l∥ = ∥l∥ :=
 begin
   delta π, dsimp,
-  rw normed_group_hom.quotient_norm_mk_eq (L f 1) l,
+  rw quotient_norm_mk_eq (L f 1) l,
   simp only [L_one, set.image_singleton, add_zero, cInf_singleton, add_subgroup.coe_bot],
 end
 
@@ -182,12 +182,12 @@ instance :
 
 lemma obj_finite_free : _root_.finite_free (obj f m) :=
 begin
-  obtain ⟨ι, _inst_ι, b, hb⟩ := polyhedral_lattice.finite_free (fin m →₀ Λ'), resetI,
+  obtain ⟨ι, _inst_ι, ⟨b⟩⟩ := polyhedral_lattice.finite_free (fin m →₀ Λ'), resetI,
   let φ := (π f m).to_int_linear_map,
   suffices : submodule.span ℤ (set.range (φ ∘ b)) = ⊤,
-  { obtain ⟨n, b, hb⟩ := module.free_of_finite_type_torsion_free this,
-    exact ⟨fin n, infer_instance, b, hb⟩ },
-  rw [set.range_comp, ← submodule.map_span, hb.2, submodule.map_top, linear_map.range_eq_top],
+  { obtain ⟨n, b⟩ := module.free_of_finite_type_torsion_free this,
+    exact ⟨fin n, infer_instance, ⟨b⟩⟩ },
+  rw [set.range_comp, ← submodule.map_span, b.span_eq, submodule.map_top, linear_map.range_eq_top],
   exact π_surjective f m
 end
 
@@ -252,8 +252,8 @@ lemma map_add_hom_strict (x : obj f (n+1)) : ∥map_add_hom f g x∥ ≤ ∥x∥
 begin
   apply le_of_forall_pos_le_add,
   intros ε hε,
-  obtain ⟨x, rfl, h⟩ := normed_group_hom.norm_mk_lt x hε,
-  calc _ ≤ ∥map_domain_hom g x∥ : normed_group_hom.quotient_norm_mk_le _ _
+  obtain ⟨x, rfl, h⟩ := norm_mk_lt x hε,
+  calc _ ≤ ∥map_domain_hom g x∥ : quotient_norm_mk_le _ _
   ... ≤ ∥x∥ : map_domain_hom_strict _ _
   ... ≤ _ : h.le,
 end
@@ -334,7 +334,7 @@ def map_succ_zero (m : ℕ) (g : fin (m+2) →ₘ fin 1) : obj f (m+1) ⟶ Λ' :
     intro x,
     apply le_of_forall_pos_le_add,
     intros ε hε,
-    obtain ⟨x, rfl, h⟩ := normed_group_hom.norm_mk_lt x hε,
+    obtain ⟨x, rfl, h⟩ := norm_mk_lt x hε,
     calc ∥finsupp.map_domain_hom g x 0∥
         ≤ ∥finsupp.map_domain_hom g x∥ : _
     ... ≤ ∥x∥ : conerve.map_domain_hom_strict g x
