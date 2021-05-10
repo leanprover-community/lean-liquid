@@ -39,6 +39,9 @@ classical.some $ classical.some_spec $ classical.some_spec ha
 theorem is_basis : is_basis ℤ ha.basis :=
 classical.some_spec $ classical.some_spec $ classical.some_spec ha
 
+noncomputable def its_basically_zn : A ≃ₗ[ℤ] (basis_type ha → ℤ) :=
+ha.is_basis.equiv_fun
+
 theorem top_fg (ha : finite_free A) : (⊤ : submodule ℕ A).fg :=
 begin
   classical,
@@ -77,57 +80,57 @@ begin
       refine submodule.smul_mem _ n (submodule.subset_span (or.inl ⟨i, rfl⟩)) } },
 end
 
-theorem dual (ha : finite_free A) : finite_free (A →+ ℤ) :=
-begin
-  -- do this after is_basis refactor?
-  sorry
-end
+-- theorem dual (ha : finite_free A) : finite_free (A →+ ℤ) :=
+-- begin
+--   -- do this after is_basis refactor?
+--   sorry
+-- end
 
 /-- The rank of a finite free abelian group. -/
 noncomputable def rank (ha : finite_free A) : ℕ := fintype.card ha.basis_type
 
 variable {ha}
 
-/-- A rank zero abelian group has at most one element (yeah I know...). -/
-lemma rank_zero (h0 : ha.rank = 0) : subsingleton A := subsingleton.intro
-begin
-  -- do this after is_basis refactor?
-  sorry
-end
+-- /-- A rank zero abelian group has at most one element (yeah I know...). -/
+-- lemma rank_zero (h0 : ha.rank = 0) : subsingleton A := subsingleton.intro
+-- begin
+--   -- do this after is_basis refactor?
+--   sorry
+-- end
 
-lemma rank_dual (ha : finite_free A) : ha.dual.rank = ha.rank :=
-begin
-  -- do this after is_basis refactor?
-  sorry
-end
+-- lemma rank_dual (ha : finite_free A) : ha.dual.rank = ha.rank :=
+-- begin
+--   -- do this after is_basis refactor?
+--   sorry
+-- end
 
-lemma congr_iso {B : Type} [add_comm_group B] (hab : A ≃+ B) (ha : finite_free A) :
-  finite_free B :=
-begin
-  -- do this after is_basis refactor?
-  sorry
-end
+-- lemma congr_iso {B : Type} [add_comm_group B] (hab : A ≃+ B) (ha : finite_free A) :
+--   finite_free B :=
+-- begin
+--   -- do this after is_basis refactor?
+--   sorry
+-- end
 
-lemma rank_iso {B : Type} [add_comm_group B] (hab : A ≃+ B) (ha : finite_free A) :
-  (congr_iso hab ha).rank = ha.rank :=
-begin
-  -- do this after is_basis refactor?
-  sorry
-end
+-- lemma rank_iso {B : Type} [add_comm_group B] (hab : A ≃+ B) (ha : finite_free A) :
+--   (congr_iso hab ha).rank = ha.rank :=
+-- begin
+--   -- do this after is_basis refactor?
+--   sorry
+-- end
 
-theorem ker (ha : finite_free A) (φ : A →+ ℤ) : finite_free φ.ker :=
-begin
-  -- submodule of Noetherian Z-module is f.g.,
-  -- submodule of torsion-free is torsion-free,
-  -- f.g. torsion-free => free
-  sorry
-end
+-- theorem ker (ha : finite_free A) (φ : A →+ ℤ) : finite_free φ.ker :=
+-- begin
+--   -- submodule of Noetherian Z-module is f.g.,
+--   -- submodule of torsion-free is torsion-free,
+--   -- f.g. torsion-free => free
+--   sorry
+-- end
 
-theorem rank_ker (ha : finite_free A) (φ : A →+ ℤ) (hφ : φ ≠ 0) :
-  (ker ha φ).rank + 1 = ha.rank :=
-begin
-  -- I don't know the best way of doing this
-  sorry
-end
+-- theorem rank_ker (ha : finite_free A) (φ : A →+ ℤ) (hφ : φ ≠ 0) :
+--   (ker ha φ).rank + 1 = ha.rank :=
+-- begin
+--   -- I don't know the best way of doing this
+--   sorry
+-- end
 
 end finite_free
