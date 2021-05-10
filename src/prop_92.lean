@@ -17,19 +17,30 @@ variables {X : Type*} [topological_space X]
 open set
 
 section
+variables {Y : Type*}
 
-lemma is_locally_constant.is_closed_fiber {X Y : Type*} [topological_space X] [topological_space Y]
-  [t1_space Y] {f : X → Y} (h : is_locally_constant f) (y : Y) : is_closed (f ⁻¹' {y}) :=
-is_closed_singleton.preimage h.continuous
+lemma is_locally_constant.is_closed_fiber
+   {f : X → Y} (h : is_locally_constant f) (y : Y) :
+  is_closed (f ⁻¹' {y}) :=
+begin
+  erw [← is_open_compl_iff, ← preimage_compl,
+       show {y}ᶜ = ⋃ z (h : z ≠ y), ({z} : set Y), by { ext, simp },
+       preimage_bUnion],
+  exact is_open_bUnion (λ z hz, h {z}),
+end
 
-lemma is_locally_constant.is_clopen_fiber {X Y : Type*} [topological_space X] [topological_space Y]
-  [t1_space Y] {f : X → Y} (h : is_locally_constant f) (y : Y) : is_clopen (f ⁻¹' {y}) :=
+lemma is_locally_constant.is_clopen_fiber {f : X → Y}
+  (h : is_locally_constant f) (y : Y): is_clopen (f ⁻¹' {y}) :=
 ⟨h.is_open_fiber y, h.is_closed_fiber y⟩
 
+lemma is_locally_constant_iff_clopen_fibers {f : X → Y} :
+  is_locally_constant f ↔ ∀ y, is_clopen (f ⁻¹' {y}) :=
+⟨λ h y, h.is_clopen_fiber y, λ h s, (by { rw [← bUnion_of_singleton s, preimage_bUnion],
+                                          exact is_open_bUnion (λ x _, (h x).1) })⟩
 end
 
 section
-variables {Y : Type*} [topological_space Y]  [t1_space Y]
+variables {Y : Type*}
 
 /-- The discrete quotient of `X` associated to a locally constant `f : X → Y` is associated
 to the relation `x ∼ x'` if `f x' = f x`. The weird ordering guarantees that
@@ -228,7 +239,7 @@ lemma embedding.discrete_quotient_spec [nonempty X] {f : X → Y} (hf : embeddin
 (hf.discrete_quotient_map S).proj ∘ f = (hf.discrete_quotient_equiv S) ∘ S.proj :=
 (hf.ex_discrete_quotient S).some_spec.some_spec
 
-variables {Z : Type*} [topological_space Z]  [t1_space Z] [nonempty X]
+variables {Z : Type*} [nonempty X]
 
 open_locale classical
 
