@@ -33,6 +33,13 @@ lemma mem_explicit_dual_set (l : ι → Λ) (x : Λ →+ ℤ) :
 def dual_finset (S : finset Λ) : submodule ℕ (Λ →+ ℤ) :=
 explicit_dual_set (coe : (S : set Λ) → Λ)
 
+lemma mem_dual_finset (S : finset Λ) (l : Λ →+ ℤ) :
+  l ∈ dual_finset S ↔ ∀ x ∈ S, 0 ≤ l x :=
+begin
+  rw [dual_finset, mem_explicit_dual_set],
+  simp
+end
+
 lemma dual_finset_antimono {S T : finset Λ} (hST : S ⊆ T) :
   dual_finset T ≤ dual_finset S :=
 begin
@@ -61,19 +68,81 @@ begin
   sorry
 end
 
+def left_conj {F G : Type*}
+  [add_comm_group F] [add_comm_group G]
+  (e : F ≃ₗ[ℕ] G) :
+  (F →+ ℤ) ≃ₗ[ℕ] (G →+ ℤ) :=
+{ to_fun := λ f, f.comp e.symm.to_linear_map.to_add_monoid_hom,
+  inv_fun := λ f, f.comp e.to_linear_map.to_add_monoid_hom,
+  map_add' := λ f g,
+  begin
+    ext x,
+    simp only [add_monoid_hom.coe_comp, function.comp_app, add_monoid_hom.add_apply],
+  end,
+  map_smul' := λ f r,
+  begin
+    ext x,
+    refl,
+  end,
+  left_inv := λ f,
+  begin
+    ext x,
+    simp,
+  end,
+  right_inv := λ f,
+  begin
+    ext x,
+    simp,
+  end }
+
 /-- A finset version of Gordan's Lemma. -/
-lemma finset_Gordan [module ℤ Λ] (hΛ : finite_free Λ) [decidable_eq Λ] (S : finset Λ) :
+lemma finset_Gordan (hΛ : finite_free Λ) [decidable_eq Λ] (S : finset Λ) :
   (dual_finset S).fg :=
 begin
-  let e := finite_free.its_basically_zn hΛ,
-  have := finset_Gordan_pi (S.image e),
-  let : (Λ →+ ℤ) →ₗ[ℕ] (hΛ.basis_type → ℤ) →+ ℤ,
-  { refine ⟨λ f, f.comp _, _, _⟩,
+  classical,
+  let e := hΛ.is_basis.equiv_fun,
+  obtain ⟨S', hS'⟩ := finset_Gordan_pi (S.image e),
+  refine ⟨S'.image (λ f, f.comp e.to_linear_map.to_add_monoid_hom), _⟩,
+  apply le_antisymm,
+  { rw submodule.span_le,
+    rintro f hf,
+    simp only [set.mem_image, finset.mem_coe, finset.coe_image] at hf,
+    rcases hf with ⟨φ, hφ, rfl⟩,
+    rintro ⟨x, hx⟩,
+    have : φ ∈ submodule.span ℕ (S' : set ((hΛ.basis_type → ℤ) →+ ℤ)),
+    { apply submodule.subset_span,
+      apply hφ },
+    dsimp,
+    rw hS' at this,
+    apply this ⟨e x, _⟩,
+    simp only [finset.mem_coe, finset.coe_image],
+    refine ⟨_, hx, rfl⟩ },
+  { intros x hx,
+    rw finset.coe_image,
 
-    -- refine ⟨λ f, ⟨λ g, f (e.symm g), by simp, λ g₁ g₂, by simp⟩, _, _⟩,
 
-  },
-  have : dual_finset (finset.image ⇑e S) = (submodule.map _ (dual_finset S)),
+  }
+
+  -- let t : (Λ →+ ℤ) ≃ₗ[ℤ] (hΛ.basis_type → ℤ) →+ ℤ := left_conj e',
+  -- have q : dual_finset (finset.image ⇑e S) = (submodule.map e (dual_finset S)),
+  -- { ext φ,
+  --   simp only [mem_dual_finset, submodule.mem_map],
+  --   simp only [and_imp, linear_map.coe_mk, finset.mem_image, forall_apply_eq_imp_iff₂,
+  --     exists_imp_distrib],
+  --   split,
+  --   { intro h,
+  --     refine ⟨⟨λ x, φ (e x), _, _⟩, h, _⟩,
+  --     { simp only [linear_equiv.map_zero, add_monoid_hom.map_zero] },
+  --     { intros x y, simp only [add_monoid_hom.map_add, linear_equiv.map_add], },
+  --     { ext x,
+  --       simp } },
+  --   { rintro ⟨φ, hφ, rfl⟩,
+  --     simpa only [add_monoid_hom.coe_comp, add_monoid_hom.coe_mk, function.comp_app,
+  --       linear_equiv.symm_apply_apply] using hφ} },
+
+  -- rw q at z,
+  -- refine submodule.fg_of_fg_map t _,
+
   -- -- We proceed by induction on the rank of Λ.
   -- suffices : ∀ n : ℕ, hΛ.rank = n → (dual_finset S).fg,
   -- { exact this _ rfl},
