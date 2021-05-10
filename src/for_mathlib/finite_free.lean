@@ -1,4 +1,7 @@
 import ring_theory.finiteness
+import linear_algebra.invariant_basis_number
+import linear_algebra.free_module
+
 /-!
 
 # Finite free ℤ-modules
@@ -82,6 +85,16 @@ end
 /-- The rank of a finite free abelian group. -/
 noncomputable def rank (ha : finite_free A) : ℕ := fintype.card ha.basis_type
 
+noncomputable
+def equiv_fin {ι : Type*} [fintype ι] (b : _root_.basis ι ℤ A) :
+  A ≃ₗ[ℤ] (fin $ fintype.card ι) → ℤ :=
+b.repr.trans $ (finsupp.lcongr (fintype.equiv_fin ι) (linear_equiv.refl ℤ ℤ)).trans $
+  finsupp.linear_equiv_fun_on_fintype ℤ
+
+lemma rank_eq {ι : Type*} [fintype ι] (b : _root_.basis ι ℤ A) (ha : finite_free A) :
+  ha.rank = fintype.card ι :=
+eq_of_fin_equiv ℤ $ (equiv_fin ha.basis).symm.trans (equiv_fin b)
+
 variable {ha}
 
 /-- A rank zero abelian group has at most one element (yeah I know...). -/
@@ -100,23 +113,28 @@ end
 lemma congr_iso {B : Type} [add_comm_group B] (hab : A ≃+ B) (ha : finite_free A) :
   finite_free B :=
 begin
-  -- do this after is_basis refactor?
-  sorry
+  obtain ⟨ι, _, ⟨b⟩⟩ := ha,
+  refine ⟨ι, ‹_›, ⟨b.map $ hab.to_linear_equiv _⟩⟩,
+  intros n a,
+  exact hab.to_add_monoid_hom.map_gsmul a n
 end
 
 lemma rank_iso {B : Type} [add_comm_group B] (hab : A ≃+ B) (ha : finite_free A) :
   (congr_iso hab ha).rank = ha.rank :=
 begin
-  -- do this after is_basis refactor?
-  sorry
+  apply eq_of_fin_equiv ℤ,
+  refine (equiv_fin $ (congr_iso hab ha).basis).symm.trans _,
+  refine (hab.symm.to_linear_equiv _).trans (equiv_fin ha.basis),
+  intros n a,
+  exact hab.symm.to_add_monoid_hom.map_gsmul a n
 end
 
 theorem ker (ha : finite_free A) (φ : A →+ ℤ) : finite_free φ.ker :=
 begin
-  -- submodule of Noetherian Z-module is f.g.,
-  -- submodule of torsion-free is torsion-free,
-  -- f.g. torsion-free => free
-  sorry
+  obtain ⟨n, b⟩ := @module.free_of_finite_type_torsion_free' ℤ _ _ φ.ker _ _ (id _) (id _),
+  { exact ⟨fin n, infer_instance, ⟨b⟩⟩ },
+  { sorry },
+  { sorry }
 end
 
 theorem rank_ker (ha : finite_free A) (φ : A →+ ℤ) (hφ : φ ≠ 0) :
