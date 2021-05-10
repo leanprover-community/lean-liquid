@@ -8,12 +8,6 @@ noncomputable theory
 open set normed_group_hom uniform_space
 
 
--- #7459
-@[to_additive]
-lemma subgroup.mem_map_of_mem {G H : Type*} [group G] [group H] {G' : subgroup G} (f : G →* H) {x : G} (hx : x ∈ G') :
-  f x ∈ subgroup.map f G' :=
-subgroup.mem_map.mpr ⟨x, hx, rfl⟩
-
 variables {G : Type*} [semi_normed_group G]
 variables {H : Type*} [semi_normed_group H]
 variables {H₁ : Type*} [normed_group H₁]

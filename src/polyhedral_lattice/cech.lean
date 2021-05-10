@@ -182,12 +182,12 @@ instance :
 
 lemma obj_finite_free : _root_.finite_free (obj f m) :=
 begin
-  obtain ⟨ι, _inst_ι, b, hb⟩ := polyhedral_lattice.finite_free (fin m →₀ Λ'), resetI,
+  obtain ⟨ι, _inst_ι, ⟨b⟩⟩ := polyhedral_lattice.finite_free (fin m →₀ Λ'), resetI,
   let φ := (π f m).to_int_linear_map,
   suffices : submodule.span ℤ (set.range (φ ∘ b)) = ⊤,
-  { obtain ⟨n, b, hb⟩ := module.free_of_finite_type_torsion_free this,
-    exact ⟨fin n, infer_instance, b, hb⟩ },
-  rw [set.range_comp, ← submodule.map_span, hb.2, submodule.map_top, linear_map.range_eq_top],
+  { obtain ⟨n, b⟩ := module.free_of_finite_type_torsion_free this,
+    exact ⟨fin n, infer_instance, ⟨b⟩⟩ },
+  rw [set.range_comp, ← submodule.map_span, b.span_eq, submodule.map_top, linear_map.range_eq_top],
   exact π_surjective f m
 end
 

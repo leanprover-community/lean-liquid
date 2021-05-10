@@ -3,7 +3,6 @@ import topology.locally_constant.basic
 import topology.discrete_quotient
 import data.setoid.partition
 
-import for_mathlib.data_set_lattice
 import for_mathlib.data_setoid_partition
 import for_mathlib.topology
 
@@ -132,7 +131,7 @@ begin
       rw ← hV (S.proj x),
       exact mem_singleton _ },
     { intro h,
-      rcases (mem_bUnion_iff' _ _).mp h with ⟨s', hss', hfx : x ∈ f ⁻¹' (V s')⟩,
+      rcases mem_bUnion_iff'.mp h with ⟨s', hss', hfx : x ∈ f ⁻¹' (V s')⟩,
       rw ← hV s' at hfx,
       exact hss' hfx.symm } },
   have W_nonempty : ∀ s, (W s).nonempty,

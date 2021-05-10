@@ -2,7 +2,6 @@ import pseudo_normed_group.breen_deligne
 import normed_group.NormedGroup
 
 import for_mathlib.Profinite
-import for_mathlib.curry
 
 /-!
 
