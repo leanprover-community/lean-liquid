@@ -202,7 +202,7 @@ lemma h_truncate_bound_by : ∀ (q q' : ℕ), q ≤ m → q+1 = q' → ∀ (c : 
 begin
   introsI c hc x,
   calc ∥NormedGroup.coker.π (condM.htpy.h 1 x)∥
-      ≤ ∥condM.htpy.h 1 x∥ : normed_group_hom.quotient_norm_le (NormedGroup.coker.π_is_quotient) _
+      ≤ ∥condM.htpy.h 1 x∥ : NormedGroup.coker.π_is_quotient.norm_le _
   ... ≤ H * ∥x∥ : condM.htpy.h_bound_by 1 2 dec_trivial rfl c x
 end
 

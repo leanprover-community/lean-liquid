@@ -55,7 +55,7 @@ begin
   obtain ⟨m₁'' : M' c₁ (i+1),
           hgm₁'' : g m₁'' = N.d i (i+1) n,
           hnorm_m₁'' : ∥m₁''∥ < ∥N.d i (i+1) n∥ + ε₁⟩ :=
-    quotient_norm_lift (hgquot _ _) hε₁ (N.d i (i+1) n),
+    (hgquot _ _).norm_lift hε₁ (N.d i (i+1) n),
   obtain ⟨m₁, hm₁⟩ : ∃ m₁ : M c₁ (i+1), f m₁ + m₁'' = m₁',
   { have hrange : m₁' - m₁'' ∈ f.apply.range,
     { rw [← hg _ _, mem_ker  _ _, normed_group_hom.map_sub],
@@ -122,7 +122,7 @@ begin
     rw [hker, sub_zero, ← res_apply, hm'] },
   refine ⟨i₀, hi₀, nnew₀, _⟩,
   rw ← hmnewlift,
-  refine (quotient_norm_le (hgquot _ _) _).trans (hmnew₀.trans (le_of_eq _)),
+  refine ((hgquot _ _).norm_le _).trans (hmnew₀.trans (le_of_eq _)),
   rw ← hε₁_ε,
   ring,
 end

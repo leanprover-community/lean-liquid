@@ -150,13 +150,13 @@ end
 def obj := quotient_add_group.quotient (L f m)
 
 instance : semi_normed_group (obj f m) :=
-normed_group_hom.semi_normed_group_quotient _
+add_subgroup.semi_normed_group_quotient _
 
 def π : (fin m →₀ Λ') →+ obj f m :=
 by convert quotient_add_group.mk' (L f m)
 
 lemma π_apply_eq_zero_iff (x : fin m →₀ Λ') : π f m x = 0 ↔ x ∈ L f m :=
-by convert quotient_add_group.mk'_eq_zero_iff
+quotient_add_group.eq_zero_iff _
 
 lemma π_surjective : function.surjective (π f m) :=
 quotient.surjective_quotient_mk'
@@ -164,7 +164,7 @@ quotient.surjective_quotient_mk'
 lemma norm_π_one_eq (l : fin 1 →₀ Λ') : ∥(π f 1) l∥ = ∥l∥ :=
 begin
   delta π, dsimp,
-  rw normed_group_hom.quotient_norm_mk_eq (L f 1) l,
+  rw quotient_norm_mk_eq (L f 1) l,
   simp only [L_one, set.image_singleton, add_zero, cInf_singleton, add_subgroup.coe_bot],
 end
 
@@ -252,8 +252,8 @@ lemma map_add_hom_strict (x : obj f (n+1)) : ∥map_add_hom f g x∥ ≤ ∥x∥
 begin
   apply le_of_forall_pos_le_add,
   intros ε hε,
-  obtain ⟨x, rfl, h⟩ := normed_group_hom.norm_mk_lt x hε,
-  calc _ ≤ ∥map_domain_hom g x∥ : normed_group_hom.quotient_norm_mk_le _ _
+  obtain ⟨x, rfl, h⟩ := norm_mk_lt x hε,
+  calc _ ≤ ∥map_domain_hom g x∥ : quotient_norm_mk_le _ _
   ... ≤ ∥x∥ : map_domain_hom_strict _ _
   ... ≤ _ : h.le,
 end
@@ -334,7 +334,7 @@ def map_succ_zero (m : ℕ) (g : fin (m+2) →ₘ fin 1) : obj f (m+1) ⟶ Λ' :
     intro x,
     apply le_of_forall_pos_le_add,
     intros ε hε,
-    obtain ⟨x, rfl, h⟩ := normed_group_hom.norm_mk_lt x hε,
+    obtain ⟨x, rfl, h⟩ := norm_mk_lt x hε,
     calc ∥finsupp.map_domain_hom g x 0∥
         ≤ ∥finsupp.map_domain_hom g x∥ : _
     ... ≤ ∥x∥ : conerve.map_domain_hom_strict g x
