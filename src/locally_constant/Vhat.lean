@@ -229,7 +229,7 @@ begin
     rw [lift_comp_incl, h] }
 end
 
-instance normed_with_aut_Completion (V : NormedGroup.{u}) (r : ℝ) [normed_with_aut r V] :
+instance normed_with_aut_Completion (V : NormedGroup.{u}) (r : ℝ≥0) [normed_with_aut r V] :
   normed_with_aut r (Completion.obj V) :=
 { T := Completion.map_iso normed_with_aut.T,
   norm_T :=
@@ -245,10 +245,10 @@ instance normed_with_aut_Completion (V : NormedGroup.{u}) (r : ℝ) [normed_with
     { erw [completion.norm_coe, normed_with_aut.norm_T, completion.norm_coe] }
   end }
 
-@[simp] lemma Completion_T_inv_eq (V : NormedGroup.{u}) (r : ℝ) [normed_with_aut r V] :
+@[simp] lemma Completion_T_inv_eq (V : NormedGroup.{u}) (r : ℝ≥0) [normed_with_aut r V] :
   (normed_with_aut.T.hom : Completion.obj V ⟶ _) = Completion.map normed_with_aut.T.hom := rfl
 
-lemma T_hom_incl {V : NormedGroup} {r : ℝ} [normed_with_aut r V] :
+lemma T_hom_incl {V : NormedGroup} {r : ℝ≥0} [normed_with_aut r V] :
   (incl : V ⟶ _) ≫ normed_with_aut.T.hom = normed_with_aut.T.hom ≫ incl :=
 begin
   ext x,
@@ -258,7 +258,7 @@ begin
   exact normed_group_hom.uniform_continuous _,
 end
 
-lemma T_hom_eq {V : NormedGroup} {r : ℝ} [normed_with_aut r V] :
+lemma T_hom_eq {V : NormedGroup} {r : ℝ≥0} [normed_with_aut r V] :
   normed_with_aut.T.hom = Completion.lift ((normed_with_aut.T.hom : V ⟶ V) ≫ incl) :=
 lift_unique _ _ T_hom_incl
 
