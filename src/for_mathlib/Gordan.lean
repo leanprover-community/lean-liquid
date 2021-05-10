@@ -53,7 +53,6 @@ universe u
 /-- The key inductive step in the proof of Gordan's Lemma -/
 lemma Gordan_inductive_step (d : ℕ) {Λ : Type u}
   (hd : ∀ {{Γ : Type u}} (S : finset Γ) [add_comm_group Γ], by exactI ∀
-        [module ℤ Γ], by exactI ∀
         (hΓ : finite_free Γ)
         [decidable_eq Γ], hΓ.rank = d → (dual_finset S).fg)
   [add_comm_group Λ]
@@ -83,7 +82,7 @@ begin
 end
 
 /-- A finset version of Gordan's Lemma. -/
-lemma finset_Gordan [module ℤ Λ] (hΛ : finite_free Λ) [decidable_eq Λ] (S : finset Λ) :
+lemma finset_Gordan (hΛ : finite_free Λ) [decidable_eq Λ] (S : finset Λ) :
   (dual_finset S).fg :=
 begin
   -- We proceed by induction on the rank of Λ.
@@ -126,7 +125,7 @@ begin
 end
 
 /-- A fintype version of Gordan's Lemma. -/
-lemma explicit_gordan [module ℤ Λ] (hΛ : finite_free Λ) [fintype ι] (l : ι → Λ) :
+lemma explicit_gordan (hΛ : finite_free Λ) [fintype ι] (l : ι → Λ) :
   (explicit_dual_set l).fg :=
 begin
   classical,
