@@ -1,4 +1,3 @@
-import for_mathlib.uniform_space_cauchy
 import for_mathlib.normed_group_hom_completion
 import for_mathlib.specific_limit
 /-!

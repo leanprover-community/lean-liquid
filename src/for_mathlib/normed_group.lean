@@ -1,8 +1,6 @@
 import topology.algebra.normed_group
 import topology.sequences
 
-import for_mathlib.uniform_space_cauchy
-
 open_locale big_operators topological_space uniformity
 open finset filter
 
