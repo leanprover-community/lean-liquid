@@ -200,7 +200,7 @@ instance add_subgroup.semi_normed_group_quotient (S : add_subgroup M) : semi_nor
   dist_self          := λ x, by simp only [norm_mk_zero, sub_self],
   dist_comm          := quotient_norm_sub_rev,
   dist_triangle      := λ x y z,
-begin
+  begin
     unfold dist,
     have : x - z = (x - y) + (y - z) := by abel,
     rw this,
@@ -238,39 +238,14 @@ rfl
 noncomputable
 instance add_subgroup.normed_group_quotient (S : add_subgroup M) [hS : is_closed (S : set M)] :
   normed_group (quotient S) :=
-{ dist               := λ x y, ∥x - y∥,
-  dist_self          := λ x, by simp only [norm_mk_zero, sub_self],
-  dist_comm          := quotient_norm_sub_rev,
-  dist_triangle      := λ x y z, by simpa only [dist, show x - z = (x - y) + (y - z), by abel] using
-                                    quotient_norm_add_le S (x - y) (y - z),
-  dist_eq := λ x y, rfl,
-  to_uniform_space   := topological_add_group.to_uniform_space (quotient S),
-  uniformity_dist    :=
-  begin
-    rw uniformity_eq_comap_nhds_zero',
-    have := filter.has_basis.comap (λ (p : quotient S × quotient S), p.2 - p.1) (quotient_nhd_basis S),
-    apply this.eq_of_same_basis,
-    have : ∀ ε : ℝ, (λ (p : quotient S × quotient S), p.snd - p.fst) ⁻¹' {x | ∥x∥ < ε} =
-      {p : quotient S × quotient S | ∥p.fst - p.snd∥ < ε},
-    { intro ε,
-      ext x,
-      dsimp,
-      rw quotient_norm_sub_rev },
-    rw funext this,
-    refine filter.has_basis_binfi_principal _ set.nonempty_Ioi,
-    rintros ε (ε_pos : 0 < ε) η (η_pos : 0 < η),
-    refine ⟨min ε η, lt_min ε_pos η_pos, _, _⟩,
-    { suffices : ∀ (a b : quotient S), ∥a - b∥ < ε → ∥a - b∥ < η → ∥a - b∥ < ε, by simpa,
-      exact λ a b h h', h },
-    { simp }
-  end,
-  eq_of_dist_eq_zero :=
+{ eq_of_dist_eq_zero :=
   begin
     rintros ⟨m⟩ ⟨m'⟩ (h : ∥mk' S m - mk' S m'∥ = 0),
     erw [← (mk' S).map_sub, quotient_norm_eq_zero_iff, hS.closure_eq,
          ← quotient_add_group.eq_iff_sub_mem] at h,
     exact h
-  end }
+  end,
+  .. add_subgroup.semi_normed_group_quotient S }
 
 -- This is a sanity check left here on purpose to ensure that potential refactors won't destroy
 -- this important property.
