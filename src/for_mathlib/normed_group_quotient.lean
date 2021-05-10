@@ -1,5 +1,34 @@
 import analysis.normed_space.normed_group_hom
 
+/-!
+# Quotient of seminormed groups
+
+For any `semi_normed_group M` and any `S : add_subgroup M`, we provide a `semi_normed_group`
+structure on `quotient S`. If `M` is a `normed_group` and `S` is closed, we provide
+`normed_group (quotient S)`.
+
+## Main definition
+
+* `add_subgroup.semi_normed_group_quotient` : The seminormed group structure on the quotient by
+an additive subgroup.
+* `add_subgroup.normed_group_quotient` : the quotient in the category of normed groups.
+* `normed_mk` : the morphism from a seminormed group to the quotient by a subgroup.
+
+
+## Main results
+
+* `norm_normed_mk` : the operator norm of the projection is `1` if the subspace is not dense.
+
+## Implementation details
+For any `semi_normed_group M` and any `S : add_subgroup M` we define a norm on `quotient S` by
+`∥x∥ = Inf (norm '' {m | mk' S m = x})`. We then prove basic facts about the norm. These are
+summarized in `quotient.is_semi_normed_group.core` and `quotient.is_normed_group.core`. Since
+`quotient S` is automatically a `uniform_space`, we avoid using `semi_normed_group.of_core`, that
+would create a diamond. Instead, we provide `pseudo_metric_space (quotient S)` manually in
+`add_subgroup.semi_normed_group_quotient`.
+
+-/
+
 noncomputable theory
 
 
@@ -193,9 +222,10 @@ lemma quotient_nhd_basis (S : add_subgroup M) :
     { exact ⟨(0 : M), mem_ball_self ε_pos, (mk' S).map_zero⟩ } },
 end⟩
 
-/-- The pseudometric space structure on the quotient by an additive subgroup. -/
+/-- The seminormed group structure on the quotient by an additive subgroup. -/
 noncomputable
-instance add_subgroup.semi_normed_group_quotient (S : add_subgroup M) : semi_normed_group (quotient S) :=
+instance add_subgroup.semi_normed_group_quotient (S : add_subgroup M) :
+  semi_normed_group (quotient S) :=
 { dist               := λ x y, ∥x - y∥,
   dist_self          := λ x, by simp only [norm_mk_zero, sub_self],
   dist_comm          := quotient_norm_sub_rev,
