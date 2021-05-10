@@ -21,8 +21,7 @@ an additive subgroup.
 
 ## Implementation details
 For any `semi_normed_group M` and any `S : add_subgroup M` we define a norm on `quotient S` by
-`∥x∥ = Inf (norm '' {m | mk' S m = x})`. We then prove basic facts about the norm. These are
-summarized in `quotient.is_semi_normed_group.core` and `quotient.is_normed_group.core`. Since
+`∥x∥ = Inf (norm '' {m | mk' S m = x})`. We then prove basic facts about the norm. Since
 `quotient S` is automatically a `uniform_space`, we avoid using `semi_normed_group.of_core`, that
 would create a diamond. Instead, we provide `pseudo_metric_space (quotient S)` manually in
 `add_subgroup.semi_normed_group_quotient`.
@@ -65,6 +64,7 @@ begin
   apply norm_nonneg
 end
 
+/-- The norm on the quotient satisfies `∥-x∥ = ∥x∥`. -/
 lemma quotient_norm_neg {S : add_subgroup M} (x : quotient S) : ∥-x∥ = ∥x∥ :=
 begin
   suffices : norm '' {m | mk' S m = x} = norm '' {m | mk' S m = -x},
@@ -82,6 +82,7 @@ end
 
 lemma quotient_norm_sub_rev {S : add_subgroup M} (x y: quotient S) : ∥x - y∥ = ∥y - x∥ :=
 by rw [show x - y = -(y - x), by abel, quotient_norm_neg]
+
 /-- The norm of the projection is smaller or equal to the norm of the original element. -/
 lemma quotient_norm_mk_le (S : add_subgroup M) (m : M) :
   ∥mk' S m∥ ≤ ∥m∥ :=
@@ -111,6 +112,7 @@ begin
     simpa using h },
 end
 
+/-- The quotient norm is nonnegative. -/
 lemma quotient_norm_nonneg (S : add_subgroup M) : ∀ x : quotient S, 0 ≤ ∥x∥ :=
 begin
   rintros ⟨m⟩,
@@ -124,6 +126,8 @@ end
 lemma norm_mk_nonneg (S : add_subgroup M) (m : M) : 0 ≤ ∥mk' S m∥ :=
 quotient_norm_nonneg S _
 
+/-- The norm of the image of `m : M` in the quotient by `S` is zero if and only if `m` belongs
+to the closure of `S`. -/
 lemma quotient_norm_eq_zero_iff (S : add_subgroup M) (m : M) :
   ∥mk' S m∥ = 0 ↔ m ∈ closure (S : set M) :=
 begin
@@ -164,6 +168,7 @@ begin
   rwa [add_neg_cancel_left]
 end
 
+/-- The quotient norm satisfies the triangular inequality. -/
 lemma quotient_norm_add_le (S : add_subgroup M) (x y : quotient S) : ∥x + y∥ ≤ ∥x∥ + ∥y∥ :=
 begin
   refine le_of_forall_pos_le_add (λ ε hε, _),
