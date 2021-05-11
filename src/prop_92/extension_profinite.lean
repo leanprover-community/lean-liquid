@@ -2,15 +2,15 @@ import for_mathlib.is_locally_constant
 /-!
 # Extending a locally constant map to larger profinite sets
 
-In this file, we prove that, given a topological embedding `f : X → Y` from a non-empty
+In this file, we prove that, given a topological embedding `e : X → Y` from a non-empty
 compact topological space to a profinite set (ie. compact Hausdorff totally disconnected space),
-every locally constant map `g` from `X` to any type `Z` "extends" to a locally constant map
-from `Y` to `Z`, ie. there exists `h : Y → Z` locally constant such that `g = h ∘ f`.
+every locally constant map `f` from `X` to any type `Z` "extends" to a locally constant map
+from `Y` to `Z`, ie. there exists `g : Y → Z` locally constant such that `f = g ∘ e`.
 
-     f
+     e
   X ↪-→ Y
   |    /
-g |   / h
+f |   / h
   ↓ ↙
   Z
 
@@ -22,7 +22,7 @@ Notes:
   directly use `X` is profinite).
 
 The main definition is `embedding.extend {e : X → Y} (he : embedding e) (f : X → Z) : Y → Z`
-It assumes `X` is compact (and non-empty) and assumes `Y` is porfinite but doesn't
+It assumes `X` is compact (and non-empty) and assumes `Y` is profinite but doesn't
 assume `f` is locally constant, it is simply defined as a constant map if `f` isn't.
 
 The announced properties of this extension are `embedding.extend_extends` and
