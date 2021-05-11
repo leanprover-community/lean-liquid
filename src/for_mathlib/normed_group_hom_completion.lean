@@ -2,7 +2,6 @@ import analysis.normed_space.normed_group_hom
 import topology.algebra.normed_group
 
 import for_mathlib.normed_group
-import for_mathlib.normed_group_hom
 
 noncomputable theory
 
@@ -113,7 +112,7 @@ begin
       { norm_cast,
         rw normed_group_hom.comp_range,
         apply add_subgroup.mem_map_of_mem,
-        simp [mem_ker, hgg'] },
+        simp only [incl_range, mem_ker, map_sub, hgg', sub_self], },
       { calc ∥hatg - (g - g')∥ = ∥hatg - g + g'∥ : by abel
       ... ≤ ∥hatg - g∥ + ∥(g' : completion G)∥ : norm_add_le _ _
       ... = ∥hatg - g∥ + ∥g'∥ : by rw [completion.norm_coe]
@@ -163,7 +162,7 @@ begin
     { norm_cast,
       rw normed_group_hom.comp_range,
       apply add_subgroup.mem_map_of_mem,
-      simp [mem_ker] },
+      simp only [incl_range, mem_ker] },
     { calc ∥hatg - (g - g')∥ = ∥hatg - g + g'∥ : by abel
       ... ≤ ∥hatg - g∥ + ∥(g' : completion G)∥ : norm_add_le _ _
       ... < δ + C*∥f∥*∥hatg - g∥ : by linarith

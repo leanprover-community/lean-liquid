@@ -98,11 +98,10 @@ def cocomplex : cosimplicial_object C ⥤ cochain_complex ℕ C :=
     comm := begin
       intros i j,
       dsimp [to_cocomplex],
-      split_ifs, swap, simp,
+      split_ifs, swap, { simp },
       subst h,
-      simp [category_theory.category.comp_id,
-        category_theory.eq_to_hom_refl, coboundary,
-        preadditive.sum_comp, preadditive.comp_sum],
+      simp only [category_theory.category.comp_id, category_theory.eq_to_hom_refl, coboundary,
+        preadditive.sum_comp, preadditive.comp_sum, comp_gsmul, gsmul_comp, nat_trans.naturality],
     end } }
 
 namespace augmented
@@ -143,7 +142,7 @@ def cocomplex : augmented C ⥤ cochain_complex ℕ C :=
     comm := begin
       intros i j,
       dsimp [to_cocomplex],
-      split_ifs, swap, simp,
+      split_ifs, swap, { simp },
       subst h,
       cases i,
       { dsimp [to_cocomplex_d],
@@ -151,7 +150,8 @@ def cocomplex : augmented C ⥤ cochain_complex ℕ C :=
         erw [← nat_trans.comp_app, ← f.w],
         refl },
       { dsimp [to_cocomplex_d, coboundary],
-        simp [preadditive.sum_comp, preadditive.comp_sum],
+        simp only [preadditive.sum_comp, preadditive.comp_sum, comp_gsmul, gsmul_comp,
+          category.comp_id],
         apply finset.sum_congr rfl,
         intros i _,
         erw (drop.map f).naturality,
