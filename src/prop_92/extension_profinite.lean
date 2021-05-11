@@ -181,31 +181,33 @@ lemma embedding.discrete_quotient_spec [nonempty X] {f : X → Y} (hf : embeddin
 (hf.discrete_quotient_map S).proj ∘ f = (hf.discrete_quotient_equiv S) ∘ S.proj :=
 (hf.ex_discrete_quotient S).some_spec.some_spec
 
-variables {Z : Type*} [nonempty X]
+variables {Z : Type*} [inhabited Z]
 
 open_locale classical
 
 def embedding.extend
   {e : X → Y} (he : embedding e) (f : X → Z)
    : Y → Z :=
-if hf : is_locally_constant f then
-(hf.discrete_quotient_map) ∘ (he.discrete_quotient_equiv hf.discrete_quotient).symm ∘ (he.discrete_quotient_map hf.discrete_quotient).proj
-else λ y, f (classical.arbitrary X)
+if h : is_locally_constant f ∧ nonempty X then
+by { haveI := h.2, exact (h.1.discrete_quotient_map) ∘ (he.discrete_quotient_equiv h.1.discrete_quotient).symm ∘ (he.discrete_quotient_map h.1.discrete_quotient).proj }
+else λ y, default Z
 
-lemma embedding.extend_eq {e : X → Y} (he : embedding e) {f : X → Z} (hf : is_locally_constant f) :
+/- lemma embedding.extend_eq {e : X → Y} (he : embedding e) {f : X → Z} (hf : is_locally_constant f) :
   he.extend f = (hf.discrete_quotient_map) ∘ (he.discrete_quotient_equiv hf.discrete_quotient).symm ∘ (he.discrete_quotient_map hf.discrete_quotient).proj
-  := dif_pos hf
-
+  := dif_pos hf -/
 
 lemma embedding.extend_extends {e : X → Y} (he : embedding e) {f : X → Z} (hf : is_locally_constant f) :
 ∀ x, he.extend f (e x) = f x :=
 begin
   intro x,
+  haveI : nonempty X := ⟨x⟩,
   let S := hf.discrete_quotient,
   let S' := he.discrete_quotient_map hf.discrete_quotient,
   let barf : S → Z := hf.discrete_quotient_map,
   let g : S ≃ S' := he.discrete_quotient_equiv hf.discrete_quotient,
-  rw he.extend_eq hf,
+  unfold embedding.extend,
+  have h : is_locally_constant f ∧ nonempty X := ⟨hf, ⟨x⟩⟩,
+  rw [dif_pos h],
   change (barf ∘ g.symm ∘ (S'.proj ∘ e)) x = f x,
   suffices : (barf ∘ S.proj) x = f x, by simpa [he.discrete_quotient_spec],
   simp
@@ -221,3 +223,7 @@ begin
     exact discrete_quotient.proj_is_locally_constant _ },
   { apply is_locally_constant.const },
 end
+
+def embedding.locally_constant_extend {e : X → Y} (he : embedding e) (f : locally_constant X Z) :
+  locally_constant Y Z :=
+⟨he.extend f, he.is_locally_constant_extend⟩
