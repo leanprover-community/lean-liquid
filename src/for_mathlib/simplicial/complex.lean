@@ -1,11 +1,12 @@
 import algebra.module.hom
 import algebra.big_operators
+import data.fintype.card
 
 import for_mathlib.preadditive_category
 import system_of_complexes.complex
 import .augmented
 
-open category_theory
+namespace category_theory
 
 variables {C : Type*} [category C] [preadditive C] (M : cosimplicial_object C)
 
@@ -163,3 +164,5 @@ def cocomplex : augmented C ⥤ cochain_complex ℕ C :=
 end augmented
 
 end cosimplicial_object
+
+end category_theory

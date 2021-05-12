@@ -1,6 +1,7 @@
 import algebraic_topology.simplicial_object
 import algebra.module.hom
 import algebra.big_operators
+import data.fintype.card
 
 import for_mathlib.preadditive_category
 
