@@ -131,8 +131,6 @@ def contracting_homotopy : Π (n : ℕ),
            (by simp)
 | (n+1) := M.map (f.cech_splitting n).op
 
-#check f.contracting_homotopy M 0
-
 lemma is_contracting_homotopy_zero :
   (f.conerve M).to_cocomplex.d 0 1 ≫ f.contracting_homotopy M 0 = 𝟙 _ :=
 begin
@@ -147,6 +145,9 @@ begin
   simp,
 end
 
+-- The proof of this is way too slow.
+-- It also has some nonterminal simps.
+-- TODO: FIX IT!
 lemma is_contracting_homotopy_one :
   (f.conerve M).to_cocomplex.d 1 2 ≫ f.contracting_homotopy M 1 +
   f.contracting_homotopy M 0 ≫ (f.conerve M).to_cocomplex.d 0 1 = 𝟙 _ :=
@@ -157,7 +158,11 @@ begin
   dsimp [contracting_homotopy,
     cosimplicial_object.augmented.to_cocomplex_d,
     cosimplicial_object.coboundary],
-  simp [fin.sum_univ_succ],
+  simp only [add_left_eq_self, category_theory.category.comp_id, if_congr,
+    fin.default_eq_zero, fin.coe_zero, if_true, one_gsmul, fin.coe_succ,
+    univ_unique, eq_self_iff_true, pow_one, zero_add, fin.sum_univ_succ,
+    finset.sum_singleton, neg_smul, pow_zero, finset.sum_congr,
+    preadditive.add_comp, preadditive.neg_comp],
   simp_rw ← M.map_comp,
   rw ← add_zero (𝟙 ((conerve M f).to_cocomplex_obj 1)),
   rw add_assoc,
@@ -168,16 +173,30 @@ begin
     simp_rw [← op_comp, ← op_id],
     congr' 1,
     dsimp [cech_splitting],
-    sorry,
-    --tidy
-  },
+    ext,
+    swap, simp,
+    simp,
+    split_ifs with h h,
+    { exfalso,
+      simp [simplex_category.δ] at h,
+      exact fin.succ_ne_zero _ h },
+    { congr,
+      simp [simplex_category.δ] } },
   { rw neg_add_eq_zero,
     congr' 1,
     simp_rw ← op_comp,
     congr' 1,
     dsimp [cech_splitting],
-    tidy,
-  }
+    ext ⟨j⟩,
+    swap, simp,
+    simp,
+    split_ifs with h h,
+    { refl },
+    { refine false.elim (h _),
+      change (1 : fin 2).succ_above j = 0,
+      rw fin.succ_above_eq_zero_iff,
+      { simp },
+      { exact top_ne_bot } } }
 end
 
 lemma is_contracting_homotopy (n : ℕ) :
