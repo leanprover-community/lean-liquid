@@ -336,8 +336,7 @@ end⟩
 lemma is_polyhedral_cone_bot [finite_dimensional ℚ Λ] :
   is_polyhedral_cone (⊥ : submodule (ℚ≥0) Λ) :=
 begin
-  obtain ⟨b, hb⟩ := finite_dimensional.exists_is_basis_finset ℚ Λ,
-  let l := hb.equiv_fun,
+  let l := (basis.of_vector_space ℚ Λ).equiv_fun,
   have := is_polyhedral_cone_of_equiv l.symm ⊥ is_polyhedral_cone_bot_aux,
   simpa using this,
 end

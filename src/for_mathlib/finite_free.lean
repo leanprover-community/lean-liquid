@@ -36,8 +36,7 @@ noncomputable instance : fintype (basis_type ha) := classical.some $ classical.s
 noncomputable def basis : basis ha.basis_type ℤ A :=
 (classical.some_spec $ classical.some_spec ha).some
 
-noncomputable def its_basically_zn : A ≃ₗ[ℤ] (basis_type ha → ℤ) :=
-ha.is_basis.equiv_fun
+noncomputable def its_basically_zn : A ≃ₗ[ℤ] (basis_type ha → ℤ) := ha.basis.equiv_fun
 
 theorem top_fg (ha : finite_free A) : (⊤ : submodule ℕ A).fg :=
 begin
@@ -76,11 +75,11 @@ begin
       refine submodule.smul_mem _ n (submodule.subset_span (or.inl ⟨i, rfl⟩)) } },
 end
 
--- theorem dual (ha : finite_free A) : finite_free (A →+ ℤ) :=
--- begin
---   -- do this after is_basis refactor?
---   sorry
--- end
+theorem dual (ha : finite_free A) : finite_free (A →+ ℤ) :=
+begin
+  -- do this after is_basis refactor?
+  sorry
+end
 
 /-- The rank of a finite free abelian group. -/
 noncomputable def rank (ha : finite_free A) : ℕ := fintype.card ha.basis_type
