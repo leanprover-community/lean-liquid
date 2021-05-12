@@ -15,11 +15,11 @@ noncomputable theory
 open_locale simplicial
 open category_theory.limits
 
-variables {C : Type u} [category.{v} C] (f : arrow C) [split f]
+variables {C : Type u} [category.{v} C] (f : arrow C)
 variables [∀ n : ℕ, has_wide_pullback f.right (λ i : ulift (fin (n+1)), f.left) (λ i, f.hom)]
 
 /-- The splittings of the Cech nerve associated to a split arrow. -/
-def cech_splitting (n : ℕ) : f.cech_nerve _[n] ⟶ f.cech_nerve _[n+1] :=
+def cech_splitting [split f] (n : ℕ) : f.cech_nerve _[n] ⟶ f.cech_nerve _[n+1] :=
 wide_pullback.lift (wide_pullback.base _)
 (λ i, if h : i.down = 0 then wide_pullback.base _ ≫ split.σ else wide_pullback.π _ ⟨i.down.pred h⟩)
 begin
@@ -28,17 +28,7 @@ begin
   tidy,
 end
 
-@[simp]
-lemma face_zero_π (n : ℕ) (i : fin (n+1)) :
-  (f.cech_nerve.δ 0 : f.cech_nerve _[n+1] ⟶ _) ≫ wide_pullback.π _ ⟨i⟩ =
-  wide_pullback.π _ ⟨i.succ⟩ :=
-begin
-  change wide_pullback.lift _ _ _ ≫ _ = _,
-  simpa,
-end
-
-@[simp]
-lemma cech_splitting_face_zero (n : ℕ) :
+lemma cech_splitting_face_zero [split f] (n : ℕ) :
   f.cech_splitting n ≫ f.cech_nerve.δ 0 = 𝟙 _ :=
 begin
   ext ⟨j⟩,
@@ -54,7 +44,6 @@ begin
     simp },
 end
 
-@[simp]
 lemma face_π (n : ℕ) (i : fin (n+1)) (j : fin (n+2)) :
   (f.cech_nerve.δ j : f.cech_nerve _[n+1] ⟶ _) ≫ wide_pullback.π _ ⟨i⟩ =
   wide_pullback.π _ ⟨j.succ_above i⟩ :=
@@ -63,8 +52,7 @@ begin
   simpa,
 end
 
-@[simp]
-lemma cech_splitting_face (n : ℕ) (j : fin (n+3)) (hj : j ≠ 0) :
+lemma cech_splitting_face [split f] (n : ℕ) (j : fin (n+3)) (hj : j ≠ 0) :
   f.cech_splitting (n+1) ≫ f.cech_nerve.δ j =
   f.cech_nerve.δ (j.pred hj) ≫ f.cech_splitting n :=
 begin
@@ -101,10 +89,11 @@ section contracting_homotopy
 open category_theory.limits opposite
 
 -- Note: Universe restrictions! I hope this doesn't pose any issues later...
-variables {P N : Type u} [category.{v} P] [category.{v} N] [preadditive N] (M : Pᵒᵖ ⥤ N)
-variables (f : arrow P) [arrow.split f]
+variables {P N : Type u} [category.{v} P] [category.{v} N] (M : Pᵒᵖ ⥤ N)
+variables (f : arrow P)
 variables [∀ n : ℕ, has_wide_pullback f.right (λ i : ulift (fin (n+1)), f.left) (λ i, f.hom)]
 
+/-- The augmented Cech conerve induced by applying M to `f.augmented_cech_nerve`. -/
 @[simps]
 def conerve : cosimplicial_object.augmented N :=
 { left := M.obj (op f.right),
@@ -122,6 +111,9 @@ def conerve : cosimplicial_object.augmented N :=
       simp,
     end } }
 
+variables [arrow.split f] [preadditive N]
+
+/-- The morphisms yielding the contracting homotopy. -/
 def contracting_homotopy : Π (n : ℕ),
   (f.conerve M).to_cocomplex.X (n+1) ⟶ (f.conerve M).to_cocomplex.X n
 | 0 := M.map $ quiver.hom.op $
@@ -144,7 +136,6 @@ begin
   congr' 2,
   simp,
 end
-
 
 open cosimplicial_object.augmented
 
