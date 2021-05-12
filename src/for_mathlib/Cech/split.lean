@@ -1,4 +1,7 @@
+import category_theory.preadditive
 import algebraic_topology.cech_nerve
+import for_mathlib.simplicial.complex
+import for_mathlib.simplicial.augmented
 import for_mathlib.arrow.split
 import for_mathlib.fin
 
@@ -88,6 +91,47 @@ begin
       change k ≠ 0 at h,
       rw fin.succ_above_pred } }
 end
+
+end arrow
+
+namespace arrow
+
+section contracting_homotopy
+
+open category_theory.limits opposite
+
+-- Note: Universe restrictions! I hope this doesn't pose any issues later...
+variables {P N : Type u} [category.{v} P] [category.{v} N] [preadditive N] (M : Pᵒᵖ ⥤ N)
+variables (f : arrow P) [arrow.split f]
+variables [∀ n : ℕ, has_wide_pullback f.right (λ i : ulift (fin (n+1)), f.left) (λ i, f.hom)]
+
+@[simps]
+def conerve : cosimplicial_object.augmented N :=
+{ left := M.obj (op f.right),
+  right := f.cech_nerve.right_op ⋙ M,
+  hom :=
+  { app := λ m, M.map (f.augmented_cech_nerve.hom.app (op m)).op,
+    naturality' := begin
+      -- opposites are annoying.
+      intros m n f,
+      dsimp,
+      simp only [← M.map_comp, ← M.map_id],
+      congr' 1,
+      simp only [← op_comp, ← op_id],
+      congr' 1,
+      simp,
+    end } }
+
+def contracting_homotopy : Π (n : ℕ),
+  (f.conerve M).to_cocomplex.X (n+1) ⟶ (f.conerve M).to_cocomplex.X n
+| 0 := M.map $ quiver.hom.op $
+         wide_pullback.lift
+           (𝟙 f.right)
+           (λ i : ulift (fin (0+1)), (split.σ : f.right ⟶ f.left))
+           (by simp)
+| (n+1) := M.map (f.cech_splitting n).op
+
+end contracting_homotopy
 
 end arrow
 
