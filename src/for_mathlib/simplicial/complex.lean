@@ -107,7 +107,7 @@ def cocomplex : cosimplicial_object C ⥤ cochain_complex ℕ C :=
 namespace augmented
 
 /-- The objects defining the cochain complex associated to an augmented cosimplicial object. -/
-@[nolint unused_arguments, simp]
+@[nolint unused_arguments]
 def to_cocomplex_obj (M : augmented C) : ℕ → C
 | 0 := augmented.point.obj M
 | (n+1) := (augmented.drop.obj M).obj [n]

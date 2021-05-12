@@ -131,6 +131,62 @@ def contracting_homotopy : Π (n : ℕ),
            (by simp)
 | (n+1) := M.map (f.cech_splitting n).op
 
+#check f.contracting_homotopy M 0
+
+lemma is_contracting_homotopy_zero :
+  (f.conerve M).to_cocomplex.d 0 1 ≫ f.contracting_homotopy M 0 = 𝟙 _ :=
+begin
+  dsimp,
+  split_ifs,
+  swap, finish,
+  dsimp [contracting_homotopy,
+    cosimplicial_object.augmented.to_cocomplex_d,
+    cosimplicial_object.augmented.to_cocomplex_obj],
+  simp only [category.comp_id, ← M.map_comp, ← M.map_id, ← op_id, ← op_comp],
+  congr' 2,
+  simp,
+end
+
+lemma is_contracting_homotopy_one :
+  (f.conerve M).to_cocomplex.d 1 2 ≫ f.contracting_homotopy M 1 +
+  f.contracting_homotopy M 0 ≫ (f.conerve M).to_cocomplex.d 0 1 = 𝟙 _ :=
+begin
+  dsimp,
+  rw if_pos,
+  swap, refl,
+  dsimp [contracting_homotopy,
+    cosimplicial_object.augmented.to_cocomplex_d,
+    cosimplicial_object.coboundary],
+  simp [fin.sum_univ_succ],
+  simp_rw ← M.map_comp,
+  rw ← add_zero (𝟙 ((conerve M f).to_cocomplex_obj 1)),
+  rw add_assoc,
+  congr' 1,
+  { dsimp [conerve, cosimplicial_object.augmented.to_cocomplex_obj],
+    rw ← M.map_id,
+    congr' 1,
+    simp_rw [← op_comp, ← op_id],
+    congr' 1,
+    dsimp [cech_splitting],
+    sorry,
+    --tidy
+  },
+  { rw neg_add_eq_zero,
+    congr' 1,
+    simp_rw ← op_comp,
+    congr' 1,
+    dsimp [cech_splitting],
+    tidy,
+  }
+end
+
+lemma is_contracting_homotopy (n : ℕ) :
+  (f.conerve M).to_cocomplex.d (n+2) (n+3) ≫ f.contracting_homotopy M (n+2) +
+  f.contracting_homotopy M (n+1) ≫ (f.conerve M).to_cocomplex.d (n+1) (n+2) = 𝟙 _ :=
+begin
+  sorry
+end
+
 end contracting_homotopy
 
 end arrow
