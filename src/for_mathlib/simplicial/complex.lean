@@ -1,5 +1,6 @@
 import algebra.module.hom
 import algebra.big_operators
+import data.fintype.card
 
 import for_mathlib.preadditive_category
 import system_of_complexes.complex
