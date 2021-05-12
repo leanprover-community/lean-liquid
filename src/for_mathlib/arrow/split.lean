@@ -7,6 +7,7 @@ universes v u
 
 variables {C : Type u} [category.{v} C]
 
+/-- Split arrows. -/
 class split (f : arrow C) :=
 (σ : f.right ⟶ f.left)
 (is_splitting' : σ ≫ f.hom = 𝟙 _ . obviously)
