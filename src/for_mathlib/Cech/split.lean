@@ -199,11 +199,48 @@ begin
       { exact top_ne_bot } } }
 end
 
+open cosimplicial_object.augmented
+
 lemma is_contracting_homotopy (n : ℕ) :
   (f.conerve M).to_cocomplex.d (n+2) (n+3) ≫ f.contracting_homotopy M (n+2) +
   f.contracting_homotopy M (n+1) ≫ (f.conerve M).to_cocomplex.d (n+1) (n+2) = 𝟙 _ :=
 begin
-  sorry
+  dsimp,
+  erw if_pos,
+  swap, refl,
+  dsimp only [to_cocomplex_d],
+  rw if_pos,
+  swap, refl,
+  dsimp only [cosimplicial_object.coboundary],
+  simp only [preadditive.sum_comp, preadditive.comp_sum],
+  erw [fin.sum_univ_succ, add_assoc, ← finset.sum_add_distrib],
+  rw ← add_zero (𝟙 ((conerve M f).to_cocomplex_obj (n + 2))),
+  congr' 1,
+  { dsimp [conerve, to_cocomplex_obj, contracting_homotopy],
+    simp,
+    simp_rw [← M.map_id, ← M.map_comp, ← op_comp, ← op_id],
+    congr' 2,
+    apply cech_splitting_face_zero },
+  { apply fintype.sum_eq_zero,
+    intros i,
+    simp only [
+      category.comp_id,
+      add_zero,
+      functor.comp_map,
+      fin.coe_succ,
+      preadditive.comp_gsmul,
+      preadditive.gsmul_comp],
+    suffices :
+      (drop.obj (conerve M f)).map (simplex_category.δ i.succ) ≫ contracting_homotopy M f (n + 2) =
+          contracting_homotopy M f (n + 1) ≫ (drop.obj (conerve M f)).map (simplex_category.δ i),
+    { rw [this, pow_succ],
+      simp },
+    dsimp only [cosimplicial_object.augmented.drop,
+      conerve, comma.snd, functor.right_op, contracting_homotopy, functor.comp],
+    simp_rw [← M.map_comp, ← op_comp],
+    congr' 2,
+    convert cech_splitting_face _ _ _ (fin.succ_ne_zero _),
+    simp }
 end
 
 end contracting_homotopy
