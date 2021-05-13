@@ -641,7 +641,8 @@ end
 
 end
 
-instance {α : Type*} [fintype α] : finite_dimensional ℚ (α → ℚ) := sorry
+instance {α : Type*} [fintype α] : finite_dimensional ℚ (α → ℚ) :=
+@is_noetherian_pi _ _ _ _ _ _ _ (λ i, infer_instance)
 
 lemma finset_Gordan_aux_pi {α : Type*} [fintype α] (S : finset ((α → ℤ) →+ ℤ)) :
   (intersect_halfspaces_set (S : set ((α → ℤ) →+ ℤ))).fg  :=

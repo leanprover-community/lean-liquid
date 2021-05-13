@@ -75,10 +75,77 @@ begin
       refine submodule.smul_mem _ n (submodule.subset_span (or.inl ⟨i, rfl⟩)) } },
 end
 
+-- def dual_basis_vecs (R : Type*) [comm_semiring R] (α : Type*) [fintype α] :
+--   α → module.dual R (α → R) := linear_map.proj
+
+-- lemma dual_basis_vecs_li (R : Type*) [comm_semiring R] (α : Type*) [fintype α] :
+--   linear_independent R (dual_basis_vecs R α) :=
+-- begin
+--   rw fintype.linear_independent_iff,
+--   intros g hg a,
+--   classical,
+--   let t : α → R := λ i, if i = a then 1 else 0,
+--   have : (∑ (i : α), g i • dual_basis_vecs R α i) t = 0,
+--   { rw hg,
+--     simp },
+--   simpa [dual_basis_vecs] using this,
+-- end
+
+-- lemma dual_basis_vecs_span (R : Type*) [comm_semiring R] (α : Type*) [fintype α] :
+--   submodule.span R (set.range (dual_basis_vecs R α)) = ⊤ :=
+-- begin
+--   rw eq_top_iff,
+--   rintro f -,
+--   classical,
+--   have : ∑ (i : α), f (pi.single i 1) • dual_basis_vecs R α i = f,
+--   { ext x,
+--     simp only [dual_basis_vecs, linear_map.coe_proj, algebra.id.smul_eq_mul, linear_map.smul_apply,
+--       fintype.sum_apply, function.comp_app, linear_map.coe_fn_sum, function.eval_apply,
+--       linear_map.coe_comp, linear_map.coe_single],
+--     simp only [pi.single, function.update],
+--     simp only [mul_boole, dite_eq_ite, eq_rec_constant, finset.mem_univ, if_true, pi.zero_apply,
+--       finset.sum_ite_eq'] },
+--   rw ←this,
+--   refine submodule.sum_smul_mem _ _ _,
+--   rintro c -,
+--   apply submodule.subset_span,
+--   simp
+-- end
+
+-- def dual_basis (R : Type*) [comm_ring R] (α : Type*) [fintype α] :
+--   basis α R (module.dual R (α → R)) :=
+-- sorry
+-- basis.mk (dual_basis_vecs_li R α) (dual_basis_vecs_span R α)
+
 theorem dual (ha : finite_free A) : finite_free (A →+ ℤ) :=
 begin
-  -- do this after is_basis refactor?
-  sorry
+  rcases ha with ⟨ι, hι, ⟨ha⟩⟩,
+  refine ⟨ι, hι, ⟨_⟩⟩,
+  let v : ι → A →+ ℤ := λ i, (ha.coord i).to_add_monoid_hom,
+  classical,
+  resetI,
+  have : linear_independent ℤ v,
+  { rw fintype.linear_independent_iff,
+    intros g hg i,
+    have : (finset.univ.sum (λ (i : ι), g i • v i)) (ha i) = (0 : A →+ ℤ) (ha i),
+    { rw hg },
+    simpa [finsupp.single_apply] using this },
+  apply basis.mk this,
+  rw eq_top_iff,
+  rintro f -,
+  have : (finset.univ.sum (λ i, (f (ha i) : ℤ) • v i)).to_int_linear_map = f.to_int_linear_map,
+  { apply ha.ext,
+    intro i,
+    simp [finsupp.single_apply] },
+  have : (finset.univ.sum (λ i, (f (ha i) : ℤ) • v i)) = f,
+  { ext x,
+    rw [←add_monoid_hom.coe_to_int_linear_map, this],
+    simp },
+  rw ←this,
+  refine submodule.sum_smul_mem _ _ _,
+  intros i hi,
+  apply submodule.subset_span,
+  refine ⟨_, rfl⟩,
 end
 
 /-- The rank of a finite free abelian group. -/
