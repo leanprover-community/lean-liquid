@@ -27,6 +27,9 @@ begin
   sorry
 end
 
+lemma nnreal.eq_zero_or_pos (r : nnreal) : r = 0 ∨ 0 < r :=
+sorry
+
 instance semi_normed_group.inhabited (G : Type*) [semi_normed_group G] : inhabited G := ⟨0⟩
 
 section locally_constant_stuff
@@ -94,6 +97,19 @@ begin
   sorry
 end
 
+lemma locally_constant.norm_eq_iff (f : locally_constant X G) {x : X} :
+  ∥f∥ = ∥f x∥ ↔ ∀ x', ∥f x'∥ ≤ ∥f x∥ :=
+sorry
+
+lemma locally_constant.norm_eq_iff' (f : locally_constant X G) {x : X} :
+  ∥f∥ = ∥f x∥ ↔ ∀ g ∈ range f, ∥g∥ ≤ ∥f x∥ :=
+sorry
+
+lemma locally_constant.norm_comap {α : Type*} [topological_space α] [compact_space α]
+  (f : locally_constant X G) {g : α → X} (h : continuous g) : ∥f.comap g∥ = ∥f∥ :=
+sorry
+
+
 lemma embedding.range_locally_constant_extend [nonempty X] {Z : Type*} [inhabited Z] (f : locally_constant X Z) :
 range (he.locally_constant_extend f) = range f :=
 begin
@@ -115,6 +131,15 @@ begin
     simp }
 end
 
+/- lemma embedding.norm_extend_eq [nonempty X] (f : locally_constant X G) :
+  ∃ x, ∥f∥ = ∥f x∥ ∧ ∥he.locally_constant_extend f∥ = ∥he.locally_constant_extend f (e x)∥ :=
+begin
+  cases f.exists_norm_eq with x hx,
+  use [x, hx],
+  rwa [(he.locally_constant_extend f).norm_eq_iff', he.range_locally_constant_extend,
+       he.locally_constant_extend_extends, ← f.norm_eq_iff']
+end
+ -/
 
 variables
   (φ : X → Y) -- this will be φ is T⁻¹ : M_{≤ r'c}^a → M_{≤ c}^a
@@ -122,28 +147,36 @@ variables
 
 include r
 
-
+lemma locally_constant.norm_map_aut (g : locally_constant Y V) : ∥g.map T.hom∥ = r*∥g∥ :=
+begin
+  by_cases hY : nonempty Y,
+  { resetI,
+    cases g.exists_norm_eq with y hy,
+    erw [hy, ← norm_T, locally_constant.norm_eq_iff],
+    intro y',
+    erw [norm_T, norm_T],
+    cases r.eq_zero_or_pos with hr hr,
+    { simp [hr] },
+    { simp [hr, ← hy, g.norm_apply_le] } },
+  { simp [hY] },
+end
 
 noncomputable
 def embedding.h (f : locally_constant X V) : ℕ → locally_constant Y V
 | 0     := (he.locally_constant_extend f).map T.hom
 | (i+1) := (he.locally_constant_extend $ (embedding.h i).comap φ).map T.hom
 
-variables (f : locally_constant X V)
+variables (f : locally_constant X V) {φ}
 
-lemma norm_h (i : ℕ) : ∥he.h φ f i∥ = r^i*∥f∥ :=
+lemma norm_h (hφ : continuous φ) (i : ℕ) : ∥he.h φ f i∥ = r^(i+1)*∥f∥ :=
 begin
-  induction i with i ih,
-  { simp [embedding.h],
-    by_cases hX : nonempty X,
-    { -- Need to argue there is some x such that ∥f∥ = ∥f x∥ *and*
-      -- ∥he.locally_constant_extend f∥ = ∥f x∥ and then
-      -- ∥locally_constant.map ⇑(T.hom) (he.locally_constant_extend f)∥ = ∥T (f x)∥ = r*∥f x∥
-      sorry },
-    /- { simp [hX] } -/sorry },
-  { -- same argument but also need that comap is norm preserving
-    sorry },
+  induction i with i ih ; dsimp [embedding.h],
+  { rw [locally_constant.norm_map_aut, he.norm_extend, zero_add, pow_one] },
+  { rw [locally_constant.norm_map_aut, he.norm_extend, (he.h φ f i).norm_comap hφ, ih, ← mul_assoc],
+    refl },
 end
+
+variables (φ)
 
 def embedding.g (f : locally_constant X V) (N : ℕ) : locally_constant Y V :=
 ∑ i in finset.range N, he.h φ f i
