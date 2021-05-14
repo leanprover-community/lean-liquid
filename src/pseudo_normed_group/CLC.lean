@@ -75,7 +75,7 @@ rfl
 
 lemma res_def' [fact (c₂ ≤ c₁)] (M : ProFiltPseuNormGrpWithTinv r') :
   (res V r' c₁ c₂ n).app (op M) =
-  (CLC V).map ((Pow n).map $ (Filtration.cast_le M c₂ c₁)).op :=
+  (CLC V).map ((Filtration.cast_le ((ProFiltPseuNormGrpWithTinv.Pow r' n).obj M) c₂ c₁)).op :=
 rfl
 
 lemma res_app' [fact (c₂ ≤ c₁)] (M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ) :

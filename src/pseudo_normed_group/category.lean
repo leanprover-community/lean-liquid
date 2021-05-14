@@ -193,7 +193,8 @@ def Pow (n : ℕ) : ProFiltPseuNormGrpWithTinv.{u} r' ⥤ ProFiltPseuNormGrpWith
 @[simps]
 def Pow_Pow_X_equiv (N n : ℕ) :
   M ^ (N * n) ≃+ (M ^ N) ^ n :=
-{ map_add' := λ x y, by { ext, refl },
+{ to_fun := ((equiv.curry _ _ _).symm.trans (((equiv.prod_comm _ _).trans fin_prod_fin_equiv).arrow_congr (equiv.refl _))).symm,
+  map_add' := λ x y, by { ext, refl },
   .. ((equiv.curry _ _ _).symm.trans (((equiv.prod_comm _ _).trans fin_prod_fin_equiv).arrow_congr (equiv.refl _))).symm }
 
 open profinitely_filtered_pseudo_normed_group

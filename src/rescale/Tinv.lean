@@ -39,18 +39,15 @@ local attribute [semireducible] CLCFPTinv₂ CLCFPTinv₂.res
   breen_deligne.universal_map.eval_CLCFPTinv₂
 
 theorem eval_CLCFPTinv₂_rescale
-  [fact (c₂ ≤ r' * c₁)] [fact (c₄ ≤ r' * c₃)]
-  [ϕ.suitable c₃ c₁] [ϕ.suitable c₄ c₂]
+  [fact (c₂ ≤ r' * c₁)] [fact (c₄ ≤ r' * c₃)] [ϕ.suitable c₃ c₁] [ϕ.suitable c₄ c₂]
   (N : ℝ≥0) [fact (c₂ * N⁻¹ ≤ r' * (c₁ * N⁻¹))] [fact (c₄ * N⁻¹ ≤ r' * (c₃ * N⁻¹))]
   (M : ProFiltPseuNormGrpWithTinv r') :
   arrow.mk ((eval_CLCFPTinv₂ r V r' c₁ c₂ c₃ c₄ ϕ).app (op (of r' (rescale N M)))) =
-  arrow.mk ((eval_CLCFPTinv₂ r V r' (c₁ * N⁻¹) (c₂ * N⁻¹) (c₃ * N⁻¹) (c₄ * N⁻¹) ϕ).app
-    (op M)) :=
+  arrow.mk ((eval_CLCFPTinv₂ r V r' (c₁ * N⁻¹) (c₂ * N⁻¹) (c₃ * N⁻¹) (c₄ * N⁻¹) ϕ).app (op M)) :=
 begin
   dsimp only [universal_map.eval_CLCFPTinv₂, _root_.id, NormedGroup.equalizer.map_nat_app],
-  refine NormedGroup.equalizer.map_congr _ _ rfl rfl rfl rfl,
-  { simp only [universal_map.eval_CLCFP_rescale V r' _ _ _ _ _ N M] },
-  { simp only [universal_map.eval_CLCFP_rescale V r' _ _ _ _ _ N M] },
+  refine NormedGroup.equalizer.map_congr _ _ rfl rfl rfl rfl;
+  { exact universal_map.eval_CLCFP_rescale V r' _ _ _ _ _ N M },
 end
 
 end universal_map

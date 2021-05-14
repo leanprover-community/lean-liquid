@@ -1,5 +1,5 @@
 import rescale.pseudo_normed_group
-import pseudo_normed_group.FiltrationPow
+import pseudo_normed_group.FP
 
 open_locale classical nnreal
 open ProFiltPseuNormGrpWithTinv

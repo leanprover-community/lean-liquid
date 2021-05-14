@@ -1,4 +1,4 @@
-import pseudo_normed_group.FiltrationPow
+import pseudo_normed_group.FP
 import locally_constant.NormedGroup
 import locally_constant.Vhat
 
