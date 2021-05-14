@@ -1,5 +1,6 @@
 import category_theory.concrete_category.bundled_hom
 import topology.category.Profinite
+import data.equiv.fin
 
 import pseudo_normed_group.with_Tinv
 
@@ -15,6 +16,8 @@ universe variables u
 
 open category_theory
 open_locale nnreal
+
+local attribute [instance] type_pow
 
 noncomputable theory
 
@@ -177,5 +180,61 @@ lemma iso_of_equiv_of_strict'_inv_apply
   (map_Tinv' : ∀ x, e (Tinv x) = Tinv (e x))
   (x : M₂) :
   (iso_of_equiv_of_strict' e strict' continuous' map_Tinv').inv x = e.symm x := rfl
+
+variables (r')
+
+@[simps]
+def Pow (n : ℕ) : ProFiltPseuNormGrpWithTinv.{u} r' ⥤ ProFiltPseuNormGrpWithTinv.{u} r' :=
+{ obj := λ M, of r' $ M ^ n,
+  map := λ M₁ M₂ f, profinitely_filtered_pseudo_normed_group_with_Tinv.pi_map r' _ _ (λ i, f),
+  map_id' := λ M, by { ext, refl },
+  map_comp' := by { intros, ext, refl } }
+
+@[simps]
+def Pow_Pow_X_equiv (N n : ℕ) :
+  M ^ (N * n) ≃+ (M ^ N) ^ n :=
+{ map_add' := λ x y, by { ext, refl },
+  .. ((equiv.curry _ _ _).symm.trans (((equiv.prod_comm _ _).trans fin_prod_fin_equiv).arrow_congr (equiv.refl _))).symm }
+
+open profinitely_filtered_pseudo_normed_group
+
+@[simps]
+def Pow_Pow_X (N n : ℕ) (M : ProFiltPseuNormGrpWithTinv.{u} r') :
+  (Pow r' N ⋙ Pow r' n).obj M ≅ (Pow r' (N * n)).obj M :=
+iso.symm $
+iso_of_equiv_of_strict'
+  (Pow_Pow_X_equiv r' N n)
+  begin
+    intros c x,
+    dsimp,
+    split; intro h,
+    { intros i j, exact h (fin_prod_fin_equiv (j, i)) },
+    { intro ij,
+      have := h (fin_prod_fin_equiv.symm ij).2 (fin_prod_fin_equiv.symm ij).1,
+      dsimp at this, simpa only [prod.mk.eta, equiv.apply_symm_apply] using this, },
+  end
+  begin
+    intro c, dsimp,
+    rw [← (filtration_pi_homeo (λ _, M ^ N) c).comp_continuous_iff,
+        ← (filtration_pi_homeo (λ _, M) c).symm.comp_continuous_iff'],
+    apply continuous_pi,
+    intro i,
+    rw [← (filtration_pi_homeo (λ _, M) c).comp_continuous_iff],
+    apply continuous_pi,
+    intro j,
+    have := @continuous_apply _ (λ _, filtration M c) _ (fin_prod_fin_equiv (j, i)),
+    dsimp [function.comp] at this ⊢,
+    simpa only [subtype.coe_eta],
+  end
+  (by { intros, ext, refl })
+
+@[simps hom inv]
+def Pow_mul (N n : ℕ) : Pow r' (N * n) ≅ Pow r' N ⋙ Pow r' n :=
+nat_iso.of_components (λ M, (Pow_Pow_X r' N n M).symm)
+begin
+  intros X Y f,
+  ext x i j,
+  refl,
+end
 
 end ProFiltPseuNormGrpWithTinv

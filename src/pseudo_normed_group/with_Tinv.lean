@@ -91,6 +91,8 @@ rfl
     profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂).to_add_monoid_hom =
     ⟨f, h₁, h₂⟩ := rfl
 
+@[simp] lemma coe_to_add_monoid_hom : ⇑f.to_add_monoid_hom = f := rfl
+
 @[simp] lemma map_zero : f 0 = 0 := f.to_add_monoid_hom.map_zero
 
 @[simp] lemma map_add (x y) : f (x + y) = f x + f y := f.to_add_monoid_hom.map_add _ _
@@ -102,6 +104,8 @@ f.to_add_monoid_hom.map_sum _ _
 @[simp] lemma map_sub (x y) : f (x - y) = f x - f y := f.to_add_monoid_hom.map_sub _ _
 
 @[simp] lemma map_neg (x) : f (-x) = -(f x) := f.to_add_monoid_hom.map_neg _
+
+@[simp] lemma map_gsmul (n : ℤ) (x) : f (n • x) = n • (f x) := f.to_add_monoid_hom.map_gsmul _ _
 
 lemma strict : ∀ ⦃c x⦄, x ∈ filtration M₁ c → f x ∈ filtration M₂ c := f.strict'
 
@@ -231,8 +235,10 @@ namespace profinitely_filtered_pseudo_normed_group_with_Tinv
 
 noncomputable theory
 
-variables (r' : ℝ≥0) {ι : Type*} (M : ι → Type*)
+variables (r' : ℝ≥0) {ι : Type*} (M M₁ M₂ : ι → Type*)
 variables [Π i, profinitely_filtered_pseudo_normed_group_with_Tinv r' (M i)]
+variables [Π i, profinitely_filtered_pseudo_normed_group_with_Tinv r' (M₁ i)]
+variables [Π i, profinitely_filtered_pseudo_normed_group_with_Tinv r' (M₂ i)]
 
 instance pi : profinitely_filtered_pseudo_normed_group_with_Tinv r' (Π i, M i) :=
 { Tinv := profinitely_filtered_pseudo_normed_group.pi_map (λ i, Tinv)
@@ -243,6 +249,42 @@ instance pi : profinitely_filtered_pseudo_normed_group_with_Tinv r' (Π i, M i) 
 instance pi' (M : Type*) [profinitely_filtered_pseudo_normed_group_with_Tinv r' M] (N : ℕ) :
   profinitely_filtered_pseudo_normed_group_with_Tinv r' (M^N) :=
 profinitely_filtered_pseudo_normed_group_with_Tinv.pi r' (λ i, M)
+
+include r'
+@[simp] lemma pi_Tinv_apply (x : Π i, M i) (i : ι) : Tinv x i = Tinv (x i) := rfl
+omit r'
+
+@[simps {fully_applied := ff}]
+def pi_proj (i : ι) : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' (Π i, M i) (M i) :=
+{ to_fun := add_monoid_hom.apply M i,
+  strict' := λ c x hx, hx i,
+  continuous' := λ c, (continuous_apply i).comp (filtration_pi_homeo M c).continuous,
+  map_Tinv' := λ x, rfl,
+  .. add_monoid_hom.apply M i }
+
+/-- Universal property of the product of
+profinitely filtered pseudo normed groups with `T⁻¹`-action -/
+@[simps {fully_applied := ff}]
+def pi_lift {N : Type*} [profinitely_filtered_pseudo_normed_group_with_Tinv r' N]
+  (f : Π i, profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' N (M i)) :
+  profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' N (Π i, M i) :=
+{ to_fun := add_monoid_hom.mk_to_pi (λ i, (f i).to_add_monoid_hom),
+  strict' := λ c x hx i, (f i).strict hx,
+  continuous' :=
+  begin
+    intros c,
+    apply continuous_induced_rng,
+    apply continuous_pi,
+    intro i,
+    exact (f i).continuous' c,
+  end,
+  map_Tinv' := λ x, by { ext i, exact (f i).map_Tinv x },
+  .. add_monoid_hom.mk_to_pi (λ i, (f i).to_add_monoid_hom) }
+
+@[simps {fully_applied := ff}]
+def pi_map (f : Π i, profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' (M₁ i) (M₂ i)) :
+  profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' (Π i, M₁ i) (Π i, M₂ i) :=
+pi_lift r' _ $ λ i, (f i).comp (pi_proj r' _ i)
 
 
 end profinitely_filtered_pseudo_normed_group_with_Tinv

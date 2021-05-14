@@ -105,6 +105,8 @@ rfl
     profinitely_filtered_pseudo_normed_group_hom M₁ M₂).to_add_monoid_hom =
     ⟨f, h₁, h₂⟩ := rfl
 
+@[simp] lemma coe_to_add_monoid_hom : ⇑f.to_add_monoid_hom = f := rfl
+
 @[simp] lemma map_zero : f 0 = 0 := f.to_add_monoid_hom.map_zero
 
 @[simp] lemma map_add (x y) : f (x + y) = f x + f y := f.to_add_monoid_hom.map_add _ _
@@ -537,6 +539,15 @@ function.injective.add_comm_group
   (λ f g h, by { ext, rw add_monoid_hom.ext_iff at h, exact h x })
   rfl (λ _ _, rfl) (λ _, rfl) (λ _ _, rfl)
 
+@[simps]
+def to_add_monoid_hom_hom : (profinitely_filtered_pseudo_normed_group_hom M₁ M₂) →+ (M₁ →+ M₂) :=
+{ to_fun := to_add_monoid_hom,
+  map_zero' := rfl,
+  map_add' := λ _ _, rfl }
+
+lemma to_add_monoid_hom_hom_injective : function.injective (@to_add_monoid_hom_hom M₁ M₂ _ _) :=
+λ f g h, by { ext x, exact add_monoid_hom.congr_fun h x }
+
 lemma bound_by.add {f g : profinitely_filtered_pseudo_normed_group_hom M₁ M₂} {Cf Cg : ℝ≥0}
   (hf : f.bound_by Cf) (hg : g.bound_by Cg) :
   (f + g).bound_by (Cf + Cg) :=
@@ -702,6 +713,7 @@ instance pi : profinitely_filtered_pseudo_normed_group (Π i, M i) :=
 
 variables {M}
 
+@[simps]
 def pi_proj (i : ι) : profinitely_filtered_pseudo_normed_group_hom (Π i, M i) (M i) :=
 profinitely_filtered_pseudo_normed_group_hom.mk_of_bound (add_monoid_hom.apply M i) 1 $
 begin
@@ -716,11 +728,13 @@ lemma pi_proj_bound_by (i : ι) : (@pi_proj _ M _ i).bound_by 1 :=
 profinitely_filtered_pseudo_normed_group_hom.mk_of_bound_bound_by _ _ _
 
 /-- Universal property of the product of profinitely filtered pseudo normed groups -/
+@[simps {fully_applied := ff}]
 def pi_lift {N : Type*} [profinitely_filtered_pseudo_normed_group N]
   (f : Π i, profinitely_filtered_pseudo_normed_group_hom N (M i))
   (hf : ∃ C, ∀ i, (f i).bound_by C) :
   profinitely_filtered_pseudo_normed_group_hom N (Π i, M i) :=
-{ bound' := by { obtain ⟨C, hC⟩ := hf, refine ⟨C, λ c x hx i, hC i hx⟩ },
+{ to_fun := add_monoid_hom.mk_to_pi (λ i, (f i).to_add_monoid_hom),
+  bound' := by { obtain ⟨C, hC⟩ := hf, refine ⟨C, λ c x hx i, hC i hx⟩ },
   continuous' :=
   begin
     intros c₁ c₂ f₀ hf₀,
