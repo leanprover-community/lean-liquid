@@ -13,7 +13,7 @@ import for_mathlib.Profinite
 - `φ.eval_FP r' c₁ c₂`: The map M_c₁^m → M_c₂^n induced by a (c₁, c₂)-suitable φ.
 
 -/
-open_locale classical nnreal
+open_locale classical nnreal big_operators
 noncomputable theory
 local attribute [instance] type_pow
 
@@ -134,16 +134,17 @@ end Filtration
 
 
 /-- `FiltrationPow r' c n` is the functor sending a profinitely filtered `M` to `M_c^n`. -/
-@[simps] def FiltrationPow (r' : ℝ≥0) (c : ℝ≥0) (n : ℕ) :
+@[simps obj map {fully_applied := ff}]
+def FiltrationPow (r' : ℝ≥0) (c : ℝ≥0) (n : ℕ) :
   ProFiltPseuNormGrpWithTinv r' ⥤ Profinite :=
-(Filtration r').obj c ⋙ Pow n
+ProFiltPseuNormGrpWithTinv.Pow r' n ⋙ (Filtration r').obj c
 
 namespace FiltrationPow
 
 @[simps]
 def cast_le (r' c₁ c₂ : ℝ≥0) [fact (c₁ ≤ c₂)] (n : ℕ) :
   FiltrationPow.{u} r' c₁ n ⟶ FiltrationPow r' c₂ n :=
-{ app := λ M, (Pow n).map (Filtration.cast_le M c₁ c₂),
+{ app := λ M, (Filtration.cast_le _ c₁ c₂),
   naturality' := λ M N f, by { ext, refl } }
 
 theorem cast_le_refl (r' c : ℝ≥0) (n : ℕ) : cast_le r' c c n = 𝟙 _ :=
@@ -157,10 +158,10 @@ by { ext, refl }
 @[simps]
 def Tinv (r' : ℝ≥0) (c c₂) [fact (c ≤ r' * c₂)] (n) :
   FiltrationPow r' c n ⟶ FiltrationPow r' c₂ n :=
-whisker_right (Filtration.Tinv₀ c c₂) (Pow n)
+whisker_left _ (Filtration.Tinv₀ c c₂)
 
 lemma Tinv_app (r' : ℝ≥0) (c c₂) [fact (c ≤ r' * c₂)] (n M) :
-  (Tinv r' c c₂ n).app M = (Pow n).map (Tinv₀_hom M c c₂) := rfl
+  (Tinv r' c c₂ n).app M = (Tinv₀_hom _ c c₂) := rfl
 
 lemma cast_le_vcomp_Tinv (r' c₁ c₂ c₃ : ℝ≥0)
   [fact (c₁ ≤ c₂)] [fact (c₂ ≤ c₃)] [fact (c₁ ≤ r' * c₂)] [fact (c₂ ≤ r' * c₃)] (n : ℕ) :
@@ -171,7 +172,7 @@ by { ext, refl }
 def mul_iso (r' c : ℝ≥0) (M : ProFiltPseuNormGrpWithTinv r') (N n : ℕ) :
   (FiltrationPow r' c n).obj (ProFiltPseuNormGrpWithTinv.of r' (↥M ^ N)) ≅
   (FiltrationPow r' c (N * n)).obj M :=
-(Pow n).map_iso (Filtration.pi_iso r' c M N) ≪≫ ((Pow_mul N n).symm.app $ ((Filtration r').obj c).obj _)
+((Filtration r').obj c).map_iso $ (ProFiltPseuNormGrpWithTinv.Pow_mul r' N n).symm.app _
 
 end FiltrationPow
 
@@ -180,7 +181,7 @@ namespace basic_universal_map
 
 variables (r' c c₁ c₂ c₃ c₄ : ℝ≥0) {l m n : ℕ} (ϕ : basic_universal_map m n)
 
-open FiltrationPow
+open FiltrationPow profinitely_filtered_pseudo_normed_group_with_Tinv_hom
 
 @[simps]
 def eval_FP [ϕ.suitable c₁ c₂] : FiltrationPow.{u} r' c₁ m ⟶ FiltrationPow r' c₂ n :=
@@ -192,27 +193,17 @@ def eval_FP [ϕ.suitable c₁ c₂] : FiltrationPow.{u} r' c₁ m ⟶ Filtration
     change ϕ.eval_png₀ M₂ c₁ c₂ ((FiltrationPow r' c₁ m).map f x) =
       (FiltrationPow r' c₂ n).map f (ϕ.eval_png₀ M₁ c₁ c₂ x),
     ext j,
-    dsimp only [basic_universal_map.eval_png₀],
-    simp only [basic_universal_map.eval_png_apply, f.map_sum,
-      FiltrationPow_map_to_fun_coe, subtype.coe_mk, pow_incl_apply, f.level_coe],
-    apply fintype.sum_congr,
-    intro i,
-    simp only [← gsmul_eq_smul],
-    exact (f.to_add_monoid_hom.map_gsmul _ _).symm
+    dsimp only [FiltrationPow_map, Filtration_obj_map_to_fun,basic_universal_map.eval_png₀_coe,
+      profinitely_filtered_pseudo_normed_group_with_Tinv_hom.level_coe,
+      comp_to_fun, coe_to_add_monoid_hom],
+    simp only [basic_universal_map.eval_png_apply, pi_map_to_fun, f.map_sum, f.map_gsmul],
   end }
 
 lemma eval_FP_comp (g : basic_universal_map m n) (f : basic_universal_map l m)
   [hg : g.suitable c₂ c₃] [hf : f.suitable c₁ c₂]
   [(basic_universal_map.comp g f).suitable c₁ c₃] :
   (basic_universal_map.comp g f).eval_FP r' c₁ c₃ = f.eval_FP r' c₁ c₂ ≫ g.eval_FP r' c₂ c₃ :=
-begin
-  ext j s i,
-  dsimp,
-  simp only [eval_png₀, subtype.coe_mk],
-  rw eval_png_comp,
-  simp only [add_monoid_hom.coe_comp, function.comp_app],
-  refl,
-end
+by { ext, dsimp, rw eval_png_comp, refl }
 
 lemma cast_le_comp_eval_FP
   [fact (c₁ ≤ c₂)] [ϕ.suitable c₂ c₄] [ϕ.suitable c₁ c₃] [fact (c₃ ≤ c₄)] :
@@ -229,14 +220,9 @@ begin
   change ϕ.eval_png₀ M c₂ c₄ ((Tinv r' c₁ c₂ m).app M x) =
     (Tinv r' c₃ c₄ n).app M (ϕ.eval_png₀ M c₁ c₃ x),
   ext j,
-  dsimp only [eval_png₀],
-  simp only [eval_png_apply, subtype.coe_mk, pow_incl_apply, continuous_map.coe_mk,
-    FiltrationPow.Tinv_app, FiltrationPow_map_to_fun_coe, Pow_map, Tinv₀_hom_to_fun,
-    Tinv₀_coe, profinitely_filtered_pseudo_normed_group_hom.map_sum],
-  apply fintype.sum_congr,
-  intro i,
-  simp only [← gsmul_eq_smul],
-  exact ((profinitely_filtered_pseudo_normed_group_hom.to_add_monoid_hom _).map_gsmul _ _).symm
+  dsimp,
+  simp only [eval_png_apply, profinitely_filtered_pseudo_normed_group_hom.map_sum,
+    profinitely_filtered_pseudo_normed_group_hom.map_gsmul, pi_Tinv_apply],
 end
 .
 
@@ -247,23 +233,13 @@ lemma mul_iso_eval_FP (N : ℕ) [ϕ.suitable c₂ c₁] (M) :
     (FiltrationPow.mul_iso.{u u} r' c₁ M N n).inv :=
 begin
   ext x i j,
-  iterate 4 { erw [category_theory.comp_apply] },
-  dsimp only [mul_iso_inv, eval_FP, mul, eval_png₀, continuous_map.coe_mk,
-    functor.map_iso_inv, add_monoid_hom.mk'_apply, matrix.reindex_linear_equiv_apply,
-    matrix.reindex_apply, nat_iso.app_inv, iso.symm_inv, Pow_mul_hom, Pow_Pow_X_inv_to_fun,
-    Filtration.pi_iso, iso_of_homeo, Pow_map, filtration_pi_homeo_symm_apply, pow_incl],
-  simp only [equiv.curry_apply, function.curry, equiv.arrow_congr_apply, subtype.coe_mk,
-    equiv.coe_refl, function.comp, _root_.id, equiv.symm_symm, equiv.trans_apply,
-    equiv.prod_comm_apply, prod.swap, eval_png, add_monoid_hom.mk_to_pi,
-    add_monoid_hom.coe_mk, matrix.minor_apply, equiv.symm_apply_apply, matrix.kronecker],
-  simp only [add_monoid_hom.coe_comp, equiv.symm_apply_apply, add_monoid_hom.apply_apply,
-    function.comp_app, const_smul_hom_apply, add_monoid_hom.mk_from_pi,
-    add_monoid_hom.finset_sum_apply],
+  dsimp [mul],
+  simp only [eval_png_apply, equiv.symm_apply_apply, matrix.minor_apply, matrix.kronecker],
   rw [← fin_prod_fin_equiv.sum_comp, ← finset.univ_product_univ, finset.sum_product,
       finset.sum_comm],
   simp only [equiv.symm_apply_apply, matrix.one_apply, boole_mul, ite_smul, zero_smul,
     finset.sum_ite_eq, finset.mem_univ, if_true],
-  convert finset.sum_apply j (finset.univ : finset (fin m)) _,
+  convert finset.sum_apply j (finset.univ : finset (fin m)) _ using 1,
 end
 
 end basic_universal_map
