@@ -24,7 +24,7 @@ variables (ι Λ : Type*) [fintype ι]
 
 section normed_group
 
-variables [semi_normed_group Λ]
+variables [normed_group Λ]
 
 instance : has_norm (ι →₀ Λ) := ⟨λ x, x.sum $ λ _, norm⟩
 
@@ -37,12 +37,12 @@ by simp only [norm_def, sum_single_index, norm_zero]
 
 variables (ι Λ)
 
-instance : semi_normed_group (ι →₀ Λ) :=
-semi_normed_group.of_core _ $
-{ norm_zero :=
+instance : normed_group (ι →₀ Λ) :=
+normed_group.of_core _ $
+{ norm_eq_zero_iff := λ x,
   begin
-    simp only [norm_def, sum, ← coe_nnnorm, ← nnreal.coe_sum, nnreal.coe_eq_zero, eq_self_iff_true,
-      finset.sum_eq_zero_iff, nnnorm_zero, zero_apply, mem_support_iff, ext_iff, imp_true_iff],
+    simp only [norm_def, sum, ← coe_nnnorm, ← nnreal.coe_sum, nnreal.coe_eq_zero, coe_zero,
+      finset.sum_eq_zero_iff, nnnorm_eq_zero, mem_support_iff, ext_iff, pi.zero_apply, not_imp_self]
   end,
   triangle :=
   begin
@@ -79,13 +79,8 @@ instance {ι : Type} [fintype ι] : polyhedral_lattice (ι →₀ Λ) :=
   end,
   polyhedral :=
   begin
-    obtain ⟨J, _instJ, x, hx, hx'⟩ := polyhedral_lattice.polyhedral Λ, resetI,
-    refine ⟨ι × J, infer_instance, λ j, single j.1 (x j.2), _, _⟩,
-    swap,
-    { rintro ⟨i, j⟩,
-      rw [finsupp.nnnorm_def, finsupp.sum_single_index],
-      { apply hx' },
-      { exact nnnorm_zero } },
+    obtain ⟨J, _instJ, x, hx⟩ := polyhedral_lattice.polyhedral Λ, resetI,
+    refine ⟨ι × J, infer_instance, λ j, single j.1 (x j.2), _⟩,
     intro l,
     have := λ i, hx (l i),
     choose d hd c H1 H2 using this,

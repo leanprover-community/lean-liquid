@@ -4,6 +4,7 @@ import ring_theory.int.basic
 
 import polyhedral_lattice.finsupp
 import polyhedral_lattice.category
+import polyhedral_lattice.topology
 
 import for_mathlib.free_abelian_group
 import for_mathlib.normed_group_quotient
@@ -149,8 +150,11 @@ end
 
 def obj := quotient_add_group.quotient (L f m)
 
-instance : semi_normed_group (obj f m) :=
-add_subgroup.semi_normed_group_quotient _
+instance : is_closed (L f m : set (fin m →₀ Λ')) :=
+is_closed_discrete _
+
+instance : normed_group (obj f m) :=
+add_subgroup.normed_group_quotient _
 
 def π : (fin m →₀ Λ') →+ obj f m :=
 by convert quotient_add_group.mk' (L f m)
@@ -170,8 +174,7 @@ end
 
 variables [fact f.to_add_monoid_hom.range.saturated]
 
-instance :
-  no_zero_smul_divisors ℤ (obj f m) :=
+instance : no_zero_smul_divisors ℤ (obj f m) :=
 { eq_zero_or_eq_zero_of_smul_eq_zero :=
   begin
     intros n x h,
@@ -195,8 +198,8 @@ instance : polyhedral_lattice (obj f m) :=
 { finite_free := obj_finite_free _ _,
   polyhedral :=
   begin
-    obtain ⟨ι, _inst_ι, l, hl, hl'⟩ := polyhedral_lattice.polyhedral (fin m →₀ Λ'),
-    refine ⟨ι, _inst_ι, (λ i, quotient_add_group.mk' (L f m) (l i)), _, _⟩,
+    obtain ⟨ι, _inst_ι, l, hl⟩ := polyhedral_lattice.polyhedral (fin m →₀ Λ'),
+    refine ⟨ι, _inst_ι, (λ i, quotient_add_group.mk' (L f m) (l i)), _⟩,
     { intros x,
       apply quotient_add_group.induction_on x; clear x,
       intro x,
@@ -207,7 +210,6 @@ instance : polyhedral_lattice (obj f m) :=
         simp only [add_monoid_hom.map_nsmul] },
       { dsimp,
         sorry } },
-    { sorry }
   end }
 
 end objects

@@ -360,7 +360,7 @@ lemma lem98 (Λ : Type*) [polyhedral_lattice Λ]
       (∀ i, y i ∈ filtration (Λ →+ Mbar r' S) (c/N + d)) :=
 begin
   classical,
-  obtain ⟨ι, _ftι, l, hl, hl'⟩ := polyhedral_lattice.polyhedral Λ, resetI,
+  obtain ⟨ι, _ftι, l, hl⟩ := polyhedral_lattice.polyhedral Λ, resetI,
   -- the next 4 lines are quite unfortunate, and it would be great to get rid of them
   have ffΛ := polyhedral_lattice.finite_free Λ,
   obtain ⟨A, hA⟩ := lem97' ffΛ N hN l,
@@ -428,7 +428,10 @@ begin
     { calc ∑ a in A, nnnorm (a (l i))
           = (∑ a in A, nnnorm (a (l i)) / nnnorm (l i)) * nnnorm (l i) : _
       ... ≤ finset.univ.sup (λ i, ∑ a in A, nnnorm (a (l i)) / nnnorm (l i)) * nnnorm (l i) : _,
-      { simp only [div_eq_mul_inv, ← finset.sum_mul, inv_mul_cancel_right' (hl' i)] },
+      { by_cases hli : l i = 0,
+        { simp only [hli, nnnorm_zero, finset.sum_const_zero, mul_zero, add_monoid_hom.map_zero] },
+        { rw ← nnnorm_eq_zero at hli,
+          simp only [div_eq_mul_inv, ← finset.sum_mul, inv_mul_cancel_right' hli] } },
       { exact mul_le_mul' (finset.le_sup (finset.mem_univ i)) le_rfl } } },
   { simp only [div_eq_mul_inv, add_mul, finset.sum_mul, nsmul_eq_mul],
     congr' 2,
