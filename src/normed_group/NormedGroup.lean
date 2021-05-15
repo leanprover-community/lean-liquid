@@ -4,6 +4,8 @@ import category_theory.limits.shapes.zero
 import category_theory.limits.shapes.kernels
 import category_theory.limits.creates
 
+import analysis.normed_space.normed_group_hom
+
 import for_mathlib.normed_group_quotient
 
 /-!
@@ -24,6 +26,8 @@ universes u v
 
 -- move this
 section for_mathlib
+
+-- These instances are in #7616
 
 instance punit.uniform_space : uniform_space punit := ⊥
 
