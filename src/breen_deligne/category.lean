@@ -1,7 +1,9 @@
 import breen_deligne.universal_map
 import breen_deligne.functorial_map
-import system_of_complexes.complex
+import algebra.homology.homotopy
+import algebra.homology.additive
 
+import for_mathlib.homological_complex
 import for_mathlib.free_abelian_group
 
 /-!
@@ -124,7 +126,7 @@ end FreeMat
 /-- Roughly speaking, this is a collection of formal finite sums of matrices
 that encode the data that rolls out of the Breen--Deligne resolution. -/
 @[derive [small_category, preadditive]]
-def data := chain_complex ℕ FreeMat
+def data := chain_complex FreeMat ℕ
 
 namespace data
 
@@ -136,15 +138,15 @@ open universal_map
 
 @[simps]
 def mul (N : ℕ) : data ⥤ data :=
-(FreeMat.mul_functor N).map_complex_like
+(FreeMat.mul_functor N).map_homological_complex _
 
 def mul_one_iso : (mul 1).obj BD ≅ BD :=
-differential_object.complex_like.iso_of_components (λ i, FreeMat.one_mul_iso.app _) $
-λ i j, FreeMat.one_mul_iso.hom.naturality (BD.d i j)
+homological_complex.iso_of_components (λ i, FreeMat.one_mul_iso.app _) $
+λ i j, (FreeMat.one_mul_iso.hom.naturality (BD.d i j)).symm
 
 def mul_mul_iso (m n : ℕ) : (mul m).obj ((mul n).obj BD) ≅ (mul (m * n)).obj BD :=
-differential_object.complex_like.iso_of_components (λ i, (FreeMat.mul_mul_iso _ _).app _) $
-λ i j, (FreeMat.mul_mul_iso _ _).hom.naturality (BD.d i j)
+homological_complex.iso_of_components (λ i, (FreeMat.mul_mul_iso _ _).app _) $
+λ i j, ((FreeMat.mul_mul_iso _ _).hom.naturality (BD.d i j)).symm
 
 end mul
 
@@ -155,17 +157,19 @@ def pow' : ℕ → data
 
 @[simps] def sum (BD : data) (N : ℕ) : (mul N).obj BD ⟶ BD :=
 { f := λ n, universal_map.sum _ _,
-  comm := λ m n, universal_map.sum_comp_mul _ _ }
+  comm' := λ m n, (universal_map.sum_comp_mul _ _).symm }
 
 @[simps] def proj (BD : data) (N : ℕ) : (mul N).obj BD ⟶ BD :=
 { f := λ n, universal_map.proj _ _,
-  comm := λ m n, universal_map.proj_comp_mul _ _ }
+  comm' := λ m n, (universal_map.proj_comp_mul _ _).symm }
 
-open differential_object.complex_like FreeMat
+open homological_complex FreeMat category_theory category_theory.limits
 
 def hom_pow' {BD : data} (f : (mul 2).obj BD ⟶ BD) : Π N, BD.pow' N ⟶ BD
 | 0     := 𝟙 _
 | (n+1) := (mul 2).map (hom_pow' n) ≫ f
+
+open_locale zero_object
 
 @[simps]
 def homotopy_two_mul {BD₁ BD₂ : data} {f g : BD₁ ⟶ BD₂} (h : homotopy f g) :
