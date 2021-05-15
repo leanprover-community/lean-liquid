@@ -212,8 +212,7 @@ begin
   { dsimp [embedding.g],
     simp only [embedding.h, finset.sum_singleton, sub_left_inj],
     ext x,
-    simp [he.continuous, he.locally_constant_extend_extends],
-     },
+    simp [he.continuous, he.locally_constant_extend_extends] },
   { set c_φ : normed_group_hom (locally_constant Y V) (locally_constant X V) := comap_hom φ hφ,
     set c_e : normed_group_hom (locally_constant Y V) (locally_constant X V) := comap_hom e he.continuous,
     set m_T : normed_group_hom (locally_constant X V) (locally_constant X V) := map_hom T.inv,
@@ -230,8 +229,7 @@ begin
     rw [← (he.locally_constant_extend $ comap φ $ H N).comap_map  e T.hom he.continuous,
         he.comap_locally_constant_extend, locally_constant.map_comp', normed_with_aut.T_inv_T_hom],
     simp [H],
-    abel,
-     },
+    abel },
 end
 
 open filter
