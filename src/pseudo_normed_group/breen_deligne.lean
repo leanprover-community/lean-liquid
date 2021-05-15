@@ -34,107 +34,100 @@ variables [pseudo_normed_group M]
 
 open add_monoid_hom pseudo_normed_group
 
--- TODO: make this definition readable.
-/-- `f.eval_png` is the group homomorphism `(M^m) →+ (M^n)`
-obtained by matrix multiplication with the matrix `f`.
+end pseudo_normed_group
 
-Implementation detail: We currently cannot multiply a matrix with `ℤ`-coefficients
-with a vector with coefficients in a `ℤ`-module.
-Hence we write out the definition of the homomorphism in a slightly convoluted way.
-See the lemma `eval_png_apply` for a readable formula. -/
-def eval_png : (M^m) →+ (M^n) :=
-mk_to_pi $ λ j, mk_from_pi $ λ i, const_smul_hom _ $ f j i
+section profinitely_filtered_pseudo_normed_group
 
-lemma eval_png_apply (x : M^m) : f.eval_png M x = λ j, ∑ i, f j i • (x i) :=
+open pseudo_normed_group profinitely_filtered_pseudo_normed_group add_monoid_hom
+open profinitely_filtered_pseudo_normed_group_hom
+
+variables [profinitely_filtered_pseudo_normed_group M]
+
+/-- `eval_png M f` is the homomorphism `M^m → M^n` of profinitely filtered pseudo-normed groups
+obtained by matrix multiplication with the matrix `f`. -/
+def eval_png : basic_universal_map m n →+
+  profinitely_filtered_pseudo_normed_group_hom (M ^ m) (M ^ n) :=
+add_monoid_hom.mk' (λ f, pi_lift (λ j, ∑ i, f j i • pi_proj i)
+  begin
+    let C : ℝ≥0 := finset.univ.sup (λ j, ∑ i, (f j i).nat_abs),
+    refine ⟨C, λ j, _⟩,
+    intros c x hx,
+    have : ∑ i, (↑(f j i).nat_abs * (1 * c)) ≤ C * c,
+    { rw ← finset.sum_mul, exact mul_le_mul' (finset.le_sup (finset.mem_univ j)) (one_mul c).le },
+    refine filtration_mono this _,
+    simp only [← coe_to_add_monoid_hom, ← to_add_monoid_hom_hom_apply,
+      add_monoid_hom.map_sum, add_monoid_hom.map_gsmul, add_monoid_hom.finset_sum_apply],
+    refine sum_mem_filtration _ _ _ _,
+    rintro i -,
+    refine int_smul_mem_filtration _ _ _ _,
+    exact @pi_proj_bound_by _ (λ _, M) _ i _ _ hx,
+  end)
+  begin
+    intros f g,
+    ext x j,
+    simp only [← coe_to_add_monoid_hom, ← to_add_monoid_hom_hom_apply,
+      add_monoid_hom.map_add, add_monoid_hom.add_apply, pi.add_apply],
+    simp only [coe_to_add_monoid_hom, to_add_monoid_hom_hom_apply],
+    simp only [pi_lift_to_fun, mk_to_pi_apply, ← to_add_monoid_hom_hom_apply,
+      add_monoid_hom.map_sum, add_monoid_hom.map_gsmul, add_monoid_hom.finset_sum_apply],
+    rw ← finset.sum_add_distrib,
+    simp only [pi_proj_to_fun, to_add_monoid_hom_hom_apply, coe_smul,
+      coe_to_add_monoid_hom, pi.smul_apply, add_smul],
+    refl
+  end
+
+lemma eval_png_apply (x : M^m) : eval_png M f x = λ j, ∑ i, f j i • (x i) :=
 begin
   ext j,
-  simp only [eval_png, coe_mk_from_pi, add_monoid_hom.apply_apply, mk_to_pi_apply,
-    add_monoid_hom.to_fun_eq_coe, fintype.sum_apply, function.comp_app, coe_smul,
-    @mk_from_pi_apply M _ (fin m) _ (λ _, M) _ _ x, const_smul_hom_apply]
-end
-
-@[simp] lemma eval_png_zero : (0 : basic_universal_map m n).eval_png M = 0 :=
-by { ext, simp only [eval_png_apply, zero_smul, finset.sum_const_zero, dmatrix.zero_apply], refl }
-
-lemma eval_png_sum {ι : Type*} (f : ι → basic_universal_map m n) (s : finset ι) :
-  eval_png (∑ i in s, f i) M = ∑ i in s, (eval_png (f i) M) :=
-begin
-  ext x j,
-  simp only [add_monoid_hom.finset_sum_apply, finset.sum_apply, eval_png_apply],
-  rw finset.sum_comm,
-  apply fintype.sum_congr,
-  intro i,
-  rw [← finset.sum_smul],
-  congr' 1,
-  classical,
-  -- this should be factored out
-  apply finset.induction_on s,
-  { simp only [finset.sum_empty, pi.zero_apply], },
-  { intros a s has IH, simp only [finset.sum_insert has, pi.add_apply, IH] }
+  simp only [eval_png, mk'_apply, pi_lift_to_fun, mk_to_pi_apply, ← to_add_monoid_hom_hom_apply],
+  simp only [add_monoid_hom.map_sum, add_monoid_hom.map_gsmul,
+    add_monoid_hom.finset_sum_apply],
+  refl
 end
 
 lemma eval_png_mem_filtration :
-  (f.eval_png M) ∈ filtration ((M^m) →+ (M^n)) (finset.univ.sup $ λ i, ∑ j, (f i j).nat_abs) :=
+  (eval_png M f).to_add_monoid_hom ∈
+    filtration ((M^m) →+ (M^n)) (finset.univ.sup $ λ i, ∑ j, (f i j).nat_abs) :=
 begin
   apply mk_to_pi_mem_filtration,
   intro j,
-  refine filtration_mono (finset.le_sup (finset.mem_univ j)) (mk_from_pi_mem_filtration _ _),
-  intros i,
-  exact const_smul_hom_int_mem_filtration _ _ le_rfl
+  let C : ℝ≥0 := finset.univ.sup (λ j, ∑ i, (f j i).nat_abs),
+  intros c x hx,
+  have : ∑ i, (↑(f j i).nat_abs * (1 * c)) ≤ C * c,
+  { rw ← finset.sum_mul, exact mul_le_mul' (finset.le_sup (finset.mem_univ j)) (one_mul c).le },
+  refine filtration_mono this _,
+  simp only [← coe_to_add_monoid_hom, ← to_add_monoid_hom_hom_apply,
+    add_monoid_hom.map_sum, add_monoid_hom.map_gsmul, add_monoid_hom.finset_sum_apply],
+  refine sum_mem_filtration _ _ _ _,
+  rintro i -,
+  refine int_smul_mem_filtration _ _ _ _,
+  exact @pi_proj_bound_by _ (λ _, M) _ i _ _ hx,
 end
 
 lemma eval_png_mem_filtration' (c₁ c₂ : ℝ≥0) [h : f.suitable c₁ c₂]
   (x : M^m) (hx : x ∈ filtration (M^m) c₁) :
-  (f.eval_png M x) ∈ filtration (M^n) c₂ :=
+  (eval_png M f x) ∈ filtration (M^n) c₂ :=
 filtration_mono (f.sup_mul_le c₁ c₂) (f.eval_png_mem_filtration M hx)
 
 /-- `f.eval_png₀ M` is the group homomorphism `(M^m) →+ (M^n)`
 obtained by matrix multiplication with the matrix `f`,
 but restricted to `(filtration M c₁)^m → (filtration M c₂)^n`. -/
-def eval_png₀ (c₁ c₂ : ℝ≥0) [h : f.suitable c₁ c₂] (x : (filtration M c₁ : Type*)^m) :
-  (filtration M c₂ : Type*)^n :=
-λ j, (⟨f.eval_png M (pow_incl x) j,
-  eval_png_mem_filtration' f M c₁ c₂ _ (λ i, (x i).2) j⟩ : (filtration M c₂ : Type*))
+@[simps {fully_applied := ff}]
+def eval_png₀ (c₁ c₂ : ℝ≥0) [h : f.suitable c₁ c₂] (x : filtration (M^m) c₁) :
+  filtration (M^n) c₂ :=
+⟨eval_png M f x, eval_png_mem_filtration' f M c₁ c₂ x x.2⟩
 
 lemma eval_png_comp {l m n} (g : basic_universal_map m n) (f : basic_universal_map l m) :
-  (basic_universal_map.comp g f).eval_png M = (g.eval_png M).comp (f.eval_png M) :=
+  eval_png M (basic_universal_map.comp g f) = (eval_png M g).comp (eval_png M f) :=
 begin
   ext x j,
-  simp only [eval_png_apply, function.comp_app, coe_comp, basic_universal_map.comp,
+  simp only [eval_png_apply, function.comp_app, coe_comp, basic_universal_map.comp, comp_to_fun,
     matrix.mul_apply, finset.smul_sum, finset.sum_smul, mul_smul, add_monoid_hom.mk'_apply],
   rw finset.sum_comm
 end
 
-end pseudo_normed_group
-
-section profinitely_filtered_pseudo_normed_group
-
-open pseudo_normed_group
-
-variables [profinitely_filtered_pseudo_normed_group M]
-
-lemma pfpng_ctu'_eval_png : pfpng_ctu' (f.eval_png M) :=
-begin
-  have : (f.eval_png M : M^m → M^n) = ∑ i, λ x j, f j i • (x i),
-  { ext x j,
-    rw [f.eval_png_apply M x, finset.sum_apply, finset.sum_apply] },
-  rw this,
-  refine pfpng_ctu'_sum _ _ _ _,
-  { rintro i -,
-    refine pfpng_ctu'_of_pfpng_ctu i (λ (x : M) j, f j i • x) _,
-    intro j,
-    exact pfpng_ctu_smul_int _ _ },
-  { rintro i - c₁,
-    let C : ℝ≥0 := finset.univ.sup (λ j, (f j i).nat_abs),
-    refine ⟨C * c₁, _⟩,
-    intros x j,
-    have := add_monoid_hom.const_smul_hom_int_mem_filtration (f j i) _ le_rfl (x i).2,
-    apply filtration_mono (mul_le_mul' _ le_rfl) this,
-    exact finset.le_sup (finset.mem_univ j) }
-end
-
 lemma eval_png₀_continuous (c₁ c₂ : ℝ≥0) [f.suitable c₁ c₂] : continuous (f.eval_png₀ M c₁ c₂) :=
-f.pfpng_ctu'_eval_png M _ $ λ x, rfl
+(eval_png M f).continuous _ (λ x, rfl)
 
 end profinitely_filtered_pseudo_normed_group
 

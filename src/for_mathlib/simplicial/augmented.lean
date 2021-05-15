@@ -1,33 +1,15 @@
 import category_theory.comma
 import algebraic_topology.simplicial_object
 
-/-!
-This file defines augmented (co)simplicial objects, and develops a basic API.
--/
-
-open category_theory
-
 open_locale simplicial
 
 universes v u
 
+namespace category_theory
+
 variables (C : Type u) [category.{v} C]
 
 namespace simplicial_object
-
-variable {C}
-
-/-- The constant simplicial object. -/
-@[simps]
-def const : C ⥤ simplicial_object C := category_theory.functor.const _
-
-variable (C)
-
-/-- Augmented simplicial objects. -/
-@[derive category, nolint has_inhabited_instance]
-def augmented := comma (𝟭 (simplicial_object C)) const
-
-variable {C}
 
 namespace augmented
 
@@ -74,3 +56,5 @@ def point : augmented C ⥤ C := comma.fst _ _
 end augmented
 
 end cosimplicial_object
+
+end category_theory

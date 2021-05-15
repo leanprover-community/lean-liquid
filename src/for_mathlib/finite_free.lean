@@ -1,4 +1,8 @@
 import ring_theory.finiteness
+import linear_algebra.invariant_basis_number
+import linear_algebra.free_module
+import linear_algebra.dual
+
 /-!
 
 # Finite free ℤ-modules
@@ -21,6 +25,21 @@ def torsion_free (A : Type*) [add_comm_group A] : Prop :=
 /-- `finite_free M` is the statement that the abelian group `M` is free of finite rank (over `ℤ`).-/
 def finite_free (A : Type*) [add_comm_group A] : Prop :=
 ∃ (ι : Type) [fintype ι], nonempty (basis ι ℤ A)
+
+section
+
+-- for mathlib
+@[simps]
+def add_monoid_hom_lequiv_linear_map {A B : Type*} [add_comm_group A] [add_comm_group B] :
+  (A →+ B) ≃ₗ[ℤ] (A →ₗ[ℤ] B) :=
+{ to_fun := add_monoid_hom.to_int_linear_map,
+  inv_fun := linear_map.to_add_monoid_hom,
+  map_add' := by { intros, ext, refl },
+  map_smul' := by { intros, ext, refl },
+  left_inv := by { intros f, ext, refl },
+  right_inv := by { intros f, ext, refl } }
+
+end
 
 namespace finite_free
 
@@ -119,80 +138,70 @@ end
 
 theorem dual (ha : finite_free A) : finite_free (A →+ ℤ) :=
 begin
-  rcases ha with ⟨ι, hι, ⟨ha⟩⟩,
+  rcases ha with ⟨ι, hι, ⟨b⟩⟩,
   refine ⟨ι, hι, ⟨_⟩⟩,
-  let v : ι → A →+ ℤ := λ i, (ha.coord i).to_add_monoid_hom,
   classical,
-  resetI,
-  have : linear_independent ℤ v,
-  { rw fintype.linear_independent_iff,
-    intros g hg i,
-    have : (finset.univ.sum (λ (i : ι), g i • v i)) (ha i) = (0 : A →+ ℤ) (ha i),
-    { rw hg },
-    simpa [finsupp.single_apply] using this },
-  apply basis.mk this,
-  rw eq_top_iff,
-  rintro f -,
-  have : (finset.univ.sum (λ i, (f (ha i) : ℤ) • v i)).to_int_linear_map = f.to_int_linear_map,
-  { apply ha.ext,
-    intro i,
-    simp [finsupp.single_apply] },
-  have : (finset.univ.sum (λ i, (f (ha i) : ℤ) • v i)) = f,
-  { ext x,
-    rw [←add_monoid_hom.coe_to_int_linear_map, this],
-    simp },
-  rw ←this,
-  refine submodule.sum_smul_mem _ _ _,
-  intros i hi,
-  apply submodule.subset_span,
-  refine ⟨_, rfl⟩,
+  exact b.dual_basis.map add_monoid_hom_lequiv_linear_map.symm
 end
 
 /-- The rank of a finite free abelian group. -/
 noncomputable def rank (ha : finite_free A) : ℕ := fintype.card ha.basis_type
 
+noncomputable
+def equiv_fin {ι : Type*} [fintype ι] (b : _root_.basis ι ℤ A) :
+  A ≃ₗ[ℤ] (fin $ fintype.card ι) → ℤ :=
+b.repr.trans $ (finsupp.lcongr (fintype.equiv_fin ι) (linear_equiv.refl ℤ ℤ)).trans $
+  finsupp.linear_equiv_fun_on_fintype ℤ
+
+lemma rank_eq {ι : Type*} [fintype ι] (b : _root_.basis ι ℤ A) (ha : finite_free A) :
+  ha.rank = fintype.card ι :=
+eq_of_fin_equiv ℤ $ (equiv_fin ha.basis).symm.trans (equiv_fin b)
+
 variable {ha}
 
--- /-- A rank zero abelian group has at most one element (yeah I know...). -/
--- lemma rank_zero (h0 : ha.rank = 0) : subsingleton A := subsingleton.intro
--- begin
---   -- do this after is_basis refactor?
---   sorry
--- end
+/-- A rank zero abelian group has at most one element (yeah I know...). -/
+lemma rank_zero (h0 : ha.rank = 0) : subsingleton A := subsingleton.intro
+begin
+  sorry
+end
 
--- lemma rank_dual (ha : finite_free A) : ha.dual.rank = ha.rank :=
--- begin
---   -- do this after is_basis refactor?
---   sorry
--- end
+lemma rank_dual (ha : finite_free A) : ha.dual.rank = ha.rank :=
+begin
+  sorry
+end
 
--- lemma congr_iso {B : Type} [add_comm_group B] (hab : A ≃+ B) (ha : finite_free A) :
---   finite_free B :=
--- begin
---   -- do this after is_basis refactor?
---   sorry
--- end
+lemma congr_iso {B : Type} [add_comm_group B] (hab : A ≃+ B) (ha : finite_free A) :
+  finite_free B :=
+begin
+  obtain ⟨ι, _, ⟨b⟩⟩ := ha,
+  refine ⟨ι, ‹_›, ⟨b.map $ hab.to_linear_equiv _⟩⟩,
+  intros n a,
+  exact hab.to_add_monoid_hom.map_gsmul a n
+end
 
--- lemma rank_iso {B : Type} [add_comm_group B] (hab : A ≃+ B) (ha : finite_free A) :
---   (congr_iso hab ha).rank = ha.rank :=
--- begin
---   -- do this after is_basis refactor?
---   sorry
--- end
+lemma rank_iso {B : Type} [add_comm_group B] (hab : A ≃+ B) (ha : finite_free A) :
+  (congr_iso hab ha).rank = ha.rank :=
+begin
+  apply eq_of_fin_equiv ℤ,
+  refine (equiv_fin $ (congr_iso hab ha).basis).symm.trans _,
+  refine (hab.symm.to_linear_equiv _).trans (equiv_fin ha.basis),
+  intros n a,
+  exact hab.symm.to_add_monoid_hom.map_gsmul a n
+end
 
--- theorem ker (ha : finite_free A) (φ : A →+ ℤ) : finite_free φ.ker :=
--- begin
---   -- submodule of Noetherian Z-module is f.g.,
---   -- submodule of torsion-free is torsion-free,
---   -- f.g. torsion-free => free
---   sorry
--- end
+theorem ker (ha : finite_free A) (φ : A →+ ℤ) : finite_free φ.ker :=
+begin
+  obtain ⟨n, b⟩ := @module.free_of_finite_type_torsion_free' ℤ _ _ φ.ker _ _ (id _) (id _),
+  { exact ⟨fin n, infer_instance, ⟨b⟩⟩ },
+  { sorry },
+  { sorry }
+end
 
--- theorem rank_ker (ha : finite_free A) (φ : A →+ ℤ) (hφ : φ ≠ 0) :
---   (ker ha φ).rank + 1 = ha.rank :=
--- begin
---   -- I don't know the best way of doing this
---   sorry
--- end
+theorem rank_ker (ha : finite_free A) (φ : A →+ ℤ) (hφ : φ ≠ 0) :
+  (ker ha φ).rank + 1 = ha.rank :=
+begin
+  -- I don't know the best way of doing this
+  sorry
+end
 
 end finite_free

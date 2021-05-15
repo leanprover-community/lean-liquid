@@ -1,7 +1,6 @@
 import rescale.basic
 import locally_constant.Vhat
 
-import for_mathlib.preadditive_category
 import category_theory.preadditive.additive_functor
 
 import facts.nnreal

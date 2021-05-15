@@ -1,8 +1,7 @@
 import algebraic_topology.simplicial_object
 import algebra.module.hom
 import algebra.big_operators
-
-import for_mathlib.preadditive_category
+import data.fintype.card
 
 import system_of_complexes.complex
 

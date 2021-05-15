@@ -1,85 +1,38 @@
-import topology.separation
-import topology.locally_constant.basic
-import topology.discrete_quotient
-import data.setoid.partition
+import for_mathlib.is_locally_constant
+/-!
+# Extending a locally constant map to larger profinite sets
 
-import for_mathlib.data_setoid_partition
-import for_mathlib.topology
+In this file, we prove that, given a topological embedding `e : X → Y` from a non-empty
+compact topological space to a profinite set (ie. compact Hausdorff totally disconnected space),
+every locally constant map `f` from `X` to any type `Z` "extends" to a locally constant map
+from `Y` to `Z`, ie. there exists `g : Y → Z` locally constant such that `f = g ∘ e`.
 
-import pseudo_normed_group.CLC
+     e
+  X ↪-→ Y
+  |    /
+f |   / h
+  ↓ ↙
+  Z
 
-noncomputable theory
+Notes:
+* this wouldn't work if `X` and `Z` were empty and `Y` weren't. The minimal assumption
+  would be assuming `Z` isn't empty, I'll refactor this soon.
+* Everything is stated assuming only `X` is compact but the existence of `f` ensures `X` is
+  profinite, we're just saving type-class search (and nothing in the construction or proofs
+  directly use `X` is profinite).
 
-open_locale nnreal
+The main definition is `embedding.extend {e : X → Y} (he : embedding e) (f : X → Z) : Y → Z`
+It assumes `X` is compact (and non-empty) and assumes `Y` is profinite but doesn't
+assume `f` is locally constant, it is simply defined as a constant map if `f` isn't.
+
+The announced properties of this extension are `embedding.extend_extends` and
+`embedding.is_locally_constant_extend`.
+-/
 
 variables {X : Type*} [topological_space X]
 
+noncomputable theory
 open set
-
-section
-
-lemma is_locally_constant.is_closed_fiber {X Y : Type*} [topological_space X] [topological_space Y]
-  [t1_space Y] {f : X → Y} (h : is_locally_constant f) (y : Y) : is_closed (f ⁻¹' {y}) :=
-is_closed_singleton.preimage h.continuous
-
-lemma is_locally_constant.is_clopen_fiber {X Y : Type*} [topological_space X] [topological_space Y]
-  [t1_space Y] {f : X → Y} (h : is_locally_constant f) (y : Y) : is_clopen (f ⁻¹' {y}) :=
-⟨h.is_open_fiber y, h.is_closed_fiber y⟩
-
-end
-
-section
-variables {Y : Type*} [topological_space Y]  [t1_space Y]
-
-/-- The discrete quotient of `X` associated to a locally constant `f : X → Y` is associated
-to the relation `x ∼ x'` if `f x' = f x`. The weird ordering guarantees that
-`{x' | x ∼ x'} = f ⁻¹' {x}`.
--/
-def is_locally_constant.discrete_quotient {f : X → Y} (hf : is_locally_constant f) :
-  discrete_quotient X :=
-{ rel := λ x x', f x' = f x,
-  equiv := ⟨λ _, rfl, λ x x', eq.symm, λ x₁ x₂ x₃ h h', by rwa h'⟩,
-  clopen := λ x, hf.is_clopen_fiber (f x) }
-
-/-- The map induced by a locally constant map `f : X → Y` from the associated discrete quotient
-to `Y`. -/
-def is_locally_constant.discrete_quotient_map {f : X → Y} (hf : is_locally_constant f) :
-  hf.discrete_quotient → Y :=
-@quotient.lift _ _ hf.discrete_quotient.setoid f (λ x x', eq.symm)
-
-@[simp]
-lemma is_locally_constant.discrete_quotient_map_proj_apply {f : X → Y} (hf : is_locally_constant f) (x : X) :
-hf.discrete_quotient_map (hf.discrete_quotient.proj x) = f x := rfl
-
-@[simp]
-lemma is_locally_constant.discrete_quotient_map_proj {f : X → Y} (hf : is_locally_constant f) :
-hf.discrete_quotient_map ∘ hf.discrete_quotient.proj = f := funext (λ x, rfl)
-
-
-def indexed_partition.discrete_quotient {ι : Type*} {s : ι → set X} (h_part : indexed_partition s)
-  (h_cl : ∀ i, is_clopen $ s i) : discrete_quotient X :=
-{ rel := h_part.setoid.rel,
-  equiv := h_part.setoid.iseqv,
-  clopen := begin
-    intro x,
-    rw h_part.class_of,
-    apply h_cl
-  end }
-
-variables {ι : Type*} {s : ι → set X} (h_cl : ∀ i, is_clopen $ s i)
-(h_part : indexed_partition s)
-
-def indexed_partition.discrete_quotient_equiv : ι ≃ h_part.discrete_quotient h_cl :=
-h_part.equiv_quotient
-
-
-lemma indexed_partition.discrete_quotient_fiber (x : h_part.discrete_quotient h_cl) :
-  (h_part.discrete_quotient h_cl).proj ⁻¹' {x} = s ((h_part.discrete_quotient_equiv h_cl).symm x) :=
-h_part.proj_fiber _
-
-end
-
-section
 
 variables [compact_space X]
   {Y : Type*} [topological_space Y] [t2_space Y] [compact_space Y] [totally_disconnected_space Y]
@@ -228,31 +181,33 @@ lemma embedding.discrete_quotient_spec [nonempty X] {f : X → Y} (hf : embeddin
 (hf.discrete_quotient_map S).proj ∘ f = (hf.discrete_quotient_equiv S) ∘ S.proj :=
 (hf.ex_discrete_quotient S).some_spec.some_spec
 
-variables {Z : Type*} [topological_space Z]  [t1_space Z] [nonempty X]
+variables {Z : Type*} [inhabited Z]
 
 open_locale classical
 
 def embedding.extend
   {e : X → Y} (he : embedding e) (f : X → Z)
    : Y → Z :=
-if hf : is_locally_constant f then
-(hf.discrete_quotient_map) ∘ (he.discrete_quotient_equiv hf.discrete_quotient).symm ∘ (he.discrete_quotient_map hf.discrete_quotient).proj
-else λ y, f (classical.arbitrary X)
+if h : is_locally_constant f ∧ nonempty X then
+by { haveI := h.2, exact (h.1.discrete_quotient_map) ∘ (he.discrete_quotient_equiv h.1.discrete_quotient).symm ∘ (he.discrete_quotient_map h.1.discrete_quotient).proj }
+else λ y, default Z
 
-lemma embedding.extend_eq {e : X → Y} (he : embedding e) {f : X → Z} (hf : is_locally_constant f) :
+/- lemma embedding.extend_eq {e : X → Y} (he : embedding e) {f : X → Z} (hf : is_locally_constant f) :
   he.extend f = (hf.discrete_quotient_map) ∘ (he.discrete_quotient_equiv hf.discrete_quotient).symm ∘ (he.discrete_quotient_map hf.discrete_quotient).proj
-  := dif_pos hf
-
+  := dif_pos hf -/
 
 lemma embedding.extend_extends {e : X → Y} (he : embedding e) {f : X → Z} (hf : is_locally_constant f) :
 ∀ x, he.extend f (e x) = f x :=
 begin
   intro x,
+  haveI : nonempty X := ⟨x⟩,
   let S := hf.discrete_quotient,
   let S' := he.discrete_quotient_map hf.discrete_quotient,
   let barf : S → Z := hf.discrete_quotient_map,
   let g : S ≃ S' := he.discrete_quotient_equiv hf.discrete_quotient,
-  rw he.extend_eq hf,
+  unfold embedding.extend,
+  have h : is_locally_constant f ∧ nonempty X := ⟨hf, ⟨x⟩⟩,
+  rw [dif_pos h],
   change (barf ∘ g.symm ∘ (S'.proj ∘ e)) x = f x,
   suffices : (barf ∘ S.proj) x = f x, by simpa [he.discrete_quotient_spec],
   simp
@@ -269,47 +224,6 @@ begin
   { apply is_locally_constant.const },
 end
 
-end
-
-namespace CLCFP
-
-variables {r r' : ℝ≥0} (V : NormedGroup) [normed_with_aut r V] (c c₁ c₂ : ℝ≥0) (n : ℕ)
-variables [fact (0 < r)] [fact (0 < r')] [fact (r' ≤ 1)] [fact (c₂ ≤ r' * c₁)] [fact (c₂ ≤ c₁)]
-variables (M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ)
-
-include r
-
-def Tinv_sub_T_inv :=
-(CLCFP.Tinv V r' c₁ c₂ n).app M - (CLCFP.res V r' c₁ c₂ n ≫ CLCFP.T_inv r V r' c₂ n).app M
-
-lemma Tinv_sub_T_inv_bound_by : (Tinv_sub_T_inv V c₁ c₂ n M).bound_by (r⁻¹ + 1) :=
-begin
-  rw [Tinv_sub_T_inv, sub_eq_neg_add],
-  refine normed_group_hom.bound_by.add _ _,
-  { refine (normed_group_hom.bound_by.comp' 1 r⁻¹ r⁻¹ (mul_one _).symm _ _).neg,
-    { exact CLC.T_inv_bound_by r V _ },
-    { exact (res_norm_noninc V r' c₁ c₂ n M).bound_by_one } },
-  { refine NormedGroup.Completion_map_bound_by _ _ _,
-    exact (NormedGroup.LocallyConstant_obj_map_norm_noninc _ _ _ _).bound_by_one },
-end
-
-variables {V c n M}
-
-/-- 9.2 of Analytic.pdf -/
-lemma Tinv_sub_T_inv_exists_preimage (f : (CLCFP V r' (r' * c) n).obj M) (ε : ℝ) (hε : 0 < ε) :
-  ∃ g : (CLCFP V r' c n).obj M, Tinv_sub_T_inv V c (r' * c) n M g = f ∧
-    (∥g∥ ≤ r / (1 - r) * (1 + ε) * ∥f∥) :=
-begin
-  sorry
-end
-
-variables (V c n M)
-
-lemma Tinv_sub_T_inv_surjective : function.surjective (Tinv_sub_T_inv V c (r' * c) n M) :=
-begin
-  intros f,
-  obtain ⟨g, hg, -⟩ := Tinv_sub_T_inv_exists_preimage f 1 zero_lt_one,
-  exact ⟨g, hg⟩
-end
-
-end CLCFP
+def embedding.locally_constant_extend {e : X → Y} (he : embedding e) (f : locally_constant X Z) :
+  locally_constant Y Z :=
+⟨he.extend f, he.is_locally_constant_extend⟩

@@ -1,5 +1,4 @@
 import for_mathlib.arrow
-import for_mathlib.Profinite
 import topology.category.Profinite.as_limit
 import topology.locally_constant.basic
 import category_theory.limits.functor_category

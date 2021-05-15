@@ -1,9 +1,7 @@
--- import algebra.homology.chain_complex
-
 import algebra.ordered_group
+import category_theory.preadditive.functor_category
 
 import for_mathlib.normed_group_quotient
-import for_mathlib.preadditive_category
 
 import normed_group.NormedGroup
 import locally_constant.Vhat -- NormedGroup is preadditive (maybe rename this file, or split it)
@@ -65,8 +63,7 @@ def quiver.hom.apply (f : M ⟶ N) {c : ℝ≥0} {i : ℕ} : M c i ⟶ N c i :=
 instance hom_to_fun : has_coe_to_fun (M ⟶ N) :=
 ⟨λ f, Π {c : ℝ≥0} {i : ℕ}, M c i → N c i, λ f {c} {i} x, f.apply x⟩
 
-instance : preadditive system_of_complexes :=
-preadditive.category_theory.functor.preadditive
+instance : preadditive system_of_complexes := functor.preadditive
 
 lemma system_of_complexes.map_sub (f : M ⟶ N) {c i} (m m' : M c i) : f (m-m') = f m - f m' :=
 normed_group_hom.map_sub _ _ _
