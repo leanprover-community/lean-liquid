@@ -187,9 +187,7 @@ variables {Z : Type*} [inhabited Z]
 
 open_locale classical
 
-def embedding.extend
-  {e : X → Y} (he : embedding e) (f : X → Z)
-   : Y → Z :=
+def embedding.extend {e : X → Y} (he : embedding e) (f : X → Z) : Y → Z :=
 if h : is_locally_constant f ∧ nonempty X then
 by { haveI := h.2, exact (h.1.discrete_quotient_map) ∘ (he.discrete_quotient_equiv h.1.discrete_quotient).symm ∘ (he.discrete_quotient_map h.1.discrete_quotient).proj }
 else λ y, default Z
@@ -226,10 +224,28 @@ begin
   { apply is_locally_constant.const },
 end
 
+lemma embedding.range_extend {e : X → Y} (he : embedding e)
+  [nonempty X] {Z : Type*} [inhabited Z] {f : X → Z} (hf : is_locally_constant f) :
+  range (he.extend f) = range f :=
+begin
+  ext z,
+  split,
+  { rintro ⟨y, rfl⟩,
+    dsimp [embedding.extend],
+    rw [dif_pos, ← congr_arg range hf.discrete_quotient_map_proj, range_comp,
+      range_iff_surjective.mpr (discrete_quotient.proj_surjective _),
+      set.image_univ, function.comp],
+    swap, { exact ⟨hf, ‹_›⟩ },
+    { exact ⟨_, rfl⟩ } },
+  { rintro ⟨x, rfl⟩,
+    exact ⟨e x, he.extend_extends hf _⟩ }
+end
+
 def embedding.locally_constant_extend {e : X → Y} (he : embedding e) (f : locally_constant X Z) :
   locally_constant Y Z :=
 ⟨he.extend f, he.is_locally_constant_extend⟩
 
+@[simp]
 lemma embedding.locally_constant_extend_extends {e : X → Y} (he : embedding e)
   (f : locally_constant X Z) (x : X) : he.locally_constant_extend f (e x) = f x :=
 he.extend_extends f.2 x
@@ -241,5 +257,10 @@ begin
   rw locally_constant.coe_comap _ _ he.continuous,
   exact he.locally_constant_extend_extends f x
 end
+
+lemma embedding.range_locally_constant_extend {e : X → Y} (he : embedding e)
+  [nonempty X] {Z : Type*} [inhabited Z] (f : locally_constant X Z) :
+  range (he.locally_constant_extend f) = range f :=
+he.range_extend f.2
 
 -- version avec comap_hom pour Z normed group ?

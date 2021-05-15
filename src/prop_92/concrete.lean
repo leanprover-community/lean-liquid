@@ -26,8 +26,8 @@ begin
   sorry
 end
 
-lemma nnreal.eq_zero_or_pos (r : nnreal) : r = 0 ∨ 0 < r :=
-by admit -- can also use lt_or_eq_of_le (zero_le r)
+-- lemma nnreal.eq_zero_or_pos (r : nnreal) : r = 0 ∨ 0 < r :=
+-- by admit -- can also use lt_or_eq_of_le (zero_le r)
 
 instance semi_normed_group.inhabited (G : Type*) [semi_normed_group G] : inhabited G := ⟨0⟩
 
@@ -51,18 +51,16 @@ variables
 
 @[simp]
 lemma locally_constant.norm_of_empty (hX : ¬ nonempty X) (f : locally_constant X G) : ∥f∥ = 0 :=
-begin
-  rw [locally_constant.norm_def, supr],
-
-  sorry
-end
+by rw [locally_constant.norm_def, supr, range_eq_empty.mpr hX, real.Sup_empty]
 
 @[simp]
 lemma embedding.locally_constant_extend_of_empty (hX : ¬ nonempty X) (f : locally_constant X G) :
  he.locally_constant_extend f = 0 :=
 begin
-
-  sorry
+  ext y, dsimp [embedding.locally_constant_extend, embedding.extend],
+  rw dif_neg,
+  { refl },
+  { intro h, exact hX h.2 }
 end
 
 @[simp]
@@ -76,11 +74,8 @@ end
 
 @[simp]
 lemma locally_constant.norm_const [h : nonempty X] (g : G) : ∥locally_constant.const X g∥ = ∥g∥ :=
-begin
-  unfreezingI { obtain ⟨x⟩ := h },
-  simp [locally_constant.norm_def, locally_constant.const],
-  sorry
-end
+by simp only [locally_constant.norm_def, locally_constant.const, csupr_const,
+    function.const_apply, locally_constant.coe_mk]
 
 @[simp]
 lemma locally_constant.norm_zero : ∥(0 : locally_constant X G)∥ = 0 :=
@@ -105,18 +100,11 @@ end
 
 lemma locally_constant.norm_eq_iff' (f : locally_constant X G) {x : X} :
   ∥f∥ = ∥f x∥ ↔ ∀ g ∈ range f, ∥g∥ ≤ ∥f x∥ :=
-sorry
+by simpa only [mem_range, forall_apply_eq_imp_iff', exists_imp_distrib] using f.norm_eq_iff
 
 lemma locally_constant.norm_comap_le {α : Type*} [topological_space α] [compact_space α]
   (f : locally_constant X G) {g : α → X} (h : continuous g) : ∥f.comap g∥ ≤ ∥f∥ :=
 locally_constant.comap_hom_norm_noninc g h f
-
-lemma embedding.range_locally_constant_extend [nonempty X] {Z : Type*} [inhabited Z] (f : locally_constant X Z) :
-range (he.locally_constant_extend f) = range f :=
-begin
-
-  sorry
-end
 
 lemma locally_constant.comap_map {W X Y Z : Type*} [topological_space W] [topological_space X] [topological_space Y]
   (f : locally_constant X Y) (g : W → X) (h : Y → Z) (hg : continuous g) : (f.comap g).map h = (f.map h).comap g :=
@@ -125,7 +113,6 @@ by { ext, simp [hg] }
 lemma locally_constant.map_comp' {W X Y Z : Type*} [topological_space W]
   (f : locally_constant W X) (g : X → Y) (h : Y → Z) : (f.map g).map h = f.map (h ∘ g) :=
 rfl
-
 
 lemma embedding.norm_extend (f : locally_constant X G) : ∥he.locally_constant_extend f∥ = ∥f∥ :=
 begin
