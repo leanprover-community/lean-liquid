@@ -76,11 +76,8 @@ end
 
 @[simp]
 lemma locally_constant.norm_const [h : nonempty X] (g : G) : ∥locally_constant.const X g∥ = ∥g∥ :=
-begin
-  unfreezingI { obtain ⟨x⟩ := h },
-  simp [locally_constant.norm_def, locally_constant.const],
-  sorry
-end
+by simp only [locally_constant.norm_def, locally_constant.const, csupr_const,
+    function.const_apply, locally_constant.coe_mk]
 
 @[simp]
 lemma locally_constant.norm_zero : ∥(0 : locally_constant X G)∥ = 0 :=
@@ -105,7 +102,7 @@ end
 
 lemma locally_constant.norm_eq_iff' (f : locally_constant X G) {x : X} :
   ∥f∥ = ∥f x∥ ↔ ∀ g ∈ range f, ∥g∥ ≤ ∥f x∥ :=
-sorry
+by simpa only [mem_range, forall_apply_eq_imp_iff', exists_imp_distrib] using f.norm_eq_iff
 
 lemma locally_constant.norm_comap_le {α : Type*} [topological_space α] [compact_space α]
   (f : locally_constant X G) {g : α → X} (h : continuous g) : ∥f.comap g∥ ≤ ∥f∥ :=
@@ -118,7 +115,6 @@ by { ext, simp [hg] }
 lemma locally_constant.map_comp' {W X Y Z : Type*} [topological_space W]
   (f : locally_constant W X) (g : X → Y) (h : Y → Z) : (f.map g).map h = f.map (h ∘ g) :=
 rfl
-
 
 lemma embedding.norm_extend (f : locally_constant X G) : ∥he.locally_constant_extend f∥ = ∥f∥ :=
 begin
