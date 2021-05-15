@@ -3,7 +3,6 @@ import category_theory.preadditive
 import category_theory.preadditive.additive_functor
 import data.int.basic
 
-import for_mathlib.preadditive_category
 /-!
 
 # Complexes of objects in a category

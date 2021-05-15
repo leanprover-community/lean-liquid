@@ -74,7 +74,7 @@ begin
   simp only [polyhedral_lattice_hom.coe_to_add_monoid_hom, add_monoid_hom.mem_range] at h ⊢,
   rw gsmul_eq_smul at h,
   obtain ⟨l, hl⟩ := h,
-  refine @smul_injective ℤ _ _ _ _ _ n hn _ _ _, dsimp,
+  refine @smul_left_injective ℤ _ _ _ _ _ n hn _ _ _, dsimp,
   rw [← hl, ← polyhedral_lattice_hom.map_gsmul],
   dsimp only [l₀],
   rw [← finsupp.smul_apply, gsmul_rescaled_power _ _ n l', ← hl, diagonal_embedding_apply],

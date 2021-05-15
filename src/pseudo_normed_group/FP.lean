@@ -1,8 +1,6 @@
 import pseudo_normed_group.breen_deligne
 import normed_group.NormedGroup
 
-import for_mathlib.Profinite
-
 /-!
 
 # Constructions on the filtration on a profinitely filtered pseudo-normed abelian group
@@ -68,7 +66,7 @@ def Pow (n : ℕ) : Profinite ⥤ Profinite :=
 
 @[simps]
 def Pow_Pow_X (N n : ℕ) (X) : (Pow N ⋙ Pow n).obj X ≅ (Pow (N * n)).obj X :=
-Profinite.iso_of_homeo _ _ $
+Profinite.iso_of_homeo
 { to_equiv := (equiv.curry _ _ _).symm.trans (((equiv.prod_comm _ _).trans fin_prod_fin_equiv).arrow_congr (equiv.refl X)),
   continuous_to_fun :=
   begin
@@ -128,7 +126,7 @@ theorem Tinv₀_comp_res {r' : ℝ≥0} (c₁ c₂ c₃ c₄ : ℝ≥0)
 
 def pi_iso (r' c : ℝ≥0) (M : ProFiltPseuNormGrpWithTinv r') (N : ℕ) :
   Profinite.of (filtration (M^N) c) ≅ Profinite.of ((filtration M c)^N) :=
-Profinite.iso_of_homeo _ _ $ filtration_pi_homeo _ _
+Profinite.iso_of_homeo $ filtration_pi_homeo _ _
 
 end Filtration
 

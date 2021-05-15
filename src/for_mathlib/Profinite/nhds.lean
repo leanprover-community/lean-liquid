@@ -26,7 +26,8 @@ begin
   let f := homeo_of_iso
     (as_iso ((limit_cone_is_limit X.diagram).lift X.as_limit_cone)),
   have := nhds_of_limit X.diagram (f a),
-  have hf : nhds a = filter.comap f (nhds $ f a), by simp,
+  have hf : nhds a = filter.comap f (nhds $ f a),
+  { simp only [homeomorph.comap_nhds_eq, nhds_eq_nhds_iff, homeomorph.symm_apply_apply] },
   rw [hf, this, filter.comap_infi],
   congr,
   funext i,
