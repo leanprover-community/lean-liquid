@@ -18,6 +18,8 @@ and does abstract normed space stuff.
 
 noncomputable theory
 
+open set
+
 -- the following proof is overkill but nice
 lemma real.Sup_mem_of_finite {s : set ℝ} (hs : s.finite) (hs' : s.nonempty):
   Sup s ∈ s :=
@@ -31,13 +33,6 @@ begin
   { resetI, rw [set.range_const, cSup_singleton] },
   { rw [set.range_eq_empty.mpr hι, real.Sup_empty] }
 end
-
--- maybe don't need this
--- lemma real.supr_range {α β : Type*} (f : β → α) (g : α → ℝ) :
---   (⨆ a ∈ set.range f, g a) = ⨆ b, g (f b) :=
--- begin
---   admit
--- end
 
 -- Move me
 lemma real.Sup_eq {s : set ℝ} (hs : s.nonempty) (hs' : ∃ x, ∀ y ∈ s, y ≤ x) {x : ℝ} :
@@ -82,6 +77,16 @@ begin
   change _ ↔ is_lub _ _,
   rw is_lub_iff
 end
+
+lemma real.supr_comp {α β : Type*} (f : β → α) (g : α → ℝ) :
+  (⨆ b, g (f b)) = Sup (g '' range f) :=
+begin
+  change Sup _ = Sup _,
+  congr,
+  ext x,
+  simp,
+end
+
 
 lemma nnreal.eq_zero_or_pos (r : nnreal) : r = 0 ∨ 0 < r :=
 (lt_or_eq_of_le $ zero_le r).elim (λ h, or.inr h) (λ h, or.inl h.symm)
@@ -196,8 +201,8 @@ lemma embedding.norm_extend (f : locally_constant X G) : ∥he.locally_constant_
 begin
   by_cases hX : nonempty X,
   { resetI,
-    simp only [locally_constant.norm_def, supr],
-    rw [range_comp, he.range_locally_constant_extend f, ← range_comp], },
+    change (⨆ y : Y, _) = (⨆ x : X, _),
+    rw [real.supr_comp, real.supr_comp, he.range_locally_constant_extend f] },
   { rw [f.norm_of_empty hX],
     dsimp [embedding.locally_constant_extend, embedding.extend],
     suffices : (⨆ (y : Y), ∥(0 : G)∥) = 0,
