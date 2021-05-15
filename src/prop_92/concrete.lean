@@ -111,13 +111,6 @@ lemma locally_constant.norm_comap_le {α : Type*} [topological_space α] [compac
   (f : locally_constant X G) {g : α → X} (h : continuous g) : ∥f.comap g∥ ≤ ∥f∥ :=
 locally_constant.comap_hom_norm_noninc g h f
 
-lemma embedding.range_locally_constant_extend [nonempty X] {Z : Type*} [inhabited Z] (f : locally_constant X Z) :
-range (he.locally_constant_extend f) = range f :=
-begin
-
-  sorry
-end
-
 lemma locally_constant.comap_map {W X Y Z : Type*} [topological_space W] [topological_space X] [topological_space Y]
   (f : locally_constant X Y) (g : W → X) (h : Y → Z) (hg : continuous g) : (f.comap g).map h = (f.map h).comap g :=
 by { ext, simp [hg] }
