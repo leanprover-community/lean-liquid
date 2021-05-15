@@ -110,7 +110,7 @@ instance : category (index_cat f) :=
 
 /--
 Make a term of `index_cat` given a clopen cover of a target of the arrow.
-This is done fuunctorially.
+This is done functorially.
 -/
 def mk_right : discrete_quotient f.right ⥤ index_cat f :=
 { obj := λ I,
@@ -123,7 +123,7 @@ def mk_right : discrete_quotient f.right ⥤ index_cat f :=
 
 /--
 Make a term of `index_cat` given a clopen cover of a source of the arrow.
-This is done fuunctorially.
+This is done functorially.
 -/
 def mk_left : discrete_quotient f.left ⥤ index_cat f :=
 { obj := λ I,
@@ -149,25 +149,25 @@ def fintype_diagram : index_cat f ⥤ arrow Fintype.{u} :=
   { left := discrete_quotient.of_le g.left,
     right := discrete_quotient.of_le g.right } }
 
-/-- An abbreviation for `diagram f ⋙ Fintype_to_Profinite.map_arrow`. -/
+/-- An abbreviation for `fintype_diagram f ⋙ Fintype_to_Profinite.map_arrow`. -/
 abbreviation diagram : index_cat f ⥤ arrow Profinite :=
 fintype_diagram f ⋙ Fintype.to_Profinite.map_arrow
 
-/-- The diagram of profinite sets obtained from the sources of `diagram'`. -/
+/-- The diagram of profinite sets obtained from the sources of `diagram`. -/
 abbreviation left_diagram : index_cat f ⥤ Profinite :=
 diagram f ⋙ arrow.left_func
 
-/-- The diagram of profinite sets obtained from the targets of `diagram'`. -/
+/-- The diagram of profinite sets obtained from the targets of `diagram`. -/
 abbreviation right_diagram : index_cat f ⥤ Profinite :=
 diagram f ⋙ arrow.right_func
 
-/-- The usual limit cone over `diagram' f`. -/
+/-- The usual limit cone over `diagram f`. -/
 def limit_cone : limits.limit_cone (diagram f) :=
 arrow.limit_cone _
   ⟨_, limit_cone_is_limit $ left_diagram _⟩ ⟨_, limit_cone_is_limit $ right_diagram _⟩
 
 /--
-The cone which we want to show is a limit cone of `diagram' f`.
+The cone which we want to show is a limit cone of `diagram f`.
 Its cone point is the given arrow `f`.
 -/
 def as_limit_cone : limits.cone (diagram f) :=
@@ -249,11 +249,11 @@ end
 -- sanity check
 example : is_iso ((limit_cone f).is_limit.lift (as_limit_cone f)) := by apply_instance
 
-/-- The isomorphism between `Fincone f` and the cone of the limit cone `(limit_cone f)`. -/
+/-- The isomorphism between `as_limit_cone f` and the cone of the limit cone `limit_cone f`. -/
 def as_limit_cone_iso : as_limit_cone f ≅ (limit_cone f).cone :=
 limits.cones.ext (as_iso $ (limit_cone f).is_limit.lift (as_limit_cone f)) (λ I, rfl)
 
-/-- `Fincone f` is indeed a limit cone. -/
+/-- `as_limit_cone f` is indeed a limit cone. -/
 def as_limit : limits.is_limit (as_limit_cone f) :=
 limits.is_limit.of_iso_limit (limit_cone f).is_limit (as_limit_cone_iso f).symm
 
