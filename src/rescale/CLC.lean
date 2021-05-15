@@ -4,11 +4,11 @@ import rescale.LC
 open_locale classical nnreal
 open opposite ProFiltPseuNormGrpWithTinv
 
-open NormedGroup opposite Profinite pseudo_normed_group category_theory breen_deligne
+open SemiNormedGroup opposite Profinite pseudo_normed_group category_theory breen_deligne
 open profinitely_filtered_pseudo_normed_group
 
 universe variable u
-variables (r : ℝ≥0) (V : NormedGroup) (r' : ℝ≥0) [fact (0 < r')]
+variables (r : ℝ≥0) (V : SemiNormedGroup) (r' : ℝ≥0) [fact (0 < r')]
 variables (c c₁ c₂ c₃ c₄ : ℝ≥0) (m n : ℕ)
 
 @[simp] theorem CLCFP_rescale (N : ℝ≥0)

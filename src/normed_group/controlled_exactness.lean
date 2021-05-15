@@ -2,11 +2,11 @@ import for_mathlib.normed_group_hom_completion
 import for_mathlib.specific_limit
 /-!
 
-# A controlled exactness lemma for normed groups
+# A controlled exactness lemma for seminormed groups
 
 This file contains a proof of Proposition 8.17 of `analytic.pdf`,
 a technical lemma which controls, in some cases, the norm of the map
-induced on completions by a map between normed abelian groups.
+induced on completions by a normed group hom.
 
 -/
 noncomputable theory

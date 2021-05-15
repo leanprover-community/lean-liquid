@@ -3,8 +3,8 @@ import category_theory.preadditive.functor_category
 
 import for_mathlib.normed_group_quotient
 
-import normed_group.NormedGroup
-import locally_constant.Vhat -- NormedGroup is preadditive (maybe rename this file, or split it)
+import normed_group.SemiNormedGroup
+import locally_constant.Vhat -- SemiNormedGroup is preadditive (maybe rename this file, or split it)
 import system_of_complexes.complex
 
 import facts
@@ -18,14 +18,14 @@ open_locale nnreal
 
 /-!
 
-# Systems of complexes of normed abelian groups
+# Systems of complexes of seminormed groups
 
-In this file we define systems of complexes of normed abelian groups,
+In this file we define systems of complexes of seminormed groups,
 as in of Definition 9.3 of [Analytic].
 
 ## Main declarations
 
-* `system_of_complexes`: a system of complexes of normed abelian groups. See Definition 4.1
+* `system_of_complexes`: a system of complexes of seminormed groups. See Definition 4.1
   of the blueprint.
 * `admissible`: such a system is *admissible* if all maps that occur in the system
     are norm-nonincreasing. See Definition 4.2 of the blueprint.
@@ -41,20 +41,20 @@ It seems a bit ridiculous that this file has to import `locally_constant.Vhat`.
 
 -/
 
--- TODO: at some point we can abstract the following definition over `NormedGroup` and `ℝ≥0`.
+-- TODO: at some point we can abstract the following definition over `SemiNormedGroup` and `ℝ≥0`.
 -- But I don't think that is relevant for this project.
 
-/-- A system of complexes of normed abelian groups, indexed by `ℝ≥0`.
+/-- A system of complexes of seminormed groups, indexed by `ℝ≥0`.
 See also Definition 9.3 of [Analytic]. -/
 @[derive category_theory.category]
-def system_of_complexes : Type* := ℝ≥0ᵒᵖ ⥤ (cochain_complex ℕ NormedGroup)
+def system_of_complexes : Type* := ℝ≥0ᵒᵖ ⥤ (cochain_complex ℕ SemiNormedGroup)
 
 -- instance : has_shift system_of_complexes := has_shift.mk $ (shift _).congr_right
 
 variables {M M' N : system_of_complexes.{u}} (f : M ⟶ M') (g : M' ⟶ N)
 
 instance : has_coe_to_fun system_of_complexes :=
-⟨λ C, ℝ≥0 → ℕ → NormedGroup, λ C c i, (C.obj $ op c).X i⟩
+⟨λ C, ℝ≥0 → ℕ → SemiNormedGroup, λ C c i, (C.obj $ op c).X i⟩
 
 /-- `f.apply c i` is application of the natural transformation `f`: $f_c^i : M_c^i ⟶ N_c^i$. -/
 def quiver.hom.apply (f : M ⟶ N) {c : ℝ≥0} {i : ℕ} : M c i ⟶ N c i :=

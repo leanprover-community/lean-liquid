@@ -4,8 +4,8 @@ import rescale.normed_group
 
 # rescaling norms on a system of complexes
 
-This file defines the `rescale` functor which will take a system of complexes of normed groups
-and systematically rescale all the norms on all the normed groups by a constant factor.
+This file defines the `rescale` functor which will take a system of complexes of seminormed groups
+and systematically rescale all the norms on all the seminormed groups by a constant factor.
 
 -/
 noncomputable theory
@@ -16,7 +16,7 @@ open category_theory
 open_locale nat nnreal
 
 def rescale (r : ℝ≥0) [fact (0 < r)] : system_of_complexes ⥤ system_of_complexes :=
-(whiskering_right _ _ _).obj $ functor.map_complex_like $ NormedGroup.rescale r
+(whiskering_right _ _ _).obj $ functor.map_complex_like $ SemiNormedGroup.rescale r
 
 lemma rescale_obj (r c : ℝ≥0) [fact (0 < r)] (C : system_of_complexes) (i : ℕ) :
   ↥(((rescale r).obj C) c i) = _root_.rescale r (C c i) := rfl
@@ -33,13 +33,13 @@ instance rescale.additive (r : ℝ≥0) [fact (0 < r)] : (rescale r).additive :=
 -- can we golf this? speed it up?
 def to_rescale (r : ℝ≥0) [fact (0 < r)] : 𝟭 system_of_complexes ⟶ rescale r :=
 { app := λ C,
-  { app := λ c, (functor.map_complex_like_nat_trans _ _ $ NormedGroup.to_rescale r).app (C.obj c),
+  { app := λ c, (functor.map_complex_like_nat_trans _ _ $ SemiNormedGroup.to_rescale r).app (C.obj c),
     naturality' := by { intros c₁ c₂ h, ext i : 2, refl } },
   naturality' := λ C₁ C₂ f, by { ext, refl } }
 
 def scale (i j : ℝ≥0) [fact (0 < i)] [fact (0 < j)] : rescale i ⟶ rescale j :=
 (whiskering_right _ _ _).map $ functor.map_complex_like_nat_trans _ _ $
-  NormedGroup.scale i j
+  SemiNormedGroup.scale i j
 
 section exact_and_admissible
 

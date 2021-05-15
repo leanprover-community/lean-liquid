@@ -16,7 +16,7 @@ theorem first_target [BD.suitable c']
   ∃ (k : ℝ≥0) [fact (1 ≤ k)],
   ∃ c₀ : ℝ≥0,
   ∀ (S : Type) [fintype S],
-  ∀ (V : NormedGroup) [normed_with_aut r V],​
+  ∀ (V : SemiNormedGroup) [normed_with_aut r V],​
     (Mbar_system V S r r' BD c').is_bounded_exact k m c₀ := _
 ```
 
@@ -85,7 +85,7 @@ There are two pieces of functionality that help a lot when browsing through Lean
     At some point we may formalize Breen--Deligne resolutions,
     but this is not part of our first target.
   - `system_of_complexes/` contains the definition of a system of complexes
-    of normed abelian groups indexed by nonnegative real numbers.
+    of seminormed groups indexed by nonnegative real numbers.
     It also contains the definition of `is_bounded_exact`,
     which is the exactness condition claimed in the main theorem.
   - `Mbar/*.lean` contains a definition of the spaces ![](svg/VhatMbar.svg)

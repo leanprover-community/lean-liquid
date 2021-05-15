@@ -21,7 +21,7 @@ on what is (or should be) in mathlib:
   (the proof that it's a polyhedral lattice is missing, and possibly not needed).
 - `topology.lean` : right now an empty file (and it might remain that way).
 
-The last two files need some of the theory of normed groups and pseudo normed groups,
+The last two files need some of the theory of normed groups and pseudo-normed groups,
 defined in `normed_group` and `pseudo_normed_group`.
 
 - `pseudo_normed_group.lean` : If M is a pseudo-normed group with T⁻¹ then so is Hom(Λ, M).

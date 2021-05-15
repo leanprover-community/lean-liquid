@@ -18,10 +18,10 @@ open_locale nnreal big_operators
 
 local attribute [instance] type_pow
 
-/-- A *profinitely filtered pseudo normed topological group* is
+/-- A *profinitely filtered pseudo-normed topological group* is
 * an abelian group `M` with an increasing filtration `filtration M c, c : ℝ≥0` such that
 * `filtration M c` is a profinite set
-* `M` is pseudo normed, so `0 ∈ filtration M c`, `-(filtration M c) = filtration M c`,
+* `M` is pseudo-normed, so `0 ∈ filtration M c`, `-(filtration M c) = filtration M c`,
   and `x₁ ∈ filtration M c₁, x₂ ∈ filtration M c₂ → (x₁ + x₂) ∈ filtration M (c₁ + c₂)`
 * (bounded) addition and negation are continuous.
 
@@ -121,7 +121,7 @@ f.to_add_monoid_hom.map_sum _ _
 
 @[simp] lemma map_gsmul (x) (n : ℤ) : f (n • x) = n • (f x) := f.to_add_monoid_hom.map_gsmul _ _
 
-/-- Make a profinitely filtered pseudo normed group hom
+/-- Make a profinitely filtered pseudo-normed group hom
 from a group hom and a proof that it is bounded and continuous. -/
 def mk_of_bound (f : M₁ →+ M₂) (C : ℝ≥0)
   (hC : ∀ c, ∃ (H : ∀ x, x ∈ filtration M₁ c → f x ∈ filtration M₂ (C * c)),
@@ -140,7 +140,7 @@ def mk_of_bound (f : M₁ →+ M₂) (C : ℝ≥0)
   end,
   .. f }
 
-/-- Make a profinitely filtered pseudo normed group hom
+/-- Make a profinitely filtered pseudo-normed group hom
 from a group hom and a proof that it is bounded and continuous. -/
 noncomputable
 def mk' (f : M₁ →+ M₂) (h : ∃ C, ∀ c, ∃ (H : ∀ x, x ∈ filtration M₁ c → f x ∈ filtration M₂ (C * c)),
@@ -243,7 +243,7 @@ variables {M M₁ M₂ M₃ : Type*}
 
 namespace pseudo_normed_group
 
-/-- Helper function for pseudo normed groups.
+/-- Helper function for pseudo-normed groups.
 `pow_incl` is the natural inclusion function `(filtration M c)^n → M^n`.
 Note that `(filtration M c)^n` is not the same type as `filtration (M^n) c`,
 although they are naturally equivalent. -/
@@ -268,7 +268,7 @@ variables [profinitely_filtered_pseudo_normed_group M₁]
 variables [profinitely_filtered_pseudo_normed_group M₂]
 variables [profinitely_filtered_pseudo_normed_group M₃]
 
-/-- A function `f : M₁ → M₂` between profinitely filtered pseudo normed groups
+/-- A function `f : M₁ → M₂` between profinitely filtered pseudo-normed groups
 is continuous if it is continuous when restricted to the filtration sets.
 
 Implementation detail: to avoid diamonds of topologies on `filtration M c`
@@ -622,7 +622,7 @@ end
 lemma pi_proj_bound_by (i : ι) : (@pi_proj _ M _ i).bound_by 1 :=
 profinitely_filtered_pseudo_normed_group_hom.mk_of_bound_bound_by _ _ _
 
-/-- Universal property of the product of profinitely filtered pseudo normed groups -/
+/-- Universal property of the product of profinitely filtered pseudo-normed groups -/
 @[simps {fully_applied := ff}]
 def pi_lift {N : Type*} [profinitely_filtered_pseudo_normed_group N]
   (f : Π i, profinitely_filtered_pseudo_normed_group_hom N (M i))

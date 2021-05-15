@@ -47,12 +47,12 @@ lemma nnnorm_def [hN : fact (0 < N)] [semi_normed_group V] (v : rescale N V) :
 
 end rescale
 
-namespace NormedGroup
+namespace SemiNormedGroup
 
 variables (r r₁ r₂ : ℝ≥0) [fact (0 < r)] [fact (0 < r₁)] [fact (0 < r₂)]
 
 @[simps]
-def rescale (r : ℝ≥0) [hr : fact (0 < r)] : NormedGroup ⥤ NormedGroup :=
+def rescale (r : ℝ≥0) [hr : fact (0 < r)] : SemiNormedGroup ⥤ SemiNormedGroup :=
 { obj := λ V, of $ rescale r V,
   map := λ V₁ V₂ f,
   { to_fun := λ v, @rescale.of r V₂ $ f ((@rescale.of r V₁).symm v),
@@ -73,7 +73,7 @@ instance rescale.additive : (rescale r).additive :=
 { map_zero' := λ V W, rfl, -- defeq abuse
   map_add' := λ V W f g, rfl /- defeq abuse -/ }
 
-lemma rescale_map_bound_by {V₁ V₂ : NormedGroup} {f : V₁ ⟶ V₂} {C : ℝ≥0} (hf : f.bound_by C) :
+lemma rescale_map_bound_by {V₁ V₂ : SemiNormedGroup} {f : V₁ ⟶ V₂} {C : ℝ≥0} (hf : f.bound_by C) :
   ((rescale r).map f).bound_by C :=
 begin
   intro v,
@@ -93,7 +93,7 @@ def to_rescale : 𝟭 _ ⟶ rescale r :=
   end,
   naturality' := λ V W f, rfl /- defeq abuse -/ }
 
-lemma to_rescale_bound_by (V : NormedGroup) : ((to_rescale r).app V).bound_by r⁻¹ :=
+lemma to_rescale_bound_by (V : SemiNormedGroup) : ((to_rescale r).app V).bound_by r⁻¹ :=
 normed_group_hom.mk_normed_group_hom'_bound_by _ _ _
 
 def scale : rescale r₁ ⟶ rescale r₂ :=
@@ -112,7 +112,7 @@ def scale : rescale r₁ ⟶ rescale r₂ :=
   end,
   naturality' := λ V W f, rfl /- defeq abuse -/ }
 
-lemma scale_bound_by (V : NormedGroup) : ((scale r₁ r₂).app V).bound_by (r₁ / r₂) :=
+lemma scale_bound_by (V : SemiNormedGroup) : ((scale r₁ r₂).app V).bound_by (r₁ / r₂) :=
 normed_group_hom.mk_normed_group_hom'_bound_by _ _ _
 
-end NormedGroup
+end SemiNormedGroup

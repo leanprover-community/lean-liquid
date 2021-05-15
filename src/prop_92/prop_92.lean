@@ -7,7 +7,7 @@ open_locale nnreal
 
 namespace CLCFP
 
-variables {r r' : ℝ≥0} (V : NormedGroup) [normed_with_aut r V] (c c₁ c₂ : ℝ≥0) (n : ℕ)
+variables {r r' : ℝ≥0} (V : SemiNormedGroup) [normed_with_aut r V] (c c₁ c₂ : ℝ≥0) (n : ℕ)
 variables [fact (0 < r)] [fact (0 < r')] [fact (r' ≤ 1)] [fact (c₂ ≤ r' * c₁)] [fact (c₂ ≤ c₁)]
 variables (M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ)
 
@@ -23,8 +23,8 @@ begin
   { refine (normed_group_hom.bound_by.comp' 1 r⁻¹ r⁻¹ (mul_one _).symm _ _).neg,
     { exact CLC.T_inv_bound_by r V _ },
     { exact (res_norm_noninc V r' c₁ c₂ n M).bound_by_one } },
-  { refine NormedGroup.Completion_map_bound_by _ _ _,
-    exact (NormedGroup.LocallyConstant_obj_map_norm_noninc _ _ _ _).bound_by_one },
+  { refine SemiNormedGroup.Completion_map_bound_by _ _ _,
+    exact (SemiNormedGroup.LocallyConstant_obj_map_norm_noninc _ _ _ _).bound_by_one },
 end
 
 variables {V c n M}

@@ -24,7 +24,7 @@ variables (h : homotopy f g)
 
 variables (c_ c_₁ c_₂ : ℕ → ℝ≥0)
 variables [BD.suitable c_] [BD₁.suitable c_₁] [BD₂.suitable c_₂]
-variables (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
+variables (r : ℝ≥0) (V : SemiNormedGroup) [normed_with_aut r V] [fact (0 < r)]
 variables {r' : ℝ≥0} [fact (0 < r')] [fact (r' ≤ 1)] (c : ℝ≥0)
 
 section homotopy
@@ -145,7 +145,7 @@ end breen_deligne
 -- variables (BD : breen_deligne.package)
 -- variables (c_ c' : ℕ → ℝ≥0)
 -- variables [BD.data.suitable c_] [package.adept BD c_ c']
--- variables (r : ℝ≥0) (V : NormedGroup.{v}) [normed_with_aut r V] [fact (0 < r)]
+-- variables (r : ℝ≥0) (V : SemiNormedGroup.{v}) [normed_with_aut r V] [fact (0 < r)]
 -- variables {r' : ℝ≥0} [fact (0 < r')] [fact (r' ≤ 1)] (c : ℝ≥0)
 -- variables (M : (ProFiltPseuNormGrpWithTinv.{u} r')ᵒᵖ)
 -- variables (N : ℕ)

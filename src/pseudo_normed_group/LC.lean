@@ -1,7 +1,7 @@
 import category_theory.preadditive.functor_category
 
 import pseudo_normed_group.FP
-import locally_constant.NormedGroup
+import locally_constant.SemiNormedGroup
 import locally_constant.Vhat
 
 import for_mathlib.normed_group_hom_bound_by
@@ -34,15 +34,15 @@ open_locale classical nnreal big_operators
 noncomputable theory
 local attribute [instance] type_pow
 
-open NormedGroup opposite Profinite pseudo_normed_group category_theory breen_deligne
+open SemiNormedGroup opposite Profinite pseudo_normed_group category_theory breen_deligne
 open profinitely_filtered_pseudo_normed_group
 
 universe variable u
-variables (r : ℝ≥0) (V : NormedGroup) (r' : ℝ≥0)
+variables (r : ℝ≥0) (V : SemiNormedGroup) (r' : ℝ≥0)
 variables (c c₁ c₂ c₃ c₄ : ℝ≥0) (l m n : ℕ)
 
 /-- `LC V n` is the functor that sends a profinite set `S` to `V(S)` -/
-def LC (V : NormedGroup) : Profiniteᵒᵖ ⥤ NormedGroup :=
+def LC (V : SemiNormedGroup) : Profiniteᵒᵖ ⥤ SemiNormedGroup :=
 LocallyConstant.obj V
 
 namespace LC
@@ -52,7 +52,7 @@ locally_constant.comap_hom_norm_noninc _ _
 
 instance obj.normed_with_aut [normed_with_aut r V] [fact (0 < r)] (A : Profiniteᵒᵖ) :
   normed_with_aut r ((LC V).obj A) :=
-NormedGroup.normed_with_aut_LocallyConstant _ _ _
+SemiNormedGroup.normed_with_aut_LocallyConstant _ _ _
 
 @[simps hom_app_apply inv_app_apply {fully_applied := ff}]
 def T [normed_with_aut r V] : LC V ≅ LC V :=
@@ -81,11 +81,11 @@ by { rw T_inv_eq', intro v, exact (normed_with_aut.norm_T_inv _ v).le }
 end LC
 
 /-- The "functor" that sends `M` and `c` to `V((filtration M c)^n)` -/
-def LCFP (V : NormedGroup) (r' : ℝ≥0) (c : ℝ≥0) (n : ℕ) :
-  (ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup :=
+def LCFP (V : SemiNormedGroup) (r' : ℝ≥0) (c : ℝ≥0) (n : ℕ) :
+  (ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ SemiNormedGroup :=
 (FiltrationPow r' c n).op ⋙ LC V
 
-theorem LCFP_def (V : NormedGroup) (r' : ℝ≥0) (c : ℝ≥0) (n : ℕ) :
+theorem LCFP_def (V : SemiNormedGroup) (r' : ℝ≥0) (c : ℝ≥0) (n : ℕ) :
   LCFP V r' c n = (FiltrationPow r' c n).op ⋙ LocallyConstant.obj V := rfl
 
 namespace LCFP
@@ -353,8 +353,8 @@ begin
   rintros ⟨g, hg⟩ -,
   -- instead of this crazy `show`, we shoul prove `comp_gsmul` and `gsmul_comp`
   -- for preadditive categories
-  show @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup) _ _ _ _ _ _ _ =
-    @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup) _ _ _ _ _ _ _,
+  show @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ SemiNormedGroup) _ _ _ _ _ _ _ =
+    @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ SemiNormedGroup) _ _ _ _ _ _ _,
   simp only [add_monoid_hom.map_gsmul, add_monoid_hom.smul_apply],
   haveI : g.suitable c₃ c₁ := suitable_of_mem_support ϕ _ _ g hg,
   haveI : g.suitable c₄ c₂ := suitable_of_mem_support ϕ _ _ g hg,
@@ -369,8 +369,8 @@ begin
   simp only [eval_LCFP, comp_sum, sum_comp],
   apply finset.sum_congr rfl,
   rintros ⟨g, hg⟩ -,
-  show @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup) _ _ _ _ _ _ _ =
-    @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup) _ _ _ _ _ _ _,
+  show @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ SemiNormedGroup) _ _ _ _ _ _ _ =
+    @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ SemiNormedGroup) _ _ _ _ _ _ _,
   simp only [add_monoid_hom.map_gsmul, add_monoid_hom.smul_apply],
   haveI : g.suitable c₃ c₁ := suitable_of_mem_support ϕ _ _ g hg,
   haveI : g.suitable c₄ c₂ := suitable_of_mem_support ϕ _ _ g hg,
@@ -385,8 +385,8 @@ begin
   simp only [eval_LCFP, comp_sum, sum_comp],
   apply finset.sum_congr rfl,
   rintros ⟨g, hg⟩ -,
-  show @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup) _ _ _ _ _ _ _ =
-    @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup) _ _ _ _ _ _ _,
+  show @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ SemiNormedGroup) _ _ _ _ _ _ _ =
+    @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ SemiNormedGroup) _ _ _ _ _ _ _,
   simp only [add_monoid_hom.map_gsmul, add_monoid_hom.smul_apply],
   haveI : g.suitable c₂ c₁ := suitable_of_mem_support ϕ _ _ g hg,
   congr' 1,

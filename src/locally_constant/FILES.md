@@ -8,7 +8,7 @@ in definition 8.18 of `analytic.pdf` .
 
 - `analysis.lean`: Locally constant maps from a compact top space to a normed group are a normed
   group.
-- `NormedGroup.lean`: category-theoretic reformulation.
+- `SemiNormedGroup.lean`: category-theoretic reformulation.
 - `Vhat.lean`: completions of normed groups, and the LCC bifunctor sending a normed abelian
   group `V` and a profinite space `S` to `V-hat(S)`, the completion of the locally constant
   functions S -> V.

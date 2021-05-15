@@ -6,7 +6,7 @@ import pseudo_normed_group.with_Tinv
 
 /-!
 
-# The category of profinitely filtered pseudo normed groups.
+# The category of profinitely filtered pseudo-normed groups.
 
 The category of profinite pseudo-normed groups, and the category of
 profinitely filtered pseudo-normed groups equipped with an action of T⁻¹.
@@ -21,11 +21,11 @@ local attribute [instance] type_pow
 
 noncomputable theory
 
-/-- The category of profinitely filtered pseudo normed groups. -/
+/-- The category of profinitely filtered pseudo-normed groups. -/
 def ProFiltPseuNormGrp : Type (u+1) :=
 bundled profinitely_filtered_pseudo_normed_group
 
-/-- The category of profinitely filtered pseudo normed groups with action of `T⁻¹`. -/
+/-- The category of profinitely filtered pseudo-normed groups with action of `T⁻¹`. -/
 def ProFiltPseuNormGrpWithTinv (r : ℝ≥0) : Type (u+1) :=
 bundled (@profinitely_filtered_pseudo_normed_group_with_Tinv r)
 

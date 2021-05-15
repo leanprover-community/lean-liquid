@@ -26,7 +26,7 @@ namespace thm95
 
 variables (BD : breen_deligne.data) (c' : ℕ → ℝ≥0) [BD.suitable c']
 variables (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)]
-variables (V : NormedGroup.{v}) [normed_with_aut r V]
+variables (V : SemiNormedGroup.{v}) [normed_with_aut r V]
 variables (Λ : PolyhedralLattice.{u}) (M : ProFiltPseuNormGrpWithTinv.{w} r')
 variables (N : ℕ) [fact (0 < N)]
 
@@ -118,7 +118,7 @@ namespace thm95
 
 variables (BD : breen_deligne.data)
 variables (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)]
-variables (V : NormedGroup.{v}) [normed_with_aut r V]
+variables (V : SemiNormedGroup.{v}) [normed_with_aut r V]
 variables (c_ : ℕ → ℝ≥0) [BD.very_suitable r r' c_]
 variables (Λ : PolyhedralLattice.{u}) (M : ProFiltPseuNormGrpWithTinv.{w} r')
 variables (N : ℕ) [fact (0 < N)]
@@ -134,7 +134,7 @@ lemma double_complex.row_admissible :
 lemma double_complex.d_one_norm_noninc (c : ℝ≥0) (q : ℕ) :
   (@system_of_double_complexes.d (double_complex BD c_ r r' V Λ M N) c 1 2 q).norm_noninc :=
 begin
-  refine ((NormedGroup.to_rescale_bound_by _ _).comp' 2 _ 1 _ _).norm_noninc,
+  refine ((SemiNormedGroup.to_rescale_bound_by _ _).comp' 2 _ 1 _ _).norm_noninc,
   { norm_num },
   have : (2 : ℝ≥0) = ∑ i : fin 2, 1,
   { simp only [finset.card_fin, mul_one, nat.cast_bit0, finset.sum_const, nsmul_eq_mul, nat.cast_one] },
@@ -155,11 +155,11 @@ end
 lemma double_complex.d_two_norm_noninc (c : ℝ≥0) (p q : ℕ) :
   (@system_of_double_complexes.d (double_complex BD c_ r r' V Λ M N) c (p+2) (p+3) q).norm_noninc :=
 begin
-  refine ((NormedGroup.scale_bound_by _ _ _).comp' (p+3:ℕ) _ 1 _ _).norm_noninc,
+  refine ((SemiNormedGroup.scale_bound_by _ _ _).comp' (p+3:ℕ) _ 1 _ _).norm_noninc,
   { simp only [add_zero, nat.add_def, ← nat.cast_succ],
     rw [mul_comm, ← mul_div_assoc, eq_comm, ← nat.cast_mul, nat.factorial_succ], apply div_self,
     norm_cast, norm_num [nat.factorial_ne_zero] },
-  apply NormedGroup.rescale_map_bound_by,
+  apply SemiNormedGroup.rescale_map_bound_by,
   have : (p+1+1+1 : ℝ≥0) = ∑ i : fin (p+1+1+1), 1,
   { simp only [finset.card_fin, mul_one, finset.sum_const, nsmul_eq_mul, nat.cast_id,
       nat.cast_bit1, nat.cast_add, nat.cast_one] },

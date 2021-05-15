@@ -1,27 +1,27 @@
-import normed_group.NormedGroup
+import normed_group.SemiNormedGroup
 /-!
 
-# Normed groups with an extra automorphism
+# Seminormed groups with an extra automorphism
 
 This file contains definition 8.13 of `analytic.pdf`, a category-theoretic
-definition of a normed group eqipped with an automorphism which scales
+definition of a seminormed group eqipped with an automorphism which scales
 norms by a fixed factor `r`.
 
 -/
 
 open_locale nnreal
 
-/-- A `normed_with_aut r V` structure on a normed abelian group `V`
+/-- A `normed_with_aut r V` structure on a seminormed group `V`
 consists of an automorphism `T` satisfying `∥T v∥ = r * ∥v∥`.
 
 In other words, it is a normed `ℤ[T^{±1}]`-module satisfying `∥T v∥ = r * ∥v∥`.
 
 Definition 8.13 of [Analytic] -/
-class normed_with_aut (r : out_param ℝ≥0) (V : NormedGroup) :=
+class normed_with_aut (r : out_param ℝ≥0) (V : SemiNormedGroup) :=
 (T : V ≅ V)
 (norm_T : ∀ v : V, ∥(T.hom : V → V) v∥ = r * ∥v∥)
 
-variables {r : ℝ≥0} (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
+variables {r : ℝ≥0} (V : SemiNormedGroup) [normed_with_aut r V] [fact (0 < r)]
 
 namespace normed_with_aut
 

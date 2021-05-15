@@ -7,7 +7,7 @@ import system_of_complexes.basic
 
 # Truncation
 
-In this file we define a truncation functors for (systems of) complexes of normed groups.
+In this file we define a truncation functors for (systems of) complexes of seminormed groups.
 This operation takes a complex `C` indexed by `ℕ`, and creates a new complex whose objects are
 * in degree `0`:   the cokernel of `d : C 0 ⟶ C 1`
 * in degree `n+1`: the object `C (n+2)`
@@ -24,16 +24,16 @@ open_locale nnreal
 
 open category_theory category_theory.limits
 
-namespace NormedGroup
+namespace SemiNormedGroup
 open quotient_add_group
 
 namespace truncate
 
-variables (C : cochain_complex ℕ NormedGroup.{u})
+variables (C : cochain_complex ℕ SemiNormedGroup.{u})
 
 open category_theory.preadditive
 
-def X : ℕ → NormedGroup.{u}
+def X : ℕ → SemiNormedGroup.{u}
 | 0     := coker (C.d 0 1)
 | (n+1) := C.X (n+2)
 
@@ -61,22 +61,22 @@ lemma d_comp_d : Π i j k, d C i j ≫ d C j k = 0
 | 0     1     (k+3) := by { rw [@d_eq_zero C 1, comp_zero], dec_trivial }
 
 @[simps]
-def obj : cochain_complex ℕ NormedGroup :=
+def obj : cochain_complex ℕ SemiNormedGroup :=
 { X := X C,
   d := d C,
   d_comp_d := d_comp_d C,
   d_eq_zero := d_eq_zero C }
 
-lemma obj_d_add_one (C : cochain_complex ℕ NormedGroup) (i j : ℕ) :
+lemma obj_d_add_one (C : cochain_complex ℕ SemiNormedGroup) (i j : ℕ) :
   (obj C).d (i+1) (j+1) = d C (i+1) (j+1) :=
 rfl
 
-def map_f {C₁ C₂ : cochain_complex ℕ NormedGroup} (f : C₁ ⟶ C₂) :
+def map_f {C₁ C₂ : cochain_complex ℕ SemiNormedGroup} (f : C₁ ⟶ C₂) :
   Π i:ℕ, X C₁ i ⟶ X C₂ i
 | 0     := coker.map (f.comm 0 1)
 | (i+1) := f.f (i+2)
 
-lemma map_comm {C₁ C₂ : cochain_complex ℕ NormedGroup.{u}} (f : C₁ ⟶ C₂) :
+lemma map_comm {C₁ C₂ : cochain_complex ℕ SemiNormedGroup.{u}} (f : C₁ ⟶ C₂) :
   Π i j, d C₁ i j ≫ map_f f j = map_f f i ≫ d C₂ i j
 | 0     1     := coker.map_lift_comm (f.comm 1 2)
 | (i+1) (j+1) := f.comm (i+2) (j+2)
@@ -85,7 +85,7 @@ lemma map_comm {C₁ C₂ : cochain_complex ℕ NormedGroup.{u}} (f : C₁ ⟶ C
 | (i+1) 0     := by { rw [d_eq_zero, d_eq_zero, zero_comp, comp_zero]; dec_trivial }
 
 @[simps]
-def map {C₁ C₂ : cochain_complex ℕ NormedGroup.{u}} (f : C₁ ⟶ C₂) :
+def map {C₁ C₂ : cochain_complex ℕ SemiNormedGroup.{u}} (f : C₁ ⟶ C₂) :
   obj C₁ ⟶ obj C₂ :=
 { f := map_f f,
   comm := map_comm f }
@@ -93,7 +93,7 @@ def map {C₁ C₂ : cochain_complex ℕ NormedGroup.{u}} (f : C₁ ⟶ C₂) :
 end truncate
 
 @[simps]
-def truncate : cochain_complex ℕ NormedGroup.{u} ⥤ cochain_complex ℕ NormedGroup.{u} :=
+def truncate : cochain_complex ℕ SemiNormedGroup.{u} ⥤ cochain_complex ℕ SemiNormedGroup.{u} :=
 { obj := λ C, truncate.obj C,
   map := λ C₁ C₂ f, truncate.map f,
   map_id' := λ C, by ext (n|n) ⟨x⟩; refl,
@@ -103,7 +103,7 @@ instance truncate.additive : truncate.additive :=
 { map_zero' := by { intros, ext (n|n) ⟨⟩; refl },
   map_add' := by { intros, ext (n|n) ⟨⟩; refl } }
 
-end NormedGroup
+end SemiNormedGroup
 
 namespace system_of_complexes
 
@@ -113,10 +113,10 @@ variables (C : system_of_complexes.{u})
 
 @[simps]
 def truncate : system_of_complexes ⥤ system_of_complexes :=
-(whiskering_right _ _ _).obj $ NormedGroup.truncate
+(whiskering_right _ _ _).obj $ SemiNormedGroup.truncate
 
 @[simp] lemma truncate_obj_d_zero_one (c : ℝ≥0) (y : C c 1) :
-  (truncate.obj C).d 0 1 (NormedGroup.coker.π y) = C.d 1 2 y := rfl
+  (truncate.obj C).d 0 1 (SemiNormedGroup.coker.π y) = C.d 1 2 y := rfl
 
 @[simp] lemma truncate_obj_d_succ_succ (c : ℝ≥0) (i j : ℕ) (x: truncate.obj C c (i+1)) :
   (truncate.obj C).d (i+1) (j+1) x = C.d (i+2) (j+2) x := rfl
@@ -126,15 +126,15 @@ lemma truncate_admissible (hC : C.admissible) :
 { d_norm_noninc' :=
   begin
     rintro c (i|i) j rfl,
-    { apply NormedGroup.coker.lift_norm_noninc,
+    { apply SemiNormedGroup.coker.lift_norm_noninc,
       exact hC.d_norm_noninc _ _ 1 2 },
     { exact hC.d_norm_noninc _ _ (i+2) (i+3) }
   end,
   res_norm_noninc :=
   begin
     rintro c₁ c₂ (i|i) h x,
-    { apply NormedGroup.coker.lift_norm_noninc,
-      exact NormedGroup.coker.π_norm_noninc.comp (hC.res_norm_noninc _ _ _ _) },
+    { apply SemiNormedGroup.coker.lift_norm_noninc,
+      exact SemiNormedGroup.coker.π_norm_noninc.comp (hC.res_norm_noninc _ _ _ _) },
     { exact hC.res_norm_noninc _ _ _ _ x }
   end }
 
@@ -145,25 +145,25 @@ lemma truncate_is_weak_bounded_exact (hC : C.is_weak_bounded_exact k K (m+1) c�
   (truncate.obj C).is_weak_bounded_exact k K m c₀
 | c hc 0 hi x ε hε :=
 begin
-  let π := λ c, @NormedGroup.coker.π _ _ (@d C c 0 1),
-  obtain ⟨x, rfl⟩ : ∃ x', π _ x' = x := NormedGroup.coker.π_surjective x,
+  let π := λ c, @SemiNormedGroup.coker.π _ _ (@d C c 0 1),
+  obtain ⟨x, rfl⟩ : ∃ x', π _ x' = x := SemiNormedGroup.coker.π_surjective x,
   obtain ⟨i₀, -, hi₀, rfl, y, hy⟩ := hC c hc _ (nat.succ_le_succ hi) x ε hε,
   obtain rfl : i₀ = 0, { rwa nat.sub_self at hi₀ }, clear hi,
   refine ⟨0, _, rfl, rfl, 0, _⟩,
   simp only [normed_group_hom.map_zero, sub_zero,
     normed_group_hom.map_neg, truncate_obj_d_zero_one, norm_neg],
   calc _ = ∥π c (res x - C.d 0 1 y)∥ : _
-  ... ≤ ∥res x - C.d 0 1 y∥ : NormedGroup.coker.π_norm_noninc _
+  ... ≤ ∥res x - C.d 0 1 y∥ : SemiNormedGroup.coker.π_norm_noninc _
   ... ≤ _ : hy,
   have hπy : π c (C.d 0 1 y) = 0,
-  { show (C.d 0 1 ≫ π c) y = 0, rw [NormedGroup.coker.comp_pi_eq_zero], refl },
+  { show (C.d 0 1 ≫ π c) y = 0, rw [SemiNormedGroup.coker.comp_pi_eq_zero], refl },
   simp only [normed_group_hom.map_sub, hπy, sub_zero], refl
 end
 | c hc (i+1) hi x ε hε :=
 begin
   obtain ⟨_, _, rfl, rfl, y, hy⟩ := hC c hc _ (nat.succ_le_succ hi) x ε hε,
   refine ⟨i, _, rfl, rfl, _⟩,
-  cases i; [exact ⟨NormedGroup.coker.π y, hy⟩, exact ⟨y, hy⟩],
+  cases i; [exact ⟨SemiNormedGroup.coker.π y, hy⟩, exact ⟨y, hy⟩],
 end
 
 lemma is_weak_bounded_exact_of_truncate (IH : C.is_weak_bounded_exact k K m c₀)
@@ -172,12 +172,12 @@ lemma is_weak_bounded_exact_of_truncate (IH : C.is_weak_bounded_exact k K m c₀
 | c hc 0 hi x ε hε := IH c hc 0 (nat.zero_le _) x ε hε
 | c hc 1 hi x ε hε :=
 begin
-  let π := λ c, @NormedGroup.coker.π _ _ (@d C c 0 1),
+  let π := λ c, @SemiNormedGroup.coker.π _ _ (@d C c 0 1),
   let δ := ε / 2,
   have hδε : δ + δ = ε, { dsimp [δ], rw [← add_div, half_add_self] },
   have hδ : 0 < δ := div_pos hε zero_lt_two,
   obtain ⟨x', Hxx', Hx'⟩ : ∃ x', π c x' = π c (res x) ∧ ∥x'∥ < ∥π c (res x)∥ + δ :=
-    NormedGroup.coker.π_is_quotient.norm_lift hδ _,
+    SemiNormedGroup.coker.π_is_quotient.norm_lift hδ _,
   obtain ⟨y, hy⟩ : ∃ y : C c 0, C.d 0 1 y = res x - x',
   { erw [quotient_add_group.eq, add_comm, ← sub_eq_add_neg, set.mem_range] at Hxx',
     exact Hxx' },
@@ -195,8 +195,8 @@ begin
   obtain ⟨_, _, rfl, rfl, y, hy⟩ := hC c hc (i+1) (nat.pred_le_pred hi) x ε hε,
   refine ⟨i+1, _, rfl, rfl, _⟩,
   cases i,
-  { let π := λ c, @NormedGroup.coker.π _ _ (@d C c 0 1),
-    obtain ⟨y, rfl⟩ : ∃ y', π _ y' = y := NormedGroup.coker.π_surjective y,
+  { let π := λ c, @SemiNormedGroup.coker.π _ _ (@d C c 0 1),
+    obtain ⟨y, rfl⟩ : ∃ y', π _ y' = y := SemiNormedGroup.coker.π_surjective y,
     exact ⟨y, hy⟩ },
   { exact ⟨y, hy⟩ },
 end

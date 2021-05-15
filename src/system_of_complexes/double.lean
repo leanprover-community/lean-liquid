@@ -1,6 +1,6 @@
 import hacks_and_tricks.by_exactI_hack
 import system_of_complexes.basic
-import normed_group.NormedGroup
+import normed_group.SemiNormedGroup
 import facts
 
 universe variables v u
@@ -10,31 +10,31 @@ open_locale nnreal
 
 /-!
 
-# Systems of double complexes of normed abelian groups
+# Systems of double complexes of seminormed groups
 
-In this file we define systems of double complexes of normed abelian groups,
+In this file we define systems of double complexes of seminormed groups,
 as needed for Definition 9.6 of [Analytic].
 
 ## Main declarations
 
-* `system_of_double_complexes`: a system of complexes of normed abelian groups.
+* `system_of_double_complexes`: a system of complexes of seminormed groups.
 * `admissible`: such a system is *admissible* if all maps that occur in the system
     are norm-nonincreasing.
 
 -/
 
-/-- A system of double complexes of normed abelian groups, indexed by `ℝ≥0`.
+/-- A system of double complexes of seminormed groups, indexed by `ℝ≥0`.
 See also Definition 9.3 of [Analytic]. -/
 @[derive category_theory.category]
 def system_of_double_complexes : Type (u+1) :=
-ℝ≥0ᵒᵖ ⥤ (cochain_complex ℕ (cochain_complex ℕ NormedGroup.{u}))
+ℝ≥0ᵒᵖ ⥤ (cochain_complex ℕ (cochain_complex ℕ SemiNormedGroup.{u}))
 
 namespace system_of_double_complexes
 
 variables (C : system_of_double_complexes)
 
 /-- `C.X c p q` is the object $C_c^{p,q}$ in a system of double complexes `C`. -/
-def X (c : ℝ≥0) (p q : ℕ) : NormedGroup :=
+def X (c : ℝ≥0) (p q : ℕ) : SemiNormedGroup :=
 ((C.obj $ op c).X p).X q
 
 /-- `C.res` is the restriction map `C.X c' p q ⟶ C.X c p q` for a system of complexes `C`,

@@ -8,8 +8,8 @@ import for_mathlib.pseudo_metric
 # A technical lemma
 
 This file has the definition of the completion of a system of
-complexes of normed groups, and it proves a technical lemma
-saying that a system of complexes of normed groups is admissible
+complexes of seminormed groups, and it proves a technical lemma
+saying that a system of complexes of seminormed groups is admissible
 and weak bounded exact, and if the groups in the complex are complete,
 then it's bounded exact (for some slightly different constants).
 
@@ -22,7 +22,7 @@ namespace system_of_complexes
 universe variables u
 
 noncomputable def completion (C : system_of_complexes) : system_of_complexes :=
-C ⋙ NormedGroup.Completion.map_complex_like
+C ⋙ SemiNormedGroup.Completion.map_complex_like
 
 namespace is_weak_bounded_exact
 

@@ -6,7 +6,7 @@ import algebra.direct_sum
 
 # Direct sums of polyhedral lattices
 
-A finite direct sum of polyhedral lattices is...a normed group.
+A finite direct sum of polyhedral lattices is...a seminormed group.
 
 ## TODO
 

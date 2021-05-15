@@ -25,7 +25,7 @@ section
 
 variables (BD : package)
 variables (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)]
-variables (V : NormedGroup) [normed_with_aut r V]
+variables (V : SemiNormedGroup) [normed_with_aut r V]
 variables (c_ c' : ℕ → ℝ≥0) [BD.data.very_suitable r r' c_] [package.adept BD c_ c']
 variables (M : ProFiltPseuNormGrpWithTinv r')
 variables (m : ℕ)

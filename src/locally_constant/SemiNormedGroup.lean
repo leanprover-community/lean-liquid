@@ -2,18 +2,18 @@ import topology.category.Profinite
 import category_theory.filtered
 
 import locally_constant.analysis
-import normed_group.NormedGroup
+import normed_group.SemiNormedGroup
 
 /-!
 
 # The functor of locally constant maps
 
-The functor sending a normed group `V` and a profinite type `S` to the normed group
+The functor sending a seminormed group `V` and a profinite type `S` to the seminormed group
 of locally constant maps from `S` to `V` (with the sup norm).
 
 ## Main definition
 
-- `LocallyConstant : NormedGroup ⥤ Profiniteᵒᵖ ⥤ NormedGroup` : the functor.
+- `LocallyConstant : SemiNormedGroup ⥤ Profiniteᵒᵖ ⥤ SemiNormedGroup` : the functor.
 
 -/
 
@@ -21,19 +21,19 @@ noncomputable theory
 
 set_option pp.proofs true
 
-namespace NormedGroup
+namespace SemiNormedGroup
 open opposite locally_constant
 
 local attribute [instance] locally_constant.semi_normed_group locally_constant.pseudo_metric_space
 
-/-- The bifunctor of locally constant maps from profinite spaces to normed groups.
+/-- The bifunctor of locally constant maps from profinite spaces to seminormed groups.
     The effects on homs of groups or space are defined in terms of push-forward
     (ie. post-composition) and pull-back (ie. pre-composition) of locally constant maps
     respectively. -/
 @[simps]
-def LocallyConstant : NormedGroup ⥤ Profiniteᵒᵖ ⥤ NormedGroup :=
+def LocallyConstant : SemiNormedGroup ⥤ Profiniteᵒᵖ ⥤ SemiNormedGroup :=
 { obj := λ V,
-  { obj := λ S, NormedGroup.of $ locally_constant (unop S : Profinite) V,
+  { obj := λ S, SemiNormedGroup.of $ locally_constant (unop S : Profinite) V,
     map := λ S₁ S₂ f, comap_hom (f.unop) (f.unop.continuous),
     map_id' := λ S, comap_hom_id,
     map_comp' := λ S₁ S₂ S₃ f g, (comap_hom_comp _ _ _ _).symm },
@@ -48,7 +48,7 @@ def LocallyConstant : NormedGroup ⥤ Profiniteᵒᵖ ⥤ NormedGroup :=
   map_id' := by { intros, ext, refl },
   map_comp' := by { intros, ext, refl } }
 
-lemma LocallyConstant_obj_map_norm_noninc (V : NormedGroup) (X Y : Profiniteᵒᵖ) (φ : X ⟶ Y) :
+lemma LocallyConstant_obj_map_norm_noninc (V : SemiNormedGroup) (X Y : Profiniteᵒᵖ) (φ : X ⟶ Y) :
   ((LocallyConstant.obj V).map φ).norm_noninc :=
 comap_hom_norm_noninc _ _
 
@@ -58,8 +58,8 @@ universe u
 
 -- TODO: Fix the statement below using bounded colimits.
 --@[nolint unused_arguments]
---instance {M : NormedGroup.{u}} {J : Type u} [small_category J] [is_filtered J] :
+--instance {M : SemiNormedGroup.{u}} {J : Type u} [small_category J] [is_filtered J] :
 --  limits.preserves_colimits_of_shape J (LocallyConstant.obj M) := sorry
 
-end NormedGroup
+end SemiNormedGroup
 #lint- only unused_arguments def_lemma doc_blame

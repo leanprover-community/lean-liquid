@@ -7,7 +7,7 @@ import for_mathlib.arrow
 # The system of complexes in Theorem 9.4 of `analytic.pdf`
 
 Theorem 9.4 is about a system of complexes built from Breen-Deligne data,
-a normed group `V` with `T⁻¹` (scaling by `r`) and a (certain explicit) profinitely filtered
+a seminormed group `V` with `T⁻¹` (scaling by `r`) and a (certain explicit) profinitely filtered
 pseudo-normed group `M` with `T⁻¹` (scaling by `r'`). We do not specialise to Scholze's
 `𝓜-bar_r'(S)` in this file, but allow general profinitely filtered `M`. This file
 contains the construction of the system of complexes from this data.
@@ -17,12 +17,12 @@ contains the construction of the system of complexes from this data.
 Let `BD = (n₁ ⟶ n₂ ⟶ …)` be Breen-Deligne data, `c_` a sequence of non-negative reals which are
 suitable for `BD`, and say `r,c≥0` and `V` is a normed group with `T⁻¹` scaling by `r`.
 
-- `BD.complex c_ r V r' c`: the functor taking a profinitely filtered pseudo-normed abelian
-group `M` to the cochain complex `V-hat(M_{≤c}^n₁)^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^n₂)^{T⁻¹} ⟶ …`
-induced by the data.
+- `BD.complex c_ r V r' c`: the functor taking a profinitely filtered pseudo-normed group `M`
+  to the cochain complex `V-hat(M_{≤c}^n₁)^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^n₂)^{T⁻¹} ⟶ …`
+  induced by the data.
 
-- `BD.system c_ r V r'`: the functor sending a profinitely filtered pseudo-normed abelian
-  group `M` to the system of complexes whose component at `c`
+- `BD.system c_ r V r'`: the functor sending a profinitely filtered pseudo-normed group `M`
+  to the system of complexes whose component at `c`
   is `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …`
 
 -/
@@ -39,31 +39,31 @@ namespace data
 
 section
 variables (BD : breen_deligne.data) (c_ : ℕ → ℝ≥0)
-variables (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
+variables (r : ℝ≥0) (V : SemiNormedGroup) [normed_with_aut r V] [fact (0 < r)]
 variables (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)]
 variables (M : ProFiltPseuNormGrpWithTinv.{u} r') (c : ℝ≥0)
 
-/-- The object for the complex of normed groups
+/-- The object for the complex of seminormed groups
 `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …` -/
 def complex₂_X (a b : ℕ → ℝ≥0) [∀ i, fact (b i ≤ r' * a i)] (i : ℕ) :
-  (ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup :=
+  (ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ SemiNormedGroup :=
 CLCFPTinv₂ r V r' (a i) (b i) (BD.X i)
 
-/-- The object for the complex of normed groups
+/-- The object for the complex of seminormed groups
 `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …` -/
-def complex_X (i : ℕ) : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup :=
+def complex_X (i : ℕ) : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ SemiNormedGroup :=
 complex₂_X BD r V r' (λ i, c * c_ i) (λ i, r' * (c * c_ i)) i
 
 variables [BD.suitable c_]
 
-/-- The differential for the complex of normed groups
+/-- The differential for the complex of seminormed groups
 `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …` -/
 def complex₂_d (a b : ℕ → ℝ≥0) [∀ i, fact (b i ≤ r' * a i)]
   [BD.suitable a] [BD.suitable b] (i j : ℕ) :
   BD.complex₂_X r V r' a b i ⟶ BD.complex₂_X r V r' a b j :=
 (BD.d j i).eval_CLCFPTinv₂ r V r' _ _ _ _
 
-/-- The differential for the complex of normed groups
+/-- The differential for the complex of seminormed groups
 `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …` -/
 def complex_d (i j : ℕ) : BD.complex_X c_ r V r' c i ⟶ BD.complex_X c_ r V r' c j :=
 (BD.d j i).eval_CLCFPTinv r V r' (c * c_ i) (c * c_ j)
@@ -80,15 +80,15 @@ section
 open differential_object
 
 variables (BD : breen_deligne.data) (c_ : ℕ → ℝ≥0) [BD.suitable c_]
-variables (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
+variables (r : ℝ≥0) (V : SemiNormedGroup) [normed_with_aut r V] [fact (0 < r)]
 variables (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] (c : ℝ≥0)
 
-/-- The complex of normed groups `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …` -/
+/-- The complex of seminormed groups `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …` -/
 @[simps]
-def complex₂ (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
+def complex₂ (r : ℝ≥0) (V : SemiNormedGroup) [normed_with_aut r V] [fact (0 < r)]
   (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)]
    (a b : ℕ → ℝ≥0) [∀ i, fact (b i ≤ r' * a i)] [BD.suitable a] [BD.suitable b] :
-  (ProFiltPseuNormGrpWithTinv.{u} r')ᵒᵖ ⥤ cochain_complex ℕ NormedGroup :=
+  (ProFiltPseuNormGrpWithTinv.{u} r')ᵒᵖ ⥤ cochain_complex ℕ SemiNormedGroup :=
 { obj := λ M,
   { X := λ i, (BD.complex₂_X r V r' a b i).obj M,
     d := λ i j, (BD.complex₂_d r V r' a b i j).app M,
@@ -112,10 +112,10 @@ def complex₂ (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < 
   map_id' := λ M, by { ext i : 2, apply category_theory.functor.map_id, },
   map_comp' := λ M₁ M₂ M₃ f g, by { ext i : 2, apply category_theory.functor.map_comp } }
 
-/-- The complex of normed groups `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …` -/
-def complex (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
+/-- The complex of seminormed groups `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …` -/
+def complex (r : ℝ≥0) (V : SemiNormedGroup) [normed_with_aut r V] [fact (0 < r)]
   (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] (c : ℝ≥0) :
-  (ProFiltPseuNormGrpWithTinv.{u} r')ᵒᵖ ⥤ cochain_complex ℕ NormedGroup :=
+  (ProFiltPseuNormGrpWithTinv.{u} r')ᵒᵖ ⥤ cochain_complex ℕ SemiNormedGroup :=
 BD.complex₂ r V r' (λ i, c * c_ i) (λ i, r' * (c * c_ i))
 
 namespace complex
@@ -126,7 +126,7 @@ CLCFPTinv.map_norm_noninc _ _ _ _ _ _
 
 end complex
 
-lemma complex_obj_d (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
+lemma complex_obj_d (r : ℝ≥0) (V : SemiNormedGroup) [normed_with_aut r V] [fact (0 < r)]
   (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] (c : ℝ≥0) (i j : ℕ) (M) :
   ((BD.complex c_ r V r' c).obj M).d i j =
     ((BD.d j i).eval_CLCFPTinv r V r' _ _).app M :=
@@ -141,7 +141,7 @@ by rw [← nat_trans.comp_app, ← nat_trans.comp_app, hf]
 `V-hat(M_{≤c}^{n₁})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^{n₂})^{T⁻¹} ⟶ ...`
 occurring in Theorems 9.4 and 9.5 of [Analytic], as a functor in `M`. -/
 @[simps obj map]
-def system (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
+def system (r : ℝ≥0) (V : SemiNormedGroup) [normed_with_aut r V] [fact (0 < r)]
   (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] :
   (ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ system_of_complexes :=
 functor.flip {
@@ -177,14 +177,14 @@ instance fact_unop_op {c₁ c₂ : ℝ≥0} [fact (c₂ ≤ c₁)] :
   fact ((unop (op c₂)) ≤ (unop (op c₁))) :=
 by { dsimp, apply_assumption }
 
-lemma system_res_def (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
+lemma system_res_def (r : ℝ≥0) (V : SemiNormedGroup) [normed_with_aut r V] [fact (0 < r)]
   (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] {M}
   {c₁ c₂ : ℝ≥0} {i : ℕ} [h : fact (c₂ ≤ c₁)] :
   @system_of_complexes.res ((BD.system c_ r V r').obj M) c₁ c₂ i _ =
     (CLCFPTinv.res r V r' _ _ _).app M :=
 rfl
 
-lemma system_obj_d (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
+lemma system_obj_d (r : ℝ≥0) (V : SemiNormedGroup) [normed_with_aut r V] [fact (0 < r)]
   (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] {M}
   (c : ℝ≥0) (i j : ℕ) :
   @system_of_complexes.d ((BD.system c_ r V r').obj M) c i j =
@@ -196,7 +196,7 @@ lemma system_map_iso_isometry {M₁ M₂ : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ
   isometry ((((BD.system c_ r V r').map_iso f).hom.app (op c)).f i) :=
 begin
   simp only [← iso.app_hom, ← complex_like.iso_app_hom],
-  apply NormedGroup.iso_isometry_of_norm_noninc;
+  apply SemiNormedGroup.iso_isometry_of_norm_noninc;
   apply complex.map_norm_noninc,
 end
 
@@ -205,7 +205,7 @@ end
 section
 
 variables (BD : breen_deligne.data)
-variables (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
+variables (r : ℝ≥0) (V : SemiNormedGroup) [normed_with_aut r V] [fact (0 < r)]
 variables (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)]
 variables (c_ : ℕ → ℝ≥0) [BD.very_suitable r r' c_]
 

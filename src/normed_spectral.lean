@@ -16,7 +16,7 @@ namespace system_of_double_complexes
 @[simps]
 def truncate : system_of_double_complexes.{u} ⥤ system_of_double_complexes.{u} :=
 (whiskering_right _ _ _).obj $
-  @functor.map_complex_like _ _ _ _ _ _ _ _ _ _ NormedGroup.truncate.additive.{u u}
+  @functor.map_complex_like _ _ _ _ _ _ _ _ _ _ SemiNormedGroup.truncate.additive.{u u}
 -- TODO: why do I need to give the instance manually? ↑ ↑ ↑
 
 namespace truncate
@@ -33,19 +33,19 @@ rfl
 
 @[simp]
 lemma d'_zero_one (c : ℝ≥0) (p : ℕ) (x : M.X c p 1) :
-  (truncate.obj M).d' 0 1 (NormedGroup.coker.π x) = M.d' 1 2 x := rfl
+  (truncate.obj M).d' 0 1 (SemiNormedGroup.coker.π x) = M.d' 1 2 x := rfl
 
 @[simp]
 lemma d_π (c : ℝ≥0) (p p' : ℕ) (x : M.X c p 1) :
-  @d (truncate.obj M) _ p p' 0 (NormedGroup.coker.π x) = NormedGroup.coker.π (M.d p p' x) := rfl
+  @d (truncate.obj M) _ p p' 0 (SemiNormedGroup.coker.π x) = SemiNormedGroup.coker.π (M.d p p' x) := rfl
 
 @[simp]
 lemma res_π (c₁ c₂ : ℝ≥0) (p : ℕ) (h : fact (c₁ ≤ c₂)) (x : M.X c₂ p 1) :
-  @res (truncate.obj M) _ _ p 0 h (NormedGroup.coker.π x) = NormedGroup.coker.π (M.res x) := rfl
+  @res (truncate.obj M) _ _ p 0 h (SemiNormedGroup.coker.π x) = SemiNormedGroup.coker.π (M.res x) := rfl
 
 def quotient_map : M.col 1 ⟶ (truncate.obj M).col 0 :=
 { app := λ c,
-  { f := λ p, NormedGroup.coker.π,
+  { f := λ p, SemiNormedGroup.coker.π,
     comm := λ p p', by { ext, refl } },
   naturality' := by { intros, ext, refl } }
 
@@ -53,8 +53,8 @@ lemma admissible (hM : M.admissible) : (truncate.obj M).admissible :=
 { d_norm_noninc' := λ c p' p q h,
   begin
     cases q,
-    { apply NormedGroup.coker.lift_norm_noninc,
-      exact NormedGroup.coker.π_norm_noninc.comp (hM.d_norm_noninc _ _ _ _) },
+    { apply SemiNormedGroup.coker.lift_norm_noninc,
+      exact SemiNormedGroup.coker.π_norm_noninc.comp (hM.d_norm_noninc _ _ _ _) },
     { exact hM.d_norm_noninc c p' p _ }
   end,
   d'_norm_noninc' := λ c p,
@@ -180,19 +180,19 @@ begin
       exists_and_distrib_left, zero_add, row_d, exists_eq_left', exists_const]
       using condM.row_exact (nat.zero_lt_succ _) i hi c hc 0 (nat.zero_le _) x ε' hε' },
   { intros c i, apply quotient_add_group.ker_mk },
-  { intros c p, exact NormedGroup.coker.π_is_quotient }
+  { intros c p, exact SemiNormedGroup.coker.π_is_quotient }
 end
 
 -- morally `q'` is `q + 1`
 def h_truncate : Π (q : ℕ) {q' : ℕ} {c : ℝ≥0},
   (truncate.obj M).X (k' * c) 0 q' ⟶ (truncate.obj M).X c 1 q
-| 0     1      c := condM.htpy.h 1 ≫ NormedGroup.coker.π
+| 0     1      c := condM.htpy.h 1 ≫ SemiNormedGroup.coker.π
 | (q+1) (q'+1) c := condM.htpy.h (q+2)
 | _     _      _ := 0
 
 @[simp]
 lemma h_truncate_zero {c : ℝ≥0} (x : (truncate.obj M).X (k' * c) 0 1) :
-  condM.h_truncate 0 x = NormedGroup.coker.π (condM.htpy.h 1 x) := rfl
+  condM.h_truncate 0 x = SemiNormedGroup.coker.π (condM.htpy.h 1 x) := rfl
 
 lemma h_truncate_bound_by : ∀ (q q' : ℕ), q ≤ m → q+1 = q' → ∀ (c : ℝ≥0), fact (c₀ ≤ c) →
   (condM.h_truncate q : (truncate.obj M).X (k' * c) 0 q' ⟶ _).bound_by H
@@ -201,14 +201,14 @@ lemma h_truncate_bound_by : ∀ (q q' : ℕ), q ≤ m → q+1 = q' → ∀ (c : 
 | 0     1      hq rfl :=
 begin
   introsI c hc x,
-  calc ∥NormedGroup.coker.π (condM.htpy.h 1 x)∥
-      ≤ ∥condM.htpy.h 1 x∥ : NormedGroup.coker.π_is_quotient.norm_le _
+  calc ∥SemiNormedGroup.coker.π (condM.htpy.h 1 x)∥
+      ≤ ∥condM.htpy.h 1 x∥ : SemiNormedGroup.coker.π_is_quotient.norm_le _
   ... ≤ H * ∥x∥ : condM.htpy.h_bound_by 1 2 dec_trivial rfl c x
 end
 
 def δ_truncate (c : ℝ≥0) :
   ((truncate.obj M).row 0).obj (op $ c) ⟶ ((truncate.obj M).row 1).obj (op $ k' * c) :=
-NormedGroup.truncate.map (condM.htpy.δ c)
+SemiNormedGroup.truncate.map (condM.htpy.δ c)
 
 lemma hδ_truncate (c : ℝ≥0) [fact (c₀ ≤ c)] : ∀ (q : ℕ) (hq : q ≤ m),
   (truncate.obj M).res ≫ (condM.δ_truncate c).f q = (d _ 0 1) ≫ (truncate.obj M).res +
@@ -218,13 +218,13 @@ lemma hδ_truncate (c : ℝ≥0) [fact (c₀ ≤ c)] : ∀ (q : ℕ) (hq : q ≤
 | 0     h :=
 begin
   ext1 x, dsimp, iterate 5 { erw [category_theory.comp_apply] },
-  let π := λ c p, @NormedGroup.coker.π _ _ (@d' M c p 0 1),
-  obtain ⟨x, rfl⟩ : ∃ x', π _ _ x' = x := NormedGroup.coker.π_surjective x,
+  let π := λ c p, @SemiNormedGroup.coker.π _ _ (@d' M c p 0 1),
+  obtain ⟨x, rfl⟩ : ∃ x', π _ _ x' = x := SemiNormedGroup.coker.π_surjective x,
   transitivity π _ _ ((condM.htpy.δ c).f 1 (M.res x)), { refl },
   erw condM.htpy.hδ_apply _ _ (nat.succ_le_succ h) x,
   simp only [nat.zero_sub, d'_self_apply, add_zero, row_d,
     truncate.d_π, truncate.res_π, truncate.d'_zero_one, h_truncate_zero,
-    normed_group_hom.map_add, NormedGroup.coker.pi_apply_dom_eq_zero],
+    normed_group_hom.map_add, SemiNormedGroup.coker.pi_apply_dom_eq_zero],
   refl
 end
 
@@ -233,9 +233,9 @@ lemma δ_truncate_bound_by (c : ℝ≥0) [fact (c₀ ≤ c)] :
 | (q+1) h := condM.htpy.δ_bound_by c (q+2) (nat.succ_le_succ h)
 | 0     h :=
 begin
-  refine NormedGroup.coker.lift_bound_by _,
+  refine SemiNormedGroup.coker.lift_bound_by _,
   intro x,
-  refine (NormedGroup.coker.π_norm_noninc _).trans _,
+  refine (SemiNormedGroup.coker.π_norm_noninc _).trans _,
   exact condM.htpy.δ_bound_by c _ (nat.succ_le_succ h) _
 end
 

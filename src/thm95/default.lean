@@ -17,7 +17,7 @@ section
 
 variables (BD : package)
 variables (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)]
-variables (V : NormedGroup) [normed_with_aut r V]
+variables (V : SemiNormedGroup) [normed_with_aut r V]
 variables (c_ c' : ℕ → ℝ≥0) [BD.data.very_suitable r r' c_] [package.adept BD c_ c']
 variables (M : ProFiltPseuNormGrpWithTinv r')
 variables (m : ℕ)
@@ -68,7 +68,7 @@ include BD c_ c' r r' M V m
 
 /-- Theorem 9.5 in [Analytic] -/
 theorem thm95 : ∀ (Λ : PolyhedralLattice.{0}) (S : Type) [fintype S]
-  (V : NormedGroup) [normed_with_aut r V],
+  (V : SemiNormedGroup) [normed_with_aut r V],
   ​((BD.data.system c_ r V r').obj (op $ Hom Λ (Mbar r' S))).is_weak_bounded_exact
     (k c' m) (K BD c' r r' m) m (c₀ m Λ) :=
 begin
@@ -101,7 +101,7 @@ theorem thm95' (BD : package)
   ∀ (Λ : Type) [polyhedral_lattice Λ],
   ∃ c₀ : ℝ≥0,
   ∀ (S : Type) [fintype S],
-  ∀ (V : NormedGroup) [normed_with_aut r V],
+  ∀ (V : SemiNormedGroup) [normed_with_aut r V],
     by exactI system_of_complexes.is_weak_bounded_exact
     (​(BD.data.system c_ r V r').obj (op $ Hom Λ (Mbar r' S))) k K m c₀ :=
 begin

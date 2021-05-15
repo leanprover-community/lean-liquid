@@ -7,30 +7,30 @@ import topology.metric_space.completion
 
 import for_mathlib.normed_group
 
-import locally_constant.NormedGroup
+import locally_constant.SemiNormedGroup
 import normed_group.normed_with_aut
 
 /-
 
 # Completions of normed groups
 
-This file contains an API for completions of normed groups (basic facts about
-objects and morphisms), and also a variant: completions for normed groups equipped with
+This file contains an API for completions of seminormed groups (basic facts about
+objects and morphisms), and also a variant: completions for seminormed groups equipped with
 an automorphism which scales norms by a constant factor `r`.
 
 ## Main definitions
 
-- `Completion` : the completion of a normed group (defined as a functor on `NormedGroup`)
+- `Completion` : the completion of a seminormed group (defined as a functor on `SemiNormedGroup`)
 - `Completion.lift` : a normed group hom from `V` to complete `W` extends ("lifts")
-  to a normed group from the completion of `V` to `W`.
+  to a seminormed group from the completion of `V` to `W`.
 - `normed_with_aut_Completion` : if `V` is equipped with an automorphism changing norms
   by a factor `r` then the completion also has such an automorphism.
-- `LCC : NormedGroup ⥤ Profiniteᵒᵖ ⥤ NormedGroup` : `LCC V S` is the normed group completion of the
-  locally constant functions from `S` to `V`.
+- `LCC : SemiNormedGroup ⥤ Profiniteᵒᵖ ⥤ SemiNormedGroup` :
+  `LCC V S` is the seminormed group completion of the locally constant functions from `S` to `V`.
 
 ## TODO
 
-Pull off the stuff about completions and put it into `normed_group/NormedGroup`?
+Pull off the stuff about completions and put it into `normed_group/SemiNormedGroup`?
 Then `system_of_complexes.basic` would not have to import this file.
 
 -/
@@ -40,13 +40,13 @@ open_locale nnreal
 
 universe u
 
-namespace NormedGroup
+namespace SemiNormedGroup
 open uniform_space opposite category_theory
 
-/-- The completion of a normed group, as an endofunctor on `NormedGroup`. -/
+/-- The completion of a seminormed group, as an endofunctor on `SemiNormedGroup`. -/
 @[simps]
-def Completion : NormedGroup.{u} ⥤ NormedGroup.{u} :=
-{ obj := λ V, NormedGroup.of (completion V),
+def Completion : SemiNormedGroup.{u} ⥤ SemiNormedGroup.{u} :=
+{ obj := λ V, SemiNormedGroup.of (completion V),
   map := λ V W f,
   { to_fun := completion.map f,
     bound' :=
@@ -87,22 +87,22 @@ def Completion : NormedGroup.{u} ⥤ NormedGroup.{u} :=
     { exact normed_group_hom.uniform_continuous _ }
   end }
 
-instance Completion_complete_space {V : NormedGroup} : complete_space (Completion.obj V) :=
+instance Completion_complete_space {V : SemiNormedGroup} : complete_space (Completion.obj V) :=
 begin
   change complete_space (completion V),
   apply_instance
 end
 
-/-- The canonical morphism from a normed group `V` to its completion. -/
+/-- The canonical morphism from a seminormed group `V` to its completion. -/
 @[simps]
-def incl {V : NormedGroup} : V ⟶ Completion.obj V :=
+def incl {V : SemiNormedGroup} : V ⟶ Completion.obj V :=
 { to_fun := λ v, (v : completion V),
   map_add' := completion.coe_add,
   bound' := ⟨1, λ v, by simp⟩ }
 
-@[simp] lemma norm_incl_eq {V : NormedGroup} {v : V} : ∥incl v∥ = ∥v∥ := by simp
+@[simp] lemma norm_incl_eq {V : SemiNormedGroup} {v : V} : ∥incl v∥ = ∥v∥ := by simp
 
-lemma Completion_map_bound_by {V W : NormedGroup} (f : V ⟶ W) (C : ℝ≥0) (hf : f.bound_by C) :
+lemma Completion_map_bound_by {V W : SemiNormedGroup} (f : V ⟶ W) (C : ℝ≥0) (hf : f.bound_by C) :
   (Completion.map f).bound_by C :=
 begin
   intros v,
@@ -114,7 +114,7 @@ begin
   exact hf v
 end
 
-lemma Completion_map_norm_noninc {V W : NormedGroup} (f : V ⟶ W) (hf : f.norm_noninc) :
+lemma Completion_map_norm_noninc {V W : SemiNormedGroup} (f : V ⟶ W) (hf : f.norm_noninc) :
   (Completion.map f).norm_noninc :=
 begin
   intros v,
@@ -126,12 +126,12 @@ begin
 end
 
 /--
-Given a morphism of normed groups `V ⟶ W`, this defines the associated morphism
+Given a normed group hom `V ⟶ W`, this defines the associated morphism
 from the completion of `V` to the completion of `W`.
 The difference from the definition obtained from the functoriality of completion is in that the
 map sending a morphism `f` to the associated morphism of completions is itself additive.
 -/
-def Completion.map_hom (V W : NormedGroup.{u}) : (V ⟶ W) →+ (Completion.obj V ⟶ Completion.obj W) :=
+def Completion.map_hom (V W : SemiNormedGroup.{u}) : (V ⟶ W) →+ (Completion.obj V ⟶ Completion.obj W) :=
 add_monoid_hom.mk' (category_theory.functor.map Completion) $
 begin
   intros f g, ext v,
@@ -149,10 +149,10 @@ begin
 end
 
 
-@[simp] lemma Completion.map_zero (V W : NormedGroup) : Completion.map (0 : V ⟶ W) = 0 :=
+@[simp] lemma Completion.map_zero (V W : SemiNormedGroup) : Completion.map (0 : V ⟶ W) = 0 :=
 (Completion.map_hom V W).map_zero
 
-instance : preadditive NormedGroup.{u} :=
+instance : preadditive SemiNormedGroup.{u} :=
 { hom_group := λ P Q, infer_instance,
   add_comp' := by { intros, ext,
     simp only [normed_group_hom.add_apply, comp_apply, normed_group_hom.map_add], },
@@ -164,11 +164,11 @@ instance : functor.additive Completion :=
   map_add' := λ X Y, (Completion.map_hom _ _).map_add }
 
 /--
-Given a morphism of normed groups `f : V → W` with `W` complete, this provides a lift of `f` to
+Given a normed group hom `f : V → W` with `W` complete, this provides a lift of `f` to
 the completion of `V`. The lemmas `lift_unique` and `lift_comp_incl` provide the api for the
 universal property of the completion.
 -/
-def Completion.lift {V W : NormedGroup} [complete_space W]
+def Completion.lift {V W : SemiNormedGroup} [complete_space W]
   [t2_space W] [separated_space W] -- these should be redundant
   (f : V ⟶ W) : Completion.obj V ⟶ W :=
 { to_fun := completion.extension f,
@@ -203,7 +203,7 @@ def Completion.lift {V W : NormedGroup} [complete_space W]
       { exact normed_group_hom.uniform_continuous _ }}
   end }
 
-lemma lift_comp_incl {V W : NormedGroup} [complete_space W]
+lemma lift_comp_incl {V W : SemiNormedGroup} [complete_space W]
   [t2_space W] [separated_space W] -- these should be redundant
   (f : V ⟶ W) : incl ≫ (Completion.lift f) = f :=
 begin
@@ -213,7 +213,7 @@ begin
   exact normed_group_hom.uniform_continuous _,
 end
 
-lemma lift_unique {V W : NormedGroup} [complete_space W]
+lemma lift_unique {V W : SemiNormedGroup} [complete_space W]
   [t2_space W] [separated_space W] -- these should be redundant
   (f : V ⟶ W) (g : Completion.obj V ⟶ W) :
   incl ≫ g = f → g = Completion.lift f :=
@@ -229,7 +229,7 @@ begin
     rw [lift_comp_incl, h] }
 end
 
-instance normed_with_aut_Completion (V : NormedGroup.{u}) (r : ℝ≥0) [normed_with_aut r V] :
+instance normed_with_aut_Completion (V : SemiNormedGroup.{u}) (r : ℝ≥0) [normed_with_aut r V] :
   normed_with_aut r (Completion.obj V) :=
 { T := Completion.map_iso normed_with_aut.T,
   norm_T :=
@@ -245,10 +245,10 @@ instance normed_with_aut_Completion (V : NormedGroup.{u}) (r : ℝ≥0) [normed_
     { erw [completion.norm_coe, normed_with_aut.norm_T, completion.norm_coe] }
   end }
 
-@[simp] lemma Completion_T_inv_eq (V : NormedGroup.{u}) (r : ℝ≥0) [normed_with_aut r V] :
+@[simp] lemma Completion_T_inv_eq (V : SemiNormedGroup.{u}) (r : ℝ≥0) [normed_with_aut r V] :
   (normed_with_aut.T.hom : Completion.obj V ⟶ _) = Completion.map normed_with_aut.T.hom := rfl
 
-lemma T_hom_incl {V : NormedGroup} {r : ℝ≥0} [normed_with_aut r V] :
+lemma T_hom_incl {V : SemiNormedGroup} {r : ℝ≥0} [normed_with_aut r V] :
   (incl : V ⟶ _) ≫ normed_with_aut.T.hom = normed_with_aut.T.hom ≫ incl :=
 begin
   ext x,
@@ -258,17 +258,17 @@ begin
   exact normed_group_hom.uniform_continuous _,
 end
 
-lemma T_hom_eq {V : NormedGroup} {r : ℝ≥0} [normed_with_aut r V] :
+lemma T_hom_eq {V : SemiNormedGroup} {r : ℝ≥0} [normed_with_aut r V] :
   normed_with_aut.T.hom = Completion.lift ((normed_with_aut.T.hom : V ⟶ V) ≫ incl) :=
 lift_unique _ _ T_hom_incl
 
 /-- `LCC` (Locally Constant Completion) is the bifunctor
-that sends a normed abelian group `V` and a profinite space `S` to `V-hat(S)`.
+that sends a seminormed group `V` and a profinite space `S` to `V-hat(S)`.
 Here `V-hat(S)` is the completion (for the sup norm) of the locally constant functions `S → V`. -/
-def LCC : NormedGroup ⥤ Profiniteᵒᵖ ⥤ NormedGroup :=
+def LCC : SemiNormedGroup ⥤ Profiniteᵒᵖ ⥤ SemiNormedGroup :=
 curry.obj ((uncurry.obj LocallyConstant) ⋙ Completion)
 
-lemma LCC_obj_map' (V : NormedGroup) {X Y : Profiniteᵒᵖ} (f : Y ⟶ X) :
+lemma LCC_obj_map' (V : SemiNormedGroup) {X Y : Profiniteᵒᵖ} (f : Y ⟶ X) :
   (LCC.obj V).map f = Completion.map ((LocallyConstant.obj V).map f) :=
 begin
   delta LCC,
@@ -277,14 +277,14 @@ begin
   erw [← functor.map_comp, category.id_comp]
 end
 
-lemma LCC_obj_map (V : NormedGroup) {X Y : Profiniteᵒᵖ} (f : Y ⟶ X) (v : (LCC.obj V).obj Y) :
+lemma LCC_obj_map (V : SemiNormedGroup) {X Y : Profiniteᵒᵖ} (f : Y ⟶ X) (v : (LCC.obj V).obj Y) :
   (LCC.obj V).map f v = completion.map (locally_constant.comap f.unop) v :=
 by { rw LCC_obj_map', refl }
 
 variables (S : Type*) [topological_space S] [compact_space S]
 
 @[simps]
-instance normed_with_aut_LocallyConstant (V : NormedGroup) (S : Profiniteᵒᵖ) (r : ℝ≥0)
+instance normed_with_aut_LocallyConstant (V : SemiNormedGroup) (S : Profiniteᵒᵖ) (r : ℝ≥0)
   [normed_with_aut r V] [hr : fact (0 < r)] :
   normed_with_aut r ((LocallyConstant.obj V).obj S) :=
 { T := (LocallyConstant.map_iso normed_with_aut.T).app S,
@@ -300,11 +300,11 @@ instance normed_with_aut_LocallyConstant (V : NormedGroup) (S : Profiniteᵒᵖ)
     simp only [exists_prop, set.mem_range, exists_exists_eq_and, set.mem_set_of_eq]
   end }
 
-instance normed_with_aut_LCC (V : NormedGroup) (S : Profiniteᵒᵖ) (r : ℝ≥0)
+instance normed_with_aut_LCC (V : SemiNormedGroup) (S : Profiniteᵒᵖ) (r : ℝ≥0)
   [normed_with_aut r V] [hr : fact (0 < r)] :
   normed_with_aut r ((LCC.obj V).obj S) :=
 show normed_with_aut r (Completion.obj $ (LocallyConstant.obj V).obj S), by apply_instance
 
-end NormedGroup
+end SemiNormedGroup
 
 #lint- only unused_arguments def_lemma doc_blame

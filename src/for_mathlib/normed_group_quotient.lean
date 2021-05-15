@@ -20,8 +20,8 @@ an additive subgroup.
 * `norm_normed_mk` : the operator norm of the projection is `1` if the subspace is not dense.
 
 ## Implementation details
-For any `semi_normed_group M` and any `S : add_subgroup M` we define a norm on `quotient S` by
-`∥x∥ = Inf (norm '' {m | mk' S m = x})`. We then prove basic facts about the norm. Since
+For any `semi_normed_group M` and any `S : add_subgroup M` we define a seminorm on `quotient S` by
+`∥x∥ = Inf (norm '' {m | mk' S m = x})`. We then prove basic facts about the seminorm. Since
 `quotient S` is automatically a `uniform_space`, we avoid using `semi_normed_group.of_core`, that
 would create a diamond. Instead, we provide `pseudo_metric_space (quotient S)` manually in
 `add_subgroup.semi_normed_group_quotient`.

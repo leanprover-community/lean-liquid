@@ -1,4 +1,4 @@
-import normed_group.NormedGroup
+import normed_group.SemiNormedGroup
 
 import Mbar.basic
 import normed_group.pseudo_normed_group

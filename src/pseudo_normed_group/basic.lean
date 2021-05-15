@@ -99,14 +99,14 @@ variables {M : Type*} [pseudo_normed_group M]
 instance (c : ℝ≥0) : has_zero (filtration M c) := ⟨⟨0, zero_mem_filtration _⟩⟩
 instance (c : ℝ≥0) : has_neg (filtration M c) := ⟨λ x, ⟨-x, neg_mem_filtration x.2⟩⟩
 
-/-- Bounded uncurried addition for pseudo normed groups. -/
+/-- Bounded uncurried addition for pseudo-normed groups. -/
 def add' {c₁ c₂} (x : (filtration M c₁) × (filtration M c₂)) : filtration M (c₁ + c₂) :=
 ⟨(x.1 + x.2 : M), add_mem_filtration x.1.2 x.2.2⟩
 
 @[simp] lemma add'_eq {c₁ c₂ : ℝ≥0} (x : (filtration M c₁) × (filtration M c₂)) :
   (add' x : M) = x.1 + x.2 := rfl
 
-/-- Bounded negation for pseudo normed groups. -/
+/-- Bounded negation for pseudo-normed groups. -/
 def neg' {c} (x : filtration M c) : filtration M c :=
 ⟨(-x : M), neg_mem_filtration x.2⟩
 
@@ -217,7 +217,7 @@ def filtration_prod_equiv (c : ℝ≥0) :
 end prod
 
 /-- The natural inclusion `filtration M c₁ → filtration M c₂`,
-for a pseudo normed group `M`, and `c₁ ≤ c₂`. -/
+for a pseudo-normed group `M`, and `c₁ ≤ c₂`. -/
 def cast_le {c₁ c₂ : ℝ≥0} [h : fact (c₁ ≤ c₂)] (x : filtration M c₁) :
   filtration M c₂ :=
 ⟨x, filtration_mono h.out x.2⟩
@@ -232,7 +232,7 @@ by simpa only [coe_cast_le] using congr_arg (coe : filtration M c₂ → M) h
 
 variables (M)
 
-/-- A pseudo normed group `M` is *archimedean* if for all positive `n : ℕ`
+/-- A pseudo-normed group `M` is *archimedean* if for all positive `n : ℕ`
 the condition `(n • m) ∈ filtration M (n • c) ↔ m ∈ filtration M c` holds. -/
 def archimedean : Prop :=
 ∀ (m : M) (c : ℝ≥0) (n : ℕ), 0 < n →

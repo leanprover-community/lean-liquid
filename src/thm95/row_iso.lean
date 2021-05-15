@@ -66,7 +66,7 @@ section rescale
 variables {BD : breen_deligne.data}
 variables (c_ c_₁ c_₂ : ℕ → ℝ≥0)
 variables [BD.suitable c_]
-variables (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
+variables (r : ℝ≥0) (V : SemiNormedGroup) [normed_with_aut r V] [fact (0 < r)]
 variables {r' : ℝ≥0} [fact (0 < r')] [fact (r' ≤ 1)] (c : ℝ≥0)
 variables (M : ProFiltPseuNormGrpWithTinv.{u} r')
 
@@ -105,12 +105,12 @@ begin
   intros i j,
   apply arrow.mk_injective,
   dsimp only [data.complex_obj_d, universal_map.eval_CLCFPTinv, universal_map.eval_CLCFPTinv₂,
-    _root_.id, NormedGroup.equalizer.map_nat_app, CLCTinv.map_iso_hom, CLCTinv.map, unop_op,
+    _root_.id, SemiNormedGroup.equalizer.map_nat_app, CLCTinv.map_iso_hom, CLCTinv.map, unop_op,
     Filtration_cast_eq, iso.op_hom],
-  simp only [NormedGroup.equalizer.map_comp_map, universal_map.eval_CLCFP_rescale,
+  simp only [SemiNormedGroup.equalizer.map_comp_map, universal_map.eval_CLCFP_rescale,
     ← CLCFP.res_def', nat_iso.app_hom, functor.map_iso_hom, Filtration_map_app,
     FiltrationPow_rescale_iso, iso.refl_trans],
-  apply NormedGroup.equalizer.map_congr,
+  apply SemiNormedGroup.equalizer.map_congr,
   { have := @universal_map.res_comp_eval_CLCFP V r'
       (c * (c_ i * N⁻¹)) (c * c_ i * N⁻¹) (c * (c_ j * N⁻¹)) (c * c_ j * N⁻¹)
       (BD.X j) (BD.X i) (BD.d j i) ⟨(mul_assoc _ _ _).le⟩ _ _ ⟨(mul_assoc _ _ _).le⟩,
@@ -154,7 +154,7 @@ namespace thm95
 open breen_deligne polyhedral_lattice opposite
 
 variables (BD : breen_deligne.data) (c_ : ℕ → ℝ≥0) [BD.suitable c_]
-variables (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
+variables (r : ℝ≥0) (V : SemiNormedGroup) [normed_with_aut r V] [fact (0 < r)]
 variables {r' : ℝ≥0} [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)] (c : ℝ≥0)
 
 section
@@ -219,10 +219,10 @@ begin
   intros i j,
   apply arrow.mk_injective,
   dsimp only [data.complex_obj_d, universal_map.eval_CLCFPTinv, universal_map.eval_CLCFPTinv₂,
-    _root_.id, NormedGroup.equalizer.map_nat_app, CLCTinv.map_iso_hom, CLCTinv.map,
+    _root_.id, SemiNormedGroup.equalizer.map_nat_app, CLCTinv.map_iso_hom, CLCTinv.map,
     data.mul_obj_d],
-  simp only [NormedGroup.equalizer.map_comp_map],
-  apply NormedGroup.equalizer.map_congr,
+  simp only [SemiNormedGroup.equalizer.map_comp_map],
+  apply SemiNormedGroup.equalizer.map_congr,
   { rw eval_CLCFP_mul },
   { rw eval_CLCFP_mul },
   all_goals { refl }
@@ -372,9 +372,9 @@ begin
   dsimp only [differential_object.complex_like.iso_of_components_hom_f,
     differential_object.complex_like.iso_of_components_inv_f],
   dsimp only [CLCFPTinv₂, universal_map.eval_CLCFPTinv₂, CLCTinv.map_iso_hom, CLCTinv.map_iso_inv,
-    CLCTinv.F_map, _root_.id, CLCTinv.map, NormedGroup.equalizer.map_nat_app, unop_op],
-  rw [NormedGroup.equalizer.map_comp_map, NormedGroup.equalizer.map_comp_map],
-  apply NormedGroup.equalizer.map_congr,
+    CLCTinv.F_map, _root_.id, CLCTinv.map, SemiNormedGroup.equalizer.map_nat_app, unop_op],
+  rw [SemiNormedGroup.equalizer.map_comp_map, SemiNormedGroup.equalizer.map_comp_map],
+  apply SemiNormedGroup.equalizer.map_congr,
   { rw foo, refl },
   { rw foo, refl },
   all_goals { refl },

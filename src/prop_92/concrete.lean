@@ -7,10 +7,10 @@ import locally_constant.analysis
 
 /-!
 This file builds a concrete version of Proposition 9.2, with almost no category.
-The exception is that `NormedGroup` is used because this is expected in
+The exception is that `SemiNormedGroup` is used because this is expected in
 `normed_with_aut` (we could easily get rid of this but this is very mild category theory hell).
 There are two independent parts. The first one is all about locally constant maps from
-compact spaces to semi-normed groups. The next one forget about locally constant functions
+compact spaces to seminormed groups. The next one forget about locally constant functions
 and does abstract normed space stuff.
 -/
 
@@ -152,7 +152,7 @@ end
 
 variables
   (φ : X → Y) -- this will be φ is T⁻¹ : M_{≤ r'c}^a → M_{≤ c}^a
-  {r : ℝ≥0} {V : NormedGroup} [normed_with_aut r V] -- this is indeed V!
+  {r : ℝ≥0} {V : SemiNormedGroup} [normed_with_aut r V] -- this is indeed V!
 
 include r
 

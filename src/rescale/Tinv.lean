@@ -7,7 +7,7 @@ local attribute [instance] type_pow
 open opposite ProFiltPseuNormGrpWithTinv category_theory
 
 universe variable u
-variables (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
+variables (r : ℝ≥0) (V : SemiNormedGroup) [normed_with_aut r V] [fact (0 < r)]
 variables (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)]
 variables (M : ProFiltPseuNormGrpWithTinv.{u} r')
 variables (c c₁ c₂ c₃ c₄ : ℝ≥0) {m n : ℕ}
@@ -30,8 +30,8 @@ theorem eval_CLCFPTinv₂_rescale
   arrow.mk ((eval_CLCFPTinv₂ r V r' c₁ c₂ c₃ c₄ ϕ).app (op (of r' (rescale N M)))) =
   arrow.mk ((eval_CLCFPTinv₂ r V r' (c₁ * N⁻¹) (c₂ * N⁻¹) (c₃ * N⁻¹) (c₄ * N⁻¹) ϕ).app (op M)) :=
 begin
-  dsimp only [universal_map.eval_CLCFPTinv₂, _root_.id, NormedGroup.equalizer.map_nat_app],
-  refine NormedGroup.equalizer.map_congr _ _ rfl rfl rfl rfl;
+  dsimp only [universal_map.eval_CLCFPTinv₂, _root_.id, SemiNormedGroup.equalizer.map_nat_app],
+  refine SemiNormedGroup.equalizer.map_congr _ _ rfl rfl rfl rfl;
   { exact universal_map.eval_CLCFP_rescale V r' _ _ _ _ _ N M },
 end
 

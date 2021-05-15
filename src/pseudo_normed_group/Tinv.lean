@@ -9,11 +9,11 @@ in `analytic.pdf`: the subspac of V-hat(M_c^n) where the two actions of T⁻¹ c
 
 ## Main definition
 
-Here `M` is a profinitely filtered pseudo-normed group with T⁻¹ scaling things by `r'`,
-`V` is a normed group with `T⁻¹` scaling norms by `r`, `c` is a real (a filtration coefficient)
+Here `M` is a profinitely filtered pseudo-normed group with `T⁻¹` scaling things by `r'`,
+`V` is a seminormed group with `T⁻¹` scaling norms by `r`, `c` is a real (a filtration coefficient)
 and `n` is a natural.
 
-- `CLCFPTinv r V r' c n M`: the normed group defined as the subgroup of `V-hat(M_c^n)` where
+- `CLCFPTinv r V r' c n M`: the seminormed group defined as the subgroup of `V-hat(M_c^n)` where
   the two actions of `T⁻¹` (one coming from the action on M, the other coming from the
   action on V) coincide.
 
@@ -32,32 +32,32 @@ by rw [category.assoc, h₂, ← category.assoc, h₁, ← category.assoc]
 
 end category_theory
 
-open NormedGroup opposite Profinite pseudo_normed_group category_theory breen_deligne
+open SemiNormedGroup opposite Profinite pseudo_normed_group category_theory breen_deligne
 open profinitely_filtered_pseudo_normed_group category_theory.limits
 open normed_group_hom
 
-namespace NormedGroup
+namespace SemiNormedGroup
 
-def equalizer {V W : NormedGroup} (f g : V ⟶ W) := of (f.equalizer g)
+def equalizer {V W : SemiNormedGroup} (f g : V ⟶ W) := of (f.equalizer g)
 
 namespace equalizer
 
-def ι {V W : NormedGroup} (f g : V ⟶ W) :
+def ι {V W : SemiNormedGroup} (f g : V ⟶ W) :
   equalizer f g ⟶ V :=
 normed_group_hom.equalizer.ι _ _
 
-@[reassoc] lemma condition {V W : NormedGroup} (f g : V ⟶ W) :
+@[reassoc] lemma condition {V W : SemiNormedGroup} (f g : V ⟶ W) :
   ι f g ≫ f = ι f g ≫ g :=
 normed_group_hom.equalizer.condition _ _
 
-def map {V₁ V₂ W₁ W₂ : NormedGroup} {f₁ f₂ g₁ g₂} (φ : V₁ ⟶ V₂) (ψ : W₁ ⟶ W₂)
+def map {V₁ V₂ W₁ W₂ : SemiNormedGroup} {f₁ f₂ g₁ g₂} (φ : V₁ ⟶ V₂) (ψ : W₁ ⟶ W₂)
   (hf : φ ≫ f₂ = f₁ ≫ ψ) (hg : φ ≫ g₂ = g₁ ≫ ψ) :
   equalizer f₁ g₁ ⟶ equalizer f₂ g₂ :=
 normed_group_hom.equalizer.map _ _ hf.symm hg.symm
 
 theorem map_congr
-  {V₁ V₂ W₁ W₂ : NormedGroup} {f₁ f₂ g₁ g₂} {φ : V₁ ⟶ V₂} {ψ : W₁ ⟶ W₂}
-  {V₁' V₂' W₁' W₂' : NormedGroup} {f₁' f₂' g₁' g₂'} {φ' : V₁' ⟶ V₂'} {ψ' : W₁' ⟶ W₂'}
+  {V₁ V₂ W₁ W₂ : SemiNormedGroup} {f₁ f₂ g₁ g₂} {φ : V₁ ⟶ V₂} {ψ : W₁ ⟶ W₂}
+  {V₁' V₂' W₁' W₂' : SemiNormedGroup} {f₁' f₂' g₁' g₂'} {φ' : V₁' ⟶ V₂'} {ψ' : W₁' ⟶ W₂'}
   {hf : φ ≫ f₂ = f₁ ≫ ψ} {hg : φ ≫ g₂ = g₁ ≫ ψ}
   {hf' : φ' ≫ f₂' = f₁' ≫ ψ'} {hg' : φ' ≫ g₂' = g₁' ≫ ψ'}
   (Hφ : arrow.mk φ = arrow.mk φ') (Hψ : arrow.mk ψ = arrow.mk ψ')
@@ -66,7 +66,7 @@ theorem map_congr
   arrow.mk (map φ ψ hf hg) = arrow.mk (map φ' ψ' hf' hg') :=
 by { cases Hφ, cases Hψ, cases Hf₁, cases Hf₂, cases Hg₁, cases Hg₂, refl }
 
-lemma map_comp_map {V₁ V₂ V₃ W₁ W₂ W₃ : NormedGroup} {f₁ f₂ f₃ g₁ g₂ g₃}
+lemma map_comp_map {V₁ V₂ V₃ W₁ W₂ W₃ : SemiNormedGroup} {f₁ f₂ f₃ g₁ g₂ g₃}
   {φ : V₁ ⟶ V₂} {ψ : W₁ ⟶ W₂} {φ' : V₂ ⟶ V₃} {ψ' : W₂ ⟶ W₃}
   (hf : φ ≫ f₂ = f₁ ≫ ψ) (hg : φ ≫ g₂ = g₁ ≫ ψ)
   (hf' : φ' ≫ f₃ = f₂ ≫ ψ') (hg' : φ' ≫ g₃ = g₂ ≫ ψ') :
@@ -74,17 +74,17 @@ lemma map_comp_map {V₁ V₂ V₃ W₁ W₂ W₃ : NormedGroup} {f₁ f₂ f₃
   map (φ ≫ φ') (ψ ≫ ψ') (comm_sq₂ hf hf') (comm_sq₂ hg hg') :=
 by { ext, refl }
 
-lemma map_id {J} [category J] {V W : NormedGroup} (f g : V ⟶ W) :
+lemma map_id {J} [category J] {V W : SemiNormedGroup} (f g : V ⟶ W) :
   map (𝟙 V) (𝟙 W) (show 𝟙 V ≫ f = f ≫ 𝟙 W, by simp) (show 𝟙 V ≫ g = g ≫ 𝟙 W, by simp) = 𝟙 _ :=
 by { ext, refl }
 
-lemma map_bound_by {V₁ V₂ W₁ W₂ : NormedGroup} {f₁ f₂ g₁ g₂} {φ : V₁ ⟶ V₂} {ψ : W₁ ⟶ W₂}
+lemma map_bound_by {V₁ V₂ W₁ W₂ : SemiNormedGroup} {f₁ f₂ g₁ g₂} {φ : V₁ ⟶ V₂} {ψ : W₁ ⟶ W₂}
   (hf : φ ≫ f₂ = f₁ ≫ ψ) (hg : φ ≫ g₂ = g₁ ≫ ψ) (C : ℝ≥0) (hφ : (ι f₁ g₁ ≫ φ).bound_by C) :
   (map φ ψ hf hg).bound_by C :=
 normed_group_hom.equalizer.map_bound_by _ _ C hφ
 
 @[simps obj map]
-protected def F {J} [category J] {V W : J ⥤ NormedGroup} (f g : V ⟶ W) : J ⥤ NormedGroup :=
+protected def F {J} [category J] {V W : J ⥤ SemiNormedGroup} (f g : V ⟶ W) : J ⥤ SemiNormedGroup :=
 { obj := λ X, of ((f.app X).equalizer (g.app X)),
   map := λ X Y φ, equalizer.map (V.map φ) (W.map φ) (f.naturality _) (g.naturality _),
   map_id' := λ X, by simp only [category_theory.functor.map_id]; exact normed_group_hom.equalizer.map_id,
@@ -94,7 +94,7 @@ protected def F {J} [category J] {V W : J ⥤ NormedGroup} (f g : V ⟶ W) : J �
   end }
 
 @[simps]
-def map_nat {J} [category J] {V₁ V₂ W₁ W₂ : J ⥤ NormedGroup}
+def map_nat {J} [category J] {V₁ V₂ W₁ W₂ : J ⥤ SemiNormedGroup}
   {f₁ f₂ g₁ g₂} (φ : V₁ ⟶ V₂) (ψ : W₁ ⟶ W₂)
   (hf : φ ≫ f₂ = f₁ ≫ ψ) (hg : φ ≫ g₂ = g₁ ≫ ψ) :
   equalizer.F f₁ g₁ ⟶ equalizer.F f₂ g₂ :=
@@ -103,7 +103,7 @@ def map_nat {J} [category J] {V₁ V₂ W₁ W₂ : J ⥤ NormedGroup}
     (by rw [← nat_trans.comp_app, ← nat_trans.comp_app, hg]),
   naturality' := λ X Y α, by simp only [equalizer.F_map, map_comp_map, nat_trans.naturality] }
 
-lemma map_nat_comp_map_nat {J} [category J] {V₁ V₂ V₃ W₁ W₂ W₃ : J ⥤ NormedGroup}
+lemma map_nat_comp_map_nat {J} [category J] {V₁ V₂ V₃ W₁ W₂ W₃ : J ⥤ SemiNormedGroup}
   {f₁ f₂ f₃ g₁ g₂ g₃} {φ : V₁ ⟶ V₂} {ψ : W₁ ⟶ W₂} {φ' : V₂ ⟶ V₃} {ψ' : W₂ ⟶ W₃}
   (hf : φ ≫ f₂ = f₁ ≫ ψ) (hg : φ ≫ g₂ = g₁ ≫ ψ)
   (hf' : φ' ≫ f₃ = f₂ ≫ ψ') (hg' : φ' ≫ g₃ = g₂ ≫ ψ') :
@@ -111,24 +111,24 @@ lemma map_nat_comp_map_nat {J} [category J] {V₁ V₂ V₃ W₁ W₂ W₃ : J �
   map_nat (φ ≫ φ') (ψ ≫ ψ') (comm_sq₂ hf hf') (comm_sq₂ hg hg') :=
 by { ext, refl }
 
-lemma map_nat_id {J} [category J] {V W : J ⥤ NormedGroup} (f g : V ⟶ W) :
+lemma map_nat_id {J} [category J] {V W : J ⥤ SemiNormedGroup} (f g : V ⟶ W) :
   map_nat (𝟙 V) (𝟙 W) (show 𝟙 V ≫ f = f ≫ 𝟙 W, by simp) (show 𝟙 V ≫ g = g ≫ 𝟙 W, by simp) = 𝟙 _ :=
 by { ext, refl }
 
 end equalizer
-end NormedGroup
+end SemiNormedGroup
 
 universe variable u
-variables (r : ℝ≥0) (V : NormedGroup) [normed_with_aut r V] [fact (0 < r)]
+variables (r : ℝ≥0) (V : SemiNormedGroup) [normed_with_aut r V] [fact (0 < r)]
 variables (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)]
 variables (M M₁ M₂ M₃ : ProFiltPseuNormGrpWithTinv.{u} r')
 variables (c c₁ c₂ c₃ c₄ c₅ c₆ c₇ c₈ : ℝ≥0) (l m n : ℕ)
 variables (f : M₁ ⟶ M₂) (g : M₂ ⟶ M₃)
 
-def CLCTinv (r : ℝ≥0) (V : NormedGroup)
+def CLCTinv (r : ℝ≥0) (V : SemiNormedGroup)
   [normed_with_aut r V] [fact (0 < r)] {A B : Profiniteᵒᵖ} (f g : A ⟶ B) :
-  NormedGroup :=
-NormedGroup.of $ normed_group_hom.equalizer
+  SemiNormedGroup :=
+SemiNormedGroup.of $ normed_group_hom.equalizer
   ((CLC V).map f)
   ((CLC V).map g ≫ (CLC.T_inv r V).app B)
 
@@ -137,7 +137,7 @@ namespace CLCTinv
 def map {A₁ B₁ A₂ B₂ : Profiniteᵒᵖ} (f₁ g₁ : A₁ ⟶ B₁) (f₂ g₂ : A₂ ⟶ B₂)
   (ϕ : A₁ ⟶ A₂) (ψ : B₁ ⟶ B₂) (h₁ : ϕ ≫ f₂ = f₁ ≫ ψ) (h₂ : ϕ ≫ g₂ = g₁ ≫ ψ) :
   CLCTinv r V f₁ g₁ ⟶ CLCTinv r V f₂ g₂ :=
-NormedGroup.equalizer.map ((CLC V).map ϕ) ((CLC V).map ψ)
+SemiNormedGroup.equalizer.map ((CLC V).map ϕ) ((CLC V).map ψ)
   (by rw [← functor.map_comp, ← functor.map_comp, h₁]) $
 by rw [← category.assoc, ← functor.map_comp, h₂, functor.map_comp,
   category.assoc, (CLC.T_inv _ _).naturality, category.assoc]
@@ -149,17 +149,17 @@ equalizer.map_norm_noninc _ _ $ CLC.map_norm_noninc _ _
 
 lemma map_bound_by {A₁ B₁ A₂ B₂ : Profiniteᵒᵖ} (f₁ g₁ : A₁ ⟶ B₁) (f₂ g₂ : A₂ ⟶ B₂)
   (ϕ : A₁ ⟶ A₂) (ψ : B₁ ⟶ B₂) (h₁ h₂) (C : ℝ≥0)
-  (H : (NormedGroup.equalizer.ι
+  (H : (SemiNormedGroup.equalizer.ι
          ((CLC V).map f₁)
          ((CLC V).map g₁ ≫ (CLC.T_inv r V).app B₁) ≫
        (CLC V).map ϕ).bound_by C) :
   (CLCTinv.map r V f₁ g₁ f₂ g₂ ϕ ψ h₁ h₂).bound_by C :=
-NormedGroup.equalizer.map_bound_by _ _ C H
+SemiNormedGroup.equalizer.map_bound_by _ _ C H
 
 @[simp] lemma map_id {A B : Profiniteᵒᵖ} (f g : A ⟶ B) :
   map r V f g f g (𝟙 A) (𝟙 B) rfl rfl = 𝟙 _ :=
 begin
-  simp only [map, NormedGroup.equalizer.map, category_theory.functor.map_id],
+  simp only [map, SemiNormedGroup.equalizer.map, category_theory.functor.map_id],
   exact equalizer.map_id,
 end
 
@@ -171,7 +171,7 @@ lemma map_comp {A₁ A₂ A₃ B₁ B₂ B₃ : Profiniteᵒᵖ}
   CLCTinv.map r V f₁ g₁ f₂ g₂ ϕ₁ ψ₁ h3 h4 ≫
   CLCTinv.map r V f₂ g₂ f₃ g₃ ϕ₂ ψ₂ h5 h6 :=
 begin
-  simp only [map, NormedGroup.equalizer.map, category_theory.functor.map_comp],
+  simp only [map, SemiNormedGroup.equalizer.map, category_theory.functor.map_comp],
   exact (equalizer.map_comp_map _ _ _ _).symm,
 end
 
@@ -199,22 +199,22 @@ lemma map_iso_isometry {A₁ B₁ A₂ B₂ : Profiniteᵒᵖ} (f₁ g₁ : A₁
   (ϕ : A₁ ≅ A₂) (ψ : B₁ ≅ B₂) (h₁ : ϕ.hom ≫ f₂ = f₁ ≫ ψ.hom) (h₂ : ϕ.hom ≫ g₂ = g₁ ≫ ψ.hom) :
   isometry (map_iso r V f₁ g₁ f₂ g₂ ϕ ψ h₁ h₂).hom :=
 begin
-  apply NormedGroup.iso_isometry_of_norm_noninc;
+  apply SemiNormedGroup.iso_isometry_of_norm_noninc;
   apply map_norm_noninc
 end
 
 @[simps]
-protected def F {J} [category J] (r : ℝ≥0) (V : NormedGroup)
+protected def F {J} [category J] (r : ℝ≥0) (V : SemiNormedGroup)
   [normed_with_aut r V] [fact (0 < r)] {A B : J ⥤ Profiniteᵒᵖ} (f g : A ⟶ B) :
-  J ⥤ NormedGroup :=
+  J ⥤ SemiNormedGroup :=
 { obj := λ X, CLCTinv r V (f.app X) (g.app X),
   map := λ X Y φ, map _ _ _ _ _ _ (A.map φ) (B.map φ) (f.naturality _) (g.naturality _),
   map_id' := λ X, by simp only [category_theory.functor.map_id]; apply map_id,
   map_comp' := λ X Y Z φ ψ, by simp only [functor.map_comp]; apply map_comp }
 
-theorem F_def {J} [category J] (r : ℝ≥0) (V : NormedGroup)
+theorem F_def {J} [category J] (r : ℝ≥0) (V : SemiNormedGroup)
   [normed_with_aut r V] [fact (0 < r)] {A B : J ⥤ Profiniteᵒᵖ} (f g : A ⟶ B) :
-  CLCTinv.F r V f g = NormedGroup.equalizer.F
+  CLCTinv.F r V f g = SemiNormedGroup.equalizer.F
     (whisker_right f (CLC V))
     (whisker_right g (CLC V) ≫ whisker_left B (CLC.T_inv r V)) := rfl
 
@@ -231,7 +231,7 @@ theorem map_nat_def {J} [category J] {A₁ B₁ A₂ B₂ : J ⥤ Profiniteᵒ�
   (ϕ : A₁ ⟶ A₂) (ψ : B₁ ⟶ B₂) (h₁ : ϕ ≫ f₂ = f₁ ≫ ψ) (h₂ : ϕ ≫ g₂ = g₁ ≫ ψ) :
   map_nat r V f₁ g₁ f₂ g₂ ϕ ψ h₁ h₂ = begin
     dsimp only [F_def],
-    refine NormedGroup.equalizer.map_nat
+    refine SemiNormedGroup.equalizer.map_nat
       (whisker_right ϕ (CLC V))
       (whisker_right ψ (CLC V))
       (by rw [← whisker_right_comp, ← whisker_right_comp, h₁])
@@ -254,14 +254,14 @@ def map_nat_iso {J} [category J] {A₁ B₁ A₂ B₂ : J ⥤ Profiniteᵒᵖ} (
     (by rw [iso.inv_comp_eq, ← category.assoc, iso.eq_comp_inv, h₂]),
   hom_inv_id' :=
   begin
-    simp only [map_nat_def, _root_.id, NormedGroup.equalizer.map_nat_comp_map_nat,
-      ← whisker_right_comp, iso.hom_inv_id, whisker_right_id', NormedGroup.equalizer.map_nat_id],
+    simp only [map_nat_def, _root_.id, SemiNormedGroup.equalizer.map_nat_comp_map_nat,
+      ← whisker_right_comp, iso.hom_inv_id, whisker_right_id', SemiNormedGroup.equalizer.map_nat_id],
     refl
   end,
   inv_hom_id' :=
   begin
-    simp only [map_nat_def, _root_.id, NormedGroup.equalizer.map_nat_comp_map_nat,
-      ← whisker_right_comp, iso.inv_hom_id, whisker_right_id', NormedGroup.equalizer.map_nat_id],
+    simp only [map_nat_def, _root_.id, SemiNormedGroup.equalizer.map_nat_comp_map_nat,
+      ← whisker_right_comp, iso.inv_hom_id, whisker_right_id', SemiNormedGroup.equalizer.map_nat_id],
     refl
   end, }
 
@@ -271,18 +271,18 @@ lemma aux (r' c c₂ : ℝ≥0) [r1 : fact (r' ≤ 1)] [h : fact (c₂ ≤ r' * 
 ⟨h.1.trans $ (mul_le_mul' r1.1 le_rfl).trans (by simp)⟩
 
 @[simps obj]
-def CLCFPTinv₂ (r : ℝ≥0) (V : NormedGroup)
+def CLCFPTinv₂ (r : ℝ≥0) (V : SemiNormedGroup)
   (r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [r1 : fact (r' ≤ 1)] [normed_with_aut r V]
-  (c c₂ : ℝ≥0) [fact (c₂ ≤ r' * c)] (n : ℕ) : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup :=
+  (c c₂ : ℝ≥0) [fact (c₂ ≤ r' * c)] (n : ℕ) : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ SemiNormedGroup :=
 by haveI : fact (c₂ ≤ c) := aux r' c c₂; exact
 CLCTinv.F r V
   (nat_trans.op (FiltrationPow.Tinv r' c₂ c n))
   (nat_trans.op (FiltrationPow.cast_le r' c₂ c n))
 
-theorem CLCFPTinv₂_def (r : ℝ≥0) (V : NormedGroup)
+theorem CLCFPTinv₂_def (r : ℝ≥0) (V : SemiNormedGroup)
   (r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [r1 : fact (r' ≤ 1)] [normed_with_aut r V]
   (c c₂ : ℝ≥0) [fact (c₂ ≤ r' * c)] (n : ℕ) :
-  CLCFPTinv₂ r V r' c c₂ n = NormedGroup.equalizer.F
+  CLCFPTinv₂ r V r' c c₂ n = SemiNormedGroup.equalizer.F
     (CLCFP.Tinv V r' c c₂ n)
     (@CLCFP.res V r' c c₂ n (aux r' c c₂) ≫ CLCFP.T_inv r V r' c₂ n) := rfl
 
@@ -295,9 +295,9 @@ defined by taking `T⁻¹`-invariants for two different actions by `T⁻¹`:
 We take the equalizer of those two actions.
 
 See the lines just above Definition 9.3 of [Analytic]. -/
-def CLCFPTinv (r : ℝ≥0) (V : NormedGroup) (r' : ℝ≥0)
+def CLCFPTinv (r : ℝ≥0) (V : SemiNormedGroup) (r' : ℝ≥0)
   (c : ℝ≥0) (n : ℕ) [normed_with_aut r V] [fact (0 < r)] [fact (0 < r')] [fact (r' ≤ 1)] :
-  (ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup :=
+  (ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ SemiNormedGroup :=
 CLCFPTinv₂ r V r' c (r' * c) n
 
 namespace CLCFPTinv₂
@@ -343,7 +343,7 @@ begin
   dsimp only [nat_trans.id_app] at this,
   rw [← this, CLC.T_inv_eq, nat_trans.comp_app, ← category.assoc ((CLC V).map _)],
   unfreezingI { subst c₃ },
-  rw [← NormedGroup.equalizer.condition_assoc, ← category.assoc],
+  rw [← SemiNormedGroup.equalizer.condition_assoc, ← category.assoc],
   refine normed_group_hom.bound_by.comp' 1 r r (mul_one r).symm _ _,
   { apply CLC.T_bound_by },
   { exact ((CLC.map_norm_noninc V _).comp equalizer.ι_norm_noninc).bound_by_one }
@@ -407,7 +407,7 @@ def eval_CLCFPTinv₂
   CLCFPTinv₂ r V r' c₁ c₂ n ⟶ CLCFPTinv₂ r V r' c₃ c₄ m :=
 begin
   dsimp only [CLCFPTinv₂_def],
-  refine NormedGroup.equalizer.map_nat (ϕ.eval_CLCFP _ _ _ _) (ϕ.eval_CLCFP _ _ _ _)
+  refine SemiNormedGroup.equalizer.map_nat (ϕ.eval_CLCFP _ _ _ _) (ϕ.eval_CLCFP _ _ _ _)
     (Tinv_comp_eval_CLCFP V r' c₁ c₂ c₃ c₄ ϕ).symm _,
   haveI : fact (c₂ ≤ c₁) := aux r' _ _, haveI : fact (c₄ ≤ c₃) := aux r' _ _,
   have h₁ := res_comp_eval_CLCFP V r' c₁ c₂ c₃ c₄ ϕ,
@@ -445,7 +445,7 @@ lemma eval_CLCFPTinv₂_comp {l m n : FreeMat} (f : l ⟶ m) (g : m ⟶ n)
   g.eval_CLCFPTinv₂ r V r' c₁ c₂ c₃ c₄ ≫ f.eval_CLCFPTinv₂ r V r' c₃ c₄ c₅ c₆ :=
 begin
   dsimp only [eval_CLCFPTinv₂, CLCFPTinv₂_def], delta id,
-  simp only [NormedGroup.equalizer.map_nat_comp_map_nat],
+  simp only [SemiNormedGroup.equalizer.map_nat_comp_map_nat],
   generalize_proofs h1 h2 h3 h4 h5 h6 h7 h8,
   revert h5 h6 h7 h8, resetI,
   have H1 : eval_CLCFP V r' c₁ c₅ (f ≫ g) = eval_CLCFP V r' c₁ c₃ g ≫ eval_CLCFP V r' c₃ c₅ f :=
@@ -467,7 +467,7 @@ lemma res_comp_eval_CLCFPTinv₂
     ϕ.eval_CLCFPTinv₂ r V r' c₁ c₂ c₅ c₆ ≫ CLCFPTinv₂.res r V r' c₅ c₆ c₇ c₈ m :=
 begin
   dsimp only [CLCFPTinv₂.res, eval_CLCFPTinv₂, CLCFPTinv₂_def, CLCTinv.map_nat_def], delta id,
-  simp only [NormedGroup.equalizer.map_nat_comp_map_nat],
+  simp only [SemiNormedGroup.equalizer.map_nat_comp_map_nat],
   congr' 1; { simp only [← CLCFP.res_def], apply res_comp_eval_CLCFP },
 end
 
@@ -475,7 +475,7 @@ lemma eval_CLCFPTinv₂_bound_by [fact (c₂ ≤ r' * c₁)] [fact (c₄ ≤ r' 
   [ϕ.suitable c₃ c₁] [ϕ.suitable c₄ c₂] (N : ℕ) (h : ϕ.bound_by N) (M) :
   ((ϕ.eval_CLCFPTinv₂ r V r' c₁ c₂ c₃ c₄).app M).bound_by N :=
 begin
-  apply NormedGroup.equalizer.map_bound_by,
+  apply SemiNormedGroup.equalizer.map_bound_by,
   refine normed_group_hom.bound_by.comp' _ _ _ (mul_one _).symm _ _,
   { apply eval_CLCFP_bound_by, exact h },
   { exact equalizer.ι_norm_noninc.bound_by_one }

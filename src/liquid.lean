@@ -34,7 +34,7 @@ theorem first_target (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < 
   ∃ (k K : ℝ≥0) [fact (1 ≤ k)],
   ∃ c₀ : ℝ≥0,
   ∀ (S : Type) [fintype S],
-  ∀ (V : NormedGroup) [normed_with_aut r V],
+  ∀ (V : SemiNormedGroup) [normed_with_aut r V],
     ​((BD.data.system c_ r V r').obj (op $ of r' (Mbar r' S))).is_weak_bounded_exact k K m c₀ :=
 begin
   intro m,
@@ -47,7 +47,7 @@ begin
   refine H.of_iso i.symm _,
   intros c n,
   rw ← system_of_complexes.apply_hom_eq_hom_apply,
-  apply NormedGroup.iso_isometry_of_norm_noninc;
+  apply SemiNormedGroup.iso_isometry_of_norm_noninc;
   apply breen_deligne.data.complex.map_norm_noninc
 end
 
@@ -65,9 +65,9 @@ The proof reduces to `thm95`, which is not proven yet. We are working on it!
   See also the "Brief note on type theory" in `README.md`.
 * `[normed_with_aut r V]` adds the assumption that `V` is endowed with an automorphism `T`
   that scales elements `v` of `V` by the positive scalar `r`: `∥T(v)∥ = r * ∥v∥`.
-* `Mbar_system` is the system of complexes of normed abelian groups
+* `Mbar_system` is the system of complexes of seminormed groups
   occuring in Theorems 9.4/9.5 of [Analytic].
 * `is_bounded_exact` is the assertion that a system of complexes
-  of normed abelian groups satisfies a suitable exactness criterion of being
+  of seminormed groups satisfies a suitable exactness criterion of being
   `≤ k`-exact in degrees `≤ m` for `c ≥ c₀` (where `c` is an index to the system of complexes).
 -/

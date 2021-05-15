@@ -1,12 +1,12 @@
 import topology.discrete_quotient
 import topology.category.Profinite
-import normed_group.NormedGroup
+import normed_group.SemiNormedGroup
 
 namespace locally_constant
 
 universes u
 
-variables {M : NormedGroup.{u}} {X : Profinite.{u}}
+variables {M : SemiNormedGroup.{u}} {X : Profinite.{u}}
 
 /-- Construct a discrete quotient from a locally constant function. -/
 def to_discrete_quotient (f : locally_constant X M) : discrete_quotient X :=

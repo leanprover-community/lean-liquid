@@ -12,7 +12,7 @@ import for_mathlib.normed_group_quotient
 # The category of seminormed abelian groups and continuous group homomorphisms
 
 This file in particular contains a robust API for cokernels of morphisms
-of normed groups.
+of seminormed groups.
 
 ## TODO
 
@@ -31,7 +31,6 @@ section for_mathlib
 
 instance punit.uniform_space : uniform_space punit := ⊥
 
-noncomputable
 instance punit.metric_space : metric_space punit :=
 { dist := λ _ _, 0,
   dist_self := λ _, rfl,
@@ -40,7 +39,6 @@ instance punit.metric_space : metric_space punit :=
   dist_triangle := λ _ _ _, show (0:ℝ) ≤ 0 + 0, by rw add_zero,
   .. punit.uniform_space }
 
-noncomputable
 instance punit.normed_group : normed_group punit :=
 { norm := function.const _ 0,
   dist_eq := λ _ _, rfl,
@@ -56,36 +54,34 @@ end for_mathlib
 
 open category_theory
 
-/-- The category of normed abelian groups and bounded group homomorphisms. -/
-def NormedGroup : Type (u+1) := bundled semi_normed_group
+/-- The category of seminormed abelian groups and bounded group homomorphisms. -/
+def SemiNormedGroup : Type (u+1) := bundled semi_normed_group
 
-namespace NormedGroup
+namespace SemiNormedGroup
 
 instance bundled_hom : bundled_hom @normed_group_hom :=
 ⟨@normed_group_hom.to_fun, @normed_group_hom.id, @normed_group_hom.comp, @normed_group_hom.coe_inj⟩
 
-attribute [derive [has_coe_to_sort, large_category, concrete_category]] NormedGroup
+attribute [derive [has_coe_to_sort, large_category, concrete_category]] SemiNormedGroup
 
-/-- Construct a bundled `NormedGroup` from the underlying type and typeclass. -/
-def of (M : Type u) [semi_normed_group M] : NormedGroup := bundled.of M
+/-- Construct a bundled `SemiNormedGroup` from the underlying type and typeclass. -/
+def of (M : Type u) [semi_normed_group M] : SemiNormedGroup := bundled.of M
 
-noncomputable
-instance : has_zero NormedGroup := ⟨of punit⟩
+instance : has_zero SemiNormedGroup := ⟨of punit⟩
 
-noncomputable
-instance : inhabited NormedGroup := ⟨0⟩
+instance : inhabited SemiNormedGroup := ⟨0⟩
 
-instance (M : NormedGroup) : semi_normed_group M := M.str
+instance (M : SemiNormedGroup) : semi_normed_group M := M.str
 
-@[simp] lemma coe_of (V : Type u) [normed_group V] : (NormedGroup.of V : Type u) = V := rfl
+@[simp] lemma coe_of (V : Type u) [normed_group V] : (SemiNormedGroup.of V : Type u) = V := rfl
 
-@[simp] lemma coe_id (V : NormedGroup) : ⇑(𝟙 V) = id := rfl
+@[simp] lemma coe_id (V : SemiNormedGroup) : ⇑(𝟙 V) = id := rfl
 
-instance : limits.has_zero_morphisms.{u (u+1)} NormedGroup :=
+instance : limits.has_zero_morphisms.{u (u+1)} SemiNormedGroup :=
 { comp_zero' := by { intros, apply normed_group_hom.zero_comp },
   zero_comp' := by { intros, apply normed_group_hom.comp_zero } }
 
-lemma iso_isometry_of_norm_noninc {V W : NormedGroup} (i : V ≅ W)
+lemma iso_isometry_of_norm_noninc {V W : SemiNormedGroup} (i : V ≅ W)
   (h1 : i.hom.norm_noninc) (h2 : i.inv.norm_noninc) :
   isometry i.hom :=
 begin
@@ -100,8 +96,8 @@ section equalizers_and_kernels
 
 open category_theory.limits
 
-/-- The equalizer cone for a parallel pair of morphisms of normed groups. -/
-def parallel_pair_cone {V W : NormedGroup.{u}} (f g : V ⟶ W) :
+/-- The equalizer cone for a parallel pair of morphisms of seminormed groups. -/
+def parallel_pair_cone {V W : SemiNormedGroup.{u}} (f g : V ⟶ W) :
   cone (parallel_pair f g) :=
 @fork.of_ι _ _ _ _ _ _ (of (f - g).ker) (normed_group_hom.incl (f - g).ker) $
 begin
@@ -112,7 +108,7 @@ begin
     normed_group_hom.coe_sub, pi.sub_apply, sub_eq_zero] using this
 end
 
-instance has_limit_parallel_pair {V W : NormedGroup.{u}} (f g : V ⟶ W) :
+instance has_limit_parallel_pair {V W : SemiNormedGroup.{u}} (f g : V ⟶ W) :
   has_limit (parallel_pair f g) :=
 { exists_limit := nonempty.intro
   { cone := parallel_pair_cone f g,
@@ -123,23 +119,23 @@ instance has_limit_parallel_pair {V W : NormedGroup.{u}} (f g : V ⟶ W) :
       (λ c, normed_group_hom.ker.incl_comp_lift _ _ _)
       (λ c g h, by { ext x, dsimp, rw ← h, refl }) } }
 
-instance : limits.has_equalizers.{u (u+1)} NormedGroup :=
-@has_equalizers_of_has_limit_parallel_pair NormedGroup _ $ λ V W f g,
-  NormedGroup.has_limit_parallel_pair f g
+instance : limits.has_equalizers.{u (u+1)} SemiNormedGroup :=
+@has_equalizers_of_has_limit_parallel_pair SemiNormedGroup _ $ λ V W f g,
+  SemiNormedGroup.has_limit_parallel_pair f g
 
-instance : limits.has_kernels.{u (u+1)} NormedGroup :=
+instance : limits.has_kernels.{u (u+1)} SemiNormedGroup :=
 by apply_instance
 
 end equalizers_and_kernels
 
 section cokernels
 
-variables {A B C : NormedGroup.{u}}
+variables {A B C : SemiNormedGroup.{u}}
 
-/-- The cokernel of a morphism of normed groups. -/
+/-- The cokernel of a morphism of seminormed groups. -/
 @[simp]
 noncomputable
-def coker (f : A ⟶ B) : NormedGroup := NormedGroup.of $
+def coker (f : A ⟶ B) : SemiNormedGroup := SemiNormedGroup.of $
   quotient_add_group.quotient f.range
 
 /-- The projection onto the cokernel. -/
@@ -158,7 +154,7 @@ add_subgroup.is_quotient_quotient _
 
 lemma coker.π_norm_noninc {f : A ⟶ B} :
   (coker.π : B ⟶ coker f).norm_noninc :=
-NormedGroup.coker.π_is_quotient.norm_le
+SemiNormedGroup.coker.π_is_quotient.norm_le
 
 instance coker.π_epi {f : A ⟶ B} : epi (coker.π : B ⟶ coker f) :=
 begin
@@ -213,7 +209,7 @@ end
 lemma coker.pi_apply_dom_eq_zero {f : A ⟶ B} (x : A) : (coker.π : B ⟶ coker f) (f x) = 0 :=
 show (f ≫ (coker.π : B ⟶ coker f)) x = 0, by { rw [coker.comp_pi_eq_zero], refl }
 
-variable {D : NormedGroup.{u}}
+variable {D : SemiNormedGroup.{u}}
 
 lemma coker.lift_comp_eq_lift {f : A ⟶ B} {g : B ⟶ C} {h : C ⟶ D} {cond : f ≫ g = 0} :
   coker.lift cond ≫ h = coker.lift (show f ≫ (g ≫ h) = 0,
@@ -296,7 +292,7 @@ coker (A → B) ----> E
 coker (C → D) ----> F
 -/
 
-lemma coker.map_lift_comm {B' D' : NormedGroup}
+lemma coker.map_lift_comm {B' D' : SemiNormedGroup}
   {fab : A ⟶ B} {fbd : B ⟶ D} {fac : A ⟶ C} {fcd : C ⟶ D}
   {h : fab ≫ fbd = fac ≫ fcd} {fbb' : B ⟶ B'} {fdd' : D ⟶ D'}
   {condb : fab ≫ fbb' = 0} {condd : fcd ≫ fdd' = 0} {g : B' ⟶ D'}
@@ -317,5 +313,5 @@ end
 
 end cokernels
 
-end NormedGroup
+end SemiNormedGroup
 #lint- only unused_arguments def_lemma doc_blame

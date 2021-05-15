@@ -1,5 +1,5 @@
 import analysis.normed_space.normed_group_hom
-import normed_group.NormedGroup
+import normed_group.SemiNormedGroup
 
 open_locale nnreal big_operators
 
@@ -86,14 +86,14 @@ end
 
 end normed_group_hom
 
-namespace NormedGroup
+namespace SemiNormedGroup
 
 universe variables u
 
-variables {V₁ V₂ V₃ : NormedGroup.{u}} {f : V₁ ⟶ V₂} {g : V₂ ⟶ V₃}
+variables {V₁ V₂ V₃ : SemiNormedGroup.{u}} {f : V₁ ⟶ V₂} {g : V₂ ⟶ V₃}
 
 lemma comp_bound_by (C₁ C₂ C₃ : ℝ≥0) (hC : C₃ = C₂ * C₁) (hf : f.bound_by C₁) (hg : g.bound_by C₂) :
   (f ≫ g).bound_by C₃ :=
 hg.comp' _ _ _ hC hf
 
-end NormedGroup
+end SemiNormedGroup

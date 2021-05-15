@@ -260,7 +260,7 @@ open free_abelian_group
 /-- A univeral map `f` is `suitable c₁ c₂` if all of the matrices `g`
 occuring in the formal sum `f` satisfy `g.suitable c₁ c₂`.
 This definition is tailored in such a way that we get a sensible
-`(LCC_Mbar_pow V S r' c₂ n) ⟶ (LCC_Mbar_pow V S r' c₁ m)`
+`CLCFP V r' c₂ n ⟶ CLCFP V r' c₁ m`
 if `f.suitable c₁ c₂`.
 
 See Lemma 9.11 of [Analytic]. -/
@@ -507,7 +507,7 @@ if for all `i : ℕ`, the constants `c_ (i+1)` and `c_ i` are
 suitable with respect to the universal map `BD.d (i+1) i`.
 
 This definition ensures that we get a well-defined complex
-of normed groups `LCC_Mbar_pow V S r' (c_ i) (BD.rank i)`,
+of normed groups `CLCFP V r' (c_ i) (BD.rank i)`,
 induced by the maps `BD.d (i+1) i`. -/
 class suitable (BD : data) (c_ : ℕ → ℝ≥0) : Prop :=
 (universal_suitable : ∀ i j, (BD.d i j).suitable (c_ i) (c_ j))

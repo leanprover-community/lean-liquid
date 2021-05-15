@@ -197,20 +197,21 @@ protected def metric_space [metric_space Y] : metric_space (locally_constant X Y
   end,
   .. locally_constant.has_dist }
 
-/-- The metric space on locally constant functions on a compact space, with sup distance. -/
-protected def normed_group {G : Type*} [normed_group G] : normed_group (locally_constant X G) :=
-{ dist_eq := λ f g, show Sup _ = Sup _,
-  by simp only [normed_group.dist_eq, locally_constant.sub_apply],
-  .. locally_constant.has_norm, .. locally_constant.add_comm_group,
-  .. locally_constant.metric_space }
 
-/-- The metric space on locally constant functions on a compact space, with sup distance. -/
+/--
+The seminormed group of locally constant functions from a compact space to a seminormed group.
+-/
 protected def semi_normed_group {G : Type*} [semi_normed_group G] :
   semi_normed_group (locally_constant X G) :=
 { dist_eq := λ f g, show Sup _ = Sup _,
   by simp only [semi_normed_group.dist_eq, locally_constant.sub_apply],
   .. locally_constant.has_norm, .. locally_constant.add_comm_group,
   .. locally_constant.pseudo_metric_space }
+
+/-- The normed group of locally constant functions from a compact space to a normed group. -/
+protected def normed_group {G : Type*} [normed_group G] : normed_group (locally_constant X G) :=
+{ .. locally_constant.semi_normed_group,
+  .. locally_constant.metric_space }
 
 local attribute [instance] locally_constant.semi_normed_group
 

@@ -12,8 +12,8 @@ open_locale nnreal big_operators
 
 local attribute [instance] type_pow
 
-/-- A *profinitely filtered pseudo normed topological group with action by `T⁻¹`* is
-a profinitely filtered pseudo normed topological group `M` together with a
+/-- A *profinitely filtered pseudo-normed topological group with action by `T⁻¹`* is
+a profinitely filtered pseudo-normed topological group `M` together with a
 nonnegative real `r'` and homomorphism `Tinv : M → M` such that
 `Tinv x ∈ filtration M (r'⁻¹ * c)` for all `x ∈ filtration M c`.
 
@@ -263,7 +263,7 @@ def pi_proj (i : ι) : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r'
   .. add_monoid_hom.apply M i }
 
 /-- Universal property of the product of
-profinitely filtered pseudo normed groups with `T⁻¹`-action -/
+profinitely filtered pseudo-normed groups with `T⁻¹`-action -/
 @[simps {fully_applied := ff}]
 def pi_lift {N : Type*} [profinitely_filtered_pseudo_normed_group_with_Tinv r' N]
   (f : Π i, profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' N (M i)) :

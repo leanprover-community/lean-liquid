@@ -1,6 +1,6 @@
 import polyhedral_lattice.basic
 import category_theory.concrete_category.bundled_hom
-import normed_group.NormedGroup
+import normed_group.SemiNormedGroup
 /-
 
 # The category of polyhedral lattices
@@ -20,7 +20,7 @@ variables (Λ : PolyhedralLattice)
 
 instance : polyhedral_lattice Λ := Λ.str
 
-def to_NormedGroup : NormedGroup := NormedGroup.of Λ
+def to_SemiNormedGroup : SemiNormedGroup := SemiNormedGroup.of Λ
 
 instance bundled_hom : bundled_hom @polyhedral_lattice_hom :=
 ⟨@polyhedral_lattice_hom.to_fun,

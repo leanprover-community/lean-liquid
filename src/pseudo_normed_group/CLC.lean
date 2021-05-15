@@ -17,15 +17,15 @@ open_locale classical nnreal
 noncomputable theory
 local attribute [instance] type_pow
 
-open NormedGroup opposite Profinite pseudo_normed_group category_theory breen_deligne
+open SemiNormedGroup opposite Profinite pseudo_normed_group category_theory breen_deligne
 open profinitely_filtered_pseudo_normed_group
 
 universe variable u
-variables (r : ℝ≥0) (V : NormedGroup) (r' : ℝ≥0)
+variables (r : ℝ≥0) (V : SemiNormedGroup) (r' : ℝ≥0)
 variables (c c₁ c₂ c₃ c₄ : ℝ≥0) (l m n : ℕ)
 
 /-- `CLC V n` is the functor that sends a profinite set `S` to `V-hat(S^n)` -/
-def CLC (V : NormedGroup) : Profiniteᵒᵖ ⥤ NormedGroup :=
+def CLC (V : SemiNormedGroup) : Profiniteᵒᵖ ⥤ SemiNormedGroup :=
 LC V ⋙ Completion
 
 namespace CLC
@@ -53,11 +53,11 @@ end CLC
 
 /-- `CLFCP v r' c n` is the functor sending a profinitely-filtered `T⁻¹`-module `M`
    to `V-hat((M_c)^n)` -/
-def CLCFP (V : NormedGroup) (r' : ℝ≥0) (c : ℝ≥0) (n : ℕ) :
-  (ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ NormedGroup :=
+def CLCFP (V : SemiNormedGroup) (r' : ℝ≥0) (c : ℝ≥0) (n : ℕ) :
+  (ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ SemiNormedGroup :=
 (FiltrationPow r' c n).op ⋙ CLC V
 
-theorem CLCFP_def (V : NormedGroup) (r' : ℝ≥0) (c : ℝ≥0) (n : ℕ) :
+theorem CLCFP_def (V : SemiNormedGroup) (r' : ℝ≥0) (c : ℝ≥0) (n : ℕ) :
   CLCFP V r' c n = LCFP V r' c n ⋙ Completion := rfl
 
 namespace CLCFP

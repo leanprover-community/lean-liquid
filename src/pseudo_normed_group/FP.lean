@@ -1,9 +1,9 @@
 import pseudo_normed_group.breen_deligne
-import normed_group.NormedGroup
+import normed_group.SemiNormedGroup
 
 /-!
 
-# Constructions on the filtration on a profinitely filtered pseudo-normed abelian group
+# Constructions on the filtration on a profinitely filtered pseudo-normed group
 
 ## Main definitions
 
@@ -52,7 +52,7 @@ def Filtration (r' : ℝ≥0) : ℝ≥0 ⥤ ProFiltPseuNormGrpWithTinv.{u} r' �
   map_id' := by { intros, ext, refl },
   map_comp' := by { intros, ext, refl } }
 
-open NormedGroup opposite Profinite pseudo_normed_group category_theory breen_deligne
+open SemiNormedGroup opposite Profinite pseudo_normed_group category_theory breen_deligne
 open profinitely_filtered_pseudo_normed_group
 open profinitely_filtered_pseudo_normed_group_with_Tinv
 
