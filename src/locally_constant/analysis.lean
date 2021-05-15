@@ -19,16 +19,17 @@ space into a normed group (with the sup norm).
 noncomputable theory
 open_locale nnreal
 
+open set
+
 -- move this
 section for_mathlib
 
-lemma real.Sup_exists_of_finite (s : set ℝ) (hs : s.finite) :
-  ∃ (x : ℝ), ∀ (y : ℝ), y ∈ s → y ≤ x :=
+lemma set.range_pair_subset_range {α β γ : Type*} (f : α → β) (g : α → γ) :
+  range (λ x, (f x, g x)) ⊆ (range f).prod (range g) :=
 begin
-  rcases hs.exists_finset with ⟨t, ht⟩,
-  use t.fold max 0 id,
-  intros y hy,
-  exact (finset.fold_op_rel_iff_or (@le_max_iff _ _)).mpr (or.inr ⟨y, by rwa ht, le_rfl⟩)
+  rw [show (λ x, (f x, g x)) = prod.map f g ∘ (λ x, (x, x)), from funext (λ x, rfl),
+      ← range_prod_map],
+  apply range_comp_subset_range
 end
 
 -- feel free to golf!!
@@ -74,6 +75,8 @@ end
 
 end for_mathlib
 
+open set
+
 namespace locally_constant
 
 variables {X Y Z V V₁ V₂ V₃ : Type*} [topological_space X]
@@ -114,23 +117,20 @@ lemma norm_apply_le [has_norm Y] (f : locally_constant X Y) (x : X) :
   ∥f x∥ ≤ ∥f∥ :=
 begin
   refine real.le_Sup _ _ (set.mem_range_self _),
-  apply real.Sup_exists_of_finite,
-  rw set.range_comp,
+  apply exists_upper_bound_image,
+  rw range_comp,
   exact f.range_finite.image _
 end
 
 lemma exists_ub_range_dist [has_dist Y] (f g : locally_constant X Y) :
   ∃ x : ℝ, ∀ y : ℝ, y ∈ set.range (λ (x : X), dist (f x) (g x)) → y ≤ x :=
 begin
-  apply real.Sup_exists_of_finite,
+  apply exists_upper_bound_image,
   simp only [← function.uncurry_apply_pair dist],
-  rw set.range_comp,
-  apply set.finite.image,
+  rw range_comp,
+  apply finite.image,
   apply (f.range_finite.prod g.range_finite).subset,
-  rintro ⟨y₁, y₂⟩,
-  simp only [set.mem_range, prod.mk.inj_iff],
-  rintro ⟨y, rfl, rfl⟩,
-  simp only [set.mem_range_self, set.prod_mk_mem_set_prod_eq, and_self]
+  apply range_pair_subset_range,
 end
 
 lemma dist_apply_le [has_dist Y] (f g : locally_constant X Y) (x : X) :
@@ -241,7 +241,7 @@ def map_hom (f : normed_group_hom V₁ V₂) :
       rintro _ ⟨x, rfl⟩,
       calc ∥f (g x)∥ ≤ C * ∥g x∥ : hC _
       ... ≤ Sup _ : real.le_Sup _ _ _,
-      { apply real.Sup_exists_of_finite,
+      { apply exists_upper_bound_image,
         rw [set.range_comp, set.range_comp],
         exact (g.range_finite.image _).image _ },
       { exact set.mem_range_self _ } },
@@ -273,7 +273,7 @@ begin
     rintro _ ⟨x, rfl⟩,
     calc ∥f (g x)∥ ≤ C * ∥g x∥ : hf _
     ... ≤ Sup _ : real.le_Sup _ _ _,
-    { apply real.Sup_exists_of_finite,
+    { apply exists_upper_bound_image,
       rw [set.range_comp, set.range_comp],
       exact (g.range_finite.image _).image _ },
     { exact set.mem_range_self _ } },
@@ -322,20 +322,20 @@ add_monoid_hom.mk_normed_group_hom'
       calc 0 ≤ ∥g y∥ : norm_nonneg _
          ... ≤ _ : _,
       apply real.le_Sup,
-      { apply real.Sup_exists_of_finite,
+      { apply exists_upper_bound_image,
         rw set.range_comp,
         exact g.range_finite.image _ },
       { exact set.mem_range_self _ } },
     rw real.Sup_le,
     { rintro _ ⟨x, rfl⟩,
       apply real.le_Sup,
-      { apply real.Sup_exists_of_finite,
+      { apply exists_upper_bound_image,
         rw set.range_comp,
         exact g.range_finite.image _ },
       { exact set.mem_range_self _ } },
     { obtain ⟨x⟩ := hX,
       exact ⟨_, set.mem_range_self x⟩ },
-    { { apply real.Sup_exists_of_finite,
+    { { apply exists_upper_bound_image,
         rw [set.range_comp, set.range_comp],
         apply set.finite.image,
         apply g.range_finite.subset,

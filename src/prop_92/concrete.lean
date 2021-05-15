@@ -27,9 +27,57 @@ lemma real.supr_range {α β : Type*} (f : β → α) (g : α → ℝ) :
 begin
   sorry
 end
+-- the following proof is overkill but nice
+lemma real.Sup_mem_of_finite {s : set ℝ} (hs : s.finite) (hs' : s.nonempty):
+  Sup s ∈ s :=
+is_compact.Sup_mem hs.is_compact hs'
 
--- lemma nnreal.eq_zero_or_pos (r : nnreal) : r = 0 ∨ 0 < r :=
--- by admit -- can also use lt_or_eq_of_le (zero_le r)
+-- Move me
+lemma real.Sup_eq {s : set ℝ} (hs : s.nonempty) (hs' : ∃ x, ∀ y ∈ s, y ≤ x) {x : ℝ} :
+  Sup s = x ↔ ∀ y, x ≤ y ↔ (∀ z ∈ s, z ≤ y) :=
+begin
+  classical,
+  rw real.Sup_def,
+  rw dif_pos,
+  { let x₀ := classical.some (real.exists_sup s hs hs'),
+    change x₀ = x ↔ _,
+    have H : ∀ y, x₀ ≤ y ↔ ∀ z ∈ s, z ≤ y := classical.some_spec (real.exists_sup s hs hs'),
+    split,
+    { dsimp [x₀],
+      rintro rfl,
+      exact H },
+    { intro h,
+      replace H : ∀ y, x₀ ≤ y ↔ x ≤ y,
+      { intro y,
+        rw [h, H] },
+      apply le_antisymm,
+      { exact (H _).mpr (le_refl _) },
+      { exact (H _).mp (le_refl _) } } },
+  { exact ⟨hs, hs'⟩ }
+end
+
+-- Move me
+lemma is_lub_iff {α : Type*} [preorder α] {s : set α} {x : α} :
+  is_lub s x ↔ ∀ y, x ≤ y ↔ ∀ z ∈ s, z ≤ y :=
+begin
+  split,
+  { rintros ⟨h₁, h₂⟩ y,
+    exact ⟨λ hxy z z_in, (h₁ z_in).trans hxy, λ h, h₂ h⟩ },
+  { intro H,
+    exact ⟨λ y y_in, (H x).mp (le_refl x) y y_in, λ z hz, by rwa H⟩ }
+end
+
+-- Move me
+lemma real.Sup_eq' {s : set ℝ} (hs : s.nonempty) (hs' : ∃ x, ∀ y ∈ s, y ≤ x) {x : ℝ} :
+  Sup s = x ↔ (∀ y ∈ s, y ≤ x) ∧ ∀ z, (∀ y ∈ s, y ≤ z) → x ≤ z :=
+begin
+  rw real.Sup_eq hs hs',
+  change _ ↔ is_lub _ _,
+  rw is_lub_iff
+end
+
+lemma nnreal.eq_zero_or_pos (r : nnreal) : r = 0 ∨ 0 < r :=
+(lt_or_eq_of_le $ zero_le r).elim (λ h, or.inr h) (λ h, or.inl h.symm)
 
 instance semi_normed_group.inhabited (G : Type*) [semi_normed_group G] : inhabited G := ⟨0⟩
 
@@ -87,22 +135,43 @@ by simp only [locally_constant.norm_def, norm_zero, real.supr_zero, locally_cons
 lemma locally_constant.norm_const_zero : ∥locally_constant.const X (0 : G)∥ = 0 :=
 locally_constant.norm_zero
 
+-- Should go in mathlib topology/algebra/ordered, next to is_compast.exists_Sup_image_eq
+lemma continuous.exists_forall_le_of_compact {X : Type*} [topological_space X] [compact_space X] [nonempty X]
+{β : Type*} [conditionally_complete_linear_order β] [topological_space β] [order_topology β] {f : X → β}
+(hf : continuous f) : ∃ x, Sup (range f) = f x :=
+by simpa using compact_univ.exists_Sup_image_eq univ_nonempty hf.continuous_on
+
 lemma locally_constant.exists_norm_eq [nonempty X] (f : locally_constant X G) : ∃ x, ∥f∥ = ∥f x∥ :=
-begin
-  simp only [locally_constant.norm_def, supr],
-  sorry
-end
+(continuous_norm.comp f.continuous).exists_forall_le_of_compact
 
 lemma locally_constant.norm_eq_iff (f : locally_constant X G) {x : X} :
   ∥f∥ = ∥f x∥ ↔ ∀ x', ∥f x'∥ ≤ ∥f x∥ :=
 begin
+  have fin_range : (range (λ (x : X), ∥f x∥)).finite,
+  { rw range_comp,
+    apply finite.image,
+    exact f.range_finite },
+  have bound : ∃ b, ∀ y ∈ range (λ (x : X), ∥f x∥), y ≤ b,
+    from exists_upper_bound_image _ _ fin_range,
   rw [locally_constant.norm_def],
-  sorry
+  split,
+  { intros h x',
+    rw ← h,
+    exact real.le_Sup _ bound (mem_range_self _) } ,
+  { intro h,
+    erw real.Sup_eq _ bound,
+    { intro y,
+      rw forall_range_iff,
+      split,
+      { intros h' x',
+        exact (h x').trans h' },
+      { tauto } },
+    { exact ⟨∥f x∥, mem_range_self _⟩ } }
 end
 
 lemma locally_constant.norm_eq_iff' (f : locally_constant X G) {x : X} :
   ∥f∥ = ∥f x∥ ↔ ∀ g ∈ range f, ∥g∥ ≤ ∥f x∥ :=
-by simpa only [mem_range, forall_apply_eq_imp_iff', exists_imp_distrib] using f.norm_eq_iff
+by rw [forall_range_iff, locally_constant.norm_eq_iff]
 
 lemma locally_constant.norm_comap_le {α : Type*} [topological_space α] [compact_space α]
   (f : locally_constant X G) {g : α → X} (h : continuous g) : ∥f.comap g∥ ≤ ∥f∥ :=
@@ -153,9 +222,9 @@ begin
     erw [hy, ← norm_T, locally_constant.norm_eq_iff],
     intro y',
     erw [norm_T, norm_T],
-    cases lt_or_eq_of_le (zero_le r) with hr hr,
-    { simp [hr, ← hy, g.norm_apply_le] },
-    { simp [hr.symm] } },
+    cases r.eq_zero_or_pos with hr hr,
+    { simp [hr] },
+    { simp [hr, ← hy, g.norm_apply_le] } },
   { simp [hY] },
 end
 
