@@ -212,7 +212,9 @@ begin
   { dsimp [embedding.g],
     simp only [embedding.h, finset.sum_singleton, sub_left_inj],
     ext x,
-    simp [he.continuous, he.locally_constant_extend_extends] },
+    sorry
+    -- simp [he.continuous, he.locally_constant_extend_extends],
+     },
   { set c_φ : normed_group_hom (locally_constant Y V) (locally_constant X V) := comap_hom φ hφ,
     set c_e : normed_group_hom (locally_constant Y V) (locally_constant X V) := comap_hom e he.continuous,
     set m_T : normed_group_hom (locally_constant X V) (locally_constant X V) := map_hom T.inv,
@@ -226,10 +228,12 @@ begin
     erw [finset.sum_range_succ, normed_group_hom.map_add, normed_group_hom.map_add, normed_group_hom.map_add, ih],
     change f - c_φ (H N) + c_φ (G N) + m_T (c_e (H N.succ)) - (c_φ (G N) + c_φ (H N.succ)) =  f - comap φ (H N.succ),
     dsimp [H, embedding.h],
-    rw [← (he.locally_constant_extend $ comap φ $ H N).comap_map  e T.hom he.continuous,
-        he.comap_locally_constant_extend, locally_constant.map_comp', normed_with_aut.T_inv_T_hom],
-    simp [H],
-    abel },
+    sorry
+    -- rw [← (he.locally_constant_extend $ comap φ $ H N).comap_map  e T.hom he.continuous,
+    --     he.comap_locally_constant_extend, locally_constant.map_comp', normed_with_aut.T_inv_T_hom],
+    -- simp [H],
+    -- abel,
+     },
 end
 
 open filter
