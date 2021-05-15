@@ -106,7 +106,7 @@ end
 section open finsupp
 
 lemma L_le_comap {n} (g : fin (n+1) → fin (m+1)) :
-  (L f (n+1)) ≤ (L f (m+1)).comap (map_domain_hom g) :=
+  (L f (n+1)) ≤ (L f (m+1)).comap (map_domain.add_monoid_hom g) :=
 begin
   rintro l' ⟨hl', Hl'⟩,
   rw add_subgroup.mem_comap,
@@ -120,7 +120,7 @@ begin
     { intro, refl } },
   { intro i,
     choose l hl using Hl',
-    simp only [map_domain_hom_apply, map_domain],
+    simp only [map_domain.add_monoid_hom_apply, map_domain],
     refine ⟨∑ j, if g j = i then (l j) else 0, _⟩,
     rw [finsupp.sum_apply, finsupp.sum_eq_sum_fintype],
     swap, { intro, simp only [coe_zero, pi.zero_apply, single_zero] },
@@ -224,11 +224,11 @@ variables {n m k : ℕ} (g : fin (n+1) → fin (m+1)) (g' : fin (m+1) → fin (k
 
 -- the underlying morphism of additive groups
 def map_add_hom : obj f (n+1) →+ obj f (m+1) :=
-quotient_add_group.map _ _ (map_domain_hom g) (L_le_comap f _ g)
+quotient_add_group.map _ _ (map_domain.add_monoid_hom g) (L_le_comap f _ g)
 
-lemma map_domain_hom_strict (x : fin (n+1) →₀ Λ) : ∥map_domain_hom g x∥ ≤ ∥x∥ :=
+lemma map_domain_add_monoid_hom_strict (x : fin (n+1) →₀ Λ) : ∥map_domain.add_monoid_hom g x∥ ≤ ∥x∥ :=
 begin
-  simp only [norm_def, map_domain_hom_apply],
+  simp only [norm_def, map_domain.add_monoid_hom_apply],
   dsimp [map_domain],
   rw [sum_eq_sum_fintype], swap, { intro, exact norm_zero },
   simp only [sum_apply],
@@ -253,17 +253,18 @@ begin
   apply le_of_forall_pos_le_add,
   intros ε hε,
   obtain ⟨x, rfl, h⟩ := norm_mk_lt x hε,
-  calc _ ≤ ∥map_domain_hom g x∥ : quotient_norm_mk_le _ _
-  ... ≤ ∥x∥ : map_domain_hom_strict _ _
+  calc _ ≤ ∥map_domain.add_monoid_hom g x∥ : quotient_norm_mk_le _ _
+  ... ≤ ∥x∥ : map_domain_add_monoid_hom_strict _ _
   ... ≤ _ : h.le,
 end
 
 lemma map_add_hom_mk (x : fin (n+1) →₀ Λ') :
-  (map_add_hom f g) (quotient_add_group.mk x) = quotient_add_group.mk (map_domain_hom g x) :=
+  (map_add_hom f g) (quotient_add_group.mk x) =
+    quotient_add_group.mk (map_domain.add_monoid_hom g x) :=
 rfl
 
 @[simp] lemma map_add_hom_π (x : fin (n+1) →₀ Λ') :
-  (map_add_hom f g) (π _ _ x) = π _ _ (map_domain_hom g x) :=
+  (map_add_hom f g) (π _ _ x) = π _ _ (map_domain.add_monoid_hom g x) :=
 rfl
 
 variables [fact f.to_add_monoid_hom.range.saturated]
@@ -279,7 +280,7 @@ begin
   apply quotient_add_group.induction_on x; clear x,
   intro x,
   simp only [add_monoid_hom.to_fun_eq_coe, map_apply, polyhedral_lattice_hom.id_apply,
-    map_add_hom_mk, map_domain_hom_apply, map_domain_id],
+    map_add_hom_mk, map_domain.add_monoid_hom_apply, map_domain_id],
 end
 
 lemma map_comp : map f (g' ∘ g) = (map f g').comp (map f g) :=
@@ -288,7 +289,7 @@ begin
   apply quotient_add_group.induction_on x; clear x,
   intro x,
   simp only [add_monoid_hom.to_fun_eq_coe, map_apply, polyhedral_lattice_hom.comp_apply,
-    map_add_hom_mk, map_domain_hom_apply, ← map_domain_comp],
+    map_add_hom_mk, map_domain.add_monoid_hom_apply, ← map_domain_comp],
 end
 
 end maps
@@ -315,11 +316,11 @@ def map_succ_zero_aux (m : ℕ) (g : fin (m+2) →ₘ fin 1) : obj f (m+1) →+ 
 (apply_add_hom (0 : fin 1)).comp $
 begin
   -- TODO: this is very ugly
-  let foo := quotient_add_group.lift (conerve.L f (m + 1 + 1)) (map_domain_hom g),
+  let foo := quotient_add_group.lift (conerve.L f (m + 1 + 1)) (map_domain.add_monoid_hom g),
   refine foo _,
   rintro l' ⟨hl', Hl'⟩,
   ext i,
-  simp only [map_domain_hom_apply, map_domain, sum_apply, single_apply, zero_apply],
+  simp only [map_domain.add_monoid_hom_apply, map_domain, sum_apply, single_apply, zero_apply],
   rw [finsupp.sum_eq_sum_fintype],
   swap, { simp only [forall_const, if_true, eq_iff_true_of_subsingleton] },
   convert hl',
@@ -335,9 +336,9 @@ def map_succ_zero (m : ℕ) (g : fin (m+2) →ₘ fin 1) : obj f (m+1) ⟶ Λ' :
     apply le_of_forall_pos_le_add,
     intros ε hε,
     obtain ⟨x, rfl, h⟩ := norm_mk_lt x hε,
-    calc ∥finsupp.map_domain_hom g x 0∥
-        ≤ ∥finsupp.map_domain_hom g x∥ : _
-    ... ≤ ∥x∥ : conerve.map_domain_hom_strict g x
+    calc ∥finsupp.map_domain.add_monoid_hom g x 0∥
+        ≤ ∥finsupp.map_domain.add_monoid_hom g x∥ : _
+    ... ≤ ∥x∥ : conerve.map_domain_add_monoid_hom_strict g x
     ... ≤ _ : h.le,
     rw [finsupp.norm_def, finsupp.sum_eq_sum_fintype, fin.sum_univ_succ, fin.sum_univ_zero, add_zero],
     intro, exact norm_zero
@@ -407,7 +408,7 @@ begin
   have H2 := conerve.map_add_hom_π f (@hom.to_preorder_hom (mk 0) _ (δ 1)) (finsupp.single 0 (f l)),
   refine H1.trans (eq.trans _ H2.symm), clear H1 H2,
   show (conerve.π f 2) _ = (conerve.π f 2) _,
-  simp only [finsupp.map_domain_single, finsupp.map_domain_hom_apply],
+  simp only [finsupp.map_domain_single, finsupp.map_domain.add_monoid_hom_apply],
   rw [← sub_eq_zero, ← add_monoid_hom.map_sub, conerve.π_apply_eq_zero_iff],
   have hδ0 : hom.to_preorder_hom (δ (0 : fin 2)) 0 = 1 := rfl,
   have hδ1 : hom.to_preorder_hom (δ (1 : fin 2)) 0 = 0 := rfl,
