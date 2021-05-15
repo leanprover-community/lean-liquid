@@ -18,19 +18,25 @@ and does abstract normed space stuff.
 
 noncomputable theory
 
+-- the following proof is overkill but nice
+lemma real.Sup_mem_of_finite {s : set ℝ} (hs : s.finite) (hs' : s.nonempty):
+  Sup s ∈ s :=
+is_compact.Sup_mem hs.is_compact hs'
+
 @[simp]
 lemma real.supr_zero (ι : Type*) : (⨆ i : ι, (0 : ℝ)) = 0 :=
-sorry
+begin
+  rw supr,
+  by_cases hι : nonempty ι,
+  { resetI, rw [set.range_const, cSup_singleton] },
+  { rw [set.range_eq_empty.mpr hι, real.Sup_empty] }
+end
 
 lemma real.supr_range {α β : Type*} (f : β → α) (g : α → ℝ) :
   (⨆ a ∈ set.range f, g a) = ⨆ b, g (f b) :=
 begin
   sorry
 end
--- the following proof is overkill but nice
-lemma real.Sup_mem_of_finite {s : set ℝ} (hs : s.finite) (hs' : s.nonempty):
-  Sup s ∈ s :=
-is_compact.Sup_mem hs.is_compact hs'
 
 -- Move me
 lemma real.Sup_eq {s : set ℝ} (hs : s.nonempty) (hs' : ∃ x, ∀ y ∈ s, y ≤ x) {x : ℝ} :
