@@ -32,11 +32,12 @@ begin
   { rw [set.range_eq_empty.mpr hι, real.Sup_empty] }
 end
 
-lemma real.supr_range {α β : Type*} (f : β → α) (g : α → ℝ) :
-  (⨆ a ∈ set.range f, g a) = ⨆ b, g (f b) :=
-begin
-  sorry
-end
+-- maybe don't need this
+-- lemma real.supr_range {α β : Type*} (f : β → α) (g : α → ℝ) :
+--   (⨆ a ∈ set.range f, g a) = ⨆ b, g (f b) :=
+-- begin
+--   admit
+-- end
 
 -- Move me
 lemma real.Sup_eq {s : set ℝ} (hs : s.nonempty) (hs' : ∃ x, ∀ y ∈ s, y ≤ x) {x : ℝ} :
@@ -195,8 +196,8 @@ lemma embedding.norm_extend (f : locally_constant X G) : ∥he.locally_constant_
 begin
   by_cases hX : nonempty X,
   { resetI,
-    change (⨆ y : Y, _) = (⨆ x : X, _),
-    rw  [← real.supr_range, ← real.supr_range, he.range_locally_constant_extend f] },
+    simp only [locally_constant.norm_def, supr],
+    rw [range_comp, he.range_locally_constant_extend f, ← range_comp], },
   { rw [f.norm_of_empty hX],
     dsimp [embedding.locally_constant_extend, embedding.extend],
     suffices : (⨆ (y : Y), ∥(0 : G)∥) = 0,
