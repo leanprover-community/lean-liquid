@@ -23,12 +23,11 @@ sorry
 lemma real.supr_range {α β : Type*} (f : β → α) (g : α → ℝ) :
   (⨆ a ∈ set.range f, g a) = ⨆ b, g (f b) :=
 begin
-
   sorry
 end
 
 lemma nnreal.eq_zero_or_pos (r : nnreal) : r = 0 ∨ 0 < r :=
-sorry
+by admit -- can also use lt_or_eq_of_le (zero_le r)
 
 instance semi_normed_group.inhabited (G : Type*) [semi_normed_group G] : inhabited G := ⟨0⟩
 
@@ -53,6 +52,7 @@ variables
 @[simp]
 lemma locally_constant.norm_of_empty (hX : ¬ nonempty X) (f : locally_constant X G) : ∥f∥ = 0 :=
 begin
+  rw [locally_constant.norm_def, supr],
 
   sorry
 end
@@ -93,13 +93,16 @@ end
 
 lemma locally_constant.exists_norm_eq [nonempty X] (f : locally_constant X G) : ∃ x, ∥f∥ = ∥f x∥ :=
 begin
-
+  simp only [locally_constant.norm_def, supr],
   sorry
 end
 
 lemma locally_constant.norm_eq_iff (f : locally_constant X G) {x : X} :
   ∥f∥ = ∥f x∥ ↔ ∀ x', ∥f x'∥ ≤ ∥f x∥ :=
-sorry
+begin
+  rw [locally_constant.norm_def],
+  sorry
+end
 
 lemma locally_constant.norm_eq_iff' (f : locally_constant X G) {x : X} :
   ∥f∥ = ∥f x∥ ↔ ∀ g ∈ range f, ∥g∥ ≤ ∥f x∥ :=
@@ -155,9 +158,9 @@ begin
     erw [hy, ← norm_T, locally_constant.norm_eq_iff],
     intro y',
     erw [norm_T, norm_T],
-    cases r.eq_zero_or_pos with hr hr,
-    { simp [hr] },
-    { simp [hr, ← hy, g.norm_apply_le] } },
+    cases lt_or_eq_of_le (zero_le r) with hr hr,
+    { simp [hr, ← hy, g.norm_apply_le] },
+    { simp [hr.symm] } },
   { simp [hY] },
 end
 

@@ -1,6 +1,8 @@
 import topology.locally_constant.algebra
 import analysis.normed_space.normed_group_hom
 
+import for_mathlib.normed_group_hom_bound_by
+
 /-!
 # Analysis of locally constant maps
 
@@ -96,6 +98,13 @@ local attribute [instance]
 lemma edist_apply_le [has_edist Y] (f g : locally_constant X Y) (x : X) :
   edist (f x) (g x) ≤ edist f g :=
 le_Sup (set.mem_range_self x)
+
+lemma norm_def [has_norm Y] (f : locally_constant X Y) : ∥f∥ = ⨆ x, ∥f x∥ := rfl
+
+lemma edist_def [has_edist Y] (f g : locally_constant X Y) :
+  edist f g = ⨆ x, edist (f x) (g x) := rfl
+
+lemma dist_def [has_dist Y] (f g : locally_constant X Y) : dist f g = ⨆ x, dist (f x) (g x) := rfl
 
 section compact_domain
 
@@ -355,9 +364,7 @@ normed_group_hom.mk_normed_group_hom'_bound_by _ _ _
 
 lemma comap_hom_norm_noninc (f : X → Y) (hf : continuous f) :
   (@comap_hom _ _ V _ _ _ _ _ f hf).norm_noninc :=
-assume g,
-calc ∥comap_hom f hf g∥ ≤ 1 * ∥g∥ : comap_hom_bound_by f hf g
-... = ∥g∥ : one_mul _
+(comap_hom_bound_by f hf).norm_noninc
 
 end comap_hom
 
