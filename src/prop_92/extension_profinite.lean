@@ -1,4 +1,6 @@
 import for_mathlib.is_locally_constant
+import locally_constant.analysis
+
 /-!
 # Extending a locally constant map to larger profinite sets
 
@@ -227,3 +229,17 @@ end
 def embedding.locally_constant_extend {e : X → Y} (he : embedding e) (f : locally_constant X Z) :
   locally_constant Y Z :=
 ⟨he.extend f, he.is_locally_constant_extend⟩
+
+lemma embedding.locally_constant_extend_extends {e : X → Y} (he : embedding e)
+  (f : locally_constant X Z) (x : X) : he.locally_constant_extend f (e x) = f x :=
+he.extend_extends f.2 x
+
+lemma embedding.comap_locally_constant_extend {e : X → Y} (he : embedding e)
+  (f : locally_constant X Z) : (he.locally_constant_extend f).comap e = f :=
+begin
+  ext x,
+  rw locally_constant.coe_comap _ _ he.continuous,
+  exact he.locally_constant_extend_extends f x
+end
+
+-- version avec comap_hom pour Z normed group ?

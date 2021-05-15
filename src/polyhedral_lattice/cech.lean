@@ -196,7 +196,7 @@ instance : polyhedral_lattice (obj f m) :=
   polyhedral :=
   begin
     obtain ⟨ι, _inst_ι, l, hl, hl'⟩ := polyhedral_lattice.polyhedral (fin m →₀ Λ'),
-    refine ⟨ι, _inst_ι, (λ i, quotient_add_group.mk (l i)), _, _⟩,
+    refine ⟨ι, _inst_ι, (λ i, quotient_add_group.mk' (L f m) (l i)), _, _⟩,
     { intros x,
       apply quotient_add_group.induction_on x; clear x,
       intro x,
@@ -204,7 +204,7 @@ instance : polyhedral_lattice (obj f m) :=
       refine ⟨d, hd, c, _, _⟩,
       { show d • quotient_add_group.mk' _ x = _,
         rw [← add_monoid_hom.map_nsmul, H1, add_monoid_hom.map_sum],
-        simp only [add_monoid_hom.map_nsmul], refl, },
+        simp only [add_monoid_hom.map_nsmul] },
       { dsimp,
         sorry } },
     { sorry }

@@ -108,10 +108,9 @@ lemma locally_constant.norm_eq_iff' (f : locally_constant X G) {x : X} :
   ∥f∥ = ∥f x∥ ↔ ∀ g ∈ range f, ∥g∥ ≤ ∥f x∥ :=
 sorry
 
-lemma locally_constant.norm_comap {α : Type*} [topological_space α] [compact_space α]
-  (f : locally_constant X G) {g : α → X} (h : continuous g) : ∥f.comap g∥ = ∥f∥ :=
-sorry
-
+lemma locally_constant.norm_comap_le {α : Type*} [topological_space α] [compact_space α]
+  (f : locally_constant X G) {g : α → X} (h : continuous g) : ∥f.comap g∥ ≤ ∥f∥ :=
+locally_constant.comap_hom_norm_noninc g h f
 
 lemma embedding.range_locally_constant_extend [nonempty X] {Z : Type*} [inhabited Z] (f : locally_constant X Z) :
 range (he.locally_constant_extend f) = range f :=
@@ -119,6 +118,14 @@ begin
 
   sorry
 end
+
+lemma locally_constant.comap_map {W X Y Z : Type*} [topological_space W] [topological_space X] [topological_space Y]
+  (f : locally_constant X Y) (g : W → X) (h : Y → Z) (hg : continuous g) : (f.comap g).map h = (f.map h).comap g :=
+by { ext, simp [hg] }
+
+lemma locally_constant.map_comp' {W X Y Z : Type*} [topological_space W]
+  (f : locally_constant W X) (g : X → Y) (h : Y → Z) : (f.map g).map h = f.map (h ∘ g) :=
+rfl
 
 
 lemma embedding.norm_extend (f : locally_constant X G) : ∥he.locally_constant_extend f∥ = ∥f∥ :=
@@ -164,47 +171,81 @@ begin
   { simp [hY] },
 end
 
+@[simp]
+lemma normed_with_aut.T_inv_T_hom : (T.inv : V → V) ∘ T.hom = id :=
+begin
+  ext,
+  simp,
+end
+
+open locally_constant
+variables {φ} (hφ : continuous φ)
+
+include hφ
+
 noncomputable
 def embedding.h (f : locally_constant X V) : ℕ → locally_constant Y V
-| 0     := (he.locally_constant_extend f).map T.hom
-| (i+1) := (he.locally_constant_extend $ (embedding.h i).comap φ).map T.hom
+| 0     := map_hom T.hom (he.locally_constant_extend f)
+| (i+1) := map_hom T.hom (he.locally_constant_extend $ (comap_hom φ hφ $ embedding.h i))
 
-variables (f : locally_constant X V) {φ}
+variables (f : locally_constant X V)
 
-lemma norm_h (hφ : continuous φ) (i : ℕ) : ∥he.h φ f i∥ = r^(i+1)*∥f∥ :=
+lemma norm_h (i : ℕ) : ∥he.h hφ f i∥ ≤ r^(i+1)*∥f∥ :=
 begin
   induction i with i ih ; dsimp [embedding.h],
   { rw [locally_constant.norm_map_aut, he.norm_extend, zero_add, pow_one] },
-  { rw [locally_constant.norm_map_aut, he.norm_extend, (he.h φ f i).norm_comap hφ, ih, ← mul_assoc],
-    refl },
+  { rw [locally_constant.norm_map_aut, he.norm_extend, pow_succ, mul_assoc],
+    exact mul_le_mul_of_nonneg_left (((he.h hφ f i).norm_comap_le hφ).trans ih) r.coe_nonneg },
 end
 
-variables (φ)
+open finset
 
 def embedding.g (f : locally_constant X V) (N : ℕ) : locally_constant Y V :=
-∑ i in finset.range N, he.h φ f i
+∑ i in range (N + 1), he.h hφ f i
+
 
 /-- T⁻¹ g_N e - g_N φ = f - h_N φ-/
-lemma one (N : ℕ) :
-((he.g φ f N).comap e).map T.inv - ((he.g φ f N).comap φ) = f - (he.h φ f N).comap φ :=
+lemma one (hφ : continuous φ) (N : ℕ) :
+  map_hom T.inv (comap_hom e he.continuous (he.g hφ f N)) - (comap_hom φ hφ (he.g hφ f N)) =
+  f - comap_hom φ hφ (he.h hφ f N) :=
 begin
-
-  sorry
+  induction N with N ih,
+  { dsimp [embedding.g],
+    simp only [embedding.h, finset.sum_singleton, sub_left_inj],
+    ext x,
+    simp [he.continuous, he.locally_constant_extend_extends] },
+  { set c_φ : normed_group_hom (locally_constant Y V) (locally_constant X V) := comap_hom φ hφ,
+    set c_e : normed_group_hom (locally_constant Y V) (locally_constant X V) := comap_hom e he.continuous,
+    set m_T : normed_group_hom (locally_constant X V) (locally_constant X V) := map_hom T.inv,
+    set G := he.g hφ f,
+    set H := he.h hφ f,
+    change m_T _ - _ = _,
+    rw sub_eq_iff_eq_add at ih,
+    dsimp [embedding.g, embedding.h],
+    change m_T (c_e ∑ i in range (N.succ + 1), H i) -
+      c_φ ∑ i in range (N.succ + 1), H i = _,
+    erw [finset.sum_range_succ, normed_group_hom.map_add, normed_group_hom.map_add, normed_group_hom.map_add, ih],
+    change f - c_φ (H N) + c_φ (G N) + m_T (c_e (H N.succ)) - (c_φ (G N) + c_φ (H N.succ)) =  f - comap φ (H N.succ),
+    dsimp [H, embedding.h],
+    rw [← (he.locally_constant_extend $ comap φ $ H N).comap_map  e T.hom he.continuous,
+        he.comap_locally_constant_extend, locally_constant.map_comp', normed_with_aut.T_inv_T_hom],
+    simp [H],
+    abel },
 end
 
 open filter
 open_locale topological_space
 
-lemma limit : tendsto (λ N, ((he.g φ f N).comap e).map T.inv - ((he.g φ f N).comap φ)) at_top (𝓝 f) :=
+lemma limit : tendsto (λ N, ((he.g hφ f N).comap e).map T.inv - ((he.g hφ f N).comap φ)) at_top (𝓝 f) :=
 begin
   -- follows easily from one and norm_h
   sorry
 end
 
-lemma cauchy_seq_g : cauchy_seq (he.g φ f) :=
+lemma cauchy_seq_g : cauchy_seq (he.g hφ f) :=
 sorry -- follows easily from norm_h and geometry series
 
-lemma norm_g_le (N : ℕ) : ∥he.g φ f N∥ ≤ r/(1 - r) * ∥f∥ :=
+lemma norm_g_le (N : ℕ) : ∥he.g hφ f N∥ ≤ r/(1 - r) * ∥f∥ :=
 sorry -- follows easily from norm_h and geometric series
 
 end locally_constant_stuff
