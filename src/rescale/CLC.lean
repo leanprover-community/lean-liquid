@@ -9,7 +9,7 @@ open profinitely_filtered_pseudo_normed_group
 
 universe variable u
 variables (r : ℝ≥0) (V : NormedGroup) (r' : ℝ≥0) [fact (0 < r')]
-variables (c c₁ c₂ c₃ c₄ : ℝ≥0) (l m n : ℕ)
+variables (c c₁ c₂ c₃ c₄ : ℝ≥0) (m n : ℕ)
 
 @[simp] theorem CLCFP_rescale (N : ℝ≥0)
   (M) [profinitely_filtered_pseudo_normed_group_with_Tinv r' M] :
