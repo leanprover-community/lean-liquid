@@ -60,7 +60,7 @@ lemma give_better_name : ∀ (n : ℤ), ∥n∥ = ↑(n.to_nat) + ↑((-n).to_na
 
 instance int.polyhedral_lattice : polyhedral_lattice ℤ :=
 { finite_free := ⟨unit, infer_instance, ⟨basis.singleton _ _⟩⟩,
-  polyhedral :=
+  polyhedral' :=
   begin
     refine ⟨units ℤ, infer_instance, coe, _⟩,
     intro n,

@@ -77,9 +77,9 @@ instance {ι : Type} [fintype ι] : polyhedral_lattice (ι →₀ Λ) :=
     obtain ⟨J, _instJ, ⟨l⟩⟩ := polyhedral_lattice.finite_free Λ, resetI,
     exact ⟨_, infer_instance, ⟨finsupp.basis (λ i, l)⟩⟩
   end,
-  polyhedral :=
+  polyhedral' :=
   begin
-    obtain ⟨J, _instJ, x, hx⟩ := polyhedral_lattice.polyhedral Λ, resetI,
+    obtain ⟨J, _instJ, x, hx⟩ := polyhedral_lattice.polyhedral' Λ, resetI,
     refine ⟨ι × J, infer_instance, λ j, single j.1 (x j.2), _⟩,
     intro l,
     have := λ i, hx (l i),
