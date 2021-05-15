@@ -156,11 +156,6 @@ end
 --   simp
 -- end
 
--- def dual_basis (R : Type*) [comm_ring R] (α : Type*) [fintype α] :
---   basis α R (module.dual R (α → R)) :=
--- sorry
--- basis.mk (dual_basis_vecs_li R α) (dual_basis_vecs_span R α)
-
 def lattice_restrict (S : submodule (ℚ≥0) (α → ℚ)) :
   submodule ℕ (α → ℤ) :=
 { carrier := to_rational_point ⁻¹' (S : set (α → ℚ)),
