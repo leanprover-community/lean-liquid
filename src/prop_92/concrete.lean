@@ -69,27 +69,26 @@ end
 lemma locally_constant.map_zero {Z : Type*} (g : G → Z) :
   (0 : locally_constant X G).map g = locally_constant.const X (g 0) :=
 begin
+  ext x,
+  simp only [function.comp_app, locally_constant.map_apply, locally_constant.zero_apply],
+  refl,
+end
 
+@[simp]
+lemma locally_constant.norm_const [h : nonempty X] (g : G) : ∥locally_constant.const X g∥ = ∥g∥ :=
+begin
+  unfreezingI { obtain ⟨x⟩ := h },
+  simp [locally_constant.norm_def, locally_constant.const],
   sorry
 end
 
 @[simp]
-lemma locally_constant.norm_const [nonempty X] (g : G) : ∥locally_constant.const X g∥ = ∥g∥ :=
-begin
-
-  sorry
-end
+lemma locally_constant.norm_zero : ∥(0 : locally_constant X G)∥ = 0 :=
+by simp only [locally_constant.norm_def, norm_zero, real.supr_zero, locally_constant.zero_apply]
 
 @[simp]
-lemma locally_constant.norm_zero : ∥locally_constant.const X (0 : G)∥ = 0 :=
-begin
-  by_cases hX : nonempty X,
-  {
-    sorry },
-  {
-    sorry },
-end
-
+lemma locally_constant.norm_const_zero : ∥locally_constant.const X (0 : G)∥ = 0 :=
+locally_constant.norm_zero
 
 lemma locally_constant.exists_norm_eq [nonempty X] (f : locally_constant X G) : ∃ x, ∥f∥ = ∥f x∥ :=
 begin
