@@ -26,8 +26,8 @@ begin
   sorry
 end
 
-lemma nnreal.eq_zero_or_pos (r : nnreal) : r = 0 ∨ 0 < r :=
-by admit -- can also use lt_or_eq_of_le (zero_le r)
+-- lemma nnreal.eq_zero_or_pos (r : nnreal) : r = 0 ∨ 0 < r :=
+-- by admit -- can also use lt_or_eq_of_le (zero_le r)
 
 instance semi_normed_group.inhabited (G : Type*) [semi_normed_group G] : inhabited G := ⟨0⟩
 
@@ -51,18 +51,16 @@ variables
 
 @[simp]
 lemma locally_constant.norm_of_empty (hX : ¬ nonempty X) (f : locally_constant X G) : ∥f∥ = 0 :=
-begin
-  rw [locally_constant.norm_def, supr],
-
-  sorry
-end
+by rw [locally_constant.norm_def, supr, range_eq_empty.mpr hX, real.Sup_empty]
 
 @[simp]
 lemma embedding.locally_constant_extend_of_empty (hX : ¬ nonempty X) (f : locally_constant X G) :
  he.locally_constant_extend f = 0 :=
 begin
-
-  sorry
+  ext y, dsimp [embedding.locally_constant_extend, embedding.extend],
+  rw dif_neg,
+  { refl },
+  { intro h, exact hX h.2 }
 end
 
 @[simp]
