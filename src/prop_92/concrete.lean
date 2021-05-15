@@ -1,7 +1,9 @@
 import pseudo_normed_group.profinitely_filtered
 import prop_92.extension_profinite
 import normed_group.normed_with_aut
+
 import for_mathlib.normed_group_hom_completion
+import for_mathlib.pseudo_metric
 
 import locally_constant.analysis
 
@@ -222,14 +224,31 @@ end
 open filter
 open_locale topological_space
 
-lemma limit : tendsto (λ N, ((he.g hφ f N).comap e).map T.inv - ((he.g hφ f N).comap φ)) at_top (𝓝 f) :=
+variables [fact ((r : ℝ) < 1)]
+
+lemma limit : tendsto (λ N, map_hom T.inv (comap_hom e he.continuous (he.g hφ f N)) - (comap_hom φ hφ (he.g hφ f N))) at_top (𝓝 f) :=
 begin
-  -- follows easily from one and norm_h
-  sorry
+  simp_rw one,
+  rw show 𝓝 f = 𝓝 (f - 0), by simp,
+  refine tendsto_const_nhds.sub _,
+  apply squeeze_zero_norm,
+  intro n,
+  apply ((he.h hφ f n).norm_comap_le hφ).trans (norm_h he hφ _ _),
+  rw ← zero_mul (∥f∥),
+  apply tendsto.mul_const,
+  rw tendsto_add_at_top_iff_nat,
+  exact tendsto_pow_at_top_nhds_0_of_lt_1 r.coe_nonneg (fact.out _)
 end
 
 lemma cauchy_seq_g : cauchy_seq (he.g hφ f) :=
-sorry -- follows easily from norm_h and geometry series
+begin
+  apply cauchy_seq_of_le_geometric_pseudo r (r^2*∥f∥) (fact.out _),
+  intro n,
+  dsimp [embedding.g],
+  rw [dist_eq_norm, sum_range_succ _ (n+1), sub_add_eq_sub_sub, sub_self, zero_sub, norm_neg],
+  convert norm_h he hφ f (n+1) using 1,
+  ring_exp
+end
 
 lemma norm_g_le (N : ℕ) : ∥he.g hφ f N∥ ≤ r/(1 - r) * ∥f∥ :=
 sorry -- follows easily from norm_h and geometric series
