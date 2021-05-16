@@ -16,13 +16,13 @@ namespace has_add_subgroup_decomposition
 
 def nonneg_piece_subring_of_int_grading {R : Type*} [ring R] (Gᵢ : ℤ → add_subgroup R)
   [has_add_subgroup_decomposition Gᵢ] [add_subgroup.is_gmonoid Gᵢ] : subring R :=
-subring_of_add_subgroup R Gᵢ
+subring_of_add_submonoid R Gᵢ
 { carrier := {n : ℤ | 0 ≤ n},
   zero_mem' := le_refl (0 : ℤ),
   add_mem' := @add_nonneg ℤ _ }
 
 universe u
--- doesn't seem to fire
+-- doesn't seem to fire (perhaps there was a universe issue which I've since fixed)
 instance (R : Type u) [comm_ring R] (Gᵢ : ℤ → add_subgroup R)
   [has_add_subgroup_decomposition Gᵢ] [add_subgroup.is_gmonoid Gᵢ] :
   algebra (zero_component_subring R Gᵢ) (nonneg_piece_subring_of_int_grading Gᵢ) :=
@@ -43,41 +43,45 @@ lemma exist_fg_gens {R : Type*} [ring R] {M : Type*} [add_comm_group M] [module 
   {S : set M} (hS : (submodule.span R S).fg) :
   ∃ T : finset M, (T : set M) ⊆ S ∧ submodule.span R (T : set M)= submodule.span R S :=
 begin
+  rcases hS with ⟨U, hU⟩,
   sorry
 end
 
 lemma aux (R : Type*) (ι : Type*) (G : ι → set R) (T : finset R)
   (p : ι → Prop) (hT : (T : set R) ⊆ ⋃ (i : ι) (H : p i), G i) :
   ∃ F : finset ι, (∀ i ∈ F, p i) ∧ (T : set R) ⊆ ⋃ (i ∈ F), G i :=
-sorry
-/-
-  { -- proof by induction on size of T
-    classical, revert hTS, apply finset.induction_on T,
-    { intros, exact ⟨37, by simp⟩ },
-    { rintros a s - hS has,
-      cases hS (set.subset.trans (finset.subset_insert a s) has) with N hN,
-      have haS : a ∈ S := has (finset.mem_insert_self _ _),
-      replace haS := set.mem_bUnion_iff.1 haS, -- why rw no work?
-      rcases haS with ⟨M, (hM : 1 ≤ M), haM⟩,
-      use max M N,
-      intros x hx,
+begin
+  classical,
+  revert hT,
+  apply finset.induction_on T,
+  { intros, exact ⟨∅, by simp⟩ },
+  { rintros a s - hS has,
+    rcases hS (set.subset.trans (finset.subset_insert a s) has) with ⟨N, hN1, hN2⟩,
+    have haS : a ∈ ⋃ (i : ι) (H : p i), G i := has (finset.mem_insert_self _ _),
+    rw set.mem_bUnion_iff' at haS,
+    rcases haS with ⟨M, hM, haM⟩,
+    use insert M N,
+    split,
+    { intros x hx,
       replace hx := finset.mem_insert.1 hx,
       rcases hx with (rfl | hxs),
-      { rw set.mem_bUnion_iff,
-        use M,
-        refine ⟨_, haM⟩,
-        -- obviously
-        simp, split, linarith, left, refl },
-      { specialize hN hxs,
-        rw set.mem_bUnion_iff at ⊢ hN,
-        rcases hN with ⟨A, hA, h⟩,
-        refine ⟨A, _, h⟩,
-        rw [set.mem_Ioc] at ⊢ hA,
-        cases hA with hA1 hA2,
-        exact ⟨hA1, hA2.trans (le_max_right _ _)⟩ } } },
-        -/
+      { exact hM },
+      { exact hN1 _ hxs } },
+    { intros x hx,
+      replace hx := finset.mem_insert.1 hx,
+      rw set.mem_bUnion_iff',
+      rcases hx with (rfl | hxs),
+      { exact ⟨M, finset.mem_insert_self M N, haM⟩ },
+      { have hxs' : x ∈ (s : set R) := finset.mem_coe.mpr hxs,
+        rcases (set.mem_bUnion_iff'.1 (hN2 hxs')) with ⟨i, hi, hi2⟩,
+        refine ⟨i, finset.mem_insert_of_mem hi, hi2⟩ } } },
+end
 
 open_locale direct_sum
+
+    -- parsing issue on next line *and* why do i have to even let Lean know the type?
+    -- let ZZZ := (to_add_monoid (λ (i : ℤ), (Gᵢ i).subtype) : (⨁ i, Gᵢ i) →+ R),
+
 
 theorem nonnegative_subalgebra_fg_over_zero_subalgebra_of_int_grading_of_noeth
   (R : Type u) [comm_ring R] [is_noetherian_ring R] (Gᵢ : ℤ → add_subgroup R)

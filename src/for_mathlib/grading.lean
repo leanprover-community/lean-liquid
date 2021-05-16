@@ -474,8 +474,8 @@ variable (Mᵢ)
 
 def internal_proj (i : A) : R →+ R :=
 { to_fun := λ r, add_submonoid_decomposition Mᵢ r i,
-  map_zero' := sorry,
-  map_add' := sorry
+  map_zero' := by simp,
+  map_add' := by simp
 }
 
 variable {Mᵢ}
@@ -512,10 +512,14 @@ begin
     rw dfinsupp.support_single_ne_zero, swap, assumption,
     simp },
   { intros x y hx hy,
-    simp [← hx, ← hy],
+    simp only [←hx, ←hy, add_monoid_hom.map_add, add_apply, add_submonoid.coe_add],
     -- bleurgh should be in API
-    sorry
-  }
+    suffices : dfinsupp.sum (x + y) (λ i, (Mᵢ i).subtype) =
+      dfinsupp.sum x (λ i, (Mᵢ i).subtype) + dfinsupp.sum y (λ i, (Mᵢ i).subtype),
+    { convert this, simp },
+    rw dfinsupp.sum_add_index,
+    { intros, refl },
+    { intros, refl } }
 end
 
 end classical

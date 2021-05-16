@@ -79,7 +79,9 @@ variables {A : Type*} [decidable_eq A] [add_monoid A]
 -- for `convert` because an external direct sum of `Gᵢ i` is syntactically different to
 -- an external direct sum of `(Gᵢ i).to_add_submonoid` and this caused me problems.
 -- In the end I've just stuck to the case we need.
-def subring_of_add_subgroup
+-- *TODO* -- this should be a sub-R₀-algebra
+-- and given an inclusion of submonoids one should get an inclusion of sub-R₀-algebras
+def subring_of_add_submonoid
     (S : add_submonoid A) : subring R :=
  { carrier := {r : R | ∀ ⦃a : A⦄, a ∉ S → add_subgroup_decomposition Gᵢ r a = 0 },
    zero_mem' := λ n _, by { rw (add_subgroup_decomposition Gᵢ).map_zero, refl },
@@ -113,7 +115,8 @@ def subring_of_add_subgroup
     end,
  }
 
--- has better definitional properties than `subring_of_add_subgroup A R Gᵢ ⊥
+-- has better definitional properties than the forthcoming
+-- `subring_of_add_submonoid A R Gᵢ ⊥`
 def zero_component_subring : subring R :=
 { one_mem' := add_subgroup.is_gmonoid.grading_one,
   mul_mem' := λ r s, begin
@@ -138,6 +141,17 @@ variables {A : Type*} [decidable_eq A] [add_monoid A]
 
 instance : comm_ring (Gᵢ 0) := subring.to_comm_ring (zero_component_subring R Gᵢ)
 instance : algebra (Gᵢ 0) R := algebra.of_subring (zero_component_subring R Gᵢ)
+
+def subalgebra_of_add_submonoid (S : add_submonoid A) : subalgebra (Gᵢ 0) R :=
+{
+   algebra_map_mem' := begin
+     rintro r a ha,
+     have ha0 : 0 ≠ a := λ h, ha (h ▸ S.zero_mem),
+     convert eval_of_ne (λ i, Gᵢ i) ha0 r,
+     cases r with r hr,
+     exact eq_decomposition_of_mem_piece'' hr,
+   end,
+  ..subring_of_add_submonoid R Gᵢ S }
 
 /-- Rₐ considered as an R₀-submodule of R. -/
 def component_submodule_for_zero_component_subring (a : A) :
