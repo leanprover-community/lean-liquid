@@ -39,7 +39,7 @@ then
 -/
 
 -- move this, if it's not there already
-def subring.incl (R : Type) [comm_ring R] (A B : subring R) (h : A ≤ B) : A →+* B :=
+def subring.incl (R : Type*) [comm_ring R] (A B : subring R) (h : A ≤ B) : A →+* B :=
 { to_fun := λ a, ⟨a.1, h a.2⟩,
   map_zero' := rfl,
   map_add' := λ _ _, rfl,
@@ -157,7 +157,7 @@ instance (a : A) : module (Gᵢ 0) (Gᵢ a) :=
 submodule.module' (component_submodule_for_zero_component_subring R Gᵢ a)
 
 
-def projection_R₀_hom (a : A) : R →ₗ[Gᵢ 0] (Gᵢ a) :=
+def proj_R₀_hom (a : A) : R →ₗ[Gᵢ 0] (Gᵢ a) :=
 { to_fun := (apply_add_monoid_hom (λ i, Gᵢ i) a).comp
     (add_subgroup_decomposition Gᵢ).to_add_monoid_hom,
   map_add' := ((apply_add_monoid_hom (λ i, Gᵢ i) a).comp
@@ -245,10 +245,10 @@ finset.sum_congr rfl hyp
 open_locale direct_sum
 
 -- move and rename
-lemma aux (a : A) (x : ⨁ i, Gᵢ i) (m : Gᵢ a): (projection (λ (i : A), ↥(Gᵢ i)) a)
+lemma aux (a : A) (x : ⨁ i, Gᵢ i) (m : Gᵢ a): (proj (λ (i : A), ↥(Gᵢ i)) a)
   (x * (of (λ (i : A), ↥(Gᵢ i)) a) m) =
-  (projection (λ (i : A), ↥(Gᵢ i)) a)
-    ((of (λ (i : A), ↥(Gᵢ i)) 0) ((projection (λ (i : A), ↥(Gᵢ i)) 0) x) *
+  (proj (λ (i : A), ↥(Gᵢ i)) a)
+    ((of (λ (i : A), ↥(Gᵢ i)) 0) ((proj (λ (i : A), ↥(Gᵢ i)) 0) x) *
        (of (λ (i : A), ↥(Gᵢ i)) a) m) :=
 begin
   apply direct_sum.induction_on x; clear x,
@@ -256,14 +256,14 @@ begin
   { intros i x,
     by_cases hi0 : i = 0,
     { subst hi0,
-      rw projection_of_same },
-    { rw projection_of_ne (λ j, Gᵢ j) hi0,
+      rw proj_of_same },
+    { rw proj_of_ne (λ j, Gᵢ j) hi0,
       rw of_mul_of,
       have hia : i + a ≠ a,
         suffices : i + a ≠ 0 + a,
           simpa,
         intro ht, apply hi0, exact (add_left_inj a).mp ht,
-      rw projection_of_ne (λ j, Gᵢ j) hia,
+      rw proj_of_ne (λ j, Gᵢ j) hia,
       convert (add_monoid_hom.map_zero _).symm,
       rw of_mul_of,
       convert (add_monoid_hom.map_zero _),
@@ -322,7 +322,7 @@ begin
     -- hm says some element of r is in Rₐ
     -- so it's equal to its projection onto Rₐ
     have hm' := hm,
-    rw mem_piece_iff_projection_eq' at hm',
+    rw mem_piece_iff_proj_eq' at hm',
     conv at hm' begin
       to_lhs,
       rw finsupp.total_apply,
@@ -330,33 +330,33 @@ begin
     change ↑(((add_subgroup_decomposition_ring_equiv Gᵢ).to_add_monoid_hom _) a) =
       (finsupp.total ↥(Gᵢ a) R R ⇑((Gᵢ a).subtype)) f at hm',
     rw add_monoid_hom.map_finsupp_sum (add_subgroup_decomposition_ring_equiv Gᵢ).to_add_monoid_hom at hm',
-    change ↑(projection _ a (f.sum (λ (m : ↥(Gᵢ a)) (b : R),
+    change ↑(proj _ a (f.sum (λ (m : ↥(Gᵢ a)) (b : R),
       (add_subgroup_decomposition_ring_equiv Gᵢ) (b * m.1)))) =
       (finsupp.total ↥(Gᵢ a) R R ⇑((Gᵢ a).subtype)) f at hm',
-    rw add_monoid_hom.map_finsupp_sum (projection (λ i, Gᵢ i) a) at hm',
+    rw add_monoid_hom.map_finsupp_sum (proj (λ i, Gᵢ i) a) at hm',
     simp_rw (add_subgroup_decomposition_ring_equiv Gᵢ).map_mul at hm',
     change (Gᵢ a).subtype _ = _ at hm',
     rw add_monoid_hom.map_finsupp_sum at hm',
     have h37 : f.sum
       (λ (m : ↥(Gᵢ a)) (b : R),
       ((Gᵢ a).subtype)
-      ((projection (λ (i : A), ↥(Gᵢ i)) a)
+      ((proj (λ (i : A), ↥(Gᵢ i)) a)
         ((add_subgroup_decomposition_ring_equiv Gᵢ) b *
           (add_subgroup_decomposition_ring_equiv Gᵢ) m.val))) = f.sum
       (λ (m : ↥(Gᵢ a)) (b : R),
       ((Gᵢ a).subtype)
-      ((projection (λ (i : A), ↥(Gᵢ i)) a)
-        ( of (λ i, Gᵢ i) 0 ((projection (λ (i : A), ↥(Gᵢ i)) 0) ((add_subgroup_decomposition_ring_equiv Gᵢ) b)) *
+      ((proj (λ (i : A), ↥(Gᵢ i)) a)
+        ( of (λ i, Gᵢ i) 0 ((proj (λ (i : A), ↥(Gᵢ i)) 0) ((add_subgroup_decomposition_ring_equiv Gᵢ) b)) *
           (add_subgroup_decomposition_ring_equiv Gᵢ) m.val))),
     { apply finsupp.sum_congr,
       rintro ⟨m, hma⟩ hmf,
       congr' 1,
-      change (projection (λ (i : A), ↥(Gᵢ i)) a)
+      change (proj (λ (i : A), ↥(Gᵢ i)) a)
     ((add_subgroup_decomposition_ring_equiv Gᵢ) (f ⟨m, hma⟩) *
        (add_subgroup_decomposition Gᵢ) m) =
-  (projection (λ (i : A), ↥(Gᵢ i)) a)
+  (proj (λ (i : A), ↥(Gᵢ i)) a)
     ((of (λ (i : A), ↥(Gᵢ i)) 0)
-         ((projection (λ (i : A), ↥(Gᵢ i)) 0)
+         ((proj (λ (i : A), ↥(Gᵢ i)) 0)
             ((add_subgroup_decomposition_ring_equiv Gᵢ) (f ⟨m, hma⟩))) *
        (add_subgroup_decomposition Gᵢ) m),
       rw eq_decomposition_of_mem_piece'' hma,
@@ -364,24 +364,24 @@ begin
       -- goal now purely external
       rw of_mul_of,
       change _ = ((of (λ (i : A), ↥(Gᵢ i)) (0 + a))
-        ((ghas_mul.mul ((projection (λ (i : A), ↥(Gᵢ i)) 0) x)) ⟨m, hma⟩)) a,
+        ((ghas_mul.mul ((proj (λ (i : A), ↥(Gᵢ i)) 0) x)) ⟨m, hma⟩)) a,
       rw eval_of_same' (λ i, Gᵢ i) (0 + a) a (by simp),
       rw aux,
       rw of_mul_of,
-      rw projection_of_same' },
+      rw proj_of_same' },
     rw h37 at hm', clear h37,
     have foo : f.sum
       (λ (m : ↥(Gᵢ a)) (b : R),
       ((Gᵢ a).subtype)
-        ((projection (λ (i : A), ↥(Gᵢ i)) a)
+        ((proj (λ (i : A), ↥(Gᵢ i)) a)
           ((of (λ (i : A), ↥(Gᵢ i)) 0)
-            ((projection (λ (i : A), ↥(Gᵢ i)) 0) ((add_subgroup_decomposition_ring_equiv Gᵢ) b)) *
+            ((proj (λ (i : A), ↥(Gᵢ i)) 0) ((add_subgroup_decomposition_ring_equiv Gᵢ) b)) *
             (add_subgroup_decomposition_ring_equiv Gᵢ) m.val))) = f.sum
       (λ (m : ↥(Gᵢ a)) (b : R),
       ((Gᵢ a).subtype)
-        ((projection (λ (i : A), ↥(Gᵢ i)) a)
+        ((proj (λ (i : A), ↥(Gᵢ i)) a)
           ((of (λ (i : A), ↥(Gᵢ i)) 0)
-            ((projection (λ (i : A), ↥(Gᵢ i)) 0) ((add_subgroup_decomposition_ring_equiv Gᵢ) b)) *
+            ((proj (λ (i : A), ↥(Gᵢ i)) 0) ((add_subgroup_decomposition_ring_equiv Gᵢ) b)) *
             (of (λ (i : A), ↥(Gᵢ i)) a m)))),
     { apply finsupp.sum_congr,
       rintro m hm,
@@ -396,9 +396,9 @@ begin
     change f ∈ finsupp.supported R R (M : set (Gᵢ a)) at hf,
     rw finsupp.mem_supported at hf,
     rw submodule.mem_map,
-    existsi ((projection (λ (i : A), ↥(Gᵢ i)) 0) ((add_subgroup_decomposition_ring_equiv Gᵢ) (f m))) • m,
+    existsi ((proj (λ (i : A), ↥(Gᵢ i)) 0) ((add_subgroup_decomposition_ring_equiv Gᵢ) (f m))) • m,
     split,
-    { convert @submodule.smul_mem _ _ _ _ _ M m ((projection (λ (i : A), ↥(Gᵢ i)) 0) ((add_subgroup_decomposition_ring_equiv Gᵢ) (f m))) _,
+    { convert @submodule.smul_mem _ _ _ _ _ M m ((proj (λ (i : A), ↥(Gᵢ i)) 0) ((add_subgroup_decomposition_ring_equiv Gᵢ) (f m))) _,
       { unfold grade_zero.has_scalar,
         unfold smul_with_zero.to_has_scalar mul_action.to_has_scalar,
         congr',
@@ -414,10 +414,10 @@ begin
         simp },
       { exact hf hm } },
     { change ((Gᵢ a).subtype)
-        ((projection (λ (i : A), ↥(Gᵢ i)) 0) ((add_subgroup_decomposition_ring_equiv Gᵢ) (f m)) • m) = _,
+        ((proj (λ (i : A), ↥(Gᵢ i)) 0) ((add_subgroup_decomposition_ring_equiv Gᵢ) (f m)) • m) = _,
       congr',
       rw of_mul_of,
-      rw projection_of_same' _ _ _ (show 0 + a = a, by simp),
+      rw proj_of_same' _ _ _ (show 0 + a = a, by simp),
       cases m,
       simp,
       unfold has_scalar.smul,
