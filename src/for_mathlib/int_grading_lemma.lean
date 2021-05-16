@@ -38,13 +38,40 @@ begin
   exact not_le.mp hn,
 end
 
-
+-- I should comment this
 lemma exist_fg_gens {R : Type*} [ring R] {M : Type*} [add_comm_group M] [module R M]
   {S : set M} (hS : (submodule.span R S).fg) :
   ∃ T : finset M, (T : set M) ⊆ S ∧ submodule.span R (T : set M)= submodule.span R S :=
 begin
   rcases hS with ⟨U, hU⟩,
-  sorry
+  have hU2 : ∀ u ∈ U, ∃ V : finset M, (V : set M) ⊆ S ∧ u ∈ submodule.span R (V : set M),
+  { intros,
+    apply submodule.mem_span_finite_of_mem_span,
+    rw ←hU,
+    apply submodule.subset_span,
+    exact finset.mem_coe.mpr H },
+  choose F hF1 hF2 using hU2,
+  classical,
+  let T := finset.bUnion U (λ u, if h : u ∈ U then F u h else ∅),
+  have hTS : (T : set M) ⊆ S,
+  { intros x hx,
+    rw finset.mem_coe at hx,
+    rw finset.mem_bUnion at hx,
+    rcases hx with ⟨a, haU, ha⟩,
+    rw dif_pos haU at ha,
+    rw ← finset.mem_coe at ha,
+    apply hF1 _ haU ha },
+  refine ⟨T, hTS, _⟩,
+  apply le_antisymm,
+  { exact submodule.span_mono hTS },
+  { rw [← hU, submodule.span_le],
+    intros u hu,
+    rw finset.mem_coe at hu,
+    specialize hF2 u hu,
+    refine submodule.span_mono _ hF2,
+    rw finset.coe_subset,
+    convert finset.subset_bUnion_of_mem _ hu,
+    rw dif_pos hu },
 end
 
 lemma aux (R : Type*) (ι : Type*) (G : ι → set R) (T : finset R)
@@ -164,12 +191,9 @@ begin
     { rwa foo at hx },
     suffices : (⟨x', hx'⟩ : nonneg_piece_subring_of_int_grading Gᵢ) ∈ R0Tgens,
     { convert this },
-
     sorry },
   sorry,
 end
-
--- note : we now have `add_monoid_algebra.finite_type_iff_fg`
 
 end has_add_subgroup_decomposition
 
