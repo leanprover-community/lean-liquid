@@ -150,19 +150,8 @@ begin
   rintro i -,
   rw finset.mem_range,
   apply nat.succ_le_succ,
+  -- this is a dead end
   sorry
-
-  -- by_cases hι : nonempty ι, swap,
-  -- { suffices : filtration Λ c ⊆ {0}, { exact (set.finite_singleton (0:Λ)).subset this },
-  --   intros x hx,
-  --   simp only [set.mem_singleton_iff],
-  --   obtain ⟨d, hd, c, h1, h2⟩ := hl x,
-  --   simpa only [finset.univ_eq_empty.mpr hι, finset.sum_empty, smul_eq_zero, hd.ne', false_or]
-  --     using h1 },
-  -- { let ε := (finset.univ.image (λ i, nnnorm (l i))).min' _,
-  --   swap, { simp only [finset.nonempty.image_iff], obtain ⟨i⟩ := hι, exact ⟨i, finset.mem_univ i⟩ },
-  --   sorry
-  --    }
 end
 
 lemma exists_filtration_finite : ∃ (c : ℝ≥0), 0 < c ∧ (filtration Λ c).finite :=

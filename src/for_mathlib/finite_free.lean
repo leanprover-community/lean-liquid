@@ -131,10 +131,6 @@ end
 --   simp
 -- end
 
--- def dual_basis (R : Type*) [comm_ring R] (α : Type*) [fintype α] :
---   basis α R (module.dual R (α → R)) :=
--- sorry
--- basis.mk (dual_basis_vecs_li R α) (dual_basis_vecs_span R α)
 
 theorem dual (ha : finite_free A) : finite_free (A →+ ℤ) :=
 begin
@@ -204,8 +200,10 @@ theorem ker (ha : finite_free A) (φ : A →+ ℤ) : finite_free φ.ker :=
 begin
   obtain ⟨n, b⟩ := @module.free_of_finite_type_torsion_free' ℤ _ _ φ.ker _ _ (id _) (id _),
   { exact ⟨fin n, infer_instance, ⟨b⟩⟩ },
-  { sorry },
-  { sorry }
+  { -- prove `module.finite R N` for `N : submodule R M` and Noetherian `M`.
+    sorry },
+  { -- prove this for arbitrary submodules
+    sorry }
 end
 
 theorem rank_ker (ha : finite_free A) (φ : A →+ ℤ) (hφ : φ ≠ 0) :
