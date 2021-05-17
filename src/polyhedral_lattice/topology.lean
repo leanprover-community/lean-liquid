@@ -54,14 +54,45 @@ begin
     intros l hl, apply star_mono, exact set.singleton_subset_iff.mpr hl }
 end
 
+lemma star_zero : star ({0} : set Λ) = {0} :=
+begin
+  ext x,
+  split,
+  { intro h,
+    obtain ⟨l, n, m, hl, hn, hm, hcopr, hprod⟩ := (mem_star_iff _ _).1 h,
+    rw [set.mem_singleton_iff] at hl ⊢,
+    rw [hl, smul_zero] at hprod,
+    cases smul_eq_zero.1 hprod.symm with hm0 hx,
+    { rw hm0 at hm,
+      exfalso,
+      exact not_le_of_gt hn hm },
+    { exact hx } },
+  { intro h,
+    refine (mem_star_iff _ _).2 ⟨0, 1, 1, set.mem_singleton 0, zero_lt_one, le_refl 1,
+    (nat.coprime_self 1).2 rfl , _⟩,
+    rw [set.mem_singleton_iff] at h,
+    rw [h] }
+end
+
 lemma star_singleton_finite (l : Λ) : (star ({l} : set Λ)).finite :=
 begin
+  by_cases lzero : l = 0,
+  { rw [lzero, star_zero],
+    exact set.finite_singleton 0 },
   obtain ⟨ι, hι, ⟨b⟩⟩ := polyhedral_lattice.finite_free Λ, resetI,
   let N := b.repr l,
   let g := (N.support.gcd N).nat_abs,
   let l₀ := b.repr.symm (N.map_range (λ k, k / g) (int.zero_div _)),
   let μ : ℕ → Λ := λ n, n • l₀,
-  have hg : 0 < g, { sorry },
+  have hg : 0 < g,
+  { refine nat.pos_of_ne_zero (λ h, _),
+    replace h := finset.gcd_eq_zero_iff.1 (int.eq_zero_of_nat_abs_eq_zero h),
+    have hzero : ∀ (i : ι), (b.coord i) l = 0,
+    { intro i,
+      by_cases hsupp : i ∈ N.support,
+      { exact h i hsupp },
+      { exact finsupp.not_mem_support_iff.1 hsupp } },
+    exact lzero ((basis.forall_coord_eq_zero_iff b).1 hzero) },
   have hgN : ∀ i, (g : ℤ) ∣ N i,
   { intros i,
     by_cases hi : i ∈ N.support,
