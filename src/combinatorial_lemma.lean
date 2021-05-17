@@ -360,7 +360,7 @@ lemma lem98 (Λ : Type*) [polyhedral_lattice Λ]
       (∀ i, y i ∈ filtration (Λ →+ Mbar r' S) (c/N + d)) :=
 begin
   classical,
-  obtain ⟨ι, _ftι, l, hl, hl', -⟩ := polyhedral_lattice.polyhedral Λ, resetI,
+  obtain ⟨ι, _ftι, l, hl, hl'⟩ := polyhedral_lattice.polyhedral Λ, resetI,
   -- the next 4 lines are quite unfortunate, and it would be great to get rid of them
   have ffΛ := polyhedral_lattice.finite_free Λ,
   obtain ⟨A, hA⟩ := lem97' ffΛ N hN l,

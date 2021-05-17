@@ -198,7 +198,7 @@ instance : polyhedral_lattice (obj f m) :=
 { finite_free := obj_finite_free _ _,
   polyhedral' :=
   begin
-    obtain ⟨ι, _inst_ι, l, hl, hl', -⟩ := polyhedral_lattice.polyhedral (fin m →₀ Λ'),
+    obtain ⟨ι, _inst_ι, l, hl, hl'⟩ := polyhedral_lattice.polyhedral (fin m →₀ Λ'),
     refine ⟨ι, _inst_ι, (λ i, quotient_add_group.mk' (L f m) (l i)), _⟩,
     { intros x,
       apply quotient_add_group.induction_on x; clear x,

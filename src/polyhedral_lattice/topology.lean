@@ -43,7 +43,7 @@ end
 lemma star_mono {s t : set Λ} (h : s ⊆ t) : star s ⊆ star t :=
 by { rintro l' ⟨l, m, n, hls, H⟩, exact ⟨l, m, n, h hls, H⟩ }
 
-lemma star_eq_union_star_singleton :
+lemma star_eq_Union_star_singleton :
   star s = ⋃ l ∈ s, star {l} :=
 begin
   apply set.subset.antisymm,
@@ -97,22 +97,28 @@ begin
       rwa [← H, ← hgl₀, ← mul_nsmul, nat.mul_div_cancel', mul_nsmul], } }
 end
 
+lemma star_finite (hs : s.finite) : (star s).finite :=
+by { rw star_eq_Union_star_singleton, exact hs.bind (λ _ _, star_singleton_finite _) }
+
 end star
 
-lemma filtration_finite (c : ℝ≥0) : (filtration Λ c).finite :=
+lemma filtration_finite (ε : ℝ≥0) : (filtration Λ ε).finite :=
 begin
   classical,
   obtain ⟨ι, _ι_inst, l, hl, hl'⟩ := polyhedral_lattice.polyhedral Λ, resetI,
-  let n : ι → ℕ := λ i, ⌈(c / nnnorm (l i) : ℝ)⌉.nat_abs + 1,
+  let n : ι → ℕ := λ i, ⌈(ε / nnnorm (l i) : ℝ)⌉.nat_abs + 1,
   let S := finset.univ.pi (λ i, finset.range (n i)),
-  -- the following step is not good enough, because the `l i` need not be a basis
-  -- need to use `star` from above
   let S' : finset Λ := S.image (λ x, ∑ i, x i (finset.mem_univ _) • l i),
-  apply S'.finite_to_set.subset,
+  apply (star_finite _ S'.finite_to_set).subset,
   intros l₀ hl₀,
-  simp only [set.mem_image, finset.mem_univ, finset.mem_pi, forall_true_left,
-    finset.mem_range, finset.mem_coe, finset.coe_image],
   obtain ⟨d, hd, c, h1, h2⟩ := hl l₀,
+  refine ⟨_, 1, d, _, zero_lt_one, hd, (one_smul _ _).trans h1.symm⟩,
+  simp only [S', set.mem_image, finset.mem_univ, finset.mem_pi, forall_true_left, finset.mem_range,
+    finset.mem_coe, finset.coe_image],
+  refine ⟨λ i _, c i, _, rfl⟩,
+  rintro i -,
+  rw finset.mem_range,
+  apply nat.succ_le_succ,
   sorry
 
   -- by_cases hι : nonempty ι, swap,
