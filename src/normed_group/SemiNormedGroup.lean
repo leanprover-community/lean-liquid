@@ -27,23 +27,6 @@ universes u v
 -- move this
 section for_mathlib
 
--- These instances are in #7616
-
-instance punit.uniform_space : uniform_space punit := ⊥
-
-instance punit.metric_space : metric_space punit :=
-{ dist := λ _ _, 0,
-  dist_self := λ _, rfl,
-  dist_comm := λ _ _, rfl,
-  eq_of_dist_eq_zero := λ _ _ _, subsingleton.elim _ _,
-  dist_triangle := λ _ _ _, show (0:ℝ) ≤ 0 + 0, by rw add_zero,
-  .. punit.uniform_space }
-
-instance punit.normed_group : normed_group punit :=
-{ norm := function.const _ 0,
-  dist_eq := λ _ _, rfl,
-  .. punit.add_comm_group, .. punit.metric_space }
-
 -- move this, better name?
 lemma norm_le_add_norm_add {V : Type*} [semi_normed_group V] (x y : V) :
   ∥x∥ ≤ ∥x + y∥ + ∥y∥ :=

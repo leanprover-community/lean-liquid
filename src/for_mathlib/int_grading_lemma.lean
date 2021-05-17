@@ -19,7 +19,7 @@ def nonneg_piece_subring_of_int_grading {R : Type*} [ring R] (Gᵢ : ℤ → add
 subring_of_add_submonoid R Gᵢ
 { carrier := {n : ℤ | 0 ≤ n},
   zero_mem' := le_refl (0 : ℤ),
-  add_mem' := @add_nonneg ℤ _ }
+  add_mem' := λ a b, @add_nonneg ℤ a b _ _ _ _ }
 
 universe u
 -- doesn't seem to fire (perhaps there was a universe issue which I've since fixed)

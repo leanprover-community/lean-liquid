@@ -405,7 +405,7 @@ def of_mask (x : Mbar r' S) (mask : S → ℕ → Prop) [∀ s n, decidable (mas
   begin
     apply nnreal.summable_of_le _ (x.summable s),
     intro n,
-    apply mul_le_mul' _ le_rfl,
+    refine mul_le_mul' _ le_rfl,
     norm_cast,
     split_ifs,
     { refl },
