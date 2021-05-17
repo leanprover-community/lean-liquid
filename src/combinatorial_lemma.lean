@@ -74,7 +74,7 @@ add_monoid_hom.mk' (λ l',
     rintro i -,
     apply nnreal.summable_of_le _ ((c i • x (l i)).summable s),
     intro n,
-    apply mul_le_mul' _ le_rfl,
+    refine mul_le_mul' _ le_rfl,
     simp only [nsmul_eq_mul, int.nat_cast_eq_coe_nat, ← nnreal.coe_nat_abs, int.nat_abs_mul,
         int.nat_abs_of_nat, ← nat.cast_mul, Mbar.coe_nsmul, pi.mul_apply, pi.nat_apply,
         @pi.nat_apply ℕ ℤ _ _ _ (c i)],
@@ -422,7 +422,7 @@ begin
     ... = ∑ a in A, (nnnorm (a (l i)) * ∥xₐ a∥₊ / N) + ∑ a in A, nnnorm (a (l i)) : _
     ... ≤ ∑ a in A, (nnnorm (a (l i)) * ∥xₐ a∥₊ / N) + d * nnnorm (l i) : add_le_add le_rfl _,
     { intros a ha, rw Mbar.nnnorm_smul },
-    { intros a ha, refine mul_le_mul' le_rfl (hy'2 a j) },
+    { intros a ha, exact mul_le_mul' le_rfl (hy'2 a j) },
     { intros a ha, rw [mul_add, mul_one, mul_div_assoc] },
     { rw finset.sum_add_distrib },
     { calc ∑ a in A, nnnorm (a (l i))
@@ -438,5 +438,5 @@ begin
   { simp only [add_mul, div_eq_mul_inv],
     refine add_le_add _ le_rfl,
     rw [mul_right_comm],
-    refine mul_le_mul' hx le_rfl }
+    exact mul_le_mul' hx le_rfl }
 end

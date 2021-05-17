@@ -1,9 +1,9 @@
+import data.fintype.card
 import algebra.module.hom
 import algebra.big_operators
-import data.fintype.card
+import algebraic_topology.simplicial_object
 
 import system_of_complexes.complex
-import .augmented
 
 namespace category_theory
 
@@ -16,9 +16,9 @@ open_locale simplicial big_operators
 
 /-- The coboundary map in the alternating face map cochain complex. -/
 def coboundary (n : ℕ) : M.obj [n] ⟶ M.obj [n+1] :=
-∑ i : fin (n+2), (-1:ℤ)^(i:ℕ) • (M.map $ δ i)
+∑ i : fin (n+2), (-1:ℤ)^(i:ℕ) • (M.δ i)
 
-lemma coboundary_zero : coboundary M 0 = (M.map $ δ 0) - (M.map $ δ 1) :=
+lemma coboundary_zero : coboundary M 0 = (M.δ 0) - (M.δ 1) :=
 begin
   simp only [coboundary, fin.sum_univ_succ, fin.default_eq_zero, fin.coe_zero, one_gsmul,
     fin.coe_succ, univ_unique, neg_gsmul, pow_one, fin.succ_zero_eq_one, sum_singleton,
@@ -30,13 +30,13 @@ lemma coboundary_coboundary (n : ℕ) : coboundary M n ≫ coboundary M (n+1) = 
 begin
   let s : finset (fin (n+2) × fin (n+3)) := univ.filter (λ ij, (ij.2:ℕ) ≤ ij.1),
   calc coboundary M n ≫ coboundary M (n+1)
-      = comp_hom (∑ (i:fin (n+2)), (-1:ℤ)^(i:ℕ) • (M.map $ δ i))
-                 (∑ (i:fin (n+3)), (-1:ℤ)^(i:ℕ) • (M.map $ δ i)) : rfl
-  ... = ∑ (i : fin (n+2)) (j : fin (n+3)), (-1:ℤ)^(i+j:ℕ) • ((M.map $ δ i) ≫ (M.map $ δ j)) : _
-  ... = ∑ ij : fin (n+2) × fin (n+3), (-1:ℤ)^(ij.1+ij.2:ℕ) • ((M.map $ δ ij.1) ≫ (M.map $ δ ij.2)) :
+      = comp_hom (∑ (i:fin (n+2)), (-1:ℤ)^(i:ℕ) • (M.δ i))
+                 (∑ (i:fin (n+3)), (-1:ℤ)^(i:ℕ) • (M.δ i)) : rfl
+  ... = ∑ (i : fin (n+2)) (j : fin (n+3)), (-1:ℤ)^(i+j:ℕ) • ((M.δ i) ≫ (M.δ j)) : _
+  ... = ∑ ij : fin (n+2) × fin (n+3), (-1:ℤ)^(ij.1+ij.2:ℕ) • ((M.δ ij.1) ≫ (M.δ ij.2)) :
         by rw [← univ_product_univ, sum_product]
-  ... =   (∑ ij in s,  (-1:ℤ)^(ij.1+ij.2:ℕ) • ((M.map $ δ ij.1) ≫ (M.map $ δ ij.2)))
-        + (∑ ij in sᶜ, (-1:ℤ)^(ij.1+ij.2:ℕ) • ((M.map $ δ ij.1) ≫ (M.map $ δ ij.2))) :
+  ... =   (∑ ij in s,  (-1:ℤ)^(ij.1+ij.2:ℕ) • ((M.δ ij.1) ≫ (M.δ ij.2)))
+        + (∑ ij in sᶜ, (-1:ℤ)^(ij.1+ij.2:ℕ) • ((M.δ ij.1) ≫ (M.δ ij.2))) :
         by rw sum_add_sum_compl
   ... = 0 : _,
   { simp only [map_sum, map_gsmul, finset_sum_apply, smul_apply, smul_sum, pow_add, mul_smul],
@@ -57,7 +57,6 @@ begin
     rintros ⟨i,j⟩ hij_aux,
     have hij := (mem_filter.mp hij_aux).2,
     dsimp at hij ⊢,
-    simp only [← M.map_comp],
     rw [δ_comp_δ], swap,
     { rwa ← fin.coe_fin_le },
     rw [← neg_gsmul],
@@ -100,7 +99,7 @@ def cocomplex : cosimplicial_object C ⥤ cochain_complex ℕ C :=
       dsimp [to_cocomplex],
       split_ifs, swap, { simp },
       subst h,
-      simp only [category_theory.category.comp_id, category_theory.eq_to_hom_refl, coboundary,
+      simp only [category_theory.category.comp_id, category_theory.eq_to_hom_refl, coboundary, δ,
         preadditive.sum_comp, preadditive.comp_sum, comp_gsmul, gsmul_comp, nat_trans.naturality],
     end } }
 
