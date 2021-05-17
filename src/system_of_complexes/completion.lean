@@ -22,7 +22,7 @@ namespace system_of_complexes
 universe variables u
 
 noncomputable def completion (C : system_of_complexes) : system_of_complexes :=
-C ⋙ SemiNormedGroup.Completion.map_complex_like
+C ⋙ SemiNormedGroup.Completion.map_homological_complex _
 
 namespace is_weak_bounded_exact
 

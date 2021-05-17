@@ -1,9 +1,10 @@
-import breen_deligne.universal_map
-import breen_deligne.functorial_map
-import algebra.homology.homotopy
 import algebra.homology.additive
 
+import breen_deligne.universal_map
+-- import breen_deligne.functorial_map
+
 import for_mathlib.homological_complex
+
 import for_mathlib.free_abelian_group
 
 /-!
@@ -171,24 +172,6 @@ def hom_pow' {BD : data} (f : (mul 2).obj BD ⟶ BD) : Π N, BD.pow' N ⟶ BD
 
 open_locale zero_object
 
-@[simps]
-def homotopy_two_mul {BD₁ BD₂ : data} {f g : BD₁ ⟶ BD₂} (h : homotopy f g) :
-  homotopy ((mul 2).map f) ((mul 2).map g) :=
-{ h := λ j i, universal_map.mul 2 (h.h j i),
-  h_eq_zero := λ i j hij, by rw [h.h_eq_zero i j hij, add_monoid_hom.map_zero],
-  comm := λ i j k hij hjk,
-  begin
-    simp only [mul_obj_d, mul_map_f, ← add_monoid_hom.map_sub],
-    rw [← h.comm i j k hij hjk, add_monoid_hom.map_add],
-    erw [universal_map.mul_comp, universal_map.mul_comp],
-    refl
-  end }
-
-def homotopy_pow' (h : homotopy (BD.proj 2) (BD.sum 2)) :
-  Π N, homotopy (hom_pow' (BD.proj 2) N) (hom_pow' (BD.sum 2) N)
-| 0     := homotopy.refl
-| (N+1) := (homotopy_two_mul (homotopy_pow' N)).comp h
-
 def pow'_iso_mul : Π N, BD.pow' N ≅ (mul (2^N)).obj BD
 | 0     := BD.mul_one_iso.symm
 | (N+1) := show (mul 2).obj (BD.pow' N) ≅ (mul (2 * 2 ^ N)).obj BD, from
@@ -211,7 +194,7 @@ begin
   slice_lhs 2 3 { rw [← functor.map_comp, hom_pow'_sum] },
   rw iso.inv_comp_eq,
   ext i : 2,
-  iterate 2 { erw [differential_object.comp_f] },
+  iterate 2 { erw [homological_complex.comp_f] },
   dsimp [mul_mul_iso, FreeMat.mul_mul_iso, universal_map.sum],
   rw [universal_map.mul_of],
   show universal_map.comp _ _ = universal_map.comp _ _,
@@ -242,7 +225,7 @@ begin
   slice_lhs 2 3 { rw [← functor.map_comp, hom_pow'_proj] },
   rw iso.inv_comp_eq,
   ext i : 2,
-  iterate 2 { erw [differential_object.comp_f] },
+  iterate 2 { erw [homological_complex.comp_f] },
   dsimp [mul_mul_iso, FreeMat.mul_mul_iso, universal_map.proj],
   simp only [add_monoid_hom.map_sum, add_monoid_hom.finset_sum_apply,
     preadditive.comp_sum, preadditive.sum_comp],
@@ -258,28 +241,6 @@ end
 lemma hom_pow'_proj' (N : ℕ) : hom_pow' (BD.proj 2) N = (BD.pow'_iso_mul N).hom ≫ BD.proj (2^N) :=
 by { rw ← iso.inv_comp_eq, apply hom_pow'_proj }
 
-def homotopy_mul (h : homotopy (BD.proj 2) (BD.sum 2)) (N : ℕ) :
-  homotopy (BD.proj (2^N)) (BD.sum (2^N)) :=
-(homotopy.of_eq $ BD.hom_pow'_proj N).symm.trans $
-  ((BD.homotopy_pow' h N).const_comp (BD.pow'_iso_mul N).inv).trans $
-  (homotopy.of_eq $ BD.hom_pow'_sum N)
-
 end data
-
-section
-universe variables u
-open universal_map
-variables {m n : ℕ} (A : Type u) [add_comm_group A] (f : universal_map m n)
-
-end
-
-open differential_object.complex_like
-
-/-- A Breen--Deligne `package` consists of Breen--Deligne `data`
-that forms a complex, together with a `homotopy`
-between the two universal maps `σ_add` and `σ_proj`. -/
-structure package :=
-(data       : data)
-(homotopy   : homotopy (data.proj 2) (data.sum 2))
 
 end breen_deligne

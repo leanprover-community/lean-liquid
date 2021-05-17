@@ -27,7 +27,7 @@ as needed for Definition 9.6 of [Analytic].
 See also Definition 9.3 of [Analytic]. -/
 @[derive category_theory.category]
 def system_of_double_complexes : Type (u+1) :=
-ℝ≥0ᵒᵖ ⥤ (cochain_complex ℕ (cochain_complex ℕ SemiNormedGroup.{u}))
+ℝ≥0ᵒᵖ ⥤ (cochain_complex (cochain_complex SemiNormedGroup.{u} ℕ) ℕ)
 
 namespace system_of_double_complexes
 
@@ -71,7 +71,7 @@ def d {c : ℝ≥0} (p p' : ℕ) {q : ℕ} : C.X c p q ⟶ C.X c p' q :=
 ((C.obj $ op c).d p p').f q
 
 lemma d_eq_zero (c : ℝ≥0) (h : p + 1 ≠ p') : (C.d p p' : C.X c p q ⟶ _) = 0 :=
-by { have : (C.obj (op c)).d p p' = 0 := (C.obj $ op c).d_eq_zero h, rw [d, this], refl }
+by { have : (C.obj (op c)).d p p' = 0 := (C.obj $ op c).shape _ _ h, rw [d, this], refl }
 
 lemma d_eq_zero_apply (c : ℝ≥0) (h : p + 1 ≠ p') (x : C.X c p q) : (C.d p p' x) = 0 :=
 by { rw [d_eq_zero C p p' q c h], refl }
@@ -81,7 +81,7 @@ d_eq_zero_apply _ _ _ _ _ p.succ_ne_self _
 
 lemma d_comp_res (h : fact (c₂ ≤ c₁)) :
   C.d p p' ≫ @res C _ _ _ q h = @res C _ _ p q _ ≫ C.d p p' :=
-congr_fun (congr_arg differential_object.hom.f ((C.map (hom_of_le h.out).op).comm p p')) q
+congr_fun (congr_arg homological_complex.hom.f ((C.map (hom_of_le h.out).op).comm p p')).symm q
 
 lemma d_res (h : fact (c₂ ≤ c₁)) (x) :
   @d C c₂ p p' q (@res C _ _ p q _ x) = @res C _ _ _ _ h (@d C c₁ p p' q x) :=
@@ -90,7 +90,7 @@ by rw d_comp_res
 
 @[simp] lemma d_comp_d {c : ℝ≥0} {p p' p'' q : ℕ} :
   @d C c p p' q ≫ C.d p' p'' = 0 :=
-congr_fun (congr_arg differential_object.hom.f ((C.obj $ op c).d_comp_d p p' p'')) q
+congr_fun (congr_arg homological_complex.hom.f ((C.obj $ op c).d_comp_d p p' p'')) q
 
 @[simp] lemma d_d {c : ℝ≥0} {p p' p'' q : ℕ} (x : C.X c p q) :
   C.d p' p'' (C.d p p' x) = 0 :=
@@ -101,7 +101,7 @@ def d' {c : ℝ≥0} {p : ℕ} (q q' : ℕ) : C.X c p q ⟶ C.X c p q' :=
 ((C.obj $ op c).X p).d q q'
 
 lemma d'_eq_zero (c : ℝ≥0) (h : q + 1 ≠ q') : (C.d' q q' : C.X c p q ⟶ _) = 0 :=
-((C.obj $ op c).X p).d_eq_zero h
+((C.obj $ op c).X p).shape _ _ h
 
 lemma d'_eq_zero_apply (c : ℝ≥0) (h : q + 1 ≠ q') (x : C.X c p q) : (C.d' q q' x) = 0 :=
 by { rw [d'_eq_zero C p q q' c h], refl }
@@ -111,7 +111,7 @@ d'_eq_zero_apply _ _ _ _ _ q.succ_ne_self _
 
 lemma d'_comp_res (h : fact (c₂ ≤ c₁)) :
   @d' C c₁ p q q' ≫ @res C _ _ _ _ h = @res C _ _ p q _ ≫ @d' C c₂ p q q' :=
-((C.map (hom_of_le h.out).op).f p).comm q q'
+(((C.map (hom_of_le h.out).op).f p).comm q q').symm
 
 lemma d'_res (h : fact (c₂ ≤ c₁)) (x) :
   C.d' q q' (@res C _ _ p q _ x) = @res C _ _ _ _ h (C.d' q q' x) :=
@@ -128,7 +128,7 @@ show (C.d' _ _ ≫ C.d' _ _) x = 0, by { rw d'_comp_d', refl }
 
 lemma d'_comp_d (c : ℝ≥0) (p p' q q' : ℕ) :
   C.d' q q' ≫ C.d p p' = C.d p p' ≫ (C.d' q q' : C.X c p' q ⟶ _) :=
-((C.obj $ op c).d p p').comm q q'
+(((C.obj $ op c).d p p').comm q q').symm
 
 lemma d'_d (c : ℝ≥0) (p p' q q' : ℕ) (x : C.X c p q) :
   C.d' q q' (C.d p p' x) = C.d p p' (C.d' q q' x) :=
@@ -143,12 +143,10 @@ def congr {c c' : ℝ≥0} {p p' q q' : ℕ} (hc : c = c') (hp : p = p') (hq : q
   C.X c p q ⟶ C.X c' p' q' :=
 eq_to_hom $ by { subst hc, subst hp, subst hq, }
 
--- attribute [simps] differential_object.forget
-
 /-- The `p`-th row in a system of double complexes, as system of complexes.
   It has object `(C.obj c).X p`over `c`. -/
 def row (C : system_of_double_complexes.{u}) (p : ℕ) : system_of_complexes.{u} :=
-C ⋙ induced_functor _ ⋙ differential_object.forget _ _ ⋙ pi.eval _ p
+C ⋙ homological_complex.forget _ _ ⋙ pi.eval _ p
 
 @[simp] lemma row_X (C : system_of_double_complexes) (p q : ℕ) (c : ℝ≥0) :
   C.row p c q = C.X c p q :=
@@ -169,29 +167,37 @@ def row_map (C : system_of_double_complexes.{u}) (p p' : ℕ) :
   C.row p ⟶ C.row p' :=
 { app := λ c,
   { f := λ q, (C.d p p' : C.X c.unop p q ⟶ C.X c.unop p' q),
-    comm := λ q q', (C.d'_comp_d _ p p' q q') },
-  naturality' := λ c₁ c₂ h, ((C.map h).comm p p').symm }
+    comm' := λ q q', (C.d'_comp_d _ p p' q q').symm },
+  naturality' := λ c₁ c₂ h, (C.map h).comm p p' }
 
 @[simp] lemma row_map_apply (C : system_of_double_complexes.{u})
   (c : ℝ≥0) (p p' q : ℕ) (x : C.X c p q) :
   C.row_map p p' x = C.d p p' x := rfl
 
+-- this should be found by TC, but we first need to make `pi.eval` and `graded_object` additive
+instance aux : (homological_complex.forget SemiNormedGroup (complex_shape.up ℕ) ⋙
+  pi.eval (λ (_ : ℕ), SemiNormedGroup) q).additive :=
+{ map_zero' := λ C₁ C₂, by { dsimp, refl },
+  map_add' := by { intros, dsimp, refl } }
+
 /-- The `q`-th column in a system of double complexes, as system of complexes. -/
 def col (C : system_of_double_complexes.{u}) (q : ℕ) : system_of_complexes.{u} :=
-C ⋙ functor.map_complex_like' (induced_functor _ ⋙ differential_object.forget _ _ ⋙ pi.eval _ q)
-  (by { intros, ext, refl })
+C ⋙ functor.map_homological_complex (homological_complex.forget _ _ ⋙ pi.eval _ q) _
 
 @[simp] lemma col_X (C : system_of_double_complexes) (p q : ℕ) (c : ℝ≥0) :
   C.col q c p = C.X c p q :=
 rfl
 
+-- jmc doesn't understand why we need the `==`
 @[simp] lemma col_res (C : system_of_double_complexes) (p q : ℕ) {c' c : ℝ≥0} [h : fact (c ≤ c')] :
-  @system_of_complexes.res (C.col q) _ _ _ _ = @res C _ _ p q h :=
-rfl
+  (@system_of_complexes.res (C.col q) _ _ p h : C.col q c' p ⟶ C.col q c p) ==
+  (@res C _ _ p q h : C.X c' p q ⟶ C.X c p q) :=
+heq.rfl
 
+-- jmc doesn't understand why we need the `==`
 @[simp] lemma col_d (C : system_of_double_complexes) (c : ℝ≥0) (p p' q : ℕ) :
-  (C.col q).d p p' = @d C c p p' q :=
-rfl
+  @system_of_complexes.d (C.col q) c p p' == @d C c p p' q :=
+heq.rfl
 
 /-- The differential between columns in a system of double complexes,
 as map of system of complexes. -/
@@ -199,8 +205,8 @@ def col_map (C : system_of_double_complexes.{u}) (q q' : ℕ) :
   C.col q ⟶ C.col q' :=
 { app := λ c,
   { f := λ p, (C.d' q q' : C.X c.unop p q ⟶ C.X c.unop p q'),
-    comm := λ p p', (C.d'_comp_d _ p p' q q').symm },
-  naturality' := λ c₁ c₂ h, by { ext p : 2, exact (((C.map h).f p).comm q q').symm } }
+    comm' := λ p p', (C.d'_comp_d _ p p' q q') },
+  naturality' := λ c₁ c₂ h, by { ext p : 2, exact ((C.map h).f p).comm q q' } }
 
 /-- A system of double complexes is *admissible*
 if all the differentials and restriction maps are norm-nonincreasing.

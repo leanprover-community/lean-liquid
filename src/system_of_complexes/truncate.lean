@@ -29,7 +29,7 @@ open quotient_add_group
 
 namespace truncate
 
-variables (C : cochain_complex ℕ SemiNormedGroup.{u})
+variables (C : cochain_complex SemiNormedGroup.{u} ℕ)
 
 open category_theory.preadditive
 
@@ -42,12 +42,12 @@ def d : Π i j, X C i ⟶ X C j
 | (i+1) (j+1) := C.d (i+2) (j+2)
 | _     _     := 0
 
-lemma d_eq_zero : ∀ ⦃i j : ℕ⦄, ¬differential_object.coherent_indices tt i j → d C i j = 0
+lemma d_eq_zero : ∀ ⦃i j : ℕ⦄, ¬(complex_shape.up ℕ).rel i j → d C i j = 0
 | 0     0     h := rfl
 | 0     (j+2) h := rfl
 | (i+1) 0     h := rfl
-| 0     1     h := (h dec_trivial).elim
-| (i+1) (j+1) h := C.d_eq_zero $ λ H, h $ nat.succ_injective $ H
+| 0     1     h := (h rfl).elim
+| (i+1) (j+1) h := C.shape _ _ $ λ H, h $ nat.succ_injective $ H
 
 lemma d_comp_d : Π i j k, d C i j ≫ d C j k = 0
 | 0     1     2     := coker.lift_comp_eq_zero _ (C.d_comp_d _ _ _)
@@ -57,43 +57,43 @@ lemma d_comp_d : Π i j k, d C i j ≫ d C j k = 0
 | (i+1) 0     _     := zero_comp
 | 0     1     0     := comp_zero
 | (i+1) (j+1) 0     := comp_zero
-| 0     1     1     := by { rw [@d_eq_zero C 1, comp_zero], dec_trivial }
-| 0     1     (k+3) := by { rw [@d_eq_zero C 1, comp_zero], dec_trivial }
+| 0     1     1     := by { rw [@d_eq_zero C 1, comp_zero], dsimp, dec_trivial }
+| 0     1     (k+3) := by { rw [@d_eq_zero C 1, comp_zero], dsimp, dec_trivial }
 
 @[simps]
-def obj : cochain_complex ℕ SemiNormedGroup :=
+def obj : cochain_complex SemiNormedGroup ℕ :=
 { X := X C,
   d := d C,
-  d_comp_d := d_comp_d C,
-  d_eq_zero := d_eq_zero C }
+  shape' := d_eq_zero C,
+  d_comp_d' := d_comp_d C }
 
-lemma obj_d_add_one (C : cochain_complex ℕ SemiNormedGroup) (i j : ℕ) :
+lemma obj_d_add_one (C : cochain_complex SemiNormedGroup ℕ) (i j : ℕ) :
   (obj C).d (i+1) (j+1) = d C (i+1) (j+1) :=
 rfl
 
-def map_f {C₁ C₂ : cochain_complex ℕ SemiNormedGroup} (f : C₁ ⟶ C₂) :
+def map_f {C₁ C₂ : cochain_complex SemiNormedGroup ℕ} (f : C₁ ⟶ C₂) :
   Π i:ℕ, X C₁ i ⟶ X C₂ i
-| 0     := coker.map (f.comm 0 1)
+| 0     := coker.map (f.comm 0 1).symm
 | (i+1) := f.f (i+2)
 
-lemma map_comm {C₁ C₂ : cochain_complex ℕ SemiNormedGroup.{u}} (f : C₁ ⟶ C₂) :
+lemma map_comm {C₁ C₂ : cochain_complex SemiNormedGroup.{u} ℕ} (f : C₁ ⟶ C₂) :
   Π i j, d C₁ i j ≫ map_f f j = map_f f i ≫ d C₂ i j
-| 0     1     := coker.map_lift_comm (f.comm 1 2)
-| (i+1) (j+1) := f.comm (i+2) (j+2)
-| 0     0     := by { rw [d_eq_zero, d_eq_zero, zero_comp, comp_zero]; dec_trivial }
-| 0     (j+2) := by { rw [d_eq_zero, d_eq_zero, zero_comp, comp_zero]; dec_trivial }
-| (i+1) 0     := by { rw [d_eq_zero, d_eq_zero, zero_comp, comp_zero]; dec_trivial }
+| 0     1     := coker.map_lift_comm (f.comm 1 2).symm
+| (i+1) (j+1) := (f.comm (i+2) (j+2)).symm
+| 0     0     := by { rw [d_eq_zero, d_eq_zero, zero_comp, comp_zero]; dsimp; dec_trivial }
+| 0     (j+2) := by { rw [d_eq_zero, d_eq_zero, zero_comp, comp_zero]; dsimp; dec_trivial }
+| (i+1) 0     := by { rw [d_eq_zero, d_eq_zero, zero_comp, comp_zero]; dsimp; dec_trivial }
 
 @[simps]
-def map {C₁ C₂ : cochain_complex ℕ SemiNormedGroup.{u}} (f : C₁ ⟶ C₂) :
+def map {C₁ C₂ : cochain_complex SemiNormedGroup.{u} ℕ} (f : C₁ ⟶ C₂) :
   obj C₁ ⟶ obj C₂ :=
 { f := map_f f,
-  comm := map_comm f }
+  comm' := λ i j, (map_comm f i j).symm }
 
 end truncate
 
 @[simps]
-def truncate : cochain_complex ℕ SemiNormedGroup.{u} ⥤ cochain_complex ℕ SemiNormedGroup.{u} :=
+def truncate : cochain_complex SemiNormedGroup.{u} ℕ ⥤ cochain_complex SemiNormedGroup.{u} ℕ :=
 { obj := λ C, truncate.obj C,
   map := λ C₁ C₂ f, truncate.map f,
   map_id' := λ C, by ext (n|n) ⟨x⟩; refl,
@@ -107,7 +107,7 @@ end SemiNormedGroup
 
 namespace system_of_complexes
 
-open differential_object category_theory
+open category_theory
 
 variables (C : system_of_complexes.{u})
 
