@@ -35,11 +35,7 @@ add_monoid_hom.mk' (λ l',
 { to_fun := λ s n, y s n l',
   coeff_zero' := λ s,
   begin
-    obtain ⟨d, hd, c, h1, h2⟩ := hl l',
-    suffices : y s 0 (d • l') = 0,
-    { rw [add_monoid_hom.map_nsmul, nsmul_eq_mul,
-        mul_eq_zero, int.nat_cast_eq_coe_nat, int.coe_nat_eq_zero] at this,
-      exact this.resolve_left hd.ne' },
+    obtain ⟨c, h1, h2⟩ := hl l',
     rw [h1, add_monoid_hom.map_sum, finset.sum_eq_zero],
     rintro i -,
     suffices : y s 0 (l i) = 0,
@@ -50,15 +46,7 @@ add_monoid_hom.mk' (λ l',
   summable' :=
   begin
     intro s,
-    obtain ⟨d, hd, c, h1, h2⟩ := hl.generates_nnnorm l',
-    suffices : summable (λ n, ↑(y s n (d • l')).nat_abs * r' ^ n),
-    { refine nnreal.summable_of_le _ this,
-      intro n,
-      refine mul_le_mul' _ le_rfl,
-      rw [add_monoid_hom.map_nsmul, nsmul_eq_mul,
-        int.nat_abs_mul, int.nat_cast_eq_coe_nat, int.nat_abs_of_nat],
-      norm_cast,
-      exact nat.le_mul_of_pos_left hd },
+    obtain ⟨c, h1, h2⟩ := hl.generates_nnnorm l',
     rw h1,
     suffices : summable (λ n, ∑ i, c i • ↑(y s n (l i)).nat_abs * r' ^ n),
     { apply nnreal.summable_of_le _ this,
@@ -96,14 +84,13 @@ lemma generates_norm.add_monoid_hom_mem_filtration_iff {ι : Type} [fintype ι]
 begin
   refine ⟨λ H i, H (le_refl (nnnorm (l i))), _⟩,
   intros H c' l' hl',
-  obtain ⟨d, hd, cᵢ, h1, h2⟩ := hl.generates_nnnorm l',
-  rw [← hM _ _ d hd, ← x.map_nsmul, h1, x.map_sum],
+  obtain ⟨cᵢ, h1, h2⟩ := hl.generates_nnnorm l',
+  rw [h1, x.map_sum],
   refine filtration_mono _ (sum_mem_filtration _ (λ i, c * cᵢ i * nnnorm (l i)) _ _),
   { calc ∑ i, c * cᵢ i * nnnorm (l i)
         = c * ∑ i, cᵢ i * nnnorm (l i) : by simp only [mul_assoc, ← finset.mul_sum]
-    ... = c * (d * nnnorm l') : by rw h2
-    ... ≤ c * (d * c') : mul_le_mul' le_rfl (mul_le_mul' le_rfl hl')
-    ... = d • (c * c') : by rw [nsmul_eq_mul, mul_left_comm] },
+    ... = c * nnnorm l' : by rw h2
+    ... ≤ c * c' : mul_le_mul' le_rfl hl' },
   rintro i -,
   rw [mul_assoc, mul_left_comm, x.map_nsmul],
   exact pseudo_normed_group.nat_smul_mem_filtration (cᵢ i) _ _ (H i),

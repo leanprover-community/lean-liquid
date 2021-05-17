@@ -140,17 +140,17 @@ begin
   let n : ι → ℕ := λ i, ⌈(ε / nnnorm (l i) : ℝ)⌉.nat_abs + 1,
   let S := finset.univ.pi (λ i, finset.range (n i)),
   let S' : finset Λ := S.image (λ x, ∑ i, x i (finset.mem_univ _) • l i),
-  apply (star_finite _ S'.finite_to_set).subset,
-  intros l₀ hl₀,
-  obtain ⟨d, hd, c, h1, h2⟩ := hl l₀,
-  refine ⟨_, 1, d, _, zero_lt_one, hd, (one_smul _ _).trans h1.symm⟩,
-  simp only [S', set.mem_image, finset.mem_univ, finset.mem_pi, forall_true_left, finset.mem_range,
-    finset.mem_coe, finset.coe_image],
-  refine ⟨λ i _, c i, _, rfl⟩,
-  rintro i -,
-  rw finset.mem_range,
-  apply nat.succ_le_succ,
-  -- this is a dead end
+  -- apply (star_finite _ S'.finite_to_set).subset,
+  -- intros l₀ hl₀,
+  -- obtain ⟨c, h1, h2⟩ := hl l₀,
+  -- refine ⟨_, 1, 1, _, zero_lt_one, le_rfl, (one_smul _ _).trans h1.symm⟩,
+  -- simp only [S', set.mem_image, finset.mem_univ, finset.mem_pi, forall_true_left, finset.mem_range,
+  --   finset.mem_coe, finset.coe_image],
+  -- refine ⟨λ i _, c i, _, rfl⟩,
+  -- rintro i -,
+  -- rw finset.mem_range,
+  -- apply nat.succ_le_succ,
+  -- -- this is a dead end
   sorry
 end
 

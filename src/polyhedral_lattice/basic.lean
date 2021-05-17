@@ -25,31 +25,27 @@ section generates_norm
 variables {Λ ι : Type*} [semi_normed_group Λ] [fintype ι]
 
 /-- A finite family `x : ι → Λ` generates the norm on `Λ`
-if for every `l : Λ`,
-there exists a scaling factor `d : ℕ`, and coefficients `c : ι → ℕ`,
-such that `d • l = ∑ i, c i • x i` and `d * ∥l∥ = ∑ i, (c i) * ∥x i∥`.
+if for every `l : Λ` there exist coefficients `c : ι → ℕ`
+such that `l = ∑ i, c i • x i` and `∥l∥ = ∑ i, (c i) * ∥x i∥`.
 -/
 def generates_norm (x : ι → Λ) :=
-∀ l : Λ, ∃ (d : ℕ) (hd : 0 < d) (c : ι → ℕ),
-  (d • l = ∑ i, c i • x i) ∧ ((d : ℝ) * ∥l∥ = ∑ i, (c i : ℝ) * ∥x i∥)
+∀ l : Λ, ∃ (c : ι → ℕ), (l = ∑ i, c i • x i) ∧ (∥l∥ = ∑ i, (c i : ℝ) * ∥x i∥)
 
 lemma generates_norm_iff_generates_nnnorm (x : ι → Λ) :
   generates_norm x ↔
-  ∀ l : Λ, ∃ (d : ℕ) (hd : 0 < d) (c : ι → ℕ),
-    (d • l = ∑ i, c i • x i) ∧ ((d : ℝ≥0) * nnnorm l = ∑ i, (c i : ℝ≥0) * nnnorm (x i)) :=
+  ∀ l : Λ, ∃ (c : ι → ℕ),
+    (l = ∑ i, c i • x i) ∧ (nnnorm l = ∑ i, (c i : ℝ≥0) * nnnorm (x i)) :=
 begin
   apply forall_congr, intro l,
   simp only [← nnreal.eq_iff, nnreal.coe_mul, nnreal.coe_sum, nnreal.coe_nat_cast, coe_nnnorm]
 end
 
 lemma generates_norm.generates_nnnorm {x : ι → Λ} (hl : generates_norm x) :
-  ∀ l : Λ, ∃ (d : ℕ) (hd : 0 < d) (c : ι → ℕ),
-    (d • l = ∑ i, c i • x i) ∧ ((d : ℝ≥0) * nnnorm l = ∑ i, (c i : ℝ≥0) * nnnorm (x i)) :=
+  ∀ l : Λ, ∃ (c : ι → ℕ), (l = ∑ i, c i • x i) ∧ (nnnorm l = ∑ i, (c i : ℝ≥0) * nnnorm (x i)) :=
 (generates_norm_iff_generates_nnnorm x).mp hl
 
 lemma generates_norm_of_generates_nnnorm {x : ι → Λ}
-  (H : ∀ l : Λ, ∃ (d : ℕ) (hd : 0 < d) (c : ι → ℕ),
-    (d • l = ∑ i, c i • x i) ∧ ((d : ℝ≥0) * nnnorm l = ∑ i, (c i : ℝ≥0) * nnnorm (x i))) :
+  (H : ∀ l : Λ, ∃ (c : ι → ℕ), (l = ∑ i, c i • x i) ∧ (nnnorm l = ∑ i, (c i : ℝ≥0) * nnnorm (x i))) :
   generates_norm x :=
 (generates_norm_iff_generates_nnnorm x).mpr H
 
@@ -77,8 +73,8 @@ begin
   obtain ⟨ι, _ι_inst, l, hl⟩ := polyhedral_lattice.polyhedral' Λ, resetI,
   refine ⟨{i // l i ≠ 0}, infer_instance, λ i, l i, _, λ i, i.2⟩,
   intro x,
-  obtain ⟨d, hd, c, h1, h2⟩ := hl x,
-  refine ⟨d, hd, λ i, c i, _, _⟩,
+  obtain ⟨c, h1, h2⟩ := hl x,
+  refine ⟨λ i, c i, _, _⟩,
   { rw h1,
     refine finset.sum_bij_ne_zero _ (λ _ _ _, finset.mem_univ _) _ _ _,
     { rintro i - hi, refine ⟨i, _⟩, contrapose! hi, rw [hi, smul_zero] },

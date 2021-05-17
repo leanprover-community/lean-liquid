@@ -200,16 +200,14 @@ instance : polyhedral_lattice (obj f m) :=
   begin
     obtain ⟨ι, _inst_ι, l, hl, hl'⟩ := polyhedral_lattice.polyhedral (fin m →₀ Λ'),
     refine ⟨ι, _inst_ι, (λ i, quotient_add_group.mk' (L f m) (l i)), _⟩,
-    { intros x,
-      apply quotient_add_group.induction_on x; clear x,
-      intro x,
-      obtain ⟨d, hd, c, H1, H2⟩ := hl x,
-      refine ⟨d, hd, c, _, _⟩,
-      { show d • quotient_add_group.mk' _ x = _,
-        rw [← add_monoid_hom.map_nsmul, H1, add_monoid_hom.map_sum],
-        simp only [add_monoid_hom.map_nsmul] },
-      { dsimp,
-        sorry } },
+    intros x,
+    apply quotient_add_group.induction_on x; clear x,
+    intro x,
+    obtain ⟨c, H1, H2⟩ := hl x,
+    refine ⟨c, _, _⟩,
+    { show quotient_add_group.mk' (L f m) x = _,
+      simp only [H1, add_monoid_hom.map_sum, add_monoid_hom.map_nsmul] },
+    { sorry },
   end }
 
 end objects
