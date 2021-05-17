@@ -428,7 +428,8 @@ begin
     { calc ∑ a in A, nnnorm (a (l i))
           = (∑ a in A, nnnorm (a (l i)) / nnnorm (l i)) * nnnorm (l i) : _
       ... ≤ finset.univ.sup (λ i, ∑ a in A, nnnorm (a (l i)) / nnnorm (l i)) * nnnorm (l i) : _,
-      { simp only [div_eq_mul_inv, ← finset.sum_mul, inv_mul_cancel_right' (hl' i)] },
+      { { have : nnnorm (l i) ≠ 0, { simp only [hl' i, nnnorm_eq_zero, ne.def, not_false_iff] },
+          simp only [div_eq_mul_inv, ← finset.sum_mul, inv_mul_cancel_right' this] } },
       { exact mul_le_mul' (finset.le_sup (finset.mem_univ i)) le_rfl } } },
   { simp only [div_eq_mul_inv, add_mul, finset.sum_mul, nsmul_eq_mul],
     congr' 2,

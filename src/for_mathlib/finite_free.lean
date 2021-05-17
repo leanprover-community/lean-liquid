@@ -13,14 +13,12 @@ The basic theory of finite free ℤ-modules
 
 * rewrite to include multiplicative version
 * also write version for modules, glue to version for groups
-* Fill in `sorry`s (although Anne told kmb that they were bundling `is_basis` so
-  I'm doing other things right now)
+* Fill in `sorry`s
 -/
 def torsion_free (A : Type*) [add_comm_group A] : Prop :=
 ∀ (a : A) (ha : a ≠ 0) (n : ℕ), n • a = 0 → n = 0
 
 -- TODO: multiplicative version
--- TODO: `is_basis` is being bundled by Anne so there's no point filling in proofs right now :-/
 
 /-- `finite_free M` is the statement that the abelian group `M` is free of finite rank (over `ℤ`).-/
 def finite_free (A : Type*) [add_comm_group A] : Prop :=
@@ -28,7 +26,9 @@ def finite_free (A : Type*) [add_comm_group A] : Prop :=
 
 section
 
--- for mathlib
+example {A B : Type*} [add_comm_group A] [add_comm_group B] : module ℤ (A →ₗ[ℤ] B) := by refine linear_map.module
+
+-- for mathlib, PR'd as #7629
 @[simps]
 def add_monoid_hom_lequiv_linear_map {A B : Type*} [add_comm_group A] [add_comm_group B] :
   (A →+ B) ≃ₗ[ℤ] (A →ₗ[ℤ] B) :=
@@ -131,10 +131,6 @@ end
 --   simp
 -- end
 
--- def dual_basis (R : Type*) [comm_ring R] (α : Type*) [fintype α] :
---   basis α R (module.dual R (α → R)) :=
--- sorry
--- basis.mk (dual_basis_vecs_li R α) (dual_basis_vecs_span R α)
 
 theorem dual (ha : finite_free A) : finite_free (A →+ ℤ) :=
 begin
@@ -147,27 +143,38 @@ end
 /-- The rank of a finite free abelian group. -/
 noncomputable def rank (ha : finite_free A) : ℕ := fintype.card ha.basis_type
 
+-- move?
 noncomputable
 def equiv_fin {ι : Type*} [fintype ι] (b : _root_.basis ι ℤ A) :
-  A ≃ₗ[ℤ] (fin $ fintype.card ι) → ℤ :=
-b.repr.trans $ (finsupp.lcongr (fintype.equiv_fin ι) (linear_equiv.refl ℤ ℤ)).trans $
-  finsupp.linear_equiv_fun_on_fintype ℤ
+  A ≃ₗ[ℤ] fin (fintype.card ι) → ℤ :=
+(b.reindex (fintype.equiv_fin ι)).equiv_fun
 
 lemma rank_eq {ι : Type*} [fintype ι] (b : _root_.basis ι ℤ A) (ha : finite_free A) :
   ha.rank = fintype.card ι :=
 eq_of_fin_equiv ℤ $ (equiv_fin ha.basis).symm.trans (equiv_fin b)
 
+noncomputable
+def equiv_fin_rank (ha : finite_free A) :
+  A ≃ₗ[ℤ] fin (ha.rank) → ℤ :=
+equiv_fin (ha.basis)
+
 variable {ha}
 
 /-- A rank zero abelian group has at most one element (yeah I know...). -/
-lemma rank_zero (h0 : ha.rank = 0) : subsingleton A := subsingleton.intro
+lemma rank_zero (h0 : ha.rank = 0) : subsingleton A :=
 begin
-  sorry
+  apply (ha.equiv_fin_rank).to_equiv.subsingleton_iff.mpr,
+  rw h0,
+  apply_instance,
 end
 
 lemma rank_dual (ha : finite_free A) : ha.dual.rank = ha.rank :=
 begin
-  sorry
+  have d := ha.dual,
+  rcases ha with ⟨ι, hι, ⟨b⟩⟩,
+  resetI, classical,
+  exact (rank_eq (b.dual_basis.map add_monoid_hom_lequiv_linear_map.symm) d).trans
+    (rank_eq b _).symm,
 end
 
 lemma congr_iso {B : Type} [add_comm_group B] (hab : A ≃+ B) (ha : finite_free A) :
@@ -193,8 +200,10 @@ theorem ker (ha : finite_free A) (φ : A →+ ℤ) : finite_free φ.ker :=
 begin
   obtain ⟨n, b⟩ := @module.free_of_finite_type_torsion_free' ℤ _ _ φ.ker _ _ (id _) (id _),
   { exact ⟨fin n, infer_instance, ⟨b⟩⟩ },
-  { sorry },
-  { sorry }
+  { -- prove `module.finite R N` for `N : submodule R M` and Noetherian `M`.
+    sorry },
+  { -- prove this for arbitrary submodules
+    sorry }
 end
 
 theorem rank_ker (ha : finite_free A) (φ : A →+ ℤ) (hφ : φ ≠ 0) :

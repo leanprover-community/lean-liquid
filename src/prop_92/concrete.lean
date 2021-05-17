@@ -1,7 +1,9 @@
 import pseudo_normed_group.profinitely_filtered
 import prop_92.extension_profinite
 import normed_group.normed_with_aut
+
 import for_mathlib.normed_group_hom_completion
+import for_mathlib.pseudo_metric
 
 import locally_constant.analysis
 
@@ -16,18 +18,78 @@ and does abstract normed space stuff.
 
 noncomputable theory
 
+open set
+
+-- the following proof is overkill but nice
+lemma real.Sup_mem_of_finite {s : set ℝ} (hs : s.finite) (hs' : s.nonempty):
+  Sup s ∈ s :=
+is_compact.Sup_mem hs.is_compact hs'
+
 @[simp]
 lemma real.supr_zero (ι : Type*) : (⨆ i : ι, (0 : ℝ)) = 0 :=
-sorry
-
-lemma real.supr_range {α β : Type*} (f : β → α) (g : α → ℝ) :
-  (⨆ a ∈ set.range f, g a) = ⨆ b, g (f b) :=
 begin
-  sorry
+  rw supr,
+  by_cases hι : nonempty ι,
+  { resetI, rw [set.range_const, cSup_singleton] },
+  { rw [set.range_eq_empty.mpr hι, real.Sup_empty] }
 end
 
--- lemma nnreal.eq_zero_or_pos (r : nnreal) : r = 0 ∨ 0 < r :=
--- by admit -- can also use lt_or_eq_of_le (zero_le r)
+-- Move me
+lemma real.Sup_eq {s : set ℝ} (hs : s.nonempty) (hs' : ∃ x, ∀ y ∈ s, y ≤ x) {x : ℝ} :
+  Sup s = x ↔ ∀ y, x ≤ y ↔ (∀ z ∈ s, z ≤ y) :=
+begin
+  classical,
+  rw real.Sup_def,
+  rw dif_pos,
+  { let x₀ := classical.some (real.exists_sup s hs hs'),
+    change x₀ = x ↔ _,
+    have H : ∀ y, x₀ ≤ y ↔ ∀ z ∈ s, z ≤ y := classical.some_spec (real.exists_sup s hs hs'),
+    split,
+    { dsimp [x₀],
+      rintro rfl,
+      exact H },
+    { intro h,
+      replace H : ∀ y, x₀ ≤ y ↔ x ≤ y,
+      { intro y,
+        rw [h, H] },
+      apply le_antisymm,
+      { exact (H _).mpr (le_refl _) },
+      { exact (H _).mp (le_refl _) } } },
+  { exact ⟨hs, hs'⟩ }
+end
+
+-- Move me
+lemma is_lub_iff {α : Type*} [preorder α] {s : set α} {x : α} :
+  is_lub s x ↔ ∀ y, x ≤ y ↔ ∀ z ∈ s, z ≤ y :=
+begin
+  split,
+  { rintros ⟨h₁, h₂⟩ y,
+    exact ⟨λ hxy z z_in, (h₁ z_in).trans hxy, λ h, h₂ h⟩ },
+  { intro H,
+    exact ⟨λ y y_in, (H x).mp (le_refl x) y y_in, λ z hz, by rwa H⟩ }
+end
+
+-- Move me
+lemma real.Sup_eq' {s : set ℝ} (hs : s.nonempty) (hs' : ∃ x, ∀ y ∈ s, y ≤ x) {x : ℝ} :
+  Sup s = x ↔ (∀ y ∈ s, y ≤ x) ∧ ∀ z, (∀ y ∈ s, y ≤ z) → x ≤ z :=
+begin
+  rw real.Sup_eq hs hs',
+  change _ ↔ is_lub _ _,
+  rw is_lub_iff
+end
+
+lemma real.supr_comp {α β : Type*} (f : β → α) (g : α → ℝ) :
+  (⨆ b, g (f b)) = Sup (g '' range f) :=
+begin
+  change Sup _ = Sup _,
+  congr,
+  ext x,
+  simp,
+end
+
+
+lemma nnreal.eq_zero_or_pos (r : nnreal) : r = 0 ∨ 0 < r :=
+(lt_or_eq_of_le $ zero_le r).elim (λ h, or.inr h) (λ h, or.inl h.symm)
 
 instance semi_normed_group.inhabited (G : Type*) [semi_normed_group G] : inhabited G := ⟨0⟩
 
@@ -85,22 +147,43 @@ by simp only [locally_constant.norm_def, norm_zero, real.supr_zero, locally_cons
 lemma locally_constant.norm_const_zero : ∥locally_constant.const X (0 : G)∥ = 0 :=
 locally_constant.norm_zero
 
+-- Should go in mathlib topology/algebra/ordered, next to is_compast.exists_Sup_image_eq
+lemma continuous.exists_forall_le_of_compact {X : Type*} [topological_space X] [compact_space X] [nonempty X]
+{β : Type*} [conditionally_complete_linear_order β] [topological_space β] [order_topology β] {f : X → β}
+(hf : continuous f) : ∃ x, Sup (range f) = f x :=
+by simpa using compact_univ.exists_Sup_image_eq univ_nonempty hf.continuous_on
+
 lemma locally_constant.exists_norm_eq [nonempty X] (f : locally_constant X G) : ∃ x, ∥f∥ = ∥f x∥ :=
-begin
-  simp only [locally_constant.norm_def, supr],
-  sorry
-end
+(continuous_norm.comp f.continuous).exists_forall_le_of_compact
 
 lemma locally_constant.norm_eq_iff (f : locally_constant X G) {x : X} :
   ∥f∥ = ∥f x∥ ↔ ∀ x', ∥f x'∥ ≤ ∥f x∥ :=
 begin
+  have fin_range : (range (λ (x : X), ∥f x∥)).finite,
+  { rw range_comp,
+    apply finite.image,
+    exact f.range_finite },
+  have bound : ∃ b, ∀ y ∈ range (λ (x : X), ∥f x∥), y ≤ b,
+    from exists_upper_bound_image _ _ fin_range,
   rw [locally_constant.norm_def],
-  sorry
+  split,
+  { intros h x',
+    rw ← h,
+    exact real.le_Sup _ bound (mem_range_self _) } ,
+  { intro h,
+    erw real.Sup_eq _ bound,
+    { intro y,
+      rw forall_range_iff,
+      split,
+      { intros h' x',
+        exact (h x').trans h' },
+      { tauto } },
+    { exact ⟨∥f x∥, mem_range_self _⟩ } }
 end
 
 lemma locally_constant.norm_eq_iff' (f : locally_constant X G) {x : X} :
   ∥f∥ = ∥f x∥ ↔ ∀ g ∈ range f, ∥g∥ ≤ ∥f x∥ :=
-by simpa only [mem_range, forall_apply_eq_imp_iff', exists_imp_distrib] using f.norm_eq_iff
+by rw [forall_range_iff, locally_constant.norm_eq_iff]
 
 lemma locally_constant.norm_comap_le {α : Type*} [topological_space α] [compact_space α]
   (f : locally_constant X G) {g : α → X} (h : continuous g) : ∥f.comap g∥ ≤ ∥f∥ :=
@@ -119,7 +202,7 @@ begin
   by_cases hX : nonempty X,
   { resetI,
     change (⨆ y : Y, _) = (⨆ x : X, _),
-    rw  [← real.supr_range, ← real.supr_range, he.range_locally_constant_extend f] },
+    rw [real.supr_comp, real.supr_comp, he.range_locally_constant_extend f] },
   { rw [f.norm_of_empty hX],
     dsimp [embedding.locally_constant_extend, embedding.extend],
     suffices : (⨆ (y : Y), ∥(0 : G)∥) = 0,
@@ -151,9 +234,9 @@ begin
     erw [hy, ← norm_T, locally_constant.norm_eq_iff],
     intro y',
     erw [norm_T, norm_T],
-    cases lt_or_eq_of_le (zero_le r) with hr hr,
-    { simp [hr, ← hy, g.norm_apply_le] },
-    { simp [hr.symm] } },
+    cases r.eq_zero_or_pos with hr hr,
+    { simp [hr] },
+    { simp [hr, ← hy, g.norm_apply_le] } },
   { simp [hY] },
 end
 
@@ -222,14 +305,31 @@ end
 open filter
 open_locale topological_space
 
-lemma limit : tendsto (λ N, ((he.g hφ f N).comap e).map T.inv - ((he.g hφ f N).comap φ)) at_top (𝓝 f) :=
+variables [fact ((r : ℝ) < 1)]
+
+lemma limit : tendsto (λ N, map_hom T.inv (comap_hom e he.continuous (he.g hφ f N)) - (comap_hom φ hφ (he.g hφ f N))) at_top (𝓝 f) :=
 begin
-  -- follows easily from one and norm_h
-  sorry
+  simp_rw one,
+  rw show 𝓝 f = 𝓝 (f - 0), by simp,
+  refine tendsto_const_nhds.sub _,
+  apply squeeze_zero_norm,
+  intro n,
+  apply ((he.h hφ f n).norm_comap_le hφ).trans (norm_h he hφ _ _),
+  rw ← zero_mul (∥f∥),
+  apply tendsto.mul_const,
+  rw tendsto_add_at_top_iff_nat,
+  exact tendsto_pow_at_top_nhds_0_of_lt_1 r.coe_nonneg (fact.out _)
 end
 
 lemma cauchy_seq_g : cauchy_seq (he.g hφ f) :=
-sorry -- follows easily from norm_h and geometry series
+begin
+  apply cauchy_seq_of_le_geometric_pseudo r (r^2*∥f∥) (fact.out _),
+  intro n,
+  dsimp [embedding.g],
+  rw [dist_eq_norm, sum_range_succ _ (n+1), sub_add_eq_sub_sub, sub_self, zero_sub, norm_neg],
+  convert norm_h he hφ f (n+1) using 1,
+  ring_exp
+end
 
 lemma norm_g_le (N : ℕ) : ∥he.g hφ f N∥ ≤ r/(1 - r) * ∥f∥ :=
 sorry -- follows easily from norm_h and geometric series

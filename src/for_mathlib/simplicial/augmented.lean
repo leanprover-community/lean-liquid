@@ -1,6 +1,8 @@
 import category_theory.comma
 import algebraic_topology.simplicial_object
 
+-- this is all in #7614
+
 open_locale simplicial
 
 universes v u

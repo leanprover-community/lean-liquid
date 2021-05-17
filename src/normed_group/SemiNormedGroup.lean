@@ -77,9 +77,7 @@ instance (M : SemiNormedGroup) : semi_normed_group M := M.str
 
 @[simp] lemma coe_id (V : SemiNormedGroup) : ⇑(𝟙 V) = id := rfl
 
-instance : limits.has_zero_morphisms.{u (u+1)} SemiNormedGroup :=
-{ comp_zero' := by { intros, apply normed_group_hom.zero_comp },
-  zero_comp' := by { intros, apply normed_group_hom.comp_zero } }
+instance : limits.has_zero_morphisms.{u (u+1)} SemiNormedGroup := {}
 
 lemma iso_isometry_of_norm_noninc {V W : SemiNormedGroup} (i : V ≅ W)
   (h1 : i.hom.norm_noninc) (h2 : i.inv.norm_noninc) :
@@ -261,6 +259,9 @@ end
 lemma neg_norm_noninc (f : A ⟶ B) (hf : f.norm_noninc) : (-f).norm_noninc :=
 λ x, (norm_neg (f x)).le.trans (hf x)
 
+-- The next two declarations are available for any category with cokernels in #7623
+-- as `cokernel.map` and `cokernel.map_desc`.
+
 /-- The downwards map between the cokernels making the diagram commute.
 
     A ----> B ---> coker
@@ -284,12 +285,12 @@ If this commutes
 
 and d^2=0 on both rows then this commutes:
 
-coker (A → B) ----> E
+coker (A → B) ----> B'
    |                |
    | coker.map      |
    |                |
    \/               \/
-coker (C → D) ----> F
+coker (C → D) ----> D'
 -/
 
 lemma coker.map_lift_comm {B' D' : SemiNormedGroup}
