@@ -71,7 +71,7 @@ instance no_zero_smul_divisors_nat : no_zero_smul_divisors ℕ Λ :=
 ⟨λ n l h, by { rw [← gsmul_coe_nat, smul_eq_zero] at h,
   refine h.imp _ id, simp only [imp_self, int.coe_nat_eq_zero] }⟩
 
-lemma polyhedral_aux :
+lemma polyhedral :
   ∃ (ι : Type) [fintype ι] (l : ι → Λ), by exactI generates_norm l ∧ ∀ i, l i ≠ 0 :=
 begin
   obtain ⟨ι, _ι_inst, l, hl⟩ := polyhedral_lattice.polyhedral' Λ, resetI,
@@ -97,40 +97,40 @@ end
 lemma int.div_eq_zero (d n : ℤ) (h : d ∣ n) (H : n / d = 0) : n = 0 :=
 by rw [← int.mul_div_cancel' h, H, mul_zero]
 
-lemma polyhedral :
-  ∃ (ι : Type) [fintype ι] (l : ι → Λ), by exactI generates_norm l ∧ (∀ i, l i ≠ 0) ∧
-      ∀ i (n : ℕ) (l' : Λ), n • l' = l i → n = 1 ∧ l' = l i :=
-begin
-  obtain ⟨ι, hι, l, hl, hl'⟩ := polyhedral_lattice.polyhedral_aux Λ,
-  obtain ⟨ι', hι', ⟨b⟩⟩ := polyhedral_lattice.finite_free Λ, resetI,
-  let N := λ i, b.repr (l i),
-  let g := λ i, (N i).support.gcd (N i),
-  let l₀ := λ i, b.repr.symm ((N i).map_range (λ k, k / (g i).nat_abs) (int.zero_div _)),
-  have gN : ∀ i i', ((g i).nat_abs : ℤ) ∣ N i i',
-  { intros i i',
-    by_cases hi' : i' ∈ (N i).support,
-    { rw [int.nat_abs_dvd], apply finset.gcd_dvd hi' },
-    { rw finsupp.not_mem_support_iff at hi', rw hi', exact dvd_zero _ } },
-  have gl₀ : ∀ i, (g i).nat_abs • l₀ i = l i,
-  { intro i, apply b.repr.injective, ext i',
-    rw [← gsmul_coe_nat, b.repr.map_smul, finsupp.smul_apply, linear_equiv.apply_symm_apply,
-      finsupp.map_range_apply, smul_eq_mul, int.mul_div_cancel'],
-    exact gN i i', },
-  refine ⟨ι, hι, l₀, _, _, _⟩,
-  { intros x,
-    obtain ⟨d, hd, c, h1, h2⟩ := hl x,
-    refine ⟨d, hd, λ i, c i * (g i).nat_abs, _, _⟩,
-    { simp only [h1, mul_nsmul, gl₀], },
-    { simp only [h2, ← gl₀],
-      -- is this even provable? Or are we missing an axiom `norm_smul` for polyhedral lattices?
-      sorry } },
-  { intros i hi, apply hl' i, apply b.repr.injective, ext i',
-    rw [b.repr.map_zero, finsupp.zero_apply],
-    simp only [← b.repr.symm.map_zero, b.repr.symm.injective.eq_iff, finsupp.ext_iff,
-      finsupp.zero_apply, finsupp.map_range_apply] at hi,
-    exact int.div_eq_zero _ _ (gN i i') (hi i'), },
-  { intros i n l' h, sorry },
-end
+-- lemma polyhedral :
+--   ∃ (ι : Type) [fintype ι] (l : ι → Λ), by exactI generates_norm l ∧ (∀ i, l i ≠ 0) ∧
+--       ∀ i (n : ℕ) (l' : Λ), n • l' = l i → n = 1 ∧ l' = l i :=
+-- begin
+--   obtain ⟨ι, hι, l, hl, hl'⟩ := polyhedral_lattice.polyhedral_aux Λ,
+--   obtain ⟨ι', hι', ⟨b⟩⟩ := polyhedral_lattice.finite_free Λ, resetI,
+--   let N := λ i, b.repr (l i),
+--   let g := λ i, (N i).support.gcd (N i),
+--   let l₀ := λ i, b.repr.symm ((N i).map_range (λ k, k / (g i).nat_abs) (int.zero_div _)),
+--   have gN : ∀ i i', ((g i).nat_abs : ℤ) ∣ N i i',
+--   { intros i i',
+--     by_cases hi' : i' ∈ (N i).support,
+--     { rw [int.nat_abs_dvd], apply finset.gcd_dvd hi' },
+--     { rw finsupp.not_mem_support_iff at hi', rw hi', exact dvd_zero _ } },
+--   have gl₀ : ∀ i, (g i).nat_abs • l₀ i = l i,
+--   { intro i, apply b.repr.injective, ext i',
+--     rw [← gsmul_coe_nat, b.repr.map_smul, finsupp.smul_apply, linear_equiv.apply_symm_apply,
+--       finsupp.map_range_apply, smul_eq_mul, int.mul_div_cancel'],
+--     exact gN i i', },
+--   refine ⟨ι, hι, l₀, _, _, _⟩,
+--   { intros x,
+--     obtain ⟨d, hd, c, h1, h2⟩ := hl x,
+--     refine ⟨d, hd, λ i, c i * (g i).nat_abs, _, _⟩,
+--     { simp only [h1, mul_nsmul, gl₀], },
+--     { simp only [h2, ← gl₀],
+--       -- is this even provable? Or are we missing an axiom `norm_smul` for polyhedral lattices?
+--       admit } },
+--   { intros i hi, apply hl' i, apply b.repr.injective, ext i',
+--     rw [b.repr.map_zero, finsupp.zero_apply],
+--     simp only [← b.repr.symm.map_zero, b.repr.symm.injective.eq_iff, finsupp.ext_iff,
+--       finsupp.zero_apply, finsupp.map_range_apply] at hi,
+--     exact int.div_eq_zero _ _ (gN i i') (hi i'), },
+--   { intros i n l' h, admit },
+-- end
 
 end polyhedral_lattice
 

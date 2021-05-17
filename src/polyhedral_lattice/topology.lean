@@ -11,13 +11,102 @@ open pseudo_normed_group normed_group
 
 variables (Λ : Type*) [polyhedral_lattice Λ]
 
+section star
+
+/-!
+This section only needs the `finite_free` part of polyhedral lattices
+-/
+
+variables {Λ} (s : set Λ)
+
+def star (s : set Λ) : set Λ :=
+{l' | ∃ (l : Λ) (m n : ℕ), l ∈ s ∧ 0 < m ∧ m ≤ n ∧ m • l = n • l' }
+
+lemma mem_star_iff (l' : Λ) :
+  l' ∈ star s ↔ ∃ (l : Λ) (m n : ℕ), l ∈ s ∧ 0 < m ∧ m ≤ n ∧ m.coprime n ∧ m • l = n • l' :=
+begin
+  split,
+  { rintro ⟨l, m, n, hls, h0m, hmn, H⟩,
+    let c := m.gcd n,
+    have hc : 0 < c := nat.gcd_pos_of_pos_left _ h0m,
+    refine ⟨l, m / c, n / c, hls, _, _, nat.coprime_div_gcd_div_gcd hc, _⟩,
+    { exact nat.div_pos (nat.gcd_le_left _ h0m) hc },
+    { exact nat.div_le_div_right hmn },
+    { apply smul_left_injective Λ hc.ne', dsimp,
+      simp only [← mul_nsmul],
+      rw [nat.mul_div_cancel', nat.mul_div_cancel', H],
+      { exact nat.gcd_dvd_right _ _ },
+      { exact nat.gcd_dvd_left _ _ } } },
+  { rintro ⟨l, m, n, hls, h0m, hmn, -, H⟩, exact ⟨l, m, n, hls, h0m, hmn, H⟩ }
+end
+
+lemma star_mono {s t : set Λ} (h : s ⊆ t) : star s ⊆ star t :=
+by { rintro l' ⟨l, m, n, hls, H⟩, exact ⟨l, m, n, h hls, H⟩ }
+
+lemma star_eq_union_star_singleton :
+  star s = ⋃ l ∈ s, star {l} :=
+begin
+  apply set.subset.antisymm,
+  { rintro l' ⟨l, m, n, hls, H⟩,
+    simp only [exists_prop, set.mem_Union],
+    refine ⟨_, hls, ⟨l, m, n, set.mem_singleton _, H⟩⟩, },
+  { simp only [set.Union_subset_iff],
+    intros l hl, apply star_mono, exact set.singleton_subset_iff.mpr hl }
+end
+
+lemma star_singleton_finite (l : Λ) : (star ({l} : set Λ)).finite :=
+begin
+  obtain ⟨ι, hι, ⟨b⟩⟩ := polyhedral_lattice.finite_free Λ, resetI,
+  let N := b.repr l,
+  let g := (N.support.gcd N).nat_abs,
+  let l₀ := b.repr.symm (N.map_range (λ k, k / g) (int.zero_div _)),
+  let μ : ℕ → Λ := λ n, n • l₀,
+  have hg : 0 < g, { sorry },
+  have hgN : ∀ i, (g : ℤ) ∣ N i,
+  { intros i,
+    by_cases hi : i ∈ N.support,
+    { rw [int.nat_abs_dvd], apply finset.gcd_dvd hi },
+    { rw finsupp.not_mem_support_iff at hi, rw hi, exact dvd_zero _ } },
+  have hgl₀ : g • l₀ = l,
+  { apply b.repr.injective, ext i,
+    rw [← gsmul_coe_nat, b.repr.map_smul, finsupp.smul_apply, linear_equiv.apply_symm_apply,
+      finsupp.map_range_apply, smul_eq_mul, int.mul_div_cancel'],
+    exact hgN i, },
+  classical,
+  suffices : ((finset.Ico 1 (g+1)).image μ : set Λ) = star {l},
+  { rw ← this, exact finset.finite_to_set _ },
+  ext l',
+  simp only [set.mem_image, finset.mem_coe, finset.coe_image, finset.Ico.mem],
+  split,
+  { rintro ⟨n, ⟨h1n, hng⟩, H⟩,
+    refine ⟨l, n, g, set.mem_singleton _, h1n, _, _⟩,
+    { exact nat.le_of_succ_le_succ hng },
+    { rw [← hgl₀, ← H, smul_comm], } },
+  { rw mem_star_iff,
+    rintro ⟨l'', m, n, hll'', h0m, hmn, hmn_cop, H⟩,
+    rw set.mem_singleton_iff at hll'', subst l'',
+    have h0n : 0 < n := h0m.trans_le hmn,
+    have hnmg : n ∣ m * g, { sorry },
+    refine ⟨m * g / n, ⟨_, _⟩, _⟩,
+    { exact nat.div_pos (nat.le_of_dvd (nat.mul_pos h0m hg) hnmg) h0n },
+    { rw [nat.div_lt_iff_lt_mul _ _ h0n, mul_comm],
+      calc g * m
+          < (g + 1) * m : nat.mul_lt_mul_of_pos_right (lt_add_one g) h0m
+      ... ≤ (g + 1) * n : nat.mul_le_mul le_rfl hmn, },
+    { apply smul_left_injective Λ h0n.ne', dsimp,
+      rwa [← H, ← hgl₀, ← mul_nsmul, nat.mul_div_cancel', mul_nsmul], } }
+end
+
+end star
+
 lemma filtration_finite (c : ℝ≥0) : (filtration Λ c).finite :=
 begin
   classical,
-  obtain ⟨ι, _ι_inst, l, hl, hl', hl''⟩ := polyhedral_lattice.polyhedral Λ, resetI,
+  obtain ⟨ι, _ι_inst, l, hl, hl'⟩ := polyhedral_lattice.polyhedral Λ, resetI,
   let n : ι → ℕ := λ i, ⌈(c / nnnorm (l i) : ℝ)⌉.nat_abs + 1,
   let S := finset.univ.pi (λ i, finset.range (n i)),
   -- the following step is not good enough, because the `l i` need not be a basis
+  -- need to use `star` from above
   let S' : finset Λ := S.image (λ x, ∑ i, x i (finset.mem_univ _) • l i),
   apply S'.finite_to_set.subset,
   intros l₀ hl₀,
