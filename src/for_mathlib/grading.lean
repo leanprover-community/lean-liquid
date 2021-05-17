@@ -12,6 +12,8 @@ import group_theory.submonoid.operations
 
 # Gradings
 
+Internal gradings of add_comm_monoids, add_comm_groups, semirings and rings.
+
 The simplest example of the set-up: we have an `add_comm_monoid R` and an indexed family
 `Mᵢ : ι → add_submonoid R`. The function `Mᵢ` is a *grading* of `R`
 if the induced map `⨁ Mᵢ i →+ R` is an isomorphism.
@@ -100,34 +102,37 @@ variables {M : Type*} [decidable_eq ι] [add_comm_monoid M] (A : ι → Type*)
   [∀ i, add_comm_monoid (A i)]
 
 /-- Add_monoid_hom version of the projection from a direct sum to a factor. -/
-def projection (j : ι) : (⨁ i, A i) →+ A j :=
+def proj (j : ι) : (⨁ i, A i) →+ A j :=
 { to_fun := λ f, f j,
   map_zero' := rfl,
   map_add' := λ x y, x.add_apply y j }
 
-lemma projection_of_same (j : ι) (aj : A j) : projection A j (of (λ i, A i) j aj) = aj :=
+lemma proj_of_same (j : ι) (aj : A j) : proj A j (of (λ i, A i) j aj) = aj :=
 @dfinsupp.single_eq_same _ _ _ _ j _
 
-lemma projection_of_same' (j k : ι) (h : j = k) (aj : A j) : projection A k (of (λ i, A i) j aj) = cast (show A j = A k, by rw h) aj :=
+lemma proj_of_same' (j k : ι) (h : j = k) (aj : A j) :
+  proj A k (of (λ i, A i) j aj) = cast (show A j = A k, by rw h) aj :=
 begin
   subst h,
-  convert projection_of_same A j _,
+  convert proj_of_same A j _,
 end
+
 lemma eval_of_same (j : ι) (aj : A j) : (of (λ i, A i) j aj) j = aj :=
 @dfinsupp.single_eq_same _ _ _ _ j _
 
-lemma eval_of_same' (j k : ι) (h : j = k) (aj : A j) : (of (λ i, A i) j aj) k = cast (show A j = A k, by rw h) aj :=
+lemma eval_of_same' (j k : ι) (h : j = k) (aj : A j) :
+  (of (λ i, A i) j aj) k = cast (show A j = A k, by rw h) aj :=
 begin
   subst h,
   convert eval_of_same A j _,
 end
 
-lemma projection_of_ne {i j : ι} (h : i ≠ j) (ai : A i) :
-  projection A j (of (λ i, A i) i ai) = 0 :=
+lemma proj_of_ne {i j : ι} (h : i ≠ j) (ai : A i) :
+  proj A j (of (λ i, A i) i ai) = 0 :=
 dfinsupp.single_eq_of_ne h
 
 lemma eval_of_ne {i j : ι} (h : i ≠ j) (ai : A i) : (of (λ i, A i) i ai) j = 0 :=
-projection_of_ne _ h ai
+proj_of_ne _ h ai
 
 open_locale direct_sum big_operators
 
@@ -171,6 +176,7 @@ section add_comm_monoid
 
 variables {ι : Type*} [decidable_eq ι] {M : Type*} [add_comm_monoid M] (Mᵢ : ι → add_submonoid M)
 
+-- TODO : I want to call this proj.
 /-- The canonical map from a direct sum of `add_submonoid`s to their carrier type-/
 abbreviation to_add_monoid_carrier : (⨁ i, Mᵢ i) →+ M :=
 (to_add_monoid $ λ i, (Mᵢ i).subtype)
@@ -253,6 +259,7 @@ begin
   refl,
 end
 
+-- TODO Even better -- this is an R₀-algebra hom
 /-- `direct_sum.add_submonoid_decomposition` as a `ring_equiv`. -/
 def add_submonoid_decomposition_ring_equiv
   [has_add_submonoid_decomposition Mᵢ] [add_submonoid.is_gmonoid Mᵢ] :
@@ -445,7 +452,7 @@ begin
   split,
   { intros hrm n hn,
     rw eq_decomposition_of_mem_piece'' hrm,
-    exact direct_sum.projection_of_ne _ hn.symm _ },
+    exact direct_sum.proj_of_ne _ hn.symm _ },
   { intro h,
     rw dfinsupp.eq_single_iff at h,
     -- can't use `classical` because `decidable_eq M` gets lost
@@ -455,13 +462,67 @@ begin
     exact (add_submonoid_decomposition Mᵢ r i).2 }
 end
 
-lemma mem_piece_iff_projection_eq (r : R) (i : A) :
+lemma mem_piece_iff_proj_eq (r : R) (i : A) :
   r ∈ Mᵢ i ↔ (add_submonoid_decomposition Mᵢ r i : R) = r :=
 ⟨eq_decomposition_of_mem_piece, begin
   intro h,
   rw ←h,
   exact (((add_submonoid_decomposition Mᵢ) r) i).2,
 end⟩
+
+variable (Mᵢ)
+
+def internal_proj (i : A) : R →+ R :=
+{ to_fun := λ r, add_submonoid_decomposition Mᵢ r i,
+  map_zero' := by simp,
+  map_add' := by simp
+}
+
+variable {Mᵢ}
+
+lemma internal_proj_apply (i : A) (r : R) :
+  internal_proj Mᵢ i r = add_submonoid_decomposition Mᵢ r i := rfl
+
+-- WTF type class inference??
+
+-- lemma sum_internal_proj [Π i (x : (λ (i : A), ↥(Mᵢ i)) i), decidable (x ≠ 0)] (r : R) (i : A) :
+--   finset.sum (add_submonoid_decomposition Mᵢ r).support (λ i, internal_proj Mᵢ i r) = 0 := sorry
+
+section classical
+-- break yury's rule of thimb
+open_locale classical
+
+/-- Decomposing `r` into `(rᵢ)ᵢ : ⨁ i, Mᵢ i` and then adding the pieces gives `r` again. -/
+lemma sum_internal_proj [Π i (x : (λ (i : A), ↥(Mᵢ i)) i), decidable (x ≠ 0)] (r : R) (i : A) :
+   finset.sum (add_submonoid_decomposition Mᵢ r).support (λ i, internal_proj Mᵢ i r) = r :=
+begin
+  conv_rhs {rw ← sum_decomposition Mᵢ r},
+  simp_rw internal_proj_apply,
+  generalize : (add_submonoid_decomposition Mᵢ) r = s,
+  apply direct_sum.induction_on s; clear i s,
+  { refl },
+  { intros,
+    simp only [add_submonoid.coe_subtype, to_add_monoid_of],
+    by_cases hx : x = 0, { subst hx, simp },
+    unfold of,
+    unfold dfinsupp.single_add_hom,
+    dsimp,
+    change x ≠ 0 at hx,
+--    rw dfinsupp.support_single_ne_zero hx, doesn't work??
+    rw dfinsupp.support_single_ne_zero, swap, assumption,
+    simp },
+  { intros x y hx hy,
+    simp only [←hx, ←hy, add_monoid_hom.map_add, add_apply, add_submonoid.coe_add],
+    -- bleurgh should be in API
+    suffices : dfinsupp.sum (x + y) (λ i, (Mᵢ i).subtype) =
+      dfinsupp.sum x (λ i, (Mᵢ i).subtype) + dfinsupp.sum y (λ i, (Mᵢ i).subtype),
+    { convert this, simp },
+    rw dfinsupp.sum_add_index,
+    { intros, refl },
+    { intros, refl } }
+end
+
+end classical
 
 end has_add_submonoid_decomposition
 
@@ -523,7 +584,7 @@ lemma mem_piece_iff_single_support (r : R) (i : A) :
 show r ∈ (Gᵢ i).to_add_submonoid ↔ ∀ ⦃j⦄, j ≠ i → add_submonoid_decomposition (λ i, (Gᵢ i).to_add_submonoid) r j = 0,
 by convert has_add_submonoid_decomposition.mem_piece_iff_single_support r i
 
-lemma mem_piece_iff_projection_eq (r : R) (i : A) :
+lemma mem_piece_iff_proj_eq (r : R) (i : A) :
   r ∈ Gᵢ i ↔ (add_subgroup_decomposition Gᵢ r i : R) = r :=
 ⟨eq_decomposition_of_mem_piece, begin
   intro h,
@@ -532,13 +593,13 @@ lemma mem_piece_iff_projection_eq (r : R) (i : A) :
 end⟩
 
 -- ring_equiv version
-lemma mem_piece_iff_projection_eq'
+lemma mem_piece_iff_proj_eq'
   {A : Type u_1} [decidable_eq A] [add_monoid A]
   {R : Type u_2} [ring R]
   {Gᵢ : A → add_subgroup R} [has_add_subgroup_decomposition Gᵢ] [add_subgroup.is_gmonoid Gᵢ]
 (r : R) (i : A) :
   r ∈ Gᵢ i ↔ (add_subgroup_decomposition_ring_equiv Gᵢ r i : R) = r :=
-mem_piece_iff_projection_eq r i
+mem_piece_iff_proj_eq r i
 
 end has_add_subgroup_decomposition
 
