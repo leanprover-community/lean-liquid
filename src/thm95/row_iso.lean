@@ -274,11 +274,7 @@ lemma quux (N : ℕ) [fact (0 < N)] (M : ProFiltPseuNormGrpWithTinv.{u} r') (c�
   [(universal_map.sum i N).suitable c₂ c₁] {_ : ((finset.univ : finset (fin N)).sum (basic_universal_map.proj i)).suitable c₂ c₁} :
   (universal_map.eval_CLCFP V r' c₁ c₂ (universal_map.sum i N)).app (op M) =
   (CLC V).map ((basic_universal_map.eval_FP r' c₂ c₁ ((finset.univ : finset (fin N)).sum (basic_universal_map.proj i))).app M).op :=
-begin
-  dsimp only [universal_map.sum],
-  rw [@universal_map.eval_CLCFP_of _ _ _ _ _ _ _ _, whisker_right_app, nat_trans.op_app],
-  refl
-end
+by { dsimp only [universal_map.sum], rw [universal_map.eval_CLCFP_of], refl }
 
 lemma bar (N : ℕ) [fact (0 < N)] (Λ : PolyhedralLattice) (M : ProFiltPseuNormGrpWithTinv.{u} r')
   (c₁ c₂ : ℝ≥0) (hc : c₁ * N⁻¹ = c₂) (n : ℕ)

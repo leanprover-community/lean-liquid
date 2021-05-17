@@ -121,8 +121,8 @@ begin
     dsimp only [unop_op, rescale_constants],
     simp only [← mul_assoc, mul_right_comm _ c],
     simp only [mul_right_comm _ (c_ q)],
-    apply mul_le_mul' _ le_rfl,
-    apply mul_le_mul' _ le_rfl,
+    refine mul_le_mul' _ le_rfl,
+    refine mul_le_mul' _ le_rfl,
     apply N₂_spec },
   { apply r_pow_b_le_ε }
 end

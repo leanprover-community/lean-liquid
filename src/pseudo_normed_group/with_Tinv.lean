@@ -256,11 +256,11 @@ omit r'
 
 @[simps {fully_applied := ff}]
 def pi_proj (i : ι) : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' (Π i, M i) (M i) :=
-{ to_fun := add_monoid_hom.apply M i,
+{ to_fun := pi.eval_add_monoid_hom M i,
   strict' := λ c x hx, hx i,
   continuous' := λ c, (continuous_apply i).comp (filtration_pi_homeo M c).continuous,
   map_Tinv' := λ x, rfl,
-  .. add_monoid_hom.apply M i }
+  .. pi.eval_add_monoid_hom M i }
 
 /-- Universal property of the product of
 profinitely filtered pseudo-normed groups with `T⁻¹`-action -/

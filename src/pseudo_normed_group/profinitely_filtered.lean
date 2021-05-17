@@ -610,7 +610,7 @@ variables {M}
 
 @[simps]
 def pi_proj (i : ι) : profinitely_filtered_pseudo_normed_group_hom (Π i, M i) (M i) :=
-profinitely_filtered_pseudo_normed_group_hom.mk_of_bound (add_monoid_hom.apply M i) 1 $
+profinitely_filtered_pseudo_normed_group_hom.mk_of_bound (pi.eval_add_monoid_hom M i) 1 $
 begin
   refine λ c, ⟨λ x hx, by { rw one_mul, exact hx i }, _⟩,
   have := ((continuous_apply i).comp (filtration_pi_homeo M c).continuous),

@@ -1,7 +1,7 @@
 import category_theory.preadditive
 import algebraic_topology.cech_nerve
+
 import for_mathlib.simplicial.complex
-import for_mathlib.simplicial.augmented
 import for_mathlib.arrow.split
 import for_mathlib.fin
 
@@ -160,6 +160,7 @@ begin
     finset.sum_singleton, neg_smul, pow_zero, finset.sum_congr,
     preadditive.add_comp, preadditive.neg_comp],
   rw [← add_zero (𝟙 (M.obj (op (f.cech_nerve.obj (op (simplex_category.mk 0)))))), add_assoc],
+  dsimp only [cosimplicial_object.δ],
   congr' 1,
   { rw [← M.map_comp, ← M.map_id, ← op_id, ← op_comp],
     congr' 2,
@@ -199,6 +200,7 @@ begin
   simp only [preadditive.sum_comp, preadditive.comp_sum],
   erw [fin.sum_univ_succ, add_assoc, ← finset.sum_add_distrib],
   rw ← add_zero (𝟙 ((conerve M f).to_cocomplex_obj (n + 2))),
+  dsimp only [cosimplicial_object.δ],
   congr' 1,
   { dsimp [conerve, to_cocomplex_obj, contracting_homotopy],
     simp only [category_theory.category.comp_id, one_gsmul, pow_zero],

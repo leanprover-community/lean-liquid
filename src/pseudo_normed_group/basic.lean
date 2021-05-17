@@ -284,9 +284,9 @@ lemma mk_to_pi_mem_filtration {ι : Type*} {M : ι → Type*}
   mk_to_pi f ∈ filtration (M₁ →+ (Π i, M i)) c :=
 λ c' x h i, hfc i h
 
-lemma apply_mem_filtration {ι : Type*} (M : ι → Type*) [Π i, pseudo_normed_group (M i)]
+lemma eval_mem_filtration {ι : Type*} (M : ι → Type*) [Π i, pseudo_normed_group (M i)]
   (i : ι) (c : ℝ≥0) (hc : 1 ≤ c) :
-  (apply M i) ∈ filtration ((Π i, M i) →+ M i) c :=
+  (pi.eval_add_monoid_hom M i) ∈ filtration ((Π i, M i) →+ M i) c :=
 λ c' x hx, by refine filtration_mono _ (hx i);
 calc c' = 1 * c' : by rw one_mul
     ... ≤ c * c' : mul_le_mul_right' hc c'
@@ -296,7 +296,7 @@ constructed from a family of monoid homomorphisms out of the factors. -/
 def mk_from_pi {ι : Type*} [fintype ι] {M : ι → Type*} {M₂}
   [Π i, add_monoid (M i)] [add_comm_monoid M₂] (f : Π i, (M i) →+ M₂) :
   (Π i, M i) →+ M₂ :=
-∑ i, (f i).comp (apply M i)
+∑ i, (f i).comp (pi.eval_add_monoid_hom M i)
 
 @[simp] lemma mk_from_pi_apply {ι : Type*} [fintype ι] {M : ι → Type*} [Π i, add_comm_monoid (M i)]
   (f : Π i, M i →+ M₂) (x : Π i, M i) :
@@ -309,7 +309,7 @@ end
 
 @[simp] lemma coe_mk_from_pi {ι : Type*} [fintype ι] {M : ι → Type*} [Π i, add_comm_monoid (M i)]
   (f : Π i, M i →+ M₂) :
-  ⇑(mk_from_pi f) = ∑ i, (f i ∘ apply M i) :=
+  ⇑(mk_from_pi f) = ∑ i, (f i ∘ pi.eval_add_monoid_hom M i) :=
 by { ext x, rw [@mk_from_pi_apply M₂ _ ι _ M _ f x, fintype.sum_apply], refl }
 
 lemma mk_from_pi_mem_filtration {ι : Type*} [fintype ι] {M : ι → Type*}
