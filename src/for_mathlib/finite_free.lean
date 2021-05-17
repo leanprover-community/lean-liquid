@@ -3,6 +3,7 @@ import linear_algebra.invariant_basis_number
 import linear_algebra.free_module
 import linear_algebra.dual
 
+
 /-!
 
 # Finite free ℤ-modules
@@ -55,43 +56,36 @@ noncomputable instance : fintype (basis_type ha) := classical.some $ classical.s
 noncomputable def basis : basis ha.basis_type ℤ A :=
 (classical.some_spec $ classical.some_spec ha).some
 
-noncomputable def its_basically_zn : A ≃ₗ[ℤ] (basis_type ha → ℤ) := ha.basis.equiv_fun
+noncomputable def its_basically_zn : A ≃ₗ[ℤ] (ha.basis_type → ℤ) := ha.basis.equiv_fun
+
+lemma zn_finite {ι : Type*} [fintype ι] : module.finite ℤ (ι →₀ ℤ) :=
+begin
+  classical,
+  rw [module.finite_def, submodule.fg_def],
+  refine ⟨((λ i, finsupp.single i 1) '' set.univ),
+    set.finite.image (λ (i : ι), finsupp.single i 1) set.finite_univ, _⟩,
+  rw [← finsupp.supported_eq_span_single, finsupp.supported_univ]
+end
+
+lemma zn_finite' {ι : Type*} [fintype ι] : module.finite ℤ (ι → ℤ) :=
+begin
+  letI : module.finite ℤ (ι →₀ ℤ) := zn_finite,
+  exact module.finite.equiv (finsupp.linear_equiv_fun_on_fintype ℤ)
+end
+
+lemma finite_free.finite (ha : finite_free A) : module.finite ℤ A :=
+begin
+  letI : module.finite ℤ (ha.basis_type → ℤ) := zn_finite',
+  exact module.finite.equiv (its_basically_zn ha).symm,
+end
 
 theorem top_fg (ha : finite_free A) : (⊤ : submodule ℕ A).fg :=
 begin
-  classical,
-  use (finset.image (ha.basis) finset.univ) ∪ (finset.image (-ha.basis) finset.univ),
-  rw eq_top_iff,
-  rintro a -,
-  rw ← ha.basis.total_repr a,
-  generalize : (ha.basis.repr) a = f, clear a,
-  apply finsupp.induction f; clear f,
-  { exact submodule.zero_mem _ },
-  { intros i z f hif hz hf,
-    rw linear_map.map_add,
-    refine submodule.add_mem _ _ hf,
-    simp only [set.image_univ, finset.coe_union, pi.neg_apply, finsupp.total_single, linear_map.to_add_monoid_hom_coe,
-      finset.coe_univ, finset.coe_image],
-    -- next 6 lines -- what am I missing? I rewrite this twice later.
-    have should_be_easy : ∀ (n : ℕ) (b : A), (n : ℤ) • b = n • b,
-    { intros,
-      induction n with n hn,
-        simp,
-      rw [nat.succ_eq_add_one, add_smul, ←hn],
-      simp [add_smul] },
-    let n := z.nat_abs,
-    by_cases hz2 : z ≤ 0,
-    -- nearly there
-    { -- messy z≤0 case
-      have hn2 : (n : ℤ) = - z := int.of_nat_nat_abs_of_nonpos hz2,
-      rw [eq_neg_iff_eq_neg, ← mul_neg_one] at hn2,
-      rw [hn2, mul_smul, neg_one_smul, should_be_easy],
-      refine submodule.smul_mem _ n (submodule.subset_span (or.inr ⟨i, rfl⟩)) },
-    { push_neg at hz2,
-      rw [← int.of_nat_nat_abs_eq_of_nonneg (le_of_lt hz2)],
-      change (n : ℤ) • _ ∈ _,
-      rw should_be_easy,
-      refine submodule.smul_mem _ n (submodule.subset_span (or.inl ⟨i, rfl⟩)) } },
+  have h₁ : (⊤ : submodule ℕ A).to_add_submonoid = (⊤ : add_subgroup A).to_add_submonoid := rfl,
+  have h₂ : (⊤ : add_subgroup A) = (⊤ : submodule ℤ A).to_add_subgroup := rfl,
+  rw [submodule.fg_iff_add_submonoid_fg, h₁, ← add_subgroup.fg_iff_add_submonoid.fg, h₂,
+    ← submodule.fg_iff_add_subgroup_fg, ← module.finite_def],
+  exact finite_free.finite ha
 end
 
 -- def dual_basis_vecs (R : Type*) [comm_semiring R] (α : Type*) [fintype α] :
