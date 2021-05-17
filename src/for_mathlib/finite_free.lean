@@ -13,14 +13,12 @@ The basic theory of finite free ℤ-modules
 
 * rewrite to include multiplicative version
 * also write version for modules, glue to version for groups
-* Fill in `sorry`s (although Anne told kmb that they were bundling `is_basis` so
-  I'm doing other things right now)
+* Fill in `sorry`s
 -/
 def torsion_free (A : Type*) [add_comm_group A] : Prop :=
 ∀ (a : A) (ha : a ≠ 0) (n : ℕ), n • a = 0 → n = 0
 
 -- TODO: multiplicative version
--- TODO: `is_basis` is being bundled by Anne so there's no point filling in proofs right now :-/
 
 /-- `finite_free M` is the statement that the abelian group `M` is free of finite rank (over `ℤ`).-/
 def finite_free (A : Type*) [add_comm_group A] : Prop :=
@@ -28,7 +26,9 @@ def finite_free (A : Type*) [add_comm_group A] : Prop :=
 
 section
 
--- for mathlib
+example {A B : Type*} [add_comm_group A] [add_comm_group B] : module ℤ (A →ₗ[ℤ] B) := by refine linear_map.module
+
+-- for mathlib, PR'd as #7629
 @[simps]
 def add_monoid_hom_lequiv_linear_map {A B : Type*} [add_comm_group A] [add_comm_group B] :
   (A →+ B) ≃ₗ[ℤ] (A →ₗ[ℤ] B) :=
