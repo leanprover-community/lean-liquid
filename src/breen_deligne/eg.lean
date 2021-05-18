@@ -47,35 +47,48 @@ by rw [map_succ (n+1), add_monoid_hom.map_sub, ← σπ_comp_mul_two, ← add_mo
 
 /-- The Breen--Deligne data for the example BD package. -/
 def BD : data :=
-chain_complex.mk' rank map
-begin
-  intro n,
-  induction n with n ih,
-  { exact is_complex_zero },
-  { exact is_complex_succ n ih }
-end
+{ X := rank,
+  d := λ i j, if h : j + 1 = i then by subst h; exact map j else 0,
+  shape' := λ i j h, dif_neg h,
+  d_comp_d' :=
+  begin
+    intros i j k,
+    by_cases hi : j + 1 = i,
+    { subst hi, rw dif_pos rfl,
+      by_cases hj : k + 1 = j,
+      { subst hj, rw dif_pos rfl,
+        induction k with k ih,
+        { exact is_complex_zero },
+        { exact is_complex_succ k ih } },
+      rw [dif_neg hj, category_theory.limits.comp_zero], },
+    rw [dif_neg hi, category_theory.limits.zero_comp]
+  end }
 
-open differential_object differential_object.complex_like
 open category_theory category_theory.limits category_theory.preadditive
+open homological_complex
 
 /-- The `n`-th homotopy map for the example BD package is the identity. -/
-def hmap : Π (j i : ℕ) (h : i = j+1), (((data.mul 2).obj BD).X j) ⟶ (BD.X i)
+def hmap : Π (j i : ℕ) (h : j + 1 = i), (((data.mul 2).obj BD).X j) ⟶ (BD.X i)
 | j i rfl := 𝟙 _
 
 def h : homotopy (BD.proj 2) (BD.sum 2) :=
-{ h := λ j i, if h : i = j+1 then hmap j i h else 0,
-  h_eq_zero := λ i j h, dif_neg h,
+{ hom := λ j i, if h : j + 1 = i then hmap j i h else 0,
+  zero' := λ i j h, dif_neg h,
   comm :=
   begin
-    intros i j k,
-    simp only [htpy_idx_rel₁_ff_nat, htpy_idx_rel₂_ff_nat],
-    rintro rfl (rfl | ⟨rfl,rfl⟩),
-    { simp only [dif_pos rfl, hmap, category.id_comp, category.comp_id],
-      erw [chain_complex.mk'_d', map, data.mul_obj_d, chain_complex.mk'_d'],
-      apply sub_add_cancel },
-    { simp only [hmap, add_zero, data.sum_f, data.proj_f, comp_zero, category.id_comp,
-        nat.zero_ne_one, dif_neg, not_false_iff, eq_self_iff_true, dif_pos],
-      erw [chain_complex.mk'_d'], refl },
+    intros j,
+    rw [d_next_nat, prev_d_eq], swap 2, { dsimp, refl },
+    cases j,
+    { dsimp, rw [dif_pos rfl, dif_neg, comp_zero, zero_add],
+      swap, { dec_trivial },
+      dsimp [BD, hmap, map, σπ],
+      erw [dif_pos rfl, category.id_comp, ← sub_eq_iff_eq_add], refl, },
+    { rw [dif_pos rfl, dif_pos], swap 2, { refl },
+      dsimp [BD, hmap, map, σπ],
+      erw [dif_pos rfl, dif_pos rfl, category.id_comp],
+      dsimp [nat.succ_eq_add_one],
+      erw [hmap, category.comp_id, ← sub_eq_iff_eq_add, add_sub, eq_comm, sub_eq_iff_eq_add'],
+      refl },
   end }
 
 end eg

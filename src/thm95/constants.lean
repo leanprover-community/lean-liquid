@@ -1,5 +1,5 @@
 import polyhedral_lattice.cosimplicial
-import breen_deligne.suitable
+import breen_deligne.eg
 
 import facts.nnreal
 /-!
@@ -217,15 +217,15 @@ by { rw [inv_eq_one_div, mul_one_div], exact N₂_spec c' r r' m }
 in the first `m` degrees. Here `N₂ = thm95.N₂ c' r r' m`. -/
 def H : ℕ :=
 max 1 $ (finset.range (m+1)).sup $ λ q,
-  ((BD.data.homotopy_mul BD.homotopy (N₂ c' r r' m)).h q (q + 1)).bound
+  ((BD.data.homotopy_mul BD.homotopy (N₂ c' r r' m)).hom q (q + 1)).bound
 
 lemma bound_by_H {q : ℕ} (h : q ≤ m) :
-  ((BD.data.homotopy_mul BD.homotopy (N₂ c' r r' m)).h q (q + 1)).bound_by (H BD c' r r' m) :=
+  ((BD.data.homotopy_mul BD.homotopy (N₂ c' r r' m)).hom q (q + 1)).bound_by (H BD c' r r' m) :=
 begin
   rw [H, universal_map.bound_by, le_max_iff],
   right,
   refine @finset.le_sup _ _ _ (finset.range (m+1))
-    (λ q, ((BD.data.homotopy_mul BD.homotopy (N₂ c' r r' m)).h q (q + 1)).bound) _ _,
+    (λ q, ((BD.data.homotopy_mul BD.homotopy (N₂ c' r r' m)).hom q (q + 1)).bound) _ _,
   rwa [finset.mem_range, nat.lt_succ_iff],
 end
 

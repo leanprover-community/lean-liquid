@@ -10,13 +10,15 @@ and systematically rescale all the norms on all the seminormed groups by a const
 -/
 noncomputable theory
 
+universe variables u
+
 namespace system_of_complexes
 
 open category_theory
 open_locale nat nnreal
 
-def rescale (r : ℝ≥0) [fact (0 < r)] : system_of_complexes ⥤ system_of_complexes :=
-(whiskering_right _ _ _).obj $ functor.map_complex_like $ SemiNormedGroup.rescale r
+def rescale (r : ℝ≥0) [fact (0 < r)] : system_of_complexes.{u} ⥤ system_of_complexes.{u} :=
+(whiskering_right _ _ _).obj $ (SemiNormedGroup.rescale r).map_homological_complex _
 
 lemma rescale_obj (r c : ℝ≥0) [fact (0 < r)] (C : system_of_complexes) (i : ℕ) :
   ↥(((rescale r).obj C) c i) = _root_.rescale r (C c i) := rfl
@@ -29,16 +31,19 @@ rfl
 instance rescale.additive (r : ℝ≥0) [fact (0 < r)] : (rescale r).additive :=
 { map_zero' := λ X Y, by { ext, refl }, -- ext can be removed but it makes the proof longer
   map_add' := λ X Y f g, by { ext, refl } } -- a heavy refl
+.
 
 -- can we golf this? speed it up?
 def to_rescale (r : ℝ≥0) [fact (0 < r)] : 𝟭 system_of_complexes ⟶ rescale r :=
 { app := λ C,
-  { app := λ c, (functor.map_complex_like_nat_trans _ _ $ SemiNormedGroup.to_rescale r).app (C.obj c),
+  { app := λ c,
+    { f := λ _, (SemiNormedGroup.to_rescale r).app _,
+      comm' := by { intros, exact ((SemiNormedGroup.to_rescale r).naturality _).symm } },
     naturality' := by { intros c₁ c₂ h, ext i : 2, refl } },
   naturality' := λ C₁ C₂ f, by { ext, refl } }
 
 def scale (i j : ℝ≥0) [fact (0 < i)] [fact (0 < j)] : rescale i ⟶ rescale j :=
-(whiskering_right _ _ _).map $ functor.map_complex_like_nat_trans _ _ $
+(whiskering_right _ _ _).map $ functor.map_homological_complex_nat_trans _ _ _ $
   SemiNormedGroup.scale i j
 
 section exact_and_admissible

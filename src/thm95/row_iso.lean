@@ -89,7 +89,7 @@ iso.refl _
 def complex_rescale_iso (N : ℝ≥0) :
   (BD.complex (rescale_constants c_ N) r V r' c).obj (op M) ≅
   (BD.complex c_ r V r' c).obj (op $ of r' $ rescale N M) :=
-differential_object.complex_like.iso_of_components
+homological_complex.iso_of_components
 begin
   intro i,
   refine CLCTinv.map_iso r V _ _ _ _ _ _ _ _,
@@ -116,14 +116,14 @@ begin
       (BD.X j) (BD.X i) (BD.d j i) ⟨(mul_assoc _ _ _).le⟩ _ _ ⟨(mul_assoc _ _ _).le⟩,
     replace := nat_trans.congr_app this.symm (op M),
     replace := congr_arg arrow.mk this,
-    refine this.trans _,
+    refine (this.trans _).symm,
     apply arrow.mk_comp_congr, { refl }, { rw universal_map.eval_CLCFP_rescale } },
   { have := @universal_map.res_comp_eval_CLCFP V r'
       (r' * (c * (c_ i * N⁻¹))) (r' * (c * c_ i) * N⁻¹) (r' * (c * (c_ j * N⁻¹))) (r' * (c * c_ j) * N⁻¹)
       (BD.X j) (BD.X i) (BD.d j i) ⟨le_of_eq $ by simp only [mul_assoc]⟩ _ _ ⟨le_of_eq $ by simp only [mul_assoc]⟩,
     replace := nat_trans.congr_app this.symm (op M),
     replace := congr_arg arrow.mk this,
-    refine this.trans _,
+    refine (this.trans _).symm,
     apply arrow.mk_comp_congr, { refl }, { rw universal_map.eval_CLCFP_rescale } },
   any_goals { refl },
 end
@@ -138,9 +138,9 @@ begin
   intros c₁ c₂ h,
   ext i : 2,
   apply arrow.mk_injective,
-  erw [differential_object.comp_f, differential_object.comp_f],
-  dsimp only [data.system_obj, differential_object.hom.mk'_f, CLCFPTinv₂.res, complex_rescale_iso,
-    differential_object.complex_like.iso_of_components, CLCTinv.map_iso_hom, CLCTinv.map_nat_app],
+  erw [homological_complex.comp_f, homological_complex.comp_f],
+  dsimp only [data.system_obj, CLCFPTinv₂.res, complex_rescale_iso,
+    homological_complex.iso_of_components, CLCTinv.map_iso_hom, CLCTinv.map_nat_app],
   simp only [CLCTinv.map_comp_map],
   refl,
 end
@@ -206,7 +206,7 @@ end
 def mul_complex_iso (c : ℝ≥0) :
   (((data.mul N).obj BD).complex c_ r V r' c).obj (op M) ≅
   (BD.complex c_ r V r' c).obj (op (ProFiltPseuNormGrpWithTinv.of r' $ M^N)) :=
-differential_object.complex_like.iso_of_components
+homological_complex.iso_of_components
 begin
   intro i,
   refine CLCTinv.map_iso r V _ _ _ _ _ _ _ _,
@@ -238,9 +238,9 @@ begin
   intros c₁ c₂ hc,
   ext i : 2,
   apply arrow.mk_injective,
-  erw [differential_object.comp_f, differential_object.comp_f],
-  dsimp only [data.system_obj, differential_object.hom.mk'_f, CLCFPTinv₂.res, mul_complex_iso,
-    differential_object.complex_like.iso_of_components, CLCTinv.map_iso_hom, CLCTinv.map_nat_app],
+  erw [homological_complex.comp_f, homological_complex.comp_f],
+  dsimp only [data.system_obj, CLCFPTinv₂.res, mul_complex_iso,
+    homological_complex.iso_of_components, CLCTinv.map_iso_hom, CLCTinv.map_nat_app],
   simp only [CLCTinv.map_comp_map],
   refl,
 end
@@ -361,12 +361,12 @@ begin
   ext c i : 4,
   apply arrow.mk_injective,
   erw [nat_trans.comp_app, nat_trans.comp_app,
-    differential_object.comp_f, differential_object.comp_f],
+    homological_complex.comp_f, homological_complex.comp_f],
   dsimp only [BD_system_map_app_app, BD_map_app_f, data.sum_f, data.system_map, data.complex,
     data.complex₂_map_f, mul_system_iso, system_rescale_iso, complex_rescale_iso, mul_complex_iso],
   erw [nat_iso.of_components.hom_app, nat_iso.of_components.inv_app],
-  dsimp only [differential_object.complex_like.iso_of_components_hom_f,
-    differential_object.complex_like.iso_of_components_inv_f],
+  dsimp only [homological_complex.iso_of_components_hom_f,
+    homological_complex.iso_of_components_inv_f],
   dsimp only [CLCFPTinv₂, universal_map.eval_CLCFPTinv₂, CLCTinv.map_iso_hom, CLCTinv.map_iso_inv,
     CLCTinv.F_map, _root_.id, CLCTinv.map, SemiNormedGroup.equalizer.map_nat_app, unop_op],
   rw [SemiNormedGroup.equalizer.map_comp_map, SemiNormedGroup.equalizer.map_comp_map],

@@ -55,7 +55,7 @@ if hqm : q' ≤ m + 1
 then
 begin
   refine (universal_map.eval_CLCFPTinv _ _ _ _ _ _).app _,
-  { exact (data.homotopy_mul BD.data BD.homotopy (N₂ c' r r' m)).h q q' },
+  { exact (data.homotopy_mul BD.data BD.homotopy (N₂ c' r r' m)).hom q q' },
   { dsimp,
     exact universal_map.suitable.le _ _ (c * (c' q' * c_ q')) _
       infer_instance le_rfl (NSH_h_aux hqm), }
@@ -94,9 +94,9 @@ def NSH_δ_res {BD : data} [BD.suitable c_]
   ((BD.system c_ r V r').obj M).obj (op c) ⟶
     ((BD.system (rescale_constants c_ (2 ^ N)) r V r').obj M).obj (op (k' c' m * c)) :=
 { f := λ i, (@CLCFPTinv.res r V _ _ r' _ _ _ _ _ (NSH_δ_res' _ _ _)).app M,
-  comm :=
+  comm' :=
   begin
-    intros i j, symmetry,
+    intros i j,
     dsimp [data.system_obj, data.complex],
     exact nat_trans.congr_app (universal_map.res_comp_eval_CLCFPTinv r V r' _ _ _ _ _) M,
   end }
@@ -129,50 +129,72 @@ end
 
 variables (V c' m)
 
-open differential_object differential_object.complex_like category_theory.preadditive
+open homological_complex category_theory.preadditive
 
-lemma NSH_hδ (M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ)
-  (c : ℝ≥0) (hc : fact (c₀ m Λ ≤ c)) (q : ℕ) (hqm : q ≤ m) :
-  system_of_complexes.res ≫ (NSH_δ c).f q =
-    ((BD_system_map (BD.data.sum (2 ^ N₂ c' r r' m))
-      c_ (rescale_constants c_ (2 ^ N₂ c' r r' m)) r V).app M).apply ≫ system_of_complexes.res +
-    ((BD.data.system c_ r V r').obj M).d q (q + 1) ≫ NSH_h q (q + 1) (k' c' m * c) +
-    NSH_h (q - 1) q (k' c' m * c) ≫
-      ((((data.mul (2 ^ N₂ c' r r' m)).obj BD.data).system
-        (rescale_constants c_ (2 ^ N₂ c' r r' m)) r V r').obj M).d (q - 1) q :=
-begin
-  haveI hqm_ : fact (q ≤ m) := ⟨hqm⟩,
-  rw [NSH_δ, NSH_h, NSH_h, dif_pos (nat.succ_le_succ hqm), dif_pos (hqm.trans (nat.le_succ _))],
-  erw [comp_f],
-  dsimp only [unop_op, NSH_δ_res_f, data.system_res_def, quiver.hom.apply,
-    BD_system_map_app_app, BD_map_app_f, data.system_obj_d],
-  simp only [← universal_map.eval_CLCFPTinv_def],
-  have hcomm := (data.homotopy_mul BD.data BD.homotopy (N₂ c' r r' m)).comm (q+1) q (q-1),
-  rw [differential_object.complex_like.htpy_idx_rel₁_ff_nat,
-      differential_object.complex_like.htpy_idx_rel₂_ff_nat] at hcomm,
-  specialize hcomm rfl _,
-  { unfreezingI { cases q },
-    { simp only [false_or, nat.zero_ne_one, and_self] },
-    { simp only [nat.succ_sub_succ_eq_sub, nat.succ_ne_zero, or_false, nat.sub_zero, false_and] } },
-  rw [eq_comm, sub_eq_iff_eq_add'] at hcomm,
-  simp only [universal_map.res_comp_eval_CLCFPTinv_absorb, hcomm, ← nat_trans.app_add, add_assoc,
-    ← nat_trans.comp_app, ← nat_trans.comp_app, ← category.assoc, ← universal_map.eval_CLCFPTinv_comp,
-    universal_map.eval_CLCFPTinv_comp_res_absorb, universal_map.res_comp_eval_CLCFPTinv_absorb,
-      ← universal_map.eval_CLCFPTinv_add],
+-- lemma NSH_hδ (M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ)
+--   (c : ℝ≥0) (hc : fact (c₀ m Λ ≤ c)) (q : ℕ) (hqm : q ≤ m) :
+--   system_of_complexes.res ≫ (NSH_δ c).f q =
+--     ((BD_system_map (BD.data.sum (2 ^ N₂ c' r r' m))
+--       c_ (rescale_constants c_ (2 ^ N₂ c' r r' m)) r V).app M).apply ≫ system_of_complexes.res +
+--     ((BD.data.system c_ r V r').obj M).d q (q + 1) ≫ NSH_h q (q + 1) (k' c' m * c) +
+--     NSH_h (q - 1) q (k' c' m * c) ≫
+--       ((((data.mul (2 ^ N₂ c' r r' m)).obj BD.data).system
+--         (rescale_constants c_ (2 ^ N₂ c' r r' m)) r V r').obj M).d (q - 1) q :=
+-- begin
+--   haveI hqm_ : fact (q ≤ m) := ⟨hqm⟩,
+--   rw [NSH_δ, NSH_h, NSH_h, dif_pos (nat.succ_le_succ hqm), dif_pos (hqm.trans (nat.le_succ _))],
+--   erw [comp_f],
+--   dsimp only [unop_op, NSH_δ_res_f, data.system_res_def, quiver.hom.apply,
+--     BD_system_map_app_app, BD_map_app_f, data.system_obj_d],
+--   simp only [← universal_map.eval_CLCFPTinv_def],
+--   have hcomm := (data.homotopy_mul BD.data BD.homotopy (N₂ c' r r' m)).comm (q+1) q (q-1),
+--   rw [differential_object.complex_like.htpy_idx_rel₁_ff_nat,
+--       differential_object.complex_like.htpy_idx_rel₂_ff_nat] at hcomm,
+--   specialize hcomm rfl _,
+--   { unfreezingI { cases q },
+--     { simp only [false_or, nat.zero_ne_one, and_self] },
+--     { simp only [nat.succ_sub_succ_eq_sub, nat.succ_ne_zero, or_false, nat.sub_zero, false_and] } },
+--   rw [eq_comm, sub_eq_iff_eq_add'] at hcomm,
+--   simp only [universal_map.res_comp_eval_CLCFPTinv_absorb, hcomm, ← nat_trans.app_add, add_assoc,
+--     ← nat_trans.comp_app, ← nat_trans.comp_app, ← category.assoc, ← universal_map.eval_CLCFPTinv_comp,
+--     universal_map.eval_CLCFPTinv_comp_res_absorb, universal_map.res_comp_eval_CLCFPTinv_absorb,
+--       ← universal_map.eval_CLCFPTinv_add],
+-- end
+-- .
+
 end
-.
 
-end
-
-def NSH_aux (M) : NSH_aux_type BD r r' V c_ c' m Λ (N₂ c' r r' m) M :=
+def NSH_aux' (M) (hδ) : NSH_aux_type BD r r' V c_ c' m Λ (N₂ c' r r' m) M :=
 { h := λ q q' c, NSH_h q q' c,
   h_bound_by := by { rintro q q' hqm rfl, apply NSH_h_bound_by Λ q hqm },
   δ := NSH_δ,
-  hδ := λ c hc q hqm, by convert NSH_hδ V c' m Λ M c hc q hqm,
+  hδ := hδ,
   δ_bound_by := λ c hc q hqm, by apply NSH_δ_bound_by }
 .
 
-open differential_object differential_object.complex_like category_theory.preadditive
+def NSH_aux (M) : NSH_aux_type BD r r' V c_ c' m Λ (N₂ c' r r' m) M :=
+NSH_aux' BD r r' V c_ c' m Λ M
+begin
+  introsI c hc q hqm,
+  haveI hqm_ : fact (q ≤ m) := ⟨hqm⟩,
+  rw [NSH_δ, NSH_h, NSH_h, dif_pos (nat.succ_le_succ hqm), dif_pos (hqm.trans (nat.le_succ _))],
+  erw [homological_complex.comp_f],
+  dsimp only [unop_op, NSH_δ_res_f, data.system_res_def, quiver.hom.apply,
+    BD_system_map_app_app, BD_map_app_f, data.system_obj_d],
+  simp only [← universal_map.eval_CLCFPTinv_def],
+  have hcomm := (data.homotopy_mul BD.data BD.homotopy (N₂ c' r r' m)).comm q,
+  simp only [universal_map.res_comp_eval_CLCFPTinv_absorb, hcomm, ← nat_trans.app_add, add_assoc,
+    ← nat_trans.comp_app, ← category.assoc, ← universal_map.eval_CLCFPTinv_comp,
+    universal_map.eval_CLCFPTinv_comp_res_absorb, ← universal_map.eval_CLCFPTinv_add],
+  congr' 2,
+  rw [← add_assoc, add_comm, @prev_d_eq _ _ _ _ _ _ _ _ q (q+1)],
+  swap, { dsimp, refl },
+  congr' 1,
+  rw add_comm,
+  congr' 1,
+  rw d_next_nat,
+end
+.
 
 def NSC_htpy :
   normed_spectral_homotopy

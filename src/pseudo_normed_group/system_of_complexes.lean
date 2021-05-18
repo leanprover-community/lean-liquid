@@ -77,7 +77,7 @@ end
 
 section
 
-open differential_object
+open homological_complex
 
 variables (BD : breen_deligne.data) (c_ : ℕ → ℝ≥0) [BD.suitable c_]
 variables (r : ℝ≥0) (V : SemiNormedGroup) [normed_with_aut r V] [fact (0 < r)]
@@ -88,34 +88,33 @@ variables (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] (c : ℝ≥0)
 def complex₂ (r : ℝ≥0) (V : SemiNormedGroup) [normed_with_aut r V] [fact (0 < r)]
   (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)]
    (a b : ℕ → ℝ≥0) [∀ i, fact (b i ≤ r' * a i)] [BD.suitable a] [BD.suitable b] :
-  (ProFiltPseuNormGrpWithTinv.{u} r')ᵒᵖ ⥤ cochain_complex ℕ SemiNormedGroup :=
+  (ProFiltPseuNormGrpWithTinv.{u} r')ᵒᵖ ⥤ cochain_complex SemiNormedGroup ℕ :=
 { obj := λ M,
   { X := λ i, (BD.complex₂_X r V r' a b i).obj M,
     d := λ i j, (BD.complex₂_d r V r' a b i j).app M,
-    d_comp_d := λ i j k,
+    d_comp_d' := λ i j k,
     begin
       rw [← nat_trans.comp_app],
       simp only [complex₂_d, ← universal_map.eval_CLCFPTinv₂_comp, BD.d_comp_d,
         universal_map.eval_CLCFPTinv₂_zero],
       refl
     end,
-    d_eq_zero := λ i j hij,
+    shape' := λ i j hij,
     begin
-      have : ¬ differential_object.coherent_indices ff j i := ne.symm hij,
-      simp only [complex₂_d, ← universal_map.eval_CLCFPTinv₂_comp, BD.d_eq_zero this,
+      simp only [complex₂_d, ← universal_map.eval_CLCFPTinv₂_comp, BD.shape _ _ hij,
         universal_map.eval_CLCFPTinv₂_zero],
       refl
     end },
   map := λ M₁ M₂ f,
   { f := λ i, ((CLCFPTinv₂ r V r' (a i) (b i) (BD.X i)).map f : _),
-    comm := λ i j, (nat_trans.naturality _ _).symm },
+    comm' := λ i j, nat_trans.naturality _ _ },
   map_id' := λ M, by { ext i : 2, apply category_theory.functor.map_id, },
   map_comp' := λ M₁ M₂ M₃ f g, by { ext i : 2, apply category_theory.functor.map_comp } }
 
 /-- The complex of seminormed groups `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …` -/
 def complex (r : ℝ≥0) (V : SemiNormedGroup) [normed_with_aut r V] [fact (0 < r)]
   (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] (c : ℝ≥0) :
-  (ProFiltPseuNormGrpWithTinv.{u} r')ᵒᵖ ⥤ cochain_complex ℕ SemiNormedGroup :=
+  (ProFiltPseuNormGrpWithTinv.{u} r')ᵒᵖ ⥤ cochain_complex SemiNormedGroup ℕ :=
 BD.complex₂ r V r' (λ i, c * c_ i) (λ i, r' * (c * c_ i))
 
 namespace complex
@@ -149,10 +148,11 @@ functor.flip {
   map := λ c₂ c₁ h,
     { app := λ M, begin
         haveI : fact ((unop c₁ : ℝ≥0) ≤ (unop c₂ : ℝ≥0)) := ⟨h.unop.down.down⟩,
-        refine differential_object.hom.mk' (λ i, _) _,
-        { exact (CLCFPTinv₂.res r V r' _ _ _ _ (BD.X i)).app _ },
-        { intros i j hij, apply comm_sq_app,
-          symmetry, apply universal_map.res_comp_eval_CLCFPTinv₂ },
+        refine
+        { f := λ i, (CLCFPTinv₂.res r V r' _ _ _ _ (BD.X i)).app _,
+          comm' := _ },
+        { intros i j, apply comm_sq_app,
+          apply universal_map.res_comp_eval_CLCFPTinv₂ },
       end,
       naturality' := λ M N f, begin
         ext i : 2,
@@ -195,7 +195,7 @@ lemma system_map_iso_isometry {M₁ M₂ : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ
   (f : M₁ ≅ M₂) (i : ℕ) :
   isometry ((((BD.system c_ r V r').map_iso f).hom.app (op c)).f i) :=
 begin
-  simp only [← iso.app_hom, ← complex_like.iso_app_hom],
+  simp only [← iso.app_hom, ← homological_complex.iso_app_hom],
   apply SemiNormedGroup.iso_isometry_of_norm_noninc;
   apply complex.map_norm_noninc,
 end
