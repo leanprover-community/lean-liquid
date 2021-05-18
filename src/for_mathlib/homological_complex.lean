@@ -37,6 +37,35 @@ variables (V c)
 { obj := λ C, C.X,
   map := λ _ _ f, f.f }
 
+-- This ↓ is maybe not really "for_mathlib"
+
+/-- A complex of functors gives a functor to complexes
+
+jmc: This is functorial, but I'm getting timeouts, and I think this is all we need -/
+def as_functor {T : Type*} [category V] [preadditive V] [category T]
+  (C : homological_complex (T ⥤ V) c) :
+  T ⥤ homological_complex V c :=
+{ obj := λ t,
+  { X := λ i, (C.X i).obj t,
+    d := λ i j, (C.d i j).app t,
+    d_comp_d' := λ i j k,
+    begin
+      have := C.d_comp_d i j k,
+      rw [nat_trans.ext_iff, function.funext_iff] at this,
+      exact this t
+    end,
+    shape' := λ i j h,
+    begin
+      have := C.shape _ _ h,
+      rw [nat_trans.ext_iff, function.funext_iff] at this,
+      exact this t
+    end },
+  map := λ t₁ t₂ h,
+  { f := λ i, (C.X i).map h,
+    comm' := λ i j, nat_trans.naturality _ _ },
+  map_id' := λ t, by { ext i, dsimp, rw (C.X i).map_id, },
+  map_comp' := λ t₁ t₂ t₃ h₁ h₂, by { ext i, dsimp, rw functor.map_comp, } }
+
 end homological_complex
 
 variable (c)

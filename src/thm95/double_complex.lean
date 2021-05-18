@@ -49,7 +49,7 @@ def augmentation_map :
   (cosimplicial_system_of_complexes BD c' r r' V Λ M N).obj (mk 0) :=
 (BD.system c' r V r').map (Cech_augmentation_map r' Λ M N)
 
-def double_complex_aux : cochain_complex ℕ system_of_complexes :=
+def double_complex_aux : cochain_complex system_of_complexes ℕ :=
 alt_face_map_cocomplex (augmentation_map BD c' r r' V Λ M N)
 begin
   dsimp only [augmentation_map, cosimplicial_system_of_complexes,
@@ -73,7 +73,7 @@ open_locale nat
 -- but before we do this, we need to rescale the norms in all the rows,
 -- so that the vertical differentials become norm-nonincreasing
 
-def double_complex_aux_rescaled : cochain_complex ℕ system_of_complexes :=
+def double_complex_aux_rescaled : cochain_complex system_of_complexes ℕ :=
 (double_complex_aux BD c' r r' V Λ M N ).modify
   system_of_complexes.rescale_functor
   system_of_complexes.rescale_nat_trans
