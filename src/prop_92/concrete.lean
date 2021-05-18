@@ -3,6 +3,7 @@ import prop_92.extension_profinite
 import normed_group.normed_with_aut
 
 import for_mathlib.normed_group_hom_completion
+import for_mathlib.normed_group_hom
 import for_mathlib.pseudo_metric
 
 import locally_constant.analysis
@@ -337,7 +338,7 @@ sorry -- follows easily from norm_h and geometric series
 end locally_constant_stuff
 
 section general_completion_stuff
-open filter
+open filter uniform_space
 open_locale topological_space
 
 -- Now we want an abstract machine where we can plug the sequence g from the previous section.
@@ -350,12 +351,42 @@ The next lemma is a version of normed_group/controlled_exactness.lean but `f` is
 surjective. We'll need to abstract part of that older proof
 -/
 
-lemma bar {C ε : ℝ} (hε : 0 < ε)
-  (h : ∀ m₂ : M₂, ∃ g : ℕ → M₁, cauchy_seq g ∧ tendsto (f ∘ g) at_top (𝓝 m₂) ∧ ∀ n, ∥g n∥ ≤ C*∥f∥) :
-  ∀ m₂, ∃ m₁, f.completion m₁ = m₂ ∧ ∥m₁∥ ≤ C*(1+ε)*∥m₂∥ :=
+-- PR very close to the definition of cauchy_seq
+lemma cauchy_seq.map {β : Type*} [semilattice_sup β]
+  {α : Type*} [uniform_space α] {γ : Type*} [uniform_space γ]
+  {u : β → α} {f : α → γ} (hu : cauchy_seq u) (hf : uniform_continuous f) :
+  cauchy_seq (f ∘ u) :=
 begin
+  change cauchy _,
+  rw ← map_map,
+  exact cauchy.map hu hf
+end
 
-  sorry
+-- actually not used here, but should go somewhere
+lemma normed_group_hom.coe_range : (f.range : set M₂) = set.range f :=
+by { erw add_monoid_hom.coe_range, refl }
+
+lemma bar {C ε : ℝ} (hC : 0 < C) (hε : 0 < ε)
+  (h : ∀ m₂ : M₂, ∃ g : ℕ → M₁, cauchy_seq g ∧ tendsto (f ∘ g) at_top (𝓝 m₂) ∧ ∀ n, ∥g n∥ ≤ C*∥m₂∥) :
+  ∀ hatm₂ : completion M₂, ∃ m₁, f.completion m₁ = hatm₂ ∧ ∥m₁∥ ≤ (C+ε)*∥hatm₂∥ :=
+begin
+  intro hatm₂,
+  refine controlled_closure_range_of_complete normed_group.norm_to_compl hC hε _ (normed_group.dense_range_to_compl _),
+  intro m₂,
+  rcases h m₂ with ⟨g, cauchy_g, lim_g, bound_g⟩,
+  have : cauchy_seq (j ∘ g),
+    from cauchy_g.map j.uniform_continuous,
+  rcases cauchy_seq_tendsto_of_complete this with ⟨y, hy⟩,
+  refine ⟨y, _, _⟩,
+  { have lim : tendsto ((f.completion.comp j) ∘ g) at_top (𝓝 (f.completion y)),
+      from (f.completion.continuous.tendsto _).comp hy,
+    rw f.completion_to_compl at lim,
+    have : tendsto ((j ∘ f) ∘ g) at_top (𝓝 (j m₂)) := (j.continuous.tendsto _).comp lim_g,
+    exact tendsto_nhds_unique lim this },
+  { refine le_of_tendsto' (tendsto_norm.comp hy) (_ : ∀ n, ∥j (g n)∥ ≤ C * ∥m₂∥),
+    intro n,
+    rw normed_group.norm_to_compl,
+    apply bound_g }
 end
 
 end general_completion_stuff
