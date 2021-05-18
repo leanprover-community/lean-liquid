@@ -152,10 +152,7 @@ functor.flip {
         { f := λ i, (CLCFPTinv₂.res r V r' _ _ _ _ (BD.X i)).app _,
           comm' := _ },
         { intros i j, apply comm_sq_app,
-          symmetry,
-          sorry
-          -- apply universal_map.res_comp_eval_CLCFPTinv₂
-           },
+          apply universal_map.res_comp_eval_CLCFPTinv₂ },
       end,
       naturality' := λ M N f, begin
         ext i : 2,

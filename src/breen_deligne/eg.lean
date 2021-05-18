@@ -77,21 +77,18 @@ def h : homotopy (BD.proj 2) (BD.sum 2) :=
   comm :=
   begin
     intros j,
-    sorry
-    -- dsimp [d_next, prev_d],
-    -- rcases (complex_shape.down ℕ).next j with _|⟨k,hk⟩;
-    -- rcases (complex_shape.down ℕ).prev j with _|⟨i,hi⟩;
-    -- dsimp [d_next, prev_d] at *;
-    -- simp only [add_zero, zero_add, dif_pos, *] at *,
-    -- ########### old code below
-    -- simp only [htpy_idx_rel₁_ff_nat, htpy_idx_rel₂_ff_nat],
-    -- rintro rfl (rfl | ⟨rfl,rfl⟩),
-    -- { simp only [dif_pos rfl, hmap, category.id_comp, category.comp_id],
-    --   erw [chain_complex.mk'_d', map, data.mul_obj_d, chain_complex.mk'_d'],
-    --   apply sub_add_cancel },
-    -- { simp only [hmap, add_zero, data.sum_f, data.proj_f, comp_zero, category.id_comp,
-    --     nat.zero_ne_one, dif_neg, not_false_iff, eq_self_iff_true, dif_pos],
-    --   erw [chain_complex.mk'_d'], refl },
+    rw [d_next_nat, prev_d_eq], swap 2, { dsimp, refl },
+    cases j,
+    { dsimp, rw [dif_pos rfl, dif_neg, comp_zero, zero_add],
+      swap, { dec_trivial },
+      dsimp [BD, hmap, map, σπ],
+      erw [dif_pos rfl, category.id_comp, ← sub_eq_iff_eq_add], refl, },
+    { rw [dif_pos rfl, dif_pos], swap 2, { refl },
+      dsimp [BD, hmap, map, σπ],
+      erw [dif_pos rfl, dif_pos rfl, category.id_comp],
+      dsimp [nat.succ_eq_add_one],
+      erw [hmap, category.comp_id, ← sub_eq_iff_eq_add, add_sub, eq_comm, sub_eq_iff_eq_add'],
+      refl },
   end }
 
 end eg

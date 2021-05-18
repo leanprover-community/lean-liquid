@@ -192,7 +192,7 @@ begin
   congr' 1,
   rw add_comm,
   congr' 1,
-  sorry
+  rw d_next_nat,
 end
 .
 
