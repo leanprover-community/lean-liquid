@@ -30,7 +30,7 @@ example {A B : Type*} [add_comm_group A] [add_comm_group B] : module ℤ (A →�
 
 -- for mathlib, PR'd as #7629
 @[simps]
-def add_monoid_hom_lequiv_linear_map {A B : Type*} [add_comm_group A] [add_comm_group B] :
+def add_monoid_hom_lequiv_int {A B : Type*} [add_comm_group A] [add_comm_group B] :
   (A →+ B) ≃ₗ[ℤ] (A →ₗ[ℤ] B) :=
 { to_fun := add_monoid_hom.to_int_linear_map,
   inv_fun := linear_map.to_add_monoid_hom,
@@ -92,7 +92,7 @@ begin
   rcases ha with ⟨ι, hι, ⟨b⟩⟩,
   refine ⟨ι, hι, ⟨_⟩⟩,
   classical,
-  exact b.dual_basis.map add_monoid_hom_lequiv_linear_map.symm
+  exact b.dual_basis.map add_monoid_hom_lequiv_int.symm
 end
 
 /-- The rank of a finite free abelian group. -/
@@ -128,7 +128,7 @@ begin
   have d := ha.dual,
   rcases ha with ⟨ι, hι, ⟨b⟩⟩,
   resetI, classical,
-  exact (rank_eq (b.dual_basis.map add_monoid_hom_lequiv_linear_map.symm) d).trans
+  exact (rank_eq (b.dual_basis.map add_monoid_hom_lequiv_int.symm) d).trans
     (rank_eq b _).symm,
 end
 
