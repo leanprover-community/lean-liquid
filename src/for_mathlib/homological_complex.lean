@@ -6,6 +6,9 @@ variables {V V₁ V₂ ι : Type*} {c : complex_shape ι} [category V] [category
 
 namespace homological_complex
 
+-- This instance is broken, and should be removed unless we can make `preadditive` extend `has_zero_morphisms`.
+attribute [priority 0] homological_complex.category_theory.limits.has_zero_morphisms
+
 section
 
 variables [has_zero_morphisms V] [has_zero_morphisms V₁] [has_zero_morphisms V₂]
@@ -35,15 +38,23 @@ def iso_of_components (f : Π i, C₁.X i ≅ C₂.X i)
 
 variables (V c)
 
+@[simps] def eval (i : ι) : homological_complex V c ⥤ V :=
+{ obj := λ C, C.X i,
+  map := λ C D f, f.f i, }
+
 @[simps] def forget : homological_complex V c ⥤ graded_object ι V :=
 { obj := λ C, C.X,
   map := λ _ _ f, f.f }
+
+-- TODO relate forget ≫ pi.eval and eval.
 
 end
 
 section
 
 variables [preadditive V]
+
+instance eval_additive (i : ι) : (eval V c i).additive := {}
 
 @[simps]
 def f_hom {C₁ C₂ : homological_complex V c} (i : ι) : (C₁ ⟶ C₂) →+ (C₁.X i ⟶ C₂.X i) :=

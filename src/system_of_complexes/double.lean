@@ -174,30 +174,30 @@ def row_map (C : system_of_double_complexes.{u}) (p p' : ℕ) :
   (c : ℝ≥0) (p p' q : ℕ) (x : C.X c p q) :
   C.row_map p p' x = C.d p p' x := rfl
 
--- this should be found by TC, but we first need to make `pi.eval` and `graded_object` additive
-instance aux : (homological_complex.forget SemiNormedGroup (complex_shape.up ℕ) ⋙
-  pi.eval (λ (_ : ℕ), SemiNormedGroup) q).additive :=
-{ map_zero' := λ C₁ C₂, by { dsimp, refl },
-  map_add' := by { intros, dsimp, refl } }
+-- -- this should be found by TC, but we first need to make `pi.eval` and `graded_object` additive
+-- instance aux : (homological_complex.forget SemiNormedGroup (complex_shape.up ℕ) ⋙
+--   pi.eval (λ (_ : ℕ), SemiNormedGroup) q).additive :=
+-- { map_zero' := λ C₁ C₂, by { dsimp, refl },
+--   map_add' := by { intros, dsimp, refl } }
 
 /-- The `q`-th column in a system of double complexes, as system of complexes. -/
 def col (C : system_of_double_complexes.{u}) (q : ℕ) : system_of_complexes.{u} :=
-C ⋙ functor.map_homological_complex (homological_complex.forget _ _ ⋙ pi.eval _ q) _
+C ⋙ functor.map_homological_complex (homological_complex.eval _ _ q) _
 
 @[simp] lemma col_X (C : system_of_double_complexes) (p q : ℕ) (c : ℝ≥0) :
   C.col q c p = C.X c p q :=
 rfl
 
--- jmc doesn't understand why we need the `==`
 @[simp] lemma col_res (C : system_of_double_complexes) (p q : ℕ) {c' c : ℝ≥0} [h : fact (c ≤ c')] :
-  (@system_of_complexes.res (C.col q) _ _ p h : C.col q c' p ⟶ C.col q c p) ==
-  (@res C _ _ p q h : C.X c' p q ⟶ C.X c p q) :=
-heq.rfl
+  (@system_of_complexes.res (C.col q) _ _ p h : C.col q c' p ⟶ C.col q c p) =
+  -- (@res C _ _ p q h : C.X c' p q ⟶ C.X c p q) :=
+  by dsimp_result { dsimp, exact (@res C _ _ p q h : C.X c' p q ⟶ C.X c p q) } :=
+rfl
 
--- jmc doesn't understand why we need the `==`
 @[simp] lemma col_d (C : system_of_double_complexes) (c : ℝ≥0) (p p' q : ℕ) :
-  @system_of_complexes.d (C.col q) c p p' == @d C c p p' q :=
-heq.rfl
+  @system_of_complexes.d (C.col q) c p p' =
+  by dsimp_result { dsimp, exact @d C c p p' q } :=
+rfl
 
 /-- The differential between columns in a system of double complexes,
 as map of system of complexes. -/
