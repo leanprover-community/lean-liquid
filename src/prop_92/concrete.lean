@@ -19,6 +19,42 @@ and does abstract normed space stuff.
 
 noncomputable theory
 
+section
+open finset
+open_locale big_operators
+
+-- Why can't I find this in mathlib?!?
+lemma partial_sum_geom {r : ℝ} (hr : 0 ≤ r) (hr' : r < 1) (n : ℕ) : (∑ k in range n, r^k) = (1 - r^n)/(1 - r) :=
+begin
+  rw eq_div_iff,
+  induction n with n ih,
+  { simp },
+  { rw [sum_range_succ, add_mul, ih],
+    ring_exp },
+  linarith,
+end
+
+-- Why can't I find this in mathlib?!?
+lemma partial_sum_geom_le {r : ℝ} (hr : 0 ≤ r) (hr' : r < 1) (n : ℕ) : (∑ k in range n, r^k) ≤ 1/(1 - r) :=
+begin
+  rw partial_sum_geom hr hr',
+  apply div_le_div ; linarith [pow_nonneg hr n],
+end
+
+lemma norm_sum_le_of_le_geom {α : Type*} [semi_normed_group α] {r C : ℝ} (hC : 0 ≤ C)
+  (hr₀ : 0 ≤ r) (hr₁ : r < 1) {f : ℕ → α} (h : ∀ n, ∥f n∥ ≤ C*r^n) {n : ℕ} :
+  ∥∑ k in range n, f k∥ ≤ C/(1-r) :=
+begin
+calc
+  ∥∑ k in range n, f k∥ ≤ ∑ k in range n, ∥f k∥ : norm_sum_le _ _
+  ... ≤ ∑ k in range n, C*r^k : sum_le_sum (λ k hk, h k)
+  ... = C*(∑ k in range n, r^k) : by rw mul_sum
+  ... ≤ C*(1/(1-r)) :  mul_le_mul_of_nonneg_left (partial_sum_geom_le hr₀ hr₁ n) hC
+  ... = C/(1-r) : mul_one_div C (1 - r)
+end
+
+end
+
 open set
 
 -- the following proof is overkill but nice
@@ -332,8 +368,16 @@ begin
   ring_exp
 end
 
+
 lemma norm_g_le (N : ℕ) : ∥he.g hφ f N∥ ≤ r/(1 - r) * ∥f∥ :=
-sorry -- follows easily from norm_h and geometric series
+begin
+  have : ∀ (n : ℕ), ∥he.h hφ f n∥ ≤ ↑r * ∥f∥ * ↑r ^ n,
+  { intro n,
+    convert norm_h he hφ f n using 1,
+    ring_exp },
+  convert norm_sum_le_of_le_geom (mul_nonneg r.coe_nonneg $ norm_nonneg f) r.coe_nonneg (fact.out _) this using 1,
+  ring
+end
 
 end locally_constant_stuff
 
@@ -345,11 +389,6 @@ open_locale topological_space
 
 variables {M₁ : Type*} [semi_normed_group M₁] {M₂ : Type*} [semi_normed_group M₂]
           (f : normed_group_hom M₁ M₂)
-
-/-
-The next lemma is a version of normed_group/controlled_exactness.lean but `f` is not assumed to be
-surjective. We'll need to abstract part of that older proof
--/
 
 -- PR very close to the definition of cauchy_seq
 lemma cauchy_seq.map {β : Type*} [semilattice_sup β]
