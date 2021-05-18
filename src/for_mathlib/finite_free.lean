@@ -14,7 +14,6 @@ The basic theory of finite free ℤ-modules
 
 * rewrite to include multiplicative version
 * also write version for modules, glue to version for groups
-* Fill in `sorry`s
 -/
 def torsion_free (A : Type*) [add_comm_group A] : Prop :=
 ∀ (a : A) (ha : a ≠ 0) (n : ℕ), n • a = 0 → n = 0
@@ -88,44 +87,6 @@ begin
   exact finite_free.finite ha
 end
 
--- def dual_basis_vecs (R : Type*) [comm_semiring R] (α : Type*) [fintype α] :
---   α → module.dual R (α → R) := linear_map.proj
-
--- lemma dual_basis_vecs_li (R : Type*) [comm_semiring R] (α : Type*) [fintype α] :
---   linear_independent R (dual_basis_vecs R α) :=
--- begin
---   rw fintype.linear_independent_iff,
---   intros g hg a,
---   classical,
---   let t : α → R := λ i, if i = a then 1 else 0,
---   have : (∑ (i : α), g i • dual_basis_vecs R α i) t = 0,
---   { rw hg,
---     simp },
---   simpa [dual_basis_vecs] using this,
--- end
-
--- lemma dual_basis_vecs_span (R : Type*) [comm_semiring R] (α : Type*) [fintype α] :
---   submodule.span R (set.range (dual_basis_vecs R α)) = ⊤ :=
--- begin
---   rw eq_top_iff,
---   rintro f -,
---   classical,
---   have : ∑ (i : α), f (pi.single i 1) • dual_basis_vecs R α i = f,
---   { ext x,
---     simp only [dual_basis_vecs, linear_map.coe_proj, algebra.id.smul_eq_mul, linear_map.smul_apply,
---       fintype.sum_apply, function.comp_app, linear_map.coe_fn_sum, function.eval_apply,
---       linear_map.coe_comp, linear_map.coe_single],
---     simp only [pi.single, function.update],
---     simp only [mul_boole, dite_eq_ite, eq_rec_constant, finset.mem_univ, if_true, pi.zero_apply,
---       finset.sum_ite_eq'] },
---   rw ←this,
---   refine submodule.sum_smul_mem _ _ _,
---   rintro c -,
---   apply submodule.subset_span,
---   simp
--- end
-
-
 theorem dual (ha : finite_free A) : finite_free (A →+ ℤ) :=
 begin
   rcases ha with ⟨ι, hι, ⟨b⟩⟩,
@@ -188,23 +149,6 @@ begin
   refine (hab.symm.to_linear_equiv _).trans (equiv_fin ha.basis),
   intros n a,
   exact hab.symm.to_add_monoid_hom.map_gsmul a n
-end
-
-theorem ker (ha : finite_free A) (φ : A →+ ℤ) : finite_free φ.ker :=
-begin
-  obtain ⟨n, b⟩ := @module.free_of_finite_type_torsion_free' ℤ _ _ φ.ker _ _ (id _) (id _),
-  { exact ⟨fin n, infer_instance, ⟨b⟩⟩ },
-  { -- prove `module.finite R N` for `N : submodule R M` and Noetherian `M`.
-    sorry },
-  { -- prove this for arbitrary submodules
-    sorry }
-end
-
-theorem rank_ker (ha : finite_free A) (φ : A →+ ℤ) (hφ : φ ≠ 0) :
-  (ker ha φ).rank + 1 = ha.rank :=
-begin
-  -- I don't know the best way of doing this
-  sorry
 end
 
 end finite_free

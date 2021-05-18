@@ -483,11 +483,6 @@ variable {Mᵢ}
 lemma internal_proj_apply (i : A) (r : R) :
   internal_proj Mᵢ i r = add_submonoid_decomposition Mᵢ r i := rfl
 
--- WTF type class inference??
-
--- lemma sum_internal_proj [Π i (x : (λ (i : A), ↥(Mᵢ i)) i), decidable (x ≠ 0)] (r : R) (i : A) :
---   finset.sum (add_submonoid_decomposition Mᵢ r).support (λ i, internal_proj Mᵢ i r) = 0 := sorry
-
 section classical
 -- break yury's rule of thimb
 open_locale classical
