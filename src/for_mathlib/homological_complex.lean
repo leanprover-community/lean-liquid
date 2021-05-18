@@ -6,6 +6,8 @@ variables {V V₁ V₂ ι : Type*} {c : complex_shape ι} [category V] [category
 
 namespace homological_complex
 
+section
+
 variables [has_zero_morphisms V] [has_zero_morphisms V₁] [has_zero_morphisms V₂]
 variables {C₁ C₂ C₃ : homological_complex V c}
 
@@ -37,12 +39,22 @@ variables (V c)
 { obj := λ C, C.X,
   map := λ _ _ f, f.f }
 
+end
+
+section
+
+variables [preadditive V]
+
+@[simps]
+def f_hom {C₁ C₂ : homological_complex V c} (i : ι) : (C₁ ⟶ C₂) →+ (C₁.X i ⟶ C₂.X i) :=
+add_monoid_hom.mk' (λ f, homological_complex.hom.f f i) (λ _ _, rfl)
+
 -- This ↓ is maybe not really "for_mathlib"
 
 /-- A complex of functors gives a functor to complexes
 
 jmc: This is functorial, but I'm getting timeouts, and I think this is all we need -/
-def as_functor {T : Type*} [category V] [preadditive V] [category T]
+def as_functor {T : Type*} [category T]
   (C : homological_complex (T ⥤ V) c) :
   T ⥤ homological_complex V c :=
 { obj := λ t,
@@ -65,6 +77,8 @@ def as_functor {T : Type*} [category V] [preadditive V] [category T]
     comm' := λ i j, nat_trans.naturality _ _ },
   map_id' := λ t, by { ext i, dsimp, rw (C.X i).map_id, },
   map_comp' := λ t₁ t₂ t₃ h₁ h₂, by { ext i, dsimp, rw functor.map_comp, } }
+
+end
 
 end homological_complex
 

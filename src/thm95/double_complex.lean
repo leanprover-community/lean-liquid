@@ -79,7 +79,7 @@ def double_complex_aux_rescaled : cochain_complex system_of_complexes ℕ :=
   system_of_complexes.rescale_nat_trans
 
 def double_complex : system_of_double_complexes :=
-(double_complex_aux_rescaled BD c' r r' V Λ M N).as_functor ℕ _
+(double_complex_aux_rescaled BD c' r r' V Λ M N).as_functor
 
 lemma double_complex.row_zero :
   (double_complex BD c' r r' V Λ M N).row 0 =
@@ -94,14 +94,13 @@ lemma double_complex.row_map_zero_one :
   (BD.system c' r V r').map (Cech_augmentation_map r' Λ M N) :=
 begin
   ext c i : 4,
-  dsimp only [double_complex, differential_object.complex_like.as_functor,
+  dsimp only [double_complex, homological_complex.as_functor,
     system_of_double_complexes.row_map_app_f, system_of_double_complexes.d,
-    double_complex_aux_rescaled, differential_object.complex_like.modify,
+    double_complex_aux_rescaled, homological_complex.modify,
     system_of_complexes.rescale_nat_trans, nat_trans.id_app,
     system_of_complexes.rescale_functor, functor.id_map,
     double_complex_aux, alt_face_map_cocomplex],
-  rw [category.comp_id, cochain_complex.mk'_d, dif_pos, eq_to_hom_refl, category.comp_id],
-  refl,
+  rw [dif_pos rfl, category.comp_id],
   refl
 end
 
@@ -139,10 +138,10 @@ begin
   have : (2 : ℝ≥0) = ∑ i : fin 2, 1,
   { simp only [finset.card_fin, mul_one, nat.cast_bit0, finset.sum_const, nsmul_eq_mul, nat.cast_one] },
   dsimp [system_of_complexes.rescale_functor, double_complex_aux, alt_face_map_cocomplex],
-  rw [if_pos rfl, category.comp_id],
+  rw [dif_pos rfl],
   dsimp [alt_face_map_cocomplex.d, alt_face_map_cocomplex.coboundary],
   simp only [← nat_trans.app_hom_apply, add_monoid_hom.map_sum, add_monoid_hom.map_gsmul,
-    ← differential_object.complex_like.f_hom_apply, this],
+    ← homological_complex.f_hom_apply, this],
   apply normed_group_hom.bound_by.sum,
   rintro i -,
   refine (normed_group_hom.bound_by.int_smul _ ((-1) ^ ↑i : ℤ)).le (_ : _ * 1 ≤ 1),
@@ -164,10 +163,10 @@ begin
   { simp only [finset.card_fin, mul_one, finset.sum_const, nsmul_eq_mul, nat.cast_id,
       nat.cast_bit1, nat.cast_add, nat.cast_one] },
   dsimp [system_of_complexes.rescale_functor, double_complex_aux, alt_face_map_cocomplex],
-  rw [if_pos rfl, category.comp_id],
+  rw [dif_pos rfl],
   dsimp [alt_face_map_cocomplex.d, alt_face_map_cocomplex.coboundary],
   simp only [← nat_trans.app_hom_apply, add_monoid_hom.map_sum, add_monoid_hom.map_gsmul,
-    ← differential_object.complex_like.f_hom_apply, this],
+    ← homological_complex.f_hom_apply, this],
   apply normed_group_hom.bound_by.sum,
   rintro i -,
   refine (normed_group_hom.bound_by.int_smul _ ((-1) ^ ↑i : ℤ)).le (_ : _ * 1 ≤ 1),
