@@ -1,8 +1,9 @@
+import algebra.homology.homotopy
+
 import pseudo_normed_group.system_of_complexes
 import rescale.Tinv
-/-!
 
-=== jmc: I think we can delete this entire file
+/-!
 
 *TODO*: find someone who can explain what is going on in this file. There
 are no docstrings, sorried data and false assumptions.
@@ -15,7 +16,7 @@ universe variables u
 
 open_locale nnreal
 
-open category_theory differential_object.complex_like
+open category_theory homological_complex
 
 namespace breen_deligne
 
@@ -31,7 +32,7 @@ section homotopy
 
 variables (M : (ProFiltPseuNormGrpWithTinv.{u} r')ᵒᵖ)
 
-open differential_object differential_object.complex_like
+open homological_complex
 
 @[simps app_f]
 def BD_map₂ (a₁ a₂ b₁ b₂ : ℕ → ℝ≥0)
@@ -42,17 +43,14 @@ def BD_map₂ (a₁ a₂ b₁ b₂ : ℕ → ℝ≥0)
   BD₁.complex₂ r V r' a₁ b₁ ⟶ BD₂.complex₂ r V r' a₂ b₂ :=
 { app := λ M,
   { f := λ i, ((f.f i).eval_CLCFPTinv₂ r V r' (a₁ i) (b₁ i) (a₂ i) (b₂ i)).app M,
-    comm := begin
+    comm' := begin
       intros i j,
-      show ((BD₁.complex₂ r V r' a₁ b₁).obj M).d i j ≫ _ =
-        _ ≫ ((BD₂.complex₂ r V r' a₂ b₂).obj M).d i j,
       dsimp [data.complex₂_obj_d, data.complex₂_d],
-      have : BD₂.d j i ≫ f.f i = f.f j ≫ BD₁.d j i := f.comm j i,
-      simp only [← nat_trans.comp_app, ← universal_map.eval_CLCFPTinv₂_comp r V r', this]
+      have : f.f j ≫ BD₁.d j i = BD₂.d j i ≫ f.f i := f.comm j i,
+      simp only [← nat_trans.comp_app, ← universal_map.eval_CLCFPTinv₂_comp r V r', this],
     end },
   naturality' := by { intros M₁ M₂ g, ext i : 2,
-    exact ((f.f i).eval_CLCFPTinv₂ r V r' (a₁ i) (b₁ i) (a₂ i) (b₂ i)).naturality g,
-    } }
+    exact ((f.f i).eval_CLCFPTinv₂ r V r' (a₁ i) (b₁ i) (a₂ i) (b₂ i)).naturality g, } }
 .
 
 @[simps app_f]
@@ -77,7 +75,7 @@ def BD_system_map [∀ i, (f.f i).suitable (c_₂ i) (c_₁ i)] :
     begin
       ext i : 2,
       erw [comp_f, comp_f],
-      dsimp only [data.system_obj, BD_map, BD_map₂_app_f, hom.mk'_f],
+      dsimp only [data.system_obj, BD_map, BD_map₂_app_f],
       haveI : fact (y.unop ≤ x.unop) := ⟨le_of_hom hxy.unop⟩,
       exact nat_trans.congr_app
         (universal_map.res_comp_eval_CLCFPTinv₂ r V r' _ _ _ _ _ _ _ _ _) M,

@@ -499,8 +499,6 @@ end universal_map
 
 namespace data
 
-open differential_object
-
 /-- A sequence of nonnegative real numbers `c_ 0`, `c_ 1`, ...
 is *suitable* with respect to a Breen--Deligne data `BD`,
 if for all `i : ℕ`, the constants `c_ (i+1)` and `c_ i` are
@@ -518,9 +516,9 @@ variables (BD : data) (c_ : ℕ → ℝ≥0) [BD.suitable c_] (i j j' : ℕ)
 
 def suitable.of_basic (H : ∀ i, (BD.d (i+1) i).suitable (c_ (i+1)) (c_ i)) : BD.suitable c_ :=
 ⟨λ j i, begin
-  by_cases hij : coherent_indices ff j i,
-  { dsimp [coherent_indices] at hij, subst j, exact H i },
-  { rw BD.d_eq_zero hij, apply_instance }
+  by_cases hij : i + 1 = j,
+  {  subst j, exact H i },
+  { rw BD.shape _ _ hij, apply_instance }
 end⟩
 
 instance comp_suitable :
@@ -658,92 +656,12 @@ lemma of_succ (h : ∀ i, universal_map.very_suitable (BD.d (i + 1) i) r r' (c_ 
     intros i j,
     by_cases hij : i = j + 1,
     { rw hij, exact h _ },
-    { rw BD.d_eq_zero, swap, exact hij,
+    { rw BD.shape, swap, exact ne.symm hij,
       exact universal_map.very_suitable.zero r r' (c_ i) (c_ j) }
   end }
 
 end very_suitable
 
 end data
-
-namespace package
-
-class adept (BD : out_param package) (c_ : out_param $ ℕ → ℝ≥0) (c' : ℕ → ℝ≥0) : Prop :=
-(htpy_suitable' :
-  ∀ i, (BD.homotopy.h i (i+1)).suitable (rescale_constants c_ 2 i) (c' (i+1) * c_ (i+1)))
-
-instance adept.htpy_suitable (BD : package) (c_ c' : ℕ → ℝ≥0) [adept BD c_ c'] (j i : ℕ) :
-  (BD.homotopy.h j i).suitable (rescale_constants c_ 2 j) (c' i * c_ i) :=
-begin
-  by_cases hij : i = j + 1,
-  { rw hij, apply adept.htpy_suitable' },
-  { rw BD.homotopy.h_eq_zero,
-    { apply_instance },
-    { exact hij } }
-end
-
-namespace adept
-
-open category_theory
-
-variables (BD : package) (c_ c' : ℕ → ℝ≥0) [adept BD c_ c']
-
--- instance mul_adept_suitable (N : ℕ) (f : (data.mul N).obj BD.data ⟶ BD.data) (i : ℕ) (c₁ : ℝ≥0)
---   [hf : universal_map.suitable c₁ (c_ i) (f.f i)] :
---   universal_map.suitable c₁ ((c' * c_) i) (f.f i) :=
--- begin
---   refine hf.le _ _ _ _ le_rfl _,
---   dsimp,
---   apply fact.out
--- end
-
-instance homotopy_pow'_suitable (j i : ℕ) :
-  Π N, ((BD.data.homotopy_pow' BD.homotopy N).h j i).suitable
-    (rescale_constants c_ (2 ^ N) j) ((c' * c_) i)
-| 0     := universal_map.suitable_zero _ _
-| (N+1) :=
-begin
-  dsimp [data.homotopy_pow'],
-  refine @universal_map.suitable_add _ _ _ _ _ _ (id _) (id _),
-  { refine @universal_map.suitable.comp
-      _ _ _ _ _ _ (c' i * c_ i) _ _ (id _),
-    refine @universal_map.mul_suitable _ _ _ _ _ (id _) _ _,
-    refine (homotopy_pow'_suitable N).le _ _ _ _ _ le_rfl,
-    calc rescale_constants c_ (2 ^ (N + 1)) j
-        = c_ j * (2⁻¹ * (2 ^ N)⁻¹) : by simp only [rescale_constants, pow_succ, mul_inv']
-    ... ≤ c_ j * (1 * (2 ^ N)⁻¹)   : mul_le_mul' le_rfl (mul_le_mul' (by norm_num) le_rfl)
-    ... = c_ j * (2 ^ N)⁻¹         : by rw one_mul, },
-  { refine @universal_map.suitable.comp
-      _ _ _ _ _ _ (rescale_constants c_ 2 j) _ _ (id _),
-    refine @universal_map.mul_suitable _ _ _ _ _ (id _) 2 ⟨zero_lt_two⟩,
-    simp only [rescale_constants, pow_succ, mul_inv'],
-    rw [← mul_assoc, mul_right_comm],
-    exact @universal_map.suitable_mul_right _ _ _ _ _ _ _ }
-end
-
-instance homotopy_mul_suitable (j i N : ℕ) :
-  ((BD.data.homotopy_mul BD.homotopy N).h j i).suitable
-    (rescale_constants c_ (2 ^ N) j) ((c' * c_) i) :=
-begin
-  dsimp [data.homotopy_mul],
-  simp only [add_zero, zero_add, neg_zero],
-  refine @universal_map.suitable.comp _ _ _ _ _ _ (rescale_constants c_ (2 ^ N) j) _ _ (id _),
-  generalize : (rescale_constants c_ (2 ^ N) j) = c,
-  induction N with N IH,
-  { dsimp [data.pow'_iso_mul, data.mul_one_iso, FreeMat.one_mul_iso],
-    -- jmc: I don't understand why TC doesn't find the following instance...
-    exact @universal_map.suitable_of _ _ _ _ _ (basic_universal_map.one_mul_hom_suitable _), },
-  { dsimp [data.pow'_iso_mul],
-    resetI,
-    refine @universal_map.suitable.comp _ _ _ _ _ _ c _ (id _) (id _),
-    { dsimp, apply_instance },
-    { dsimp [data.mul_mul_iso, FreeMat.mul_mul_iso],
-      erw [nat_iso.of_components.inv_app, FreeMat.iso_mk'_inv],
-      apply_instance } }
-end
-
-end adept
-
-end package
 
 end breen_deligne

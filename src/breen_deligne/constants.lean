@@ -1,4 +1,4 @@
-import breen_deligne.suitable
+import breen_deligne.homotopy
 
 noncomputable theory
 
@@ -71,7 +71,7 @@ variables (BD : package) (r r' : ℝ≥0)
 a given Breen--Deligne package `BD` and constants `c_`. -/
 def c' (BD : package) (c_ : ℕ → ℝ≥0) : ℕ → ℝ≥0
 | 0     := 1
-| (n+1) := (BD.homotopy.h n (n + 1)).factor * rescale_constants c_ 2 n * (c_ (n + 1))⁻¹
+| (n+1) := (BD.homotopy.hom n (n + 1)).factor * rescale_constants c_ 2 n * (c_ (n + 1))⁻¹
 
 instance c'_adept (c_ : ℕ → ℝ≥0) [BD.data.suitable c_] [∀ i, fact (0 < c_ i)] :
   package.adept BD c_ (c' BD c_) :=

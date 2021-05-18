@@ -1,6 +1,9 @@
+import algebra.homology.additive
+
 import breen_deligne.universal_map
-import breen_deligne.functorial_map
-import system_of_complexes.complex
+-- import breen_deligne.functorial_map
+
+import for_mathlib.homological_complex
 
 import for_mathlib.free_abelian_group
 
@@ -124,7 +127,7 @@ end FreeMat
 /-- Roughly speaking, this is a collection of formal finite sums of matrices
 that encode the data that rolls out of the Breen--Deligne resolution. -/
 @[derive [small_category, preadditive]]
-def data := chain_complex ℕ FreeMat
+def data := chain_complex FreeMat ℕ
 
 namespace data
 
@@ -136,15 +139,15 @@ open universal_map
 
 @[simps]
 def mul (N : ℕ) : data ⥤ data :=
-(FreeMat.mul_functor N).map_complex_like
+(FreeMat.mul_functor N).map_homological_complex _
 
 def mul_one_iso : (mul 1).obj BD ≅ BD :=
-differential_object.complex_like.iso_of_components (λ i, FreeMat.one_mul_iso.app _) $
-λ i j, FreeMat.one_mul_iso.hom.naturality (BD.d i j)
+homological_complex.iso_of_components (λ i, FreeMat.one_mul_iso.app _) $
+λ i j, (FreeMat.one_mul_iso.hom.naturality (BD.d i j)).symm
 
 def mul_mul_iso (m n : ℕ) : (mul m).obj ((mul n).obj BD) ≅ (mul (m * n)).obj BD :=
-differential_object.complex_like.iso_of_components (λ i, (FreeMat.mul_mul_iso _ _).app _) $
-λ i j, (FreeMat.mul_mul_iso _ _).hom.naturality (BD.d i j)
+homological_complex.iso_of_components (λ i, (FreeMat.mul_mul_iso _ _).app _) $
+λ i j, ((FreeMat.mul_mul_iso _ _).hom.naturality (BD.d i j)).symm
 
 end mul
 
@@ -155,35 +158,19 @@ def pow' : ℕ → data
 
 @[simps] def sum (BD : data) (N : ℕ) : (mul N).obj BD ⟶ BD :=
 { f := λ n, universal_map.sum _ _,
-  comm := λ m n, universal_map.sum_comp_mul _ _ }
+  comm' := λ m n, (universal_map.sum_comp_mul _ _).symm }
 
 @[simps] def proj (BD : data) (N : ℕ) : (mul N).obj BD ⟶ BD :=
 { f := λ n, universal_map.proj _ _,
-  comm := λ m n, universal_map.proj_comp_mul _ _ }
+  comm' := λ m n, (universal_map.proj_comp_mul _ _).symm }
 
-open differential_object.complex_like FreeMat
+open homological_complex FreeMat category_theory category_theory.limits
 
 def hom_pow' {BD : data} (f : (mul 2).obj BD ⟶ BD) : Π N, BD.pow' N ⟶ BD
 | 0     := 𝟙 _
 | (n+1) := (mul 2).map (hom_pow' n) ≫ f
 
-@[simps]
-def homotopy_two_mul {BD₁ BD₂ : data} {f g : BD₁ ⟶ BD₂} (h : homotopy f g) :
-  homotopy ((mul 2).map f) ((mul 2).map g) :=
-{ h := λ j i, universal_map.mul 2 (h.h j i),
-  h_eq_zero := λ i j hij, by rw [h.h_eq_zero i j hij, add_monoid_hom.map_zero],
-  comm := λ i j k hij hjk,
-  begin
-    simp only [mul_obj_d, mul_map_f, ← add_monoid_hom.map_sub],
-    rw [← h.comm i j k hij hjk, add_monoid_hom.map_add],
-    erw [universal_map.mul_comp, universal_map.mul_comp],
-    refl
-  end }
-
-def homotopy_pow' (h : homotopy (BD.proj 2) (BD.sum 2)) :
-  Π N, homotopy (hom_pow' (BD.proj 2) N) (hom_pow' (BD.sum 2) N)
-| 0     := homotopy.refl
-| (N+1) := (homotopy_two_mul (homotopy_pow' N)).comp h
+open_locale zero_object
 
 def pow'_iso_mul : Π N, BD.pow' N ≅ (mul (2^N)).obj BD
 | 0     := BD.mul_one_iso.symm
@@ -207,7 +194,7 @@ begin
   slice_lhs 2 3 { rw [← functor.map_comp, hom_pow'_sum] },
   rw iso.inv_comp_eq,
   ext i : 2,
-  iterate 2 { erw [differential_object.comp_f] },
+  iterate 2 { erw [homological_complex.comp_f] },
   dsimp [mul_mul_iso, FreeMat.mul_mul_iso, universal_map.sum],
   rw [universal_map.mul_of],
   show universal_map.comp _ _ = universal_map.comp _ _,
@@ -238,7 +225,7 @@ begin
   slice_lhs 2 3 { rw [← functor.map_comp, hom_pow'_proj] },
   rw iso.inv_comp_eq,
   ext i : 2,
-  iterate 2 { erw [differential_object.comp_f] },
+  iterate 2 { erw [homological_complex.comp_f] },
   dsimp [mul_mul_iso, FreeMat.mul_mul_iso, universal_map.proj],
   simp only [add_monoid_hom.map_sum, add_monoid_hom.finset_sum_apply,
     preadditive.comp_sum, preadditive.sum_comp],
@@ -254,28 +241,6 @@ end
 lemma hom_pow'_proj' (N : ℕ) : hom_pow' (BD.proj 2) N = (BD.pow'_iso_mul N).hom ≫ BD.proj (2^N) :=
 by { rw ← iso.inv_comp_eq, apply hom_pow'_proj }
 
-def homotopy_mul (h : homotopy (BD.proj 2) (BD.sum 2)) (N : ℕ) :
-  homotopy (BD.proj (2^N)) (BD.sum (2^N)) :=
-(homotopy.of_eq $ BD.hom_pow'_proj N).symm.trans $
-  ((BD.homotopy_pow' h N).const_comp (BD.pow'_iso_mul N).inv).trans $
-  (homotopy.of_eq $ BD.hom_pow'_sum N)
-
 end data
-
-section
-universe variables u
-open universal_map
-variables {m n : ℕ} (A : Type u) [add_comm_group A] (f : universal_map m n)
-
-end
-
-open differential_object.complex_like
-
-/-- A Breen--Deligne `package` consists of Breen--Deligne `data`
-that forms a complex, together with a `homotopy`
-between the two universal maps `σ_add` and `σ_proj`. -/
-structure package :=
-(data       : data)
-(homotopy   : homotopy (data.proj 2) (data.sum 2))
 
 end breen_deligne

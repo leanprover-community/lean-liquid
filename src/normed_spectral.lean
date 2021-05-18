@@ -16,7 +16,7 @@ namespace system_of_double_complexes
 @[simps]
 def truncate : system_of_double_complexes.{u} ⥤ system_of_double_complexes.{u} :=
 (whiskering_right _ _ _).obj $
-  @functor.map_complex_like _ _ _ _ _ _ _ _ _ _ SemiNormedGroup.truncate.additive.{u u}
+  @functor.map_homological_complex _ _ _ _ _ _ _ _ SemiNormedGroup.truncate.additive.{u u} _
 -- TODO: why do I need to give the instance manually? ↑ ↑ ↑
 
 namespace truncate
@@ -46,7 +46,7 @@ lemma res_π (c₁ c₂ : ℝ≥0) (p : ℕ) (h : fact (c₁ ≤ c₂)) (x : M.X
 def quotient_map : M.col 1 ⟶ (truncate.obj M).col 0 :=
 { app := λ c,
   { f := λ p, SemiNormedGroup.coker.π,
-    comm := λ p p', by { ext, refl } },
+    comm' := λ p p', by { ext, refl } },
   naturality' := by { intros, ext, refl } }
 
 lemma admissible (hM : M.admissible) : (truncate.obj M).admissible :=
