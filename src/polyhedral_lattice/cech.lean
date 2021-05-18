@@ -1,13 +1,11 @@
 import algebraic_topology.simplicial_object
-import linear_algebra.free_module
 import ring_theory.int.basic
 
 import polyhedral_lattice.finsupp
 import polyhedral_lattice.category
-import polyhedral_lattice.topology
+import polyhedral_lattice.quotient
 
 import for_mathlib.free_abelian_group
-import for_mathlib.normed_group_quotient
 import for_mathlib.finsupp
 import for_mathlib.normed_group
 
@@ -29,30 +27,10 @@ noncomputable theory
 
 open_locale big_operators
 
-section saturated
-
-variables {G G₁ G₂ : Type*} [group G] [add_comm_group G₁] [add_comm_group G₂]
-
-namespace subgroup -- move this section
-
-@[to_additive]
-def saturated (H : subgroup G) : Prop := ∀ ⦃n g⦄, gpow n g ∈ H → n = 0 ∨ g ∈ H
-
-end subgroup
-
-lemma add_subgroup.ker_saturated [no_zero_smul_divisors ℤ G₂] (f : G₁ →+ G₂) :
-  (f.ker).saturated :=
-begin
-  intros n g hg,
-  simpa only [f.mem_ker, gsmul_eq_smul, f.map_gsmul, smul_eq_zero] using hg
-end
-
-end saturated
-
 namespace polyhedral_lattice
 
 variables {Λ Λ' : Type*} [polyhedral_lattice Λ] [polyhedral_lattice Λ']
-variables (f : polyhedral_lattice_hom Λ Λ') (f' : polyhedral_lattice_hom Λ' Λ)
+variables (f : polyhedral_lattice_hom Λ Λ')
 
 namespace conerve
 
@@ -89,9 +67,10 @@ def L : add_subgroup (fin m →₀ Λ') :=
       rw [f.map_neg, hl, finsupp.neg_apply] }
   end }
 
-lemma L_saturated [hf : fact f.to_add_monoid_hom.range.saturated] :
-  (L f m).saturated :=
+instance L_saturated [hf : fact f.to_add_monoid_hom.range.saturated] :
+  fact (L f m).saturated :=
 begin
+  constructor,
   rintro n l' ⟨hl', Hl'⟩,
   simp only [gsmul_eq_smul, finsupp.smul_apply, ← finset.smul_sum, smul_eq_zero] at hl' Hl',
   rw or_iff_not_imp_left,
@@ -150,14 +129,11 @@ end
 
 def obj := quotient_add_group.quotient (L f m)
 
-instance : is_closed (L f m : set (fin m →₀ Λ')) :=
-is_closed_discrete _
-
 instance : normed_group (obj f m) :=
 add_subgroup.normed_group_quotient _
 
-def π : (fin m →₀ Λ') →+ obj f m :=
-by convert quotient_add_group.mk' (L f m)
+def π : normed_group_hom (fin m →₀ Λ') (obj f m) :=
+(L f m).normed_mk
 
 lemma π_apply_eq_zero_iff (x : fin m →₀ Λ') : π f m x = 0 ↔ x ∈ L f m :=
 quotient_add_group.eq_zero_iff _
@@ -172,45 +148,12 @@ begin
   simp only [L_one, set.image_singleton, add_zero, cInf_singleton, add_subgroup.coe_bot],
 end
 
-variables [fact f.to_add_monoid_hom.range.saturated]
+-- uugh namespace
+lemma π_is_quotient : add_subgroup.is_quotient (π f m) :=
+add_subgroup.is_quotient_quotient _
 
-instance : no_zero_smul_divisors ℤ (obj f m) :=
-{ eq_zero_or_eq_zero_of_smul_eq_zero :=
-  begin
-    intros n x h,
-    obtain ⟨x, rfl⟩ := π_surjective f m x,
-    simp only [← add_monoid_hom.map_gsmul, π_apply_eq_zero_iff] at h ⊢,
-    exact L_saturated _ _ h
-  end }
-
-lemma obj_finite_free : _root_.finite_free (obj f m) :=
-begin
-  obtain ⟨ι, _inst_ι, ⟨b⟩⟩ := polyhedral_lattice.finite_free (fin m →₀ Λ'), resetI,
-  let φ := (π f m).to_int_linear_map,
-  suffices : submodule.span ℤ (set.range (φ ∘ b)) = ⊤,
-  { obtain ⟨n, b⟩ := module.free_of_finite_type_torsion_free this,
-    exact ⟨fin n, infer_instance, ⟨b⟩⟩ },
-  rw [set.range_comp, ← submodule.map_span, b.span_eq, submodule.map_top, linear_map.range_eq_top],
-  exact π_surjective f m
-end
-
-instance : polyhedral_lattice (obj f m) :=
-{ finite_free := obj_finite_free _ _,
-  polyhedral' :=
-  begin
-    obtain ⟨ι, _inst_ι, l, hl, hl'⟩ := polyhedral_lattice.polyhedral (fin m →₀ Λ'),
-    refine ⟨ι, _inst_ι, (λ i, quotient_add_group.mk' (L f m) (l i)), _⟩,
-    { intros x,
-      apply quotient_add_group.induction_on x; clear x,
-      intro x,
-      obtain ⟨d, hd, c, H1, H2⟩ := hl x,
-      refine ⟨d, hd, c, _, _⟩,
-      { show d • quotient_add_group.mk' _ x = _,
-        rw [← add_monoid_hom.map_nsmul, H1, add_monoid_hom.map_sum],
-        simp only [add_monoid_hom.map_nsmul] },
-      { dsimp,
-        sorry } },
-  end }
+instance [fact f.to_add_monoid_hom.range.saturated] : polyhedral_lattice (obj f m) :=
+by { delta obj, apply_instance }
 
 end objects
 
@@ -369,7 +312,7 @@ iso.symm $ PolyhedralLattice.iso_mk
 by a subgroup that is provably trivial -/
 def obj_zero_iso' : obj f 0 ≅ of (fin 1 →₀ Λ') :=
 iso.symm $ PolyhedralLattice.iso_mk
-  (polyhedral_lattice.conerve.π _ _)
+  (polyhedral_lattice.conerve.π _ _).to_add_monoid_hom
   (quotient_add_group.lift _ (add_monoid_hom.id _)
     (by { intros x hx, rwa [polyhedral_lattice.conerve.L_one, add_subgroup.mem_bot] at hx }))
   (polyhedral_lattice.conerve.norm_π_one_eq _)
@@ -411,7 +354,7 @@ begin
   refine H1.trans (eq.trans _ H2.symm), clear H1 H2,
   show (conerve.π f 2) _ = (conerve.π f 2) _,
   simp only [finsupp.map_domain_single, finsupp.map_domain.add_monoid_hom_apply],
-  rw [← sub_eq_zero, ← add_monoid_hom.map_sub, conerve.π_apply_eq_zero_iff],
+  rw [← sub_eq_zero, ← normed_group_hom.map_sub, conerve.π_apply_eq_zero_iff],
   have hδ0 : hom.to_preorder_hom (δ (0 : fin 2)) 0 = 1 := rfl,
   have hδ1 : hom.to_preorder_hom (δ (1 : fin 2)) 0 = 0 := rfl,
   erw [hδ0, hδ1],

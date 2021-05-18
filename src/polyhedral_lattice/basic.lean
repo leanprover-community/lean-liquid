@@ -25,31 +25,27 @@ section generates_norm
 variables {Λ ι : Type*} [semi_normed_group Λ] [fintype ι]
 
 /-- A finite family `x : ι → Λ` generates the norm on `Λ`
-if for every `l : Λ`,
-there exists a scaling factor `d : ℕ`, and coefficients `c : ι → ℕ`,
-such that `d • l = ∑ i, c i • x i` and `d * ∥l∥ = ∑ i, (c i) * ∥x i∥`.
+if for every `l : Λ` there exist coefficients `c : ι → ℕ`
+such that `l = ∑ i, c i • x i` and `∥l∥ = ∑ i, (c i) * ∥x i∥`.
 -/
 def generates_norm (x : ι → Λ) :=
-∀ l : Λ, ∃ (d : ℕ) (hd : 0 < d) (c : ι → ℕ),
-  (d • l = ∑ i, c i • x i) ∧ ((d : ℝ) * ∥l∥ = ∑ i, (c i : ℝ) * ∥x i∥)
+∀ l : Λ, ∃ (c : ι → ℕ), (l = ∑ i, c i • x i) ∧ (∥l∥ = ∑ i, c i * ∥x i∥)
 
 lemma generates_norm_iff_generates_nnnorm (x : ι → Λ) :
   generates_norm x ↔
-  ∀ l : Λ, ∃ (d : ℕ) (hd : 0 < d) (c : ι → ℕ),
-    (d • l = ∑ i, c i • x i) ∧ ((d : ℝ≥0) * nnnorm l = ∑ i, (c i : ℝ≥0) * nnnorm (x i)) :=
+  ∀ l : Λ, ∃ (c : ι → ℕ),
+    (l = ∑ i, c i • x i) ∧ (nnnorm l = ∑ i, c i * nnnorm (x i)) :=
 begin
   apply forall_congr, intro l,
   simp only [← nnreal.eq_iff, nnreal.coe_mul, nnreal.coe_sum, nnreal.coe_nat_cast, coe_nnnorm]
 end
 
 lemma generates_norm.generates_nnnorm {x : ι → Λ} (hl : generates_norm x) :
-  ∀ l : Λ, ∃ (d : ℕ) (hd : 0 < d) (c : ι → ℕ),
-    (d • l = ∑ i, c i • x i) ∧ ((d : ℝ≥0) * nnnorm l = ∑ i, (c i : ℝ≥0) * nnnorm (x i)) :=
+  ∀ l : Λ, ∃ (c : ι → ℕ), (l = ∑ i, c i • x i) ∧ (nnnorm l = ∑ i, c i * nnnorm (x i)) :=
 (generates_norm_iff_generates_nnnorm x).mp hl
 
 lemma generates_norm_of_generates_nnnorm {x : ι → Λ}
-  (H : ∀ l : Λ, ∃ (d : ℕ) (hd : 0 < d) (c : ι → ℕ),
-    (d • l = ∑ i, c i • x i) ∧ ((d : ℝ≥0) * nnnorm l = ∑ i, (c i : ℝ≥0) * nnnorm (x i))) :
+  (H : ∀ l : Λ, ∃ (c : ι → ℕ), (l = ∑ i, c i • x i) ∧ (nnnorm l = ∑ i, c i * nnnorm (x i))) :
   generates_norm x :=
 (generates_norm_iff_generates_nnnorm x).mpr H
 
@@ -77,8 +73,8 @@ begin
   obtain ⟨ι, _ι_inst, l, hl⟩ := polyhedral_lattice.polyhedral' Λ, resetI,
   refine ⟨{i // l i ≠ 0}, infer_instance, λ i, l i, _, λ i, i.2⟩,
   intro x,
-  obtain ⟨d, hd, c, h1, h2⟩ := hl x,
-  refine ⟨d, hd, λ i, c i, _, _⟩,
+  obtain ⟨c, h1, h2⟩ := hl x,
+  refine ⟨λ i, c i, _, _⟩,
   { rw h1,
     refine finset.sum_bij_ne_zero _ (λ _ _ _, finset.mem_univ _) _ _ _,
     { rintro i - hi, refine ⟨i, _⟩, contrapose! hi, rw [hi, smul_zero] },
@@ -96,41 +92,6 @@ end
 -- move this
 lemma int.div_eq_zero (d n : ℤ) (h : d ∣ n) (H : n / d = 0) : n = 0 :=
 by rw [← int.mul_div_cancel' h, H, mul_zero]
-
--- lemma polyhedral :
---   ∃ (ι : Type) [fintype ι] (l : ι → Λ), by exactI generates_norm l ∧ (∀ i, l i ≠ 0) ∧
---       ∀ i (n : ℕ) (l' : Λ), n • l' = l i → n = 1 ∧ l' = l i :=
--- begin
---   obtain ⟨ι, hι, l, hl, hl'⟩ := polyhedral_lattice.polyhedral_aux Λ,
---   obtain ⟨ι', hι', ⟨b⟩⟩ := polyhedral_lattice.finite_free Λ, resetI,
---   let N := λ i, b.repr (l i),
---   let g := λ i, (N i).support.gcd (N i),
---   let l₀ := λ i, b.repr.symm ((N i).map_range (λ k, k / (g i).nat_abs) (int.zero_div _)),
---   have gN : ∀ i i', ((g i).nat_abs : ℤ) ∣ N i i',
---   { intros i i',
---     by_cases hi' : i' ∈ (N i).support,
---     { rw [int.nat_abs_dvd], apply finset.gcd_dvd hi' },
---     { rw finsupp.not_mem_support_iff at hi', rw hi', exact dvd_zero _ } },
---   have gl₀ : ∀ i, (g i).nat_abs • l₀ i = l i,
---   { intro i, apply b.repr.injective, ext i',
---     rw [← gsmul_coe_nat, b.repr.map_smul, finsupp.smul_apply, linear_equiv.apply_symm_apply,
---       finsupp.map_range_apply, smul_eq_mul, int.mul_div_cancel'],
---     exact gN i i', },
---   refine ⟨ι, hι, l₀, _, _, _⟩,
---   { intros x,
---     obtain ⟨d, hd, c, h1, h2⟩ := hl x,
---     refine ⟨d, hd, λ i, c i * (g i).nat_abs, _, _⟩,
---     { simp only [h1, mul_nsmul, gl₀], },
---     { simp only [h2, ← gl₀],
---       -- is this even provable? Or are we missing an axiom `norm_smul` for polyhedral lattices?
---       admit } },
---   { intros i hi, apply hl' i, apply b.repr.injective, ext i',
---     rw [b.repr.map_zero, finsupp.zero_apply],
---     simp only [← b.repr.symm.map_zero, b.repr.symm.injective.eq_iff, finsupp.ext_iff,
---       finsupp.zero_apply, finsupp.map_range_apply] at hi,
---     exact int.div_eq_zero _ _ (gN i i') (hi i'), },
---   { intros i n l' h, admit },
--- end
 
 end polyhedral_lattice
 

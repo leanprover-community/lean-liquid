@@ -26,8 +26,8 @@ instance (Λ : Type*) [hN : fact (0 < N)] [polyhedral_lattice Λ] :
     obtain ⟨ι, _inst_ι, l, hl⟩ := polyhedral_lattice.polyhedral' Λ,
     refine ⟨ι, _inst_ι, l, _⟩,
     { intro x,
-      obtain ⟨d, hd, c, H1, H2⟩ := hl x,
-      refine ⟨d, hd, c, H1, _⟩,
+      obtain ⟨c, H1, H2⟩ := hl x,
+      refine ⟨c, H1, _⟩,
       simp only [norm_def, ← mul_div_assoc, ← finset.sum_div],
       congr' 1, }, -- defeq abuse
   end }

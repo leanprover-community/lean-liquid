@@ -64,10 +64,9 @@ instance int.polyhedral_lattice : polyhedral_lattice ℤ :=
   begin
     refine ⟨units ℤ, infer_instance, coe, _⟩,
     intro n,
-    refine ⟨1, zero_lt_one, (λ e, int.to_nat (e * n)), _, _⟩,
-    { rw [int.sum_units_to_nat, one_smul] },
-    { simp only [int.norm_coe_units, mul_one, nat.cast_one, one_mul, int.units_univ],
-      show ∥n∥ = ((1 * n).to_nat) + (↑(((-1) * n).to_nat) + 0),
-      simp only [neg_mul_eq_neg_mul_symm, add_zero, one_mul],
-      exact give_better_name n }
+    refine ⟨λ e, int.to_nat (e * n), (int.sum_units_to_nat _).symm, _⟩,
+    simp only [int.norm_coe_units, mul_one, nat.cast_one, one_mul, int.units_univ],
+    show ∥n∥ = ((1 * n).to_nat) + (↑(((-1) * n).to_nat) + 0),
+    simp only [neg_mul_eq_neg_mul_symm, add_zero, one_mul],
+    exact give_better_name n
   end }

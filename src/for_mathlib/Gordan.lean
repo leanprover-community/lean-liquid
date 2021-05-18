@@ -119,43 +119,6 @@ begin
   simpa using h
 end
 
--- def dual_basis_vecs (R : Type*) [comm_semiring R] (α : Type*) [fintype α] :
---   α → module.dual R (α → R) := linear_map.proj
-
--- lemma dual_basis_vecs_li (R : Type*) [comm_semiring R] (α : Type*) [fintype α] :
---   linear_independent R (dual_basis_vecs R α) :=
--- begin
---   rw fintype.linear_independent_iff,
---   intros g hg a,
---   classical,
---   let t : α → R := λ i, if i = a then 1 else 0,
---   have : (∑ (i : α), g i • dual_basis_vecs R α i) t = 0,
---   { rw hg,
---     simp },
---   simpa [dual_basis_vecs] using this,
--- end
-
--- lemma dual_basis_vecs_span (R : Type*) [comm_semiring R] (α : Type*) [fintype α] :
---   submodule.span R (set.range (dual_basis_vecs R α)) = ⊤ :=
--- begin
---   rw eq_top_iff,
---   rintro f -,
---   classical,
---   have : ∑ (i : α), f (pi.single i 1) • dual_basis_vecs R α i = f,
---   { ext x,
---     simp only [dual_basis_vecs, linear_map.coe_proj, algebra.id.smul_eq_mul, linear_map.smul_apply,
---       fintype.sum_apply, function.comp_app, linear_map.coe_fn_sum, function.eval_apply,
---       linear_map.coe_comp, linear_map.coe_single],
---     simp only [pi.single, function.update],
---     simp only [mul_boole, dite_eq_ite, eq_rec_constant, finset.mem_univ, if_true, pi.zero_apply,
---       finset.sum_ite_eq'] },
---   rw ←this,
---   refine submodule.sum_smul_mem _ _ _,
---   rintro c -,
---   apply submodule.subset_span,
---   simp
--- end
-
 def lattice_restrict (S : submodule (ℚ≥0) (α → ℚ)) :
   submodule ℕ (α → ℤ) :=
 { carrier := to_rational_point ⁻¹' (S : set (α → ℚ)),
@@ -335,23 +298,7 @@ begin
   apply thingy',
 end
 
--- def to_rational_point : (α → ℤ) →ₗ[ℤ] (α → ℚ) :=
--- { to_fun := λ f x, f x, ... }
-
--- def lattice_restrict (S : submodule (ℚ≥0) (α → ℚ)) :
---   submodule ℕ (α → ℤ) :=
--- { carrier := to_rational_point ⁻¹' (S : set (α → ℚ)), ... }
-
--- #check mem_span_finset
--- lemma mem_span_finset {R M : Type*} [semiring R] [add_comm_monoid M] [module R M]
---   (S : finset M) (x : M) :
---   x ∈ submodule.span R (S : set M) ↔ ∃ (w : M → R), ∑ i in S, w i • i = x :=
--- begin
--- end
-
 section
-
--- local attribute [instance] nnrat_module
 
 lemma finitely_generated_iff_integrally_generated [fintype α] (C : submodule (ℚ≥0) (α → ℚ)) :
   C.fg ↔ ∃ S : finset (α → ℤ), submodule.span (ℚ≥0) (S.image to_rational_point : set (α → ℚ)) = C :=
@@ -411,12 +358,6 @@ begin
     refine ⟨s.image v, _⟩,
     rw finset.image_image }
 end
-
--- noncomputable def evaluation {ι : Type*} (i : ι) : C(ι → ℚ, ℚ) :=
--- { to_fun := λ f, f i }
--- noncomputable def smul_left [fintype α] (x : α → ℚ) : C(ℚ, α → ℚ) :=
--- { to_fun := λ i, i • x,
---   continuous_to_fun := continuous.smul (by continuity) (by continuity) }
 
 lemma bounded_lattice_thing [fintype α] {k : α → ℕ} (C : set (α → ℤ))
   (hC : ∀ (x : α → ℤ) i, x ∈ C → int.nat_abs (x i) ≤ k i) : C.finite :=
@@ -655,35 +596,6 @@ begin
   simp [mem_lattice_restrict, mem_intersect_halfspaces_set, upgrade_id],
 end
 
--- #exit
-
--- def left_conj {F G : Type*}
---   [add_comm_group F] [add_comm_group G]
---   (e : F ≃ₗ[ℕ] G) :
---   (F →+ ℤ) ≃ₗ[ℕ] (G →+ ℤ) :=
--- { to_fun := λ f, f.comp e.symm.to_linear_map.to_add_monoid_hom,
---   inv_fun := λ f, f.comp e.to_linear_map.to_add_monoid_hom,
---   map_add' := λ f g,
---   begin
---     ext x,
---     simp only [add_monoid_hom.coe_comp, function.comp_app, add_monoid_hom.add_apply],
---   end,
---   map_smul' := λ f r,
---   begin
---     ext x,
---     refl,
---   end,
---   left_inv := λ f,
---   begin
---     ext x,
---     simp,
---   end,
---   right_inv := λ f,
---   begin
---     ext x,
---     simp,
---   end }
-
 /-- A finset version of Gordan's Lemma. -/
 lemma finset_Gordan_aux (hΛ : finite_free Λ) (S : finset (Λ →+ ℤ)) :
   (intersect_halfspaces_set (S : set (Λ →+ ℤ))).fg :=
@@ -712,39 +624,6 @@ begin
   ext x,
   simp [mem_dual_finset, mem_intersect_halfspaces_set],
 end
-
--- /-- A finset version of Gordan's Lemma. -/
--- lemma finset_Gordan (hΛ : finite_free Λ) [decidable_eq Λ] (S : finset Λ) :
---   (dual_finset S).fg :=
--- begin
---   classical,
---   let e := linear_equiv.restrict_scalars ℕ hΛ.basis.equiv_fun,
---   have hS := finset_Gordan_pi (S.image e),
---   let e' := left_conj e,
---   have q : dual_finset (finset.image e S) = submodule.map ↑e' (dual_finset S),
---   { ext f,
---     simp only [mem_dual_finset, finset.mem_image, submodule.mem_map, linear_equiv.coe_coe],
---     split,
---     { rintro h,
---       refine ⟨e'.symm f, λ x hx, _, by simp⟩,
---       apply h _ ⟨_, hx, rfl⟩ },
---     { rintro ⟨f, hf, rfl⟩ g ⟨x, hx, rfl⟩,
---       clear_value e,
---       change (0 : ℤ) ≤ left_conj e f (e x),
---       simp only [left_conj, add_monoid_hom.coe_comp, function.comp_app,
---         linear_map.to_add_monoid_hom_coe, linear_equiv.coe_mk, linear_equiv.coe_to_linear_map,
---         linear_equiv.symm_apply_apply],
---       apply hf _ hx } },
---   rw q at hS,
---   have : submodule.map (e'.symm : ((hΛ.basis_type → ℤ) →+ ℤ) →ₗ[ℕ] Λ →+ ℤ)
---             (submodule.map (e' : (Λ →+ ℤ) →ₗ[ℕ] ((hΛ.basis_type → ℤ) →+ ℤ)) (dual_finset S)) =
---               dual_finset S,
---   { rw ←submodule.map_comp,
---     simp },
---   rw ← this,
---   apply submodule.fg_map,
---   apply hS
--- end
 
 /-- A fintype version of Gordan's Lemma. -/
 lemma explicit_gordan (hΛ : finite_free Λ) [fintype ι] (l : ι → Λ) :

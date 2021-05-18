@@ -3,6 +3,7 @@ import linear_algebra.invariant_basis_number
 import linear_algebra.free_module
 import linear_algebra.dual
 
+
 /-!
 
 # Finite free ℤ-modules
@@ -13,7 +14,6 @@ The basic theory of finite free ℤ-modules
 
 * rewrite to include multiplicative version
 * also write version for modules, glue to version for groups
-* Fill in `sorry`s
 -/
 def torsion_free (A : Type*) [add_comm_group A] : Prop :=
 ∀ (a : A) (ha : a ≠ 0) (n : ℕ), n • a = 0 → n = 0
@@ -55,82 +55,37 @@ noncomputable instance : fintype (basis_type ha) := classical.some $ classical.s
 noncomputable def basis : basis ha.basis_type ℤ A :=
 (classical.some_spec $ classical.some_spec ha).some
 
-noncomputable def its_basically_zn : A ≃ₗ[ℤ] (basis_type ha → ℤ) := ha.basis.equiv_fun
+noncomputable def its_basically_zn : A ≃ₗ[ℤ] (ha.basis_type → ℤ) := ha.basis.equiv_fun
+
+lemma zn_finite {ι : Type*} [fintype ι] : module.finite ℤ (ι →₀ ℤ) :=
+begin
+  classical,
+  rw [module.finite_def, submodule.fg_def],
+  refine ⟨((λ i, finsupp.single i 1) '' set.univ),
+    set.finite.image (λ (i : ι), finsupp.single i 1) set.finite_univ, _⟩,
+  rw [← finsupp.supported_eq_span_single, finsupp.supported_univ]
+end
+
+lemma zn_finite' {ι : Type*} [fintype ι] : module.finite ℤ (ι → ℤ) :=
+begin
+  letI : module.finite ℤ (ι →₀ ℤ) := zn_finite,
+  exact module.finite.equiv (finsupp.linear_equiv_fun_on_fintype ℤ)
+end
+
+lemma finite_free.finite (ha : finite_free A) : module.finite ℤ A :=
+begin
+  letI : module.finite ℤ (ha.basis_type → ℤ) := zn_finite',
+  exact module.finite.equiv (its_basically_zn ha).symm,
+end
 
 theorem top_fg (ha : finite_free A) : (⊤ : submodule ℕ A).fg :=
 begin
-  classical,
-  use (finset.image (ha.basis) finset.univ) ∪ (finset.image (-ha.basis) finset.univ),
-  rw eq_top_iff,
-  rintro a -,
-  rw ← ha.basis.total_repr a,
-  generalize : (ha.basis.repr) a = f, clear a,
-  apply finsupp.induction f; clear f,
-  { exact submodule.zero_mem _ },
-  { intros i z f hif hz hf,
-    rw linear_map.map_add,
-    refine submodule.add_mem _ _ hf,
-    simp only [set.image_univ, finset.coe_union, pi.neg_apply, finsupp.total_single, linear_map.to_add_monoid_hom_coe,
-      finset.coe_univ, finset.coe_image],
-    -- next 6 lines -- what am I missing? I rewrite this twice later.
-    have should_be_easy : ∀ (n : ℕ) (b : A), (n : ℤ) • b = n • b,
-    { intros,
-      induction n with n hn,
-        simp,
-      rw [nat.succ_eq_add_one, add_smul, ←hn],
-      simp [add_smul] },
-    let n := z.nat_abs,
-    by_cases hz2 : z ≤ 0,
-    -- nearly there
-    { -- messy z≤0 case
-      have hn2 : (n : ℤ) = - z := int.of_nat_nat_abs_of_nonpos hz2,
-      rw [eq_neg_iff_eq_neg, ← mul_neg_one] at hn2,
-      rw [hn2, mul_smul, neg_one_smul, should_be_easy],
-      refine submodule.smul_mem _ n (submodule.subset_span (or.inr ⟨i, rfl⟩)) },
-    { push_neg at hz2,
-      rw [← int.of_nat_nat_abs_eq_of_nonneg (le_of_lt hz2)],
-      change (n : ℤ) • _ ∈ _,
-      rw should_be_easy,
-      refine submodule.smul_mem _ n (submodule.subset_span (or.inl ⟨i, rfl⟩)) } },
+  have h₁ : (⊤ : submodule ℕ A).to_add_submonoid = (⊤ : add_subgroup A).to_add_submonoid := rfl,
+  have h₂ : (⊤ : add_subgroup A) = (⊤ : submodule ℤ A).to_add_subgroup := rfl,
+  rw [submodule.fg_iff_add_submonoid_fg, h₁, ← add_subgroup.fg_iff_add_submonoid.fg, h₂,
+    ← submodule.fg_iff_add_subgroup_fg, ← module.finite_def],
+  exact finite_free.finite ha
 end
-
--- def dual_basis_vecs (R : Type*) [comm_semiring R] (α : Type*) [fintype α] :
---   α → module.dual R (α → R) := linear_map.proj
-
--- lemma dual_basis_vecs_li (R : Type*) [comm_semiring R] (α : Type*) [fintype α] :
---   linear_independent R (dual_basis_vecs R α) :=
--- begin
---   rw fintype.linear_independent_iff,
---   intros g hg a,
---   classical,
---   let t : α → R := λ i, if i = a then 1 else 0,
---   have : (∑ (i : α), g i • dual_basis_vecs R α i) t = 0,
---   { rw hg,
---     simp },
---   simpa [dual_basis_vecs] using this,
--- end
-
--- lemma dual_basis_vecs_span (R : Type*) [comm_semiring R] (α : Type*) [fintype α] :
---   submodule.span R (set.range (dual_basis_vecs R α)) = ⊤ :=
--- begin
---   rw eq_top_iff,
---   rintro f -,
---   classical,
---   have : ∑ (i : α), f (pi.single i 1) • dual_basis_vecs R α i = f,
---   { ext x,
---     simp only [dual_basis_vecs, linear_map.coe_proj, algebra.id.smul_eq_mul, linear_map.smul_apply,
---       fintype.sum_apply, function.comp_app, linear_map.coe_fn_sum, function.eval_apply,
---       linear_map.coe_comp, linear_map.coe_single],
---     simp only [pi.single, function.update],
---     simp only [mul_boole, dite_eq_ite, eq_rec_constant, finset.mem_univ, if_true, pi.zero_apply,
---       finset.sum_ite_eq'] },
---   rw ←this,
---   refine submodule.sum_smul_mem _ _ _,
---   rintro c -,
---   apply submodule.subset_span,
---   simp
--- end
-
 
 theorem dual (ha : finite_free A) : finite_free (A →+ ℤ) :=
 begin
@@ -194,23 +149,6 @@ begin
   refine (hab.symm.to_linear_equiv _).trans (equiv_fin ha.basis),
   intros n a,
   exact hab.symm.to_add_monoid_hom.map_gsmul a n
-end
-
-theorem ker (ha : finite_free A) (φ : A →+ ℤ) : finite_free φ.ker :=
-begin
-  obtain ⟨n, b⟩ := @module.free_of_finite_type_torsion_free' ℤ _ _ φ.ker _ _ (id _) (id _),
-  { exact ⟨fin n, infer_instance, ⟨b⟩⟩ },
-  { -- prove `module.finite R N` for `N : submodule R M` and Noetherian `M`.
-    sorry },
-  { -- prove this for arbitrary submodules
-    sorry }
-end
-
-theorem rank_ker (ha : finite_free A) (φ : A →+ ℤ) (hφ : φ ≠ 0) :
-  (ker ha φ).rank + 1 = ha.rank :=
-begin
-  -- I don't know the best way of doing this
-  sorry
 end
 
 end finite_free
