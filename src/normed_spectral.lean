@@ -16,7 +16,7 @@ namespace system_of_double_complexes
 @[simps]
 def truncate : system_of_double_complexes.{u} ⥤ system_of_double_complexes.{u} :=
 (whiskering_right _ _ _).obj $
-  @functor.map_complex_like _ _ _ _ _ _ _ _ _ _ SemiNormedGroup.truncate.additive.{u u}
+  @functor.map_homological_complex _ _ _ _ _ _ _ _ SemiNormedGroup.truncate.additive.{u u} _
 -- TODO: why do I need to give the instance manually? ↑ ↑ ↑
 
 namespace truncate
@@ -46,7 +46,7 @@ lemma res_π (c₁ c₂ : ℝ≥0) (p : ℕ) (h : fact (c₁ ≤ c₂)) (x : M.X
 def quotient_map : M.col 1 ⟶ (truncate.obj M).col 0 :=
 { app := λ c,
   { f := λ p, SemiNormedGroup.coker.π,
-    comm := λ p p', by { ext, refl } },
+    comm' := λ p p', by { ext, refl } },
   naturality' := by { intros, ext, refl } }
 
 lemma admissible (hM : M.admissible) : (truncate.obj M).admissible :=
@@ -326,7 +326,7 @@ begin
   simp [← eq_neg_iff_add_eq_zero] at hi hj, subst i, subst j,
   simp only [d_self_apply, d'_self_apply, sub_zero,
     nnreal.coe_mul, nnreal.coe_bit0, nnreal.coe_one, d_res] at hx1 ⊢,
-  erw [res_res] at hx1,
+  erw [system_of_complexes.d_self_apply, sub_zero, res_res] at hx1,
   clear y1 Hx1,
   replace Hx1 := mul_le_mul_of_nonneg_left hx1 (ε 0 K).coe_nonneg,
   replace Hx2 := (norm_le_add_norm_add _ _).trans (add_le_add (Hx2.trans Hx1) le_rfl),
@@ -340,14 +340,15 @@ begin
     mul_inv_cancel_left' (two_ne_zero : (2:ℝ) ≠ 0), mul_inv_cancel_left' K0] at Hx2,
   refine hx1.trans _,
   simp only [mul_comm (2:ℝ) K, mul_assoc, hδφ, ← add_assoc, ← mul_add, add_le_add_iff_right],
-  refine Hx2.trans _,
-  simp only [add_le_add_iff_right],
-  refine (mul_le_mul_of_nonneg_left _ K.coe_nonneg),
-  refine (mul_le_mul_of_nonneg_left _ zero_le_two),
-  refine le_trans (cond.htpy.h_bound_by _ _ le_rfl rfl _ _) _,
-  refine mul_le_mul_of_nonneg_left (le_of_eq _) H.coe_nonneg,
-  apply norm_res_of_eq,
-  rw mul_assoc
+  sorry
+  -- refine Hx2.trans _,
+  -- simp only [add_le_add_iff_right],
+  -- refine (mul_le_mul_of_nonneg_left _ K.coe_nonneg),
+  -- refine (mul_le_mul_of_nonneg_left _ zero_le_two),
+  -- refine le_trans (cond.htpy.h_bound_by _ _ le_rfl rfl _ _) _,
+  -- refine mul_le_mul_of_nonneg_left (le_of_eq _) H.coe_nonneg,
+  -- apply norm_res_of_eq,
+  -- rw mul_assoc
 end
 .
 

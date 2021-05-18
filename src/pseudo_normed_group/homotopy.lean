@@ -1,5 +1,8 @@
+import algebra.homology.homotopy
+
 import pseudo_normed_group.system_of_complexes
 import rescale.Tinv
+
 /-!
 
 === jmc: I think we can delete this entire file
@@ -15,7 +18,7 @@ universe variables u
 
 open_locale nnreal
 
-open category_theory differential_object.complex_like
+open category_theory homological_complex
 
 namespace breen_deligne
 
