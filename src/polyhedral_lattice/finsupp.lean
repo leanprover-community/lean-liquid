@@ -90,17 +90,13 @@ instance {ι : Type} [fintype ι] : polyhedral_lattice (ι →₀ Λ) :=
       rintro i - hi,
       rw not_mem_support_iff at hi,
       rw [hi, single_zero] },
+    simp only [← single_add_hom_apply, ← add_monoid_hom.map_nsmul] at hl ⊢,
     refine ⟨λ j, c j.1 j.2, _, _⟩,
-    { rw [hl, ← finset.univ_product_univ, finset.sum_product],
-      apply fintype.sum_congr,
-      intro i,
-      rw [← single_add_hom_apply, H1, add_monoid_hom.map_sum],
-      apply fintype.sum_congr,
-      intro j,
-      rw [add_monoid_hom.map_nsmul],
-      refl },
+    { simp only [H1, add_monoid_hom.map_sum] at hl,
+      rw [hl, ← finset.univ_product_univ, finset.sum_product] },
     { have aux := @sum_eq_sum_fintype ι Λ _ _ _ _ (λ i, norm) (λ i, norm_zero),
-      simp only [norm_def, aux, ← finset.univ_product_univ, finset.sum_product, H2, norm_single], }
+      simp only [norm_def, aux, ← finset.univ_product_univ, finset.sum_product, H2,
+        single_add_hom_apply, norm_single], }
   end }
 
 end finsupp

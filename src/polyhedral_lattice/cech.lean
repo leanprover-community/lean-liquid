@@ -10,6 +10,7 @@ import for_mathlib.free_abelian_group
 import for_mathlib.normed_group_quotient
 import for_mathlib.finsupp
 import for_mathlib.normed_group
+import for_mathlib.norm_nsmul
 
 
 /-!
@@ -156,8 +157,8 @@ is_closed_discrete _
 instance : normed_group (obj f m) :=
 add_subgroup.normed_group_quotient _
 
-def π : (fin m →₀ Λ') →+ obj f m :=
-by convert quotient_add_group.mk' (L f m)
+def π : normed_group_hom (fin m →₀ Λ') (obj f m) :=
+(L f m).normed_mk
 
 lemma π_apply_eq_zero_iff (x : fin m →₀ Λ') : π f m x = 0 ↔ x ∈ L f m :=
 quotient_add_group.eq_zero_iff _
@@ -172,6 +173,10 @@ begin
   simp only [L_one, set.image_singleton, add_zero, cInf_singleton, add_subgroup.coe_bot],
 end
 
+-- uugh namespace
+lemma π_is_quotient : add_subgroup.is_quotient (π f m) :=
+add_subgroup.is_quotient_quotient _
+
 variables [fact f.to_add_monoid_hom.range.saturated]
 
 instance : no_zero_smul_divisors ℤ (obj f m) :=
@@ -179,14 +184,15 @@ instance : no_zero_smul_divisors ℤ (obj f m) :=
   begin
     intros n x h,
     obtain ⟨x, rfl⟩ := π_surjective f m x,
-    simp only [← add_monoid_hom.map_gsmul, π_apply_eq_zero_iff] at h ⊢,
+    have : π f m (n • x) = n • π f m x := (π f m).to_add_monoid_hom.map_gsmul x n,
+    simp only [← this, π_apply_eq_zero_iff] at h ⊢,
     exact L_saturated _ _ h
   end }
 
 lemma obj_finite_free : _root_.finite_free (obj f m) :=
 begin
   obtain ⟨ι, _inst_ι, ⟨b⟩⟩ := polyhedral_lattice.finite_free (fin m →₀ Λ'), resetI,
-  let φ := (π f m).to_int_linear_map,
+  let φ := (π f m).to_add_monoid_hom.to_int_linear_map,
   suffices : submodule.span ℤ (set.range (φ ∘ b)) = ⊤,
   { obtain ⟨n, b⟩ := module.free_of_finite_type_torsion_free this,
     exact ⟨fin n, infer_instance, ⟨b⟩⟩ },
@@ -194,20 +200,72 @@ begin
   exact π_surjective f m
 end
 
+open pseudo_normed_group
+
+lemma norm_lift (y : obj f m) : ∃ x, π f m x = y ∧ ∥x∥ = ∥y∥ :=
+begin
+  let s := λ ε, {x | π f m x = y ∧ nnnorm x ≤ nnnorm y + ε },
+  have hs : ∀ ε, (s ε).finite,
+  { intro ε,
+    apply (filtration_finite (fin m →₀ Λ') (nnnorm y + ε)).subset,
+    rintro x ⟨h1, h2⟩,
+    simpa only [semi_normed_group.mem_filtration_iff] using h2 },
+  let t := λ ε, (hs ε).to_finset,
+  have ht : ∀ ε, 0 < ε → (t ε).nonempty,
+  { intros ε hε,
+    obtain ⟨x, h1, h2⟩ := (π_is_quotient f m).norm_lift hε y,
+    refine ⟨x, _⟩, simp only [set.finite.mem_to_finset], exact ⟨h1, h2.le⟩ },
+  let r := ((t 1).image nnnorm).min' ((ht _ zero_lt_one).image _),
+  have aux := finset.min'_mem ((t 1).image nnnorm) ((ht _ zero_lt_one).image _),
+  simp only [finset.mem_image] at aux,
+  obtain ⟨x, hx, H⟩ := aux,
+  simp only [set.finite.mem_to_finset, set.mem_set_of_eq] at hx,
+  suffices hr : r = nnnorm y,
+  { refine ⟨x, hx.1, _⟩,
+    simp only [← coe_nnnorm, nnreal.coe_injective.eq_iff],
+    exact H.trans hr },
+  refine ((lt_or_eq_of_le _).resolve_left _).symm,
+  { rw ← hx.1, exact ((π_is_quotient f m).norm_le x).trans H.le },
+  { intro hyr,
+    let ε := (r - nnnorm y) / 2,
+    have hε' : (ε : ℝ) = (r - nnnorm y) / 2,
+    { dsimp only [ε], rw [nnreal.coe_div, nnreal.coe_sub hyr.le, nnreal.coe_bit0, nnreal.coe_one] },
+    have hε : 0 < ε,
+    { rw [← nnreal.coe_lt_coe, nnreal.coe_zero, hε'],
+      exact div_pos (sub_pos.mpr $ nnreal.coe_lt_coe.mpr hyr) zero_lt_two },
+    have key : nnnorm y + ε < r,
+    { rw [← nnreal.coe_lt_coe, nnreal.coe_add, hε'],
+      exact add_sub_div_two_lt (nnreal.coe_lt_coe.mpr hyr), },
+    refine not_le_of_lt key _,
+    obtain ⟨x₀, hx₀⟩ := ht ε hε,
+    simp only [exists_prop, set.finite.mem_to_finset, finset.mem_image, set.mem_set_of_eq] at hx₀,
+    refine (finset.min'_le _ _ _).trans hx₀.2,
+    simp only [exists_prop, set.finite.mem_to_finset, finset.mem_image, set.mem_set_of_eq],
+    exact ⟨x₀, ⟨hx₀.1, (hx₀.2.trans key.le).trans (H.ge.trans hx.2)⟩, rfl⟩, }
+end
+
 instance : polyhedral_lattice (obj f m) :=
 { finite_free := obj_finite_free _ _,
   polyhedral' :=
   begin
-    obtain ⟨ι, _inst_ι, l, hl, hl'⟩ := polyhedral_lattice.polyhedral (fin m →₀ Λ'),
-    refine ⟨ι, _inst_ι, (λ i, quotient_add_group.mk' (L f m) (l i)), _⟩,
-    intros x,
-    apply quotient_add_group.induction_on x; clear x,
-    intro x,
+    obtain ⟨ι, _inst_ι, l, hl, hl'⟩ := polyhedral_lattice.polyhedral (fin m →₀ Λ'), resetI,
+    refine ⟨ι, _inst_ι, (λ i, π f m (l i)), _⟩,
+    intros y,
+    obtain ⟨x, rfl, hx⟩ := norm_lift f m y,
     obtain ⟨c, H1, H2⟩ := hl x,
-    refine ⟨c, _, _⟩,
-    { show quotient_add_group.mk' (L f m) x = _,
-      simp only [H1, add_monoid_hom.map_sum, add_monoid_hom.map_nsmul] },
-    { sorry },
+    have key : _ := _,
+    refine ⟨c, key, _⟩, swap,
+    { show π f m x = _,
+      rw [H1, normed_group_hom.map_sum, fintype.sum_congr],
+      intro, exact (π f m).to_add_monoid_hom.map_nsmul _ _ },
+    { apply le_antisymm,
+      { rw key,
+        exact (norm_sum_le _ _).trans (finset.sum_le_sum $ λ i hi, norm_nsmul_le _ _) },
+      { simp only [← hx, H2],
+        apply finset.sum_le_sum,
+        rintro i -,
+        exact mul_le_mul le_rfl ((π_is_quotient f m).norm_le _)
+          (norm_nonneg _) (nat.cast_nonneg _) } },
   end }
 
 end objects
@@ -367,7 +425,7 @@ iso.symm $ PolyhedralLattice.iso_mk
 by a subgroup that is provably trivial -/
 def obj_zero_iso' : obj f 0 ≅ of (fin 1 →₀ Λ') :=
 iso.symm $ PolyhedralLattice.iso_mk
-  (polyhedral_lattice.conerve.π _ _)
+  (polyhedral_lattice.conerve.π _ _).to_add_monoid_hom
   (quotient_add_group.lift _ (add_monoid_hom.id _)
     (by { intros x hx, rwa [polyhedral_lattice.conerve.L_one, add_subgroup.mem_bot] at hx }))
   (polyhedral_lattice.conerve.norm_π_one_eq _)
@@ -409,7 +467,7 @@ begin
   refine H1.trans (eq.trans _ H2.symm), clear H1 H2,
   show (conerve.π f 2) _ = (conerve.π f 2) _,
   simp only [finsupp.map_domain_single, finsupp.map_domain.add_monoid_hom_apply],
-  rw [← sub_eq_zero, ← add_monoid_hom.map_sub, conerve.π_apply_eq_zero_iff],
+  rw [← sub_eq_zero, ← normed_group_hom.map_sub, conerve.π_apply_eq_zero_iff],
   have hδ0 : hom.to_preorder_hom (δ (0 : fin 2)) 0 = 1 := rfl,
   have hδ1 : hom.to_preorder_hom (δ (1 : fin 2)) 0 = 0 := rfl,
   erw [hδ0, hδ1],

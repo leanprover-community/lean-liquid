@@ -10,6 +10,7 @@ import data.equiv.basic
 import Mbar.bounded
 import pseudo_normed_group.basic
 
+import for_mathlib.coe_nat_abs
 import for_mathlib.tsum
 
 /-!
@@ -32,14 +33,6 @@ open_locale big_operators nnreal
 
 -- move this
 lemma int.norm_def (n : ℤ) : ∥n∥ = abs n := rfl
-
--- move this
-@[simp] lemma nnreal.coe_nat_abs (n : ℤ) : ↑n.nat_abs = nnnorm n :=
-nnreal.eq $
-calc ((n.nat_abs : ℝ≥0) : ℝ)
-    = ↑(n.nat_abs : ℤ) : by simp only [int.cast_coe_nat, nnreal.coe_nat_cast]
-... = abs n            : by simp only [← int.abs_eq_nat_abs, int.cast_abs]
-... = ∥n∥               : rfl
 
 section defs
 
