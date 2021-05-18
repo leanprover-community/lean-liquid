@@ -130,6 +130,55 @@ lemma nnreal.eq_zero_or_pos (r : nnreal) : r = 0 ∨ 0 < r :=
 
 instance semi_normed_group.inhabited (G : Type*) [semi_normed_group G] : inhabited G := ⟨0⟩
 
+section general_completion_stuff
+open filter uniform_space
+open_locale topological_space
+
+-- Now we want an abstract machine where we can plug the sequence g from the previous section.
+
+variables {M₁ : Type*} [semi_normed_group M₁] {M₂ : Type*} [semi_normed_group M₂]
+          (f : normed_group_hom M₁ M₂)
+
+-- PR very close to the definition of cauchy_seq
+lemma cauchy_seq.map {β : Type*} [semilattice_sup β]
+  {α : Type*} [uniform_space α] {γ : Type*} [uniform_space γ]
+  {u : β → α} {f : α → γ} (hu : cauchy_seq u) (hf : uniform_continuous f) :
+  cauchy_seq (f ∘ u) :=
+begin
+  change cauchy _,
+  rw ← map_map,
+  exact cauchy.map hu hf
+end
+
+-- actually not used here, but should go somewhere
+lemma normed_group_hom.coe_range : (f.range : set M₂) = set.range f :=
+by { erw add_monoid_hom.coe_range, refl }
+
+lemma bar {C ε : ℝ} (hC : 0 < C) (hε : 0 < ε)
+  (h : ∀ m₂ : M₂, ∃ g : ℕ → M₁, cauchy_seq g ∧ tendsto (f ∘ g) at_top (𝓝 m₂) ∧ ∀ n, ∥g n∥ ≤ C*∥m₂∥) :
+  ∀ hatm₂ : completion M₂, ∃ m₁, f.completion m₁ = hatm₂ ∧ ∥m₁∥ ≤ (C+ε)*∥hatm₂∥ :=
+begin
+  intro hatm₂,
+  refine controlled_closure_range_of_complete normed_group.norm_to_compl hC hε _ (normed_group.dense_range_to_compl _),
+  intro m₂,
+  rcases h m₂ with ⟨g, cauchy_g, lim_g, bound_g⟩,
+  have : cauchy_seq (j ∘ g),
+    from cauchy_g.map j.uniform_continuous,
+  rcases cauchy_seq_tendsto_of_complete this with ⟨y, hy⟩,
+  refine ⟨y, _, _⟩,
+  { have lim : tendsto ((f.completion.comp j) ∘ g) at_top (𝓝 (f.completion y)),
+      from (f.completion.continuous.tendsto _).comp hy,
+    rw f.completion_to_compl at lim,
+    have : tendsto ((j ∘ f) ∘ g) at_top (𝓝 (j m₂)) := (j.continuous.tendsto _).comp lim_g,
+    exact tendsto_nhds_unique lim this },
+  { refine le_of_tendsto' (tendsto_norm.comp hy) (_ : ∀ n, ∥j (g n)∥ ≤ C * ∥m₂∥),
+    intro n,
+    rw normed_group.norm_to_compl,
+    apply bound_g }
+end
+
+end general_completion_stuff
+
 section locally_constant_stuff
 open topological_space normed_with_aut set
 open_locale nnreal big_operators
@@ -247,16 +296,6 @@ begin
     simp }
 end
 
-/- lemma embedding.norm_extend_eq [nonempty X] (f : locally_constant X G) :
-  ∃ x, ∥f∥ = ∥f x∥ ∧ ∥he.locally_constant_extend f∥ = ∥he.locally_constant_extend f (e x)∥ :=
-begin
-  cases f.exists_norm_eq with x hx,
-  use [x, hx],
-  rwa [(he.locally_constant_extend f).norm_eq_iff', he.range_locally_constant_extend,
-       he.locally_constant_extend_extends, ← f.norm_eq_iff']
-end
- -/
-
 variables
   (φ : X → Y) -- this will be φ is T⁻¹ : M_{≤ r'c}^a → M_{≤ c}^a
   {r : ℝ≥0} {V : SemiNormedGroup} [normed_with_aut r V] -- this is indeed V!
@@ -371,7 +410,7 @@ end
 
 lemma norm_g_le (N : ℕ) : ∥he.g hφ f N∥ ≤ r/(1 - r) * ∥f∥ :=
 begin
-  have : ∀ (n : ℕ), ∥he.h hφ f n∥ ≤ ↑r * ∥f∥ * ↑r ^ n,
+  have : ∀ (n : ℕ), ∥he.h hφ f n∥ ≤ r * ∥f∥ * r ^ n,
   { intro n,
     convert norm_h he hφ f n using 1,
     ring_exp },
@@ -379,53 +418,22 @@ begin
   ring
 end
 
-end locally_constant_stuff
+open uniform_space
 
-section general_completion_stuff
-open filter uniform_space
-open_locale topological_space
-
--- Now we want an abstract machine where we can plug the sequence g from the previous section.
-
-variables {M₁ : Type*} [semi_normed_group M₁] {M₂ : Type*} [semi_normed_group M₂]
-          (f : normed_group_hom M₁ M₂)
-
--- PR very close to the definition of cauchy_seq
-lemma cauchy_seq.map {β : Type*} [semilattice_sup β]
-  {α : Type*} [uniform_space α] {γ : Type*} [uniform_space γ]
-  {u : β → α} {f : α → γ} (hu : cauchy_seq u) (hf : uniform_continuous f) :
-  cauchy_seq (f ∘ u) :=
+lemma concrete_92 [fact (0 < r)] (f : completion (locally_constant X V)) {ε : ℝ} (hε : 0 < ε) :
+  ∃ g : completion (locally_constant Y V),
+    ((map_hom T.inv).comp (comap_hom e he.continuous) - comap_hom φ hφ).completion g = f ∧
+    ∥g∥ ≤ (r/(1-r) + ε)*∥f∥ :=
 begin
-  change cauchy _,
-  rw ← map_map,
-  exact cauchy.map hu hf
-end
-
--- actually not used here, but should go somewhere
-lemma normed_group_hom.coe_range : (f.range : set M₂) = set.range f :=
-by { erw add_monoid_hom.coe_range, refl }
-
-lemma bar {C ε : ℝ} (hC : 0 < C) (hε : 0 < ε)
-  (h : ∀ m₂ : M₂, ∃ g : ℕ → M₁, cauchy_seq g ∧ tendsto (f ∘ g) at_top (𝓝 m₂) ∧ ∀ n, ∥g n∥ ≤ C*∥m₂∥) :
-  ∀ hatm₂ : completion M₂, ∃ m₁, f.completion m₁ = hatm₂ ∧ ∥m₁∥ ≤ (C+ε)*∥hatm₂∥ :=
-begin
-  intro hatm₂,
-  refine controlled_closure_range_of_complete normed_group.norm_to_compl hC hε _ (normed_group.dense_range_to_compl _),
+  have : (0 : ℝ) < r / (1 - r),
+  { have : 0 < r := fact.out _,
+    apply div_pos,
+    exact_mod_cast this,
+    have : (r : ℝ) < 1 := fact.out _,
+    linarith },
+  apply bar _ this hε,
   intro m₂,
-  rcases h m₂ with ⟨g, cauchy_g, lim_g, bound_g⟩,
-  have : cauchy_seq (j ∘ g),
-    from cauchy_g.map j.uniform_continuous,
-  rcases cauchy_seq_tendsto_of_complete this with ⟨y, hy⟩,
-  refine ⟨y, _, _⟩,
-  { have lim : tendsto ((f.completion.comp j) ∘ g) at_top (𝓝 (f.completion y)),
-      from (f.completion.continuous.tendsto _).comp hy,
-    rw f.completion_to_compl at lim,
-    have : tendsto ((j ∘ f) ∘ g) at_top (𝓝 (j m₂)) := (j.continuous.tendsto _).comp lim_g,
-    exact tendsto_nhds_unique lim this },
-  { refine le_of_tendsto' (tendsto_norm.comp hy) (_ : ∀ n, ∥j (g n)∥ ≤ C * ∥m₂∥),
-    intro n,
-    rw normed_group.norm_to_compl,
-    apply bound_g }
+  exact ⟨he.g hφ m₂, cauchy_seq_g he hφ m₂, limit he hφ m₂, norm_g_le he hφ m₂⟩
 end
 
-end general_completion_stuff
+end locally_constant_stuff
