@@ -1,19 +1,22 @@
-import breen_deligne.category
 import algebra.homology.homotopy
 
-open_locale big_operators
+import for_mathlib.homotopy
+
+import breen_deligne.category
+import breen_deligne.suitable
 
 namespace breen_deligne
 
-open free_abelian_group category_theory
-open homological_complex FreeMat category_theory category_theory.limits
+open category_theory category_theory.limits free_abelian_group homological_complex FreeMat
 
-open_locale zero_object
+open_locale big_operators nnreal zero_object
 
 namespace data
 
 variables (BD : data)
 
+
+-- generalize this to something like `functor.map_homotopy`
 @[simps]
 def homotopy_two_mul {BD₁ BD₂ : data} {f g : BD₁ ⟶ BD₂} (h : homotopy f g) :
   homotopy ((mul 2).map f) ((mul 2).map g) :=
@@ -21,11 +24,15 @@ def homotopy_two_mul {BD₁ BD₂ : data} {f g : BD₁ ⟶ BD₂} (h : homotopy 
   zero' := λ i j hij, by rw [h.zero i j hij, add_monoid_hom.map_zero],
   comm :=
   begin
-    intro i,
-    simp only [mul_map_f, h.comm i, add_monoid_hom.map_add],
-    sorry
-    -- erw [universal_map.mul_comp, universal_map.mul_comp],
-    -- refl
+    intro j,
+    simp only [mul_map_f, h.comm j, add_monoid_hom.map_add],
+    dsimp [d_next, prev_d],
+    rcases (complex_shape.down ℕ).next j with _|⟨k,hk⟩;
+    rcases (complex_shape.down ℕ).prev j with _|⟨i,hi⟩;
+    dsimp [d_next, prev_d];
+    simp only [add_zero, zero_add, add_monoid_hom.map_zero];
+    repeat { erw [universal_map.mul_comp] };
+    refl
   end }
 
 def homotopy_pow' (h : homotopy (BD.proj 2) (BD.sum 2)) :
@@ -35,8 +42,8 @@ def homotopy_pow' (h : homotopy (BD.proj 2) (BD.sum 2)) :
 
 def homotopy_mul (h : homotopy (BD.proj 2) (BD.sum 2)) (N : ℕ) :
   homotopy (BD.proj (2^N)) (BD.sum (2^N)) :=
-(homotopy.of_eq $ BD.hom_pow'_proj N).symm.trans $
-  ((BD.homotopy_pow' h N).const_comp (BD.pow'_iso_mul N).inv).trans $
+(homotopy.of_eq (BD.hom_pow'_proj N).symm).trans $
+  ((BD.homotopy_pow' h N).comp_left (BD.pow'_iso_mul N).inv).trans $
   (homotopy.of_eq $ BD.hom_pow'_sum N)
 
 end data
@@ -52,14 +59,14 @@ namespace package
 
 class adept (BD : out_param package) (c_ : out_param $ ℕ → ℝ≥0) (c' : ℕ → ℝ≥0) : Prop :=
 (htpy_suitable' :
-  ∀ i, (BD.homotopy.h i (i+1)).suitable (rescale_constants c_ 2 i) (c' (i+1) * c_ (i+1)))
+  ∀ i, (BD.homotopy.hom i (i+1)).suitable (rescale_constants c_ 2 i) (c' (i+1) * c_ (i+1)))
 
 instance adept.htpy_suitable (BD : package) (c_ c' : ℕ → ℝ≥0) [adept BD c_ c'] (j i : ℕ) :
-  (BD.homotopy.h j i).suitable (rescale_constants c_ 2 j) (c' i * c_ i) :=
+  (BD.homotopy.hom j i).suitable (rescale_constants c_ 2 j) (c' i * c_ i) :=
 begin
-  by_cases hij : i = j + 1,
-  { rw hij, apply adept.htpy_suitable' },
-  { rw BD.homotopy.h_eq_zero,
+  by_cases hij : j + 1 = i,
+  { rw ← hij, apply adept.htpy_suitable' },
+  { rw BD.homotopy.zero,
     { apply_instance },
     { exact hij } }
 end
@@ -80,7 +87,7 @@ variables (BD : package) (c_ c' : ℕ → ℝ≥0) [adept BD c_ c']
 -- end
 
 instance homotopy_pow'_suitable (j i : ℕ) :
-  Π N, ((BD.data.homotopy_pow' BD.homotopy N).h j i).suitable
+  Π N, ((BD.data.homotopy_pow' BD.homotopy N).hom j i).suitable
     (rescale_constants c_ (2 ^ N) j) ((c' * c_) i)
 | 0     := universal_map.suitable_zero _ _
 | (N+1) :=
@@ -102,13 +109,17 @@ begin
     rw [← mul_assoc, mul_right_comm],
     exact @universal_map.suitable_mul_right _ _ _ _ _ _ _ }
 end
+.
+
+-- move to mathlib
+attribute [simps] homotopy.refl homotopy.symm homotopy.trans homotopy.comp_left homotopy.comp_right
 
 instance homotopy_mul_suitable (j i N : ℕ) :
-  ((BD.data.homotopy_mul BD.homotopy N).h j i).suitable
+  ((BD.data.homotopy_mul BD.homotopy N).hom j i).suitable
     (rescale_constants c_ (2 ^ N) j) ((c' * c_) i) :=
 begin
-  dsimp [data.homotopy_mul],
-  simp only [add_zero, zero_add, neg_zero],
+  dsimp [data.homotopy_mul, homotopy.trans_hom],
+  simp only [add_zero, zero_add],
   refine @universal_map.suitable.comp _ _ _ _ _ _ (rescale_constants c_ (2 ^ N) j) _ _ (id _),
   generalize : (rescale_constants c_ (2 ^ N) j) = c,
   induction N with N IH,
@@ -118,7 +129,7 @@ begin
   { dsimp [data.pow'_iso_mul],
     resetI,
     refine @universal_map.suitable.comp _ _ _ _ _ _ c _ (id _) (id _),
-    { dsimp, apply_instance },
+    { apply_instance },
     { dsimp [data.mul_mul_iso, FreeMat.mul_mul_iso],
       erw [nat_iso.of_components.inv_app, FreeMat.iso_mk'_inv],
       apply_instance } }
