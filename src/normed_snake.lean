@@ -48,7 +48,6 @@ begin
     from mul_div_cancel' _ (by exact_mod_cast ne_of_gt (lt_of_lt_of_le zero_lt_one honele.out)),
   have hε₁ : 0 < ε₁, from div_pos hε (lt_of_lt_of_le zero_lt_one honele.out),
 
-  let c₁ := k''*(k*(k'*c)),
   obtain ⟨m' : M' c₁ i, hm' : g m' = n⟩ := (hgquot _ _).surjective _,
   let m₁' := M'.d i (i+1) m',
   have hm₁' : g m₁' = N.d i (i+1) n, { simpa [hm'] using (d_apply _ _ g m').symm },
