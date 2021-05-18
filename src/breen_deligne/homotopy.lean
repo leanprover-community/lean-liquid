@@ -12,22 +12,25 @@ open_locale zero_object
 
 namespace data
 
+variables (BD : data)
+
 @[simps]
 def homotopy_two_mul {BD₁ BD₂ : data} {f g : BD₁ ⟶ BD₂} (h : homotopy f g) :
   homotopy ((mul 2).map f) ((mul 2).map g) :=
-{ h := λ j i, universal_map.mul 2 (h.h j i),
-  h_eq_zero := λ i j hij, by rw [h.h_eq_zero i j hij, add_monoid_hom.map_zero],
-  comm := λ i j k hij hjk,
+{ hom := λ j i, universal_map.mul 2 (h.hom j i),
+  zero' := λ i j hij, by rw [h.zero i j hij, add_monoid_hom.map_zero],
+  comm :=
   begin
-    simp only [mul_obj_d, mul_map_f, ← add_monoid_hom.map_sub],
-    rw [← h.comm i j k hij hjk, add_monoid_hom.map_add],
-    erw [universal_map.mul_comp, universal_map.mul_comp],
-    refl
+    intro i,
+    simp only [mul_map_f, h.comm i, add_monoid_hom.map_add],
+    sorry
+    -- erw [universal_map.mul_comp, universal_map.mul_comp],
+    -- refl
   end }
 
 def homotopy_pow' (h : homotopy (BD.proj 2) (BD.sum 2)) :
   Π N, homotopy (hom_pow' (BD.proj 2) N) (hom_pow' (BD.sum 2) N)
-| 0     := homotopy.refl
+| 0     := homotopy.refl _
 | (N+1) := (homotopy_two_mul (homotopy_pow' N)).comp h
 
 def homotopy_mul (h : homotopy (BD.proj 2) (BD.sum 2)) (N : ℕ) :
