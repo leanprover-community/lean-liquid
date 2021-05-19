@@ -17,7 +17,7 @@ universes u
 variables (F : arrow Profinite.{u}) (surj : function.surjective F.hom)
 variables (M : SemiNormedGroup.{u})
 
-abbreviation FLC : cochain_complex ℕ SemiNormedGroup :=
+abbreviation FLC : cochain_complex SemiNormedGroup ℕ :=
   ((cosimplicial_object.augmented.map (LCC.{u u}.obj M)).obj
   F.augmented_cech_nerve.right_op).to_cocomplex
 

@@ -3,6 +3,7 @@ import prop_92.extension_profinite
 import normed_group.normed_with_aut
 
 import for_mathlib.normed_group_hom_completion
+import for_mathlib.normed_group_hom
 import for_mathlib.pseudo_metric
 
 import locally_constant.analysis
@@ -17,6 +18,42 @@ and does abstract normed space stuff.
 -/
 
 noncomputable theory
+
+section
+open finset
+open_locale big_operators
+
+-- Why can't I find this in mathlib?!?
+lemma partial_sum_geom {r : ℝ} (hr : 0 ≤ r) (hr' : r < 1) (n : ℕ) : (∑ k in range n, r^k) = (1 - r^n)/(1 - r) :=
+begin
+  rw eq_div_iff,
+  induction n with n ih,
+  { simp },
+  { rw [sum_range_succ, add_mul, ih],
+    ring_exp },
+  linarith,
+end
+
+-- Why can't I find this in mathlib?!?
+lemma partial_sum_geom_le {r : ℝ} (hr : 0 ≤ r) (hr' : r < 1) (n : ℕ) : (∑ k in range n, r^k) ≤ 1/(1 - r) :=
+begin
+  rw partial_sum_geom hr hr',
+  apply div_le_div ; linarith [pow_nonneg hr n],
+end
+
+lemma norm_sum_le_of_le_geom {α : Type*} [semi_normed_group α] {r C : ℝ} (hC : 0 ≤ C)
+  (hr₀ : 0 ≤ r) (hr₁ : r < 1) {f : ℕ → α} (h : ∀ n, ∥f n∥ ≤ C*r^n) {n : ℕ} :
+  ∥∑ k in range n, f k∥ ≤ C/(1-r) :=
+begin
+calc
+  ∥∑ k in range n, f k∥ ≤ ∑ k in range n, ∥f k∥ : norm_sum_le _ _
+  ... ≤ ∑ k in range n, C*r^k : sum_le_sum (λ k hk, h k)
+  ... = C*(∑ k in range n, r^k) : by rw mul_sum
+  ... ≤ C*(1/(1-r)) :  mul_le_mul_of_nonneg_left (partial_sum_geom_le hr₀ hr₁ n) hC
+  ... = C/(1-r) : mul_one_div C (1 - r)
+end
+
+end
 
 open set
 
@@ -92,6 +129,55 @@ lemma nnreal.eq_zero_or_pos (r : nnreal) : r = 0 ∨ 0 < r :=
 (lt_or_eq_of_le $ zero_le r).elim (λ h, or.inr h) (λ h, or.inl h.symm)
 
 instance semi_normed_group.inhabited (G : Type*) [semi_normed_group G] : inhabited G := ⟨0⟩
+
+section general_completion_stuff
+open filter uniform_space
+open_locale topological_space
+
+-- Now we want an abstract machine where we can plug the sequence g from the previous section.
+
+variables {M₁ : Type*} [semi_normed_group M₁] {M₂ : Type*} [semi_normed_group M₂]
+          (f : normed_group_hom M₁ M₂)
+
+-- PR very close to the definition of cauchy_seq
+lemma cauchy_seq.map {β : Type*} [semilattice_sup β]
+  {α : Type*} [uniform_space α] {γ : Type*} [uniform_space γ]
+  {u : β → α} {f : α → γ} (hu : cauchy_seq u) (hf : uniform_continuous f) :
+  cauchy_seq (f ∘ u) :=
+begin
+  change cauchy _,
+  rw ← map_map,
+  exact cauchy.map hu hf
+end
+
+-- actually not used here, but should go somewhere
+lemma normed_group_hom.coe_range : (f.range : set M₂) = set.range f :=
+by { erw add_monoid_hom.coe_range, refl }
+
+lemma bar {C ε : ℝ} (hC : 0 < C) (hε : 0 < ε)
+  (h : ∀ m₂ : M₂, ∃ g : ℕ → M₁, cauchy_seq g ∧ tendsto (f ∘ g) at_top (𝓝 m₂) ∧ ∀ n, ∥g n∥ ≤ C*∥m₂∥) :
+  ∀ hatm₂ : completion M₂, ∃ m₁, f.completion m₁ = hatm₂ ∧ ∥m₁∥ ≤ (C+ε)*∥hatm₂∥ :=
+begin
+  intro hatm₂,
+  refine controlled_closure_range_of_complete normed_group.norm_to_compl hC hε _ (normed_group.dense_range_to_compl _),
+  intro m₂,
+  rcases h m₂ with ⟨g, cauchy_g, lim_g, bound_g⟩,
+  have : cauchy_seq (j ∘ g),
+    from cauchy_g.map j.uniform_continuous,
+  rcases cauchy_seq_tendsto_of_complete this with ⟨y, hy⟩,
+  refine ⟨y, _, _⟩,
+  { have lim : tendsto ((f.completion.comp j) ∘ g) at_top (𝓝 (f.completion y)),
+      from (f.completion.continuous.tendsto _).comp hy,
+    rw f.completion_to_compl at lim,
+    have : tendsto ((j ∘ f) ∘ g) at_top (𝓝 (j m₂)) := (j.continuous.tendsto _).comp lim_g,
+    exact tendsto_nhds_unique lim this },
+  { refine le_of_tendsto' (tendsto_norm.comp hy) (_ : ∀ n, ∥j (g n)∥ ≤ C * ∥m₂∥),
+    intro n,
+    rw normed_group.norm_to_compl,
+    apply bound_g }
+end
+
+end general_completion_stuff
 
 section locally_constant_stuff
 open topological_space normed_with_aut set
@@ -210,16 +296,6 @@ begin
     simp }
 end
 
-/- lemma embedding.norm_extend_eq [nonempty X] (f : locally_constant X G) :
-  ∃ x, ∥f∥ = ∥f x∥ ∧ ∥he.locally_constant_extend f∥ = ∥he.locally_constant_extend f (e x)∥ :=
-begin
-  cases f.exists_norm_eq with x hx,
-  use [x, hx],
-  rwa [(he.locally_constant_extend f).norm_eq_iff', he.range_locally_constant_extend,
-       he.locally_constant_extend_extends, ← f.norm_eq_iff']
-end
- -/
-
 variables
   (φ : X → Y) -- this will be φ is T⁻¹ : M_{≤ r'c}^a → M_{≤ c}^a
   {r : ℝ≥0} {V : SemiNormedGroup} [normed_with_aut r V] -- this is indeed V!
@@ -331,31 +407,33 @@ begin
   ring_exp
 end
 
+
 lemma norm_g_le (N : ℕ) : ∥he.g hφ f N∥ ≤ r/(1 - r) * ∥f∥ :=
-sorry -- follows easily from norm_h and geometric series
-
-end locally_constant_stuff
-
-section general_completion_stuff
-open filter
-open_locale topological_space
-
--- Now we want an abstract machine where we can plug the sequence g from the previous section.
-
-variables {M₁ : Type*} [semi_normed_group M₁] {M₂ : Type*} [semi_normed_group M₂]
-          (f : normed_group_hom M₁ M₂)
-
-/-
-The next lemma is a version of normed_group/controlled_exactness.lean but `f` is not assumed to be
-surjective. We'll need to abstract part of that older proof
--/
-
-lemma bar {C ε : ℝ} (hε : 0 < ε)
-  (h : ∀ m₂ : M₂, ∃ g : ℕ → M₁, cauchy_seq g ∧ tendsto (f ∘ g) at_top (𝓝 m₂) ∧ ∀ n, ∥g n∥ ≤ C*∥f∥) :
-  ∀ m₂, ∃ m₁, f.completion m₁ = m₂ ∧ ∥m₁∥ ≤ C*(1+ε)*∥m₂∥ :=
 begin
-
-  sorry
+  have : ∀ (n : ℕ), ∥he.h hφ f n∥ ≤ r * ∥f∥ * r ^ n,
+  { intro n,
+    convert norm_h he hφ f n using 1,
+    ring_exp },
+  convert norm_sum_le_of_le_geom (mul_nonneg r.coe_nonneg $ norm_nonneg f) r.coe_nonneg (fact.out _) this using 1,
+  ring
 end
 
-end general_completion_stuff
+open uniform_space
+
+lemma concrete_92 [fact (0 < r)] (f : completion (locally_constant X V)) {ε : ℝ} (hε : 0 < ε) :
+  ∃ g : completion (locally_constant Y V),
+    ((map_hom T.inv).comp (comap_hom e he.continuous) - comap_hom φ hφ).completion g = f ∧
+    ∥g∥ ≤ (r/(1-r) + ε)*∥f∥ :=
+begin
+  have : (0 : ℝ) < r / (1 - r),
+  { have : 0 < r := fact.out _,
+    apply div_pos,
+    exact_mod_cast this,
+    have : (r : ℝ) < 1 := fact.out _,
+    linarith },
+  apply bar _ this hε,
+  intro m₂,
+  exact ⟨he.g hφ m₂, cauchy_seq_g he hφ m₂, limit he hφ m₂, norm_g_le he hφ m₂⟩
+end
+
+end locally_constant_stuff

@@ -2,7 +2,6 @@ import algebra.ordered_group
 import category_theory.preadditive.functor_category
 import algebra.homology.additive
 
-import for_mathlib.normed_group_quotient
 import for_mathlib.homological_complex
 
 import normed_group.SemiNormedGroup

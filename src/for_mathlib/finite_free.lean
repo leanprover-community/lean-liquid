@@ -120,7 +120,7 @@ variable {ha}
 /-- A rank zero abelian group has at most one element (yeah I know...). -/
 lemma rank_zero (h0 : ha.rank = 0) : subsingleton A :=
 begin
-  apply (ha.equiv_fin_rank).to_equiv.subsingleton_iff.mpr,
+  apply (ha.equiv_fin_rank).to_equiv.subsingleton_congr.mpr,
   rw h0,
   apply_instance,
 end

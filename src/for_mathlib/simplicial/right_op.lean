@@ -16,13 +16,6 @@ namespace augmented
 variable (X : simplicial_object.augmented C)
 
 -- TODO: Generalize and move!
-@[simps]
-def right_op : cosimplicial_object.augmented Cᵒᵖ :=
-{ left := op $ point.obj X,
-  right := (drop.obj X).right_op,
-  hom := X.hom.right_op }
-
--- TODO: Generalize and move!
 def right_op_functor : (simplicial_object.augmented C)ᵒᵖ ⥤
   (cosimplicial_object.augmented Cᵒᵖ) :=
 { obj := λ X, X.unop.right_op,

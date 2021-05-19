@@ -1,12 +1,10 @@
+import analysis.normed_space.normed_group_quotient
+
 import algebra.punit_instances
 import category_theory.concrete_category.bundled_hom
 import category_theory.limits.shapes.zero
 import category_theory.limits.shapes.kernels
 import category_theory.limits.creates
-
-import analysis.normed_space.normed_group_hom
-
-import for_mathlib.normed_group_quotient
 
 /-!
 # The category of seminormed abelian groups and continuous group homomorphisms

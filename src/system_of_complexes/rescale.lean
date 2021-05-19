@@ -12,10 +12,10 @@ noncomputable theory
 
 universe variables u
 
-namespace system_of_complexes
-
 open category_theory
 open_locale nat nnreal
+
+namespace system_of_complexes
 
 def rescale (r : ℝ≥0) [fact (0 < r)] : system_of_complexes.{u} ⥤ system_of_complexes.{u} :=
 (whiskering_right _ _ _).obj $ (SemiNormedGroup.rescale r).map_homological_complex _
@@ -41,10 +41,10 @@ def to_rescale (r : ℝ≥0) [fact (0 < r)] : 𝟭 system_of_complexes ⟶ resca
       comm' := by { intros, exact ((SemiNormedGroup.to_rescale r).naturality _).symm } },
     naturality' := by { intros c₁ c₂ h, ext i : 2, refl } },
   naturality' := λ C₁ C₂ f, by { ext, refl } }
+.
 
 def scale (i j : ℝ≥0) [fact (0 < i)] [fact (0 < j)] : rescale i ⟶ rescale j :=
-(whiskering_right _ _ _).map $ functor.map_homological_complex_nat_trans _ _ _ $
-  SemiNormedGroup.scale i j
+(whiskering_right _ _ _).map $ nat_trans.map_homological_complex (SemiNormedGroup.scale i j) _
 
 section exact_and_admissible
 
@@ -99,5 +99,36 @@ def rescale_nat_trans : Π i j, rescale_functor i ⟶ rescale_functor j
 | (i+2) (j+2) := scale (i+2)! (j+2)!
 | _     _     := 0
 
-
 end system_of_complexes
+
+namespace thm95
+
+def rescale_functor' : ℕ → ((ℝ≥0ᵒᵖ ⥤ SemiNormedGroup) ⥤ (ℝ≥0ᵒᵖ ⥤ SemiNormedGroup))
+| 0     := 𝟭 _
+| 1     := 𝟭 _
+| (m+2) := (whiskering_right _ _ _).obj (SemiNormedGroup.rescale (m+2)!)
+
+instance rescale_functor'.additive : Π m, (rescale_functor' m).additive
+| 0     := functor.id.additive
+| 1     := functor.id.additive
+| (m+2) := {}
+
+def to_rescale' (r : ℝ≥0) [fact (0 < r)] :
+  𝟭 (ℝ≥0ᵒᵖ ⥤ SemiNormedGroup) ⟶ ((whiskering_right _ _ _).obj (SemiNormedGroup.rescale r)) :=
+{ app := λ V,
+  { app := λ c, (SemiNormedGroup.to_rescale r).app _,
+    naturality' := by { intros c₁ c₂ h, dsimp, ext i : 2, refl } },
+  naturality' := λ C₁ C₂ f, by { ext, refl } }
+
+def scale' (i j : ℝ≥0) [fact (0 < i)] [fact (0 < j)] :
+  ((whiskering_right ℝ≥0ᵒᵖ _ _).obj (SemiNormedGroup.rescale i)) ⟶
+  ((whiskering_right ℝ≥0ᵒᵖ _ _).obj (SemiNormedGroup.rescale j)) :=
+(whiskering_right ℝ≥0ᵒᵖ _ _).map $ SemiNormedGroup.scale i j
+
+def rescale_nat_trans' : Π i j, rescale_functor' i ⟶ rescale_functor' j
+| 0     1     := 𝟙 _
+| 1     (j+2) := to_rescale' (j+2)!
+| (i+2) (j+2) := scale' (i+2)! (j+2)!
+| _     _     := 0
+
+end thm95

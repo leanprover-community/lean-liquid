@@ -92,15 +92,3 @@ def as_functor {T : Type*} [category T]
 end
 
 end homological_complex
-
-variable (c)
-
-@[simps]
-def functor.map_homological_complex_nat_trans [preadditive V₁] [preadditive V₂]
-  (F G : V₁ ⥤ V₂) [F.additive] [G.additive] (α : F ⟶ G) :
-  F.map_homological_complex c ⟶
-  (G.map_homological_complex c : homological_complex V₁ c ⥤ homological_complex V₂ c) :=
-{ app := λ C,
-  { f := λ i, α.app _,
-    comm' := λ i j, (α.naturality _).symm },
-  naturality' := λ C₁ C₂ f, by { ext i, exact α.naturality _ } }
