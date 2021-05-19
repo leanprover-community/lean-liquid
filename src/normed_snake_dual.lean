@@ -79,10 +79,18 @@ lemma weak_normed_snake_dual {k k' K K' r₁ r₂ : ℝ≥0}
     have : i' + 1 = i,
     { rw [hi', nat.sub_one, nat.add_one, nat.succ_pred_eq_of_pos (zero_lt_iff.mpr hizero)] },
 
-    calc ∥res m - (M.d i' i) m₁∥ = ∥f(res m - (M.d i' i) m₁)∥ : sorry
-    ... = ∥res n - (N.d i' i) (res n₁ - n₁' - nnew₁)∥ : sorry
-    ... ≤ ∥res n - (N.d i' i) (@res _ c₂ c _ _ n₁)∥ + ∥ (N.d i' i) (n₁' - nnew₁) ∥ : sorry
-    ... = ∥res n - (N.d i' i) (@res _ c₂ c _ _ n₁)∥ + ∥ (N.d i' i) nnew₁∥ : sorry
+    calc ∥res m - (M.d i' i) m₁∥ = ∥f (res m - (M.d i' i) m₁)∥ : ((hfker _ _).norm _).symm
+    ... = ∥f.apply (res m - (M.d i' i) m₁)∥ : rfl
+    ... = ∥f.apply (res m) - f.apply (M.d i' i m₁)∥ : by rw normed_group_hom.map_sub
+    ... = ∥f (res m) - f (M.d i' i m₁)∥ : rfl
+    ... = ∥res (f m) - f (M.d i' i m₁)∥ : by rw ← res_apply
+    ... = ∥res n - f (M.d i' i m₁)∥ : rfl
+    ... = ∥res n - (N.d i' i (res n₁) - N.d i' i (n₁' + nnew₁))∥ :
+      by rw [← d_apply, hm₁, sub_sub, normed_group_hom.map_sub]
+    ... = ∥(res n - N.d i' i (res n₁)) + N.d i' i (n₁' + nnew₁)∥ : by abel
+    ... ≤ ∥res n - (N.d i' i) (@res _ c₂ c _ _ n₁)∥ + ∥(N.d i' i) (n₁' + nnew₁) ∥ : norm_add_le _ _
+    ... = ∥res n - (N.d i' i) (@res _ c₂ c _ _ n₁)∥ + ∥(N.d i' i) nnew₁∥ :
+      by simp only [map_add, zero_add, d_d]
     ... ≤ ∥res n - (N.d i' i) (@res _ c₂ c _ _ n₁)∥ + ∥nnew₁∥ : sorry
     ... ≤ ∥res n - (N.d i' i) (@res _ c₂ c _ _ n₁)∥ + r₂ * ∥g (res n₁ - n₁')∥ : sorry
     ... = ∥res n - (N.d i' i) (@res _ c₂ c _ _ n₁)∥ + r₂ * ∥g (res n₁ - N.d i'' i' n₂)∥ : sorry
