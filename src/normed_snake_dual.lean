@@ -83,6 +83,19 @@ lemma weak_normed_snake_dual {k k' K K' r₁ r₂ : ℝ≥0}
       rw [nat.zero_sub] at hi',
       subst hi',
       rw [zero_add] at *,
+      simp only [d_self_apply, sub_zero, nnreal.coe_add, nnreal.coe_mul] at hn₁ ⊢,
+      change ∥res (f m)∥ ≤ K * ∥N.d 0 1 n∥ + ε₁ at hn₁,
+      rw [res_apply] at hn₁,
+      change ∥f.apply (res m)∥ ≤ ↑K * ∥N.d 0 1 n∥ + ε₁ at hn₁,
+      rw (hfker _ _).norm _ at hn₁,
+      rw ← @res_res _ c₁ c₂ c _ _ _ _,
+      refine le_trans ((admissible_of_kernel hfker hN_adm).res_norm_noninc _ _ _ _ _) (le_trans hn₁ _),
+      change ↑K * ∥(N.d 0 1) (f m)∥ + ε₁ ≤ (↑K + ↑r₁ * ↑r₂ * ↑K * ↑K') * ∥(M.d 0 1) m∥ + ε,
+      rw [d_apply],
+      change ↑K * ∥f.apply ((M.d 0 1) m)∥ + ε₁ ≤ (↑K + ↑r₁ * ↑r₂ * ↑K * ↑K') * ∥(M.d 0 1) m∥ + ε,
+      rw (hfker _ _).norm _,
+
+
       sorry },
 
     have hii' : i' + 1 = i,
