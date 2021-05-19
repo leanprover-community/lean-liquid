@@ -41,10 +41,10 @@ def to_rescale (r : ℝ≥0) [fact (0 < r)] : 𝟭 system_of_complexes ⟶ resca
       comm' := by { intros, exact ((SemiNormedGroup.to_rescale r).naturality _).symm } },
     naturality' := by { intros c₁ c₂ h, ext i : 2, refl } },
   naturality' := λ C₁ C₂ f, by { ext, refl } }
+.
 
 def scale (i j : ℝ≥0) [fact (0 < i)] [fact (0 < j)] : rescale i ⟶ rescale j :=
-(whiskering_right _ _ _).map $ functor.map_homological_complex_nat_trans _ _ _ $
-  SemiNormedGroup.scale i j
+(whiskering_right _ _ _).map $ nat_trans.map_homological_complex (SemiNormedGroup.scale i j) _
 
 section exact_and_admissible
 
