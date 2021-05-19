@@ -134,6 +134,11 @@ SemiNormedGroup.of $ normed_group_hom.equalizer
 
 namespace CLCTinv
 
+def ι (r : ℝ≥0) (V : SemiNormedGroup)
+  [normed_with_aut r V] [fact (0 < r)] {A B : Profiniteᵒᵖ} (f g : A ⟶ B) :
+  CLCTinv r V f g ⟶ (CLC V).obj A :=
+SemiNormedGroup.equalizer.ι _ _
+
 def map {A₁ B₁ A₂ B₂ : Profiniteᵒᵖ} (f₁ g₁ : A₁ ⟶ B₁) (f₂ g₂ : A₂ ⟶ B₂)
   (ϕ : A₁ ⟶ A₂) (ψ : B₁ ⟶ B₂) (h₁ : ϕ ≫ f₂ = f₁ ≫ ψ) (h₂ : ϕ ≫ g₂ = g₁ ≫ ψ) :
   CLCTinv r V f₁ g₁ ⟶ CLCTinv r V f₂ g₂ :=

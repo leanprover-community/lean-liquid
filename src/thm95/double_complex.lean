@@ -24,7 +24,7 @@ universe variables u v w
 
 namespace thm95
 
-variables (BD : breen_deligne.data) (c' : ℕ → ℝ≥0) [BD.suitable c']
+variables (BD : breen_deligne.data) (c_ : ℕ → ℝ≥0) [BD.suitable c_]
 variables (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)]
 variables (V : SemiNormedGroup.{v}) [normed_with_aut r V]
 variables (Λ : PolyhedralLattice.{u}) (M : ProFiltPseuNormGrpWithTinv.{w} r')
@@ -42,20 +42,20 @@ def Cech_augmentation_map : (Hom M).obj Λ ⟶ (Cech_nerve r' Λ M N).obj (mk 0)
 (Hom M).map (cosimplicial_augmentation_map Λ N)
 
 def cosimplicial_system_of_complexes : simplex_category ⥤ system_of_complexes :=
-Cech_nerve r' Λ M N ⋙ BD.system c' r V r'
+Cech_nerve r' Λ M N ⋙ BD.system c_ r V r'
 
 def augmentation_map :
-  (BD.system c' r V r').obj (op $ polyhedral_lattice.Hom Λ M) ⟶
-  (cosimplicial_system_of_complexes BD c' r r' V Λ M N).obj (mk 0) :=
-(BD.system c' r V r').map (Cech_augmentation_map r' Λ M N)
+  (BD.system c_ r V r').obj (op $ polyhedral_lattice.Hom Λ M) ⟶
+  (cosimplicial_system_of_complexes BD c_ r r' V Λ M N).obj (mk 0) :=
+(BD.system c_ r V r').map (Cech_augmentation_map r' Λ M N)
 
 def double_complex_aux : cochain_complex system_of_complexes ℕ :=
-alt_face_map_cocomplex (augmentation_map BD c' r r' V Λ M N)
+alt_face_map_cocomplex (augmentation_map BD c_ r r' V Λ M N)
 begin
   dsimp only [augmentation_map, cosimplicial_system_of_complexes,
     category_theory.functor.comp_map, Cech_augmentation_map, Cech_nerve,
     cosimplicial_augmentation_map, cosimplicial],
-  simp only [← (BD.system c' r V r').map_comp, ← (Hom M).map_comp],
+  simp only [← (BD.system c_ r V r').map_comp, ← (Hom M).map_comp],
   rw augmentation_map_equalizes (diagonal_embedding Λ N),
 end
 
@@ -74,24 +74,24 @@ open_locale nat
 -- so that the vertical differentials become norm-nonincreasing
 
 def double_complex_aux_rescaled : cochain_complex system_of_complexes ℕ :=
-(double_complex_aux BD c' r r' V Λ M N ).modify
+(double_complex_aux BD c_ r r' V Λ M N ).modify
   system_of_complexes.rescale_functor
   system_of_complexes.rescale_nat_trans
 
 def double_complex : system_of_double_complexes :=
-(double_complex_aux_rescaled BD c' r r' V Λ M N).as_functor
+(double_complex_aux_rescaled BD c_ r r' V Λ M N).as_functor
 
 lemma double_complex.row_zero :
-  (double_complex BD c' r r' V Λ M N).row 0 =
-  (BD.system c' r V r').obj (op $ Hom Λ M) := rfl
+  (double_complex BD c_ r r' V Λ M N).row 0 =
+  (BD.system c_ r V r').obj (op $ Hom Λ M) := rfl
 
 lemma double_complex.row_one :
-  (double_complex BD c' r r' V Λ M N).row 1 =
-  (BD.system c' r V r').obj (op $ Hom ((cosimplicial Λ N).obj (mk 0)) M) := rfl
+  (double_complex BD c_ r r' V Λ M N).row 1 =
+  (BD.system c_ r V r').obj (op $ Hom ((cosimplicial Λ N).obj (mk 0)) M) := rfl
 
 lemma double_complex.row_map_zero_one :
-  (double_complex BD c' r r' V Λ M N).row_map 0 1 =
-  (BD.system c' r V r').map (Cech_augmentation_map r' Λ M N) :=
+  (double_complex BD c_ r r' V Λ M N).row_map 0 1 =
+  (BD.system c_ r V r').map (Cech_augmentation_map r' Λ M N) :=
 begin
   ext c i : 4,
   dsimp only [double_complex, homological_complex.as_functor,
@@ -105,9 +105,9 @@ begin
 end
 
 lemma double_complex.row (m : ℕ) :
-  (double_complex BD c' r r' V Λ M N).row (m+2) =
+  (double_complex BD c_ r r' V Λ M N).row (m+2) =
   (system_of_complexes.rescale_functor (m+2)).obj
-    ((BD.system c' r V r').obj (op $ Hom ((cosimplicial Λ N).obj (mk (m+1))) M)) := rfl
+    ((BD.system c_ r V r').obj (op $ Hom ((cosimplicial Λ N).obj (mk (m+1))) M)) := rfl
 
 end
 

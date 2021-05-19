@@ -15,6 +15,18 @@ universe variables u
 open category_theory
 open_locale nat nnreal
 
+namespace nnreal
+
+def MulLeft (κ : ℝ≥0) : ℝ≥0 ⥤ ℝ≥0 :=
+{ obj := λ c, κ * c,
+  map := λ c₁ c₂ h, hom_of_le $ mul_le_mul' le_rfl (le_of_hom h) }
+
+def MulRight (κ : ℝ≥0) : ℝ≥0 ⥤ ℝ≥0 :=
+{ obj := λ c, c * κ,
+  map := λ c₁ c₂ h, hom_of_le $ mul_le_mul' (le_of_hom h) le_rfl }
+
+end nnreal
+
 namespace system_of_complexes
 
 def rescale (r : ℝ≥0) [fact (0 < r)] : system_of_complexes.{u} ⥤ system_of_complexes.{u} :=
@@ -98,6 +110,22 @@ def rescale_nat_trans : Π i j, rescale_functor i ⟶ rescale_functor j
 | 1     (j+2) := to_rescale (j+2)!
 | (i+2) (j+2) := scale (i+2)! (j+2)!
 | _     _     := 0
+
+section scale_index
+
+@[simps]
+def ScaleIndexLeft (κ : ℝ≥0) : system_of_complexes ⥤ system_of_complexes :=
+(whiskering_left _ _ _).obj (nnreal.MulLeft κ).op
+
+def scale_index_left (C : system_of_complexes) (κ : ℝ≥0) := (ScaleIndexLeft κ).obj C
+
+@[simps]
+def ScaleIndexRight (κ : ℝ≥0) : system_of_complexes ⥤ system_of_complexes :=
+(whiskering_left _ _ _).obj (nnreal.MulRight κ).op
+
+def scale_index_right (C : system_of_complexes) (κ : ℝ≥0) := (ScaleIndexRight κ).obj C
+
+end scale_index
 
 end system_of_complexes
 
