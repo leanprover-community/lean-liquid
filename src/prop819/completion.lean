@@ -9,6 +9,7 @@ variables (C : cochain_complex SemiNormedGroup ℕ)
 
 open SemiNormedGroup
 
+/-- The completed cochain complex associated to C. -/
 abbreviation cmpl := (Completion.map_homological_complex _).obj C
 
 open_locale nnreal
