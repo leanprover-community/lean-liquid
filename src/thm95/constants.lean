@@ -219,6 +219,15 @@ def H : ℕ :=
 max 1 $ (finset.range (m+1)).sup $ λ q,
   ((BD.data.homotopy_mul BD.homotopy (N₂ c' r r' m)).hom q (q + 1)).bound
 
+lemma one_le_H : 1 ≤ H BD c' r r' m :=
+le_max_left _ _
+
+instance H_pos : fact (0 < H BD c' r r' m) :=
+⟨zero_lt_one.trans_le $ one_le_H _ _ _ _ _⟩
+
+instance H_pos' : fact ((0:ℝ≥0) < H BD c' r r' m) :=
+by { norm_cast, apply_instance }
+
 lemma bound_by_H {q : ℕ} (h : q ≤ m) :
   ((BD.data.homotopy_mul BD.homotopy (N₂ c' r r' m)).hom q (q + 1)).bound_by (H BD c' r r' m) :=
 begin
@@ -229,19 +238,21 @@ begin
   rwa [finset.mem_range, nat.lt_succ_iff],
 end
 
-instance H_pos : fact (0 < H BD c' r r' m) :=
-⟨lt_max_iff.mpr $ or.inl zero_lt_one⟩
-
-instance H_pos' : fact ((0:ℝ≥0) < H BD c' r r' m) :=
-by { norm_cast, apply_instance }
-
 def k : ℝ≥0 := k' c' m * k' c' m
 
 instance one_le_k : fact (1 ≤ k c' m) := by { delta k, apply_instance }
 
 def K : ℝ≥0 := 2 * normed_spectral.K₀ m (K₁ m) * H BD c' r r' m
 
-instance one_le_K : fact (1 ≤ K BD c' r r' m) := sorry
+instance one_le_K : fact (1 ≤ K BD c' r r' m) :=
+fact.mk $
+calc 1 = 1 * 1 * 1 : by simp
+... ≤ 2 * normed_spectral.K₀ m (K₁ m) * H BD c' r r' m :
+begin
+  refine mul_le_mul' (mul_le_mul' one_le_two $ (normed_spectral.one_le_K₀ _ _).1) _,
+  norm_cast,
+  apply one_le_H
+end
 
 instance k_le_k₁ [fact (0 < m)] : fact (k c' (m - 1) ≤ k₁ m) := sorry
 
