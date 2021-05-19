@@ -3,6 +3,7 @@ import for_mathlib.Profinite.functorial_limit
 import for_mathlib.simplicial.complex
 import for_mathlib.SemiNormedGroup
 import locally_constant.Vhat
+import prop819.completion
 
 open_locale nnreal
 
@@ -24,5 +25,8 @@ abbreviation FLC : cochain_complex SemiNormedGroup ℕ :=
 include surj
 
 theorem prop819 {m : ℕ} (ε : ℝ≥0) (hε : 0 < ε)
-  (f : (FLC F M).X m) (hf : (FLC F M).d_from m f = 0) :
-  ∃ g : (FLC F M).X_prev m, (FLC F M).d_to m g = f ∧ nnnorm g ≤ (1 + ε) * (nnnorm f) := sorry
+  (f : (FLC F M).X (m+1)) (hf : (FLC F M).d (m+1) (m+2) f = 0) :
+  ∃ g : (FLC F M).X m, (FLC F M).d m (m+1) g = f ∧ nnnorm g ≤ (1 + ε) * (nnnorm f) :=
+begin
+  sorry
+end
