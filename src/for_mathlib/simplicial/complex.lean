@@ -3,7 +3,7 @@ import algebra.module.hom
 import algebra.big_operators
 import algebraic_topology.simplicial_object
 
-import system_of_complexes.complex
+import algebra.homology.homological_complex
 
 namespace category_theory
 
@@ -86,17 +86,17 @@ begin
 end
 
 /-- Make a cochain complex from a cosimplicial object. -/
-def to_cocomplex : cochain_complex ℕ C := cochain_complex.mk'
+def to_cocomplex : cochain_complex C ℕ := cochain_complex.of
 (λ n, M.obj [n]) (λ n, M.coboundary n) M.coboundary_coboundary
 
 /-- A functorial version of `to_cocomplex`. -/
-def cocomplex : cosimplicial_object C ⥤ cochain_complex ℕ C :=
+def cocomplex : cosimplicial_object C ⥤ cochain_complex C ℕ :=
 { obj := to_cocomplex,
   map := λ M N f,
   { f := λ i, f.app _,
-    comm := begin
+    comm' := begin
       intros i j,
-      dsimp [to_cocomplex],
+      dsimp [to_cocomplex, cochain_complex.of],
       split_ifs, swap, { simp },
       subst h,
       simp only [category_theory.category.comp_id, category_theory.eq_to_hom_refl, coboundary, δ,
@@ -118,7 +118,7 @@ def to_cocomplex_d {M : augmented C} : Π (n : ℕ), to_cocomplex_obj M n ⟶ to
 
 /-- The cochain complex associated to an augmented cosimplicial object. -/
 @[simps]
-def to_cocomplex (M : augmented C) : cochain_complex ℕ C := cochain_complex.mk'
+def to_cocomplex (M : augmented C) : cochain_complex C ℕ := cochain_complex.of
 (to_cocomplex_obj M) to_cocomplex_d
 begin
   rintros (_|_),
@@ -130,7 +130,7 @@ begin
 end
 
 /-- A functorial version of to_cocomplex. -/
-def cocomplex : augmented C ⥤ cochain_complex ℕ C :=
+def cocomplex : augmented C ⥤ cochain_complex C ℕ :=
 { obj := to_cocomplex,
   map := λ M N f,
   { f := λ i,
@@ -138,9 +138,9 @@ def cocomplex : augmented C ⥤ cochain_complex ℕ C :=
     | 0 := point.map f
     | (n+1) := (drop.map f).app _
     end,
-    comm := begin
+    comm' := begin
       intros i j,
-      dsimp [to_cocomplex],
+      dsimp [to_cocomplex, cochain_complex.of],
       split_ifs, swap, { simp },
       subst h,
       cases i,
