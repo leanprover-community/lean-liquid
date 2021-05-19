@@ -76,8 +76,15 @@ lemma weak_normed_snake_dual {k k' K K' r₁ r₂ : ℝ≥0}
       rw [zero_add] at *,
       sorry },
 
-    have : i' + 1 = i,
+    have hii' : i' + 1 = i,
     { rw [hi', nat.sub_one, nat.add_one, nat.succ_pred_eq_of_pos (zero_lt_iff.mpr hizero)] },
+    have hfm : ∥g (res (f m) - N.d i' i n₁)∥ = ∥g (N.d i' i n₁)∥,
+    { have : f m ∈ f.apply.range,
+      {
+
+      },
+      sorry
+    },
 
     calc ∥res m - (M.d i' i) m₁∥ = ∥f (res m - (M.d i' i) m₁)∥ : ((hfker _ _).norm _).symm
     ... = ∥f.apply (res m - (M.d i' i) m₁)∥ : rfl
@@ -88,24 +95,36 @@ lemma weak_normed_snake_dual {k k' K K' r₁ r₂ : ℝ≥0}
     ... = ∥res n - (N.d i' i (res n₁) - N.d i' i (n₁' + nnew₁))∥ :
       by rw [← d_apply, hm₁, sub_sub, normed_group_hom.map_sub]
     ... = ∥(res n - N.d i' i (res n₁)) + N.d i' i (n₁' + nnew₁)∥ : by abel
-    ... ≤ ∥res n - (N.d i' i) (@res _ c₂ c _ _ n₁)∥ + ∥(N.d i' i) (n₁' + nnew₁) ∥ : norm_add_le _ _
-    ... = ∥res n - (N.d i' i) (@res _ c₂ c _ _ n₁)∥ + ∥(N.d i' i) nnew₁∥ :
+    ... ≤ ∥res n - N.d i' i (@res _ c₂ c _ _ n₁)∥ + ∥N.d i' i (n₁' + nnew₁) ∥ : norm_add_le _ _
+    ... = ∥res n - N.d i' i (@res _ c₂ c _ _ n₁)∥ + ∥N.d i' i nnew₁∥ :
       by simp only [map_add, zero_add, d_d]
-    ... ≤ ∥res n - (N.d i' i) (@res _ c₂ c _ _ n₁)∥ + ∥nnew₁∥ : sorry
-    ... ≤ ∥res n - (N.d i' i) (@res _ c₂ c _ _ n₁)∥ + r₂ * ∥g (res n₁ - n₁')∥ : sorry
-    ... = ∥res n - (N.d i' i) (@res _ c₂ c _ _ n₁)∥ + r₂ * ∥g (res n₁ - N.d i'' i' n₂)∥ : sorry
-    ... = ∥res n - (N.d i' i) (@res _ c₂ c _ _ n₁)∥ + r₂ * ∥g (res n₁) - g (N.d i'' i' n₂)∥ : sorry
-    ... = ∥res n - (N.d i' i) (@res _ c₂ c _ _ n₁)∥ + r₂ * ∥res (g n₁) - P.d i'' i' (g n₂)∥ : sorry
-    ... = ∥res n - (N.d i' i) (@res _ c₂ c _ _ n₁)∥ + r₂ * ∥res p₁ - P.d i'' i' p₂∥ : sorry
-    ... ≤ ∥res n - (N.d i' i) (@res _ c₂ c _ _ n₁)∥ + r₂ * K' * ∥P.d i' (i' + 1) p₁∥ + ε₁ : sorry
-    ... ≤ ∥res n - (N.d i' i) n₁∥ + r₂ * K' * ∥P.d i' (i' + 1) p₁∥ + ε₁ : sorry
-    ... ≤ K * ∥(N.d i (i + 1)) n∥ + ε / 2 + r₂ * K' * ∥P.d i' (i' + 1) p₁∥ + ε₁ : sorry
-    ... = K * ∥(N.d i (i + 1)) n∥ + ε / 2 + r₂ * K' * ∥P.d i' (i' + 1) (g n₁)∥ + ε₁ : sorry
-    ... = K * ∥(N.d i (i + 1)) n∥ + ε / 2 + r₂ * K' * ∥g (N.d i' (i' + 1) n₁)∥ + ε₁ : sorry
-    ... = K * ∥(N.d i (i + 1)) n∥ + ε / 2 + r₂ * K' * ∥g (N.d i' i n₁)∥ + ε₁ : by rw [this]
-    ... = K * ∥(N.d i (i + 1)) n∥ + ε / 2 + r₂ * K' * ∥g (res (f m) - N.d i' i n₁)∥ + ε₁ : sorry
-    ... ≤ K * ∥(N.d i (i + 1)) n∥ + ε / 2 + r₂ * K' * r₁ * ∥res (f m) - N.d i' i n₁∥ + ε₁ : sorry
-    ... = K * ∥(N.d i (i + 1)) n∥ + ε / 2 + r₂ * K' * r₁ * ∥res n - N.d i' i n₁∥ + ε₁ : rfl
-    ... ≤ K * ∥(N.d i (i + 1)) n∥ + ε / 2 + r₂ * K' * r₁ * (K * ∥(N.d i (i + 1)) n∥ + ε / 2) + ε₁ : sorry
+    ... ≤ ∥res n - N.d i' i (@res _ c₂ c _ _ n₁)∥ + ∥nnew₁∥ :
+      add_le_add_left (hN_adm.d_norm_noninc _ _ i' i nnew₁) _
+    ... ≤ ∥res n - N.d i' i (@res _ c₂ c _ _ n₁)∥ + r₂ * ∥g (res n₁ - n₁')∥ :
+      add_le_add_left hnormnnew₁ _
+    ... = ∥res n - N.d i' i (@res _ c₂ c _ _ n₁)∥ + r₂ * ∥g.apply (res n₁ - N.d i'' i' n₂)∥ : rfl
+    ... = ∥res n - N.d i' i (@res _ c₂ c _ _ n₁)∥ + r₂ * ∥g.apply (res n₁) - g.apply (N.d i'' i' n₂)∥ :
+      by rw normed_group_hom.map_sub
+    ... = ∥res n - N.d i' i (@res _ c₂ c _ _ n₁)∥ + r₂ * ∥g (res n₁) - g (N.d i'' i' n₂)∥ : rfl
+    ... = ∥res n - N.d i' i (@res _ c₂ c _ _ n₁)∥ + r₂ * ∥res (g n₁) - P.d i'' i' (g n₂)∥ :
+      by rw [← res_apply, d_apply]
+    ... = ∥res n - N.d i' i (@res _ c₂ c _ _ n₁)∥ + r₂ * ∥res p₁ - P.d i'' i' (g n₂)∥ : rfl
+    ... = ∥res n - N.d i' i (@res _ c₂ c _ _ n₁)∥ + r₂ * ∥res p₁ - P.d i'' i' p₂∥ : by rw hn₂
+    ... ≤ ∥res n - N.d i' i (@res _ c₂ c _ _ n₁)∥ + r₂ * (K' * ∥P.d i' (i' + 1) p₁∥ + ε₁) :
+      add_le_add_left (mul_le_mul_of_nonneg_left hp₂ $ nnreal.coe_nonneg r₂) _
+    ... = ∥res (@res _ c₁ c₂ _ _ n) - (@res _ c₂ c _ _ (N.d i' i n₁))∥ + r₂ * (K' * ∥P.d i' (i' + 1) p₁∥ + ε₁) :
+      by rw [res_res, d_res]
+    ... = ∥@res _ c₂ c _ _ (@res _ c₁ c₂ _ _ n - N.d i' i n₁)∥ + r₂ * (K' * ∥P.d i' (i' + 1) p₁∥ + ε₁) :
+      by rw [normed_group_hom.map_sub]
+    ... ≤ ∥res n - N.d i' i n₁∥ + r₂ * (K' * ∥P.d i' (i' + 1) p₁∥ + ε₁) :
+      add_le_add_right (hN_adm.res_norm_noninc _ _ _ _ _) _
+    ... ≤ K * ∥N.d i (i + 1) n∥ + ε / 2 + r₂ * (K' * ∥P.d i' (i' + 1) p₁∥ + ε₁) :
+      add_le_add_right hn₁ _
+    ... = K * ∥N.d i (i + 1) n∥ + ε / 2 + r₂ * (K' * ∥P.d i' (i' + 1) (g n₁)∥ + ε₁) : rfl
+    ... = K * ∥N.d i (i + 1) n∥ + ε / 2 + r₂ * (K' * ∥g (N.d i' i n₁)∥ + ε₁) : by rw [← d_apply, hii']
+    ... = K * ∥N.d i (i + 1) n∥ + ε / 2 + r₂ * (K' * ∥g (res (f m) - N.d i' i n₁)∥ + ε₁) : sorry
+    ... ≤ K * ∥N.d i (i + 1) n∥ + ε / 2 + r₂ * (K' * r₁ * ∥res (f m) - N.d i' i n₁∥ + ε₁) : sorry
+    ... = K * ∥N.d i (i + 1) n∥ + ε / 2 + r₂ * (K' * r₁ * ∥res n - N.d i' i n₁∥ + ε₁) : rfl
+    ... ≤ K * ∥N.d i (i + 1) n∥ + ε / 2 + r₂ * (K' * r₁ * (K * ∥(N.d i (i + 1)) n∥ + ε / 2) + ε₁) : sorry
     ... = Knew * ∥(M.d i (i + 1)) m∥ + ε : sorry
   end
