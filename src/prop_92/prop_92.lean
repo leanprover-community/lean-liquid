@@ -7,16 +7,16 @@ open_locale nnreal
 
 namespace CLCFP
 
-variables {r r' : ℝ≥0} (V : SemiNormedGroup) [normed_with_aut r V] (c c₁ c₂ : ℝ≥0) (n : ℕ)
+variables (r r' : ℝ≥0) (V : SemiNormedGroup) [normed_with_aut r V] (c c₁ c₂ : ℝ≥0) (n : ℕ)
 variables [fact (0 < r)] [fact (0 < r')] [fact (r' ≤ 1)] [fact (c₂ ≤ r' * c₁)] [fact (c₂ ≤ c₁)]
 variables (M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ)
 
 include r
 
 def T_inv_sub_Tinv :=
-(CLCFP.res V r' c₁ c₂ n ≫ CLCFP.T_inv r V r' c₂ n).app M - (CLCFP.Tinv V r' c₁ c₂ n).app M
+CLCFP.res V r' c₁ c₂ n ≫ CLCFP.T_inv r V r' c₂ n - CLCFP.Tinv V r' c₁ c₂ n
 
-lemma T_inv_sub_Tinv_bound_by : (T_inv_sub_Tinv V c₁ c₂ n M).bound_by (1 + r⁻¹) :=
+lemma T_inv_sub_Tinv_bound_by : ((T_inv_sub_Tinv r r' V c₁ c₂ n).app M).bound_by (1 + r⁻¹) :=
 begin
   rw [T_inv_sub_Tinv, sub_eq_neg_add],
   refine normed_group_hom.bound_by.add _ _,
@@ -35,7 +35,7 @@ open locally_constant category_theory
 /-- 9.2 of Analytic.pdf -/
 lemma T_inv_sub_Tinv_exists_preimage [hr1 : fact (r < 1)]
   (f : (CLCFP V r' (r' * c) n).obj M) (ε : ℝ) (hε : 0 < ε) :
-  ∃ g : (CLCFP V r' c n).obj M, T_inv_sub_Tinv V c (r' * c) n M g = f ∧
+  ∃ g : (CLCFP V r' c n).obj M, (T_inv_sub_Tinv r r' V c (r' * c) n).app M g = f ∧
     (∥g∥ ≤ (r / (1 - r) + ε) * ∥f∥) :=
 begin
   obtain ⟨g, hg1, hg2⟩ := @concrete_92 _ _ _ _ _ _ _ _
@@ -53,10 +53,10 @@ end
 variables (V c n M)
 
 lemma T_inv_sub_Tinv_surjective [fact (r < 1)] :
-  function.surjective (T_inv_sub_Tinv V c (r' * c) n M) :=
+  function.surjective ((T_inv_sub_Tinv r r' V c (r' * c) n).app M) :=
 begin
   intros f,
-  obtain ⟨g, hg, -⟩ := T_inv_sub_Tinv_exists_preimage f 1 zero_lt_one,
+  obtain ⟨g, hg, -⟩ := T_inv_sub_Tinv_exists_preimage r r' f 1 zero_lt_one,
   exact ⟨g, hg⟩
 end
 
