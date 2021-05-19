@@ -1,4 +1,3 @@
-import for_mathlib.normed_group_quotient
 import category_theory.preadditive.additive_functor
 
 import system_of_complexes.basic

@@ -7,13 +7,13 @@ section
 
 variables {m n R : Type*} [fintype m] [fintype n] [semiring R] (M : matrix m n R)
 
-lemma reindex_linear_equiv_sum_empty_symm :
-  (reindex_linear_equiv (sum_empty _) (sum_empty _)).symm M = from_blocks M 0 0 0 :=
+lemma reindex_linear_equiv_sum_empty_symm (α β : Type*) [is_empty α] [is_empty β] :
+  (reindex_linear_equiv (sum_empty _ α) (sum_empty _ β)).symm M = from_blocks M 0 0 0 :=
 begin
   ext (i|i) (j|j),
   { simp only [reindex_linear_equiv_symm, from_blocks_apply₁₁], refl },
-  { cases j },
-  { cases i }
+  { exact is_empty_elim j },
+  { exact is_empty_elim i }
 end
 
 end
