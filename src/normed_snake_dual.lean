@@ -97,7 +97,7 @@ lemma weak_normed_snake_dual {k k' K K' r₁ r₂ : ℝ≥0}
     ... = K * ∥(N.d i (i + 1)) n∥ + ε / 2 + r₂ * K' * ∥g (N.d i' i n₁)∥ + ε₁ : by rw [this]
     ... = K * ∥(N.d i (i + 1)) n∥ + ε / 2 + r₂ * K' * ∥g (res (f m) - N.d i' i n₁)∥ + ε₁ : sorry
     ... ≤ K * ∥(N.d i (i + 1)) n∥ + ε / 2 + r₂ * K' * r₁ * ∥res (f m) - N.d i' i n₁∥ + ε₁ : sorry
-    ... = K * ∥(N.d i (i + 1)) n∥ + ε / 2 + r₂ * K' * r₁ * ∥res n - N.d i' i n₁∥ + ε₁ : sorry
+    ... = K * ∥(N.d i (i + 1)) n∥ + ε / 2 + r₂ * K' * r₁ * ∥res n - N.d i' i n₁∥ + ε₁ : rfl
     ... ≤ K * ∥(N.d i (i + 1)) n∥ + ε / 2 + r₂ * K' * r₁ * (K * ∥(N.d i (i + 1)) n∥ + ε / 2) + ε₁ : sorry
     ... = Knew * ∥(M.d i (i + 1)) m∥ + ε : sorry
   end
