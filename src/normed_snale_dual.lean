@@ -14,17 +14,88 @@ structure add_subgroup.is_kernel {M N : Type*} [semi_normed_group M] [semi_norme
 def system_of_complexes.is_kernel {M M' : system_of_complexes} (f : M ⟶ M') : Prop :=
 ∀ c i, add_subgroup.is_kernel (f.apply : M c i ⟶ M' c i)
 
-variables (M M' N : system_of_complexes.{u}) (f : N ⟶ M) (g : M ⟶ M')
+lemma admissible_of_kernel {M M' : system_of_complexes} {f : M ⟶ M'}
+  (hker : system_of_complexes.is_kernel f) (hadm : M'.admissible) : M.admissible :=
+begin
+  sorry
+end
+
+variables (M N P : system_of_complexes.{u}) (f : M ⟶ N) (g : N ⟶ P)
 
 lemma weak_normed_snake_dual {k k' K K' r₁ r₂ : ℝ≥0}
-  [hk : fact (1 ≤ k)] [hk' : fact (1 ≤ k')] [hk'' : fact (1 ≤ k'')]
+  [hk : fact (1 ≤ k)] [hk' : fact (1 ≤ k')]
   {m : ℕ} {c₀ : ℝ≥0}
-  (hM : M.is_weak_bounded_exact k K (m+1) c₀)
-  (hM' : M'.is_weak_bounded_exact k' K' (m+1) c₀)
-  (hM'_adm : M'.admissible)
-  (hg : ∀ c i (x : M c i), ∥g x∥ ≤ r₁ * ∥x∥)
-  (Hg : ∀ (c : ℝ≥0) [fact (c₀ ≤ c)] (i : ℕ) (hi : i ≤ m+1+1) (y : M' c i),
-    ∃ (x : M c i), g x = y ∧ ∥x∥ ≤ r₂ * ∥x∥)
-  (hg : ∀ c i, (f.apply : N c i ⟶ M c i).range = g.apply.ker)
-  (hgker : system_of_complexes.is_kernel f) :
-  N.is_weak_bounded_exact (k*k') (K'*(K + 1)) m c₀ := sorry
+  (hN : N.is_weak_bounded_exact k K (m+1) c₀)
+  (hP : P.is_weak_bounded_exact k' K' (m+1) c₀)
+  (hN_adm : N.admissible)
+  (hg : ∀ c i (x : N c i), ∥g x∥ ≤ r₁ * ∥x∥)
+  (Hg : ∀ (c : ℝ≥0) [fact (c₀ ≤ c)] (i : ℕ) (hi : i ≤ m+1+1) (y : P c i),
+    ∃ (x : N c i), g x = y ∧ ∥x∥ ≤ r₂ * ∥y∥)
+  (hg : ∀ c i, (f.apply : M c i ⟶ N c i).range = g.apply.ker)
+  (hfker : system_of_complexes.is_kernel f) :
+  M.is_weak_bounded_exact (k * k') (K + r₁ * r₂ * K * K') m c₀ :=
+  begin
+    let Knew := K + r₁ * r₂ * K * K',
+    have bound_nonneg : (0 : ℝ) ≤ Knew := sorry,
+    introsI c hc i hi,
+    let c₁ := k * (k' * c),
+    let c₂ := k' * c,
+    suffices : ∀ m : M c₁ i, ∀ ε > 0,
+    ∃ i₀ (hi₀ : i₀ = i - 1) (y : M c i₀), ∥res m - M.d _ _ y∥ ≤ Knew * ∥M.d i (i+1) m∥ + ε,
+    { dsimp [c₁] at this,
+      intros m₁ ε hε,
+      haveI hc : fact (k * k' * c = c₁) := by { constructor, simp [mul_assoc, c₁] },
+      let m : ↥(M c₁ i) := res m₁,
+      rcases this m ε hε with ⟨i₀, hi₀, y, hy⟩,
+      rw [res_res, d_res] at hy,
+      have : ∥(res (M.d i (i+1) m₁) : M (k * (k' * c)) (i+1))∥ ≤ ∥M.d i (i+1) m₁∥,
+      { apply (admissible_of_kernel hfker hN_adm).res_norm_noninc },
+      refine ⟨i₀, _, hi₀, rfl, _⟩,
+      refine ⟨y, hy.trans (add_le_add_right (mul_le_mul_of_nonneg_left this bound_nonneg) ε)⟩ },
+
+    intros m ε hε,
+    let n := f m,
+    obtain ⟨i', j', hi', rfl, n₁, hn₁⟩ :=
+      hN _ ⟨hc.out.trans $ le_mul_of_one_le_left' hk'.out⟩ _ (by linarith) n (ε/2) (half_pos hε),
+    let p₁ := g n₁,
+    let ε₁ := ε/(2 * (1 + r₂)),
+    have hε₁ : 0 < ε₁ := sorry,
+    obtain ⟨i'', j'', hi'', hj'', p₂, hp₂⟩ := hP _ hc _ (by sorry) p₁ ε₁ hε₁,
+    obtain ⟨n₂, hn₂, hnormn₂⟩ := Hg c i'' (by sorry) p₂,
+    let n₁' := N.d i'' i' n₂,
+    obtain ⟨nnew₁, hnnew₁, hnormnnew₁⟩ := Hg c i' (by sorry) (g (res n₁ - n₁')),
+    have hker : (res n₁ - n₁') - nnew₁ ∈ g.apply.ker := sorry,
+    rw ← hg at hker,
+    obtain ⟨m₁, hm₁ : f m₁ = res n₁ - n₁' - nnew₁⟩ := (mem_range _ _).1 hker,
+    refine ⟨i', hi', m₁, _⟩,
+
+    by_cases hizero : i = 0,
+    {
+      sorry
+    },
+    have : i' + 1 = i,
+    { rw [hi', nat.sub_one, nat.add_one, nat.succ_pred_eq_of_pos (zero_lt_iff.mpr hizero)] },
+
+    calc ∥res m - (M.d i' i) m₁∥ = ∥f(res m - (M.d i' i) m₁)∥ : sorry
+    ... = ∥res n - (N.d i' i) (res n₁ - n₁' - nnew₁)∥ : sorry
+    ... ≤ ∥res n - (N.d i' i) (@res _ c₂ c _ _ n₁)∥ + ∥ (N.d i' i) (n₁' - nnew₁) ∥ : sorry
+    ... = ∥res n - (N.d i' i) (@res _ c₂ c _ _ n₁)∥ + ∥ (N.d i' i) nnew₁∥ : sorry
+    ... ≤ ∥res n - (N.d i' i) (@res _ c₂ c _ _ n₁)∥ + ∥nnew₁∥ : sorry
+    ... ≤ ∥res n - (N.d i' i) (@res _ c₂ c _ _ n₁)∥ + r₂ * ∥g (res n₁ - n₁')∥ : sorry
+    ... = ∥res n - (N.d i' i) (@res _ c₂ c _ _ n₁)∥ + r₂ * ∥g (res n₁ - N.d i'' i' n₂)∥ : sorry
+    ... = ∥res n - (N.d i' i) (@res _ c₂ c _ _ n₁)∥ + r₂ * ∥g (res n₁) - g (N.d i'' i' n₂)∥ : sorry
+    ... = ∥res n - (N.d i' i) (@res _ c₂ c _ _ n₁)∥ + r₂ * ∥res (g n₁) - P.d i'' i' (g n₂)∥ : sorry
+    ... = ∥res n - (N.d i' i) (@res _ c₂ c _ _ n₁)∥ + r₂ * ∥res p₁ - P.d i'' i' p₂∥ : sorry
+    ... ≤ ∥res n - (N.d i' i) (@res _ c₂ c _ _ n₁)∥ + r₂ * K' * ∥P.d i' j'' p₁∥ + ε₁ : sorry
+    ... ≤ ∥res n - (N.d i' i) n₁∥ + r₂ * K' * ∥P.d i' (i' + 1) p₁∥ + ε₁ : sorry
+    ... ≤ K * ∥(N.d i (i + 1)) n∥ + ε / 2 + r₂ * K' * ∥P.d i' (i' + 1) p₁∥ + ε₁ : sorry
+    ... = K * ∥(N.d i (i + 1)) n∥ + ε / 2 + r₂ * K' * ∥P.d i' (i' + 1) (g n₁)∥ + ε₁ : sorry
+    ... = K * ∥(N.d i (i + 1)) n∥ + ε / 2 + r₂ * K' * ∥g (N.d i' (i' + 1) n₁)∥ + ε₁ : sorry
+    ... = K * ∥(N.d i (i + 1)) n∥ + ε / 2 + r₂ * K' * ∥g (N.d i' i n₁)∥ + ε₁ : by rw [this]
+    ... = K * ∥(N.d i (i + 1)) n∥ + ε / 2 + r₂ * K' * ∥g (res (f m) - N.d i' i n₁)∥ + ε₁ : sorry
+
+
+    ... ≤ ↑Knew * ∥(M.d i (i + 1)) m∥ + ε : sorry
+
+
+  end
