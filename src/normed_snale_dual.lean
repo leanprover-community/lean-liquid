@@ -60,7 +60,7 @@ lemma weak_normed_snake_dual {k k' K K' r₁ r₂ : ℝ≥0}
     let p₁ := g n₁,
     let ε₁ := ε/(2 * (1 + r₂)),
     have hε₁ : 0 < ε₁ := sorry,
-    obtain ⟨i'', j'', hi'', hj'', p₂, hp₂⟩ := hP _ hc _ (by sorry) p₁ ε₁ hε₁,
+    obtain ⟨i'', j'', hi'', rfl, p₂, hp₂⟩ := hP _ hc _ (by sorry) p₁ ε₁ hε₁,
     obtain ⟨n₂, hn₂, hnormn₂⟩ := Hg c i'' (by sorry) p₂,
     let n₁' := N.d i'' i' n₂,
     obtain ⟨nnew₁, hnnew₁, hnormnnew₁⟩ := Hg c i' (by sorry) (g (res n₁ - n₁')),
@@ -70,9 +70,12 @@ lemma weak_normed_snake_dual {k k' K K' r₁ r₂ : ℝ≥0}
     refine ⟨i', hi', m₁, _⟩,
 
     by_cases hizero : i = 0,
-    {
-      sorry
-    },
+    { subst hizero,
+      rw [nat.zero_sub] at hi',
+      subst hi',
+      rw [zero_add] at *,
+      sorry },
+
     have : i' + 1 = i,
     { rw [hi', nat.sub_one, nat.add_one, nat.succ_pred_eq_of_pos (zero_lt_iff.mpr hizero)] },
 
@@ -86,16 +89,15 @@ lemma weak_normed_snake_dual {k k' K K' r₁ r₂ : ℝ≥0}
     ... = ∥res n - (N.d i' i) (@res _ c₂ c _ _ n₁)∥ + r₂ * ∥g (res n₁) - g (N.d i'' i' n₂)∥ : sorry
     ... = ∥res n - (N.d i' i) (@res _ c₂ c _ _ n₁)∥ + r₂ * ∥res (g n₁) - P.d i'' i' (g n₂)∥ : sorry
     ... = ∥res n - (N.d i' i) (@res _ c₂ c _ _ n₁)∥ + r₂ * ∥res p₁ - P.d i'' i' p₂∥ : sorry
-    ... ≤ ∥res n - (N.d i' i) (@res _ c₂ c _ _ n₁)∥ + r₂ * K' * ∥P.d i' j'' p₁∥ + ε₁ : sorry
+    ... ≤ ∥res n - (N.d i' i) (@res _ c₂ c _ _ n₁)∥ + r₂ * K' * ∥P.d i' (i' + 1) p₁∥ + ε₁ : sorry
     ... ≤ ∥res n - (N.d i' i) n₁∥ + r₂ * K' * ∥P.d i' (i' + 1) p₁∥ + ε₁ : sorry
     ... ≤ K * ∥(N.d i (i + 1)) n∥ + ε / 2 + r₂ * K' * ∥P.d i' (i' + 1) p₁∥ + ε₁ : sorry
     ... = K * ∥(N.d i (i + 1)) n∥ + ε / 2 + r₂ * K' * ∥P.d i' (i' + 1) (g n₁)∥ + ε₁ : sorry
     ... = K * ∥(N.d i (i + 1)) n∥ + ε / 2 + r₂ * K' * ∥g (N.d i' (i' + 1) n₁)∥ + ε₁ : sorry
     ... = K * ∥(N.d i (i + 1)) n∥ + ε / 2 + r₂ * K' * ∥g (N.d i' i n₁)∥ + ε₁ : by rw [this]
     ... = K * ∥(N.d i (i + 1)) n∥ + ε / 2 + r₂ * K' * ∥g (res (f m) - N.d i' i n₁)∥ + ε₁ : sorry
-
-
-    ... ≤ ↑Knew * ∥(M.d i (i + 1)) m∥ + ε : sorry
-
-
+    ... ≤ K * ∥(N.d i (i + 1)) n∥ + ε / 2 + r₂ * K' * r₁ * ∥res (f m) - N.d i' i n₁∥ + ε₁ : sorry
+    ... = K * ∥(N.d i (i + 1)) n∥ + ε / 2 + r₂ * K' * r₁ * ∥res n - N.d i' i n₁∥ + ε₁ : sorry
+    ... ≤ K * ∥(N.d i (i + 1)) n∥ + ε / 2 + r₂ * K' * r₁ * (K * ∥(N.d i (i + 1)) n∥ + ε / 2) + ε₁ : sorry
+    ... = Knew * ∥(M.d i (i + 1)) m∥ + ε : sorry
   end
