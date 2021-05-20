@@ -128,8 +128,8 @@ lemma coker.π_surjective {f : A ⟶ B} :
 surjective_quot_mk _
 
 lemma coker.π_is_quotient {f : A ⟶ B} :
-  add_subgroup.is_quotient (coker.π : B ⟶ coker f) :=
-add_subgroup.is_quotient_quotient _
+  normed_group_hom.is_quotient (coker.π : B ⟶ coker f) :=
+normed_group_hom.is_quotient_quotient _
 
 lemma coker.π_norm_noninc {f : A ⟶ B} :
   (coker.π : B ⟶ coker f).norm_noninc :=
@@ -151,7 +151,7 @@ open normed_group_hom
 /-- Lift (aka descend) a morphism to the cokernel. -/
 noncomputable
 def coker.lift {f : A ⟶ B} {g : B ⟶ C} (cond : f ≫ g = 0) : coker f ⟶ C :=
-add_subgroup.lift _ g (begin
+normed_group_hom.lift _ g (begin
   rintros _ ⟨b,rfl⟩,
   change (f ≫ g) b = 0,
   simp [cond]
@@ -162,7 +162,7 @@ lemma coker.lift_comp_π {f : A ⟶ B} {g : B ⟶ C} {cond : f ≫ g = 0} :
   coker.π ≫ coker.lift cond = g :=
 begin
   ext,
-  rw ← f.range.lift_mk g,
+  rw ← normed_group_hom.lift_mk f.range g,
   refl,
   rintro _ ⟨b,rfl⟩,
   change (f ≫ g) b = 0,
@@ -175,7 +175,7 @@ lemma coker.lift_comp_π_apply {f : A ⟶ B} {g : B ⟶ C} {cond : f ≫ g = 0} 
 show (coker.π ≫ coker.lift cond) x = g x, by rw coker.lift_comp_π
 
 lemma coker.lift_unique {f : A ⟶ B} {g : B ⟶ C} {cond : f ≫ g = 0} {h : coker f ⟶ C} :
-  coker.π ≫ h = g → h = coker.lift cond := add_subgroup.lift_unique _ _ _ _
+  coker.π ≫ h = g → h = coker.lift cond := normed_group_hom.lift_unique _ _ _ _
 
 lemma coker.comp_pi_eq_zero {f : A ⟶ B} : f ≫ (coker.π : B ⟶ coker f) = 0 :=
 begin

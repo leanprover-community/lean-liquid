@@ -362,7 +362,7 @@ variables {M M'}
 
 /-- The quotient of a system of complexes. -/
 def is_quotient (f : M ⟶ M') : Prop :=
-∀ c i, add_subgroup.is_quotient (f.apply : M c i ⟶ M' c i)
+∀ c i, (f.apply : M c i ⟶ M' c i).is_quotient
 
 -- The next three lemmas restate lemmas about normed_group_hom.is_quotient in terms of the coercion
 -- of `M ⟶ M'` to functions.

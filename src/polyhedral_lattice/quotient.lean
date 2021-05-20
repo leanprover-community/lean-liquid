@@ -47,9 +47,8 @@ add_subgroup.normed_group_quotient _
 lemma π_apply_eq_zero_iff (x) : L.normed_mk x = 0 ↔ x ∈ L :=
 quotient_add_group.eq_zero_iff _
 
--- uugh namespace
-lemma π_is_quotient : add_subgroup.is_quotient L.normed_mk :=
-add_subgroup.is_quotient_quotient _
+lemma π_is_quotient : L.normed_mk.is_quotient :=
+normed_group_hom.is_quotient_quotient _
 
 instance [H : fact L.saturated] : no_zero_smul_divisors ℤ (quotient_add_group.quotient L) :=
 { eq_zero_or_eq_zero_of_smul_eq_zero :=
@@ -77,7 +76,7 @@ open pseudo_normed_group
 lemma norm_lift (y : quotient_add_group.quotient L) :
   ∃ x, L.normed_mk x = y ∧ ∥x∥ = ∥y∥ :=
 begin
-  have hq : add_subgroup.is_quotient L.normed_mk := add_subgroup.is_quotient_quotient _,
+  have hq : L.normed_mk.is_quotient := normed_group_hom.is_quotient_quotient _,
   let s := λ ε, {x | L.normed_mk x = y ∧ nnnorm x ≤ nnnorm y + ε },
   have hs : ∀ ε, (s ε).finite,
   { intro ε,
@@ -138,7 +137,7 @@ instance [H : fact L.saturated] : polyhedral_lattice (quotient_add_group.quotien
       { simp only [← hx, H2],
         apply finset.sum_le_sum,
         rintro i -,
-        have hq : add_subgroup.is_quotient L.normed_mk := add_subgroup.is_quotient_quotient _,
+        have hq : L.normed_mk.is_quotient := normed_group_hom.is_quotient_quotient _,
         exact mul_le_mul le_rfl (hq.norm_le _) (norm_nonneg _) (nat.cast_nonneg _) } },
   end }
 

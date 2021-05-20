@@ -148,9 +148,8 @@ begin
   simp only [L_one, set.image_singleton, add_zero, cInf_singleton, add_subgroup.coe_bot],
 end
 
--- uugh namespace
-lemma π_is_quotient : add_subgroup.is_quotient (π f m) :=
-add_subgroup.is_quotient_quotient _
+lemma π_is_quotient : (π f m).is_quotient :=
+normed_group_hom.is_quotient_quotient _
 
 instance [fact f.to_add_monoid_hom.range.saturated] : polyhedral_lattice (obj f m) :=
 by { delta obj, apply_instance }
