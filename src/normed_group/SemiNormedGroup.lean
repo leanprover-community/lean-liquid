@@ -1,3 +1,4 @@
+import analysis.normed_space.SemiNormedGroup
 import analysis.normed_space.normed_group_quotient
 
 import algebra.punit_instances
@@ -35,30 +36,7 @@ end for_mathlib
 
 open category_theory
 
-/-- The category of seminormed abelian groups and bounded group homomorphisms. -/
-def SemiNormedGroup : Type (u+1) := bundled semi_normed_group
-
 namespace SemiNormedGroup
-
-instance bundled_hom : bundled_hom @normed_group_hom :=
-⟨@normed_group_hom.to_fun, @normed_group_hom.id, @normed_group_hom.comp, @normed_group_hom.coe_inj⟩
-
-attribute [derive [has_coe_to_sort, large_category, concrete_category]] SemiNormedGroup
-
-/-- Construct a bundled `SemiNormedGroup` from the underlying type and typeclass. -/
-def of (M : Type u) [semi_normed_group M] : SemiNormedGroup := bundled.of M
-
-instance : has_zero SemiNormedGroup := ⟨of punit⟩
-
-instance : inhabited SemiNormedGroup := ⟨0⟩
-
-instance (M : SemiNormedGroup) : semi_normed_group M := M.str
-
-@[simp] lemma coe_of (V : Type u) [normed_group V] : (SemiNormedGroup.of V : Type u) = V := rfl
-
-@[simp] lemma coe_id (V : SemiNormedGroup) : ⇑(𝟙 V) = id := rfl
-
-instance : limits.has_zero_morphisms.{u (u+1)} SemiNormedGroup := {}
 
 lemma iso_isometry_of_norm_noninc {V W : SemiNormedGroup} (i : V ≅ W)
   (h1 : i.hom.norm_noninc) (h2 : i.inv.norm_noninc) :

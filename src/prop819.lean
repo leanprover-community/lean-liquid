@@ -2,6 +2,8 @@ import for_mathlib.Cech.split
 import for_mathlib.Profinite.functorial_limit
 import for_mathlib.simplicial.complex
 import for_mathlib.SemiNormedGroup
+import for_mathlib.homological_complex
+
 import locally_constant.Vhat
 import prop819.completion
 
