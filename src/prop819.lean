@@ -29,7 +29,14 @@ abbreviation FLC : cochain_complex SemiNormedGroup ℕ :=
   F.augmented_cech_nerve.right_op).to_cocomplex
 
 def FLC_iso : strict_iso ((Completion.map_homological_complex _).obj (FL F M)) (FLC F M) :=
-sorry
+{ iso := homological_complex.iso_of_components (λ i,
+    match i with
+    | 0 := eq_to_iso rfl
+    | n+1 := eq_to_iso rfl
+    end) begin
+      sorry
+    end,
+  is_strict := λ i, { strict_hom' := λ a, by { cases i; refl } } }
 
 include surj
 
