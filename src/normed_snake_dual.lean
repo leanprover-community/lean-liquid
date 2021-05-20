@@ -10,16 +10,16 @@ variables (M N P : system_of_complexes.{u}) (f : M ⟶ N) (g : N ⟶ P)
 
 lemma weak_normed_snake_dual {k k' K K' r₁ r₂ : ℝ≥0}
   [hk : fact (1 ≤ k)] [hk' : fact (1 ≤ k')]
-  {m : ℕ} {c₀ : ℝ≥0}
-  (hN : N.is_weak_bounded_exact k K (m+1) c₀)
-  (hP : P.is_weak_bounded_exact k' K' (m+1) c₀)
+  {a : ℕ} {c₀ : ℝ≥0}
+  (hN : N.is_weak_bounded_exact k K (a + 1) c₀)
+  (hP : P.is_weak_bounded_exact k' K' (a + 1) c₀)
   (hN_adm : N.admissible)
   (hgnorm : ∀ c i (x : N c i), ∥g x∥ ≤ r₁ * ∥x∥)
-  (Hg : ∀ (c : ℝ≥0) [fact (c₀ ≤ c)] (i : ℕ) (hi : i ≤ m+1+1) (y : P c i),
+  (Hg : ∀ (c : ℝ≥0) [fact (c₀ ≤ c)] (i : ℕ) (hi : i ≤ a + 1 + 1) (y : P c i),
     ∃ (x : N c i), g x = y ∧ ∥x∥ ≤ r₂ * ∥y∥)
   (hg : ∀ c i, (f.apply : M c i ⟶ N c i).range = g.apply.ker)
   (hfiso : ∀ c i, @isometry (M c i) (N c i) _ _ f.apply) :
-  M.is_weak_bounded_exact (k * k') (K + r₁ * r₂ * K * K') m c₀ :=
+  M.is_weak_bounded_exact (k * k') (K + r₁ * r₂ * K * K') a c₀ :=
   begin
     have hfnorm : ∀ c i (x : M c i), ∥f.apply x∥ = ∥x∥ := λ c i x, (isometry_iff_norm _).1 (hfiso c i) x,
     have hM_adm : M.admissible := admissible_of_isometry hN_adm hfiso,
@@ -74,10 +74,16 @@ lemma weak_normed_snake_dual {k k' K K' r₁ r₂ : ℝ≥0}
     obtain ⟨i', j', hi', rfl, n₁, hn₁⟩ :=
       hN _ ⟨hc.out.trans $ le_mul_of_one_le_left' hk'.out⟩ _ (by linarith) n ε₁ hε₁,
     let p₁ := g n₁,
-    obtain ⟨i'', j'', hi'', rfl, p₂, hp₂⟩ := hP _ hc _ (by sorry) p₁ ε₂ hε₂,
-    obtain ⟨n₂, hn₂, hnormn₂⟩ := Hg c i'' (by sorry) p₂,
+    have Hi' : i' ≤ a + 1 :=
+      by { rw [hi', nat.sub_one], exact le_trans (nat.pred_le i) (le_trans hi (nat.le_succ a)) },
+    obtain ⟨i'', j'', hi'', rfl, p₂, hp₂⟩ := hP _ hc _ Hi' p₁ ε₂ hε₂,
+    have Hi'' : i'' ≤ a + 1 + 1,
+    { rw [hi'', hi', nat.sub_one, nat.sub_one],
+      refine le_trans (nat.pred_le _) (le_trans (nat.pred_le _) _),
+      linarith },
+    obtain ⟨n₂, hn₂, hnormn₂⟩ := Hg c i'' Hi'' p₂,
     let n₁' := N.d i'' i' n₂,
-    obtain ⟨nnew₁, hnnew₁, hnormnnew₁⟩ := Hg c i' (by sorry) (g (res n₁ - n₁')),
+    obtain ⟨nnew₁, hnnew₁, hnormnnew₁⟩ := Hg c i' (le_trans Hi' (nat.le_succ _)) (g (res n₁ - n₁')),
     have hker : (res n₁ - n₁') - nnew₁ ∈ g.apply.ker,
     { rw [mem_ker, normed_group_hom.map_sub, sub_eq_zero, ← hom_apply, ← hom_apply, hnnew₁] },
     rw ← hg at hker,
