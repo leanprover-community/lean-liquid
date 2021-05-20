@@ -48,15 +48,27 @@ lemma weak_normed_snake_dual {k k' K K' r₁ r₂ : ℝ≥0}
     { refine add_pos_of_pos_of_nonneg zero_lt_one _,
       rw [← nnreal.coe_mul, ← nnreal.coe_mul],
       exact nnreal.coe_nonneg _ },
-    have hmulε₁ : ε₁ *  (1 + K' * r₁ * r₂) = ε / 2 := sorry,
+    have hmulε₁ : ε₁ *  (1 + K' * r₁ * r₂) = ε / 2,
+    { rw [mul_assoc, inv_mul_cancel (ne_of_lt hlt).symm, mul_one] },
     have hε₁ : 0 < ε₁ := mul_pos (half_pos hε) (inv_pos.2 hlt),
     let ε₂ := if (r₂ : ℝ) = 0 then 1 else (ε / 2) * r₂⁻¹,
     have hle : ↑r₂ * ε₂ ≤ ε / 2,
-    { by_cases H : (r₂ : ℝ) = 0,
-      { simp only [H, (half_pos hε).le, if_true, zero_mul] },
-      { simp only [H, if_false, mul_ite],
-        rw [mul_comm, mul_assoc, inv_mul_cancel H, mul_one] } },
-    have hε₂ : 0 < ε₂ := sorry,
+    { by_cases H : r₂ = 0,
+      { simp only [H, nnreal.coe_zero, if_true, zero_mul, (half_pos hε).le], },
+      { simp only [H, nnreal.coe_eq_zero, if_false, mul_ite],
+        rw [mul_comm, mul_assoc, ← nnreal.coe_inv, ← nnreal.coe_mul, inv_mul_cancel H,
+          nnreal.coe_one, mul_one], } },
+    have hε₂ : 0 < ε₂,
+    { change 0 < (if (r₂ : ℝ) = 0 then 1 else (ε / 2) * r₂⁻¹),
+      by_cases H : r₂ = 0,
+      { simp only [H, zero_lt_one, if_true, eq_self_iff_true, nnreal.coe_eq_zero] },
+      { simp only [H, nnreal.coe_eq_zero, if_false],
+        have hpos : 0 < (r₂ : ℝ)⁻¹,
+        { refine inv_pos.2 _,
+          by_contra habs,
+          simp only [not_lt, nnreal.coe_pos, le_zero_iff] at habs,
+          exact H habs },
+        exact mul_pos (half_pos hε) hpos } },
 
     let n := f m,
     obtain ⟨i', j', hi', rfl, n₁, hn₁⟩ :=
@@ -66,7 +78,10 @@ lemma weak_normed_snake_dual {k k' K K' r₁ r₂ : ℝ≥0}
     obtain ⟨n₂, hn₂, hnormn₂⟩ := Hg c i'' (by sorry) p₂,
     let n₁' := N.d i'' i' n₂,
     obtain ⟨nnew₁, hnnew₁, hnormnnew₁⟩ := Hg c i' (by sorry) (g (res n₁ - n₁')),
-    have hker : (res n₁ - n₁') - nnew₁ ∈ g.apply.ker := sorry,
+    have hker : (res n₁ - n₁') - nnew₁ ∈ g.apply.ker,
+    { rw [mem_ker],
+      sorry
+    },
     rw ← hg at hker,
     obtain ⟨m₁, hm₁ : f m₁ = res n₁ - n₁' - nnew₁⟩ := (mem_range _ _).1 hker,
     refine ⟨i', hi', m₁, _⟩,
@@ -152,8 +167,7 @@ lemma weak_normed_snake_dual {k k' K K' r₁ r₂ : ℝ≥0}
       hn₁ $ mul_nonneg (nnreal.coe_nonneg K') (nnreal.coe_nonneg r₁)) _) $ nnreal.coe_nonneg r₂) _
     ... = (K + r₁ * r₂ * K * K') * ∥N.d i (i + 1) n∥ + ε₁ * (1 + K' * r₁ * r₂) + r₂ * ε₂ : by ring
     ... = Knew * ∥N.d i (i + 1) (f m)∥ + ε / 2 * (1 + K' * r₁ * r₂)⁻¹ * (1 + K' * r₁ * r₂) + r₂ * ε₂ : rfl
-    ... = Knew * ∥N.d i (i + 1) (f m)∥ + ε / 2 + r₂ * ε₂ :
-      by rw [mul_assoc, inv_mul_cancel (ne_of_lt hlt).symm, mul_one]
+    ... = Knew * ∥N.d i (i + 1) (f m)∥ + ε / 2 + r₂ * ε₂ : by rw [hmulε₁]
     ... ≤ Knew * ∥N.d i (i + 1) (f m)∥ + ε / 2 + ε / 2 : add_le_add_left hle _
     ... = Knew * ∥f (M.d i (i + 1) m)∥ + ε : by rw [add_assoc, add_halves', d_apply]
     ... = Knew * ∥f.apply (M.d i (i + 1) m)∥ + ε : rfl
