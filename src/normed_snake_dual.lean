@@ -44,7 +44,10 @@ lemma weak_normed_snake_dual {k k' K K' r₁ r₂ : ℝ≥0}
 
     intros m ε hε,
     let ε₁ := (ε / 2) * (1 + K' * r₁ * r₂)⁻¹,
-    have hlt : 0 < (1 + K' * r₁ * r₂ : ℝ) := sorry,
+    have hlt : 0 < (1 + K' * r₁ * r₂ : ℝ),
+    { refine add_pos_of_pos_of_nonneg zero_lt_one _,
+      rw [← nnreal.coe_mul, ← nnreal.coe_mul],
+      exact nnreal.coe_nonneg _ },
     have hmulε₁ : ε₁ *  (1 + K' * r₁ * r₂) = ε / 2 := sorry,
     have hε₁ : 0 < ε₁ := sorry,
     let ε₂ := if (r₂ : ℝ) = 0 then 1 else (ε / 2) * r₂⁻¹,
