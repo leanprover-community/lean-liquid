@@ -95,11 +95,9 @@ def cocomplex : cosimplicial_object C ⥤ cochain_complex C ℕ :=
   map := λ M N f,
   { f := λ i, f.app _,
     comm' := begin
-      intros i j,
+      rintro i j (rfl : i + 1 = j),
       dsimp [to_cocomplex, cochain_complex.of],
-      split_ifs, swap, { simp },
-      subst h,
-      simp only [category_theory.category.comp_id, category_theory.eq_to_hom_refl, coboundary, δ,
+      simp only [if_pos rfl, category.comp_id, eq_to_hom_refl, coboundary, δ,
         preadditive.sum_comp, preadditive.comp_sum, comp_gsmul, gsmul_comp, nat_trans.naturality],
     end } }
 
@@ -139,20 +137,17 @@ def cocomplex : augmented C ⥤ cochain_complex C ℕ :=
     | (n+1) := (drop.map f).app _
     end,
     comm' := begin
-      intros i j,
+      rintro i j (rfl : i + 1 = j),
       dsimp [to_cocomplex, cochain_complex.of],
-      split_ifs, swap, { simp },
-      subst h,
+      simp only [if_pos rfl, eq_to_hom_refl, category.comp_id],
       cases i,
       { dsimp [to_cocomplex_d],
-        simp only [to_cocomplex_d, category_theory.category.comp_id],
         erw [← nat_trans.comp_app, ← f.w],
         refl },
       { dsimp [to_cocomplex_d, coboundary],
-        simp only [preadditive.sum_comp, preadditive.comp_sum, comp_gsmul, gsmul_comp,
-          category.comp_id],
-        apply finset.sum_congr rfl,
-        intros i _,
+        simp only [preadditive.sum_comp, preadditive.comp_sum, comp_gsmul, gsmul_comp],
+        apply fintype.sum_congr,
+        intro i,
         erw (drop.map f).naturality,
         refl }
     end },

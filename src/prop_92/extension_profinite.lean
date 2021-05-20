@@ -44,7 +44,7 @@ lemma embedding.preimage_clopen {f : X → Y} (hf : embedding f) {U : set X} (hU
 begin
   cases hU with hU hU',
   have hfU : is_compact (f '' U),
-    from hU'.compact.image hf.continuous,
+    from hU'.is_compact.image hf.continuous,
   obtain ⟨W, W_op, hfW⟩ : ∃ W : set Y, is_open W ∧ f ⁻¹' W = U,
   { rw hf.to_inducing.induced at hU,
     exact is_open_induced_iff.mp hU },

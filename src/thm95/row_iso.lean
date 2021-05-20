@@ -102,7 +102,7 @@ begin
   { refl }
 end
 begin
-  intros i j,
+  intros i j hij,
   apply arrow.mk_injective,
   dsimp only [data.complex_obj_d, universal_map.eval_CLCFPTinv, universal_map.eval_CLCFPTinv₂,
     _root_.id, SemiNormedGroup.equalizer.map_nat_app, CLCTinv.map_iso_hom, CLCTinv.map, unop_op,
@@ -216,7 +216,7 @@ begin
   { refl }
 end
 begin
-  intros i j,
+  intros i j hij,
   apply arrow.mk_injective,
   dsimp only [data.complex_obj_d, universal_map.eval_CLCFPTinv, universal_map.eval_CLCFPTinv₂,
     _root_.id, SemiNormedGroup.equalizer.map_nat_app, CLCTinv.map_iso_hom, CLCTinv.map,

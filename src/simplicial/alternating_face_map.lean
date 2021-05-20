@@ -113,16 +113,7 @@ variables {X M}
 /-- The cochain complex of an augmented cosimplicial object in a preadditive category -/
 def alt_face_map_cocomplex (hf : f ≫ M.map (δ 0) = f ≫ M.map (δ 1)) :
   cochain_complex C ℕ :=
-{ X := alt_face_map_cocomplex.obj X M,
-  d := λ i j, if h : i + 1 = j then by subst h; exact alt_face_map_cocomplex.d f i else 0,
-  shape' := λ i j h, dif_neg h,
-  d_comp_d' :=
-  begin
-    intros i j k,
-    by_cases hk : j + 1 = k,
-    { subst hk, rw dif_pos rfl,
-      by_cases hj : i + 1 = j,
-      { subst hj, rw dif_pos rfl, exact alt_face_map_cocomplex.d_comp_d f hf _ },
-      { rw [dif_neg hj, limits.zero_comp] } },
-    { rw [dif_neg hk, limits.comp_zero] }
-  end }
+cochain_complex.of
+  (alt_face_map_cocomplex.obj X M)
+  (alt_face_map_cocomplex.d f)
+  (alt_face_map_cocomplex.d_comp_d f hf)

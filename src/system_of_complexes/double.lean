@@ -167,7 +167,7 @@ def row_map (C : system_of_double_complexes.{u}) (p p' : ℕ) :
   C.row p ⟶ C.row p' :=
 { app := λ c,
   { f := λ q, (C.d p p' : C.X c.unop p q ⟶ C.X c.unop p' q),
-    comm' := λ q q', (C.d'_comp_d _ p p' q q').symm },
+    comm' := λ q q' _, (C.d'_comp_d _ p p' q q').symm },
   naturality' := λ c₁ c₂ h, (C.map h).comm p p' }
 
 @[simp] lemma row_map_apply (C : system_of_double_complexes.{u})
@@ -205,7 +205,7 @@ def col_map (C : system_of_double_complexes.{u}) (q q' : ℕ) :
   C.col q ⟶ C.col q' :=
 { app := λ c,
   { f := λ p, (C.d' q q' : C.X c.unop p q ⟶ C.X c.unop p q'),
-    comm' := λ p p', (C.d'_comp_d _ p p' q q') },
+    comm' := λ p p' _, (C.d'_comp_d _ p p' q q') },
   naturality' := λ c₁ c₂ h, by { ext p : 2, exact ((C.map h).f p).comm q q' } }
 
 /-- A system of double complexes is *admissible*

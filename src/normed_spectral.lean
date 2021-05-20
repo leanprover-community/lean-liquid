@@ -46,7 +46,7 @@ lemma res_π (c₁ c₂ : ℝ≥0) (p : ℕ) (h : fact (c₁ ≤ c₂)) (x : M.X
 def quotient_map : M.col 1 ⟶ (truncate.obj M).col 0 :=
 { app := λ c,
   { f := λ p, SemiNormedGroup.coker.π,
-    comm' := λ p p', by { ext, refl } },
+    comm' := λ p p' _, by { ext, refl } },
   naturality' := by { intros, ext, refl } }
 
 lemma admissible (hM : M.admissible) : (truncate.obj M).admissible :=

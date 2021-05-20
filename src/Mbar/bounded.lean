@@ -247,8 +247,9 @@ lemma emb (r S c) : closed_embedding (@emb_aux r S c) :=
 
 instance [fact (0 < r)] : compact_space (limit r S c) :=
 begin
-  erw [← compact_iff_compact_space, compact_iff_compact_univ, compact_iff_compact_in_subtype],
-  apply is_closed.compact,
+  erw [← is_compact_iff_compact_space, is_compact_iff_is_compact_univ,
+    compact_iff_compact_in_subtype],
+  apply is_closed.is_compact,
   exact (emb r S c).is_closed_map _ is_closed_univ
 end
 

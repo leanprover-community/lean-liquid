@@ -48,16 +48,9 @@ lemma d_eq_zero : ∀ ⦃i j : ℕ⦄, ¬(complex_shape.up ℕ).rel i j → d C 
 | 0     1     h := (h rfl).elim
 | (i+1) (j+1) h := C.shape _ _ $ λ H, h $ nat.succ_injective $ H
 
-lemma d_comp_d : Π i j k, d C i j ≫ d C j k = 0
-| 0     1     2     := coker.lift_comp_eq_zero _ (C.d_comp_d _ _ _)
-| (i+1) (j+1) (k+1) := C.d_comp_d _ _ _
-| 0     0     _     := zero_comp
-| 0     (j+2) _     := zero_comp
-| (i+1) 0     _     := zero_comp
-| 0     1     0     := comp_zero
-| (i+1) (j+1) 0     := comp_zero
-| 0     1     1     := by { rw [@d_eq_zero C 1, comp_zero], dsimp, dec_trivial }
-| 0     1     (k+3) := by { rw [@d_eq_zero C 1, comp_zero], dsimp, dec_trivial }
+lemma d_comp_d : Π i j k, i + 1 = j → j + 1 = k → d C i j ≫ d C j k = 0
+| 0     1     2     rfl rfl := coker.lift_comp_eq_zero _ (C.d_comp_d _ _ _)
+| (i+1) (j+1) (k+1) rfl rfl := C.d_comp_d _ _ _
 
 @[simps]
 def obj : cochain_complex SemiNormedGroup ℕ :=
@@ -76,18 +69,15 @@ def map_f {C₁ C₂ : cochain_complex SemiNormedGroup ℕ} (f : C₁ ⟶ C₂) 
 | (i+1) := f.f (i+2)
 
 lemma map_comm {C₁ C₂ : cochain_complex SemiNormedGroup.{u} ℕ} (f : C₁ ⟶ C₂) :
-  Π i j, d C₁ i j ≫ map_f f j = map_f f i ≫ d C₂ i j
-| 0     1     := coker.map_lift_comm (f.comm 1 2).symm
-| (i+1) (j+1) := (f.comm (i+2) (j+2)).symm
-| 0     0     := by { rw [d_eq_zero, d_eq_zero, zero_comp, comp_zero]; dsimp; dec_trivial }
-| 0     (j+2) := by { rw [d_eq_zero, d_eq_zero, zero_comp, comp_zero]; dsimp; dec_trivial }
-| (i+1) 0     := by { rw [d_eq_zero, d_eq_zero, zero_comp, comp_zero]; dsimp; dec_trivial }
+  Π i j, i + 1 = j → map_f f i ≫ d C₂ i j = d C₁ i j ≫ map_f f j
+| 0     1     rfl := (coker.map_lift_comm (f.comm 1 2).symm).symm
+| (i+1) (j+1) rfl := f.comm (i+2) (j+2)
 
 @[simps]
 def map {C₁ C₂ : cochain_complex SemiNormedGroup.{u} ℕ} (f : C₁ ⟶ C₂) :
   obj C₁ ⟶ obj C₂ :=
 { f := map_f f,
-  comm' := λ i j, (map_comm f i j).symm }
+  comm' := map_comm f }
 
 end truncate
 

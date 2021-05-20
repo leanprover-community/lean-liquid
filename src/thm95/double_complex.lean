@@ -100,7 +100,7 @@ begin
     system_of_complexes.rescale_nat_trans, nat_trans.id_app,
     system_of_complexes.rescale_functor, functor.id_map,
     double_complex_aux, alt_face_map_cocomplex],
-  rw [dif_pos rfl, category.comp_id],
+  erw [category.comp_id, cochain_complex.of_d],
   refl
 end
 
@@ -138,7 +138,7 @@ begin
   have : (2 : ℝ≥0) = ∑ i : fin 2, 1,
   { simp only [finset.card_fin, mul_one, nat.cast_bit0, finset.sum_const, nsmul_eq_mul, nat.cast_one] },
   dsimp [system_of_complexes.rescale_functor, double_complex_aux, alt_face_map_cocomplex],
-  rw [dif_pos rfl],
+  erw [cochain_complex.of_d],
   dsimp [alt_face_map_cocomplex.d, alt_face_map_cocomplex.coboundary],
   simp only [← nat_trans.app_hom_apply, add_monoid_hom.map_sum, add_monoid_hom.map_gsmul,
     ← homological_complex.f_hom_apply, this],
@@ -163,7 +163,7 @@ begin
   { simp only [finset.card_fin, mul_one, finset.sum_const, nsmul_eq_mul, nat.cast_id,
       nat.cast_bit1, nat.cast_add, nat.cast_one] },
   dsimp [system_of_complexes.rescale_functor, double_complex_aux, alt_face_map_cocomplex],
-  rw [dif_pos rfl],
+  erw [cochain_complex.of_d],
   dsimp [alt_face_map_cocomplex.d, alt_face_map_cocomplex.coboundary],
   simp only [← nat_trans.app_hom_apply, add_monoid_hom.map_sum, add_monoid_hom.map_gsmul,
     ← homological_complex.f_hom_apply, this],

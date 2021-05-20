@@ -5,8 +5,7 @@ import rescale.Tinv
 
 /-!
 
-*TODO*: find someone who can explain what is going on in this file. There
-are no docstrings, sorried data and false assumptions.
+*TODO*: find someone who can explain what is going on in this file.
 
 -/
 
@@ -44,7 +43,7 @@ def BD_map₂ (a₁ a₂ b₁ b₂ : ℕ → ℝ≥0)
 { app := λ M,
   { f := λ i, ((f.f i).eval_CLCFPTinv₂ r V r' (a₁ i) (b₁ i) (a₂ i) (b₂ i)).app M,
     comm' := begin
-      intros i j,
+      intros i j _,
       dsimp [data.complex₂_obj_d, data.complex₂_d],
       have : f.f j ≫ BD₁.d j i = BD₂.d j i ≫ f.f i := f.comm j i,
       simp only [← nat_trans.comp_app, ← universal_map.eval_CLCFPTinv₂_comp r V r', this],
@@ -87,69 +86,6 @@ def BD_system_map [∀ i, (f.f i).suitable (c_₂ i) (c_₁ i)] :
   end }
 .
 
-/-
-variables {f g}
-
-def homotopy₂ (a₁ a₂ b₁ b₂ : ℕ → ℝ≥0)
-  [∀ (i : ℕ), fact (b₁ i ≤ r' * a₁ i)] [∀ (i : ℕ), fact (b₂ i ≤ r' * a₂ i)]
-  [BD₁.suitable a₁] [BD₂.suitable a₂] [BD₁.suitable b₁] [BD₂.suitable b₂]
-  [∀ i, (f.f i).suitable (a₂ i) (a₁ i)]
-  [∀ i, (f.f i).suitable (b₂ i) (b₁ i)]
-  [∀ i, (g.f i).suitable (a₂ i) (a₁ i)]
-  [∀ i, (g.f i).suitable (b₂ i) (b₁ i)]
-  [∀ j i, (h.h j i).suitable (a₂ j) (a₁ i)]
-  [∀ j i, (h.h j i).suitable (b₂ j) (b₁ i)] :
-  homotopy ((BD_map₂ f r V a₁ a₂ b₁ b₂).app M) ((BD_map₂ g r V a₁ a₂ b₁ b₂).app M) :=
-{ h := λ j i, ((h.h i j).eval_CLCFPTinv₂ r V r' _ _ _ _).app M,
-  h_eq_zero := λ i j hij,
-  begin
-    convert nat_trans.congr_app (universal_map.eval_CLCFPTinv₂_zero r V r' _ _ _ _) M,
-    rw h.h_eq_zero,
-    exact ne.symm hij
-  end,
-  comm :=
-  begin
-    simp only [htpy_idx_rel₁_tt_nat, htpy_idx_rel₂_tt_nat],
-    rintro i j k hij hjk,
-    dsimp only [data.complex₂, data.complex₂_d],
-    erw [← nat_trans.comp_app, ← nat_trans.comp_app],
-    erw [← universal_map.eval_CLCFPTinv₂_comp r V r',
-        ← universal_map.eval_CLCFPTinv₂_comp r V r'],
-    rw [← nat_trans.app_add, ← universal_map.eval_CLCFPTinv₂_add],
-    rw eq_comm at hij hjk,
-    rw and_comm at hij,
-    simp only [(add_comm _ _).trans (h.comm k j i
-      (by simp only [htpy_idx_rel₁_ff_nat]; exact hjk)
-      (by simp only [htpy_idx_rel₂_ff_nat]; exact hij)),
-      universal_map.eval_CLCFPTinv₂_sub],
-    refl,
-  end }
-
-def homotopy [∀ i, (f.f i).suitable (c_₂ i) (c_₁ i)] [∀ i, (g.f i).suitable (c_₂ i) (c_₁ i)]
-  [∀ j i, (h.h j i).suitable (c_₂ j) (c_₁ i)] :
-  homotopy ((BD_map f c_₁ c_₂ r V c).app M) ((BD_map g c_₁ c_₂ r V c).app M) :=
-homotopy₂ h r V M _ _ _ _
-
--/
-
 end homotopy
 
 end breen_deligne
-
--- namespace breen_deligne
-
--- universe variables v
-
--- variables (BD : breen_deligne.package)
--- variables (c_ c' : ℕ → ℝ≥0)
--- variables [BD.data.suitable c_] [package.adept BD c_ c']
--- variables (r : ℝ≥0) (V : SemiNormedGroup.{v}) [normed_with_aut r V] [fact (0 < r)]
--- variables {r' : ℝ≥0} [fact (0 < r')] [fact (r' ≤ 1)] (c : ℝ≥0)
--- variables (M : (ProFiltPseuNormGrpWithTinv.{u} r')ᵒᵖ)
--- variables (N : ℕ)
-
--- def homotopy_σπ :=
--- homotopy.{u v} (data.homotopy_mul BD.data BD.homotopy N)
---   (c' * c_) (rescale_constants c_ (2^N)) r V c M
-
--- end breen_deligne
