@@ -37,7 +37,8 @@ theorem prop819 {m : ℕ} (ε : ℝ≥0) (hε : 0 < ε)
 begin
   apply exact_of_strict_iso _ _ (FLC_iso F M) ε hε _ _ _ hf,
   apply cmpl_exact_of_exact _ _ hε,
-  clear hf f,
+  clear hf f m hε ε,
+  intros n f hf,
   -- We've reduced to the non-completed case.
   sorry,
 end
