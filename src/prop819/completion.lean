@@ -2,10 +2,13 @@ import for_mathlib.SemiNormedGroup
 import algebra.homology.additive
 import locally_constant.Vhat
 import normed_group.controlled_exactness
+import prop819.strict_complex_iso
 
 noncomputable theory
 
-variables (C : cochain_complex SemiNormedGroup ℕ)
+universes u
+
+variables (C D : cochain_complex SemiNormedGroup.{u} ℕ)
 
 open SemiNormedGroup
 
@@ -41,4 +44,28 @@ begin
     exact h2 },
   { erw add_monoid_hom.mem_ker,
     exact hf },
+end
+
+lemma exact_of_strict_iso (F : strict_iso C D) (ε : ℝ≥0) (hε : 0 < ε)
+  (cond : ∀ (n : ℕ) (f : C.X (n+1)) (hf : C.d _ (n+2) f = 0), ∃ g : C.X n, C.d _ _ g = f ∧
+  (nnnorm g) ≤ (1+ε) * nnnorm f) (n : ℕ) (f : D.X (n+1)) (hf : D.d _ (n+2) f = 0) :
+  ∃ g : D.X n, D.d _ _ g = f ∧ nnnorm g ≤ (1 + ε) * nnnorm f :=
+begin
+  specialize cond n (((homological_complex.eval_at (n+1)).map_iso F.iso).inv f) _,
+  { dsimp [homological_complex.eval_at],
+    change (F.iso.inv.f (n+1) ≫ C.d (n+1) (n+2)) f = 0,
+    rw F.iso.inv.comm,
+    simp [hf] },
+  rcases cond with ⟨g, h1, h2⟩,
+  refine ⟨((homological_complex.eval_at n).map_iso F.iso).hom g, _, _⟩,
+  { dsimp [homological_complex.eval_at] at *,
+    change (F.iso.hom.f _ ≫ D.d _ _) _ = _,
+    rw F.iso.hom.comm,
+    simp [h1],
+    let FF := (homological_complex.eval_at (n+1)).map_iso F.iso,
+    change (FF.inv ≫ FF.hom) f = f,
+    rw FF.inv_hom_id,
+    refl },
+  { rw SemiNormedGroup.strict_iso_inv at h2,
+    rwa SemiNormedGroup.strict_iso_hom },
 end
