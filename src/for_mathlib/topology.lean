@@ -76,7 +76,7 @@ lemma exists_subset_nhd_of_compact' [compact_space X] {ι : Type*} [nonempty ι]
   (hV_closed : ∀ i, is_closed (V i))
   {U : set X} (hU : ∀ x ∈ ⋂ i, V i, U ∈ 𝓝 x) :
   ∃ i, V i ⊆ U :=
-exists_subset_nhd_of_compact hV (λ i, (hV_closed i).compact) hV_closed hU
+exists_subset_nhd_of_compact hV (λ i, (hV_closed i).is_compact) hV_closed hU
 
 section
 variables [compact_space X] [t2_space X] [totally_disconnected_space X]

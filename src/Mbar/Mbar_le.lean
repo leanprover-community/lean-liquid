@@ -327,7 +327,7 @@ instance : t2_space (Mbar_le r' S c) :=
 instance [fact (0 < r')] : compact_space (Mbar_le r' S c) :=
 begin
   constructor,
-  rw homeo.embedding.compact_iff_compact_image,
+  rw homeo.embedding.is_compact_iff_is_compact_image,
   simp only [set.image_univ, homeomorph.range_coe],
   obtain ⟨h⟩ := (by apply_instance : compact_space (Mbar_bdd.limit r' ⟨S⟩ c)),
   exact h,

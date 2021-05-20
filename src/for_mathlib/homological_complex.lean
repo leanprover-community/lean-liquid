@@ -23,15 +23,15 @@ def iso_app (f : C₁ ≅ C₂) (i : ι) : C₁.X i ≅ C₂.X i :=
 
 @[simps]
 def iso_of_components (f : Π i, C₁.X i ≅ C₂.X i)
-  (hf : ∀ i j, (f i).hom ≫ C₂.d i j = C₁.d i j ≫ (f j).hom) :
+  (hf : ∀ i j, c.rel i j → (f i).hom ≫ C₂.d i j = C₁.d i j ≫ (f j).hom) :
   C₁ ≅ C₂ :=
 { hom := { f := λ i, (f i).hom, comm' := hf },
   inv :=
   { f := λ i, (f i).inv,
-    comm' := λ i j,
+    comm' := λ i j hij,
     calc (f i).inv ≫ C₁.d i j
         = (f i).inv ≫ (C₁.d i j ≫ (f j).hom) ≫ (f j).inv : by simp
-    ... = (f i).inv ≫ ((f i).hom ≫ C₂.d i j) ≫ (f j).inv : by rw hf
+    ... = (f i).inv ≫ ((f i).hom ≫ C₂.d i j) ≫ (f j).inv : by rw hf i j hij
     ... =  C₂.d i j ≫ (f j).inv : by simp },
   hom_inv_id' := by { ext i, exact (f i).hom_inv_id },
   inv_hom_id' := by { ext i, exact (f i).inv_hom_id } }
@@ -71,7 +71,7 @@ def as_functor {T : Type*} [category T]
 { obj := λ t,
   { X := λ i, (C.X i).obj t,
     d := λ i j, (C.d i j).app t,
-    d_comp_d' := λ i j k,
+    d_comp_d' := λ i j k hij hjk,
     begin
       have := C.d_comp_d i j k,
       rw [nat_trans.ext_iff, function.funext_iff] at this,
@@ -85,7 +85,7 @@ def as_functor {T : Type*} [category T]
     end },
   map := λ t₁ t₂ h,
   { f := λ i, (C.X i).map h,
-    comm' := λ i j, nat_trans.naturality _ _ },
+    comm' := λ i j hij, nat_trans.naturality _ _ },
   map_id' := λ t, by { ext i, dsimp, rw (C.X i).map_id, },
   map_comp' := λ t₁ t₂ t₃ h₁ h₂, by { ext i, dsimp, rw functor.map_comp, } }
 

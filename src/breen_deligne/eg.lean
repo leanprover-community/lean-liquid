@@ -52,16 +52,11 @@ def BD : data :=
   shape' := λ i j h, dif_neg h,
   d_comp_d' :=
   begin
-    intros i j k,
-    by_cases hi : j + 1 = i,
-    { subst hi, rw dif_pos rfl,
-      by_cases hj : k + 1 = j,
-      { subst hj, rw dif_pos rfl,
-        induction k with k ih,
-        { exact is_complex_zero },
-        { exact is_complex_succ k ih } },
-      rw [dif_neg hj, category_theory.limits.comp_zero], },
-    rw [dif_neg hi, category_theory.limits.zero_comp]
+    rintro i j k (rfl : j + 1 = i) (rfl : k + 1 = j),
+    simp only [dif_pos rfl],
+    induction k with k ih,
+    { exact is_complex_zero },
+    { exact is_complex_succ k ih }
   end }
 
 open category_theory category_theory.limits category_theory.preadditive

@@ -92,7 +92,7 @@ def complex₂ (r : ℝ≥0) (V : SemiNormedGroup) [normed_with_aut r V] [fact (
 { obj := λ M,
   { X := λ i, (BD.complex₂_X r V r' a b i).obj M,
     d := λ i j, (BD.complex₂_d r V r' a b i j).app M,
-    d_comp_d' := λ i j k,
+    d_comp_d' := λ i j k _ _,
     begin
       rw [← nat_trans.comp_app],
       simp only [complex₂_d, ← universal_map.eval_CLCFPTinv₂_comp, BD.d_comp_d,
@@ -107,7 +107,7 @@ def complex₂ (r : ℝ≥0) (V : SemiNormedGroup) [normed_with_aut r V] [fact (
     end },
   map := λ M₁ M₂ f,
   { f := λ i, ((CLCFPTinv₂ r V r' (a i) (b i) (BD.X i)).map f : _),
-    comm' := λ i j, nat_trans.naturality _ _ },
+    comm' := λ i j _, nat_trans.naturality _ _ },
   map_id' := λ M, by { ext i : 2, apply category_theory.functor.map_id, },
   map_comp' := λ M₁ M₂ M₃ f g, by { ext i : 2, apply category_theory.functor.map_comp } }
 
@@ -151,7 +151,7 @@ functor.flip {
         refine
         { f := λ i, (CLCFPTinv₂.res r V r' _ _ _ _ (BD.X i)).app _,
           comm' := _ },
-        { intros i j, apply comm_sq_app,
+        { intros i j _, apply comm_sq_app,
           apply universal_map.res_comp_eval_CLCFPTinv₂ },
       end,
       naturality' := λ M N f, begin

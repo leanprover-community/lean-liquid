@@ -143,11 +143,11 @@ def mul (N : ℕ) : data ⥤ data :=
 
 def mul_one_iso : (mul 1).obj BD ≅ BD :=
 homological_complex.iso_of_components (λ i, FreeMat.one_mul_iso.app _) $
-λ i j, (FreeMat.one_mul_iso.hom.naturality (BD.d i j)).symm
+λ i j _, (FreeMat.one_mul_iso.hom.naturality (BD.d i j)).symm
 
 def mul_mul_iso (m n : ℕ) : (mul m).obj ((mul n).obj BD) ≅ (mul (m * n)).obj BD :=
 homological_complex.iso_of_components (λ i, (FreeMat.mul_mul_iso _ _).app _) $
-λ i j, ((FreeMat.mul_mul_iso _ _).hom.naturality (BD.d i j)).symm
+λ i j _, ((FreeMat.mul_mul_iso _ _).hom.naturality (BD.d i j)).symm
 
 end mul
 
@@ -158,11 +158,11 @@ def pow' : ℕ → data
 
 @[simps] def sum (BD : data) (N : ℕ) : (mul N).obj BD ⟶ BD :=
 { f := λ n, universal_map.sum _ _,
-  comm' := λ m n, (universal_map.sum_comp_mul _ _).symm }
+  comm' := λ m n _, (universal_map.sum_comp_mul _ _).symm }
 
 @[simps] def proj (BD : data) (N : ℕ) : (mul N).obj BD ⟶ BD :=
 { f := λ n, universal_map.proj _ _,
-  comm' := λ m n, (universal_map.proj_comp_mul _ _).symm }
+  comm' := λ m n _, (universal_map.proj_comp_mul _ _).symm }
 
 open homological_complex FreeMat category_theory category_theory.limits
 

@@ -107,7 +107,7 @@ instance : compact_space (filtration (Λ →+ M) c) :=
 { compact_univ :=
   begin
     rw ← (incl_inducing Λ r' M c).is_compact_iff,
-    apply is_closed.compact,
+    apply is_closed.is_compact,
     rw set.image_univ,
     exact incl_range_is_closed _ _ _ _
   end }
