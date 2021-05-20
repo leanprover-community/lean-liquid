@@ -34,7 +34,7 @@ open locally_constant category_theory
 
 /-- 9.2 of Analytic.pdf -/
 lemma T_inv_sub_Tinv_exists_preimage [hr1 : fact (r < 1)]
-  (f : (CLCFP V r' (r' * c) n).obj M) (ε : ℝ) (hε : 0 < ε) :
+  (f : (CLCFP V r' (r' * c) n).obj M) (ε : ℝ≥0) (hε : 0 < ε) :
   ∃ g : (CLCFP V r' c n).obj M, (T_inv_sub_Tinv r r' V c (r' * c) n).app M g = f ∧
     (∥g∥ ≤ (r / (1 - r) + ε) * ∥f∥) :=
 begin

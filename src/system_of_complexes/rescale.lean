@@ -117,13 +117,65 @@ section scale_index
 def ScaleIndexLeft (κ : ℝ≥0) : system_of_complexes ⥤ system_of_complexes :=
 (whiskering_left _ _ _).obj (nnreal.MulLeft κ).op
 
+@[simp] lemma ScaleIndexLeft_apply (C : system_of_complexes) (κ c : ℝ≥0) (i : ℕ) :
+  (ScaleIndexLeft κ).obj C c i = C (κ * c) i := rfl
+
 def scale_index_left (C : system_of_complexes) (κ : ℝ≥0) := (ScaleIndexLeft κ).obj C
+
+lemma admissible.scale_index_left {C : system_of_complexes} (hC : C.admissible) (κ : ℝ≥0) :
+  (C.scale_index_left κ).admissible :=
+{ d_norm_noninc' := λ c i j hij, (by { apply admissible.d_norm_noninc C hC (κ * c) i j, }),
+  res_norm_noninc := λ c₁ c₂ i hc, hC.res_norm_noninc _ _ i
+    (by { resetI, dsimp, apply_instance }) }
+
+lemma is_weak_bounded_exact.scale_index_left
+  {C : system_of_complexes} {k K :ℝ≥0} {m : ℕ} {c₀ c₁: ℝ≥0} [fact (1 ≤ k)]
+  (hC : C.is_weak_bounded_exact k K m c₀) (κ : ℝ≥0) [hκ : fact (c₀ ≤ κ * c₁)]
+  (C_adm : C.admissible) :
+  (C.scale_index_left κ).is_weak_bounded_exact k K m c₁ :=
+begin
+  intros c hc i hi x ε hε,
+  dsimp [scale_index_left, ScaleIndexLeft_apply] at x,
+  haveI aux1 : fact (k * (κ * c) ≤ κ * (k * c)) := ⟨(mul_left_comm _ _ _).le⟩,
+  obtain ⟨i₀, j, hi₀, hj, y, hy⟩ := hC (κ * c) _ i hi (res x) ε hε,
+  swap, { exact ⟨hκ.1.trans $ fact.out _⟩, },
+  refine ⟨i₀, j, hi₀, hj, y, _⟩,
+  simp only [res_res, d_res] at hy,
+  refine hy.trans (add_le_add (mul_le_mul le_rfl _ (norm_nonneg _) K.coe_nonneg) le_rfl),
+  apply C_adm.res_norm_noninc,
+end
 
 @[simps]
 def ScaleIndexRight (κ : ℝ≥0) : system_of_complexes ⥤ system_of_complexes :=
 (whiskering_left _ _ _).obj (nnreal.MulRight κ).op
 
+@[simp] lemma ScaleIndexRight_apply (C : system_of_complexes) (κ c : ℝ≥0) (i : ℕ) :
+  (ScaleIndexRight κ).obj C c i = C (c * κ) i := rfl
+
 def scale_index_right (C : system_of_complexes) (κ : ℝ≥0) := (ScaleIndexRight κ).obj C
+
+lemma admissible.scale_index_right {C : system_of_complexes} (hC : C.admissible) (κ : ℝ≥0) :
+  (C.scale_index_right κ).admissible :=
+{ d_norm_noninc' := λ c i j hij, (by { apply admissible.d_norm_noninc C hC (c * κ) i j, }),
+  res_norm_noninc := λ c₁ c₂ i hc, hC.res_norm_noninc _ _ i
+    (by { resetI, dsimp, apply_instance }) }
+
+lemma is_weak_bounded_exact.scale_index_right
+  {C : system_of_complexes} {k K :ℝ≥0} {m : ℕ} {c₀ c₁ : ℝ≥0} [fact (1 ≤ k)]
+  (hC : C.is_weak_bounded_exact k K m c₀) (κ : ℝ≥0) [hκ : fact (c₀ ≤ κ * c₁)]
+  (C_adm : C.admissible) :
+  (C.scale_index_right κ).is_weak_bounded_exact k K m c₁ :=
+begin
+  intros c hc i hi x ε hε,
+  dsimp [scale_index_right, ScaleIndexRight_apply] at x,
+  haveI aux1 : fact (k * (c * κ) ≤ k * c * κ) := ⟨(mul_assoc _ _ _).ge⟩,
+  obtain ⟨i₀, j, hi₀, hj, y, hy⟩ := hC (c * κ) _ i hi (res x) ε hε,
+  swap, { rw mul_comm, exact ⟨hκ.1.trans $ fact.out _⟩, },
+  refine ⟨i₀, j, hi₀, hj, y, _⟩,
+  simp only [res_res, d_res] at hy,
+  refine hy.trans (add_le_add (mul_le_mul le_rfl _ (norm_nonneg _) K.coe_nonneg) le_rfl),
+  apply C_adm.res_norm_noninc,
+end
 
 end scale_index
 

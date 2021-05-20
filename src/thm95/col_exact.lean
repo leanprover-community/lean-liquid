@@ -1,5 +1,7 @@
+import thm95.constants
 import thm95.double_complex
 import prop_92.prop_92
+import normed_snake_dual
 
 noncomputable theory
 
@@ -104,34 +106,96 @@ def T_inv_sub_Tinv [normed_with_aut r V] :
 
 end col_complex_rescaled
 
+namespace double_complex
+
 open polyhedral_lattice (Hom)
 
 local attribute [semireducible] CLCFPTinv CLCFPTinv₂ CLCFP -- CLCTinv
 
-lemma double_complex.col_obj_X_zero [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) :
+lemma col_obj_X_zero [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) :
   (((double_complex BD c_ r r' V Λ M N).col n).obj c).X 0 =
   (CLCFPTinv r V r' (c.unop * c_ n) (BD.X n)).obj (op $ Hom Λ M) := rfl
 
 -- local attribute [semireducible] opposite
 
-def double_complex.col_ι_f_succ_succ [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) (i : ℕ) :
+def col_ι_f_succ_succ [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) (i : ℕ) :
   (((double_complex.{u v w u₀} BD c_ r r' V Λ M N).col n).obj c).X (i+2) ⟶
     (((col_complex_rescaled.{u v w u₀} r' V Λ M N (BD.X n)).scale_index_right (c_ n)).obj c).X (i+2) :=
 (SemiNormedGroup.rescale (i+2)!).map (CLCTinv.ι r V _ _)
 
-def double_complex.col_ι_f [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) :
+def col_ι_f [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) :
   Π i, (((double_complex.{u v w u₀} BD c_ r r' V Λ M N).col n).obj c).X i ⟶
        (((col_complex_rescaled.{u v w u₀} r' V Λ M N (BD.X n)).scale_index_right (c_ n)).obj c).X i
 | 0     := CLCTinv.ι r V _ _
 | 1     := CLCTinv.ι r V _ _
-| (i+2) := double_complex.col_ι_f_succ_succ _ _ _ _ _ _ _ _ _ _ i
+| (i+2) := col_ι_f_succ_succ _ _ _ _ _ _ _ _ _ _ i
 
-lemma double_complex.col_ι [normed_with_aut r V] :
+lemma col_ι [normed_with_aut r V] :
   (double_complex.{u v w u₀} BD c_ r r' V Λ M N).col n ⟶
     (col_complex_rescaled.{u v w u₀} r' V Λ M N (BD.X n)).scale_index_right (c_ n) :=
 { app := λ c,
-  { f := double_complex.col_ι_f BD c_ r r' V Λ M N n c,
+  { f := col_ι_f BD c_ r r' V Λ M N n c,
     comm' := sorry },
   naturality' := sorry }
+
+end double_complex
+
+namespace col_complex_rescaled
+
+lemma admissible : (col_complex_rescaled r' V Λ M N n).admissible := sorry
+
+lemma is_weak_bounded_exact (m : ℕ) (tom jerry micky : ℝ≥0) [fact (1 ≤ tom)] :
+  (col_complex_rescaled r' V Λ M N n).is_weak_bounded_exact tom jerry m micky :=
+sorry
+
+end col_complex_rescaled
+
+open universal_constants (hiding N)
+
+set_option pp.universes true
+
+lemma col_exact' [normed_with_aut r V] [fact (r < 1)] (m : ℕ)
+  (tom jerry micky : ℝ≥0) [fact (1 ≤ tom)] (huey dewey louie : ℝ≥0) [fact (1 ≤ huey)]
+   (ε : ℝ≥0) (hε : 0 < ε) :
+  ((double_complex.{u v w u₀} BD c_ r r' V Λ M N).col n).is_weak_bounded_exact (k₁ m) (K₁ m) m (c₀ m Λ) :=
+begin
+  have adm := (col_complex_rescaled.admissible.{u v w u₀} r' V Λ M N (BD.X n)),
+  have adm2 := adm.scale_index_left r',
+  let T_T := (system_of_complexes.ScaleIndexRight (c_ n)).map
+    (col_complex_rescaled.T_inv_sub_Tinv r r' V Λ M N (BD.X n)),
+  have key := weak_normed_snake_dual
+    ((double_complex.{u v w u₀} BD c_ r r' V Λ M N).col n) _ _
+    (double_complex.col_ι BD c_ r r' V Λ M N n) T_T
+    _ _ _ _ (1 + r⁻¹) (r / (1 - r) + ε)
+    ((col_complex_rescaled.is_weak_bounded_exact.{u v w u₀}
+      r' V Λ M N _ (m + 1) tom jerry micky).scale_index_right _ adm)
+    (((col_complex_rescaled.is_weak_bounded_exact.{u v w u₀}
+      r' V Λ M N _ (m + 1) huey dewey louie).scale_index_left _ adm).scale_index_right _ adm2)
+    (adm.scale_index_right _),
+  have hk : k₁ m = tom * huey, { sorry },
+  have hK : K₁ m = (jerry + (1 + r⁻¹) * (r / (1 - r) + ε) * jerry * dewey), { sorry },
+  simp only [hk, hK],
+  convert key _ _ _ _, swap 8, { exact ⟨le_rfl⟩ },
+  any_goals { clear key },
+  { intros c i x,
+    -- probably split this off into a different lemma
+    -- for `i = 0,1` we don't need to do anything
+    -- for `i >= 2` we need to use `SemiNormedGroup.rescale`
+    -- in both cases, we then use
+    have := CLCFP.T_inv_sub_Tinv_bound_by r r' V,
+    sorry },
+  { intros c hc i hi y,
+    -- probably split this off into a different lemma
+    -- for `i = 0,1` we don't need to do anything
+    -- for `i >= 2` we need to use `SemiNormedGroup.rescale`
+    -- in both cases, we then use
+    have := @CLCFP.T_inv_sub_Tinv_exists_preimage r r' V,
+    sorry },
+  -- split off the next 4 sorrys
+  { sorry },
+  { sorry },
+  { sorry },
+  { sorry },
+end
 
 end thm95

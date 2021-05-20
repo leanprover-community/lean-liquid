@@ -22,7 +22,7 @@ end
 
 variables (M N P : system_of_complexes.{u}) (f : M ⟶ N) (g : N ⟶ P)
 
-lemma weak_normed_snake_dual {k k' K K' r₁ r₂ : ℝ≥0}
+lemma weak_normed_snake_dual (k k' K K' r₁ r₂ : ℝ≥0)
   [hk : fact (1 ≤ k)] [hk' : fact (1 ≤ k')]
   {m : ℕ} {c₀ : ℝ≥0}
   (hN : N.is_weak_bounded_exact k K (m+1) c₀)
