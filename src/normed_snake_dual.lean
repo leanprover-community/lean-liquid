@@ -94,12 +94,10 @@ lemma weak_normed_snake_dual {k k' K K' r₁ r₂ : ℝ≥0}
     { subst hizero,
       rw [nat.zero_sub] at hi',
       subst hi',
-      rw [zero_add] at *,
       simp only [d_self_apply, sub_zero, nnreal.coe_add, nnreal.coe_mul] at hn₁ ⊢,
       rw [res_apply, hom_apply f (res m), hfnorm] at hn₁,
       rw ← @res_res _ c₁ c₂ c _ _ _ _,
       refine le_trans (hM_adm.res_norm_noninc _ _ _ _ _) (le_trans hn₁ _),
-      change ↑K * ∥(N.d 0 1) (f m)∥ + ε₁ ≤ (K + r₁ * r₂ * K * K') * ∥(M.d 0 1) m∥ + ε,
       rw [d_apply],
       change ↑K * ∥f.apply ((M.d 0 1) m)∥ + ε₁ ≤ (K + r₁ * r₂ * K * K') * ∥(M.d 0 1) m∥ + ε,
       have : (↑K + ↑r₁ * ↑r₂ * ↑K * ↑K') * ∥(M.d 0 1) m∥ + ε =
@@ -110,11 +108,9 @@ lemma weak_normed_snake_dual {k k' K K' r₁ r₂ : ℝ≥0}
         (ε / 2) + ((ε / 2) + (↑r₁ * ↑r₂ * ↑K * ↑K' * ∥(M.d 0 1) m∥ +
         ↑r₁ * ↑r₂ * ↑K * ↑K' * ∥(M.d 0 1) m∥ * ↑K' * ↑r₁ * ↑r₂ +
         ε * (↑K' * ↑r₁ * ↑r₂))) := by ring,
-      rw [← add_halves' ε, hmulε₁, hmul],
+      rw [← add_halves' ε, hmulε₁, hmul, ← coe_nnnorm],
       refine (le_add_iff_nonneg_right (ε / 2)).2 (add_nonneg (half_pos hε).le _),
-      rw ← coe_nnnorm,
-      norm_cast,
-      exact add_nonneg (nnreal.coe_nonneg _) (mul_nonneg (gt.lt hε).le (nnreal.coe_nonneg _)) },
+      exact_mod_cast add_nonneg (nnreal.coe_nonneg _) (mul_nonneg (gt.lt hε).le (nnreal.coe_nonneg _)) },
 
     have hii' : i' + 1 = i,
     { rw [hi', nat.sub_one, nat.add_one, nat.succ_pred_eq_of_pos (zero_lt_iff.mpr hizero)] },
@@ -211,12 +207,8 @@ lemma normed_snake_dual {k k' K K' r₁ r₂ : ℝ≥0}
       { apply hM_adm.res_norm_noninc },
       refine ⟨i₀, _, hi₀, rfl, _⟩,
       exact ⟨y, hy.trans (mul_le_mul_of_nonneg_left this bound_nonneg)⟩ },
-    intro m,
-    have hlt : 0 < (1 + K' * r₁ * r₂ : ℝ),
-    { refine add_pos_of_pos_of_nonneg zero_lt_one _,
-      rw [← nnreal.coe_mul, ← nnreal.coe_mul],
-      exact nnreal.coe_nonneg _ },
 
+    intro m,
     let n := f m,
     obtain ⟨i', j', hi', rfl, n₁, hn₁⟩ :=
       hN _ ⟨hc.out.trans $ le_mul_of_one_le_left' hk'.out⟩ _ (by linarith) n,
@@ -241,12 +233,10 @@ lemma normed_snake_dual {k k' K K' r₁ r₂ : ℝ≥0}
     { subst hizero,
       rw [nat.zero_sub] at hi',
       subst hi',
-      rw [zero_add] at *,
       simp only [d_self_apply, sub_zero, nnreal.coe_add, nnreal.coe_mul] at hn₁ ⊢,
       rw [res_apply, hom_apply f (res m), hfnorm] at hn₁,
       rw ← @res_res _ c₁ c₂ c _ _ _ _,
       refine le_trans (hM_adm.res_norm_noninc _ _ _ _ _) (le_trans hn₁ _),
-      change ↑K * ∥(N.d 0 1) (f m)∥ ≤ (K + r₁ * r₂ * K * K') * ∥(M.d 0 1) m∥,
       rw [d_apply],
       change ↑K * ∥f.apply ((M.d 0 1) m)∥ ≤ (K + r₁ * r₂ * K * K') * ∥(M.d 0 1) m∥,
       have : (↑K + ↑r₁ * ↑r₂ * ↑K * ↑K') * ∥(M.d 0 1) m∥ =
