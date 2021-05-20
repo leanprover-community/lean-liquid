@@ -6,20 +6,6 @@ noncomputable theory
 open_locale nnreal
 open category_theory opposite normed_group_hom system_of_complexes
 
-structure add_subgroup.is_kernel {M N : Type*} [semi_normed_group M] [semi_normed_group N]
-  (f : normed_group_hom M N) : Prop :=
-(injective : function.injective f)
-(norm : ∀ x, ∥f x∥ = ∥x∥)
-
-def system_of_complexes.is_kernel {M M' : system_of_complexes} (f : M ⟶ M') : Prop :=
-∀ c i, add_subgroup.is_kernel (f.apply : M c i ⟶ M' c i)
-
-lemma admissible_of_kernel {M M' : system_of_complexes} {f : M ⟶ M'}
-  (hker : system_of_complexes.is_kernel f) (hadm : M'.admissible) : M.admissible :=
-begin
-  sorry
-end
-
 variables (M N P : system_of_complexes.{u}) (f : M ⟶ N) (g : N ⟶ P)
 
 lemma weak_normed_snake_dual (k k' K K' r₁ r₂ : ℝ≥0)
@@ -32,11 +18,14 @@ lemma weak_normed_snake_dual (k k' K K' r₁ r₂ : ℝ≥0)
   (Hg : ∀ (c : ℝ≥0) [fact (c₀ ≤ c)] (i : ℕ) (hi : i ≤ m+1+1) (y : P c i),
     ∃ (x : N c i), g x = y ∧ ∥x∥ ≤ r₂ * ∥y∥)
   (hg : ∀ c i, (f.apply : M c i ⟶ N c i).range = g.apply.ker)
-  (hfker : system_of_complexes.is_kernel f) :
+  (hfiso : ∀ c i, @isometry (M c i) (N c i) _ _ f.apply) :
   M.is_weak_bounded_exact (k * k') (K + r₁ * r₂ * K * K') m c₀ :=
   begin
+    have hfnorm : ∀ c i (x : M c i), ∥f.apply x∥ = ∥x∥ := λ c i x, (isometry_iff_norm _).1 (hfiso c i) x,
+    have hM_adm : M.admissible := admissible_of_isometry hN_adm hfiso,
+
     let Knew := K + r₁ * r₂ * K * K',
-    have bound_nonneg : (0 : ℝ) ≤ Knew := sorry,
+    have bound_nonneg : (0 : ℝ) ≤ Knew := nnreal.coe_nonneg _,
     introsI c hc i hi,
     let c₁ := k * (k' * c),
     let c₂ := k' * c,
@@ -49,15 +38,18 @@ lemma weak_normed_snake_dual (k k' K K' r₁ r₂ : ℝ≥0)
       rcases this m ε hε with ⟨i₀, hi₀, y, hy⟩,
       rw [res_res, d_res] at hy,
       have : ∥(res (M.d i (i+1) m₁) : M (k * (k' * c)) (i+1))∥ ≤ ∥M.d i (i+1) m₁∥,
-      { apply (admissible_of_kernel hfker hN_adm).res_norm_noninc },
+      { apply hM_adm.res_norm_noninc },
       refine ⟨i₀, _, hi₀, rfl, _⟩,
       refine ⟨y, hy.trans (add_le_add_right (mul_le_mul_of_nonneg_left this bound_nonneg) ε)⟩ },
 
     intros m ε hε,
     let ε₁ := (ε / 2) * (1 + K' * r₁ * r₂)⁻¹,
-    have hlt : 0 < (1 + K' * r₁ * r₂ : ℝ) := sorry,
+    have hlt : 0 < (1 + K' * r₁ * r₂ : ℝ),
+    { refine add_pos_of_pos_of_nonneg zero_lt_one _,
+      rw [← nnreal.coe_mul, ← nnreal.coe_mul],
+      exact nnreal.coe_nonneg _ },
     have hmulε₁ : ε₁ *  (1 + K' * r₁ * r₂) = ε / 2 := sorry,
-    have hε₁ : 0 < ε₁ := sorry,
+    have hε₁ : 0 < ε₁ := mul_pos (half_pos hε) (inv_pos.2 hlt),
     let ε₂ := if (r₂ : ℝ) = 0 then 1 else (ε / 2) * r₂⁻¹,
     have hle : ↑r₂ * ε₂ ≤ ε / 2,
     { by_cases H : (r₂ : ℝ) = 0,
@@ -85,19 +77,15 @@ lemma weak_normed_snake_dual (k k' K K' r₁ r₂ : ℝ≥0)
       subst hi',
       rw [zero_add] at *,
       simp only [d_self_apply, sub_zero, nnreal.coe_add, nnreal.coe_mul] at hn₁ ⊢,
-      change ∥res (f m)∥ ≤ K * ∥N.d 0 1 n∥ + ε₁ at hn₁,
-      rw [res_apply] at hn₁,
-      change ∥f.apply (res m)∥ ≤ ↑K * ∥N.d 0 1 n∥ + ε₁ at hn₁,
-      rw (hfker _ _).norm _ at hn₁,
+      rw [res_apply, system_of_complexes.hom_apply f (res m), hfnorm] at hn₁,
       rw ← @res_res _ c₁ c₂ c _ _ _ _,
-      refine le_trans ((admissible_of_kernel hfker hN_adm).res_norm_noninc _ _ _ _ _) (le_trans hn₁ _),
+      refine le_trans (hM_adm.res_norm_noninc _ _ _ _ _) (le_trans hn₁ _),
       change ↑K * ∥(N.d 0 1) (f m)∥ + ε₁ ≤ (K + r₁ * r₂ * K * K') * ∥(M.d 0 1) m∥ + ε,
       rw [d_apply],
       change ↑K * ∥f.apply ((M.d 0 1) m)∥ + ε₁ ≤ (K + r₁ * r₂ * K * K') * ∥(M.d 0 1) m∥ + ε,
-      rw (hfker _ _).norm _,
       have : (↑K + ↑r₁ * ↑r₂ * ↑K * ↑K') * ∥(M.d 0 1) m∥ + ε =
         ↑K * ∥(M.d 0 1) m∥ + (↑r₁ * ↑r₂ * ↑K * ↑K' * ∥(M.d 0 1) m∥ + ε) := by ring,
-      rw [this],
+      rw [hfnorm, this],
       refine add_le_add_left ((mul_le_mul_right hlt).1 _) (↑K * ∥(M.d 0 1) m∥),
       have hmul : (↑r₁ * ↑r₂ * ↑K * ↑K' * ∥(M.d 0 1) m∥ + (ε / 2 + ε / 2)) * (1 + ↑K' * ↑r₁ * ↑r₂) =
         (ε / 2) + ((ε / 2) + (↑r₁ * ↑r₂ * ↑K * ↑K' * ∥(M.d 0 1) m∥ +
@@ -120,7 +108,7 @@ lemma weak_normed_snake_dual (k k' K K' r₁ r₂ : ℝ≥0)
       rw [res_apply, normed_group_hom.map_sub, this, zero_sub, norm_neg],
       refl },
 
-    calc ∥res m - (M.d i' i) m₁∥ = ∥f (res m - (M.d i' i) m₁)∥ : ((hfker _ _).norm _).symm
+    calc ∥res m - (M.d i' i) m₁∥ = ∥f (res m - (M.d i' i) m₁)∥ : (hfnorm _ _ _).symm
     ... = ∥f.apply (res m - (M.d i' i) m₁)∥ : rfl
     ... = ∥f.apply (res m) - f.apply (M.d i' i m₁)∥ : by rw normed_group_hom.map_sub
     ... = ∥f (res m) - f (M.d i' i m₁)∥ : rfl
@@ -169,5 +157,5 @@ lemma weak_normed_snake_dual (k k' K K' r₁ r₂ : ℝ≥0)
     ... ≤ Knew * ∥N.d i (i + 1) (f m)∥ + ε / 2 + ε / 2 : add_le_add_left hle _
     ... = Knew * ∥f (M.d i (i + 1) m)∥ + ε : by rw [add_assoc, add_halves', d_apply]
     ... = Knew * ∥f.apply (M.d i (i + 1) m)∥ + ε : rfl
-    ... = Knew * ∥(M.d i (i + 1)) m∥ + ε : by rw (hfker _ _).norm _
+    ... = Knew * ∥(M.d i (i + 1)) m∥ + ε : by rw hfnorm
   end

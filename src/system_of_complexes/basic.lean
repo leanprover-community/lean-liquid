@@ -63,6 +63,9 @@ def quiver.hom.apply (f : M ⟶ N) {c : ℝ≥0} {i : ℕ} : M c i ⟶ N c i :=
 instance hom_to_fun : has_coe_to_fun (M ⟶ N) :=
 ⟨λ f, Π {c : ℝ≥0} {i : ℕ}, M c i → N c i, λ f {c} {i} x, f.apply x⟩
 
+lemma system_of_complexes.hom_apply (f : M ⟶ N) {c : ℝ≥0} {i : ℕ} (x : M c i) : f x = f.apply x :=
+rfl
+
 instance : preadditive system_of_complexes := functor.preadditive
 
 lemma system_of_complexes.map_sub (f : M ⟶ N) {c i} (m m' : M c i) : f (m-m') = f m - f m' :=
@@ -196,6 +199,25 @@ begin
   { exact hC.d_norm_noninc' c i j h },
   { rw C.d_eq_zero i j c h, intro v, simp }
 end
+
+variables {M M'}
+
+lemma admissible_of_isometry {f : M ⟶ M'} (hadm : M'.admissible)
+  (hiso : ∀ c i, @isometry (M c i) (M' c i) _ _ f.apply) :
+  M.admissible :=
+begin
+  refine ⟨λ c i j h x, _, λ c' c i h x, _⟩,
+  { rw [← (normed_group_hom.isometry_iff_norm _).1 (hiso c i) _,
+      ← (normed_group_hom.isometry_iff_norm _).1 (hiso c j) _, ← system_of_complexes.hom_apply f,
+      ← d_apply],
+    exact hadm.d_norm_noninc _ _ _ _ _ },
+  { rw [← (normed_group_hom.isometry_iff_norm _).1 (hiso c i) _,
+      ← (normed_group_hom.isometry_iff_norm _).1 (hiso c' i) _, ← system_of_complexes.hom_apply f,
+      ← system_of_complexes.hom_apply f, ← res_apply],
+    exact hadm.res_norm_noninc _ _ _ _ _  }
+end
+
+variables (M M')
 
 /-- `is_bounded_exact k K m c₀` is a predicate on systems of complexes.
 
