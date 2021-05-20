@@ -25,7 +25,7 @@ lemma weak_normed_snake_dual {k k' K K' r₁ r₂ : ℝ≥0}
     have hM_adm : M.admissible := admissible_of_isometry hN_adm hfiso,
 
     let Knew := K + r₁ * r₂ * K * K',
-    have bound_nonneg : (0 : ℝ) ≤ Knew := sorry,
+    have bound_nonneg : (0 : ℝ) ≤ Knew := nnreal.coe_nonneg _,
     introsI c hc i hi,
     let c₁ := k * (k' * c),
     let c₂ := k' * c,
