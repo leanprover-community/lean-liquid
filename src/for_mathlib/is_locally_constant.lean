@@ -4,7 +4,6 @@ import topology.discrete_quotient
 import data.setoid.partition
 
 import for_mathlib.data_setoid_partition
-import for_mathlib.topology
 
 
 noncomputable theory
