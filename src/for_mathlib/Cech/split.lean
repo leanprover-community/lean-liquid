@@ -94,96 +94,86 @@ variables (f : arrow P)
 variables [∀ n : ℕ, has_wide_pullback f.right (λ i : ulift (fin (n+1)), f.left) (λ i, f.hom)]
 
 /-- The augmented Cech conerve induced by applying M to `f.augmented_cech_nerve`. -/
-@[simps]
-def conerve : cosimplicial_object.augmented N :=
-{ left := M.obj (op f.right),
-  right := f.cech_nerve.right_op ⋙ M,
-  hom :=
-  { app := λ m, M.map (f.augmented_cech_nerve.hom.app (op m)).op,
-    naturality' := begin
-      -- opposites are annoying.
-      intros m n f,
-      dsimp,
-      simp only [← M.map_comp, ← M.map_id],
-      congr' 1,
-      simp only [← op_comp, ← op_id],
-      congr' 1,
-      simp,
-    end } }
+abbreviation conerve : cosimplicial_object.augmented N :=
+((cosimplicial_object.augmented.whiskering _ _).obj M).obj f.augmented_cech_nerve.right_op
 
 variables [arrow.split f] [preadditive N]
 
 /-- The morphisms yielding the contracting homotopy. -/
 def contracting_homotopy : Π (n : ℕ),
   (f.conerve M).to_cocomplex.X (n+1) ⟶ (f.conerve M).to_cocomplex.X n
-| 0 := M.map $ quiver.hom.op $
-         wide_pullback.lift
-           (𝟙 f.right)
-           (λ i : ulift (fin (0+1)), (split.σ : f.right ⟶ f.left))
-           (by simp)
+| 0 := M.map (wide_pullback.lift (𝟙 _)
+         (λ i, (split.σ : f.right ⟶ _))
+         (by simp)).op
 | (n+1) := M.map (f.cech_splitting n).op
+
+open cosimplicial_object.augmented
+open_locale big_operators
 
 lemma is_contracting_homotopy_zero :
   (f.conerve M).to_cocomplex.d 0 1 ≫ f.contracting_homotopy M 0 = 𝟙 _ :=
 begin
   dsimp,
-  split_ifs,
-  swap, finish,
-  dsimp [contracting_homotopy,
-    cosimplicial_object.augmented.to_cocomplex_d,
-    cosimplicial_object.augmented.to_cocomplex_obj],
-  simp only [category.comp_id, ← M.map_comp, ← M.map_id, ← op_id, ← op_comp],
+  rw if_pos,
+  swap, { simp },
+  delta conerve,
+  dsimp [to_cocomplex_d, to_cocomplex_obj, contracting_homotopy ],
+  simp only [category.id_comp, category.comp_id],
+  simp_rw [← M.map_comp, ← op_comp, ← M.map_id, ← op_id],
   congr' 2,
   simp,
 end
 
-open cosimplicial_object.augmented
-
-open_locale big_operators
-
--- TODO: The proof of this is way too slow.
 lemma is_contracting_homotopy_one :
   (f.conerve M).to_cocomplex.d 1 2 ≫ f.contracting_homotopy M 1 +
   f.contracting_homotopy M 0 ≫ (f.conerve M).to_cocomplex.d 0 1 = 𝟙 _ :=
 begin
+  rw ← add_zero (𝟙 ((conerve M f).to_cocomplex.X 1)),
+  dsimp only [to_cocomplex, cochain_complex.of],
+  rw dif_pos,
+  swap, { dec_trivial },
+  rw dif_pos,
+  swap, { dec_trivial },
   dsimp,
-  rw if_pos,
-  swap, refl,
-  rw if_pos,
-  swap, refl,
-  dsimp only [to_cocomplex_d, drop, cosimplicial_object.coboundary, to_cocomplex_obj,
-    comma.snd, contracting_homotopy, conerve, arrow.augmented_cech_nerve,
-    functor.right_op, functor.comp ],
-  simp only [add_left_eq_self, category_theory.category.comp_id, if_congr,
-    fin.default_eq_zero, fin.coe_zero, if_true, one_gsmul, fin.coe_succ,
-    univ_unique, eq_self_iff_true, pow_one, zero_add, fin.sum_univ_succ,
-    finset.sum_singleton, neg_smul, pow_zero, finset.sum_congr,
-    preadditive.add_comp, preadditive.neg_comp],
-  rw [← add_zero (𝟙 (M.obj (op (f.cech_nerve.obj (op (simplex_category.mk 0)))))), add_assoc],
-  dsimp only [cosimplicial_object.δ],
+  delta conerve,
+  dsimp only [to_cocomplex_d, cosimplicial_object.coboundary, whiskering, whiskering_obj,
+    drop, to_cocomplex_obj, comma.snd, cosimplicial_object.whiskering, whiskering_right,
+    contracting_homotopy],
+  simp_rw fin.sum_univ_succ,
+  simp only [fin.coe_zero, fin.sum_univ_zero, fin.coe_one,
+    one_gsmul, preadditive.add_comp, pow_one, fin.succ_zero_eq_one,
+    category.id_comp, neg_smul, category.comp_id, preadditive.neg_comp, pow_zero ],
+  rw [add_assoc],
   congr' 1,
-  { rw [← M.map_comp, ← M.map_id, ← op_id, ← op_comp],
+  { dsimp [cosimplicial_object.δ],
+    simp_rw [← M.map_comp, ← M.map_id, ← op_id, ← op_comp],
     congr' 2,
-    dsimp only [cech_splitting],
-    tidy },
-  { rw [add_assoc, neg_add_eq_zero, ← M.map_comp],
-    rw ← zero_add (M.map ((f.cech_nerve.map (simplex_category.δ _).op).op ≫
-      (f.cech_splitting 0).op)),
-    congr' 1,
-    { dsimp [cech_splitting],
-      simp },
-    { rw [← M.map_comp, ← op_comp, ← op_comp],
-      congr' 2,
-      dsimp [cech_splitting],
-      ext ⟨j⟩,
-      swap, { simp },
-      simp only [category_theory.category.assoc, category_theory.limits.wide_pullback.lift_π],
-      split_ifs with h h, { refl },
+    dsimp [cech_splitting],
+    ext ⟨j⟩,
+    { simp only [wide_pullback.lift_π, category.id_comp, category.assoc],
+      split_ifs,
+      { cases j,
+        dsimp at h,
+        injection h with hh,
+        simp only [nat.succ_ne_zero] at hh,
+        cases hh },
+      { congr, } },
+    { simp only [wide_pullback.lift_base, category.assoc, category.id_comp] } },
+  { dsimp [cosimplicial_object.δ],
+    rw [add_assoc, neg_add_eq_zero, ← M.map_comp],
+    simp only [zero_comp, category.id_comp, zero_add, functor.map_comp, ← M.map_comp, ← op_comp],
+    congr' 2,
+    dsimp [cech_splitting],
+    ext ⟨j⟩,
+    { simp only [wide_pullback.lift_π, category.assoc],
+      split_ifs,
+      { refl },
       { refine false.elim (h _),
         change (1 : fin 2).succ_above j = 0,
         rw fin.succ_above_eq_zero_iff,
         { simp },
-        { exact top_ne_bot, } } } }
+        { exact top_ne_bot } } },
+    { simp only [wide_pullback.lift_base, category.assoc, category.comp_id] } }
 end
 
 lemma is_contracting_homotopy (n : ℕ) :
@@ -202,7 +192,8 @@ begin
   rw ← add_zero (𝟙 ((conerve M f).to_cocomplex_obj (n + 2))),
   dsimp only [cosimplicial_object.δ],
   congr' 1,
-  { dsimp [conerve, to_cocomplex_obj, contracting_homotopy],
+  { delta conerve,
+    dsimp [to_cocomplex_obj, contracting_homotopy],
     simp only [category_theory.category.comp_id, one_gsmul, pow_zero],
     simp_rw [← M.map_id, ← M.map_comp, ← op_comp, ← op_id],
     congr' 2,
@@ -217,15 +208,17 @@ begin
       preadditive.comp_gsmul,
       preadditive.gsmul_comp],
     suffices :
-      (drop.obj (conerve M f)).map (simplex_category.δ i.succ) ≫ contracting_homotopy M f (n + 2) =
-          contracting_homotopy M f (n + 1) ≫ (drop.obj (conerve M f)).map (simplex_category.δ i),
+      (drop.obj (conerve M f)).map (simplex_category.δ i.succ) ≫ contracting_homotopy M f (n+2) =
+          contracting_homotopy M f (n+1) ≫ (drop.obj (conerve M f)).map (simplex_category.δ i),
     { rw [this, pow_succ],
       simp },
-    dsimp only [cosimplicial_object.augmented.drop,
-      conerve, comma.snd, functor.right_op, contracting_homotopy, functor.comp],
+    delta conerve,
+    dsimp [contracting_homotopy],
     simp_rw [← M.map_comp, ← op_comp],
     congr' 2,
     convert cech_splitting_face _ _ _ (fin.succ_ne_zero _),
+    funext,
+    congr,
     simp }
 end
 
