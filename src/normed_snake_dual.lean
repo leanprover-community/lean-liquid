@@ -96,30 +96,25 @@ lemma weak_normed_snake_dual {k k' K K' r₁ r₂ : ℝ≥0}
       rw [res_apply, hom_apply f (res m), hfnorm] at hn₁,
       rw ← @res_res _ c₁ c₂ c _ _ _ _,
       refine le_trans (hM_adm.res_norm_noninc _ _ _ _ _) (le_trans hn₁ _),
-      rw [d_apply],
-      change ↑K * ∥f.apply (M.d 0 1 m)∥ + ε₁ ≤ (K + r₁ * r₂ * K * K') * ∥M.d 0 1 m∥ + ε,
       have : (↑K + ↑r₁ * ↑r₂ * ↑K * ↑K') * ∥M.d 0 1 m∥ + ε =
         ↑K * ∥M.d 0 1 m∥ + (↑r₁ * ↑r₂ * ↑K * ↑K' * ∥M.d 0 1 m∥ + ε) := by ring,
-      rw [hfnorm, this],
+      rw [d_apply, hom_apply f _, hfnorm, this],
       refine add_le_add_left ((mul_le_mul_right hlt).1 _) _,
       have hmul : (↑r₁ * ↑r₂ * ↑K * ↑K' * ∥M.d 0 1 m∥ + (ε / 2 + ε / 2)) * (1 + ↑K' * ↑r₁ * ↑r₂) =
         (ε / 2) + ((ε / 2) + (↑r₁ * ↑r₂ * ↑K * ↑K' * ∥M.d 0 1 m∥ +
         ↑r₁ * ↑r₂ * ↑K * ↑K' * ∥M.d 0 1 m∥ * ↑K' * ↑r₁ * ↑r₂ +
         ε * (↑K' * ↑r₁ * ↑r₂))) := by ring,
       rw [← add_halves' ε, hmulε₁, hmul, ← coe_nnnorm],
-      refine (le_add_iff_nonneg_right (ε / 2)).2 (add_nonneg (half_pos hε).le _),
-      exact_mod_cast add_nonneg (nnreal.coe_nonneg _) (mul_nonneg (gt.lt hε).le (nnreal.coe_nonneg _)) },
+      exact_mod_cast (le_add_iff_nonneg_right (ε / 2)).2 (add_nonneg (half_pos hε).le
+        (add_nonneg (nnreal.coe_nonneg _) (mul_nonneg (gt.lt hε).le (nnreal.coe_nonneg _)))) },
 
     have hii' : i' + 1 = i,
     { rw [hi', nat.sub_one, nat.add_one, nat.succ_pred_eq_of_pos (zero_lt_iff.mpr hizero)] },
     have hfm : ∥g (N.d i' i n₁)∥ = ∥g (res (f m) - N.d i' i n₁)∥,
-    { have : f (@res _ c₁ (k' * c) _ _ m) ∈ f.apply.range,
-      { rw mem_range,
-        exact ⟨res m, rfl⟩ },
+    { have : f (@res _ _ (k' * c) _ _ m) ∈ f.apply.range := by { rw mem_range, exact ⟨res m, rfl⟩ },
       rw [hg, mem_ker] at this,
-      change ∥g ((N.d i' i) n₁)∥ = ∥g.apply (res (f m) - (N.d i' i) n₁)∥,
-      rw [res_apply, normed_group_hom.map_sub, this, zero_sub, norm_neg],
-      refl },
+      rw [hom_apply g (res (f m) - (N.d i' i) n₁), res_apply, normed_group_hom.map_sub, this,
+        zero_sub, norm_neg, ← hom_apply] },
 
     calc ∥res m - (M.d i' i) m₁∥ = ∥f (res m - (M.d i' i) m₁)∥ : (hfnorm _ _ _).symm
     ... = ∥f.apply (res m - (M.d i' i) m₁)∥ : rfl
@@ -238,25 +233,20 @@ lemma normed_snake_dual {k k' K K' r₁ r₂ : ℝ≥0}
       rw [res_apply, hom_apply f (res m), hfnorm] at hn₁,
       rw ← @res_res _ c₁ c₂ c _ _ _ _,
       refine le_trans (hM_adm.res_norm_noninc _ _ _ _ _) (le_trans hn₁ _),
-      rw [d_apply],
-      change ↑K * ∥f.apply (M.d 0 1 m)∥ ≤ (K + r₁ * r₂ * K * K') * ∥M.d 0 1 m∥,
       have : (↑K + ↑r₁ * ↑r₂ * ↑K * ↑K') * ∥M.d 0 1 m∥ =
         ↑K * ∥M.d 0 1 m∥ + ↑r₁ * ↑r₂ * ↑K * ↑K' * ∥M.d 0 1 m∥ := by ring,
-      rw [hfnorm, this],
-      refine le_add_of_nonneg_right (_),
+      rw [d_apply, hom_apply f _, hfnorm, this],
+      refine le_add_of_nonneg_right _,
       rw [← nnreal.coe_mul, ← nnreal.coe_mul, ← nnreal.coe_mul],
       exact mul_nonneg (nnreal.coe_nonneg _) (norm_nonneg _) },
 
     have hii' : i' + 1 = i,
     { rw [hi', nat.sub_one, nat.add_one, nat.succ_pred_eq_of_pos (zero_lt_iff.mpr hizero)] },
     have hfm : ∥g (N.d i' i n₁)∥ = ∥g (res (f m) - N.d i' i n₁)∥,
-    { have : f (@res _ c₁ (k' * c) _ _ m) ∈ f.apply.range,
-      { rw mem_range,
-        exact ⟨res m, rfl⟩ },
+    { have : f (@res _ _ (k' * c) _ _ m) ∈ f.apply.range := by { rw mem_range, exact ⟨res m, rfl⟩ },
       rw [hg, mem_ker] at this,
-      change ∥g ((N.d i' i) n₁)∥ = ∥g.apply (res (f m) - (N.d i' i) n₁)∥,
-      rw [res_apply, normed_group_hom.map_sub, this, zero_sub, norm_neg],
-      refl },
+      rw [hom_apply g (res (f m) - (N.d i' i) n₁), res_apply, normed_group_hom.map_sub, this,
+        zero_sub, norm_neg, ← hom_apply] },
 
     calc ∥res m - (M.d i' i) m₁∥ = ∥f (res m - (M.d i' i) m₁)∥ : (hfnorm _ _ _).symm
     ... = ∥f.apply (res m - (M.d i' i) m₁)∥ : rfl
