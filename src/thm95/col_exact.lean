@@ -2,21 +2,102 @@ import thm95.constants
 import thm95.double_complex
 import prop_92.prop_92
 import normed_snake_dual
+import combinatorial_lemma
+import prop819
 
 noncomputable theory
 
 open_locale nnreal big_operators nat
 open category_theory opposite simplex_category
 
-universe variables u v w u₀
+universe variables u u₀
+set_option pp.universes true
 
 namespace thm95
 
 variables (BD : breen_deligne.data) (c_ : ℕ → ℝ≥0) [BD.suitable c_]
-variables (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)]
-variables (V : SemiNormedGroup.{v})
-variables (Λ : PolyhedralLattice.{u}) (M : ProFiltPseuNormGrpWithTinv.{w} r')
+variables (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' < 1)]
+variables (V : SemiNormedGroup.{u})
+variables (Λ : PolyhedralLattice.{u}) (M : ProFiltPseuNormGrpWithTinv.{u} r')
 variables (N : ℕ) [fact (0 < N)] (n : ℕ)
+
+-- move this
+instance fact_le_of_lt (c₁ c₂ : ℝ≥0) [h : fact (c₁ < c₂)] : fact (c₁ ≤ c₂) := ⟨h.1.le⟩
+
+section
+
+open pseudo_normed_group
+
+def d := (@lem98.{u u₀} r' Λ _ _ N $ (fact.out _)).some
+
+include Λ r' N
+
+lemma hd (S : Type u₀) [fintype S] (c : ℝ≥0)
+  (x : Λ →+ Mbar r' S) (hx : x ∈ filtration (Λ →+ Mbar r' S) c) :
+  ∃ y : fin N → (Λ →+ Mbar r' S),
+    (x = ∑ i, y i) ∧
+    (∀ i, y i ∈ filtration (Λ →+ Mbar r' S) (c/N + (d.{u u₀} r' Λ N))) :=
+(@lem98.{u u₀} r' Λ _ _ N $ (fact.out _)).some_spec S c x hx
+
+end
+
+def FLC_complex_arrow (c : ℝ≥0) : arrow Profinite :=
+arrow.mk $ (FiltrationPow r' c n).map (Cech_augmentation_map r' Λ M N).unop
+
+def FLC_complex : system_of_complexes :=
+{ obj := λ c, (FLC_functor V).obj (op $ FLC_complex_arrow r' Λ M N n c.unop),
+  map := λ c₁ c₂ h, (FLC_functor V).map $ quiver.hom.op $
+    @arrow.hom_mk _ _ (FLC_complex_arrow r' Λ M N n (unop c₂))
+      (FLC_complex_arrow r' Λ M N n (unop c₁))
+      ((@FiltrationPow.cast_le r' _ _ ⟨le_of_hom h.unop⟩ n).app $ _)
+      ((@FiltrationPow.cast_le r' _ _ ⟨le_of_hom h.unop⟩ n).app $ _)
+      (by { ext, refl }),
+  map_id' := λ c,
+  begin
+    convert (FLC_functor V).map_id _,
+    simp only [unop_id, ←op_id, quiver.hom.op_inj.eq_iff, nat_trans.id_app,
+      FiltrationPow.cast_le_refl],
+    ext1;
+    simp only [arrow.id_left, arrow.hom_mk_left, arrow.id_right, arrow.hom_mk_right];
+    refl
+  end,
+  map_comp' := λ c₁ c₂ c₃ h1 h2,
+  begin
+    convert (FLC_functor V).map_comp _ _,
+    simp only [← op_comp, quiver.hom.op_inj.eq_iff, nat_trans.comp_app,
+      FiltrationPow.cast_le_comp],
+    ext1;
+    simp only [comma.comp_left, arrow.hom_mk_left, comma.comp_right, arrow.hom_mk_right,
+      ← FiltrationPow.cast_le_comp, unop_comp, ← nat_trans.comp_app, ← op_comp];
+    refl
+  end, }
+.
+
+namespace FLC_complex
+
+def aux_space (c₁ c₂ : ℝ≥0) (h : c₁ ≤ c₂) : Profinite :=
+limits.pullback ((@FiltrationPow.cast_le r' c₁ c₂ ⟨h⟩ n).app _)
+  ((FiltrationPow r' c₂ n).map (Cech_augmentation_map r' Λ M N).unop)
+
+namespace aux_space
+
+variables (c₁ c₂ : ℝ≥0) (h : c₁ ≤ c₂)
+
+def fst : aux_space r' Λ M N n c₁ c₂ h ⟶ _ := limits.pullback.fst
+
+lemma fst_surjective : function.surjective (fst r' Λ M N n c₁ c₂ h) :=
+sorry
+
+end aux_space
+
+lemma weak_bounded_exact (k K : ℝ≥0) [fact (1 ≤ k)] (m : ℕ) (c₀ : ℝ≥0) :
+  (FLC_complex r' V Λ M N n).is_weak_bounded_exact k K m c₀ :=
+begin
+  intros c hc i hi x ε hε,
+  sorry
+end
+
+end FLC_complex
 
 section
 open PolyhedralLattice
@@ -47,9 +128,9 @@ def col_complex : system_of_complexes :=
 (col_complex_aux r' V Λ M N n).as_functor
 
 def col_complex_rescaled_aux : cochain_complex (ℝ≥0ᵒᵖ ⥤ SemiNormedGroup) ℕ :=
-(col_complex_aux r' V Λ M N n).modify
+(col_complex_aux.{u u₀} r' V Λ M N n).modify
   thm95.rescale_functor'
-  thm95.rescale_nat_trans'
+  thm95.rescale_nat_trans'.{u u}
 
 def col_complex_rescaled : system_of_complexes :=
 (col_complex_rescaled_aux r' V Λ M N n).as_functor
@@ -79,13 +160,13 @@ instance move_pls2 (c : ℝ≥0ᵒᵖ) : fact (unop (r'.MulLeft.op.obj c) ≤ un
 by { dsimp [nnreal.MulLeft], apply_instance }
 
 def T_inv_sub_Tinv_f_succ_succ [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) (i : ℕ) :
-  ((col_complex_rescaled.{u v w u₀} r' V Λ M N n).obj c).X (i + 2) ⟶
-    (((col_complex_rescaled.{u v w u₀} r' V Λ M N n).scale_index_left r').obj c).X (i + 2) :=
+  ((col_complex_rescaled.{u u₀} r' V Λ M N n).obj c).X (i + 2) ⟶
+    (((col_complex_rescaled.{u u₀} r' V Λ M N n).scale_index_left r').obj c).X (i + 2) :=
 (SemiNormedGroup.rescale (i+2)!).map $ (CLCFP.T_inv_sub_Tinv r r' V _ _ n).app _
 
 def T_inv_sub_Tinv_f [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) :
-  Π i, ((col_complex_rescaled.{u v w u₀} r' V Λ M N n).obj c).X i ⟶
-  (((col_complex_rescaled.{u v w u₀} r' V Λ M N n).scale_index_left r').obj c).X i
+  Π i, ((col_complex_rescaled.{u u₀} r' V Λ M N n).obj c).X i ⟶
+  (((col_complex_rescaled.{u u₀} r' V Λ M N n).scale_index_left r').obj c).X i
 | 0     := (CLCFP.T_inv_sub_Tinv r r' V _ _ n).app _
 | 1     := (CLCFP.T_inv_sub_Tinv r r' V _ _ n).app _
 | (i+2) := T_inv_sub_Tinv_f_succ_succ r r' V Λ M N n c i
@@ -119,13 +200,13 @@ lemma col_obj_X_zero [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) :
 -- local attribute [semireducible] opposite
 
 def col_ι_f_succ_succ [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) (i : ℕ) :
-  (((double_complex.{u v w u₀} BD c_ r r' V Λ M N).col n).obj c).X (i+2) ⟶
-    (((col_complex_rescaled.{u v w u₀} r' V Λ M N (BD.X n)).scale_index_right (c_ n)).obj c).X (i+2) :=
+  (((double_complex.{u u u u₀} BD c_ r r' V Λ M N).col n).obj c).X (i+2) ⟶
+    (((col_complex_rescaled.{u u₀} r' V Λ M N (BD.X n)).scale_index_right (c_ n)).obj c).X (i+2) :=
 (SemiNormedGroup.rescale (i+2)!).map (CLCTinv.ι r V _ _)
 
 def col_ι_f [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) :
-  Π i, (((double_complex.{u v w u₀} BD c_ r r' V Λ M N).col n).obj c).X i ⟶
-       (((col_complex_rescaled.{u v w u₀} r' V Λ M N (BD.X n)).scale_index_right (c_ n)).obj c).X i
+  Π i, (((double_complex.{u u u u₀} BD c_ r r' V Λ M N).col n).obj c).X i ⟶
+       (((col_complex_rescaled.{u u₀} r' V Λ M N (BD.X n)).scale_index_right (c_ n)).obj c).X i
 | 0     := CLCTinv.ι r V _ _
 | 1     := CLCTinv.ι r V _ _
 | (i+2) := col_ι_f_succ_succ _ _ _ _ _ _ _ _ _ _ i
@@ -140,8 +221,8 @@ lemma col_ι_f_comm [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) :
 | (i+2) := sorry
 
 lemma col_ι [normed_with_aut r V] :
-  (double_complex.{u v w u₀} BD c_ r r' V Λ M N).col n ⟶
-    (col_complex_rescaled.{u v w u₀} r' V Λ M N (BD.X n)).scale_index_right (c_ n) :=
+  (double_complex.{u u u u₀} BD c_ r r' V Λ M N).col n ⟶
+    (col_complex_rescaled.{u u₀} r' V Λ M N (BD.X n)).scale_index_right (c_ n) :=
 { app := λ c,
   { f := col_ι_f BD c_ r r' V Λ M N n c,
     comm' := by { rintro i j (rfl : i + 1 = j), apply col_ι_f_comm } },
@@ -171,19 +252,19 @@ set_option pp.universes true
 lemma col_exact' [normed_with_aut r V] [fact (r < 1)] (m : ℕ)
   (tom jerry micky : ℝ≥0) [fact (1 ≤ tom)] (huey dewey louie : ℝ≥0) [fact (1 ≤ huey)]
    (ε : ℝ≥0) (hε : 0 < ε) :
-  ((double_complex.{u v w u₀} BD c_ r r' V Λ M N).col n).is_weak_bounded_exact (k₁ m) (K₁ m) m (c₀ m Λ) :=
+  ((double_complex.{u u u u₀} BD c_ r r' V Λ M N).col n).is_weak_bounded_exact (k₁ m) (K₁ m) m (c₀ m Λ) :=
 begin
-  have adm := (col_complex_rescaled.admissible.{u v w u₀} r' V Λ M N (BD.X n)),
+  have adm := (col_complex_rescaled.admissible.{u u₀} r' V Λ M N (BD.X n)),
   have adm2 := adm.scale_index_left r',
   let T_T := (system_of_complexes.ScaleIndexRight (c_ n)).map
     (col_complex_rescaled.T_inv_sub_Tinv r r' V Λ M N (BD.X n)),
   have key := weak_normed_snake_dual
-    ((double_complex.{u v w u₀} BD c_ r r' V Λ M N).col n) _ _
+    ((double_complex.{u u u u₀} BD c_ r r' V Λ M N).col n) _ _
     (double_complex.col_ι BD c_ r r' V Λ M N n) T_T
     _ _ _ _ (1 + r⁻¹) (r / (1 - r) + ε)
-    ((col_complex_rescaled.is_weak_bounded_exact.{u v w u₀}
+    ((col_complex_rescaled.is_weak_bounded_exact.{u u₀}
       r' V Λ M N _ (m + 1) tom jerry micky).scale_index_right _ adm)
-    (((col_complex_rescaled.is_weak_bounded_exact.{u v w u₀}
+    (((col_complex_rescaled.is_weak_bounded_exact.{u u₀}
       r' V Λ M N _ (m + 1) huey dewey louie).scale_index_left _ adm).scale_index_right _ adm2)
     (adm.scale_index_right _),
   have hk : k₁ m = tom * huey, { sorry },
