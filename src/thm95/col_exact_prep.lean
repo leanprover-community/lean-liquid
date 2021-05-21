@@ -24,18 +24,53 @@ def norm_exact_complex (D : cochain_complex SemiNormedGroup ℕ) : Prop :=
 ∀ (m : ℕ) (ε : ℝ≥0) (hε : 0 < ε) (x : D.X (m+1)) (hx : D.d _ (m+2) x = 0),
   ∃ y : D.X m, D.d _ _ y = x ∧ nnnorm y ≤ (1 + ε) * nnnorm x
 
-lemma weak_exact_of_factor_exact (k K : ℝ≥0) [fact (1 ≤ k)] (m : ℕ) (c₀ : ℝ≥0)
+lemma weak_exact_of_factor_exact (k : ℝ≥0) [fact (1 ≤ k)] (m : ℕ) (c₀ : ℝ≥0)
   (D : ℝ≥0 → cochain_complex SemiNormedGroup ℕ)
   (hD : ∀ c, c₀ ≤ c → norm_exact_complex (D c))
   (f : Π c, C.obj (op $ k * c) ⟶ D c)
   (g : Π c, D c ⟶ C.obj (op c))
+  (hf : ∀ c i, ((f c).f i).norm_noninc)
+  (hg : ∀ c i, ((g c).f i).norm_noninc)
   (hfg : ∀ c, c₀ ≤ c → f c ≫ g c = C.map (hom_of_le (fact.out _ : c ≤ k * c)).op) :
-  C.is_weak_bounded_exact k K m c₀ :=
+  C.is_weak_bounded_exact k 1 m c₀ :=
 begin
-  intros c hc i hi x ε hε,
-  let dx := C.d _ (i+1) x,
-
-  sorry
+  intros c hc i hi x ε' hε',
+  cases i, { sorry },
+  let dx := C.d _ (i+2) x,
+  let ε : ℝ≥0 := ⟨ε', hε'.le⟩,
+  have hε : 0 < ε := hε',
+  let δ : ℝ≥0 := ε / (nnnorm dx + 1),
+  have hδ : 0 < δ,
+  { rw [← nnreal.coe_lt_coe],
+    exact div_pos hε (lt_of_le_of_lt (nnreal.coe_nonneg _) (lt_add_one _)), },
+  let fdx := (f c).f _ dx,
+  have hfdx : (D _).d _ (i+3) fdx = 0, { sorry },
+  obtain ⟨x', hx'1, hx'2⟩ := hD _ hc.1 _ δ hδ _ hfdx,
+  let fx := (f _).f _ x,
+  have hdfxx' : (D _).d _ (i+2) (fx - x') = 0, { sorry },
+  obtain ⟨y, hy1, hy2⟩ := hD _ hc.1 _ δ hδ _ hdfxx',
+  let gy := (g _).f _ y,
+  let gx' := (g _).f _ x',
+  refine ⟨i, i+2, rfl, rfl, gy, _⟩,
+  simp only [nnreal.coe_one, one_mul],
+  have hxdgy : res x - C.d _ _ gy = gx', { sorry },
+  rw hxdgy,
+  change (nnnorm gx' : ℝ) ≤ (nnnorm dx) + ε,
+  simp only [← nnreal.coe_add, nnreal.coe_le_coe],
+  calc nnnorm gx'
+      ≤ nnnorm x' : hg _ _ _
+  ... ≤ (1 + δ) * nnnorm fdx : hx'2
+  ... ≤ (1 + δ) * nnnorm dx : mul_le_mul' le_rfl (hf _ _ _)
+  ... ≤ nnnorm dx + δ * nnnorm dx : by rw [add_mul, one_mul]
+  ... ≤ nnnorm dx + ε * 1 : add_le_add le_rfl _
+  ... ≤ nnnorm dx + ε : by rw [mul_one],
+  dsimp only [δ],
+  rw [div_eq_mul_inv, mul_assoc],
+  refine mul_le_mul' le_rfl _,
+  rw [nnreal.mul_le_iff_le_inv, inv_inv', mul_one],
+  { exact (lt_add_one _).le },
+  { refine inv_ne_zero (lt_of_le_of_lt _ (lt_add_one _)).ne',
+    exact zero_le' }
 end
 
 end system_of_complexes
@@ -186,14 +221,14 @@ def fstₐ_sum_homₐ [fact (0 < N)] : fstₐ _ (sum_hom_strict M N) c₁ c₂ �
 
 include d
 
-lemma weak_bounded_exact (k K : ℝ≥0) [hk : fact (1 ≤ k)] (m : ℕ) (c₀ : ℝ≥0) [fact (0 < N)]
+lemma weak_bounded_exact (k : ℝ≥0) [hk : fact (1 ≤ k)] (m : ℕ) (c₀ : ℝ≥0) [fact (0 < N)]
   (hdkc₀N : d ≤ (k - 1) * c₀ / N) :
-  (FLC_complex V _ (sum_hom_strict M N)).is_weak_bounded_exact k K m c₀ :=
+  (FLC_complex V _ (sum_hom_strict M N)).is_weak_bounded_exact k 1 m c₀ :=
 begin
   let D := λ c, (FLC_functor V).obj (op $ fstₐ _ (sum_hom_strict M N) c (k * c)),
   let f := λ c, (FLC_functor V).map (fstₐ_sum_homₐ M N c (k * c)).op,
   let g := λ c, (FLC_functor V).map (sum_homₐ_fstₐ M N c (k * c)).op,
-  refine system_of_complexes.weak_exact_of_factor_exact _ k K m c₀ D _ f g _,
+  refine system_of_complexes.weak_exact_of_factor_exact _ k m c₀ D _ f g _ _ _,
   { intros c hc,
     apply prop819,
     refine fst_surjective M N d c (k * c) _,
@@ -207,6 +242,8 @@ begin
     { simp only [div_eq_mul_inv, mul_assoc],
       rw ← add_mul, congr,
       rw [← nnreal.eq_iff, nnreal.coe_add, nnreal.coe_sub hk.1, add_sub_cancel'_right], } },
+  { sorry },
+  { sorry },
   { intros c hc,
     dsimp only [f, g, FLC_complex_map],
     rw [← category_theory.functor.map_comp, ← op_comp],
