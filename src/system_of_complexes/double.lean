@@ -181,6 +181,7 @@ def row_map (C : system_of_double_complexes.{u}) (p p' : ℕ) :
 --   map_add' := by { intros, dsimp, refl } }
 
 /-- The `q`-th column in a system of double complexes, as system of complexes. -/
+@[simps]
 def col (C : system_of_double_complexes.{u}) (q : ℕ) : system_of_complexes.{u} :=
 C ⋙ functor.map_homological_complex (homological_complex.eval _ _ q) _
 

@@ -130,13 +130,27 @@ def col_ι_f [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) :
 | 1     := CLCTinv.ι r V _ _
 | (i+2) := col_ι_f_succ_succ _ _ _ _ _ _ _ _ _ _ i
 
+lemma col_ι_f_comm [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) :
+  ∀ i, col_ι_f BD c_ r r' V Λ M N n c i ≫
+    (((col_complex_rescaled r' V Λ M N (BD.X n)).scale_index_right (c_ n)).obj c).d i (i + 1) =
+  (((double_complex BD c_ r r' V Λ M N).col n).obj c).d i (i + 1) ≫
+    col_ι_f BD c_ r r' V Λ M N n c (i + 1)
+| 0     := sorry
+| 1     := sorry
+| (i+2) := sorry
+
 lemma col_ι [normed_with_aut r V] :
   (double_complex.{u v w u₀} BD c_ r r' V Λ M N).col n ⟶
     (col_complex_rescaled.{u v w u₀} r' V Λ M N (BD.X n)).scale_index_right (c_ n) :=
 { app := λ c,
   { f := col_ι_f BD c_ r r' V Λ M N n c,
-    comm' := sorry },
-  naturality' := sorry }
+    comm' := by { rintro i j (rfl : i + 1 = j), apply col_ι_f_comm } },
+  naturality' :=
+  begin
+    intros c₁ c₂ h, ext i : 2,
+    simp only [homological_complex.comp_f],
+    sorry
+  end }
 
 end double_complex
 
