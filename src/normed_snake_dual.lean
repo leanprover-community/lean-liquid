@@ -30,17 +30,17 @@ lemma weak_normed_snake_dual {k k' K K' r₁ r₂ : ℝ≥0}
     let c₁ := k * (k' * c),
     let c₂ := k' * c,
     suffices : ∀ m : M c₁ i, ∀ ε > 0,
-    ∃ i₀ (hi₀ : i₀ = i - 1) (y : M c i₀), ∥res m - M.d _ _ y∥ ≤ Knew * ∥M.d i (i+1) m∥ + ε,
+    ∃ i₀ (hi₀ : i₀ = i - 1) (y : M c i₀), ∥res m - M.d _ _ y∥ ≤ Knew * ∥M.d i (i + 1) m∥ + ε,
     { dsimp [c₁] at this,
       intros m₁ ε hε,
       haveI hc : fact (k * k' * c = c₁) := by { constructor, simp [mul_assoc, c₁] },
       let m : ↥(M c₁ i) := res m₁,
       rcases this m ε hε with ⟨i₀, hi₀, y, hy⟩,
       rw [res_res, d_res] at hy,
-      have : ∥(res (M.d i (i+1) m₁) : M (k * (k' * c)) (i+1))∥ ≤ ∥M.d i (i+1) m₁∥,
+      have : ∥(res (M.d i (i + 1) m₁) : M c₁ (i + 1))∥ ≤ ∥M.d i (i + 1) m₁∥,
       { apply hM_adm.res_norm_noninc },
       refine ⟨i₀, _, hi₀, rfl, _⟩,
-      refine ⟨y, hy.trans (add_le_add_right (mul_le_mul_of_nonneg_left this bound_nonneg) ε)⟩ },
+      exact ⟨y, hy.trans (add_le_add_right (mul_le_mul_of_nonneg_left this bound_nonneg) ε)⟩ },
 
     intros m ε hε,
     let ε₁ := (ε / 2) * (1 + K' * r₁ * r₂)⁻¹,
@@ -99,14 +99,14 @@ lemma weak_normed_snake_dual {k k' K K' r₁ r₂ : ℝ≥0}
       rw ← @res_res _ c₁ c₂ c _ _ _ _,
       refine le_trans (hM_adm.res_norm_noninc _ _ _ _ _) (le_trans hn₁ _),
       rw [d_apply],
-      change ↑K * ∥f.apply ((M.d 0 1) m)∥ + ε₁ ≤ (K + r₁ * r₂ * K * K') * ∥(M.d 0 1) m∥ + ε,
+      change ↑K * ∥f.apply (M.d 0 1 m)∥ + ε₁ ≤ (K + r₁ * r₂ * K * K') * ∥M.d 0 1 m∥ + ε,
       have : (↑K + ↑r₁ * ↑r₂ * ↑K * ↑K') * ∥(M.d 0 1) m∥ + ε =
-        ↑K * ∥(M.d 0 1) m∥ + (↑r₁ * ↑r₂ * ↑K * ↑K' * ∥(M.d 0 1) m∥ + ε) := by ring,
+        ↑K * ∥M.d 0 1 m∥ + (↑r₁ * ↑r₂ * ↑K * ↑K' * ∥M.d 0 1 m∥ + ε) := by ring,
       rw [hfnorm, this],
       refine add_le_add_left ((mul_le_mul_right hlt).1 _) _,
-      have hmul : (↑r₁ * ↑r₂ * ↑K * ↑K' * ∥(M.d 0 1) m∥ + (ε / 2 + ε / 2)) * (1 + ↑K' * ↑r₁ * ↑r₂) =
-        (ε / 2) + ((ε / 2) + (↑r₁ * ↑r₂ * ↑K * ↑K' * ∥(M.d 0 1) m∥ +
-        ↑r₁ * ↑r₂ * ↑K * ↑K' * ∥(M.d 0 1) m∥ * ↑K' * ↑r₁ * ↑r₂ +
+      have hmul : (↑r₁ * ↑r₂ * ↑K * ↑K' * ∥M.d 0 1 m∥ + (ε / 2 + ε / 2)) * (1 + ↑K' * ↑r₁ * ↑r₂) =
+        (ε / 2) + ((ε / 2) + (↑r₁ * ↑r₂ * ↑K * ↑K' * ∥M.d 0 1 m∥ +
+        ↑r₁ * ↑r₂ * ↑K * ↑K' * ∥M.d 0 1 m∥ * ↑K' * ↑r₁ * ↑r₂ +
         ε * (↑K' * ↑r₁ * ↑r₂))) := by ring,
       rw [← add_halves' ε, hmulε₁, hmul, ← coe_nnnorm],
       refine (le_add_iff_nonneg_right (ε / 2)).2 (add_nonneg (half_pos hε).le _),
@@ -196,14 +196,14 @@ lemma normed_snake_dual {k k' K K' r₁ r₂ : ℝ≥0}
     let c₁ := k * (k' * c),
     let c₂ := k' * c,
     suffices : ∀ m : M c₁ i,
-    ∃ i₀ (hi₀ : i₀ = i - 1) (y : M c i₀), ∥res m - M.d _ _ y∥ ≤ Knew * ∥M.d i (i+1) m∥,
+    ∃ i₀ (hi₀ : i₀ = i - 1) (y : M c i₀), ∥res m - M.d _ _ y∥ ≤ Knew * ∥M.d i (i + 1) m∥,
     { dsimp [c₁] at this,
       intros m₁,
       haveI hc : fact (k * k' * c = c₁) := by { constructor, simp [mul_assoc, c₁] },
       let m : ↥(M c₁ i) := res m₁,
       rcases this m with ⟨i₀, hi₀, y, hy⟩,
       rw [res_res, d_res] at hy,
-      have : ∥(res (M.d i (i+1) m₁) : M (k * (k' * c)) (i+1))∥ ≤ ∥M.d i (i+1) m₁∥,
+      have : ∥(res (M.d i (i + 1) m₁) : M c₁ (i + 1))∥ ≤ ∥M.d i (i + 1) m₁∥,
       { apply hM_adm.res_norm_noninc },
       refine ⟨i₀, _, hi₀, rfl, _⟩,
       exact ⟨y, hy.trans (mul_le_mul_of_nonneg_left this bound_nonneg)⟩ },
@@ -238,9 +238,9 @@ lemma normed_snake_dual {k k' K K' r₁ r₂ : ℝ≥0}
       rw ← @res_res _ c₁ c₂ c _ _ _ _,
       refine le_trans (hM_adm.res_norm_noninc _ _ _ _ _) (le_trans hn₁ _),
       rw [d_apply],
-      change ↑K * ∥f.apply ((M.d 0 1) m)∥ ≤ (K + r₁ * r₂ * K * K') * ∥(M.d 0 1) m∥,
-      have : (↑K + ↑r₁ * ↑r₂ * ↑K * ↑K') * ∥(M.d 0 1) m∥ =
-        ↑K * ∥(M.d 0 1) m∥ + ↑r₁ * ↑r₂ * ↑K * ↑K' * ∥(M.d 0 1) m∥ := by ring,
+      change ↑K * ∥f.apply (M.d 0 1 m)∥ ≤ (K + r₁ * r₂ * K * K') * ∥M.d 0 1 m∥,
+      have : (↑K + ↑r₁ * ↑r₂ * ↑K * ↑K') * ∥M.d 0 1 m∥ =
+        ↑K * ∥M.d 0 1 m∥ + ↑r₁ * ↑r₂ * ↑K * ↑K' * ∥M.d 0 1 m∥ := by ring,
       rw [hfnorm, this],
       refine le_add_of_nonneg_right (_),
       rw [← nnreal.coe_mul, ← nnreal.coe_mul, ← nnreal.coe_mul],
