@@ -10,7 +10,7 @@ noncomputable theory
 open_locale nnreal big_operators nat
 open category_theory opposite simplex_category
 
-universe variables u u₀
+universe variables u u₀ uₘ
 set_option pp.universes true
 
 namespace thm95
@@ -23,81 +23,6 @@ variables (N : ℕ) [fact (0 < N)] (n : ℕ)
 
 -- move this
 instance fact_le_of_lt (c₁ c₂ : ℝ≥0) [h : fact (c₁ < c₂)] : fact (c₁ ≤ c₂) := ⟨h.1.le⟩
-
-section
-
-open pseudo_normed_group
-
-def d := (@lem98.{u u₀} r' Λ _ _ N $ (fact.out _)).some
-
-include Λ r' N
-
-lemma hd (S : Type u₀) [fintype S] (c : ℝ≥0)
-  (x : Λ →+ Mbar r' S) (hx : x ∈ filtration (Λ →+ Mbar r' S) c) :
-  ∃ y : fin N → (Λ →+ Mbar r' S),
-    (x = ∑ i, y i) ∧
-    (∀ i, y i ∈ filtration (Λ →+ Mbar r' S) (c/N + (d.{u u₀} r' Λ N))) :=
-(@lem98.{u u₀} r' Λ _ _ N $ (fact.out _)).some_spec S c x hx
-
-end
-
-def FLC_complex_arrow (c : ℝ≥0) : arrow Profinite :=
-arrow.mk $ (FiltrationPow r' c n).map (Cech_augmentation_map r' Λ M N).unop
-
-def FLC_complex : system_of_complexes :=
-{ obj := λ c, (FLC_functor V).obj (op $ FLC_complex_arrow r' Λ M N n c.unop),
-  map := λ c₁ c₂ h, (FLC_functor V).map $ quiver.hom.op $
-    @arrow.hom_mk _ _ (FLC_complex_arrow r' Λ M N n (unop c₂))
-      (FLC_complex_arrow r' Λ M N n (unop c₁))
-      ((@FiltrationPow.cast_le r' _ _ ⟨le_of_hom h.unop⟩ n).app $ _)
-      ((@FiltrationPow.cast_le r' _ _ ⟨le_of_hom h.unop⟩ n).app $ _)
-      (by { ext, refl }),
-  map_id' := λ c,
-  begin
-    convert (FLC_functor V).map_id _,
-    simp only [unop_id, ←op_id, quiver.hom.op_inj.eq_iff, nat_trans.id_app,
-      FiltrationPow.cast_le_refl],
-    ext1;
-    simp only [arrow.id_left, arrow.hom_mk_left, arrow.id_right, arrow.hom_mk_right];
-    refl
-  end,
-  map_comp' := λ c₁ c₂ c₃ h1 h2,
-  begin
-    convert (FLC_functor V).map_comp _ _,
-    simp only [← op_comp, quiver.hom.op_inj.eq_iff, nat_trans.comp_app,
-      FiltrationPow.cast_le_comp],
-    ext1;
-    simp only [comma.comp_left, arrow.hom_mk_left, comma.comp_right, arrow.hom_mk_right,
-      ← FiltrationPow.cast_le_comp, unop_comp, ← nat_trans.comp_app, ← op_comp];
-    refl
-  end, }
-.
-
-namespace FLC_complex
-
-def aux_space (c₁ c₂ : ℝ≥0) (h : c₁ ≤ c₂) : Profinite :=
-limits.pullback ((@FiltrationPow.cast_le r' c₁ c₂ ⟨h⟩ n).app _)
-  ((FiltrationPow r' c₂ n).map (Cech_augmentation_map r' Λ M N).unop)
-
-namespace aux_space
-
-variables (c₁ c₂ : ℝ≥0) (h : c₁ ≤ c₂)
-
-def fst : aux_space r' Λ M N n c₁ c₂ h ⟶ _ := limits.pullback.fst
-
-lemma fst_surjective : function.surjective (fst r' Λ M N n c₁ c₂ h) :=
-sorry
-
-end aux_space
-
-lemma weak_bounded_exact (k K : ℝ≥0) [fact (1 ≤ k)] (m : ℕ) (c₀ : ℝ≥0) :
-  (FLC_complex r' V Λ M N n).is_weak_bounded_exact k K m c₀ :=
-begin
-  intros c hc i hi x ε hε,
-  sorry
-end
-
-end FLC_complex
 
 section
 open PolyhedralLattice

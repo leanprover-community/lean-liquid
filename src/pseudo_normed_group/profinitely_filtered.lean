@@ -140,6 +140,20 @@ def mk_of_bound (f : M₁ →+ M₂) (C : ℝ≥0)
   end,
   .. f }
 
+  /-- Make a profinitely filtered pseudo-normed group hom
+from a group hom and a proof that it is bounded and continuous. -/
+def mk_of_strict (f : M₁ →+ M₂)
+  (h : ∀ c, ∃ (H : ∀ x, x ∈ filtration M₁ c → f x ∈ filtration M₂ c),
+    @continuous (filtration M₁ c) (filtration M₂ c) _ _ (λ x, ⟨f x, H x x.2⟩)) :
+  profinitely_filtered_pseudo_normed_group_hom M₁ M₂ :=
+mk_of_bound f 1 $ λ c,
+begin
+  obtain ⟨w, H⟩ := h c,
+  refine ⟨_, _⟩,
+  { simpa only [one_mul] },
+  { rwa (embedding_cast_le (1 * c) c).continuous_iff, }
+end
+
 /-- Make a profinitely filtered pseudo-normed group hom
 from a group hom and a proof that it is bounded and continuous. -/
 noncomputable
@@ -152,11 +166,29 @@ mk_of_bound f h.some h.some_spec
 
 @[simp] lemma coe_mk' (f : M₁ →+ M₂) (h) : ⇑(mk' f h) = f := rfl
 
+def strict : Prop := ∀ ⦃c x⦄, x ∈ filtration M₁ c → f x ∈ filtration M₂ c
+
 def bound_by (C : ℝ≥0) : Prop := ∀ ⦃c x⦄, x ∈ filtration M₁ c → f x ∈ filtration M₂ (C * c)
+
+lemma strict_iff_bound_by_one : f.strict ↔ f.bound_by 1 :=
+by simp only [strict, bound_by, one_mul]
+
+variables {f}
+
+lemma strict.bound_by_one (hf : f.strict) : f.bound_by 1 :=
+f.strict_iff_bound_by_one.1 hf
+
+lemma bound_by.strict (hf : f.bound_by 1) : f.strict :=
+f.strict_iff_bound_by_one.2 hf
+
+variables (f)
 
 lemma bound : ∃ C, f.bound_by C := f.bound'
 
 lemma mk_of_bound_bound_by (f : M₁ →+ M₂) (C) (h) : (mk_of_bound f C h).bound_by C :=
+λ c, (h c).some
+
+lemma mk_of_strict_strict (f : M₁ →+ M₂) (h) : (mk_of_strict f h).strict :=
 λ c, (h c).some
 
 protected lemma continuous ⦃c₁ c₂⦄ (f₀ : filtration M₁ c₁ → filtration M₂ c₂) (h : ∀ x, f ↑x = f₀ x) :

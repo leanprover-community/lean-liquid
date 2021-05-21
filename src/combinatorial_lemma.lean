@@ -337,34 +337,61 @@ begin
       Mbar.mk_of_add_monoid_hom_to_fun, mul_zero,
       if_congr, and_congr, eq_self_iff_true, if_false, false_and] },
 end
+.
 
-lemma lem98 (Λ : Type*) [polyhedral_lattice Λ]
-  [fact (r' < 1)] (N : ℕ) (hN : 0 < N) :
-  ∃ d, ∀ (S : Type*) [fintype S],
-    ​∀ c (x : Λ →+ Mbar r' S) (hx : x ∈ filtration (Λ →+ Mbar r' S) c),
-    ∃ y : fin N → (Λ →+ Mbar r' S),
-      (x = ∑ i, y i) ∧
-      (∀ i, y i ∈ filtration (Λ →+ Mbar r' S) (c/N + d)) :=
+namespace lem98
+
+def ι (Λ : Type*) [polyhedral_lattice Λ] : Type :=
+(polyhedral_lattice.polyhedral Λ).some
+
+instance : fintype (ι Λ) := (polyhedral_lattice.polyhedral Λ).some_spec.some
+
+variables (Λ)
+
+def l : ι Λ → Λ := (polyhedral_lattice.polyhedral Λ).some_spec.some_spec.some
+
+lemma hl : generates_norm (l Λ) :=
+by convert (polyhedral_lattice.polyhedral Λ).some_spec.some_spec.some_spec.1
+
+lemma hl' : ∀ i, l Λ i ≠ 0 :=
+(polyhedral_lattice.polyhedral Λ).some_spec.some_spec.some_spec.2
+
+def A (N : ℕ) [hN : fact (0 < N)] :=
+(lem97' (polyhedral_lattice.finite_free Λ) N hN.1 (l Λ)).some
+
+lemma hA (N : ℕ) [hN : fact (0 < N)] (x : Λ →+ ℤ) :
+  ∃ x' (H : x' ∈ A Λ N) y, x = N • y + x' ∧
+    ∀ i, (x (l Λ i)).nat_abs = N * (y (l Λ i)).nat_abs + (x' (l Λ i)).nat_abs :=
+(lem97' (polyhedral_lattice.finite_free Λ) N hN.1 (l Λ)).some_spec x
+
+def d  (N : ℕ) [hN : fact (0 < N)] : ℝ≥0 :=
+finset.univ.sup (λ i, ∑ a in A Λ N, nnnorm (a (l Λ i)) / nnnorm (l Λ i))
+
+end lem98
+
+lemma lem98 [fact (r' < 1)] (Λ : Type*) [polyhedral_lattice Λ] (S : Type*) [fintype S]
+  (N : ℕ) [hN : fact (0 < N)] :
+  pseudo_normed_group.splittable (Λ →+ Mbar r' S) N (lem98.d Λ N) :=
 begin
-  classical,
-  obtain ⟨ι, _ftι, l, hl, hl'⟩ := polyhedral_lattice.polyhedral Λ, resetI,
-  -- the next 4 lines are quite unfortunate, and it would be great to get rid of them
-  have ffΛ := polyhedral_lattice.finite_free Λ,
-  obtain ⟨A, hA⟩ := lem97' ffΛ N hN l,
-  let d : ℝ≥0 := finset.univ.sup (λ i, ∑ a in A, nnnorm (a (l i)) / nnnorm (l i)),
-  use d,
-  introsI S hS c x hx,
+  classical, constructor,
+  let l := lem98.l Λ,
+  have hl := lem98.hl Λ,
+  have hl' := lem98.hl' Λ,
+  let A := lem98.A Λ N,
+  have hA := lem98.hA Λ N,
+  let d := lem98.d Λ N,
+  intros c x hx,
   -- `x` is a homomorphism `Λ →+ Mbar r' S`
   -- we split it into pieces `Λ →+ ℤ` for all coefficients indexed by `s` and `n`
   let x' : S → ℕ → Λ →+ ℤ := λ s n, (Mbar.coeff s n).comp x,
   have := λ s n, hA (x' s n), clear hA,
   choose x₁' hx₁' x₀' hx₀' H using this,
   have hx₀_aux : ∀ s n i, (x₀' s n (l i)).nat_abs ≤ (x (l i) s n).nat_abs :=
-    (λ s n i, le_trans (le_add_right (nat.le_mul_of_pos_left hN)) (H s n i).ge),
+    (λ s n i, le_trans (le_add_right (nat.le_mul_of_pos_left hN.1)) (H s n i).ge),
   -- now we assemble `x₀' : S → ℕ → Λ →+ ℤ` into a homomorphism `Λ →+ Mbar r' S`
   let x₀ : Λ →+ Mbar r' S := Mbar.mk_aux hl x x₀' hx₀_aux,
   have hx₀ : x₀ ∈ filtration (Λ →+ Mbar r' S) (c / N) :=
-    Mbar.mk_aux_mem_filtration _ _ _ hN hl hx x₀' x₁' x' (λ _ _ _, rfl) H hx₀_aux,
+    Mbar.mk_aux_mem_filtration _ _ _ hN.1 hl hx x₀' x₁' x' (λ _ _ _, rfl) H hx₀_aux,
   -- and similarly for `x₁'`
   let x₁ : Λ →+ Mbar r' S := Mbar.mk_aux hl x x₁'
     (λ s n i, le_trans (le_add_left le_rfl) (H s n i).ge),
@@ -376,7 +403,7 @@ begin
   -- we first decompose the `xₐ a` into `N` pieces
   have hxₐ : ∀ a s n, (xₐ a s n).nat_abs ≤ 1,
   { intros a s n, dsimp [xₐ, Mbar.mk_of_add_monoid_hom_to_fun], split_ifs; simp },
-  have := λ a, lem98_int N hN ∥xₐ a∥₊ (xₐ a) _ (hxₐ a),
+  have := λ a, lem98_int N hN.1 ∥xₐ a∥₊ (xₐ a) _ (hxₐ a),
   swap 2, { rw Mbar.mem_filtration_iff },
   choose y' hy'1 hy'2 using this,
   -- the candidate `y` combines `x₀` together with the pieces `y'` of `xₐ a`
@@ -391,7 +418,7 @@ begin
   specialize hx i,
   simp only [Mbar.mem_filtration_iff] at hx hy'2 ⊢,
   have Hx : ∥x (l i)∥₊ = N • ∥x₀ (l i)∥₊ + ∑ a in A, nnnorm (a (l i)) * ∥xₐ a∥₊,
-  { apply lem98_crux hl N hN A x x₀ x₁ x' x₀' x₁' xₐ,
+  { apply lem98_crux hl N hN.1 A x x₀ x₁ x' x₀' x₁' xₐ,
     all_goals { intros, refl <|> apply_assumption } },
   calc ∥y j (l i)∥₊
       ≤ ∥x₀ (l i)∥₊ + ∑ a in A, nnnorm (a (l i)) * ∥xₐ a∥₊ / N + d * nnnorm (l i) : _
@@ -421,7 +448,7 @@ begin
   { simp only [div_eq_mul_inv, add_mul, finset.sum_mul, nsmul_eq_mul],
     congr' 2,
     rw [mul_comm, inv_mul_cancel_left'],
-    exact_mod_cast hN.ne' },
+    exact_mod_cast hN.1.ne' },
   { simp only [add_mul, div_eq_mul_inv],
     refine add_le_add _ le_rfl,
     rw [mul_right_comm],

@@ -1,5 +1,6 @@
 import thm95.double_complex
 import rescale.Tinv
+import pseudo_normed_group.sum_hom
 
 universe variables u
 
@@ -239,28 +240,10 @@ by { intros c x hx, rw [rescale.mem_filtration, mul_comm] at hx, exact hx i }
 def Hom_sum :
   ProFiltPseuNormGrpWithTinv.of r' (rescale N ((Λ →+ M) ^ N)) ⟶
   ProFiltPseuNormGrpWithTinv.of r' (Λ →+ M) :=
-profinitely_filtered_pseudo_normed_group_with_Tinv_hom.mk'
-  (∑ i, rescale_proj N _ i)
-  (begin
-    have := profinitely_filtered_pseudo_normed_group_hom.sum_bound_by finset.univ
-      (rescale_proj N (Λ →+ M)) (λ i, N⁻¹) (λ i _, rescale_proj_bound_by N (Λ →+ M) i),
-    dsimp at this,
-    simp only [finset.sum_const, finset.card_univ, fintype.card_fin, nsmul_eq_mul] at this,
-    rwa [mul_inv_cancel] at this,
-    apply ne_of_gt,
-    norm_cast,
-    exact fact.out _
-  end)
-  (λ x, by { simp only [profinitely_filtered_pseudo_normed_group_hom.sum_apply,
-    profinitely_filtered_pseudo_normed_group_hom.map_sum], refl })
-.
+profinitely_filtered_pseudo_normed_group_with_Tinv.sum_hom (Λ →+ M) N
 
 lemma Hom_sum_apply (x) : Hom_sum Λ N r' M x = ∑ i, x i :=
-begin
-  dsimp only [Hom_sum, profinitely_filtered_pseudo_normed_group_with_Tinv_hom.mk'_apply],
-  rw [profinitely_filtered_pseudo_normed_group_hom.sum_apply],
-  refl
-end
+profinitely_filtered_pseudo_normed_group_with_Tinv.sum_hom_apply _ _ _
 
 lemma finsupp_sum_diagonal_embedding (f : (Λ →+ M) ^ N) (l : Λ) :
   finsupp.sum ((Λ.diagonal_embedding N) l) (λ i, (f i)) =

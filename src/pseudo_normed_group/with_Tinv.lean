@@ -231,6 +231,7 @@ end punit
 
 namespace profinitely_filtered_pseudo_normed_group_with_Tinv
 
+section
 /-! ## Powers -/
 
 noncomputable theory
@@ -286,5 +287,6 @@ def pi_map (f : Π i, profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' 
   profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' (Π i, M₁ i) (Π i, M₂ i) :=
 pi_lift r' _ $ λ i, (f i).comp (pi_proj r' _ i)
 
+end
 
 end profinitely_filtered_pseudo_normed_group_with_Tinv

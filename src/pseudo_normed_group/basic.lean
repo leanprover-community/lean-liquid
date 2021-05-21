@@ -362,7 +362,7 @@ class splittable (M : Type*) [pseudo_normed_group M] (N : ℕ) (d : ℝ≥0) :=
 variables {M : Type*} [pseudo_normed_group M] (N : ℕ) (d : ℝ≥0) [splittable M N d]
 
 lemma exists_sum (c : ℝ≥0) (x : M) (hx : x ∈ filtration M c) :
-  ∃ y : fin N → M, (x = ∑ i, y i) ∧ (∀ i, y i ∈ filtration M (c/N + d)) :=
+  ∃ y : fin N → M, (x = ∑ i, y i) ∧ (y ∈ filtration (M^N) (c/N + d)) :=
 splittable.exists_sum c x hx
 
 instance splittable_pi {ι : Type*} (M : ι → Type*) [Π i, pseudo_normed_group (M i)]
