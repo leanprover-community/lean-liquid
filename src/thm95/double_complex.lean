@@ -49,6 +49,7 @@ def augmentation_map :
   (cosimplicial_system_of_complexes BD c_ r r' V Λ M N).obj (mk 0) :=
 (BD.system c_ r V r').map (Cech_augmentation_map r' Λ M N)
 
+@[simps X d]
 def double_complex_aux : cochain_complex system_of_complexes ℕ :=
 alt_face_map_cocomplex (augmentation_map BD c_ r r' V Λ M N)
 begin
@@ -58,7 +59,9 @@ begin
   simp only [← (BD.system c_ r V r').map_comp, ← (Hom M).map_comp],
   rw augmentation_map_equalizes (diagonal_embedding Λ N),
 end
+.
 
+@[simps obj map]
 def double_complex' : system_of_double_complexes :=
 (double_complex_aux BD c_ r r' V Λ M N).as_functor
 
@@ -76,11 +79,13 @@ open_locale nat
 -- but before we do this, we need to rescale the norms in all the rows,
 -- so that the vertical differentials become norm-nonincreasing
 
+@[simps X d]
 def double_complex_aux_rescaled : cochain_complex system_of_complexes ℕ :=
 (double_complex_aux BD c_ r r' V Λ M N ).modify
   system_of_complexes.rescale_functor
   system_of_complexes.rescale_nat_trans
 
+@[simps obj map]
 def double_complex : system_of_double_complexes :=
 (double_complex_aux_rescaled BD c_ r r' V Λ M N).as_functor
 

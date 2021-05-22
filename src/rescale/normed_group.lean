@@ -144,4 +144,11 @@ def scale : rescale r₁ ⟶ rescale r₂ :=
 lemma scale_bound_by (V : SemiNormedGroup) : ((scale r₁ r₂).app V).bound_by (r₁ / r₂) :=
 normed_group_hom.mk_normed_group_hom'_bound_by _ _ _
 
+lemma scale_comm {V₁ V₂ W₁ W₂ : SemiNormedGroup}
+  (f₁ : V₁ ⟶ W₁) (f₂ : V₂ ⟶ W₂) (φ : V₁ ⟶ V₂) (ψ : W₁ ⟶ W₂) (h : f₁ ≫ ψ = φ ≫ f₂) :
+  (rescale r₁).map f₁ ≫ ((rescale r₁).map ψ ≫ (scale r₁ r₂).app W₂) =
+  ((rescale r₁).map φ ≫ (scale r₁ r₂).app V₂) ≫ (rescale r₂).map f₂ :=
+by rw [← category.assoc, ← category_theory.functor.map_comp, nat_trans.naturality,
+    nat_trans.naturality, category.assoc, ← category_theory.functor.map_comp, h]
+
 end SemiNormedGroup

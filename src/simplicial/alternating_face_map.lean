@@ -111,6 +111,7 @@ variables {X M}
 
 -- TODO use `cochain_complex.of`, after #7643 lands
 /-- The cochain complex of an augmented cosimplicial object in a preadditive category -/
+-- @[simps X d]
 def alt_face_map_cocomplex (hf : f ≫ M.map (δ 0) = f ≫ M.map (δ 1)) :
   cochain_complex C ℕ :=
 cochain_complex.of

@@ -200,6 +200,7 @@ def to_rescale' (r : ℝ≥0) [fact (0 < r)] :
     naturality' := by { intros c₁ c₂ h, dsimp, ext i : 2, refl } },
   naturality' := λ C₁ C₂ f, by { ext, refl } }
 
+@[simps app]
 def scale' (i j : ℝ≥0) [fact (0 < i)] [fact (0 < j)] :
   ((whiskering_right ℝ≥0ᵒᵖ _ _).obj (SemiNormedGroup.rescale i)) ⟶
   ((whiskering_right ℝ≥0ᵒᵖ _ _).obj (SemiNormedGroup.rescale j)) :=
