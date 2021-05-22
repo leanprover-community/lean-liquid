@@ -21,8 +21,8 @@ namespace system_of_complexes
 variables (C : system_of_complexes)
 
 def norm_exact_complex (D : cochain_complex SemiNormedGroup ℕ) : Prop :=
-∀ (m : ℕ) (ε : ℝ≥0) (hε : 0 < ε) (x : D.X (m+1)) (hx : D.d _ (m+2) x = 0),
-  ∃ y : D.X m, D.d _ _ y = x ∧ nnnorm y ≤ (1 + ε) * nnnorm x
+∀ (m : ℕ) (ε : ℝ≥0) (hε : 0 < ε) (x : D.X m) (hx : D.d _ (m+1) x = 0),
+  ∃ y : D.X (m-1), D.d _ _ y = x ∧ nnnorm y ≤ (1 + ε) * nnnorm x
 
 lemma weak_exact_of_factor_exact (k : ℝ≥0) [fact (1 ≤ k)] (m : ℕ) (c₀ : ℝ≥0)
   (D : ℝ≥0 → cochain_complex SemiNormedGroup ℕ)
@@ -35,34 +35,34 @@ lemma weak_exact_of_factor_exact (k : ℝ≥0) [fact (1 ≤ k)] (m : ℕ) (c₀ 
   C.is_weak_bounded_exact k 1 m c₀ :=
 begin
   intros c hc i hi x ε' hε',
-  cases i, { sorry },
-  let dx := C.d _ (i+2) x,
+  let dx := C.d _ (i+1) x,
+  let fx := (f _).f _ x,
+  let fdx := (f c).f _ dx,
+  let dfx := (D _).d _ (i+1) fx,
+  have fdx_dfx : fdx = dfx,
+  { simp only [fdx, dfx, fx, ← comp_apply], congr' 1, exact ((f _).comm _ _).symm },
+  have hfdx : (D _).d _ (i+2) fdx = 0,
+  { calc (D _).d _ (i+2) fdx = (D _).d _ (i+2) ((D _).d _ (i+1) (fx)) : congr_arg _ fdx_dfx
+    ... = ((D _).d _ (i+1) ≫ (D _).d _ (i+2)) (fx) : rfl
+    ... = 0 : by { rw (D c).d_comp_d _ _ _, refl } },
   let ε : ℝ≥0 := ⟨ε', hε'.le⟩,
   have hε : 0 < ε := hε',
   let δ : ℝ≥0 := ε / (nnnorm dx + 1),
   have hδ : 0 < δ,
   { rw [← nnreal.coe_lt_coe],
     exact div_pos hε (lt_of_le_of_lt (nnreal.coe_nonneg _) (lt_add_one _)), },
-  let fx := (f _).f _ x,
-  let fdx := (f c).f _ dx,
-  let dfx := (D _).d _ (i+2) fx,
-  have fdx_dfx : fdx = dfx,
-  { simp only [fdx, dfx, fx, ← comp_apply], congr' 1, exact ((f _).comm _ _).symm },
-  have hfdx : (D _).d _ (i+3) fdx = 0,
-  { calc (D _).d _ (i+3) fdx = (D _).d _ (i+3) ((D _).d _ (i+2) (fx)) : congr_arg _ fdx_dfx
-    ... = ((D _).d _ (i+2) ≫ (D _).d _ (i+3)) (fx) : rfl
-    ... = 0 : by { rw (D c).d_comp_d _ _ _, refl } },
-  obtain ⟨x', hdx', hnorm_x'⟩ := hD _ hc.1 _ δ hδ _ hfdx,
-  have hdfxx' : (D _).d _ (i+2) (fx - x') = 0,
+  obtain ⟨(x' : (D c).X i), (hdx' : (D c).d i (i+1) x' = fdx), hnorm_x'⟩ :=
+    (hD _ hc.1) _ δ hδ _ hfdx,
+  let gx' := (g _).f _ x',
+  have hdfxx' : (D _).d _ (i+1) (fx - x') = 0,
   { rw [normed_group_hom.map_sub, hdx', fdx_dfx], exact sub_self _ },
-  obtain ⟨y, hdy, -⟩ := hD _ hc.1 _ δ hδ _ hdfxx',
+  obtain ⟨y, hdy, -⟩ := (hD _ hc.1) _ δ hδ _ hdfxx',
   let gy := (g _).f _ y,
-  let dgy := C.d _ (i+1) gy,
-  let gdy := (g _).f _ ((D _).d _ (i+1) y),
+  let dgy := C.d _ i gy,
+  let gdy := (g _).f _ ((D _).d _ i y),
   have gdy_dgy : gdy = dgy,
   { simp only [gdy, dgy, gy, ← comp_apply], congr' 1, exact ((g _).comm _ _).symm },
-  let gx' := (g _).f _ x',
-  refine ⟨i, i+2, rfl, rfl, gy, _⟩,
+  refine ⟨i-1, i+1, rfl, rfl, gy, _⟩,
   simp only [nnreal.coe_one, one_mul],
   have hxdgy : res x - C.d _ _ gy = gx',
   { calc res x - dgy
@@ -245,7 +245,13 @@ begin
   let g := λ c, (FLC_functor V).map (sum_homₐ_fstₐ M N c (k * c)).op,
   refine system_of_complexes.weak_exact_of_factor_exact _ k m c₀ D _ f g _ _ _,
   { intros c hc,
-    apply prop819,
+    suffices : function.surjective ((unop (op (fstₐ (sum_hom M N) _ c (k * c)))).hom),
+    { intros i ε hε x hx, cases i,
+      { simp only [nat.one_ne_zero, homological_complex.shape, complex_shape.up_rel,
+          exists_and_distrib_left, not_false_iff, normed_group_hom.zero_apply],
+        refine ⟨(prop819_degree_zero _ this _ x hx).symm, 0, _⟩,
+        simp only [nnnorm_zero, zero_le'] },
+      exact prop819 _ this _ ε hε x hx },
     refine fst_surjective M N d c (k * c) _,
     calc c / N + d
         ≤ c / N + (k - 1) * c₀ / N : add_le_add le_rfl hdkc₀N
