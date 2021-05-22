@@ -41,6 +41,25 @@ simplicial_object.augmented_cech_nerve.op ⋙
   (cosimplicial_object.augmented.whiskering _ _).obj (LCC.{u u}.obj M) ⋙
   cosimplicial_object.augmented.cocomplex
 
+lemma _root_.cosimplicial_object.augmented.cocomplex_map_norm_noninc
+  {C₁ C₂ : cosimplicial_object.augmented SemiNormedGroup} (f : C₁ ⟶ C₂)
+  (hf1 : f.left.norm_noninc) (hf2 : ∀ n, (f.right.app n).norm_noninc) (i : ℕ) :
+  ((cosimplicial_object.augmented.cocomplex.map f).f i).norm_noninc :=
+begin
+  cases i,
+  { exact hf1 },
+  { exact hf2 _ },
+end
+
+lemma FLC_functor_map_norm_noninc {f g : (arrow Profinite.{u})ᵒᵖ} (α : f ⟶ g) (i : ℕ) :
+  (((FLC_functor M).map α).f i).norm_noninc :=
+begin
+  refine cosimplicial_object.augmented.cocomplex_map_norm_noninc _ _ _ _,
+  { exact SemiNormedGroup.LCC_obj_map_norm_noninc _ _ },
+  { intro n,
+    exact SemiNormedGroup.LCC_obj_map_norm_noninc _ _ },
+end
+
 --⊢ cosimplicial_object.δ
 --      (functor.right_op F.cech_nerve ⋙ (curry.obj (uncurry.obj LocallyConstant ⋙ Completion)).obj M)
 --      k =

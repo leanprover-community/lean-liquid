@@ -43,23 +43,38 @@ begin
   have hδ : 0 < δ,
   { rw [← nnreal.coe_lt_coe],
     exact div_pos hε (lt_of_le_of_lt (nnreal.coe_nonneg _) (lt_add_one _)), },
-  let fdx := (f c).f _ dx,
-  have hfdx : (D _).d _ (i+3) fdx = 0, { sorry },
-  obtain ⟨x', hx'1, hx'2⟩ := hD _ hc.1 _ δ hδ _ hfdx,
   let fx := (f _).f _ x,
-  have hdfxx' : (D _).d _ (i+2) (fx - x') = 0, { sorry },
-  obtain ⟨y, hy1, hy2⟩ := hD _ hc.1 _ δ hδ _ hdfxx',
+  let fdx := (f c).f _ dx,
+  let dfx := (D _).d _ (i+2) fx,
+  have fdx_dfx : fdx = dfx,
+  { simp only [fdx, dfx, fx, ← comp_apply], congr' 1, exact ((f _).comm _ _).symm },
+  have hfdx : (D _).d _ (i+3) fdx = 0,
+  { calc (D _).d _ (i+3) fdx = (D _).d _ (i+3) ((D _).d _ (i+2) (fx)) : congr_arg _ fdx_dfx
+    ... = ((D _).d _ (i+2) ≫ (D _).d _ (i+3)) (fx) : rfl
+    ... = 0 : by { rw (D c).d_comp_d _ _ _, refl } },
+  obtain ⟨x', hdx', hnorm_x'⟩ := hD _ hc.1 _ δ hδ _ hfdx,
+  have hdfxx' : (D _).d _ (i+2) (fx - x') = 0,
+  { rw [normed_group_hom.map_sub, hdx', fdx_dfx], exact sub_self _ },
+  obtain ⟨y, hdy, -⟩ := hD _ hc.1 _ δ hδ _ hdfxx',
   let gy := (g _).f _ y,
+  let dgy := C.d _ (i+1) gy,
+  let gdy := (g _).f _ ((D _).d _ (i+1) y),
+  have gdy_dgy : gdy = dgy,
+  { simp only [gdy, dgy, gy, ← comp_apply], congr' 1, exact ((g _).comm _ _).symm },
   let gx' := (g _).f _ x',
   refine ⟨i, i+2, rfl, rfl, gy, _⟩,
   simp only [nnreal.coe_one, one_mul],
-  have hxdgy : res x - C.d _ _ gy = gx', { sorry },
+  have hxdgy : res x - C.d _ _ gy = gx',
+  { calc res x - dgy
+        = (g _).f _ ((f _).f _ x) - gdy : _
+    ... = gx' : by rw [← normed_group_hom.map_sub, hdy, sub_sub_cancel],
+    rw [gdy_dgy, ← comp_apply, ← homological_complex.comp_f, hfg _ hc.1], refl },
   rw hxdgy,
   change (nnnorm gx' : ℝ) ≤ (nnnorm dx) + ε,
   simp only [← nnreal.coe_add, nnreal.coe_le_coe],
   calc nnnorm gx'
       ≤ nnnorm x' : hg _ _ _
-  ... ≤ (1 + δ) * nnnorm fdx : hx'2
+  ... ≤ (1 + δ) * nnnorm fdx : hnorm_x'
   ... ≤ (1 + δ) * nnnorm dx : mul_le_mul' le_rfl (hf _ _ _)
   ... ≤ nnnorm dx + δ * nnnorm dx : by rw [add_mul, one_mul]
   ... ≤ nnnorm dx + ε * 1 : add_le_add le_rfl _
@@ -242,8 +257,8 @@ begin
     { simp only [div_eq_mul_inv, mul_assoc],
       rw ← add_mul, congr,
       rw [← nnreal.eq_iff, nnreal.coe_add, nnreal.coe_sub hk.1, add_sub_cancel'_right], } },
-  { sorry },
-  { sorry },
+  { intros c i, exact FLC_functor_map_norm_noninc _ _ _ },
+  { intros c i, exact FLC_functor_map_norm_noninc _ _ _ },
   { intros c hc,
     dsimp only [f, g, FLC_complex_map],
     rw [← category_theory.functor.map_comp, ← op_comp],

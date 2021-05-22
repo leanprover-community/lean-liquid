@@ -281,6 +281,13 @@ lemma LCC_obj_map (V : SemiNormedGroup) {X Y : Profiniteᵒᵖ} (f : Y ⟶ X) (v
   (LCC.obj V).map f v = completion.map (locally_constant.comap f.unop) v :=
 by { rw LCC_obj_map', refl }
 
+lemma LCC_obj_map_norm_noninc (V : SemiNormedGroup) {X Y : Profiniteᵒᵖ} (f : Y ⟶ X) :
+  ((LCC.obj V).map f).norm_noninc :=
+begin
+  rw LCC_obj_map',
+  exact (Completion_map_norm_noninc _ $ LocallyConstant_obj_map_norm_noninc _ _ _ _)
+end
+
 variables (S : Type*) [topological_space S] [compact_space S]
 
 @[simps]
