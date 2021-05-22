@@ -6,6 +6,7 @@ import for_mathlib.homological_complex
 
 import locally_constant.Vhat
 import prop819.completion
+import prop819.locally_constant
 
 open_locale nnreal
 
@@ -35,11 +36,21 @@ abbreviation FLC : cochain_complex SemiNormedGroup ℕ :=
 --    right := nat_trans.right_op (comma_morphism.left f.unop),
 --    w' := by { ext, exact congr_arg (λ η, (nat_trans.app η (op x)).op) f.unop.w.symm, } } }
 
+def FL_functor : (arrow Profinite.{u})ᵒᵖ ⥤ cochain_complex SemiNormedGroup ℕ :=
+simplicial_object.augmented_cech_nerve.op ⋙
+simplicial_to_cosimplicial_augmented _ ⋙
+(cosimplicial_object.augmented.whiskering _ _).obj (LocallyConstant.obj M) ⋙
+cosimplicial_object.augmented.cocomplex
+
 def FLC_functor : (arrow Profinite.{u})ᵒᵖ ⥤ cochain_complex SemiNormedGroup ℕ :=
 simplicial_object.augmented_cech_nerve.op ⋙
   simplicial_to_cosimplicial_augmented _ ⋙
   (cosimplicial_object.augmented.whiskering _ _).obj (LCC.{u u}.obj M) ⋙
   cosimplicial_object.augmented.cocomplex
+
+-- Sanity checks
+example : FL F M = (FL_functor M).obj (op F) := rfl
+example : FLC F M = (FLC_functor M).obj (op F) := rfl
 
 lemma _root_.cosimplicial_object.augmented.cocomplex_map_norm_noninc
   {C₁ C₂ : cosimplicial_object.augmented SemiNormedGroup} (f : C₁ ⟶ C₂)
@@ -215,6 +226,63 @@ begin
     apply prop819_zero_norm_le _ surj },
   { exact hf }
 end
+.
+
+def FLF : (discrete_quotient F.left)ᵒᵖ ⥤ cochain_complex SemiNormedGroup ℕ :=
+(Profinite.arrow_diagram F surj).op ⋙ FL_functor M
+
+def FLF_cocone : limits.cocone (FLF F surj M) :=
+(FL_functor M).map_cocone $ (Profinite.arrow_cone F surj).op
+
+lemma exists_locally_constant (n : ℕ) (f : (FL F M).X n) :
+  ∃ (S : discrete_quotient F.left) (g : ((FLF F surj M).obj (op S)).X n),
+  ((FLF_cocone F surj M).ι.app (op S)).f _ g = f := sorry
+
+lemma locally_constant_eq_zero (n : ℕ)
+  (S : discrete_quotient F.left) (g : ((FLF F surj M).obj (op S)).X n)
+  (hg : ((FLF_cocone F surj M).ι.app (op S)).f _ g = 0) :
+  ∃ (T : discrete_quotient F.left) (hT : T ≤ S),
+  ((FLF F surj M).map (hom_of_le hT).op).f _ g = 0 := sorry
+
+-- Is this true?
+@[simp]
+lemma nnnorm_eq (n : ℕ) (S : discrete_quotient F.left)
+  (f : ((FLF F surj M).obj (op S)).X n) :
+  nnnorm (((FLF_cocone F surj M).ι.app (op S)).f _ f) = nnnorm f := sorry
+
+theorem prop819_reduce_to_finite (n : ℕ) (S : discrete_quotient F.left)
+  (f : ((FLF F surj M).obj (op S)).X (n+1))
+  (hf : ((FLF F surj M).obj (op S)).d (n+1) (n+2) f = 0)
+  (cond : ∃ g : ((FLF F surj M).obj (op S)).X n,
+    ((FLF F surj M).obj (op S)).d _ _ g = f ∧ nnnorm g ≤ nnnorm f) :
+  ∃ g : (FL F M).X n, (FL F M).d _ (n+1) g =
+    ((FLF_cocone F surj M).ι.app (op S)).f _ f ∧
+    nnnorm g ≤ nnnorm (((FLF_cocone F surj M).ι.app (op S)).f _ f) :=
+begin
+  rcases cond with ⟨gg,hgg1,hgg2⟩,
+  let g := ((FLF_cocone F surj M).ι.app (op S)).f _ gg,
+  refine ⟨g,_,_⟩,
+  { dsimp only [g],
+    have := ((FLF_cocone F surj M).ι.app (op S)).comm n (n+1),
+    apply_fun (λ e, e gg) at this,
+    erw this,
+    rw ← hgg1,
+    refl },
+  { dsimp [g],
+    simpa }
+end
+
+lemma contracting_homotopy_norm_noninc (n : ℕ) (S : discrete_quotient F.left)
+  (f : ((FLF F surj M).obj (op S)).X (n+1)) :
+  nnnorm ((((Profinite.arrow_diagram F surj).obj S).contracting_homotopy
+    (LocallyConstant.{u u}.obj M)) _ f)
+  ≤ nnnorm f :=
+begin
+  cases n,
+  dsimp only [arrow.contracting_homotopy],
+  apply LocallyConstant_obj_map_norm_noninc,
+  apply LocallyConstant_obj_map_norm_noninc,
+end
 
 theorem prop819 {m : ℕ} (ε : ℝ≥0) (hε : 0 < ε)
   (f : (FLC F M).X (m+1)) (hf : (FLC F M).d (m+1) (m+2) f = 0) :
@@ -225,5 +293,56 @@ begin
   clear hf f m hε ε,
   intros n f hf,
   -- We've reduced to the non-completed case.
-  sorry,
+  have := exists_locally_constant F surj M (n+1) f,
+  rcases this with ⟨S,f,rfl⟩,
+  have := ((FLF_cocone F surj M).ι.app (op S)).comm (n+1) (n+2),
+  apply_fun (λ e, e f) at this,
+  erw this at hf,
+  clear this,
+  have := locally_constant_eq_zero F surj M (n+2) S _ hf,
+  rcases this with ⟨T,hT,hh⟩,
+  let ff := ((FLF F surj M).map (hom_of_le hT).op).f _ f,
+  have hff : ((FLF F surj M).obj (op T)).d _ (n+2) ff = 0,
+  { dsimp [ff],
+    have := ((FLF F surj M).map (hom_of_le hT).op).comm (n+1) (n+2),
+    apply_fun (λ e, e f) at this,
+    erw this,
+    exact hh },
+  clear hh hf,
+  have := (FLF_cocone F surj M).w (hom_of_le hT).op,
+  apply_fun (λ e, e.f (n+1) f) at this,
+  erw ← this,
+  clear this,
+  apply prop819_reduce_to_finite,
+  exact hff,
+  let gg := arrow.contracting_homotopy (LocallyConstant.{u u}.obj M)
+    ((Profinite.arrow_diagram.{u} F surj).obj T) n ff,
+  refine ⟨gg,_,_⟩,
+  change _ = ff,
+  cases n,
+  { have := arrow.is_contracting_homotopy_one (LocallyConstant.{u u}.obj M)
+      ((Profinite.arrow_diagram F surj).obj T),
+    apply_fun (λ e, e ff) at this,
+    let CC := arrow.contracting_homotopy (LocallyConstant.{u u}.obj M)
+      ((Profinite.arrow_diagram F surj).obj T),
+    change ((FLF F surj M).obj (op T)).d _ _ (CC 0 ff) = ff,
+    change CC 1 _ + _ = ff at this,
+    erw hff at this,
+    rw [normed_group_hom.map_zero, zero_add] at this,
+    exact this },
+  { have := arrow.is_contracting_homotopy (LocallyConstant.{u u}.obj M)
+      ((Profinite.arrow_diagram F surj).obj T) n,
+    apply_fun (λ e, e ff) at this,
+    let CC := arrow.contracting_homotopy (LocallyConstant.{u u}.obj M)
+      ((Profinite.arrow_diagram F surj).obj T),
+    change ((FLF F surj M).obj (op T)).d _ _ (CC _ ff) = ff,
+    change CC _ _ + _ = ff at this,
+    erw hff at this,
+    rw [normed_group_hom.map_zero, zero_add] at this,
+    exact this },
+  change nnnorm gg ≤ nnnorm ff,
+  let CC := arrow.contracting_homotopy (LocallyConstant.{u u}.obj M)
+    ((Profinite.arrow_diagram F surj).obj T),
+  change nnnorm (CC _ ff) ≤ nnnorm ff,
+  apply contracting_homotopy_norm_noninc,
 end

@@ -13,6 +13,8 @@ variables (n : ℕ) (F : arrow Profinite.{u}) (M : SemiNormedGroup.{u}) (surj : 
 
 open SemiNormedGroup opposite Profinite
 
+-- This has moved.
+/-
 /-- The functor sending a discrete quotient of F.left to the
 n-fold fibered product of the quotient of F induced by the quotient.
 -/
@@ -42,3 +44,4 @@ lemma locally_constant_eq_zero (S : discrete_quotient F.left)
   (cond : (LocallyConstant.obj M).map ((FPR_cone n F surj).π.app S).op f = 0) :
   ∃ (T : discrete_quotient F.left) (h : T ≤ S),
     (LocallyConstant.obj M).map ((FPR n F surj).map $ hom_of_le h).op f = 0 := sorry
+-/

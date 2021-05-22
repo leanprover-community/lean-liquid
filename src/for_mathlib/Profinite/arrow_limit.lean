@@ -1,4 +1,5 @@
 import for_mathlib.Profinite.compat_discrete_quotient
+import for_mathlib.Cech.split
 
 noncomputable theory
 
@@ -17,6 +18,23 @@ def arrow_diagram : discrete_quotient F.left ⥤ arrow Profinite :=
   map := λ S T f,
   { left := ⟨of_le $ le_of_hom f⟩,
     right := ⟨of_le $ make_right_mono surj S T $ le_of_hom f⟩ } }.
+
+lemma arrow_diagram_surjective (S : discrete_quotient F.left) :
+  function.surjective ((arrow_diagram F surj).obj S).hom :=
+begin
+  rintro ⟨x⟩,
+  obtain ⟨x,rfl⟩ := surj x,
+  exact ⟨S.proj x,rfl⟩,
+end
+
+instance (S : discrete_quotient F.left) : arrow.split ((arrow_diagram F surj).obj S) :=
+{ σ := ⟨λ x, classical.some (arrow_diagram_surjective F surj S x),
+    continuous_of_discrete_topology⟩,
+  is_splitting' := begin
+    ext x,
+    have := classical.some_spec (arrow_diagram_surjective F surj S x),
+    simp [this],
+  end }
 
 /-- A cone which is a limit expressing an arrow as a limit. -/
 @[simps]
