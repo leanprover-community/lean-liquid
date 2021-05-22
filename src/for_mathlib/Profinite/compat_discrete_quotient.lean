@@ -122,11 +122,13 @@ def make (S : discrete_quotient f.left) : compat_discrete_quotient f :=
     end },
   compat' := make_rel_impl _ }
 
+/-- make as an arrow. -/
 def make_arrow (S : discrete_quotient f.left) : arrow Profinite :=
 { left := Profinite.of (S.make surj).left,
   right := Profinite.of (S.make surj).right,
   hom := ⟨discrete_quotient.map (S.make surj).compat⟩ }
 
+/-- the canonical morphism of arrows to make. -/
 def make_hom (S : discrete_quotient f.left) : f ⟶ S.make_arrow surj :=
 { left := ⟨(S.make surj).left.proj, (S.make surj).left.proj_continuous⟩,
   right := ⟨(S.make surj).right.proj, (S.make surj).right.proj_continuous⟩ }

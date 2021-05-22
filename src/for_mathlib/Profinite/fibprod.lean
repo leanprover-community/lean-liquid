@@ -9,6 +9,7 @@ namespace Profinite
 
 variable (f : arrow Profinite)
 
+/-- Finite fibered products as a functor. -/
 @[simps]
 def fibprod (n : ℕ) : arrow Profinite ⥤ Profinite :=
 { obj := λ f, limits.wide_pullback f.right (λ i : ulift (fin n), f.left) (λ i, f.hom),
