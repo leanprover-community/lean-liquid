@@ -107,9 +107,116 @@ def FLC_iso : strict_iso ((Completion.map_homological_complex _).obj (FL F M)) (
         apply hh,
         refl }
     end,
-  is_strict := λ i, { strict_hom' := λ a, by { cases i; refl } } }
+  is_strict := λ i, { strict_hom' := λ a, by { cases i; refl } } }.
+
+open_locale simplicial
+
+-- TODO: Move this to mathlib (also relax the has_limits condition).
+/-- the iso between the 0-th term of the Cech nerve and F.left-/
+@[simps]
+def cech_iso_zero {C : Type*} [category C] (F : arrow C) [limits.has_limits C]
+  : F.cech_nerve _[0] ≅ F.left :=
+{ hom := limits.wide_pullback.π _ ⟨0⟩,
+  inv := limits.wide_pullback.lift F.hom (λ _, 𝟙 _) (by simp),
+  hom_inv_id' := begin
+    apply limits.wide_pullback.hom_ext,
+    { intro i,
+      simp only [limits.wide_pullback.lift_π, category.id_comp, category.comp_id, category.assoc],
+      congr,
+      tidy },
+    { simp }
+  end }
+
+lemma augmentation_zero {C : Type*} [category C] (F : arrow C) [limits.has_limits C] :
+  (cech_iso_zero F).inv ≫ F.augmented_cech_nerve.hom.app _ = F.hom := by tidy
+
+lemma locally_constant_norm_empty (X : Profinite) (hX : ¬ nonempty X)
+  (g : (LocallyConstant.obj M).obj (op X)) : ∥ g ∥ = 0 :=
+begin
+  rw locally_constant.norm_def,
+  dsimp [supr],
+  suffices : set.range (λ x : ↥X, ∥ g.to_fun x ∥) = ∅,
+  { erw [this, real.Sup_empty],  },
+  simp only [set.range_eq_empty, not_nonempty_iff],
+  exact not_nonempty_iff.mp hX
+end
 
 include surj
+
+lemma prop819_degree_zero_helper :
+  function.surjective (limits.wide_pullback.base (λ i : ulift (fin 1), F.hom)) :=
+begin
+  intro x,
+  obtain ⟨x,rfl⟩ := surj x,
+  dsimp at *,
+  refine ⟨(cech_iso_zero F).inv x, _⟩,
+  dsimp,
+  change (limits.wide_pullback.lift F.hom _ _ ≫ limits.wide_pullback.base _) _ = _,
+  simp,
+end
+
+lemma prop819_zero_norm_le (g : (LocallyConstant.obj M).obj (op F.right)) : ∥ g ∥ ≤
+  ∥ (LocallyConstant.obj M).map (limits.wide_pullback.base (λ i : ulift (fin 1), F.hom)).op g ∥ :=
+begin
+  by_cases hh : nonempty F.right,
+  { erw real.Sup_le,
+    { rintros z ⟨z,rfl⟩,
+      obtain ⟨z,rfl⟩ := (prop819_degree_zero_helper _ surj) z,
+      dsimp [locally_constant.comap],
+      split_ifs,
+      { dsimp at g,
+        erw ← function.comp_app ⇑g _,
+        convert locally_constant.norm_apply_le _ z,
+        refl },
+      { exfalso, apply h, continuity },
+      { exfalso, apply h, continuity } },
+    { rcases hh with ⟨x⟩,
+      refine ⟨∥ g.to_fun x ∥, x, rfl⟩ },
+    { use ∥ g ∥,
+      rintro y ⟨y,rfl⟩,
+      dsimp,
+      apply locally_constant.norm_apply_le } },
+  { rw locally_constant_norm_empty _ _ hh g,
+    simp }
+end
+
+theorem prop819_degree_zero (f : (FLC F M).X 0) (hf : (FLC F M).d 0 1 f = 0) :
+  f = 0 :=
+begin
+  apply injective_of_strict_iso _ _ (FLC_iso F M) _ _ hf,
+  intros f hf,
+  have := @controlled_exactness ((FL F M).X 0) (0 : SemiNormedGroup) ((FL F M).X 1) _ _ _ 0 1
+    zero_lt_one 1 ((FL F M).d _ _) _ _ f _ 1 zero_lt_one,
+  { rcases this with ⟨g,h1,h2⟩,
+    rw ← h1,
+    simp },
+  { intros g hg,
+    refine ⟨0,_, by simp⟩,
+    change (FL F M).d 0 1 g = 0 at hg,
+    dsimp,
+    symmetry,
+    delta FL at hg,
+    dsimp at hg,
+    rw if_pos at hg,
+    swap, {simp},
+    dsimp [cosimplicial_object.augmented.to_cocomplex_d] at hg,
+    simp only [locally_constant.comap_hom_apply, category.id_comp, category.comp_id] at hg,
+    dsimp [locally_constant.comap] at hg,
+    ext x,
+    obtain ⟨x,rfl⟩ := (prop819_degree_zero_helper F surj) x,
+    split_ifs at hg,
+    { apply_fun (λ e, e x) at hg,
+      exact hg },
+    { exfalso, apply h, continuity },
+    { exfalso, apply h, continuity } },
+  { rintro g ⟨g,rfl⟩,
+    refine ⟨g,rfl,_⟩,
+    dsimp [cosimplicial_object.augmented.to_cocomplex_d],
+    simp only [locally_constant.comap_hom_apply, one_mul,
+      if_true, eq_self_iff_true, category.id_comp, category.comp_id],
+    apply prop819_zero_norm_le _ surj },
+  { exact hf }
+end
 
 theorem prop819 {m : ℕ} (ε : ℝ≥0) (hε : 0 < ε)
   (f : (FLC F M).X (m+1)) (hf : (FLC F M).d (m+1) (m+2) f = 0) :

@@ -46,6 +46,23 @@ begin
     exact hf },
 end
 
+lemma injective_of_strict_iso (F : strict_iso C D)
+  (cond : ∀ (f : C.X 0) (hf : C.d 0 1 f = 0), f = 0) (f : D.X 0) (hf : D.d 0 1 f = 0) : f = 0 :=
+begin
+  let FF := (homological_complex.eval_at 0).map_iso F.iso,
+  have : f = (FF.inv ≫ FF.hom) f, by {rw FF.inv_hom_id, simp},
+  rw this,
+  change FF.hom (FF.inv f) = 0,
+  rw ←(show FF.hom 0 = 0, by simp),
+  congr' 1,
+  apply cond,
+  change (F.iso.inv.f 0 ≫ C.d 0 1) f = 0,
+  erw F.iso.inv.comm,
+  change (F.iso.inv.f 1) _ = 0,
+  erw hf,
+  simp,
+end
+
 lemma exact_of_strict_iso (F : strict_iso C D) (ε : ℝ≥0) (hε : 0 < ε)
   (cond : ∀ (n : ℕ) (f : C.X (n+1)) (hf : C.d _ (n+2) f = 0), ∃ g : C.X n, C.d _ _ g = f ∧
   (nnnorm g) ≤ (1+ε) * nnnorm f) (n : ℕ) (f : D.X (n+1)) (hf : D.d _ (n+2) f = 0) :
