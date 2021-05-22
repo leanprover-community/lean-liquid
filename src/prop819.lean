@@ -234,66 +234,12 @@ def FLF : (discrete_quotient F.left)ᵒᵖ ⥤ cochain_complex SemiNormedGroup �
 def FLF_cocone : limits.cocone (FLF F surj M) :=
 (FL_functor M).map_cocone $ (Profinite.arrow_cone F surj).op
 
-/-
-lemma exists_locally_constant (n : ℕ) (f : (FL F M).X n) :
-  ∃ (S : discrete_quotient F.left) (g : ((FLF F surj M).obj (op S)).X n),
-  ((FLF_cocone F surj M).ι.app (op S)).f _ g = f := sorry
-
-lemma locally_constant_eq_zero (n : ℕ)
-  (S : discrete_quotient F.left) (g : ((FLF F surj M).obj (op S)).X n)
-  (hg : ((FLF_cocone F surj M).ι.app (op S)).f _ g = 0) :
-  ∃ (T : discrete_quotient F.left) (hT : T ≤ S),
-  ((FLF F surj M).map (hom_of_le hT).op).f _ g = 0 := sorry
--/
-
 lemma exists_locally_constant (n : ℕ) (f : (FL F M).X n)
   (hf : (FL F M).d n (n+1) f = 0) : ∃ (S : discrete_quotient F.left)
   (g : ((FLF F surj M).obj (op S)).X n)
   (hgf : ((FLF_cocone F surj M).ι.app (op S)).f _ g = f)
   (hgd : (((FLF F surj M).obj (op S)).d n (n+1) g = 0))
   (hgnorm : nnnorm f = nnnorm g), true := sorry
-
-/-
--- Is this true? (Not quite...)
-@[simp]
-lemma nnnorm_eq (n : ℕ) (S : discrete_quotient F.left)
-  (f : ((FLF F surj M).obj (op S)).X n) :
-  nnnorm (((FLF_cocone F surj M).ι.app (op S)).f _ f) = nnnorm f := sorry
-
-theorem prop819_reduce_to_finite (n : ℕ) (S : discrete_quotient F.left)
-  (f : ((FLF F surj M).obj (op S)).X (n+1))
-  (hf : ((FLF F surj M).obj (op S)).d (n+1) (n+2) f = 0)
-  (cond : ∃ g : ((FLF F surj M).obj (op S)).X n,
-    ((FLF F surj M).obj (op S)).d _ _ g = f ∧ nnnorm g ≤ nnnorm f) :
-  ∃ g : (FL F M).X n, (FL F M).d _ (n+1) g =
-    ((FLF_cocone F surj M).ι.app (op S)).f _ f ∧
-    nnnorm g ≤ nnnorm (((FLF_cocone F surj M).ι.app (op S)).f _ f) :=
-begin
-  rcases cond with ⟨gg,hgg1,hgg2⟩,
-  let g := ((FLF_cocone F surj M).ι.app (op S)).f _ gg,
-  refine ⟨g,_,_⟩,
-  { dsimp only [g],
-    have := ((FLF_cocone F surj M).ι.app (op S)).comm n (n+1),
-    apply_fun (λ e, e gg) at this,
-    erw this,
-    rw ← hgg1,
-    refl },
-  { dsimp [g],
-    simpa }
-end
-
-lemma contracting_homotopy_norm_noninc (n : ℕ) (S : discrete_quotient F.left)
-  (f : ((FLF F surj M).obj (op S)).X (n+1)) :
-  nnnorm ((((Profinite.arrow_diagram F surj).obj S).contracting_homotopy
-    (LocallyConstant.{u u}.obj M)) _ f)
-  ≤ nnnorm f :=
-begin
-  cases n,
-  dsimp only [arrow.contracting_homotopy],
-  apply LocallyConstant_obj_map_norm_noninc,
-  apply LocallyConstant_obj_map_norm_noninc,
-end
--/
 
 lemma FLF_norm_noninc (n : ℕ) (S : discrete_quotient F.left)
   (f : ((FLF F surj M).obj (op S)).X n) :
