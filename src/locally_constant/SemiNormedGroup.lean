@@ -48,6 +48,17 @@ def LocallyConstant : SemiNormedGroup ⥤ Profiniteᵒᵖ ⥤ SemiNormedGroup :=
   map_id' := by { intros, ext, refl },
   map_comp' := by { intros, ext, refl } }
 
+@[simp]
+lemma LocallyConstant_map_apply (M : SemiNormedGroup) (X Y : Profinite) (f : X ⟶ Y)
+  (g : (LocallyConstant.obj M).obj (op Y)) (x : X) :
+  ((LocallyConstant.obj M).map f.op g).to_fun x = g.to_fun (f x) :=
+begin
+  dsimp [LocallyConstant, comap],
+  split_ifs,
+  { refl },
+  all_goals { exfalso, apply h, continuity }
+end
+
 lemma LocallyConstant_obj_map_norm_noninc (V : SemiNormedGroup) (X Y : Profiniteᵒᵖ) (φ : X ⟶ Y) :
   ((LocallyConstant.obj V).map φ).norm_noninc :=
 comap_hom_norm_noninc _ _
