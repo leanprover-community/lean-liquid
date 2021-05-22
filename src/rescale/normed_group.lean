@@ -93,6 +93,35 @@ def to_rescale : 𝟭 _ ⟶ rescale r :=
   end,
   naturality' := λ V W f, rfl /- defeq abuse -/ }
 
+def of_rescale [hr : fact (0 < r)] : rescale r ⟶ 𝟭 _ :=
+{ app := λ V,
+  add_monoid_hom.mk_normed_group_hom' (add_monoid_hom.mk' (@rescale.of r V) .symm $ λ _ _, rfl) r
+  begin
+    intro v,
+    erw [rescale.nnnorm_def, mul_div_cancel' _ hr.1.ne'],
+    exact le_rfl
+  end,
+  naturality' := λ V W f, rfl /- defeq abuse -/ }
+
+@[simps]
+def iso_rescale [fact (0 < r)] : 𝟭 _ ≅ (rescale r) :=
+{ hom := to_rescale r,
+  inv := of_rescale r, }
+
+open category_theory
+
+lemma iso_rescale_isometry [fact (0 < r)] (h : r = 1) (V : SemiNormedGroup) :
+  isometry ((iso_rescale r).app V).hom :=
+begin
+  unfreezingI { cases h },
+  dsimp only [nat_iso.app_hom, iso_rescale_hom],
+  apply normed_group_hom.isometry_of_norm,
+  intro v,
+  erw [rescale.norm_def],
+  simp only [div_one, subtype.coe_mk],
+  refl
+end
+
 lemma to_rescale_bound_by (V : SemiNormedGroup) : ((to_rescale r).app V).bound_by r⁻¹ :=
 normed_group_hom.mk_normed_group_hom'_bound_by _ _ _
 

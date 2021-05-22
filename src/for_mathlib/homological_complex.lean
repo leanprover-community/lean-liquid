@@ -65,6 +65,7 @@ add_monoid_hom.mk' (λ f, homological_complex.hom.f f i) (λ _ _, rfl)
 /-- A complex of functors gives a functor to complexes
 
 jmc: This is functorial, but I'm getting timeouts, and I think this is all we need -/
+@[simps obj map]
 def as_functor {T : Type*} [category T]
   (C : homological_complex (T ⥤ V) c) :
   T ⥤ homological_complex V c :=

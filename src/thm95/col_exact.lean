@@ -11,7 +11,7 @@ open_locale nnreal big_operators nat
 open category_theory opposite simplex_category
 
 universe variables u u₀ uₘ
-set_option pp.universes true
+-- set_option pp.universes true
 
 namespace thm95
 
@@ -133,30 +133,126 @@ open polyhedral_lattice (Hom)
 
 local attribute [semireducible] CLCFPTinv CLCFPTinv₂ CLCFP -- CLCTinv
 
+@[simps obj map]
 def col'_aux [normed_with_aut r V] (n : ℕ) : system_of_complexes :=
 (double_complex' BD c_ r r' V Λ M N).col n
 
+@[simps obj map]
 def scale37 : system_of_complexes.{u} ⥤ system_of_complexes.{u} :=
 (whiskering_right _ _ _).obj $
 homological_complex.modify_functor
   (λ m, SemiNormedGroup.rescale m!) (λ m₁ m₂, SemiNormedGroup.scale _ _)
 
+@[simps obj map]
 def col' [normed_with_aut r V] (n : ℕ) : system_of_complexes :=
 scale37.obj (col'_aux BD c_ r r' V Λ M N n)
 
 lemma col_iso_obj_X [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) :
   Π m, (((double_complex.{u u u u₀} BD c_ r r' V Λ M N).col n).obj c).X m ≅
   ((col'.{u u₀} BD c_ r r' V Λ M N n).obj c).X m
-| 0     := sorry
-| 1     := sorry
+| 0     := (SemiNormedGroup.iso_rescale _).app _
+| 1     := (SemiNormedGroup.iso_rescale _).app _
 | (m+2) := iso.refl _
 
-lemma col_iso [normed_with_aut r V] :
+section
+
+open homological_complex system_of_complexes
+
+lemma col_iso_comm₁_0 [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) :
+  (col_iso_obj_X BD c_ r r' V Λ M N n c 0).hom ≫
+    ((col' BD c_ r r' V Λ M N n).obj c).d 0 1 =
+  (((double_complex BD c_ r r' V Λ M N).col n).obj c).d 0 1 ≫
+    (col_iso_obj_X BD c_ r r' V Λ M N n c 1).hom :=
+by { delta col_iso_obj_X, ext, refl }
+.
+
+lemma col_iso_comm₁_1 [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) :
+  (col_iso_obj_X BD c_ r r' V Λ M N n c 1).hom ≫
+    ((col' BD c_ r r' V Λ M N n).obj c).d 1 2 =
+  (((double_complex BD c_ r r' V Λ M N).col n).obj c).d 1 2 ≫
+    (col_iso_obj_X BD c_ r r' V Λ M N n c 2).hom :=
+begin
+  delta col_iso_obj_X,
+  simp only [iso.refl_hom, nat.rec_add_one, category.id_comp, category.comp_id,
+    system_of_double_complexes.col_obj_d],
+  dsimp only [col'_obj, scale37_obj, col'_aux_obj, double_complex', double_complex,
+    double_complex_aux_rescaled, as_functor_obj, modify_d, eval_obj, eval_map,
+    functor.map_homological_complex_obj_d, functor.map_homological_complex_obj_X,
+    nat_trans.comp_app, comp_f, rescale_functor, rescale_nat_trans,
+    system_of_complexes.rescale, scale],
+  refl
+end
+.
+
+local attribute [irreducible] CLCFPTinv CLCFPTinv₂ CLCFP
+  SemiNormedGroup.rescale SemiNormedGroup.scale
+  double_complex_aux
+
+lemma col_iso_comm₁_succ [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) (i : ℕ) :
+  (col_iso_obj_X BD c_ r r' V Λ M N n c i.succ.succ).hom ≫
+    ((col'.{u u₀} BD c_ r r' V Λ M N n).obj c).d i.succ.succ (i.succ.succ + 1) =
+  (((double_complex.{u u u u₀} BD c_ r r' V Λ M N).col n).obj c).d i.succ.succ (i.succ.succ + 1) ≫
+    (col_iso_obj_X BD c_ r r' V Λ M N n c (i.succ.succ + 1)).hom :=
+begin
+  delta col_iso_obj_X,
+  simp only [iso.refl_hom, nat.rec_add_one, category.id_comp, category.comp_id,
+    system_of_double_complexes.col_obj_d],
+  dsimp only [col'_obj, scale37_obj, col'_aux_obj, double_complex', double_complex,
+    double_complex_aux_rescaled, as_functor_obj, modify_d, eval_obj, eval_map,
+    functor.map_homological_complex_obj_d, functor.map_homological_complex_obj_X,
+    nat_trans.comp_app, comp_f, rescale_functor, rescale_nat_trans,
+    system_of_complexes.rescale, scale],
+  refl
+end
+.
+
+lemma col_iso_comm₂ [normed_with_aut r V] (c₁ c₂ : ℝ≥0ᵒᵖ) (h : c₁ ⟶ c₂) (i : ℕ) :
+  (((double_complex.{u u u u₀} BD c_ r r' V Λ M N).col n).map h).f i ≫
+    (col_iso_obj_X BD c_ r r' V Λ M N n c₂ i).hom =
+  (col_iso_obj_X BD c_ r r' V Λ M N n c₁ i).hom ≫
+    ((col'.{u u₀} BD c_ r r' V Λ M N n).map h).f i :=
+begin
+  cases i, { delta col_iso_obj_X, ext, dsimp, sorry },
+  sorry
+end
+.
+
+end
+
+section
+
+open homological_complex
+
+-- set_option pp.universes true
+
+@[simps]
+def col_iso [normed_with_aut r V] :
   (double_complex.{u u u u₀} BD c_ r r' V Λ M N).col n ≅
   col'.{u u₀} BD c_ r r' V Λ M N n :=
-nat_iso.of_components (λ c, homological_complex.iso_of_components
-  (col_iso_obj_X BD c_ r r' V Λ M N n _)
-  sorry) sorry
+nat_iso.of_components (λ c, iso_of_components (col_iso_obj_X.{u u₀} BD c_ r r' V Λ M N n _)
+  begin
+    rintro i j (rfl : i + 1 = j),
+    cases i, { exact col_iso_comm₁_0 BD c_ r r' V Λ M N n c, },
+    cases i, { exact col_iso_comm₁_1 BD c_ r r' V Λ M N n c, },
+    { exact col_iso_comm₁_succ BD c_ r r' V Λ M N n c i, },
+  end)
+  begin
+    intros c₁ c₂ h, ext i : 2,
+    dsimp only [comp_f, iso_of_components_hom_f],
+    exact col_iso_comm₂ BD c_ r r' V Λ M N n c₁ c₂ h i,
+  end
+.
+
+lemma col_iso_strict [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) (i : ℕ) :
+  isometry (iso_app ((col_iso BD c_ r r' V Λ M N n).app c) i).hom :=
+begin
+  dsimp only [iso_app_hom, nat_iso.app_hom, col_iso_hom_app_f],
+  cases i, { delta col_iso_obj_X, apply SemiNormedGroup.iso_rescale_isometry, exact nat.cast_one },
+  cases i, { delta col_iso_obj_X, apply SemiNormedGroup.iso_rescale_isometry, exact nat.cast_one },
+  { delta col_iso_obj_X, exact isometry_id }
+end
+
+end
 
 lemma col_obj_X_zero [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) :
   (((double_complex BD c_ r r' V Λ M N).col n).obj c).X 0 =
