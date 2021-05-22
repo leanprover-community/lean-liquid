@@ -59,7 +59,8 @@ universe u
 -- TODO: Fix the statement below using bounded colimits.
 --@[nolint unused_arguments]
 --instance {M : SemiNormedGroup.{u}} {J : Type u} [small_category J] [is_filtered J] :
---  limits.preserves_colimits_of_shape J (LocallyConstant.obj M) := sorry
+--  limits.preserves_colimits_of_shape J (LocallyConstant.obj M) := by admit
 
 end SemiNormedGroup
+
 #lint- only unused_arguments def_lemma doc_blame
