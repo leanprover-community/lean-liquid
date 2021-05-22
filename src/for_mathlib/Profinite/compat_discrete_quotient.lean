@@ -2,7 +2,6 @@ import topology.discrete_quotient
 import topology.category.Profinite
 import category_theory.arrow
 import data.setoid.partition
-import prop819.fibprod
 
 open category_theory
 
