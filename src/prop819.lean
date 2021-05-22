@@ -28,16 +28,16 @@ abbreviation FLC : cochain_complex SemiNormedGroup ℕ :=
   (((cosimplicial_object.augmented.whiskering _ _).obj (LCC.{u u}.obj M)).obj
   F.augmented_cech_nerve.right_op).to_cocomplex
 
-def Rop : (simplicial_object.augmented Profinite)ᵒᵖ ⥤ cosimplicial_object.augmented Profiniteᵒᵖ :=
-{ obj := λ X, X.unop.right_op,
-  map := λ X Y f,
-  { left := quiver.hom.op (comma_morphism.right f.unop),
-    right := nat_trans.right_op (comma_morphism.left f.unop),
-    w' := by { ext, exact congr_arg (λ η, (nat_trans.app η (op x)).op) f.unop.w.symm, } } }
+--def Rop : (simplicial_object.augmented Profinite)ᵒᵖ ⥤ cosimplicial_object.augmented Profiniteᵒᵖ :=
+--{ obj := λ X, X.unop.right_op,
+--  map := λ X Y f,
+--  { left := quiver.hom.op (comma_morphism.right f.unop),
+--    right := nat_trans.right_op (comma_morphism.left f.unop),
+--    w' := by { ext, exact congr_arg (λ η, (nat_trans.app η (op x)).op) f.unop.w.symm, } } }
 
 def FLC_functor : (arrow Profinite.{u})ᵒᵖ ⥤ cochain_complex SemiNormedGroup ℕ :=
 simplicial_object.augmented_cech_nerve.op ⋙
-  Rop.{u u} ⋙
+  simplicial_to_cosimplicial_augmented _ ⋙
   (cosimplicial_object.augmented.whiskering _ _).obj (LCC.{u u}.obj M) ⋙
   cosimplicial_object.augmented.cocomplex
 
