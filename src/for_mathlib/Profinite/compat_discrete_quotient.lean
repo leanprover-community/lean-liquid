@@ -94,47 +94,47 @@ variable {f}
 
 /-- Given a discrete quotient S of f.left, this is the compatible quotient
  of f where f.right is as large as possible. -/
-def make (S : discrete_quotient f.left) : compat_discrete_quotient f :=
-{ left := S,
-  right :=
-  { rel := make_rel S,
-    equiv := S.make_rel_equiv surj,
-    clopen := begin
-      intros x,
-      have : set_of (S.make_rel x) = S.make_proj surj ⁻¹' {S.make_proj surj x},
-      { dsimp [make_proj],
-        ext,
-        simp only [set.mem_preimage, set.mem_singleton_iff, quotient.eq', set.mem_set_of_eq],
-        refine ⟨λ h, setoid.symm' _ h, λ h, setoid.symm' _ h⟩ },
-      rw this,
-      letI : topological_space (S.make_quotient surj) := ⊥,
-      haveI : discrete_topology (S.make_quotient surj) := ⟨rfl⟩,
-      suffices : continuous (S.make_proj surj),
-      { split,
-        apply is_open.preimage this trivial,
-        apply is_closed.preimage this ⟨trivial⟩ },
-      rw (quotient_map f surj).continuous_iff,
-      rw S.make_proj_comm surj,
-      apply continuous.comp,
-      continuity,
-      exact S.proj_continuous,
-    end },
-  compat' := make_rel_impl _ }
+def make (S : discrete_quotient f.left) : discrete_quotient f.right :=
+{ rel := make_rel S,
+  equiv := S.make_rel_equiv surj,
+  clopen := begin
+    intros x,
+    have : set_of (S.make_rel x) = S.make_proj surj ⁻¹' {S.make_proj surj x},
+    { dsimp [make_proj],
+      ext,
+      simp only [set.mem_preimage, set.mem_singleton_iff, quotient.eq', set.mem_set_of_eq],
+      refine ⟨λ h, setoid.symm' _ h, λ h, setoid.symm' _ h⟩ },
+    rw this,
+    letI : topological_space (S.make_quotient surj) := ⊥,
+    haveI : discrete_topology (S.make_quotient surj) := ⟨rfl⟩,
+    suffices : continuous (S.make_proj surj),
+    { split,
+      apply is_open.preimage this trivial,
+      apply is_closed.preimage this ⟨trivial⟩ },
+    rw (quotient_map f surj).continuous_iff,
+    rw S.make_proj_comm surj,
+    apply continuous.comp,
+    continuity,
+    exact S.proj_continuous,
+  end }
+
+lemma make_le_comap (S : discrete_quotient f.left) : le_comap f.hom.continuous S (S.make surj) :=
+make_rel_impl _
 
 /-- make as an arrow. -/
 def make_arrow (S : discrete_quotient f.left) : arrow Profinite :=
-{ left := Profinite.of (S.make surj).left,
-  right := Profinite.of (S.make surj).right,
-  hom := ⟨discrete_quotient.map (S.make surj).compat⟩ }
+{ left := Profinite.of S,
+  right := Profinite.of (S.make surj),
+  hom := ⟨discrete_quotient.map (S.make_le_comap surj)⟩ }
 
 /-- the canonical morphism of arrows to make. -/
 def make_hom (S : discrete_quotient f.left) : f ⟶ S.make_arrow surj :=
-{ left := ⟨(S.make surj).left.proj, (S.make surj).left.proj_continuous⟩,
-  right := ⟨(S.make surj).right.proj, (S.make surj).right.proj_continuous⟩ }
+{ left := ⟨S.proj, S.proj_continuous⟩,
+  right := ⟨(S.make surj).proj, (S.make surj).proj_continuous⟩ }
 
 lemma make_right_le (S : discrete_quotient f.left) (T : discrete_quotient f.right)
   (compat : le_comap f.hom.continuous S T) :
-  (S.make surj).right ≤ T :=
+  (S.make surj) ≤ T :=
 begin
   intros x y h,
   induction h with a b hab a b c _ _ h1 h2,
@@ -142,5 +142,18 @@ begin
   assumption,
   apply T.trans _ _ _ h1 h2,
 end
+
+lemma make_right_mono (S1 S2 : discrete_quotient f.left) (h : S1 ≤ S2) :
+  S1.make surj ≤ S2.make surj :=
+begin
+  intros x y h,
+  induction h,
+  apply make_rel.of,
+  apply h,
+  assumption,
+  apply make_rel.trans,
+  assumption',
+end
+
 
 end discrete_quotient
