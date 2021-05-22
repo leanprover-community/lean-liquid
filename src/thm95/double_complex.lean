@@ -59,6 +59,9 @@ begin
   rw augmentation_map_equalizes (diagonal_embedding Λ N),
 end
 
+def double_complex' : system_of_double_complexes :=
+(double_complex_aux BD c_ r r' V Λ M N).as_functor
+
 end
 
 section

@@ -155,18 +155,20 @@ by cases f; cases g; cases h; refl
                   ... = Tinv (g (f x)) : by rw g.map_Tinv,
   .. (g.to_add_monoid_hom.comp f.to_add_monoid_hom) }
 
+variables (f)
+
 /-- The `profinitely_filtered_pseudo_normed_group_hom` underlying a
 `profinitely_filtered_pseudo_normed_group_with_Tinv_hom`. -/
 def to_profinitely_filtered_pseudo_normed_group_hom :
   profinitely_filtered_pseudo_normed_group_hom M₁ M₂ :=
-profinitely_filtered_pseudo_normed_group_hom.mk_of_bound f.to_add_monoid_hom 1
-begin
-  refine λ c, ⟨_, _⟩,
-  { rw one_mul, intros x h, exact f.strict h },
-  haveI : fact (1 * c ≤ c) := by { rw one_mul, exact ⟨le_rfl⟩ },
-  rw (embedding_cast_le (1 * c) c).continuous_iff,
-  exact f.level_continuous c
-end
+profinitely_filtered_pseudo_normed_group_hom.mk_of_strict f.to_add_monoid_hom
+(λ c, ⟨λ x h, f.strict h, f.level_continuous c⟩)
+
+lemma to_profinitely_filtered_pseudo_normed_group_hom_strict :
+  f.to_profinitely_filtered_pseudo_normed_group_hom.strict :=
+profinitely_filtered_pseudo_normed_group_hom.mk_of_strict_strict _ _
+
+variables {f}
 
 def mk' (f : profinitely_filtered_pseudo_normed_group_hom M₁ M₂)
   (hf1 : f.bound_by 1) (hfT) :

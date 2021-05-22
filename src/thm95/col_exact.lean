@@ -1,9 +1,9 @@
-import thm95.constants
-import thm95.double_complex
 import prop_92.prop_92
 import normed_snake_dual
 import combinatorial_lemma
-import prop819
+import thm95.constants
+import thm95.double_complex
+import thm95.col_exact_prep
 
 noncomputable theory
 
@@ -28,7 +28,7 @@ section
 open PolyhedralLattice
 
 def CLCFP' : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ ℝ≥0ᵒᵖ ⥤ SemiNormedGroup :=
-(ProFiltPseuNormGrpWithTinv.Pow r' n ⋙ (Filtration r').flip).op ⋙
+(ProFiltPseuNormGrpWithTinv.Pow r' n ⋙ (_root_.Filtration r').flip).op ⋙
   functor.op_hom _ _ ⋙ (whiskering_right ℝ≥0ᵒᵖ Profiniteᵒᵖ _).obj (CLC V)
 
 def cosimplicial_SemiNormedGroup : simplex_category ⥤ (ℝ≥0ᵒᵖ ⥤ SemiNormedGroup) :=
@@ -52,6 +52,18 @@ end
 def col_complex : system_of_complexes :=
 (col_complex_aux r' V Λ M N n).as_functor
 
+-- lemma col_complex_iso :
+--   col_complex r' V Λ M N n ≅ FLC_complex V _ _ :=
+-- sorry
+
+instance rescale_additive (κ : ℝ≥0) [fact (0 < κ)] :
+  ((whiskering_right ℝ≥0ᵒᵖ _ _).obj (SemiNormedGroup.rescale κ)).additive := {}
+
+def col_complex_rescaled_aux' : cochain_complex (ℝ≥0ᵒᵖ ⥤ SemiNormedGroup) ℕ :=
+(col_complex_aux.{u u₀} r' V Λ M N n).modify
+  (λ m, (whiskering_right _ _ _).obj (SemiNormedGroup.rescale m!))
+  (λ m₁ m₂, thm95.scale' _ _)
+
 def col_complex_rescaled_aux : cochain_complex (ℝ≥0ᵒᵖ ⥤ SemiNormedGroup) ℕ :=
 (col_complex_aux.{u u₀} r' V Λ M N n).modify
   thm95.rescale_functor'
@@ -59,6 +71,9 @@ def col_complex_rescaled_aux : cochain_complex (ℝ≥0ᵒᵖ ⥤ SemiNormedGrou
 
 def col_complex_rescaled : system_of_complexes :=
 (col_complex_rescaled_aux r' V Λ M N n).as_functor
+
+def col_complex_rescaled' : system_of_complexes :=
+(col_complex_rescaled_aux' r' V Λ M N n).as_functor
 
 end
 
@@ -107,7 +122,7 @@ def T_inv_sub_Tinv [normed_with_aut r V] :
   col_complex_rescaled r' V Λ M N n ⟶ (col_complex_rescaled r' V Λ M N n).scale_index_left r' :=
 { app := λ c,
   { f := T_inv_sub_Tinv_f r r' V Λ M N n c,
-    comm' := sorry },
+    comm' := by { rintros i j (rfl : i + 1 = j), exact T_inv_sub_Tinv_comm r r' V Λ M N n c i } },
   naturality' := sorry }
 
 end col_complex_rescaled
@@ -117,6 +132,31 @@ namespace double_complex
 open polyhedral_lattice (Hom)
 
 local attribute [semireducible] CLCFPTinv CLCFPTinv₂ CLCFP -- CLCTinv
+
+def col'_aux [normed_with_aut r V] (n : ℕ) : system_of_complexes :=
+(double_complex' BD c_ r r' V Λ M N).col n
+
+def scale37 : system_of_complexes.{u} ⥤ system_of_complexes.{u} :=
+(whiskering_right _ _ _).obj $
+homological_complex.modify_functor
+  (λ m, SemiNormedGroup.rescale m!) (λ m₁ m₂, SemiNormedGroup.scale _ _)
+
+def col' [normed_with_aut r V] (n : ℕ) : system_of_complexes :=
+scale37.obj (col'_aux BD c_ r r' V Λ M N n)
+
+lemma col_iso_obj_X [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) :
+  Π m, (((double_complex.{u u u u₀} BD c_ r r' V Λ M N).col n).obj c).X m ≅
+  ((col'.{u u₀} BD c_ r r' V Λ M N n).obj c).X m
+| 0     := sorry
+| 1     := sorry
+| (m+2) := iso.refl _
+
+lemma col_iso [normed_with_aut r V] :
+  (double_complex.{u u u u₀} BD c_ r r' V Λ M N).col n ≅
+  col'.{u u₀} BD c_ r r' V Λ M N n :=
+nat_iso.of_components (λ c, homological_complex.iso_of_components
+  (col_iso_obj_X BD c_ r r' V Λ M N n _)
+  sorry) sorry
 
 lemma col_obj_X_zero [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) :
   (((double_complex BD c_ r r' V Λ M N).col n).obj c).X 0 =
