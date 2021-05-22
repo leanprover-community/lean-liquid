@@ -2,6 +2,7 @@ import topology.discrete_quotient
 import topology.category.Profinite
 import category_theory.arrow
 import data.setoid.partition
+import prop819.fibprod
 
 open category_theory
 
@@ -120,5 +121,14 @@ def make (S : discrete_quotient f.left) : compat_discrete_quotient f :=
       exact S.proj_continuous,
     end },
   compat' := make_rel_impl _ }
+
+def make_arrow (S : discrete_quotient f.left) : arrow Profinite :=
+{ left := Profinite.of (S.make surj).left,
+  right := Profinite.of (S.make surj).right,
+  hom := ⟨discrete_quotient.map (S.make surj).compat⟩ }
+
+def make_hom (S : discrete_quotient f.left) : f ⟶ S.make_arrow surj :=
+{ left := ⟨(S.make surj).left.proj, (S.make surj).left.proj_continuous⟩,
+  right := ⟨(S.make surj).right.proj, (S.make surj).right.proj_continuous⟩ }
 
 end discrete_quotient
