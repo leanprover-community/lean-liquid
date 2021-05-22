@@ -299,7 +299,9 @@ lemma FLF_norm_noninc (n : ℕ) (S : discrete_quotient F.left)
   (f : ((FLF F surj M).obj (op S)).X n) :
   nnnorm (((FLF_cocone F surj M).ι.app (op S)).f _ f) ≤ nnnorm f :=
 begin
-  sorry,
+  cases n,
+  apply LocallyConstant_obj_map_norm_noninc,
+  apply LocallyConstant_obj_map_norm_noninc,
 end
 
 theorem prop819 {m : ℕ} (ε : ℝ≥0) (hε : 0 < ε)
