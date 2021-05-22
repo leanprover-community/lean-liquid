@@ -132,4 +132,15 @@ def make_hom (S : discrete_quotient f.left) : f ⟶ S.make_arrow surj :=
 { left := ⟨(S.make surj).left.proj, (S.make surj).left.proj_continuous⟩,
   right := ⟨(S.make surj).right.proj, (S.make surj).right.proj_continuous⟩ }
 
+lemma make_right_le (S : discrete_quotient f.left) (T : discrete_quotient f.right)
+  (compat : le_comap f.hom.continuous S T) :
+  (S.make surj).right ≤ T :=
+begin
+  intros x y h,
+  induction h with a b hab a b c _ _ h1 h2,
+  apply compat,
+  assumption,
+  apply T.trans _ _ _ h1 h2,
+end
+
 end discrete_quotient
