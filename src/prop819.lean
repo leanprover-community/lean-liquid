@@ -234,11 +234,11 @@ def FLF : (discrete_quotient F.left)ᵒᵖ ⥤ cochain_complex SemiNormedGroup �
 def FLF_cocone : limits.cocone (FLF F surj M) :=
 (FL_functor M).map_cocone $ (Profinite.arrow_cone F surj).op
 
-lemma exists_locally_constant (n : ℕ) (f : (FL F M).X n)
-  (hf : (FL F M).d n (n+1) f = 0) : ∃ (S : discrete_quotient F.left)
-  (g : ((FLF F surj M).obj (op S)).X n)
+lemma exists_locally_constant (n : ℕ) (f : (FL F M).X (n+1))
+  (hf : (FL F M).d _ (n+2) f = 0) : ∃ (S : discrete_quotient F.left)
+  (g : ((FLF F surj M).obj (op S)).X (n+1))
   (hgf : ((FLF_cocone F surj M).ι.app (op S)).f _ g = f)
-  (hgd : (((FLF F surj M).obj (op S)).d n (n+1) g = 0))
+  (hgd : (((FLF F surj M).obj (op S)).d _ (n+2) g = 0))
   (hgnorm : nnnorm f = nnnorm g), true := sorry
 
 lemma FLF_norm_noninc (n : ℕ) (S : discrete_quotient F.left)
@@ -259,7 +259,7 @@ begin
   clear hf f m hε ε,
   intros n f hf,
   -- We've reduced to the non-completed case.
-  have := exists_locally_constant F surj M (n+1) f hf,
+  have := exists_locally_constant F surj M _ f hf,
   rcases this with ⟨S,g,rfl,h2,h3,-⟩,
   --let gg := ((FLF_cocone F surj M).ι.app (op S)).f _ g,
   let CC : Π (n : ℕ), ((FLF F surj M).obj (op S)).X (n+1) ⟶
