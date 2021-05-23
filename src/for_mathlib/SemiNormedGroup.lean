@@ -27,4 +27,8 @@ noncomputable instance has_zero_object : limits.has_zero_object SemiNormedGroup.
       ext x,
     end } }
 
+-- Do we have this?
+lemma coe_comp_apply (A B C : SemiNormedGroup) (f : A ⟶ B) (g : B ⟶ C)
+  (a : A) : (f ≫ g) a = g (f a) := rfl
+
 end SemiNormedGroup

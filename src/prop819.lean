@@ -234,12 +234,68 @@ def FLF : (discrete_quotient F.left)ᵒᵖ ⥤ cochain_complex SemiNormedGroup �
 def FLF_cocone : limits.cocone (FLF F surj M) :=
 (FL_functor M).map_cocone $ (Profinite.arrow_cone F surj).op
 
+lemma exists_locally_constant_FLF (n : ℕ) (f : (FL F M).X (n+1)) :
+  ∃ (S : discrete_quotient F.left) (g : ((FLF F surj M).obj (op S)).X (n+1)),
+    ((FLF_cocone F surj M).ι.app (op S)).f _ g = f := sorry
+
+lemma d_eq_zero_FLF (n : ℕ) (S : discrete_quotient F.left)
+  (g : ((FLF F surj M).obj (op S)).X (n+1))
+  (hg : (FL F M).d (n+1) (n+2)
+    (((FLF_cocone F surj M).ι.app (op S)).f _ g) = 0) :
+  ∃ (T : discrete_quotient F.left) (hT : T ≤ S),
+  ((FLF F surj M).obj (op T)).d (n+1) (n+2)
+    (((FLF F surj M).map $ (hom_of_le hT).op).f _ g) = 0 := sorry
+
+lemma norm_eq_FLF (n : ℕ) (S : discrete_quotient F.left)
+  (g : ((FLF F surj M).obj (op S)).X (n+1)) :
+  ∃ (T : discrete_quotient F.left) (hT : T ≤ S),
+  nnnorm (((FLF_cocone F surj M).ι.app (op S)).f _ g) =
+  nnnorm ((((FLF F surj M)).map (hom_of_le hT).op).f _ g) := sorry
+
 lemma exists_locally_constant (n : ℕ) (f : (FL F M).X (n+1))
   (hf : (FL F M).d _ (n+2) f = 0) : ∃ (S : discrete_quotient F.left)
   (g : ((FLF F surj M).obj (op S)).X (n+1))
   (hgf : ((FLF_cocone F surj M).ι.app (op S)).f _ g = f)
   (hgd : (((FLF F surj M).obj (op S)).d _ (n+2) g = 0))
-  (hgnorm : nnnorm f = nnnorm g), true := sorry
+  (hgnorm : nnnorm f = nnnorm g), true :=
+begin
+  obtain ⟨S,f,rfl⟩ := exists_locally_constant_FLF F surj M n f,
+  obtain ⟨T1,hT1,h1⟩ := d_eq_zero_FLF F surj M n S f hf,
+  obtain ⟨T2,hT2,h2⟩ := norm_eq_FLF F surj M n S f,
+  let T := T1 ⊓ T2,
+  have hT : T ≤ S := le_trans inf_le_left hT1,
+  have hhT1 : T ≤ T1 := inf_le_left,
+  have hhT2 : T ≤ T2 := inf_le_right,
+  let g := ((FLF F surj M).map (hom_of_le hT).op).f _ f,
+  let g1 := ((FLF F surj M).map (hom_of_le hT1).op).f _ f,
+  let g2 := ((FLF F surj M).map (hom_of_le hT2).op).f _ f,
+  have hg1 : ((FLF F surj M).map (hom_of_le hhT1).op).f _ g1 = g,
+  { dsimp only [g, g1],
+    have : (hom_of_le hT).op = (hom_of_le hT1).op ≫ (hom_of_le hhT1).op, refl,
+    rw [this, functor.map_comp],
+    refl },
+  have hg2 : ((FLF F surj M).map (hom_of_le hhT2).op).f _ g2 = g,
+  { dsimp only [g, g2],
+    have : (hom_of_le hT).op = (hom_of_le hT2).op ≫ (hom_of_le hhT2).op, refl,
+    rw [this, functor.map_comp],
+    refl },
+  refine ⟨T, g, _, _, _, trivial⟩,
+  { rw ← (FLF_cocone F surj M).w (hom_of_le hT).op,
+    refl },
+  { rw ← hg1,
+    have := ((FLF F surj M).map (hom_of_le hhT1).op).comm (n+1) (n+2),
+    apply_fun (λ e, e g1) at this,
+    erw this, clear this,
+    dsimp only [g1, SemiNormedGroup.coe_comp_apply],
+    rw [h1, normed_group_hom.map_zero] },
+  { apply le_antisymm,
+    { dsimp only [g],
+      have := (FLF_cocone F surj M).w (hom_of_le hT).op,
+      rw ← this, clear this,
+      apply LocallyConstant_obj_map_norm_noninc },
+    { rw [← hg2, h2],
+      apply LocallyConstant_obj_map_norm_noninc } }
+end
 
 lemma FLF_norm_noninc (n : ℕ) (S : discrete_quotient F.left)
   (f : ((FLF F surj M).obj (op S)).X n) :
