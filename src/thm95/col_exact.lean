@@ -67,14 +67,33 @@ lemma is_weak_bounded_exact {C : system_of_complexes} {k K : ℝ≥0} [fact (1 �
   (scale_factorial.obj C).is_weak_bounded_exact k (K * (m+1)) m c₀ :=
 begin
   intros c hc i hi x ε hε,
-  obtain ⟨_, _, rfl, rfl, y, hy⟩ := hC c hc i hi ((of_rescale i!).app _ x) ε hε,
+  let δ := ε * i!,
+  have hδ : 0 < δ := mul_pos hε (nat.cast_pos.2 (nat.factorial_pos i)),
+  have hifact : ¬(↑(i!) : ℝ) = 0 := by exact_mod_cast nat.factorial_ne_zero _,
+  have him : 1 ≤ (↑m + 1) * ((↑i : ℝ) + 1)⁻¹,
+  { have : (↑i : ℝ) + 1 ≤ (↑m + 1) := by rwa [add_le_add_iff_right, nat.cast_le],
+    refine le_trans _ (mul_le_mul_of_nonneg_right this (inv_nonneg.2 (add_nonneg
+      ((@nat.cast_nonneg ℝ _ i)) zero_le_one))),
+    rw mul_inv_cancel,
+    refine (ne_of_lt _).symm,
+    refine add_pos_of_nonneg_of_pos (nat.cast_nonneg i) zero_lt_one },
+  obtain ⟨_, _, rfl, rfl, y, hy⟩ := hC c hc i hi ((of_rescale i!).app _ x) δ hδ,
   refine ⟨_, _, rfl, rfl, ((SemiNormedGroup.to_rescale (i-1)!).app _ y), _⟩,
   erw [rescale.norm_def, rescale.norm_def],
   simp only [nnreal.coe_nat_cast, nnreal.coe_add, nat.cast_succ, nat.factorial_succ,
     nat.cast_mul, nnreal.coe_one, nnreal.coe_mul, div_eq_mul_inv],
   rw [mul_inv_le_iff], swap, { exact_mod_cast nat.factorial_pos i },
   refine hy.trans _,
-  sorry
+  rw [left_distrib, mul_inv', ← mul_assoc ↑i!, mul_comm ↑i!, mul_assoc _ ↑i!, mul_comm ↑i!,
+    mul_assoc _ _ ↑i!, inv_mul_cancel_right' hifact, mul_comm _ ε, add_le_add_iff_right,
+    mul_assoc ↑K],
+  refine mul_le_mul_of_nonneg_left _ (nnreal.coe_nonneg _),
+  rw [mul_comm _ ((↑i : ℝ) + 1)⁻¹, ← mul_assoc,
+    ← one_mul ∥(C.d i (i + 1)) (((of_rescale ↑i!).app ((C.obj (op (k * c))).X i)) x)∥],
+  refine le_trans (le_mul_of_one_le_left (by simp only [one_mul, norm_nonneg]) him) _,
+  { refine mul_le_mul_of_nonneg_left _ (mul_nonneg (add_nonneg (nat.cast_nonneg m) zero_le_one)
+      (inv_nonneg.2 (add_nonneg (nat.cast_nonneg i) zero_le_one))),
+    simpa using le_refl _ },
 end
 
 end scale_factorial
