@@ -1,3 +1,5 @@
+import for_mathlib.simplicial.complex
+
 import polyhedral_lattice.cosimplicial
 import polyhedral_lattice.Hom
 import pseudo_normed_group.system_of_complexes
@@ -26,39 +28,40 @@ namespace thm95
 
 variables (BD : breen_deligne.data) (c_ : ℕ → ℝ≥0) [BD.suitable c_]
 variables (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)]
-variables (V : SemiNormedGroup.{v}) [normed_with_aut r V]
-variables (Λ : PolyhedralLattice.{u}) (M : ProFiltPseuNormGrpWithTinv.{w} r')
+variables (V : SemiNormedGroup.{u}) [normed_with_aut r V]
+variables (Λ : PolyhedralLattice.{u}) (M : ProFiltPseuNormGrpWithTinv.{u} r')
 variables (N : ℕ) [fact (0 < N)]
 
 section
 
 open PolyhedralLattice
 
-def Cech_nerve : simplex_category ⥤ (ProFiltPseuNormGrpWithTinv r')ᵒᵖ :=
-cosimplicial Λ N ⋙ Hom M
+def Cech_nerve : cosimplicial_object.augmented (ProFiltPseuNormGrpWithTinv.{u} r')ᵒᵖ :=
+(cosimplicial_object.augmented.whiskering_obj _ _ (Hom.{u u} M).right_op).obj
+  (augmented_cosimplicial.{u} Λ N)
 
-/-- Warning: this is a map in the *opposite* category. -/
-def Cech_augmentation_map : (Hom M).obj Λ ⟶ (Cech_nerve r' Λ M N).obj (mk 0) :=
-(Hom M).map (cosimplicial_augmentation_map Λ N)
+def Cech_augmentation_map : ((Cech_nerve r' Λ M N).right.obj (mk 0)).unop ⟶ (Hom M).obj (op Λ) :=
+(Hom M).map (cosimplicial_augmentation_map Λ N).op
 
-def cosimplicial_system_of_complexes : simplex_category ⥤ system_of_complexes :=
-Cech_nerve r' Λ M N ⋙ BD.system c_ r V r'
+lemma Cech_nerve_hom_zero :
+  (Cech_nerve.{u} r' Λ M N).hom.app (mk.{u} 0) = (Cech_augmentation_map.{u} r' Λ M N).op :=
+begin
+  dsimp only [Cech_nerve, Cech_augmentation_map, cosimplicial_object.augmented.whiskering_obj],
+  simp only [whisker_right_app, category.id_comp, functor.right_op_map, nat_trans.comp_app,
+    functor.const_comp_inv_app],
+  congr' 2,
+  dsimp only [augmented_cosimplicial, augmented_Cech_conerve],
+  rw cosimplicial_object.augment_hom_zero,
+  refl
+end
 
-def augmentation_map :
-  (BD.system c_ r V r').obj (op $ polyhedral_lattice.Hom Λ M) ⟶
-  (cosimplicial_system_of_complexes BD c_ r r' V Λ M N).obj (mk 0) :=
-(BD.system c_ r V r').map (Cech_augmentation_map r' Λ M N)
+def cosimplicial_system_of_complexes : cosimplicial_object.augmented system_of_complexes.{u} :=
+(cosimplicial_object.augmented.whiskering_obj.{u} _ _ (BD.system c_ r V r')).obj
+  (Cech_nerve r' Λ M N)
 
 @[simps X d]
 def double_complex_aux : cochain_complex system_of_complexes ℕ :=
-alt_face_map_cocomplex (augmentation_map BD c_ r r' V Λ M N)
-begin
-  dsimp only [augmentation_map, cosimplicial_system_of_complexes,
-    category_theory.functor.comp_map, Cech_augmentation_map, Cech_nerve,
-    cosimplicial_augmentation_map, cosimplicial],
-  simp only [← (BD.system c_ r V r').map_comp, ← (Hom M).map_comp],
-  rw augmentation_map_equalizes (diagonal_embedding Λ N),
-end
+(cosimplicial_system_of_complexes BD c_ r r' V Λ M N).to_cocomplex
 .
 
 @[simps obj map]
@@ -79,11 +82,15 @@ open_locale nat
 -- but before we do this, we need to rescale the norms in all the rows,
 -- so that the vertical differentials become norm-nonincreasing
 
+set_option pp.universes true
+
 @[simps X d]
 def double_complex_aux_rescaled : cochain_complex system_of_complexes ℕ :=
-(double_complex_aux BD c_ r r' V Λ M N ).modify
-  system_of_complexes.rescale_functor
-  system_of_complexes.rescale_nat_trans
+@homological_complex.modify _ _ _ _ _ _ _ _
+(double_complex_aux BD c_ r r' V Λ M N )
+  system_of_complexes.rescale_functor.{u}
+  system_of_complexes.rescale_nat_trans.{u u}
+  (system_of_complexes.rescale_functor.additive.{u u})
 
 @[simps obj map]
 def double_complex : system_of_double_complexes :=
@@ -99,16 +106,21 @@ lemma double_complex.row_one :
 
 lemma double_complex.row_map_zero_one :
   (double_complex BD c_ r r' V Λ M N).row_map 0 1 =
-  (BD.system c_ r V r').map (Cech_augmentation_map r' Λ M N) :=
+  (BD.system c_ r V r').map (Cech_augmentation_map r' Λ M N).op :=
 begin
   ext c i : 4,
-  dsimp only [double_complex, homological_complex.as_functor,
-    system_of_double_complexes.row_map_app_f, system_of_double_complexes.d,
+  dsimp only [system_of_double_complexes.row_map_app_f, system_of_double_complexes.d,
+    double_complex, homological_complex.as_functor_obj,
     double_complex_aux_rescaled, homological_complex.modify,
     system_of_complexes.rescale_nat_trans, nat_trans.id_app,
-    system_of_complexes.rescale_functor, functor.id_map,
-    double_complex_aux, alt_face_map_cocomplex],
-  erw [category.comp_id, cochain_complex.of_d],
+    system_of_complexes.rescale_functor, functor.id_map, double_complex_aux, op_unop],
+  erw [category.comp_id, ← Cech_nerve_hom_zero],
+  simp only [dite_eq_ite, breen_deligne.data.system_map, if_true, eq_self_iff_true,
+    cosimplicial_object.augmented.to_cocomplex_d_2, eq_to_hom_refl, category.comp_id],
+  dsimp only [cosimplicial_object.augmented.to_cocomplex_d,
+    cosimplicial_system_of_complexes, cosimplicial_object.augmented.whiskering_obj],
+  simp only [breen_deligne.data.system_map, whisker_right_app, category.id_comp,
+    nat_trans.comp_app, functor.const_comp_inv_app],
   refl
 end
 
@@ -125,9 +137,9 @@ namespace thm95
 
 variables (BD : breen_deligne.data)
 variables (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)]
-variables (V : SemiNormedGroup.{v}) [normed_with_aut r V]
+variables (V : SemiNormedGroup.{u}) [normed_with_aut r V]
 variables (c_ : ℕ → ℝ≥0) [BD.very_suitable r r' c_]
-variables (Λ : PolyhedralLattice.{u}) (M : ProFiltPseuNormGrpWithTinv.{w} r')
+variables (Λ : PolyhedralLattice.{u}) (M : ProFiltPseuNormGrpWithTinv.{u} r')
 variables (N : ℕ) [fact (0 < N)]
 
 variables {r r' V c_ Λ M N}
@@ -145,9 +157,10 @@ begin
   { norm_num },
   have : (2 : ℝ≥0) = ∑ i : fin 2, 1,
   { simp only [finset.card_fin, mul_one, nat.cast_bit0, finset.sum_const, nsmul_eq_mul, nat.cast_one] },
-  dsimp [system_of_complexes.rescale_functor, double_complex_aux, alt_face_map_cocomplex],
-  erw [cochain_complex.of_d],
-  dsimp [alt_face_map_cocomplex.d, alt_face_map_cocomplex.coboundary],
+  dsimp [system_of_complexes.rescale_functor, double_complex_aux,
+    cosimplicial_object.augmented.to_cocomplex_d],
+  erw [category.comp_id, if_pos rfl],
+  dsimp [cosimplicial_object.coboundary],
   simp only [← nat_trans.app_hom_apply, add_monoid_hom.map_sum, add_monoid_hom.map_gsmul,
     ← homological_complex.f_hom_apply, this],
   apply normed_group_hom.bound_by.sum,
@@ -170,9 +183,10 @@ begin
   have : (p+1+1+1 : ℝ≥0) = ∑ i : fin (p+1+1+1), 1,
   { simp only [finset.card_fin, mul_one, finset.sum_const, nsmul_eq_mul, nat.cast_id,
       nat.cast_bit1, nat.cast_add, nat.cast_one] },
-  dsimp [system_of_complexes.rescale_functor, double_complex_aux, alt_face_map_cocomplex],
-  erw [cochain_complex.of_d],
-  dsimp [alt_face_map_cocomplex.d, alt_face_map_cocomplex.coboundary],
+  dsimp [system_of_complexes.rescale_functor, double_complex_aux,
+    cosimplicial_object.augmented.to_cocomplex_d],
+  erw [category.comp_id, if_pos rfl],
+  dsimp [cosimplicial_object.coboundary],
   simp only [← nat_trans.app_hom_apply, add_monoid_hom.map_sum, add_monoid_hom.map_gsmul,
     ← homological_complex.f_hom_apply, this],
   apply normed_group_hom.bound_by.sum,

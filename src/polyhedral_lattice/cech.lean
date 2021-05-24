@@ -8,7 +8,7 @@ import polyhedral_lattice.quotient
 import for_mathlib.free_abelian_group
 import for_mathlib.finsupp
 import for_mathlib.normed_group
-
+import for_mathlib.simplicial.augmented
 
 /-!
 # The Čech conerve attached to `Λ → Λ'`
@@ -331,7 +331,7 @@ open Cech_conerve
 
 variables [fact f.to_add_monoid_hom.range.saturated]
 
-@[simps] def Cech_conerve : simplex_category ⥤ PolyhedralLattice :=
+@[simps] def Cech_conerve : cosimplicial_object PolyhedralLattice :=
 { obj := λ n, obj f n.len,
   map := λ n m g, conerve.map f g.to_preorder_hom,
   map_id' := λ _, conerve.map_id f,
@@ -339,6 +339,34 @@ variables [fact f.to_add_monoid_hom.range.saturated]
 
 @[simps] def Cech_augmentation_map : Λ ⟶ (Cech_conerve f).obj (mk 0) :=
 f ≫ (obj_zero_iso f).inv
+
+def augmented_Cech_conerve : cosimplicial_object.augmented PolyhedralLattice :=
+(Cech_conerve f).augment Λ (Cech_augmentation_map f)
+begin
+  intros n g₁ g₂,
+  ext l : 2,
+  simp only [comp_apply, Cech_augmentation_map_apply, Cech_conerve_map, conerve.map_apply,
+    add_monoid_hom.to_fun_eq_coe, obj_zero_iso, iso.trans_inv, finsupp.single_add_hom_apply,
+    finsupp_fin_one_iso_inv, obj_zero_iso'_inv],
+  have H1 := conerve.map_add_hom_π f (g₁.to_preorder_hom) (finsupp.single 0 (f l)),
+  have H2 := conerve.map_add_hom_π f (g₂.to_preorder_hom) (finsupp.single 0 (f l)),
+  refine H1.trans (eq.trans _ H2.symm), clear H1 H2,
+  simp only [finsupp.map_domain_single, finsupp.map_domain.add_monoid_hom_apply],
+  rw [← sub_eq_zero, ← normed_group_hom.map_sub, conerve.π_apply_eq_zero_iff],
+  refine ⟨_, λ i, _⟩,
+  { simp only [finsupp.sub_apply, finset.sum_sub_distrib, sub_eq_zero, finsupp.single_apply,
+      finset.sum_ite_eq, finset.mem_univ, if_true], },
+  { by_cases H : g₁.to_preorder_hom 0 = g₂.to_preorder_hom 0,
+    { refine ⟨0, _⟩, simp only [H, sub_self, f.map_zero, finsupp.zero_apply], },
+    simp only [finsupp.sub_apply, finsupp.single_apply],
+    by_cases h₁ : i = g₁.to_preorder_hom 0,
+    { refine ⟨l, _⟩, subst i,
+      simp only [if_neg (ne.symm H), if_true, eq_self_iff_true, sub_zero], },
+    by_cases h₂ : i = g₂.to_preorder_hom 0,
+    { refine ⟨-l, _⟩, subst i,
+      simp only [if_neg H, if_true, eq_self_iff_true, zero_sub, f.map_neg], },
+    { refine ⟨0, _⟩, simp only [if_false, ne.symm h₁, ne.symm h₂, f.map_zero, sub_zero], } }
+end
 
 lemma augmentation_map_equalizes :
   Cech_augmentation_map f ≫ (Cech_conerve f).map (δ 0) =

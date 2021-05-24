@@ -38,33 +38,28 @@ variables {r' : ℝ≥0} [fact (0 < r')]
 
 /-- Like `polyhedral_lattice.Hom` but functorial in the first entry.
 Unfortunately, this means that the entries are now swapped.
-So `(PolyhedralLattice.Hom M).obj (op Λ) = Λ →+ M`.
-
-Implementation detail: Contrary to what is usually done,
-we model this contravariant functor by taking the opposite category on the target,
-this way it composes flawlessly with other functors in this project,
-such as `thm95.Cech_nerve` and `breen_deligne.package.System`. -/
+So `(PolyhedralLattice.Hom M).obj (op Λ) = Λ →+ M`. -/
 @[simps]
 def Hom (M : ProFiltPseuNormGrpWithTinv r') :
-  PolyhedralLattice ⥤ (ProFiltPseuNormGrpWithTinv r')ᵒᵖ :=
-{ obj := λ Λ, op (Hom Λ M),
-  map := λ Λ₁ Λ₂ f, quiver.hom.op $
-  { to_fun := λ g, g.comp f.to_add_monoid_hom,
+  PolyhedralLatticeᵒᵖ ⥤ (ProFiltPseuNormGrpWithTinv r') :=
+{ obj := λ Λ, (Hom Λ.unop M),
+  map := λ Λ₁ Λ₂ f,
+  { to_fun := λ g, g.comp f.unop.to_add_monoid_hom,
     map_zero' := add_monoid_hom.zero_comp _,
     map_add' := λ g₁ g₂, add_monoid_hom.add_comp _ _ _,
-    strict' := λ c g hg c' l hl, hg ((f.strict_nnnorm _).trans hl),
+    strict' := λ c g hg c' l hl, hg ((f.unop.strict_nnnorm _).trans hl),
     continuous' := λ c,
     begin
       rw [add_monoid_hom.continuous_iff],
       intro l,
-      haveI : fact (nnnorm (f l) ≤ nnnorm l) := ⟨f.strict_nnnorm l⟩,
-      have aux := (continuous_apply (f l)).comp
-        (add_monoid_hom.incl_continuous Λ₂ r' M c),
-      rwa (embedding_cast_le (c * nnnorm (f l)) (c * nnnorm l)).continuous_iff at aux
+      haveI : fact (nnnorm (f.unop l) ≤ nnnorm l) := ⟨f.unop.strict_nnnorm l⟩,
+      have aux := (continuous_apply (f.unop l)).comp
+        (add_monoid_hom.incl_continuous Λ₁.unop r' M c),
+      rwa (embedding_cast_le (c * nnnorm (f.unop l)) (c * nnnorm l)).continuous_iff at aux
     end,
     map_Tinv' := λ g, by { ext l, refl } },
-  map_id' := λ Λ, by { rw [← op_id, quiver.hom.op_inj.eq_iff], ext, refl },
-  map_comp' := by { intros, rw [← op_comp, quiver.hom.op_inj.eq_iff], ext, refl } }
+  map_id' := λ Λ, by { ext, refl },
+  map_comp' := by { intros, ext, refl } }
 
 end PolyhedralLattice
 

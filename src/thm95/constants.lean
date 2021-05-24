@@ -13,7 +13,6 @@ open_locale nnreal
 variables (BD : breen_deligne.package) (c_ c' : ℕ → ℝ≥0)
 variables [BD.data.suitable c_] [breen_deligne.package.adept BD c_ c']
 variables (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)]
-variables (V : SemiNormedGroup)
 variables (Λ : PolyhedralLattice) -- (M : ProFiltPseuNormGrpWithTinv r')
 variables (m : ℕ)
 

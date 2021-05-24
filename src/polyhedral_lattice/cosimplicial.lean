@@ -80,12 +80,15 @@ begin
   rw [← finsupp.smul_apply, gsmul_rescaled_power _ _ n l', ← hl, diagonal_embedding_apply],
 end
 
-def cosimplicial : simplex_category ⥤ PolyhedralLattice.{u} :=
+def cosimplicial : cosimplicial_object PolyhedralLattice.{u} :=
 Cech_conerve $ diagonal_embedding Λ N
 
 open simplex_category
 
 def cosimplicial_augmentation_map : Λ ⟶ (cosimplicial Λ N).obj (mk 0) :=
 Cech_augmentation_map _
+
+def augmented_cosimplicial : cosimplicial_object.augmented PolyhedralLattice.{u} :=
+augmented_Cech_conerve $ diagonal_embedding Λ N
 
 end PolyhedralLattice
