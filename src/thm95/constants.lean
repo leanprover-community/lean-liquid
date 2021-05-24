@@ -18,7 +18,6 @@ open real
 
 section b_function
 
-/-- `b c' r r' m` is the smallest `b` such that `2 * (k' c' m) * (r / r') ^ b ≤ (ε m)` -/
 def b (r r' k' ε : ℝ): ℕ := nat_ceil ((log $ ε/(2 * k'))/log (r/r'))
 
 lemma real.log_pow {x : ℝ} (hx : 0 < x) (n : ℕ) : real.log (x ^ n) = n * real.log x :=
@@ -43,6 +42,23 @@ begin
 end
 
 end b_function
+
+section N₂_function
+open real
+
+def N₂ (r' k' b : ℝ) := nat_ceil (log (k'/r'^b)/ log 2)
+
+lemma N₂_spec {r' k' b : ℝ} (hr' : 0 < r') (hk' : 0 < k') : k'/ (2 ^ (N₂ r' k' b)) ≤ r' ^ b :=
+begin
+  have f₁ : (0 : ℝ) < 2 ^ N₂ r' k' b := pow_pos zero_lt_two _,
+  have f₂ : (0 : ℝ) < r' ^ b := rpow_pos_of_pos hr' _,
+  have f₃ : 0 < k' / r' ^ b := div_pos hk' f₂,
+  have f₄ : 0 < log 2 := log_pos one_lt_two,
+  rw [div_le_iff' f₁, ← div_le_iff f₂,  ← log_le_log f₃ f₁, log_pow zero_lt_two, ← div_le_iff f₄],
+  apply le_nat_ceil,
+end
+
+end N₂_function
 
 variables (BD : breen_deligne.package) (c_ c' : ℕ → ℝ≥0)
 variables [BD.data.suitable c_] [breen_deligne.package.adept BD c_ c']
