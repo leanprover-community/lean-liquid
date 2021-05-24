@@ -31,7 +31,7 @@ lemma ε_pos : ∀ m K [fact (1 ≤ K)], 0 < ε m K
 | 0     K hK := nnreal.inv_pos.mpr (mul_pos zero_lt_two (lt_of_lt_of_le zero_lt_one hK.out))
 | (m+1) K hK := by { dsimp [ε], exactI ε_pos m _ }
 
-noncomputable
+--noncomputable
 def k₀ : Π (m : ℕ) (k : ℝ≥0), ℝ≥0
 | 0     k := k
 | (m+1) k := k₀ m (k * k * k)
@@ -58,13 +58,15 @@ namespace universal_constants
 
 open system_of_double_complexes breen_deligne
 
+noncomputable
 def k₁ : ℕ → ℝ≥0
 | 0     := 2 -- should be anything > 1
-| (m+1) := sorry
+| (m+1) := max 1 ((max (normed_spectral.k₀ m (k₁ m)) $ (finset.range (m+2)).sup c')^2)
 
-instance one_le_k₁ : ∀ m, fact (1 ≤ k₁ m)
+
+instance one_le_k₁ : Π (m : ℕ), fact (1 ≤ k₁ c' m)
 | 0     := ⟨one_le_two⟩
-| (m+1) := sorry
+| (m+1) := ⟨le_max_left _ _⟩
 
 def K₁ : ℕ → ℝ≥0
 | 0     := 2 -- should be anything > 1, probably
@@ -78,7 +80,7 @@ instance one_le_K₁ : ∀ m, fact (1 ≤ K₁ m)
 -- === maybe we should pass an `m-1` around somewhere...
 
 /-- `k₀ m` is the constant `k₀ m (k m)` used in the proof of `normed_spectral` -/
-abbreviation k₀ : ℝ≥0 := normed_spectral.k₀ m (k₁ m)
+abbreviation k₀ : ℝ≥0 := normed_spectral.k₀ m (k₁ c' m)
 
 /-- `K₀ m` is the constant `K₀ m (K m)` used in the proof of `normed_spectral` -/
 abbreviation K₀ : ℝ≥0 := normed_spectral.K₀ m (K₁ m)
@@ -89,7 +91,7 @@ abbreviation ε : ℝ≥0 := normed_spectral.ε m (K₁ m)
 instance ε_pos : fact (0 < ε m) := ⟨normed_spectral.ε_pos _ _⟩
 
 /-- `k' c' m` is the maximum of `k₀ m` and the constants `c' 0`, `c' 1`, ..., `c' m`, `c' (m+1)` -/
-def k' : ℝ≥0 := max (k₀ m) $ (finset.range (m+2)).sup c'
+def k' : ℝ≥0 := max (k₀ c' m) $ (finset.range (m+2)).sup c'
 
 lemma c'_le_k' {i : ℕ} (hi : i ≤ m+1) : c' i ≤ k' c' m :=
 le_max_iff.mpr $ or.inr $ finset.le_sup $ finset.mem_range.mpr $ nat.lt_succ_iff.mpr hi
@@ -100,7 +102,7 @@ instance fact_c'_le_k' {i : ℕ} (hi : fact (i ≤ m+1)) : fact (c' i ≤ k' c' 
 instance one_le_k' : fact (1 ≤ k' c' m) :=
 ⟨le_trans (fact.out _) $ le_max_left _ _⟩
 
-instance k₀_le_k' : fact (normed_spectral.k₀ m (k₁ m) ≤ k' c' m) := ⟨le_max_left _ _⟩
+instance k₀_le_k' : fact (normed_spectral.k₀ m (k₁ c' m) ≤ k' c' m) := ⟨le_max_left _ _⟩
 
 -- in the PDF `b` is *positive*, we might need to make that explicit
 lemma b_exists : ∃ b : ℕ, 2 * (k' c' m) * (r / r') ^ b ≤ (ε m) :=
@@ -256,16 +258,27 @@ begin
   apply one_le_H
 end
 
-instance k_le_k₁ [fact (0 < m)] : fact (k c' (m - 1) ≤ k₁ m) := sorry
+
+instance k_le_k₁ [fact (0 < m)] : fact (k c' (m - 1) ≤ k₁ c' m) :=
+begin
+  unfreezingI {cases m},
+  { exact false.elim (lt_irrefl 0 (fact.elim infer_instance)) },
+  { apply fact.mk,
+    simp only [k₁],
+    convert le_max_right _ _,
+    rw pow_two,
+    refl }
+end
+
 
 instance K_le_K₁ [fact (0 < m)] : fact (K BD c' r r' (m - 1) ≤ K₁ m) := sorry
 
-def k₁_sqrt : ℝ≥0 := ⟨real.sqrt (k₁ m), real.sqrt_nonneg _⟩
+def k₁_sqrt : ℝ≥0 := ⟨real.sqrt (k₁ c' m), real.sqrt_nonneg _⟩
 
-instance one_le_k₁_sqrt : fact (1 ≤ k₁_sqrt m) := ⟨begin
-  change (1 : ℝ) ≤ real.sqrt (k₁ m),
+instance one_le_k₁_sqrt : fact (1 ≤ k₁_sqrt c' m) := ⟨begin
+  change (1 : ℝ) ≤ real.sqrt (k₁ c' m),
   rw [real.le_sqrt' zero_lt_one, pow_two, mul_one],
-  exact (universal_constants.one_le_k₁ m).elim,
+  exact (universal_constants.one_le_k₁ c' m).elim,
 end⟩
 
 lemma K₁_spec : (m + 2 + (r + 1) / r * (r / (1 - r) + 1) * (m + 2) * (m + 2) : ℝ≥0) ≤ K₁ m :=
@@ -286,7 +299,7 @@ lemma c₀_pred_le_of_le (i : ℕ) (hi : i + 2 ≤ m + 1) :
 sorry
 
 lemma c₀_spec (j : ℕ) (hj : j ≤ m) :
-  lem98.d Λ (N c' r r' m) ≤ (k₁_sqrt m - 1) * (r' * (c_ j * c₀ Λ c' r r' m)) / (N c' r r' m) :=
+  lem98.d Λ (N c' r r' m) ≤ (k₁_sqrt c' m - 1) * (r' * (c_ j * c₀ Λ c' r r' m)) / (N c' r r' m) :=
 sorry
 
 end universal_constants
