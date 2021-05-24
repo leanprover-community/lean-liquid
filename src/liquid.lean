@@ -28,7 +28,8 @@ variables (c_ : ℕ → ℝ≥0)  -- implicit constants, chosen once and for all
                           -- see the sentence after that statement of Thm 9.5
 
 /-- A mix of Theorems 9.4 and 9.5 in [Analytic] -/
-theorem first_target (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)]
+theorem first_target (r r' : ℝ≥0)
+  [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r < 1)] [fact (r' < 1)]
   [BD.data.very_suitable r r' c_] [∀ (i : ℕ), fact (0 < c_ i)] :
   ∀ m : ℕ,
   ∃ (k K : ℝ≥0) [fact (1 ≤ k)],

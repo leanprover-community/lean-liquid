@@ -319,6 +319,11 @@ begin
   { delta col_iso_obj_X, exact isometry_id }
 end
 
+lemma col_iso_inv_strict [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) (i : ℕ) :
+  isometry (iso_app ((col_iso BD c_ r r' V Λ M N n).app c) i).inv :=
+(col_iso_strict BD c_ r r' V Λ M N n c i).right_inv $
+λ x, by rw [← comp_apply, iso.inv_hom_id, id_apply]
+
 end
 
 lemma col_obj_X_zero [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) :
@@ -385,9 +390,8 @@ lemma col_exact' [normed_with_aut r V] [fact (r < 1)]
   (k : ℝ≥0) [fact (1 ≤ k)] (m : ℕ) (c₀ : ℝ≥0) (hdkc₀N : d ≤ (k - 1) * c₀ / N)
   (k' K' : ℝ≥0) [fact (1 ≤ k')] (hk' : k * k ≤ k')
   (hK' : (m + 2 + ((r + 1) / r) * (r / (1 - r) + 1) * (m + 2) * (m + 2) : ℝ≥0) ≤ K')
-  (c₁ c₂ c₃ : ℝ≥0) [fact (c₀ ≤ r' * c₁)] [fact (c₀ ≤ c_ n * c₂)] [fact (c₁ ≤ c_ n * c₂)] :
-  (double_complex.col'.{u} BD c_ r r' V Λ M N n).is_weak_bounded_exact
-    k' K' m c₂ :=
+  (c₁ c₂ : ℝ≥0) [fact (c₀ ≤ r' * c₁)] [fact (c₀ ≤ c_ n * c₂)] [fact (c₁ ≤ c_ n * c₂)] :
+  (double_complex.col'.{u} BD c_ r r' V Λ M N n).is_weak_bounded_exact k' K' m c₂ :=
 begin
   have adm := (col_complex_rescaled.admissible.{u} r' V Λ M N (BD.X n)),
   have adm2 := adm.scale_index_left r',
@@ -417,6 +421,20 @@ begin
     apply normed_group_hom.isometry_of_norm,
     intro v,
     sorry }
+end
+
+lemma col_exact [normed_with_aut r V] [fact (r < 1)]
+  (d : ℝ≥0) [pseudo_normed_group.splittable (Λ →+ M) N d]
+  (k : ℝ≥0) [fact (1 ≤ k)] (m : ℕ) (c₀ : ℝ≥0) (hdkc₀N : d ≤ (k - 1) * c₀ / N)
+  (k' K' : ℝ≥0) [fact (1 ≤ k')] (hk' : k * k ≤ k')
+  (hK' : (m + 2 + ((r + 1) / r) * (r / (1 - r) + 1) * (m + 2) * (m + 2) : ℝ≥0) ≤ K')
+  (c₁ c₂ : ℝ≥0) (_ : fact (c₀ ≤ r' * c₁)) (_ : fact (c₀ ≤ c_ n * c₂)) (_ : fact (c₁ ≤ c_ n * c₂)) :
+  ((double_complex.{u} BD c_ r r' V Λ M N).col n).is_weak_bounded_exact k' K' m c₂ :=
+begin
+  have key := col_exact' BD c_ r r' V Λ M N n d k m c₀ hdkc₀N k' K' hk' hK' c₁ c₂,
+  apply key.of_iso (double_complex.col_iso BD c_ r r' V Λ M N n).symm,
+  intros,
+  apply double_complex.col_iso_inv_strict
 end
 
 end thm95

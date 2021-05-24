@@ -1,4 +1,7 @@
+import data.real.sqrt
+
 import polyhedral_lattice.cosimplicial
+import combinatorial_lemma
 import breen_deligne.eg
 
 import facts.nnreal
@@ -257,20 +260,31 @@ instance k_le_k₁ [fact (0 < m)] : fact (k c' (m - 1) ≤ k₁ m) := sorry
 
 instance K_le_K₁ [fact (0 < m)] : fact (K BD c' r r' (m - 1) ≤ K₁ m) := sorry
 
--- include c' r r' m
-include m
+lemma k₁_sqrt : ℝ≥0 := ⟨real.sqrt (k₁ m), real.sqrt_nonneg _⟩
+
+instance one_le_k₁_sqrt : fact (1 ≤ k₁_sqrt m) := sorry
+
+lemma K₁_spec : (m + 2 + (r + 1) / r * (r / (1 - r) + 1) * (m + 2) * (m + 2) : ℝ≥0) ≤ K₁ m :=
+sorry
 
 -- this should be a constant roughly determined by `combinatorial_lemma.lean` (`lem98`)
 -- it should probably also depend on an `N : ℕ`
-def c₀ (Λ : PolyhedralLattice) : ℝ≥0 :=
+-- define this such that the lemmas below hold
+def c₀ (Λ : PolyhedralLattice) (c' : ℕ → ℝ≥0) (r r' : ℝ≥0) (m : ℕ) : ℝ≥0 :=
 sorry
 
 lemma c₀_pred_le (hm : 0 < m) :
-  fact (c₀ (m - 1) ((Λ.cosimplicial (N c' r r' m)).obj (simplex_category.mk 0)) ≤ c₀ m Λ) :=
+  fact (c₀ ((Λ.cosimplicial (N c' r r' m)).obj (simplex_category.mk 0)) c' r r' (m - 1) ≤
+    c₀ Λ c' r r' m) :=
 sorry
 
 lemma c₀_pred_le_of_le (i : ℕ) (hi : i + 2 ≤ m + 1) :
-  fact (c₀ (m - 1) ((Λ.cosimplicial (N c' r r' m)).obj (simplex_category.mk (i + 1))) ≤ c₀ m Λ) :=
+  fact (c₀ ((Λ.cosimplicial (N c' r r' m)).obj (simplex_category.mk (i + 1))) c' r r' (m - 1) ≤
+    c₀ Λ c' r r' m) :=
+sorry
+
+lemma c₀_spec (j : ℕ) (hj : j ≤ m) :
+  lem98.d Λ (N c' r r' m) ≤ (k₁_sqrt m - 1) * (r' * (c_ j * c₀ Λ c' r r' m)) / (N c' r r' m) :=
 sorry
 
 end universal_constants
