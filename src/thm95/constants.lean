@@ -267,8 +267,6 @@ instance one_le_k₁_sqrt : fact (1 ≤ k₁_sqrt m) := sorry
 lemma K₁_spec : (m + 2 + (r + 1) / r * (r / (1 - r) + 1) * (m + 2) * (m + 2) : ℝ≥0) ≤ K₁ m :=
 sorry
 
--- this should be a constant roughly determined by `combinatorial_lemma.lean` (`lem98`)
--- it should probably also depend on an `N : ℕ`
 -- define this such that the lemmas below hold
 def c₀ (Λ : PolyhedralLattice) (c' : ℕ → ℝ≥0) (r r' : ℝ≥0) (m : ℕ) : ℝ≥0 :=
 sorry

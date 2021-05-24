@@ -178,6 +178,10 @@ def T_inv_sub_Tinv [normed_with_aut r V] :
     comm' := by { rintros i j (rfl : i + 1 = j), exact T_inv_sub_Tinv_comm r r' V Λ M N n c i } },
   naturality' := sorry }
 
+def T_inv_sub_Tinv' [normed_with_aut r V] :=
+(system_of_complexes.ScaleIndexRight (c_ n)).map
+  (col_complex_rescaled.T_inv_sub_Tinv r r' V Λ M N (BD.X n))
+
 end col_complex_rescaled
 
 namespace double_complex
@@ -375,6 +379,17 @@ lemma col_ι [normed_with_aut r V] :
     sorry
   end }
 
+variables [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) (i : ℕ)
+
+lemma col_ι_range :
+  (((double_complex.col_ι BD c_ r r' V Λ M N n).app c).f i).range =
+  normed_group_hom.ker (((col_complex_rescaled.T_inv_sub_Tinv' BD c_ r r' V Λ M N (BD.X n)).app c).f i) :=
+sorry
+
+lemma col_ι_isometry :
+  isometry (((double_complex.col_ι BD c_ r r' V Λ M N n).app c).f i) :=
+sorry
+
 end double_complex
 
 namespace col_complex_rescaled
@@ -395,8 +410,7 @@ lemma col_exact' [normed_with_aut r V] [fact (r < 1)]
 begin
   have adm := (col_complex_rescaled.admissible.{u} r' V Λ M N (BD.X n)),
   have adm2 := adm.scale_index_left r',
-  let T_T := (system_of_complexes.ScaleIndexRight (c_ n)).map
-    (col_complex_rescaled.T_inv_sub_Tinv r r' V Λ M N (BD.X n)),
+  let T_T := col_complex_rescaled.T_inv_sub_Tinv; r r' V Λ M N (BD.X n),
   have H := (col_complex_rescaled.is_weak_bounded_exact.{u}
     r' V Λ M N (BD.X n) d k (m+1) c₀ hdkc₀N),
   have H1 := H.scale_index_right _ c₂ (c_ n) adm,
@@ -410,17 +424,14 @@ begin
   any_goals { clear key adm2 H1 H2 },
   { sorry },
   { sorry },
-  { sorry },
+  { apply double_complex.col_ι_range },
   { apply system_of_complexes.admissible_of_isometry (adm.scale_index_right _) h_isom, },
   { refine ⟨le_trans (le_of_eq _) hK'⟩,
     simp only [nat.cast_add, nat.cast_one, bit0, ← add_assoc, or_false, add_eq_zero_iff,
       one_ne_zero, add_right_inj, mul_eq_mul_right_iff, and_false, div_eq_mul_inv],
     rw [add_mul, one_mul, mul_inv_cancel],
     exact ne_of_gt (fact.out _) },
-  { intros c i,
-    apply normed_group_hom.isometry_of_norm,
-    intro v,
-    sorry }
+  { intros c i, apply double_complex.col_ι_isometry, }
 end
 
 lemma col_exact [normed_with_aut r V] [fact (r < 1)]
