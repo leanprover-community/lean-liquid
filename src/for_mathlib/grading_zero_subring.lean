@@ -79,8 +79,9 @@ variables {A : Type*} [decidable_eq A] [add_monoid A]
 -- for `convert` because an external direct sum of `Gᵢ i` is syntactically different to
 -- an external direct sum of `(Gᵢ i).to_add_submonoid` and this caused me problems.
 -- In the end I've just stuck to the case we need.
--- *TODO* -- this should be a sub-R₀-algebra
+-- *TODO* -- this should be a sub-R₀-algebra (I make it a sub-R₀-algebra later in the comm case)
 -- and given an inclusion of submonoids one should get an inclusion of sub-R₀-algebras
+-- TODO : change def to "support in S" ****
 def subring_of_add_submonoid
     (S : add_submonoid A) : subring R :=
  { carrier := {r : R | ∀ ⦃a : A⦄, a ∉ S → add_subgroup_decomposition Gᵢ r a = 0 },

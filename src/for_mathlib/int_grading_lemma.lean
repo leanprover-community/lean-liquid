@@ -14,52 +14,33 @@ namespace direct_sum
 
 namespace has_add_subgroup_decomposition
 
-def nonneg_piece_subring_of_int_grading {R : Type*} [ring R] (Gᵢ : ℤ → add_subgroup R)
-  [has_add_subgroup_decomposition Gᵢ] [add_subgroup.is_gmonoid Gᵢ] : subring R :=
-subring_of_add_submonoid R Gᵢ
+def nonneg_piece_subalgebra_of_int_grading {R : Type*} [comm_ring R] (Gᵢ : ℤ → add_subgroup R)
+  [has_add_subgroup_decomposition Gᵢ] [add_subgroup.is_gmonoid Gᵢ] : subalgebra (Gᵢ 0) R :=
+subalgebra_of_add_submonoid R Gᵢ
 { carrier := {n : ℤ | 0 ≤ n},
   zero_mem' := le_refl (0 : ℤ),
   add_mem' := λ a b, @add_nonneg ℤ a b _ _ _ _ }
 
-universe u
--- doesn't seem to fire (perhaps there was a universe issue which I've since fixed)
-instance (R : Type u) [comm_ring R] (Gᵢ : ℤ → add_subgroup R)
-  [has_add_subgroup_decomposition Gᵢ] [add_subgroup.is_gmonoid Gᵢ] :
-  algebra (zero_component_subring R Gᵢ) (nonneg_piece_subring_of_int_grading Gᵢ) :=
-ring_hom.to_algebra $ subring.incl R
-  (zero_component_subring R Gᵢ) (nonneg_piece_subring_of_int_grading Gᵢ)
-begin
-  intros r hr n hn,
-  change r ∈ Gᵢ 0 at hr,
-  change ¬0 ≤ n at hn,
-  rw mem_piece_iff_single_support at hr,
-  apply hr,
-  apply ne_of_lt,
-  exact not_le.mp hn,
-end
-
 -- I should comment this
 lemma exist_fg_gens {R : Type*} [ring R] {M : Type*} [add_comm_group M] [module R M]
   {S : set M} (hS : (submodule.span R S).fg) :
-  ∃ T : finset M, (T : set M) ⊆ S ∧ submodule.span R (T : set M)= submodule.span R S :=
+  ∃ T : finset M, (T : set M) ⊆ S ∧ submodule.span R (T : set M) = submodule.span R S :=
 begin
   rcases hS with ⟨U, hU⟩,
   have hU2 : ∀ u ∈ U, ∃ V : finset M, (V : set M) ⊆ S ∧ u ∈ submodule.span R (V : set M),
   { intros,
     apply submodule.mem_span_finite_of_mem_span,
     rw ←hU,
-    apply submodule.subset_span,
-    exact finset.mem_coe.mpr H },
+    refine submodule.subset_span (finset.mem_coe.mpr H) },
   choose F hF1 hF2 using hU2,
   classical,
+  -- we don't have dependent bind
   let T := finset.bUnion U (λ u, if h : u ∈ U then F u h else ∅),
   have hTS : (T : set M) ⊆ S,
   { intros x hx,
-    rw finset.mem_coe at hx,
-    rw finset.mem_bUnion at hx,
+    rw [finset.mem_coe, finset.mem_bUnion] at hx,
     rcases hx with ⟨a, haU, ha⟩,
-    rw dif_pos haU at ha,
-    rw ← finset.mem_coe at ha,
+    rw [dif_pos haU, ← finset.mem_coe] at ha,
     apply hF1 _ haU ha },
   refine ⟨T, hTS, _⟩,
   apply le_antisymm,
@@ -108,7 +89,6 @@ open_locale direct_sum
 
     -- parsing issue on next line *and* why do i have to even let Lean know the type?
     -- let ZZZ := (to_add_monoid (λ (i : ℤ), (Gᵢ i).subtype) : (⨁ i, Gᵢ i) →+ R),
-
 
 theorem nonnegative_subalgebra_fg_over_zero_subalgebra_of_int_grading_of_noeth
   (R : Type u) [comm_ring R] [is_noetherian_ring R] (Gᵢ : ℤ → add_subgroup R)
