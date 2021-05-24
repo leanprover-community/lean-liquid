@@ -81,7 +81,6 @@ def arrow_limit_cone : limits.limit_cone (arrow_diagram F surj) :=
 arrow.limit_cone _ ⟨_,limit_cone_is_limit _⟩ ⟨_,limit_cone_is_limit _⟩
 
 /-- lifing arrow_cone gives an isomorphism on the left -/
-@[simps]
 instance arrow_is_iso_lift_left : is_iso ((arrow_limit_cone F surj).is_limit.lift
   (arrow_cone F surj)).left := Profinite.is_iso_as_limit_cone_lift _
 
@@ -139,4 +138,3 @@ limits.is_limit.of_iso_limit (arrow_limit_cone F surj).is_limit
   (arrow_cone_iso F surj).symm
 
 end Profinite
-#lint
