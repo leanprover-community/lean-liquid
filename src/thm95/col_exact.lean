@@ -36,6 +36,15 @@ def Cech_nerve' : cosimplicial_object.augmented (ℝ≥0ᵒᵖ ⥤ SemiNormedGro
 (cosimplicial_object.augmented.whiskering_obj.{u} _ _ (CLCFP' r' V n)).obj
   (Cech_nerve r' Λ M N)
 
+lemma Cech_nerve'_hom_zero :
+  (Cech_nerve'.{u} r' V Λ M N n).hom.app (mk.{u} 0) =
+    (CLCFP' r' V n).map (Cech_augmentation_map.{u} r' Λ M N).op :=
+begin
+  dsimp only [Cech_nerve', cosimplicial_object.augmented.whiskering_obj],
+  simp only [whisker_right_app, category.id_comp, functor.right_op_map, nat_trans.comp_app,
+    functor.const_comp_inv_app, Cech_nerve_hom_zero],
+end
+
 @[simps X d]
 def col_complex_aux : cochain_complex (ℝ≥0ᵒᵖ ⥤ SemiNormedGroup) ℕ :=
 (Cech_nerve' r' V Λ M N n).to_cocomplex
@@ -397,7 +406,62 @@ end double_complex
 
 namespace col_complex_rescaled
 
-lemma admissible : (col_complex_rescaled r' V Λ M N n).admissible := sorry
+lemma d_zero_norm_noninc (c : ℝ≥0) :
+  (@system_of_complexes.d (col_complex_rescaled r' V Λ M N n) c 0 1).norm_noninc :=
+begin
+  refine ((SemiNormedGroup.scale_bound_by _ _ _).comp' (1:ℕ) _ 1 _ _).norm_noninc,
+  { simp only [nat.factorial_zero, nat.factorial_one, nat.cast_one, div_one, mul_one], },
+  apply SemiNormedGroup.rescale_map_bound_by,
+  have : (1 : ℝ≥0) = ∑ i : fin 1, 1,
+  { simp only [finset.card_fin, mul_one, finset.sum_const, nsmul_eq_mul, nat.cast_id,
+      nat.cast_bit1, nat.cast_add, nat.cast_one] },
+  dsimp [system_of_complexes.rescale_functor, double_complex_aux,
+    cosimplicial_object.augmented.to_cocomplex_d],
+  erw [category.comp_id, if_pos rfl, Cech_nerve'_hom_zero, zero_add],
+  apply normed_group_hom.norm_noninc.bound_by_one,
+  apply CLC.map_norm_noninc,
+end
+
+lemma d_succ_norm_noninc (c : ℝ≥0) (p : ℕ) :
+  (@system_of_complexes.d (col_complex_rescaled r' V Λ M N n) c (p+1) (p+2)).norm_noninc :=
+begin
+  refine ((SemiNormedGroup.scale_bound_by _ _ _).comp' (p+2:ℕ) _ 1 _ _).norm_noninc,
+  { rw [mul_comm, ← mul_div_assoc, eq_comm, ← nat.cast_mul, nat.factorial_succ], apply div_self,
+    norm_cast, norm_num [nat.factorial_ne_zero] },
+  apply SemiNormedGroup.rescale_map_bound_by,
+  have : (p+1+1 : ℝ≥0) = ∑ i : fin (p+1+1), 1,
+  { simp only [finset.card_fin, mul_one, finset.sum_const, nsmul_eq_mul, nat.cast_id,
+      nat.cast_bit1, nat.cast_add, nat.cast_one] },
+  dsimp [system_of_complexes.rescale_functor, double_complex_aux,
+    cosimplicial_object.augmented.to_cocomplex_d],
+  erw [category.comp_id, if_pos rfl],
+  dsimp [cosimplicial_object.coboundary],
+  simp only [← nat_trans.app_hom_apply, add_monoid_hom.map_sum, add_monoid_hom.map_gsmul,
+    ← homological_complex.f_hom_apply, this],
+  apply normed_group_hom.bound_by.sum,
+  rintro i -,
+  refine (normed_group_hom.bound_by.int_smul _ ((-1) ^ ↑i : ℤ)).le (_ : _ * 1 ≤ 1),
+  { apply normed_group_hom.norm_noninc.bound_by_one,
+    apply CLC.map_norm_noninc, },
+  { simp only [mul_one, int.nat_abs_pow, int.nat_abs_neg, int.nat_abs_one, one_pow, nat.cast_one] },
+end
+
+lemma admissible : (col_complex_rescaled r' V Λ M N n).admissible :=
+{ d_norm_noninc' :=
+  begin
+    rintro c i j rfl, cases i,
+    { apply d_zero_norm_noninc, },
+    { apply d_succ_norm_noninc, }
+  end,
+  res_norm_noninc :=
+  begin
+    intros c₁ c₂ i h,
+    apply normed_group_hom.bound_by.norm_noninc,
+    cases i;
+    { apply SemiNormedGroup.rescale_map_bound_by,
+      apply normed_group_hom.norm_noninc.bound_by_one,
+      apply CLC.map_norm_noninc, },
+  end }
 
 end col_complex_rescaled
 
