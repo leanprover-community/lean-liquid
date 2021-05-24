@@ -11,13 +11,11 @@ import thm95.row_iso
 
 noncomputable theory
 
+universe variable u
+
 open_locale nnreal -- enable the notation `ℝ≥0` for the nonnegative real numbers.
 
-
 open polyhedral_lattice opposite
-
-/- === Warning: with `BD.suitable` the rows are not admissible, we need `BD.very_suitable` === -/
-
 open thm95.universal_constants system_of_double_complexes category_theory breen_deligne
 open ProFiltPseuNormGrpWithTinv (of)
 
@@ -25,11 +23,11 @@ section
 
 variables (BD : package)
 variables (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)]
-variables (V : SemiNormedGroup) [normed_with_aut r V]
+variables (V : SemiNormedGroup.{u}) [normed_with_aut r V]
 variables (c_ c' : ℕ → ℝ≥0) [BD.data.very_suitable r r' c_] [package.adept BD c_ c']
-variables (M : ProFiltPseuNormGrpWithTinv r')
+variables (M : ProFiltPseuNormGrpWithTinv.{u} r')
 variables (m : ℕ)
-variables (Λ : PolyhedralLattice.{0})
+variables (Λ : PolyhedralLattice.{u})
 
 def NSH_aux_type (N : ℕ) (M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ) :=
 normed_spectral_homotopy

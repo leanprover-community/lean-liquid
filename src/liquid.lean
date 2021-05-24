@@ -34,7 +34,7 @@ theorem first_target (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < 
   ∃ (k K : ℝ≥0) [fact (1 ≤ k)],
   ∃ c₀ : ℝ≥0,
   ∀ (S : Type) [fintype S],
-  ∀ (V : SemiNormedGroup) [normed_with_aut r V],
+  ∀ (V : SemiNormedGroup.{0}) [normed_with_aut r V],
     ​((BD.data.system c_ r V r').obj (op $ of r' (Mbar r' S))).is_weak_bounded_exact k K m c₀ :=
 begin
   intro m,

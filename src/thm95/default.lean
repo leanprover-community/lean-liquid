@@ -3,13 +3,12 @@ import thm95.homotopy
 
 noncomputable theory
 
+universe variable u
+
 open_locale nnreal -- enable the notation `ℝ≥0` for the nonnegative real numbers.
 
 
 open polyhedral_lattice opposite
-
-/- === Warning: with `BD.suitable` the rows are not admissible, we need `BD.very_suitable` === -/
-
 open thm95.universal_constants system_of_double_complexes category_theory breen_deligne
 open ProFiltPseuNormGrpWithTinv (of)
 
@@ -17,15 +16,15 @@ section
 
 variables (BD : package)
 variables (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)]
-variables (V : SemiNormedGroup) [normed_with_aut r V]
+variables (V : SemiNormedGroup.{u}) [normed_with_aut r V]
 variables (c_ c' : ℕ → ℝ≥0) [BD.data.very_suitable r r' c_] [package.adept BD c_ c']
-variables (M : ProFiltPseuNormGrpWithTinv r')
+variables (M : ProFiltPseuNormGrpWithTinv.{u} r')
 variables (m : ℕ)
-variables (Λ : PolyhedralLattice.{0})
+variables (Λ : PolyhedralLattice.{u})
 
 include BD c_ c' r r' M V
 
-def thm95.IH (m : ℕ) : Prop := ∀ Λ : PolyhedralLattice.{0},
+def thm95.IH (m : ℕ) : Prop := ∀ Λ : PolyhedralLattice.{u},
   ​((BD.data.system c_ r V r').obj (op $ Hom Λ M)).is_weak_bounded_exact
     (k c' m) (K BD c' r r' m) m (c₀ m Λ)
 
@@ -68,13 +67,13 @@ include BD c_ c' r r' M V m
 
 /-- Theorem 9.5 in [Analytic] -/
 theorem thm95 : ∀ (Λ : PolyhedralLattice.{0}) (S : Type) [fintype S]
-  (V : SemiNormedGroup) [normed_with_aut r V],
+  (V : SemiNormedGroup.{0}) [normed_with_aut r V],
   ​((BD.data.system c_ r V r').obj (op $ Hom Λ (Mbar r' S))).is_weak_bounded_exact
     (k c' m) (K BD c' r r' m) m (c₀ m Λ) :=
 begin
   apply nat.strong_induction_on m; clear m,
   introsI m IH Λ S _S_fin V _V_r,
-  let cond := NSC BD r r' V c_ c' (of r' $ Mbar r' S) m Λ _,
+  let cond := NSC.{0} BD r r' V c_ c' (of r' $ Mbar r' S) m Λ _,
   swap,
   { introsI m' hm' Λ,
     apply IH, assumption },
@@ -101,7 +100,7 @@ theorem thm95' (BD : package)
   ∀ (Λ : Type) [polyhedral_lattice Λ],
   ∃ c₀ : ℝ≥0,
   ∀ (S : Type) [fintype S],
-  ∀ (V : SemiNormedGroup) [normed_with_aut r V],
+  ∀ (V : SemiNormedGroup.{0}) [normed_with_aut r V],
     by exactI system_of_complexes.is_weak_bounded_exact
     (​(BD.data.system c_ r V r').obj (op $ Hom Λ (Mbar r' S))) k K m c₀ :=
 begin

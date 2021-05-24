@@ -66,7 +66,7 @@ section rescale
 variables {BD : breen_deligne.data}
 variables (c_ c_₁ c_₂ : ℕ → ℝ≥0)
 variables [BD.suitable c_]
-variables (r : ℝ≥0) (V : SemiNormedGroup) [normed_with_aut r V] [fact (0 < r)]
+variables (r : ℝ≥0) (V : SemiNormedGroup.{u}) [normed_with_aut r V] [fact (0 < r)]
 variables {r' : ℝ≥0} [fact (0 < r')] [fact (r' ≤ 1)] (c : ℝ≥0)
 variables (M : ProFiltPseuNormGrpWithTinv.{u} r')
 
@@ -82,7 +82,7 @@ open breen_deligne opposite ProFiltPseuNormGrpWithTinv (of)
 section
 
 def FiltrationPow_rescale_iso (n : ℕ) (N : ℝ≥0) :
-  ((Filtration r').obj c).obj ((ProFiltPseuNormGrpWithTinv.Pow r' n).obj (of r' (rescale N ↥M))) ≅
+  ((Filtration r').obj c).obj ((ProFiltPseuNormGrpWithTinv.Pow r' n).obj (of r' (rescale N M))) ≅
     ((Filtration r').obj (c * N⁻¹)).obj ((ProFiltPseuNormGrpWithTinv.Pow r' n).obj M) :=
 iso.refl _
 
@@ -154,7 +154,7 @@ namespace thm95
 open breen_deligne polyhedral_lattice opposite
 
 variables (BD : breen_deligne.data) (c_ : ℕ → ℝ≥0) [BD.suitable c_]
-variables (r : ℝ≥0) (V : SemiNormedGroup) [normed_with_aut r V] [fact (0 < r)]
+variables (r : ℝ≥0) (V : SemiNormedGroup.{u}) [normed_with_aut r V] [fact (0 < r)]
 variables {r' : ℝ≥0} [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)] (c : ℝ≥0)
 
 section
@@ -247,7 +247,7 @@ end
 
 def mul_rescale_iso_row_one
   (N : ℕ) [fact (0 < N)] (N' : ℝ≥0) (h : N' = N)
-  (Λ : PolyhedralLattice) (M : ProFiltPseuNormGrpWithTinv.{u} r') :
+  (Λ : PolyhedralLattice.{u}) (M : ProFiltPseuNormGrpWithTinv.{u} r') :
   (((data.mul N).obj BD).system (rescale_constants c_ N') r V r').obj (op (Hom Λ M)) ≅
     ((thm95.double_complex BD c_ r r' V Λ M N).row 1) :=
 (mul_system_iso _ _ r V N _) ≪≫
@@ -257,7 +257,7 @@ def mul_rescale_iso_row_one
 
 lemma mul_rescale_iso_row_one_strict
   (N : ℕ) [fact (0 < N)] (N' : ℝ≥0) (h : N' = N)
-  (Λ : PolyhedralLattice) (M : ProFiltPseuNormGrpWithTinv.{u} r')
+  (Λ : PolyhedralLattice.{u}) (M : ProFiltPseuNormGrpWithTinv.{u} r')
   (c : ℝ≥0) (i : ℕ)
   (x : (((data.mul N).obj BD).system (rescale_constants c_ N') r V r').obj (op (Hom Λ M)) c i) :
   ∥(mul_rescale_iso_row_one BD c_ r V N N' h Λ M).hom x∥ = ∥x∥ :=
@@ -276,15 +276,15 @@ lemma quux (N : ℕ) [fact (0 < N)] (M : ProFiltPseuNormGrpWithTinv.{u} r') (c�
   (CLC V).map ((basic_universal_map.eval_FP r' c₂ c₁ ((finset.univ : finset (fin N)).sum (basic_universal_map.proj i))).app M).op :=
 by { dsimp only [universal_map.sum], rw [universal_map.eval_CLCFP_of], refl }
 
-lemma bar (N : ℕ) [fact (0 < N)] (Λ : PolyhedralLattice) (M : ProFiltPseuNormGrpWithTinv.{u} r')
+lemma bar (N : ℕ) [fact (0 < N)] (Λ : PolyhedralLattice.{u}) (M : ProFiltPseuNormGrpWithTinv.{u} r')
   (c₁ c₂ : ℝ≥0) (hc : c₁ * N⁻¹ = c₂) (n : ℕ)
   {_ : ((finset.univ : finset (fin N)).sum (basic_universal_map.proj n)).suitable c₂ c₁} :
   (FiltrationPow_rescale_iso c₁ (ProFiltPseuNormGrpWithTinv.of r' ((Hom Λ M) ^ N)) n N ≪≫
      ((Filtration r').map_iso (eq_to_iso hc)).app
        ((ProFiltPseuNormGrpWithTinv.Pow r' n).obj (ProFiltPseuNormGrpWithTinv.of r' ((Hom Λ M) ^ N)))).inv ≫
   ((Filtration r').obj c₁).map ((ProFiltPseuNormGrpWithTinv.Pow r' n).map (Λ.Hom_sum N r' M)) =
-  (FiltrationPow.mul_iso r' c₂ (Hom Λ M) N n).hom ≫
-    (basic_universal_map.eval_FP r' c₂ c₁ (finset.univ.sum (basic_universal_map.proj n))).app (Hom ↥Λ ↥M) :=
+  (FiltrationPow.mul_iso.{u u} r' c₂ (Hom.{u u} Λ M) N n).hom ≫
+    (basic_universal_map.eval_FP.{u} r' c₂ c₁ (finset.univ.sum (basic_universal_map.proj n))).app (Hom.{u u} Λ M) :=
 begin
   dsimp only [FiltrationPow_rescale_iso], rw [iso.refl_trans],
   dsimp only [FiltrationPow.mul_iso_hom, nat_iso.app_inv, functor.map_iso_inv,
@@ -323,12 +323,12 @@ begin
     split_ifs; refl }
 end
 
-lemma foo (N : ℕ) [fact (0 < N)] (Λ : PolyhedralLattice) (M : ProFiltPseuNormGrpWithTinv.{u} r')
+lemma foo (N : ℕ) [fact (0 < N)] (Λ : PolyhedralLattice.{u}) (M : ProFiltPseuNormGrpWithTinv.{u} r')
   (c₁ c₂ : ℝ≥0) (hc : c₁ * N⁻¹ = c₂) (i : ℕ) [H : universal_map.suitable c₂ c₁ (universal_map.sum i N)] :
   (CLC V).map ((FiltrationPow r' c₁ i).op.map (Λ.Hom_sum N r' M).op) ≫
-    (CLC V).map (FiltrationPow_rescale_iso c₁ ((ProFiltPseuNormGrpWithTinv.of r' (↥(Hom ↥Λ ↥M) ^ N))) i N ≪≫
-      Filtration_cast_eq r' (c₁ * N⁻¹) c₂ hc ((ProFiltPseuNormGrpWithTinv.Pow r' i).obj ((ProFiltPseuNormGrpWithTinv.of r' (↥(Hom ↥Λ ↥M) ^ N))))).op.inv =
-  ((universal_map.eval_CLCFP V r' c₁ c₂ (universal_map.sum i N)).app (op (Hom Λ M)) ≫ (CLC V).map (FiltrationPow.mul_iso r' c₂ (Hom Λ M) N i).op.hom) :=
+    (CLC V).map (FiltrationPow_rescale_iso c₁ ((ProFiltPseuNormGrpWithTinv.of r' ((Hom Λ M) ^ N))) i N ≪≫
+      Filtration_cast_eq r' (c₁ * N⁻¹) c₂ hc ((ProFiltPseuNormGrpWithTinv.Pow r' i).obj ((ProFiltPseuNormGrpWithTinv.of r' ((Hom Λ M) ^ N))))).op.inv =
+  ((universal_map.eval_CLCFP V r' c₁ c₂ (universal_map.sum i N)).app (op (Hom Λ M)) ≫ (CLC V).map (FiltrationPow.mul_iso.{u u} r' c₂ (Hom Λ M) N i).op.hom) :=
 begin
   rw [← (CLC V).map_comp],
   dsimp only [FiltrationPow, category_theory.functor.op_map, category_theory.functor.comp_map,
@@ -342,7 +342,7 @@ end
 lemma row_map_eq_sum_comp
   (N : ℕ) [fact (0 < N)] (N' : ℝ≥0) (h : N' = N)
   [∀ (i : ℕ), universal_map.suitable (rescale_constants c_ N' i) (c_ i) ((BD.sum N).f i)]
-  (Λ : PolyhedralLattice) (M : ProFiltPseuNormGrpWithTinv.{u} r') :
+  (Λ : PolyhedralLattice.{u}) (M : ProFiltPseuNormGrpWithTinv.{u} r') :
   (thm95.double_complex BD c_ r r' V Λ M N).row_map 0 1 =
     (iso.refl ((BD.system c_ r V r').obj (op (Hom Λ M)))).inv ≫
     (BD_system_map (BD.sum N) c_
@@ -356,7 +356,7 @@ begin
   rw [thm95.double_complex.row_map_zero_one],
   dsimp only [mul_rescale_iso_row_one, iso.trans_inv, nat_trans.comp_app, functor.map_iso_inv],
   simp only [← category.assoc, ← (BD.system c_ r V r').map_comp, ← nat_trans.comp_app,
-    PolyhedralLattice.Cech_augmentation_map_eq_Hom_sum],
+    iso.op_inv, ← op_comp, PolyhedralLattice.Cech_augmentation_map_eq_Hom_sum],
   rw [iso.comp_inv_eq],
   ext c i : 4,
   apply arrow.mk_injective,
