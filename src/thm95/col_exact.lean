@@ -116,9 +116,7 @@ lemma col_complex_iso₃_strict (c : ℝ≥0ᵒᵖ) (i : ℕ) :
   isometry (((col_complex_iso₃ r' V Λ M N n).hom.app c).f i) :=
 sorry
 
-namespace col_complex
-
-lemma is_weak_bounded_exact (d : ℝ≥0) [pseudo_normed_group.splittable ((Λ →+ M)^n) N d]
+lemma col_complex.is_weak_bounded_exact (d : ℝ≥0) [pseudo_normed_group.splittable ((Λ →+ M)^n) N d]
   (k : ℝ≥0) [fact (1 ≤ k)] (m : ℕ) (c₀ : ℝ≥0) (hdkc₀N : d ≤ (k - 1) * c₀ / N) :
   (col_complex r' V Λ M N n).is_weak_bounded_exact k 1 m c₀ :=
 begin
@@ -126,12 +124,20 @@ begin
   exact key.of_iso _ (λ c, col_complex_iso₃_strict r' V Λ M N n (op c)),
 end
 
-end col_complex
-
 @[simps obj map]
 def col_complex_rescaled : system_of_complexes :=
 scale_factorial.obj (col_complex r' V Λ M N n)
 .
+
+lemma col_complex_rescaled.is_weak_bounded_exact
+  (d : ℝ≥0) [pseudo_normed_group.splittable ((Λ →+ M)^n) N d]
+  (k : ℝ≥0) [fact (1 ≤ k)] (m : ℕ) (c₀ : ℝ≥0) (hdkc₀N : d ≤ (k - 1) * c₀ / N) :
+  (col_complex_rescaled r' V Λ M N n).is_weak_bounded_exact k (m+1) m c₀ :=
+begin
+  have := scale_factorial.is_weak_bounded_exact
+    (col_complex.is_weak_bounded_exact r' V Λ M N n d k m c₀ hdkc₀N),
+  rwa [one_mul] at this,
+end
 
 end
 
@@ -370,58 +376,47 @@ namespace col_complex_rescaled
 
 lemma admissible : (col_complex_rescaled r' V Λ M N n).admissible := sorry
 
-lemma is_weak_bounded_exact (m : ℕ) (tom jerry micky : ℝ≥0) [fact (1 ≤ tom)] :
-  (col_complex_rescaled r' V Λ M N n).is_weak_bounded_exact tom jerry m micky :=
-sorry
-
 end col_complex_rescaled
 
 open universal_constants (hiding N)
 
-set_option pp.universes true
-
--- lemma col_exact' [normed_with_aut r V] [fact (r < 1)] (m : ℕ)
---   (tom jerry micky : ℝ≥0) [fact (1 ≤ tom)] (huey dewey louie : ℝ≥0) [fact (1 ≤ huey)]
---    (ε : ℝ≥0) (hε : 0 < ε) :
---   ((double_complex.{u} BD c_ r r' V Λ M N).col n).is_weak_bounded_exact (k₁ m) (K₁ m) m (c₀ m Λ) :=
--- begin
---   have adm := (col_complex_rescaled.admissible.{u} r' V Λ M N (BD.X n)),
---   have adm2 := adm.scale_index_left r',
---   let T_T := (system_of_complexes.ScaleIndexRight (c_ n)).map
---     (col_complex_rescaled.T_inv_sub_Tinv r r' V Λ M N (BD.X n)),
---   have key := weak_normed_snake_dual
---     ((double_complex.{u} BD c_ r r' V Λ M N).col n) _ _
---     (double_complex.col_ι BD c_ r r' V Λ M N n) T_T
---     _ _ _ _ (1 + r⁻¹) (r / (1 - r) + ε)
---     ((col_complex_rescaled.is_weak_bounded_exact.{u}
---       r' V Λ M N _ (m + 1) tom jerry micky).scale_index_right _ adm)
---     (((col_complex_rescaled.is_weak_bounded_exact.{u}
---       r' V Λ M N _ (m + 1) huey dewey louie).scale_index_left _ adm).scale_index_right _ adm2)
---     (adm.scale_index_right _),
---   have hk : k₁ m = tom * huey, { sorry },
---   have hK : K₁ m = (jerry + (1 + r⁻¹) * (r / (1 - r) + ε) * jerry * dewey), { sorry },
---   simp only [hk, hK],
---   convert key _ _ _ _, swap 8, { exact ⟨le_rfl⟩ },
---   any_goals { clear key },
---   { intros c i x,
---     -- probably split this off into a different lemma
---     -- for `i = 0,1` we don't need to do anything
---     -- for `i >= 2` we need to use `SemiNormedGroup.rescale`
---     -- in both cases, we then use
---     have := CLCFP.T_inv_sub_Tinv_bound_by r r' V,
---     sorry },
---   { intros c hc i hi y,
---     -- probably split this off into a different lemma
---     -- for `i = 0,1` we don't need to do anything
---     -- for `i >= 2` we need to use `SemiNormedGroup.rescale`
---     -- in both cases, we then use
---     have := @CLCFP.T_inv_sub_Tinv_exists_preimage r r' V,
---     sorry },
---   -- split off the next 4 sorrys
---   { sorry },
---   { sorry },
---   { sorry },
---   { sorry },
--- end
+lemma col_exact' [normed_with_aut r V] [fact (r < 1)]
+  (d : ℝ≥0) [pseudo_normed_group.splittable (Λ →+ M) N d]
+  (k : ℝ≥0) [fact (1 ≤ k)] (m : ℕ) (c₀ : ℝ≥0) (hdkc₀N : d ≤ (k - 1) * c₀ / N)
+  (k' K' : ℝ≥0) [fact (1 ≤ k')] (hk' : k * k ≤ k')
+  (hK' : (m + 2 + ((r + 1) / r) * (r / (1 - r) + 1) * (m + 2) * (m + 2) : ℝ≥0) ≤ K')
+  (c₁ c₂ c₃ : ℝ≥0) [fact (c₀ ≤ r' * c₁)] [fact (c₀ ≤ c_ n * c₂)] [fact (c₁ ≤ c_ n * c₂)] :
+  (double_complex.col'.{u} BD c_ r r' V Λ M N n).is_weak_bounded_exact
+    k' K' m c₂ :=
+begin
+  have adm := (col_complex_rescaled.admissible.{u} r' V Λ M N (BD.X n)),
+  have adm2 := adm.scale_index_left r',
+  let T_T := (system_of_complexes.ScaleIndexRight (c_ n)).map
+    (col_complex_rescaled.T_inv_sub_Tinv r r' V Λ M N (BD.X n)),
+  have H := (col_complex_rescaled.is_weak_bounded_exact.{u}
+    r' V Λ M N (BD.X n) d k (m+1) c₀ hdkc₀N),
+  have H1 := H.scale_index_right _ c₂ (c_ n) adm,
+  have H2 := (H.scale_index_left _ c₁ r' adm).scale_index_right _ c₂ (c_ n) adm2,
+  have key := weak_normed_snake_dual
+    (double_complex.col'.{u} BD c_ r r' V Λ M N n) _ _
+    (double_complex.col_ι BD c_ r r' V Λ M N n) T_T
+    k _ ((m + 1) + 1) _ (1 + r⁻¹) (r / (1 - r) + 1) H1 H2 (adm.scale_index_right _),
+  have h_isom : _ := _,
+  apply (key _ _ _ h_isom).of_le _ ⟨hk'⟩ _ le_rfl ⟨le_rfl⟩,
+  any_goals { clear key adm2 H1 H2 },
+  { sorry },
+  { sorry },
+  { sorry },
+  { apply system_of_complexes.admissible_of_isometry (adm.scale_index_right _) h_isom, },
+  { refine ⟨le_trans (le_of_eq _) hK'⟩,
+    simp only [nat.cast_add, nat.cast_one, bit0, ← add_assoc, or_false, add_eq_zero_iff,
+      one_ne_zero, add_right_inj, mul_eq_mul_right_iff, and_false, div_eq_mul_inv],
+    rw [add_mul, one_mul, mul_inv_cancel],
+    exact ne_of_gt (fact.out _) },
+  { intros c i,
+    apply normed_group_hom.isometry_of_norm,
+    intro v,
+    sorry }
+end
 
 end thm95

@@ -129,7 +129,7 @@ lemma admissible.scale_index_left {C : system_of_complexes} (hC : C.admissible) 
     (by { resetI, dsimp, apply_instance }) }
 
 lemma is_weak_bounded_exact.scale_index_left
-  {C : system_of_complexes} {k K :ℝ≥0} {m : ℕ} {c₀ c₁: ℝ≥0} [fact (1 ≤ k)]
+  {C : system_of_complexes} {k K :ℝ≥0} {m : ℕ} (c₀ c₁: ℝ≥0) [fact (1 ≤ k)]
   (hC : C.is_weak_bounded_exact k K m c₀) (κ : ℝ≥0) [hκ : fact (c₀ ≤ κ * c₁)]
   (C_adm : C.admissible) :
   (C.scale_index_left κ).is_weak_bounded_exact k K m c₁ :=
@@ -161,7 +161,7 @@ lemma admissible.scale_index_right {C : system_of_complexes} (hC : C.admissible)
     (by { resetI, dsimp, apply_instance }) }
 
 lemma is_weak_bounded_exact.scale_index_right
-  {C : system_of_complexes} {k K :ℝ≥0} {m : ℕ} {c₀ c₁ : ℝ≥0} [fact (1 ≤ k)]
+  {C : system_of_complexes} {k K :ℝ≥0} {m : ℕ} (c₀ c₁ : ℝ≥0) [fact (1 ≤ k)]
   (hC : C.is_weak_bounded_exact k K m c₀) (κ : ℝ≥0) [hκ : fact (c₀ ≤ κ * c₁)]
   (C_adm : C.admissible) :
   (C.scale_index_right κ).is_weak_bounded_exact k K m c₁ :=
