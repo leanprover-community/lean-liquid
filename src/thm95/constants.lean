@@ -260,9 +260,13 @@ instance k_le_k₁ [fact (0 < m)] : fact (k c' (m - 1) ≤ k₁ m) := sorry
 
 instance K_le_K₁ [fact (0 < m)] : fact (K BD c' r r' (m - 1) ≤ K₁ m) := sorry
 
-lemma k₁_sqrt : ℝ≥0 := ⟨real.sqrt (k₁ m), real.sqrt_nonneg _⟩
+def k₁_sqrt : ℝ≥0 := ⟨real.sqrt (k₁ m), real.sqrt_nonneg _⟩
 
-instance one_le_k₁_sqrt : fact (1 ≤ k₁_sqrt m) := sorry
+instance one_le_k₁_sqrt : fact (1 ≤ k₁_sqrt m) := ⟨begin
+  change (1 : ℝ) ≤ real.sqrt (k₁ m),
+  rw [real.le_sqrt' zero_lt_one, pow_two, mul_one],
+  exact (universal_constants.one_le_k₁ m).elim,
+end⟩
 
 lemma K₁_spec : (m + 2 + (r + 1) / r * (r / (1 - r) + 1) * (m + 2) * (m + 2) : ℝ≥0) ≤ K₁ m :=
 sorry
@@ -288,3 +292,4 @@ sorry
 end universal_constants
 
 end thm95
+#lint
