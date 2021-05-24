@@ -2,10 +2,12 @@ import topology.discrete_quotient
 import topology.category.Profinite
 import normed_group.SemiNormedGroup
 
-namespace locally_constant
+open category_theory
+open category_theory.limits
 
 universes u
 
+namespace locally_constant
 variables {M : SemiNormedGroup.{u}} {X : Profinite.{u}}
 
 /-- Construct a discrete quotient from a locally constant function. -/
@@ -24,3 +26,11 @@ lemma factors (f : locally_constant X M) : f.desc ∘ f.to_discrete_quotient.pro
 rfl
 
 end locally_constant
+
+/-
+lemma Profinite.locally_constant_factors
+  {J : Type u} [small_category.{u} J] [is_filtered Jᵒᵖ]
+  (F : J ⥤ Profinite.{u}) (S : Type*) (f : locally_constant ↥(limit F) S) :
+  ∃ (j : J) (g : locally_constant (F.obj j) S),
+  g ∘ (limit.π F j) = f := sorry
+-/
