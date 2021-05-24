@@ -98,22 +98,25 @@ lemma aug_map_strict : (aug_map r' Λ M N n).strict :=
 to_profinitely_filtered_pseudo_normed_group_hom_strict _
 end
 
-lemma col_complex_iso₁ :
-  col_complex r' V Λ M N n ≅ FLC_complex V _ (aug_map_strict r' Λ M N n) :=
-sorry
+/-
+-- === jmc: it's not clear to me that these isos will be on the critical path
+-- lemma col_complex_iso₁ :
+--   col_complex r' V Λ M N n ≅ FLC_complex V _ (aug_map_strict r' Λ M N n) :=
+-- by admit
 
 
-lemma col_complex_iso₁_strict (c : ℝ≥0ᵒᵖ) (i : ℕ) :
-  isometry (((col_complex_iso₁ r' V Λ M N n).hom.app c).f i) :=
-sorry
+-- lemma col_complex_iso₁_strict (c : ℝ≥0ᵒᵖ) (i : ℕ) :
+--   isometry (((col_complex_iso₁ r' V Λ M N n).hom.app c).f i) :=
+-- by admit
+-/
 
-lemma col_complex_iso₃ :
+lemma col_complex_iso :
   FLC_complex V _ (profinitely_filtered_pseudo_normed_group.sum_hom_strict ((↥Λ →+ ↥M)^n) N) ≅
   col_complex r' V Λ M N n :=
 sorry
 
-lemma col_complex_iso₃_strict (c : ℝ≥0ᵒᵖ) (i : ℕ) :
-  isometry (((col_complex_iso₃ r' V Λ M N n).hom.app c).f i) :=
+lemma col_complex_iso_strict (c : ℝ≥0ᵒᵖ) (i : ℕ) :
+  isometry (((col_complex_iso r' V Λ M N n).hom.app c).f i) :=
 sorry
 
 lemma col_complex.is_weak_bounded_exact (d : ℝ≥0) [pseudo_normed_group.splittable ((Λ →+ M)^n) N d]
@@ -121,7 +124,7 @@ lemma col_complex.is_weak_bounded_exact (d : ℝ≥0) [pseudo_normed_group.split
   (col_complex r' V Λ M N n).is_weak_bounded_exact k 1 m c₀ :=
 begin
   have key := FLC_complex.weak_bounded_exact V ((Λ →+ M)^n) N d k m c₀ hdkc₀N,
-  exact key.of_iso _ (λ c, col_complex_iso₃_strict r' V Λ M N n (op c)),
+  exact key.of_iso _ (λ c, col_complex_iso_strict r' V Λ M N n (op c)),
 end
 
 @[simps obj map]
@@ -178,9 +181,9 @@ def T_inv_sub_Tinv [normed_with_aut r V] :
     comm' := by { rintros i j (rfl : i + 1 = j), exact T_inv_sub_Tinv_comm r r' V Λ M N n c i } },
   naturality' := sorry }
 
-def T_inv_sub_Tinv' [normed_with_aut r V] :=
-(system_of_complexes.ScaleIndexRight (c_ n)).map
-  (col_complex_rescaled.T_inv_sub_Tinv r r' V Λ M N (BD.X n))
+def T_inv_sub_Tinv' (c : ℝ≥0) [normed_with_aut r V] :=
+(system_of_complexes.ScaleIndexRight c).map
+  (col_complex_rescaled.T_inv_sub_Tinv r r' V Λ M N n)
 
 end col_complex_rescaled
 
@@ -383,7 +386,7 @@ variables [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) (i : ℕ)
 
 lemma col_ι_range :
   (((double_complex.col_ι BD c_ r r' V Λ M N n).app c).f i).range =
-  normed_group_hom.ker (((col_complex_rescaled.T_inv_sub_Tinv' BD c_ r r' V Λ M N (BD.X n)).app c).f i) :=
+  (((col_complex_rescaled.T_inv_sub_Tinv' r r' V Λ M N (BD.X n) (c_ n)).app c).f i).ker :=
 sorry
 
 lemma col_ι_isometry :
@@ -400,6 +403,17 @@ end col_complex_rescaled
 
 open universal_constants (hiding N)
 
+lemma col_exact'_aux1 [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) (i : ℕ) :
+  ∀ x, ∥(((col_complex_rescaled.T_inv_sub_Tinv' r r' V Λ M N (BD.X n) (c_ n)).app c).f i) x∥ ≤
+    (1 + r⁻¹) * ∥x∥ :=
+sorry
+
+lemma col_exact'_aux2 [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) (i : ℕ) :
+  ∀ y, ∃ x,
+    (((col_complex_rescaled.T_inv_sub_Tinv' r r' V Λ M N (BD.X n) (c_ n)).app c).f i) x = y ∧
+    ∥x∥ ≤ ↑(r / (1 - r) + 1) * ∥y∥ :=
+sorry
+
 lemma col_exact' [normed_with_aut r V] [fact (r < 1)]
   (d : ℝ≥0) [pseudo_normed_group.splittable (Λ →+ M) N d]
   (k : ℝ≥0) [fact (1 ≤ k)] (m : ℕ) (c₀ : ℝ≥0) (hdkc₀N : d ≤ (k - 1) * c₀ / N)
@@ -410,7 +424,7 @@ lemma col_exact' [normed_with_aut r V] [fact (r < 1)]
 begin
   have adm := (col_complex_rescaled.admissible.{u} r' V Λ M N (BD.X n)),
   have adm2 := adm.scale_index_left r',
-  let T_T := col_complex_rescaled.T_inv_sub_Tinv; r r' V Λ M N (BD.X n),
+  let T_T := col_complex_rescaled.T_inv_sub_Tinv' r r' V Λ M N (BD.X n) (c_ n),
   have H := (col_complex_rescaled.is_weak_bounded_exact.{u}
     r' V Λ M N (BD.X n) d k (m+1) c₀ hdkc₀N),
   have H1 := H.scale_index_right _ c₂ (c_ n) adm,
@@ -422,9 +436,9 @@ begin
   have h_isom : _ := _,
   apply (key _ _ _ h_isom).of_le _ ⟨hk'⟩ _ le_rfl ⟨le_rfl⟩,
   any_goals { clear key adm2 H1 H2 },
-  { sorry },
-  { sorry },
-  { apply double_complex.col_ι_range },
+  { intros, apply col_exact'_aux1 },
+  { intros, apply col_exact'_aux2 },
+  { intros c i, apply double_complex.col_ι_range },
   { apply system_of_complexes.admissible_of_isometry (adm.scale_index_right _) h_isom, },
   { refine ⟨le_trans (le_of_eq _) hK'⟩,
     simp only [nat.cast_add, nat.cast_one, bit0, ← add_assoc, or_false, add_eq_zero_iff,
