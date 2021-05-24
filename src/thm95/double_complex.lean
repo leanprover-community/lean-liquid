@@ -6,8 +6,6 @@ import pseudo_normed_group.system_of_complexes
 import system_of_complexes.rescale
 import normed_spectral
 
-import simplicial.alternating_face_map
-
 import thm95.modify_complex
 import thm95.constants
 

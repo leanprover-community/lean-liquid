@@ -32,24 +32,13 @@ def CLCFP' : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ ℝ≥0ᵒᵖ ⥤ SemiNor
 (ProFiltPseuNormGrpWithTinv.Pow r' n ⋙ (_root_.Filtration r').flip).op ⋙
   functor.op_hom _ _ ⋙ (whiskering_right ℝ≥0ᵒᵖ Profiniteᵒᵖ _).obj (CLC V)
 
-def cosimplicial_SemiNormedGroup : simplex_category ⥤ (ℝ≥0ᵒᵖ ⥤ SemiNormedGroup) :=
-Cech_nerve r' Λ M N ⋙ CLCFP' r' V n
-
-def col_augmentation_map :
-  (CLCFP' r' V n).obj ((PolyhedralLattice.Hom M).obj Λ) ⟶
-    (cosimplicial_SemiNormedGroup r' V Λ M N n).obj (mk 0) :=
-(CLCFP' r' V n).map (Cech_augmentation_map r' Λ M N)
+def Cech_nerve' : cosimplicial_object.augmented (ℝ≥0ᵒᵖ ⥤ SemiNormedGroup) :=
+(cosimplicial_object.augmented.whiskering_obj.{u} _ _ (CLCFP' r' V n)).obj
+  (Cech_nerve r' Λ M N)
 
 @[simps X d]
 def col_complex_aux : cochain_complex (ℝ≥0ᵒᵖ ⥤ SemiNormedGroup) ℕ :=
-alt_face_map_cocomplex (col_augmentation_map r' V Λ M N n)
-begin
-  dsimp only [col_augmentation_map, cosimplicial_SemiNormedGroup,
-    category_theory.functor.comp_map, Cech_augmentation_map, Cech_nerve,
-    cosimplicial_augmentation_map, cosimplicial],
-  simp only [← functor.map_comp],
-  rw augmentation_map_equalizes (diagonal_embedding Λ N),
-end
+(Cech_nerve' r' V Λ M N n).to_cocomplex
 .
 
 @[simps obj map]
@@ -101,7 +90,7 @@ def col_complex : system_of_complexes :=
 .
 
 def aug_map :=
-((ProFiltPseuNormGrpWithTinv.Pow r' n).map (Cech_augmentation_map r' Λ M N).unop)
+((ProFiltPseuNormGrpWithTinv.Pow r' n).map (Cech_augmentation_map r' Λ M N))
   .to_profinitely_filtered_pseudo_normed_group_hom
 
 section open profinitely_filtered_pseudo_normed_group_with_Tinv_hom
@@ -158,13 +147,13 @@ instance move_pls2 (c : ℝ≥0ᵒᵖ) : fact (unop (r'.MulLeft.op.obj c) ≤ un
 by { dsimp [nnreal.MulLeft], apply_instance }
 
 def T_inv_sub_Tinv_f_succ_succ [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) (i : ℕ) :
-  ((col_complex_rescaled.{u u₀} r' V Λ M N n).obj c).X (i + 1) ⟶
-    (((col_complex_rescaled.{u u₀} r' V Λ M N n).scale_index_left r').obj c).X (i + 1) :=
+  ((col_complex_rescaled.{u} r' V Λ M N n).obj c).X (i + 1) ⟶
+    (((col_complex_rescaled.{u} r' V Λ M N n).scale_index_left r').obj c).X (i + 1) :=
 (SemiNormedGroup.rescale (i+1)!).map $ (CLCFP.T_inv_sub_Tinv r r' V _ _ n).app _
 
 def T_inv_sub_Tinv_f [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) :
-  Π i, ((col_complex_rescaled.{u u₀} r' V Λ M N n).obj c).X i ⟶
-  (((col_complex_rescaled.{u u₀} r' V Λ M N n).scale_index_left r').obj c).X i
+  Π i, ((col_complex_rescaled.{u} r' V Λ M N n).obj c).X i ⟶
+  (((col_complex_rescaled.{u} r' V Λ M N n).scale_index_left r').obj c).X i
 | 0     := (SemiNormedGroup.rescale 0!).map $ (CLCFP.T_inv_sub_Tinv r r' V _ _ n).app _
 | (i+1) := T_inv_sub_Tinv_f_succ_succ r r' V Λ M N n c i
 
@@ -200,8 +189,8 @@ def col' [normed_with_aut r V] (n : ℕ) : system_of_complexes :=
 scale_factorial.obj (col'_aux BD c_ r r' V Λ M N n)
 
 def col_iso_obj_X [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) :
-  Π m, (((double_complex.{u u u u₀} BD c_ r r' V Λ M N).col n).obj c).X m ≅
-  ((col'.{u u₀} BD c_ r r' V Λ M N n).obj c).X m
+  Π m, (((double_complex.{u} BD c_ r r' V Λ M N).col n).obj c).X m ≅
+  ((col'.{u} BD c_ r r' V Λ M N n).obj c).X m
 | 0     := (SemiNormedGroup.iso_rescale _).app _
 | 1     := (SemiNormedGroup.iso_rescale _).app _
 | (m+2) := iso.refl _
@@ -237,18 +226,18 @@ end
 .
 
 lemma col_iso_comm₂_0 [normed_with_aut r V] (c₁ c₂ : ℝ≥0ᵒᵖ) (h : c₁ ⟶ c₂) :
-  (((double_complex.{u u u u₀} BD c_ r r' V Λ M N).col n).map h).f 0 ≫
+  (((double_complex.{u} BD c_ r r' V Λ M N).col n).map h).f 0 ≫
     (col_iso_obj_X BD c_ r r' V Λ M N n c₂ 0).hom =
   (col_iso_obj_X BD c_ r r' V Λ M N n c₁ 0).hom ≫
-    ((col'.{u u₀} BD c_ r r' V Λ M N n).map h).f 0 :=
+    ((col'.{u} BD c_ r r' V Λ M N n).map h).f 0 :=
 by { dsimp only [col_iso_obj_X], ext, refl }
 .
 
 lemma col_iso_comm₂_1 [normed_with_aut r V] (c₁ c₂ : ℝ≥0ᵒᵖ) (h : c₁ ⟶ c₂) :
-  (((double_complex.{u u u u₀} BD c_ r r' V Λ M N).col n).map h).f 1 ≫
+  (((double_complex.{u} BD c_ r r' V Λ M N).col n).map h).f 1 ≫
     (col_iso_obj_X BD c_ r r' V Λ M N n c₂ 1).hom =
   (col_iso_obj_X BD c_ r r' V Λ M N n c₁ 1).hom ≫
-    ((col'.{u u₀} BD c_ r r' V Λ M N n).map h).f 1 :=
+    ((col'.{u} BD c_ r r' V Λ M N n).map h).f 1 :=
 by { dsimp only [col_iso_obj_X], ext, refl }
 .
 
@@ -258,8 +247,8 @@ local attribute [irreducible] CLCFPTinv CLCFPTinv₂ CLCFP
 
 lemma col_iso_comm₁_succ [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) (i : ℕ) :
   (col_iso_obj_X BD c_ r r' V Λ M N n c i.succ.succ).hom ≫
-    ((col'.{u u₀} BD c_ r r' V Λ M N n).obj c).d i.succ.succ (i.succ.succ + 1) =
-  (((double_complex.{u u u u₀} BD c_ r r' V Λ M N).col n).obj c).d i.succ.succ (i.succ.succ + 1) ≫
+    ((col'.{u} BD c_ r r' V Λ M N n).obj c).d i.succ.succ (i.succ.succ + 1) =
+  (((double_complex.{u} BD c_ r r' V Λ M N).col n).obj c).d i.succ.succ (i.succ.succ + 1) ≫
     (col_iso_obj_X BD c_ r r' V Λ M N n c (i.succ.succ + 1)).hom :=
 begin
   dsimp only [col_iso_obj_X, iso.refl_hom],
@@ -269,10 +258,10 @@ end
 .
 
 lemma col_iso_comm₂_succ [normed_with_aut r V] (c₁ c₂ : ℝ≥0ᵒᵖ) (h : c₁ ⟶ c₂) (i : ℕ) :
-  (((double_complex.{u u u u₀} BD c_ r r' V Λ M N).col n).map h).f (i+2) ≫
+  (((double_complex.{u} BD c_ r r' V Λ M N).col n).map h).f (i+2) ≫
     (col_iso_obj_X BD c_ r r' V Λ M N n c₂ (i+2)).hom =
   (col_iso_obj_X BD c_ r r' V Λ M N n c₁ (i+2)).hom ≫
-    ((col'.{u u₀} BD c_ r r' V Λ M N n).map h).f (i+2) :=
+    ((col'.{u} BD c_ r r' V Λ M N n).map h).f (i+2) :=
 begin
   dsimp only [col_iso_obj_X, iso.refl_hom],
   simp only [category.id_comp, category.comp_id, system_of_double_complexes.col_obj_d],
@@ -280,10 +269,10 @@ begin
 end
 
 lemma col_iso_comm₂ [normed_with_aut r V] (c₁ c₂ : ℝ≥0ᵒᵖ) (h : c₁ ⟶ c₂) :
-  ∀ i, (((double_complex.{u u u u₀} BD c_ r r' V Λ M N).col n).map h).f i ≫
+  ∀ i, (((double_complex.{u} BD c_ r r' V Λ M N).col n).map h).f i ≫
     (col_iso_obj_X BD c_ r r' V Λ M N n c₂ i).hom =
   (col_iso_obj_X BD c_ r r' V Λ M N n c₁ i).hom ≫
-    ((col'.{u u₀} BD c_ r r' V Λ M N n).map h).f i
+    ((col'.{u} BD c_ r r' V Λ M N n).map h).f i
 | 0     := col_iso_comm₂_0 _ _ _ _ _ _ _ _ _ _ _ _
 | 1     := col_iso_comm₂_1 _ _ _ _ _ _ _ _ _ _ _ _
 | (i+2) := col_iso_comm₂_succ _ _ _ _ _ _ _ _ _ _ _ _ _
@@ -299,9 +288,9 @@ open homological_complex
 
 @[simps]
 def col_iso [normed_with_aut r V] :
-  (double_complex.{u u u u₀} BD c_ r r' V Λ M N).col n ≅
-  col'.{u u₀} BD c_ r r' V Λ M N n :=
-nat_iso.of_components (λ c, iso_of_components (col_iso_obj_X.{u u₀} BD c_ r r' V Λ M N n _)
+  (double_complex.{u} BD c_ r r' V Λ M N).col n ≅
+  col'.{u} BD c_ r r' V Λ M N n :=
+nat_iso.of_components (λ c, iso_of_components (col_iso_obj_X.{u} BD c_ r r' V Λ M N n _)
   begin
     rintro i j (rfl : i + 1 = j),
     cases i, { exact col_iso_comm₁_0 BD c_ r r' V Λ M N n c, },
@@ -333,13 +322,13 @@ lemma col_obj_X_zero [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) :
 -- local attribute [semireducible] opposite
 
 def col_ι_f_succ [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) (i : ℕ) :
-  ((col'.{u u₀} BD c_ r r' V Λ M N n).obj c).X (i+1) ⟶
-    (((col_complex_rescaled.{u u₀} r' V Λ M N (BD.X n)).scale_index_right (c_ n)).obj c).X (i+1) :=
+  ((col'.{u} BD c_ r r' V Λ M N n).obj c).X (i+1) ⟶
+    (((col_complex_rescaled.{u} r' V Λ M N (BD.X n)).scale_index_right (c_ n)).obj c).X (i+1) :=
 (SemiNormedGroup.rescale (i+1)!).map (CLCTinv.ι r V _ _)
 
 def col_ι_f [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) :
-  Π i, ((col'.{u u₀} BD c_ r r' V Λ M N n).obj c).X i ⟶
-    (((col_complex_rescaled.{u u₀} r' V Λ M N (BD.X n)).scale_index_right (c_ n)).obj c).X i
+  Π i, ((col'.{u} BD c_ r r' V Λ M N n).obj c).X i ⟶
+    (((col_complex_rescaled.{u} r' V Λ M N (BD.X n)).scale_index_right (c_ n)).obj c).X i
 | 0     := (SemiNormedGroup.rescale 0!).map (CLCTinv.ι r V _ _)
 | (i+1) := col_ι_f_succ _ _ _ _ _ _ _ _ _ _ i
 
@@ -365,8 +354,8 @@ end
 end
 
 lemma col_ι [normed_with_aut r V] :
-  col'.{u u₀} BD c_ r r' V Λ M N n ⟶
-    (col_complex_rescaled.{u u₀} r' V Λ M N (BD.X n)).scale_index_right (c_ n) :=
+  col'.{u} BD c_ r r' V Λ M N n ⟶
+    (col_complex_rescaled.{u} r' V Λ M N (BD.X n)).scale_index_right (c_ n) :=
 { app := λ c,
   { f := col_ι_f BD c_ r r' V Λ M N n c,
     comm' := by { rintro i j (rfl : i + 1 = j), apply col_ι_f_comm } },
@@ -394,19 +383,19 @@ set_option pp.universes true
 -- lemma col_exact' [normed_with_aut r V] [fact (r < 1)] (m : ℕ)
 --   (tom jerry micky : ℝ≥0) [fact (1 ≤ tom)] (huey dewey louie : ℝ≥0) [fact (1 ≤ huey)]
 --    (ε : ℝ≥0) (hε : 0 < ε) :
---   ((double_complex.{u u u u₀} BD c_ r r' V Λ M N).col n).is_weak_bounded_exact (k₁ m) (K₁ m) m (c₀ m Λ) :=
+--   ((double_complex.{u} BD c_ r r' V Λ M N).col n).is_weak_bounded_exact (k₁ m) (K₁ m) m (c₀ m Λ) :=
 -- begin
---   have adm := (col_complex_rescaled.admissible.{u u₀} r' V Λ M N (BD.X n)),
+--   have adm := (col_complex_rescaled.admissible.{u} r' V Λ M N (BD.X n)),
 --   have adm2 := adm.scale_index_left r',
 --   let T_T := (system_of_complexes.ScaleIndexRight (c_ n)).map
 --     (col_complex_rescaled.T_inv_sub_Tinv r r' V Λ M N (BD.X n)),
 --   have key := weak_normed_snake_dual
---     ((double_complex.{u u u u₀} BD c_ r r' V Λ M N).col n) _ _
+--     ((double_complex.{u} BD c_ r r' V Λ M N).col n) _ _
 --     (double_complex.col_ι BD c_ r r' V Λ M N n) T_T
 --     _ _ _ _ (1 + r⁻¹) (r / (1 - r) + ε)
---     ((col_complex_rescaled.is_weak_bounded_exact.{u u₀}
+--     ((col_complex_rescaled.is_weak_bounded_exact.{u}
 --       r' V Λ M N _ (m + 1) tom jerry micky).scale_index_right _ adm)
---     (((col_complex_rescaled.is_weak_bounded_exact.{u u₀}
+--     (((col_complex_rescaled.is_weak_bounded_exact.{u}
 --       r' V Λ M N _ (m + 1) huey dewey louie).scale_index_left _ adm).scale_index_right _ adm2)
 --     (adm.scale_index_right _),
 --   have hk : k₁ m = tom * huey, { sorry },
