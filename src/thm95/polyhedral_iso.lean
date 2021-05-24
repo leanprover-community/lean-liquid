@@ -16,8 +16,8 @@ namespace PolyhedralLattice
 
 open simplex_category polyhedral_lattice (conerve.L conerve.obj)
 
-variables (Λ : PolyhedralLattice) (N : ℕ) [fact (0 < N)]
-variables (r' : ℝ≥0) (M : ProFiltPseuNormGrpWithTinv r')
+variables (Λ : PolyhedralLattice.{u}) (N : ℕ) [fact (0 < N)]
+variables (r' : ℝ≥0) (M : ProFiltPseuNormGrpWithTinv.{u} r')
 
 
 -- TODO: we probably want some efficient constructor for these isomorphisms,
@@ -187,9 +187,9 @@ section
 variables [fact (0 < r')] (N' : ℝ≥0)
 
 def Hom_cosimplicial_zero_iso' :
-  (Hom M).obj (of $ rescale N (of (fin N →₀ Λ))) ≅
-  (Hom M).obj ((Λ.cosimplicial N).obj (mk 0)) :=
-(Hom M).map_iso $ (Cech_conerve.obj_zero_iso _).symm
+  (Hom M).obj (op $ of $ rescale N (of (fin N →₀ Λ))) ≅
+  (Hom M).obj (op $ (Λ.cosimplicial N).obj (mk 0)) :=
+(Hom M).map_iso $ (Cech_conerve.obj_zero_iso _).op
 
 def Hom_cosimplicial_zero_iso_aux (h : N' = N) :
   ProFiltPseuNormGrpWithTinv.of r' (rescale N (polyhedral_lattice.Hom Λ M)) ≅
@@ -204,7 +204,7 @@ end
 def Hom_cosimplicial_zero_iso (h : N' = N) :
   polyhedral_lattice.Hom ((Λ.cosimplicial N).obj (simplex_category.mk 0)) M ≅
   (ProFiltPseuNormGrpWithTinv.of r' (rescale N' ((polyhedral_lattice.Hom Λ M) ^ N))) :=
-(Hom_cosimplicial_zero_iso' Λ N r' M).unop ≪≫
+(Hom_cosimplicial_zero_iso' Λ N r' M).symm ≪≫
 /- jmc is not very proud of this -/
 (by exact iso.refl _ : _) ≪≫
 (Hom_rescale_iso (of (fin N →₀ Λ)) N r' M) ≪≫
@@ -259,18 +259,15 @@ begin
 end
 
 lemma Cech_augmentation_map_eq_Hom_sum :
-  (thm95.Cech_augmentation_map r' Λ M N ≫ (Λ.Hom_cosimplicial_zero_iso N r' M ↑N rfl).op.inv) =
-  (Hom_sum Λ N r' M).op :=
+  (Λ.Hom_cosimplicial_zero_iso N r' M ↑N rfl).inv ≫ (thm95.Cech_augmentation_map r' Λ M N) =
+  (Hom_sum Λ N r' M) :=
 begin
   dsimp only [thm95.Cech_augmentation_map, Hom_cosimplicial_zero_iso,
     Hom_cosimplicial_zero_iso_aux_rfl, Hom_cosimplicial_zero_iso'],
-  rw [iso.refl_trans, iso.refl_trans, iso.op_inv],
-  dsimp only [iso.trans_inv, functor.map_iso_inv, iso.unop_inv, op_comp, iso.symm_inv],
-  simp only [quiver.hom.op_unop, ← category.assoc, ← (Hom M).map_comp,
-    augmentation_eq_diagonal],
+  rw [iso.refl_trans, iso.refl_trans],
+  dsimp only [iso.trans_inv, functor.map_iso_hom, functor.map_iso_inv, iso.symm_inv, op_comp],
+  simp only [category.assoc, ← (Hom M).map_comp, augmentation_eq_diagonal, iso.op_hom, ← op_comp],
   dsimp only [Hom_rescale_iso, Hom_finsupp_iso],
-  dsimp only [Hom_map],
-  simp only [iso.op_inv, ← op_comp, quiver.hom.op_inj.eq_iff],
   ext f l : 2,
   exact finsupp_sum_diagonal_embedding Λ N r' M f l,
 end
