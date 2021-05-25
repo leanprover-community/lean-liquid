@@ -345,7 +345,7 @@ lemma c₀_pred_le_of_le (i : ℕ) (hi : i + 2 ≤ m + 1) :
     c₀ Λ c' r r' m) :=
 sorry
 
-lemma c₀_spec (j : ℕ) (hj : j ≤ m) :
+lemma c₀_spec [fact (0 < r')] (j : ℕ) (hj : j ≤ m) :
   lem98.d Λ (N c' r r' m) ≤ (k₁_sqrt c' m - 1) * (r' * (c_ j * c₀ Λ c' r r' m)) / (N c' r r' m) :=
 sorry
 
