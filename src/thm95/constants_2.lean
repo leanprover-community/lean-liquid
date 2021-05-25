@@ -332,13 +332,62 @@ lemma c₀_pred_le_of_le (i : ℕ) (hi : i + 2 ≤ m + 1) :
     c₀ r r' c_ c' m Λ) :=
 sorry
 
--- BD.pos gives `0 < c_ j`
+
+-- This should be possible without `change`.
+-- TODO find a home / generalize?
+lemma nnreal.le_div_iff (a b c : ℝ≥0) (h : 0 < c) : a ≤ b / c ↔ a * c ≤ b :=
+begin
+  rcases a with ⟨a, a_pos⟩,
+  rcases b with ⟨b, b_pos⟩,
+  rcases c with ⟨c, c_pos⟩,
+  change a ≤ b / c ↔ a * c ≤ b,
+  change 0 < c at h,
+  exact le_div_iff h,
+end
+
+lemma nnreal.le_div_iff' (a b c : ℝ≥0) (h : 0 < c) : a ≤ b / c ↔ c * a ≤ b :=
+sorry
+
+lemma nnreal.div_le_iff (a b c : ℝ≥0) (h : 0 < b) : a / b ≤ c ↔ a ≤ c * b :=
+sorry
+
+lemma nnreal.div_le_iff' (a b c : ℝ≥0) (h : 0 < b) : a / b ≤ c ↔ a ≤ b * c :=
+sorry
+
+lemma nnreal.div_le_div_left_of (a b c : ℝ≥0) (w : 0 < c) (h : c ≤ b) : a / b ≤ a / c := sorry
 
 lemma c₀_spec (BD : breen_deligne.package) [BD.data.very_suitable r r' c_] [package.adept BD c_ c']
   [fact (0 < r')] (j : ℕ) (hj : j ≤ m) :
   lem98.d Λ (N c' r r' m) ≤
     (k₁_sqrt c' m - 1) * (r' * (c_ j * c₀ r r' c_ c' m Λ)) / (N c' r r' m) :=
-sorry
+begin
+  have w : ∀ j, j ≤ m → 0 < c_ j := sorry, -- This is meant to come from `BD`?
+  -- TODO golf
+  rw nnreal.le_div_iff',
+  rw ←nnreal.div_le_iff',
+  rw ←nnreal.div_le_iff',
+  rw ←nnreal.div_le_iff',
+  cases m,
+  { cases hj,
+    apply le_refl, },
+  refine le_trans _ (le_max_left _ _),
+  dsimp [c₀_aux],
+  apply nnreal.div_le_div_left_of,
+  rw finset.lt_inf'_iff,
+  intros b mem,
+  exact w b (finset.mem_range_succ_iff.mp mem),
+  refine finset.inf'_le _ _,
+  exact finset.mem_range_succ_iff.mpr hj,
+  exact w j hj,
+  apply fact.out,
+  rw ←add_lt_add_iff_right (1 : ℝ≥0),
+  rw nnreal.sub_add_cancel_of_le,
+  simp only [zero_add],
+  apply fact.out,
+  apply le_of_lt,
+  apply fact.out,
+  apply fact.out,
+end
 
 end
 
