@@ -4,6 +4,7 @@ import prop_92.prop_92
 import normed_snake_dual
 import thm95.double_complex
 import thm95.col_exact_prep
+import thm95.polyhedral_iso
 
 noncomputable theory
 
@@ -121,20 +122,35 @@ def col_complex_obj_iso_X_zero (c : ℝ≥0ᵒᵖ) :
     ((FLC_functor V).obj (op $ FLC_complex_arrow _ (aug_map_strict r' Λ M N n) (c.unop))).X 0 :=
 iso.refl _
 
-lemma wide_pullback_iso (c : ℝ≥0ᵒᵖ) (i : ℕ) :
+def wide_pullback_iso_aux (c : ℝ≥0) (i : ℕ) :
   limits.wide_pullback
-    (FLC_complex_arrow _ (aug_map_strict r' Λ M N n) c.unop).right
-    (λ i : ulift (fin (i+1)), (FLC_complex_arrow _ (aug_map_strict r' Λ M N n) c.unop).left)
-    (λ i : ulift (fin (i+1)), (FLC_complex_arrow _ (aug_map_strict r' Λ M N n) c.unop).hom) ≅
-  pseudo_normed_group.filtration_obj (((polyhedral_lattice.Hom (Cech_conerve.obj (Λ.diagonal_embedding N) i) M) ^ n)) c.unop :=
+    (FLC_complex_arrow _ (aug_map_strict r' Λ M N n) c).right
+    (λ i : ulift (fin (i+1)), (FLC_complex_arrow _ (aug_map_strict r' Λ M N n) c).left)
+    (λ i : ulift (fin (i+1)), (FLC_complex_arrow _ (aug_map_strict r' Λ M N n) c).hom) ≅
+  (Profinite.limit_cone $
+    limits.wide_pullback_shape.wide_cospan
+      (FLC_complex_arrow _ (aug_map_strict r' Λ M N n) c).right
+      (λ i : ulift (fin (i+1)), (FLC_complex_arrow _ (aug_map_strict r' Λ M N n) c).left)
+      (λ i : ulift (fin (i+1)), (FLC_complex_arrow _ (aug_map_strict r' Λ M N n) c).hom)).X :=
+limits.is_limit.cone_point_unique_up_to_iso
+  (limits.limit_cone.is_limit _) (Profinite.limit_cone_is_limit _)
+
+lemma wide_pullback_iso (c : ℝ≥0) (i : ℕ) :
+  limits.wide_pullback
+    (FLC_complex_arrow _ (aug_map_strict r' Λ M N n) c).right
+    (λ i : ulift (fin (i+1)), (FLC_complex_arrow _ (aug_map_strict r' Λ M N n) c).left)
+    (λ i : ulift (fin (i+1)), (FLC_complex_arrow _ (aug_map_strict r' Λ M N n) c).hom) ≅
+  pseudo_normed_group.filtration_obj (((polyhedral_lattice.Hom (Cech_conerve.obj (Λ.diagonal_embedding N) i) M) ^ n)) c :=
 begin
+  refine wide_pullback_iso_aux r' Λ M N n c i ≪≫ _,
+  dsimp [pseudo_normed_group.filtration_obj],
   sorry
 end
 
 def col_complex_obj_iso_X_succ (c : ℝ≥0ᵒᵖ) (i : ℕ) :
   ((col_complex r' V Λ M N n).obj c).X (i+1) ≅
     ((FLC_functor V).obj (op $ FLC_complex_arrow _ (aug_map_strict r' Λ M N n) (c.unop))).X (i+1) :=
-(CLC V).map_iso $ (wide_pullback_iso r' Λ M N n c i).op
+(CLC V).map_iso $ (wide_pullback_iso r' Λ M N n c.unop i).op
 
 def col_complex_obj_iso_X (c : ℝ≥0ᵒᵖ) :
   Π i, ((col_complex r' V Λ M N n).obj c).X i ≅
@@ -178,7 +194,8 @@ lemma FLC_arrow_iso_aux :
     (unop ((Cech_nerve r' Λ M N).right.obj (mk 0)))) ≅
   ProFiltPseuNormGrpWithTinv.of r' (rescale ↑N (((↥Λ →+ ↥M) ^ n) ^ N)) :=
 begin
-  dsimp [Cech_nerve, augmented_cosimplicial, augmented_Cech_conerve],
+  refine (ProFiltPseuNormGrpWithTinv.Pow r' n).map_iso
+    (Hom_cosimplicial_zero_iso Λ N r' M N rfl) ≪≫ _,
   sorry
 end
 
@@ -187,6 +204,7 @@ lemma FLC_arrow_iso (c : ℝ≥0) :
   FLC_complex_arrow _ (sum_hom_strict ((↥Λ →+ ↥M) ^ n) N) c :=
 arrow.iso_mk (((Filtration r').obj c).map_iso (FLC_arrow_iso_aux r' Λ M N n)) (iso.refl _)
 begin
+  -- erw [functor.map_iso_hom, iso.refl_hom, category.comp_id],
   sorry
 end
 
