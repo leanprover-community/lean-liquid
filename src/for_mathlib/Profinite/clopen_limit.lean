@@ -47,12 +47,25 @@ let FF := iso_to_Top _ _ hC in
   continuous_to_fun := FF.hom.continuous,
   continuous_inv_fun := FF.inv.continuous }
 
-lemma exists_clopen' [inhabited J]
+def compact_space_of_limit (hC : is_limit C) :
+  compact_space (Top.limit_cone_Inf $ F ⋙ Profinite_to_Top).X :=
+begin
+  constructor,
+  rw ← homeomorph.compact_image (cone_homeo _ _ hC).symm,
+  simp,
+  exact compact_univ,
+end
+
+lemma exists_clopen' [inhabited J] (hC : is_limit C)
   (U : set (Top.limit_cone_Inf $ F ⋙ Profinite_to_Top).X) (hU : is_clopen U) :
   ∃ (j : J) (V : set (F.obj j)) (hV : is_clopen V),
   U = ((Top.limit_cone_Inf $ F ⋙ Profinite_to_Top).π.app j) ⁻¹' V :=
 begin
-  cases hU with h1 hU,
+  haveI := compact_space_of_limit _ _ hC,
+  cases hU with hOpen hClosed,
+  have hBasis : ∀ j : J, topological_space.is_topological_basis
+    { S : set (F.obj j) | is_clopen S } :=  λ _, is_topological_basis_clopen,
+  have hCompact : _root_.is_compact U := hClosed.is_compact,
   sorry,
 end
 
@@ -67,7 +80,7 @@ begin
   { split,
     exact is_open.preimage (FF.symm.continuous) hU.1,
     exact is_closed.preimage (FF.symm.continuous) hU.2 },
-  rcases exists_clopen' F UU hUU with ⟨j,V,hV,hJ⟩,
+  rcases exists_clopen' F _ hC UU hUU with ⟨j,V,hV,hJ⟩,
   use j, use V, use hV,
   dsimp only [UU] at hJ,
   have : U = FF ⁻¹' (((Top.limit_cone_Inf (F ⋙ Profinite_to_Top)).π.app j) ⁻¹' V),
