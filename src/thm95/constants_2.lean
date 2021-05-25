@@ -306,14 +306,23 @@ noncomputable def c₀ (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r 
   (c_ c' : ℕ → ℝ≥0) : ℕ → PolyhedralLattice → ℝ≥0
 | 0 Λ := c₀_aux r r' c_ c' 0 Λ
 | (m+1) Λ := max (c₀_aux r r' c_ c' (m+1) Λ)
-    (c₀ m ((Λ.cosimplicial (N c' r r' (m+1))).obj (mk 0))) -- this is not done yet: we need more maxes!
+    (max (c₀ m Λ) (c₀ m ((Λ.cosimplicial (N c' r r' (m+1))).obj (mk 0)))) -- this is not done yet: we need more maxes!
 
 
 -- Scott is really unhappy that these lemmas have `fact` in them.
 -- Putting aside the fact that we're badly abusing the `fact` system,
 -- typeclass inference can even use these, because it can't provide the inequality arguments.
 
-lemma c₀_mono : fact (c₀ r r' c_ c' (m - 1) Λ ≤ c₀ r r' c_ c' m Λ) := sorry
+lemma c₀_mono : fact (c₀ r r' c_ c' (m - 1) Λ ≤ c₀ r r' c_ c' m Λ) :=
+begin
+  fsplit,
+  cases m,
+  { apply le_refl, },
+  { dsimp [c₀],
+    apply le_trans _ (le_max_right _ _),
+    apply le_trans _ (le_max_left _ _),
+    simp, }
+end
 
 lemma c₀_pred_le (hm : 0 < m) :
   fact (c₀ r r' c_ c' (m - 1) ((Λ.cosimplicial (N c' r r' m)).obj (mk 0)) ≤
@@ -323,6 +332,7 @@ begin
   cases m,
   { cases hm, },
   { dsimp [c₀],
+    apply le_trans _ (le_max_right _ _),
     apply le_trans _ (le_max_right _ _),
     simp, }
 end
