@@ -306,8 +306,9 @@ noncomputable def c₀ (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r 
   (c_ c' : ℕ → ℝ≥0) : ℕ → PolyhedralLattice → ℝ≥0
 | 0 Λ := c₀_aux r r' c_ c' 0 Λ
 | (m+1) Λ := max (c₀_aux r r' c_ c' (m+1) Λ)
-    (max (c₀ m Λ) (c₀ m ((Λ.cosimplicial (N c' r r' (m+1))).obj (mk 0)))) -- this is not done yet: we need more maxes!
-
+    (max (c₀ m Λ)
+    (max (c₀ m ((Λ.cosimplicial (N c' r r' (m+1))).obj (mk 0)))
+      ((finset.range (m+1)).sup (λ i, c₀ m ((Λ.cosimplicial (N c' r r' (m+1))).obj (mk (i + 1)))))))
 
 -- Scott is really unhappy that these lemmas have `fact` in them.
 -- Putting aside the fact that we're badly abusing the `fact` system,
@@ -334,14 +335,26 @@ begin
   { dsimp [c₀],
     apply le_trans _ (le_max_right _ _),
     apply le_trans _ (le_max_right _ _),
+    apply le_trans _ (le_max_left _ _),
     simp, }
 end
 
 lemma c₀_pred_le_of_le (i : ℕ) (hi : i + 2 ≤ m + 1) :
   fact (c₀ r r' c_ c' (m - 1) ((Λ.cosimplicial (N c' r r' m)).obj (mk (i + 1))) ≤
     c₀ r r' c_ c' m Λ) :=
-sorry
-
+begin
+  fsplit,
+  cases m,
+  { simpa using nat.succ_le_succ_iff.mp hi, },
+  { dsimp [c₀],
+    replace hi : i ∈ finset.range (m + 1) :=
+      finset.mem_range.mpr (nat.succ_le_iff.mp (nat.succ_le_succ_iff.mp hi)),
+    apply le_trans _ (le_max_right _ _),
+    apply le_trans _ (le_max_right _ _),
+    apply le_trans _ (le_max_right _ _),
+    simp only [nat.succ_sub_succ_eq_sub, nat.sub_zero, nat.succ_eq_add_one],
+    exact finset.le_sup hi, }
+end
 
 -- This should be possible without `change`.
 -- TODO find a home / generalize?
