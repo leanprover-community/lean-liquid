@@ -1,7 +1,5 @@
 import for_mathlib.connected
 
-import thm95.constants
-import combinatorial_lemma
 import system_of_complexes.basic
 import prop819
 import pseudo_normed_group.sum_hom

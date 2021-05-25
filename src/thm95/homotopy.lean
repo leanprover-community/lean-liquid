@@ -5,7 +5,6 @@ import normed_spectral
 
 import pseudo_normed_group.homotopy
 
-import thm95.constants
 import thm95.double_complex
 import thm95.row_iso
 

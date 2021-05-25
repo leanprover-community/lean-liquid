@@ -1,13 +1,11 @@
 import for_mathlib.simplicial.complex
 
-import polyhedral_lattice.cosimplicial
 import polyhedral_lattice.Hom
 import pseudo_normed_group.system_of_complexes
 import system_of_complexes.rescale
 import normed_spectral
 
 import thm95.modify_complex
-import thm95.constants
 
 .
 
