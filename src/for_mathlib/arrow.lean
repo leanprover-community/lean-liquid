@@ -11,16 +11,6 @@ variables {C : Type u} [category.{v} C]
 
 -- the rest of this file is mathlib PR: #7457
 
-/-- The functor sending an arrow to its source. -/
-abbreviation left_func : arrow C ⥤ C := comma.fst _ _
-
-/-- The functor sending an arrow to its target. -/
-abbreviation right_func : arrow C ⥤ C := comma.snd _ _
-
-/-- The natural transformation from `left_func` to `right_func`, given by the arrow itself. -/
-def left_to_right : (left_func : arrow C ⥤ C) ⟶ right_func :=
-{ app := λ f, f.hom }
-
 /-- Make a limit cone for a diagram of arrows, given limit cones for the left and right. -/
 def limit_cone {J : Type v} [small_category J] (F : J ⥤ arrow C)
   (CL : limits.limit_cone (F ⋙ left_func))
@@ -55,8 +45,12 @@ def limit_cone {J : Type v} [small_category J] (F : J ⥤ arrow C)
         erw left_to_right.naturality,
         refl,
       end },
-    fac' := by { intros, ext; dsimp;
-        simp only [functor.map_cone_π_app, limits.is_limit.fac, comma.fst_map, comma.snd_map] },
+    fac' :=
+    begin
+      intros, ext; dsimp;
+      simp only [functor.map_cone_π_app, limits.is_limit.fac, comma.fst_map, comma.snd_map,
+        right_func_map, left_func_map],
+    end,
     uniq' := begin
       intros S m w,
       ext1,

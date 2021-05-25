@@ -51,7 +51,7 @@ begin
     refine ⟨AA, ⟨_,_⟩, λ x hx, _⟩,
     { rintros _ ⟨i,rfl⟩,
       rcases hVs i with ⟨h1,h2⟩,
-      rw mem_nhds_sets_iff at h1,
+      rw mem_nhds_iff at h1,
       rcases h1 with ⟨Q,hQ,h1,h3⟩,
       apply hQ h3 },
     { refine @is_clopen_Inter X _ T hT.fintype (λ i, i.val.proj ⁻¹' (Vs i)) (λ i, _),
@@ -62,7 +62,7 @@ begin
       rcases hVs i with ⟨h1,h2⟩,
       exact h2 (hx _ ⟨i,rfl⟩) } },
   { rintro ⟨V, ⟨hxV, V_op, -⟩, hUV : V ⊆ S⟩,
-    rw mem_nhds_sets_iff,
+    rw mem_nhds_iff,
     exact ⟨V, hUV, V_op, hxV⟩ }
 end
 
