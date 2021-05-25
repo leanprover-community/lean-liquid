@@ -14,11 +14,8 @@ noncomputable theory
 
 open_locale nnreal
 
+
 open real
-
-section b_function
-
-def b (r r' k' ε : ℝ): ℕ := nat_ceil ((log $ ε/(2 * k'))/log (r/r'))
 
 lemma real.log_pow {x : ℝ} (hx : 0 < x) (n : ℕ) : real.log (x ^ n) = n * real.log x :=
 begin
@@ -28,7 +25,11 @@ begin
   rw log_rpow hx
 end
 
+namespace helper
+
 open real
+
+def b (r r' k' ε : ℝ): ℕ := nat_ceil ((log $ ε/(2 * k'))/log (r/r'))
 
 lemma b_spec {r r' k' ε : ℝ} (hr : 0 < r) ( hr' : 0 < r') (hrr' : r < r')
   (hk' : 0 < k') (hε : 0 < ε) : (2 * k') * (r / r') ^ (b r r' k' ε) ≤ ε :=
@@ -40,11 +41,6 @@ begin
   rw [← le_div_iff' f₁, ← log_le_log f₄ (div_pos hε f₁), log_pow f₃, ← div_le_iff_of_neg (log_neg f₃ f₂)],
   exact le_nat_ceil (log (ε / (2 * k')) / log (r / r')),
 end
-
-end b_function
-
-section N₂_function
-open real
 
 def N₂ (r' k' b : ℝ) := nat_ceil (log (k'/r'^b)/ log 2)
 
@@ -58,7 +54,7 @@ begin
   apply le_nat_ceil,
 end
 
-end N₂_function
+end helper
 
 variables (BD : breen_deligne.package) (c_ c' : ℕ → ℝ≥0)
 variables [BD.data.suitable c_] [breen_deligne.package.adept BD c_ c']
