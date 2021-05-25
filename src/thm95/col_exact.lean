@@ -380,7 +380,7 @@ end
 
 end
 
-lemma col_ι [normed_with_aut r V] :
+def col_ι [normed_with_aut r V] :
   col'.{u} BD c_ r r' V Λ M N n ⟶
     (col_complex_rescaled.{u} r' V Λ M N (BD.X n)).scale_index_right (c_ n) :=
 { app := λ c,
@@ -396,11 +396,22 @@ variables [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) (i : ℕ)
 lemma col_ι_range :
   (((double_complex.col_ι BD c_ r r' V Λ M N n).app c).f i).range =
   (((col_complex_rescaled.T_inv_sub_Tinv' r r' V Λ M N (BD.X n) (c_ n)).app c).f i).ker :=
-sorry
+begin
+  cases i;
+  { refine SemiNormedGroup.rescale_exact _ _ _ _,
+    rw CLCTinv.ι_range',
+    ext1 x,
+    refl, },
+end
 
 lemma col_ι_isometry :
   isometry (((double_complex.col_ι BD c_ r r' V Λ M N n).app c).f i) :=
-sorry
+begin
+  cases i;
+  { refine SemiNormedGroup.rescale_map_isometry _ _,
+    apply normed_group_hom.isometry_of_norm,
+    intro, refl },
+end
 
 end double_complex
 

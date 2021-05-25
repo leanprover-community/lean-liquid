@@ -50,6 +50,23 @@ normed_group_hom.equalizer.ι _ _
   ι f g ≫ f = ι f g ≫ g :=
 normed_group_hom.equalizer.condition _ _
 
+lemma ι_range {V W : SemiNormedGroup} (f g : V ⟶ W) :
+  (ι f g).range = (f - g).ker :=
+begin
+  ext, rw [normed_group_hom.mem_range, normed_group_hom.mem_ker],
+  split,
+  { rintro ⟨x, rfl⟩, rw [normed_group_hom.sub_apply], exact x.2 },
+  { intro h, refine ⟨⟨x, h⟩, rfl⟩, }
+end
+
+lemma ι_range' {V W : SemiNormedGroup} (f g : V ⟶ W) :
+  (ι f g).range = (g - f).ker :=
+begin
+  rw ι_range, ext x,
+  simp only [normed_group_hom.mem_ker, normed_group_hom.sub_apply, sub_eq_zero],
+  rw eq_comm
+end
+
 def map {V₁ V₂ W₁ W₂ : SemiNormedGroup} {f₁ f₂ g₁ g₂} (φ : V₁ ⟶ V₂) (ψ : W₁ ⟶ W₂)
   (hf : φ ≫ f₂ = f₁ ≫ ψ) (hg : φ ≫ g₂ = g₁ ≫ ψ) :
   equalizer f₁ g₁ ⟶ equalizer f₂ g₂ :=
@@ -138,6 +155,18 @@ def ι (r : ℝ≥0) (V : SemiNormedGroup)
   [normed_with_aut r V] [fact (0 < r)] {A B : Profiniteᵒᵖ} (f g : A ⟶ B) :
   CLCTinv r V f g ⟶ (CLC V).obj A :=
 SemiNormedGroup.equalizer.ι _ _
+
+lemma ι_range (r : ℝ≥0) (V : SemiNormedGroup)
+  [normed_with_aut r V] [fact (0 < r)] {A B : Profiniteᵒᵖ} (f g : A ⟶ B) :
+  (ι r V f g).range =
+    normed_group_hom.ker ((CLC V).map f - ((CLC V).map g ≫ (CLC.T_inv r V).app B)) :=
+SemiNormedGroup.equalizer.ι_range _ _
+
+lemma ι_range' (r : ℝ≥0) (V : SemiNormedGroup)
+  [normed_with_aut r V] [fact (0 < r)] {A B : Profiniteᵒᵖ} (f g : A ⟶ B) :
+  (ι r V f g).range =
+    normed_group_hom.ker (((CLC V).map g ≫ (CLC.T_inv r V).app B) - (CLC V).map f) :=
+SemiNormedGroup.equalizer.ι_range' _ _
 
 def map {A₁ B₁ A₂ B₂ : Profiniteᵒᵖ} (f₁ g₁ : A₁ ⟶ B₁) (f₂ g₂ : A₂ ⟶ B₂)
   (ϕ : A₁ ⟶ A₂) (ψ : B₁ ⟶ B₂) (h₁ : ϕ ≫ f₂ = f₁ ≫ ψ) (h₂ : ϕ ≫ g₂ = g₁ ≫ ψ) :

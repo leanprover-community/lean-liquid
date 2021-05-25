@@ -83,6 +83,36 @@ begin
   rw nnreal.coe_pos, apply fact.out
 end
 
+lemma rescale_map_isometry {V₁ V₂ : SemiNormedGroup} {f : V₁ ⟶ V₂} (hf : isometry f) :
+  isometry ((rescale r).map f) :=
+begin
+  rw normed_group_hom.isometry_iff_norm at hf ⊢,
+  intro v,
+  erw [rescale.norm_def, rescale.norm_def, hf ((@rescale.of r _).symm v)],
+end
+
+lemma rescale_exact {V₁ V₂ V₃ : SemiNormedGroup} (f : V₁ ⟶ V₂) (g : V₂ ⟶ V₃)
+  (hfg : f.range = g.ker) :
+  ((rescale r).map f).range = ((rescale r).map g).ker :=
+begin
+  ext x,
+  calc x ∈ ((rescale r).map f).range ↔ x ∈ f.range : iff.rfl
+  ... ↔ x ∈ g.ker : by rw hfg
+  ... ↔ x ∈ ((rescale r).map g).ker : iff.rfl,
+end
+
+lemma rescale_exists_norm_le {V₁ V₂ : SemiNormedGroup} (f : V₁ ⟶ V₂) (C : ℝ≥0)
+  (hf : ∀ y, ∃ x, f x = y ∧ ∥x∥ ≤ C * ∥y∥) :
+  ∀ y, ∃ x, (rescale r).map f x = y ∧ ∥x∥ ≤ C * ∥y∥ :=
+begin
+  intro y,
+  obtain ⟨x, h1, h2⟩ := hf ((@rescale.of r _).symm y),
+  refine ⟨@rescale.of r _ x, h1, _⟩,
+  erw [rescale.norm_def, rescale.norm_def],
+  simp only [div_eq_mul_inv, ← mul_assoc, equiv.symm_apply_apply, ← coe_nnnorm],
+  norm_cast, exact mul_le_mul' h2 le_rfl,
+end
+
 def to_rescale : 𝟭 _ ⟶ rescale r :=
 { app := λ V,
   add_monoid_hom.mk_normed_group_hom' (add_monoid_hom.mk' (@rescale.of r V) $ λ _ _, rfl) r⁻¹
@@ -107,28 +137,6 @@ def of_rescale [hr : fact (0 < r)] : rescale r ⟶ 𝟭 _ :=
 def iso_rescale [fact (0 < r)] : 𝟭 _ ≅ (rescale r) :=
 { hom := to_rescale r,
   inv := of_rescale r, }
-
-lemma rescale_exact {V₁ V₂ V₃ : SemiNormedGroup} (f : V₁ ⟶ V₂) (g : V₂ ⟶ V₃)
-  (hfg : f.range = g.ker) :
-  ((rescale r).map f).range = ((rescale r).map g).ker :=
-begin
-  ext x,
-  calc x ∈ ((rescale r).map f).range ↔ x ∈ f.range : iff.rfl
-  ... ↔ x ∈ g.ker : by rw hfg
-  ... ↔ x ∈ ((rescale r).map g).ker : iff.rfl,
-end
-
-lemma rescale_exists_norm_le {V₁ V₂ : SemiNormedGroup} (f : V₁ ⟶ V₂) (C : ℝ≥0)
-  (hf : ∀ y, ∃ x, f x = y ∧ ∥x∥ ≤ C * ∥y∥) :
-  ∀ y, ∃ x, (rescale r).map f x = y ∧ ∥x∥ ≤ C * ∥y∥ :=
-begin
-  intro y,
-  obtain ⟨x, h1, h2⟩ := hf ((@rescale.of r _).symm y),
-  refine ⟨@rescale.of r _ x, h1, _⟩,
-  erw [rescale.norm_def, rescale.norm_def],
-  simp only [div_eq_mul_inv, ← mul_assoc, equiv.symm_apply_apply, ← coe_nnnorm],
-  norm_cast, exact mul_le_mul' h2 le_rfl,
-end
 
 open category_theory
 
