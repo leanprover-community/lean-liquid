@@ -1,3 +1,5 @@
+import for_mathlib.arrow.iso_mk
+
 import prop_92.prop_92
 import normed_snake_dual
 import thm95.double_complex
@@ -117,8 +119,7 @@ end
 def col_complex_obj_iso_X_zero (c : ℝ≥0ᵒᵖ) :
   ((col_complex r' V Λ M N n).obj c).X 0 ≅
     ((FLC_functor V).obj (op $ FLC_complex_arrow _ (aug_map_strict r' Λ M N n) (c.unop))).X 0 :=
-(CLC V).map_iso $
-  (iso.refl $ (FLC_complex_arrow _ (aug_map_strict r' Λ M N n) c.unop).right).op
+iso.refl _
 
 lemma wide_pullback_iso (c : ℝ≥0ᵒᵖ) (i : ℕ) :
   limits.wide_pullback
@@ -135,7 +136,7 @@ def col_complex_obj_iso_X_succ (c : ℝ≥0ᵒᵖ) (i : ℕ) :
     ((FLC_functor V).obj (op $ FLC_complex_arrow _ (aug_map_strict r' Λ M N n) (c.unop))).X (i+1) :=
 (CLC V).map_iso $ (wide_pullback_iso r' Λ M N n c i).op
 
-lemma col_complex_obj_iso_X (c : ℝ≥0ᵒᵖ) :
+def col_complex_obj_iso_X (c : ℝ≥0ᵒᵖ) :
   Π i, ((col_complex r' V Λ M N n).obj c).X i ≅
     ((FLC_functor V).obj (op $ FLC_complex_arrow _ (aug_map_strict r' Λ M N n) (c.unop))).X i
 | 0     := col_complex_obj_iso_X_zero r' V Λ M N n c
@@ -160,15 +161,34 @@ end
 
 lemma col_complex_obj_iso_strict (c : ℝ≥0ᵒᵖ) (i : ℕ) :
   isometry (((col_complex_obj_iso r' V Λ M N n c).inv).f i) :=
-sorry
+begin
+  cases i,
+  { apply isometry_id },
+  { dsimp [col_complex_obj_iso, col_complex_obj_iso_X, col_complex_obj_iso_X_succ],
+    rw [← iso.op_inv, ← functor.map_iso_inv, ← iso.symm_hom],
+    apply SemiNormedGroup.iso_isometry_of_norm_noninc;
+    { apply CLC.map_norm_noninc } }
+end
 
 section
 open profinitely_filtered_pseudo_normed_group
 
+lemma FLC_arrow_iso_aux :
+  ((ProFiltPseuNormGrpWithTinv.Pow r' n).obj
+    (unop ((Cech_nerve r' Λ M N).right.obj (mk 0)))) ≅
+  ProFiltPseuNormGrpWithTinv.of r' (rescale ↑N (((↥Λ →+ ↥M) ^ n) ^ N)) :=
+begin
+  dsimp [Cech_nerve, augmented_cosimplicial, augmented_Cech_conerve],
+  sorry
+end
+
 lemma FLC_arrow_iso (c : ℝ≥0) :
   FLC_complex_arrow _ (aug_map_strict r' Λ M N n) c ≅
   FLC_complex_arrow _ (sum_hom_strict ((↥Λ →+ ↥M) ^ n) N) c :=
-sorry
+arrow.iso_mk (((Filtration r').obj c).map_iso (FLC_arrow_iso_aux r' Λ M N n)) (iso.refl _)
+begin
+  sorry
+end
 
 lemma FLC_arrow_iso_left_eq (c₁ c₂ : ℝ≥0) {_ : fact (c₁ ≤ c₂)}
   (x : ((FLC_complex_arrow _ (aug_map_strict r' Λ M N n) c₁).left.to_Top)) :
