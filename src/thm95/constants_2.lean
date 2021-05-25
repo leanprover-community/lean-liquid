@@ -296,9 +296,18 @@ sorry
 
 section open simplex_category
 
+def c₀_aux (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)]
+  (c_ c' : ℕ → ℝ≥0) (m : ℕ) (Λ : PolyhedralLattice) : ℝ≥0 :=
+N c' r r' m * lem98.d Λ (N c' r r' m) /
+  (k₁_sqrt c' m - 1) / r' / (finset.range (m+1)).inf' ⟨0, by simp⟩ c_
+
 -- define this such that the lemmas below hold
-def c₀ (r r' : ℝ≥0) (c_ c' : ℕ → ℝ≥0) : Π (m : ℕ) (Λ : PolyhedralLattice), ℝ≥0 :=
-sorry
+noncomputable def c₀ (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)]
+  (c_ c' : ℕ → ℝ≥0) : ℕ → PolyhedralLattice → ℝ≥0
+| 0 Λ := c₀_aux r r' c_ c' 0 Λ
+| (m+1) Λ := max (c₀_aux r r' c_ c' (m+1) Λ)
+    (c₀ m ((Λ.cosimplicial (N c' r r' m)).obj (mk 0))) -- this is not done yet: we need more maxes!
+
 
 -- Scott is really unhappy that these lemmas have `fact` in them.
 -- Putting aside the fact that we're badly abusing the `fact` system,
