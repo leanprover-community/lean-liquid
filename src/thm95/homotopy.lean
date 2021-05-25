@@ -32,7 +32,7 @@ variables (Λ : PolyhedralLattice.{u})
 def NSH_aux_type (N : ℕ) (M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ) :=
 normed_spectral_homotopy
   ((BD_system_map (BD.data.sum (2^N)) c_ (rescale_constants c_ (2^N)) r V).app M)
-  m (k' c' m) (ε m) (c₀ Λ c' r r' m) (H BD c' r r' m)
+  m (k' c' m) (ε m) (c₀ Λ c_ c' r r' m) (H BD c' r r' m)
 
 section
 
@@ -61,7 +61,7 @@ end
 else 0
 
 lemma NSH_h_bound_by {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ}
-  (q : ℕ) (hqm : q ≤ m) (c : ℝ≥0) [fact (c₀ Λ c' r r' m ≤ c)] :
+  (q : ℕ) (hqm : q ≤ m) (c : ℝ≥0) [fact (c₀ Λ c_ c' r r' m ≤ c)] :
   normed_group_hom.bound_by
     (@NSH_h BD r r' _ _ _ _ V _ c_ c' _ _ m M q (q+1) c)
     (H BD c' r r' m) :=
@@ -121,7 +121,7 @@ begin
     simp only [mul_right_comm _ (c_ q)],
     refine mul_le_mul' _ le_rfl,
     refine mul_le_mul' _ le_rfl,
-    apply N₂_spec },
+    apply thm95.universal_constants.N₂_spec, },
   { apply r_pow_b_le_ε }
 end
 
@@ -166,7 +166,7 @@ end
 def NSC_htpy :
   normed_spectral_homotopy
     ((thm95.double_complex BD.data c_ r r' V Λ M (N c' r r' m)).row_map 0 1)
-      m (k' c' m) (ε m) (c₀ Λ c' r r' m) (H BD c' r r' m) :=
+      m (k' c' m) (ε m) (c₀ Λ c_ c' r r' m) (H BD c' r r' m) :=
 (NSH_aux BD r r' V c_ c' m Λ (op (Hom Λ M))).of_iso _ _ _
   (iso.refl _) (thm95.mul_rescale_iso_row_one BD.data c_ r V _ _ (by norm_cast) Λ M)
   (λ _ _ _, rfl) (thm95.mul_rescale_iso_row_one_strict BD.data c_ r V _ _ (by norm_cast) Λ M)

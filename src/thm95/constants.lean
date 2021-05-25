@@ -108,12 +108,13 @@ open system_of_double_complexes breen_deligne
 noncomputable
 def k₁ : ℕ → ℝ≥0
 | 0     := 2 -- should be anything > 1
-| (m+1) := max 1 ((max (normed_spectral.k₀ m (k₁ m)) $ (finset.range (m+2)).sup c')^2)
+| (m+1) := max 2 ((max (normed_spectral.k₀ m (k₁ m)) $ (finset.range (m+2)).sup c')^2)
 
+instance one_lt_k₁ : Π (m : ℕ), fact (1 < k₁ c' m)
+| 0     := ⟨one_lt_two⟩
+| (m+1) := ⟨lt_of_lt_of_le one_lt_two (le_max_left _ _)⟩
 
-instance one_le_k₁ : Π (m : ℕ), fact (1 ≤ k₁ c' m)
-| 0     := ⟨one_le_two⟩
-| (m+1) := ⟨le_max_left _ _⟩
+instance one_le_k₁ (m : ℕ) : fact (1 ≤ k₁ c' m) := ⟨(fact.out (1 < k₁ c' m)).le⟩
 
 def K₁ : ℕ → ℝ≥0
 | 0     := 2 -- should be anything > 1, probably
@@ -322,31 +323,34 @@ instance K_le_K₁ [fact (0 < m)] : fact (K BD c' r r' (m - 1) ≤ K₁ m) := so
 
 def k₁_sqrt : ℝ≥0 := ⟨real.sqrt (k₁ c' m), real.sqrt_nonneg _⟩
 
-instance one_le_k₁_sqrt : fact (1 ≤ k₁_sqrt c' m) := ⟨begin
-  change (1 : ℝ) ≤ real.sqrt (k₁ c' m),
-  rw [real.le_sqrt' zero_lt_one, pow_two, mul_one],
-  exact (universal_constants.one_le_k₁ c' m).elim,
+instance one_lt_k₁_sqrt : fact (1 < k₁_sqrt c' m) := ⟨begin
+  change (1 : ℝ) < real.sqrt (k₁ c' m),
+  rw [real.lt_sqrt zero_le_one, pow_two, mul_one],
+  exact (universal_constants.one_lt_k₁ c' m).elim,
+  exact (k₁ c' m).coe_nonneg,
 end⟩
 
 lemma K₁_spec : (m + 2 + (r + 1) / r * (r / (1 - r) + 1) * (m + 2) * (m + 2) : ℝ≥0) ≤ K₁ m :=
 sorry
 
 -- define this such that the lemmas below hold
-def c₀ (Λ : PolyhedralLattice) (c' : ℕ → ℝ≥0) (r r' : ℝ≥0) (m : ℕ) : ℝ≥0 :=
-sorry
+def c₀ (Λ : PolyhedralLattice) (c_ c' : ℕ → ℝ≥0)
+  (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)] (m : ℕ) : ℝ≥0 :=
+  sorry
 
 lemma c₀_pred_le (hm : 0 < m) :
-  fact (c₀ ((Λ.cosimplicial (N c' r r' m)).obj (simplex_category.mk 0)) c' r r' (m - 1) ≤
-    c₀ Λ c' r r' m) :=
+  fact (c₀ ((Λ.cosimplicial (N c' r r' m)).obj (simplex_category.mk 0)) c_ c' r r' (m - 1) ≤
+    c₀ Λ c_ c' r r' m) :=
 sorry
 
 lemma c₀_pred_le_of_le (i : ℕ) (hi : i + 2 ≤ m + 1) :
-  fact (c₀ ((Λ.cosimplicial (N c' r r' m)).obj (simplex_category.mk (i + 1))) c' r r' (m - 1) ≤
-    c₀ Λ c' r r' m) :=
+  fact (c₀ ((Λ.cosimplicial (N c' r r' m)).obj (simplex_category.mk (i + 1))) c_ c' r r' (m - 1) ≤
+    c₀ Λ c_ c' r r' m) :=
 sorry
 
-lemma c₀_spec [fact (0 < r')] (j : ℕ) (hj : j ≤ m) :
-  lem98.d Λ (N c' r r' m) ≤ (k₁_sqrt c' m - 1) * (r' * (c_ j * c₀ Λ c' r r' m)) / (N c' r r' m) :=
+-- TODO perhaps move the `hc` hypothesis? I'm not sure where it comes from, anyway.
+lemma c₀_spec (j : ℕ) (hj : j ≤ m) (hc : c_ j ≠ 0) :
+  lem98.d Λ (N c' r r' m) ≤ (k₁_sqrt c' m - 1) * (r' * (c_ j * c₀ Λ c_ c' r r' m)) / (N c' r r' m) :=
 sorry
 
 end universal_constants
