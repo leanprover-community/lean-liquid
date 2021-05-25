@@ -114,12 +114,40 @@ lemma aug_map_strict : (aug_map r' Λ M N n).strict :=
 to_profinitely_filtered_pseudo_normed_group_hom_strict _
 end
 
-lemma col_complex_obj_iso (c : ℝ≥0ᵒᵖ) :
+def col_complex_obj_iso_X_zero (c : ℝ≥0ᵒᵖ) :
+  ((col_complex r' V Λ M N n).obj c).X 0 ≅
+    ((FLC_functor V).obj (op $ FLC_complex_arrow _ (aug_map_strict r' Λ M N n) (c.unop))).X 0 :=
+(CLC V).map_iso $
+  (iso.refl $ (FLC_complex_arrow _ (aug_map_strict r' Λ M N n) (unop c)).right).op
+
+lemma wide_pullback_iso (c : ℝ≥0ᵒᵖ) (i : ℕ) :
+  limits.wide_pullback
+    (FLC_complex_arrow _ (aug_map_strict r' Λ M N n) (unop c)).right
+    (λ i : ulift (fin (i+1)), (FLC_complex_arrow _ (aug_map_strict r' Λ M N n) (unop c)).left)
+    (λ i : ulift (fin (i+1)), (FLC_complex_arrow _ (aug_map_strict r' Λ M N n) (unop c)).hom) ≅
+  pseudo_normed_group.filtration_obj (↥(unop ((Cech_nerve r' Λ M N).right.obj (mk i))) ^ n) (unop c) :=
+begin
+  sorry
+end
+
+def col_complex_obj_iso_X_succ (c : ℝ≥0ᵒᵖ) (i : ℕ) :
+  ((col_complex r' V Λ M N n).obj c).X (i+1) ≅
+    ((FLC_functor V).obj (op $ FLC_complex_arrow _ (aug_map_strict r' Λ M N n) (c.unop))).X (i+1) :=
+(CLC V).map_iso $ (wide_pullback_iso r' Λ M N n c i).op
+
+lemma col_complex_obj_iso_X (c : ℝ≥0ᵒᵖ) :
+  Π i, ((col_complex r' V Λ M N n).obj c).X i ≅
+    ((FLC_functor V).obj (op $ FLC_complex_arrow _ (aug_map_strict r' Λ M N n) (c.unop))).X i
+| 0     := col_complex_obj_iso_X_zero r' V Λ M N n c
+| (i+1) := col_complex_obj_iso_X_succ r' V Λ M N n c i
+
+def col_complex_obj_iso (c : ℝ≥0ᵒᵖ) :
   (col_complex r' V Λ M N n).obj c ≅
     (FLC_functor V).obj (op $ FLC_complex_arrow _ (aug_map_strict r' Λ M N n) (c.unop)) :=
-sorry
+homological_complex.iso_of_components (col_complex_obj_iso_X r' V Λ M N n c)
+  sorry
 
-lemma col_complex_iso_aux :
+def col_complex_iso_aux :
   col_complex r' V Λ M N n ≅ FLC_complex V _ (aug_map_strict r' Λ M N n) :=
 nat_iso.of_components (col_complex_obj_iso r' V Λ M N n) sorry
 
@@ -127,7 +155,7 @@ lemma col_complex_obj_iso_strict (c : ℝ≥0ᵒᵖ) (i : ℕ) :
   isometry (((col_complex_obj_iso r' V Λ M N n c).hom).f i) :=
 sorry
 
-lemma col_complex_iso_obj (c : ℝ≥0ᵒᵖ) :
+def col_complex_iso_obj (c : ℝ≥0ᵒᵖ) :
   (FLC_complex V _ (profinitely_filtered_pseudo_normed_group.sum_hom_strict ((↥Λ →+ ↥M)^n) N)).obj c ≅
   (col_complex r' V Λ M N n).obj c :=
 begin
