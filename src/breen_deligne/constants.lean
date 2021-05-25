@@ -29,7 +29,18 @@ noncomputable def c_ (BD : data) (r r' : ℝ≥0) [hr : fact (r < 1)] : ℕ → 
 | 0     := 1
 | (n+1) := (max 1 (BD.d (n+1) n).factor)⁻¹ * (r' ^ (b r $ max 1 (BD.d (n+1) n).bound) * c_ n)
 
-instance c_very_suitable [hr : fact (r < 1)] : BD.very_suitable r r' (BD.c_ r r') :=
+instance c__pos [hr : fact (r < 1)] [hr' : fact (0 < r')] :
+  Π (n : ℕ), fact (0 < c_ BD r r' n)
+| 0     := ⟨zero_lt_one⟩
+| (n+1) :=
+begin
+  dsimp [c_],
+  refine ⟨mul_pos (nnreal.inv_pos.mpr _) (mul_pos (pow_pos hr'.1 _) $ (c__pos _).1)⟩,
+  exact lt_of_lt_of_le zero_lt_one (le_max_left _ _)
+end
+
+instance c_very_suitable [hr : fact (r < 1)] [hr' : fact (0 < r')] :
+  BD.very_suitable r r' (BD.c_ r r') :=
 very_suitable.of_succ _ _ _ _
 begin
   intro n,
@@ -50,16 +61,7 @@ begin
     rw nnreal.mul_le_iff_le_inv hc,
     dsimp [c_], exact le_rfl }
 end
-
-instance c__pos [hr : fact (r < 1)] [hr' : fact (0 < r')] :
-  Π (n : ℕ), fact (0 < c_ BD r r' n)
-| 0     := ⟨zero_lt_one⟩
-| (n+1) :=
-begin
-  dsimp [c_],
-  refine ⟨mul_pos (nnreal.inv_pos.mpr _) (mul_pos (pow_pos hr'.1 _) $ (c__pos _).1)⟩,
-  exact lt_of_lt_of_le zero_lt_one (le_max_left _ _)
-end
+(λ i, (data.c__pos _ _ _ i).1)
 
 end data
 

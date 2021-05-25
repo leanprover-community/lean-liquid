@@ -95,7 +95,7 @@ namespace eg
 
 noncomputable theory
 
-variables (r r' : ℝ≥0) [fact (r < 1)]
+variables (r r' : ℝ≥0) [fact (r < 1)] [fact (0 < r')]
 
 /-- Very suitable sequence of constants for the example Breen--Deligne package -/
 def c_ : ℕ → ℝ≥0 :=

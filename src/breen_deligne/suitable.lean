@@ -638,6 +638,11 @@ namespace data
 
 class very_suitable (BD : data) (r r' : out_param ℝ≥0) (c_ : ℕ → ℝ≥0) : Prop :=
 (universal_very_suitable : ∀ i j, (BD.d i j).very_suitable r r' (c_ i) (c_ j))
+(pos : ∀ i, 0 < c_ i)
+
+def pos (BD : data) {r r' : ℝ≥0} (c_ : ℕ → ℝ≥0) [BD.very_suitable r r' c_] (i : ℕ) :
+  0 < c_ i :=
+very_suitable.pos BD i
 
 attribute [instance] very_suitable.universal_very_suitable
 
@@ -649,16 +654,18 @@ instance suitable [hr' : fact (r' ≤ 1)] [h : BD.very_suitable r r' c_] :
   BD.suitable c_ :=
 { universal_suitable := λ i j, by apply_instance }
 
-lemma of_succ (h : ∀ i, universal_map.very_suitable (BD.d (i + 1) i) r r' (c_ (i + 1)) (c_ i)) :
+lemma of_succ (h1 : ∀ i, universal_map.very_suitable (BD.d (i + 1) i) r r' (c_ (i + 1)) (c_ i))
+  (h2 : ∀ i, 0 < c_ i) :
   BD.very_suitable r r' c_ :=
 { universal_very_suitable :=
   begin
     intros i j,
     by_cases hij : i = j + 1,
-    { rw hij, exact h _ },
+    { rw hij, exact h1 _ },
     { rw BD.shape, swap, exact ne.symm hij,
       exact universal_map.very_suitable.zero r r' (c_ i) (c_ j) }
-  end }
+  end,
+  pos := h2 }
 
 end very_suitable
 

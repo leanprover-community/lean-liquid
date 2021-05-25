@@ -57,9 +57,9 @@ end
 end helper
 
 variables (BD : breen_deligne.package) (c_ c' : ℕ → ℝ≥0)
-variables [BD.data.suitable c_] [breen_deligne.package.adept BD c_ c']
 variables (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)]
-variables (Λ : PolyhedralLattice) -- (M : ProFiltPseuNormGrpWithTinv r')
+variables [breen_deligne.package.adept BD c_ c'] [BD.data.very_suitable r r' c_]
+variables (Λ : PolyhedralLattice)
 variables (m : ℕ)
 
 namespace system_of_double_complexes
@@ -302,7 +302,6 @@ begin
   apply one_le_H
 end
 
-
 instance k_le_k₁ [fact (0 < m)] : fact (k c' (m - 1) ≤ k₁ c' m) :=
 begin
   unfreezingI {cases m},
@@ -313,7 +312,6 @@ begin
     rw pow_two,
     refl }
 end
-
 
 instance K_le_K₁ [fact (0 < m)] : fact (K BD c' r r' (m - 1) ≤ K₁ m) := sorry
 
@@ -329,25 +327,29 @@ end⟩
 lemma K₁_spec : (m + 2 + (r + 1) / r * (r / (1 - r) + 1) * (m + 2) * (m + 2) : ℝ≥0) ≤ K₁ m :=
 sorry
 
+section open simplex_category
+
 -- define this such that the lemmas below hold
-def c₀ (Λ : PolyhedralLattice) (c_ c' : ℕ → ℝ≥0)
-  (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)] (m : ℕ) : ℝ≥0 :=
-  sorry
+def c₀ (BD : breen_deligne.package) (r r' : ℝ≥0) (c_ c' : ℕ → ℝ≥0) (Λ : PolyhedralLattice) (m : ℕ)
+  [BD.data.very_suitable r r' c_] [package.adept BD c_ c'] : ℝ≥0 :=
+sorry
 
 lemma c₀_pred_le (hm : 0 < m) :
-  fact (c₀ ((Λ.cosimplicial (N c' r r' m)).obj (simplex_category.mk 0)) c_ c' r r' (m - 1) ≤
-    c₀ Λ c_ c' r r' m) :=
+  fact (c₀ BD r r' c_ c' ((Λ.cosimplicial (N c' r r' m)).obj (mk 0)) (m - 1) ≤
+    c₀ BD r r' c_ c' Λ m) :=
 sorry
 
 lemma c₀_pred_le_of_le (i : ℕ) (hi : i + 2 ≤ m + 1) :
-  fact (c₀ ((Λ.cosimplicial (N c' r r' m)).obj (simplex_category.mk (i + 1))) c_ c' r r' (m - 1) ≤
-    c₀ Λ c_ c' r r' m) :=
+  fact (c₀ BD r r' c_ c' ((Λ.cosimplicial (N c' r r' m)).obj (mk (i + 1))) (m - 1) ≤
+    c₀ BD r r' c_ c' Λ m) :=
 sorry
 
--- TODO perhaps move the `hc` hypothesis? I'm not sure where it comes from, anyway.
-lemma c₀_spec (j : ℕ) (hj : j ≤ m) (hc : c_ j ≠ 0) :
-  lem98.d Λ (N c' r r' m) ≤ (k₁_sqrt c' m - 1) * (r' * (c_ j * c₀ Λ c_ c' r r' m)) / (N c' r r' m) :=
+lemma c₀_spec [fact (0 < r')] (j : ℕ) (hj : j ≤ m) :
+  lem98.d Λ (N c' r r' m) ≤
+    (k₁_sqrt c' m - 1) * (r' * (c_ j * c₀ BD r r' c_ c' Λ m)) / (N c' r r' m) :=
 sorry
+
+end
 
 end universal_constants
 
