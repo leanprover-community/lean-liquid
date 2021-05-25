@@ -30,6 +30,15 @@ def CLCFP' : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ ℝ≥0ᵒᵖ ⥤ SemiNor
 (ProFiltPseuNormGrpWithTinv.Pow r' n ⋙ (_root_.Filtration r').flip).op ⋙
   functor.op_hom _ _ ⋙ (whiskering_right ℝ≥0ᵒᵖ Profiniteᵒᵖ _).obj (CLC V)
 
+lemma CLCFP'_map_app {M₁ M₂ : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ} (f : M₁ ⟶ M₂) (c : ℝ≥0ᵒᵖ) :
+  ((CLCFP' r' V n).map f).app c = (CLCFP V r' c.unop n).map f := rfl
+
+lemma CLCFP'_obj_map (M₁ : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ) (c₁ c₂ : ℝ≥0ᵒᵖ) (h : c₁ ⟶ c₂) :
+  ((CLCFP' r' V n).obj M₁).map h =
+    (by haveI : fact (c₂.unop ≤ c₁.unop) := ⟨le_of_hom h.unop⟩;
+      exact (CLCFP.res V r' c₁.unop c₂.unop n).app M₁) :=
+rfl
+
 def Cech_nerve' : cosimplicial_object.augmented (ℝ≥0ᵒᵖ ⥤ SemiNormedGroup) :=
 (cosimplicial_object.augmented.whiskering_obj.{u} _ _ (CLCFP' r' V n)).obj
   (Cech_nerve r' Λ M N)
@@ -162,7 +171,7 @@ instance move_pls (r' : ℝ≥0) (c : ℝ≥0ᵒᵖ) : fact (unop (r'.MulLeft.op
 instance move_pls2 (c : ℝ≥0ᵒᵖ) : fact (unop (r'.MulLeft.op.obj c) ≤ unop c) :=
 by { dsimp [nnreal.MulLeft], apply_instance }
 
-def T_inv_sub_Tinv_f_succ_succ [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) (i : ℕ) :
+def T_inv_sub_Tinv_f_succ [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) (i : ℕ) :
   ((col_complex_rescaled.{u} r' V Λ M N n).obj c).X (i + 1) ⟶
     (((col_complex_rescaled.{u} r' V Λ M N n).scale_index_left r').obj c).X (i + 1) :=
 (SemiNormedGroup.rescale (i+1)!).map $ (CLCFP.T_inv_sub_Tinv r r' V _ _ n).app _
@@ -171,22 +180,115 @@ def T_inv_sub_Tinv_f [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) :
   Π i, ((col_complex_rescaled.{u} r' V Λ M N n).obj c).X i ⟶
   (((col_complex_rescaled.{u} r' V Λ M N n).scale_index_left r').obj c).X i
 | 0     := (SemiNormedGroup.rescale 0!).map $ (CLCFP.T_inv_sub_Tinv r r' V _ _ n).app _
-| (i+1) := T_inv_sub_Tinv_f_succ_succ r r' V Λ M N n c i
+| (i+1) := T_inv_sub_Tinv_f_succ r r' V Λ M N n c i
 
-lemma T_inv_sub_Tinv_comm [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) :
-  ∀ i, T_inv_sub_Tinv_f r r' V Λ M N n c i ≫
-    (((col_complex_rescaled r' V Λ M N n).scale_index_left r').obj c).d i (i+1) =
-  ((col_complex_rescaled r' V Λ M N n).obj c).d i (i+1) ≫
-    T_inv_sub_Tinv_f r r' V Λ M N n c (i+1)
-| 0     := sorry -- by { ext, dsimp [T_inv_sub_Tinv_f, system_of_complexes.scale_index_left, nnreal.MulLeft], sorry }
-| (i+1) := sorry
+section open system_of_complexes category_theory.preadditive category_theory.cosimplicial_object
+  homological_complex
+
+lemma T_inv_sub_Tinv_comm_zero [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) :
+  T_inv_sub_Tinv_f r r' V Λ M N n c 0 ≫
+    (((col_complex_rescaled r' V Λ M N n).scale_index_left r').obj c).d 0 1 =
+  ((col_complex_rescaled r' V Λ M N n).obj c).d 0 1 ≫
+    T_inv_sub_Tinv_f r r' V Λ M N n c 1 :=
+begin
+  dsimp only [T_inv_sub_Tinv_f, T_inv_sub_Tinv_f_succ, scale_index_left, col_complex_rescaled],
+  refine SemiNormedGroup.scale_comm _ _ _ _ _ _ _,
+  dsimp,
+  rw [if_pos rfl, category.comp_id],
+  dsimp only [augmented.to_cocomplex_d],
+  erw [Cech_nerve'_hom_zero],
+  dsimp only [CLCFP'_map_app],
+  erw nat_trans.naturality,
+  refl
+end
+.
+
+lemma T_inv_sub_Tinv_comm_succ [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) (i : ℕ) :
+  T_inv_sub_Tinv_f r r' V Λ M N n c (i+1) ≫
+    (((col_complex_rescaled r' V Λ M N n).scale_index_left r').obj c).d (i+1) (i+2) =
+  ((col_complex_rescaled r' V Λ M N n).obj c).d (i+1) (i+2) ≫
+    T_inv_sub_Tinv_f r r' V Λ M N n c (i+2) :=
+begin
+  dsimp only [T_inv_sub_Tinv_f, T_inv_sub_Tinv_f_succ, scale_index_left, col_complex_rescaled],
+  refine SemiNormedGroup.scale_comm _ _ _ _ _ _ _,
+  dsimp,
+  rw [if_pos rfl, category.comp_id],
+  dsimp only [augmented.to_cocomplex_d, coboundary, augmented.drop_obj, Cech_nerve',
+    augmented.whiskering_obj_2, augmented.whiskering_obj, cosimplicial_object.δ,
+    whiskering_obj_obj_map],
+  simp only [nat_trans.app_sum, nat_trans.app_gsmul, sum_comp, comp_sum, gsmul_comp, comp_gsmul],
+  apply fintype.sum_congr,
+  intro j,
+  congr' 1,
+  dsimp only [CLCFP'_map_app],
+  erw nat_trans.naturality,
+  refl,
+end
+.
+
+lemma T_inv_sub_Tinv_naturality_zero [normed_with_aut r V] (c₁ c₂ : ℝ≥0ᵒᵖ) (h : c₁ ⟶ c₂) :
+  ((col_complex_rescaled r' V Λ M N n).map h).f 0 ≫ T_inv_sub_Tinv_f r r' V Λ M N n c₂ 0 =
+    T_inv_sub_Tinv_f r r' V Λ M N n c₁ 0 ≫
+      (((col_complex_rescaled r' V Λ M N n).scale_index_left r').map h).f 0 :=
+begin
+  dsimp only [T_inv_sub_Tinv_f, scale_index_left, ScaleIndexLeft_obj_map,
+    col_complex_rescaled, scale_factorial_obj, functor.comp_map, modify_functor_map_f,
+    col_complex_map, augmented.to_cocomplex_obj, augmented.point_obj, Cech_nerve',
+    augmented.whiskering_obj],
+  simp only [← category_theory.functor.map_comp],
+  congr' 1,
+  dsimp only [CLCFP'_obj_map, CLCFP.T_inv_sub_Tinv, nnreal.MulLeft, functor.op_obj, unop_op],
+  simp only [nat_trans.app_sub, comp_sub, sub_comp, ← nat_trans.comp_app],
+  congr' 2,
+  { rw [category.assoc, ← CLCFP.res_comp_T_inv],
+    haveI : fact (c₂.unop ≤ c₁.unop) := ⟨le_of_hom h.unop⟩,
+    simp only [← category.assoc, CLCFP.res_comp_res], },
+  { dsimp only [CLCFP.Tinv, CLCFP.res, CLC, LC],
+    simp only [← whisker_right_comp, ← nat_trans.op_comp],
+    refl, }
+end
+.
+
+lemma T_inv_sub_Tinv_naturality_succ [normed_with_aut r V] (c₁ c₂ : ℝ≥0ᵒᵖ) (h : c₁ ⟶ c₂) (i : ℕ) :
+  ((col_complex_rescaled r' V Λ M N n).map h).f (i+1) ≫ T_inv_sub_Tinv_f r r' V Λ M N n c₂ (i+1) =
+    T_inv_sub_Tinv_f r r' V Λ M N n c₁ (i+1) ≫
+      (((col_complex_rescaled r' V Λ M N n).scale_index_left r').map h).f (i+1) :=
+begin
+  dsimp only [T_inv_sub_Tinv_f, T_inv_sub_Tinv_f_succ, scale_index_left, ScaleIndexLeft_obj_map,
+    col_complex_rescaled, scale_factorial_obj, functor.comp_map, modify_functor_map_f,
+    col_complex_map, augmented.to_cocomplex_obj, augmented.drop_obj, Cech_nerve',
+    augmented.whiskering_obj, whiskering_obj_obj_obj],
+  simp only [← category_theory.functor.map_comp],
+  congr' 1,
+  dsimp only [CLCFP'_obj_map, CLCFP.T_inv_sub_Tinv, nnreal.MulLeft, functor.op_obj, unop_op],
+  simp only [nat_trans.app_sub, comp_sub, sub_comp],
+  erw [← nat_trans.comp_app, ← nat_trans.comp_app, ← nat_trans.comp_app, ← nat_trans.comp_app],
+  congr' 2,
+  { rw [category.assoc, ← CLCFP.res_comp_T_inv],
+    haveI : fact (c₂.unop ≤ c₁.unop) := ⟨le_of_hom h.unop⟩,
+    simp only [← category.assoc, CLCFP.res_comp_res], },
+  { dsimp only [CLCFP.Tinv, CLCFP.res, CLC, LC],
+    simp only [← whisker_right_comp, ← nat_trans.op_comp],
+    refl, }
+end
+
+end
 
 def T_inv_sub_Tinv [normed_with_aut r V] :
   col_complex_rescaled r' V Λ M N n ⟶ (col_complex_rescaled r' V Λ M N n).scale_index_left r' :=
 { app := λ c,
   { f := T_inv_sub_Tinv_f r r' V Λ M N n c,
-    comm' := by { rintros i j (rfl : i + 1 = j), exact T_inv_sub_Tinv_comm r r' V Λ M N n c i } },
-  naturality' := sorry }
+    comm' :=
+    begin
+      rintros i j (rfl : i + 1 = j),
+      cases i, { apply T_inv_sub_Tinv_comm_zero }, { apply T_inv_sub_Tinv_comm_succ }
+    end },
+  naturality' :=
+  begin
+    intros c₁ c₂ h, ext i : 2, cases i,
+    { apply T_inv_sub_Tinv_naturality_zero },
+    { apply T_inv_sub_Tinv_naturality_succ },
+  end }
 
 def T_inv_sub_Tinv' (c : ℝ≥0) [normed_with_aut r V] :=
 (system_of_complexes.ScaleIndexRight c).map
