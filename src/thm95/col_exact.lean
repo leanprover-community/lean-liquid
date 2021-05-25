@@ -437,15 +437,11 @@ begin
   simp only [← category_theory.functor.map_comp],
   congr' 1,
   dsimp only [augmented.to_cocomplex_obj, augmented.drop_obj, cosimplicial_system_of_complexes,
-    Cech_nerve', augmented.whiskering_obj, CLCFP',
+    Cech_nerve', augmented.whiskering_obj, CLCFP', whiskering_obj_obj_obj,
     data.system_obj, data.complex, data.complex₂_obj_X, CLCFPTinv₂.res, CLCTinv.map_nat,
     functor.comp_obj, functor.comp_map, functor.op_obj, functor.op_map, whiskering_right_obj_obj,
     functor.op_hom_obj, unop_op, functor.flip_obj_map],
-  -- apply CLCTinv.map_comp_ι,
-  sorry
-  -- dsimp only [col_ι_f, col_ι_f_succ, col'_obj, functor.map_homological_complex_obj_d,
-  --   modify_d, eval_map, scale_index_right, ScaleIndexRight_obj_obj, col_complex_rescaled_obj,
-  --   scale'_app],
+  apply CLCTinv.map_comp_ι,
 end
 .
 
