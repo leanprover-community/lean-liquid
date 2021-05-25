@@ -108,6 +108,28 @@ def iso_rescale [fact (0 < r)] : 𝟭 _ ≅ (rescale r) :=
 { hom := to_rescale r,
   inv := of_rescale r, }
 
+lemma rescale_exact {V₁ V₂ V₃ : SemiNormedGroup} (f : V₁ ⟶ V₂) (g : V₂ ⟶ V₃)
+  (hfg : f.range = g.ker) :
+  ((rescale r).map f).range = ((rescale r).map g).ker :=
+begin
+  ext x,
+  calc x ∈ ((rescale r).map f).range ↔ x ∈ f.range : iff.rfl
+  ... ↔ x ∈ g.ker : by rw hfg
+  ... ↔ x ∈ ((rescale r).map g).ker : iff.rfl,
+end
+
+lemma rescale_exists_norm_le {V₁ V₂ : SemiNormedGroup} (f : V₁ ⟶ V₂) (C : ℝ≥0)
+  (hf : ∀ y, ∃ x, f x = y ∧ ∥x∥ ≤ C * ∥y∥) :
+  ∀ y, ∃ x, (rescale r).map f x = y ∧ ∥x∥ ≤ C * ∥y∥ :=
+begin
+  intro y,
+  obtain ⟨x, h1, h2⟩ := hf ((@rescale.of r _).symm y),
+  refine ⟨@rescale.of r _ x, h1, _⟩,
+  erw [rescale.norm_def, rescale.norm_def],
+  simp only [div_eq_mul_inv, ← mul_assoc, equiv.symm_apply_apply, ← coe_nnnorm],
+  norm_cast, exact mul_le_mul' h2 le_rfl,
+end
+
 open category_theory
 
 lemma iso_rescale_isometry [fact (0 < r)] (h : r = 1) (V : SemiNormedGroup) :

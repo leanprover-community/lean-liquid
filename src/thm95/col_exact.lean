@@ -470,13 +470,27 @@ open universal_constants (hiding N)
 lemma col_exact'_aux1 [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) (i : ℕ) :
   ∀ x, ∥(((col_complex_rescaled.T_inv_sub_Tinv' r r' V Λ M N (BD.X n) (c_ n)).app c).f i) x∥ ≤
     (1 + r⁻¹) * ∥x∥ :=
-sorry
+begin
+  intro x,
+  cases i;
+  { refine @SemiNormedGroup.rescale_map_bound_by _ _ _ _ _ (1 + r⁻¹) _ x,
+    exact CLCFP.T_inv_sub_Tinv_bound_by _ _ _ _ _ _ _ }
+end
 
 lemma col_exact'_aux2 [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) (i : ℕ) :
   ∀ y, ∃ x,
     (((col_complex_rescaled.T_inv_sub_Tinv' r r' V Λ M N (BD.X n) (c_ n)).app c).f i) x = y ∧
     ∥x∥ ≤ ↑(r / (1 - r) + 1) * ∥y∥ :=
-sorry
+begin
+  haveI : fact (r < 1) := ⟨@lt_trans _ _ r r' 1 (fact.out _) (fact.out _)⟩,
+  cases i;
+  { refine SemiNormedGroup.rescale_exists_norm_le _ _ _ _,
+    intro y,
+    obtain ⟨x, h1, h2⟩ := CLCFP.T_inv_sub_Tinv_exists_preimage r r' y 1 zero_lt_one,
+    refine ⟨x, h1, _⟩,
+    rwa [nnreal.coe_add, nnreal.coe_div, nnreal.coe_sub],
+    exact fact.out _ }
+end
 
 lemma col_exact' [normed_with_aut r V] [fact (r < 1)]
   (d : ℝ≥0) [pseudo_normed_group.splittable (Λ →+ M) N d]
