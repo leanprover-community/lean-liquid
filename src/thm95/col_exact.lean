@@ -505,8 +505,6 @@ lemma admissible : (col_complex_rescaled r' V Λ M N n).admissible :=
 
 end col_complex_rescaled
 
-open universal_constants (hiding N)
-
 lemma col_exact'_aux1 [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) (i : ℕ) :
   ∀ x, ∥(((col_complex_rescaled.T_inv_sub_Tinv' r r' V Λ M N (BD.X n) (c_ n)).app c).f i) x∥ ≤
     (1 + r⁻¹) * ∥x∥ :=
