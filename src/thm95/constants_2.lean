@@ -358,12 +358,12 @@ begin
     exact finset.le_sup hi, }
 end
 
-lemma c₀_spec (BD : breen_deligne.package) [BD.data.very_suitable r r' c_] [package.adept BD c_ c']
+lemma c₀_spec (BD : breen_deligne.package) [BD.data.very_suitable r r' c_]
   [fact (0 < r')] (j : ℕ) (hj : j ≤ m) :
   lem98.d Λ (N c' r r' m) ≤
     (k₁_sqrt c' m - 1) * (r' * (c_ j * c₀ r r' c_ c' m Λ)) / (N c' r r' m) :=
 begin
-  have w : ∀ j, j ≤ m → 0 < c_ j := sorry, -- This is meant to come from `BD`?
+  have w := BD.data.pos c_,
   -- TODO golf
   rw nnreal.le_div_iff',
   rw ←nnreal.div_le_iff',
@@ -377,10 +377,10 @@ begin
   apply nnreal.div_le_div_left_of,
   rw finset.lt_inf'_iff,
   intros b mem,
-  exact w b (finset.mem_range_succ_iff.mp mem),
+  exact w b,
   refine finset.inf'_le _ _,
   exact finset.mem_range_succ_iff.mpr hj,
-  exact pos_iff_ne_zero.1 (w j hj),
+  exact pos_iff_ne_zero.1 (w j),
   apply pos_iff_ne_zero.1,
   apply fact.out,
   apply pos_iff_ne_zero.1,
