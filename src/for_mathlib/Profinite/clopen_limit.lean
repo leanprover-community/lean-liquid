@@ -1,5 +1,6 @@
 import topology.category.Profinite
 import topology.discrete_quotient
+import for_mathlib.Top
 
 noncomputable theory
 
@@ -13,7 +14,7 @@ universe u
 variables {J : Type u} [semilattice_inf J] (F : J ⥤ Profinite.{u}) (C : cone F)
 
 def created_cone : limits.cone F :=
-  lift_limit (Top.limit_cone_is_limit $ F ⋙ Profinite_to_Top)
+  lift_limit (Top.limit_cone_Inf_is_limit $ F ⋙ Profinite_to_Top)
 
 def created_cone_is_limit : limits.is_limit (created_cone F) :=
   lifted_limit_is_limit _
@@ -25,19 +26,19 @@ def cone_point_iso (hC : is_limit C) : C.X ≅ (created_cone F).X :=
 (cones.forget _).map_iso $ cone_iso _ _ hC
 
 def created_iso : Profinite_to_Top.map_cone (created_cone F) ≅
-  (Top.limit_cone $ F ⋙ Profinite_to_Top) :=
+  (Top.limit_cone_Inf $ F ⋙ Profinite_to_Top) :=
 lifted_limit_maps_to_original _
 
 def created_point_iso : Profinite_to_Top.obj (created_cone F).X ≅
-  (Top.limit_cone $ F ⋙ Profinite_to_Top).X := (cones.forget _).map_iso $
+  (Top.limit_cone_Inf $ F ⋙ Profinite_to_Top).X := (cones.forget _).map_iso $
 created_iso _
 
 def iso_to_Top (hC : is_limit C) : Profinite_to_Top.obj C.X ≅
-  (Top.limit_cone $ F ⋙ Profinite_to_Top).X :=
+  (Top.limit_cone_Inf $ F ⋙ Profinite_to_Top).X :=
   Profinite_to_Top.map_iso (cone_point_iso _ _ hC) ≪≫ created_point_iso _
 
 def cone_homeo (hC : is_limit C) :
-  C.X ≃ₜ (Top.limit_cone $ F ⋙ Profinite_to_Top).X :=
+  C.X ≃ₜ (Top.limit_cone_Inf $ F ⋙ Profinite_to_Top).X :=
 let FF := iso_to_Top _ _ hC in
 { to_fun := FF.hom,
   inv_fun := FF.inv,
@@ -46,12 +47,18 @@ let FF := iso_to_Top _ _ hC in
   continuous_to_fun := FF.hom.continuous,
   continuous_inv_fun := FF.inv.continuous }
 
-lemma exists_clopen' (U : set (Top.limit_cone $ F ⋙ Profinite_to_Top).X) (hU : is_clopen U) :
+lemma exists_clopen' [inhabited J]
+  (U : set (Top.limit_cone_Inf $ F ⋙ Profinite_to_Top).X) (hU : is_clopen U) :
   ∃ (j : J) (V : set (F.obj j)) (hV : is_clopen V),
-  U = ((Top.limit_cone $ F ⋙ Profinite_to_Top).π.app j) ⁻¹' V := sorry
+  U = ((Top.limit_cone_Inf $ F ⋙ Profinite_to_Top).π.app j) ⁻¹' V :=
+begin
+  cases hU with h1 hU,
+  sorry,
+end
 
 /-- The existence of a clopen. -/
-theorem exists_clopen (hC : is_limit C) (U : set C.X) (hU : is_clopen U) :
+theorem exists_clopen [inhabited J]
+  (hC : is_limit C) (U : set C.X) (hU : is_clopen U) :
   ∃ (j : J) (V : set (F.obj j)) (hV : is_clopen V), U = (C.π.app j) ⁻¹' V :=
 begin
   let FF := cone_homeo _ _ hC,
@@ -63,7 +70,7 @@ begin
   rcases exists_clopen' F UU hUU with ⟨j,V,hV,hJ⟩,
   use j, use V, use hV,
   dsimp only [UU] at hJ,
-  have : U = FF ⁻¹' (((Top.limit_cone (F ⋙ Profinite_to_Top)).π.app j) ⁻¹' V),
+  have : U = FF ⁻¹' (((Top.limit_cone_Inf (F ⋙ Profinite_to_Top)).π.app j) ⁻¹' V),
   { rw [← hJ, ← set.preimage_comp],
     simp },
   rw this,
