@@ -27,20 +27,23 @@ include BD c_ c' r r' M V
 
 def thm95.IH (m : ℕ) : Prop := ∀ Λ : PolyhedralLattice.{u},
   ​((BD.data.system c_ r V r').obj (op $ Hom Λ M)).is_weak_bounded_exact
-    (k c' m) (K BD c' r r' m) m (c₀ BD r r' c_ c' m Λ)
+    (k c' m) (K BD c' r r' m) m (c₀ r r' c_ c' m Λ)
 
 omit BD c_ c' r r' M V
 
 lemma NSC_row_exact (IH : ∀ m' < m, thm95.IH BD r r' V c_ c' M m')
   (h0m : 0 < m) (i : ℕ) (hi : i ≤ m + 1) :
   ((thm95.double_complex BD.data c_ r r' V Λ M (N c' r r' m)).row i).is_weak_bounded_exact
-    (k₁ c' m) (K₁ m) (m - 1) (c₀ BD r r' c_ c' m Λ) :=
+    (k₁ c' m) (K₁ m) (m - 1) (c₀ r r' c_ c' m Λ) :=
 begin
   haveI h0m_ : fact (0 < m) := ⟨h0m⟩,
   have hm' : m - 1 < m := nat.pred_lt h0m.ne',
   rcases i with (i|i|i),
   { rw thm95.double_complex.row_zero,
-    refine (IH (m-1) hm' Λ).of_le BD.data.system_admissible _ _ le_rfl ⟨le_rfl⟩,
+  have := (IH (m-1) hm' Λ),
+    refine (IH (m-1) hm' Λ).of_le BD.data.system_admissible _ _ le_rfl _,
+    swap 3,
+    { apply c₀_mono, },
     all_goals { apply_instance } },
   { rw thm95.double_complex.row_one,
     refine (IH (m-1) hm' _).of_le BD.data.system_admissible _ _ le_rfl _,
@@ -59,15 +62,15 @@ end
 def NSC (IH : ∀ m' < m, thm95.IH BD r r' V c_ c' M m')
   [pseudo_normed_group.splittable (Λ →+ M) (N c' r r' m) (lem98.d Λ (N c' r r' m))] :
   normed_spectral_conditions (thm95.double_complex BD.data c_ r r' V Λ M (N c' r r' m)) m
-    (k₁ c' m) (K₁ m) (k' c' m) (ε m) (c₀ BD r r' c_ c' m Λ) (H BD c' r r' m) :=
+    (k₁ c' m) (K₁ m) (k' c' m) (ε m) (c₀ r r' c_ c' m Λ) (H BD c' r r' m) :=
 { row_exact := NSC_row_exact _ _ _ _ _ _ _ _ _ IH,
   col_exact :=
   begin
     let N := N c' r r' m,
     intros j hj,
     refine thm95.col_exact BD.data c_ r r' V Λ M N j (lem98.d Λ N) (k₁_sqrt c' m) m _ _
-      (k₁ c' m) (K₁ m) (le_of_eq _) _ _ (c₀ BD r r' c_ c' m Λ) ⟨le_rfl⟩ infer_instance ⟨le_rfl⟩,
-    { apply c₀_spec, exact hj },
+      (k₁ c' m) (K₁ m) (le_of_eq _) _ _ (c₀ r r' c_ c' m Λ) ⟨le_rfl⟩ infer_instance ⟨le_rfl⟩,
+    { apply c₀_spec _ _ _ _ _ _ BD, all_goals { assumption, }, },
     { ext, delta k₁_sqrt, dsimp, simp only [real.mul_self_sqrt, nnreal.zero_le_coe], },
     { apply K₁_spec }
   end,
@@ -80,7 +83,7 @@ include BD c_ c' r r' M V m
 theorem thm95 : ∀ (Λ : PolyhedralLattice.{0}) (S : Type) [fintype S]
   (V : SemiNormedGroup.{0}) [normed_with_aut r V],
   ​((BD.data.system c_ r V r').obj (op $ Hom Λ (Mbar r' S))).is_weak_bounded_exact
-    (k c' m) (K BD c' r r' m) m (c₀ BD r r' c_ c' m Λ) :=
+    (k c' m) (K BD c' r r' m) m (c₀ r r' c_ c' m Λ) :=
 begin
   apply nat.strong_induction_on m; clear m,
   introsI m IH Λ S _S_fin V _V_r,
@@ -122,6 +125,6 @@ begin
   let c' := package.c' BD c_,
   haveI _inst_c' : package.adept BD c_ c' := package.c'_adept BD c_,
   refine ⟨(k c' m), (K BD c' r r' m), infer_instance, λ Λ _inst_Λ, _⟩,
-  refine ⟨c₀ BD r r' c_ c' m (@PolyhedralLattice.of Λ _inst_Λ), λ S _inst_S V _inst_V, _⟩,
+  refine ⟨c₀ r r' c_ c' m (@PolyhedralLattice.of Λ _inst_Λ), λ S _inst_S V _inst_V, _⟩,
   apply @thm95 BD r r' _ _ _ _ _ V _inst_V c_ c' _ _ (@Hom _ _ Λ (@Mbar r' S _inst_S)  _inst_Λ _)
 end

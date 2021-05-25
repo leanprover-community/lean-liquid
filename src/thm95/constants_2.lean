@@ -297,23 +297,31 @@ sorry
 section open simplex_category
 
 -- define this such that the lemmas below hold
-def c₀ (BD : breen_deligne.package) (r r' : ℝ≥0) (c_ c' : ℕ → ℝ≥0)
-  [BD.data.very_suitable r r' c_] [package.adept BD c_ c'] (m : ℕ) (Λ : PolyhedralLattice) : ℝ≥0 :=
+def c₀ (r r' : ℝ≥0) (c_ c' : ℕ → ℝ≥0) : Π (m : ℕ) (Λ : PolyhedralLattice), ℝ≥0 :=
 sorry
 
+-- Scott is really unhappy that these lemmas have `fact` in them.
+-- Putting aside the fact that we're badly abusing the `fact` system,
+-- typeclass inference can even use these, because it can't provide the inequality arguments.
+
+lemma c₀_mono : fact (c₀ r r' c_ c' (m - 1) Λ ≤ c₀ r r' c_ c' m Λ) := sorry
+
 lemma c₀_pred_le (hm : 0 < m) :
-  fact (c₀ BD r r' c_ c' (m - 1) ((Λ.cosimplicial (N c' r r' m)).obj (mk 0)) ≤
-    c₀ BD r r' c_ c' m Λ) :=
+  fact (c₀ r r' c_ c' (m - 1) ((Λ.cosimplicial (N c' r r' m)).obj (mk 0)) ≤
+    c₀ r r' c_ c' m Λ) :=
 sorry
 
 lemma c₀_pred_le_of_le (i : ℕ) (hi : i + 2 ≤ m + 1) :
-  fact (c₀ BD r r' c_ c' (m - 1) ((Λ.cosimplicial (N c' r r' m)).obj (mk (i + 1))) ≤
-    c₀ BD r r' c_ c' m Λ) :=
+  fact (c₀ r r' c_ c' (m - 1) ((Λ.cosimplicial (N c' r r' m)).obj (mk (i + 1))) ≤
+    c₀ r r' c_ c' m Λ) :=
 sorry
 
-lemma c₀_spec [fact (0 < r')] (j : ℕ) (hj : j ≤ m) :
+-- BD.pos gives `0 < c_ j`
+
+lemma c₀_spec (BD : breen_deligne.package) [BD.data.very_suitable r r' c_] [package.adept BD c_ c']
+  [fact (0 < r')] (j : ℕ) (hj : j ≤ m) :
   lem98.d Λ (N c' r r' m) ≤
-    (k₁_sqrt c' m - 1) * (r' * (c_ j * c₀ BD r r' c_ c' m Λ)) / (N c' r r' m) :=
+    (k₁_sqrt c' m - 1) * (r' * (c_ j * c₀ r r' c_ c' m Λ)) / (N c' r r' m) :=
 sorry
 
 end
