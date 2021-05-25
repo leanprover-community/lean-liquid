@@ -2,6 +2,8 @@ import data.real.nnreal
 
 open_locale nnreal
 
+-- These first three have been PR'd as #7710
+
 lemma nnreal.le_div_iff {a b c : ℝ≥0} (h : c ≠ 0) : a ≤ b / c ↔ a * c ≤ b :=
 @le_div_iff ℝ _ a b c $ pos_iff_ne_zero.2 h
 
