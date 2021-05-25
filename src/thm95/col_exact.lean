@@ -114,22 +114,37 @@ lemma aug_map_strict : (aug_map r' Λ M N n).strict :=
 to_profinitely_filtered_pseudo_normed_group_hom_strict _
 end
 
-/-
--- === jmc: it's not clear to me that these isos will be on the critical path
--- lemma col_complex_iso₁ :
---   col_complex r' V Λ M N n ≅ FLC_complex V _ (aug_map_strict r' Λ M N n) :=
--- by admit
+lemma col_complex_obj_iso (c : ℝ≥0ᵒᵖ) :
+  (col_complex r' V Λ M N n).obj c ≅
+    (FLC_functor V).obj (op $ FLC_complex_arrow _ (aug_map_strict r' Λ M N n) (c.unop)) :=
+sorry
 
+lemma col_complex_iso_aux :
+  col_complex r' V Λ M N n ≅ FLC_complex V _ (aug_map_strict r' Λ M N n) :=
+nat_iso.of_components (col_complex_obj_iso r' V Λ M N n) sorry
 
--- lemma col_complex_iso₁_strict (c : ℝ≥0ᵒᵖ) (i : ℕ) :
---   isometry (((col_complex_iso₁ r' V Λ M N n).hom.app c).f i) :=
--- by admit
--/
+lemma col_complex_obj_iso_strict (c : ℝ≥0ᵒᵖ) (i : ℕ) :
+  isometry (((col_complex_obj_iso r' V Λ M N n c).hom).f i) :=
+sorry
 
-lemma col_complex_iso :
+lemma col_complex_iso_obj (c : ℝ≥0ᵒᵖ) :
+  (FLC_complex V _ (profinitely_filtered_pseudo_normed_group.sum_hom_strict ((↥Λ →+ ↥M)^n) N)).obj c ≅
+  (col_complex r' V Λ M N n).obj c :=
+begin
+  refine (cosimplicial_object.augmented.cocomplex.map_iso _) ≪≫
+    (col_complex_obj_iso r' V Λ M N n c).symm,
+  refine functor.map_iso _ _,
+  refine functor.map_iso _ _,
+  refine functor.map_iso _ _,
+  refine iso.op _,
+  sorry
+end
+
+def col_complex_iso :
   FLC_complex V _ (profinitely_filtered_pseudo_normed_group.sum_hom_strict ((↥Λ →+ ↥M)^n) N) ≅
   col_complex r' V Λ M N n :=
-sorry
+nat_iso.of_components (col_complex_iso_obj r' V Λ M N n)
+  sorry
 
 lemma col_complex_iso_strict (c : ℝ≥0ᵒᵖ) (i : ℕ) :
   isometry (((col_complex_iso r' V Λ M N n).hom.app c).f i) :=
