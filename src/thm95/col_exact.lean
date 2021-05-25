@@ -378,6 +378,8 @@ begin
   apply CLCTinv.map_comp_ι,
 end
 
+section open category_theory.preadditive
+
 lemma col_ι_f_comm_succ [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) (i : ℕ) :
   col_ι_f BD c_ r r' V Λ M N n c (i + 1) ≫
     (((col_complex_rescaled r' V Λ M N (BD.X n)).scale_index_right (c_ n)).obj c).d (i+1) (i+2) =
@@ -389,10 +391,15 @@ begin
   refine SemiNormedGroup.scale_comm _ _ _ _ _ _ _,
   rw [dif_pos rfl, dif_pos rfl],
   simp only [cosimplicial_object.augmented.to_cocomplex_d, eq_to_hom_refl, category.comp_id,
-    cosimplicial_object.coboundary],
+    cosimplicial_object.coboundary, nat_trans.app_sum, nat_trans.app_gsmul,
+    ← homological_complex.f_hom_apply, add_monoid_hom.map_sum, add_monoid_hom.map_gsmul,
+    sum_comp, comp_sum, gsmul_comp, comp_gsmul],
   symmetry,
-  -- apply CLCTinv.map_comp_ι,
-  sorry
+  apply fintype.sum_congr,
+  intro j,
+  refl,
+end
+
 end
 
 lemma col_ι_f_comm [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) :
