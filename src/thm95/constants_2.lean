@@ -306,7 +306,7 @@ noncomputable def c₀ (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r 
   (c_ c' : ℕ → ℝ≥0) : ℕ → PolyhedralLattice → ℝ≥0
 | 0 Λ := c₀_aux r r' c_ c' 0 Λ
 | (m+1) Λ := max (c₀_aux r r' c_ c' (m+1) Λ)
-    (c₀ m ((Λ.cosimplicial (N c' r r' m)).obj (mk 0))) -- this is not done yet: we need more maxes!
+    (c₀ m ((Λ.cosimplicial (N c' r r' (m+1))).obj (mk 0))) -- this is not done yet: we need more maxes!
 
 
 -- Scott is really unhappy that these lemmas have `fact` in them.
@@ -318,7 +318,14 @@ lemma c₀_mono : fact (c₀ r r' c_ c' (m - 1) Λ ≤ c₀ r r' c_ c' m Λ) := 
 lemma c₀_pred_le (hm : 0 < m) :
   fact (c₀ r r' c_ c' (m - 1) ((Λ.cosimplicial (N c' r r' m)).obj (mk 0)) ≤
     c₀ r r' c_ c' m Λ) :=
-sorry
+begin
+  fsplit,
+  cases m,
+  { cases hm, },
+  { dsimp [c₀],
+    apply le_trans _ (le_max_right _ _),
+    simp, }
+end
 
 lemma c₀_pred_le_of_le (i : ℕ) (hi : i + 2 ≤ m + 1) :
   fact (c₀ r r' c_ c' (m - 1) ((Λ.cosimplicial (N c' r r' m)).obj (mk (i + 1))) ≤
