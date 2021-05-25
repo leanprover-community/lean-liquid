@@ -359,24 +359,48 @@ def col_ι_f [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) :
 | 0     := (SemiNormedGroup.rescale 0!).map (CLCTinv.ι r V _ _)
 | (i+1) := col_ι_f_succ _ _ _ _ _ _ _ _ _ _ i
 
-section open homological_complex system_of_complexes
+section open homological_complex system_of_complexes breen_deligne
+
+lemma col_ι_f_comm_zero [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) :
+  col_ι_f BD c_ r r' V Λ M N n c 0 ≫
+    (((col_complex_rescaled r' V Λ M N (BD.X n)).scale_index_right (c_ n)).obj c).d 0 1 =
+  ((col' BD c_ r r' V Λ M N n).obj c).d 0 1 ≫ col_ι_f BD c_ r r' V Λ M N n c 1 :=
+begin
+  dsimp only [col_ι_f, col_ι_f_succ, col'_obj, functor.map_homological_complex_obj_d,
+    modify_d, eval_map, scale_index_right, ScaleIndexRight_obj_obj, col_complex_rescaled_obj,
+    scale'_app],
+  refine SemiNormedGroup.scale_comm _ _ _ _ _ _ _,
+  rw [dif_pos rfl, dif_pos rfl],
+  simp only [cosimplicial_object.augmented.to_cocomplex_d, eq_to_hom_refl, category.comp_id],
+  erw [Cech_nerve'_hom_zero, cosimplicial_system_of_complexes_hom_zero],
+  dsimp only [data.system_map, data.complex, data.complex₂_map_f, CLCFPTinv₂, CLCTinv.F_map],
+  symmetry,
+  apply CLCTinv.map_comp_ι,
+end
+
+lemma col_ι_f_comm_succ [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) (i : ℕ) :
+  col_ι_f BD c_ r r' V Λ M N n c (i + 1) ≫
+    (((col_complex_rescaled r' V Λ M N (BD.X n)).scale_index_right (c_ n)).obj c).d (i+1) (i+2) =
+  ((col' BD c_ r r' V Λ M N n).obj c).d (i + 1) (i + 2) ≫ col_ι_f BD c_ r r' V Λ M N n c (i+2) :=
+begin
+  dsimp only [col_ι_f, col_ι_f_succ, col'_obj, functor.map_homological_complex_obj_d,
+    modify_d, eval_map, scale_index_right, ScaleIndexRight_obj_obj, col_complex_rescaled_obj,
+    scale'_app],
+  refine SemiNormedGroup.scale_comm _ _ _ _ _ _ _,
+  rw [dif_pos rfl, dif_pos rfl],
+  simp only [cosimplicial_object.augmented.to_cocomplex_d, eq_to_hom_refl, category.comp_id,
+    cosimplicial_object.coboundary],
+  symmetry,
+  -- apply CLCTinv.map_comp_ι,
+  sorry
+end
 
 lemma col_ι_f_comm [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) :
   ∀ i, col_ι_f BD c_ r r' V Λ M N n c i ≫
     (((col_complex_rescaled r' V Λ M N (BD.X n)).scale_index_right (c_ n)).obj c).d i (i + 1) =
   ((col' BD c_ r r' V Λ M N n).obj c).d i (i + 1) ≫ col_ι_f BD c_ r r' V Λ M N n c (i + 1)
-| 0     :=
-begin
-  dsimp only [col_ι_f, col_ι_f_succ, col'_obj, functor.map_homological_complex_obj_d,
-    modify_d, eval_map, scale_index_right, ScaleIndexRight_obj_obj, col_complex_rescaled_obj,
-    scale'_app],
-  sorry
-  -- rw [← (SemiNormedGroup.scale ↑0! ↑(0 + 1)!).naturality],
-  -- refine SemiNormedGroup.scale_comm 0! 1! _ _ _ _ _,
-  -- rw [dif_pos rfl],
-  -- rw [category.assoc], -- dif_pos rfl], -- ← nat_trans.naturality],
-end
-| (i+1) := sorry
+| 0     := by apply col_ι_f_comm_zero
+| (i+1) := by apply col_ι_f_comm_succ
 
 end
 

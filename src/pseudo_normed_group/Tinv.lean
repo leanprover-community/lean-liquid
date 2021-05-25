@@ -176,6 +176,11 @@ SemiNormedGroup.equalizer.map ((CLC V).map ϕ) ((CLC V).map ψ)
 by rw [← category.assoc, ← functor.map_comp, h₂, functor.map_comp,
   category.assoc, (CLC.T_inv _ _).naturality, category.assoc]
 
+def map_comp_ι {A₁ B₁ A₂ B₂ : Profiniteᵒᵖ} (f₁ g₁ : A₁ ⟶ B₁) (f₂ g₂ : A₂ ⟶ B₂)
+  (ϕ : A₁ ⟶ A₂) (ψ : B₁ ⟶ B₂) (h₁ : ϕ ≫ f₂ = f₁ ≫ ψ) (h₂ : ϕ ≫ g₂ = g₁ ≫ ψ) :
+  map r V f₁ g₁ f₂ g₂ ϕ ψ h₁ h₂ ≫ ι r V _ _ = ι _ _ _ _ ≫ (CLC V).map ϕ :=
+normed_group_hom.equalizer.map_ι _ _
+
 lemma map_norm_noninc {A₁ B₁ A₂ B₂ : Profiniteᵒᵖ} (f₁ g₁ : A₁ ⟶ B₁) (f₂ g₂ : A₂ ⟶ B₂)
   (ϕ : A₁ ⟶ A₂) (ψ : B₁ ⟶ B₂) (h₁ h₂) :
   (CLCTinv.map r V f₁ g₁ f₂ g₂ ϕ ψ h₁ h₂).norm_noninc :=

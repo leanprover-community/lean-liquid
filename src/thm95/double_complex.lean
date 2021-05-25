@@ -57,6 +57,14 @@ def cosimplicial_system_of_complexes : cosimplicial_object.augmented system_of_c
 (cosimplicial_object.augmented.whiskering_obj.{u} _ _ (BD.system c_ r V r')).obj
   (Cech_nerve r' Λ M N)
 
+lemma cosimplicial_system_of_complexes_hom_zero :
+  (cosimplicial_system_of_complexes BD c_ r r' V Λ M N).hom.app (mk 0) =
+  (BD.system c_ r V r').map (Cech_augmentation_map.{u} r' Λ M N).op :=
+begin
+  ext : 2, dsimp [cosimplicial_system_of_complexes],
+  rw [category.id_comp, Cech_nerve_hom_zero]
+end
+
 @[simps X d]
 def double_complex_aux : cochain_complex system_of_complexes ℕ :=
 (cosimplicial_system_of_complexes BD c_ r r' V Λ M N).to_cocomplex
