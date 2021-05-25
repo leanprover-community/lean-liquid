@@ -208,9 +208,24 @@ begin
   { ext1, exact FLC_arrow_iso_right_eq r' Λ M N n _ _ x }
 end
 
+section open cosimplicial_object
+
 lemma col_complex_iso_aux2_strict (c : ℝ≥0ᵒᵖ) (i : ℕ) :
   isometry (((col_complex_iso_aux2 r' V Λ M N n).hom.app c).f i) :=
-sorry
+begin
+  rw [← iso.app_hom, ← homological_complex.iso_app_hom],
+  refine SemiNormedGroup.iso_isometry_of_norm_noninc _ _ _;
+  [ rw [homological_complex.iso_app_hom, iso.app_hom],
+    rw [homological_complex.iso_app_inv, iso.app_inv] ];
+  { dsimp only [col_complex_iso_aux2, col_complex_iso_obj, nat_iso.of_components, functor.comp_map,
+      functor.map_iso_hom, iso.op_hom, quiver.hom.unop_op, functor.op_map,
+      cosimplicial_object.augmented.whiskering_obj_2,
+      cosimplicial_object.augmented.whiskering_obj],
+    apply augmented.cocomplex_map_norm_noninc;
+    { intros, apply SemiNormedGroup.LCC_obj_map_norm_noninc, }, },
+end
+
+end
 
 def col_complex_iso :
   FLC_complex V _ (sum_hom_strict ((↥Λ →+ ↥M)^n) N) ≅
