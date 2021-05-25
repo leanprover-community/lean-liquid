@@ -4,6 +4,8 @@ import combinatorial_lemma
 import breen_deligne.eg
 
 import thm95.constants
+
+import for_mathlib.nnreal
 /-!
 # Explicit formulas for the constants in theorem 9.5
 -/
@@ -310,7 +312,7 @@ noncomputable def c₀ (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r 
     (max (c₀ m ((Λ.cosimplicial (N c' r r' (m+1))).obj (mk 0)))
       ((finset.range (m+1)).sup (λ i, c₀ m ((Λ.cosimplicial (N c' r r' (m+1))).obj (mk (i + 1)))))))
 
--- Scott is really unhappy that these lemmas have `fact` in them.
+-- Should we be unhappy that these lemmas have `fact` in them?
 -- Putting aside the fact that we're badly abusing the `fact` system,
 -- typeclass inference can even use these, because it can't provide the inequality arguments.
 
@@ -356,29 +358,6 @@ begin
     exact finset.le_sup hi, }
 end
 
--- This should be possible without `change`.
--- TODO find a home / generalize?
-lemma nnreal.le_div_iff (a b c : ℝ≥0) (h : 0 < c) : a ≤ b / c ↔ a * c ≤ b :=
-begin
-  rcases a with ⟨a, a_pos⟩,
-  rcases b with ⟨b, b_pos⟩,
-  rcases c with ⟨c, c_pos⟩,
-  change a ≤ b / c ↔ a * c ≤ b,
-  change 0 < c at h,
-  exact le_div_iff h,
-end
-
-lemma nnreal.le_div_iff' (a b c : ℝ≥0) (h : 0 < c) : a ≤ b / c ↔ c * a ≤ b :=
-sorry
-
-lemma nnreal.div_le_iff (a b c : ℝ≥0) (h : 0 < b) : a / b ≤ c ↔ a ≤ c * b :=
-sorry
-
-lemma nnreal.div_le_iff' (a b c : ℝ≥0) (h : 0 < b) : a / b ≤ c ↔ a ≤ b * c :=
-sorry
-
-lemma nnreal.div_le_div_left_of (a b c : ℝ≥0) (w : 0 < c) (h : c ≤ b) : a / b ≤ a / c := sorry
-
 lemma c₀_spec (BD : breen_deligne.package) [BD.data.very_suitable r r' c_] [package.adept BD c_ c']
   [fact (0 < r')] (j : ℕ) (hj : j ≤ m) :
   lem98.d Λ (N c' r r' m) ≤
@@ -401,14 +380,17 @@ begin
   exact w b (finset.mem_range_succ_iff.mp mem),
   refine finset.inf'_le _ _,
   exact finset.mem_range_succ_iff.mpr hj,
-  exact w j hj,
+  exact pos_iff_ne_zero.1 (w j hj),
+  apply pos_iff_ne_zero.1,
   apply fact.out,
+  apply pos_iff_ne_zero.1,
   rw ←add_lt_add_iff_right (1 : ℝ≥0),
   rw nnreal.sub_add_cancel_of_le,
   simp only [zero_add],
   apply fact.out,
   apply le_of_lt,
   apply fact.out,
+  apply pos_iff_ne_zero.1,
   apply fact.out,
 end
 
