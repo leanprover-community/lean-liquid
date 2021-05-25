@@ -407,6 +407,50 @@ lemma col_ι_f_comm [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) :
 | 0     := by apply col_ι_f_comm_zero
 | (i+1) := by apply col_ι_f_comm_succ
 
+section open category_theory.cosimplicial_object
+
+lemma col_ι_naturality_zero [normed_with_aut r V] (c₁ c₂ : ℝ≥0ᵒᵖ) (h : c₁ ⟶ c₂) :
+  ((col' BD c_ r r' V Λ M N n).map h).f 0 ≫ col_ι_f BD c_ r r' V Λ M N n c₂ 0 =
+  col_ι_f BD c_ r r' V Λ M N n c₁ 0 ≫ (((col_complex_rescaled r' V Λ M N (BD.X n)).scale_index_right (c_ n)).map h).f 0 :=
+begin
+  dsimp only [col'_map, functor.map_homological_complex_map_f, eval_map,
+    modify_functor_map_f, col_ι_f,
+    scale_index_right, ScaleIndexRight_obj_map, col_complex_rescaled_map],
+  simp only [← category_theory.functor.map_comp],
+  congr' 1,
+  dsimp only [augmented.to_cocomplex_obj, augmented.point_obj, cosimplicial_system_of_complexes,
+    Cech_nerve', augmented.whiskering_obj, CLCFP',
+    data.system_obj, data.complex, data.complex₂_obj_X, CLCFPTinv₂.res, CLCTinv.map_nat,
+    functor.comp_obj, functor.comp_map, functor.op_obj, functor.op_map, whiskering_right_obj_obj,
+    functor.op_hom_obj, unop_op, functor.flip_obj_map],
+  apply CLCTinv.map_comp_ι,
+end
+.
+
+lemma col_ι_naturality_succ [normed_with_aut r V] (c₁ c₂ : ℝ≥0ᵒᵖ) (h : c₁ ⟶ c₂) (i : ℕ) :
+  ((col' BD c_ r r' V Λ M N n).map h).f (i+1) ≫ col_ι_f BD c_ r r' V Λ M N n c₂ (i+1) =
+  col_ι_f BD c_ r r' V Λ M N n c₁ (i+1) ≫ (((col_complex_rescaled r' V Λ M N (BD.X n)).scale_index_right (c_ n)).map h).f (i+1) :=
+begin
+  dsimp only [col'_map, functor.map_homological_complex_map_f, eval_map,
+    modify_functor_map_f, col_ι_f, col_ι_f_succ,
+    scale_index_right, ScaleIndexRight_obj_map, col_complex_rescaled_map],
+  simp only [← category_theory.functor.map_comp],
+  congr' 1,
+  dsimp only [augmented.to_cocomplex_obj, augmented.drop_obj, cosimplicial_system_of_complexes,
+    Cech_nerve', augmented.whiskering_obj, CLCFP',
+    data.system_obj, data.complex, data.complex₂_obj_X, CLCFPTinv₂.res, CLCTinv.map_nat,
+    functor.comp_obj, functor.comp_map, functor.op_obj, functor.op_map, whiskering_right_obj_obj,
+    functor.op_hom_obj, unop_op, functor.flip_obj_map],
+  -- apply CLCTinv.map_comp_ι,
+  sorry
+  -- dsimp only [col_ι_f, col_ι_f_succ, col'_obj, functor.map_homological_complex_obj_d,
+  --   modify_d, eval_map, scale_index_right, ScaleIndexRight_obj_obj, col_complex_rescaled_obj,
+  --   scale'_app],
+end
+.
+
+end
+
 end
 
 def col_ι [normed_with_aut r V] :
@@ -417,7 +461,10 @@ def col_ι [normed_with_aut r V] :
     comm' := by { rintro i j (rfl : i + 1 = j), apply col_ι_f_comm } },
   naturality' :=
   begin
-    sorry
+    intros c₁ c₂ h, ext i : 2,
+    cases i,
+    { apply col_ι_naturality_zero },
+    { apply col_ι_naturality_succ },
   end }
 
 variables [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) (i : ℕ)
