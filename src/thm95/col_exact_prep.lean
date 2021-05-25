@@ -1,5 +1,6 @@
 import for_mathlib.connected
 
+import pseudo_normed_group.FP
 import system_of_complexes.basic
 import prop819
 import pseudo_normed_group.sum_hom
@@ -98,15 +99,8 @@ variables (f : profinitely_filtered_pseudo_normed_group_hom M₁ M₂) (hf : f.s
 
 section open Profinite pseudo_normed_group profinitely_filtered_pseudo_normed_group
 
--- move this?
-def Filtration (c : ℝ≥0) : Profinite := Profinite.of (filtration M c)
-
-def CastLe (c₁ c₂ : ℝ≥0) [fact (c₁ ≤ c₂)] : Filtration M c₁ ⟶ Filtration M c₂ :=
-{ to_fun := cast_le,
-  continuous_to_fun := (embedding_cast_le c₁ c₂).continuous }
-
 def FLC_complex_arrow (c : ℝ≥0) : arrow Profinite :=
-@arrow.mk _ _ (Filtration M₁ c) (Filtration M₂ c) $
+@arrow.mk _ _ (filtration_obj M₁ c) (filtration_obj M₂ c) $
 { to_fun := pseudo_normed_group.level f hf c,
   continuous_to_fun := f.continuous _ (λ _, rfl) }
 
@@ -178,19 +172,19 @@ namespace AuxSpace
 
 open profinitely_filtered_pseudo_normed_group
 
-@[simps] def ι : Filtration M₁ c₁ ⟶ AuxSpace f hf c₁ c₂ :=
-{ to_fun := λ x, ⟨⟨level f hf c₁ x, CastLe M₁ c₁ c₂ x⟩, rfl⟩,
+@[simps] def ι : filtration_obj M₁ c₁ ⟶ AuxSpace f hf c₁ c₂ :=
+{ to_fun := λ x, ⟨⟨level f hf c₁ x, Filtration.cast_le M₁ c₁ c₂ x⟩, rfl⟩,
   continuous_to_fun :=
   begin
     apply continuous_induced_rng,
-    refine continuous.prod_mk (f.continuous _ (λ _, rfl)) (CastLe M₁ c₁ c₂).continuous,
+    refine continuous.prod_mk (f.continuous _ (λ _, rfl)) (Filtration.cast_le M₁ c₁ c₂).continuous,
   end }
 
-@[simps] def fst : AuxSpace f hf c₁ c₂ ⟶ Filtration M₂ c₁ :=
+@[simps] def fst : AuxSpace f hf c₁ c₂ ⟶ filtration_obj M₂ c₁ :=
 { to_fun := _,
   continuous_to_fun := continuous_fst.comp continuous_subtype_coe }
 
-@[simps] def snd : AuxSpace f hf c₁ c₂ ⟶ Filtration M₁ c₂ :=
+@[simps] def snd : AuxSpace f hf c₁ c₂ ⟶ filtration_obj M₁ c₂ :=
 { to_fun := _,
   continuous_to_fun := continuous_snd.comp continuous_subtype_coe }
 
@@ -216,7 +210,7 @@ end AuxSpace
 open AuxSpace profinitely_filtered_pseudo_normed_group
 
 @[simps]
-def sum_hom₀ [fact (0 < N)] (c : ℝ≥0) : Filtration (rescale N (M^N)) c ⟶ Filtration M c :=
+def sum_hom₀ [fact (0 < N)] (c : ℝ≥0) : filtration_obj (rescale N (M^N)) c ⟶ filtration_obj M c :=
 ⟨pseudo_normed_group.level (sum_hom M N) (sum_hom_strict M N) c,
   (sum_hom M N).continuous _ (λ _, rfl)⟩
 
@@ -229,7 +223,7 @@ def sum_homₐ_fstₐ [fact (0 < N)] : sum_homₐ M N c₁ ⟶ fstₐ _ (sum_hom
 
 def fstₐ_sum_homₐ [fact (0 < N)] : fstₐ _ (sum_hom_strict M N) c₁ c₂ ⟶ sum_homₐ M N c₂ :=
 { left := snd _ _ _ _,
-  right := CastLe _ _ _,
+  right := Filtration.cast_le _ _ _,
   w' := by { ext1 ⟨x, h⟩, exact h.symm } }
 
 include d
