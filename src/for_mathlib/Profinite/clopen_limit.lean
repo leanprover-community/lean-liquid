@@ -4,6 +4,8 @@ import for_mathlib.Top
 
 noncomputable theory
 
+open_locale classical
+
 namespace Profinite
 
 open category_theory
@@ -12,6 +14,22 @@ open category_theory.limits
 universe u
 
 variables {J : Type u} [semilattice_inf J] (F : J ⥤ Profinite.{u}) (C : cone F)
+
+-- We have the dual version of this in mathlib for directed preorders.
+lemma exists_le_finset [inhabited J] (G : finset J) : ∃ j : J, ∀ g ∈ G, j ≤ g :=
+begin
+  apply G.induction_on,
+  use (default J),
+  tauto,
+  rintros a S ha ⟨j0,h0⟩,
+  use a ⊓ j0,
+  intros g hg,
+  rw finset.mem_insert at hg,
+  cases hg,
+  rw hg,
+  exact inf_le_left,
+  refine le_trans inf_le_right (h0 _ hg),
+end
 
 def created_cone : limits.cone F :=
   lift_limit (Top.limit_cone_Inf_is_limit $ F ⋙ Profinite_to_Top)
@@ -120,8 +138,20 @@ begin
     let Us : Js → set P := λ e, { p | F.map (hom_of_le e.2.2) (p (e.1)) = p (e.2.1) ∧ p i = x},
     haveI : compact_space P := by apply_instance,
     have hP : (_root_.is_compact (set.univ : set P)) := compact_univ,
-    have := hP.inter_Inter_nonempty Us _ _,
-    { sorry },
+    have hh := hP.inter_Inter_nonempty Us _ _,
+    { rcases hh with ⟨z,hz⟩,
+      let IC : (limit_cone F) ≅ C := (limit_cone_is_limit F).unique_up_to_iso hC,
+      let ICX : (limit_cone F).X ≅ C.X := (cones.forget _).map_iso IC,
+      let z : (limit_cone F).X := ⟨z,_⟩,
+      swap,
+      { sorry },
+      use ICX.hom z,
+      dsimp,
+      change (hC.lift _ ≫ _) _ = _,
+      rw hC.fac,
+      cases hz with _ hz,
+      specialize hz _ ⟨⟨i,i,le_refl _⟩,rfl⟩,
+      exact hz.2 },
     { intros i,
       apply is_closed.inter,
       apply is_closed_eq,
