@@ -94,9 +94,26 @@ begin
   simp only [comp_of, mul_of, basic_universal_map.comp, add_monoid_hom.mk'_apply,
     basic_universal_map.mul, basic_universal_map.one_mul_hom,
     add_monoid_hom.comp_hom_apply_apply, add_monoid_hom.comp_apply, add_monoid_hom.flip_apply,
-    matrix.reindex_linear_equiv_mul, matrix.one_mul, matrix.mul_one, iso_mk'_hom],
+    iso_mk'_hom],
+  rw [← matrix.reindex_linear_equiv_mul, ← matrix.reindex_linear_equiv_mul,
+    matrix.one_mul, matrix.mul_one],
 end
 .
+
+lemma mul_mul_iso_aux (m n i j : ℕ) (f : basic_universal_map i j) :
+  (comp (of (basic_universal_map.mul_mul_hom m n j))) (mul m (mul n (of f))) =
+    comp (mul (m * n) (of f)) (of (basic_universal_map.mul_mul_hom m n i)) :=
+begin
+  simp only [comp_of, mul_of, basic_universal_map.comp, add_monoid_hom.mk'_apply,
+    basic_universal_map.mul, basic_universal_map.mul_mul_hom, matrix.mul_reindex_linear_equiv_one],
+  rw [← matrix.reindex_linear_equiv_mul, matrix.one_mul,
+    matrix.kronecker_reindex_right, matrix.kronecker_assoc', matrix.kronecker_one_one,
+    ← matrix.reindex_linear_equiv_one (@fin_prod_fin_equiv m n), matrix.kronecker_reindex_left],
+  simp only [matrix.reindex_reindex],
+  congr' 3,
+  { ext ⟨⟨a, b⟩, c⟩ : 1, dsimp, simp only [equiv.symm_apply_apply], },
+  { ext ⟨⟨a, b⟩, c⟩ : 1, dsimp, simp only [equiv.symm_apply_apply], },
+end
 
 def mul_mul_iso (m n : ℕ) : mul_functor n ⋙ mul_functor m ≅ mul_functor (m * n) :=
 nat_iso.of_components (λ i, iso_mk'
@@ -110,16 +127,7 @@ begin
     ← add_monoid_hom.flip_apply _ (mul (m * n) f),
     ← add_monoid_hom.comp_apply],
   congr' 1, clear f, ext1 f,
-  simp only [comp_of, mul_of, basic_universal_map.comp, add_monoid_hom.mk'_apply,
-    basic_universal_map.mul, basic_universal_map.mul_mul_hom, matrix.reindex_linear_equiv_mul,
-    add_monoid_hom.comp_hom_apply_apply, add_monoid_hom.comp_apply, add_monoid_hom.flip_apply,
-    matrix.one_mul, matrix.mul_reindex_linear_equiv_one],
-  rw [matrix.kronecker_reindex_right, matrix.kronecker_assoc', matrix.kronecker_one_one,
-    ← matrix.reindex_linear_equiv_one (@fin_prod_fin_equiv m n), matrix.kronecker_reindex_left],
-  simp only [matrix.reindex_reindex],
-  congr' 3,
-  { ext ⟨⟨a, b⟩, c⟩ : 1, dsimp, simp only [equiv.symm_apply_apply], },
-  { ext ⟨⟨a, b⟩, c⟩ : 1, dsimp, simp only [equiv.symm_apply_apply], },
+  apply mul_mul_iso_aux,
 end
 
 end FreeMat

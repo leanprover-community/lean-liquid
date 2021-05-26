@@ -45,21 +45,13 @@ begin
   convert rfl
 end
 
-lemma reindex_linear_equiv_mul (e1 : m ≃ m') (e2 : n ≃ n') (e3 : o ≃ o')
-  (M : matrix m n R) (N : matrix n o R) :
-  (reindex_linear_equiv e1 e2 M).mul (reindex_linear_equiv e2 e3 N) =
-  reindex_linear_equiv e1 e3 (M.mul N) :=
-begin
-  dsimp, symmetry, apply minor_mul, exact e2.symm.bijective
-end
-
 lemma mul_reindex_linear_equiv_one [decidable_eq o] (e1 : o ≃ n) (e2 : o ≃ n') (M : matrix m n R) :
   M.mul (reindex_linear_equiv e1 e2 1) = reindex_linear_equiv (equiv.refl _) (e1.symm.trans e2) M :=
 begin
   have : M = reindex_linear_equiv (equiv.refl _) e1 (reindex_linear_equiv (equiv.refl _) e1.symm M),
   { rw [reindex_reindex, equiv.symm_trans, equiv.refl_trans, reindex_linear_equiv_refl_refl], refl },
   conv_lhs { rw this },
-  rw [reindex_linear_equiv_mul, matrix.mul_one, reindex_reindex, equiv.refl_trans]
+  rw [← reindex_linear_equiv_mul, matrix.mul_one, reindex_reindex, equiv.refl_trans]
 end
 
 end

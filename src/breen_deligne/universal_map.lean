@@ -153,7 +153,7 @@ lemma mul_comp (N : ℕ) (g : basic_universal_map m n) (f : basic_universal_map 
 begin
   ext1 i j,
   dsimp only [mul, comp, add_monoid_hom.mk'_apply],
-  rw [matrix.reindex_linear_equiv_mul, ← matrix.kronecker_mul, matrix.one_mul],
+  rw [← matrix.reindex_linear_equiv_mul, ← matrix.kronecker_mul, matrix.one_mul],
 end
 
 def one_mul_hom (n) : basic_universal_map (1 * n) n :=
@@ -171,13 +171,13 @@ matrix.reindex_linear_equiv
 lemma one_mul_hom_inv : comp (one_mul_hom n) (one_mul_inv n) = id n :=
 begin
   dsimp only [comp, one_mul_hom, one_mul_inv, add_monoid_hom.mk'_apply, id],
-  rw [matrix.reindex_linear_equiv_mul, matrix.one_mul, matrix.reindex_linear_equiv_one],
+  rw [← matrix.reindex_linear_equiv_mul, matrix.one_mul, matrix.reindex_linear_equiv_one],
 end
 
 lemma one_mul_inv_hom : comp (one_mul_inv n) (one_mul_hom n) = id _ :=
 begin
   dsimp only [comp, one_mul_hom, one_mul_inv, add_monoid_hom.mk'_apply, id],
-  rw [matrix.reindex_linear_equiv_mul, matrix.one_mul, matrix.reindex_linear_equiv_one],
+  rw [← matrix.reindex_linear_equiv_mul, matrix.one_mul, matrix.reindex_linear_equiv_one],
 end
 
 def mul_mul_hom (m n i : ℕ) : basic_universal_map (m * (n * i)) ((m * n) * i) :=
@@ -199,13 +199,13 @@ matrix.reindex_linear_equiv
 lemma mul_mul_hom_inv {m n i : ℕ} : comp (mul_mul_hom m n i) (mul_mul_inv m n i) = id _ :=
 begin
   dsimp only [comp, mul_mul_hom, mul_mul_inv, add_monoid_hom.mk'_apply, id],
-  rw [matrix.reindex_linear_equiv_mul, matrix.one_mul, matrix.reindex_linear_equiv_one],
+  rw [← matrix.reindex_linear_equiv_mul, matrix.one_mul, matrix.reindex_linear_equiv_one],
 end
 
 lemma mul_mul_inv_hom {m n i : ℕ} : comp (mul_mul_inv m n i) (mul_mul_hom m n i) = id _ :=
 begin
   dsimp only [comp, mul_mul_hom, mul_mul_inv, add_monoid_hom.mk'_apply, id],
-  rw [matrix.reindex_linear_equiv_mul, matrix.one_mul, matrix.reindex_linear_equiv_one],
+  rw [← matrix.reindex_linear_equiv_mul, matrix.one_mul, matrix.reindex_linear_equiv_one],
 end
 
 def proj_aux {N : ℕ} (k : fin N) : matrix punit.{1} (fin N) ℤ :=
@@ -226,7 +226,8 @@ begin
     simp only [matrix.reindex_linear_equiv_apply, matrix.reindex_apply, matrix.minor_apply,
       equiv.punit_prod_symm_apply, matrix.kronecker, matrix.one_apply_eq, one_mul] },
   conv_rhs { rw this },
-  simp only [matrix.reindex_linear_equiv_mul, ← matrix.kronecker_mul, matrix.one_mul, matrix.mul_one],
+  rw [← matrix.reindex_linear_equiv_mul, ← matrix.reindex_linear_equiv_mul],
+  simp only [← matrix.kronecker_mul, matrix.one_mul, matrix.mul_one],
 end
 
 lemma one_mul_hom_eq_proj : basic_universal_map.one_mul_hom n = basic_universal_map.proj n 0 :=
@@ -262,7 +263,7 @@ lemma comp_proj_mul_proj (n N : ℕ) (j : fin (2 * 2 ^ N)) :
   (comp (proj n j)) (mul_mul_hom 2 (2 ^ N) n) :=
 begin
   dsimp only [mul_mul_hom, proj, comp, mul_apply, add_monoid_hom.mk'_apply],
-  rw [matrix.reindex_linear_equiv_mul, ← matrix.kronecker_mul, matrix.one_mul,
+  rw [← matrix.reindex_linear_equiv_mul, ← matrix.kronecker_mul, matrix.one_mul,
     matrix.kronecker_reindex_right, matrix.mul_one,
     matrix.kronecker_assoc', matrix.mul_reindex_linear_equiv_one, proj_aux_kronecker_proj_aux,
     matrix.kronecker_reindex_left],
