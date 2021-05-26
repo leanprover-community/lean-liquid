@@ -32,7 +32,7 @@ variables (Λ : PolyhedralLattice.{u})
 def NSH_aux_type (N : ℕ) (M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ) :=
 normed_spectral_homotopy
   ((BD_system_map (BD.data.sum (2^N)) c_ (rescale_constants c_ (2^N)) r V).app M)
-  m (k' c' m) (ε m) (c₀ r r' c_ c' m Λ) (H BD c' r r' m)
+  m (k' c' m) (ε BD c' r r' m) (c₀ BD r r' c_ c' m Λ) (H BD c' r r' m)
 
 section
 
@@ -47,13 +47,13 @@ calc c * (c' q' * x)
 
 def NSH_h {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ} (q q' : ℕ) (c : ℝ≥0) :
   ((BD.data.system c_ r V r').obj M) (k' c' m * c) q' ⟶
-    ((((data.mul (2 ^ N₂ c' r r' m)).obj BD.data).system
-      (rescale_constants c_ (2 ^ N₂ c' r r' m)) r V r').obj M) c q :=
+    ((((data.mul (2 ^ N₂ BD c' r r' m)).obj BD.data).system
+      (rescale_constants c_ (2 ^ N₂ BD c' r r' m)) r V r').obj M) c q :=
 if hqm : q' ≤ m + 1
 then
 begin
   refine (universal_map.eval_CLCFPTinv _ _ _ _ _ _).app _,
-  { exact (data.homotopy_mul BD.data BD.homotopy (N₂ c' r r' m)).hom q q' },
+  { exact (data.homotopy_mul BD.data BD.homotopy (N₂ BD c' r r' m)).hom q q' },
   { dsimp,
     exact universal_map.suitable.le _ _ (c * (c' q' * c_ q')) _
       infer_instance le_rfl (NSH_h_aux hqm), }
@@ -61,7 +61,7 @@ end
 else 0
 
 lemma NSH_h_bound_by {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ}
-  (q : ℕ) (hqm : q ≤ m) (c : ℝ≥0) [fact (c₀ r r' c_ c' m Λ ≤ c)] :
+  (q : ℕ) (hqm : q ≤ m) (c : ℝ≥0) [fact (c₀ BD r r' c_ c' m Λ ≤ c)] :
   normed_group_hom.bound_by
     (@NSH_h BD r r' _ _ _ _ V _ c_ c' _ _ m M q (q+1) c)
     (H BD c' r r' m) :=
@@ -104,15 +104,15 @@ variables {c'}
 
 def NSH_δ {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ} (c : ℝ≥0) :
   ((BD.data.system c_ r V r').obj M).obj (op c) ⟶
-    ((((data.mul (2 ^ N₂ c' r r' m)).obj BD.data).system
-      (rescale_constants c_ (2 ^ N₂ c' r r' m)) r V r').obj M).obj (op (k' c' m * c)) :=
-NSH_δ_res c' (N₂ c' r r' m) _ ≫ (BD_map (BD.data.proj (2 ^ N₂ c' r r' m)) _ _ r V _).app M
+    ((((data.mul (2 ^ N₂ BD c' r r' m)).obj BD.data).system
+      (rescale_constants c_ (2 ^ N₂ BD c' r r' m)) r V r').obj M).obj (op (k' c' m * c)) :=
+NSH_δ_res c' (N₂ BD c' r r' m) _ ≫ (BD_map (BD.data.proj (2 ^ N₂ BD c' r r' m)) _ _ r V _).app M
 
 lemma NSH_δ_bound_by {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ} (c : ℝ≥0) (q : ℕ) :
-  normed_group_hom.bound_by ((@NSH_δ BD r r' _ _ _ _ V _ c_ c' _ _ m M c).f q) (ε m) :=
+  normed_group_hom.bound_by ((@NSH_δ BD r r' _ _ _ _ V _ c_ c' _ _ m M c).f q) (ε BD c' r r' m) :=
 begin
   refine (normed_group_hom.bound_by.comp'
-    (r ^ (b c' r r' m)) (N c' r r' m) _ (mul_comm _ _) _ _).le _,
+    (r ^ (b BD c' r r' m)) (N BD c' r r' m) _ (mul_comm _ _) _ _).le _,
   { apply universal_map.eval_CLCFPTinv₂_bound_by,
     apply universal_map.proj_bound_by },
   { refine @CLCFPTinv.res_bound_by_pow r V _ _ r' _ _ _ _ _ _ _ ⟨_⟩ _,
@@ -131,7 +131,7 @@ open homological_complex category_theory.preadditive
 
 end
 
-def NSH_aux' (M) (hδ) : NSH_aux_type BD r r' V c_ c' m Λ (N₂ c' r r' m) M :=
+def NSH_aux' (M) (hδ) : NSH_aux_type BD r r' V c_ c' m Λ (N₂ BD c' r r' m) M :=
 { h := λ q q' c, NSH_h q q' c,
   h_bound_by := by { rintro q q' hqm rfl, apply NSH_h_bound_by Λ q hqm },
   δ := NSH_δ,
@@ -139,7 +139,7 @@ def NSH_aux' (M) (hδ) : NSH_aux_type BD r r' V c_ c' m Λ (N₂ c' r r' m) M :=
   δ_bound_by := λ c hc q hqm, by apply NSH_δ_bound_by }
 .
 
-def NSH_aux (M) : NSH_aux_type BD r r' V c_ c' m Λ (N₂ c' r r' m) M :=
+def NSH_aux (M) : NSH_aux_type BD r r' V c_ c' m Λ (N₂ BD c' r r' m) M :=
 NSH_aux' BD r r' V c_ c' m Λ M
 begin
   introsI c hc q hqm,
@@ -149,7 +149,7 @@ begin
   dsimp only [unop_op, NSH_δ_res_f, data.system_res_def, quiver.hom.apply,
     BD_system_map_app_app, BD_map_app_f, data.system_obj_d],
   simp only [← universal_map.eval_CLCFPTinv_def],
-  have hcomm := (data.homotopy_mul BD.data BD.homotopy (N₂ c' r r' m)).comm q,
+  have hcomm := (data.homotopy_mul BD.data BD.homotopy (N₂ BD c' r r' m)).comm q,
   simp only [universal_map.res_comp_eval_CLCFPTinv_absorb, hcomm, ← nat_trans.app_add, add_assoc,
     ← nat_trans.comp_app, ← category.assoc, ← universal_map.eval_CLCFPTinv_comp,
     universal_map.eval_CLCFPTinv_comp_res_absorb, ← universal_map.eval_CLCFPTinv_add],
@@ -165,8 +165,8 @@ end
 
 def NSC_htpy :
   normed_spectral_homotopy
-    ((thm95.double_complex BD.data c_ r r' V Λ M (N c' r r' m)).row_map 0 1)
-      m (k' c' m) (ε m) (c₀ r r' c_ c' m Λ) (H BD c' r r' m) :=
+    ((thm95.double_complex BD.data c_ r r' V Λ M (N BD c' r r' m)).row_map 0 1)
+      m (k' c' m) (ε BD c' r r' m) (c₀ BD r r' c_ c' m Λ) (H BD c' r r' m) :=
 (NSH_aux BD r r' V c_ c' m Λ (op (Hom Λ M))).of_iso _ _ _
   (iso.refl _) (thm95.mul_rescale_iso_row_one BD.data c_ r V _ _ (by norm_cast) Λ M)
   (λ _ _ _, rfl) (thm95.mul_rescale_iso_row_one_strict BD.data c_ r V _ _ (by norm_cast) Λ M)
