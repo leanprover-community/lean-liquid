@@ -66,7 +66,11 @@ begin
   have hBasis : ∀ j : J, topological_space.is_topological_basis
     { S : set (F.obj j) | is_clopen S } :=  λ _, is_topological_basis_clopen,
   have hCompact : _root_.is_compact U := hClosed.is_compact,
-  sorry,
+  induction hOpen,
+  case topological_space.generate_open.basic : V hV { sorry },
+  case topological_space.generate_open.univ { sorry },
+  case topological_space.generate_open.inter { sorry },
+  case topological_space.generate_open.sUnion { sorry },
 end
 
 /-- The existence of a clopen. -/
