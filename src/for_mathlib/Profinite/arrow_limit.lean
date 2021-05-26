@@ -7,15 +7,17 @@ noncomputable theory
 
 open category_theory
 
+universe u
+
 namespace Profinite
 
-variables (F : arrow Profinite) (surj : function.surjective F.hom)
+variables (F : arrow Profinite.{u}) (surj : function.surjective F.hom)
 
 open discrete_quotient
 
 /-- A diagram of arrows construction from discrete quotients of F.left. -/
 @[simps]
-def fintype_arrow_diagram : discrete_quotient F.left ⥤ arrow Fintype :=
+def fintype_arrow_diagram : discrete_quotient F.left ⥤ arrow Fintype.{u} :=
 { obj := λ S,
   { left := Fintype.of S,
     right := Fintype.of $ S.make F.hom surj,
@@ -26,7 +28,7 @@ def fintype_arrow_diagram : discrete_quotient F.left ⥤ arrow Fintype :=
 
 /-- A diagram of arrows construction from discrete quotients of F.left. -/
 @[simps]
-def arrow_diagram : discrete_quotient F.left ⥤ arrow Profinite :=
+def arrow_diagram : discrete_quotient F.left ⥤ arrow Profinite.{u} :=
 fintype_arrow_diagram F surj ⋙ Fintype.to_Profinite.map_arrow
 /-
 { obj := λ S,
@@ -40,11 +42,11 @@ fintype_arrow_diagram F surj ⋙ Fintype.to_Profinite.map_arrow
 -/
 
 /-- The left diagram associated to arrow_diagram. -/
-abbreviation left_arrow_diagram : discrete_quotient F.left ⥤ Profinite :=
+abbreviation left_arrow_diagram : discrete_quotient F.left ⥤ Profinite.{u} :=
 arrow_diagram F surj ⋙ arrow.left_func
 
 /-- The right diagram associated to arrow_diagram. -/
-abbreviation right_arrow_diagram : discrete_quotient F.left ⥤ Profinite :=
+abbreviation right_arrow_diagram : discrete_quotient F.left ⥤ Profinite.{u} :=
 arrow_diagram F surj ⋙ arrow.right_func
 
 lemma arrow_diagram_surjective (S : discrete_quotient F.left) :
@@ -127,14 +129,141 @@ begin
       rw [← of_le_comp_apply, ← of_le_comp_apply] } },
 end
 
+@[simps]
+def left_arrow_cone : limits.cone (left_arrow_diagram F surj) :=
+functor.map_cone _ (arrow_cone F surj)
+
+@[simps]
+def right_arrow_cone : limits.cone (right_arrow_diagram F surj) :=
+functor.map_cone _ (arrow_cone F surj)
+
+instance left_arrow_cone_lift_is_iso : is_iso $
+  (limit_cone_is_limit $ left_arrow_diagram F surj).lift (left_arrow_cone F surj) :=
+Profinite.arrow_is_iso_lift_left _ _
+
+instance right_arrow_cone_lift_is_iso : is_iso $
+  (limit_cone_is_limit $ right_arrow_diagram F surj).lift (right_arrow_cone F surj) :=
+Profinite.arrow_is_iso_lift_right _ _
+
+@[simps]
+def left_arrow_cone_iso : left_arrow_cone F surj ≅
+  (limit_cone $ left_arrow_diagram F surj) :=
+limits.cones.ext (as_iso $ (limit_cone_is_limit $ left_arrow_diagram F surj).lift _)
+  (λ _ , rfl)
+
+@[simps]
+def right_arrow_cone_iso : right_arrow_cone F surj ≅
+  (limit_cone $ right_arrow_diagram F surj) :=
+limits.cones.ext (as_iso $ (limit_cone_is_limit $ right_arrow_diagram F surj).lift _)
+  (λ _ , rfl)
+
 /-- The isomorphism of cones showing that arrow_cone is a limit cone. -/
+@[simps]
 def arrow_cone_iso : arrow_cone F surj ≅ (arrow_limit_cone F surj).cone :=
 limits.cones.ext (as_iso $ (arrow_limit_cone F surj).is_limit.lift (arrow_cone F surj))
   (λ _, rfl)
 
 /-- arrow_cone is a limit cone. -/
+@[simps]
 def is_limit_arrow_cone : limits.is_limit (arrow_cone F surj) :=
 limits.is_limit.of_iso_limit (arrow_limit_cone F surj).is_limit
   (arrow_cone_iso F surj).symm
+
+@[simps]
+def is_limit_left_arrow_cone : limits.is_limit (left_arrow_cone F surj) :=
+limits.is_limit.of_iso_limit (limit_cone_is_limit $ left_arrow_diagram F surj)
+  (left_arrow_cone_iso _ _).symm
+
+@[simps]
+def is_limit_right_arrow_cone : limits.is_limit (right_arrow_cone F surj) :=
+limits.is_limit.of_iso_limit (limit_cone_is_limit $ right_arrow_diagram F surj)
+  (right_arrow_cone_iso _ _).symm
+
+open opposite
+
+open_locale simplicial
+
+@[simps]
+def Cech_cone_diagram (n : ℕ) : discrete_quotient F.left ⥤ Profinite.{u} :=
+arrow_diagram F surj ⋙ simplicial_object.cech_nerve ⋙
+  (evaluation _ _).obj (op [n])
+
+@[simps]
+def Cech_cone (n : ℕ) : limits.cone (Cech_cone_diagram F surj n) :=
+functor.map_cone _ (arrow_cone F surj)
+
+@[simps]
+def swap_cone_right (n : ℕ) (S : limits.cone (Cech_cone_diagram F surj n)) :
+  limits.cone (right_arrow_diagram F surj) :=
+{ X := S.X,
+  π := { app := λ T, S.π.app T ≫ limits.wide_pullback.base _,
+  naturality' := begin
+    intros X Y f,
+    dsimp,
+    simp [← S.w f],
+  end } }
+
+@[simps]
+def swap_cone_left (n : ℕ) (i : ulift.{u} (fin (n+1)))
+  (S : limits.cone (Cech_cone_diagram F surj n)) :
+  limits.cone (left_arrow_diagram F surj) :=
+{ X := S.X,
+  π :=
+  { app := λ T, S.π.app T ≫ limits.wide_pullback.π _ i,
+    naturality' := begin
+      intros X Y f,
+      dsimp,
+      simp [← S.w f],
+    end } }
+
+@[simps]
+def Cech_cone_is_limit (n : ℕ) : limits.is_limit (Cech_cone F surj n) :=
+{ lift := λ S, limits.wide_pullback.lift
+    ((is_limit_right_arrow_cone F surj).lift $ swap_cone_right _ _ _ _)
+    (λ i, (is_limit_left_arrow_cone F surj).lift $ swap_cone_left _ _ _ i _)
+    begin
+      intros i,
+      apply (is_limit_right_arrow_cone F surj).hom_ext,
+      intros T,
+      simp,
+      have : (arrow_cone F surj).X.hom ≫ (right_arrow_cone F surj).π.app T =
+        (left_arrow_cone F surj).π.app T ≫
+        (whisker_left (arrow_diagram F surj) arrow.left_to_right).app T, by refl,
+      erw [this, ← category.assoc,
+        (is_limit_left_arrow_cone F surj).fac (swap_cone_left F surj n i S) T],
+      simp,
+    end,
+  fac' := begin
+    intros S T,
+    apply limits.wide_pullback.hom_ext,
+    { intro i,
+      dsimp,
+      simp,
+      have := (is_limit_left_arrow_cone F surj).fac,
+      erw this,
+      refl },
+    { dsimp,
+      simp,
+      have := (is_limit_right_arrow_cone F surj).fac,
+      erw this,
+      refl }
+  end,
+  uniq' := begin
+    intros S f h,
+    apply limits.wide_pullback.hom_ext,
+    { dsimp, simp,
+      intros i,
+      apply (is_limit_left_arrow_cone F surj).hom_ext,
+      intros T,
+      simp,
+      erw [← h T, category.assoc, limits.wide_pullback.lift_π],
+      refl },
+    { dsimp, simp,
+      apply (is_limit_right_arrow_cone F surj).hom_ext,
+      intros T,
+      simp,
+      erw [← h T, category.assoc, limits.wide_pullback.lift_base],
+      refl }
+  end }.
 
 end Profinite
