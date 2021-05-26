@@ -42,11 +42,14 @@ simplicial_to_cosimplicial_augmented _ ⋙
 (cosimplicial_object.augmented.whiskering _ _).obj (LocallyConstant.obj M) ⋙
 cosimplicial_object.augmented.cocomplex
 
-def FLC_functor : (arrow Profinite.{u})ᵒᵖ ⥤ cochain_complex SemiNormedGroup ℕ :=
-simplicial_object.augmented_cech_nerve.op ⋙
-  simplicial_to_cosimplicial_augmented _ ⋙
-  (cosimplicial_object.augmented.whiskering _ _).obj (LCC.{u u}.obj M) ⋙
+@[simps obj map]
+def FLC_functor' : (simplicial_object.augmented Profinite.{u})ᵒᵖ ⥤ cochain_complex SemiNormedGroup ℕ :=
+simplicial_to_cosimplicial_augmented _ ⋙
+  (cosimplicial_object.augmented.whiskering _ _).obj (SemiNormedGroup.LCC.{u u}.obj M) ⋙
   cosimplicial_object.augmented.cocomplex
+
+def FLC_functor : (arrow Profinite.{u})ᵒᵖ ⥤ cochain_complex SemiNormedGroup ℕ :=
+simplicial_object.augmented_cech_nerve.op ⋙ FLC_functor' M
 
 -- Sanity checks
 example : FL F M = (FL_functor M).obj (op F) := rfl

@@ -1,3 +1,5 @@
+import category_theory.products.basic
+
 import for_mathlib.arrow.iso_mk
 
 import prop_92.prop_92
@@ -55,9 +57,20 @@ begin
     functor.const_comp_inv_app, Cech_nerve_hom_zero],
 end
 
+@[simps obj map]
+def Cech_nerve_level : ℝ≥0 ⥤ simplicial_object.augmented Profinite.{u} :=
+(ProFiltPseuNormGrpWithTinv.Pow r' n ⋙ (Filtration r').flip).flip ⋙
+  (simplicial_object.augmented.whiskering _ _).flip.obj (Cech_nerve.{u} r' Λ M N).left_op
+.
+
 @[simps X d]
 def col_complex_aux : cochain_complex (ℝ≥0ᵒᵖ ⥤ SemiNormedGroup) ℕ :=
 (Cech_nerve' r' V Λ M N n).to_cocomplex
+.
+
+@[simps obj map]
+def col_complex_level : system_of_complexes :=
+((whiskering_right _ _ _).obj $ FLC_functor' V).obj (Cech_nerve_level r' Λ M N n).op
 .
 
 @[simps obj map]
@@ -232,12 +245,13 @@ begin
   exact FLC_arrow_iso r' Λ M N n c.unop
 end
 
-def col_complex_iso_aux2 : FLC_complex V _ (sum_hom_strict ((↥Λ →+ ↥M) ^ n) N) ≅
+def col_complex_iso_aux2 :
+  FLC_complex V _ (sum_hom_strict ((↥Λ →+ ↥M) ^ n) N) ≅
   FLC_complex V _ (aug_map_strict r' Λ M N n) :=
 nat_iso.of_components (col_complex_iso_obj r' V Λ M N n)
 begin
   intros c₁ c₂ h,
-  dsimp only [FLC_complex, FLC_functor, col_complex_iso_obj, functor.comp_map,
+  dsimp only [FLC_complex, FLC_functor, FLC_functor', col_complex_iso_obj, functor.comp_map,
     functor.map_iso_hom, iso.op_hom],
   simp only [← category_theory.functor.map_comp, ← op_comp],
   congr' 5,
