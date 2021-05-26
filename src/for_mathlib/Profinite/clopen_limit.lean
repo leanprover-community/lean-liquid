@@ -101,6 +101,25 @@ begin
   refl,
 end
 
+lemma image_eq (hC : is_limit C) (i : J) :
+  set.range (C.π.app i) = ⋂ (j : J) (h : j ≤ i), set.range (F.map (hom_of_le h)) :=
+begin
+  refine le_antisymm _ _,
+  { apply set.subset_Inter,
+    intros j,
+    apply set.subset_Inter,
+    intros hj,
+    rw ← C.w (hom_of_le hj),
+    apply set.range_comp_subset_range },
+  { rintro x hx,
+    have cond : ∀ (j : J) (hj : j ≤ i), ∃ y : F.obj j, (F.map (hom_of_le hj)) y = x,
+    { intros j hj,
+      exact hx _ ⟨j,rfl⟩ _ ⟨hj, rfl⟩ },
+    sorry,
+  }
+end
+
+/- Not sure about the best formulation...
 /-- The images of the transition maps stabilize. -/
 lemma image_stabilizes [∀ i, fintype (F.obj i)]
   (i : J) : ∃ (j : J) (hj : j ≤ i), ∀ (k : J) (hk : k ≤ j),
@@ -109,9 +128,22 @@ lemma image_stabilizes [∀ i, fintype (F.obj i)]
 
 /-- The images of the transition maps stabilize, in which case they agree with
 the image of the cone point. -/
-theorem exists_image [∀ i, fintype (F.obj i)] (hC : is_limit C)
-  (i : J) : ∃ (j : J) (hj : j ≤ i),
-  set.range (C.π.app i) = set.range (F.map $ hom_of_le $ hj) := sorry
+theorem exists_image [∀ i, fintype (F.obj i)]
+  [∀ i, discrete_topology (F.obj i)] (hC : is_limit C) (i : J) :
+  ∃ (j : J) (hj : j ≤ i),
+  set.range (C.π.app i) = set.range (F.map $ hom_of_le $ hj) :=
+begin
+  obtain ⟨j,hj,h⟩ := image_stabilizes F i,
+  use j, use hj,
+  refine le_antisymm _ _,
+  { rw ← C.w (hom_of_le hj),
+    rw Profinite.coe_comp,
+    apply set.range_comp_subset_range },
+  { rw image_eq _ _ hC,
+    sorry,
+  },
+end
+-/
 
 /-- Any discrete quotient arises from some point in the limit. -/
 theorem exists_discrete_quotient [∀ i, fintype (F.obj i)] (hC : is_limit C)
