@@ -196,10 +196,10 @@ end
 
 lemma Cech_nerve_level_iso (c : ℝ≥0) :
   (Cech_nerve_level r' Λ M N n).obj c ≅
-    simplicial_object.augmented_cech_nerve.obj (FLC_complex_arrow _ (aug_map_strict r' Λ M N n) c) :=
+    (FLC_complex_arrow _ (aug_map_strict r' Λ M N n) c).augmented_cech_nerve :=
 sorry
 
-lemma FLC_complex_aug_iso_obj (c : ℝ≥0ᵒᵖ) :
+def FLC_complex_aug_iso_obj (c : ℝ≥0ᵒᵖ) :
   (FLC_complex V _ (aug_map_strict r' Λ M N n)).obj c ≅ (col_complex_level r' V Λ M N n).obj c :=
 (FLC_functor' V).map_iso (Cech_nerve_level_iso r' Λ M N n c.unop).op
 
@@ -212,7 +212,14 @@ end
 
 lemma FLC_complex_aug_iso_strict (c : ℝ≥0ᵒᵖ) (i : ℕ) :
   isometry (((FLC_complex_aug_iso r' V Λ M N n).hom.app c).f i) :=
-sorry
+begin
+  rw [← iso.app_hom, ← homological_complex.iso_app_hom],
+  refine SemiNormedGroup.iso_isometry_of_norm_noninc _ _ _;
+  [ rw [homological_complex.iso_app_hom, iso.app_hom],
+    rw [homological_complex.iso_app_inv, iso.app_inv] ];
+  { apply cosimplicial_object.augmented.cocomplex_map_norm_noninc;
+    intros; apply SemiNormedGroup.LCC_obj_map_norm_noninc, },
+end
 
 def col_complex_obj_iso_X_zero (c : ℝ≥0ᵒᵖ) :
   ((col_complex r' V Λ M N n).obj c).X 0 ≅
@@ -366,13 +373,14 @@ end
 def col_complex_iso :
   FLC_complex V _ (sum_hom_strict ((↥Λ →+ ↥M)^n) N) ≅
   col_complex r' V Λ M N n :=
-col_complex_iso_aux2 r' V Λ M N n ≪≫ (col_complex_iso_aux r' V Λ M N n).symm
+col_complex_iso_aux2 r' V Λ M N n ≪≫ FLC_complex_aug_iso r' V Λ M N n ≪≫ col_complex_level_iso r' V Λ M N n
 
 lemma col_complex_iso_strict (c : ℝ≥0ᵒᵖ) (i : ℕ) :
   isometry (((col_complex_iso r' V Λ M N n).hom.app c).f i) :=
 begin
   refine isometry.comp _ (col_complex_iso_aux2_strict r' V Λ M N n c i),
-  apply col_complex_obj_iso_strict,
+  exact (col_complex_level_iso_strict r' V Λ M N n c i).comp
+    (FLC_complex_aug_iso_strict r' V Λ M N n c i),
 end
 
 end
