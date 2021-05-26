@@ -28,6 +28,49 @@ variables (N : ℕ) [fact (0 < N)] (n : ℕ)
 -- move this
 instance fact_le_of_lt (c₁ c₂ : ℝ≥0) [h : fact (c₁ < c₂)] : fact (c₁ ≤ c₂) := ⟨h.1.le⟩
 
+@[simps obj map]
+def scale_factorial : system_of_complexes.{u} ⥤ system_of_complexes.{u} :=
+(whiskering_right _ _ _).obj $
+homological_complex.modify_functor
+  (λ m, SemiNormedGroup.rescale m!) (λ m₁ m₂, SemiNormedGroup.scale _ _)
+.
+
+namespace scale_factorial
+open system_of_complexes SemiNormedGroup homological_complex
+
+lemma is_weak_bounded_exact {C : system_of_complexes} {k K : ℝ≥0} [fact (1 ≤ k)] {m : ℕ} {c₀ : ℝ≥0}
+  (hC : C.is_weak_bounded_exact k K m c₀) :
+  (scale_factorial.obj C).is_weak_bounded_exact k (K * (m + 1)) m c₀ :=
+begin
+  intros c hc i hi x ε hε,
+  let δ := ε * i!,
+  have hδ : 0 < δ := mul_pos hε (nat.cast_pos.2 (nat.factorial_pos i)),
+  have hifact : ¬(↑(i!) : ℝ) = 0 := by exact_mod_cast nat.factorial_ne_zero _,
+  have him : 1 ≤ (↑m + 1) * ((↑i : ℝ) + 1)⁻¹,
+  { refine le_trans _ (mul_le_mul_of_nonneg_right (show (↑i : ℝ) + 1 ≤ (↑m + 1),
+      by rwa [add_le_add_iff_right, nat.cast_le])
+      (inv_nonneg.2 (add_nonneg ((@nat.cast_nonneg ℝ _ i)) zero_le_one))),
+    rw mul_inv_cancel (ne_of_lt (add_pos_of_nonneg_of_pos (@nat.cast_nonneg ℝ _ i) zero_lt_one)).symm },
+  obtain ⟨_, _, rfl, rfl, y, hy⟩ := hC c hc i hi ((of_rescale i!).app _ x) δ hδ,
+  refine ⟨_, _, rfl, rfl, ((SemiNormedGroup.to_rescale (i - 1)!).app _ y), _⟩,
+  erw [rescale.norm_def, rescale.norm_def],
+  simp only [nnreal.coe_nat_cast, nnreal.coe_add, nat.cast_succ, nat.factorial_succ,
+    nat.cast_mul, nnreal.coe_one, nnreal.coe_mul, div_eq_mul_inv],
+  rw [mul_inv_le_iff], swap, { exact_mod_cast nat.factorial_pos i },
+  refine hy.trans _,
+  rw [left_distrib, mul_inv', ← mul_assoc ↑i!, mul_comm ↑i!, mul_assoc _ ↑i!, mul_comm ↑i!,
+    mul_assoc _ _ ↑i!, inv_mul_cancel_right' hifact, mul_comm _ ε, add_le_add_iff_right,
+    mul_assoc ↑K],
+  refine mul_le_mul_of_nonneg_left _ (nnreal.coe_nonneg _),
+  rw [mul_comm _ ((↑i : ℝ) + 1)⁻¹, ← mul_assoc],
+  refine le_trans (le_mul_of_one_le_left (by simp only [one_mul, norm_nonneg]) him)
+    (mul_le_mul_of_nonneg_left _ (mul_nonneg (add_nonneg (nat.cast_nonneg m) zero_le_one)
+    (inv_nonneg.2 (add_nonneg (nat.cast_nonneg i) zero_le_one)))),
+  simpa using le_refl _
+end
+
+end scale_factorial
+
 section
 open PolyhedralLattice
 
@@ -74,52 +117,73 @@ def col_complex_level : system_of_complexes :=
 .
 
 @[simps obj map]
-def scale_factorial : system_of_complexes.{u} ⥤ system_of_complexes.{u} :=
-(whiskering_right _ _ _).obj $
-homological_complex.modify_functor
-  (λ m, SemiNormedGroup.rescale m!) (λ m₁ m₂, SemiNormedGroup.scale _ _)
-.
-
-namespace scale_factorial
-open system_of_complexes SemiNormedGroup homological_complex
-
-lemma is_weak_bounded_exact {C : system_of_complexes} {k K : ℝ≥0} [fact (1 ≤ k)] {m : ℕ} {c₀ : ℝ≥0}
-  (hC : C.is_weak_bounded_exact k K m c₀) :
-  (scale_factorial.obj C).is_weak_bounded_exact k (K * (m + 1)) m c₀ :=
-begin
-  intros c hc i hi x ε hε,
-  let δ := ε * i!,
-  have hδ : 0 < δ := mul_pos hε (nat.cast_pos.2 (nat.factorial_pos i)),
-  have hifact : ¬(↑(i!) : ℝ) = 0 := by exact_mod_cast nat.factorial_ne_zero _,
-  have him : 1 ≤ (↑m + 1) * ((↑i : ℝ) + 1)⁻¹,
-  { refine le_trans _ (mul_le_mul_of_nonneg_right (show (↑i : ℝ) + 1 ≤ (↑m + 1),
-      by rwa [add_le_add_iff_right, nat.cast_le])
-      (inv_nonneg.2 (add_nonneg ((@nat.cast_nonneg ℝ _ i)) zero_le_one))),
-    rw mul_inv_cancel (ne_of_lt (add_pos_of_nonneg_of_pos (@nat.cast_nonneg ℝ _ i) zero_lt_one)).symm },
-  obtain ⟨_, _, rfl, rfl, y, hy⟩ := hC c hc i hi ((of_rescale i!).app _ x) δ hδ,
-  refine ⟨_, _, rfl, rfl, ((SemiNormedGroup.to_rescale (i - 1)!).app _ y), _⟩,
-  erw [rescale.norm_def, rescale.norm_def],
-  simp only [nnreal.coe_nat_cast, nnreal.coe_add, nat.cast_succ, nat.factorial_succ,
-    nat.cast_mul, nnreal.coe_one, nnreal.coe_mul, div_eq_mul_inv],
-  rw [mul_inv_le_iff], swap, { exact_mod_cast nat.factorial_pos i },
-  refine hy.trans _,
-  rw [left_distrib, mul_inv', ← mul_assoc ↑i!, mul_comm ↑i!, mul_assoc _ ↑i!, mul_comm ↑i!,
-    mul_assoc _ _ ↑i!, inv_mul_cancel_right' hifact, mul_comm _ ε, add_le_add_iff_right,
-    mul_assoc ↑K],
-  refine mul_le_mul_of_nonneg_left _ (nnreal.coe_nonneg _),
-  rw [mul_comm _ ((↑i : ℝ) + 1)⁻¹, ← mul_assoc],
-  refine le_trans (le_mul_of_one_le_left (by simp only [one_mul, norm_nonneg]) him)
-    (mul_le_mul_of_nonneg_left _ (mul_nonneg (add_nonneg (nat.cast_nonneg m) zero_le_one)
-    (inv_nonneg.2 (add_nonneg (nat.cast_nonneg i) zero_le_one)))),
-  simpa using le_refl _
-end
-
-end scale_factorial
-
-@[simps obj map]
 def col_complex : system_of_complexes :=
 (col_complex_aux r' V Λ M N n).as_functor
 .
+
+def col_complex_level_iso_obj_X (c : ℝ≥0ᵒᵖ) :
+  Π (i : ℕ), ((col_complex_level r' V Λ M N n).obj c).X i ≅ ((col_complex r' V Λ M N n).obj c).X i
+| 0     := iso.refl _
+| (i+1) := iso.refl _
+
+lemma col_complex_level_iso_obj_comm (c : ℝ≥0ᵒᵖ) (i : ℕ) :
+  (col_complex_level_iso_obj_X r' V Λ M N n c i).hom ≫
+    ((col_complex r' V Λ M N n).obj c).d i (i + 1) =
+  ((col_complex_level r' V Λ M N n).obj c).d i (i + 1) ≫
+    (col_complex_level_iso_obj_X r' V Λ M N n c (i + 1)).hom :=
+begin
+  cases i,
+  all_goals {
+    dsimp only [col_complex_level_iso_obj_X],
+    simp only [iso.refl_hom, category.id_comp, category.comp_id],
+    dsimp only [col_complex_obj, col_complex_level_obj,
+      cosimplicial_object.augmented.cocomplex,
+      cosimplicial_object.augmented.to_cocomplex_d_2,
+      cosimplicial_object.augmented.to_cocomplex_d,
+      functor.const_comp_hom_app, functor.const_comp_inv_app,
+      nat_trans.comp_app, whisker_right_app, nat_trans.right_op_app, nat_trans.left_op_app,
+      cosimplicial_object.augmented.drop_obj, cosimplicial_object.coboundary,
+      cosimplicial_object.δ, cosimplicial_object.whiskering_obj_obj_map],
+    rw [dif_pos rfl, eq_to_hom_refl, category.comp_id,
+        dif_pos rfl, eq_to_hom_refl, category.comp_id], },
+  { erw [Cech_nerve'_hom_zero, Cech_nerve_hom_zero, SemiNormedGroup.LCC_obj_map',
+      category.id_comp, category.comp_id],
+    refl },
+  { simp only [nat_trans.app_sum, nat_trans.app_gsmul],
+    apply fintype.sum_congr, intro j, congr' 1,
+    rw [SemiNormedGroup.LCC_obj_map'],
+    refl, }
+end
+
+def col_complex_level_iso_obj (c : ℝ≥0ᵒᵖ) :
+  (col_complex_level r' V Λ M N n).obj c ≅ (col_complex r' V Λ M N n).obj c :=
+homological_complex.iso_of_components (col_complex_level_iso_obj_X r' V Λ M N n c)
+(by { rintro i j (rfl : i + 1 = j), apply col_complex_level_iso_obj_comm })
+
+lemma col_complex_level_iso_comm (c₁ c₂ : ℝ≥0ᵒᵖ) (h : c₁ ⟶ c₂) (i : ℕ) :
+  ((col_complex_level r' V Λ M N n).map h ≫ (col_complex_level_iso_obj r' V Λ M N n c₂).hom).f i =
+    ((col_complex_level_iso_obj r' V Λ M N n c₁).hom ≫ (col_complex r' V Λ M N n).map h).f i :=
+begin
+  cases i,
+  all_goals {
+    dsimp only [col_complex_level_iso_obj, col_complex_level_iso_obj_X,
+      homological_complex.comp_f, homological_complex.iso_of_components_hom_f, iso.refl_hom],
+      rw [category.id_comp, category.comp_id],
+    dsimp only [col_complex_level_map, col_complex_map, whisker_right_app,
+      cosimplicial_object.augmented.cocomplex,
+      cosimplicial_object.augmented.point_map,
+      cosimplicial_object.augmented.drop_map],
+      rw [SemiNormedGroup.LCC_obj_map'], refl },
+end
+
+def col_complex_level_iso :
+  col_complex_level r' V Λ M N n ≅ col_complex r' V Λ M N n :=
+nat_iso.of_components (col_complex_level_iso_obj r' V Λ M N n)
+(by { intros c₁ c₂ h, ext i : 2, apply col_complex_level_iso_comm })
+
+lemma col_complex_level_iso_strict (c : ℝ≥0ᵒᵖ) (i : ℕ) :
+  isometry (((col_complex_level_iso r' V Λ M N n).hom.app c).f i) :=
+by { cases i; exact isometry_id }
 
 def aug_map :=
 ((ProFiltPseuNormGrpWithTinv.Pow r' n).map (Cech_augmentation_map r' Λ M N))
@@ -129,6 +193,26 @@ section open profinitely_filtered_pseudo_normed_group_with_Tinv_hom
 lemma aug_map_strict : (aug_map r' Λ M N n).strict :=
 to_profinitely_filtered_pseudo_normed_group_hom_strict _
 end
+
+lemma Cech_nerve_level_iso (c : ℝ≥0) :
+  (Cech_nerve_level r' Λ M N n).obj c ≅
+    simplicial_object.augmented_cech_nerve.obj (FLC_complex_arrow _ (aug_map_strict r' Λ M N n) c) :=
+sorry
+
+lemma FLC_complex_aug_iso_obj (c : ℝ≥0ᵒᵖ) :
+  (FLC_complex V _ (aug_map_strict r' Λ M N n)).obj c ≅ (col_complex_level r' V Λ M N n).obj c :=
+(FLC_functor' V).map_iso (Cech_nerve_level_iso r' Λ M N n c.unop).op
+
+def FLC_complex_aug_iso :
+  FLC_complex V _ (aug_map_strict r' Λ M N n) ≅ col_complex_level r' V Λ M N n :=
+nat_iso.of_components (FLC_complex_aug_iso_obj r' V Λ M N n)
+begin
+  sorry
+end
+
+lemma FLC_complex_aug_iso_strict (c : ℝ≥0ᵒᵖ) (i : ℕ) :
+  isometry (((FLC_complex_aug_iso r' V Λ M N n).hom.app c).f i) :=
+sorry
 
 def col_complex_obj_iso_X_zero (c : ℝ≥0ᵒᵖ) :
   ((col_complex r' V Λ M N n).obj c).X 0 ≅
