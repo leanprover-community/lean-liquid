@@ -823,7 +823,7 @@ lemma col_exact' [normed_with_aut r V] [fact (r < 1)]
   (d : ℝ≥0) [pseudo_normed_group.splittable (Λ →+ M) N d]
   (k : ℝ≥0) [fact (1 ≤ k)] (m : ℕ) (c₀ : ℝ≥0) (hdkc₀N : d ≤ (k - 1) * c₀ / N)
   (k' K' : ℝ≥0) [fact (1 ≤ k')] (hk' : k * k ≤ k')
-  (hK' : (m + 2 + ((r + 1) / r) * (r / (1 - r) + 1) * (m + 2) * (m + 2) : ℝ≥0) ≤ K')
+  (hK' : (m + 2 + (r + 1) / (r * (1 - r)) * (m + 2)^2 : ℝ≥0) ≤ K')
   (c₁ c₂ : ℝ≥0) [fact (c₀ ≤ r' * c₁)] [fact (c₀ ≤ c_ n * c₂)] [fact (c₁ ≤ c_ n * c₂)] :
   (double_complex.col'.{u} BD c_ r r' V Λ M N n).is_weak_bounded_exact k' K' m c₂ :=
 begin
@@ -846,10 +846,23 @@ begin
   { intros c i, apply double_complex.col_ι_range },
   { apply system_of_complexes.admissible_of_isometry (adm.scale_index_right _) h_isom, },
   { refine ⟨le_trans (le_of_eq _) hK'⟩,
+    rw [pow_two, ← mul_assoc],
     simp only [nat.cast_add, nat.cast_one, bit0, ← add_assoc, or_false, add_eq_zero_iff,
       one_ne_zero, add_right_inj, mul_eq_mul_right_iff, and_false, div_eq_mul_inv],
-    rw [add_mul, one_mul, mul_inv_cancel],
-    exact ne_of_gt (fact.out _) },
+    have hr0 : r ≠ 0, { exact ne_of_gt (fact.out _) },
+    have h1r : 1 - r ≠ 0,
+    { rw [← nnreal.coe_injective.ne_iff, nnreal.coe_sub, nnreal.coe_zero, sub_ne_zero],
+      { norm_cast, exact ne_of_gt (fact.out _) },
+      { exact fact.out _ } },
+    calc (1 + r⁻¹) * (r * (1 - r)⁻¹ + 1)
+        = (1 + r⁻¹) * (r * (1 - r)⁻¹ + (1 - r) * (1 - r)⁻¹) : by rw [mul_inv_cancel h1r]
+    ... = (1 + r⁻¹) * (1 - r)⁻¹ : congr_arg _ _
+    ... = (1 + r⁻¹) * (r * r⁻¹) * (1 - r)⁻¹ : by rw [mul_inv_cancel hr0, mul_one]
+    ... = ((1 + r⁻¹) * r) * (r⁻¹ * (1 - r)⁻¹) : by simp only [mul_assoc]
+    ... = (r + 1) * (r * (1 - r))⁻¹ : _,
+    { rw [← add_mul, add_comm, nnreal.sub_add_cancel_of_le, one_mul], exact fact.out _ },
+    { rw [add_mul, one_mul, inv_mul_cancel, mul_inv'],
+      exact ne_of_gt (fact.out _) } },
   { intros c i, apply double_complex.col_ι_isometry, }
 end
 
@@ -857,7 +870,7 @@ lemma col_exact [normed_with_aut r V] [fact (r < 1)]
   (d : ℝ≥0) [pseudo_normed_group.splittable (Λ →+ M) N d]
   (k : ℝ≥0) [fact (1 ≤ k)] (m : ℕ) (c₀ : ℝ≥0) (hdkc₀N : d ≤ (k - 1) * c₀ / N)
   (k' K' : ℝ≥0) [fact (1 ≤ k')] (hk' : k * k ≤ k')
-  (hK' : (m + 2 + ((r + 1) / r) * (r / (1 - r) + 1) * (m + 2) * (m + 2) : ℝ≥0) ≤ K')
+  (hK' : (m + 2 + (r + 1) / (r * (1 - r)) * (m + 2)^2 : ℝ≥0) ≤ K')
   (c₁ c₂ : ℝ≥0) (_ : fact (c₀ ≤ r' * c₁)) (_ : fact (c₀ ≤ c_ n * c₂)) (_ : fact (c₁ ≤ c_ n * c₂)) :
   ((double_complex.{u} BD c_ r r' V Λ M N).col n).is_weak_bounded_exact k' K' m c₂ :=
 begin

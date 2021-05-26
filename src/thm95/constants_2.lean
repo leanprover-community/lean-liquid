@@ -144,13 +144,13 @@ instance one_lt_k₁_sqrt : fact (1 < k₁_sqrt c' m) := ⟨begin
   exact (k₁ c' m).coe_nonneg,
 end⟩
 
-def y (m : ℕ) (r : ℝ≥0):= (m + 2 : ℝ≥0) + (r + 1) / r * (r / (1 - r) + 1) * (m + 2) * (m + 2)
+def y (m : ℕ) (r : ℝ≥0):= (m + 2 : ℝ≥0) + (r + 1) / (r * (1 - r)) * (m + 2)^2
 
 def H' (n : ℕ) := max 1 ((range $ m+1).sup $ λ q, ((BD.data.homotopy_mul BD.homotopy n).hom q (q + 1)).bound)
 
 noncomputable
 def K₁ : ℕ → ℝ≥0
-| 0     := 2 + (r + 1) / r * (r / (1 - r) + 1) * 2 * 2
+| 0     := 2 + (r + 1) / (r * (1 - r)) * 4
 | (m+1) := max (y (m+1) r) (2 * normed_spectral.K₀ m (K₁ m) * (H' BD m $ helper.N₂ r' (k' c' m) (helper.b r r' (k' c' m) (normed_spectral.ε m (K₁ m)))))
 
 
@@ -318,10 +318,10 @@ instance K_le_K₁ [fact (0 < m)] : fact (K BD c' r r' (m - 1) ≤ K₁ BD c' r 
   apply le_refl
 end⟩
 
-lemma K₁_spec : (m + 2 + (r + 1) / r * (r / (1 - r) + 1) * (m + 2) * (m + 2) : ℝ≥0) ≤ K₁ BD c' r r' m :=
+lemma K₁_spec : (m + 2 + (r + 1) / (r * (1 - r)) * (m + 2)^2 : ℝ≥0) ≤ K₁ BD c' r r' m :=
 begin
   cases m,
-  { simp [K₁] },
+  { norm_num [K₁] },
   { simp only [K₁, le_max_iff],
     left,
     apply le_refl }
