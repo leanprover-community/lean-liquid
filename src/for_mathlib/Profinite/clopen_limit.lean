@@ -115,7 +115,20 @@ begin
     have cond : ∀ (j : J) (hj : j ≤ i), ∃ y : F.obj j, (F.map (hom_of_le hj)) y = x,
     { intros j hj,
       exact hx _ ⟨j,rfl⟩ _ ⟨hj, rfl⟩ },
-    sorry,
+    let Js := Σ' (a b : J), a ≤ b,
+    let P := Π (j : J), F.obj j,
+    let Us : Js → set P := λ e, { p | F.map (hom_of_le e.2.2) (p (e.1)) = p (e.2.1) ∧ p i = x},
+    haveI : compact_space P := by apply_instance,
+    have hP : (_root_.is_compact (set.univ : set P)) := compact_univ,
+    have := hP.inter_Inter_nonempty Us _ _,
+    { sorry },
+    { intros i,
+      apply is_closed.inter,
+      apply is_closed_eq,
+      continuity,
+      apply is_closed_eq,
+      continuity },
+    { sorry },
   }
 end
 
