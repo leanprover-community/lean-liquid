@@ -208,12 +208,28 @@ begin
     classical.some (hClopens s),
   have hTs : ∀ (s : S) (t : Ts s), is_clopen (t : set (F.obj (js s))), sorry,
   have hTsCover : ∀ (s : S), Us s = ⋃ (t : Ts s), (t : set (F.obj (js s))), sorry,
-  let Bs : (Σ (s : S), Ts s) → set XX :=
+  let ST := Σ (s : S), Ts s,
+  let Bs : ST → set XX :=
     λ e, (CC.π.app (js e.1)) ⁻¹' (e.2 : set (F.obj (js e.1))),
   have := hUCompact.elim_finite_subcover Bs _ _,
-  { sorry },
-  { sorry },
-  { sorry }
+  { obtain ⟨FF,hFF⟩ := this,
+    let js' : ST → J := λ e, js e.1,
+    let GG : finset J := FF.image js',
+    obtain ⟨j0,hj0⟩ := exists_le_finset GG,
+    use j0,
+    let Vs : Π (e : ST) (he : js' e ∈ GG), set (F.obj j0) := λ e he,
+      F.map (hom_of_le (hj0 _ he)) ⁻¹' (e.2 : set (F.obj (js e.1))),
+    let V : set (F.obj j0) := ⋃ (e : ST) (he : js' e ∈ GG), Vs e he,
+    use V,
+    split,
+    { -- use hTs
+      sorry },
+    { -- use hh, hFF and hTsCover
+      sorry } },
+  { -- use hTs,
+    sorry },
+  { -- use hh,
+    sorry }
 end
 
 /-- The existence of a clopen. -/
