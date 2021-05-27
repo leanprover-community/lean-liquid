@@ -1,6 +1,6 @@
 import topology.category.Profinite
 import topology.discrete_quotient
-import for_mathlib.Top
+import for_mathlib.topology
 
 noncomputable theory
 
@@ -32,7 +32,7 @@ begin
 end
 
 def created_cone : limits.cone F :=
-  lift_limit (Top.limit_cone_Inf_is_limit $ F ⋙ Profinite_to_Top)
+  lift_limit (Top.limit_cone_is_limit $ F ⋙ Profinite_to_Top)
 
 def created_cone_is_limit : limits.is_limit (created_cone F) :=
   lifted_limit_is_limit _
@@ -44,19 +44,19 @@ def cone_point_iso (hC : is_limit C) : C.X ≅ (created_cone F).X :=
 (cones.forget _).map_iso $ cone_iso _ _ hC
 
 def created_iso : Profinite_to_Top.map_cone (created_cone F) ≅
-  (Top.limit_cone_Inf $ F ⋙ Profinite_to_Top) :=
+  (Top.limit_cone $ F ⋙ Profinite_to_Top) :=
 lifted_limit_maps_to_original _
 
 def created_point_iso : Profinite_to_Top.obj (created_cone F).X ≅
-  (Top.limit_cone_Inf $ F ⋙ Profinite_to_Top).X := (cones.forget _).map_iso $
+  (Top.limit_cone $ F ⋙ Profinite_to_Top).X := (cones.forget _).map_iso $
 created_iso _
 
 def iso_to_Top (hC : is_limit C) : Profinite_to_Top.obj C.X ≅
-  (Top.limit_cone_Inf $ F ⋙ Profinite_to_Top).X :=
+  (Top.limit_cone $ F ⋙ Profinite_to_Top).X :=
   Profinite_to_Top.map_iso (cone_point_iso _ _ hC) ≪≫ created_point_iso _
 
 def cone_homeo (hC : is_limit C) :
-  C.X ≃ₜ (Top.limit_cone_Inf $ F ⋙ Profinite_to_Top).X :=
+  C.X ≃ₜ (Top.limit_cone $ F ⋙ Profinite_to_Top).X :=
 let FF := iso_to_Top _ _ hC in
 { to_fun := FF.hom,
   inv_fun := FF.inv,
@@ -66,7 +66,7 @@ let FF := iso_to_Top _ _ hC in
   continuous_inv_fun := FF.inv.continuous }
 
 def compact_space_of_limit (hC : is_limit C) :
-  compact_space (Top.limit_cone_Inf $ F ⋙ Profinite_to_Top).X :=
+  compact_space (Top.limit_cone $ F ⋙ Profinite_to_Top).X :=
 begin
   constructor,
   rw ← homeomorph.compact_image (cone_homeo _ _ hC).symm,
@@ -74,11 +74,142 @@ begin
   exact compact_univ,
 end
 
-lemma exists_clopen' [inhabited J] (hC : is_limit C)
-  (U : set (Top.limit_cone_Inf $ F ⋙ Profinite_to_Top).X) (hU : is_clopen U) :
-  ∃ (j : J) (V : set (F.obj j)) (hV : is_clopen V),
-  U = ((Top.limit_cone_Inf $ F ⋙ Profinite_to_Top).π.app j) ⁻¹' V :=
+lemma product_topological_basis : topological_space.is_topological_basis
+  { S : set (Π (j : J), F.obj j) |
+    ∃ (Us : Π (j : J), set (F.obj j)) (F : finset J),
+      (∀ j, j ∈ F → is_open (Us j)) ∧ S = (F : set J).pi Us } :=
+topological_basis_pi _
+
+lemma limit_topological_basis [inhabited J] : topological_space.is_topological_basis
+  { S : set (Top.limit_cone $ F ⋙ Profinite_to_Top).X |
+    ∃ (j : J) (U : set (F.obj j)) (hU : is_open U),
+      S = (Top.limit_cone $ F ⋙ Profinite_to_Top).π.app j ⁻¹' U } :=
 begin
+  let ι : (Top.limit_cone $ F ⋙ Profinite_to_Top).X → Π (j : J), F.obj j :=
+    λ x, x.val,
+  have := pullback_topological_basis ι ⟨rfl⟩ _ (product_topological_basis F),
+  convert this, clear this,
+  funext,
+  dsimp,
+  ext,
+  split,
+  { intro h,
+    obtain ⟨j,U,hU,rfl⟩ := h,
+    let Us : Π (j : J), set (F.obj j) := λ k, if h : k = j then by {rw h, exact U} else set.univ,
+    let FF : finset J := {j},
+    use (FF : set J).pi Us,
+    use Us,
+    use FF,
+    split,
+    intros k hk,
+    dsimp [FF] at hk,
+    simp at hk,
+    rw hk,
+    dsimp [Us],
+    rw if_pos rfl,
+    exact hU,
+    refl,
+    dsimp [set.pi],
+    ext,
+    split,
+    { intros hx k hk,
+      dsimp [FF] at hk,
+      simp at hk,
+      subst hk,
+      dsimp [Us],
+      rw if_pos rfl,
+      exact hx },
+    { intro hx,
+      specialize hx j _,
+      dsimp [FF],
+      simp,
+      dsimp [Us] at hx,
+      rw if_pos rfl at hx,
+      exact hx } },
+  { intro h,
+    obtain ⟨B,hB,rfl⟩ := h,
+    obtain ⟨Us,FF,h1,rfl⟩ := hB,
+    obtain ⟨j0,hj0⟩ := exists_le_finset FF,
+    use j0,
+    let U : set (F.obj j0) :=
+      ⋂ (j : J) (hj : j ∈ FF), (F.map (hom_of_le (hj0 j hj))) ⁻¹' (Us j),
+    use U,
+    split,
+    { let Vs : J → set (F.obj j0) :=
+        λ j, if hj : j ∈ FF then ⇑(F.map (hom_of_le (hj0 j hj))) ⁻¹' (Us j) else set.univ,
+      have := @is_open_bInter _ J _ FF Vs FF.finite_to_set _,
+      swap,
+      intros i hi,
+      dsimp [Vs],
+      rw dif_pos,
+      swap, exact hi,
+      apply is_open.preimage,
+      continuity,
+      apply h1,
+      exact hi,
+      convert this,
+      dsimp [U, Vs],
+      have := set.Inter_congr (λ j : J, j) (by tauto),
+      apply this, clear this,
+      intros j,
+      congr' 1,
+      funext hj,
+      dsimp at hj,
+      dsimp,
+      rw dif_pos hj },
+    { dsimp [U, set.pi],
+      simp_rw set.preimage_Inter,
+      ext,
+      split,
+      { intro hx,
+        dsimp at hx,
+        rintros i ⟨i,rfl⟩,
+        dsimp,
+        rintros _ hi,
+        cases hi with hi hh,
+        dsimp at hh,
+        rw ← hh,
+        change _ ∈ Us i,
+        have : ∀ (a b : J) (h : a ≤ b), ⇑(F.map (hom_of_le h)) =
+          ⇑((F ⋙ Profinite_to_Top).map (hom_of_le h)),
+        { intros _ _ _, refl },
+        erw this, clear this,
+        have : ∀ (a b c : Top) (f : a ⟶ b) (g : b ⟶ c) (x : a), (f ≫ g) x =
+          g (f x) := by tauto,
+        rw ← this,
+        clear this,
+        let C := Top.limit_cone (F ⋙ Profinite_to_Top),
+        rw C.w,
+        apply hx,
+        exact hi },
+      { intros hx,
+        dsimp,
+        intros i hi,
+        specialize hx _ ⟨i,rfl⟩,
+        dsimp at hx,
+        specialize hx _ ⟨hi,rfl⟩,
+        dsimp at hx,
+        have : ∀ (a b : J) (h : a ≤ b), ⇑(F.map (hom_of_le h)) =
+          ⇑((F ⋙ Profinite_to_Top).map (hom_of_le h)),
+        { intros _ _ _, refl },
+        erw this at hx, clear this,
+        have : ∀ (a b c : Top) (f : a ⟶ b) (g : b ⟶ c) (x : a), (f ≫ g) x =
+          g (f x) := by tauto,
+        change _ ∈ Us i at hx,
+        rw ← this at hx, clear this,
+        let C := Top.limit_cone (F ⋙ Profinite_to_Top),
+        rw C.w at hx,
+        exact hx } } }
+end
+
+
+lemma exists_clopen' [inhabited J] (hC : is_limit C)
+  (U : set (Top.limit_cone $ F ⋙ Profinite_to_Top).X) (hU : is_clopen U) :
+  ∃ (j : J) (V : set (F.obj j)) (hV : is_clopen V),
+  U = ((Top.limit_cone $ F ⋙ Profinite_to_Top).π.app j) ⁻¹' V :=
+begin
+  sorry
+  /-
   haveI := compact_space_of_limit _ _ hC,
   cases hU with hOpen hClosed,
   have hBasis : ∀ j : J, topological_space.is_topological_basis
@@ -89,6 +220,7 @@ begin
   case topological_space.generate_open.univ { sorry },
   case topological_space.generate_open.inter { sorry },
   case topological_space.generate_open.sUnion { sorry },
+  -/
 end
 
 /-- The existence of a clopen. -/
@@ -105,7 +237,7 @@ begin
   rcases exists_clopen' F _ hC UU hUU with ⟨j,V,hV,hJ⟩,
   use j, use V, use hV,
   dsimp only [UU] at hJ,
-  have : U = FF ⁻¹' (((Top.limit_cone_Inf (F ⋙ Profinite_to_Top)).π.app j) ⁻¹' V),
+  have : U = FF ⁻¹' (((Top.limit_cone (F ⋙ Profinite_to_Top)).π.app j) ⁻¹' V),
   { rw [← hJ, ← set.preimage_comp],
     simp },
   rw this,
