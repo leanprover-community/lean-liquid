@@ -6,7 +6,14 @@ open topological_space
 lemma topological_basis_pi {ι : Type*} (Xs : ι → Type*)
   [∀ i, topological_space (Xs i)] : is_topological_basis
   { S : set (Π i, Xs i) | ∃ (Us : Π (i : ι), set (Xs i)) (F : finset ι),
-    (∀ i, i ∈ F → is_open (Us i)) ∧ S = (F : set ι).pi Us } := sorry
+    (∀ i, i ∈ F → is_open (Us i)) ∧ S = (F : set ι).pi Us } :=
+{ exists_subset_inter := begin
+    sorry,
+  end,
+  sUnion_eq := begin
+    sorry
+  end,
+  eq_generate_from := by rw pi_eq_generate_from }
 
 variables {X Y : Type*} [topological_space X] [topological_space Y]
   (f : X → Y)
