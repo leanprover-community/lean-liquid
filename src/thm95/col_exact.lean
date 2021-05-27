@@ -7,6 +7,7 @@ import normed_snake_dual
 import thm95.double_complex
 import thm95.col_exact_prep
 import thm95.polyhedral_iso
+import thm95.pfpng_iso
 
 noncomputable theory
 
@@ -302,11 +303,9 @@ lemma FLC_arrow_iso_aux :
   ((ProFiltPseuNormGrpWithTinv.Pow r' n).obj
     (unop ((Cech_nerve r' Λ M N).right.obj (mk 0)))) ≅
   ProFiltPseuNormGrpWithTinv.of r' (rescale ↑N (((↥Λ →+ ↥M) ^ n) ^ N)) :=
-begin
-  refine (ProFiltPseuNormGrpWithTinv.Pow r' n).map_iso
-    (Hom_cosimplicial_zero_iso Λ N r' M N rfl) ≪≫ _,
-  sorry
-end
+(ProFiltPseuNormGrpWithTinv.Pow r' n).map_iso
+    (Hom_cosimplicial_zero_iso Λ N r' M N rfl) ≪≫
+  (ProFiltPseuNormGrpWithTinv.Pow_rescale_Pow_iso r' N N n).app _
 
 def FLC_arrow_iso (c : ℝ≥0) :
   FLC_complex_arrow _ (aug_map_strict r' Λ M N n) c ≅
