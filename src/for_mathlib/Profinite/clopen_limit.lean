@@ -445,6 +445,50 @@ begin
         erw dif_pos } } }
 end
 
+theorem exists_clopen_finite [inhabited J]
+  (hC : is_limit C) (S : Type*) [fintype S]
+  (Us : S → set C.X) (hUs : ∀ i, is_clopen (Us i)) :
+  ∃ (j : J) (Vs : S → set (F.obj j)) (hVs : ∀ i, is_clopen (Vs i)),
+    ∀i,  Us i = (C.π.app j) ⁻¹' (Vs i) :=
+begin
+  have := λ (i : S), exists_clopen F C hC (Us i) (hUs i),
+  let js : S → J := λ s, classical.some (this s),
+  have hjs : ∀ (s : S), ∃ (V : set (F.obj (js s))) (hV : is_clopen V),
+    Us s = (C.π.app (js s)) ⁻¹' V := λ s, classical.some_spec (this s),
+  let Vs : Π (s : S), set (F.obj (js s)) := λ s, classical.some (hjs s),
+  have hVs : ∀ (s : S), is_clopen (Vs s),
+  { intros s,
+    obtain ⟨h1,h2⟩ := classical.some_spec (hjs s),
+    exact h1 },
+  have hVs' : ∀ (s : S), Us s = (C.π.app (js s)) ⁻¹' (Vs s),
+  { intros s,
+    obtain ⟨h1,h2⟩ := classical.some_spec (hjs s),
+    exact h2 },
+  let FF : finset J := (finset.univ : finset S).image js,
+  obtain ⟨j0,hj0⟩ := exists_le_finset FF,
+  use j0,
+  have hj0S : ∀ s : S, j0 ≤ js s,
+  { intros s,
+    apply hj0,
+    dsimp [FF],
+    simp [finset.image] },
+  let Ws : S → set (F.obj j0) := λ s, F.map (hom_of_le (hj0S s)) ⁻¹' (Vs s),
+  use Ws,
+  split,
+  { intros s,
+    split,
+    { apply is_open.preimage,
+      continuity,
+      refine (hVs _).1 },
+    { apply is_closed.preimage,
+      continuity,
+      refine (hVs _).2 } },
+  { intros i,
+    dsimp [Ws],
+    rw [← set.preimage_comp, ← Profinite.coe_comp, C.w],
+    apply hVs' }
+end
+
 /- Not sure about the best formulation...
 /-- The images of the transition maps stabilize. -/
 lemma image_stabilizes [∀ i, fintype (F.obj i)]
