@@ -6,6 +6,11 @@ open_locale classical
 
 open topological_space
 
+lemma is_closed_bUnion' {ι X : Type*} [topological_space X]
+  (F : finset ι) (Vs : Π (i : ι) (hi : i ∈ F), set X)
+  (hVs : ∀ (i : ι) (hi : i ∈ F), is_closed (Vs i hi)) :
+  is_closed (⋃ (i : ι) (hi : i ∈ F), Vs i hi) := sorry
+
 lemma topological_basis_pi {ι : Type*} (Xs : ι → Type*)
   [∀ i, topological_space (Xs i)] : is_topological_basis
   { S : set (Π i, Xs i) | ∃ (Us : Π (i : ι), set (Xs i)) (F : finset ι),
