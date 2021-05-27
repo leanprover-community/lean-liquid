@@ -190,7 +190,42 @@ lemma exists_clopen' [inhabited J] (hC : is_limit C)
   ∃ (j : J) (V : set (F.obj j)) (hV : is_clopen V),
   U = ((Top.limit_cone $ F ⋙ Profinite_to_Top).π.app j) ⁻¹' V :=
 begin
-  sorry
+  haveI := compact_space_of_limit _ _ hC,
+  cases hU with hUOpen hUClosed,
+  have hUCompact := hUClosed.is_compact,
+  obtain ⟨S,hS,hh⟩ := (limit_topological_basis F).open_eq_sUnion hUOpen,
+  let js : S → J := λ a, classical.some (hS a.2),
+  let Us : Π (s : S), set (F.obj (js s)) := λ a,
+    classical.some (classical.some_spec (hS a.2)),
+  have hUsOpen : ∀ (s : S), is_open (Us s), sorry,
+  have hUseq : ∀ (s : S),
+    s.1 = (Top.limit_cone (F ⋙ Profinite_to_Top)).π.app (js s) ⁻¹' (Us s), sorry,
+  have := hUCompact.elim_finite_subcover (λ s : S, s.1) _ _,
+  { rcases this with ⟨T,hT⟩,
+    dsimp at hT,
+    let FF : finset J := T.image js,
+    obtain ⟨j0,hj0⟩ := exists_le_finset FF,
+    use j0,
+    -- Replace hh with U = union of the sets in the finite collection T.
+    -- Pull back all of the Ts to j0, to obtain a finite collection in
+    -- F.obj j0 such that union of the pullbacks is U.
+    -- Each of these Ts is a union of clopens since we're in a profinite set.
+    -- There is a finite subcollection whose union is all of U, again by
+    -- compactness of U.
+    -- The union of those is clopen and does the job.
+    sorry
+  },
+  { intros s,
+    change is_open s.1,
+    rw hUseq s,
+    apply is_open.preimage,
+    continuity,
+    apply hUsOpen },
+  { intros u hu,
+    rw hh at hu,
+    rcases hu with ⟨W,hW,hhW⟩,
+    use W, use ⟨⟨W,hW⟩,rfl⟩,
+    exact hhW },
 end
 
 /-- The existence of a clopen. -/
