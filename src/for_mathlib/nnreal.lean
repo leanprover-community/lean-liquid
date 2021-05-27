@@ -2,17 +2,6 @@ import data.real.nnreal
 
 open_locale nnreal
 
--- These first three have been PR'd as #7710
-
-lemma nnreal.le_div_iff {a b c : ℝ≥0} (h : c ≠ 0) : a ≤ b / c ↔ a * c ≤ b :=
-@le_div_iff ℝ _ a b c $ pos_iff_ne_zero.2 h
-
-lemma nnreal.le_div_iff' {a b c : ℝ≥0} (h : c ≠ 0) : a ≤ b / c ↔ c * a ≤ b :=
-@le_div_iff' ℝ _ a b c $ pos_iff_ne_zero.2 h
-
-lemma nnreal.div_le_iff' {a b c : ℝ≥0} (h : b ≠ 0) : a / b ≤ c ↔ a ≤ b * c :=
-@div_le_iff' ℝ _ a b c $ pos_iff_ne_zero.2 h
-
 -- There doesn't seem to be a real analogue of this one, but probably should be?
 lemma nnreal.div_le_div_left_of {a b c : ℝ≥0} (w : 0 < c) (h : c ≤ b) : a / b ≤ a / c :=
 begin
