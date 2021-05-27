@@ -1,5 +1,8 @@
 import topology.order
 import topology.bases
+import data.finset.basic
+
+open_locale classical
 
 open topological_space
 
@@ -8,10 +11,59 @@ lemma topological_basis_pi {ι : Type*} (Xs : ι → Type*)
   { S : set (Π i, Xs i) | ∃ (Us : Π (i : ι), set (Xs i)) (F : finset ι),
     (∀ i, i ∈ F → is_open (Us i)) ∧ S = (F : set ι).pi Us } :=
 { exists_subset_inter := begin
-    sorry,
+    intros A hA B hB x hx,
+    obtain ⟨C,F,hF,rfl⟩ := hA,
+    obtain ⟨D,G,hG,rfl⟩ := hB,
+    use ((F : set ι).pi C) ∩ ((G : set ι).pi D),
+    dsimp,
+    let Us : Π (i : ι), set (Xs i) := λ i,
+      if i ∈ F ∧ i ∈ G then (C i) ∩ (D i) else
+      if i ∈ F then (C i) else
+      if i ∈ G then (D i) else set.univ,
+    use Us,
+    { use F ∪ G,
+      split,
+      { intros i hi,
+        rw finset.mem_union at hi,
+        dsimp [Us],
+        split_ifs with hh1 hh2 hh3,
+        { refine is_open.inter (hF _ hh1.1) (hG _ hh1.2) },
+        { exact hF _ hh2 },
+        { exact hG _ hh3 },
+        { exact is_open_univ } },
+      { dsimp [set.pi],
+        ext z,
+        split,
+        { rintro ⟨h1,h2⟩ i hi,
+          dsimp [Us],
+          split_ifs with hh1 hh2 hh3,
+          { refine ⟨h1 _ hh1.1, h2 _ hh1.2⟩ },
+          { exact h1 _ hh2 },
+          { exact h2 _ hh3 },
+          { trivial } },
+        { intro h,
+          split,
+          { intros i hi,
+            specialize h i (by finish),
+            dsimp [Us] at h,
+            split_ifs at h,
+            { exact h.1 },
+            { exact h } },
+          { intros i hi,
+            specialize h i (by finish),
+            dsimp [Us] at h,
+            split_ifs at h,
+            { exact h.2 },
+            { finish },
+            { exact h } } } } },
+    { refine ⟨hx, by tauto⟩ }
   end,
   sUnion_eq := begin
-    sorry
+    rw set.eq_univ_iff_forall,
+    intros x,
+    use set.univ,
+    use (λ i, set.univ),
+    simp [∅],
   end,
   eq_generate_from := by rw pi_eq_generate_from }
 
