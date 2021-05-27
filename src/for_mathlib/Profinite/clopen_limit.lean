@@ -308,9 +308,27 @@ begin
         { use e.2 },
         { rwa [useful1, ← set.preimage_comp, ← useful3, CC.w] at hw } } } },
   { -- use hTs,
-    sorry },
+    intros e,
+    dsimp [Bs],
+    apply is_open.preimage,
+    continuity,
+    refine (hTs _ _).1 },
   { -- use hh,
-    sorry }
+    intros x hx,
+    rw hh at hx,
+    rcases hx with ⟨A,hA,hx⟩,
+    let s : S := ⟨A,hA⟩,
+    change x ∈ (s : set XX) at hx,
+    rw hUseq at hx,
+    rw hTsCover at hx,
+    rw set.preimage_Union at hx,
+    rcases hx with ⟨HH,⟨tt,htt⟩,hhx⟩,
+    dsimp at htt,
+    dsimp [Bs],
+    refine ⟨HH,_,hhx⟩,
+    use ⟨s,tt⟩,
+    dsimp,
+    exact htt }
 end
 
 /-- The existence of a clopen. -/
