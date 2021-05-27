@@ -10,7 +10,7 @@ namespace category_theory
 
 namespace simplex_category
 
-lemma hom_zero_zero (f : mk 0 ⟶ mk 0) : f = 𝟙 _ :=
+@[simp] lemma hom_zero_zero (f : mk 0 ⟶ mk 0) : f = 𝟙 _ :=
 by { ext : 2, dsimp, exact subsingleton.elim _ _ }
 
 end simplex_category

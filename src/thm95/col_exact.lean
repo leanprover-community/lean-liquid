@@ -1,6 +1,8 @@
 import category_theory.products.basic
 
 import for_mathlib.arrow.iso_mk
+import for_mathlib.Cech.adjunction
+import for_mathlib.simplicial.iso
 
 import prop_92.prop_92
 import normed_snake_dual
@@ -195,10 +197,44 @@ lemma aug_map_strict : (aug_map r' Λ M N n).strict :=
 to_profinitely_filtered_pseudo_normed_group_hom_strict _
 end
 
-lemma Cech_nerve_level_iso (c : ℝ≥0) :
+section open category_theory.simplicial_object simplicial_object
+
+@[simps left right]
+def Cech_nerve_level_hom' (c : ℝ≥0) :
+  augmented.to_arrow.obj ((Cech_nerve_level r' Λ M N n).obj c) ⟶
+    FLC_complex_arrow _ (aug_map_strict r' Λ M N n) c :=
+@arrow.hom_mk _ _
+  (augmented.to_arrow.obj ((Cech_nerve_level r' Λ M N n).obj c))
+  (FLC_complex_arrow _ (aug_map_strict r' Λ M N n) c)
+  (𝟙 _) (𝟙 _)
+begin
+  erw [category.comp_id, category.id_comp, augmented.to_arrow_obj_hom],
+  dsimp only [Cech_nerve_level_obj, nat_trans.comp_app, whisker_right_app,
+    functor.const_comp_hom_app, nat_trans.left_op_app, unop_op,
+    functor.flip_obj_map, functor.comp_map, functor.flip_map_app],
+  erw [category.comp_id, Cech_nerve_hom_zero],
+  refl,
+end
+
+@[simps left right]
+def Cech_nerve_level_hom (c : ℝ≥0) :
+  (Cech_nerve_level r' Λ M N n).obj c ⟶
+    (FLC_complex_arrow _ (aug_map_strict r' Λ M N n) c).augmented_cech_nerve :=
+equivalence_left_to_right _ _ $ Cech_nerve_level_hom' _ _ _ _ _ _
+.
+
+instance Cech_nerve_level_hom_is_iso (c : ℝ≥0) : is_iso (Cech_nerve_level_hom r' Λ M N n c) :=
+begin
+  refine @simplicial_object.augmented.is_iso_of _ _ _ _ _ (id _) (id _),
+  swap, { exact is_iso.id _ },
+  intro i,
+  sorry
+end
+
+def Cech_nerve_level_iso (c : ℝ≥0) :
   (Cech_nerve_level r' Λ M N n).obj c ≅
     (FLC_complex_arrow _ (aug_map_strict r' Λ M N n) c).augmented_cech_nerve :=
-sorry
+as_iso (Cech_nerve_level_hom r' Λ M N n c)
 
 def FLC_complex_aug_iso_obj (c : ℝ≥0ᵒᵖ) :
   (FLC_complex V _ (aug_map_strict r' Λ M N n)).obj c ≅ (col_complex_level r' V Λ M N n).obj c :=
@@ -210,10 +246,26 @@ nat_iso.of_components (FLC_complex_aug_iso_obj r' V Λ M N n)
 begin
   intros c₁ c₂ h,
   dsimp only [FLC_complex, col_complex_level, FLC_functor, FLC_complex_aug_iso_obj,
-    functor.comp_map, functor.map_iso_hom, whiskering_right_obj_obj],
-  simp only [← category_theory.functor.map_comp],
-  congr' 1,
-  sorry
+    functor.comp_map, functor.map_iso_hom, whiskering_right_obj_obj,
+    Cech_nerve_level_iso, iso.op_hom, as_iso_hom, functor.op_map],
+  simp only [← category_theory.functor.map_comp, ← op_comp, quiver.hom.unop_op],
+  congr' 2,
+  apply simplicial_object.hom_ext,
+  { dsimp only [unop_op],
+    let f := FLC_complex_arrow _ (aug_map_strict r' Λ M N n) (unop c₁),
+    rw ← cancel_mono (augmented_cech_nerve.left_obj_zero_iso f).hom,
+    dsimp only [comma.comp_left, nat_trans.comp_app,
+      Cech_nerve_level_hom, augmented_cech_nerve_map_left, cech_nerve_map_app,
+      arrow.hom_mk_right, arrow.hom_mk_left, augmented_cech_nerve.left_obj_zero_iso_hom],
+    simp only [category.assoc, limits.wide_pullback.lift_π,
+      simplicial_object.equivalence_left_to_right_left_app_zero_comp_π],
+    erw [← category.assoc, simplicial_object.equivalence_left_to_right_left_app_zero_comp_π],
+    refl, },
+  { dsimp only [equivalence_right_to_left_right, comma.comp_right, Cech_nerve_level_hom_right],
+    erw [category.comp_id, category.id_comp],
+    refl, }
+end
+
 end
 
 lemma FLC_complex_aug_iso_strict (c : ℝ≥0ᵒᵖ) (i : ℕ) :
