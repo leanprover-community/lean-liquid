@@ -99,6 +99,7 @@ variables (f : profinitely_filtered_pseudo_normed_group_hom M₁ M₂) (hf : f.s
 
 section open Profinite pseudo_normed_group profinitely_filtered_pseudo_normed_group
 
+@[simps left right]
 def FLC_complex_arrow (c : ℝ≥0) : arrow Profinite :=
 @arrow.mk _ _ (filtration_obj M₁ c) (filtration_obj M₂ c) $
 { to_fun := pseudo_normed_group.level f hf c,

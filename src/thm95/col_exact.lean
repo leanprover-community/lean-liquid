@@ -3,6 +3,7 @@ import category_theory.products.basic
 import for_mathlib.arrow.iso_mk
 import for_mathlib.Cech.adjunction
 import for_mathlib.simplicial.iso
+import for_mathlib.wide_pullback
 
 import prop_92.prop_92
 import normed_snake_dual
@@ -223,12 +224,35 @@ def Cech_nerve_level_hom (c : ℝ≥0) :
 equivalence_left_to_right _ _ $ Cech_nerve_level_hom' _ _ _ _ _ _
 .
 
+lemma Cech_nerve_level_hom_injective (c : ℝ≥0) (i : simplex_categoryᵒᵖ) :
+  function.injective ⇑((Cech_nerve_level_hom r' Λ M N n c).left.app i) :=
+begin
+  set F := FLC_complex_arrow _ (aug_map_strict r' Λ M N n) c,
+  intros x y h,
+  rw Profinite.wide_pullback.ext_iff' at h,
+  have aux := λ j, (augmented_cech_nerve.left_map_comp_obj_zero_iso F i.unop j).symm,
+  dsimp only [unop_op] at aux,
+  simp only [← comp_apply, aux] at h,
+  have aux' := (Cech_nerve_level_hom r' Λ M N n c).left.naturality,
+  simp only [← category.assoc, ← aux'] at h, clear aux aux',
+  simp only [category.assoc, Cech_nerve_level_hom, augmented_cech_nerve.left_obj_zero_iso_hom,
+    equivalence_left_to_right_left_app_zero_comp_π, Cech_nerve_level_hom'_left,
+    coe_comp, function.comp, id_apply] at h,
+  sorry
+end
+
+lemma Cech_nerve_level_hom_surjective (c : ℝ≥0) (i : simplex_categoryᵒᵖ) :
+  function.surjective ⇑((Cech_nerve_level_hom r' Λ M N n c).left.app i) :=
+sorry
+
 instance Cech_nerve_level_hom_is_iso (c : ℝ≥0) : is_iso (Cech_nerve_level_hom r' Λ M N n c) :=
 begin
   refine @simplicial_object.augmented.is_iso_of _ _ _ _ _ (id _) (id _),
   swap, { exact is_iso.id _ },
   intro i,
-  sorry
+  apply Profinite.is_iso_of_bijective,
+  exact ⟨Cech_nerve_level_hom_injective r' Λ M N n c i,
+        Cech_nerve_level_hom_surjective r' Λ M N n c i⟩,
 end
 
 def Cech_nerve_level_iso (c : ℝ≥0) :

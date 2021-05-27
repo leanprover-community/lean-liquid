@@ -165,6 +165,23 @@ def augmented_cech_nerve.left_obj_zero_iso (F : arrow C) :
   inv_hom_id' := lift_π _ _ _ _ _ }
 .
 
+-- move this
+lemma augmented_cech_nerve.left_map_comp_obj_zero_iso
+  (F : arrow C) (n : simplex_category) (i : ulift (fin (n.len+1))) :
+  F.augmented_cech_nerve.left.map (n.const i.down).op ≫ (augmented_cech_nerve.left_obj_zero_iso F).hom =
+  wide_pullback.π _ i :=
+begin
+  rw [← iso.eq_comp_inv],
+  dsimp only [arrow.augmented_cech_nerve_left, arrow.cech_nerve_map,
+    augmented_cech_nerve.left_obj_zero_iso_inv],
+  ext1 ⟨j⟩,
+  { rw [limits.wide_pullback.lift_π, category.assoc, limits.wide_pullback.lift_π, category.comp_id],
+    cases i, refl },
+  { rw [limits.wide_pullback.lift_base, category.assoc, limits.wide_pullback.lift_base,
+      limits.wide_pullback.π_arrow], }
+end
+.
+
 @[simp]
 lemma equivalence_left_to_right_left_app_zero_comp_π
   (X : simplicial_object.augmented C) (F : arrow C) (G : augmented.to_arrow.obj X ⟶ F) (i) :
@@ -175,6 +192,7 @@ begin
   rw [limits.wide_pullback.lift_π, simplex_category.hom_zero_zero ([0].const i.down),
     op_id, X.left.map_id, category.id_comp],
 end
+.
 
 end
 
