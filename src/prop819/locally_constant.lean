@@ -33,7 +33,7 @@ lemma exists_locally_constant_fibprod
   (f : (LocallyConstant.obj M).obj (op $ (fibprod n).obj F)) :
   ∃ (S : discrete_quotient F.left)
     (g : (LocallyConstant.obj M).obj (op $ (FPR n F surj).obj S)),
-    (LocallyConstant.obj M).map ((FPR_cone n F surj).π.app S).op g = f := sorry
+    (LocallyConstant.obj M).map ((FPR_cone n F surj).π.app S).op g = f := by admit
 
 /--
 The assertion that if a locally constant function becomes trivial in the limit,
@@ -43,5 +43,5 @@ lemma locally_constant_eq_zero (S : discrete_quotient F.left)
   (f : (LocallyConstant.obj M).obj (op $ (FPR n F surj).obj S))
   (cond : (LocallyConstant.obj M).map ((FPR_cone n F surj).π.app S).op f = 0) :
   ∃ (T : discrete_quotient F.left) (h : T ≤ S),
-    (LocallyConstant.obj M).map ((FPR n F surj).map $ hom_of_le h).op f = 0 := sorry
+    (LocallyConstant.obj M).map ((FPR n F surj).map $ hom_of_le h).op f = 0 := by admit
 -/

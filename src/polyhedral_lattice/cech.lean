@@ -325,6 +325,14 @@ iso.symm $ PolyhedralLattice.iso_mk
 
 def obj_zero_iso : obj f 0 ≅ Λ' := obj_zero_iso' _ ≪≫ finsupp_fin_one_iso
 
+def π_hom (m : ℕ) : of (fin (m+1) →₀ Λ') ⟶ obj f m :=
+{ to_fun := conerve.π f (m+1),
+  strict' := (conerve.π_is_quotient f (m+1)).norm_le,
+  .. conerve.π f (m+1) }
+
+instance (m : ℕ) : epi (π_hom f m) :=
+concrete_category.epi_of_surjective _ $ conerve.π_surjective f (m+1)
+
 end Cech_conerve
 
 open Cech_conerve

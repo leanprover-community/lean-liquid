@@ -224,6 +224,45 @@ def Cech_nerve_level_hom (c : ℝ≥0) :
 equivalence_left_to_right _ _ $ Cech_nerve_level_hom' _ _ _ _ _ _
 .
 
+/-
+
+  dsimp only [Cech_nerve_level_obj, Cech_nerve_level_map,
+    whiskering_obj_obj_map, whiskering_obj_obj_obj,
+    functor.flip_obj_obj, functor.flip_obj_map, functor.flip_map_app,
+    functor.comp_obj, functor.comp_map,
+    functor.left_op_obj, functor.left_op_map,
+    quiver.hom.unop_op,
+    Cech_nerve, cosimplicial_object.augmented.whiskering_obj, cosimplicial_object.whiskering,
+    whiskering_right_obj_obj, whiskering_right_obj_map,
+    functor.right_op_obj, functor.right_op_map, unop_op,
+    cosimplicial_object.augmented.drop_obj, cosimplicial_object.augmented.drop_map,
+    augmented_cosimplicial, augmented_Cech_conerve,
+    cosimplicial_object.augment_right, Cech_conerve_obj, Cech_conerve_map,
+    Filtration_obj_map_to_fun, Filtration_obj_obj,
+    ProFiltPseuNormGrpWithTinv.Pow_obj, ProFiltPseuNormGrpWithTinv.Pow_map,
+    Hom_obj, Hom_map_to_fun, polyhedral_lattice.Hom,
+    profinitely_filtered_pseudo_normed_group_with_Tinv_hom.level,
+    pseudo_normed_group.level] at x y h ⊢,
+
+-/
+
+
+lemma Cech_nerve_level_hom_injective' (c : ℝ≥0) (i : simplex_categoryᵒᵖ)
+  (x y: ((((Cech_nerve_level r' Λ M N n).obj c).left.obj i)))
+  (h : ∀ (j : ulift (fin ((unop i).len + 1))),
+    (((Cech_nerve_level r' Λ M N n).obj c).left.map ((unop i).const j.down).op) x =
+    (((Cech_nerve_level r' Λ M N n).obj c).left.map ((unop i).const j.down).op) y) : x = y :=
+begin
+  ext j : 2,
+  let π := (polyhedral_lattice.conerve.π
+    (Λ.diagonal_embedding N) (i.unop.len + 1)).to_add_monoid_hom,
+  have hπ : function.surjective π := polyhedral_lattice.conerve.π_surjective _ _,
+  rw ← add_monoid_hom.cancel_right hπ, -- Bingo!
+  -- dsimp only [unop_op, cosimplicial_object.augmented.drop_obj] at z,
+  sorry
+end
+.
+
 lemma Cech_nerve_level_hom_injective (c : ℝ≥0) (i : simplex_categoryᵒᵖ) :
   function.injective ⇑((Cech_nerve_level_hom r' Λ M N n c).left.app i) :=
 begin
@@ -238,7 +277,8 @@ begin
   simp only [category.assoc, Cech_nerve_level_hom, augmented_cech_nerve.left_obj_zero_iso_hom,
     equivalence_left_to_right_left_app_zero_comp_π, Cech_nerve_level_hom'_left,
     coe_comp, function.comp, id_apply] at h,
-  sorry
+  apply Cech_nerve_level_hom_injective',
+  exact h
 end
 
 lemma Cech_nerve_level_hom_surjective (c : ℝ≥0) (i : simplex_categoryᵒᵖ) :
