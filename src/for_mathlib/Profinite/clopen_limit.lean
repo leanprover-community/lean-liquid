@@ -2,6 +2,8 @@ import topology.category.Profinite
 import topology.discrete_quotient
 import for_mathlib.topology
 import for_mathlib.order
+import for_mathlib.Profinite.locally_constant
+import for_mathlib.discrete_quotient
 
 noncomputable theory
 
@@ -525,7 +527,7 @@ end
 /-- Any discrete quotient arises from some point in the limit. -/
 theorem exists_discrete_quotient [inhabited J] (hC : is_limit C)
   (S : discrete_quotient C.X) : ∃ (i : J) (T : discrete_quotient (F.obj i)),
-  S = T.comap (C.π.app i).continuous :=
+  S.rel = (T.comap (C.π.app i).continuous).rel :=
 begin
   have := exists_clopen_finite F C hC S
     (λ s, S.proj ⁻¹' {s}) _,
@@ -739,5 +741,34 @@ begin
         symmetry,
         simpa using ha } } }
 end
+
+theorem exists_locally_constant_factors {α : Type*} [nonempty C.X] [inhabited J]
+  (hC : is_limit C) (ff : locally_constant C.X α) : ∃ (i : J)
+  (gg : locally_constant (F.obj i) α), gg ∘ (C.π.app i) = ff :=
+begin
+  let S : discrete_quotient C.X := ff.to_discrete_quotient,
+  let fff : S → α := ff.desc,
+  have hfff : fff ∘ S.proj = _ := ff.factors,
+  obtain ⟨i,T,hT⟩ := exists_discrete_quotient F C hC S,
+  have h := discrete_quotient.le_comap_of_eq _ _ hT,
+  let ι : S → T := discrete_quotient.map h,
+  let σ : T → S := choose_section ι,
+  let gg : locally_constant (F.obj i) α :=
+    ⟨fff ∘ σ ∘ T.proj ,_⟩,
+  swap,
+  { intros U,
+    rw [set.preimage_comp, set.preimage_comp],
+    apply T.proj_is_locally_constant },
+  use i, use gg,
+  rw ← hfff,
+  ext, dsimp,
+  congr' 1,
+  have : T.proj ((C.π.app i) x) = ι (S.proj x), refl,
+  rw this,
+  dsimp [σ],
+  have hι : function.injective ι := discrete_quotient.map_injective _ _ _ hT,
+  erw choose_section_is_section ι hι,
+end
+
 
 end Profinite

@@ -8,7 +8,7 @@ open category_theory.limits
 universes u
 
 namespace locally_constant
-variables {M : SemiNormedGroup.{u}} {X : Profinite.{u}}
+variables {M : Type*} {X : Profinite.{u}}
 
 /-- Construct a discrete quotient from a locally constant function. -/
 def to_discrete_quotient (f : locally_constant X M) : discrete_quotient X :=
