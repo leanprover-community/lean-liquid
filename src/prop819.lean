@@ -1,12 +1,14 @@
 import for_mathlib.Cech.split
-import for_mathlib.Profinite.functorial_limit
+import for_mathlib.Profinite.arrow_limit
+import for_mathlib.Profinite.locally_constant
+import for_mathlib.Profinite.clopen_limit
 import for_mathlib.simplicial.complex
 import for_mathlib.SemiNormedGroup
 import for_mathlib.homological_complex
 
 import locally_constant.Vhat
 import prop819.completion
-import prop819.locally_constant
+--import prop819.locally_constant
 
 open_locale nnreal
 
@@ -237,9 +239,15 @@ def FLF : (discrete_quotient F.left)ᵒᵖ ⥤ cochain_complex SemiNormedGroup �
 def FLF_cocone : limits.cocone (FLF F surj M) :=
 (FL_functor M).map_cocone $ (Profinite.arrow_cone F surj).op
 
+open Profinite
+
 lemma exists_locally_constant_FLF (n : ℕ) (f : (FL F M).X (n+1)) :
   ∃ (S : discrete_quotient F.left) (g : ((FLF F surj M).obj (op S)).X (n+1)),
-    ((FLF_cocone F surj M).ι.app (op S)).f _ g = f := sorry
+    ((FLF_cocone F surj M).ι.app (op S)).f _ g = f :=
+begin
+  let S : discrete_quotient (F.cech_nerve _[n]) := locally_constant.to_discrete_quotient f,
+  have := Cech_cone_is_limit F surj n,
+end
 
 lemma d_eq_zero_FLF (n : ℕ) (S : discrete_quotient F.left)
   (g : ((FLF F surj M).obj (op S)).X (n+1))
