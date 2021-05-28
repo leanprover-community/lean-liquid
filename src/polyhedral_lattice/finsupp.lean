@@ -18,9 +18,9 @@ noncomputable theory
 
 open_locale big_operators classical
 
-namespace finsupp
-
 variables (ι Λ : Type*) [fintype ι]
+
+namespace finsupp
 
 section normed_group
 
@@ -69,6 +69,46 @@ end
 
 end normed_group
 
+end finsupp
+
+namespace generates_norm
+
+open finsupp
+
+variables [polyhedral_lattice Λ]
+variables {J : Type*} [fintype J] (x : J → Λ) (hx : generates_norm x)
+
+def finsupp_generators : ι × J → (ι →₀ Λ) := λ j, single j.1 (x j.2)
+
+variables {Λ x}
+
+include hx
+
+lemma finsupp : generates_norm (finsupp_generators ι Λ x) :=
+begin
+  dsimp only [finsupp_generators],
+  intro l,
+  have := λ i, hx (l i),
+  choose c H1 H2 using this,
+  have hl : l = ∑ i, single i (l i),
+  { conv_lhs { rw [← sum_single l, finsupp.sum] },
+    apply finset.sum_subset (finset.subset_univ _),
+    rintro i - hi,
+    rw not_mem_support_iff at hi,
+    rw [hi, single_zero] },
+  simp only [← single_add_hom_apply, ← add_monoid_hom.map_nsmul] at hl ⊢,
+  refine ⟨λ j, c j.1 j.2, _, _⟩,
+  { simp only [H1, add_monoid_hom.map_sum] at hl,
+    rw [hl, ← finset.univ_product_univ, finset.sum_product] },
+  { have aux := @sum_eq_sum_fintype ι Λ _ _ _ _ (λ i, norm) (λ i, norm_zero),
+    simp only [norm_def, aux, ← finset.univ_product_univ, finset.sum_product, H2,
+      single_add_hom_apply, norm_single], }
+end
+
+end generates_norm
+
+namespace finsupp
+
 variables [polyhedral_lattice Λ]
 
 instance {ι : Type} [fintype ι] : polyhedral_lattice (ι →₀ Λ) :=
@@ -81,22 +121,7 @@ instance {ι : Type} [fintype ι] : polyhedral_lattice (ι →₀ Λ) :=
   begin
     obtain ⟨J, _instJ, x, hx⟩ := polyhedral_lattice.polyhedral' Λ, resetI,
     refine ⟨ι × J, infer_instance, λ j, single j.1 (x j.2), _⟩,
-    intro l,
-    have := λ i, hx (l i),
-    choose c H1 H2 using this,
-    have hl : l = ∑ i, single i (l i),
-    { conv_lhs { rw [← sum_single l, sum] },
-      apply finset.sum_subset (finset.subset_univ _),
-      rintro i - hi,
-      rw not_mem_support_iff at hi,
-      rw [hi, single_zero] },
-    simp only [← single_add_hom_apply, ← add_monoid_hom.map_nsmul] at hl ⊢,
-    refine ⟨λ j, c j.1 j.2, _, _⟩,
-    { simp only [H1, add_monoid_hom.map_sum] at hl,
-      rw [hl, ← finset.univ_product_univ, finset.sum_product] },
-    { have aux := @sum_eq_sum_fintype ι Λ _ _ _ _ (λ i, norm) (λ i, norm_zero),
-      simp only [norm_def, aux, ← finset.univ_product_univ, finset.sum_product, H2,
-        single_add_hom_apply, norm_single], }
+    exact hx.finsupp _
   end }
 
 end finsupp

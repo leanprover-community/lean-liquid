@@ -14,6 +14,30 @@ condition which we are missing).
 noncomputable theory
 open_locale big_operators classical nnreal
 
+namespace generates_norm
+
+open rescale
+
+variables (N : ℝ≥0) (Λ : Type*) [polyhedral_lattice Λ]
+variables {J : Type*} [fintype J] (x : J → Λ) (hx : generates_norm x)
+
+def rescale_generators : J → (rescale N Λ) := x
+
+variables {Λ x}
+
+include hx
+
+lemma rescale [hN : fact (0 < N)] : generates_norm (rescale_generators N Λ x) :=
+begin
+  intro l,
+  obtain ⟨c, H1, H2⟩ := hx l,
+  refine ⟨c, H1, _⟩,
+  simp only [norm_def, ← mul_div_assoc, ← finset.sum_div],
+  congr' 1,
+end
+
+end generates_norm
+
 namespace rescale
 
 variables {N : ℝ≥0} {V : Type*}
@@ -23,13 +47,8 @@ instance (Λ : Type*) [hN : fact (0 < N)] [polyhedral_lattice Λ] :
 { finite_free := by { delta rescale, exact polyhedral_lattice.finite_free _ },
   polyhedral' :=
   begin
-    obtain ⟨ι, _inst_ι, l, hl⟩ := polyhedral_lattice.polyhedral' Λ,
-    refine ⟨ι, _inst_ι, l, _⟩,
-    { intro x,
-      obtain ⟨c, H1, H2⟩ := hl x,
-      refine ⟨c, H1, _⟩,
-      simp only [norm_def, ← mul_div_assoc, ← finset.sum_div],
-      congr' 1, }, -- defeq abuse
+    obtain ⟨ι, _inst_ι, l, hl⟩ := polyhedral_lattice.polyhedral' Λ, resetI,
+    refine ⟨ι, _inst_ι, l, hl.rescale N⟩,
   end }
 
 end rescale

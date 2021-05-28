@@ -238,15 +238,11 @@ end
 
 end maps
 
-def lift' {M : Type*} [add_comm_group M] (m : ℕ) (g₀ : Λ →+ M)
+lemma lift'_w {M : Type*} [add_comm_group M] (m : ℕ) (g₀ : Λ →+ M)
   (g : fin (m + 1) → (Λ' →+ M)) (hg : ∀ i l, (g i) (f l) = g₀ l)
   (hf : function.injective f) :
-  obj f (m + 1) →+ M :=
+  ∀ (l : fin (m + 1) →₀ Λ') (hl : l ∈ L f (m + 1)), finsupp.lift_add_hom g l = 0 :=
 begin
-  let Ψ := quotient_add_group.lift
-    (polyhedral_lattice.conerve.L f (m + 1))
-    (finsupp.lift_add_hom g) _,
-  exact Ψ,
   rintro l ⟨h1, h2⟩,
   choose l₀ hl₀ using h2,
   dsimp only [finsupp.lift_add_hom_apply],
@@ -256,6 +252,17 @@ begin
   rw [← polyhedral_lattice_hom.coe_to_add_monoid_hom] at h1 hf,
   rw [add_monoid_hom.injective_iff] at hf,
   rw [hf _ h1, g₀.map_zero],
+end
+
+def lift' {M : Type*} [add_comm_group M] (m : ℕ) (g₀ : Λ →+ M)
+  (g : fin (m + 1) → (Λ' →+ M)) (hg : ∀ i l, (g i) (f l) = g₀ l)
+  (hf : function.injective f) :
+  obj f (m + 1) →+ M :=
+begin
+  let Ψ := quotient_add_group.lift
+    (polyhedral_lattice.conerve.L f (m + 1))
+    (finsupp.lift_add_hom g) (lift'_w f m g₀ g hg hf),
+  exact Ψ,
 end
 
 end conerve
