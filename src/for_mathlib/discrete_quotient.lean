@@ -39,7 +39,7 @@ end discrete_quotient
 open_locale classical
 noncomputable theory
 
-variables {X Y : Type*}
+variables {X Y Z : Type*}
 
 -- Ugh
 def choose_section [hnn : nonempty X] (f : X → Y) : Y → X :=
@@ -51,6 +51,22 @@ begin
   dsimp [choose_section],
   split_ifs,
   { have := classical.some_spec h,
+    exact inj this },
+  { exfalso,
+    apply h,
+    use a }
+end
+
+def choose_extension [hnn : nonempty Z] (f : X → Y) (g : X → Z) : Y → Z :=
+λ y, if hh : ∃ x : X, f x = y then g (classical.some hh) else nonempty.some hnn
+
+lemma choose_extension_injective [hnn : nonempty Z] (f : X → Y) (g : X → Z)
+  (inj : function.injective f) (a : X) : choose_extension f g (f a) = g a :=
+begin
+  dsimp [choose_extension],
+  split_ifs,
+  { have := classical.some_spec h,
+    congr' 1,
     exact inj this },
   { exfalso,
     apply h,

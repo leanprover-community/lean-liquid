@@ -507,8 +507,7 @@ end
 /-- The images of the transition maps stabilize, in which case they agree with
 the image of the cone point. -/
 theorem exists_image [inhabited J] [∀ i, fintype (F.obj i)]
-  [∀ i, discrete_topology (F.obj i)] (hC : is_limit C) (i : J) :
-  ∃ (j : J) (hj : j ≤ i),
+  (hC : is_limit C) (i : J) : ∃ (j : J) (hj : j ≤ i),
   set.range (C.π.app i) = set.range (F.map $ hom_of_le $ hj) :=
 begin
   have := Inter_eq i (λ e he, set.range (F.map (hom_of_le he))) _,
@@ -742,7 +741,7 @@ begin
         simpa using ha } } }
 end
 
-theorem exists_locally_constant_factors {α : Type*} [nonempty C.X] [inhabited J]
+theorem exists_locally_constant_factors {α : Type*} [nonempty α] [inhabited J]
   (hC : is_limit C) (ff : locally_constant C.X α) : ∃ (i : J)
   (gg : locally_constant (F.obj i) α), gg ∘ (C.π.app i) = ff :=
 begin
@@ -752,23 +751,20 @@ begin
   obtain ⟨i,T,hT⟩ := exists_discrete_quotient F C hC S,
   have h := discrete_quotient.le_comap_of_eq _ _ hT,
   let ι : S → T := discrete_quotient.map h,
-  let σ : T → S := choose_section ι,
+  let σ : T → α := choose_extension ι fff,
   let gg : locally_constant (F.obj i) α :=
-    ⟨fff ∘ σ ∘ T.proj ,_⟩,
+    ⟨σ ∘ T.proj ,_⟩,
   swap,
   { intros U,
-    rw [set.preimage_comp, set.preimage_comp],
+    rw set.preimage_comp,
     apply T.proj_is_locally_constant },
   use i, use gg,
   rw ← hfff,
   ext, dsimp,
-  congr' 1,
-  have : T.proj ((C.π.app i) x) = ι (S.proj x), refl,
-  rw this,
   dsimp [σ],
-  have hι : function.injective ι := discrete_quotient.map_injective _ _ _ hT,
-  erw choose_section_is_section ι hι,
+  have : function.injective ι := discrete_quotient.map_injective _ _ _ hT,
+  rw ← choose_extension_injective ι fff this,
+  refl,
 end
-
 
 end Profinite
