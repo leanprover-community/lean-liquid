@@ -162,6 +162,26 @@ end
 --instance Cech_nonempty {n : ℕ} [nonempty F.left] : nonempty (F.cech_nerve _[n]) :=
 --  sorry
 
+lemma locally_constant_eq {X : Profinite} (f g : locally_constant X M) :
+  f.to_fun = g.to_fun ↔ f = g :=
+begin
+  split,
+  { intro h, ext, change f.to_fun _ = _, rw h, refl, },
+  { intro h, rw h }
+end
+
+lemma locally_constant_eq_zero {X : Profinite} (f : locally_constant X M) :
+  f = 0 ↔ set.range f.to_fun ⊆ {0} :=
+begin
+  split,
+  { intro h, rw h, simp, },
+  { intro h, ext x,
+    dsimp,
+    apply h,
+    use x,
+    refl }
+end
+
 include surj
 
 lemma prop819_degree_zero_helper :
@@ -266,13 +286,75 @@ begin
     continuity },
 end
 
+-- Move this...
+lemma eq_zero_of_image (n : ℕ) (S : discrete_quotient F.left)
+  (g : ((FLF F surj M).obj (op S)).X (n+1)) :
+  g = 0 ↔ set.range g.to_fun ⊆ {0} :=
+begin
+  split,
+  { intro h,
+    simp [h] },
+  { intros h,
+    ext x,
+    apply h,
+    use x,
+    refl },
+end
+
+lemma FLF_cocone_app_coe_eq (n : ℕ) (S : discrete_quotient F.left)
+  (g : ((FLF F surj M).obj (op S)).X (n+1)) :
+  (((FLF_cocone F surj M).ι.app (op S)).f _ g).to_fun =
+    g.to_fun ∘ ((Cech_cone F surj n).π.app _) :=
+begin
+  ext x,
+  change locally_constant.comap _ _ _ = _,
+  dsimp [locally_constant.comap],
+  split_ifs,
+  { refl, },
+  all_goals { exfalso, apply h, continuity },
+end
+
+lemma FLF_map_coe_eq (n : ℕ) (S T : discrete_quotient F.left) (hh : T ≤ S)
+  (g : ((FLF F surj M).obj (op S)).X (n+1)) :
+  (((FLF F surj M).map (hom_of_le hh).op).f _ g).to_fun  =
+  g.to_fun ∘ ((Cech_cone_diagram F surj n).map (hom_of_le hh)) :=
+begin
+  ext x,
+  change locally_constant.comap _ _ _ = _,
+  dsimp [locally_constant.comap],
+  split_ifs,
+  { refl, },
+  all_goals { exfalso, apply h, continuity },
+end
+
 lemma eq_zero_FLF (n : ℕ) (S : discrete_quotient F.left)
   (g : ((FLF F surj M).obj (op S)).X (n+1))
   (hg : ((FLF_cocone F surj M).ι.app (op S)).f _ g = 0) :
   ∃ (T : discrete_quotient F.left) (hT : T ≤ S),
     ((FLF F surj M).map (hom_of_le hT).op).f _ g = 0 :=
 begin
-  sorry
+  have := exists_image (Cech_cone_diagram F surj n)
+    (Cech_cone F surj n) (Cech_cone_is_limit F surj n) S,
+  obtain ⟨T,hT,hh⟩ := this,
+  use T, use hT,
+  rw locally_constant_eq_zero,
+  rw locally_constant_eq_zero at hg,
+  rw FLF_cocone_app_coe_eq at hg,
+  rw FLF_map_coe_eq,
+  rintro x ⟨x,rfl⟩,
+  apply hg,
+  let P : (Cech_cone F surj n).X ⟶ (Cech_cone_diagram F surj n).obj S :=
+    (Cech_cone F surj n).π.app _,
+  let p : (Cech_cone_diagram F surj n).obj T ⟶ (Cech_cone_diagram F surj n).obj S :=
+    (Cech_cone_diagram F surj n).map (hom_of_le hT),
+  change ↥((Cech_cone_diagram F surj n).obj T) at x,
+  have : p x ∈ set.range p, use x,
+  erw ← hh at this,
+  obtain ⟨y,hy⟩ := this,
+  dsimp only [p] at hy,
+  use y,
+  dsimp only [function.comp_apply],
+  erw hy,
 end
 
 lemma d_eq_zero_FLF (n : ℕ) (S : discrete_quotient F.left)
