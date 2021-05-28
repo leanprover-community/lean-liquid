@@ -254,8 +254,16 @@ begin
   obtain ⟨i,g,hg⟩ := exists_locally_constant_factors _ _ hC f,
   use i, use g,
   ext x,
-  rw ← hg,
-  sorry,
+  change locally_constant.comap _ _ _ = _,
+  dsimp [locally_constant.comap],
+  split_ifs,
+  { dsimp,
+    rw ← hg,
+    refl },
+  all_goals {
+    exfalso,
+    apply h,
+    continuity },
 end
 
 lemma d_eq_zero_FLF (n : ℕ) (S : discrete_quotient F.left)
