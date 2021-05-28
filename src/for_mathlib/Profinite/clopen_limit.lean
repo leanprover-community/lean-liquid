@@ -1,6 +1,7 @@
 import topology.category.Profinite
 import topology.discrete_quotient
 import for_mathlib.topology
+import for_mathlib.order
 
 noncomputable theory
 
@@ -15,6 +16,7 @@ universe u
 
 variables {J : Type u} [semilattice_inf J] (F : J ⥤ Profinite.{u}) (C : cone F)
 
+/-
 -- We have the dual version of this in mathlib for directed preorders.
 lemma exists_le_finset [inhabited J] (G : finset J) : ∃ j : J, ∀ g ∈ G, j ≤ g :=
 begin
@@ -30,6 +32,7 @@ begin
   exact inf_le_left,
   refine le_trans inf_le_right (h0 _ hg),
 end
+-/
 
 def created_cone : limits.cone F :=
   lift_limit (Top.limit_cone_is_limit $ F ⋙ Profinite_to_Top)
@@ -479,31 +482,36 @@ begin
     apply (hVs _).2 }
 end
 
-/- Not sure about the best formulation...
-/-- The images of the transition maps stabilize. -/
-lemma image_stabilizes [∀ i, fintype (F.obj i)]
+set_option pp.proofs true
+
+lemma image_stabilizes [inhabited J] [∀ i, fintype (F.obj i)]
   (i : J) : ∃ (j : J) (hj : j ≤ i), ∀ (k : J) (hk : k ≤ j),
-  set.range (F.map (hom_of_le hj)) =
-  set.range (F.map (hom_of_le $ le_trans hk hj)) := sorry
+  set.range (F.map (hom_of_le $ le_trans hk hj)) =
+  set.range (F.map (hom_of_le hj)) :=
+begin
+  have := eventually_constant i
+    (λ e he, set.range (F.map (hom_of_le he))) _,
+  swap,
+  { intros a b ha hb h,
+    dsimp,
+    have : hom_of_le ha = (hom_of_le h) ≫ (hom_of_le hb) := rfl,
+    rw [this, F.map_comp, Profinite.coe_comp],
+    apply set.range_comp_subset_range },
+  obtain ⟨j0,hj0,hh⟩ := this,
+  use j0, use hj0,
+  exact hh,
+end
 
 /-- The images of the transition maps stabilize, in which case they agree with
 the image of the cone point. -/
-theorem exists_image [∀ i, fintype (F.obj i)]
+theorem exists_image [inhabited J] [∀ i, fintype (F.obj i)]
   [∀ i, discrete_topology (F.obj i)] (hC : is_limit C) (i : J) :
   ∃ (j : J) (hj : j ≤ i),
   set.range (C.π.app i) = set.range (F.map $ hom_of_le $ hj) :=
 begin
-  obtain ⟨j,hj,h⟩ := image_stabilizes F i,
-  use j, use hj,
-  refine le_antisymm _ _,
-  { rw ← C.w (hom_of_le hj),
-    rw Profinite.coe_comp,
-    apply set.range_comp_subset_range },
-  { rw image_eq _ _ hC,
-    sorry,
-  },
+  sorry,
+  --have := Inter_eq,
 end
--/
 
 /-- Any discrete quotient arises from some point in the limit. -/
 theorem exists_discrete_quotient [inhabited J] [∀ i, fintype (F.obj i)] (hC : is_limit C)
