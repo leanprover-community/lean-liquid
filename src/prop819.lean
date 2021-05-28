@@ -162,6 +162,12 @@ end
 --instance Cech_nonempty {n : ℕ} [nonempty F.left] : nonempty (F.cech_nerve _[n]) :=
 --  sorry
 
+lemma Profinite.coe_comp_apply {X Y Z : Profinite} (f : X ⟶ Y) (g : Y ⟶ Z) (x : X) :
+  (f ≫ g) x = g (f x) := rfl
+
+lemma locally_constant_to_fun_eq {X : Profinite} (f : locally_constant X M) :
+  f.to_fun = f := rfl
+
 lemma locally_constant_eq {X : Profinite} (f g : locally_constant X M) :
   f.to_fun = g.to_fun ↔ f = g :=
 begin
@@ -356,6 +362,7 @@ begin
   dsimp only [function.comp_apply],
   erw hy,
 end
+.
 
 lemma d_eq_zero_FLF (n : ℕ) (S : discrete_quotient F.left)
   (g : ((FLF F surj M).obj (op S)).X (n+1))
@@ -382,7 +389,47 @@ lemma norm_eq_FLF (n : ℕ) (S : discrete_quotient F.left)
   (g : ((FLF F surj M).obj (op S)).X (n+1)) :
   ∃ (T : discrete_quotient F.left) (hT : T ≤ S),
   nnnorm (((FLF_cocone F surj M).ι.app (op S)).f _ g) =
-  nnnorm ((((FLF F surj M)).map (hom_of_le hT).op).f _ g) := sorry
+  nnnorm ((((FLF F surj M)).map (hom_of_le hT).op).f _ g) :=
+begin
+  have := exists_image (Cech_cone_diagram F surj n)
+    (Cech_cone F surj n) (Cech_cone_is_limit F surj n) S,
+  obtain ⟨T,hT,hh⟩ := this,
+  use T, use hT,
+  ext,
+  dsimp,
+  change Sup _ = Sup _,
+  congr' 1,
+  ext r,
+  split,
+  { rintros ⟨x,rfl⟩,
+    dsimp only,
+    change ↥(Cech_cone F surj n).X at x,
+    use (Cech_cone F surj n).π.app T x,
+    dsimp only,
+    rw ← locally_constant_to_fun_eq,
+    erw FLF_map_coe_eq F surj M n S T hT g,
+    rw function.comp_apply,
+    rw ← Profinite.coe_comp_apply,
+    rw (Cech_cone F surj n).w,
+    rw ← locally_constant_to_fun_eq,
+    rw FLF_cocone_app_coe_eq,
+    refl },
+  { rintros ⟨x,rfl⟩,
+    dsimp only,
+    change ↥((Cech_cone_diagram F surj n).obj T) at x,
+    have : (Cech_cone_diagram F surj n).map (hom_of_le hT) x ∈
+      set.range ((Cech_cone_diagram F surj n).map (hom_of_le hT)), use x,
+    rw ← hh at this,
+    obtain ⟨y,hy⟩ := this,
+    change ↥(Cech_cone F surj n).X at y,
+    use y,
+    dsimp only,
+    simp_rw ← locally_constant_to_fun_eq,
+    rw FLF_map_coe_eq,
+    rw FLF_cocone_app_coe_eq,
+    dsimp only [function.comp_apply],
+    erw hy }
+end
 
 lemma exists_locally_constant  (n : ℕ) (f : (FL F M).X (n+1))
   (hf : (FL F M).d _ (n+2) f = 0) : ∃ (S : discrete_quotient F.left)
