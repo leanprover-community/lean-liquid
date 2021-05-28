@@ -112,6 +112,19 @@ def Cech_nerve_level : ℝ≥0 ⥤ simplicial_object.augmented Profinite.{u} :=
   (simplicial_object.augmented.whiskering _ _).flip.obj (Cech_nerve.{u} r' Λ M N).left_op
 .
 
+lemma Cech_nerve_level_left_map (c : ℝ≥0) (i j : simplex_categoryᵒᵖ) (g : i ⟶ j) :
+  ((Cech_nerve_level r' Λ M N n).obj c).left.map g =
+    ((Filtration r').obj c).map ((ProFiltPseuNormGrpWithTinv.Pow r' n).map
+      ((Hom M).map ((Cech_conerve (Λ.diagonal_embedding N)).map g.unop).op)) :=
+rfl
+
+lemma Cech_nerve_level_left_map' (c : ℝ≥0) (i j : simplex_categoryᵒᵖ) (g : i ⟶ j)
+  (x : ((Cech_nerve_level r' Λ M N n).obj c).left.obj i) (k : fin n) :
+  (((Cech_nerve_level r' Λ M N n).obj c).left.map g x).1 k =
+    add_monoid_hom.comp (x.1 k) (polyhedral_lattice.conerve.map
+      (Λ.diagonal_embedding N) ⇑(hom.to_preorder_hom g.unop)).to_add_monoid_hom :=
+rfl
+
 @[simps X d]
 def col_complex_aux : cochain_complex (ℝ≥0ᵒᵖ ⥤ SemiNormedGroup) ℕ :=
 (Cech_nerve' r' V Λ M N n).to_cocomplex
@@ -301,15 +314,15 @@ begin
 end
 .
 
-lemma Cech_nerve_level_hom_surjective (c : ℝ≥0) (i : simplex_categoryᵒᵖ) :
-  function.surjective ⇑((Cech_nerve_level_hom r' Λ M N n c).left.app i) :=
+def Cech_nerve_level_hom_section (c : ℝ≥0) (i : simplex_categoryᵒᵖ)
+  (y : (FLC_complex_arrow _ (aug_map_strict r' Λ M N n) c).augmented_cech_nerve.left.obj i) :
+  ((Cech_nerve_level r' Λ M N n).obj c).left.obj i :=
 begin
   let F := FLC_complex_arrow _ (aug_map_strict r' Λ M N n) c,
   let G := Cech_nerve_level_inv' r' Λ M N n c,
-  intro y,
   let z₀ := G.right (limits.wide_pullback.base (λ _, F.hom) y),
   let z := λ j, G.left (limits.wide_pullback.π (λ _, F.hom) j y),
-  refine ⟨⟨λ k, _, _⟩, _⟩,
+  refine ⟨λ k, _, _⟩,
   { refine cosimplicial_lift Λ N _ (z₀.1 k) (λ j, _) _,
     { let ψ := Cech_conerve.obj_zero_iso (Λ.diagonal_embedding N),
       refine add_monoid_hom.comp _ ψ.inv.to_add_monoid_hom,
@@ -325,13 +338,56 @@ begin
     rw [semi_normed_group.mem_filtration_iff] at hl ⊢,
     refine le_trans _ hl,
     exact (Cech_conerve.obj_zero_iso (Λ.diagonal_embedding N)).inv.strict l },
+end
+.
+
+lemma Cech_nerve_level_hom_surjective (c : ℝ≥0) (i : simplex_categoryᵒᵖ) :
+  function.surjective ⇑((Cech_nerve_level_hom r' Λ M N n c).left.app i) :=
+begin
+  intro y,
+  refine ⟨Cech_nerve_level_hom_section r' Λ M N n c i y, _⟩,
   { rw Profinite.wide_pullback.ext_iff',
     intro j,
-    erw [← augmented_cech_nerve.left_map_comp_obj_zero_iso F _ j, ← comp_apply,
+    erw [← augmented_cech_nerve.left_map_comp_obj_zero_iso _ _ j, ← comp_apply,
       ← category.assoc, ← (Cech_nerve_level_hom r' Λ M N n c).left.naturality,
-      augmented_cech_nerve.left_map_comp_obj_zero_iso F _ j],
-    dsimp only,
-    sorry }
+      augmented_cech_nerve.left_map_comp_obj_zero_iso _ _ j, category.assoc],
+    dsimp only [Cech_nerve_level_hom, augmented_cech_nerve.left_obj_zero_iso],
+    erw [equivalence_left_to_right_left_app_zero_comp_π, Cech_nerve_level_hom'_left,
+      category.comp_id],
+    ext k : 2,
+    have := Cech_nerve_level_left_map' r' Λ M N n c i _ (i.unop.const j.down).op,
+    simp only [subtype.val_eq_coe] at this,
+    erw this _ k, clear this,
+    ext1 l',
+    obtain ⟨l, rfl⟩ : ∃ l, quotient_add_group.mk l = l',
+    { exact quotient.surjective_quotient_mk' l' },
+    dsimp only [add_monoid_hom.comp_apply, subtype.coe_mk,
+      polyhedral_lattice_hom.coe_to_add_monoid_hom,
+      polyhedral_lattice.conerve.map_apply,
+      add_monoid_hom.to_fun_eq_coe,
+      polyhedral_lattice.conerve.map_add_hom_mk,
+      Cech_nerve_level_hom_section,
+      cosimplicial_lift, polyhedral_lattice.conerve.lift'],
+    refine (quotient_add_group.lift_mk'
+      (polyhedral_lattice.conerve.L (Λ.diagonal_embedding N) ((unop i).len + 1)) _ _).trans _,
+    dsimp only [finsupp.lift_add_hom_apply, finsupp.map_domain.add_monoid_hom_apply,
+      unop_op],
+    rw [finsupp.sum_map_domain_index_add_monoid_hom, finsupp.sum_eq_sum_fintype,
+      fin.sum_univ_succ, finset.sum_eq_zero, add_zero],
+    swap, { intros m hm, exfalso, change fin 0 at m, exact nat.not_lt_zero m m.2 },
+    swap, { intro, rw add_monoid_hom.map_zero },
+    dsimp only [add_monoid_hom.comp_apply, subtype.coe_mk,
+      polyhedral_lattice_hom.coe_to_add_monoid_hom,
+      Cech_nerve_level_inv'_left, Cech_conerve.obj_zero_iso,
+      iso.trans_inv, subtype.val_eq_coe, quiver.hom.unop_op],
+    rw [id_apply, comp_apply, Cech_conerve.obj_zero_iso'_inv,
+      Cech_conerve.finsupp_fin_one_iso_inv],
+    suffices : finsupp.single_add_hom 0 (l 0) = l,
+    { cases j, rw this, refl },
+    ext m o,
+    change fin 1 at m,
+    have hm : m = 0, { exact subsingleton.elim _ _ },
+    simp only [hm, finsupp.single_add_hom_apply, finsupp.single_apply, if_pos rfl], }
 end
 
 instance Cech_nerve_level_hom_is_iso (c : ℝ≥0) : is_iso (Cech_nerve_level_hom r' Λ M N n c) :=
