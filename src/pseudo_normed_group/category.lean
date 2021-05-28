@@ -173,6 +173,16 @@ def iso_of_equiv_of_strict'
   ..e.to_add_monoid_hom } e (λ _, rfl)
   (by { intros c x hx, rwa [strict', e.apply_symm_apply] })
 
+@[simp]
+lemma iso_of_equiv_of_strict'_hom_apply
+  (e : M₁ ≃+ M₂)
+  (strict' : ∀ c x, x ∈ filtration M₁ c ↔ e x ∈ filtration M₂ c)
+  (continuous' : ∀ c, continuous (pseudo_normed_group.level e (λ c x, (strict' c x).1) c))
+  (map_Tinv' : ∀ x, e (Tinv x) = Tinv (e x))
+  (x : M₁) :
+  (iso_of_equiv_of_strict' e strict' continuous' map_Tinv').hom x = e x := rfl
+
+@[simp]
 lemma iso_of_equiv_of_strict'_inv_apply
   (e : M₁ ≃+ M₂)
   (strict' : ∀ c x, x ∈ filtration M₁ c ↔ e x ∈ filtration M₂ c)
