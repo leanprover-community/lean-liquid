@@ -29,19 +29,23 @@ lemma cosimplicial_lift_mem_filtration (c : ℝ≥0)
   (H : ∀ i, g i ∈ filtration ((Λ.rescaled_power N) →+ M) c) :
   cosimplicial_lift Λ N m g₀ g hg ∈ filtration (obj (Λ.diagonal_embedding N) (m + 1) →+ M) c :=
 begin
-  intros c' l' hl,
-  obtain ⟨J, _instJ, x, hx⟩ := polyhedral_lattice.polyhedral' Λ, resetI,
-  obtain ⟨l, rfl⟩ : ∃ l, quotient_add_group.mk l = l',
-  { exact quotient.surjective_quotient_mk' l' },
-  rw cosimplicial_lift_mk,
-  let x' : (fin N) × J → Λ.rescaled_power N :=
-    generates_norm.rescale_generators N _ (generates_norm.finsupp_generators (fin N) Λ x),
-  have hx' : generates_norm x' := (hx.finsupp (fin N)).rescale N,
-  have aux := λ i, hx'.generates_nnnorm (l i),
-  choose C h1 h2 using aux,
-  rw [finsupp.lift_add_hom_apply],
-  -- rw [generates_norm.add_monoid_hom_mem_filtration_iff],
-  sorry
+  intros c' l' hl',
+  rw [semi_normed_group.mem_filtration_iff] at hl',
+  obtain ⟨l, rfl, hl⟩ := polyhedral_lattice.norm_lift _ l',
+  erw cosimplicial_lift_mk,
+  rw [finsupp.lift_add_hom_apply, finsupp.sum_eq_sum_fintype],
+  swap, { intro, rw add_monoid_hom.map_zero },
+  simp only [← coe_nnnorm, nnreal.eq_iff] at hl,
+  erw [finsupp.nnnorm_def, finsupp.sum_eq_sum_fintype] at hl,
+  swap, { intro, rw nnnorm_zero },
+  rw ← hl at hl',
+  replace hl' := mul_le_mul' (le_refl c) hl',
+  rw [finset.mul_sum] at hl',
+  apply filtration_mono hl',
+  apply sum_mem_filtration,
+  rintro i -,
+  apply H,
+  exact semi_normed_group.mem_filtration_nnnorm (l i),
 end
 
 end PolyhedralLattice
