@@ -509,8 +509,17 @@ theorem exists_image [inhabited J] [∀ i, fintype (F.obj i)]
   ∃ (j : J) (hj : j ≤ i),
   set.range (C.π.app i) = set.range (F.map $ hom_of_le $ hj) :=
 begin
-  sorry,
-  --have := Inter_eq,
+  have := Inter_eq i (λ e he, set.range (F.map (hom_of_le he))) _,
+  swap,
+  { intros a b ha hb hh,
+    dsimp,
+    have : hom_of_le ha = hom_of_le hh ≫ hom_of_le hb, refl,
+    rw [this, F.map_comp, Profinite.coe_comp],
+    apply set.range_comp_subset_range },
+  obtain ⟨j0,hj0,hh⟩ := this,
+  dsimp at hh,
+  use j0, use hj0,
+  rw [image_eq _ _ hC, ← hh],
 end
 
 /-- Any discrete quotient arises from some point in the limit. -/
