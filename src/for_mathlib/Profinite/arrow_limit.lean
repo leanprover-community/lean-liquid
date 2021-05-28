@@ -188,6 +188,51 @@ def Cech_cone_diagram (n : ℕ) : discrete_quotient F.left ⥤ Profinite.{u} :=
 arrow_diagram F surj ⋙ simplicial_object.cech_nerve ⋙
   (evaluation _ _).obj (op [n])
 
+def Cech_cone_diagram_proj (n : ℕ) (S : discrete_quotient F.left) (i : fin (n+1)) :
+  (Cech_cone_diagram F surj n).obj S ⟶ Profinite.of S :=
+limits.wide_pullback.π _ ⟨i⟩
+
+def Cech_cone_diagram_inclusion (n : ℕ) (S : discrete_quotient F.left) :
+  (Cech_cone_diagram F surj n).obj S → fin (n+1) → S :=
+λ a i, Cech_cone_diagram_proj F surj n S i a
+
+def point_to_hom {X : Profinite} (x : X)  : Profinite.of punit ⟶ X :=
+{ to_fun := λ i, x }
+
+lemma point_to_hom_ext {X : Profinite} (a b : X) : point_to_hom a = point_to_hom b
+  → a = b :=
+begin
+  intros h,
+  apply_fun (λ e, e punit.star) at h,
+  exact h,
+end
+
+lemma Cech_cone_diagram_inclusion_injective (n : ℕ) (S : discrete_quotient F.left) :
+  function.injective (Cech_cone_diagram_inclusion F surj n S) :=
+begin
+  intros a b h,
+  apply point_to_hom_ext,
+  apply limits.wide_pullback.hom_ext,
+  { rintro ⟨i⟩,
+    apply_fun (λ e, e i) at h,
+    ext ⟨⟩,
+    exact h },
+  { ext ⟨⟩,
+    apply_fun (λ e, e 0) at h,
+    dsimp [point_to_hom],
+    dsimp [Cech_cone_diagram_inclusion,
+      Cech_cone_diagram_proj] at h,
+    rw ← limits.wide_pullback.π_arrow _ (ulift.up (0 : fin (n+1))),
+    erw Profinite.coe_comp,
+    dsimp,
+    congr' 1 }
+end
+
+instance Cech_cone_diagram_fintype (n : ℕ) (S : discrete_quotient F.left) :
+  fintype ((Cech_cone_diagram F surj n).obj S) :=
+fintype.of_injective (Cech_cone_diagram_inclusion F surj n S)
+  (Cech_cone_diagram_inclusion_injective F surj n S)
+
 @[simps]
 def Cech_cone (n : ℕ) : limits.cone (Cech_cone_diagram F surj n) :=
 functor.map_cone _ (arrow_cone F surj)
