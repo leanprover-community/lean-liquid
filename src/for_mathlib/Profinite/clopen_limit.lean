@@ -523,7 +523,7 @@ begin
 end
 
 /-- Any discrete quotient arises from some point in the limit. -/
-theorem exists_discrete_quotient [inhabited J] [∀ i, fintype (F.obj i)] (hC : is_limit C)
+theorem exists_discrete_quotient [inhabited J] (hC : is_limit C)
   (S : discrete_quotient C.X) : ∃ (i : J) (T : discrete_quotient (F.obj i)),
   S = T.comap (C.π.app i).continuous :=
 begin
