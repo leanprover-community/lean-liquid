@@ -158,10 +158,6 @@ begin
   exact not_nonempty_iff.mp hX
 end
 
--- (NOT NEEDED ANYMORE!)
---instance Cech_nonempty {n : ℕ} [nonempty F.left] : nonempty (F.cech_nerve _[n]) :=
---  sorry
-
 lemma Profinite.coe_comp_apply {X Y Z : Profinite} (f : X ⟶ Y) (g : Y ⟶ Z) (x : X) :
   (f ≫ g) x = g (f x) := rfl
 
