@@ -61,6 +61,19 @@ by simp only [diagonal_embedding, single_add_hom_apply, finset.sum_apply',
     polyhedral_lattice_hom.coe_mk, equiv.symm_apply_apply, finsupp.single_apply,
     finset.sum_ite_eq', finset.mem_univ, if_true]
 
+def cosimplicial_lift {M : Type*} [add_comm_group M] (m : ℕ) (g₀ : Λ →+ M)
+  (g : fin (m + 1) → (Λ.rescaled_power N →+ M))
+  (hg : ∀ i l, (g i) (Λ.diagonal_embedding N l) = g₀ l) :
+  polyhedral_lattice.conerve.obj (Λ.diagonal_embedding N) (m + 1) →+ M :=
+polyhedral_lattice.conerve.lift' _ m g₀ g hg $
+begin
+  intros l₁ l₂ h,
+  rw [finsupp.ext_iff] at h,
+  specialize h ⟨0, fact.out _⟩,
+  erw [diagonal_embedding_apply, diagonal_embedding_apply] at h,
+  exact h
+end
+
 lemma gsmul_rescaled_power (n : ℤ) (l : Λ.rescaled_power N) :
   n • (@rescale.of N ((fin N) →₀ Λ)).symm l = (@rescale.of N ((fin N) →₀ Λ)).symm (n • l) :=
 rfl

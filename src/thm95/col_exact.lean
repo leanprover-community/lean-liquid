@@ -5,6 +5,8 @@ import for_mathlib.Cech.adjunction
 import for_mathlib.simplicial.iso
 import for_mathlib.wide_pullback
 
+import polyhedral_lattice.cosimplicial_extra
+
 import prop_92.prop_92
 import normed_snake_dual
 import thm95.double_complex
@@ -218,34 +220,28 @@ begin
 end
 
 @[simps left right]
+def Cech_nerve_level_inv' (c : ℝ≥0) :
+  FLC_complex_arrow _ (aug_map_strict r' Λ M N n) c ⟶
+    augmented.to_arrow.obj ((Cech_nerve_level r' Λ M N n).obj c) :=
+@arrow.hom_mk _ _
+  (FLC_complex_arrow _ (aug_map_strict r' Λ M N n) c)
+  (augmented.to_arrow.obj ((Cech_nerve_level r' Λ M N n).obj c))
+  (𝟙 _) (𝟙 _)
+begin
+  erw [category.comp_id, category.id_comp, augmented.to_arrow_obj_hom],
+  dsimp only [Cech_nerve_level_obj, nat_trans.comp_app, whisker_right_app,
+    functor.const_comp_hom_app, nat_trans.left_op_app, unop_op,
+    functor.flip_obj_map, functor.comp_map, functor.flip_map_app],
+  erw [category.comp_id, Cech_nerve_hom_zero],
+  refl,
+end
+
+@[simps left right]
 def Cech_nerve_level_hom (c : ℝ≥0) :
   (Cech_nerve_level r' Λ M N n).obj c ⟶
     (FLC_complex_arrow _ (aug_map_strict r' Λ M N n) c).augmented_cech_nerve :=
 equivalence_left_to_right _ _ $ Cech_nerve_level_hom' _ _ _ _ _ _
 .
-
-/-
-
-  dsimp only [Cech_nerve_level_obj, Cech_nerve_level_map,
-    whiskering_obj_obj_map, whiskering_obj_obj_obj,
-    functor.flip_obj_obj, functor.flip_obj_map, functor.flip_map_app,
-    functor.comp_obj, functor.comp_map,
-    functor.left_op_obj, functor.left_op_map,
-    quiver.hom.unop_op,
-    Cech_nerve, cosimplicial_object.augmented.whiskering_obj, cosimplicial_object.whiskering,
-    whiskering_right_obj_obj, whiskering_right_obj_map,
-    functor.right_op_obj, functor.right_op_map, unop_op,
-    cosimplicial_object.augmented.drop_obj, cosimplicial_object.augmented.drop_map,
-    augmented_cosimplicial, augmented_Cech_conerve,
-    cosimplicial_object.augment_right, Cech_conerve_obj, Cech_conerve_map,
-    Filtration_obj_map_to_fun, Filtration_obj_obj,
-    ProFiltPseuNormGrpWithTinv.Pow_obj, ProFiltPseuNormGrpWithTinv.Pow_map,
-    Hom_obj, Hom_map_to_fun, polyhedral_lattice.Hom,
-    profinitely_filtered_pseudo_normed_group_with_Tinv_hom.level,
-    pseudo_normed_group.level] at x y h ⊢,
-
--/
-
 
 lemma Cech_nerve_level_hom_injective' (c : ℝ≥0) (i : simplex_categoryᵒᵖ)
   (x y: ((((Cech_nerve_level r' Λ M N n).obj c).left.obj i)))
@@ -289,7 +285,7 @@ end
 lemma Cech_nerve_level_hom_injective (c : ℝ≥0) (i : simplex_categoryᵒᵖ) :
   function.injective ⇑((Cech_nerve_level_hom r' Λ M N n c).left.app i) :=
 begin
-  set F := FLC_complex_arrow _ (aug_map_strict r' Λ M N n) c,
+  let F := FLC_complex_arrow _ (aug_map_strict r' Λ M N n) c,
   intros x y h,
   rw Profinite.wide_pullback.ext_iff' at h,
   have aux := λ j, (augmented_cech_nerve.left_map_comp_obj_zero_iso F i.unop j).symm,
@@ -303,10 +299,40 @@ begin
   apply Cech_nerve_level_hom_injective',
   exact h
 end
+.
 
 lemma Cech_nerve_level_hom_surjective (c : ℝ≥0) (i : simplex_categoryᵒᵖ) :
   function.surjective ⇑((Cech_nerve_level_hom r' Λ M N n c).left.app i) :=
-sorry
+begin
+  let F := FLC_complex_arrow _ (aug_map_strict r' Λ M N n) c,
+  let G := Cech_nerve_level_inv' r' Λ M N n c,
+  intro y,
+  let z₀ := G.right (limits.wide_pullback.base (λ _, F.hom) y),
+  let z := λ j, G.left (limits.wide_pullback.π (λ _, F.hom) j y),
+  refine ⟨⟨λ k, _, _⟩, _⟩,
+  { refine cosimplicial_lift Λ N _ (z₀.1 k) (λ j, _) _,
+    { let ψ := Cech_conerve.obj_zero_iso (Λ.diagonal_embedding N),
+      refine add_monoid_hom.comp _ ψ.inv.to_add_monoid_hom,
+      exact (z ⟨j⟩).1 k },
+    { intros j l, dsimp only,
+      -- dsimp only [add_monoid_hom.comp_apply],
+      sorry } },
+  { intros k,
+    apply cosimplicial_lift_mem_filtration,
+    intros j c' l hl,
+    dsimp only [add_monoid_hom.comp_apply, polyhedral_lattice_hom.coe_to_add_monoid_hom],
+    apply (z ⟨j⟩).property,
+    rw [semi_normed_group.mem_filtration_iff] at hl ⊢,
+    refine le_trans _ hl,
+    exact (Cech_conerve.obj_zero_iso (Λ.diagonal_embedding N)).inv.strict l },
+  { rw Profinite.wide_pullback.ext_iff',
+    intro j,
+    erw [← augmented_cech_nerve.left_map_comp_obj_zero_iso F _ j, ← comp_apply,
+      ← category.assoc, ← (Cech_nerve_level_hom r' Λ M N n c).left.naturality,
+      augmented_cech_nerve.left_map_comp_obj_zero_iso F _ j],
+    dsimp only,
+    sorry }
+end
 
 instance Cech_nerve_level_hom_is_iso (c : ℝ≥0) : is_iso (Cech_nerve_level_hom r' Λ M N n c) :=
 begin
