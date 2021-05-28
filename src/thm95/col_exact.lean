@@ -532,6 +532,16 @@ def FLC_arrow_iso_aux :
     (polyhedral_lattice.Hom ↥Λ ↥M)
 .
 
+section open ProFiltPseuNormGrpWithTinv
+
+lemma FLC_arrow_hom' {M₁ M₂ : ProFiltPseuNormGrpWithTinv r'} (f : M₁ ⟶ M₂) (c : ℝ≥0) :
+  (FLC_complex_arrow f.to_profinitely_filtered_pseudo_normed_group_hom f.strict c).hom =
+    ((Filtration r').obj c).map f :=
+rfl
+
+--move this
+attribute [simps] linear_equiv.to_add_equiv
+
 lemma FLC_arrow_iso_w (c : ℝ≥0) :
   ((((Filtration r').obj c).map_iso (FLC_arrow_iso_aux r' Λ M N n)).hom ≫
     (FLC_complex_arrow _ (sum_hom_strict ((↥Λ →+ ↥M) ^ n) N) c).hom : _) =
@@ -539,12 +549,50 @@ lemma FLC_arrow_iso_w (c : ℝ≥0) :
 begin
   rw [← iso.eq_inv_comp],
   ext x i l,
-  erw [comp_apply],
-  dsimp only [FLC_arrow_iso_aux, iso.trans_inv, FLC_complex_arrow, arrow.mk_hom,
-    Filtration_obj_map_to_fun, functor.map_iso_inv, comp_apply,
+  dsimp only [FLC_arrow_iso_aux, iso.trans_inv, functor.map_iso_inv, aug_map,
+    Pow_rescale_Pow_iso, iso.app_inv, iso.symm_inv,
+    nat_trans.comp_app, functor.associator_hom_app, functor.associator_inv_app,
+    iso_whisker_left_inv, iso_whisker_right_inv, whisker_left_app, whisker_right_app,
+    Pow_comm, Pow_rescale, FLC_arrow_hom'],
+  erw [category.id_comp, category.id_comp, FLC_arrow_hom',
+    ← ((Filtration r').obj c).map_comp, category.assoc, ← (Pow r' n).map_comp,
+    Cech_augmentation_map_eq_Hom_sum],
+  dsimp only [FLC_complex_arrow, arrow.mk_hom,
+    Filtration_obj_map_to_fun, comp_apply,
     continuous_map.coe_mk, pseudo_normed_group.level, subtype.coe_mk,
-    aug_map],
-  sorry
+    profinitely_filtered_pseudo_normed_group_with_Tinv_hom.to_profinitely_filtered_pseudo_normed_group_hom,
+    profinitely_filtered_pseudo_normed_group_hom.mk_of_strict,
+    profinitely_filtered_pseudo_normed_group_hom.mk_of_bound,
+    profinitely_filtered_pseudo_normed_group_hom.coe_mk,
+    add_monoid_hom.to_fun_eq_coe,
+    profinitely_filtered_pseudo_normed_group_with_Tinv_hom.coe_to_add_monoid_hom,
+    ProFiltPseuNormGrpWithTinv.Pow_map, nat_iso.of_components.hom_app, id,
+    profinitely_filtered_pseudo_normed_group_with_Tinv_hom.level_coe],
+  erw [comp_apply, comp_apply, iso_of_equiv_of_strict'_hom_apply],
+  dsimp only [profinitely_filtered_pseudo_normed_group_with_Tinv.pi_map_to_fun,
+    ProFiltPseuNormGrpWithTinv.Pow_mul_inv, Pow_comm, Pow_mul_comm,
+    nat_iso.of_components.inv_app, Pow_rescale_aux_apply],
+  simp only [comp_apply, rescale.of, equiv.refl_apply, equiv.refl_symm,
+    nat_iso.of_components.inv_app, id, iso_of_equiv_of_strict'_inv_apply,
+    rescale_map_to_fun, ProFiltPseuNormGrpWithTinv.Pow_mul_hom,
+    equiv.symm_apply_apply, ProFiltPseuNormGrpWithTinv.Pow_Pow_X_hom_to_fun,
+    ProFiltPseuNormGrpWithTinv.Pow_Pow_X_inv_to_fun,
+    Pow_Pow_X_equiv_apply, Pow_Pow_X_equiv_symm_apply],
+  rw [sum_hom_apply, Hom_sum_apply, finset.sum_apply],
+  congr' 1,
+  refine fintype.sum_congr _ _ _,
+  intro j,
+  simp only [Pow_Pow_X_equiv_apply, Pow_Pow_X_equiv_symm_apply,
+    equiv.symm_trans_apply, equiv.symm_symm, equiv.curry_apply, equiv.curry_symm_apply,
+    function.curry, function.uncurry, equiv.arrow_congr_symm, equiv.arrow_congr_apply,
+    function.comp, equiv.refl_apply, equiv.refl_symm, equiv.trans_apply,
+    linear_equiv.to_add_equiv_symm_apply, equiv.prod_comm_apply,
+    linear_equiv.inv_fun_eq_symm, equiv.inv_fun_as_coe, linear_map.fun_congr_left_symm,
+    linear_map.fun_congr_left_apply, linear_map.fun_left_apply,
+    equiv.symm_apply_apply, equiv.apply_symm_apply, equiv.prod_comm_symm],
+  refl
+end
+
 end
 
 def FLC_arrow_iso (c : ℝ≥0) :
