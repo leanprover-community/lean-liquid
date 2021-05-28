@@ -246,33 +246,16 @@ def FLF_cocone : limits.cocone (FLF F surj M) :=
 
 open Profinite
 
--- TODO: add nonempty
 lemma exists_locally_constant_FLF (n : ℕ) (f : (FL F M).X (n+1)) :
   ∃ (S : discrete_quotient F.left) (g : ((FLF F surj M).obj (op S)).X (n+1)),
     ((FLF_cocone F surj M).ι.app (op S)).f _ g = f :=
 begin
-  sorry,
-  /-
-  let flc : locally_constant (F.cech_nerve _[n]) M := f,
-  let S : discrete_quotient (F.cech_nerve _[n]) := locally_constant.to_discrete_quotient flc,
-  let ff : locally_constant S M := locally_constant.desc flc,
-  have hS : ff ∘ S.proj = flc := locally_constant.factors f,
-  let C := Cech_cone F surj n,
   have hC := Cech_cone_is_limit F surj n,
-  obtain ⟨T,L,hTL⟩ := exists_discrete_quotient _ _ hC S,
-  use T,
-  have : discrete_quotient.le_comap (C.π.app T).continuous S L, sorry,
-  let gg : S → L := discrete_quotient.map this,
-  let gs : L → S := choose_section gg,
-  let g : ((FLF F surj M).obj (op T)).X (n+1) :=
-    ⟨λ i, (ff ∘ gs ∘ L.proj) i, _⟩,
-  swap,
-  { intros U, dsimp,
-    rw [set.preimage_comp, set.preimage_comp],
-    apply L.proj_is_locally_constant },
-  use g,
+  obtain ⟨i,g,hg⟩ := exists_locally_constant_factors _ _ hC f,
+  use i, use g,
+  ext x,
+  rw ← hg,
   sorry,
-  -/
 end
 
 lemma d_eq_zero_FLF (n : ℕ) (S : discrete_quotient F.left)
@@ -289,7 +272,6 @@ lemma norm_eq_FLF (n : ℕ) (S : discrete_quotient F.left)
   nnnorm (((FLF_cocone F surj M).ι.app (op S)).f _ g) =
   nnnorm ((((FLF F surj M)).map (hom_of_le hT).op).f _ g) := sorry
 
--- TODO: add nonempty
 lemma exists_locally_constant  (n : ℕ) (f : (FL F M).X (n+1))
   (hf : (FL F M).d _ (n+2) f = 0) : ∃ (S : discrete_quotient F.left)
   (g : ((FLF F surj M).obj (op S)).X (n+1))
@@ -344,7 +326,6 @@ begin
   apply LocallyConstant_obj_map_norm_noninc,
 end
 
--- TODO: add nonempty
 theorem prop819 {m : ℕ} (ε : ℝ≥0) (hε : 0 < ε)
   (f : (FLC F M).X (m+1)) (hf : (FLC F M).d (m+1) (m+2) f = 0) :
   ∃ g : (FLC F M).X m, (FLC F M).d m (m+1) g = f ∧ nnnorm g ≤ (1 + ε) * (nnnorm f) :=
