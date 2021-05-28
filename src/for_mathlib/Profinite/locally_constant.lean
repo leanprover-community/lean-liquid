@@ -32,5 +32,5 @@ lemma Profinite.locally_constant_factors
   {J : Type u} [small_category.{u} J] [is_filtered Jᵒᵖ]
   (F : J ⥤ Profinite.{u}) (S : Type*) (f : locally_constant ↥(limit F) S) :
   ∃ (j : J) (g : locally_constant (F.obj j) S),
-  g ∘ (limit.π F j) = f := sorry
+  g ∘ (limit.π F j) = f := by admit
 -/
