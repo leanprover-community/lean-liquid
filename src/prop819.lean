@@ -158,9 +158,9 @@ begin
   exact not_nonempty_iff.mp hX
 end
 
--- Move this.
-instance Cech_nonempty {n : ℕ} [nonempty F.left] : nonempty (F.cech_nerve _[n]) :=
-  sorry
+-- (NOT NEEDED ANYMORE!)
+--instance Cech_nonempty {n : ℕ} [nonempty F.left] : nonempty (F.cech_nerve _[n]) :=
+--  sorry
 
 include surj
 
@@ -266,13 +266,35 @@ begin
     continuity },
 end
 
+lemma eq_zero_FLF (n : ℕ) (S : discrete_quotient F.left)
+  (g : ((FLF F surj M).obj (op S)).X (n+1))
+  (hg : ((FLF_cocone F surj M).ι.app (op S)).f _ g = 0) :
+  ∃ (T : discrete_quotient F.left) (hT : T ≤ S),
+    ((FLF F surj M).map (hom_of_le hT).op).f _ g = 0 :=
+begin
+  sorry
+end
+
 lemma d_eq_zero_FLF (n : ℕ) (S : discrete_quotient F.left)
   (g : ((FLF F surj M).obj (op S)).X (n+1))
   (hg : (FL F M).d (n+1) (n+2)
     (((FLF_cocone F surj M).ι.app (op S)).f _ g) = 0) :
   ∃ (T : discrete_quotient F.left) (hT : T ≤ S),
   ((FLF F surj M).obj (op T)).d (n+1) (n+2)
-    (((FLF F surj M).map $ (hom_of_le hT).op).f _ g) = 0 := sorry
+    (((FLF F surj M).map $ (hom_of_le hT).op).f _ g) = 0 :=
+begin
+  have := ((FLF_cocone F surj M).ι.app (op S)).comm (n+1) (n+2),
+  apply_fun (λ e, e g) at this,
+  erw this at hg,
+  dsimp only [SemiNormedGroup.coe_comp_apply] at hg,
+  have := eq_zero_FLF F surj M (n+1) S _ hg,
+  obtain ⟨T,hT,h⟩ := this,
+  use T, use hT,
+  have hh := ((FLF F surj M).map (hom_of_le hT).op).comm (n+1) (n+2),
+  apply_fun (λ e, e g) at hh,
+  erw ← hh at h,
+  exact h,
+end
 
 lemma norm_eq_FLF (n : ℕ) (S : discrete_quotient F.left)
   (g : ((FLF F surj M).obj (op S)).X (n+1)) :
