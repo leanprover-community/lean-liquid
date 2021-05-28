@@ -333,6 +333,21 @@ def π_hom (m : ℕ) : of (fin (m+1) →₀ Λ') ⟶ obj f m :=
 instance (m : ℕ) : epi (π_hom f m) :=
 concrete_category.epi_of_surjective _ $ conerve.π_surjective f (m+1)
 
+lemma map_const_obj_zero_iso (m : ℕ) (i : fin (m+1)) (l : Λ') :
+  conerve.map f (λ _, i) ((obj_zero_iso f).inv l) =
+    conerve.π f (m+1) (finsupp.single i l) :=
+begin
+  dsimp only [conerve.map_apply, add_monoid_hom.to_fun_eq_coe,
+    conerve.map_add_hom, obj_zero_iso, iso.trans_inv,
+    finsupp.single_add_hom_apply],
+  simp only [comp_apply, finsupp_fin_one_iso_inv, obj_zero_iso'_inv, conerve.π],
+  delta quotient_add_group.map,
+  erw quotient_add_group.lift_mk',
+  simp only [add_monoid_hom.comp_apply],
+  simp only [finsupp.map_domain.add_monoid_hom_apply, finsupp.single_add_hom_apply,
+    finsupp.map_domain_single, add_subgroup.normed_mk.apply],
+end
+
 end Cech_conerve
 
 open Cech_conerve

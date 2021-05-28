@@ -258,8 +258,31 @@ begin
     (Λ.diagonal_embedding N) (i.unop.len + 1)).to_add_monoid_hom,
   have hπ : function.surjective π := polyhedral_lattice.conerve.π_surjective _ _,
   rw ← add_monoid_hom.cancel_right hπ, -- Bingo!
-  -- dsimp only [unop_op, cosimplicial_object.augmented.drop_obj] at z,
-  sorry
+  apply finsupp.add_hom_ext',
+  intro k, specialize h ⟨k⟩,
+  rw subtype.ext_iff at h,
+  replace h := congr_fun h j,
+  rw add_monoid_hom.ext_iff at h ⊢,
+  intro l, specialize h ((Cech_conerve.obj_zero_iso _).inv l),
+  dsimp only [Cech_nerve_level_obj, Cech_nerve_level_map,
+    whiskering_obj_obj_map, functor.flip_obj_map, functor.flip_map_app,
+    functor.comp_map, functor.left_op_map, quiver.hom.unop_op,
+    Cech_nerve, cosimplicial_object.augmented.whiskering_obj, cosimplicial_object.whiskering,
+    whiskering_right_obj_obj, whiskering_right_obj_map,
+    functor.right_op_map, unop_op,
+    cosimplicial_object.augmented.drop_obj, cosimplicial_object.augmented.drop_map,
+    augmented_cosimplicial, augmented_Cech_conerve,
+    cosimplicial_object.augment_right, Cech_conerve_map,
+    Filtration_obj_map_to_fun, ProFiltPseuNormGrpWithTinv.Pow_map,
+    Hom_obj, Hom_map_to_fun, polyhedral_lattice.Hom,
+    profinitely_filtered_pseudo_normed_group_with_Tinv_hom.level,
+    profinitely_filtered_pseudo_normed_group_with_Tinv.pi_map_to_fun,
+    profinitely_filtered_pseudo_normed_group_with_Tinv.pi_lift_to_fun,
+    profinitely_filtered_pseudo_normed_group_with_Tinv_hom.comp_to_fun,
+    pseudo_normed_group.level, finsupp.single_add_hom_apply,
+    subtype.coe_mk, add_monoid_hom.coe_mk_from_pi, add_monoid_hom.comp_apply] at h ⊢,
+  erw [Cech_conerve.map_const_obj_zero_iso] at h,
+  exact h,
 end
 .
 
