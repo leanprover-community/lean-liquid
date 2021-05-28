@@ -80,10 +80,7 @@ nat_iso.of_components
     { intros c' x,
       erw pseudo_normed_group.mem_filtration_pi, }, -- err, why does that close the goal?
     { intros c', sorry, },
-    { intros x, ext i, dsimp,
-      -- refl, -- seems to perhaps work here, but very slow.
-      sorry,
-      },
+    { intros x, ext i, refl, },
   end)
   begin
     intros X Y f, ext x i,
