@@ -4,7 +4,7 @@
 
 For the eponymous blogpost by Peter Scholze which started it all: see https://xenaproject.wordpress.com/2020/12/05/liquid-tensor-experiment/.
 
-This main aim of this community-owned repository is to *digitise* some mathematical definitions, theorem statements and theorem proofs. Digitisation, or formalisation, is a process where the source material, typically a mathematical textbook or a pdf file or website or video, is transformed into definitions in a target system consisting of a computer simulation of a logical theory (such as set theory or type theory). It is the pure mathematical analogue of the act of turning a vinyl record into an mp3 file.
+The main aim of this community-owned repository is to *digitise* some mathematical definitions, theorem statements and theorem proofs. Digitisation, or formalisation, is a process where the source material, typically a mathematical textbook or a pdf file or website or video, is transformed into definitions in a target system consisting of a computer simulation of a logical theory (such as set theory or type theory). It is the pure mathematical analogue of the act of turning a vinyl record into an mp3 file.
 
 ## The source.
 
@@ -25,7 +25,7 @@ An important intermediate achievement was the completion of a [blueprint](https:
 
 The preliminary announcement of a proof of Theorem 9.4 was made on 28th May 2021, by Johan Commelin and his team from the Lean prover community.
 
-Much work remains in formalising the proof that `Analytic 9.4` implies `Analytic 9.1`. The proof in the Scholze pdf file is only half a page long, however it assues a host of other definitions and structures which are yet to be formalised in Lean. Bhavik Mehta and Calle Sönne have made progress in formalising the definition of a condensed type, but there is still a long journey and we do not even have a formal blueprint.
+Much work remains in formalising the proof that `Analytic 9.4` implies `Analytic 9.1`. The proof in the Scholze pdf file is only half a page long, however it assumes a host of other definitions and structures which are yet to be formalised in Lean. Bhavik Mehta and Calle Sönne have made progress in formalising the definition of a condensed type, but there is still a long journey and we do not even have a formal blueprint.
 
 ## The formal statement of `Analytic 9.4`.
 
