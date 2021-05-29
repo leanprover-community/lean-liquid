@@ -4,7 +4,7 @@
 
 For the eponymous blogpost by Peter Scholze which started it all: see https://xenaproject.wordpress.com/2020/12/05/liquid-tensor-experiment/.
 
-This main aim of this community-owned repository is to *formalise* some mathematical definitions, theorem statements and theorem proofs. The main "source" definitions, theorems and proofs are all taken from Scholze's Bonn lecture notes [Analytic.pdf](https://www.math.uni-bonn.de/people/scholze/Analytic.pdf) explaining some of his work with Clausen on the theory of solid and liquid modules, and their applications. The formal system (the "target system") that we are currently using is Lean's dependent type theory.
+This main aim of this community-owned repository is to *formalise* some mathematical definitions, theorem statements and theorem proofs. The main "source" definitions, theorems and proofs are all taken from Scholze's Bonn lecture notes [Analytic.pdf](https://www.math.uni-bonn.de/people/scholze/Analytic.pdf) explaining some of his work with Clausen on the theory of solid and liquid modules, and their applications. The formal system (the "target system") that we are currently using is Lean's dependent type theory. Lean is a project being developed at Microsoft Research by Leonardo de Moura and his team.
 
 ## Brief overview of the project
 
