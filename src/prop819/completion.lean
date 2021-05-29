@@ -24,7 +24,7 @@ lemma cmpl_exact_of_exact (ε : ℝ≥0) (hε : 0 < ε)
     (nnnorm g) ≤ (1 + ε) * (nnnorm f) :=
 begin
   have := @controlled_exactness (C.X (n+1)) (C.X n) (C.X (n+2)) _ _ _ (C.d _ _) 1 zero_lt_one
-    1 (C.d _ _) _ _ f _ ε hε,
+    1 (C.d _ _) _ _ ε hε f _,
   { rcases this with ⟨g,hg1,hg2⟩,
     exact ⟨g,hg1,hg2⟩ },
   { intros g hg,

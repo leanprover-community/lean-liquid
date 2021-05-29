@@ -9,12 +9,16 @@ noncomputable theory
 open_locale filter topological_space big_operators
 open set normed_group_hom uniform_space filter finset
 
+def normed_group_hom.surjective_on_with {G H : Type*} [semi_normed_group G] [semi_normed_group H]
+  (f : normed_group_hom G H) (K : add_subgroup H) (C : ℝ) : Prop :=
+ ∀ h ∈ K, ∃ g, f g = h ∧ ∥g∥ ≤ C*∥h∥
+
 variables {G : Type*} [normed_group G]
 variables {H : Type*} [normed_group H]
 
 lemma controlled_closure_of_complete [complete_space G] {f : normed_group_hom G H} {K : add_subgroup H}
-  {C ε : ℝ} (hC : 0 < C) (hε : 0 < ε) (hyp : ∀ h ∈ K, ∃ g, f g = h ∧ ∥g∥ ≤ C*∥h∥) :
-  ∀ {h}, h ∈ K.topological_closure → ∃ g, f g = h ∧ ∥g∥ ≤ (C + ε)*∥h∥ :=
+  {C ε : ℝ} (hC : 0 < C) (hε : 0 < ε) (hyp : f.surjective_on_with K C) :
+  f.surjective_on_with K.topological_closure (C + ε) :=
 begin
   intros h h_in,
   by_cases hyp_h : h = 0,
@@ -83,5 +87,5 @@ begin
     rcases (j.mem_range _).mp h_in with ⟨k, rfl⟩,
     rw hj,
     exact hyp k },
-  exact λ _, controlled_closure_of_complete hC hε hyp
+  exact controlled_closure_of_complete hC hε hyp
 end

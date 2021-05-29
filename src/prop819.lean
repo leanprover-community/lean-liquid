@@ -224,7 +224,7 @@ begin
   apply injective_of_strict_iso _ _ (FLC_iso F M) _ _ hf,
   intros f hf,
   have := @controlled_exactness ((FL F M).X 0) (0 : SemiNormedGroup) ((FL F M).X 1) _ _ _ 0 1
-    zero_lt_one 1 ((FL F M).d _ _) _ _ f _ 1 zero_lt_one,
+    zero_lt_one 1 ((FL F M).d _ _) _ _ 1 zero_lt_one f _,
   { rcases this with ⟨g,h1,h2⟩,
     rw ← h1,
     simp },

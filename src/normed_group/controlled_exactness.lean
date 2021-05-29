@@ -19,11 +19,11 @@ lemma controlled_exactness {M M₁ M₂ : Type*} [semi_normed_group M] [semi_nor
   [semi_normed_group M₂]
   {f : normed_group_hom M₁ M} {C : ℝ} (hC : 0 < C) {D : ℝ}
   {g : normed_group_hom M M₂}
-  (h : ∀ m ∈ g.ker, ∃ m' : M₁, f m' = m ∧ ∥m'∥ ≤ C*∥m∥)
-  (h' : ∀ x ∈ g.range, ∃ y, g y = x ∧ ∥y∥ ≤ D * ∥x∥) :
-  ∀ m ∈ g.completion.ker, ∀ ε > 0, ∃ m' : completion M₁, f.completion m' = m ∧ ∥m'∥ ≤ (C + ε)*∥m∥ :=
+  (h : f.surjective_on_with g.ker C)
+  (h' : g.surjective_on_with g.range D) :
+  ∀ ε > 0, f.completion.surjective_on_with g.completion.ker (C + ε) :=
 begin
-  intros hatm hatm_in ε ε_pos,
+  intros ε ε_pos hatm hatm_in,
   by_cases H : hatm = 0,
   { use 0,
     simp [H] },
