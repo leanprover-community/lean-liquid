@@ -6,26 +6,15 @@ open category_theory
 
 universes u
 
+-- PR'd as #7740
 noncomputable instance has_zero_object : limits.has_zero_object SemiNormedGroup.{u} :=
 { zero := 0,
   unique_to := λ X,
   { default := 0,
-    uniq := begin
-      intros a,
-      dsimp [default],
-      ext x,
-      have : x = 0, by dec_trivial,
-      rw this,
-      rw a.map_zero,
-      simp [a.map_zero],
-    end },
+    uniq := λ a, by { ext ⟨⟩, exact a.map_zero, }, },
   unique_from := λ X,
   { default := 0,
-    uniq := begin
-      intros f,
-      dsimp [default],
-      ext x,
-    end } }
+    uniq := λ f, by ext } }
 
 -- Do we have this?
 lemma coe_comp_apply (A B C : SemiNormedGroup) (f : A ⟶ B) (g : B ⟶ C)
