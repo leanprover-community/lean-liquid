@@ -1,6 +1,8 @@
 import algebra.module
 .
 
+-- PR'd as #7746 (with its nat/rat cousins)
+
 namespace add_monoid_hom
 
 variables (M₁ M₂ : Type*) [add_comm_group M₁] [add_comm_group M₂]
