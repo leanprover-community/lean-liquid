@@ -1,5 +1,7 @@
 import topology.connected
 
+-- PR'd as #7747
+
 instance prod.totally_disconnected_space (X Y : Type*)
   [topological_space X] [topological_space Y]
   [totally_disconnected_space X] [totally_disconnected_space Y] :
