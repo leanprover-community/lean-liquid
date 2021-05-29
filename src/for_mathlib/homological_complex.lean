@@ -80,7 +80,7 @@ def hom.f_add_monoid_hom {C₁ C₂ : homological_complex V c} (i : ι) :
   (C₁ ⟶ C₂) →+ (C₁.X i ⟶ C₂.X i) :=
 add_monoid_hom.mk' (λ f, homological_complex.hom.f f i) (λ _ _, rfl)
 
--- This ↓ is maybe not really "for_mathlib"
+-- PR'd as #7744
 
 /-- A complex of functors gives a functor to complexes. -/
 @[simps obj map]
@@ -110,6 +110,7 @@ def as_functor {T : Type*} [category T]
 
 /-- The functorial version of `homological_complex.as_functor`. -/
 -- TODO in fact, this is an equivalence of categories.
+@[simps]
 def complex_of_functors_to_functor_to_complex {T : Type*} [category T] :
   (homological_complex (T ⥤ V) c) ⥤ (T ⥤ homological_complex V c) :=
 { obj := λ C, C.as_functor,
