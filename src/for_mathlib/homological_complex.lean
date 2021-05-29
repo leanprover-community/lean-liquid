@@ -74,8 +74,10 @@ variables [preadditive V]
 
 instance eval_additive (i : ι) : (eval V c i).additive := {}
 
+-- PR'd as #7743
 @[simps]
-def f_add_monoid_hom {C₁ C₂ : homological_complex V c} (i : ι) : (C₁ ⟶ C₂) →+ (C₁.X i ⟶ C₂.X i) :=
+def hom.f_add_monoid_hom {C₁ C₂ : homological_complex V c} (i : ι) :
+  (C₁ ⟶ C₂) →+ (C₁.X i ⟶ C₂.X i) :=
 add_monoid_hom.mk' (λ f, homological_complex.hom.f f i) (λ _ _, rfl)
 
 -- This ↓ is maybe not really "for_mathlib"
