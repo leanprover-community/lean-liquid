@@ -233,8 +233,9 @@ end
 lemma one_mul_hom_eq_proj : basic_universal_map.one_mul_hom n = basic_universal_map.proj n 0 :=
 begin
   dsimp only [basic_universal_map.one_mul_hom, basic_universal_map.proj],
-  rw [← linear_equiv.symm_apply_eq, matrix.reindex_linear_equiv_symm, matrix.reindex_reindex,
-    equiv.trans_symm, equiv.trans_assoc, equiv.trans_symm, equiv.trans_refl],
+  rw [← linear_equiv.symm_apply_eq, matrix.reindex_linear_equiv_symm,
+    matrix.reindex_linear_equiv_reindex_linear_equiv, equiv.trans_symm, equiv.trans_assoc,
+    equiv.trans_symm, equiv.trans_refl],
   ext ⟨i, i'⟩ ⟨j, j'⟩ : 2,
   change fin 1 at j,
   dsimp only [matrix.reindex_linear_equiv_apply, matrix.kronecker],
@@ -267,7 +268,7 @@ begin
     matrix.kronecker_reindex_right, matrix.mul_one,
     matrix.kronecker_assoc', matrix.mul_reindex_linear_equiv_one, proj_aux_kronecker_proj_aux,
     matrix.kronecker_reindex_left],
-  simp only [matrix.reindex_reindex],
+  simp only [matrix.reindex_linear_equiv_reindex_linear_equiv],
   congr' 2,
   ext ⟨x, y⟩,
   dsimp,
