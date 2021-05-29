@@ -287,21 +287,6 @@ begin
     continuity },
 end
 
--- Move this...
-lemma eq_zero_of_image (n : ℕ) (S : discrete_quotient F.left)
-  (g : ((FLF F surj M).obj (op S)).X (n+1)) :
-  g = 0 ↔ set.range g.to_fun ⊆ {0} :=
-begin
-  split,
-  { intro h,
-    simp [h] },
-  { intros h,
-    ext x,
-    apply h,
-    use x,
-    refl },
-end
-
 lemma FLF_cocone_app_coe_eq (n : ℕ) (S : discrete_quotient F.left)
   (g : ((FLF F surj M).obj (op S)).X (n+1)) :
   (((FLF_cocone F surj M).ι.app (op S)).f _ g).to_fun =
