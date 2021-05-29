@@ -1,4 +1,4 @@
-import for_mathlib.Profinite.functorial_limit
+import for_mathlib.unused.Profinite.functorial_limit
 
 namespace Profinite
 
