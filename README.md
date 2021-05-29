@@ -4,21 +4,21 @@
 
 For the eponymous blogpost by Peter Scholze which started it all: see https://xenaproject.wordpress.com/2020/12/05/liquid-tensor-experiment/.
 
-The main aim of this community-owned repository is to *digitise* some mathematical definitions, theorem statements and theorem proofs. Digitisation, or formalisation, is a process where the source material, typically a mathematical textbook or a pdf file or website or video, is transformed into definitions in a target system consisting of a computer simulation of a logical theory (such as set theory or type theory). It is the pure mathematical analogue of the act of turning a vinyl record into an mp3 file.
+The main aim of this community-owned repository is to *digitise* some mathematical definitions, theorem statements and theorem proofs. Digitisation, or formalisation, is a process where the source material, typically a mathematical textbook or a pdf file or website or video, is transformed into definitions in a target system consisting of a computer implementation of a logical theory (such as set theory or type theory). 
 
 ## The source.
 
-The main "source" definitions, theorems and proofs in this repository are all taken from Scholze's Bonn lecture notes [Analytic.pdf](https://www.math.uni-bonn.de/people/scholze/Analytic.pdf) explaining some of his work with Clausen on the theory of solid and liquid modules, and on their development of a new "topology-free" approach to certain proofs in complex analytic geometry.
+The main "source" definitions, theorems and proofs in this repository are all taken from Scholze's Bonn lecture notes [Analytic.pdf](https://www.math.uni-bonn.de/people/scholze/Analytic.pdf) explaining some of his work with Clausen on the theory of solid and liquid modules, and on their development of a new approach to certain proofs in complex analytic geometry.
 
 ## The target
 
-The formal system which we are currently using as a target system is Lean's dependent type theory. Lean is a project being developed at Microsoft Research by Leonardo de Moura and his team. Our formalisation could not have even started without a major classical mathematical library backing it up, and so we chose Lean 3 as the engine behind the project. Note that Lean 4's type theory is the same as Lean 3's type theory, however porting 500K lines of mathematical library between languages is a *highly* nontrivial endeavour.
+The formal system which we are using as a target system is Lean's dependent type theory. Lean is a project being developed at Microsoft Research by Leonardo de Moura and his team. Our formalisation could not have even started without a major classical mathematical library backing it up, and so we chose Lean 3 as the engine behind the project. Note that Lean 4's type theory is the same as Lean 3's type theory, however porting 500K lines of mathematical library between languages is a *highly* nontrivial endeavour.
 
 ## Brief overview of the project
 
 Our interpretation of the blog post and TeX file was that the challenge was to formalise `Analytic 9.1` (i.e. Theorem 9.1 of the pdf) in Lean. We chose to use Lean 3 because of the advanced state of its classical mathematics library `mathlib`, an essential ingredient.
 
-When the project started, it was immediately noticed that there was a "sub-boss" in the form of `Analytic 9.4`, a far more technical theorem involving a completely differnt class of objects and which Scholze was claiming was a sufficiently powerful stepping stone. The project then split intwo two sub-projects:
+When the project started, it was immediately noticed that there was a "sub-boss" in the form of `Analytic 9.4`, a far more technical theorem involving a completely different class of objects and which Scholze was claiming was a sufficiently powerful stepping stone. The project then split intwo two sub-projects:
 "Prove `9.4`" and "Prove that `9.4` implies `9.1`".
 
 An important intermediate achievement was the completion of a [blueprint](https://leanprover-community.github.io/liquid/) for the proof of `9.4` and the related `9.5`. The blueprint was a guide which was comprehensible to mathematicians who had no Lean training, whilst also being a visual guide to where progress was needed during the formalisation process.
