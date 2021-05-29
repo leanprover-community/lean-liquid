@@ -2,7 +2,18 @@ import algebra.homology.additive
 
 open category_theory category_theory.limits
 
-variables {V V₁ V₂ ι : Type*} {c : complex_shape ι} [category V] [category V₁] [category V₂]
+variables {V ι : Type*} {c : complex_shape ι} [category V]
+
+namespace category_theory.graded_object
+
+/-- The projection of a graded object to its `i`-th component. -/
+def eval (i : ι) : graded_object ι V ⥤ V :=
+{ obj := λ X, X i,
+  map := λ X Y f, f i, }
+
+end category_theory.graded_object
+
+open category_theory
 
 namespace homological_complex
 
@@ -11,8 +22,8 @@ attribute [priority 0] homological_complex.category_theory.limits.has_zero_morph
 
 section
 
-variables [has_zero_morphisms V] [has_zero_morphisms V₁] [has_zero_morphisms V₂]
-variables {C₁ C₂ C₃ : homological_complex V c}
+variables [has_zero_morphisms V]
+variables {C₁ C₂ : homological_complex V c}
 
 @[simps]
 def iso_app (f : C₁ ≅ C₂) (i : ι) : C₁.X i ≅ C₂.X i :=
@@ -46,7 +57,10 @@ variables (V c)
 { obj := λ C, C.X,
   map := λ _ _ f, f.f }
 
--- TODO relate forget ≫ pi.eval and eval.
+@[simps] def forget_eval (i : ι) : forget V c ⋙ graded_object.eval i ≅ eval V c i :=
+nat_iso.of_components
+  (λ X, iso.refl _)
+  (by tidy)
 
 end
 
@@ -57,14 +71,12 @@ variables [preadditive V]
 instance eval_additive (i : ι) : (eval V c i).additive := {}
 
 @[simps]
-def f_hom {C₁ C₂ : homological_complex V c} (i : ι) : (C₁ ⟶ C₂) →+ (C₁.X i ⟶ C₂.X i) :=
+def f_add_monoid_hom {C₁ C₂ : homological_complex V c} (i : ι) : (C₁ ⟶ C₂) →+ (C₁.X i ⟶ C₂.X i) :=
 add_monoid_hom.mk' (λ f, homological_complex.hom.f f i) (λ _ _, rfl)
 
 -- This ↓ is maybe not really "for_mathlib"
 
-/-- A complex of functors gives a functor to complexes
-
-jmc: This is functorial, but I'm getting timeouts, and I think this is all we need -/
+/-- A complex of functors gives a functor to complexes. -/
 @[simps obj map]
 def as_functor {T : Type*} [category T]
   (C : homological_complex (T ⥤ V) c) :
@@ -89,6 +101,17 @@ def as_functor {T : Type*} [category T]
     comm' := λ i j hij, nat_trans.naturality _ _ },
   map_id' := λ t, by { ext i, dsimp, rw (C.X i).map_id, },
   map_comp' := λ t₁ t₂ t₃ h₁ h₂, by { ext i, dsimp, rw functor.map_comp, } }
+
+/-- The functorial version of `homological_complex.as_functor`. -/
+-- TODO in fact, this is an equivalence of categories.
+def complex_of_functors_to_functor_to_complex {T : Type*} [category T] :
+  (homological_complex (T ⥤ V) c) ⥤ (T ⥤ homological_complex V c) :=
+{ obj := λ C, C.as_functor,
+  map := λ C D f,
+  { app := λ t,
+    { f := λ i, (f.f i).app t,
+      comm' := λ i j w, nat_trans.congr_app (f.comm i j) t, },
+    naturality' := λ t t' g, by { ext i, exact (f.f i).naturality g, }, } }
 
 end
 
