@@ -2,10 +2,22 @@
 
 ![](https://github.com/leanprover-community/lean-liquid/workflows/continuous%20integration/badge.svg?branch=master)
 
-For the eponymous blogpost by Peter Scholze: see https://xenaproject.wordpress.com/2020/12/05/liquid-tensor-experiment/.
-The aim of this project is to formalize Theorem 9.4 of Scholze--Clausen, [Analytic].
+For the eponymous blogpost by Peter Scholze which started it all: see https://xenaproject.wordpress.com/2020/12/05/liquid-tensor-experiment/.
 
-## The statement
+This main aim of this community-owned repository is to *formalise* some "TeX mathematical definitions, theorem statements and theorem proofs". The main definitions, theorems and proofs are all taken from Scholze's Bonn lecture notes [Analytic.pdf](https://www.math.uni-bonn.de/people/scholze/Analytic.pdf) explaining some of his work with Clausen on the theory of solid and liquid modules, and their applications. The formal system we are currently using is Lean's dependent type theory.
+
+## Brief overview of the project
+
+Our interpretation of the blog post and TeX file was that the challenge was to formalise `Analytic 9.1` (i.e. Theorem 9.1 of the pdf) in Lean. We chose to use Lean 3 because of the advanced state of its classical mathematics library `mathlib, an essential ingredient.
+
+When the project started, it was immediately noticed that there was a "sub-boss" in the form of `Analytic 9.4`, a far more technical theorem involving a completely differnt class of objects and which Scholze was claiming was a sufficiently powerful stepping stone. The project then split intwo two sub-projects:
+"Prove 9.4" and "Prove 9.4 implies 9.1".
+
+The preliminary announcement of a proof of Theorem 9.4 was made on 28th May 2021, by a team led by Johan Commelin.
+
+Much work remains in formalising the proof that `Analytic 9.4` implies `Analytic 9.1`. The proof in the Scholze TeX file is only half a page long, however it assues a host of other definitions and structures which are yet to be formalised in Lean.
+
+## The formal statement of `Analytic 9.4`.
 
 The statement can be found in [`src/liquid.lean`](https://github.com/leanprover-community/lean-liquid/blob/master/src/liquid.lean#L29)
 
