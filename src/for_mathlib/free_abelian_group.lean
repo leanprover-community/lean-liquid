@@ -5,7 +5,7 @@ import data.finsupp.basic
 In this file we define the equivalence between `free_abelian_group X`
 and `X →₀ ℤ` (the type of finitely supported function `X → ℤ`).
 Both types come with useful machinery, and the purpose of this file
-is to transport some of the machinery from one to the author.
+is to transport some of the machinery from one to the other.
 
 We also define a new induction principle on `free_abelian_group X`,
 needed for proving that the maps in `Mbar_complex` compose the way they should.

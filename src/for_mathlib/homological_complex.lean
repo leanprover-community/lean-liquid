@@ -25,6 +25,8 @@ section
 variables [has_zero_morphisms V]
 variables {C₁ C₂ : homological_complex V c}
 
+-- These next two are PR'd as #7741
+
 @[simps]
 def iso_app (f : C₁ ≅ C₂) (i : ι) : C₁.X i ≅ C₂.X i :=
 { hom := f.hom.f i,
@@ -48,6 +50,8 @@ def iso_of_components (f : Π i, C₁.X i ≅ C₂.X i)
   inv_hom_id' := by { ext i, exact (f i).inv_hom_id } }
 
 variables (V c)
+
+-- eval / forget / forget_eval / eval_additive have been PR'd as #7742
 
 @[simps] def eval (i : ι) : homological_complex V c ⥤ V :=
 { obj := λ C, C.X i,

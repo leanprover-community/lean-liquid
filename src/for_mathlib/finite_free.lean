@@ -24,25 +24,6 @@ def torsion_free (A : Type*) [add_comm_group A] : Prop :=
 def finite_free (A : Type*) [add_comm_group A] : Prop :=
 ∃ (ι : Type) [fintype ι], nonempty (basis ι ℤ A)
 
-section
-
-example {A B : Type*} [add_comm_group A] [add_comm_group B] : module ℤ (A →ₗ[ℤ] B) := by refine linear_map.module
-
-/-
--- for mathlib, PR'd as #7629
-@[simps]
-def add_monoid_hom_lequiv_int {A B : Type*} [add_comm_group A] [add_comm_group B] :
-  (A →+ B) ≃ₗ[ℤ] (A →ₗ[ℤ] B) :=
-{ to_fun := add_monoid_hom.to_int_linear_map,
-  inv_fun := linear_map.to_add_monoid_hom,
-  map_add' := by { intros, ext, refl },
-  map_smul' := by { intros, ext, refl },
-  left_inv := by { intros f, ext, refl },
-  right_inv := by { intros f, ext, refl } }
--/
-
-end
-
 namespace finite_free
 
 variables {A : Type*} [add_comm_group A] (ha : finite_free A)
