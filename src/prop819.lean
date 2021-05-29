@@ -24,10 +24,14 @@ universes u
 variables (F : arrow Profinite.{u}) (surj : function.surjective F.hom)
 variables (M : SemiNormedGroup.{u})
 
+/-- The cochain complex built out of the cosimplicial object obtained by applying
+  `LocallyConstant.obj M` to the augmented Cech nerve of `F`. -/
 abbreviation FL : cochain_complex SemiNormedGroup ℕ :=
   (((cosimplicial_object.augmented.whiskering _ _).obj (LocallyConstant.{u u}.obj M)).obj
   F.augmented_cech_nerve.right_op).to_cocomplex
 
+/-- The cochain complex built out of the cosimplicial object obtained by applying
+  `LCC.obj M` to the augmented Cech nerve of `F`. -/
 abbreviation FLC : cochain_complex SemiNormedGroup ℕ :=
   (((cosimplicial_object.augmented.whiskering _ _).obj (LCC.{u u}.obj M)).obj
   F.augmented_cech_nerve.right_op).to_cocomplex
@@ -39,18 +43,22 @@ abbreviation FLC : cochain_complex SemiNormedGroup ℕ :=
 --    right := nat_trans.right_op (comma_morphism.left f.unop),
 --    w' := by { ext, exact congr_arg (λ η, (nat_trans.app η (op x)).op) f.unop.w.symm, } } }
 
+/-- A functorial version of `FL`. -/
 def FL_functor : (arrow Profinite.{u})ᵒᵖ ⥤ cochain_complex SemiNormedGroup ℕ :=
 simplicial_object.augmented_cech_nerve.op ⋙
 simplicial_to_cosimplicial_augmented _ ⋙
 (cosimplicial_object.augmented.whiskering _ _).obj (LocallyConstant.obj M) ⋙
 cosimplicial_object.augmented.cocomplex
 
+/-- The functor sending an augmented cosimplicial object `X` to
+  the cochain complex associated to the composition of `X` with `LCC.obj M`. -/
 @[simps obj map]
 def FLC_functor' : (simplicial_object.augmented Profinite.{u})ᵒᵖ ⥤ cochain_complex SemiNormedGroup ℕ :=
 simplicial_to_cosimplicial_augmented _ ⋙
   (cosimplicial_object.augmented.whiskering _ _).obj (SemiNormedGroup.LCC.{u u}.obj M) ⋙
   cosimplicial_object.augmented.cocomplex
 
+/-- A functorial version of `FLC`. -/
 def FLC_functor : (arrow Profinite.{u})ᵒᵖ ⥤ cochain_complex SemiNormedGroup ℕ :=
 simplicial_object.augmented_cech_nerve.op ⋙ FLC_functor' M
 
@@ -94,6 +102,10 @@ begin
   rw category.id_comp,
 end
 
+/--
+This is a strict (i.e. norm-preserving) isomorphism between `FLC F M` and
+the cochain complex obtained by mapping `FL F M` along the `Completion` functor.
+-/
 def FLC_iso : strict_iso ((Completion.map_homological_complex _).obj (FL F M)) (FLC F M) :=
 { iso := homological_complex.iso_of_components (λ i,
     match i with
@@ -129,7 +141,7 @@ def FLC_iso : strict_iso ((Completion.map_homological_complex _).obj (FL F M)) (
 open_locale simplicial
 
 -- TODO: Move this to mathlib (also relax the has_limits condition).
-/-- the iso between the 0-th term of the Cech nerve and F.left-/
+/-- the isomorphism between the 0-th term of the Cech nerve and F.left-/
 @[simps]
 def cech_iso_zero {C : Type*} [category C] (F : arrow C) [limits.has_limits C]
   : F.cech_nerve _[0] ≅ F.left :=
@@ -259,9 +271,18 @@ begin
 end
 .
 
+/-- Any discrete quotient `S` of `F.left` yields a cochain complex, as follows.
+First, let `T` be the maximal quotient of `F.right` such that `F.hom : F.left ⟶ F.right`
+descends to `S → T`. Next construct the augmented Cech nerve of `S → T`, and finally
+apply `FL_functor M` to this augmented Cech nerve.
+-/
 def FLF : (discrete_quotient F.left)ᵒᵖ ⥤ cochain_complex SemiNormedGroup ℕ :=
 (Profinite.arrow_diagram F surj).op ⋙ FL_functor M
 
+/--
+The diagram of cochain complexes given by `FLF F surj` fits together into a cocone
+whose cocone point is defeq to `FL F M`. This is precisely this cocone.
+-/
 def FLF_cocone : limits.cocone (FLF F surj M) :=
 (FL_functor M).map_cocone $ (Profinite.arrow_cone F surj).op
 
