@@ -1,5 +1,7 @@
 import analysis.normed_space.basic
 
+-- PR'd as #7745
+
 variables {A : Type*} [semi_normed_group A]
 
 lemma norm_nsmul_le (n : ℕ) (a : A) : ∥n • a∥ ≤ n * ∥a∥ :=
