@@ -42,7 +42,7 @@ variables {k k' K K' : ℝ≥0} {m m' : ℕ} {c₀ c₀' : ℝ≥0}
 --   C.completion.is_weak_bounded_exact (k^2) K m c₀ :=
 -- by admit
 
-lemma strong_of_complete [hk : fact (1 ≤ k)] [hk' : fact (1 ≤ k')]
+lemma strong_of_complete [hk : fact (1 ≤ k)]
   [∀ c i, separated_space (C c i)]
   (hC : C.is_weak_bounded_exact k K m c₀)
   (hC' : admissible C) [∀ c i, complete_space (C c i)] :

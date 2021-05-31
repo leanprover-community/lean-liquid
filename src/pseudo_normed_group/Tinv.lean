@@ -325,6 +325,24 @@ theorem CLCFPTinv₂_def (r : ℝ≥0) (V : SemiNormedGroup)
     (CLCFP.Tinv V r' c c₂ n)
     (@CLCFP.res V r' c c₂ n (aux r' c c₂) ≫ CLCFP.T_inv r V r' c₂ n) := rfl
 
+instance CLCFPTinv₂.separated_space [fact (c₂ ≤ r' * c₁)] (M) :
+  separated_space ((CLCFPTinv₂ r V r' c₁ c₂ n).obj M) :=
+begin
+  rw separated_iff_t2,
+  refine @subtype.t2_space _ _ (id _) (id _),
+  rw ← separated_iff_t2,
+  apply uniform_space.completion.separated_space
+end
+
+instance CLCFPTinv₂.complete_space [fact (c₂ ≤ r' * c₁)] (M) :
+  complete_space ((CLCFPTinv₂ r V r' c₁ c₂ n).obj M) :=
+begin
+  refine @is_closed.complete_space_coe _ (id _) (id _) _ _,
+  { apply uniform_space.completion.complete_space },
+  { refine is_closed_eq _ continuous_const,
+    apply normed_group_hom.continuous }
+end
+
 /-- The functor that sends `M` and `c` to `V-hat((filtration M c)^n)^{T⁻¹}`,
 defined by taking `T⁻¹`-invariants for two different actions by `T⁻¹`:
 

@@ -200,6 +200,14 @@ begin
   apply complex.map_norm_noninc,
 end
 
+instance system.separated_space (c : ℝ≥0) (i : ℕ) (M) :
+  separated_space (((BD.system c_ r V r').obj M) c i) :=
+CLCFPTinv₂.separated_space _ _ _ _ _ _ _
+
+instance system.complete_space (c : ℝ≥0) (i : ℕ) (M) :
+  complete_space (((BD.system c_ r V r').obj M) c i) :=
+CLCFPTinv₂.complete_space _ _ _ _ _ _ _
+
 end
 
 section

@@ -1,6 +1,8 @@
 import breen_deligne.constants
+import system_of_complexes.completion
 import thm95.homotopy
 import thm95.col_exact
+
 
 noncomputable theory
 
@@ -77,10 +79,10 @@ def NSC (IH : ∀ m' < m, thm95.IH BD r r' V c_ c' M m')
   htpy := NSC_htpy BD r r' V c_ c' M m Λ,
   admissible := thm95.double_complex_admissible _ }
 
-include BD c_ c' r r' M V m
+include BD c_ c' r r' m
 
-/-- Theorem 9.5 in [Analytic] -/
-theorem thm95 : ∀ (Λ : PolyhedralLattice.{0}) (S : Type) [fintype S]
+/-- A variant of Theorem 9.5 in [Analytic] using weak bounded exactness. -/
+theorem thm95' : ∀ (Λ : PolyhedralLattice.{0}) (S : Type) [fintype S]
   (V : SemiNormedGroup.{0}) [normed_with_aut r V],
   ​((BD.data.system c_ r V r').obj (op $ Hom Λ (Mbar r' S))).is_weak_bounded_exact
     (k c' m) (K BD c' r r' m) m (c₀ BD r r' c_ c' m Λ) :=
@@ -97,6 +99,19 @@ begin
   exact normed_spectral cond
 end
 
+omit BD c_ c' r r' m
+
+/-- Theorem 9.5 in [Analytic] -/
+theorem thm95 (Λ : PolyhedralLattice.{0}) (S : Type) [fintype S]
+  (V : SemiNormedGroup.{0}) [normed_with_aut r V] :
+  ((BD.data.system c_ r V r').obj (op $ Hom Λ (Mbar r' S))).is_bounded_exact
+    (k c' m ^ 2) (K BD c' r r' m + 1) m (c₀ BD r r' c_ c' m Λ) :=
+begin
+  refine system_of_complexes.is_weak_bounded_exact.strong_of_complete
+    _ (thm95' BD r r' c_ c' m Λ S V) _ 1 zero_lt_one,
+  apply data.system_admissible
+end
+
 end
 
 
@@ -109,7 +124,7 @@ and not be troubled with fixing the proof of the implication.
 === -/
 
 /-- Theorem 9.5 in [Analytic] -/
-theorem thm95' (BD : package)
+theorem thm95'' (BD : package)
   (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r < 1)] [fact (r' < 1)]
   (c_ : ℕ → ℝ≥0) [BD.data.very_suitable r r' c_] [∀ (i : ℕ), fact (0 < c_ i)] :
   ∀ m : ℕ,
@@ -126,5 +141,5 @@ begin
   haveI _inst_c' : package.adept BD c_ c' := package.c'_adept BD c_,
   refine ⟨(k c' m), (K BD c' r r' m), infer_instance, λ Λ _inst_Λ, _⟩,
   refine ⟨c₀ BD r r' c_ c' m (@PolyhedralLattice.of Λ _inst_Λ), λ S _inst_S V _inst_V, _⟩,
-  apply @thm95 BD r r' _ _ _ _ _ V _inst_V c_ c' _ _ (@Hom _ _ Λ (@Mbar r' S _inst_S)  _inst_Λ _)
+  apply thm95'
 end

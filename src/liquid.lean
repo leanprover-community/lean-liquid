@@ -39,7 +39,7 @@ theorem first_target (r r' : ℝ≥0)
     ​((BD.data.system c_ r V r').obj (op $ of r' (Mbar r' S))).is_weak_bounded_exact k K m c₀ :=
 begin
   intro m,
-  obtain ⟨k, K, hk, H⟩ := thm95' BD r r' c_ m,
+  obtain ⟨k, K, hk, H⟩ := thm95'' BD r r' c_ m,
   obtain ⟨c₀, H⟩ := H ℤ,
   use [k, K, hk, c₀],
   introsI S hS V hV,
