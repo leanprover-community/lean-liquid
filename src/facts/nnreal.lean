@@ -6,6 +6,8 @@ namespace nnreal
 
 variables (r r' k c c₁ c₂ c₃ : ℝ≥0)
 
+instance fact_le_of_lt [h : fact (c₁ < c₂)] : fact (c₁ ≤ c₂) := ⟨h.1.le⟩
+
 instance fact_pos_of_one_le [hk : fact (1 ≤ c)] : fact (0 < c) :=
 ⟨lt_of_lt_of_le zero_lt_one hk.1⟩
 

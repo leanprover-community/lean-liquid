@@ -31,9 +31,6 @@ variables (V : SemiNormedGroup.{u})
 variables (Λ : PolyhedralLattice.{u}) (M : ProFiltPseuNormGrpWithTinv.{u} r')
 variables (N : ℕ) [fact (0 < N)] (n : ℕ)
 
--- move this
-instance fact_le_of_lt (c₁ c₂ : ℝ≥0) [h : fact (c₁ < c₂)] : fact (c₁ ≤ c₂) := ⟨h.1.le⟩
-
 @[simps obj map]
 def scale_factorial : system_of_complexes.{u} ⥤ system_of_complexes.{u} :=
 (whiskering_right _ _ _).obj $

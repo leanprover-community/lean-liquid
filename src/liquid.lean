@@ -1,4 +1,5 @@
 import thm95
+import statement
 
 /-!
 # Liquid Tensor Experiment
@@ -72,3 +73,9 @@ The proof reduces to `thm95`, which is not proven yet. We are working on it!
   of seminormed groups satisfies a suitable exactness criterion of being
   `≤ k`-exact in degrees `≤ m` for `c ≥ c₀` (where `c` is an index to the system of complexes).
 -/
+
+example (r r' : ℝ≥0)
+  [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r < 1)] [fact (r' < 1)]
+  [BD.data.very_suitable r r' c_] [∀ (i : ℕ), fact (0 < c_ i)] :
+  first_target_stmt BD c_ r r' :=
+first_target BD c_ r r'
