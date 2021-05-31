@@ -10,8 +10,8 @@ import pseudo_normed_group.profinitely_filtered
 # $\overline{\mathcal{M}}_{r'}(S)_{≤ c}$
 
 In this file we put a profinite topology on the subspace
-`Mbar_le r' S c` of `Mbar_le r' S` consisting of power series
-`F_s = ∑ a_{n,s}T^n ∈ Tℤ[[T]]` such that `∑_{n,s} |a_{n,s}|r'^n ≤ c`.
+`Mbar_le r' S c` of `Mbar r' S` consisting of power series
+`F_s = ∑ a_{n,s}T^n ∈ Tℤ⟦T⟧` such that `∑_{n,s} |a_{n,s}|r'^n ≤ c`.
 -/
 
 universe u
