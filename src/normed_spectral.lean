@@ -3,7 +3,7 @@ import system_of_complexes.truncate
 import normed_snake
 import category_theory.concrete_category
 
-import thm95.constants
+import thm95.constants.spectral_constants
 
 noncomputable theory
 open_locale nnreal

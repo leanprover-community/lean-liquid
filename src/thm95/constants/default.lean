@@ -3,7 +3,7 @@ import analysis.special_functions.pow
 import combinatorial_lemma
 import breen_deligne.eg
 
-import thm95.constants
+import thm95.constants.spectral_constants
 
 import for_mathlib.nnreal
 /-!

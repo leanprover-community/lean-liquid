@@ -7,7 +7,7 @@ import pseudo_normed_group.homotopy
 
 import thm95.double_complex
 import thm95.row_iso
-import thm95.constants_2
+import thm95.constants
 
 noncomputable theory
 
