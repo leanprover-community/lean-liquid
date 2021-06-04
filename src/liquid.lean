@@ -58,7 +58,7 @@ end
 
 Most of the theorem should be fairly readable.
 We will now briefly explain some of the more peculiar syntax.
-The proof reduces to `thm95`, which is not proven yet. We are working on it!
+The proof reduces to `thm95''` (a variant of Theorem 9.5).
 
 * `[BD.suitable c_]` assumes that the nonnegative reals `c_ i` satisfy some suitable conditions
   with respect to the package of Breen--Deligne data `BD`.
