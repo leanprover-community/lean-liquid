@@ -110,19 +110,17 @@ def FLC_iso : strict_iso ((Completion.map_homological_complex _).obj (FL F M)) (
 { iso := homological_complex.iso_of_components (λ i, eq_to_iso (nat.rec rfl (λ _ _, rfl) i))
     begin
       rintro (_|i) (_|j) h; rcases h with _|⟨i,w⟩; ext,
-      { dsimp,
-        split_ifs with hh hh,
-        { simp only [category.id_comp, category.comp_id, Completion_map_apply],
+      { simp only [iso.refl_hom, dite_eq_ite, functor.map_homological_complex_obj_d, if_true,
+          eq_self_iff_true, category.id_comp, cosimplicial_object.augmented.to_cocomplex_d_2,
+          eq_to_hom_refl, category.comp_id, Completion_map_apply, eq_to_iso_refl],
           dsimp only [cosimplicial_object.augmented.to_cocomplex_d,
             cosimplicial_object.augmented.drop, comma.snd, cosimplicial_object.whiskering,
             whiskering_right, cosimplicial_object.coboundary, functor.const_comp, LCC],
-          simp },
-        { exfalso,
-          apply hh,
-          refl } },
-      { dsimp,
-        split_ifs with hh hh,
-      { simp only [category.id_comp, category.comp_id, Completion_map_apply],
+          dsimp, -- non-terminal
+          congr', ext1, simp},
+      { simp only [iso.refl_hom, dite_eq_ite, functor.map_homological_complex_obj_d, if_true,
+          eq_self_iff_true, category.id_comp, cosimplicial_object.augmented.to_cocomplex_d_2,
+          eq_to_hom_refl, category.comp_id, Completion_map_apply, eq_to_iso_refl],
         dsimp only [cosimplicial_object.augmented.to_cocomplex_d,
           cosimplicial_object.augmented.drop, comma.snd, cosimplicial_object.whiskering,
           whiskering_right, cosimplicial_object.coboundary, LCC],
@@ -132,9 +130,6 @@ def FLC_iso : strict_iso ((Completion.map_homological_complex _).obj (FL F M)) (
         rw [Completion.map_gsmul],
         congr' 1,
         apply FLC_iso_helper },
-      { exfalso,
-        apply hh,
-        refl } }
     end,
   is_strict := λ i, { strict_hom' := λ a, by { cases i; refl } } }.
 
