@@ -107,21 +107,21 @@ This is a strict (i.e. norm-preserving) isomorphism between `FLC F M` and
 the cochain complex obtained by mapping `FL F M` along the `Completion` functor.
 -/
 def FLC_iso : strict_iso ((Completion.map_homological_complex _).obj (FL F M)) (FLC F M) :=
-{ iso := homological_complex.iso_of_components (λ i,
-    match i with
-    | 0 := eq_to_iso rfl
-    | n+1 := eq_to_iso rfl
-    end) begin
-      rintro (_|i) (_|j) h; rcases h with _|⟨i,w⟩; ext; dsimp [FLC_iso._match_1];
+{ iso := homological_complex.iso_of_components (λ i, eq_to_iso (nat.rec rfl (λ _ _, rfl) i))
+    begin
+      rintro (_|i) (_|j) h; rcases h with _|⟨i,w⟩; ext,
+      { dsimp,
         split_ifs with hh hh,
-      { simp only [category.id_comp, category.comp_id, Completion_map_apply],
-        dsimp only [cosimplicial_object.augmented.to_cocomplex_d,
-          cosimplicial_object.augmented.drop, comma.snd, cosimplicial_object.whiskering,
-          whiskering_right, cosimplicial_object.coboundary, functor.const_comp, LCC],
-        simp },
-      { exfalso,
-        apply hh,
-        refl },
+        { simp only [category.id_comp, category.comp_id, Completion_map_apply],
+          dsimp only [cosimplicial_object.augmented.to_cocomplex_d,
+            cosimplicial_object.augmented.drop, comma.snd, cosimplicial_object.whiskering,
+            whiskering_right, cosimplicial_object.coboundary, functor.const_comp, LCC],
+          simp },
+        { exfalso,
+          apply hh,
+          refl } },
+      { dsimp,
+        split_ifs with hh hh,
       { simp only [category.id_comp, category.comp_id, Completion_map_apply],
         dsimp only [cosimplicial_object.augmented.to_cocomplex_d,
           cosimplicial_object.augmented.drop, comma.snd, cosimplicial_object.whiskering,
@@ -134,7 +134,7 @@ def FLC_iso : strict_iso ((Completion.map_homological_complex _).obj (FL F M)) (
         apply FLC_iso_helper },
       { exfalso,
         apply hh,
-        refl }
+        refl } }
     end,
   is_strict := λ i, { strict_hom' := λ a, by { cases i; refl } } }.
 
