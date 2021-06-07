@@ -24,7 +24,7 @@ end SemiNormedGroup
 
 structure strict_iso (C D : cochain_complex SemiNormedGroup ℕ) :=
 (iso : C ≅ D)
-[is_strict : ∀ i : ℕ, SemiNormedGroup.strict_iso $ (homological_complex.eval_at i).map_iso iso]
+[is_strict : ∀ i : ℕ, SemiNormedGroup.strict_iso $ (homological_complex.eval _ _ i).map_iso iso]
 
 instance (C D : cochain_complex SemiNormedGroup ℕ) (f : strict_iso C D) (n : ℕ) :
-  SemiNormedGroup.strict_iso ((homological_complex.eval_at n).map_iso f.iso) := f.is_strict _
+  SemiNormedGroup.strict_iso ((homological_complex.eval _ _ n).map_iso f.iso) := f.is_strict _

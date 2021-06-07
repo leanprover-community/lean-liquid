@@ -3,7 +3,6 @@ import for_mathlib.Profinite.arrow_limit
 import for_mathlib.Profinite.locally_constant
 import for_mathlib.Profinite.clopen_limit
 import for_mathlib.simplicial.complex
-import for_mathlib.SemiNormedGroup
 import for_mathlib.homological_complex
 import for_mathlib.discrete_quotient
 

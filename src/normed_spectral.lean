@@ -125,7 +125,8 @@ def normed_spectral_homotopy.of_iso {row₀ row₁ : system_of_complexes.{u}} {d
     ... = _ : _,
     { apply normed_group_hom.map_add },
     congr' 1,
-    { dsimp, rw ← system_of_complexes.res_comp_apply, apply normed_group_hom.map_add },
+    { refine (normed_group_hom.map_add _ _ _).trans _,
+      simp only [← comp_apply, ← system_of_complexes.res_comp_apply], refl },
     { erw [system_of_complexes.d_apply], refl }
   end,
   δ_bound_by := λ c hc q hq,
@@ -217,7 +218,7 @@ lemma hδ_truncate (c : ℝ≥0) [fact (c₀ ≤ c)] : ∀ (q : ℕ) (hq : q ≤
 | (q+2) h := condM.htpy.hδ _ _ (nat.succ_le_succ h)
 | 0     h :=
 begin
-  ext1 x, dsimp, iterate 5 { erw [category_theory.comp_apply] },
+  ext1 x, dsimp,
   let π := λ c p, @SemiNormedGroup.coker.π _ _ (@d' M c p 0 1),
   obtain ⟨x, rfl⟩ : ∃ x', π _ _ x' = x := SemiNormedGroup.coker.π_surjective x,
   transitivity π _ _ ((condM.htpy.δ c).f 1 (M.res x)), { refl },

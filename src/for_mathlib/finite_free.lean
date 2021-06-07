@@ -1,6 +1,6 @@
 import ring_theory.finiteness
 import linear_algebra.invariant_basis_number
-import linear_algebra.free_module
+import linear_algebra.free_module_pid
 import linear_algebra.dual
 
 

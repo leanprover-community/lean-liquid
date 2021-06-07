@@ -1,4 +1,3 @@
-import for_mathlib.SemiNormedGroup
 import algebra.homology.additive
 import locally_constant.Vhat
 import normed_group.controlled_exactness
@@ -49,7 +48,7 @@ end
 lemma injective_of_strict_iso (F : strict_iso C D)
   (cond : ∀ (f : C.X 0) (hf : C.d 0 1 f = 0), f = 0) (f : D.X 0) (hf : D.d 0 1 f = 0) : f = 0 :=
 begin
-  let FF := (homological_complex.eval_at 0).map_iso F.iso,
+  let FF := (homological_complex.eval _ _ 0).map_iso F.iso,
   have : f = (FF.inv ≫ FF.hom) f, by {rw FF.inv_hom_id, simp},
   rw this,
   change FF.hom (FF.inv f) = 0,
@@ -68,18 +67,18 @@ lemma exact_of_strict_iso (F : strict_iso C D) (ε : ℝ≥0) (hε : 0 < ε)
   (nnnorm g) ≤ (1+ε) * nnnorm f) (n : ℕ) (f : D.X (n+1)) (hf : D.d _ (n+2) f = 0) :
   ∃ g : D.X n, D.d _ _ g = f ∧ nnnorm g ≤ (1 + ε) * nnnorm f :=
 begin
-  specialize cond n (((homological_complex.eval_at (n+1)).map_iso F.iso).inv f) _,
-  { dsimp [homological_complex.eval_at],
+  specialize cond n (((homological_complex.eval _ _ (n+1)).map_iso F.iso).inv f) _,
+  { dsimp [homological_complex.eval],
     change (F.iso.inv.f (n+1) ≫ C.d (n+1) (n+2)) f = 0,
     rw F.iso.inv.comm,
     simp [hf] },
   rcases cond with ⟨g, h1, h2⟩,
-  refine ⟨((homological_complex.eval_at n).map_iso F.iso).hom g, _, _⟩,
-  { dsimp [homological_complex.eval_at] at *,
+  refine ⟨((homological_complex.eval _ _ n).map_iso F.iso).hom g, _, _⟩,
+  { dsimp [homological_complex.eval] at *,
     change (F.iso.hom.f _ ≫ D.d _ _) _ = _,
     rw F.iso.hom.comm,
     simp [h1],
-    let FF := (homological_complex.eval_at (n+1)).map_iso F.iso,
+    let FF := (homological_complex.eval _ _ (n+1)).map_iso F.iso,
     change (FF.inv ≫ FF.hom) f = f,
     rw FF.inv_hom_id,
     refl },

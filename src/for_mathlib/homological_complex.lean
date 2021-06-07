@@ -6,15 +6,6 @@ open category_theory category_theory.limits
 
 variables {V ι : Type*} {c : complex_shape ι} [category V]
 
-namespace category_theory.graded_object
-
-/-- The projection of a graded object to its `i`-th component. -/
-def eval (i : ι) : graded_object ι V ⥤ V :=
-{ obj := λ X, X i,
-  map := λ X Y f, f i, }
-
-end category_theory.graded_object
-
 open category_theory
 
 namespace homological_complex
@@ -51,36 +42,11 @@ def iso_of_components (f : Π i, C₁.X i ≅ C₂.X i)
   hom_inv_id' := by { ext i, exact (f i).hom_inv_id },
   inv_hom_id' := by { ext i, exact (f i).inv_hom_id } }
 
-variables (V c)
-
--- eval / forget / forget_eval / eval_additive have been PR'd as #7742
-
-@[simps] def eval (i : ι) : homological_complex V c ⥤ V :=
-{ obj := λ C, C.X i,
-  map := λ C D f, f.f i, }
-
-@[simps] def forget : homological_complex V c ⥤ graded_object ι V :=
-{ obj := λ C, C.X,
-  map := λ _ _ f, f.f }
-
-@[simps] def forget_eval (i : ι) : forget V c ⋙ graded_object.eval i ≅ eval V c i :=
-nat_iso.of_components
-  (λ X, iso.refl _)
-  (by tidy)
-
 end
 
 section
 
 variables [preadditive V]
-
-instance eval_additive (i : ι) : (eval V c i).additive := {}
-
--- PR'd as #7743
-@[simps]
-def hom.f_add_monoid_hom {C₁ C₂ : homological_complex V c} (i : ι) :
-  (C₁ ⟶ C₂) →+ (C₁.X i ⟶ C₂.X i) :=
-add_monoid_hom.mk' (λ f, homological_complex.hom.f f i) (λ _ _, rfl)
 
 -- PR'd as #7744
 

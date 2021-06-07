@@ -225,7 +225,7 @@ lemma aug_map_strict : (aug_map r' Λ M N n).strict :=
 to_profinitely_filtered_pseudo_normed_group_hom_strict _
 end
 
-section open category_theory.simplicial_object simplicial_object
+section open category_theory.simplicial_object
 
 @[simps left right]
 def Cech_nerve_level_hom' (c : ℝ≥0) :

@@ -1,7 +1,5 @@
 import analysis.normed_space.normed_group_quotient
-import linear_algebra.free_module
-
-import for_mathlib.norm_nsmul
+import linear_algebra.free_module_pid
 
 import polyhedral_lattice.topology
 

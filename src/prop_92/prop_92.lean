@@ -43,8 +43,9 @@ begin
     ((FiltrationPow.Tinv r' (r' * c) c _).app _) r V _ (Tinv₀_continuous _ _) hr1 _ f ε hε,
   refine ⟨g, _, hg2⟩,
   rw ← hg1, clear hg1,
-  dsimp [T_inv_sub_Tinv, CLC, T_inv, CLC.T_inv],
-  dsimp only [Tinv, whisker_right_app, functor.comp_map],
+  dsimp only [T_inv_sub_Tinv, CLC, T_inv, CLC.T_inv, Tinv, CLCFP.res,
+    whisker_left_app, nat_trans.app_sub, nat_trans.comp_app, whisker_right_app,
+    normed_group_hom.sub_apply, whisker_right_app, functor.comp_map],
   rw [← SemiNormedGroup.Completion.map_comp,
       ← normed_group_hom.sub_apply, ← functor.map_sub],
   refl

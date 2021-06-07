@@ -321,7 +321,7 @@ begin
     suffices : m ∈ M',
     { rcases this with ⟨t, ht, rfl⟩,
       cases M, simp only [set_like.eta, submodule.subtype_apply], exact ht },
-    -- change hypothesis h to a form where we can rewrite finsupp.span_eq_map_total
+    -- change hypothesis h to a form where we can rewrite finsupp.span_image_eq_map_total
     have h' : m ∈ submodule.span R (set.image (Gᵢ a).subtype (M : set (Gᵢ a))),
     { convert h,
       ext t,
@@ -331,7 +331,7 @@ begin
       { rintro ⟨⟨⟨s, hs⟩, hs2⟩, rfl⟩,
         exact ⟨⟨s, hs⟩, hs2, rfl⟩ } },
     clear h,
-    rw finsupp.span_eq_map_total at h',
+    rw finsupp.span_image_eq_map_total at h',
     rcases h' with ⟨f, hf, rfl⟩,
     -- hm says some element of r is in Rₐ
     -- so it's equal to its projection onto Rₐ

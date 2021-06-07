@@ -1,5 +1,3 @@
-import for_mathlib.connected
-
 import pseudo_normed_group.FP
 import system_of_complexes.basic
 import prop819
