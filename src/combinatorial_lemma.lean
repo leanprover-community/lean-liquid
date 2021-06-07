@@ -77,8 +77,7 @@ variables (M : Type*) [pseudo_normed_group M]
 variables {M}
 
 lemma generates_norm.add_monoid_hom_mem_filtration_iff {ι : Type} [fintype ι]
-  {l : ι → Λ} (hl : generates_norm l) (hM : pseudo_normed_group.archimedean M)
-  (x : Λ →+ M) (c : ℝ≥0) :
+  {l : ι → Λ} (hl : generates_norm l) (x : Λ →+ M) (c : ℝ≥0) :
   x ∈ filtration (Λ →+ M) c ↔
   ∀ i, x (l i) ∈ filtration M (c * nnnorm (l i)) :=
 begin
@@ -128,7 +127,7 @@ begin
   { rw [nsmul_eq_mul, mul_comm, div_mul_cancel],
     exact_mod_cast hN.ne' },
   rw aux,
-  rw hl.add_monoid_hom_mem_filtration_iff Mbar.archimedean at hx ⊢,
+  rw hl.add_monoid_hom_mem_filtration_iff at hx ⊢,
   intro i,
   specialize hx i,
   rw Mbar.mem_filtration_iff at hx ⊢,
@@ -413,7 +412,7 @@ begin
     all_goals { intros, refl } },
   use [y, hxy],
   intro j,
-  rw hl.add_monoid_hom_mem_filtration_iff Mbar.archimedean at hx ⊢,
+  rw hl.add_monoid_hom_mem_filtration_iff at hx ⊢,
   intro i,
   specialize hx i,
   simp only [Mbar.mem_filtration_iff] at hx hy'2 ⊢,
