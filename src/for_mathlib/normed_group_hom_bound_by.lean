@@ -11,6 +11,10 @@ variables {f : normed_group_hom V₁ V₂} {g : normed_group_hom V₂ V₃}
 lemma bound_by.norm_noninc (hf : f.bound_by 1) : f.norm_noninc :=
 λ v, (hf v).trans $ by rw [nnreal.coe_one, one_mul]
 
+lemma norm_noninc_iff_norm_le_one : f.norm_noninc ↔ ∥f∥ ≤ 1 :=
+⟨λ h, op_norm_le_bound f zero_le_one (by simpa [h]),
+  λ h, bound_by.norm_noninc (λ v, le_of_op_norm_le f h v)⟩
+
 lemma bound_by.comp {C₁ C₂ : ℝ≥0} (hg : g.bound_by C₂) (hf : f.bound_by C₁) :
   (g.comp f).bound_by (C₂ * C₁) :=
 λ v,
@@ -63,6 +67,19 @@ begin
     exact (h i $ s.mem_insert_self _).add (IH $ λ i hi, h i $ finset.mem_insert_of_mem hi) }
 end
 
+lemma sum.norm_le {ι : Type*} (s : finset ι)
+  (f : ι → normed_group_hom V₁ V₂) (C : ι → ℝ) (h : ∀ i ∈ s, ∥f i∥ ≤ (C i)) :
+  ∥(∑ i in s, f i)∥ ≤ (∑ i in s, C i) :=
+begin
+  classical,
+  revert h, apply finset.induction_on s; clear s,
+  { intros, simp only [norm_zero, finset.sum_empty] },
+  { intros i s his IH h,
+    simp only [finset.sum_insert his],
+    refine le_trans (norm_add_le (f i) (finset.sum s f)) _,
+    exact add_le_add (h i $ s.mem_insert_self _) (IH $ λ i hi, h i $ finset.mem_insert_of_mem hi) }
+end
+
 @[simp] lemma bound_by.nat_smul {C : ℝ≥0} (hf : f.bound_by C) (n : ℕ) :
   (n • f).bound_by (n * C) :=
 begin
@@ -83,6 +100,31 @@ begin
     simp only [int.nat_abs, nsmul_eq_smul],
     apply bound_by.nat_smul, exact hf }
 end
+
+@[simp] lemma norm_nsmul_le {C : ℝ} (hf : ∥f∥ ≤ C) (n : ℕ) : ∥n • f∥ ≤ n * C :=
+begin
+  induction n with i hi,
+  { simp only [norm_zero, nat.cast_zero, zero_mul, zero_smul] },
+  simp only [nat.succ_eq_add_one, add_smul, add_mul, nat.cast_add, nat.cast_one, one_mul, one_smul],
+  exact le_trans (norm_add_le _ _) (add_le_add hi hf),
+end
+
+@[simp] lemma norm_gsmul_le {C : ℝ} (hf : ∥f∥ ≤ C) (n : ℤ) : ∥n • f∥ ≤ (n.nat_abs * C) :=
+begin
+  induction n,
+  { simp only [int.nat_abs_of_nat, int.of_nat_eq_coe, gsmul_coe_nat, nsmul_eq_smul],
+    exact norm_nsmul_le hf n },
+  { simp only [gsmul_neg_succ_of_nat, nat.cast_succ, int.nat_abs, norm_neg],
+    exact norm_nsmul_le hf n.succ }
+end
+
+lemma norm_comp_le_of_le {C₁ C₂ : ℝ} (hf : ∥f∥ ≤ C₁) (hg : ∥g∥ ≤ C₂) :
+  ∥g.comp f∥ ≤ C₂ * C₁ :=
+le_trans (norm_comp_le g f) $ mul_le_mul hg hf (norm_nonneg _) (le_trans (norm_nonneg _) hg)
+
+lemma norm_comp_le_of_le' (C₁ C₂ C₃ : ℝ) (h : C₃ = C₂ * C₁) (hg : ∥g∥ ≤ C₂) (hf : ∥f∥ ≤ C₁) :
+  ∥g.comp f∥ ≤ C₃ :=
+by { rw h, exact norm_comp_le_of_le hf hg }
 
 end normed_group_hom
 

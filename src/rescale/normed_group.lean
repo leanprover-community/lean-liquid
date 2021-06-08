@@ -113,14 +113,16 @@ begin
   norm_cast, exact mul_le_mul' h2 le_rfl,
 end
 
+lemma nnnorm_to_rescale {V : SemiNormedGroup} (v : V) : ∥(@rescale.of r V) v∥ ≤ r⁻¹ * ∥v∥ :=
+begin
+  rw ← div_eq_inv_mul,
+  refl
+end
+
 def to_rescale : 𝟭 _ ⟶ rescale r :=
 { app := λ V,
-  add_monoid_hom.mk_normed_group_hom' (add_monoid_hom.mk' (@rescale.of r V) $ λ _ _, rfl) r⁻¹
-  begin
-    intro v,
-    rw ← div_eq_inv_mul,
-    refl
-  end,
+  add_monoid_hom.mk_normed_group_hom'
+    (add_monoid_hom.mk' (@rescale.of r V) $ λ _ _, rfl) r⁻¹ (λ v, nnnorm_to_rescale _ v),
   naturality' := λ V W f, rfl /- defeq abuse -/ }
 
 def of_rescale [hr : fact (0 < r)] : rescale r ⟶ 𝟭 _ :=
@@ -155,24 +157,36 @@ end
 lemma to_rescale_bound_by (V : SemiNormedGroup) : ((to_rescale r).app V).bound_by r⁻¹ :=
 normed_group_hom.mk_normed_group_hom'_bound_by _ _ _
 
+lemma norm_to_rescale_le (V : SemiNormedGroup) : ∥(to_rescale r).app V∥ ≤ r⁻¹ :=
+normed_group_hom.mk_normed_group_hom_norm_le _
+  (inv_nonneg.2 (nnreal.zero_le_coe)) (λ v, nnnorm_to_rescale _ v)
+
+lemma nnnorm_rescale_rescale_symm {V : SemiNormedGroup} (v : (rescale r₁).obj V) :
+  nnnorm ((@rescale.of r₂ V) ((@rescale.of r₁ V).symm v)) ≤ r₁ / r₂ * nnnorm v :=
+begin
+  apply le_of_eq,
+  show _ = r₁ / r₂ * (nnnorm ((@rescale.of r₁ V).symm v) / r₁),
+  simp only [add_monoid_hom.mk'_apply, div_eq_inv_mul, rescale.nnnorm_def],
+  rw [mul_assoc, mul_inv_cancel_left' (show r₁ ≠ 0, from ne_of_gt $ fact.out _)],
+  refl
+end
+
 def scale : rescale r₁ ⟶ rescale r₂ :=
 { app := λ V,
   add_monoid_hom.mk_normed_group_hom'
     (add_monoid_hom.mk' (λ v, (@rescale.of r₂ V) $ (@rescale.of r₁ V).symm v) $
-      λ _ _, rfl) (r₁ / r₂)
-  begin
-    dsimp,
-    intro v,
-    apply le_of_eq,
-    show _ = r₁ / r₂ * (nnnorm ((@rescale.of r₁ V).symm v) / r₁),
-    simp only [add_monoid_hom.mk'_apply, div_eq_inv_mul, rescale.nnnorm_def],
-    rw [mul_assoc, mul_inv_cancel_left' (show r₁ ≠ 0, from ne_of_gt $ fact.out _)],
-    refl,
-  end,
+      λ _ _, rfl) (r₁ / r₂) (λ v, nnnorm_rescale_rescale_symm r₁ r₂ v),
   naturality' := λ V W f, rfl /- defeq abuse -/ }
 
+lemma norm_scale_le (V : SemiNormedGroup) : ∥(scale r₁ r₂).app V∥ ≤ (r₁ / r₂) :=
+normed_group_hom.mk_normed_group_hom_norm_le _ (div_nonneg (nnreal.coe_nonneg _)
+    (nnreal.coe_nonneg _)) (λ v, nnnorm_rescale_rescale_symm r₁ r₂ v)
+
 lemma scale_bound_by (V : SemiNormedGroup) : ((scale r₁ r₂).app V).bound_by (r₁ / r₂) :=
-normed_group_hom.mk_normed_group_hom'_bound_by _ _ _
+begin
+  intro v,
+  refine normed_group_hom.le_of_op_norm_le _ (norm_scale_le r₁ r₂ V) v,
+end
 
 lemma scale_comm {V₁ V₂ W₁ W₂ : SemiNormedGroup}
   (f₁ : V₁ ⟶ W₁) (f₂ : V₂ ⟶ W₂) (φ : V₁ ⟶ V₂) (ψ : W₁ ⟶ W₂) (h : f₁ ≫ ψ = φ ≫ f₂) :

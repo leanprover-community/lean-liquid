@@ -154,12 +154,12 @@ lemma double_complex.row_admissible :
 | 1     := BD.system_admissible
 | (m+2) := system_of_complexes.rescale_admissible _ _ BD.system_admissible
 
-lemma double_complex.d_one_norm_noninc (c : ℝ≥0) (q : ℕ) :
-  (@system_of_double_complexes.d (double_complex BD c_ r r' V Λ M N) c 1 2 q).norm_noninc :=
+lemma double_complex.d_one_norm_le_one (c : ℝ≥0) (q : ℕ) :
+  ∥(@system_of_double_complexes.d (double_complex BD c_ r r' V Λ M N) c 1 2 q)∥ ≤ 1 :=
 begin
-  refine ((SemiNormedGroup.to_rescale_bound_by _ _).comp' 2 _ 1 _ _).norm_noninc,
+  refine normed_group_hom.norm_comp_le_of_le' 2 _ 1 _ (SemiNormedGroup.norm_to_rescale_le _ _) _,
   { norm_num },
-  have : (2 : ℝ≥0) = ∑ i : fin 2, 1,
+  have : (2 : ℝ) = ∑ i : fin 2, 1,
   { simp only [finset.card_fin, mul_one, nat.cast_bit0, finset.sum_const, nsmul_eq_mul, nat.cast_one] },
   dsimp [system_of_complexes.rescale_functor, double_complex_aux,
     cosimplicial_object.augmented.to_cocomplex_d],
@@ -167,10 +167,10 @@ begin
   dsimp [cosimplicial_object.coboundary],
   simp only [← nat_trans.app_hom_apply, add_monoid_hom.map_sum, add_monoid_hom.map_gsmul,
     ← homological_complex.hom.f_add_monoid_hom_apply, this],
-  apply normed_group_hom.bound_by.sum,
+  apply normed_group_hom.sum.norm_le,
   rintro i -,
-  refine (normed_group_hom.bound_by.int_smul _ ((-1) ^ ↑i : ℤ)).le (_ : _ * 1 ≤ 1),
-  { apply normed_group_hom.norm_noninc.bound_by_one,
+  refine le_trans (normed_group_hom.norm_gsmul_le _ ((-1) ^ ↑i : ℤ)) (_ : _ * 1 ≤ 1),
+  { apply normed_group_hom.norm_noninc_iff_norm_le_one.1,
     apply breen_deligne.data.complex.map_norm_noninc },
   { simp only [mul_one, int.nat_abs_pow, int.nat_abs_neg, int.nat_abs_one, one_pow, nat.cast_one] },
 end
@@ -204,7 +204,7 @@ end
 lemma double_complex.d_norm_noninc (c : ℝ≥0) (q : ℕ) :
   ∀ p, (@system_of_double_complexes.d (double_complex BD c_ r r' V Λ M N) c p (p+1) q).norm_noninc
 | 0     := breen_deligne.data.complex.map_norm_noninc _ _ _ _ _ _ _ _
-| 1     := double_complex.d_one_norm_noninc _ _ _
+| 1     := normed_group_hom.norm_noninc_iff_norm_le_one.2 $ double_complex.d_one_norm_le_one _ _ _
 | (p+2) := double_complex.d_two_norm_noninc _ _ _ _
 
 -- see above: currently we can only prove this for the columns
