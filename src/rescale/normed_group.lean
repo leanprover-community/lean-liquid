@@ -154,9 +154,6 @@ begin
   refl
 end
 
-lemma to_rescale_bound_by (V : SemiNormedGroup) : ((to_rescale r).app V).bound_by r⁻¹ :=
-normed_group_hom.mk_normed_group_hom'_bound_by _ _ _
-
 lemma norm_to_rescale_le (V : SemiNormedGroup) : ∥(to_rescale r).app V∥ ≤ r⁻¹ :=
 normed_group_hom.mk_normed_group_hom_norm_le _
   (inv_nonneg.2 (nnreal.zero_le_coe)) (λ v, nnnorm_to_rescale _ v)
