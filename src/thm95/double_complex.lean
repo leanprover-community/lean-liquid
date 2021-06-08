@@ -154,9 +154,10 @@ lemma double_complex.row_admissible :
 | 1     := BD.system_admissible
 | (m+2) := system_of_complexes.rescale_admissible _ _ BD.system_admissible
 
-lemma double_complex.d_one_norm_le_one (c : ℝ≥0) (q : ℕ) :
-  ∥(@system_of_double_complexes.d (double_complex BD c_ r r' V Λ M N) c 1 2 q)∥ ≤ 1 :=
+lemma double_complex.d_one_norm_noninc (c : ℝ≥0) (q : ℕ) :
+  (@system_of_double_complexes.d (double_complex BD c_ r r' V Λ M N) c 1 2 q).norm_noninc :=
 begin
+  apply normed_group_hom.norm_noninc_iff_norm_le_one.2,
   refine normed_group_hom.norm_comp_le_of_le' 2 _ 1 _ (SemiNormedGroup.norm_to_rescale_le _ _) _,
   { norm_num },
   have : (2 : ℝ) = ∑ i : fin 2, 1,
@@ -204,7 +205,7 @@ end
 lemma double_complex.d_norm_noninc (c : ℝ≥0) (q : ℕ) :
   ∀ p, (@system_of_double_complexes.d (double_complex BD c_ r r' V Λ M N) c p (p+1) q).norm_noninc
 | 0     := breen_deligne.data.complex.map_norm_noninc _ _ _ _ _ _ _ _
-| 1     := normed_group_hom.norm_noninc_iff_norm_le_one.2 $ double_complex.d_one_norm_le_one _ _ _
+| 1     := double_complex.d_one_norm_noninc _ _ _
 | (p+2) := double_complex.d_two_norm_noninc _ _ _ _
 
 -- see above: currently we can only prove this for the columns
