@@ -81,6 +81,11 @@ lemma lift_bound_by (φ : normed_group_hom V₁ V) (h : f.comp φ = g.comp φ)
   (lift φ h).bound_by C :=
 hφ
 
+lemma norm_lift_le (φ : normed_group_hom V₁ V) (h : f.comp φ = g.comp φ)
+  (C : ℝ≥0) (hφ : ∥φ∥ ≤ C) :
+  ∥(lift φ h)∥ ≤ C :=
+hφ
+
 lemma map_norm_noninc (hf : ψ.comp f₁ = f₂.comp φ) (hg : ψ.comp g₁ = g₂.comp φ)
   (hφ : φ.norm_noninc) :
   (map φ ψ hf hg).norm_noninc :=
@@ -90,6 +95,11 @@ lemma map_bound_by (hf : ψ.comp f₁ = f₂.comp φ) (hg : ψ.comp g₁ = g₂.
   (C : ℝ≥0) (hφ : (φ.comp (ι f₁ g₁)).bound_by C) :
   (map φ ψ hf hg).bound_by C :=
 lift_bound_by _ _ _ hφ
+
+lemma norm_map_le (hf : ψ.comp f₁ = f₂.comp φ) (hg : ψ.comp g₁ = g₂.comp φ)
+  (C : ℝ≥0) (hφ : ∥φ.comp (ι f₁ g₁)∥ ≤ C) :
+  ∥map φ ψ hf hg∥ ≤ C :=
+norm_lift_le _ _ _ hφ
 
 end equalizer
 
