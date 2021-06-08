@@ -259,30 +259,6 @@ by { ext, refl }
   (@map_hom X _ _ _ _ _ _ g).comp (map_hom f) = map_hom (g.comp f) :=
 by { ext, refl }
 
-lemma map_hom_bound_by (C : ℝ≥0) (hC : 0 < C) {f : normed_group_hom V₁ V₂} (hf : f.bound_by C) :
-  (@map_hom X _ _ _ _ _ _ f).bound_by C :=
-begin
-  rintro (g : locally_constant _ _),
-  calc Sup (set.range (λ x, ∥f (g x)∥))
-      ≤ Sup (set.range (λ x, C * ∥g x∥)) : _
-  ... = C * Sup (set.range (λ x, ∥g x∥)) : _,
-  { by_cases H : nonempty X, swap,
-    { simp only [set.range_eq_empty.mpr H, real.Sup_empty] },
-    apply real.Sup_le_ub,
-    { obtain ⟨x⟩ := H, exact ⟨_, set.mem_range_self x⟩ },
-    rintro _ ⟨x, rfl⟩,
-    calc ∥f (g x)∥ ≤ C * ∥g x∥ : hf _
-    ... ≤ Sup _ : real.le_Sup _ _ _,
-    { apply exists_upper_bound_image,
-      rw [set.range_comp, set.range_comp],
-      exact (g.range_finite.image _).image _ },
-    { exact set.mem_range_self _ } },
-  { convert real.Sup_mul C _ hC using 2,
-    ext x,
-    simp only [set.mem_range, exists_prop, set.set_of_mem_eq, exists_exists_eq_and],
-    simp only [set.mem_set_of_eq] }
-end
-
 end map_hom
 
 section comap_hom
