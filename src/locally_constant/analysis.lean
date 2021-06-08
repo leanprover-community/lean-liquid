@@ -274,7 +274,7 @@ group hom between types of locally constant functions. -/
 @[simps]
 def comap_hom (f : X → Y) (hf : continuous f) :
   normed_group_hom (locally_constant Y V) (locally_constant X V) :=
-add_monoid_hom.mk_normed_group_hom'
+add_monoid_hom.mk_normed_group_hom
   (add_monoid_hom.mk'
     (locally_constant.comap f)
     (by { intros, ext, simp only [hf, add_apply, function.comp_app, coe_comap] }))
@@ -329,13 +329,10 @@ begin
   simp only [hg.comp hf, hf, hg, comap_hom_apply, coe_comap]
 end
 
-lemma comap_hom_bound_by (f : X → Y) (hf : continuous f) :
-  (@comap_hom _ _ V _ _ _ _ _ f hf).bound_by 1 :=
-normed_group_hom.mk_normed_group_hom'_bound_by _ _ _
-
 lemma comap_hom_norm_noninc (f : X → Y) (hf : continuous f) :
   (@comap_hom _ _ V _ _ _ _ _ f hf).norm_noninc :=
-(comap_hom_bound_by f hf).norm_noninc
+normed_group_hom.norm_noninc_iff_norm_le_one.2 $
+  normed_group_hom.mk_normed_group_hom_norm_le _ (zero_le_one) _
 
 end comap_hom
 
