@@ -61,9 +61,13 @@ LocallyConstant.map_iso normed_with_aut.T
 lemma T_eq [normed_with_aut r V] [fact (0 < r)] (A) :
   (T r V).hom.app A = normed_with_aut.T.hom := rfl
 
-lemma T_bound_by [normed_with_aut r V] [fact (0 < r)] (A) :
-  normed_group_hom.bound_by ((LC.T r V).hom.app A) r :=
-by { rw T_eq, intro v, exact (normed_with_aut.norm_T v).le }
+lemma norm_T_le [normed_with_aut r V] [fact (0 < r)] (A) :
+  ∥(LC.T r V).hom.app A∥ ≤ r :=
+begin
+  rw T_eq,
+  refine normed_group_hom.op_norm_le_bound _ (nnreal.zero_le_coe) (λ v, _),
+  exact le_of_eq (normed_with_aut.norm_T v)
+end
 
 @[simps {fully_applied := ff}]
 def T_inv [normed_with_aut r V] [fact (0 < r)] : LC V ⟶ LC V :=
@@ -397,20 +401,21 @@ begin
   apply basic_universal_map.T_inv_comp_eval_LCFP r V r'
 end
 
-lemma eval_LCFP_bound_by [normed_with_aut r V] [fact (0 < r)] [ϕ.suitable c₂ c₁]
+lemma norm_eval_LCFP_le [normed_with_aut r V] [fact (0 < r)] [ϕ.suitable c₂ c₁]
   (N : ℕ) (h : ϕ.bound_by N) (M) :
-  ((ϕ.eval_LCFP V r' c₁ c₂).app M).bound_by N :=
+  ∥(ϕ.eval_LCFP V r' c₁ c₂).app M∥ ≤ N :=
 begin
   rw [eval_LCFP_eq_eval_LCFP', eval_LCFP'],
-  have : (∑ (g : basic_universal_map m n) in support ϕ, (coeff g ϕ).nat_abs : ℝ≥0) ≤ N,
+  have : (∑ (g : basic_universal_map m n) in support ϕ, (coeff g ϕ).nat_abs : ℝ) ≤ N,
   { exact_mod_cast h },
   simp only [← nat_trans.app_hom_apply, add_monoid_hom.map_sum, add_monoid_hom.map_int_module_smul],
-  refine (normed_group_hom.bound_by.sum ϕ.support _ _ _).le this,
+  refine le_trans (normed_group_hom.sum.norm_le ϕ.support _ _ _) this,
   intros g hg,
   have aux := ϕ.suitable_of_mem_support c₂ c₁ g hg,
-  refine ((normed_group_hom.norm_noninc.bound_by_one _).int_smul _).le (mul_one _).le,
+  refine le_trans (normed_group_hom.norm_gsmul_le _ _) (mul_one _).le,
   rw [← g.eval_LCFP_eq_eval_LCFP' V r' c₁ c₂, basic_universal_map.eval_LCFP],
-  { refine locally_constant.comap_hom_norm_noninc _ _, exact aux },
+  { apply normed_group_hom.norm_noninc_iff_norm_le_one.1,
+    exact locally_constant.comap_hom_norm_noninc _ _, exact aux },
 end
 
 end universal_map

@@ -69,13 +69,13 @@ open opposite
 structure normed_spectral_homotopy {row₀ row₁ : system_of_complexes.{u}} (d : row₀ ⟶ row₁)
   (m : ℕ) (k' ε : ℝ≥0) [fact (1 ≤ k')] (c₀ H : ℝ≥0) [fact (0 < H)] :=
 (h : Π (q : ℕ) {q' : ℕ} {c}, row₀ (k' * c) q' ⟶ row₁ c q)
-(h_bound_by : ∀ (q q' : ℕ) (hq : q ≤ m) (hq' : q+1 = q') (c) [fact (c₀ ≤ c)],
-  (h q : row₀ (k' * c) q' ⟶ row₁ c q).bound_by H)
+(norm_h_le : ∀ (q q' : ℕ) (hq : q ≤ m) (hq' : q+1 = q') (c) [fact (c₀ ≤ c)],
+  ∥(h q : row₀ (k' * c) q' ⟶ row₁ c q)∥ ≤ H)
 (δ : Π (c : ℝ≥0), row₀.obj (op $ c) ⟶ row₁.obj (op $ k' * c))
 (hδ : ∀ (c : ℝ≥0) [fact (c₀ ≤ c)] (q : ℕ) (hq : q ≤ m),
   (system_of_complexes.res : row₀ (k' * (k' * c)) q ⟶ _) ≫ (δ c).f q =
     d.apply ≫ system_of_complexes.res + row₀.d q (q+1) ≫ h q + h (q-1) ≫ row₁.d (q-1) q)
-(δ_bound_by : ∀ (c : ℝ≥0) [fact (c₀ ≤ c)] (q : ℕ) (hq : q ≤ m), ((δ c).f q).bound_by ε)
+(norm_δ_le : ∀ (c : ℝ≥0) [fact (c₀ ≤ c)] (q : ℕ) (hq : q ≤ m), ∥(δ c).f q∥ ≤ ε)
 .
 
 lemma normed_spectral_homotopy.hδ_apply {row₀ row₁ : system_of_complexes.{u}} {d : row₀ ⟶ row₁}
@@ -101,12 +101,14 @@ def normed_spectral_homotopy.of_iso {row₀ row₁ : system_of_complexes.{u}} {d
   normed_spectral_homotopy d' m k' ε c₀ H :=
 { h := λ q q' c, φ₀.inv.apply ≫ NSH.h q ≫ φ₁.hom.apply,
   δ := λ c, φ₀.inv.app (op $ c) ≫ NSH.δ c ≫ φ₁.hom.app (op $ k' * c),
-  h_bound_by :=
+  norm_h_le :=
   begin
-    introsI q q' hqm hq' c hc x,
+    introsI q q' hqm hq' c hc,
+    refine normed_group_hom.op_norm_le_bound _ (nnreal.coe_nonneg H) (λ x, _),
     calc  ∥φ₁.hom (NSH.h q (φ₀.inv x))∥
         = ∥NSH.h q (φ₀.inv x)∥ : hφ₁ _ _ _
-    ... ≤ ↑H * ∥φ₀.inv x∥ : NSH.h_bound_by _ _ hqm hq' _ (φ₀.inv x)
+    ... ≤ ↑H * ∥φ₀.inv x∥ :
+      normed_group_hom.le_of_op_norm_le _ (NSH.norm_h_le _ _ hqm hq' _) (φ₀.inv x)
     ... = ↑H * ∥x∥ : congr_arg _ (hφ₀ _ _ _),
   end,
   hδ :=
@@ -129,13 +131,14 @@ def normed_spectral_homotopy.of_iso {row₀ row₁ : system_of_complexes.{u}} {d
       simp only [← comp_apply, ← system_of_complexes.res_comp_apply], refl },
     { erw [system_of_complexes.d_apply], refl }
   end,
-  δ_bound_by := λ c hc q hq,
+  norm_δ_le := λ c hc q hq,
   begin
     resetI,
+    refine normed_group_hom.op_norm_le_bound _ (nnreal.coe_nonneg ε) _,
     rintro (x : row'₀ c q),
     calc  ∥φ₁.hom ((NSH.δ c).f q (φ₀.inv x))∥
         = ∥(NSH.δ c).f q (φ₀.inv x)∥ : hφ₁ _ _ _
-    ... ≤ ↑ε * ∥φ₀.inv x∥ : NSH.δ_bound_by _ _ hq (φ₀.inv x)
+    ... ≤ ↑ε * ∥φ₀.inv x∥ : normed_group_hom.le_of_op_norm_le _  (NSH.norm_δ_le _ _ hq) (φ₀.inv x)
     ... = ↑ε * ∥x∥ : congr_arg _ (hφ₀ _ _ _),
   end }
 
@@ -195,16 +198,17 @@ def h_truncate : Π (q : ℕ) {q' : ℕ} {c : ℝ≥0},
 lemma h_truncate_zero {c : ℝ≥0} (x : (truncate.obj M).X (k' * c) 0 1) :
   condM.h_truncate 0 x = SemiNormedGroup.coker.π (condM.htpy.h 1 x) := rfl
 
-lemma h_truncate_bound_by : ∀ (q q' : ℕ), q ≤ m → q+1 = q' → ∀ (c : ℝ≥0), fact (c₀ ≤ c) →
-  (condM.h_truncate q : (truncate.obj M).X (k' * c) 0 q' ⟶ _).bound_by H
-| (q+1) (q'+1) hq rfl := condM.htpy.h_bound_by _ _ (nat.succ_le_succ hq)
+lemma norm_h_truncate_le : ∀ (q q' : ℕ), q ≤ m → q+1 = q' → ∀ (c : ℝ≥0), fact (c₀ ≤ c) →
+  ∥(condM.h_truncate q : (truncate.obj M).X (k' * c) 0 q' ⟶ _)∥ ≤ H
+| (q+1) (q'+1) hq rfl := condM.htpy.norm_h_le _ _ (nat.succ_le_succ hq)
                                     (by simp only [nat.add_def, add_zero])
 | 0     1      hq rfl :=
 begin
-  introsI c hc x,
+  introsI c hc,
+  refine normed_group_hom.op_norm_le_bound _ (nnreal.coe_nonneg H) (λ x, _),
   calc ∥SemiNormedGroup.coker.π (condM.htpy.h 1 x)∥
       ≤ ∥condM.htpy.h 1 x∥ : SemiNormedGroup.coker.π_is_quotient.norm_le _
-  ... ≤ H * ∥x∥ : condM.htpy.h_bound_by 1 2 dec_trivial rfl c x
+  ... ≤ H * ∥x∥ : normed_group_hom.le_of_op_norm_le _ (condM.htpy.norm_h_le 1 2 dec_trivial rfl c) x
 end
 
 def δ_truncate (c : ℝ≥0) :
@@ -229,15 +233,15 @@ begin
   refl
 end
 
-lemma δ_truncate_bound_by (c : ℝ≥0) [fact (c₀ ≤ c)] :
-  ∀ (q : ℕ) (hq : q ≤ m), ((condM.δ_truncate c).f q).bound_by ε
-| (q+1) h := condM.htpy.δ_bound_by c (q+2) (nat.succ_le_succ h)
+lemma norm_δ_truncate_le (c : ℝ≥0) [fact (c₀ ≤ c)] :
+  ∀ (q : ℕ) (hq : q ≤ m), ∥(condM.δ_truncate c).f q∥ ≤ ε
+| (q+1) h := condM.htpy.norm_δ_le c (q+2) (nat.succ_le_succ h)
 | 0     h :=
 begin
-  refine SemiNormedGroup.coker.lift_bound_by _,
-  intro x,
+  refine SemiNormedGroup.coker.norm_lift_le
+    (normed_group_hom.op_norm_le_bound _ (nnreal.coe_nonneg ε) (λ x, _)),
   refine (SemiNormedGroup.coker.π_norm_noninc _).trans _,
-  exact condM.htpy.δ_bound_by c _ (nat.succ_le_succ h) _
+  exact normed_group_hom.le_of_op_norm_le _ (condM.htpy.norm_δ_le c _ (nat.succ_le_succ h)) _
 end
 
 def truncate :
@@ -264,10 +268,10 @@ def truncate :
   end,
   htpy :=
   { h := condM.h_truncate,
-    h_bound_by := condM.h_truncate_bound_by,
+    norm_h_le := condM.norm_h_truncate_le,
     δ := condM.δ_truncate,
     hδ := condM.hδ_truncate,
-    δ_bound_by := condM.δ_truncate_bound_by },
+    norm_δ_le := condM.norm_δ_truncate_le },
   admissible := condM.truncate_admissible }
 
 omit condM
@@ -286,14 +290,22 @@ def of_le (cond : M.normed_spectral_conditions m k K k' ε c₀ H)
       (cond.admissible.row i) hk hK (nat.pred_le_pred hm) hc₀,
   htpy :=
   { h := cond.htpy.h,
-    h_bound_by := λ q q' hq hq' c hc x, have fact (c₀ ≤ c) := ⟨hc₀.out.trans hc.out⟩, by exactI
-    calc ∥cond.htpy.h q x∥ ≤ H * ∥x∥  : cond.htpy.h_bound_by q q' (hq.trans hm) hq' c x
+    norm_h_le := λ q q' hq hq' c hc, have fact (c₀ ≤ c) := ⟨hc₀.out.trans hc.out⟩, by exactI
+    begin
+    refine normed_group_hom.op_norm_le_bound _ (nnreal.coe_nonneg H_) (λ x, _),
+    calc ∥cond.htpy.h q x∥ ≤ H * ∥x∥  :
+      normed_group_hom.le_of_op_norm_le _ (cond.htpy.norm_h_le q q' (hq.trans hm) hq' c) x
                        ... ≤ H_ * ∥x∥ : mul_le_mul_of_nonneg_right hH (norm_nonneg x),
+    end,
     δ := cond.htpy.δ,
     hδ := λ c hc q hq, have fact (c₀ ≤ c) := ⟨hc₀.out.trans hc.out⟩,
       by exactI cond.htpy.hδ c q (hq.trans hm),
-    δ_bound_by := λ c hc q hq x, have fact (c₀ ≤ c) := ⟨hc₀.out.trans hc.out⟩, by exactI
-      (cond.htpy.δ_bound_by c q (hq.trans hm) x).trans (mul_le_mul_of_nonneg_right hε (norm_nonneg _)) },
+    norm_δ_le := λ c hc q hq, have fact (c₀ ≤ c) := ⟨hc₀.out.trans hc.out⟩, by exactI
+    begin
+      refine normed_group_hom.op_norm_le_bound _ (nnreal.coe_nonneg ε_) (λ x, _),
+      refine normed_group_hom.le_of_op_norm_le _ _ x,
+      exact le_trans (cond.htpy.norm_δ_le c q (hq.trans hm)) hε,
+    end },
   admissible := cond.admissible }
 
 end normed_spectral_conditions
@@ -316,7 +328,7 @@ begin
   haveI : fact (k' * (k' * c) ≤ k' * k' * c) := by { rw mul_assoc, exact ⟨le_rfl⟩ },
   have Hx1 := (cond.col_exact 0 le_rfl).of_le
     (cond.admissible.col 0) ‹_› ⟨le_rfl⟩ le_rfl ⟨le_rfl⟩ c hc 0 le_rfl,
-  have Hx2 := cond.htpy.δ_bound_by c 0 le_rfl (M.res x),
+  have Hx2 := normed_group_hom.le_of_op_norm_le _ (cond.htpy.norm_δ_le c 0 le_rfl) (M.res x),
   have aux := cond.htpy.hδ_apply c 0 le_rfl (M.res x),
   erw [res_res] at aux,
   rw aux at Hx2,
@@ -345,7 +357,7 @@ begin
   simp only [add_le_add_iff_right],
   refine (mul_le_mul_of_nonneg_left _ K.coe_nonneg),
   refine (mul_le_mul_of_nonneg_left _ zero_le_two),
-  refine le_trans (cond.htpy.h_bound_by _ _ le_rfl rfl _ _) _,
+  refine le_trans (normed_group_hom.le_of_op_norm_le _ (cond.htpy.norm_h_le _ _ le_rfl rfl _) _) _,
   refine mul_le_mul_of_nonneg_left (le_of_eq _) H.coe_nonneg,
   apply norm_res_of_eq,
   rw mul_assoc

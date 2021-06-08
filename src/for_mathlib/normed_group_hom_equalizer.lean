@@ -82,7 +82,7 @@ lemma lift_bound_by (φ : normed_group_hom V₁ V) (h : f.comp φ = g.comp φ)
 hφ
 
 lemma norm_lift_le (φ : normed_group_hom V₁ V) (h : f.comp φ = g.comp φ)
-  (C : ℝ≥0) (hφ : ∥φ∥ ≤ C) :
+  (C : ℝ) (hφ : ∥φ∥ ≤ C) :
   ∥(lift φ h)∥ ≤ C :=
 hφ
 
@@ -97,7 +97,7 @@ lemma map_bound_by (hf : ψ.comp f₁ = f₂.comp φ) (hg : ψ.comp g₁ = g₂.
 lift_bound_by _ _ _ hφ
 
 lemma norm_map_le (hf : ψ.comp f₁ = f₂.comp φ) (hg : ψ.comp g₁ = g₂.comp φ)
-  (C : ℝ≥0) (hφ : ∥φ.comp (ι f₁ g₁)∥ ≤ C) :
+  (C : ℝ) (hφ : ∥φ.comp (ι f₁ g₁)∥ ≤ C) :
   ∥map φ ψ hf hg∥ ≤ C :=
 norm_lift_le _ _ _ hφ
 

@@ -7,6 +7,7 @@ import category_theory.limits.shapes.zero
 import category_theory.limits.shapes.kernels
 import category_theory.limits.creates
 
+
 /-!
 # The category of seminormed abelian groups and continuous group homomorphisms
 
@@ -181,36 +182,30 @@ section
 open_locale nnreal
 
 -- maybe prove this for `normed_group_hom` first, without the category lib
-lemma coker.lift_bound_by {f : A ⟶ B} {g : B ⟶ C} {cond : f ≫ g = 0} {c : ℝ≥0}
-  (hg : g.bound_by c) :
-  (coker.lift cond).bound_by c :=
+lemma coker.norm_lift_le {f : A ⟶ B} {g : B ⟶ C} {cond : f ≫ g = 0} {c : ℝ}
+  (hg : ∥g∥ ≤ c) :
+  ∥coker.lift cond∥ ≤ c :=
 begin
-  intros x,
+  refine op_norm_le_bound _ (le_trans (norm_nonneg g) hg) (λ x, _),
   by_cases hc : c = 0,
   { simp only [hc, nnreal.coe_zero, zero_mul] at hg ⊢,
     obtain ⟨x, rfl⟩ := coker.π_surjective x,
     show ∥g x∥ ≤ 0,
-    calc ∥g x∥ ≤ 0 * ∥x∥ : hg x
+    calc ∥g x∥ ≤ 0 * ∥x∥ : le_of_op_norm_le _ hg x
     ... = 0 : zero_mul _ },
-  { replace hc : 0 < c := pos_iff_ne_zero.mpr hc,
+  { replace hc : 0 < c := lt_of_le_of_ne (le_trans (norm_nonneg g) hg) (ne.symm hc),
     apply le_of_forall_pos_le_add,
     intros ε hε,
     have aux : 0 < (ε / c) := div_pos hε hc,
     obtain ⟨x, rfl, Hx⟩ : ∃ x', coker.π x' = x ∧ ∥x'∥ < ∥x∥ + (ε / c) :=
       coker.π_is_quotient.norm_lift aux _,
     rw coker.lift_comp_π_apply,
-    calc ∥g x∥ ≤ c * ∥x∥ : hg x
+    calc ∥g x∥ ≤ c * ∥x∥ : le_of_op_norm_le _ hg x
     ... ≤ c * (∥coker.π x∥ + ε / c) : (mul_le_mul_left _).mpr Hx.le
     ... = c * _ + ε : _,
     { exact_mod_cast hc },
     { rw [mul_add, mul_div_cancel'], exact_mod_cast hc.ne' } },
 end
-
--- maybe prove this for `normed_group_hom` first, without the category lib
-lemma coker.lift_norm_noninc {f : A ⟶ B} {g : B ⟶ C} {cond : f ≫ g = 0}
-  (hg : g.norm_noninc) :
-  (coker.lift cond).norm_noninc :=
-λ x, by simpa only [one_mul, nnreal.coe_one] using coker.lift_bound_by hg.bound_by_one x
 
 end
 

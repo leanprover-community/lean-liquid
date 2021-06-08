@@ -118,13 +118,13 @@ begin
     exact norm_nsmul_le hf n.succ }
 end
 
-lemma norm_comp_le_of_le {C₁ C₂ : ℝ} (hf : ∥f∥ ≤ C₁) (hg : ∥g∥ ≤ C₂) :
+lemma norm_comp_le_of_le {C₁ C₂ : ℝ} (hg : ∥g∥ ≤ C₂) (hf : ∥f∥ ≤ C₁) :
   ∥g.comp f∥ ≤ C₂ * C₁ :=
 le_trans (norm_comp_le g f) $ mul_le_mul hg hf (norm_nonneg _) (le_trans (norm_nonneg _) hg)
 
 lemma norm_comp_le_of_le' (C₁ C₂ C₃ : ℝ) (h : C₃ = C₂ * C₁) (hg : ∥g∥ ≤ C₂) (hf : ∥f∥ ≤ C₁) :
   ∥g.comp f∥ ≤ C₃ :=
-by { rw h, exact norm_comp_le_of_le hf hg }
+by { rw h, exact norm_comp_le_of_le hg hf }
 
 end normed_group_hom
 
@@ -137,5 +137,12 @@ variables {V₁ V₂ V₃ : SemiNormedGroup.{u}} {f : V₁ ⟶ V₂} {g : V₂ �
 lemma comp_bound_by (C₁ C₂ C₃ : ℝ≥0) (hC : C₃ = C₂ * C₁) (hf : f.bound_by C₁) (hg : g.bound_by C₂) :
   (f ≫ g).bound_by C₃ :=
 hg.comp' _ _ _ hC hf
+
+-- maybe prove this for `normed_group_hom` first, without the category lib
+lemma coker.lift_norm_noninc {cond : f ≫ g = 0}
+  (hg : g.norm_noninc) :
+  (coker.lift cond).norm_noninc :=
+normed_group_hom.norm_noninc_iff_norm_le_one.2 $ coker.norm_lift_le $
+  normed_group_hom.norm_noninc_iff_norm_le_one.1 hg
 
 end SemiNormedGroup

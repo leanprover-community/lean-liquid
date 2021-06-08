@@ -60,14 +60,12 @@ begin
 end
 else 0
 
-lemma NSH_h_bound_by {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ}
+lemma norm_NSH_h_le {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ}
   (q : ℕ) (hqm : q ≤ m) (c : ℝ≥0) [fact (c₀ BD r r' c_ c' m Λ ≤ c)] :
-  normed_group_hom.bound_by
-    (@NSH_h BD r r' _ _ _ _ V _ c_ c' _ _ m M q (q+1) c)
-    (H BD c' r r' m) :=
+  ∥@NSH_h BD r r' _ _ _ _ V _ c_ c' _ _ m M q (q+1) c∥ ≤ (H BD c' r r' m) :=
 begin
   rw [NSH_h, dif_pos (nat.succ_le_succ hqm)],
-  apply universal_map.eval_CLCFPTinv₂_bound_by,
+  apply universal_map.norm_eval_CLCFPTinv₂_le,
   exact (bound_by_H BD c' r r' _ hqm),
 end
 
@@ -108,21 +106,21 @@ def NSH_δ {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ} (c : ℝ≥0) :
       (rescale_constants c_ (2 ^ N₂ BD c' r r' m)) r V r').obj M).obj (op (k' c' m * c)) :=
 NSH_δ_res c' (N₂ BD c' r r' m) _ ≫ (BD_map (BD.data.proj (2 ^ N₂ BD c' r r' m)) _ _ r V _).app M
 
-lemma NSH_δ_bound_by {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ} (c : ℝ≥0) (q : ℕ) :
-  normed_group_hom.bound_by ((@NSH_δ BD r r' _ _ _ _ V _ c_ c' _ _ m M c).f q) (ε BD c' r r' m) :=
+lemma norm_NSH_δ_le {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ} (c : ℝ≥0) (q : ℕ) :
+  ∥(@NSH_δ BD r r' _ _ _ _ V _ c_ c' _ _ m M c).f q∥ ≤ (ε BD c' r r' m) :=
 begin
-  refine (normed_group_hom.bound_by.comp'
-    (r ^ (b BD c' r r' m)) (N BD c' r r' m) _ (mul_comm _ _) _ _).le _,
-  { apply universal_map.eval_CLCFPTinv₂_bound_by,
+  refine le_trans (normed_group_hom.norm_comp_le_of_le'
+    (r ^ (b BD c' r r' m)) (N BD c' r r' m) _ (mul_comm _ _) _ _) _,
+  { apply universal_map.norm_eval_CLCFPTinv₂_le,
     apply universal_map.proj_bound_by },
-  { refine @CLCFPTinv.res_bound_by_pow r V _ _ r' _ _ _ _ _ _ _ ⟨_⟩ _,
+  { refine @CLCFPTinv.norm_res_le_pow r V _ _ r' _ _ _ _ _ _ _ ⟨_⟩ _,
     dsimp only [unop_op, rescale_constants],
     simp only [← mul_assoc, mul_right_comm _ c],
     simp only [mul_right_comm _ (c_ q)],
     refine mul_le_mul' _ le_rfl,
     refine mul_le_mul' _ le_rfl,
     apply thm95.universal_constants.N₂_spec, },
-  { apply r_pow_b_le_ε }
+  { apply_mod_cast r_pow_b_le_ε }
 end
 
 variables (V c' m)
@@ -133,10 +131,10 @@ end
 
 def NSH_aux' (M) (hδ) : NSH_aux_type BD r r' V c_ c' m Λ (N₂ BD c' r r' m) M :=
 { h := λ q q' c, NSH_h q q' c,
-  h_bound_by := by { rintro q q' hqm rfl, apply NSH_h_bound_by Λ q hqm },
+  norm_h_le := by { rintro q q' hqm rfl, apply_mod_cast norm_NSH_h_le Λ q hqm},
   δ := NSH_δ,
   hδ := hδ,
-  δ_bound_by := λ c hc q hqm, by apply NSH_δ_bound_by }
+  norm_δ_le := λ c hc q hqm, by apply norm_NSH_δ_le }
 .
 
 def NSH_aux (M) : NSH_aux_type BD r r' V c_ c' m Λ (N₂ BD c' r r' m) M :=
