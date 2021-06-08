@@ -283,12 +283,6 @@ begin
     simp only [set.mem_set_of_eq] }
 end
 
-lemma map_hom_norm_noninc {f : normed_group_hom V₁ V₂} (hf : f.norm_noninc) :
-  (@map_hom X _ _ _ _ _ _ f).norm_noninc :=
-assume g,
-calc ∥map f g∥ ≤ 1 * ∥g∥ : map_hom_bound_by 1 zero_lt_one hf.bound_by_one _
-... = ∥g∥ : one_mul _
-
 end map_hom
 
 section comap_hom
