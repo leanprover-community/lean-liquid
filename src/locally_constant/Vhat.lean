@@ -102,6 +102,7 @@ def incl {V : SemiNormedGroup} : V ⟶ Completion.obj V :=
 
 @[simp] lemma norm_incl_eq {V : SemiNormedGroup} {v : V} : ∥incl v∥ = ∥v∥ := by simp
 
+--This is normed_group_hom.norm_completion_le
 lemma Completion_map_bound_by {V W : SemiNormedGroup} (f : V ⟶ W) (C : ℝ≥0) (hf : f.bound_by C) :
   (Completion.map f).bound_by C :=
 begin
