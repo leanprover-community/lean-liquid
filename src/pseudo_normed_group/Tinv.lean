@@ -538,7 +538,7 @@ lemma norm_eval_CLCFPTinv₂_le [fact (c₂ ≤ r' * c₁)] [fact (c₄ ≤ r' *
 begin
   apply SemiNormedGroup.equalizer.norm_map_le,
   refine normed_group_hom.norm_comp_le_of_le' _ _ _ (mul_one _).symm _ _,
-  { apply eval_CLCFP_bound_by, exact h },
+  { apply norm_eval_CLCFP_le, exact h },
   { apply norm_noninc_iff_norm_le_one.1,
     exact equalizer.ι_norm_noninc }
 end

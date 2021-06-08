@@ -223,7 +223,7 @@ lemma T_inv_comp_eval_CLCFP [normed_with_aut r V] [fact (0 < r)] [ϕ.suitable c�
     ϕ.eval_CLCFP V r' c₁ c₂ ≫ T_inv r V r' c₂ m :=
 by simp only [eval_CLCFP, T_inv_def, ← whisker_right_comp, T_inv_comp_eval_LCFP]
 
-lemma eval_CLCFP_bound_by [normed_with_aut r V] [fact (0 < r)] [ϕ.suitable c₂ c₁]
+lemma norm_eval_CLCFP_le [normed_with_aut r V] [fact (0 < r)] [ϕ.suitable c₂ c₁]
   (N : ℕ) (h : ϕ.bound_by N) (M) :
   ∥(ϕ.eval_CLCFP V r' c₁ c₂).app M∥ ≤ N :=
 le_trans (normed_group_hom.norm_completion_le _) $ norm_eval_LCFP_le _ _ _ _ _ _ _ h _
