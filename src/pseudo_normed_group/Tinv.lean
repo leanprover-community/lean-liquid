@@ -95,11 +95,6 @@ lemma map_id {J} [category J] {V W : SemiNormedGroup} (f g : V ⟶ W) :
   map (𝟙 V) (𝟙 W) (show 𝟙 V ≫ f = f ≫ 𝟙 W, by simp) (show 𝟙 V ≫ g = g ≫ 𝟙 W, by simp) = 𝟙 _ :=
 by { ext, refl }
 
-lemma map_bound_by {V₁ V₂ W₁ W₂ : SemiNormedGroup} {f₁ f₂ g₁ g₂} {φ : V₁ ⟶ V₂} {ψ : W₁ ⟶ W₂}
-  (hf : φ ≫ f₂ = f₁ ≫ ψ) (hg : φ ≫ g₂ = g₁ ≫ ψ) (C : ℝ≥0) (hφ : (ι f₁ g₁ ≫ φ).bound_by C) :
-  (map φ ψ hf hg).bound_by C :=
-normed_group_hom.equalizer.map_bound_by _ _ C hφ
-
 lemma norm_map_le {V₁ V₂ W₁ W₂ : SemiNormedGroup} {f₁ f₂ g₁ g₂} {φ : V₁ ⟶ V₂} {ψ : W₁ ⟶ W₂}
   (hf : φ ≫ f₂ = f₁ ≫ ψ) (hg : φ ≫ g₂ = g₁ ≫ ψ) (C : ℝ) (hφ : ∥ι f₁ g₁ ≫ φ∥ ≤ C) :
   ∥map φ ψ hf hg∥ ≤ C :=
@@ -190,15 +185,6 @@ lemma map_norm_noninc {A₁ B₁ A₂ B₂ : Profiniteᵒᵖ} (f₁ g₁ : A₁ 
   (ϕ : A₁ ⟶ A₂) (ψ : B₁ ⟶ B₂) (h₁ h₂) :
   (CLCTinv.map r V f₁ g₁ f₂ g₂ ϕ ψ h₁ h₂).norm_noninc :=
 equalizer.map_norm_noninc _ _ $ CLC.map_norm_noninc _ _
-
-lemma map_bound_by {A₁ B₁ A₂ B₂ : Profiniteᵒᵖ} (f₁ g₁ : A₁ ⟶ B₁) (f₂ g₂ : A₂ ⟶ B₂)
-  (ϕ : A₁ ⟶ A₂) (ψ : B₁ ⟶ B₂) (h₁ h₂) (C : ℝ≥0)
-  (H : (SemiNormedGroup.equalizer.ι
-         ((CLC V).map f₁)
-         ((CLC V).map g₁ ≫ (CLC.T_inv r V).app B₁) ≫
-       (CLC V).map ϕ).bound_by C) :
-  (CLCTinv.map r V f₁ g₁ f₂ g₂ ϕ ψ h₁ h₂).bound_by C :=
-SemiNormedGroup.equalizer.map_bound_by _ _ C H
 
 lemma norm_map_le {A₁ B₁ A₂ B₂ : Profiniteᵒᵖ} (f₁ g₁ : A₁ ⟶ B₁) (f₂ g₂ : A₂ ⟶ B₂)
   (ϕ : A₁ ⟶ A₂) (ψ : B₁ ⟶ B₂) (h₁ h₂) (C : ℝ≥0)
