@@ -16,15 +16,17 @@ include r
 def T_inv_sub_Tinv :=
 CLCFP.res V r' c₁ c₂ n ≫ CLCFP.T_inv r V r' c₂ n - CLCFP.Tinv V r' c₁ c₂ n
 
-lemma T_inv_sub_Tinv_bound_by : ((T_inv_sub_Tinv r r' V c₁ c₂ n).app M).bound_by (1 + r⁻¹) :=
+lemma norm_T_inv_sub_Tinv_le : ∥(T_inv_sub_Tinv r r' V c₁ c₂ n).app M∥ ≤ (1 + r⁻¹) :=
 begin
   rw [T_inv_sub_Tinv, sub_eq_neg_add],
-  refine normed_group_hom.bound_by.add _ _,
-  { refine (SemiNormedGroup.Completion_map_bound_by _ _ _).neg,
-    exact (SemiNormedGroup.LocallyConstant_obj_map_norm_noninc _ _ _ _).bound_by_one },
-  { refine normed_group_hom.bound_by.comp' 1 r⁻¹ r⁻¹ (mul_one _).symm _ _,
-    { exact CLC.T_inv_bound_by r V _ },
-    { exact (res_norm_noninc V r' c₁ c₂ n M).bound_by_one } },
+  refine le_trans (norm_add_le _ _) (add_le_add _ _),
+  { rw [category_theory.nat_trans.app_neg, norm_neg],
+    refine le_trans (normed_group_hom.norm_completion_le _) _,
+    exact normed_group_hom.norm_noninc_iff_norm_le_one.1
+      (SemiNormedGroup.LocallyConstant_obj_map_norm_noninc _ _ _ _) },
+  { refine normed_group_hom.norm_comp_le_of_le' 1 r⁻¹ r⁻¹ (mul_one _).symm _ _,
+    { exact CLC.norm_T_inv_le r V _ },
+    { exact normed_group_hom.norm_noninc_iff_norm_le_one.1 (res_norm_noninc V r' c₁ c₂ n M) } },
 end
 
 variables {V c n M}

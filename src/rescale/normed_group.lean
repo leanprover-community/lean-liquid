@@ -73,13 +73,14 @@ instance rescale.additive : (rescale r).additive :=
 { map_zero' := λ V W, rfl, -- defeq abuse
   map_add' := λ V W f g, rfl /- defeq abuse -/ }
 
-lemma rescale_map_bound_by {V₁ V₂ : SemiNormedGroup} {f : V₁ ⟶ V₂} {C : ℝ≥0} (hf : f.bound_by C) :
-  ((rescale r).map f).bound_by C :=
+lemma norm_rescale_map_le {V₁ V₂ : SemiNormedGroup} {f : V₁ ⟶ V₂} {C : ℝ} (hf : ∥f∥ ≤ C) :
+  ∥(rescale r).map f∥ ≤ C :=
 begin
-  intro v,
+  refine normed_group_hom.op_norm_le_bound _ (le_trans (norm_nonneg _) hf) (λ v, _),
   dsimp,
   erw [rescale.norm_def, rescale.norm_def, equiv.symm_apply_apply, ← mul_div_assoc],
-  refine div_le_div (mul_nonneg C.coe_nonneg (norm_nonneg _)) (hf _) _ le_rfl,
+  refine div_le_div (mul_nonneg (le_trans (norm_nonneg _) hf) (norm_nonneg _))
+    (normed_group_hom.le_of_op_norm_le _ hf _) _ le_rfl,
   rw nnreal.coe_pos, apply fact.out
 end
 
@@ -178,12 +179,6 @@ def scale : rescale r₁ ⟶ rescale r₂ :=
 lemma norm_scale_le (V : SemiNormedGroup) : ∥(scale r₁ r₂).app V∥ ≤ (r₁ / r₂) :=
 normed_group_hom.mk_normed_group_hom_norm_le _ (div_nonneg (nnreal.coe_nonneg _)
     (nnreal.coe_nonneg _)) (λ v, nnnorm_rescale_rescale_symm r₁ r₂ v)
-
-lemma scale_bound_by (V : SemiNormedGroup) : ((scale r₁ r₂).app V).bound_by (r₁ / r₂) :=
-begin
-  intro v,
-  refine normed_group_hom.le_of_op_norm_le _ (norm_scale_le r₁ r₂ V) v,
-end
 
 lemma scale_comm {V₁ V₂ W₁ W₂ : SemiNormedGroup}
   (f₁ : V₁ ⟶ W₁) (f₂ : V₂ ⟶ W₂) (φ : V₁ ⟶ V₂) (ψ : W₁ ⟶ W₂) (h : f₁ ≫ ψ = φ ≫ f₂) :

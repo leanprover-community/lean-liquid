@@ -180,12 +180,14 @@ end
 lemma double_complex.d_two_norm_noninc (c : ℝ≥0) (p q : ℕ) :
   (@system_of_double_complexes.d (double_complex BD c_ r r' V Λ M N) c (p+2) (p+3) q).norm_noninc :=
 begin
-  refine ((SemiNormedGroup.scale_bound_by _ _ _).comp' (p+3:ℕ) _ 1 _ _).norm_noninc,
+  apply normed_group_hom.norm_noninc_iff_norm_le_one.2,
+  refine normed_group_hom.norm_comp_le_of_le' (p+3:ℕ) _ 1 _ (SemiNormedGroup.norm_scale_le _ _ _) _,
   { simp only [add_zero, nat.add_def, ← nat.cast_succ],
+    norm_cast,
     rw [mul_comm, ← mul_div_assoc, eq_comm, ← nat.cast_mul, nat.factorial_succ], apply div_self,
-    norm_cast, norm_num [nat.factorial_ne_zero] },
-  apply SemiNormedGroup.rescale_map_bound_by,
-  have : (p+1+1+1 : ℝ≥0) = ∑ i : fin (p+1+1+1), 1,
+    norm_num [nat.factorial_ne_zero] },
+  apply SemiNormedGroup.norm_rescale_map_le,
+  have : (p+1+1+1 : ℝ) = ∑ i : fin (p+1+1+1), 1,
   { simp only [finset.card_fin, mul_one, finset.sum_const, nsmul_eq_mul, nat.cast_id,
       nat.cast_bit1, nat.cast_add, nat.cast_one] },
   dsimp [system_of_complexes.rescale_functor, double_complex_aux,
@@ -194,10 +196,10 @@ begin
   dsimp [cosimplicial_object.coboundary],
   simp only [← nat_trans.app_hom_apply, add_monoid_hom.map_sum, add_monoid_hom.map_gsmul,
     ← homological_complex.hom.f_add_monoid_hom_apply, this],
-  apply normed_group_hom.bound_by.sum,
+  apply normed_group_hom.sum.norm_le,
   rintro i -,
-  refine (normed_group_hom.bound_by.int_smul _ ((-1) ^ ↑i : ℤ)).le (_ : _ * 1 ≤ 1),
-  { apply normed_group_hom.norm_noninc.bound_by_one,
+  refine le_trans (normed_group_hom.norm_gsmul_le _ ((-1) ^ ↑i : ℤ)) (_ : _ * 1 ≤ 1),
+  { apply normed_group_hom.norm_noninc_iff_norm_le_one.1,
     apply breen_deligne.data.complex.map_norm_noninc },
   { simp only [mul_one, int.nat_abs_pow, int.nat_abs_neg, int.nat_abs_one, one_pow, nat.cast_one] },
 end

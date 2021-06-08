@@ -1,4 +1,5 @@
 import pseudo_normed_group.LC
+import for_mathlib.normed_group_hom_completion
 /-!
 
 # V-hat(M_c^n)
@@ -45,9 +46,9 @@ whisker_right (LC.T_inv r V) Completion
 
 lemma T_inv_eq [normed_with_aut r V] [fact (0 < r)] : (T r V).inv = T_inv r V := rfl
 
-lemma T_inv_bound_by [normed_with_aut r V] [fact (0 < r)] (A) :
-  ((T_inv r V).app A).bound_by r⁻¹ :=
-Completion_map_bound_by _ _ $ LC.T_inv_bound_by _ _ _
+lemma norm_T_inv_le [normed_with_aut r V] [fact (0 < r)] (A) :
+  ∥(T_inv r V).app A∥ ≤ r⁻¹ :=
+le_trans (normed_group_hom.norm_completion_le _) $ LC.norm_T_inv_le _ _ _
 
 end CLC
 

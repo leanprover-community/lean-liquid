@@ -1134,27 +1134,30 @@ namespace col_complex_rescaled
 lemma d_zero_norm_noninc (c : ℝ≥0) :
   (@system_of_complexes.d (col_complex_rescaled r' V Λ M N n) c 0 1).norm_noninc :=
 begin
-  refine ((SemiNormedGroup.scale_bound_by _ _ _).comp' (1:ℕ) _ 1 _ _).norm_noninc,
-  { simp only [nat.factorial_zero, nat.factorial_one, nat.cast_one, div_one, mul_one], },
-  apply SemiNormedGroup.rescale_map_bound_by,
-  have : (1 : ℝ≥0) = ∑ i : fin 1, 1,
+  apply normed_group_hom.norm_noninc_iff_norm_le_one.2,
+  refine normed_group_hom.norm_comp_le_of_le' (1:ℕ) _ 1 _ (SemiNormedGroup.norm_scale_le _ _ _) _,
+  { simp only [mul_one, nat.factorial_zero, nat.factorial_one, nat.cast_one, div_one, nnreal.coe_one]},
+  apply SemiNormedGroup.norm_rescale_map_le,
+  have : (1 : ℝ) = ∑ i : fin 1, 1,
   { simp only [finset.card_fin, mul_one, finset.sum_const, nsmul_eq_mul, nat.cast_id,
       nat.cast_bit1, nat.cast_add, nat.cast_one] },
   dsimp [system_of_complexes.rescale_functor, double_complex_aux,
     cosimplicial_object.augmented.to_cocomplex_d],
   erw [category.comp_id, if_pos rfl, Cech_nerve'_hom_zero, zero_add],
-  apply normed_group_hom.norm_noninc.bound_by_one,
+  apply normed_group_hom.norm_noninc_iff_norm_le_one.1,
   apply CLC.map_norm_noninc,
 end
 
 lemma d_succ_norm_noninc (c : ℝ≥0) (p : ℕ) :
   (@system_of_complexes.d (col_complex_rescaled r' V Λ M N n) c (p+1) (p+2)).norm_noninc :=
 begin
-  refine ((SemiNormedGroup.scale_bound_by _ _ _).comp' (p+2:ℕ) _ 1 _ _).norm_noninc,
-  { rw [mul_comm, ← mul_div_assoc, eq_comm, ← nat.cast_mul, nat.factorial_succ], apply div_self,
-    norm_cast, norm_num [nat.factorial_ne_zero] },
-  apply SemiNormedGroup.rescale_map_bound_by,
-  have : (p+1+1 : ℝ≥0) = ∑ i : fin (p+1+1), 1,
+  apply normed_group_hom.norm_noninc_iff_norm_le_one.2,
+  refine normed_group_hom.norm_comp_le_of_le' (p+2:ℕ) _ 1 _ (SemiNormedGroup.norm_scale_le _ _ _) _,
+  { norm_cast,
+    rw [mul_comm, ← mul_div_assoc, eq_comm, ← nat.cast_mul, nat.factorial_succ], apply div_self,
+    norm_num [nat.factorial_ne_zero] },
+  apply SemiNormedGroup.norm_rescale_map_le,
+  have : (p+1+1 : ℝ) = ∑ i : fin (p+1+1), 1,
   { simp only [finset.card_fin, mul_one, finset.sum_const, nsmul_eq_mul, nat.cast_id,
       nat.cast_bit1, nat.cast_add, nat.cast_one] },
   dsimp [system_of_complexes.rescale_functor, double_complex_aux,
@@ -1163,10 +1166,10 @@ begin
   dsimp [cosimplicial_object.coboundary],
   simp only [← nat_trans.app_hom_apply, add_monoid_hom.map_sum, add_monoid_hom.map_gsmul,
     ← homological_complex.hom.f_add_monoid_hom_apply, this],
-  apply normed_group_hom.bound_by.sum,
+  apply normed_group_hom.sum.norm_le,
   rintro i -,
-  refine (normed_group_hom.bound_by.int_smul _ ((-1) ^ ↑i : ℤ)).le (_ : _ * 1 ≤ 1),
-  { apply normed_group_hom.norm_noninc.bound_by_one,
+  refine le_trans (normed_group_hom.norm_gsmul_le _ ((-1) ^ ↑i : ℤ)) (_ : _ * 1 ≤ 1),
+  { apply normed_group_hom.norm_noninc_iff_norm_le_one.1,
     apply CLC.map_norm_noninc, },
   { simp only [mul_one, int.nat_abs_pow, int.nat_abs_neg, int.nat_abs_one, one_pow, nat.cast_one] },
 end
@@ -1181,10 +1184,10 @@ lemma admissible : (col_complex_rescaled r' V Λ M N n).admissible :=
   res_norm_noninc :=
   begin
     intros c₁ c₂ i h,
-    apply normed_group_hom.bound_by.norm_noninc,
+    apply normed_group_hom.norm_noninc_iff_norm_le_one.2,
     cases i;
-    { apply SemiNormedGroup.rescale_map_bound_by,
-      apply normed_group_hom.norm_noninc.bound_by_one,
+    { apply SemiNormedGroup.norm_rescale_map_le,
+      apply normed_group_hom.norm_noninc_iff_norm_le_one.1,
       apply CLC.map_norm_noninc, },
   end }
 
@@ -1196,8 +1199,9 @@ lemma col_exact'_aux1 [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) (i : ℕ) :
 begin
   intro x,
   cases i;
-  { refine @SemiNormedGroup.rescale_map_bound_by _ _ _ _ _ (1 + r⁻¹) _ x,
-    exact CLCFP.T_inv_sub_Tinv_bound_by _ _ _ _ _ _ _ }
+  { apply normed_group_hom.le_of_op_norm_le,
+    refine @SemiNormedGroup.norm_rescale_map_le _ _ _ _ _ (1 + r⁻¹) _,
+    exact CLCFP.norm_T_inv_sub_Tinv_le _ _ _ _ _ _ _ }
 end
 
 lemma col_exact'_aux2 [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) (i : ℕ) :

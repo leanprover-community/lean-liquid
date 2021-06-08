@@ -74,9 +74,13 @@ lemma T_inv_eq [normed_with_aut r V] [fact (0 < r)] : (T r V).inv = T_inv r V :=
 lemma T_inv_eq' [normed_with_aut r V] [fact (0 < r)] (A) :
   (T_inv r V).app A = normed_with_aut.T.inv := rfl
 
-lemma T_inv_bound_by [normed_with_aut r V] [fact (0 < r)] (A) :
-  ((T_inv r V).app A).bound_by r⁻¹ :=
-by { rw T_inv_eq', intro v, exact (normed_with_aut.norm_T_inv _ v).le }
+lemma norm_T_inv_le [normed_with_aut r V] [fact (0 < r)] (A) :
+  ∥(T_inv r V).app A∥ ≤ r⁻¹ :=
+begin
+  rw T_inv_eq',
+  refine normed_group_hom.op_norm_le_bound _ (inv_nonneg.2 (nnreal.zero_le_coe)) (λ v, _),
+  exact (normed_with_aut.norm_T_inv _ v).le
+end
 
 end LC
 
