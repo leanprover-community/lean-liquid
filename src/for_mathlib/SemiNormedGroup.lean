@@ -7,6 +7,7 @@ import category_theory.limits.shapes.zero
 import category_theory.limits.shapes.kernels
 import category_theory.limits.creates
 
+import for_mathlib.normed_group_hom
 
 /-!
 # The category of seminormed abelian groups and continuous group homomorphisms
@@ -267,6 +268,16 @@ begin
 end
 
 end cokernels
+
+variables {V₁ V₂ V₃ : SemiNormedGroup.{u}} {f : V₁ ⟶ V₂} {g : V₂ ⟶ V₃}
+
+-- maybe prove this for `normed_group_hom` first, without the category lib
+lemma coker.lift_norm_noninc {cond : f ≫ g = 0}
+  (hg : g.norm_noninc) :
+  (coker.lift cond).norm_noninc :=
+normed_group_hom.norm_noninc_iff_norm_le_one.2 $ coker.norm_lift_le $
+  normed_group_hom.norm_noninc_iff_norm_le_one.1 hg
+
 
 end SemiNormedGroup
 #lint- only unused_arguments def_lemma doc_blame
