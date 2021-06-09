@@ -33,9 +33,59 @@ def normed_group_hom.completion (f : normed_group_hom G H) :
     simp only [f.le_op_norm x, completion.norm_coe]
   end }
 
+lemma normed_group_hom.completion_def (f : normed_group_hom G H) (x : completion G) :
+  f.completion x = completion.map f x := rfl
+
+lemma normed_group_hom.completion_coe_to_fun (f : normed_group_hom G H) :
+  (f.completion : (completion G) → (completion H)) = completion.map f :=
+by { ext x, exact normed_group_hom.completion_def f x }
+
 @[simp]
-lemma normed_group_hom.completion_coe (f : normed_group_hom G H) (g : G) : f.completion g = f g:=
+lemma normed_group_hom.completion_coe (f : normed_group_hom G H) (g : G) : f.completion g = f g :=
 completion.map_coe f.uniform_continuous _
+
+--This has nothing to do with completions.
+@[simp]
+lemma normed_group_hom.coe_id : ((normed_group_hom.id : normed_group_hom G G) : G → G) =
+  (_root_.id : G → G) := rfl
+
+--This has nothing to do with completions.
+@[simp]
+lemma normed_group_hom.coe_comp (f : normed_group_hom G H) (g : normed_group_hom H K) :
+  (g.comp f : G → K) = (g : H → K) ∘ (f : G → H) := rfl
+
+--Why is the group implicit in `normed_group_hom.id`? I (RB) probably did it, for no reason.
+@[simp]
+lemma normed_group_hom.completion_id : (normed_group_hom.id : normed_group_hom G G).completion =
+  (normed_group_hom.id : normed_group_hom (completion G) (completion G)) :=
+begin
+  ext x,
+  rw [normed_group_hom.completion_def, normed_group_hom.coe_id, completion.map_id],
+  refl
+end
+
+lemma normed_group_hom.completion_comp (f : normed_group_hom G H) (g : normed_group_hom H K) :
+  g.completion.comp f.completion = (g.comp f).completion :=
+begin
+  ext x,
+  rw [normed_group_hom.coe_comp, normed_group_hom.completion_def,
+    normed_group_hom.completion_coe_to_fun, normed_group_hom.completion_coe_to_fun,
+    completion.map_comp (normed_group_hom.uniform_continuous _)
+    (normed_group_hom.uniform_continuous _)],
+  refl
+end
+
+lemma normed_group_hom.completion_add (f g : normed_group_hom G H) :
+  (f + g).completion = f.completion + g.completion :=
+begin
+  ext x,
+  apply uniform_space.completion.induction_on x,
+  { refine is_closed_eq (normed_group_hom.continuous _) _,
+    apply continuous.add; apply normed_group_hom.continuous },
+  { clear x, intro x,
+    simp only [add_apply, normed_group_hom.completion_coe],
+    exact is_add_hom.map_add coe (f x) (g x) }
+end
 
 def normed_group.to_compl : normed_group_hom G (completion G) :=
 { to_fun := coe,
@@ -44,7 +94,6 @@ def normed_group.to_compl : normed_group_hom G (completion G) :=
   bound' := ⟨1, by simp [le_refl]⟩ }
 
 abbreviation j := (normed_group.to_compl : normed_group_hom G $ completion G)
-
 
 lemma normed_group.norm_to_compl (x : G) : ∥j x∥ = ∥x∥ :=
 completion.norm_coe x
@@ -80,8 +129,6 @@ begin
   { intro g,
     simp [f.le_op_norm  g] },
 end
-
-open normed_group_hom
 
 lemma normed_group_hom.ker_le_ker_completion (f : normed_group_hom G H) :
   (j.comp $ incl f.ker).range ≤ f.completion.ker  :=
@@ -149,7 +196,8 @@ begin
         ... = ∥f.completion (g - hatg)∥ : by rw [f.completion.map_sub]
         ... ≤ ∥f.completion∥ * ∥(g :completion G) - hatg∥ : f.completion.le_op_norm _
         ... = ∥f.completion∥ * ∥hatg - g∥ : by rw norm_sub_rev
-        ... ≤ ∥f∥ * ∥hatg - g∥ : mul_le_mul_of_nonneg_right (norm_completion_le f) (norm_nonneg _),
+        ... ≤ ∥f∥ * ∥hatg - g∥ : mul_le_mul_of_nonneg_right
+          (normed_group_hom.norm_completion_le f) (norm_nonneg _),
     have : ∥(g' : completion G)∥ ≤ C*∥f∥*∥hatg - g∥,
     calc
     ∥(g' : completion G)∥ = ∥g'∥ : completion.norm_coe _
