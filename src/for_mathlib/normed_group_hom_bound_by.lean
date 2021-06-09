@@ -11,9 +11,14 @@ variables {f : normed_group_hom V₁ V₂} {g : normed_group_hom V₂ V₃}
 lemma bound_by.norm_noninc (hf : f.bound_by 1) : f.norm_noninc :=
 λ v, (hf v).trans $ by rw [nnreal.coe_one, one_mul]
 
+--This is in #7860
 lemma norm_noninc_iff_norm_le_one : f.norm_noninc ↔ ∥f∥ ≤ 1 :=
-⟨λ h, op_norm_le_bound f zero_le_one (by simpa [h]),
-  λ h, bound_by.norm_noninc (λ v, le_of_op_norm_le f h v)⟩
+begin
+  refine ⟨λ h, _, λ h, λ v, _⟩,
+  { refine op_norm_le_bound _ (zero_le_one) (λ v, _),
+    simpa [one_mul] using h v },
+  { simpa using le_of_op_norm_le f h v }
+end
 
 lemma bound_by.comp {C₁ C₂ : ℝ≥0} (hg : g.bound_by C₂) (hf : f.bound_by C₁) :
   (g.comp f).bound_by (C₂ * C₁) :=
