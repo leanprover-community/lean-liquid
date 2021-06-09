@@ -180,7 +180,7 @@ lemma eval_CLCFP_mul [ϕ.suitable c₂ c₁] {_ : (universal_map.mul N ϕ).suita
   ((CLC V).map (FiltrationPow.mul_iso.{u u} r' c₁ M N n).op.hom ≫
    ((ϕ.eval_CLCFP V r' c₁ c₂).app (op (ProFiltPseuNormGrpWithTinv.of r' (M ^ N))) : _)) :=
 begin
-  dsimp [universal_map.eval_CLCFP],
+  dsimp only [universal_map.eval_CLCFP, whisker_right_app],
   simp only [universal_map.eval_LCFP_eq_eval_LCFP', universal_map.eval_LCFP',
     ← nat_trans.app_hom_apply, ← functor.map_add_hom_apply,
     add_monoid_hom.map_sum, add_monoid_hom.map_gsmul],

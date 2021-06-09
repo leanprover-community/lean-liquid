@@ -36,37 +36,7 @@ open uniform_space opposite category_theory
 @[simps]
 def Completion : SemiNormedGroup.{u} ⥤ SemiNormedGroup.{u} :=
 { obj := λ V, SemiNormedGroup.of (completion V),
-  map := λ V W f,
-  { to_fun := completion.map f,
-    bound' :=
-    begin
-      obtain ⟨C, C_pos, hC⟩ := f.bound,
-      use C,
-      intro v,
-      apply completion.induction_on v; clear v,
-      { refine is_closed_le _ _,
-        { exact continuous_norm.comp completion.continuous_map },
-        { exact continuous_const.mul continuous_norm } },
-      { intro v,
-        rw [completion.map_coe, completion.norm_coe, completion.norm_coe],
-        { apply hC },
-        { exact f.uniform_continuous } }
-    end,
-    map_add' :=
-    begin
-    intros x y,
-    apply completion.induction_on₂ x y; clear x y,
-    { refine is_closed_eq _ _,
-      { exact completion.continuous_map.comp continuous_add },
-      { apply continuous.add,
-        { exact completion.continuous_map.comp continuous_fst },
-        { exact completion.continuous_map.comp continuous_snd } } },
-    { intros x y,
-      rw [← completion.coe_add, completion.map_coe,
-        completion.map_coe, completion.map_coe, ← completion.coe_add],
-      { congr' 1, exact f.map_add' x y },
-      all_goals { exact normed_group_hom.uniform_continuous f } }
-    end },
+  map := λ V W f, normed_group_hom.completion f,
   map_id' := λ V, by { ext1 v, show completion.map id v = v, rw completion.map_id, refl },
   map_comp' :=
   begin
