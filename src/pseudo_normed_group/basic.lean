@@ -17,7 +17,6 @@ not work in an arbitrary topos.
 ## Main definitions
 
 `pseudo_normed_group` -- a pseudo-normed abelian additive group
-`archimedean` -- a predicate saying m ∈ M_c ↔ n•m ∈ M_{nc} for all positive naturals `n`.
 
 ## Implementation issues
 
@@ -232,12 +231,6 @@ by simpa only [coe_cast_le] using congr_arg (coe : filtration M c₂ → M) h
 
 variables (M)
 
-/-- A pseudo-normed group `M` is *archimedean* if for all positive `n : ℕ`
-the condition `(n • m) ∈ filtration M (n • c) ↔ m ∈ filtration M c` holds. -/
-def archimedean : Prop :=
-∀ (m : M) (c : ℝ≥0) (n : ℕ), 0 < n →
-  ((n • m) ∈ filtration M (n • c) ↔ m ∈ filtration M c)
-
 end pseudo_normed_group
 
 open pseudo_normed_group
@@ -335,21 +328,6 @@ lemma const_smul_hom_int_mem_filtration (n : ℤ) (c : ℝ≥0) (h : ↑(n.nat_a
   using filtration_mono (mul_le_mul_right' h c') (int_smul_mem_filtration _ _ _ hx)
 
 end add_monoid_hom
-
-lemma pseudo_normed_group.archimedean.add_monoid_hom (M : Type*) {N : Type*}
-  [pseudo_normed_group M] [pseudo_normed_group N]
-  (h : pseudo_normed_group.archimedean N) :
-  archimedean (M →+ N) :=
-begin
-  intros f c k hk,
-  apply forall_congr, intro c',
-  apply forall_congr, intro l,
-  apply forall_congr, intro hl,
-  have := h (f l) (c * c') k hk,
-  simp only [← nsmul_eq_smul, nsmul_eq_mul, mul_assoc] at this ⊢,
-  simp only [nsmul_eq_smul, ← nsmul_eq_mul, ← add_monoid_hom.smul_apply] at this ⊢,
-  convert this
-end
 
 namespace pseudo_normed_group
 

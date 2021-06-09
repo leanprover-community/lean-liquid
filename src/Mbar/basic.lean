@@ -384,14 +384,6 @@ begin
   simp only [nnreal.coe_nat_cast, nnreal.coe_tsum, nnreal.coe_mul, ← tsum_mul_left, ← mul_assoc]
 end
 
-lemma archimedean : pseudo_normed_group.archimedean (Mbar r' S) :=
-begin
-  intros x c N hN,
-  simp only [Mbar.mem_filtration_iff, nnnorm_nsmul, nsmul_eq_mul],
-  rw mul_le_mul_left,
-  exact_mod_cast hN,
-end
-
 /-- `of_mask x mask : Mbar r' S` is `∑ a_{s,n}T^n ∈ Tℤ[[T]]`,
 where `a_{s,n}` is `x_{s,n}` if `mask n s` is true and `0` otherwise. -/
 @[simps]
