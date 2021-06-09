@@ -1,6 +1,5 @@
 import polyhedral_lattice.basic
 import linear_algebra.dual
-import for_mathlib.grading
 import for_mathlib.nnrat
 import for_mathlib.rational_cones
 import topology.continuous_function.algebra
