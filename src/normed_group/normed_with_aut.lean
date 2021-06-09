@@ -1,4 +1,4 @@
-import normed_group.SemiNormedGroup
+import for_mathlib.SemiNormedGroup
 /-!
 
 # Seminormed groups with an extra automorphism

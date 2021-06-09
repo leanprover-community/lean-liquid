@@ -1,6 +1,6 @@
 import topology.discrete_quotient
 import topology.category.Profinite
-import normed_group.SemiNormedGroup
+import for_mathlib.SemiNormedGroup
 
 open category_theory
 open category_theory.limits

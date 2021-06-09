@@ -1,6 +1,5 @@
 import hacks_and_tricks.by_exactI_hack
 import system_of_complexes.basic
-import normed_group.SemiNormedGroup
 import facts
 
 universe variables v u

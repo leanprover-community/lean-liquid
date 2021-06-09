@@ -2,7 +2,7 @@ import topology.category.Profinite
 import category_theory.filtered
 
 import locally_constant.analysis
-import normed_group.SemiNormedGroup
+import for_mathlib.SemiNormedGroup
 
 /-!
 

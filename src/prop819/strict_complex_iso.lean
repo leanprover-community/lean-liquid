@@ -1,4 +1,4 @@
-import normed_group.SemiNormedGroup
+import for_mathlib.SemiNormedGroup
 import algebra.homology.additive
 
 namespace SemiNormedGroup

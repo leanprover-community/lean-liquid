@@ -1,5 +1,5 @@
 import analysis.normed_space.normed_group_hom
-import normed_group.SemiNormedGroup
+import for_mathlib.SemiNormedGroup
 
 open_locale nnreal big_operators
 

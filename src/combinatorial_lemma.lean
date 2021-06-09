@@ -1,4 +1,4 @@
-import normed_group.SemiNormedGroup
+import for_mathlib.SemiNormedGroup
 
 import Mbar.basic
 import normed_group.pseudo_normed_group

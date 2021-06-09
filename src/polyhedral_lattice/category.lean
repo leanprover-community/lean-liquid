@@ -1,6 +1,6 @@
 import polyhedral_lattice.basic
 import category_theory.concrete_category.bundled_hom
-import normed_group.SemiNormedGroup
+import for_mathlib.SemiNormedGroup
 /-
 
 # The category of polyhedral lattices
