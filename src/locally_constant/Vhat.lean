@@ -5,7 +5,7 @@ import topology.algebra.normed_group
 import topology.algebra.group_completion
 import topology.metric_space.completion
 
-import for_mathlib.normed_group
+import for_mathlib.normed_group_hom_completion
 
 import locally_constant.SemiNormedGroup
 import normed_group.normed_with_aut
@@ -104,14 +104,8 @@ def incl {V : SemiNormedGroup} : V ⟶ Completion.obj V :=
 
 lemma Completion_map_norm_noninc {V W : SemiNormedGroup} (f : V ⟶ W) (hf : f.norm_noninc) :
   (Completion.map f).norm_noninc :=
-begin
-  intros v,
-  apply completion.induction_on v; clear v,
-  { refine is_closed_le (continuous_norm.comp completion.continuous_map) continuous_norm },
-  intro v,
-  simp only [completion.norm_coe, Completion_map_apply, completion.map_coe f.uniform_continuous],
-  exact hf v
-end
+normed_group_hom.norm_noninc_iff_norm_le_one.2 $ le_trans
+  (normed_group_hom.norm_completion_le f) $ normed_group_hom.norm_noninc_iff_norm_le_one.1 hf
 
 /--
 Given a normed group hom `V ⟶ W`, this defines the associated morphism
@@ -120,21 +114,8 @@ The difference from the definition obtained from the functoriality of completion
 map sending a morphism `f` to the associated morphism of completions is itself additive.
 -/
 def Completion.map_hom (V W : SemiNormedGroup.{u}) : (V ⟶ W) →+ (Completion.obj V ⟶ Completion.obj W) :=
-add_monoid_hom.mk' (category_theory.functor.map Completion) $
-begin
-  intros f g, ext v,
-  apply uniform_space.completion.induction_on v,
-  { refine is_closed_eq (normed_group_hom.continuous _) _,
-    apply continuous.add; apply normed_group_hom.continuous },
-  { clear v, intro v,
-    simp only [normed_group_hom.coe_add, pi.add_apply,
-      Completion_map_apply, normed_group_hom.coe_add],
-    rw [uniform_space.completion.map_coe,
-        uniform_space.completion.map_coe f.uniform_continuous,
-        uniform_space.completion.map_coe g.uniform_continuous],
-    { rw [pi.add_apply, uniform_space.completion.coe_add] },
-    { exact (f + g).uniform_continuous } }
-end
+add_monoid_hom.mk' (category_theory.functor.map Completion) $ λ f g,
+  normed_group_hom.completion_add f g
 
 
 @[simp] lemma Completion.map_zero (V W : SemiNormedGroup) : Completion.map (0 : V ⟶ W) = 0 :=
