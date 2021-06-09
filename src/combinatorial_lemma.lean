@@ -122,15 +122,16 @@ lemma Mbar.mk_aux_mem_filtration
   Mbar.mk_aux hl x x₀' H' ∈ filtration (Λ →+ Mbar r' S) (c / ↑N) :=
 begin
   set x₀ := Mbar.mk_aux hl x x₀' H',
-  refine (Mbar.archimedean.add_monoid_hom _ _ _ _ hN).mp _,
-  have aux : N • (c / N) = c,
-  { rw [nsmul_eq_mul, mul_comm, div_mul_cancel],
+  have aux : c = (N : ℝ≥0) * (c / N),
+  { rw [mul_comm, div_mul_cancel],
     exact_mod_cast hN.ne' },
-  rw aux,
+  have hN' : (0: ℝ≥0) < N,
+  {  exact_mod_cast hN },
   rw hl.add_monoid_hom_mem_filtration_iff at hx ⊢,
   intro i,
   specialize hx i,
   rw Mbar.mem_filtration_iff at hx ⊢,
+  rw [← mul_le_mul_left hN', ← mul_assoc, ← aux, ← nsmul_eq_mul, ← Mbar.nnnorm_nsmul],
   refine le_trans (finset.sum_le_sum _) hx,
   rintro s -,
   refine tsum_le_tsum _ (Mbar.summable _ s) ((x (l i)).summable s),
@@ -453,3 +454,4 @@ begin
     rw [mul_right_comm],
     exact mul_le_mul' hx le_rfl }
 end
+.
