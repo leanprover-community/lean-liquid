@@ -25,27 +25,27 @@ open_locale nnreal -- enable the notation `ℝ≥0` for the nonnegative real num
 open category_theory ProFiltPseuNormGrpWithTinv polyhedral_lattice opposite
 
 variables (BD : breen_deligne.package)
-variables (c_ : ℕ → ℝ≥0)  -- implicit constants, chosen once and for all
+variables (κ : ℕ → ℝ≥0)  -- implicit constants, chosen once and for all
                           -- see the sentence after that statement of Thm 9.5
 
 /-- A mix of Theorems 9.4 and 9.5 in [Analytic] -/
 theorem first_target (r r' : ℝ≥0)
   [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r < 1)] [fact (r' < 1)]
-  [BD.data.very_suitable r r' c_] [∀ (i : ℕ), fact (0 < c_ i)] :
+  [BD.data.very_suitable r r' κ] [∀ (i : ℕ), fact (0 < κ i)] :
   ∀ m : ℕ,
   ∃ (k K : ℝ≥0) [fact (1 ≤ k)],
   ∃ c₀ : ℝ≥0,
   ∀ (S : Type) [fintype S],
   ∀ (V : SemiNormedGroup.{0}) [normed_with_aut r V],
-    ​((BD.data.system c_ r V r').obj (op $ of r' (Mbar r' S))).is_weak_bounded_exact k K m c₀ :=
+    ​((BD.data.system κ r V r').obj (op $ of r' (Mbar r' S))).is_weak_bounded_exact k K m c₀ :=
 begin
   intro m,
-  obtain ⟨k, K, hk, H⟩ := thm95'' BD r r' c_ m,
+  obtain ⟨k, K, hk, H⟩ := thm95'' BD r r' κ m,
   obtain ⟨c₀, H⟩ := H ℤ,
   use [k, K, hk, c₀],
   introsI S hS V hV,
   specialize H S V,
-  let i := (BD.data.system c_ r V r').map_iso (HomZ_iso (of r' $ Mbar r' S)).op,
+  let i := (BD.data.system κ r V r').map_iso (HomZ_iso (of r' $ Mbar r' S)).op,
   refine H.of_iso i.symm _,
   intros c n,
   rw ← system_of_complexes.apply_hom_eq_hom_apply,
@@ -60,7 +60,7 @@ Most of the theorem should be fairly readable.
 We will now briefly explain some of the more peculiar syntax.
 The proof reduces to `thm95''` (a variant of Theorem 9.5).
 
-* `[BD.suitable c_]` assumes that the nonnegative reals `c_ i` satisfy some suitable conditions
+* `[BD.suitable κ]` assumes that the nonnegative reals `κ i` satisfy some suitable conditions
   with respect to the package of Breen--Deligne data `BD`.
 * `[fact (0 < r)]` records the "fact" `0 < r` as an assumption to whatever comes later.
 * `(S : Type) [fintype S]` is Lean's way of saying "`S` is a finite set".
@@ -76,6 +76,6 @@ The proof reduces to `thm95''` (a variant of Theorem 9.5).
 
 example (r r' : ℝ≥0)
   [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r < 1)] [fact (r' < 1)]
-  [BD.data.very_suitable r r' c_] [∀ (i : ℕ), fact (0 < c_ i)] :
-  first_target_stmt BD c_ r r' :=
-first_target BD c_ r r'
+  [BD.data.very_suitable r r' κ] [∀ (i : ℕ), fact (0 < κ i)] :
+  first_target_stmt BD κ r r' :=
+first_target BD κ r r'

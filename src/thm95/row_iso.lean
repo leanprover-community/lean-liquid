@@ -8,8 +8,8 @@ import rescale.FiltrationPow
 We have
 ```
 lemma double_complex.row_one :
-  (double_complex BD c' r r' V Λ M N).row 1 =
-  BD.system c' r V r' (Hom ((cosimplicial Λ N).obj (mk 0)) M) := rfl
+  (double_complex BD κ r r' V Λ M N).row 1 =
+  BD.system κ r V r' (Hom ((cosimplicial Λ N).obj (mk 0)) M) := rfl
 ```
 
 We want to "rewrite" this row in such a way that it is the target
@@ -17,8 +17,8 @@ of the homotopies that will be constructed formally from `BD.homotopy`.
 
 Concretely, we want:
 ```
-(((data.mul N).obj BD.data).system (rescale_constants c_ N) r V r').obj (op (Hom Λ M)) ≅
-  (thm95.double_complex BD.data c_ r r' V Λ M N).row 1
+(((data.mul N).obj BD.data).system (rescale_constants κ N) r V r').obj (op (Hom Λ M)) ≅
+  (thm95.double_complex BD.data κ r r' V Λ M N).row 1
 ```
 
 This means that we need to multiply `BD` by `N`,
@@ -64,15 +64,15 @@ open category_theory
 section rescale
 
 variables {BD : breen_deligne.data}
-variables (c_ c_₁ c_₂ : ℕ → ℝ≥0)
-variables [BD.suitable c_]
+variables (κ : ℕ → ℝ≥0)
+variables [BD.suitable κ]
 variables (r : ℝ≥0) (V : SemiNormedGroup.{u}) [normed_with_aut r V] [fact (0 < r)]
 variables {r' : ℝ≥0} [fact (0 < r')] [fact (r' ≤ 1)] (c : ℝ≥0)
 variables (M : ProFiltPseuNormGrpWithTinv.{u} r')
 
 -- move this
 instance rescale_constants_suitable (N : ℝ≥0) :
-  BD.suitable (rescale_constants c_ N) :=
+  BD.suitable (rescale_constants κ N) :=
 by { delta rescale_constants, apply_instance }
 
 variables (BD)
@@ -87,16 +87,16 @@ def FiltrationPow_rescale_iso (n : ℕ) (N : ℝ≥0) :
 iso.refl _
 
 def complex_rescale_iso (N : ℝ≥0) :
-  (BD.complex (rescale_constants c_ N) r V r' c).obj (op M) ≅
-  (BD.complex c_ r V r' c).obj (op $ of r' $ rescale N M) :=
+  (BD.complex (rescale_constants κ N) r V r' c).obj (op M) ≅
+  (BD.complex κ r V r' c).obj (op $ of r' $ rescale N M) :=
 homological_complex.iso_of_components
 begin
   intro i,
   refine CLCTinv.map_iso r V _ _ _ _ _ _ _ _,
   { refine (FiltrationPow_rescale_iso _ _ _ _ ≪≫
-      Filtration_cast_eq r' _ _ (mul_assoc c (c_ i) (N⁻¹)) _).op, },
+      Filtration_cast_eq r' _ _ (mul_assoc c (κ i) (N⁻¹)) _).op, },
   { refine (FiltrationPow_rescale_iso _ _ _ _ ≪≫
-      Filtration_cast_eq _ (r' * (c * c_ i) * N⁻¹) (r' * (c * (c_ i * N⁻¹)))
+      Filtration_cast_eq _ (r' * (c * κ i) * N⁻¹) (r' * (c * (κ i * N⁻¹)))
       (by simp only [mul_assoc]) _).op, },
   { refl },
   { refl }
@@ -112,14 +112,14 @@ begin
     FiltrationPow_rescale_iso, iso.refl_trans],
   apply SemiNormedGroup.equalizer.map_congr,
   { have := @universal_map.res_comp_eval_CLCFP V r'
-      (c * (c_ i * N⁻¹)) (c * c_ i * N⁻¹) (c * (c_ j * N⁻¹)) (c * c_ j * N⁻¹)
+      (c * (κ i * N⁻¹)) (c * κ i * N⁻¹) (c * (κ j * N⁻¹)) (c * κ j * N⁻¹)
       (BD.X j) (BD.X i) (BD.d j i) ⟨(mul_assoc _ _ _).le⟩ _ _ ⟨(mul_assoc _ _ _).le⟩,
     replace := nat_trans.congr_app this.symm (op M),
     replace := congr_arg arrow.mk this,
     refine (this.trans _).symm,
     apply arrow.mk_comp_congr, { refl }, { rw universal_map.eval_CLCFP_rescale } },
   { have := @universal_map.res_comp_eval_CLCFP V r'
-      (r' * (c * (c_ i * N⁻¹))) (r' * (c * c_ i) * N⁻¹) (r' * (c * (c_ j * N⁻¹))) (r' * (c * c_ j) * N⁻¹)
+      (r' * (c * (κ i * N⁻¹))) (r' * (c * κ i) * N⁻¹) (r' * (c * (κ j * N⁻¹))) (r' * (c * κ j) * N⁻¹)
       (BD.X j) (BD.X i) (BD.d j i) ⟨le_of_eq $ by simp only [mul_assoc]⟩ _ _ ⟨le_of_eq $ by simp only [mul_assoc]⟩,
     replace := nat_trans.congr_app this.symm (op M),
     replace := congr_arg arrow.mk this,
@@ -131,9 +131,9 @@ end
 
 noncomputable
 def system_rescale_iso (N : ℝ≥0) :
-  (BD.system (rescale_constants c_ N) r V r').obj (op M) ≅
-  (BD.system c_ r V r').obj (op $ of r' $ rescale N M) :=
-nat_iso.of_components (λ c, complex_rescale_iso BD c_ r V c.unop _ _)
+  (BD.system (rescale_constants κ N) r V r').obj (op M) ≅
+  (BD.system κ r V r').obj (op $ of r' $ rescale N M) :=
+nat_iso.of_components (λ c, complex_rescale_iso BD κ r V c.unop _ _)
 begin
   intros c₁ c₂ h,
   ext i : 2,
@@ -153,7 +153,7 @@ namespace thm95
 
 open breen_deligne polyhedral_lattice opposite
 
-variables (BD : breen_deligne.data) (c_ : ℕ → ℝ≥0) [BD.suitable c_]
+variables (BD : breen_deligne.data) (κ : ℕ → ℝ≥0) [BD.suitable κ]
 variables (r : ℝ≥0) (V : SemiNormedGroup.{u}) [normed_with_aut r V] [fact (0 < r)]
 variables {r' : ℝ≥0} [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)] (c : ℝ≥0)
 
@@ -204,14 +204,14 @@ begin
 end
 
 def mul_complex_iso (c : ℝ≥0) :
-  (((data.mul N).obj BD).complex c_ r V r' c).obj (op M) ≅
-  (BD.complex c_ r V r' c).obj (op (ProFiltPseuNormGrpWithTinv.of r' $ M^N)) :=
+  (((data.mul N).obj BD).complex κ r V r' c).obj (op M) ≅
+  (BD.complex κ r V r' c).obj (op (ProFiltPseuNormGrpWithTinv.of r' $ M^N)) :=
 homological_complex.iso_of_components
 begin
   intro i,
   refine CLCTinv.map_iso r V _ _ _ _ _ _ _ _,
-  { exact (FiltrationPow.mul_iso.{u u} r' (c * c_ i) M N (BD.X i)).op },
-  { exact (FiltrationPow.mul_iso.{u u} r' (r' * (c * c_ i)) M N (BD.X i)).op },
+  { exact (FiltrationPow.mul_iso.{u u} r' (c * κ i) M N (BD.X i)).op },
+  { exact (FiltrationPow.mul_iso.{u u} r' (r' * (c * κ i)) M N (BD.X i)).op },
   { refl },
   { refl }
 end
@@ -231,9 +231,9 @@ end
 end
 
 def mul_system_iso (N : ℕ) [fact (0 < N)] (M : ProFiltPseuNormGrpWithTinv.{u} r') :
-  (((data.mul N).obj BD).system c_ r V r').obj (op M) ≅
-  (BD.system c_ r V r').obj (op (ProFiltPseuNormGrpWithTinv.of r' $ M^N)) :=
-nat_iso.of_components (λ c, mul_complex_iso BD c_ r V N M c.unop)
+  (((data.mul N).obj BD).system κ r V r').obj (op M) ≅
+  (BD.system κ r V r').obj (op (ProFiltPseuNormGrpWithTinv.of r' $ M^N)) :=
+nat_iso.of_components (λ c, mul_complex_iso BD κ r V N M c.unop)
 begin
   intros c₁ c₂ hc,
   ext i : 2,
@@ -248,19 +248,19 @@ end
 def mul_rescale_iso_row_one
   (N : ℕ) [fact (0 < N)] (N' : ℝ≥0) (h : N' = N)
   (Λ : PolyhedralLattice.{u}) (M : ProFiltPseuNormGrpWithTinv.{u} r') :
-  (((data.mul N).obj BD).system (rescale_constants c_ N') r V r').obj (op (Hom Λ M)) ≅
-    ((thm95.double_complex BD c_ r r' V Λ M N).row 1) :=
+  (((data.mul N).obj BD).system (rescale_constants κ N') r V r').obj (op (Hom Λ M)) ≅
+    ((thm95.double_complex BD κ r r' V Λ M N).row 1) :=
 (mul_system_iso _ _ r V N _) ≪≫
-(system_rescale_iso _ c_ r V _ _) ≪≫
-((BD.system c_ r V r').map_iso $
+(system_rescale_iso _ κ r V _ _) ≪≫
+((BD.system κ r V r').map_iso $
   (PolyhedralLattice.Hom_cosimplicial_zero_iso Λ N r' M N' h).op)
 
 lemma mul_rescale_iso_row_one_strict
   (N : ℕ) [fact (0 < N)] (N' : ℝ≥0) (h : N' = N)
   (Λ : PolyhedralLattice.{u}) (M : ProFiltPseuNormGrpWithTinv.{u} r')
   (c : ℝ≥0) (i : ℕ)
-  (x : (((data.mul N).obj BD).system (rescale_constants c_ N') r V r').obj (op (Hom Λ M)) c i) :
-  ∥(mul_rescale_iso_row_one BD c_ r V N N' h Λ M).hom x∥ = ∥x∥ :=
+  (x : (((data.mul N).obj BD).system (rescale_constants κ N') r V r').obj (op (Hom Λ M)) c i) :
+  ∥(mul_rescale_iso_row_one BD κ r V N N' h Λ M).hom x∥ = ∥x∥ :=
 begin
   apply normed_group_hom.norm_eq_of_isometry,
   refine isometry.comp (isometry.comp _ _) _,
@@ -341,13 +341,13 @@ end
 
 lemma row_map_eq_sum_comp
   (N : ℕ) [fact (0 < N)] (N' : ℝ≥0) (h : N' = N)
-  [∀ (i : ℕ), universal_map.suitable (rescale_constants c_ N' i) (c_ i) ((BD.sum N).f i)]
+  [∀ (i : ℕ), universal_map.suitable (rescale_constants κ N' i) (κ i) ((BD.sum N).f i)]
   (Λ : PolyhedralLattice.{u}) (M : ProFiltPseuNormGrpWithTinv.{u} r') :
-  (thm95.double_complex BD c_ r r' V Λ M N).row_map 0 1 =
-    (iso.refl ((BD.system c_ r V r').obj (op (Hom Λ M)))).inv ≫
-    (BD_system_map (BD.sum N) c_
-      (rescale_constants c_ N') r V).app (op (Hom Λ M)) ≫
-    (thm95.mul_rescale_iso_row_one BD c_ r V N N' h Λ M).hom :=
+  (thm95.double_complex BD κ r r' V Λ M N).row_map 0 1 =
+    (iso.refl ((BD.system κ r V r').obj (op (Hom Λ M)))).inv ≫
+    (BD_system_map (BD.sum N) κ
+      (rescale_constants κ N') r V).app (op (Hom Λ M)) ≫
+    (thm95.mul_rescale_iso_row_one BD κ r V N N' h Λ M).hom :=
 begin
   unfreezingI { subst h },
   dsimp only [iso.refl_inv],
@@ -355,7 +355,7 @@ begin
   rw [← iso.comp_inv_eq],
   rw [thm95.double_complex.row_map_zero_one],
   dsimp only [mul_rescale_iso_row_one, iso.trans_inv, nat_trans.comp_app, functor.map_iso_inv],
-  simp only [← category.assoc, ← (BD.system c_ r V r').map_comp, ← nat_trans.comp_app,
+  simp only [← category.assoc, ← (BD.system κ r V r').map_comp, ← nat_trans.comp_app,
     iso.op_inv, ← op_comp, PolyhedralLattice.Cech_augmentation_map_eq_Hom_sum],
   rw [iso.comp_inv_eq],
   ext c i : 4,

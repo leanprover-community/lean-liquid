@@ -4,7 +4,7 @@
 
 For the eponymous blogpost by Peter Scholze which started it all: see https://xenaproject.wordpress.com/2020/12/05/liquid-tensor-experiment/.
 
-The main aim of this community-owned repository is to *digitise* some mathematical definitions, theorem statements and theorem proofs. Digitisation, or formalisation, is a process where the source material, typically a mathematical textbook or a pdf file or website or video, is transformed into definitions in a target system consisting of a computer implementation of a logical theory (such as set theory or type theory). 
+The main aim of this community-owned repository is to *digitise* some mathematical definitions, theorem statements and theorem proofs. Digitisation, or formalisation, is a process where the source material, typically a mathematical textbook or a pdf file or website or video, is transformed into definitions in a target system consisting of a computer implementation of a logical theory (such as set theory or type theory).
 
 ## The source.
 
@@ -32,14 +32,15 @@ Much work remains in formalising the proof that `Analytic 9.4` implies `Analytic
 The statement can be found in [`src/liquid.lean`](https://github.com/leanprover-community/lean-liquid/blob/master/src/liquid.lean#L29)
 
 ```lean
-theorem first_target [BD.suitable c']
-  (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)] :
+theorem first_target (r r' : ℝ≥0)
+  [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r < 1)] [fact (r' < 1)]
+  [BD.data.very_suitable r r' κ] [∀ (i : ℕ), fact (0 < κ i)] :
   ∀ m : ℕ,
-  ∃ (k : ℝ≥0) [fact (1 ≤ k)],
+  ∃ (k K : ℝ≥0) [fact (1 ≤ k)],
   ∃ c₀ : ℝ≥0,
   ∀ (S : Type) [fintype S],
-  ∀ (V : SemiNormedGroup) [normed_with_aut r V],​
-    (Mbar_system V S r r' BD c').is_bounded_exact k m c₀ := _
+  ∀ (V : SemiNormedGroup.{0}) [normed_with_aut r V],
+    ​((BD.data.system κ r V r').obj (op $ of r' (Mbar r' S))).is_weak_bounded_exact k K m c₀ := _
 ```
 
 See [`src/liquid.lean`](https://github.com/leanprover-community/lean-liquid/blob/master/src/liquid.lean#40)

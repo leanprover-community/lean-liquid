@@ -20,9 +20,6 @@ noncomputable theory
 universe variables u
 open_locale nnreal -- enable the notation `ℝ≥0` for the nonnegative real numbers.
 
-variables (c' : ℕ → ℝ≥0)  -- implicit constants, chosen once and for all
-                          -- see the sentence after that statement of Thm 9.5
-
 open ProFiltPseuNormGrpWithTinv (of)
 
 def polyhedral_lattice.Hom {r' : ℝ≥0} [fact (0 < r')] (Λ M : Type*) [polyhedral_lattice Λ]

@@ -78,9 +78,9 @@ end
 
 end helper
 
-variables (BD : breen_deligne.package) (c_ c' : ℕ → ℝ≥0)
+variables (BD : breen_deligne.package) (κ κ' : ℕ → ℝ≥0)
 variables (r r' : ℝ≥0)
-variables [breen_deligne.package.adept BD c_ c'] [BD.data.very_suitable r r' c_]
+variables [breen_deligne.package.adept BD κ κ'] [BD.data.very_suitable r r' κ]
 variables (Λ : PolyhedralLattice)
 variables (m : ℕ)
 
@@ -95,36 +95,36 @@ open breen_deligne
 noncomputable
 def k₁ : ℕ → ℝ≥0
 | 0     := 2 -- should be anything > 1
-| (m+1) := max 2 ((max (normed_spectral.k₀ m (k₁ m)) $ (range $ m+2).sup c')^2)
+| (m+1) := max 2 ((max (normed_spectral.k₀ m (k₁ m)) $ (range $ m+2).sup κ')^2)
 
-instance one_lt_k₁ : Π (m : ℕ), fact (1 < k₁ c' m)
+instance one_lt_k₁ : Π (m : ℕ), fact (1 < k₁ κ' m)
 | 0     := ⟨one_lt_two⟩
 | (m+1) := ⟨lt_of_lt_of_le one_lt_two (le_max_left _ _)⟩
 
-instance one_le_k₁ (m : ℕ) : fact (1 ≤ k₁ c' m) := ⟨(fact.out (1 < k₁ c' m)).le⟩
+instance one_le_k₁ (m : ℕ) : fact (1 ≤ k₁ κ' m) := ⟨(fact.out (1 < k₁ κ' m)).le⟩
 
 /-- `k₀ m` is the constant `k₀ m (k m)` used in the proof of `normed_spectral` -/
-abbreviation k₀ : ℝ≥0 := normed_spectral.k₀ m (k₁ c' m)
+abbreviation k₀ : ℝ≥0 := normed_spectral.k₀ m (k₁ κ' m)
 
-/-- `k' c' m` is the maximum of `k₀ m` and the constants `c' 0`, `c' 1`, ..., `c' m`, `c' (m+1)` -/
-def k' : ℝ≥0 := max (k₀ c' m) $ (range $ m+2).sup c'
+/-- `k' κ' m` is the maximum of `k₀ m` and the constants `κ' 0`, `κ' 1`, ..., `κ' m`, `κ' (m+1)` -/
+def k' : ℝ≥0 := max (k₀ κ' m) $ (range $ m+2).sup κ'
 
-lemma c'_le_k' {i : ℕ} (hi : i ≤ m+1) : c' i ≤ k' c' m :=
+lemma κ'_le_k' {i : ℕ} (hi : i ≤ m+1) : κ' i ≤ k' κ' m :=
 le_max_iff.mpr $ or.inr $ le_sup $ mem_range.mpr $ nat.lt_succ_iff.mpr hi
 
-instance fact_c'_le_k' {i : ℕ} (hi : fact (i ≤ m+1)) : fact (c' i ≤ k' c' m) :=
-⟨c'_le_k' _ _ hi.1⟩
+instance fact_κ'_le_k' {i : ℕ} (hi : fact (i ≤ m+1)) : fact (κ' i ≤ k' κ' m) :=
+⟨κ'_le_k' _ _ hi.1⟩
 
-instance one_le_k' : fact (1 ≤ k' c' m) :=
+instance one_le_k' : fact (1 ≤ k' κ' m) :=
 ⟨le_trans (fact.out _) $ le_max_left _ _⟩
 
-instance k₀_le_k' : fact (normed_spectral.k₀ m (k₁ c' m) ≤ k' c' m) := ⟨le_max_left _ _⟩
+instance k₀_le_k' : fact (normed_spectral.k₀ m (k₁ κ' m) ≤ k' κ' m) := ⟨le_max_left _ _⟩
 
-def k : ℝ≥0 := k' c' m * k' c' m
+def k : ℝ≥0 := k' κ' m * k' κ' m
 
-instance one_le_k : fact (1 ≤ k c' m) := by { delta k, apply_instance }
+instance one_le_k : fact (1 ≤ k κ' m) := by { delta k, apply_instance }
 
-instance k_le_k₁ [fact (0 < m)] : fact (k c' (m - 1) ≤ k₁ c' m) :=
+instance k_le_k₁ [fact (0 < m)] : fact (k κ' (m - 1) ≤ k₁ κ' m) :=
 begin
   unfreezingI {cases m},
   { exact false.elim (lt_irrefl 0 (fact.elim infer_instance)) },
@@ -135,13 +135,13 @@ begin
     refl }
 end
 
-def k₁_sqrt : ℝ≥0 := ⟨real.sqrt (k₁ c' m), real.sqrt_nonneg _⟩
+def k₁_sqrt : ℝ≥0 := ⟨real.sqrt (k₁ κ' m), real.sqrt_nonneg _⟩
 
-instance one_lt_k₁_sqrt : fact (1 < k₁_sqrt c' m) := ⟨begin
-  change (1 : ℝ) < real.sqrt (k₁ c' m),
+instance one_lt_k₁_sqrt : fact (1 < k₁_sqrt κ' m) := ⟨begin
+  change (1 : ℝ) < real.sqrt (k₁ κ' m),
   rw [real.lt_sqrt zero_le_one, pow_two, mul_one],
-  exact (universal_constants.one_lt_k₁ c' m).elim,
-  exact (k₁ c' m).coe_nonneg,
+  exact (universal_constants.one_lt_k₁ κ' m).elim,
+  exact (k₁ κ' m).coe_nonneg,
 end⟩
 
 def y (m : ℕ) (r : ℝ≥0):= (m + 2 : ℝ≥0) + (r + 1) / (r * (1 - r)) * (m + 2)^2
@@ -151,10 +151,10 @@ def H' (n : ℕ) := max 1 ((range $ m+1).sup $ λ q, ((BD.data.homotopy_mul BD.h
 noncomputable
 def K₁ : ℕ → ℝ≥0
 | 0     := 2 + (r + 1) / (r * (1 - r)) * 4
-| (m+1) := max (y (m+1) r) (2 * normed_spectral.K₀ m (K₁ m) * (H' BD m $ helper.N₂ r' (k' c' m) (helper.b r r' (k' c' m) (normed_spectral.ε m (K₁ m)))))
+| (m+1) := max (y (m+1) r) (2 * normed_spectral.K₀ m (K₁ m) * (H' BD m $ helper.N₂ r' (k' κ' m) (helper.b r r' (k' κ' m) (normed_spectral.ε m (K₁ m)))))
 
 
-instance one_le_K₁ : ∀ m, fact (1 ≤ K₁ BD c' r r' m)
+instance one_le_K₁ : ∀ m, fact (1 ≤ K₁ BD κ' r r' m)
 | 0     := ⟨begin
              dsimp [K₁],
              apply le_add_right,
@@ -172,45 +172,45 @@ instance one_le_K₁ : ∀ m, fact (1 ≤ K₁ BD c' r r' m)
 
 
 /-- `K₀ m` is the constant `K₀ m (K m)` used in the proof of `normed_spectral` -/
-abbreviation K₀ : ℝ≥0 := normed_spectral.K₀ m (K₁ BD c' r r' m)
+abbreviation K₀ : ℝ≥0 := normed_spectral.K₀ m (K₁ BD κ' r r' m)
 
 /-- `ε m` is the constant `ε m (K m)` used in the proof of `normed_spectral` -/
-abbreviation ε : ℝ≥0 := normed_spectral.ε m (K₁ BD c' r r' m)
+abbreviation ε : ℝ≥0 := normed_spectral.ε m (K₁ BD κ' r r' m)
 
-instance ε_pos : fact (0 < ε BD c' r r' m) := ⟨normed_spectral.ε_pos _ _⟩
+instance ε_pos : fact (0 < ε BD κ' r r' m) := ⟨normed_spectral.ε_pos _ _⟩
 
 variables [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)]
 
 -- in the PDF `b` is *positive*, we might need to make that explicit
 
-/-- `b c' r r' m` is the smallest `b` such that `2 * (k' c' m) * (r / r') ^ b ≤ (ε m)` -/
-def b : ℕ := helper.b r r' (k' c' m) (ε BD c' r r' m)
+/-- `b κ' r r' m` is the smallest `b` such that `2 * (k' κ' m) * (r / r') ^ b ≤ (ε m)` -/
+def b : ℕ := helper.b r r' (k' κ' m) (ε BD κ' r r' m)
 
 lemma b_spec :
-  (2 * k' c' m) * (r / r') ^ (b BD c' r r' m) ≤ ε BD c' r r' m :=
+  (2 * k' κ' m) * (r / r') ^ (b BD κ' r r' m) ≤ ε BD κ' r r' m :=
 begin
-  suffices : 2 * (k' c' m : ℝ) * (r / r') ^ b BD c' r r' m ≤ ε BD c' r r' m,
+  suffices : 2 * (k' κ' m : ℝ) * (r / r') ^ b BD κ' r r' m ≤ ε BD κ' r r' m,
   exact_mod_cast this,
   apply helper.b_spec ; norm_cast ; apply fact.out,
 end
 
-/-- `N₂ c' r r' m` is the smallest `N₂` such that `N = 2 ^ N₂` satisfies
-`(k' c' m) / N ≤ r' ^ (b c' r r' m)` -/
-def N₂ : ℕ := helper.N₂ r' (k' c' m) (b BD c' r r' m)
+/-- `N₂ κ' r r' m` is the smallest `N₂` such that `N = 2 ^ N₂` satisfies
+`(k' κ' m) / N ≤ r' ^ (b κ' r r' m)` -/
+def N₂ : ℕ := helper.N₂ r' (k' κ' m) (b BD κ' r r' m)
 
-lemma N₂_spec : (k' c' m) / (2 ^ (N₂ BD c' r r' m)) ≤ r' ^ b BD c' r r' m :=
+lemma N₂_spec : (k' κ' m) / (2 ^ (N₂ BD κ' r r' m)) ≤ r' ^ b BD κ' r r' m :=
 begin
-  suffices : (k' c' m : ℝ) / 2 ^ N₂ BD c' r r' m ≤ r' ^ (b BD c' r r' m : ℝ),
+  suffices : (k' κ' m : ℝ) / 2 ^ N₂ BD κ' r r' m ≤ r' ^ (b BD κ' r r' m : ℝ),
   exact_mod_cast this,
   apply helper.N₂_spec ; norm_cast ; apply fact.out
 end
 
-variables {c' r r' m}
+variables {κ' r r' m}
 
-lemma N₂_spec_of_pos' (h : 0 < N₂ BD c' r r' m) :
-  r' ^ b BD c' r r' m < 2 * k' c' m / 2 ^ N₂ BD c' r r' m :=
+lemma N₂_spec_of_pos' (h : 0 < N₂ BD κ' r r' m) :
+  r' ^ b BD κ' r r' m < 2 * k' κ' m / 2 ^ N₂ BD κ' r r' m :=
 begin
-  suffices : (r' : ℝ) ^ (b BD c' r r' m : ℝ) < 2 * k' c' m / 2 ^ N₂ BD c' r r' m,
+  suffices : (r' : ℝ) ^ (b BD κ' r r' m : ℝ) < 2 * k' κ' m / 2 ^ N₂ BD κ' r r' m,
   exact_mod_cast this,
   apply helper.N₂_spec_of_pos' h,
   { norm_cast,
@@ -218,28 +218,28 @@ begin
   apply nnreal.coe_nonneg
 end
 
-lemma k'_eq_one_of_N₂_spec_eq_zero (h : N₂ BD c' r r' m = 0) :
-  k' c' m = 1 :=
+lemma k'_eq_one_of_N₂_spec_eq_zero (h : N₂ BD κ' r r' m = 0) :
+  k' κ' m = 1 :=
 begin
   refine le_antisymm _ (universal_constants.one_le_k' _ _).1,
-  obtain F := N₂_spec BD c' r r' m,
+  obtain F := N₂_spec BD κ' r r' m,
   rw [h, pow_zero, div_one] at F,
-  refine F.trans (pow_le_one (b BD c' r r' m) (le_of_lt _) _);
+  refine F.trans (pow_le_one (b BD κ' r r' m) (le_of_lt _) _);
   { apply fact.out _,
     assumption }
 end
 
-variables (c' r r' m)
-/-- `N c' r r' m = 2 ^ N₂ c' r r' m` is the smallest `N` that satisfies
-`(k' c' m) / N ≤ r' ^ (b c' r r' m)` -/
-def N : ℕ := 2 ^ N₂ BD c' r r' m
+variables (κ' r r' m)
+/-- `N κ' r r' m = 2 ^ N₂ κ' r r' m` is the smallest `N` that satisfies
+`(k' κ' m) / N ≤ r' ^ (b κ' r r' m)` -/
+def N : ℕ := 2 ^ N₂ BD κ' r r' m
 
-instance N_pos : fact (0 < N BD c' r r' m) := ⟨pow_pos zero_lt_two _⟩
+instance N_pos : fact (0 < N BD κ' r r' m) := ⟨pow_pos zero_lt_two _⟩
 
-instance k'_le_two_pow_N : fact (k' c' m ≤ 2 ^ N₂ BD c' r r' m) :=
+instance k'_le_two_pow_N : fact (k' κ' m ≤ 2 ^ N₂ BD κ' r r' m) :=
 { out := begin
   rw [← mul_one ((2 : ℝ≥0) ^ _)],
-  obtain F := N₂_spec BD c' r r' m,
+  obtain F := N₂_spec BD κ' r r' m,
   rw [nnreal.div_le_iff (pow_pos zero_lt_two _).ne', mul_comm] at F,
   refine F.trans (mul_le_mul rfl.le _ _ _),
   { refine pow_le_one _ (zero_le r') _,
@@ -249,13 +249,13 @@ instance k'_le_two_pow_N : fact (k' c' m ≤ 2 ^ N₂ BD c' r r' m) :=
 end }
 
 lemma r_pow_b_mul_N_le :
-  r ^ (b BD c' r r' m) * (N BD c' r r' m) ≤ 2 * k' c' m * (r / r') ^ (b BD c' r r' m) :=
+  r ^ (b BD κ' r r' m) * (N BD κ' r r' m) ≤ 2 * k' κ' m * (r / r') ^ (b BD κ' r r' m) :=
 begin
   rw [mul_comm _ (_ ^ _), N, div_pow, nat.cast_pow, nat.cast_bit0, nat.cast_one, div_eq_mul_one_div,
     mul_assoc, div_mul_comm', mul_one],
   refine mul_le_mul_left' _ _,
   rw [nnreal.le_div_iff_mul_le, mul_comm, ← nnreal.le_div_iff_mul_le],
-  { by_cases N0 : N₂ BD c' r r' m = 0,
+  { by_cases N0 : N₂ BD κ' r r' m = 0,
     { rw [k'_eq_one_of_N₂_spec_eq_zero BD N0, mul_one, N0, pow_zero, div_one],
       refine le_trans (pow_le_one _ (nnreal.coe_nonneg _) _) one_le_two,
       apply fact.out _,
@@ -265,49 +265,49 @@ begin
   { exact pow_ne_zero _ (ne_of_gt (fact.out _)) }
 end
 
-lemma r_pow_b_le_ε : r ^ b BD c' r r' m * N BD c' r r' m ≤ ε BD c' r r' m :=
+lemma r_pow_b_le_ε : r ^ b BD κ' r r' m * N BD κ' r r' m ≤ ε BD κ' r r' m :=
 (r_pow_b_mul_N_le _ _ _ _ _).trans (b_spec _ _ _ _ _)
 
-lemma N₂_spec' : k' c' m * (2 ^ N₂ BD c' r r' m)⁻¹ ≤ r' ^ b BD c' r r' m :=
-by { rw [inv_eq_one_div, mul_one_div], exact N₂_spec BD c' r r' m }
+lemma N₂_speκ' : k' κ' m * (2 ^ N₂ BD κ' r r' m)⁻¹ ≤ r' ^ b BD κ' r r' m :=
+by { rw [inv_eq_one_div, mul_one_div], exact N₂_spec BD κ' r r' m }
 
-/-- `H BD c_ r r' m` is the universal bound on the norm of the `N₂`th Breen--Deligne homotopy
-in the first `m` degrees. Here `N₂ = thm95.N₂ c' r r' m`. -/
-def H : ℕ := H' BD m (N₂ BD c' r r' m)
+/-- `H BD κ r r' m` is the universal bound on the norm of the `N₂`th Breen--Deligne homotopy
+in the first `m` degrees. Here `N₂ = thm95.N₂ κ' r r' m`. -/
+def H : ℕ := H' BD m (N₂ BD κ' r r' m)
 
-lemma one_le_H : 1 ≤ H BD c' r r' m :=
+lemma one_le_H : 1 ≤ H BD κ' r r' m :=
 le_max_left _ _
 
-instance H_pos : fact (0 < H BD c' r r' m) :=
+instance H_pos : fact (0 < H BD κ' r r' m) :=
 ⟨zero_lt_one.trans_le $ one_le_H _ _ _ _ _⟩
 
-instance H_pos' : fact ((0:ℝ≥0) < H BD c' r r' m) :=
+instance H_pos' : fact ((0:ℝ≥0) < H BD κ' r r' m) :=
 by { norm_cast, apply_instance }
 
 lemma bound_by_H {q : ℕ} (h : q ≤ m) :
-  ((BD.data.homotopy_mul BD.homotopy (N₂ BD c' r r' m)).hom q (q + 1)).bound_by (H BD c' r r' m) :=
+  ((BD.data.homotopy_mul BD.homotopy (N₂ BD κ' r r' m)).hom q (q + 1)).bound_by (H BD κ' r r' m) :=
 begin
   rw [H, H', universal_map.bound_by, le_max_iff],
   right,
   refine @le_sup _ _ _ (range $ m+1)
-    (λ q, ((BD.data.homotopy_mul BD.homotopy (N₂ BD c' r r' m)).hom q (q + 1)).bound) _ _,
+    (λ q, ((BD.data.homotopy_mul BD.homotopy (N₂ BD κ' r r' m)).hom q (q + 1)).bound) _ _,
   rwa [mem_range, nat.lt_succ_iff],
 end
 
 
-def K : ℝ≥0 := 2 * normed_spectral.K₀ m (K₁ BD c' r r' m) * H BD c' r r' m
+def K : ℝ≥0 := 2 * normed_spectral.K₀ m (K₁ BD κ' r r' m) * H BD κ' r r' m
 
-instance one_le_K : fact (1 ≤ K BD c' r r' m) :=
+instance one_le_K : fact (1 ≤ K BD κ' r r' m) :=
 fact.mk $
 calc 1 = 1 * 1 * 1 : by simp
-... ≤ 2 * normed_spectral.K₀ m (K₁ BD c' r r' m) * H BD c' r r' m :
+... ≤ 2 * normed_spectral.K₀ m (K₁ BD κ' r r' m) * H BD κ' r r' m :
 begin
   refine mul_le_mul' (mul_le_mul' one_le_two $ (normed_spectral.one_le_K₀ _ _).1) _,
   norm_cast,
   apply one_le_H
 end
 
-instance K_le_K₁ [fact (0 < m)] : fact (K BD c' r r' (m - 1) ≤ K₁ BD c' r r' m) :=
+instance K_le_K₁ [fact (0 < m)] : fact (K BD κ' r r' (m - 1) ≤ K₁ BD κ' r r' m) :=
 ⟨begin
   tactic.unfreeze_local_instances,
   have hm : 0 < m, from fact.out _,
@@ -318,7 +318,7 @@ instance K_le_K₁ [fact (0 < m)] : fact (K BD c' r r' (m - 1) ≤ K₁ BD c' r 
   apply le_refl
 end⟩
 
-lemma K₁_spec : (m + 2 + (r + 1) / (r * (1 - r)) * (m + 2)^2 : ℝ≥0) ≤ K₁ BD c' r r' m :=
+lemma K₁_spec : (m + 2 + (r + 1) / (r * (1 - r)) * (m + 2)^2 : ℝ≥0) ≤ K₁ BD κ' r r' m :=
 begin
   cases m,
   { norm_num [K₁] },
@@ -330,24 +330,24 @@ end
 section open simplex_category
 
 def c₀_aux (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)]
-  (c_ c' : ℕ → ℝ≥0) (m : ℕ) (Λ : PolyhedralLattice) : ℝ≥0 :=
-N BD c' r r' m * lem98.d Λ (N BD c' r r' m) /
-  (k₁_sqrt c' m - 1) / r' / (range $ m+1).inf' ⟨0, by simp⟩ c_
+  (κ κ' : ℕ → ℝ≥0) (m : ℕ) (Λ : PolyhedralLattice) : ℝ≥0 :=
+N BD κ' r r' m * lem98.d Λ (N BD κ' r r' m) /
+  (k₁_sqrt κ' m - 1) / r' / (range $ m+1).inf' ⟨0, by simp⟩ κ
 
 -- define this such that the lemmas below hold
 noncomputable def c₀ (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)]
-  (c_ c' : ℕ → ℝ≥0) : ℕ → PolyhedralLattice → ℝ≥0
-| 0 Λ := c₀_aux BD r r' c_ c' 0 Λ
-| (m+1) Λ := max (c₀_aux BD r r' c_ c' (m+1) Λ)
+  (κ κ' : ℕ → ℝ≥0) : ℕ → PolyhedralLattice → ℝ≥0
+| 0 Λ := c₀_aux BD r r' κ κ' 0 Λ
+| (m+1) Λ := max (c₀_aux BD r r' κ κ' (m+1) Λ)
     (max (c₀ m Λ)
-    (max (c₀ m ((Λ.cosimplicial (N BD c' r r' (m+1))).obj (mk 0)))
-      ((range (m+1)).sup (λ i, c₀ m ((Λ.cosimplicial (N BD c' r r' (m+1))).obj (mk (i + 1)))))))
+    (max (c₀ m ((Λ.cosimplicial (N BD κ' r r' (m+1))).obj (mk 0)))
+      ((range (m+1)).sup (λ i, c₀ m ((Λ.cosimplicial (N BD κ' r r' (m+1))).obj (mk (i + 1)))))))
 
 -- Should we be unhappy that these lemmas have `fact` in them?
 -- Putting aside the fact that we're badly abusing the `fact` system,
 -- typeclass inference can even use these, because it can't provide the inequality arguments.
 
-lemma c₀_mono : fact (c₀ BD r r' c_ c' (m - 1) Λ ≤ c₀ BD r r' c_ c' m Λ) :=
+lemma c₀_mono : fact (c₀ BD r r' κ κ' (m - 1) Λ ≤ c₀ BD r r' κ κ' m Λ) :=
 begin
   fsplit,
   cases m,
@@ -359,8 +359,8 @@ begin
 end
 
 lemma c₀_pred_le (hm : 0 < m) :
-  fact (c₀ BD r r' c_ c' (m - 1) ((Λ.cosimplicial (N BD c' r r' m)).obj (mk 0)) ≤
-    c₀ BD r r' c_ c' m Λ) :=
+  fact (c₀ BD r r' κ κ' (m - 1) ((Λ.cosimplicial (N BD κ' r r' m)).obj (mk 0)) ≤
+    c₀ BD r r' κ κ' m Λ) :=
 begin
   fsplit,
   cases m,
@@ -373,8 +373,8 @@ begin
 end
 
 lemma c₀_pred_le_of_le (i : ℕ) (hi : i + 2 ≤ m + 1) :
-  fact (c₀ BD r r' c_ c' (m - 1) ((Λ.cosimplicial (N BD c' r r' m)).obj (mk (i + 1))) ≤
-    c₀ BD r r' c_ c' m Λ) :=
+  fact (c₀ BD r r' κ κ' (m - 1) ((Λ.cosimplicial (N BD κ' r r' m)).obj (mk (i + 1))) ≤
+    c₀ BD r r' κ κ' m Λ) :=
 begin
   fsplit,
   cases m,
@@ -389,12 +389,12 @@ begin
     exact le_sup hi, }
 end
 
-lemma c₀_spec (BD : breen_deligne.package) [BD.data.very_suitable r r' c_]
+lemma c₀_spec (BD : breen_deligne.package) [BD.data.very_suitable r r' κ]
   [fact (0 < r')] (j : ℕ) (hj : j ≤ m) :
-  lem98.d Λ (N BD c' r r' m) ≤
-    (k₁_sqrt c' m - 1) * (r' * (c_ j * c₀ BD r r' c_ c' m Λ)) / (N BD c' r r' m) :=
+  lem98.d Λ (N BD κ' r r' m) ≤
+    (k₁_sqrt κ' m - 1) * (r' * (κ j * c₀ BD r r' κ κ' m Λ)) / (N BD κ' r r' m) :=
 begin
-  have w := BD.data.pos c_,
+  have w := BD.data.pos κ,
   -- TODO golf
   rw nnreal.le_div_iff',
   rw ←nnreal.div_le_iff',

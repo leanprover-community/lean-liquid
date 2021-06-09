@@ -29,15 +29,15 @@ objects induced by `f`.
 open_locale nnreal big_operators
 
 -- move this??
-/-- `rescale_constants c_ N` for a sequence `c_ : ℕ → ℝ≥0`,
-  is the sequence `(c_ i) / N`. -/
+/-- `rescale_constants κ N` for a sequence `κ : ℕ → ℝ≥0`,
+  is the sequence `(κ i) / N`. -/
 noncomputable
-def rescale_constants (c_ : ℕ → ℝ≥0) (N : ℝ≥0) : ℕ → ℝ≥0 :=
-λ i, (c_ i) * N⁻¹
+def rescale_constants (κ : ℕ → ℝ≥0) (N : ℝ≥0) : ℕ → ℝ≥0 :=
+λ i, (κ i) * N⁻¹
 
 namespace rescale_constants
 
-@[simp] lemma one (c_ : ℕ → ℝ≥0) : rescale_constants c_ 1 = c_ :=
+@[simp] lemma one (κ : ℕ → ℝ≥0) : rescale_constants κ 1 = κ :=
 by { ext i, simp only [rescale_constants, mul_one, inv_one] }
 
 end rescale_constants
@@ -51,7 +51,7 @@ namespace basic_universal_map
 
 variables (f : basic_universal_map m n)
 
-/-- Addition goes from `Mbar r' S c` to `Mbar r' S c_` for suitable `c_`.
+/-- Addition goes from `Mbar r' S c` to `Mbar r' S κ` for suitable `κ`.
 This predicate says what *suitable* means for basic universal maps.
 See Lemma 9.11 of [Analytic]. -/
 def suitable (f : basic_universal_map m n) (c₁ c₂ : ℝ≥0) : Prop :=
@@ -182,9 +182,9 @@ begin
 end
 
 instance suitable_sum {ι : Type*} (s : finset ι) (f : ι → basic_universal_map m n)
-  {c : ℝ≥0} {c' : ι → ℝ≥0}
-  [hf : ∀ i, (f i).suitable c (c' i)] :
-  (∑ i in s, f i).suitable c (∑ i in s, c' i) :=
+  {c : ℝ≥0} {κ' : ι → ℝ≥0}
+  [hf : ∀ i, (f i).suitable c (κ' i)] :
+  (∑ i in s, f i).suitable c (∑ i in s, κ' i) :=
 begin
   classical,
   apply finset.induction_on s,
@@ -499,22 +499,22 @@ end universal_map
 
 namespace data
 
-/-- A sequence of nonnegative real numbers `c_ 0`, `c_ 1`, ...
+/-- A sequence of nonnegative real numbers `κ 0`, `κ 1`, ...
 is *suitable* with respect to a Breen--Deligne data `BD`,
-if for all `i : ℕ`, the constants `c_ (i+1)` and `c_ i` are
+if for all `i : ℕ`, the constants `κ (i+1)` and `κ i` are
 suitable with respect to the universal map `BD.d (i+1) i`.
 
 This definition ensures that we get a well-defined complex
-of normed groups `CLCFP V r' (c_ i) (BD.rank i)`,
+of normed groups `CLCFP V r' (κ i) (BD.rank i)`,
 induced by the maps `BD.d (i+1) i`. -/
-class suitable (BD : data) (c_ : ℕ → ℝ≥0) : Prop :=
-(universal_suitable : ∀ i j, (BD.d i j).suitable (c_ i) (c_ j))
+class suitable (BD : data) (κ : ℕ → ℝ≥0) : Prop :=
+(universal_suitable : ∀ i j, (BD.d i j).suitable (κ i) (κ j))
 
 attribute [instance] suitable.universal_suitable
 
-variables (BD : data) (c_ : ℕ → ℝ≥0) [BD.suitable c_] (i j j' : ℕ)
+variables (BD : data) (κ : ℕ → ℝ≥0) [BD.suitable κ] (i j j' : ℕ)
 
-def suitable.of_basic (H : ∀ i, (BD.d (i+1) i).suitable (c_ (i+1)) (c_ i)) : BD.suitable c_ :=
+def suitable.of_basic (H : ∀ i, (BD.d (i+1) i).suitable (κ (i+1)) (κ i)) : BD.suitable κ :=
 ⟨λ j i, begin
   by_cases hij : i + 1 = j,
   {  subst j, exact H i },
@@ -522,19 +522,19 @@ def suitable.of_basic (H : ∀ i, (BD.d (i+1) i).suitable (c_ (i+1)) (c_ i)) : B
 end⟩
 
 instance comp_suitable :
-  (universal_map.comp (BD.d j i) (BD.d j' j)).suitable (c_ j') (c_ i) :=
-universal_map.suitable.comp (c_ j)
+  (universal_map.comp (BD.d j i) (BD.d j' j)).suitable (κ j') (κ i) :=
+universal_map.suitable.comp (κ j)
 
-instance suitable_mul_left (c : ℝ≥0) : BD.suitable (λ i, c * c_ i) :=
+instance suitable_mul_left (c : ℝ≥0) : BD.suitable (λ i, c * κ i) :=
 ⟨λ i j, by apply_instance⟩
 
-instance suitable_mul_right (c : ℝ≥0) : BD.suitable (λ i, c_ i * c) :=
+instance suitable_mul_right (c : ℝ≥0) : BD.suitable (λ i, κ i * c) :=
 ⟨λ i j, by apply_instance⟩
 
-instance suitable_rescale_constants (N : ℝ≥0) : BD.suitable (rescale_constants c_ N) :=
+instance suitable_rescale_constants (N : ℝ≥0) : BD.suitable (rescale_constants κ N) :=
 data.suitable_mul_right _ _ _
 
-instance mul_obj_suitable (N : ℕ) [fact (0 < N)] : ((mul N).obj BD).suitable c_ :=
+instance mul_obj_suitable (N : ℕ) [fact (0 < N)] : ((mul N).obj BD).suitable κ :=
 begin
   constructor,
   intros i j,
@@ -547,7 +547,7 @@ instance fact_two_pow_inv_le_two_pow_inv (N : ℕ) : fact ((2 ^ N : ℝ≥0)⁻�
 ⟨le_of_eq $ by norm_cast⟩
 
 instance sum_suitable (i N : ℕ) (N' : ℝ≥0) [hN' : fact (N'⁻¹ ≤ N⁻¹)] :
-  universal_map.suitable (rescale_constants c_ N' i) (c_ i) ((BD.sum N).f i) :=
+  universal_map.suitable (rescale_constants κ N' i) (κ i) ((BD.sum N).f i) :=
 (universal_map.sum_suitable _ _ _).le _ _ _ _ (mul_le_mul' le_rfl hN'.1) le_rfl
 
 -- move this
@@ -559,7 +559,7 @@ instance proj_suitable_strict (i N : ℕ) :
 universal_map.proj_suitable _ _ _
 
 instance proj_suitable (i N : ℕ) (N' : ℝ≥0) [fact (N'⁻¹ ≤ 1)] :
-  universal_map.suitable (rescale_constants c_ N' i) (c_ i) ((BD.proj N).f i) :=
+  universal_map.suitable (rescale_constants κ N' i) (κ i) ((BD.proj N).f i) :=
 begin
   refine (universal_map.proj_suitable _ _ _).le _ _ _ _ _ le_rfl,
   dsimp [rescale_constants],
@@ -596,7 +596,7 @@ end data
 namespace universal_map
 
 def very_suitable (f : universal_map m n) (r r' : out_param ℝ≥0) (c₁ c₂ : ℝ≥0) : Prop :=
-∃ (N b : ℕ) (c_ : ℝ≥0), f.bound_by N ∧ f.suitable c₁ c_ ∧ r ^ b * N ≤ 1 ∧ c_ ≤ r' ^ b * c₂
+∃ (N b : ℕ) (κ : ℝ≥0), f.bound_by N ∧ f.suitable c₁ κ ∧ r ^ b * N ≤ 1 ∧ κ ≤ r' ^ b * c₂
 
 attribute [class] very_suitable
 
@@ -606,15 +606,15 @@ variables (f : universal_map m n)
 
 instance suitable [hr' : fact (r' ≤ 1)] [hf : f.very_suitable r r' c₁ c₂] : f.suitable c₁ c₂ :=
 begin
-  unfreezingI { rcases hf with ⟨N, b, c_, hN, hf, hr, H⟩ },
+  unfreezingI { rcases hf with ⟨N, b, κ, hN, hf, hr, H⟩ },
   exact hf.le _ _ _ _ le_rfl (H.trans $ fact.out _)
 end
 
 instance mul_left (f : universal_map m n) [h : f.very_suitable r r' c₁ c₂] :
   f.very_suitable r r' (c * c₁) (c * c₂) :=
 begin
-  unfreezingI { rcases h with ⟨N, b, c_, hN, hf, hr, H⟩ },
-  refine ⟨N, b, c * c_, hN, infer_instance, hr, _⟩,
+  unfreezingI { rcases h with ⟨N, b, κ, hN, hf, hr, H⟩ },
+  refine ⟨N, b, c * κ, hN, infer_instance, hr, _⟩,
   rw mul_left_comm,
   exact mul_le_mul' le_rfl H
 end
@@ -636,34 +636,34 @@ end universal_map
 
 namespace data
 
-class very_suitable (BD : data) (r r' : out_param ℝ≥0) (c_ : ℕ → ℝ≥0) : Prop :=
-(universal_very_suitable : ∀ i j, (BD.d i j).very_suitable r r' (c_ i) (c_ j))
-(pos : ∀ i, 0 < c_ i)
+class very_suitable (BD : data) (r r' : out_param ℝ≥0) (κ : ℕ → ℝ≥0) : Prop :=
+(universal_very_suitable : ∀ i j, (BD.d i j).very_suitable r r' (κ i) (κ j))
+(pos : ∀ i, 0 < κ i)
 
-def pos (BD : data) {r r' : ℝ≥0} (c_ : ℕ → ℝ≥0) [BD.very_suitable r r' c_] (i : ℕ) :
-  0 < c_ i :=
+def pos (BD : data) {r r' : ℝ≥0} (κ : ℕ → ℝ≥0) [BD.very_suitable r r' κ] (i : ℕ) :
+  0 < κ i :=
 very_suitable.pos BD i
 
 attribute [instance] very_suitable.universal_very_suitable
 
 namespace very_suitable
 
-variables (BD : data) (c_ : ℕ → ℝ≥0)
+variables (BD : data) (κ : ℕ → ℝ≥0)
 
-instance suitable [hr' : fact (r' ≤ 1)] [h : BD.very_suitable r r' c_] :
-  BD.suitable c_ :=
+instance suitable [hr' : fact (r' ≤ 1)] [h : BD.very_suitable r r' κ] :
+  BD.suitable κ :=
 { universal_suitable := λ i j, by apply_instance }
 
-lemma of_succ (h1 : ∀ i, universal_map.very_suitable (BD.d (i + 1) i) r r' (c_ (i + 1)) (c_ i))
-  (h2 : ∀ i, 0 < c_ i) :
-  BD.very_suitable r r' c_ :=
+lemma of_succ (h1 : ∀ i, universal_map.very_suitable (BD.d (i + 1) i) r r' (κ (i + 1)) (κ i))
+  (h2 : ∀ i, 0 < κ i) :
+  BD.very_suitable r r' κ :=
 { universal_very_suitable :=
   begin
     intros i j,
     by_cases hij : i = j + 1,
     { rw hij, exact h1 _ },
     { rw BD.shape, swap, exact ne.symm hij,
-      exact universal_map.very_suitable.zero r r' (c_ i) (c_ j) }
+      exact universal_map.very_suitable.zero r r' (κ i) (κ j) }
   end,
   pos := h2 }
 

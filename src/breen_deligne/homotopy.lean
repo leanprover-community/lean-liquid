@@ -57,12 +57,12 @@ structure package :=
 
 namespace package
 
-class adept (BD : out_param package) (c_ : out_param $ ℕ → ℝ≥0) (c' : ℕ → ℝ≥0) : Prop :=
+class adept (BD : out_param package) (κ : out_param $ ℕ → ℝ≥0) (κ' : ℕ → ℝ≥0) : Prop :=
 (htpy_suitable' :
-  ∀ i, (BD.homotopy.hom i (i+1)).suitable (rescale_constants c_ 2 i) (c' (i+1) * c_ (i+1)))
+  ∀ i, (BD.homotopy.hom i (i+1)).suitable (rescale_constants κ 2 i) (κ' (i+1) * κ (i+1)))
 
-instance adept.htpy_suitable (BD : package) (c_ c' : ℕ → ℝ≥0) [adept BD c_ c'] (j i : ℕ) :
-  (BD.homotopy.hom j i).suitable (rescale_constants c_ 2 j) (c' i * c_ i) :=
+instance adept.htpy_suitable (BD : package) (κ κ' : ℕ → ℝ≥0) [adept BD κ κ'] (j i : ℕ) :
+  (BD.homotopy.hom j i).suitable (rescale_constants κ 2 j) (κ' i * κ i) :=
 begin
   by_cases hij : j + 1 = i,
   { rw ← hij, apply adept.htpy_suitable' },
@@ -75,11 +75,11 @@ namespace adept
 
 open category_theory
 
-variables (BD : package) (c_ c' : ℕ → ℝ≥0) [adept BD c_ c']
+variables (BD : package) (κ κ' : ℕ → ℝ≥0) [adept BD κ κ']
 
 -- instance mul_adept_suitable (N : ℕ) (f : (data.mul N).obj BD.data ⟶ BD.data) (i : ℕ) (c₁ : ℝ≥0)
---   [hf : universal_map.suitable c₁ (c_ i) (f.f i)] :
---   universal_map.suitable c₁ ((c' * c_) i) (f.f i) :=
+--   [hf : universal_map.suitable c₁ (κ i) (f.f i)] :
+--   universal_map.suitable c₁ ((κ' * κ) i) (f.f i) :=
 -- begin
 --   refine hf.le _ _ _ _ le_rfl _,
 --   dsimp,
@@ -88,22 +88,22 @@ variables (BD : package) (c_ c' : ℕ → ℝ≥0) [adept BD c_ c']
 
 instance homotopy_pow'_suitable (j i : ℕ) :
   Π N, ((BD.data.homotopy_pow' BD.homotopy N).hom j i).suitable
-    (rescale_constants c_ (2 ^ N) j) ((c' * c_) i)
+    (rescale_constants κ (2 ^ N) j) ((κ' * κ) i)
 | 0     := universal_map.suitable_zero _ _
 | (N+1) :=
 begin
   dsimp [data.homotopy_pow'],
   refine @universal_map.suitable_add _ _ _ _ _ _ (id _) (id _),
   { refine @universal_map.suitable.comp
-      _ _ _ _ _ _ (c' i * c_ i) _ _ (id _),
+      _ _ _ _ _ _ (κ' i * κ i) _ _ (id _),
     refine @universal_map.mul_suitable _ _ _ _ _ (id _) _ _,
     refine (homotopy_pow'_suitable N).le _ _ _ _ _ le_rfl,
-    calc rescale_constants c_ (2 ^ (N + 1)) j
-        = c_ j * (2⁻¹ * (2 ^ N)⁻¹) : by simp only [rescale_constants, pow_succ, mul_inv']
-    ... ≤ c_ j * (1 * (2 ^ N)⁻¹)   : mul_le_mul' le_rfl (mul_le_mul' (by norm_num) le_rfl)
-    ... = c_ j * (2 ^ N)⁻¹         : by rw one_mul, },
+    calc rescale_constants κ (2 ^ (N + 1)) j
+        = κ j * (2⁻¹ * (2 ^ N)⁻¹) : by simp only [rescale_constants, pow_succ, mul_inv']
+    ... ≤ κ j * (1 * (2 ^ N)⁻¹)   : mul_le_mul' le_rfl (mul_le_mul' (by norm_num) le_rfl)
+    ... = κ j * (2 ^ N)⁻¹         : by rw one_mul, },
   { refine @universal_map.suitable.comp
-      _ _ _ _ _ _ (rescale_constants c_ 2 j) _ _ (id _),
+      _ _ _ _ _ _ (rescale_constants κ 2 j) _ _ (id _),
     refine @universal_map.mul_suitable _ _ _ _ _ (id _) 2 ⟨zero_lt_two⟩,
     simp only [rescale_constants, pow_succ, mul_inv'],
     rw [← mul_assoc, mul_right_comm],
@@ -116,12 +116,12 @@ attribute [simps] homotopy.refl homotopy.symm homotopy.trans homotopy.comp_left 
 
 instance homotopy_mul_suitable (j i N : ℕ) :
   ((BD.data.homotopy_mul BD.homotopy N).hom j i).suitable
-    (rescale_constants c_ (2 ^ N) j) ((c' * c_) i) :=
+    (rescale_constants κ (2 ^ N) j) ((κ' * κ) i) :=
 begin
   dsimp [data.homotopy_mul, homotopy.trans_hom],
   simp only [add_zero, zero_add],
-  refine @universal_map.suitable.comp _ _ _ _ _ _ (rescale_constants c_ (2 ^ N) j) _ _ (id _),
-  generalize : (rescale_constants c_ (2 ^ N) j) = c,
+  refine @universal_map.suitable.comp _ _ _ _ _ _ (rescale_constants κ (2 ^ N) j) _ _ (id _),
+  generalize : (rescale_constants κ (2 ^ N) j) = c,
   induction N with N IH,
   { dsimp [data.pow'_iso_mul, data.mul_one_iso, FreeMat.one_mul_iso],
     -- jmc: I don't understand why TC doesn't find the following instance...

@@ -14,14 +14,14 @@ contains the construction of the system of complexes from this data.
 
 ## Main definitions
 
-Let `BD = (n₁ ⟶ n₂ ⟶ …)` be Breen-Deligne data, `c_` a sequence of non-negative reals which are
+Let `BD = (n₁ ⟶ n₂ ⟶ …)` be Breen-Deligne data, `κ` a sequence of non-negative reals which are
 suitable for `BD`, and say `r,c≥0` and `V` is a normed group with `T⁻¹` scaling by `r`.
 
-- `BD.complex c_ r V r' c`: the functor taking a profinitely filtered pseudo-normed group `M`
+- `BD.complex κ r V r' c`: the functor taking a profinitely filtered pseudo-normed group `M`
   to the cochain complex `V-hat(M_{≤c}^n₁)^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^n₂)^{T⁻¹} ⟶ …`
   induced by the data.
 
-- `BD.system c_ r V r'`: the functor sending a profinitely filtered pseudo-normed group `M`
+- `BD.system κ r V r'`: the functor sending a profinitely filtered pseudo-normed group `M`
   to the system of complexes whose component at `c`
   is `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …`
 
@@ -38,7 +38,7 @@ namespace breen_deligne
 namespace data
 
 section
-variables (BD : breen_deligne.data) (c_ : ℕ → ℝ≥0)
+variables (BD : breen_deligne.data) (κ : ℕ → ℝ≥0)
 variables (r : ℝ≥0) (V : SemiNormedGroup) [normed_with_aut r V] [fact (0 < r)]
 variables (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)]
 variables (M : ProFiltPseuNormGrpWithTinv.{u} r') (c : ℝ≥0)
@@ -52,9 +52,9 @@ CLCFPTinv₂ r V r' (a i) (b i) (BD.X i)
 /-- The object for the complex of seminormed groups
 `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …` -/
 def complex_X (i : ℕ) : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ SemiNormedGroup :=
-complex₂_X BD r V r' (λ i, c * c_ i) (λ i, r' * (c * c_ i)) i
+complex₂_X BD r V r' (λ i, c * κ i) (λ i, r' * (c * κ i)) i
 
-variables [BD.suitable c_]
+variables [BD.suitable κ]
 
 /-- The differential for the complex of seminormed groups
 `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …` -/
@@ -65,11 +65,11 @@ def complex₂_d (a b : ℕ → ℝ≥0) [∀ i, fact (b i ≤ r' * a i)]
 
 /-- The differential for the complex of seminormed groups
 `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …` -/
-def complex_d (i j : ℕ) : BD.complex_X c_ r V r' c i ⟶ BD.complex_X c_ r V r' c j :=
-(BD.d j i).eval_CLCFPTinv r V r' (c * c_ i) (c * c_ j)
+def complex_d (i j : ℕ) : BD.complex_X κ r V r' c i ⟶ BD.complex_X κ r V r' c j :=
+(BD.d j i).eval_CLCFPTinv r V r' (c * κ i) (c * κ j)
 
 lemma complex_d_comp_d (i j k : ℕ) :
-  BD.complex_d c_ r V r' c i j ≫ BD.complex_d c_ r V r' c j k = 0 :=
+  BD.complex_d κ r V r' c i j ≫ BD.complex_d κ r V r' c j k = 0 :=
 by simp only [complex_d, ← universal_map.eval_CLCFPTinv_comp, BD.d_comp_d,
     universal_map.eval_CLCFPTinv_zero]
 
@@ -79,7 +79,7 @@ section
 
 open homological_complex
 
-variables (BD : breen_deligne.data) (c_ : ℕ → ℝ≥0) [BD.suitable c_]
+variables (BD : breen_deligne.data) (κ : ℕ → ℝ≥0) [BD.suitable κ]
 variables (r : ℝ≥0) (V : SemiNormedGroup) [normed_with_aut r V] [fact (0 < r)]
 variables (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] (c : ℝ≥0)
 
@@ -115,19 +115,19 @@ def complex₂ (r : ℝ≥0) (V : SemiNormedGroup) [normed_with_aut r V] [fact (
 def complex (r : ℝ≥0) (V : SemiNormedGroup) [normed_with_aut r V] [fact (0 < r)]
   (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] (c : ℝ≥0) :
   (ProFiltPseuNormGrpWithTinv.{u} r')ᵒᵖ ⥤ cochain_complex SemiNormedGroup ℕ :=
-BD.complex₂ r V r' (λ i, c * c_ i) (λ i, r' * (c * c_ i))
+BD.complex₂ r V r' (λ i, c * κ i) (λ i, r' * (c * κ i))
 
 namespace complex
 
 lemma map_norm_noninc {M₁ M₂} (f : M₁ ⟶ M₂) (n : ℕ) :
-  (((BD.complex c_ r V r' c).map f).f n).norm_noninc :=
+  (((BD.complex κ r V r' c).map f).f n).norm_noninc :=
 CLCFPTinv.map_norm_noninc _ _ _ _ _ _
 
 end complex
 
 lemma complex_obj_d (r : ℝ≥0) (V : SemiNormedGroup) [normed_with_aut r V] [fact (0 < r)]
   (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] (c : ℝ≥0) (i j : ℕ) (M) :
-  ((BD.complex c_ r V r' c).obj M).d i j =
+  ((BD.complex κ r V r' c).obj M).d i j =
     ((BD.d j i).eval_CLCFPTinv r V r' _ _).app M :=
 rfl
 
@@ -144,7 +144,7 @@ def system (r : ℝ≥0) (V : SemiNormedGroup) [normed_with_aut r V] [fact (0 < 
   (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] :
   (ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ system_of_complexes :=
 functor.flip {
-  obj := λ c, BD.complex c_ r V r' (unop c),
+  obj := λ c, BD.complex κ r V r' (unop c),
   map := λ c₂ c₁ h,
     { app := λ M, begin
         haveI : fact ((unop c₁ : ℝ≥0) ≤ (unop c₂ : ℝ≥0)) := ⟨h.unop.down.down⟩,
@@ -180,20 +180,20 @@ by { dsimp, apply_assumption }
 lemma system_res_def (r : ℝ≥0) (V : SemiNormedGroup) [normed_with_aut r V] [fact (0 < r)]
   (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] {M}
   {c₁ c₂ : ℝ≥0} {i : ℕ} [h : fact (c₂ ≤ c₁)] :
-  @system_of_complexes.res ((BD.system c_ r V r').obj M) c₁ c₂ i _ =
+  @system_of_complexes.res ((BD.system κ r V r').obj M) c₁ c₂ i _ =
     (CLCFPTinv.res r V r' _ _ _).app M :=
 rfl
 
 lemma system_obj_d (r : ℝ≥0) (V : SemiNormedGroup) [normed_with_aut r V] [fact (0 < r)]
   (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)] {M}
   (c : ℝ≥0) (i j : ℕ) :
-  @system_of_complexes.d ((BD.system c_ r V r').obj M) c i j =
+  @system_of_complexes.d ((BD.system κ r V r').obj M) c i j =
     ((BD.d j i).eval_CLCFPTinv r V r' _ _).app M :=
 rfl
 
 lemma system_map_iso_isometry {M₁ M₂ : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ}
   (f : M₁ ≅ M₂) (i : ℕ) :
-  isometry ((((BD.system c_ r V r').map_iso f).hom.app (op c)).f i) :=
+  isometry ((((BD.system κ r V r').map_iso f).hom.app (op c)).f i) :=
 begin
   simp only [← iso.app_hom, ← homological_complex.iso_app_hom],
   apply SemiNormedGroup.iso_isometry_of_norm_noninc;
@@ -201,11 +201,11 @@ begin
 end
 
 instance system.separated_space (c : ℝ≥0) (i : ℕ) (M) :
-  separated_space (((BD.system c_ r V r').obj M) c i) :=
+  separated_space (((BD.system κ r V r').obj M) c i) :=
 CLCFPTinv₂.separated_space _ _ _ _ _ _ _
 
 instance system.complete_space (c : ℝ≥0) (i : ℕ) (M) :
-  complete_space (((BD.system c_ r V r').obj M) c i) :=
+  complete_space (((BD.system κ r V r').obj M) c i) :=
 CLCFPTinv₂.complete_space _ _ _ _ _ _ _
 
 end
@@ -215,14 +215,14 @@ section
 variables (BD : breen_deligne.data)
 variables (r : ℝ≥0) (V : SemiNormedGroup) [normed_with_aut r V] [fact (0 < r)]
 variables (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)]
-variables (c_ : ℕ → ℝ≥0) [BD.very_suitable r r' c_]
+variables (κ : ℕ → ℝ≥0) [BD.very_suitable r r' κ]
 
-variables {r V r' c_}
+variables {r V r' κ}
 
-lemma system_admissible {M} : ((BD.system c_ r V r').obj M).admissible :=
+lemma system_admissible {M} : ((BD.system κ r V r').obj M).admissible :=
 { d_norm_noninc' := λ c i j hij,
   begin
-    haveI : universal_map.very_suitable (BD.d j i) r r' (unop (op c) * c_ j) (unop (op c) * c_ i) :=
+    haveI : universal_map.very_suitable (BD.d j i) r r' (unop (op c) * κ j) (unop (op c) * κ i) :=
     by { dsimp only [unop_op], apply_instance },
     exact universal_map.eval_CLCFPTinv_norm_noninc _ _ _ _ _ _ _,
   end,

@@ -98,21 +98,21 @@ noncomputable theory
 variables (r r' : ℝ≥0) [fact (r < 1)] [fact (0 < r')]
 
 /-- Very suitable sequence of constants for the example Breen--Deligne package -/
-def c_ : ℕ → ℝ≥0 :=
-eg.data.c_ r r'
+def κ : ℕ → ℝ≥0 :=
+eg.data.κ r r'
 
-instance very_suitable : eg.data.very_suitable r r' (c_ r r') :=
+instance very_suitable : eg.data.very_suitable r r' (κ r r') :=
 eg.data.c_very_suitable _ _
 
-instance [fact (0 < r')] (n : ℕ) : fact (0 < c_ r r' n) :=
+instance [fact (0 < r')] (n : ℕ) : fact (0 < κ r r' n) :=
 data.c__pos _ _ _ _
 
 /-- Adept sequence of constants for the example Breen--Deligne package -/
-def c' : ℕ → ℝ≥0 :=
-eg.c' (eg.c_ r r')
+def κ' : ℕ → ℝ≥0 :=
+eg.κ' (eg.κ r r')
 
-instance adept [fact (0 < r')] [fact (r' ≤ 1)] : package.adept eg (c_ r r') (c' r r') :=
-eg.c'_adept _
+instance adept [fact (0 < r')] [fact (r' ≤ 1)] : package.adept eg (κ r r') (κ' r r') :=
+eg.κ'_adept _
 
 end eg
 

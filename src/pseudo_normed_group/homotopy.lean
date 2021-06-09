@@ -22,8 +22,8 @@ namespace breen_deligne
 variables {BD BD₁ BD₂ : breen_deligne.data} (f g : BD₂ ⟶ BD₁)
 variables (h : homotopy f g)
 
-variables (c_ c_₁ c_₂ : ℕ → ℝ≥0)
-variables [BD.suitable c_] [BD₁.suitable c_₁] [BD₂.suitable c_₂]
+variables (κ c_₁ c_₂ : ℕ → ℝ≥0)
+variables [BD.suitable κ] [BD₁.suitable c_₁] [BD₂.suitable c_₂]
 variables (r : ℝ≥0) (V : SemiNormedGroup) [normed_with_aut r V] [fact (0 < r)]
 variables {r' : ℝ≥0} [fact (0 < r')] [fact (r' ≤ 1)] (c : ℝ≥0)
 

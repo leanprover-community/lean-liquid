@@ -9,12 +9,12 @@ open_locale nnreal
 open category_theory ProFiltPseuNormGrpWithTinv opposite
 
 variables (BD : breen_deligne.package)
-variables (c_ : ℕ → ℝ≥0)
+variables (κ : ℕ → ℝ≥0)
 variables (r r' : ℝ≥0)
 variables [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r < 1)] [fact (r' < 1)]
-variables [BD.data.very_suitable r r' c_] [∀ (i : ℕ), fact (0 < c_ i)]
+variables [BD.data.very_suitable r r' κ] [∀ (i : ℕ), fact (0 < κ i)]
 
-include BD c_ r'
+include BD κ r'
 
 def first_target_stmt : Prop :=
   ∀ m : ℕ,
@@ -22,4 +22,4 @@ def first_target_stmt : Prop :=
   ∃ c₀ : ℝ≥0,
   ∀ (S : Type) [fintype S],
   ∀ (V : SemiNormedGroup.{0}) [normed_with_aut r V],
-    ​((BD.data.system c_ r V r').obj (op $ of r' (Mbar r' S))).is_weak_bounded_exact k K m c₀
+    ​((BD.data.system κ r V r').obj (op $ of r' (Mbar r' S))).is_weak_bounded_exact k K m c₀

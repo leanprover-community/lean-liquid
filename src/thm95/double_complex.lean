@@ -22,7 +22,7 @@ universe variables u v w
 
 namespace thm95
 
-variables (BD : breen_deligne.data) (c_ : ℕ → ℝ≥0) [BD.suitable c_]
+variables (BD : breen_deligne.data) (κ : ℕ → ℝ≥0) [BD.suitable κ]
 variables (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)]
 variables (V : SemiNormedGroup.{u}) [normed_with_aut r V]
 variables (Λ : PolyhedralLattice.{u}) (M : ProFiltPseuNormGrpWithTinv.{u} r')
@@ -52,12 +52,12 @@ begin
 end
 
 def cosimplicial_system_of_complexes : cosimplicial_object.augmented system_of_complexes.{u} :=
-(cosimplicial_object.augmented.whiskering_obj.{u} _ _ (BD.system c_ r V r')).obj
+(cosimplicial_object.augmented.whiskering_obj.{u} _ _ (BD.system κ r V r')).obj
   (Cech_nerve r' Λ M N)
 
 lemma cosimplicial_system_of_complexes_hom_zero :
-  (cosimplicial_system_of_complexes BD c_ r r' V Λ M N).hom.app (mk 0) =
-  (BD.system c_ r V r').map (Cech_augmentation_map.{u} r' Λ M N).op :=
+  (cosimplicial_system_of_complexes BD κ r r' V Λ M N).hom.app (mk 0) =
+  (BD.system κ r V r').map (Cech_augmentation_map.{u} r' Λ M N).op :=
 begin
   ext : 2, dsimp [cosimplicial_system_of_complexes],
   rw [category.id_comp, Cech_nerve_hom_zero]
@@ -65,12 +65,12 @@ end
 
 @[simps X d]
 def double_complex_aux : cochain_complex system_of_complexes ℕ :=
-(cosimplicial_system_of_complexes BD c_ r r' V Λ M N).to_cocomplex
+(cosimplicial_system_of_complexes BD κ r r' V Λ M N).to_cocomplex
 .
 
 @[simps obj map]
 def double_complex' : system_of_double_complexes :=
-(double_complex_aux BD c_ r r' V Λ M N).as_functor
+(double_complex_aux BD κ r r' V Λ M N).as_functor
 
 end
 
@@ -91,26 +91,26 @@ set_option pp.universes true
 @[simps X d]
 def double_complex_aux_rescaled : cochain_complex system_of_complexes ℕ :=
 @homological_complex.modify _ _ _ _ _ _ _ _
-(double_complex_aux BD c_ r r' V Λ M N )
+(double_complex_aux BD κ r r' V Λ M N )
   system_of_complexes.rescale_functor.{u}
   system_of_complexes.rescale_nat_trans.{u u}
   (system_of_complexes.rescale_functor.additive.{u u})
 
 @[simps obj map]
 def double_complex : system_of_double_complexes :=
-(double_complex_aux_rescaled BD c_ r r' V Λ M N).as_functor
+(double_complex_aux_rescaled BD κ r r' V Λ M N).as_functor
 
 lemma double_complex.row_zero :
-  (double_complex BD c_ r r' V Λ M N).row 0 =
-  (BD.system c_ r V r').obj (op $ Hom Λ M) := rfl
+  (double_complex BD κ r r' V Λ M N).row 0 =
+  (BD.system κ r V r').obj (op $ Hom Λ M) := rfl
 
 lemma double_complex.row_one :
-  (double_complex BD c_ r r' V Λ M N).row 1 =
-  (BD.system c_ r V r').obj (op $ Hom ((cosimplicial Λ N).obj (mk 0)) M) := rfl
+  (double_complex BD κ r r' V Λ M N).row 1 =
+  (BD.system κ r V r').obj (op $ Hom ((cosimplicial Λ N).obj (mk 0)) M) := rfl
 
 lemma double_complex.row_map_zero_one :
-  (double_complex BD c_ r r' V Λ M N).row_map 0 1 =
-  (BD.system c_ r V r').map (Cech_augmentation_map r' Λ M N).op :=
+  (double_complex BD κ r r' V Λ M N).row_map 0 1 =
+  (BD.system κ r V r').map (Cech_augmentation_map r' Λ M N).op :=
 begin
   ext c i : 4,
   dsimp only [system_of_double_complexes.row_map_app_f, system_of_double_complexes.d,
@@ -129,9 +129,9 @@ begin
 end
 
 lemma double_complex.row (m : ℕ) :
-  (double_complex BD c_ r r' V Λ M N).row (m+2) =
+  (double_complex BD κ r r' V Λ M N).row (m+2) =
   (system_of_complexes.rescale_functor (m+2)).obj
-    ((BD.system c_ r V r').obj (op $ Hom ((cosimplicial Λ N).obj (mk (m+1))) M)) := rfl
+    ((BD.system κ r V r').obj (op $ Hom ((cosimplicial Λ N).obj (mk (m+1))) M)) := rfl
 
 end
 
@@ -142,20 +142,20 @@ namespace thm95
 variables (BD : breen_deligne.data)
 variables (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)]
 variables (V : SemiNormedGroup.{u}) [normed_with_aut r V]
-variables (c_ : ℕ → ℝ≥0) [BD.very_suitable r r' c_]
+variables (κ : ℕ → ℝ≥0) [BD.very_suitable r r' κ]
 variables (Λ : PolyhedralLattice.{u}) (M : ProFiltPseuNormGrpWithTinv.{u} r')
 variables (N : ℕ) [fact (0 < N)]
 
-variables {r r' V c_ Λ M N}
+variables {r r' V κ Λ M N}
 
 lemma double_complex.row_admissible :
-  ∀ m, ((double_complex BD c_ r r' V Λ M N).row m).admissible
+  ∀ m, ((double_complex BD κ r r' V Λ M N).row m).admissible
 | 0     := BD.system_admissible
 | 1     := BD.system_admissible
 | (m+2) := system_of_complexes.rescale_admissible _ _ BD.system_admissible
 
 lemma double_complex.d_one_norm_noninc (c : ℝ≥0) (q : ℕ) :
-  (@system_of_double_complexes.d (double_complex BD c_ r r' V Λ M N) c 1 2 q).norm_noninc :=
+  (@system_of_double_complexes.d (double_complex BD κ r r' V Λ M N) c 1 2 q).norm_noninc :=
 begin
   apply normed_group_hom.norm_noninc_iff_norm_le_one.2,
   refine normed_group_hom.norm_comp_le_of_le' 2 _ 1 _ (SemiNormedGroup.norm_to_rescale_le _ _) _,
@@ -178,7 +178,7 @@ end
 .
 
 lemma double_complex.d_two_norm_noninc (c : ℝ≥0) (p q : ℕ) :
-  (@system_of_double_complexes.d (double_complex BD c_ r r' V Λ M N) c (p+2) (p+3) q).norm_noninc :=
+  (@system_of_double_complexes.d (double_complex BD κ r r' V Λ M N) c (p+2) (p+3) q).norm_noninc :=
 begin
   apply normed_group_hom.norm_noninc_iff_norm_le_one.2,
   refine normed_group_hom.norm_comp_le_of_le' (p+3:ℕ) _ 1 _ (SemiNormedGroup.norm_scale_le _ _ _) _,
@@ -205,14 +205,14 @@ begin
 end
 
 lemma double_complex.d_norm_noninc (c : ℝ≥0) (q : ℕ) :
-  ∀ p, (@system_of_double_complexes.d (double_complex BD c_ r r' V Λ M N) c p (p+1) q).norm_noninc
+  ∀ p, (@system_of_double_complexes.d (double_complex BD κ r r' V Λ M N) c p (p+1) q).norm_noninc
 | 0     := breen_deligne.data.complex.map_norm_noninc _ _ _ _ _ _ _ _
 | 1     := double_complex.d_one_norm_noninc _ _ _
 | (p+2) := double_complex.d_two_norm_noninc _ _ _ _
 
 -- see above: currently we can only prove this for the columns
 lemma double_complex_admissible :
-  (double_complex BD c_ r r' V Λ M N).admissible :=
+  (double_complex BD κ r r' V Λ M N).admissible :=
 system_of_double_complexes.admissible.mk' (double_complex.row_admissible _)
   (by { rintro _ _ _ _ rfl, apply double_complex.d_norm_noninc })
 
