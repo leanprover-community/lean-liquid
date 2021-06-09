@@ -5,7 +5,7 @@ import algebra.homology.additive
 import for_mathlib.homological_complex
 
 import normed_group.SemiNormedGroup
-import locally_constant.Vhat -- SemiNormedGroup is preadditive (maybe rename this file, or split it)
+import for_mathlib.SemiNormedGroup_Completion
 
 import facts
 
