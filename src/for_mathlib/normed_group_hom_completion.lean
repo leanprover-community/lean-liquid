@@ -45,16 +45,19 @@ lemma normed_group_hom.completion_coe (f : normed_group_hom G H) (g : G) : f.com
 completion.map_coe f.uniform_continuous _
 
 --This has nothing to do with completions.
+--#7875
 @[simp]
 lemma normed_group_hom.coe_id : ((normed_group_hom.id : normed_group_hom G G) : G → G) =
   (_root_.id : G → G) := rfl
 
 --This has nothing to do with completions.
+--#7875
 @[simp]
 lemma normed_group_hom.coe_comp (f : normed_group_hom G H) (g : normed_group_hom H K) :
   (g.comp f : G → K) = (g : H → K) ∘ (f : G → H) := rfl
 
---Why is the group implicit in `normed_group_hom.id`? I (RB) probably did it, for no reason.
+--Why is the group implicit in `normed_group_hom.id`? #7875
+
 @[simp]
 lemma normed_group_hom.completion_id : (normed_group_hom.id : normed_group_hom G G).completion =
   (normed_group_hom.id : normed_group_hom (completion G) (completion G)) :=

@@ -109,6 +109,7 @@ lemma comp_assoc {V₄: Type* } [semi_normed_group V₄] (h : normed_group_hom V
   (h.comp g).comp f = h.comp (g.comp f) :=
 by { ext, refl }
 
+--#7875
 lemma sum.norm_le {ι : Type*} (s : finset ι)
   (f : ι → normed_group_hom V₁ V₂) (C : ι → ℝ) (h : ∀ i ∈ s, ∥f i∥ ≤ (C i)) :
   ∥(∑ i in s, f i)∥ ≤ (∑ i in s, C i) :=
@@ -122,6 +123,7 @@ begin
     exact add_le_add (h i $ s.mem_insert_self _) (IH $ λ i hi, h i $ finset.mem_insert_of_mem hi) }
 end
 
+--#7875
 @[simp] lemma norm_nsmul_le {C : ℝ} (hf : ∥f∥ ≤ C) (n : ℕ) : ∥n • f∥ ≤ n * C :=
 begin
   induction n with i hi,
@@ -130,6 +132,7 @@ begin
   exact le_trans (norm_add_le _ _) (add_le_add hi hf),
 end
 
+--#7875
 @[simp] lemma norm_gsmul_le {C : ℝ} (hf : ∥f∥ ≤ C) (n : ℤ) : ∥n • f∥ ≤ (n.nat_abs * C) :=
 begin
   induction n,
@@ -139,10 +142,12 @@ begin
     exact norm_nsmul_le hf n.succ }
 end
 
+--#7875
 lemma norm_comp_le_of_le {C₁ C₂ : ℝ} (hg : ∥g∥ ≤ C₂) (hf : ∥f∥ ≤ C₁) :
   ∥g.comp f∥ ≤ C₂ * C₁ :=
 le_trans (norm_comp_le g f) $ mul_le_mul hg hf (norm_nonneg _) (le_trans (norm_nonneg _) hg)
 
+--#7875
 lemma norm_comp_le_of_le' (C₁ C₂ C₃ : ℝ) (h : C₃ = C₂ * C₁) (hg : ∥g∥ ≤ C₂) (hf : ∥f∥ ≤ C₁) :
   ∥g.comp f∥ ≤ C₃ :=
 by { rw h, exact norm_comp_le_of_le hg hf }
