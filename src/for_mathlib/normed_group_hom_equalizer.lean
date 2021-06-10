@@ -1,5 +1,7 @@
 import analysis.normed_space.normed_group_hom
 
+import for_mathlib.normed_group_hom
+
 noncomputable theory
 
 open_locale nnreal
@@ -14,12 +16,6 @@ variables {f₂ g₂ : normed_group_hom V₂ W₂}
 variables {f₃ g₃ : normed_group_hom V₃ W₃}
 
 namespace normed_group_hom
-
--- move this
-lemma comp_assoc (h : normed_group_hom V₃ V₄) (g : normed_group_hom V₂ V₃)
-  (f : normed_group_hom V₁ V₂) :
-  (h.comp g).comp f = h.comp (g.comp f) :=
-by { ext, refl }
 
 def equalizer := (f - g).ker
 
