@@ -29,7 +29,7 @@ namespace helper
 
 open real
 
-def b (r r' k' ε : ℝ): ℕ := nat_ceil ((log $ ε/(2 * k'))/log (r/r'))
+def b (r r' k' ε : ℝ) : ℕ := nat_ceil ((log $ ε/(2 * k'))/log (r/r'))
 
 lemma b_spec {r r' k' ε : ℝ} (hr : 0 < r) ( hr' : 0 < r') (hrr' : r < r')
   (hk' : 0 < k') (hε : 0 < ε) : (2 * k') * (r / r') ^ (b r r' k' ε) ≤ ε :=
@@ -42,12 +42,12 @@ begin
   exact le_nat_ceil (log (ε / (2 * k')) / log (r / r')),
 end
 
-def N₂ (r' k' b : ℝ) := nat_ceil (log (k'/r'^b)/ log 2)
+def N₂ (r' k' : ℝ) (b : ℕ) := nat_ceil (log (k'/r'^b)/ log 2)
 
-lemma N₂_spec {r' k' b : ℝ} (hr' : 0 < r') (hk' : 0 < k') : k'/ (2 ^ (N₂ r' k' b)) ≤ r' ^ b :=
+lemma N₂_spec {r' k' : ℝ} {b : ℕ} (hr' : 0 < r') (hk' : 0 < k') : k'/ (2 ^ (N₂ r' k' b)) ≤ r' ^ b :=
 begin
   have f₁ : (0 : ℝ) < 2 ^ N₂ r' k' b := pow_pos zero_lt_two _,
-  have f₂ : (0 : ℝ) < r' ^ b := rpow_pos_of_pos hr' _,
+  have f₂ : (0 : ℝ) < r' ^ b := pow_pos hr' _,
   have f₃ : 0 < k' / r' ^ b := div_pos hk' f₂,
   have f₄ : 0 < log 2 := log_pos one_lt_two,
   rw [div_le_iff' f₁, ← div_le_iff f₂,  ← log_le_log f₃ f₁, log_pow zero_lt_two, ← div_le_iff f₄],
@@ -64,7 +64,7 @@ begin
   have Hk' : k' ≠ 0,
   { intro H,
     simpa [H, N₂] using h },
-  have f₂ : 0 < r' ^ b := rpow_pos_of_pos hr' b,
+  have f₂ : 0 < r' ^ b := pow_pos hr' b,
 
   have f₃ : 0 < k' / r' ^ b := div_pos ((ne.symm Hk').le_iff_lt.mp hk') f₂,
   have f₃' : k' / r' ^ b ≠ 0 := f₃.ne.symm,
@@ -200,7 +200,7 @@ def N₂ : ℕ := helper.N₂ r' (k' κ' m) (b BD κ' r r' m)
 
 lemma N₂_spec : (k' κ' m) / (2 ^ (N₂ BD κ' r r' m)) ≤ r' ^ b BD κ' r r' m :=
 begin
-  suffices : (k' κ' m : ℝ) / 2 ^ N₂ BD κ' r r' m ≤ r' ^ (b BD κ' r r' m : ℝ),
+  suffices : (k' κ' m : ℝ) / 2 ^ N₂ BD κ' r r' m ≤ r' ^ (b BD κ' r r' m),
   exact_mod_cast this,
   apply helper.N₂_spec ; norm_cast ; apply fact.out
 end
@@ -210,7 +210,7 @@ variables {κ' r r' m}
 lemma N₂_spec_of_pos' (h : 0 < N₂ BD κ' r r' m) :
   r' ^ b BD κ' r r' m < 2 * k' κ' m / 2 ^ N₂ BD κ' r r' m :=
 begin
-  suffices : (r' : ℝ) ^ (b BD κ' r r' m : ℝ) < 2 * k' κ' m / 2 ^ N₂ BD κ' r r' m,
+  suffices : (r' : ℝ) ^ (b BD κ' r r' m) < 2 * k' κ' m / 2 ^ N₂ BD κ' r r' m,
   exact_mod_cast this,
   apply helper.N₂_spec_of_pos' h,
   { norm_cast,
