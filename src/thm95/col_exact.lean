@@ -1166,12 +1166,13 @@ begin
   dsimp [cosimplicial_object.coboundary],
   simp only [← nat_trans.app_hom_apply, add_monoid_hom.map_sum, add_monoid_hom.map_gsmul,
     ← homological_complex.hom.f_add_monoid_hom_apply, this],
-  apply normed_group_hom.sum.norm_le,
+  apply norm_sum_le_of_le,
   rintro i -,
-  refine le_trans (normed_group_hom.norm_gsmul_le _ ((-1) ^ ↑i : ℤ)) (_ : _ * 1 ≤ 1),
-  { apply normed_group_hom.norm_noninc_iff_norm_le_one.1,
-    apply CLC.map_norm_noninc, },
-  { simp only [mul_one, int.nat_abs_pow, int.nat_abs_neg, int.nat_abs_one, one_pow, nat.cast_one] },
+  refine le_trans (norm_gsmul_le _ _) _,
+  rw [← int.norm_cast_real, int.cast_pow, normed_field.norm_pow, int.cast_neg, int.cast_one,
+    norm_neg, norm_one, one_pow, one_mul],
+  apply normed_group_hom.norm_noninc_iff_norm_le_one.1,
+  apply CLC.map_norm_noninc
 end
 
 lemma admissible : (col_complex_rescaled r' V Λ M N n).admissible :=
