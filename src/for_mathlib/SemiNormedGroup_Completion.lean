@@ -126,7 +126,7 @@ def Completion.lift {V W : SemiNormedGroup} [complete_space W]
       refine continuous.mul continuous_const continuous_norm },
     { intros a,
       rw completion.extension_coe,
-      { change _ ≤ ↑c * ∥incl _∥,
+      { change _ ≤ c * ∥incl _∥,
         simpa using h a },
       { exact normed_group_hom.uniform_continuous _ }}
   end }
