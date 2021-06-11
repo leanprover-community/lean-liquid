@@ -104,6 +104,7 @@ begin
   { simpa using le_of_op_norm_le f h v }
 end
 
+--#7875
 lemma comp_assoc {V₄: Type* } [semi_normed_group V₄] (h : normed_group_hom V₃ V₄)
   (g : normed_group_hom V₂ V₃) (f : normed_group_hom V₁ V₂) :
   (h.comp g).comp f = h.comp (g.comp f) :=
