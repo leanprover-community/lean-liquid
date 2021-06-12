@@ -58,10 +58,3 @@ begin
   refine ⟨g, by simpa [← hg] using sum_v, by simpa [hg 0] using hv₀, λ n hn,
           by simpa [hg] using hv_pos n hn⟩
 end
-
-
-
--- move this
-@[simp] lemma norm_ite {V : Type*} [semi_normed_group V] (P : Prop) {hP : decidable P} (x y : V) :
-  ∥(if P then x else y)∥ = if P then ∥x∥ else ∥y∥ :=
-by split_ifs; refl

@@ -1,8 +1,8 @@
 import analysis.normed_space.normed_group_hom
 import topology.algebra.normed_group
+import analysis.specific_limits
 
 import for_mathlib.normed_group
-import for_mathlib.specific_limit
 
 noncomputable theory
 

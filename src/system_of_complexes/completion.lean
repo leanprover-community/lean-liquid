@@ -1,7 +1,6 @@
 import analysis.specific_limits
 import system_of_complexes.basic
 import locally_constant.Vhat
-import for_mathlib.pseudo_metric
 
 /-
 
@@ -128,7 +127,7 @@ begin
   choose z hz using seq,
   let y : ℕ → C c i := λ j, res (w j) - ∑ l in range j, C.d _ _ (z l),
   have cau_y : cauchy_seq y,
-  { apply cauchy_seq_of_le_geometric_pseudo (1/(2 : ℝ)) 1 (half_lt_self zero_lt_one),
+  { apply cauchy_seq_of_le_geometric (1/(2 : ℝ)) 1 (half_lt_self zero_lt_one),
     intros j,
     have fact : ∥C.d _ (i+1) (w (j + 1) - w j)∥ ≤ 2*ε j :=
     calc ∥C.d _ (i+1) (w (j + 1) - w j)∥

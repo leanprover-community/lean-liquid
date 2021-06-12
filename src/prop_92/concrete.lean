@@ -4,7 +4,6 @@ import normed_group.normed_with_aut
 
 import for_mathlib.normed_group_hom_completion
 import for_mathlib.normed_group_hom
-import for_mathlib.pseudo_metric
 
 import locally_constant.analysis
 
@@ -399,7 +398,7 @@ end
 
 lemma cauchy_seq_g : cauchy_seq (he.g hφ f) :=
 begin
-  apply cauchy_seq_of_le_geometric_pseudo r (r^2*∥f∥) (fact.out _),
+  apply cauchy_seq_of_le_geometric r (r^2*∥f∥) (fact.out _),
   intro n,
   dsimp [embedding.g],
   rw [dist_eq_norm, sum_range_succ _ (n+1), sub_add_eq_sub_sub, sub_self, zero_sub, norm_neg],

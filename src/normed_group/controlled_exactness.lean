@@ -1,6 +1,6 @@
 import for_mathlib.normed_group_hom_completion
 import for_mathlib.normed_group_hom
-import for_mathlib.specific_limit
+
 /-!
 
 # A controlled exactness lemma for seminormed groups

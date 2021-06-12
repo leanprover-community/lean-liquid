@@ -187,7 +187,7 @@ begin
   { rw finset.sum_comm,
     apply finset.sum_le_sum,
     rintro j -,
-    simp only [single_apply, norm_ite, norm_zero],
+    simp only [single_apply, norm_zero, apply_ite norm],
     apply le_of_eq,
     simp only [finset.sum_ite_eq, finset.mem_univ, if_true], }
 end

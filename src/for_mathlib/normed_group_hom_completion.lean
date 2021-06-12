@@ -151,10 +151,10 @@ begin
   by_cases Hf : ∀ x, ∥f x∥ = 0, -- This is a bit silly, we simply avoid assuming C ≥ 0
   { apply le_antisymm,
     { intros hatg hatg_in,
-      rw normed_group.mem_closure_iff,
+      rw semi_normed_group.mem_closure_iff,
       intros ε ε_pos,
       obtain ⟨_, ⟨g : G, rfl⟩, hg : ∥hatg - g∥ < ε⟩ :=
-      normed_group.mem_closure_iff.mp (completion.dense_inducing_coe.dense hatg) ε ε_pos,
+      semi_normed_group.mem_closure_iff.mp (completion.dense_inducing_coe.dense hatg) ε ε_pos,
       obtain ⟨g' : G, hgg' : f g' = f g, hfg : ∥g'∥ ≤ C * ∥f g∥⟩ :=
       h (f g) (mem_range_self g),
       rw [Hf g, mul_zero] at hfg,
@@ -179,14 +179,14 @@ begin
       (lt_of_le_of_ne (norm_nonneg (f y)) hx.symm) },
   apply le_antisymm, -- Now start the actual proof
   { intros hatg hatg_in,
-    rw normed_group.mem_closure_iff,
+    rw semi_normed_group.mem_closure_iff,
     intros ε ε_pos,
     have hCf : 0 ≤ C*∥f∥ := mul_nonneg hC (norm_nonneg _),
     have ineq : 0 < 1 + C*∥f∥, by linarith,
     set δ := ε/(1 + C*∥f∥),
     have δ_pos : δ > 0, from div_pos ε_pos ineq,
     obtain ⟨_, ⟨g : G, rfl⟩, hg : ∥hatg - g∥ < δ⟩ :=
-      normed_group.mem_closure_iff.mp (completion.dense_inducing_coe.dense hatg) δ δ_pos,
+      semi_normed_group.mem_closure_iff.mp (completion.dense_inducing_coe.dense hatg) δ δ_pos,
     obtain ⟨g' : G, hgg' : f g' = f g, hfg : ∥g'∥ ≤ C * ∥f g∥⟩ :=
       h (f g) (mem_range_self g),
     have mem_ker : g - g' ∈ f.ker,
