@@ -9,14 +9,6 @@ variables {G : Type*} [semi_normed_group G]
 
 universe u
 
-lemma norm_le_insert' (a b : G) : ∥a∥ ≤ ∥b∥ + ∥a - b∥ :=
-begin
-  rw norm_sub_rev,
-  exact norm_le_insert b a
-end
-
-lemma normed_group.mem_closure_iff {s : set G} {x : G} : x ∈ closure s ↔ ∀ ε > 0, ∃ y ∈ s, ∥x - y∥ < ε :=
-by simp [metric.mem_closure_iff, dist_eq_norm]
 
 lemma controlled_sum_of_mem_closure {s : add_subgroup G} {g : G}
   (hg : g ∈ closure (s : set G)) {b : ℕ → ℝ} (b_pos : ∀ n, 0 < b n) :
@@ -67,92 +59,9 @@ begin
           by simpa [hg] using hv_pos n hn⟩
 end
 
-lemma normed_group.cauchy_seq_iff {u : ℕ → G} :
-  cauchy_seq u ↔ ∀ ε > 0, ∃ N, ∀ m n, m ≥ N → n ≥ N → ∥u m - u n∥ < ε :=
-by simp [metric.cauchy_seq_iff, dist_eq_norm]
-
-lemma cauchy_seq.add {u v : ℕ → G} (hu : cauchy_seq u) (hv : cauchy_seq v) : cauchy_seq (u + v) :=
-begin
-  rw normed_group.cauchy_seq_iff at *,
-  intros ε ε_pos,
-  rcases hu (ε/2) (half_pos ε_pos) with ⟨Nu, hNu⟩,
-  rcases hv (ε/2) (half_pos ε_pos) with ⟨Nv, hNv⟩,
-  use max Nu Nv,
-  intros m n hm hn,
-  replace hm := max_le_iff.mp hm,
-  replace hn := max_le_iff.mp hn,
-
-  calc ∥(u + v) m - (u + v) n∥ = ∥u m + v m - (u n + v n)∥ : rfl
-  ... = ∥(u m - u n) + (v m - v n)∥ : by abel
-  ... ≤ ∥u m - u n∥ + ∥v m - v n∥ : norm_add_le _ _
-  ... < ε : by linarith [hNu m n hm.1 hn.1, hNv m n hm.2 hn.2]
-end
-
-lemma eventually_constant_sum {G : Type*} [add_comm_monoid G] {u : ℕ → G} {N : ℕ}
-  (hu : ∀ n ≥ N, u n = 0) {n : ℕ} (hn : n ≥ N) :
-  ∑ k in range (n + 1), u k = ∑ k in range (N + 1), u k :=
-begin
-  obtain ⟨m, rfl : n = N + m⟩ := le_iff_exists_add.mp hn,
-  clear hn,
-  induction m with m hm,
-  { simp },
-  erw [sum_range_succ, hm],
-  simp [hu]
-end
-
-lemma cauchy_seq_of_eventually_eq {u v : ℕ → G} {N : ℕ} (huv : ∀ n ≥ N, u n = v n)
-  (hv : cauchy_seq (λ n, ∑ k in range (n+1), v k)) : cauchy_seq (λ n, ∑ k in range (n + 1), u k) :=
-begin
-  have : (λ n, ∑ k in range (n + 1), u k) = (λ n, ∑ k in range (n + 1), (u k - v k)) + (λ n, ∑ k in range (n + 1), v k),
-  { ext n,
-    simp },
-  rw this, clear this,
-  apply cauchy_seq.add _ hv,
-  apply tendsto.cauchy_seq,
-  have : ∀ n ≥ N, ∑ (k : ℕ) in range (n + 1), (u k - v k) = ∑ (k : ℕ) in range (N + 1), (u k - v k),
-  { intros n hn,
-    rw eventually_constant_sum _ hn,
-    intros m hm,
-    simp [huv m hm] },
-  apply tendsto.congr',
-  apply eventually_eq.symm,
-  change ∀ᶠ n in at_top, _,
-  rw eventually_at_top,
-  use N,
-  exact this,
-  exact tendsto_const_nhds
-end
 
 
 -- move this
 @[simp] lemma norm_ite {V : Type*} [semi_normed_group V] (P : Prop) {hP : decidable P} (x y : V) :
   ∥(if P then x else y)∥ = if P then ∥x∥ else ∥y∥ :=
 by split_ifs; refl
-
-
-lemma norm_le_zero_iff' {G : Type*} [semi_normed_group G] [separated_space G] {g : G} :
-  ∥g∥ ≤ 0 ↔ g = 0 :=
-begin
-  have : g = 0 ↔ g ∈ closure ({0} : set G),
-  by simpa only [separated_space.out, mem_id_rel, sub_zero] using group_separation_rel g (0 : G),
-  rw [this, normed_group.mem_closure_iff],
-  simp [forall_lt_iff_le']
-end
-
-lemma norm_eq_zero_iff' {G : Type*} [semi_normed_group G] [separated_space G] {g : G} :
-  ∥g∥ = 0 ↔ g = 0 :=
-begin
-  conv_rhs { rw ← norm_le_zero_iff' },
-  split ; intro h,
-  { rw h },
-  { exact le_antisymm h (norm_nonneg g) }
-end
-
-lemma norm_pos_iff' {G : Type*} [semi_normed_group G] [separated_space G] {g : G} :
-  0 < ∥g∥ ↔ g ≠ 0 :=
-begin
-  rw lt_iff_le_and_ne,
-  simp only [norm_nonneg, true_and],
-  rw [ne_comm],
-  exact not_iff_not_of_iff (norm_eq_zero_iff'),
-end
