@@ -1,5 +1,6 @@
 import topology.category.Profinite
 import topology.discrete_quotient
+
 import for_mathlib.topology
 import for_mathlib.order
 import for_mathlib.Profinite.locally_constant
@@ -79,12 +80,6 @@ begin
   exact compact_univ,
 end
 
-lemma product_topological_basis : topological_space.is_topological_basis
-  { S : set (Π (j : J), F.obj j) |
-    ∃ (Us : Π (j : J), set (F.obj j)) (F : finset J),
-      (∀ j, j ∈ F → is_open (Us j)) ∧ S = (F : set J).pi Us } :=
-topological_basis_pi _
-
 -- TODO: Golfing required!
 -- TODO: This generalizes to any cofiltered limit in Top -- Generalize before moving to mathlib!
 lemma limit_topological_basis [inhabited J] : topological_space.is_topological_basis
@@ -94,7 +89,8 @@ lemma limit_topological_basis [inhabited J] : topological_space.is_topological_b
 begin
   let ι : (Top.limit_cone $ F ⋙ Profinite_to_Top).X → Π (j : J), F.obj j :=
     λ x, x.val,
-  convert pullback_topological_basis ι ⟨rfl⟩ _ (product_topological_basis F),
+  convert pullback_topological_basis ι ⟨rfl⟩ _
+    (is_topological_basis_pi  (λ _, topological_space.is_topological_basis_opens)),
   funext S,
   ext,
   split,
