@@ -1,5 +1,7 @@
 import analysis.normed_space.basic
 
+-- PRed in #7911
+
 open_locale nnreal
 
 lemma nnreal.coe_nat_abs (n : ℤ) : (n.nat_abs : ℝ≥0) = nnnorm n :=
