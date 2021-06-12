@@ -1,7 +1,7 @@
 import data.quot
 import data.setoid.basic
 
--- PR together with data_setoid_partition
+-- PRed in  #7910
 
 --- in data.quot
 lemma quotient.mk_eq_iff_out {α : Type*} [s : setoid α] {x : α} {y : quotient s} : ⟦x⟧ = y ↔ x ≈ quotient.out y :=
