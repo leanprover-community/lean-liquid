@@ -89,7 +89,7 @@ iso.refl _
 def complex_rescale_iso (N : ℝ≥0) :
   (BD.complex (rescale_constants κ N) r V r' c).obj (op M) ≅
   (BD.complex κ r V r' c).obj (op $ of r' $ rescale N M) :=
-homological_complex.iso_of_components
+homological_complex.hom.iso_of_components
 begin
   intro i,
   refine CLCTinv.map_iso r V _ _ _ _ _ _ _ _,
@@ -140,7 +140,7 @@ begin
   apply arrow.mk_injective,
   erw [homological_complex.comp_f, homological_complex.comp_f],
   dsimp only [data.system_obj, CLCFPTinv₂.res, complex_rescale_iso,
-    homological_complex.iso_of_components, CLCTinv.map_iso_hom, CLCTinv.map_nat_app],
+    homological_complex.hom.iso_of_components, CLCTinv.map_iso_hom, CLCTinv.map_nat_app],
   simp only [CLCTinv.map_comp_map],
   refl,
 end
@@ -206,7 +206,7 @@ end
 def mul_complex_iso (c : ℝ≥0) :
   (((data.mul N).obj BD).complex κ r V r' c).obj (op M) ≅
   (BD.complex κ r V r' c).obj (op (ProFiltPseuNormGrpWithTinv.of r' $ M^N)) :=
-homological_complex.iso_of_components
+homological_complex.hom.iso_of_components
 begin
   intro i,
   refine CLCTinv.map_iso r V _ _ _ _ _ _ _ _,
@@ -240,7 +240,7 @@ begin
   apply arrow.mk_injective,
   erw [homological_complex.comp_f, homological_complex.comp_f],
   dsimp only [data.system_obj, CLCFPTinv₂.res, mul_complex_iso,
-    homological_complex.iso_of_components, CLCTinv.map_iso_hom, CLCTinv.map_nat_app],
+    homological_complex.hom.iso_of_components, CLCTinv.map_iso_hom, CLCTinv.map_nat_app],
   simp only [CLCTinv.map_comp_map],
   refl,
 end
@@ -365,8 +365,8 @@ begin
   dsimp only [BD_system_map_app_app, BD_map_app_f, data.sum_f, data.system_map, data.complex,
     data.complex₂_map_f, mul_system_iso, system_rescale_iso, complex_rescale_iso, mul_complex_iso],
   erw [nat_iso.of_components.hom_app, nat_iso.of_components.inv_app],
-  dsimp only [homological_complex.iso_of_components_hom_f,
-    homological_complex.iso_of_components_inv_f],
+  dsimp only [homological_complex.hom.iso_of_components_hom_f,
+    homological_complex.hom.iso_of_components_inv_f],
   dsimp only [CLCFPTinv₂, universal_map.eval_CLCFPTinv₂, CLCTinv.map_iso_hom, CLCTinv.map_iso_inv,
     CLCTinv.F_map, _root_.id, CLCTinv.map, SemiNormedGroup.equalizer.map_nat_app, unop_op],
   rw [SemiNormedGroup.equalizer.map_comp_map, SemiNormedGroup.equalizer.map_comp_map],

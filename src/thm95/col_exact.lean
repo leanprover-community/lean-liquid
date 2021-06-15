@@ -188,7 +188,7 @@ end
 
 def col_complex_level_iso_obj (c : ℝ≥0ᵒᵖ) :
   (col_complex_level r' V Λ M N n).obj c ≅ (col_complex r' V Λ M N n).obj c :=
-homological_complex.iso_of_components (col_complex_level_iso_obj_X r' V Λ M N n c)
+homological_complex.hom.iso_of_components (col_complex_level_iso_obj_X r' V Λ M N n c)
 (by { rintro i j (rfl : i + 1 = j), apply col_complex_level_iso_obj_comm })
 
 lemma col_complex_level_iso_comm (c₁ c₂ : ℝ≥0ᵒᵖ) (h : c₁ ⟶ c₂) (i : ℕ) :
@@ -198,7 +198,7 @@ begin
   cases i,
   all_goals {
     dsimp only [col_complex_level_iso_obj, col_complex_level_iso_obj_X,
-      homological_complex.comp_f, homological_complex.iso_of_components_hom_f, iso.refl_hom],
+      homological_complex.comp_f, homological_complex.hom.iso_of_components_hom_f, iso.refl_hom],
       rw [category.id_comp, category.comp_id],
     dsimp only [col_complex_level_map, col_complex_map, whisker_right_app,
       cosimplicial_object.augmented.cocomplex,
@@ -503,10 +503,10 @@ end
 lemma FLC_complex_aug_iso_strict (c : ℝ≥0ᵒᵖ) (i : ℕ) :
   isometry (((FLC_complex_aug_iso r' V Λ M N n).hom.app c).f i) :=
 begin
-  rw [← iso.app_hom, ← homological_complex.iso_app_hom],
+  rw [← iso.app_hom, ← homological_complex.hom.iso_app_hom],
   refine SemiNormedGroup.iso_isometry_of_norm_noninc _ _ _;
-  [ rw [homological_complex.iso_app_hom, iso.app_hom],
-    rw [homological_complex.iso_app_inv, iso.app_inv] ];
+  [ rw [homological_complex.hom.iso_app_hom, iso.app_hom],
+    rw [homological_complex.hom.iso_app_inv, iso.app_inv] ];
   { apply cosimplicial_object.augmented.cocomplex_map_norm_noninc;
     intros; apply SemiNormedGroup.LCC_obj_map_norm_noninc, },
 end
@@ -646,10 +646,10 @@ section open cosimplicial_object
 lemma col_complex_iso_aux2_strict (c : ℝ≥0ᵒᵖ) (i : ℕ) :
   isometry (((col_complex_iso_aux2 r' V Λ M N n).hom.app c).f i) :=
 begin
-  rw [← iso.app_hom, ← homological_complex.iso_app_hom],
+  rw [← iso.app_hom, ← homological_complex.hom.iso_app_hom],
   refine SemiNormedGroup.iso_isometry_of_norm_noninc _ _ _;
-  [ rw [homological_complex.iso_app_hom, iso.app_hom],
-    rw [homological_complex.iso_app_inv, iso.app_inv] ];
+  [ rw [homological_complex.hom.iso_app_hom, iso.app_hom],
+    rw [homological_complex.hom.iso_app_inv, iso.app_inv] ];
   { dsimp only [col_complex_iso_aux2, col_complex_iso_obj, nat_iso.of_components, functor.comp_map,
       functor.map_iso_hom, iso.op_hom, quiver.hom.unop_op, functor.op_map,
       cosimplicial_object.augmented.whiskering_obj_2,
@@ -952,7 +952,7 @@ open homological_complex
 def col_iso [normed_with_aut r V] :
   (double_complex.{u} BD κ r r' V Λ M N).col n ≅
   col'.{u} BD κ r r' V Λ M N n :=
-nat_iso.of_components (λ c, iso_of_components (col_iso_obj_X.{u} BD κ r r' V Λ M N n _)
+nat_iso.of_components (λ c, hom.iso_of_components (col_iso_obj_X.{u} BD κ r r' V Λ M N n _)
   begin
     rintro i j (rfl : i + 1 = j),
     cases i, { exact col_iso_comm₁_0 BD κ r r' V Λ M N n c, },
@@ -961,22 +961,22 @@ nat_iso.of_components (λ c, iso_of_components (col_iso_obj_X.{u} BD κ r r' V �
   end)
   begin
     intros c₁ c₂ h, ext i : 2,
-    dsimp only [comp_f, iso_of_components_hom_f],
+    dsimp only [comp_f, hom.iso_of_components_hom_f],
     exact col_iso_comm₂ BD κ r r' V Λ M N n c₁ c₂ h i,
   end
 .
 
 lemma col_iso_strict [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) (i : ℕ) :
-  isometry (iso_app ((col_iso BD κ r r' V Λ M N n).app c) i).hom :=
+  isometry (hom.iso_app ((col_iso BD κ r r' V Λ M N n).app c) i).hom :=
 begin
-  dsimp only [iso_app_hom, nat_iso.app_hom, col_iso_hom_app_f],
+  dsimp only [hom.iso_app_hom, nat_iso.app_hom, col_iso_hom_app_f],
   cases i, { delta col_iso_obj_X, apply SemiNormedGroup.iso_rescale_isometry, exact nat.cast_one },
   cases i, { delta col_iso_obj_X, apply SemiNormedGroup.iso_rescale_isometry, exact nat.cast_one },
   { delta col_iso_obj_X, exact isometry_id }
 end
 
 lemma col_iso_inv_strict [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) (i : ℕ) :
-  isometry (iso_app ((col_iso BD κ r r' V Λ M N n).app c) i).inv :=
+  isometry (hom.iso_app ((col_iso BD κ r r' V Λ M N n).app c) i).inv :=
 (col_iso_strict BD κ r r' V Λ M N n c i).right_inv $
 λ x, by rw [← comp_apply, iso.inv_hom_id, id_apply]
 
