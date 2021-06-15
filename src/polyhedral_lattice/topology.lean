@@ -2,8 +2,6 @@ import polyhedral_lattice.basic
 import normed_group.pseudo_normed_group
 import pseudo_normed_group.profinitely_filtered
 
-import for_mathlib.coe_nat_abs
-
 noncomputable theory
 open_locale nnreal big_operators
 

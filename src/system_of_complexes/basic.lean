@@ -1,8 +1,7 @@
 import algebra.ordered_group
 import category_theory.preadditive.functor_category
 import algebra.homology.additive
-
-import for_mathlib.homological_complex
+import algebra.homology.homological_complex
 
 import for_mathlib.SemiNormedGroup
 import for_mathlib.SemiNormedGroup_Completion
@@ -73,7 +72,7 @@ normed_group_hom.map_sub _ _ _
 
 /-- `f.apply c i` is application of the natural isomorphism `f`: $f_c^i : M_c^i ≅ N_c^i$. -/
 def category_theory.iso.apply (f : M ≅ N) {c : ℝ≥0} {i : ℕ} : M c i ≅ N c i :=
-homological_complex.iso_app (f.app (op c)) i
+homological_complex.hom.iso_app (f.app (op c)) i
 
 namespace system_of_complexes
 

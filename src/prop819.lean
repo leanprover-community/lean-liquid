@@ -1,9 +1,10 @@
+import algebra.homology.homological_complex
+
 import for_mathlib.Cech.split
 import for_mathlib.Profinite.arrow_limit
 import for_mathlib.Profinite.locally_constant
 import for_mathlib.Profinite.clopen_limit
 import for_mathlib.simplicial.complex
-import for_mathlib.homological_complex
 import for_mathlib.discrete_quotient
 
 import locally_constant.Vhat
@@ -106,7 +107,7 @@ This is a strict (i.e. norm-preserving) isomorphism between `FLC F M` and
 the cochain complex obtained by mapping `FL F M` along the `Completion` functor.
 -/
 def FLC_iso : strict_iso ((Completion.map_homological_complex _).obj (FL F M)) (FLC F M) :=
-{ iso := homological_complex.iso_of_components
+{ iso := homological_complex.hom.iso_of_components
     (λ i, nat.rec_on i (eq_to_iso rfl) (λ _ _, eq_to_iso rfl))
     begin
       rintro (_|i) (_|j) (_|⟨i,w⟩); ext,

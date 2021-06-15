@@ -1,9 +1,7 @@
 import algebra.homology.additive
+import algebra.homology.homological_complex
 
 import breen_deligne.universal_map
--- import breen_deligne.functorial_map
-
-import for_mathlib.homological_complex
 
 import for_mathlib.free_abelian_group
 
@@ -150,11 +148,11 @@ def mul (N : ℕ) : data ⥤ data :=
 (FreeMat.mul_functor N).map_homological_complex _
 
 def mul_one_iso : (mul 1).obj BD ≅ BD :=
-homological_complex.iso_of_components (λ i, FreeMat.one_mul_iso.app _) $
+homological_complex.hom.iso_of_components (λ i, FreeMat.one_mul_iso.app _) $
 λ i j _, (FreeMat.one_mul_iso.hom.naturality (BD.d i j)).symm
 
 def mul_mul_iso (m n : ℕ) : (mul m).obj ((mul n).obj BD) ≅ (mul (m * n)).obj BD :=
-homological_complex.iso_of_components (λ i, (FreeMat.mul_mul_iso _ _).app _) $
+homological_complex.hom.iso_of_components (λ i, (FreeMat.mul_mul_iso _ _).app _) $
 λ i j _, ((FreeMat.mul_mul_iso _ _).hom.naturality (BD.d i j)).symm
 
 end mul

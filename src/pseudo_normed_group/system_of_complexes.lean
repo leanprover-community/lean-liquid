@@ -195,7 +195,7 @@ lemma system_map_iso_isometry {M₁ M₂ : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ
   (f : M₁ ≅ M₂) (i : ℕ) :
   isometry ((((BD.system κ r V r').map_iso f).hom.app (op c)).f i) :=
 begin
-  simp only [← iso.app_hom, ← homological_complex.iso_app_hom],
+  simp only [← iso.app_hom, ← homological_complex.hom.iso_app_hom],
   apply SemiNormedGroup.iso_isometry_of_norm_noninc;
   apply complex.map_norm_noninc,
 end

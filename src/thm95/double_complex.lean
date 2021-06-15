@@ -1,3 +1,5 @@
+import algebra.homology.functor
+
 import for_mathlib.simplicial.complex
 
 import polyhedral_lattice.Hom
@@ -6,8 +8,6 @@ import system_of_complexes.rescale
 import normed_spectral
 
 import thm95.modify_complex
-
-.
 
 /-!
 # The double complex that is the protagonist in the proof of Theorem 9.5

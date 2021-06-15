@@ -10,7 +10,6 @@ import data.equiv.basic
 import Mbar.bounded
 import pseudo_normed_group.basic
 
-import for_mathlib.coe_nat_abs
 import for_mathlib.tsum
 
 /-!
