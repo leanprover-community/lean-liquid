@@ -175,7 +175,7 @@ end sign_vectors
 
 /-- Given a list l, a vector of signs ε (and a positive integer N), (pos_A l ε) is a finite set of
 functionals satisfying the requirements of Lemma 9.7 of [Analytic] with respect to all functionals
-which are positive on all ((ε • l) i)'s. Its existence is established in lem97_pos.
+which are positive on all ((ε • l) i)'s. Its existence was established in lem97_pos above.
 -/
 def pos_A [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (hN : 0 < N)
   (l : ι → Λ) (ε : sign_vectors ι) : finset (Λ →+ ℤ) :=
