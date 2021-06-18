@@ -3,8 +3,8 @@ import topology.discrete_quotient
 
 import for_mathlib.topology
 import for_mathlib.order
-import for_mathlib.Profinite.locally_constant
 import for_mathlib.discrete_quotient
+import for_mathlib.Profinite.locally_constant
 
 noncomputable theory
 
@@ -401,8 +401,8 @@ theorem exists_locally_constant_factors {α : Type*} [nonempty α] [inhabited J]
   (gg : locally_constant (F.obj i) α), gg ∘ (C.π.app i) = ff :=
 begin
   let S : discrete_quotient C.X := ff.to_discrete_quotient,
-  let fff : S → α := ff.desc,
-  have hfff : fff ∘ S.proj = _ := ff.factors,
+  let fff : S → α := ff.desc',
+  have hfff : fff ∘ S.proj = _ := ff.factors',
   obtain ⟨i,T,hT⟩ := exists_discrete_quotient F C hC S,
   have h := discrete_quotient.le_comap_of_eq _ _ hT,
   let ι : S → T := discrete_quotient.map h,
