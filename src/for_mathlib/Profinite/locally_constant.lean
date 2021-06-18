@@ -17,14 +17,6 @@ def to_discrete_quotient (f : locally_constant X M) : discrete_quotient X :=
   clopen := λ x, ⟨is_locally_constant _ _,
     ⟨by {erw ← set.preimage_compl, apply is_locally_constant _ _ }⟩⟩ }
 
-/-- Construct a locally constant function on the discrete quotient associated to `f`. -/
-def desc (f : locally_constant X M) : locally_constant (f.to_discrete_quotient) M :=
-{ to_fun := λ i, quotient.lift_on' i f (by tauto),
-  is_locally_constant := λ U, is_open_discrete _ }
-
-lemma factors (f : locally_constant X M) : f.desc ∘ f.to_discrete_quotient.proj = f :=
-rfl
-
 end locally_constant
 
 /-

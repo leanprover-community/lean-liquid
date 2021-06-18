@@ -238,7 +238,7 @@ instance : no_top_order ℚ≥0 :=
 lemma bdd_above_coe {s : set ℚ≥0} : bdd_above ((coe : ℚ≥0 → ℚ) '' s) ↔ bdd_above s :=
 iff.intro
   (assume ⟨b, hb⟩, ⟨nnrat.of_rat b, assume ⟨y, hy⟩ hys, show y ≤ max b 0, from
-    le_max_left_of_le $ hb $ set.mem_image_of_mem _ hys⟩)
+    le_trans (hb $ set.mem_image_of_mem _ hys) (le_max_left _ _)⟩)
   (assume ⟨b, hb⟩, ⟨b, assume y ⟨x, hx, eq⟩, eq ▸ hb hx⟩)
 
 lemma bdd_below_coe (s : set ℚ≥0) : bdd_below ((coe : ℚ≥0 → ℚ) '' s) :=

@@ -3,8 +3,8 @@ import topology.discrete_quotient
 
 import for_mathlib.topology
 import for_mathlib.order
-import for_mathlib.Profinite.locally_constant
 import for_mathlib.discrete_quotient
+import for_mathlib.Profinite.locally_constant
 
 noncomputable theory
 
