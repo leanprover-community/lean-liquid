@@ -433,7 +433,7 @@ begin
       (polyhedral_lattice.conerve.L (Λ.diagonal_embedding N) ((unop i).len + 1)) _ _).trans _,
     dsimp only [finsupp.lift_add_hom_apply, finsupp.map_domain.add_monoid_hom_apply,
       unop_op],
-    rw [finsupp.sum_map_domain_index_add_monoid_hom, finsupp.sum_eq_sum_fintype,
+    rw [finsupp.sum_map_domain_index_add_monoid_hom, finsupp.sum_fintype,
       fin.sum_univ_succ, finset.sum_eq_zero, add_zero],
     swap, { intros m hm, exfalso, change fin 0 at m, exact nat.not_lt_zero m m.2 },
     swap, { intro, rw add_monoid_hom.map_zero },

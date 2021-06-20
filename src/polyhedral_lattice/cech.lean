@@ -92,17 +92,17 @@ begin
   rw add_subgroup.mem_comap,
   refine ⟨_, _⟩,
   { have aux1 : l'.sum (λ _, add_monoid_hom.id _) = ∑ i, l' i,
-    { exact finsupp.sum_eq_sum_fintype _ (λ _, rfl) _ },
+    { exact finsupp.sum_fintype _ _ (λ _, rfl) },
     have aux2 := @sum_map_domain_index_add_monoid_hom _ _ _ _ _ _ g l' (λ _, add_monoid_hom.id _),
     dsimp only at aux2,
-    rw [aux1, finsupp.sum_eq_sum_fintype, hl'] at aux2,
+    rw [aux1, finsupp.sum_fintype, hl'] at aux2,
     { simpa only [add_monoid_hom.id_apply] using aux2 },
     { intro, refl } },
   { intro i,
     choose l hl using Hl',
     simp only [map_domain.add_monoid_hom_apply, map_domain],
     refine ⟨∑ j, if g j = i then (l j) else 0, _⟩,
-    rw [finsupp.sum_apply, finsupp.sum_eq_sum_fintype],
+    rw [finsupp.sum_apply, finsupp.sum_fintype],
     swap, { intro, simp only [coe_zero, pi.zero_apply, single_zero] },
     simp only [f.map_sum, single_apply, ← hl],
     apply fintype.sum_congr,
@@ -174,15 +174,15 @@ lemma map_domain_add_monoid_hom_strict (x : fin (n+1) →₀ Λ) : ∥map_domain
 begin
   simp only [norm_def, map_domain.add_monoid_hom_apply],
   dsimp [map_domain],
-  rw [sum_eq_sum_fintype], swap, { intro, exact norm_zero },
+  rw [sum_fintype], swap, { intro, exact norm_zero },
   simp only [sum_apply],
-  rw [sum_eq_sum_fintype], swap, { intro, exact norm_zero },
+  rw [sum_fintype], swap, { intro, exact norm_zero },
   calc ∑ i, ∥x.sum (λ j l, single (g j) l i)∥
       ≤ ∑ i, ∑ j, ∥single (g j) (x j) i∥ : _
   ... ≤ ∑ j, ∥x j∥ : _,
   { apply finset.sum_le_sum,
     rintro i -,
-    rw sum_eq_sum_fintype, swap, { intro, rw [single_zero, zero_apply] },
+    rw sum_fintype, swap, { intro, rw [single_zero, zero_apply] },
     exact norm_sum_le _ _ },
   { rw finset.sum_comm,
     apply finset.sum_le_sum,
@@ -246,7 +246,7 @@ begin
   rintro l ⟨h1, h2⟩,
   choose l₀ hl₀ using h2,
   dsimp only [finsupp.lift_add_hom_apply],
-  rw [finsupp.sum_eq_sum_fintype],
+  rw [finsupp.sum_fintype],
   swap, { intro j, exact (g j).map_zero },
   simp only [← hl₀, hg, ← g₀.map_sum, ← f.map_sum] at h1 ⊢,
   rw [← polyhedral_lattice_hom.coe_to_add_monoid_hom] at h1 hf,
@@ -292,7 +292,7 @@ begin
   rintro l' ⟨hl', Hl'⟩,
   ext i,
   simp only [map_domain.add_monoid_hom_apply, map_domain, sum_apply, single_apply, zero_apply],
-  rw [finsupp.sum_eq_sum_fintype],
+  rw [finsupp.sum_fintype],
   swap, { simp only [forall_const, if_true, eq_iff_true_of_subsingleton] },
   convert hl',
   ext, rw if_pos, exact subsingleton.elim _ _
@@ -311,7 +311,7 @@ def map_succ_zero (m : ℕ) (g : fin (m+2) →ₘ fin 1) : obj f (m+1) ⟶ Λ' :
         ≤ ∥finsupp.map_domain.add_monoid_hom g x∥ : _
     ... ≤ ∥x∥ : conerve.map_domain_add_monoid_hom_strict g x
     ... ≤ _ : h.le,
-    rw [finsupp.norm_def, finsupp.sum_eq_sum_fintype, fin.sum_univ_succ, fin.sum_univ_zero, add_zero],
+    rw [finsupp.norm_def, finsupp.sum_fintype, fin.sum_univ_succ, fin.sum_univ_zero, add_zero],
     intro, exact norm_zero
   end,
   .. map_succ_zero_aux f m g }

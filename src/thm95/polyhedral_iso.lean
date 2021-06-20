@@ -140,9 +140,9 @@ begin
   { intros hf c' l hl,
     let g := (Λ.Hom_finsupp_equiv N r' M) f,
     have hg : (Λ.Hom_finsupp_equiv N r' M).symm g = f := add_equiv.symm_apply_apply _ _,
-    rw [semi_normed_group.mem_filtration_iff, finsupp.nnnorm_def, finsupp.sum_eq_sum_fintype] at hl,
+    rw [semi_normed_group.mem_filtration_iff, finsupp.nnnorm_def, finsupp.sum_fintype] at hl,
     swap, { intro, exact nnnorm_zero },
-    rw [← hg, Hom_finsupp_equiv_symm_apply, add_monoid_hom.coe_mk, finsupp.sum_eq_sum_fintype],
+    rw [← hg, Hom_finsupp_equiv_symm_apply, add_monoid_hom.coe_mk, finsupp.sum_fintype],
     swap, { intro, exact add_monoid_hom.map_zero _ },
     apply filtration_mono (mul_le_mul' le_rfl hl),
     rw [finset.mul_sum],
@@ -250,7 +250,7 @@ lemma finsupp_sum_diagonal_embedding (f : (Λ →+ M) ^ N) (l : Λ) :
   (show Λ → M, from show Λ →+ M, from Λ.Hom_sum N r' M f) l :=
 begin
   simp only [add_monoid_hom.coe_mk, Hom_sum_apply],
-  rw [finsupp.sum_eq_sum_fintype, add_monoid_hom.finset_sum_apply, fintype.sum_congr],
+  rw [finsupp.sum_fintype, add_monoid_hom.finset_sum_apply, fintype.sum_congr],
   { intro i,
     dsimp only [diagonal_embedding, polyhedral_lattice_hom.coe_mk, finsupp.single_add_hom_apply,
       rescale.of, equiv.coe_refl, id],

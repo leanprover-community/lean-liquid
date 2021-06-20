@@ -42,7 +42,7 @@ def diagonal_embedding : Λ ⟶ rescaled_power Λ N :=
   strict' := λ l,
   begin
     rw [rescale.norm_def, equiv.symm_apply_apply, norm_def, nnreal.coe_nat_cast,
-      sum_eq_sum_fintype],
+      sum_fintype],
     swap, { intro, exact norm_zero },
     apply le_of_eq,
     rw div_eq_iff, swap,
