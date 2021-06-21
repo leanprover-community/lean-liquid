@@ -1,7 +1,5 @@
 import linear_algebra.finsupp_vector_space
 
-import for_mathlib.finsupp
-
 import polyhedral_lattice.basic
 /-!
 
