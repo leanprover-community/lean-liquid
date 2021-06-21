@@ -1,4 +1,4 @@
-import topology.algebra.normed_group
+import analysis.normed_space.basic
 import topology.sequences
 
 open_locale big_operators topological_space uniformity

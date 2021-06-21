@@ -1,7 +1,6 @@
 import category_theory.currying
 import category_theory.preadditive.additive_functor
 import topology.category.Profinite
-import topology.algebra.normed_group
 import topology.algebra.group_completion
 import topology.metric_space.completion
 

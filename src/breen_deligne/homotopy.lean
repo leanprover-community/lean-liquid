@@ -1,7 +1,5 @@
 import algebra.homology.homotopy
 
-import for_mathlib.homotopy
-
 import breen_deligne.category
 import breen_deligne.suitable
 

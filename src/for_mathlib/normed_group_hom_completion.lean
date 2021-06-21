@@ -1,5 +1,4 @@
 import analysis.normed_space.normed_group_hom
-import topology.algebra.normed_group
 
 import for_mathlib.normed_group
 
