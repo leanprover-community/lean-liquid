@@ -94,15 +94,6 @@ namespace normed_group_hom
 variables {V₁ V₂ V₃ : Type*} [semi_normed_group V₁] [semi_normed_group V₂] [semi_normed_group V₃]
 variables {f : normed_group_hom V₁ V₂} {g : normed_group_hom V₂ V₃}
 
---This is in #7860
-lemma norm_noninc_iff_norm_le_one : f.norm_noninc ↔ ∥f∥ ≤ 1 :=
-begin
-  refine ⟨λ h, _, λ h, λ v, _⟩,
-  { refine op_norm_le_bound _ (zero_le_one) (λ v, _),
-    simpa [one_mul] using h v },
-  { simpa using le_of_op_norm_le f h v }
-end
-
 --#7875
 lemma comp_assoc {V₄: Type* } [semi_normed_group V₄] (h : normed_group_hom V₃ V₄)
   (g : normed_group_hom V₂ V₃) (f : normed_group_hom V₁ V₂) :
