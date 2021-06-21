@@ -88,30 +88,3 @@ begin
     exact hyp k },
   exact controlled_closure_of_complete hC hε hyp
 end
-
-namespace normed_group_hom
-
-variables {V₁ V₂ V₃ : Type*} [semi_normed_group V₁] [semi_normed_group V₂] [semi_normed_group V₃]
-variables {f : normed_group_hom V₁ V₂} {g : normed_group_hom V₂ V₃}
-
---#7875
-lemma comp_assoc {V₄: Type* } [semi_normed_group V₄] (h : normed_group_hom V₃ V₄)
-  (g : normed_group_hom V₂ V₃) (f : normed_group_hom V₁ V₂) :
-  (h.comp g).comp f = h.comp (g.comp f) :=
-by { ext, refl }
-
---#7875
-lemma norm_comp_le_of_le {C₁ C₂ : ℝ} (hg : ∥g∥ ≤ C₂) (hf : ∥f∥ ≤ C₁) :
-  ∥g.comp f∥ ≤ C₂ * C₁ :=
-le_trans (norm_comp_le g f) $ mul_le_mul hg hf (norm_nonneg _) (le_trans (norm_nonneg _) hg)
-
---#7875
-lemma norm_comp_le_of_le' (C₁ C₂ C₃ : ℝ) (h : C₃ = C₂ * C₁) (hg : ∥g∥ ≤ C₂) (hf : ∥f∥ ≤ C₁) :
-  ∥g.comp f∥ ≤ C₃ :=
-by { rw h, exact norm_comp_le_of_le hg hf }
-
-end normed_group_hom
-
-namespace SemiNormedGroup
-
-end SemiNormedGroup

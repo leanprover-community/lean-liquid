@@ -53,7 +53,7 @@ variables {φ' : normed_group_hom V₂ V₃} {ψ' : normed_group_hom W₂ W₃}
   (ι f₂ g₂).comp (map φ ψ hf hg) = φ.comp (ι _ _) :=
 lift_ι _ _
 
-@[simp] lemma map_id : @map _ _ _ _ _ _ _ _ f₁ g₁ f₁ g₁ id id rfl rfl = id :=
+@[simp] lemma map_id : @map _ _ _ _ _ _ _ _ f₁ g₁ f₁ g₁ (id V₁) (id W₁) rfl rfl = id _ :=
 by { ext, refl }
 
 lemma comm_sq₂ (hf : ψ.comp f₁ = f₂.comp φ)(hf' : ψ'.comp f₂ = f₃.comp φ') :

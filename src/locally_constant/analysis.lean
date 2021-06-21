@@ -252,7 +252,7 @@ def map_hom (f : normed_group_hom V₁ V₂) :
   end }
 
 @[simp] lemma map_hom_id :
-  @map_hom X _ _ _ _ _ _ (@normed_group_hom.id V _) = normed_group_hom.id :=
+  @map_hom X _ _ _ _ _ _ (@normed_group_hom.id V _) = normed_group_hom.id _ :=
 by { ext, refl }
 
 @[simp] lemma map_hom_comp (g : normed_group_hom V₂ V₃) (f : normed_group_hom V₁ V₂) :
@@ -312,7 +312,7 @@ add_monoid_hom.mk_normed_group_hom
         apply set.image_subset_range } }
   end
 
-@[simp] lemma comap_hom_id : @comap_hom X X V _ _ _ _ _ id continuous_id = normed_group_hom.id :=
+@[simp] lemma comap_hom_id : @comap_hom X X V _ _ _ _ _ id continuous_id = normed_group_hom.id _ :=
 begin
   ext,
   simp only [comap_id, comap_hom_apply, id.def, normed_group_hom.id_apply,
