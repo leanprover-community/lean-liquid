@@ -419,7 +419,7 @@ begin
     rw aux₁,
     exact mul_le_of_le_one_right ((coeff g) ϕ).nat_abs.cast_nonneg this },
   rw [← g.eval_LCFP_eq_eval_LCFP' V r' c₁ c₂, basic_universal_map.eval_LCFP],
-  { apply normed_group_hom.norm_noninc_iff_norm_le_one.1,
+  { apply normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.1,
     exact locally_constant.comap_hom_norm_noninc _ _, exact aux },
 end
 

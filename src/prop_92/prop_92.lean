@@ -22,11 +22,12 @@ begin
   refine le_trans (norm_add_le _ _) (add_le_add _ _),
   { rw [category_theory.nat_trans.app_neg, norm_neg],
     refine le_trans (normed_group_hom.norm_completion_le _) _,
-    exact normed_group_hom.norm_noninc_iff_norm_le_one.1
+    exact normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.1
       (SemiNormedGroup.LocallyConstant_obj_map_norm_noninc _ _ _ _) },
   { refine normed_group_hom.norm_comp_le_of_le' 1 r⁻¹ r⁻¹ (mul_one _).symm _ _,
     { exact CLC.norm_T_inv_le r V _ },
-    { exact normed_group_hom.norm_noninc_iff_norm_le_one.1 (res_norm_noninc V r' c₁ c₂ n M) } },
+    { exact normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.1
+      (res_norm_noninc V r' c₁ c₂ n M) } },
 end
 
 variables {V c n M}

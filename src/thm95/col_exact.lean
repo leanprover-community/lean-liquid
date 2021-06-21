@@ -1134,7 +1134,7 @@ namespace col_complex_rescaled
 lemma d_zero_norm_noninc (c : ℝ≥0) :
   (@system_of_complexes.d (col_complex_rescaled r' V Λ M N n) c 0 1).norm_noninc :=
 begin
-  apply normed_group_hom.norm_noninc_iff_norm_le_one.2,
+  apply normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.2,
   refine normed_group_hom.norm_comp_le_of_le' (1:ℕ) _ 1 _ (SemiNormedGroup.norm_scale_le _ _ _) _,
   { simp only [mul_one, nat.factorial_zero, nat.factorial_one, nat.cast_one, div_one, nnreal.coe_one]},
   apply SemiNormedGroup.norm_rescale_map_le,
@@ -1144,14 +1144,14 @@ begin
   dsimp [system_of_complexes.rescale_functor, double_complex_aux,
     cosimplicial_object.augmented.to_cocomplex_d],
   erw [category.comp_id, if_pos rfl, Cech_nerve'_hom_zero, zero_add],
-  apply normed_group_hom.norm_noninc_iff_norm_le_one.1,
+  apply normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.1,
   apply CLC.map_norm_noninc,
 end
 
 lemma d_succ_norm_noninc (c : ℝ≥0) (p : ℕ) :
   (@system_of_complexes.d (col_complex_rescaled r' V Λ M N n) c (p+1) (p+2)).norm_noninc :=
 begin
-  apply normed_group_hom.norm_noninc_iff_norm_le_one.2,
+  apply normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.2,
   refine normed_group_hom.norm_comp_le_of_le' (p+2:ℕ) _ 1 _ (SemiNormedGroup.norm_scale_le _ _ _) _,
   { norm_cast,
     rw [mul_comm, ← mul_div_assoc, eq_comm, ← nat.cast_mul, nat.factorial_succ], apply div_self,
@@ -1171,7 +1171,7 @@ begin
   refine le_trans (norm_gsmul_le _ _) _,
   rw [← int.norm_cast_real, int.cast_pow, normed_field.norm_pow, int.cast_neg, int.cast_one,
     norm_neg, norm_one, one_pow, one_mul],
-  apply normed_group_hom.norm_noninc_iff_norm_le_one.1,
+  apply normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.1,
   apply CLC.map_norm_noninc
 end
 
@@ -1185,10 +1185,10 @@ lemma admissible : (col_complex_rescaled r' V Λ M N n).admissible :=
   res_norm_noninc :=
   begin
     intros c₁ c₂ i h,
-    apply normed_group_hom.norm_noninc_iff_norm_le_one.2,
+    apply normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.2,
     cases i;
     { apply SemiNormedGroup.norm_rescale_map_le,
-      apply normed_group_hom.norm_noninc_iff_norm_le_one.1,
+      apply normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.1,
       apply CLC.map_norm_noninc, },
   end }
 

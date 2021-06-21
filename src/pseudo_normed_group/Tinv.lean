@@ -403,7 +403,7 @@ begin
   rw [← SemiNormedGroup.equalizer.condition_assoc, ← category.assoc],
   refine normed_group_hom.norm_comp_le_of_le' 1 r r (mul_one ↑r).symm _ _,
   { apply CLC.norm_T_le },
-  { apply norm_noninc_iff_norm_le_one.1,
+  { apply norm_noninc.norm_noninc_iff_norm_le_one.1,
     exact (CLC.map_norm_noninc V _).comp equalizer.ι_norm_noninc }
 end
 
@@ -433,7 +433,7 @@ lemma norm_res_le [fact (c₂ ≤ c₁)] [fact (c₂ ≤ r' * c₁)] (M) :
 begin
   rw ← res_comp_res r V r' c₁ (r' * c₁) c₂,
   refine norm_comp_le_of_le' _ _ _ (one_mul ↑r).symm _ (CLCFPTinv₂.norm_res_le r V r' _ _ _ _ n rfl M),
-  apply norm_noninc_iff_norm_le_one.1,
+  apply norm_noninc.norm_noninc_iff_norm_le_one.1,
   exact CLCTinv.map_norm_noninc r V _ _ _ _ _ _ _ _
 end
 
@@ -442,7 +442,7 @@ lemma norm_res_le_pow (N : ℕ) [fact (c₂ ≤ c₁)] [h : fact (c₂ ≤ r' ^ 
 begin
   unfreezingI { induction N with N ih generalizing c₁ c₂ },
   { rw pow_zero,
-    apply norm_noninc_iff_norm_le_one.1,
+    apply norm_noninc.norm_noninc_iff_norm_le_one.1,
     exact CLCTinv.map_norm_noninc r V _ _ _ _ _ _ _ _ },
   haveI : fact (c₂ ≤ r' ^ N * c₁) := nnreal.fact_le_pow_mul_of_le_pow_succ_mul _ _ _,
   rw [pow_succ, mul_assoc] at h, resetI,
@@ -539,7 +539,7 @@ begin
   apply SemiNormedGroup.equalizer.norm_map_le,
   refine normed_group_hom.norm_comp_le_of_le' _ _ _ (mul_one _).symm _ _,
   { apply norm_eval_CLCFP_le, exact h },
-  { apply norm_noninc_iff_norm_le_one.1,
+  { apply norm_noninc.norm_noninc_iff_norm_le_one.1,
     exact equalizer.ι_norm_noninc }
 end
 
@@ -601,7 +601,7 @@ lemma eval_CLCFPTinv_norm_noninc [normed_with_aut r V] [fact (0 < r)]
   [h : ϕ.very_suitable r r' c₂ c₁] (M) :
   ((ϕ.eval_CLCFPTinv r V r' c₁ c₂).app M).norm_noninc :=
 begin
-  apply norm_noninc_iff_norm_le_one.2,
+  apply norm_noninc.norm_noninc_iff_norm_le_one.2,
   have h' := h,
   unfreezingI { rcases h with ⟨N, k, c', hN, hϕ, hr, H⟩ },
   haveI : fact (c' ≤ c₁) := ⟨H.trans $ fact.out _⟩,

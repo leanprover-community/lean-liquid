@@ -275,8 +275,8 @@ variables {V₁ V₂ V₃ : SemiNormedGroup.{u}} {f : V₁ ⟶ V₂} {g : V₂ �
 lemma coker.lift_norm_noninc {cond : f ≫ g = 0}
   (hg : g.norm_noninc) :
   (coker.lift cond).norm_noninc :=
-normed_group_hom.norm_noninc_iff_norm_le_one.2 $ coker.norm_lift_le $
-  normed_group_hom.norm_noninc_iff_norm_le_one.1 hg
+normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.2 $ coker.norm_lift_le $
+  normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.1 hg
 
 
 end SemiNormedGroup
