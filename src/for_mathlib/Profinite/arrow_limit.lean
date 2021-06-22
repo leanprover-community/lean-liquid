@@ -77,10 +77,22 @@ def arrow_cone : limits.cone (arrow_diagram F surj) :=
       right := ⟨(S.make _ surj).proj,
         (S.make _ surj).proj_continuous⟩ } } }
 
+/-- A helper definition used for `arrow_limit_cone`. -/
+def arrow_diagram_snd_preserves :
+  limits.preserves_limit (arrow_diagram F surj ⋙ comma.snd _ _) (𝟭 _) :=
+begin
+  have h := limits.id_preserves_limits.preserves_limits_of_shape,
+  have hh := h.preserves_limit,
+  exact hh,
+end
+
 /-- the limit cone assocciated to arrow_diagram -/
 @[simps]
 def arrow_limit_cone : limits.limit_cone (arrow_diagram F surj) :=
-arrow.limit_cone _ ⟨_,limit_cone_is_limit _⟩ ⟨_,limit_cone_is_limit _⟩
+{ cone := @comma.cone_of_preserves _ _ _ _ _ _ _ _ _ _ _
+  (arrow_diagram_snd_preserves _ _) (limit_cone _) _ (limit_cone_is_limit _),
+  is_limit := @comma.cone_of_preserves_is_limit _ _ _ _ _ _ _ _ _ _ _
+    (arrow_diagram_snd_preserves _ _) _ (limit_cone_is_limit _) _ _ }
 
 /-- lifing arrow_cone gives an isomorphism on the left -/
 instance arrow_is_iso_lift_left : is_iso ((arrow_limit_cone F surj).is_limit.lift
@@ -118,6 +130,9 @@ begin
       have h1 : II ≤ I := inf_le_right,
       have h2 : II ≤ J.comap F.hom.continuous := inf_le_left,
       rw ← hx (hom_of_le h1),
+      dsimp [comma.cone_of_preserves_is_limit,
+        limit_cone_is_limit, CompHaus.limit_cone_is_limit,
+        Top.limit_cone_is_limit],
       rw hy,
       dsimp [Us],
       rw ← hx (hom_of_le h2),
