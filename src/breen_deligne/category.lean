@@ -107,7 +107,7 @@ begin
   rw [← matrix.reindex_linear_equiv_mul, matrix.one_mul,
     matrix.kronecker_reindex_right, matrix.kronecker_assoc', matrix.kronecker_one_one,
     ← matrix.reindex_linear_equiv_one (@fin_prod_fin_equiv m n), matrix.kronecker_reindex_left],
-  simp only [matrix.reindex_linear_equiv_reindex_linear_equiv],
+  simp only [matrix.reindex_linear_equiv_comp_apply],
   congr' 3,
   { ext ⟨⟨a, b⟩, c⟩ : 1, dsimp, simp only [equiv.symm_apply_apply], },
   { ext ⟨⟨a, b⟩, c⟩ : 1, dsimp, simp only [equiv.symm_apply_apply], },
