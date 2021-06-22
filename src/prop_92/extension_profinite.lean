@@ -189,7 +189,12 @@ open_locale classical
 
 def embedding.extend {e : X → Y} (he : embedding e) (f : X → Z) : Y → Z :=
 if h : is_locally_constant f ∧ nonempty X then
-by { haveI := h.2, exact (h.1.discrete_quotient_map) ∘ (he.discrete_quotient_equiv h.1.discrete_quotient).symm ∘ (he.discrete_quotient_map h.1.discrete_quotient).proj }
+by {
+  haveI := h.2,
+  let ff : locally_constant X Z := ⟨f,h.1⟩,
+  let T := he.discrete_quotient_map ff.discrete_quotient,
+  let ee : ff.discrete_quotient ≃ T := he.discrete_quotient_equiv ff.discrete_quotient,
+  exact ff.lift ∘ ee.symm ∘ T.proj }
 else λ y, default Z
 
 /- lemma embedding.extend_eq {e : X → Y} (he : embedding e) {f : X → Z} (hf : is_locally_constant f) :
@@ -201,16 +206,17 @@ lemma embedding.extend_extends {e : X → Y} (he : embedding e) {f : X → Z} (h
 begin
   intro x,
   haveI : nonempty X := ⟨x⟩,
-  let S := hf.discrete_quotient,
-  let S' := he.discrete_quotient_map hf.discrete_quotient,
-  let barf : S → Z := hf.discrete_quotient_map,
-  let g : S ≃ S' := he.discrete_quotient_equiv hf.discrete_quotient,
+  let ff : locally_constant X Z := ⟨f,hf⟩,
+  let S := ff.discrete_quotient,
+  let S' := he.discrete_quotient_map S,
+  let barf : S → Z := ff.lift,
+  let g : S ≃ S' := he.discrete_quotient_equiv S,
   unfold embedding.extend,
   have h : is_locally_constant f ∧ nonempty X := ⟨hf, ⟨x⟩⟩,
   rw [dif_pos h],
   change (barf ∘ g.symm ∘ (S'.proj ∘ e)) x = f x,
   suffices : (barf ∘ S.proj) x = f x, by simpa [he.discrete_quotient_spec],
-  simp
+  simpa,
 end
 
 lemma embedding.is_locally_constant_extend {e : X → Y} (he : embedding e) {f : X → Z} :
@@ -231,12 +237,17 @@ begin
   ext z,
   split,
   { rintro ⟨y, rfl⟩,
-    dsimp [embedding.extend],
-    rw [dif_pos, ← congr_arg range hf.discrete_quotient_map_proj, range_comp,
-      range_iff_surjective.mpr (discrete_quotient.proj_surjective _),
-      set.image_univ, function.comp],
+    let ff : locally_constant _ _ := ⟨f,hf⟩,
+    let T := he.discrete_quotient_map ff.discrete_quotient,
+    let ee : ff.discrete_quotient ≃ T := he.discrete_quotient_equiv ff.discrete_quotient,
+    dsimp only [embedding.extend],
+    rw dif_pos,
     swap, { exact ⟨hf, ‹_›⟩ },
-    { exact ⟨_, rfl⟩ } },
+    change ff.lift (ee.symm (T.proj y)) ∈ _,
+    rcases ff.discrete_quotient.proj_surjective (ee.symm (T.proj y)) with ⟨w,hz⟩,
+    use w,
+    rw ← hz,
+    refl },
   { rintro ⟨x, rfl⟩,
     exact ⟨e x, he.extend_extends hf _⟩ }
 end
