@@ -430,7 +430,7 @@ map (basic_universal_map.mul N)
 
 lemma mul_of (N : ℕ) (f : basic_universal_map m n) :
   mul N (of f) = of (basic_universal_map.mul N f) :=
-map_of' _ _
+map_of_apply _
 
 lemma mul_comp (N : ℕ) (g : universal_map m n) (f : universal_map l m) :
   mul N (comp g f) = comp (mul N g) (mul N f) :=
@@ -461,7 +461,7 @@ begin
   rw [← add_monoid_hom.comp_hom_apply_apply],
   congr' 1, clear f, ext f,
   simp only [comp_hom_apply_apply, function.comp_app, coe_comp, mul, coeff, to_finsupp_of,
-    map_of', finsupp.apply_add_hom_apply, finsupp.single_apply,
+    map_of_apply, finsupp.apply_add_hom_apply, finsupp.single_apply,
     (basic_universal_map.mul_injective N hN).eq_iff],
   convert rfl
 end
