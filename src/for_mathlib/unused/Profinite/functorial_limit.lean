@@ -2,6 +2,7 @@ import for_mathlib.arrow
 import topology.category.Profinite.as_limit
 import topology.locally_constant.basic
 import category_theory.limits.functor_category
+import category_theory.limits.comma
 
 /-!
 Let `X` and `Y` be profinite sets and `f : X ⟶ Y` a morphism.
@@ -161,10 +162,21 @@ diagram f ⋙ arrow.left_func
 abbreviation right_diagram : index_cat f ⥤ Profinite :=
 diagram f ⋙ arrow.right_func
 
+def diagram_snd_preserves : limits.preserves_limit
+  (diagram f ⋙ comma.snd _ _) (𝟭 _) :=
+begin
+  have h := limits.id_preserves_limits.preserves_limits_of_shape,
+  have hh := h.preserves_limit,
+  exact hh,
+end
+
 /-- The usual limit cone over `diagram f`. -/
 def limit_cone : limits.limit_cone (diagram f) :=
-arrow.limit_cone _
-  ⟨_, limit_cone_is_limit $ left_diagram _⟩ ⟨_, limit_cone_is_limit $ right_diagram _⟩
+{ cone := @comma.cone_of_preserves _ _ _ _ _ _ _ _ _ _ _
+    (diagram_snd_preserves f) (limit_cone _) _ (limit_cone_is_limit _),
+  is_limit := @comma.cone_of_preserves_is_limit _ _ _ _ _ _ _ _ _ _ _
+    (diagram_snd_preserves f) _ (limit_cone_is_limit _) _ _
+  }
 
 /--
 The cone which we want to show is a limit cone of `diagram f`.
