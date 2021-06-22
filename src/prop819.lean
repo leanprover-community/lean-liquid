@@ -279,11 +279,9 @@ begin
     ext x,
     obtain ⟨x,rfl⟩ := (prop819_degree_zero_helper F surj) x,
     apply_fun (λ e, e x) at hg,
-    dsimp [locally_constant.comap] at hg,
-    split_ifs at hg,
-    { exact hg },
-    { exfalso, apply h, continuity },
-    { exfalso, apply h, continuity } },
+    rw locally_constant.coe_comap at hg,
+    swap, { continuity },
+    exact hg },
   { rintro g ⟨g,rfl⟩,
     refine ⟨g,rfl,_⟩,
     dsimp [cosimplicial_object.augmented.to_cocomplex_d],
@@ -320,15 +318,11 @@ begin
   use i, use g,
   ext x,
   change locally_constant.comap _ _ _ = _,
-  dsimp [locally_constant.comap],
-  split_ifs,
-  { dsimp,
-    rw ← hg,
-    refl },
-  all_goals {
-    exfalso,
-    apply h,
-    continuity },
+  rw locally_constant.coe_comap,
+  swap, { continuity },
+  dsimp,
+  rw ← hg,
+  refl,
 end
 
 lemma FLF_cocone_app_coe_eq (n : ℕ) (S : discrete_quotient F.left)
@@ -338,10 +332,9 @@ lemma FLF_cocone_app_coe_eq (n : ℕ) (S : discrete_quotient F.left)
 begin
   ext x,
   change locally_constant.comap _ _ _ = _,
-  dsimp [locally_constant.comap],
-  split_ifs,
-  { refl, },
-  all_goals { exfalso, apply h, continuity },
+  rw locally_constant.coe_comap,
+  swap, { continuity },
+  refl,
 end
 
 lemma FLF_map_coe_eq (n : ℕ) (S T : discrete_quotient F.left) (hh : T ≤ S)
@@ -351,10 +344,9 @@ lemma FLF_map_coe_eq (n : ℕ) (S T : discrete_quotient F.left) (hh : T ≤ S)
 begin
   ext x,
   change locally_constant.comap _ _ _ = _,
-  dsimp [locally_constant.comap],
-  split_ifs,
-  { refl, },
-  all_goals { exfalso, apply h, continuity },
+  rw locally_constant.coe_comap,
+  swap, { continuity },
+  refl,
 end
 
 lemma eq_zero_FLF (n : ℕ) (S : discrete_quotient F.left)
