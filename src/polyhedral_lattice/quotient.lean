@@ -58,14 +58,21 @@ instance [H : fact L.saturated] : no_zero_smul_divisors ℤ (quotient_add_group.
     have := H.1, exact this h
   end }
 
-lemma quotient_finite_free [H : fact L.saturated] : _root_.finite_free (quotient_add_group.quotient L) :=
+instance quotient_finite [H : fact L.saturated] : module.finite ℤ (quotient_add_group.quotient L) :=
 begin
-  obtain ⟨ι, _inst_ι, ⟨b⟩⟩ := polyhedral_lattice.finite_free Λ, resetI,
+  sorry
+end
+
+instance quotient_free [H : fact L.saturated] : module.free ℤ (quotient_add_group.quotient L) :=
+begin
+  -- obtain ⟨ι, _inst_ι, ⟨b⟩⟩ := polyhedral_lattice.finite_free Λ, resetI,
   let φ := L.normed_mk.to_add_monoid_hom.to_int_linear_map,
-  suffices : submodule.span ℤ (set.range (φ ∘ b)) = ⊤,
+  letI : fintype (module.free.choose_basis_index ℤ Λ) := sorry,
+  suffices : submodule.span ℤ (set.range (φ ∘ (module.free.choose_basis ℤ Λ))) = ⊤,
   { obtain ⟨n, b⟩ := module.free_of_finite_type_torsion_free this,
-    exact ⟨fin n, infer_instance, ⟨b⟩⟩ },
-  rw [set.range_comp, ← submodule.map_span, b.span_eq, submodule.map_top, linear_map.range_eq_top],
+    exact module.free.of_basis b, },
+  rw [set.range_comp, ← submodule.map_span, basis.span_eq,
+    submodule.map_top, linear_map.range_eq_top],
   exact quotient.surjective_quotient_mk'
 end
 
@@ -116,8 +123,7 @@ begin
 end
 
 instance [H : fact L.saturated] : polyhedral_lattice (quotient_add_group.quotient L) :=
-{ finite_free := quotient_finite_free _,
-  polyhedral' :=
+{ polyhedral' :=
   begin
     obtain ⟨ι, _inst_ι, l, hl, hl'⟩ := polyhedral_lattice.polyhedral Λ, resetI,
     refine ⟨ι, _inst_ι, (λ i, L.normed_mk (l i)), _⟩,
