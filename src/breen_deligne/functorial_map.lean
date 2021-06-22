@@ -175,7 +175,7 @@ def to_functorial_map {m n : ℕ} (U : universal_map m n) :
     ext as,
     rw [comp_apply, comp_apply],
     -- free_abelian_group.map_of should be redefined now map is an add_group_hom not a map?
-    -- Bhavik says make a dsimp lemma, I say make `map_of'` or `map_apply`
+    -- Bhavik says make a dsimp lemma, I say make `map_of_apply` or `map_apply`
     change _ = ((eval B) U) ((φ.pow m) <$> (free_abelian_group.of as)),
     rw free_abelian_group.map_of,
     --  We need to prove that for all `as : A^m`, evaluating `U` then mapping with `φ`
