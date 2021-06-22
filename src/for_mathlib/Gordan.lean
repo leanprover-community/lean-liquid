@@ -192,7 +192,7 @@ lemma rat_scale_factor_ne_zero {α : Type*} [fintype α] (x : α → ℚ) :
   (scale_factor x : ℚ) ≠ 0 :=
 begin
   norm_cast,
-  apply ne_of_gt (scale_factor_pos x),
+  apply (scale_factor_pos x).ne',
 end
 
 noncomputable def scale_up {α : Type*} [fintype α] (x : α → ℚ) : α → ℤ :=
@@ -218,10 +218,7 @@ begin
 end
 
 example {a b : ℤ} : (a : ℚ) = b → a = b :=
-begin
-  intro h,
-  exact (rat.coe_int_inj a b).mp h,
-end
+λ h, (rat.coe_int_inj a b).mp h
 
 noncomputable def upgrade_functional {α : Type*} [fintype α] (f : (α → ℤ) →+ ℤ) : (α → ℚ) →ₗ[ℚ] ℚ :=
 { to_fun := λ g, (f (scale_up g) : ℚ) / scale_factor g,

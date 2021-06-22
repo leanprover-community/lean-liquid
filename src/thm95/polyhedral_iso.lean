@@ -71,12 +71,13 @@ lemma Hom_rescale_hom_ctu [fact (0 < r')] (c : ℝ≥0) :
   continuous (pseudo_normed_group.level (Hom_rescale_hom Λ N r' M)
     (λ c f, (Hom_rescale_hom_strict Λ N r' M c f).1) c) :=
 begin
-  rw [add_monoid_hom.continuous_iff],
+  refine (add_monoid_hom.continuous_iff _ _ _ _ _).mpr _,
   intro l,
-  haveI : fact (c * (nnnorm l * N⁻¹) ≤ c * N⁻¹ * nnnorm l) := ⟨le_of_eq $ by ring⟩,
+  haveI : fact (c * (nnnorm l * N⁻¹) ≤ c * N⁻¹ * nnnorm l) :=
+    ⟨by { rw [mul_comm (nnnorm _), mul_assoc] }⟩,
   have aux1 := add_monoid_hom.incl_continuous (rescale N Λ) r' M c,
   have aux2 := (continuous_apply (rescale.of l)).comp aux1,
-  rwa (embedding_cast_le (c * (nnnorm l * N⁻¹)) (c * N⁻¹ * nnnorm l)).continuous_iff at aux2
+  exact (embedding_cast_le (c * (nnnorm l * N⁻¹)) (c * N⁻¹ * nnnorm l)).continuous_iff.mp aux2
 end
 
 end
@@ -88,7 +89,7 @@ def Hom_rescale_iso [fact (0 < r')] :
   (polyhedral_lattice.Hom (rescale N Λ) M)
   (ProFiltPseuNormGrpWithTinv.of r' (rescale N (polyhedral_lattice.Hom Λ M)))
   (Hom_rescale_hom Λ N r' M)
-  (by exact λ c f, Hom_rescale_hom_strict Λ N r' M c f)
+  (λ c f, Hom_rescale_hom_strict Λ N r' M c f)
   (Hom_rescale_hom_ctu Λ N r' M) (λ x, rfl)
 
 
@@ -149,7 +150,7 @@ begin
     apply sum_mem_filtration,
     rintro i hi,
     apply hf _,
-    rw semi_normed_group.mem_filtration_iff, }
+    exact (semi_normed_group.mem_filtration_iff _ _).mpr rfl.le }
 end
 
 lemma Hom_finsupp_equiv_ctu [fact (0 < r')] (c : ℝ≥0) :
