@@ -19,13 +19,6 @@ namespace simplicial_object
 variables [∀ (n : ℕ) (f : arrow C),
   has_wide_pullback f.right (λ i : ulift (fin (n+1)), f.left) (λ i, f.hom)]
 
-/-- The augmented Cech nerve construction is right adjoint to the `to_arrow` functor. -/
-@[simps]
-def cech_adjunction : (augmented.to_arrow : _ ⥤ arrow C) ⊣
-  simplicial_object.augmented_cech_nerve :=
-adjunction.mk_of_hom_equiv { hom_equiv := cech_nerve_equiv }
-.
-
 section
 open simplex_category opposite limits.wide_pullback
 
