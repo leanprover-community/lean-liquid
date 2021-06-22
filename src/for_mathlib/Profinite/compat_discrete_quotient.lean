@@ -10,7 +10,6 @@ namespace discrete_quotient
 universe u
 variables {X Y : Profinite.{u}} (f : X ⟶ Y) (surj : function.surjective f)
 
-
 /-- The relation defining the largest quotient of f.right compatible with S. -/
 inductive make_rel (S : discrete_quotient X) : Y → Y → Prop
 | of (x y : X) (h : S.rel x y) : make_rel (f x) (f y)
@@ -87,14 +86,9 @@ def make (S : discrete_quotient X) : discrete_quotient Y :=
     letI : topological_space (S.make_quotient f surj) := ⊥,
     haveI : discrete_topology (S.make_quotient f surj) := ⟨rfl⟩,
     suffices : continuous (S.make_proj f surj),
-    { split,
-      apply is_open.preimage this trivial,
-      apply is_closed.preimage this ⟨trivial⟩ },
-    rw (quotient_map f surj).continuous_iff,
-    rw S.make_proj_comm f surj,
-    apply continuous.comp,
-    continuity,
-    exact S.proj_continuous,
+    { refine ⟨is_open.preimage this trivial, is_closed.preimage this ⟨trivial⟩⟩ },
+    rw [(quotient_map f surj).continuous_iff, S.make_proj_comm f surj],
+    exact continuous_bot.comp (proj_continuous S),
   end }
 
 lemma make_le_comap (S : discrete_quotient X) : le_comap f.continuous S (S.make f surj) :=
@@ -106,9 +100,8 @@ lemma make_right_le (S : discrete_quotient X) (T : discrete_quotient Y)
 begin
   intros x y h,
   induction h with a b hab a b c _ _ h1 h2,
-  apply compat,
-  assumption,
-  apply T.trans _ _ _ h1 h2,
+  { exact compat a b hab },
+  { exact trans T a b c h1 h2 },
 end
 
 lemma make_right_mono (S1 S2 : discrete_quotient X) (h : S1 ≤ S2) :
@@ -116,11 +109,10 @@ lemma make_right_mono (S1 S2 : discrete_quotient X) (h : S1 ≤ S2) :
 begin
   intros x y h,
   induction h,
-  apply make_rel.of,
-  apply h,
-  assumption,
-  apply make_rel.trans,
-  assumption',
+  { refine make_rel.of _ _ (h _ _ _),
+  assumption },
+  { apply make_rel.trans,
+    assumption' },
 end
 
 end discrete_quotient
