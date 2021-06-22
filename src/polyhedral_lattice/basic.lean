@@ -1,5 +1,6 @@
 import analysis.normed_space.normed_group_hom
 import ring_theory.finiteness
+import linear_algebra.free_module
 import ring_theory.int.basic
 
 import for_mathlib.finite_free
@@ -52,16 +53,18 @@ lemma generates_norm_of_generates_nnnorm {x : ι → Λ}
 end generates_norm
 
 class polyhedral_lattice (Λ : Type*) extends normed_group Λ :=
--- now we get to the actual definition
-(finite_free [] : finite_free Λ)
+[finite [] : module.finite ℤ Λ]
+[free   [] : module.free ℤ Λ]
 (polyhedral' [] : ∃ (ι : Type) [fintype ι] (l : ι → Λ), generates_norm l)
 
 namespace polyhedral_lattice
 
 variables (Λ : Type*) [polyhedral_lattice Λ]
 
+attribute [instance] polyhedral_lattice.finite polyhedral_lattice.free
+
 instance no_zero_smul_divisors_int : no_zero_smul_divisors ℤ Λ :=
-(polyhedral_lattice.finite_free Λ).basis.no_zero_smul_divisors
+module.free.no_zero_smul_divisors ℤ Λ
 
 instance no_zero_smul_divisors_nat : no_zero_smul_divisors ℕ Λ :=
 ⟨λ n l h, by { rw [← gsmul_coe_nat, smul_eq_zero] at h,
