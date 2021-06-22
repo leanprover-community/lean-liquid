@@ -3,7 +3,6 @@ import group_theory.free_abelian_group
 import algebra.direct_sum
 import algebra.big_operators.finsupp
 
-import for_mathlib.linear_algebra
 import for_mathlib.free_abelian_group
 import for_mathlib.kronecker
 
