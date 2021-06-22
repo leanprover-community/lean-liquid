@@ -5,7 +5,6 @@ import polyhedral_lattice.finsupp
 import polyhedral_lattice.category
 import polyhedral_lattice.quotient
 
-import for_mathlib.free_abelian_group
 import for_mathlib.normed_group
 import for_mathlib.simplicial.augmented
 
