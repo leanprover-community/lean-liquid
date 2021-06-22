@@ -15,20 +15,6 @@ open set
 section
 variables {Y : Type*}
 
-lemma is_locally_constant.is_closed_fiber
-   {f : X → Y} (h : is_locally_constant f) (y : Y) :
-  is_closed (f ⁻¹' {y}) :=
-begin
-  erw [← is_open_compl_iff, ← preimage_compl,
-       show {y}ᶜ = ⋃ z (h : z ≠ y), ({z} : set Y), by { ext, simp },
-       preimage_bUnion],
-  exact is_open_bUnion (λ z hz, h {z}),
-end
-
-lemma is_locally_constant.is_clopen_fiber {f : X → Y}
-  (h : is_locally_constant f) (y : Y): is_clopen (f ⁻¹' {y}) :=
-⟨h.is_open_fiber y, h.is_closed_fiber y⟩
-
 lemma is_locally_constant_iff_clopen_fibers {f : X → Y} :
   is_locally_constant f ↔ ∀ y, is_clopen (f ⁻¹' {y}) :=
 ⟨λ h y, h.is_clopen_fiber y, λ h s, (by { rw [← bUnion_of_singleton s, preimage_bUnion],

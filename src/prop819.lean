@@ -1,4 +1,5 @@
 import algebra.homology.homological_complex
+import topology.category.Profinite.cofiltered_limit
 
 import for_mathlib.Cech.split
 import for_mathlib.Profinite.arrow_limit
@@ -314,15 +315,9 @@ lemma exists_locally_constant_FLF (n : ℕ) (f : (FL F M).X (n+1)) :
     ((FLF_cocone F surj M).ι.app (op S)).f _ g = f :=
 begin
   have hC := Cech_cone_is_limit F surj n,
-  obtain ⟨i,g,hg⟩ := exists_locally_constant_factors _ _ hC f,
-  use i, use g,
-  ext x,
-  change locally_constant.comap _ _ _ = _,
-  rw locally_constant.coe_comap,
-  swap, { continuity },
-  dsimp,
-  rw ← hg,
-  refl,
+  obtain ⟨i,g,hg⟩ := Profinite.exists_locally_constant _ hC f,
+  use [i, g],
+  exact hg.symm,
 end
 
 lemma FLF_cocone_app_coe_eq (n : ℕ) (S : discrete_quotient F.left)
