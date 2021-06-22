@@ -1,6 +1,8 @@
 import analysis.normed_space.normed_group_quotient
 import linear_algebra.free_module_pid
 
+import for_mathlib.finite_free
+
 import polyhedral_lattice.topology
 
 
@@ -60,14 +62,13 @@ instance [H : fact L.saturated] : no_zero_smul_divisors ℤ (quotient_add_group.
 
 instance quotient_finite [H : fact L.saturated] : module.finite ℤ (quotient_add_group.quotient L) :=
 begin
-  sorry
+  apply module.finite.of_surjective (L.normed_mk).to_add_monoid_hom.to_int_linear_map,
+  exact quotient.surjective_quotient_mk'
 end
 
 instance quotient_free [H : fact L.saturated] : module.free ℤ (quotient_add_group.quotient L) :=
 begin
-  -- obtain ⟨ι, _inst_ι, ⟨b⟩⟩ := polyhedral_lattice.finite_free Λ, resetI,
   let φ := L.normed_mk.to_add_monoid_hom.to_int_linear_map,
-  letI : fintype (module.free.choose_basis_index ℤ Λ) := sorry,
   suffices : submodule.span ℤ (set.range (φ ∘ (module.free.choose_basis ℤ Λ))) = ⊤,
   { obtain ⟨n, b⟩ := module.free_of_finite_type_torsion_free this,
     exact module.free.of_basis b, },

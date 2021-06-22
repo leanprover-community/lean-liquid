@@ -357,12 +357,12 @@ lemma hl' : ∀ i, l Λ i ≠ 0 :=
 (polyhedral_lattice.polyhedral Λ).some_spec.some_spec.some_spec.2
 
 def A (N : ℕ) [hN : fact (0 < N)] :=
-(lem97' (polyhedral_lattice.finite_free Λ) N hN.1 (l Λ)).some
+(lem97' N hN.1 (l Λ)).some
 
 lemma hA (N : ℕ) [hN : fact (0 < N)] (x : Λ →+ ℤ) :
   ∃ x' (H : x' ∈ A Λ N) y, x = N • y + x' ∧
     ∀ i, (x (l Λ i)).nat_abs = N * (y (l Λ i)).nat_abs + (x' (l Λ i)).nat_abs :=
-(lem97' (polyhedral_lattice.finite_free Λ) N hN.1 (l Λ)).some_spec x
+(lem97' N hN.1 (l Λ)).some_spec x
 
 def d  (N : ℕ) [hN : fact (0 < N)] : ℝ≥0 :=
 finset.univ.sup (λ i, ∑ a in A Λ N, nnnorm (a (l Λ i)) / nnnorm (l Λ i))

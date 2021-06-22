@@ -1,10 +1,12 @@
-import polyhedral_lattice.basic
 import linear_algebra.dual
-import for_mathlib.nnrat
-import for_mathlib.rational_cones
 import topology.continuous_function.algebra
 import analysis.normed_space.basic
+import ring_theory.finiteness
+import linear_algebra.free_module
 
+import for_mathlib.nnrat
+import for_mathlib.rational_cones
+import for_mathlib.finite_free
 
 /-
 
@@ -596,15 +598,16 @@ begin
 end
 
 /-- A finset version of Gordan's Lemma. -/
-lemma finset_Gordan_aux (hΛ : finite_free Λ) (S : finset (Λ →+ ℤ)) :
+lemma finset_Gordan_aux [module.finite ℤ Λ] [module.free ℤ Λ] (S : finset (Λ →+ ℤ)) :
   (intersect_halfspaces_set (S : set (Λ →+ ℤ))).fg :=
 begin
   classical,
-  have e := linear_equiv.restrict_scalars ℕ hΛ.basis.equiv_fun,
+  have e := linear_equiv.restrict_scalars ℕ (module.free.choose_basis ℤ Λ).equiv_fun,
     -- deliberately forget the data here, it makes the simp at the end easier
-  let e' : (Λ →+ ℤ) → (hΛ.basis_type → ℤ) →+ ℤ :=
+  let e' : (Λ →+ ℤ) → (module.free.choose_basis_index ℤ Λ → ℤ) →+ ℤ :=
     λ f, f.comp e.symm.to_linear_map.to_add_monoid_hom,
-  let L := (intersect_halfspaces_set ↑(S.image e')).map (e.symm : (hΛ.basis_type → ℤ) →ₗ[ℕ] Λ),
+  let L := (intersect_halfspaces_set ↑(S.image e')).map
+    (e.symm : (module.free.choose_basis_index ℤ Λ → ℤ) →ₗ[ℕ] Λ),
   have : L.fg := submodule.fg_map (finset_Gordan_aux_pi (S.image e')),
   suffices : L = intersect_halfspaces_set (S : set (Λ →+ ℤ)),
   { rwa ←this },
@@ -613,22 +616,22 @@ begin
 end
 
 /-- A finset version of Gordan's Lemma. -/
-lemma finset_Gordan (hΛ : finite_free Λ) (S : finset Λ) :
+lemma finset_Gordan [module.finite ℤ Λ] [module.free ℤ Λ] (S : finset Λ) :
   (dual_finset S).fg :=
 begin
   classical,
   let S' : finset ((Λ →+ ℤ) →+ ℤ) := S.image add_monoid_hom.eval,
-  have := finset_Gordan_aux (finite_free.dual hΛ) S',
+  have := finset_Gordan_aux S',
   convert this using 1,
   ext x,
   simp [mem_dual_finset, mem_intersect_halfspaces_set],
 end
 
 /-- A fintype version of Gordan's Lemma. -/
-lemma explicit_gordan (hΛ : finite_free Λ) [fintype ι] (l : ι → Λ) :
+lemma explicit_gordan [module.finite ℤ Λ] [module.free ℤ Λ] [fintype ι] (l : ι → Λ) :
   (explicit_dual_set l).fg :=
 begin
   classical,
   rw explicit_dual_set_eq_dual_finset,
-  apply finset_Gordan hΛ,
+  apply finset_Gordan,
 end

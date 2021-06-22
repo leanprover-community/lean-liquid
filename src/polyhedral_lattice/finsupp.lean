@@ -1,6 +1,9 @@
 import linear_algebra.finsupp_vector_space
 
+import for_mathlib.finite_free
+
 import polyhedral_lattice.basic
+
 /-!
 
 # Hom(ι, Λ) for Λ a polyhedral lattice
@@ -110,10 +113,7 @@ namespace finsupp
 variables [polyhedral_lattice Λ]
 
 instance {ι : Type} [fintype ι] : polyhedral_lattice (ι →₀ Λ) :=
-{ finite :=
-  begin
-    sorry
-  end,
+{ finite := module.finite.of_basis ℤ _ (finsupp.basis (λ i, module.free.choose_basis ℤ Λ)),
   free := module.free.of_basis (finsupp.basis (λ i, module.free.choose_basis ℤ Λ)),
   polyhedral' :=
   begin

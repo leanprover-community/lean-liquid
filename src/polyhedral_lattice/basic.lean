@@ -3,8 +3,6 @@ import ring_theory.finiteness
 import linear_algebra.free_module
 import ring_theory.int.basic
 
-import for_mathlib.finite_free
-
 /-!
 
 # Polyhedral lattices
