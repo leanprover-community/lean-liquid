@@ -37,13 +37,6 @@ local notation `ℤ[` A `]` := free_abelian_group A
 namespace breen_deligne
 open free_abelian_group
 
-
-section move_this
-
-attribute [simps] equiv.sum_empty equiv.prod_punit equiv.punit_prod
-
-end move_this
-
 /-!
 Suppose you have an abelian group `A`.
 What data do you need to specify a "universal" map `f : ℤ[A^m] → ℤ[A^n]`?
