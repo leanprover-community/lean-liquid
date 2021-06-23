@@ -3,7 +3,8 @@ import group_theory.free_abelian_group
 import algebra.direct_sum
 import algebra.big_operators.finsupp
 
-import for_mathlib.free_abelian_group
+import for_mathlib.finsupp
+import for_mathlib.linear_map
 import for_mathlib.kronecker
 
 import hacks_and_tricks.type_pow
@@ -32,10 +33,10 @@ noncomputable theory
 open_locale big_operators direct_sum
 
 local attribute [instance] type_pow
-local notation `ℤ[` A `]` := free_abelian_group A
+local notation `ℤ[` A `]` := A →₀ ℤ
 
 namespace breen_deligne
-open free_abelian_group
+open finsupp
 
 /-!
 Suppose you have an abelian group `A`.
@@ -67,40 +68,11 @@ namespace basic_universal_map
 variables (A : Type*) [add_comm_group A]
 variables {k l m n : ℕ} (g : basic_universal_map m n) (f : basic_universal_map l m)
 
-def pre_eval : basic_universal_map m n →+ A^m → A^n :=
-add_monoid_hom.mk' (λ f x i, ∑ j, f i j • (x : fin _ → A) j)
-begin
-  intros f₁ f₂,
-  ext x i,
-  simp only [pi.add_apply, dmatrix.add_apply, add_smul, finset.sum_add_distrib],
-end
-
-lemma pre_eval_apply : pre_eval A g = λ x i, ∑ j, g i j • (x : fin _ → A) j := rfl
-
-/-- `f.eval A` for a `f : basic_universal_map m n`
-is the homomorphism `ℤ[A^m] →+ ℤ[A^n]` induced by matrix multiplication. -/
-def eval : ℤ[A^m] →+ ℤ[A^n] :=
-map $ pre_eval A g
-
-lemma eval_of (x : A^m) :
-  g.eval A (of x) = (of $ pre_eval A g x) :=
-lift.of _ _
-
 /-- The composition of basic universal maps,
 defined as matrix multiplication. -/
 def comp : basic_universal_map m n →+ basic_universal_map l m →+ basic_universal_map l n :=
 add_monoid_hom.mk' (λ g, add_monoid_hom.mk' (λ f, matrix.mul g f) $ matrix.mul_add _) $
   λ g₁ g₂, by { ext1 f, apply matrix.add_mul }
-
-lemma eval_comp : (comp g f).eval A = (g.eval A).comp (f.eval A) :=
-begin
-  ext1 x,
-  simp only [add_monoid_hom.coe_comp, function.comp_app, eval_of, pre_eval, comp, finset.smul_sum,
-    matrix.mul_apply, finset.sum_smul, mul_smul, add_monoid_hom.mk'_apply],
-  congr' 1,
-  ext1 i,
-  exact finset.sum_comm
-end
 
 lemma comp_assoc
   (h : basic_universal_map m n) (g : basic_universal_map l m) (f : basic_universal_map k l) :
@@ -282,98 +254,87 @@ universe variable u
 variables {k l m n : ℕ} (g : universal_map m n) (f : universal_map l m)
 variables (A : Type u) [add_comm_group A]
 
-/-- `f.eval A` for a `f : universal_map m n`
-is the homomorphism `ℤ[A^m] →+ ℤ[A^n]` induced by matrix multiplication
-of the summands occurring in the formal linear combination `f`. -/
-def eval : universal_map m n →+ ℤ[A^m] →+ ℤ[A^n] :=
-free_abelian_group.lift $ λ (f : basic_universal_map m n), f.eval A
+instance : has_coe_to_fun (universal_map m n) :=
+finsupp.has_coe_to_fun
 
-@[simp] lemma eval_of (f : basic_universal_map m n) :
-  eval A (of f) = f.eval A :=
-lift.of _ _
+@[simps] def coeff (g : basic_universal_map m n) : universal_map m n →ₗ[ℤ] ℤ :=
+{ to_fun := λ f, f g,
+  map_add' := λ f₁ f₂, finsupp.add_apply _ _ _,
+  map_smul' := λ r f, finsupp.smul_apply _ _ _ }
 
 /-- The composition of `universal_map`s `g` and `f`,
 given by the formal linear combination of all compositions
 of summands occurring in `g` and `f`. -/
-def comp : universal_map m n →+ universal_map l m →+ universal_map l n :=
-free_abelian_group.lift $ λ (g : basic_universal_map m n), free_abelian_group.lift $ λ f,
-of $ basic_universal_map.comp g f
+def comp : universal_map m n →ₗ[ℤ] universal_map l m →ₗ[ℤ] universal_map l n :=
+finsupp.lift _ ℤ _ $ λ (g : basic_universal_map m n), finsupp.lift _ ℤ _ $ λ f,
+finsupp.single (basic_universal_map.comp g f) (1:ℤ)
 
-@[simp] lemma comp_of (g : basic_universal_map m n) (f : basic_universal_map l m) :
-  comp (of g) (of f) = of (basic_universal_map.comp g f) :=
-by rw [comp, lift.of, lift.of]
+@[simp] lemma comp_single (g : basic_universal_map m n) (f : basic_universal_map l m) :
+  comp (single g 1) (single f 1) = single (basic_universal_map.comp g f) 1 :=
+by rw [comp, lift_single, one_smul, lift_single, one_smul]
 
 section
-open add_monoid_hom
-
-lemma eval_comp : eval A (comp g f) = (eval A g).comp (eval A f) :=
-show comp_hom (comp_hom (@eval l n A _)) (comp) g f =
-  comp_hom (comp_hom (comp_hom.flip (@eval l m A _)) (comp_hom)) (@eval m n A _) g f,
-begin
-  congr' 2, clear f g, ext g f : 2,
-  show eval A (comp (of g) (of f)) = (eval A (of g)).comp (eval A (of f)),
-  simp only [basic_universal_map.eval_comp, comp_of, eval_of]
-end
+open linear_map
 
 lemma comp_assoc (h : universal_map m n) (g : universal_map l m) (f : universal_map k l) :
   comp (comp h g) f = comp h (comp g f) :=
-show comp_hom (comp_hom (@comp k l n)) (@comp l m n) h g f =
-     comp_hom (comp_hom (comp_hom.flip (@comp k l m)) (comp_hom)) (@comp k m n) h g f,
 begin
-  congr' 3, clear h g f, ext h g f : 3,
-  show comp (comp (of h) (of g)) (of f) = comp (of h) (comp (of g) (of f)),
-  simp only [basic_universal_map.comp_assoc, comp_of]
+  show (comp_hom (@comp k l n)).comp (@comp l m n) h g f =
+     comp_hom (comp_hom (comp_hom.flip (@comp k l m)) (comp_hom)) (@comp k m n) h g f,
+  congr' 3, clear h g f, ext h g f : 6,
+  simp only [lsingle_apply, function.comp_app, coe_comp, comp_single,
+    basic_universal_map.comp_assoc, flip_apply, comp_hom_apply_apply],
 end
 
 /-- The identity `universal_map`. -/
-def id (n : ℕ) : universal_map n n := of (basic_universal_map.id n)
+def id (n : ℕ) : universal_map n n := single (basic_universal_map.id n) 1
 
 @[simp] lemma id_comp : comp (id _) f = f :=
-show comp (id _) f = add_monoid_hom.id _ f,
 begin
-  congr' 1, clear f, ext1 f,
-  simp only [id, comp_of, id_apply, basic_universal_map.id_comp]
+  suffices : comp (id m) = linear_map.id, { exact linear_map.congr_fun this f },
+  clear f, ext f : 2,
+  simp only [lsingle_apply, function.comp_app, id_comp, coe_comp, id, comp_single,
+    basic_universal_map.id_comp],
 end
 
 @[simp] lemma comp_id : comp g (id _) = g :=
-show (@comp m m n).flip (id _) g = add_monoid_hom.id _ g,
 begin
-  congr' 1, clear g, ext1 g,
-  show comp (of g) (id _) = (of g),
-  simp only [id, comp_of, id_apply, basic_universal_map.comp_id]
+  suffices : (@comp m m n).flip (id _) = linear_map.id, { exact linear_map.congr_fun this g },
+  clear g, ext g : 2,
+  simp only [lsingle_apply, function.comp_app, comp_id, coe_comp, id, comp_single,
+    basic_universal_map.comp_id, flip_apply, id_apply],
 end
 
-def bound : ℕ := ∑ g in f.support, (free_abelian_group.coeff g f).nat_abs
+def bound : ℕ :=
+∑ g in f.support, (f g).nat_abs
 
 def bound_by (N : ℕ) : Prop := f.bound ≤ N
 
-lemma of_bound_by (f : basic_universal_map m n) : bound_by (of f) 1 :=
-begin
-  simp only [bound_by, bound, coeff_of_self, int.nat_abs_one, finset.sum_singleton, support_of],
-end
+lemma of_bound_by (f : basic_universal_map m n) : bound_by (single f 1) 1 :=
+by simp only [bound_by, bound, int.nat_abs_one, finset.sum_singleton,
+    support_single_ne_zero one_ne_zero, single_apply, if_pos rfl]
 
 lemma zero_bound_by (N : ℕ) : (0 : universal_map m n).bound_by N :=
-by simp only [bound_by, bound, zero_le', finset.sum_const_zero,
-    add_monoid_hom.map_zero, int.nat_abs_zero]
+by simp only [bound_by, bound, zero_le', finset.sum_empty, support_zero]
 
 lemma zero_bound_by_zero : (0 : universal_map m n).bound_by 0 :=
 zero_bound_by _
 
 lemma bound_by.random_index {f : universal_map m n} {N : ℕ}
   (hf : f.bound_by N) (s : finset (basic_universal_map m n)) :
-  ∑ g in s, (free_abelian_group.coeff g f).nat_abs ≤ N :=
+  ∑ g in s, (f g).nat_abs ≤ N :=
 begin
-  calc ∑ g in s, (free_abelian_group.coeff g f).nat_abs
-      = ∑ g in s ∩ f.support, (free_abelian_group.coeff g f).nat_abs +
-        ∑ g in s \ f.support, (free_abelian_group.coeff g f).nat_abs : _
-  ... = ∑ g in s ∩ f.support, (free_abelian_group.coeff g f).nat_abs : _
-  ... ≤ ∑ g in f.support ∩ s, (free_abelian_group.coeff g f).nat_abs +
-        ∑ g in f.support \ s, (free_abelian_group.coeff g f).nat_abs : _
-  ... ≤ ∑ g in f.support, (free_abelian_group.coeff g f).nat_abs : _
+  calc ∑ g in s, (f g).nat_abs
+      = ∑ g in s ∩ f.support, (f g).nat_abs +
+        ∑ g in s \ f.support, (f g).nat_abs : _
+  ... = ∑ g in s ∩ f.support, (f g).nat_abs : _
+  ... ≤ ∑ g in f.support ∩ s, (f g).nat_abs +
+        ∑ g in f.support \ s, (f g).nat_abs : _
+  ... ≤ ∑ g in f.support, (f g).nat_abs : _
   ... ≤ N : hf,
   { rw finset.sum_inter_add_sum_diff },
   { simp only [and_imp, add_right_eq_self, int.nat_abs_eq_zero, imp_self, imp_true_iff,
-      finset.mem_sdiff, finset.sum_eq_zero_iff, free_abelian_group.not_mem_support_iff] },
+      finset.mem_sdiff, finset.sum_eq_zero_iff, not_mem_support_iff] },
   { rw finset.inter_comm, simp only [le_add_iff_nonneg_right, zero_le'], },
   { rw finset.sum_inter_add_sum_diff },
 end
@@ -384,10 +345,9 @@ lemma bound_by.add {f₁ f₂ : universal_map m n} {N₁ N₂ : ℕ}
 begin
   calc (f₁ + f₂).bound ≤
       ∑ (g : basic_universal_map m n) in support (f₁ + f₂),
-        ((coeff g f₁).nat_abs + (coeff g f₂).nat_abs) : finset.sum_le_sum _
+        ((f₁ g).nat_abs + (f₂ g).nat_abs) : finset.sum_le_sum _
   ... ≤ N₁ + N₂ : _,
   { intros g hg,
-    rw add_monoid_hom.map_add,
     apply int.nat_abs_add_le },
   { rw finset.sum_add_distrib,
     exact add_le_add (h₁.random_index _) (h₂.random_index _) }
@@ -418,43 +378,44 @@ TODO: refactor `mul` to be a functor
 TODO: put a monoidal structure on `FreeMat`, so that this is just `N ⊗ _`.
 -/
 
-def mul (N : ℕ) : universal_map m n →+ universal_map (N * m) (N * n) :=
-map (basic_universal_map.mul N)
+def mul (N : ℕ) : universal_map m n →ₗ[ℤ] universal_map (N * m) (N * n) :=
+(@map_domain.add_monoid_hom _ _ ℤ _ (@basic_universal_map.mul m n N)).to_int_linear_map
 
-lemma mul_of (N : ℕ) (f : basic_universal_map m n) :
-  mul N (of f) = of (basic_universal_map.mul N f) :=
-map_of_apply _
+lemma mul_single (N : ℕ) (f : basic_universal_map m n) :
+  mul N (single f 1) = single (basic_universal_map.mul N f) 1 :=
+map_domain_single
 
 lemma mul_comp (N : ℕ) (g : universal_map m n) (f : universal_map l m) :
   mul N (comp g f) = comp (mul N g) (mul N f) :=
 begin
-  simp only [← add_monoid_hom.comp_apply],
-  rw [← add_monoid_hom.comp_hom_apply_apply, ← add_monoid_hom.comp_hom_apply_apply,
-    ← add_monoid_hom.comp_hom_apply_apply,
-    ← add_monoid_hom.flip_apply _ _ (mul N)],
-  simp only [← add_monoid_hom.comp_apply],
-  rw [← add_monoid_hom.comp_hom_apply_apply, ← add_monoid_hom.comp_hom_apply_apply],
-  congr' 2, clear f g, ext g f,
-  show (mul N) ((comp (of g)) (of f)) = (comp ((mul N) (of g))) ((mul N) (of f)),
-  simp only [comp_of, mul_of, basic_universal_map.mul_comp],
+  simp only [← linear_map.comp_apply],
+  rw [← linear_map.comp_hom_apply_apply, ← linear_map.comp_hom_apply_apply,
+    ← linear_map.comp_hom_apply_apply,
+    ← linear_map.flip_apply _ _ (mul N)],
+  simp only [← linear_map.comp_apply],
+  rw [← linear_map.comp_hom_apply_apply, ← linear_map.comp_hom_apply_apply],
+  congr' 2, clear f g, ext g f : 4,
+  simp only [linear_map.comp_hom_apply_apply, linear_map.comp_apply, linear_map.flip_apply,
+    comp_single, mul_single, basic_universal_map.mul_comp, lsingle_apply],
 end
 
 lemma mem_support_mul (N : ℕ) (hN : 0 < N) (f : universal_map m n) (g) :
   g ∈ (mul N f).support ↔ ∃ g', g' ∈ f.support ∧ g = basic_universal_map.mul N g' :=
 begin
-  apply free_abelian_group.mem_support_map,
+  apply finsupp.mem_support_map_domain,
   exact basic_universal_map.mul_injective N hN
 end
 
 @[simp]
 lemma coeff_mul (N : ℕ) (hN : 0 < N) (f : universal_map m n) (g : basic_universal_map m n) :
-  coeff (basic_universal_map.mul N g) (mul N f) = coeff g f :=
+  (mul N f) (basic_universal_map.mul N g) = f g :=
 begin
-  simp only [← add_monoid_hom.comp_apply],
-  rw [← add_monoid_hom.comp_hom_apply_apply],
-  congr' 1, clear f, ext f,
-  simp only [comp_hom_apply_apply, function.comp_app, coe_comp, mul, coeff, to_finsupp_of,
-    map_of_apply, finsupp.apply_add_hom_apply, finsupp.single_apply,
+  simp only [← coeff_apply, ← linear_map.comp_apply],
+  rw [← linear_map.comp_hom_apply_apply],
+  congr' 1, clear f, ext f : 2,
+  simp only [linear_map.comp_hom_apply_apply, linear_map.comp_apply, mul, coeff_apply],
+  dsimp [to_int_linear_map, map_domain.add_monoid_hom_apply],
+  simp only [map_domain_single, finsupp.single_apply,
     (basic_universal_map.mul_injective N hN).eq_iff],
   convert rfl
 end
@@ -466,33 +427,33 @@ TODO: refactor `sum` and `proj` to be natural transformations from `mul n` to `�
 -/
 
 def sum (n N : ℕ) : universal_map (N * n) n :=
-of (∑ i, basic_universal_map.proj n i)
+single (∑ i, basic_universal_map.proj n i) 1
 
 def proj (n N : ℕ) : universal_map (N * n) n :=
-∑ i, of (basic_universal_map.proj n i)
+∑ i, single (basic_universal_map.proj n i) 1
 
 lemma sum_comp_mul (N : ℕ) (f : universal_map m n) :
   comp (sum n N) (mul N f) = comp f (sum m N) :=
 begin
-  simp only [← add_monoid_hom.comp_apply],
-  rw [← add_monoid_hom.comp_hom_apply_apply, ← add_monoid_hom.flip_apply _ _ (sum m N)],
-  simp only [← add_monoid_hom.comp_apply],
-  congr' 1, clear f, ext f,
-  show (comp (sum n N)) ((mul N) (of f)) = (comp (of f)) (sum m N),
-  simp only [sum, mul_of, comp_of, add_monoid_hom.map_sum,
+  simp only [← linear_map.comp_apply],
+  rw [← linear_map.comp_hom_apply_apply, ← linear_map.flip_apply _ _ (sum m N)],
+  simp only [← linear_map.comp_apply],
+  congr' 1, clear f, ext f : 2,
+  simp only [linear_map.comp_hom_apply_apply, linear_map.comp_apply, linear_map.flip_apply,
+    lsingle_apply, sum, mul_single, comp_single, add_monoid_hom.map_sum,
     add_monoid_hom.finset_sum_apply, basic_universal_map.proj_comp_mul],
 end
 
 lemma proj_comp_mul (N : ℕ) (f : universal_map m n) :
   comp (proj n N) (mul N f) = comp f (proj m N) :=
 begin
-  simp only [← add_monoid_hom.comp_apply],
-  rw [← add_monoid_hom.comp_hom_apply_apply, ← add_monoid_hom.flip_apply _ _ (proj m N)],
-  simp only [← add_monoid_hom.comp_apply],
-  congr' 1, clear f, ext f,
-  show (comp (proj n N)) ((mul N) (of f)) = (comp (of f)) (proj m N),
-  simp only [proj, mul_of, comp_of, add_monoid_hom.map_sum,
-    add_monoid_hom.finset_sum_apply, basic_universal_map.proj_comp_mul],
+  simp only [← linear_map.comp_apply],
+  rw [← linear_map.comp_hom_apply_apply, ← linear_map.flip_apply _ _ (proj m N)],
+  simp only [← linear_map.comp_apply],
+  congr' 1, clear f, ext f : 2,
+  simp only [linear_map.comp_hom_apply_apply, linear_map.comp_apply, linear_map.flip_apply,
+    lsingle_apply, proj, mul_single, comp_single, linear_map.map_sum, linear_map.sum_apply,
+    add_monoid_hom.map_sum, add_monoid_hom.finset_sum_apply, basic_universal_map.proj_comp_mul],
 end
 .
 

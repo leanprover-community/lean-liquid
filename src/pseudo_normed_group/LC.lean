@@ -300,12 +300,12 @@ lemma eval_LCFP_sub (f g : universal_map m n) [f.suitable c₂ c₁] [g.suitable
   eval_LCFP V r' c₁ c₂ (f - g) = f.eval_LCFP V r' c₁ c₂ - g.eval_LCFP V r' c₁ c₂ :=
 by simp only [sub_eq_add_neg, eval_LCFP_add, eval_LCFP_neg]
 
-lemma eval_LCFP'_comp_of (g : basic_universal_map m n) (f : basic_universal_map l m)
+lemma eval_LCFP'_comp_single (g : basic_universal_map m n) (f : basic_universal_map l m)
   [hg : g.suitable c₂ c₁] [hf : f.suitable c₃ c₂] :
   eval_LCFP' V r' c₁ c₃ ((comp (of g)) (of f)) =
     eval_LCFP' V r' c₁ c₂ (of g) ≫ eval_LCFP' V r' c₂ c₃ (of f) :=
 begin
-  simp only [comp_of, eval_LCFP'_of],
+  simp only [comp_single, eval_LCFP'_of],
   haveI hfg : (basic_universal_map.comp g f).suitable c₃ c₁ := basic_universal_map.suitable_comp c₂,
   rw ← basic_universal_map.eval_LCFP'_comp,
 end
@@ -330,7 +330,7 @@ begin
     { intros f hf,
       rw suitable_of_iff at hf hg,
       resetI,
-      apply eval_LCFP'_comp_of },
+      apply eval_LCFP'_comp_single },
     { intros f hf IH,
       simp only [IH, eval_LCFP'_neg, add_monoid_hom.map_neg, comp_neg] },
     { rintros (f₁ : universal_map l m) (f₂ : universal_map l m) hf₁ hf₂ IH₁ IH₂, resetI,

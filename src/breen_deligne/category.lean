@@ -14,6 +14,8 @@ and whose morphisms `m ⟶ n` are functorial maps `φ_A : ℤ[A^m] → ℤ[A^n]`
 
 -/
 
+noncomputable theory
+
 open_locale big_operators
 
 namespace breen_deligne
@@ -37,18 +39,20 @@ instance : small_category FreeMat :=
 
 instance : preadditive FreeMat :=
 { hom_group := λ m n, infer_instance,
-  add_comp' := λ l m n f g h, add_monoid_hom.map_add _ _ _,
+  add_comp' := λ l m n f g h, linear_map.map_add _ _ _,
   comp_add' := λ l m n f g h, show universal_map.comp (g + h) f = _,
-    by { rw [add_monoid_hom.map_add, add_monoid_hom.add_apply], refl } }
+    by { rw [linear_map.map_add, linear_map.add_apply], refl } }
 
-open universal_map
+open universal_map finsupp
 
 @[simps]
 def mul_functor (N : ℕ) : FreeMat ⥤ FreeMat :=
 { obj := λ n, N * n,
   map := λ m n f, mul N f,
-  map_id' := λ n, (free_abelian_group.map_of _ _).trans $ congr_arg _ $
+  map_id' := λ n,
   begin
+    refine finsupp.map_domain_single.trans (_ : single _ 1 = single _ 1),
+    congr' 1,
     dsimp [basic_universal_map.mul, basic_universal_map.id],
     ext i j,
     rw matrix.kronecker_one_one,
@@ -66,10 +70,10 @@ instance mul_functor.additive (N : ℕ) : (mul_functor N).additive :=
   (hfg : basic_universal_map.comp g f = basic_universal_map.id _)
   (hgf : basic_universal_map.comp f g = basic_universal_map.id _) :
   m ≅ n :=
-{ hom := of f,
-  inv := of g,
-  hom_inv_id' := (comp_of _ _).trans $ congr_arg _ $ hfg,
-  inv_hom_id' := (comp_of _ _).trans $ congr_arg _ $ hgf }
+{ hom := single f 1,
+  inv := single g 1,
+  hom_inv_id' := (comp_single _ _).trans $ by { rw hfg, refl },
+  inv_hom_id' := (comp_single _ _).trans $ by { rw hgf, refl } }
 
 def one_mul_iso : mul_functor 1 ≅ 𝟭 _ :=
 nat_iso.of_components (λ n, iso_mk'
@@ -79,9 +83,9 @@ begin
   intros m n f,
   dsimp,
   show universal_map.comp _ _ = universal_map.comp _ _,
-  rw [← add_monoid_hom.comp_apply, ← add_monoid_hom.comp_hom_apply_apply,
-    ← add_monoid_hom.flip_apply _ f],
-  congr' 1, clear f, ext1 f,
+  rw [← linear_map.comp_apply, ← linear_map.comp_hom_apply_apply,
+    ← linear_map.flip_apply _ f],
+  congr' 1, clear f, ext f : 2,
   have : f = matrix.reindex_linear_equiv
       ((fin_one_equiv.prod_congr $ equiv.refl _).trans $ equiv.punit_prod _)
       ((fin_one_equiv.prod_congr $ equiv.refl _).trans $ equiv.punit_prod _)
@@ -89,9 +93,9 @@ begin
   { ext i j, dsimp [matrix.kronecker, matrix.one_apply],
     simp only [one_mul, if_true, eq_iff_true_of_subsingleton], },
   conv_rhs { rw this },
-  simp only [comp_of, mul_of, basic_universal_map.comp, add_monoid_hom.mk'_apply,
-    basic_universal_map.mul, basic_universal_map.one_mul_hom,
-    add_monoid_hom.comp_hom_apply_apply, add_monoid_hom.comp_apply, add_monoid_hom.flip_apply,
+  simp only [comp_single, mul_single, basic_universal_map.comp, add_monoid_hom.mk'_apply,
+    basic_universal_map.mul, basic_universal_map.one_mul_hom, lsingle_apply,
+    linear_map.comp_hom_apply_apply, linear_map.comp_apply, linear_map.flip_apply,
     iso_mk'_hom],
   rw [← matrix.reindex_linear_equiv_mul, ← matrix.reindex_linear_equiv_mul,
     matrix.one_mul, matrix.mul_one],
@@ -99,10 +103,11 @@ end
 .
 
 lemma mul_mul_iso_aux (m n i j : ℕ) (f : basic_universal_map i j) :
-  (comp (of (basic_universal_map.mul_mul_hom m n j))) (mul m (mul n (of f))) =
-    comp (mul (m * n) (of f)) (of (basic_universal_map.mul_mul_hom m n i)) :=
+  (comp (single (basic_universal_map.mul_mul_hom m n j) 1))
+    (mul m (mul n (single f 1))) =
+  comp (mul (m * n) (single f 1)) (single (basic_universal_map.mul_mul_hom m n i) 1) :=
 begin
-  simp only [comp_of, mul_of, basic_universal_map.comp, add_monoid_hom.mk'_apply,
+  simp only [comp_single, mul_single, basic_universal_map.comp, add_monoid_hom.mk'_apply,
     basic_universal_map.mul, basic_universal_map.mul_mul_hom, matrix.mul_reindex_linear_equiv_one],
   rw [← matrix.reindex_linear_equiv_mul, matrix.one_mul,
     matrix.kronecker_reindex_right, matrix.kronecker_assoc', matrix.kronecker_one_one,
@@ -121,10 +126,10 @@ begin
   intros i j f,
   dsimp,
   show universal_map.comp _ _ = universal_map.comp _ _,
-  rw [← add_monoid_hom.comp_apply, ← add_monoid_hom.comp_apply,
-    ← add_monoid_hom.flip_apply _ (mul (m * n) f),
-    ← add_monoid_hom.comp_apply],
-  congr' 1, clear f, ext1 f,
+  rw [← linear_map.comp_apply, ← linear_map.comp_apply,
+    ← linear_map.flip_apply _ (mul (m * n) f),
+    ← linear_map.comp_apply],
+  congr' 1, clear f, ext f : 2,
   apply mul_mul_iso_aux,
 end
 
@@ -158,7 +163,7 @@ homological_complex.hom.iso_of_components (λ i, (FreeMat.mul_mul_iso _ _).app _
 end mul
 
 /-- `BD.pow N` is the Breen--Deligne data whose `n`-th rank is `2^N * BD.rank n`. -/
-def pow' : ℕ → data
+noncomputable def pow' : ℕ → data
 | 0     := BD
 | (n+1) := (mul 2).obj (pow' n)
 
@@ -172,16 +177,16 @@ def pow' : ℕ → data
 
 open homological_complex FreeMat category_theory category_theory.limits
 
-def hom_pow' {BD : data} (f : (mul 2).obj BD ⟶ BD) : Π N, BD.pow' N ⟶ BD
+noncomputable def hom_pow' {BD : data} (f : (mul 2).obj BD ⟶ BD) : Π N, BD.pow' N ⟶ BD
 | 0     := 𝟙 _
-| (n+1) := (mul 2).map (hom_pow' n) ≫ f
+| (n+1) := by { refine _ ≫ f, dsimp only [pow'], exact (mul 2).map (hom_pow' n) }
 
 open_locale zero_object
+open finsupp
 
-def pow'_iso_mul : Π N, BD.pow' N ≅ (mul (2^N)).obj BD
+noncomputable def pow'_iso_mul : Π N, BD.pow' N ≅ (mul (2^N)).obj BD
 | 0     := BD.mul_one_iso.symm
-| (N+1) := show (mul 2).obj (BD.pow' N) ≅ (mul (2 * 2 ^ N)).obj BD, from
-   (mul 2).map_iso (pow'_iso_mul N) ≪≫ mul_mul_iso _ _ _
+| (N+1) := by { dsimp only [pow'], exact (mul 2).map_iso (pow'_iso_mul N) ≪≫ mul_mul_iso _ _ _ }
 
 lemma hom_pow'_sum : ∀ N, (BD.pow'_iso_mul N).inv ≫ hom_pow' (BD.sum 2) N = BD.sum (2^N)
 | 0     :=
@@ -191,8 +196,7 @@ begin
   show (BD.pow'_iso_mul 0).inv.f n = (BD.sum 1).f n,
   dsimp only [sum_f, universal_map.sum],
   simp only [fin.default_eq_zero, univ_unique, finset.sum_singleton],
-  refine congr_arg of _,
-  apply basic_universal_map.one_mul_hom_eq_proj,
+  rw ← basic_universal_map.one_mul_hom_eq_proj, refl,
 end
 | (N+1) :=
 begin
@@ -202,9 +206,9 @@ begin
   ext i : 2,
   iterate 2 { erw [homological_complex.comp_f] },
   dsimp [mul_mul_iso, FreeMat.mul_mul_iso, universal_map.sum],
-  rw [universal_map.mul_of],
+  rw [universal_map.mul_single],
   show universal_map.comp _ _ = universal_map.comp _ _,
-  simp only [universal_map.comp_of, add_monoid_hom.map_sum, add_monoid_hom.finset_sum_apply],
+  simp only [universal_map.comp_single, add_monoid_hom.map_sum, add_monoid_hom.finset_sum_apply],
   congr' 1,
   rw [← finset.sum_product', finset.univ_product_univ, ← fin_prod_fin_equiv.symm.sum_comp],
   apply fintype.sum_congr,
@@ -239,9 +243,9 @@ begin
       ← fin_prod_fin_equiv.symm.sum_comp],
   apply fintype.sum_congr,
   intros j,
-  rw [universal_map.mul_of],
+  rw [universal_map.mul_single],
   show universal_map.comp _ _ = universal_map.comp _ _,
-  simp only [universal_map.comp_of, basic_universal_map.comp_proj_mul_proj],
+  simp only [universal_map.comp_single, basic_universal_map.comp_proj_mul_proj],
 end
 
 lemma hom_pow'_proj' (N : ℕ) : hom_pow' (BD.proj 2) N = (BD.pow'_iso_mul N).hom ≫ BD.proj (2^N) :=

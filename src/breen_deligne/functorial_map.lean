@@ -47,6 +47,68 @@ universes u
 
 namespace breen_deligne
 
+namespace basic_universal_map
+variables {k l m n : ℕ} (g : basic_universal_map m n) (f : basic_universal_map l m)
+variables (A : Type u) [add_comm_group A]
+open free_abelian_group
+
+def pre_eval : basic_universal_map m n →+ A^m → A^n :=
+add_monoid_hom.mk' (λ f x i, ∑ j, f i j • (x : fin _ → A) j)
+begin
+  intros f₁ f₂,
+  ext x i,
+  simp only [pi.add_apply, dmatrix.add_apply, add_smul, finset.sum_add_distrib],
+end
+
+lemma pre_eval_apply : pre_eval A g = λ x i, ∑ j, g i j • (x : fin _ → A) j := rfl
+
+/-- `f.eval A` for a `f : basic_universal_map m n`
+is the homomorphism `ℤ[A^m] →+ ℤ[A^n]` induced by matrix multiplication. -/
+def eval : ℤ[A^m] →+ ℤ[A^n] :=
+map $ pre_eval A g
+
+lemma eval_of (x : A^m) :
+  g.eval A (of x) = (of $ pre_eval A g x) :=
+lift.of _ _
+
+lemma eval_comp : (comp g f).eval A = (g.eval A).comp (f.eval A) :=
+begin
+  ext1 x,
+  simp only [add_monoid_hom.coe_comp, function.comp_app, eval_of, pre_eval, comp, finset.smul_sum,
+    matrix.mul_apply, finset.sum_smul, mul_smul, add_monoid_hom.mk'_apply],
+  congr' 1,
+  ext1 i,
+  exact finset.sum_comm
+end
+
+end basic_universal_map
+
+namespace universal_map
+variables {k l m n : ℕ} (g : universal_map m n) (f : universal_map l m)
+variables (A : Type u) [add_comm_group A]
+open add_monoid_hom free_abelian_group
+
+/-- `f.eval A` for a `f : universal_map m n`
+is the homomorphism `ℤ[A^m] →+ ℤ[A^n]` induced by matrix multiplication
+of the summands occurring in the formal linear combination `f`. -/
+def eval : universal_map m n →+ ℤ[A^m] →+ ℤ[A^n] :=
+free_abelian_group.lift $ λ (f : basic_universal_map m n), f.eval A
+
+@[simp] lemma eval_of (f : basic_universal_map m n) :
+  eval A (of f) = f.eval A :=
+lift.of _ _
+
+lemma eval_comp : eval A (comp g f) = (eval A g).comp (eval A f) :=
+show comp_hom (comp_hom (@eval l n A _)) (comp) g f =
+  comp_hom (comp_hom (comp_hom.flip (@eval l m A _)) (comp_hom)) (@eval m n A _) g f,
+begin
+  congr' 2, clear f g, ext g f : 2,
+  show eval A (comp (of g) (of f)) = (eval A (of g)).comp (eval A (of f)),
+  simp only [basic_universal_map.eval_comp, comp_of, eval_of]
+end
+
+end universal_map
+
 section functorial_map_section
 
 open free_abelian_group

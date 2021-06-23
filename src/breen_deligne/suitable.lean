@@ -452,7 +452,7 @@ begin
       (suitable c₁ c₂) (suitable_free_predicate c₁ c₂) f hf; unfreezingI { clear_dependent f },
       { simp only [add_monoid_hom.map_zero], apply_instance },
       { intros f hf,
-        rw comp_of,
+        rw comp_single,
         rw suitable_of_iff at hf hg ⊢,
         resetI,
         exact breen_deligne.basic_universal_map.suitable_comp c₂ },
