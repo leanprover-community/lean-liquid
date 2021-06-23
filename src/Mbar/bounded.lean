@@ -122,7 +122,7 @@ def transition (r' : ℝ≥0) {S : Fintype} {c : ℝ≥0} {M N : ℕ} (h : M ≤
     refine le_trans _ x.sum_le,
     apply finset.sum_le_sum,
     intros s hs,
-    let I := finset.map (fin.cast_le (by linarith : M+1 ≤ N+1)).to_embedding
+    let I := finset.map (fin.cast_le (add_le_add_right h 1)).to_embedding
       (finset.univ : finset (fin (M+1))),
     refine le_trans _
       (finset.sum_le_sum_of_subset_of_nonneg (finset.subset_univ I) _),
@@ -134,7 +134,7 @@ def transition (r' : ℝ≥0) {S : Fintype} {c : ℝ≥0} {M N : ℕ} (h : M ≤
 
 lemma transition_eq {r' : ℝ≥0} {S : Fintype} {c : ℝ≥0} {M N : ℕ} (h : M ≤ N)
   (F : Mbar_bdd r' S c N) (s : S) (i : fin (M+1)) :
-  (transition r' h F).1 s i = F.1 s (fin.cast_le (by linarith) i) := rfl
+  (transition r' h F).1 s i = F.1 s (fin.cast_le (add_le_add_right h 1) i) := rfl
 
 lemma transition_transition {r' : ℝ≥0} {S : Fintype} {c : ℝ≥0}
   {M N K : ℕ} (h : M ≤ N) (hh : N ≤ K) (x : Mbar_bdd r' S c K) :
@@ -162,21 +162,17 @@ example : t2_space (limit r' S c) := by apply_instance
 example : totally_disconnected_space (limit r' S c) := by apply_instance
 example [fact (0 < r')] : compact_space (Mbar_bdd r' S c M) := by apply_instance
 
-/-- An auxiliary object used in proving the topological properties of `Mbar_bdd.limit r' S c`. -/
-private def Γ : Π (m n : ℕ) (h : m ≤ n), set (Π (M : ℕ), Mbar_bdd r' S c M) :=
-λ m n h, { F | transition r' h (F n) = F m }
-
-lemma range_emb_aux_eq :
-  range (@emb_aux r' S c) = ⋂ (x : {y : ℕ × ℕ // y.1 ≤ y.2}), Γ x.1.1 x.1.2 x.2 :=
-set.ext $ λ x, iff.intro (λ ⟨w,hx⟩ y ⟨z,hz⟩, hz ▸ hx ▸ w.2 _ _ _)
-  (λ h0, ⟨⟨x,λ m n h1, h0 _ ⟨⟨⟨m,n⟩,h1⟩,rfl⟩⟩, rfl⟩)
-
 lemma emb (r' S c) : closed_embedding (@emb_aux r' S c) :=
 { induced := rfl,
   inj := subtype.coe_injective,
   closed_range :=
   begin
-    rw range_emb_aux_eq,
+    have : range emb_aux = ⋂ (x : {y : ℕ × ℕ // y.1 ≤ y.2}),
+      {F : Π M, Mbar_bdd r' S c M | transition r' x.2 (F x.val.2) = F x.val.1},
+    { ext,
+      simp only [emb_aux, prod.forall, mem_Inter, mem_set_of_eq,
+        subtype.range_coe_subtype, subtype.forall], },
+    rw this,
     apply is_closed_Inter,
     rintros ⟨⟨m, n⟩, h0 : m ≤ n⟩,
     refine is_closed_eq (continuous.comp _ $ continuous_apply _) (continuous_apply _),
@@ -209,10 +205,9 @@ end topological_structure
 
 section addition
 
-/-- The addition on `Mbar_bdd r' S c`.
-It takes a term of type `Mbar_bdd r' S c₁` and a term of type `Mbar_bdd r' S c₂`
-and produces a term of type `Mbar_bdd r' S (c₁ + c₂)`.
--/
+/-- The addition on `Mbar_bdd r' S c M`.
+It takes a term of type `Mbar_bdd r' S c₁ M` and a term of type `Mbar_bdd r' S c₂ M`
+and produces a term of type `Mbar_bdd r' S (c₁ + c₂) M`. -/
 def add (F : Mbar_bdd r' S c₁ M) (G : Mbar_bdd r' S c₂ M) : Mbar_bdd r' S (c₁ + c₂) M :=
 { to_fun := F + G,
   coeff_zero' := λ s, by simp,
@@ -231,15 +226,11 @@ def add (F : Mbar_bdd r' S c₁ M) (G : Mbar_bdd r' S c₂ M) : Mbar_bdd r' S (c
     apply int.nat_abs_add_le
   end }
 
-/-- Negation on Mbar_bdd r' S c -/
+/-- Negation on `Mbar_bdd r' S c M` -/
 def neg (F : Mbar_bdd r' S c M) : Mbar_bdd r' S c M :=
 { to_fun := -F,
   coeff_zero' := λ s, by simp,
-  sum_le' :=
-  begin
-    simp only [abs_neg, pi.neg_apply, int.nat_abs_neg, int.nat_abs],
-    exact F.sum_le,
-  end }
+  sum_le' := by { simp only [abs_neg, pi.neg_apply, int.nat_abs_neg], exact F.sum_le } }
 
 end addition
 
