@@ -151,7 +151,7 @@ begin
       { calc ∥hatg - (g - g')∥ = ∥hatg - g + g'∥ : by abel
       ... ≤ ∥hatg - g∥ + ∥(g' : completion G)∥ : norm_add_le _ _
       ... = ∥hatg - g∥ + ∥g'∥ : by rw [completion.norm_coe]
-      ... ≤ ∥hatg - g∥ : add_le_iff_nonpos_right.2 hfg
+      ... ≤ ∥hatg - g∥ : (add_le_iff_nonpos_right _).2 hfg
       ... < ε : hg } },
     { rw ← f.completion.is_closed_ker.closure_eq,
       exact closure_mono f.ker_le_ker_completion } },

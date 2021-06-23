@@ -185,8 +185,8 @@ instance : order_bot ℚ≥0 :=
 { bot := ⊥, bot_le := assume ⟨a, h⟩, h, .. nnrat.linear_order }
 
 instance : canonically_linear_ordered_add_monoid ℚ≥0 :=
-{ add_le_add_left       := assume a b h c, @add_le_add_left ℚ a b _ _ _ h c,
-  lt_of_add_lt_add_left := assume a b c, @lt_of_add_lt_add_left ℚ a b c _ _ _,
+{ add_le_add_left       := assume a b h c, @add_le_add_left ℚ _ _ _ _ _ h c,
+  lt_of_add_lt_add_left := assume a b c, @lt_of_add_lt_add_left ℚ _ _ _ a b c,
   le_iff_exists_add     := assume ⟨a, ha⟩ ⟨b, hb⟩,
     iff.intro
       (assume h : a ≤ b,
