@@ -6,23 +6,58 @@ import topology.algebra.monoid
 open_locale nnreal big_operators
 open finset
 
-namespace combinatorial_lemma
+/-!
 
-def mask_fun {α : Type*} (f : α → ℝ≥0) (mask : α → Prop) [∀ n, decidable (mask n)] : α → ℝ≥0 :=
-λ n, if mask n then f n else 0
+# A technical lemma on the way to `lem98`
+
+The purpose of this file is to prove the following lemma:
+```
+lemma exists_partition (N : ℕ) (hN : 0 < N) (f : ℕ → ℝ≥0) (hf : ∀ n, f n ≤ 1) (hf' : summable f) :
+  ∃ (mask : fin N → set ℕ),
+    (∀ n, ∃! i, n ∈ mask i) ∧ (∀ i, ∑' n, set.indicator (mask i) f n ≤ (∑' n, f n) / N + 1) :=
+```
+In disguise, this is `lem98` (`combinatorial_lemma/default.lean`) specialized to `Λ = ℤ`.
+The proof of the general case makes a reduction to this special case.
+
+## Informal explanation of the statement
+
+The lemma `exists_partition` informally says the following:
+
+Suppose we have a sequence of real numbers `f 0`, `f 1`, …, all between `0` and `1`,
+and suppose that `c = ∑ (f i)` exists.
+Then, for every positive natural number `N`, we can split `f` into `N` subsequences `g 1`, …, `g N`,
+such that `∑ (g j i) ≤ c/N + 1`.
+
+The informal proof is easy: consider `N` buckets, that are initially empty.
+Now view the numbers `f i` as an incoming stream of numbers,
+and place each of these in the buckets with the smallest total sum.
+
+The formal proof is a bit trickier: we need to make sure that every number ends up in a bucket,
+we need to show that the final subsequences have a converging sum, etc…
+We model the subsqeuences by using indicator functions to mask parts of `f`
+using `N` subsets of `ℕ` (`mask` in the statement).
+
+In `recursion_data` below, we setup the `N` buckets,
+and define the recursion step in `recursion_data_succ`.
+The rest of the file consists of assembling the pieces.
+
+-/
+
+namespace combinatorial_lemma
 
 structure recursion_data (N : ℕ) (hN : 0 < N) (f : ℕ → ℝ≥0) (hf : ∀ n, f n ≤ 1) (k : ℕ) :=
 (m : fin N → Prop)
-(dec_inst : ∀ i, decidable (m i))
+[dec_inst : ∀ i, decidable (m i)]
 (hm :  ∃! i, m i)
 (partial_sums : fin N → ℝ≥0)
 (h₁ : ∑ i, partial_sums i = ∑ n in range (k + 1), f n)
 (h₂ : ∀ i, partial_sums i ≤ (∑ n in range (k + 1), f n) / N + 1)
 
+attribute [instance] recursion_data.dec_inst
+
 def recursion_data_zero (N : ℕ) (hN : 0 < N) (f : ℕ → ℝ≥0) (hf : ∀ n, f n ≤ 1) :
   recursion_data N hN f hf 0 :=
 { m := λ j, j = ⟨0, hN⟩,
-  dec_inst := by apply_instance,
   hm := ⟨_, rfl, by simp⟩,
   partial_sums := λ j, if j = ⟨0, hN⟩ then f 0 else 0,
   h₁ := by simp,
@@ -36,13 +71,15 @@ def recursion_data_zero (N : ℕ) (hN : 0 < N) (f : ℕ → ℝ≥0) (hf : ∀ n
     { simp }
   end }
 
+instance (N : ℕ) (hN : 0 < N) (f : ℕ → ℝ≥0) (hf : ∀ n, f n ≤ 1) :
+  inhabited (recursion_data N hN f hf 0) := ⟨recursion_data_zero N hN f hf⟩
+
 noncomputable def recursion_data_succ (N : ℕ) (hN : 0 < N) (f : ℕ → ℝ≥0) (hf : ∀ n, f n ≤ 1) (k : ℕ)
   (dat : recursion_data N hN f hf k) :
   recursion_data N hN f hf (k + 1) :=
 let I := (finset.univ : finset (fin N)).exists_min_image
   dat.partial_sums ⟨⟨0, hN⟩, finset.mem_univ _⟩ in
 { m := λ j, j = I.some,
-  dec_inst := by apply_instance,
   hm := ⟨I.some, by simp, by simp⟩,
   partial_sums := λ i, dat.partial_sums i + (if i = I.some then f (k + 1) else 0),
   h₁ := begin
@@ -84,52 +121,45 @@ noncomputable def partition (N : ℕ) (hN : 0 < N) (f : ℕ → ℝ≥0) (hf : �
 
 lemma partition_sums_aux (k : ℕ) (N : ℕ) (hN : 0 < N) (f : ℕ → ℝ≥0) (hf : ∀ n, f n ≤ 1)
   (i : fin N) :
-  (partition N hN f hf (k + 1)).partial_sums i
-  = (partition N hN f hf k).partial_sums i
-  + (@ite _ ((partition N hN f hf (k + 1)).m i) ((partition N hN f hf (k + 1)).dec_inst i) (f (k + 1)) 0) :=
+  (partition N hN f hf (k + 1)).partial_sums i =
+  (partition N hN f hf k).partial_sums i +
+    if (partition N hN f hf (k + 1)).m i then f (k + 1) else 0 :=
 by simp [partition, recursion_data_succ]
 
 lemma partition_sums (k : ℕ) (N : ℕ) (hN : 0 < N) (f : ℕ → ℝ≥0) (hf : ∀ n, f n ≤ 1)
   (i : fin N) :
-  (partition N hN f hf k).partial_sums i
-  = ∑ n in range (k + 1), @mask_fun _ f (λ k, (partition N hN f hf k).m i)
-    (λ k, (partition N hN f hf k).dec_inst i) n :=
+  (partition N hN f hf k).partial_sums i =
+    ∑ n in range (k + 1), set.indicator {k | (partition N hN f hf k).m i} f n :=
 begin
   induction k with k IH,
-  { dsimp [partition, mask_fun], simp, dsimp [partition, recursion_data_zero], congr },
-  rw [partition_sums_aux, IH, sum_range_succ _ k.succ],
-  congr' 1
+  { dsimp [partition], simp, dsimp [partition, recursion_data_zero], congr },
+  rw [partition_sums_aux, IH, sum_range_succ _ k.succ, set.indicator, add_right_inj],
+  congr' 1,
 end
 
 lemma exists_partition (N : ℕ) (hN : 0 < N) (f : ℕ → ℝ≥0) (hf : ∀ n, f n ≤ 1) (hf' : summable f) :
-  ∃ (mask : fin N → ℕ → Prop) [∀ i n, decidable (mask i n)], by exactI
-    (∀ n, ∃! i, mask i n) ∧ (∀ i, ∑' n, mask_fun f (mask i) n ≤ (∑' n, f n) / N + 1) :=
+  ∃ (mask : fin N → set ℕ),
+    (∀ n, ∃! i, n ∈ mask i) ∧ (∀ i, ∑' n, set.indicator (mask i) f n ≤ (∑' n, f n) / N + 1) :=
 begin
-  let mask : fin N → ℕ → Prop := λ i, λ n, (partition N hN f hf n).m i,
+  let mask : fin N → ℕ → Prop := λ i, {n | (partition N hN f hf n).m i},
   let partial_sums : fin N → ℕ → ℝ≥0 := λ i, λ n, (partition N hN f hf n).partial_sums i,
   haveI : ∀ i n, decidable (mask i n) := λ i, λ n, (partition N hN f hf n).dec_inst i,
-  have h_sum : ∀ k, ∀ i, ∑ n in range k, mask_fun f (mask i) n ≤ (∑ n in range k, f n) / ↑N + 1,
+  have h_sum : ∀ k, ∀ i, ∑ n in range k, set.indicator (mask i) f n ≤ (∑ n in range k, f n) / N + 1,
   { intros k i,
     cases k,
-    { simp [mask_fun, mask] },
+    { simp [mask] },
     convert (partition N hN f hf k).h₂ i,
-    convert (partition_sums k N hN f hf i).symm using 1,
-    ext n m,
-    simp [mask, mask_fun],
-    congr,
-    ext i,
-    split_ifs,
-    simp },
-  refine ⟨mask, by apply_instance, _, _⟩,
+    convert (partition_sums k N hN f hf i).symm using 1, },
+  refine ⟨mask, _, _⟩,
   { intros n,
     exact (partition N hN f hf n).hm },
   { intros i,
     set S₁ : ℝ≥0 := ∑' (n : ℕ), f n,
     have hf'' : has_sum f S₁ := hf'.has_sum,
     have hf''' : has_sum _ (S₁ / N) := hf''.mul_right (N:ℝ≥0)⁻¹,
-    have : mask_fun f (mask i) ≤ f,
+    have : set.indicator (mask i) f ≤ f,
     { intros n,
-      dsimp [mask_fun],
+      dsimp [set.indicator],
       split_ifs,
       { refl },
       { exact (f n).2 } },
@@ -144,3 +174,6 @@ begin
 end
 
 end combinatorial_lemma
+
+-- TODO
+-- #lint-
