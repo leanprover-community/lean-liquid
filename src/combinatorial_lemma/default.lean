@@ -2,8 +2,8 @@ import for_mathlib.SemiNormedGroup
 
 import Mbar.basic
 import normed_group.pseudo_normed_group
-import partition
-import lem97
+import combinatorial_lemma.partition
+import combinatorial_lemma.lem97
 
 import hacks_and_tricks.by_exactI_hack
 
