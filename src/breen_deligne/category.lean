@@ -163,9 +163,9 @@ homological_complex.hom.iso_of_components (λ i, (FreeMat.mul_mul_iso _ _).app _
 end mul
 
 /-- `BD.pow N` is the Breen--Deligne data whose `n`-th rank is `2^N * BD.rank n`. -/
-noncomputable def pow' : ℕ → data
-| 0     := BD
-| (n+1) := (mul 2).obj (pow' n)
+def pow' (N : ℕ) : data := nat.rec_on N BD (λ M A, (mul 2).obj A)
+--| 0     := BD
+--| (n+1) := (mul 2).obj (pow' n)
 
 @[simps] def sum (BD : data) (N : ℕ) : (mul N).obj BD ⟶ BD :=
 { f := λ n, universal_map.sum _ _,
@@ -177,18 +177,46 @@ noncomputable def pow' : ℕ → data
 
 open homological_complex FreeMat category_theory category_theory.limits
 
-noncomputable def hom_pow' {BD : data} (f : (mul 2).obj BD ⟶ BD) : Π N, BD.pow' N ⟶ BD
-| 0     := 𝟙 _
-| (n+1) := by { refine _ ≫ f, dsimp only [pow'], exact (mul 2).map (hom_pow' n) }
+def hom_pow' {BD : data} (f : (mul 2).obj BD ⟶ BD) (N : ℕ) : BD.pow' N ⟶ BD :=
+nat.rec_on N (𝟙 _) (λ M g, (mul 2).map g ≫ f)
+--| 0     := 𝟙 _
+--| (n+1) := by { refine _ ≫ f, dsimp only [pow'], exact (mul 2).map (hom_pow' n) }
 
 open_locale zero_object
 open finsupp
 
-noncomputable def pow'_iso_mul : Π N, BD.pow' N ≅ (mul (2^N)).obj BD
-| 0     := BD.mul_one_iso.symm
-| (N+1) := by { dsimp only [pow'], exact (mul 2).map_iso (pow'_iso_mul N) ≪≫ mul_mul_iso _ _ _ }
+def pow'_iso_mul (N : ℕ) : BD.pow' N ≅ (mul (2^N)).obj BD :=
+nat.rec_on N BD.mul_one_iso.symm (λ M G, (mul 2).map_iso G ≪≫ mul_mul_iso _ _ _)
+--| 0     := BD.mul_one_iso.symm
+--| (N+1) := by { dsimp only [pow'], exact (mul 2).map_iso (pow'_iso_mul N) ≪≫ mul_mul_iso _ _ _ }
 
-lemma hom_pow'_sum : ∀ N, (BD.pow'_iso_mul N).inv ≫ hom_pow' (BD.sum 2) N = BD.sum (2^N)
+lemma hom_pow'_sum : ∀ N, (BD.pow'_iso_mul N).inv ≫ hom_pow' (BD.sum 2) N = BD.sum (2^N) :=
+begin
+  intro N,
+  induction N with N hN,
+  { ext n : 2,
+    simp only [hom_pow', category.comp_id],
+    show (BD.pow'_iso_mul 0).inv.f n = (BD.sum 1).f n,
+    dsimp only [sum_f, universal_map.sum],
+    simp only [fin.default_eq_zero, univ_unique, finset.sum_singleton],
+    rw ← basic_universal_map.one_mul_hom_eq_proj, refl },
+  { change ((BD.mul_mul_iso 2 (2 ^ N)).inv ≫ (mul 2).map (BD.pow'_iso_mul N).inv) ≫
+      (mul 2).map (hom_pow' (BD.sum 2) N) ≫ BD.sum 2 = BD.sum (2 ^ (N + 1)),
+    slice_lhs 2 3 { rw [← functor.map_comp, hN] },
+    rw iso.inv_comp_eq,
+    ext i : 2,
+    iterate 2 { erw [homological_complex.comp_f] },
+    dsimp [mul_mul_iso, FreeMat.mul_mul_iso, universal_map.sum],
+    rw [universal_map.mul_single],
+    show universal_map.comp _ _ = universal_map.comp _ _,
+    simp only [universal_map.comp_single, add_monoid_hom.map_sum, add_monoid_hom.finset_sum_apply],
+    congr' 1,
+    rw [← finset.sum_product', finset.univ_product_univ, ← fin_prod_fin_equiv.symm.sum_comp],
+    apply fintype.sum_congr,
+    apply basic_universal_map.comp_proj_mul_proj }
+end
+.
+/-
 | 0     :=
 begin
   ext n : 2,
@@ -215,11 +243,42 @@ begin
   apply basic_universal_map.comp_proj_mul_proj,
 end
 .
+-/
 
 lemma hom_pow'_sum' (N : ℕ) : hom_pow' (BD.sum 2) N = (BD.pow'_iso_mul N).hom ≫ BD.sum (2^N) :=
 by { rw ← iso.inv_comp_eq, apply hom_pow'_sum }
 
-lemma hom_pow'_proj : ∀ N, (BD.pow'_iso_mul N).inv ≫ hom_pow' (BD.proj 2) N = BD.proj (2^N)
+lemma hom_pow'_proj : ∀ N, (BD.pow'_iso_mul N).inv ≫ hom_pow' (BD.proj 2) N = BD.proj (2^N) :=
+begin
+  intro N,
+  induction N with N hN,
+  { ext n : 2,
+    dsimp only [pow'_iso_mul],
+    simp only [hom_pow', category.comp_id],
+    show (BD.pow'_iso_mul 0).inv.f n = (BD.proj 1).f n,
+    dsimp only [proj_f, universal_map.proj],
+    simp only [fin.default_eq_zero, univ_unique, finset.sum_singleton],
+    change finsupp.single _ _ = _,
+    congr' 1,
+    apply basic_universal_map.one_mul_hom_eq_proj },
+  { change ((BD.mul_mul_iso 2 (2 ^ N)).inv ≫ (mul 2).map (BD.pow'_iso_mul N).inv) ≫
+      (mul 2).map (hom_pow' (BD.proj 2) N) ≫ BD.proj 2 = BD.proj (2 ^ (N + 1)),
+    slice_lhs 2 3 { rw [← functor.map_comp, hN] },
+    rw iso.inv_comp_eq,
+    ext i : 2,
+    iterate 2 { erw [homological_complex.comp_f] },
+    dsimp [mul_mul_iso, FreeMat.mul_mul_iso, universal_map.proj],
+    simp only [linear_map.map_sum, add_monoid_hom.finset_sum_apply,
+      preadditive.comp_sum, preadditive.sum_comp],
+    rw [← finset.sum_comm, ← finset.sum_product', finset.univ_product_univ,
+        ← fin_prod_fin_equiv.symm.sum_comp],
+    apply fintype.sum_congr,
+    intros j,
+    rw [universal_map.mul_single],
+    show universal_map.comp _ _ = universal_map.comp _ _,
+    simp only [universal_map.comp_single, basic_universal_map.comp_proj_mul_proj] }
+end
+/-
 | 0     :=
 begin
   ext n : 2,
@@ -247,6 +306,7 @@ begin
   show universal_map.comp _ _ = universal_map.comp _ _,
   simp only [universal_map.comp_single, basic_universal_map.comp_proj_mul_proj],
 end
+-/
 
 lemma hom_pow'_proj' (N : ℕ) : hom_pow' (BD.proj 2) N = (BD.pow'_iso_mul N).hom ≫ BD.proj (2^N) :=
 by { rw ← iso.inv_comp_eq, apply hom_pow'_proj }
