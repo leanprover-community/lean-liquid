@@ -113,12 +113,12 @@ end
 that (in the notation of the paper) λᵢ(x)≥0 for all i. -/
 lemma lem97_pos [module.finite ℤ Λ] [module.free ℤ Λ] [fintype ι] (N : ℕ) (hN : 0 < N) (l : ι → Λ) :
   ∃ B : finset (Λ →+ ℤ), (∀ b ∈ B, b ∈ (explicit_dual_set l)) ∧
-   ∀ x : Λ →+ ℤ, x ∈ (explicit_dual_set l) → ∃ (x' ∈ B) (y : Λ →+ ℤ),
-   x = N • y + x' ∧ ∀ i, x' (l i) ≤ x (l i) :=
+    ∀ x : Λ →+ ℤ, x ∈ (explicit_dual_set l) → ∃ (x' ∈ B) (y : Λ →+ ℤ),
+    x = N • y + x' ∧ ∀ i, x' (l i) ≤ x (l i) :=
 begin
   obtain ⟨S₀, hS₀⟩ := explicit_gordan l,
-  let Y := { x // x ∈ S₀ } → (fin N),
-  let ψ := (λ y : Y, ∑ s in finset.attach S₀, (y s).1 • s.val),--modification?
+  let Y : Type* := { x // x ∈ S₀ } → (fin N),
+  let ψ : Y → Λ →+ ℤ := λ y : Y, ∑ s in finset.attach S₀, (y s).1 • s.val,
   exact ⟨finset.image ψ finset.univ, aux_1 hS₀, aux_3 hN hS₀⟩,
 end
 
@@ -303,3 +303,12 @@ begin
   rw [add_monoid_hom.add_apply, add_monoid_hom.coe_smul, pi.smul_apply, add_comm, hx', add_comm,
     add_left_inj, ← nat_smul_nat_abs, smul_eq_mul],
 end
+
+-- TODO
+-- #lint-
+
+-- /- The `doc_blame` linter reports: -/
+-- /- DEFINITIONS ARE MISSING DOCUMENTATION STRINGS: -/
+-- #print nonzero_sign /- def missing doc string -/
+-- #print sign_vectors /- def missing doc string -/
+-- #print fintype_sign_vectors /- def missing doc string -/
