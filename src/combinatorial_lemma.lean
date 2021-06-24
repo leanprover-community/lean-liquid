@@ -158,7 +158,7 @@ lemma lem_98_aux [fact (r' < 1)] (A : finset (Λ →+ ℤ))
   x₁ l = ∑ a in A, a l • Mbar.mk_of_add_monoid_hom x₁' a :=
 begin
   ext s n,
-  simp only [finset.sum_apply, Mbar.coe_sum, pi.smul_apply, Mbar.coe_smul,
+  simp only [finset.sum_apply, Mbar.coe_sum, pi.smul_apply, Mbar.coe_gsmul,
     Mbar.coe_mk],
   rw [finset.sum_eq_single (x₁' s n)],
   { simp only [true_and, and_congr, if_congr, eq_self_iff_true, if_true,
@@ -324,7 +324,7 @@ begin
   simp only [finset.sum_apply, Mbar.coe_sum, Mbar.mk_of_add_monoid_hom_to_fun,
     pi.smul_apply],
   rw [finset.sum_eq_single (x₁' s n), finset.sum_eq_single (x₁' s n)],
-  { simp only [Mbar.coe_smul, Mbar.mk_of_add_monoid_hom_to_fun, if_true,
+  { simp only [Mbar.coe_gsmul, Mbar.mk_of_add_monoid_hom_to_fun, if_true,
       pi.smul_apply, eq_self_iff_true, true_and, if_congr, and_congr],
     split_ifs,
     { simp only [mul_zero, norm_zero, smul_eq_mul] },
@@ -333,7 +333,7 @@ begin
   all_goals { intros a haA hasn },
   { simp only [hasn.symm, Mbar.mk_of_add_monoid_hom_to_fun, norm_zero,
       mul_zero, if_congr, and_congr, eq_self_iff_true, if_false, false_and] },
-  { simp only [hasn.symm, Mbar.coe_smul, pi.smul_apply, smul_eq_mul,
+  { simp only [hasn.symm, Mbar.coe_gsmul, pi.smul_apply, smul_eq_mul,
       Mbar.mk_of_add_monoid_hom_to_fun, mul_zero,
       if_congr, and_congr, eq_self_iff_true, if_false, false_and] },
 end
@@ -435,7 +435,7 @@ begin
     ... = ∑ a in A, (nnnorm (a (l i)) * ∥xₐ a∥₊ / N + nnnorm (a (l i))) : finset.sum_congr rfl _
     ... = ∑ a in A, (nnnorm (a (l i)) * ∥xₐ a∥₊ / N) + ∑ a in A, nnnorm (a (l i)) : _
     ... ≤ ∑ a in A, (nnnorm (a (l i)) * ∥xₐ a∥₊ / N) + d * nnnorm (l i) : add_le_add le_rfl _,
-    { intros a ha, rw Mbar.nnnorm_smul },
+    { intros a ha, rw Mbar.nnnorm_gsmul },
     { intros a ha, exact mul_le_mul' le_rfl (hy'2 a j) },
     { intros a ha, rw [mul_add, mul_one, mul_div_assoc] },
     { rw finset.sum_add_distrib },
