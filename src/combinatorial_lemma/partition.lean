@@ -45,48 +45,58 @@ The rest of the file consists of assembling the pieces.
 
 namespace combinatorial_lemma
 
+/-- A data structure for recording partial sums of subsequences of a sequence of real numbers,
+such that all the partial sums are rougly the same size.
+The field `m` records to which partial sum the next entry in the sequence will be added. -/
 structure recursion_data (N : ℕ) (hN : 0 < N) (f : ℕ → ℝ≥0) (hf : ∀ n, f n ≤ 1) (k : ℕ) :=
 (m : fin N → Prop)
-[dec_inst : ∀ i, decidable (m i)]
-(hm :  ∃! i, m i)
+(hm : ∃! i, m i)
 (partial_sums : fin N → ℝ≥0)
 (h₁ : ∑ i, partial_sums i = ∑ n in range (k + 1), f n)
 (h₂ : ∀ i, partial_sums i ≤ (∑ n in range (k + 1), f n) / N + 1)
+[dec_inst : ∀ i, decidable (m i)]
 
 attribute [instance] recursion_data.dec_inst
 
+/-- The starting point for recursively constructing subsequences of a sequence of real numbers
+such that all the subsequences sum to be roughly the same size:
+we start by placing the first element of the sequence into the subsequence `0`. -/
 def recursion_data_zero (N : ℕ) (hN : 0 < N) (f : ℕ → ℝ≥0) (hf : ∀ n, f n ≤ 1) :
   recursion_data N hN f hf 0 :=
 { m := λ j, j = ⟨0, hN⟩,
-  hm := ⟨_, rfl, by simp⟩,
+  hm := ⟨_, rfl, λ _, id⟩,
   partial_sums := λ j, if j = ⟨0, hN⟩ then f 0 else 0,
-  h₁ := by simp,
+  h₁ := by simp only [sum_ite_eq', if_true, mem_univ, sum_singleton, range_one],
   h₂ :=
   begin
     intros i,
     split_ifs,
-    { simp,
+    { simp only [sum_singleton, range_one],
       refine (hf 0).trans _,
       exact self_le_add_left 1 (f 0 / ↑N) },
-    { simp }
+    { exact zero_le' }
   end }
 
 instance (N : ℕ) (hN : 0 < N) (f : ℕ → ℝ≥0) (hf : ∀ n, f n ≤ 1) :
   inhabited (recursion_data N hN f hf 0) := ⟨recursion_data_zero N hN f hf⟩
 
+/-- Given partial sums of subsequences up to the `k`-th element in a sequence of real numbers,
+add the `k+1`st element to the smallest partial sum so far. -/
 noncomputable def recursion_data_succ (N : ℕ) (hN : 0 < N) (f : ℕ → ℝ≥0) (hf : ∀ n, f n ≤ 1) (k : ℕ)
   (dat : recursion_data N hN f hf k) :
   recursion_data N hN f hf (k + 1) :=
 let I := (finset.univ : finset (fin N)).exists_min_image
   dat.partial_sums ⟨⟨0, hN⟩, finset.mem_univ _⟩ in
 { m := λ j, j = I.some,
-  hm := ⟨I.some, by simp, by simp⟩,
+  hm := ⟨I.some, rfl, λ _, id⟩,
   partial_sums := λ i, dat.partial_sums i + (if i = I.some then f (k + 1) else 0),
-  h₁ := begin
+  h₁ :=
+  begin
     rw sum_range_succ _ (k + 1),
     simp [finset.sum_add_distrib, dat.h₁, add_comm],
   end,
-  h₂ := begin
+  h₂ :=
+  begin
     intros i,
     split_ifs,
     { rw h,
@@ -114,6 +124,8 @@ let I := (finset.univ : finset (fin N)).exists_min_image
       exact self_le_add_right _ _ }
   end }
 
+/-- Recursively construct subsequences of a given sequence of real numbers,
+in such a way that the sums of the subsequences are all roughly of the same size. -/
 noncomputable def partition (N : ℕ) (hN : 0 < N) (f : ℕ → ℝ≥0) (hf : ∀ n, f n ≤ 1) :
   Π i : ℕ, (recursion_data N hN f hf i)
 | 0 := recursion_data_zero N hN f hf
@@ -142,17 +154,13 @@ lemma exists_partition (N : ℕ) (hN : 0 < N) (f : ℕ → ℝ≥0) (hf : ∀ n,
     (∀ n, ∃! i, n ∈ mask i) ∧ (∀ i, ∑' n, set.indicator (mask i) f n ≤ (∑' n, f n) / N + 1) :=
 begin
   let mask : fin N → ℕ → Prop := λ i, {n | (partition N hN f hf n).m i},
-  let partial_sums : fin N → ℕ → ℝ≥0 := λ i, λ n, (partition N hN f hf n).partial_sums i,
-  haveI : ∀ i n, decidable (mask i n) := λ i, λ n, (partition N hN f hf n).dec_inst i,
-  have h_sum : ∀ k, ∀ i, ∑ n in range k, set.indicator (mask i) f n ≤ (∑ n in range k, f n) / N + 1,
-  { intros k i,
-    cases k,
+  have h_sum : ∀ k i, ∑ n in range k, set.indicator (mask i) f n ≤ (∑ n in range k, f n) / N + 1,
+  { rintros ⟨k⟩ i,
     { simp [mask] },
-    convert (partition N hN f hf k).h₂ i,
-    convert (partition_sums k N hN f hf i).symm using 1, },
+    rw ← partition_sums k N hN f hf i,
+    exact (partition N hN f hf k).h₂ i, },
   refine ⟨mask, _, _⟩,
-  { intros n,
-    exact (partition N hN f hf n).hm },
+  { intros n, exact (partition N hN f hf n).hm },
   { intros i,
     set S₁ : ℝ≥0 := ∑' (n : ℕ), f n,
     have hf'' : has_sum f S₁ := hf'.has_sum,
@@ -160,9 +168,7 @@ begin
     have : set.indicator (mask i) f ≤ f,
     { intros n,
       dsimp [set.indicator],
-      split_ifs,
-      { refl },
-      { exact (f n).2 } },
+      split_ifs, exacts [le_rfl, zero_le'] },
     obtain ⟨S₂, -, h_mask⟩ := nnreal.exists_le_has_sum_of_le this hf'',
     rw h_mask.tsum_eq,
     rw nnreal.has_sum_iff_tendsto_nat at hf''' h_mask,
@@ -175,5 +181,4 @@ end
 
 end combinatorial_lemma
 
--- TODO
--- #lint-
+#lint-
