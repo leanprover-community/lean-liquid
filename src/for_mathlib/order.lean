@@ -5,16 +5,9 @@ open_locale classical
 lemma exists_le_finset {α : Type*} [inhabited α] [semilattice_inf α]
   (G : finset α) : ∃ j : α, ∀ g ∈ G, j ≤ g :=
 begin
-  apply G.induction_on,
-  refine ⟨(default α), by tauto⟩,
-  rintros a S ha ⟨j0,h0⟩,
-  use a ⊓ j0,
-  intros g hg,
-  rw finset.mem_insert at hg,
-  cases hg,
-  { rw hg,
-    exact inf_le_left },
-  { exact le_trans inf_le_right (h0 _ hg) },
+  by_cases h : G.nonempty,
+  { exact ⟨finset.inf' G h id, λ g, finset.inf'_le _⟩ },
+  { exact ⟨default α, λ g hg, false.elim $ h ⟨_, hg⟩⟩ }
 end
 
 lemma Inter_eq {α β : Type*} [inhabited α] [fintype β] [semilattice_inf α]
