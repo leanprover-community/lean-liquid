@@ -1,5 +1,6 @@
 import pseudo_normed_group.with_Tinv
 import Mbar.Mbar_le
+
 /-!
 
 # Mbar_r(S) is a profinitely filtered pseudo-normed group with T⁻¹
@@ -7,12 +8,11 @@ import Mbar.Mbar_le
 This file constructs this instance.
 
 -/
+
 universe u
 
 noncomputable theory
 open_locale big_operators nnreal
-open pseudo_normed_group
-local attribute [instance] type_pow
 
 variables {r' : ℝ≥0} {S : Type u} [fact (0 < r')] [fintype S] {c c₁ c₂ c₃ : ℝ≥0}
 
@@ -29,3 +29,5 @@ instance : profinitely_filtered_pseudo_normed_group_with_Tinv r' (Mbar r' S) :=
   .. Mbar.profinitely_filtered_pseudo_normed_group }
 
 end Mbar
+
+#lint-
