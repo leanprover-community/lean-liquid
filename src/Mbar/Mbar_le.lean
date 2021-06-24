@@ -366,6 +366,9 @@ begin
   exact continuous_bot.comp continuous_truncate
 end
 
+/-! We now prove some scaffolding lemmas
+in order to prove that the action of `T⁻¹` is continuous. -/
+
 lemma continuous_of_normed_group_hom
   (f : (Mbar r' S) →+ (Mbar r' S))
   (g : Mbar_le r' S c₁ → Mbar_le r' S c₂)
@@ -466,7 +469,6 @@ end Tinv
 
 end Mbar_le
 
--- move this up a bit
 instance [fact (0 < r')] : profinitely_filtered_pseudo_normed_group (Mbar r' S) :=
 { topology := λ c, show topological_space (Mbar_le r' S c), by apply_instance,
   t2 := λ c, show t2_space (Mbar_le r' S c), by apply_instance,
