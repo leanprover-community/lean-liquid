@@ -33,7 +33,7 @@ namespace add_monoid_hom
 
 variables {Λ r' M} (c : ℝ≥0)
 
-def incl (c : ℝ≥0) : filtration (Λ →+ M) c → Π l : Λ, filtration M (c * nnnorm l) :=
+def incl (c : ℝ≥0) : filtration (Λ →+ M) c → Π l : Λ, filtration M (c * ∥l∥₊) :=
 λ f l, ⟨f l, f.2 $ mem_filtration_nnnorm _⟩
 
 @[simp] lemma coe_incl_apply (f : filtration (Λ →+ M) c) (l : Λ) :
@@ -71,7 +71,7 @@ instance : totally_disconnected_space (filtration (Λ →+ M) c) :=
 
 lemma incl_range_eq :
   (set.range (@incl Λ r' M _ _ c)) =
-    ⋂ l₁ l₂, {f | (cast_le (f (l₁ + l₂)) : filtration M (c * (nnnorm l₁ + nnnorm l₂))) =
+    ⋂ l₁ l₂, {f | (cast_le (f (l₁ + l₂)) : filtration M (c * (∥l₁∥₊ + ∥l₂∥₊))) =
     cast_le (add' (f l₁, f l₂))} :=
 begin
   ext f,
@@ -132,7 +132,7 @@ instance profinitely_filtered_pseudo_normed_group :
     have step1 :=
       ((continuous_apply l).comp (incl_continuous Λ r' M c₁)).prod_map
       ((continuous_apply l).comp (incl_continuous Λ r' M c₂)),
-    have step2 := (continuous_add' (c₁ * nnnorm l) (c₂ * nnnorm l)),
+    have step2 := (continuous_add' (c₁ * ∥l∥₊) (c₂ * ∥l∥₊)),
     have := step2.comp step1,
     refine (@continuous_cast_le _ _ _ _ (id _)).comp this,
     rw add_mul, exact ⟨le_rfl⟩
@@ -189,7 +189,7 @@ begin
   haveI : ∀ a, fact (a ≤ r' * (r'⁻¹ * a)) :=
     λ a, ⟨by simp [mul_inv_cancel_left' (ne_of_gt (fact.out _ : 0 < r'))]⟩,
   refine (@continuous_cast_le _ _ _ _ (id _)).comp
-    ((@Tinv₀_continuous r' M _ (c * nnnorm l) (r'⁻¹ * (c * nnnorm l)) _).comp
+    ((@Tinv₀_continuous r' M _ (c * ∥l∥₊) (r'⁻¹ * (c * ∥l∥₊)) _).comp
     ((continuous_apply l).comp (add_monoid_hom.incl_continuous Λ r' M c))),
   rw mul_assoc, exact ⟨le_rfl⟩
 end

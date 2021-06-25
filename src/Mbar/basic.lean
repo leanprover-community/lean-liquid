@@ -203,10 +203,9 @@ def coeff (s : S) (n : ℕ) : Mbar r' S →+ ℤ :=
 
 /-- The norm of `F : Mbar r' S` as nonnegative real number.
 It is defined as `∑ s, ∑' n, (↑(F s n).nat_abs * r' ^ n)`. -/
-protected
-def nnnorm (F : Mbar r' S) : ℝ≥0 := ∑ s, ∑' n, (↑(F s n).nat_abs * r' ^ n)
+protected def nnnorm (F : Mbar r' S) : ℝ≥0 := ∑ s, ∑' n, (↑(F s n).nat_abs * r' ^ n)
 
-notation `∥`F`∥₊` := Mbar.nnnorm F
+instance : has_nnnorm (Mbar r' S) := ⟨Mbar.nnnorm⟩
 
 lemma nnnorm_def (F : Mbar r' S) : ∥F∥₊ = ∑ s, ∑' n, (↑(F s n).nat_abs * r' ^ n) := rfl
 
@@ -271,7 +270,7 @@ show coe_hom (∑ i in s, F i) = ∑ i in s, coe_hom (F i), from add_monoid_hom.
 
 @[simp] lemma coe_nsmul (n : ℕ) (F : Mbar r' S) : ⇑(n • F) = n • F := rfl
 
-@[simp] lemma nnnorm_gsmul (N : ℤ) (F : Mbar r' S) : ∥N • F∥₊ = nnnorm N * ∥F∥₊ :=
+@[simp] lemma nnnorm_gsmul (N : ℤ) (F : Mbar r' S) : ∥N • F∥₊ = ∥N∥₊ * ∥F∥₊ :=
 begin
   simp only [nnnorm_def, finset.mul_sum],
   apply fintype.sum_congr,

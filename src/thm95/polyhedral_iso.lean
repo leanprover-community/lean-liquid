@@ -73,10 +73,10 @@ lemma Hom_rescale_hom_ctu [fact (0 < r')] (c : ℝ≥0) :
 begin
   rw [add_monoid_hom.continuous_iff],
   intro l,
-  haveI : fact (c * (nnnorm l * N⁻¹) ≤ c * N⁻¹ * nnnorm l) := ⟨le_of_eq $ by ring⟩,
+  haveI : fact (c * (∥l∥₊ * N⁻¹) ≤ c * N⁻¹ * ∥l∥₊) := ⟨le_of_eq $ by ring⟩,
   have aux1 := add_monoid_hom.incl_continuous (rescale N Λ) r' M c,
   have aux2 := (continuous_apply (rescale.of l)).comp aux1,
-  rwa (embedding_cast_le (c * (nnnorm l * N⁻¹)) (c * N⁻¹ * nnnorm l)).continuous_iff at aux2
+  rwa (embedding_cast_le (c * (∥l∥₊ * N⁻¹)) (c * N⁻¹ * ∥l∥₊)).continuous_iff at aux2
 end
 
 end
@@ -162,10 +162,10 @@ begin
   dsimp only [function.comp],
   rw add_monoid_hom.continuous_iff,
   intro l,
-  haveI : fact (c * nnnorm (finsupp.single i l) ≤ c * nnnorm l) := ⟨mul_le_mul' le_rfl $ le_of_eq _⟩,
+  haveI : fact (c * ∥finsupp.single i l∥₊ ≤ c * ∥l∥₊) := ⟨mul_le_mul' le_rfl $ le_of_eq _⟩,
   { have aux1 := add_monoid_hom.incl_continuous (fin N →₀ Λ) r' M c,
     have aux2 := (continuous_apply (finsupp.single i l)).comp aux1,
-    rwa (embedding_cast_le (c * nnnorm (finsupp.single i l)) (c * nnnorm l)).continuous_iff at aux2 },
+    rwa (embedding_cast_le (c * ∥finsupp.single i l∥₊) (c * ∥l∥₊)).continuous_iff at aux2 },
   { rw [finsupp.nnnorm_def, finsupp.sum_single_index], exact nnnorm_zero }
 end
 

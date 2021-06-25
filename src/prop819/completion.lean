@@ -18,9 +18,9 @@ open_locale nnreal
 
 lemma cmpl_exact_of_exact (ε : ℝ≥0) (hε : 0 < ε)
   (cond : ∀ (n : ℕ) (f : C.X (n+1)) (hf : C.d (n+1) (n+2) f = 0),
-    ∃ g : C.X n, C.d _ _ g = f ∧ (nnnorm g) ≤ (nnnorm f)) (n : ℕ) (f : (cmpl C).X (n+1))
+    ∃ g : C.X n, C.d _ _ g = f ∧ ∥g∥₊ ≤ ∥f∥₊) (n : ℕ) (f : (cmpl C).X (n+1))
     (hf : (cmpl C).d _ (n+2) f = 0) : ∃ g : (cmpl C).X n, (cmpl C).d _ _ g = f ∧
-    (nnnorm g) ≤ (1 + ε) * (nnnorm f) :=
+    ∥g∥₊ ≤ (1 + ε) * ∥f∥₊ :=
 begin
   have := @controlled_exactness (C.X (n+1)) (C.X n) (C.X (n+2)) _ _ _ (C.d _ _) 1 zero_lt_one
     1 (C.d _ _) _ _ ε hε f _,
@@ -63,9 +63,10 @@ begin
 end
 
 lemma exact_of_strict_iso (F : strict_iso C D) (ε : ℝ≥0) (hε : 0 < ε)
-  (cond : ∀ (n : ℕ) (f : C.X (n+1)) (hf : C.d _ (n+2) f = 0), ∃ g : C.X n, C.d _ _ g = f ∧
-  (nnnorm g) ≤ (1+ε) * nnnorm f) (n : ℕ) (f : D.X (n+1)) (hf : D.d _ (n+2) f = 0) :
-  ∃ g : D.X n, D.d _ _ g = f ∧ nnnorm g ≤ (1 + ε) * nnnorm f :=
+  (cond : ∀ (n : ℕ) (f : C.X (n+1)) (hf : C.d _ (n+2) f = 0),
+    ∃ g : C.X n, C.d _ _ g = f ∧ ∥g∥₊ ≤ (1+ε) * ∥f∥₊)
+  (n : ℕ) (f : D.X (n+1)) (hf : D.d _ (n+2) f = 0) :
+  ∃ g : D.X n, D.d _ _ g = f ∧ ∥g∥₊ ≤ (1 + ε) * ∥f∥₊ :=
 begin
   specialize cond n (((homological_complex.eval _ _ (n+1)).map_iso F.iso).inv f) _,
   { dsimp [homological_complex.eval],

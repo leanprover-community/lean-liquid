@@ -11,7 +11,7 @@ noncomputable theory
 open_locale big_operators
 
 -- move this
-lemma int.nnnorm_coe_units (e : units ℤ) : nnnorm (e : ℤ) = 1 :=
+lemma int.nnnorm_coe_units (e : units ℤ) : ∥(e : ℤ)∥₊ = 1 :=
 begin
   obtain (rfl|rfl) := int.units_eq_one_or e;
   simp only [units.coe_neg_one, units.coe_one, nnnorm_neg, nnnorm_one],

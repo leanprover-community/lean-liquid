@@ -62,7 +62,7 @@ normed_group.of_core _ $
 
 variables {ι Λ}
 
-lemma nnnorm_def (x : ι →₀ Λ) : nnnorm x = x.sum (λ _, nnnorm) :=
+lemma nnnorm_def (x : ι →₀ Λ) : ∥x∥₊ = x.sum (λ _, nnnorm) :=
 begin
   ext,
   simpa only [coe_nnnorm, finsupp.sum, nnreal.coe_sum] using norm_def x,

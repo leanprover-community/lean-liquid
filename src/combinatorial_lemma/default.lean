@@ -79,16 +79,16 @@ variables {M}
 lemma generates_norm.add_monoid_hom_mem_filtration_iff {ι : Type} [fintype ι]
   {l : ι → Λ} (hl : generates_norm l) (x : Λ →+ M) (c : ℝ≥0) :
   x ∈ filtration (Λ →+ M) c ↔
-  ∀ i, x (l i) ∈ filtration M (c * nnnorm (l i)) :=
+  ∀ i, x (l i) ∈ filtration M (c * ∥l i∥₊) :=
 begin
-  refine ⟨λ H i, H (le_refl (nnnorm (l i))), _⟩,
+  refine ⟨λ H i, H (le_refl ∥l i∥₊), _⟩,
   intros H c' l' hl',
   obtain ⟨cᵢ, h1, h2⟩ := hl.generates_nnnorm l',
   rw [h1, x.map_sum],
-  refine filtration_mono _ (sum_mem_filtration _ (λ i, c * cᵢ i * nnnorm (l i)) _ _),
-  { calc ∑ i, c * cᵢ i * nnnorm (l i)
-        = c * ∑ i, cᵢ i * nnnorm (l i) : by simp only [mul_assoc, ← finset.mul_sum]
-    ... = c * nnnorm l' : by rw h2
+  refine filtration_mono _ (sum_mem_filtration _ (λ i, c * cᵢ i * ∥l i∥₊) _ _),
+  { calc ∑ i, c * cᵢ i * ∥l i∥₊
+        = c * ∑ i, cᵢ i * ∥l i∥₊ : by simp only [mul_assoc, ← finset.mul_sum]
+    ... = c * ∥l'∥₊ : by rw h2
     ... ≤ c * c' : mul_le_mul' le_rfl hl' },
   rintro i -,
   rw [mul_assoc, mul_left_comm, x.map_nsmul],
@@ -306,7 +306,7 @@ lemma lem98_crux [fact (r' < 1)] {ι : Type} [fintype ι] {l : ι → Λ}
   (H : ∀ s n i, (x' s n (l i)).nat_abs =
     N * (x₀' s n (l i)).nat_abs + (x₁' s n (l i)).nat_abs)
   (i : ι) :
-  ∥x (l i)∥₊ = N • ∥x₀ (l i)∥₊ + ∑ a in A, nnnorm (a (l i)) * ∥xₐ a∥₊ :=
+  ∥x (l i)∥₊ = N • ∥x₀ (l i)∥₊ + ∑ a in A, ∥a (l i)∥₊ * ∥xₐ a∥₊ :=
 begin
   simp only [hx, H, ← hx₀, ← hx₁, Mbar.nnnorm_def,
     nsmul_eq_mul, mul_assoc,
@@ -370,7 +370,7 @@ lemma hA (N : ℕ) [hN : fact (0 < N)] (x : Λ →+ ℤ) :
 (lem97' N hN.1 (l Λ)).some_spec x
 
 def d  (N : ℕ) [hN : fact (0 < N)] : ℝ≥0 :=
-finset.univ.sup (λ i, ∑ a in A Λ N, nnnorm (a (l Λ i)) / nnnorm (l Λ i))
+finset.univ.sup (λ i, ∑ a in A Λ N, ∥a (l Λ i)∥₊ / ∥l Λ i∥₊)
 
 end lem98
 
@@ -422,32 +422,32 @@ begin
   intro i,
   specialize hx i,
   simp only [Mbar.mem_filtration_iff] at hx hy'2 ⊢,
-  have Hx : ∥x (l i)∥₊ = N • ∥x₀ (l i)∥₊ + ∑ a in A, nnnorm (a (l i)) * ∥xₐ a∥₊,
+  have Hx : ∥x (l i)∥₊ = N • ∥x₀ (l i)∥₊ + ∑ a in A, ∥a (l i)∥₊ * ∥xₐ a∥₊,
   { apply lem98_crux hl N hN.1 A x x₀ x₁ x' x₀' x₁' xₐ,
     all_goals { intros, refl <|> apply_assumption } },
   calc ∥y j (l i)∥₊
-      ≤ ∥x₀ (l i)∥₊ + ∑ a in A, nnnorm (a (l i)) * ∥xₐ a∥₊ / N + d * nnnorm (l i) : _
-  ... = (N • ∥x₀ (l i)∥₊ + ∑ a in A, nnnorm (a (l i)) * ∥xₐ a∥₊) / N + d * nnnorm (l i) : _
-  ... = ∥x (l i)∥₊ / N + d * nnnorm (l i) : by rw Hx
+      ≤ ∥x₀ (l i)∥₊ + ∑ a in A, ∥a (l i)∥₊ * ∥xₐ a∥₊ / N + d * ∥l i∥₊ : _
+  ... = (N • ∥x₀ (l i)∥₊ + ∑ a in A, ∥a (l i)∥₊ * ∥xₐ a∥₊) / N + d * ∥l i∥₊ : _
+  ... = ∥x (l i)∥₊ / N + d * ∥l i∥₊ : by rw Hx
   ... ≤ _ : _,
   { simp only [add_monoid_hom.add_apply, add_assoc, add_monoid_hom.finset_sum_apply,
          Mbar.mk_tensor_apply],
     refine (Mbar.nnnorm_add_le _ _).trans (add_le_add le_rfl _),
     refine (Mbar.nnnorm_sum_le _ _).trans _,
     calc ∑ a in A, ∥a (l i) • y' a j∥₊
-        = ∑ a in A, nnnorm (a (l i)) * ∥y' a j∥₊ : finset.sum_congr rfl _
-    ... ≤ ∑ a in A, nnnorm (a (l i)) * (∥xₐ a∥₊ / N + 1) : finset.sum_le_sum _
-    ... = ∑ a in A, (nnnorm (a (l i)) * ∥xₐ a∥₊ / N + nnnorm (a (l i))) : finset.sum_congr rfl _
-    ... = ∑ a in A, (nnnorm (a (l i)) * ∥xₐ a∥₊ / N) + ∑ a in A, nnnorm (a (l i)) : _
-    ... ≤ ∑ a in A, (nnnorm (a (l i)) * ∥xₐ a∥₊ / N) + d * nnnorm (l i) : add_le_add le_rfl _,
+        = ∑ a in A, ∥a (l i)∥₊ * ∥y' a j∥₊ : finset.sum_congr rfl _
+    ... ≤ ∑ a in A, ∥a (l i)∥₊ * (∥xₐ a∥₊ / N + 1) : finset.sum_le_sum _
+    ... = ∑ a in A, (∥a (l i)∥₊ * ∥xₐ a∥₊ / N + ∥a (l i)∥₊) : finset.sum_congr rfl _
+    ... = ∑ a in A, (∥a (l i)∥₊ * ∥xₐ a∥₊ / N) + ∑ a in A, ∥a (l i)∥₊ : _
+    ... ≤ ∑ a in A, (∥a (l i)∥₊ * ∥xₐ a∥₊ / N) + d * ∥l i∥₊ : add_le_add le_rfl _,
     { intros a ha, rw Mbar.nnnorm_gsmul },
     { intros a ha, exact mul_le_mul' le_rfl (hy'2 a j) },
     { intros a ha, rw [mul_add, mul_one, mul_div_assoc] },
     { rw finset.sum_add_distrib },
-    { calc ∑ a in A, nnnorm (a (l i))
-          = (∑ a in A, nnnorm (a (l i)) / nnnorm (l i)) * nnnorm (l i) : _
-      ... ≤ finset.univ.sup (λ i, ∑ a in A, nnnorm (a (l i)) / nnnorm (l i)) * nnnorm (l i) : _,
-      { { have : nnnorm (l i) ≠ 0, { simp only [hl' i, nnnorm_eq_zero, ne.def, not_false_iff] },
+    { calc ∑ a in A, ∥a (l i)∥₊
+          = (∑ a in A, ∥a (l i)∥₊ / ∥l i∥₊) * ∥l i∥₊ : _
+      ... ≤ finset.univ.sup (λ i, ∑ a in A, ∥a (l i)∥₊ / ∥l i∥₊) * ∥l i∥₊ : _,
+      { { have : ∥l i∥₊ ≠ 0, { simp only [hl' i, nnnorm_eq_zero, ne.def, not_false_iff] },
           simp only [div_eq_mul_inv, ← finset.sum_mul, inv_mul_cancel_right' this] } },
       { exact mul_le_mul' (finset.le_sup (finset.mem_univ i)) le_rfl } } },
   { simp only [div_eq_mul_inv, add_mul, finset.sum_mul, nsmul_eq_mul],

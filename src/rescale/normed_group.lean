@@ -43,7 +43,7 @@ normed_group.of_core (rescale N V)
   norm_neg := λ v, by { simp only [norm_def], congr' 1, exact norm_neg _ /- defeq abuse -/ } }
 
 lemma nnnorm_def [hN : fact (0 < N)] [semi_normed_group V] (v : rescale N V) :
-  nnnorm v = nnnorm (of.symm v) / N := rfl
+  ∥v∥₊ = ∥of.symm v∥₊ / N := rfl
 
 end rescale
 
@@ -160,10 +160,10 @@ normed_group_hom.mk_normed_group_hom_norm_le _
   (inv_nonneg.2 (nnreal.zero_le_coe)) (λ v, nnnorm_to_rescale _ v)
 
 lemma nnnorm_rescale_rescale_symm {V : SemiNormedGroup} (v : (rescale r₁).obj V) :
-  nnnorm ((@rescale.of r₂ V) ((@rescale.of r₁ V).symm v)) ≤ r₁ / r₂ * nnnorm v :=
+  ∥(@rescale.of r₂ V) ((@rescale.of r₁ V).symm v)∥₊ ≤ r₁ / r₂ * ∥v∥₊ :=
 begin
   apply le_of_eq,
-  show _ = r₁ / r₂ * (nnnorm ((@rescale.of r₁ V).symm v) / r₁),
+  show _ = r₁ / r₂ * (∥(@rescale.of r₁ V).symm v∥₊ / r₁),
   simp only [add_monoid_hom.mk'_apply, div_eq_inv_mul, rescale.nnnorm_def],
   rw [mul_assoc, mul_inv_cancel_left' (show r₁ ≠ 0, from ne_of_gt $ fact.out _)],
   refl

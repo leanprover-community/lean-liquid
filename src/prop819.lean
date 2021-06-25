@@ -397,8 +397,8 @@ end
 lemma norm_eq_FLF (n : ℕ) (S : discrete_quotient F.left)
   (g : ((FLF F surj M).obj (op S)).X (n+1)) :
   ∃ (T : discrete_quotient F.left) (hT : T ≤ S),
-  nnnorm (((FLF_cocone F surj M).ι.app (op S)).f _ g) =
-  nnnorm ((((FLF F surj M)).map (hom_of_le hT).op).f _ g) :=
+    ∥((FLF_cocone F surj M).ι.app (op S)).f _ g∥₊ =
+    ∥(((FLF F surj M)).map (hom_of_le hT).op).f _ g∥₊ :=
 begin
   have := exists_image (Cech_cone_diagram F surj n)
     (Cech_cone F surj n) (Cech_cone_is_limit F surj n) S,
@@ -436,12 +436,14 @@ begin
     erw hy }
 end
 
-lemma exists_locally_constant  (n : ℕ) (f : (FL F M).X (n+1))
-  (hf : (FL F M).d _ (n+2) f = 0) : ∃ (S : discrete_quotient F.left)
-  (g : ((FLF F surj M).obj (op S)).X (n+1))
-  (hgf : ((FLF_cocone F surj M).ι.app (op S)).f _ g = f)
-  (hgd : (((FLF F surj M).obj (op S)).d _ (n+2) g = 0))
-  (hgnorm : nnnorm f = nnnorm g), true :=
+lemma exists_locally_constant (n : ℕ) (f : (FL F M).X (n+1))
+  (hf : (FL F M).d _ (n+2) f = 0) :
+  -- TODO: ∃ ..., true looks a bit fuuny
+  ∃ (S : discrete_quotient F.left)
+    (g : ((FLF F surj M).obj (op S)).X (n+1))
+    (hgf : ((FLF_cocone F surj M).ι.app (op S)).f _ g = f)
+    (hgd : (((FLF F surj M).obj (op S)).d _ (n+2) g = 0))
+    (hgnorm : ∥f∥₊ = ∥g∥₊), true :=
 begin
   obtain ⟨S,f,rfl⟩ := exists_locally_constant_FLF F surj M n f,
   obtain ⟨T1,hT1,h1⟩ := d_eq_zero_FLF F surj M n S f hf,
@@ -483,7 +485,7 @@ end
 
 lemma FLF_norm_noninc (n : ℕ) (S : discrete_quotient F.left)
   (f : ((FLF F surj M).obj (op S)).X n) :
-  nnnorm (((FLF_cocone F surj M).ι.app (op S)).f _ f) ≤ nnnorm f :=
+  ∥((FLF_cocone F surj M).ι.app (op S)).f _ f∥₊ ≤ ∥f∥₊ :=
 begin
   cases n,
   apply LocallyConstant_obj_map_norm_noninc,
@@ -492,7 +494,7 @@ end
 
 theorem prop819 {m : ℕ} (ε : ℝ≥0) (hε : 0 < ε)
   (f : (FLC F M).X (m+1)) (hf : (FLC F M).d (m+1) (m+2) f = 0) :
-  ∃ g : (FLC F M).X m, (FLC F M).d m (m+1) g = f ∧ nnnorm g ≤ (1 + ε) * (nnnorm f) :=
+  ∃ g : (FLC F M).X m, (FLC F M).d m (m+1) g = f ∧ ∥g∥₊ ≤ (1 + ε) * ∥f∥₊ :=
 begin
   apply exact_of_strict_iso _ _ (FLC_iso F M) ε hε _ _ _ hf,
   apply cmpl_exact_of_exact _ _ hε,
@@ -538,7 +540,7 @@ begin
       rw [normed_group_hom.map_zero, zero_add] at hh,
       exact hh } },
   { rw h3,
-    suffices : nnnorm GG ≤ nnnorm gc,
+    suffices : ∥GG∥₊ ≤ ∥gc∥₊,
     { apply le_trans this _,
       cases n,
       apply LocallyConstant_obj_map_norm_noninc,
