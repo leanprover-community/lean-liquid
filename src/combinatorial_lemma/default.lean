@@ -213,9 +213,9 @@ begin
     ... = 1 : mul_one 1,
     { exact_mod_cast (H _ _) },
     { have : fact (r' < 1) := ‹_›, exact pow_le_one _ zero_le' this.out.le } },
-  obtain ⟨mask, h0, h1, h2⟩ := exists_partition N hN f f_aux summable_f,
-  resetI,
-  let y := λ i, Mbar.of_mask x (λ s n, mask i (e (s, n))),
+  obtain ⟨mask, h1, h2⟩ := exists_partition N hN f f_aux summable_f,
+  classical,
+  let y := λ i, Mbar.of_mask x (λ s n, (e (s, n)) ∈ mask i),
   have hxy : x = ∑ i, y i,
   { ext s n,
     simp only [Mbar.coe_sum, if_congr, function.curry_apply, fintype.sum_apply,
@@ -229,8 +229,8 @@ begin
   refine ⟨y, hxy, _⟩,
   intro i,
   rw [Mbar.mem_filtration_iff] at hx ⊢,
-  suffices : ∥x∥₊ = ∑' n, f n ∧ ∥y i∥₊ = ∑' (n : ℕ), mask_fun f (mask i) n,
-  { calc ∥y i∥₊ = ∑' (n : ℕ), mask_fun f (mask i) n : this.right
+  suffices : ∥x∥₊ = ∑' n, f n ∧ ∥y i∥₊ = ∑' (n : ℕ), (mask i).indicator f n,
+  { calc ∥y i∥₊ = ∑' (n : ℕ), (mask i).indicator f n : this.right
             ... ≤ (∑' (n : ℕ), f n) / N + 1         : h2 i
             ... ≤ c / N + 1                         : _,
     simp only [div_eq_mul_inv],
@@ -249,17 +249,22 @@ begin
     { rw nnreal.summable_sigma, exact ⟨x.summable, ⟨_, has_sum_fintype _⟩⟩ } },
   { calc ∑ s, ∑' n, ↑(y i s n).nat_abs * r' ^ n
         = ∑' s, ∑' n, ↑(y i s n).nat_abs * r' ^ n : (tsum_fintype _).symm
-    ... = ∑' x, mask_fun f (mask i) (e x) : _
-    ... = ∑' n, mask_fun f (mask i) n : e.tsum_eq _,
+    ... = ∑' x, (mask i).indicator f (e x) : _
+    ... = ∑' n, (mask i).indicator f n : e.tsum_eq _,
     rw [← (equiv.sigma_equiv_prod S ℕ).tsum_eq], swap, { apply_instance },
-    have aux : ∀ i s n, (if mask i (e (s, n)) then ↑(x s n).nat_abs * r' ^ n else 0) =
-      ↑(if mask i (e (s, n)) then x s n else 0).nat_abs * r' ^ n,
+    have aux : ∀ i s n h1, @ite _ (e (s, n) ∈ mask i) h1 (↑(x s n).nat_abs * r' ^ n) 0 =
+      ↑(@ite _ (e (s, n) ∈ mask i) h1 (x s n) 0).nat_abs * r' ^ n,
     { intros, split_ifs; simp only [int.nat_abs_zero, nat.cast_zero, zero_mul, eq_self_iff_true] },
-    dsimp only [f, y, mask_fun, equiv.sigma_equiv_prod_apply],
+    dsimp only [f, y, set.indicator, equiv.sigma_equiv_prod_apply],
     simp only [equiv.symm_apply_apply, Mbar.of_mask_to_fun, aux],
     rw [tsum_sigma'],
-    { exact (y i).summable },
-    { rw nnreal.summable_sigma, exact ⟨(y i).summable, ⟨_, has_sum_fintype _⟩⟩ } }
+    { congr' 1, ext1 s, congr' 1, ext1 n, split_ifs; refl },
+    { convert (y i).summable, ext1, apply forall_congr, intro s, convert iff.rfl, ext1 n,
+      dsimp only [y, Mbar.of_mask], congr, convert rfl, },
+    { rw nnreal.summable_sigma,
+      refine ⟨_, ⟨_, has_sum_fintype _⟩⟩,
+      convert (y i).summable, ext1, apply forall_congr, intro s, convert iff.rfl, ext1 n,
+      dsimp only [y, Mbar.of_mask], congr, convert rfl, } }
 end
 
 lemma lem98_aux' [fact (r' < 1)] (N : ℕ)
