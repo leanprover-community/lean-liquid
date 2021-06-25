@@ -15,12 +15,37 @@ of `pseudo_normed_group.with_Tinv`.
 -/
 
 noncomputable theory
-open_locale nnreal
+open_locale nnreal big_operators
 
 open pseudo_normed_group semi_normed_group
 
 lemma int.one_mem_filtration : (1 : ℤ) ∈ filtration ℤ 1 :=
 by simp only [nnnorm_one, mem_filtration_iff]
+
+section
+
+variables {Λ : Type*} [polyhedral_lattice Λ]
+variables {M : Type*} [pseudo_normed_group M]
+
+lemma generates_norm.add_monoid_hom_mem_filtration_iff {ι : Type} [fintype ι]
+  {l : ι → Λ} (hl : generates_norm l) (x : Λ →+ M) (c : ℝ≥0) :
+  x ∈ filtration (Λ →+ M) c ↔ ∀ i, x (l i) ∈ filtration M (c * ∥l i∥₊) :=
+begin
+  refine ⟨λ H i, H (le_refl ∥l i∥₊), _⟩,
+  intros H c' l' hl',
+  obtain ⟨cᵢ, h1, h2⟩ := hl.generates_nnnorm l',
+  rw [h1, x.map_sum],
+  refine filtration_mono _ (sum_mem_filtration _ (λ i, c * cᵢ i * ∥l i∥₊) _ _),
+  { calc ∑ i, c * cᵢ i * ∥l i∥₊
+        = c * ∑ i, cᵢ i * ∥l i∥₊ : by simp only [mul_assoc, ← finset.mul_sum]
+    ... = c * ∥l'∥₊ : by rw h2
+    ... ≤ c * c' : mul_le_mul' le_rfl hl' },
+  rintro i -,
+  rw [mul_assoc, mul_left_comm, x.map_nsmul],
+  exact pseudo_normed_group.nat_smul_mem_filtration (cᵢ i) _ _ (H i),
+end
+
+end
 
 namespace polyhedral_lattice
 
