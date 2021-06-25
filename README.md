@@ -33,7 +33,7 @@ The statement can be found in [`src/liquid.lean`](https://github.com/leanprover-
 
 ```lean
 theorem first_target :
-  ∀ m : ℕ, ∃ (k K : ℝ≥0) [fact (1 ≤ k)] c₀ : ℝ≥0,
+  ∀ m : ℕ, ∃ (k K : ℝ≥0) [fact (1 ≤ k)] (c₀ : ℝ≥0),
   ∀ (S : Type) [fintype S] (V : SemiNormedGroup.{0}) [normed_with_aut r V],
     ​((BD.data.system κ r V r').obj (op $ of r' (Mbar r' S))).is_weak_bounded_exact k K m c₀ := _
 ```
