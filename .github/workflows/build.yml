@@ -90,3 +90,12 @@ jobs:
 
       - name: test thm95 is sorry free
         run: python scripts/ensure_thm95_sorry_free.py
+
+      - name: install ripgrep
+        if: always()
+        run: sudo apt install -y ripgrep
+
+      - name: count sorries
+        if: always()
+        run: |
+          rg --count-matches sorry src | awk -F ':' 'BEGIN {sum = 0} {sum += $2} {print $2 " " $1} END {print "Total: " sum}'
