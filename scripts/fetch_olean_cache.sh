@@ -1,10 +1,18 @@
 set -e
 set -x
 
-archive_url="https://oleanstorage.azureedge.net/mathlib/"
+# Source `.mathlibtools` to determine olean cache location for this project.
+if [ -e ./.mathlibtools ]; then
+  . ./.mathlibtools
+  archive_url=$olean_cache_url
+else
+  # Otherwise assume project is mathlib
+  archive_url="https://oleanstorage.azureedge.net/mathlib/"
+fi
+echo "olean cache location: $archive_url"
 
 # GIT_HISTORY_DEPTH is set in .github/workflows/build.yml
-for new_git_sha in $(git log -$GIT_HISTORY_DEPTH --first-parent --pretty=format:%H)
+for new_git_sha in $(git log -${GIT_HISTORY_DEPTH:-20} --first-parent --pretty=format:%H)
 do
   if curl -sfI "$archive_url$new_git_sha.tar.xz" ; then
     echo "found ancestor Git sha: $new_git_sha"

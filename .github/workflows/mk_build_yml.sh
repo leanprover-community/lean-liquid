@@ -50,4 +50,3 @@ include() {
 }
 
 build_yml > build.yml
-bors_yml > bors.yml
