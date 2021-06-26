@@ -6,8 +6,10 @@ noncomputable theory
 open_locale nnreal
 open category_theory opposite normed_group_hom system_of_complexes
 
-variables (M N P : system_of_complexes.{u}) (f : M ⟶ N) (g : N ⟶ P)
 
+variables (M N P : system_of_complexes.{u}) (f : M ⟶ N) (g : N ⟶ P)
+set_option profiler true
+-- 12.8s
 lemma weak_normed_snake_dual (k k' K K' r₁ r₂ : ℝ≥0)
   [hk : fact (1 ≤ k)] [hk' : fact (1 ≤ k')]
   {a : ℕ} {c₀ : ℝ≥0}
@@ -70,7 +72,7 @@ lemma weak_normed_snake_dual (k k' K K' r₁ r₂ : ℝ≥0)
 
     let n := f m,
     obtain ⟨i', j', hi', rfl, n₁, hn₁⟩ :=
-      hN _ ⟨hc.out.trans $ le_mul_of_one_le_left' hk'.out⟩ _ (by linarith) n ε₁ hε₁,
+      hN _ ⟨hc.out.trans $ le_mul_of_one_le_left' hk'.out⟩ _ (trans hi a.le_succ) n ε₁ hε₁,
     set p₁ := g n₁ with hdefp₁,
     have Hi' : i' ≤ a + 1 :=
       by { rw [hi', nat.sub_one], exact le_trans (nat.pred_le i) (le_trans hi (nat.le_succ a)) },
@@ -78,7 +80,7 @@ lemma weak_normed_snake_dual (k k' K K' r₁ r₂ : ℝ≥0)
     have Hi'' : i'' ≤ a + 1 + 1,
     { rw [hi'', hi', nat.sub_one, nat.sub_one],
       refine le_trans (nat.pred_le _) (le_trans (nat.pred_le _) _),
-      linarith },
+      exact trans hi (nat.le_succ_of_le a.le_succ) },
     obtain ⟨n₂, hn₂, hnormn₂⟩ := Hg c i'' Hi'' p₂,
     set n₁' := N.d i'' i' n₂ with hdefn₁',
     obtain ⟨nnew₁, hnnew₁, hnormnnew₁⟩ := Hg c i' (le_trans Hi' (nat.le_succ _)) (g (res n₁ - n₁')),
@@ -115,7 +117,7 @@ lemma weak_normed_snake_dual (k k' K K' r₁ r₂ : ℝ≥0)
       rw [hg, mem_ker] at this,
       rw [hom_apply g (res (f m) - (N.d i' i) n₁), res_apply, normed_group_hom.map_sub, this,
         zero_sub, norm_neg, ←hom_apply] },
-
+--extract_goal,
     calc ∥res m - (M.d i' i) m₁∥ = ∥f (res m - (M.d i' i) m₁)∥ : (hfnorm _ _ _).symm
     ... = ∥res n - (N.d i' i (res n₁) - N.d i' i (n₁' + nnew₁))∥ :
       by rw [hom_apply, normed_group_hom.map_sub, ←hom_apply, ←hom_apply, ←res_apply,
