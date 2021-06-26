@@ -10,14 +10,14 @@ def encode_msg_text_for_github(msg):
 
 def format_msg(msg):
     # Formatted for https://github.com/actions/toolkit/blob/master/docs/commands.md#log-level
-    
+
     # mapping between lean severity levels and github levels.
     # github does not support info levels, which are emitted by `#check` etc:
     # https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-a-debug-message
     severity_map = {'information': 'warning'}
     severity = msg.get('severity')
     severity = severity_map.get(severity, severity)
-    
+
     # We include the filename / line number information as both message and metadata, to ensure
     # that github shows it.
     msg_text = f"{msg['file_name']}:{msg.get('pos_line')}:{msg.get('pos_col')}:\n{msg.get('text')}"
@@ -39,6 +39,9 @@ for line in sys.stdin:
             print("Also, the following files were noisy:")
             write_and_print_noisy_files(noisy_files)
         sys.exit(1)
+    elif msg.get('text', '').endswith("uses sorry"):
+        # Using sorry should not cause the build to fail in this repository.
+        continue
     else:
         noisy_files.add(str(Path(msg['file_name']).relative_to(Path.cwd())))
 
