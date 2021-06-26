@@ -3,6 +3,7 @@ name = "lean-liquid"
 version = "0.1"
 lean_version = "leanprover-community/lean:3.30.0"
 path = "src"
+olean_url = "https://oleanstorageben.blob.core.windows.net/lean-liquid/"
 
 [dependencies]
 mathlib = {git = "https://github.com/leanprover-community/mathlib", rev = "68ec06cf3d0a9803cde78e8c0cdc249d9f6d788c"}

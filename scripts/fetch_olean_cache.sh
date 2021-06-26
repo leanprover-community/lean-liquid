@@ -2,10 +2,8 @@ set -e
 set -x
 
 # Source `.mathlibtools` to determine olean cache location for this project.
-if [ -e ./.mathlibtools ]; then
-  . ./.mathlibtools
-  archive_url=$olean_cache_url
-else
+archive_url=$(grep -E "^olean_url" ./leanpkg.toml | sed "s/.*=\s*['\"]\(.*\)['\"]/\1/")
+if [ -z $archive_url ]; then
   # Otherwise assume project is mathlib
   archive_url="https://oleanstorage.azureedge.net/mathlib/"
 fi
