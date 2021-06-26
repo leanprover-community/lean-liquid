@@ -25,19 +25,18 @@ open_locale big_operators
 -- Why can't I find this in mathlib?!?
 lemma partial_sum_geom {r : ℝ} (hr : 0 ≤ r) (hr' : r < 1) (n : ℕ) : (∑ k in range n, r^k) = (1 - r^n)/(1 - r) :=
 begin
-  rw eq_div_iff,
+  refine (eq_div_iff (sub_ne_zero.mpr hr'.ne')).mpr _,
   induction n with n ih,
   { simp },
   { rw [sum_range_succ, add_mul, ih],
-    ring_exp },
-  linarith,
+    ring_exp }
 end
 
 -- Why can't I find this in mathlib?!?
 lemma partial_sum_geom_le {r : ℝ} (hr : 0 ≤ r) (hr' : r < 1) (n : ℕ) : (∑ k in range n, r^k) ≤ 1/(1 - r) :=
 begin
   rw partial_sum_geom hr hr',
-  apply div_le_div ; linarith [pow_nonneg hr n],
+  exact div_le_div zero_le_one (sub_le_self _ (pow_nonneg hr n)) (sub_pos.mpr hr') rfl.le,
 end
 
 lemma norm_sum_le_of_le_geom {α : Type*} [semi_normed_group α] {r C : ℝ} (hC : 0 ≤ C)
@@ -46,10 +45,10 @@ lemma norm_sum_le_of_le_geom {α : Type*} [semi_normed_group α] {r C : ℝ} (hC
 begin
 calc
   ∥∑ k in range n, f k∥ ≤ ∑ k in range n, ∥f k∥ : norm_sum_le _ _
-  ... ≤ ∑ k in range n, C*r^k : sum_le_sum (λ k hk, h k)
-  ... = C*(∑ k in range n, r^k) : by rw mul_sum
-  ... ≤ C*(1/(1-r)) :  mul_le_mul_of_nonneg_left (partial_sum_geom_le hr₀ hr₁ n) hC
-  ... = C/(1-r) : mul_one_div C (1 - r)
+  ... ≤ ∑ k in range n, C*r^k   : sum_le_sum (λ k hk, h k)
+  ... = C*(∑ k in range n, r^k) : (range n).sum_hom (has_mul.mul C)
+  ... ≤ C*(1/(1-r))             : mul_le_mul_of_nonneg_left (partial_sum_geom_le hr₀ hr₁ n) hC
+  ... = C/(1-r)                 : mul_one_div C (1 - r)
 end
 
 end
@@ -117,7 +116,7 @@ end
 lemma real.supr_comp {α β : Type*} (f : β → α) (g : α → ℝ) :
   (⨆ b, g (f b)) = Sup (g '' range f) :=
 begin
-  change Sup _ = Sup _,
+  change Sup _ = _,
   congr,
   ext x,
   simp,
@@ -262,7 +261,7 @@ begin
       split,
       { intros h' x',
         exact (h x').trans h' },
-      { tauto } },
+      { exact λ i, i x } },
     { exact ⟨∥f x∥, mem_range_self _⟩ } }
 end
 
@@ -414,7 +413,7 @@ begin
     convert norm_h he hφ f n using 1,
     ring_exp },
   convert norm_sum_le_of_le_geom (mul_nonneg r.coe_nonneg $ norm_nonneg f) r.coe_nonneg (fact.out _) this using 1,
-  ring
+  exact div_mul_eq_mul_div _ _ _,
 end
 
 open uniform_space
@@ -427,9 +426,8 @@ begin
   have : (0 : ℝ) < r / (1 - r),
   { have : 0 < r := fact.out _,
     apply div_pos,
-    exact_mod_cast this,
-    have : (r : ℝ) < 1 := fact.out _,
-    linarith },
+    { exact_mod_cast this },
+    { exact sub_pos.mpr (fact.out _) } },
   apply bar _ this hε,
   intro m₂,
   exact ⟨he.g hφ m₂, cauchy_seq_g he hφ m₂, limit he hφ m₂, norm_g_le he hφ m₂⟩
