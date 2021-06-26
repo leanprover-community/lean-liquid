@@ -12,7 +12,7 @@ open_locale nnreal
 namespace semi_normed_group
 
 instance (V : Type*) [semi_normed_group V] : pseudo_normed_group V :=
-{ filtration := λ c, {v | nnnorm v ≤ c},
+{ filtration := λ c, {v | ∥v∥₊ ≤ c},
   filtration_mono := λ c₁ c₂ h v (hv : ∥v∥ ≤ c₁), le_trans hv h,
   zero_mem_filtration := λ c, by simp only [set.mem_set_of_eq, nnnorm_zero, zero_le],
   neg_mem_filtration := λ c v hv, by simpa only [set.mem_set_of_eq, nnnorm_neg] using hv,
@@ -25,10 +25,10 @@ variables {V : Type*} [semi_normed_group V]
 
 open pseudo_normed_group
 
-lemma mem_filtration_nnnorm (v : V) : v ∈ filtration V (nnnorm v) :=
-show nnnorm v ≤ nnnorm v, from le_rfl
+lemma mem_filtration_nnnorm (v : V) : v ∈ filtration V (∥v∥₊) :=
+show ∥v∥₊ ≤ ∥v∥₊, from le_rfl
 
 @[simp] lemma mem_filtration_iff (v : V) (c : ℝ≥0) :
-  v ∈ filtration V c ↔ nnnorm v ≤ c := iff.rfl
+  v ∈ filtration V c ↔ ∥v∥₊ ≤ c := iff.rfl
 
 end semi_normed_group

@@ -3,8 +3,6 @@ import polyhedral_lattice.int
 import polyhedral_lattice.category
 import pseudo_normed_group.category
 
-import for_mathlib.free_abelian_group -- for int.cast_add_hom', which should move
-
 /-!
 
 # Category-theoretic Hom(Λ, M)
@@ -48,10 +46,10 @@ def Hom (M : ProFiltPseuNormGrpWithTinv r') :
     begin
       rw [add_monoid_hom.continuous_iff],
       intro l,
-      haveI : fact (nnnorm (f.unop l) ≤ nnnorm l) := ⟨f.unop.strict_nnnorm l⟩,
+      haveI : fact (∥f.unop l∥₊ ≤ ∥l∥₊) := ⟨f.unop.strict_nnnorm l⟩,
       have aux := (continuous_apply (f.unop l)).comp
         (add_monoid_hom.incl_continuous Λ₁.unop r' M c),
-      rwa (embedding_cast_le (c * nnnorm (f.unop l)) (c * nnnorm l)).continuous_iff at aux
+      rwa (embedding_cast_le (c * ∥f.unop l∥₊) (c * ∥l∥₊)).continuous_iff at aux
     end,
     map_Tinv' := λ g, by { ext l, refl } },
   map_id' := λ Λ, by { ext, refl },
@@ -95,11 +93,11 @@ end
 lemma HomZ_map_equiv_ctu (c : ℝ≥0) :
   continuous (level (HomZ_map_equiv M) (λ c x , (HomZ_map_equiv_strict M c x).1) c) :=
 begin
-  haveI : fact (c * nnnorm (1:ℤ) ≤ c) := ⟨by rw [nnnorm_one, mul_one]⟩,
+  haveI : fact (c * ∥(1:ℤ)∥₊ ≤ c) := ⟨by rw [nnnorm_one, mul_one]⟩,
   have aux := add_monoid_hom.incl_continuous ℤ r' M c,
   have aux2 := (continuous_apply 1).comp aux,
   rwa (profinitely_filtered_pseudo_normed_group.embedding_cast_le
-    (c * nnnorm (1 : ℤ)) c).continuous_iff at aux2
+    (c * ∥(1:ℤ)∥₊) c).continuous_iff at aux2
 end
 
 /-- The isomorphism `Hom ℤ M ≅ M` for `M` a `profinitely_filtered_pseudo_normed_group_with_Tinv`. -/

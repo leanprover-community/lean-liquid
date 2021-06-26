@@ -1,6 +1,8 @@
 import analysis.normed_space.normed_group_quotient
 import linear_algebra.free_module_pid
 
+import for_mathlib.finite_free
+
 import polyhedral_lattice.topology
 
 
@@ -58,14 +60,20 @@ instance [H : fact L.saturated] : no_zero_smul_divisors ℤ (quotient_add_group.
     have := H.1, exact this h
   end }
 
-lemma quotient_finite_free [H : fact L.saturated] : _root_.finite_free (quotient_add_group.quotient L) :=
+instance quotient_finite [H : fact L.saturated] : module.finite ℤ (quotient_add_group.quotient L) :=
 begin
-  obtain ⟨ι, _inst_ι, ⟨b⟩⟩ := polyhedral_lattice.finite_free Λ, resetI,
+  apply module.finite.of_surjective (L.normed_mk).to_add_monoid_hom.to_int_linear_map,
+  exact quotient.surjective_quotient_mk'
+end
+
+instance quotient_free [H : fact L.saturated] : module.free ℤ (quotient_add_group.quotient L) :=
+begin
   let φ := L.normed_mk.to_add_monoid_hom.to_int_linear_map,
-  suffices : submodule.span ℤ (set.range (φ ∘ b)) = ⊤,
+  suffices : submodule.span ℤ (set.range (φ ∘ (module.free.choose_basis ℤ Λ))) = ⊤,
   { obtain ⟨n, b⟩ := module.free_of_finite_type_torsion_free this,
-    exact ⟨fin n, infer_instance, ⟨b⟩⟩ },
-  rw [set.range_comp, ← submodule.map_span, b.span_eq, submodule.map_top, linear_map.range_eq_top],
+    exact module.free.of_basis b, },
+  rw [set.range_comp, ← submodule.map_span, basis.span_eq,
+    submodule.map_top, linear_map.range_eq_top],
   exact quotient.surjective_quotient_mk'
 end
 
@@ -75,10 +83,10 @@ lemma norm_lift (y : quotient_add_group.quotient L) :
   ∃ x, L.normed_mk x = y ∧ ∥x∥ = ∥y∥ :=
 begin
   have hq : L.normed_mk.is_quotient := normed_group_hom.is_quotient_quotient _,
-  let s := λ ε, {x | L.normed_mk x = y ∧ nnnorm x ≤ nnnorm y + ε },
+  let s := λ ε, {x | L.normed_mk x = y ∧ ∥x∥₊ ≤ ∥y∥₊ + ε },
   have hs : ∀ ε, (s ε).finite,
   { intro ε,
-    apply (filtration_finite Λ (nnnorm y + ε)).subset,
+    apply (filtration_finite Λ (∥y∥₊ + ε)).subset,
     rintro x ⟨h1, h2⟩,
     simpa only [semi_normed_group.mem_filtration_iff] using h2 },
   let t := λ ε, (hs ε).to_finset,
@@ -91,20 +99,20 @@ begin
   simp only [finset.mem_image] at aux,
   obtain ⟨x, hx, H⟩ := aux,
   simp only [set.finite.mem_to_finset, set.mem_set_of_eq] at hx,
-  suffices hr : r = nnnorm y,
+  suffices hr : r = ∥y∥₊,
   { refine ⟨x, hx.1, _⟩,
     simp only [← coe_nnnorm, nnreal.coe_injective.eq_iff],
     exact H.trans hr },
   refine ((lt_or_eq_of_le _).resolve_left _).symm,
   { rw ← hx.1, exact (hq.norm_le x).trans H.le },
   { intro hyr,
-    let ε := (r - nnnorm y) / 2,
-    have hε' : (ε : ℝ) = (r - nnnorm y) / 2,
+    let ε := (r - ∥y∥₊) / 2,
+    have hε' : (ε : ℝ) = (r - ∥y∥₊) / 2,
     { dsimp only [ε], rw [nnreal.coe_div, nnreal.coe_sub hyr.le, nnreal.coe_bit0, nnreal.coe_one] },
     have hε : 0 < ε,
     { rw [← nnreal.coe_lt_coe, nnreal.coe_zero, hε'],
       exact div_pos (sub_pos.mpr $ nnreal.coe_lt_coe.mpr hyr) zero_lt_two },
-    have key : nnnorm y + ε < r,
+    have key : ∥y∥₊ + ε < r,
     { rw [← nnreal.coe_lt_coe, nnreal.coe_add, hε'],
       exact add_sub_div_two_lt (nnreal.coe_lt_coe.mpr hyr), },
     refine not_le_of_lt key _,
@@ -116,8 +124,7 @@ begin
 end
 
 instance [H : fact L.saturated] : polyhedral_lattice (quotient_add_group.quotient L) :=
-{ finite_free := quotient_finite_free _,
-  polyhedral' :=
+{ polyhedral' :=
   begin
     obtain ⟨ι, _inst_ι, l, hl, hl'⟩ := polyhedral_lattice.polyhedral Λ, resetI,
     refine ⟨ι, _inst_ι, (λ i, L.normed_mk (l i)), _⟩,

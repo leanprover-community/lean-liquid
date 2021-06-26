@@ -11,7 +11,7 @@ noncomputable theory
 open_locale big_operators
 
 -- move this
-lemma int.nnnorm_coe_units (e : units ℤ) : nnnorm (e : ℤ) = 1 :=
+lemma int.nnnorm_coe_units (e : units ℤ) : ∥(e : ℤ)∥₊ = 1 :=
 begin
   obtain (rfl|rfl) := int.units_eq_one_or e;
   simp only [units.coe_neg_one, units.coe_one, nnnorm_neg, nnnorm_one],
@@ -59,8 +59,7 @@ lemma give_better_name : ∀ (n : ℤ), ∥n∥ = ↑(n.to_nat) + ↑((-n).to_na
 | -[1+ n]   := show ∥-↑(n+1:ℕ)∥ = 0 + (n+1), by rw [zero_add, norm_neg, int.norm_coe_nat, nat.cast_succ]
 
 instance int.polyhedral_lattice : polyhedral_lattice ℤ :=
-{ finite_free := ⟨unit, infer_instance, ⟨basis.singleton _ _⟩⟩,
-  polyhedral' :=
+{ polyhedral' :=
   begin
     refine ⟨units ℤ, infer_instance, coe, _⟩,
     intro n,

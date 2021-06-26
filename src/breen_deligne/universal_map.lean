@@ -3,7 +3,6 @@ import group_theory.free_abelian_group
 import algebra.direct_sum
 import algebra.big_operators.finsupp
 
-import for_mathlib.linear_algebra
 import for_mathlib.free_abelian_group
 import for_mathlib.kronecker
 
@@ -37,13 +36,6 @@ local notation `ℤ[` A `]` := free_abelian_group A
 
 namespace breen_deligne
 open free_abelian_group
-
-
-section move_this
-
-attribute [simps] equiv.sum_empty equiv.prod_punit equiv.punit_prod
-
-end move_this
 
 /-!
 Suppose you have an abelian group `A`.
@@ -234,7 +226,7 @@ lemma one_mul_hom_eq_proj : basic_universal_map.one_mul_hom n = basic_universal_
 begin
   dsimp only [basic_universal_map.one_mul_hom, basic_universal_map.proj],
   rw [← linear_equiv.symm_apply_eq, matrix.reindex_linear_equiv_symm,
-    matrix.reindex_linear_equiv_reindex_linear_equiv, equiv.trans_symm, equiv.trans_assoc,
+    matrix.reindex_linear_equiv_comp_apply, equiv.trans_symm, equiv.trans_assoc,
     equiv.trans_symm, equiv.trans_refl],
   ext ⟨i, i'⟩ ⟨j, j'⟩ : 2,
   change fin 1 at j,
@@ -268,7 +260,7 @@ begin
     matrix.kronecker_reindex_right, matrix.mul_one,
     matrix.kronecker_assoc', matrix.mul_reindex_linear_equiv_one, proj_aux_kronecker_proj_aux,
     matrix.kronecker_reindex_left],
-  simp only [matrix.reindex_linear_equiv_reindex_linear_equiv],
+  simp only [matrix.reindex_linear_equiv_comp_apply],
   congr' 2,
   ext ⟨x, y⟩,
   dsimp,
@@ -431,7 +423,7 @@ map (basic_universal_map.mul N)
 
 lemma mul_of (N : ℕ) (f : basic_universal_map m n) :
   mul N (of f) = of (basic_universal_map.mul N f) :=
-map_of' _ _
+map_of_apply _
 
 lemma mul_comp (N : ℕ) (g : universal_map m n) (f : universal_map l m) :
   mul N (comp g f) = comp (mul N g) (mul N f) :=
@@ -462,7 +454,7 @@ begin
   rw [← add_monoid_hom.comp_hom_apply_apply],
   congr' 1, clear f, ext f,
   simp only [comp_hom_apply_apply, function.comp_app, coe_comp, mul, coeff, to_finsupp_of,
-    map_of', finsupp.apply_add_hom_apply, finsupp.single_apply,
+    map_of_apply, finsupp.apply_add_hom_apply, finsupp.single_apply,
     (basic_universal_map.mul_injective N hN).eq_iff],
   convert rfl
 end

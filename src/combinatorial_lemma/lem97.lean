@@ -2,8 +2,9 @@ import algebra.group.basic
 import analysis.convex.cone
 import linear_algebra.dual
 import algebra.ordered_ring
+import ring_theory.finiteness
+import linear_algebra.free_module
 
-import polyhedral_lattice.basic
 import for_mathlib.Gordan
 
 /-!
@@ -110,14 +111,14 @@ end
 
 /-- The proof of Lemma 9.7 of `Analytic.pdf` under the additional assumption
 that (in the notation of the paper) λᵢ(x)≥0 for all i. -/
-lemma lem97_pos (hΛ : finite_free Λ) [fintype ι] (N : ℕ) (hN : 0 < N) (l : ι → Λ) :
+lemma lem97_pos [module.finite ℤ Λ] [module.free ℤ Λ] [fintype ι] (N : ℕ) (hN : 0 < N) (l : ι → Λ) :
   ∃ B : finset (Λ →+ ℤ), (∀ b ∈ B, b ∈ (explicit_dual_set l)) ∧
-   ∀ x : Λ →+ ℤ, x ∈ (explicit_dual_set l) → ∃ (x' ∈ B) (y : Λ →+ ℤ),
-   x = N • y + x' ∧ ∀ i, x' (l i) ≤ x (l i) :=
+    ∀ x : Λ →+ ℤ, x ∈ (explicit_dual_set l) → ∃ (x' ∈ B) (y : Λ →+ ℤ),
+    x = N • y + x' ∧ ∀ i, x' (l i) ≤ x (l i) :=
 begin
-  obtain ⟨S₀, hS₀⟩ := explicit_gordan hΛ l,
-  let Y := { x // x ∈ S₀ } → (fin N),
-  let ψ := (λ y : Y, ∑ s in finset.attach S₀, (y s).1 • s.val),--modification?
+  obtain ⟨S₀, hS₀⟩ := explicit_gordan l,
+  let Y : Type* := { x // x ∈ S₀ } → (fin N),
+  let ψ : Y → Λ →+ ℤ := λ y : Y, ∑ s in finset.attach S₀, (y s).1 • s.val,
   exact ⟨finset.image ψ finset.univ, aux_1 hS₀, aux_3 hN hS₀⟩,
 end
 
@@ -177,22 +178,23 @@ end sign_vectors
 functionals satisfying the requirements of Lemma 9.7 of [Analytic] with respect to all functionals
 which are positive on all ((ε • l) i)'s. Its existence was established in lem97_pos above.
 -/
-def pos_A [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (hN : 0 < N)
+def pos_A [fintype ι] [module.finite ℤ Λ] [module.free ℤ Λ] (N : ℕ) (hN : 0 < N)
   (l : ι → Λ) (ε : sign_vectors ι) : finset (Λ →+ ℤ) :=
-some (lem97_pos hΛ N hN (ε • l))
+some (lem97_pos N hN (ε • l))
 
-lemma posA_to_explicit [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (hN : 0 < N) (l : ι → Λ)
-  (ε : sign_vectors ι) (x' : Λ →+ ℤ) (H : x' ∈ pos_A hΛ N hN l ε) :
+lemma posA_to_explicit [fintype ι] [module.finite ℤ Λ] [module.free ℤ Λ]
+  (N : ℕ) (hN : 0 < N) (l : ι → Λ) (ε : sign_vectors ι) (x' : Λ →+ ℤ) (H : x' ∈ pos_A N hN l ε) :
   x' ∈ explicit_dual_set (ε • l) :=
-(some_spec (lem97_pos hΛ N hN (ε • l))).1 x' H
+(some_spec (lem97_pos N hN (ε • l))).1 x' H
 
 
-lemma exists_good_pair [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (hN : 0 < N) (l : ι → Λ)
+lemma exists_good_pair [fintype ι] [module.finite ℤ Λ] [module.free ℤ Λ]
+  (N : ℕ) (hN : 0 < N) (l : ι → Λ)
   (ε : sign_vectors ι) (x : Λ →+ ℤ) (H : x ∈ (explicit_dual_set (ε • l))) :
   ∃ x' y : (Λ →+ ℤ),
-    x' ∈ pos_A hΛ N hN l ε ∧ x = N • y + x' ∧ ∀ i, x' ((ε • l) i) ≤ x ((ε • l) i) :=
+    x' ∈ pos_A N hN l ε ∧ x = N • y + x' ∧ ∀ i, x' ((ε • l) i) ≤ x ((ε • l) i) :=
 begin
-  obtain ⟨x', hx', ⟨y, hy⟩⟩ := (some_spec (lem97_pos hΛ N hN (ε • l))).2 x H,
+  obtain ⟨x', hx', ⟨y, hy⟩⟩ := (some_spec (lem97_pos N hN (ε • l))).2 x H,
   exact ⟨x', y, hx', hy⟩,
 end
 
@@ -205,20 +207,20 @@ The remainder of this file is proofs of two versions of Lemma 9.7, namely
 
 
 /-- Lemma 9.7 of [Analytic]. See also the (mathematically indistinguishable) variant `lem97'`. -/
-lemma lem97 [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (hN : 0 < N) (l : ι → Λ) :
+lemma lem97 [fintype ι] [module.finite ℤ Λ] [module.free ℤ Λ] (N : ℕ) (hN : 0 < N) (l : ι → Λ) :
   ∃ A : finset (Λ →+ ℤ), ∀ x : Λ →+ ℤ, ∃ (x' ∈ A) (y : Λ →+ ℤ),
     x = N • y + x' ∧
     ∀ i, (0 ≤ x' (l i) ∧ 0 ≤ (x - x') (l i)) ∨ (x' (l i) ≤ 0 ∧ (x - x') (l i) ≤ 0) :=
 begin
-  refine ⟨(@finset.univ (sign_vectors ι) (fintype_sign_vectors)).bUnion (pos_A hΛ N hN l), λ x, _⟩,
+  refine ⟨(@finset.univ (sign_vectors ι) (fintype_sign_vectors)).bUnion (pos_A N hN l), λ x, _⟩,
   have hx : x ∈ (explicit_dual_set ((pos_vector l x) • l)) := smul_to_explicit_dual_set l x,
-  obtain ⟨x', y, mem_x', hy, hx'⟩ := exists_good_pair hΛ N hN l (pos_vector l x) x hx,
+  obtain ⟨x', y, mem_x', hy, hx'⟩ := exists_good_pair N hN l (pos_vector l x) x hx,
   refine ⟨x', _, _⟩,
   { refine finset.mem_bUnion.mpr ⟨pos_vector l x, _, mem_x'⟩,
     simp only [finset.mem_univ] },
   { refine ⟨y, hy, λ i, _⟩,
     have h_pos' : x' ∈ explicit_dual_set ((pos_vector l x) • l) :=
-      posA_to_explicit hΛ N hN l (pos_vector l x) x' mem_x',
+      posA_to_explicit N hN l (pos_vector l x) x' mem_x',
     replace h_pos' : 0 ≤ x' (((pos_vector l x) • l) i) := h_pos' _,
     by_cases h_pos : 0 ≤ x (l i),
     { have h_posvect_id : ((pos_vector l x) • l) i = l i := pos_vector_id_if_nonneg l x i h_pos,
@@ -287,12 +289,12 @@ begin
 end
 
 /-- Lemma 9.7 of [Analytic]. See also the (mathematically indistinguishable) variant `lem97`. -/
-lemma lem97' [fintype ι] (hΛ : finite_free Λ) (N : ℕ) (hN : 0 < N) (l : ι → Λ) :
+lemma lem97' [fintype ι] [module.finite ℤ Λ] [module.free ℤ Λ] (N : ℕ) (hN : 0 < N) (l : ι → Λ) :
   ∃ A : finset (Λ →+ ℤ), ∀ x : Λ →+ ℤ, ∃ (x' ∈ A) (y : Λ →+ ℤ),
     x = N • y + x' ∧
     ∀ i, (x (l i)).nat_abs = N * (y (l i)).nat_abs + (x' (l i)).nat_abs :=
 begin
-  obtain ⟨A, hA⟩ := lem97 hΛ N hN l,
+  obtain ⟨A, hA⟩ := lem97 N hN l,
   refine ⟨A, λ x, _⟩,
   rcases hA x with ⟨x', mem_x', y, rfl, hx'⟩,
   refine ⟨x', mem_x', y, rfl, λ i, _⟩,
@@ -301,3 +303,12 @@ begin
   rw [add_monoid_hom.add_apply, add_monoid_hom.coe_smul, pi.smul_apply, add_comm, hx', add_comm,
     add_left_inj, ← nat_smul_nat_abs, smul_eq_mul],
 end
+
+-- TODO
+-- #lint-
+
+-- /- The `doc_blame` linter reports: -/
+-- /- DEFINITIONS ARE MISSING DOCUMENTATION STRINGS: -/
+-- #print nonzero_sign /- def missing doc string -/
+-- #print sign_vectors /- def missing doc string -/
+-- #print fintype_sign_vectors /- def missing doc string -/

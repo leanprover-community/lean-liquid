@@ -1,6 +1,9 @@
 import linear_algebra.finsupp_vector_space
 
+import for_mathlib.finite_free
+
 import polyhedral_lattice.basic
+
 /-!
 
 # Hom(ι, Λ) for Λ a polyhedral lattice
@@ -59,7 +62,7 @@ normed_group.of_core _ $
 
 variables {ι Λ}
 
-lemma nnnorm_def (x : ι →₀ Λ) : nnnorm x = x.sum (λ _, nnnorm) :=
+lemma nnnorm_def (x : ι →₀ Λ) : ∥x∥₊ = x.sum (λ _, nnnorm) :=
 begin
   ext,
   simpa only [coe_nnnorm, finsupp.sum, nnreal.coe_sum] using norm_def x,
@@ -110,11 +113,8 @@ namespace finsupp
 variables [polyhedral_lattice Λ]
 
 instance {ι : Type} [fintype ι] : polyhedral_lattice (ι →₀ Λ) :=
-{ finite_free :=
-  begin
-    obtain ⟨J, _instJ, ⟨l⟩⟩ := polyhedral_lattice.finite_free Λ, resetI,
-    exact ⟨_, infer_instance, ⟨finsupp.basis (λ i, l)⟩⟩
-  end,
+{ finite := module.finite.of_basis ℤ _ (finsupp.basis (λ i, module.free.choose_basis ℤ Λ)),
+  free := module.free.of_basis (finsupp.basis (λ i, module.free.choose_basis ℤ Λ)),
   polyhedral' :=
   begin
     obtain ⟨J, _instJ, x, hx⟩ := polyhedral_lattice.polyhedral' Λ, resetI,

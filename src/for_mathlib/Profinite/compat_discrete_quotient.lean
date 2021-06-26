@@ -10,7 +10,6 @@ namespace discrete_quotient
 universe u
 variables {X Y : Profinite.{u}} (f : X ⟶ Y) (surj : function.surjective f)
 
-
 /-- The relation defining the largest quotient of f.right compatible with S. -/
 inductive make_rel (S : discrete_quotient X) : Y → Y → Prop
 | of (x y : X) (h : S.rel x y) : make_rel (f x) (f y)
@@ -23,20 +22,12 @@ include surj
 
 lemma make_rel_equiv (S : discrete_quotient X) : equivalence (S.make_rel f) :=
 begin
-  refine ⟨_,_,_⟩,
-  { intro x,
-    obtain ⟨x,rfl⟩ := surj x,
-    apply make_rel.of,
-    apply S.refl },
-  { intros x y h,
-    induction h with x y h1 x y z h1 h2 h3 h4,
-    apply make_rel.of,
-    apply S.symm _ _ h1,
-    apply make_rel.trans,
-    assumption' },
-  { intros x y z h1 h2,
-    apply make_rel.trans,
-    assumption' }
+  refine ⟨λ x, _, λ x y h, _, λ x y z h1 h2, make_rel.trans h1 h2⟩,
+  { obtain ⟨x,rfl⟩ := surj x,
+    exact make_rel.of _ _ (S.refl _) },
+  { induction h with x y h1 x y z h1 h2 h3 h4,
+    exact make_rel.of y x (S.symm x y h1),
+    exact make_rel.trans h4 h3 },
 end
 
 /-- The setoid assoc. to make_rel. -/
@@ -64,23 +55,19 @@ begin
   rw quotient_map_iff,
   refine ⟨surj,_⟩,
   intro S,
-  split,
-  { intro hS,
-    exact is_open.preimage f.continuous hS },
-  { intro hS,
-    rw ← is_closed_compl_iff at *,
-    rw ← set.preimage_compl at hS,
-    have : Sᶜ = f '' (f ⁻¹' Sᶜ),
-    { ext,
-      split,
-      { intro h,
-        obtain ⟨y,rfl⟩ := surj x,
-        refine ⟨y,h,rfl⟩ },
-      { rintro ⟨y,h,rfl⟩,
-        exact h } },
-    rw this,
-    apply Profinite.is_closed_map f,
-    assumption }
+  refine ⟨λ hS, hS.preimage f.continuous, λ hS, _⟩,
+  rw ← is_closed_compl_iff at *,
+  rw ← set.preimage_compl at hS,
+  have : Sᶜ = f '' (f ⁻¹' Sᶜ),
+  { ext,
+    split,
+    { intro h,
+      obtain ⟨y,rfl⟩ := surj x,
+      refine ⟨y,h,rfl⟩ },
+    { rintro ⟨y,h,rfl⟩,
+      exact h } },
+  rw this,
+  exact Profinite.is_closed_map f (⇑f ⁻¹' Sᶜ) hS
 end
 
 /-- Given a discrete quotient S of f.left, this is the compatible quotient
@@ -99,31 +86,13 @@ def make (S : discrete_quotient X) : discrete_quotient Y :=
     letI : topological_space (S.make_quotient f surj) := ⊥,
     haveI : discrete_topology (S.make_quotient f surj) := ⟨rfl⟩,
     suffices : continuous (S.make_proj f surj),
-    { split,
-      apply is_open.preimage this trivial,
-      apply is_closed.preimage this ⟨trivial⟩ },
-    rw (quotient_map f surj).continuous_iff,
-    rw S.make_proj_comm f surj,
-    apply continuous.comp,
-    continuity,
-    exact S.proj_continuous,
+    { refine ⟨is_open.preimage this trivial, is_closed.preimage this ⟨trivial⟩⟩ },
+    rw [(quotient_map f surj).continuous_iff, S.make_proj_comm f surj],
+    exact continuous_bot.comp (proj_continuous S),
   end }
 
 lemma make_le_comap (S : discrete_quotient X) : le_comap f.continuous S (S.make f surj) :=
 make_rel_impl _ _
-
-/-
-/-- make as an arrow. -/
-def make_arrow (S : discrete_quotient X) : arrow Profinite :=
-{ left := Profinite.of S,
-  right := Profinite.of (S.make surj),
-  hom := ⟨discrete_quotient.map (S.make_le_comap surj)⟩ }
-
-/-- the canonical morphism of arrows to make. -/
-def make_hom (S : discrete_quotient X) : f ⟶ S.make_arrow surj :=
-{ left := ⟨S.proj, S.proj_continuous⟩,
-  right := ⟨(S.make surj).proj, (S.make surj).proj_continuous⟩ }
--/
 
 lemma make_right_le (S : discrete_quotient X) (T : discrete_quotient Y)
   (compat : le_comap f.continuous S T) :
@@ -131,9 +100,8 @@ lemma make_right_le (S : discrete_quotient X) (T : discrete_quotient Y)
 begin
   intros x y h,
   induction h with a b hab a b c _ _ h1 h2,
-  apply compat,
-  assumption,
-  apply T.trans _ _ _ h1 h2,
+  { exact compat a b hab },
+  { exact trans T a b c h1 h2 },
 end
 
 lemma make_right_mono (S1 S2 : discrete_quotient X) (h : S1 ≤ S2) :
@@ -141,11 +109,10 @@ lemma make_right_mono (S1 S2 : discrete_quotient X) (h : S1 ≤ S2) :
 begin
   intros x y h,
   induction h,
-  apply make_rel.of,
-  apply h,
-  assumption,
-  apply make_rel.trans,
-  assumption',
+  { refine make_rel.of _ _ (h _ _ _),
+  assumption },
+  { apply make_rel.trans,
+    assumption' },
 end
 
 end discrete_quotient

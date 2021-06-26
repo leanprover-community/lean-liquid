@@ -2,8 +2,9 @@ import for_mathlib.SemiNormedGroup
 
 import Mbar.basic
 import normed_group.pseudo_normed_group
-import partition
-import lem97
+import combinatorial_lemma.partition
+import combinatorial_lemma.lem97
+import polyhedral_lattice.pseudo_normed_group
 
 import hacks_and_tricks.by_exactI_hack
 
@@ -26,6 +27,29 @@ variables {S Λ r'}
 
 -- ugly name
 @[simps]
+def Mbar.mk_aux'
+  (x : Λ →+ Mbar r' S) (y : S → ℕ → Λ →+ ℤ)
+  (h : ∀ s n l, (y s n l).nat_abs ≤ (x l s n).nat_abs) :
+  Λ →+ Mbar r' S :=
+add_monoid_hom.mk' (λ l,
+{ to_fun := λ s n, y s n l,
+  coeff_zero' := λ s,
+  begin
+    specialize h s 0 l,
+    simpa only [int.nat_abs_eq_zero, Mbar.coeff_zero, le_zero_iff, int.nat_abs_zero] using h
+  end,
+  summable' :=
+  begin
+    intro s,
+    apply nnreal.summable_of_le _ ((x l).summable s),
+    intro n,
+    refine mul_le_mul' _ le_rfl,
+    norm_cast,
+    exact (h _ _ _)
+  end }) $ λ l₁ l₂, by { ext s n, exact (y s n).map_add l₁ l₂ }
+
+-- jmc: It seems to me that we cannot easily define this using `Mbar.mk_aux'` above
+@[simps]
 def Mbar.mk_aux
   {ι : Type} [fintype ι] {l : ι → Λ} (hl : generates_norm l)
   (x : Λ →+ Mbar r' S) (y : S → ℕ → Λ →+ ℤ)
@@ -35,7 +59,7 @@ add_monoid_hom.mk' (λ l',
 { to_fun := λ s n, y s n l',
   coeff_zero' := λ s,
   begin
-    obtain ⟨c, h1, h2⟩ := hl l',
+    obtain ⟨c, h1, -⟩ := hl l',
     rw [h1, add_monoid_hom.map_sum, finset.sum_eq_zero],
     rintro i -,
     suffices : y s 0 (l i) = 0,
@@ -46,7 +70,7 @@ add_monoid_hom.mk' (λ l',
   summable' :=
   begin
     intro s,
-    obtain ⟨c, h1, h2⟩ := hl.generates_nnnorm l',
+    obtain ⟨c, h1, -⟩ := hl.generates_nnnorm l',
     rw h1,
     suffices : summable (λ n, ∑ i, c i • ↑(y s n (l i)).nat_abs * r' ^ n),
     { apply nnreal.summable_of_le _ this,
@@ -70,42 +94,9 @@ add_monoid_hom.mk' (λ l',
     exact nat.mul_le_mul le_rfl (h _ _ _)
   end }) $ λ l₁ l₂, by { ext s n, exact (y s n).map_add l₁ l₂ }
 
-section pseudo_normed_group
-
-variables (M : Type*) [pseudo_normed_group M]
-
-variables {M}
-
-lemma generates_norm.add_monoid_hom_mem_filtration_iff {ι : Type} [fintype ι]
-  {l : ι → Λ} (hl : generates_norm l) (x : Λ →+ M) (c : ℝ≥0) :
-  x ∈ filtration (Λ →+ M) c ↔
-  ∀ i, x (l i) ∈ filtration M (c * nnnorm (l i)) :=
-begin
-  refine ⟨λ H i, H (le_refl (nnnorm (l i))), _⟩,
-  intros H c' l' hl',
-  obtain ⟨cᵢ, h1, h2⟩ := hl.generates_nnnorm l',
-  rw [h1, x.map_sum],
-  refine filtration_mono _ (sum_mem_filtration _ (λ i, c * cᵢ i * nnnorm (l i)) _ _),
-  { calc ∑ i, c * cᵢ i * nnnorm (l i)
-        = c * ∑ i, cᵢ i * nnnorm (l i) : by simp only [mul_assoc, ← finset.mul_sum]
-    ... = c * nnnorm l' : by rw h2
-    ... ≤ c * c' : mul_le_mul' le_rfl hl' },
-  rintro i -,
-  rw [mul_assoc, mul_left_comm, x.map_nsmul],
-  exact pseudo_normed_group.nat_smul_mem_filtration (cᵢ i) _ _ (H i),
-end
-
-end pseudo_normed_group
-
 end
 
 variables {Λ r' S}
-
-@[simps]
-def Mbar.mk_of_add_monoid_hom [fact (r' < 1)] (x : S → ℕ → Λ →+ ℤ) (a : Λ →+ ℤ)
-  [∀ s n, decidable (x s n = a)] :
-  Mbar r' S :=
-Mbar.of_mask (Mbar.geom r' S) $ λ s n, x s n = a
 
 lemma Mbar.mk_aux_mem_filtration
   (ι : Type) (c : ℝ≥0) (N : ℕ) (hN : 0 < N) [fintype ι]
@@ -145,9 +136,14 @@ begin
   congr' 1,
 end
 
+@[simps]
+def Mbar.mk_of_add_monoid_hom [fact (r' < 1)] (x : S → ℕ → Λ →+ ℤ) (a : Λ →+ ℤ)
+  [∀ s n, decidable (x s n = a)] :
+  Mbar r' S :=
+Mbar.of_mask (Mbar.geom r' S) $ λ s n, x s n = a
+
 @[simps apply]
-lemma Mbar.mk_tensor (a : Λ →+ ℤ) (x : Mbar r' S) :
-  Λ →+ Mbar r' S :=
+lemma Mbar.mk_tensor (a : Λ →+ ℤ) (x : Mbar r' S) : Λ →+ Mbar r' S :=
 add_monoid_hom.mk' (λ l, a l • x) $ λ l₁ l₂, by rw [a.map_add, add_smul]
 
 -- better name?
@@ -158,7 +154,7 @@ lemma lem_98_aux [fact (r' < 1)] (A : finset (Λ →+ ℤ))
   x₁ l = ∑ a in A, a l • Mbar.mk_of_add_monoid_hom x₁' a :=
 begin
   ext s n,
-  simp only [finset.sum_apply, Mbar.coe_sum, pi.smul_apply, Mbar.coe_smul,
+  simp only [finset.sum_apply, Mbar.coe_sum, pi.smul_apply, Mbar.coe_gsmul,
     Mbar.coe_mk],
   rw [finset.sum_eq_single (x₁' s n)],
   { simp only [true_and, and_congr, if_congr, eq_self_iff_true, if_true,
@@ -213,9 +209,9 @@ begin
     ... = 1 : mul_one 1,
     { exact_mod_cast (H _ _) },
     { have : fact (r' < 1) := ‹_›, exact pow_le_one _ zero_le' this.out.le } },
-  obtain ⟨mask, h0, h1, h2⟩ := exists_partition N hN f f_aux summable_f,
-  resetI,
-  let y := λ i, Mbar.of_mask x (λ s n, mask i (e (s, n))),
+  obtain ⟨mask, h1, h2⟩ := exists_partition N hN f f_aux summable_f,
+  classical,
+  let y := λ i, Mbar.of_mask x (λ s n, (e (s, n)) ∈ mask i),
   have hxy : x = ∑ i, y i,
   { ext s n,
     simp only [Mbar.coe_sum, if_congr, function.curry_apply, fintype.sum_apply,
@@ -229,8 +225,8 @@ begin
   refine ⟨y, hxy, _⟩,
   intro i,
   rw [Mbar.mem_filtration_iff] at hx ⊢,
-  suffices : ∥x∥₊ = ∑' n, f n ∧ ∥y i∥₊ = ∑' (n : ℕ), mask_fun f (mask i) n,
-  { calc ∥y i∥₊ = ∑' (n : ℕ), mask_fun f (mask i) n : this.right
+  suffices : ∥x∥₊ = ∑' n, f n ∧ ∥y i∥₊ = ∑' (n : ℕ), (mask i).indicator f n,
+  { calc ∥y i∥₊ = ∑' (n : ℕ), (mask i).indicator f n : this.right
             ... ≤ (∑' (n : ℕ), f n) / N + 1         : h2 i
             ... ≤ c / N + 1                         : _,
     simp only [div_eq_mul_inv],
@@ -249,17 +245,22 @@ begin
     { rw nnreal.summable_sigma, exact ⟨x.summable, ⟨_, has_sum_fintype _⟩⟩ } },
   { calc ∑ s, ∑' n, ↑(y i s n).nat_abs * r' ^ n
         = ∑' s, ∑' n, ↑(y i s n).nat_abs * r' ^ n : (tsum_fintype _).symm
-    ... = ∑' x, mask_fun f (mask i) (e x) : _
-    ... = ∑' n, mask_fun f (mask i) n : e.tsum_eq _,
+    ... = ∑' x, (mask i).indicator f (e x) : _
+    ... = ∑' n, (mask i).indicator f n : e.tsum_eq _,
     rw [← (equiv.sigma_equiv_prod S ℕ).tsum_eq], swap, { apply_instance },
-    have aux : ∀ i s n, (if mask i (e (s, n)) then ↑(x s n).nat_abs * r' ^ n else 0) =
-      ↑(if mask i (e (s, n)) then x s n else 0).nat_abs * r' ^ n,
+    have aux : ∀ i s n h1, @ite _ (e (s, n) ∈ mask i) h1 (↑(x s n).nat_abs * r' ^ n) 0 =
+      ↑(@ite _ (e (s, n) ∈ mask i) h1 (x s n) 0).nat_abs * r' ^ n,
     { intros, split_ifs; simp only [int.nat_abs_zero, nat.cast_zero, zero_mul, eq_self_iff_true] },
-    dsimp only [f, y, mask_fun, equiv.sigma_equiv_prod_apply],
+    dsimp only [f, y, set.indicator, equiv.sigma_equiv_prod_apply],
     simp only [equiv.symm_apply_apply, Mbar.of_mask_to_fun, aux],
     rw [tsum_sigma'],
-    { exact (y i).summable },
-    { rw nnreal.summable_sigma, exact ⟨(y i).summable, ⟨_, has_sum_fintype _⟩⟩ } }
+    { congr' 1, ext1 s, congr' 1, ext1 n, split_ifs; refl },
+    { convert (y i).summable, ext1, apply forall_congr, intro s, convert iff.rfl, ext1 n,
+      dsimp only [y, Mbar.of_mask], congr, convert rfl, },
+    { rw nnreal.summable_sigma,
+      refine ⟨_, ⟨_, has_sum_fintype _⟩⟩,
+      convert (y i).summable, ext1, apply forall_congr, intro s, convert iff.rfl, ext1 n,
+      dsimp only [y, Mbar.of_mask], congr, convert rfl, } }
 end
 
 lemma lem98_aux' [fact (r' < 1)] (N : ℕ)
@@ -286,12 +287,11 @@ begin
     fintype.card_fin, finset.sum_comm, ← hx₀],
 end
 
-lemma lem98_crux [fact (r' < 1)] {ι : Type} [fintype ι] {l : ι → Λ}
-  (hl : generates_norm l) (N : ℕ) (hN : 0 < N) (A : finset (Λ →+ ℤ))
+lemma lem98_crux [fact (r' < 1)] {ι : Type} {l : ι → Λ}
+  (N : ℕ) (hN : 0 < N) (A : finset (Λ →+ ℤ))
   (x x₀ x₁ : Λ →+ Mbar r' S)
   (x' x₀' x₁' : S → ℕ → Λ →+ ℤ) [∀ s n a, decidable (x₁' s n = a)]
   (xₐ : (Λ →+ ℤ) → Mbar r' S)
-  -- (H : ∀ s n, x' s n = N • x₀' s n + x₁' s n)
   (hx : ∀ l s n, x l s n = x' s n l)
   (hx₀ : ∀ l s n, x₀ l s n = x₀' s n l)
   (hx₁ : ∀ l s n, x₁ l s n = x₁' s n l)
@@ -301,7 +301,7 @@ lemma lem98_crux [fact (r' < 1)] {ι : Type} [fintype ι] {l : ι → Λ}
   (H : ∀ s n i, (x' s n (l i)).nat_abs =
     N * (x₀' s n (l i)).nat_abs + (x₁' s n (l i)).nat_abs)
   (i : ι) :
-  ∥x (l i)∥₊ = N • ∥x₀ (l i)∥₊ + ∑ a in A, nnnorm (a (l i)) * ∥xₐ a∥₊ :=
+  ∥x (l i)∥₊ = N • ∥x₀ (l i)∥₊ + ∑ a in A, ∥a (l i)∥₊ * ∥xₐ a∥₊ :=
 begin
   simp only [hx, H, ← hx₀, ← hx₁, Mbar.nnnorm_def,
     nsmul_eq_mul, mul_assoc,
@@ -324,7 +324,7 @@ begin
   simp only [finset.sum_apply, Mbar.coe_sum, Mbar.mk_of_add_monoid_hom_to_fun,
     pi.smul_apply],
   rw [finset.sum_eq_single (x₁' s n), finset.sum_eq_single (x₁' s n)],
-  { simp only [Mbar.coe_smul, Mbar.mk_of_add_monoid_hom_to_fun, if_true,
+  { simp only [Mbar.coe_gsmul, Mbar.mk_of_add_monoid_hom_to_fun, if_true,
       pi.smul_apply, eq_self_iff_true, true_and, if_congr, and_congr],
     split_ifs,
     { simp only [mul_zero, norm_zero, smul_eq_mul] },
@@ -333,7 +333,7 @@ begin
   all_goals { intros a haA hasn },
   { simp only [hasn.symm, Mbar.mk_of_add_monoid_hom_to_fun, norm_zero,
       mul_zero, if_congr, and_congr, eq_self_iff_true, if_false, false_and] },
-  { simp only [hasn.symm, Mbar.coe_smul, pi.smul_apply, smul_eq_mul,
+  { simp only [hasn.symm, Mbar.coe_gsmul, pi.smul_apply, smul_eq_mul,
       Mbar.mk_of_add_monoid_hom_to_fun, mul_zero,
       if_congr, and_congr, eq_self_iff_true, if_false, false_and] },
 end
@@ -356,16 +356,15 @@ by convert (polyhedral_lattice.polyhedral Λ).some_spec.some_spec.some_spec.1
 lemma hl' : ∀ i, l Λ i ≠ 0 :=
 (polyhedral_lattice.polyhedral Λ).some_spec.some_spec.some_spec.2
 
-def A (N : ℕ) [hN : fact (0 < N)] :=
-(lem97' (polyhedral_lattice.finite_free Λ) N hN.1 (l Λ)).some
+def A (N : ℕ) [hN : fact (0 < N)] := (lem97' N hN.1 (l Λ)).some
 
 lemma hA (N : ℕ) [hN : fact (0 < N)] (x : Λ →+ ℤ) :
   ∃ x' (H : x' ∈ A Λ N) y, x = N • y + x' ∧
     ∀ i, (x (l Λ i)).nat_abs = N * (y (l Λ i)).nat_abs + (x' (l Λ i)).nat_abs :=
-(lem97' (polyhedral_lattice.finite_free Λ) N hN.1 (l Λ)).some_spec x
+(lem97' N hN.1 (l Λ)).some_spec x
 
 def d  (N : ℕ) [hN : fact (0 < N)] : ℝ≥0 :=
-finset.univ.sup (λ i, ∑ a in A Λ N, nnnorm (a (l Λ i)) / nnnorm (l Λ i))
+finset.univ.sup (λ i, ∑ a in A Λ N, ∥a (l Λ i)∥₊ / ∥l Λ i∥₊)
 
 end lem98
 
@@ -417,32 +416,32 @@ begin
   intro i,
   specialize hx i,
   simp only [Mbar.mem_filtration_iff] at hx hy'2 ⊢,
-  have Hx : ∥x (l i)∥₊ = N • ∥x₀ (l i)∥₊ + ∑ a in A, nnnorm (a (l i)) * ∥xₐ a∥₊,
-  { apply lem98_crux hl N hN.1 A x x₀ x₁ x' x₀' x₁' xₐ,
+  have Hx : ∥x (l i)∥₊ = N • ∥x₀ (l i)∥₊ + ∑ a in A, ∥a (l i)∥₊ * ∥xₐ a∥₊,
+  { apply lem98_crux N hN.1 A x x₀ x₁ x' x₀' x₁' xₐ,
     all_goals { intros, refl <|> apply_assumption } },
   calc ∥y j (l i)∥₊
-      ≤ ∥x₀ (l i)∥₊ + ∑ a in A, nnnorm (a (l i)) * ∥xₐ a∥₊ / N + d * nnnorm (l i) : _
-  ... = (N • ∥x₀ (l i)∥₊ + ∑ a in A, nnnorm (a (l i)) * ∥xₐ a∥₊) / N + d * nnnorm (l i) : _
-  ... = ∥x (l i)∥₊ / N + d * nnnorm (l i) : by rw Hx
+      ≤ ∥x₀ (l i)∥₊ + ∑ a in A, ∥a (l i)∥₊ * ∥xₐ a∥₊ / N + d * ∥l i∥₊ : _
+  ... = (N • ∥x₀ (l i)∥₊ + ∑ a in A, ∥a (l i)∥₊ * ∥xₐ a∥₊) / N + d * ∥l i∥₊ : _
+  ... = ∥x (l i)∥₊ / N + d * ∥l i∥₊ : by rw Hx
   ... ≤ _ : _,
   { simp only [add_monoid_hom.add_apply, add_assoc, add_monoid_hom.finset_sum_apply,
          Mbar.mk_tensor_apply],
     refine (Mbar.nnnorm_add_le _ _).trans (add_le_add le_rfl _),
     refine (Mbar.nnnorm_sum_le _ _).trans _,
     calc ∑ a in A, ∥a (l i) • y' a j∥₊
-        = ∑ a in A, nnnorm (a (l i)) * ∥y' a j∥₊ : finset.sum_congr rfl _
-    ... ≤ ∑ a in A, nnnorm (a (l i)) * (∥xₐ a∥₊ / N + 1) : finset.sum_le_sum _
-    ... = ∑ a in A, (nnnorm (a (l i)) * ∥xₐ a∥₊ / N + nnnorm (a (l i))) : finset.sum_congr rfl _
-    ... = ∑ a in A, (nnnorm (a (l i)) * ∥xₐ a∥₊ / N) + ∑ a in A, nnnorm (a (l i)) : _
-    ... ≤ ∑ a in A, (nnnorm (a (l i)) * ∥xₐ a∥₊ / N) + d * nnnorm (l i) : add_le_add le_rfl _,
-    { intros a ha, rw Mbar.nnnorm_smul },
+        = ∑ a in A, ∥a (l i)∥₊ * ∥y' a j∥₊ : finset.sum_congr rfl _
+    ... ≤ ∑ a in A, ∥a (l i)∥₊ * (∥xₐ a∥₊ / N + 1) : finset.sum_le_sum _
+    ... = ∑ a in A, (∥a (l i)∥₊ * ∥xₐ a∥₊ / N + ∥a (l i)∥₊) : finset.sum_congr rfl _
+    ... = ∑ a in A, (∥a (l i)∥₊ * ∥xₐ a∥₊ / N) + ∑ a in A, ∥a (l i)∥₊ : _
+    ... ≤ ∑ a in A, (∥a (l i)∥₊ * ∥xₐ a∥₊ / N) + d * ∥l i∥₊ : add_le_add le_rfl _,
+    { intros a ha, rw Mbar.nnnorm_gsmul },
     { intros a ha, exact mul_le_mul' le_rfl (hy'2 a j) },
     { intros a ha, rw [mul_add, mul_one, mul_div_assoc] },
     { rw finset.sum_add_distrib },
-    { calc ∑ a in A, nnnorm (a (l i))
-          = (∑ a in A, nnnorm (a (l i)) / nnnorm (l i)) * nnnorm (l i) : _
-      ... ≤ finset.univ.sup (λ i, ∑ a in A, nnnorm (a (l i)) / nnnorm (l i)) * nnnorm (l i) : _,
-      { { have : nnnorm (l i) ≠ 0, { simp only [hl' i, nnnorm_eq_zero, ne.def, not_false_iff] },
+    { calc ∑ a in A, ∥a (l i)∥₊
+          = (∑ a in A, ∥a (l i)∥₊ / ∥l i∥₊) * ∥l i∥₊ : _
+      ... ≤ finset.univ.sup (λ i, ∑ a in A, ∥a (l i)∥₊ / ∥l i∥₊) * ∥l i∥₊ : _,
+      { { have : ∥l i∥₊ ≠ 0, { simp only [hl' i, nnnorm_eq_zero, ne.def, not_false_iff] },
           simp only [div_eq_mul_inv, ← finset.sum_mul, inv_mul_cancel_right' this] } },
       { exact mul_le_mul' (finset.le_sup (finset.mem_univ i)) le_rfl } } },
   { simp only [div_eq_mul_inv, add_mul, finset.sum_mul, nsmul_eq_mul],
@@ -455,3 +454,5 @@ begin
     exact mul_le_mul' hx le_rfl }
 end
 .
+
+#lint- only unused_arguments

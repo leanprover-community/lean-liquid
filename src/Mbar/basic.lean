@@ -11,13 +11,15 @@ import Mbar.bounded
 import pseudo_normed_group.basic
 
 import for_mathlib.tsum
+import for_mathlib.int_norm
+import for_mathlib.int_basic
 
 /-!
 
 ## $\overline{\mathcal{M}}_{r'}(S)$
 
-This file contains a definition of ℳ-barᵣ'(S) as defined at the very beginning
-of section 9 of `analytic.pdf` (p57), and its action of `T⁻¹`.
+This file contains a definition of `ℳ-bar_{r'}(S) as defined at the very beginning
+of section 9 of `Analytic.pdf` (p57), and its action of `T⁻¹`.
 
 ## Implementation issues
 
@@ -30,9 +32,6 @@ universe u
 noncomputable theory
 open_locale big_operators nnreal
 
--- move this
-lemma int.norm_def (n : ℤ) : ∥n∥ = abs n := rfl
-
 section defs
 
 set_option old_structure_cmd true
@@ -40,9 +39,9 @@ set_option old_structure_cmd true
 /-- `Mbar r' S` is the set of power series
 `F_s = ∑ a_{s,n}T^n ∈ Tℤ[[T]]` such that `∑_{s,n} |a_{s,n}|r'^n` converges -/
 structure Mbar (r' : ℝ≥0) (S : Type u) [fintype S] :=
-(to_fun : S → ℕ → ℤ)
+(to_fun      : S → ℕ → ℤ)
 (coeff_zero' : ∀ s, to_fun s 0 = 0)
-(summable' : ∀ s, summable (λ n, (↑(to_fun s n).nat_abs * r' ^ n)))
+(summable'   : ∀ s, summable (λ n, (↑(to_fun s n).nat_abs * r' ^ n)))
 
 end defs
 
@@ -102,9 +101,8 @@ def sub (F : Mbar r' S) (G : Mbar r' S) : Mbar r' S :=
     intro n,
     rw [← add_mul, ← nat.cast_add],
     apply mul_le_mul_right',
-    rw [nat.cast_le, sub_eq_add_neg, ← int.nat_abs_neg (G s n)],
-    -- there should be an `int.nat_abs_sub_le`
-    exact int.nat_abs_add_le _ _
+    rw nat.cast_le,
+    exact int.nat_abs_sub_le _ _
   end }
 
 /-- Negation in `Mbar r' S`, defined as pointwise negation. -/
@@ -124,13 +122,15 @@ instance : has_add (Mbar r' S) := ⟨add⟩
 instance : has_sub (Mbar r' S) := ⟨sub⟩
 instance : has_neg (Mbar r' S) := ⟨neg⟩
 
+instance : inhabited (Mbar r' S) := ⟨0⟩
+
 @[simp] lemma coe_zero : ⇑(0 : Mbar r' S) = 0 := rfl
 @[simp] lemma coe_add (F G : Mbar r' S) : ⇑(F + G : Mbar r' S) = F + G := rfl
 @[simp] lemma coe_sub (F G : Mbar r' S) : ⇑(F - G : Mbar r' S) = F - G := rfl
 @[simp] lemma coe_neg (F : Mbar r' S) : ⇑(-F : Mbar r' S) = -F := rfl
 
 /-- Tailored scalar multiplication by natural numbers. -/
-def nsmul (N : ℕ) (F : Mbar r' S) : Mbar r' S :=
+protected def nsmul (N : ℕ) (F : Mbar r' S) : Mbar r' S :=
 { to_fun := λ s n, N • F s n,
   coeff_zero' := λ s, by simp only [F.coeff_zero, smul_zero],
   summable' := λ s,
@@ -146,7 +146,7 @@ def nsmul (N : ℕ) (F : Mbar r' S) : Mbar r' S :=
   end }
 
 /-- Tailored scalar multiplication by integers. -/
-def gsmul (N : ℤ) (F : Mbar r' S) : Mbar r' S :=
+protected def gsmul (N : ℤ) (F : Mbar r' S) : Mbar r' S :=
 { to_fun := λ s n, N • F s n,
   coeff_zero' := λ s, by simp only [F.coeff_zero, smul_zero],
   summable' := λ s,
@@ -171,25 +171,25 @@ instance : add_comm_group (Mbar r' S) :=
   add_comm := by { intros, ext, simp only [coe_add, add_comm] },
   sub_eq_add_neg := by { intros, ext, simp only [coe_sub, coe_add, coe_neg, sub_eq_add_neg] },
   nsmul := λ n F, F.nsmul n,
-  nsmul_zero' := λ F, by { ext, simp only [nsmul, zero_smul], refl },
+  nsmul_zero' := λ F, by { ext, simp only [Mbar.nsmul, zero_smul], refl },
   nsmul_succ' := λ n F,
   begin
     ext,
-    simp only [nsmul, nat.succ_eq_add_one, add_smul, one_smul, add_comm, coe_mk, coe_add,
+    simp only [Mbar.nsmul, nat.succ_eq_add_one, add_smul, one_smul, add_comm, coe_mk, coe_add,
       pi.add_apply],
   end,
   gsmul := λ n F, F.gsmul n,
-  gsmul_zero' := λ F, by { ext, simp only [gsmul, zero_smul], refl },
+  gsmul_zero' := λ F, by { ext, simp only [Mbar.gsmul, zero_smul], refl },
   gsmul_succ' := λ n F,
   begin
     ext,
-    simp only [gsmul, nat.succ_eq_add_one, algebra.id.smul_eq_mul, coe_mk, pi.add_apply,
+    simp only [Mbar.gsmul, nat.succ_eq_add_one, algebra.id.smul_eq_mul, coe_mk, pi.add_apply,
       int.coe_nat_succ, int.of_nat_eq_coe, coe_add, add_mul, one_mul, add_comm],
   end,
   gsmul_neg' := λ n F,
   begin
     ext,
-    simp only [gsmul, algebra.id.smul_eq_mul, coe_mk, pi.neg_apply, int.coe_nat_succ, coe_neg,
+    simp only [Mbar.gsmul, algebra.id.smul_eq_mul, coe_mk, pi.neg_apply, int.coe_nat_succ, coe_neg,
       add_mul, one_mul, neg_add_rev, int.neg_succ_of_nat_coe, neg_mul_eq_neg_mul_symm, one_mul],
   end }
 
@@ -203,10 +203,9 @@ def coeff (s : S) (n : ℕ) : Mbar r' S →+ ℤ :=
 
 /-- The norm of `F : Mbar r' S` as nonnegative real number.
 It is defined as `∑ s, ∑' n, (↑(F s n).nat_abs * r' ^ n)`. -/
-protected
-def nnnorm (F : Mbar r' S) : ℝ≥0 := ∑ s, ∑' n, (↑(F s n).nat_abs * r' ^ n)
+protected def nnnorm (F : Mbar r' S) : ℝ≥0 := ∑ s, ∑' n, (↑(F s n).nat_abs * r' ^ n)
 
-notation `∥`F`∥₊` := Mbar.nnnorm F
+instance : has_nnnorm (Mbar r' S) := ⟨Mbar.nnnorm⟩
 
 lemma nnnorm_def (F : Mbar r' S) : ∥F∥₊ = ∑ s, ∑' n, (↑(F s n).nat_abs * r' ^ n) := rfl
 
@@ -267,25 +266,23 @@ add_monoid_hom.mk' coe_fn $ coe_add
   ⇑(∑ i in s, F i) = ∑ i in s, (F i) :=
 show coe_hom (∑ i in s, F i) = ∑ i in s, coe_hom (F i), from add_monoid_hom.map_sum _ _ _
 
-@[simp] lemma coe_gsmul (n : ℤ) (F : Mbar r' S) : ⇑(n • F) = n • F :=
-show coe_hom (n • F) = n • coe_hom F, from add_monoid_hom.map_gsmul _ _ _
+@[simp] lemma coe_gsmul (n : ℤ) (F : Mbar r' S) : ⇑(n • F) = n • F := rfl
 
-@[simp] lemma coe_smul (n : ℤ) (F : Mbar r' S) : ⇑(n • F) = n • F :=
-coe_gsmul _ _
+@[simp] lemma coe_nsmul (n : ℕ) (F : Mbar r' S) : ⇑(n • F) = n • F := rfl
 
-@[simp] lemma coe_nsmul (n : ℕ) (F : Mbar r' S) : ⇑(n • F) = n • F :=
-by simpa only [gsmul_coe_nat] using coe_gsmul ↑n F
-
-@[simp] lemma nnnorm_smul (N : ℤ) (F : Mbar r' S) : ∥N • F∥₊ = nnnorm N * ∥F∥₊ :=
+@[simp] lemma nnnorm_gsmul (N : ℤ) (F : Mbar r' S) : ∥N • F∥₊ = ∥N∥₊ * ∥F∥₊ :=
 begin
   simp only [nnnorm_def, finset.mul_sum],
   apply fintype.sum_congr,
   intro s,
   apply nnreal.eq,
   simp only [nnreal.coe_mul, nnreal.coe_tsum, ← tsum_mul_left, ← mul_assoc,
-    nnreal.coe_nat_abs, coe_nnnorm, coe_smul, pi.smul_apply, int.norm_def,
+    nnreal.coe_nat_abs, coe_nnnorm, coe_gsmul, pi.smul_apply, int.norm_def,
     ← abs_mul, ← int.cast_mul, smul_eq_mul],
 end
+
+lemma nnnorm_nsmul (x : Mbar r' S) (N : ℕ) : ∥N • x∥₊ = N • ∥x∥₊ :=
+by { rw [← gsmul_coe_nat, nnnorm_gsmul, nsmul_eq_mul, ← nnreal.coe_nat_abs], refl, }
 
 section Tinv
 
@@ -372,17 +369,6 @@ end
 
 end Tinv
 
-lemma nnnorm_nsmul (x : Mbar r' S) (N : ℕ) : ∥N • x∥₊ = N • ∥x∥₊ :=
-begin
-  simp only [nnnorm_def, nsmul_eq_mul, finset.mul_sum, finset.sum_mul,
-    coe_nsmul, pi.mul_apply, pi.nat_apply, @pi.nat_apply ℕ ℤ _ _ _ N,
-    int.nat_abs_mul, int.nat_abs_of_nat, int.nat_cast_eq_coe_nat, nat.cast_mul],
-  apply fintype.sum_congr,
-  intro s,
-  ext1,
-  simp only [nnreal.coe_nat_cast, nnreal.coe_tsum, nnreal.coe_mul, ← tsum_mul_left, ← mul_assoc]
-end
-
 /-- `of_mask x mask : Mbar r' S` is `∑ a_{s,n}T^n ∈ Tℤ[[T]]`,
 where `a_{s,n}` is `x_{s,n}` if `mask n s` is true and `0` otherwise. -/
 @[simps]
@@ -422,4 +408,4 @@ def geom [hr' : fact (r' < 1)] : Mbar r' S :=
 
 end Mbar
 
-#lint- only unused_arguments def_lemma doc_blame
+#lint-

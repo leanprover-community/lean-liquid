@@ -32,14 +32,9 @@ Much work remains in formalising the proof that `Analytic 9.4` implies `Analytic
 The statement can be found in [`src/liquid.lean`](https://github.com/leanprover-community/lean-liquid/blob/master/src/liquid.lean#L29)
 
 ```lean
-theorem first_target (r r' : ℝ≥0)
-  [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r < 1)] [fact (r' < 1)]
-  [BD.data.very_suitable r r' κ] [∀ (i : ℕ), fact (0 < κ i)] :
-  ∀ m : ℕ,
-  ∃ (k K : ℝ≥0) [fact (1 ≤ k)],
-  ∃ c₀ : ℝ≥0,
-  ∀ (S : Type) [fintype S],
-  ∀ (V : SemiNormedGroup.{0}) [normed_with_aut r V],
+theorem first_target :
+  ∀ m : ℕ, ∃ (k K : ℝ≥0) [fact (1 ≤ k)] (c₀ : ℝ≥0),
+  ∀ (S : Type) [fintype S] (V : SemiNormedGroup.{0}) [normed_with_aut r V],
     ​((BD.data.system κ r V r').obj (op $ of r' (Mbar r' S))).is_weak_bounded_exact k K m c₀ := _
 ```
 

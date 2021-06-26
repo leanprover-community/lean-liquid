@@ -19,7 +19,7 @@ variables (C : system_of_complexes)
 
 def norm_exact_complex (D : cochain_complex SemiNormedGroup ℕ) : Prop :=
 ∀ (m : ℕ) (ε : ℝ≥0) (hε : 0 < ε) (x : D.X m) (hx : D.d _ (m+1) x = 0),
-  ∃ y : D.X (m-1), D.d _ _ y = x ∧ nnnorm y ≤ (1 + ε) * nnnorm x
+  ∃ y : D.X (m-1), D.d _ _ y = x ∧ ∥y∥₊ ≤ (1 + ε) * ∥x∥₊
 
 lemma weak_exact_of_factor_exact (k : ℝ≥0) [fact (1 ≤ k)] (m : ℕ) (c₀ : ℝ≥0)
   (D : ℝ≥0 → cochain_complex SemiNormedGroup ℕ)
@@ -44,7 +44,7 @@ begin
     ... = 0 : by { rw (D c).d_comp_d _ _ _, refl } },
   let ε : ℝ≥0 := ⟨ε', hε'.le⟩,
   have hε : 0 < ε := hε',
-  let δ : ℝ≥0 := ε / (nnnorm dx + 1),
+  let δ : ℝ≥0 := ε / (∥dx∥₊ + 1),
   have hδ : 0 < δ,
   { rw [← nnreal.coe_lt_coe],
     exact div_pos hε (lt_of_le_of_lt (nnreal.coe_nonneg _) (lt_add_one _)), },
@@ -67,15 +67,15 @@ begin
     ... = gx' : by rw [← normed_group_hom.map_sub, hdy, sub_sub_cancel],
     rw [gdy_dgy, ← comp_apply, ← homological_complex.comp_f, hfg _ hc.1], refl },
   rw hxdgy,
-  change (nnnorm gx' : ℝ) ≤ (nnnorm dx) + ε,
+  change (∥gx'∥₊ : ℝ) ≤ ∥dx∥₊ + ε,
   simp only [← nnreal.coe_add, nnreal.coe_le_coe],
-  calc nnnorm gx'
-      ≤ nnnorm x' : hg _ _ _
-  ... ≤ (1 + δ) * nnnorm fdx : hnorm_x'
-  ... ≤ (1 + δ) * nnnorm dx : mul_le_mul' le_rfl (hf _ _ _)
-  ... ≤ nnnorm dx + δ * nnnorm dx : by rw [add_mul, one_mul]
-  ... ≤ nnnorm dx + ε * 1 : add_le_add le_rfl _
-  ... ≤ nnnorm dx + ε : by rw [mul_one],
+  calc ∥gx'∥₊
+      ≤ ∥x'∥₊ : hg _ _ _
+  ... ≤ (1 + δ) * ∥fdx∥₊ : hnorm_x'
+  ... ≤ (1 + δ) * ∥dx∥₊ : mul_le_mul' le_rfl (hf _ _ _)
+  ... ≤ ∥dx∥₊ + δ * ∥dx∥₊ : by rw [add_mul, one_mul]
+  ... ≤ ∥dx∥₊ + ε * 1 : add_le_add le_rfl _
+  ... ≤ ∥dx∥₊ + ε : by rw [mul_one],
   dsimp only [δ],
   rw [div_eq_mul_inv, mul_assoc],
   refine mul_le_mul' le_rfl _,

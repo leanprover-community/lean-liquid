@@ -67,30 +67,12 @@ begin
   rw h,
 end
 
-
-/-- An alternative constructor for terms of type `Mbar_le r' S c`,
-taking as input a function `x : S → ℕ → ℤ`
-(to be thought of as power series indexed by `S`)
-together with a single proof obligation
-showing that `x` is summable and converges to a real number `≤ c` at `r'`. -/
-def mk' (x : S → ℕ → ℤ)
-  (h : (∀ s, x s 0 = 0) ∧
-       (∀ s, summable (λ n, ↑(x s n).nat_abs * r'^n)) ∧
-       (∑ s, ∑' n, (↑(x s n).nat_abs * r'^n)) ≤ c) :
-  Mbar_le r' S c :=
-⟨{ to_fun := x, coeff_zero' := h.1, summable' := h.2.1}, h.2.2⟩
-
-@[simp] lemma coe_mk' (x : S → ℕ → ℤ)
-  (h : (∀ s, x s 0 = 0) ∧
-       (∀ s, summable (λ n, ↑(x s n).nat_abs * r'^n)) ∧
-       (∑ s, ∑' n, (↑(x s n).nat_abs * r'^n)) ≤ c) :
-  ⇑(mk' x h) = x := rfl
-
 @[ext] lemma ext (x y : Mbar_le r' S c) (h : ⇑x = y) : x = y :=
 by { ext:2, exact h }
 
-instance : has_zero (Mbar_le r' S c) :=
-⟨⟨0, zero_mem_filtration _⟩⟩
+instance : has_zero (Mbar_le r' S c) := ⟨⟨0, zero_mem_filtration _⟩⟩
+
+instance : inhabited (Mbar_le r' S c) := ⟨0⟩
 
 end Mbar_le
 
@@ -118,7 +100,7 @@ subtype.mk (-F) $ neg_mem_filtration F.mem_filtration
 
 namespace Mbar_le
 
-/-- The truncation map from Mbar_le to Mbar_bdd -/
+/-- The truncation map from Mbar_le to `Mbar_bdd`. -/
 @[simps] def truncate (M : ℕ) (F : Mbar_le r' S c) : Mbar_bdd r' ⟨S⟩ c M :=
 { to_fun := λ s n, F s n,
   coeff_zero' := by simp,
@@ -130,8 +112,6 @@ namespace Mbar_le
     rw fin.sum_univ_eq_sum_range (λ i, (↑(F s i).nat_abs * r' ^i)) (M+1),
     exact sum_le_tsum _ (λ _ _, subtype.property (_ : ℝ≥0)) (F.summable s),
   end }
-
-example : order_closed_topology ℝ≥0 := by apply_instance
 
 lemma truncate_surjective (M : ℕ) :
   function.surjective (truncate M : Mbar_le r' S c → Mbar_bdd r' ⟨S⟩ c M) :=
@@ -164,11 +144,7 @@ begin
     simp only [hi, zero_mul, dif_neg, not_false_iff, nat.cast_zero, int.nat_abs_zero] }
 end
 
--- /-- The truncation maps commute with the transition maps. -/
--- lemma truncate_transition {hr : 0 < r'} {M N : ℕ} (h : M ≤ N) (x : Mbar_le r' S c) :
---   transition h (truncate hr N x) = truncate hr M x := by tidy
-
--- Injectivity of the map Mbar_le to limit of Mbar_bdd
+/-- Injectivity of the map `Mbar_le` to the limit of the `Mbar_bdd`. -/
 lemma eq_iff_truncate_eq (x y : Mbar_le r' S c)
   (cond : ∀ M, truncate M x = truncate M y) : x = y :=
 begin
@@ -178,16 +154,15 @@ begin
 end
 
 lemma truncate_cast_le (M : ℕ) [hc : fact (c₁ ≤ c₂)] (x : Mbar_le r' S c₁) :
-  truncate M (@Mbar_le.cast_le r' S _ c₁ c₂ _ x) =
-    Mbar_bdd.cast_le (truncate M x) :=
-by { ext, refl }
+  truncate M (Mbar_le.cast_le x : Mbar_le r' S c₂) = Mbar_bdd.cast_le (truncate M x) :=
+rfl
 
-/-- Underlying function of the element of Mbar_le f' S associated to a sequence of
+/-- Underlying function of the element of `Mbar_le r' S c` associated to a sequence of
   elements of the truncated Mbars. -/
 def mk_seq (T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M) : S → ℕ → ℤ :=
-  λ s n, (T n).1 s ⟨n, by linarith⟩
+λ s n, (T n).1 s ⟨n, lt_add_one n⟩
 
-lemma mk_seq_zero {T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M} (s : S) : mk_seq T s 0 = 0 :=
+@[simp] lemma mk_seq_zero {T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M} (s : S) : mk_seq T s 0 = 0 :=
 (T 0).coeff_zero s
 
 lemma mk_seq_eq_of_compat {T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M}
@@ -231,8 +206,8 @@ open filter
 lemma mk_seq_tendsto {T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M}
   (compat : ∀ (M N : ℕ) (h : M ≤ N), Mbar_bdd.transition r' h (T N) = T M) :
   tendsto (λ (n : ℕ), ∑ (s : S), ∑  i in finset.range n, (↑(mk_seq T s i).nat_abs * r'^i))
-  at_top (nhds $ ∑ (s : S), ∑' n, (↑(mk_seq T s n).nat_abs * r'^n)) := tendsto_finset_sum _ $
-λ s _, has_sum.tendsto_sum_nat $ summable.has_sum $ mk_seq_summable compat s
+  at_top (nhds $ ∑ (s : S), ∑' n, (↑(mk_seq T s n).nat_abs * r'^n)) :=
+tendsto_finset_sum _ $ λ s _, has_sum.tendsto_sum_nat $ summable.has_sum $ mk_seq_summable compat s
 
 lemma mk_seq_sum_le {T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M}
   (compat : ∀ (M N : ℕ) (h : M ≤ N), Mbar_bdd.transition r' h (T N) = T M) :
@@ -255,14 +230,6 @@ begin
   exact mk_seq_eq_of_compat compat _,
 end
 
-/-
--- Surjectivity
-lemma of_compat (T : Π (M : ℕ), Mbar_bdd r' ⟨S⟩ c M)
-  (compat : ∀ (M N : ℕ) (h : M ≤ N), transition r' h (T N) = T M) :
-  ∃ (F : Mbar_le r' S c), ∀ M, truncate M F = T M :=
-⟨⟨mk_seq T, mk_seq_zero, mk_seq_summable compat, mk_seq_sum_le compat⟩, truncate_mk_seq compat⟩
--/
-
 /-- `of_compat hT` is the limit of a compatible family `T M : Mbar_bdd r' ⟨S⟩ c M`.
 This realizes `Mbar_le` as the profinite limit of the spaces `Mbar_bdd`,
 see also `Mbar_le.eqv`. -/
@@ -281,11 +248,10 @@ end
 /-- The equivalence (as types) between `Mbar_le r' S c`
 and the profinite limit of the spaces `Mbar_bdd r' ⟨S⟩ c M`. -/
 def eqv : Mbar_le r' S c ≃ Mbar_bdd.limit r' ⟨S⟩ c :=
-{ to_fun := λ F, ⟨λ N, truncate _ F, by tidy⟩,
+{ to_fun := λ F, ⟨λ N, truncate _ F, by { intros, refl }⟩,
   inv_fun := λ F, of_compat F.2,
-  left_inv := by tidy,
-  right_inv := by tidy }
-
+  left_inv := λ x, by { ext, refl },
+  right_inv := by { rintro ⟨x, hx⟩, simp only [truncate_of_compat], } }
 
 section topological_structure
 
@@ -318,8 +284,8 @@ def homeo : Mbar_le r' S c ≃ₜ Mbar_bdd.limit r' ⟨S⟩ c :=
   end,
   ..eqv }
 
-lemma truncate_eq (M : ℕ) : (truncate M : Mbar_le r' S c → Mbar_bdd r' ⟨S⟩ c M) =
-  (Mbar_bdd.proj M) ∘ homeo := rfl
+lemma truncate_eq (M : ℕ) :
+  (truncate M : Mbar_le r' S c → Mbar_bdd r' ⟨S⟩ c M) = (Mbar_bdd.proj M) ∘ homeo := rfl
 
 instance : t2_space (Mbar_le r' S c) :=
 ⟨λ x y h, separated_by_continuous homeo.continuous (λ c, h $ homeo.injective c)⟩
@@ -362,7 +328,7 @@ lemma continuous_truncate {M} : continuous (@truncate r' S _ c M) :=
 (continuous_iff id).mp continuous_id _
 
 lemma continuous_add' :
-  continuous (Mbar_le.add' (c₁ + c₂) : Mbar_le r' S c₁ × Mbar_le r' S c₂ → Mbar_le r' S (c₁ + c₂)) :=
+  continuous (Mbar_le.add' (c₁ + c₂) : Mbar_le r' S c₁ × Mbar_le r' S c₂ → Mbar_le r' S (c₁+c₂)) :=
 begin
   rw continuous_iff,
   intros M,
@@ -371,7 +337,8 @@ begin
     by {ext; refl},
   erw this,
   suffices : continuous (λ x : Mbar_bdd r' ⟨S⟩ c₁ M × Mbar_bdd r' ⟨S⟩ c₂ M, Mbar_bdd.add x.1 x.2),
-  { have claim : (λ x : (Mbar_le r' S c₁ × Mbar_le r' S c₂), Mbar_bdd.add (truncate M x.1) (truncate M x.2)) =
+  { have claim : (λ x : (Mbar_le r' S c₁ × Mbar_le r' S c₂),
+      Mbar_bdd.add (truncate M x.1) (truncate M x.2)) =
       (λ x : Mbar_bdd r' ⟨S⟩ c₁ M × Mbar_bdd r' ⟨S⟩ c₂ M, Mbar_bdd.add x.1 x.2) ∘
       (λ x : Mbar_le r' S c₁ × Mbar_le r' S c₂, (truncate M x.1, truncate M x.2)), by {ext, refl},
     rw claim,
@@ -380,8 +347,7 @@ begin
   exact continuous_of_discrete_topology,
 end
 
-lemma continuous_neg :
-  continuous (Mbar_le.neg : Mbar_le r' S c → Mbar_le r' S c) :=
+lemma continuous_neg : continuous (Mbar_le.neg : Mbar_le r' S c → Mbar_le r' S c) :=
 begin
   rw continuous_iff,
   intro M,
@@ -399,6 +365,9 @@ begin
   simp only [function.comp, truncate_cast_le],
   exact continuous_bot.comp continuous_truncate
 end
+
+/-! We now prove some scaffolding lemmas
+in order to prove that the action of `T⁻¹` is continuous. -/
 
 lemma continuous_of_normed_group_hom
   (f : (Mbar r' S) →+ (Mbar r' S))
@@ -463,78 +432,6 @@ continuous_of_normed_group_hom f _ (λ F, by { ext, refl }) H
   (F : (Mbar_le r' S c₁)) (s : S) (i : ℕ) :
   (hom_of_normed_group_hom c₁ c₂ f h) F s i = f F s i := rfl
 
-open pseudo_normed_group
-
-variables (r') (S)
-
-/-- Construct a map between `(Mbar_le r' S c₁)^m` and `(Mbar_le r' S c₂)^n`
-from a bounded group homomorphism `f : (Mbar r' S)^m → (Mbar r' S)^n`.
-
-If `f` satisfies a suitable criterion,
-then the constructed map is continuous for the profinite topology;
-see `continuous_of_normed_group_hom'`. -/
-def hom_of_normed_group_hom' {C : ℝ≥0} (c₁ c₂ : ℝ≥0) {m n : ℕ} (hc : C * c₁ ≤ c₂)
-  (f : (Mbar r' S)^m →+ (Mbar r' S)^n) (h : f ∈ filtration ((Mbar r' S)^m →+ (Mbar r' S)^n) C)
-  (F : (Mbar_le r' S c₁)^m) :
-  (Mbar_le r' S c₂)^n :=
-λ j,
-(⟨({to_fun := λ s i, f (λ k, (F k)) j s i,
-    coeff_zero' := λ s, Mbar.coeff_zero _ _,
-    summable' := λ s, Mbar.summable _ _ } : Mbar r' S),
-    by apply filtration_mono hc (h $ λ i, (F i).mem_filtration)⟩ : Mbar_le r' S c₂)
-
-@[simp] lemma coe_hom_of_normed_group_hom'_apply {C : ℝ≥0} (c₁ c₂ : ℝ≥0) {m n : ℕ} (hc : C * c₁ ≤ c₂)
-  (f : (Mbar r' S)^m →+ (Mbar r' S)^n) (h : f ∈ filtration ((Mbar r' S)^m →+ (Mbar r' S)^n) C)
-  (F : (Mbar_le r' S c₁)^m) (j : fin n) (s : S) (i : ℕ) :
-  (hom_of_normed_group_hom' r' S c₁ c₂ hc f h F j) s i = f (λ k, (F k)) j s i := rfl
-
-lemma continuous_of_normed_group_hom' (c₁ c₂ : ℝ≥0) {m n : ℕ}
-  (f : ((Mbar r' S) ^ m) →+ ((Mbar r' S) ^ n))
-  (g : (Mbar_le r' S c₁)^m → (Mbar_le r' S c₂)^n)
-  (h : ∀ x j, (g x j).1 = f (λ i, (x i).1) j)
-  (H : ∀ M : ℕ, ∃ N : ℕ, ∀ (F : (Mbar r' S)^m),
-    (∀ i s k, k < N + 1 → (F i : Mbar r' S) s k = 0) → (∀ j s k, k < M + 1 → f F j s k = 0)) :
-  continuous g :=
-begin
-  apply continuous_pi,
-  intro j,
-  rw continuous_iff,
-  intros M,
-  rcases H M with ⟨N, hN⟩,
-  let φ : (Mbar_bdd r' ⟨S⟩ c₁ N)^m → (Mbar_le r' S c₁)^m :=
-    function.comp (classical.some (truncate_surjective N).has_right_inverse),
-  have hφ : function.right_inverse φ (function.comp $ truncate N),
-  { intro x, ext1 i,
-    exact (classical.some_spec (truncate_surjective N).has_right_inverse) (x i) },
-  suffices :
-    truncate M ∘ (λ F, g F j) = truncate M ∘ (λ F, g F j) ∘ φ ∘ (function.comp $ truncate N),
-  { rw [this, ← function.comp.assoc, ← function.comp.assoc],
-    refine continuous_of_discrete_topology.comp (continuous_pi _),
-    intro i, exact continuous_truncate.comp (continuous_apply _) },
-  ext1 x,
-  suffices : ∀ s k, k < M + 1 → (g x j).1 s k = (g (φ (λ i, truncate N (x i))) j).1 s k,
-  { ext s k, dsimp [function.comp], apply this, exact k.property },
-  intros s k hk,
-  rw [h, h, ← sub_eq_zero],
-  show (f (λ i, (x i).1) - f (λ i, (φ (λ i', truncate N (x i')) i).1)) j s k = 0,
-  rw [← f.map_sub],
-  apply hN _ _ _ _ _ hk,
-  clear hk k s, intros i s k hk,
-  simp only [Mbar.coe_sub, pi.sub_apply, sub_eq_zero],
-  suffices : ∀ k, (truncate N (x i)) s k = truncate N (φ (λ i', truncate N (x i')) i) s k,
-  { exact this ⟨k, hk⟩ },
-  intros k, congr' 1, revert i, rw ← function.funext_iff,
-  exact (hφ _).symm
-end
-
-lemma hom_of_normed_group_hom'_continuous
-  {C : ℝ≥0} (c₁ c₂ : ℝ≥0) {m n : ℕ} (hc : C * c₁ ≤ c₂)
-  (f : (Mbar r' S)^m →+ (Mbar r' S)^n) (h : f ∈ filtration ((Mbar r' S)^m →+ (Mbar r' S)^n) C)
-  (H : ∀ M : ℕ, ∃ N : ℕ, ∀ (F : (Mbar r' S)^m),
-    (∀ i s k, k < N + 1 → (F i : Mbar r' S) s k = 0) → (∀ j s k, k < M + 1 → f F j s k = 0)) :
-  continuous (hom_of_normed_group_hom' r' S c₁ c₂ hc f h) :=
-continuous_of_normed_group_hom' r' S c₁ c₂ f _ (λ x i, by { ext, refl }) H
-
 section Tinv
 
 /-!
@@ -572,7 +469,6 @@ end Tinv
 
 end Mbar_le
 
--- move this up a bit
 instance [fact (0 < r')] : profinitely_filtered_pseudo_normed_group (Mbar r' S) :=
 { topology := λ c, show topological_space (Mbar_le r' S c), by apply_instance,
   t2 := λ c, show t2_space (Mbar_le r' S c), by apply_instance,
@@ -589,4 +485,4 @@ instance [fact (0 < r')] : profinitely_filtered_pseudo_normed_group (Mbar r' S) 
   end,
   .. Mbar.pseudo_normed_group }
 
-#lint- only unused_arguments def_lemma doc_blame
+#lint-

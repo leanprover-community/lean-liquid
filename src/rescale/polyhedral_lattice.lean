@@ -44,7 +44,8 @@ variables {N : ℝ≥0} {V : Type*}
 
 instance (Λ : Type*) [hN : fact (0 < N)] [polyhedral_lattice Λ] :
   polyhedral_lattice (rescale N Λ) :=
-{ finite_free := by { delta rescale, exact polyhedral_lattice.finite_free _ },
+{ finite := by { delta rescale, apply_instance },
+  free   := by { delta rescale, apply_instance },
   polyhedral' :=
   begin
     obtain ⟨ι, _inst_ι, l, hl⟩ := polyhedral_lattice.polyhedral' Λ, resetI,

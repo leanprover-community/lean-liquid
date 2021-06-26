@@ -1,8 +1,7 @@
 import analysis.normed_space.normed_group_hom
 import ring_theory.finiteness
+import linear_algebra.free_module
 import ring_theory.int.basic
-
-import for_mathlib.finite_free
 
 /-!
 
@@ -34,34 +33,36 @@ def generates_norm (x : ι → Λ) :=
 lemma generates_norm_iff_generates_nnnorm (x : ι → Λ) :
   generates_norm x ↔
   ∀ l : Λ, ∃ (c : ι → ℕ),
-    (l = ∑ i, c i • x i) ∧ (nnnorm l = ∑ i, c i * nnnorm (x i)) :=
+    (l = ∑ i, c i • x i) ∧ (∥l∥₊ = ∑ i, c i * ∥x i∥₊) :=
 begin
   apply forall_congr, intro l,
   simp only [← nnreal.eq_iff, nnreal.coe_mul, nnreal.coe_sum, nnreal.coe_nat_cast, coe_nnnorm]
 end
 
 lemma generates_norm.generates_nnnorm {x : ι → Λ} (hl : generates_norm x) :
-  ∀ l : Λ, ∃ (c : ι → ℕ), (l = ∑ i, c i • x i) ∧ (nnnorm l = ∑ i, c i * nnnorm (x i)) :=
+  ∀ l : Λ, ∃ (c : ι → ℕ), (l = ∑ i, c i • x i) ∧ (∥l∥₊ = ∑ i, c i * ∥x i∥₊) :=
 (generates_norm_iff_generates_nnnorm x).mp hl
 
 lemma generates_norm_of_generates_nnnorm {x : ι → Λ}
-  (H : ∀ l : Λ, ∃ (c : ι → ℕ), (l = ∑ i, c i • x i) ∧ (nnnorm l = ∑ i, c i * nnnorm (x i))) :
+  (H : ∀ l : Λ, ∃ (c : ι → ℕ), (l = ∑ i, c i • x i) ∧ (∥l∥₊ = ∑ i, c i * ∥x i∥₊)) :
   generates_norm x :=
 (generates_norm_iff_generates_nnnorm x).mpr H
 
 end generates_norm
 
 class polyhedral_lattice (Λ : Type*) extends normed_group Λ :=
--- now we get to the actual definition
-(finite_free [] : finite_free Λ)
+[finite [] : module.finite ℤ Λ]
+[free   [] : module.free ℤ Λ]
 (polyhedral' [] : ∃ (ι : Type) [fintype ι] (l : ι → Λ), generates_norm l)
 
 namespace polyhedral_lattice
 
 variables (Λ : Type*) [polyhedral_lattice Λ]
 
+attribute [instance] polyhedral_lattice.finite polyhedral_lattice.free
+
 instance no_zero_smul_divisors_int : no_zero_smul_divisors ℤ Λ :=
-(polyhedral_lattice.finite_free Λ).basis.no_zero_smul_divisors
+module.free.no_zero_smul_divisors ℤ Λ
 
 instance no_zero_smul_divisors_nat : no_zero_smul_divisors ℕ Λ :=
 ⟨λ n l h, by { rw [← gsmul_coe_nat, smul_eq_zero] at h,
@@ -116,7 +117,7 @@ def mk_polyhedral_lattice_hom (f : Λ₁ →+ Λ₂) (h : ∀ v, ∥f v∥ ≤ �
 /-- Associate to a group homomorphism a bounded group homomorphism under a norm control condition.
 
 See `add_monoid_hom.mk_polyhedral_lattice_hom` for a version that uses `ℝ` for the bound. -/
-def mk_polyhedral_lattice_hom' (f : Λ₁ →+ Λ₂) (h : ∀ x, nnnorm (f x) ≤ nnnorm x) :
+def mk_polyhedral_lattice_hom' (f : Λ₁ →+ Λ₂) (h : ∀ x, ∥f x∥₊ ≤ ∥x∥₊) :
   polyhedral_lattice_hom Λ₁ Λ₂ :=
 { strict' := h, .. f}
 
@@ -188,7 +189,7 @@ instance : has_zero (polyhedral_lattice_hom Λ₁ Λ₂) :=
 
 lemma strict (l : Λ₁) : ∥f l∥ ≤ ∥l∥ := f.strict' l
 
-lemma strict_nnnorm (l : Λ₁) : nnnorm (f l) ≤ nnnorm l := f.strict' l
+lemma strict_nnnorm (l : Λ₁) : ∥f l∥₊ ≤ ∥l∥₊ := f.strict' l
 
 @[simps]
 def to_normed_group_hom : normed_group_hom Λ₁ Λ₂ :=

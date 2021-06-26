@@ -1,6 +1,5 @@
 import category_theory.products.basic
 
-import for_mathlib.arrow.iso_mk
 import for_mathlib.Cech.adjunction
 import for_mathlib.simplicial.iso
 import for_mathlib.wide_pullback

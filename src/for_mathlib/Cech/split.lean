@@ -3,7 +3,6 @@ import algebraic_topology.cech_nerve
 
 import for_mathlib.simplicial.complex
 import for_mathlib.arrow.split
-import for_mathlib.fin
 
 namespace category_theory
 
@@ -67,17 +66,16 @@ begin
     { refine false.elim (h2 _),
       change j.succ_above k = 0 at h1,
       change k = 0,
-      rwa ← fin.succ_above_eq_zero_iff _ _ hj },
+      rwa ← fin.succ_above_eq_zero_iff hj },
     { refine false.elim (h1 _),
       erw h,
       change j.succ_above 0 = 0,
-      rw fin.succ_above_eq_zero_iff _ _ hj },
+      rw fin.succ_above_eq_zero_iff hj },
     { simp only [category_theory.limits.wide_pullback.lift_π],
       congr,
       change (j.succ_above k).pred h1 = (j.pred hj).succ_above (k.pred h),
-      change j.succ_above k ≠ 0 at h1,
-      change k ≠ 0 at h,
-      rw fin.succ_above_pred } }
+      rw fin.pred_succ_above_pred,
+      refl } }
 end
 
 end arrow

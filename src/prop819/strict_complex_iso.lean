@@ -4,15 +4,15 @@ import algebra.homology.additive
 namespace SemiNormedGroup
 
 protected class strict_iso {A B : SemiNormedGroup} (f : A ≅ B) :=
-(strict_hom' : ∀ a : A, nnnorm (f.hom a) = nnnorm a)
+(strict_hom' : ∀ a : A, ∥f.hom a∥₊ = ∥a∥₊)
 
 @[simp]
 lemma strict_iso_hom {A B : SemiNormedGroup} (f : A ≅ B) [strict_iso f] (a : A) :
-  nnnorm (f.hom a) = nnnorm a := strict_iso.strict_hom' _
+  ∥f.hom a∥₊ = ∥a∥₊ := strict_iso.strict_hom' _
 
 @[simp]
 lemma strict_iso_inv {A B : SemiNormedGroup} (f : A ≅ B) [strict_iso f] (b : B) :
-  nnnorm (f.inv b) = nnnorm b :=
+  ∥f.inv b∥₊ = ∥b∥₊ :=
 begin
   have : b = f.hom (f.inv b),
   { change b = (f.inv ≫ f.hom) b, simp },

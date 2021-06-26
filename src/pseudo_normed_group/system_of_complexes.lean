@@ -1,7 +1,7 @@
 import system_of_complexes.basic
 import pseudo_normed_group.Tinv
 import pseudo_normed_group.category
-import for_mathlib.arrow
+
 /-!
 
 # The system of complexes in Theorem 9.4 of `analytic.pdf`

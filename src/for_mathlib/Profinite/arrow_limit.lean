@@ -1,7 +1,6 @@
+import topology.category.Profinite.as_limit
 import for_mathlib.Profinite.compat_discrete_quotient
 import for_mathlib.Cech.split
-import for_mathlib.arrow
-import topology.category.Profinite.as_limit
 
 noncomputable theory
 

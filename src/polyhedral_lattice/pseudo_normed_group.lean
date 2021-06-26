@@ -15,12 +15,37 @@ of `pseudo_normed_group.with_Tinv`.
 -/
 
 noncomputable theory
-open_locale nnreal
+open_locale nnreal big_operators
 
 open pseudo_normed_group semi_normed_group
 
 lemma int.one_mem_filtration : (1 : ℤ) ∈ filtration ℤ 1 :=
 by simp only [nnnorm_one, mem_filtration_iff]
+
+section
+
+variables {Λ : Type*} [polyhedral_lattice Λ]
+variables {M : Type*} [pseudo_normed_group M]
+
+lemma generates_norm.add_monoid_hom_mem_filtration_iff {ι : Type} [fintype ι]
+  {l : ι → Λ} (hl : generates_norm l) (x : Λ →+ M) (c : ℝ≥0) :
+  x ∈ filtration (Λ →+ M) c ↔ ∀ i, x (l i) ∈ filtration M (c * ∥l i∥₊) :=
+begin
+  refine ⟨λ H i, H (le_refl ∥l i∥₊), _⟩,
+  intros H c' l' hl',
+  obtain ⟨cᵢ, h1, h2⟩ := hl.generates_nnnorm l',
+  rw [h1, x.map_sum],
+  refine filtration_mono _ (sum_mem_filtration _ (λ i, c * cᵢ i * ∥l i∥₊) _ _),
+  { calc ∑ i, c * cᵢ i * ∥l i∥₊
+        = c * ∑ i, cᵢ i * ∥l i∥₊ : by simp only [mul_assoc, ← finset.mul_sum]
+    ... = c * ∥l'∥₊ : by rw h2
+    ... ≤ c * c' : mul_le_mul' le_rfl hl' },
+  rintro i -,
+  rw [mul_assoc, mul_left_comm, x.map_nsmul],
+  exact pseudo_normed_group.nat_smul_mem_filtration (cᵢ i) _ _ (H i),
+end
+
+end
 
 namespace polyhedral_lattice
 
@@ -33,7 +58,7 @@ namespace add_monoid_hom
 
 variables {Λ r' M} (c : ℝ≥0)
 
-def incl (c : ℝ≥0) : filtration (Λ →+ M) c → Π l : Λ, filtration M (c * nnnorm l) :=
+def incl (c : ℝ≥0) : filtration (Λ →+ M) c → Π l : Λ, filtration M (c * ∥l∥₊) :=
 λ f l, ⟨f l, f.2 $ mem_filtration_nnnorm _⟩
 
 @[simp] lemma coe_incl_apply (f : filtration (Λ →+ M) c) (l : Λ) :
@@ -71,7 +96,7 @@ instance : totally_disconnected_space (filtration (Λ →+ M) c) :=
 
 lemma incl_range_eq :
   (set.range (@incl Λ r' M _ _ c)) =
-    ⋂ l₁ l₂, {f | (cast_le (f (l₁ + l₂)) : filtration M (c * (nnnorm l₁ + nnnorm l₂))) =
+    ⋂ l₁ l₂, {f | (cast_le (f (l₁ + l₂)) : filtration M (c * (∥l₁∥₊ + ∥l₂∥₊))) =
     cast_le (add' (f l₁, f l₂))} :=
 begin
   ext f,
@@ -132,7 +157,7 @@ instance profinitely_filtered_pseudo_normed_group :
     have step1 :=
       ((continuous_apply l).comp (incl_continuous Λ r' M c₁)).prod_map
       ((continuous_apply l).comp (incl_continuous Λ r' M c₂)),
-    have step2 := (continuous_add' (c₁ * nnnorm l) (c₂ * nnnorm l)),
+    have step2 := (continuous_add' (c₁ * ∥l∥₊) (c₂ * ∥l∥₊)),
     have := step2.comp step1,
     refine (@continuous_cast_le _ _ _ _ (id _)).comp this,
     rw add_mul, exact ⟨le_rfl⟩
@@ -189,7 +214,7 @@ begin
   haveI : ∀ a, fact (a ≤ r' * (r'⁻¹ * a)) :=
     λ a, ⟨by simp [mul_inv_cancel_left' (ne_of_gt (fact.out _ : 0 < r'))]⟩,
   refine (@continuous_cast_le _ _ _ _ (id _)).comp
-    ((@Tinv₀_continuous r' M _ (c * nnnorm l) (r'⁻¹ * (c * nnnorm l)) _).comp
+    ((@Tinv₀_continuous r' M _ (c * ∥l∥₊) (r'⁻¹ * (c * ∥l∥₊)) _).comp
     ((continuous_apply l).comp (add_monoid_hom.incl_continuous Λ r' M c))),
   rw mul_assoc, exact ⟨le_rfl⟩
 end

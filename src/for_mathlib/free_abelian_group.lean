@@ -21,9 +21,6 @@ open_locale big_operators
 namespace free_abelian_group
 variables (X : Type*)
 
-@[simp] lemma map_of' {X Y : Type*} (f : X → Y) (x : X) :
-  map f (of x) = of (f x) := rfl
-
 /-- The group homomorphism `free_abelian_group X →+ (X →₀ ℤ)`. -/
 def to_finsupp : free_abelian_group X →+ (X →₀ ℤ) :=
 free_abelian_group.lift $ λ x, finsupp.single x (1 : ℤ)
@@ -360,10 +357,10 @@ begin
     simp only [finset.not_mem_empty, exists_false, support_zero,
       add_monoid_hom.map_zero, false_and], },
   { intros n hn x y,
-    simp only [hn, add_monoid_hom.map_int_module_smul, map_of', support_smul, support_of,
+    simp only [hn, add_monoid_hom.map_int_module_smul, map_of_apply, support_smul, support_of,
       exists_eq_left, ne.def, not_false_iff, finset.mem_singleton], },
   { rintro a n hn x hx IH - y,
-    simp only [add_monoid_hom.map_int_module_smul, add_monoid_hom.map_add, map_of',
+    simp only [add_monoid_hom.map_int_module_smul, add_monoid_hom.map_add, map_of_apply,
       support_add_smul_of _ _ hn _ hx],
     rw support_add_smul_of _ _ hn,
     { simp only [IH, finset.mem_insert],
