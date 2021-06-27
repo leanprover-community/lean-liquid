@@ -29,16 +29,6 @@ def fintype_arrow_diagram : discrete_quotient F.left ⥤ arrow Fintype.{u} :=
 @[simps]
 def arrow_diagram : discrete_quotient F.left ⥤ arrow Profinite.{u} :=
 fintype_arrow_diagram F surj ⋙ Fintype.to_Profinite.map_arrow
-/-
-{ obj := λ S,
-  { left := Profinite.of S,
-    right := Profinite.of $ S.make F.hom surj,
-    hom := ⟨discrete_quotient.map (S.make_le_comap _ _),
-      discrete_quotient.map_continuous _⟩ },
-  map := λ S T f,
-  { left := ⟨of_le $ le_of_hom f⟩,
-    right := ⟨of_le $ make_right_mono F.hom surj S T $ le_of_hom f⟩ } }.
--/
 
 /-- The left diagram associated to arrow_diagram. -/
 abbreviation left_arrow_diagram : discrete_quotient F.left ⥤ Profinite.{u} :=
@@ -61,9 +51,8 @@ instance (S : discrete_quotient F.left) : arrow.split ((arrow_diagram F surj).ob
     continuous_of_discrete_topology⟩,
   is_splitting' := begin
     ext x,
-    have := classical.some_spec (arrow_diagram_surjective F surj S x),
-    erw this,
-    simp,
+    erw classical.some_spec (arrow_diagram_surjective F surj S x),
+    refl,
   end }
 
 /-- A cone which is a limit expressing an arrow as a limit. -/
@@ -303,8 +292,7 @@ def Cech_cone_is_limit (n : ℕ) : limits.is_limit (Cech_cone F surj n) :=
       refl },
     { dsimp,
       simp,
-      have := (is_limit_right_arrow_cone F surj).fac,
-      erw this,
+      erw (is_limit_right_arrow_cone F surj).fac,
       refl }
   end,
   uniq' := begin
