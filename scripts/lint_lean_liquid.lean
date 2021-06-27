@@ -74,14 +74,20 @@ h ← mk_file_handle fn mode.write,
 put_str h contents,
 close h
 
+/-- Returns the full path of the `src/` dir.
+
+We obtain this by starting with a "hackish way to get the `src` directory of mathlib" as implemented
+in `tactic.get_mathlib_dir`. We note that this is a rather ridiculous way to get the full path of
+`src/`.
+-/
+meta def get_src_dir : tactic string := do
+ml ← tactic.get_mathlib_dir,
+pure $ ml.popn_back (string.length "_target/deps/mathlib/src/") ++ "src/"
+
 /-- Returns the declarations to be considered. -/
 meta def lint_decls : tactic (list declaration) := do
 e ← tactic.get_env,
-ml ← tactic.get_mathlib_dir,
--- We need to convert mathlib's src dir to lean-liquid's
--- This is kind of a ridiculous way to get the full path of the `src/` directory if you look at what
--- `get_mathlib_dir` does, but it does involve minimal changes to the mathlib linting script...
-src ← pure $ ml.popn_back (string.length "_target/deps/mathlib/src/") ++ "src/",
+src ← get_src_dir,
 pure $ e.filter $ λ d, e.is_prefix_of_file src d.to_name
 
 meta def enabled_linters : list name :=
@@ -100,7 +106,7 @@ meta def main : io unit := do
 env ← tactic.get_env,
 decls ← lint_decls,
 linters ← get_linters enabled_linters,
-mathlib_path_len ← string.length <$> tactic.get_mathlib_dir,
+path_len ← string.length <$> get_src_dir,
 let non_auto_decls := decls.filter (λ d, ¬ d.is_auto_or_internal env),
 results₀ ← lint_core decls non_auto_decls linters,
 nolint_file ← read_nolints_file,
@@ -108,6 +114,6 @@ let results := (do
   (linter_name, linter, decls) ← results₀,
   [(linter_name, linter, (nolint_file.find linter_name).foldl rb_map.erase decls)]),
 io.print $ to_string $ format_linter_results env results decls non_auto_decls
-  mathlib_path_len "in lean-liquid" tt lint_verbosity.medium,
--- io.write_file "nolints.txt" $ to_string $ mk_nolint_file env mathlib_path_len results₀,
+  path_len "in lean-liquid" tt lint_verbosity.medium,
+-- io.write_file "nolints.txt" $ to_string $ mk_nolint_file env path_len results₀,
 if results.all (λ r, r.2.2.empty) then pure () else io.fail ""
