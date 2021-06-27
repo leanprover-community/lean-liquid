@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 set -e
 set -x
 
@@ -51,7 +52,7 @@ git clean -f -d
 # n.b. this for loop will break if there are filenames with spaces
 for olean_file in `find $dirs -name "*.olean"`
 do
-  lean_file=${olean_file/%.olean/.lean}
+  lean_file=${olean_file%.olean}.lean
   if [ ! -e $lean_file ]; then
     rm $olean_file
   fi
