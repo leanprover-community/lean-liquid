@@ -93,6 +93,22 @@ jobs:
       - name: test thm95 is sorry free
         run: python scripts/ensure_thm95_sorry_free.py
 
+      - name: setup precompiled zip file
+        if: always() && steps.build.outputs.started == 'true'
+        id: setup_precompiled
+        run: |
+          touch workspace.tar
+          tar -cf workspace.tar --exclude=*.tar* .
+          git_hash="$(git log -1 --pretty=format:%h)"
+          echo "::set-output name=artifact_name::precompiled-lean-liquid-$short_lean_version-$git_hash"
+
+      - name: upload precompiled lean-liquid zip file
+        if: always() && steps.build.outputs.started == 'true'
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ steps.setup_precompiled.outputs.artifact_name }}
+          path: workspace.tar
+
       - name: install ripgrep
         if: always()
         run: sudo apt install -y ripgrep
@@ -101,3 +117,29 @@ jobs:
         if: always()
         run: |
           rg --count-matches sorry src | awk -F ':' 'BEGIN {sum = 0} {sum += $2} {print $2 " " $1} END {print "Total: " sum}'
+
+  lint:
+    name: Lint lean-liquid
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: retrieve build
+        uses: actions/download-artifact@v2
+        with:
+          name: ${{ needs.build.outputs.artifact_name }}
+
+      - name: untar build
+        run: tar -xf workspace.tar
+
+      - name: install elan
+        run: |
+          set -o pipefail
+          curl https://raw.githubusercontent.com/Kha/elan/master/elan-init.sh -sSf | sh -s -- --default-toolchain none -y
+          ~/.elan/bin/lean --version
+          echo "$HOME/.elan/bin" >> $GITHUB_PATH
+
+      - name: lint
+        run: |
+          ./scripts/mk_all.sh
+          lean --run scripts/lint_lean_liquid.lean
