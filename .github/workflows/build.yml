@@ -72,6 +72,7 @@ jobs:
         run: leanproject get-mathlib-cache || true
 
       - name: try to find olean cache
+        continue-on-error: true
         run: ./scripts/fetch_olean_cache.sh
 
       - name: leanpkg build
@@ -83,6 +84,7 @@ jobs:
 
       - name: push release to azure
         if: always() && (github.repository == 'leanprover-community/lean-liquid' || github.repository == 'bentoner/lean-liquid') && steps.build.outputs.started == 'true'
+        continue-on-error: true
         run: |
           archive_name="$(git rev-parse HEAD).tar.xz"
           find src/ -name "*.olean" -o -name ".noisy_files" | tar cJf "$archive_name" -T -
