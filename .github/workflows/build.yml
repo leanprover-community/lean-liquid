@@ -104,15 +104,6 @@ jobs:
           name: ${{ steps.setup_precompiled.outputs.artifact_name }}
           path: workspace.tar
 
-      - name: install ripgrep
-        if: always()
-        run: sudo apt install -y ripgrep
-
-      - name: count sorries
-        if: always()
-        run: |
-          rg --count-matches sorry src | awk -F ':' 'BEGIN {sum = 0} {sum += $2} {print $2 " " $1} END {print "Total: " sum}'
-
   lint:
     name: Lint lean-liquid
     runs-on: ubuntu-latest
@@ -168,3 +159,29 @@ jobs:
 
       - name: test thm95 is sorry free
         run: python scripts/ensure_thm95_sorry_free.py
+
+
+  stats:
+    name: Stats for lean-liquid
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: install ripgrep
+        run: sudo apt install -y ripgrep
+
+      - name: count lines in src
+        run: |
+          shopt -s globstar
+          wc -l src/**/*.lean
+
+      - name: count lines in for_mathlib
+        run: |
+          shopt -s globstar
+          wc -l src/for_mathlib/**/*.lean
+
+      - name: count sorries
+        run: |
+          rg --count-matches sorry src | awk -F ':' 'BEGIN {sum = 0} {sum += $2} {print $2 " " $1} END {print sum " total"}'
