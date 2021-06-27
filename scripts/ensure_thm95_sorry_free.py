@@ -6,14 +6,7 @@ import sys
 
 SCRIPT_LOCATION = os.path.join(os.path.dirname(__file__), "print_thm95_axioms.lean")
 
-# We need lean to rebuild this file each time otherwise our #print statement doesn't execute, so
-# first delete its olean, if it exists.
-try:
-  os.remove(SCRIPT_LOCATION.replace(".lean", ".olean"))
-except OSError:
-  pass
-
-completed_lean_process = subprocess.run(["lean", "--make", SCRIPT_LOCATION], capture_output=True)
+completed_lean_process = subprocess.run(["lean", "--run", SCRIPT_LOCATION], capture_output=True)
 
 if completed_lean_process.returncode or b"BEGIN_THM95_AXIOMS" not in completed_lean_process.stdout:
   print("Lean subprocess didn't complete successfully:")
