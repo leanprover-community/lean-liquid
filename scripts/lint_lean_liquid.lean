@@ -59,7 +59,7 @@ open io io.fs
 /--
 Reads the `nolints.txt`, and returns it as an `rb_lmap` from linters to declarations.
 -/
-meta def read_nolints_file (fn := "scripts/nolints.txt") : io (rb_lmap name name) := do
+meta def read_nolints_file (fn := "_target/deps/mathlib/scripts/nolints.txt") : io (rb_lmap name name) := do
 cont ← io.fs.read_file fn,
 pure $ parse_nolints $ cont.to_string.split (= '\n')
 
@@ -74,11 +74,32 @@ h ← mk_file_handle fn mode.write,
 put_str h contents,
 close h
 
-/-- Runs when called with `lean --run` -/
+/-- Returns the declarations to be considered. -/
+meta def lint_decls : tactic (list declaration) := do
+e ← tactic.get_env,
+ml ← tactic.get_mathlib_dir,
+-- We need to convert mathlib's src dir to lean-liquid's
+-- This is kind of a ridiculous way to get the full path of the `src/` directory if you look at what
+-- `get_mathlib_dir` does, but it does involve minimal changes to the mathlib linting script...
+src ← pure $ ml.popn_back (string.length "_target/deps/mathlib/src/") ++ "src/",
+pure $ e.filter $ λ d, e.is_prefix_of_file src d.to_name
+
+meta def enabled_linters : list name :=
+  -- Enable additional linters for lean-liquid by adding them to this list.
+  let enabled_linter_names := ["linter.unused_arguments"] in
+  mathlib_linters.filter $ λ x: name, x.to_string ∈ enabled_linter_names
+
+/-- Runs when called with `lean --run`.
+
+Edit the list in `enabled_linters` to run additional linters.
+
+We currently rely on mathlib to provide the `nolints.txt` file and do not maintain a separate
+`nolints.txt` file for lean-liquid.
+-/
 meta def main : io unit := do
 env ← tactic.get_env,
-decls ← lint_mathlib_decls,
-linters ← get_linters mathlib_linters,
+decls ← lint_decls,
+linters ← get_linters enabled_linters,
 mathlib_path_len ← string.length <$> tactic.get_mathlib_dir,
 let non_auto_decls := decls.filter (λ d, ¬ d.is_auto_or_internal env),
 results₀ ← lint_core decls non_auto_decls linters,
@@ -87,6 +108,6 @@ let results := (do
   (linter_name, linter, decls) ← results₀,
   [(linter_name, linter, (nolint_file.find linter_name).foldl rb_map.erase decls)]),
 io.print $ to_string $ format_linter_results env results decls non_auto_decls
-  mathlib_path_len "in mathlib" tt lint_verbosity.medium,
-io.write_file "nolints.txt" $ to_string $ mk_nolint_file env mathlib_path_len results₀,
+  mathlib_path_len "in lean-liquid and mathlib" tt lint_verbosity.medium,
+-- io.write_file "nolints.txt" $ to_string $ mk_nolint_file env mathlib_path_len results₀,
 if results.all (λ r, r.2.2.empty) then pure () else io.fail ""
