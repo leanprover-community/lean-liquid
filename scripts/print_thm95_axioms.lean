@@ -6,5 +6,4 @@ import thm95
 #print axioms thm95''
 #print "END_THM95_AXIOMS"
 
--- TODO what's the idiomatic way to do a no-op, like "pass" in Python
-meta def main : io unit := io.proc.sleep(0)
+meta def main : io unit := pure ()
