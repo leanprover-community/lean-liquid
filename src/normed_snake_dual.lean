@@ -72,8 +72,7 @@ calc ∥res m - (M.d i' i) m₁∥ = ∥f (res m - (M.d i' i) m₁)∥ : (hfnorm
 
 
 /-  I (DT) extracted this lemma to speed up the proof of `weak_normed_snake_dual`.
-The `ρ` in this lemma stands for `K + r₁ * r₂ * K * K'` in the application.
- -/
+The `ρ` in this lemma stands for `K + r₁ * r₂ * K * K'` in the application. -/
 lemma exists_norm_sub_le_mul_add {M : system_of_complexes} {k k' c ρ : ℝ≥0}
   {i : ℕ}
   [hk : fact (1 ≤ k)] [hk' : fact (1 ≤ k')]
