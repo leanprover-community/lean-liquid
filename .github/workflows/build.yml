@@ -128,6 +128,7 @@ jobs:
           echo "$HOME/.elan/bin" >> $GITHUB_PATH
 
       - name: lint
+        continue-on-error: true
         run: |
           ./scripts/mk_all.sh
           lean --run scripts/lint_lean_liquid.lean
