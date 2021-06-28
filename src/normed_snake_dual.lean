@@ -123,6 +123,65 @@ by { rw [hε₁, div_eq_mul_inv, mul_assoc, ← mul_inv'],
      exact mul_le_of_le_one_right hε (inv_le_one $ nnreal.coe_le_coe.mpr $
       one_le_mul one_le_two $ le_add_of_nonneg_right mK.2) }
 
+lemma exist_norm_sub_le_mul_norm_add {M N P : system_of_complexes} {k k' K K' r₁ r₂ c₀ c : ℝ≥0}
+  {a i : ℕ}
+  (ε : ℝ) -- keep explicit to work with positive, for weak, and with zero, for non-weak
+  {f : M ⟶ N} {g : N ⟶ P}
+  [hk : fact (1 ≤ k)]
+  [hk' : fact (1 ≤ k')]
+  (hN_adm : N.admissible)
+  (hgnrm : ∀ (c : ℝ≥0) (i : ℕ) (x : (N c i)), ∥g x∥ ≤ r₁ * ∥x∥)
+  (Hg : ∀ (c : ℝ≥0) [_inst_1 : fact (c₀ ≤ c)] (i : ℕ),
+          i ≤ a + 1 + 1 → ∀ (y : (P c i)), ∃ (x : (N c i)), g x = y ∧ ∥x∥ ≤ r₂ * ∥y∥)
+  (hg : ∀ (c : ℝ≥0) (i : ℕ), (range f.apply : add_subgroup (N c i)) = ker g.apply)
+  (hf : ∀ (c : ℝ≥0) (i : ℕ), (isometry (f.apply : M c i ⟶ N c i) : _))
+  (hc : fact (c₀ ≤ c))
+  (hi : i ≤ a)
+  (m : (M (k * (k' * c)) i))
+  (hε : 0 ≤ ε)
+  (n₁ : (N (k' * c) (i - 1)))
+  (hn₁ : ∥res (f m) - (N.d (i - 1) i) n₁∥ ≤
+    K * ∥(N.d i (i + 1)) (f m)∥ + ε / 2 * (1 + K' * r₁ * r₂)⁻¹)
+  (Hi' : i - 1 ≤ a + 1)
+  (p₂ : (P c (i - 1 - 1)))
+  (hp₂ : ∥res (g n₁) - (P.d (i - 1 - 1) (i - 1)) p₂∥ ≤
+    K' * ∥(P.d (i - 1) (i - 1 + 1)) (g n₁)∥ + ite (r₂ = 0) 1 (ε / 2 * (r₂)⁻¹)) :
+  ∃ (i₀ : ℕ) (hi₀ : i₀ = i - 1) (y : (M c i₀)),
+    ∥res m - (M.d i₀ i) y∥ ≤ (K + r₁ * r₂ * K * K') * ∥(M.d i (i + 1)) m∥ + ε :=
+begin
+  have hlt : 0 < 1 + K' * r₁ * r₂ := add_pos_of_pos_of_nonneg zero_lt_one (zero_le _),
+    have Hi'' : (i - 1 - 1) ≤ a + 1 + 1 := trans (nat.pred_le _) (trans Hi' (nat.le_succ _)),
+    obtain ⟨n₂, rfl, hnormn₂⟩ := Hg c (i - 1 - 1) Hi'' p₂,
+    let n₁' := N.d (i - 1 - 1) (i - 1) n₂,
+    obtain ⟨nnew₁, hnnew₁, hnrmnew₁⟩ := Hg c (i - 1) (trans Hi' a.succ.le_succ) (g (res n₁ - n₁')),
+    have hker : (res n₁ - n₁') - nnew₁ ∈ g.apply.ker,
+    { rw [mem_ker, normed_group_hom.map_sub, sub_eq_zero, ←hom_apply, ←hom_apply, hnnew₁] },
+    rw ←hg at hker,
+    obtain ⟨m₁, hm₁ : f m₁ = res n₁ - n₁' - nnew₁⟩ := (mem_range _ _).1 hker,
+    refine ⟨i - 1, rfl, m₁, _⟩,
+
+    have hfnrm : ∀ c i (x : M c i), ∥f.apply x∥ = ∥x∥ :=
+      λ c i x, (isometry_iff_norm _).1 (hf c i) x,
+    by_cases hizero : i = 0,
+    { subst hizero,
+      convert norm_sub_le_mul_mul_norm_add (K' * r₁ * r₂) _ hfnrm _ hn₁,
+      { norm_cast, ring },
+      { exact ε₁_le_ε hε (K' * r₁ * r₂) rfl },
+      { exact (admissible_of_isometry hN_adm hf).res_norm_noninc _ _ _ _ _ } },
+
+    { refine norm_sub_le_mul_norm_add M N P f g _ hN_adm hgnrm hfnrm _ _ hn₁ hp₂ hnrmnew₁ hm₁ _,
+      { exact nat.succ_pred_eq_of_pos (nat.pos_of_ne_zero hizero) },
+      { rw inv_mul_cancel_right', exact_mod_cast hlt.ne' },
+      { by_cases H : r₂ = 0,
+        { simp only [H, nnreal.coe_zero, if_true, zero_mul, (div_nonneg hε zero_le_two)] },
+        { simp only [H, nnreal.coe_eq_zero, if_false, mul_comm,
+            mul_inv_cancel_left' (nnreal.coe_ne_zero.mpr H)] } },
+      { have : f (res m : M (k' * c) i) ∈ f.apply.range, { rw mem_range, exact ⟨res m, rfl⟩ },
+        rw [hg, mem_ker] at this,
+        rw [hom_apply g (res (f m) - (N.d (i - 1) i) n₁), res_apply, normed_group_hom.map_sub, this,
+          zero_sub, norm_neg, ←hom_apply] } }
+end
+
 lemma weak_normed_snake_dual (k k' K K' r₁ r₂ : ℝ≥0)
   [hk : fact (1 ≤ k)] [hk' : fact (1 ≤ k')]
   {a : ℕ} {c₀ : ℝ≥0}
@@ -148,36 +207,10 @@ begin
   have Hi' : i - 1 ≤ a + 1 := trans i.pred_le (trans hi a.le_succ),
   obtain ⟨_, _, rfl, rfl, p₂, hp₂⟩ := hP _ hc _ Hi' (g n₁)
     (if (r₂ : ℝ) = 0 then 1 else (ε / 2) * r₂⁻¹) _,
-  { have Hi'' : (i - 1 - 1) ≤ a + 1 + 1 := trans (nat.pred_le _) (trans Hi' (nat.le_succ _)),
-    obtain ⟨n₂, rfl, hnormn₂⟩ := Hg c (i - 1 - 1) Hi'' p₂,
-    let n₁' := N.d (i - 1 - 1) (i - 1) n₂,
-    obtain ⟨nnew₁, hnnew₁, hnrmnew₁⟩ := Hg c (i - 1) (trans Hi' a.succ.le_succ) (g (res n₁ - n₁')),
-    have hker : (res n₁ - n₁') - nnew₁ ∈ g.apply.ker,
-    { rw [mem_ker, normed_group_hom.map_sub, sub_eq_zero, ←hom_apply, ←hom_apply, hnnew₁] },
-    rw ←hg at hker,
-    obtain ⟨m₁, hm₁ : f m₁ = res n₁ - n₁' - nnew₁⟩ := (mem_range _ _).1 hker,
-    refine ⟨i - 1, rfl, m₁, _⟩,
-
-    have hfnrm : ∀ c i (x : M c i), ∥f.apply x∥ = ∥x∥ :=
-      λ c i x, (isometry_iff_norm _).1 (hf c i) x,
-    by_cases hizero : i = 0,
-    { subst hizero,
-      convert norm_sub_le_mul_mul_norm_add (K' * r₁ * r₂) _ hfnrm _ hn₁,
-      { norm_cast, ring },
-      { exact ε₁_le_ε hε.le (K' * r₁ * r₂) rfl },
-      { exact (admissible_of_isometry hN_adm hf).res_norm_noninc _ _ _ _ _ } },
-
-    { refine norm_sub_le_mul_norm_add M N P f g _ hN_adm hgnrm hfnrm _ _ hn₁ hp₂ hnrmnew₁ hm₁ _,
-      { exact nat.succ_pred_eq_of_pos (nat.pos_of_ne_zero hizero) },
-      { field_simp [hlt.ne.symm], ring },
-      { by_cases H : r₂ = 0,
-        { simp only [H, nnreal.coe_zero, if_true, zero_mul, (half_pos hε).le], },
-        { simp only [H, nnreal.coe_eq_zero, if_false, mul_comm,
-            mul_inv_cancel_left' (nnreal.coe_ne_zero.mpr H)] } },
-      { have : f (res m : M (k' * c) i) ∈ f.apply.range, { rw mem_range, exact ⟨res m, rfl⟩ },
-        rw [hg, mem_ker] at this,
-        rw [hom_apply g (res (f m) - (N.d (i - 1) i) n₁), res_apply, normed_group_hom.map_sub, this,
-          zero_sub, norm_neg, ←hom_apply] } } },
+  { simp_rw [nnreal.coe_eq_zero r₂] at hp₂,
+    apply exist_norm_sub_le_mul_norm_add ε hN_adm hgnrm Hg hg hf
+      hc hi m hε.le n₁ hn₁ Hi' p₂,
+    convert hp₂, },
   { by_cases H : r₂ = 0,
     { simp only [H, zero_lt_one, if_true, eq_self_iff_true, nnreal.coe_eq_zero] },
     { simp only [H, nnreal.coe_eq_zero, if_false],
@@ -247,31 +280,14 @@ begin
     hN _ ⟨hc.out.trans $ le_mul_of_one_le_left' hk'.out⟩ _ (trans hi a.le_succ) (f m),
   have Hi' : (i - 1) ≤ a + 1 := trans i.pred_le (trans hi a.le_succ),
   obtain ⟨_, _, rfl, rfl, p₂, hp₂⟩ := hP _ hc _ Hi' (g n₁),
-  have Hi'' : (i - 1 - 1) ≤ a + 1 + 1 := trans (nat.pred_le _) (trans Hi' (nat.le_succ _)),
-  obtain ⟨n₂, rfl, hnormn₂⟩ := Hg c (i - 1 - 1) Hi'' p₂,
-  let n₁' := N.d (i - 1 - 1) (i - 1) n₂,
-  obtain ⟨nnew₁, hnnew₁, hnormnnew₁⟩ := Hg c (i - 1) (trans Hi' (nat.le_succ _)) (g (res n₁ - n₁')),
-  have hker : (res n₁ - n₁') - nnew₁ ∈ g.apply.ker,
-  { rw [mem_ker, normed_group_hom.map_sub, sub_eq_zero, ←hom_apply, ←hom_apply, hnnew₁] },
-  rw ←hg at hker,
-  obtain ⟨m₁, hm₁ : f m₁ = res n₁ - n₁' - nnew₁⟩ := (mem_range _ _).1 hker,
-  refine ⟨i - 1, rfl, m₁, _⟩,
-
-  have hfnorm : ∀ c i (x : M c i), ∥f.apply x∥ = ∥x∥ := λ c i x, (isometry_iff_norm _).1 (hf c i) x,
-  by_cases hizero : i = 0,
-  { subst hizero,
-    convert norm_sub_le_mul_mul_norm (K' * r₁ * r₂) hfnorm _ hn₁,
-    { norm_cast, ring },
-    { exact (admissible_of_isometry hN_adm hf).res_norm_noninc _ _ _ _ _ } },
-
-  have hii' : i - 1 + 1 = i,
-  { rw [nat.sub_one, nat.add_one, nat.succ_pred_eq_of_pos (zero_lt_iff.mpr hizero)] },
-  have hfm : ∥g (N.d (i - 1) i n₁)∥ = ∥g (res (f m) - N.d (i - 1) i n₁)∥,
-  { have : f (@res _ _ (k' * c) _ _ m) ∈ f.apply.range := by { rw mem_range, exact ⟨res m, rfl⟩ },
-    rw [hg, mem_ker] at this,
-    rw [hom_apply g (res (f m) - (N.d _ i) n₁), res_apply, normed_group_hom.map_sub, this,
-      zero_sub, norm_neg, ←hom_apply] },
-  rw ← add_zero (_ * ∥_∥) at ⊢ hn₁ hp₂,
-  apply norm_sub_le_mul_norm_add M N P f g hii' hN_adm hgnorm hfnorm _ _ hn₁ hp₂ hnormnnew₁ hm₁ hfm;
-  simp,
+  rw ← add_zero (_ * ∥_∥) at ⊢,
+  have hn₁₁ :  ∥res (f m) - (N.d (i - 1) i) n₁∥ ≤
+    K * ∥(N.d i (i + 1)) (f m)∥ + 0 / 2 * (1 + K' * r₁ * r₂)⁻¹, rwa [zero_div, zero_mul, add_zero],
+  obtain F := exist_norm_sub_le_mul_norm_add 0 hN_adm
+    hgnorm Hg hg hf hc hi m rfl.le n₁ hn₁₁ Hi' p₂,
+  by_cases hr : r₂ = 0,
+  { subst hr,
+    simp at ⊢ F,
+    exact F (trans hp₂ (le_add_of_nonneg_right zero_le_one)) },
+  { exact F (by { convert hp₂, simp [hr] } ) }
 end
