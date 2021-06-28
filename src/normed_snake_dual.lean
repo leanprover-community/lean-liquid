@@ -230,32 +230,6 @@ begin
   exact le_mul_of_one_le_left (norm_nonneg _) (le_add_of_nonneg_right mK.2),
 end
 
-/-  I (DT) extracted this lemma to speed up the proof of `normed_snake_dual`. -/
-lemma norm_sub_le_mul_norm {k' K K' r₁ r₂ c c₁ : ℝ≥0}
-  {i  : ℕ} (hii' : (i - 1) + 1 = i)
-  [hk' : fact (1 ≤ k')]
-  [fc₁ : fact (k' * c ≤ c₁)]
-  [fc : fact (c ≤ c₁)]
-  (hN_adm : N.admissible)
-  (hgnorm : ∀ (c : ℝ≥0) (i : ℕ) (x : (N c i)), ∥g x∥ ≤ ↑r₁ * ∥x∥)
-  (hfnorm : ∀ (c : ℝ≥0) (i : ℕ) (x : (M c i)), ∥(f.apply) x∥ = ∥x∥)
-  {n₁ : N (k' * c) (i - 1)}
-  {n₂ : N c (i - 1 - 1)}
-  {nnew₁ : N c (i - 1)}
-  {m₁ : M c (i - 1)}
-  {m : (M c₁ i)}
-  (hn₁ : ∥res (f m) - (N.d (i - 1) i) n₁∥ ≤ K * ∥(N.d i (i + 1)) (f m)∥)
-  (hp₂ : ∥res (g n₁) - (P.d (i - 1 - 1) (i - 1)) (g n₂)∥ ≤ K' * ∥(P.d (i - 1) ((i - 1) + 1)) (g n₁)∥)
-  (hnormnnew₁ : ∥nnew₁∥ ≤ r₂ * ∥g (res n₁ - ((N.d (i - 1 - 1) (i - 1)) n₂))∥)
-  (hm₁ : f m₁ = res n₁ - ((N.d (i - 1 - 1) (i - 1)) n₂) - nnew₁)
-  (hfm : ∥g ((N.d (i - 1) i) n₁)∥ = ∥g (res (f m) - (N.d (i - 1) i) n₁)∥) :
-  ∥res m - (M.d (i - 1) i) m₁∥ ≤ (K + r₁ * r₂ * K * K') * ∥(M.d i (i + 1)) m∥ :=
-begin
-  rw ← add_zero (_ * ∥_∥) at ⊢ hn₁ hp₂,
-  apply norm_sub_le_mul_norm_add M N P f g hii' hN_adm hgnorm hfnorm _ _ hn₁ hp₂ hnormnnew₁ hm₁ hfm;
-  simp,
-end
-
 lemma normed_snake_dual {k k' K K' r₁ r₂ : ℝ≥0}
   [hk : fact (1 ≤ k)] [hk' : fact (1 ≤ k')]
   {a : ℕ} {c₀ : ℝ≥0}
@@ -302,5 +276,7 @@ begin
     rw [hg, mem_ker] at this,
     rw [hom_apply g (res (f m) - (N.d _ i) n₁), res_apply, normed_group_hom.map_sub, this,
       zero_sub, norm_neg, ←hom_apply] },
-  exact norm_sub_le_mul_norm M N P f g hii' hN_adm hgnorm hfnorm hn₁ hp₂ hnormnnew₁ hm₁ hfm,
+  rw ← add_zero (_ * ∥_∥) at ⊢ hn₁ hp₂,
+  apply norm_sub_le_mul_norm_add M N P f g hii' hN_adm hgnorm hfnorm _ _ hn₁ hp₂ hnormnnew₁ hm₁ hfm;
+  simp,
 end
