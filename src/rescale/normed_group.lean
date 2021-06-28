@@ -49,7 +49,7 @@ end rescale
 
 namespace SemiNormedGroup
 
-variables (r r₁ r₂ : ℝ≥0) [fact (0 < r)] [fact (0 < r₁)] [fact (0 < r₂)]
+variables (r r₁ r₂ : ℝ≥0) [fact (0 < r₁)] [fact (0 < r₂)]
 
 @[simps]
 def rescale (r : ℝ≥0) [hr : fact (0 < r)] : SemiNormedGroup ⥤ SemiNormedGroup :=
@@ -69,11 +69,12 @@ def rescale (r : ℝ≥0) [hr : fact (0 < r)] : SemiNormedGroup ⥤ SemiNormedGr
   map_id' := λ V, rfl, -- defeq abuse
   map_comp' := λ V₁ V₂ V₃ f g, rfl /- defeq abuse -/ }
 
-instance rescale.additive : (rescale r).additive :=
+instance rescale.additive [fact (0 < r)] : (rescale r).additive :=
 { map_zero' := λ V W, rfl, -- defeq abuse
   map_add' := λ V W f g, rfl /- defeq abuse -/ }
 
-lemma norm_rescale_map_le {V₁ V₂ : SemiNormedGroup} {f : V₁ ⟶ V₂} {C : ℝ} (hf : ∥f∥ ≤ C) :
+lemma norm_rescale_map_le [fact (0 < r)] {V₁ V₂ : SemiNormedGroup}
+  {f : V₁ ⟶ V₂} {C : ℝ} (hf : ∥f∥ ≤ C) :
   ∥(rescale r).map f∥ ≤ C :=
 begin
   refine normed_group_hom.op_norm_le_bound _ (le_trans (norm_nonneg _) hf) (λ v, _),
@@ -84,7 +85,8 @@ begin
   rw nnreal.coe_pos, apply fact.out
 end
 
-lemma rescale_map_isometry {V₁ V₂ : SemiNormedGroup} {f : V₁ ⟶ V₂} (hf : isometry f) :
+lemma rescale_map_isometry [fact (0 < r)]
+  {V₁ V₂ : SemiNormedGroup} {f : V₁ ⟶ V₂} (hf : isometry f) :
   isometry ((rescale r).map f) :=
 begin
   rw normed_group_hom.isometry_iff_norm at hf ⊢,
@@ -92,7 +94,7 @@ begin
   erw [rescale.norm_def, rescale.norm_def, hf ((@rescale.of r _).symm v)],
 end
 
-lemma rescale_exact {V₁ V₂ V₃ : SemiNormedGroup} (f : V₁ ⟶ V₂) (g : V₂ ⟶ V₃)
+lemma rescale_exact [fact (0 < r)] {V₁ V₂ V₃ : SemiNormedGroup} (f : V₁ ⟶ V₂) (g : V₂ ⟶ V₃)
   (hfg : f.range = g.ker) :
   ((rescale r).map f).range = ((rescale r).map g).ker :=
 begin
@@ -102,7 +104,7 @@ begin
   ... ↔ x ∈ ((rescale r).map g).ker : iff.rfl,
 end
 
-lemma rescale_exists_norm_le {V₁ V₂ : SemiNormedGroup} (f : V₁ ⟶ V₂) (C : ℝ≥0)
+lemma rescale_exists_norm_le [fact (0 < r)] {V₁ V₂ : SemiNormedGroup} (f : V₁ ⟶ V₂) (C : ℝ≥0)
   (hf : ∀ y, ∃ x, f x = y ∧ ∥x∥ ≤ C * ∥y∥) :
   ∀ y, ∃ x, (rescale r).map f x = y ∧ ∥x∥ ≤ C * ∥y∥ :=
 begin
@@ -115,12 +117,9 @@ begin
 end
 
 lemma nnnorm_to_rescale {V : SemiNormedGroup} (v : V) : ∥(@rescale.of r V) v∥ ≤ r⁻¹ * ∥v∥ :=
-begin
-  rw ← div_eq_inv_mul,
-  refl
-end
+by { rw ← div_eq_inv_mul, refl }
 
-def to_rescale : 𝟭 _ ⟶ rescale r :=
+def to_rescale [fact (0 < r)] : 𝟭 _ ⟶ rescale r :=
 { app := λ V,
   add_monoid_hom.mk_normed_group_hom'
     (add_monoid_hom.mk' (@rescale.of r V) $ λ _ _, rfl) r⁻¹ (λ v, nnnorm_to_rescale _ v),
@@ -155,7 +154,7 @@ begin
   refl
 end
 
-lemma norm_to_rescale_le (V : SemiNormedGroup) : ∥(to_rescale r).app V∥ ≤ r⁻¹ :=
+lemma norm_to_rescale_le [fact (0 < r)] (V : SemiNormedGroup) : ∥(to_rescale r).app V∥ ≤ r⁻¹ :=
 normed_group_hom.mk_normed_group_hom_norm_le _
   (inv_nonneg.2 (nnreal.zero_le_coe)) (λ v, nnnorm_to_rescale _ v)
 

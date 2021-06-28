@@ -278,7 +278,7 @@ omit condM
 
 variables {m_ : ℕ} {k_ K_ : ℝ≥0} [fact (1 ≤ k_)]
 variables {ε_ : ℝ≥0} {k₀_ : ℝ≥0} [fact (1 ≤ k₀_)]
-variables [fact (k₀_ ≤ k')] [fact (1 ≤ k')] {c₀_ H_ : ℝ≥0} [fact (0 < H_)]
+variables [fact (k₀_ ≤ k')] {c₀_ H_ : ℝ≥0} [fact (0 < H_)]
 
 def of_le (cond : M.normed_spectral_conditions m k K k' ε c₀ H)
   (hm : m_ ≤ m) (hk : fact (k ≤ k_)) (hK : fact (K ≤ K_)) (hε : ε ≤ ε_)
