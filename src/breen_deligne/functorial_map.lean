@@ -1,10 +1,10 @@
--- n©
-
 import breen_deligne.universal_map
 
 /-!
 
 # Universality of universal maps
+
+(Note: this file exists as a consistency check, but is not used in the rest of the project.)
 
 A `universal_map m n` in this repo is a finite formal `ℤ`-linear combination
 of `m × n` matrices (so-called `basic_universal_map`s). In this file we show that
