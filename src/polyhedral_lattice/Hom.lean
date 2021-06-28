@@ -19,6 +19,7 @@ open_locale nnreal -- enable the notation `ℝ≥0` for the nonnegative real num
 
 open ProFiltPseuNormGrpWithTinv (of)
 
+/-- The additive group homomorphisms `Λ →+ M` as an object of `ProFiltPseuNormGrpWithTinv r'`. -/
 def polyhedral_lattice.Hom {r' : ℝ≥0} [fact (0 < r')] (Λ M : Type*) [polyhedral_lattice Λ]
   [profinitely_filtered_pseudo_normed_group_with_Tinv r' M] :
   ProFiltPseuNormGrpWithTinv r' :=
@@ -65,7 +66,7 @@ In the remainder of the file, we show that `Hom(ℤ, M)` is isomorphic to `M`.
 
 open pseudo_normed_group profinitely_filtered_pseudo_normed_group_with_Tinv_hom
 
-variables {r' : ℝ≥0} [fact (0 < r')] [fact (r' ≤ 1)]
+variables {r' : ℝ≥0} [fact (0 < r')]
 variables (M  : ProFiltPseuNormGrpWithTinv.{u} r')
 
 /-- `HomZ_map` as an equiv. -/
@@ -108,3 +109,5 @@ ProFiltPseuNormGrpWithTinv.iso_of_equiv_of_strict'
   λ x, by { simp only [add_monoid_hom.eval_apply_apply, HomZ_map_equiv_apply], refl }
 
 end polyhedral_lattice
+
+#lint-
