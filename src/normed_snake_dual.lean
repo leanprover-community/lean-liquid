@@ -66,7 +66,8 @@ calc ∥res m - (M.d i' i) m₁∥ = ∥f (res m - (M.d i' i) m₁)∥ : (hfnorm
     add_le_add_left (mul_le_mul_of_nonneg_left (add_le_add_right (mul_le_mul_of_nonneg_left
       hn₁ $ mul_nonneg K'.coe_nonneg r₁.coe_nonneg) _) r₂.coe_nonneg) _
   ... = (K + r₁ * r₂ * K * K') * ∥N.d i (i+1) (f m)∥ + ε₁ * (1 + K' * r₁ * r₂) + r₂ * ε₂ : by ring
-  ... = (K + r₁ * r₂ * K * K') * ∥N.d i (i+1) (f m)∥ + ε / 2 + r₂ * ε₂ : by rw [hmulε₁]
+  ... = (K + r₁ * r₂ * K * K') * ∥N.d i (i+1) (f m)∥ + ε / 2 + r₂ * ε₂ :
+    congr_arg (λ e, (↑K + ↑r₁ * ↑r₂ * ↑K * ↑K') * ∥(N.d i (i + 1)) (f m)∥ + e + ↑r₂ * ε₂) hmulε₁
   ... ≤ _ * ∥N.d i (i+1) (f m)∥ + ε / 2 + ε / 2 : add_le_add_left hle _
   ... = _ * ∥(M.d i (i+1)) m∥ + ε : by rw [add_assoc, add_halves', d_apply, hom_apply, hfnorm]
 
@@ -250,38 +251,9 @@ lemma norm_sub_le_mul_norm {k' K K' r₁ r₂ c c₁ : ℝ≥0}
   (hfm : ∥g ((N.d (i - 1) i) n₁)∥ = ∥g (res (f m) - (N.d (i - 1) i) n₁)∥) :
   ∥res m - (M.d (i - 1) i) m₁∥ ≤ (K + r₁ * r₂ * K * K') * ∥(M.d i (i + 1)) m∥ :=
 begin
-  set n₁' := N.d (i - 1 - 1) (i - 1) n₂ with hdefn₁',
-  exact calc
-  ∥res m - (M.d (i - 1) i) m₁∥ = ∥f (res m - (M.d _ i) m₁)∥ : (hfnorm _ _ _).symm
-  ... = ∥res (f m) - (N.d _ i (res n₁) - N.d _ i (n₁' + nnew₁))∥ :
-      by rw [hom_apply, normed_group_hom.map_sub, ←hom_apply, ←hom_apply, ←res_apply, ←d_apply, hm₁,
-        sub_sub, normed_group_hom.map_sub]
-  ... = ∥(res (f m) - N.d _ i (res n₁)) + N.d _ i (n₁' + nnew₁)∥ :
-      by rw [sub_eq_add_neg, neg_sub, sub_add_eq_add_sub, add_sub]
-  ... ≤ _ + ∥N.d _ i (n₁' + nnew₁)∥ : norm_add_le _ _
-  ... = _ + ∥N.d _ i nnew₁∥ : by simp only [map_add, zero_add, d_d]
-  ... ≤ _ + r₂ * ∥g (res n₁ - n₁')∥ :
-      add_le_add_left (le_trans (hN_adm.d_norm_noninc _ _ _ i nnew₁) hnormnnew₁) _
-  ... = ∥res (f m) - (N.d (i - 1) i) (res n₁)∥ + r₂ * ∥res (g n₁) - P.d (i - 1 - 1) _ (g n₂)∥ :
-      by rw [hom_apply g, normed_group_hom.map_sub, ←hom_apply, ←hom_apply, ←res_apply, hdefn₁', ←d_apply]
-  ... ≤ _ + r₂ * (K' * ∥P.d _ (_+1) (g n₁)∥) :
-      add_le_add_left (mul_le_mul_of_nonneg_left hp₂ r₂.coe_nonneg) _
-  ... = ∥@res _ _ c _ _ (@res _ _ _ _ _ (f m) - N.d _ i n₁)∥ + r₂ * (K' * ∥P.d _ (_+1) (g n₁)∥) :
-      by rw [←@res_res _ _ _ c _ _ _ (f m), d_res, normed_group_hom.map_sub]
-  ... ≤ K * ∥N.d i (i+1) _∥ + r₂ * (K' * ∥P.d _ (_+1) (g n₁)∥) :
-      add_le_add_right (le_trans (hN_adm.res_norm_noninc _ _ _ _ _) hn₁) _
-  ... = K * ∥N.d i (i+1) _∥ + r₂ * (K' * ∥g (res (f m) - N.d _ i n₁)∥) :
-      by rw [d_apply _ _ g _, hii', hfm]
-  ... ≤ K * ∥N.d i (i+1) _∥ + r₂ * (K' * (r₁ * ∥res (f m) - N.d _ i n₁∥)) :
-      add_le_add_left (mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left
-        (hgnorm _ _ _) $ nnreal.coe_nonneg K') $ nnreal.coe_nonneg r₂) _
-  ... = K * ∥N.d i (i+1) (f m)∥ + r₂ * (K' * r₁ * ∥res (f m) - N.d _ i n₁∥) : by rw mul_assoc
-  ... ≤ K * ∥N.d i (i+1) (f m)∥ + r₂ * (K' * r₁ * (K * ∥(N.d i (i+1)) _∥)) :
-      add_le_add_left (mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left
-        hn₁ $ mul_nonneg K'.coe_nonneg r₁.coe_nonneg) r₂.coe_nonneg) _
-  ... = (K + r₁ * r₂ * K * K') * ∥N.d i (i+1) (f m)∥ : by ring
-  ... = _ * ∥(M.d i (i+1)) m∥ :
-      by { rw d_apply _ _ f, simp only [hom_apply, hfnorm, nnreal.coe_add, nnreal.coe_mul] }
+  rw ← add_zero (_ * ∥_∥) at ⊢ hn₁ hp₂,
+  apply norm_sub_le_mul_norm_add M N P f g hii' hN_adm hgnorm hfnorm _ _ hn₁ hp₂ hnormnnew₁ hm₁ hfm;
+  simp,
 end
 
 lemma normed_snake_dual {k k' K K' r₁ r₂ : ℝ≥0}
