@@ -117,10 +117,10 @@ begin
 end
 
 /-  I (DT) extracted this lemma to speed up the proof of `weak_normed_snake_dual`. -/
-lemma ε₁_le_ε {ε ε₁ : ℝ} (hε : 0 < ε) (mK : ℝ≥0) (hε₁ : ε₁ = ε / 2 * (1 + mK)⁻¹) :
+lemma ε₁_le_ε {ε ε₁ : ℝ} (hε : 0 ≤ ε) (mK : ℝ≥0) (hε₁ : ε₁ = ε / 2 * (1 + mK)⁻¹) :
   ε₁ ≤ ε :=
 by { rw [hε₁, div_eq_mul_inv, mul_assoc, ← mul_inv'],
-     exact mul_le_of_le_one_right hε.le (inv_le_one $ nnreal.coe_le_coe.mpr $
+     exact mul_le_of_le_one_right hε (inv_le_one $ nnreal.coe_le_coe.mpr $
       one_le_mul one_le_two $ le_add_of_nonneg_right mK.2) }
 
 lemma weak_normed_snake_dual (k k' K K' r₁ r₂ : ℝ≥0)
@@ -148,9 +148,7 @@ begin
   have Hi' : i - 1 ≤ a + 1 := trans i.pred_le (trans hi a.le_succ),
   obtain ⟨_, _, rfl, rfl, p₂, hp₂⟩ := hP _ hc _ Hi' (g n₁)
     (if (r₂ : ℝ) = 0 then 1 else (ε / 2) * r₂⁻¹) _,
-  { --revert ε,
-    extract_goal,
-    have Hi'' : (i - 1 - 1) ≤ a + 1 + 1 := trans (nat.pred_le _) (trans Hi' (nat.le_succ _)),
+  { have Hi'' : (i - 1 - 1) ≤ a + 1 + 1 := trans (nat.pred_le _) (trans Hi' (nat.le_succ _)),
     obtain ⟨n₂, rfl, hnormn₂⟩ := Hg c (i - 1 - 1) Hi'' p₂,
     let n₁' := N.d (i - 1 - 1) (i - 1) n₂,
     obtain ⟨nnew₁, hnnew₁, hnrmnew₁⟩ := Hg c (i - 1) (trans Hi' a.succ.le_succ) (g (res n₁ - n₁')),
@@ -166,7 +164,7 @@ begin
     { subst hizero,
       convert norm_sub_le_mul_mul_norm_add (K' * r₁ * r₂) _ hfnrm _ hn₁,
       { norm_cast, ring },
-      { exact ε₁_le_ε hε (K' * r₁ * r₂) rfl },
+      { exact ε₁_le_ε hε.le (K' * r₁ * r₂) rfl },
       { exact (admissible_of_isometry hN_adm hf).res_norm_noninc _ _ _ _ _ } },
 
     { refine norm_sub_le_mul_norm_add M N P f g _ hN_adm hgnrm hfnrm _ _ hn₁ hp₂ hnrmnew₁ hm₁ _,
