@@ -119,14 +119,9 @@ end
 /-  I (DT) extracted this lemma to speed up the proof of `weak_normed_snake_dual`. -/
 lemma ε₁_le_ε {ε ε₁ : ℝ} (hε : 0 < ε) (mK : ℝ≥0) (hε₁ : ε₁ = ε / 2 * (1 + mK)⁻¹) :
   ε₁ ≤ ε :=
-begin
-  rw [hε₁, div_eq_mul_inv, mul_assoc, ← mul_inv'],
-  refine mul_le_of_le_one_right (le_of_lt hε) _,
-  rw mul_inv',
-  refine mul_le_one nnreal.two_inv_lt_one.le (inv_nonneg.mpr (add_nonneg zero_le_one _)) _,
-  { exact mK.coe_nonneg },
-  { exact inv_le_one (le_add_of_nonneg_right mK.coe_nonneg) }
-end
+by { rw [hε₁, div_eq_mul_inv, mul_assoc, ← mul_inv'],
+     exact mul_le_of_le_one_right hε.le (inv_le_one $ nnreal.coe_le_coe.mpr $
+      one_le_mul one_le_two $ le_add_of_nonneg_right mK.2) }
 
 lemma weak_normed_snake_dual (k k' K K' r₁ r₂ : ℝ≥0)
   [hk : fact (1 ≤ k)] [hk' : fact (1 ≤ k')]
@@ -153,7 +148,9 @@ begin
   have Hi' : i - 1 ≤ a + 1 := trans i.pred_le (trans hi a.le_succ),
   obtain ⟨_, _, rfl, rfl, p₂, hp₂⟩ := hP _ hc _ Hi' (g n₁)
     (if (r₂ : ℝ) = 0 then 1 else (ε / 2) * r₂⁻¹) _,
-  { have Hi'' : (i - 1 - 1) ≤ a + 1 + 1 := trans (nat.pred_le _) (trans Hi' (nat.le_succ _)),
+  { --revert ε,
+    extract_goal,
+    have Hi'' : (i - 1 - 1) ≤ a + 1 + 1 := trans (nat.pred_le _) (trans Hi' (nat.le_succ _)),
     obtain ⟨n₂, rfl, hnormn₂⟩ := Hg c (i - 1 - 1) Hi'' p₂,
     let n₁' := N.d (i - 1 - 1) (i - 1) n₂,
     obtain ⟨nnew₁, hnnew₁, hnrmnew₁⟩ := Hg c (i - 1) (trans Hi' a.succ.le_succ) (g (res n₁ - n₁')),
