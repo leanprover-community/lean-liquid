@@ -20,6 +20,7 @@ open universal_map
 /-- The `i`-th rank of this BD package is `2^i`. -/
 def rank (i : ℕ) : FreeMat := 2 ^ i
 
+/-- `σπ n` is an abreviation for `proj n 2 - sum n 2`. -/
 def σπ (n : ℕ) := universal_map.proj n 2 - universal_map.sum n 2
 
 lemma σπ_comp_mul_two {m n} (f : universal_map m n) :
@@ -66,6 +67,8 @@ open homological_complex
 def hmap : Π (j i : ℕ) (h : j + 1 = i), (((data.mul 2).obj BD).X j) ⟶ (BD.X i)
 | j i rfl := 𝟙 _
 
+/-- The identity maps form a homotopy between the chain maps `proj 2` and `sum 2`
+for the Breen--Deligne data `eg.BD`. -/
 def h : homotopy (BD.proj 2) (BD.sum 2) :=
 { hom := λ j i, if h : j + 1 = i then hmap j i h else 0,
   zero' := λ i j h, dif_neg h,
@@ -95,13 +98,13 @@ namespace eg
 
 noncomputable theory
 
-variables (r r' : ℝ≥0) [fact (r < 1)] [fact (0 < r')]
+variables (r r' : ℝ≥0) [fact (r < 1)]
 
 /-- Very suitable sequence of constants for the example Breen--Deligne package -/
 def κ : ℕ → ℝ≥0 :=
 eg.data.κ r r'
 
-instance very_suitable : eg.data.very_suitable r r' (κ r r') :=
+instance very_suitable [fact (0 < r')] : eg.data.very_suitable r r' (κ r r') :=
 eg.data.c_very_suitable _ _
 
 instance [fact (0 < r')] (n : ℕ) : fact (0 < κ r r' n) :=
@@ -111,9 +114,11 @@ data.c__pos _ _ _ _
 def κ' : ℕ → ℝ≥0 :=
 eg.κ' (eg.κ r r')
 
-instance adept [fact (0 < r')] [fact (r' ≤ 1)] : package.adept eg (κ r r') (κ' r r') :=
+instance adept [fact (0 < r')] : package.adept eg (κ r r') (κ' r r') :=
 eg.κ'_adept _
 
 end eg
 
 end breen_deligne
+
+#lint-
