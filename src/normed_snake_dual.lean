@@ -16,7 +16,7 @@ calc 0 < ε / 2 / (1 + ↑a) : div_pos (half_pos hε) one_add_pos
        ... = _ : ((eq_div_iff one_add_pos.ne').mpr hmulε).symm
 
 /-  I (DT) extracted this lemma to speed up the proof of `weak_normed_snake_dual`. -/
-lemma norm_sub_le_mul_norm_add {k' K K' r₁ r₂ c c₁ : ℝ≥0} {ε ε₁ ε₂ : ℝ} (hε : 0 < ε)
+lemma norm_sub_le_mul_norm_add {k' K K' r₁ r₂ c c₁ : ℝ≥0} {ε ε₁ ε₂ : ℝ}
   {i i' i'' : ℕ} (hii' : i' + 1 = i)
   [hk' : fact (1 ≤ k')]
   [fc₁ : fact (k' * c ≤ c₁)]
@@ -37,7 +37,6 @@ lemma norm_sub_le_mul_norm_add {k' K K' r₁ r₂ c c₁ : ℝ≥0} {ε ε₁ ε
   (hm₁ : f m₁ = res n₁ - ((N.d i'' i') n₂) - nnew₁)
   (hfm : ∥g ((N.d i' i) n₁)∥ = ∥g (res (f m) - (N.d i' i) n₁)∥) :
   ∥res m - (M.d i' i) m₁∥ ≤ (K + r₁ * r₂ * K * K') * ∥(M.d i (i + 1)) m∥ + ε :=
-have hε₁ : 0 < ε₁ := ε₁_pos (K' * r₁ * r₂) hε hmulε₁,
 calc ∥res m - (M.d i' i) m₁∥ = ∥f (res m - (M.d i' i) m₁)∥ : (hfnorm _ _ _).symm
   ... = ∥res _ - (N.d i' i (res n₁) - N.d i' i (_ + nnew₁))∥ :
     by rw [hom_apply, normed_group_hom.map_sub, ←hom_apply, ←hom_apply, ←res_apply,
@@ -173,7 +172,7 @@ begin
       { exact ε₁_le_ε hε (K' * r₁ * r₂) rfl },
       { exact (admissible_of_isometry hN_adm hf).res_norm_noninc _ _ _ _ _ } },
 
-    { refine norm_sub_le_mul_norm_add M N P f g hε _ hN_adm hgnrm hfnrm _ _ hn₁ hp₂ hnrmnew₁ hm₁ _,
+    { refine norm_sub_le_mul_norm_add M N P f g _ hN_adm hgnrm hfnrm _ _ hn₁ hp₂ hnrmnew₁ hm₁ _,
       { exact nat.succ_pred_eq_of_pos (nat.pos_of_ne_zero hizero) },
       { field_simp [hlt.ne.symm], ring },
       { by_cases H : r₂ = 0,
@@ -189,6 +188,29 @@ begin
     { simp only [H, nnreal.coe_eq_zero, if_false],
       exact mul_pos (half_pos hε) (inv_pos.2 (nnreal.coe_pos.2 (zero_lt_iff.2 H))) } }
 end
+
+
+/-  I (DT) extracted this lemma to speed up the proof of `weak_normed_snake_dual`.
+The `ρ` in this lemma stands for `K + r₁ * r₂ * K * K'` in the application. -/
+lemma exists_norm_sub_le_mul {M : system_of_complexes} {k k' c ρ : ℝ≥0}
+  {i : ℕ}
+  [hk : fact (1 ≤ k)] [hk' : fact (1 ≤ k')]
+  (hM_adm : M.admissible)
+  (ex_le : (∀ (m : (M (k * (k' * c)) i)),
+        (∃ (i₀ : ℕ) (hi₀ : i₀ = i - 1) (y : (M c i₀)),
+           ∥res m - (M.d i₀ i) y∥ ≤ ↑ρ * ∥(M.d i (i + 1)) m∥)))
+  (m₁ : (M (k * k' * c) i)) :
+  ∃ (i₀ j : ℕ) (hi₀ : i₀ = i - 1) (hj : i + 1 = j) (y : (M c i₀)),
+      ∥res m₁ - (M.d i₀ i) y∥ ≤ ↑ρ * ∥(M.d i j) m₁∥ :=
+begin
+  haveI : fact (k * (k' * c) ≤ k * k' * c) := { out := (mul_assoc _ _ _).symm.le },
+  rcases ex_le (res m₁) with ⟨i₀, rfl, y, hy⟩,
+  rw [res_res, d_res] at hy,
+  refine ⟨i - 1, _, rfl, rfl, _⟩,
+  refine ⟨y, hy.trans (mul_le_mul_of_nonneg_left _ ρ.2)⟩,
+  exact hM_adm.res_norm_noninc _ _ _ _ _,
+end
+
 
 lemma normed_snake_dual {k k' K K' r₁ r₂ : ℝ≥0}
   [hk : fact (1 ≤ k)] [hk' : fact (1 ≤ k')]
@@ -217,7 +239,7 @@ lemma normed_snake_dual {k k' K K' r₁ r₂ : ℝ≥0}
     ∃ i₀ (hi₀ : i₀ = i - 1) (y : M c i₀), ∥res m - M.d _ _ y∥ ≤ Knew * ∥M.d i (i+1) m∥,
     { dsimp [c₁] at this,
       intros m₁,
-      haveI hc : fact (k * k' * c = c₁) := by { constructor, simp [mul_assoc, c₁] },
+      haveI hc : fact (k * k' * c = c₁) := { out := by simp [mul_assoc, c₁] },
       let m : M c₁ i := res m₁,
       rcases this m with ⟨i₀, hi₀, y, hy⟩,
       rw [res_res, d_res] at hy,
