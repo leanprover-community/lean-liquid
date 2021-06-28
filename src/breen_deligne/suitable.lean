@@ -290,8 +290,10 @@ lemma suitable_of_le (f : universal_map m n) [hf : f.suitable c₂ c₃] (h1 : c
   f.suitable c₁ c₄ :=
 hf.le _ _ _ _ h1 h2
 
-noncomputable
-def factor (f : universal_map m n) : ℝ≥0 :=
+/-- `f.factor` for `f : universal_map m n`
+is the ratio `c₂ / c₁` that two constants need to satisfy
+in order that `f.suitable c₁ c₂` holds. -/
+noncomputable def factor (f : universal_map m n) : ℝ≥0 :=
 (f.support.product finset.univ).sup (λ gi, (∑ j, ↑(gi.1 gi.2 j).nat_abs))
 
 lemma le_factor (f : universal_map m n) (g : basic_universal_map m n)
@@ -512,29 +514,30 @@ class suitable (BD : data) (κ : ℕ → ℝ≥0) : Prop :=
 
 attribute [instance] suitable.universal_suitable
 
-variables (BD : data) (κ : ℕ → ℝ≥0) [BD.suitable κ] (i j j' : ℕ)
+variables (BD : data) (κ : ℕ → ℝ≥0) (i j j' : ℕ)
 
-def suitable.of_basic (H : ∀ i, (BD.d (i+1) i).suitable (κ (i+1)) (κ i)) : BD.suitable κ :=
+lemma suitable.of_basic (H : ∀ i, (BD.d (i+1) i).suitable (κ (i+1)) (κ i)) : BD.suitable κ :=
 ⟨λ j i, begin
   by_cases hij : i + 1 = j,
   {  subst j, exact H i },
   { rw BD.shape _ _ hij, apply_instance }
 end⟩
 
-instance comp_suitable :
+instance comp_suitable [BD.suitable κ] :
   (universal_map.comp (BD.d j i) (BD.d j' j)).suitable (κ j') (κ i) :=
 universal_map.suitable.comp (κ j)
 
-instance suitable_mul_left (c : ℝ≥0) : BD.suitable (λ i, c * κ i) :=
+instance suitable_mul_left [BD.suitable κ] (c : ℝ≥0) : BD.suitable (λ i, c * κ i) :=
 ⟨λ i j, by apply_instance⟩
 
-instance suitable_mul_right (c : ℝ≥0) : BD.suitable (λ i, κ i * c) :=
+instance suitable_mul_right [BD.suitable κ] (c : ℝ≥0) : BD.suitable (λ i, κ i * c) :=
 ⟨λ i j, by apply_instance⟩
 
-instance suitable_rescale_constants (N : ℝ≥0) : BD.suitable (rescale_constants κ N) :=
+instance suitable_rescale_constants [BD.suitable κ] (N : ℝ≥0) :
+  BD.suitable (rescale_constants κ N) :=
 data.suitable_mul_right _ _ _
 
-instance mul_obj_suitable (N : ℕ) [fact (0 < N)] : ((mul N).obj BD).suitable κ :=
+instance mul_obj_suitable [BD.suitable κ] (N : ℕ) [fact (0 < N)] : ((mul N).obj BD).suitable κ :=
 begin
   constructor,
   intros i j,
@@ -595,6 +598,17 @@ end data
 
 namespace universal_map
 
+/-- A universal map `f` satisfies `very_suitable r r' c₁ c₂` if it satisfies a technical predicate
+that is useful when evaluating `f` on a special type of semi-normed groups,
+namely those considered in the system of complexes occuring in `first_target`.
+
+In this case, we have the naive evaluation of `f`, whose norm is bounded by `N = f.bound`,
+but we can compose this sufficiently often with a restriction map whose norm is stricly `< 1`.
+
+This predicate records the conditions that make sure that the resulting composition
+is norm-nonincreasing: In addition to `f` being `suitable c₁ κ` we require
+that `κ ≤ c₂` leaves enough room to apply the restriction map `b` times,
+where `b` satisfies `r ^ b * N ≤ 1` and `κ ≤ r' ^ b * c₂`. -/
 def very_suitable (f : universal_map m n) (r r' : out_param ℝ≥0) (c₁ c₂ : ℝ≥0) : Prop :=
 ∃ (N b : ℕ) (κ : ℝ≥0), f.bound_by N ∧ f.suitable c₁ κ ∧ r ^ b * N ≤ 1 ∧ κ ≤ r' ^ b * c₂
 
@@ -604,6 +618,7 @@ namespace very_suitable
 
 variables (f : universal_map m n)
 
+@[priority 100]
 instance suitable [hr' : fact (r' ≤ 1)] [hf : f.very_suitable r r' c₁ c₂] : f.suitable c₁ c₂ :=
 begin
   unfreezingI { rcases hf with ⟨N, b, κ, hN, hf, hr, H⟩ },
@@ -636,11 +651,13 @@ end universal_map
 
 namespace data
 
+/-- A sequence of constants `κ : ℕ → ℝ≥0` is `very_suitable` for some Breen--Deligne data `BD`
+if every pair of constants is `very_suitable` for the corresponding differential in `BD`. -/
 class very_suitable (BD : data) (r r' : out_param ℝ≥0) (κ : ℕ → ℝ≥0) : Prop :=
 (universal_very_suitable : ∀ i j, (BD.d i j).very_suitable r r' (κ i) (κ j))
 (pos : ∀ i, 0 < κ i)
 
-def pos (BD : data) {r r' : ℝ≥0} (κ : ℕ → ℝ≥0) [BD.very_suitable r r' κ] (i : ℕ) :
+lemma pos (BD : data) {r r' : ℝ≥0} (κ : ℕ → ℝ≥0) [BD.very_suitable r r' κ] (i : ℕ) :
   0 < κ i :=
 very_suitable.pos BD i
 
@@ -650,6 +667,7 @@ namespace very_suitable
 
 variables (BD : data) (κ : ℕ → ℝ≥0)
 
+@[priority 100]
 instance suitable [hr' : fact (r' ≤ 1)] [h : BD.very_suitable r r' κ] :
   BD.suitable κ :=
 { universal_suitable := λ i j, by apply_instance }

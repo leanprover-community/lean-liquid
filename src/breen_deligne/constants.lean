@@ -22,6 +22,7 @@ begin
   apply fact.out
 end
 
+/-- The smallest `b` such that `r ^ b ≤ x⁻¹`.  -/
 def b [hr : fact (r < 1)] (x : ℝ≥0) [fact (0 < x)] := nat.find (b_exists r x)
 
 /-- Example of a very suitable sequence of constants for given Breen--Deligne data. -/
@@ -75,7 +76,7 @@ def κ' (BD : package) (κ : ℕ → ℝ≥0) : ℕ → ℝ≥0
 | 0     := 1
 | (n+1) := (BD.homotopy.hom n (n + 1)).factor * rescale_constants κ 2 n * (κ (n + 1))⁻¹
 
-instance κ'_adept (κ : ℕ → ℝ≥0) [BD.data.suitable κ] [∀ i, fact (0 < κ i)] :
+instance κ'_adept (κ : ℕ → ℝ≥0) [∀ i, fact (0 < κ i)] :
   package.adept BD κ (κ' BD κ) :=
 { htpy_suitable' :=
   begin
@@ -90,3 +91,5 @@ instance κ'_adept (κ : ℕ → ℝ≥0) [BD.data.suitable κ] [∀ i, fact (0 
 end package
 
 end breen_deligne
+
+#lint-
