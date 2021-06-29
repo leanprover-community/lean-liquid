@@ -5,7 +5,6 @@ import data.setoid.partition
 
 import for_mathlib.data_setoid_partition
 
-
 noncomputable theory
 
 variables {X : Type*} [topological_space X]

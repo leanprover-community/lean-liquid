@@ -277,7 +277,7 @@ begin
   intro s,
   apply nnreal.eq,
   simp only [nnreal.coe_mul, nnreal.coe_tsum, ← tsum_mul_left, ← mul_assoc,
-    nnreal.coe_nat_abs, coe_nnnorm, coe_gsmul, pi.smul_apply, int.norm_def,
+    nnreal.coe_nat_abs, coe_nnnorm, coe_gsmul, pi.smul_apply, int.norm_eq_abs,
     ← abs_mul, ← int.cast_mul, smul_eq_mul],
 end
 
