@@ -14,7 +14,7 @@ Lean-definitions of these concepts appears in `system_of_complexes.basic`.
 
 Intuitively, the two predicates assert a version of exactness for a complex whose overall shape is
 an inequality of the form
-```
+```lean
 ∥res ? - (M.d ??) ?∥ ≤ const * ∥(M.d ?? ?∥ + ε.
 ```
 (Recall that `res` is a restriction among certain complexes, `M.d` stands for a differential,
