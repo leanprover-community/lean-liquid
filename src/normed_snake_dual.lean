@@ -301,6 +301,9 @@ end
 
 variables (M N P f g)
 
+/-!
+Finally, we can state and prove the weak normed snake dual lemma.
+-/
 lemma weak_normed_snake_dual (k k' K K' r₁ r₂ : ℝ≥0)
   [hk : fact (1 ≤ k)] [hk' : fact (1 ≤ k')]
   {a : ℕ} {c₀ : ℝ≥0}
@@ -334,6 +337,9 @@ begin
       exact mul_pos (half_pos hε) (inv_pos.2 (nnreal.coe_pos.2 (zero_lt_iff.2 H))) } }
 end
 
+/-!
+And also the normed snake dual lemma.
+-/
 lemma normed_snake_dual {k k' K K' r₁ r₂ : ℝ≥0}
   [hk : fact (1 ≤ k)] [hk' : fact (1 ≤ k')]
   {a : ℕ} {c₀ : ℝ≥0}
