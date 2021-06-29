@@ -137,7 +137,7 @@ lemma exists_norm_sub_le_mul_add {M : system_of_complexes} {k k' c ρ : ℝ≥0}
   (ex_le : (∀ (m : (M (k * (k' * c)) i)) (ε : ℝ), 0 < ε →
         (∃ (i₀ : ℕ) (hi₀ : i₀ = i - 1) (y : (M c i₀)),
            ∥res m - (M.d i₀ i) y∥ ≤ ↑ρ * ∥(M.d i (i + 1)) m∥ + ε)))
-  (m₁ : (M (k * k' * c) i))
+  {m₁ : (M (k * k' * c) i)}
   {ε : ℝ}
   (hε : 0 < ε) :
   ∃ (i₀ j : ℕ) (hi₀ : i₀ = i - 1) (hj : i + 1 = j) (y : (M c i₀)),
@@ -308,7 +308,6 @@ lemma normed_snake_dual {k k' K K' r₁ r₂ : ℝ≥0}
 begin
   introsI c hc i hi,
   refine exists_norm_sub_le_mul (admissible_of_isometry hN_adm hf) _,
-
   intro m,
 
   obtain ⟨_, _, rfl, rfl, n₁, hn₁⟩ :=
