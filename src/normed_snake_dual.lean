@@ -12,8 +12,8 @@ The principal definitions of the concepts in this file appear in Section 4 of th
 The two main results prove `is_(weak_)bounded_exact` for certain `system_of_complexes`.  The
 Lean-definitions of these concepts appears in `system_of_complexes.basic`.
 
-Intuitively, the two predicates assert a form of exactness for a complex in the form of an
-inequality of the form
+Intuitively, the two predicates assert a version of exactness for a complex whose overall shape is
+an inequality of the form
 ```
 ∥res ? - (M.d ??) ?∥ ≤ const * ∥(M.d ?? ?∥ + ε.
 ```
