@@ -6,7 +6,6 @@ import polyhedral_lattice.category
 import polyhedral_lattice.quotient
 
 import for_mathlib.normed_group
-import for_mathlib.simplicial.augmented
 
 /-!
 # The Čech conerve attached to `Λ → Λ'`
