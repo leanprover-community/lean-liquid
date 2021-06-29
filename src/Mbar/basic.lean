@@ -11,7 +11,6 @@ import Mbar.bounded
 import pseudo_normed_group.basic
 
 import for_mathlib.tsum
-import for_mathlib.int_norm
 import for_mathlib.int_basic
 
 /-!
