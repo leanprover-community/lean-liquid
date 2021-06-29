@@ -25,15 +25,15 @@ More in detail, at the heart of the computation, is a proof of an inequality of 
 ```lean
 ∥res m - (M.d (i - 1) i) y∥ ≤ K * (1 + K' * r₁ * r₂) * ∥(M.d i (i + 1)) m∥ + ε.
 ```
-For the weak normed snake dual lemma, for any choice of positive `0 < ε`, we should be able to fix
-the parameters so that the inequality above is satisfied.  For the normed snake dual lemma, we want
+In the weak normed snake dual lemma, for any choice of positive `0 < ε`, we should be able to fix
+the parameters so that the inequality above is satisfied.  In the normed snake dual lemma, we want
 the inequality above with `ε = 0`.  As you will see, the bulk of the proof of the normed snake dual
 lemma recycles the proof of the weak version.
 
-
 The proof involves several estimations: we broke these proofs into smaller partial inequalities,
-for two reasons.  First, it streamlines the formalization.  Second, it helps Lean processing the
-statements, reducing processing times.
+for three reasons.  First, it streamlines the formalization.  Second, it helps Lean processing the
+statements, reducing processing times.  Third, it allows us to us a large part of the argument for
+both `weak_normed_snake_dual` and `normed_snake_dual`.
 
 # Remark
 
