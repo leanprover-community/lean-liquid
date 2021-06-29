@@ -18,9 +18,11 @@ name: continuous integration (new)
 
 jobs:
 
-  # Cancels previous runs of jobs in this file
+  # When you push to a branch other than master, we cancel previous runs of jobs in this file on
+  # that branch.
   cancel:
-    name: 'Cancel Previous Runs (CI)'
+    name: 'Cancel previous runs on branch'
+    if: github.ref != 'refs/heads/master'
     runs-on: ubuntu-latest
     # timeout-minutes: 3
     steps:
