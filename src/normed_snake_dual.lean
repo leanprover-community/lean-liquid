@@ -7,7 +7,21 @@ import system_of_complexes.basic
 This file proves the weak normed snake dual lemma and the normed snake dual lemma: they are the
 statements `weak_normed_snake_dual` and `normed_snake_dual`, respectively.
 
-At the heart of the computation, is a proof of an inequality of the form
+The principal definitions of the concepts in this file appear in Section 4 of the blueprint.
+
+The two main results prove `is_(weak_)bounded_exact` for certain `system_of_complexes`.  The
+Lean-definitions of these concepts appears in `system_of_complexes.basic`.
+
+Intuitively, the two predicates assert a form of exactness for a complex in the form of an
+inequality of the form
+```
+∥res ? - (M.d ??) ?∥ ≤ const * ∥(M.d ?? ?∥ + ε.
+```
+(Recall that `res` is a restriction for among certain complexes, `M.d` stands for a differential,
+`const` is a constant; the error `ε` is a non-negative real number.  For the weak version, we
+quantify over all `0 < ε ∈ ℝ`.  For the non-weak version, we use `ε = 0`.)
+
+More in detail, at the heart of the computation, is a proof of an inequality of the form
 ```lean
 ∥res m - (M.d (i - 1) i) y∥ ≤ K * (1 + K' * r₁ * r₂) * ∥(M.d i (i + 1)) m∥ + ε.
 ```
@@ -49,14 +63,9 @@ First, we break off the main term `∥res m - (M.d i' i) m₁∥` into a sum of 
 * `∥(N.d i' i ((N.d i'' i') n₂ + nnew₁) : N c i)∥`.
 -/
 lemma norm_sub_le_split {k' c c₁ : ℝ≥0} {i i' i'' : ℕ}
-  [hk' : fact (1 ≤ k')]
-  [fc : fact (c ≤ c₁)]
+  [hk' : fact (1 ≤ k')] [fc : fact (c ≤ c₁)]
   (hfnorm : ∀ (c : ℝ≥0) (i : ℕ) (x : (M c i)), ∥(f.apply) x∥ = ∥x∥)
-  {n₁ : N (k' * c) i'}
-  {n₂ : N c i''}
-  {nnew₁ : N c i'}
-  {m₁ : M c i'}
-  {m : (M c₁ i)}
+  {n₁ : N (k' * c) i'} {n₂ : N c i''} {nnew₁ : N c i'} {m₁ : M c i'} {m : (M c₁ i)}
   (hm₁ : f m₁ = res n₁ - ((N.d i'' i') n₂) - nnew₁) :
   ∥res m - (M.d i' i) m₁∥ ≤
     ∥(res (f m) : N c i) - N.d i' i (res n₁)∥ + ∥(N.d i' i ((N.d i'' i') n₂ + nnew₁) : N c i)∥ :=
@@ -80,8 +89,7 @@ producing the inequality
 -/
 lemma norm_sub_le_mul_norm_add_lhs {k' K c c₁ : ℝ≥0} {ε₁ : ℝ} {i i' : ℕ}
   [hk' : fact (1 ≤ k')] [fc₁ : fact (k' * c ≤ c₁)] [fc : fact (c ≤ c₁)]
-  {n₁ : N (k' * c) i'}
-  {m : (M c₁ i)}
+  {n₁ : N (k' * c) i'} {m : (M c₁ i)}
   (hN_adm : N.admissible)
   (hn₁ : ∥res (f m) - (N.d i' i) n₁∥ ≤ K * ∥(N.d i (i + 1)) (f m)∥ + ε₁) :
   ∥(res (f m) : N c i) - N.d i' i (res n₁)∥ ≤ K * ∥(N.d i (i + 1)) (f m)∥ + ε₁ :=
@@ -97,14 +105,10 @@ producing the inequality `(dis : ∥(N.d i' i) nnew₁∥ ≤ ∥nnew₁∥)`.)
 -/
 lemma norm_sub_le_mul_norm_add_rhs {k' K K' r₁ r₂ c c₁ : ℝ≥0} {ε₁ ε₂ : ℝ}
   {i i' i'' : ℕ} (hii' : i' + 1 = i)
-  [hk' : fact (1 ≤ k')]
-  [fc₁ : fact (k' * c ≤ c₁)]
+  [hk' : fact (1 ≤ k')] [fc₁ : fact (k' * c ≤ c₁)]
   (hgnorm : ∀ (c : ℝ≥0) (i : ℕ) (x : (N c i)), ∥g x∥ ≤ ↑r₁ * ∥x∥)
-  {n₁ : N (k' * c) i'}
-  {n₂ : N c i''}
-  {nnew₁ : N c i'}
+  {n₁ : N (k' * c) i'} {n₂ : N c i''} {nnew₁ : N c i'} {m : (M c₁ i)}
   (hN_adm : N.admissible)
-  {m : (M c₁ i)}
   (hn₁ : ∥res (f m) - (N.d i' i) n₁∥ ≤ K * ∥(N.d i (i + 1)) (f m)∥ + ε₁)
   (hp₂ : ∥res (g n₁) - (P.d i'' i') (g n₂)∥ ≤ K' * ∥(P.d i' (i' + 1)) (g n₁)∥ + ε₂)
   (hnormnnew₁ : ∥nnew₁∥ ≤ r₂ * ∥g (res n₁ - ((N.d i'' i') n₂))∥)
@@ -138,17 +142,11 @@ The rest is simple manipulations of real numbers.
 -/
 lemma norm_sub_le_mul_norm_add {k' K K' r₁ r₂ c c₁ : ℝ≥0} {ε ε₁ ε₂ : ℝ}
   {i i' i'' : ℕ} (hii' : i' + 1 = i)
-  [hk' : fact (1 ≤ k')]
-  [fc₁ : fact (k' * c ≤ c₁)]
-  [fc : fact (c ≤ c₁)]
+  [hk' : fact (1 ≤ k')] [fc₁ : fact (k' * c ≤ c₁)] [fc : fact (c ≤ c₁)]
   (hN_adm : N.admissible)
   (hgnorm : ∀ (c : ℝ≥0) (i : ℕ) (x : (N c i)), ∥g x∥ ≤ ↑r₁ * ∥x∥)
   (hfnorm : ∀ (c : ℝ≥0) (i : ℕ) (x : (M c i)), ∥(f.apply) x∥ = ∥x∥)
-  {n₁ : N (k' * c) i'}
-  {n₂ : N c i''}
-  {nnew₁ : N c i'}
-  {m₁ : M c i'}
-  {m : (M c₁ i)}
+  {n₁ : N (k' * c) i'} {n₂ : N c i''} {nnew₁ : N c i'} {m₁ : M c i'} {m : (M c₁ i)}
   (hmulε₁ : ε₁ * (1 + K' * r₁ * r₂) = ε / 2)
   (hle : (r₂ : ℝ) * ε₂ ≤ ε / 2)
   (hn₁ : ∥res (f m) - (N.d i' i) n₁∥ ≤ K * ∥(N.d i (i + 1)) (f m)∥ + ε₁)
@@ -182,8 +180,7 @@ lemma exists_norm_sub_le_mul_add {k k' c ρ : ℝ≥0}
         (∃ (i₀ : ℕ) (hi₀ : i₀ = i - 1) (y : (M c i₀)),
            ∥res m - (M.d i₀ i) y∥ ≤ ↑ρ * ∥(M.d i (i + 1)) m∥ + ε)))
   {m₁ : (M (k * k' * c) i)}
-  {ε : ℝ}
-  (hε : 0 < ε) :
+  {ε : ℝ} (hε : 0 < ε) :
   ∃ (i₀ j : ℕ) (hi₀ : i₀ = i - 1) (hj : i + 1 = j) (y : (M c i₀)),
       ∥res m₁ - (M.d i₀ i) y∥ ≤ ↑ρ * ∥(M.d i j) m₁∥ + ε :=
 begin
@@ -223,11 +220,9 @@ end
 Note that `ε = 0` is allowed.  Indeed, the weak normed snake dual lemma uses `0 ≤ ε`, while the
 normed snake dual lemma uses `ε = 0`.
 -/
-lemma exist_norm_sub_le_mul_norm_add {M N P : system_of_complexes} {k k' K K' r₁ r₂ c₀ c : ℝ≥0}
+lemma exist_norm_sub_le_mul_norm_add {k k' K K' r₁ r₂ c₀ c : ℝ≥0}
   {a i : ℕ} {ε : ℝ} (hε : 0 ≤ ε)
-  {f : M ⟶ N} {g : N ⟶ P}
-  [hk : fact (1 ≤ k)]
-  [hk' : fact (1 ≤ k')]
+  [hk : fact (1 ≤ k)] [hk' : fact (1 ≤ k')]
   (hN_adm : N.admissible)
   (hgnrm : ∀ (c : ℝ≥0) (i : ℕ) (x : (N c i)), ∥g x∥ ≤ r₁ * ∥x∥)
   (Hg : ∀ (c : ℝ≥0) [_inst_1 : fact (c₀ ≤ c)] (i : ℕ),
@@ -236,13 +231,11 @@ lemma exist_norm_sub_le_mul_norm_add {M N P : system_of_complexes} {k k' K K' r�
   (hf : ∀ (c : ℝ≥0) (i : ℕ), (isometry (f.apply : M c i ⟶ N c i) : _))
   (hc : fact (c₀ ≤ c))
   (hi : i ≤ a)
-  (m : (M (k * (k' * c)) i))
-  (n₁ : (N (k' * c) (i - 1)))
+  {m : M (k * (k' * c)) i} {n₁ : N (k' * c) (i - 1)}
   (hn₁ : ∥res (f m) - (N.d (i - 1) i) n₁∥ ≤
     K * ∥(N.d i (i + 1)) (f m)∥ + ε / 2 * (1 + K' * r₁ * r₂)⁻¹)
   (Hi' : i - 1 ≤ a + 1)
-  (p₂ : (P c (i - 1 - 1)))
-  (hp₂ : ∥res (g n₁) - (P.d (i - 1 - 1) (i - 1)) p₂∥ ≤
+  (p₂ : P c (i - 1 - 1)) (hp₂ : ∥res (g n₁) - (P.d (i - 1 - 1) (i - 1)) p₂∥ ≤
     K' * ∥(P.d (i - 1) (i - 1 + 1)) (g n₁)∥ + ite (r₂ = 0) 1 (ε / 2 * (r₂)⁻¹)) :
   ∃ (i₀ : ℕ) (hi₀ : i₀ = i - 1) (y : (M c i₀)),
     ∥res m - (M.d i₀ i) y∥ ≤ (K + r₁ * r₂ * K * K') * ∥(M.d i (i + 1)) m∥ + ε :=
@@ -329,7 +322,7 @@ begin
   obtain ⟨_, _, rfl, rfl, p₂, hp₂⟩ := hP _ hc _ Hi' (g n₁)
     (if (r₂ : ℝ) = 0 then 1 else (ε / 2) * r₂⁻¹) _,
   { simp_rw [nnreal.coe_eq_zero r₂] at hp₂,
-    apply exist_norm_sub_le_mul_norm_add hε.le hN_adm hgnrm Hg hg hf hc hi m n₁ hn₁ Hi' p₂,
+    apply exist_norm_sub_le_mul_norm_add hε.le hN_adm hgnrm Hg hg hf hc hi hn₁ Hi' p₂,
     convert hp₂, },
   { by_cases H : r₂ = 0,
     { simp only [H, zero_lt_one, if_true, eq_self_iff_true, nnreal.coe_eq_zero] },
@@ -364,7 +357,7 @@ begin
   rw ← add_zero (_ * ∥_∥) at ⊢,
   have hn₁₁ :  ∥res (f m) - (N.d (i - 1) i) n₁∥ ≤
     K * ∥(N.d i (i + 1)) (f m)∥ + 0 / 2 * (1 + K' * r₁ * r₂)⁻¹, rwa [zero_div, zero_mul, add_zero],
-  obtain F := exist_norm_sub_le_mul_norm_add rfl.le hN_adm hgnorm Hg hg hf hc hi m n₁ hn₁₁ Hi' p₂,
+  obtain F := exist_norm_sub_le_mul_norm_add rfl.le hN_adm hgnorm Hg hg hf hc hi hn₁₁ Hi' p₂,
   by_cases hr : r₂ = 0,
   { subst hr,
     simp at ⊢ F,
