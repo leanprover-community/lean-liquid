@@ -6,8 +6,16 @@ noncomputable theory
 open_locale nnreal
 open category_theory opposite normed_group_hom system_of_complexes
 
+
 variables (M N P : system_of_complexes.{u}) (f : M ⟶ N) (g : N ⟶ P)
 
+/-  I (DT) extracted this lemma to speed up the proof of `weak_normed_snake_dual`. -/
+lemma ε₁_pos (a : ℝ≥0) {ε ε₁ : ℝ} (hε : 0 < ε) (hmulε : ε₁ * (1 + a) = ε / 2) :
+  0 < ε₁ :=
+have one_add_pos : (0 : ℝ) < 1 + a := add_pos_of_pos_of_nonneg zero_lt_one (zero_le a),
+calc 0 < ε / 2 / (1 + ↑a) : div_pos (half_pos hε) one_add_pos
+   ... = _                : ((eq_div_iff one_add_pos.ne').mpr hmulε).symm
+set_option profiler true
 /-  I (DT) extracted this lemma to speed up the proof of `weak_normed_snake_dual`. -/
 /-  Breaking off the into two terms. -/
 lemma norm_sub_le_split {k' c c₁ : ℝ≥0} {i i' i'' : ℕ}
@@ -31,7 +39,11 @@ calc
     by rw [sub_eq_add_neg, neg_sub, sub_eq_neg_add, ← add_assoc, ← sub_eq_add_neg]
   ... ≤ ∥res (f m) - N.d i' i (res n₁)∥ + ∥N.d i' i ((N.d i'' i') n₂ + nnew₁)∥ : norm_add_le _ _
 
-/-! The proof of this lemma is deceptively simple, since there is a lot of typeclass work happening
+
+
+
+
+/- The proof of this lemma is deceptively simple, since there is a lot of typeclass work happening
 in the background.  In particular, the `c` in the sea of underscores of the second line is crucial.
 
 The hypothesis `(hN_adm : N.admissible)` is only used via `(hN_adm.res_norm_noninc _ c _ _ _)`,
@@ -45,14 +57,11 @@ lemma norm_sub_le_mul_norm_add_lhs {k' K c c₁ : ℝ≥0} {ε₁ : ℝ} {i i' :
   (hn₁ : ∥res (f m) - (N.d i' i) n₁∥ ≤ K * ∥(N.d i (i + 1)) (f m)∥ + ε₁) :
   ∥(res (f m) : N c i) - N.d i' i (res n₁)∥ ≤ K * ∥(N.d i (i + 1)) (f m)∥ + ε₁ :=
 calc
-    _ = ∥res (res (f m) - (N.d i' i) n₁)∥ : by rw [normed_group_hom.map_sub, d_res, ← res_res]
-  ... ≤ K * ∥(N.d i (i + 1)) (f m)∥ + ε₁  : trans (hN_adm.res_norm_noninc _ c _ _ _) hn₁
+    _ = ∥res (res (f m) - (N.d i' i) n₁)∥      : by rw [normed_group_hom.map_sub, d_res, ← res_res]
+  ... ≤ K * ∥(N.d i (i + 1)) (f m)∥ + ε₁ : trans (hN_adm.res_norm_noninc _ c _ _ _) hn₁
 
-/-! This chain of inequalities converts the right-hand summands appearing in the (weak) normed snake
-dual lemma.
-
-The hypothesis `(hN_adm : N.admissible)` is only used via `(hN_adm.d_norm_noninc _ _ i' i nnew₁)`,
-producing the inequality `(dis : ∥(N.d i' i) nnew₁∥ ≤ ∥nnew₁∥)`. -/
+/- This chain of inequalities converts one of the two summands appearing in the (weak) normed snake
+dual lemma. -/
 lemma norm_sub_le_mul_norm_add_rhs {k' K K' r₁ r₂ c c₁ : ℝ≥0} {ε₁ ε₂ : ℝ}
   {i i' i'' : ℕ} (hii' : i' + 1 = i)
   [hk' : fact (1 ≤ k')]
@@ -61,7 +70,8 @@ lemma norm_sub_le_mul_norm_add_rhs {k' K K' r₁ r₂ c c₁ : ℝ≥0} {ε₁ �
   {n₁ : N (k' * c) i'}
   {n₂ : N c i''}
   {nnew₁ : N c i'}
-  (hN_adm : N.admissible)
+  (hN_adm : N.admissible) /- could use (dis : ∥(N.d i' i) nnew₁∥ ≤ ∥nnew₁∥)
+                           `hN_adm.d_norm_noninc _ _ i' i nnew₁` -/
   {m : (M c₁ i)}
   (hn₁ : ∥res (f m) - (N.d i' i) n₁∥ ≤ K * ∥(N.d i (i + 1)) (f m)∥ + ε₁)
   (hp₂ : ∥res (g n₁) - (P.d i'' i') (g n₂)∥ ≤ K' * ∥(P.d i' (i' + 1)) (g n₁)∥ + ε₂)
@@ -69,11 +79,12 @@ lemma norm_sub_le_mul_norm_add_rhs {k' K K' r₁ r₂ c c₁ : ℝ≥0} {ε₁ �
   (hfm : ∥g ((N.d i' i) n₁)∥ = ∥g (res (f m) - (N.d i' i) n₁)∥) :
   ∥(N.d i' i ((N.d i'' i') n₂ + nnew₁) : N c i)∥ ≤
     K * K' * r₁ * r₂ * ∥(N.d i (i+1)) (f m)∥ + K' * r₁ * r₂ * ε₁ + r₂ * ε₂ :=
-calc ∥(N.d i' i ((N.d i'' i') n₂ + nnew₁) : N c i)∥
-      = ∥N.d i' i nnew₁∥ : by simp only [map_add, zero_add, d_d]
+calc ∥(N.d i' i ((N.d i'' i') n₂ + nnew₁) : N c i)∥ =
+  ∥N.d i' i ((N.d i'' i') n₂ + nnew₁)∥ : rfl
+  ... = ∥N.d i' i nnew₁∥ : by simp only [map_add, zero_add, d_d]
   ... ≤ r₂ * ∥g (res n₁ - (N.d i'' i') n₂)∥ : trans (hN_adm.d_norm_noninc _ _ i' i nnew₁) hnormnnew₁
   ... = r₂ * ∥res (g n₁) - P.d i'' i' (g n₂)∥ :
-    by rw [hom_apply, normed_group_hom.map_sub, ←hom_apply, ←hom_apply, ←res_apply _ _ g, ←d_apply]
+    by rw [hom_apply g, normed_group_hom.map_sub, ←hom_apply, ←hom_apply, ←res_apply _ _ g, ←d_apply]
   ... ≤ r₂ * (K' * ∥P.d i' (i'+1) (g n₁)∥ + ε₂) : mul_le_mul_of_nonneg_left hp₂ r₂.coe_nonneg
   ... = r₂ * (K' * ∥g (res (f m) - N.d i' i n₁)∥ + ε₂) : by rw [d_apply _ _ g _, hii', hfm]
   ... ≤ r₂ * (K' * (r₁ * ∥res (f m) - N.d i' i n₁∥) + ε₂) :
@@ -85,14 +96,6 @@ calc ∥(N.d i' i ((N.d i'' i') n₂ + nnew₁) : N c i)∥
       hn₁ $ mul_nonneg K'.coe_nonneg r₁.coe_nonneg) _) r₂.coe_nonneg
   ... = _ : by ring
 
-/-!
-Use `norm_sub_le_split` to split the norm into a sum of two contribution:
-
-* apply `norm_sub_le_mul_norm_add_lhs` to the left-hand-side;
-* apply `norm_sub_le_mul_norm_add_rhs` to the right-hand-side.
-
-The rest is simple manipulations of real numbers.
--/
 lemma norm_sub_le_mul_norm_add {k' K K' r₁ r₂ c c₁ : ℝ≥0} {ε ε₁ ε₂ : ℝ}
   {i i' i'' : ℕ} (hii' : i' + 1 = i)
   [hk' : fact (1 ≤ k')]
@@ -128,8 +131,8 @@ calc
   ... = (K + r₁ * r₂ * K * K') * ∥(M.d i (i+1)) m∥ + ε :
     by rw [add_assoc, add_halves', d_apply, hom_apply, hfnorm]
 
-/-  I (DT) extracted this lemma to speed up the proof of `weak_normed_snake_dual`. -/
-/-! We apply this lemma with `ρ = K + r₁ * r₂ * K * K'`. -/
+/-  I (DT) extracted this lemma to speed up the proof of `weak_normed_snake_dual`.
+The `ρ` in this lemma stands for `K + r₁ * r₂ * K * K'` in the application. -/
 lemma exists_norm_sub_le_mul_add {M : system_of_complexes} {k k' c ρ : ℝ≥0}
   {i : ℕ}
   [hk : fact (1 ≤ k)] [hk' : fact (1 ≤ k')]
@@ -152,6 +155,28 @@ begin
 end
 
 /-  I (DT) extracted this lemma to speed up the proof of `weak_normed_snake_dual`. -/
+lemma norm_sub_le_mul_mul_norm_add_new {M N : system_of_complexes} {f : M ⟶ N}
+  {k k' K c mK : ℝ≥0} (mK1 : 1 ≤ mK) {ε ε₁ : ℝ} {m : M (k * (k' * c)) 0} {n₁ : N (k' * c) 0} {m₁ : M c 0}
+  (ee1 : ε₁ ≤ ε)
+  [hk : fact (1 ≤ k)] [hk' : fact (1 ≤ k')]
+  (hfnorm : ∀ (c : ℝ≥0) (i : ℕ) (x : (M c i)), ∥(f.apply) x∥ = ∥x∥)
+  (inadm : ∥((res (res m : (M (k' * c) 0))) : (M c 0))∥ ≤ ∥(res m : (M (k' * c) 0))∥ )
+  (hn₁ : ∥res (f m) - (N.d 0 0) n₁∥ ≤ ↑K * ∥(N.d 0 (0 + 1)) (f m)∥ + ε₁) :
+  ∥res m - (M.d 0 0) m₁∥ ≤ (K * mK) * ∥(M.d 0 (0 + 1)) m∥ + ε :=
+begin
+  simp only [d_self_apply, sub_zero, nnreal.coe_add, nnreal.coe_mul] at hn₁ ⊢,
+  rw [res_apply, hom_apply f (res m), hfnorm] at hn₁,
+  have new : fact (c ≤ k' * c) := { out := le_mul_of_one_le_left c.2 hk'.out },
+  rw ←res_res _ _ _ new,
+  refine le_trans inadm (le_trans hn₁ _),
+  rw [d_apply, hom_apply f _, hfnorm],
+  refine add_le_add _ ee1,
+  rw mul_assoc,
+  refine (mul_le_mul_of_nonneg_left _ K.2),
+  exact le_mul_of_one_le_left (norm_nonneg _) mK1,
+end
+--/-
+/-  I (DT) extracted this lemma to speed up the proof of `weak_normed_snake_dual`. -/
 lemma norm_sub_le_mul_mul_norm_add {M N : system_of_complexes} {f : M ⟶ N}
   {k k' K c : ℝ≥0} (mK : ℝ≥0) {ε ε₁ : ℝ} {m : M (k * (k' * c)) 0} {n₁ : N (k' * c) 0} {m₁ : M c 0}
   (ee1 : ε₁ ≤ ε)
@@ -172,6 +197,43 @@ begin
   refine (mul_le_mul_of_nonneg_left _ K.2),
   exact le_mul_of_one_le_left (norm_nonneg _) (le_add_of_nonneg_right mK.2),
 end
+--/
+
+lemma weak_normed_snake_dual (k k' K K' r₁ r₂ : ℝ≥0)
+  [hk : fact (1 ≤ k)] [hk' : fact (1 ≤ k')]
+  {a : ℕ} {c₀ : ℝ≥0}
+  (hN : N.is_weak_bounded_exact k K (a + 1) c₀)
+  (hP : P.is_weak_bounded_exact k' K' (a + 1) c₀)
+  (hN_adm : N.admissible)
+  (hgnrm : ∀ c i (x : N c i), ∥g x∥ ≤ r₁ * ∥x∥)
+  (Hg : ∀ (c : ℝ≥0) [fact (c₀ ≤ c)] (i : ℕ) (hi : i ≤ a + 1 + 1) (y : P c i),
+    ∃ (x : N c i), g x = y ∧ ∥x∥ ≤ r₂ * ∥y∥)
+  (hg : ∀ c i, (f.apply : M c i ⟶ N c i).range = g.apply.ker)
+  (hf : ∀ c i, @isometry (M c i) (N c i) _ _ f.apply) :
+  M.is_weak_bounded_exact (k * k') (K + r₁ * r₂ * K * K') a c₀ :=
+begin
+  introsI c hc i hi,
+  apply exists_norm_sub_le_mul_add (admissible_of_isometry hN_adm hf),
+  intros m ε hε,
+
+  have hlt : 0 < (1 + K' * r₁ * r₂ : ℝ) :=
+    add_pos_of_pos_of_nonneg zero_lt_one ((K' * r₁ * r₂).coe_nonneg),
+  have hε₁ : 0 < ε / 2 * (1 + K' * r₁ * r₂)⁻¹ := mul_pos (half_pos hε) (inv_pos.2 hlt),
+  obtain ⟨_, _, rfl, rfl, n₁, hn₁⟩ :=
+    hN _ ⟨hc.out.trans $ le_mul_of_one_le_left' hk'.out⟩ _ (trans hi a.le_succ) (f m) _ hε₁,
+  have Hi' : i - 1 ≤ a + 1 := trans i.pred_le (trans hi a.le_succ),
+  obtain ⟨_, _, rfl, rfl, p₂, hp₂⟩ := hP _ hc _ Hi' (g n₁)
+    (if (r₂ : ℝ) = 0 then 1 else (ε / 2) * r₂⁻¹) _,
+  { simp_rw [nnreal.coe_eq_zero r₂] at hp₂,
+    apply exist_norm_sub_le_mul_norm_add ε hN_adm hgnrm Hg hg hf
+      hc hi m hε.le n₁ hn₁ Hi' p₂,
+    convert hp₂, },
+  { by_cases H : r₂ = 0,
+    { simp only [H, zero_lt_one, if_true, eq_self_iff_true, nnreal.coe_eq_zero] },
+    { simp only [H, nnreal.coe_eq_zero, if_false],
+      exact mul_pos (half_pos hε) (inv_pos.2 (nnreal.coe_pos.2 (zero_lt_iff.2 H))) } }
+end
+
 
 /-  I (DT) extracted this lemma to speed up the proof of `weak_normed_snake_dual`. -/
 lemma ε₁_le_ε {ε ε₁ : ℝ} (hε : 0 ≤ ε) (mK : ℝ≥0) (hε₁ : ε₁ = ε / 2 * (1 + mK)⁻¹) :
@@ -180,13 +242,10 @@ by { rw [hε₁, div_eq_mul_inv, mul_assoc, ← mul_inv'],
      exact mul_le_of_le_one_right hε (inv_le_one $ nnreal.coe_le_coe.mpr $
       one_le_mul one_le_two $ le_add_of_nonneg_right mK.2) }
 
-/-!
-Note that `ε = 0` is allowed.  Indeed, the weak normed snake dual lemma uses `0 ≤ ε`, while the
-normed snake dual lemma uses `ε = 0`. -/
 lemma exist_norm_sub_le_mul_norm_add {M N P : system_of_complexes} {k k' K K' r₁ r₂ c₀ c : ℝ≥0}
+  (mK : ℝ≥0)
   {a i : ℕ}
-  {ε : ℝ}
-  (hε : 0 ≤ ε)
+  (ε : ℝ) -- keep explicit to work with positive, for weak, and with zero, for non-weak
   {f : M ⟶ N} {g : N ⟶ P}
   [hk : fact (1 ≤ k)]
   [hk' : fact (1 ≤ k')]
@@ -199,15 +258,16 @@ lemma exist_norm_sub_le_mul_norm_add {M N P : system_of_complexes} {k k' K K' r�
   (hc : fact (c₀ ≤ c))
   (hi : i ≤ a)
   (m : (M (k * (k' * c)) i))
+  (hε : 0 ≤ ε)
   (n₁ : (N (k' * c) (i - 1)))
   (hn₁ : ∥res (f m) - (N.d (i - 1) i) n₁∥ ≤
-    K * ∥(N.d i (i + 1)) (f m)∥ + ε / 2 * (1 + K' * r₁ * r₂)⁻¹)
+    K * ∥(N.d i (i + 1)) (f m)∥ + ε / 2 * (1 + mK)⁻¹)
   (Hi' : i - 1 ≤ a + 1)
   (p₂ : (P c (i - 1 - 1)))
   (hp₂ : ∥res (g n₁) - (P.d (i - 1 - 1) (i - 1)) p₂∥ ≤
     K' * ∥(P.d (i - 1) (i - 1 + 1)) (g n₁)∥ + ite (r₂ = 0) 1 (ε / 2 * (r₂)⁻¹)) :
   ∃ (i₀ : ℕ) (hi₀ : i₀ = i - 1) (y : (M c i₀)),
-    ∥res m - (M.d i₀ i) y∥ ≤ (K + r₁ * r₂ * K * K') * ∥(M.d i (i + 1)) m∥ + ε :=
+    ∥res m - (M.d i₀ i) y∥ ≤ K * (1 + mK) * ∥(M.d i (i + 1)) m∥ + ε :=
 begin
   obtain ⟨n₂, rfl, hnormn₂⟩ :=
     Hg c (i - 1 - 1) (trans (nat.pred_le _) (trans Hi' (nat.le_succ _))) p₂,
@@ -218,17 +278,23 @@ begin
   rw ←hg at hker,
   obtain ⟨m₁, hm₁ : f m₁ = res n₁ - n₁' - nnew₁⟩ := (mem_range _ _).1 hker,
   refine ⟨i - 1, rfl, m₁, _⟩,
-  have hfnrm : ∀ c i (x : M c i), ∥f.apply x∥ = ∥x∥ := λ c i x, (isometry_iff_norm _).1 (hf c i) x,
+  have hfnrm : ∀ c i (x : M c i), ∥f.apply x∥ = ∥x∥ :=
+    λ c i x, (isometry_iff_norm _).1 (hf c i) x,
+  have hlt : 1 ≤ 1 + mK := le_add_of_nonneg_right (zero_le _),
   by_cases hizero : i = 0,
   { subst hizero,
-    convert norm_sub_le_mul_mul_norm_add (K' * r₁ * r₂) _ hfnrm _ hn₁,
-    { norm_cast, ring },
-    { exact ε₁_le_ε hε (K' * r₁ * r₂) rfl },
+    convert norm_sub_le_mul_mul_norm_add hlt _ hfnrm _ hn₁,
+    { rw [div_eq_mul_inv, mul_assoc, ← mul_inv'],
+      apply mul_le_of_le_one_right hε,
+      apply inv_le_one,
+      refine one_le_mul_of_one_le_of_one_le one_le_two hlt,  },
+    --{ exact ε₁_le_ε hε mK rfl },
     { exact (admissible_of_isometry hN_adm hf).res_norm_noninc _ _ _ _ _ } },
-  { refine norm_sub_le_mul_norm_add M N P f g _ hN_adm hgnrm hfnrm _ _ hn₁ hp₂ hnrmnew₁ hm₁ _,
+  { convert norm_sub_le_mul_norm_add M N P f g _ hN_adm hgnrm hfnrm _ _ hn₁ hp₂ hnrmnew₁ hm₁ _,
+    { ring, },
     { exact nat.succ_pred_eq_of_pos (nat.pos_of_ne_zero hizero) },
     { rw inv_mul_cancel_right',
-      exact ne_of_gt (add_pos_of_pos_of_nonneg zero_lt_one (zero_le (K' * r₁ * r₂))) },
+      exact ne_of_gt (lt_of_lt_of_le zero_lt_one hlt) },
     { by_cases H : r₂ = 0,
       { simp only [H, nnreal.coe_zero, if_true, zero_mul, (div_nonneg hε zero_le_two)] },
       { simp only [H, nnreal.coe_eq_zero, if_false, mul_comm,
@@ -256,15 +322,17 @@ begin
   apply exists_norm_sub_le_mul_add (admissible_of_isometry hN_adm hf),
   intros m ε hε,
 
-  have hε₁ : 0 < ε / 2 * (1 + K' * r₁ * r₂)⁻¹ := mul_pos (half_pos hε)
-    (inv_pos.2 $ add_pos_of_pos_of_nonneg zero_lt_one ((K' * r₁ * r₂).coe_nonneg)),
+  have hlt : 0 < (1 + K' * r₁ * r₂ : ℝ) :=
+    add_pos_of_pos_of_nonneg zero_lt_one ((K' * r₁ * r₂).coe_nonneg),
+  have hε₁ : 0 < ε / 2 * (1 + K' * r₁ * r₂)⁻¹ := mul_pos (half_pos hε) (inv_pos.2 hlt),
   obtain ⟨_, _, rfl, rfl, n₁, hn₁⟩ :=
     hN _ ⟨hc.out.trans $ le_mul_of_one_le_left' hk'.out⟩ _ (trans hi a.le_succ) (f m) _ hε₁,
   have Hi' : i - 1 ≤ a + 1 := trans i.pred_le (trans hi a.le_succ),
   obtain ⟨_, _, rfl, rfl, p₂, hp₂⟩ := hP _ hc _ Hi' (g n₁)
     (if (r₂ : ℝ) = 0 then 1 else (ε / 2) * r₂⁻¹) _,
   { simp_rw [nnreal.coe_eq_zero r₂] at hp₂,
-    apply exist_norm_sub_le_mul_norm_add hε.le hN_adm hgnrm Hg hg hf hc hi m n₁ hn₁ Hi' p₂,
+    apply exist_norm_sub_le_mul_norm_add ε hN_adm hgnrm Hg hg hf --can I get this lemma to work with mK?
+      hc hi m hε.le n₁ hn₁ Hi' p₂,
     convert hp₂, },
   { by_cases H : r₂ = 0,
     { simp only [H, zero_lt_one, if_true, eq_self_iff_true, nnreal.coe_eq_zero] },
@@ -338,7 +406,8 @@ begin
   rw ← add_zero (_ * ∥_∥) at ⊢,
   have hn₁₁ :  ∥res (f m) - (N.d (i - 1) i) n₁∥ ≤
     K * ∥(N.d i (i + 1)) (f m)∥ + 0 / 2 * (1 + K' * r₁ * r₂)⁻¹, rwa [zero_div, zero_mul, add_zero],
-  obtain F := exist_norm_sub_le_mul_norm_add rfl.le hN_adm hgnorm Hg hg hf hc hi m n₁ hn₁₁ Hi' p₂,
+  obtain F := exist_norm_sub_le_mul_norm_add 0 hN_adm
+    hgnorm Hg hg hf hc hi m rfl.le n₁ hn₁₁ Hi' p₂,
   by_cases hr : r₂ = 0,
   { subst hr,
     simp at ⊢ F,
