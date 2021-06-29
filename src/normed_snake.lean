@@ -44,8 +44,6 @@ begin
   let ε₁ := ε/(K' * (K * K'' + 2) + 1),
 
   have honele : fact (1 ≤ K' * (K * K'' + 2) + 1), { apply_instance },
-  have hε₁_ε : (K' * (K * K'' + 2) + 1 : ℝ)*ε₁ = ε,
-    from mul_div_cancel' _ (by exact_mod_cast ne_of_gt (lt_of_lt_of_le zero_lt_one honele.out)),
   have hε₁ : 0 < ε₁, from div_pos hε (lt_of_lt_of_le zero_lt_one honele.out),
 
   obtain ⟨m' : M' c₁ i, hm' : g m' = n⟩ := (hgquot _ _).surjective _,
@@ -122,6 +120,8 @@ begin
   refine ⟨i₀, hi₀, nnew₀, _⟩,
   rw ← hmnewlift,
   refine ((hgquot _ _).norm_le _).trans (hmnew₀.trans (le_of_eq _)),
+  have hε₁_ε : (K' * (K * K'' + 2) + 1 : ℝ)*ε₁ = ε,
+    from mul_div_cancel' _ (by exact_mod_cast ne_of_gt (lt_of_lt_of_le zero_lt_one honele.out)),
   rw ← hε₁_ε,
   ring,
 end
