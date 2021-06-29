@@ -272,8 +272,8 @@ begin
       exact mul_pos (half_pos hε) (inv_pos.2 (nnreal.coe_pos.2 (zero_lt_iff.2 H))) } }
 end
 
-/-  I (DT) extracted this lemma to speed up the proof of `normed_snake_dual`.
-The `ρ` in this lemma stands for `K + r₁ * r₂ * K * K'` in the application. -/
+/-  I (DT) extracted this lemma to speed up the proof of `normed_snake_dual`. -/
+/-! We apply this lemma with `ρ = K + r₁ * r₂ * K * K'`. -/
 lemma exists_norm_sub_le_mul {M : system_of_complexes} {k k' c ρ : ℝ≥0}
   {i : ℕ}
   [hk : fact (1 ≤ k)] [hk' : fact (1 ≤ k')]
@@ -291,26 +291,6 @@ begin
   refine ⟨i - 1, _, rfl, rfl, _⟩,
   refine ⟨y, hy.trans (mul_le_mul_of_nonneg_left _ ρ.2)⟩,
   exact hM_adm.res_norm_noninc _ _ _ _ _,
-end
-
-/-  I (DT) extracted this lemma to speed up the proof of `normed_snake_dual`. -/
-lemma norm_sub_le_mul_mul_norm {M N : system_of_complexes} {f : M ⟶ N}
-  {k k' K c : ℝ≥0} (mK : ℝ≥0) {m : M (k * (k' * c)) 0} {n₁ : N (k' * c) 0} {m₁ : M c 0}
-  [hk : fact (1 ≤ k)] [hk' : fact (1 ≤ k')]
-  (hfnorm : ∀ (c : ℝ≥0) (i : ℕ) (x : (M c i)), ∥(f.apply) x∥ = ∥x∥)
-  (inadm : ∥((res (res m : (M (k' * c) 0))) : (M c 0))∥ ≤ ∥(res m : (M (k' * c) 0))∥ )
-  (hn₁ : ∥res (f m) - (N.d 0 0) n₁∥ ≤ ↑K * ∥(N.d 0 (0 + 1)) (f m)∥) :
-  ∥res m - (M.d 0 0) m₁∥ ≤ (K * (1 + mK)) * ∥(M.d 0 (0 + 1)) m∥ :=
-begin
-  simp only [d_self_apply, sub_zero, nnreal.coe_add, nnreal.coe_mul] at hn₁ ⊢,
-  rw [res_apply, hom_apply f (res m), hfnorm] at hn₁,
-  have new : fact (c ≤ k' * c) := { out := le_mul_of_one_le_left c.2 hk'.out },
-  rw ←res_res _ _ _ new,
-  refine le_trans inadm (le_trans hn₁ _),
-  rw [d_apply, hom_apply f _, hfnorm],
-  rw mul_assoc,
-  refine (mul_le_mul_of_nonneg_left _ K.2),
-  exact le_mul_of_one_le_left (norm_nonneg _) (le_add_of_nonneg_right mK.2),
 end
 
 lemma normed_snake_dual {k k' K K' r₁ r₂ : ℝ≥0}
