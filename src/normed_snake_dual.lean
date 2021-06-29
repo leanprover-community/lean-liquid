@@ -17,7 +17,7 @@ inequality of the form
 ```
 ∥res ? - (M.d ??) ?∥ ≤ const * ∥(M.d ?? ?∥ + ε.
 ```
-(Recall that `res` is a restriction for among certain complexes, `M.d` stands for a differential,
+(Recall that `res` is a restriction among certain complexes, `M.d` stands for a differential,
 `const` is a constant; the error `ε` is a non-negative real number.  For the weak version, we
 quantify over all `0 < ε ∈ ℝ`.  For the non-weak version, we use `ε = 0`.)
 
