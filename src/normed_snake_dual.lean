@@ -295,7 +295,7 @@ end
 variables (M N P f g)
 
 /-!
-Finally, we can state and prove the weak normed snake dual lemma.
+Finally, we state and prove the weak normed snake dual lemma.
 -/
 lemma weak_normed_snake_dual (k k' K K' r₁ r₂ : ℝ≥0)
   [hk : fact (1 ≤ k)] [hk' : fact (1 ≤ k')]
