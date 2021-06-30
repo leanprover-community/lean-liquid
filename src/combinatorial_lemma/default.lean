@@ -328,7 +328,7 @@ begin
       pi.smul_apply, eq_self_iff_true, true_and, if_congr, and_congr],
     split_ifs,
     { simp only [mul_zero, norm_zero, smul_eq_mul] },
-    { simp only [int.norm_def, ← abs_mul, ← int.cast_mul, smul_eq_mul] } },
+    { simp only [int.norm_eq_abs, ← abs_mul, ← int.cast_mul, smul_eq_mul] } },
   all_goals { try { intro hsnA, exact (hsnA (hx₁'A s n)).elim } },
   all_goals { intros a haA hasn },
   { simp only [hasn.symm, Mbar.mk_of_add_monoid_hom_to_fun, norm_zero,

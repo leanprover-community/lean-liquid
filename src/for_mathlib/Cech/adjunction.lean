@@ -1,7 +1,5 @@
 import algebraic_topology.cech_nerve
 
-import for_mathlib.simplicial.augmented
-
 universe u
 
 noncomputable theory
