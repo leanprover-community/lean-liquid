@@ -90,7 +90,7 @@ begin
     { intros, refl } },
 end
 
--- move this
+-- PR #8134
 lemma int.div_eq_zero (d n : ℤ) (h : d ∣ n) (H : n / d = 0) : n = 0 :=
 by rw [← int.mul_div_cancel' h, H, mul_zero]
 

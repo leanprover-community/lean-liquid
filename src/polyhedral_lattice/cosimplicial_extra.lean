@@ -1,8 +1,6 @@
 import polyhedral_lattice.cosimplicial
 import polyhedral_lattice.Hom
 
-import combinatorial_lemma -- for `add_monoid_hom_mem_filtration_iff` (move it)
-
 open_locale nnreal
 
 namespace PolyhedralLattice

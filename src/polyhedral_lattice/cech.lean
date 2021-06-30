@@ -313,7 +313,7 @@ def map_succ_zero (m : ℕ) (g : fin (m+2) →ₘ fin 1) : obj f (m+1) ⟶ Λ' :
   end,
   .. map_succ_zero_aux f m g }
 
--- move this, generalize to arbitrary subsingletons
+-- PR #8135
 @[simp] lemma preorder_hom_eq_id (g : fin 1 →ₘ fin 1) : g = preorder_hom.id :=
 by { ext1, exact subsingleton.elim _ _ }
 

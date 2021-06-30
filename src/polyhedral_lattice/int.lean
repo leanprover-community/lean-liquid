@@ -10,18 +10,17 @@ noncomputable theory
 
 open_locale big_operators
 
--- move this
+section PR_8136
+
 lemma int.nnnorm_coe_units (e : units ℤ) : ∥(e : ℤ)∥₊ = 1 :=
 begin
   obtain (rfl|rfl) := int.units_eq_one_or e;
   simp only [units.coe_neg_one, units.coe_one, nnnorm_neg, nnnorm_one],
 end
 
--- move this
 lemma int.norm_coe_units (e : units ℤ) : ∥(e : ℤ)∥ = 1 :=
 by rw [← coe_nnnorm, int.nnnorm_coe_units, nnreal.coe_one]
 
---move this
 @[simp]
 lemma int.units_univ : (finset.univ : finset (units ℤ)) = {1, -1} := rfl
 
@@ -57,6 +56,21 @@ lemma give_better_name : ∀ (n : ℤ), ∥n∥ = ↑(n.to_nat) + ↑((-n).to_na
 | (0 : ℕ)   := by simp only [add_zero, norm_zero, int.coe_nat_zero, nat.cast_zero, int.to_nat_zero, neg_zero]
 | (n+1 : ℕ) := show ∥(↑(n+1):ℤ)∥ = n+1 + 0, by rw [add_zero, int.norm_coe_nat, nat.cast_succ]
 | -[1+ n]   := show ∥-↑(n+1:ℕ)∥ = 0 + (n+1), by rw [zero_add, norm_neg, int.norm_coe_nat, nat.cast_succ]
+
+end PR_8136
+
+-- === Once ↑↑↑ is merged into mathlib, the following will compile:
+
+/-
+lemma sum_units_to_nat_smul (n : ℤ) :
+  ∑ (i : units ℤ), int.to_nat (i * n) • (i : ℤ) = n :=
+begin
+  rw [int.units_univ, finset.sum_insert], swap, dec_trivial,
+  simp only [neg_mul_eq_neg_mul_symm, mul_one, nat_cast_eq_coe_nat, one_mul, nsmul_eq_mul,
+    units.coe_one, units.coe_neg_one, mul_neg_eq_neg_mul_symm, finset.sum_singleton,
+    ← sub_eq_add_neg, to_nat_sub_to_nat_neg],
+end
+-/
 
 instance int.polyhedral_lattice : polyhedral_lattice ℤ :=
 { polyhedral' :=
