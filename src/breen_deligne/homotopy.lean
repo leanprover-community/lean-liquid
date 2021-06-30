@@ -109,9 +109,6 @@ begin
 end
 .
 
--- move to mathlib
-attribute [simps] homotopy.refl homotopy.symm homotopy.trans homotopy.comp_left homotopy.comp_right
-
 instance homotopy_mul_suitable (j i N : ℕ) :
   ((BD.data.homotopy_mul BD.homotopy N).hom j i).suitable
     (rescale_constants κ (2 ^ N) j) ((κ' * κ) i) :=

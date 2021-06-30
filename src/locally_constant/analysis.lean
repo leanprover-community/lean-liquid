@@ -24,13 +24,10 @@ open set
 -- move this
 section for_mathlib
 
-lemma set.range_pair_subset_range {α β γ : Type*} (f : α → β) (g : α → γ) :
+lemma set.range_pair_subset {α β γ : Type*} (f : α → β) (g : α → γ) :
   range (λ x, (f x, g x)) ⊆ (range f).prod (range g) :=
-begin
-  rw [show (λ x, (f x, g x)) = prod.map f g ∘ (λ x, (x, x)), from funext (λ x, rfl),
-      ← range_prod_map],
-  apply range_comp_subset_range
-end
+have (λ x, (f x, g x)) = prod.map f g ∘ (λ x, (x, x)), from funext (λ x, rfl),
+by { rw [this, ← range_prod_map], apply range_comp_subset_range }
 
 -- feel free to golf!!
 lemma real.Sup_mul (r : ℝ) (s : set ℝ) (hr : 0 < r) :
@@ -130,7 +127,7 @@ begin
   rw range_comp,
   apply finite.image,
   apply (f.range_finite.prod g.range_finite).subset,
-  apply range_pair_subset_range,
+  apply range_pair_subset,
 end
 
 lemma dist_apply_le [has_dist Y] (f g : locally_constant X Y) (x : X) :

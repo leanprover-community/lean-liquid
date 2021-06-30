@@ -78,8 +78,8 @@ instance suitable_mul_right (f : basic_universal_map m n) [h : f.suitable c₁ c
   f.suitable (c₁ * c) (c₂ * c) :=
 by { rw [mul_comm _ c, mul_comm _ c], exact basic_universal_map.suitable_mul_left _ _ _ _ }
 
--- move this
-lemma nat_abs_sum_le_sum_nat_abs {ι : Type*} (s : finset ι) (f : ι → ℤ) :
+-- PR #8132
+lemma nat_abs_sum_le {ι : Type*} (s : finset ι) (f : ι → ℤ) :
   (∑ i in s, f i).nat_abs ≤ ∑ i in s, (f i).nat_abs :=
 begin
   classical,
@@ -123,7 +123,7 @@ begin
     apply finset.sum_le_sum,
     rintro k -,
     simp only [← int.nat_abs_mul],
-    apply nat_abs_sum_le_sum_nat_abs },
+    apply nat_abs_sum_le },
   { simp only [← nat.coe_cast_ring_hom, ring_hom.map_sum, ring_hom.map_mul,
       finset.sum_mul, mul_assoc] },
   { apply finset.sum_le_sum, rintro j -, exact mul_le_mul' le_rfl (hf j) }
@@ -545,17 +545,9 @@ begin
   apply_instance
 end
 
--- move this
-instance fact_two_pow_inv_le_two_pow_inv (N : ℕ) : fact ((2 ^ N : ℝ≥0)⁻¹ ≤ (2 ^ N : ℕ)⁻¹) :=
-⟨le_of_eq $ by norm_cast⟩
-
 instance sum_suitable (i N : ℕ) (N' : ℝ≥0) [hN' : fact (N'⁻¹ ≤ N⁻¹)] :
   universal_map.suitable (rescale_constants κ N' i) (κ i) ((BD.sum N).f i) :=
 (universal_map.sum_suitable _ _ _).le _ _ _ _ (mul_le_mul' le_rfl hN'.1) le_rfl
-
--- move this
-instance fact_two_pow_inv_le_one (N : ℕ) : fact ((2 ^ N : ℝ≥0)⁻¹ ≤ 1) :=
-⟨le_trans (data.fact_two_pow_inv_le_two_pow_inv N).1 $ fact.out _⟩
 
 instance proj_suitable_strict (i N : ℕ) :
   universal_map.suitable c c ((BD.proj N).f i) :=

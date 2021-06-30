@@ -122,6 +122,12 @@ end
 
 instance fact_one_le_two : fact ((1:ℝ≥0) ≤ 2) := ⟨one_le_two⟩
 
+instance fact_two_pow_inv_le_two_pow_inv (N : ℕ) : fact ((2 ^ N : ℝ≥0)⁻¹ ≤ (2 ^ N : ℕ)⁻¹) :=
+⟨le_of_eq $ by norm_cast⟩
+
+instance fact_two_pow_inv_le_one (N : ℕ) : fact ((2 ^ N : ℝ≥0)⁻¹ ≤ 1) :=
+⟨le_trans (nnreal.fact_two_pow_inv_le_two_pow_inv N).1 $ fact.out _⟩
+
 end nnreal
 
 #lint- only unused_arguments def_lemma doc_blame
