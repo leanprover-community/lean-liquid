@@ -24,11 +24,6 @@ open set
 -- move this
 section for_mathlib
 
-lemma set.range_pair_subset {α β γ : Type*} (f : α → β) (g : α → γ) :
-  range (λ x, (f x, g x)) ⊆ (range f).prod (range g) :=
-have (λ x, (f x, g x)) = prod.map f g ∘ (λ x, (x, x)), from funext (λ x, rfl),
-by { rw [this, ← range_prod_map], apply range_comp_subset_range }
-
 -- feel free to golf!!
 lemma real.Sup_mul (r : ℝ) (s : set ℝ) (hr : 0 < r) :
   Sup ({x | ∃ y ∈ s, r * y = x}) = r * Sup s :=
