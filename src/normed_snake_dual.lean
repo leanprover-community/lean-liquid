@@ -81,7 +81,7 @@ calc ∥res m - (M.d i' i) m₁∥
 /-!
 We then massage the left-hand side.  The proof of this lemma is deceptively simple, since
 there is a lot of typeclass work happening in the background.  In particular, the `c` in the sea of
-underscores of the second line is crucial.
+underscores of the second line is crucial for the *previous* line to compile.
 
 (The hypothesis `(hN_adm : N.admissible)` is only used via `(hN_adm.res_norm_noninc _ c _ _ _)`,
 producing the inequality
@@ -132,9 +132,9 @@ calc ∥(N.d i' i ((N.d i'' i') n₂ + nnew₁) : N c i)∥
   ... = _ : by ring
 
 /-!
-We collect the inequalities obtained so far.  Use `norm_sub_le_split` to split the norm into a sum
-of two contribution:
+We collect the inequalities obtained so far:
 
+* use `norm_sub_le_split` to split the norm into a sum of two terme;
 * apply `norm_sub_le_mul_norm_add_lhs` to the left-hand-side;
 * apply `norm_sub_le_mul_norm_add_rhs` to the right-hand-side.
 
