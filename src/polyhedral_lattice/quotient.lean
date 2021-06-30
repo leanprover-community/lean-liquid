@@ -15,10 +15,11 @@ noncomputable theory
 open_locale big_operators
 
 section saturated
+-- PR #8137
 
 variables {G G₁ G₂ : Type*} [group G] [add_comm_group G₁] [add_comm_group G₂]
 
-namespace subgroup -- move this section
+namespace subgroup
 
 @[to_additive]
 def saturated (H : subgroup G) : Prop := ∀ ⦃n g⦄, gpow n g ∈ H → n = 0 ∨ g ∈ H
