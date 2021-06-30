@@ -14,7 +14,7 @@ on:
       # ignore staging branch used by bors, this is handled by bors.yml
       - 'staging'
 
-name: continuous integration
+name: continuous integration (new)
 
 jobs:
 
@@ -44,7 +44,9 @@ jobs:
           fetch-depth: ${{ env.GIT_HISTORY_DEPTH }}
 
       - name: update branch
-        if: github.ref == 'refs/heads/master'
+        # This is currently handled by the existing CI.
+        # Enable this when the existing CI is turned off.
+        if: false && github.ref == 'refs/heads/master'
         uses: leanprover-contrib/update-versions-action@master
 
       - name: install elan
