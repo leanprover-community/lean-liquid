@@ -84,7 +84,7 @@ begin
 
   let mnew₁' := M'.d i (i+1) (res m' - f m₀),
   have hmnew' : mnew₁' = res m₁'' + f (res m₁ - M.d i (i+1) m₀),
-  { exact calc mnew₁'
+  { calc mnew₁'
         = M'.d i (i+1) (res m' - f m₀) : rfl
     ... = res (M'.d i (i+1) m') - (f (M.d i (i+1) m₀)) : by rw [normed_group_hom.map_sub, d_res _, d_apply]
     ... = res (M'.d i (i+1) m') - (f (res m₁)) + (f (res m₁) - f (M.d i (i+1) m₀)) : by abel
@@ -96,13 +96,14 @@ begin
         = ∥res m₁'' + f (res m₁ - M.d i (i+1) m₀)∥ : by rw [hmnew']
     ... ≤ ∥res m₁''∥ + ∥f (res m₁ - M.d i (i+1) m₀)∥ : norm_add_le _ _
     ... ≤ ∥m₁''∥ + ∥f (res m₁ - M.d i (i+1) m₀)∥ : add_le_add_right
-                                      (hM'_adm.res_norm_noninc _ _ _ infer_instance m₁'') _
+                                      (hM'_adm.res_norm_noninc _ _ _ _ m₁'') _
     ... ≤ ∥m₁''∥ + ∥res m₁ - M.d i (i+1) m₀∥ : add_le_add_left (hf _ _ _) _
     ... ≤ ∥N.d i (i+1) (g m')∥ + ε₁ + ∥res m₁ - M.d i (i+1) m₀∥ : add_le_add_right (le_of_lt hnorm_m₁'')  _
     ... ≤ ∥N.d i (i+1) (g m')∥ + ε₁ + (K * K'' * ∥N.d i (i+1) (g m')∥ + K * K'' * ε₁ + ε₁) : add_le_add_left hm₀ _
     ... = (K*K'' + 1)*∥d _ _ (i+1) (g m')∥ + (K*K'' + 2) * ε₁ : by ring },
   obtain ⟨i₀, _, hi₀, rfl, mnew₀, hmnew₀⟩ := hM' _ hc _ (hi.trans m.le_succ) (res m' - f m₀) _ hε₁,
-  replace hmnew₀ : ∥res (res m' - f m₀) - d _ _ _ mnew₀∥ ≤ K' * ((K * K'' + 1) * ∥N.d i (i+1) (g m')∥ + (K * K'' + 2) * ε₁) + ε₁ :=
+  replace hmnew₀ : ∥res (res m' - f m₀) - d _ _ _ mnew₀∥ ≤
+    K' * ((K * K'' + 1) * ∥N.d i (i+1) (g m')∥ + (K * K'' + 2) * ε₁) + ε₁ :=
     hmnew₀.trans (add_le_add_right (mul_le_mul_of_nonneg_left hnormle nnreal.zero_le_coe) ε₁),
   let nnew₀ : ↥(N c i₀) := g mnew₀,
   have hmnewlift : g (res (res m' - f m₀) - M'.d i₀ i mnew₀) = res (g m') - N.d i₀ i nnew₀,
