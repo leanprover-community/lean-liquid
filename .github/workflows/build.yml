@@ -82,11 +82,11 @@ jobs:
           lean --json --make src | python scripts/detect_errors.py
 
       - name: push release to azure
-        if: always() && (github.repository == 'leanprover-community/lean-liquid' || github.repository == 'bentoner/lean-liquid') && steps.build.outputs.started == 'true' && github.ref == 'refs/heads/master
+        if: always() && (github.repository == 'leanprover-community/lean-liquid' || github.repository == 'bentoner/lean-liquid') && steps.build.outputs.started == 'true' && github.ref == 'refs/heads/master'
         continue-on-error: true
         run: |
           archive_name="$(git rev-parse HEAD).tar.xz"
-          find src/ -name "*.olean" -o -name ".noisy_files" | tar cJf "$archive_name" -T - 
+          find src/ -name "*.olean" -o -name ".noisy_files" | tar cJf "$archive_name" -T -
           azcopy copy "$archive_name" "https://oleanstorage.blob.core.windows.net/mathlib/lean-liquid/$archive_name${{ secrets.AZURE_SAS_TOKEN }}" --block-size-mb 99 --overwrite false
 
       - name: setup precompiled zip file
