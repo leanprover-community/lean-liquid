@@ -1,6 +1,6 @@
 # Liquid Tensor Experiment
 
-![](https://github.com/leanprover-community/lean-liquid/workflows/continuous%20integration/badge.svg?branch=master)
+[![](https://github.com/leanprover-community/lean-liquid/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/leanprover-community/lean-liquid/actions/workflows/build.yml)
 
 For the eponymous blogpost by Peter Scholze which started it all: see https://xenaproject.wordpress.com/2020/12/05/liquid-tensor-experiment/.
 
