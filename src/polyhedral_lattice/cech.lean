@@ -119,11 +119,6 @@ end
 
 end
 
-lemma int.div_eq_zero (d n : ℤ) (h : d ∣ n) (H : n / d = 0) : n = 0 :=
-begin
-  rw [← int.mul_div_cancel' h, H, mul_zero]
-end
-
 def obj := quotient_add_group.quotient (L f m)
 
 instance : normed_group (obj f m) :=

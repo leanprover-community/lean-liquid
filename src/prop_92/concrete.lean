@@ -55,11 +55,6 @@ end
 
 open set
 
--- the following proof is overkill but nice
-lemma real.Sup_mem_of_finite {s : set ℝ} (hs : s.finite) (hs' : s.nonempty):
-  Sup s ∈ s :=
-is_compact.Sup_mem hs.is_compact hs'
-
 @[simp]
 lemma real.supr_zero (ι : Type*) : (⨆ i : ι, (0 : ℝ)) = 0 :=
 begin
