@@ -252,7 +252,7 @@ end profinitely_filtered_pseudo_normed_group_hom
 
 namespace punit
 
--- move this
+-- PR #8138
 instance (X : Type*) [subsingleton X] (p : X → Prop) :
   subsingleton (subtype p) :=
 ⟨λ x y, subtype.ext $ subsingleton.elim _ _⟩
