@@ -10,6 +10,7 @@ open category_theory category_theory.limits category_theory.limits.wide_pullback
 namespace Profinite
 namespace wide_pullback
 
+/-
 lemma ext {B : Profinite} {ι : Type*} {X : ι → Profinite} {f : Π (j : ι), X j ⟶ B}
   [has_wide_pullback B X f]
   (x y : wide_pullback B X f) (h₀ : base f x = base f y) (h : ∀ j, π f j x = π f j y) :
@@ -50,5 +51,6 @@ lemma ext_iff' {B : Profinite} {ι : Type*} [nonempty ι]
   x = y ↔ (∀ j, π f j x = π f j y) :=
 by { refine ⟨_, ext' x y⟩, rintro rfl _, refl }
 
+-/
 end wide_pullback
 end Profinite

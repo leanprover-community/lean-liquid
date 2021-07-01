@@ -1,4 +1,5 @@
 import category_theory.products.basic
+import category_theory.limits.concrete_category
 
 import for_mathlib.Cech.adjunction
 import for_mathlib.simplicial.iso
@@ -306,12 +307,15 @@ begin
 end
 .
 
+open category_theory.limits.wide_pullback
+
 lemma Cech_nerve_level_hom_injective (c : ℝ≥0) (i : simplex_categoryᵒᵖ) :
   function.injective ⇑((Cech_nerve_level_hom r' Λ M N n c).left.app i) :=
 begin
   let F := FLC_complex_arrow _ (aug_map_strict r' Λ M N n) c,
+  let G := (Cech_nerve_level_hom r' Λ M N n c).left.app i,
   intros x y h,
-  rw Profinite.wide_pullback.ext_iff' at h,
+  replace h : ∀ j, π (λ i, F.hom) j (G x) = π (λ i, F.hom) j (G y), { intros j, rw h },
   have aux := λ j, (augmented_cech_nerve.left_map_comp_obj_zero_iso F i.unop j).symm,
   dsimp only [unop_op] at aux,
   simp only [← comp_apply, aux] at h,
