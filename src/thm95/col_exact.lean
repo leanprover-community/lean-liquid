@@ -409,9 +409,11 @@ end
 lemma surjective (c : ℝ≥0) (i : simplex_categoryᵒᵖ) :
   function.surjective ⇑((Cech_nerve_level_hom r' Λ M N n c).left.app i) :=
 begin
+  let F := FLC_complex_arrow (aug_map r' Λ M N n) _ c,
   intro y,
   refine ⟨Cech_nerve_level_hom.s y, _⟩,
-  { rw Profinite.wide_pullback.ext_iff',
+  { apply limits.concrete.wide_pullback_ext' (λ i, F.hom),
+    rotate, { apply_instance }, { apply_instance },
     intro j,
     erw [← augmented_cech_nerve.left_map_comp_obj_zero_iso _ _ j, ← comp_apply,
       ← category.assoc, ← (Cech_nerve_level_hom r' Λ M N n c).left.naturality,
