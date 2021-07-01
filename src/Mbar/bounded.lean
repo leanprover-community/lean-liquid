@@ -8,7 +8,6 @@ import topology.separation
 import topology.subset_properties
 import data.real.nnreal
 
-import for_mathlib.finite
 import for_mathlib.nat_abs
 
 /-!
