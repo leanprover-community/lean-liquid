@@ -3,7 +3,6 @@ import category_theory.limits.concrete_category
 
 import for_mathlib.Cech.adjunction
 import for_mathlib.simplicial.iso
-import for_mathlib.wide_pullback
 
 import polyhedral_lattice.cosimplicial_extra
 
