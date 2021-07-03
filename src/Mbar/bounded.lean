@@ -8,8 +8,6 @@ import topology.separation
 import topology.subset_properties
 import data.real.nnreal
 
-import for_mathlib.nat_abs
-
 /-!
 
 # \overline{\mathcal{M}}_r(S)_{\leq c}
