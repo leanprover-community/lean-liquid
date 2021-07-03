@@ -2,12 +2,10 @@
 set -e
 set -x
 
-# Retrieve the 'olean_url' field from leanpkg.toml.
 archive_url=$(grep -E "^olean_url" ./leanpkg.toml | sed "s/.*=\s*['\"]\(.*\)['\"]/\1/")
 if [[ -z $archive_url ]]; then
   # Currently, it doesn't make sense to store the field in leanpkg.toml since leanproject/leanpkg
   # will delete it, so hard code it here instead.
-  # TODO replace this with correct URL for lean-liquid
   archive_url="https://oleanstorage.azureedge.net/mathlib/lean-liquid/"
 fi
 echo "olean cache location: $archive_url"
