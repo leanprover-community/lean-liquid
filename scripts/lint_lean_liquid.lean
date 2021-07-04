@@ -59,7 +59,7 @@ open io io.fs
 /--
 Reads the `nolints.txt`, and returns it as an `rb_lmap` from linters to declarations.
 -/
-meta def read_nolints_file (fn := "_target/deps/mathlib/scripts/nolints.txt") : io (rb_lmap name name) := do
+meta def read_nolints_file (fn := "scripts/nolints.txt") : io (rb_lmap name name) := do
 cont ← io.fs.read_file fn,
 pure $ parse_nolints $ cont.to_string.split (= '\n')
 
@@ -91,8 +91,29 @@ src ← get_src_dir,
 pure $ e.filter $ λ d, e.is_prefix_of_file src d.to_name
 
 meta def enabled_linters : list name :=
-  -- Enable additional linters for lean-liquid by adding them to this list.
-  let enabled_linter_names := ["linter.unused_arguments"] in
+  -- Enable linters by editing this list.
+  let enabled_linter_names := list.map (λ x, "linter." ++ x) [
+    "check_type",
+    "def_lemma",
+    "doc_blame",
+    "unused_arguments",
+    "dup_namespace",
+    "ge_or_gt",
+    "has_coe_to_fun",
+    "decidable_classical",
+    "inhabited_nonempty",
+    "has_coe_variable",
+    "class_structure",
+    "fails_quickly",
+    -- "dangerous_instance",
+    "incorrect_type_class_argument",
+    "impossible_instance",
+    -- "has_inhabited_instance",
+    "instance_priority",
+    "simp_comm",
+    "simp_var_head"
+    -- "simp_nf"
+    ] in
   mathlib_linters.filter $ λ x: name, x.to_string ∈ enabled_linter_names
 
 /-- Runs when called with `lean --run`.
@@ -115,5 +136,5 @@ let results := (do
   [(linter_name, linter, (nolint_file.find linter_name).foldl rb_map.erase decls)]),
 io.print $ to_string $ format_linter_results env results decls non_auto_decls
   path_len "in lean-liquid" tt lint_verbosity.medium,
--- io.write_file "nolints.txt" $ to_string $ mk_nolint_file env path_len results₀,
+io.write_file "nolints.txt" $ to_string $ mk_nolint_file env path_len results₀,
 if results.all (λ r, r.2.2.empty) then pure () else io.fail ""
