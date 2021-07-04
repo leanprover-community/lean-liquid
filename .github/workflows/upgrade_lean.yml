@@ -1,18 +1,29 @@
+name: bump lean and dependencies
 on:
+  workflow_dispatch: ~
   schedule:
     - cron: '0 2 * * *' # once a day at 2am UTC
 
 jobs:
   upgrade_lean:
     runs-on: ubuntu-latest
-    name: Bump Lean and dependency versions
+    name: Bump lean and dependencies
     steps:
       - name: checkout project
         uses: actions/checkout@v2
-      - name: upgrade Lean and dependencies
+        with:
+          # We need to use a personal access token here, instead of secrets.GITHUB_TOKEN. It will
+          # be persisted for the next step, where using a personal access token is necessary
+          # so that pushing to master will trigger the build.yml workflow. See
+          # https://github.community/t/push-from-action-does-not-trigger-subsequent-action/16854
+          #
+          # To create a personal access token, log in to github and add a token at
+          # https://github.com/settings/tokens. It it necessary and sufficient that the token have
+          # the "public_repo" scope. The relevant user also needs permission to push to master of
+          # this repo.
+          token: ${{ secrets.PA_TOKEN }}
+      - name: upgrade lean and dependencies
         uses: leanprover-contrib/lean-upgrade-action@master
         with:
           repo: ${{ github.repository }}
-          access-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: update version branches
-        uses: leanprover-contrib/update-versions-action@master
+          access-token: ${{ secrets.PA_TOKEN }}
