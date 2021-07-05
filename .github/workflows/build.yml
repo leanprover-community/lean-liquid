@@ -43,10 +43,6 @@ jobs:
         with:
           fetch-depth: ${{ env.GIT_HISTORY_DEPTH }}
 
-      - name: update branch
-        if: github.ref == 'refs/heads/master'
-        uses: leanprover-contrib/update-versions-action@master
-
       - name: install elan
         run: |
           set -o pipefail
@@ -162,14 +158,11 @@ jobs:
       - name: test thm95 is sorry free
         run: python scripts/ensure_thm95_sorry_free.py
 
-
   stats:
     name: Stats for lean-liquid
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
 
       - name: install ripgrep
         run: sudo apt install -y ripgrep
@@ -187,3 +180,18 @@ jobs:
       - name: count sorries
         run: |
           rg --count-matches sorry src | awk -F ':' 'BEGIN {sum = 0} {sum += $2} {print $2 " " $1} END {print sum " total"}'
+
+  update-branch:
+    # This should be configured so that failure (which is likely whenever there is a force-push to
+    # master) doesn't cause the rest of the build to fail, e.g., by putting it in its own job.
+    name: Update lean-3.3x branch
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: update lean-3.3x branch
+      if: github.ref == 'refs/heads/master'
+      uses: leanprover-contrib/update-versions-action@master
