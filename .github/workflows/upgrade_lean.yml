@@ -29,22 +29,18 @@ jobs:
         continue-on-error: true
         run: ./scripts/fetch_olean_cache.sh
 
-      # This is to figure out if lean-upgrade-action updated master.
-      - name: record HEAD of master
-        run: git rev-parse HEAD > /tmp/INITIAL_HEAD
-
       - name: upgrade lean and dependencies
         uses: leanprover-contrib/lean-upgrade-action@master
         with:
           repo: ${{ github.repository }}
           access-token: ${{ secrets.PA_TOKEN }}
 
-      # TODO: upload oleans if we generated a new commit.
-      - name: upload oleans if necessary
-        run: |
-          if [[ $(cat /tmp/INITIAL_HEAD) != $(git rev-parse HEAD) ]]; then
-            echo "TODO upload oleans"
-          else
-            echo "master branch was not updated"
-          fi
-      # TODO: make sure things don't go wrong when we try to upload oleans again in build.yml
+      # Not doing: Ideally, if we generated a new commit in the previous step, we would upload new
+      # oleans here to save us having to rebuild in the build.yml action. This seems too hard to be
+      # worth doing (absent a broader refactor) for the following reasons:
+      #   * the timing's off: the build.yml workflow fires on push, which happens in the previous
+      #     step, so that the build.yml workflow might go looking for oleans before we've uploaded
+      #     them.
+      #   * we need to build again first, because the build is not idempotent; alternatively, upload
+      #     what we have here but then have build.yml overwrite when it rebuilds;
+      #   * (easy to solve) we have to figure out if the previous step made a commit.
