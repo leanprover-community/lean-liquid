@@ -141,12 +141,12 @@ def col_complex_aux : cochain_complex (ℝ≥0ᵒᵖ ⥤ SemiNormedGroup) ℕ :=
 (Cech_nerve' r' V Λ M N n).to_cocomplex
 .
 
-@[simps obj map]
+@[simps obj obj_d map]
 def col_complex_level : system_of_complexes :=
 ((whiskering_right _ _ _).obj $ FLC_functor' V).obj (Cech_nerve_level r' Λ M N n).op
 .
 
-@[simps obj map]
+@[simps obj obj_d map]
 def col_complex : system_of_complexes :=
 (col_complex_aux r' V Λ M N n).as_functor
 .
@@ -166,7 +166,7 @@ begin
   all_goals {
     dsimp only [col_complex_level_iso_obj_X],
     simp only [iso.refl_hom, category.id_comp, category.comp_id],
-    dsimp only [col_complex_obj, col_complex_level_obj,
+    dsimp only [col_complex_obj_d, col_complex_level_obj_d,
       cosimplicial_object.augmented.cocomplex,
       cosimplicial_object.augmented.to_cocomplex_d_2,
       cosimplicial_object.augmented.to_cocomplex_d,
@@ -176,8 +176,9 @@ begin
       cosimplicial_object.δ, cosimplicial_object.whiskering_obj_obj_map],
     rw [dif_pos rfl, eq_to_hom_refl, category.comp_id,
         dif_pos rfl, eq_to_hom_refl, category.comp_id], },
-  { erw [Cech_nerve'_hom_zero, Cech_nerve_hom_zero, SemiNormedGroup.LCC_obj_map',
-      category.id_comp, category.comp_id],
+  { erw [Cech_nerve'_hom_zero, SemiNormedGroup.LCC_obj_map', category.id_comp],
+    dsimp only [unop_op],
+    erw [Cech_nerve_hom_zero, op_id, category.id_comp],
     refl },
   { simp only [nat_trans.app_sum, nat_trans.app_gsmul],
     apply fintype.sum_congr, intro j, congr' 1,
@@ -853,6 +854,7 @@ def col'_aux [normed_with_aut r V] (n : ℕ) : system_of_complexes :=
 @[simps obj map]
 def col' [normed_with_aut r V] (n : ℕ) : system_of_complexes :=
 scale_factorial.obj (col'_aux BD κ r r' V Λ M N n)
+.
 
 def col_iso_obj_X [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) :
   Π m, (((double_complex.{u} BD κ r r' V Λ M N).col n).obj c).X m ≅

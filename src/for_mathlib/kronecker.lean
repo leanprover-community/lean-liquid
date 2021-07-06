@@ -54,26 +54,26 @@ end
 
 lemma kronecker_reindex [semiring R] (el : l ≃ l') (em : m ≃ m') (en : n ≃ n') (eo : o ≃ o')
   (M : matrix l m R) (N : matrix n o R) :
-  kronecker (reindex_linear_equiv el em M) (reindex_linear_equiv en eo N) =
-  reindex_linear_equiv
+  kronecker (reindex_linear_equiv ℕ _ el em M) (reindex_linear_equiv ℕ _ en eo N) =
+  reindex_linear_equiv ℕ _
     (el.prod_congr en) (em.prod_congr eo) (kronecker M N) :=
 by { ext ⟨i, i'⟩ ⟨j, j'⟩, refl }
 
 lemma kronecker_reindex_left [semiring R] (el : l ≃ l') (em : m ≃ m') (M : matrix l m R) (N : matrix n o R) :
-  kronecker (reindex_linear_equiv el em M) N =
-  reindex_linear_equiv
+  kronecker (reindex_linear_equiv ℕ _ el em M) N =
+  reindex_linear_equiv ℕ _
     (el.prod_congr (equiv.refl _)) (em.prod_congr (equiv.refl _)) (kronecker M N) :=
 by { ext ⟨i, i'⟩ ⟨j, j'⟩, refl }
 
 lemma kronecker_reindex_right [semiring R] (en : n ≃ n') (eo : o ≃ o') (M : matrix l m R) (N : matrix n o R) :
-  kronecker M (reindex_linear_equiv en eo N) =
-  reindex_linear_equiv
+  kronecker M (reindex_linear_equiv ℕ _ en eo N) =
+  reindex_linear_equiv ℕ _
     ((equiv.refl _).prod_congr en) ((equiv.refl _).prod_congr eo) (kronecker M N) :=
 by { ext ⟨i, i'⟩ ⟨j, j'⟩, refl }
 
 lemma kronecker_assoc [semiring R] (A : matrix m m' R) (B : matrix n n' R) (C : matrix o o' R) :
   (A.kronecker B).kronecker C =
-  reindex_linear_equiv
+  reindex_linear_equiv ℕ _
     (equiv.prod_assoc _ _ _).symm
     (equiv.prod_assoc _ _ _).symm
     (A.kronecker (kronecker B C)) :=
@@ -81,7 +81,7 @@ by { ext ⟨⟨i, j⟩, k⟩ ⟨⟨i', j'⟩, k'⟩, apply mul_assoc }
 
 lemma kronecker_assoc' [semiring R] (A : matrix m m' R) (B : matrix n n' R) (C : matrix o o' R) :
   A.kronecker (kronecker B C) =
-  reindex_linear_equiv
+  reindex_linear_equiv ℕ _
     (equiv.prod_assoc _ _ _)
     (equiv.prod_assoc _ _ _)
     ((A.kronecker B).kronecker C) :=

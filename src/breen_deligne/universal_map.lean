@@ -118,14 +118,14 @@ matrix.mul_one g
 
 def mul (N : ℕ) : basic_universal_map m n →+ basic_universal_map (N * m) (N * n) :=
 add_monoid_hom.mk'
- (λ f, matrix.reindex_linear_equiv fin_prod_fin_equiv fin_prod_fin_equiv (matrix.kronecker 1 f))
+ (λ f, matrix.reindex_linear_equiv ℕ _ fin_prod_fin_equiv fin_prod_fin_equiv (matrix.kronecker 1 f))
 begin
   intros f g,
   simp only [← matrix.kroneckerₗ_apply_apply, linear_map.map_add, linear_equiv.map_add],
 end
 
 lemma mul_apply (N : ℕ) (f : basic_universal_map m n) :
-  mul N f = matrix.reindex_linear_equiv fin_prod_fin_equiv fin_prod_fin_equiv (matrix.kronecker 1 f) :=
+  mul N f = matrix.reindex_linear_equiv ℕ _ fin_prod_fin_equiv fin_prod_fin_equiv (matrix.kronecker 1 f) :=
 rfl
 
 lemma mul_injective (N : ℕ) (hN : 0 < N) : function.injective (@mul m n N) :=
@@ -149,13 +149,13 @@ begin
 end
 
 def one_mul_hom (n) : basic_universal_map (1 * n) n :=
-matrix.reindex_linear_equiv
+matrix.reindex_linear_equiv ℕ _
   ((fin_one_equiv.prod_congr $ equiv.refl _).trans $ equiv.punit_prod _)
   fin_prod_fin_equiv
   (1 : matrix (fin 1 × fin n) _ ℤ)
 
 def one_mul_inv (n) : basic_universal_map n (1 * n) :=
-matrix.reindex_linear_equiv
+matrix.reindex_linear_equiv ℕ _
   fin_prod_fin_equiv
   ((fin_one_equiv.prod_congr $ equiv.refl _).trans $ equiv.punit_prod _)
   (1 : matrix (fin 1 × fin n) _ ℤ)
@@ -173,7 +173,7 @@ begin
 end
 
 def mul_mul_hom (m n i : ℕ) : basic_universal_map (m * (n * i)) ((m * n) * i) :=
-matrix.reindex_linear_equiv
+matrix.reindex_linear_equiv ℕ _
   (((equiv.refl _).prod_congr fin_prod_fin_equiv.symm).trans $
     (equiv.prod_assoc _ _ _).symm.trans $ (fin_prod_fin_equiv.prod_congr $ equiv.refl _).trans
       fin_prod_fin_equiv)
@@ -181,7 +181,7 @@ matrix.reindex_linear_equiv
   (1 : matrix (fin m × fin (n * i)) (fin m × fin (n * i)) ℤ)
 
 def mul_mul_inv (m n i : ℕ) : basic_universal_map ((m * n) * i) (m * (n * i)) :=
-matrix.reindex_linear_equiv
+matrix.reindex_linear_equiv ℕ _
   fin_prod_fin_equiv
   (((equiv.refl _).prod_congr fin_prod_fin_equiv.symm).trans $
     (equiv.prod_assoc _ _ _).symm.trans $ (fin_prod_fin_equiv.prod_congr $ equiv.refl _).trans
@@ -204,7 +204,7 @@ def proj_aux {N : ℕ} (k : fin N) : matrix punit.{1} (fin N) ℤ :=
 λ i j, if j = k then 1 else 0
 
 def proj (n : ℕ) {N : ℕ} (k : fin N) : basic_universal_map (N * n) n :=
-matrix.reindex_linear_equiv (equiv.punit_prod _) fin_prod_fin_equiv $
+matrix.reindex_linear_equiv ℕ _ (equiv.punit_prod _) fin_prod_fin_equiv $
 matrix.kronecker (proj_aux k) 1
 
 lemma proj_comp_mul {N : ℕ} (k : fin N) (f : basic_universal_map m n) :
@@ -212,7 +212,7 @@ lemma proj_comp_mul {N : ℕ} (k : fin N) (f : basic_universal_map m n) :
 begin
   dsimp only [comp, proj, mul, add_monoid_hom.mk'_apply],
   have : f = (matrix.reindex_linear_equiv
-    (equiv.punit_prod (fin n)) (equiv.punit_prod (fin m)))
+  ℕ _   (equiv.punit_prod (fin n)) (equiv.punit_prod (fin m)))
     (matrix.kronecker (1 : matrix punit.{1} punit.{1} ℤ) f),
   { ext i j,
     simp only [matrix.reindex_linear_equiv_apply, matrix.reindex_apply, matrix.minor_apply,
@@ -241,7 +241,7 @@ end
 
 lemma proj_aux_kronecker_proj_aux (a :fin m) (b : fin n) :
   (proj_aux a).kronecker (proj_aux b) =
-  matrix.reindex_linear_equiv (equiv.prod_punit _).symm fin_prod_fin_equiv.symm
+  matrix.reindex_linear_equiv ℕ _ (equiv.prod_punit _).symm fin_prod_fin_equiv.symm
     (proj_aux (fin_prod_fin_equiv (a,b))) :=
 begin
   ext ⟨i, i'⟩ ⟨j, j'⟩ : 2,

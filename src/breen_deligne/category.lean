@@ -82,7 +82,7 @@ begin
   rw [← add_monoid_hom.comp_apply, ← add_monoid_hom.comp_hom_apply_apply,
     ← add_monoid_hom.flip_apply _ f],
   congr' 1, clear f, ext1 f,
-  have : f = matrix.reindex_linear_equiv
+  have : f = matrix.reindex_linear_equiv ℕ _
       ((fin_one_equiv.prod_congr $ equiv.refl _).trans $ equiv.punit_prod _)
       ((fin_one_equiv.prod_congr $ equiv.refl _).trans $ equiv.punit_prod _)
       (matrix.kronecker 1 f),
@@ -106,7 +106,7 @@ begin
     basic_universal_map.mul, basic_universal_map.mul_mul_hom, matrix.mul_reindex_linear_equiv_one],
   rw [← matrix.reindex_linear_equiv_mul, matrix.one_mul,
     matrix.kronecker_reindex_right, matrix.kronecker_assoc', matrix.kronecker_one_one,
-    ← matrix.reindex_linear_equiv_one (@fin_prod_fin_equiv m n), matrix.kronecker_reindex_left],
+    ← matrix.reindex_linear_equiv_one ℕ _ (@fin_prod_fin_equiv m n), matrix.kronecker_reindex_left],
   simp only [matrix.reindex_linear_equiv_comp_apply],
   congr' 3,
   { ext ⟨⟨a, b⟩, c⟩ : 1, dsimp, simp only [equiv.symm_apply_apply], },
