@@ -12,6 +12,7 @@ jobs:
       - name: checkout project
         uses: actions/checkout@v2
         with:
+          fetch-depth: 20
           # We need to use a personal access token here, instead of secrets.GITHUB_TOKEN. It will
           # be persisted for the next step, where using a personal access token is necessary
           # so that pushing to master will trigger the build.yml workflow. See
@@ -22,8 +23,28 @@ jobs:
           # the "public_repo" scope. The relevant user also needs permission to push to master of
           # this repo.
           token: ${{ secrets.PA_TOKEN }}
+
+      # TODO: I think but have not tested that this gets used in lean-upgrade-action
+      - name: try to find olean cache
+        continue-on-error: true
+        run: ./scripts/fetch_olean_cache.sh
+
+      # This is to figure out if lean-upgrade-action updated master.
+      - name: record HEAD of master
+        run: git rev-parse HEAD > /tmp/INITIAL_HEAD
+
       - name: upgrade lean and dependencies
         uses: leanprover-contrib/lean-upgrade-action@master
         with:
           repo: ${{ github.repository }}
           access-token: ${{ secrets.PA_TOKEN }}
+
+      # TODO: upload oleans if we generated a new commit.
+      - name: upload oleans if necessary
+        run: |
+          if [[ $(cat /tmp/INITIAL_HEAD) != $(git rev-parse HEAD) ]]; then
+            echo "TODO upload oleans"
+          else
+            echo "master branch was not updated"
+          fi
+      # TODO: make sure things don't go wrong when we try to upload oleans again in build.yml
