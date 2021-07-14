@@ -147,6 +147,8 @@ end
 lemma normed_group_hom.coe_range : (f.range : set M₂) = set.range f :=
 by { erw add_monoid_hom.coe_range, refl }
 
+open normed_group
+
 lemma bar {C ε : ℝ} (hC : 0 < C) (hε : 0 < ε)
   (h : ∀ m₂ : M₂, ∃ g : ℕ → M₁, cauchy_seq g ∧ tendsto (f ∘ g) at_top (𝓝 m₂) ∧ ∀ n, ∥g n∥ ≤ C*∥m₂∥) :
   ∀ hatm₂ : completion M₂, ∃ m₁, f.completion m₁ = hatm₂ ∧ ∥m₁∥ ≤ (C+ε)*∥hatm₂∥ :=
@@ -155,16 +157,17 @@ begin
   refine controlled_closure_range_of_complete normed_group.norm_to_compl hC hε _ (normed_group.dense_range_to_compl _),
   intro m₂,
   rcases h m₂ with ⟨g, cauchy_g, lim_g, bound_g⟩,
-  have : cauchy_seq (j ∘ g),
-    from cauchy_g.map j.uniform_continuous,
+  have : cauchy_seq (to_compl ∘ g),
+    from cauchy_g.map to_compl.uniform_continuous,
   rcases cauchy_seq_tendsto_of_complete this with ⟨y, hy⟩,
   refine ⟨y, _, _⟩,
-  { have lim : tendsto ((f.completion.comp j) ∘ g) at_top (𝓝 (f.completion y)),
+  { have lim : tendsto ((f.completion.comp to_compl) ∘ g) at_top (𝓝 (f.completion y)),
       from (f.completion.continuous.tendsto _).comp hy,
     rw f.completion_to_compl at lim,
-    have : tendsto ((j ∘ f) ∘ g) at_top (𝓝 (j m₂)) := (j.continuous.tendsto _).comp lim_g,
+    have : tendsto ((to_compl ∘ f) ∘ g) at_top (𝓝 (to_compl m₂)) :=
+      (to_compl.continuous.tendsto _).comp lim_g,
     exact tendsto_nhds_unique lim this },
-  { refine le_of_tendsto' (tendsto_norm.comp hy) (_ : ∀ n, ∥j (g n)∥ ≤ C * ∥m₂∥),
+  { refine le_of_tendsto' (tendsto_norm.comp hy) (_ : ∀ n, ∥to_compl (g n)∥ ≤ C * ∥m₂∥),
     intro n,
     rw normed_group.norm_to_compl,
     apply bound_g }

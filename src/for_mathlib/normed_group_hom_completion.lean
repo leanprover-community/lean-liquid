@@ -1,6 +1,6 @@
 import analysis.normed_space.normed_group_hom
 
-import for_mathlib.normed_group
+import for_mathlib.normed_group_hom
 
 noncomputable theory
 
@@ -81,9 +81,9 @@ def normed_group.to_compl : normed_group_hom G (completion G) :=
                    exact is_add_hom.map_add coe x y },
   bound' := ⟨1, by simp [le_refl]⟩ }
 
-abbreviation j := (normed_group.to_compl : normed_group_hom G $ completion G)
+open normed_group
 
-lemma normed_group.norm_to_compl (x : G) : ∥j x∥ = ∥x∥ :=
+lemma normed_group.norm_to_compl (x : G) : ∥to_compl x∥ = ∥x∥ :=
 completion.norm_coe x
 
 @[simp]
@@ -96,11 +96,12 @@ begin
   { simp [normed_group_hom.mem_ker, completion.coe_zero] }
 end
 
-lemma normed_group.dense_range_to_compl : dense_range (j : G → completion G) :=
+lemma normed_group.dense_range_to_compl : dense_range (to_compl : G → completion G) :=
 completion.dense_inducing_coe.dense
 
 @[simp]
-lemma normed_group_hom.completion_to_compl (f : normed_group_hom G H) : f.completion.comp j = j.comp f :=
+lemma normed_group_hom.completion_to_compl (f : normed_group_hom G H) :
+  f.completion.comp to_compl = to_compl.comp f :=
 begin
   ext x,
   change f.completion x = _,
@@ -119,10 +120,10 @@ begin
 end
 
 lemma normed_group_hom.ker_le_ker_completion (f : normed_group_hom G H) :
-  (j.comp $ incl f.ker).range ≤ f.completion.ker  :=
+  (to_compl.comp $ incl f.ker).range ≤ f.completion.ker  :=
 begin
   intros a h,
-  replace h : ∃ y : f.ker, j (y : G) = a, by simpa using h,
+  replace h : ∃ y : f.ker, to_compl (y : G) = a, by simpa using h,
   rcases h with ⟨⟨g, g_in : g ∈ f.ker⟩, rfl⟩,
   rw f.mem_ker at g_in,
   change f.completion (g : completion G) = 0,
@@ -130,8 +131,8 @@ begin
 end
 
 lemma normed_group_hom.ker_completion {f : normed_group_hom G H} {C : ℝ}
-  (h : ∀ h ∈ f.range, ∃ g, f g = h ∧ ∥g∥ ≤ C*∥h∥) :
-  (f.completion.ker : set $ completion G) = closure (j.comp $ incl f.ker).range :=
+  (h : f.surjective_on_with f.range C) :
+  (f.completion.ker : set $ completion G) = closure (to_compl.comp $ incl f.ker).range :=
 begin
   by_cases Hf : ∀ x, ∥f x∥ = 0, -- This is a bit silly, we simply avoid assuming C ≥ 0
   { apply le_antisymm,
