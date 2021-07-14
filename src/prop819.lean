@@ -5,7 +5,6 @@ import for_mathlib.Cech.split
 import for_mathlib.Profinite.arrow_limit
 import for_mathlib.Profinite.clopen_limit
 import for_mathlib.simplicial.complex
-import for_mathlib.discrete_quotient
 
 import locally_constant.Vhat
 import prop819.completion

@@ -2,7 +2,6 @@ import topology.category.Profinite.cofiltered_limit
 import topology.discrete_quotient
 
 import for_mathlib.order
-import for_mathlib.discrete_quotient
 
 noncomputable theory
 
