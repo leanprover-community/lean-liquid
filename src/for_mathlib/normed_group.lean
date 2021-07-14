@@ -1,6 +1,8 @@
 import analysis.normed_space.basic
 import topology.sequences
 
+-- PRed in #8310
+
 open_locale big_operators topological_space uniformity
 open finset filter
 
