@@ -1,4 +1,3 @@
-import for_mathlib.normed_group_hom_equalizer
 import pseudo_normed_group.CLC
 /-!
 
