@@ -54,7 +54,7 @@ jobs:
       - name: lint
         run: |
           ./scripts/mk_all.sh
-          lean --run ./scripts/lint_project.lean
+          lean --run ./scripts/lint_project.lean || true
           mv nolints.txt scripts/nolints.txt
           # ./scripts/update-style-exceptions.sh
           git diff
