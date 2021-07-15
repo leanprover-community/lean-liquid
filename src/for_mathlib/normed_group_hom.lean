@@ -1,8 +1,6 @@
 import analysis.normed_space.normed_group_hom
 import analysis.specific_limits
 
-import for_mathlib.normed_group
-
 noncomputable theory
 
 open_locale filter topological_space big_operators
