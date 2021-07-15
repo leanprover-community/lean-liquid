@@ -65,6 +65,17 @@ apply_nolint fintype_sign_vectors doc_blame
 apply_nolint nonzero_sign doc_blame
 apply_nolint sign_vectors doc_blame
 
+-- condensed/condensed.lean
+apply_nolint category_theory.functor.preserves_binary_products doc_blame unused_arguments
+apply_nolint category_theory.functor.preserves_terminal doc_blame unused_arguments
+apply_nolint condensed_type_condition doc_blame
+apply_nolint embed_Top doc_blame
+apply_nolint natural_fork doc_blame
+
+-- condensed/proetale_site.lean
+apply_nolint mk_pullback doc_blame
+apply_nolint proetale_topology doc_blame
+
 -- for_mathlib/Cech/adjunction.lean
 apply_nolint category_theory.simplicial_object.augmented_cech_nerve.left_obj_zero_iso doc_blame
 
@@ -102,10 +113,6 @@ apply_nolint Profinite.swap_cone_right doc_blame
 apply_nolint Profinite.exists_image inhabited_nonempty
 apply_nolint Profinite.image_stabilizes inhabited_nonempty
 
--- for_mathlib/discrete_quotient.lean
-apply_nolint choose_extension doc_blame
-apply_nolint choose_section doc_blame
-
 -- for_mathlib/is_locally_constant.lean
 apply_nolint indexed_partition.discrete_quotient doc_blame
 apply_nolint indexed_partition.discrete_quotient_equiv doc_blame
@@ -119,7 +126,6 @@ apply_nolint matrix.kroneckerₗ doc_blame
 apply_nolint normed_group_hom.surjective_on_with doc_blame
 
 -- for_mathlib/normed_group_hom_completion.lean
-apply_nolint j doc_blame
 apply_nolint normed_group.to_compl doc_blame
 apply_nolint normed_group_hom.completion doc_blame
 
