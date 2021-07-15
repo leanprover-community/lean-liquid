@@ -47,7 +47,7 @@ normed_group_hom.equalizer.ι _ _
 
 @[reassoc] lemma condition {V W : SemiNormedGroup} (f g : V ⟶ W) :
   ι f g ≫ f = ι f g ≫ g :=
-normed_group_hom.equalizer.condition _ _
+normed_group_hom.equalizer.comp_ι_eq _ _
 
 lemma ι_range {V W : SemiNormedGroup} (f g : V ⟶ W) :
   (ι f g).range = (f - g).ker :=
@@ -178,7 +178,7 @@ by rw [← category.assoc, ← functor.map_comp, h₂, functor.map_comp,
 def map_comp_ι {A₁ B₁ A₂ B₂ : Profiniteᵒᵖ} (f₁ g₁ : A₁ ⟶ B₁) (f₂ g₂ : A₂ ⟶ B₂)
   (ϕ : A₁ ⟶ A₂) (ψ : B₁ ⟶ B₂) (h₁ : ϕ ≫ f₂ = f₁ ≫ ψ) (h₂ : ϕ ≫ g₂ = g₁ ≫ ψ) :
   map r V f₁ g₁ f₂ g₂ ϕ ψ h₁ h₂ ≫ ι r V _ _ = ι _ _ _ _ ≫ (CLC V).map ϕ :=
-normed_group_hom.equalizer.map_ι _ _
+normed_group_hom.equalizer.ι_comp_map _ _
 
 lemma map_norm_noninc {A₁ B₁ A₂ B₂ : Profiniteᵒᵖ} (f₁ g₁ : A₁ ⟶ B₁) (f₂ g₂ : A₂ ⟶ B₂)
   (ϕ : A₁ ⟶ A₂) (ψ : B₁ ⟶ B₂) (h₁ h₂) :
