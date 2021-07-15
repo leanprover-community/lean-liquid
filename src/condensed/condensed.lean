@@ -58,8 +58,8 @@ sorry
 -- structure.
 -- TODO: Use `sheaf_condition_iff` to define the functor of Example 1.5, it might look like this:
 def embed_Top : Top.{u} ⥤ CondensedSet.{u} :=
-{ obj := λ T, ⟨Profinite_to_Top.op ⋙ yoneda.obj T, sorry⟩,
-  map := λ T₁ T₂ f, whisker_left Profinite_to_Top.op (yoneda.map f) }
+{ obj := λ T, ⟨Profinite.to_Top.op ⋙ yoneda.obj T, sorry⟩,
+  map := λ T₁ T₂ f, whisker_left Profinite.to_Top.op (yoneda.map f) }
 
 -- TODO: Use the above to prove the first part of Proposition 1.7:
 lemma embed_Top_faithful : faithful embed_Top := sorry

@@ -28,7 +28,7 @@ section to_generalise
 
 /-- A terminal Profinite type, which has the important property that morphisms to `X` are the same
 thing as elements of `X`. -/
-def point : Profinite.{u} := ⟨⟨punit⟩⟩
+def point : Profinite.{u} := Profinite.of punit
 
 /-- There is a (natural) bijection between morphisms `* ⟶ X` and elements of `X`.  -/
 def from_point {X : Profinite.{u}} :
