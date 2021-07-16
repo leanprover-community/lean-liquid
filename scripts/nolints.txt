@@ -129,12 +129,6 @@ apply_nolint normed_group_hom.surjective_on_with doc_blame
 apply_nolint normed_group.to_compl doc_blame
 apply_nolint normed_group_hom.completion doc_blame
 
--- for_mathlib/normed_group_hom_equalizer.lean
-apply_nolint normed_group_hom.equalizer doc_blame
-apply_nolint normed_group_hom.equalizer.lift doc_blame
-apply_nolint normed_group_hom.equalizer.map doc_blame
-apply_nolint normed_group_hom.equalizer.ι doc_blame
-
 -- for_mathlib/order.lean
 apply_nolint Inter_eq inhabited_nonempty
 apply_nolint eventually_constant inhabited_nonempty
