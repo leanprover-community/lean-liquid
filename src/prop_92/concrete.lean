@@ -7,6 +7,8 @@ import for_mathlib.normed_group_hom
 
 import locally_constant.analysis
 
+import tactic.ring_exp
+
 /-!
 This file builds a concrete version of Proposition 9.2, with almost no category.
 The exception is that `SemiNormedGroup` is used because this is expected in
