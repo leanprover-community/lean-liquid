@@ -433,12 +433,11 @@ def map : Mbar r' S → Mbar r' T := λ F,
       (∑ s : S, (F s n).nat_abs) * r' ^ n,
     { intro n,
       refine mul_le_mul _ (le_refl _) zero_le' zero_le',
-      have : ∑ (s : S), ((F s n).nat_abs : ℝ≥0) = ↑(∑ (s : S), (F s n).nat_abs), by simp,
-      rw this, clear this,
+      simp_rw ← nat.cast_sum,
       apply nat.cast_le.mpr,
       have : (∑ (s : S) in finset.univ.filter (λ (s' : S), f s' = t), F s n).nat_abs ≤
         ∑ (s : S) in finset.univ.filter (λ s', f s' = t), (F s n).nat_abs,
-        by apply nat_abs_sum_le,
+      { apply nat_abs_sum_le },
       refine le_trans this _,
       apply finset.sum_le_sum_of_subset,
       { intros t ht, simp },
@@ -470,6 +469,42 @@ begin
     simp at ht1 ht2 hs ⊢,
     refine h _,
     rw [← hs.1, ← hs.2] }
+end
+
+lemma nnnorm_map_le_of_nnnorm_le {c : ℝ≥0} (F : Mbar r' S) (hF : ∥ F ∥₊ ≤ c) :
+  ∥ F.map f ∥₊ ≤ c :=
+begin
+  simp [ Mbar.nnnorm_def ] at *,
+  rw ← tsum_sum at hF ⊢,
+  { refine le_trans (tsum_le_tsum _ _ _) hF,
+    { intros n,
+      simp_rw ← finset.sum_mul,
+      refine mul_le_mul _ (le_refl _) zero_le' zero_le',
+      simp_rw ← nat.cast_sum,
+      rw nat.cast_le,
+      have : ∑ (x : T), (∑ (s : S) in finset.univ.filter (λ (s' : S), f s' = x), F s n).nat_abs ≤
+        ∑ (x : T), (∑ (s : S) in finset.univ.filter (λ s', f s' = x), (F s n).nat_abs),
+      { apply finset.sum_le_sum,
+        intros t ht,
+        apply nat_abs_sum_le },
+      refine le_trans this _,
+      rw ← finset.sum_bUnion,
+      apply finset.sum_le_sum_of_subset,
+      { intros t ht, simp },
+      { intros t1 ht1 t2 ht2 h s hs,
+        simp at ht1 ht2 hs ⊢,
+        apply h,
+        rw [← hs.1, ← hs.2] } },
+    { apply summable_sum,
+      intros t ht,
+      apply (F.map f).summable },
+    { apply summable_sum,
+      intros s hs,
+      apply F.summable } },
+  { intros t ht,
+    apply (F.map f).summable },
+  { intros s hs,
+    apply F.summable }
 end
 
 end map
