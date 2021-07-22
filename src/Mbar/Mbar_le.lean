@@ -467,6 +467,28 @@ end
 
 end Tinv
 
+section map
+
+def map {S T : Fintype} (f : S ⟶ T) : Mbar_le r' S c → Mbar_le r' T c := λ F,
+⟨(F : Mbar r' S).map f, Mbar.nnnorm_map_le_of_nnnorm_le _ _ F.2⟩
+
+lemma map_truncate {S T : Fintype} (f : S ⟶ T) (F : Mbar_le r' S c) (M : ℕ) :
+  ((F.truncate M).map f) = (F.map f).truncate M := rfl
+
+lemma map_continuous {S T : Fintype} (f : S ⟶ T) : continuous
+  (map f : Mbar_le r' S c → Mbar_le r' T c) :=
+begin
+  rw continuous_iff,
+  intros M,
+  have : truncate M ∘ (map f : Mbar_le r' S c → Mbar_le r' T c) =
+    Mbar_bdd.map f ∘ truncate M, { ext, refl },
+  rw this,
+  refine continuous.comp _ continuous_truncate,
+  continuity,
+end
+
+end map
+
 end Mbar_le
 
 instance [fact (0 < r')] : profinitely_filtered_pseudo_normed_group (Mbar r' S) :=

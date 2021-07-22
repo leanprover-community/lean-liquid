@@ -233,8 +233,10 @@ end addition
 
 section map
 
+-- To avoid defeq nonsense, we need to use ⟨S⟩ as opposed to S.
+-- TODO: Use `Fintype` everywhere?!
 /-- TODO -/
-def map {S T : Fintype} (f : S ⟶ T) : Mbar_bdd r' S c M → Mbar_bdd r' T c M := λ F,
+def map {S T : Fintype} (f : S ⟶ T) : Mbar_bdd r' ⟨S⟩ c M → Mbar_bdd r' ⟨T⟩ c M := λ F,
 { to_fun := λ t i, ∑ s in finset.univ.filter (λ s', f s' = t), F s i,
   coeff_zero' := by simp,
   sum_le' := calc
