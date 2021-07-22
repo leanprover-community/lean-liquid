@@ -231,6 +231,46 @@ def neg (F : Mbar_bdd r' S c M) : Mbar_bdd r' S c M :=
 
 end addition
 
+section map
+
+/-- TODO -/
+def map {S T : Fintype} (f : S ⟶ T) : Mbar_bdd r' S c M → Mbar_bdd r' T c M := λ F,
+{ to_fun := λ t i, ∑ s in finset.univ.filter (λ s', f s' = t), F s i,
+  coeff_zero' := by simp,
+  sum_le' := calc
+    ∑ (t : T) (i : fin (M+1)),
+      ↑((∑ (s : S) in finset.univ.filter (λ s', f s' = t), F s i).nat_abs) * r' ^ (i : ℕ)
+    ≤ ∑ (t : T) (i : fin (M+1)),
+      ∑ s in finset.univ.filter (λ s', f s' = t), ↑(F s i).nat_abs * r' ^ (i : ℕ) :
+    begin
+      apply finset.sum_le_sum,
+      rintros t -,
+      apply finset.sum_le_sum,
+      rintros i -,
+      rw ← finset.sum_mul,
+      refine mul_le_mul _ (le_refl _) zero_le' zero_le',
+      rw ← nat.cast_sum,
+      rw nat.cast_le,
+      apply nat_abs_sum_le,
+    end
+    ... ≤ ∑ (s : S) (i : fin (M+1)), ↑(F s i).nat_abs * r' ^ (i : ℕ) :
+    begin
+      rw finset.sum_comm,
+      nth_rewrite 1 finset.sum_comm,
+      apply finset.sum_le_sum,
+      rintro i -,
+      rw ← finset.sum_bUnion,
+      { apply finset.sum_le_sum_of_subset,
+        intros _ _, simp },
+      { rintros t1 - t2 - h s hs,
+        simp at hs ⊢,
+        apply h,
+        rw [← hs.1, ← hs.2] }
+    end
+    ... ≤ _ : F.sum_le }
+
+end map
+
 end Mbar_bdd
 
 #lint-
