@@ -404,6 +404,49 @@ def geom [hr' : fact (r' < 1)] : Mbar r' S :=
     split_ifs; simp
   end }
 
+section map
+
+variables {T : Type u} [fintype T] (f : S → T)
+
+open_locale classical
+
+lemma has_sum_aux (F : Mbar r' S) :
+  has_sum (λ n : ℕ, (∑ s, ↑(F s n).nat_abs) * r' ^ n) (∑ s, ∑' n, (F s n).nat_abs * r' ^ n) :=
+begin
+  have : (λ (n : ℕ), (∑ (s : S), ↑(F s n).nat_abs) * r' ^ n) =
+    (λ (n : ℕ), ∑ (s : S), (↑(F s n).nat_abs) * r' ^ n),
+  { funext n,
+    rw finset.sum_mul },
+  rw this, clear this,
+  exact has_sum_sum (λ s _, (F.summable s).has_sum)
+end
+
+/-- Given an element of `Mbar r' S` and a function `f : S → T`, this
+  constructs an associated element of `Mbar r' T`. -/
+def map : Mbar r' S → Mbar r' T := λ F,
+{ to_fun := λ t n, ∑ s in finset.univ.filter (λ s', f s' = t), F s n,
+  coeff_zero' := λ s, by simp,
+  summable' := λ t, begin
+    have : ∀ (n : ℕ),
+      ↑((∑ (s : S) in finset.univ.filter (λ (s' : S), f s' = t), F s n).nat_abs) * r' ^ n ≤
+      (∑ s : S, (F s n).nat_abs) * r' ^ n,
+    { intro n,
+      refine mul_le_mul _ (le_refl _) zero_le' zero_le',
+      have : ∑ (s : S), ((F s n).nat_abs : ℝ≥0) = ↑(∑ (s : S), (F s n).nat_abs), by simp,
+      rw this, clear this,
+      apply nat.cast_le.mpr,
+      have : (∑ (s : S) in finset.univ.filter (λ (s' : S), f s' = t), F s n).nat_abs ≤
+        ∑ (s : S) in finset.univ.filter (λ s', f s' = t), (F s n).nat_abs,
+        by apply nat_abs_sum_le,
+      refine le_trans this _,
+      apply finset.sum_le_sum_of_subset,
+      { intros t ht, simp },
+      { apply_instance } },
+    apply nnreal.summable_of_le this (has_sum.summable (has_sum_aux _ _ _)),
+  end }
+
+end map
+
 end Mbar
 
 #lint-
