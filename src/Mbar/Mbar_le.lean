@@ -1,3 +1,5 @@
+import topology.category.Profinite
+
 import data.fintype.card
 
 import facts
@@ -469,6 +471,7 @@ end Tinv
 
 section map
 
+/-- TODO -/
 def map {S T : Fintype} (f : S ⟶ T) : Mbar_le r' S c → Mbar_le r' T c := λ F,
 ⟨(F : Mbar r' S).map f, Mbar.nnnorm_map_le_of_nnnorm_le _ _ F.2⟩
 
@@ -488,6 +491,22 @@ begin
 end
 
 end map
+
+/-- A version of `Mbar_le` which is functorial in `S`. -/
+@[simps]
+def functor [fact (0 < r')]: Fintype ⥤ Profinite :=
+{ obj := λ S, Profinite.of $ Mbar_le r' S c,
+  map := λ S T f,
+  { to_fun := map f,
+    continuous_to_fun := map_continuous _ },
+  map_id' := λ S, begin
+    ext1,
+    exact subtype.ext x.1.map_id,
+  end,
+  map_comp' := λ S T U f g, begin
+    ext1,
+    exact subtype.ext (x.1.map_comp f g),
+  end }
 
 end Mbar_le
 
