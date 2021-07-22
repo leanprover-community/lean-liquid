@@ -406,7 +406,7 @@ def geom [hr' : fact (r' < 1)] : Mbar r' S :=
 
 section map
 
-variables {T : Type u} [fintype T] (f : S → T)
+variables {r' S} {T : Type u} [fintype T] (f : S → T)
 
 open_locale classical
 
@@ -423,6 +423,7 @@ end
 
 /-- Given an element of `Mbar r' S` and a function `f : S → T`, this
   constructs an associated element of `Mbar r' T`. -/
+@[simps]
 def map : Mbar r' S → Mbar r' T := λ F,
 { to_fun := λ t n, ∑ s in finset.univ.filter (λ s', f s' = t), F s n,
   coeff_zero' := λ s, by simp,
@@ -442,8 +443,34 @@ def map : Mbar r' S → Mbar r' T := λ F,
       apply finset.sum_le_sum_of_subset,
       { intros t ht, simp },
       { apply_instance } },
-    apply nnreal.summable_of_le this (has_sum.summable (has_sum_aux _ _ _)),
+    exact nnreal.summable_of_le this (has_sum.summable (has_sum_aux _)),
   end }
+
+lemma map_id (F : Mbar r' S) : F.map id = F :=
+begin
+  ext s n,
+  simp [finset.sum_filter],
+end
+
+lemma map_comp (F : Mbar r' S) {U : Type*} [fintype U] (g : T → U) :
+  F.map (g ∘ f) = (F.map f).map g :=
+begin
+  ext u n,
+  dsimp,
+  rw ← finset.sum_bUnion,
+  { apply finset.sum_congr,
+    ext s,
+    split,
+    { intro hs,
+      simpa using hs },
+    { intro hs,
+      simpa using hs },
+    { tauto } },
+  { rintros t1 ht1 t2 ht2 h s hs,
+    simp at ht1 ht2 hs ⊢,
+    refine h _,
+    rw [← hs.1, ← hs.2] }
+end
 
 end map
 
