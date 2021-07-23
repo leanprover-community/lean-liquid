@@ -23,10 +23,11 @@ def change_cone {X Y : Profinite} (f : X ⟶ Y) (D : cone (X.fintype_diagram ⋙
     naturality' := begin
       rintros I J h,
       dsimp,
-      simp,
+      simp only [category.id_comp, category.assoc],
       rw ← D.w (hom_of_le $ discrete_quotient.comap_mono _ $ le_of_hom h),
-      simp only [category.assoc, ← F.map_comp],
+      simp only [category.assoc, ← F.map_comp, functor.comp_map],
       congr' 2,
+      ext ⟨t⟩, refl,
     end } }
 
 end Profinite
