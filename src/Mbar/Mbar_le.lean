@@ -1,4 +1,4 @@
-import topology.category.Profinite
+import for_mathlib.Profinite.extend
 
 import data.fintype.card
 
@@ -492,9 +492,11 @@ end
 
 end map
 
+variables (r' c)
+
 /-- A version of `Mbar_le` which is functorial in `S`. -/
 @[simps]
-def functor [fact (0 < r')]: Fintype ⥤ Profinite :=
+def Fintype_functor [fact (0 < r')]: Fintype ⥤ Profinite :=
 { obj := λ S, Profinite.of $ Mbar_le r' S c,
   map := λ S T f,
   { to_fun := map f,
@@ -507,6 +509,19 @@ def functor [fact (0 < r')]: Fintype ⥤ Profinite :=
     ext1,
     exact subtype.ext (x.1.map_comp f g),
   end }
+
+/-- The extension of `Fintype_functor` to `Profinite` obtained by taking limits. -/
+@[simps]
+def functor [fact (0 < r')] : Profinite ⥤ Profinite :=
+Profinite.extend (Fintype_functor r' c)
+
+/-- `Mbar_le.functor r' c` is indeed an extension of `Mbar_le.Fintype_functor r' c`. -/
+@[simps]
+def functor_extends [fact (0 < r')] :
+  Fintype.to_Profinite ⋙ functor r' c ≅ Fintype_functor r' c :=
+Profinite.extend_extends _ .
+
+variables {r' c}
 
 end Mbar_le
 
