@@ -56,4 +56,7 @@ def extend : Profinite ⥤ C :=
     exact discrete_quotient.map_comp _ _,
   end }
 
+--def extend_extends : Fintype.to_Profinite ⋙ extend F ≅ F :=
+--nat_iso.of_components (λ X, _) _
+
 end Profinite
