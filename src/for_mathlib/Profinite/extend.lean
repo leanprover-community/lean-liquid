@@ -11,12 +11,9 @@ open category_theory.limits
 
 universes v u
 
--- Let C be a category which has enough limits.
-variables {C : Type u} [category.{v} C]
-  [∀ X : Profinite, has_limits_of_shape (discrete_quotient X) C]
--- And let `F` be a functor from `Fintype` to `C`.
-  (F : Fintype.{v} ⥤ C)
+variables {C : Type u} [category.{v} C] (F : Fintype.{v} ⥤ C)
 
+/-- Change a cone with respect to a morphism from `Profinite`. -/
 @[simps]
 def change_cone {X Y : Profinite} (f : X ⟶ Y) (D : cone (X.fintype_diagram ⋙ F)) :
   cone (Y.fintype_diagram ⋙ F) :=
@@ -33,6 +30,11 @@ def change_cone {X Y : Profinite} (f : X ⟶ Y) (D : cone (X.fintype_diagram ⋙
       ext ⟨t⟩, refl,
     end } } .
 
+-- Assume that C has enough limits.
+variable [∀ X : Profinite, has_limits_of_shape (discrete_quotient X) C]
+
+-- PROJECT: Prove that this is isomorphic to the right Kan extension along `Fintype.to_Profinite`.
+/-- Extend a functor `Fintype ⥤ C` to `Profinite`. -/
 @[simps]
 def extend : Profinite ⥤ C :=
 { obj := λ X, limit (X.fintype_diagram ⋙ F),
@@ -58,11 +60,13 @@ def extend : Profinite ⥤ C :=
     exact discrete_quotient.map_comp _ _,
   end } .
 
+/-- discrete quotients of a finite type has an initial object given by `⊥`. -/
 @[simps]
 def bot_initial (X : Fintype) :
   is_initial (⊥ : discrete_quotient (Fintype.to_Profinite.obj X)) :=
 { desc := λ S, hom_of_le bot_le }
 
+/-- The extension of `F : Fintype ⥤ C` extends `F`. -/
 @[simps]
 def extend_extends : Fintype.to_Profinite ⋙ extend F ≅ F :=
 nat_iso.of_components (λ X, begin
@@ -93,7 +97,6 @@ end) begin
   symmetry,
   rw ← iso.comp_inv_eq,
   refl,
-end
-
+end .
 
 end Profinite

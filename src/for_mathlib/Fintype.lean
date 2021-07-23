@@ -2,6 +2,7 @@ import category_theory.Fintype
 
 namespace Fintype
 
+/-- An equivalence between finite types induces an isomorphism in `Fintype`. -/
 @[simps]
 def iso_of_equiv {A B : Fintype} (e : A ≃ B) : A ≅ B :=
 { hom := e,
