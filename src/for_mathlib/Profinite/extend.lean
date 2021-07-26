@@ -102,26 +102,7 @@ end .
 /-- A natural transformation induces a natural transformation on extensions. -/
 @[simps]
 def extend_nat_trans {F G : Fintype ⥤ C} (η : F ⟶ G) : extend F ⟶ extend G :=
-{ app := λ X,
-  let D : cone (X.fintype_diagram ⋙ G) :=
-    { X := limit (X.fintype_diagram ⋙ F),
-      π := { app := λ S, limit.π _ S ≫ η.app (Fintype.of S),
-    naturality' := begin
-      intros S T f,
-      dsimp,
-      simp,
-      rw [← η.naturality, ← category.assoc],
-      congr' 1,
-      exact (limit.w _ _).symm,
-    end } } in limit.lift _ D,
-  naturality' := begin
-    intros X Y f,
-    ext S,
-    dsimp,
-    simp,
-    erw η.naturality,
-    refl,
-  end } .
+{ app := λ X, category_theory.limits.lim.map $ whisker_left _ η } .
 
 @[simp]
 lemma extend_nat_trans_id (F : Fintype ⥤ C) : extend_nat_trans (𝟙 F) = 𝟙 _ :=
@@ -129,7 +110,6 @@ begin
   ext S,
   dsimp,
   simp,
-  erw category.comp_id,
 end
 
 @[simp]
