@@ -582,8 +582,9 @@ def profinite_diagram [fact (0 < r')] : ℝ≥0 ⥤ Profinite.{u} ⥤ Type u :=
 let E := (whiskering_right Profinite _ _).obj (forget Profinite) in
   ((whiskering_right _ _ _).obj E).obj (Mbar_le.bifunctor.{u u} r')
 
--- Problem: We want to take a colimit, but `Profinite.{u} ⥤ Type u`
--- has type `Type (u+1)`, so we need to apply `ulift` to `ℝ≥0`, even if `u = 0`.
+/-- The functor `Mbar : Profinite ⥤ Type*`. -/
+def profinite [fact (0 < r')] : Profinite ⥤ Type* :=
+(as_small.down ⋙ profinite_diagram r').flip ⋙ colim
 
 end Mbar
 
