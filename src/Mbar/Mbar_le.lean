@@ -1,6 +1,7 @@
 import for_mathlib.Profinite.extend
 
 import data.fintype.card
+import category_theory.limits.functor_category
 
 import facts
 import hacks_and_tricks.type_pow
@@ -585,6 +586,24 @@ let E := (whiskering_right Profinite _ _).obj (forget Profinite) in
 /-- The functor `Mbar : Profinite ⥤ Type*`. -/
 def profinite [fact (0 < r')] : Profinite ⥤ Type* :=
 (as_small.down ⋙ profinite_diagram r').flip ⋙ colim
+
+-- TODO: Move this to the condensed folder, once it's more stable!
+/-- The representable presheaf associated to a profinite set. -/
+def representable : Profinite.{u} ⥤ (as_small.{u+1} Profinite.{u})ᵒᵖ ⥤ Type (u+1) :=
+let Y := @yoneda (as_small.{u+1} Profinite.{u}) _ in
+((whiskering_right Profinite.{u} _ _).obj Y).obj as_small.up
+
+/-- The diagram whose colimit yields `Mbar.precondensed`. -/
+def precondensed_diagram [fact (0 < r')] :
+  ℝ≥0 ⥤ Profinite.{u} ⥤ (as_small.{u+1} Profinite.{u})ᵒᵖ ⥤ Type (u+1) :=
+let E := (whiskering_right Profinite _ _).obj representable in
+((whiskering_right _ _ _).obj E).obj $ Mbar_le.bifunctor.{u u} r'
+
+/-- A functor associating to every `S : Profinite` the presheaf associated to the condensed set
+`Mbar(S)`. -/
+-- TODO: Prove that it is a condensed set!
+def precondensed [fact (0 < r')] : Profinite.{u} ⥤ (as_small.{u+1} Profinite.{u})ᵒᵖ ⥤ Type (u+1) :=
+(as_small.down.{_ _ (u+1)} ⋙ precondensed_diagram.{u} r').flip  ⋙ colim
 
 end Mbar
 
