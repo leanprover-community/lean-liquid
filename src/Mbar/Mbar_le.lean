@@ -512,6 +512,7 @@ def Fintype_functor [fact (0 < r')]: Fintype ⥤ Profinite :=
 
 open category_theory
 
+/-- A bifunctor version of `Fintype_functor`, where `c` can vary. -/
 @[simps]
 def Fintype_bifunctor [fact (0 < r')] : ℝ≥0 ⥤ Fintype ⥤ Profinite :=
 { obj := λ c, Fintype_functor r' c,
