@@ -570,4 +570,21 @@ instance [fact (0 < r')] : profinitely_filtered_pseudo_normed_group (Mbar r' S) 
   end,
   .. Mbar.pseudo_normed_group }
 
+namespace Mbar
+
+open category_theory
+open category_theory.limits
+
+variable r'
+
+/-- The diagram whose colimit yields `Mbar.profinite`. -/
+def profinite_diagram [fact (0 < r')] : ℝ≥0 ⥤ Profinite.{u} ⥤ Type u :=
+let E := (whiskering_right Profinite _ _).obj (forget Profinite) in
+  ((whiskering_right _ _ _).obj E).obj (Mbar_le.bifunctor.{u u} r')
+
+-- Problem: We want to take a colimit, but `Profinite.{u} ⥤ Type u`
+-- has type `Type (u+1)`, so we need to apply `ulift` to `ℝ≥0`, even if `u = 0`.
+
+end Mbar
+
 #lint-
