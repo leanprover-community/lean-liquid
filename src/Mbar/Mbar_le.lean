@@ -528,6 +528,22 @@ def Fintype_bifunctor [fact (0 < r')] : ℝ≥0 ⥤ Fintype ⥤ Profinite :=
 def functor [fact (0 < r')] : Profinite ⥤ Profinite :=
 Profinite.extend (Fintype_functor r' c)
 
+/-- A bifunctor version of `functor`, where `c` can vary. -/
+@[simps]
+def bifunctor [fact (0 < r')] : ℝ≥0 ⥤ Profinite ⥤ Profinite :=
+{ obj := λ c, functor r' c,
+  map := λ a b f, Profinite.extend_nat_trans $ (Fintype_bifunctor r').map f,
+  map_id' := begin
+    intros c,
+    rw (Fintype_bifunctor r').map_id,
+    exact Profinite.extend_nat_trans_id _,
+  end,
+  map_comp' := begin
+    intros a b c α β,
+    rw (Fintype_bifunctor r').map_comp,
+    exact Profinite.extend_nat_trans_comp _ _,
+  end }
+
 /-- `Mbar_le.functor r' c` is indeed an extension of `Mbar_le.Fintype_functor r' c`. -/
 @[simps]
 def functor_extends [fact (0 < r')] :

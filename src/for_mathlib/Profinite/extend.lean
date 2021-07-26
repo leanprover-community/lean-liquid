@@ -123,7 +123,8 @@ def extend_nat_trans {F G : Fintype ⥤ C} (η : F ⟶ G) : extend F ⟶ extend 
     refl,
   end } .
 
-lemma extend_nat_trans_id {F : Fintype ⥤ C} : extend_nat_trans (𝟙 F) = 𝟙 _ :=
+@[simp]
+lemma extend_nat_trans_id (F : Fintype ⥤ C) : extend_nat_trans (𝟙 F) = 𝟙 _ :=
 begin
   ext S,
   dsimp,
@@ -131,6 +132,7 @@ begin
   erw category.comp_id,
 end
 
+@[simp]
 lemma extend_nat_trans_comp {F G H : Fintype ⥤ C} (α : F ⟶ G) (β : G ⟶ H) :
   extend_nat_trans (α ≫ β) = extend_nat_trans α ≫ extend_nat_trans β :=
 begin
