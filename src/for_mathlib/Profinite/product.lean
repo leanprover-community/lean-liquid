@@ -41,6 +41,7 @@ def is_limit_prod_cone : is_limit (prod_cone X Y) :=
       exact h },
   end }
 
+/-- The isomorphism between the categorical product and the "usual" product. -/
 @[simps hom inv]
 noncomputable def prod_iso : X ⨯ Y ≅ Profinite.of (X × Y) :=
 (limit.is_limit _).cone_point_unique_up_to_iso (is_limit_prod_cone X Y)
