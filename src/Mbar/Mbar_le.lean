@@ -1,7 +1,10 @@
 import for_mathlib.Profinite.extend
+import for_mathlib.Profinite.product
 
 import data.fintype.card
 import category_theory.limits.functor_category
+import category_theory.limits.shapes.binary_products
+import category_theory.currying
 
 import facts
 import hacks_and_tricks.type_pow
@@ -21,7 +24,7 @@ universe u
 
 noncomputable theory
 open_locale big_operators nnreal
-open pseudo_normed_group
+open pseudo_normed_group category_theory category_theory.limits
 local attribute [instance] type_pow
 
 variables {r' : ℝ≥0} {S : Type u} [fintype S] {c c₁ c₂ c₃ : ℝ≥0}
@@ -511,6 +514,46 @@ def Fintype_functor [fact (0 < r')]: Fintype ⥤ Profinite :=
     exact subtype.ext (x.1.map_comp f g),
   end }
 
+variables (c₁ c₂)
+/-- The functor sending S to the (categorical) product
+  of `Mbar_le r' S c₁` and `Mbar_le r' S c₂`. -/
+@[simps]
+def Fintype_functor_prod [fact (0 < r')] : Fintype ⥤ Profinite :=
+{ obj := λ S, (S,S),
+  map := λ _ _ f, (f,f) } ⋙
+    (Fintype_functor r' c₁).prod (Fintype_functor r' c₂) ⋙
+    (uncurry.obj prod.functor)
+
+/-- This is a functorial version of `add'`. -/
+@[simps]
+def Fintype_add_functor [fact (0 < r')] :
+  Fintype_functor_prod r' c₁ c₂ ⟶ Fintype_functor r' (c₁ + c₂) :=
+{ app := λ S, (Profinite.prod_iso _ _).hom ≫ ⟨add' _, continuous_add'⟩,
+  naturality' := begin
+    intros S T f,
+    ext,
+    dsimp only [functor.prod, Profinite.prod_iso, Fintype_functor_prod,
+      uncurry, prod.functor, functor.comp_map],
+    rw [category_theory.limits.prod.map_map, category.comp_id, category.id_comp],
+    dsimp [map, Mbar.map, add', add, is_limit.cone_point_unique_up_to_iso,
+      is_limit.unique_up_to_iso],
+    rw finset.sum_add_distrib,
+    -- annoying
+    have useful : ∀ {A B C : Profinite} (f : A ⟶ B) (g : B ⟶ C) (a : A),
+      (f ≫ g) a = g (f a) := λ _ _ _ _ _ _, rfl,
+    congr,
+    { have : binary_fan.fst (limit.cone (pair (Profinite.of (Mbar_le r' ↥T c₁))
+        (Profinite.of (Mbar_le r' ↥T c₂)))) = category_theory.limits.prod.fst := rfl,
+      rw [this, ← useful, category_theory.limits.prod.map_fst],
+      refl },
+    { have : binary_fan.snd (limit.cone (pair (Profinite.of (Mbar_le r' ↥T c₁))
+        (Profinite.of (Mbar_le r' ↥T c₂)))) = category_theory.limits.prod.snd := rfl,
+      rw [this, ← useful, category_theory.limits.prod.map_snd],
+      refl },
+  end}
+
+variables {c₁ c₂}
+
 open category_theory
 
 /-- A bifunctor version of `Fintype_functor`, where `c` can vary. -/
@@ -573,8 +616,6 @@ instance [fact (0 < r')] : profinitely_filtered_pseudo_normed_group (Mbar r' S) 
 
 namespace Mbar
 
-open category_theory
-open category_theory.limits
 
 variable r'
 
