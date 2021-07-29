@@ -594,6 +594,7 @@ def functor_prod_cone [fact (0 < r')] (S : Profinite) :
       simp [← limit.w _ f],
     end } }
 
+-- TODO: this proof is SLOW.
 /-- The profinite variant of `Fintype_add_functor`. -/
 def add_functor [fact (0 < r')] : functor_prod r' c₁ c₂ ⟶ functor r' (c₁ + c₂) :=
 -- Why doesn't this work without the "by apply ..."?
