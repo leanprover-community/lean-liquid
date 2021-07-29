@@ -572,6 +572,57 @@ def Fintype_bifunctor [fact (0 < r')] : ℝ≥0 ⥤ Fintype ⥤ Profinite :=
 def functor [fact (0 < r')] : Profinite ⥤ Profinite :=
 Profinite.extend (Fintype_functor r' c)
 
+variables (c₁ c₂)
+
+/-- The profinite variant of `Fintype_functor_prod`. -/
+@[simps]
+def functor_prod [fact (0 < r')] : Profinite ⥤ Profinite :=
+{ obj := λ S, (S,S), map := λ _ _ f, (f, f) } ⋙
+  (functor r' c₁).prod (functor r' c₂) ⋙
+  (uncurry.obj prod.functor)
+
+/-- A cone over `(S.fintype_diagram ⋙ Fintype_functor_prod r' c₁ c₂)` used in the definition
+  of `add_functor`. -/
+def functor_prod_cone [fact (0 < r')] (S : Profinite) :
+  cone (S.fintype_diagram ⋙ Fintype_functor_prod r' c₁ c₂) :=
+{ X := (functor_prod r' c₁ c₂).obj S,
+  π :=
+  { app := λ I, category_theory.limits.prod.map (limit.π _ I) (limit.π _ I),
+    naturality' := begin
+      intros I J f,
+      dsimp [Fintype_functor_prod],
+      simp [← limit.w _ f],
+    end } }
+
+/-- The profinite variant of `Fintype_add_functor`. -/
+def add_functor [fact (0 < r')] : functor_prod r' c₁ c₂ ⟶ functor r' (c₁ + c₂) :=
+-- Why doesn't this work without the "by apply ..."?
+{ app := λ S, by apply limit.lift _ (functor_prod_cone r' c₁ c₂ S) ≫
+      category_theory.limits.lim.map (whisker_left _ (Fintype_add_functor _ _ _)),
+  naturality' := begin
+    intros S T f,
+    erw [limits.limit.lift_map, limits.limit.lift_map],
+    dsimp only [whisker_left, limits.cones.postcompose],
+    apply limit.hom_ext,
+    intros I,
+    dsimp only [nat_trans.comp_app, functor, Profinite.extend, Profinite.change_cone],
+    simp_rw [category.assoc, limits.limit.lift_π],
+    change _ = _ ≫ limit.π _ _ ≫ _,
+    simp_rw [← category.assoc, limits.limit.lift_π],
+    dsimp only [nat_trans.comp_app, functor_prod_cone, functor_prod,
+      functor.comp_map, uncurry, limits.prod.functor],
+    simp only [limits.prod.map_map, category.id_comp, category.comp_id, category.assoc],
+    let e : Fintype.of (I.comap f.continuous) ⟶ Fintype.of I := discrete_quotient.map (le_refl _),
+    erw ← (Fintype_add_functor r' c₁ c₂).naturality e,
+    simp_rw ← category.assoc,
+    dsimp only [Fintype_functor_prod, functor.comp_map, uncurry, limits.prod.functor,
+      functor.prod, functor, Profinite.extend],
+    simp only [limits.prod.map_map, category.id_comp, category.comp_id, limits.limit.lift_π],
+    refl,
+  end }
+
+variables {c₁ c₂}
+
 /-- A bifunctor version of `functor`, where `c` can vary. -/
 @[simps]
 def bifunctor [fact (0 < r')] : ℝ≥0 ⥤ Profinite ⥤ Profinite :=
