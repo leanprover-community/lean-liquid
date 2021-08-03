@@ -99,6 +99,30 @@ end) begin
   refl,
 end .
 
+def extend_unique (G : Profinite ⥤ C)
+  [∀ X : Profinite, preserves_limits_of_shape (discrete_quotient X) G]
+  (w : Fintype.to_Profinite ⋙ G ≅ F) : G ≅ extend F :=
+nat_iso.of_components (λ X,
+  let D := (X.as_limit_cone),
+      hD := (X.as_limit),
+      E := G.map_cone D,
+      hE : is_limit E := preserves_limit.preserves hD,
+      f : X.diagram ⋙ G ≅ X.fintype_diagram ⋙ F := iso_whisker_left _ w,
+      E' : cone (X.fintype_diagram ⋙ F) := (cones.postcompose f.hom).obj E,
+      hE' : is_limit E' := (is_limit.postcompose_hom_equiv f _).symm hE in
+      hE'.cone_point_unique_up_to_iso (limit.is_limit _) )
+begin
+  intros A B f,
+  dsimp [is_limit.postcompose_hom_equiv, is_limit.of_cone_equiv,
+    is_limit.cone_point_unique_up_to_iso],
+  ext S,
+  simp only [←nat_trans.naturality w.hom, limit.lift_π, cones.postcompose_obj_π,
+    functor.comp_map, functor.map_cone_π_app, change_cone_π_app, limit.cone_π,
+    limit.lift_π_assoc, whisker_left_app, nat_trans.comp_app, category.assoc],
+  simp only [← category.assoc, ← G.map_comp],
+  refl,
+end
+
 /-- A natural transformation induces a natural transformation on extensions. -/
 @[simps]
 def extend_nat_trans {F G : Fintype ⥤ C} (η : F ⟶ G) : extend F ⟶ extend G :=
