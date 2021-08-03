@@ -99,8 +99,10 @@ end) begin
   refl,
 end .
 
+/-- `extend` is characterized by the fact that it preserves the correct limits and
+  that its composition with `Profinite.to_Fintype` is the original functor. -/
 def extend_unique (G : Profinite ⥤ C)
-  [∀ X : Profinite, preserves_limits_of_shape (discrete_quotient X) G]
+  [∀ X : Profinite, preserves_limit X.diagram G]
   (w : Fintype.to_Profinite ⋙ G ≅ F) : G ≅ extend F :=
 nat_iso.of_components (λ X,
   let D := (X.as_limit_cone),
