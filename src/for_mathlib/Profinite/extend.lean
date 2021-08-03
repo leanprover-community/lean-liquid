@@ -31,7 +31,7 @@ def change_cone {X Y : Profinite} (f : X ⟶ Y) (D : cone (X.fintype_diagram ⋙
     end } } .
 
 -- Assume that C has enough limits.
-variable [∀ X : Profinite, has_limits_of_shape (discrete_quotient X) C]
+variable [∀ X : Profinite, has_limit (X.fintype_diagram ⋙ F)]
 
 -- PROJECT: Prove that this is isomorphic to the right Kan extension along `Fintype.to_Profinite`.
 /-- Extend a functor `Fintype ⥤ C` to `Profinite`. -/
@@ -99,6 +99,23 @@ end) begin
   refl,
 end .
 
+/-
+instance extend_preserves_limit (X : Profinite) : preserves_limit X.diagram (extend F) :=
+{ preserves := λ D hD,
+    let e : X.diagram ⋙ extend F ≅ X.fintype_diagram ⋙ F :=
+          iso_whisker_left _ (extend_extends F),
+        D' : cone (X.fintype_diagram ⋙ F) :=
+          (cones.postcompose e.hom).obj ((extend F).map_cone D) in
+  { lift := λ E, begin
+      dsimp,
+      let D'' : cone X.diagram := X.as_limit_cone,
+      let f' : X ⟶ D.X := hD.lift D'',
+      sorry
+    end,
+    fac' := _,
+    uniq' := _ } }
+-/
+
 /-- `extend` is characterized by the fact that it preserves the correct limits and
   that its composition with `Profinite.to_Fintype` is the original functor. -/
 def extend_unique (G : Profinite ⥤ C)
@@ -127,11 +144,16 @@ end
 
 /-- A natural transformation induces a natural transformation on extensions. -/
 @[simps]
-def extend_nat_trans {F G : Fintype ⥤ C} (η : F ⟶ G) : extend F ⟶ extend G :=
-{ app := λ X, category_theory.limits.lim.map $ whisker_left _ η } .
+def extend_nat_trans {F G : Fintype ⥤ C}
+  [∀ X : Profinite, has_limit (X.fintype_diagram ⋙ F)]
+  [∀ X : Profinite, has_limit (X.fintype_diagram ⋙ G)]
+  (η : F ⟶ G) : extend F ⟶ extend G :=
+{ app := λ X, category_theory.limits.lim_map $ whisker_left _ η } .
 
 @[simp]
-lemma extend_nat_trans_id (F : Fintype ⥤ C) : extend_nat_trans (𝟙 F) = 𝟙 _ :=
+lemma extend_nat_trans_id (F : Fintype ⥤ C)
+  [∀ X : Profinite, has_limit (X.fintype_diagram ⋙ F)] :
+  extend_nat_trans (𝟙 F) = 𝟙 _ :=
 begin
   ext S,
   dsimp,
@@ -139,7 +161,11 @@ begin
 end
 
 @[simp]
-lemma extend_nat_trans_comp {F G H : Fintype ⥤ C} (α : F ⟶ G) (β : G ⟶ H) :
+lemma extend_nat_trans_comp {F G H : Fintype ⥤ C}
+  [∀ X : Profinite, has_limit (X.fintype_diagram ⋙ F)]
+  [∀ X : Profinite, has_limit (X.fintype_diagram ⋙ G)]
+  [∀ X : Profinite, has_limit (X.fintype_diagram ⋙ H)]
+  (α : F ⟶ G) (β : G ⟶ H) :
   extend_nat_trans (α ≫ β) = extend_nat_trans α ≫ extend_nat_trans β :=
 begin
   ext S,
