@@ -72,13 +72,13 @@ begin
     apply continuous.add; apply normed_group_hom.continuous },
   { clear x, intro x,
     simp only [add_apply, normed_group_hom.completion_coe],
-    exact is_add_hom.map_add coe (f x) (g x) }
+    exact completion.coe_add (f x) (g x) }
 end
 
 def normed_group.to_compl : normed_group_hom G (completion G) :=
 { to_fun := coe,
   map_add' := by { intros x y,
-                   exact is_add_hom.map_add coe x y },
+                    exact completion.coe_add x y},
   bound' := ⟨1, by simp [le_refl]⟩ }
 
 open normed_group
