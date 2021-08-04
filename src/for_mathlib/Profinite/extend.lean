@@ -76,7 +76,7 @@ nat_iso.of_components (λ X, begin
   let E := limit_of_diagram_initial (bot_initial X) (Y.fintype_diagram ⋙ F),
   letI : topological_space X := ⊥,
   let e : Fintype.of (⊥ : discrete_quotient X) ≅ X :=
-    Fintype.iso_of_equiv (equiv.of_bijective _ (discrete_quotient.proj_bot_bijective _)).symm,
+    Fintype.iso_of_equiv (equiv.of_bijective _ (discrete_quotient.proj_bot_bijective)).symm,
   let g := D.cone_point_unique_up_to_iso E,
   exact g ≪≫ F.map_iso e,
 end) begin
