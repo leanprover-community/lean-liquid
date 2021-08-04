@@ -631,12 +631,16 @@ def add_functor [fact (0 < r')] : functor_prod r' c₁ c₂ ⟶ functor r' (c₁
     refl,
   end }
 
+/-- The profinite functorial variant of negation on `Mbar_le`. -/
 def neg_functor [fact (0 < r')] : functor r' c ⟶ functor r' c :=
 { app := λ X, limits.lim.map $ whisker_left _ $ Fintype_neg_functor _ _,
   naturality' := begin
     intros A B f,
-  end
-  }
+    apply limit.hom_ext,
+    intros S,
+    dsimp,
+    simp,
+  end }
 
 variables {c₁ c₂}
 
