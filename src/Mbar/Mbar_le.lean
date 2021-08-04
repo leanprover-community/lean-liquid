@@ -552,6 +552,7 @@ def Fintype_add_functor [fact (0 < r')] :
       refl },
   end}
 
+/-- Negation on `Mbar_le` as a functor in `S`. -/
 def Fintype_neg_functor [fact (0 < r')] : Fintype_functor r' c ⟶ Fintype_functor r' c :=
 { app := λ S, ⟨Mbar_le.neg, Mbar_le.continuous_neg⟩,
   naturality' := begin
