@@ -552,6 +552,15 @@ def Fintype_add_functor [fact (0 < r')] :
       refl },
   end}
 
+def Fintype_neg_functor [fact (0 < r')] : Fintype_functor r' c ⟶ Fintype_functor r' c :=
+{ app := λ S, ⟨Mbar_le.neg, Mbar_le.continuous_neg⟩,
+  naturality' := begin
+    intros A B f,
+    ext,
+    dsimp [map, neg],
+    simp,
+  end }
+
 variables {c₁ c₂}
 
 open category_theory
@@ -621,6 +630,13 @@ def add_functor [fact (0 < r')] : functor_prod r' c₁ c₂ ⟶ functor r' (c₁
     simp only [limits.prod.map_map, category.id_comp, category.comp_id, limits.limit.lift_π],
     refl,
   end }
+
+def neg_functor [fact (0 < r')] : functor r' c ⟶ functor r' c :=
+{ app := λ X, limits.lim.map $ whisker_left _ $ Fintype_neg_functor _ _,
+  naturality' := begin
+    intros A B f,
+  end
+  }
 
 variables {c₁ c₂}
 
