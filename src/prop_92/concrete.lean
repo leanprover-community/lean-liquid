@@ -14,7 +14,7 @@ This file builds a concrete version of Proposition 9.2, with almost no category.
 The exception is that `SemiNormedGroup` is used because this is expected in
 `normed_with_aut` (we could easily get rid of this but this is very mild category theory hell).
 There are two independent parts. The first one is all about locally constant maps from
-compact spaces to seminormed groups. The next one forget about locally constant functions
+compact spaces to seminormed groups. The next one forgets about locally constant functions
 and does abstract normed space stuff.
 -/
 
