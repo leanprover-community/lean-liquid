@@ -47,10 +47,10 @@ lemma norm_sum_le_of_le_geom {α : Type*} [semi_normed_group α] {r C : ℝ} (hC
 begin
 calc
   ∥∑ k in range n, f k∥ ≤ ∑ k in range n, ∥f k∥ : norm_sum_le _ _
-  ... ≤ ∑ k in range n, C*r^k   : sum_le_sum (λ k hk, h k)
-  ... = C*(∑ k in range n, r^k) : (range n).sum_hom (has_mul.mul C)
-  ... ≤ C*(1/(1-r))             : mul_le_mul_of_nonneg_left (partial_sum_geom_le hr₀ hr₁ n) hC
-  ... = C/(1-r)                 : mul_one_div C (1 - r)
+    ... ≤ ∑ k in range n, C*r^k : sum_le_sum (λ k hk, h k)
+  ... = C*(∑ k in range n, r^k) : by rw mul_sum
+  ... ≤ C*(1/(1-r)) :  mul_le_mul_of_nonneg_left (partial_sum_geom_le hr₀ hr₁ n) hC
+  ... = C/(1-r) : mul_one_div C (1 - r)
 end
 
 end
