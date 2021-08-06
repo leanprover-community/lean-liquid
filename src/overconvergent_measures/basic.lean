@@ -97,7 +97,12 @@ variable {α : Type*}
 
 def oc_functor (r : ℝ≥0) : Fintype.{u} ⥤ ProFiltPseuNormGrp.{u} :=
 { obj := λ S, ProFiltPseuNormGrp.of $ oc_measures r S,
-  map := _,
+  map := λ S T f,
+  { to_fun := _,
+    map_zero' := _,
+    map_add' := _,
+    bound' := _,
+    continuous' := _ },
   map_id' := _,
   map_comp' := _ }
 
