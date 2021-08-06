@@ -11,6 +11,7 @@ import category_theory.Fintype
 
 import Mbar.bounded
 import pseudo_normed_group.basic
+import pseudo_normed_group.category
 
 import for_mathlib.tsum
 import for_mathlib.int_norm
@@ -56,13 +57,8 @@ instance png_oc_measures (r : ℝ≥0) (S : Type*) (hS : fintype S) :
 
 variable {α : Type*}
 
-def oc_functor (r : ℝ≥0) : Fintype.{u} ⥤ Ab.{u} :=
-{ obj := begin
-          intro S,
-          have M := png_oc_measures r S.1 S.2,
-          have N:= M.to_add_comm_group,
-          use N,
-          end,
+def oc_functor (r : ℝ≥0) : Fintype.{u} ⥤ ProFiltPseuNormGrp.{u} :=
+{ obj := _,
   map := _,
   map_id' := _,
   map_comp' := _ }
