@@ -34,7 +34,7 @@ begin
   have H : P₁ ↔ P₂ := _,
   { by_cases h : P₁,
     { apply le_antisymm,
-      { rw real.Sup_le _ h.1 h.2,
+      { apply cSup_le,
         rintro _ ⟨x, hx, rfl⟩,
         apply mul_le_mul_of_nonneg_left _ hr.le,
         rw H at h,
@@ -108,7 +108,7 @@ variables [compact_space X]
 lemma norm_apply_le [has_norm Y] (f : locally_constant X Y) (x : X) :
   ∥f x∥ ≤ ∥f∥ :=
 begin
-  refine real.le_Sup _ _ (set.mem_range_self _),
+  refine le_cSup _ (set.mem_range_self _),
   apply exists_upper_bound_image,
   rw range_comp,
   exact f.range_finite.image _
@@ -127,7 +127,7 @@ end
 
 lemma dist_apply_le [has_dist Y] (f g : locally_constant X Y) (x : X) :
   dist (f x) (g x) ≤ dist f g :=
-real.le_Sup _ (exists_ub_range_dist _ _) (set.mem_range_self x)
+le_cSup (exists_ub_range_dist _ _) (set.mem_range_self x)
 
 -- consider giving the `edist` and the `uniform_space` explicitly
 /-- The metric space on locally constant functions on a compact space, with sup distance. -/
@@ -147,7 +147,7 @@ protected def pseudo_metric_space [pseudo_metric_space Y] :
     intros f g h,
     by_cases H : nonempty X, swap,
     { show Sup _ ≤ Sup _ + Sup _, simp only [set.range_eq_empty.mpr H, real.Sup_empty, add_zero] },
-    refine (real.Sup_le _ _ (exists_ub_range_dist _ _)).mpr _,
+    refine cSup_le _ _,
     { obtain ⟨x⟩ := H, exact ⟨_, set.mem_range_self x⟩ },
     rintro r ⟨x, rfl⟩,
     calc dist (f x) (h x) ≤ dist (f x) (g x) + dist (g x) (h x) : dist_triangle _ _ _
@@ -181,7 +181,7 @@ protected def metric_space [metric_space Y] : metric_space (locally_constant X Y
     intros f g h,
     by_cases H : nonempty X, swap,
     { show Sup _ ≤ Sup _ + Sup _, simp only [set.range_eq_empty.mpr H, real.Sup_empty, add_zero] },
-    refine (real.Sup_le _ _ (exists_ub_range_dist _ _)).mpr _,
+    refine cSup_le _ _,
     { obtain ⟨x⟩ := H, exact ⟨_, set.mem_range_self x⟩ },
     rintro r ⟨x, rfl⟩,
     calc dist (f x) (h x) ≤ dist (f x) (g x) + dist (g x) (h x) : dist_triangle _ _ _
@@ -228,11 +228,11 @@ def map_hom (f : normed_group_hom V₁ V₂) :
     ... = C * Sup (set.range (λ x, ∥g x∥)) : _,
     { by_cases H : nonempty X, swap,
       { simp only [set.range_eq_empty.mpr H, real.Sup_empty] },
-      apply real.Sup_le_ub,
+      apply cSup_le,
       { obtain ⟨x⟩ := H, exact ⟨_, set.mem_range_self x⟩ },
       rintro _ ⟨x, rfl⟩,
       calc ∥f (g x)∥ ≤ C * ∥g x∥ : hC _
-      ... ≤ Sup _ : real.le_Sup _ _ _,
+      ... ≤ Sup _ : le_cSup _ _,
       { apply exists_upper_bound_image,
         rw [set.range_comp, set.range_comp],
         exact (g.range_finite.image _).image _ },
@@ -283,25 +283,19 @@ add_monoid_hom.mk_normed_group_hom
       obtain ⟨y⟩ := hY,
       calc 0 ≤ ∥g y∥ : norm_nonneg _
          ... ≤ _ : _,
-      apply real.le_Sup,
+      apply le_cSup,
       { apply exists_upper_bound_image,
         rw set.range_comp,
         exact g.range_finite.image _ },
       { exact set.mem_range_self _ } },
-    rw real.Sup_le,
+    resetI,
+    refine cSup_le (range_nonempty _) _,
     { rintro _ ⟨x, rfl⟩,
-      apply real.le_Sup,
+      apply le_cSup,
       { apply exists_upper_bound_image,
         rw set.range_comp,
         exact g.range_finite.image _ },
       { exact set.mem_range_self _ } },
-    { obtain ⟨x⟩ := hX,
-      exact ⟨_, set.mem_range_self x⟩ },
-    { { apply exists_upper_bound_image,
-        rw [set.range_comp, set.range_comp],
-        apply set.finite.image,
-        apply g.range_finite.subset,
-        apply set.image_subset_range } }
   end
 
 @[simp] lemma comap_hom_id : @comap_hom X X V _ _ _ _ _ id continuous_id = normed_group_hom.id _ :=
