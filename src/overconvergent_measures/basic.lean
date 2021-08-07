@@ -2,6 +2,7 @@ import analysis.specific_limits
 import category_theory.Fintype
 import analysis.normed_space.basic
 
+import overconvergent_measures.bounded
 import pseudo_normed_group.basic
 import pseudo_normed_group.category
 
@@ -165,6 +166,31 @@ begin
       exact nnreal.coe_nonneg r },
     { simp } }
 end
+
+section profinite_structure
+
+def truncate {c : ℝ≥0} (k₁ k₂ : ℤ) :
+  { F : oc_measures r S | ∥ F ∥ ≤ c } → oc_measures_bdd r S k₁ k₂ c := λ F,
+{ to_fun := λ s i, F s i,
+  bound' := begin
+    refine le_trans _ F.2,
+    dsimp,
+    apply finset.sum_le_sum,
+    rintros s -,
+    sorry,
+  end }
+
+lemma eq_iff_truncate_eq (c : ℝ≥0) (F G : {F : oc_measures r S | ∥ F ∥ ≤ c}) :
+  (∀ k₁ k₂, truncate k₁ k₂ F = truncate k₁ k₂ G) → F = G :=
+begin
+  intros h,
+  ext s i,
+  specialize h i i,
+  apply_fun (λ e, e s ⟨i, by simp⟩) at h,
+  exact h,
+end
+
+end profinite_structure
 
 /-
 --should this be a coercion?
