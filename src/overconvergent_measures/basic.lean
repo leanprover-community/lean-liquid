@@ -112,11 +112,13 @@ instance : add_comm_group (oc_measures r S) :=
   ..(infer_instance : has_neg _),
   ..(infer_instance : has_sub _) }.
 
-variables (r S)
-def filtration (c : ℝ≥0) : set (oc_measures r S) :=
-{ F | ∀ s, ∑' n, ∥ F s n ∥ * r ^ n ≤ c }
-variables {r S}
+instance : has_norm (oc_measures r S) :=
+⟨λ F, ∑ s, ∑' n, ∥ F s n ∥ * (r : ℝ) ^ n⟩
 
+@[simp]
+lemma norm_def (F : oc_measures r S) : ∥ F ∥ = ∑ s, ∑' n, ∥ F s n ∥ * (r : ℝ)^n := rfl
+
+/-
 lemma exists_c (F : oc_measures r S) : ∃ (c : ℝ≥0),
   ∀ s : S, ∑' n, ∥ F s n ∥ * r ^ n ≤ c :=
 begin
@@ -129,10 +131,11 @@ begin
     exact nnreal.coe_nonneg r, },
   { sorry },
 end
+-/
 
 /-- This lemma puts bounds on where `F s n` can be nonzero. -/
 lemma eq_zero_of_filtration (F : oc_measures r S) (c : ℝ≥0) :
-  F ∈ filtration r S c → ∀ (s : S) (n : ℤ), (c : ℝ) < (r : ℝ)^n → F s n = 0 :=
+  ∥ F ∥ ≤ c → ∀ (s : S) (n : ℤ), (c : ℝ) < (r : ℝ)^n → F s n = 0 :=
 begin
   intros hF s n h,
   suffices : ∥ F s n ∥ < 1,
@@ -144,7 +147,7 @@ begin
     rintros k -,
     refine mul_nonneg (norm_nonneg _) (fpow_nonneg _ _),
     exact nnreal.coe_nonneg r },
-  replace this := lt_of_le_of_lt (le_trans this (hF s)) h,
+  replace this := lt_of_le_of_lt (le_trans this _) h,
   have hr₁ : 0 < (r : ℝ)^n := lt_of_le_of_lt (nnreal.coe_nonneg c) h,
   have hr₂ : (r: ℝ)^n ≠ 0 := ne_of_gt hr₁,
   convert mul_lt_mul this (le_refl ((r : ℝ) ^ n)⁻¹) _ _,
@@ -152,6 +155,15 @@ begin
   { field_simp [hr₂] },
   { simp [hr₁] },
   { exact le_of_lt hr₁ },
+  { refine le_trans _ hF,
+    apply @finset.single_le_sum S ℝ _ (λ s, ∑' n, ∥ F s n ∥ * (r : ℝ)^n),
+    { rintros s -,
+      dsimp,
+      apply tsum_nonneg,
+      intros k,
+      refine mul_nonneg (norm_nonneg _) (fpow_nonneg _ _),
+      exact nnreal.coe_nonneg r },
+    { simp } }
 end
 
 /-
@@ -167,22 +179,13 @@ lemma oc_measures_are_c (r : ℝ≥0) (S : Type*) (hS : fintype S) (F : oc_measu
 --needed?
 instance png_oc_measures :
   profinitely_filtered_pseudo_normed_group (oc_measures r S) :=
-{ filtration := filtration r S,
-  filtration_mono := λ c₁ c₂ h F hF s, le_trans (hF _) h,
-  zero_mem_filtration := λ c s, by simp,
-  neg_mem_filtration := λ c F h s, by simp [h s],
-  add_mem_filtration := λ c₁ c₂ F₁ F₂ h₁ h₂ s, begin
-    have : ∀ n, ∥ (F₁ + F₂) s n ∥ * r ^ n ≤ ∥ F₁ s n ∥ * r^n + ∥ F₂ s n ∥ * r^n,
-    { intro n,
-      rw ← add_mul,
-      refine mul_le_mul (norm_add_le _ _) (le_refl _) (fpow_nonneg _ _)
-        (add_nonneg (norm_nonneg _) (norm_nonneg _)),
-      exact nnreal.coe_nonneg r },
-    refine le_trans (tsum_le_tsum this _ _) _,
-    { exact (F₁ + F₂).summable _ },
-    { exact summable.add (F₁.summable _) (F₂.summable _) },
-    { rw [nnreal.coe_add, tsum_add (F₁.summable _) (F₂.summable _)],
-      exact add_le_add (h₁ _) (h₂ _) }
+{ filtration := λ c, { F | ∥ F ∥ ≤ c },
+  filtration_mono := λ c₁ c₂ h F hF, by { dsimp at *, exact le_trans hF h},
+  zero_mem_filtration := λ c, by simp,
+  neg_mem_filtration := λ c F h, by {dsimp at *, simp [h]},
+  add_mem_filtration := λ c₁ c₂ F₁ F₂ h₁ h₂, begin
+    dsimp at *,
+    sorry,
   end,
   topology := _,
   t2 := _,
@@ -194,6 +197,7 @@ instance png_oc_measures :
 
 variable {α : Type*}
 
+/-
 def oc_functor (r : ℝ≥0) : Fintype.{u} ⥤ ProFiltPseuNormGrp.{u} :=
 { obj := λ S, ProFiltPseuNormGrp.of $ oc_measures r S,
   map := λ S T f,
@@ -204,5 +208,6 @@ def oc_functor (r : ℝ≥0) : Fintype.{u} ⥤ ProFiltPseuNormGrp.{u} :=
     continuous' := _ },
   map_id' := _,
   map_comp' := _ }
+-/
 
 end definitions
