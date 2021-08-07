@@ -1,22 +1,9 @@
-import data.real.basic
-import algebra.big_operators.basic
-import algebra.category.Group.basic
-import topology.algebra.infinite_sum
-import data.finset.basic
-import data.equiv.basic
-import analysis.normed_space.basic
 import analysis.specific_limits
-import data.equiv.basic
 import category_theory.Fintype
 import analysis.normed_space.basic
 
-import Mbar.bounded
 import pseudo_normed_group.basic
 import pseudo_normed_group.category
-
-import for_mathlib.tsum
-import for_mathlib.int_norm
-import for_mathlib.int_basic
 
 universe u
 
