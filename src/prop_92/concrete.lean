@@ -255,7 +255,7 @@ begin
   split,
   { intros h x',
     rw ← h,
-    exact real.le_Sup _ bound (mem_range_self _) } ,
+    exact le_cSup bound (mem_range_self _) } ,
   { intro h,
     erw real.Sup_eq _ bound,
     { intro y,

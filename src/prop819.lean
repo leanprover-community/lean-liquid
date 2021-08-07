@@ -234,20 +234,16 @@ begin
 end
 
 lemma prop819_zero_norm_le (g : (LocallyConstant.obj M).obj (op F.right)) : ∥ g ∥ ≤
-  ∥ (LocallyConstant.obj M).map (limits.wide_pullback.base (λ i : ulift (fin 1), F.hom)).op g ∥ :=
+  ∥(LocallyConstant.obj M).map (limits.wide_pullback.base (λ i : ulift (fin 1), F.hom)).op g∥ :=
 begin
   by_cases hh : nonempty F.right,
-  { erw real.Sup_le,
+  { apply cSup_le,
+    { rcases hh with ⟨x⟩,
+      refine ⟨∥g.to_fun x∥, x, rfl⟩ },
     { rintros z ⟨z,rfl⟩,
       obtain ⟨z,rfl⟩ := (prop819_degree_zero_helper _ surj) z,
-      change ∥ g.to_fun _ ∥ ≤ _,
+      change ∥g.to_fun _∥ ≤ _,
       erw ← LocallyConstant_map_apply M _ F.right (limits.wide_pullback.base (λ i, F.hom)) g z,
-      apply locally_constant.norm_apply_le },
-    { rcases hh with ⟨x⟩,
-      refine ⟨∥ g.to_fun x ∥, x, rfl⟩ },
-    { use ∥ g ∥,
-      rintro y ⟨y,rfl⟩,
-      dsimp,
       apply locally_constant.norm_apply_le } },
   { rw locally_constant_norm_empty _ _ hh g,
     simp }
