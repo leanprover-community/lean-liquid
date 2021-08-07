@@ -8,6 +8,7 @@ import analysis.normed_space.basic
 import analysis.specific_limits
 import data.equiv.basic
 import category_theory.Fintype
+import analysis.normed_space.basic
 
 import Mbar.bounded
 import pseudo_normed_group.basic
@@ -101,7 +102,7 @@ instance : has_sub (oc_measures r S) := ⟨sub⟩
 @[simp]
 lemma sub_apply (F G : oc_measures r S) (s : S) (n : ℤ) : (F - G) s n = F s n - G s n := rfl
 
-instance {r S} : add_comm_group (oc_measures r S) :=
+instance : add_comm_group (oc_measures r S) :=
 { add_assoc := λ a b c, by { ext, simp [add_assoc] },
   zero_add := λ a, by { ext, simp },
   add_zero := λ a, by { ext, simp },
@@ -122,12 +123,14 @@ instance {r S} : add_comm_group (oc_measures r S) :=
   ..(infer_instance : has_add _),
   ..(infer_instance : has_zero _),
   ..(infer_instance : has_neg _),
-  ..(infer_instance : has_sub _) }
+  ..(infer_instance : has_sub _) }.
 
-def filtration (r : ℝ≥0) (S : Fintype) (c : ℝ≥0) : set (oc_measures r S) :=
+variables (r S)
+def filtration (c : ℝ≥0) : set (oc_measures r S) :=
 { F | ∀ s, ∑' n, ∥ F s n ∥ * r ^ n ≤ c }
+variables {r S}
 
-lemma exists_c (r : ℝ≥0) (S : Fintype) (F : oc_measures r S) : ∃ (c : ℝ≥0),
+lemma exists_c (F : oc_measures r S) : ∃ (c : ℝ≥0),
   ∀ s : S, ∑' n, ∥ F s n ∥ * r ^ n ≤ c :=
 begin
   use ∑ s, ∑' n, ∥ F s n ∥ * r ^ n,
@@ -138,6 +141,30 @@ begin
     refine mul_nonneg (norm_nonneg _) (fpow_nonneg _ _),
     exact nnreal.coe_nonneg r, },
   { sorry },
+end
+
+/-- This lemma puts bounds on where `F s n` can be nonzero. -/
+lemma eq_zero_of_filtration (F : oc_measures r S) (c : ℝ≥0) :
+  F ∈ filtration r S c → ∀ (s : S) (n : ℤ), (c : ℝ) < (r : ℝ)^n → F s n = 0 :=
+begin
+  intros hF s n h,
+  suffices : ∥ F s n ∥ < 1,
+  { change abs (F s n : ℝ) < 1 at this,
+    norm_cast at this,
+    rwa ← int.eq_zero_iff_abs_lt_one },
+  have : ∥ F s n ∥ * r ^ n ≤ ∑' k, ∥ F s k ∥ * r ^ k,
+  { apply le_tsum (F.summable s),
+    rintros k -,
+    refine mul_nonneg (norm_nonneg _) (fpow_nonneg _ _),
+    exact nnreal.coe_nonneg r },
+  replace this := lt_of_le_of_lt (le_trans this (hF s)) h,
+  have hr₁ : 0 < (r : ℝ)^n := lt_of_le_of_lt (nnreal.coe_nonneg c) h,
+  have hr₂ : (r: ℝ)^n ≠ 0 := ne_of_gt hr₁,
+  convert mul_lt_mul this (le_refl ((r : ℝ) ^ n)⁻¹) _ _,
+  { field_simp [hr₂] },
+  { field_simp [hr₂] },
+  { simp [hr₁] },
+  { exact le_of_lt hr₁ },
 end
 
 /-
@@ -151,7 +178,7 @@ lemma oc_measures_are_c (r : ℝ≥0) (S : Type*) (hS : fintype S) (F : oc_measu
 -/
 
 --needed?
-instance png_oc_measures (r : ℝ≥0) (S : Fintype) :
+instance png_oc_measures :
   profinitely_filtered_pseudo_normed_group (oc_measures r S) :=
 { filtration := filtration r S,
   filtration_mono := λ c₁ c₂ h F hF s, le_trans (hF _) h,
