@@ -124,15 +124,20 @@ instance {r S} : add_comm_group (oc_measures r S) :=
   ..(infer_instance : has_neg _),
   ..(infer_instance : has_sub _) }
 
-def filtration (r c : ℝ≥0) (S : Fintype) : set (oc_measures r S) :=
-{ F | ∀ s, ∑' n, ∥ F s n ∥₊ ≤ c }
+def filtration (r : ℝ≥0) (S : Fintype) (c : ℝ≥0) : set (oc_measures r S) :=
+{ F | ∀ s, ∑' n, ∥ F s n ∥ * r ^ n ≤ c }
 
 lemma exists_c (r : ℝ≥0) (S : Fintype) (F : oc_measures r S) : ∃ (c : ℝ≥0),
-  ∀ s : S, ∑' n, ∥ F s n ∥₊ ≤ c :=
+  ∀ s : S, ∑' n, ∥ F s n ∥ * r ^ n ≤ c :=
 begin
-  use ∑ s, ∑' n, ∥ F s n ∥₊,
-  intro s,
-  sorry,
+  use ∑ s, ∑' n, ∥ F s n ∥ * r ^ n,
+  { apply finset.sum_nonneg,
+    rintros s -,
+    apply tsum_nonneg,
+    intros n,
+    refine mul_nonneg (norm_nonneg _) (fpow_nonneg _ _),
+    exact nnreal.coe_nonneg r, },
+  { sorry },
 end
 
 /-
@@ -147,7 +152,31 @@ lemma oc_measures_are_c (r : ℝ≥0) (S : Type*) (hS : fintype S) (F : oc_measu
 
 --needed?
 instance png_oc_measures (r : ℝ≥0) (S : Fintype) :
- profinitely_filtered_pseudo_normed_group (oc_measures r S) := sorry
+  profinitely_filtered_pseudo_normed_group (oc_measures r S) :=
+{ filtration := filtration r S,
+  filtration_mono := λ c₁ c₂ h F hF s, le_trans (hF _) h,
+  zero_mem_filtration := λ c s, by simp,
+  neg_mem_filtration := λ c F h s, by simp [h s],
+  add_mem_filtration := λ c₁ c₂ F₁ F₂ h₁ h₂ s, begin
+    have : ∀ n, ∥ (F₁ + F₂) s n ∥ * r ^ n ≤ ∥ F₁ s n ∥ * r^n + ∥ F₂ s n ∥ * r^n,
+    { intro n,
+      rw ← add_mul,
+      refine mul_le_mul (norm_add_le _ _) (le_refl _) (fpow_nonneg _ _)
+        (add_nonneg (norm_nonneg _) (norm_nonneg _)),
+      exact nnreal.coe_nonneg r },
+    refine le_trans (tsum_le_tsum this _ _) _,
+    { exact (F₁ + F₂).summable _ },
+    { exact summable.add (F₁.summable _) (F₂.summable _) },
+    { rw [nnreal.coe_add, tsum_add (F₁.summable _) (F₂.summable _)],
+      exact add_le_add (h₁ _) (h₂ _) }
+  end,
+  topology := _,
+  t2 := _,
+  td := _,
+  compact := _,
+  continuous_add' := _,
+  continuous_neg' := _,
+  continuous_cast_le := _ }
 
 variable {α : Type*}
 
