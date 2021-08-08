@@ -24,7 +24,7 @@ structure oc_measures (r : ℝ≥0) (S : Fintype) :=
 (to_fun     : S → ℤ → ℤ)
 (summable'   : ∀ s, summable (λ n, ∥ to_fun s n ∥ * r ^ n))
 
-variables {r : ℝ≥0} {S : Fintype}
+variables {r : ℝ≥0} {S : Fintype.{u}}
 
 instance : has_coe_to_fun (oc_measures r S) :=
 ⟨λ F, S → ℤ → ℤ, λ F, F.to_fun⟩
@@ -169,27 +169,6 @@ end
 
 section profinite_structure
 
-def truncate {c : ℝ≥0} (k₁ k₂ : ℤ) :
-  { F : oc_measures r S | ∥ F ∥ ≤ c } → oc_measures_bdd r S k₁ k₂ c := λ F,
-{ to_fun := λ s i, F s i,
-  bound' := begin
-    refine le_trans _ F.2,
-    dsimp,
-    apply finset.sum_le_sum,
-    rintros s -,
-    sorry,
-  end }
-
-lemma eq_iff_truncate_eq (c : ℝ≥0) (F G : {F : oc_measures r S | ∥ F ∥ ≤ c}) :
-  (∀ k₁ k₂, truncate k₁ k₂ F = truncate k₁ k₂ G) → F = G :=
-begin
-  intros h,
-  ext s i,
-  specialize h i i,
-  apply_fun (λ e, e s ⟨i, by simp⟩) at h,
-  exact h,
-end
-
 def index_category := ulift (ℤ × ℤ)
 
 def index_category.fst : index_category → ℤ := λ a, a.down.fst
@@ -215,6 +194,28 @@ instance : partial_order index_category :=
     { exact le_antisymm h₁.1 h₂.1 },
     { exact le_antisymm h₂.2 h₁.2 }
   end }
+
+def truncate {c : ℝ≥0} (A : index_category) :
+  { F : oc_measures r S | ∥ F ∥ ≤ c } → oc_measures_bdd r S A.fst A.snd c := λ F,
+{ to_fun := λ s i, F s i,
+  bound' := begin
+    refine le_trans _ F.2,
+    dsimp,
+    apply finset.sum_le_sum,
+    rintros s -,
+    sorry,
+  end }
+
+lemma eq_iff_truncate_eq (c : ℝ≥0) (F G : {F : oc_measures r S | ∥ F ∥ ≤ c}) :
+  (∀ k, truncate k F = truncate k G) → F = G :=
+begin
+  intros h,
+  ext s i,
+  specialize h ⟨⟨i, i⟩⟩,
+  apply_fun (λ e, e s ⟨i, le_refl _, le_refl _⟩) at h,
+  exact h,
+end
+
 
 def Icc_transition {A B : index_category} (h : A ≤ B) :
   set.Icc B.fst B.snd → set.Icc A.fst A.snd := λ i,
@@ -242,25 +243,119 @@ def transition {c : ℝ≥0} {A B : index_category} (h : A ≤ B) :
     exact nnreal.coe_nonneg r }
 end⟩
 
-lemma exists_of_compat {c} (F : Π (k₁ k₂ : ℤ), oc_measures_bdd r S k₁ k₂ c)
+lemma exists_of_compat {c} (F : Π (A : index_category), oc_measures_bdd r S A.fst A.snd c)
   (compat : ∀ (A B : index_category) (h : A ≤ B),
-    transition h (F _ _) = F _ _) :
-  ∃ (G : {H : oc_measures r S | ∥ H ∥ ≤ c }), ∀ k₁ k₂, truncate k₁ k₂ G = F k₁ k₂ :=
+    transition h (F _) = F _) :
+  ∃ (G : {H : oc_measures r S | ∥ H ∥ ≤ c }), ∀ (k : index_category), truncate k G = F k :=
 begin
-  let G : oc_measures r S := ⟨λ s i, F i i s ⟨i, le_refl _, le_refl _⟩, _⟩,
+  let G : oc_measures r S := ⟨λ s i, F ⟨⟨i, i⟩⟩ s ⟨i, le_refl _, le_refl _⟩, _⟩,
   swap,
   { sorry },
   use G,
   { sorry },
-  { intros k₁ k₂,
+  { intros k,
     ext s i,
-    change F _ _ _ _ = _,
-    have := compat ⟨⟨k₁, k₂⟩⟩ ⟨⟨i, i⟩⟩ ⟨i.2.1,i.2.2⟩,
+    change F _ _ _ = _,
+    have := compat k ⟨⟨i, i⟩⟩ ⟨i.2.1,i.2.2⟩,
     apply_fun (λ e, e s ⟨i, le_refl _, le_refl _⟩) at this,
     erw ← this,
-    change F k₁ k₂ _ _ = F k₁ k₂ _ _,
+    change F k _ _ = F k _ _,
     congr,
     ext, refl }
+end
+
+variables (r S)
+def oc_measures_bdd_functor (c : ℝ≥0) [fact (0 < r)] : index_category ⥤ Fintype :=
+{ obj := λ A, Fintype.of $ oc_measures_bdd r S A.fst A.snd c,
+  map := λ A B f, transition $ category_theory.le_of_hom f }
+
+def oc_measures_bdd_equiv (c : ℝ≥0) [fact (0 < r)] : { F : oc_measures r S | ∥ F ∥ ≤ c } ≃
+  (Profinite.limit_cone (oc_measures_bdd_functor r S c ⋙ Fintype.to_Profinite)).X :=
+equiv.of_bijective (λ F, ⟨λ A, truncate A F, begin
+  intros A B f,
+  ext,
+  refl,
+end⟩)
+begin
+  split,
+  { intros F G h,
+    apply eq_iff_truncate_eq,
+    intros k,
+    apply_fun (λ e, e.1 k) at h,
+    exact h },
+  { rintros ⟨F, hF⟩,
+    dsimp at F hF,
+    obtain ⟨G,hG⟩ := exists_of_compat F _,
+    { use G,
+      ext : 2,
+      apply hG },
+    { intros A B h,
+      apply hF (category_theory.hom_of_le h) } }
+end
+
+instance (c : ℝ≥0) [fact (0 < r)] : topological_space {F : oc_measures r S | ∥ F ∥ ≤ c} :=
+topological_space.induced (oc_measures_bdd_equiv r S c) infer_instance
+
+def oc_measures_bdd_homeo (c : ℝ≥0) [fact (0 < r)] : { F : oc_measures r S | ∥ F ∥ ≤ c } ≃ₜ
+  (Profinite.limit_cone (oc_measures_bdd_functor r S c ⋙ Fintype.to_Profinite)).X :=
+{ continuous_to_fun := continuous_induced_dom,
+  continuous_inv_fun := begin
+    have : inducing (oc_measures_bdd_equiv r S c) := ⟨rfl⟩,
+    rw this.continuous_iff,
+    dsimp,
+    convert continuous_id,
+    ext,
+    simp,
+  end,
+  ..(oc_measures_bdd_equiv _ _ _) }
+
+instance (c : ℝ≥0) [fact (0 < r)] : t2_space { F : oc_measures r S | ∥ F ∥ ≤ c } :=
+⟨λ x y h, separated_by_continuous (oc_measures_bdd_homeo r S c).continuous
+(λ cc, h $ by simpa using congr_arg (oc_measures_bdd_homeo r S c).symm cc)⟩
+
+instance (c : ℝ≥0) [fact (0 < r)] : totally_disconnected_space
+  { F : oc_measures r S | ∥ F ∥ ≤ c } :=
+begin
+  constructor,
+  rintros A - hA,
+  suffices : ((oc_measures_bdd_homeo r S c) '' A).subsingleton,
+  { intros x hx y hy,
+    apply_rules [(oc_measures_bdd_homeo r S c).injective, this, set.mem_image_of_mem] },
+  obtain ⟨h⟩ := (infer_instance : totally_disconnected_space
+   (Profinite.limit_cone (oc_measures_bdd_functor r S c ⋙ Fintype.to_Profinite)).X),
+  refine h _ (by tauto) (is_preconnected.image hA _ _),
+  exact (oc_measures_bdd_homeo r S c).continuous.continuous_on,
+end
+
+instance (c : ℝ≥0) [fact (0 < r)] : compact_space {F : oc_measures r S | ∥ F ∥ ≤ c} :=
+begin
+  constructor,
+  rw (oc_measures_bdd_homeo r S c).embedding.is_compact_iff_is_compact_image,
+  simp [compact_univ],
+end
+
+@[continuity]
+lemma truncate_continuous (c : ℝ≥0) [fact (0 < r)] (A : index_category.{u}) :
+  continuous (truncate A : _ → oc_measures_bdd r S _ _ c) :=
+begin
+  let g₁ :=
+    (Profinite.limit_cone (oc_measures_bdd_functor.{u} r S c ⋙ Fintype.to_Profinite)).π.app A,
+  let g₂ := (oc_measures_bdd_homeo r S c),
+  change continuous (g₁ ∘ g₂),
+  continuity,
+end
+
+lemma continuous_iff (c : ℝ≥0) [fact (0 < r)] {α : Type*} [topological_space α]
+  (f : α → { F : oc_measures r S | ∥ F ∥ ≤ c }) :
+  continuous f ↔ ∀ (A : index_category.{u}), continuous ((truncate A) ∘ f) :=
+begin
+  split,
+  { intros hf A, continuity },
+  { intros h,
+    rw ← (oc_measures_bdd_homeo r S c).comp_continuous_iff,
+    apply continuous_subtype_mk,
+    apply continuous_pi,
+    exact h }
 end
 
 end profinite_structure
@@ -276,7 +371,7 @@ lemma oc_measures_are_c (r : ℝ≥0) (S : Type*) (hS : fintype S) (F : oc_measu
 -/
 
 --needed?
-instance png_oc_measures :
+instance png_oc_measures [fact (0 < r)] :
   profinitely_filtered_pseudo_normed_group (oc_measures r S) :=
 { filtration := λ c, { F | ∥ F ∥ ≤ c },
   filtration_mono := λ c₁ c₂ h F hF, by { dsimp at *, exact le_trans hF h},
@@ -286,10 +381,10 @@ instance png_oc_measures :
     dsimp at *,
     sorry,
   end,
-  topology := _,
-  t2 := _,
-  td := _,
-  compact := _,
+  --topology := _,
+  --t2 := _,
+  --td := _,
+  --compact := _,
   continuous_add' := _,
   continuous_neg' := _,
   continuous_cast_le := _ }
