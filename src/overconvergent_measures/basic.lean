@@ -216,6 +216,27 @@ def transition {c : ℝ≥0} {k₁ k₂ k₁' k₂' : ℤ} (h₁ : k₁' ≤ k�
     exact nnreal.coe_nonneg r }
 end⟩
 
+lemma exists_of_compat {c} (F : Π (k₁ k₂ : ℤ), oc_measures_bdd r S k₁ k₂ c)
+  (compat : ∀ (k₁ k₂ k₁' k₂' : ℤ) (h₁ : k₁' ≤ k₁) (h₂ : k₂ ≤ k₂'),
+    transition h₁ h₂ (F k₁' k₂') = F k₁ k₂) :
+  ∃ (G : {H : oc_measures r S | ∥ H ∥ ≤ c }), ∀ k₁ k₂, truncate k₁ k₂ G = F k₁ k₂ :=
+begin
+  let G : oc_measures r S := ⟨λ s i, F i i s ⟨i, le_refl _, le_refl _⟩, _⟩,
+  swap,
+  { sorry },
+  use G,
+  { sorry },
+  { intros k₁ k₂,
+    ext s i,
+    change F _ _ _ _ = _,
+    have := compat i i k₁ k₂ i.2.1 i.2.2,
+    apply_fun (λ e, e s ⟨i, le_refl _, le_refl _⟩) at this,
+    rw ← this,
+    change F k₁ k₂ _ _ = F k₁ k₂ _ _,
+    congr,
+    ext, refl }
+end
+
 end profinite_structure
 
 /-
