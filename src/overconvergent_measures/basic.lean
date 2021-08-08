@@ -190,24 +190,50 @@ begin
   exact h,
 end
 
-def Icc_transition {k₁ k₂ k₁' k₂' : ℤ} (h₁ : k₁' ≤ k₁) (h₂ : k₂ ≤ k₂') :
-  set.Icc k₁ k₂ → set.Icc k₁' k₂' := λ i,
-⟨i, le_trans h₁ i.2.1, le_trans i.2.2 h₂⟩
+def index_category := ulift (ℤ × ℤ)
 
-def transition {c : ℝ≥0} {k₁ k₂ k₁' k₂' : ℤ} (h₁ : k₁' ≤ k₁) (h₂ : k₂ ≤ k₂') :
-  oc_measures_bdd r S k₁' k₂' c → oc_measures_bdd r S k₁ k₂ c := λ F,
-⟨λ s i, F s (Icc_transition h₁ h₂ i), begin
+def index_category.fst : index_category → ℤ := λ a, a.down.fst
+def index_category.snd : index_category → ℤ := λ a, a.down.snd
+
+@[ext] lemma index_category.ext (A B : index_category) :
+  A.fst = B.fst → A.snd = B.snd → A = B :=
+begin
+  rintro h h',
+  ext,
+  { exact h },
+  { exact h' }
+end
+
+-- A ≤ B implies Icc B.fst B.snd ⊆ Icc A.fst A.snd
+instance : partial_order index_category :=
+{ le := λ A B, A.fst ≤ B.fst ∧ B.snd ≤ A.snd,
+  --lt := _,
+  le_refl := λ a, ⟨le_refl _, le_refl _⟩,
+  le_trans := λ a b c h₁ h₂, ⟨le_trans h₁.1 h₂.1, le_trans h₂.2 h₁.2⟩,
+  le_antisymm := λ a b h₁ h₂, begin
+    ext,
+    { exact le_antisymm h₁.1 h₂.1 },
+    { exact le_antisymm h₂.2 h₁.2 }
+  end }
+
+def Icc_transition {A B : index_category} (h : A ≤ B) :
+  set.Icc B.fst B.snd → set.Icc A.fst A.snd := λ i,
+⟨i, le_trans h.1 i.2.1, le_trans i.2.2 h.2⟩
+
+def transition {c : ℝ≥0} {A B : index_category} (h : A ≤ B) :
+  oc_measures_bdd r S A.fst A.snd c → oc_measures_bdd r S B.fst B.snd c := λ F,
+⟨λ s i, F s (Icc_transition h i), begin
   refine le_trans _ F.2,
   apply finset.sum_le_sum,
   rintros s -,
-  have : ∑ i : set.Icc k₁ k₂, ∥ F s (Icc_transition h₁ h₂ i) ∥ * (r : ℝ)^(i : ℤ) =
-    ∑ i in finset.univ.image (Icc_transition h₁ h₂), ∥ F s i ∥ * (r : ℝ)^(i : ℤ),
+  have : ∑ i : set.Icc B.fst B.snd, ∥ F s (Icc_transition h i) ∥ * (r : ℝ)^(i : ℤ) =
+    ∑ i in finset.univ.image (Icc_transition h), ∥ F s i ∥ * (r : ℝ)^(i : ℤ),
   { rw finset.sum_image,
     { refl },
-    { rintros i - j - h,
+    { rintros i - j - hh,
       apply subtype.ext,
-      apply_fun (λ e, e.val) at h,
-      exact h } },
+      apply_fun (λ e, e.val) at hh,
+      exact hh } },
   rw this, clear this,
   apply finset.sum_le_sum_of_subset_of_nonneg,
   { apply finset.subset_univ },
@@ -217,8 +243,8 @@ def transition {c : ℝ≥0} {k₁ k₂ k₁' k₂' : ℤ} (h₁ : k₁' ≤ k�
 end⟩
 
 lemma exists_of_compat {c} (F : Π (k₁ k₂ : ℤ), oc_measures_bdd r S k₁ k₂ c)
-  (compat : ∀ (k₁ k₂ k₁' k₂' : ℤ) (h₁ : k₁' ≤ k₁) (h₂ : k₂ ≤ k₂'),
-    transition h₁ h₂ (F k₁' k₂') = F k₁ k₂) :
+  (compat : ∀ (A B : index_category) (h : A ≤ B),
+    transition h (F _ _) = F _ _) :
   ∃ (G : {H : oc_measures r S | ∥ H ∥ ≤ c }), ∀ k₁ k₂, truncate k₁ k₂ G = F k₁ k₂ :=
 begin
   let G : oc_measures r S := ⟨λ s i, F i i s ⟨i, le_refl _, le_refl _⟩, _⟩,
@@ -229,9 +255,9 @@ begin
   { intros k₁ k₂,
     ext s i,
     change F _ _ _ _ = _,
-    have := compat i i k₁ k₂ i.2.1 i.2.2,
+    have := compat ⟨⟨k₁, k₂⟩⟩ ⟨⟨i, i⟩⟩ ⟨i.2.1,i.2.2⟩,
     apply_fun (λ e, e s ⟨i, le_refl _, le_refl _⟩) at this,
-    rw ← this,
+    erw ← this,
     change F k₁ k₂ _ _ = F k₁ k₂ _ _,
     congr,
     ext, refl }
