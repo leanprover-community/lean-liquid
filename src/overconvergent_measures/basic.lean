@@ -371,23 +371,65 @@ lemma oc_measures_are_c (r : ℝ≥0) (S : Type*) (hS : fintype S) (F : oc_measu
 -/
 
 --needed?
-instance png_oc_measures [fact (0 < r)] :
-  profinitely_filtered_pseudo_normed_group (oc_measures r S) :=
+instance pnf_oc_measures : pseudo_normed_group (oc_measures r S) :=
 { filtration := λ c, { F | ∥ F ∥ ≤ c },
-  filtration_mono := λ c₁ c₂ h F hF, by { dsimp at *, exact le_trans hF h},
+  filtration_mono := λ c₁ c₂ h F hF, by {dsimp at *, exact le_trans hF h},
   zero_mem_filtration := λ c, by simp,
   neg_mem_filtration := λ c F h, by {dsimp at *, simp [h]},
   add_mem_filtration := λ c₁ c₂ F₁ F₂ h₁ h₂, begin
     dsimp at *,
     sorry,
+  end }
+
+instance pfpng_oc_measures [fact (0 < r)] :
+  profinitely_filtered_pseudo_normed_group (oc_measures r S) :=
+{ continuous_add' := begin
+    intros c₁ c₂,
+    rw continuous_iff,
+    intros A,
+    let E : oc_measures_bdd r S A.fst A.snd c₁ × oc_measures_bdd r S A.fst A.snd c₂ →
+      oc_measures_bdd r S A.fst A.snd (c₁ + c₂) := λ G, ⟨G.1 + G.2, _⟩,
+    swap, { sorry },
+    have :
+      (truncate A : _ → oc_measures_bdd r S A.fst A.snd (c₁ + c₂)) ∘ pseudo_normed_group.add' =
+      E ∘ (prod.map (truncate A) (truncate A)),
+    { ext, refl },
+    rw this,
+    apply continuous.comp,
+    { exact continuous_of_discrete_topology },
+    { apply continuous.prod_map,
+      all_goals {apply truncate_continuous} }
   end,
-  --topology := _,
-  --t2 := _,
-  --td := _,
-  --compact := _,
-  continuous_add' := _,
-  continuous_neg' := _,
-  continuous_cast_le := _ }
+  continuous_neg' := begin
+    intros c,
+    rw continuous_iff,
+    intros A,
+    let E : oc_measures_bdd r S A.fst A.snd c → oc_measures_bdd r S A.fst A.snd c :=
+      λ G, ⟨- G, _⟩,
+    swap, { sorry },
+    have : (truncate A : _ → oc_measures_bdd r S A.fst A.snd c) ∘ pseudo_normed_group.neg' =
+      E ∘ truncate A,
+    { ext, refl },
+    rw this,
+    apply continuous.comp,
+    { exact continuous_of_discrete_topology },
+    { apply truncate_continuous }
+  end,
+  continuous_cast_le := begin
+    introsI c₁ c₂ h,
+    rw continuous_iff,
+    intros A,
+    let g : oc_measures_bdd r S A.fst A.snd c₁ → oc_measures_bdd r S A.fst A.snd c₂ :=
+      λ g, ⟨g, le_trans g.2 h.out⟩,
+    have : (truncate A : _ → oc_measures_bdd r S A.fst A.snd c₂) ∘ pseudo_normed_group.cast_le =
+      g ∘ truncate A,
+    { ext, refl },
+    rw this,
+    apply continuous.comp,
+    { exact continuous_of_discrete_topology },
+    { apply truncate_continuous }
+  end,
+  ..(infer_instance : (pseudo_normed_group (oc_measures r S))) }
 
 variable {α : Type*}
 
