@@ -190,6 +190,32 @@ begin
   exact h,
 end
 
+def Icc_transition {k₁ k₂ k₁' k₂' : ℤ} (h₁ : k₁' ≤ k₁) (h₂ : k₂ ≤ k₂') :
+  set.Icc k₁ k₂ → set.Icc k₁' k₂' := λ i,
+⟨i, le_trans h₁ i.2.1, le_trans i.2.2 h₂⟩
+
+def transition {c : ℝ≥0} {k₁ k₂ k₁' k₂' : ℤ} (h₁ : k₁' ≤ k₁) (h₂ : k₂ ≤ k₂') :
+  oc_measures_bdd r S k₁' k₂' c → oc_measures_bdd r S k₁ k₂ c := λ F,
+⟨λ s i, F s (Icc_transition h₁ h₂ i), begin
+  refine le_trans _ F.2,
+  apply finset.sum_le_sum,
+  rintros s -,
+  have : ∑ i : set.Icc k₁ k₂, ∥ F s (Icc_transition h₁ h₂ i) ∥ * (r : ℝ)^(i : ℤ) =
+    ∑ i in finset.univ.image (Icc_transition h₁ h₂), ∥ F s i ∥ * (r : ℝ)^(i : ℤ),
+  { rw finset.sum_image,
+    { refl },
+    { rintros i - j - h,
+      apply subtype.ext,
+      apply_fun (λ e, e.val) at h,
+      exact h } },
+  rw this, clear this,
+  apply finset.sum_le_sum_of_subset_of_nonneg,
+  { apply finset.subset_univ },
+  { rintros i - -,
+    refine mul_nonneg (norm_nonneg _) (fpow_nonneg _ _),
+    exact nnreal.coe_nonneg r }
+end⟩
+
 end profinite_structure
 
 /-
