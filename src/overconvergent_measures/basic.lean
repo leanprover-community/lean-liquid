@@ -83,7 +83,7 @@ lemma neg_apply (F : oc_measures r S) (s : S) (n : ℤ) : (-F) s n = - (F s n) :
 
 def sub : oc_measures r S → oc_measures r S → oc_measures r S := λ F G,
 { to_fun := F - G,
-  summable' := sorry }
+  summable' := (add F (neg G)).summable }
 
 instance : has_sub (oc_measures r S) := ⟨sub⟩
 
