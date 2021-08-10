@@ -90,6 +90,8 @@ instance : has_sub (oc_measures r S) := ⟨sub⟩
 @[simp]
 lemma sub_apply (F G : oc_measures r S) (s : S) (n : ℤ) : (F - G) s n = F s n - G s n := rfl
 
+-- example (n : ℕ) (x : ℤ) : -[1+n]*x=-((1+n)*x) := by library_search
+
 instance : add_comm_group (oc_measures r S) :=
 { add_assoc := λ a b c, by { ext, simp [add_assoc] },
   zero_add := λ a, by { ext, simp },
@@ -125,9 +127,19 @@ instance : add_comm_group (oc_measures r S) :=
                     apply summable.neg this },
                  end },
   gsmul_zero' := λ F, by { ext, simpa, },
-  gsmul_succ' := λ n F, by { ext, simpa, },
-  gsmul_neg' := λ n F, by { ext, simpa, },
-  add_left_neg := λ F, by { ext, simp },
+  gsmul_succ' := λ n F, by { ext, simpa [add_apply, int.coe_nat_succ, int.of_nat_eq_coe,
+    gsmul_eq_smul, smul_eq_mul, add_mul, add_comm, one_mul], },
+  gsmul_neg' := begin
+      intros n F,
+      ext,
+      simp only [int.coe_nat_succ, gsmul_eq_smul, smul_eq_mul, neg_apply, add_comm,
+        int.of_nat_eq_coe, add_mul],-- int.neg_of_nat],
+      sorry,
+  end,
+
+
+  --λ n F, by { ext, simpa, },
+  add_left_neg := λ F, by { ext, simp, },
   add_comm := λ a b, by { ext, dsimp, rw add_comm },
   ..(infer_instance : has_add _),
   ..(infer_instance : has_zero _),
