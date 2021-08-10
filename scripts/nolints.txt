@@ -76,6 +76,10 @@ apply_nolint natural_fork doc_blame
 apply_nolint mk_pullback doc_blame
 apply_nolint proetale_topology doc_blame
 
+-- condensed/proj_cond.lean
+apply_nolint Profinite.extr_sheaf_cond doc_blame
+apply_nolint Profinite.proetale_topology' doc_blame
+
 -- for_mathlib/Cech/adjunction.lean
 apply_nolint category_theory.simplicial_object.augmented_cech_nerve.left_obj_zero_iso doc_blame
 
