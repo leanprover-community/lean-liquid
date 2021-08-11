@@ -295,16 +295,45 @@ def transition {c : ℝ≥0} {A B : index_category} (h : A ≤ B) :
     exact nnreal.coe_nonneg r }
 end⟩
 
+def index_category.single : ℤ → index_category := λ i, ⟨⟨i,i⟩⟩
+
+lemma index_category.mem_single {i} :
+  i ∈ set.Icc (index_category.single i).fst (index_category.single i).snd :=
+⟨le_refl _, le_refl _⟩
+
+def mk_seq {c} (F : Π (A : index_category), oc_measures_bdd r S A.fst A.snd c) :
+  S → ℤ → ℤ := λ s i, F (index_category.single i) s ⟨i, index_category.mem_single⟩
+
+lemma mk_seq_compat {c} (F : Π (A : index_category), oc_measures_bdd r S A.fst A.snd c)
+  (compat : ∀ (A B : index_category) (h : A ≤ B), transition h (F _) = F _) (s : S)
+  (A : index_category) (i : set.Icc A.fst A.snd) : mk_seq F s i = F A s i :=
+begin
+  have : A ≤ index_category.single i := ⟨i.2.1, i.2.2⟩,
+  specialize compat _ _ this,
+  dsimp [mk_seq],
+  rw ← compat,
+  change (F A) s _ = _,
+  congr,
+  ext,
+  refl,
+end
+
+lemma mk_seq_compat_summable {c} (F : Π (A : index_category), oc_measures_bdd r S A.fst A.snd c)
+  (compat : ∀ (A B : index_category) (h : A ≤ B), transition h (F _) = F _) (s : S) :
+  summable (λ k : ℤ, ∥ mk_seq F s k ∥ * (r : ℝ)^k) := sorry
+
+lemma mk_seq_compat_sum_le {c} (F : Π (A : index_category), oc_measures_bdd r S A.fst A.snd c)
+  (compat : ∀ (A B : index_category) (h : A ≤ B), transition h (F _) = F _)  :
+  ∑ (s : S), ∑' (k : ℤ), ∥ mk_seq F s k ∥ * (r : ℝ)^k ≤ c := sorry
+
 lemma exists_of_compat {c} (F : Π (A : index_category), oc_measures_bdd r S A.fst A.snd c)
   (compat : ∀ (A B : index_category) (h : A ≤ B),
     transition h (F _) = F _) :
   ∃ (G : {H : oc_measures r S | ∥ H ∥ ≤ c }), ∀ (k : index_category), truncate k G = F k :=
 begin
-  let G : oc_measures r S := ⟨λ s i, F ⟨⟨i, i⟩⟩ s ⟨i, le_refl _, le_refl _⟩, _⟩,
-  swap,
-  { sorry },
+  let G : oc_measures r S := ⟨mk_seq F, mk_seq_compat_summable _ compat⟩,
   use G,
-  { sorry },
+  { apply mk_seq_compat_sum_le _ compat },
   { intros k,
     ext s i,
     change F _ _ _ = _,
