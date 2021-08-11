@@ -90,10 +90,12 @@ instance : has_sub (oc_measures r S) := ⟨sub⟩
 @[simp]
 lemma sub_apply (F G : oc_measures r S) (s : S) (n : ℤ) : (F - G) s n = F s n - G s n := rfl
 
--- example (n : ℕ) (x : ℤ) : -[1+n]*x=-((1+n)*x) := by library_search
+example (a m : ℤ) : (-a)*m=a*(-m) := neg_mul_comm a m
 
-instance : add_comm_group (oc_measures r S) :=
-{ add_assoc := λ a b c, by { ext, simp [add_assoc] },
+instance : add_monoid (oc_measures r S) :=
+{ add := (+),
+  add_assoc := λ a b c, by { ext, simp [add_assoc] },
+  zero := 0,
   zero_add := λ a, by { ext, simp },
   add_zero := λ a, by { ext, simp },
   nsmul := λ n F,
@@ -107,9 +109,21 @@ instance : add_comm_group (oc_measures r S) :=
                   simp only [int.cast_coe_nat, int.cast_mul, int.nat_cast_eq_coe_nat,
                     int.cast_abs] at *,
                   exact this,
-                end },
+                 end },
+  nsmul_zero' := λ F, by { ext, refl },
+  nsmul_succ' := λ n F, by { ext, refl }, }
+
+instance : add_comm_group (oc_measures r S) :=
+{ add := (+),
+  add_assoc := add_assoc,
+  zero := 0,
+  zero_add := zero_add,
+  add_zero := add_zero,
+  nsmul := nsmul,
   nsmul_zero' := λ F, by { ext, refl },
   nsmul_succ' := λ n F, by { ext, refl },
+  neg := neg,
+  sub := sub,
   sub_eq_add_neg := λ F G, by { ext, refl },
   gsmul := λ n F,
   { to_fun := λ s m, gsmul n (F s m),
@@ -129,16 +143,8 @@ instance : add_comm_group (oc_measures r S) :=
   gsmul_zero' := λ F, by { ext, simpa, },
   gsmul_succ' := λ n F, by { ext, simpa [add_apply, int.coe_nat_succ, int.of_nat_eq_coe,
     gsmul_eq_smul, smul_eq_mul, add_mul, add_comm, one_mul], },
-  gsmul_neg' := begin
-      intros n F,
-      ext,
-      simp only [int.coe_nat_succ, gsmul_eq_smul, smul_eq_mul, neg_apply, add_comm,
-        int.of_nat_eq_coe, add_mul],-- int.neg_of_nat],
-      sorry,
-  end,
-
-
-  --λ n F, by { ext, simpa, },
+  gsmul_neg' := λ n F, by { ext, simp only [int.coe_nat_succ, int.of_nat_eq_coe,
+    int.neg_succ_of_nat_coe, add_comm, gsmul_eq_smul, smul_eq_mul], ring_nf},
   add_left_neg := λ F, by { ext, simp, },
   add_comm := λ a b, by { ext, dsimp, rw add_comm },
   ..(infer_instance : has_add _),
