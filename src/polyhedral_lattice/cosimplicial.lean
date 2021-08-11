@@ -80,12 +80,13 @@ rfl
 
 instance : fact (polyhedral_lattice_hom.to_add_monoid_hom (Λ.diagonal_embedding N)).range.saturated :=
 begin
-  refine ⟨λ n l' h, _⟩,
+  constructor,
+  rw add_subgroup.saturated_iff_gsmul,
+  intros n l' h,
   by_cases hn : n = 0, { exact or.inl hn },
   let l₀ : ↥Λ := ((@rescale.of N ((fin N) →₀ Λ)).symm l' : fin N →₀ Λ) ⟨0, hN.1⟩,
   refine or.inr ⟨l₀, _⟩,
   simp only [polyhedral_lattice_hom.coe_to_add_monoid_hom, add_monoid_hom.mem_range] at h ⊢,
-  rw gsmul_eq_smul at h,
   obtain ⟨l, hl⟩ := h,
   refine @smul_left_injective ℤ _ _ _ _ _ n hn _ _ _, dsimp,
   rw [← hl, ← polyhedral_lattice_hom.map_gsmul],

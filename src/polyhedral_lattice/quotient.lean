@@ -14,27 +14,6 @@ noncomputable theory
 
 open_locale big_operators
 
-section saturated
--- PR #8137
-
-variables {G G₁ G₂ : Type*} [group G] [add_comm_group G₁] [add_comm_group G₂]
-
-namespace subgroup
-
-@[to_additive]
-def saturated (H : subgroup G) : Prop := ∀ ⦃n g⦄, gpow n g ∈ H → n = 0 ∨ g ∈ H
-
-end subgroup
-
-lemma add_subgroup.ker_saturated [no_zero_smul_divisors ℤ G₂] (f : G₁ →+ G₂) :
-  (f.ker).saturated :=
-begin
-  intros n g hg,
-  simpa only [f.mem_ker, gsmul_eq_smul, f.map_gsmul, smul_eq_zero] using hg
-end
-
-end saturated
-
 namespace polyhedral_lattice
 
 variables {Λ : Type*} [polyhedral_lattice Λ] (L : add_subgroup Λ)
@@ -58,7 +37,7 @@ instance [H : fact L.saturated] : no_zero_smul_divisors ℤ (quotient_add_group.
     obtain ⟨x, rfl⟩ : ∃ y, L.normed_mk y = x := quotient.surjective_quotient_mk' x,
     have : L.normed_mk (n • x) = n • L.normed_mk x := L.normed_mk.to_add_monoid_hom.map_gsmul x n,
     simp only [← this, π_apply_eq_zero_iff] at h ⊢,
-    have := H.1, exact this h
+    exact add_subgroup.saturated_iff_gsmul.mp H.1 _ _ h,
   end }
 
 instance quotient_finite [H : fact L.saturated] : module.finite ℤ (quotient_add_group.quotient L) :=
