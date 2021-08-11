@@ -30,35 +30,40 @@ open opposite
 
 noncomputable theory
 
-variables (P : Profinite.{u}ᵒᵖ ⥤ Type u)
+variables (X : Profinite.{u}ᵒᵖ ⥤ Type u)
+
 lemma maps_comm {S S' : Profinite.{u}} (f : S' ⟶ S) :
-  P.map f.op ≫ P.map (pullback.fst : pullback f f ⟶ S').op = P.map f.op ≫ P.map pullback.snd.op :=
-by rw [←P.map_comp, ←op_comp, pullback.condition, op_comp, P.map_comp]
+  X.map f.op ≫ X.map (pullback.fst : pullback f f ⟶ S').op = X.map f.op ≫ X.map pullback.snd.op :=
+by rw [←X.map_comp, ←op_comp, pullback.condition, op_comp, X.map_comp]
 
 def natural_fork {S S' : Profinite.{u}} (f : S' ⟶ S) :
-  fork (P.map pullback.fst.op) (P.map pullback.snd.op) :=
-fork.of_ι (P.map (quiver.hom.op f)) (maps_comm P f)
+  fork (X.map pullback.fst.op) (X.map pullback.snd.op) :=
+fork.of_ι (X.map (quiver.hom.op f)) (maps_comm X f)
 
 -- TODO (BM): put this in mathlib (it's already in a mathlib branch with API)
-def category_theory.functor.preserves_terminal (P : Profinite.{u}ᵒᵖ ⥤ Type u) : Prop := sorry
+def category_theory.functor.preserves_terminal (X : Profinite.{u}ᵒᵖ ⥤ Type u) : Prop := sorry
 -- TODO (BM): put this in mathlib (it's already in a mathlib branch with API)
-def category_theory.functor.preserves_binary_products (P : Profinite.{u}ᵒᵖ ⥤ Type u) : Prop := sorry
+def category_theory.functor.preserves_binary_products (X : Profinite.{u}ᵒᵖ ⥤ Type u) : Prop := sorry
 
 structure condensed_type_condition : Prop :=
-(empty : nonempty P.preserves_terminal)
-(bin_prod : nonempty P.preserves_binary_products)
-(pullbacks : ∀ {S S' : Profinite.{u}} (f : S' ⟶ S) [epi f], nonempty (is_limit (natural_fork P f)))
+(empty : nonempty X.preserves_terminal)
+(bin_prod : nonempty X.preserves_binary_products)
+(pullbacks : ∀ {S S' : Profinite.{u}} (f : S' ⟶ S) [epi f], nonempty (is_limit (natural_fork X f)))
 
 -- (BM): I'm 90% sure this is true as stated, the forward direction is about halfway done.
 lemma sheaf_condition_iff :
-  presieve.is_sheaf proetale_topology P ↔ condensed_type_condition P :=
+  presieve.is_sheaf proetale_topology X ↔ condensed_type_condition X :=
 sorry
 
 -- TODO: State `sheaf_condition_iff` for presheaves taking values in `A` for `A` with appropriate
 -- structure.
 -- TODO: Use `sheaf_condition_iff` to define the functor of Example 1.5, it might look like this:
 def embed_Top : Top.{u} ⥤ CondensedSet.{u} :=
-{ obj := λ T, ⟨Profinite.to_Top.op ⋙ yoneda.obj T, sorry⟩,
+{ obj := λ T, ⟨Profinite.to_Top.op ⋙ yoneda.obj T,
+  begin
+    rw sheaf_condition_iff, refine ⟨⟨_⟩, ⟨_⟩, _⟩,
+    all_goals { sorry }
+  end⟩,
   map := λ T₁ T₂ f, whisker_left Profinite.to_Top.op (yoneda.map f) }
 
 -- TODO: Use the above to prove the first part of Proposition 1.7:
