@@ -322,7 +322,44 @@ lemma mk_seq_compat_summable {c} (F : Π (A : index_category), oc_measures_bdd r
   (compat : ∀ (A B : index_category) (h : A ≤ B), transition h (F _) = F _) (s : S) :
   summable (λ k : ℤ, ∥ mk_seq F s k ∥ * (r : ℝ)^k) :=
 begin
-  sorry
+  let e : ℝ := ⨆ (A : finset ℤ), ∑ a in A, ∥ mk_seq F s a ∥ * (r : ℝ)^a,
+  use e,
+  apply has_sum_of_is_lub_of_nonneg,
+  { intros b,
+    refine mul_nonneg (norm_nonneg _) (fpow_nonneg (nnreal.coe_nonneg _) _) },
+  { apply real.is_lub_Sup,
+    { use [0, ∅],
+      simp },
+    { use c,
+      rintro e ⟨I,rfl⟩,
+      dsimp,
+      by_cases hI : I.nonempty,
+      { let A : index_category := ⟨⟨I.min' hI, I.max' hI⟩⟩,
+        let J := finset.univ.image (coe : set.Icc A.fst A.snd → ℤ),
+        have hIJ : I ≤ J,
+        { intros i hi,
+          rw finset.mem_image,
+          refine ⟨⟨i, I.min'_le _ hi, I.le_max' _ hi⟩, by simp, rfl⟩ },
+        have : ∑ b in J, ∥ mk_seq F s b ∥ * (r : ℝ)^(b : ℤ) ≤ c,
+        { refine le_trans _ (F A).bound,
+          rw finset.sum_image,
+          simp_rw mk_seq_compat _ compat,
+          apply @finset.single_le_sum S ℝ _
+            (λ s, ∑ (i : set.Icc A.fst A.snd), ∥ F A s i ∥ * (r : ℝ)^(i : ℤ)),
+          { rintros s -,
+            apply finset.sum_nonneg,
+            rintros i -,
+            refine mul_nonneg (norm_nonneg _) (fpow_nonneg (nnreal.coe_nonneg _) _),
+          },
+          { simp },
+          { rintro x - y - h,
+            exact subtype.ext h } },
+        refine le_trans _ this,
+        apply finset.sum_le_sum_of_subset_of_nonneg hIJ,
+        rintros i - -,
+        refine mul_nonneg (norm_nonneg _) (fpow_nonneg (nnreal.coe_nonneg _) _) },
+      { simp only [finset.not_nonempty_iff_eq_empty] at hI,
+        simp [hI] } } }
 end
 
 lemma mk_seq_compat_sum_le {c} (F : Π (A : index_category), oc_measures_bdd r S A.fst A.snd c)
