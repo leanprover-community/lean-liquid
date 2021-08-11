@@ -320,11 +320,57 @@ end
 
 lemma mk_seq_compat_summable {c} (F : Π (A : index_category), oc_measures_bdd r S A.fst A.snd c)
   (compat : ∀ (A B : index_category) (h : A ≤ B), transition h (F _) = F _) (s : S) :
-  summable (λ k : ℤ, ∥ mk_seq F s k ∥ * (r : ℝ)^k) := sorry
+  summable (λ k : ℤ, ∥ mk_seq F s k ∥ * (r : ℝ)^k) :=
+begin
+  sorry
+end
 
 lemma mk_seq_compat_sum_le {c} (F : Π (A : index_category), oc_measures_bdd r S A.fst A.snd c)
   (compat : ∀ (A B : index_category) (h : A ≤ B), transition h (F _) = F _)  :
-  ∑ (s : S), ∑' (k : ℤ), ∥ mk_seq F s k ∥ * (r : ℝ)^k ≤ c := sorry
+  ∑ (s : S), ∑' (k : ℤ), ∥ mk_seq F s k ∥ * (r : ℝ)^k ≤ c :=
+begin
+  rw ← tsum_sum,
+  swap, { intros s hs, apply mk_seq_compat_summable _ compat },
+  have : ∀ A : index_category,
+    ∑ (b : set.Icc A.fst A.snd), ∑ (s : S), ∥ F A s b ∥ * (r : ℝ)^(b : ℤ) ≤ c,
+  { intros A,
+    rw finset.sum_comm,
+    exact (F A).bound },
+  apply tsum_le_of_sum_le,
+  { apply summable_sum,
+    intros s hs,
+    apply mk_seq_compat_summable _ compat },
+  intros I,
+  by_cases hI : I.nonempty,
+  { let A : index_category := ⟨⟨I.min' hI, I.max' hI⟩⟩,
+    let J := finset.univ.image (coe : set.Icc A.fst A.snd → ℤ),
+    have hIJ : I ≤ J,
+    { dsimp [J],
+      intros i hi,
+      rw finset.mem_image,
+      exact ⟨⟨i, finset.min'_le _ _ hi, finset.le_max' _ _ hi⟩, by simp, rfl⟩ },
+    have : ∑ b in J, ∑ (i : S), ∥ mk_seq F i b ∥ * (r : ℝ)^b ≤ c,
+    { have hA := (F A).bound,
+      dsimp at hA,
+      rw finset.sum_comm,
+      convert hA using 1,
+      apply finset.sum_congr rfl,
+      rintros s -,
+      rw finset.sum_image,
+      { apply finset.sum_congr rfl,
+        rintros i -,
+        rw mk_seq_compat _ compat },
+      { rintros i - j - h,
+        exact subtype.ext h } },
+    refine le_trans _ this,
+    apply finset.sum_le_sum_of_subset_of_nonneg hIJ,
+    rintros i - -,
+    apply finset.sum_nonneg,
+    rintros s -,
+    refine mul_nonneg (norm_nonneg _) (fpow_nonneg (nnreal.coe_nonneg _) _) },
+  { simp only [finset.not_nonempty_iff_eq_empty] at hI,
+    simp [hI] }
+end
 
 lemma exists_of_compat {c} (F : Π (A : index_category), oc_measures_bdd r S A.fst A.snd c)
   (compat : ∀ (A B : index_category) (h : A ≤ B),
