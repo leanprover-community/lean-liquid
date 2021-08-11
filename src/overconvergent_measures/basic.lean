@@ -148,6 +148,22 @@ instance : has_norm (oc_measures r S) :=
 @[simp]
 lemma norm_def (F : oc_measures r S) : ∥ F ∥ = ∑ s, ∑' n, ∥ F s n ∥ * (r : ℝ)^n := rfl
 
+lemma norm_add (F G : oc_measures r S) : ∥ F + G ∥ ≤ ∥ F ∥ + ∥ G ∥ :=
+begin
+  dsimp,
+  rw ← finset.sum_add_distrib,
+  apply finset.sum_le_sum,
+  intros s hs,
+  rw ← tsum_add (F.summable _) (G.summable _),
+  apply tsum_le_tsum _ ((F + G).summable _),
+  { apply summable.add (F.summable s) (G.summable s) },
+  { intros b,
+    dsimp,
+    rw ← add_mul,
+    refine mul_le_mul (norm_add_le _ _) (le_refl _) (fpow_nonneg (nnreal.coe_nonneg _) _)
+      (add_nonneg (norm_nonneg _) (norm_nonneg _)) }
+end
+
 /-
 lemma exists_c (F : oc_measures r S) : ∃ (c : ℝ≥0),
   ∀ s : S, ∑' n, ∥ F s n ∥ * r ^ n ≤ c :=
@@ -413,8 +429,9 @@ instance pnf_oc_measures : pseudo_normed_group (oc_measures r S) :=
   zero_mem_filtration := λ c, by simp,
   neg_mem_filtration := λ c F h, by {dsimp at *, simp [h]},
   add_mem_filtration := λ c₁ c₂ F₁ F₂ h₁ h₂, begin
-    dsimp at *,
-    sorry,
+    refine le_trans (norm_add _ _) _,
+    rw nnreal.coe_add,
+    exact add_le_add h₁ h₂,
   end }
 
 instance pfpng_oc_measures [fact (0 < r)] :
@@ -425,7 +442,18 @@ instance pfpng_oc_measures [fact (0 < r)] :
     intros A,
     let E : oc_measures_bdd r S A.fst A.snd c₁ × oc_measures_bdd r S A.fst A.snd c₂ →
       oc_measures_bdd r S A.fst A.snd (c₁ + c₂) := λ G, ⟨G.1 + G.2, _⟩,
-    swap, { sorry },
+    swap, {
+      rw nnreal.coe_add,
+      refine le_trans _ (add_le_add G.fst.2 G.snd.2),
+      rw ← finset.sum_add_distrib,
+      apply finset.sum_le_sum,
+      intros i hi,
+      rw ← finset.sum_add_distrib,
+      apply finset.sum_le_sum,
+      intros j hj,
+      rw ← add_mul,
+      refine mul_le_mul (norm_add_le _ _) (le_refl _)
+        (fpow_nonneg (nnreal.coe_nonneg _) _) (add_nonneg (norm_nonneg _) (norm_nonneg _)) },
     have :
       (truncate A : _ → oc_measures_bdd r S A.fst A.snd (c₁ + c₂)) ∘ pseudo_normed_group.add' =
       E ∘ (prod.map (truncate A) (truncate A)),
@@ -442,7 +470,14 @@ instance pfpng_oc_measures [fact (0 < r)] :
     intros A,
     let E : oc_measures_bdd r S A.fst A.snd c → oc_measures_bdd r S A.fst A.snd c :=
       λ G, ⟨- G, _⟩,
-    swap, { sorry },
+    swap, {
+      convert G.2 using 1,
+      apply finset.sum_congr rfl,
+      intros s hs,
+      apply finset.sum_congr rfl,
+      intros x hx,
+      congr' 1,
+      simpa },
     have : (truncate A : _ → oc_measures_bdd r S A.fst A.snd c) ∘ pseudo_normed_group.neg' =
       E ∘ truncate A,
     { ext, refl },
