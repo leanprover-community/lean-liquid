@@ -1,6 +1,17 @@
 import analysis.normed_space.banach
 import analysis.mean_inequalities
 
+/-!
+# p-Banach spaces
+
+A `p`-Banach space is just like an ordinary Banach space,
+except that the axiom `∥c • v∥ = ∥c∥ * ∥v∥` is replaced by `∥c • v∥ = ∥c∥^p * ∥v∥`
+
+In this file, we define `p`-normed spaces, called `normed_space'`,
+and we prove that every `p`-normed space is also `p'`-normed, for `0 < p' ≤ p`.
+
+-/
+
 noncomputable theory
 
 open_locale nnreal
@@ -24,21 +35,29 @@ set_option extends_priority 920
 /-- A normed space over a normed field is a vector space endowed with a norm which satisfies the
 equality `∥c • x∥ = ∥c∥ ∥x∥`. We require only `∥c • x∥ ≤ ∥c∥ ∥x∥` in the definition, then prove
 `∥c • x∥ = ∥c∥ ∥x∥` in `norm_smul`. -/
-class normed_space' (𝕜 : Type*) (p : out_param ℝ) (V : Type*) [normed_field 𝕜] [normed_group V]
-  extends module 𝕜 V :=
+class normed_space' (𝕜 : Type*) (p : out_param ℝ) (V : Type*)
+  [normed_field 𝕜] [normed_group V] [module 𝕜 V] :=
 (norm_smul : ∀ (c:𝕜) (v:V), ∥c • v∥ = ∥c∥^p * ∥v∥)
 
-variables (𝕜 : Type*) (V : Type*) [normed_field 𝕜] [normed_group V]
-
-instance normed_space.normed_space' [normed_space 𝕜 V] : normed_space' 𝕜 1 V :=
+@[priority 100]
+instance normed_space.normed_space'
+  (𝕜 : Type*) (V : Type*) [normed_field 𝕜] [normed_group V] [normed_space 𝕜 V] :
+  normed_space' 𝕜 1 V :=
 { norm_smul := λ c k, by simp only [real.rpow_one, norm_smul] }
 
+/-- A type alias: `as_normed_space' p' V` is a `p'`-normed space over `𝕜`,
+when `V` is a `p`-normed space over `𝕜` and `0 < p' ≤ p`. -/
+@[nolint unused_arguments]
 def as_normed_space' (p' : ℝ) (V : Type*) := V
 
 namespace as_normed_space'
 
+instance (p' : ℝ) (V : Type*) [i : inhabited V] : inhabited (as_normed_space' p' V) := i
+
+/-- The identity map `V → as_normed_space' p' V`. -/
 def up (p' : ℝ) {V : Type*} (v : V) : as_normed_space' p' V := v
 
+/-- The identity map `as_normed_space' p' V → V`. -/
 def down {p' : ℝ} {V : Type*} (v : as_normed_space' p' V) : V := v
 
 instance (p' : ℝ) (V : Type*) [i : add_comm_group V] : add_comm_group (as_normed_space' p' V) := i
@@ -56,13 +75,19 @@ instance (p' : ℝ) (𝕜 V : Type*) [ring 𝕜] [add_comm_group V] [i : module 
   (c : 𝕜) (v : as_normed_space' p' V) :
   (c • v).down = c • v.down := rfl
 
-def has_norm (p' p : ℝ) (V : Type*) [has_norm V] :
+/-- The natural `p'`-norm on `as_normed_space' p' V` induced by a `p`-norm on `V`. -/
+protected def has_norm (p' p : ℝ) (V : Type*) [has_norm V] :
   has_norm (as_normed_space' p' V) :=
 ⟨λ v, ∥v.down∥^(p'/p)⟩
 
-instance (p' p : ℝ) [fact (0 < p')] [fact (p' ≤ p)] [normed_space' 𝕜 p V] :
+lemma norm_def {V : Type*} [has_norm V] (p' p : ℝ) (v : as_normed_space' p' V) :
+  @has_norm.norm _ (as_normed_space'.has_norm p' p V) v = ∥v.down∥^(p'/p) := rfl
+
+/-- The natural `p'`-normed group structure on `as_normed_space' p' V`
+induced by a `p`-normed group structure on `V` -/
+protected def normed_group (V : Type*) [normed_group V] (p' p : ℝ) [fact (0 < p')] [fact (p' ≤ p)] :
   normed_group (as_normed_space' p' V) :=
-@normed_group.of_core _ _ (has_norm p' p V) $
+@normed_group.of_core _ _ (as_normed_space'.has_norm p' p V) $
 have hp' : 0 < p'   := fact.out _,
 have hp  : 0 < p    := lt_of_lt_of_le hp' (fact.out _),
 have H   : 0 < p'/p := div_pos hp' hp,
@@ -81,10 +106,10 @@ have H   : 0 < p'/p := div_pos hp' hp,
   end,
   norm_neg := λ v, show ∥(-v).down∥^(p'/p) = ∥v.down∥^(p'/p), by rw [down_neg, norm_neg] }
 
-lemma norm_def (p' p : ℝ) [fact (0 < p')] [fact (p' ≤ p)] [normed_space' 𝕜 p V]
-  (v : as_normed_space' p' V) : ∥v∥ = ∥v.down∥^(p'/p) := rfl
+local attribute [instance] as_normed_space'.normed_group
 
-instance (p' p : ℝ) [fact (0 < p')] [fact (p' ≤ p)] [normed_space' 𝕜 p V] :
+instance (𝕜 : Type*) (V : Type*) [normed_field 𝕜] [normed_group V] [module 𝕜 V]
+  (p' p : ℝ) [fact (0 < p')] [fact (p' ≤ p)] [normed_space' 𝕜 p V] :
   normed_space' 𝕜 p' (as_normed_space' p' V) :=
 { norm_smul := λ c v,
   begin
