@@ -232,7 +232,14 @@ def truncate {c : ℝ≥0} (A : index_category) :
     dsimp,
     apply finset.sum_le_sum,
     rintros s -,
-    sorry,
+    let T : finset ℤ := finset.univ.image (coe : set.Icc A.fst A.snd → ℤ),
+    convert sum_le_tsum T _ ((F : oc_measures r S).summable s) using 1,
+    { rw finset.sum_image,
+      intros x hx y hy h,
+      exact subtype.ext h },
+    { intros b hb,
+      refine mul_nonneg (norm_nonneg _) (fpow_nonneg _ _),
+      exact nnreal.coe_nonneg r },
   end }
 
 lemma eq_iff_truncate_eq (c : ℝ≥0) (F G : {F : oc_measures r S | ∥ F ∥ ≤ c}) :
