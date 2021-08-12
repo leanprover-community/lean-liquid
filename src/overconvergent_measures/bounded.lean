@@ -14,32 +14,32 @@ open set
 
 instance (k₁ k₂ : ℤ) : fintype (Icc k₁ k₂) := (Icc_ℤ_finite _ _).some
 
-structure oc_measures_bdd (r : ℝ≥0) (S : Fintype) (T : finset ℤ) (c : ℝ≥0) :=
+structure laurent_measures_bdd (r : ℝ≥0) (S : Fintype) (T : finset ℤ) (c : ℝ≥0) :=
 (to_fun : S → T → ℤ)
 (bound' : ∑ s i, ∥ to_fun s i ∥ * (r : ℝ) ^ (i : ℤ) ≤ c)
 
-namespace oc_measures_bdd
+namespace laurent_measures_bdd
 
 variables {r : ℝ≥0} {S : Fintype} {T : finset ℤ} {c : ℝ≥0}
 
-instance : has_coe_to_fun (oc_measures_bdd r S T c) :=
+instance : has_coe_to_fun (laurent_measures_bdd r S T c) :=
 ⟨λ _, S → T → ℤ, λ F, F.1⟩
 
-instance : has_norm (oc_measures_bdd r S T c) :=
+instance : has_norm (laurent_measures_bdd r S T c) :=
 ⟨λ F, ∑ s i, ∥ F s i ∥ * (r : ℝ)^(i : ℤ)⟩
 
 @[ext]
-lemma ext (F G : oc_measures_bdd r S T c) :
+lemma ext (F G : laurent_measures_bdd r S T c) :
   (F : S → T → ℤ) = G  → F = G := by {intros h, cases F, cases G, simpa }
 
 @[simp]
-lemma norm_def (F : oc_measures_bdd r S T c) : ∥ F ∥ =
+lemma norm_def (F : laurent_measures_bdd r S T c) : ∥ F ∥ =
   ∑ s i, ∥ F s i ∥ * (r : ℝ)^(i : ℤ) := rfl
 
-lemma bound (F : oc_measures_bdd r S T c) :
+lemma bound (F : laurent_measures_bdd r S T c) :
   ∥ F ∥ ≤ c := F.2
 
-lemma coeff_bound (F : oc_measures_bdd r S T c) [hr : fact (0 < r)]
+lemma coeff_bound (F : laurent_measures_bdd r S T c) [hr : fact (0 < r)]
   (s : S) (i : T) : ∥ F s i ∥ ≤ c * ((r : ℝ)^(i : ℤ))⁻¹ :=
 begin
   suffices : ∥ F s i ∥ * (r : ℝ)^(i : ℤ) ≤ c,
@@ -74,11 +74,11 @@ end
 open_locale classical
 
 instance (r : ℝ≥0) [fact (0 < r)] (S : Fintype) (T : finset ℤ) :
-  fintype (oc_measures_bdd r S T c) :=
+  fintype (laurent_measures_bdd r S T c) :=
 begin
   let lb : T → ℤ := λ i, floor (-((c : ℝ) * ((r : ℝ)^(i : ℤ))⁻¹)),
   let ub : T → ℤ := λ i, ceil ((c : ℝ) * ((r : ℝ)^(i : ℤ))⁻¹),
-  let ι : oc_measures_bdd r S T c →
+  let ι : laurent_measures_bdd r S T c →
     (Π (s : S) (i : T), Icc (lb i) (ub i)) :=
     λ F s i, ⟨F s i, _⟩,
   apply fintype.of_injective ι _,
@@ -94,14 +94,14 @@ begin
     { exact_mod_cast le_trans this.2 (le_ceil _) } }
 end
 
-instance : topological_space (oc_measures_bdd r S T c) := ⊥
+instance : topological_space (laurent_measures_bdd r S T c) := ⊥
 
-example [fact (0 < r)] : compact_space (oc_measures_bdd r S T c) :=
+example [fact (0 < r)] : compact_space (laurent_measures_bdd r S T c) :=
   by apply_instance
 
-example : t2_space (oc_measures_bdd r S T c) := by apply_instance
+example : t2_space (laurent_measures_bdd r S T c) := by apply_instance
 
-example : totally_disconnected_space (oc_measures_bdd r S T c) :=
+example : totally_disconnected_space (laurent_measures_bdd r S T c) :=
   by apply_instance
 
-end oc_measures_bdd
+end laurent_measures_bdd
