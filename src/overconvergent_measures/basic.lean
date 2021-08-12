@@ -214,45 +214,18 @@ end
 
 section profinite_structure
 
-def index_category := ulift (ℤ × ℤ)
-
-def index_category.fst : index_category → ℤ := λ a, a.down.fst
-def index_category.snd : index_category → ℤ := λ a, a.down.snd
-
-@[ext] lemma index_category.ext (A B : index_category) :
-  A.fst = B.fst → A.snd = B.snd → A = B :=
-begin
-  rintro h h',
-  ext,
-  { exact h },
-  { exact h' }
-end
-
--- A ≤ B implies Icc B.fst B.snd ⊆ Icc A.fst A.snd
-instance : partial_order index_category :=
-{ le := λ A B, A.fst ≤ B.fst ∧ B.snd ≤ A.snd,
-  --lt := _,
-  le_refl := λ a, ⟨le_refl _, le_refl _⟩,
-  le_trans := λ a b c h₁ h₂, ⟨le_trans h₁.1 h₂.1, le_trans h₂.2 h₁.2⟩,
-  le_antisymm := λ a b h₁ h₂, begin
-    ext,
-    { exact le_antisymm h₁.1 h₂.1 },
-    { exact le_antisymm h₂.2 h₁.2 }
-  end }
-
-def truncate {c : ℝ≥0} (A : index_category) :
-  { F : oc_measures r S | ∥ F ∥ ≤ c } → oc_measures_bdd r S A.fst A.snd c := λ F,
+def truncate {c : ℝ≥0} (A : finset ℤ) :
+  { F : oc_measures r S | ∥ F ∥ ≤ c } → oc_measures_bdd r S A c := λ F,
 { to_fun := λ s i, F s i,
   bound' := begin
     refine le_trans _ F.2,
     dsimp,
     apply finset.sum_le_sum,
     rintros s -,
-    let T : finset ℤ := finset.univ.image (coe : set.Icc A.fst A.snd → ℤ),
-    convert sum_le_tsum T _ ((F : oc_measures r S).summable s) using 1,
-    { rw finset.sum_image,
-      intros x hx y hy h,
-      exact subtype.ext h },
+    let T : finset ℤ := finset.univ.image (coe : A → ℤ),
+    convert sum_le_tsum A _ ((F : oc_measures r S).summable s) using 1,
+    { conv_rhs {rw ← finset.sum_attach},
+      refl },
     { intros b hb,
       refine mul_nonneg (norm_nonneg _) (fpow_nonneg _ _),
       exact nnreal.coe_nonneg r },
@@ -263,24 +236,24 @@ lemma eq_iff_truncate_eq (c : ℝ≥0) (F G : {F : oc_measures r S | ∥ F ∥ �
 begin
   intros h,
   ext s i,
-  specialize h ⟨⟨i, i⟩⟩,
-  apply_fun (λ e, e s ⟨i, le_refl _, le_refl _⟩) at h,
+  specialize h {i},
+  apply_fun (λ e, e s ⟨i, by simp⟩) at h,
   exact h,
 end
 
 
-def Icc_transition {A B : index_category} (h : A ≤ B) :
-  set.Icc B.fst B.snd → set.Icc A.fst A.snd := λ i,
-⟨i, le_trans h.1 i.2.1, le_trans i.2.2 h.2⟩
+def finset_map {A B : finset ℤ} (h : B ≤ A) :
+  B → A :=
+λ i, ⟨i, h i.2⟩
 
-def transition {c : ℝ≥0} {A B : index_category} (h : A ≤ B) :
-  oc_measures_bdd r S A.fst A.snd c → oc_measures_bdd r S B.fst B.snd c := λ F,
-⟨λ s i, F s (Icc_transition h i), begin
+def transition {c : ℝ≥0} {A B : finset ℤ} (h : B ≤ A) :
+  oc_measures_bdd r S A c → oc_measures_bdd r S B c := λ F,
+⟨λ s i, F s (finset_map h i), begin
   refine le_trans _ F.2,
   apply finset.sum_le_sum,
   rintros s -,
-  have : ∑ i : set.Icc B.fst B.snd, ∥ F s (Icc_transition h i) ∥ * (r : ℝ)^(i : ℤ) =
-    ∑ i in finset.univ.image (Icc_transition h), ∥ F s i ∥ * (r : ℝ)^(i : ℤ),
+  have : ∑ i : B, ∥ F s (finset_map h i) ∥ * (r : ℝ)^(i : ℤ) =
+    ∑ i in finset.univ.image (finset_map h), ∥ F s i ∥ * (r : ℝ)^(i : ℤ),
   { rw finset.sum_image,
     { refl },
     { rintros i - j - hh,
@@ -295,20 +268,14 @@ def transition {c : ℝ≥0} {A B : index_category} (h : A ≤ B) :
     exact nnreal.coe_nonneg r }
 end⟩
 
-def index_category.single : ℤ → index_category := λ i, ⟨⟨i,i⟩⟩
+def mk_seq {c} (F : Π (A : finset ℤ), oc_measures_bdd r S A c) :
+  S → ℤ → ℤ := λ s i, F {i} s ⟨i, by simp⟩
 
-lemma index_category.mem_single {i} :
-  i ∈ set.Icc (index_category.single i).fst (index_category.single i).snd :=
-⟨le_refl _, le_refl _⟩
-
-def mk_seq {c} (F : Π (A : index_category), oc_measures_bdd r S A.fst A.snd c) :
-  S → ℤ → ℤ := λ s i, F (index_category.single i) s ⟨i, index_category.mem_single⟩
-
-lemma mk_seq_compat {c} (F : Π (A : index_category), oc_measures_bdd r S A.fst A.snd c)
-  (compat : ∀ (A B : index_category) (h : A ≤ B), transition h (F _) = F _) (s : S)
-  (A : index_category) (i : set.Icc A.fst A.snd) : mk_seq F s i = F A s i :=
+lemma mk_seq_compat {c} (F : Π (A : finset ℤ), oc_measures_bdd r S A c)
+  (compat : ∀ (A B : finset ℤ) (h : B ≤ A), transition h (F _) = F _) (s : S)
+  (A : finset ℤ) (i : A) : mk_seq F s i = F A s i :=
 begin
-  have : A ≤ index_category.single i := ⟨i.2.1, i.2.2⟩,
+  have : ({i} : finset ℤ) ≤ A, { simp },
   specialize compat _ _ this,
   dsimp [mk_seq],
   rw ← compat,
@@ -318,58 +285,35 @@ begin
   refl,
 end
 
-lemma mk_seq_compat_summable {c} (F : Π (A : index_category), oc_measures_bdd r S A.fst A.snd c)
-  (compat : ∀ (A B : index_category) (h : A ≤ B), transition h (F _) = F _) (s : S) :
+lemma mk_seq_compat_summable {c} (F : Π (A : finset ℤ), oc_measures_bdd r S A c)
+  (compat : ∀ (A B : finset ℤ) (h : B ≤ A), transition h (F _) = F _) (s : S) :
   summable (λ k : ℤ, ∥ mk_seq F s k ∥ * (r : ℝ)^k) :=
 begin
-  let e : ℝ := ⨆ (A : finset ℤ), ∑ a in A, ∥ mk_seq F s a ∥ * (r : ℝ)^a,
-  use e,
-  apply has_sum_of_is_lub_of_nonneg,
-  { intros b,
+  apply summable_of_sum_le,
+  { intro k,
+    dsimp,
     refine mul_nonneg (norm_nonneg _) (fpow_nonneg (nnreal.coe_nonneg _) _) },
-  { apply real.is_lub_Sup,
-    { use [0, ∅],
-      simp },
-    { use c,
-      rintro e ⟨I,rfl⟩,
-      dsimp,
-      by_cases hI : I.nonempty,
-      { let A : index_category := ⟨⟨I.min' hI, I.max' hI⟩⟩,
-        let J := finset.univ.image (coe : set.Icc A.fst A.snd → ℤ),
-        have hIJ : I ≤ J,
-        { intros i hi,
-          rw finset.mem_image,
-          refine ⟨⟨i, I.min'_le _ hi, I.le_max' _ hi⟩, by simp, rfl⟩ },
-        have : ∑ b in J, ∥ mk_seq F s b ∥ * (r : ℝ)^(b : ℤ) ≤ c,
-        { refine le_trans _ (F A).bound,
-          rw finset.sum_image,
-          simp_rw mk_seq_compat _ compat,
-          apply @finset.single_le_sum S ℝ _
-            (λ s, ∑ (i : set.Icc A.fst A.snd), ∥ F A s i ∥ * (r : ℝ)^(i : ℤ)),
-          { rintros s -,
-            apply finset.sum_nonneg,
-            rintros i -,
-            refine mul_nonneg (norm_nonneg _) (fpow_nonneg (nnreal.coe_nonneg _) _),
-          },
-          { simp },
-          { rintro x - y - h,
-            exact subtype.ext h } },
-        refine le_trans _ this,
-        apply finset.sum_le_sum_of_subset_of_nonneg hIJ,
-        rintros i - -,
-        refine mul_nonneg (norm_nonneg _) (fpow_nonneg (nnreal.coe_nonneg _) _) },
-      { simp only [finset.not_nonempty_iff_eq_empty] at hI,
-        simp [hI] } } }
+  { intros A,
+    rw ← finset.sum_attach,
+    refine le_trans _ (F A).bound,
+    simp_rw mk_seq_compat _ compat,
+    dsimp,
+    apply @finset.single_le_sum S ℝ _ (λ s, ∑ (i : A), ∥ F A s i ∥ * (r : ℝ)^(i : ℤ)),
+    swap, { simp },
+    rintro s -,
+    apply finset.sum_nonneg,
+    rintros a -,
+    refine mul_nonneg (norm_nonneg _) (fpow_nonneg (nnreal.coe_nonneg _) _) },
 end
 
-lemma mk_seq_compat_sum_le {c} (F : Π (A : index_category), oc_measures_bdd r S A.fst A.snd c)
-  (compat : ∀ (A B : index_category) (h : A ≤ B), transition h (F _) = F _)  :
+lemma mk_seq_compat_sum_le {c} (F : Π (A : finset ℤ), oc_measures_bdd r S A c)
+  (compat : ∀ (A B : finset ℤ) (h : B ≤ A), transition h (F _) = F _)  :
   ∑ (s : S), ∑' (k : ℤ), ∥ mk_seq F s k ∥ * (r : ℝ)^k ≤ c :=
 begin
   rw ← tsum_sum,
   swap, { intros s hs, apply mk_seq_compat_summable _ compat },
-  have : ∀ A : index_category,
-    ∑ (b : set.Icc A.fst A.snd), ∑ (s : S), ∥ F A s b ∥ * (r : ℝ)^(b : ℤ) ≤ c,
+  have : ∀ A : finset ℤ,
+    ∑ (b : A), ∑ (s : S), ∥ F A s b ∥ * (r : ℝ)^(b : ℤ) ≤ c,
   { intros A,
     rw finset.sum_comm,
     exact (F A).bound },
@@ -378,41 +322,21 @@ begin
     intros s hs,
     apply mk_seq_compat_summable _ compat },
   intros I,
-  by_cases hI : I.nonempty,
-  { let A : index_category := ⟨⟨I.min' hI, I.max' hI⟩⟩,
-    let J := finset.univ.image (coe : set.Icc A.fst A.snd → ℤ),
-    have hIJ : I ≤ J,
-    { dsimp [J],
-      intros i hi,
-      rw finset.mem_image,
-      exact ⟨⟨i, finset.min'_le _ _ hi, finset.le_max' _ _ hi⟩, by simp, rfl⟩ },
-    have : ∑ b in J, ∑ (i : S), ∥ mk_seq F i b ∥ * (r : ℝ)^b ≤ c,
-    { have hA := (F A).bound,
-      dsimp at hA,
-      rw finset.sum_comm,
-      convert hA using 1,
-      apply finset.sum_congr rfl,
-      rintros s -,
-      rw finset.sum_image,
-      { apply finset.sum_congr rfl,
-        rintros i -,
-        rw mk_seq_compat _ compat },
-      { rintros i - j - h,
-        exact subtype.ext h } },
-    refine le_trans _ this,
-    apply finset.sum_le_sum_of_subset_of_nonneg hIJ,
-    rintros i - -,
-    apply finset.sum_nonneg,
-    rintros s -,
-    refine mul_nonneg (norm_nonneg _) (fpow_nonneg (nnreal.coe_nonneg _) _) },
-  { simp only [finset.not_nonempty_iff_eq_empty] at hI,
-    simp [hI] }
+  rw finset.sum_comm,
+  convert (F I).bound using 1,
+  dsimp,
+  apply finset.sum_congr rfl,
+  rintros s -,
+  rw ← finset.sum_attach,
+  apply finset.sum_congr rfl,
+  rintros i -,
+  simp_rw [mk_seq_compat _ compat],
 end
 
-lemma exists_of_compat {c} (F : Π (A : index_category), oc_measures_bdd r S A.fst A.snd c)
-  (compat : ∀ (A B : index_category) (h : A ≤ B),
+lemma exists_of_compat {c} (F : Π (A : finset ℤ), oc_measures_bdd r S A c)
+  (compat : ∀ (A B : finset ℤ) (h : B ≤ A),
     transition h (F _) = F _) :
-  ∃ (G : {H : oc_measures r S | ∥ H ∥ ≤ c }), ∀ (k : index_category), truncate k G = F k :=
+  ∃ (G : {H : oc_measures r S | ∥ H ∥ ≤ c }), ∀ (k : finset ℤ), truncate k G = F k :=
 begin
   let G : oc_measures r S := ⟨mk_seq F, mk_seq_compat_summable _ compat⟩,
   use G,
@@ -420,8 +344,8 @@ begin
   { intros k,
     ext s i,
     change F _ _ _ = _,
-    have := compat k ⟨⟨i, i⟩⟩ ⟨i.2.1,i.2.2⟩,
-    apply_fun (λ e, e s ⟨i, le_refl _, le_refl _⟩) at this,
+    have := compat k {i} (by simp),
+    apply_fun (λ e, e s ⟨i, by simp⟩) at this,
     erw ← this,
     change F k _ _ = F k _ _,
     congr,
@@ -429,13 +353,16 @@ begin
 end
 
 variables (r S)
-def oc_measures_bdd_functor (c : ℝ≥0) [fact (0 < r)] : index_category ⥤ Fintype :=
-{ obj := λ A, Fintype.of $ oc_measures_bdd r S A.fst A.snd c,
-  map := λ A B f, transition $ category_theory.le_of_hom f }
+open category_theory
+def oc_measures_bdd_functor (c : ℝ≥0) [fact (0 < r)] :
+  (as_small (finset ℤ))ᵒᵖ ⥤ Fintype :=
+{ obj := λ A, Fintype.of $ oc_measures_bdd r S (ulift.down A.unop) c,
+  map := λ A B f, transition (le_of_hom $ ulift.down f.unop) }.
 
+set_option pp.universes true
 def oc_measures_bdd_equiv (c : ℝ≥0) [fact (0 < r)] : { F : oc_measures r S | ∥ F ∥ ≤ c } ≃
   (Profinite.limit_cone (oc_measures_bdd_functor r S c ⋙ Fintype.to_Profinite)).X :=
-equiv.of_bijective (λ F, ⟨λ A, truncate A F, begin
+equiv.of_bijective (λ F, ⟨λ A, truncate (ulift.down A.unop) F, begin
   intros A B f,
   ext,
   refl,
@@ -445,16 +372,25 @@ begin
   { intros F G h,
     apply eq_iff_truncate_eq,
     intros k,
-    apply_fun (λ e, e.1 k) at h,
+    dsimp at h,
+    apply_fun (λ e, e.1 (opposite.op ⟨k⟩)) at h,
     exact h },
   { rintros ⟨F, hF⟩,
     dsimp at F hF,
-    obtain ⟨G,hG⟩ := exists_of_compat F _,
+    obtain ⟨G,hG⟩ := exists_of_compat (λ A, F (opposite.op ⟨A⟩)) _,
     { use G,
       ext : 2,
-      apply hG },
+      dsimp,
+      have := hG (ulift.down x.unop),
+      convert this,
+      rw ← x.op_unop,
+      congr' 1,
+      ext,
+      refl },
     { intros A B h,
-      apply hF (category_theory.hom_of_le h) } }
+      let e : (opposite.op $ as_small.up.obj A) ⟶ (opposite.op $ as_small.up.obj B) :=
+        quiver.hom.op (as_small.up.map (hom_of_le h)),
+      exact hF e } }
 end
 
 instance (c : ℝ≥0) [fact (0 < r)] : topological_space {F : oc_measures r S | ∥ F ∥ ≤ c} :=
