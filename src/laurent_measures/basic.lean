@@ -206,6 +206,52 @@ instance : has_norm (laurent_measures r S) :=
 @[simp]
 lemma norm_def (F : laurent_measures r S) : ∥ F ∥ = ∑ s, ∑' n, ∥ F s n ∥ * (r : ℝ)^n := rfl
 
+lemma map_bound (c : ℝ) (f : S ⟶ S') (F : laurent_measures r S) :
+  ∥ map f F ∥ ≤ ∥ F ∥ := calc
+∥ map f F ∥ = ∑ s', ∑' n, ∥ ∑ s in finset.univ.filter (λ t, f t = s'), F s n ∥ * _ : rfl
+... ≤ ∑ s', ∑' n, ∑ s in finset.univ.filter (λ t, f t = s'), ∥ F s n ∥ * (r : ℝ)^n : begin
+  apply finset.sum_le_sum,
+  rintros s' -,
+  have h1 : summable (λ n : ℤ,
+    ∑ (s : S.α) in finset.univ.filter (λ (t : S.α), f t = s'), ∥F s n∥ * (r : ℝ)^n),
+  { apply summable_sum,
+    intros s hs,
+    apply F.summable },
+  have h2 : ∀ b : ℤ,
+    ∥∑ (s : S.α) in finset.univ.filter (λ (t : S.α), f t = s'), F s b∥ * (r : ℝ) ^ b ≤
+      ∑ (s : S.α) in finset.univ.filter (λ (t : S.α), f t = s'), ∥F s b∥ * (r : ℝ) ^ b,
+  { intros b,
+    rw ← finset.sum_mul,
+    refine mul_le_mul _ (le_refl _) (fpow_nonneg (nnreal.coe_nonneg _) _)
+      (finset.sum_nonneg $ λ _ _, norm_nonneg _),
+    apply norm_sum_le },
+  apply tsum_le_tsum h2 _ h1,
+  { apply summable_of_nonneg_of_le _ h2,
+    exact h1,
+    intro b, apply nonneg_of_norm_mul_fpow }
+end
+... = ∑ s', ∑ s in finset.univ.filter (λ t, f t = s'), ∑' n, ∥ F s n ∥ * (r : ℝ)^n : begin
+  apply finset.sum_congr rfl,
+  rintros s' -,
+  rw tsum_sum,
+  rintros s -,
+  exact F.summable _,
+end
+... = _ : begin
+  dsimp,
+  rw ← finset.sum_bUnion,
+  apply finset.sum_congr,
+  { ext s,
+    split,
+    { intro h, simp },
+    { intro h, simp } },
+  { tauto },
+  { rintro x - y - h i hi,
+    apply h,
+    simp at hi,
+    rw [← hi.1, ← hi.2] }
+end
+
 lemma norm_add (F G : laurent_measures r S) : ∥ F + G ∥ ≤ ∥ F ∥ + ∥ G ∥ :=
 begin
   dsimp,
