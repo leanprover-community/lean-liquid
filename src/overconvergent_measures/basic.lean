@@ -359,7 +359,6 @@ def oc_measures_bdd_functor (c : ℝ≥0) [fact (0 < r)] :
 { obj := λ A, Fintype.of $ oc_measures_bdd r S (ulift.down A.unop) c,
   map := λ A B f, transition (le_of_hom $ ulift.down f.unop) }.
 
-set_option pp.universes true
 def oc_measures_bdd_equiv (c : ℝ≥0) [fact (0 < r)] : { F : oc_measures r S | ∥ F ∥ ≤ c } ≃
   (Profinite.limit_cone (oc_measures_bdd_functor r S c ⋙ Fintype.to_Profinite)).X :=
 equiv.of_bijective (λ F, ⟨λ A, truncate (ulift.down A.unop) F, begin
@@ -435,11 +434,12 @@ begin
 end
 
 @[continuity]
-lemma truncate_continuous (c : ℝ≥0) [fact (0 < r)] (A : index_category.{u}) :
-  continuous (truncate A : _ → oc_measures_bdd r S _ _ c) :=
+lemma truncate_continuous (c : ℝ≥0) [fact (0 < r)] (A : finset ℤ) :
+  continuous (truncate A : _ → oc_measures_bdd r S _ c) :=
 begin
   let g₁ :=
-    (Profinite.limit_cone (oc_measures_bdd_functor.{u} r S c ⋙ Fintype.to_Profinite)).π.app A,
+    (Profinite.limit_cone (oc_measures_bdd_functor.{u} r S c ⋙ Fintype.to_Profinite)).π.app
+    (opposite.op $ ulift.up A),
   let g₂ := (oc_measures_bdd_homeo r S c),
   change continuous (g₁ ∘ g₂),
   continuity,
@@ -447,7 +447,7 @@ end
 
 lemma continuous_iff (c : ℝ≥0) [fact (0 < r)] {α : Type*} [topological_space α]
   (f : α → { F : oc_measures r S | ∥ F ∥ ≤ c }) :
-  continuous f ↔ ∀ (A : index_category.{u}), continuous ((truncate A) ∘ f) :=
+  continuous f ↔ ∀ (A : finset ℤ), continuous ((truncate A) ∘ f) :=
 begin
   split,
   { intros hf A, continuity },
@@ -455,7 +455,8 @@ begin
     rw ← (oc_measures_bdd_homeo r S c).comp_continuous_iff,
     apply continuous_subtype_mk,
     apply continuous_pi,
-    exact h }
+    intros A,
+    apply h }
 end
 
 end profinite_structure
@@ -488,8 +489,8 @@ instance pfpng_oc_measures [fact (0 < r)] :
     intros c₁ c₂,
     rw continuous_iff,
     intros A,
-    let E : oc_measures_bdd r S A.fst A.snd c₁ × oc_measures_bdd r S A.fst A.snd c₂ →
-      oc_measures_bdd r S A.fst A.snd (c₁ + c₂) := λ G, ⟨G.1 + G.2, _⟩,
+    let E : oc_measures_bdd r S A c₁ × oc_measures_bdd r S A c₂ →
+      oc_measures_bdd r S A (c₁ + c₂) := λ G, ⟨G.1 + G.2, _⟩,
     swap, {
       rw nnreal.coe_add,
       refine le_trans _ (add_le_add G.fst.2 G.snd.2),
@@ -503,7 +504,7 @@ instance pfpng_oc_measures [fact (0 < r)] :
       refine mul_le_mul (norm_add_le _ _) (le_refl _)
         (fpow_nonneg (nnreal.coe_nonneg _) _) (add_nonneg (norm_nonneg _) (norm_nonneg _)) },
     have :
-      (truncate A : _ → oc_measures_bdd r S A.fst A.snd (c₁ + c₂)) ∘ pseudo_normed_group.add' =
+      (truncate A : _ → oc_measures_bdd r S A (c₁ + c₂)) ∘ pseudo_normed_group.add' =
       E ∘ (prod.map (truncate A) (truncate A)),
     { ext, refl },
     rw this,
@@ -516,7 +517,7 @@ instance pfpng_oc_measures [fact (0 < r)] :
     intros c,
     rw continuous_iff,
     intros A,
-    let E : oc_measures_bdd r S A.fst A.snd c → oc_measures_bdd r S A.fst A.snd c :=
+    let E : oc_measures_bdd r S A c → oc_measures_bdd r S A c :=
       λ G, ⟨- G, _⟩,
     swap, {
       convert G.2 using 1,
@@ -526,7 +527,7 @@ instance pfpng_oc_measures [fact (0 < r)] :
       intros x hx,
       congr' 1,
       simpa },
-    have : (truncate A : _ → oc_measures_bdd r S A.fst A.snd c) ∘ pseudo_normed_group.neg' =
+    have : (truncate A : _ → oc_measures_bdd r S A c) ∘ pseudo_normed_group.neg' =
       E ∘ truncate A,
     { ext, refl },
     rw this,
@@ -538,9 +539,9 @@ instance pfpng_oc_measures [fact (0 < r)] :
     introsI c₁ c₂ h,
     rw continuous_iff,
     intros A,
-    let g : oc_measures_bdd r S A.fst A.snd c₁ → oc_measures_bdd r S A.fst A.snd c₂ :=
+    let g : oc_measures_bdd r S A c₁ → oc_measures_bdd r S A c₂ :=
       λ g, ⟨g, le_trans g.2 h.out⟩,
-    have : (truncate A : _ → oc_measures_bdd r S A.fst A.snd c₂) ∘ pseudo_normed_group.cast_le =
+    have : (truncate A : _ → oc_measures_bdd r S A c₂) ∘ pseudo_normed_group.cast_le =
       g ∘ truncate A,
     { ext, refl },
     rw this,
