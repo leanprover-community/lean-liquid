@@ -2,7 +2,7 @@ import analysis.specific_limits
 import category_theory.Fintype
 import analysis.normed_space.basic
 
-import overconvergent_measures.bounded
+import laurent_measures.bounded
 import pseudo_normed_group.basic
 import pseudo_normed_group.category
 
@@ -20,27 +20,29 @@ structure c_measures (r : ℝ≥0) (c : ℝ≥0) (S : Fintype) :=
 (bdd        : ∀ s, tsum (λ n, (∥ to_fun s n ∥₊ * r ^ n)) ≤ c)
 -/
 
-structure oc_measures (r : ℝ≥0) (S : Fintype) :=
+structure laurent_measures (r : ℝ≥0) (S : Fintype) :=
 (to_fun     : S → ℤ → ℤ)
 (summable'   : ∀ s, summable (λ n, ∥ to_fun s n ∥ * r ^ n))
 
 variables {r : ℝ≥0} {S S' : Fintype.{u}}
 
-instance : has_coe_to_fun (oc_measures r S) :=
+instance : has_coe_to_fun (laurent_measures r S) :=
 ⟨λ F, S → ℤ → ℤ, λ F, F.to_fun⟩
 
 @[ext]
-lemma oc_measures.ext (F G : oc_measures r S) : (F : S → ℤ → ℤ) = G → F = G :=
+lemma laurent_measures.ext (F G : laurent_measures r S) : (F : S → ℤ → ℤ) = G → F = G :=
 by { intros h, cases F, cases G, simpa }
 
-lemma oc_measures.summable (F : oc_measures r S) (s : S) : summable (λ n, ∥ F s n ∥ * r ^ n) :=
+protected lemma laurent_measures.summable (F : laurent_measures r S) (s : S) : summable (λ n, ∥ F s n ∥ * r ^ n) :=
   F.2 _
+
+namespace laurent_measures
 
 -- Move me
 lemma nonneg_of_norm_mul_fpow (k n : ℤ) (r : ℝ≥0) : 0 ≤ ∥ k ∥ * (r : ℝ)^n :=
 mul_nonneg (norm_nonneg _) (fpow_nonneg (nnreal.coe_nonneg _) _)
 
-def map (f : S ⟶ S') : oc_measures r S → oc_measures r S' := λ F,
+def map (f : S ⟶ S') : laurent_measures r S → laurent_measures r S' := λ F,
 { to_fun := λ s' k, ∑ s in finset.univ.filter (λ t, f t = s'), F s k,
   summable' := begin
     intros s',
@@ -60,11 +62,11 @@ def map (f : S ⟶ S') : oc_measures r S → oc_measures r S' := λ F,
   end }
 
 @[simp]
-lemma map_apply (f : S ⟶ S') (F : oc_measures r S) (s' : S') (k : ℤ) :
+lemma map_apply (f : S ⟶ S') (F : laurent_measures r S) (s' : S') (k : ℤ) :
   map f F s' k = ∑ s in finset.univ.filter (λ t, f t = s'), F s k := rfl
 
 @[simp]
-lemma map_id : (map (𝟙 S) : oc_measures r S → oc_measures r S) = id :=
+lemma map_id : (map (𝟙 S) : laurent_measures r S → laurent_measures r S) = id :=
 begin
   ext F s k,
   simp,
@@ -74,7 +76,7 @@ end
 
 @[simp]
 lemma map_comp {S'' : Fintype.{u}} (f : S ⟶ S') (g : S' ⟶ S'') :
-  (map (f ≫ g) : oc_measures r S → oc_measures r S'') = map g ∘ map f :=
+  (map (f ≫ g) : laurent_measures r S → laurent_measures r S'') = map g ∘ map f :=
 begin
   ext F s k,
   simp only [function.comp_app, map_apply, finset.sum_congr],
@@ -92,7 +94,7 @@ begin
     rw [← hk.1, ← hk.2] }
 end
 
-def add : oc_measures r S → oc_measures r S → oc_measures r S := λ F G,
+def add : laurent_measures r S → laurent_measures r S → laurent_measures r S := λ F G,
 { to_fun := F + G,
   summable' := begin
     intros s,
@@ -114,41 +116,41 @@ def add : oc_measures r S → oc_measures r S → oc_measures r S := λ F G,
       exact nnreal.coe_nonneg r }
   end }
 
-instance : has_add (oc_measures r S) := ⟨add⟩
+instance : has_add (laurent_measures r S) := ⟨add⟩
 
 @[simp]
-lemma add_apply (F G : oc_measures r S) (s : S) (n : ℤ) : (F + G) s n = F s n + G s n := rfl
+lemma add_apply (F G : laurent_measures r S) (s : S) (n : ℤ) : (F + G) s n = F s n + G s n := rfl
 
-def zero : oc_measures r S :=
+def zero : laurent_measures r S :=
 { to_fun := 0,
   summable' := λ s, by simp [summable_zero] }
 
-instance : has_zero (oc_measures r S) := ⟨zero⟩
+instance : has_zero (laurent_measures r S) := ⟨zero⟩
 
 @[simp]
-lemma zero_apply (s : S) (n : ℤ) : (0 : oc_measures r S) s n = 0 := rfl
+lemma zero_apply (s : S) (n : ℤ) : (0 : laurent_measures r S) s n = 0 := rfl
 
-def neg : oc_measures r S → oc_measures r S := λ F,
+def neg : laurent_measures r S → laurent_measures r S := λ F,
 { to_fun := - F,
   summable' := λ s, by simp [F.summable] }
 
-instance : has_neg (oc_measures r S) := ⟨neg⟩
+instance : has_neg (laurent_measures r S) := ⟨neg⟩
 
 @[simp]
-lemma neg_apply (F : oc_measures r S) (s : S) (n : ℤ) : (-F) s n = - (F s n) := rfl
+lemma neg_apply (F : laurent_measures r S) (s : S) (n : ℤ) : (-F) s n = - (F s n) := rfl
 
-def sub : oc_measures r S → oc_measures r S → oc_measures r S := λ F G,
+def sub : laurent_measures r S → laurent_measures r S → laurent_measures r S := λ F G,
 { to_fun := F - G,
   summable' := (add F (neg G)).summable }
 
-instance : has_sub (oc_measures r S) := ⟨sub⟩
+instance : has_sub (laurent_measures r S) := ⟨sub⟩
 
 @[simp]
-lemma sub_apply (F G : oc_measures r S) (s : S) (n : ℤ) : (F - G) s n = F s n - G s n := rfl
+lemma sub_apply (F G : laurent_measures r S) (s : S) (n : ℤ) : (F - G) s n = F s n - G s n := rfl
 
 example (a m : ℤ) : (-a)*m=a*(-m) := neg_mul_comm a m
 
-instance : add_comm_monoid (oc_measures r S) :=
+instance : add_comm_monoid (laurent_measures r S) :=
 { add_assoc := λ a b c, by { ext, simp [add_assoc] },
   add_comm := λ F G, by { ext, simp [add_comm] },
   zero_add := λ a, by { ext, simp },
@@ -169,7 +171,7 @@ instance : add_comm_monoid (oc_measures r S) :=
   ..(infer_instance : has_add _),
   ..(infer_instance : has_zero _) }
 
-instance : add_comm_group (oc_measures r S) :=
+instance : add_comm_group (laurent_measures r S) :=
 { neg := neg,
   sub := sub,
   sub_eq_add_neg := λ F G, by { ext, refl },
@@ -198,13 +200,13 @@ instance : add_comm_group (oc_measures r S) :=
   ..(infer_instance : has_neg _),
   ..(infer_instance : has_sub _) }.
 
-instance : has_norm (oc_measures r S) :=
+instance : has_norm (laurent_measures r S) :=
 ⟨λ F, ∑ s, ∑' n, ∥ F s n ∥ * (r : ℝ) ^ n⟩
 
 @[simp]
-lemma norm_def (F : oc_measures r S) : ∥ F ∥ = ∑ s, ∑' n, ∥ F s n ∥ * (r : ℝ)^n := rfl
+lemma norm_def (F : laurent_measures r S) : ∥ F ∥ = ∑ s, ∑' n, ∥ F s n ∥ * (r : ℝ)^n := rfl
 
-lemma norm_add (F G : oc_measures r S) : ∥ F + G ∥ ≤ ∥ F ∥ + ∥ G ∥ :=
+lemma norm_add (F G : laurent_measures r S) : ∥ F + G ∥ ≤ ∥ F ∥ + ∥ G ∥ :=
 begin
   dsimp,
   rw ← finset.sum_add_distrib,
@@ -221,7 +223,7 @@ begin
 end
 
 /-
-lemma exists_c (F : oc_measures r S) : ∃ (c : ℝ≥0),
+lemma exists_c (F : laurent_measures r S) : ∃ (c : ℝ≥0),
   ∀ s : S, ∑' n, ∥ F s n ∥ * r ^ n ≤ c :=
 begin
   use ∑ s, ∑' n, ∥ F s n ∥ * r ^ n,
@@ -236,7 +238,7 @@ end
 -/
 
 /-- This lemma puts bounds on where `F s n` can be nonzero. -/
-lemma eq_zero_of_filtration (F : oc_measures r S) (c : ℝ≥0) :
+lemma eq_zero_of_filtration (F : laurent_measures r S) (c : ℝ≥0) :
   ∥ F ∥ ≤ c → ∀ (s : S) (n : ℤ), (c : ℝ) < (r : ℝ)^n → F s n = 0 :=
 begin
   intros hF s n h,
@@ -271,7 +273,7 @@ end
 section profinite_structure
 
 def truncate {c : ℝ≥0} (A : finset ℤ) :
-  { F : oc_measures r S | ∥ F ∥ ≤ c } → oc_measures_bdd r S A c := λ F,
+  { F : laurent_measures r S | ∥ F ∥ ≤ c } → laurent_measures_bdd r S A c := λ F,
 { to_fun := λ s i, F s i,
   bound' := begin
     refine le_trans _ F.2,
@@ -279,7 +281,7 @@ def truncate {c : ℝ≥0} (A : finset ℤ) :
     apply finset.sum_le_sum,
     rintros s -,
     let T : finset ℤ := finset.univ.image (coe : A → ℤ),
-    convert sum_le_tsum A _ ((F : oc_measures r S).summable s) using 1,
+    convert sum_le_tsum A _ ((F : laurent_measures r S).summable s) using 1,
     { conv_rhs {rw ← finset.sum_attach},
       refl },
     { intros b hb,
@@ -287,7 +289,7 @@ def truncate {c : ℝ≥0} (A : finset ℤ) :
       exact nnreal.coe_nonneg r },
   end }
 
-lemma eq_iff_truncate_eq (c : ℝ≥0) (F G : {F : oc_measures r S | ∥ F ∥ ≤ c}) :
+lemma eq_iff_truncate_eq (c : ℝ≥0) (F G : {F : laurent_measures r S | ∥ F ∥ ≤ c}) :
   (∀ k, truncate k F = truncate k G) → F = G :=
 begin
   intros h,
@@ -303,7 +305,7 @@ def finset_map {A B : finset ℤ} (h : B ≤ A) :
 λ i, ⟨i, h i.2⟩
 
 def transition {c : ℝ≥0} {A B : finset ℤ} (h : B ≤ A) :
-  oc_measures_bdd r S A c → oc_measures_bdd r S B c := λ F,
+  laurent_measures_bdd r S A c → laurent_measures_bdd r S B c := λ F,
 ⟨λ s i, F s (finset_map h i), begin
   refine le_trans _ F.2,
   apply finset.sum_le_sum,
@@ -324,10 +326,10 @@ def transition {c : ℝ≥0} {A B : finset ℤ} (h : B ≤ A) :
     exact nnreal.coe_nonneg r }
 end⟩
 
-def mk_seq {c} (F : Π (A : finset ℤ), oc_measures_bdd r S A c) :
+def mk_seq {c} (F : Π (A : finset ℤ), laurent_measures_bdd r S A c) :
   S → ℤ → ℤ := λ s i, F {i} s ⟨i, by simp⟩
 
-lemma mk_seq_compat {c} (F : Π (A : finset ℤ), oc_measures_bdd r S A c)
+lemma mk_seq_compat {c} (F : Π (A : finset ℤ), laurent_measures_bdd r S A c)
   (compat : ∀ (A B : finset ℤ) (h : B ≤ A), transition h (F _) = F _) (s : S)
   (A : finset ℤ) (i : A) : mk_seq F s i = F A s i :=
 begin
@@ -341,7 +343,7 @@ begin
   refl,
 end
 
-lemma mk_seq_compat_summable {c} (F : Π (A : finset ℤ), oc_measures_bdd r S A c)
+lemma mk_seq_compat_summable {c} (F : Π (A : finset ℤ), laurent_measures_bdd r S A c)
   (compat : ∀ (A B : finset ℤ) (h : B ≤ A), transition h (F _) = F _) (s : S) :
   summable (λ k : ℤ, ∥ mk_seq F s k ∥ * (r : ℝ)^k) :=
 begin
@@ -362,7 +364,7 @@ begin
     refine mul_nonneg (norm_nonneg _) (fpow_nonneg (nnreal.coe_nonneg _) _) },
 end
 
-lemma mk_seq_compat_sum_le {c} (F : Π (A : finset ℤ), oc_measures_bdd r S A c)
+lemma mk_seq_compat_sum_le {c} (F : Π (A : finset ℤ), laurent_measures_bdd r S A c)
   (compat : ∀ (A B : finset ℤ) (h : B ≤ A), transition h (F _) = F _)  :
   ∑ (s : S), ∑' (k : ℤ), ∥ mk_seq F s k ∥ * (r : ℝ)^k ≤ c :=
 begin
@@ -389,12 +391,12 @@ begin
   simp_rw [mk_seq_compat _ compat],
 end
 
-lemma exists_of_compat {c} (F : Π (A : finset ℤ), oc_measures_bdd r S A c)
+lemma exists_of_compat {c} (F : Π (A : finset ℤ), laurent_measures_bdd r S A c)
   (compat : ∀ (A B : finset ℤ) (h : B ≤ A),
     transition h (F _) = F _) :
-  ∃ (G : {H : oc_measures r S | ∥ H ∥ ≤ c }), ∀ (k : finset ℤ), truncate k G = F k :=
+  ∃ (G : {H : laurent_measures r S | ∥ H ∥ ≤ c }), ∀ (k : finset ℤ), truncate k G = F k :=
 begin
-  let G : oc_measures r S := ⟨mk_seq F, mk_seq_compat_summable _ compat⟩,
+  let G : laurent_measures r S := ⟨mk_seq F, mk_seq_compat_summable _ compat⟩,
   use G,
   { apply mk_seq_compat_sum_le _ compat },
   { intros k,
@@ -410,13 +412,13 @@ end
 
 variables (r S)
 open category_theory
-def oc_measures_bdd_functor (c : ℝ≥0) [fact (0 < r)] :
+def laurent_measures_bdd_functor (c : ℝ≥0) [fact (0 < r)] :
   (as_small (finset ℤ))ᵒᵖ ⥤ Fintype :=
-{ obj := λ A, Fintype.of $ oc_measures_bdd r S (ulift.down A.unop) c,
+{ obj := λ A, Fintype.of $ laurent_measures_bdd r S (ulift.down A.unop) c,
   map := λ A B f, transition (le_of_hom $ ulift.down f.unop) }.
 
-def oc_measures_bdd_equiv (c : ℝ≥0) [fact (0 < r)] : { F : oc_measures r S | ∥ F ∥ ≤ c } ≃
-  (Profinite.limit_cone (oc_measures_bdd_functor r S c ⋙ Fintype.to_Profinite)).X :=
+def laurent_measures_bdd_equiv (c : ℝ≥0) [fact (0 < r)] : { F : laurent_measures r S | ∥ F ∥ ≤ c } ≃
+  (Profinite.limit_cone (laurent_measures_bdd_functor r S c ⋙ Fintype.to_Profinite)).X :=
 equiv.of_bijective (λ F, ⟨λ A, truncate (ulift.down A.unop) F, begin
   intros A B f,
   ext,
@@ -448,67 +450,67 @@ begin
       exact hF e } }
 end
 
-instance (c : ℝ≥0) [fact (0 < r)] : topological_space {F : oc_measures r S | ∥ F ∥ ≤ c} :=
-topological_space.induced (oc_measures_bdd_equiv r S c) infer_instance
+instance (c : ℝ≥0) [fact (0 < r)] : topological_space {F : laurent_measures r S | ∥ F ∥ ≤ c} :=
+topological_space.induced (laurent_measures_bdd_equiv r S c) infer_instance
 
-def oc_measures_bdd_homeo (c : ℝ≥0) [fact (0 < r)] : { F : oc_measures r S | ∥ F ∥ ≤ c } ≃ₜ
-  (Profinite.limit_cone (oc_measures_bdd_functor r S c ⋙ Fintype.to_Profinite)).X :=
+def laurent_measures_bdd_homeo (c : ℝ≥0) [fact (0 < r)] : { F : laurent_measures r S | ∥ F ∥ ≤ c } ≃ₜ
+  (Profinite.limit_cone (laurent_measures_bdd_functor r S c ⋙ Fintype.to_Profinite)).X :=
 { continuous_to_fun := continuous_induced_dom,
   continuous_inv_fun := begin
-    have : inducing (oc_measures_bdd_equiv r S c) := ⟨rfl⟩,
+    have : inducing (laurent_measures_bdd_equiv r S c) := ⟨rfl⟩,
     rw this.continuous_iff,
     dsimp,
     convert continuous_id,
     ext,
     simp,
   end,
-  ..(oc_measures_bdd_equiv _ _ _) }
+  ..(laurent_measures_bdd_equiv _ _ _) }
 
-instance (c : ℝ≥0) [fact (0 < r)] : t2_space { F : oc_measures r S | ∥ F ∥ ≤ c } :=
-⟨λ x y h, separated_by_continuous (oc_measures_bdd_homeo r S c).continuous
-(λ cc, h $ by simpa using congr_arg (oc_measures_bdd_homeo r S c).symm cc)⟩
+instance (c : ℝ≥0) [fact (0 < r)] : t2_space { F : laurent_measures r S | ∥ F ∥ ≤ c } :=
+⟨λ x y h, separated_by_continuous (laurent_measures_bdd_homeo r S c).continuous
+(λ cc, h $ by simpa using congr_arg (laurent_measures_bdd_homeo r S c).symm cc)⟩
 
 instance (c : ℝ≥0) [fact (0 < r)] : totally_disconnected_space
-  { F : oc_measures r S | ∥ F ∥ ≤ c } :=
+  { F : laurent_measures r S | ∥ F ∥ ≤ c } :=
 begin
   constructor,
   rintros A - hA,
-  suffices : ((oc_measures_bdd_homeo r S c) '' A).subsingleton,
+  suffices : ((laurent_measures_bdd_homeo r S c) '' A).subsingleton,
   { intros x hx y hy,
-    apply_rules [(oc_measures_bdd_homeo r S c).injective, this, set.mem_image_of_mem] },
+    apply_rules [(laurent_measures_bdd_homeo r S c).injective, this, set.mem_image_of_mem] },
   obtain ⟨h⟩ := (infer_instance : totally_disconnected_space
-   (Profinite.limit_cone (oc_measures_bdd_functor r S c ⋙ Fintype.to_Profinite)).X),
+   (Profinite.limit_cone (laurent_measures_bdd_functor r S c ⋙ Fintype.to_Profinite)).X),
   refine h _ (by tauto) (is_preconnected.image hA _ _),
-  exact (oc_measures_bdd_homeo r S c).continuous.continuous_on,
+  exact (laurent_measures_bdd_homeo r S c).continuous.continuous_on,
 end
 
-instance (c : ℝ≥0) [fact (0 < r)] : compact_space {F : oc_measures r S | ∥ F ∥ ≤ c} :=
+instance (c : ℝ≥0) [fact (0 < r)] : compact_space {F : laurent_measures r S | ∥ F ∥ ≤ c} :=
 begin
   constructor,
-  rw (oc_measures_bdd_homeo r S c).embedding.is_compact_iff_is_compact_image,
+  rw (laurent_measures_bdd_homeo r S c).embedding.is_compact_iff_is_compact_image,
   simp [compact_univ],
 end
 
 @[continuity]
 lemma truncate_continuous (c : ℝ≥0) [fact (0 < r)] (A : finset ℤ) :
-  continuous (truncate A : _ → oc_measures_bdd r S _ c) :=
+  continuous (truncate A : _ → laurent_measures_bdd r S _ c) :=
 begin
   let g₁ :=
-    (Profinite.limit_cone (oc_measures_bdd_functor.{u} r S c ⋙ Fintype.to_Profinite)).π.app
+    (Profinite.limit_cone (laurent_measures_bdd_functor.{u} r S c ⋙ Fintype.to_Profinite)).π.app
     (opposite.op $ ulift.up A),
-  let g₂ := (oc_measures_bdd_homeo r S c),
+  let g₂ := (laurent_measures_bdd_homeo r S c),
   change continuous (g₁ ∘ g₂),
   continuity,
 end
 
 lemma continuous_iff (c : ℝ≥0) [fact (0 < r)] {α : Type*} [topological_space α]
-  (f : α → { F : oc_measures r S | ∥ F ∥ ≤ c }) :
+  (f : α → { F : laurent_measures r S | ∥ F ∥ ≤ c }) :
   continuous f ↔ ∀ (A : finset ℤ), continuous ((truncate A) ∘ f) :=
 begin
   split,
   { intros hf A, continuity },
   { intros h,
-    rw ← (oc_measures_bdd_homeo r S c).comp_continuous_iff,
+    rw ← (laurent_measures_bdd_homeo r S c).comp_continuous_iff,
     apply continuous_subtype_mk,
     apply continuous_pi,
     intros A,
@@ -520,15 +522,15 @@ end profinite_structure
 /-
 --should this be a coercion?
 def c_measures_to_oc (r : ℝ≥0) (c : ℝ≥0) (S : Type*) (hS : fintype S) :
-  c_measures r c S hS → oc_measures r S hS := λ f, ⟨f.to_fun, f.summable⟩
+  c_measures r c S hS → laurent_measures r S hS := λ f, ⟨f.to_fun, f.summable⟩
 
-lemma oc_measures_are_c (r : ℝ≥0) (S : Type*) (hS : fintype S) (F : oc_measures r S hS) :
+lemma laurent_measures_are_c (r : ℝ≥0) (S : Type*) (hS : fintype S) (F : laurent_measures r S hS) :
   ∃ (c : ℝ≥0) (f : c_measures r c S hS),
   c_measures_to_oc r c S hS f = F := sorry
 -/
 
 --needed?
-instance pnf_oc_measures : pseudo_normed_group (oc_measures r S) :=
+instance pnf_laurent_measures : pseudo_normed_group (laurent_measures r S) :=
 { filtration := λ c, { F | ∥ F ∥ ≤ c },
   filtration_mono := λ c₁ c₂ h F hF, by {dsimp at *, exact le_trans hF h},
   zero_mem_filtration := λ c, by simp,
@@ -539,14 +541,14 @@ instance pnf_oc_measures : pseudo_normed_group (oc_measures r S) :=
     exact add_le_add h₁ h₂,
   end }
 
-instance pfpng_oc_measures [fact (0 < r)] :
-  profinitely_filtered_pseudo_normed_group (oc_measures r S) :=
+instance pfpng_laurent_measures [fact (0 < r)] :
+  profinitely_filtered_pseudo_normed_group (laurent_measures r S) :=
 { continuous_add' := begin
     intros c₁ c₂,
     rw continuous_iff,
     intros A,
-    let E : oc_measures_bdd r S A c₁ × oc_measures_bdd r S A c₂ →
-      oc_measures_bdd r S A (c₁ + c₂) := λ G, ⟨G.1 + G.2, _⟩,
+    let E : laurent_measures_bdd r S A c₁ × laurent_measures_bdd r S A c₂ →
+      laurent_measures_bdd r S A (c₁ + c₂) := λ G, ⟨G.1 + G.2, _⟩,
     swap, {
       rw nnreal.coe_add,
       refine le_trans _ (add_le_add G.fst.2 G.snd.2),
@@ -560,7 +562,7 @@ instance pfpng_oc_measures [fact (0 < r)] :
       refine mul_le_mul (norm_add_le _ _) (le_refl _)
         (fpow_nonneg (nnreal.coe_nonneg _) _) (add_nonneg (norm_nonneg _) (norm_nonneg _)) },
     have :
-      (truncate A : _ → oc_measures_bdd r S A (c₁ + c₂)) ∘ pseudo_normed_group.add' =
+      (truncate A : _ → laurent_measures_bdd r S A (c₁ + c₂)) ∘ pseudo_normed_group.add' =
       E ∘ (prod.map (truncate A) (truncate A)),
     { ext, refl },
     rw this,
@@ -573,7 +575,7 @@ instance pfpng_oc_measures [fact (0 < r)] :
     intros c,
     rw continuous_iff,
     intros A,
-    let E : oc_measures_bdd r S A c → oc_measures_bdd r S A c :=
+    let E : laurent_measures_bdd r S A c → laurent_measures_bdd r S A c :=
       λ G, ⟨- G, _⟩,
     swap, {
       convert G.2 using 1,
@@ -583,7 +585,7 @@ instance pfpng_oc_measures [fact (0 < r)] :
       intros x hx,
       congr' 1,
       simpa },
-    have : (truncate A : _ → oc_measures_bdd r S A c) ∘ pseudo_normed_group.neg' =
+    have : (truncate A : _ → laurent_measures_bdd r S A c) ∘ pseudo_normed_group.neg' =
       E ∘ truncate A,
     { ext, refl },
     rw this,
@@ -595,9 +597,9 @@ instance pfpng_oc_measures [fact (0 < r)] :
     introsI c₁ c₂ h,
     rw continuous_iff,
     intros A,
-    let g : oc_measures_bdd r S A c₁ → oc_measures_bdd r S A c₂ :=
+    let g : laurent_measures_bdd r S A c₁ → laurent_measures_bdd r S A c₂ :=
       λ g, ⟨g, le_trans g.2 h.out⟩,
-    have : (truncate A : _ → oc_measures_bdd r S A c₂) ∘ pseudo_normed_group.cast_le =
+    have : (truncate A : _ → laurent_measures_bdd r S A c₂) ∘ pseudo_normed_group.cast_le =
       g ∘ truncate A,
     { ext, refl },
     rw this,
@@ -605,13 +607,13 @@ instance pfpng_oc_measures [fact (0 < r)] :
     { exact continuous_of_discrete_topology },
     { apply truncate_continuous }
   end,
-  ..(infer_instance : (pseudo_normed_group (oc_measures r S))) }
+  ..(infer_instance : (pseudo_normed_group (laurent_measures r S))) }
 
 variable {α : Type*}
 
 /-
 def oc_functor (r : ℝ≥0) : Fintype.{u} ⥤ ProFiltPseuNormGrp.{u} :=
-{ obj := λ S, ProFiltPseuNormGrp.of $ oc_measures r S,
+{ obj := λ S, ProFiltPseuNormGrp.of $ laurent_measures r S,
   map := λ S T f,
   { to_fun := _,
     map_zero' := _,
@@ -621,5 +623,7 @@ def oc_functor (r : ℝ≥0) : Fintype.{u} ⥤ ProFiltPseuNormGrp.{u} :=
   map_id' := _,
   map_comp' := _ }
 -/
+
+end laurent_measures
 
 end definitions
