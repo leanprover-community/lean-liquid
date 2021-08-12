@@ -14,33 +14,33 @@ open set
 
 instance (k₁ k₂ : ℤ) : fintype (Icc k₁ k₂) := (Icc_ℤ_finite _ _).some
 
-structure oc_measures_bdd (r : ℝ≥0) (S : Fintype) (k₁ k₂ : ℤ) (c : ℝ≥0) :=
-(to_fun : S → Icc k₁ k₂ → ℤ)
+structure oc_measures_bdd (r : ℝ≥0) (S : Fintype) (T : finset ℤ) (c : ℝ≥0) :=
+(to_fun : S → T → ℤ)
 (bound' : ∑ s i, ∥ to_fun s i ∥ * (r : ℝ) ^ (i : ℤ) ≤ c)
 
 namespace oc_measures_bdd
 
-variables {r : ℝ≥0} {S : Fintype} {k₁ k₂ : ℤ} {c : ℝ≥0}
+variables {r : ℝ≥0} {S : Fintype} {T : finset ℤ} {c : ℝ≥0}
 
-instance : has_coe_to_fun (oc_measures_bdd r S k₁ k₂ c) :=
-⟨λ _, S → Icc k₁ k₂ → ℤ, λ F, F.1⟩
+instance : has_coe_to_fun (oc_measures_bdd r S T c) :=
+⟨λ _, S → T → ℤ, λ F, F.1⟩
 
-instance : has_norm (oc_measures_bdd r S k₁ k₂ c) :=
+instance : has_norm (oc_measures_bdd r S T c) :=
 ⟨λ F, ∑ s i, ∥ F s i ∥ * (r : ℝ)^(i : ℤ)⟩
 
 @[ext]
-lemma ext (F G : oc_measures_bdd r S k₁ k₂ c) :
-  (F : S → Icc k₁ k₂ → ℤ) = G  → F = G := by {intros h, cases F, cases G, simpa }
+lemma ext (F G : oc_measures_bdd r S T c) :
+  (F : S → T → ℤ) = G  → F = G := by {intros h, cases F, cases G, simpa }
 
 @[simp]
-lemma norm_def (F : oc_measures_bdd r S k₁ k₂ c) : ∥ F ∥ =
+lemma norm_def (F : oc_measures_bdd r S T c) : ∥ F ∥ =
   ∑ s i, ∥ F s i ∥ * (r : ℝ)^(i : ℤ) := rfl
 
-lemma bound (F : oc_measures_bdd r S k₁ k₂ c) :
+lemma bound (F : oc_measures_bdd r S T c) :
   ∥ F ∥ ≤ c := F.2
 
-lemma coeff_bound (F : oc_measures_bdd r S k₁ k₂ c) [hr : fact (0 < r)]
-  (s : S) (i : Icc k₁ k₂) : ∥ F s i ∥ ≤ c * ((r : ℝ)^(i : ℤ))⁻¹ :=
+lemma coeff_bound (F : oc_measures_bdd r S T c) [hr : fact (0 < r)]
+  (s : S) (i : T) : ∥ F s i ∥ ≤ c * ((r : ℝ)^(i : ℤ))⁻¹ :=
 begin
   suffices : ∥ F s i ∥ * (r : ℝ)^(i : ℤ) ≤ c,
   { have hh : 0 < ((r : ℝ)^(i : ℤ))⁻¹,
@@ -64,7 +64,7 @@ begin
       exact nnreal.coe_nonneg r },
     { simp } },
   refine le_trans _ this,
-  apply @finset.single_le_sum (Icc k₁ k₂) ℝ _ (λ i, ∥ F s i∥ * (r : ℝ)^(i : ℤ)),
+  apply @finset.single_le_sum T ℝ _ (λ i, ∥ F s i∥ * (r : ℝ)^(i : ℤ)),
   { rintros i -,
     refine mul_nonneg (norm_nonneg _) (fpow_nonneg _ _),
     exact nnreal.coe_nonneg r },
@@ -73,13 +73,13 @@ end
 
 open_locale classical
 
-instance (r : ℝ≥0) [fact (0 < r)] (S : Fintype) (k₁ k₂ : ℤ) :
-  fintype (oc_measures_bdd r S k₁ k₂ c) :=
+instance (r : ℝ≥0) [fact (0 < r)] (S : Fintype) (T : finset ℤ) :
+  fintype (oc_measures_bdd r S T c) :=
 begin
-  let lb : Icc k₁ k₂ → ℤ := λ i, floor (-((c : ℝ) * ((r : ℝ)^(i : ℤ))⁻¹)),
-  let ub : Icc k₁ k₂ → ℤ := λ i, ceil ((c : ℝ) * ((r : ℝ)^(i : ℤ))⁻¹),
-  let ι : oc_measures_bdd r S k₁ k₂ c →
-    (Π (s : S) (i : Icc k₁ k₂), Icc (lb i) (ub i)) :=
+  let lb : T → ℤ := λ i, floor (-((c : ℝ) * ((r : ℝ)^(i : ℤ))⁻¹)),
+  let ub : T → ℤ := λ i, ceil ((c : ℝ) * ((r : ℝ)^(i : ℤ))⁻¹),
+  let ι : oc_measures_bdd r S T c →
+    (Π (s : S) (i : T), Icc (lb i) (ub i)) :=
     λ F s i, ⟨F s i, _⟩,
   apply fintype.of_injective ι _,
   { intros F G h,
@@ -94,14 +94,14 @@ begin
     { exact_mod_cast le_trans this.2 (le_ceil _) } }
 end
 
-instance : topological_space (oc_measures_bdd r S k₁ k₂ c) := ⊥
+instance : topological_space (oc_measures_bdd r S T c) := ⊥
 
-example [fact (0 < r)] : compact_space (oc_measures_bdd r S k₁ k₂ c) :=
+example [fact (0 < r)] : compact_space (oc_measures_bdd r S T c) :=
   by apply_instance
 
-example : t2_space (oc_measures_bdd r S k₁ k₂ c) := by apply_instance
+example : t2_space (oc_measures_bdd r S T c) := by apply_instance
 
-example : totally_disconnected_space (oc_measures_bdd r S k₁ k₂ c) :=
+example : totally_disconnected_space (oc_measures_bdd r S T c) :=
   by apply_instance
 
 end oc_measures_bdd
