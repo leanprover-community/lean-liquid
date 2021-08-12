@@ -9,7 +9,7 @@ import pseudo_normed_group.category
 universe u
 
 noncomputable theory
-open_locale big_operators nnreal
+open_locale big_operators nnreal classical
 
 section definitions
 
@@ -24,7 +24,7 @@ structure oc_measures (r : ℝ≥0) (S : Fintype) :=
 (to_fun     : S → ℤ → ℤ)
 (summable'   : ∀ s, summable (λ n, ∥ to_fun s n ∥ * r ^ n))
 
-variables {r : ℝ≥0} {S : Fintype.{u}}
+variables {r : ℝ≥0} {S S' : Fintype.{u}}
 
 instance : has_coe_to_fun (oc_measures r S) :=
 ⟨λ F, S → ℤ → ℤ, λ F, F.to_fun⟩
@@ -35,6 +35,62 @@ by { intros h, cases F, cases G, simpa }
 
 lemma oc_measures.summable (F : oc_measures r S) (s : S) : summable (λ n, ∥ F s n ∥ * r ^ n) :=
   F.2 _
+
+-- Move me
+lemma nonneg_of_norm_mul_fpow (k n : ℤ) (r : ℝ≥0) : 0 ≤ ∥ k ∥ * (r : ℝ)^n :=
+mul_nonneg (norm_nonneg _) (fpow_nonneg (nnreal.coe_nonneg _) _)
+
+def map (f : S ⟶ S') : oc_measures r S → oc_measures r S' := λ F,
+{ to_fun := λ s' k, ∑ s in finset.univ.filter (λ t, f t = s'), F s k,
+  summable' := begin
+    intros s',
+    have : ∀ n : ℤ, ∥ ∑ s in finset.univ.filter (λ t, f t = s'), F s n ∥ * (r : ℝ)^n ≤
+      ∑ s in finset.univ.filter (λ t, f t = s'), ∥ F s n ∥ * (r : ℝ)^n := λ n,
+    calc ∥ ∑ s in finset.univ.filter (λ t, f t = s'), F s n ∥ * (r : ℝ)^n ≤
+      (∑ s in finset.univ.filter (λ t, f t = s'), ∥ F s n ∥) * (r : ℝ)^n :
+        mul_le_mul (norm_sum_le _ _) (le_refl _) (fpow_nonneg (nnreal.coe_nonneg _) _)
+        (finset.sum_nonneg $ λ s _, norm_nonneg _)
+      ... = _ : by rw finset.sum_mul,
+    apply summable_of_nonneg_of_le _ this,
+    { apply summable_sum,
+      rintros s -,
+      exact F.summable s },
+    { intros n,
+      apply nonneg_of_norm_mul_fpow }
+  end }
+
+@[simp]
+lemma map_apply (f : S ⟶ S') (F : oc_measures r S) (s' : S') (k : ℤ) :
+  map f F s' k = ∑ s in finset.univ.filter (λ t, f t = s'), F s k := rfl
+
+@[simp]
+lemma map_id : (map (𝟙 S) : oc_measures r S → oc_measures r S) = id :=
+begin
+  ext F s k,
+  simp,
+  change ∑ s' in finset.univ.filter (λ t, t = s), F s' k = F s k,
+  simp [finset.sum_filter],
+end
+
+@[simp]
+lemma map_comp {S'' : Fintype.{u}} (f : S ⟶ S') (g : S' ⟶ S'') :
+  (map (f ≫ g) : oc_measures r S → oc_measures r S'') = map g ∘ map f :=
+begin
+  ext F s k,
+  simp only [function.comp_app, map_apply, finset.sum_congr],
+  rw ← finset.sum_bUnion,
+  { apply finset.sum_congr,
+    { change finset.univ.filter (λ t, g (f t) = s) = _,
+      ext i,
+      split,
+      { intro hi, simpa using hi },
+      { intro hi, simpa using hi } },
+    { tauto } },
+  { intros i hi j hj h k hk,
+    simp at hi hj hk,
+    refine h _,
+    rw [← hk.1, ← hk.2] }
+end
 
 def add : oc_measures r S → oc_measures r S → oc_measures r S := λ F G,
 { to_fun := F + G,
