@@ -165,6 +165,27 @@ apply_nolint system_of_double_complexes.normed_spectral_homotopy.of_iso doc_blam
 apply_nolint system_of_double_complexes.truncate doc_blame
 apply_nolint system_of_double_complexes.truncate.quotient_map doc_blame
 
+-- overconvergent_measures/basic.lean
+apply_nolint Icc_transition doc_blame
+apply_nolint add doc_blame
+apply_nolint index_category doc_blame
+apply_nolint index_category.fst doc_blame
+apply_nolint index_category.single doc_blame
+apply_nolint index_category.snd doc_blame
+apply_nolint mk_seq doc_blame
+apply_nolint neg doc_blame
+apply_nolint oc_measures doc_blame
+apply_nolint oc_measures_bdd_equiv doc_blame
+apply_nolint oc_measures_bdd_functor doc_blame
+apply_nolint oc_measures_bdd_homeo doc_blame
+apply_nolint sub doc_blame
+apply_nolint transition doc_blame
+apply_nolint truncate doc_blame
+apply_nolint zero doc_blame
+
+-- overconvergent_measures/bounded.lean
+apply_nolint oc_measures_bdd doc_blame
+
 -- polyhedral_lattice/basic.lean
 apply_nolint polyhedral_lattice doc_blame
 apply_nolint polyhedral_lattice_hom.to_normed_group_hom doc_blame
@@ -210,9 +231,7 @@ apply_nolint polyhedral_lattice.Tinv' doc_blame
 apply_nolint polyhedral_lattice.add_monoid_hom.incl doc_blame
 
 -- polyhedral_lattice/quotient.lean
-apply_nolint add_subgroup.saturated doc_blame
 apply_nolint polyhedral_lattice.quotient_finite unused_arguments
-apply_nolint subgroup.saturated doc_blame
 
 -- polyhedral_lattice/topology.lean
 apply_nolint polyhedral_lattice.discrete_topology instance_priority
