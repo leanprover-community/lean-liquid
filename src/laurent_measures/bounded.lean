@@ -9,7 +9,7 @@ import pseudo_normed_group.category
 universe u
 
 noncomputable theory
-open_locale big_operators nnreal
+open_locale big_operators nnreal classical
 open set
 
 instance (k₁ k₂ : ℤ) : fintype (Icc k₁ k₂) := (Icc_ℤ_finite _ _).some
@@ -20,7 +20,7 @@ structure laurent_measures_bdd (r : ℝ≥0) (S : Fintype) (T : finset ℤ) (c :
 
 namespace laurent_measures_bdd
 
-variables {r : ℝ≥0} {S : Fintype} {T : finset ℤ} {c : ℝ≥0}
+variables {r : ℝ≥0} {S S' S'' : Fintype.{u}} {T : finset ℤ} {c : ℝ≥0}
 
 instance : has_coe_to_fun (laurent_measures_bdd r S T c) :=
 ⟨λ _, S → T → ℤ, λ F, F.1⟩
@@ -38,6 +38,81 @@ lemma norm_def (F : laurent_measures_bdd r S T c) : ∥ F ∥ =
 
 lemma bound (F : laurent_measures_bdd r S T c) :
   ∥ F ∥ ≤ c := F.2
+
+def map (f : S ⟶ S') : laurent_measures_bdd r S T c → laurent_measures_bdd r S' T c := λ F,
+{ to_fun := λ s' k, ∑ s in finset.univ.filter (λ t, f t = s'), F s k,
+  bound' := calc
+  ∑ (s : S') (i : T),
+    ∥∑ (s : S.α) in finset.univ.filter (λ (t : S), f t = s), F s i∥ * (r : ℝ)^(i : ℤ) ≤
+  ∑ (s' : S') (i : T), ∑ s in finset.univ.filter (λ t, f t = s'), ∥ F s i ∥ * (r : ℝ)^(i : ℤ) :
+  begin
+    apply finset.sum_le_sum,
+    intros s' hs',
+    apply finset.sum_le_sum,
+    intros i hi,
+    rw ← finset.sum_mul,
+    refine mul_le_mul _ (le_refl _) (fpow_nonneg (nnreal.coe_nonneg _) _)
+      (finset.sum_nonneg $ λ _ _, norm_nonneg _),
+    apply norm_sum_le,
+  end
+  ... =
+    ∑ (s' : S'), ∑ s in finset.univ.filter (λ t, f t = s'), ∑ i, ∥ F s i ∥ * (r : ℝ)^(i : ℤ) :
+  begin
+    apply finset.sum_congr rfl,
+    intros s' hs',
+    rw finset.sum_comm,
+  end
+  ... = ∑ s, ∑ i, ∥ F s i ∥ * (r : ℝ)^(i : ℤ) :
+  begin
+    rw ← finset.sum_bUnion,
+    { apply finset.sum_congr,
+      { ext e,
+        split,
+        { simp },
+        { intro h,
+          simp only [true_and, finset.mem_univ,
+            finset.mem_bUnion, exists_true_left, finset.mem_filter],
+          use f e,
+          simp } },
+      { tauto } },
+    { intros x hx y hy h i hi,
+      apply h,
+      simp at hi,
+      rw [← hi.1, ← hi.2] }
+  end
+  ... ≤ c : F.bound }
+
+@[simp]
+lemma map_apply (f : S ⟶ S') (F : laurent_measures_bdd r S T c) (s' : S') (t : T) :
+  map f F s' t = ∑ s in finset.univ.filter (λ i, f i = s'), F s t := rfl
+
+@[simp]
+lemma map_id : (map (𝟙 S) : laurent_measures_bdd r S T c → laurent_measures_bdd r S T c) = id :=
+begin
+  ext F s t,
+  dsimp,
+  change ∑ s in finset.univ.filter (λ i, i = s), F s t = _,
+  simp [finset.sum_filter],
+end
+
+@[simp]
+lemma map_comp (f : S ⟶ S') (g : S' ⟶ S'') :
+  (map (f ≫ g) : laurent_measures_bdd r S T c → laurent_measures_bdd r S'' T c) = map g ∘ map f :=
+begin
+  ext F s t,
+  simp,
+  rw ← finset.sum_bUnion,
+  { apply finset.sum_congr,
+    { ext x,
+      split,
+      { intro h, simpa using h },
+      { intro h, simpa using h } },
+    { tauto } },
+  { intros i hi j hj h e he,
+    simp at he,
+    apply h,
+    rw [← he.1, ← he.2] }
+end
 
 lemma coeff_bound (F : laurent_measures_bdd r S T c) [hr : fact (0 < r)]
   (s : S) (i : T) : ∥ F s i ∥ ≤ c * ((r : ℝ)^(i : ℤ))⁻¹ :=
