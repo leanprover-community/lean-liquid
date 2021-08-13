@@ -206,7 +206,7 @@ instance : has_norm (laurent_measures r S) :=
 @[simp]
 lemma norm_def (F : laurent_measures r S) : ∥ F ∥ = ∑ s, ∑' n, ∥ F s n ∥ * (r : ℝ)^n := rfl
 
-lemma map_bound (c : ℝ) (f : S ⟶ S') (F : laurent_measures r S) :
+lemma map_bound (f : S ⟶ S') (F : laurent_measures r S) :
   ∥ map f F ∥ ≤ ∥ F ∥ := calc
 ∥ map f F ∥ = ∑ s', ∑' n, ∥ ∑ s in finset.univ.filter (λ t, f t = s'), F s n ∥ * _ : rfl
 ... ≤ ∑ s', ∑' n, ∑ s in finset.univ.filter (λ t, f t = s'), ∥ F s n ∥ * (r : ℝ)^n : begin
@@ -657,18 +657,62 @@ instance pfpng_laurent_measures [fact (0 < r)] :
 
 variable {α : Type*}
 
-/-
-def oc_functor (r : ℝ≥0) : Fintype.{u} ⥤ ProFiltPseuNormGrp.{u} :=
+open pseudo_normed_group profinitely_filtered_pseudo_normed_group
+
+def map_hom [fact (0 < r)] (f : S ⟶ S') :
+  profinitely_filtered_pseudo_normed_group_hom (laurent_measures r S) (laurent_measures r S') :=
+{ to_fun := map f,
+  map_zero' := begin
+    ext F s i,
+    simp,
+  end,
+  map_add' := begin
+    intros F G,
+    ext s i,
+    simp [← finset.sum_bUnion, ← finset.sum_add_distrib],
+  end,
+  bound' := begin
+    -- should we introduce strict morphisms, and the strict category, so we can have limits?
+    use 1,
+    rintros c F (hF : ∥ F ∥ ≤ c),
+    exact le_trans (map_bound _ _) (by simpa),
+  end,
+  continuous' := begin
+    intros c₁ c₂ f₀ h,
+    haveI h₂ : fact (c₂ ≤ c₁ ⊔ c₂) := ⟨le_sup_right⟩,
+    let e : filtration (laurent_measures r S') c₂ → filtration (laurent_measures r S') (c₁ ⊔ c₂) :=
+      cast_le,
+    suffices : continuous (e ∘ f₀),
+    { rwa (embedding_cast_le _ _).to_inducing.continuous_iff },
+    rw continuous_iff,
+    intros T,
+    let e' : laurent_measures_bdd r S T c₁ → laurent_measures_bdd r S T (c₁ ⊔ c₂) :=
+      λ F, ⟨F, le_trans F.bound $ by exact_mod_cast le_sup_left⟩,
+    have : truncate T ∘ e ∘ f₀ = laurent_measures_bdd.map f ∘ e' ∘ truncate T,
+    { ext F s' t,
+      change (f₀ F : laurent_measures r S') s' t = _,
+      rw ← h,
+      refl },
+    rw this,
+    continuity,
+  end }
+
+@[simps]
+def functor (r : ℝ≥0) [fact (0 < r)] : Fintype.{u} ⥤ ProFiltPseuNormGrp.{u} :=
 { obj := λ S, ProFiltPseuNormGrp.of $ laurent_measures r S,
-  map := λ S T f,
-  { to_fun := _,
-    map_zero' := _,
-    map_add' := _,
-    bound' := _,
-    continuous' := _ },
-  map_id' := _,
-  map_comp' := _ }
--/
+  map := λ S T f, map_hom f,
+  map_id' := begin
+    intros S,
+    ext1,
+    dsimp [map_hom],
+    simp,
+  end,
+  map_comp' := begin
+    intros S S' S'' f g,
+    ext1,
+    dsimp [map_hom],
+    simp,
+  end }
 
 end laurent_measures
 
