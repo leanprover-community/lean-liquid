@@ -1,5 +1,4 @@
 import for_mathlib.normed_group_hom_completion
-import for_mathlib.normed_group_hom
 
 /-!
 
@@ -43,5 +42,5 @@ begin
     use m₁,
     erw [f.completion_coe, hm₁, norm_to_compl],
     exact ⟨rfl, hm₁'⟩ },
-  exact controlled_closure_range_of_complete norm_j_comp_i hC ε_pos this hatm_in
+  exact controlled_closure_range_of_complete norm_j_comp_i hC ε_pos this _ hatm_in
 end

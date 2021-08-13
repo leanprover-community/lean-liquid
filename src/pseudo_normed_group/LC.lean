@@ -4,7 +4,6 @@ import pseudo_normed_group.FP
 import locally_constant.SemiNormedGroup
 import locally_constant.Vhat
 
-import for_mathlib.normed_group_hom
 /-!
 
 # The category of locally constant maps

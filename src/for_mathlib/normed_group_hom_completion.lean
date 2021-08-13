@@ -1,7 +1,5 @@
 import analysis.normed_space.normed_group_hom
 
-import for_mathlib.normed_group_hom
-
 noncomputable theory
 
 open set normed_group_hom uniform_space

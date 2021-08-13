@@ -3,7 +3,6 @@ import prop_92.extension_profinite
 import normed_group.normed_with_aut
 
 import for_mathlib.normed_group_hom_completion
-import for_mathlib.normed_group_hom
 
 import locally_constant.analysis
 
@@ -158,7 +157,8 @@ lemma bar {C ε : ℝ} (hC : 0 < C) (hε : 0 < ε)
   ∀ hatm₂ : completion M₂, ∃ m₁, f.completion m₁ = hatm₂ ∧ ∥m₁∥ ≤ (C+ε)*∥hatm₂∥ :=
 begin
   intro hatm₂,
-  refine controlled_closure_range_of_complete normed_group.norm_to_compl hC hε _ (normed_group.dense_range_to_compl _),
+  refine controlled_closure_range_of_complete normed_group.norm_to_compl hC hε _ _
+    (normed_group.dense_range_to_compl _),
   intro m₂,
   rcases h m₂ with ⟨g, cauchy_g, lim_g, bound_g⟩,
   have : cauchy_seq (to_compl ∘ g),

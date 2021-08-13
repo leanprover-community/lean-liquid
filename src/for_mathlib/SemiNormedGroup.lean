@@ -7,8 +7,6 @@ import category_theory.limits.shapes.zero
 import category_theory.limits.shapes.kernels
 import category_theory.limits.creates
 
-import for_mathlib.normed_group_hom
-
 /-!
 # The category of seminormed abelian groups and continuous group homomorphisms
 
