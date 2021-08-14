@@ -126,9 +126,6 @@ apply_nolint matrix.kronecker doc_blame
 apply_nolint matrix.kronecker_mul unused_arguments decidable_classical
 apply_nolint matrix.kroneckerₗ doc_blame
 
--- for_mathlib/normed_group_hom.lean
-apply_nolint normed_group_hom.surjective_on_with doc_blame
-
 -- for_mathlib/normed_group_hom_completion.lean
 apply_nolint normed_group.to_compl doc_blame
 apply_nolint normed_group_hom.completion doc_blame
@@ -156,11 +153,12 @@ apply_nolint exact_notation doc_blame
 apply_nolint laurent_measures doc_blame
 apply_nolint laurent_measures.add doc_blame
 apply_nolint laurent_measures.finset_map doc_blame
+apply_nolint laurent_measures.functor doc_blame
 apply_nolint laurent_measures.laurent_measures_bdd_equiv doc_blame
 apply_nolint laurent_measures.laurent_measures_bdd_functor doc_blame
 apply_nolint laurent_measures.laurent_measures_bdd_homeo doc_blame
 apply_nolint laurent_measures.map doc_blame
-apply_nolint laurent_measures.map_bound unused_arguments
+apply_nolint laurent_measures.map_hom doc_blame
 apply_nolint laurent_measures.mk_seq doc_blame
 apply_nolint laurent_measures.neg doc_blame
 apply_nolint laurent_measures.sub doc_blame
@@ -170,6 +168,7 @@ apply_nolint laurent_measures.zero doc_blame
 
 -- laurent_measures/bounded.lean
 apply_nolint laurent_measures_bdd doc_blame
+apply_nolint laurent_measures_bdd.map doc_blame
 
 -- normed_group/pseudo_normed_group.lean
 apply_nolint semi_normed_group.pseudo_normed_group instance_priority
