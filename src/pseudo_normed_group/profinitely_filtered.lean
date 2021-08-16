@@ -704,3 +704,27 @@ end
 end pi
 
 end comphaus_filtered_pseudo_normed_group
+
+namespace profinitely_filtered_pseudo_normed_group
+
+/-! ## Products -/
+
+section pi
+
+open comphaus_filtered_pseudo_normed_group
+
+variables {ι : Type*} (M : ι → Type*) [Π i, profinitely_filtered_pseudo_normed_group (M i)]
+
+instance pi_td (c : ℝ≥0) : totally_disconnected_space (filtration (Π i, M i) c) :=
+begin
+  obtain ⟨H⟩ : totally_disconnected_space (Π i, filtration (M i) c) := infer_instance,
+  rw [← homeomorph.range_coe (filtration_pi_homeo M c), ← set.image_univ] at H,
+  exact ⟨embedding.is_totally_disconnected (filtration_pi_homeo M c).embedding H⟩,
+end
+
+instance pi : profinitely_filtered_pseudo_normed_group (Π i, M i) :=
+{ ..(infer_instance : comphaus_filtered_pseudo_normed_group _) }
+
+end pi
+
+end profinitely_filtered_pseudo_normed_group
