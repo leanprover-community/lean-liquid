@@ -220,8 +220,8 @@ begin
     (Tinv r' c₃ c₄ n).app M (ϕ.eval_png₀ M c₁ c₃ x),
   ext j,
   dsimp,
-  simp only [eval_png_apply, profinitely_filtered_pseudo_normed_group_hom.map_sum,
-    profinitely_filtered_pseudo_normed_group_hom.map_gsmul, pi_Tinv_apply],
+  simp only [eval_png_apply, comphaus_filtered_pseudo_normed_group_hom.map_sum,
+    comphaus_filtered_pseudo_normed_group_hom.map_gsmul, pi_Tinv_apply],
 end
 .
 
