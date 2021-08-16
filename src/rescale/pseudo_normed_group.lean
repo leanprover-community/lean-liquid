@@ -31,6 +31,7 @@ end pseudo_normed_group
 section profinitely_filtered_pseudo_normed_group
 
 open profinitely_filtered_pseudo_normed_group
+open comphaus_filtered_pseudo_normed_group
 
 variables [profinitely_filtered_pseudo_normed_group M]
 
@@ -75,8 +76,8 @@ by simpa only [mem_filtration, Tinv'_apply, equiv.symm_apply_apply, mul_assoc]
 variable [fact (0 < r')]
 
 @[simps]
-def Tinv : profinitely_filtered_pseudo_normed_group_hom (rescale r M) (rescale r M) :=
-profinitely_filtered_pseudo_normed_group_hom.mk' (Tinv' r r' M)
+def Tinv : comphaus_filtered_pseudo_normed_group_hom (rescale r M) (rescale r M) :=
+comphaus_filtered_pseudo_normed_group_hom.mk' (Tinv' r r' M)
 begin
   refine ⟨r'⁻¹, λ c, ⟨Tinv'_mem_filtration r r' M c, _⟩⟩,
   haveI :  fact (c * r⁻¹ ≤ r' * (r'⁻¹ * c * r⁻¹)) :=
