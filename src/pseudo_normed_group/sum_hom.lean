@@ -14,34 +14,34 @@ namespace profinitely_filtered_pseudo_normed_group
 variables [profinitely_filtered_pseudo_normed_group M]
 
 def unrescale (N : ℝ≥0) (M : Type*) [profinitely_filtered_pseudo_normed_group M] :
-  profinitely_filtered_pseudo_normed_group_hom (rescale N M) M :=
-profinitely_filtered_pseudo_normed_group_hom.mk_of_bound (add_monoid_hom.id _) N⁻¹
+  comphaus_filtered_pseudo_normed_group_hom (rescale N M) M :=
+comphaus_filtered_pseudo_normed_group_hom.mk_of_bound (add_monoid_hom.id _) N⁻¹
 begin
   intro c,
   refine ⟨λ x hx, _, _⟩,
   { rwa mul_comm },
   { haveI : fact (c * N⁻¹ ≤ N⁻¹ * c) := ⟨(mul_comm _ _).le⟩,
-    exact profinitely_filtered_pseudo_normed_group.continuous_cast_le (c * N⁻¹) (N⁻¹ * c) },
+    exact comphaus_filtered_pseudo_normed_group.continuous_cast_le (c * N⁻¹) (N⁻¹ * c) },
 end
 
 def rescale_proj (i : fin N) :
-  profinitely_filtered_pseudo_normed_group_hom (rescale N (M ^ N)) M :=
-(profinitely_filtered_pseudo_normed_group.pi_proj i).comp (unrescale N _)
+  comphaus_filtered_pseudo_normed_group_hom (rescale N (M ^ N)) M :=
+(comphaus_filtered_pseudo_normed_group.pi_proj i).comp (unrescale N _)
 
 lemma rescale_proj_bound_by (i : fin N) : (rescale_proj M N i).bound_by N⁻¹ :=
 by { intros c x hx, rw [rescale.mem_filtration, mul_comm] at hx, exact hx i }
 
 def sum_hom (N : ℕ) :
-  profinitely_filtered_pseudo_normed_group_hom (rescale N (M ^ N)) M :=
+  comphaus_filtered_pseudo_normed_group_hom (rescale N (M ^ N)) M :=
 ∑ i, rescale_proj M N i
 
 lemma sum_hom_apply (x) : sum_hom M N x = ∑ i, x i :=
-profinitely_filtered_pseudo_normed_group_hom.sum_apply _ _ _
+comphaus_filtered_pseudo_normed_group_hom.sum_apply _ _ _
 
 lemma sum_hom_strict [fact (0 < N)] : (sum_hom M N).strict :=
 begin
-  rw profinitely_filtered_pseudo_normed_group_hom.strict_iff_bound_by_one,
-  have := profinitely_filtered_pseudo_normed_group_hom.sum_bound_by finset.univ
+  rw comphaus_filtered_pseudo_normed_group_hom.strict_iff_bound_by_one,
+  have := comphaus_filtered_pseudo_normed_group_hom.sum_bound_by finset.univ
     (rescale_proj M N) (λ i, N⁻¹) (λ i _, rescale_proj_bound_by M N i),
   dsimp at this,
   simp only [finset.sum_const, finset.card_univ, fintype.card_fin, nsmul_eq_mul] at this,
