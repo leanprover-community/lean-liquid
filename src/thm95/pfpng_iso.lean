@@ -23,7 +23,7 @@ Useful facts that we already have:
 * `iso_of_equiv_of_strict'` for constructing isos in `ProFiltPseuNormGrpWithTinv r'`
 -/
 
-open profinitely_filtered_pseudo_normed_group
+open comphaus_filtered_pseudo_normed_group
 
 @[simps {fully_applied := ff}]
 def Pow_mul_comm_obj_equiv (X : ProFiltPseuNormGrpWithTinv r') :
