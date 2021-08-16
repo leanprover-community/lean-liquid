@@ -21,7 +21,23 @@ local attribute [instance] type_pow
 
 noncomputable theory
 
-/-- The category of profinitely filtered pseudo-normed groups. -/
+/-- The category of CompHaus-ly filtered pseudo-normed groups. -/
+def CompHausFiltPseuNormGrp : Type (u+1) :=
+bundled comphaus_filtered_pseudo_normed_group
+
+instance bundled_hom : bundled_hom @comphaus_filtered_pseudo_normed_group_hom :=
+⟨@comphaus_filtered_pseudo_normed_group_hom.to_fun,
+ @comphaus_filtered_pseudo_normed_group_hom.id,
+ @comphaus_filtered_pseudo_normed_group_hom.comp,
+ @comphaus_filtered_pseudo_normed_group_hom.coe_inj⟩
+
+namespace CompHausFiltPseudoNormGrp
+
+attribute [derive [has_coe_to_sort, large_category, concrete_category]] CompHausFiltPseuNormGrp
+
+end CompHausFiltPseudoNormGrp
+
+/-- The category of CompHaus-ly filtered pseudo-normed groups. -/
 def ProFiltPseuNormGrp : Type (u+1) :=
 bundled profinitely_filtered_pseudo_normed_group
 
@@ -31,11 +47,8 @@ bundled (@profinitely_filtered_pseudo_normed_group_with_Tinv r)
 
 namespace ProFiltPseuNormGrp
 
-instance bundled_hom : bundled_hom @profinitely_filtered_pseudo_normed_group_hom :=
-⟨@profinitely_filtered_pseudo_normed_group_hom.to_fun,
- @profinitely_filtered_pseudo_normed_group_hom.id,
- @profinitely_filtered_pseudo_normed_group_hom.comp,
- @profinitely_filtered_pseudo_normed_group_hom.coe_inj⟩
+instance bundled_hom : bundled_hom.parent_projection
+  @profinitely_filtered_pseudo_normed_group.to_comphaus_filtered_pseudo_normed_group := ⟨⟩
 
 attribute [derive [has_coe_to_sort, large_category, concrete_category]] ProFiltPseuNormGrp
 
@@ -208,6 +221,7 @@ def Pow_Pow_X_equiv (N n : ℕ) :
   .. ((equiv.curry _ _ _).symm.trans (((equiv.prod_comm _ _).trans fin_prod_fin_equiv).arrow_congr (equiv.refl _))).symm }
 
 open profinitely_filtered_pseudo_normed_group
+open comphaus_filtered_pseudo_normed_group
 
 @[simps]
 def Pow_Pow_X (N n : ℕ) (M : ProFiltPseuNormGrpWithTinv.{u} r') :
