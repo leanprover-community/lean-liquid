@@ -64,8 +64,8 @@ def sum_hom :
 profinitely_filtered_pseudo_normed_group_with_Tinv_hom.mk'
   (sum_hom M N)
   (sum_hom_strict M N).bound_by_one
-  (λ x, by { simp only [sum_hom, profinitely_filtered_pseudo_normed_group_hom.sum_apply,
-    profinitely_filtered_pseudo_normed_group_hom.map_sum], refl })
+  (λ x, by { simp only [sum_hom, comphaus_filtered_pseudo_normed_group_hom.sum_apply,
+    comphaus_filtered_pseudo_normed_group_hom.map_sum], refl })
 
 include r'
 
