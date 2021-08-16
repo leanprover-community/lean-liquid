@@ -23,6 +23,7 @@ def pseudo_normed_group.filtration_obj
 Profinite.of (pseudo_normed_group.filtration M c)
 
 open profinitely_filtered_pseudo_normed_group category_theory
+  comphaus_filtered_pseudo_normed_group
 
 namespace Filtration
 variables (M : Type u) [profinitely_filtered_pseudo_normed_group M]
