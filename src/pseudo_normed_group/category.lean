@@ -37,7 +37,7 @@ attribute [derive [has_coe_to_sort, large_category, concrete_category]] CompHaus
 
 end CompHausFiltPseudoNormGrp
 
-/-- The category of CompHaus-ly filtered pseudo-normed groups. -/
+/-- The category of profinitely filtered pseudo-normed groups. -/
 def ProFiltPseuNormGrp : Type (u+1) :=
 bundled profinitely_filtered_pseudo_normed_group
 
