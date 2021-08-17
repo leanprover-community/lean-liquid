@@ -37,6 +37,51 @@ attribute [derive [has_coe_to_sort, large_category, concrete_category]] CompHaus
 
 end CompHausFiltPseudoNormGrp
 
+/-- The category of CompHaus-ly filtered pseudo-normed groups with strict morphisms. -/
+def CompHausFiltPseuNormGrp₁ : Type (u+1) :=
+bundled comphaus_filtered_pseudo_normed_group
+
+instance bundled_strict_hom : bundled_hom @strict_comphaus_filtered_pseudo_normed_group_hom :=
+⟨@strict_comphaus_filtered_pseudo_normed_group_hom.to_fun,
+ @strict_comphaus_filtered_pseudo_normed_group_hom.id,
+ @strict_comphaus_filtered_pseudo_normed_group_hom.comp,
+ @strict_comphaus_filtered_pseudo_normed_group_hom.coe_inj⟩
+
+namespace CompHausFiltPseudoNormGrp₁
+
+attribute [derive [has_coe_to_sort, large_category, concrete_category]] CompHausFiltPseuNormGrp₁
+
+def enlarging_functor : CompHausFiltPseuNormGrp₁ ⥤ CompHausFiltPseuNormGrp :=
+{ obj := λ M, M,
+  map := --to_chfpsng_hom f,
+    begin
+      intros M₁ M₂ f,
+      use f,
+      repeat {simp},
+      { use (1 : ℝ≥0),
+        simp_rw one_mul,
+        intros c x,
+        have := strict_comphaus_filtered_pseudo_normed_group_hom.strict',
+        specialize this f c x,
+        exact this,
+-- FAE: Why `exact strict_comphaus_filtered_pseudo_normed_group_hom.strict' f c x` does not work?,
+      },
+      { --f.level_continuous _,
+      have := strict_comphaus_filtered_pseudo_normed_group_hom.continuous₁',
+        specialize this f,
+        intros c₁ c₂ f₀ H,
+        have h₂ : pseudo_normed_group M₂, sorry,
+        have h₁ : pseudo_normed_group M₁, sorry,
+        resetI,
+        have g := pseudo_normed_group.level f,
+        have H_s: c₁ = c₂, sorry,
+      },
+    end,
+  map_id' := _,
+  map_comp' := _ }
+
+end CompHausFiltPseudoNormGrp₁
+
 /-- The category of profinitely filtered pseudo-normed groups. -/
 def ProFiltPseuNormGrp : Type (u+1) :=
 bundled profinitely_filtered_pseudo_normed_group
