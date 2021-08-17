@@ -51,21 +51,7 @@ instance [comphaus_filtered_pseudo_normed_group M] :
   continuous_cast_le := λ c₁ c₂ h, by exactI continuous_cast_le _ _,}
 
 instance [profinitely_filtered_pseudo_normed_group M] :
-  profinitely_filtered_pseudo_normed_group (rescale r M) :=
--- { topology := by { delta rescale, apply_instance },
---   t2 := by { delta rescale, apply_instance },
---   td := by { delta rescale, apply_instance },
---   compact := by { delta rescale, apply_instance },
---   continuous_add' :=
---   begin
---     intros c₁ c₂,
---     haveI : fact ((c₁ + c₂) * r⁻¹ ≤ c₁ * r⁻¹ + c₂ * r⁻¹) := ⟨(add_mul _ _ _).le⟩,
---     rw (embedding_cast_le ((c₁ + c₂) * r⁻¹) (c₁ * r⁻¹ + c₂ * r⁻¹)).continuous_iff,
---     exact (continuous_add' (c₁ * r⁻¹) (c₂ * r⁻¹))
---   end,
---   continuous_neg' := λ c, continuous_neg' _,
---   continuous_cast_le := λ c₁ c₂ h, by exactI continuous_cast_le _ _,
-{.. rescale.pseudo_normed_group _ _ }
+  profinitely_filtered_pseudo_normed_group (rescale r M) := {}
 
 end profinitely_filtered_pseudo_normed_group
 
