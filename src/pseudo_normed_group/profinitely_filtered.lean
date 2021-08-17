@@ -18,6 +18,14 @@ open_locale nnreal big_operators
 
 local attribute [instance] type_pow
 
+/-- A *complete Hausdorff filtered pseudo-normed topological group* is
+* an abelian group `M` with an increasing filtration `filtration M c, c : ℝ≥0` such that
+* `filtration M c` is a compact Hausdorff (or T2) space
+* `M` is pseudo-normed, so `0 ∈ filtration M c`, `-(filtration M c) = filtration M c`,
+  and `x₁ ∈ filtration M c₁, x₂ ∈ filtration M c₂ → (x₁ + x₂) ∈ filtration M (c₁ + c₂)`
+* (bounded) addition and negation are continuous.
+
+Morphisms are continuous and bounded homomorphisms. -/
 class comphaus_filtered_pseudo_normed_group (M : Type*)
   extends pseudo_normed_group M :=
 [topology : ∀ c, topological_space (filtration c)]
@@ -30,12 +38,9 @@ class comphaus_filtered_pseudo_normed_group (M : Type*)
 (continuous_cast_le : ∀ (c₁ c₂) [h : fact (c₁ ≤ c₂)],
   continuous (cast_le : filtration c₁ → filtration c₂))
 
-/-- A *profinitely filtered pseudo-normed topological group* is
-* an abelian group `M` with an increasing filtration `filtration M c, c : ℝ≥0` such that
+/-- A *profinitely filtered pseudo-normed topological group* is a *complete Hausdorff filtered
+pseudo-normed topological group* with the additional requirement that
 * `filtration M c` is a profinite set
-* `M` is pseudo-normed, so `0 ∈ filtration M c`, `-(filtration M c) = filtration M c`,
-  and `x₁ ∈ filtration M c₁, x₂ ∈ filtration M c₂ → (x₁ + x₂) ∈ filtration M (c₁ + c₂)`
-* (bounded) addition and negation are continuous.
 
 Morphisms are continuous and bounded homomorphisms. -/
 class profinitely_filtered_pseudo_normed_group (M : Type*)
