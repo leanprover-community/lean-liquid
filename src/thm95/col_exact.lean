@@ -420,13 +420,12 @@ begin
       augmented_cech_nerve.left_map_comp_obj_zero_iso _ _ j, category.assoc],
     dsimp only [Cech_nerve_level_hom, augmented_cech_nerve.left_obj_zero_iso],
     erw [equivalence_left_to_right_left_app_zero_comp_π, Cech_nerve_level_hom'_left,
-        category.comp_id],
-    ext k : 2,
+      category.comp_id],
+    apply subtype.ext, apply funext, rintro k, -- ext k : 2
     have := Cech_nerve_level_left_map' r' Λ M N n c i _ (i.unop.const j.down).op,
     simp only [subtype.val_eq_coe] at this,
     erw this _ k, clear this,
-    -- ext1 l',
-  sorry,
+    apply add_monoid_hom.ext, rintro l', -- ext1 l'
     obtain ⟨l, rfl⟩ : ∃ l, quotient_add_group.mk l = l',
     { exact quotient.surjective_quotient_mk' l' },
     dsimp only [z₀, z, s', s, add_monoid_hom.comp_apply, subtype.coe_mk,
@@ -451,7 +450,7 @@ begin
       Cech_conerve.finsupp_fin_one_iso_inv],
     suffices : finsupp.single_add_hom 0 (l 0) = l,
     { cases j, rw this, refl },
-    ext m o,
+    apply finsupp.ext, rintro m, apply finsupp.ext, rintro o, -- ext m o
     change fin 1 at m,
     have hm : m = 0, { exact subsingleton.elim _ _ },
     simp only [hm, finsupp.single_add_hom_apply, finsupp.single_apply, if_pos rfl], }
