@@ -8,8 +8,6 @@ import for_mathlib.SemiNormedGroup_Completion
 
 import facts
 
-import tactic.gptf
-
 universe variables v u
 noncomputable theory
 open opposite category_theory
