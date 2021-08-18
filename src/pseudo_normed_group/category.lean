@@ -31,13 +31,17 @@ instance bundled_hom : bundled_hom @comphaus_filtered_pseudo_normed_group_hom :=
  @comphaus_filtered_pseudo_normed_group_hom.comp,
  @comphaus_filtered_pseudo_normed_group_hom.coe_inj⟩
 
-namespace CompHausFiltPseudoNormGrp
+namespace CompHausFiltPseuNormGrp
 
 attribute [derive [has_coe_to_sort, large_category, concrete_category]] CompHausFiltPseuNormGrp
 
 instance (M : CompHausFiltPseuNormGrp) : comphaus_filtered_pseudo_normed_group M := M.str
 
-end CompHausFiltPseudoNormGrp
+/-- Construct a bundled `CompHausFiltPseuNormGrp` from the underlying type and typeclass. -/
+def of (M : Type u) [comphaus_filtered_pseudo_normed_group M] : CompHausFiltPseuNormGrp :=
+bundled.of M
+
+end CompHausFiltPseuNormGrp
 
 /-- The category of CompHaus-ly filtered pseudo-normed groups with strict morphisms. -/
 def CompHausFiltPseuNormGrp₁ : Type (u+1) :=
@@ -49,7 +53,7 @@ instance bundled_strict_hom : bundled_hom @strict_comphaus_filtered_pseudo_norme
  @strict_comphaus_filtered_pseudo_normed_group_hom.comp,
  @strict_comphaus_filtered_pseudo_normed_group_hom.coe_inj⟩
 
-namespace CompHausFiltPseudoNormGrp₁
+namespace CompHausFiltPseuNormGrp₁
 
 attribute [derive [has_coe_to_sort, large_category, concrete_category]] CompHausFiltPseuNormGrp₁
 
@@ -59,7 +63,7 @@ def enlarging_functor : CompHausFiltPseuNormGrp₁ ⥤ CompHausFiltPseuNormGrp :
 { obj := λ M, M,
   map := λ M₁ M₂ f, f.to_chfpsng_hom }
 
-end CompHausFiltPseudoNormGrp₁
+end CompHausFiltPseuNormGrp₁
 
 /-- The category of profinitely filtered pseudo-normed groups. -/
 def ProFiltPseuNormGrp : Type (u+1) :=
