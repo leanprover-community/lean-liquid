@@ -699,8 +699,8 @@ def map_hom [fact (0 < r)] (f : S ⟶ S') :
   end }
 
 @[simps]
-def functor (r : ℝ≥0) [fact (0 < r)] : Fintype.{u} ⥤ CompHausFiltPseuNormGrp.{u} :=
-{ obj := λ S, CompHausFiltPseuNormGrp.of $ laurent_measures r S,
+def functor (r : ℝ≥0) [fact (0 < r)] : Fintype.{u} ⥤ ProFiltPseuNormGrp.{u} :=
+{ obj := λ S, ProFiltPseuNormGrp.of $ laurent_measures r S,
   map := λ S T f, map_hom f,
   map_id' := begin
     intros S,

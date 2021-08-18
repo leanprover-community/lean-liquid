@@ -25,14 +25,15 @@ noncomputable theory
 def CompHausFiltPseuNormGrp : Type (u+1) :=
 bundled comphaus_filtered_pseudo_normed_group
 
-instance bundled_hom : bundled_hom @comphaus_filtered_pseudo_normed_group_hom :=
+namespace CompHausFiltPseuNormGrp
+
+def bundled_hom : bundled_hom @comphaus_filtered_pseudo_normed_group_hom :=
 ⟨@comphaus_filtered_pseudo_normed_group_hom.to_fun,
  @comphaus_filtered_pseudo_normed_group_hom.id,
  @comphaus_filtered_pseudo_normed_group_hom.comp,
  @comphaus_filtered_pseudo_normed_group_hom.coe_inj⟩
 
-namespace CompHausFiltPseuNormGrp
-
+local attribute [instance] bundled_hom
 attribute [derive [has_coe_to_sort, large_category, concrete_category]] CompHausFiltPseuNormGrp
 
 instance (M : CompHausFiltPseuNormGrp) : comphaus_filtered_pseudo_normed_group M := M.str
@@ -47,14 +48,15 @@ end CompHausFiltPseuNormGrp
 def CompHausFiltPseuNormGrp₁ : Type (u+1) :=
 bundled comphaus_filtered_pseudo_normed_group
 
-instance bundled_strict_hom : bundled_hom @strict_comphaus_filtered_pseudo_normed_group_hom :=
+namespace CompHausFiltPseuNormGrp₁
+
+def bundled_hom : bundled_hom @strict_comphaus_filtered_pseudo_normed_group_hom :=
 ⟨@strict_comphaus_filtered_pseudo_normed_group_hom.to_fun,
  @strict_comphaus_filtered_pseudo_normed_group_hom.id,
  @strict_comphaus_filtered_pseudo_normed_group_hom.comp,
  @strict_comphaus_filtered_pseudo_normed_group_hom.coe_inj⟩
 
-namespace CompHausFiltPseuNormGrp₁
-
+local attribute [instance] bundled_hom
 attribute [derive [has_coe_to_sort, large_category, concrete_category]] CompHausFiltPseuNormGrp₁
 
 instance (M : CompHausFiltPseuNormGrp₁) : comphaus_filtered_pseudo_normed_group M := M.str
@@ -75,10 +77,19 @@ bundled (@profinitely_filtered_pseudo_normed_group_with_Tinv r)
 
 namespace ProFiltPseuNormGrp
 
-instance bundled_hom : bundled_hom.parent_projection
+local attribute [instance] CompHausFiltPseuNormGrp.bundled_hom
+
+def bundled_hom : bundled_hom.parent_projection
   @profinitely_filtered_pseudo_normed_group.to_comphaus_filtered_pseudo_normed_group := ⟨⟩
 
+local attribute [instance] bundled_hom
+
 attribute [derive [has_coe_to_sort, large_category, concrete_category]] ProFiltPseuNormGrp
+
+instance : has_forget₂ ProFiltPseuNormGrp CompHausFiltPseuNormGrp := bundled_hom.forget₂ _ _
+
+@[simps]
+def to_CompHausFilt : ProFiltPseuNormGrp ⥤ CompHausFiltPseuNormGrp := forget₂ _ _
 
 /-- Construct a bundled `ProFiltPseuNormGrp` from the underlying type and typeclass. -/
 def of (M : Type u) [profinitely_filtered_pseudo_normed_group M] : ProFiltPseuNormGrp :=
