@@ -4,7 +4,8 @@ import algebra.direct_sum
 import algebra.big_operators.finsupp
 
 import for_mathlib.free_abelian_group
-import for_mathlib.kronecker
+-- import for_mathlib.kronecker
+import data.matrix.kronecker
 
 import hacks_and_tricks.type_pow
 import hacks_and_tricks.by_exactI_hack
@@ -29,7 +30,7 @@ that encode that data that rolls out of the Breen--Deligne resolution.
 noncomputable theory
 
 -- get some notation working:
-open_locale big_operators direct_sum
+open_locale big_operators direct_sum kronecker
 
 local attribute [instance] type_pow
 local notation `ℤ[` A `]` := free_abelian_group A
@@ -118,14 +119,15 @@ matrix.mul_one g
 
 def mul (N : ℕ) : basic_universal_map m n →+ basic_universal_map (N * m) (N * n) :=
 add_monoid_hom.mk'
- (λ f, matrix.reindex_linear_equiv ℕ _ fin_prod_fin_equiv fin_prod_fin_equiv (matrix.kronecker 1 f))
+ (λ f, matrix.reindex_linear_equiv ℕ _ fin_prod_fin_equiv fin_prod_fin_equiv (1 ⊗ₖ f))
 begin
   intros f g,
-  simp only [← matrix.kroneckerₗ_apply_apply, linear_map.map_add, linear_equiv.map_add],
+  simp only [matrix.kronecker_add, matrix.reindex_linear_equiv_apply,
+    matrix.reindex_apply, matrix.minor_add, dmatrix.add_apply],
 end
 
 lemma mul_apply (N : ℕ) (f : basic_universal_map m n) :
-  mul N f = matrix.reindex_linear_equiv ℕ _ fin_prod_fin_equiv fin_prod_fin_equiv (matrix.kronecker 1 f) :=
+  mul N f = matrix.reindex_linear_equiv ℕ _ fin_prod_fin_equiv fin_prod_fin_equiv (1 ⊗ₖ f) :=
 rfl
 
 lemma mul_injective (N : ℕ) (hN : 0 < N) : function.injective (@mul m n N) :=
@@ -145,7 +147,7 @@ lemma mul_comp (N : ℕ) (g : basic_universal_map m n) (f : basic_universal_map 
 begin
   ext1 i j,
   dsimp only [mul, comp, add_monoid_hom.mk'_apply],
-  rw [← matrix.reindex_linear_equiv_mul, ← matrix.kronecker_mul, matrix.one_mul],
+  rw [← matrix.reindex_linear_equiv_mul, ← matrix.mul_kronecker_mul, matrix.one_mul],
 end
 
 def one_mul_hom (n) : basic_universal_map (1 * n) n :=
@@ -205,7 +207,7 @@ def proj_aux {N : ℕ} (k : fin N) : matrix punit.{1} (fin N) ℤ :=
 
 def proj (n : ℕ) {N : ℕ} (k : fin N) : basic_universal_map (N * n) n :=
 matrix.reindex_linear_equiv ℕ _ (equiv.punit_prod _) fin_prod_fin_equiv $
-matrix.kronecker (proj_aux k) 1
+(proj_aux k) ⊗ₖ 1
 
 lemma proj_comp_mul {N : ℕ} (k : fin N) (f : basic_universal_map m n) :
   comp (proj n k) (mul N f) = comp f (proj m k) :=
@@ -213,13 +215,14 @@ begin
   dsimp only [comp, proj, mul, add_monoid_hom.mk'_apply],
   have : f = (matrix.reindex_linear_equiv
   ℕ _   (equiv.punit_prod (fin n)) (equiv.punit_prod (fin m)))
-    (matrix.kronecker (1 : matrix punit.{1} punit.{1} ℤ) f),
+    ((1 : matrix punit.{1} punit.{1} ℤ) ⊗ₖ f),
   { ext i j,
     simp only [matrix.reindex_linear_equiv_apply, matrix.reindex_apply, matrix.minor_apply,
-      equiv.punit_prod_symm_apply, matrix.kronecker, matrix.one_apply_eq, one_mul] },
+      equiv.punit_prod_symm_apply, matrix.kronecker, matrix.kronecker_apply,
+      matrix.one_apply_eq, one_mul] },
   conv_rhs { rw this },
   rw [← matrix.reindex_linear_equiv_mul, ← matrix.reindex_linear_equiv_mul],
-  simp only [← matrix.kronecker_mul, matrix.one_mul, matrix.mul_one],
+  simp only [←matrix.mul_kronecker_mul, matrix.kronecker, matrix.mul_one, matrix.one_mul],
 end
 
 lemma one_mul_hom_eq_proj : basic_universal_map.one_mul_hom n = basic_universal_map.proj n 0 :=
@@ -240,7 +243,7 @@ end
 .
 
 lemma proj_aux_kronecker_proj_aux (a :fin m) (b : fin n) :
-  (proj_aux a).kronecker (proj_aux b) =
+  (proj_aux a) ⊗ₖ (proj_aux b) =
   matrix.reindex_linear_equiv ℕ _ (equiv.prod_punit _).symm fin_prod_fin_equiv.symm
     (proj_aux (fin_prod_fin_equiv (a,b))) :=
 begin
@@ -255,17 +258,18 @@ lemma comp_proj_mul_proj (n N : ℕ) (j : fin (2 * 2 ^ N)) :
   (comp (proj n ((fin_prod_fin_equiv.symm) j).fst)) (mul 2 (proj n ((fin_prod_fin_equiv.symm) j).snd)) =
   (comp (proj n j)) (mul_mul_hom 2 (2 ^ N) n) :=
 begin
-  dsimp only [mul_mul_hom, proj, comp, mul_apply, add_monoid_hom.mk'_apply],
-  rw [← matrix.reindex_linear_equiv_mul, ← matrix.kronecker_mul, matrix.one_mul,
-    matrix.kronecker_reindex_right, matrix.mul_one,
-    matrix.kronecker_assoc', matrix.mul_reindex_linear_equiv_one, proj_aux_kronecker_proj_aux,
-    matrix.kronecker_reindex_left],
-  simp only [matrix.reindex_linear_equiv_comp_apply],
-  congr' 2,
-  ext ⟨x, y⟩,
-  dsimp,
-  simp only [equiv.symm_apply_apply],
-  rw [prod.mk.eta, equiv.apply_symm_apply],
+  sorry,
+  -- dsimp only [mul_mul_hom, proj, comp, mul_apply, add_monoid_hom.mk'_apply],
+  -- rw [← matrix.reindex_linear_equiv_mul, ← matrix.kronecker_mul, matrix.one_mul,
+  --   matrix.kronecker_reindex_right, matrix.mul_one,
+  --   matrix.kronecker_assoc', matrix.mul_reindex_linear_equiv_one, proj_aux_kronecker_proj_aux,
+  --   matrix.kronecker_reindex_left],
+  -- simp only [matrix.reindex_linear_equiv_comp_apply],
+  -- congr' 2,
+  -- ext ⟨x, y⟩,
+  -- dsimp,
+  -- simp only [equiv.symm_apply_apply],
+  -- rw [prod.mk.eta, equiv.apply_symm_apply],
 end
 
 end basic_universal_map

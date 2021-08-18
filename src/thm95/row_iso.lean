@@ -36,7 +36,7 @@ universe variables u
 
 noncomputable theory
 
-open_locale nnreal big_operators
+open_locale nnreal big_operators kronecker
 
 local attribute [instance] type_pow
 
@@ -316,11 +316,12 @@ begin
     equiv.punit_prod_symm_apply, matrix.kronecker, matrix.one_apply,
     basic_universal_map.proj_aux, equiv.symm_apply_apply,
     boole_mul, ← ite_and, @eq_comm _ i],
-  simp only [← prod.mk.inj_iff, ite_smul, one_smul, zero_smul, prod.mk.eta],
-  convert (finset.sum_ite_eq' finset.univ (j, i) (λ p, x.val p.2 p.1)).symm using 2,
-  { simp only [finset.mem_univ, if_true, subtype.val_eq_coe], },
-  { ext ⟨a, b⟩,
-    split_ifs; refl }
+  sorry,
+  -- simp only [← prod.mk.inj_iff, ite_smul, one_smul, zero_smul, prod.mk.eta],
+  -- convert (finset.sum_ite_eq' finset.univ (j, i) (λ p, x.val p.2 p.1)).symm using 2,
+  -- { simp only [finset.mem_univ, if_true, subtype.val_eq_coe], },
+  -- { ext ⟨a, b⟩,
+  --   split_ifs; refl }
 end
 
 lemma foo (N : ℕ) [fact (0 < N)] (Λ : PolyhedralLattice.{u}) (M : ProFiltPseuNormGrpWithTinv.{u} r')

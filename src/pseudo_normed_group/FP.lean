@@ -11,7 +11,7 @@ import for_mathlib.SemiNormedGroup
 - `φ.eval_FP r' c₁ c₂`: The map M_c₁^m → M_c₂^n induced by a (c₁, c₂)-suitable φ.
 
 -/
-open_locale classical nnreal big_operators
+open_locale classical nnreal big_operators kronecker
 noncomputable theory
 local attribute [instance] type_pow
 
@@ -236,7 +236,7 @@ begin
   rw [← fin_prod_fin_equiv.sum_comp, ← finset.univ_product_univ, finset.sum_product,
       finset.sum_comm],
   simp only [equiv.symm_apply_apply, matrix.one_apply, boole_mul, ite_smul, zero_smul,
-    finset.sum_ite_eq, finset.mem_univ, if_true],
+    finset.sum_ite_eq, finset.mem_univ, if_true, matrix.kronecker_map, matrix.kronecker_apply],
   convert finset.sum_apply j (finset.univ : finset (fin m)) _ using 1,
 end
 

@@ -26,7 +26,7 @@ These are all precise ways of controlling the norm on maps between normed
 objects induced by `f`.
 -/
 
-open_locale nnreal big_operators
+open_locale nnreal big_operators kronecker
 
 -- move this??
 /-- `rescale_constants κ N` for a sequence `κ : ℕ → ℝ≥0`,
