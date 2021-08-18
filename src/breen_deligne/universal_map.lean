@@ -259,17 +259,17 @@ lemma comp_proj_mul_proj (n N : ℕ) (j : fin (2 * 2 ^ N)) :
   (comp (proj n j)) (mul_mul_hom 2 (2 ^ N) n) :=
 begin
   dsimp only [mul_mul_hom, proj, comp, mul_apply, add_monoid_hom.mk'_apply],
-  rw [← matrix.reindex_linear_equiv_mul, ← matrix.mul_kronecker_mul, matrix.one_mul,
-    matrix.kronecker_reindex_right, matrix.mul_one,
-    matrix.kronecker_assoc', matrix.mul_reindex_linear_equiv_one, proj_aux_kronecker_proj_aux,
-    matrix.kronecker_reindex_left],
   sorry,
-  simp only [matrix.reindex_linear_equiv_comp_apply],
-  congr' 2,
-  ext ⟨x, y⟩,
-  dsimp,
-  simp only [equiv.symm_apply_apply],
-  rw [prod.mk.eta, equiv.apply_symm_apply],
+  -- rw [← matrix.reindex_linear_equiv_mul, ← matrix.mul_kronecker_mul, matrix.one_mul,
+  --   matrix.kronecker_reindex_right, matrix.mul_one,
+  --   matrix.kronecker_assoc', matrix.mul_reindex_linear_equiv_one, proj_aux_kronecker_proj_aux,
+  --   matrix.kronecker_reindex_left],
+  -- simp only [matrix.reindex_linear_equiv_comp_apply],
+  -- congr' 2,
+  -- ext ⟨x, y⟩,
+  -- dsimp,
+  -- simp only [equiv.symm_apply_apply],
+  -- rw [prod.mk.eta, equiv.apply_symm_apply],
 end
 
 end basic_universal_map
