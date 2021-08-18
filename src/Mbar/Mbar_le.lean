@@ -500,7 +500,7 @@ variables (r' c)
 
 /-- A version of `Mbar_le` which is functorial in `S`. -/
 @[simps]
-def Fintype_functor [fact (0 < r')]: Fintype ⥤ Profinite :=
+def Fintype_functor [fact (0 < r')]: Fintype.{u} ⥤ Profinite.{u} :=
 { obj := λ S, Profinite.of $ Mbar_le r' S c,
   map := λ S T f,
   { to_fun := map f,
@@ -518,7 +518,7 @@ variables (c₁ c₂)
 /-- The functor sending S to the (categorical) product
   of `Mbar_le r' S c₁` and `Mbar_le r' S c₂`. -/
 @[simps]
-def Fintype_functor_prod [fact (0 < r')] : Fintype ⥤ Profinite :=
+def Fintype_functor_prod [fact (0 < r')] : Fintype.{u} ⥤ Profinite.{u} :=
 { obj := λ S, (S,S),
   map := λ _ _ f, (f,f) } ⋙
     (Fintype_functor r' c₁).prod (Fintype_functor r' c₂) ⋙
@@ -527,7 +527,7 @@ def Fintype_functor_prod [fact (0 < r')] : Fintype ⥤ Profinite :=
 /-- This is a functorial version of `add'`. -/
 @[simps]
 def Fintype_add_functor [fact (0 < r')] :
-  Fintype_functor_prod r' c₁ c₂ ⟶ Fintype_functor r' (c₁ + c₂) :=
+  Fintype_functor_prod.{u} r' c₁ c₂ ⟶ Fintype_functor.{u} r' (c₁ + c₂) :=
 { app := λ S, (Profinite.prod_iso _ _).hom ≫ ⟨add' _, continuous_add'⟩,
   naturality' := begin
     intros S T f,
@@ -553,7 +553,7 @@ def Fintype_add_functor [fact (0 < r')] :
   end}
 
 /-- Negation on `Mbar_le` as a functor in `S`. -/
-def Fintype_neg_functor [fact (0 < r')] : Fintype_functor r' c ⟶ Fintype_functor r' c :=
+def Fintype_neg_functor [fact (0 < r')] : Fintype_functor.{u} r' c ⟶ Fintype_functor.{u} r' c :=
 { app := λ S, ⟨Mbar_le.neg, Mbar_le.continuous_neg⟩,
   naturality' := begin
     intros A B f,
@@ -568,7 +568,7 @@ open category_theory
 
 /-- A bifunctor version of `Fintype_functor`, where `c` can vary. -/
 @[simps]
-def Fintype_bifunctor [fact (0 < r')] : ℝ≥0 ⥤ Fintype ⥤ Profinite :=
+def Fintype_bifunctor [fact (0 < r')] : ℝ≥0 ⥤ Fintype.{u} ⥤ Profinite.{u} :=
 { obj := λ c, Fintype_functor r' c,
   map := λ c₁ c₂ f,
   { app := λ S,
@@ -579,14 +579,14 @@ def Fintype_bifunctor [fact (0 < r')] : ℝ≥0 ⥤ Fintype ⥤ Profinite :=
 
 /-- The extension of `Fintype_functor` to `Profinite` obtained by taking limits. -/
 @[simps]
-def functor [fact (0 < r')] : Profinite ⥤ Profinite :=
+def functor [fact (0 < r')] : Profinite.{u} ⥤ Profinite.{u} :=
 Profinite.extend (Fintype_functor r' c)
 
 variables (c₁ c₂)
 
 /-- The profinite variant of `Fintype_functor_prod`. -/
 @[simps]
-def functor_prod [fact (0 < r')] : Profinite ⥤ Profinite :=
+def functor_prod [fact (0 < r')] : Profinite.{u} ⥤ Profinite.{u} :=
 { obj := λ S, (S,S), map := λ _ _ f, (f, f) } ⋙
   (functor r' c₁).prod (functor r' c₂) ⋙
   (uncurry.obj prod.functor)
@@ -594,7 +594,7 @@ def functor_prod [fact (0 < r')] : Profinite ⥤ Profinite :=
 /-- A cone over `(S.fintype_diagram ⋙ Fintype_functor_prod r' c₁ c₂)` used in the definition
   of `add_functor`. -/
 def functor_prod_cone [fact (0 < r')] (S : Profinite) :
-  cone (S.fintype_diagram ⋙ Fintype_functor_prod r' c₁ c₂) :=
+  cone (S.fintype_diagram ⋙ Fintype_functor_prod.{u} r' c₁ c₂) :=
 { X := (functor_prod r' c₁ c₂).obj S,
   π :=
   { app := λ I, category_theory.limits.prod.map (limit.π _ I) (limit.π _ I),
@@ -606,7 +606,7 @@ def functor_prod_cone [fact (0 < r')] (S : Profinite) :
 
 -- TODO: this proof is SLOW.
 /-- The profinite variant of `Fintype_add_functor`. -/
-def add_functor [fact (0 < r')] : functor_prod r' c₁ c₂ ⟶ functor r' (c₁ + c₂) :=
+def add_functor [fact (0 < r')] : functor_prod.{u} r' c₁ c₂ ⟶ functor.{u} r' (c₁ + c₂) :=
 -- Why doesn't this work without the "by apply ..."?
 { app := λ S, by apply limit.lift _ (functor_prod_cone r' c₁ c₂ S) ≫
       category_theory.limits.lim.map (whisker_left _ (Fintype_add_functor _ _ _)),
@@ -633,7 +633,7 @@ def add_functor [fact (0 < r')] : functor_prod r' c₁ c₂ ⟶ functor r' (c₁
   end }
 
 /-- The profinite functorial variant of negation on `Mbar_le`. -/
-def neg_functor [fact (0 < r')] : functor r' c ⟶ functor r' c :=
+def neg_functor [fact (0 < r')] : functor.{u} r' c ⟶ functor.{u} r' c :=
 { app := λ X, limits.lim.map $ whisker_left _ $ Fintype_neg_functor _ _,
   naturality' := begin
     intros A B f,
@@ -647,7 +647,7 @@ variables {c₁ c₂}
 
 /-- A bifunctor version of `functor`, where `c` can vary. -/
 @[simps]
-def bifunctor [fact (0 < r')] : ℝ≥0 ⥤ Profinite ⥤ Profinite :=
+def bifunctor [fact (0 < r')] : ℝ≥0 ⥤ Profinite.{u} ⥤ Profinite.{u} :=
 { obj := λ c, functor r' c,
   map := λ a b f, Profinite.extend_nat_trans $ (Fintype_bifunctor r').map f,
   map_id' := begin
@@ -664,7 +664,7 @@ def bifunctor [fact (0 < r')] : ℝ≥0 ⥤ Profinite ⥤ Profinite :=
 /-- `Mbar_le.functor r' c` is indeed an extension of `Mbar_le.Fintype_functor r' c`. -/
 @[simps]
 def functor_extends [fact (0 < r')] :
-  Fintype.to_Profinite ⋙ functor r' c ≅ Fintype_functor r' c :=
+  Fintype.to_Profinite ⋙ functor.{u} r' c ≅ Fintype_functor.{u} r' c :=
 Profinite.extend_extends _ .
 
 variables {r' c}
@@ -695,11 +695,14 @@ variable r'
 /-- The diagram whose colimit yields `Mbar.profinite`. -/
 def profinite_diagram [fact (0 < r')] : ℝ≥0 ⥤ Profinite.{u} ⥤ Type u :=
 let E := (whiskering_right Profinite _ _).obj (forget Profinite) in
-  ((whiskering_right _ _ _).obj E).obj (Mbar_le.bifunctor.{u u} r')
+  ((whiskering_right _ _ _).obj E).obj (Mbar_le.bifunctor.{u} r')
 
 /-- The functor `Mbar : Profinite ⥤ Type*`. -/
+@[nolint check_univs] -- TODO remove this
 def profinite [fact (0 < r')] : Profinite ⥤ Type* :=
 (as_small.down ⋙ profinite_diagram r').flip ⋙ colim
+
+attribute [nolint check_univs] profinite._proof_1
 
 -- TODO: Move this to the condensed folder, once it's more stable!
 /-- The representable presheaf associated to a profinite set. -/
@@ -711,7 +714,7 @@ let Y := @yoneda (as_small.{u+1} Profinite.{u}) _ in
 def precondensed_diagram [fact (0 < r')] :
   ℝ≥0 ⥤ Profinite.{u} ⥤ (as_small.{u+1} Profinite.{u})ᵒᵖ ⥤ Type (u+1) :=
 let E := (whiskering_right Profinite _ _).obj representable in
-((whiskering_right _ _ _).obj E).obj $ Mbar_le.bifunctor.{u u} r'
+((whiskering_right _ _ _).obj E).obj $ Mbar_le.bifunctor.{u} r'
 
 /-- A functor associating to every `S : Profinite` the presheaf associated to the condensed set
 `Mbar(S)`. -/
