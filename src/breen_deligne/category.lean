@@ -51,7 +51,6 @@ def mul_functor (N : ℕ) : FreeMat ⥤ FreeMat :=
   begin
     dsimp [basic_universal_map.mul, basic_universal_map.id],
     ext i j,
-    -- rw matrix.kronecker_map_one_one,
     simp only [matrix.kronecker_map_one_one, matrix.minor_apply, matrix.one_apply,
       equiv.apply_eq_iff_eq, eq_self_iff_true],
     split_ifs;
@@ -99,9 +98,12 @@ begin
     matrix.one_mul, matrix.mul_one],
 end
 
---move me
+/--
+Should `kronecker_reindex_left` and `kronecker_reindex_right` land into `mathlib`?
+-/
+
 variables {l₁ m₁ n₁ l₂ m₂ n₂ o o' R : Type*}
-variables [fintype l₁] [fintype m₁] [fintype n₁] --[fintype o] [fintype l'] [fintype m'] [fintype n']
+variables [fintype l₁] [fintype m₁] [fintype n₁]
 variables [fintype l₂] [fintype m₂] [fintype n₂]
 
 lemma kronecker_reindex_left [semiring R] (el : l₁ ≃ l₂) (em : m₁ ≃ m₂) (M : matrix l₁ m₁ R)

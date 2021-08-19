@@ -4,7 +4,6 @@ import algebra.direct_sum
 import algebra.big_operators.finsupp
 
 import for_mathlib.free_abelian_group
--- import for_mathlib.kronecker
 import data.matrix.kronecker
 
 import hacks_and_tricks.type_pow
@@ -253,21 +252,6 @@ begin
   symmetry,
   convert ite_and
 end
-
---move me
-
--- variables {l' m' n' o' R: Type*}
--- variables [fintype l'] [fintype m'] [fintype n'] [fintype o']
-
--- lemma kronecker_reindex_left [semiring R] (e1 : l' ≃ m') (e2 : n' ≃ o') (M : matrix l' n' R)
---   (N : matrix m' o' R) : (matrix.reindex_linear_equiv ℕ _ e1 e2 M) ⊗ₖ N =
---   matrix.reindex_linear_equiv ℕ _ (e1.prod_congr (equiv.refl _)) (e2.prod_congr (equiv.refl _))
---     (M ⊗ₖ N) := by { ext ⟨i, i'⟩ ⟨j, j'⟩, refl }
-
--- lemma kronecker_reindex_right [semiring R] (e1 : l' ≃ m') (e2 : n' ≃ o') (M : matrix m' o' R)
---   (N : matrix l' n' R) : M ⊗ₖ (matrix.reindex_linear_equiv ℕ _ e1 e2 N) =
---   matrix.reindex_linear_equiv ℕ _ ((equiv.refl _).prod_congr e1) ((equiv.refl _).prod_congr e2)
---     (M ⊗ₖ N) := by { ext ⟨i, i'⟩ ⟨j, j'⟩, refl }
 
 lemma proj_aux_apply (a : fin m) (b : fin m) : proj_aux a punit.star b = ite (a = b) 1 0 :=
 begin
