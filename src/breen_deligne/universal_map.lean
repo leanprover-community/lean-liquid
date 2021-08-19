@@ -269,7 +269,7 @@ end
 --   matrix.reindex_linear_equiv ℕ _ ((equiv.refl _).prod_congr e1) ((equiv.refl _).prod_congr e2)
 --     (M ⊗ₖ N) := by { ext ⟨i, i'⟩ ⟨j, j'⟩, refl }
 
-lemma proj_aux_apply [a : fin m] [b : fin m] : proj_aux a punit.star b = ite (a = b) 1 0 :=
+lemma proj_aux_apply (a : fin m) (b : fin m) : proj_aux a punit.star b = ite (a = b) 1 0 :=
 begin
   by_cases h : a = b,
   rw if_pos,
