@@ -99,7 +99,9 @@ begin
 end
 
 /--
-Should `kronecker_reindex_left` and `kronecker_reindex_right` land into `mathlib`?
+Should `kronecker_reindex_left` and `kronecker_reindex_right` land into `mathlib`? The primed
+  versions use `minor` instead of `reindex_linear_equiv`, and according to Eric Wieser are more
+  suited for `mathlib`.
 -/
 
 variables {l₁ m₁ n₁ l₂ m₂ n₂ o o' R : Type*}
@@ -112,13 +114,22 @@ lemma kronecker_reindex_left [semiring R] (el : l₁ ≃ l₂) (em : m₁ ≃ m�
     (el.prod_congr (equiv.refl _)) (em.prod_congr (equiv.refl _)) (M ⊗ₖ N) :=
 by { ext ⟨i, i'⟩ ⟨j, j'⟩, refl }
 
+lemma kronecker_reindex_left' [semiring R] (el : l₂ ≃ l₁) (em : m₂ ≃ m₁) (M : matrix l₁ m₁ R)
+  (N : matrix n₁ n₂ R) : (M.minor el em) ⊗ₖ  N =
+    (M ⊗ₖ N).minor (el.prod_congr (equiv.refl _)) (em.prod_congr (equiv.refl _)) :=
+by { ext ⟨i, i'⟩ ⟨j, j'⟩, refl }
+
 lemma kronecker_reindex_right [semiring R] (em : m₁ ≃ m₂) (en : n₁ ≃ n₂) (M : matrix l₁ l₂ R)
   (N : matrix m₁ n₁ R) : M ⊗ₖ (matrix.reindex_linear_equiv ℕ _ em en N) =
   matrix.reindex_linear_equiv ℕ _
     ((equiv.refl _).prod_congr em) ((equiv.refl _).prod_congr en) (M ⊗ₖ N) :=
 by { ext ⟨i, i'⟩ ⟨j, j'⟩, refl }
 
---
+lemma kronecker_reindex_right' [semiring R] (em : m₂ ≃ m₁) (en : n₂ ≃ n₁) (M : matrix l₁ l₂ R)
+  (N : matrix m₁ n₁ R) : M ⊗ₖ (N.minor em en)  =
+    (M ⊗ₖ N).minor ((equiv.refl _).prod_congr em) ((equiv.refl _).prod_congr en) :=
+by { ext ⟨i, i'⟩ ⟨j, j'⟩, refl }
+
 
 lemma mul_mul_iso_aux (m n i j : ℕ) (f : basic_universal_map i j) :
   (comp (of (basic_universal_map.mul_mul_hom m n j))) (mul m (mul n (of f))) =
