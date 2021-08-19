@@ -78,28 +78,26 @@ nat_iso.of_components (λ n, iso_mk'
   (basic_universal_map.one_mul_hom _) (basic_universal_map.one_mul_inv _)
   basic_universal_map.one_mul_inv_hom basic_universal_map.one_mul_hom_inv)
 begin
-  sorry,
-  -- intros m n f,
-  -- dsimp,
-  -- show universal_map.comp _ _ = universal_map.comp _ _,
-  -- rw [← add_monoid_hom.comp_apply, ← add_monoid_hom.comp_hom_apply_apply,
-  --   ← add_monoid_hom.flip_apply _ f],
-  -- congr' 1, clear f, ext1 f,
-  -- have : f = matrix.reindex_linear_equiv ℕ _
-  --     ((fin_one_equiv.prod_congr $ equiv.refl _).trans $ equiv.punit_prod _)
-  --     ((fin_one_equiv.prod_congr $ equiv.refl _).trans $ equiv.punit_prod _)
-  --     (1 ⊗ₖ f),
-  -- { ext i j, dsimp [matrix.kronecker, matrix.one_apply],
-  --   simp only [one_mul, if_true, eq_iff_true_of_subsingleton], },
-  -- conv_rhs { rw this },
-  -- simp only [comp_of, mul_of, basic_universal_map.comp, add_monoid_hom.mk'_apply,
-  --   basic_universal_map.mul, basic_universal_map.one_mul_hom,
-  --   add_monoid_hom.comp_hom_apply_apply, add_monoid_hom.comp_apply, add_monoid_hom.flip_apply,
-  --   iso_mk'_hom],
-  -- rw [← matrix.reindex_linear_equiv_mul, ← matrix.reindex_linear_equiv_mul,
-  --   matrix.one_mul, matrix.mul_one],
+  intros m n f,
+  dsimp,
+  show universal_map.comp _ _ = universal_map.comp _ _,
+  rw [← add_monoid_hom.comp_apply, ← add_monoid_hom.comp_hom_apply_apply,
+    ← add_monoid_hom.flip_apply _ f],
+  congr' 1, clear f, ext1 f,
+  have : f = matrix.reindex_linear_equiv ℕ _
+      ((fin_one_equiv.prod_congr $ equiv.refl _).trans $ equiv.punit_prod _)
+      ((fin_one_equiv.prod_congr $ equiv.refl _).trans $ equiv.punit_prod _)
+      (1 ⊗ₖ f),
+  { ext i j, dsimp [matrix.kronecker, matrix.one_apply],
+    simp only [one_mul, if_true, eq_iff_true_of_subsingleton], },
+  conv_rhs { rw this },
+  simp only [comp_of, mul_of, basic_universal_map.comp, add_monoid_hom.mk'_apply,
+    basic_universal_map.mul, basic_universal_map.one_mul_hom,
+    add_monoid_hom.comp_hom_apply_apply, add_monoid_hom.comp_apply, add_monoid_hom.flip_apply,
+    iso_mk'_hom],
+  rw [← matrix.reindex_linear_equiv_mul, ← matrix.reindex_linear_equiv_mul,
+    matrix.one_mul, matrix.mul_one],
 end
-.
 
 lemma mul_mul_iso_aux (m n i j : ℕ) (f : basic_universal_map i j) :
   (comp (of (basic_universal_map.mul_mul_hom m n j))) (mul m (mul n (of f))) =
