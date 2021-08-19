@@ -99,20 +99,38 @@ begin
     matrix.one_mul, matrix.mul_one],
 end
 
+--move me
+variables {l₁ m₁ n₁ l₂ m₂ n₂ o o' R : Type*}
+variables [fintype l₁] [fintype m₁] [fintype n₁] --[fintype o] [fintype l'] [fintype m'] [fintype n']
+variables [fintype l₂] [fintype m₂] [fintype n₂]
+
+lemma kronecker_reindex_left [semiring R] (el : l₁ ≃ l₂) (em : m₁ ≃ m₂) (M : matrix l₁ m₁ R)
+  (N : matrix n₁ n₂ R) : (matrix.reindex_linear_equiv ℕ _ el em M) ⊗ₖ  N =
+  matrix.reindex_linear_equiv ℕ _
+    (el.prod_congr (equiv.refl _)) (em.prod_congr (equiv.refl _)) (M ⊗ₖ N) :=
+by { ext ⟨i, i'⟩ ⟨j, j'⟩, refl }
+
+lemma kronecker_reindex_right [semiring R] (em : m₁ ≃ m₂) (en : n₁ ≃ n₂) (M : matrix l₁ l₂ R)
+  (N : matrix m₁ n₁ R) : M ⊗ₖ (matrix.reindex_linear_equiv ℕ _ em en N) =
+  matrix.reindex_linear_equiv ℕ _
+    ((equiv.refl _).prod_congr em) ((equiv.refl _).prod_congr en) (M ⊗ₖ N) :=
+by { ext ⟨i, i'⟩ ⟨j, j'⟩, refl }
+
+--
+
 lemma mul_mul_iso_aux (m n i j : ℕ) (f : basic_universal_map i j) :
   (comp (of (basic_universal_map.mul_mul_hom m n j))) (mul m (mul n (of f))) =
     comp (mul (m * n) (of f)) (of (basic_universal_map.mul_mul_hom m n i)) :=
 begin
   simp only [comp_of, mul_of, basic_universal_map.comp, add_monoid_hom.mk'_apply,
     basic_universal_map.mul, basic_universal_map.mul_mul_hom, matrix.mul_reindex_linear_equiv_one],
-  sorry,
-  -- rw [← matrix.reindex_linear_equiv_mul, matrix.one_mul,
-  --   matrix.kronecker_reindex_right, matrix.kronecker_assoc', matrix.kronecker_one_one,
-  --   ← matrix.reindex_linear_equiv_one ℕ _ (@fin_prod_fin_equiv m n), matrix.kronecker_reindex_left],
-  -- simp only [matrix.reindex_linear_equiv_comp_apply],
-  -- congr' 3,
-  -- { ext ⟨⟨a, b⟩, c⟩ : 1, dsimp, simp only [equiv.symm_apply_apply], },
-  -- { ext ⟨⟨a, b⟩, c⟩ : 1, dsimp, simp only [equiv.symm_apply_apply], },
+  rw [← matrix.reindex_linear_equiv_mul, matrix.one_mul,
+    ← matrix.reindex_linear_equiv_one ℕ _ (@fin_prod_fin_equiv m n)],
+  rw [kronecker_reindex_left, kronecker_reindex_right, ← matrix.kronecker_assoc],
+  simp only [matrix.reindex_linear_equiv_comp_apply],
+  congr' 3,
+  ext,
+  simp,
 end
 
 def mul_mul_iso (m n : ℕ) : mul_functor n ⋙ mul_functor m ≅ mul_functor (m * n) :=
