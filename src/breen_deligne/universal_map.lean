@@ -242,7 +242,7 @@ begin
 end
 .
 
-lemma proj_aux_kronecker_proj_aux (a :fin m) (b : fin n) :
+lemma proj_aux_kronecker_proj_aux (a : fin m) (b : fin n) :
   (proj_aux a) ⊗ₖ (proj_aux b) =
   matrix.reindex_linear_equiv ℕ _ (equiv.prod_punit _).symm fin_prod_fin_equiv.symm
     (proj_aux (fin_prod_fin_equiv (a,b))) :=
@@ -254,22 +254,59 @@ begin
   convert ite_and
 end
 
+--move me
+
+-- variables {l' m' n' o' R: Type*}
+-- variables [fintype l'] [fintype m'] [fintype n'] [fintype o']
+
+-- lemma kronecker_reindex_left [semiring R] (e1 : l' ≃ m') (e2 : n' ≃ o') (M : matrix l' n' R)
+--   (N : matrix m' o' R) : (matrix.reindex_linear_equiv ℕ _ e1 e2 M) ⊗ₖ N =
+--   matrix.reindex_linear_equiv ℕ _ (e1.prod_congr (equiv.refl _)) (e2.prod_congr (equiv.refl _))
+--     (M ⊗ₖ N) := by { ext ⟨i, i'⟩ ⟨j, j'⟩, refl }
+
+-- lemma kronecker_reindex_right [semiring R] (e1 : l' ≃ m') (e2 : n' ≃ o') (M : matrix m' o' R)
+--   (N : matrix l' n' R) : M ⊗ₖ (matrix.reindex_linear_equiv ℕ _ e1 e2 N) =
+--   matrix.reindex_linear_equiv ℕ _ ((equiv.refl _).prod_congr e1) ((equiv.refl _).prod_congr e2)
+--     (M ⊗ₖ N) := by { ext ⟨i, i'⟩ ⟨j, j'⟩, refl }
+
+lemma proj_aux_apply [a : fin m] [b : fin m] : proj_aux a punit.star b = ite (a = b) 1 0 :=
+begin
+  by_cases h : a = b,
+  rw if_pos,
+  assumption',
+  all_goals { simp only [proj_aux, zero_ne_one, ite_eq_left_iff], finish },
+end
+
 lemma comp_proj_mul_proj (n N : ℕ) (j : fin (2 * 2 ^ N)) :
   (comp (proj n ((fin_prod_fin_equiv.symm) j).fst)) (mul 2 (proj n ((fin_prod_fin_equiv.symm) j).snd)) =
   (comp (proj n j)) (mul_mul_hom 2 (2 ^ N) n) :=
 begin
   dsimp only [mul_mul_hom, proj, comp, mul_apply, add_monoid_hom.mk'_apply],
-  sorry,
-  -- rw [← matrix.reindex_linear_equiv_mul, ← matrix.mul_kronecker_mul, matrix.one_mul,
-  --   matrix.kronecker_reindex_right, matrix.mul_one,
-  --   matrix.kronecker_assoc', matrix.mul_reindex_linear_equiv_one, proj_aux_kronecker_proj_aux,
-  --   matrix.kronecker_reindex_left],
-  -- simp only [matrix.reindex_linear_equiv_comp_apply],
-  -- congr' 2,
-  -- ext ⟨x, y⟩,
-  -- dsimp,
-  -- simp only [equiv.symm_apply_apply],
-  -- rw [prod.mk.eta, equiv.apply_symm_apply],
+  rw [← matrix.reindex_linear_equiv_mul, ← matrix.mul_kronecker_mul, matrix.one_mul,
+    matrix.mul_one, matrix.mul_reindex_linear_equiv_one],
+  simp only [matrix.reindex_linear_equiv_apply, matrix.reindex_apply, function.comp.right_id,
+    matrix.minor_minor, equiv.refl_symm, equiv.coe_refl],
+  dsimp [matrix.minor],
+  ext x y,
+  repeat { rw matrix.one_apply },
+  simp,
+  congr' 2,
+  repeat { rw proj_aux_apply },
+  simp only [boole_mul],
+  split_ifs,
+  any_goals { refl },
+  { rw [← h_1, ← h] at h_2,
+    simp only [prod.mk.eta, eq_self_iff_true, not_true, equiv.apply_symm_apply] at h_2,
+    simpa },
+  { apply_fun fin_prod_fin_equiv.symm at h_2,
+    rw equiv.symm_apply_apply at h_2,
+    apply_fun prod.snd at h_2,
+    tauto, },
+  { apply_fun fin_prod_fin_equiv.symm at h_1,
+    apply_fun prod.fst at h_1,
+    rw h_1 at h,
+    simp only [equiv.symm_apply_apply, eq_self_iff_true, not_true] at h,
+    tauto },
 end
 
 end basic_universal_map
