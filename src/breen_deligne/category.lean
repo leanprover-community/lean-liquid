@@ -109,9 +109,8 @@ variables [fintype l₁] [fintype m₁] [fintype n₁]
 variables [fintype l₂] [fintype m₂] [fintype n₂]
 
 lemma kronecker_reindex_left [semiring R] (el : l₁ ≃ l₂) (em : m₁ ≃ m₂) (M : matrix l₁ m₁ R)
-  (N : matrix n₁ n₂ R) : (matrix.reindex_linear_equiv ℕ _ el em M) ⊗ₖ  N =
-  matrix.reindex_linear_equiv ℕ _
-    (el.prod_congr (equiv.refl _)) (em.prod_congr (equiv.refl _)) (M ⊗ₖ N) :=
+  (N : matrix n₁ n₂ R) : (matrix.reindex el em M) ⊗ₖ  N =
+  matrix.reindex (el.prod_congr (equiv.refl _)) (em.prod_congr (equiv.refl _)) (M ⊗ₖ N) :=
 by { ext ⟨i, i'⟩ ⟨j, j'⟩, refl }
 
 lemma kronecker_reindex_left' [semiring R] (el : l₂ ≃ l₁) (em : m₂ ≃ m₁) (M : matrix l₁ m₁ R)
@@ -120,8 +119,8 @@ lemma kronecker_reindex_left' [semiring R] (el : l₂ ≃ l₁) (em : m₂ ≃ m
 by { ext ⟨i, i'⟩ ⟨j, j'⟩, refl }
 
 lemma kronecker_reindex_right [semiring R] (em : m₁ ≃ m₂) (en : n₁ ≃ n₂) (M : matrix l₁ l₂ R)
-  (N : matrix m₁ n₁ R) : M ⊗ₖ (matrix.reindex_linear_equiv ℕ _ em en N) =
-  matrix.reindex_linear_equiv ℕ _
+  (N : matrix m₁ n₁ R) : M ⊗ₖ (matrix.reindex em en N) =
+  matrix.reindex
     ((equiv.refl _).prod_congr em) ((equiv.refl _).prod_congr en) (M ⊗ₖ N) :=
 by { ext ⟨i, i'⟩ ⟨j, j'⟩, refl }
 
@@ -139,6 +138,11 @@ begin
     basic_universal_map.mul, basic_universal_map.mul_mul_hom, matrix.mul_reindex_linear_equiv_one],
   rw [← matrix.reindex_linear_equiv_mul, matrix.one_mul,
     ← matrix.reindex_linear_equiv_one ℕ _ (@fin_prod_fin_equiv m n)],
+  rw [matrix.reindex_linear_equiv_apply],
+  rw [matrix.reindex_linear_equiv_apply],
+  rw [matrix.reindex_linear_equiv_apply],
+  rw [matrix.reindex_linear_equiv_apply],
+  rw [matrix.reindex_linear_equiv_apply],
   rw [kronecker_reindex_left, kronecker_reindex_right, ← matrix.kronecker_assoc],
   simp only [matrix.reindex_linear_equiv_comp_apply],
   congr' 3,
