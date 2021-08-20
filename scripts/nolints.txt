@@ -121,11 +121,6 @@ apply_nolint Profinite.image_stabilizes inhabited_nonempty
 apply_nolint indexed_partition.discrete_quotient doc_blame
 apply_nolint indexed_partition.discrete_quotient_equiv doc_blame
 
--- for_mathlib/kronecker.lean
-apply_nolint matrix.kronecker doc_blame
-apply_nolint matrix.kronecker_mul unused_arguments decidable_classical
-apply_nolint matrix.kroneckerₗ doc_blame
-
 -- for_mathlib/normed_group_hom_completion.lean
 apply_nolint normed_group.to_compl doc_blame
 apply_nolint normed_group_hom.completion doc_blame
