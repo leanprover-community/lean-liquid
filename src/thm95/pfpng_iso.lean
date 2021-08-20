@@ -28,7 +28,7 @@ open profinitely_filtered_pseudo_normed_group
 @[simps {fully_applied := ff}]
 def Pow_mul_comm_obj_equiv (X : ProFiltPseuNormGrpWithTinv r') :
   X ^ (m * n) ≃+ X ^ (n * m) :=
-(linear_map.fun_congr_left ℤ X $
+(linear_equiv.fun_congr_left ℤ X $
 calc fin (n * m) ≃ fin n × fin m : fin_prod_fin_equiv.symm
       ... ≃ fin m × fin n            : equiv.prod_comm _ _
       ... ≃ fin (m * n)              : fin_prod_fin_equiv).to_add_equiv
@@ -41,7 +41,7 @@ begin
   intros,
   simp only [Pow_mul_comm_obj_equiv_apply,
     linear_equiv.trans_apply, linear_equiv.coe_to_add_equiv,
-    linear_map.fun_congr_left_apply, linear_map.fun_congr_left_comp],
+    linear_equiv.fun_congr_left_apply, linear_equiv.fun_congr_left_comp],
   erw pseudo_normed_group.mem_filtration_pi, -- TODO arrange so that `simp` can achieve this
   erw pseudo_normed_group.mem_filtration_pi,
   fsplit,
@@ -84,7 +84,7 @@ def Pow_mul_comm : Pow r' (m * n) ≅ Pow r' (n * m) :=
       ProFiltPseuNormGrpWithTinv.Pow_map, linear_equiv.trans_apply,
       ProFiltPseuNormGrpWithTinv.coe_comp_apply,
       linear_map.fun_left_apply, linear_equiv.coe_to_add_equiv, id.def,
-      equiv.prod_comm_apply, linear_map.fun_congr_left_apply, linear_map.fun_congr_left_comp,
+      equiv.prod_comm_apply, linear_equiv.fun_congr_left_apply, linear_equiv.fun_congr_left_comp,
       profinitely_filtered_pseudo_normed_group_with_Tinv.pi_map_to_fun],
   end
 

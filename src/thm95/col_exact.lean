@@ -594,7 +594,7 @@ begin
     linear_equiv.to_add_equiv_symm_apply, equiv.prod_comm_apply,
     linear_equiv.inv_fun_eq_symm, equiv.inv_fun_as_coe,
     linear_equiv.trans_apply, linear_equiv.symm_apply_apply, linear_equiv.symm_trans_apply,
-    linear_map.fun_congr_left_symm, linear_map.fun_congr_left_apply, linear_map.fun_left_apply,
+    linear_equiv.fun_congr_left_symm, linear_equiv.fun_congr_left_apply, linear_map.fun_left_apply,
     equiv.symm_apply_apply, equiv.apply_symm_apply, equiv.prod_comm_symm],
   refl
 end
