@@ -99,35 +99,24 @@ begin
 end
 
 /--
-Should `kronecker_reindex_left` and `kronecker_reindex_right` land into `mathlib`? The primed
-  versions use `minor` instead of `reindex_linear_equiv`, and according to Eric Wieser are more
-  suited for `mathlib`.
+Should `kronecker_reindex_left` and `kronecker_reindex_right` land into `mathlib`?
 -/
 
-variables {l₁ m₁ n₁ l₂ m₂ n₂ o o' R : Type*}
+variables {α β γ : Type*}
+variables {l₁ m₁ n₁ l₂ m₂ n₂ : Type*}
 variables [fintype l₁] [fintype m₁] [fintype n₁]
 variables [fintype l₂] [fintype m₂] [fintype n₂]
 
-lemma kronecker_reindex_left [semiring R] (el : l₁ ≃ l₂) (em : m₁ ≃ m₂) (M : matrix l₁ m₁ R)
-  (N : matrix n₁ n₂ R) : (matrix.reindex el em M) ⊗ₖ  N =
-  matrix.reindex (el.prod_congr (equiv.refl _)) (em.prod_congr (equiv.refl _)) (M ⊗ₖ N) :=
-by { ext ⟨i, i'⟩ ⟨j, j'⟩, refl }
+lemma kronecker_map_reindex_left (f : α → β → γ) (el : l₁ ≃ l₂) (em : m₁ ≃ m₂) (M : matrix l₁ m₁ α)
+  (N : matrix n₁ n₂ β) : matrix.kronecker_map f (matrix.reindex el em M) N =
+  matrix.reindex (el.prod_congr (equiv.refl _)) (em.prod_congr (equiv.refl _))
+  (matrix.kronecker_map f M N) := by { ext ⟨i, i'⟩ ⟨j, j'⟩, refl }
 
-lemma kronecker_reindex_left' [semiring R] (el : l₂ ≃ l₁) (em : m₂ ≃ m₁) (M : matrix l₁ m₁ R)
-  (N : matrix n₁ n₂ R) : (M.minor el em) ⊗ₖ  N =
-    (M ⊗ₖ N).minor (el.prod_congr (equiv.refl _)) (em.prod_congr (equiv.refl _)) :=
-by { ext ⟨i, i'⟩ ⟨j, j'⟩, refl }
-
-lemma kronecker_reindex_right [semiring R] (em : m₁ ≃ m₂) (en : n₁ ≃ n₂) (M : matrix l₁ l₂ R)
-  (N : matrix m₁ n₁ R) : M ⊗ₖ (matrix.reindex em en N) =
-  matrix.reindex
-    ((equiv.refl _).prod_congr em) ((equiv.refl _).prod_congr en) (M ⊗ₖ N) :=
-by { ext ⟨i, i'⟩ ⟨j, j'⟩, refl }
-
-lemma kronecker_reindex_right' [semiring R] (em : m₂ ≃ m₁) (en : n₂ ≃ n₁) (M : matrix l₁ l₂ R)
-  (N : matrix m₁ n₁ R) : M ⊗ₖ (N.minor em en)  =
-    (M ⊗ₖ N).minor ((equiv.refl _).prod_congr em) ((equiv.refl _).prod_congr en) :=
-by { ext ⟨i, i'⟩ ⟨j, j'⟩, refl }
+lemma kronecker_map_reindex_right (f : α → β → γ) (em : m₁ ≃ m₂) (en : n₁ ≃ n₂)
+  (M : matrix l₁ l₂ α) (N : matrix m₁ n₁ β) :
+  matrix.kronecker_map f M (matrix.reindex em en N) =
+  matrix.reindex ((equiv.refl _).prod_congr em) ((equiv.refl _).prod_congr en)
+    (matrix.kronecker_map f M N) := by { ext ⟨i, i'⟩ ⟨j, j'⟩, refl }
 
 
 lemma mul_mul_iso_aux (m n i j : ℕ) (f : basic_universal_map i j) :
@@ -143,7 +132,7 @@ begin
   rw [matrix.reindex_linear_equiv_apply],
   rw [matrix.reindex_linear_equiv_apply],
   rw [matrix.reindex_linear_equiv_apply],
-  rw [kronecker_reindex_left, kronecker_reindex_right, ← matrix.kronecker_assoc],
+  rw [kronecker_map_reindex_left, kronecker_map_reindex_right, ← matrix.kronecker_assoc],
   simp only [matrix.reindex_linear_equiv_comp_apply],
   congr' 3,
   ext,
