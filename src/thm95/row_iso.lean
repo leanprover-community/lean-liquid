@@ -317,13 +317,12 @@ begin
     basic_universal_map.proj_aux, equiv.symm_apply_apply,
     boole_mul, ← ite_and, @eq_comm _ i, boole_mul, matrix.kronecker_map, subtype.val_eq_coe],
   simp_rw [ite_smul, one_smul, zero_smul],
-  sorry,
-  -- rw finset.sum_ite,
-  --simp only [← prod.mk.inj_iff, ite_smul, one_smul, zero_smul, prod.mk.eta],
-  -- convert (finset.sum_ite_eq' finset.univ (j, i) (λ p, x.val p.2 p.1)).symm using 2,
-  -- { simp only [finset.mem_univ, if_true, subtype.val_eq_coe], },
-  -- { ext ⟨a, b⟩,
-  --   split_ifs; refl }
+  convert (finset.sum_ite_eq' finset.univ (j, i) (λ p, x.val p.2 p.1)).symm using 2,
+  { simp only [finset.mem_univ, if_true, subtype.val_eq_coe] },
+  { ext ⟨a, b⟩,
+    split_ifs,
+    any_goals {refl},
+    all_goals { rw [← prod.mk.inj_iff, prod.mk.eta] at h, tauto } },
 end
 
 lemma foo (N : ℕ) [fact (0 < N)] (Λ : PolyhedralLattice.{u}) (M : ProFiltPseuNormGrpWithTinv.{u} r')
