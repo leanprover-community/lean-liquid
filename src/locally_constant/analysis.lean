@@ -122,19 +122,18 @@ protected def pseudo_metric_space [pseudo_metric_space Y] :
 { dist_self := λ f, show (⨆ x, dist (f x) (f x)) = 0,
     begin
       simp only [dist_self, supr],
-      by_cases H : nonempty X, swap,
-      { rwa [set.range_eq_empty.mpr H, real.Sup_empty] },
-      resetI,
-      simp only [set.range_const, cSup_singleton]
+      casesI is_empty_or_nonempty X,
+      { rw [set.range_eq_empty, real.Sup_empty] },
+      { simp only [set.range_const, cSup_singleton] },
     end,
   dist_comm := λ f g, show Sup _ = Sup _, by { simp only [dist_comm] },
   dist_triangle :=
   begin
     intros f g h,
-    by_cases H : nonempty X, swap,
-    { show Sup _ ≤ Sup _ + Sup _, simp only [set.range_eq_empty.mpr H, real.Sup_empty, add_zero] },
+    casesI is_empty_or_nonempty X,
+    { show Sup _ ≤ Sup _ + Sup _, simp only [set.range_eq_empty, real.Sup_empty, add_zero] },
     refine cSup_le _ _,
-    { obtain ⟨x⟩ := H, exact ⟨_, set.mem_range_self x⟩ },
+    { inhabit X, exact ⟨_, set.mem_range_self (default X)⟩ },
     rintro r ⟨x, rfl⟩,
     calc dist (f x) (h x) ≤ dist (f x) (g x) + dist (g x) (h x) : dist_triangle _ _ _
     ... ≤ dist f g + dist g h : add_le_add (dist_apply_le _ _ _) (dist_apply_le _ _ _)
@@ -145,13 +144,12 @@ protected def pseudo_metric_space [pseudo_metric_space Y] :
 /-- The metric space on locally constant functions on a compact space, with sup distance. -/
 protected def metric_space [metric_space Y] : metric_space (locally_constant X Y) :=
 { dist_self := λ f, show (⨆ x, dist (f x) (f x)) = 0,
-    begin
-      simp only [dist_self, supr],
-      by_cases H : nonempty X, swap,
-      { rwa [set.range_eq_empty.mpr H, real.Sup_empty] },
-      resetI,
-      simp only [set.range_const, cSup_singleton]
-    end,
+  begin
+    simp only [dist_self, supr],
+    casesI is_empty_or_nonempty X,
+    { rwa [set.range_eq_empty, real.Sup_empty] },
+    { simp only [set.range_const, cSup_singleton] }
+  end,
   eq_of_dist_eq_zero :=
   begin
     intros f g h,
@@ -165,10 +163,10 @@ protected def metric_space [metric_space Y] : metric_space (locally_constant X Y
   dist_triangle :=
   begin
     intros f g h,
-    by_cases H : nonempty X, swap,
-    { show Sup _ ≤ Sup _ + Sup _, simp only [set.range_eq_empty.mpr H, real.Sup_empty, add_zero] },
+    casesI is_empty_or_nonempty X,
+    { show Sup _ ≤ Sup _ + Sup _, simp only [set.range_eq_empty, real.Sup_empty, add_zero] },
     refine cSup_le _ _,
-    { obtain ⟨x⟩ := H, exact ⟨_, set.mem_range_self x⟩ },
+    { inhabit X, exact ⟨_, set.mem_range_self (default X)⟩ },
     rintro r ⟨x, rfl⟩,
     calc dist (f x) (h x) ≤ dist (f x) (g x) + dist (g x) (h x) : dist_triangle _ _ _
     ... ≤ dist f g + dist g h : add_le_add (dist_apply_le _ _ _) (dist_apply_le _ _ _)
@@ -212,10 +210,10 @@ def map_hom (f : normed_group_hom V₁ V₂) :
     calc Sup (set.range (λ x, ∥f (g x)∥))
         ≤ Sup (set.range (λ x, C * ∥g x∥)) : _
     ... = C * Sup (set.range (λ x, ∥g x∥)) : _,
-    { by_cases H : nonempty X, swap,
-      { simp only [set.range_eq_empty.mpr H, real.Sup_empty] },
-      apply cSup_le,
-      { obtain ⟨x⟩ := H, exact ⟨_, set.mem_range_self x⟩ },
+    { casesI is_empty_or_nonempty X,
+      { simp only [set.range_eq_empty, real.Sup_empty] },
+      refine cSup_le _ _,
+      { inhabit X, exact ⟨_, set.mem_range_self (default X)⟩ },
       rintro _ ⟨x, rfl⟩,
       calc ∥f (g x)∥ ≤ C * ∥g x∥ : hC _
       ... ≤ Sup _ : le_cSup _ _,
@@ -262,12 +260,12 @@ add_monoid_hom.mk_normed_group_hom
     rw one_mul,
     show Sup _ ≤ Sup _,
     simp only [hf, function.comp_app, coe_comap, add_monoid_hom.mk'_apply],
-    by_cases hX : nonempty X, swap,
-    { simp only [set.range_eq_empty.mpr hX, real.Sup_empty],
-      by_cases hY : nonempty Y, swap,
-      { simp only [set.range_eq_empty.mpr hY, real.Sup_empty] },
-      obtain ⟨y⟩ := hY,
-      calc 0 ≤ ∥g y∥ : norm_nonneg _
+    casesI is_empty_or_nonempty X,
+    { simp only [set.range_eq_empty, real.Sup_empty],
+      casesI is_empty_or_nonempty Y,
+      { simp only [set.range_eq_empty, real.Sup_empty] },
+      inhabit Y,
+      calc 0 ≤ ∥g (default Y)∥ : norm_nonneg _
          ... ≤ _ : _,
       apply le_cSup,
       { apply exists_upper_bound_image,

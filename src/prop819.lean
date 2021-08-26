@@ -182,15 +182,14 @@ def cech_iso_zero {C : Type*} [category C] (F : arrow C) [limits.has_limits C]
 lemma augmentation_zero {C : Type*} [category C] (F : arrow C) [limits.has_limits C] :
   (cech_iso_zero F).inv ≫ F.augmented_cech_nerve.hom.app _ = F.hom := by tidy
 
-lemma locally_constant_norm_empty (X : Profinite) (hX : ¬ nonempty X)
-  (g : (LocallyConstant.obj M).obj (op X)) : ∥ g ∥ = 0 :=
+lemma locally_constant_norm_empty (X : Profinite) [is_empty X]
+  (g : (LocallyConstant.obj M).obj (op X)) : ∥g∥ = 0 :=
 begin
   rw locally_constant.norm_def,
   dsimp [supr],
   suffices : set.range (λ x : ↥X, ∥ g.to_fun x ∥) = ∅,
-  { erw [this, real.Sup_empty],  },
-  simp only [set.range_eq_empty, not_nonempty_iff],
-  exact not_nonempty_iff.mp hX
+  { erw [this, real.Sup_empty], },
+  simp only [set.range_eq_empty],
 end
 
 lemma Profinite.coe_comp_apply {X Y Z : Profinite} (f : X ⟶ Y) (g : Y ⟶ Z) (x : X) :
@@ -236,17 +235,17 @@ end
 lemma prop819_zero_norm_le (g : (LocallyConstant.obj M).obj (op F.right)) : ∥ g ∥ ≤
   ∥(LocallyConstant.obj M).map (limits.wide_pullback.base (λ i : ulift (fin 1), F.hom)).op g∥ :=
 begin
-  by_cases hh : nonempty F.right,
+  casesI is_empty_or_nonempty F.right,
+  { simp only [locally_constant_norm_empty, norm_nonneg] },
   { apply cSup_le,
-    { rcases hh with ⟨x⟩,
-      refine ⟨∥g.to_fun x∥, x, rfl⟩ },
+    { inhabit ↥(F.right),
+      dsimp only [unop_op],
+      refine ⟨∥g.to_fun _∥, default _, rfl⟩, },
     { rintros z ⟨z,rfl⟩,
       obtain ⟨z,rfl⟩ := (prop819_degree_zero_helper _ surj) z,
       change ∥g.to_fun _∥ ≤ _,
       erw ← LocallyConstant_map_apply M _ F.right (limits.wide_pullback.base (λ i, F.hom)) g z,
       apply locally_constant.norm_apply_le } },
-  { rw locally_constant_norm_empty _ _ hh g,
-    simp }
 end
 
 theorem prop819_degree_zero (f : (FLC F M).X 0) (hf : (FLC F M).d 0 1 f = 0) :

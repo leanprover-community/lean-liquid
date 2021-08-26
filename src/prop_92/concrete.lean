@@ -60,9 +60,9 @@ open set
 lemma real.supr_zero (ι : Type*) : (⨆ i : ι, (0 : ℝ)) = 0 :=
 begin
   rw supr,
-  by_cases hι : nonempty ι,
-  { resetI, rw [set.range_const, cSup_singleton] },
-  { rw [set.range_eq_empty.mpr hι, real.Sup_empty] }
+  casesI is_empty_or_nonempty ι,
+  { rw [set.range_eq_empty, real.Sup_empty] },
+  { rw [set.range_const, cSup_singleton] },
 end
 
 -- Move me
@@ -198,8 +198,8 @@ variables
 
 
 @[simp]
-lemma locally_constant.norm_of_empty (hX : ¬ nonempty X) (f : locally_constant X G) : ∥f∥ = 0 :=
-by rw [locally_constant.norm_def, supr, range_eq_empty.mpr hX, real.Sup_empty]
+lemma locally_constant.norm_of_is_empty [is_empty X] (f : locally_constant X G) : ∥f∥ = 0 :=
+by rw [locally_constant.norm_def, supr, range_eq_empty, real.Sup_empty]
 
 @[simp]
 lemma embedding.locally_constant_extend_of_empty (hX : ¬ nonempty X) (f : locally_constant X G) :
@@ -285,15 +285,14 @@ rfl
 
 lemma embedding.norm_extend (f : locally_constant X G) : ∥he.locally_constant_extend f∥ = ∥f∥ :=
 begin
-  by_cases hX : nonempty X,
-  { resetI,
-    change (⨆ y : Y, _) = (⨆ x : X, _),
-    rw [real.supr_comp, real.supr_comp, he.range_locally_constant_extend f] },
-  { rw [f.norm_of_empty hX],
+  casesI is_empty_or_nonempty X,
+  { rw [f.norm_of_is_empty],
     dsimp [embedding.locally_constant_extend, embedding.extend],
-    suffices : (⨆ (y : Y), ∥(0 : G)∥) = 0,
-    by simpa only [hX, dif_neg, not_false_iff, and_false],
-    simp }
+    have hX : ¬ nonempty X, { rwa not_nonempty_iff },
+    suffices : (⨆ (y : Y), ∥(0 : G)∥) = 0, { simpa only [hX, dif_neg, not_false_iff, and_false] },
+    simp only [norm_zero, real.supr_zero] },
+  { change (⨆ y : Y, _) = (⨆ x : X, _),
+    rw [real.supr_comp, real.supr_comp, he.range_locally_constant_extend f] },
 end
 
 variables
@@ -304,16 +303,15 @@ include r
 
 lemma locally_constant.norm_map_aut (g : locally_constant Y V) : ∥g.map T.hom∥ = r*∥g∥ :=
 begin
-  by_cases hY : nonempty Y,
-  { resetI,
-    cases g.exists_norm_eq with y hy,
+  casesI is_empty_or_nonempty Y,
+  { simp only [mul_zero, locally_constant.norm_of_is_empty] },
+  { cases g.exists_norm_eq with y hy,
     erw [hy, ← norm_T, locally_constant.norm_eq_iff],
     intro y',
     erw [norm_T, norm_T],
     cases r.eq_zero_or_pos with hr hr,
-    { simp [hr] },
-    { simp [hr, ← hy, g.norm_apply_le] } },
-  { simp [hY] },
+    { simp only [hr, nnreal.coe_zero, zero_mul] },
+    { simp only [hr, ←hy, g.norm_apply_le, mul_le_mul_left, nnreal.coe_pos] } },
 end
 
 @[simp]

@@ -1,6 +1,6 @@
 import linear_algebra.matrix
 import group_theory.free_abelian_group
-import algebra.direct_sum
+import algebra.direct_sum.basic
 import algebra.big_operators.finsupp
 
 import for_mathlib.free_abelian_group

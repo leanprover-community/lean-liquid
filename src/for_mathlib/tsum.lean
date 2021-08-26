@@ -5,7 +5,7 @@ open_locale big_operators nnreal
 
 lemma tsum_abs_eq_coe_tsum_nnabs {α : Type*} (f : α → ℝ) :
   (∑' i, abs (f i)) = ∑' i, real.nnabs (f i) :=
-by simp only [nnreal.coe_nnabs]
+by simp only [real.coe_nnabs]
 
 open nnreal finset
 
