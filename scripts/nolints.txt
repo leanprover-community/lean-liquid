@@ -3,6 +3,8 @@ run_cmd tactic.skip
 
 -- breen_deligne/category.lean
 apply_nolint breen_deligne.FreeMat.iso_mk' doc_blame
+apply_nolint breen_deligne.FreeMat.kronecker_map_reindex_left unused_arguments
+apply_nolint breen_deligne.FreeMat.kronecker_map_reindex_right unused_arguments
 apply_nolint breen_deligne.FreeMat.mul_functor doc_blame
 apply_nolint breen_deligne.FreeMat.mul_mul_iso doc_blame
 apply_nolint breen_deligne.FreeMat.one_mul_iso doc_blame
