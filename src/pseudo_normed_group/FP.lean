@@ -23,6 +23,7 @@ def pseudo_normed_group.filtration_obj
 Profinite.of (pseudo_normed_group.filtration M c)
 
 open profinitely_filtered_pseudo_normed_group category_theory
+  comphaus_filtered_pseudo_normed_group
 
 namespace Filtration
 variables (M : Type u) [profinitely_filtered_pseudo_normed_group M]
@@ -219,8 +220,8 @@ begin
     (Tinv r' c₃ c₄ n).app M (ϕ.eval_png₀ M c₁ c₃ x),
   ext j,
   dsimp,
-  simp only [eval_png_apply, profinitely_filtered_pseudo_normed_group_hom.map_sum,
-    profinitely_filtered_pseudo_normed_group_hom.map_gsmul, pi_Tinv_apply],
+  simp only [eval_png_apply, comphaus_filtered_pseudo_normed_group_hom.map_sum,
+    comphaus_filtered_pseudo_normed_group_hom.map_gsmul, pi_Tinv_apply],
 end
 .
 

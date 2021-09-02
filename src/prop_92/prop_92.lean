@@ -33,6 +33,7 @@ end
 variables {V c n M}
 
 open profinitely_filtered_pseudo_normed_group profinitely_filtered_pseudo_normed_group_with_Tinv
+  comphaus_filtered_pseudo_normed_group
 open locally_constant category_theory
 
 /-- 9.2 of Analytic.pdf -/

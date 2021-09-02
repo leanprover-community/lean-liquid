@@ -39,14 +39,15 @@ end pseudo_normed_group
 section profinitely_filtered_pseudo_normed_group
 
 open pseudo_normed_group profinitely_filtered_pseudo_normed_group add_monoid_hom
-open profinitely_filtered_pseudo_normed_group_hom
+
+open comphaus_filtered_pseudo_normed_group_hom comphaus_filtered_pseudo_normed_group
 
 variables [profinitely_filtered_pseudo_normed_group M]
 
 /-- `eval_png M f` is the homomorphism `M^m → M^n` of profinitely filtered pseudo-normed groups
 obtained by matrix multiplication with the matrix `f`. -/
 def eval_png : basic_universal_map m n →+
-  profinitely_filtered_pseudo_normed_group_hom (M ^ m) (M ^ n) :=
+  comphaus_filtered_pseudo_normed_group_hom (M ^ m) (M ^ n) :=
 add_monoid_hom.mk' (λ f, pi_lift (λ j, ∑ i, f j i • pi_proj i)
   begin
     let C : ℝ≥0 := finset.univ.sup (λ j, ∑ i, (f j i).nat_abs),

@@ -27,6 +27,7 @@ of r' (Λ →+ M)
 
 namespace PolyhedralLattice
 open opposite pseudo_normed_group polyhedral_lattice profinitely_filtered_pseudo_normed_group
+  comphaus_filtered_pseudo_normed_group
 open category_theory
 
 variables {r' : ℝ≥0} [fact (0 < r')]
@@ -97,7 +98,7 @@ begin
   haveI : fact (c * ∥(1:ℤ)∥₊ ≤ c) := ⟨by rw [nnnorm_one, mul_one]⟩,
   have aux := add_monoid_hom.incl_continuous ℤ r' M c,
   have aux2 := (continuous_apply 1).comp aux,
-  rwa (profinitely_filtered_pseudo_normed_group.embedding_cast_le
+  rwa (comphaus_filtered_pseudo_normed_group.embedding_cast_le
     (c * ∥(1:ℤ)∥₊) c).continuous_iff at aux2
 end
 

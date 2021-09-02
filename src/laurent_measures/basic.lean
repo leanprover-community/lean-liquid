@@ -658,9 +658,10 @@ instance pfpng_laurent_measures [fact (0 < r)] :
 variable {α : Type*}
 
 open pseudo_normed_group profinitely_filtered_pseudo_normed_group
+  comphaus_filtered_pseudo_normed_group
 
 def map_hom [fact (0 < r)] (f : S ⟶ S') :
-  profinitely_filtered_pseudo_normed_group_hom (laurent_measures r S) (laurent_measures r S') :=
+  comphaus_filtered_pseudo_normed_group_hom (laurent_measures r S) (laurent_measures r S') :=
 { to_fun := map f,
   map_zero' := begin
     ext F s i,
@@ -712,7 +713,7 @@ def functor (r : ℝ≥0) [fact (0 < r)] : Fintype.{u} ⥤ ProFiltPseuNormGrp.{u
     ext1,
     dsimp [map_hom],
     simp,
-  end }
+  end}
 
 end laurent_measures
 

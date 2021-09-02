@@ -21,6 +21,52 @@ local attribute [instance] type_pow
 
 noncomputable theory
 
+/-- The category of CompHaus-ly filtered pseudo-normed groups. -/
+def CompHausFiltPseuNormGrp : Type (u+1) :=
+bundled comphaus_filtered_pseudo_normed_group
+
+namespace CompHausFiltPseuNormGrp
+
+def bundled_hom : bundled_hom @comphaus_filtered_pseudo_normed_group_hom :=
+⟨@comphaus_filtered_pseudo_normed_group_hom.to_fun,
+ @comphaus_filtered_pseudo_normed_group_hom.id,
+ @comphaus_filtered_pseudo_normed_group_hom.comp,
+ @comphaus_filtered_pseudo_normed_group_hom.coe_inj⟩
+
+local attribute [instance] bundled_hom
+attribute [derive [has_coe_to_sort, large_category, concrete_category]] CompHausFiltPseuNormGrp
+
+instance (M : CompHausFiltPseuNormGrp) : comphaus_filtered_pseudo_normed_group M := M.str
+
+/-- Construct a bundled `CompHausFiltPseuNormGrp` from the underlying type and typeclass. -/
+def of (M : Type u) [comphaus_filtered_pseudo_normed_group M] : CompHausFiltPseuNormGrp :=
+bundled.of M
+
+end CompHausFiltPseuNormGrp
+
+/-- The category of CompHaus-ly filtered pseudo-normed groups with strict morphisms. -/
+def CompHausFiltPseuNormGrp₁ : Type (u+1) :=
+bundled comphaus_filtered_pseudo_normed_group
+
+namespace CompHausFiltPseuNormGrp₁
+
+def bundled_hom : bundled_hom @strict_comphaus_filtered_pseudo_normed_group_hom :=
+⟨@strict_comphaus_filtered_pseudo_normed_group_hom.to_fun,
+ @strict_comphaus_filtered_pseudo_normed_group_hom.id,
+ @strict_comphaus_filtered_pseudo_normed_group_hom.comp,
+ @strict_comphaus_filtered_pseudo_normed_group_hom.coe_inj⟩
+
+local attribute [instance] bundled_hom
+attribute [derive [has_coe_to_sort, large_category, concrete_category]] CompHausFiltPseuNormGrp₁
+
+instance (M : CompHausFiltPseuNormGrp₁) : comphaus_filtered_pseudo_normed_group M := M.str
+
+def enlarging_functor : CompHausFiltPseuNormGrp₁ ⥤ CompHausFiltPseuNormGrp :=
+{ obj := λ M, M,
+  map := λ M₁ M₂ f, f.to_chfpsng_hom }
+
+end CompHausFiltPseuNormGrp₁
+
 /-- The category of profinitely filtered pseudo-normed groups. -/
 def ProFiltPseuNormGrp : Type (u+1) :=
 bundled profinitely_filtered_pseudo_normed_group
@@ -31,13 +77,19 @@ bundled (@profinitely_filtered_pseudo_normed_group_with_Tinv r)
 
 namespace ProFiltPseuNormGrp
 
-instance bundled_hom : bundled_hom @profinitely_filtered_pseudo_normed_group_hom :=
-⟨@profinitely_filtered_pseudo_normed_group_hom.to_fun,
- @profinitely_filtered_pseudo_normed_group_hom.id,
- @profinitely_filtered_pseudo_normed_group_hom.comp,
- @profinitely_filtered_pseudo_normed_group_hom.coe_inj⟩
+local attribute [instance] CompHausFiltPseuNormGrp.bundled_hom
+
+def bundled_hom : bundled_hom.parent_projection
+  @profinitely_filtered_pseudo_normed_group.to_comphaus_filtered_pseudo_normed_group := ⟨⟩
+
+local attribute [instance] bundled_hom
 
 attribute [derive [has_coe_to_sort, large_category, concrete_category]] ProFiltPseuNormGrp
+
+instance : has_forget₂ ProFiltPseuNormGrp CompHausFiltPseuNormGrp := bundled_hom.forget₂ _ _
+
+@[simps]
+def to_CompHausFilt : ProFiltPseuNormGrp ⥤ CompHausFiltPseuNormGrp := forget₂ _ _
 
 /-- Construct a bundled `ProFiltPseuNormGrp` from the underlying type and typeclass. -/
 def of (M : Type u) [profinitely_filtered_pseudo_normed_group M] : ProFiltPseuNormGrp :=
@@ -208,6 +260,7 @@ def Pow_Pow_X_equiv (N n : ℕ) :
   .. ((equiv.curry _ _ _).symm.trans (((equiv.prod_comm _ _).trans fin_prod_fin_equiv).arrow_congr (equiv.refl _))).symm }
 
 open profinitely_filtered_pseudo_normed_group
+open comphaus_filtered_pseudo_normed_group
 
 @[simps]
 def Pow_Pow_X (N n : ℕ) (M : ProFiltPseuNormGrpWithTinv.{u} r') :

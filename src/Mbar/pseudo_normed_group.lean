@@ -19,7 +19,7 @@ variables {r' : ℝ≥0} {S : Type u} [fact (0 < r')] [fintype S] {c c₁ c₂ c
 namespace Mbar
 
 instance : profinitely_filtered_pseudo_normed_group_with_Tinv r' (Mbar r' S) :=
-{ Tinv := profinitely_filtered_pseudo_normed_group_hom.mk' Mbar.Tinv
+{ Tinv := comphaus_filtered_pseudo_normed_group_hom.mk' Mbar.Tinv
   begin
     refine ⟨r'⁻¹, λ c, ⟨_, _⟩⟩,
     { intros x hx, exact Mbar.Tinv_mem_filtration hx },

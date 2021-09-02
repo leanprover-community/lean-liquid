@@ -114,6 +114,7 @@ begin
 end
 
 open profinitely_filtered_pseudo_normed_group
+  comphaus_filtered_pseudo_normed_group
 
 lemma incl_range_is_closed : (is_closed (set.range (@incl Λ r' M _ _ c))) :=
 begin
@@ -203,10 +204,11 @@ end
 variables (Λ r' M)
 
 open profinitely_filtered_pseudo_normed_group
+open comphaus_filtered_pseudo_normed_group
 variables [fact (0 < r')]
 
-def Tinv : profinitely_filtered_pseudo_normed_group_hom (Λ →+ M) (Λ →+ M) :=
-profinitely_filtered_pseudo_normed_group_hom.mk' Tinv'
+def Tinv : comphaus_filtered_pseudo_normed_group_hom (Λ →+ M) (Λ →+ M) :=
+comphaus_filtered_pseudo_normed_group_hom.mk' Tinv'
 begin
   refine ⟨r'⁻¹, λ c, ⟨Tinv'_mem_filtration c, _⟩⟩,
   rw add_monoid_hom.continuous_iff,

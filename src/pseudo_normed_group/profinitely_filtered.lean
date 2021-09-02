@@ -18,19 +18,19 @@ open_locale nnreal big_operators
 
 local attribute [instance] type_pow
 
-/-- A *profinitely filtered pseudo-normed topological group* is
+/-- A *complete Hausdorff filtered pseudo-normed topological group* is
 * an abelian group `M` with an increasing filtration `filtration M c, c : ℝ≥0` such that
-* `filtration M c` is a profinite set
+* `filtration M c` is a compact Hausdorff (or T2) space
 * `M` is pseudo-normed, so `0 ∈ filtration M c`, `-(filtration M c) = filtration M c`,
   and `x₁ ∈ filtration M c₁, x₂ ∈ filtration M c₂ → (x₁ + x₂) ∈ filtration M (c₁ + c₂)`
 * (bounded) addition and negation are continuous.
 
 Morphisms are continuous and bounded homomorphisms. -/
-class profinitely_filtered_pseudo_normed_group (M : Type*)
+class comphaus_filtered_pseudo_normed_group (M : Type*)
   extends pseudo_normed_group M :=
 [topology : ∀ c, topological_space (filtration c)]
 [t2 : ∀ c, t2_space (filtration c)]
-[td : ∀ c, totally_disconnected_space (filtration c)]
+--[td : ∀ c, totally_disconnected_space (filtration c)]
 [compact : ∀ c, compact_space (filtration c)]
 (continuous_add' : ∀ (c₁ c₂),
   continuous (add' : filtration c₁ × filtration c₂ → filtration (c₁ + c₂)))
@@ -38,17 +38,26 @@ class profinitely_filtered_pseudo_normed_group (M : Type*)
 (continuous_cast_le : ∀ (c₁ c₂) [h : fact (c₁ ≤ c₂)],
   continuous (cast_le : filtration c₁ → filtration c₂))
 
-namespace profinitely_filtered_pseudo_normed_group
+/-- A *profinitely filtered pseudo-normed topological group* is a *complete Hausdorff filtered
+pseudo-normed topological group* with the additional requirement that
+* `filtration M c` is a profinite set
+
+Morphisms are continuous and bounded homomorphisms. -/
+class profinitely_filtered_pseudo_normed_group (M : Type*)
+  extends comphaus_filtered_pseudo_normed_group M :=
+[td : ∀ c, totally_disconnected_space (filtration c)]
+
+namespace comphaus_filtered_pseudo_normed_group
 
 variables {M M₁ M₂ M₃ : Type*}
-variables [profinitely_filtered_pseudo_normed_group M]
-variables [profinitely_filtered_pseudo_normed_group M₁]
-variables [profinitely_filtered_pseudo_normed_group M₂]
-variables [profinitely_filtered_pseudo_normed_group M₃]
+variables [comphaus_filtered_pseudo_normed_group M]
+variables [comphaus_filtered_pseudo_normed_group M₁]
+variables [comphaus_filtered_pseudo_normed_group M₂]
+variables [comphaus_filtered_pseudo_normed_group M₃]
 
 instance (c : ℝ≥0) : topological_space (filtration M c) := topology c
 instance (c : ℝ≥0) : t2_space (filtration M c) := t2 c
-instance (c : ℝ≥0) : totally_disconnected_space (filtration M c) := td c
+--instance (c : ℝ≥0) : totally_disconnected_space (filtration M c) := td c
 instance (c : ℝ≥0) : compact_space (filtration M c) := compact c
 
 lemma is_closed_map_cast_le (c₁ c₂) [h : fact (c₁ ≤ c₂)] :
@@ -64,45 +73,60 @@ lemma embedding_cast_le (c₁ c₂) [h : fact (c₁ ≤ c₂)] :
   embedding (@pseudo_normed_group.cast_le M _ _ _ h) :=
 (closed_embedding_cast_le c₁ c₂).to_embedding
 
+end comphaus_filtered_pseudo_normed_group
+
+namespace profinitely_filtered_pseudo_normed_group
+
+variables {M : Type*} [profinitely_filtered_pseudo_normed_group M]
+
+instance (c : ℝ≥0) : totally_disconnected_space (filtration M c) := td c
+
 end profinitely_filtered_pseudo_normed_group
 
 section
 set_option old_structure_cmd true
 
-structure profinitely_filtered_pseudo_normed_group_hom (M₁ M₂ : Type*)
-  [profinitely_filtered_pseudo_normed_group M₁]
-  [profinitely_filtered_pseudo_normed_group M₂]
+structure comphaus_filtered_pseudo_normed_group_hom (M₁ M₂ : Type*)
+  [comphaus_filtered_pseudo_normed_group M₁]
+  [comphaus_filtered_pseudo_normed_group M₂]
   extends M₁ →+ M₂ :=
 (bound' : ∃ C, ∀ c x, x ∈ filtration M₁ c → to_fun x ∈ filtration M₂ (C * c))
 (continuous' : ∀ ⦃c₁ c₂⦄ (f₀ : filtration M₁ c₁ → filtration M₂ c₂)
   (h : ∀ x, to_fun ↑x = f₀ x), continuous f₀)
 
+structure strict_comphaus_filtered_pseudo_normed_group_hom (M₁ M₂ : Type*)
+  [comphaus_filtered_pseudo_normed_group M₁]
+  [comphaus_filtered_pseudo_normed_group M₂]
+  extends M₁ →+ M₂ :=
+(strict' : ∀ c x, x ∈ filtration M₁ c → to_fun x ∈ filtration M₂ c)
+(continuous₁' : ∀ c, continuous (pseudo_normed_group.level to_fun strict' c))
+
 end
 
-attribute [nolint doc_blame] profinitely_filtered_pseudo_normed_group_hom.mk
-  profinitely_filtered_pseudo_normed_group_hom.to_add_monoid_hom
+attribute [nolint doc_blame] comphaus_filtered_pseudo_normed_group_hom.mk
+  comphaus_filtered_pseudo_normed_group_hom.to_add_monoid_hom
 
-namespace profinitely_filtered_pseudo_normed_group_hom
+namespace comphaus_filtered_pseudo_normed_group_hom
 
-open profinitely_filtered_pseudo_normed_group
+open comphaus_filtered_pseudo_normed_group
 
 variables {M M₁ M₂ M₃ : Type*}
-variables [profinitely_filtered_pseudo_normed_group M]
-variables [profinitely_filtered_pseudo_normed_group M₁]
-variables [profinitely_filtered_pseudo_normed_group M₂]
-variables [profinitely_filtered_pseudo_normed_group M₃]
-variables (f g : profinitely_filtered_pseudo_normed_group_hom M₁ M₂)
+variables [comphaus_filtered_pseudo_normed_group M]
+variables [comphaus_filtered_pseudo_normed_group M₁]
+variables [comphaus_filtered_pseudo_normed_group M₂]
+variables [comphaus_filtered_pseudo_normed_group M₃]
+variables (f g : comphaus_filtered_pseudo_normed_group_hom M₁ M₂)
 
-instance : has_coe_to_fun (profinitely_filtered_pseudo_normed_group_hom M₁ M₂) :=
-⟨_, profinitely_filtered_pseudo_normed_group_hom.to_fun⟩
+instance : has_coe_to_fun (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :=
+⟨_, comphaus_filtered_pseudo_normed_group_hom.to_fun⟩
 
 @[simp] lemma coe_mk (f) (h₁) (h₂) (h₃) (h₄) :
-  ⇑(⟨f, h₁, h₂, h₃, h₄⟩ : profinitely_filtered_pseudo_normed_group_hom M₁ M₂) = f :=
+  ⇑(⟨f, h₁, h₂, h₃, h₄⟩ : comphaus_filtered_pseudo_normed_group_hom M₁ M₂) = f :=
 rfl
 
 @[simp] lemma mk_to_monoid_hom (f) (h₁) (h₂) (h₃) (h₄) :
   (⟨f, h₁, h₂, h₃, h₄⟩ :
-    profinitely_filtered_pseudo_normed_group_hom M₁ M₂).to_add_monoid_hom =
+    comphaus_filtered_pseudo_normed_group_hom M₁ M₂).to_add_monoid_hom =
     ⟨f, h₁, h₂⟩ := rfl
 
 @[simp] lemma coe_to_add_monoid_hom : ⇑f.to_add_monoid_hom = f := rfl
@@ -126,7 +150,7 @@ from a group hom and a proof that it is bounded and continuous. -/
 def mk_of_bound (f : M₁ →+ M₂) (C : ℝ≥0)
   (hC : ∀ c, ∃ (H : ∀ x, x ∈ filtration M₁ c → f x ∈ filtration M₂ (C * c)),
     @continuous (filtration M₁ c) (filtration M₂ (C * c)) _ _ (λ x, ⟨f x, H x x.2⟩)) :
-  profinitely_filtered_pseudo_normed_group_hom M₁ M₂ :=
+  comphaus_filtered_pseudo_normed_group_hom M₁ M₂ :=
 { bound' := ⟨C, λ c, (hC c).some⟩,
   continuous' := λ c₁ c₂ f₀ hf₀,
   begin
@@ -145,7 +169,7 @@ from a group hom and a proof that it is bounded and continuous. -/
 def mk_of_strict (f : M₁ →+ M₂)
   (h : ∀ c, ∃ (H : ∀ x, x ∈ filtration M₁ c → f x ∈ filtration M₂ c),
     @continuous (filtration M₁ c) (filtration M₂ c) _ _ (λ x, ⟨f x, H x x.2⟩)) :
-  profinitely_filtered_pseudo_normed_group_hom M₁ M₂ :=
+  comphaus_filtered_pseudo_normed_group_hom M₁ M₂ :=
 mk_of_bound f 1 $ λ c,
 begin
   obtain ⟨w, H⟩ := h c,
@@ -159,7 +183,7 @@ from a group hom and a proof that it is bounded and continuous. -/
 noncomputable
 def mk' (f : M₁ →+ M₂) (h : ∃ C, ∀ c, ∃ (H : ∀ x, x ∈ filtration M₁ c → f x ∈ filtration M₂ (C * c)),
     @continuous (filtration M₁ c) (filtration M₂ (C * c)) _ _ (λ x, ⟨f x, H x x.2⟩)) :
-  profinitely_filtered_pseudo_normed_group_hom M₁ M₂ :=
+  comphaus_filtered_pseudo_normed_group_hom M₁ M₂ :=
 mk_of_bound f h.some h.some_spec
 
 @[simp] lemma coe_mk_of_bound (f : M₁ →+ M₂) (C) (h) : ⇑(mk_of_bound f C h) = f := rfl
@@ -205,20 +229,20 @@ variables {f g}
 @[ext] theorem ext (H : ∀ x, f x = g x) : f = g :=
 by cases f; cases g; congr'; exact funext H
 
-instance : has_zero (profinitely_filtered_pseudo_normed_group_hom M₁ M₂) :=
+instance : has_zero (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :=
 ⟨mk_of_bound (0 : M₁ →+ M₂) 0 (λ c, ⟨λ _ _, zero_mem_filtration _, @continuous_const _ _ _ _ 0⟩)⟩
 
-instance : inhabited (profinitely_filtered_pseudo_normed_group_hom M₁ M₂) := ⟨0⟩
+instance : inhabited (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) := ⟨0⟩
 
-lemma zero_bound_by_zero : (0 : profinitely_filtered_pseudo_normed_group_hom M₁ M₂).bound_by 0 :=
+lemma zero_bound_by_zero : (0 : comphaus_filtered_pseudo_normed_group_hom M₁ M₂).bound_by 0 :=
 mk_of_bound_bound_by _ _ _
 
-lemma coe_inj ⦃f g : profinitely_filtered_pseudo_normed_group_hom M₁ M₂⦄ (h : (f : M₁ → M₂) = g) :
+lemma coe_inj ⦃f g : comphaus_filtered_pseudo_normed_group_hom M₁ M₂⦄ (h : (f : M₁ → M₂) = g) :
   f = g :=
 by cases f; cases g; cases h; refl
 
 /-- The identity function as `profinitely_filtered_pseudo_normed_group_hom`. -/
-@[simps] def id : profinitely_filtered_pseudo_normed_group_hom M M :=
+@[simps] def id : comphaus_filtered_pseudo_normed_group_hom M M :=
 mk_of_bound (add_monoid_hom.id _) 1 $
 begin
   refine λ c, ⟨_, _⟩,
@@ -230,9 +254,9 @@ end
 
 /-- The composition of `profinitely_filtered_pseudo_normed_group_hom`s. -/
 @[simps] noncomputable def comp
-  (g : profinitely_filtered_pseudo_normed_group_hom M₂ M₃)
-  (f : profinitely_filtered_pseudo_normed_group_hom M₁ M₂) :
-  profinitely_filtered_pseudo_normed_group_hom M₁ M₃ :=
+  (g : comphaus_filtered_pseudo_normed_group_hom M₂ M₃)
+  (f : comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :
+  comphaus_filtered_pseudo_normed_group_hom M₁ M₃ :=
 mk' (g.to_add_monoid_hom.comp f.to_add_monoid_hom) $
 begin
   obtain ⟨Cf, hCf⟩ := f.bound,
@@ -248,7 +272,127 @@ begin
   exact hg₀.comp hf₀
 end
 
-end profinitely_filtered_pseudo_normed_group_hom
+end comphaus_filtered_pseudo_normed_group_hom
+
+namespace strict_comphaus_filtered_pseudo_normed_group_hom
+
+open comphaus_filtered_pseudo_normed_group
+
+variables {M M₁ M₂ M₃ : Type*}
+variables [comphaus_filtered_pseudo_normed_group M]
+variables [comphaus_filtered_pseudo_normed_group M₁]
+variables [comphaus_filtered_pseudo_normed_group M₂]
+variables [comphaus_filtered_pseudo_normed_group M₃]
+variables (f g : strict_comphaus_filtered_pseudo_normed_group_hom M₁ M₂)
+
+instance : has_coe_to_fun (strict_comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :=
+⟨_, strict_comphaus_filtered_pseudo_normed_group_hom.to_fun⟩
+
+@[simp] lemma coe_mk (f) (h₁) (h₂) (h₃) (h₄) :
+  ⇑(⟨f, h₁, h₂, h₃, h₄⟩ : strict_comphaus_filtered_pseudo_normed_group_hom M₁ M₂) = f :=
+rfl
+
+@[simp] lemma mk_to_monoid_hom (f) (h₁) (h₂) (h₃) (h₄) :
+  (⟨f, h₁, h₂, h₃, h₄⟩ :
+    strict_comphaus_filtered_pseudo_normed_group_hom M₁ M₂).to_add_monoid_hom =
+    ⟨f, h₁, h₂⟩ := rfl
+
+@[simp] lemma coe_to_add_monoid_hom : ⇑f.to_add_monoid_hom = f := rfl
+
+@[simp] lemma map_zero : f 0 = 0 := f.to_add_monoid_hom.map_zero
+
+@[simp] lemma map_add (x y) : f (x + y) = f x + f y := f.to_add_monoid_hom.map_add _ _
+
+@[simp] lemma map_sum {ι : Type*} (x : ι → M₁) (s : finset ι) :
+  f (∑ i in s, x i) = ∑ i in s, f (x i) :=
+f.to_add_monoid_hom.map_sum _ _
+
+@[simp] lemma map_sub (x y) : f (x - y) = f x - f y := f.to_add_monoid_hom.map_sub _ _
+
+@[simp] lemma map_neg (x) : f (-x) = -(f x) := f.to_add_monoid_hom.map_neg _
+
+@[simp] lemma map_gsmul (x) (n : ℤ) : f (n • x) = n • (f x) := f.to_add_monoid_hom.map_gsmul _ _
+
+/-- Make a strict comphaus filtered pseudo-normed group hom
+from a group hom and a proof that it is bounded and continuous. -/
+def mk' (f : M₁ →+ M₂)
+  (h : ∀ c, ∃ (H : ∀ x, x ∈ filtration M₁ c → f x ∈ filtration M₂ c),
+      @continuous (filtration M₁ c) (filtration M₂ c) _ _ (λ x, ⟨f x, H x x.2⟩)) :
+  strict_comphaus_filtered_pseudo_normed_group_hom M₁ M₂ :=
+{ strict' := λ c x hh, (h c).some x hh,
+  continuous₁' := λ c, (h c).some_spec,
+  ..f }
+
+@[simp] lemma coe_mk' (f : M₁ →+ M₂) (h) : ⇑(mk' f h) = f := rfl
+
+lemma strict ⦃c x⦄ : x ∈ filtration M₁ c → f x ∈ filtration M₂ c := f.strict' c x
+
+
+def level (c) : filtration M₁ c → filtration M₂ c := pseudo_normed_group.level f f.strict c
+
+protected lemma level_continuous (c) : continuous (pseudo_normed_group.level f f.strict c) :=
+  f.continuous₁' _
+
+variables {f g}
+
+@[ext] theorem ext (H : ∀ x, f x = g x) : f = g :=
+by cases f; cases g; congr'; exact funext H
+
+instance : has_zero (strict_comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :=
+{ zero :=
+  { strict' := λ c x h, pseudo_normed_group.zero_mem_filtration _,
+    continuous₁' := λ c, begin
+      let e : filtration M₁ c → filtration M₂ c := λ x,
+        ⟨0, pseudo_normed_group.zero_mem_filtration _⟩,
+      exact (continuous_const : continuous e),
+    end,
+    ..(0 : M₁ →+ M₂) } }
+
+instance : inhabited (strict_comphaus_filtered_pseudo_normed_group_hom M₁ M₂) := ⟨0⟩
+
+lemma coe_inj ⦃f g : strict_comphaus_filtered_pseudo_normed_group_hom M₁ M₂⦄
+  (h : (f : M₁ → M₂) = g) : f = g :=
+by cases f; cases g; cases h; refl
+
+/-- The identity function as `profinitely_filtered_pseudo_normed_group_hom`. -/
+@[simps] def id : strict_comphaus_filtered_pseudo_normed_group_hom M M :=
+{ strict' := λ c x h, h,
+  continuous₁' := λ c, begin
+    convert continuous_id,
+    ext, refl,
+  end,
+  ..(add_monoid_hom.id M) }
+
+/-- The composition of `profinitely_filtered_pseudo_normed_group_hom`s. -/
+@[simps] def comp
+  (g : strict_comphaus_filtered_pseudo_normed_group_hom M₂ M₃)
+  (f : strict_comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :
+  strict_comphaus_filtered_pseudo_normed_group_hom M₁ M₃ :=
+{ strict' := λ c x h, g.strict $ f.strict h,
+  continuous₁' := λ c, (g.level_continuous c).comp (f.level_continuous c),
+  ..(g.to_add_monoid_hom.comp f.to_add_monoid_hom) }
+
+def to_chfpsng_hom (f : strict_comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :
+  comphaus_filtered_pseudo_normed_group_hom M₁ M₂ :=
+comphaus_filtered_pseudo_normed_group_hom.mk_of_strict f.to_add_monoid_hom $
+λ c, ⟨λ x h, f.strict h, f.level_continuous _⟩
+
+end strict_comphaus_filtered_pseudo_normed_group_hom
+
+namespace comphaus_filtered_pseudo_normed_group_hom
+
+variables {M₁ M₂ : Type*}
+variables [comphaus_filtered_pseudo_normed_group M₁]
+variables [comphaus_filtered_pseudo_normed_group M₂]
+
+def strict.to_schfpsng_hom {f : comphaus_filtered_pseudo_normed_group_hom M₁ M₂}
+  (h : f.strict) :
+  strict_comphaus_filtered_pseudo_normed_group_hom M₁ M₂ :=
+{ strict' := h,
+  continuous₁' := λ c, f.continuous _ (λ x, rfl),
+  ..f.to_add_monoid_hom }
+
+end comphaus_filtered_pseudo_normed_group_hom
 
 namespace punit
 
@@ -293,12 +437,12 @@ lemma pow_incl_injective {n : ℕ} {c : ℝ≥0} [pseudo_normed_group M] :
 
 end pseudo_normed_group
 
-open pseudo_normed_group profinitely_filtered_pseudo_normed_group
+open pseudo_normed_group comphaus_filtered_pseudo_normed_group
 
-variables [profinitely_filtered_pseudo_normed_group M]
-variables [profinitely_filtered_pseudo_normed_group M₁]
-variables [profinitely_filtered_pseudo_normed_group M₂]
-variables [profinitely_filtered_pseudo_normed_group M₃]
+variables [comphaus_filtered_pseudo_normed_group M]
+variables [comphaus_filtered_pseudo_normed_group M₁]
+variables [comphaus_filtered_pseudo_normed_group M₂]
+variables [comphaus_filtered_pseudo_normed_group M₃]
 
 /-- A function `f : M₁ → M₂` between profinitely filtered pseudo-normed groups
 is continuous if it is continuous when restricted to the filtration sets.
@@ -395,15 +539,15 @@ end pfpng_ctu
 
 end continuity
 
-namespace profinitely_filtered_pseudo_normed_group_hom
+namespace comphaus_filtered_pseudo_normed_group_hom
 
 variables {M M₁ M₂ : Type*}
-variables [profinitely_filtered_pseudo_normed_group M]
-variables [profinitely_filtered_pseudo_normed_group M₁]
-variables [profinitely_filtered_pseudo_normed_group M₂]
+variables [comphaus_filtered_pseudo_normed_group M]
+variables [comphaus_filtered_pseudo_normed_group M₁]
+variables [comphaus_filtered_pseudo_normed_group M₂]
 
-def add (f g : profinitely_filtered_pseudo_normed_group_hom M₁ M₂) :
-  profinitely_filtered_pseudo_normed_group_hom M₁ M₂ :=
+def add (f g : comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :
+  comphaus_filtered_pseudo_normed_group_hom M₁ M₂ :=
 { to_fun := f + g,
   bound' :=
   begin
@@ -422,8 +566,8 @@ def add (f g : profinitely_filtered_pseudo_normed_group_hom M₁ M₂) :
   end,
   .. f.to_add_monoid_hom + g.to_add_monoid_hom }
 
-def sub (f g : profinitely_filtered_pseudo_normed_group_hom M₁ M₂) :
-  profinitely_filtered_pseudo_normed_group_hom M₁ M₂ :=
+def sub (f g : comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :
+  comphaus_filtered_pseudo_normed_group_hom M₁ M₂ :=
 { to_fun := f - g,
   bound' :=
   begin
@@ -442,8 +586,8 @@ def sub (f g : profinitely_filtered_pseudo_normed_group_hom M₁ M₂) :
   end,
   .. f.to_add_monoid_hom - g.to_add_monoid_hom }
 
-def neg (f : profinitely_filtered_pseudo_normed_group_hom M₁ M₂) :
-  profinitely_filtered_pseudo_normed_group_hom M₁ M₂ :=
+def neg (f : comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :
+  comphaus_filtered_pseudo_normed_group_hom M₁ M₂ :=
 { to_fun := -f,
   bound' :=
   begin
@@ -454,20 +598,20 @@ def neg (f : profinitely_filtered_pseudo_normed_group_hom M₁ M₂) :
   continuous' := pfpng_ctu.neg f.continuous,
   .. -f.to_add_monoid_hom }
 
-instance : has_add (profinitely_filtered_pseudo_normed_group_hom M₁ M₂) := ⟨add⟩
+instance : has_add (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) := ⟨add⟩
 
-instance : has_sub (profinitely_filtered_pseudo_normed_group_hom M₁ M₂) := ⟨sub⟩
+instance : has_sub (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) := ⟨sub⟩
 
-instance : has_neg (profinitely_filtered_pseudo_normed_group_hom M₁ M₂) := ⟨neg⟩
+instance : has_neg (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) := ⟨neg⟩
 
-instance : add_comm_group (profinitely_filtered_pseudo_normed_group_hom M₁ M₂) :=
+instance : add_comm_group (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :=
 function.injective.add_comm_group
-  profinitely_filtered_pseudo_normed_group_hom.to_add_monoid_hom
+  comphaus_filtered_pseudo_normed_group_hom.to_add_monoid_hom
   (λ f g h, by { ext, rw add_monoid_hom.ext_iff at h, exact h x })
   rfl (λ _ _, rfl) (λ _, rfl) (λ _ _, rfl)
 
 @[simps]
-def to_add_monoid_hom_hom : (profinitely_filtered_pseudo_normed_group_hom M₁ M₂) →+ (M₁ →+ M₂) :=
+def to_add_monoid_hom_hom : (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) →+ (M₁ →+ M₂) :=
 { to_fun := to_add_monoid_hom,
   map_zero' := rfl,
   map_add' := λ _ _, rfl }
@@ -475,16 +619,16 @@ def to_add_monoid_hom_hom : (profinitely_filtered_pseudo_normed_group_hom M₁ M
 lemma to_add_monoid_hom_hom_injective : function.injective (@to_add_monoid_hom_hom M₁ M₂ _ _) :=
 λ f g h, by { ext x, exact add_monoid_hom.congr_fun h x }
 
-lemma bound_by.add {f g : profinitely_filtered_pseudo_normed_group_hom M₁ M₂} {Cf Cg : ℝ≥0}
+lemma bound_by.add {f g : comphaus_filtered_pseudo_normed_group_hom M₁ M₂} {Cf Cg : ℝ≥0}
   (hf : f.bound_by Cf) (hg : g.bound_by Cg) :
   (f + g).bound_by (Cf + Cg) :=
 λ c x hx, by { rw add_mul, exact add_mem_filtration (hf hx) (hg hx) }
 
-@[simp] lemma add_apply (f g : profinitely_filtered_pseudo_normed_group_hom M₁ M₂) (x : M₁) :
+@[simp] lemma add_apply (f g : comphaus_filtered_pseudo_normed_group_hom M₁ M₂) (x : M₁) :
   (f + g) x = f x + g x := rfl
 
 @[simp] lemma sum_apply {ι : Type*} (s : finset ι)
-  (f : ι → profinitely_filtered_pseudo_normed_group_hom M₁ M₂) (x : M₁) :
+  (f : ι → comphaus_filtered_pseudo_normed_group_hom M₁ M₂) (x : M₁) :
   (∑ i in s, f i) x = ∑ i in s, (f i x) :=
 begin
   classical, apply finset.induction_on s,
@@ -494,7 +638,7 @@ begin
 end
 
 lemma sum_bound_by {ι : Type*} (s : finset ι)
-  (f : ι → profinitely_filtered_pseudo_normed_group_hom M₁ M₂)
+  (f : ι → comphaus_filtered_pseudo_normed_group_hom M₁ M₂)
   (C : ι → ℝ≥0) (hf : ∀ i ∈ s, (f i).bound_by (C i)) :
   (∑ i in s, f i).bound_by (∑ i in s, C i) :=
 begin
@@ -505,15 +649,15 @@ begin
     apply (hf _ (s.mem_insert_self i)).add (IH $ λ j hj, hf _ $ finset.mem_insert_of_mem hj) }
 end
 
-end profinitely_filtered_pseudo_normed_group_hom
+end comphaus_filtered_pseudo_normed_group_hom
 
-namespace profinitely_filtered_pseudo_normed_group
+namespace comphaus_filtered_pseudo_normed_group
 
 /-! ## Products -/
 
 section pi
 
-variables {ι : Type*} (M : ι → Type*) [Π i, profinitely_filtered_pseudo_normed_group (M i)]
+variables {ι : Type*} (M : ι → Type*) [Π i, comphaus_filtered_pseudo_normed_group (M i)]
 
 instance pi_topology (c : ℝ≥0) : topological_space (filtration (Π i, M i) c) :=
 topological_space.induced (filtration_pi_equiv M c) $ infer_instance
@@ -551,12 +695,14 @@ begin
   apply @embedding.t2_space _ _ _ _ this (filtration_pi_homeo M c) (filtration_pi_homeo M c).embedding,
 end
 
+/-
 instance pi_td (c : ℝ≥0) : totally_disconnected_space (filtration (Π i, M i) c) :=
 begin
   obtain ⟨H⟩ : totally_disconnected_space (Π i, filtration (M i) c) := infer_instance,
   rw [← homeomorph.range_coe (filtration_pi_homeo M c), ← set.image_univ] at H,
   exact ⟨embedding.is_totally_disconnected (filtration_pi_homeo M c).embedding H⟩,
 end
+-/
 
 instance pi_compact (c : ℝ≥0) : compact_space (filtration (Π i, M i) c) :=
 begin
@@ -566,7 +712,7 @@ begin
   exact ⟨H⟩,
 end
 
-def prod_pi_homeo_pi_prod [Π i, profinitely_filtered_pseudo_normed_group (M i)]
+def prod_pi_homeo_pi_prod [Π i, comphaus_filtered_pseudo_normed_group (M i)]
 (c₁ c₂ : ℝ≥0) :
  filtration (Π i, M i) c₁ × filtration (Π i, M i) c₂ ≃ₜ Π i, (filtration (M i) c₁ × filtration (M i) c₂) :=
 { to_fun := λ x i, ⟨⟨x.1.1 i, x.1.2 i⟩, ⟨x.2.1 i, x.2.2 i⟩⟩,
@@ -607,7 +753,7 @@ def prod_pi_homeo_pi_prod [Π i, profinitely_filtered_pseudo_normed_group (M i)]
     end,}
 
 
-instance pi : profinitely_filtered_pseudo_normed_group (Π i, M i) :=
+instance pi : comphaus_filtered_pseudo_normed_group (Π i, M i) :=
 { continuous_add' :=
     begin
       intros c₁ c₂,
@@ -641,8 +787,8 @@ instance pi : profinitely_filtered_pseudo_normed_group (Π i, M i) :=
 variables {M}
 
 @[simps]
-def pi_proj (i : ι) : profinitely_filtered_pseudo_normed_group_hom (Π i, M i) (M i) :=
-profinitely_filtered_pseudo_normed_group_hom.mk_of_bound (pi.eval_add_monoid_hom M i) 1 $
+def pi_proj (i : ι) : comphaus_filtered_pseudo_normed_group_hom (Π i, M i) (M i) :=
+comphaus_filtered_pseudo_normed_group_hom.mk_of_bound (pi.eval_add_monoid_hom M i) 1 $
 begin
   refine λ c, ⟨λ x hx, by { rw one_mul, exact hx i }, _⟩,
   have := ((continuous_apply i).comp (filtration_pi_homeo M c).continuous),
@@ -652,14 +798,14 @@ begin
 end
 
 lemma pi_proj_bound_by (i : ι) : (@pi_proj _ M _ i).bound_by 1 :=
-profinitely_filtered_pseudo_normed_group_hom.mk_of_bound_bound_by _ _ _
+comphaus_filtered_pseudo_normed_group_hom.mk_of_bound_bound_by _ _ _
 
 /-- Universal property of the product of profinitely filtered pseudo-normed groups -/
 @[simps {fully_applied := ff}]
-def pi_lift {N : Type*} [profinitely_filtered_pseudo_normed_group N]
-  (f : Π i, profinitely_filtered_pseudo_normed_group_hom N (M i))
+def pi_lift {N : Type*} [comphaus_filtered_pseudo_normed_group N]
+  (f : Π i, comphaus_filtered_pseudo_normed_group_hom N (M i))
   (hf : ∃ C, ∀ i, (f i).bound_by C) :
-  profinitely_filtered_pseudo_normed_group_hom N (Π i, M i) :=
+  comphaus_filtered_pseudo_normed_group_hom N (Π i, M i) :=
 { to_fun := add_monoid_hom.mk_to_pi (λ i, (f i).to_add_monoid_hom),
   bound' := by { obtain ⟨C, hC⟩ := hf, refine ⟨C, λ c x hx i, hC i hx⟩ },
   continuous' :=
@@ -675,10 +821,10 @@ def pi_lift {N : Type*} [profinitely_filtered_pseudo_normed_group N]
   end,
   .. add_monoid_hom.mk_to_pi (λ i, (f i).to_add_monoid_hom) }
 
-noncomputable def pi_map {N : ι → Type*} [Π i, profinitely_filtered_pseudo_normed_group (N i)]
-  (f : Π i, profinitely_filtered_pseudo_normed_group_hom (M i) (N i))
+noncomputable def pi_map {N : ι → Type*} [Π i, comphaus_filtered_pseudo_normed_group (N i)]
+  (f : Π i, comphaus_filtered_pseudo_normed_group_hom (M i) (N i))
   (hf : ∃ C, ∀ i, (f i).bound_by C) :
-  profinitely_filtered_pseudo_normed_group_hom (Π i, M i) (Π i, N i) :=
+  comphaus_filtered_pseudo_normed_group_hom (Π i, M i) (Π i, N i) :=
 pi_lift (λ i, (f i).comp (pi_proj i))
 begin
   obtain ⟨C, hC⟩ := hf,
@@ -686,6 +832,30 @@ begin
   have := pi_proj_bound_by i hx,
   rwa one_mul at this,
 end
+
+end pi
+
+end comphaus_filtered_pseudo_normed_group
+
+namespace profinitely_filtered_pseudo_normed_group
+
+/-! ## Products -/
+
+section pi
+
+open comphaus_filtered_pseudo_normed_group
+
+variables {ι : Type*} (M : ι → Type*) [Π i, profinitely_filtered_pseudo_normed_group (M i)]
+
+instance pi_td (c : ℝ≥0) : totally_disconnected_space (filtration (Π i, M i) c) :=
+begin
+  obtain ⟨H⟩ : totally_disconnected_space (Π i, filtration (M i) c) := infer_instance,
+  rw [← homeomorph.range_coe (filtration_pi_homeo M c), ← set.image_univ] at H,
+  exact ⟨embedding.is_totally_disconnected (filtration_pi_homeo M c).embedding H⟩,
+end
+
+instance pi : profinitely_filtered_pseudo_normed_group (Π i, M i) :=
+{ ..(infer_instance : comphaus_filtered_pseudo_normed_group _) }
 
 end pi
 

@@ -8,6 +8,7 @@ and morphisms between them.
 
 -/
 open pseudo_normed_group profinitely_filtered_pseudo_normed_group
+  comphaus_filtered_pseudo_normed_group
 open_locale nnreal big_operators
 
 local attribute [instance] type_pow
@@ -20,7 +21,7 @@ nonnegative real `r'` and homomorphism `Tinv : M → M` such that
 Morphisms are continuous and strict homomorphisms. -/
 class profinitely_filtered_pseudo_normed_group_with_Tinv (r' : out_param $ ℝ≥0) (M : Type*)
   extends profinitely_filtered_pseudo_normed_group M :=
-(Tinv : profinitely_filtered_pseudo_normed_group_hom M M)
+(Tinv : comphaus_filtered_pseudo_normed_group_hom M M)
 (Tinv_mem_filtration : ∀ c x, x ∈ filtration c → Tinv x ∈ filtration (r'⁻¹ * c))
 
 namespace profinitely_filtered_pseudo_normed_group_with_Tinv
@@ -160,17 +161,17 @@ variables (f)
 /-- The `profinitely_filtered_pseudo_normed_group_hom` underlying a
 `profinitely_filtered_pseudo_normed_group_with_Tinv_hom`. -/
 def to_profinitely_filtered_pseudo_normed_group_hom :
-  profinitely_filtered_pseudo_normed_group_hom M₁ M₂ :=
-profinitely_filtered_pseudo_normed_group_hom.mk_of_strict f.to_add_monoid_hom
+  comphaus_filtered_pseudo_normed_group_hom M₁ M₂ :=
+comphaus_filtered_pseudo_normed_group_hom.mk_of_strict f.to_add_monoid_hom
 (λ c, ⟨λ x h, f.strict h, f.level_continuous c⟩)
 
 lemma to_profinitely_filtered_pseudo_normed_group_hom_strict :
   f.to_profinitely_filtered_pseudo_normed_group_hom.strict :=
-profinitely_filtered_pseudo_normed_group_hom.mk_of_strict_strict _ _
+comphaus_filtered_pseudo_normed_group_hom.mk_of_strict_strict _ _
 
 variables {f}
 
-def mk' (f : profinitely_filtered_pseudo_normed_group_hom M₁ M₂)
+def mk' (f : comphaus_filtered_pseudo_normed_group_hom M₁ M₂)
   (hf1 : f.bound_by 1) (hfT) :
   profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂ :=
 { to_fun := f,
@@ -180,7 +181,7 @@ def mk' (f : profinitely_filtered_pseudo_normed_group_hom M₁ M₂)
   .. f }
 
 @[simp] lemma mk'_apply
-  (f : profinitely_filtered_pseudo_normed_group_hom M₁ M₂) (hf1) (hfT) (x : M₁) :
+  (f : comphaus_filtered_pseudo_normed_group_hom M₁ M₂) (hf1) (hfT) (x : M₁) :
   @mk' r' _ _ _ _ f hf1 hfT x = f x := rfl
 
 /-- If the inverse of `profinitely_filtered_pseudo_normed_group_with_Tinv_hom` is strict, then it
@@ -225,7 +226,7 @@ namespace punit
 
 instance profinitely_filtered_pseudo_normed_group_with_Tinv (r' : ℝ≥0) :
   profinitely_filtered_pseudo_normed_group_with_Tinv r' punit :=
-{ Tinv := profinitely_filtered_pseudo_normed_group_hom.id,
+{ Tinv := comphaus_filtered_pseudo_normed_group_hom.id,
   Tinv_mem_filtration := λ c x h, set.mem_univ _,
   .. punit.profinitely_filtered_pseudo_normed_group }
 
@@ -244,7 +245,7 @@ variables [Π i, profinitely_filtered_pseudo_normed_group_with_Tinv r' (M₁ i)]
 variables [Π i, profinitely_filtered_pseudo_normed_group_with_Tinv r' (M₂ i)]
 
 instance pi : profinitely_filtered_pseudo_normed_group_with_Tinv r' (Π i, M i) :=
-{ Tinv := profinitely_filtered_pseudo_normed_group.pi_map (λ i, Tinv)
+{ Tinv := comphaus_filtered_pseudo_normed_group.pi_map (λ i, Tinv)
     ⟨r'⁻¹, λ i, Tinv_bound_by⟩,
   Tinv_mem_filtration := λ c x hx i, Tinv_mem_filtration _ _ (hx i),
   .. profinitely_filtered_pseudo_normed_group.pi _ }
