@@ -13,10 +13,10 @@ universes v u
 
 namespace Condensed
 
-instance : preadditive (Condensed Ab.{u}) := sorry
+instance : preadditive (Condensed Ab.{u+1}) := sorry
 
-instance : abelian (Condensed Ab.{u}) := sorry
+instance : abelian (Condensed Ab.{u+1}) := sorry
 
-instance : enough_projectives (Condensed Ab.{u}) := sorry
+instance : enough_projectives (Condensed Ab.{u+1}) := sorry
 
 end Condensed
