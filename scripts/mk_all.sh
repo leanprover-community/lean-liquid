@@ -16,5 +16,6 @@ else
 fi
 
 find "$dir" -name \*.lean -not -name all.lean \
+  | grep -v "proetale_site_as_small.lean" \
   | sed 's,^\./,,;s,\.lean$,,;s,/,.,g;s,^,import ,' \
   | sort >"$dir"/all.lean
