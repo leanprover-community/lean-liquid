@@ -6,6 +6,13 @@ import condensed.proetale_site_as_small
 Defines the category of condensed sets and condensed structures.
 *Strictly speaking* these are pyknotic, but we hope that in the context of Lean's type theory they
 serve the same purpose.
+
+## Implementation notes regarding universe levels.
+`proetale_topology.{u}` is the pro-etale topology on the small category
+`as_small.{u+1} Profinite.{u} : Type (u+1)`.
+The category of condensed (actually, pyknotic sets, see above), is defined as the category of
+`Type (u+1)`-valued sheaves on `proetale_topology.{u}`.
+Similarly, the category of condensed abelian groups will be defined as `Ab.{u+1}`-valued sheaves.
 -/
 
 open category_theory category_theory.limits
