@@ -45,11 +45,21 @@ bundled.of M
 end CompHausFiltPseuNormGrp
 
 /-- The category of CompHaus-ly filtered pseudo-normed groups with strict morphisms. -/
-def CompHausFiltPseuNormGrp₁ : Type (u+1) :=
-bundled comphaus_filtered_pseudo_normed_group
+structure CompHausFiltPseuNormGrp₁ : Type (u+1) :=
+(M : Type u)
+[str : comphaus_filtered_pseudo_normed_group M]
+(exhaustive' : ∀ m : M, ∃ c, m ∈ pseudo_normed_group.filtration M c)
+
 
 namespace CompHausFiltPseuNormGrp₁
 
+instance : has_coe_to_sort CompHausFiltPseuNormGrp₁ := ⟨Type*, λ M, M.M⟩
+instance (M : CompHausFiltPseuNormGrp₁) : comphaus_filtered_pseudo_normed_group M := M.str
+
+lemma exhaustive (M : CompHausFiltPseuNormGrp₁) (m : M) :
+  ∃ c, m ∈ pseudo_normed_group.filtration M c := M.exhaustive' _
+
+/-
 def bundled_hom : bundled_hom @strict_comphaus_filtered_pseudo_normed_group_hom :=
 ⟨@strict_comphaus_filtered_pseudo_normed_group_hom.to_fun,
  @strict_comphaus_filtered_pseudo_normed_group_hom.id,
@@ -58,11 +68,15 @@ def bundled_hom : bundled_hom @strict_comphaus_filtered_pseudo_normed_group_hom 
 
 local attribute [instance] bundled_hom
 attribute [derive [has_coe_to_sort, large_category, concrete_category]] CompHausFiltPseuNormGrp₁
+-/
 
-instance (M : CompHausFiltPseuNormGrp₁) : comphaus_filtered_pseudo_normed_group M := M.str
+instance : large_category CompHausFiltPseuNormGrp₁.{u} :=
+{ hom := λ A B, strict_comphaus_filtered_pseudo_normed_group_hom A B,
+  id := λ A, strict_comphaus_filtered_pseudo_normed_group_hom.id,
+  comp := λ A B C f g, g.comp f }
 
 def enlarging_functor : CompHausFiltPseuNormGrp₁ ⥤ CompHausFiltPseuNormGrp :=
-{ obj := λ M, M,
+{ obj := λ M, CompHausFiltPseuNormGrp.of M,
   map := λ M₁ M₂ f, f.to_chfpsng_hom }
 
 end CompHausFiltPseuNormGrp₁
