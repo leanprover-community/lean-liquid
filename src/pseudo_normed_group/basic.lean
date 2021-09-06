@@ -318,13 +318,13 @@ begin
 end
 
 lemma const_smul_hom_nat_mem_filtration (n : ℕ) (c : ℝ≥0) (h : ↑n ≤ c) :
-  const_smul_hom M n ∈ filtration (M →+ M) c :=
-λ c' x hx, by simpa only [const_smul_hom_apply]
+  distrib_mul_action.to_add_monoid_hom M n ∈ filtration (M →+ M) c :=
+λ c' x hx, by simpa only [distrib_mul_action.to_add_monoid_hom_apply]
   using filtration_mono (mul_le_mul_right' h c') (nat_smul_mem_filtration _ _ _ hx)
 
 lemma const_smul_hom_int_mem_filtration (n : ℤ) (c : ℝ≥0) (h : ↑(n.nat_abs) ≤ c) :
-  const_smul_hom M n ∈ filtration (M →+ M) c :=
-λ c' x hx, by simpa only [const_smul_hom_apply, smul_eq_mul]
+  distrib_mul_action.to_add_monoid_hom M n ∈ filtration (M →+ M) c :=
+λ c' x hx, by simpa only [distrib_mul_action.to_add_monoid_hom_apply]
   using filtration_mono (mul_le_mul_right' h c') (int_smul_mem_filtration _ _ _ hx)
 
 end add_monoid_hom
