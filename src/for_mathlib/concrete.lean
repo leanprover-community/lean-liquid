@@ -12,6 +12,7 @@ variables {C : Type u} [category.{v} C] [concrete_category.{v} C]
 
 local attribute [instance] has_coe_to_sort has_coe_to_fun
 
+@[nolint doc_blame] --add doc?
 noncomputable def limit.mk (x : Π j : J, G.obj j) (compat : ∀ ⦃i j : J⦄ (e : i ⟶ j),
   G.map e (x _) = x _) : ↥(limits.limit G) :=
 let E := limits.is_limit_of_preserves (forget C) (limits.limit.is_limit G),
