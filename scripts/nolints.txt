@@ -332,7 +332,6 @@ apply_nolint pseudo_normed_group.to_add_comm_group instance_priority
 
 -- pseudo_normed_group/category.lean
 apply_nolint CompHausFiltPseuNormGrp.bundled_hom doc_blame
-apply_nolint CompHausFiltPseuNormGrp₁.bundled_hom doc_blame
 apply_nolint CompHausFiltPseuNormGrp₁.enlarging_functor doc_blame
 apply_nolint ProFiltPseuNormGrp.bundled_hom doc_blame
 apply_nolint ProFiltPseuNormGrp.to_CompHausFilt doc_blame
