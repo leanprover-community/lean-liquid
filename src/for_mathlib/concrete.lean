@@ -27,6 +27,16 @@ way as a sequence compatible with the transition morphisms in the diagram. -/
 noncomputable def limit.mk (x : Π j : J, G.obj j) (compat : ∀ ⦃i j : J⦄ (e : i ⟶ j),
   G.map e (x _) = x _) : ↥(limits.limit G) := (limit.equiv G) ⟨x,compat⟩
 
+lemma limit.mk_π (x : Π j : J, G.obj j) (compat : ∀ ⦃i j⦄ (e : i ⟶ j),
+  G.map e (x _) = x _) (j : J)  : limits.limit.π G j (limit.mk _ x compat) = x _ :=
+begin
+  dsimp [limit.mk, limit.equiv, limits.is_limit.cone_point_unique_up_to_iso],
+  let t := (limits.is_limit_of_preserves (forget C) (limits.limit.is_limit G)).lift
+    (limits.types.limit_cone (G ⋙ forget C)),
+  erw [← comp_apply t (limits.limit.π G j) ⟨x,compat⟩, limits.is_limit.fac],
+  refl,
+end
+
 -- Rename this?
 lemma limit.term_ext {x y : limits.limit G}
   (h : ∀ j : J, limits.limit.π G j x = limits.limit.π G j y) : x = y :=
