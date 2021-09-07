@@ -321,7 +321,23 @@ end
 
 lemma add_assoc (a b c : cone_point_type G) : a + b + c = a + (b + c) := sorry
 
-lemma add_comm (a b : cone_point_type G) : a + b = b + a := sorry
+lemma add_comm (a b : cone_point_type G) : a + b = b + a :=
+begin
+  change incl _ _ _ = incl _ _ _,
+  apply incl_eq_incl _ _ _ (le_refl _) (le_of_eq _),
+  swap, {rw add_comm},
+  apply proj_ext,
+  intros j,
+  ext1,
+  rw [← CompHaus.coe_comp_apply, proj_trans, CompHaus.coe_comp_apply],
+  dsimp [level],
+  erw concrete_category.limit.mk_π,
+  rw [← CompHaus.coe_comp_apply, proj_trans, CompHaus.coe_comp_apply],
+  dsimp [level],
+  erw concrete_category.limit.mk_π,
+  change _ + _ = _ + _,
+  rw add_comm,
+end
 
 lemma add_left_neg (a : cone_point_type G) : -a + a = 0 := sorry
 
