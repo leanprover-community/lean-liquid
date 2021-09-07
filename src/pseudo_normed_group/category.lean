@@ -124,7 +124,7 @@ lemma incl_injective (c : ℝ≥0) : function.injective (incl G c) := sorry
 lemma incl_jointly_surjective (x : cone_point_type G) :
   ∃ (c : ℝ≥0) (y : cone_point_type_filt G c), x = incl G c y := sorry
 
-instance (c : ℝ≥0) : has_zero ↥(cone_point_type_filt G c) :=
+instance (c : ℝ≥0) : has_zero (cone_point_type_filt G c) :=
 has_zero.mk (concrete_category.limit.mk _
   (λ j, (0 : pseudo_normed_group.filtration _ _)) begin
     intros i j e,
@@ -134,6 +134,30 @@ has_zero.mk (concrete_category.limit.mk _
   end)
 
 instance : has_zero (cone_point_type G) := ⟨incl G 0 0⟩
+
+def neg_nat_trans (c : ℝ≥0) : ((cone_point_diagram G).obj (as_small.up.obj c)) ⟶
+  ((cone_point_diagram G).obj (as_small.up.obj c)) :=
+{ app := λ j,
+  { to_fun := λ (x : pseudo_normed_group.filtration _ _), (-x :
+      pseudo_normed_group.filtration _ _),
+    continuous_to_fun := comphaus_filtered_pseudo_normed_group.continuous_neg' _ },
+  naturality' := begin
+    intros i j e,
+    ext (t : pseudo_normed_group.filtration _ _) : 2,
+    dsimp [cone_point_diagram, level, CompHaus.coe_comp_apply],
+    simp,
+  end }
+
+instance (c : ℝ≥0) : has_neg (cone_point_type_filt G c) := ⟨lim_map (neg_nat_trans _ _)⟩
+
+def neg_nat_trans' : (cone_point_diagram G ⋙ lim ⋙ forget _) ⟶
+  (cone_point_diagram G ⋙ lim ⋙ forget _) :=
+{ app := λ ⟨c⟩ (x : cone_point_type_filt G c), (-x : cone_point_type_filt G c),
+  naturality' := begin
+    sorry
+  end }
+
+instance : has_neg (cone_point_type G) := ⟨colim_map (neg_nat_trans' _)⟩
 
 -- This is the goal of this section...
 instance : has_limits CompHausFiltPseuNormGrp₁ := sorry
