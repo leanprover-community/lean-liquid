@@ -9,7 +9,7 @@ statements `weak_normed_snake_dual` and `normed_snake_dual`, respectively.
 
 The principal definitions of the concepts in this file appear in Section 4 of the blueprint.
 
-The two main results prove `is_(weak_)bounded_exact` for certain `system_of_complexes`.  The
+The two main results prove `is_(weak_)bounded_exact` for certain `system_of_complexes`. The
 Lean-definitions of these concepts appears in `system_of_complexes.basic`.
 
 Intuitively, the two predicates assert a version of exactness for a complex whose overall shape is
