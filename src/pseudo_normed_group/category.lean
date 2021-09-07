@@ -1,6 +1,8 @@
 import category_theory.concrete_category.bundled_hom
 import topology.category.Profinite
 import data.equiv.fin
+import for_mathlib.concrete
+import for_mathlib.CompHaus
 
 import pseudo_normed_group.with_Tinv
 
@@ -78,6 +80,49 @@ instance : large_category CompHausFiltPseuNormGrp₁.{u} :=
 def enlarging_functor : CompHausFiltPseuNormGrp₁ ⥤ CompHausFiltPseuNormGrp :=
 { obj := λ M, CompHausFiltPseuNormGrp.of M,
   map := λ M₁ M₂ f, f.to_chfpsng_hom }
+
+instance : concrete_category CompHausFiltPseuNormGrp₁.{u} :=
+{ forget :=
+  { obj := λ M, M.M,
+    map := λ A B f, f },
+  forget_faithful := ⟨⟩ } .
+
+def level : ℝ≥0 ⥤ CompHausFiltPseuNormGrp₁.{u} ⥤ CompHaus :=
+{ obj := λ c,
+  { obj := λ M, CompHaus.of $ pseudo_normed_group.filtration M c,
+    map := λ A B f, ⟨_, f.level_continuous _⟩ },
+  map := λ c₁ c₂ h,
+    { app := λ M, by letI : fact (c₁ ≤ c₂) := ⟨le_of_hom h⟩; exact
+        ⟨_, comphaus_filtered_pseudo_normed_group.continuous_cast_le _ _⟩ } } .
+
+section limits
+
+/-!
+In this section, we show (hopefully ;)) that `CompHausFiltPseuNormGrp₁` has limits.
+-/
+
+variables {J : Type u} [small_category J] (G : J ⥤ CompHausFiltPseuNormGrp₁.{u})
+
+open category_theory.limits
+
+/-- This is a bifunctor which associates to each `c : ℝ≥0` and `j : J`,
+  the `c`-th term of the filtration of `G.obj j`. -/
+def cone_point_diagram : as_small.{u} ℝ≥0 ⥤ J ⥤ CompHaus.{u} :=
+as_small.down ⋙ level ⋙ (whiskering_left _ _ _).obj G
+
+instance (c : as_small ℝ≥0) : has_zero ↥(limit ((cone_point_diagram G).obj c)) :=
+has_zero.mk (concrete_category.limit.mk _
+  (λ j, (0 : pseudo_normed_group.filtration _ _)) begin
+    intros i j e,
+    dsimp [cone_point_diagram, level],
+    ext1,
+    simp [(G.map e).map_zero],
+  end)
+
+-- This is the goal of this section...
+instance : has_limits CompHausFiltPseuNormGrp₁ := sorry
+
+end limits
 
 end CompHausFiltPseuNormGrp₁
 
