@@ -251,20 +251,19 @@ end
 
 instance : has_zero (cone_point_type G) := ⟨incl G 0 0⟩
 
-def neg_nat_trans (c : ℝ≥0) : ((cone_point_diagram G).obj (as_small.up.obj c)) ⟶
-  ((cone_point_diagram G).obj (as_small.up.obj c)) :=
-{ app := λ j,
-  { to_fun := λ (x : pseudo_normed_group.filtration _ _), (-x :
-      pseudo_normed_group.filtration _ _),
-    continuous_to_fun := comphaus_filtered_pseudo_normed_group.continuous_neg' _ },
-  naturality' := begin
-    intros i j e,
-    ext (t : pseudo_normed_group.filtration _ _) : 2,
-    dsimp [cone_point_diagram, level, CompHaus.coe_comp_apply],
-    simp,
-  end }
-
-instance (c : ℝ≥0) : has_neg (cone_point_type_filt G c) := ⟨lim_map (neg_nat_trans _ _)⟩
+instance (c : ℝ≥0) : has_neg (cone_point_type_filt G c) := has_neg.mk $
+λ x, concrete_category.limit.mk _
+  (λ j, (- (proj _ _ _ x) : pseudo_normed_group.filtration _ _))
+begin
+  intros i j e,
+  dsimp [cone_point_diagram, level],
+  ext1,
+  dsimp,
+  rw [(G.map e).map_neg],
+  congr' 1,
+  change ((proj G c i ≫ (level.obj c).map (G.map e)) x).val = _,
+  simp,
+end
 
 /-
 def neg_nat_trans' : (cone_point_diagram G ⋙ lim ⋙ forget _) ⟶
@@ -319,7 +318,10 @@ begin
   refl,
 end
 
-lemma add_assoc (a b c : cone_point_type G) : a + b + c = a + (b + c) := sorry
+lemma add_assoc (a b c : cone_point_type G) : a + b + c = a + (b + c) :=
+begin
+  sorry,
+end
 
 lemma add_comm (a b : cone_point_type G) : a + b = b + a :=
 begin
@@ -339,7 +341,25 @@ begin
   rw add_comm,
 end
 
-lemma add_left_neg (a : cone_point_type G) : -a + a = 0 := sorry
+lemma add_left_neg (a : cone_point_type G) : -a + a = 0 :=
+begin
+  change incl _ _ _ = incl _ _ _,
+  apply incl_eq_incl _ _ _ (le_refl _),
+  swap, { simp },
+  apply proj_ext,
+  intros j,
+  ext1,
+  rw [← CompHaus.coe_comp_apply, proj_trans, CompHaus.coe_comp_apply],
+  dsimp [level],
+  erw concrete_category.limit.mk_π,
+  rw [← CompHaus.coe_comp_apply, proj_trans, CompHaus.coe_comp_apply],
+  dsimp [level],
+  change subtype.val _ + subtype.val _ = _,
+  erw aux,
+  convert add_left_neg _,
+  erw concrete_category.limit.mk_π, refl,
+  erw concrete_category.limit.mk_π, refl,
+end
 
 instance : add_comm_group (cone_point_type G) :=
 { add_assoc := add_assoc G,
