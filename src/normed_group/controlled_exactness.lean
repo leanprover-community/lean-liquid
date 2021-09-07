@@ -1,4 +1,4 @@
-import for_mathlib.normed_group_hom_completion
+import analysis.normed_space.normed_group_hom_completion
 
 /-!
 
@@ -25,7 +25,7 @@ begin
   intros ε ε_pos hatm hatm_in,
   by_cases H : hatm = 0,
   { use 0,
-    simp [H] },
+    simp only [H, le_refl, norm_zero, eq_self_iff_true, and_self, mul_zero, map_zero], },
   set hatf := f.completion,
   set i := incl g.ker,
 
