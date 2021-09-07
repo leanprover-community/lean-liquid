@@ -390,6 +390,68 @@ instance : add_comm_group (cone_point_type G) :=
   ..(infer_instance : has_neg _),
   ..(infer_instance : has_zero _) }
 
+instance (c : ℝ≥0) : topological_space (set.range (incl G c)) :=
+let f : cone_point_type_filt G c → set.range (incl G c) := λ x, ⟨incl G c x, x, rfl⟩ in
+topological_space.coinduced f infer_instance
+
+instance : comphaus_filtered_pseudo_normed_group (cone_point_type G) :=
+{ --to_add_comm_group := _,
+  filtration := λ r, set.range (incl G r),
+  filtration_mono := begin
+    rintros a b h x ⟨x,rfl⟩,
+    use trans G h x,
+    rw incl_trans_apply,
+  end,
+  zero_mem_filtration := begin
+    intros c,
+    change incl _ _ _ ∈ _,
+    use trans G (by simp : 0 ≤ c) 0,
+    rw incl_trans_apply,
+  end,
+  neg_mem_filtration := begin
+    rintros c x ⟨y,rfl⟩,
+    use -y,
+    change _ = incl _ _ _,
+    apply incl_eq_incl _ _ _ (le_max_left _ _) (le_max_right _ _),
+    apply proj_ext,
+    intros j,
+    rw [← CompHaus.coe_comp_apply, proj_trans, CompHaus.coe_comp_apply],
+    dsimp [level],
+    erw concrete_category.limit.mk_π,
+    rw [← CompHaus.coe_comp_apply, proj_trans, CompHaus.coe_comp_apply],
+    dsimp [level],
+    erw concrete_category.limit.mk_π,
+    ext1,
+    dsimp,
+    change _ = -(subtype.val _),
+    erw aux,
+    refl,
+  end,
+  add_mem_filtration := begin
+    rintros c₁ c₂ x₁ x₂ ⟨x₁,rfl⟩ ⟨x₂,rfl⟩,
+    use cone_point_type_filt_add G x₁ x₂,
+    apply incl_eq_incl _ _ _ (le_max_left _ _) (le_max_right _ _),
+    apply proj_ext,
+    intros j,
+    rw [← CompHaus.coe_comp_apply, proj_trans, CompHaus.coe_comp_apply],
+    dsimp [level],
+    erw concrete_category.limit.mk_π,
+    rw [← CompHaus.coe_comp_apply, proj_trans, CompHaus.coe_comp_apply],
+    dsimp [level],
+    erw concrete_category.limit.mk_π,
+    ext1,
+    dsimp,
+    change _ + _ = subtype.val _ + subtype.val _,
+    erw [aux, aux],
+    refl,
+  end,
+  --topology := _,
+  --t2 := _,
+  --compact := _,
+  continuous_add' := sorry,
+  continuous_neg' := sorry,
+  continuous_cast_le := sorry }
+
 -- This is the goal of this section...
 instance : has_limits CompHausFiltPseuNormGrp₁ := sorry
 
