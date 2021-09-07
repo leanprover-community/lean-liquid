@@ -394,6 +394,9 @@ instance (c : ℝ≥0) : topological_space (set.range (incl G c)) :=
 let f : cone_point_type_filt G c → set.range (incl G c) := λ x, ⟨incl G c x, x, rfl⟩ in
 topological_space.coinduced f infer_instance
 
+instance (c : ℝ≥0) : compact_space (set.range (incl G c)) := sorry
+instance (c : ℝ≥0) : t2_space (set.range (incl G c)) := sorry
+
 instance : comphaus_filtered_pseudo_normed_group (cone_point_type G) :=
 { --to_add_comm_group := _,
   filtration := λ r, set.range (incl G r),
@@ -445,9 +448,9 @@ instance : comphaus_filtered_pseudo_normed_group (cone_point_type G) :=
     erw [aux, aux],
     refl,
   end,
-  --topology := _,
-  --t2 := _,
-  --compact := _,
+  topology := by apply_instance,
+  t2 := by apply_instance,
+  compact := by apply_instance,
   continuous_add' := sorry,
   continuous_neg' := sorry,
   continuous_cast_le := sorry }
