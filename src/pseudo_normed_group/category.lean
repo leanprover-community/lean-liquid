@@ -110,7 +110,21 @@ open category_theory.limits
 def cone_point_diagram : as_small.{u} ℝ≥0 ⥤ J ⥤ CompHaus.{u} :=
 as_small.down ⋙ level ⋙ (whiskering_left _ _ _).obj G
 
-instance (c : as_small ℝ≥0) : has_zero ↥(limit ((cone_point_diagram G).obj c)) :=
+def cone_point_type : Type u :=
+colimit (cone_point_diagram G ⋙ lim ⋙ forget _)
+
+def cone_point_type_filt (c : ℝ≥0) : CompHaus :=
+limit ((cone_point_diagram G).obj (as_small.up.obj c))
+
+def incl (c : ℝ≥0) : cone_point_type_filt G c → cone_point_type G :=
+colimit.ι (cone_point_diagram G ⋙ lim ⋙ forget _) (as_small.up.obj c)
+
+lemma incl_injective (c : ℝ≥0) : function.injective (incl G c) := sorry
+
+lemma incl_jointly_surjective (x : cone_point_type G) :
+  ∃ (c : ℝ≥0) (y : cone_point_type_filt G c), x = incl G c y := sorry
+
+instance (c : ℝ≥0) : has_zero ↥(cone_point_type_filt G c) :=
 has_zero.mk (concrete_category.limit.mk _
   (λ j, (0 : pseudo_normed_group.filtration _ _)) begin
     intros i j e,
@@ -118,6 +132,8 @@ has_zero.mk (concrete_category.limit.mk _
     ext1,
     simp [(G.map e).map_zero],
   end)
+
+instance : has_zero (cone_point_type G) := ⟨incl G 0 0⟩
 
 -- This is the goal of this section...
 instance : has_limits CompHausFiltPseuNormGrp₁ := sorry
