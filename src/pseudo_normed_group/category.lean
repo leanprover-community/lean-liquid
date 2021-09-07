@@ -119,10 +119,43 @@ limit ((cone_point_diagram G).obj (as_small.up.obj c))
 def incl (c : ℝ≥0) : cone_point_type_filt G c → cone_point_type G :=
 colimit.ι (cone_point_diagram G ⋙ lim ⋙ forget _) (as_small.up.obj c)
 
-lemma incl_injective (c : ℝ≥0) : function.injective (incl G c) := sorry
+lemma cone_point_diagram_map_injective {c₁ c₂ : as_small.{u} ℝ≥0} (e : c₁ ⟶ c₂) :
+  function.injective ((cone_point_diagram G ⋙ lim ⋙ forget CompHaus).map e) :=
+begin
+  intros x y h,
+  apply concrete_category.limit.term_ext,
+  intros j,
+  apply_fun (concrete_category.limit.equiv _).symm at h,
+  apply_fun (λ e, (e.val j).val) at h,
+  ext1,
+  convert h using 1,
+  all_goals { dsimp [concrete_category.limit.equiv, types.limit_cone_is_limit,
+      is_limit.cone_point_unique_up_to_iso, lim_map, is_limit.map],
+    simp_rw ← CompHaus.coe_comp_apply,
+    erw limit.lift_π,
+    refl },
+end
+
+lemma incl_injective (c : ℝ≥0) : function.injective (incl G c) :=
+begin
+  intros a b h,
+  erw limits.types.filtered_colimit.colimit_eq_iff at h,
+  obtain ⟨k,e₁,e₂,h⟩ := h,
+  have : e₁ = e₂, by ext,
+  rw this at h,
+  apply cone_point_diagram_map_injective _ e₂,
+  exact h,
+end
 
 lemma incl_jointly_surjective (x : cone_point_type G) :
-  ∃ (c : ℝ≥0) (y : cone_point_type_filt G c), x = incl G c y := sorry
+  ∃ (c : ℝ≥0) (y : cone_point_type_filt G c), x = incl G c y :=
+begin
+  obtain ⟨⟨c⟩,y,hy⟩ := limits.concrete.is_colimit_exists_rep
+    (cone_point_diagram G ⋙ lim ⋙ forget _) (colimit.is_colimit _) x,
+  use [c,y],
+  exact hy.symm
+end
+
 
 instance (c : ℝ≥0) : has_zero (cone_point_type_filt G c) :=
 has_zero.mk (concrete_category.limit.mk _

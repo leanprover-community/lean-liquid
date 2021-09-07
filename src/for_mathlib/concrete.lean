@@ -27,6 +27,15 @@ way as a sequence compatible with the transition morphisms in the diagram. -/
 noncomputable def limit.mk (x : Π j : J, G.obj j) (compat : ∀ ⦃i j : J⦄ (e : i ⟶ j),
   G.map e (x _) = x _) : ↥(limits.limit G) := (limit.equiv G) ⟨x,compat⟩
 
+-- Rename this?
+lemma limit.term_ext {x y : limits.limit G}
+  (h : ∀ j : J, limits.limit.π G j x = limits.limit.π G j y) : x = y :=
+begin
+  apply_fun (limit.equiv G).symm,
+  ext j,
+  exact h j,
+end
+
 end concrete_category
 
 end category_theory
