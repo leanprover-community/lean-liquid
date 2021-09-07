@@ -312,7 +312,6 @@ begin
   rw [← CompHaus.coe_comp_apply, proj_trans, CompHaus.coe_comp_apply],
   dsimp [level],
   simp only [add_left_eq_self],
-  have : 0 ≤ choose_index G 0, simp,
   change subtype.val _ = _,
   erw [aux, concrete_category.limit.mk_π],
   refl,
@@ -320,7 +319,27 @@ end
 
 lemma add_assoc (a b c : cone_point_type G) : a + b + c = a + (b + c) :=
 begin
-  sorry,
+  let e :=
+    (choose_index G (a + b) + choose_index G c) ⊔ (choose_index G a + choose_index G (b + c)),
+  apply incl_eq_incl _ _ _ (le_sup_left : _ ≤ e) (le_sup_right : _ ≤ e),
+  apply proj_ext,
+  intros j,
+  ext1,
+  rw [← CompHaus.coe_comp_apply, proj_trans, CompHaus.coe_comp_apply],
+  dsimp [level],
+  erw concrete_category.limit.mk_π,
+  rw [← CompHaus.coe_comp_apply, proj_trans, CompHaus.coe_comp_apply],
+  dsimp [level],
+  erw concrete_category.limit.mk_π,
+  change subtype.val _ + subtype.val _ = subtype.val _ + subtype.val _,
+  erw aux,
+  dsimp,
+  change _ = subtype.val _ + subtype.val _,
+  conv_rhs { congr, skip, erw aux },
+  erw concrete_category.limit.mk_π,
+  erw concrete_category.limit.mk_π,
+  erw add_assoc,
+  refl,
 end
 
 lemma add_comm (a b : cone_point_type G) : a + b = b + a :=
