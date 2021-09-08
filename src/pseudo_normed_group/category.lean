@@ -390,12 +390,33 @@ instance : add_comm_group (cone_point_type G) :=
   ..(infer_instance : has_neg _),
   ..(infer_instance : has_zero _) }
 
-instance (c : ℝ≥0) : topological_space (set.range (incl G c)) :=
-let f : cone_point_type_filt G c → set.range (incl G c) := λ x, ⟨incl G c x, x, rfl⟩ in
-topological_space.coinduced f infer_instance
+def equiv (c : ℝ≥0) : cone_point_type_filt G c ≃ set.range (incl G c) :=
+equiv.of_bijective (λ x, ⟨incl G c x, x, rfl⟩)
+begin
+  split,
+  { intros x y h,
+    apply incl_injective,
+    apply_fun (λ e, e.1) at h,
+    exact h },
+  { rintro ⟨-,x,rfl⟩, use x }
+end
 
-instance (c : ℝ≥0) : compact_space (set.range (incl G c)) := sorry
-instance (c : ℝ≥0) : t2_space (set.range (incl G c)) := sorry
+instance (c : ℝ≥0) : topological_space (set.range (incl G c)) :=
+topological_space.induced (equiv G c).symm infer_instance
+
+def homeo (c : ℝ≥0) : set.range (incl G c) ≃ₜ cone_point_type_filt G c :=
+homeomorph.homeomorph_of_continuous_open (equiv G c).symm (continuous_induced_dom)
+begin
+  intros U hU,
+  have : inducing (equiv G c).symm := ⟨rfl⟩,
+  rw this.is_open_iff at hU,
+  obtain ⟨U,hU,rfl⟩ := hU,
+  simpa,
+end
+
+instance (c : ℝ≥0) : t2_space (set.range (incl G c)) := (homeo G c).symm.t2_space
+
+instance (c : ℝ≥0) : compact_space (set.range (incl G c)) := (homeo G c).symm.compact_space
 
 instance : comphaus_filtered_pseudo_normed_group (cone_point_type G) :=
 { --to_add_comm_group := _,
