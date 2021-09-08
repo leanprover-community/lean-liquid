@@ -591,10 +591,28 @@ def limit_cone : cone G :=
       exact this.symm,
     end } }
 
-def limit_cone_is_limit : is_limit (limit_cone G) := sorry
+def index {M : CompHausFiltPseuNormGrp₁} (x : M) : ℝ≥0 := (M.exhaustive x).some
+def preimage {M : CompHausFiltPseuNormGrp₁} (x : M) : filtration M (index x) :=
+  ⟨x,(M.exhaustive x).some_spec⟩
+
+def limit_cone_lift (D : cone G) : D.X ⟶ cone_point G :=
+{ to_fun := λ x, cone_point_type.incl (index x)
+    ⟨λ j, (D.π.app j).level (preimage x), sorry⟩,
+  map_zero' := sorry,
+  map_add' := sorry,
+  strict' := sorry,
+  continuous₁' := sorry }
+
+def limit_cone_is_limit : is_limit (limit_cone G) :=
+{ lift := λ S, limit_cone_lift _ _,
+  fac' := sorry,
+  uniq' := sorry }
 
 -- This is the goal of this section...
-instance : has_limits CompHausFiltPseuNormGrp₁ := sorry
+instance : has_limit G := has_limit.mk ⟨limit_cone _, limit_cone_is_limit _⟩
+
+instance : has_limits CompHausFiltPseuNormGrp₁ :=
+⟨λ J hJ, { has_limit := λ G, by resetI; apply_instance }⟩
 
 end limits
 
