@@ -155,6 +155,15 @@ begin
   exact (hS.map T η).continuous,
 end
 
+lemma continuous_apply {c : ℝ≥0} (j : J) : continuous (λ t : cone_point_type_filt G c, t j) :=
+begin
+  change continuous ((λ u : Π j, filtration (G.obj j) c, u j) ∘
+    (λ u : cone_point_type_filt G c, ⇑u)),
+  apply continuous.comp,
+  apply continuous_apply,
+  apply continuous_subtype_coe,
+end
+
 instance {c} : has_zero (cone_point_type_filt G c) := has_zero.mk $
 ⟨λ j, 0, λ i j e, by { ext, dsimp, simp }⟩
 
@@ -169,6 +178,48 @@ def add' {c₁ c₂} (x : cone_point_type_filt G c₁) (y : cone_point_type_filt
 @[simp] lemma neg_apply {c} (j : J) (x : cone_point_type_filt G c) : (-x) j = - (x j) := rfl
 @[simp] lemma add'_apply_coe {c₁ c₂} (j : J) (x : cone_point_type_filt G c₁)
   (y : cone_point_type_filt G c₂) : ((x.add' y) j : G.obj j) = x j + y j := rfl
+
+lemma continuous_neg {c} : continuous (λ x : cone_point_type_filt G c, - x) :=
+begin
+  apply continuous_subtype_mk,
+  apply continuous_pi,
+  intros j,
+  change continuous ((λ x, -x) ∘ (λ a : cone_point_type_filt G c, (a j))),
+  apply continuous.comp,
+  apply comphaus_filtered_pseudo_normed_group.continuous_neg',
+  apply continuous_apply,
+end
+
+lemma continuous_add' {c1 c2} :
+  continuous (λ t : cone_point_type_filt G c1 × cone_point_type_filt G c2, t.1.add' t.2) :=
+begin
+  apply continuous_subtype_mk,
+  apply continuous_pi,
+  intros j,
+  let A : cone_point_type_filt G c1 × cone_point_type_filt G c2 →
+    (Π j : J, filtration (G.obj j) c1) × (Π j : J, filtration (G.obj j) c2) :=
+    λ t, (t.1,t.2),
+  let B : (Π j : J, filtration (G.obj j) c1) × (Π j : J, filtration (G.obj j) c2) →
+    filtration (G.obj j) c1 × filtration (G.obj j) c2 := λ t, (t.1 j, t.2 j),
+  let C : filtration (G.obj j) c1 × filtration (G.obj j) c2 → filtration (G.obj j) (c1 + c2) :=
+    pseudo_normed_group.add',
+  change continuous (C ∘ B ∘ A),
+  apply continuous.comp,
+  apply comphaus_filtered_pseudo_normed_group.continuous_add',
+  apply continuous.comp,
+  { apply continuous.prod_mk,
+    { change continuous ((λ t : Π j : J, filtration (G.obj j) c1, t j) ∘ prod.fst),
+      apply continuous.comp,
+      apply _root_.continuous_apply,
+      exact continuous_fst },
+    { change continuous ((λ t : Π j : J, filtration (G.obj j) c2, t j) ∘ prod.snd),
+      apply continuous.comp,
+      apply _root_.continuous_apply,
+      exact continuous_snd } },
+  apply continuous.prod_map,
+  apply continuous_subtype_coe,
+  apply continuous_subtype_coe,
+end
 
 end cone_point_type_filt
 
@@ -258,10 +309,18 @@ end
 
 
 instance : has_zero (cone_point_type G) := ⟨incl 0 0⟩
+
+lemma zero_def : (0 : cone_point_type G) = incl 0 0 := rfl
+
 instance : has_neg (cone_point_type G) := has_neg.mk $
 λ x, incl _ (-x.preimage)
+
+lemma neg_def (x : cone_point_type G) : -x = incl _ (-x.preimage) := rfl
+
 instance : has_add (cone_point_type G) := has_add.mk $
 λ x y, incl _ (x.preimage.add' y.preimage)
+
+lemma add_def (x y : cone_point_type G) : x + y = incl _ (x.preimage.add' y.preimage) := rfl
 
 lemma zero_add (x : cone_point_type G) : 0 + x = x :=
 begin
@@ -323,9 +382,9 @@ instance : add_comm_group (cone_point_type G) :=
   ..(infer_instance : has_neg _) }
 
 variable (G)
-def filtration (c : ℝ≥0) : set (cone_point_type G) := set.range (incl c)
+def filt (c : ℝ≥0) : set (cone_point_type G) := set.range (incl c)
 
-def filtration_equiv (c : ℝ≥0) : cone_point_type_filt G c ≃ filtration G c :=
+def filt_equiv (c : ℝ≥0) : cone_point_type_filt G c ≃ filt G c :=
 equiv.of_bijective (λ x, ⟨_, x, rfl⟩)
 begin
   split,
@@ -336,60 +395,77 @@ begin
   { rintro ⟨_,x,rfl⟩, use x }
 end
 
-instance {c} : topological_space (filtration G c) :=
-topological_space.induced (filtration_equiv G c).symm infer_instance
+instance {c} : topological_space (filt G c) :=
+topological_space.induced (filt_equiv G c).symm infer_instance
 
-def filtration_homeo (c : ℝ≥0) : filtration G c ≃ₜ cone_point_type_filt G c :=
-homeomorph.homeomorph_of_continuous_open (filtration_equiv G c).symm continuous_induced_dom
+def filt_homeo (c : ℝ≥0) : filt G c ≃ₜ cone_point_type_filt G c :=
+homeomorph.homeomorph_of_continuous_open (filt_equiv G c).symm continuous_induced_dom
 begin
   intros U hU,
-  have : inducing (filtration_equiv G c).symm := ⟨rfl⟩,
+  have : inducing (filt_equiv G c).symm := ⟨rfl⟩,
   rw this.is_open_iff at hU,
   obtain ⟨U,hU,rfl⟩ := hU,
   simpa,
 end
 
-instance {c} : compact_space (filtration G c) :=
-(filtration_homeo G c).symm.compact_space
+instance {c} : compact_space (filt G c) :=
+(filt_homeo G c).symm.compact_space
 
-instance {c} : t2_space (filtration G c) :=
-(filtration_homeo G c).symm.t2_space
+instance {c} : t2_space (filt G c) :=
+(filt_homeo G c).symm.t2_space
 
 variable {G}
 
+@[simp] lemma incl_neg {c} (x : cone_point_type_filt G c) :
+  incl c (-x) = - incl c x :=
+begin
+  apply quotient.sound',
+  refine ⟨_, le_sup_left, le_sup_right, _⟩,
+  dsimp,
+  ext j : 3,
+  simp,
+end
+
+@[simp] lemma incl_add' {c1 c2} (x1 : cone_point_type_filt G c1) (x2 : cone_point_type_filt G c2) :
+  incl (c1 + c2) (x1.add' x2) = incl c1 x1 + incl c2 x2 :=
+begin
+  apply quotient.sound',
+  refine ⟨_, le_sup_left, le_sup_right, _⟩,
+  dsimp,
+  ext j : 3,
+  simp,
+end
+
+@[simp] lemma incl_zero {c} : incl c (0 : cone_point_type_filt G c) = 0 :=
+begin
+  apply quotient.sound',
+  refine ⟨_, le_sup_left, le_sup_right, _⟩,
+  dsimp,
+  ext j : 3,
+  simp,
+end
+
 instance : pseudo_normed_group (cone_point_type G) :=
-{ filtration := filtration G,
+{ filtration := filt G,
   filtration_mono := begin
     rintro c1 c2 h x ⟨x,rfl⟩,
-    dsimp [filtration],
+    dsimp [filt],
     use x.trans h,
     simp,
   end,
   zero_mem_filtration := begin
     intro c,
     use 0,
-    apply quotient.sound',
-    refine ⟨_, le_sup_left, le_sup_right, _⟩,
-    dsimp,
-    ext j : 3,
     simp,
   end,
   neg_mem_filtration := begin
     rintros c x ⟨x,rfl⟩,
     use -x,
-    apply quotient.sound',
-    refine ⟨_, le_sup_left, le_sup_right, _⟩,
-    dsimp,
-    ext j : 3,
     simp,
   end,
   add_mem_filtration := begin
     rintros c1 c2 x1 x2 ⟨x1,rfl⟩ ⟨x2,rfl⟩,
     use x1.add' x2,
-    apply quotient.sound',
-    refine ⟨_, le_sup_left, le_sup_right, _⟩,
-    dsimp,
-    ext j : 3,
     simp,
   end }
 
@@ -397,26 +473,125 @@ instance : comphaus_filtered_pseudo_normed_group (cone_point_type G) :=
 { topology := by apply_instance,
   t2 := by apply_instance,
   compact := by apply_instance,
-  continuous_add' := sorry,
-  continuous_neg' := sorry,
+  continuous_add' := begin
+    intros c1 c2,
+    let E : filtration (cone_point_type G) c1 × filtration (cone_point_type G) c2 →
+      cone_point_type_filt G c1 × cone_point_type_filt G c2 :=
+      λ t, ⟨(filt_homeo G c1) t.1, (filt_homeo G c2) t.2⟩,
+    let E' : cone_point_type_filt G c1 × cone_point_type_filt G c2 →
+      filtration (cone_point_type G) c1 × filtration (cone_point_type G) c2 :=
+      λ t, ⟨(filt_homeo G c1).symm t.1, (filt_homeo G c2).symm t.2⟩,
+    have hE'E : E' ∘ E = id := by { dsimp [E,E'], ext, simp, simp },
+    have : (filt_homeo G (c1 + c2)).symm ∘
+      (λ t : cone_point_type_filt G c1 × cone_point_type_filt G c2, t.1.add' t.2) ∘ E = add',
+    { suffices : add' ∘ E' = (filt_homeo G (c1 + c2)).to_equiv.symm ∘
+        (λ t : cone_point_type_filt G c1 × cone_point_type_filt G c2, t.1.add' t.2),
+      { erw [← function.comp.assoc, ← this, function.comp.assoc, hE'E],
+        simp },
+      dsimp only [filt_homeo, homeomorph.homeomorph_of_continuous_open, E'],
+      ext,
+      dsimp [filt_homeo, filt_equiv, E, E'],
+      simp },
+    rw ← this, clear this,
+    apply continuous.comp (homeomorph.continuous _),
+    apply continuous.comp,
+    apply cone_point_type_filt.continuous_add',
+    dsimp [E],
+    continuity,
+  end,
+  continuous_neg' := begin
+    intros c,
+    have : (neg' : filtration (cone_point_type G) c → filtration (cone_point_type G) c) =
+      (filt_homeo G c).symm ∘ (λ x, -x) ∘ filt_homeo G c,
+    { suffices :
+        (neg' : filtration (cone_point_type G) c → filtration (cone_point_type G) c) ∘
+          (filt_homeo G c).to_equiv.symm = (filt_homeo G c).to_equiv.symm ∘ (λ x, -x),
+      { erw [← function.comp.assoc, ← this, function.comp.assoc, equiv.symm_comp_self],
+        simp },
+      dsimp only [filt_homeo, homeomorph.homeomorph_of_continuous_open],
+      simp only [equiv.symm_symm],
+      ext,
+      dsimp [filt_equiv],
+      simp },
+    rw this,
+    simp [cone_point_type_filt.continuous_neg],
+  end,
   continuous_cast_le := begin
     rintro c₁ c₂ ⟨h⟩,
     change continuous (cast_le' h),
-    have : cast_le' h = (filtration_homeo G c₂).symm ∘
-      cone_point_type_filt.trans h ∘ (filtration_homeo G c₁),
-    { suffices : cast_le' h ∘ (filtration_homeo G c₁).to_equiv.symm =
-        (filtration_homeo G c₂).to_equiv.symm ∘ cone_point_type_filt.trans h,
+    have : cast_le' h = (filt_homeo G c₂).symm ∘
+      cone_point_type_filt.trans h ∘ (filt_homeo G c₁),
+    { suffices : cast_le' h ∘ (filt_homeo G c₁).to_equiv.symm =
+        (filt_homeo G c₂).to_equiv.symm ∘ cone_point_type_filt.trans h,
       { erw [← function.comp.assoc, ← this, function.comp.assoc, equiv.symm_comp_self],
         simp },
-      dsimp only [filtration_homeo, homeomorph.homeomorph_of_continuous_open],
+      dsimp only [filt_homeo, homeomorph.homeomorph_of_continuous_open],
       simp only [equiv.symm_symm],
       ext,
-      dsimp [filtration_equiv],
+      dsimp [filt_equiv],
       simp },
     simp [this, cone_point_type_filt.trans_continuous],
   end }
 
 end cone_point_type
+
+def cone_point : CompHausFiltPseuNormGrp₁ :=
+{ M := cone_point_type G,
+  exhaustive' := cone_point_type.incl_jointly_surjective }
+
+def proj (j : J) : cone_point G ⟶ G.obj j :=
+{ to_fun := λ x, x.preimage j,
+  map_zero' := begin
+    rw cone_point_type.zero_def,
+    simp only [cone_point_type.coe_incl_preimage_apply,
+      cone_point_type_filt.zero_apply, filtration.coe_zero],
+  end,
+  map_add' := begin
+    intros x y,
+    rw cone_point_type.add_def x y,
+    simp only [cone_point_type.coe_incl_preimage_apply,
+      cone_point_type_filt.add'_apply_coe],
+  end,
+  strict' := begin
+    rintros c x ⟨x,rfl⟩,
+    simp only [cone_point_type.coe_incl_preimage_apply,
+      subtype.coe_prop],
+  end,
+  continuous₁' := begin
+    intros c,
+    dsimp,
+    let E : filtration (cone_point_type G) c → filtration (G.obj j) c :=
+      λ t, ((cone_point_type.filt_homeo G c) t) j,
+    suffices : continuous E,
+    { convert this,
+      ext ⟨t,t,rfl⟩,
+      dsimp [E],
+      simp only [cone_point_type.coe_incl_preimage_apply],
+      congr' 2,
+      apply_fun (cone_point_type.filt_homeo G c).symm,
+      simp only [homeomorph.symm_apply_apply],
+      ext, refl },
+    dsimp [E],
+    change continuous ((λ (u : cone_point_type_filt G c), u j) ∘ cone_point_type.filt_homeo G c),
+    simp only [homeomorph.comp_continuous_iff'],
+    apply cone_point_type_filt.continuous_apply,
+  end } .
+
+def limit_cone : cone G :=
+{ X := cone_point G,
+  π :=
+  { app := λ j, proj G j,
+    naturality' := begin
+      intros i j e,
+      ext,
+      dsimp,
+      simp only [comp_apply, category.id_comp],
+      have := (cone_point_type.preimage x).2 e,
+      apply_fun (λ e, (e : G.obj j)) at this,
+      exact this.symm,
+    end } }
+
+def limit_cone_is_limit : is_limit (limit_cone G) := sorry
 
 -- This is the goal of this section...
 instance : has_limits CompHausFiltPseuNormGrp₁ := sorry
