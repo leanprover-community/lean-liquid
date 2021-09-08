@@ -45,20 +45,22 @@ begin
   apply tendsto_of_tendsto_of_tendsto_of_le_of_le HH tendsto_const_nhds h₁ h₂,
 end
 
-noncomputable def sum_floor (x : ℝ≥0): ℤ → ℤ
+noncomputable def floor_seq (x : ℝ≥0): ℤ → ℤ
 | (int.of_nat n)          := nat.rec_on n
-                          (floor x.1) (λ n, floor (2 ^ (nat.succ n) * x.1) - floor (2 ^ n * x.1))
+                          (floor x.1) (λ n, floor (2 ^ n * x.1) - 2 * floor (2 ^ (n-1) * x.1))
 | (int.neg_succ_of_nat n) := 0
 
 
 lemma has_sum_pow_floor (r' : ℝ≥0) [fact (r' < 1)] (x : ℝ≥0) :
-  has_sum (λ n, (coe ∘ sum_floor x) n * r'.1 ^ n) x.1 :=
+  has_sum (λ n, (coe ∘ floor_seq x) n * r'.1 ^ n) x.1 :=
 begin
+  dsimp [has_sum],
   sorry,
+  -- apply summable.has_sum_iff_tendsto_nat,
 end
 
 lemma has_sum_pow_floor_norm (r : ℝ≥0)  [fact (r < 1)] (x : ℝ≥0) :
-  has_sum (λ n, ∥ ((coe : ℤ → ℝ) ∘ sum_floor x) n ∥ * r ^ n) x.1:=
+  has_sum (λ n, ∥ ((coe : ℤ → ℝ) ∘ floor_seq x) n ∥ * r ^ n) x.1:=
 begin
   sorry,--will be an easy consequence of the previous one
 end
@@ -72,7 +74,7 @@ noncomputable def θ (r' : ℝ≥0) [fact (r' < 1)] (r : ℝ≥0) [fact (r < 1)]
 lemma θ_surj_on_nonneg (r' : ℝ≥0) [fact (r' < 1)] (r : ℝ≥0) [fact (r < 1)] (x : ℝ≥0) :
   ∃ (F : laurent_measures r (Fintype.of punit)), (θ r' r F) = x :=
 begin
-  let F₀ : Fintype.of punit → ℤ → ℤ := λ a, (sum_floor x),
+  let F₀ : Fintype.of punit → ℤ → ℤ := λ a, (floor_seq x),
   have Hr : ∀ (s : Fintype.of punit), summable (λ (n : ℤ), ∥F₀ s n∥ * ↑r ^ n),
   { intro s,
     apply has_sum.summable (has_sum_pow_floor_norm r x) },
