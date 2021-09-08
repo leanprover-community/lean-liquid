@@ -16,6 +16,9 @@ open_locale topological_space classical nnreal
 
 section thm69_surjective
 
+lemma converges_floor_nat (x : ℝ≥0) (r' : ℝ≥0) [fact (r' < 1)] :
+  tendsto (λn : ℕ, (nat_floor (2 ^ n * x.1 ) * r' ^ n : ℝ≥0)) at_top (𝓝 x) := sorry
+
 lemma converges_floor (x : ℝ≥0) :
   tendsto (λn : ℕ, (floor (2 ^ n * x : ℝ) / (2 ^ n) : ℝ)) at_top (𝓝 x) :=
 begin
@@ -50,17 +53,85 @@ noncomputable def floor_seq (x : ℝ≥0): ℤ → ℤ
                           (floor x.1) (λ n, floor (2 ^ n * x.1) - 2 * floor (2 ^ (n-1) * x.1))
 | (int.neg_succ_of_nat n) := 0
 
+noncomputable  def floor_seq_nat (x : ℝ≥0): ℤ → ℕ
+| (int.of_nat n)          := nat.rec_on n
+                          (nat_floor x.1) (λ n, nat_floor (2 ^ n * x.1) - 2 * nat_floor (2 ^ (n-1) * x.1))
+| (int.neg_succ_of_nat n) := 0
+
+-- example : summable (λ (n : ℤ), (φ n) * (1 / 2) ^ n) :=
+-- begin
+--   have hinj : function.injective (coe : ℕ → ℤ) := by {apply int.coe_nat_inj},
+--   have hφ : ∀ n : ℤ, n ∉ set.range (coe : ℕ → ℤ) → φ n = 0,
+--   { rintros n hn,
+--     induction n with n,
+--     { simp only [set.mem_range_self, not_true, int.of_nat_eq_coe] at hn, tauto },
+--     refl },
+--   replace hφ : ∀ n : ℤ, n ∉ set.range (coe : ℕ → ℤ) → φ n * (1 / 2) ^ n = 0,
+--   { intros n hn,
+--     specialize hφ n hn,
+--     rw [hφ, zero_mul] },
+--   apply (function.injective.summable_iff hinj hφ).mp,
+--   have H : (λ (n : ℤ), φ n * (1 / 2) ^ n) ∘ coe = λ (n : ℕ), (1 / 2) ^ n,
+--   funext a,
+--   simp only [function.comp_app, gpow_coe_nat],
+--   suffices : φ a = 1,
+--   rw [this, one_mul],
+--   refl,
+--   rw H,
+--   exact summable_geometric_two,
+-- end
+
+lemma has_sum_pow_floor_nat (r' : ℝ≥0) [fact (r' < 1)] (x : ℝ≥0) :
+  has_sum (λ n, (coe ∘ floor_seq_nat x) n * r' ^ n) x :=
+begin
+  have hinj : function.injective (coe : ℕ → ℤ) := by {apply int.coe_nat_inj},
+  have h_range : ∀ n : ℤ, n ∉ set.range (coe : ℕ → ℤ) → floor_seq_nat x n = 0, sorry,
+  replace h_range : ∀ n : ℤ, n ∉ set.range (coe : ℕ → ℤ) → (coe ∘ floor_seq_nat x) n * r' ^ n = 0,
+  sorry,
+  apply (@function.injective.has_sum_iff _ _ _ _ _ _ x _ hinj h_range).mp,
+  have H : (λ (n : ℤ), (coe ∘ floor_seq_nat x) n * r' ^ n) ∘ coe =
+    (λ (n : ℕ), (coe ∘ floor_seq_nat x) n * r' ^ n), sorry,
+  rw H,
+  apply (nnreal.has_sum_iff_tendsto_nat).mpr,
+  have h_calc : ∀ n : ℕ,
+  (finset.range n).sum (λ (i : ℕ), (coe ∘ floor_seq_nat x) ↑i * r' ^ i) =
+    nat_floor (2 ^ n * x.1) * r' ^ n, sorry,
+  simp_rw h_calc,
+  apply (converges_floor_nat x r'),
+end
 
 lemma has_sum_pow_floor (r' : ℝ≥0) [fact (r' < 1)] (x : ℝ≥0) :
-  has_sum (λ n, (coe ∘ floor_seq x) n * r'.1 ^ n) x.1 :=
+  has_sum (λ n, (coe ∘ floor_seq x) n * r'.1 ^ n) x :=
 begin
-  dsimp [has_sum],
+  -- apply (has_sum_iff_tendsto_nat_of_nonneg).mp,
+  have hinj : function.injective (coe : ℕ → ℤ) := by {apply int.coe_nat_inj},
+  have h_range : ∀ n : ℤ, n ∉ set.range (coe : ℕ → ℤ) → floor_seq x n = 0, sorry,
+  replace h_range : ∀ n : ℤ, n ∉ set.range (coe : ℕ → ℤ) → (coe ∘ floor_seq x) n * r'.1 ^ n = 0,
   sorry,
+  apply (@function.injective.has_sum_iff _ _ _ _ _ _ x.1 _ hinj h_range).mp,
+  have H : (λ (n : ℤ), (coe ∘ floor_seq x) n * r'.val ^ n) ∘ coe =
+    (λ (n : ℕ), (coe ∘ floor_seq x) n * r'.val ^ n), sorry,
+  rw H,
+  sorry,
+  -- apply (nnreal.has_sum_iff_tendsto_nat).mpr,
+--   funext a,
+--   simp only [function.comp_app, gpow_coe_nat],
+--   suffices : φ a = 1,
+--   rw [this, one_mul],
+--   refl,
+--   rw H,
+  -- dsimp [has_sum],
   -- apply summable.has_sum_iff_tendsto_nat,
 end
 
 lemma has_sum_pow_floor_norm (r : ℝ≥0)  [fact (r < 1)] (x : ℝ≥0) :
   has_sum (λ n, ∥ ((coe : ℤ → ℝ) ∘ floor_seq x) n ∥ * r ^ n) x.1:=
+begin
+  sorry,--will be an easy consequence of the previous one
+end
+
+lemma has_sum_pow_floor_norm_nat (r : ℝ≥0)  [fact (r < 1)] (x : ℝ≥0) :
+  has_sum (λ n, ∥ ((coe : ℕ → ℝ) ∘ floor_seq_nat x) n ∥ * r ^ n) x.1:=
 begin
   sorry,--will be an easy consequence of the previous one
 end
@@ -82,6 +153,23 @@ begin
   use F,
   have : summable (λ (n : ℤ), (F.to_Rfct r n) * (r'.1) ^ n) :=
     has_sum.summable (has_sum_pow_floor r' x),
+  unfold θ,
+  unfold tsum,
+  rw [dif_pos this],
+  exact has_sum.unique (some_spec this) (has_sum_pow_floor r' x),
+end
+
+lemma θ_surj_on_nonneg_nat (r' : ℝ≥0) [fact (r' < 1)] (r : ℝ≥0) [fact (r < 1)] (x : ℝ≥0) :
+  ∃ (F : laurent_measures r (Fintype.of punit)), (θ r' r F) = x :=
+begin
+  let F₀ : Fintype.of punit → ℤ → ℤ := λ a m, int.of_nat (floor_seq_nat x m),
+  have Hr : ∀ (s : Fintype.of punit), summable (λ (n : ℤ), ∥F₀ s n∥ * ↑r ^ n),
+  { intro s,
+    apply has_sum.summable (has_sum_pow_floor_norm_nat r x) },
+  let F : laurent_measures r (Fintype.of punit) := ⟨F₀, Hr⟩,
+  use F,
+  have : summable (λ (n : ℤ), (F.to_Rfct r n) * (r'.1) ^ n) := sorry,
+    -- has_sum.summable (has_sum_pow_floor_nat r' x),
   unfold θ,
   unfold tsum,
   rw [dif_pos this],
