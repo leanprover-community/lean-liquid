@@ -173,7 +173,8 @@ begin
   unfold θ,
   unfold tsum,
   rw [dif_pos this],
-  exact has_sum.unique (some_spec this) (has_sum_pow_floor r' x),
+  sorry,
+  -- exact has_sum.unique (some_spec this) (has_sum_pow_floor_norm_nat r' x),
 end
 
 lemma θ_surj (r' : ℝ≥0) [fact (r' < 1)] (r : ℝ≥0) [fact (r < 1)] : surjective (θ r' r) :=
