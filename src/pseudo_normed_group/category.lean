@@ -103,6 +103,7 @@ In this section, we show (hopefully ;)) that `CompHausFiltPseuNormGrp₁` has li
 
 variables {J : Type u} [small_category J] (G : J ⥤ CompHausFiltPseuNormGrp₁.{u})
 
+open pseudo_normed_group
 open category_theory.limits
 
 /-- This is a bifunctor which associates to each `c : ℝ≥0` and `j : J`,
@@ -110,371 +111,312 @@ open category_theory.limits
 def cone_point_diagram : as_small.{u} ℝ≥0 ⥤ J ⥤ CompHaus.{u} :=
 as_small.down ⋙ level ⋙ (whiskering_left _ _ _).obj G
 
-def cone_point_type : Type u :=
-colimit (cone_point_diagram G ⋙ lim ⋙ forget _)
+@[derive [topological_space, t2_space]]
+def cone_point_type_filt (c : ℝ≥0) : Type u :=
+{ x : Π j : J, filtration (G.obj j) c | ∀ ⦃i j : J⦄ (e : i ⟶ j), (G.map e).level (x _) = x _ }
 
-def cone_point_type_filt (c : ℝ≥0) : CompHaus :=
-limit ((cone_point_diagram G).obj (as_small.up.obj c))
+instance (c : ℝ≥0) : compact_space (cone_point_type_filt G c) :=
+(CompHaus.limit_cone (((cone_point_diagram G).obj (as_small.up.obj c)))).X.is_compact -- ;-)
+
+namespace cone_point_type_filt
+
+variable {G}
+
+instance (c : ℝ≥0) : has_coe_to_fun (cone_point_type_filt G c) :=
+⟨λ x, Π j : J, filtration (G.obj j) c, λ x, x.1⟩
+
+@[ext] lemma ext {c} (x y : cone_point_type_filt G c) : ⇑x = y → x = y := subtype.ext
+
+@[simp] lemma level_apply {c : ℝ≥0} {i j : J} (x : cone_point_type_filt G c) (e : i ⟶ j) :
+  (G.map e).level (x i) = x j := x.2 e
+
+def trans {c₁ c₂ : ℝ≥0} (h : c₁ ≤ c₂) (x : cone_point_type_filt G c₁) : cone_point_type_filt G c₂ :=
+⟨λ j, cast_le' h (x j), λ i j e, by { ext, simp }⟩
+
+@[simp] lemma trans_apply {c₁ c₂ : ℝ≥0} (h : c₁ ≤ c₂) (x : cone_point_type_filt G c₁) (j : J) :
+  x.trans h j = cast_le' h (x j) := by { ext, refl }
+
+lemma trans_injective {c₁ c₂ : ℝ≥0} (h : c₁ ≤ c₂) :
+  function.injective (trans h : cone_point_type_filt G c₁ → cone_point_type_filt G c₂) :=
+begin
+  intros x y hh,
+  ext j,
+  apply_fun (λ e, (e j : G.obj j)) at hh,
+  exact hh
+end
+
+lemma trans_continuous {c₁ c₂ : ℝ≥0} (h : c₁ ≤ c₂) :
+  continuous (trans h : cone_point_type_filt G c₁ → cone_point_type_filt G c₂) :=
+begin
+  -- ;-)
+  let η := ((cone_point_diagram G).map (as_small.up.map $ hom_of_le $ h)),
+  let hS := (CompHaus.limit_cone_is_limit (((cone_point_diagram G).obj (as_small.up.obj c₂)))),
+  let T := (CompHaus.limit_cone (((cone_point_diagram G).obj (as_small.up.obj c₁)))),
+  exact (hS.map T η).continuous,
+end
+
+instance {c} : has_zero (cone_point_type_filt G c) := has_zero.mk $
+⟨λ j, 0, λ i j e, by { ext, dsimp, simp }⟩
+
+instance {c} : has_neg (cone_point_type_filt G c) := has_neg.mk $ λ x,
+⟨λ j, - (x j), λ i j e, by { ext, dsimp, simp }⟩
+
+def add' {c₁ c₂} (x : cone_point_type_filt G c₁) (y : cone_point_type_filt G c₂) :
+  cone_point_type_filt G (c₁ + c₂) :=
+⟨λ j, add' (x j, y j), λ i j e, by { ext, dsimp, simp }⟩
+
+@[simp] lemma zero_apply {c} (j : J) : (0 : cone_point_type_filt G c) j = 0 := rfl
+@[simp] lemma neg_apply {c} (j : J) (x : cone_point_type_filt G c) : (-x) j = - (x j) := rfl
+@[simp] lemma add'_apply_coe {c₁ c₂} (j : J) (x : cone_point_type_filt G c₁)
+  (y : cone_point_type_filt G c₂) : ((x.add' y) j : G.obj j) = x j + y j := rfl
+
+end cone_point_type_filt
+
+def cone_point_type_setoid : setoid (Σ (c : ℝ≥0), cone_point_type_filt G c) :=
+{ r := λ x y, ∃ (d : ℝ≥0) (hx : x.1 ≤ d) (hy : y.1 ≤ d), x.2.trans hx = y.2.trans hy,
+  iseqv := begin
+    refine ⟨_,_,_⟩,
+    { rintro ⟨c,x⟩,
+      use [c, le_refl _, le_refl _] },
+    { rintro ⟨c,x⟩ ⟨d,y⟩ ⟨e,h1,h2,h⟩,
+      dsimp at *,
+      refine ⟨_, le_sup_left, le_sup_right, _⟩,
+      ext j : 3,
+      symmetry,
+      apply_fun (λ e, (e j : G.obj j)) at h,
+      exact h },
+    { rintro ⟨c,x⟩ ⟨d,y⟩ ⟨e,z⟩ ⟨i,h1,hh1,hhh1⟩ ⟨j,h2,hh2,hhh2⟩,
+      dsimp at *,
+      refine ⟨_, le_sup_left, le_sup_right, _⟩,
+      ext jj : 3,
+      apply_fun (λ e, (e jj : G.obj jj)) at hhh1,
+      apply_fun (λ e, (e jj : G.obj jj)) at hhh2,
+      erw [hhh1, hhh2], refl },
+  end }
+
+def cone_point_type : Type u := quotient (cone_point_type_setoid G)
+
+namespace cone_point_type
+variable {G}
 
 def incl (c : ℝ≥0) : cone_point_type_filt G c → cone_point_type G :=
-colimit.ι (cone_point_diagram G ⋙ lim ⋙ forget _) (as_small.up.obj c)
+quotient.mk' ∘ sigma.mk c
 
-def trans {c₁ c₂ : ℝ≥0} (h : c₁ ≤ c₂) :
-  cone_point_type_filt G c₁ ⟶ cone_point_type_filt G c₂ :=
-(cone_point_diagram G ⋙ lim).map (as_small.up.map $ hom_of_le h)
-
-def proj (c : ℝ≥0) (j : J) : cone_point_type_filt G c ⟶ (level.obj c).obj (G.obj j) :=
-limit.π _ _
-
-lemma proj_trans {c₁ c₂ : ℝ≥0} (h : c₁ ≤ c₂) (j : J) :
-  trans G h ≫ proj G c₂ j = proj G _ j ≫ (level.map $ hom_of_le h).app _ :=
-begin
-  dsimp [trans, proj, cone_point_diagram],
-  simp,
-end
-
-
-@[simp] lemma map_proj {c : ℝ≥0} {i j : J} (e : i ⟶ j) :
-  proj G c i ≫ (level.obj c).map (G.map e) = proj G c j :=
-limit.w _ _
-
-lemma proj_ext {c : ℝ≥0} (a b : cone_point_type_filt G c) (h : ∀ i, proj G c i a = proj G c i b) :
-  a = b := concrete_category.limit.term_ext _ h
-
-lemma cone_point_diagram_map_injective {c₁ c₂ : as_small.{u} ℝ≥0} (e : c₁ ⟶ c₂) :
-  function.injective ((cone_point_diagram G ⋙ lim ⋙ forget CompHaus).map e) :=
+lemma incl_injective (c : ℝ≥0) :
+  function.injective (incl c : cone_point_type_filt G c → cone_point_type G) :=
 begin
   intros x y h,
-  apply concrete_category.limit.term_ext,
-  intros j,
-  apply_fun (concrete_category.limit.equiv _).symm at h,
-  apply_fun (λ e, (e.val j).val) at h,
-  ext1,
-  convert h using 1,
-  all_goals { dsimp [concrete_category.limit.equiv, types.limit_cone_is_limit,
-      is_limit.cone_point_unique_up_to_iso, lim_map, is_limit.map],
-    simp_rw ← CompHaus.coe_comp_apply,
-    erw limit.lift_π,
-    refl },
-end
-
-lemma trans_injective {c₁ c₂ : ℝ≥0} (h : c₁ ≤ c₂) : function.injective (trans G h) :=
-cone_point_diagram_map_injective _ _
-
--- This should be generalized to filtered colimits in a concrete category
--- where the forgetful functor preserves colimits.
-lemma incl_injective (c : ℝ≥0) : function.injective (incl G c) :=
-begin
-  intros a b h,
-  erw limits.types.filtered_colimit.colimit_eq_iff at h,
-  obtain ⟨k,e₁,e₂,h⟩ := h,
-  have : e₁ = e₂, by ext,
-  rw this at h,
-  apply cone_point_diagram_map_injective _ e₂,
+  replace h := quotient.exact' h,
+  obtain ⟨d,h1,h2,h⟩ := h,
+  dsimp at h1 h2 h,
+  rw (show h1 = h2, by refl) at h,
+  apply cone_point_type_filt.trans_injective h2,
   exact h,
 end
 
-lemma incl_trans {c₁ c₂ : ℝ≥0} (h : c₁ ≤ c₂) :
-  incl G c₂ ∘ trans G h = incl G c₁ :=
+@[simp]
+lemma incl_trans {c₁ c₂ : ℝ≥0} (h : c₁ ≤ c₂) (x : cone_point_type_filt G c₁) :
+  incl _ (x.trans h) = incl _ x :=
 begin
-  ext1 x,
-  have := colimit.w (cone_point_diagram G ⋙ lim ⋙ forget _) (as_small.up.map (hom_of_le h)),
-  apply_fun (λ e, e x) at this,
-  exact this,
+  apply quotient.sound',
+  refine ⟨c₁ ⊔ c₂, by simp, by simp, _⟩,
+  ext,
+  refl,
 end
 
-lemma incl_trans_apply {c₁ c₂ : ℝ≥0} (h : c₁ ≤ c₂) (x : cone_point_type_filt G c₁) :
-  incl G c₂ (trans G h x) = incl G c₁ x :=
-by { change (incl G c₂ ∘ trans G h) x = _, simp [incl_trans] }
-
-lemma incl_eq_incl {c₁ c₂ c : ℝ≥0} (a : cone_point_type_filt G c₁)
-  (b : cone_point_type_filt G c₂) (h₁ : c₁ ≤ c) (h₂ : c₂ ≤ c)
-  (h : trans G h₁ a = trans G h₂ b) :
-  incl G _ a = incl G _ b :=
-begin
-  rw [← incl_trans _ h₁, ← incl_trans _ h₂],
-  dsimp,
-  rw h,
-end
-
--- This should be generalized to colimits in a concrete category
--- where the forgetful functor preserves colimits.
 lemma incl_jointly_surjective (x : cone_point_type G) :
-  ∃ (c : ℝ≥0) (y : cone_point_type_filt G c), x = incl G c y :=
+  ∃ (c : ℝ≥0) (y : cone_point_type_filt G c), incl c y = x :=
 begin
-  obtain ⟨⟨c⟩,y,hy⟩ := limits.concrete.is_colimit_exists_rep
-    (cone_point_diagram G ⋙ lim ⋙ forget _) (colimit.is_colimit _) x,
+  rcases x,
+  obtain ⟨c,y⟩ := x,
   use [c,y],
-  exact hy.symm
+  refl,
 end
 
-def choose_index (x : cone_point_type G) : ℝ≥0 :=
-(incl_jointly_surjective G x).some
+def index (x : cone_point_type G) : ℝ≥0 := (incl_jointly_surjective x).some
 
-def choose_preimage (x : cone_point_type G) :
-  (cone_point_type_filt G (choose_index G x)) :=
-(incl_jointly_surjective G x).some_spec.some
+def preimage (x : cone_point_type G) : cone_point_type_filt G x.index :=
+  (incl_jointly_surjective x).some_spec.some
 
-lemma choose_preimage_spec (x : cone_point_type G) :
-  x = incl _ _ (choose_preimage G x) :=
-(incl_jointly_surjective G x).some_spec.some_spec
+@[simp]
+lemma preimage_spec (x : cone_point_type G) : incl _ x.preimage = x :=
+  (incl_jointly_surjective x).some_spec.some_spec
 
-instance (c : ℝ≥0) : has_zero (cone_point_type_filt G c) :=
-has_zero.mk (concrete_category.limit.mk _
-  (λ j, (0 : pseudo_normed_group.filtration _ _)) begin
-    intros i j e,
-    dsimp [cone_point_diagram, level],
-    ext1,
-    simp [(G.map e).map_zero],
-  end)
-
-lemma aux (c : ℝ≥0) (j : J) (x : cone_point_type_filt G c) :
-  ((proj G _ j (choose_preimage G (incl G _ x))).val : G.obj j) = (proj G _ j x).val :=
+@[simp]
+lemma coe_incl_preimage_apply {c} (x : cone_point_type_filt G c) (j : J) :
+  ((incl c x).preimage j : G.obj j) = x j :=
 begin
-  let e := c ⊔ (choose_index G (incl G _ x)),
-  have := proj_trans G (le_sup_left : _ ≤ e) j,
-  have : (proj G _ j x).val =
-    ((proj G c j ≫ (level.map (hom_of_le le_sup_left)).app (G.obj j)) x).val, refl,
-  rw this,
-  rw ← proj_trans G (le_sup_left : _ ≤ e),
-  have : ((proj G (choose_index G (incl G c x)) j) (choose_preimage G (incl G c x))).val =
-    ((proj G (choose_index G (incl G c x)) j ≫
-    (level.map (hom_of_le le_sup_right)).app (G.obj j)) _).val, refl,
-  rw this,
-  rw ← proj_trans G (le_sup_right : _ ≤ e),
-  dsimp,
+  let e := c ⊔ (incl c x).index,
+  change _ = (cast_le' le_sup_left (x j) : G.obj j),
+  rw ← cone_point_type_filt.trans_apply (le_sup_left : _ ≤ e) x j,
+  rw ← coe_cast_le' (le_sup_right : _ ≤ e),
+  rw ← cone_point_type_filt.trans_apply,
   congr' 2,
   apply incl_injective,
-  simp_rw incl_trans_apply,
-  rw ← choose_preimage_spec G (incl G _ x),
-end
-
-instance : has_zero (cone_point_type G) := ⟨incl G 0 0⟩
-
-instance (c : ℝ≥0) : has_neg (cone_point_type_filt G c) := has_neg.mk $
-λ x, concrete_category.limit.mk _
-  (λ j, (- (proj _ _ _ x) : pseudo_normed_group.filtration _ _))
-begin
-  intros i j e,
-  dsimp [cone_point_diagram, level],
-  ext1,
-  dsimp,
-  rw [(G.map e).map_neg],
-  congr' 1,
-  change ((proj G c i ≫ (level.obj c).map (G.map e)) x).val = _,
   simp,
 end
 
-/-
-def neg_nat_trans' : (cone_point_diagram G ⋙ lim ⋙ forget _) ⟶
-  (cone_point_diagram G ⋙ lim ⋙ forget _) :=
-{ app := λ ⟨c⟩ (x : cone_point_type_filt G c), (-x : cone_point_type_filt G c),
-  naturality' := begin
-    sorry
-  end }
--/
 
+instance : has_zero (cone_point_type G) := ⟨incl 0 0⟩
 instance : has_neg (cone_point_type G) := has_neg.mk $
-λ x, incl G (choose_index G x) (-(choose_preimage G x))
-
-def cone_point_type_filt_add {c₁ c₂ : ℝ≥0} (x : cone_point_type_filt G c₁)
-  (y : cone_point_type_filt G c₂) : cone_point_type_filt G (c₁ + c₂) :=
-concrete_category.limit.mk _
-(λ j, pseudo_normed_group.add' ⟨proj G c₁ j x, proj G c₂ j y⟩)
-begin
-  intros i j e,
-  dsimp [cone_point_diagram, level],
-  ext : 1,
-  dsimp,
-  rw (G.map e).map_add,
-  congr' 1,
-  { change ((proj G c₁ i ≫ (level.obj c₁).map (G.map e)) x).val = _,
-    simp },
-  { change ((proj G c₂ i ≫ (level.obj c₂).map (G.map e)) y).val = _,
-    simp },
-end
-
+λ x, incl _ (-x.preimage)
 instance : has_add (cone_point_type G) := has_add.mk $
-λ x y, incl G _ (cone_point_type_filt_add _ (choose_preimage G x) (choose_preimage G y))
+λ x y, incl _ (x.preimage.add' y.preimage)
 
-lemma zero_add (a : cone_point_type G) : 0 + a = a :=
+lemma zero_add (x : cone_point_type G) : 0 + x = x :=
 begin
-  change incl _ _ _ = _,
-  conv_rhs {rw choose_preimage_spec _ a},
-  apply incl_eq_incl _ _ _ (le_refl _),
-  swap, simp,
-  apply proj_ext,
-  intros j,
-  ext1,
-  rw [← CompHaus.coe_comp_apply, proj_trans, CompHaus.coe_comp_apply],
-  erw concrete_category.limit.mk_π,
-  change _ + _ = _,
-  rw [← CompHaus.coe_comp_apply, proj_trans, CompHaus.coe_comp_apply],
-  dsimp [level],
-  simp only [add_left_eq_self],
-  change subtype.val _ = _,
-  erw [aux, concrete_category.limit.mk_π],
-  refl,
-end
-
-lemma add_assoc (a b c : cone_point_type G) : a + b + c = a + (b + c) :=
-begin
-  let e :=
-    (choose_index G (a + b) + choose_index G c) ⊔ (choose_index G a + choose_index G (b + c)),
-  apply incl_eq_incl _ _ _ (le_sup_left : _ ≤ e) (le_sup_right : _ ≤ e),
-  apply proj_ext,
-  intros j,
-  ext1,
-  rw [← CompHaus.coe_comp_apply, proj_trans, CompHaus.coe_comp_apply],
-  dsimp [level],
-  erw concrete_category.limit.mk_π,
-  rw [← CompHaus.coe_comp_apply, proj_trans, CompHaus.coe_comp_apply],
-  dsimp [level],
-  erw concrete_category.limit.mk_π,
-  change subtype.val _ + subtype.val _ = subtype.val _ + subtype.val _,
-  erw aux,
+  conv_rhs {rw ← x.preimage_spec},
+  apply quotient.sound',
+  refine ⟨(0 : cone_point_type G).index + x.index, by simp, by simp, _⟩,
   dsimp,
-  change _ = subtype.val _ + subtype.val _,
-  conv_rhs { congr, skip, erw aux },
-  erw concrete_category.limit.mk_π,
-  erw concrete_category.limit.mk_π,
-  erw add_assoc,
-  refl,
+  ext j : 3,
+  simp only [cone_point_type_filt.trans_apply, cone_point_type_filt.add'_apply_coe, coe_cast_le'],
+  simp only [add_left_eq_self],
+  apply coe_incl_preimage_apply,
 end
 
-lemma add_comm (a b : cone_point_type G) : a + b = b + a :=
+lemma add_comm (x y : cone_point_type G) : x + y = y + x :=
 begin
-  change incl _ _ _ = incl _ _ _,
-  apply incl_eq_incl _ _ _ (le_refl _) (le_of_eq _),
-  swap, {rw add_comm},
-  apply proj_ext,
-  intros j,
-  ext1,
-  rw [← CompHaus.coe_comp_apply, proj_trans, CompHaus.coe_comp_apply],
-  dsimp [level],
-  erw concrete_category.limit.mk_π,
-  rw [← CompHaus.coe_comp_apply, proj_trans, CompHaus.coe_comp_apply],
-  dsimp [level],
-  erw concrete_category.limit.mk_π,
-  change _ + _ = _ + _,
+  apply quotient.sound',
+  refine ⟨x.index + y.index, le_refl _, le_of_eq (by {dsimp, rw add_comm}), _⟩,
+  dsimp,
+  ext j : 3,
+  simp only [cone_point_type_filt.trans_apply, cone_point_type_filt.add'_apply_coe,
+    coe_cast_le, coe_cast_le'],
   rw add_comm,
 end
 
-lemma add_left_neg (a : cone_point_type G) : -a + a = 0 :=
+lemma add_zero (x : cone_point_type G) : x + 0 = x := by { rw add_comm, apply zero_add }
+
+lemma add_assoc (x y z : cone_point_type G) : x + y + z = x + (y + z) :=
 begin
-  change incl _ _ _ = incl _ _ _,
-  apply incl_eq_incl _ _ _ (le_refl _),
-  swap, { simp },
-  apply proj_ext,
-  intros j,
-  ext1,
-  rw [← CompHaus.coe_comp_apply, proj_trans, CompHaus.coe_comp_apply],
-  dsimp [level],
-  erw concrete_category.limit.mk_π,
-  rw [← CompHaus.coe_comp_apply, proj_trans, CompHaus.coe_comp_apply],
-  dsimp [level],
-  change subtype.val _ + subtype.val _ = _,
-  erw aux,
-  convert add_left_neg _,
-  erw concrete_category.limit.mk_π, refl,
-  erw concrete_category.limit.mk_π, refl,
+  apply quotient.sound',
+  refine ⟨_, le_sup_left, le_sup_right, _⟩,
+  dsimp,
+  ext j : 3,
+  simp only [cone_point_type_filt.trans_apply, cone_point_type_filt.add'_apply_coe,
+    coe_cast_le, coe_cast_le'],
+  erw [coe_incl_preimage_apply, coe_incl_preimage_apply],
+  simp [add_assoc],
+end
+
+lemma add_left_neg (x : cone_point_type G) : -x + x = 0 :=
+begin
+  apply quotient.sound',
+  refine ⟨_,le_sup_left, le_sup_right,_⟩,
+  dsimp,
+  ext j : 3,
+  simp only [cone_point_type_filt.trans_apply, cone_point_type_filt.zero_apply,
+    cone_point_type_filt.add'_apply_coe, coe_cast_le, filtration.coe_zero, coe_cast_le'],
+  erw coe_incl_preimage_apply,
+  simp,
 end
 
 instance : add_comm_group (cone_point_type G) :=
-{ add_assoc := add_assoc G,
-  zero_add := zero_add G,
-  add_zero := by { intro a, rw [add_comm G, zero_add G] },
-  add_left_neg := add_left_neg G,
-  add_comm := add_comm G,
+{ add_assoc := add_assoc,
+  zero_add := zero_add,
+  add_zero := add_zero,
+  add_left_neg := add_left_neg,
+  add_comm := add_comm,
   ..(infer_instance : has_add _),
-  ..(infer_instance : has_neg _),
-  ..(infer_instance : has_zero _) }
+  ..(infer_instance : has_zero _),
+  ..(infer_instance : has_neg _) }
 
-def equiv (c : ℝ≥0) : cone_point_type_filt G c ≃ set.range (incl G c) :=
-equiv.of_bijective (λ x, ⟨incl G c x, x, rfl⟩)
+variable (G)
+def filtration (c : ℝ≥0) : set (cone_point_type G) := set.range (incl c)
+
+def filtration_equiv (c : ℝ≥0) : cone_point_type_filt G c ≃ filtration G c :=
+equiv.of_bijective (λ x, ⟨_, x, rfl⟩)
 begin
   split,
   { intros x y h,
+    apply_fun (λ e, e.val) at h,
     apply incl_injective,
-    apply_fun (λ e, e.1) at h,
     exact h },
-  { rintro ⟨-,x,rfl⟩, use x }
+  { rintro ⟨_,x,rfl⟩, use x }
 end
 
-instance (c : ℝ≥0) : topological_space (set.range (incl G c)) :=
-topological_space.induced (equiv G c).symm infer_instance
+instance {c} : topological_space (filtration G c) :=
+topological_space.induced (filtration_equiv G c).symm infer_instance
 
-def homeo (c : ℝ≥0) : set.range (incl G c) ≃ₜ cone_point_type_filt G c :=
-homeomorph.homeomorph_of_continuous_open (equiv G c).symm (continuous_induced_dom)
+def filtration_homeo (c : ℝ≥0) : filtration G c ≃ₜ cone_point_type_filt G c :=
+homeomorph.homeomorph_of_continuous_open (filtration_equiv G c).symm continuous_induced_dom
 begin
   intros U hU,
-  have : inducing (equiv G c).symm := ⟨rfl⟩,
+  have : inducing (filtration_equiv G c).symm := ⟨rfl⟩,
   rw this.is_open_iff at hU,
   obtain ⟨U,hU,rfl⟩ := hU,
   simpa,
 end
 
-instance (c : ℝ≥0) : t2_space (set.range (incl G c)) := (homeo G c).symm.t2_space
+instance {c} : compact_space (filtration G c) :=
+(filtration_homeo G c).symm.compact_space
 
-instance (c : ℝ≥0) : compact_space (set.range (incl G c)) := (homeo G c).symm.compact_space
+instance {c} : t2_space (filtration G c) :=
+(filtration_homeo G c).symm.t2_space
 
-instance : comphaus_filtered_pseudo_normed_group (cone_point_type G) :=
-{ --to_add_comm_group := _,
-  filtration := λ r, set.range (incl G r),
+variable {G}
+
+instance : pseudo_normed_group (cone_point_type G) :=
+{ filtration := filtration G,
   filtration_mono := begin
-    rintros a b h x ⟨x,rfl⟩,
-    use trans G h x,
-    rw incl_trans_apply,
+    rintro c1 c2 h x ⟨x,rfl⟩,
+    dsimp [filtration],
+    use x.trans h,
+    simp,
   end,
   zero_mem_filtration := begin
-    intros c,
-    change incl _ _ _ ∈ _,
-    use trans G (by simp : 0 ≤ c) 0,
-    rw incl_trans_apply,
+    intro c,
+    use 0,
+    apply quotient.sound',
+    refine ⟨_, le_sup_left, le_sup_right, _⟩,
+    dsimp,
+    ext j : 3,
+    simp,
   end,
   neg_mem_filtration := begin
-    rintros c x ⟨y,rfl⟩,
-    use -y,
-    change _ = incl _ _ _,
-    apply incl_eq_incl _ _ _ (le_max_left _ _) (le_max_right _ _),
-    apply proj_ext,
-    intros j,
-    rw [← CompHaus.coe_comp_apply, proj_trans, CompHaus.coe_comp_apply],
-    dsimp [level],
-    erw concrete_category.limit.mk_π,
-    rw [← CompHaus.coe_comp_apply, proj_trans, CompHaus.coe_comp_apply],
-    dsimp [level],
-    erw concrete_category.limit.mk_π,
-    ext1,
+    rintros c x ⟨x,rfl⟩,
+    use -x,
+    apply quotient.sound',
+    refine ⟨_, le_sup_left, le_sup_right, _⟩,
     dsimp,
-    change _ = -(subtype.val _),
-    erw aux,
-    refl,
+    ext j : 3,
+    simp,
   end,
   add_mem_filtration := begin
-    rintros c₁ c₂ x₁ x₂ ⟨x₁,rfl⟩ ⟨x₂,rfl⟩,
-    use cone_point_type_filt_add G x₁ x₂,
-    apply incl_eq_incl _ _ _ (le_max_left _ _) (le_max_right _ _),
-    apply proj_ext,
-    intros j,
-    rw [← CompHaus.coe_comp_apply, proj_trans, CompHaus.coe_comp_apply],
-    dsimp [level],
-    erw concrete_category.limit.mk_π,
-    rw [← CompHaus.coe_comp_apply, proj_trans, CompHaus.coe_comp_apply],
-    dsimp [level],
-    erw concrete_category.limit.mk_π,
-    ext1,
+    rintros c1 c2 x1 x2 ⟨x1,rfl⟩ ⟨x2,rfl⟩,
+    use x1.add' x2,
+    apply quotient.sound',
+    refine ⟨_, le_sup_left, le_sup_right, _⟩,
     dsimp,
-    change _ + _ = subtype.val _ + subtype.val _,
-    erw [aux, aux],
-    refl,
-  end,
-  topology := by apply_instance,
+    ext j : 3,
+    simp,
+  end }
+
+instance : comphaus_filtered_pseudo_normed_group (cone_point_type G) :=
+{ topology := by apply_instance,
   t2 := by apply_instance,
   compact := by apply_instance,
   continuous_add' := sorry,
   continuous_neg' := sorry,
-  continuous_cast_le := sorry }
+  continuous_cast_le := begin
+    rintro c₁ c₂ ⟨h⟩,
+    change continuous (cast_le' h),
+    have : cast_le' h = (filtration_homeo G c₂).symm ∘
+      cone_point_type_filt.trans h ∘ (filtration_homeo G c₁),
+    { suffices : cast_le' h ∘ (filtration_homeo G c₁).to_equiv.symm =
+        (filtration_homeo G c₂).to_equiv.symm ∘ cone_point_type_filt.trans h,
+      { erw [← function.comp.assoc, ← this, function.comp.assoc, equiv.symm_comp_self],
+        simp },
+      dsimp only [filtration_homeo, homeomorph.homeomorph_of_continuous_open],
+      simp only [equiv.symm_symm],
+      ext,
+      dsimp [filtration_equiv],
+      simp },
+    simp [this, cone_point_type_filt.trans_continuous],
+  end }
+
+end cone_point_type
 
 -- This is the goal of this section...
 instance : has_limits CompHausFiltPseuNormGrp₁ := sorry
