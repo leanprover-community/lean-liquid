@@ -70,7 +70,7 @@ end generalize_this
 
 /-- The proetale pretopology on Profinites. -/
 def proetale_pretopology : pretopology.{u + 1} (as_small.{u+1} Profinite.{u}) :=
-{ coverings := λ X S, ∃ (ι : Type (u + 1)) [fintype ι]
+{ coverings := λ X S, ∃ (ι : Type (u + 1)) (_ : fintype ι)
       (Y : ι → as_small.{u+1} Profinite.{u}) (f : Π (i : ι), Y i ⟶ X),
       (∀ (x : X), ∃ i (y : (Y i)), (f i) y = x) ∧ S = presieve.of_arrows Y f,
   has_isos := λ X Y f i,
