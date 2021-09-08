@@ -21,7 +21,7 @@ begin
   rw [T_inv_sub_Tinv, sub_eq_neg_add],
   refine le_trans (norm_add_le _ _) (add_le_add _ _),
   { rw [category_theory.nat_trans.app_neg, norm_neg],
-    refine le_trans (normed_group_hom.norm_completion_le _) _,
+    refine le_trans (normed_group_hom.norm_completion _).le _,
     exact normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.1
       (SemiNormedGroup.LocallyConstant_obj_map_norm_noninc _ _ _ _) },
   { refine normed_group_hom.norm_comp_le_of_le' 1 r⁻¹ r⁻¹ (mul_one _).symm _ _,
@@ -33,6 +33,7 @@ end
 variables {V c n M}
 
 open profinitely_filtered_pseudo_normed_group profinitely_filtered_pseudo_normed_group_with_Tinv
+  comphaus_filtered_pseudo_normed_group
 open locally_constant category_theory
 
 /-- 9.2 of Analytic.pdf -/

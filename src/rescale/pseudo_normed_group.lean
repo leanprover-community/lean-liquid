@@ -28,27 +28,30 @@ iff.rfl
 
 end pseudo_normed_group
 
+
+--Should we change name to this section? But one for the comphaus_fil.. and one for the
+--profinitely_filt.. seems a lot
 section profinitely_filtered_pseudo_normed_group
 
-open profinitely_filtered_pseudo_normed_group
+open comphaus_filtered_pseudo_normed_group profinitely_filtered_pseudo_normed_group
 
-variables [profinitely_filtered_pseudo_normed_group M]
-
-instance : profinitely_filtered_pseudo_normed_group (rescale r M) :=
+instance [comphaus_filtered_pseudo_normed_group M] :
+  comphaus_filtered_pseudo_normed_group (rescale r M) :=
 { topology := by { delta rescale, apply_instance },
   t2 := by { delta rescale, apply_instance },
-  td := by { delta rescale, apply_instance },
   compact := by { delta rescale, apply_instance },
   continuous_add' :=
   begin
     intros c₁ c₂,
     haveI : fact ((c₁ + c₂) * r⁻¹ ≤ c₁ * r⁻¹ + c₂ * r⁻¹) := ⟨(add_mul _ _ _).le⟩,
     rw (embedding_cast_le ((c₁ + c₂) * r⁻¹) (c₁ * r⁻¹ + c₂ * r⁻¹)).continuous_iff,
-    exact (continuous_add' (c₁ * r⁻¹) (c₂ * r⁻¹))
+    exact (continuous_add' (c₁ * r⁻¹) (c₂ * r⁻¹)),
   end,
   continuous_neg' := λ c, continuous_neg' _,
-  continuous_cast_le := λ c₁ c₂ h, by exactI continuous_cast_le _ _,
-  .. rescale.pseudo_normed_group _ _ }
+  continuous_cast_le := λ c₁ c₂ h, by exactI continuous_cast_le _ _,}
+
+instance [profinitely_filtered_pseudo_normed_group M] :
+  profinitely_filtered_pseudo_normed_group (rescale r M) := {}
 
 end profinitely_filtered_pseudo_normed_group
 
@@ -75,8 +78,8 @@ by simpa only [mem_filtration, Tinv'_apply, equiv.symm_apply_apply, mul_assoc]
 variable [fact (0 < r')]
 
 @[simps]
-def Tinv : profinitely_filtered_pseudo_normed_group_hom (rescale r M) (rescale r M) :=
-profinitely_filtered_pseudo_normed_group_hom.mk' (Tinv' r r' M)
+def Tinv : comphaus_filtered_pseudo_normed_group_hom (rescale r M) (rescale r M) :=
+comphaus_filtered_pseudo_normed_group_hom.mk' (Tinv' r r' M)
 begin
   refine ⟨r'⁻¹, λ c, ⟨Tinv'_mem_filtration r r' M c, _⟩⟩,
   haveI :  fact (c * r⁻¹ ≤ r' * (r'⁻¹ * c * r⁻¹)) :=

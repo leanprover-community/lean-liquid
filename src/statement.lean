@@ -16,7 +16,7 @@ include r r' BD κ
 
 def first_target_stmt : Prop :=
   ∀ m : ℕ,
-  ∃ (k K : ℝ≥0) [fact (1 ≤ k)],
+  ∃ (k K : ℝ≥0) (hk : fact (1 ≤ k)),
   ∃ c₀ : ℝ≥0,
   ∀ (S : Type) [fintype S],
   ∀ (V : SemiNormedGroup.{0}) [normed_with_aut r V],

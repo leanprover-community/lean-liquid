@@ -69,7 +69,7 @@ instance no_zero_smul_divisors_nat : no_zero_smul_divisors ℕ Λ :=
   refine h.imp _ id, simp only [imp_self, int.coe_nat_eq_zero] }⟩
 
 lemma polyhedral :
-  ∃ (ι : Type) [fintype ι] (l : ι → Λ), by exactI generates_norm l ∧ ∀ i, l i ≠ 0 :=
+  ∃ (ι : Type) (_ : fintype ι) (l : ι → Λ), by exactI generates_norm l ∧ ∀ i, l i ≠ 0 :=
 begin
   obtain ⟨ι, _ι_inst, l, hl⟩ := polyhedral_lattice.polyhedral' Λ, resetI,
   refine ⟨{i // l i ≠ 0}, infer_instance, λ i, l i, _, λ i, i.2⟩,

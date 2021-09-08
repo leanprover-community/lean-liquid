@@ -66,6 +66,7 @@ begin
 end
 
 section open profinitely_filtered_pseudo_normed_group polyhedral_lattice
+  comphaus_filtered_pseudo_normed_group
 
 lemma Hom_rescale_hom_ctu [fact (0 < r')] (c : ℝ≥0) :
   continuous (pseudo_normed_group.level (Hom_rescale_hom Λ N r' M)
@@ -125,6 +126,7 @@ def Hom_finsupp_equiv [fact (0 < r')] :
 .
 
 section open profinitely_filtered_pseudo_normed_group polyhedral_lattice pseudo_normed_group
+  comphaus_filtered_pseudo_normed_group
 
 lemma Hom_finsupp_equiv_strict [fact (0 < r')]
   (c : ℝ≥0) (f : (polyhedral_lattice.Hom (fin N →₀ Λ) M)) :
@@ -219,19 +221,19 @@ variables [fact (0 < r')] [fact (r' ≤ 1)]
 open_locale big_operators
 
 def unrescale (N : ℝ≥0) (M : Type*) [profinitely_filtered_pseudo_normed_group M] :
-  profinitely_filtered_pseudo_normed_group_hom (rescale N M) M :=
-profinitely_filtered_pseudo_normed_group_hom.mk_of_bound (add_monoid_hom.id _) N⁻¹
+  comphaus_filtered_pseudo_normed_group_hom (rescale N M) M :=
+comphaus_filtered_pseudo_normed_group_hom.mk_of_bound (add_monoid_hom.id _) N⁻¹
 begin
   intro c,
   refine ⟨λ x hx, _, _⟩,
   { rwa mul_comm },
   { haveI : fact (c * N⁻¹ ≤ N⁻¹ * c) := ⟨(mul_comm _ _).le⟩,
-    exact profinitely_filtered_pseudo_normed_group.continuous_cast_le (c * N⁻¹) (N⁻¹ * c) },
+    exact comphaus_filtered_pseudo_normed_group.continuous_cast_le (c * N⁻¹) (N⁻¹ * c) },
 end
 
 def rescale_proj (N : ℕ) (M : Type*) [profinitely_filtered_pseudo_normed_group M] (i : fin N) :
-  profinitely_filtered_pseudo_normed_group_hom (rescale N (M ^ N)) M :=
-(profinitely_filtered_pseudo_normed_group.pi_proj i).comp (unrescale N _)
+  comphaus_filtered_pseudo_normed_group_hom (rescale N (M ^ N)) M :=
+(comphaus_filtered_pseudo_normed_group.pi_proj i).comp (unrescale N _)
 
 lemma rescale_proj_bound_by
   (N : ℕ) (M : Type*) [profinitely_filtered_pseudo_normed_group M] (i : fin N) :

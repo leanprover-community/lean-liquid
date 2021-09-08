@@ -1,5 +1,6 @@
 import pseudo_normed_group.LC
-import for_mathlib.normed_group_hom_completion
+import analysis.normed_space.normed_group_hom_completion
+
 /-!
 
 # V-hat(M_c^n)
@@ -38,7 +39,7 @@ def T [normed_with_aut r V] [fact (0 < r)] : CLC V ≅ CLC V :=
 ((whiskering_right _ _ _).obj _).map_iso (LC.T r V)
 
 lemma norm_T_le [normed_with_aut r V] [fact (0 < r)] (A) : ∥(T r V).hom.app A∥ ≤ r :=
-le_trans (normed_group_hom.norm_completion_le _) $ LC.norm_T_le _ _ _
+le_trans (normed_group_hom.norm_completion _).le $ LC.norm_T_le _ _ _
 
 def T_inv [normed_with_aut r V] [fact (0 < r)] : CLC V ⟶ CLC V :=
 whisker_right (LC.T_inv r V) Completion
@@ -46,7 +47,7 @@ whisker_right (LC.T_inv r V) Completion
 lemma T_inv_eq [normed_with_aut r V] [fact (0 < r)] : (T r V).inv = T_inv r V := rfl
 
 lemma norm_T_inv_le [normed_with_aut r V] [fact (0 < r)] (A) : ∥(T_inv r V).app A∥ ≤ r⁻¹ :=
-le_trans (normed_group_hom.norm_completion_le _) $ LC.norm_T_inv_le _ _ _
+le_trans (normed_group_hom.norm_completion _).le $ LC.norm_T_inv_le _ _ _
 
 end CLC
 
@@ -226,7 +227,7 @@ by simp only [eval_CLCFP, T_inv_def, ← whisker_right_comp, T_inv_comp_eval_LCF
 lemma norm_eval_CLCFP_le [normed_with_aut r V] [fact (0 < r)] [ϕ.suitable c₂ c₁]
   (N : ℕ) (h : ϕ.bound_by N) (M) :
   ∥(ϕ.eval_CLCFP V r' c₁ c₂).app M∥ ≤ N :=
-le_trans (normed_group_hom.norm_completion_le _) $ norm_eval_LCFP_le _ _ _ _ _ _ _ h _
+le_trans (normed_group_hom.norm_completion _).le $ norm_eval_LCFP_le _ _ _ _ _ _ _ h _
 
 end universal_map
 

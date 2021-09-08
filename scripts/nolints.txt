@@ -74,13 +74,11 @@ apply_nolint condensed_type_condition doc_blame
 apply_nolint embed_Top doc_blame
 apply_nolint natural_fork doc_blame
 
--- condensed/proetale_site.lean
+-- condensed/proetale_site_as_small.lean
+apply_nolint from_point doc_blame
 apply_nolint mk_pullback doc_blame
+apply_nolint point doc_blame
 apply_nolint proetale_topology doc_blame
-
--- condensed/proj_cond.lean
-apply_nolint Profinite.extr_sheaf_cond doc_blame
-apply_nolint Profinite.proetale_topology' doc_blame
 
 -- for_mathlib/Cech/adjunction.lean
 apply_nolint category_theory.simplicial_object.augmented_cech_nerve.left_obj_zero_iso doc_blame
@@ -123,14 +121,14 @@ apply_nolint Profinite.image_stabilizes inhabited_nonempty
 apply_nolint indexed_partition.discrete_quotient doc_blame
 apply_nolint indexed_partition.discrete_quotient_equiv doc_blame
 
--- for_mathlib/normed_group_hom_completion.lean
-apply_nolint normed_group.to_compl doc_blame
-apply_nolint normed_group_hom.completion doc_blame
-
 -- for_mathlib/order.lean
 apply_nolint Inter_eq inhabited_nonempty
 apply_nolint eventually_constant inhabited_nonempty
 apply_nolint exists_le_finset inhabited_nonempty
+
+-- for_mathlib/pullbacks.lean
+apply_nolint category_theory.equivalence.is_limit_pullback_cone doc_blame
+apply_nolint category_theory.equivalence.pullback_cone doc_blame
 
 -- for_mathlib/rational_cones.lean
 apply_nolint down_two doc_blame
@@ -166,6 +164,13 @@ apply_nolint laurent_measures.zero doc_blame
 -- laurent_measures/bounded.lean
 apply_nolint laurent_measures_bdd doc_blame
 apply_nolint laurent_measures_bdd.map doc_blame
+
+-- laurent_measures/thm69.lean
+apply_nolint has_sum_pow_floor unused_arguments
+apply_nolint has_sum_pow_floor_norm unused_arguments
+apply_nolint laurent_measures.to_Rfct doc_blame unused_arguments
+apply_nolint sum_floor doc_blame
+apply_nolint θ doc_blame unused_arguments
 
 -- normed_group/pseudo_normed_group.lean
 apply_nolint semi_normed_group.pseudo_normed_group instance_priority
@@ -322,6 +327,21 @@ apply_nolint pseudo_normed_group.splittable doc_blame
 apply_nolint pseudo_normed_group.to_add_comm_group instance_priority
 
 -- pseudo_normed_group/category.lean
+apply_nolint CompHausFiltPseuNormGrp.bundled_hom doc_blame
+apply_nolint CompHausFiltPseuNormGrp₁.choose_index doc_blame
+apply_nolint CompHausFiltPseuNormGrp₁.choose_preimage doc_blame
+apply_nolint CompHausFiltPseuNormGrp₁.cone_point_type doc_blame
+apply_nolint CompHausFiltPseuNormGrp₁.cone_point_type_filt doc_blame
+apply_nolint CompHausFiltPseuNormGrp₁.cone_point_type_filt_add doc_blame
+apply_nolint CompHausFiltPseuNormGrp₁.enlarging_functor doc_blame
+apply_nolint CompHausFiltPseuNormGrp₁.equiv doc_blame
+apply_nolint CompHausFiltPseuNormGrp₁.homeo doc_blame
+apply_nolint CompHausFiltPseuNormGrp₁.incl doc_blame
+apply_nolint CompHausFiltPseuNormGrp₁.level doc_blame
+apply_nolint CompHausFiltPseuNormGrp₁.proj doc_blame
+apply_nolint CompHausFiltPseuNormGrp₁.trans doc_blame
+apply_nolint ProFiltPseuNormGrp.bundled_hom doc_blame
+apply_nolint ProFiltPseuNormGrp.to_CompHausFilt doc_blame
 apply_nolint ProFiltPseuNormGrpWithTinv.Pow doc_blame
 apply_nolint ProFiltPseuNormGrpWithTinv.Pow_Pow_X doc_blame
 apply_nolint ProFiltPseuNormGrpWithTinv.Pow_Pow_X_equiv doc_blame
@@ -334,17 +354,22 @@ apply_nolint breen_deligne.BD_map₂ doc_blame
 apply_nolint breen_deligne.BD_system_map doc_blame
 
 -- pseudo_normed_group/profinitely_filtered.lean
-apply_nolint profinitely_filtered_pseudo_normed_group.filtration_pi_homeo doc_blame
-apply_nolint profinitely_filtered_pseudo_normed_group.pi_map doc_blame
-apply_nolint profinitely_filtered_pseudo_normed_group.pi_proj doc_blame
-apply_nolint profinitely_filtered_pseudo_normed_group.prod_pi_homeo_pi_prod doc_blame unused_arguments
-apply_nolint profinitely_filtered_pseudo_normed_group_hom doc_blame
-apply_nolint profinitely_filtered_pseudo_normed_group_hom.add doc_blame
-apply_nolint profinitely_filtered_pseudo_normed_group_hom.bound_by doc_blame
-apply_nolint profinitely_filtered_pseudo_normed_group_hom.neg doc_blame
-apply_nolint profinitely_filtered_pseudo_normed_group_hom.strict doc_blame
-apply_nolint profinitely_filtered_pseudo_normed_group_hom.sub doc_blame
-apply_nolint profinitely_filtered_pseudo_normed_group_hom.to_add_monoid_hom_hom doc_blame
+apply_nolint comphaus_filtered_pseudo_normed_group.filtration_pi_homeo doc_blame
+apply_nolint comphaus_filtered_pseudo_normed_group.pi_map doc_blame
+apply_nolint comphaus_filtered_pseudo_normed_group.pi_proj doc_blame
+apply_nolint comphaus_filtered_pseudo_normed_group.prod_pi_homeo_pi_prod doc_blame unused_arguments
+apply_nolint comphaus_filtered_pseudo_normed_group_hom doc_blame
+apply_nolint comphaus_filtered_pseudo_normed_group_hom.add doc_blame
+apply_nolint comphaus_filtered_pseudo_normed_group_hom.bound_by doc_blame
+apply_nolint comphaus_filtered_pseudo_normed_group_hom.neg doc_blame
+apply_nolint comphaus_filtered_pseudo_normed_group_hom.strict doc_blame
+apply_nolint comphaus_filtered_pseudo_normed_group_hom.strict.to_schfpsng_hom doc_blame
+apply_nolint comphaus_filtered_pseudo_normed_group_hom.sub doc_blame
+apply_nolint comphaus_filtered_pseudo_normed_group_hom.to_add_monoid_hom_hom doc_blame
+apply_nolint strict_comphaus_filtered_pseudo_normed_group_hom doc_blame
+apply_nolint strict_comphaus_filtered_pseudo_normed_group_hom.level doc_blame
+apply_nolint strict_comphaus_filtered_pseudo_normed_group_hom.to_add_monoid_hom doc_blame
+apply_nolint strict_comphaus_filtered_pseudo_normed_group_hom.to_chfpsng_hom doc_blame
 
 -- pseudo_normed_group/sum_hom.lean
 apply_nolint profinitely_filtered_pseudo_normed_group.rescale_proj doc_blame

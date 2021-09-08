@@ -135,6 +135,6 @@ let results := (do
   (linter_name, linter, decls) ← results₀,
   [(linter_name, linter, (nolint_file.find linter_name).foldl rb_map.erase decls)]),
 io.print $ to_string $ format_linter_results env results decls non_auto_decls
-  path_len "in lean-liquid" tt lint_verbosity.medium,
+  path_len "in lean-liquid" tt lint_verbosity.medium linters.length,
 io.write_file "nolints.txt" $ to_string $ mk_nolint_file env path_len results₀,
 if results.all (λ r, r.2.2.empty) then pure () else io.fail ""

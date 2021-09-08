@@ -98,6 +98,10 @@ variables {M : Type*} [pseudo_normed_group M]
 instance (c : ℝ≥0) : has_zero (filtration M c) := ⟨⟨0, zero_mem_filtration _⟩⟩
 instance (c : ℝ≥0) : has_neg (filtration M c) := ⟨λ x, ⟨-x, neg_mem_filtration x.2⟩⟩
 
+@[simp] lemma filtration.coe_zero {c : ℝ≥0} : ((0 : filtration M c) : M) = 0 := rfl
+@[simp] lemma filtration.coe_neg {c : ℝ≥0} (x : filtration M c) :
+  ((-x : filtration M c) : M) = -(x : M) := rfl
+
 /-- Bounded uncurried addition for pseudo-normed groups. -/
 def add' {c₁ c₂} (x : (filtration M c₁) × (filtration M c₂)) : filtration M (c₁ + c₂) :=
 ⟨(x.1 + x.2 : M), add_mem_filtration x.1.2 x.2.2⟩
@@ -318,13 +322,13 @@ begin
 end
 
 lemma const_smul_hom_nat_mem_filtration (n : ℕ) (c : ℝ≥0) (h : ↑n ≤ c) :
-  const_smul_hom M n ∈ filtration (M →+ M) c :=
-λ c' x hx, by simpa only [const_smul_hom_apply]
+  distrib_mul_action.to_add_monoid_hom M n ∈ filtration (M →+ M) c :=
+λ c' x hx, by simpa only [distrib_mul_action.to_add_monoid_hom_apply]
   using filtration_mono (mul_le_mul_right' h c') (nat_smul_mem_filtration _ _ _ hx)
 
 lemma const_smul_hom_int_mem_filtration (n : ℤ) (c : ℝ≥0) (h : ↑(n.nat_abs) ≤ c) :
-  const_smul_hom M n ∈ filtration (M →+ M) c :=
-λ c' x hx, by simpa only [const_smul_hom_apply, smul_eq_mul]
+  distrib_mul_action.to_add_monoid_hom M n ∈ filtration (M →+ M) c :=
+λ c' x hx, by simpa only [distrib_mul_action.to_add_monoid_hom_apply]
   using filtration_mono (mul_le_mul_right' h c') (int_smul_mem_filtration _ _ _ hx)
 
 end add_monoid_hom

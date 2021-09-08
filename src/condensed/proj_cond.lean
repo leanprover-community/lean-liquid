@@ -1,3 +1,5 @@
+/-
+-- This stuff is probably not needed anymore.
 import category_theory.preadditive.projective
 import condensed.condensed
 
@@ -28,3 +30,4 @@ sorry
 theorem extr_sheaf_iff : extr_sheaf_cond F ↔ presheaf.is_sheaf proetale_topology' F := sorry
 
 end Profinite
+-/

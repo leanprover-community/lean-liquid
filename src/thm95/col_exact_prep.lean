@@ -93,7 +93,7 @@ variables (r' : ℝ) (V : SemiNormedGroup.{u}) (M : Type u) {M₁ M₂ : Type u}
 variables [profinitely_filtered_pseudo_normed_group M] [pseudo_normed_group.splittable M N d]
 variables [profinitely_filtered_pseudo_normed_group M₁]
 variables [profinitely_filtered_pseudo_normed_group M₂]
-variables (f : profinitely_filtered_pseudo_normed_group_hom M₁ M₂) (hf : f.strict)
+variables (f : comphaus_filtered_pseudo_normed_group_hom M₁ M₂) (hf : f.strict)
 
 section open Profinite pseudo_normed_group profinitely_filtered_pseudo_normed_group
 
@@ -106,6 +106,7 @@ def FLC_complex_arrow (c : ℝ≥0) : arrow Profinite :=
 end
 
 section open profinitely_filtered_pseudo_normed_group
+  comphaus_filtered_pseudo_normed_group
 
 @[simps obj map]
 def FLC_complex : system_of_complexes :=
@@ -140,7 +141,7 @@ def aux_space (c₁ c₂ : ℝ≥0) [fact (c₁ ≤ c₂)] :=
 { p : filtration M₂ c₁ × filtration M₁ c₂ // cast_le p.1 = level f hf c₂ p.2 }
 
 namespace aux_space
-open profinitely_filtered_pseudo_normed_group
+open profinitely_filtered_pseudo_normed_group comphaus_filtered_pseudo_normed_group
 
 instance : topological_space (aux_space f hf c₁ c₂) :=
 by { delta aux_space, apply_instance }

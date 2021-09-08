@@ -33,7 +33,7 @@ include r r' BD κ
 
 /-- A mix of Theorems 9.4 and 9.5 in [Analytic] -/
 theorem first_target :
-  ∀ m : ℕ, ∃ (k K : ℝ≥0) [fact (1 ≤ k)] (c₀ : ℝ≥0),
+  ∀ m : ℕ, ∃ (k K : ℝ≥0) (hk : fact (1 ≤ k)) (c₀ : ℝ≥0),
   ∀ (S : Type) [fintype S] (V : SemiNormedGroup.{0}) [normed_with_aut r V],
     ​((BD.data.system κ r V r').obj (op $ of r' (Mbar r' S))).is_weak_bounded_exact k K m c₀ :=
 begin

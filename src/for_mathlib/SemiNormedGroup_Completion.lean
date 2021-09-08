@@ -4,7 +4,7 @@ import topology.category.Profinite
 import topology.algebra.group_completion
 import topology.metric_space.completion
 
-import for_mathlib.normed_group_hom_completion
+import analysis.normed_space.normed_group_hom_completion
 
 import locally_constant.SemiNormedGroup
 
@@ -63,7 +63,7 @@ def incl {V : SemiNormedGroup} : V ⟶ Completion.obj V :=
 lemma Completion_map_norm_noninc {V W : SemiNormedGroup} (f : V ⟶ W) (hf : f.norm_noninc) :
   (Completion.map f).norm_noninc :=
 normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.2 $ le_trans
-  (normed_group_hom.norm_completion_le f) $
+  (normed_group_hom.norm_completion f).le $
   normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.1 hf
 
 /--

@@ -128,7 +128,7 @@ theorem thm95'' (BD : package)
   (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r < 1)] [fact (r' < 1)]
   (κ : ℕ → ℝ≥0) [BD.data.very_suitable r r' κ] [∀ (i : ℕ), fact (0 < κ i)] :
   ∀ m : ℕ,
-  ∃ (k K : ℝ≥0) [fact (1 ≤ k)],
+  ∃ (k K : ℝ≥0) (hk : fact (1 ≤ k)),
   ∀ (Λ : Type) [polyhedral_lattice Λ],
   ∃ c₀ : ℝ≥0,
   ∀ (S : Type) [fintype S],

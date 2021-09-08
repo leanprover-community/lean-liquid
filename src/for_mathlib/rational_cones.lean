@@ -267,7 +267,7 @@ end
 
 /-- A submodule is polyhedral if it is the intersection of finitely many half spaces. -/
 def is_polyhedral_cone (C : submodule (ℚ≥0) Λ) : Prop :=
-  ∃ (ι : Type u) [fintype ι] (l : ι → Λ →ₗ[ℚ] ℚ), C = index_down_one l
+  ∃ (ι : Type u) (_ : fintype ι) (l : ι → Λ →ₗ[ℚ] ℚ), C = index_down_one l
 
 lemma is_polyhedral_cone_iff_finset (C : submodule (ℚ≥0) Λ) :
   is_polyhedral_cone C ↔ ∃ (s : finset (dual ℚ Λ)), C = set_down_one s :=
