@@ -675,7 +675,7 @@ def limit_cone_lift (D : cone G) : D.X ⟶ cone_point G :=
       refine ⟨_, le_sup_left, le_sup_right, _⟩,
       ext,
       dsimp,
-      simp,
+      simp only [cone_point_type_filt.trans_apply, coe_cast_le, coe_cast_le'],
       refl },
     rw this,
     apply continuous_subtype_mk,
