@@ -327,11 +327,40 @@ def mk' (f : M₁ →+ M₂)
 
 lemma strict ⦃c x⦄ : x ∈ filtration M₁ c → f x ∈ filtration M₂ c := f.strict' c x
 
-
-def level (c) : filtration M₁ c → filtration M₂ c := pseudo_normed_group.level f f.strict c
+def level {c} : filtration M₁ c → filtration M₂ c := pseudo_normed_group.level f f.strict c
 
 protected lemma level_continuous (c) : continuous (pseudo_normed_group.level f f.strict c) :=
   f.continuous₁' _
+
+@[simp] protected lemma level_cast_le' {c₁ c₂} (h : c₁ ≤ c₂) (x : filtration M₁ c₁) :
+  (f.level (cast_le' h x)) = cast_le' h (f.level x) := rfl
+
+@[simp] protected lemma level_zero {c} : f.level (0 : filtration M₁ c) = 0 :=
+begin
+  ext,
+  dsimp,
+  rw ← f.map_zero,
+  refl,
+end
+
+@[simp] protected lemma level_neg {c} (x : filtration M₁ c) : f.level (-x) = - (f.level x) :=
+begin
+  ext,
+  dsimp,
+  erw ← f.map_neg,
+  refl,
+end
+
+@[simp] protected lemma level_add {c₁ c₂} (x : filtration M₁ c₁ × filtration M₁ c₂) :
+  f.level (add' x) = add' ⟨f.level x.1, f.level x.2⟩ :=
+begin
+  ext,
+  dsimp,
+  erw ← f.map_add,
+  refl,
+end
+
+@[simp] lemma coe_level {c} (x : filtration M₁ c) : (f.level x : M₂) = f x := rfl
 
 variables {f g}
 

@@ -225,8 +225,19 @@ def cast_le {c₁ c₂ : ℝ≥0} [h : fact (c₁ ≤ c₂)] (x : filtration M c
   filtration M c₂ :=
 ⟨x, filtration_mono h.out x.2⟩
 
+/-- The natural inclusion `filtration M c₁ → filtration M c₂`,
+for a pseudo-normed group `M`, and `c₁ ≤ c₂`. -/
+def cast_le' {c₁ c₂ : ℝ≥0} (h : c₁ ≤ c₂) : filtration M c₁ → filtration M c₂ :=
+λ x, ⟨x, filtration_mono h x.2⟩
+
+@[simp] lemma cast_le'_eq_cast_le {c₁ c₂ : ℝ≥0} [h : fact (c₁ ≤ c₂)] (x : filtration M c₁) :
+  cast_le' h.out x = cast_le x := rfl
+
 @[simp] lemma coe_cast_le {c₁ c₂ : ℝ≥0} [h : fact (c₁ ≤ c₂)] (x : filtration M c₁) :
   ((cast_le x : filtration M c₂) : M) = x := rfl
+
+@[simp] lemma coe_cast_le' {c₁ c₂ : ℝ≥0} (h : c₁ ≤ c₂) (x : filtration M c₁) :
+  ((cast_le' h x) : M) = x := rfl
 
 lemma injective_cast_le (c₁ c₂ : ℝ≥0) [fact (c₁ ≤ c₂)] :
   function.injective (cast_le : filtration M c₁ → filtration M c₂) :=
