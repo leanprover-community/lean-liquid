@@ -3,90 +3,112 @@ import category_theory.monoidal.CommMon_
 import category_theory.monoidal.of_chosen_finite_products
 import category_theory.limits.types
 import algebra.category.Group
+import category_theory.sites.sheaf_of_types
 
 namespace category_theory
 open category_theory.limits category_theory.monoidal_category
 
-variables (C : Type*) [category C]
+variables {C : Type*} [category C] (T : grothendieck_topology C)
 
 noncomputable theory
 
-class cartesian :=
-[hbp : has_binary_products C]
-[ht : has_terminal C]
+namespace SheafOfTypes
 
-variables [cartesian C]
-namespace cartesian
+@[simps]
+def terminal_sheaf : SheafOfTypes T :=
+{ val := (functor.const _).obj punit,
+  property := sorry }
 
-instance : has_binary_products C := cartesian.hbp
-instance : has_terminal C := cartesian.ht
+def terminal_cone : cone (functor.empty (SheafOfTypes T)) :=
+{ X := terminal_sheaf T,
+  π := { app := λ X, X.elim } }
 
-instance [cartesian C] : monoidal_category C := monoidal_of_chosen_finite_products
-  ⟨limit.cone _, limit.is_limit _⟩ (λ X Y, ⟨limit.cone _, limit.is_limit _⟩)
+variables {T}
+def terminal_sheaf.to (F : SheafOfTypes T) : F ⟶ terminal_sheaf T :=
+{ app := λ X t, punit.star }
+variables (T)
 
-@[simp] lemma tensor_hom_eq {X X' Y Y' : C} (f : X ⟶ X') (g : Y ⟶ Y') :
-  f ⊗ g = limits.prod.map f g :=
-begin
-  change limits.prod.lift _ _ = _,
-  tidy,
-end
+def terminal_cone_is_limit : is_limit (terminal_cone T) :=
+{ lift := λ S, terminal_sheaf.to _ }
 
-@[simp] lemma α_eq (X Y Z : C) : α_ X Y Z = limits.prod.associator _ _ _ := rfl
+variables {T}
 
-instance : braided_category C := { braiding := λ X Y, limits.prod.braiding X Y }
+@[simps]
+def product_sheaf (F G : SheafOfTypes T) : SheafOfTypes T :=
+{ val :=
+  { obj := λ X, F.val.obj X × G.val.obj X,
+    map := λ X Y f t, (F.val.map f t.1, G.val.map f t.2) },
+  property := sorry }
 
-end cartesian
+@[simps]
+def product_sheaf.swap (F G : SheafOfTypes T) : product_sheaf F G ≅ product_sheaf G F :=
+{ hom := { app := λ X, _root_.prod.swap },
+  inv := { app := λ X, _root_.prod.swap } }
 
-structure Group_ extends Mon_ C :=
-(inv : X ⟶ X)
-(inv_mul : prod.lift inv (𝟙 X) ≫ mul = terminal.from X ≫ one)
-(mul_inv : prod.lift (𝟙 X) inv ≫ mul = terminal.from X ≫ one)
+@[simps]
+def product_sheaf.fst (F G : SheafOfTypes T) : product_sheaf F G ⟶ F :=
+{ app := λ X, _root_.prod.fst }
 
-structure Ab_ extends CommMon_ C :=
-(inv : X ⟶ X)
-(inv_mul : prod.lift inv (𝟙 X) ≫ mul = terminal.from X ≫ one)
-(mul_inv : prod.lift (𝟙 X) inv ≫ mul = terminal.from X ≫ one)
+@[simps]
+def product_sheaf.snd (F G : SheafOfTypes T) : product_sheaf F G ⟶ G :=
+{ app := λ X, _root_.prod.snd }
 
-section examples
+@[simps]
+def product_cone (F G : SheafOfTypes T) : binary_fan F G :=
+binary_fan.mk (product_sheaf.fst F G) (product_sheaf.snd F G)
 
-instance : cartesian Type* := {}
+@[simps]
+def product_sheaf.lift {F G H : SheafOfTypes T} (f : H ⟶ F) (g : H ⟶ G) :
+  H ⟶ product_sheaf F G :=
+{ app := λ X t, (f.app X t, g.app X t),
+  naturality' := begin
+    intros X Y e,
+    ext t,
+    { change (H.val.map e ≫ f.app Y) t = _,
+      simpa [f.naturality] },
+    { change (H.val.map e ≫ g.app Y) t = _,
+      simpa [g.naturality] },
+  end }
 
-def types.prod_cone (A B : Type*) : cone (pair A B) :=
-  binary_fan.mk (_root_.prod.fst : A × B → A) _root_.prod.snd
-
-def types.prod_cone_is_limit (A B : Type*) : is_limit (types.prod_cone A B) :=
-{ lift := λ (S : binary_fan A B) x, ⟨S.fst x, S.snd x⟩,
+@[simps]
+def product_cone_is_limit (F G : SheafOfTypes T) : is_limit (product_cone F G) :=
+{ lift := λ (S : binary_fan F G), product_sheaf.lift S.fst S.snd,
   fac' := begin
-    rintro S (j|j),
+    rintros S (j|j),
     tidy,
   end,
   uniq' := begin
-    rintro S m h,
-    ext,
-    { specialize h walking_pair.left, tidy },
-    { specialize h walking_pair.right, tidy },
+    intros S m h,
+    ext X t : 4,
+    { specialize h walking_pair.left,
+      dsimp,
+      apply_fun (λ e, e.app X t) at h,
+      exact h },
+    { specialize h walking_pair.right,
+      dsimp,
+      apply_fun (λ e, e.app X t) at h,
+      exact h },
   end }
 
-def types.terminal_cone : cone (functor.empty Type*) :=
-{ X := punit,
-  π :=
-  { app := λ X t, X.elim } }
+variables (T)
 
-def types.terminal_cone_is_limit : is_limit types.terminal_cone :=
-{ lift := λ S t, punit.star }
+instance : monoidal_category (SheafOfTypes T) :=
+monoidal_of_chosen_finite_products ⟨terminal_cone T, terminal_cone_is_limit T⟩
+  (λ F G, ⟨product_cone F G, product_cone_is_limit F G⟩)
 
-def Ab__to_Ab (M : Ab_ Type*) : Ab :=
-{ α := M.X,
-  str :=
-  { add := λ x y, let F := limit.lift _ (types.prod_cone M.X M.X) in (F ≫ M.mul) ⟨x,y⟩,
-    add_assoc := sorry,
-    zero := ((limit.lift _ types.terminal_cone) ≫ M.one) punit.star,
-    zero_add := sorry,
-    add_zero := sorry,
-    neg := λ x, M.inv x,
-    add_left_neg := sorry,
-    add_comm := sorry } }
+instance : braided_category (SheafOfTypes T) :=
+{ braiding := λ X Y, product_sheaf.swap X Y }
 
-end examples
+structure Group extends Mon_ (SheafOfTypes T) :=
+(inv : X ⟶ X)
+(inv_mul : (product_sheaf.lift inv (𝟙 X)) ≫ mul = terminal_sheaf.to _ ≫ one)
+(mul_inv : (product_sheaf.lift (𝟙 X) inv) ≫ mul = terminal_sheaf.to _ ≫ one)
+
+structure Ab extends CommMon_ (SheafOfTypes T) :=
+(inv : X ⟶ X)
+(inv_mul : (product_sheaf.lift inv (𝟙 X)) ≫ mul = terminal_sheaf.to _ ≫ one)
+(mul_inv : (product_sheaf.lift (𝟙 X) inv) ≫ mul = terminal_sheaf.to _ ≫ one)
+
+end SheafOfTypes
 
 end category_theory
