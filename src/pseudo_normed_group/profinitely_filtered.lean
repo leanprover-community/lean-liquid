@@ -360,6 +360,8 @@ begin
   refl,
 end
 
+@[simp] lemma coe_level {c} (x : filtration M₁ c) : (f.level x : M₂) = f x := rfl
+
 variables {f g}
 
 @[ext] theorem ext (H : ∀ x, f x = g x) : f = g :=

@@ -130,6 +130,9 @@ instance (c : ℝ≥0) : has_coe_to_fun (cone_point_type_filt G c) :=
 @[simp] lemma level_apply {c : ℝ≥0} {i j : J} (x : cone_point_type_filt G c) (e : i ⟶ j) :
   (G.map e).level (x i) = x j := x.2 e
 
+@[simp] lemma map_apply {c : ℝ≥0} {i j : J} (x : cone_point_type_filt G c) (e : i ⟶ j) :
+  (G.map e) (x i) = x j := by {rw ← (G.map e).coe_level, simp }
+
 def trans {c₁ c₂ : ℝ≥0} (h : c₁ ≤ c₂) (x : cone_point_type_filt G c₁) : cone_point_type_filt G c₂ :=
 ⟨λ j, cast_le' h (x j), λ i j e, by { ext, simp }⟩
 
@@ -168,11 +171,11 @@ instance {c} : has_zero (cone_point_type_filt G c) := has_zero.mk $
 ⟨λ j, 0, λ i j e, by { ext, dsimp, simp }⟩
 
 instance {c} : has_neg (cone_point_type_filt G c) := has_neg.mk $ λ x,
-⟨λ j, - (x j), λ i j e, by { ext, dsimp, simp }⟩
+⟨λ j, - (x j), λ i j e, by { ext, dsimp, simp, }⟩
 
 def add' {c₁ c₂} (x : cone_point_type_filt G c₁) (y : cone_point_type_filt G c₂) :
   cone_point_type_filt G (c₁ + c₂) :=
-⟨λ j, add' (x j, y j), λ i j e, by { ext, dsimp, simp }⟩
+⟨λ j, add' (x j, y j), λ i j e, by { ext, dsimp, simp, }⟩
 
 @[simp] lemma zero_apply {c} (j : J) : (0 : cone_point_type_filt G c) j = 0 := rfl
 @[simp] lemma neg_apply {c} (j : J) (x : cone_point_type_filt G c) : (-x) j = - (x j) := rfl
@@ -595,13 +598,92 @@ def index {M : CompHausFiltPseuNormGrp₁} (x : M) : ℝ≥0 := (M.exhaustive x)
 def preimage {M : CompHausFiltPseuNormGrp₁} (x : M) : filtration M (index x) :=
   ⟨x,(M.exhaustive x).some_spec⟩
 
+def limit_cone_lift_map (D : cone G) : D.X → cone_point G := λ x,
+cone_point_type.incl (index x) ⟨λ j, (D.π.app j).level (preimage x), begin
+  intros i j e,
+  ext,
+  dsimp,
+  simp,
+end⟩
+
+lemma limit_cone_lift_map_map_zero {D : cone G} :
+  limit_cone_lift_map G D 0 = 0 :=
+begin
+  apply quotient.sound',
+  refine ⟨_, le_sup_left, le_sup_right, _⟩,
+  dsimp,
+  ext j,
+  simp only [cone_point_type_filt.trans_apply, cone_point_type_filt.zero_apply,
+    coe_cast_le, filtration.coe_zero, coe_cast_le'],
+  apply (D.π.app j).map_zero,
+end
+
+lemma limit_cone_lift_map_map_add {D : cone G} (a b : D.X) :
+  limit_cone_lift_map G D (a + b) = limit_cone_lift_map G D a + limit_cone_lift_map G D b :=
+begin
+  apply quotient.sound',
+  refine ⟨_, le_sup_left, le_sup_right, _⟩,
+  dsimp,
+  ext j,
+  dsimp [limit_cone_lift_map],
+  simp only [cone_point_type_filt.trans_apply, cone_point_type.coe_incl_preimage_apply,
+    cone_point_type_filt.add'_apply_coe, coe_cast_le, coe_cast_le'],
+  exact (D.π.app j).map_add a b,
+end
+
+lemma limit_cone_lift_map_strict {D : cone G} {x : D.X} (c : ℝ≥0) (hx : x ∈ filtration D.X c) :
+  limit_cone_lift_map G D x ∈ filtration (cone_point_type G) c :=
+begin
+  dsimp [limit_cone_lift_map],
+  change _ ∈ set.range _,
+  refine ⟨⟨λ j, (D.π.app j).level ⟨x,hx⟩, _⟩, _⟩,
+  { intros i j e,
+    ext,
+    dsimp,
+    simp },
+  { dsimp,
+    apply quotient.sound',
+    refine ⟨_, le_sup_left, le_sup_right, _⟩,
+    dsimp,
+    ext j,
+    simpa }
+end
+
 def limit_cone_lift (D : cone G) : D.X ⟶ cone_point G :=
-{ to_fun := λ x, cone_point_type.incl (index x)
-    ⟨λ j, (D.π.app j).level (preimage x), sorry⟩,
-  map_zero' := sorry,
-  map_add' := sorry,
-  strict' := sorry,
-  continuous₁' := sorry }
+{ to_fun := limit_cone_lift_map _ D,
+  map_zero' := limit_cone_lift_map_map_zero _,
+  map_add' := limit_cone_lift_map_map_add _,
+  strict' := λ c x hx, limit_cone_lift_map_strict G c hx,
+  continuous₁' := begin
+    intros c,
+    rw (cone_point_type.filt_homeo G c).inducing.continuous_iff,
+    let E : filtration D.X c → cone_point_type_filt G c := λ t,
+      ⟨λ j, (D.π.app j).level t, _⟩,
+    swap, {
+      intros i j e,
+      ext,
+      dsimp,
+      simp },
+    have : (cone_point_type.filt_homeo G c) ∘ pseudo_normed_group.level
+      (limit_cone_lift_map G D) (λ c x hx, limit_cone_lift_map_strict G c hx) c = E,
+    { ext1,
+      apply_fun (cone_point_type.filt_homeo G c).symm,
+      dsimp [E],
+      simp only [homeomorph.symm_apply_apply],
+      ext,
+      apply quotient.sound',
+      refine ⟨_, le_sup_left, le_sup_right, _⟩,
+      ext,
+      dsimp,
+      simp,
+      refl },
+    rw this,
+    apply continuous_subtype_mk,
+    apply continuous_pi,
+    intros j,
+    dsimp,
+    apply (D.π.app j).level_continuous,
+  end }
 
 def limit_cone_is_limit : is_limit (limit_cone G) :=
 { lift := λ S, limit_cone_lift _ _,
