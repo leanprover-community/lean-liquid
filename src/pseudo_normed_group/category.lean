@@ -687,8 +687,27 @@ def limit_cone_lift (D : cone G) : D.X ⟶ cone_point G :=
 
 def limit_cone_is_limit : is_limit (limit_cone G) :=
 { lift := λ S, limit_cone_lift _ _,
-  fac' := sorry,
-  uniq' := sorry }
+  fac' := begin
+    intros S j,
+    ext,
+    change (limit_cone G).π.app j _ = _,
+    dsimp [limit_cone_lift, limit_cone, limit_cone_lift_map, proj],
+    simpa,
+  end,
+  uniq' := begin
+    intros S m h,
+    ext,
+    dsimp [limit_cone_lift, limit_cone_lift_map],
+    rw ← (m x).preimage_spec,
+    apply quotient.sound',
+    refine ⟨_, le_sup_left, le_sup_right, _⟩,
+    ext j,
+    dsimp,
+    simp only [cone_point_type_filt.trans_apply, coe_cast_le, coe_cast_le'],
+    specialize h j,
+    apply_fun (λ e, e x) at h,
+    exact h,
+  end }
 
 -- This is the goal of this section...
 instance : has_limit G := has_limit.mk ⟨limit_cone _, limit_cone_is_limit _⟩
