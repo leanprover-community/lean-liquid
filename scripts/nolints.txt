@@ -80,6 +80,9 @@ apply_nolint mk_pullback doc_blame
 apply_nolint point doc_blame
 apply_nolint proetale_topology doc_blame
 
+-- facts/int.lean
+apply_nolint fact_le_of_add_one_le fails_quickly
+
 -- for_mathlib/Cech/adjunction.lean
 apply_nolint category_theory.simplicial_object.augmented_cech_nerve.left_obj_zero_iso doc_blame
 
@@ -156,6 +159,9 @@ apply_nolint set_down_one doc_blame
 apply_nolint set_up_one doc_blame
 apply_nolint up_two doc_blame
 
+-- for_mathlib/simplicial/iso.lean
+apply_nolint category_theory.simplicial_object.is_iso_of fails_quickly
+
 -- hacks_and_tricks/by_exactI_hack.lean
 apply_nolint exact_notation doc_blame
 
@@ -189,6 +195,10 @@ apply_nolint has_sum_pow_floor_norm unused_arguments
 apply_nolint has_sum_pow_floor_norm_nat unused_arguments
 apply_nolint laurent_measures.to_Rfct doc_blame unused_arguments
 apply_nolint θ doc_blame unused_arguments
+
+-- locally_constant/Vhat.lean
+apply_nolint SemiNormedGroup.normed_with_aut_LCC fails_quickly
+apply_nolint SemiNormedGroup.normed_with_aut_LocallyConstant fails_quickly
 
 -- normed_group/pseudo_normed_group.lean
 apply_nolint semi_normed_group.pseudo_normed_group instance_priority
@@ -305,9 +315,11 @@ apply_nolint pseudo_normed_group.filtration_obj doc_blame
 -- pseudo_normed_group/LC.lean
 apply_nolint LC.T doc_blame
 apply_nolint LC.T_inv doc_blame unused_arguments
+apply_nolint LC.obj.normed_with_aut fails_quickly
 apply_nolint LCFP.T doc_blame unused_arguments
 apply_nolint LCFP.T_inv doc_blame
 apply_nolint LCFP.Tinv doc_blame unused_arguments
+apply_nolint LCFP.obj.normed_with_aut fails_quickly
 apply_nolint LCFP.res doc_blame
 apply_nolint breen_deligne.basic_universal_map.eval_LCFP doc_blame
 apply_nolint breen_deligne.basic_universal_map.eval_LCFP' doc_blame
@@ -416,6 +428,8 @@ apply_nolint Filtration_cast_eq doc_blame unused_arguments
 
 -- rescale/basic.lean
 apply_nolint rescale doc_blame
+apply_nolint rescale.add_comm_group fails_quickly
+apply_nolint rescale.add_comm_monoid fails_quickly
 apply_nolint rescale.of doc_blame
 
 -- rescale/normed_group.lean
@@ -433,6 +447,10 @@ apply_nolint generates_norm.rescale_generators doc_blame unused_arguments
 apply_nolint ProFiltPseuNormGrpWithTinv.rescale doc_blame
 apply_nolint rescale.Tinv doc_blame
 apply_nolint rescale.Tinv' doc_blame
+apply_nolint rescale.comphaus_filtered_pseudo_normed_group fails_quickly
+apply_nolint rescale.profinitely_filtered_pseudo_normed_group fails_quickly
+apply_nolint rescale.profinitely_filtered_pseudo_normed_group_with_Tinv fails_quickly
+apply_nolint rescale.pseudo_normed_group fails_quickly
 
 -- statement.lean
 apply_nolint first_target_stmt doc_blame unused_arguments
