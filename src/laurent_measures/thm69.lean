@@ -16,8 +16,45 @@ open_locale topological_space classical nnreal
 
 section thm69_surjective
 
-lemma converges_floor_nat (x : ℝ≥0) (r' : ℝ≥0) [fact (r' < 1)] :
-  tendsto (λn : ℕ, (nat_floor (2 ^ n * x.1 ) * r' ^ n : ℝ≥0)) at_top (𝓝 x) := sorry
+lemma sub_one_lt_nat_floor (x : ℝ) : x - 1 < nat_floor x :=
+begin
+  refine (sub_one_lt_floor x).trans_le _,
+  norm_cast,
+  exact int.le_to_nat _,
+end
+
+
+lemma converges_floor_nat (x : ℝ≥0) (r' : ℝ≥0) [fact (r' < 1)] [fact (r'.1 ≠ 0)] (h_nz : r'.1 ≠ 0) :
+  tendsto (λn : ℕ, (nat_floor (x.1 / r'.1 ^ n) : ℝ) * r'.1 ^ n) at_top (𝓝 x) :=
+begin
+  haveI : ∀ n : ℕ, invertible (r'.1 ^ n) := λ n, invertible_of_nonzero (pow_ne_zero n (fact.out _)),
+  -- have h2 : ∀ n : ℕ, invertible (r'.1 ^ n) := λ n, invertible_of_nonzero (pow_ne_zero n h_nz),
+  have pow_pos : ∀ n : ℕ,  0 < (r' ^ n : ℝ), sorry,
+    -- [forall_const, zero_lt_bit0, pow_pos, zero_lt_one],
+  have h₁ : ∀ n : ℕ, (x.1 - r'.1 ^ n) ≤ (nat_floor (x.1 / r'.1 ^ n) * r'.1 ^ n),
+  { intro n,
+    have := (mul_le_mul_right $ pow_pos n).mpr (le_of_lt (sub_one_lt_nat_floor (x / r' ^ n : ℝ ))),
+    calc (x - r' ^ n : ℝ)  = ( x / r' ^ n - 1) * (r' ^ n : ℝ) : by field_simp
+                       ... ≤ (nat_floor ( x / r' ^ n : ℝ) * (r' ^ n)) : this },
+  have HH : tendsto (λn : ℕ, x.1 - r'.1 ^ n) at_top (𝓝 x),
+  { suffices : tendsto (λn : ℕ, r'.1 ^ n) at_top (𝓝 0),
+    { have h_geom := tendsto.mul_const (-1 : ℝ) this,
+      replace h_geom := tendsto.const_add x.1 h_geom,
+      simp_rw [pi.add_apply, zero_mul, add_zero, mul_neg_one] at h_geom,
+      exact h_geom },
+    have h_abs : abs r'.1 < 1 := sorry,
+    replace h_abs := tendsto_pow_at_top_nhds_0_of_abs_lt_1 (h_abs),
+    simp_rw [← one_div_pow],
+    exact h_abs },
+  have h₂ : ∀ n : ℕ, (nat_floor (x.1 / r'.1 ^ n) : ℝ) * (r'.1 ^ n) ≤ x.1,
+  { intro n,
+    have h_div_pos : x.1 / r'.1 ^ n ≥ 0, sorry,
+    have :=  (mul_le_mul_right $ pow_pos n).mpr (nat_floor_le h_div_pos),
+    calc (nat_floor (x.1 / r'.1 ^ n) : ℝ) * (r'.1 ^ n) ≤ (x.1 / r'.1 ^ n : ℝ) * (r'.1 ^ n) : this
+                                        ... = (x.1 / r'.1 ^ n * r'.1 ^ n) : by simp only [mul_comm]
+                                        ... = x.1 : div_mul_cancel_of_invertible x.1 (r'.1 ^ n) },
+  apply tendsto_of_tendsto_of_tendsto_of_le_of_le HH tendsto_const_nhds h₁ h₂,
+end
 
 lemma converges_floor (x : ℝ≥0) :
   tendsto (λn : ℕ, (floor (2 ^ n * x : ℝ) / (2 ^ n) : ℝ)) at_top (𝓝 x) :=
