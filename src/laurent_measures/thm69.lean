@@ -23,17 +23,17 @@ begin
   exact int.le_to_nat _,
 end
 
+example : order_bot ℝ≥0 := nnreal.order_bot
 
-lemma converges_floor_nat (x : ℝ≥0) (r' : ℝ≥0) [fact (r' < 1)] [fact (r'.1 ≠ 0)] (h_nz : r'.1 ≠ 0) :
-  tendsto (λn : ℕ, (nat_floor (x.1 / r'.1 ^ n) : ℝ) * r'.1 ^ n) at_top (𝓝 x) :=
+
+lemma converges_floor_nat (x : ℝ≥0) (r' : ℝ≥0) [fact (r' < 1)] --[fact (r'.1 ≠ 0)]
+  (h_nz : r'.1 ≠ 0) : tendsto (λn : ℕ, (nat_floor (x.1 / r'.1 ^ n) : ℝ) * r'.1 ^ n) at_top (𝓝 x) :=
 begin
-  haveI : ∀ n : ℕ, invertible (r'.1 ^ n) := λ n, invertible_of_nonzero (pow_ne_zero n (fact.out _)),
-  -- have h2 : ∀ n : ℕ, invertible (r'.1 ^ n) := λ n, invertible_of_nonzero (pow_ne_zero n h_nz),
-  have pow_pos : ∀ n : ℕ,  0 < (r' ^ n : ℝ), sorry,
-    -- [forall_const, zero_lt_bit0, pow_pos, zero_lt_one],
+  haveI : ∀ n : ℕ, invertible (r'.1 ^ n) := λ n, invertible_of_nonzero (pow_ne_zero n h_nz),
+  have h_pos : ∀ n : ℕ,  0 < (r'.1 ^ n : ℝ) := λ n, pow_pos ((ne.symm h_nz).le_iff_lt.mp r'.2) n,
   have h₁ : ∀ n : ℕ, (x.1 - r'.1 ^ n) ≤ (nat_floor (x.1 / r'.1 ^ n) * r'.1 ^ n),
   { intro n,
-    have := (mul_le_mul_right $ pow_pos n).mpr (le_of_lt (sub_one_lt_nat_floor (x / r' ^ n : ℝ ))),
+    have := (mul_le_mul_right $ h_pos n).mpr (le_of_lt (sub_one_lt_nat_floor (x / r' ^ n : ℝ ))),
     calc (x - r' ^ n : ℝ)  = ( x / r' ^ n - 1) * (r' ^ n : ℝ) : by field_simp
                        ... ≤ (nat_floor ( x / r' ^ n : ℝ) * (r' ^ n)) : this },
   have HH : tendsto (λn : ℕ, x.1 - r'.1 ^ n) at_top (𝓝 x),
@@ -42,14 +42,16 @@ begin
       replace h_geom := tendsto.const_add x.1 h_geom,
       simp_rw [pi.add_apply, zero_mul, add_zero, mul_neg_one] at h_geom,
       exact h_geom },
-    have h_abs : abs r'.1 < 1 := sorry,
+    have h_abs : abs r'.1 < 1 := by {simp, norm_cast, from fact.out _},
     replace h_abs := tendsto_pow_at_top_nhds_0_of_abs_lt_1 (h_abs),
     simp_rw [← one_div_pow],
     exact h_abs },
   have h₂ : ∀ n : ℕ, (nat_floor (x.1 / r'.1 ^ n) : ℝ) * (r'.1 ^ n) ≤ x.1,
   { intro n,
-    have h_div_pos : x.1 / r'.1 ^ n ≥ 0, sorry,
-    have :=  (mul_le_mul_right $ pow_pos n).mpr (nat_floor_le h_div_pos),
+    have h_div_pos : x.1 / r'.1 ^ n ≥ 0,
+    { have := (div_le_div_right (h_pos n)).mpr x.2,
+      rwa zero_div at this },
+    have :=  (mul_le_mul_right $ h_pos n).mpr (nat_floor_le h_div_pos),
     calc (nat_floor (x.1 / r'.1 ^ n) : ℝ) * (r'.1 ^ n) ≤ (x.1 / r'.1 ^ n : ℝ) * (r'.1 ^ n) : this
                                         ... = (x.1 / r'.1 ^ n * r'.1 ^ n) : by simp only [mul_comm]
                                         ... = x.1 : div_mul_cancel_of_invertible x.1 (r'.1 ^ n) },
@@ -134,7 +136,8 @@ begin
   (finset.range n).sum (λ (i : ℕ), (coe ∘ floor_seq_nat x) ↑i * r' ^ i) =
     nat_floor (2 ^ n * x.1) * r' ^ n, sorry,
   simp_rw h_calc,
-  apply (converges_floor_nat x r'),
+  sorry,
+  -- apply (converges_floor_nat x r'),
 end
 
 lemma has_sum_pow_floor (r' : ℝ≥0) [fact (r' < 1)] (x : ℝ≥0) :
