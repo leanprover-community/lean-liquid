@@ -16,9 +16,18 @@ open_locale topological_space classical nnreal
 
 section thm69_surjective
 
+example (x : ℝ) : 0 ≤ x - 1 → 1 ≤ x := sub_nonneg.mp
+
 lemma sub_one_lt_nat_floor (x : ℝ≥0) (hx : x ≠ 0) : x - 1 < ⌊x.1⌋₊ :=
 begin
-  sorry,
+  simp only [← nnreal.coe_lt_coe],
+  by_cases h_one : x - 1 ≤ 0,
+  {sorry },
+  { rw nnreal.coe_sub,
+    rw nnreal.val_eq_coe,
+    sorry,
+    simp only [not_le, zero_add, nnreal.sub_le_iff_le_add] at h_one,
+    exact le_of_lt h_one },
 end
 
 lemma nat_floor_le' (x : ℝ≥0) : (⌊(x.1)⌋₊ : ℝ≥0) ≤ x :=
