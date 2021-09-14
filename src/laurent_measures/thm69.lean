@@ -16,18 +16,19 @@ open_locale topological_space classical nnreal
 
 section thm69_surjective
 
-example (x : ℝ) : 0 ≤ x - 1 → 1 ≤ x := sub_nonneg.mp
+example (x y : ℝ) (hx : x ≠ 0) (hy : y ≠ 0) : x / y ≠ 0 := div_ne_zero hx hy
 
-lemma sub_one_lt_nat_floor (x : ℝ≥0) (hx : x ≠ 0) : x - 1 < ⌊x.1⌋₊ :=
+lemma sub_one_le_nat_floor (x : ℝ≥0) (hx : x ≠ 0) : x - 1 ≤ ⌊x.1⌋₊ :=
 begin
-  simp only [← nnreal.coe_lt_coe],
-  by_cases h_one : x - 1 ≤ 0,
-  {sorry },
-  { rw nnreal.coe_sub,
-    rw nnreal.val_eq_coe,
-    sorry,
-    simp only [not_le, zero_add, nnreal.sub_le_iff_le_add] at h_one,
-    exact le_of_lt h_one },
+  by_cases h_one : x.1 - 1 ≤ 0,
+  { have : x - 1 = 0 := real.to_nnreal_eq_zero.mpr h_one,
+    rw this,
+    exact zero_le ⌊x.1⌋₊ },
+  { simp only [← nnreal.coe_le_coe],
+    rw [nnreal.coe_sub, sub_le_iff_le_add, nnreal.coe_nat_cast],
+    all_goals { simp only [not_le, zero_add, nnreal.val_eq_coe] at h_one,
+      rw [lt_sub_iff_add_lt, zero_add] at h_one, apply le_of_lt },
+    exacts [(lt_nat_floor_add_one x.1), h_one] }
 end
 
 lemma nat_floor_le' (x : ℝ≥0) : (⌊(x.1)⌋₊ : ℝ≥0) ≤ x :=
@@ -36,39 +37,42 @@ lemma nat_floor_le' (x : ℝ≥0) : (⌊(x.1)⌋₊ : ℝ≥0) ≤ x :=
 lemma converges_floor_nat (x : ℝ≥0) (r' : ℝ≥0) [fact (r' < 1)] --[fact (r'.1 ≠ 0)]
   (h_nz : r' ≠ 0) : tendsto (λn : ℕ, (nat_floor (x.1 / r'.1 ^ n) : ℝ≥0) * r' ^ n) at_top (𝓝 x) :=
 begin
-  by_cases hx : x = 0, sorry,--trivial case if x=0,
-  replace hx : ∀ n : ℕ, x / r' ^ n ≠ 0, sorry,--if x ≠ 0, then x / r' ^ n ≠ 0
-  haveI : ∀ n : ℕ, invertible (r' ^ n) := λ n, invertible_of_nonzero (pow_ne_zero n _),
-  have h_pos : ∀ n : ℕ,  0 < (r' ^ n) := λ n, pow_pos ((ne.symm h_nz).le_iff_lt.mp r'.2) n,
-  have h₁ : ∀ n : ℕ, (x - r' ^ n) ≤ (nat_floor (x.1 / r'.1 ^ n) : ℝ≥0) * r' ^ n,
-  { intro n,
-    have := (mul_le_mul_right $ h_pos n).mpr (le_of_lt (sub_one_lt_nat_floor (x / r' ^ n) (hx n))),
-    rw [nnreal.val_eq_coe, nnreal.coe_div, nnreal.coe_pow] at this,
-    calc (x - r' ^ n)  = ( x / r' ^ n - 1) * (r' ^ n) : by sorry
-                   ... ≤ (nat_floor ( x.1 / r'.1 ^ n) * (r' ^ n)) : this },
-  have HH : tendsto (λn : ℕ, x - r' ^ n) at_top (𝓝 x),
-  { suffices : tendsto (λn : ℕ, r'.1 ^ n) at_top (𝓝 0),
-    { have h_geom := tendsto.mul_const (-1 : ℝ) this,
-      replace h_geom := tendsto.const_add x.1 h_geom,
-      simp_rw [pi.add_apply, zero_mul, add_zero, mul_neg_one,
-        tactic.ring.add_neg_eq_sub, nnreal.val_eq_coe] at h_geom,
-      apply nnreal.tendsto_coe.mp,
-      sorry,
-      -- simp_rw [← nnreal.coe_pow, ← nnreal.coe_sub] at h_geom,
-      -- convert h_geom -> bad idea!
-      },
-    have h_abs : abs r'.1 < 1 := by {simp, norm_cast, from fact.out _},
-    replace h_abs := tendsto_pow_at_top_nhds_0_of_abs_lt_1 (h_abs),
-    simp_rw [← one_div_pow],
-    exact h_abs },
-  have h₂ : ∀ n : ℕ, (nat_floor ((x : ℝ) / r' ^ n ): ℝ≥0) * (r' ^ n) ≤ x,
-  { intro n,
-    have := (mul_le_mul_right $ h_pos n).mpr (nat_floor_le' (x / r' ^ n)),
-    rw [nnreal.val_eq_coe, nnreal.coe_div, nnreal.coe_pow] at this,
-    calc (nat_floor (x.1 / r'.1 ^ n) : ℝ≥0) * (r' ^ n) ≤ (x / r' ^ n) * (r' ^ n) : this
-                                        ... = x : div_mul_cancel_of_invertible x (r' ^ n) },
-  apply tendsto_of_tendsto_of_tendsto_of_le_of_le HH tendsto_const_nhds h₁ h₂,
-  simpa only [nnreal.val_eq_coe, nnreal.coe_eq_zero, ne.def, not_false_iff],
+  by_cases hx : x = 0,
+  { simp_rw [hx, nnreal.val_eq_coe, nnreal.coe_zero, zero_div, nat_floor_zero],
+    sorry,--trivial case if x=0,
+  },
+  { haveI : ∀ n : ℕ, invertible (r' ^ n) := λ n, invertible_of_nonzero (pow_ne_zero n _),
+    have h_pos : ∀ n : ℕ,  0 < (r' ^ n) := λ n, pow_pos ((ne.symm h_nz).le_iff_lt.mp r'.2) n,
+    replace hx : ∀ n : ℕ, x / r' ^ n ≠ 0 := λ n, div_ne_zero hx (ne_of_gt (h_pos n)),
+    have h₁ : ∀ n : ℕ, (x - r' ^ n) ≤ (nat_floor (x.1 / r'.1 ^ n) : ℝ≥0) * r' ^ n,
+    { intro n,
+      have := (mul_le_mul_right $ h_pos n).mpr (sub_one_le_nat_floor (x / r' ^ n) (hx n)),
+      rw [nnreal.val_eq_coe, nnreal.coe_div, nnreal.coe_pow] at this,
+      calc (x - r' ^ n)  = ( x / r' ^ n - 1) * (r' ^ n) : by sorry
+                    ... ≤ (nat_floor ( x.1 / r'.1 ^ n) * (r' ^ n)) : this },
+    have HH : tendsto (λn : ℕ, x - r' ^ n) at_top (𝓝 x),
+    { suffices : tendsto (λn : ℕ, r'.1 ^ n) at_top (𝓝 0),
+      { have h_geom := tendsto.mul_const (-1 : ℝ) this,
+        replace h_geom := tendsto.const_add x.1 h_geom,
+        simp_rw [pi.add_apply, zero_mul, add_zero, mul_neg_one,
+          tactic.ring.add_neg_eq_sub, nnreal.val_eq_coe] at h_geom,
+        apply nnreal.tendsto_coe.mp,
+        sorry,
+        -- simp_rw [← nnreal.coe_pow, ← nnreal.coe_sub] at h_geom,
+        -- convert h_geom -> bad idea!
+        },
+      have h_abs : abs r'.1 < 1 := by {simp, norm_cast, from fact.out _},
+      replace h_abs := tendsto_pow_at_top_nhds_0_of_abs_lt_1 (h_abs),
+      simp_rw [← one_div_pow],
+      exact h_abs },
+    have h₂ : ∀ n : ℕ, (nat_floor ((x : ℝ) / r' ^ n ): ℝ≥0) * (r' ^ n) ≤ x,
+    { intro n,
+      have := (mul_le_mul_right $ h_pos n).mpr (nat_floor_le' (x / r' ^ n)),
+      rw [nnreal.val_eq_coe, nnreal.coe_div, nnreal.coe_pow] at this,
+      calc (nat_floor (x.1 / r'.1 ^ n) : ℝ≥0) * (r' ^ n) ≤ (x / r' ^ n) * (r' ^ n) : this
+                                          ... = x : div_mul_cancel_of_invertible x (r' ^ n) },
+    apply tendsto_of_tendsto_of_tendsto_of_le_of_le HH tendsto_const_nhds h₁ h₂,
+    simpa only [nnreal.val_eq_coe, nnreal.coe_eq_zero, ne.def, not_false_iff] },
 end
 
 lemma converges_floor (x : ℝ≥0) :
