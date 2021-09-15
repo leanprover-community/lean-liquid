@@ -1,6 +1,7 @@
 import category_theory.abelian.projective
+import pseudo_normed_group.category
 
-import condensed.condensed
+import condensed.basic
 
 /-!
 # Properties of the category of condensed abelian groups
