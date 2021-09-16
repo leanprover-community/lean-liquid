@@ -500,7 +500,7 @@ variables (r' c)
 
 /-- A version of `Mbar_le` which is functorial in `S`. -/
 @[simps]
-def Fintype_functor [fact (0 < r')]: Fintype.{u} ⥤ Profinite.{u} :=
+def Fintype_functor [fact (0 < r')] : Fintype.{u} ⥤ Profinite.{u} :=
 { obj := λ S, Profinite.of $ Mbar_le r' S c,
   map := λ S T f,
   { to_fun := map f,
@@ -515,7 +515,7 @@ def Fintype_functor [fact (0 < r')]: Fintype.{u} ⥤ Profinite.{u} :=
   end }
 
 variables (c₁ c₂)
-/-- The functor sending S to the (categorical) product
+/-- The functor sending `S` to the (categorical) product
   of `Mbar_le r' S c₁` and `Mbar_le r' S c₂`. -/
 @[simps]
 def Fintype_functor_prod [fact (0 < r')] : Fintype.{u} ⥤ Profinite.{u} :=
