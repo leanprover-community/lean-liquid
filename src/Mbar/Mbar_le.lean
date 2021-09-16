@@ -473,6 +473,8 @@ end
 
 end Tinv
 
+/-
+
 section map
 
 /-- TODO -/
@@ -500,7 +502,7 @@ variables (r' c)
 
 /-- A version of `Mbar_le` which is functorial in `S`. -/
 @[simps]
-def Fintype_functor [fact (0 < r')]: Fintype.{u} ⥤ Profinite.{u} :=
+def Fintype_functor [fact (0 < r')] : Fintype.{u} ⥤ Profinite.{u} :=
 { obj := λ S, Profinite.of $ Mbar_le r' S c,
   map := λ S T f,
   { to_fun := map f,
@@ -515,7 +517,7 @@ def Fintype_functor [fact (0 < r')]: Fintype.{u} ⥤ Profinite.{u} :=
   end }
 
 variables (c₁ c₂)
-/-- The functor sending S to the (categorical) product
+/-- The functor sending `S` to the (categorical) product
   of `Mbar_le r' S c₁` and `Mbar_le r' S c₂`. -/
 @[simps]
 def Fintype_functor_prod [fact (0 < r')] : Fintype.{u} ⥤ Profinite.{u} :=
@@ -669,6 +671,8 @@ Profinite.extend_extends _ .
 
 variables {r' c}
 
+-/
+
 end Mbar_le
 
 instance [fact (0 < r')] : profinitely_filtered_pseudo_normed_group (Mbar r' S) :=
@@ -686,6 +690,8 @@ instance [fact (0 < r')] : profinitely_filtered_pseudo_normed_group (Mbar r' S) 
     exact Mbar_le.continuous_cast_le r' S c₁ c₂,
   end,
   .. Mbar.pseudo_normed_group }
+
+/-
 
 namespace Mbar
 
@@ -723,5 +729,7 @@ def precondensed [fact (0 < r')] : Profinite.{u} ⥤ (as_small.{u+1} Profinite.{
 (as_small.down.{_ _ (u+1)} ⋙ precondensed_diagram.{u} r').flip  ⋙ colim
 
 end Mbar
+
+-/
 
 #lint-

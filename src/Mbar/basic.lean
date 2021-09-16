@@ -406,7 +406,7 @@ def geom [hr' : fact (r' < 1)] : Mbar r' S :=
 
 section map
 
-variables {r' S} {T : Type u} [fintype T] (f : S → T)
+variables {r' S} {T : Type*} [fintype T] (f : S → T)
 
 open_locale classical
 

@@ -67,7 +67,7 @@ apply_nolint fintype_sign_vectors doc_blame
 apply_nolint nonzero_sign doc_blame
 apply_nolint sign_vectors doc_blame
 
--- condensed/condensed.lean
+-- condensed/basic.lean
 apply_nolint category_theory.functor.preserves_binary_products doc_blame unused_arguments
 apply_nolint category_theory.functor.preserves_terminal doc_blame unused_arguments
 apply_nolint condensed_type_condition doc_blame
@@ -194,6 +194,7 @@ apply_nolint has_sum_pow_floor unused_arguments
 apply_nolint has_sum_pow_floor_norm unused_arguments
 apply_nolint has_sum_pow_floor_norm_nat unused_arguments
 apply_nolint laurent_measures.to_Rfct doc_blame unused_arguments
+apply_nolint sub_one_le_nat_floor unused_arguments
 apply_nolint θ doc_blame unused_arguments
 
 -- locally_constant/Vhat.lean
