@@ -154,13 +154,19 @@ begin
   -- exact has_sum.tsum_eq this,
 end
 
-lemma θ_surj (r' : ℝ≥0) (h_r' : r' ≠ 0) [fact (r' < 1)]  (r : ℝ≥0) (h_r : r ≠ 0)
+-- This is the version that I will probably be able to prove. I would also like to turn h_r' and
+-- h_r into facts rather than being hypothesis.
+-- theorem θ_surj (r' : ℚ) [h_r' : r' > 0] [fact (r' < 1)] (r : ℝ≥0) [h_r : r ≠ 0] [fact (r < 1)]
+--   (h_r'r : r' < r.1): ∀ x : ℝ, ∃ (F : laurent_measures r (Fintype.of punit)), (θ r' r F) = x :=
+
+
+theorem θ_surj (r' : ℝ≥0) (h_r' : r' ≠ 0) [fact (r' < 1)]  (r : ℝ≥0) (h_r : r ≠ 0)
   [fact (r < 1)] : ∀ x : ℝ, ∃ (F : laurent_measures r (Fintype.of punit)), (θ r' r F) = x :=
 begin
   intro x,
-  by_cases hx : 0 ≤ x,
-  { exact θ_surj_on_nonneg_nat r' h_r' r h_r x hx},
-  replace hx := le_of_lt (neg_pos_of_neg (lt_of_not_ge hx)),
+  by_cases h_x : 0 ≤ x,
+  { exact (θ_surj_on_nonneg_nat r' h_r' r h_r x h_x)},
+  replace hx := le_of_lt (neg_pos_of_neg (lt_of_not_ge h_x)),
   obtain ⟨F, hF⟩ := θ_surj_on_nonneg_nat r' h_r' r h_r (-x) hx ,
   use -F,
   sorry,--better to do it later, once θ becomes a comp_haus_blah morphism, in particular linear
