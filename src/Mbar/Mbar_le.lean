@@ -473,6 +473,8 @@ end
 
 end Tinv
 
+/-
+
 section map
 
 /-- TODO -/
@@ -669,6 +671,8 @@ Profinite.extend_extends _ .
 
 variables {r' c}
 
+-/
+
 end Mbar_le
 
 instance [fact (0 < r')] : profinitely_filtered_pseudo_normed_group (Mbar r' S) :=
@@ -686,6 +690,8 @@ instance [fact (0 < r')] : profinitely_filtered_pseudo_normed_group (Mbar r' S) 
     exact Mbar_le.continuous_cast_le r' S c₁ c₂,
   end,
   .. Mbar.pseudo_normed_group }
+
+/-
 
 namespace Mbar
 
@@ -723,5 +729,7 @@ def precondensed [fact (0 < r')] : Profinite.{u} ⥤ (as_small.{u+1} Profinite.{
 (as_small.down.{_ _ (u+1)} ⋙ precondensed_diagram.{u} r').flip  ⋙ colim
 
 end Mbar
+
+-/
 
 #lint-
