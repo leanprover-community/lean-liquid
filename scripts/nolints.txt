@@ -67,7 +67,7 @@ apply_nolint fintype_sign_vectors doc_blame
 apply_nolint nonzero_sign doc_blame
 apply_nolint sign_vectors doc_blame
 
--- condensed/condensed.lean
+-- condensed/basic.lean
 apply_nolint category_theory.functor.preserves_binary_products doc_blame unused_arguments
 apply_nolint category_theory.functor.preserves_terminal doc_blame unused_arguments
 apply_nolint condensed_type_condition doc_blame
