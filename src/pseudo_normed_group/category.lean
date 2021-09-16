@@ -777,6 +777,36 @@ end
 
 end ProFiltPseuNormGrp
 
+structure ProFiltPseuNormGrp₁ : Type (u+1) :=
+(M : Type u)
+[str : profinitely_filtered_pseudo_normed_group M]
+(exhaustive' : ∀ m : M, ∃ c, m ∈ pseudo_normed_group.filtration M c)
+
+namespace ProFiltPseuNormGrp₁
+
+instance : has_coe_to_sort ProFiltPseuNormGrp₁ := ⟨Type*, λ M, M.M⟩
+instance (M : ProFiltPseuNormGrp₁) : profinitely_filtered_pseudo_normed_group M := M.str
+
+lemma exhaustive (M : ProFiltPseuNormGrp₁) (m : M) :
+  ∃ c, m ∈ pseudo_normed_group.filtration M c := M.exhaustive' m
+
+instance : large_category ProFiltPseuNormGrp₁.{u} :=
+{ hom := λ A B, strict_comphaus_filtered_pseudo_normed_group_hom A B,
+  id := λ A, strict_comphaus_filtered_pseudo_normed_group_hom.id,
+  comp := λ A B C f g, g.comp f }
+
+def enlarging_functor : ProFiltPseuNormGrp₁ ⥤ ProFiltPseuNormGrp :=
+{ obj := λ M, ProFiltPseuNormGrp.of M,
+  map := λ M₁ M₂ f, f.to_chfpsng_hom }
+
+instance : concrete_category ProFiltPseuNormGrp₁.{u} :=
+{ forget :=
+  { obj := λ M, M.M,
+    map := λ A B f, f },
+  forget_faithful := ⟨⟩ } .
+
+end ProFiltPseuNormGrp₁
+
 namespace ProFiltPseuNormGrpWithTinv
 
 variables (r' : ℝ≥0)
