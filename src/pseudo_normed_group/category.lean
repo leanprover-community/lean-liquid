@@ -3,6 +3,7 @@ import topology.category.Profinite
 import data.equiv.fin
 import for_mathlib.concrete
 import for_mathlib.CompHaus
+import for_mathlib.topology
 
 import pseudo_normed_group.with_Tinv
 
@@ -804,6 +805,48 @@ instance : concrete_category ProFiltPseuNormGrp₁.{u} :=
   { obj := λ M, M.M,
     map := λ A B f, f },
   forget_faithful := ⟨⟩ } .
+
+def to_CHFPNG₁ : ProFiltPseuNormGrp₁.{u} ⥤ CompHausFiltPseuNormGrp₁.{u} :=
+{ obj := λ M,
+  { M := M,
+    exhaustive' := M.exhaustive },
+  map := λ A B f, f }
+
+def limit_cone {J : Type u} [small_category J] (K : J ⥤ ProFiltPseuNormGrp₁.{u}) :
+  limits.cone K :=
+{ X :=
+  { M := (CompHausFiltPseuNormGrp₁.limit_cone (K ⋙ to_CHFPNG₁)).X,
+    str :=
+    { continuous_add' := comphaus_filtered_pseudo_normed_group.continuous_add',
+      continuous_neg' := comphaus_filtered_pseudo_normed_group.continuous_neg',
+      continuous_cast_le := comphaus_filtered_pseudo_normed_group.continuous_cast_le,
+      td := begin
+        intro c,
+        let E := (CompHausFiltPseuNormGrp₁.cone_point_type.filt_homeo (K ⋙ to_CHFPNG₁) c),
+        haveI : totally_disconnected_space
+          (CompHausFiltPseuNormGrp₁.cone_point_type_filt (K ⋙ to_CHFPNG₁) c) :=
+        begin
+          dsimp [CompHausFiltPseuNormGrp₁.cone_point_type_filt],
+          apply_instance,
+        end,
+        apply E.symm.totally_disconnected_space,
+      end,
+      ..(infer_instance : pseudo_normed_group _) },
+    exhaustive' :=  CompHausFiltPseuNormGrp₁.exhaustive _ },
+  π :=
+  { app := λ j, (CompHausFiltPseuNormGrp₁.limit_cone (K ⋙ to_CHFPNG₁)).π.app j,
+    naturality' := (CompHausFiltPseuNormGrp₁.limit_cone (K ⋙ to_CHFPNG₁)).π.naturality } }
+
+instance {J : Type u} [small_category J] : creates_limits_of_shape J to_CHFPNG₁ :=
+{ creates_limit := λ K,
+  { reflects := λ C hC,
+    { lift := λ S, hC.lift (to_CHFPNG₁.map_cone S),
+      fac' := λ S j, hC.fac _ _,
+      uniq' := λ S m h, hC.uniq (to_CHFPNG₁.map_cone S) m h },
+    lifts := λ C hC,
+    { lifted_cone := limit_cone _,
+      valid_lift :=
+        (CompHausFiltPseuNormGrp₁.limit_cone_is_limit (K ⋙ to_CHFPNG₁)).unique_up_to_iso hC } } }
 
 end ProFiltPseuNormGrp₁
 
