@@ -281,11 +281,11 @@ end
 
 @[simp, norm_cast] lemma coe_max (x y : ℚ≥0) :
   ((max x y : ℚ≥0) : ℚ) = max (x : ℚ) (y : ℚ) :=
-by { delta max, split_ifs; refl }
+by { simp only [max_def], split_ifs; refl }
 
 @[simp, norm_cast] lemma coe_min (x y : ℚ≥0) :
   ((min x y : ℚ≥0) : ℚ) = min (x : ℚ) (y : ℚ) :=
-by { delta min, split_ifs; refl }
+by { simp only [min_def], split_ifs; refl }
 
 section of_rat
 

@@ -401,7 +401,7 @@ begin
   apply fact.out,
   apply pos_iff_ne_zero.1,
   rw ←add_lt_add_iff_right (1 : ℝ≥0),
-  rw nnreal.sub_add_cancel_of_le,
+  rw sub_add_cancel_of_le,
   simp only [zero_add],
   apply fact.out,
   apply le_of_lt,

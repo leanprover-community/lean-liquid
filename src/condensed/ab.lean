@@ -20,4 +20,8 @@ instance : abelian (Condensed Ab.{u+1}) := sorry
 
 instance : enough_projectives (Condensed Ab.{u+1}) := sorry
 
+def CompHausFiltPseuNormGrp.to_Condensed :
+  CompHausFiltPseuNormGrp ⥤ Condensed Ab :=
+sorry
+
 end Condensed
