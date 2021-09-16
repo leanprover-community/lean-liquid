@@ -848,6 +848,11 @@ instance {J : Type u} [small_category J] : creates_limits_of_shape J to_CHFPNG�
       valid_lift :=
         (CompHausFiltPseuNormGrp₁.limit_cone_is_limit (K ⋙ to_CHFPNG₁)).unique_up_to_iso hC } } }
 
+instance : creates_limits to_CHFPNG₁ := ⟨⟩
+
+instance : limits.has_limits ProFiltPseuNormGrp₁.{u} :=
+has_limits_of_has_limits_creates_limits to_CHFPNG₁
+
 end ProFiltPseuNormGrp₁
 
 namespace ProFiltPseuNormGrpWithTinv
