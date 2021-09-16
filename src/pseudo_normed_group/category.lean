@@ -3,6 +3,7 @@ import topology.category.Profinite
 import data.equiv.fin
 import for_mathlib.concrete
 import for_mathlib.CompHaus
+import for_mathlib.topology
 
 import pseudo_normed_group.with_Tinv
 
@@ -776,6 +777,83 @@ instance : compact_space (Top.of (filtration M c)) := by { dsimp, apply_instance
 end
 
 end ProFiltPseuNormGrp
+
+structure ProFiltPseuNormGrp₁ : Type (u+1) :=
+(M : Type u)
+[str : profinitely_filtered_pseudo_normed_group M]
+(exhaustive' : ∀ m : M, ∃ c, m ∈ pseudo_normed_group.filtration M c)
+
+namespace ProFiltPseuNormGrp₁
+
+instance : has_coe_to_sort ProFiltPseuNormGrp₁ := ⟨Type*, λ M, M.M⟩
+instance (M : ProFiltPseuNormGrp₁) : profinitely_filtered_pseudo_normed_group M := M.str
+
+lemma exhaustive (M : ProFiltPseuNormGrp₁) (m : M) :
+  ∃ c, m ∈ pseudo_normed_group.filtration M c := M.exhaustive' m
+
+instance : large_category ProFiltPseuNormGrp₁.{u} :=
+{ hom := λ A B, strict_comphaus_filtered_pseudo_normed_group_hom A B,
+  id := λ A, strict_comphaus_filtered_pseudo_normed_group_hom.id,
+  comp := λ A B C f g, g.comp f }
+
+def enlarging_functor : ProFiltPseuNormGrp₁ ⥤ ProFiltPseuNormGrp :=
+{ obj := λ M, ProFiltPseuNormGrp.of M,
+  map := λ M₁ M₂ f, f.to_chfpsng_hom }
+
+instance : concrete_category ProFiltPseuNormGrp₁.{u} :=
+{ forget :=
+  { obj := λ M, M.M,
+    map := λ A B f, f },
+  forget_faithful := ⟨⟩ } .
+
+def to_CHFPNG₁ : ProFiltPseuNormGrp₁.{u} ⥤ CompHausFiltPseuNormGrp₁.{u} :=
+{ obj := λ M,
+  { M := M,
+    exhaustive' := M.exhaustive },
+  map := λ A B f, f }
+
+def limit_cone {J : Type u} [small_category J] (K : J ⥤ ProFiltPseuNormGrp₁.{u}) :
+  limits.cone K :=
+{ X :=
+  { M := (CompHausFiltPseuNormGrp₁.limit_cone (K ⋙ to_CHFPNG₁)).X,
+    str :=
+    { continuous_add' := comphaus_filtered_pseudo_normed_group.continuous_add',
+      continuous_neg' := comphaus_filtered_pseudo_normed_group.continuous_neg',
+      continuous_cast_le := comphaus_filtered_pseudo_normed_group.continuous_cast_le,
+      td := begin
+        intro c,
+        let E := (CompHausFiltPseuNormGrp₁.cone_point_type.filt_homeo (K ⋙ to_CHFPNG₁) c),
+        haveI : totally_disconnected_space
+          (CompHausFiltPseuNormGrp₁.cone_point_type_filt (K ⋙ to_CHFPNG₁) c) :=
+        begin
+          dsimp [CompHausFiltPseuNormGrp₁.cone_point_type_filt],
+          apply_instance,
+        end,
+        apply E.symm.totally_disconnected_space,
+      end,
+      ..(infer_instance : pseudo_normed_group _) },
+    exhaustive' :=  CompHausFiltPseuNormGrp₁.exhaustive _ },
+  π :=
+  { app := λ j, (CompHausFiltPseuNormGrp₁.limit_cone (K ⋙ to_CHFPNG₁)).π.app j,
+    naturality' := (CompHausFiltPseuNormGrp₁.limit_cone (K ⋙ to_CHFPNG₁)).π.naturality } }
+
+instance {J : Type u} [small_category J] : creates_limits_of_shape J to_CHFPNG₁ :=
+{ creates_limit := λ K,
+  { reflects := λ C hC,
+    { lift := λ S, hC.lift (to_CHFPNG₁.map_cone S),
+      fac' := λ S j, hC.fac _ _,
+      uniq' := λ S m h, hC.uniq (to_CHFPNG₁.map_cone S) m h },
+    lifts := λ C hC,
+    { lifted_cone := limit_cone _,
+      valid_lift :=
+        (CompHausFiltPseuNormGrp₁.limit_cone_is_limit (K ⋙ to_CHFPNG₁)).unique_up_to_iso hC } } }
+
+instance : creates_limits to_CHFPNG₁ := ⟨⟩
+
+instance : limits.has_limits ProFiltPseuNormGrp₁.{u} :=
+has_limits_of_has_limits_creates_limits to_CHFPNG₁
+
+end ProFiltPseuNormGrp₁
 
 namespace ProFiltPseuNormGrpWithTinv
 
