@@ -281,11 +281,11 @@ end
 
 @[simp, norm_cast] lemma coe_max (x y : ℚ≥0) :
   ((max x y : ℚ≥0) : ℚ) = max (x : ℚ) (y : ℚ) :=
-by { simp only [max_def], split_ifs; refl }
+nnrat.coe_mono.map_max
 
 @[simp, norm_cast] lemma coe_min (x y : ℚ≥0) :
   ((min x y : ℚ≥0) : ℚ) = min (x : ℚ) (y : ℚ) :=
-by { simp only [min_def], split_ifs; refl }
+nnrat.coe_mono.map_min
 
 section of_rat
 

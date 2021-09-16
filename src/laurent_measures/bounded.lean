@@ -12,8 +12,6 @@ noncomputable theory
 open_locale big_operators nnreal classical
 open set
 
-instance (k₁ k₂ : ℤ) : fintype (Icc k₁ k₂) := (Icc_ℤ_finite k₁ k₂).fintype
-
 structure laurent_measures_bdd (r : ℝ≥0) (S : Fintype) (T : finset ℤ) (c : ℝ≥0) :=
 (to_fun : S → T → ℤ)
 (bound' : ∑ s i, ∥ to_fun s i ∥ * (r : ℝ) ^ (i : ℤ) ≤ c)

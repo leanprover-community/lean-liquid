@@ -11,18 +11,10 @@ variables [module.finite ℤ M] [module.free ℤ M]
 
 -- generalize?
 instance : module.finite ℤ (M →+ ℤ) :=
-begin
-  classical,
-  let b := module.free.choose_basis ℤ M,
-  exact module.finite.of_basis (b.dual_basis.map add_monoid_hom_lequiv_int.symm),
-end
+module.finite.equiv add_monoid_hom_lequiv_int.symm
 
 -- generalize?
 instance : module.free ℤ (M →+ ℤ) :=
-begin
-  classical,
-  let b := module.free.choose_basis ℤ M,
-  exact module.free.of_basis (b.dual_basis.map add_monoid_hom_lequiv_int.symm),
-end
+module.free.of_equiv add_monoid_hom_lequiv_int.symm
 
 end
