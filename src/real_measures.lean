@@ -15,14 +15,12 @@ universe u
 noncomputable theory
 open_locale big_operators nnreal classical
 
-section definitions
-
 @[nolint unused_arguments, derive add_comm_group]
 def real_measures (p : ℝ≥0) (S : Fintype) := S → ℝ
 
 variables {p : ℝ≥0} {S S' : Fintype.{u}}
 
-notation `ℳ` := real_measures
+local notation `ℳ` := real_measures
 
 namespace real_measures
 
@@ -199,23 +197,25 @@ end
 -- move me
 lemma continuous.sum {ι X A : Type*} [topological_space X]
   [topological_space A] [add_comm_monoid A] [has_continuous_add A]
-  (s : finset ι) (f : ι → X → A) (hf : ∀ i, continuous (f i)) :
+  (s : finset ι) (f : ι → X → A) (hf : ∀ i ∈ s, continuous (f i)) :
   continuous (∑ i in s, f i) :=
 begin
   induction s using finset.induction_on with i s his IH,
   { simp only [finset.sum_empty], exact @continuous_zero X A _ _ _ },
-  { simpa only [his, finset.sum_insert, not_false_iff] using (hf i).add IH }
+  { simp only [his, finset.sum_insert, not_false_iff],
+    refine (hf i $ s.mem_insert_self i).add (IH $ λ i hi, hf i $ finset.mem_insert_of_mem hi), }
 end
 
 -- move me
 lemma continuous.sum' {ι X A : Type*} [topological_space X]
   [topological_space A] [add_comm_monoid A] [has_continuous_add A]
-  (s : finset ι) (f : ι → X → A) (hf : ∀ i, continuous (f i)) :
+  (s : finset ι) (f : ι → X → A) (hf : ∀ i ∈ s, continuous (f i)) :
   continuous (λ x, ∑ i in s, f i x) :=
 begin
   induction s using finset.induction_on with i s his IH,
   { simp only [finset.sum_empty], exact @continuous_zero X A _ _ _ },
-  { simpa only [his, finset.sum_insert, not_false_iff] using (hf i).add IH }
+  { simp only [his, finset.sum_insert, not_false_iff],
+    refine (hf i $ s.mem_insert_self i).add (IH $ λ i hi, hf i $ finset.mem_insert_of_mem hi), }
 end
 
 instance compact_space (c : ℝ≥0) : compact_space (filtration (ℳ p S) c) :=
@@ -228,7 +228,7 @@ begin
   have hT : is_compact T := is_compact_pi_infinite (λ s, is_compact_Icc),
   refine compact_of_is_closed_subset hT _ (λ F hF s, apply_mem_Icc_of_nnnorm_le F s c hF),
   refine is_closed_le (continuous.sum' _ _ _) continuous_const,
-  intro s,
+  rintro s -,
   have h0p : 0 ≤ (p : ℝ), { norm_cast, exact fact.out _ },
   exact (nnreal.continuous_rpow_const h0p).comp (continuous_nnnorm.comp (continuous_apply s)),
 end
@@ -255,70 +255,36 @@ instance chpng_real_measures : comphaus_filtered_pseudo_normed_group (ℳ p S) :
   end,
   ..(infer_instance : (pseudo_normed_group (ℳ p S))) }
 
-/-
-
 variable {α : Type*}
 
-open pseudo_normed_group profinitely_filtered_pseudo_normed_group
-  comphaus_filtered_pseudo_normed_group
+open pseudo_normed_group comphaus_filtered_pseudo_normed_group
 
+@[simps]
 def map_hom [fact (0 < p)] (f : S ⟶ S') :
   comphaus_filtered_pseudo_normed_group_hom (ℳ p S) (ℳ p S') :=
 { to_fun := map f,
-  map_zero' := begin
-    ext F s i,
-    simp,
-  end,
-  map_add' := begin
-    intros F G,
-    ext s i,
-    simp [← finset.sum_bUnion, ← finset.sum_add_distrib],
-  end,
-  bound' := begin
+  map_zero' := by { ext F s i, simp only [map_apply, finset.sum_const_zero, zero_apply], },
+  map_add' := λ F G, by { ext s i, simp only [finset.sum_add_distrib, add_apply, map_apply], },
+  bound' :=
     -- should we introduce strict morphisms, and the strict category, so we can have limits?
-    use 1,
-    rintros c F (hF : ∥ F ∥ ≤ c),
-    exact le_trans (map_bound _ _) (by simpa),
-  end,
+    by { refine ⟨1, _⟩, rintros c F (hF : ∥F∥₊ ≤ c), rw one_mul, exact (map_bound f F).trans hF },
   continuous' := begin
     intros c₁ c₂ f₀ h,
     haveI h₂ : fact (c₂ ≤ c₁ ⊔ c₂) := ⟨le_sup_right⟩,
-    let e : filtration (ℳ p S') c₂ → filtration (ℳ p S') (c₁ ⊔ c₂) :=
-      cast_le,
-    suffices : continuous (e ∘ f₀),
-    { rwa (embedding_cast_le _ _).to_inducing.continuous_iff },
-    rw continuous_iff,
-    intros T,
-    let e' : real_measures_bdd p S T c₁ → real_measures_bdd p S T (c₁ ⊔ c₂) :=
-      λ F, ⟨F, le_trans F.bound $ by exact_mod_cast le_sup_left⟩,
-    have : truncate T ∘ e ∘ f₀ = real_measures_bdd.map f ∘ e' ∘ truncate T,
-    { ext F s' t,
-      change (f₀ F : ℳ p S') s' t = _,
-      rw ← h,
-      refl },
-    rw this,
-    continuity,
+    rw (embedding_cast_le c₂ (c₁ ⊔ c₂)).to_inducing.continuous_iff,
+    refine continuous_induced_rng (continuous_pi _),
+    intro s',
+    simp only [function.comp, coe_cast_le, ← h, map_apply],
+    refine continuous.sum' _ _ _,
+    rintro s -,
+    exact (continuous_apply s).comp continuous_subtype_val,
   end }
 
 @[simps]
-def functor (p : ℝ≥0) [fact (0 < p)] : Fintype.{u} ⥤ CompHausFiltPseuNormGrp.{u} :=
+def functor (p : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)] : Fintype.{u} ⥤ CompHausFiltPseuNormGrp.{u} :=
 { obj := λ S, CompHausFiltPseuNormGrp.of $ ℳ p S,
   map := λ S T f, map_hom f,
-  map_id' := begin
-    intros S,
-    ext1,
-    dsimp [map_hom],
-    simp,
-  end,
-  map_comp' := begin
-    intros S S' S'' f g,
-    ext1,
-    dsimp [map_hom],
-    simp,
-  end}
-
--/
+  map_id' := λ S, by { ext1, rw [map_hom_to_fun, map_id], refl, },
+  map_comp' := λ S S' S'' f g, by { ext1, simp only [map_hom_to_fun, map_comp], refl } }
 
 end real_measures
-
-end definitions
