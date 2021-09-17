@@ -850,6 +850,10 @@ instance {J : Type u} [small_category J] : creates_limits_of_shape J to_CHFPNG�
 
 instance : creates_limits to_CHFPNG₁ := ⟨⟩
 
+def limit_cone_is_limit {J : Type u} [small_category J] (K : J ⥤ ProFiltPseuNormGrp₁.{u}) :
+  limits.is_limit (limit_cone K) :=
+limits.is_limit_of_reflects to_CHFPNG₁ (CompHausFiltPseuNormGrp₁.limit_cone_is_limit _)
+
 instance : limits.has_limits ProFiltPseuNormGrp₁.{u} :=
 has_limits_of_has_limits_creates_limits to_CHFPNG₁
 
@@ -1074,23 +1078,5 @@ def to_PFPNG₁ : (ProFiltPseuNormGrpWithTinv₁.{u} r) ⥤ ProFiltPseuNormGrp�
     map_add' := f.map_add,
     strict' := f.strict,
     continuous' := f.continuous' } }
-
-/-
-def limit_cone {J : Type u} [small_category J] (K : J ⥤ (ProFiltPseuNormGrpWithTinv₁.{u} r)) :
-  limits.cone K :=
-{ X :=
-  { M := (ProFiltPseuNormGrp₁.limit_cone (K ⋙ to_PFPNG₁ r)).X,
-    str :=
-    { Tinv :=
-      { to_fun := quotient.map' (λ x, _) _,
-        map_zero' := _,
-        map_add' := _,
-        bound' := _,
-        continuous' := _ },
-      Tinv_mem_filtration := _,
-    ..(infer_instance : profinitely_filtered_pseudo_normed_group _) },
-    exhaustive' := _ },
-  π := _ }
--/
 
 end ProFiltPseuNormGrpWithTinv₁
