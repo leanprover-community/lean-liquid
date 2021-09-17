@@ -169,8 +169,69 @@ instance topological_space (c : ℝ≥0) : topological_space (filtration (ℳ p 
 instance t2_space (c : ℝ≥0) : t2_space (filtration (ℳ p S) c) :=
 @subtype.t2_space _ _ Pi.topological_space _
 
+lemma nnnorm_apply_le_of_nnnorm_le (F : ℳ p S) (s : S) (c : ℝ≥0) (h : ∥F∥₊ ≤ c) :
+  ∥F s∥₊ ≤ c ^ (p⁻¹ : ℝ) :=
+begin
+  calc ∥F s∥₊ = (∥F s∥₊ ^ (p:ℝ)) ^ (p⁻¹ : ℝ) : _
+  ... ≤ c ^ (p⁻¹ : ℝ) : _,
+  { rw_mod_cast [← nnreal.rpow_mul, mul_inv_cancel, nnreal.rpow_one], exact ne_of_gt (fact.out _) },
+  { apply nnreal.rpow_le_rpow _ (inv_pos.mpr _).le,
+    { refine le_trans _ h,
+      have aux := finset.sum_pi_single' s (∥F s∥₊ ^ (p:ℝ)) finset.univ,
+      simp only [finset.mem_univ, if_true] at aux,
+      rw ← aux,
+      apply finset.sum_le_sum,
+      rintro t -,
+      split_ifs, { subst t }, { exact zero_le' } },
+    { norm_cast, exact (fact.out _), } }
+end
+
+lemma apply_mem_Icc_of_nnnorm_le (F : ℳ p S) (s : S) (c : ℝ≥0) (h : ∥F∥₊ ≤ c) :
+  F s ∈ set.Icc (-c ^ (p⁻¹ : ℝ) : ℝ) (c ^ (p⁻¹ : ℝ) : ℝ) :=
+begin
+  have := @set.mem_Icc_iff_abs_le ℝ _ 0 (F s) (c ^ (p:ℝ)⁻¹),
+  simp only [zero_sub, abs_neg, zero_add, ← real.norm_eq_abs, ← coe_nnnorm, nnnorm_neg] at this,
+  rw ← this,
+  norm_cast,
+  exact nnnorm_apply_le_of_nnnorm_le F s c h
+end
+
+-- move me
+lemma continuous.sum {ι X A : Type*} [topological_space X]
+  [topological_space A] [add_comm_monoid A] [has_continuous_add A]
+  (s : finset ι) (f : ι → X → A) (hf : ∀ i, continuous (f i)) :
+  continuous (∑ i in s, f i) :=
+begin
+  induction s using finset.induction_on with i s his IH,
+  { simp only [finset.sum_empty], exact @continuous_zero X A _ _ _ },
+  { simpa only [his, finset.sum_insert, not_false_iff] using (hf i).add IH }
+end
+
+-- move me
+lemma continuous.sum' {ι X A : Type*} [topological_space X]
+  [topological_space A] [add_comm_monoid A] [has_continuous_add A]
+  (s : finset ι) (f : ι → X → A) (hf : ∀ i, continuous (f i)) :
+  continuous (λ x, ∑ i in s, f i x) :=
+begin
+  induction s using finset.induction_on with i s his IH,
+  { simp only [finset.sum_empty], exact @continuous_zero X A _ _ _ },
+  { simpa only [his, finset.sum_insert, not_false_iff] using (hf i).add IH }
+end
+
 instance compact_space (c : ℝ≥0) : compact_space (filtration (ℳ p S) c) :=
-sorry
+begin
+  constructor,
+  rw [← embedding_subtype_coe.to_inducing.is_compact_iff],
+  simp only [set.image_univ, subtype.range_coe_subtype, set.set_of_mem_eq],
+  let d : ℝ := c ^ (p⁻¹ : ℝ),
+  let T : set (S → ℝ) := {x | ∀ s, x s ∈ set.Icc (-d) d},
+  have hT : is_compact T := is_compact_pi_infinite (λ s, is_compact_Icc),
+  refine compact_of_is_closed_subset hT _ (λ F hF s, apply_mem_Icc_of_nnnorm_le F s c hF),
+  refine is_closed_le (continuous.sum' _ _ _) continuous_const,
+  intro s,
+  have h0p : 0 ≤ (p : ℝ), { norm_cast, exact fact.out _ },
+  exact (nnreal.continuous_rpow_const h0p).comp (continuous_nnnorm.comp (continuous_apply s)),
+end
 
 instance chpng_real_measures : comphaus_filtered_pseudo_normed_group (ℳ p S) :=
 { continuous_add' := begin
