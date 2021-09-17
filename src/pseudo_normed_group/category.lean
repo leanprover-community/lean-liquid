@@ -561,7 +561,7 @@ def proj (j : J) : cone_point G ⟶ G.obj j :=
     simp only [cone_point_type.coe_incl_preimage_apply,
       subtype.coe_prop],
   end,
-  continuous₁' := begin
+  continuous' := begin
     intros c,
     dsimp,
     let E : filtration (cone_point_type G) c → filtration (G.obj j) c :=
@@ -655,7 +655,7 @@ def limit_cone_lift (D : cone G) : D.X ⟶ cone_point G :=
   map_zero' := limit_cone_lift_map_map_zero _,
   map_add' := limit_cone_lift_map_map_add _,
   strict' := λ c x hx, limit_cone_lift_map_strict G c hx,
-  continuous₁' := begin
+  continuous' := begin
     intros c,
     rw (cone_point_type.filt_homeo G c).inducing.continuous_iff,
     let E : filtration D.X c → cone_point_type_filt G c := λ t,
