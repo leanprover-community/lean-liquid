@@ -157,78 +157,44 @@ begin
       simp only [true_and, finset.inf_eq_inter, finset.mem_univ,
         finset.mem_filter, finset.mem_inter] at hi,
       rw [← hi.1, ← hi.2] } },
-
 end
 
-/-
+variables [fact (0 < p)] [fact (p ≤ 1)]
 
-instance pfpng_real_measures [fact (0 < p)] :
-  comphaus_filtered_pseudo_normed_group (ℳ p S) :=
+open pseudo_normed_group (filtration)
+
+instance topological_space (c : ℝ≥0) : topological_space (filtration (ℳ p S) c) :=
+@subtype.topological_space _ _ Pi.topological_space
+
+instance t2_space (c : ℝ≥0) : t2_space (filtration (ℳ p S) c) :=
+@subtype.t2_space _ _ Pi.topological_space _
+
+instance compact_space (c : ℝ≥0) : compact_space (filtration (ℳ p S) c) :=
+sorry
+
+instance chpng_real_measures : comphaus_filtered_pseudo_normed_group (ℳ p S) :=
 { continuous_add' := begin
     intros c₁ c₂,
-    rw continuous_iff,
-    intros A,
-    let E : real_measures_bdd p S A c₁ × real_measures_bdd p S A c₂ →
-      real_measures_bdd p S A (c₁ + c₂) := λ G, ⟨G.1 + G.2, _⟩,
-    swap, {
-      rw nnreal.coe_add,
-      refine le_trans _ (add_le_add G.fst.2 G.snd.2),
-      rw ← finset.sum_add_distrib,
-      apply finset.sum_le_sum,
-      intros i hi,
-      rw ← finset.sum_add_distrib,
-      apply finset.sum_le_sum,
-      intros j hj,
-      rw ← add_mul,
-      refine mul_le_mul (norm_add_le _ _) (le_refl _)
-        (fpow_nonneg (nnreal.coe_nonneg _) _) (add_nonneg (norm_nonneg _) (norm_nonneg _)) },
-    have :
-      (truncate A : _ → real_measures_bdd p S A (c₁ + c₂)) ∘ pseudo_normed_group.add' =
-      E ∘ (prod.map (truncate A) (truncate A)),
-    { ext, refl },
-    rw this,
-    apply continuous.comp,
-    { exact continuous_of_discrete_topology },
-    { apply continuous.prod_map,
-      all_goals {apply truncate_continuous} }
+    apply continuous_induced_rng,
+    simp only [function.comp, pseudo_normed_group.add'_eq],
+    exact (continuous_subtype_val.comp continuous_fst).add
+          (continuous_subtype_val.comp continuous_snd),
   end,
   continuous_neg' := begin
     intros c,
-    rw continuous_iff,
-    intros A,
-    let E : real_measures_bdd p S A c → real_measures_bdd p S A c :=
-      λ G, ⟨- G, _⟩,
-    swap, {
-      convert G.2 using 1,
-      apply finset.sum_congr rfl,
-      intros s hs,
-      apply finset.sum_congr rfl,
-      intros x hx,
-      congr' 1,
-      simpa },
-    have : (truncate A : _ → real_measures_bdd p S A c) ∘ pseudo_normed_group.neg' =
-      E ∘ truncate A,
-    { ext, refl },
-    rw this,
-    apply continuous.comp,
-    { exact continuous_of_discrete_topology },
-    { apply truncate_continuous }
+    apply continuous_induced_rng,
+    simp only [function.comp, pseudo_normed_group.neg'_eq],
+    exact continuous_subtype_val.neg,
   end,
   continuous_cast_le := begin
     introsI c₁ c₂ h,
-    rw continuous_iff,
-    intros A,
-    let g : real_measures_bdd p S A c₁ → real_measures_bdd p S A c₂ :=
-      λ g, ⟨g, le_trans g.2 h.out⟩,
-    have : (truncate A : _ → real_measures_bdd p S A c₂) ∘ pseudo_normed_group.cast_le =
-      g ∘ truncate A,
-    { ext, refl },
-    rw this,
-    apply continuous.comp,
-    { exact continuous_of_discrete_topology },
-    { apply truncate_continuous }
+    apply continuous_induced_rng,
+    simp only [function.comp, pseudo_normed_group.coe_cast_le],
+    exact continuous_subtype_val,
   end,
   ..(infer_instance : (pseudo_normed_group (ℳ p S))) }
+
+/-
 
 variable {α : Type*}
 
