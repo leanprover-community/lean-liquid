@@ -266,7 +266,7 @@ def map_hom [fact (0 < p)] (f : S ⟶ S') :
   map_zero' := by { ext F s i, simp only [map_apply, finset.sum_const_zero, zero_apply], },
   map_add' := λ F G, by { ext s i, simp only [finset.sum_add_distrib, add_apply, map_apply], },
   strict' := λ c F hF, (map_bound _ _).trans hF,
-  continuous₁' := λ c, begin
+  continuous' := λ c, begin
     refine continuous_induced_rng (continuous_pi _),
     intro s',
     simp only [function.comp, map_apply],
