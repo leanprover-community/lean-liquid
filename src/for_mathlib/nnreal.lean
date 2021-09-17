@@ -18,3 +18,9 @@ begin
     subst q,
     simp, }
 end
+
+@[simp, norm_cast] lemma nnreal.coe_fpow (x : ℝ≥0) (n : ℤ) : ((x ^ n : ℝ≥0) : ℝ) = x ^ n :=
+begin
+  induction n with n ih;
+  simp only [int.of_nat_eq_coe, nnreal.coe_pow, gpow_coe_nat, gpow_neg_succ_of_nat, nnreal.coe_inv]
+end
