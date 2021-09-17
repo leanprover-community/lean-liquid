@@ -1046,4 +1046,51 @@ instance : has_coe_to_sort (ProFiltPseuNormGrpWithTinv₁ r) := ⟨Type*, λ M, 
 instance (M : ProFiltPseuNormGrpWithTinv₁ r) :
   profinitely_filtered_pseudo_normed_group_with_Tinv r M := M.str
 
+lemma exhaustive (M : ProFiltPseuNormGrpWithTinv₁ r) (m : M) : ∃ c : ℝ≥0,
+  m ∈ pseudo_normed_group.filtration M c := M.exhaustive' m
+
+instance : large_category (ProFiltPseuNormGrpWithTinv₁.{u} r) :=
+{ hom := λ A B, profinitely_filtered_pseudo_normed_group_with_Tinv_hom r A B,
+  id := λ A, profinitely_filtered_pseudo_normed_group_with_Tinv_hom.id,
+  comp := λ A B C f g, g.comp f } .
+
+def enlarging_functor : (ProFiltPseuNormGrpWithTinv₁.{u} r) ⥤ (ProFiltPseuNormGrpWithTinv.{u} r) :=
+{ obj := λ M, ProFiltPseuNormGrpWithTinv.of r M,
+  map := λ A B f, f }
+
+instance : concrete_category (ProFiltPseuNormGrpWithTinv₁.{u} r) :=
+{ forget :=
+  { obj := λ M, M,
+    map := λ X Y f, f },
+  forget_faithful := ⟨⟩ } .
+
+def to_PFPNG₁ : (ProFiltPseuNormGrpWithTinv₁.{u} r) ⥤ ProFiltPseuNormGrp₁.{u} :=
+{ obj := λ M,
+  { M := M,
+    exhaustive' := M.exhaustive' },
+  map := λ A B f,
+  { to_fun := f,
+    map_zero' := f.map_zero,
+    map_add' := f.map_add,
+    strict' := f.strict,
+    continuous' := f.continuous' } }
+
+/-
+def limit_cone {J : Type u} [small_category J] (K : J ⥤ (ProFiltPseuNormGrpWithTinv₁.{u} r)) :
+  limits.cone K :=
+{ X :=
+  { M := (ProFiltPseuNormGrp₁.limit_cone (K ⋙ to_PFPNG₁ r)).X,
+    str :=
+    { Tinv :=
+      { to_fun := quotient.map' (λ x, _) _,
+        map_zero' := _,
+        map_add' := _,
+        bound' := _,
+        continuous' := _ },
+      Tinv_mem_filtration := _,
+    ..(infer_instance : profinitely_filtered_pseudo_normed_group _) },
+    exhaustive' := _ },
+  π := _ }
+-/
+
 end ProFiltPseuNormGrpWithTinv₁
