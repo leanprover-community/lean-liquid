@@ -1,6 +1,11 @@
 import .all
 run_cmd tactic.skip
 
+-- Mbar/functor.lean
+apply_nolint Mbar.map_add unused_arguments
+apply_nolint Mbar.map_strict unused_arguments
+apply_nolint Mbar.map_zero unused_arguments
+
 -- breen_deligne/category.lean
 apply_nolint breen_deligne.FreeMat.iso_mk' doc_blame
 apply_nolint breen_deligne.FreeMat.kronecker_map_reindex_left unused_arguments
@@ -66,6 +71,9 @@ apply_nolint lem98.ι doc_blame
 apply_nolint fintype_sign_vectors doc_blame
 apply_nolint nonzero_sign doc_blame
 apply_nolint sign_vectors doc_blame
+
+-- condensed/ab.lean
+apply_nolint Condensed.CompHausFiltPseuNormGrp.to_Condensed doc_blame
 
 -- condensed/basic.lean
 apply_nolint category_theory.functor.preserves_binary_products doc_blame unused_arguments
@@ -162,6 +170,9 @@ apply_nolint up_two doc_blame
 -- for_mathlib/simplicial/iso.lean
 apply_nolint category_theory.simplicial_object.is_iso_of fails_quickly
 
+-- for_mathlib/topology.lean
+apply_nolint homeomorph.totally_disconnected_space def_lemma doc_blame
+
 -- hacks_and_tricks/by_exactI_hack.lean
 apply_nolint exact_notation doc_blame
 
@@ -187,15 +198,17 @@ apply_nolint laurent_measures_bdd doc_blame
 apply_nolint laurent_measures_bdd.map doc_blame
 
 -- laurent_measures/thm69.lean
-apply_nolint converges_floor_nat unused_arguments
+apply_nolint converges_floor_nat' ge_or_gt
+apply_nolint finite_sum_floor_seq_nat' unused_arguments
 apply_nolint floor_seq doc_blame
 apply_nolint floor_seq_nat doc_blame
-apply_nolint has_sum_pow_floor unused_arguments
-apply_nolint has_sum_pow_floor_norm unused_arguments
-apply_nolint has_sum_pow_floor_norm_nat unused_arguments
+apply_nolint floor_seq_nat' doc_blame
+apply_nolint has_sum_pow_floor_nat' ge_or_gt
+apply_nolint has_sum_pow_floor_norm_nat' unused_arguments
 apply_nolint laurent_measures.to_Rfct doc_blame unused_arguments
 apply_nolint sub_one_le_nat_floor unused_arguments
 apply_nolint θ doc_blame unused_arguments
+apply_nolint θ_surj_on_nonneg_nat unused_arguments ge_or_gt
 
 -- locally_constant/Vhat.lean
 apply_nolint SemiNormedGroup.normed_with_aut_LCC fails_quickly
@@ -387,6 +400,10 @@ apply_nolint ProFiltPseuNormGrpWithTinv.Pow_Pow_X doc_blame
 apply_nolint ProFiltPseuNormGrpWithTinv.Pow_Pow_X_equiv doc_blame
 apply_nolint ProFiltPseuNormGrpWithTinv.Pow_mul doc_blame
 apply_nolint ProFiltPseuNormGrpWithTinv.iso_of_equiv_of_strict' doc_blame
+apply_nolint ProFiltPseuNormGrp₁ doc_blame
+apply_nolint ProFiltPseuNormGrp₁.enlarging_functor doc_blame
+apply_nolint ProFiltPseuNormGrp₁.limit_cone doc_blame
+apply_nolint ProFiltPseuNormGrp₁.to_CHFPNG₁ doc_blame
 
 -- pseudo_normed_group/homotopy.lean
 apply_nolint breen_deligne.BD_map doc_blame
