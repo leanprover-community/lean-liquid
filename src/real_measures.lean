@@ -261,28 +261,23 @@ open pseudo_normed_group comphaus_filtered_pseudo_normed_group
 
 @[simps]
 def map_hom [fact (0 < p)] (f : S ⟶ S') :
-  comphaus_filtered_pseudo_normed_group_hom (ℳ p S) (ℳ p S') :=
+  strict_comphaus_filtered_pseudo_normed_group_hom (ℳ p S) (ℳ p S') :=
 { to_fun := map f,
   map_zero' := by { ext F s i, simp only [map_apply, finset.sum_const_zero, zero_apply], },
   map_add' := λ F G, by { ext s i, simp only [finset.sum_add_distrib, add_apply, map_apply], },
-  bound' :=
-    -- should we introduce strict morphisms, and the strict category, so we can have limits?
-    by { refine ⟨1, _⟩, rintros c F (hF : ∥F∥₊ ≤ c), rw one_mul, exact (map_bound f F).trans hF },
-  continuous' := begin
-    intros c₁ c₂ f₀ h,
-    haveI h₂ : fact (c₂ ≤ c₁ ⊔ c₂) := ⟨le_sup_right⟩,
-    rw (embedding_cast_le c₂ (c₁ ⊔ c₂)).to_inducing.continuous_iff,
+  strict' := λ c F hF, (map_bound _ _).trans hF,
+  continuous₁' := λ c, begin
     refine continuous_induced_rng (continuous_pi _),
     intro s',
-    simp only [function.comp, coe_cast_le, ← h, map_apply],
+    simp only [function.comp, map_apply],
     refine continuous.sum' _ _ _,
     rintro s -,
     exact (continuous_apply s).comp continuous_subtype_val,
   end }
 
 @[simps]
-def functor (p : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)] : Fintype.{u} ⥤ CompHausFiltPseuNormGrp.{u} :=
-{ obj := λ S, CompHausFiltPseuNormGrp.of $ ℳ p S,
+def functor (p : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)] : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u} :=
+{ obj := λ S, ⟨ℳ p S, λ F, ⟨∥F∥₊, (mem_filtration_iff _ _).mpr le_rfl⟩⟩,
   map := λ S T f, map_hom f,
   map_id' := λ S, by { ext1, rw [map_hom_to_fun, map_id], refl, },
   map_comp' := λ S S' S'' f g, by { ext1, simp only [map_hom_to_fun, map_comp], refl } }
