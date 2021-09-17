@@ -143,12 +143,21 @@ def Presheaf.map {A B : CompHausFiltPseuNormGrp₁} (φ : A ⟶ B) :
 { app := λ S, presheaf.map φ (unop S),
   naturality' := by { intros, refl } }
 
+@[simp]
+lemma Presheaf.map_id (A : CompHausFiltPseuNormGrp₁) :
+  Presheaf.map (𝟙 A) = 𝟙 _ := by { ext, refl }
 
-def to_Condensed : CompHausFiltPseuNormGrp₁ ⥤ Condensed Ab :=
-{ obj := λ A, { val := sorry, -- almost `Presheaf A`
+@[simp]
+lemma Presheaf.map_comp {A B C : CompHausFiltPseuNormGrp₁} (f : A ⟶ B) (g : B ⟶ C) :
+  Presheaf.map (f ≫ g) = Presheaf.map f ≫ Presheaf.map g := by { ext, refl }
+
+set_option pp.universes true
+
+def to_Condensed : CompHausFiltPseuNormGrp₁.{u+1} ⥤ Condensed.{u} Ab :=
+{ obj := λ A, { val := as_small.down.op ⋙ Presheaf A,
   property := sorry }, -- ← this one will be hard
-  map := sorry, -- almost `Presheaf.map`
-  map_id' := sorry,
-  map_comp' := sorry }
+  map := λ A B f, whisker_left _ $ Presheaf.map f,
+  map_id' := λ X, by { ext : 2, dsimp, simpa },
+  map_comp' := λ X Y Z f g, by { ext : 2, dsimp, simpa } }
 
 end CompHausFiltPseuNormGrp₁
