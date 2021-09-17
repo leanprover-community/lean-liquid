@@ -99,7 +99,7 @@ structure strict_comphaus_filtered_pseudo_normed_group_hom (M₁ M₂ : Type*)
   [comphaus_filtered_pseudo_normed_group M₂]
   extends M₁ →+ M₂ :=
 (strict' : ∀ c x, x ∈ filtration M₁ c → to_fun x ∈ filtration M₂ c)
-(continuous₁' : ∀ c, continuous (pseudo_normed_group.level to_fun strict' c))
+(continuous' : ∀ c, continuous (pseudo_normed_group.level to_fun strict' c))
 
 end
 
@@ -320,7 +320,7 @@ def mk' (f : M₁ →+ M₂)
       @continuous (filtration M₁ c) (filtration M₂ c) _ _ (λ x, ⟨f x, H x x.2⟩)) :
   strict_comphaus_filtered_pseudo_normed_group_hom M₁ M₂ :=
 { strict' := λ c x hh, (h c).some x hh,
-  continuous₁' := λ c, (h c).some_spec,
+  continuous' := λ c, (h c).some_spec,
   ..f }
 
 @[simp] lemma coe_mk' (f : M₁ →+ M₂) (h) : ⇑(mk' f h) = f := rfl
@@ -330,7 +330,7 @@ lemma strict ⦃c x⦄ : x ∈ filtration M₁ c → f x ∈ filtration M₂ c :
 def level {c} : filtration M₁ c → filtration M₂ c := pseudo_normed_group.level f f.strict c
 
 protected lemma level_continuous (c) : continuous (pseudo_normed_group.level f f.strict c) :=
-  f.continuous₁' _
+  f.continuous' _
 
 @[simp] protected lemma level_cast_le' {c₁ c₂} (h : c₁ ≤ c₂) (x : filtration M₁ c₁) :
   (f.level (cast_le' h x)) = cast_le' h (f.level x) := rfl
@@ -370,7 +370,7 @@ by cases f; cases g; congr'; exact funext H
 instance : has_zero (strict_comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :=
 { zero :=
   { strict' := λ c x h, pseudo_normed_group.zero_mem_filtration _,
-    continuous₁' := λ c, begin
+    continuous' := λ c, begin
       let e : filtration M₁ c → filtration M₂ c := λ x,
         ⟨0, pseudo_normed_group.zero_mem_filtration _⟩,
       exact (continuous_const : continuous e),
@@ -386,7 +386,7 @@ by cases f; cases g; cases h; refl
 /-- The identity function as `profinitely_filtered_pseudo_normed_group_hom`. -/
 @[simps] def id : strict_comphaus_filtered_pseudo_normed_group_hom M M :=
 { strict' := λ c x h, h,
-  continuous₁' := λ c, begin
+  continuous' := λ c, begin
     convert continuous_id,
     ext, refl,
   end,
@@ -398,7 +398,7 @@ by cases f; cases g; cases h; refl
   (f : strict_comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :
   strict_comphaus_filtered_pseudo_normed_group_hom M₁ M₃ :=
 { strict' := λ c x h, g.strict $ f.strict h,
-  continuous₁' := λ c, (g.level_continuous c).comp (f.level_continuous c),
+  continuous' := λ c, (g.level_continuous c).comp (f.level_continuous c),
   ..(g.to_add_monoid_hom.comp f.to_add_monoid_hom) }
 
 def to_chfpsng_hom (f : strict_comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :
@@ -418,7 +418,7 @@ def strict.to_schfpsng_hom {f : comphaus_filtered_pseudo_normed_group_hom M₁ M
   (h : f.strict) :
   strict_comphaus_filtered_pseudo_normed_group_hom M₁ M₂ :=
 { strict' := h,
-  continuous₁' := λ c, f.continuous _ (λ x, rfl),
+  continuous' := λ c, f.continuous _ (λ x, rfl),
   ..f.to_add_monoid_hom }
 
 end comphaus_filtered_pseudo_normed_group_hom

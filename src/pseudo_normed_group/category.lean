@@ -1032,3 +1032,18 @@ begin
 end
 
 end ProFiltPseuNormGrpWithTinv
+
+structure ProFiltPseuNormGrpWithTinv₁ (r : ℝ≥0) : Type (u+1) :=
+(M : Type u)
+[str : profinitely_filtered_pseudo_normed_group_with_Tinv r M]
+(exhaustive' : ∀ m : M, ∃ c : ℝ≥0, m ∈ pseudo_normed_group.filtration M c)
+
+namespace ProFiltPseuNormGrpWithTinv₁
+
+variable (r : ℝ≥0)
+
+instance : has_coe_to_sort (ProFiltPseuNormGrpWithTinv₁ r) := ⟨Type*, λ M, M.M⟩
+instance (M : ProFiltPseuNormGrpWithTinv₁ r) :
+  profinitely_filtered_pseudo_normed_group_with_Tinv r M := M.str
+
+end ProFiltPseuNormGrpWithTinv₁
