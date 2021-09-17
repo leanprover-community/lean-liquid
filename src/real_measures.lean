@@ -1,7 +1,8 @@
 import analysis.special_functions.pow
 import analysis.specific_limits
-import category_theory.Fintype
 import analysis.normed_space.basic
+import analysis.mean_inequalities
+import category_theory.Fintype
 
 import pseudo_normed_group.basic
 import pseudo_normed_group.category
@@ -25,9 +26,77 @@ notation `ℳ` := real_measures
 
 namespace real_measures
 
--- Move me
-lemma nonneg_of_norm_mul_fpow (k n : ℤ) (p : ℝ≥0) : 0 ≤ ∥ k ∥ * (p : ℝ)^n :=
-mul_nonneg (norm_nonneg _) (fpow_nonneg (nnreal.coe_nonneg _) _)
+@[simp] lemma zero_apply (s : S) : (0 : ℳ p S) s = 0 := rfl
+
+@[simp] lemma add_apply (F G : ℳ p S) (s : S) : (F + G) s = F s + G s := rfl
+
+@[simp] lemma neg_apply (F : ℳ p S) (s : S) : (-F) s = - (F s) := rfl
+
+@[simp] lemma sub_apply (F G : ℳ p S) (s : S) : (F - G) s = F s - G s := rfl
+
+instance : has_norm (ℳ p S) := ⟨λ F, ∑ s, ∥F s∥ ^ (p:ℝ)⟩
+
+lemma norm_def (F : ℳ p S) : ∥F∥ = ∑ s, ∥F s∥ ^ (p:ℝ) := rfl
+
+instance : has_nnnorm (ℳ p S) := ⟨λ F, ∑ s, ∥F s∥₊ ^ (p:ℝ)⟩
+
+lemma nnnorm_def (F : ℳ p S) : ∥F∥₊ = ∑ s, ∥F s∥₊ ^ (p:ℝ) := rfl
+
+@[simp] protected lemma coe_nnnorm (F : ℳ p S) : (∥F∥₊ : ℝ) = ∥F∥ :=
+by simp only [norm_def, nnnorm_def, nnreal.coe_sum, nnreal.coe_rpow, coe_nnnorm]
+
+@[simp] protected lemma nnnorm_zero [hp : fact (0 < p)] : ∥(0 : ℳ p S)∥₊ = 0 :=
+begin
+  rw [nnnorm_def, finset.sum_eq_zero],
+  rintro s -,
+  rw [zero_apply, nnnorm_zero, nnreal.zero_rpow],
+  exact_mod_cast hp.out.ne',
+end
+
+-- move this
+lemma nnreal.rpow_add_le_add_rpow {p : ℝ} (a b : ℝ≥0) (hp_pos : 0 < p) (hp1 : p ≤ 1) :
+  (a + b) ^ p ≤ a ^ p + b ^ p :=
+begin
+  rw [← ennreal.coe_le_coe],
+  simpa only [← ennreal.coe_rpow_of_nonneg _ hp_pos.le, ennreal.coe_add]
+    using ennreal.rpow_add_le_add_rpow a b hp_pos hp1,
+end
+
+-- move this
+lemma nnreal.rpow_sum_le_sum_rpow
+  {ι : Type*} (s : finset ι) {p : ℝ} (a : ι → ℝ≥0) (hp_pos : 0 < p) (hp1 : p ≤ 1) :
+  (∑ i in s, a i) ^ p ≤ ∑ i in s, (a i ^ p) :=
+begin
+  induction s using finset.induction_on with i s his IH,
+  { simp only [nnreal.zero_rpow hp_pos.ne', finset.sum_empty, le_zero_iff], },
+  { simp only [his, finset.sum_insert, not_false_iff],
+    exact (nnreal.rpow_add_le_add_rpow _ _ hp_pos hp1).trans (add_le_add le_rfl IH), }
+end
+
+protected lemma nnnorm_add [h0p : fact (0 < p)] [hp1 : fact (p ≤ 1)]
+  (F G : ℳ p S) : ∥F + G∥₊ ≤ ∥F∥₊ + ∥G∥₊ :=
+begin
+  dsimp [nnnorm_def],
+  rw ← finset.sum_add_distrib,
+  apply finset.sum_le_sum,
+  intros s hs,
+  have h0p' : (0 : ℝ) < p, exact_mod_cast h0p.out,
+  have hp1' : (p : ℝ) ≤ 1, exact_mod_cast hp1.out,
+  exact (nnreal.rpow_le_rpow (nnnorm_add_le _ _) h0p'.le).trans
+    (@nnreal.rpow_add_le_add_rpow p (∥F s∥₊) (∥G s∥₊) h0p' hp1'),
+end
+
+--needed?
+instance png_real_measures [fact (0 < p)] [fact (p ≤ 1)] : pseudo_normed_group (ℳ p S) :=
+{ filtration := λ c, { F | ∥F∥₊ ≤ c },
+  filtration_mono := λ c₁ c₂ h F hF, by {dsimp at *, exact le_trans hF h},
+  zero_mem_filtration := λ c, by simp only [real_measures.nnnorm_zero, zero_le', set.mem_set_of_eq],
+  neg_mem_filtration := λ c F h, by { dsimp [nnnorm_def] at *, simp only [h, nnnorm_neg] },
+  add_mem_filtration := λ c₁ c₂ F₁ F₂ h₁ h₂,
+    (real_measures.nnnorm_add _ _).trans (add_le_add h₁ h₂) }
+
+lemma mem_filtration_iff [fact (0 < p)] [fact (p ≤ 1)] (F : ℳ p S) (c : ℝ≥0) :
+  F ∈ pseudo_normed_group.filtration (ℳ p S) c ↔ ∥F∥₊ ≤ c := iff.rfl
 
 def map (f : S ⟶ S') : ℳ p S → ℳ p S' :=
 λ F s', ∑ s in finset.univ.filter (λ t, f t = s'), F s
@@ -64,33 +133,18 @@ begin
     rw [← hk.1, ← hk.2] }
 end
 
-@[simp] lemma zero_apply (s : S) : (0 : ℳ p S) s = 0 := rfl
-
-@[simp] lemma add_apply (F G : ℳ p S) (s : S) : (F + G) s = F s + G s := rfl
-
-@[simp] lemma neg_apply (F : ℳ p S) (s : S) : (-F) s = - (F s) := rfl
-
-@[simp] lemma sub_apply (F G : ℳ p S) (s : S) : (F - G) s = F s - G s := rfl
-
-instance : has_norm (ℳ p S) := ⟨λ F, ∑ s, ∥F s∥ ^ (p:ℝ)⟩
-
-lemma norm_def (F : ℳ p S) : ∥F∥ = ∑ s, ∥F s∥ ^ (p:ℝ) := rfl
-
-instance : has_nnnorm (ℳ p S) := ⟨λ F, ∑ s, ∥F s∥₊ ^ (p:ℝ)⟩
-
-lemma nnnorm_def (F : ℳ p S) : ∥F∥₊ = ∑ s, ∥F s∥₊ ^ (p:ℝ) := rfl
-
-@[simp] protected lemma coe_nnnorm (F : ℳ p S) : (∥F∥₊ : ℝ) = ∥F∥ :=
-by simp only [norm_def, nnnorm_def, nnreal.coe_sum, nnreal.coe_rpow, coe_nnnorm]
-
-lemma map_bound [hp : fact (p ≤ 1)] (f : S ⟶ S') (F : ℳ p S) :
+lemma map_bound [h0p : fact (0 < p)] [hp1 : fact (p ≤ 1)] (f : S ⟶ S') (F : ℳ p S) :
   ∥map f F∥₊ ≤ ∥F∥₊ :=
 begin
   calc ∑ s', ∥∑ s in finset.univ.filter (λ t, f t = s'), F s∥₊ ^ (p:ℝ)
-      ≤  ∑ s' : S', ∑ s in finset.univ.filter (λ t, f t = s'), ∥F s∥₊ ^ (p:ℝ) : _
+      ≤ ∑ s' : S', ∑ s in finset.univ.filter (λ t, f t = s'), ∥F s∥₊ ^ (p:ℝ) : _
   ... = ∑ s, ∥F s∥₊ ^ (p:ℝ) : _,
   { apply finset.sum_le_sum,
-    rintros s' -, sorry, },
+    rintros s' -,
+    have h0p' : (0 : ℝ) < p, exact_mod_cast h0p.out,
+    have hp1' : (p : ℝ) ≤ 1, exact_mod_cast hp1.out,
+    exact (nnreal.rpow_le_rpow (nnnorm_sum_le _ _) h0p'.le).trans
+      (nnreal.rpow_sum_le_sum_rpow _ _ h0p' hp1'), },
   { rw ← finset.sum_bUnion,
     { refine finset.sum_congr _ _,
       { ext s,
@@ -105,32 +159,6 @@ begin
       rw [← hi.1, ← hi.2] } },
 
 end
-
-@[simp] protected lemma nnnorm_zero [hp : fact (0 < p)] : ∥(0 : ℳ p S)∥₊ = 0 :=
-begin
-  rw [nnnorm_def, finset.sum_eq_zero],
-  rintro s -,
-  rw [zero_apply, nnnorm_zero, nnreal.zero_rpow],
-  exact_mod_cast hp.out.ne',
-end
-
-protected lemma nnnorm_add (F G : ℳ p S) : ∥F + G∥₊ ≤ ∥F∥₊ + ∥G∥₊ :=
-begin
-  dsimp [nnnorm_def],
-  rw ← finset.sum_add_distrib,
-  apply finset.sum_le_sum,
-  intros s hs,
-  sorry
-end
-
---needed?
-instance png_real_measures [fact (0 < p)] : pseudo_normed_group (ℳ p S) :=
-{ filtration := λ c, { F | ∥F∥₊ ≤ c },
-  filtration_mono := λ c₁ c₂ h F hF, by {dsimp at *, exact le_trans hF h},
-  zero_mem_filtration := λ c, by simp only [real_measures.nnnorm_zero, zero_le', set.mem_set_of_eq],
-  neg_mem_filtration := λ c F h, by { dsimp [nnnorm_def] at *, simp only [h, nnnorm_neg] },
-  add_mem_filtration := λ c₁ c₂ F₁ F₂ h₁ h₂,
-    (real_measures.nnnorm_add _ _).trans (add_le_add h₁ h₂) }
 
 /-
 
