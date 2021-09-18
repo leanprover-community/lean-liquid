@@ -73,7 +73,14 @@ apply_nolint nonzero_sign doc_blame
 apply_nolint sign_vectors doc_blame
 
 -- condensed/ab.lean
-apply_nolint Condensed.CompHausFiltPseuNormGrp.to_Condensed doc_blame
+apply_nolint CompHausFiltPseuNormGrp₁.Presheaf doc_blame
+apply_nolint CompHausFiltPseuNormGrp₁.Presheaf.map doc_blame
+apply_nolint CompHausFiltPseuNormGrp₁.presheaf doc_blame
+apply_nolint CompHausFiltPseuNormGrp₁.presheaf.comap doc_blame
+apply_nolint CompHausFiltPseuNormGrp₁.presheaf.gsmul doc_blame
+apply_nolint CompHausFiltPseuNormGrp₁.presheaf.map doc_blame
+apply_nolint CompHausFiltPseuNormGrp₁.presheaf.nsmul doc_blame
+apply_nolint CompHausFiltPseuNormGrp₁.to_Condensed doc_blame
 
 -- condensed/basic.lean
 apply_nolint category_theory.functor.preserves_binary_products doc_blame unused_arguments
@@ -400,9 +407,13 @@ apply_nolint ProFiltPseuNormGrpWithTinv.Pow_Pow_X doc_blame
 apply_nolint ProFiltPseuNormGrpWithTinv.Pow_Pow_X_equiv doc_blame
 apply_nolint ProFiltPseuNormGrpWithTinv.Pow_mul doc_blame
 apply_nolint ProFiltPseuNormGrpWithTinv.iso_of_equiv_of_strict' doc_blame
+apply_nolint ProFiltPseuNormGrpWithTinv₁ doc_blame
+apply_nolint ProFiltPseuNormGrpWithTinv₁.enlarging_functor doc_blame
+apply_nolint ProFiltPseuNormGrpWithTinv₁.to_PFPNG₁ doc_blame
 apply_nolint ProFiltPseuNormGrp₁ doc_blame
 apply_nolint ProFiltPseuNormGrp₁.enlarging_functor doc_blame
 apply_nolint ProFiltPseuNormGrp₁.limit_cone doc_blame
+apply_nolint ProFiltPseuNormGrp₁.limit_cone_is_limit doc_blame
 apply_nolint ProFiltPseuNormGrp₁.to_CHFPNG₁ doc_blame
 
 -- pseudo_normed_group/homotopy.lean
@@ -440,6 +451,13 @@ apply_nolint profinitely_filtered_pseudo_normed_group_with_Tinv.pi_map doc_blame
 apply_nolint profinitely_filtered_pseudo_normed_group_with_Tinv.pi_proj doc_blame
 apply_nolint profinitely_filtered_pseudo_normed_group_with_Tinv_hom doc_blame
 apply_nolint profinitely_filtered_pseudo_normed_group_with_Tinv_hom.mk' doc_blame
+
+-- real_measures.lean
+apply_nolint real_measures doc_blame
+apply_nolint real_measures.functor doc_blame
+apply_nolint real_measures.map doc_blame
+apply_nolint real_measures.map_hom doc_blame unused_arguments
+apply_nolint real_measures.nnnorm_apply_le_of_nnnorm_le unused_arguments
 
 -- rescale/FiltrationPow.lean
 apply_nolint Filtration_cast_eq doc_blame unused_arguments
