@@ -1079,4 +1079,11 @@ def to_PFPNG₁ : (ProFiltPseuNormGrpWithTinv₁.{u} r) ⥤ ProFiltPseuNormGrp�
     strict' := f.strict,
     continuous' := f.continuous' } }
 
+instance {J : Type u} [small_category J] (K : J ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r) :
+  profinitely_filtered_pseudo_normed_group_with_Tinv r
+    (ProFiltPseuNormGrp₁.limit_cone (K ⋙ to_PFPNG₁ r)).X :=
+{ Tinv := sorry,
+  Tinv_mem_filtration := sorry,
+  ..(infer_instance : profinitely_filtered_pseudo_normed_group _) }
+
 end ProFiltPseuNormGrpWithTinv₁
