@@ -11,7 +11,7 @@ TO DO :
 * Finish the proof of surjectivity for negative reals using linearity
 -/
 
-open filter function classical
+open filter function classical finset
 open_locale topological_space classical nnreal big_operators
 
 section thm69_surjective
@@ -23,11 +23,11 @@ begin
   { rw [sub_le_iff_le_add], exact le_of_lt (lt_nat_floor_add_one x) }
 end
 
-lemma nat_floor_le_nat (x : ℝ≥0) : (⌊(x.1)⌋₊ : ℝ≥0) ≤ x :=
-  by {simp only [← nnreal.coe_le_coe, nnreal.coe_nat_cast], from nat_floor_le x.2}
+-- lemma nat_floor_le_nat (x : ℝ≥0) : (⌊(x.1)⌋₊ : ℝ≥0) ≤ x :=
+--   by {simp only [← nnreal.coe_le_coe, nnreal.coe_nat_cast], from nat_floor_le x.2}
 
 --FAE: I believe that although r,r' are naturally in ℝ≥0, it is reasonable to consider x : ℝ,
---may be locally with the assumption x ≥ 0
+--perhaps locally with the assumption x ≥ 0
 lemma converges_floor_nat' (x : ℝ) (h_x : x ≥ 0) (r' : ℝ≥0) [fact (r' < 1)] --[fact (r'.1 ≠ 0)]
   (h_r' : r' ≠ 0) : tendsto (λn : ℕ, (nat_floor (x / r' ^ n) : ℝ) * r' ^ n) at_top (𝓝 x) := --sorry
 begin
@@ -64,23 +64,42 @@ begin
     simpa only [nnreal.val_eq_coe, nnreal.coe_eq_zero, ne.def, not_false_iff] },
 end
 
-
---[FAE] In the following def I use r' : ℝ, but it is probably a bad idea
+--[FAE] In the following def I use r' : ℝ, but it might be a bad idea
 noncomputable  def floor_seq_nat' (x : ℝ) (r' : ℝ) : ℤ → ℕ
-| (int.of_nat n)          := nat.rec_on n
-                          (nat_floor x) (λ n, nat_floor (r' ^ n * x) - ⌊1 / r'⌋₊ * nat_floor (r' ^ (n-1) * x))
+| (int.of_nat n)          := nat.rec_on n ⌊x⌋₊ (λ n, ⌊1 / r' ^ n * x⌋₊ - ⌊1 / r'⌋₊ * ⌊1 / r' ^ (n-1) * x⌋₊)
 | (int.neg_succ_of_nat n) := 0
 
 
+--the following lemma si false for n = 0 (so, with range (n+1) replaced by range n)
 lemma finite_sum_floor_seq_nat' (r' : ℝ≥0) [fact (r' < 1)] (h_r' : r' ≠ 0) (x : ℝ) (n : ℕ) :
-  (finset.range n).sum (λ (i : ℕ), (coe ∘ floor_seq_nat' r'.1 x) ↑i * r'.1 ^ i) =
+  (range (n + 1)).sum (λ (i : ℕ), (coe ∘ floor_seq_nat' r'.1 x) ↑i * r'.1 ^ i) =
     ⌊x / r'.1 ^ n⌋₊ * r' ^ n :=
 begin
   sorry,
 end
 
-lemma has_sum_pow_floor_nat' (r' : ℝ≥0) [fact (r' < 1)] (h_r' : r' ≠ 0) (x : ℝ) (hx_pos : x≥0)
-  : has_sum (λ n, (coe ∘ floor_seq_nat' r'.1 x) n * r'.1 ^ n) x :=
+lemma finite_sum_floor_seq_half (x : ℝ) (n : ℕ) : --[fact (r' < 1)] (h_r' : r' > 0)
+  (range (n + 1)).sum (λ (i : ℕ), (coe ∘ floor_seq_nat' (1 / 2 : ℚ) x) ↑i * (1 / 2 : ℚ) ^ i) =
+    (⌊x / (1 / 2 : ℚ) ^ n⌋₊ : ℚ) * (1 / 2 : ℚ) ^ n :=
+begin
+  by_cases h_nz : n = 0, sorry,
+  have uno := calc (range n).sum (λ (i : ℕ), (coe ∘ floor_seq_nat' (1 / 2 : ℚ) x) ↑i * (1 / 2 : ℚ) ^ i) =
+    ⌊x⌋₊ + ∑ k in (Ico 1 n), 1 / 2 * (⌊2 ^ k * x⌋₊ - 2 * ⌊2 ^ (k - 1) * x⌋₊) : sorry,
+  have due :=
+  calc  ⌊x⌋₊ + ∑ k in (Ico 1 n), 1 / 2 * (⌊2 ^ k * x⌋₊ - 2 * ⌊2 ^ (k - 1) * x⌋₊) =
+        ⌊x⌋₊ + 1 / 2 ^ (n - 1) * ∑ k in (Ico 1 n), 2 ^ (n - k) * (⌊2 ^ k * x⌋₊ - 2 * ⌊2 ^ (k - 1) * x⌋₊) : sorry
+  ... = ⌊x⌋₊ + 1 / 2 ^ (n - 1) * ( ∑ k in (Ico 1 n), 2 ^ (n - k) * ⌊2 ^ k * x⌋₊ - ∑ k in (Ico 1 n), 2 ^ (n - (k - 1)) * ⌊2 ^ (k - 1) * x⌋₊) : sorry
+  ... = ⌊x⌋₊ + 1 / 2 ^ (n - 1) * (⌊2 ^ (n - 1) * x⌋₊ + ∑ k in (Ico 1 (n - 1)), 2 ^ (n - k) * ⌊2 ^ k * x⌋₊ - ∑ k in (Ico 1 n), 2 ^ (n - (k - 1)) * ⌊2 ^ (k - 1) * x⌋₊) : sorry
+  ... = ⌊x⌋₊ + 1 / 2 ^ (n - 1) * (⌊2 ^ (n - 1) * x⌋₊ + ∑ k in (Ico 1 (n - 1)), 2 ^ (n - k) * ⌊2 ^ k * x⌋₊ - ∑ k in (Ico 2 n), 2 ^ (n - (k - 1)) * ⌊2 ^ (k - 1) * x⌋₊ - 2 ^ (n - 1) * ⌊x⌋₊) : sorry
+  ... = ⌊x⌋₊ + 1 / 2 ^ (n - 1) * (⌊2 ^ (n - 1) * x⌋₊ + ∑ k in (Ico 1 (n - 1)), 2 ^ (n - k) * ⌊2 ^ k * x⌋₊ - ∑ k in (Ico 1 (n - 1)), 2 ^ (n - k) * ⌊2 ^ k * x⌋₊ - 2 ^ (n - 1) * ⌊x⌋₊) : sorry
+  ... = ⌊x⌋₊ + 1 / 2 ^ (n - 1) * (⌊2 ^ (n - 1) * x⌋₊ - 2 ^ (n - 1) * ⌊x⌋₊) : sorry
+  ... = ⌊x⌋₊ + 1 / 2 ^ (n - 1) * ⌊2 ^ (n - 1) * x⌋₊ - (1 / 2 ) ^ (n - 1) * 2 ^ (n - 1) * ⌊x⌋₊ : sorry
+  ... = 1 / 2 ^ (n - 1) * ⌊2 ^ (n - 1) * x⌋₊ : sorry,
+    --  sorry,/
+    sorry,
+end
+
+lemma has_sum_pow_floor_nat' (r' : ℝ≥0) [fact (r' < 1)] (h_r' : r' ≠ 0) (x : ℝ) (hx_pos : x≥0) : has_sum (λ n, (coe ∘ floor_seq_nat' r'.1 x) n * r'.1 ^ n) x :=
 begin
   let x₀ : ℝ≥0 := ⟨x, hx_pos⟩,
   have hinj : function.injective (coe : ℕ → ℤ) := by {apply int.coe_nat_inj},
@@ -106,8 +125,10 @@ begin
     simp only [nat.cast_nonneg],
     exact pow_nonneg r'.2 n },
   apply (has_sum_iff_tendsto_nat_of_nonneg h_pos x).mpr,
-  simp_rw (finite_sum_floor_seq_nat' r' h_r' x),
-  apply converges_floor_nat' x hx_pos r' h_r',
+  sorry,
+  -- have temp := finite_sum_floor_seq_nat' r' h_r' x,
+  -- simp_rw (finite_sum_floor_seq_nat' r' h_r' x),
+  -- apply converges_floor_nat' x hx_pos r' h_r',
 end
 
 lemma has_sum_pow_floor_norm_nat' (r' : ℝ≥0)  [fact (r' < 1)] (h_nz :  r' ≠ 0) (x : ℝ) :
