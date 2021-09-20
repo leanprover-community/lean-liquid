@@ -20,6 +20,23 @@ instance : abelian (Condensed Ab.{u+1}) := sorry
 
 instance : enough_projectives (Condensed Ab.{u+1}) := sorry
 
+section
+
+variables (A : Type (u+1)) [add_comm_group A] [topological_space A] [topological_add_group A]
+
+def of_top_ab.presheaf : Profiniteᵒᵖ ⥤ Ab :=
+{ obj := λ S, ⟨C(S.unop, A)⟩,
+  map := λ S₁ S₂ f, add_monoid_hom.mk' (λ g, g.comp f.unop) $ λ g₁ g₂, rfl,
+  map_id' := by { intros, ext, refl },
+  map_comp' := by { intros, ext, refl } }
+
+/-- The condensed abelian group associated with a topological abelian group -/
+def of_top_ab : Condensed.{u} Ab :=
+{ val := as_small.down.op ⋙ (of_top_ab.presheaf A),
+  property := sorry }
+
+end
+
 end Condensed
 
 namespace CompHausFiltPseuNormGrp₁
