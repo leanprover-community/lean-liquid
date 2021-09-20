@@ -88,16 +88,71 @@ variables [has_images C] [has_zero_morphisms C] [has_kernels C]
 variables [has_images D] [has_zero_morphisms D] [has_kernels D]
 
 /-- Cohomological covariant delta functor. -/
-class delta_functor (F : ℕ → C ⥤ D) :=
-(δ : Π (n : ℕ), short_exact_sequence.Trd C ⋙ (F n) ⟶ short_exact_sequence.Fst C ⋙ (F (n+1)))
+variables (C D)
+structure delta_functor :=
+(F : ℕ → C ⥤ D)
+(δ' : Π (n : ℕ), short_exact_sequence.Trd C ⋙ (F n) ⟶ short_exact_sequence.Fst C ⋙ (F (n+1)))
 (mono : ∀ (A : short_exact_sequence C), mono ((F 0).map A.f))
 (exact' : ∀ (n : ℕ) (A : short_exact_sequence C), exact ((F n).map A.f) ((F n).map A.g))
-(exact_δ : ∀ (n : ℕ) (A : short_exact_sequence C), exact ((F n).map A.g) ((δ n).app A))
-(δ_exact : ∀ (n : ℕ) (A : short_exact_sequence C), exact ((δ n).app A) ((F (n+1)).map A.f))
+(exact_δ' : ∀ (n : ℕ) (A : short_exact_sequence C), exact ((F n).map A.g) ((δ' n).app A))
+(δ_exact' : ∀ (n : ℕ) (A : short_exact_sequence C), exact ((δ' n).app A) ((F (n+1)).map A.f))
+variables {C D}
+
+infixr ` ⥤δ  `:26 := delta_functor
 
 namespace delta_functor
 
-variables (F : ℕ → C ⥤ D) [delta_functor F]
+instance : has_coe_to_fun (C ⥤δ D) := ⟨_, λ F, F.F⟩
+
+def δ (F : C ⥤δ D) (n : ℕ) : short_exact_sequence.Trd C ⋙ F n ⟶
+  short_exact_sequence.Fst C ⋙ F (n+1) := F.δ' _
+
+structure hom (F G : C ⥤δ D) :=
+(η' : Π n : ℕ, F n ⟶ G n)
+(w' : ∀ n, whisker_left _ (η' _) ≫ G.δ _ = F.δ n ≫ whisker_left _ (η' _) . obviously)
+
+namespace hom
+
+instance {F G : C ⥤δ D} : has_coe_to_fun (hom F G) := ⟨_,λ η, η.η'⟩
+
+@[ext]
+lemma ext {F G : C ⥤δ D} (f g : hom F G) : (∀ n, f n = g n) → f = g :=
+by { intro h, cases f, cases g, congr' 1, ext1, apply h }
+
+@[simp, reassoc]
+lemma w {F G : C ⥤δ D} (e : hom F G) (n : ℕ) :
+  whisker_left _ (e _) ≫ G.δ _ = F.δ n ≫ whisker_left _ (e _) := e.w' _
+
+def id (F : C ⥤δ D) : hom F F := { η' := λ n, 𝟙 _ }
+
+def comp {F G H : C ⥤δ D} (f : hom F G) (g : hom G H) : hom F H := { η' := λ n, f n ≫ g n }
+
+@[simp]
+lemma coe_id (F : C ⥤δ D) (n) : id F n = 𝟙 _ := rfl
+
+@[simp]
+lemma coe_comp {F G H : C ⥤δ D} (f : hom F G) (g : hom G H) (n) : f.comp g n = f n ≫ g n := rfl
+
+end hom
+
+instance : category (C ⥤δ D) :=
+{ hom := λ F G, hom F G,
+  id := hom.id,
+  comp := λ F G H, hom.comp } .
+
+class universal (F : C ⥤δ D) : Prop :=
+(bij : ∀ G : C ⥤δ D, function.bijective (λ (e : hom F G), e 0))
+
+variables (F : C ⥤δ D) [universal F]
+
+def equiv {G : C ⥤δ D} : (F ⟶ G) ≃ (F 0 ⟶ G 0) :=
+equiv.of_bijective _ $ universal.bij _
+
+def lift {G : C ⥤δ D} (η : F 0 ⟶ G 0) : F ⟶ G := F.equiv.symm η
+
+@[simp]
+lemma lift_spec {G : C ⥤δ D} (η : F 0 ⟶ G 0) : F.lift η 0 = η :=
+by { change F.equiv (F.equiv.symm _) = _, simp }
 
 end delta_functor
 
