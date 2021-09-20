@@ -176,20 +176,26 @@ begin
   exact h
 end
 
+@[simp]
+lemma lift_comp {G H : C ⥤δ D} [universal G] (e : F 0 ⟶ G 0) (f : G 0 ⟶ H 0) :
+  F.lift e ≫ G.lift f = F.lift (e ≫ f) :=
+begin
+  ext1,
+  change _ ≫ _ = _,
+  simp,
+end
+
+@[simp]
+lemma lift_id : 𝟙 _ = F.lift (𝟙 _) :=
+begin
+  ext1,
+  simpa,
+end
+
 @[simps hom inv]
 def lift_iso {G : C ⥤δ D} [universal G] (η : F 0 ≅ G 0) : F ≅ G :=
 { hom := F.lift η.hom,
-  inv := G.lift η.inv,
-  hom_inv_id' := begin
-    ext1,
-    change F.lift η.hom 0 ≫ _ = _,
-    simpa,
-  end,
-  inv_hom_id' := begin
-    ext1,
-    change G.lift η.inv 0 ≫ _ = _,
-    simpa,
-  end }
+  inv := G.lift η.inv }
 
 end delta_functor
 
