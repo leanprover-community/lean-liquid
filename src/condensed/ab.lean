@@ -20,6 +20,20 @@ instance : abelian (Condensed Ab.{u+1}) := sorry
 
 instance : enough_projectives (Condensed Ab.{u+1}) := sorry
 
+instance : is_right_adjoint (Sheaf_to_presheaf _ _ : Condensed Ab.{u+1} ⥤ _) := sorry
+
+def forget_to_CondensedType : Condensed Ab.{u+1} ⥤ CondensedSet :=
+{ obj := λ F, ⟨F.val ⋙ forget _, begin
+    cases F with F hF,
+    rw (presheaf.is_sheaf_iff_is_sheaf_forget _ _ (forget Ab)) at hF,
+    rw ← is_sheaf_iff_is_sheaf_of_type,
+    assumption,
+    apply_instance
+  end ⟩,
+  map := λ A B f, whisker_right f _ }
+
+instance : is_right_adjoint forget_to_CondensedType := sorry
+
 section
 
 variables (A : Type (u+1)) [add_comm_group A] [topological_space A] [topological_add_group A]
