@@ -35,8 +35,8 @@ Profinite.extend (real_measures.functor p') ⋙ CompHausFiltPseuNormGrp₁.to_Co
 
 local notation `ℳ` p' := real_measures.condensed p'
 
-local notation `Ext` i `(` A `,` B `)` := ((Ext ℤ (Condensed Ab) i).obj (op A)).obj B
+local notation `Ext` i `,` A `,` B := ((Ext ℤ (Condensed Ab) i).obj (op A)).obj B
 
 theorem main_challenge (i : ℕ) (hi : 0 < i) :
-  Ext i ( (ℳ p').obj S , Condensed.of_top_ab V ) :=
+  Ext i , (ℳ p').obj S , Condensed.of_top_ab V :=
 sorry
