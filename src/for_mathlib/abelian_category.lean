@@ -1,4 +1,5 @@
 import category_theory.preadditive
+import category_theory.abelian.exact
 import algebra.homology.exact
 
 
@@ -32,9 +33,16 @@ lemma is_zero_of_top_le_bot [has_zero_object C] (X : C)
     exact subobject.factors_of_le f h (subobject.top_factors f),
   end }
 
-variables [has_images C] [has_kernels C] [has_zero_object C]
+lemma is_zero_of_exact_zero_zero {C : Type*} [category C] [abelian C]
+  {X Y Z : C} (h : exact (0 : X ⟶ Y) (0 : Y ⟶ Z)) : is_zero Y :=
+is_zero_of_top_le_bot _
+begin
+  rw abelian.exact_iff'' at h,
+  rw [← @kernel_subobject_zero _ _ _ Y Z, ← @image_subobject_zero _ _ _ _ X Y, h],
+end
 
-lemma is_zero_of_exact_zero_zero {X Y Z : C} (h : exact (0 : X ⟶ Y) (0 : Y ⟶ Z)) : is_zero Y :=
-is_zero_of_top_le_bot _ $ sorry
+lemma is_zero_of_exact_zero_zero' {C : Type*} [category C] [abelian C]
+  {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) (hf : f = 0) (hg : g = 0) (h : exact f g) : is_zero Y :=
+by { rw [hf, hg] at h, exact is_zero_of_exact_zero_zero h }
 
 end category_theory
