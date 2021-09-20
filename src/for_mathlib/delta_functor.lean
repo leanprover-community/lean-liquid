@@ -148,11 +148,33 @@ variables (F : C ⥤δ D) [universal F]
 def equiv {G : C ⥤δ D} : (F ⟶ G) ≃ (F 0 ⟶ G 0) :=
 equiv.of_bijective _ $ universal.bij _
 
+@[simp]
+lemma equiv_coe {G : C ⥤δ D} (g : F ⟶ G) : F.equiv g = g 0 := rfl
+
 def lift {G : C ⥤δ D} (η : F 0 ⟶ G 0) : F ⟶ G := F.equiv.symm η
 
 @[simp]
 lemma lift_spec {G : C ⥤δ D} (η : F 0 ⟶ G 0) : F.lift η 0 = η :=
-by { change F.equiv (F.equiv.symm _) = _, simp }
+by { change F.equiv (F.equiv.symm _) = _, simp only [equiv.apply_symm_apply] }
+
+lemma lift_unique {G : C ⥤δ D} (h : F ⟶ G) (η : F 0 ⟶ G 0) :
+  h 0 = η → h = F.lift η :=
+begin
+  intro hh,
+  apply_fun F.equiv,
+  convert hh using 1,
+  simp,
+end
+
+@[ext]
+lemma hom_ext {G : C ⥤δ D} (f g : F ⟶ G) : f 0 = g 0 → f = g :=
+begin
+  intro h,
+  have : g = F.lift (g 0) := lift_unique _ _ _ rfl,
+  rw this,
+  apply lift_unique,
+  exact h
+end
 
 end delta_functor
 
