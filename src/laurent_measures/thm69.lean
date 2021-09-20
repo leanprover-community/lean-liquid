@@ -72,8 +72,8 @@ noncomputable  def floor_seq_nat' (x : ℝ) (r' : ℝ) : ℤ → ℕ
 
 --the following lemma si false for n = 0 (so, with range (n+1) replaced by range n)
 lemma finite_sum_floor_seq_nat' (r' : ℝ≥0) [fact (r' < 1)] (h_r' : r' ≠ 0) (x : ℝ) (n : ℕ) :
-  (range (n + 1)).sum (λ (i : ℕ), (coe ∘ floor_seq_nat' r'.1 x) ↑i * r'.1 ^ i) =
-    ⌊x / r'.1 ^ n⌋₊ * r' ^ n :=
+  (range n).sum (λ (i : ℕ), (coe ∘ floor_seq_nat' r'.1 x) ↑i * r'.1 ^ i) =
+    if n = 0 then 0 else ⌊x / r'.1 ^ (n - 1) ⌋₊ * r' ^ (n - 1) :=
 begin
   sorry,
 end
@@ -125,10 +125,12 @@ begin
     simp only [nat.cast_nonneg],
     exact pow_nonneg r'.2 n },
   apply (has_sum_iff_tendsto_nat_of_nonneg h_pos x).mpr,
+  have aux : (λ n, ite (n = 0) 0 ((⌊x / r'.val ^ (n - 1)⌋₊ : ℝ) * ↑r' ^ (n - 1))) =ᶠ[at_top]
+    λ n, (↑⌊x / r'.val ^ (n - 1)⌋₊ * ↑r' ^ (n - 1)), sorry,
+  simp_rw (finite_sum_floor_seq_nat' r' h_r' x),
+  rw ← (tendsto_congr' aux.symm),
   sorry,
-  -- have temp := finite_sum_floor_seq_nat' r' h_r' x,
-  -- simp_rw (finite_sum_floor_seq_nat' r' h_r' x),
-  -- apply converges_floor_nat' x hx_pos r' h_r',
+  -- convert converges_floor_nat' x hx_pos r' h_r',
 end
 
 lemma has_sum_pow_floor_norm_nat' (r' : ℝ≥0)  [fact (r' < 1)] (h_nz :  r' ≠ 0) (x : ℝ) :
