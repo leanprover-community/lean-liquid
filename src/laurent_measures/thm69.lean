@@ -26,22 +26,19 @@ end
 -- lemma nat_floor_le_nat (x : ℝ≥0) : (⌊(x.1)⌋₊ : ℝ≥0) ≤ x :=
 --   by {simp only [← nnreal.coe_le_coe, nnreal.coe_nat_cast], from nat_floor_le x.2}
 
-
-
---FAE: I believe that although r,r' are naturally in ℝ≥0, it is reasonable to consider x : ℝ,
---perhaps locally with the assumption x ≥ 0
 lemma converges_floor_rat (x : ℝ) (h_x : x ≥ 0) --(r' : ℝ≥0) [fact (r' < 1)] (h_r' : r' ≠ 0) :
-  (r' : ℚ) (h_r' : 0 < r') [fact (r' < 1)] :
-  tendsto (λn : ℕ, (nat_floor (x / r' ^ (n - 1)) : ℝ) * r' ^ ( n- 1)) at_top (𝓝 x) := --sorry
+  (r' : ℚ) (h_pos' : 0 < r') (h_one' : r' < 1) :
+  tendsto (λn : ℕ, (nat_floor (x / r' ^ (n - 1)) : ℝ) * r' ^ ( n- 1)) at_top (𝓝 x) :=
 begin
   by_cases h_zero : x = 0,
   { simp_rw [h_zero, zero_div, nat_floor_zero, nat.cast_zero, zero_mul, tendsto_const_nhds] },
   { let x₀ : ℝ≥0 := ⟨x, h_x⟩,
-    haveI : ∀ n : ℕ, invertible ((r' : ℝ) ^ n) := sorry,--λ n, invertible_of_nonzero (pow_ne_zero n (ne_of_gt h_r')),
-    have h_pos : ∀ n : ℕ, 0 < (r' : ℝ) ^ n := pow_pos (rat.cast_pos.mpr h_r'),
+    have h_pos : ∀ n : ℕ, 0 < (r' : ℝ) ^ n := pow_pos (rat.cast_pos.mpr h_pos'),
+    haveI : ∀ n : ℕ, invertible ((r' : ℝ) ^ n) := λ n, invertible_of_nonzero (ne_of_gt (h_pos n)),
     have h₁ : ∀ n : ℕ, (x - r' ^ (n - 1)) ≤ (nat_floor (x / r' ^ (n - 1)) : ℝ) * r' ^ (n - 1),
     { intro n,
-      have := (mul_le_mul_right $ h_pos (n -1)).mpr (sub_one_le_nat_floor' (x / (r' : ℝ) ^ (n - 1) : ℝ)),
+      have := (mul_le_mul_right $ h_pos (n -1)).mpr
+        (sub_one_le_nat_floor' (x / (r' : ℝ) ^ (n - 1) : ℝ)),
       have h_calc : (x - r' ^ (n - 1)) = ( x / r' ^ (n - 1) - 1) * (r' ^ (n - 1)),
       { rw [div_sub_one, div_mul_cancel];
         apply ne_of_gt (h_pos (n - 1)) },
@@ -53,22 +50,35 @@ begin
         simp_rw [pi.add_apply, zero_mul, add_zero, mul_neg_one,
           tactic.ring.add_neg_eq_sub] at h_geom,
         exact h_geom },
-      have h_abs : abs (r' : ℝ) < 1 := sorry,
-      replace h_abs := tendsto_pow_at_top_nhds_0_of_abs_lt_1 (h_abs),
-      replace h_abs := filter.tendsto.const_mul (r'⁻¹ : ℝ) h_abs,
-    simp_rw [mul_zero, (mul_comm (r'⁻¹ : ℝ) _)] at h_abs,
-    apply tendsto.congr _ h_abs,
-    intro n,
-    field_simp, sorry,},
+      have h_abs : abs (r' : ℝ) < 1,
+      { norm_cast,
+        apply abs_lt.mpr,
+        exact and.intro ((right.neg_neg_iff.mpr (@zero_lt_one ℚ _ _)).trans h_pos') h_one',
+        all_goals {apply_instance} },
+      replace h_abs := filter.tendsto.const_mul (r'⁻¹ : ℝ)
+        (tendsto_pow_at_top_nhds_0_of_abs_lt_1 (h_abs)),
+      simp_rw [mul_zero, (mul_comm (r'⁻¹ : ℝ) _)] at h_abs,
+      apply tendsto.congr' _ h_abs,
+      replace h_pos' : (r' : ℝ) ≠ 0 := by {rwa [ne.def, rat.cast_eq_zero], from (ne_of_gt h_pos')},
+      rw eventually_eq_iff_exists_mem,
+      use {n | n ≥ 1},
+      split,
+      { simp only [mem_at_top_sets, ge_iff_le, set.mem_set_of_eq],
+        use 1,
+        tauto },
+      { intros n hn,
+        field_simp,
+        ring_nf,
+        nth_rewrite_rhs 0 [← pow_one ↑r'],
+        rw [← pow_add ↑r' 1 (n - 1)],
+        rwa nat.add_sub_cancel' }},
     have h₂ : ∀ n : ℕ, (nat_floor (x / (r' : ℝ) ^ (n - 1) ) : ℝ) * (r' : ℝ) ^ (n - 1) ≤ x,
-    -- sorry,
     { intro n,
       have h_pos' : (x / r' ^ (n - 1)) > 0 := div_pos ((ne.symm h_zero).le_iff_lt.mp h_x) (h_pos (n - 1)),
       have := (mul_le_mul_right $ h_pos (n - 1)).mpr (nat_floor_le (le_of_lt h_pos')),
       calc (nat_floor (x / r' ^ (n - 1)) : ℝ) * (r' : ℝ) ^ (n - 1) ≤ (x / r' ^ (n - 1)) * (r' ^ (n - 1)) : this
                                               ... = x : div_mul_cancel_of_invertible x (r' ^ (n - 1)) },
     apply tendsto_of_tendsto_of_tendsto_of_le_of_le HH tendsto_const_nhds h₁ h₂ },
-    -- simpa only [nnreal.val_eq_coe, nnreal.coe_eq_zero, ne.def, not_false_iff] },
 end
 
 
