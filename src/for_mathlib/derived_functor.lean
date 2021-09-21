@@ -21,11 +21,11 @@ variables [has_images C] [has_projective_resolutions C]
 variables [preadditive D] [has_zero_object D] [has_equalizers D] [has_cokernels D]
 variables [has_images D] [has_image_maps D]
 
-instance (F : C ⥤ D) [F.additive] : delta_functor F.left_derived :=
-{ δ := _,
-  mono := _,
-  exact' := _,
-  exact_δ := _,
-  δ_exact := _ }
+-- instance (F : C ⥤ D) [F.additive] : delta_functor F.left_derived :=
+-- { δ := _,
+--   mono := _,
+--   exact' := _,
+--   exact_δ := _,
+--   δ_exact := _ }
 
 end category_theory
