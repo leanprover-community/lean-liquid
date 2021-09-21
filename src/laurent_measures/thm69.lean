@@ -136,7 +136,8 @@ begin
     λ n, (↑⌊x / r'.val ^ (n - 1)⌋₊ * ↑r' ^ (n - 1)), sorry,
   simp_rw (finite_sum_floor_seq_nat' r' h_r' x),
   rw ← (tendsto_congr' aux.symm),
-  apply converges_floor_rat x hx_pos r' h_r',
+  sorry,
+  -- apply converges_floor_rat x hx_pos r' h_r',
 end
 
 lemma has_sum_pow_floor_norm_nat' (r' : ℝ≥0)  [fact (r' < 1)] (h_nz :  r' ≠ 0) (x : ℝ) :
