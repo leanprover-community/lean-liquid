@@ -16,6 +16,20 @@ lemma prod.le_def {X Y : Type*} [has_le X] [has_le Y] (a b : X × Y) :
 
 namespace category_theory
 
+/-- The base diagram for the snake lemma. The object are indexed by `fin 4 × fin 3`:
+
+(0,0) --> (0,1) --> (0,2)              | the kernels
+  |         |         |
+  v         v         v
+(1,0) --> (1,1) --> (1,2)              | the first exact row
+  |         |         |
+  v         v         v
+(2,0) --> (2,1) --> (2,2)              | the second exact row
+  |         |         |
+  v         v         v
+(3,0) --> (3,1) --> (3,2)              | the cokernels
+
+-/
 @[derive [preorder, decidable_eq]]
 def snake_diagram := fin 4 × fin 3
 
