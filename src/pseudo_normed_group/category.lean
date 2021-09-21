@@ -1241,4 +1241,30 @@ instance {J : Type u} [small_category J] (K : J ⥤ ProFiltPseuNormGrpWithTinv�
   Tinv_mem_filtration := comphaus_filtered_pseudo_normed_group_hom.mk_of_bound_bound_by _ _ _,
   ..(infer_instance : profinitely_filtered_pseudo_normed_group _) }
 
+def limit_cone {J : Type u} [small_category J] (K : J ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r) :
+  limits.cone K :=
+{ X :=
+    { M := (ProFiltPseuNormGrp₁.limit_cone (K ⋙ to_PFPNG₁ r)).X,
+      exhaustive' := (ProFiltPseuNormGrp₁.limit_cone (K ⋙ to_PFPNG₁ r)).X.exhaustive },
+  π :=
+  { app := λ j,
+    { map_Tinv' := begin
+        rintro ⟨⟨c,x⟩⟩,
+        dsimp [Tinv, Tinv_limit, Tinv_limit_fun, Tinv_limit_fun', Tinv_limit_fun_aux],
+        dsimp [ProFiltPseuNormGrp₁.limit_cone, CompHausFiltPseuNormGrp₁.limit_cone],
+        erw quotient.map'_mk',
+        change proj (K ⋙ to_PFPNG₁ r ⋙ to_CHFPNG₁) j (incl _ _) = _,
+        change _ = Tinv (proj _ _ (incl _ _)),
+        dsimp [proj],
+        simpa,
+      end,
+      ..(ProFiltPseuNormGrp₁.limit_cone (K ⋙ to_PFPNG₁ r)).π.app j },
+  naturality' := begin
+    intros i j e,
+    ext1 x,
+    have := (ProFiltPseuNormGrp₁.limit_cone (K ⋙ to_PFPNG₁ r)).π.naturality e,
+    apply_fun (λ e, e x) at this,
+    exact this,
+  end } }
+
 end ProFiltPseuNormGrpWithTinv₁
