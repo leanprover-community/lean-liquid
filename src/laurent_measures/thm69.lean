@@ -234,7 +234,6 @@ begin
   simp only [one_div, rat.cast_inv, rat.cast_one, rat.cast_bit0],
 end
 
-
 -- lemma has_sum_pow_floor_nat' (r' : ℝ≥0) [fact (r' < 1)] (h_r' : r' ≠ 0) (x : ℝ) (hx_pos : x≥0) : has_sum (λ n, (coe ∘ floor_seq_nat' r'.1 x) n * r'.1 ^ n) x :=
 -- begin
 --   let x₀ : ℝ≥0 := ⟨x, hx_pos⟩,
@@ -282,12 +281,12 @@ begin
 end
 
 
-lemma has_sum_pow_floor_norm_nat' (r' : ℝ≥0)  [fact (r' < 1)] (h_nz :  r' ≠ 0) (x : ℝ) :
-  has_sum (λ n, ∥ (floor_seq_nat' r'.1 x n : ℝ) ∥ * r' ^ n) x :=
-  -- has_sum (λ n, ∥ ((coe : ℕ → ℝ) ∘ floor_seq_nat x) n ∥ * r' ^ n) x :=
-begin
-  sorry,--will be an easy consequence of the previous one
-end
+-- lemma has_sum_pow_floor_norm_nat' (r' : ℝ≥0)  [fact (r' < 1)] (h_nz :  r' ≠ 0) (x : ℝ) :
+--   has_sum (λ n, ∥ (floor_seq_nat' r'.1 x n : ℝ) ∥ * r' ^ n) x :=
+--   -- has_sum (λ n, ∥ ((coe : ℕ → ℝ) ∘ floor_seq_nat x) n ∥ * r' ^ n) x :=
+-- begin
+--   sorry,--will be an easy consequence of the previous one
+-- end
 
 
 
@@ -297,6 +296,8 @@ def laurent_measures.to_Rfct (r : ℝ≥0) [fact (r < 1)] :
 noncomputable def θ (r' : ℚ) (h_pos' : 0 < r') (h_one' : r' < 1) (r : ℝ≥0) [fact (r < 1)] :
  (laurent_measures r (Fintype.of punit)) → ℝ := λ F, tsum (λ n, (F.to_Rfct r n) * r' ^ n)
 
+
+--[FAE] : modify ϕ to a `def` and do things properly!
 
 def ϕ (r₂ r₁ : ℝ≥0) (h : r₁ < r₂) {S : Fintype} :
   (laurent_measures r₂ S) → (laurent_measures r₁ S) := sorry
@@ -348,7 +349,7 @@ lemma θ_surj_on_nonneg_rat (r' : ℚ) (h_pos' : 0 < r') (h_one' : r' < 1) --(r 
 begin
   let t₀ : ℝ≥0 := (⟨(t : ℝ), le_of_lt ((@rat.cast_pos ℝ _ _).mpr h_pos)⟩),
   have h_one : t₀ < (1 : ℝ≥0) := H.out,
-  replace h_one : t < 1, sorry, --apply (@rat.cast_lt ℝ _ _ _).mp,
+  replace h_one : t < 1 := by {apply (@rat.cast_lt ℝ _ _ _).mp, rw rat.cast_one, exact h_one},
   let F₀ : Fintype.of punit → ℤ → ℤ := λ _ n, int.of_nat (floor_seq_rat t x n),
   have hF : ∀ (s : Fintype.of punit), summable (λ n : ℤ, ∥ F₀ s n ∥ * t ^ n),
   { intro s,
@@ -363,7 +364,15 @@ begin
   -- exact has_sum.tsum_eq this,
 end
 
-def τ (r' : ℚ) (r : ℝ≥0) [fact (r < 1)] : {t : ℚ // 0 < t} := sorry
+
+--certainly the wrong def: I am not assuming r' ≥ 0 and r' < r
+noncomputable def τ (r' : ℚ) (r : ℝ≥0) [fact (r < 1)] : {t : ℚ // 0 < t} :=
+begin
+  have h : r < 1 := fact.out _,
+  use some (@exists_rat_btwn ℝ _ _ r 1 h),
+  rwa [← (@rat.cast_lt ℝ _ 0 (some _)), rat.cast_zero],
+  exact (lt_of_le_of_lt r.2) (some_spec (@exists_rat_btwn ℝ _ _ r 1 h)).left,
+end
 
 noncomputable def τ₀ (r' : ℚ) (r : ℝ≥0) [fact (r < 1)] : ℝ≥0 :=
 ⟨((τ r' r).1 : ℝ), le_of_lt ((@rat.cast_pos ℝ _ _).mpr (τ r' r).2)⟩
