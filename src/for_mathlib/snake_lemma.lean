@@ -63,8 +63,15 @@ variables (a0 : F 0 0 ⟶ F 1 0) (a1 : F 1 0 ⟶ F 2 0) (a2 : F 2 0 ⟶ F 3 0)
 variables (b0 : F 0 1 ⟶ F 1 1) (b1 : F 1 1 ⟶ F 2 1) (b2 : F 2 1 ⟶ F 3 1)
 variables (c0 : F 0 2 ⟶ F 1 2) (c1 : F 1 2 ⟶ F 2 2) (c2 : F 2 2 ⟶ F 3 2)
 variables (sq00 : a0 ≫ f1 = f0 ≫ b0) (sq01 : b0 ≫ g1 = g0 ≫ c0)
--- variables (sq00 : a0 ≫ f1 = f0 ≫ b0) (sq01 : b0 ≫ g1 = g0 ≫ c0)
--- variables (sq00 : a0 ≫ f1 = f0 ≫ b0) (sq01 : b0 ≫ g1 = g0 ≫ c0)
+variables (sq10 : a1 ≫ f2 = f1 ≫ b1) (sq11 : b1 ≫ g2 = g1 ≫ c1)
+variables (sq20 : a2 ≫ f3 = f2 ≫ b2) (sq21 : b2 ≫ g3 = g2 ≫ c2)
+
+namespace mk_functor
+
+def map : Π (x y : snake_diagram), F x.1 x.2 ⟶ F y.1 y.2 :=
+sorry
+
+end mk_functor
 
 def mk_functor : snake_diagram ⥤ C :=
 { obj := function.uncurry F,
