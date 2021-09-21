@@ -51,6 +51,20 @@ def hom (i j : snake_diagram) (hij : i ≤ j . hom_tac) : i ⟶ j := hom_of_le h
 
 lemma hom_ext {i j : snake_diagram} (f g : i ⟶ j) : f = g := by ext
 
+section
+variables {C : Type u} [category.{v} C]
+
+variables (F : fin 4 → fin 3 → C)
+variables (f₁ : F 0 0 ⟶ F 0 1)
+
+def mk_functor : snake_diagram ⥤ C :=
+{ obj := function.uncurry F,
+  map := sorry,
+  map_id' := sorry,
+  map_comp' := sorry }
+
+end
+
 end snake_diagram
 
 open snake_diagram (o hom)
