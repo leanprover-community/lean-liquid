@@ -869,6 +869,13 @@ limits.is_limit_of_reflects to_CHFPNG₁ (CompHausFiltPseuNormGrp₁.limit_cone_
 instance : limits.has_limits ProFiltPseuNormGrp₁.{u} :=
 has_limits_of_has_limits_creates_limits to_CHFPNG₁
 
+lemma eq_of_π_eq {J : Type u} [small_category J] {K : J ⥤ ProFiltPseuNormGrp₁.{u}}
+  (C : limits.cone K) (hC : limits.is_limit C) (x y : C.X)
+  (cond : ∀ j, C.π.app j x = C.π.app j y) : x = y := sorry
+
+lemma coe_comp_apply {A B C : ProFiltPseuNormGrp₁} (f : A ⟶ B) (g : B ⟶ C) (x : A) :
+  (f ≫ g) x = g (f x) := rfl
+
 end ProFiltPseuNormGrp₁
 
 namespace ProFiltPseuNormGrpWithTinv
@@ -1091,6 +1098,9 @@ def to_PFPNG₁ : (ProFiltPseuNormGrpWithTinv₁.{u} r) ⥤ ProFiltPseuNormGrp�
     strict' := f.strict,
     continuous' := f.continuous' } }
 
+lemma coe_comp_apply {A B C : ProFiltPseuNormGrpWithTinv₁ r} (f : A ⟶ B) (g : B ⟶ C) (a : A) :
+  (f ≫ g) a = g (f a) := rfl
+
 open profinitely_filtered_pseudo_normed_group_with_Tinv
 
 def Tinv_limit_fun_aux {J : Type u} [small_category J] (K : J ⥤ ProFiltPseuNormGrpWithTinv₁ r)
@@ -1244,8 +1254,8 @@ instance {J : Type u} [small_category J] (K : J ⥤ ProFiltPseuNormGrpWithTinv�
 def limit_cone {J : Type u} [small_category J] (K : J ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r) :
   limits.cone K :=
 { X :=
-    { M := (ProFiltPseuNormGrp₁.limit_cone (K ⋙ to_PFPNG₁ r)).X,
-      exhaustive' := (ProFiltPseuNormGrp₁.limit_cone (K ⋙ to_PFPNG₁ r)).X.exhaustive },
+  { M := (ProFiltPseuNormGrp₁.limit_cone (K ⋙ to_PFPNG₁ r)).X,
+    exhaustive' := (ProFiltPseuNormGrp₁.limit_cone (K ⋙ to_PFPNG₁ r)).X.exhaustive },
   π :=
   { app := λ j,
     { map_Tinv' := begin
@@ -1271,7 +1281,20 @@ instance {J : Type u} [small_category J] : creates_limits_of_shape J (to_PFPNG�
 { creates_limit := λ K,
   { reflects := λ C hC,
     { lift := λ S,
-      { map_Tinv' := sorry,
+      { map_Tinv' := begin
+          intros x,
+          apply ProFiltPseuNormGrp₁.eq_of_π_eq _ hC,
+          intros j,
+          erw [← ProFiltPseuNormGrp₁.coe_comp_apply, ← ProFiltPseuNormGrp₁.coe_comp_apply,
+            hC.fac],
+          dsimp,
+          change S.π.app _ _ = C.π.app _ _,
+          rw [(S.π.app _).map_Tinv, (C.π.app _).map_Tinv],
+          congr' 1,
+          change _ = ((to_PFPNG₁ r).map (C.π.app j)) _,
+          erw [← ProFiltPseuNormGrp₁.coe_comp_apply, hC.fac],
+          refl,
+        end,
         ..hC.lift ((to_PFPNG₁ r).map_cone S) },
       fac' := begin
         intros S j,
