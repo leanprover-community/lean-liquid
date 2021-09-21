@@ -97,7 +97,19 @@ class delta_functor (F : ℕ → C ⥤ D) :=
 
 namespace delta_functor
 
-variables (F : ℕ → C ⥤ D) [delta_functor F]
+variables {𝒜 : Type*} [category 𝒜] [abelian 𝒜]
+variables (F : ℕ → C ⥤ 𝒜) [delta_functor F]
+
+example (A : short_exact_sequence C)
+  (hA₂ : ∀ i, 0 < i → is_zero ((F i).obj A.2)) (hA₃ : ∀ i, 0 < i → is_zero ((F i).obj A.3))
+  (i : ℕ) (hi : 1 < i) :
+  is_zero ((F i).obj A.1) :=
+begin
+  obtain ⟨i, rfl⟩ : ∃ k, i = k + 2, { simpa only [add_comm] using nat.exists_eq_add_of_le hi },
+  refine is_zero_of_exact_zero_zero' _ _ (delta_functor.δ_exact (i+1) A) _ _,
+  { exact (hA₃ (i+1) i.succ_pos).eq_zero_of_src _ },
+  { refine (hA₂ (i+2) _).eq_zero_of_tgt _, exact pos_of_gt hi }
+end
 
 end delta_functor
 

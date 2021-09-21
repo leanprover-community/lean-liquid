@@ -42,7 +42,7 @@ begin
 end
 
 lemma is_zero_of_exact_zero_zero' {C : Type*} [category C] [abelian C]
-  {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) (hf : f = 0) (hg : g = 0) (h : exact f g) : is_zero Y :=
+  {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) (h : exact f g) (hf : f = 0) (hg : g = 0) : is_zero Y :=
 by { rw [hf, hg] at h, exact is_zero_of_exact_zero_zero h }
 
 end category_theory
