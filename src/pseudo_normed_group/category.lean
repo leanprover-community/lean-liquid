@@ -871,7 +871,24 @@ has_limits_of_has_limits_creates_limits to_CHFPNG₁
 
 lemma eq_of_π_eq {J : Type u} [small_category J] {K : J ⥤ ProFiltPseuNormGrp₁.{u}}
   (C : limits.cone K) (hC : limits.is_limit C) (x y : C.X)
-  (cond : ∀ j, C.π.app j x = C.π.app j y) : x = y := sorry
+  (cond : ∀ j, C.π.app j x = C.π.app j y) : x = y :=
+begin
+  let D := limit_cone K,
+  let hD : limits.is_limit D := limit_cone_is_limit _,
+  let E : C.X ≅ D.X := hC.cone_point_unique_up_to_iso hD,
+  apply_fun E.hom,
+  swap, {
+    intros a b h,
+    apply_fun E.inv at h,
+    change (E.hom ≫ E.inv) _ = (E.hom ≫ E.inv) _ at h,
+    simpa using h },
+  apply quotient.sound',
+  refine ⟨_, le_sup_left, le_sup_right, _⟩,
+  simp,
+  ext j : 3,
+  dsimp, simp,
+  exact cond j,
+end
 
 lemma coe_comp_apply {A B C : ProFiltPseuNormGrp₁} (f : A ⟶ B) (g : B ⟶ C) (x : A) :
   (f ≫ g) x = g (f x) := rfl
@@ -1319,5 +1336,14 @@ instance {J : Type u} [small_category J] : creates_limits_of_shape J (to_PFPNG�
     { lifted_cone := limit_cone r K,
       valid_lift :=
         (ProFiltPseuNormGrp₁.limit_cone_is_limit (K ⋙ to_PFPNG₁ r)).unique_up_to_iso hC } } }
+
+instance : creates_limits (to_PFPNG₁ r) := ⟨⟩
+
+def limit_cone_is_limit {J : Type u} [small_category J]
+  (K : J ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r) : limits.is_limit (limit_cone r K) :=
+limits.is_limit_of_reflects (to_PFPNG₁ r) (ProFiltPseuNormGrp₁.limit_cone_is_limit _)
+
+instance : limits.has_limits (ProFiltPseuNormGrpWithTinv₁.{u} r) :=
+has_limits_of_has_limits_creates_limits (to_PFPNG₁ r)
 
 end ProFiltPseuNormGrpWithTinv₁
