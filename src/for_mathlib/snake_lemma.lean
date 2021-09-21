@@ -51,6 +51,36 @@ def hom (i j : snake_diagram) (hij : i ≤ j . hom_tac) : i ⟶ j := hom_of_le h
 
 lemma hom_ext {i j : snake_diagram} (f g : i ⟶ j) : f = g := by ext
 
+section
+variables {C : Type u} [category.{v} C]
+
+variables (F : fin 4 → fin 3 → C)
+variables (f0 : F 0 0 ⟶ F 0 1) (g0 : F 0 1 ⟶ F 0 2)
+variables (f1 : F 1 0 ⟶ F 1 1) (g1 : F 1 1 ⟶ F 1 2)
+variables (f2 : F 2 0 ⟶ F 2 1) (g2 : F 2 1 ⟶ F 2 2)
+variables (f3 : F 3 0 ⟶ F 3 1) (g3 : F 3 1 ⟶ F 3 2)
+variables (a0 : F 0 0 ⟶ F 1 0) (a1 : F 1 0 ⟶ F 2 0) (a2 : F 2 0 ⟶ F 3 0)
+variables (b0 : F 0 1 ⟶ F 1 1) (b1 : F 1 1 ⟶ F 2 1) (b2 : F 2 1 ⟶ F 3 1)
+variables (c0 : F 0 2 ⟶ F 1 2) (c1 : F 1 2 ⟶ F 2 2) (c2 : F 2 2 ⟶ F 3 2)
+variables (sq00 : a0 ≫ f1 = f0 ≫ b0) (sq01 : b0 ≫ g1 = g0 ≫ c0)
+variables (sq10 : a1 ≫ f2 = f1 ≫ b1) (sq11 : b1 ≫ g2 = g1 ≫ c1)
+variables (sq20 : a2 ≫ f3 = f2 ≫ b2) (sq21 : b2 ≫ g3 = g2 ≫ c2)
+
+namespace mk_functor
+
+def map : Π (x y : snake_diagram), F x.1 x.2 ⟶ F y.1 y.2 :=
+sorry
+
+end mk_functor
+
+def mk_functor : snake_diagram ⥤ C :=
+{ obj := function.uncurry F,
+  map := sorry,
+  map_id' := sorry,
+  map_comp' := sorry }
+
+end
+
 end snake_diagram
 
 open snake_diagram (o hom)
