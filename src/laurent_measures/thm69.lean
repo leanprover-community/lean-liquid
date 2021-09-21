@@ -122,8 +122,8 @@ end
 -- end
 
 lemma finite_sum_floor_seq_half (x : ℝ) (n : ℕ) : --[fact (r' < 1)] (h_r' : r' > 0)
-  (range n).sum (λ (i : ℕ), (coe ∘ floor_seq_nat' (1 / 2 : ℚ) x) ↑i * (1 / 2 : ℝ) ^ i) =
-    if n =0 then 0 else (⌊x / (1 / 2 : ℚ) ^ n⌋₊ : ℚ) * (1 / 2 : ℚ) ^ n :=
+  (range n).sum (λ (i : ℕ), (coe ∘ floor_seq_rat (1 / 2 : ℚ) x) ↑i * (1 / 2 : ℝ) ^ i) =
+    if n = 0 then 0 else ⌊x / (1 / 2 : ℝ) ^ (n - 1) ⌋₊ * (1 / 2 : ℝ) ^ (n - 1) :=
 begin
   by_cases h_nz : n = 0, sorry,
   have uno := calc (range n).sum (λ (i : ℕ), (coe ∘ floor_seq_nat' (1 / 2 : ℚ) x) ↑i * (1 / 2 : ℚ) ^ i) =
@@ -185,6 +185,53 @@ begin
   simp_rw (finite_sum_floor_seq_rat r' h_pos' h_one' x),
   rw ← (tendsto_congr' aux.symm),
   apply converges_floor_rat r' h_pos' h_one' x h_x,
+end
+
+lemma has_sum_pow_floor_half (x : ℝ) (h_x : x≥0) :
+  has_sum (λ n, (coe ∘ floor_seq_rat (1 / 2) x) n * ((1 / 2) : ℝ) ^ n) x :=
+begin
+  -- have h_pos' := (@one_half_pos ℝ _),
+  let x₀ : ℝ≥0 := ⟨x, h_x⟩,
+  have hinj : function.injective (coe : ℕ → ℤ) := by {apply int.coe_nat_inj},
+  have h_range : ∀ n : ℤ, n ∉ set.range (coe : ℕ → ℤ) → floor_seq_rat (1 / 2) x n = 0,
+  { intro,
+    cases n,
+    simp only [forall_false_left, set.mem_range_self, not_true, int.of_nat_eq_coe],
+    intro,
+    refl },
+  replace h_range : ∀ n : ℤ, n ∉ set.range (coe : ℕ → ℤ) →
+    (coe ∘ floor_seq_rat (1 / 2) x) n * ((1 / 2) : ℝ) ^ n = 0,
+  { intros n hn,
+    specialize h_range n hn,
+    rw [comp_app, h_range, nat.cast_zero, zero_mul], },
+  apply (@function.injective.has_sum_iff _ _ _ _ _ _ x _ hinj h_range).mp,
+  have H : (λ (n : ℤ), ((coe ∘ floor_seq_rat (1 / 2) x) n * ((1 / 2) : ℝ) ^ n)) ∘ coe =
+    (λ (n : ℕ), (coe ∘ floor_seq_rat (1 / 2) x) n * (1 / 2) ^ n) := by {funext,--want to change  (r' : ℝ) ^ n?
+      simp only [comp_app, gpow_coe_nat] },
+  rw H,
+  have h_pos : ∀ n : ℕ, (coe ∘ floor_seq_rat (1 / 2) x) n * ((1 / 2) : ℝ) ^ n ≥ 0,
+  { intro n,
+    apply mul_nonneg,
+    rw comp_app,
+    simp only [nat.cast_nonneg],
+    norm_cast,
+    apply pow_nonneg (le_of_lt (@one_half_pos ℝ _)) n },
+  apply (has_sum_iff_tendsto_nat_of_nonneg h_pos x).mpr,
+  have aux : (λ n, ite (n = 0) (0 : ℝ) ((⌊x / ((1 / 2) : ℝ) ^ (n - 1)⌋₊) * ((1 / 2) : ℝ) ^ (n - 1)))
+   =ᶠ[at_top] λ n, (↑⌊x / ((1 / 2) : ℝ) ^ (n - 1)⌋₊ * ((1 / 2) : ℝ) ^ (n - 1)),
+  { rw eventually_eq_iff_exists_mem,
+    use { n | n ≥ 1 },
+    split,
+    { simp only [mem_at_top_sets, ge_iff_le, set.mem_set_of_eq],
+      use 1,
+      tauto },
+    { intros n hn,
+      replace hn : n ≠ 0 := ne_of_gt (nat.succ_le_iff.mp hn),
+      simpa only [ite_eq_right_iff, nat.cast_eq_zero, zero_eq_mul] }},
+  simp_rw (finite_sum_floor_seq_half x),
+  rw ← (tendsto_congr' aux.symm),
+  convert converges_floor_rat (1 / 2 : ℚ) (@one_half_pos ℚ _) (one_half_lt_one) x h_x,
+  simp only [one_div, rat.cast_inv, rat.cast_one, rat.cast_bit0],
 end
 
 
@@ -283,8 +330,8 @@ end
 --   have := (@rat.cast_lt ℝ _ r 1).mpr h,
 -- end
 
-variables (t : ℚ) (ht : 0 < t)
-#check (⟨(t : ℝ), le_of_lt ((@rat.cast_pos ℝ _ _).mpr ht)⟩ : ℝ≥0)
+-- variables (t : ℚ) (ht : 0 < t)
+-- #check (⟨(t : ℝ), le_of_lt ((@rat.cast_pos ℝ _ _).mpr ht)⟩ : ℝ≥0)
 
 -- lemma θ_surj_on_nonneg_rat (r' : ℚ) (h_pos' : 0 < r') (h_one' : r' < 1) --(r : ℝ≥0) [fact (r < 1)]
 --   (t : ℚ) (h_pos : 0 < t)
