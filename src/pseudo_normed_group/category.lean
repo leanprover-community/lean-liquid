@@ -1265,6 +1265,36 @@ def limit_cone {J : Type u} [small_category J] (K : J ⥤ ProFiltPseuNormGrpWith
     have := (ProFiltPseuNormGrp₁.limit_cone (K ⋙ to_PFPNG₁ r)).π.naturality e,
     apply_fun (λ e, e x) at this,
     exact this,
-  end } }
+  end } } .
+
+instance {J : Type u} [small_category J] : creates_limits_of_shape J (to_PFPNG₁ r) :=
+{ creates_limit := λ K,
+  { reflects := λ C hC,
+    { lift := λ S,
+      { map_Tinv' := sorry,
+        ..hC.lift ((to_PFPNG₁ r).map_cone S) },
+      fac' := begin
+        intros S j,
+        ext1 x,
+        have := hC.fac ((to_PFPNG₁ r).map_cone S) j,
+        apply_fun (λ e, e x) at this,
+        exact this,
+      end,
+      uniq' := begin
+        intros S m h,
+        ext1 x,
+        have := hC.uniq ((to_PFPNG₁ r).map_cone S) ((to_PFPNG₁ r).map m) _,
+        apply_fun (λ e, e x) at this,
+        exact this,
+        { intros j,
+          ext y,
+          specialize h j,
+          apply_fun (λ e, e y) at h,
+          exact h },
+      end },
+    lifts := λ C hC,
+    { lifted_cone := limit_cone r K,
+      valid_lift :=
+        (ProFiltPseuNormGrp₁.limit_cone_is_limit (K ⋙ to_PFPNG₁ r)).unique_up_to_iso hC } } }
 
 end ProFiltPseuNormGrpWithTinv₁
