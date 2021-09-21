@@ -300,7 +300,8 @@ variables (𝒜 : Type u) [category.{v} 𝒜] [has_images 𝒜] [has_zero_morphi
 variables {𝒜}
 
 structure is_snake_input (D : snake_diagram ⥤ 𝒜) : Prop :=
-(row_exact : ∀ i, exact ((i,0) ⟶[D] (i,1)) ((i,1) ⟶[D] (i,2)))
+(row_exact₁ : exact ((1,0) ⟶[D] (1,1)) ((1,1) ⟶[D] (1,2)))
+(row_exact₂ : exact ((2,0) ⟶[D] (2,1)) ((2,1) ⟶[D] (2,2)))
 (col_exact₁ : ∀ j, exact ((0,j) ⟶[D] (1,j)) ((1,j) ⟶[D] (2,j)))
 (col_exact₂ : ∀ j, exact ((1,j) ⟶[D] (2,j)) ((2,j) ⟶[D] (3,j)))
 (col_mono : ∀ j, mono ((0,j) ⟶[D] (1,j)))
@@ -339,6 +340,16 @@ begin
   { exact (hD.col_exact₂ j).w },
 end
 
+lemma row_exact₀ (hD : is_snake_input D) : exact ((0,0) ⟶[D] (0,1)) ((0,1) ⟶[D] (0,2)) :=
+sorry
+
+lemma row_exact₃ (hD : is_snake_input D) : exact ((3,0) ⟶[D] (3,1)) ((3,1) ⟶[D] (3,2)) :=
+sorry
+
+lemma row_exact (hD : is_snake_input D) (i : fin 4) :
+  exact ((i,0) ⟶[D] (i,1)) ((i,1) ⟶[D] (i,2)) :=
+by { fin_cases i, exacts [hD.row_exact₀, hD.row_exact₁, hD.row_exact₂, hD.row_exact₃] }
+
 lemma hom_eq_zero₂ (hD : is_snake_input D) {x y : snake_diagram} (f : x ⟶ y)
   (h : x.2 = 0 ∧ y.2 = 2 . snake_diagram.hom_tac) : D.map f = 0 :=
 begin
@@ -352,6 +363,7 @@ begin
   ... = ((D.map f₁) ≫ D.map f₂) ≫ D.map f₃ : by simp only [D.map_comp]
   ... = 0                                    : by rw [(hD.row_exact i).w, zero_comp]
 end
+
 
 example (hD : is_snake_input D) (f : (o 1 0) ⟶ (o 2 2)) : D.map f = 0 := hD.hom_eq_zero₂ f
 
