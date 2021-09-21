@@ -1,4 +1,5 @@
 import category_theory.derived
+import data.matrix.notation
 
 import for_mathlib.snake_lemma
 import for_mathlib.delta_functor
@@ -21,6 +22,23 @@ variables [has_images C] [has_projective_resolutions C]
 variables [preadditive D] [has_zero_object D] [has_equalizers D] [has_cokernels D]
 variables [has_images D] [has_image_maps D]
 
+namespace functor
+namespace left_derived
+
+variables (F : C ⥤ D)
+
+-- def snake_diagram [F.additive] (A : short_exact_sequence C) (n : ℕ) : snake_diagram ⥤ D :=
+-- snake_diagram.mk_functor
+-- ![(F.left_derived n).obj ∘ ![A.1, A.2, A.3],
+--   ![_, _, _],
+--   ![_, _, _],
+--   (F.left_derived (n+1)).obj ∘ ![A.1, A.2, A.3]]
+-- ((F.left_derived n).map A.f) ((F.left_derived n).map A.g)
+-- _ _ _ _
+-- ((F.left_derived (n+1)).map A.f) ((F.left_derived (n+1)).map A.g)
+-- _ _ _ _ _ _ _ _ _
+-- _ _ _ _ _ _
+
 -- instance (F : C ⥤ D) [F.additive] : delta_functor F.left_derived :=
 -- { δ := _,
 --   mono := _,
@@ -28,4 +46,6 @@ variables [has_images D] [has_image_maps D]
 --   exact_δ := _,
 --   δ_exact := _ }
 
+end left_derived
+end functor
 end category_theory
