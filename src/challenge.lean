@@ -3,6 +3,7 @@ import real_measures
 import condensed.ab
 import category_theory.abelian.ext
 import for_mathlib.Profinite.extend
+import for_mathlib.abelian_category
 
 /-!
 # Liquid Tensor Experiment
@@ -24,7 +25,7 @@ for `i ≥ 1`.
 noncomputable theory
 
 open_locale nnreal
-open opposite
+open opposite category_theory
 
 variables (p' p : ℝ≥0) [fact (0 < p')] [fact (p' ≤ 1)] [fact (p' < p)] [fact (p ≤ 1)]
 variables (S : Profinite.{1})
@@ -38,5 +39,5 @@ local notation `ℳ` p' := real_measures.condensed p'
 local notation `Ext` i `,` A `,` B := ((Ext ℤ (Condensed Ab) i).obj (op A)).obj B
 
 theorem main_challenge (i : ℕ) (hi : 0 < i) :
-  Ext i , (ℳ p').obj S , Condensed.of_top_ab V :=
+  is_zero (Ext i , (ℳ p').obj S , Condensed.of_top_ab V) :=
 sorry

@@ -56,6 +56,10 @@ apply_nolint breen_deligne.universal_map.mul doc_blame
 apply_nolint breen_deligne.universal_map.proj doc_blame
 apply_nolint breen_deligne.universal_map.sum doc_blame
 
+-- challenge.lean
+apply_nolint main_challenge unused_arguments
+apply_nolint real_measures.condensed doc_blame
+
 -- combinatorial_lemma/default.lean
 apply_nolint Mbar.mk_aux doc_blame
 apply_nolint Mbar.mk_aux' doc_blame
@@ -81,6 +85,8 @@ apply_nolint CompHausFiltPseuNormGrp₁.presheaf.gsmul doc_blame
 apply_nolint CompHausFiltPseuNormGrp₁.presheaf.map doc_blame
 apply_nolint CompHausFiltPseuNormGrp₁.presheaf.nsmul doc_blame
 apply_nolint CompHausFiltPseuNormGrp₁.to_Condensed doc_blame
+apply_nolint Condensed.forget_to_CondensedType doc_blame
+apply_nolint Condensed.of_top_ab.presheaf doc_blame
 
 -- condensed/basic.lean
 apply_nolint category_theory.functor.preserves_binary_products doc_blame unused_arguments
@@ -135,6 +141,9 @@ apply_nolint Profinite.swap_cone_right doc_blame
 apply_nolint Profinite.exists_image inhabited_nonempty
 apply_nolint Profinite.image_stabilizes inhabited_nonempty
 
+-- for_mathlib/abelian_category.lean
+apply_nolint category_theory.is_zero doc_blame
+
 -- for_mathlib/abelian_group_object.lean
 apply_nolint category_theory.SheafOfTypes.Ab doc_blame
 apply_nolint category_theory.SheafOfTypes.Group doc_blame
@@ -149,6 +158,15 @@ apply_nolint category_theory.SheafOfTypes.terminal_cone doc_blame
 apply_nolint category_theory.SheafOfTypes.terminal_cone_is_limit doc_blame
 apply_nolint category_theory.SheafOfTypes.terminal_sheaf doc_blame
 apply_nolint category_theory.SheafOfTypes.terminal_sheaf.to doc_blame
+
+-- for_mathlib/delta_functor.lean
+apply_nolint category_theory.short_exact_sequence doc_blame
+apply_nolint category_theory.short_exact_sequence.Fst doc_blame
+apply_nolint category_theory.short_exact_sequence.Snd doc_blame
+apply_nolint category_theory.short_exact_sequence.Trd doc_blame
+apply_nolint category_theory.short_exact_sequence.comp doc_blame
+apply_nolint category_theory.short_exact_sequence.hom doc_blame
+apply_nolint category_theory.short_exact_sequence.id doc_blame
 
 -- for_mathlib/is_locally_constant.lean
 apply_nolint indexed_partition.discrete_quotient doc_blame
@@ -210,7 +228,7 @@ apply_nolint finite_sum_floor_seq_nat' unused_arguments
 apply_nolint floor_seq doc_blame
 apply_nolint floor_seq_nat doc_blame
 apply_nolint floor_seq_nat' doc_blame
-apply_nolint has_sum_pow_floor_nat' ge_or_gt
+apply_nolint has_sum_pow_floor_nat' unused_arguments ge_or_gt
 apply_nolint has_sum_pow_floor_norm_nat' unused_arguments
 apply_nolint laurent_measures.to_Rfct doc_blame unused_arguments
 apply_nolint sub_one_le_nat_floor unused_arguments
