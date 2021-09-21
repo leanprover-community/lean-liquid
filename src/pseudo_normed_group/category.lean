@@ -1163,6 +1163,20 @@ def Tinv_limit_add_monoid_hom
     ext j, refine Tinv.map_add _ _,
   end }
 
+open pseudo_normed_group ProFiltPseuNormGrp₁ CompHausFiltPseuNormGrp₁
+
+lemma Tinv_limit_aux {J : Type u} [small_category J] (K : J ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r)
+  (c : ℝ≥0) (x : ((ProFiltPseuNormGrp₁.limit_cone (K ⋙ to_PFPNG₁ r)).X))
+  (hx : x ∈ filtration (ProFiltPseuNormGrp₁.limit_cone (K ⋙ to_PFPNG₁ r)).X c) :
+  Tinv_limit_add_monoid_hom r K x ∈
+    filtration (ProFiltPseuNormGrp₁.limit_cone (K ⋙ to_PFPNG₁ r)).X (r⁻¹ * c) :=
+begin
+  obtain ⟨x,rfl⟩ := hx,
+  dsimp only [Tinv_limit_add_monoid_hom_apply, Tinv_limit_fun_incl],
+  exact ⟨_,rfl⟩,
+end
+
+-- TODO: break up this proof into pieces.
 def Tinv_limit {J : Type u} [small_category J] (K : J ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r) :
   comphaus_filtered_pseudo_normed_group_hom
     ((ProFiltPseuNormGrp₁.limit_cone (K ⋙ to_PFPNG₁ r)).X)
@@ -1170,11 +1184,54 @@ def Tinv_limit {J : Type u} [small_category J] (K : J ⥤ ProFiltPseuNormGrpWith
 comphaus_filtered_pseudo_normed_group_hom.mk_of_bound (Tinv_limit_add_monoid_hom r K) r⁻¹
 begin
   intro c,
-  split,
-  { sorry },
-  { rintros _ ⟨x, rfl⟩,
-    dsimp only [Tinv_limit_add_monoid_hom_apply, Tinv_limit_fun_incl],
-    exact ⟨_, rfl⟩ }
+  fsplit,
+  { apply Tinv_limit_aux },
+  { let X := ((ProFiltPseuNormGrp₁.limit_cone (K ⋙ to_PFPNG₁ r)).X),
+    let F : filtration X c → filtration X (r⁻¹ * c) := λ x,
+      ⟨Tinv_limit_add_monoid_hom r K x, Tinv_limit_aux _ _ _ _ x.2⟩,
+    change continuous F,
+    let e := filt_homeo (K ⋙ to_PFPNG₁ _ ⋙ to_CHFPNG₁),
+    suffices : continuous (e (r⁻¹ * c) ∘ F ∘ (e c).symm), by simpa,
+    let I : Π (j : J), comphaus_filtered_pseudo_normed_group_hom (K.obj j) (K.obj j) :=
+      λ j, Tinv,
+    let G : cone_point_type_filt (K ⋙ to_PFPNG₁ _ ⋙ to_CHFPNG₁) c →
+      cone_point_type_filt (K ⋙ to_PFPNG₁ _ ⋙ to_CHFPNG₁) (r⁻¹ * c) :=
+      λ x, ⟨λ j, ⟨I j (x j).1, _⟩, _⟩,
+    rotate,
+    { apply Tinv_bound_by, exact (x j).2 },
+    { intros i j e,
+      have := x.2 e,
+      ext,
+      dsimp,
+      apply_fun (λ e, e.val) at this,
+      change _ = I j (x.val j).val,
+      rw ← this,
+      apply (K.map e).map_Tinv },
+    have : continuous G,
+    { apply continuous_subtype_mk,
+      apply continuous_pi,
+      intros i,
+      let G1 : cone_point_type_filt (K ⋙ to_PFPNG₁ _ ⋙ to_CHFPNG₁) c →
+        filtration (K.obj i) c := λ x, x i,
+      let G2 : filtration (K.obj i) c → filtration (K.obj i) (r⁻¹ * c) :=
+        λ x, ⟨I i x, _⟩,
+      swap, { apply Tinv_bound_by, exact x.2 },
+      change continuous (G2 ∘ G1),
+      apply continuous.comp,
+      { apply comphaus_filtered_pseudo_normed_group_hom.continuous, intros x, refl },
+      { let G11 : cone_point_type_filt (K ⋙ to_PFPNG₁ _ ⋙ to_CHFPNG₁) c →
+          Π j : J, filtration (K.obj j) c := λ x, x,
+        let G12 : (Π j : J, filtration (K.obj j) c) → filtration (K.obj i) c := λ x, x i,
+        change continuous (G12 ∘ G11),
+        apply continuous.comp,
+        apply continuous_apply,
+        apply continuous_subtype_coe } },
+    convert this,
+    ext : 1,
+    dsimp,
+    apply_fun (e (r⁻¹ * c)).symm,
+    simp,
+    ext, refl },
 end
 
 instance {J : Type u} [small_category J] (K : J ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r) :
