@@ -1,5 +1,6 @@
 import category_theory.preadditive
 import category_theory.abelian.projective
+import data.matrix.notation
 import tactic.interval_cases
 import category_theory.abelian.pseudoelements
 
@@ -82,34 +83,31 @@ parameters (sq20 : a2 ≫ f3 = f2 ≫ b2) (sq21 : b2 ≫ g3 = g2 ≫ c2)
 
 namespace mk_functor
 
-lemma aux {n : ℕ} {i j : fin n} (h : i ≤ j) : i.cast_succ ≤ j.cast_succ :=
-order_embedding.monotone fin.cast_succ h
-
 def col : Π (j : fin 3), fin 4 ⥤ C
 | ⟨0,h⟩ := fin4_functor_mk (flip F 0) a0 a1 a2
 | ⟨1,h⟩ := fin4_functor_mk (flip F 1) b0 b1 b2
 | ⟨2,h⟩ := fin4_functor_mk (flip F 2) c0 c1 c2
 | ⟨j+3,h⟩ := by { exfalso, revert h, dec_trivial }
 
-def row : Π (i : fin 4), fin 4 ⥤ C
-| ⟨0,h⟩ := fin4_functor_mk (fin.snoc (F 0) (F 0 2)) f0 g0 (𝟙 _)
-| ⟨1,h⟩ := fin4_functor_mk (fin.snoc (F 1) (F 1 2)) f1 g1 (𝟙 _)
-| ⟨2,h⟩ := fin4_functor_mk (fin.snoc (F 2) (F 2 2)) f2 g2 (𝟙 _)
-| ⟨3,h⟩ := fin4_functor_mk (fin.snoc (F 3) (F 3 2)) f3 g3 (𝟙 _)
+def row : Π (i : fin 4), fin 3 ⥤ C
+| ⟨0,h⟩ := fin3_functor_mk (F 0) f0 g0
+| ⟨1,h⟩ := fin3_functor_mk (F 1) f1 g1
+| ⟨2,h⟩ := fin3_functor_mk (F 2) f2 g2
+| ⟨3,h⟩ := fin3_functor_mk (F 3) f3 g3
 | ⟨j+4,h⟩ := by { exfalso, revert h, dec_trivial }
 
 lemma col_obj (i : fin 4) (j : fin 3) : (col j).obj i = F i j :=
 by fin_cases i; fin_cases j; refl.
 
-lemma row_obj (i : fin 4) (j : fin 3) : (row i).obj j.cast_succ = F i j :=
+lemma row_obj (i : fin 4) (j : fin 3) : (row i).obj j = F i j :=
 by fin_cases i; fin_cases j; refl.
 
-lemma row_eq_col_obj (i : fin 4) (j : fin 3) : (row i).obj j.cast_succ = (col j).obj i :=
+lemma row_eq_col_obj (i : fin 4) (j : fin 3) : (row i).obj j = (col j).obj i :=
 (row_obj i j).trans (col_obj i j).symm
 
 def map'  (x y : snake_diagram) (h : x ≤ y) : F x.1 x.2 ⟶ F y.1 y.2 :=
 eq_to_hom (by rw [row_obj]) ≫
-(row x.1).map (aux h.2).hom ≫ eq_to_hom (by rw [row_obj, col_obj]) ≫
+(row x.1).map h.2.hom ≫ eq_to_hom (by rw [row_obj, col_obj]) ≫
 (col y.2).map h.1.hom ≫ eq_to_hom (by rw [col_obj])
 
 lemma map'_id (x : snake_diagram) : map' x x le_rfl = 𝟙 _ :=
@@ -118,7 +116,7 @@ by simp only [map', hom_of_le_refl, functor.map_id,
 
 def square_commutes (i j : fin 4) (k l : fin 3) (hij : i ≤ j) (hkl : k ≤ l) : Prop :=
 (col k).map hij.hom ≫ eq_to_hom (by rw [row_obj, col_obj]) ≫
-(row j).map (aux hkl).hom =
+(row j).map hkl.hom =
 eq_to_hom (by rw [col_obj]; refl) ≫
 map' (o i k) (o j l) ⟨hij, hkl⟩ ≫ eq_to_hom (by rw [row_obj]; refl)
 
@@ -204,11 +202,11 @@ begin
      ... = ψ ≫ h2.lhs : _
      ... = ψ ≫ h2.rhs : by { congr' 1, }
      ... = _ : _,
-  swap 5, { exact functor.map _ (aux hmn).hom },
+  swap 5, { exact functor.map _ hmn.hom },
   swap 4, { refine (eq_to_hom _ ≫ _ ≫ eq_to_hom _),
     swap 2, { symmetry, apply row_eq_col_obj; assumption },
     swap 3, { apply row_eq_col_obj; assumption },
-    exact functor.map _ (aux hlm).hom },
+    exact functor.map _ hlm.hom },
   all_goals { dsimp [φ, ψ, eq.lhs_def, eq.rhs_def] },
   { simp only [category.assoc, ← functor.map_comp], refl },
   { simp only [category.assoc], refl },
@@ -221,7 +219,7 @@ end
 
 lemma col_comp_row (i j : fin 4) (k l : fin 3) (hij : i ≤ j) (hkl : k ≤ l) :
   (col k).map hij.hom ≫ eq_to_hom (by rw [row_obj, col_obj]) ≫
-  (row j).map (aux hkl).hom =
+  (row j).map hkl.hom =
   eq_to_hom (by rw [col_obj]; refl) ≫
   map' (o i k) (o j l) ⟨hij, hkl⟩ ≫ eq_to_hom (by rw [row_obj]; refl) :=
 begin
@@ -279,6 +277,41 @@ def mk_functor : snake_diagram ⥤ C :=
   map := λ x y h, mk_functor.map' F f0 g0 f1 g1 f2 g2 f3 g3 a0 a1 a2 b0 b1 b2 c0 c1 c2 x y h.le,
   map_id' := λ x, mk_functor.map'_id F f0 g0 f1 g1 f2 g2 f3 g3 a0 a1 a2 b0 b1 b2 c0 c1 c2 x,
   map_comp' := λ x y z hxy hyz, by { rw mk_functor.map'_comp; assumption } }
+
+end
+
+section
+
+variables {𝒜 ℬ : Type*} [category 𝒜] [category ℬ]
+variables (A : fin 3 → 𝒜) (F : fin 4 → 𝒜 ⥤ ℬ)
+variables (f : A 0 ⟶ A 1) (g : A 1 ⟶ A 2) (α : F 0 ⟶ F 1) (β : F 1 ⟶ F 2) (γ : F 2 ⟶ F 3)
+
+def mk_functor' : snake_diagram ⥤ ℬ :=
+mk_functor (λ i, (F i).obj ∘ A)
+((F 0).map f) ((F 0).map g)
+((F 1).map f) ((F 1).map g)
+((F 2).map f) ((F 2).map g)
+((F 3).map f) ((F 3).map g)
+(α.app _) (β.app _) (γ.app _)
+(α.app _) (β.app _) (γ.app _)
+(α.app _) (β.app _) (γ.app _)
+(α.naturality _).symm (α.naturality _).symm
+(β.naturality _).symm (β.naturality _).symm
+(γ.naturality _).symm (γ.naturality _).symm
+
+end
+
+section
+
+variables {𝒜 ℬ 𝒞 : Type*} [category 𝒜] [category ℬ] [category 𝒞]
+variables (A : fin 3 → 𝒜 ⥤ ℬ) (F : fin 4 → ℬ ⥤ 𝒞)
+variables (f : A 0 ⟶ A 1) (g : A 1 ⟶ A 2) (α : F 0 ⟶ F 1) (β : F 1 ⟶ F 2) (γ : F 2 ⟶ F 3)
+
+def mk_functor'' : 𝒜 ⥤ snake_diagram ⥤ 𝒞 :=
+{ obj := λ x, mk_functor' ![(A 0).obj x, (A 1).obj x, (A 2).obj x] F (f.app x) (g.app x) α β γ,
+  map := sorry,
+  map_id' := sorry,
+  map_comp' := sorry }
 
 end
 
