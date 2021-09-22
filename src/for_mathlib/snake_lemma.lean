@@ -408,8 +408,8 @@ has_snake_lemma.exact_δ D
 lemma δ_exact (D : snake_input 𝒜) : exact (δ D) ((3,0) ⟶[D] (3,1)) :=
 has_snake_lemma.δ_exact D
 
-end abelian
-
 end snake_lemma
+
+end abelian
 
 end category_theory
