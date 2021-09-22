@@ -2,7 +2,7 @@ import category_theory.derived
 import data.matrix.notation
 
 import for_mathlib.snake_lemma
-import for_mathlib.delta_functor
+import for_mathlib.short_exact_sequence
 
 noncomputable theory
 
