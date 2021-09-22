@@ -375,22 +375,79 @@ section
 
 open abelian.pseudoelement
 
-variables {𝒜 : Type u} [category.{v} 𝒜] [has_zero_morphisms 𝒜] [has_kernels 𝒜] [has_images 𝒜]
+variables {𝒜 : Type u} [category.{v} 𝒜] [abelian 𝒜]
+  --[has_zero_morphisms 𝒜] [has_kernels 𝒜] [has_images 𝒜]
 variables {D : snake_diagram ⥤ 𝒜}
 
 namespace is_snake_input
 
+local attribute [instance] abelian.pseudoelement.over_to_sort
+  abelian.pseudoelement.hom_to_fun
+  abelian.pseudoelement.has_zero
+
+section move_me
+
+local attribute [instance] abelian.pseudoelement.over_to_sort
+  abelian.pseudoelement.hom_to_fun
+
+lemma injective_iff_mono {P Q : 𝒜} (f : P ⟶ Q) : function.injective f ↔ mono f :=
+⟨λ h, mono_of_zero_of_map_zero _ (zero_of_map_zero _ h),
+  by introsI h; apply pseudo_injective_of_mono⟩
+
+lemma surjective_iff_epi {P Q : 𝒜} (f : P ⟶ Q) : function.surjective f ↔ epi f :=
+⟨epi_of_pseudo_surjective _, by introI h; apply pseudo_surjective_of_epi⟩
+
+lemma exists_of_exact {P Q R : 𝒜} {f : P ⟶ Q} {g : Q ⟶ R} (e : exact f g) (q) (hq : g q = 0) :
+  ∃ p, f p = q :=
+begin
+  apply pseudo_exact_of_exact.2 _ hq,
+  apply_instance
+end
+
+lemma eq_zero_of_exact {P Q R : 𝒜} {f : P ⟶ Q} {g : Q ⟶ R} (e : exact f g) (p) : g (f p) = 0 :=
+begin
+  apply pseudo_exact_of_exact.1,
+  apply_instance
+end
+
+end move_me
+
 lemma row_exact₀ (hD : is_snake_input D) : exact ((0,0) ⟶[D] (0,1)) ((0,1) ⟶[D] (0,2)) :=
 begin
-  letI := hD.col_mono 2,
-  refine exact_of_pseudo_exact _ _ ⟨λ a, zero_of_map_zero _
-    (pseudo_injective_of_mono ((0,2) ⟶[D] (1,2))) _ _, λ b, _⟩,
-  { rw [← abelian.pseudoelement.comp_apply, ← abelian.pseudoelement.comp_apply,
-      ← functor.map_comp, ← functor.map_comp, hD.map_eq (hom _ (0, 1) _ ≫ hom _ (0, 2) _
-      ≫ hom (0, 2) (1, 2) _) ((hom (0, 0) (1, 0)) ≫ ((hom _ (1, 1)) ≫ (hom _ (1, 2)))),
-      functor.map_comp, functor.map_comp, ((abelian.exact_iff _ _).1 hD.row_exact₁).1, comp_zero,
-      zero_apply] },
-  { sorry }
+  apply exact_of_pseudo_exact,
+  split,
+  { intro a,
+    apply_fun ((0,2) ⟶[D] (1,2)),
+    swap, { rw injective_iff_mono, exact hD.col_mono _ },
+    simp_rw [← abelian.pseudoelement.comp_apply, ← D.map_comp, abelian.pseudoelement.apply_zero],
+    change D.map (hom (0,0) (1,0) ≫ hom (1,0) (1,1) ≫ hom (1,1) (1,2)) a = 0,
+    simp [abelian.pseudoelement.comp_apply, eq_zero_of_exact hD.row_exact₁] },
+  { intros b hb,
+    apply_fun ((0,2) ⟶[D] (1,2)) at hb,
+    simp_rw [← abelian.pseudoelement.comp_apply,
+      ← D.map_comp, abelian.pseudoelement.apply_zero] at hb,
+    change D.map (hom (0,1) (1,1) ≫ hom (1,1) (1,2)) b = 0 at hb,
+    simp_rw [D.map_comp, abelian.pseudoelement.comp_apply] at hb,
+    let b' := ((0,1) ⟶[D] (1,1)) b,
+    change ((1,1) ⟶[D] (1,2)) b' = 0 at hb,
+    obtain ⟨c,hc⟩ := exists_of_exact hD.row_exact₁ b' hb,
+    have hcz : ((1,0) ⟶[D] (2,0)) c = 0,
+    { apply_fun ((2,0) ⟶[D] (2,1)),
+      swap, { rw injective_iff_mono, apply hD.row_mono },
+      simp_rw [← abelian.pseudoelement.comp_apply, ← D.map_comp, abelian.pseudoelement.apply_zero],
+      change D.map (hom (1,0) (1,1) ≫ hom (1,1) (2,1)) c = 0,
+      simp_rw [D.map_comp, abelian.pseudoelement.comp_apply, hc],
+      dsimp [b'],
+      apply eq_zero_of_exact,
+      apply hD.col_exact₁ },
+    obtain ⟨d,hd⟩ := exists_of_exact (hD.col_exact₁ _) c hcz,
+    use d,
+    apply_fun ((0,1) ⟶[D] (1,1)),
+    swap, { rw injective_iff_mono, exact hD.col_mono _ },
+    dsimp [b'] at hc,
+    rw [← hc, ← hd],
+    simp_rw [← abelian.pseudoelement.comp_apply, ← D.map_comp],
+    refl }
 end
 
 lemma row_exact₃ (hD : is_snake_input D) : exact ((3,0) ⟶[D] (3,1)) ((3,1) ⟶[D] (3,2)) :=
