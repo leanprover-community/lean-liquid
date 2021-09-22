@@ -556,8 +556,54 @@ begin
   ... = 0                                    : by rw [(hD.row_exact i).w, zero_comp]
 end
 
-
 example (hD : is_snake_input D) (f : (o 1 0) ⟶ (o 2 2)) : D.map f = 0 := hD.hom_eq_zero₂ f
+
+section delta
+
+def cokernel_iso_0_2 (hD : is_snake_input D) : D.obj (0,2) ≅ cokernel ((0,0) ⟶[D] (0,1)) :=
+begin
+  let f : cokernel ((0,0) ⟶[D] (0,1)) ⟶ D.obj (0,2) :=
+    cokernel.desc _ ((0,1) ⟶[D] (0,2)) hD.row_exact₀.1,
+  haveI : mono f := sorry,
+  haveI : epi f := sorry,
+  haveI : is_iso f := abelian.is_iso_of_mono_of_epi f,
+  exact (as_iso f).symm,
+end
+
+def kernel_iso_3_0 (hD : is_snake_input D) : D.obj (3,0) ≅ kernel ((3,1) ⟶[D] (3,2)) :=
+begin
+  let f : D.obj (3,0) ⟶ kernel ((3,1) ⟶[D] (3,2)) :=
+    kernel.lift _ ((3,0) ⟶[D] (3,1)) hD.row_exact₃.1,
+  haveI : mono f := sorry,
+  haveI : epi f := sorry,
+  haveI : is_iso f := abelian.is_iso_of_mono_of_epi f,
+  exact as_iso f,
+end
+
+def δ_aux (hD : is_snake_input D) : cokernel ((0,0) ⟶[D] (0,1)) ⟶ kernel ((3,1) ⟶[D] (3,2)) :=
+cokernel.desc _ (kernel.lift _ ((0,1) ⟶[D] (3,1)) begin
+  ext a,
+  rw ← D.map_comp,
+  change D.map (hom (0,1) (0,2) ≫ hom (0,2) (1,2) ≫ hom (1,2) (2,2) ≫ hom (2,2) (3,2)) a = 0,
+  simp_rw [D.map_comp, abelian.pseudoelement.comp_apply],
+  simp [eq_zero_of_exact (hD.col_exact₁ 2)],
+end) begin
+  ext a,
+  apply_fun kernel.ι (D.map (hom (3, 1) (3, 2))),
+  swap, {
+    rw injective_iff_mono,
+    apply_instance },
+  simp_rw [← abelian.pseudoelement.comp_apply, abelian.pseudoelement.apply_zero, category.assoc,
+    kernel.lift_ι, ← D.map_comp],
+  change D.map (hom (0,0) (0,1) ≫ hom (0,1) (1,1) ≫ hom (1,1) (2,1) ≫ hom (2,1) (3,1)) a = 0,
+  simp_rw [D.map_comp, abelian.pseudoelement.comp_apply],
+  simp [eq_zero_of_exact (hD.col_exact₁ 1)],
+end
+
+def δ (hD : is_snake_input D) : D.obj (0,2) ⟶ D.obj (3,0) :=
+hD.cokernel_iso_0_2.hom ≫ hD.δ_aux ≫ hD.kernel_iso_3_0.inv
+
+end delta
 
 end is_snake_input
 
