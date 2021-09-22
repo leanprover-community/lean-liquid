@@ -108,15 +108,15 @@ def cycles_to_homology (n : ℕ) :
 
 variables (C)
 
-abbreviation Fst : homological_complex (short_exact_sequence C) (complex_shape.down ℕ) ⥤
+abbreviation Fst : chain_complex (short_exact_sequence C) ℕ ⥤
   homological_complex C (complex_shape.down ℕ) :=
 (short_exact_sequence.Fst C).map_homological_complex _
 
-abbreviation Snd : homological_complex (short_exact_sequence C) (complex_shape.down ℕ) ⥤
+abbreviation Snd : chain_complex (short_exact_sequence C) ℕ ⥤
   homological_complex C (complex_shape.down ℕ) :=
 (short_exact_sequence.Snd C).map_homological_complex _
 
-abbreviation Trd : homological_complex (short_exact_sequence C) (complex_shape.down ℕ) ⥤
+abbreviation Trd : chain_complex (short_exact_sequence C) ℕ ⥤
   homological_complex C (complex_shape.down ℕ) :=
 (short_exact_sequence.Trd C).map_homological_complex _
 
@@ -126,10 +126,9 @@ nat_trans.map_homological_complex (short_exact_sequence.f_nat C) _
 abbreviation Snd_Trd : Snd C ⟶ Trd C :=
 nat_trans.map_homological_complex (short_exact_sequence.g_nat C) _
 
-variables (A : homological_complex (short_exact_sequence C) (complex_shape.down ℕ))
+variables (A : chain_complex (short_exact_sequence C) ℕ)
 
-def snake_diagram (n : ℕ) :
-  homological_complex (short_exact_sequence C) (complex_shape.down ℕ) → snake_diagram ⥤ C :=
+def snake_diagram (n : ℕ) : chain_complex (short_exact_sequence C) ℕ → snake_diagram ⥤ C :=
 snake_diagram.mk_functor''
   ![Fst C, Snd C, Trd C]
   ![homology_functor _ _ (n+1),
@@ -150,8 +149,8 @@ sorry
 --   row_mono := _,
 --   row_epi := _ }
 
-def snake_input (n : ℕ) :
-  homological_complex (short_exact_sequence C) (complex_shape.down ℕ) → snake_input C :=
+def snake_input {C : Type*} [category C] [abelian C] (n : ℕ) :
+  chain_complex (short_exact_sequence C) ℕ → snake_input C :=
 λ A, ⟨snake_diagram C n A, snake_diagram_is_snake_input C A n⟩
 
 end homological_complex
