@@ -307,11 +307,8 @@ variables {𝒜 ℬ 𝒞 : Type*} [category 𝒜] [category ℬ] [category 𝒞]
 variables (A : fin 3 → 𝒜 ⥤ ℬ) (F : fin 4 → ℬ ⥤ 𝒞)
 variables (f : A 0 ⟶ A 1) (g : A 1 ⟶ A 2) (α : F 0 ⟶ F 1) (β : F 1 ⟶ F 2) (γ : F 2 ⟶ F 3)
 
-def mk_functor'' : 𝒜 ⥤ snake_diagram ⥤ 𝒞 :=
-{ obj := λ x, mk_functor' ![(A 0).obj x, (A 1).obj x, (A 2).obj x] F (f.app x) (g.app x) α β γ,
-  map := sorry,
-  map_id' := sorry,
-  map_comp' := sorry }
+def mk_functor'' : 𝒜 → snake_diagram ⥤ 𝒞 :=
+λ x, mk_functor' ![(A 0).obj x, (A 1).obj x, (A 2).obj x] F (f.app x) (g.app x) α β γ
 
 end
 
@@ -374,11 +371,12 @@ end is_snake_input
 
 end definitions
 
-section abelian
+section
 
 open abelian.pseudoelement
 
-variables {𝒜 : Type u} [category.{v} 𝒜] [abelian 𝒜] {D : snake_diagram ⥤ 𝒜}
+variables {𝒜 : Type u} [category.{v} 𝒜] [has_zero_morphisms 𝒜] [has_kernels 𝒜] [has_images 𝒜]
+variables {D : snake_diagram ⥤ 𝒜}
 
 namespace is_snake_input
 
@@ -456,6 +454,6 @@ has_snake_lemma.δ_exact D
 
 end snake_lemma
 
-end abelian
+end
 
 end category_theory

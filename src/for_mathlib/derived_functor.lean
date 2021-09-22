@@ -129,7 +129,7 @@ nat_trans.map_homological_complex (short_exact_sequence.g_nat C) _
 variables (A : homological_complex (short_exact_sequence C) (complex_shape.down ℕ))
 
 def snake_diagram (n : ℕ) :
-  homological_complex (short_exact_sequence C) (complex_shape.down ℕ) ⥤ snake_diagram ⥤ C :=
+  homological_complex (short_exact_sequence C) (complex_shape.down ℕ) → snake_diagram ⥤ C :=
 snake_diagram.mk_functor''
   ![Fst C, Snd C, Trd C]
   ![homology_functor _ _ (n+1),
@@ -139,7 +139,7 @@ snake_diagram.mk_functor''
   (Fst_Snd C) (Snd_Trd C)
   (homology_to_mod_boundaries (n+1)) (mod_boundaries_to_cycles n) (cycles_to_homology n)
 
-lemma snake_diagram_is_snake_input (n : ℕ) : is_snake_input ((snake_diagram C n).obj A) :=
+lemma snake_diagram_is_snake_input (n : ℕ) : is_snake_input (snake_diagram C n A) :=
 sorry
 -- { row_exact₁ := _,
 --   row_exact₂ := _,
@@ -151,13 +151,8 @@ sorry
 --   row_epi := _ }
 
 def snake_input (n : ℕ) :
-  homological_complex (short_exact_sequence C) (complex_shape.down ℕ) ⥤ snake_input C :=
-{ obj := λ A, ⟨(snake_diagram C n).obj A, snake_diagram_is_snake_input C A n⟩,
-  map := λ A B f, (snake_diagram C n).map f,
-  map_id' := λ A, (snake_diagram C n).map_id A,
-  map_comp' := λ _ _ _ f g, (snake_diagram C n).map_comp f g }
-
--- instance : delta_functor (homology_functor C (complex_shape.down ℕ))
+  homological_complex (short_exact_sequence C) (complex_shape.down ℕ) → snake_input C :=
+λ A, ⟨snake_diagram C n A, snake_diagram_is_snake_input C A n⟩
 
 end homological_complex
 
@@ -177,24 +172,6 @@ namespace left_derived
 
 variables (F : C ⥤ D)
 
--- def snake_diagram [F.additive] (A : short_exact_sequence C) (n : ℕ) : snake_diagram ⥤ D :=
--- snake_diagram.mk_functor
--- ![(F.left_derived n).obj ∘ ![A.1, A.2, A.3],
---   ![_, _, _],
---   ![_, _, _],
---   (F.left_derived (n+1)).obj ∘ ![A.1, A.2, A.3]]
--- ((F.left_derived n).map A.f) ((F.left_derived n).map A.g)
--- _ _ _ _
--- ((F.left_derived (n+1)).map A.f) ((F.left_derived (n+1)).map A.g)
--- _ _ _ _ _ _ _ _ _
--- _ _ _ _ _ _
-
--- instance (F : C ⥤ D) [F.additive] : delta_functor F.left_derived :=
--- { δ := _,
---   mono := _,
---   exact' := _,
---   exact_δ := _,
---   δ_exact := _ }
 
 end left_derived
 end functor
