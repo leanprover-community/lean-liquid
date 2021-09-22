@@ -1,6 +1,7 @@
 import category_theory.preadditive
 import category_theory.abelian.projective
 import tactic.interval_cases
+import category_theory.abelian.pseudoelements
 
 import for_mathlib.abelian_category
 import for_mathlib.fin_functor
@@ -342,12 +343,24 @@ end definitions
 
 section abelian
 
+open abelian.pseudoelement
+
 variables {𝒜 : Type u} [category.{v} 𝒜] [abelian 𝒜] {D : snake_diagram ⥤ 𝒜}
 
 namespace is_snake_input
 
 lemma row_exact₀ (hD : is_snake_input D) : exact ((0,0) ⟶[D] (0,1)) ((0,1) ⟶[D] (0,2)) :=
-sorry
+begin
+  letI := hD.col_mono 2,
+  refine exact_of_pseudo_exact _ _ ⟨λ a, zero_of_map_zero _
+    (pseudo_injective_of_mono ((0,2) ⟶[D] (1,2))) _ _, λ b, _⟩,
+  { rw [← abelian.pseudoelement.comp_apply, ← abelian.pseudoelement.comp_apply,
+      ← functor.map_comp, ← functor.map_comp, hD.map_eq (hom _ (0, 1) _ ≫ hom _ (0, 2) _
+      ≫ hom (0, 2) (1, 2) _) ((hom (0, 0) (1, 0)) ≫ ((hom _ (1, 1)) ≫ (hom _ (1, 2)))),
+      functor.map_comp, functor.map_comp, ((abelian.exact_iff _ _).1 hD.row_exact₁).1, comp_zero,
+      zero_apply] },
+  { sorry }
+end
 
 lemma row_exact₃ (hD : is_snake_input D) : exact ((3,0) ⟶[D] (3,1)) ((3,1) ⟶[D] (3,2)) :=
 sorry
