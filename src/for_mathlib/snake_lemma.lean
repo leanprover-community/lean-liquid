@@ -98,16 +98,10 @@ def row : Π (i : fin 4), fin 4 ⥤ C
 | ⟨j+4,h⟩ := by { exfalso, revert h, dec_trivial }
 
 lemma col_obj (i : fin 4) (j : fin 3) : (col j).obj i = F i j :=
-begin
-  fin_cases i; fin_cases j; refl,
-end
-.
+by fin_cases i; fin_cases j; refl.
 
 lemma row_obj (i : fin 4) (j : fin 3) : (row i).obj j.cast_succ = F i j :=
-begin
-  fin_cases i; fin_cases j; refl,
-end
-.
+by fin_cases i; fin_cases j; refl.
 
 lemma row_eq_col_obj (i : fin 4) (j : fin 3) : (row i).obj j.cast_succ = (col j).obj i :=
 (row_obj i j).trans (col_obj i j).symm
