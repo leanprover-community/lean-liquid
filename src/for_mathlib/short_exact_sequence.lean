@@ -205,3 +205,4 @@ instance Snd_additive : (Snd 𝒞).additive := {}
 instance Trd_additive : (Trd 𝒞).additive := {}
 
 end short_exact_sequence
+end category_theory
