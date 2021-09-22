@@ -444,14 +444,14 @@ meta def aux_simp : tactic unit :=
 lemma mk_of_short_exact_sequence_hom {𝒜 : Type*} [category 𝒜] [abelian 𝒜]
   (A B : short_exact_sequence 𝒜) (f : A ⟶ B) :
   is_snake_input (snake_diagram.mk_of_short_exact_sequence_hom A B f) :=
-{ row_exact₁ := by { aux_simp, exact A.exact },
-  row_exact₂ := by { aux_simp, exact B.exact },
+{ row_exact₁ := by { aux_simp, exact A.exact' },
+  row_exact₂ := by { aux_simp, exact B.exact' },
   col_exact₁ := λ j, by { fin_cases j; aux_simp, all_goals { apply_instance } },
   col_exact₂ := λ j, by { fin_cases j; aux_simp, all_goals { apply_instance } },
   col_mono := λ j, by { fin_cases j; aux_simp, all_goals { apply_instance } },
   col_epi := λ j, by { fin_cases j; aux_simp, all_goals { apply_instance } },
-  row_mono := by { aux_simp, exact B.mono },
-  row_epi := by { aux_simp, exact A.epi }, }
+  row_mono := by { aux_simp, exact B.mono' },
+  row_epi := by { aux_simp, exact A.epi' }, }
 
 end is_snake_input
 

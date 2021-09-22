@@ -21,13 +21,17 @@ structure short_exact_sequence [has_images 𝒞] [has_zero_morphisms 𝒞] [has_
 (fst snd trd : 𝒞)
 (f : fst ⟶ snd)
 (g : snd ⟶ trd)
-(mono : mono f)
-(epi : epi g)
-(exact : exact f g)
+[mono'  : mono f]
+[epi'   : epi g]
+[exact' : exact f g]
 
 namespace short_exact_sequence
 
+attribute [instance] mono' epi'
+
 variables {𝒞} [has_images 𝒞] [has_zero_morphisms 𝒞] [has_kernels 𝒞]
+
+@[simp, reassoc] lemma f_comp_g (A : short_exact_sequence 𝒞) : A.f ≫ A.g = 0 := A.exact'.w
 
 @[ext]
 structure hom (A B : short_exact_sequence 𝒞) :=

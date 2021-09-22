@@ -11,7 +11,7 @@ TO DO :
 * Finish the proof of surjectivity for negative reals using linearity
 -/
 
-open filter function classical finset
+open filter function classical finset nat
 open_locale topological_space classical nnreal big_operators
 
 --move me to laurent_measures.basic
@@ -95,16 +95,69 @@ begin
 end
 
 
---[FAE] In the following def I use r' : ℝ, but it might be a bad idea
-noncomputable  def floor_seq_nat' (x : ℝ) (r' : ℝ) : ℤ → ℕ
-| (int.of_nat n)          := nat.rec_on n ⌊x⌋₊ (λ n, ⌊1 / r' ^ n * x⌋₊ - ⌊1 / r'⌋₊ * ⌊1 / r' ^ (n-1) * x⌋₊)
-| (int.neg_succ_of_nat n) := 0
+-- --[FAE] In the following def I use r' : ℝ, but it might be a bad idea
+-- noncomputable  def floor_seq_nat' (x : ℝ) (r' : ℝ) : ℤ → ℕ
+-- | (int.of_nat n)          := nat.rec_on n ⌊x⌋₊ (λ n, ⌊1 / r' ^ n * x⌋₊ - ⌊1 / r'⌋₊ * ⌊1 / r' ^ (n-1) * x⌋₊)
+-- | (int.neg_succ_of_nat n) := 0
 
-noncomputable  def floor_seq_rat (r' : ℚ) (x : ℝ) : ℤ → ℕ --or → ℤ?
+noncomputable  def floor_seq_rat (r' : ℚ) (x : ℝ) : ℤ → ℤ --or → ℤ?
 | (int.of_nat n)          := nat.rec_on n
                             ⌊x⌋₊
                             (λ n, ⌊1 / (r' : ℝ) ^ n * x⌋₊ - ⌊1 / r'⌋₊ * ⌊1 / (r' : ℝ) ^ (n-1) * x⌋₊)
 | (int.neg_succ_of_nat n) := 0
+
+noncomputable  def floor_seq_half (x : ℝ) : ℤ → ℤ --or → ℤ?
+| (int.of_nat n)          := nat.rec_on n
+                            ⌊x⌋
+                            (λ n, ⌊2 ^ n * x⌋ - 2 * ⌊2 ^ (n - 1) * x⌋)
+| (int.neg_succ_of_nat n) := 0
+
+
+lemma pos_floor_seq_half (x : ℝ) (h_x : x ≥ 0) (m : ℤ) : floor_seq_half x m ≥ 0 :=
+begin
+  -- sorry,
+  induction m with m hm,
+  induction m with n h_ind generalizing x,
+  { simp only [int.coe_nat_zero, ge_iff_le, int.of_nat_eq_coe],
+    have : floor_seq_half x 0 = ⌊x⌋ := rfl,
+    rw [this, ← (@floor_zero ℝ _ _)],
+    exact floor_mono h_x },
+  have : ∀ x, ∀ n : ℕ, n ≥ 1 → floor_seq_half x (int.of_nat n) =
+     ⌊2 ^ n * x⌋ - 2 * ⌊2 ^ (n - 1) * x⌋, sorry,
+  rw this,
+  -- rw this at ⊢ h_ind,
+    have h_big : n ≥ 1, sorry,--not quite, put it above
+    have basic : ∀ y : ℝ, y ≥ 0 → floor_seq_half (2 ^ n * x) (int.of_nat 1) ≥ 0, sorry,
+    have that := this (2 ^ n * x) 1 (ge_of_eq rfl),
+    rw [pow_one, nat.sub_self, pow_zero, one_mul, ← mul_assoc] at that,
+    specialize this x n h_big,
+    rw succ_sub_one,
+    have one : ⌊2 ^ n.succ * x⌋ - 2 * ⌊2 ^ n * x⌋ = ⌊2 ^ (n + 1) * x⌋ - 2 * ⌊2 ^ n * x⌋, by {rw succ_eq_add_one},
+    rw one,
+    have two : ⌊2 ^ (n + 1) * x⌋ - 2 * ⌊2 ^ n * x⌋ = ⌊2 * 2 ^ n * x⌋ - 2 * ⌊2 ^ n * x⌋, by sorry,
+    rw two,
+    have h_pos : 2 ^ n * x  ≥ 0, sorry,
+    -- rw this at h_ind,
+    specialize h_ind (2 ^ n * x) h_pos,
+    rw ← that,
+    exact basic (2 ^ n * x) h_pos,
+  { exact (succ_le_succ n.zero_le) },
+  { have : floor_seq_half x -[1+ hm] = 0,
+    refl,
+    exact ge_of_eq this },
+end
+
+lemma pos_floor_seq_rat (r' : ℚ) (x : ℝ) (m : ℤ) : floor_seq_rat r' x m ≥ 0 :=
+begin
+  by_cases hm : m < 0,
+  refine le_of_eq _,
+  sorry,
+  lift m to ℕ,
+  induction m with m h_ind,
+  { change (⌊x⌋₊ : ℤ) ≥ 0,
+    simp only [ge_iff_le, int.coe_nat_nonneg]},
+  sorry, sorry,
+end
 
 
 lemma finite_sum_floor_seq_rat (r' : ℚ) (h_pos' : 0 < r') (h_one' : r' < 1) (x : ℝ) (n : ℕ) :
@@ -114,32 +167,146 @@ begin
   sorry,
 end
 
--- lemma finite_sum_floor_seq_nat' (r' : ℝ≥0) [fact (r' < 1)] (h_r' : r' ≠ 0) (x : ℝ) (n : ℕ) :
---   (range n).sum (λ (i : ℕ), (coe ∘ floor_seq_nat' r'.1 x) ↑i * r'.1 ^ i) =
---     if n = 0 then 0 else ⌊x / r'.1 ^ (n - 1) ⌋₊ * r' ^ (n - 1) :=
--- begin
---   sorry,
--- end
+
+--move me
+lemma range_Ico_prepend (n : ℕ) (h : 0 < n) : range n = insert 0 (Ico 1 n) :=
+by {rw [← zero_add 1, range_eq_Ico], from (Ico.insert_succ_bot h).symm}
 
 lemma finite_sum_floor_seq_half (x : ℝ) (n : ℕ) : --[fact (r' < 1)] (h_r' : r' > 0)
+  (range n).sum (λ (i : ℕ), (coe ∘ floor_seq_half x) ↑i * (1 / 2 : ℝ) ^ i) =
+    if n = 0 then 0 else ⌊x / (1 / 2 : ℝ) ^ (n - 1) ⌋₊ * (1 / 2 : ℝ) ^ (n - 1) :=
+begin
+  sorry,
+  -- by_cases h_nz : n = 0, sorry,
+  -- rw if_neg h_nz,
+  -- have uno : (range n).sum (λ (i : ℕ), (coe ∘ floor_seq_half x) ↑i * (1 / 2 : ℚ) ^ i) =
+  --   ⌊x⌋₊ + ∑ k in (Ico 1 n), (1 / 2 ^ (k : ℤ)) * (⌊2 ^ (k : ℤ) * x⌋₊ - 2 * ⌊2 ^ ((k - 1) : ℤ) * x⌋₊),
+  -- rw [range_Ico_prepend, sum_insert],
+  -- congr' 1,
+  --   { rw [pow_zero, mul_one], refl },
+  --   { apply finset.sum_congr,
+  --     refl,
+  --     intros k hk,
+  --     induction k with k H_ind,sorry,
+  --     rw nat.succ_eq_add_one,
+  --     field_simp,
+  --     simp,
+
+
+
+  --     replace hk : k ≥ 1, sorry,
+  --     field_simp,
+  --     suffices : floor_seq_half_temp x k = ⌊2 ^ k * x⌋₊ - 2 * ⌊2 ^ (k - 1) * x⌋₊,
+  --     rw this,
+  --     simp only [int.cast_coe_nat, int.cast_bit0, int.cast_mul, int.cast_one, int.cast_sub,
+  --       gpow_coe_nat],sorry,
+
+
+  --     -- have try : floor_seq_half_temp x 0 = ⌊x⌋₊, refl,
+  --     -- have try2 : floor_seq_half_temp x 1 = (⌊2 ^ 1 * x⌋₊ : ℤ) - 2 * (2 ^ (1 - 1) * ⌊x⌋₊ : ℤ),
+  --     convert if_neg hk,
+
+  --     -- replace hk : k ≠ 0, sorry,
+  --     -- simp,
+  --     -- nth_rewrite 3 [← cast_one],
+  --     -- have mah : (k : ℤ) - (1 : ℤ) = ↑(k - 1), sorry,
+  --     -- rw mah,
+
+  --     -- cases k,sorry,
+  --     -- simp,
+  --     -- simp,/
+  --     -- erw ← cast_sub hk,
+
+
+  --        },
+end
+
+lemma finite_sum_floor_seq_half₁ (x : ℝ) (n : ℕ) : --[fact (r' < 1)] (h_r' : r' > 0)
   (range n).sum (λ (i : ℕ), (coe ∘ floor_seq_rat (1 / 2 : ℚ) x) ↑i * (1 / 2 : ℝ) ^ i) =
     if n = 0 then 0 else ⌊x / (1 / 2 : ℝ) ^ (n - 1) ⌋₊ * (1 / 2 : ℝ) ^ (n - 1) :=
 begin
-  by_cases h_nz : n = 0, sorry,
-  have uno := calc (range n).sum (λ (i : ℕ), (coe ∘ floor_seq_nat' (1 / 2 : ℚ) x) ↑i * (1 / 2 : ℚ) ^ i) =
-    ⌊x⌋₊ + ∑ k in (Ico 1 n), 1 / 2 * (⌊2 ^ k * x⌋₊ - 2 * ⌊2 ^ (k - 1) * x⌋₊) : sorry,
-  have due :=
-  calc  ⌊x⌋₊ + ∑ k in (Ico 1 n), 1 / 2 * (⌊2 ^ k * x⌋₊ - 2 * ⌊2 ^ (k - 1) * x⌋₊) =
-        ⌊x⌋₊ + 1 / 2 ^ (n - 1) * ∑ k in (Ico 1 n), 2 ^ (n - k) * (⌊2 ^ k * x⌋₊ - 2 * ⌊2 ^ (k - 1) * x⌋₊) : sorry
-  ... = ⌊x⌋₊ + 1 / 2 ^ (n - 1) * ( ∑ k in (Ico 1 n), 2 ^ (n - k) * ⌊2 ^ k * x⌋₊ - ∑ k in (Ico 1 n), 2 ^ (n - (k - 1)) * ⌊2 ^ (k - 1) * x⌋₊) : sorry
-  ... = ⌊x⌋₊ + 1 / 2 ^ (n - 1) * (⌊2 ^ (n - 1) * x⌋₊ + ∑ k in (Ico 1 (n - 1)), 2 ^ (n - k) * ⌊2 ^ k * x⌋₊ - ∑ k in (Ico 1 n), 2 ^ (n - (k - 1)) * ⌊2 ^ (k - 1) * x⌋₊) : sorry
-  ... = ⌊x⌋₊ + 1 / 2 ^ (n - 1) * (⌊2 ^ (n - 1) * x⌋₊ + ∑ k in (Ico 1 (n - 1)), 2 ^ (n - k) * ⌊2 ^ k * x⌋₊ - ∑ k in (Ico 2 n), 2 ^ (n - (k - 1)) * ⌊2 ^ (k - 1) * x⌋₊ - 2 ^ (n - 1) * ⌊x⌋₊) : sorry
-  ... = ⌊x⌋₊ + 1 / 2 ^ (n - 1) * (⌊2 ^ (n - 1) * x⌋₊ + ∑ k in (Ico 1 (n - 1)), 2 ^ (n - k) * ⌊2 ^ k * x⌋₊ - ∑ k in (Ico 1 (n - 1)), 2 ^ (n - k) * ⌊2 ^ k * x⌋₊ - 2 ^ (n - 1) * ⌊x⌋₊) : sorry
-  ... = ⌊x⌋₊ + 1 / 2 ^ (n - 1) * (⌊2 ^ (n - 1) * x⌋₊ - 2 ^ (n - 1) * ⌊x⌋₊) : sorry
-  ... = ⌊x⌋₊ + 1 / 2 ^ (n - 1) * ⌊2 ^ (n - 1) * x⌋₊ - (1 / 2 ) ^ (n - 1) * 2 ^ (n - 1) * ⌊x⌋₊ : sorry
-  ... = 1 / 2 ^ (n - 1) * ⌊2 ^ (n - 1) * x⌋₊ : sorry,
-    --  sorry,/
-    sorry,
+  sorry,
+  -- by_cases h_nz : n = 0, sorry,
+  -- rw if_neg h_nz,
+  -- have uno : (range n).sum (λ (i : ℕ), (coe ∘ floor_seq_rat (1 / 2 : ℚ) x) ↑i * (1 / 2 : ℚ) ^ i) =
+  --   ⌊x⌋₊ + ∑ k in (Ico 1 n), (1 / 2 ^ (k : ℤ)) * (⌊2 ^ (k : ℤ) * x⌋₊ - 2 * ⌊2 ^ (k - 1 : ℤ) * x⌋₊),
+  -- { rw [range_Ico_prepend, sum_insert],
+  --   congr,
+  --   {rw [pow_zero, mul_one], refl },
+  --   funext k,
+  --   rw mul_comm,
+  --   rw div_pow,
+  --   rw one_pow,
+  --   rw ← gpow_coe_nat,
+  --   rw mul_eq_mul_left_iff,
+  --   apply or.intro_left,
+  --   field_simp,
+  --   --refl,
+  --   -- rw ← int.cast_id,
+  --   -- rw cast_mul,
+  --   -- simp,
+  --   -- norm_cast,
+  --   -- zify,
+  --   -- simp,
+
+  --   -- suffices : (floor_seq_rat (1 / 2 : ℚ) x ↑k) = (⌊2 ^ (k : ℤ) * x⌋₊ : ℤ) - ↑2 * ↑⌊2 ^ (k - 1 : ℤ) * x⌋₊,
+  --   -- apply_fun (coe : ℤ → ℚ) at this,
+  --   -- rw [int.cast_sub, int.cast_mul] at this,
+  --   -- rw this,
+  --   -- simp only [int.cast_coe_nat, int.cast_bit0, int.cast_one, gpow_coe_nat],
+  --   -- simp only [cast_one, cast_bit0],
+  --   -- rw gpow_coe_nat,
+  --   -- simp,
+  --   -- rw gpow_coe_nat,
+
+  --   -- rw int.cast_one,
+  --   -- rw nsmul_eq_gsmul,
+  --   -- rw ← int.nat_cast_eq_coe_nat,
+  --   -- rw [← cast_mul 2 ⌊2 ^ (↑k - 1) * x⌋₊],
+  --   -- refl,
+  --   conv_rhs
+  --   -- begin
+  --     {rw [← inv_inv' (2 : ℝ)],
+  --     rw norm_num.inv_div_one,
+  --     rw norm_num.inv_div_one,
+  --     rw [← inv_inv' (2 : ℚ)],
+  --     rw norm_num.inv_div_one,
+  --     rw norm_num.inv_div_one,},
+  --     norm_cast,
+  --     nth_rewrite 0 div_pow,
+  --     nth_rewrite 0 div_pow,
+  --     repeat {rw one_pow},
+  --     rw ← gpow_coe_nat,
+  --     have : 1 / (1 / 2 : ℚ) = ⌊ 1 / (1 / 2 : ℚ)⌋₊,sorry,
+  --     rw this,
+  --     refl,
+
+  --   -- end
+
+  --   -- nth_rewrite_rhs 0 [← inv_inv' (2 : ℝ)],
+  --   -- repeat {rw norm_num.inv_div_one},
+  --   -- nth_rewrite_rhs 0 [← inv_inv' (2 : ℚ)],
+  --   -- rw norm_num.inv_div_one,
+  --   -- nth_rewrite_rhs 0 [← inv_inv' (2 : ℝ)],
+  --   -- rw norm_num.inv_div_one,
+  --   -- rw norm_num.inv_div_one,
+  --   -- refl,
+  -- -- rfl,
+  -- -- obtain ⟨k, hk⟩ := exists_eq_succ_of_ne_zero h_nz,
+  -- -- rw hk,
+  -- },
+  -- have due :=
+  -- calc  ⌊x⌋₊ + ∑ k in (Ico 1 n), 1 / 2 * (⌊2 ^ k * x⌋₊ - 2 * ⌊2 ^ (k - 1) * x⌋₊) =
+  --       ⌊x⌋₊ + 1 / 2 ^ (n - 1) * ∑ k in (Ico 1 n), 2 ^ (n - k) * (⌊2 ^ k * x⌋₊ - 2 * ⌊2 ^ (k - 1) * x⌋₊) : sorry
+  -- ... = ⌊x⌋₊ + 1 / 2 ^ (n - 1) * ( ∑ k in (Ico 1 n), 2 ^ (n - k) * ⌊2 ^ k * x⌋₊ - ∑ k in (Ico 1 n), 2 ^ (n - (k - 1)) * ⌊2 ^ (k - 1) * x⌋₊) : sorry
+  -- ... = ⌊x⌋₊ + 1 / 2 ^ (n - 1) * (⌊2 ^ (n - 1) * x⌋₊ + ∑ k in (Ico 1 (n - 1)), 2 ^ (n - k) * ⌊2 ^ k * x⌋₊ - ∑ k in (Ico 1 n), 2 ^ (n - (k - 1)) * ⌊2 ^ (k - 1) * x⌋₊) : sorry
+  -- ... = ⌊x⌋₊ + 1 / 2 ^ (n - 1) * (⌊2 ^ (n - 1) * x⌋₊ + ∑ k in (Ico 1 (n - 1)), 2 ^ (n - k) * ⌊2 ^ k * x⌋₊ - ∑ k in (Ico 2 n), 2 ^ (n - (k - 1)) * ⌊2 ^ (k - 1) * x⌋₊ - 2 ^ (n - 1) * ⌊x⌋₊) : sorry
+  -- ... = ⌊x⌋₊ + 1 / 2 ^ (n - 1) * (⌊2 ^ (n - 1) * x⌋₊ + ∑ k in (Ico 1 (n - 1)), 2 ^ (n - k) * ⌊2 ^ k * x⌋₊ - ∑ k in (Ico 1 (n - 1)), 2 ^ (n - k) * ⌊2 ^ k * x⌋₊ - 2 ^ (n - 1) * ⌊x⌋₊) : sorry
+  -- ... = ⌊x⌋₊ + 1 / 2 ^ (n - 1) * (⌊2 ^ (n - 1) * x⌋₊ - 2 ^ (n - 1) * ⌊x⌋₊) : sorry
+  -- ... = ⌊x⌋₊ + 1 / 2 ^ (n - 1) * ⌊2 ^ (n - 1) * x⌋₊ - (1 / 2 ) ^ (n - 1) * 2 ^ (n - 1) * ⌊x⌋₊ : sorry
+  -- ... = 1 / 2 ^ (n - 1) * ⌊2 ^ (n - 1) * x⌋₊ : sorry,
+  --   --  sorry,/
+  --   sorry,
 end
 
 lemma has_sum_pow_floor_rat (r' : ℚ) (h_pos' : 0 < r') (h_one' : r' < 1) (x : ℝ) (h_x : x≥0)
@@ -157,7 +324,8 @@ begin
     (coe ∘ floor_seq_rat r' x) n * (r' : ℝ) ^ n = 0,
   { intros n hn,
     specialize h_range n hn,
-    rw [comp_app, h_range, nat.cast_zero, zero_mul], },
+    rw [comp_app, h_range, int.cast_zero, zero_mul], },
+    -- rw [comp_app, h_range, nat.cast_zero, zero_mul], },--for the ℕ-valued version of floor_seq_rat
   apply (@function.injective.has_sum_iff _ _ _ _ _ _ x _ hinj h_range).mp,
   have H : (λ (n : ℤ), ((coe ∘ floor_seq_rat r' x) n * (r' : ℝ) ^ n)) ∘ coe =
     (λ (n : ℕ), (coe ∘ floor_seq_rat r' x) n * r' ^ n) := by {funext,--want to change  (r' : ℝ) ^ n?
@@ -167,7 +335,9 @@ begin
   { intro n,
     apply mul_nonneg,
     rw comp_app,
-    simp only [nat.cast_nonneg],
+    simp only [int.cast_nonneg],
+    exact pos_floor_seq_rat r' x n,--remove for ℕ-val'd floor_seq_rat
+    -- simp only [nat.cast_nonneg],-- for ℕ-val'd floor_seq_rat
     norm_cast,
     apply pow_nonneg (le_of_lt h_pos') n, },
   apply (has_sum_iff_tendsto_nat_of_nonneg h_pos x).mpr,
@@ -188,33 +358,35 @@ begin
 end
 
 lemma has_sum_pow_floor_half (x : ℝ) (h_x : x≥0) :
-  has_sum (λ n, (coe ∘ floor_seq_rat (1 / 2) x) n * ((1 / 2) : ℝ) ^ n) x :=
+  has_sum (λ n, (coe ∘ floor_seq_half x) n * ((1 / 2) : ℝ) ^ n) x :=
 begin
   -- have h_pos' := (@one_half_pos ℝ _),
   let x₀ : ℝ≥0 := ⟨x, h_x⟩,
   have hinj : function.injective (coe : ℕ → ℤ) := by {apply int.coe_nat_inj},
-  have h_range : ∀ n : ℤ, n ∉ set.range (coe : ℕ → ℤ) → floor_seq_rat (1 / 2) x n = 0,
+  have h_range : ∀ n : ℤ, n ∉ set.range (coe : ℕ → ℤ) → floor_seq_half x n = 0,
   { intro,
     cases n,
     simp only [forall_false_left, set.mem_range_self, not_true, int.of_nat_eq_coe],
     intro,
     refl },
   replace h_range : ∀ n : ℤ, n ∉ set.range (coe : ℕ → ℤ) →
-    (coe ∘ floor_seq_rat (1 / 2) x) n * ((1 / 2) : ℝ) ^ n = 0,
+    (coe ∘ floor_seq_half x) n * ((1 / 2) : ℝ) ^ n = 0,
   { intros n hn,
     specialize h_range n hn,
-    rw [comp_app, h_range, nat.cast_zero, zero_mul], },
+    rw [comp_app, h_range, int.cast_zero, zero_mul], },
+    -- rw [comp_app, h_range, nat.cast_zero, zero_mul], },
   apply (@function.injective.has_sum_iff _ _ _ _ _ _ x _ hinj h_range).mp,
-  have H : (λ (n : ℤ), ((coe ∘ floor_seq_rat (1 / 2) x) n * ((1 / 2) : ℝ) ^ n)) ∘ coe =
-    (λ (n : ℕ), (coe ∘ floor_seq_rat (1 / 2) x) n * (1 / 2) ^ n) := by {funext,--want to change  (r' : ℝ) ^ n?
+  have H : (λ (n : ℤ), ((coe ∘ floor_seq_half x) n * ((1 / 2) : ℝ) ^ n)) ∘ coe =
+    (λ (n : ℕ), (coe ∘ floor_seq_half x) n * (1 / 2) ^ n) := by {funext,--want to change  (r' : ℝ) ^ n?
       simp only [comp_app, gpow_coe_nat] },
   rw H,
-  have h_pos : ∀ n : ℕ, (coe ∘ floor_seq_rat (1 / 2) x) n * ((1 / 2) : ℝ) ^ n ≥ 0,
+  have h_pos : ∀ n : ℕ, (coe ∘ floor_seq_half x) n * ((1 / 2) : ℝ) ^ n ≥ 0,
   { intro n,
     apply mul_nonneg,
     rw comp_app,
-    simp only [nat.cast_nonneg],
+    -- simp only [nat.cast_nonneg],-- for ℕ-val'd floor_seq_rat
     norm_cast,
+    exact (pos_floor_seq_half x h_x n),--remove -- for ℕ-val'd floor_seq_rat
     apply pow_nonneg (le_of_lt (@one_half_pos ℝ _)) n },
   apply (has_sum_iff_tendsto_nat_of_nonneg h_pos x).mpr,
   have aux : (λ n, ite (n = 0) (0 : ℝ) ((⌊x / ((1 / 2) : ℝ) ^ (n - 1)⌋₊) * ((1 / 2) : ℝ) ^ (n - 1)))
@@ -234,61 +406,12 @@ begin
   simp only [one_div, rat.cast_inv, rat.cast_one, rat.cast_bit0],
 end
 
--- lemma has_sum_pow_floor_nat' (r' : ℝ≥0) [fact (r' < 1)] (h_r' : r' ≠ 0) (x : ℝ) (hx_pos : x≥0) : has_sum (λ n, (coe ∘ floor_seq_nat' r'.1 x) n * r'.1 ^ n) x :=
--- begin
---   let x₀ : ℝ≥0 := ⟨x, hx_pos⟩,
---   have hinj : function.injective (coe : ℕ → ℤ) := by {apply int.coe_nat_inj},
---   have h_range : ∀ n : ℤ, n ∉ set.range (coe : ℕ → ℤ) → floor_seq_nat' r'.1 x n = 0,--could also use primed version
---   { intro,
---     cases n,
---     simp only [forall_false_left, set.mem_range_self, not_true, int.of_nat_eq_coe],
---     intro,
---     refl },
---   replace h_range : ∀ n : ℤ, n ∉ set.range (coe : ℕ → ℤ) → (coe ∘ floor_seq_nat' r'.1 x) n * r'.1 ^ n = 0,
---   { intros n hn,
---     specialize h_range n hn,
---     rw [comp_app, h_range, nat.cast_zero, zero_mul] },
---   apply (@function.injective.has_sum_iff _ _ _ _ _ _ x _ hinj h_range).mp,
---   have H : (λ (n : ℤ), ((coe ∘ floor_seq_nat' r'.1 x) n * r'.1 ^ n)) ∘ coe =
---     (λ (n : ℕ), (coe ∘ floor_seq_nat' r'.1 x) n * r'.1 ^ n) := by {funext,
---       simp only [comp_app, gpow_coe_nat] },
---   rw H,
---   have h_pos : ∀ n : ℕ, (coe ∘ floor_seq_nat' r'.1 x) n * r'.1 ^ n ≥ 0,
---   { intro n,
---     apply mul_nonneg,
---     rw comp_app,
---     simp only [nat.cast_nonneg],
---     exact pow_nonneg r'.2 n },
---   apply (has_sum_iff_tendsto_nat_of_nonneg h_pos x).mpr,
---   have aux : (λ n, ite (n = 0) 0 ((⌊x / r'.val ^ (n - 1)⌋₊ : ℝ) * ↑r' ^ (n - 1))) =ᶠ[at_top]
---     λ n, (↑⌊x / r'.val ^ (n - 1)⌋₊ * ↑r' ^ (n - 1)),
---     sorry,
---   simp_rw (finite_sum_floor_seq_nat' r' h_r' x),
---   rw ← (tendsto_congr' aux.symm),
---   sorry,
---   -- apply converges_floor_rat x hx_pos r' h_r',
--- end
-
-/-
-lemma has_sum_pow_floor_rat (r' : ℚ) (h_pos' : 0 < r') (h_one' : r' < 1) (x : ℝ) (h_x : x≥0)
-  : has_sum (λ n, (coe ∘ floor_seq_rat r' x) n * (r' : ℝ) ^ n) x :=
--/
 
 lemma has_sum_pow_floor_rat_norm (r' : ℚ) (h_pos' : 0 < r') (h_one' : r' < 1) (x : ℝ) (h_x : x≥0) :
   has_sum (λ n, ∥ (floor_seq_rat r' x n : ℝ) ∥ * r' ^ n) x :=
 begin
   sorry,--will be an easy consequence of the previous one
 end
-
-
--- lemma has_sum_pow_floor_norm_nat' (r' : ℝ≥0)  [fact (r' < 1)] (h_nz :  r' ≠ 0) (x : ℝ) :
---   has_sum (λ n, ∥ (floor_seq_nat' r'.1 x n : ℝ) ∥ * r' ^ n) x :=
---   -- has_sum (λ n, ∥ ((coe : ℕ → ℝ) ∘ floor_seq_nat x) n ∥ * r' ^ n) x :=
--- begin
---   sorry,--will be an easy consequence of the previous one
--- end
-
-
 
 def laurent_measures.to_Rfct (r : ℝ≥0) [fact (r < 1)] :
   (laurent_measures r (Fintype.of punit)) → (ℤ → ℝ) := λ ⟨F, _⟩, coe ∘ (F punit.star)
@@ -306,9 +429,6 @@ lemma θ_and_ϕ (r' : ℚ) (h_pos' : 0 < r') (h_one' : r' < 1) (r₁ r₂ : ℝ�
   [fact (r₂ < 1)] (h : r₁ < r₂) (F : laurent_measures r₂ (Fintype.of punit)) :
   θ r' h_pos' h_one' r₁ (ϕ r₂ r₁ h F) = θ r' h_pos' h_one' r₂ F := sorry
 
--- lemma θ_ext : (r' : ℚ) (h_pos' : 0 < r') (h_one' : r' < 1) (r₁ r₂  : ℝ≥0) [fact (r₁ < 1)]
---  [fact (r₂ < 1)] : (laurent_measures r (Fintype.of punit)) → ℝ := λ F, tsum (λ n, (F.to_Rfct r n) * r' ^ n)
-
 noncomputable def θ₁ (r' : ℝ≥0) [fact (r' < 1)] (r : ℝ≥0) [fact (r < 1)] :
  (laurent_measures r (Fintype.of punit)) → ℝ := λ F, tsum (λ n, (F.to_Rfct r n) * (r'.1) ^ n)
 --FAE The assumption that r' < r is not needed by the definition of tsum
@@ -323,23 +443,7 @@ begin
   simp only [gpow_neg_succ_of_nat, inv_pow', nnreal.coe_pow, nnreal.coe_inv],
 end
 
--- theorem θ_surj (r' : ℚ) [h_r' : r' > 0] [fact (r' < 1)] (r : ℝ≥0) [h_r : r ≠ 0] [fact (r < 1)]
---   (h_r'r : r' < r.1): ∀ x : ℝ, ∃ (F : laurent_measures r (Fintype.of punit)), (θ r' r F) = x :=
 
--- example (r : ℚ) (h : r < 1) : (r : ℝ) < 1 :=
--- begin
---   have := (@rat.cast_lt ℝ _ r 1).mpr h,
--- end
-
--- variables (t : ℚ) (ht : 0 < t)
--- #check (⟨(t : ℝ), le_of_lt ((@rat.cast_pos ℝ _ _).mpr ht)⟩ : ℝ≥0)
-
--- lemma θ_surj_on_nonneg_rat (r' : ℚ) (h_pos' : 0 < r') (h_one' : r' < 1) --(r : ℝ≥0) [fact (r < 1)]
---   (t : ℚ) (h_pos : 0 < t)
---   [A : fact ((⟨(t : ℝ), le_of_lt ((@rat.cast_pos ℝ _ _).mpr h_pos)⟩ : ℝ≥0) < (1 : ℝ≥0))]
---   (h_r't : r' < t)
---   (x : ℝ) (h_x : x≥0) : ∃ (F : laurent_measures (real.to_nnreal (t : ℝ)) (Fintype.of punit)),
---   (θ r' h_pos' h_one' (real.to_nnreal (t : ℝ)) F) = x :=
 lemma θ_surj_on_nonneg_rat (r' : ℚ) (h_pos' : 0 < r') (h_one' : r' < 1) --(r : ℝ≥0) [fact (r < 1)]
   (t : ℚ) (h_pos : 0 < t)
   [H : fact ((⟨(t : ℝ), le_of_lt ((@rat.cast_pos ℝ _ _).mpr h_pos)⟩ : ℝ≥0) < (1 : ℝ≥0))]
@@ -350,7 +454,8 @@ begin
   let t₀ : ℝ≥0 := (⟨(t : ℝ), le_of_lt ((@rat.cast_pos ℝ _ _).mpr h_pos)⟩),
   have h_one : t₀ < (1 : ℝ≥0) := H.out,
   replace h_one : t < 1 := by {apply (@rat.cast_lt ℝ _ _ _).mp, rw rat.cast_one, exact h_one},
-  let F₀ : Fintype.of punit → ℤ → ℤ := λ _ n, int.of_nat (floor_seq_rat t x n),
+  let F₀ : Fintype.of punit → ℤ → ℤ := λ _ n, floor_seq_rat t x n,
+  -- let F₀ : Fintype.of punit → ℤ → ℤ := λ _ n, int.of_nat (floor_seq_rat t x n),-- for ℕ-val'd floor_seq_rat
   have hF : ∀ (s : Fintype.of punit), summable (λ n : ℤ, ∥ F₀ s n ∥ * t ^ n),
   { intro s,
     apply has_sum.summable (has_sum_pow_floor_rat_norm t h_pos h_one x h_x) },
@@ -365,8 +470,7 @@ begin
 end
 
 
---certainly the wrong def: I am not assuming r' ≥ 0 and r' < r
-noncomputable def τ (r' : ℚ) (r : ℝ≥0) [fact (r < 1)] : {t : ℚ // 0 < t} :=
+noncomputable def τ (r : ℝ≥0) [fact (r < 1)] : {t : ℚ // 0 < t} :=
 begin
   have h : r < 1 := fact.out _,
   use some (@exists_rat_btwn ℝ _ _ r 1 h),
@@ -374,14 +478,14 @@ begin
   exact (lt_of_le_of_lt r.2) (some_spec (@exists_rat_btwn ℝ _ _ r 1 h)).left,
 end
 
-noncomputable def τ₀ (r' : ℚ) (r : ℝ≥0) [fact (r < 1)] : ℝ≥0 :=
-⟨((τ r' r).1 : ℝ), le_of_lt ((@rat.cast_pos ℝ _ _).mpr (τ r' r).2)⟩
+noncomputable def τ₀ (r : ℝ≥0) [fact (r < 1)] : ℝ≥0 :=
+⟨((τ r).1 : ℝ), le_of_lt ((@rat.cast_pos ℝ _ _).mpr (τ r).2)⟩
 
-lemma r'_lt_τ (r' : ℚ) (r : ℝ≥0) [fact (r < 1)] : r' < τ r' r := sorry
+lemma r'_lt_τ (r' : ℚ) (r : ℝ≥0) [fact (r < 1)] : r' < τ r := sorry
 
-lemma τ₀_one (r' : ℚ) (r : ℝ≥0) [fact (r < 1)] : (τ₀ r' r) < (1 : ℝ≥0) := sorry
+lemma τ₀_one (r' : ℚ) (r : ℝ≥0) [fact (r < 1)] : (τ₀ r) < (1 : ℝ≥0) := sorry
 
-lemma r_lt_τ₀ (r' : ℚ) (r : ℝ≥0) [fact (r < 1)] : r < (τ₀ r' r) := sorry
+lemma r_lt_τ₀ (r' : ℚ) (r : ℝ≥0) [fact (r < 1)] : r < (τ₀ r) := sorry
 
 lemma θ_surj_on_nonneg (r' : ℚ) (h_pos' : 0 < r') (h_one' : r' < 1) --(r : ℝ≥0) [fact (r < 1)]
   (r : ℝ≥0) (h_pos : 0 < r) [fact (r < 1)] (h_r'r : (r' : ℝ) < r)
@@ -391,54 +495,17 @@ begin
   -- have t : ℚ, sorry,--ok
   -- have h_post : 0 < t, sorry,--ok
   -- let t₀ : ℝ≥0 := (⟨(t : ℝ), le_of_lt ((@rat.cast_pos ℝ _ _).mpr h_post)⟩),--ok
-  have H : fact (τ₀ r' r < (1 : ℝ≥0)) := ⟨τ₀_one r' r⟩,
+  have H : fact (τ₀ r < (1 : ℝ≥0)) := ⟨τ₀_one r' r⟩,
   -- have h_tr : r < t₀, sorry,--ok
   -- have h_tr' : r' < t, sorry, --follows from h_sr
   -- resetI,
-  obtain ⟨F, hF⟩ := @θ_surj_on_nonneg_rat r' h_pos' h_one' (τ r' r) (τ r' r).2 H (r'_lt_τ r' r) x h_x,
-  use ϕ (τ₀ r' r) r (r_lt_τ₀ r' r) F,
-  have := @θ_and_ϕ r' h_pos' h_one' r (τ₀ r' r) _ H (r_lt_τ₀ r' r) F,
+  obtain ⟨F, hF⟩ := @θ_surj_on_nonneg_rat r' h_pos' h_one' (τ r) (τ r).2 H (r'_lt_τ r' r) x h_x,
+  use ϕ (τ₀ r) r (r_lt_τ₀ r' r) F,
+  have := @θ_and_ϕ r' h_pos' h_one' r (τ₀ r) _ H (r_lt_τ₀ r' r) F,
   sorry,
   -- rw this,
   -- rwa [← @θ_and_ϕ r' h_pos' h_one' r (τ₀ r' r) _ H (r_lt_τ₀ r' r) F] at hF,
 end
-
--- lemma θ_surj_on_nonneg' (r' : ℚ) (h_pos' : 0 < r') (h_one' : r' < 1) (r : ℝ≥0) [fact (r < 1)]
---   (h_r'r : ↑r' < r.1) (x : ℝ) (h_x : x≥0) : ∃ (F : laurent_measures r (Fintype.of punit)),
---   (θ r' h_pos' h_one' r F) = x :=
--- begin
---   let F₀ : Fintype.of punit → ℤ → ℤ := λ _ n, int.of_nat (floor_seq_rat r' x n),
---   have Hr : ∀ (s : Fintype.of punit), summable (λ n : ℤ, ∥ F₀ s n ∥ * r ^ n),
---   { intro s,
---     apply has_sum.summable (has_sum_pow_floor_norm_nat' r h_r x) },
---   let F : laurent_measures r (Fintype.of punit) := ⟨F₀, Hr⟩,
---   use F,
---   have h_sum : summable (λ (n : ℤ), (F.to_Rfct r n) * r.1 ^ n) :=
---     (has_sum_pow_floor_nat' r h_r x hx_pos).summable,
---   unfold θ,
---   have := has_sum_pow_floor_nat' r' h_r' x hx_pos,
---   sorry,--FAE: We need somewhere to pass from convergence for r to convergence for r' < r
---   -- exact has_sum.tsum_eq this,
--- end
-
-
--- lemma θ_surj_on_nonneg_nat (r' : ℝ≥0) (h_r' : r' ≠ 0) [fact (r' < 1)] (r : ℝ≥0) [fact (r < 1)]
---   (h_r : r ≠ 0) (x : ℝ) (hx_pos : x≥0) : ∃ (F : laurent_measures r (Fintype.of punit)),
---   (θ r' r F) = x :=
--- begin
---   let F₀ : Fintype.of punit → ℤ → ℤ := λ _ n, int.of_nat (floor_seq_nat' r.1 x n),
---   have Hr : ∀ (s : Fintype.of punit), summable (λ n : ℤ, ∥ F₀ s n ∥ * r ^ n),
---   { intro s,
---     apply has_sum.summable (has_sum_pow_floor_norm_nat' r h_r x) },
---   let F : laurent_measures r (Fintype.of punit) := ⟨F₀, Hr⟩,
---   use F,
---   have h_sum : summable (λ (n : ℤ), (F.to_Rfct r n) * r.1 ^ n) :=
---     (has_sum_pow_floor_nat' r h_r x hx_pos).summable,
---   unfold θ,
---   have := has_sum_pow_floor_nat' r' h_r' x hx_pos,
---   sorry,--FAE: We need somewhere to pass from convergence for r to convergence for r' < r
---   -- exact has_sum.tsum_eq this,
--- end
 
 -- This is the version that I will probably be able to prove. I would also like to turn h_r' and
 -- h_r into facts rather than being hypothesis.
