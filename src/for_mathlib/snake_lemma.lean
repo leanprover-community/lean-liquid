@@ -375,7 +375,7 @@ section
 
 open abelian.pseudoelement
 
-variables {𝒜 : Type u} [category.{v} 𝒜] [has_zero_morphisms 𝒜] [has_kernels 𝒜] [has_images 𝒜]
+variables {𝒜 : Type u} [category.{v} 𝒜] [abelian 𝒜]
 variables {D : snake_diagram ⥤ 𝒜}
 
 namespace is_snake_input
