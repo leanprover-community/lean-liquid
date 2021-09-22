@@ -4,6 +4,7 @@ import data.matrix.notation
 import tactic.interval_cases
 import category_theory.abelian.pseudoelements
 
+import for_mathlib.short_exact_sequence
 import for_mathlib.abelian_category
 import for_mathlib.fin_functor
 
@@ -430,6 +431,10 @@ instance : category (snake_input 𝒜) := induced_category.category to_functor
 
 @[simps] def proj (x : snake_diagram) : snake_input 𝒜 ⥤ 𝒜 :=
 induced_functor _ ⋙ (evaluation _ _).obj x
+
+def mk_of_short_exact_sequence_hom (A B : short_exact_sequence 𝒜) (f : A ⟶ B) :
+  snake_input 𝒜 :=
+sorry
 
 end snake_input
 
