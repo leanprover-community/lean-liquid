@@ -55,10 +55,10 @@ def o (i : fin 4) (j : fin 3) : snake_diagram := (i,j)
   o i k ≤ o j l ↔ i ≤ j ∧ k ≤ l := iff.rfl
 
 meta def hom_tac : tactic unit :=
-`[ simp only [category_theory.snake_diagram.o_le_o,
-       category_theory.snake_diagram.o_fst, category_theory.snake_diagram.o_snd,
+`[simp only [category_theory.snake_diagram.o_le_o,
+      category_theory.snake_diagram.o_fst, category_theory.snake_diagram.o_snd,
       prod.le_def, and_true, true_and, le_refl],
-   dec_trivial! ]
+  dec_trivial! ]
 
 def hom (i j : snake_diagram) (hij : i ≤ j . hom_tac) : i ⟶ j := hom_of_le hij
 
