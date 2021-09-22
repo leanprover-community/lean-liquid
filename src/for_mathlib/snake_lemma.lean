@@ -289,6 +289,8 @@ example (i : fin 4) : o i 0 ⟶ o i 1 := hom (i,0) (i,1)
 
 local notation x `⟶[`D`]` y := D.map (hom x y)
 
+section definitions
+
 variables (𝒜 : Type u) [category.{v} 𝒜] [has_images 𝒜] [has_zero_morphisms 𝒜] [has_kernels 𝒜]
 
 variables {𝒜}
@@ -333,6 +335,16 @@ begin
   { exact (hD.col_exact₁ j).w },
   { exact (hD.col_exact₂ j).w },
 end
+
+end is_snake_input
+
+end definitions
+
+section abelian
+
+variables {𝒜 : Type u} [category.{v} 𝒜] [abelian 𝒜] {D : snake_diagram ⥤ 𝒜}
+
+namespace is_snake_input
 
 lemma row_exact₀ (hD : is_snake_input D) : exact ((0,0) ⟶[D] (0,1)) ((0,1) ⟶[D] (0,2)) :=
 sorry
@@ -395,6 +407,8 @@ has_snake_lemma.exact_δ D
 
 lemma δ_exact (D : snake_input 𝒜) : exact (δ D) ((3,0) ⟶[D] (3,1)) :=
 has_snake_lemma.δ_exact D
+
+end abelian
 
 end snake_lemma
 
