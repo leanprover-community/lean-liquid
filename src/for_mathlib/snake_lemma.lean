@@ -568,15 +568,37 @@ end
 
 lemma row_exact₃ (hD : is_snake_input D) : exact ((3,0) ⟶[D] (3,1)) ((3,1) ⟶[D] (3,2)) :=
 begin
-  refine exact_of_pseudo_exact _ _ ⟨λ a, _, _⟩,
+  refine exact_of_pseudo_exact _ _ ⟨λ a, _,λ b hb, _⟩,
   { obtain ⟨b, hb⟩ := (surjective_iff_epi ((2,0) ⟶[D] (3,0))).2 (hD.col_epi 0) a,
     rw [← hb, ← abelian.pseudoelement.comp_apply, ← abelian.pseudoelement.comp_apply,
       ← D.map_comp, ← D.map_comp, map_eq hD ((hom (2, 0) (3, 0)) ≫ (hom _ (3, 1)) ≫
       (hom _ (3, 2))) ((hom (2, 0) (2, 1)) ≫ (hom _ (2, 2)) ≫ (hom _ _)), ← category.assoc,
       D.map_comp _ (hom (2, 2) (3, 2)), D.map_comp, hD.row_exact₂.w, zero_comp, zero_apply] },
-  {
-    sorry
-  }
+  { set f₁ := hom (2, 1) (2, 2),
+    set f₂ := hom (2, 2) (3, 2),
+    set f₃ := hom (1, 1) (2, 1),
+    set f₄ := hom (2, 0) (3, 0),
+    set f₅ := hom (3, 0) (3, 1),
+    obtain ⟨c, hc⟩ := (surjective_iff_epi ((2,1) ⟶[D] (3,1))).2 (hD.col_epi 1) b,
+    let d := D.map f₁ c,
+    have hd : D.map f₂ d = 0,
+    { rw [← abelian.pseudoelement.comp_apply, ← D.map_comp, map_eq hD ((hom (2, 1) (2, 2)) ≫
+      (hom _ (3, 2))) ((hom (2, 1) (3, 1)) ≫ (hom _ (3, 2))), D.map_comp,
+      abelian.pseudoelement.comp_apply, hc, hb] },
+    obtain ⟨e, he⟩ := exists_of_exact (hD.col_exact₂ 2) d hd,
+    obtain ⟨f, hf⟩ := (surjective_iff_epi ((1,1) ⟶[D] (1,2))).2 hD.row_epi e,
+    have hfzero : ((2,1) ⟶[D] (3,1)) ((D.map f₃) f) = 0,
+    { rw [← abelian.pseudoelement.comp_apply, (hD.col_exact₂ 1).w, zero_apply] },
+    have hdiff : D.map f₁ c = D.map f₁ (D.map f₃ f),
+    { rw [← abelian.pseudoelement.comp_apply, ← D.map_comp, map_eq hD ((hom (1, 1) (2, 1)) ≫
+      (hom _ (2, 2))) ((hom (1, 1) (1, 2)) ≫ (hom _ (2, 2))), D.map_comp,
+      abelian.pseudoelement.comp_apply, hf, he] },
+    obtain ⟨g, ⟨hg₁, hg₂⟩⟩ := sub_of_eq_image _ _ _ hdiff,
+    obtain ⟨h, hh⟩ := exists_of_exact hD.row_exact₂ g hg₁,
+    use D.map f₄ h,
+    rw [← abelian.pseudoelement.comp_apply, ← D.map_comp, map_eq hD
+      ((hom (2, 0) (3, 0)) ≫ (hom _ (3, 1))) ((hom _ (2, 1)) ≫ (hom _ _)), D.map_comp,
+      abelian.pseudoelement.comp_apply, hh, hg₂ _ ((2,1) ⟶[D] (3,1)) hfzero, hc] }
 end
 
 lemma row_exact (hD : is_snake_input D) (i : fin 4) :
