@@ -760,7 +760,23 @@ begin
   simpa [← abelian.pseudoelement.comp_apply] using ha,
 end
 
-instance : epi hD.to_kernel := sorry
+instance : epi hD.to_kernel :=
+begin
+  apply epi_of_pseudo_surjective,
+  intros a,
+  let a' := kernel.ι ((1,2) ⟶[D] (2,2)) a,
+  obtain ⟨b,hb⟩ : ∃ b, ((0,2) ⟶[D] (1,2)) b = a',
+  { apply exists_of_exact (hD.col_exact₁ _),
+    dsimp [a'],
+    simp },
+  use b,
+  dsimp [to_kernel],
+  apply_fun kernel.ι ((1,2) ⟶[D] (2,2)),
+  swap, { rw injective_iff_mono, apply_instance },
+  change _ = a',
+  rw ← hb,
+  simp [← abelian.pseudoelement.comp_apply],
+end
 
 instance : is_iso hD.to_kernel :=
 abelian.is_iso_of_mono_of_epi _
