@@ -502,11 +502,30 @@ begin
   simp,
 end
 
+-- (AT) I don't know if we actually want this lemma, but it came in handy below.
+lemma eq_zero_iff_kernel_ι_eq_zero {P Q : 𝒜} (f : P ⟶ Q) (q) : kernel.ι f q = 0 ↔ q = 0 :=
+begin
+  split,
+  { intro h,
+    apply_fun kernel.ι f,
+    simp [h],
+    rw injective_iff_mono,
+    apply_instance },
+  { intro h,
+    simp [h] },
+end
+
 @[simp]
 lemma cokernel_π_apply {P Q : 𝒜} (f : P ⟶ Q) (a) : cokernel.π f (f a) = 0 :=
 begin
   rw ← abelian.pseudoelement.comp_apply,
   simp,
+end
+
+lemma cokernel_π_surjective {P Q : 𝒜} (f : P ⟶ Q) : function.surjective (cokernel.π f) :=
+begin
+  rw surjective_iff_epi,
+  apply_instance,
 end
 
 end move_me
@@ -600,8 +619,76 @@ end) begin
   simp [← abelian.pseudoelement.comp_apply, hD.row_exact₁.1],
 end
 
+instance : mono hD.cokernel_to :=
+begin
+  apply mono_of_zero_of_map_zero,
+  intros a h,
+  obtain ⟨b,rfl⟩ := cokernel_π_surjective _ a,
+  rw ← eq_zero_iff_kernel_ι_eq_zero at h,
+  simp [← abelian.pseudoelement.comp_apply, cokernel_to] at h,
+  simp [ abelian.pseudoelement.comp_apply] at h,
+  have : ∃ c, ((1,0) ⟶[D] (1,1)) c = kernel.ι ((1,1) ⟶[D] (2,2)) b,
+  { apply exists_of_exact _ _ h,
+    exact hD.row_exact₁ },
+  obtain ⟨c,hc⟩ := this,
+  let f : cokernel hD.to_kernel ⟶ cokernel ((1,0) ⟶[D] (1,1)) :=
+    cokernel.desc _ _ _,
+  swap, { refine kernel.ι _ ≫ cokernel.π _ },
+  swap, { simp [to_kernel] },
+  apply_fun f,
+  swap, {
+    rw injective_iff_mono,
+    apply mono_of_zero_of_map_zero,
+    intros a ha,
+    dsimp [f] at ha,
+    obtain ⟨a,rfl⟩ := cokernel_π_surjective _ a,
+    simp [← abelian.pseudoelement.comp_apply] at ha,
+    simp [abelian.pseudoelement.comp_apply] at ha,
+    have : ∃ c, ((1,0) ⟶[D] (1,1)) c = kernel.ι ((1,1) ⟶[D] (2,2)) a,
+    { apply exists_of_exact _ _ ha,
+      apply_instance },
+    obtain ⟨c,hc⟩ := this,
+    have : hD.to_kernel c = a,
+    { apply_fun kernel.ι ((1,1) ⟶[D] (2,2)),
+      swap, { rw injective_iff_mono, apply_instance },
+      dsimp [to_kernel],
+      simp [← abelian.pseudoelement.comp_apply],
+      erw kernel.lift_ι,
+      exact hc },
+    simp [← this] },
+  dsimp [f],
+  simp [← abelian.pseudoelement.comp_apply, to_kernel],
+  simp [abelian.pseudoelement.comp_apply, ← hc],
+end
+
+instance : epi hD.cokernel_to :=
+begin
+  apply epi_of_pseudo_surjective,
+  intros a,
+  let a' := kernel.ι ((1,2) ⟶[D] (2,2)) a,
+  obtain ⟨b,hb⟩ : ∃ b, ((1,1) ⟶[D] (1,2)) b = a',
+  { suffices : function.surjective ((1,1) ⟶[D] (1,2)), by apply this,
+    rw surjective_iff_epi,
+    apply hD.row_epi },
+  obtain ⟨c,hc⟩ : ∃ c, kernel.ι ((1,1) ⟶[D] (2,2)) c = b,
+  { have : exact (kernel.ι ((1,1) ⟶[D] (2,2))) ((1,1) ⟶[D] (2,2)), by apply_instance,
+    apply exists_of_exact this,
+    rw [(show hom (1,1) (2,2) = hom (1,1) (1,2) ≫ hom (1,2) (2,2), by refl),
+      D.map_comp, abelian.pseudoelement.comp_apply, hb],
+    dsimp [a'],
+    simp },
+  use cokernel.π hD.to_kernel c,
+  apply_fun kernel.ι ((1,2) ⟶[D] (2,2)),
+  swap, { rw injective_iff_mono, apply_instance },
+  dsimp [to_kernel, cokernel_to],
+  simp [← abelian.pseudoelement.comp_apply],
+  change _ = a',
+  rw ← hb,
+  simp [← hb, abelian.pseudoelement.comp_apply, ← hc],
+end
+
 -- prove by using bijectivity for pseudoelements!
-instance : is_iso hD.cokernel_to := sorry
+instance : is_iso hD.cokernel_to := abelian.is_iso_of_mono_of_epi _
 
 def from_cokernel : cokernel ((1,0) ⟶[D] (2,1)) ⟶ D.obj (2,2) :=
 cokernel.desc _ (_ ⟶[D] _)
@@ -649,7 +736,7 @@ begin
   swap, { rw injective_iff_mono, apply_instance },
   simp [← abelian.pseudoelement.comp_apply],
   rw [← category.assoc, ← D.map_comp],
-  have : hom (1,0) (1,1) ≫ hom (1,1) (2,1) = hom _ _, rw this, clear this,
+  have : hom (1,0) (1,1) ≫ hom (1,1) (2,1) = hom _ _, refl, rw this, clear this,
   simp [abelian.pseudoelement.comp_apply],
 end
 
