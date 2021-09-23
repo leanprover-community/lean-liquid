@@ -760,7 +760,25 @@ end) begin
   simp [← abelian.pseudoelement.comp_apply, hD.row_exact₂.1],
 end
 
-instance : mono hD.left_cokernel_to_kernel_bottom_left_cokernel_to := sorry
+instance : mono hD.left_cokernel_to_kernel_bottom_left_cokernel_to :=
+begin
+  apply mono_of_zero_of_map_zero,
+  intros a ha,
+  obtain ⟨a,rfl⟩ := cokernel_π_surjective _ a,
+  dsimp [left_cokernel_to_kernel_bottom_left_cokernel_to] at ha,
+  rw ← eq_zero_iff_kernel_ι_eq_zero at ha,
+  simp [← abelian.pseudoelement.comp_apply] at ha,
+  simp [abelian.pseudoelement.comp_apply] at ha,
+  obtain ⟨c,hc⟩ : ∃ c, ((1,0) ⟶[D] (2,1)) c = ((2,0) ⟶[D] (2,1)) a,
+  { apply exists_of_exact _ _ ha,
+    apply_instance },
+  have : ((1,0) ⟶[D] (2,0)) c = a,
+  { apply_fun ((2,0) ⟶[D] (2,1)),
+    swap, { rw injective_iff_mono, apply hD.row_mono },
+    simpa only [← hc, ← abelian.pseudoelement.comp_apply, ← D.map_comp] },
+  simp [← this],
+end
+
 instance : epi hD.left_cokernel_to_kernel_bottom_left_cokernel_to := sorry
 
 instance : is_iso hD.left_cokernel_to_kernel_bottom_left_cokernel_to :=
