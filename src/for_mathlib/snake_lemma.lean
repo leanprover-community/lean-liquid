@@ -537,7 +537,12 @@ begin
 end
 
 lemma exists_of_cokernel_π_eq_zero {P Q : 𝒜} (f : P ⟶ Q) (a) :
-  cokernel.π f a = 0 → ∃ b, f b = a := sorry
+  cokernel.π f a = 0 → ∃ b, f b = a :=
+begin
+  intro h,
+  apply exists_of_exact _ _ h,
+  apply_instance
+end
 
 lemma cokernel_π_surjective {P Q : 𝒜} (f : P ⟶ Q) : function.surjective (cokernel.π f) :=
 begin
@@ -547,10 +552,16 @@ end
 
 --move
 lemma exact_is_iso_iff {P Q Q' R : 𝒜} (f : P ⟶ Q) (g : Q' ⟶ R) (e : Q ⟶ Q') [is_iso e] :
-  exact f (e ≫ g) ↔ exact (f ≫ e) g := sorry
+  exact f (e ≫ g) ↔ exact (f ≫ e) g :=
+begin
+  let E := as_iso e,
+  change exact f (E.hom ≫ g) ↔ exact (f ≫ E.hom) g,
+  conv_rhs { rw (show g = E.inv ≫ E.hom ≫ g, by simp) },
+  rw exact_comp_hom_inv_comp_iff
+end
 
-lemma exact_comp_is_iso {P Q R R' : 𝒜} (f : P ⟶ Q) (g : Q ⟶ R) (e : R ⟶ R') [is_iso e] :
-  exact f (g ≫ e) ↔ exact f g := sorry
+--lemma exact_comp_is_iso {P Q R R' : 𝒜} (f : P ⟶ Q) (g : Q ⟶ R) (e : R ⟶ R') [is_iso e] :
+--  exact f (g ≫ e) ↔ exact f g := exact_comp_iso
 
 end move_me
 
@@ -962,7 +973,7 @@ end
 theorem exact_to_δ : exact ((0,1) ⟶[D] (0,2)) hD.δ :=
 begin
   dsimp [δ],
-  rw [exact_is_iso_iff, exact_is_iso_iff, exact_comp_is_iso],
+  rw [exact_is_iso_iff, exact_is_iso_iff, exact_comp_iso],
   convert hD.exact_to_δ_aux using 1,
   rw is_iso.comp_inv_eq,
   dsimp [to_kernel, to_δ_aux, cokernel_to_top_right_kernel_to_right_kernel],
