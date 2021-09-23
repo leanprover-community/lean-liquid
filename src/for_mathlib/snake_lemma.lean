@@ -777,9 +777,24 @@ begin
     swap, { rw injective_iff_mono, apply hD.row_mono },
     simpa only [← hc, ← abelian.pseudoelement.comp_apply, ← D.map_comp] },
   simp [← this],
-end
+end .
 
-instance : epi hD.left_cokernel_to_kernel_bottom_left_cokernel_to := sorry
+instance : epi hD.left_cokernel_to_kernel_bottom_left_cokernel_to :=
+begin
+  apply epi_of_pseudo_surjective,
+  intros a,
+  let a' := kernel.ι hD.bottom_left_cokernel_to a,
+  obtain ⟨b,hb⟩ := cokernel_π_surjective _ a',
+  have : ((2,1) ⟶[D] (2,2)) b = 0, sorry,
+  obtain ⟨c,hc⟩ : ∃ c, ((2,0) ⟶[D] (2,1)) c = b, sorry,
+  use cokernel.π ((1,0) ⟶[D] (2,0)) c,
+  apply_fun kernel.ι hD.bottom_left_cokernel_to,
+  swap, { rw injective_iff_mono, apply_instance },
+  change _ = a',
+  simp [← abelian.pseudoelement.comp_apply, ← hb,
+    left_cokernel_to_kernel_bottom_left_cokernel_to],
+  simp [abelian.pseudoelement.comp_apply, hc],
+end
 
 instance : is_iso hD.left_cokernel_to_kernel_bottom_left_cokernel_to :=
 abelian.is_iso_of_mono_of_epi _
