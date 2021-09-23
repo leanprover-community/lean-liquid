@@ -545,6 +545,13 @@ begin
   apply_instance,
 end
 
+--move
+lemma exact_is_iso_iff {P Q Q' R : 𝒜} (f : P ⟶ Q) (g : Q' ⟶ R) (e : Q ⟶ Q') [is_iso e] :
+  exact f (e ≫ g) ↔ exact (f ≫ e) g := sorry
+
+lemma exact_comp_is_iso {P Q R R' : 𝒜} (f : P ⟶ Q) (g : Q ⟶ R) (e : R ⟶ R') [is_iso e] :
+  exact f (g ≫ e) ↔ exact f g := sorry
+
 end move_me
 
 lemma row_exact₀ (hD : is_snake_input D) : exact ((0,0) ⟶[D] (0,1)) ((0,1) ⟶[D] (0,2)) :=
@@ -904,8 +911,10 @@ def δ : D.obj (0,2) ⟶ D.obj (3,0) :=
   inv hD.left_cokernel_to_kernel_bottom_left_cokernel_to ≫ hD.cokernel_to -- <-- this is an iso
 
 def to_δ_aux : D.obj (0,1) ⟶ cokernel hD.to_top_right_kernel :=
-kernel.lift _ (_ ⟶[D] _) begin
-  sorry
+kernel.lift _ ((0,1) ⟶[D] (1,1)) begin
+  rw [(show (hom (1,1) (2,2) = hom (1,1) (2,1) ≫ hom _ _), by refl), D.map_comp,
+    ← category.assoc, (hD.col_exact₁ _).1],
+  simp,
 end ≫ cokernel.π _
 
 theorem exact_to_δ_aux : exact hD.to_δ_aux hD.δ_aux :=
@@ -948,6 +957,18 @@ begin
       category.assoc, kernel.lift_ι],
     simp only [abelian.pseudoelement.comp_apply],
     rw [hw, h2] }
+end
+
+theorem exact_to_δ : exact ((0,1) ⟶[D] (0,2)) hD.δ :=
+begin
+  dsimp [δ],
+  rw [exact_is_iso_iff, exact_is_iso_iff, exact_comp_is_iso],
+  convert hD.exact_to_δ_aux using 1,
+  rw is_iso.comp_inv_eq,
+  dsimp [to_kernel, to_δ_aux, cokernel_to_top_right_kernel_to_right_kernel],
+  ext,
+  simp only [cokernel.π_desc, kernel.lift_ι_assoc, category.assoc, kernel.lift_ι],
+  simpa only [← D.map_comp],
 end
 
 end delta
