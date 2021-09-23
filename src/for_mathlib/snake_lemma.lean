@@ -784,8 +784,23 @@ abelian.is_iso_of_mono_of_epi _
 def cokernel_to : cokernel ((1,0) ⟶[D] (2,0)) ⟶ D.obj (3,0) :=
 cokernel.desc _ (_ ⟶[D] _) (hD.col_exact₂ _).1
 
-instance : mono hD.cokernel_to := sorry
-instance : epi hD.cokernel_to := sorry
+instance : mono hD.cokernel_to :=
+begin
+  apply mono_of_zero_of_map_zero,
+  intros a ha,
+  dsimp [cokernel_to] at *,
+  obtain ⟨b,rfl⟩ : ∃ b, cokernel.π ((1,0) ⟶[D] (2,0)) b = a := cokernel_π_surjective _ _,
+  simp [← abelian.pseudoelement.comp_apply] at ha,
+  obtain ⟨c,rfl⟩ : ∃ c, ((1,0) ⟶[D] (2,0)) c = b,
+  { apply exists_of_exact _ _ ha,
+    exact hD.col_exact₂ _ },
+  simp,
+end
+
+instance : epi hD.cokernel_to :=
+begin
+  apply epi_of_pseudo_surjective,
+end
 
 instance : is_iso hD.cokernel_to :=
 abelian.is_iso_of_mono_of_epi _
