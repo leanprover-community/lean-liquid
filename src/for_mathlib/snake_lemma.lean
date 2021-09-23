@@ -736,7 +736,7 @@ begin
   swap, { rw injective_iff_mono, apply_instance },
   simp [← abelian.pseudoelement.comp_apply],
   rw [← category.assoc, ← D.map_comp],
-  have : hom (1,0) (1,1) ≫ hom (1,1) (2,1) = hom _ _, rw this, clear this,
+  have : hom (1,0) (1,1) ≫ hom (1,1) (2,1) = hom _ _, refl, rw this, clear this,
   simp [abelian.pseudoelement.comp_apply],
 end
 
