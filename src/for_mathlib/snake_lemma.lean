@@ -532,10 +532,8 @@ end move_me
 
 lemma row_exact₀ (hD : is_snake_input D) : exact ((0,0) ⟶[D] (0,1)) ((0,1) ⟶[D] (0,2)) :=
 begin
-  apply exact_of_pseudo_exact,
-  split,
-  { intro a,
-    apply_fun ((0,2) ⟶[D] (1,2)),
+  refine exact_of_pseudo_exact _ _ ⟨λ a, _, _⟩,
+  { apply_fun ((0,2) ⟶[D] (1,2)),
     swap, { rw injective_iff_mono, exact hD.col_mono _ },
     simp_rw [← abelian.pseudoelement.comp_apply, ← D.map_comp, abelian.pseudoelement.apply_zero],
     change D.map (hom (0,0) (1,0) ≫ hom (1,0) (1,1) ≫ hom (1,1) (1,2)) a = 0,
@@ -569,7 +567,17 @@ begin
 end
 
 lemma row_exact₃ (hD : is_snake_input D) : exact ((3,0) ⟶[D] (3,1)) ((3,1) ⟶[D] (3,2)) :=
-sorry
+begin
+  refine exact_of_pseudo_exact _ _ ⟨λ a, _, _⟩,
+  { obtain ⟨b, hb⟩ := (surjective_iff_epi ((2,0) ⟶[D] (3,0))).2 (hD.col_epi 0) a,
+    rw [← hb, ← abelian.pseudoelement.comp_apply, ← abelian.pseudoelement.comp_apply,
+      ← D.map_comp, ← D.map_comp, map_eq hD ((hom (2, 0) (3, 0)) ≫ (hom _ (3, 1)) ≫
+      (hom _ (3, 2))) ((hom (2, 0) (2, 1)) ≫ (hom _ (2, 2)) ≫ (hom _ _)), ← category.assoc,
+      D.map_comp _ (hom (2, 2) (3, 2)), D.map_comp, hD.row_exact₂.w, zero_comp, zero_apply] },
+  {
+    sorry
+  }
+end
 
 lemma row_exact (hD : is_snake_input D) (i : fin 4) :
   exact ((i,0) ⟶[D] (i,1)) ((i,1) ⟶[D] (i,2)) :=
