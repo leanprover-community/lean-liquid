@@ -536,6 +536,9 @@ begin
   simp,
 end
 
+lemma exists_of_cokernel_π_eq_zero {P Q : 𝒜} (f : P ⟶ Q) (a) :
+  cokernel.π f a = 0 → ∃ b, f b = a := sorry
+
 lemma cokernel_π_surjective {P Q : 𝒜} (f : P ⟶ Q) : function.surjective (cokernel.π f) :=
 begin
   rw surjective_iff_epi,
@@ -899,6 +902,53 @@ def δ : D.obj (0,2) ⟶ D.obj (3,0) :=
   hD.to_kernel ≫ inv hD.cokernel_to_top_right_kernel_to_right_kernel ≫  -- <-- this is an iso
   hD.δ_aux ≫ -- <- this is the key
   inv hD.left_cokernel_to_kernel_bottom_left_cokernel_to ≫ hD.cokernel_to -- <-- this is an iso
+
+def to_δ_aux : D.obj (0,1) ⟶ cokernel hD.to_top_right_kernel :=
+kernel.lift _ (_ ⟶[D] _) begin
+  sorry
+end ≫ cokernel.π _
+
+theorem exact_to_δ_aux : exact hD.to_δ_aux hD.δ_aux :=
+begin
+  apply exact_of_pseudo_exact,
+  split,
+  { intros a,
+    dsimp [δ_aux, to_δ_aux],
+    rw ← eq_zero_iff_kernel_ι_eq_zero,
+    simp only [←abelian.pseudoelement.comp_apply, cokernel.π_desc,
+      kernel.lift_ι_assoc, category.assoc, kernel.lift_ι],
+    simp [abelian.pseudoelement.comp_apply, eq_zero_of_exact (hD.col_exact₁ _)] },
+  { intros b hb,
+    obtain ⟨b,rfl⟩ := cokernel_π_surjective _ b,
+    dsimp [δ_aux] at hb,
+    rw ← eq_zero_iff_kernel_ι_eq_zero at hb,
+    simp only [←abelian.pseudoelement.comp_apply, cokernel.π_desc, kernel.lift_ι] at hb,
+    simp only [abelian.pseudoelement.comp_apply] at hb,
+    let b' := kernel.ι ((1,1) ⟶[D] (2,2)) b,
+    obtain ⟨c,hc⟩ := exists_of_cokernel_π_eq_zero _ _ hb, clear hb,
+    change _ = ((1,1) ⟶[D] (2,1)) b' at hc,
+    rw [(show hom (1,0) (2,1) = hom (1,0) (1,1) ≫ hom _ _, by refl), D.map_comp,
+      abelian.pseudoelement.comp_apply] at hc,
+    obtain ⟨z,h1,h2⟩ := sub_of_eq_image _ _ _ hc.symm, clear hc,
+    specialize h2 _ ((1,1) ⟶[D] (1,2)) (eq_zero_of_exact hD.row_exact₁ _),
+    obtain ⟨w,hw⟩ : ∃ w, ((0,1) ⟶[D] (1,1)) w = z := exists_of_exact (hD.col_exact₁ _) _ h1,
+    clear h1,
+    use w,
+    dsimp [b'] at h2,
+    dsimp [to_δ_aux],
+    simp only [abelian.pseudoelement.comp_apply],
+    apply_fun hD.cokernel_to_top_right_kernel_to_right_kernel,
+    swap, { rw injective_iff_mono, apply_instance },
+    dsimp [cokernel_to_top_right_kernel_to_right_kernel],
+    simp only [←abelian.pseudoelement.comp_apply, cokernel.π_desc, category.assoc],
+    simp only [abelian.pseudoelement.comp_apply],
+    apply_fun kernel.ι ((1,2) ⟶[D] (2,2)),
+    swap, { rw injective_iff_mono, apply_instance },
+    simp only [←abelian.pseudoelement.comp_apply, kernel.lift_ι_assoc,
+      category.assoc, kernel.lift_ι],
+    simp only [abelian.pseudoelement.comp_apply],
+    rw [hw, h2] }
+end
 
 end delta
 
