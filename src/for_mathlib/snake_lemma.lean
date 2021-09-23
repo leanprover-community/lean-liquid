@@ -928,6 +928,13 @@ kernel.lift _ ((0,1) ⟶[D] (1,1)) begin
   simp,
 end ≫ cokernel.π _
 
+def from_δ_aux : kernel hD.bottom_left_cokernel_to ⟶ D.obj (3,1) :=
+kernel.ι _ ≫ cokernel.desc _ ((2,1) ⟶[D] (3,1)) begin
+  rw [(show hom (1,0) (2,1) = hom (1,0) (1,1) ≫ hom (1,1) (2,1), by refl),
+    D.map_comp, category.assoc, (hD.col_exact₂ _).w],
+  simp,
+end
+
 theorem exact_to_δ_aux : exact hD.to_δ_aux hD.δ_aux :=
 begin
   apply exact_of_pseudo_exact,
@@ -970,6 +977,8 @@ begin
     rw [hw, h2] }
 end
 
+theorem exact_from_δ_aux : exact hD.δ_aux hD.from_δ_aux := sorry
+
 theorem exact_to_δ : exact ((0,1) ⟶[D] (0,2)) hD.δ :=
 begin
   dsimp [δ],
@@ -979,6 +988,18 @@ begin
   dsimp [to_kernel, to_δ_aux, cokernel_to_top_right_kernel_to_right_kernel],
   ext,
   simp only [cokernel.π_desc, kernel.lift_ι_assoc, category.assoc, kernel.lift_ι],
+  simpa only [← D.map_comp],
+end
+
+theorem exact_from_δ : exact hD.δ ((3,0) ⟶[D] (3,1)) :=
+begin
+  dsimp [δ],
+  rw [← category.assoc, ← category.assoc, ← exact_is_iso_iff, exact_iso_comp],
+  convert hD.exact_from_δ_aux using 1,
+  rw [category.assoc, is_iso.inv_comp_eq],
+  dsimp [cokernel_to, left_cokernel_to_kernel_bottom_left_cokernel_to, from_δ_aux],
+  ext,
+  simp only [cokernel.π_desc, kernel.lift_ι_assoc, cokernel.π_desc_assoc, category.assoc],
   simpa only [← D.map_comp],
 end
 
