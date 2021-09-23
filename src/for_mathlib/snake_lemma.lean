@@ -747,7 +747,19 @@ end
 def to_kernel : D.obj (0,2) ⟶ kernel ((1,2) ⟶[D] (2,2)) :=
 kernel.lift _ (_ ⟶[D] _) (hD.col_exact₁ _).1
 
-instance : mono hD.to_kernel := sorry
+instance : mono hD.to_kernel :=
+begin
+  apply mono_of_zero_of_map_zero,
+  intros a ha,
+  dsimp [to_kernel] at *,
+  apply_fun ((0,2) ⟶[D] (1,2)),
+  swap, {
+    rw injective_iff_mono,
+    apply hD.col_mono },
+  rw ← eq_zero_iff_kernel_ι_eq_zero at ha,
+  simpa [← abelian.pseudoelement.comp_apply] using ha,
+end
+
 instance : epi hD.to_kernel := sorry
 
 instance : is_iso hD.to_kernel :=
