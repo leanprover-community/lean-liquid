@@ -716,8 +716,11 @@ end) begin
   simp [← abelian.pseudoelement.comp_apply, hD.row_exact₂.1],
 end
 
--- prove by using bijectivity for pseudoelements!
-instance : is_iso hD.left_cokernel_to_kernel_bottom_left_cokernel_to := sorry
+instance : mono hD.left_cokernel_to_kernel_bottom_left_cokernel_to := sorry
+instance : epi hD.left_cokernel_to_kernel_bottom_left_cokernel_to := sorry
+
+instance : is_iso hD.left_cokernel_to_kernel_bottom_left_cokernel_to :=
+abelian.is_iso_of_mono_of_epi _
 
 def δ_aux : cokernel hD.to_top_right_kernel ⟶ kernel hD.bottom_left_cokernel_to :=
 cokernel.desc _ (kernel.lift _ (kernel.ι _ ≫ (_ ⟶[D] _) ≫ cokernel.π _) begin
@@ -744,14 +747,20 @@ end
 def to_kernel : D.obj (0,2) ⟶ kernel ((1,2) ⟶[D] (2,2)) :=
 kernel.lift _ (_ ⟶[D] _) (hD.col_exact₁ _).1
 
--- prove by using bijectivity for pseudoelements!
-instance : is_iso hD.to_kernel := sorry
+instance : mono hD.to_kernel := sorry
+instance : epi hD.to_kernel := sorry
+
+instance : is_iso hD.to_kernel :=
+abelian.is_iso_of_mono_of_epi _
 
 def cokernel_to : cokernel ((1,0) ⟶[D] (2,0)) ⟶ D.obj (3,0) :=
 cokernel.desc _ (_ ⟶[D] _) (hD.col_exact₂ _).1
 
--- prove by using bijectivity for pseudoelements!
-instance : is_iso hD.cokernel_to := sorry
+instance : mono hD.cokernel_to := sorry
+instance : epi hD.cokernel_to := sorry
+
+instance : is_iso hD.cokernel_to :=
+abelian.is_iso_of_mono_of_epi _
 
 def δ : D.obj (0,2) ⟶ D.obj (3,0) :=
   hD.to_kernel ≫ inv hD.cokernel_to_top_right_kernel_to_right_kernel ≫  -- <-- this is an iso
