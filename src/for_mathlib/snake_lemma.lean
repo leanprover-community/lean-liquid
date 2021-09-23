@@ -977,7 +977,18 @@ begin
     rw [hw, h2] }
 end
 
-theorem exact_from_δ_aux : exact hD.δ_aux hD.from_δ_aux := sorry
+theorem exact_from_δ_aux : exact hD.δ_aux hD.from_δ_aux :=
+begin
+  apply exact_of_pseudo_exact,
+  split,
+  { intros a,
+    dsimp [δ_aux, from_δ_aux],
+    obtain ⟨a,rfl⟩ := cokernel_π_surjective _ a,
+    simp only [←abelian.pseudoelement.comp_apply,
+      cokernel.π_desc, kernel.lift_ι_assoc, category.assoc],
+    simp [abelian.pseudoelement.comp_apply, eq_zero_of_exact (hD.col_exact₂ _)] },
+  { sorry }
+end
 
 theorem exact_to_δ : exact ((0,1) ⟶[D] (0,2)) hD.δ :=
 begin
