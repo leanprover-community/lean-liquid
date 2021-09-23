@@ -341,9 +341,23 @@ section
 
 variables {𝒜 : Type*} [category 𝒜] [abelian 𝒜]
 
--- move this
+-- move (ang generalize) this
 instance exact_kernel_ι_self {A B : 𝒜} (f : A ⟶ B) : exact (kernel.ι f) f :=
-sorry
+begin
+  apply abelian.pseudoelement.exact_of_pseudo_exact,
+  split,
+  { intros a,
+    simp [← abelian.pseudoelement.comp_apply] },
+  { intros b hb, rcases b with ⟨b⟩,
+    erw abelian.pseudoelement.pseudo_apply_mk at hb,
+    obtain ⟨X, p : _ ⟶ b.left, q : _ ⟶ B, h1, h2, h : _ = _ ≫ 0⟩ := quotient.exact' hb,
+    simp at h,
+    let g : over (kernel f) := over.mk (kernel.lift _ (p ≫ b.hom) (by simpa using h)),
+    use quotient.mk' g,
+    erw abelian.pseudoelement.pseudo_apply_mk,
+    apply quotient.sound',
+    use [X, 𝟙 X, p, by apply_instance, by assumption, by simp] }
+end
 
 -- move this
 instance exact_self_cokernel_π {A B : 𝒜} (f : A ⟶ B) : exact f (cokernel.π f) :=
