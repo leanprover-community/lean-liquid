@@ -800,6 +800,14 @@ end
 instance : epi hD.cokernel_to :=
 begin
   apply epi_of_pseudo_surjective,
+  intros a,
+  obtain ⟨b,rfl⟩ : ∃ b, ((2,0) ⟶[D] (3,0)) b = a,
+  { suffices : function.surjective ((2,0) ⟶[D] (3,0)), by apply this,
+    rw surjective_iff_epi,
+    apply hD.col_epi },
+  use cokernel.π ((1,0) ⟶[D] (2,0)) b,
+  dsimp [cokernel_to],
+  simp [← abelian.pseudoelement.comp_apply],
 end
 
 instance : is_iso hD.cokernel_to :=
