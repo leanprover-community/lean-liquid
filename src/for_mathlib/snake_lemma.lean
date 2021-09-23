@@ -596,45 +596,45 @@ section delta
 variable (hD : is_snake_input D)
 include hD
 
-def to_kernel : D.obj (1,0) ⟶ kernel ((1,1) ⟶[D] (2,2)) :=
+def to_top_right_kernel : D.obj (1,0) ⟶ kernel ((1,1) ⟶[D] (2,2)) :=
 kernel.lift _ (_ ⟶[D] _)
 begin
   rw ← D.map_comp,
   change D.map (hom (1,0) (2,0) ≫ hom (2,0) (2,1) ≫ hom (2,1) (2,2)) = 0,
-  simp_rw D.map_comp,
   simp [hD.row_exact₂.1],
 end
 
-def cokernel_to : cokernel hD.to_kernel ⟶ kernel ((1,2) ⟶[D] (2,2)) :=
+def cokernel_to_top_right_kernel_to_right_kernel :
+  cokernel hD.to_top_right_kernel ⟶ kernel ((1,2) ⟶[D] (2,2)) :=
 cokernel.desc _ (kernel.lift _ (kernel.ι _ ≫ (_ ⟶[D] _)) begin
   rw [category.assoc, ← D.map_comp],
   have : hom (1,1) (1,2) ≫ hom (1,2) (2,2) = hom (1,1) (2,2) := rfl,
   rw this, clear this,
   ext, simp [abelian.pseudoelement.comp_apply],
 end) begin
-  dsimp [to_kernel],
+  dsimp [to_top_right_kernel],
   ext a,
   apply_fun kernel.ι (D.map (hom (1, 2) (2, 2))),
   swap, { rw injective_iff_mono, apply_instance },
   simp [← abelian.pseudoelement.comp_apply, hD.row_exact₁.1],
 end
 
-instance : mono hD.cokernel_to :=
+instance : mono hD.cokernel_to_top_right_kernel_to_right_kernel :=
 begin
   apply mono_of_zero_of_map_zero,
   intros a h,
   obtain ⟨b,rfl⟩ := cokernel_π_surjective _ a,
   rw ← eq_zero_iff_kernel_ι_eq_zero at h,
-  simp [← abelian.pseudoelement.comp_apply, cokernel_to] at h,
+  simp [← abelian.pseudoelement.comp_apply, cokernel_to_top_right_kernel_to_right_kernel] at h,
   simp [ abelian.pseudoelement.comp_apply] at h,
   have : ∃ c, ((1,0) ⟶[D] (1,1)) c = kernel.ι ((1,1) ⟶[D] (2,2)) b,
   { apply exists_of_exact _ _ h,
     exact hD.row_exact₁ },
   obtain ⟨c,hc⟩ := this,
-  let f : cokernel hD.to_kernel ⟶ cokernel ((1,0) ⟶[D] (1,1)) :=
+  let f : cokernel hD.to_top_right_kernel ⟶ cokernel ((1,0) ⟶[D] (1,1)) :=
     cokernel.desc _ _ _,
   swap, { refine kernel.ι _ ≫ cokernel.π _ },
-  swap, { simp [to_kernel] },
+  swap, { simp [to_top_right_kernel] },
   apply_fun f,
   swap, {
     rw injective_iff_mono,
@@ -648,20 +648,20 @@ begin
     { apply exists_of_exact _ _ ha,
       apply_instance },
     obtain ⟨c,hc⟩ := this,
-    have : hD.to_kernel c = a,
+    have : hD.to_top_right_kernel c = a,
     { apply_fun kernel.ι ((1,1) ⟶[D] (2,2)),
       swap, { rw injective_iff_mono, apply_instance },
-      dsimp [to_kernel],
+      dsimp [to_top_right_kernel],
       simp [← abelian.pseudoelement.comp_apply],
       erw kernel.lift_ι,
       exact hc },
     simp [← this] },
   dsimp [f],
-  simp [← abelian.pseudoelement.comp_apply, to_kernel],
+  simp [← abelian.pseudoelement.comp_apply, to_top_right_kernel],
   simp [abelian.pseudoelement.comp_apply, ← hc],
-end
+end .
 
-instance : epi hD.cokernel_to :=
+instance : epi hD.cokernel_to_top_right_kernel_to_right_kernel :=
 begin
   apply epi_of_pseudo_surjective,
   intros a,
@@ -677,20 +677,20 @@ begin
       D.map_comp, abelian.pseudoelement.comp_apply, hb],
     dsimp [a'],
     simp },
-  use cokernel.π hD.to_kernel c,
+  use cokernel.π hD.to_top_right_kernel c,
   apply_fun kernel.ι ((1,2) ⟶[D] (2,2)),
   swap, { rw injective_iff_mono, apply_instance },
-  dsimp [to_kernel, cokernel_to],
+  dsimp [to_top_right_kernel, cokernel_to_top_right_kernel_to_right_kernel],
   simp [← abelian.pseudoelement.comp_apply],
   change _ = a',
   rw ← hb,
   simp [← hb, abelian.pseudoelement.comp_apply, ← hc],
-end
+end .
 
--- prove by using bijectivity for pseudoelements!
-instance : is_iso hD.cokernel_to := abelian.is_iso_of_mono_of_epi _
+instance : is_iso hD.cokernel_to_top_right_kernel_to_right_kernel :=
+abelian.is_iso_of_mono_of_epi _
 
-def from_cokernel : cokernel ((1,0) ⟶[D] (2,1)) ⟶ D.obj (2,2) :=
+def bottom_left_cokernel_to : cokernel ((1,0) ⟶[D] (2,1)) ⟶ D.obj (2,2) :=
 cokernel.desc _ (_ ⟶[D] _)
 begin
   rw ← D.map_comp,
@@ -699,14 +699,15 @@ begin
   simp [hD.row_exact₂.1],
 end
 
-def kernel_from : cokernel ((1,0) ⟶[D] (2,0)) ⟶ kernel hD.from_cokernel :=
+def left_cokernel_to_kernel_bottom_left_cokernel_to :
+  cokernel ((1,0) ⟶[D] (2,0)) ⟶ kernel hD.bottom_left_cokernel_to :=
 kernel.lift _ (cokernel.desc _ ((_ ⟶[D] _) ≫ cokernel.π _) begin
   rw [← category.assoc, ← D.map_comp],
   have : hom (1,0) (2,0) ≫ hom (2,0) (2,1) = hom _ _ := rfl,
   rw this, clear this,
   ext, simp [abelian.pseudoelement.comp_apply],
 end) begin
-  dsimp [from_cokernel],
+  dsimp [bottom_left_cokernel_to],
   ext a,
   obtain ⟨b,rfl⟩ : ∃ b, cokernel.π ((1,0) ⟶[D] (2,0)) b = a,
   { have : function.surjective (cokernel.π ((1,0) ⟶[D] (2,0))),
@@ -716,11 +717,11 @@ end) begin
 end
 
 -- prove by using bijectivity for pseudoelements!
-instance : is_iso hD.kernel_from := sorry
+instance : is_iso hD.left_cokernel_to_kernel_bottom_left_cokernel_to := sorry
 
-def δ_aux : cokernel hD.to_kernel ⟶ kernel hD.from_cokernel :=
+def δ_aux : cokernel hD.to_top_right_kernel ⟶ kernel hD.bottom_left_cokernel_to :=
 cokernel.desc _ (kernel.lift _ (kernel.ι _ ≫ (_ ⟶[D] _) ≫ cokernel.π _) begin
-  dsimp [from_cokernel],
+  dsimp [bottom_left_cokernel_to],
   simp,
   rw ← D.map_comp,
   have : hom (1,1) (2,1) ≫ hom (2,1) (2,2) = hom _ _ := rfl,
@@ -729,10 +730,10 @@ cokernel.desc _ (kernel.lift _ (kernel.ι _ ≫ (_ ⟶[D] _) ≫ cokernel.π _) 
   simp [abelian.pseudoelement.comp_apply],
 end)
 begin
-  dsimp [to_kernel],
+  dsimp [to_top_right_kernel],
   simp,
   ext,
-  apply_fun kernel.ι hD.from_cokernel,
+  apply_fun kernel.ι hD.bottom_left_cokernel_to,
   swap, { rw injective_iff_mono, apply_instance },
   simp [← abelian.pseudoelement.comp_apply],
   rw [← category.assoc, ← D.map_comp],
@@ -740,20 +741,22 @@ begin
   simp [abelian.pseudoelement.comp_apply],
 end
 
-def to_kernel' : D.obj (0,2) ⟶ kernel ((1,2) ⟶[D] (2,2)) :=
+def to_kernel : D.obj (0,2) ⟶ kernel ((1,2) ⟶[D] (2,2)) :=
 kernel.lift _ (_ ⟶[D] _) (hD.col_exact₁ _).1
 
 -- prove by using bijectivity for pseudoelements!
-instance : is_iso hD.to_kernel' := sorry
+instance : is_iso hD.to_kernel := sorry
 
-def cokernel_to' : cokernel ((1,0) ⟶[D] (2,0)) ⟶ D.obj (3,0) :=
+def cokernel_to : cokernel ((1,0) ⟶[D] (2,0)) ⟶ D.obj (3,0) :=
 cokernel.desc _ (_ ⟶[D] _) (hD.col_exact₂ _).1
 
 -- prove by using bijectivity for pseudoelements!
-instance : is_iso hD.cokernel_to' := sorry
+instance : is_iso hD.cokernel_to := sorry
 
 def δ : D.obj (0,2) ⟶ D.obj (3,0) :=
-hD.to_kernel' ≫ inv hD.cokernel_to ≫ hD.δ_aux ≫ inv hD.kernel_from ≫ hD.cokernel_to'
+  hD.to_kernel ≫ inv hD.cokernel_to_top_right_kernel_to_right_kernel ≫  -- <-- this is an iso
+  hD.δ_aux ≫ -- <- this is the key
+  inv hD.left_cokernel_to_kernel_bottom_left_cokernel_to ≫ hD.cokernel_to -- <-- this is an iso
 
 end delta
 
