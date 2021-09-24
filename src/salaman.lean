@@ -19,19 +19,21 @@ instance : has_lt grid := ⟨λ p₁ p₂, p₁.y > p₂.y ∨ (p₁.y = p₂.y 
 
 variables (p : grid)
 
-/-- `p.up` is the gridpoint directly above `p` -/
-def up : grid := ⟨p.x, p.y + 1⟩
+/-- `p.u` is the gridpoint directly above `p` -/
+def u : grid := ⟨p.x, p.y + 1⟩
 
-/-- `p.down` is the gridpoint directly below `p` -/
-def down : grid := ⟨p.x, p.y - 1⟩
+/-- `p.d` is the gridpoint directly below `p` -/
+def d : grid := ⟨p.x, p.y - 1⟩
 
-/-- `p.left` is the gridpoint directly left of `p` -/
-def left : grid := ⟨p.x - 1, p.y⟩
+/-- `p.l` is the gridpoint directly left of `p` -/
+def l : grid := ⟨p.x - 1, p.y⟩
 
-/-- `p.right` is the gridpoint directly right of `p` -/
-def right : grid := ⟨p.x + 1, p.y⟩
+/-- `p.r` is the gridpoint directly right of `p` -/
+def r : grid := ⟨p.x + 1, p.y⟩
 
 end grid
+
+namespace old
 
 /-- An object in a double complex -/
 structure obj :=
@@ -57,11 +59,11 @@ def y := X.coord.y
 
 /-- A constructor for a morphism out of an object, going to the right -/
 def right (s : string := "") : hom :=
-{ name := s, src := X.coord, tgt := X.coord.right }
+{ name := s, src := X.coord, tgt := X.coord.r }
 
 /-- A constructor for a morphism out of an object, going down -/
 def down (s : string := "") : hom :=
-{ name := s, src := X.coord, tgt := X.coord.down }
+{ name := s, src := X.coord, tgt := X.coord.d }
 
 /-- Constructor for a zero object at a grid position -/
 def mk_zero (p : grid) : obj := ⟨"0", p⟩
@@ -86,6 +88,8 @@ def mk_tgt (s : string := "") : obj :=
 def mk_zero (s t : grid) : hom := ⟨"0", s, t⟩
 
 end hom
+
+end old
 
 ----------------------------------------------------------------------------------------------------
 
@@ -134,7 +138,93 @@ namespace dir
 
 end dir
 
-local attribute [instance] prod.has_lt
+inductive obj
+| ob (p : grid) -- ordinary object
+| rc (p : grid) -- receptor
+| dn (p : grid) -- donor
+| Hh (p : grid) -- horizontal homology
+| Hv (p : grid) -- vertical homology
+
+namespace grid
+
+variables (p : grid)
+
+def ob := obj.ob p
+def rc := obj.rc p
+def dn := obj.dn p
+def Hh := obj.Hh p
+def Hv := obj.Hv p
+
+end grid
+
+inductive hom : obj → obj → Type
+| comp {p q r : obj} (f : hom p q) (g : hom q r) : hom p r
+| hor (p : grid) : hom p.ob p.r.ob
+| ver (p : grid) : hom p.ob p.d.ob
+| in_rh (p : grid) : hom p.rc p.Hh -- intramural map `receptor   -> horizontal`
+| in_rv (p : grid) : hom p.rc p.Hv -- intramural map `receptor   -> vertical`
+| in_hd (p : grid) : hom p.Hh p.dn -- intramural map `horizontal -> donor`
+| in_vd (p : grid) : hom p.Hv p.dn -- intramural map `vertical   -> donor`
+| ex_h  (p : grid) : hom p.dn p.r.rc -- extramural map for horizontal morphism
+| ex_v  (p : grid) : hom p.dn p.d.rc  -- extramural map for vertical morphism
+
+namespace grid
+
+variables (p : grid)
+
+def hor := hom.hor p
+def ver := hom.ver p
+def in_rh := hom.in_rh p
+def in_rv := hom.in_rv p
+def in_hd := hom.in_hd p
+def in_vd := hom.in_vd p
+def ex_h  := hom.ex_h p
+def ex_v  := hom.ex_v p
+
+def ex_dh (p : grid) : hom p.dn p.d.Hh := p.ex_v.comp p.d.in_rh
+def ex_hr (p : grid) : hom p.Hh p.d.rc := p.in_hd.comp p.ex_v
+
+end grid
+
+inductive hom.exact : Π {p q r}, hom p q → hom q r → Prop
+| salamander_h1 (p : grid) : hom.exact p.ex_dh p.d.in_hd
+| salamander_h2 (p : grid) : hom.exact p.in_hd p.ex_h
+| salamander_h3 (p : grid) : hom.exact p.ex_h  p.r.in_rh
+| salamander_h4 (p : grid) : hom.exact p.in_rh p.ex_hr
+
+inductive obj.is_zero : obj → Prop
+| hor (p : grid) : p.hor.exact p.r.hor → obj.is_zero p.r.Hh
+| ver (p : grid) : p.ver.exact p.d.ver → obj.is_zero p.d.Hv
+
+def grid.is_zero (p : grid) := p.ob.is_zero
+
+inductive hom.is_iso : Π {s t}, hom s t → Prop
+| of_zero_exact_zero {w x y z} (g : hom x y) (f : hom w x) (h : hom y z) :
+    f.exact g → g.exact h → w.is_zero → z.is_zero → hom.is_iso g
+
+lemma ex_h_is_iso {p : grid} (h : p.Hh.is_zero) (hr : p.r.Hh.is_zero) : p.ex_h.is_iso :=
+hom.is_iso.of_zero_exact_zero _ _ _ (hom.exact.salamander_h2 p) (hom.exact.salamander_h3 p) h hr
+
+lemma in_rh_is_iso_l {p : grid} (h : p.is_zero) (h' : p.d.is_zero) (H : p.d.r.Hh.is_zero) :
+  p.r.in_rh.is_iso :=
+hom.is_iso.of_zero_exact_zero _ _ _ (hom.exact.salamander_h3 _) (hom.exact.salamander_h4 _) _ _
+
+-- | ex_h {p : grid} : is_zero (obj.hor p) → is_zero (obj.hor p.right) → is_iso (hom.ex_h p)
+-- | ex_v {p : grid} : is_zero (obj.ver p) → is_zero (obj.ver p.down)  → is_iso (hom.ex_v p)
+-- | in_rh_l {p : grid} : is_zero (obj.obj p) → is_zero (obj.obj p.down) →
+--                         is_zero (obj.hor p.down.right) → is_iso (hom.in_rh p.right)
+-- | in_vd_l {p : grid} : is_zero (obj.obj p) → is_zero (obj.obj p.down) →
+--                         is_zero (obj.hor p.down.right) → is_iso (hom.in_vd p.right)
+
+inductive iso : obj → obj → Type
+| comp {p q r : obj} (f : iso p q) (g : iso q r) : iso p r
+| hom {p q : obj} (f : hom p q) (hf : is_iso f) : iso p q
+| inv {p q : obj} (f : hom p q) (hf : is_iso f) : iso q p
+
+
+
+
+
 
 /-- A data structure for double complexes, consisting of a list of objects and morphisms -/
 structure environment :=
@@ -195,40 +285,6 @@ mk_of_list
  ["a₂",       "b₂",       "c₂"],
  ["A₃", "f₂", "B₃", "g₂", "C₃"]]
 
-inductive obj
-| obj (p : grid) -- ordinary object
-| rcp (p : grid) -- receptor
-| dnr (p : grid) -- donor
-| hor (p : grid) -- horizontal homology
-| ver (p : grid) -- vertical homology
-
-inductive hom : obj → obj → Type
-| comp {p q r : obj} (f : hom p q) (g : hom q r) : hom p r
-| hor (p : grid) : hom (obj.obj p) (obj.obj p.right)
-| ver (p : grid) : hom (obj.obj p) (obj.obj p.down)
-| in_rh (p : grid) : hom (obj.rcp p) (obj.hor p) -- intramural map `receptor   -> horizontal`
-| in_rv (p : grid) : hom (obj.rcp p) (obj.ver p) -- intramural map `receptor   -> vertical`
-| in_hd (p : grid) : hom (obj.hor p) (obj.dnr p) -- intramural map `horizontal -> donor`
-| in_vd (p : grid) : hom (obj.ver p) (obj.dnr p) -- intramural map `vertical   -> donor`
-| ex_h  (p : grid) : hom (obj.dnr p) (obj.rcp p.right) -- extramural map for horizontal morphism
-| ex_v  (p : grid) : hom (obj.dnr p) (obj.rcp p.down)  -- extramural map for vertical morphism
-
-inductive obj.is_zero : obj → Type.
-inductive hom.is_zero : Π {s t}, hom s t → Type.
-inductive hom.exact : Π {p q r}, hom p q → hom q r → Type.
-
-inductive is_iso : Π {s t}, hom s t → Type
-| ex_h {p : grid} : is_zero (obj.hor p) → is_zero (obj.hor p.right) → is_iso (hom.ex_h p)
-| ex_v {p : grid} : is_zero (obj.ver p) → is_zero (obj.ver p.down)  → is_iso (hom.ex_v p)
-| in_rh_l {p : grid} : is_zero (obj.obj p) → is_zero (obj.obj p.down) →
-                        is_zero (obj.hor p.down.right) → is_iso (hom.in_rh p.right)
-| in_vd_l {p : grid} : is_zero (obj.obj p) → is_zero (obj.obj p.down) →
-                        is_zero (obj.hor p.down.right) → is_iso (hom.in_vd p.right)
-
-inductive iso : obj → obj → Type
-| comp {p q r : obj} (f : iso p q) (g : iso q r) : iso p r
-| hom {p q : obj} (f : hom p q) (hf : is_iso f) : iso p q
-| inv {p q : obj} (f : hom p q) (hf : is_iso f) : iso q p
 
 
 end environment
