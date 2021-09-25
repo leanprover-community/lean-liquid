@@ -1,7 +1,7 @@
 import algebra.group.basic
 import analysis.convex.cone
 import linear_algebra.dual
-import algebra.ordered_ring
+import algebra.order.ring
 import algebra.module.hom
 import ring_theory.finiteness
 import linear_algebra.free_module

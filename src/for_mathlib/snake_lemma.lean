@@ -27,9 +27,6 @@ abbreviation rhs (h : x = y) := y
 
 end eq
 
-lemma prod.le_def {X Y : Type*} [has_le X] [has_le Y] (a b : X × Y) :
-  a ≤ b ↔ a.1 ≤ b.1 ∧ a.2 ≤ b.2 := iff.rfl
-
 namespace category_theory
 
 /-- The base diagram for the snake lemma. The object are indexed by `fin 4 × fin 3`:
