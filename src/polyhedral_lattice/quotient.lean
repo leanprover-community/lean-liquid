@@ -1,8 +1,6 @@
 import analysis.normed_space.normed_group_quotient
 import linear_algebra.free_module_pid
 
-import for_mathlib.finite_free
-
 import polyhedral_lattice.topology
 
 
