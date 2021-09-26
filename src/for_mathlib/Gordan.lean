@@ -6,7 +6,6 @@ import linear_algebra.free_module
 
 import for_mathlib.nnrat
 import for_mathlib.rational_cones
-import for_mathlib.finite_free
 
 /-
 
