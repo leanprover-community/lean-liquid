@@ -11,10 +11,10 @@ variables [module.finite ℤ M] [module.free ℤ M]
 
 -- generalize?
 instance : module.finite ℤ (M →+ ℤ) :=
-module.finite.equiv add_monoid_hom_lequiv_int.symm
+module.finite.equiv (add_monoid_hom_lequiv_int _).symm
 
 -- generalize?
 instance : module.free ℤ (M →+ ℤ) :=
-module.free.of_equiv add_monoid_hom_lequiv_int.symm
+module.free.of_equiv (add_monoid_hom_lequiv_int _).symm
 
 end

@@ -1,4 +1,4 @@
-import algebra.linear_ordered_comm_group_with_zero
+import algebra.order.with_zero
 import algebra.big_operators.ring
 import data.real.basic
 import algebra.indicator_function

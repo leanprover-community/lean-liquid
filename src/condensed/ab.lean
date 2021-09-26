@@ -1,5 +1,6 @@
 import category_theory.abelian.projective
 import pseudo_normed_group.category
+import topology.continuous_function.algebra
 
 import condensed.basic
 

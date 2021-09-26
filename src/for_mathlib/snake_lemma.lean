@@ -27,9 +27,6 @@ abbreviation rhs (h : x = y) := y
 
 end eq
 
-lemma prod.le_def {X Y : Type*} [has_le X] [has_le Y] (a b : X × Y) :
-  a ≤ b ↔ a.1 ≤ b.1 ∧ a.2 ≤ b.2 := iff.rfl
-
 namespace category_theory
 
 /-- The base diagram for the snake lemma. The object are indexed by `fin 4 × fin 3`:
@@ -536,11 +533,32 @@ begin
   simp,
 end
 
+lemma exists_of_cokernel_π_eq_zero {P Q : 𝒜} (f : P ⟶ Q) (a) :
+  cokernel.π f a = 0 → ∃ b, f b = a :=
+begin
+  intro h,
+  apply exists_of_exact _ _ h,
+  apply_instance
+end
+
 lemma cokernel_π_surjective {P Q : 𝒜} (f : P ⟶ Q) : function.surjective (cokernel.π f) :=
 begin
   rw surjective_iff_epi,
   apply_instance,
 end
+
+--move
+lemma exact_is_iso_iff {P Q Q' R : 𝒜} (f : P ⟶ Q) (g : Q' ⟶ R) (e : Q ⟶ Q') [is_iso e] :
+  exact f (e ≫ g) ↔ exact (f ≫ e) g :=
+begin
+  let E := as_iso e,
+  change exact f (E.hom ≫ g) ↔ exact (f ≫ E.hom) g,
+  conv_rhs { rw (show g = E.inv ≫ E.hom ≫ g, by simp) },
+  rw exact_comp_hom_inv_comp_iff
+end
+
+--lemma exact_comp_is_iso {P Q R R' : 𝒜} (f : P ⟶ Q) (g : Q ⟶ R) (e : R ⟶ R') [is_iso e] :
+--  exact f (g ≫ e) ↔ exact f g := exact_comp_iso
 
 end move_me
 
@@ -899,6 +917,125 @@ def δ : D.obj (0,2) ⟶ D.obj (3,0) :=
   hD.to_kernel ≫ inv hD.cokernel_to_top_right_kernel_to_right_kernel ≫  -- <-- this is an iso
   hD.δ_aux ≫ -- <- this is the key
   inv hD.left_cokernel_to_kernel_bottom_left_cokernel_to ≫ hD.cokernel_to -- <-- this is an iso
+
+def to_δ_aux : D.obj (0,1) ⟶ cokernel hD.to_top_right_kernel :=
+kernel.lift _ ((0,1) ⟶[D] (1,1)) begin
+  rw [(show (hom (1,1) (2,2) = hom (1,1) (2,1) ≫ hom _ _), by refl), D.map_comp,
+    ← category.assoc, (hD.col_exact₁ _).1],
+  simp,
+end ≫ cokernel.π _
+
+def from_δ_aux : kernel hD.bottom_left_cokernel_to ⟶ D.obj (3,1) :=
+kernel.ι _ ≫ cokernel.desc _ ((2,1) ⟶[D] (3,1)) begin
+  rw [(show hom (1,0) (2,1) = hom (1,0) (1,1) ≫ hom (1,1) (2,1), by refl),
+    D.map_comp, category.assoc, (hD.col_exact₂ _).w],
+  simp,
+end
+
+theorem exact_to_δ_aux : exact hD.to_δ_aux hD.δ_aux :=
+begin
+  apply exact_of_pseudo_exact,
+  split,
+  { intros a,
+    dsimp [δ_aux, to_δ_aux],
+    rw ← eq_zero_iff_kernel_ι_eq_zero,
+    simp only [←abelian.pseudoelement.comp_apply, cokernel.π_desc,
+      kernel.lift_ι_assoc, category.assoc, kernel.lift_ι],
+    simp [abelian.pseudoelement.comp_apply, eq_zero_of_exact (hD.col_exact₁ _)] },
+  { intros b hb,
+    obtain ⟨b,rfl⟩ := cokernel_π_surjective _ b,
+    dsimp [δ_aux] at hb,
+    rw ← eq_zero_iff_kernel_ι_eq_zero at hb,
+    simp only [←abelian.pseudoelement.comp_apply, cokernel.π_desc, kernel.lift_ι] at hb,
+    simp only [abelian.pseudoelement.comp_apply] at hb,
+    let b' := kernel.ι ((1,1) ⟶[D] (2,2)) b,
+    obtain ⟨c,hc⟩ := exists_of_cokernel_π_eq_zero _ _ hb, clear hb,
+    change _ = ((1,1) ⟶[D] (2,1)) b' at hc,
+    rw [(show hom (1,0) (2,1) = hom (1,0) (1,1) ≫ hom _ _, by refl), D.map_comp,
+      abelian.pseudoelement.comp_apply] at hc,
+    obtain ⟨z,h1,h2⟩ := sub_of_eq_image _ _ _ hc.symm, clear hc,
+    specialize h2 _ ((1,1) ⟶[D] (1,2)) (eq_zero_of_exact hD.row_exact₁ _),
+    obtain ⟨w,hw⟩ : ∃ w, ((0,1) ⟶[D] (1,1)) w = z := exists_of_exact (hD.col_exact₁ _) _ h1,
+    clear h1,
+    use w,
+    dsimp [b'] at h2,
+    dsimp [to_δ_aux],
+    simp only [abelian.pseudoelement.comp_apply],
+    apply_fun hD.cokernel_to_top_right_kernel_to_right_kernel,
+    swap, { rw injective_iff_mono, apply_instance },
+    dsimp [cokernel_to_top_right_kernel_to_right_kernel],
+    simp only [←abelian.pseudoelement.comp_apply, cokernel.π_desc, category.assoc],
+    simp only [abelian.pseudoelement.comp_apply],
+    apply_fun kernel.ι ((1,2) ⟶[D] (2,2)),
+    swap, { rw injective_iff_mono, apply_instance },
+    simp only [←abelian.pseudoelement.comp_apply, kernel.lift_ι_assoc,
+      category.assoc, kernel.lift_ι],
+    simp only [abelian.pseudoelement.comp_apply],
+    rw [hw, h2] }
+end
+
+theorem exact_from_δ_aux : exact hD.δ_aux hD.from_δ_aux :=
+begin
+  apply exact_of_pseudo_exact,
+  split,
+  { intros a,
+    dsimp [δ_aux, from_δ_aux],
+    obtain ⟨a,rfl⟩ := cokernel_π_surjective _ a,
+    simp only [←abelian.pseudoelement.comp_apply,
+      cokernel.π_desc, kernel.lift_ι_assoc, category.assoc],
+    simp [abelian.pseudoelement.comp_apply, eq_zero_of_exact (hD.col_exact₂ _)] },
+  { intros b hb,
+    let b' := kernel.ι hD.bottom_left_cokernel_to b,
+    obtain ⟨c,hc⟩ := cokernel_π_surjective _ b',
+    simp only [from_δ_aux, abelian.pseudoelement.comp_apply] at hb,
+    change cokernel.desc ((1,0) ⟶[D] (2,1)) _ _ b' = 0 at hb,
+    rw ← hc at hb,
+    simp only [←abelian.pseudoelement.comp_apply, cokernel.π_desc] at hb,
+    obtain ⟨d,hd⟩ : ∃ d, ((1,1) ⟶[D] (2,1)) d = c := exists_of_exact (hD.col_exact₂ _) _ hb,
+    obtain ⟨e,he⟩ : ∃ e, kernel.ι ((1,1) ⟶[D] (2,2)) e = d,
+    { apply exists_of_exact _ _ (_ : ((1,1) ⟶[D] (2,2)) d = 0),
+      { apply_instance },
+      dsimp [b'] at hc,
+      apply_fun hD.bottom_left_cokernel_to at hc,
+      simp only [bottom_left_cokernel_to, ←abelian.pseudoelement.comp_apply, cokernel.π_desc] at hc,
+      rw [(show hom (1,1) (2,2) = hom (1,1) (2,1) ≫ hom (2,1) (2,2), by refl), D.map_comp,
+        abelian.pseudoelement.comp_apply, hd, hc],
+      simp only [abelian.pseudoelement.comp_apply],
+      change hD.bottom_left_cokernel_to (kernel.ι hD.bottom_left_cokernel_to b) = 0,
+      apply kernel_ι_apply },
+    use cokernel.π hD.to_top_right_kernel e,
+    apply_fun kernel.ι hD.bottom_left_cokernel_to,
+    swap, { rw injective_iff_mono, apply_instance },
+    change _ = b',
+    dsimp [δ_aux],
+    simp only [←abelian.pseudoelement.comp_apply, cokernel.π_desc, kernel.lift_ι],
+    simp only [abelian.pseudoelement.comp_apply],
+    rw [he, hd, hc] }
+end
+
+theorem exact_to_δ : exact ((0,1) ⟶[D] (0,2)) hD.δ :=
+begin
+  dsimp [δ],
+  rw [exact_is_iso_iff, exact_is_iso_iff, exact_comp_iso],
+  convert hD.exact_to_δ_aux using 1,
+  rw is_iso.comp_inv_eq,
+  dsimp [to_kernel, to_δ_aux, cokernel_to_top_right_kernel_to_right_kernel],
+  ext,
+  simp only [cokernel.π_desc, kernel.lift_ι_assoc, category.assoc, kernel.lift_ι],
+  simpa only [← D.map_comp],
+end
+
+theorem exact_from_δ : exact hD.δ ((3,0) ⟶[D] (3,1)) :=
+begin
+  dsimp [δ],
+  rw [← category.assoc, ← category.assoc, ← exact_is_iso_iff, exact_iso_comp],
+  convert hD.exact_from_δ_aux using 1,
+  rw [category.assoc, is_iso.inv_comp_eq],
+  dsimp [cokernel_to, left_cokernel_to_kernel_bottom_left_cokernel_to, from_δ_aux],
+  ext,
+  simp only [cokernel.π_desc, kernel.lift_ι_assoc, cokernel.π_desc_assoc, category.assoc],
+  simpa only [← D.map_comp],
+end
 
 end delta
 

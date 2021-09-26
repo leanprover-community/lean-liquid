@@ -162,11 +162,11 @@ end
 
 noncomputable def down_two [finite_dimensional ℚ Λ] :
   submodule (ℚ≥0) (dual ℚ (dual ℚ Λ)) → submodule (ℚ≥0) Λ :=
-submodule.comap (linear_equiv.restrict_scalars (ℚ≥0) (eval_equiv ℚ Λ))
+submodule.comap (linear_equiv.restrict_scalars (ℚ≥0) (eval_equiv ℚ Λ) : Λ →ₗ[ℚ≥0] dual ℚ (dual ℚ Λ))
 
 noncomputable def up_two [finite_dimensional ℚ Λ] :
   submodule (ℚ≥0) Λ → submodule (ℚ≥0) (dual ℚ (dual ℚ Λ)) :=
-submodule.map (linear_equiv.restrict_scalars (ℚ≥0) (eval_equiv ℚ Λ))
+submodule.map (linear_equiv.restrict_scalars (ℚ≥0) (eval_equiv ℚ Λ) : Λ →ₗ[ℚ≥0] dual ℚ (dual ℚ Λ))
 
 lemma down_two_up [finite_dimensional ℚ Λ] (C : submodule (ℚ≥0) Λ) :
   down_two (up_two C) = C :=
