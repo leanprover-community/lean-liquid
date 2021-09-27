@@ -13,12 +13,31 @@ structure is_zero (X : C) : Prop :=
 (eq_zero_of_src : ∀ {Y : C} (f : X ⟶ Y), f = 0)
 (eq_zero_of_tgt : Π {Y : C} (f : Y ⟶ X), f = 0)
 
+def is_zero.eq_of_src {C : Type*} [category C] [has_zero_morphisms C] {X Y : C}
+  (hX : is_zero X) (f g : X ⟶ Y) : f = g :=
+(hX.eq_zero_of_src f).trans (hX.eq_zero_of_src g).symm
+
+def is_zero.eq_of_tgt {C : Type*} [category C] [has_zero_morphisms C] {X Y : C}
+  (hX : is_zero X) (f g : Y ⟶ X) : f = g :=
+(hX.eq_zero_of_tgt f).trans (hX.eq_zero_of_tgt g).symm
+
+def is_zero.iso {C : Type*} [category C] [has_zero_morphisms C] {X Y : C}
+  (hX : is_zero X) (hY : is_zero Y) : X ≅ Y :=
+{ hom := 0,
+  inv := 0,
+  hom_inv_id' := hX.eq_of_src _ _,
+  inv_hom_id' := hY.eq_of_src _ _, }
+
 open_locale zero_object
 
 lemma is_zero_zero (C : Type*) [category C] [has_zero_morphisms C] [has_zero_object C] :
   is_zero (0 : C) :=
 { eq_zero_of_src := λ Y f, by ext,
   eq_zero_of_tgt := λ Y f, by ext }
+
+def is_zero.iso_zero {C : Type*} [category C] [has_zero_morphisms C] [has_zero_object C]
+  {X : C} (hX : is_zero X) : X ≅ 0 :=
+hX.iso (is_zero_zero C)
 
 lemma is_zero_of_top_le_bot [has_zero_object C] (X : C)
   (h : (⊤ : subobject X) ≤ ⊥) : is_zero X :=
