@@ -847,33 +847,16 @@ kernel.lift _ (_ ⟶[D] _) (hD.col_exact₁ _).1
 
 instance : mono hD.to_kernel :=
 begin
-  apply mono_of_zero_of_map_zero,
-  intros a ha,
-  dsimp [to_kernel] at *,
-  apply_fun ((0,2) ⟶[D] (1,2)),
-  swap, {
-    rw injective_iff_mono,
-    apply hD.col_mono },
-  rw ← eq_zero_iff_kernel_ι_eq_zero at ha,
-  simpa [← abelian.pseudoelement.comp_apply] using ha,
+  dsimp [to_kernel],
+  haveI : mono ((0,2) ⟶[D] (1,2)) := hD.col_mono _,
+  apply_instance,
 end
 
 instance : epi hD.to_kernel :=
 begin
-  apply epi_of_pseudo_surjective,
-  intros a,
-  let a' := kernel.ι ((1,2) ⟶[D] (2,2)) a,
-  obtain ⟨b,hb⟩ : ∃ b, ((0,2) ⟶[D] (1,2)) b = a',
-  { apply exists_of_exact (hD.col_exact₁ _),
-    dsimp [a'],
-    simp },
-  use b,
   dsimp [to_kernel],
-  apply_fun kernel.ι ((1,2) ⟶[D] (2,2)),
-  swap, { rw injective_iff_mono, apply_instance },
-  change _ = a',
-  rw ← hb,
-  simp [← abelian.pseudoelement.comp_apply],
+  haveI : exact ((0,2) ⟶[D] (1,2)) ((1,2) ⟶[D] (2,2)) := hD.col_exact₁ _,
+  apply_instance,
 end
 
 instance : is_iso hD.to_kernel :=
@@ -884,28 +867,16 @@ cokernel.desc _ (_ ⟶[D] _) (hD.col_exact₂ _).1
 
 instance : mono hD.cokernel_to :=
 begin
-  apply mono_of_zero_of_map_zero,
-  intros a ha,
-  dsimp [cokernel_to] at *,
-  obtain ⟨b,rfl⟩ : ∃ b, cokernel.π ((1,0) ⟶[D] (2,0)) b = a := cokernel_π_surjective _ _,
-  simp [← abelian.pseudoelement.comp_apply] at ha,
-  obtain ⟨c,rfl⟩ : ∃ c, ((1,0) ⟶[D] (2,0)) c = b,
-  { apply exists_of_exact _ _ ha,
-    exact hD.col_exact₂ _ },
-  simp,
+  dsimp [cokernel_to],
+  haveI : exact ((1,0) ⟶[D] (2,0)) ((2,0) ⟶[D] (3,0)) := hD.col_exact₂ _,
+  apply_instance,
 end
 
 instance : epi hD.cokernel_to :=
 begin
-  apply epi_of_pseudo_surjective,
-  intros a,
-  obtain ⟨b,rfl⟩ : ∃ b, ((2,0) ⟶[D] (3,0)) b = a,
-  { suffices : function.surjective ((2,0) ⟶[D] (3,0)), by apply this,
-    rw surjective_iff_epi,
-    apply hD.col_epi },
-  use cokernel.π ((1,0) ⟶[D] (2,0)) b,
   dsimp [cokernel_to],
-  simp [← abelian.pseudoelement.comp_apply],
+  haveI : epi ((2,0) ⟶[D] (3,0)) := hD.col_epi _,
+  apply_instance,
 end
 
 instance : is_iso hD.cokernel_to :=
