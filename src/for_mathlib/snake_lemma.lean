@@ -651,6 +651,18 @@ begin
   ... = 0                                    : by rw [(hD.row_exact i).w, zero_comp]
 end
 
+lemma ker_row₁_to_row₂ (hD : is_snake_input D) :
+  (kernel.ι ((1,0) ⟶[D] (1,1))) ≫ ((1,0) ⟶[D] (2,0)) = 0 :=
+begin
+  refine zero_morphism_ext _ (λ a, (injective_iff_mono ((2,0) ⟶[D] (2,1))).2 hD.row_mono _),
+  rw [apply_zero, ← abelian.pseudoelement.comp_apply, category.assoc,
+    abelian.pseudoelement.comp_apply, ← D.map_comp, map_eq hD
+    ((hom (1, 0) (2, 0)) ≫ (hom _ (2, 1))) ((hom _ (1, 1)) ≫ (hom _ _)), D.map_comp,
+    abelian.pseudoelement.comp_apply, kernel_ι_apply, apply_zero]
+end
+
+def long_row₀ (hD : is_snake_input D) : kernel ((1,0) ⟶[D] (1,1)) ⟶ D.obj (0, 0) := sorry
+
 example (hD : is_snake_input D) (f : (o 1 0) ⟶ (o 2 2)) : D.map f = 0 := hD.hom_eq_zero₂ f
 
 section delta
