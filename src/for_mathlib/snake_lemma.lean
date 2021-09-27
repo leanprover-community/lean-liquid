@@ -1048,6 +1048,7 @@ has_snake_lemma.exact_δ D
 lemma δ_exact (D : snake_input 𝒜) : exact (δ D) ((3,0) ⟶[D] (3,1)) :=
 has_snake_lemma.δ_exact D
 
+/-
 -- move this
 lemma epi_iff_exact_zero_right' {V : Type*} [category V] [has_kernels V] [has_images V]
   [has_zero_morphisms V]
@@ -1066,6 +1067,7 @@ lemma epi_iff_exact_zero_right' {V : Type*} [category V] [has_kernels V] [has_im
     -- haveI : epi (image.ι f) := epi_of_epi (image_subobject_iso f).hom (image.ι f),
     -- apply epi_of_epi_image,
   end⟩
+-/
 
 def kernel_sequence (D : snake_input 𝒜)
   (h1 : mono ((1,0) ⟶[D] (1,1))) (h2 : is_zero (D.obj (3,0))) :
@@ -1078,7 +1080,7 @@ def kernel_sequence (D : snake_input 𝒜)
   mono' := sorry,
   epi' :=
   begin
-    rw [epi_iff_exact_zero_right' (D.obj (3,0))],
+    rw (abelian.tfae_epi (D.obj (3,0)) ((0,1) ⟶[D] (0,2))).out 0 2,
     convert exact_δ D,
     apply h2.eq_of_tgt,
   end,
