@@ -58,19 +58,94 @@ end thm71
 
 section fae_surjectivity
 
-variables (ξ : ℝ)-- [h_pos : 0 < ξ] [h_small : ξ < 1]
+variables (ξ : ℝ) [fact (0 < ξ)] [fact (ξ < 1)]
 variable (x : ℝ)
 
 noncomputable def y : ℕ → ℝ
 | 0         := x
 | (n + 1)   := (y n) - (⌊(((y n) / ξ ^ n) : ℝ)⌋ : ℝ) * ξ ^ n
 
+
 example (f : ℕ → ℝ) (h_mono : monotone f) :
   tendsto f at_top at_top ∨ (∃ l, tendsto f at_top (𝓝 l)) := tendsto_of_monotone h_mono
 
-lemma eventually_monotone : monotone (λ n : ℕ, y ξ x n.succ) :=
+
+--[FAE] why I can't find this in mathlib?
+lemma ge_of_div_le_one {a b : ℝ} (ha₁ : a ≥ 0) (hb₁ : b ≤ 1) (hb₂ : b > 0) : a ≤ a / b :=
 begin
-  sorry,
+  by_cases ha : a > 0,
+  { have that := (mul_le_mul_left ha).mpr ((one_le_div hb₂).mpr hb₁),
+    rwa [← div_eq_mul_one_div, mul_one] at that },
+  { simp only [gt_iff_lt, not_lt, ge_iff_le] at *,
+    have : a = 0 := linarith.eq_of_not_lt_of_not_gt a 0 (not_lt_of_le ha₁) (not_lt_of_le ha),
+    rw [this, zero_div] },
+end
+
+-- lemma eventually_le : ∀ n : ℕ, n ≥ 1 → (y ξ x n) ≤ ⌊(((y ξ x n) / ξ ^ n) : ℝ)⌋ :=
+-- begin
+--   intros n hn,
+--   have h_pow : ξ ^ n ≤ 1, sorry,
+--   -- have := (pow_lt_one_iff _).mpr (fact.out _) ξ,
+--   -- have := (pow_lt_one_iff _).mpr
+--   --   ((not_iff_not_of_iff (@nat.lt_one_iff n)).mp (not_lt_of_ge hn)),
+--   -- -- sorry,
+--   -- exact fact.out _,
+--   calc y ξ x n ≤ (y ξ x n) / (ξ ^ n) : sorry--ge_of_div_le_one h_pow
+--            ... ≤ ⌊(y ξ x n) / (ξ ^ n)⌋ : sorry,
+-- end
+
+
+lemma eventually_pos_y : ∀ n : ℕ, n ≥ 1 → y ξ x n ≥ 0 :=
+begin
+  have h_pos : ∀ n : ℕ, n ≥ 1 → ξ ^ n > 0 := λ n _, pow_pos (fact.out _) n,
+  have : ∀ n : ℕ, n ≥ 1 →  (y ξ x n) / ξ ^ n ≥ ⌊(((y ξ x n) / ξ ^ n) : ℝ)⌋ := λ n _, floor_le _,
+  intros n hn₁,
+  by_cases hn₀ : n = 1,
+  { rw [hn₀, y,pow_zero, div_one, mul_one, ge_iff_le, sub_nonneg], apply floor_le },
+  { replace hn₁ : n > 1, {apply (lt_of_le_of_ne hn₁), tauto },
+    obtain ⟨m, hm⟩ : ∃ m : ℕ, m ≥ 1 ∧ n = m + 1,
+    use ⟨n - 1, and.intro (nat.le_pred_of_lt hn₁) (nat.sub_add_cancel (le_of_lt hn₁)).symm⟩,
+    rw [hm.2, y],
+    replace this := (le_div_iff (h_pos m hm.1)).mp (this m hm.1),
+    rwa ← sub_nonneg at this },
+end
+
+lemma eventually_pos_floor : ∀ n : ℕ, n ≥ 1 → (⌊((y ξ x n) / ξ ^ n )⌋ : ℝ) * ξ ^ n ≥ 0 :=
+begin
+  have h_pos : ∀ n : ℕ, n ≥ 1 → ξ ^ n > 0 := λ n _, pow_pos (fact.out _) n,
+  intros n hn,
+  apply mul_nonneg _ (le_of_lt (h_pos n hn)),
+  norm_cast,
+  apply floor_nonneg.mpr,
+  exact div_nonneg (eventually_pos_y ξ x n hn) (le_of_lt (h_pos n hn)),
+end
+
+example (a b : ℝ) (hb : b ≥ 0) : a ≥ a - b := sub_le_self a hb
+
+lemma eventually_monotone : monotone (λ n : order_dual ℕ, y ξ x n+1) :=
+begin
+  sorry,--the problem is that `monotone` means incresing, while this is decreasing
+  -- intros n b H,
+  -- apply le_of_lt,
+  -- funext,
+  -- simp only [add_lt_add_iff_right],
+  -- -- intro n,
+  -- apply strict_mono_incr_on.dual,
+  -- -- apply monotone_nat_of_le_succ,
+  -- intro n,
+  -- -- apply monotone_nat_of_le_succ,
+  -- simp only [add_le_add_iff_right],
+  -- by_cases hn : n ≥ 1,
+  -- rw y,
+  -- have := sub_le_self (y ξ x n) (eventually_pos_floor ξ x n hn),
+  -- induction n with n h_ind,
+  -- sorry,
+  -- -- simp_rw [add_le_add_iff_right] at H,
+  -- rw nat.succ_eq_add_one,
+  -- rw y,
+  -- by_cases h : n < m,
+  -- have togli := H (le_of_lt h),
+  -- all_goals {sorry},
 end
 
 lemma exists_limit : ∃ a, tendsto (λ n, y ξ x n) at_top (𝓝 a) := sorry--use the above and that for two
