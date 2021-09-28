@@ -1027,6 +1027,23 @@ def mk_of_short_exact_sequence_hom (A B : short_exact_sequence 𝒜) (f : A ⟶ 
 ⟨snake_diagram.mk_of_short_exact_sequence_hom A B f,
 is_snake_input.mk_of_short_exact_sequence_hom A B f⟩
 
+def kernel_sequence (D : snake_input 𝒜)
+  (h1 : mono ((1,0) ⟶[D] (1,1))) (h2 : is_zero (D.obj (3,0))) :
+  short_exact_sequence 𝒜 :=
+{ fst := D.obj (0,0),
+  snd := D.obj (0,1),
+  trd := D.obj (0,2),
+  f := (0,0) ⟶[D] (0,1),
+  g := (0,1) ⟶[D] (0,2),
+  mono' := sorry,
+  epi' :=
+  begin
+    rw (abelian.tfae_epi (D.obj (3,0)) ((0,1) ⟶[D] (0,2))).out 0 2,
+    convert D.2.exact_to_δ,
+    apply h2.eq_of_tgt,
+  end,
+  exact' := D.2.row_exact _ }
+
 end snake_input
 
 class has_snake_lemma :=
@@ -1047,44 +1064,6 @@ has_snake_lemma.exact_δ D
 
 lemma δ_exact (D : snake_input 𝒜) : exact (δ D) ((3,0) ⟶[D] (3,1)) :=
 has_snake_lemma.δ_exact D
-
-/-
--- move this
-lemma epi_iff_exact_zero_right' {V : Type*} [category V] [has_kernels V] [has_images V]
-  [has_zero_morphisms V]
-  {A B : V} (C : V) (f : A ⟶ B) :
-  epi f ↔ exact f (0 : (B ⟶ C)) :=
-⟨λ h, by { sorry /- resetI, apply_instance, -/ },
-  λ h, begin
-    sorry
-    -- have e₁ := h.epi,
-    -- rw image_to_kernel_zero_right at e₁,
-    -- have e₂ : epi (((image_subobject f).arrow ≫ inv (kernel_subobject 0).arrow) ≫
-    --   (kernel_subobject 0).arrow) := @epi_comp _ _ _ _ _ _ e₁ _ _,
-    -- rw [category.assoc, is_iso.inv_hom_id, category.comp_id] at e₂,
-    -- rw [←image_subobject_arrow] at e₂,
-    -- resetI,
-    -- haveI : epi (image.ι f) := epi_of_epi (image_subobject_iso f).hom (image.ι f),
-    -- apply epi_of_epi_image,
-  end⟩
--/
-
-def kernel_sequence (D : snake_input 𝒜)
-  (h1 : mono ((1,0) ⟶[D] (1,1))) (h2 : is_zero (D.obj (3,0))) :
-  short_exact_sequence 𝒜 :=
-{ fst := D.obj (0,0),
-  snd := D.obj (0,1),
-  trd := D.obj (0,2),
-  f := (0,0) ⟶[D] (0,1),
-  g := (0,1) ⟶[D] (0,2),
-  mono' := sorry,
-  epi' :=
-  begin
-    rw (abelian.tfae_epi (D.obj (3,0)) ((0,1) ⟶[D] (0,2))).out 0 2,
-    convert exact_δ D,
-    apply h2.eq_of_tgt,
-  end,
-  exact' := D.2.row_exact _ }
 
 end snake_lemma
 
