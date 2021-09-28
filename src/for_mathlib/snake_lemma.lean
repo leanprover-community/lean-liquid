@@ -665,7 +665,25 @@ end
 lemma ker_row₁_to_top_left_comp_eq_ι (hD : is_snake_input D) : ker_row₁_to_top_left hD ≫
   ((0,0) ⟶[D] (1,0)) = kernel.ι ((1,0) ⟶[D] (1,1)) :=
 begin
-  sorry
+  letI := hD.col_mono 0,
+  have : inv (abelian.images.factor_thru_image ((0,0) ⟶[D] (1,0))) ≫ ((0,0) ⟶[D] (1,0)) =
+    category_theory.abelian.images.image.ι _ := by simp,
+  rw [ker_row₁_to_top_left, category.assoc, category.assoc, this],
+  simp
+end
+
+lemma long_row₀_exact (hD : is_snake_input D) :
+  exact (ker_row₁_to_top_left hD) ((0,0) ⟶[D] (0,1)) :=
+begin
+  refine abelian.pseudoelement.exact_of_pseudo_exact _ _ ⟨λ a, _, _⟩,
+  { refine (injective_iff_mono _).2 (hD.col_mono _) _,
+    rw [apply_zero, ← abelian.pseudoelement.comp_apply, ← D.map_comp, map_eq hD
+      ((hom (0, 0) (0, 1)) ≫ (hom _ (1, 1))) ((hom _ (1, 0)) ≫ (hom _ _)), D.map_comp,
+      ← abelian.pseudoelement.comp_apply, ← category.assoc, ker_row₁_to_top_left_comp_eq_ι hD,
+      abelian.pseudoelement.comp_apply, kernel_ι_apply] },
+  {
+    sorry
+  }
 end
 
 lemma ker_row₁_to_top_left_comp_eq_zero (hD : is_snake_input D) : ker_row₁_to_top_left hD ≫
