@@ -1088,7 +1088,15 @@ def kernel_sequence (D : snake_input 𝒜)
   trd := D.obj (0,2),
   f := (0,0) ⟶[D] (0,1),
   g := (0,1) ⟶[D] (0,2),
-  mono' := sorry,
+  mono' :=
+  begin
+    letI := h1,
+    refine abelian.pseudoelement.mono_of_zero_of_map_zero _ (λ a ha, _),
+    obtain ⟨b, hb⟩ := is_snake_input.exists_of_exact
+      (is_snake_input.long_row₀_exact D.is_snake_input) a ha,
+    rw [← hb],
+    simp [is_snake_input.ker_row₁_to_top_left, limits.kernel.ι_of_mono ((1,0) ⟶[D] (1,1))]
+  end,
   epi' :=
   begin
     rw (abelian.tfae_epi (D.obj (3,0)) ((0,1) ⟶[D] (0,2))).out 0 2,
