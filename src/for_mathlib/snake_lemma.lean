@@ -340,25 +340,11 @@ variables {𝒜 : Type*} [category 𝒜] [abelian 𝒜]
 
 -- move (ang generalize) this
 instance exact_kernel_ι_self {A B : 𝒜} (f : A ⟶ B) : exact (kernel.ι f) f :=
-begin
-  apply abelian.pseudoelement.exact_of_pseudo_exact,
-  split,
-  { intros a,
-    simp [← abelian.pseudoelement.comp_apply] },
-  { intros b hb, rcases b with ⟨b⟩,
-    erw abelian.pseudoelement.pseudo_apply_mk at hb,
-    obtain ⟨X, p : _ ⟶ b.left, q : _ ⟶ B, h1, h2, h : _ = _ ≫ 0⟩ := quotient.exact' hb,
-    simp at h,
-    let g : over (kernel f) := over.mk (kernel.lift _ (p ≫ b.hom) (by simpa using h)),
-    use quotient.mk' g,
-    erw abelian.pseudoelement.pseudo_apply_mk,
-    apply quotient.sound',
-    use [X, 𝟙 X, p, by apply_instance, by assumption, by simp] }
-end
+by { rw abelian.exact_iff, tidy } -- why do we not have abelian.exact_kernel?
 
 -- move this
 instance exact_self_cokernel_π {A B : 𝒜} (f : A ⟶ B) : exact f (cokernel.π f) :=
-sorry
+abelian.exact_cokernel _
 
 local notation `kernel_map`   := kernel.map _ _ _ _
 local notation `cokernel_map` := cokernel.map _ _ _ _
@@ -651,6 +637,71 @@ begin
   ... = 0                                    : by rw [(hD.row_exact i).w, zero_comp]
 end
 
+lemma ker_row₁_to_row₂ (hD : is_snake_input D) :
+  (kernel.ι ((1,0) ⟶[D] (1,1))) ≫ ((1,0) ⟶[D] (2,0)) = 0 :=
+begin
+  refine zero_morphism_ext _ (λ a, (injective_iff_mono ((2,0) ⟶[D] (2,1))).2 hD.row_mono _),
+  rw [apply_zero, ← abelian.pseudoelement.comp_apply, category.assoc,
+    abelian.pseudoelement.comp_apply, ← D.map_comp, map_eq hD
+    ((hom (1, 0) (2, 0)) ≫ (hom _ (2, 1))) ((hom _ (1, 1)) ≫ (hom _ _)), D.map_comp,
+    abelian.pseudoelement.comp_apply, kernel_ι_apply, apply_zero]
+end
+
+def ker_row₁_to_top_left (hD : is_snake_input D) : kernel ((1,0) ⟶[D] (1,1)) ⟶ D.obj (0, 0) :=
+by { letI := hD.col_mono 0, exact (limits.kernel.lift _ _ (ker_row₁_to_row₂ hD)) ≫
+    (limits.kernel.lift _ _ (((abelian.exact_iff _ _).1 (hD.col_exact₁ 0)).2)) ≫
+    inv (abelian.images.factor_thru_image ((0,0) ⟶[D] (1,0))) }
+
+lemma ker_row₁_to_top_left_mono (hD : is_snake_input D) : mono (ker_row₁_to_top_left hD) :=
+begin
+  refine mono_of_zero_of_map_zero _ (λ a ha, _),
+  rw [ker_row₁_to_top_left, abelian.pseudoelement.comp_apply,
+    abelian.pseudoelement.comp_apply] at ha,
+  replace ha := abelian.pseudoelement.zero_of_map_zero _ (pseudo_injective_of_mono _) _ ha,
+  replace ha := abelian.pseudoelement.zero_of_map_zero _ (pseudo_injective_of_mono _) _ ha,
+  exact abelian.pseudoelement.zero_of_map_zero _ (pseudo_injective_of_mono _) _ ha
+end
+
+lemma ker_row₁_to_top_left_comp_eq_ι (hD : is_snake_input D) : ker_row₁_to_top_left hD ≫
+  ((0,0) ⟶[D] (1,0)) = kernel.ι ((1,0) ⟶[D] (1,1)) :=
+begin
+  letI := hD.col_mono 0,
+  have : inv (abelian.images.factor_thru_image ((0,0) ⟶[D] (1,0))) ≫ ((0,0) ⟶[D] (1,0)) =
+    category_theory.abelian.images.image.ι _ := by simp,
+  rw [ker_row₁_to_top_left, category.assoc, category.assoc, this],
+  simp
+end
+
+lemma long_row₀_exact (hD : is_snake_input D) :
+  exact (ker_row₁_to_top_left hD) ((0,0) ⟶[D] (0,1)) :=
+begin
+  refine abelian.pseudoelement.exact_of_pseudo_exact _ _ ⟨λ a, _, λ a ha, _⟩,
+  { refine (injective_iff_mono _).2 (hD.col_mono _) _,
+    rw [apply_zero, ← abelian.pseudoelement.comp_apply, ← D.map_comp, map_eq hD
+      ((hom (0, 0) (0, 1)) ≫ (hom _ (1, 1))) ((hom _ (1, 0)) ≫ (hom _ _)), D.map_comp,
+      ← abelian.pseudoelement.comp_apply, ← category.assoc, ker_row₁_to_top_left_comp_eq_ι hD,
+      abelian.pseudoelement.comp_apply, kernel_ι_apply] },
+  { let b := ((0,0) ⟶[D] (1,0)) a,
+    have hb : ((1,0) ⟶[D] (1,1)) b = 0,
+    { rw [← abelian.pseudoelement.comp_apply, ← D.map_comp, map_eq hD
+        ((hom (0, 0) (1, 0)) ≫ (hom _ (1, 1))) ((hom _ (0, 1)) ≫ (hom _ _)), D.map_comp,
+        abelian.pseudoelement.comp_apply, ha, apply_zero] },
+    obtain ⟨c, hc⟩ := exists_of_exact category_theory.exact_kernel_ι _ hb,
+    refine ⟨c, (injective_iff_mono _).2 (hD.col_mono _) _⟩,
+    rw [← abelian.pseudoelement.comp_apply, ker_row₁_to_top_left_comp_eq_ι hD, hc] }
+end
+
+lemma ker_row₁_to_top_left_comp_eq_zero (hD : is_snake_input D) : ker_row₁_to_top_left hD ≫
+  ((0,0) ⟶[D] (0,1)) = 0 :=
+begin
+  refine zero_morphism_ext _ (λ a, (injective_iff_mono _).2 (hD.col_mono _) _),
+  rw [apply_zero, ← abelian.pseudoelement.comp_apply, category.assoc,
+    abelian.pseudoelement.comp_apply, ← D.map_comp, map_eq hD
+    ((hom (0, 0) (0, 1)) ≫ (hom _ (1, 1))) ((hom _ (1, 0)) ≫ (hom _ _)), D.map_comp,
+    ← abelian.pseudoelement.comp_apply, ← category.assoc, ker_row₁_to_top_left_comp_eq_ι hD,
+    abelian.pseudoelement.comp_apply, kernel_ι_apply],
+end
+
 example (hD : is_snake_input D) (f : (o 1 0) ⟶ (o 2 2)) : D.map f = 0 := hD.hom_eq_zero₂ f
 
 section delta
@@ -849,33 +900,16 @@ kernel.lift _ (_ ⟶[D] _) (hD.col_exact₁ _).1
 
 instance : mono hD.to_kernel :=
 begin
-  apply mono_of_zero_of_map_zero,
-  intros a ha,
-  dsimp [to_kernel] at *,
-  apply_fun ((0,2) ⟶[D] (1,2)),
-  swap, {
-    rw injective_iff_mono,
-    apply hD.col_mono },
-  rw ← eq_zero_iff_kernel_ι_eq_zero at ha,
-  simpa [← abelian.pseudoelement.comp_apply] using ha,
+  dsimp [to_kernel],
+  haveI : mono ((0,2) ⟶[D] (1,2)) := hD.col_mono _,
+  apply_instance,
 end
 
 instance : epi hD.to_kernel :=
 begin
-  apply epi_of_pseudo_surjective,
-  intros a,
-  let a' := kernel.ι ((1,2) ⟶[D] (2,2)) a,
-  obtain ⟨b,hb⟩ : ∃ b, ((0,2) ⟶[D] (1,2)) b = a',
-  { apply exists_of_exact (hD.col_exact₁ _),
-    dsimp [a'],
-    simp },
-  use b,
   dsimp [to_kernel],
-  apply_fun kernel.ι ((1,2) ⟶[D] (2,2)),
-  swap, { rw injective_iff_mono, apply_instance },
-  change _ = a',
-  rw ← hb,
-  simp [← abelian.pseudoelement.comp_apply],
+  haveI : exact ((0,2) ⟶[D] (1,2)) ((1,2) ⟶[D] (2,2)) := hD.col_exact₁ _,
+  apply_instance,
 end
 
 instance : is_iso hD.to_kernel :=
@@ -886,28 +920,16 @@ cokernel.desc _ (_ ⟶[D] _) (hD.col_exact₂ _).1
 
 instance : mono hD.cokernel_to :=
 begin
-  apply mono_of_zero_of_map_zero,
-  intros a ha,
-  dsimp [cokernel_to] at *,
-  obtain ⟨b,rfl⟩ : ∃ b, cokernel.π ((1,0) ⟶[D] (2,0)) b = a := cokernel_π_surjective _ _,
-  simp [← abelian.pseudoelement.comp_apply] at ha,
-  obtain ⟨c,rfl⟩ : ∃ c, ((1,0) ⟶[D] (2,0)) c = b,
-  { apply exists_of_exact _ _ ha,
-    exact hD.col_exact₂ _ },
-  simp,
+  dsimp [cokernel_to],
+  haveI : exact ((1,0) ⟶[D] (2,0)) ((2,0) ⟶[D] (3,0)) := hD.col_exact₂ _,
+  apply_instance,
 end
 
 instance : epi hD.cokernel_to :=
 begin
-  apply epi_of_pseudo_surjective,
-  intros a,
-  obtain ⟨b,rfl⟩ : ∃ b, ((2,0) ⟶[D] (3,0)) b = a,
-  { suffices : function.surjective ((2,0) ⟶[D] (3,0)), by apply this,
-    rw surjective_iff_epi,
-    apply hD.col_epi },
-  use cokernel.π ((1,0) ⟶[D] (2,0)) b,
   dsimp [cokernel_to],
-  simp [← abelian.pseudoelement.comp_apply],
+  haveI : epi ((2,0) ⟶[D] (3,0)) := hD.col_epi _,
+  apply_instance,
 end
 
 instance : is_iso hD.cokernel_to :=
@@ -1057,6 +1079,31 @@ def mk_of_short_exact_sequence_hom (A B : short_exact_sequence 𝒜) (f : A ⟶ 
   snake_input 𝒜 :=
 ⟨snake_diagram.mk_of_short_exact_sequence_hom A B f,
 is_snake_input.mk_of_short_exact_sequence_hom A B f⟩
+
+def kernel_sequence (D : snake_input 𝒜)
+  (h1 : mono ((1,0) ⟶[D] (1,1))) (h2 : is_zero (D.obj (3,0))) :
+  short_exact_sequence 𝒜 :=
+{ fst := D.obj (0,0),
+  snd := D.obj (0,1),
+  trd := D.obj (0,2),
+  f := (0,0) ⟶[D] (0,1),
+  g := (0,1) ⟶[D] (0,2),
+  mono' :=
+  begin
+    letI := h1,
+    refine abelian.pseudoelement.mono_of_zero_of_map_zero _ (λ a ha, _),
+    obtain ⟨b, hb⟩ := is_snake_input.exists_of_exact
+      (is_snake_input.long_row₀_exact D.is_snake_input) a ha,
+    rw [← hb],
+    simp [is_snake_input.ker_row₁_to_top_left, limits.kernel.ι_of_mono ((1,0) ⟶[D] (1,1))]
+  end,
+  epi' :=
+  begin
+    rw (abelian.tfae_epi (D.obj (3,0)) ((0,1) ⟶[D] (0,2))).out 0 2,
+    convert D.2.exact_to_δ,
+    apply h2.eq_of_tgt,
+  end,
+  exact' := D.2.row_exact _ }
 
 end snake_input
 
