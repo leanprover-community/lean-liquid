@@ -13,50 +13,48 @@ open_locale topological_space nnreal big_operators filter classical
 
 namespace thm71
 
-section surjectivity
+-- section surjectivity
 
-parameter (x : ℝ≥0)
-variables (y : ℝ≥0) --(N : ℕ)
+-- parameter (x : ℝ≥0)
+-- variables (y : ℝ≥0) --(N : ℕ)
 
-def N : ℕ := ⌈(x⁻¹ : ℝ)⌉₊
+-- def N : ℕ := ⌈(x⁻¹ : ℝ)⌉₊
 
-lemma N_inv_le : x ≥ 1 / N := sorry
-
-
---The minimal integer such that the corresponding coefficient in the Laurent series for y is ≠ 0
-def deg : ℤ := ⌊(log y) / (log x)⌋
-
-lemma xpow_le : x ^ (deg y) ≤ y := sorry
-
-lemma deg_is_min : ∀ k < deg y, x ^ k > y := sorry
-
-def a (m : ℤ) := ⌊ (y / x ^ m : ℝ)⌋₊
-
-lemma a_bdd : a y (deg y) < N  := sorry
-
-lemma y_mul_xpow_le : ((a y (deg y) : ℝ≥0) * x ^ (deg y)) ≤ y := sorry
-
-def z (m : ℤ) := y - (a y m) * x ^ m
-
-/--Given the bound L (eventually L = deg y), `step m` is the pair whose first element is the
-(m+L)-th coefficient
--/
-def step (L : ℤ) (m : ℕ) : ℕ × ℝ≥0 := (a y (L + m), z y (L + m))
-
-noncomputable def A : ℕ → ℕ × ℝ≥0
-| 0         := step y (deg y) 0
-| (m + 1)   := step (A m).2 (deg y) (m + 1)--let z' := (A m).2, c := n y + m + 1 in (a z' c, z z' c)
-
-lemma deg_increasing (k : ℕ) : deg (A y (k + 1)).2 > deg (A y k).2 := sorry
-
-def coeff : ℤ → ℕ := λ k, if k < deg y then 0 else (A y (k + deg y ).to_nat).1
-
-lemma surj_on_nonneg : has_sum (λ k : ℤ, (coeff y k : ℝ≥0) * x ^ k ) y := sorry
-
-end surjectivity
+-- lemma N_inv_le : x ≥ 1 / N := sorry
 
 
-section fae_surjectivity
+-- --The minimal integer such that the corresponding coefficient in the Laurent series for y is ≠ 0
+-- def deg : ℤ := ⌊(log y) / (log x)⌋
+
+-- lemma xpow_le : x ^ (deg y) ≤ y := sorry
+
+-- lemma deg_is_min : ∀ k < deg y, x ^ k > y := sorry
+
+-- def a (m : ℤ) := ⌊ (y / x ^ m : ℝ)⌋₊
+
+-- lemma a_bdd : a y (deg y) < N  := sorry
+
+-- lemma y_mul_xpow_le : ((a y (deg y) : ℝ≥0) * x ^ (deg y)) ≤ y := sorry
+
+-- def z (m : ℤ) := y - (a y m) * x ^ m
+
+-- /--Given the bound L (eventually L = deg y), `step m` is the pair whose first element is the
+-- (m+L)-th coefficient
+-- -/
+-- def step (L : ℤ) (m : ℕ) : ℕ × ℝ≥0 := (a y (L + m), z y (L + m))
+
+-- noncomputable def A : ℕ → ℕ × ℝ≥0
+-- | 0         := step y (deg y) 0
+-- | (m + 1)   := step (A m).2 (deg y) (m + 1)--let z' := (A m).2, c := n y + m + 1 in (a z' c, z z' c)
+
+-- lemma deg_increasing (k : ℕ) : deg (A y (k + 1)).2 > deg (A y k).2 := sorry
+
+-- def coeff : ℤ → ℕ := λ k, if k < deg y then 0 else (A y (k + deg y ).to_nat).1
+
+-- lemma surj_on_nonneg : has_sum (λ k : ℤ, (coeff y k : ℝ≥0) * x ^ k ) y := sorry
+
+-- end surjectivity
+
 
 variables (ξ : ℝ) [fact (0 < ξ)] [fact (ξ < 1)]
 variable (x : ℝ)
@@ -64,10 +62,6 @@ variable (x : ℝ)
 noncomputable def y : ℕ → ℝ
 | 0         := x
 | (n + 1)   := (y n) - (⌊(((y n) / ξ ^ n) : ℝ)⌋ : ℝ) * ξ ^ n
-
-
-example (f : ℕ → ℝ) (h_mono : monotone f) :
-  tendsto f at_top at_top ∨ (∃ l, tendsto f at_top (𝓝 l)) := tendsto_of_monotone h_mono
 
 
 --[FAE] why I can't find this in mathlib?
@@ -94,6 +88,37 @@ end
 --            ... ≤ ⌊(y ξ x n) / (ξ ^ n)⌋ : sorry,
 -- end
 
+section aux_lemmas
+
+example (a b c : ℝ) : a < b + c ↔ a - b < c := sub_lt_iff_lt_add'.symm
+
+lemma bdd_floor : bdd_above (range (λ n : ℕ, (⌊ y ξ x n / ξ ^ n⌋ : ℝ))) :=
+begin
+  use (max x ξ ⁻¹ : ℝ),
+  intros z hz,
+  obtain ⟨m, h_mz⟩ := (set.mem_range).mp hz,
+    by_cases hm : m = 0,
+  { rw [hm, pow_zero, div_one] at h_mz,
+    rw [← h_mz, y, le_max_iff],
+    apply or.intro_left,
+    exact floor_le x },
+  rw ← h_mz,
+  apply (floor_le _).trans,
+  obtain ⟨k, hk⟩ : ∃ k : ℕ, m = k + 1 := nat.exists_eq_succ_of_ne_zero hm,
+  rw [hk, y],
+  have : ξ ^ k ≠ 0 := ne_of_gt (pow_pos (fact.out _) k),
+  calc (y ξ x k - ↑⌊y ξ x k / ξ ^ k⌋ * ξ ^ k) / ξ ^ (k + 1) =
+              (y ξ x k - ↑⌊y ξ x k / ξ ^ k⌋ * ξ ^ k) / (ξ ^ k * ξ) : by {rw [pow_add, pow_one]}
+        ... = (y ξ x k - ↑⌊y ξ x k / ξ ^ k⌋ * ξ ^ k) / ξ ^ k / ξ : by {field_simp}
+        ... = (y ξ x k / ξ ^ k - ↑⌊y ξ x k / ξ ^ k⌋ * ξ ^ k / ξ ^ k) / ξ : by {rw [sub_div]}
+        ... = (y ξ x k / ξ ^ k - ↑⌊y ξ x k / ξ ^ k⌋) / ξ : by {simp only [mul_div_cancel,
+                                                                      this, ne.def, not_false_iff]}
+        ... ≤ 1 / ξ : div_le_div_of_le (le_of_lt _) (le_of_lt _)
+        ... ≤ max x ξ ⁻¹ : by {field_simp},
+  exact fact.out _,
+  {rw [sub_lt_iff_lt_add, add_comm], from (lt_floor_add_one _)},
+end
+
 lemma eventually_pos_y : ∀ n : ℕ, n ≥ 1 → y ξ x n ≥ 0 :=
 begin
   have h_pos : ∀ n : ℕ, n ≥ 1 → ξ ^ n > 0 := λ n _, pow_pos (fact.out _) n,
@@ -109,11 +134,11 @@ begin
     rwa ← sub_nonneg at this },
 end
 
-lemma eventually_pos_floor : ∀ n : ℕ, n ≥ 1 → (⌊((y ξ x n) / ξ ^ n )⌋ : ℝ) * ξ ^ n ≥ 0 :=
+lemma eventually_pos_floor : ∀ n : ℕ, n ≥ 1 → (⌊((y ξ x n) / ξ ^ n )⌋ : ℝ) ≥ 0 :=
 begin
   have h_pos : ∀ n : ℕ, n ≥ 1 → ξ ^ n > 0 := λ n _, pow_pos (fact.out _) n,
   intros n hn,
-  apply mul_nonneg _ (le_of_lt (h_pos n hn)),
+  -- apply mul_nonneg _ (le_of_lt (h_pos n hn)),
   norm_cast,
   apply floor_nonneg.mpr,
   exact div_nonneg (eventually_pos_y ξ x n hn) (le_of_lt (h_pos n hn)),
@@ -122,9 +147,12 @@ end
 
 lemma eventually_le : ∀ n, n ≥ 1 → y ξ x (n + 1) ≤ (y ξ x n) :=
 begin
+  have h_pos : ∀ n : ℕ, n ≥ 1 → ξ ^ n > 0 := λ n _, pow_pos (fact.out _) n,
   intros n hn,
-  convert sub_le_self (y ξ x n) (eventually_pos_floor ξ x n hn),
-  rwa y,
+  rw y,
+  apply sub_le_self (y ξ x n),
+  apply mul_nonneg _ (le_of_lt (h_pos n hn)),
+  exact eventually_pos_floor ξ x n hn,
 end
 
 lemma eventually_le_one {n : ℕ} (hn : n ≥ 1) : (y ξ x n) ≤ (y ξ x 1) :=
@@ -150,7 +178,35 @@ begin
     exact eventually_le ξ x n hn },
 end
 
-lemma exists_limit : ∃ a, tendsto (λ n, y ξ x n) at_top (𝓝 a) :=
+lemma limit_neg_geometric : tendsto (λ i : ℕ, - ξ ^ i) at_top (𝓝 0) :=
+begin
+  apply summable.tendsto_at_top_zero,
+  rw summable_neg_iff,
+  apply summable_geometric_of_abs_lt_1,
+  rw abs_of_pos,
+  all_goals {exact fact.out _},
+end
+
+end aux_lemmas
+
+section summability
+
+lemma finite_sum (n : ℕ) : (y ξ x (n + 1) : ℝ) =
+  x - ∑ i in range(n + 1),  (⌊(((y ξ x i) / ξ ^ i) : ℝ)⌋ : ℝ) * (ξ ^ i) :=
+begin
+  induction n with n h_ind,
+  { rw [zero_add, range_one, sum_singleton], refl },
+  { replace h_ind : (x - (y ξ x (n + 1)) : ℝ) =
+    ∑ i in range(n + 1),  (⌊(y ξ x i / ξ ^ i : ℝ)⌋ : ℝ) * ξ ^ i := by {rw [sub_eq_iff_eq_add,
+      ← sub_eq_iff_eq_add', h_ind] },
+    nth_rewrite_rhs 2 [nat.succ_eq_add_one, ← nat.succ_eq_add_one, range_succ],
+    rw [sum_insert, nat.succ_eq_add_one, ← sub_sub, ← h_ind, sub_sub, add_sub, add_comm _ x,
+      ← add_sub, ← sub_sub, sub_self, zero_sub, neg_sub],
+    refl,
+    simp },
+end
+
+lemma exists_limit_y : ∃ a, tendsto (λ n, y ξ x n) at_top (𝓝 a) :=
 begin
   have h_bdd : bdd_below (range (trunc_y ξ x)),
   { use 0,
@@ -179,66 +235,39 @@ begin
   tauto,
 end
 
-
-lemma finite_sum (n : ℕ) : (y ξ x (n + 1) : ℝ) =
-  x - ∑ i in range(n + 1),  (⌊(((y ξ x i) / ξ ^ i) : ℝ)⌋ : ℝ) * (ξ ^ i) :=
+lemma summable_floor (r : ℝ) (hr₀ : 0 < r) (hr₁ : r < 1) :
+   summable (λ i, (⌊(y ξ x i / ξ ^ i : ℝ)⌋ : ℝ) * r ^ i) :=
 begin
-  induction n with n h_ind,
-  { rw [zero_add, range_one, sum_singleton], refl },
-  { replace h_ind : (x - (y ξ x (n + 1)) : ℝ) =
-    ∑ i in range(n + 1),  (⌊(y ξ x i / ξ ^ i : ℝ)⌋ : ℝ) * ξ ^ i := by {rw [sub_eq_iff_eq_add,
-      ← sub_eq_iff_eq_add', h_ind] },
-    nth_rewrite_rhs 2 [nat.succ_eq_add_one, ← nat.succ_eq_add_one, range_succ],
-    rw [sum_insert, nat.succ_eq_add_one, ← sub_sub, ← h_ind, sub_sub, add_sub, add_comm _ x,
-      ← add_sub, ← sub_sub, sub_self, zero_sub, neg_sub],
-    refl,
-    simp },
-end
-
-lemma summable_floor : summable (λ i, (⌊(y ξ x i / ξ ^ i : ℝ)⌋ : ℝ) * ξ ^ i) :=
-begin
+  have h_pos : ∀ n : ℕ, n ≥ 1 → r ^ n > 0 := λ n _, pow_pos (hr₀) n,
   have H : ∀ j : {i // i ∉ range 1}, j.1 ≥ 1,
   { rintro ⟨n, h_n⟩,
     simp only [ge_iff_le, finset.mem_singleton, range_one] at h_n,
     exact le_of_not_gt ((not_iff_not.mpr nat.lt_one_iff).mpr h_n) },
   apply (finset.summable_compl_iff (finset.range 1)).mp,
-  -- have h_one : ∀ i : ℕ, ξ ^ i ≥ 0 := λ i, le_of_lt (pow_pos (fact.out _) i),
-  have h_nonneg : ∀ i : {i // i ∉ range 1}, (⌊(y ξ x i.1 / ξ ^ i.1 : ℝ)⌋ : ℝ) * ξ ^ i.1 ≥ 0,
-  -- { rintro ⟨i, h_i⟩,
-  --   have hi : i ≥ 1,
-  --   { simp only [*, ge_iff_le, finset.mem_singleton, range_one] at *,
-  --     exact le_of_not_gt ((not_iff_not.mpr nat.lt_one_iff).mpr h_i) },
+  swap, apply_instance,
+  have h_nonneg : ∀ i : {i // i ∉ range 1}, (⌊(y ξ x i.1 / ξ ^ i.1 : ℝ)⌋ : ℝ) * r ^ i.1 ≥ 0,
   { intro i,
+    apply mul_nonneg _ (le_of_lt (h_pos i.1 (H i))),
     exact (eventually_pos_floor ξ x i.1 (H i)) },
-  have h_bdd : ∀ i : {i // i ∉ range 1}, (⌊(y ξ x i.1 / ξ ^ i.1 : ℝ)⌋ : ℝ) * ξ ^ i.1 ≤ ξ ^ i.1,
+  obtain ⟨μ, hμ⟩  := bdd_floor ξ x,
+  have h_bdd : ∀ i : {i // i ∉ range 1}, (⌊(y ξ x i.1 / ξ ^ i.1 : ℝ)⌋ : ℝ) ≤ μ,
+  { rw upper_bounds at hμ,
+    simp only [*, forall_apply_eq_imp_iff', set.mem_range, forall_exists_index, mem_set_of_eq,
+      implies_true_iff] at * },
+  replace h_bdd : ∀ i : {i // i ∉ range 1}, (⌊(y ξ x i.1 / ξ ^ i.1 : ℝ)⌋ : ℝ) * r ^ i.1
+      ≤ μ * r ^ i.1,
   { intro i,
-
-  -- { rintro ⟨i, h_i⟩,
-    have temp := eventually_le_one ξ x (H i),
-  have zero : ξ ^ i.1 > 0, sorry,
-  have uno := (mul_le_mul_right zero).mpr (floor_le ((y ξ x i.1) / ξ ^ i.1 : ℝ)),
-  calc (⌊(y ξ x i.1 / ξ ^ i.1 : ℝ)⌋ : ℝ) * (ξ ^ i.1) ≤ (y ξ x i.1 / ξ ^ i.1 : ℝ) * (ξ ^ i.1) :
-    (mul_le_mul_right zero).mpr (floor_le ((y ξ x i.1) / ξ ^ i.1 : ℝ))
-                                                ... ≤ ξ ^ i.1 : sorry,
-
-  },
+    rw mul_le_mul_right,
+    exacts [h_bdd i, pow_pos hr₀ i.1] },
   apply summable_of_nonneg_of_le h_nonneg h_bdd,
-  -- simp only [summable_geometric_iff_norm_lt_1, real.norm_eq_abs],
-  sorry,
-  apply_instance,
-end
-
-lemma limit_geometric : tendsto (λ i : ℕ, - ξ ^ i) at_top (𝓝 0) :=
-begin
-  apply summable.tendsto_at_top_zero,
-  rw summable_neg_iff,
+  apply (@finset.summable_compl_iff _ _ _ _ _ (λ i, μ * r ^ i) (finset.range 1)).mpr,
+  apply summable.mul_left,
   apply summable_geometric_of_abs_lt_1,
-  rw abs_of_pos,
-  all_goals {exact fact.out _},
+  rwa [abs_eq_self.mpr (le_of_lt hr₀)],
 end
 
 
-lemma limit (h_pos : 0 < ξ) (h_small : ξ < 1)
+lemma limit_y (h_pos : 0 < ξ) (h_small : ξ < 1)
   : tendsto (λ n, y ξ x n) at_top (𝓝 0) :=
 begin
   have h_right : ∀ n, n ≥ 1 → (⌊(y ξ x n / ξ ^ n)⌋ : ℝ) ≤ (y ξ x n / ξ ^ n) := (λ _ _, floor_le _),
@@ -261,19 +290,20 @@ begin
                                                   (mul_le_mul_right (h_one n)).mpr (h_left n hn) },
   replace h_left : ∀ᶠ n in at_top, y ξ x n - ξ ^ n ≤ (⌊(y ξ x n / ξ ^ n)⌋ : ℝ) * ξ ^ n,
   { simp only [eventually_at_top], use [1, h_left] },
-  have : tendsto (λ n, y ξ x n - ξ ^ n) at_top (𝓝 (exists_limit ξ x).some),
-  { convert tendsto.add (exists_limit ξ x).some_spec (limit_geometric ξ),
+  have : tendsto (λ n, y ξ x n - ξ ^ n) at_top (𝓝 (exists_limit_y ξ x).some),
+  { convert tendsto.add (exists_limit_y ξ x).some_spec (limit_neg_geometric ξ),
     rw add_zero } ,
   have h₁ := (le_of_tendsto_of_tendsto this
-    (summable_floor ξ x).tendsto_at_top_zero h_left).antisymm (le_of_tendsto_of_tendsto
-    (summable_floor ξ x).tendsto_at_top_zero (exists_limit ξ x).some_spec h_right),
-  have := (exists_limit ξ x).some_spec,
+    (summable_floor ξ x ξ _ _).tendsto_at_top_zero h_left).antisymm (le_of_tendsto_of_tendsto
+    (summable_floor ξ x ξ _ _).tendsto_at_top_zero (exists_limit_y ξ x).some_spec h_right),
+  have := (exists_limit_y ξ x).some_spec,
   rwa h₁ at this,
+  all_goals {exact (fact.out _)},
 end
 
 
 
-end fae_surjectivity
+end summability
 
 
 end thm71
