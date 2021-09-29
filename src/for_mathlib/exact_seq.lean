@@ -1,4 +1,5 @@
 import algebra.homology.exact
+import category_theory.abelian.opposite
 
 noncomputable theory
 
@@ -29,6 +30,17 @@ example : [0,1,2,3,4,5,6,7,8,9].extract 4 3 = [4,5,6] := rfl
 namespace category_theory
 variables (𝒞 : Type u) [category.{v} 𝒞]
 variables [has_zero_morphisms 𝒞] [has_images 𝒞] [has_kernels 𝒞]
+variables {𝒜 : Type u} [category.{v} 𝒜] [abelian 𝒜]
+
+namespace exact -- move this
+
+variables {A B C : 𝒜} (f : A ⟶ B) (g : B ⟶ C)
+
+instance [exact f g] : exact g.op f.op := sorry
+
+instance {C B A : 𝒜ᵒᵖ} (g : C ⟶ B) (f : B ⟶ A) [exact g f] : exact f.unop g.unop := sorry
+
+end exact
 
 /-- A sequence `[f, g, ...]` of morphisms is exact if the pair `(f,g)` is exact,
 and the sequence `[g, ...]` is exact.
@@ -78,6 +90,13 @@ begin
   substs h₁ h₂,
   rcases h with _ | _ | ⟨A, B, C, f, g, hfg, _, hL⟩,
   refine exact_seq.cons _ _ hfg _ (congr hL (arrow_congr.cons rfl H)),
+end
+
+section
+
+lemma of_op : ∀ {L : list (arrow 𝒜)}, exact_seq 𝒜ᵒᵖ (L.reverse.map (λ f, sorry)) →
+  exact_seq 𝒜 L := sorry
+
 end
 
 end exact_seq
