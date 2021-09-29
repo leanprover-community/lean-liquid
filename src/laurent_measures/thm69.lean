@@ -94,7 +94,6 @@ end
 --            ... ≤ ⌊(y ξ x n) / (ξ ^ n)⌋ : sorry,
 -- end
 
-
 lemma eventually_pos_y : ∀ n : ℕ, n ≥ 1 → y ξ x n ≥ 0 :=
 begin
   have h_pos : ∀ n : ℕ, n ≥ 1 → ξ ^ n > 0 := λ n _, pow_pos (fact.out _) n,
@@ -120,34 +119,63 @@ begin
   exact div_nonneg (eventually_pos_y ξ x n hn) (le_of_lt (h_pos n hn)),
 end
 
--- def dual_y := order_dual.to_dual ∘ (y ξ x)
-def shift_y := λ n, y ξ x (n + 1)
 
-#check shift_y ξ x
--- def dual_y : ℕ → (order_dual ℝ) := λ n, y ξ x n
+lemma eventually_le : ∀ n, n ≥ 1 → y ξ x (n + 1) ≤ (y ξ x n) :=
+begin
+  intros n hn,
+  convert sub_le_self (y ξ x n) (eventually_pos_floor ξ x n hn),
+  rwa y,
+end
 
-lemma eventually_monotone : monotone (order_dual.to_dual ∘ (shift_y ξ x)) :=
--- lemma eventually_monotone : monotone (order_dual.to_dual ∘ (λ n : ℕ, y ξ x (n + 1))) :=
+lemma eventually_le_one {n : ℕ} (hn : n ≥ 1) : (y ξ x n) ≤ (y ξ x 1) :=
+begin
+  induction hn with n hn h_ind,
+  exact le_of_eq (refl _),
+  have also := (eventually_le ξ x n hn).trans h_ind,
+  rwa nat.succ_eq_add_one,
+end
+
+def trunc_y : ℕ → ℝ := λ n, if n = 0 then y ξ x 1 else y ξ x n
+
+lemma eventually_monotone : monotone (order_dual.to_dual ∘ (trunc_y ξ x)) :=
 begin
   apply monotone_nat_of_le_succ,
   intro n,
-  rw [@order_dual.dual_le ℝ _ _ _],
-  by_cases hn : n ≥ 1,
-  { replace hn : n + 1 ≥ 1 := by {simp only [ge_iff_le, zero_le', le_add_iff_nonneg_left] },
-    exact sub_le_self (y ξ x (n + 1)) (eventually_pos_floor ξ x (n + 1) hn) },
-  { replace hn : n = 0,
-    rwa [not_le, nat.lt_one_iff] at hn,
-    rw [hn, zero_add],
-    exact sub_le_self (y ξ x 1) (eventually_pos_floor ξ x 1 (le_of_eq (refl 1))) },
+  rw [order_dual.to_dual_le, order_dual.of_dual_to_dual],
+  by_cases hn : n = 0,
+  {rw [hn, zero_add, trunc_y],
+    simp only [nat.one_ne_zero, if_true, eq_self_iff_true, if_false] },
+  { simp only [trunc_y, if_neg hn, function.comp_app, nat.succ_ne_zero, if_false],
+    replace hn : n ≥ 1 := le_of_not_gt ((not_iff_not.mpr nat.lt_one_iff).mpr hn),
+    exact eventually_le ξ x n hn },
 end
 
 lemma exists_limit : ∃ a, tendsto (λ n, y ξ x n) at_top (𝓝 a) :=
 begin
-  have h_bdd : bdd_below (range (shift_y ξ x)), sorry,
+  have h_bdd : bdd_below (range (trunc_y ξ x)),
+  { use (y ξ x 1),
+    intros z hz,
+    obtain ⟨m, h_mz⟩ := (set.mem_range).mp hz,
+    by_cases hm : m = 0,
+    { simp_rw [hm, trunc_y, if_pos] at h_mz, rw h_mz },
+      simp_rw [trunc_y, (if_neg hm)] at h_mz,
+      rw ← h_mz,
+      replace hm : m ≥ 1 := le_of_not_gt ((not_iff_not.mpr nat.lt_one_iff).mpr hm),
+      sorry },
+      -- exact (eventually_le_one ξ x hm) },
   have := tendsto_at_top_cinfi (eventually_monotone ξ x) h_bdd,
-  use (⨅ (i : ℕ), shift_y ξ x i),
-  apply @tendsto.congr' _ _ (shift_y ξ x) _ _ _ _ this,
-  sorry,
+  use (⨅ (i : ℕ), trunc_y ξ x i),
+  apply @tendsto.congr' _ _ (trunc_y ξ x) _ _ _ _ this,
+  apply (filter.eventually_eq_iff_exists_mem).mpr,
+  use {n | n ≥ 1},
+  simp only [mem_at_top_sets, ge_iff_le, mem_set_of_eq],
+  use 1,
+  simp only [imp_self, forall_const],
+  intros n hn,
+  replace hn : n ≥ 1 := by {simp only [*, ge_iff_le, mem_set_of_eq] at * },
+  have := ne_of_lt (lt_of_lt_of_le nat.zero_lt_one hn),
+  rw [trunc_y, ite_eq_right_iff],
+  tauto,
 end
 
 
