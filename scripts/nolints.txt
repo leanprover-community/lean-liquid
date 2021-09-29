@@ -143,6 +143,10 @@ apply_nolint Profinite.image_stabilizes inhabited_nonempty
 
 -- for_mathlib/abelian_category.lean
 apply_nolint category_theory.is_zero doc_blame
+apply_nolint category_theory.is_zero.eq_of_src def_lemma doc_blame
+apply_nolint category_theory.is_zero.eq_of_tgt def_lemma doc_blame
+apply_nolint category_theory.is_zero.iso doc_blame
+apply_nolint category_theory.is_zero.iso_zero doc_blame
 
 -- for_mathlib/abelian_group_object.lean
 apply_nolint category_theory.SheafOfTypes.Ab doc_blame
@@ -159,7 +163,18 @@ apply_nolint category_theory.SheafOfTypes.terminal_cone_is_limit doc_blame
 apply_nolint category_theory.SheafOfTypes.terminal_sheaf doc_blame
 apply_nolint category_theory.SheafOfTypes.terminal_sheaf.to doc_blame
 
--- for_mathlib/derived_functor.lean
+-- for_mathlib/exact_seq.lean
+apply_nolint category_theory.exact_seq.arrow_congr doc_blame
+
+-- for_mathlib/fin_functor.lean
+apply_nolint category_theory.fin3_functor_mk doc_blame
+apply_nolint category_theory.fin3_functor_mk.map' doc_blame
+apply_nolint category_theory.fin3_functor_mk.map'_comp def_lemma doc_blame
+apply_nolint category_theory.fin4_functor_mk doc_blame
+apply_nolint category_theory.fin4_functor_mk.map' doc_blame
+apply_nolint category_theory.fin4_functor_mk.map'_comp def_lemma doc_blame
+
+-- for_mathlib/homological_complex.lean
 apply_nolint homological_complex.Fst doc_blame unused_arguments
 apply_nolint homological_complex.Fst_Snd doc_blame
 apply_nolint homological_complex.Snd doc_blame unused_arguments
@@ -173,23 +188,18 @@ apply_nolint homological_complex.mod_boundaries_map doc_blame
 apply_nolint homological_complex.mod_boundaries_to_cycles doc_blame
 apply_nolint homological_complex.snake_diagram doc_blame
 apply_nolint homological_complex.snake_input doc_blame
-
--- for_mathlib/fin_functor.lean
-apply_nolint category_theory.fin3_functor_mk doc_blame
-apply_nolint category_theory.fin3_functor_mk.map' doc_blame
-apply_nolint category_theory.fin3_functor_mk.map'_comp def_lemma doc_blame
-apply_nolint category_theory.fin4_functor_mk doc_blame
-apply_nolint category_theory.fin4_functor_mk.map' doc_blame
-apply_nolint category_theory.fin4_functor_mk.map'_comp def_lemma doc_blame
+apply_nolint homological_complex.δ doc_blame
 
 -- for_mathlib/horseshoe.lean
 apply_nolint short_exact_sequence.biprod_factors def_lemma doc_blame unused_arguments
-apply_nolint short_exact_sequence.exact_of_split unused_arguments
-apply_nolint short_exact_sequence.horseshoe doc_blame unused_arguments
+apply_nolint short_exact_sequence.horseshoe doc_blame
 apply_nolint short_exact_sequence.horseshoe_base doc_blame
 apply_nolint short_exact_sequence.horseshoe_base_π doc_blame
+apply_nolint short_exact_sequence.horseshoe_d doc_blame
+apply_nolint short_exact_sequence.horseshoe_ker doc_blame unused_arguments
+apply_nolint short_exact_sequence.horseshoe_ker_ι doc_blame
+apply_nolint short_exact_sequence.horseshoe_obj doc_blame
 apply_nolint short_exact_sequence.horseshoe_step doc_blame
-apply_nolint short_exact_sequence.horseshoe_step_π doc_blame
 
 -- for_mathlib/is_locally_constant.lean
 apply_nolint indexed_partition.discrete_quotient doc_blame
@@ -199,6 +209,10 @@ apply_nolint indexed_partition.discrete_quotient_equiv doc_blame
 apply_nolint Inter_eq inhabited_nonempty
 apply_nolint eventually_constant inhabited_nonempty
 apply_nolint exists_le_finset inhabited_nonempty
+
+-- for_mathlib/projectives.lean
+apply_nolint chain_complex.is_projective_resolution doc_blame
+apply_nolint chain_complex.is_projective_resolution.mk_ProjectiveResolution doc_blame
 
 -- for_mathlib/pullbacks.lean
 apply_nolint category_theory.equivalence.is_limit_pullback_cone doc_blame
@@ -216,6 +230,7 @@ apply_nolint set_up_one doc_blame
 apply_nolint up_two doc_blame
 
 -- for_mathlib/short_exact_sequence.lean
+apply_nolint category_theory.functor.map_short_exact_sequence_of_split doc_blame
 apply_nolint category_theory.short_exact_sequence doc_blame
 apply_nolint category_theory.short_exact_sequence.Fst doc_blame
 apply_nolint category_theory.short_exact_sequence.Functor doc_blame
@@ -230,6 +245,14 @@ apply_nolint category_theory.short_exact_sequence.g_nat doc_blame
 apply_nolint category_theory.short_exact_sequence.hom doc_blame
 apply_nolint category_theory.short_exact_sequence.hom_inj doc_blame
 apply_nolint category_theory.short_exact_sequence.id doc_blame
+apply_nolint category_theory.short_exact_sequence.iso_of_components doc_blame
+apply_nolint category_theory.short_exact_sequence.iso_of_components' doc_blame
+apply_nolint category_theory.short_exact_sequence.left_split.splitting doc_blame
+apply_nolint category_theory.short_exact_sequence.mk_of_split doc_blame
+apply_nolint category_theory.short_exact_sequence.mk_of_split' doc_blame
+apply_nolint category_theory.short_exact_sequence.mk_split doc_blame
+apply_nolint category_theory.short_exact_sequence.right_split.splitting doc_blame
+apply_nolint category_theory.short_exact_sequence.snd_is_iso unused_arguments
 
 -- for_mathlib/simplicial/iso.lean
 apply_nolint category_theory.simplicial_object.is_iso_of fails_quickly
@@ -239,9 +262,11 @@ apply_nolint category_theory.has_snake_lemma doc_blame
 apply_nolint category_theory.is_snake_input doc_blame
 apply_nolint category_theory.is_snake_input.aux_simp doc_blame
 apply_nolint category_theory.is_snake_input.bottom_left_cokernel_to doc_blame
+apply_nolint category_theory.is_snake_input.bottom_right_to_coker_row₂ doc_blame
 apply_nolint category_theory.is_snake_input.cokernel_to doc_blame
 apply_nolint category_theory.is_snake_input.cokernel_to_top_right_kernel_to_right_kernel doc_blame
 apply_nolint category_theory.is_snake_input.from_δ_aux doc_blame
+apply_nolint category_theory.is_snake_input.ker_row₁_to_top_left doc_blame
 apply_nolint category_theory.is_snake_input.left_cokernel_to_kernel_bottom_left_cokernel_to doc_blame
 apply_nolint category_theory.is_snake_input.to_kernel doc_blame
 apply_nolint category_theory.is_snake_input.to_top_right_kernel doc_blame
@@ -265,6 +290,7 @@ apply_nolint category_theory.snake_diagram.mk_functor.square_commutes_row unused
 apply_nolint category_theory.snake_diagram.mk_of_short_exact_sequence_hom doc_blame
 apply_nolint category_theory.snake_diagram.o doc_blame
 apply_nolint category_theory.snake_input doc_blame
+apply_nolint category_theory.snake_input.kernel_sequence doc_blame
 apply_nolint category_theory.snake_input.mk_of_short_exact_sequence_hom doc_blame
 apply_nolint category_theory.snake_input.proj doc_blame
 apply_nolint category_theory.snake_lemma.δ doc_blame
@@ -307,7 +333,14 @@ apply_nolint thm71.coeff doc_blame
 apply_nolint thm71.deg doc_blame
 apply_nolint thm71.deg_increasing ge_or_gt
 apply_nolint thm71.deg_is_min ge_or_gt
-apply_nolint thm71.step doc_blame
+apply_nolint thm71.eventually_le ge_or_gt
+apply_nolint thm71.eventually_le_one ge_or_gt
+apply_nolint thm71.eventually_pos_floor ge_or_gt
+apply_nolint thm71.eventually_pos_y ge_or_gt
+apply_nolint thm71.ge_of_div_le_one ge_or_gt
+apply_nolint thm71.limit unused_arguments
+apply_nolint thm71.trunc_y doc_blame
+apply_nolint thm71.y doc_blame unused_arguments
 apply_nolint thm71.z doc_blame
 
 -- locally_constant/Vhat.lean
