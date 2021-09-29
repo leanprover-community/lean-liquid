@@ -7,6 +7,7 @@ import category_theory.abelian.pseudoelements
 import for_mathlib.short_exact_sequence
 import for_mathlib.abelian_category
 import for_mathlib.fin_functor
+import for_mathlib.exact_seq
 
 noncomputable theory
 
@@ -1049,6 +1050,16 @@ begin
 end
 
 end delta
+
+lemma six_term_exact_seq (hD : is_snake_input D) :
+  exact_seq 𝒜 [(0,0) ⟶[D] (0,1), (0,1) ⟶[D] (0,2), hD.δ, (3,0) ⟶[D] (3,1), (3,1) ⟶[D] (3,2)] :=
+begin
+  refine exact_seq.cons _ _ hD.row_exact₀ _ _,
+  refine exact_seq.cons _ _ hD.exact_to_δ _ _,
+  refine exact_seq.cons _ _ hD.exact_from_δ _ _,
+  refine exact_seq.cons _ _ hD.row_exact₃ _ _,
+  refine exact_seq.single _,
+end
 
 end is_snake_input
 
