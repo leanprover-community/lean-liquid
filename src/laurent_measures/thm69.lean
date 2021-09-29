@@ -120,36 +120,35 @@ begin
   exact div_nonneg (eventually_pos_y ξ x n hn) (le_of_lt (h_pos n hn)),
 end
 
-example (a b : ℝ) (hb : b ≥ 0) : a ≥ a - b := sub_le_self a hb
+-- def dual_y := order_dual.to_dual ∘ (y ξ x)
+def shift_y := λ n, y ξ x (n + 1)
 
-lemma eventually_monotone : monotone (λ n : order_dual ℕ, y ξ x n+1) :=
+#check shift_y ξ x
+-- def dual_y : ℕ → (order_dual ℝ) := λ n, y ξ x n
+
+lemma eventually_monotone : monotone (order_dual.to_dual ∘ (shift_y ξ x)) :=
+-- lemma eventually_monotone : monotone (order_dual.to_dual ∘ (λ n : ℕ, y ξ x (n + 1))) :=
 begin
-  sorry,--the problem is that `monotone` means incresing, while this is decreasing
-  -- intros n b H,
-  -- apply le_of_lt,
-  -- funext,
-  -- simp only [add_lt_add_iff_right],
-  -- -- intro n,
-  -- apply strict_mono_incr_on.dual,
-  -- -- apply monotone_nat_of_le_succ,
-  -- intro n,
-  -- -- apply monotone_nat_of_le_succ,
-  -- simp only [add_le_add_iff_right],
-  -- by_cases hn : n ≥ 1,
-  -- rw y,
-  -- have := sub_le_self (y ξ x n) (eventually_pos_floor ξ x n hn),
-  -- induction n with n h_ind,
-  -- sorry,
-  -- -- simp_rw [add_le_add_iff_right] at H,
-  -- rw nat.succ_eq_add_one,
-  -- rw y,
-  -- by_cases h : n < m,
-  -- have togli := H (le_of_lt h),
-  -- all_goals {sorry},
+  apply monotone_nat_of_le_succ,
+  intro n,
+  rw [@order_dual.dual_le ℝ _ _ _],
+  by_cases hn : n ≥ 1,
+  { replace hn : n + 1 ≥ 1 := by {simp only [ge_iff_le, zero_le', le_add_iff_nonneg_left] },
+    exact sub_le_self (y ξ x (n + 1)) (eventually_pos_floor ξ x (n + 1) hn) },
+  { replace hn : n = 0,
+    rwa [not_le, nat.lt_one_iff] at hn,
+    rw [hn, zero_add],
+    exact sub_le_self (y ξ x 1) (eventually_pos_floor ξ x 1 (le_of_eq (refl 1))) },
 end
 
-lemma exists_limit : ∃ a, tendsto (λ n, y ξ x n) at_top (𝓝 a) := sorry--use the above and that for two
--- functions which are eventually equal, one admits a limit iff the other does
+lemma exists_limit : ∃ a, tendsto (λ n, y ξ x n) at_top (𝓝 a) :=
+begin
+  have h_bdd : bdd_below (range (shift_y ξ x)), sorry,
+  have := tendsto_at_top_cinfi (eventually_monotone ξ x) h_bdd,
+  use (⨅ (i : ℕ), shift_y ξ x i),
+  apply @tendsto.congr' _ _ (shift_y ξ x) _ _ _ _ this,
+  sorry,
+end
 
 
 lemma finite_sum (n : ℕ) : (y ξ x (n + 1) : ℝ) =
