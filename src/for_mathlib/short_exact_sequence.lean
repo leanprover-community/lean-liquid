@@ -10,6 +10,7 @@ noncomputable theory
 
 open category_theory
 open category_theory.limits
+open category_theory.preadditive
 
 universes v u
 
@@ -52,7 +53,6 @@ end hom
 
 instance : quiver (short_exact_sequence 𝒞) := ⟨hom⟩
 
-@[simps]
 def id (A : short_exact_sequence 𝒞) : A ⟶ A :=
 { fst := 𝟙 _,
   snd := 𝟙 _,
@@ -60,7 +60,6 @@ def id (A : short_exact_sequence 𝒞) : A ⟶ A :=
   sq1' := by simp only [category.id_comp, category.comp_id],
   sq2' := by simp only [category.id_comp, category.comp_id], }
 
-@[simps]
 def comp {A B C : short_exact_sequence 𝒞} (f : A ⟶ B) (g : B ⟶ C) : A ⟶ C :=
 { fst := f.1 ≫ g.1,
   snd := f.2 ≫ g.2,
@@ -71,10 +70,20 @@ def comp {A B C : short_exact_sequence 𝒞} (f : A ⟶ B) (g : B ⟶ C) : A ⟶
 instance : category (short_exact_sequence 𝒞) :=
 { id := id,
   comp := λ A B C f g, comp f g,
-  id_comp' := by { intros, ext; dsimp; simp only [category.id_comp], },
-  comp_id' := by { intros, ext; dsimp; simp only [category.comp_id], },
-  assoc' := by { intros, ext; dsimp; simp only [category.assoc], },
+  id_comp' := by { intros, ext; dsimp; apply category.id_comp, },
+  comp_id' := by { intros, ext; dsimp; apply category.comp_id, },
+  assoc' := by { intros, ext; dsimp; apply category.assoc, },
   .. (infer_instance : quiver (short_exact_sequence 𝒞)) }
+
+@[simp] lemma id_fst (A : short_exact_sequence 𝒞) : hom.fst (𝟙 A) = 𝟙 A.1 := rfl
+@[simp] lemma id_snd (A : short_exact_sequence 𝒞) : hom.snd (𝟙 A) = 𝟙 A.2 := rfl
+@[simp] lemma id_trd (A : short_exact_sequence 𝒞) : hom.trd (𝟙 A) = 𝟙 A.3 := rfl
+
+variables {A B C : short_exact_sequence 𝒞} (f : A ⟶ B) (g : B ⟶ C)
+
+@[simp, reassoc] lemma comp_fst : (f ≫ g).1 = f.1 ≫ g.1 := rfl
+@[simp, reassoc] lemma comp_snd : (f ≫ g).2 = f.2 ≫ g.2 := rfl
+@[simp, reassoc] lemma comp_trd : (f ≫ g).3 = f.3 ≫ g.3 := rfl
 
 variables (𝒞)
 
@@ -145,13 +154,175 @@ begin
   { rw [← functor.map_comp_assoc], congr, },
 end
 
-def Functor : short_exact_sequence 𝒞 ⥤ fin 3 ⥤ 𝒞 :=
+@[simps] def Functor : short_exact_sequence 𝒞 ⥤ fin 3 ⥤ 𝒞 :=
 { obj := short_exact_sequence.functor,
   map := λ A B f,
   { app := functor_map f,
     naturality' := λ i j hij, (functor_map_naturality f i j hij.le).symm },
   map_id' := λ A, by { ext i, fin_cases i; refl },
   map_comp' := λ A B C f g, by { ext i, fin_cases i; refl } }
+
+variables {𝒞}
+
+section iso
+
+variables {A B C} (f g)
+
+/-- One form of the five lemma: if a morphism of short exact sequences has isomorphisms
+as first and third component, then the second component is also an isomorphism. -/
+lemma snd_is_iso (h1 : is_iso f.1) (h3 : is_iso f.3) : is_iso f.2 := sorry
+
+/-- One form of the five lemma: if a morphism `f` of short exact sequences has isomorphisms
+as first and third component, then `f` itself is an isomorphism. -/
+lemma is_iso_of_fst_of_trd (h1 : is_iso f.1) (h3 : is_iso f.3) : is_iso f :=
+{ out :=
+  begin
+    haveI : is_iso f.2 := snd_is_iso f h1 h3,
+    refine ⟨⟨inv f.1, inv f.2, inv f.3, _, _⟩, _, _⟩,
+    { dsimp, simp only [is_iso.inv_comp_eq, f.sq1_assoc, category.comp_id, is_iso.hom_inv_id], },
+    { dsimp, simp only [is_iso.inv_comp_eq, f.sq2_assoc, category.comp_id, is_iso.hom_inv_id], },
+    { ext; dsimp; simp only [is_iso.hom_inv_id], },
+    { ext; dsimp; simp only [is_iso.inv_hom_id], },
+  end }
+
+@[simps] def iso_of_components (f₁ : A.1 ≅ B.1) (f₂ : A.2 ≅ B.2) (f₃ : A.3 ≅ B.3)
+  (sq1 : f₁.hom ≫ B.f = A.f ≫ f₂.hom) (sq2 : f₂.hom ≫ B.g = A.g ≫ f₃.hom) :
+  A ≅ B :=
+{ hom := ⟨f₁.hom, f₂.hom, f₃.hom, sq1, sq2⟩,
+  inv :=
+  begin
+    refine ⟨f₁.inv, f₂.inv, f₃.inv, _, _⟩; dsimp,
+    rw [iso.inv_comp_eq, ← category.assoc, iso.eq_comp_inv, sq1],
+    rw [iso.inv_comp_eq, ← category.assoc, iso.eq_comp_inv, sq2],
+  end,
+  hom_inv_id' := by { ext; apply iso.hom_inv_id, },
+  inv_hom_id' := by { ext; apply iso.inv_hom_id, } }
+
+@[simps] def iso_of_components' (f₁ : A.1 ≅ B.1) (f₂ : A.2 ⟶ B.2) (f₃ : A.3 ≅ B.3)
+  (sq1 : f₁.hom ≫ B.f = A.f ≫ f₂) (sq2 : f₂ ≫ B.g = A.g ≫ f₃.hom) :
+  A ≅ B :=
+let F : A ⟶ B := ⟨f₁.hom, f₂, f₃.hom, sq1, sq2⟩ in
+{ hom := F,
+  inv :=
+  begin
+    haveI : is_iso F.2 := snd_is_iso _ infer_instance infer_instance,
+    refine ⟨f₁.inv, inv F.2, f₃.inv, _, _⟩; dsimp,
+    rw [iso.inv_comp_eq, ← category.assoc, is_iso.eq_comp_inv, sq1],
+    rw [is_iso.inv_comp_eq, ← category.assoc, iso.eq_comp_inv, sq2],
+  end,
+  hom_inv_id' := by { ext; try { apply iso.hom_inv_id, }, apply is_iso.hom_inv_id },
+  inv_hom_id' := by { ext; try { apply iso.inv_hom_id, }, apply is_iso.inv_hom_id } }
+
+end iso
+
+section split
+
+/-- A short exact sequence `0 ⟶ A₁ -f⟶ A₂ -g⟶ A₃ ⟶ 0` is *left split*
+if there exists a morphism `φ : A₂ ⟶ A₁` such that `f ≫ φ = 𝟙 A₁`. -/
+def left_split (A : short_exact_sequence 𝒞) : Prop :=
+∃ φ : A.2 ⟶ A.1, A.f ≫ φ = 𝟙 A.1
+
+/-- A short exact sequence `0 ⟶ A₁ -f⟶ A₂ -g⟶ A₃ ⟶ 0` is *right split*
+if there exists a morphism `φ : A₂ ⟶ A₁` such that `f ≫ φ = 𝟙 A₁`. -/
+def right_split (A : short_exact_sequence 𝒞) : Prop :=
+∃ χ : A.3 ⟶ A.2, χ ≫ A.g = 𝟙 A.3
+
+variables {𝒜 : Type*} [category 𝒜] [abelian 𝒜]
+
+lemma exact_of_split {X Y Z : 𝒜} (f : X ⟶ Y) (g : Y ⟶ Z) (χ : Z ⟶ Y) (φ : Y ⟶ X)
+  (hfg : f ≫ g = 0) (H : φ ≫ f + g ≫ χ = 𝟙 Y) : exact f g :=
+{ w := hfg,
+  epi :=
+  begin
+    let ψ : (kernel_subobject g : 𝒜) ⟶ image_subobject f :=
+      subobject.arrow _ ≫ φ ≫ factor_thru_image_subobject f,
+    suffices : ψ ≫ image_to_kernel f g hfg = 𝟙 _,
+    { convert epi_of_epi ψ _, rw this, apply_instance },
+    rw ← cancel_mono (subobject.arrow _), swap, { apply_instance },
+    simp only [image_to_kernel_arrow, image_subobject_arrow_comp, category.id_comp, category.assoc],
+    calc (kernel_subobject g).arrow ≫ φ ≫ f
+        = (kernel_subobject g).arrow ≫ 𝟙 Y : _
+    ... = (kernel_subobject g).arrow        : category.comp_id _,
+    rw [← H, preadditive.comp_add],
+    simp only [add_zero, zero_comp, kernel_subobject_arrow_comp_assoc],
+  end }
+
+-- move this
+instance exact_inl_snd (A B : 𝒜) : exact (biprod.inl : A ⟶ A ⊞ B) biprod.snd :=
+exact_of_split _ _ biprod.inr biprod.fst biprod.inl_snd biprod.total
+
+@[simp] def mk_split (A B : 𝒜) : short_exact_sequence 𝒜 :=
+{ fst := A,
+  snd := A ⊞ B,
+  trd := B,
+  f := biprod.inl,
+  g := biprod.snd }
+
+/-- A *splitting* of a short exact sequence `0 ⟶ A₁ -f⟶ A₂ -g⟶ A₃ ⟶ 0` is
+an isomorphism to the short exact sequence `0 ⟶ A₁ ⟶ A₁ ⊕ A₃ ⟶ A₃ ⟶ 0`,
+where the left and right components of the isomorphism are identity maps. -/
+structure splitting (A : short_exact_sequence 𝒜) extends A ≅ (mk_split A.1 A.3) :=
+(fst_eq_id : hom.1 = 𝟙 A.1)
+(trd_eq_id : hom.3 = 𝟙 A.3)
+
+/-- A short exact sequence `0 ⟶ A₁ -f⟶ A₂ -g⟶ A₃ ⟶ 0` is *split* if there exist
+`φ : A₂ ⟶ A₁` and `χ : A₃ ⟶ A₂` such that:
+* `f ≫ φ = 𝟙 A₁`
+* `χ ≫ g = 𝟙 A₃`
+* `χ ≫ φ = 0`
+* `φ ≫ f + g ≫ χ = 𝟙 A₂`
+-/
+def split (A : short_exact_sequence 𝒜) : Prop :=
+∃ (φ : A.2 ⟶ A.1) (χ : A.3 ⟶ A.2),
+   A.f ≫ φ = 𝟙 A.1 ∧ χ ≫ A.g = 𝟙 A.3 ∧ χ ≫ φ = 0 ∧ φ ≫ A.f + A.g ≫ χ = 𝟙 A.2
+
+lemma mk_split_split (A B : 𝒜) : (mk_split A B).split :=
+⟨biprod.fst, biprod.inr, biprod.inl_fst, biprod.inr_snd, biprod.inr_fst, biprod.total⟩
+
+lemma splitting.split {A : short_exact_sequence 𝒜} (i : splitting A) : A.split :=
+begin
+  refine ⟨i.hom.2 ≫ biprod.fst ≫ i.inv.1, i.hom.3 ≫ biprod.inr ≫ i.inv.2, _⟩,
+  simp only [category.assoc, ← hom.sq1_assoc, hom.sq2], dsimp,
+  simp only [biprod.inl_fst_assoc, biprod.inr_snd_assoc, category.comp_id, category.assoc,
+    ← comp_fst, ← comp_snd_assoc, ← comp_trd, i.to_iso.hom_inv_id, i.to_iso.inv_hom_id],
+  dsimp,
+  simp only [true_and, biprod.inr_fst_assoc, zero_comp, eq_self_iff_true, comp_zero,
+    category.id_comp],
+  simp only [hom.sq1, ← hom.sq2_assoc, ← comp_add],
+  simp only [← category.assoc, ← add_comp, biprod.total,
+    category.comp_id, ← comp_snd, i.to_iso.hom_inv_id], refl,
+end
+
+def left_split.splitting {A : short_exact_sequence 𝒜} (h : A.left_split) : A.splitting :=
+{ to_iso := iso_of_components' (iso.refl _) (biprod.lift h.some A.g) (iso.refl _)
+    (by { dsimp, simp only [category.id_comp], ext,
+      { simpa only [biprod.inl_fst, biprod.lift_fst, category.assoc] using h.some_spec.symm, },
+      { simp only [exact.w, f_comp_g, biprod.lift_snd, category.assoc] } })
+    (by { dsimp, simp only [category.comp_id, biprod.lift_snd], }),
+  fst_eq_id := rfl,
+  trd_eq_id := rfl }
+
+def right_split.splitting {A : short_exact_sequence 𝒜} (h : A.right_split) : A.splitting :=
+{ to_iso := iso.symm $ iso_of_components' (iso.refl _) (biprod.desc A.f h.some) (iso.refl _)
+    (by { dsimp, simp only [biprod.inl_desc, category.id_comp], })
+    (by { dsimp, simp only [category.comp_id], ext,
+      { simp only [exact.w, f_comp_g, biprod.inl_desc_assoc] },
+      { simpa only [biprod.inr_snd, biprod.inr_desc_assoc] using h.some_spec, } }),
+  fst_eq_id := rfl,
+  trd_eq_id := rfl }
+
+lemma tfae_split (A : short_exact_sequence 𝒜) :
+  tfae [A.left_split, A.right_split, A.split, nonempty A.splitting] :=
+begin
+  tfae_have : 3 → 1, { rintro ⟨φ, χ, hφ, hχ, hχφ, H⟩, exact ⟨φ, hφ⟩ },
+  tfae_have : 3 → 2, { rintro ⟨φ, χ, hφ, hχ, hχφ, H⟩, exact ⟨χ, hχ⟩ },
+  tfae_have : 4 → 3, { rintro ⟨i⟩, exact i.split, },
+  tfae_have : 1 → 4, { intro h, exact ⟨h.splitting⟩ },
+  tfae_have : 2 → 4, { intro h, exact ⟨h.splitting⟩ },
+  tfae_finish
+end
+
+end split
 
 end short_exact_sequence
 

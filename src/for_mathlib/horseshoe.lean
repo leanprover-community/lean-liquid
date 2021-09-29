@@ -16,29 +16,6 @@ namespace short_exact_sequence
 variables {C : Type u} [category.{v} C] [abelian C] [enough_projectives C]
 
 -- move this
-lemma exact_of_split {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) (χ : Z ⟶ Y) (φ : Y ⟶ X)
-  (hfg : f ≫ g = 0) (H : φ ≫ f + g ≫ χ = 𝟙 Y) : exact f g :=
-{ w := hfg,
-  epi :=
-  begin
-    let ψ : (kernel_subobject g : C) ⟶ image_subobject f :=
-      subobject.arrow _ ≫ φ ≫ factor_thru_image_subobject f,
-    suffices : ψ ≫ image_to_kernel f g hfg = 𝟙 _,
-    { convert epi_of_epi ψ _, rw this, apply_instance },
-    rw ← cancel_mono (subobject.arrow _), swap, { apply_instance },
-    simp only [image_to_kernel_arrow, image_subobject_arrow_comp, category.id_comp, category.assoc],
-    calc (kernel_subobject g).arrow ≫ φ ≫ f
-        = (kernel_subobject g).arrow ≫ 𝟙 Y : _
-    ... = (kernel_subobject g).arrow        : category.comp_id _,
-    rw [← H, preadditive.comp_add],
-    simp only [add_zero, zero_comp, kernel_subobject_arrow_comp_assoc],
-  end }
-
--- move this
-instance exact_inl_snd (A B : C) : exact (biprod.inl : A ⟶ A ⊞ B) biprod.snd :=
-exact_of_split _ _ biprod.inr biprod.fst biprod.inl_snd biprod.total
-
--- move this
 def biprod_factors (A B : C) [projective A] [projective B]
   (E X : C) (f : A ⊞ B ⟶ X) (e : E ⟶ X) [epi e] :
   ∃ f' : A ⊞ B ⟶ E, f' ≫ e = f :=
@@ -51,18 +28,10 @@ def biprod_factors (A B : C) [projective A] [projective B]
 instance projective_biprod (A B : C) [projective A] [projective B] : projective (A ⊞ B) :=
 { factors := λ E X f e he, by exactI biprod_factors A B E X f e }
 
--- move this
-@[simp] def short_exact_sequence.mk_of_split (A B : C) : short_exact_sequence C :=
-{ fst := A,
-  snd := A ⊞ B,
-  trd := B,
-  f := biprod.inl,
-  g := biprod.snd }
-
 variables (A B : short_exact_sequence C) (f : A ⟶ B)
 
 def horseshoe_base : short_exact_sequence C :=
-short_exact_sequence.mk_of_split (projective.over A.1) (projective.over A.3)
+short_exact_sequence.mk_split (projective.over A.1) (projective.over A.3)
 
 def horseshoe_base_π : horseshoe_base A ⟶ A :=
 { fst := projective.π _,
