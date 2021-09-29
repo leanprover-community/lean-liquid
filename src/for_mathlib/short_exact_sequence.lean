@@ -28,7 +28,7 @@ structure short_exact_sequence [has_images 𝒞] [has_zero_morphisms 𝒞] [has_
 
 namespace short_exact_sequence
 
-attribute [instance] mono' epi'
+attribute [instance] mono' epi' exact'
 
 variables {𝒞} [has_images 𝒞] [has_zero_morphisms 𝒞] [has_kernels 𝒞]
 
@@ -229,8 +229,8 @@ def right_split (A : short_exact_sequence 𝒞) : Prop :=
 
 variables {𝒜 : Type*} [category 𝒜] [abelian 𝒜]
 
-lemma exact_of_split {X Y Z : 𝒜} (f : X ⟶ Y) (g : Y ⟶ Z) (χ : Z ⟶ Y) (φ : Y ⟶ X)
-  (hfg : f ≫ g = 0) (H : φ ≫ f + g ≫ χ = 𝟙 Y) : exact f g :=
+lemma exact_of_split {A B C : 𝒜} (f : A ⟶ B) (g : B ⟶ C) (χ : C ⟶ B) (φ : B ⟶ A)
+  (hfg : f ≫ g = 0) (H : φ ≫ f + g ≫ χ = 𝟙 B) : exact f g :=
 { w := hfg,
   epi :=
   begin
@@ -241,7 +241,7 @@ lemma exact_of_split {X Y Z : 𝒜} (f : X ⟶ Y) (g : Y ⟶ Z) (χ : Z ⟶ Y) (
     rw ← cancel_mono (subobject.arrow _), swap, { apply_instance },
     simp only [image_to_kernel_arrow, image_subobject_arrow_comp, category.id_comp, category.assoc],
     calc (kernel_subobject g).arrow ≫ φ ≫ f
-        = (kernel_subobject g).arrow ≫ 𝟙 Y : _
+        = (kernel_subobject g).arrow ≫ 𝟙 B : _
     ... = (kernel_subobject g).arrow        : category.comp_id _,
     rw [← H, preadditive.comp_add],
     simp only [add_zero, zero_comp, kernel_subobject_arrow_comp_assoc],
@@ -250,6 +250,24 @@ lemma exact_of_split {X Y Z : 𝒜} (f : X ⟶ Y) (g : Y ⟶ Z) (χ : Z ⟶ Y) (
 -- move this
 instance exact_inl_snd (A B : 𝒜) : exact (biprod.inl : A ⟶ A ⊞ B) biprod.snd :=
 exact_of_split _ _ biprod.inr biprod.fst biprod.inl_snd biprod.total
+
+def mk_of_split {A B C : 𝒜} (f : A ⟶ B) (g : B ⟶ C) (φ : B ⟶ A) (χ : C ⟶ B)
+  (hfg : f ≫ g = 0) (hφ : f ≫ φ = 𝟙 A) (hχ : χ ≫ g = 𝟙 C) (H : φ ≫ f + g ≫ χ = 𝟙 B) :
+  short_exact_sequence 𝒜 :=
+{ fst := A,
+  snd := B,
+  trd := C,
+  f := f,
+  g := g,
+  mono' := by { haveI : mono (f ≫ φ), { rw hφ, apply_instance }, exact mono_of_mono f φ, },
+  epi' := by { haveI : epi (χ ≫ g), { rw hχ, apply_instance }, exact epi_of_epi χ g, },
+  exact' := exact_of_split f g χ φ hfg H }
+
+def mk_of_split' {A B C : 𝒜} (f : A ⟶ B) (g : B ⟶ C)
+  (H : ∃ (φ : B ⟶ A) (χ : C ⟶ B), f ≫ g = 0 ∧ f ≫ φ = 𝟙 A ∧ χ ≫ g = 𝟙 C ∧ φ ≫ f + g ≫ χ = 𝟙 B) :
+  short_exact_sequence 𝒜 :=
+mk_of_split f g H.some H.some_spec.some H.some_spec.some_spec.1 H.some_spec.some_spec.2.1
+  H.some_spec.some_spec.2.2.1 H.some_spec.some_spec.2.2.2
 
 @[simp] def mk_split (A B : 𝒜) : short_exact_sequence 𝒜 :=
 { fst := A,
@@ -380,4 +398,24 @@ instance Snd_additive : (Snd 𝒞).additive := {}
 instance Trd_additive : (Trd 𝒞).additive := {}
 
 end short_exact_sequence
+
+namespace functor
+
+variables {𝒟 : Type*} [category 𝒟] [abelian 𝒞] [abelian 𝒟]
+
+def map_short_exact_sequence_of_split (F : 𝒞 ⥤ 𝒟) [F.additive]
+  (A : short_exact_sequence 𝒞) (h : A.split) :
+  short_exact_sequence 𝒟 :=
+short_exact_sequence.mk_of_split' (F.map A.f) (F.map A.g)
+begin
+  rcases h with ⟨φ, χ, hφ, hχ, hχφ, H⟩,
+  refine ⟨F.map φ, F.map χ, _, _, _, _⟩,
+  { rw [← F.map_comp, exact.w, F.map_zero], },
+  { rw [← F.map_comp, hφ, F.map_id], },
+  { rw [← F.map_comp, hχ, F.map_id], },
+  { rw [← F.map_comp, ← F.map_comp, ← F.map_add, H, F.map_id], },
+end
+
+end functor
+
 end category_theory
