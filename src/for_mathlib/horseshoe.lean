@@ -116,4 +116,33 @@ end
 def horseshoe (A : short_exact_sequence C) : chain_complex (short_exact_sequence C) ℕ :=
 chain_complex.of (horseshoe_obj A) (horseshoe_d A) (horseshoe_d_d A)
 
+variables (A)
+
+def horseshoe_π : (horseshoe A).X 0 ⟶ A := horseshoe_base_π _
+
+lemma horseshoe_d_π : (horseshoe A).d 1 0 ≫ horseshoe_π A = 0 :=
+begin
+  dsimp [horseshoe],
+  erw [chain_complex.of_d],
+  dsimp [horseshoe_d, horseshoe_π, horseshoe_step],
+  simp only [category.id_comp, category.assoc, comp_zero, zero_comp,
+    horseshoe_step_comp_eq_zero_assoc, horseshoe_ker_ι_comp_base_π],
+end
+
+def horseshoe_to_single₁ :=
+(chain_complex.to_single₀_equiv ((homological_complex.Fst C).obj (horseshoe A)) A.1).symm
+⟨(short_exact_sequence.Fst C).map (horseshoe_π A),
+begin
+  have := horseshoe_d_π A, apply_fun (λ f, (short_exact_sequence.Fst C).map f) at this,
+  rwa [functor.map_comp, functor.map_zero] at this,
+end⟩
+
+lemma horseshoe_is_projective_resolution₁ (A : short_exact_sequence C) :
+  chain_complex.is_projective_resolution
+    ((homological_complex.Fst C).obj (horseshoe A)) A.1 (horseshoe_to_single₁ A) :=
+{ projective := by rintro (_|n); { show projective (projective.over _), apply_instance },
+  exact₀ := sorry,
+  exact := sorry,
+  epi := show epi (projective.π _), from infer_instance }
+
 end short_exact_sequence

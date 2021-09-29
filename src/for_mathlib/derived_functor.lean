@@ -35,6 +35,17 @@ def functor.left_derived_obj_iso' (F : C ⥤ D) [F.additive] (n : ℕ)
   (F.left_derived n).obj X ≅
     (homology_functor D _ n).obj ((F.map_homological_complex _).obj P) :=
 (F.left_derived_obj_iso n (h.mk_ProjectiveResolution P X π) : _)
+.
+
+def δ [F.additive] (n : ℕ) (A : short_exact_sequence C) :
+  (F.left_derived (n+1)).obj A.3 ⟶ (F.left_derived n).obj A.1 :=
+sorry
+
+lemma six_term_exact_seq [F.additive] (n : ℕ) (A : short_exact_sequence C) :
+  exact_seq D [
+    (F.left_derived (n+1)).map A.f, (F.left_derived (n+1)).map A.g,
+    δ F n A,
+    (F.left_derived n).map A.f, (F.left_derived n).map A.g] := sorry
 
 end left_derived
 end functor
