@@ -638,6 +638,8 @@ begin
   ... = 0                                    : by rw [(hD.row_exact i).w, zero_comp]
 end
 
+section long_snake
+
 lemma ker_row₁_to_row₂ (hD : is_snake_input D) :
   (kernel.ι ((1,0) ⟶[D] (1,1))) ≫ ((1,0) ⟶[D] (2,0)) = 0 :=
 begin
@@ -691,6 +693,42 @@ begin
     refine ⟨c, (injective_iff_mono _).2 (hD.col_mono _) _⟩,
     rw [← abelian.pseudoelement.comp_apply, ker_row₁_to_top_left_comp_eq_ι hD, hc] }
 end
+
+lemma row₁_middle_to_coker_row₂_eq_zero (hD : is_snake_input D) :
+   ((1,1) ⟶[D] (1,2)) ≫ ((1,2) ⟶[D] (2,2)) ≫ (limits.cokernel.π ((2,1) ⟶[D] (2,2))) = 0 :=
+begin
+  refine zero_morphism_ext _ (λ a, _),
+  rw [← category.assoc, abelian.pseudoelement.comp_apply, ← D.map_comp, map_eq hD
+    ((hom (1, 1) (1, 2)) ≫ (hom _ (2, 2))) ((hom _ (2, 1)) ≫ (hom _ _)), D.map_comp,
+    ← abelian.pseudoelement.comp_apply],
+  simp,
+end
+
+lemma row₁_to_coker_row₂_eq_zero (hD : is_snake_input D) :
+  ((1,2) ⟶[D] (2,2)) ≫ (limits.cokernel.π ((2,1) ⟶[D] (2,2))) = 0 :=
+begin
+  letI := hD.row_epi,
+  have := row₁_middle_to_coker_row₂_eq_zero hD,
+  rw [← limits.comp_zero] at this,
+  exact (cancel_epi _).1 this
+end
+
+lemma ker_col₂_to_coker_row₂_eq_zero (hD : is_snake_input D) :
+  kernel.ι ((2,2) ⟶[D] (3,2)) ≫ (limits.cokernel.π ((1,2) ⟶[D] (2,2))) = 0 :=
+begin
+  refine zero_morphism_ext _ (λ a, _),
+  obtain ⟨c, hc⟩ := exists_of_exact (hD.col_exact₂ 2) (kernel.ι (_ ⟶[D] _) a) (kernel_ι_apply _ _),
+  rw [abelian.pseudoelement.comp_apply, ← hc, cokernel_π_apply]
+end
+
+def bottom_right_to_coker_row₂ (hD : is_snake_input D) :
+  D.obj (3, 2) ⟶ cokernel ((2,1) ⟶[D] (2,2)) :=
+by { letI := hD.col_epi 2, exact
+  (inv (category_theory.abelian.coimages.factor_thru_coimage ((2,2) ⟶[D] (3,2)))) ≫
+  (limits.cokernel.desc _ _ (ker_col₂_to_coker_row₂_eq_zero hD)) ≫
+  (limits.cokernel.desc _ _ (row₁_to_coker_row₂_eq_zero hD)) }
+
+end long_snake
 
 example (hD : is_snake_input D) (f : (o 1 0) ⟶ (o 2 2)) : D.map f = 0 := hD.hom_eq_zero₂ f
 
