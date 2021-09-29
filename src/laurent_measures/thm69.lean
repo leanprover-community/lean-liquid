@@ -131,7 +131,7 @@ lemma eventually_le_one {n : ℕ} (hn : n ≥ 1) : (y ξ x n) ≤ (y ξ x 1) :=
 begin
   induction hn with n hn h_ind,
   exact le_of_eq (refl _),
-  have also := (eventually_le ξ x n hn).trans h_ind,
+  have := (eventually_le ξ x n hn).trans h_ind,
   rwa nat.succ_eq_add_one,
 end
 
@@ -184,9 +184,7 @@ lemma finite_sum (n : ℕ) : (y ξ x (n + 1) : ℝ) =
   x - ∑ i in range(n + 1),  (⌊(((y ξ x i) / ξ ^ i) : ℝ)⌋ : ℝ) * (ξ ^ i) :=
 begin
   induction n with n h_ind,
-  { rw [zero_add, range_one, sum_singleton],-- ← coe_pow, ← coe_mul, ← nnreal.coe_sub,
-    -- nnreal.eq_iff],
-   refl },
+  { rw [zero_add, range_one, sum_singleton], refl },
   { replace h_ind : (x - (y ξ x (n + 1)) : ℝ) =
     ∑ i in range(n + 1),  (⌊(y ξ x i / ξ ^ i : ℝ)⌋ : ℝ) * ξ ^ i := by {rw [sub_eq_iff_eq_add,
       ← sub_eq_iff_eq_add', h_ind] },
@@ -199,9 +197,35 @@ end
 
 lemma summable_floor : summable (λ i, (⌊(y ξ x i / ξ ^ i : ℝ)⌋ : ℝ) * ξ ^ i) :=
 begin
-  -- rw has
-  -- apply (aux_has_sum_of_le_geometric).summable,
-  sorry,--use cauchy_seq_of_le_geometric and its friends
+  have H : ∀ j : {i // i ∉ range 1}, j.1 ≥ 1,
+  { rintro ⟨n, h_n⟩,
+    simp only [ge_iff_le, finset.mem_singleton, range_one] at h_n,
+    exact le_of_not_gt ((not_iff_not.mpr nat.lt_one_iff).mpr h_n) },
+  apply (finset.summable_compl_iff (finset.range 1)).mp,
+  -- have h_one : ∀ i : ℕ, ξ ^ i ≥ 0 := λ i, le_of_lt (pow_pos (fact.out _) i),
+  have h_nonneg : ∀ i : {i // i ∉ range 1}, (⌊(y ξ x i.1 / ξ ^ i.1 : ℝ)⌋ : ℝ) * ξ ^ i.1 ≥ 0,
+  -- { rintro ⟨i, h_i⟩,
+  --   have hi : i ≥ 1,
+  --   { simp only [*, ge_iff_le, finset.mem_singleton, range_one] at *,
+  --     exact le_of_not_gt ((not_iff_not.mpr nat.lt_one_iff).mpr h_i) },
+  { intro i,
+    exact (eventually_pos_floor ξ x i.1 (H i)) },
+  have h_bdd : ∀ i : {i // i ∉ range 1}, (⌊(y ξ x i.1 / ξ ^ i.1 : ℝ)⌋ : ℝ) * ξ ^ i.1 ≤ ξ ^ i.1,
+  { intro i,
+
+  -- { rintro ⟨i, h_i⟩,
+    have temp := eventually_le_one ξ x (H i),
+  have zero : ξ ^ i.1 > 0, sorry,
+  have uno := (mul_le_mul_right zero).mpr (floor_le ((y ξ x i.1) / ξ ^ i.1 : ℝ)),
+  calc (⌊(y ξ x i.1 / ξ ^ i.1 : ℝ)⌋ : ℝ) * (ξ ^ i.1) ≤ (y ξ x i.1 / ξ ^ i.1 : ℝ) * (ξ ^ i.1) :
+    (mul_le_mul_right zero).mpr (floor_le ((y ξ x i.1) / ξ ^ i.1 : ℝ))
+                                                ... ≤ ξ ^ i.1 : sorry,
+
+  },
+  apply summable_of_nonneg_of_le h_nonneg h_bdd,
+  -- simp only [summable_geometric_iff_norm_lt_1, real.norm_eq_abs],
+  sorry,
+  apply_instance,
 end
 
 lemma limit_geometric : tendsto (λ i : ℕ, - ξ ^ i) at_top (𝓝 0) :=
