@@ -54,7 +54,7 @@ def coeff : ℤ → ℕ := λ k, if k < deg y then 0 else (A y (k + deg y ).to_n
 lemma surj_on_nonneg : has_sum (λ k : ℤ, (coeff y k : ℝ≥0) * x ^ k ) y := sorry
 
 end surjectivity
-end thm71
+
 
 section fae_surjectivity
 
@@ -153,16 +153,17 @@ end
 lemma exists_limit : ∃ a, tendsto (λ n, y ξ x n) at_top (𝓝 a) :=
 begin
   have h_bdd : bdd_below (range (trunc_y ξ x)),
-  { use (y ξ x 1),
+  { use 0,
     intros z hz,
     obtain ⟨m, h_mz⟩ := (set.mem_range).mp hz,
     by_cases hm : m = 0,
-    { simp_rw [hm, trunc_y, if_pos] at h_mz, rw h_mz },
+    { simp_rw [hm, trunc_y, if_pos] at h_mz,
+      rw ← h_mz,
+      exact eventually_pos_y ξ x 1 (le_of_eq (refl _)), },
       simp_rw [trunc_y, (if_neg hm)] at h_mz,
       rw ← h_mz,
       replace hm : m ≥ 1 := le_of_not_gt ((not_iff_not.mpr nat.lt_one_iff).mpr hm),
-      sorry },
-      -- exact (eventually_le_one ξ x hm) },
+      exact eventually_pos_y ξ x m hm },
   have := tendsto_at_top_cinfi (eventually_monotone ξ x) h_bdd,
   use (⨅ (i : ℕ), trunc_y ξ x i),
   apply @tendsto.congr' _ _ (trunc_y ξ x) _ _ _ _ this,
@@ -196,10 +197,20 @@ begin
     simp },
 end
 
-lemma geometric : --(ξ : ℝ) (h_pos : 0 < ξ) (h_small : ξ < 1) :
-  summable (λ i, (⌊(y ξ x i / ξ ^ i : ℝ)⌋ : ℝ) * ξ ^ i) :=
+lemma summable_floor : summable (λ i, (⌊(y ξ x i / ξ ^ i : ℝ)⌋ : ℝ) * ξ ^ i) :=
 begin
+  -- rw has
+  -- apply (aux_has_sum_of_le_geometric).summable,
   sorry,--use cauchy_seq_of_le_geometric and its friends
+end
+
+lemma limit_geometric : tendsto (λ i : ℕ, - ξ ^ i) at_top (𝓝 0) :=
+begin
+  apply summable.tendsto_at_top_zero,
+  rw summable_neg_iff,
+  apply summable_geometric_of_abs_lt_1,
+  rw abs_of_pos,
+  all_goals {exact fact.out _},
 end
 
 
@@ -226,14 +237,19 @@ begin
                                                   (mul_le_mul_right (h_one n)).mpr (h_left n hn) },
   replace h_left : ∀ᶠ n in at_top, y ξ x n - ξ ^ n ≤ (⌊(y ξ x n / ξ ^ n)⌋ : ℝ) * ξ ^ n,
   { simp only [eventually_at_top], use [1, h_left] },
-  have : tendsto (λ n, y ξ x n - ξ ^ n) at_top (𝓝 (exists_limit ξ x).some), sorry,
-  have exact := (le_of_tendsto_of_tendsto this (geometric ξ x).tendsto_at_top_zero h_left).antisymm
-   (le_of_tendsto_of_tendsto (geometric ξ x).tendsto_at_top_zero (exists_limit ξ x).some_spec
-    h_right),
+  have : tendsto (λ n, y ξ x n - ξ ^ n) at_top (𝓝 (exists_limit ξ x).some),
+  { convert tendsto.add (exists_limit ξ x).some_spec (limit_geometric ξ),
+    rw add_zero } ,
+  have h₁ := (le_of_tendsto_of_tendsto this
+    (summable_floor ξ x).tendsto_at_top_zero h_left).antisymm (le_of_tendsto_of_tendsto
+    (summable_floor ξ x).tendsto_at_top_zero (exists_limit ξ x).some_spec h_right),
   have := (exists_limit ξ x).some_spec,
-  rwa exact at this,
+  rwa h₁ at this,
 end
 
 
 
 end fae_surjectivity
+
+
+end thm71
