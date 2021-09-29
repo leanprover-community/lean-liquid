@@ -65,6 +65,21 @@ lemma extract : ∀ {L : list (arrow 𝒞)} (h : exact_seq 𝒞 L) (m n : ℕ),
 | _ (cons f g hfg L hL) 0     1     := single f
 | _ (cons f g hfg L hL) 0     (n+2) := cons f g hfg (L.take n) (extract hL 0 (n+1))
 
+inductive arrow_congr : Π (L L' : list (arrow 𝒞)), Prop
+| nil  : arrow_congr [] []
+| cons : ∀ {A B : 𝒞} {f f' : A ⟶ B} {L L' : list (arrow 𝒞)} (h : f = f') (H : arrow_congr L L'),
+         arrow_congr (f :: L) (f' :: L')
+
+lemma congr : ∀ {L L' : list (arrow 𝒞)}, exact_seq 𝒞 L → arrow_congr L L' → exact_seq 𝒞 L'
+| _ _ h arrow_congr.nil                                 := exact_seq.nil
+| _ _ h (arrow_congr.cons h₁ arrow_congr.nil)           := exact_seq.single _
+| _ _ h (arrow_congr.cons h₁ ((arrow_congr.cons h₂ H))) :=
+begin
+  substs h₁ h₂,
+  rcases h with _ | _ | ⟨A, B, C, f, g, hfg, _, hL⟩,
+  refine exact_seq.cons _ _ hfg _ (congr hL (arrow_congr.cons rfl H)),
+end
+
 end exact_seq
 
 end category_theory

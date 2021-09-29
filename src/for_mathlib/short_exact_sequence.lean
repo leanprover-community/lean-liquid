@@ -401,10 +401,9 @@ end short_exact_sequence
 
 namespace functor
 
-variables {𝒟 : Type*} [category 𝒟] [abelian 𝒞] [abelian 𝒟]
+variables {𝒟 : Type*} [category 𝒟] [abelian 𝒞] [abelian 𝒟] (F : 𝒞 ⥤ 𝒟)
 
-def map_short_exact_sequence_of_split (F : 𝒞 ⥤ 𝒟) [F.additive]
-  (A : short_exact_sequence 𝒞) (h : A.split) :
+def map_short_exact_sequence_of_split [F.additive] (A : short_exact_sequence 𝒞) (h : A.split) :
   short_exact_sequence 𝒟 :=
 short_exact_sequence.mk_of_split' (F.map A.f) (F.map A.g)
 begin

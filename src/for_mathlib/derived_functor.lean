@@ -153,7 +153,55 @@ def snake_input {C : Type*} [category C] [abelian C] (n : ℕ) :
   chain_complex (short_exact_sequence C) ℕ → snake_input C :=
 λ A, ⟨snake_diagram C n A, snake_diagram_is_snake_input C A n⟩
 
+def δ {C : Type*} [category C] [abelian C] (n : ℕ) (A : chain_complex (short_exact_sequence C) ℕ) :
+  homology ((Trd C).obj A) (n+1) ⟶ homology ((Fst C).obj A) n :=
+(snake_input n A).2.δ
+
+lemma six_term_exact_seq {C : Type*} [category C] [abelian C]
+  (n : ℕ) (A : chain_complex (short_exact_sequence C) ℕ) :
+  exact_seq C [
+    (homology_functor _ _ (n+1)).map ((Fst_Snd C).app A), -- Hⁿ⁺¹(A₁) ⟶ Hⁿ⁺¹(A₂)
+    (homology_functor _ _ (n+1)).map ((Snd_Trd C).app A), -- Hⁿ⁺¹(A₂) ⟶ Hⁿ⁺¹(A₃)
+    δ n A,                                                -- Hⁿ⁺¹(A₃) ⟶  Hⁿ(A₁)
+    (homology_functor _ _ n).map ((Fst_Snd C).app A),     --  Hⁿ(A₁)  ⟶  Hⁿ(A₂)
+    (homology_functor _ _ n).map ((Snd_Trd C).app A)      --  Hⁿ(A₁)  ⟶  Hⁿ(A₃)
+  ] :=
+begin
+  have key := (snake_input n A).2.six_term_exact_seq,
+  dsimp only [snake_input, snake_diagram,
+    snake_diagram.mk_functor'', snake_diagram.mk_functor'] at key,
+  refine exact_seq.congr key _, clear key,
+  iterate 5 { refine exact_seq.arrow_congr.cons _ _, rotate },
+  { apply exact_seq.arrow_congr.nil },
+  { apply snake_diagram.mk_functor_map_f0 },
+  { apply snake_diagram.mk_functor_map_g0 },
+  { refl },
+  { apply snake_diagram.mk_functor_map_f3 },
+  { apply snake_diagram.mk_functor_map_g3 },
+end
+
 end homological_complex
+
+namespace chain_complex
+
+variables {C : Type u} [category.{v} C]
+variables [preadditive C] [has_zero_object C] [has_equalizers C] [has_images C]
+
+structure is_projective_resolution (P : chain_complex C ℕ) (Z : C)
+  (π : P ⟶ ((chain_complex.single₀ C).obj Z)) : Prop :=
+(projective : ∀ n, projective (P.X n) . tactic.apply_instance)
+(exact₀ : exact (P.d 1 0) (π.f 0) . tactic.apply_instance)
+(exact : ∀ n, exact (P.d (n+2) (n+1)) (P.d (n+1) n) . tactic.apply_instance)
+(epi : epi (π.f 0) . tactic.apply_instance)
+
+def is_projective_resolution.mk_ProjectiveResolution (P : chain_complex C ℕ) (Z : C)
+  (π : P ⟶ ((chain_complex.single₀ C).obj Z)) (h : P.is_projective_resolution Z π) :
+  ProjectiveResolution Z :=
+{ complex := P,
+  π := π,
+  .. h }
+
+end chain_complex
 
 namespace category_theory
 
@@ -171,6 +219,14 @@ namespace left_derived
 
 variables (F : C ⥤ D)
 
+/-- We can compute a left derived functor using a chosen projective resolution. -/
+@[simps]
+def functor.left_derived_obj_iso' (F : C ⥤ D) [F.additive] (n : ℕ)
+  (X : C) (P : chain_complex C ℕ) (π : P ⟶ ((chain_complex.single₀ C).obj X))
+  (h : P.is_projective_resolution X π) :
+  (F.left_derived n).obj X ≅
+    (homology_functor D _ n).obj ((F.map_homological_complex _).obj P) :=
+(F.left_derived_obj_iso n (h.mk_ProjectiveResolution P X π) : _)
 
 end left_derived
 end functor
