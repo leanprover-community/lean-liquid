@@ -1125,15 +1125,23 @@ end
 
 end delta
 
-lemma six_term_exact_seq (hD : is_snake_input D) :
-  exact_seq 𝒜 [(0,0) ⟶[D] (0,1), (0,1) ⟶[D] (0,2), hD.δ, (3,0) ⟶[D] (3,1), (3,1) ⟶[D] (3,2)] :=
+lemma eight_term_exact_seq (hD : is_snake_input D) :
+  exact_seq 𝒜 [hD.ker_row₁_to_top_left, (0,0) ⟶[D] (0,1), (0,1) ⟶[D] (0,2),
+  hD.δ,
+  (3,0) ⟶[D] (3,1), (3,1) ⟶[D] (3,2), hD.bottom_right_to_coker_row₂] :=
 begin
+  refine exact_seq.cons _ _ hD.long_row₀_exact _ _,
   refine exact_seq.cons _ _ hD.row_exact₀ _ _,
   refine exact_seq.cons _ _ hD.exact_to_δ _ _,
   refine exact_seq.cons _ _ hD.exact_from_δ _ _,
   refine exact_seq.cons _ _ hD.row_exact₃ _ _,
+  refine exact_seq.cons _ _ hD.long_row₃_exact _ _,
   refine exact_seq.single _,
 end
+
+lemma six_term_exact_seq (hD : is_snake_input D) :
+  exact_seq 𝒜 [(0,0) ⟶[D] (0,1), (0,1) ⟶[D] (0,2), hD.δ, (3,0) ⟶[D] (3,1), (3,1) ⟶[D] (3,2)] :=
+exact_seq.extract hD.eight_term_exact_seq 1 5
 
 end is_snake_input
 
