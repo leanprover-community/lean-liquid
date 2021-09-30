@@ -335,11 +335,11 @@ end summability
 
 section theta_surj
 
-/--The map `θ` defined in Theorem 6.9 of Nalytic.pdf -/
+/--The map `θ` defined in Theorem 6.9 of Analytic.pdf -/
 def θ (r : ℝ≥0) : (laurent_measures r (Fintype.of punit)) → ℝ :=
   λ F, tsum (λ n, (F.to_Rfct r n) * ξ ^ n)
 
-theorem θ_surj (r : ℝ≥0) [fact (r < 1)] [fact (0 < ξ)] [fact (ξ < 1)] :
+theorem θ_surjective (r : ℝ≥0) [fact (r < 1)] [fact (0 < ξ)] [fact (ξ < 1)] :
   ∃ (F : laurent_measures r (Fintype.of punit)), (θ ξ r F) = x :=
 begin
   let f₀ : ℤ → ℤ := λ m, int.rec_on m (λ i, ⌊((y ξ x i) / ξ ^ i)⌋) (0),
