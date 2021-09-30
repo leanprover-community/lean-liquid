@@ -722,7 +722,7 @@ end
 def bottom_right_to_coker_row₂ (hD : is_snake_input D) :
   D.obj (3, 2) ⟶ cokernel ((2,1) ⟶[D] (2,2)) :=
 by { letI := hD.col_epi 2, exact
-  (inv (category_theory.abelian.coimages.factor_thru_coimage ((2,2) ⟶[D] (3,2)))) ≫
+  (inv (abelian.coimages.factor_thru_coimage ((2,2) ⟶[D] (3,2)))) ≫
   (limits.cokernel.desc _ _ (ker_col₂_to_coker_row₂_eq_zero hD)) ≫
   (limits.cokernel.desc _ _ (row₁_to_coker_row₂_eq_zero hD)) }
 
@@ -732,6 +732,36 @@ begin
     (limits.cokernel.desc _ _ (row₁_to_coker_row₂_eq_zero hD))),
   { letI := this, exact epi_comp _ _ },
   exact epi_comp _ _,
+end
+
+lemma bottom_right_to_coker_row₂_comp_eq_π (hD : is_snake_input D) : ((2,2) ⟶[D] (3,2))  ≫
+  bottom_right_to_coker_row₂ hD = cokernel.π ((2,1) ⟶[D] (2,2)) :=
+begin
+  letI := hD.col_epi 2,
+  have : ((2,2) ⟶[D] (3,2)) ≫ inv (abelian.coimages.factor_thru_coimage ((2,2) ⟶[D] (3,2))) =
+    category_theory.abelian.coimages.coimage.π _ := by simp,
+  rw [bottom_right_to_coker_row₂, ← category.assoc, ← category.assoc, this],
+  simp
+end
+
+lemma long_row₃_exact (hD : is_snake_input D) :
+  exact ((3,1) ⟶[D] (3,2)) (bottom_right_to_coker_row₂ hD) :=
+begin
+  refine abelian.pseudoelement.exact_of_pseudo_exact _ _ ⟨λ a, _, λ a ha, _⟩,
+  { letI := hD.col_epi 1,
+    obtain ⟨b, hb⟩ := abelian.pseudoelement.pseudo_surjective_of_epi ((2,1) ⟶[D] (3,1)) a,
+    rw [← hb, ← abelian.pseudoelement.comp_apply, ← abelian.pseudoelement.comp_apply,
+      ← category.assoc, ← D.map_comp, map_eq hD ((hom (2, 1) (3, 1)) ≫ (hom _ (3, 2)))
+      ((hom _ (2, 2)) ≫ (hom _ _)), D.map_comp, category.assoc,
+      bottom_right_to_coker_row₂_comp_eq_π hD, exact.w, zero_apply] },
+  { letI := hD.col_epi 2,
+    obtain ⟨b, hb⟩ := abelian.pseudoelement.pseudo_surjective_of_epi ((2,2) ⟶[D] (3,2)) a,
+    rw [← hb, ← abelian.pseudoelement.comp_apply, bottom_right_to_coker_row₂_comp_eq_π hD] at ha,
+    obtain ⟨c, hc⟩ := exists_of_exact (abelian.exact_cokernel _) _ ha,
+    refine ⟨((2,1) ⟶[D] (3,1)) c, _⟩,
+    rw [← hb, ← hc, ← abelian.pseudoelement.comp_apply, ← abelian.pseudoelement.comp_apply,
+      ← D.map_comp, map_eq hD ((hom (2, 1) (3, 1)) ≫ (hom _ (3, 2))) ((hom _ (2, 2)) ≫ (hom _ _)),
+      D.map_comp] }
 end
 
 end long_snake
