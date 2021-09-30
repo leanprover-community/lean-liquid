@@ -657,12 +657,10 @@ by { letI := hD.col_mono 0, exact (limits.kernel.lift _ _ (ker_row₁_to_row₂ 
 
 lemma ker_row₁_to_top_left_mono (hD : is_snake_input D) : mono (ker_row₁_to_top_left hD) :=
 begin
-  refine mono_of_zero_of_map_zero _ (λ a ha, _),
-  rw [ker_row₁_to_top_left, abelian.pseudoelement.comp_apply,
-    abelian.pseudoelement.comp_apply] at ha,
-  replace ha := abelian.pseudoelement.zero_of_map_zero _ (pseudo_injective_of_mono _) _ ha,
-  replace ha := abelian.pseudoelement.zero_of_map_zero _ (pseudo_injective_of_mono _) _ ha,
-  exact abelian.pseudoelement.zero_of_map_zero _ (pseudo_injective_of_mono _) _ ha
+  suffices : mono ((limits.kernel.lift _ _ (ker_row₁_to_row₂ hD)) ≫
+    (limits.kernel.lift _ _ (((abelian.exact_iff _ _).1 (hD.col_exact₁ 0)).2))),
+  { letI := this, exact mono_comp _ _, },
+  exact mono_comp _ _
 end
 
 lemma ker_row₁_to_top_left_comp_eq_ι (hD : is_snake_input D) : ker_row₁_to_top_left hD ≫
@@ -724,9 +722,47 @@ end
 def bottom_right_to_coker_row₂ (hD : is_snake_input D) :
   D.obj (3, 2) ⟶ cokernel ((2,1) ⟶[D] (2,2)) :=
 by { letI := hD.col_epi 2, exact
-  (inv (category_theory.abelian.coimages.factor_thru_coimage ((2,2) ⟶[D] (3,2)))) ≫
+  (inv (abelian.coimages.factor_thru_coimage ((2,2) ⟶[D] (3,2)))) ≫
   (limits.cokernel.desc _ _ (ker_col₂_to_coker_row₂_eq_zero hD)) ≫
   (limits.cokernel.desc _ _ (row₁_to_coker_row₂_eq_zero hD)) }
+
+lemma bottom_right_to_coker_row₂_epi (hD : is_snake_input D) : epi (bottom_right_to_coker_row₂ hD) :=
+begin
+  suffices : epi ((limits.cokernel.desc _ _ (ker_col₂_to_coker_row₂_eq_zero hD)) ≫
+    (limits.cokernel.desc _ _ (row₁_to_coker_row₂_eq_zero hD))),
+  { letI := this, exact epi_comp _ _ },
+  exact epi_comp _ _,
+end
+
+lemma bottom_right_to_coker_row₂_comp_eq_π (hD : is_snake_input D) : ((2,2) ⟶[D] (3,2))  ≫
+  bottom_right_to_coker_row₂ hD = cokernel.π ((2,1) ⟶[D] (2,2)) :=
+begin
+  letI := hD.col_epi 2,
+  have : ((2,2) ⟶[D] (3,2)) ≫ inv (abelian.coimages.factor_thru_coimage ((2,2) ⟶[D] (3,2))) =
+    category_theory.abelian.coimages.coimage.π _ := by simp,
+  rw [bottom_right_to_coker_row₂, ← category.assoc, ← category.assoc, this],
+  simp
+end
+
+lemma long_row₃_exact (hD : is_snake_input D) :
+  exact ((3,1) ⟶[D] (3,2)) (bottom_right_to_coker_row₂ hD) :=
+begin
+  refine abelian.pseudoelement.exact_of_pseudo_exact _ _ ⟨λ a, _, λ a ha, _⟩,
+  { letI := hD.col_epi 1,
+    obtain ⟨b, hb⟩ := abelian.pseudoelement.pseudo_surjective_of_epi ((2,1) ⟶[D] (3,1)) a,
+    rw [← hb, ← abelian.pseudoelement.comp_apply, ← abelian.pseudoelement.comp_apply,
+      ← category.assoc, ← D.map_comp, map_eq hD ((hom (2, 1) (3, 1)) ≫ (hom _ (3, 2)))
+      ((hom _ (2, 2)) ≫ (hom _ _)), D.map_comp, category.assoc,
+      bottom_right_to_coker_row₂_comp_eq_π hD, exact.w, zero_apply] },
+  { letI := hD.col_epi 2,
+    obtain ⟨b, hb⟩ := abelian.pseudoelement.pseudo_surjective_of_epi ((2,2) ⟶[D] (3,2)) a,
+    rw [← hb, ← abelian.pseudoelement.comp_apply, bottom_right_to_coker_row₂_comp_eq_π hD] at ha,
+    obtain ⟨c, hc⟩ := exists_of_exact (abelian.exact_cokernel _) _ ha,
+    refine ⟨((2,1) ⟶[D] (3,1)) c, _⟩,
+    rw [← hb, ← hc, ← abelian.pseudoelement.comp_apply, ← abelian.pseudoelement.comp_apply,
+      ← D.map_comp, map_eq hD ((hom (2, 1) (3, 1)) ≫ (hom _ (3, 2))) ((hom _ (2, 2)) ≫ (hom _ _)),
+      D.map_comp] }
+end
 
 end long_snake
 
@@ -1089,15 +1125,23 @@ end
 
 end delta
 
-lemma six_term_exact_seq (hD : is_snake_input D) :
-  exact_seq 𝒜 [(0,0) ⟶[D] (0,1), (0,1) ⟶[D] (0,2), hD.δ, (3,0) ⟶[D] (3,1), (3,1) ⟶[D] (3,2)] :=
+lemma eight_term_exact_seq (hD : is_snake_input D) :
+  exact_seq 𝒜 [hD.ker_row₁_to_top_left, (0,0) ⟶[D] (0,1), (0,1) ⟶[D] (0,2),
+  hD.δ,
+  (3,0) ⟶[D] (3,1), (3,1) ⟶[D] (3,2), hD.bottom_right_to_coker_row₂] :=
 begin
+  refine exact_seq.cons _ _ hD.long_row₀_exact _ _,
   refine exact_seq.cons _ _ hD.row_exact₀ _ _,
   refine exact_seq.cons _ _ hD.exact_to_δ _ _,
   refine exact_seq.cons _ _ hD.exact_from_δ _ _,
   refine exact_seq.cons _ _ hD.row_exact₃ _ _,
+  refine exact_seq.cons _ _ hD.long_row₃_exact _ _,
   refine exact_seq.single _,
 end
+
+lemma six_term_exact_seq (hD : is_snake_input D) :
+  exact_seq 𝒜 [(0,0) ⟶[D] (0,1), (0,1) ⟶[D] (0,2), hD.δ, (3,0) ⟶[D] (3,1), (3,1) ⟶[D] (3,2)] :=
+exact_seq.extract hD.eight_term_exact_seq 1 5
 
 end is_snake_input
 

@@ -163,8 +163,16 @@ apply_nolint category_theory.SheafOfTypes.terminal_cone_is_limit doc_blame
 apply_nolint category_theory.SheafOfTypes.terminal_sheaf doc_blame
 apply_nolint category_theory.SheafOfTypes.terminal_sheaf.to doc_blame
 
+-- for_mathlib/derived_functor.lean
+apply_nolint category_theory.functor.left_derived.δ doc_blame
+
 -- for_mathlib/exact_seq.lean
+apply_nolint category_theory.exact.quiver.hom.op.exact unused_arguments
+apply_nolint category_theory.exact.quiver.hom.unop.exact unused_arguments
 apply_nolint category_theory.exact_seq.arrow_congr doc_blame
+
+-- for_mathlib/ext.lean
+apply_nolint Ext.δ doc_blame
 
 -- for_mathlib/fin_functor.lean
 apply_nolint category_theory.fin3_functor_mk doc_blame
@@ -200,6 +208,8 @@ apply_nolint short_exact_sequence.horseshoe_ker doc_blame unused_arguments
 apply_nolint short_exact_sequence.horseshoe_ker_ι doc_blame
 apply_nolint short_exact_sequence.horseshoe_obj doc_blame
 apply_nolint short_exact_sequence.horseshoe_step doc_blame
+apply_nolint short_exact_sequence.horseshoe_to_single₁ doc_blame
+apply_nolint short_exact_sequence.horseshoe_π doc_blame
 
 -- for_mathlib/is_locally_constant.lean
 apply_nolint indexed_partition.discrete_quotient doc_blame
@@ -325,23 +335,14 @@ apply_nolint laurent_measures_bdd doc_blame
 apply_nolint laurent_measures_bdd.map doc_blame
 
 -- laurent_measures/thm69.lean
-apply_nolint thm71.A doc_blame
-apply_nolint thm71.N doc_blame
-apply_nolint thm71.N_inv_le ge_or_gt
-apply_nolint thm71.a doc_blame
-apply_nolint thm71.coeff doc_blame
-apply_nolint thm71.deg doc_blame
-apply_nolint thm71.deg_increasing ge_or_gt
-apply_nolint thm71.deg_is_min ge_or_gt
 apply_nolint thm71.eventually_le ge_or_gt
 apply_nolint thm71.eventually_le_one ge_or_gt
 apply_nolint thm71.eventually_pos_floor ge_or_gt
 apply_nolint thm71.eventually_pos_y ge_or_gt
 apply_nolint thm71.ge_of_div_le_one ge_or_gt
-apply_nolint thm71.limit unused_arguments
+apply_nolint thm71.limit_y unused_arguments
 apply_nolint thm71.trunc_y doc_blame
 apply_nolint thm71.y doc_blame unused_arguments
-apply_nolint thm71.z doc_blame
 
 -- locally_constant/Vhat.lean
 apply_nolint SemiNormedGroup.normed_with_aut_LCC fails_quickly
