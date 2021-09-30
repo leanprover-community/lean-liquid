@@ -206,6 +206,17 @@ begin
     simp },
 end
 
+lemma finite_sum' (n : ℕ) : x - (y ξ x n : ℝ) =
+  ∑ i in range (n),  (⌊(((y ξ x i) / ξ ^ i) : ℝ)⌋ : ℝ) * (ξ ^ i) :=
+begin
+  by_cases hn : n =0,
+  { rw [hn, range_zero, sum_empty, sub_eq_zero], refl },
+  { replace hn : n ≥ 1 := le_of_not_gt ((not_iff_not.mpr nat.lt_one_iff).mpr hn),
+    rw [← (nat.sub_add_cancel hn), finite_sum ξ x (n - 1)],
+    simp only [sub_sub_cancel] at * },
+end
+
+
 lemma exists_limit_y : ∃ a, tendsto (λ n, y ξ x n) at_top (𝓝 a) :=
 begin
   have h_bdd : bdd_below (range (trunc_y ξ x)),
@@ -301,6 +312,19 @@ begin
   all_goals {exact (fact.out _)},
 end
 
+-- lemma finite_sum (n : ℕ) : (y ξ x (n + 1) : ℝ) =
+--   x - ∑ i in range(n + 1),  (⌊(((y ξ x i) / ξ ^ i) : ℝ)⌋ : ℝ) * (ξ ^ i) :=
+
+lemma has_sum_x : has_sum (λ i, (⌊(((y ξ x i) / ξ ^ i) : ℝ)⌋ : ℝ) * (ξ ^ i)) x :=
+begin
+  apply (summable_floor ξ x ξ _ _).has_sum_iff_tendsto_nat.mpr,
+  simp_rw [← (finite_sum' ξ x), sub_eq_add_neg],
+  nth_rewrite_rhs 0 [← add_zero x],
+  apply @tendsto.const_add ℕ ℝ _ _ _ x 0 _ at_top,
+  rw ← neg_zero,
+  refine tendsto.neg (limit_y ξ x _ _),
+  all_goals {exact (fact.out _)},
+end
 
 
 end summability
