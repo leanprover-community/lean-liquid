@@ -5,16 +5,15 @@ import order.filter.at_top_bot
 
 /-
 We define the map θ : (laurent_measures r `singleton`) → ℝ and we show it is surjective.
-TO DO :
-* Prove `lemma has_sum_pow_floor` and deduce `lemma has_sum_pow_floor_norm` from it
-* Upgrade θ to a `comp_haus_blah` morphism
-* Finish the proof of surjectivity for negative reals using linearity
 -/
 
 noncomputable theory
 
 open set filter function classical finset nat
 open_locale topological_space classical nnreal big_operators
+
+def laurent_measures.to_Rfct (r : ℝ≥0) : --[fact (r < 1)] :
+  (laurent_measures r (Fintype.of punit)) → (ℤ → ℤ) := λ ⟨F, _⟩, (F punit.star)
 
 namespace thm71
 
@@ -61,7 +60,7 @@ namespace thm71
 -- end surjectivity
 
 
-variables (ξ : ℝ) [fact (0 < ξ)] [fact (ξ < 1)]
+variables (ξ : ℝ)
 variable (x : ℝ)
 
 noncomputable def y : ℕ → ℝ
@@ -69,16 +68,16 @@ noncomputable def y : ℕ → ℝ
 | (n + 1)   := (y n) - (⌊(((y n) / ξ ^ n) : ℝ)⌋ : ℝ) * ξ ^ n
 
 
---[FAE] why I can't find this in mathlib?
-lemma ge_of_div_le_one {a b : ℝ} (ha₁ : a ≥ 0) (hb₁ : b ≤ 1) (hb₂ : b > 0) : a ≤ a / b :=
-begin
-  by_cases ha : a > 0,
-  { have that := (mul_le_mul_left ha).mpr ((one_le_div hb₂).mpr hb₁),
-    rwa [← div_eq_mul_one_div, mul_one] at that },
-  { simp only [gt_iff_lt, not_lt, ge_iff_le] at *,
-    have : a = 0 := linarith.eq_of_not_lt_of_not_gt a 0 (not_lt_of_le ha₁) (not_lt_of_le ha),
-    rw [this, zero_div] },
-end
+-- --[FAE] why I can't find this in mathlib?
+-- lemma ge_of_div_le_one {a b : ℝ} (ha₁ : a ≥ 0) (hb₁ : b ≤ 1) (hb₂ : b > 0) : a ≤ a / b :=
+-- begin
+--   by_cases ha : a > 0,
+--   { have that := (mul_le_mul_left ha).mpr ((one_le_div hb₂).mpr hb₁),
+--     rwa [← div_eq_mul_one_div, mul_one] at that },
+--   { simp only [gt_iff_lt, not_lt, ge_iff_le] at *,
+--     have : a = 0 := linarith.eq_of_not_lt_of_not_gt a 0 (not_lt_of_le ha₁) (not_lt_of_le ha),
+--     rw [this, zero_div] },
+-- end
 
 -- lemma eventually_le : ∀ n : ℕ, n ≥ 1 → (y ξ x n) ≤ ⌊(((y ξ x n) / ξ ^ n) : ℝ)⌋ :=
 -- begin
@@ -95,7 +94,7 @@ end
 
 section aux_lemmas
 
-example (a b c : ℝ) : a < b + c ↔ a - b < c := sub_lt_iff_lt_add'.symm
+variable [fact (0 < ξ)]
 
 lemma bdd_floor : bdd_above (range (λ n : ℕ, (⌊ y ξ x n / ξ ^ n⌋ : ℝ))) :=
 begin
@@ -183,7 +182,7 @@ begin
     exact eventually_le ξ x n hn },
 end
 
-lemma limit_neg_geometric : tendsto (λ i : ℕ, - ξ ^ i) at_top (𝓝 0) :=
+lemma limit_neg_geometric [fact (ξ < 1)] : tendsto (λ i : ℕ, - ξ ^ i) at_top (𝓝 0) :=
 begin
   apply summable.tendsto_at_top_zero,
   rw summable_neg_iff,
@@ -221,6 +220,7 @@ begin
     simp only [sub_sub_cancel] at * },
 end
 
+variables [fact (0 < ξ)]
 
 lemma exists_limit_y : ∃ a, tendsto (λ n, y ξ x n) at_top (𝓝 a) :=
 begin
@@ -251,41 +251,110 @@ begin
   tauto,
 end
 
-lemma summable_floor (r : ℝ) (hr₀ : 0 < r) (hr₁ : r < 1) :
-   summable (λ i, (⌊(y ξ x i / ξ ^ i : ℝ)⌋ : ℝ) * r ^ i) :=
+-- lemma summable_floor (r : ℝ≥0) (hr₁ : r < 1) :
+--    summable (λ i, (⌊(y ξ x i / ξ ^ i : ℝ)⌋ : ℝ) * r ^ i) :=
+-- begin
+--   by_cases hr₀ : r = 0,
+--   { rw hr₀,
+--     apply @summable_of_ne_finset_zero _ _ _ _ _ (range 1),
+--     simp only [int.cast_eq_zero, nnreal.coe_zero, zero_pow_eq_zero, finset.mem_singleton,
+--       mul_eq_zero, range_one],
+--     intros _ hb,
+--     exact or.intro_right _ (nat.pos_of_ne_zero hb) },
+--   have h_nonneg : ∀ n : ℕ, n ≥ 1 → (r ^ n : ℝ) ≥ 0 := λ n _, pow_nonneg (r.2) n,
+--   have H : ∀ j : {i // i ∉ range 1}, j.1 ≥ 1,
+--   { rintro ⟨n, h_n⟩,
+--     simp only [ge_iff_le, finset.mem_singleton, range_one] at h_n,
+--     exact le_of_not_gt ((not_iff_not.mpr nat.lt_one_iff).mpr h_n) },
+--   apply (finset.summable_compl_iff (finset.range 1)).mp,
+--   swap, apply_instance,
+--   have h_nonneg : ∀ i : {i // i ∉ range 1}, (⌊(y ξ x i.1 / ξ ^ i.1 : ℝ)⌋ : ℝ) * r ^ i.1 ≥ 0,
+--   { intro i,
+--     apply mul_nonneg _ (h_nonneg i.1 (H i)),
+--     exact (eventually_pos_floor ξ x i.1 (H i)) },
+--   obtain ⟨μ, hμ⟩  := bdd_floor ξ x,
+--   have h_bdd : ∀ i : {i // i ∉ range 1}, (⌊(y ξ x i.1 / ξ ^ i.1 : ℝ)⌋ : ℝ) ≤ μ,
+--   { rw upper_bounds at hμ,
+--     simp only [*, forall_apply_eq_imp_iff', set.mem_range, forall_exists_index, mem_set_of_eq,
+--       implies_true_iff] at * },
+--   replace h_bdd : ∀ i : {i // i ∉ range 1}, (⌊(y ξ x i.1 / ξ ^ i.1 : ℝ)⌋ : ℝ) * r ^ i.1
+--       ≤ μ * r ^ i.1,
+--   { intro i,
+--     rw mul_le_mul_right,
+--     exacts [h_bdd i, pow_pos ((ne.symm hr₀).le_iff_lt.mp r.2) i.1] },
+--   apply summable_of_nonneg_of_le h_nonneg h_bdd,
+--   apply (@finset.summable_compl_iff _ _ _ _ _ (λ i, μ * r ^ i) (finset.range 1)).mpr,
+--   apply summable.mul_left,
+--   apply summable_geometric_of_abs_lt_1,
+--   rwa [← nnreal.val_eq_coe, abs_eq_self.mpr r.2],
+-- end
+
+
+lemma summable_norm (r : ℝ≥0) (hr₁ : r < 1) :
+      summable (λ i, ∥⌊(y ξ x i / ξ ^ i : ℝ)⌋∥ * (r ^ i)) :=
 begin
-  have h_pos : ∀ n : ℕ, n ≥ 1 → r ^ n > 0 := λ n _, pow_pos (hr₀) n,
+  by_cases hr₀ : r = 0,
+  { rw hr₀,
+    apply @summable_of_ne_finset_zero _ _ _ _ _ (range 1),
+    simp only [int.cast_eq_zero, nnreal.coe_zero, zero_pow_eq_zero, finset.mem_singleton,
+      mul_eq_zero, range_one],
+    intros _ hb,
+    exact or.intro_right _ (nat.pos_of_ne_zero hb) },
+  have h_nonneg : ∀ n : ℕ, n ≥ 1 → (r ^ n : ℝ) ≥ 0 := λ n _, pow_nonneg (r.2) n,
   have H : ∀ j : {i // i ∉ range 1}, j.1 ≥ 1,
   { rintro ⟨n, h_n⟩,
     simp only [ge_iff_le, finset.mem_singleton, range_one] at h_n,
     exact le_of_not_gt ((not_iff_not.mpr nat.lt_one_iff).mpr h_n) },
   apply (finset.summable_compl_iff (finset.range 1)).mp,
   swap, apply_instance,
-  have h_nonneg : ∀ i : {i // i ∉ range 1}, (⌊(y ξ x i.1 / ξ ^ i.1 : ℝ)⌋ : ℝ) * r ^ i.1 ≥ 0,
-  { intro i,
-    apply mul_nonneg _ (le_of_lt (h_pos i.1 (H i))),
-    exact (eventually_pos_floor ξ x i.1 (H i)) },
+  have h_nonneg : ∀ i : {i // i ∉ range 1}, (∥⌊(y ξ x i.1 / ξ ^ i.1 : ℝ)⌋∥) * r ^ i.1 ≥ 0,
+    { intro i,
+      apply mul_nonneg _ (h_nonneg i.1 (H i)),
+      simp only [norm_nonneg] },
   obtain ⟨μ, hμ⟩  := bdd_floor ξ x,
-  have h_bdd : ∀ i : {i // i ∉ range 1}, (⌊(y ξ x i.1 / ξ ^ i.1 : ℝ)⌋ : ℝ) ≤ μ,
+  have h_bdd : ∀ i : {i // i ∉ range 1}, (∥⌊(y ξ x i.1 / ξ ^ i.1 : ℝ)⌋∥) ≤ μ,
   { rw upper_bounds at hμ,
-    simp only [*, forall_apply_eq_imp_iff', set.mem_range, forall_exists_index, mem_set_of_eq,
-      implies_true_iff] at * },
-  replace h_bdd : ∀ i : {i // i ∉ range 1}, (⌊(y ξ x i.1 / ξ ^ i.1 : ℝ)⌋ : ℝ) * r ^ i.1
+    simp only [*, forall_apply_eq_imp_iff', lt_one_iff, set.mem_range, forall_const,
+      forall_exists_index, nnreal.zero_le_coe, ge_iff_le, set.mem_set_of_eq, implies_true_iff,
+      nonempty_of_inhabited, subtype.forall, pow_nonneg, finset.mem_range, subtype.val_eq_coe] at *,
+    intros a ha,
+    rw [finset.range_one, finset.mem_singleton] at ha,
+    rw [subtype.coe_mk, int.norm_eq_abs],
+    replace ha : a ≥ 1 := le_of_not_gt ((not_iff_not.mpr nat.lt_one_iff).mpr ha),
+    rwa [abs_eq_self.mpr (eventually_pos_floor ξ x a ha)],
+    exact hμ a },
+  replace h_bdd : ∀ i : {i // i ∉ range 1}, (∥⌊(y ξ x i.1 / ξ ^ i.1 : ℝ)⌋∥) * r ^ i.1
       ≤ μ * r ^ i.1,
-  { intro i,
+    { intro i,
     rw mul_le_mul_right,
-    exacts [h_bdd i, pow_pos hr₀ i.1] },
+    exacts [h_bdd i, pow_pos ((ne.symm hr₀).le_iff_lt.mp r.2) i.1] },
   apply summable_of_nonneg_of_le h_nonneg h_bdd,
   apply (@finset.summable_compl_iff _ _ _ _ _ (λ i, μ * r ^ i) (finset.range 1)).mpr,
   apply summable.mul_left,
   apply summable_geometric_of_abs_lt_1,
-  rwa [abs_eq_self.mpr (le_of_lt hr₀)],
+  rwa [← nnreal.val_eq_coe, abs_eq_self.mpr r.2],
 end
 
 
-lemma limit_y (h_pos : 0 < ξ) (h_small : ξ < 1)
-  : tendsto (λ n, y ξ x n) at_top (𝓝 0) :=
+lemma summable_floor (r : ℝ≥0) (hr₁ : r < 1) :
+   summable (λ i, (⌊(y ξ x i / ξ ^ i : ℝ)⌋ : ℝ) * r ^ i) :=
 begin
+  have h_norm_eq : (λ i : ℕ, (∥⌊y ξ x i / ξ ^ i⌋∥ * (r ^ i : ℝ))) =
+    (λ i : ℕ, (∥(⌊y ξ x i / ξ ^ i⌋ : ℝ) * (r ^ i)∥)),
+    { funext,
+      simp only [normed_field.norm_mul, nnreal.norm_eq, normed_field.norm_pow,
+        mul_eq_mul_right_iff],
+      rw [real.norm_eq_abs, int.norm_eq_abs],
+      tauto },
+  have := summable_norm ξ x r hr₁,
+  rw h_norm_eq at this,
+  apply summable_of_summable_norm (this),
+end
+
+lemma limit_y [fact (ξ < 1)]: tendsto (λ n, y ξ x n) at_top (𝓝 0) :=
+begin
+  have h_pos : 0 < ξ := fact.out _,
+  let ξ₀ : ℝ≥0 := ⟨ξ, le_of_lt (fact.out _)⟩,
   have h_right : ∀ n, n ≥ 1 → (⌊(y ξ x n / ξ ^ n)⌋ : ℝ) ≤ (y ξ x n / ξ ^ n) := (λ _ _, floor_le _),
   replace h_right : ∀ n, n ≥ 1 → (⌊(y ξ x n / ξ ^ n)⌋ : ℝ) * ξ ^ n  ≤ y ξ x n :=
     (λ n hn, (le_div_iff (pow_pos h_pos n)).mp (h_right n hn)),
@@ -310,75 +379,67 @@ begin
   { convert tendsto.add (exists_limit_y ξ x).some_spec (limit_neg_geometric ξ),
     rw add_zero } ,
   have h₁ := (le_of_tendsto_of_tendsto this
-    (summable_floor ξ x ξ _ _).tendsto_at_top_zero h_left).antisymm (le_of_tendsto_of_tendsto
-    (summable_floor ξ x ξ _ _).tendsto_at_top_zero (exists_limit_y ξ x).some_spec h_right),
+    (summable_floor ξ x ξ₀ _).tendsto_at_top_zero h_left).antisymm (le_of_tendsto_of_tendsto
+    (summable_floor ξ x ξ₀ _).tendsto_at_top_zero (exists_limit_y ξ x).some_spec h_right),
   have := (exists_limit_y ξ x).some_spec,
   rwa h₁ at this,
-  all_goals {exact (fact.out _)},
+  all_goals {rw [← nnreal.coe_lt_coe, nnreal.coe_one, subtype.coe_mk], exact fact.out _},
 end
 
--- lemma finite_sum (n : ℕ) : (y ξ x (n + 1) : ℝ) =
---   x - ∑ i in range(n + 1),  (⌊(((y ξ x i) / ξ ^ i) : ℝ)⌋ : ℝ) * (ξ ^ i) :=
-
-lemma has_sum_x : has_sum (λ i, (⌊(((y ξ x i) / ξ ^ i) : ℝ)⌋ : ℝ) * (ξ ^ i)) x :=
+lemma has_sum_x [fact (ξ < 1)] : has_sum (λ i, (⌊(((y ξ x i) / ξ ^ i) : ℝ)⌋ : ℝ) * (ξ ^ i)) x :=
 begin
-  apply (summable_floor ξ x ξ _ _).has_sum_iff_tendsto_nat.mpr,
-  simp_rw [← (finite_sum' ξ x), sub_eq_add_neg],
+  let ξ₀ : ℝ≥0 := ⟨ξ, le_of_lt (fact.out _)⟩,
+  apply (summable_floor ξ x ξ₀ _).has_sum_iff_tendsto_nat.mpr,
+  simp_rw [subtype.coe_mk, ← (finite_sum' ξ x), sub_eq_add_neg],
   nth_rewrite_rhs 0 [← add_zero x],
   apply @tendsto.const_add ℕ ℝ _ _ _ x 0 _ at_top,
   rw ← neg_zero,
-  refine tendsto.neg (limit_y ξ x _ _),
-  all_goals {exact (fact.out _)},
+  refine tendsto.neg (limit_y ξ x),
+  { rw [← nnreal.coe_lt_coe, nnreal.coe_one, subtype.coe_mk],
+    exact fact.out _},
 end
 
 end summability
 
 section theta_surj
 
-open filter function classical finset nat
-open_locale topological_space classical nnreal big_operators
 
--- --move me to laurent_measures.basic
-
--- -- instance : has_coe (laurent_measures r S) (laurent_measures r₁ S) :=
--- -- { coe :=
--- -- begin
--- --   rintros ⟨F, hF⟩,
--- --   use F,
--- --   sorry,
--- -- end}
-
--- exclude ξ
-
-def laurent_measures.to_Rfct (r : ℝ≥0) : --[fact (r < 1)] :
-  (laurent_measures r (Fintype.of punit)) → (ℤ → ℝ) := λ ⟨F, _⟩, coe ∘ (F punit.star)
-
-def θ (r : ℝ≥0) [fact (r < 1)] : (laurent_measures r (Fintype.of punit)) → ℝ :=
-  λ F, tsum (λ n, (laurent_measures.to_Rfct r F n) * ξ ^ n)
-
--- noncomputable def θ₂ (r : ℝ≥0) [fact (r < 1)] : (laurent_measures r (Fintype.of punit)) → ℝ :=
---   λ F, tsum (λ n, (F.to_Rfct r n) * ( 1 / 2) ^ n)
+def θ (r : ℝ≥0) : (laurent_measures r (Fintype.of punit)) → ℝ :=
+  λ F, tsum (λ n, (F.to_Rfct r n) * ξ ^ n)
 
 
---[FAE] : modify ϕ to a `def` and do things properly!
--- def ϕ (r₂ r₁ : ℝ≥0) (h : r₁ < r₂) {S : Fintype} :
---   (laurent_measures r₂ S) → (laurent_measures r₁ S) := sorry
-
--- lemma θ_and_ϕ (r' : ℚ) (h_pos' : 0 < r') (h_one' : r' < 1) (r₁ r₂ : ℝ≥0) [fact (r₁ < 1)]
---   [fact (r₂ < 1)] (h : r₁ < r₂) (F : laurent_measures r₂ (Fintype.of punit)) :
---   θ r' h_pos' h_one' r₁ (ϕ r₂ r₁ h F) = θ r' h_pos' h_one' r₂ F := sorry
-
--- lemma θ_and_ϕ₂ (r₁ r₂ : ℝ≥0) [fact (r₁ < 1)] [fact (r₂ < 1)] (h : r₁ < r₂)
---   (F : laurent_measures r₂ (Fintype.of punit)) : θ₂ r₁ (ϕ r₂ r₁ h F) = θ₂ r₂ F := sorry
-
--- #check θ ξ
-
-theorem θ_surj (r : ℝ≥0) [fact (r < 1)] :
+theorem θ_surj (r : ℝ≥0) [fact (r < 1)] [fact (0 < ξ)] [fact (ξ < 1)] :
   ∃ (F : laurent_measures r (Fintype.of punit)), (θ ξ r F) = x :=
 begin
-  let F₀ := (λ i : ℕ, ⌊((y ξ x i) / ξ ^ i)⌋),
-  --probably need to upgrade y to be defined on ℤ, or otherwise simply do it here
-  sorry,
+  let f₀ : ℤ → ℤ := λ m, int.rec_on m (λ i, ⌊((y ξ x i) / ξ ^ i)⌋) (0),
+  let F₀ : Fintype.of punit → ℤ → ℤ := λ a, f₀,
+  have hinj : function.injective (coe : ℕ → ℤ) := by {apply int.coe_nat_inj},
+  have h_aux : ∀ n : ℤ, n ∉ set.range (coe : ℕ → ℤ) → f₀ n = 0,
+  { rintro ( _ | _ ),
+    simp only [forall_false_left, set.mem_range_self, not_true, int.of_nat_eq_coe],
+    intro,
+    refl },
+  have h_range : ∀ n : ℤ,
+    n ∉ set.range (coe : ℕ → ℤ) → (F₀ punit.star n : ℝ) * ξ ^ n = 0,
+  swap,
+  have h_range_norm : ∀ n : ℤ,
+    n ∉ set.range (coe : ℕ → ℤ) → ∥F₀ punit.star n ∥ * r ^ n = 0, --sorry,
+  swap,
+  { have HF₀ : ∀ (s : Fintype.of punit), summable (λ (n : ℤ), ∥F₀ s n∥ * r ^ n),
+    { intro s,
+      apply (@function.injective.summable_iff _ _ _ _ _ _ _ hinj h_range_norm).mp,
+      apply summable_norm ξ x r (fact.out _) },
+    let F : laurent_measures r (Fintype.of punit) := ⟨F₀, HF₀⟩,
+    use F,
+    have : has_sum (λ n, ((F₀ punit.star n) : ℝ) * ξ ^ n) x,
+    { apply (@function.injective.has_sum_iff _ _ _ _ _ _ x _ hinj h_range).mp,
+      exact has_sum_x ξ x },
+    apply has_sum.tsum_eq,
+    exact this },
+  all_goals { intros n hn,
+    specialize h_aux n hn,
+    simp only [h_aux, int.cast_eq_zero, mul_eq_zero, norm_eq_zero],
+    tauto },
 end
 
 end theta_surj
