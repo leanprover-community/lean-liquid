@@ -12,11 +12,6 @@ noncomputable theory
 open set filter function classical finset nat
 open_locale topological_space classical nnreal big_operators
 
-def laurent_measures.to_Rfct (r : ℝ≥0) : --[fact (r < 1)] :
-  (laurent_measures r (Fintype.of punit)) → (ℤ → ℤ) := λ ⟨F, _⟩, (F punit.star)
-
-namespace thm71
-
 -- section surjectivity
 
 -- parameter (x : ℝ≥0)
@@ -59,38 +54,17 @@ namespace thm71
 
 -- end surjectivity
 
+def laurent_measures.to_Rfct (r : ℝ≥0) : --[fact (r < 1)] :
+  (laurent_measures r (Fintype.of punit)) → (ℤ → ℤ) := λ ⟨F, _⟩, (F punit.star)
 
-variables (ξ : ℝ)
-variable (x : ℝ)
+namespace thm71
 
+variables (ξ x : ℝ)
+
+/--The basic function computing the **integer-valued** `ξ`-adic expansion of `x` -/
 noncomputable def y : ℕ → ℝ
 | 0         := x
 | (n + 1)   := (y n) - (⌊(((y n) / ξ ^ n) : ℝ)⌋ : ℝ) * ξ ^ n
-
-
--- --[FAE] why I can't find this in mathlib?
--- lemma ge_of_div_le_one {a b : ℝ} (ha₁ : a ≥ 0) (hb₁ : b ≤ 1) (hb₂ : b > 0) : a ≤ a / b :=
--- begin
---   by_cases ha : a > 0,
---   { have that := (mul_le_mul_left ha).mpr ((one_le_div hb₂).mpr hb₁),
---     rwa [← div_eq_mul_one_div, mul_one] at that },
---   { simp only [gt_iff_lt, not_lt, ge_iff_le] at *,
---     have : a = 0 := linarith.eq_of_not_lt_of_not_gt a 0 (not_lt_of_le ha₁) (not_lt_of_le ha),
---     rw [this, zero_div] },
--- end
-
--- lemma eventually_le : ∀ n : ℕ, n ≥ 1 → (y ξ x n) ≤ ⌊(((y ξ x n) / ξ ^ n) : ℝ)⌋ :=
--- begin
---   intros n hn,
---   have h_pow : ξ ^ n ≤ 1, sorry,
---   -- have := (pow_lt_one_iff _).mpr (fact.out _) ξ,
---   -- have := (pow_lt_one_iff _).mpr
---   --   ((not_iff_not_of_iff (@nat.lt_one_iff n)).mp (not_lt_of_ge hn)),
---   -- -- sorry,
---   -- exact fact.out _,
---   calc y ξ x n ≤ (y ξ x n) / (ξ ^ n) : sorry--ge_of_div_le_one h_pow
---            ... ≤ ⌊(y ξ x n) / (ξ ^ n)⌋ : sorry,
--- end
 
 section aux_lemmas
 
@@ -142,12 +116,10 @@ lemma eventually_pos_floor : ∀ n : ℕ, n ≥ 1 → (⌊((y ξ x n) / ξ ^ n )
 begin
   have h_pos : ∀ n : ℕ, n ≥ 1 → ξ ^ n > 0 := λ n _, pow_pos (fact.out _) n,
   intros n hn,
-  -- apply mul_nonneg _ (le_of_lt (h_pos n hn)),
   norm_cast,
   apply floor_nonneg.mpr,
   exact div_nonneg (eventually_pos_y ξ x n hn) (le_of_lt (h_pos n hn)),
 end
-
 
 lemma eventually_le : ∀ n, n ≥ 1 → y ξ x (n + 1) ≤ (y ξ x n) :=
 begin
@@ -167,17 +139,17 @@ begin
   rwa nat.succ_eq_add_one,
 end
 
-def trunc_y : ℕ → ℝ := λ n, if n = 0 then y ξ x 1 else y ξ x n
+def aux_y : ℕ → ℝ := λ n, if n = 0 then y ξ x 1 else y ξ x n
 
-lemma eventually_monotone : monotone (order_dual.to_dual ∘ (trunc_y ξ x)) :=
+lemma eventually_monotone : monotone (order_dual.to_dual ∘ (aux_y ξ x)) :=
 begin
   apply monotone_nat_of_le_succ,
   intro n,
   rw [order_dual.to_dual_le, order_dual.of_dual_to_dual],
   by_cases hn : n = 0,
-  {rw [hn, zero_add, trunc_y],
+  {rw [hn, zero_add, aux_y],
     simp only [nat.one_ne_zero, if_true, eq_self_iff_true, if_false] },
-  { simp only [trunc_y, if_neg hn, function.comp_app, nat.succ_ne_zero, if_false],
+  { simp only [aux_y, if_neg hn, function.comp_app, nat.succ_ne_zero, if_false],
     replace hn : n ≥ 1 := le_of_not_gt ((not_iff_not.mpr nat.lt_one_iff).mpr hn),
     exact eventually_le ξ x n hn },
 end
@@ -224,21 +196,21 @@ variables [fact (0 < ξ)]
 
 lemma exists_limit_y : ∃ a, tendsto (λ n, y ξ x n) at_top (𝓝 a) :=
 begin
-  have h_bdd : bdd_below (range (trunc_y ξ x)),
+  have h_bdd : bdd_below (range (aux_y ξ x)),
   { use 0,
     intros z hz,
     obtain ⟨m, h_mz⟩ := (set.mem_range).mp hz,
     by_cases hm : m = 0,
-    { simp_rw [hm, trunc_y, if_pos] at h_mz,
+    { simp_rw [hm, aux_y, if_pos] at h_mz,
       rw ← h_mz,
       exact eventually_pos_y ξ x 1 (le_of_eq (refl _)), },
-      simp_rw [trunc_y, (if_neg hm)] at h_mz,
+      simp_rw [aux_y, (if_neg hm)] at h_mz,
       rw ← h_mz,
       replace hm : m ≥ 1 := le_of_not_gt ((not_iff_not.mpr nat.lt_one_iff).mpr hm),
       exact eventually_pos_y ξ x m hm },
   have := tendsto_at_top_cinfi (eventually_monotone ξ x) h_bdd,
-  use (⨅ (i : ℕ), trunc_y ξ x i),
-  apply @tendsto.congr' _ _ (trunc_y ξ x) _ _ _ _ this,
+  use (⨅ (i : ℕ), aux_y ξ x i),
+  apply @tendsto.congr' _ _ (aux_y ξ x) _ _ _ _ this,
   apply (filter.eventually_eq_iff_exists_mem).mpr,
   use {n | n ≥ 1},
   simp only [mem_at_top_sets, ge_iff_le, mem_set_of_eq],
@@ -247,48 +219,9 @@ begin
   intros n hn,
   replace hn : n ≥ 1 := by {simp only [*, ge_iff_le, mem_set_of_eq] at * },
   have := ne_of_lt (lt_of_lt_of_le nat.zero_lt_one hn),
-  rw [trunc_y, ite_eq_right_iff],
+  rw [aux_y, ite_eq_right_iff],
   tauto,
 end
-
--- lemma summable_floor (r : ℝ≥0) (hr₁ : r < 1) :
---    summable (λ i, (⌊(y ξ x i / ξ ^ i : ℝ)⌋ : ℝ) * r ^ i) :=
--- begin
---   by_cases hr₀ : r = 0,
---   { rw hr₀,
---     apply @summable_of_ne_finset_zero _ _ _ _ _ (range 1),
---     simp only [int.cast_eq_zero, nnreal.coe_zero, zero_pow_eq_zero, finset.mem_singleton,
---       mul_eq_zero, range_one],
---     intros _ hb,
---     exact or.intro_right _ (nat.pos_of_ne_zero hb) },
---   have h_nonneg : ∀ n : ℕ, n ≥ 1 → (r ^ n : ℝ) ≥ 0 := λ n _, pow_nonneg (r.2) n,
---   have H : ∀ j : {i // i ∉ range 1}, j.1 ≥ 1,
---   { rintro ⟨n, h_n⟩,
---     simp only [ge_iff_le, finset.mem_singleton, range_one] at h_n,
---     exact le_of_not_gt ((not_iff_not.mpr nat.lt_one_iff).mpr h_n) },
---   apply (finset.summable_compl_iff (finset.range 1)).mp,
---   swap, apply_instance,
---   have h_nonneg : ∀ i : {i // i ∉ range 1}, (⌊(y ξ x i.1 / ξ ^ i.1 : ℝ)⌋ : ℝ) * r ^ i.1 ≥ 0,
---   { intro i,
---     apply mul_nonneg _ (h_nonneg i.1 (H i)),
---     exact (eventually_pos_floor ξ x i.1 (H i)) },
---   obtain ⟨μ, hμ⟩  := bdd_floor ξ x,
---   have h_bdd : ∀ i : {i // i ∉ range 1}, (⌊(y ξ x i.1 / ξ ^ i.1 : ℝ)⌋ : ℝ) ≤ μ,
---   { rw upper_bounds at hμ,
---     simp only [*, forall_apply_eq_imp_iff', set.mem_range, forall_exists_index, mem_set_of_eq,
---       implies_true_iff] at * },
---   replace h_bdd : ∀ i : {i // i ∉ range 1}, (⌊(y ξ x i.1 / ξ ^ i.1 : ℝ)⌋ : ℝ) * r ^ i.1
---       ≤ μ * r ^ i.1,
---   { intro i,
---     rw mul_le_mul_right,
---     exacts [h_bdd i, pow_pos ((ne.symm hr₀).le_iff_lt.mp r.2) i.1] },
---   apply summable_of_nonneg_of_le h_nonneg h_bdd,
---   apply (@finset.summable_compl_iff _ _ _ _ _ (λ i, μ * r ^ i) (finset.range 1)).mpr,
---   apply summable.mul_left,
---   apply summable_geometric_of_abs_lt_1,
---   rwa [← nnreal.val_eq_coe, abs_eq_self.mpr r.2],
--- end
-
 
 lemma summable_norm (r : ℝ≥0) (hr₁ : r < 1) :
       summable (λ i, ∥⌊(y ξ x i / ξ ^ i : ℝ)⌋∥ * (r ^ i)) :=
@@ -334,7 +267,6 @@ begin
   apply summable_geometric_of_abs_lt_1,
   rwa [← nnreal.val_eq_coe, abs_eq_self.mpr r.2],
 end
-
 
 lemma summable_floor (r : ℝ≥0) (hr₁ : r < 1) :
    summable (λ i, (⌊(y ξ x i / ξ ^ i : ℝ)⌋ : ℝ) * r ^ i) :=
@@ -403,10 +335,9 @@ end summability
 
 section theta_surj
 
-
+/--The map `θ` defined in Theorem 6.9 of Nalytic.pdf -/
 def θ (r : ℝ≥0) : (laurent_measures r (Fintype.of punit)) → ℝ :=
   λ F, tsum (λ n, (F.to_Rfct r n) * ξ ^ n)
-
 
 theorem θ_surj (r : ℝ≥0) [fact (r < 1)] [fact (0 < ξ)] [fact (ξ < 1)] :
   ∃ (F : laurent_measures r (Fintype.of punit)), (θ ξ r F) = x :=
@@ -443,6 +374,4 @@ begin
 end
 
 end theta_surj
-
-
 end thm71
