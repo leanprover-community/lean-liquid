@@ -1125,23 +1125,44 @@ end
 
 end delta
 
-lemma eight_term_exact_seq (hD : is_snake_input D) :
-  exact_seq 𝒜 [hD.ker_row₁_to_top_left, (0,0) ⟶[D] (0,1), (0,1) ⟶[D] (0,2),
-  hD.δ,
-  (3,0) ⟶[D] (3,1), (3,1) ⟶[D] (3,2), hD.bottom_right_to_coker_row₂] :=
+local attribute [instance] limits.has_zero_object.has_zero
+
+lemma exact_zero_to_ker_row₁_to_top_left (hD : is_snake_input D) :
+  exact (0 : 0 ⟶ kernel ((1,0) ⟶[D] (1,1))) hD.ker_row₁_to_top_left :=
 begin
+  haveI : mono hD.ker_row₁_to_top_left := ker_row₁_to_top_left_mono hD,
+  apply exact_zero_left_of_mono,
+end
+
+lemma exact_bottom_right_to_coker_row₂_to_zero (hD : is_snake_input D) :
+  exact hD.bottom_right_to_coker_row₂ (0 : cokernel ((2,1) ⟶[D] (2,2)) ⟶ 0) :=
+begin
+  rw ← epi_iff_exact_zero_right,
+  apply bottom_right_to_coker_row₂_epi hD,
+end
+
+lemma eight_term_exact_seq (hD : is_snake_input D) :
+  exact_seq 𝒜 [
+    (0 : 0 ⟶ kernel ((1,0) ⟶[D] (1,1))),
+    hD.ker_row₁_to_top_left, (0,0) ⟶[D] (0,1), (0,1) ⟶[D] (0,2),
+    hD.δ,
+    (3,0) ⟶[D] (3,1), (3,1) ⟶[D] (3,2), hD.bottom_right_to_coker_row₂,
+    (0 : cokernel ((2,1) ⟶[D] (2,2)) ⟶ 0)] :=
+begin
+  refine exact_seq.cons _ _ hD.exact_zero_to_ker_row₁_to_top_left _ _,
   refine exact_seq.cons _ _ hD.long_row₀_exact _ _,
   refine exact_seq.cons _ _ hD.row_exact₀ _ _,
   refine exact_seq.cons _ _ hD.exact_to_δ _ _,
   refine exact_seq.cons _ _ hD.exact_from_δ _ _,
   refine exact_seq.cons _ _ hD.row_exact₃ _ _,
   refine exact_seq.cons _ _ hD.long_row₃_exact _ _,
+  refine exact_seq.cons _ _ hD.exact_bottom_right_to_coker_row₂_to_zero _ _,
   refine exact_seq.single _,
 end
 
 lemma six_term_exact_seq (hD : is_snake_input D) :
   exact_seq 𝒜 [(0,0) ⟶[D] (0,1), (0,1) ⟶[D] (0,2), hD.δ, (3,0) ⟶[D] (3,1), (3,1) ⟶[D] (3,2)] :=
-exact_seq.extract hD.eight_term_exact_seq 1 5
+exact_seq.extract hD.eight_term_exact_seq 2 5
 
 end is_snake_input
 
