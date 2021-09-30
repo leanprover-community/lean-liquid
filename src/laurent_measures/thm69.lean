@@ -1,15 +1,20 @@
 import category_theory.Fintype
 import data.real.nnreal
 import laurent_measures.basic
-import topology.basic
 import order.filter.at_top_bot
-import analysis.special_functions.exp_log
 
+/-
+We define the map θ : (laurent_measures r `singleton`) → ℝ and we show it is surjective.
+TO DO :
+* Prove `lemma has_sum_pow_floor` and deduce `lemma has_sum_pow_floor_norm` from it
+* Upgrade θ to a `comp_haus_blah` morphism
+* Finish the proof of surjectivity for negative reals using linearity
+-/
 
 noncomputable theory
 
-open set real (log) finset filter
-open_locale topological_space nnreal big_operators filter classical
+open set filter function classical finset nat
+open_locale topological_space classical nnreal big_operators
 
 namespace thm71
 
@@ -326,8 +331,57 @@ begin
   all_goals {exact (fact.out _)},
 end
 
-
 end summability
+
+section theta_surj
+
+open filter function classical finset nat
+open_locale topological_space classical nnreal big_operators
+
+-- --move me to laurent_measures.basic
+
+-- -- instance : has_coe (laurent_measures r S) (laurent_measures r₁ S) :=
+-- -- { coe :=
+-- -- begin
+-- --   rintros ⟨F, hF⟩,
+-- --   use F,
+-- --   sorry,
+-- -- end}
+
+-- exclude ξ
+
+def laurent_measures.to_Rfct (r : ℝ≥0) : --[fact (r < 1)] :
+  (laurent_measures r (Fintype.of punit)) → (ℤ → ℝ) := λ ⟨F, _⟩, coe ∘ (F punit.star)
+
+def θ (r : ℝ≥0) [fact (r < 1)] : (laurent_measures r (Fintype.of punit)) → ℝ :=
+  λ F, tsum (λ n, (laurent_measures.to_Rfct r F n) * ξ ^ n)
+
+-- noncomputable def θ₂ (r : ℝ≥0) [fact (r < 1)] : (laurent_measures r (Fintype.of punit)) → ℝ :=
+--   λ F, tsum (λ n, (F.to_Rfct r n) * ( 1 / 2) ^ n)
+
+
+--[FAE] : modify ϕ to a `def` and do things properly!
+-- def ϕ (r₂ r₁ : ℝ≥0) (h : r₁ < r₂) {S : Fintype} :
+--   (laurent_measures r₂ S) → (laurent_measures r₁ S) := sorry
+
+-- lemma θ_and_ϕ (r' : ℚ) (h_pos' : 0 < r') (h_one' : r' < 1) (r₁ r₂ : ℝ≥0) [fact (r₁ < 1)]
+--   [fact (r₂ < 1)] (h : r₁ < r₂) (F : laurent_measures r₂ (Fintype.of punit)) :
+--   θ r' h_pos' h_one' r₁ (ϕ r₂ r₁ h F) = θ r' h_pos' h_one' r₂ F := sorry
+
+-- lemma θ_and_ϕ₂ (r₁ r₂ : ℝ≥0) [fact (r₁ < 1)] [fact (r₂ < 1)] (h : r₁ < r₂)
+--   (F : laurent_measures r₂ (Fintype.of punit)) : θ₂ r₁ (ϕ r₂ r₁ h F) = θ₂ r₂ F := sorry
+
+-- #check θ ξ
+
+theorem θ_surj (r : ℝ≥0) [fact (r < 1)] :
+  ∃ (F : laurent_measures r (Fintype.of punit)), (θ ξ r F) = x :=
+begin
+  let F₀ := (λ i : ℕ, ⌊((y ξ x i) / ξ ^ i)⌋),
+  --probably need to upgrade y to be defined on ℤ, or otherwise simply do it here
+  sorry,
+end
+
+end theta_surj
 
 
 end thm71
