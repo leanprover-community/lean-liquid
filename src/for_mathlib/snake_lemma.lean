@@ -657,12 +657,10 @@ by { letI := hD.col_mono 0, exact (limits.kernel.lift _ _ (ker_row₁_to_row₂ 
 
 lemma ker_row₁_to_top_left_mono (hD : is_snake_input D) : mono (ker_row₁_to_top_left hD) :=
 begin
-  refine mono_of_zero_of_map_zero _ (λ a ha, _),
-  rw [ker_row₁_to_top_left, abelian.pseudoelement.comp_apply,
-    abelian.pseudoelement.comp_apply] at ha,
-  replace ha := abelian.pseudoelement.zero_of_map_zero _ (pseudo_injective_of_mono _) _ ha,
-  replace ha := abelian.pseudoelement.zero_of_map_zero _ (pseudo_injective_of_mono _) _ ha,
-  exact abelian.pseudoelement.zero_of_map_zero _ (pseudo_injective_of_mono _) _ ha
+  suffices : mono ((limits.kernel.lift _ _ (ker_row₁_to_row₂ hD)) ≫
+    (limits.kernel.lift _ _ (((abelian.exact_iff _ _).1 (hD.col_exact₁ 0)).2))),
+  { letI := this, exact mono_comp _ _, },
+  exact mono_comp _ _
 end
 
 lemma ker_row₁_to_top_left_comp_eq_ι (hD : is_snake_input D) : ker_row₁_to_top_left hD ≫
@@ -727,6 +725,14 @@ by { letI := hD.col_epi 2, exact
   (inv (category_theory.abelian.coimages.factor_thru_coimage ((2,2) ⟶[D] (3,2)))) ≫
   (limits.cokernel.desc _ _ (ker_col₂_to_coker_row₂_eq_zero hD)) ≫
   (limits.cokernel.desc _ _ (row₁_to_coker_row₂_eq_zero hD)) }
+
+lemma bottom_right_to_coker_row₂_epi (hD : is_snake_input D) : epi (bottom_right_to_coker_row₂ hD) :=
+begin
+  suffices : epi ((limits.cokernel.desc _ _ (ker_col₂_to_coker_row₂_eq_zero hD)) ≫
+    (limits.cokernel.desc _ _ (row₁_to_coker_row₂_eq_zero hD))),
+  { letI := this, exact epi_comp _ _ },
+  exact epi_comp _ _,
+end
 
 end long_snake
 
