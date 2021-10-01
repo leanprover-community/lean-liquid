@@ -1,6 +1,6 @@
 import analysis.normed_space.normed_group_hom
 import ring_theory.finiteness
-import linear_algebra.free_module
+import linear_algebra.free_module.basic
 import ring_theory.int.basic
 
 /-!

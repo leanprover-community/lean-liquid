@@ -579,7 +579,7 @@ begin
   induction N with N ih,
   { simp only [hom_pow', rescale_constants, pow_zero, inv_one, mul_one],
     exact universal_map.suitable_id _ },
-  simp only [hom_pow', rescale_constants, pow_succ, mul_inv'] at ih ⊢, resetI,
+  simp only [hom_pow', rescale_constants, pow_succ, mul_inv₀] at ih ⊢, resetI,
   refine @universal_map.suitable.comp _ _ _ _ _ _ (c * 2⁻¹) _ (id _) (id _),
   { apply universal_map.sum_two_suitable },
   { rw [← mul_assoc, mul_right_comm],

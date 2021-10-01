@@ -60,7 +60,7 @@ begin
     nat.cast_mul, nnreal.coe_one, nnreal.coe_mul, div_eq_mul_inv],
   rw [mul_inv_le_iff], swap, { exact_mod_cast nat.factorial_pos i },
   refine hy.trans _,
-  rw [left_distrib, mul_inv', ← mul_assoc ↑i!, mul_comm ↑i!, mul_assoc _ ↑i!, mul_comm ↑i!,
+  rw [left_distrib, mul_inv₀, ← mul_assoc ↑i!, mul_comm ↑i!, mul_assoc _ ↑i!, mul_comm ↑i!,
     mul_assoc _ _ ↑i!, inv_mul_cancel_right' hifact, mul_comm _ ε, add_le_add_iff_right,
     mul_assoc ↑K],
   refine mul_le_mul_of_nonneg_left _ (nnreal.coe_nonneg _),
@@ -1268,7 +1268,7 @@ begin
     ... = ((1 + r⁻¹) * r) * (r⁻¹ * (1 - r)⁻¹) : by simp only [mul_assoc]
     ... = (r + 1) * (r * (1 - r))⁻¹ : _,
     { rw [← add_mul, add_comm, sub_add_cancel_of_le, one_mul], exact fact.out _ },
-    { rw [add_mul, one_mul, inv_mul_cancel, mul_inv'],
+    { rw [add_mul, one_mul, inv_mul_cancel, mul_inv₀],
       exact ne_of_gt (fact.out _) } },
   { intros c i, apply double_complex.col_ι_isometry, }
 end

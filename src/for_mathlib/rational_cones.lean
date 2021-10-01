@@ -1,5 +1,6 @@
-import polyhedral_lattice.basic
 import linear_algebra.dual
+import linear_algebra.free_module.basic
+
 import for_mathlib.nnrat
 
 universe u
@@ -366,7 +367,7 @@ begin
   apply_instance
 end
 
-noncomputable def extended_half_spaces {ι : Type*} (s : ι → Λ →ₗ[ℚ] ℚ) (x : Λ) :
+def extended_half_spaces {ι : Type*} (s : ι → Λ →ₗ[ℚ] ℚ) (x : Λ) :
   extended_half_spaces_index s x → Λ →ₗ[ℚ] ℚ :=
 sum.elim (s ∘ coe) (λ ij, (s ij.1 x) • s ij.2 - (s ij.2 x) • s ij.1)
 

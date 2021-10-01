@@ -276,10 +276,10 @@
 --   --   -- refl,
 --   --   conv_rhs
 --   --   -- begin
---   --     {rw [← inv_inv' (2 : ℝ)],
+--   --     {rw [← inv_inv₀ (2 : ℝ)],
 --   --     rw norm_num.inv_div_one,
 --   --     rw norm_num.inv_div_one,
---   --     rw [← inv_inv' (2 : ℚ)],
+--   --     rw [← inv_inv₀ (2 : ℚ)],
 --   --     rw norm_num.inv_div_one,
 --   --     rw norm_num.inv_div_one,},
 --   --     norm_cast,
@@ -293,11 +293,11 @@
 
 --   --   -- end
 
---   --   -- nth_rewrite_rhs 0 [← inv_inv' (2 : ℝ)],
+--   --   -- nth_rewrite_rhs 0 [← inv_inv₀ (2 : ℝ)],
 --   --   -- repeat {rw norm_num.inv_div_one},
---   --   -- nth_rewrite_rhs 0 [← inv_inv' (2 : ℚ)],
+--   --   -- nth_rewrite_rhs 0 [← inv_inv₀ (2 : ℚ)],
 --   --   -- rw norm_num.inv_div_one,
---   --   -- nth_rewrite_rhs 0 [← inv_inv' (2 : ℝ)],
+--   --   -- nth_rewrite_rhs 0 [← inv_inv₀ (2 : ℝ)],
 --   --   -- rw norm_num.inv_div_one,
 --   --   -- rw norm_num.inv_div_one,
 --   --   -- refl,

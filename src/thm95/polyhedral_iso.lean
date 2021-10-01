@@ -55,7 +55,7 @@ begin
     { exact ↑N * c' },
     { simp only [semi_normed_group.mem_filtration_iff] at hl ⊢,
       erw [rescale.nnnorm_def, div_eq_mul_inv] at hl,
-      rwa [← inv_inv' (N : ℝ≥0), ← nnreal.mul_le_iff_le_inv, mul_comm],
+      rwa [← inv_inv₀ (N : ℝ≥0), ← nnreal.mul_le_iff_le_inv, mul_comm],
       apply ne_of_gt,
       rw [nnreal.inv_pos],
       have hN : 0 < N := fact.out _,
