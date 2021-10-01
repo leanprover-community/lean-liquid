@@ -30,7 +30,7 @@ begin
   calc ∥(T.inv : V → V) v∥
       = r⁻¹ * ∥T.hom (T.inv v)∥ : _
   ... = r⁻¹ * ∥v∥ : _,
-  { rw [normed_with_aut.norm_T, inv_mul_cancel_left'],
+  { rw [normed_with_aut.norm_T, inv_mul_cancel_left₀],
     apply ne_of_gt,
     rw nnreal.coe_pos,
     exact fact.out _ },

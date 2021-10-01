@@ -61,7 +61,7 @@ begin
   rw [mul_inv_le_iff], swap, { exact_mod_cast nat.factorial_pos i },
   refine hy.trans _,
   rw [left_distrib, mul_inv₀, ← mul_assoc ↑i!, mul_comm ↑i!, mul_assoc _ ↑i!, mul_comm ↑i!,
-    mul_assoc _ _ ↑i!, inv_mul_cancel_right' hifact, mul_comm _ ε, add_le_add_iff_right,
+    mul_assoc _ _ ↑i!, inv_mul_cancel_right₀ hifact, mul_comm _ ε, add_le_add_iff_right,
     mul_assoc ↑K],
   refine mul_le_mul_of_nonneg_left _ (nnreal.coe_nonneg _),
   rw [mul_comm _ ((↑i : ℝ) + 1)⁻¹, ← mul_assoc],

@@ -214,7 +214,7 @@ begin
   rw add_monoid_hom.continuous_iff,
   intro l,
   haveI : ∀ a, fact (a ≤ r' * (r'⁻¹ * a)) :=
-    λ a, ⟨by simp [mul_inv_cancel_left' (ne_of_gt (fact.out _ : 0 < r'))]⟩,
+    λ a, ⟨by simp [mul_inv_cancel_left₀ (ne_of_gt (fact.out _ : 0 < r'))]⟩,
   refine (@continuous_cast_le _ _ _ _ (id _)).comp
     ((@Tinv₀_continuous r' M _ (c * ∥l∥₊) (r'⁻¹ * (c * ∥l∥₊)) _).comp
     ((continuous_apply l).comp (add_monoid_hom.incl_continuous Λ r' M c))),

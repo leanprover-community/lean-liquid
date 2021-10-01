@@ -83,7 +83,7 @@ comphaus_filtered_pseudo_normed_group_hom.mk' (Tinv' r r' M)
 begin
   refine ⟨r'⁻¹, λ c, ⟨Tinv'_mem_filtration r r' M c, _⟩⟩,
   haveI :  fact (c * r⁻¹ ≤ r' * (r'⁻¹ * c * r⁻¹)) :=
-    ⟨by rw [mul_assoc, mul_inv_cancel_left' ‹fact (0 < r')›.1.ne.symm]⟩,
+    ⟨by rw [mul_assoc, mul_inv_cancel_left₀ ‹fact (0 < r')›.1.ne.symm]⟩,
   apply Tinv₀_continuous,
 end
 

@@ -1,4 +1,5 @@
 import linear_algebra.finsupp_vector_space
+import linear_algebra.free_module.finite
 
 import polyhedral_lattice.basic
 

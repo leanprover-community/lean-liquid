@@ -164,7 +164,7 @@ begin
   apply le_of_eq,
   show _ = r₁ / r₂ * (∥(@rescale.of r₁ V).symm v∥₊ / r₁),
   simp only [add_monoid_hom.mk'_apply, div_eq_inv_mul, rescale.nnnorm_def],
-  rw [mul_assoc, mul_inv_cancel_left' (show r₁ ≠ 0, from ne_of_gt $ fact.out _)],
+  rw [mul_assoc, mul_inv_cancel_left₀ (show r₁ ≠ 0, from ne_of_gt $ fact.out _)],
   refl
 end
 

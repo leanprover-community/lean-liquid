@@ -60,7 +60,7 @@ begin
       rw [nnreal.inv_pos],
       have hN : 0 < N := fact.out _,
       exact_mod_cast hN },
-    { rw [mul_assoc, inv_mul_cancel_left'],
+    { rw [mul_assoc, inv_mul_cancel_left₀],
       have hN : 0 < N := fact.out _,
       exact_mod_cast hN.ne' } }
 end
