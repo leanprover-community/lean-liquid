@@ -1141,7 +1141,7 @@ begin
   apply bottom_right_to_coker_row₂_epi hD,
 end
 
-lemma eight_term_exact_seq (hD : is_snake_input D) :
+lemma ten_term_exact_seq (hD : is_snake_input D) :
   exact_seq 𝒜 [
     (0 : 0 ⟶ kernel ((1,0) ⟶[D] (1,1))),
     hD.ker_row₁_to_top_left, (0,0) ⟶[D] (0,1), (0,1) ⟶[D] (0,2),
@@ -1160,9 +1160,15 @@ begin
   refine exact_seq.single _,
 end
 
+lemma eight_term_exact_seq (hD : is_snake_input D) :
+  exact_seq 𝒜 [hD.ker_row₁_to_top_left, (0,0) ⟶[D] (0,1), (0,1) ⟶[D] (0,2),
+    hD.δ,
+    (3,0) ⟶[D] (3,1), (3,1) ⟶[D] (3,2), hD.bottom_right_to_coker_row₂] :=
+exact_seq.extract hD.ten_term_exact_seq 1 7
+
 lemma six_term_exact_seq (hD : is_snake_input D) :
   exact_seq 𝒜 [(0,0) ⟶[D] (0,1), (0,1) ⟶[D] (0,2), hD.δ, (3,0) ⟶[D] (3,1), (3,1) ⟶[D] (3,2)] :=
-exact_seq.extract hD.eight_term_exact_seq 2 5
+exact_seq.extract hD.eight_term_exact_seq 1 5
 
 end is_snake_input
 

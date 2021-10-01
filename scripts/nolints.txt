@@ -335,14 +335,12 @@ apply_nolint laurent_measures_bdd doc_blame
 apply_nolint laurent_measures_bdd.map doc_blame
 
 -- laurent_measures/thm69.lean
+apply_nolint laurent_measures.to_Rfct doc_blame
+apply_nolint thm71.aux_y doc_blame unused_arguments
 apply_nolint thm71.eventually_le ge_or_gt
 apply_nolint thm71.eventually_le_one ge_or_gt
 apply_nolint thm71.eventually_pos_floor ge_or_gt
 apply_nolint thm71.eventually_pos_y ge_or_gt
-apply_nolint thm71.ge_of_div_le_one ge_or_gt
-apply_nolint thm71.limit_y unused_arguments
-apply_nolint thm71.trunc_y doc_blame
-apply_nolint thm71.y doc_blame unused_arguments
 
 -- locally_constant/Vhat.lean
 apply_nolint SemiNormedGroup.normed_with_aut_LCC fails_quickly
