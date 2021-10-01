@@ -1,8 +1,7 @@
-import linear_algebra.dual
 import topology.continuous_function.algebra
 import analysis.normed_space.basic
 import ring_theory.finiteness
-import linear_algebra.free_module
+import linear_algebra.free_module.finite
 
 import for_mathlib.nnrat
 import for_mathlib.rational_cones
@@ -10,10 +9,6 @@ import for_mathlib.rational_cones
 /-
 
 # Gordan's Lemma
-
-The algebraic proof of Gordan's lemma on Wikipedia.
-See also `src/toric/gordan_algebraic_blueprint.tex`; this should
-perhaps go into the LTE blueprint.
 
 -/
 

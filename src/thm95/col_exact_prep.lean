@@ -79,7 +79,7 @@ begin
   dsimp only [δ],
   rw [div_eq_mul_inv, mul_assoc],
   refine mul_le_mul' le_rfl _,
-  rw [nnreal.mul_le_iff_le_inv, inv_inv', mul_one],
+  rw [nnreal.mul_le_iff_le_inv, inv_inv₀, mul_one],
   { exact (lt_add_one _).le },
   { refine inv_ne_zero (lt_of_le_of_lt _ (lt_add_one _)).ne',
     exact zero_le' }

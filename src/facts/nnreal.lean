@@ -45,7 +45,7 @@ instance fact_le_subst_left' [fact (c₁ ≤ c₂)] [h : fact (c₃ = c₁)]: fa
 by rwa ← h.1.symm
 
 instance fact_inv_mul_le [h : fact (0 < r')] : fact (r'⁻¹ * (r' * c) ≤ c) :=
-⟨le_of_eq $ inv_mul_cancel_left' (ne_of_gt h.1) _⟩
+⟨le_of_eq $ inv_mul_cancel_left₀ (ne_of_gt h.1) _⟩
 
 instance fact_mul_le_mul_left [h : fact (c₁ ≤ c₂)] : fact (r' * c₁ ≤ r' * c₂) :=
 ⟨mul_le_mul' le_rfl h.1⟩

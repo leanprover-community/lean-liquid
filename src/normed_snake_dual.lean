@@ -52,7 +52,7 @@ variables {M N P : system_of_complexes.{u}} {f : M ⟶ N} {g : N ⟶ P}
 /-  I (DT) extracted this lemma to speed up the proof of `weak_normed_snake_dual`. -/
 lemma ε₁_le_ε {ε ε₁ : ℝ} (hε : 0 ≤ ε) (mK : ℝ≥0) (hε₁ : ε₁ = ε / 2 * (1 + mK)⁻¹) :
   ε₁ ≤ ε :=
-by { rw [hε₁, div_eq_mul_inv, mul_assoc, ← mul_inv'],
+by { rw [hε₁, div_eq_mul_inv, mul_assoc, ← mul_inv₀],
      exact mul_le_of_le_one_right hε (inv_le_one $ nnreal.coe_le_coe.mpr $
       one_le_mul one_le_two $ le_add_of_nonneg_right mK.2) }
 
@@ -258,12 +258,12 @@ begin
     { exact (admissible_of_isometry hN_adm hf).res_norm_noninc _ _ _ _ _ } },
   { refine norm_sub_le_mul_norm_add _ hN_adm hgnrm hfnrm _ _ hn₁ hp₂ hnrmnew₁ hm₁ _,
     { exact nat.succ_pred_eq_of_pos (nat.pos_of_ne_zero hizero) },
-    { rw inv_mul_cancel_right',
+    { rw inv_mul_cancel_right₀,
       exact ne_of_gt (add_pos_of_pos_of_nonneg zero_lt_one (zero_le (K' * r₁ * r₂))) },
     { by_cases H : r₂ = 0,
       { simp only [H, nnreal.coe_zero, if_true, zero_mul, (div_nonneg hε zero_le_two)] },
       { simp only [H, nnreal.coe_eq_zero, if_false, mul_comm,
-          mul_inv_cancel_left' (nnreal.coe_ne_zero.mpr H)] } },
+          mul_inv_cancel_left₀ (nnreal.coe_ne_zero.mpr H)] } },
     { have : f (res m : M (k' * c) i) ∈ f.apply.range, { rw mem_range, exact ⟨res m, rfl⟩ },
       rw [hg, mem_ker] at this,
       rw [hom_apply g (res (f m) - (N.d (i - 1) i) n₁), res_apply, normed_group_hom.map_sub, this,

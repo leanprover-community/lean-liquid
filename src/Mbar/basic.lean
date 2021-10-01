@@ -303,7 +303,7 @@ lemma Tinv_aux_summable [h0r : fact (0 < r')] (F : Mbar r' S) (s : S) :
   summable (λ n, (↑(Tinv_aux (F s) n).nat_abs * r' ^ n)) :=
 begin
   have : ∀ n:ℕ, r' ^ n = r' ^ n * r' * r'⁻¹,
-  { intro, rw [mul_inv_cancel_right' h0r.out.ne'] },
+  { intro, rw [mul_inv_cancel_right₀ h0r.out.ne'] },
   conv { congr, funext, rw [this, ← mul_assoc] },
   apply summable.mul_right,
   refine nnreal.summable_of_le _ (nnreal.summable_nat_add _ (F.summable s) 1),

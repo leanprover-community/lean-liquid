@@ -4,7 +4,6 @@ import linear_algebra.dual
 import algebra.order.ring
 import algebra.module.hom
 import ring_theory.finiteness
-import linear_algebra.free_module
 
 import for_mathlib.Gordan
 
@@ -263,7 +262,8 @@ lemma abs_add_eq_iff_abs_mul_eq {R : Type*} [linear_ordered_comm_ring R] {a b : 
   abs (a + b) = abs a + abs b ↔ abs (a * b) = a * b :=
 begin
   refine ⟨λ h, _, λ h, _⟩,
-  { simpa [abs_mul, eq_comm, add_pow_two, mul_assoc] using (congr_arg (λ x : R, x ^ 2) h) },
+  { simpa only [abs_mul, add_pow_two, mul_assoc, pow_bit0_abs, add_left_inj, mul_eq_mul_left_iff,
+      or_false, bit0_eq_zero, one_ne_zero, add_right_inj] using congr_arg (λ x : R, x ^ 2) h.symm },
   { rcases (mul_nonneg_iff.mp (abs_eq_self.mp h)) with ⟨a0, b0⟩ | ⟨a0, b0⟩,
     { rw [abs_of_nonneg a0, abs_of_nonneg b0, abs_of_nonneg (add_nonneg a0 b0)] },
     { rw [abs_of_nonpos a0, abs_of_nonpos b0, abs_of_nonpos (add_nonpos a0 b0), neg_add] } }
@@ -280,7 +280,6 @@ end
 lemma nat_abs_add_eq_iff (a b : ℤ) :
   int.nat_abs (a + b) = int.nat_abs a + int.nat_abs b ↔ (0 ≤ a ∧ 0 ≤ b ∨ a ≤ 0 ∧ b ≤ 0) :=
 nat_abs_add_eq_iff_nat_abs_mul_eq.trans ((int.nat_abs_eq_self _).trans mul_nonneg_iff)
---  rw [nat_abs_add_eq_iff_nat_abs_mul_eq, int.nat_abs_eq_self],exact mul_nonneg_iff,
 
 lemma nat_smul_nat_abs (a : ℕ) (b : ℤ) : a • b.nat_abs = (a • b).nat_abs :=
 begin

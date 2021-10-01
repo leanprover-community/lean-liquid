@@ -82,7 +82,7 @@ instance κ'_adept (κ : ℕ → ℝ≥0) [∀ i, fact (0 < κ i)] :
     intros n,
     apply universal_map.suitable_of_factor_le,
     dsimp [κ'],
-    rw [inv_mul_cancel_right', mul_inv_cancel_right'],
+    rw [inv_mul_cancel_right₀, mul_inv_cancel_right₀],
     { dsimp [rescale_constants], refine mul_ne_zero (ne_of_gt $ fact.out _) _, norm_num, },
     { exact ne_of_gt (fact.out _) }
   end }

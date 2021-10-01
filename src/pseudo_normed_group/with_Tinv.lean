@@ -36,7 +36,7 @@ lemma aux {r' c c₂ : ℝ≥0} (h : c ≤ r' * c₂) : r'⁻¹ * c ≤ c₂ :=
 begin
   by_cases hr' : r' = 0,
   { subst r', rw [inv_zero, zero_mul], exact zero_le' },
-  { rwa [nnreal.mul_le_iff_le_inv, inv_inv'], exact inv_ne_zero hr' }
+  { rwa [nnreal.mul_le_iff_le_inv, inv_inv₀], exact inv_ne_zero hr' }
 end
 
 @[simps]

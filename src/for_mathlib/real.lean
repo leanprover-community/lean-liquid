@@ -4,23 +4,7 @@ import analysis.convex.combination
 open real set
 open_locale big_operators
 
-
--- lemma foo {p : ℝ} (hp : 1 ≤ p) : convex_on (Ici 0) (λ x : ℝ, x^p) :=
--- begin
---   have A : deriv (λ (x : ℝ), x ^ p) = λ x, p * x^(p-1), by { ext x, simp only [deriv_rpow_const, one_mul, mul_eq_mul_left_iff, deriv_id'', true_or, eq_self_iff_true]},
---   apply convex_on_of_deriv2_nonneg (convex_Ici 0),
---   { exact continuous_on_id.rpow_const (λ x _, or.inr (zero_le_one.trans hp)) },
---   { exact (differentiable_rpow_const hp).differentiable_on },
---   { rw A,
---     assume x hx,
---     replace hx : x ≠ 0, by { simp at hx, exact ne_of_gt hx },
---     simp [differentiable_at.differentiable_within_at, hx] },
---   { assume x hx,
---     replace hx : 0 < x, by simpa using hx,
---     suffices : 0 ≤ p * ((p - 1) * x ^ (p - 1 - 1)), by simpa [ne_of_gt hx, A],
---     apply mul_nonneg (le_trans zero_le_one hp),
---     exact mul_nonneg (sub_nonneg_of_le hp) (rpow_nonneg_of_nonneg (le_of_lt hx) _) }
--- end
+/-
 
 variables {E F : Type*}
 variables [ordered_add_comm_group E] [module ℝ E]
@@ -56,3 +40,5 @@ begin
   { intros x hx, rw [← rpow_mul hx, inv_mul_cancel hp, rpow_one], },
   { intros, apply rpow_le_rpow, assumption' },
 end
+
+-/

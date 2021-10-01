@@ -442,11 +442,11 @@ begin
           = (∑ a in A, ∥a (l i)∥₊ / ∥l i∥₊) * ∥l i∥₊ : _
       ... ≤ finset.univ.sup (λ i, ∑ a in A, ∥a (l i)∥₊ / ∥l i∥₊) * ∥l i∥₊ : _,
       { { have : ∥l i∥₊ ≠ 0, { simp only [hl' i, nnnorm_eq_zero, ne.def, not_false_iff] },
-          simp only [div_eq_mul_inv, ← finset.sum_mul, inv_mul_cancel_right' this] } },
+          simp only [div_eq_mul_inv, ← finset.sum_mul, inv_mul_cancel_right₀ this] } },
       { exact mul_le_mul' (finset.le_sup (finset.mem_univ i)) le_rfl } } },
   { simp only [div_eq_mul_inv, add_mul, finset.sum_mul, nsmul_eq_mul],
     congr' 2,
-    rw [mul_comm, inv_mul_cancel_left'],
+    rw [mul_comm, inv_mul_cancel_left₀],
     exact_mod_cast hN.1.ne' },
   { simp only [add_mul, div_eq_mul_inv],
     refine add_le_add _ le_rfl,
