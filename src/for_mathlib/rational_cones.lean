@@ -360,7 +360,7 @@ end
 def extended_half_spaces_index {ι : Type*} (s : ι → Λ →ₗ[ℚ] ℚ) (x : Λ) : Type* :=
 {i : ι // 0 ≤ s i x} ⊕ ({i : ι // 0 < s i x} × {i : ι // s i x < 0})
 
-noncomputable instance {ι : Type*} [fintype ι] (s : ι → Λ →ₗ[ℚ] ℚ) (x : Λ) :
+instance {ι : Type*} [fintype ι] (s : ι → Λ →ₗ[ℚ] ℚ) (x : Λ) :
   fintype (extended_half_spaces_index s x) :=
 begin
   rw extended_half_spaces_index,

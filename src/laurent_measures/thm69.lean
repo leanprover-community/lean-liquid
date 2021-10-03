@@ -99,11 +99,10 @@ end
 
 def aux_y : ℕ → ℝ := λ n, if n = 0 then y ξ x 1 else y ξ x n
 
-lemma eventually_monotone : monotone (order_dual.to_dual ∘ (aux_y ξ x)) :=
+lemma eventually_antitone : antitone (aux_y ξ x) :=
 begin
-  apply monotone_nat_of_le_succ,
+  apply antitone_nat_of_succ_le,
   intro n,
-  rw [order_dual.to_dual_le, order_dual.of_dual_to_dual],
   by_cases hn : n = 0,
   {rw [hn, zero_add, aux_y],
     simp only [nat.one_ne_zero, if_true, eq_self_iff_true, if_false] },
@@ -166,7 +165,7 @@ begin
       rw ← h_mz,
       replace hm : m ≥ 1 := le_of_not_gt ((not_iff_not.mpr nat.lt_one_iff).mpr hm),
       exact eventually_pos_y ξ x m hm },
-  have := tendsto_at_top_cinfi (eventually_monotone ξ x) h_bdd,
+  have := tendsto_at_top_cinfi (eventually_antitone ξ x) h_bdd,
   use (⨅ (i : ℕ), aux_y ξ x i),
   apply @tendsto.congr' _ _ (aux_y ξ x) _ _ _ _ this,
   apply (filter.eventually_eq_iff_exists_mem).mpr,
