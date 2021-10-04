@@ -1,4 +1,3 @@
-import generalisation_linter
 import system_of_complexes.double
 import system_of_complexes.truncate
 import normed_snake

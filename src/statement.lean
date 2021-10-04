@@ -1,4 +1,3 @@
-import generalisation_linter
 import pseudo_normed_group.system_of_complexes
 import Mbar.pseudo_normed_group
 import breen_deligne.homotopy

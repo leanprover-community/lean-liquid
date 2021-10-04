@@ -1,4 +1,3 @@
-import generalisation_linter
 import algebra.homology.homological_complex
 import topology.category.Profinite.cofiltered_limit
 

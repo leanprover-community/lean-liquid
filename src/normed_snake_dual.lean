@@ -1,4 +1,3 @@
-import generalisation_linter
 import system_of_complexes.basic
 
 
