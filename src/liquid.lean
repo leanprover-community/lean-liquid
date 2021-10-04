@@ -1,3 +1,4 @@
+import generalisation_linter
 import thm95
 import statement
 

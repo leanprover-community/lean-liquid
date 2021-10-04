@@ -24,12 +24,13 @@ open_locale big_operators
 
 namespace polyhedral_lattice
 
-variables {Λ Λ' : Type*} [polyhedral_lattice Λ] [polyhedral_lattice Λ']
-variables (f : polyhedral_lattice_hom Λ Λ')
+variables {Λ Λ' : Type*}
 
 namespace conerve
 
 section objects
+variables [polyhedral_lattice Λ] [polyhedral_lattice Λ']
+variables (f : polyhedral_lattice_hom Λ Λ')
 
 /-!
 ## The objects
@@ -145,6 +146,8 @@ instance [fact f.to_add_monoid_hom.range.saturated] : polyhedral_lattice (obj f 
 by { delta obj, apply_instance }
 
 end objects
+variables [polyhedral_lattice Λ] [polyhedral_lattice Λ']
+variables (f : polyhedral_lattice_hom Λ Λ')
 
 section maps
 
@@ -160,7 +163,8 @@ variables {n m k : ℕ} (g : fin (n+1) → fin (m+1)) (g' : fin (m+1) → fin (k
 def map_add_hom : obj f (n+1) →+ obj f (m+1) :=
 quotient_add_group.map _ _ (map_domain.add_monoid_hom g) (L_le_comap f _ g)
 
-lemma map_domain_add_monoid_hom_strict (x : fin (n+1) →₀ Λ) : ∥map_domain.add_monoid_hom g x∥ ≤ ∥x∥ :=
+lemma map_domain_add_monoid_hom_strict {Λ' : Type*} [semi_normed_group Λ'] (x : fin (n+1) →₀ Λ') :
+∥map_domain.add_monoid_hom g x∥ ≤ ∥x∥ :=
 begin
   simp only [norm_def, map_domain.add_monoid_hom_apply],
   dsimp [map_domain],
@@ -368,8 +372,6 @@ end
 end Cech_conerve
 
 open Cech_conerve
-
-variables [fact f.to_add_monoid_hom.range.saturated]
 
 @[simps] def Cech_conerve : cosimplicial_object PolyhedralLattice :=
 { obj := λ n, obj f n.len,

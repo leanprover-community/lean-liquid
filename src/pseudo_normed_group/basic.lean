@@ -291,8 +291,10 @@ def mk_from_pi {ι : Type*} [fintype ι] {M : ι → Type*} {M₂}
   (Π i, M i) →+ M₂ :=
 ∑ i, (f i).comp (pi.eval_add_monoid_hom M i)
 
+variables {M₅ : Type*}
+variables [add_comm_monoid M₅]
 @[simp] lemma mk_from_pi_apply {ι : Type*} [fintype ι] {M : ι → Type*} [Π i, add_comm_monoid (M i)]
-  (f : Π i, M i →+ M₂) (x : Π i, M i) :
+  (f : Π i, M i →+ M₅) (x : Π i, M i) :
   mk_from_pi f x = (∑ i, f i (x i)) :=
 begin
   show add_monoid_hom.eval x (mk_from_pi f) = _,
@@ -301,9 +303,9 @@ begin
 end
 
 @[simp] lemma coe_mk_from_pi {ι : Type*} [fintype ι] {M : ι → Type*} [Π i, add_comm_monoid (M i)]
-  (f : Π i, M i →+ M₂) :
+  (f : Π i, M i →+ M₅) :
   ⇑(mk_from_pi f) = ∑ i, (f i ∘ pi.eval_add_monoid_hom M i) :=
-by { ext x, rw [@mk_from_pi_apply M₂ _ ι _ M _ f x, fintype.sum_apply], refl }
+by { ext x, rw [@mk_from_pi_apply M₅ _ ι _ M _ f x, fintype.sum_apply], refl }
 
 lemma mk_from_pi_mem_filtration {ι : Type*} [fintype ι] {M : ι → Type*}
   [Π i, pseudo_normed_group (M i)] (f : Π i, (M i) →+ M₂)
@@ -360,3 +362,4 @@ end pseudo_normed_group
 
 
 -- #lint- only unused_arguments def_lemma doc_blame
+#lint

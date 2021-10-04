@@ -16,27 +16,27 @@ namespace PolyhedralLattice
 
 open simplex_category polyhedral_lattice (conerve.L conerve.obj)
 
-variables (Λ : PolyhedralLattice.{u}) (N : ℕ) [fact (0 < N)]
+variables (Λ : PolyhedralLattice.{u}) (N : ℕ)
 variables (r' : ℝ≥0) (M : ProFiltPseuNormGrpWithTinv.{u} r')
 
 
 -- TODO: we probably want some efficient constructor for these isomorphisms,
 -- because the default has a lot of redundancy in the proof obligations
 
-lemma augmentation_eq_diagonal :
+lemma augmentation_eq_diagonal  [fact (0 < N)]:
   cosimplicial_augmentation_map Λ N ≫ (Cech_conerve.obj_zero_iso _).hom =
   diagonal_embedding Λ N :=
 by { rw ← iso.eq_comp_inv, refl }
 
-def Hom_rescale_hom [fact (0 < r')] :
+def Hom_rescale_hom [fact (0 < r')]  [fact (0 < N)]:
   polyhedral_lattice.Hom (rescale N Λ) M ≃+
   (ProFiltPseuNormGrpWithTinv.of r' $ (rescale N (polyhedral_lattice.Hom Λ M))) :=
 add_equiv.refl _
 
-lemma Hom_rescale_hom_symm_apply [fact (0 < r')] (x) :
+lemma Hom_rescale_hom_symm_apply [fact (0 < r')] (x)  [fact (0 < N)]:
   (Hom_rescale_hom Λ N r' M).symm x = x := rfl
 
-lemma Hom_rescale_hom_strict [fact (0 < r')] (c : ℝ≥0) (f : polyhedral_lattice.Hom (rescale ↑N Λ) M) :
+lemma Hom_rescale_hom_strict [fact (0 < r')] (c : ℝ≥0)  [fact (0 < N)](f : polyhedral_lattice.Hom (rescale ↑N Λ) M) :
     f ∈ pseudo_normed_group.filtration (polyhedral_lattice.Hom (rescale ↑N Λ) M) c ↔
     f ∈ pseudo_normed_group.filtration
         (ProFiltPseuNormGrpWithTinv.of r' (rescale ↑N (polyhedral_lattice.Hom Λ M))) c :=
@@ -67,7 +67,7 @@ end
 
 section open profinitely_filtered_pseudo_normed_group polyhedral_lattice
 
-lemma Hom_rescale_hom_ctu [fact (0 < r')] (c : ℝ≥0) :
+lemma Hom_rescale_hom_ctu  [fact (0 < N)] [fact (0 < r')] (c : ℝ≥0) :
   continuous (pseudo_normed_group.level (Hom_rescale_hom Λ N r' M)
     (λ c f, (Hom_rescale_hom_strict Λ N r' M c f).1) c) :=
 begin
@@ -82,7 +82,7 @@ end
 
 end
 
-def Hom_rescale_iso [fact (0 < r')] :
+def Hom_rescale_iso [fact (0 < r')] [fact (0 < N)]:
   polyhedral_lattice.Hom (rescale N Λ) M ≅
   (ProFiltPseuNormGrpWithTinv.of r' $ (rescale N (polyhedral_lattice.Hom Λ M))) :=
 @ProFiltPseuNormGrpWithTinv.iso_of_equiv_of_strict' _
@@ -187,7 +187,7 @@ section
 
 variables [fact (0 < r')] (N' : ℝ≥0)
 
-def Hom_cosimplicial_zero_iso' :
+def Hom_cosimplicial_zero_iso' [fact (0 < N)] :
   (Hom M).obj (op $ of $ rescale N (of (fin N →₀ Λ))) ≅
   (Hom M).obj (op $ (Λ.cosimplicial N).obj (mk 0)) :=
 (Hom M).map_iso $ (Cech_conerve.obj_zero_iso _).op
@@ -202,7 +202,7 @@ end
 @[simp] lemma Hom_cosimplicial_zero_iso_aux_rfl :
   Hom_cosimplicial_zero_iso_aux Λ N r' M N rfl = iso.refl _ := rfl
 
-def Hom_cosimplicial_zero_iso (h : N' = N) :
+def Hom_cosimplicial_zero_iso (h : N' = N) [fact (0 < N)] :
   polyhedral_lattice.Hom ((Λ.cosimplicial N).obj (simplex_category.mk 0)) M ≅
   (ProFiltPseuNormGrpWithTinv.of r' (rescale N' ((polyhedral_lattice.Hom Λ M) ^ N))) :=
 (Hom_cosimplicial_zero_iso' Λ N r' M).symm ≪≫
@@ -214,7 +214,7 @@ Hom_cosimplicial_zero_iso_aux _ _ _ _ _ h ≪≫
 
 end
 
-variables [fact (0 < r')] [fact (r' ≤ 1)]
+variables [fact (0 < r')]
 
 open_locale big_operators
 
@@ -238,15 +238,15 @@ lemma rescale_proj_bound_by
   (rescale_proj N M i).bound_by N⁻¹ :=
 by { intros c x hx, rw [rescale.mem_filtration, mul_comm] at hx, exact hx i }
 
-def Hom_sum :
+def Hom_sum [fact (0 < N)] :
   ProFiltPseuNormGrpWithTinv.of r' (rescale N ((Λ →+ M) ^ N)) ⟶
   ProFiltPseuNormGrpWithTinv.of r' (Λ →+ M) :=
 profinitely_filtered_pseudo_normed_group_with_Tinv.sum_hom (Λ →+ M) N
 
-lemma Hom_sum_apply (x) : Hom_sum Λ N r' M x = ∑ i, x i :=
+lemma Hom_sum_apply [fact (0 < N)] (x) : Hom_sum Λ N r' M x = ∑ i, x i :=
 profinitely_filtered_pseudo_normed_group_with_Tinv.sum_hom_apply _ _ _
 
-lemma finsupp_sum_diagonal_embedding (f : (Λ →+ M) ^ N) (l : Λ) :
+lemma finsupp_sum_diagonal_embedding [fact (0 < N)] (f : (Λ →+ M) ^ N) (l : Λ) :
   finsupp.sum ((Λ.diagonal_embedding N) l) (λ i, (f i)) =
   (show Λ → M, from show Λ →+ M, from Λ.Hom_sum N r' M f) l :=
 begin
@@ -259,7 +259,7 @@ begin
   { intro i, exact (f i).map_zero }
 end
 
-lemma Cech_augmentation_map_eq_Hom_sum :
+lemma Cech_augmentation_map_eq_Hom_sum [fact (0 < N)] :
   (Λ.Hom_cosimplicial_zero_iso N r' M ↑N rfl).inv ≫ (thm95.Cech_augmentation_map r' Λ M N) =
   (Hom_sum Λ N r' M) :=
 begin

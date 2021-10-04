@@ -123,7 +123,7 @@ end
 lemma nnreal.eq_zero_or_pos (r : nnreal) : r = 0 ∨ 0 < r :=
 (lt_or_eq_of_le $ zero_le r).elim (λ h, or.inr h) (λ h, or.inl h.symm)
 
-instance semi_normed_group.inhabited (G : Type*) [semi_normed_group G] : inhabited G := ⟨0⟩
+instance semi_normed_group.inhabited (G : Type*) [add_group G] : inhabited G := ⟨0⟩
 
 section general_completion_stuff
 open filter uniform_space
@@ -182,25 +182,32 @@ open topological_space normed_with_aut set
 open_locale nnreal big_operators
 
 local attribute [instance] locally_constant.semi_normed_group
-
+section
 /- Comment below indicate how this will be applied to Prop 9.2 -/
 variables
   /- this will be M_{≤ r'c}^a -/
-  {X : Type*} [topological_space X] [compact_space X]
+  {X : Type*} [topological_space X]
   /- this will be M_{≤ c}^a -/
   {Y : Type*} [topological_space Y] [compact_space Y] [t2_space Y] [totally_disconnected_space Y]
   /- This will be inclusion -/
   {e : X → Y} (he : embedding e)
   /- This is used only for premilinary lemma not need the T action on V -/
-  {G : Type*} [semi_normed_group G]
+  {G : Type*}
 
 
 @[simp]
-lemma locally_constant.norm_of_empty (hX : ¬ nonempty X) (f : locally_constant X G) : ∥f∥ = 0 :=
-by rw [locally_constant.norm_def, supr, range_eq_empty.mpr hX, real.Sup_empty]
+lemma locally_constant.map_zero [has_zero G] {Z : Type*} (g : G → Z) :
+  (0 : locally_constant X G).map g = locally_constant.const X (g 0) :=
+begin
+  ext x,
+  simp only [function.comp_app, locally_constant.map_apply, locally_constant.zero_apply],
+  refl,
+end
+
+variables [compact_space X]
 
 @[simp]
-lemma embedding.locally_constant_extend_of_empty (hX : ¬ nonempty X) (f : locally_constant X G) :
+lemma embedding.locally_constant_extend_of_empty [add_group G] (hX : ¬ nonempty X) (f : locally_constant X G) :
  he.locally_constant_extend f = 0 :=
 begin
   ext y, dsimp [embedding.locally_constant_extend, embedding.extend],
@@ -209,14 +216,11 @@ begin
   { intro h, exact hX h.2 }
 end
 
+variable [semi_normed_group G]
+
 @[simp]
-lemma locally_constant.map_zero {Z : Type*} (g : G → Z) :
-  (0 : locally_constant X G).map g = locally_constant.const X (g 0) :=
-begin
-  ext x,
-  simp only [function.comp_app, locally_constant.map_apply, locally_constant.zero_apply],
-  refl,
-end
+lemma locally_constant.norm_of_empty (hX : ¬ nonempty X) (f : locally_constant X G) : ∥f∥ = 0 :=
+by rw [locally_constant.norm_def, supr, range_eq_empty.mpr hX, real.Sup_empty]
 
 @[simp]
 lemma locally_constant.norm_const [h : nonempty X] (g : G) : ∥locally_constant.const X g∥ = ∥g∥ :=
@@ -273,7 +277,7 @@ lemma locally_constant.norm_comap_le {α : Type*} [topological_space α] [compac
   (f : locally_constant X G) {g : α → X} (h : continuous g) : ∥f.comap g∥ ≤ ∥f∥ :=
 locally_constant.comap_hom_norm_noninc g h f
 
-lemma locally_constant.comap_map {W X Y Z : Type*} [topological_space W] [topological_space X] [topological_space Y]
+lemma locally_constant.comap_map {W X Y Z : Type*} [topological_space W] [topological_space X]
   (f : locally_constant X Y) (g : W → X) (h : Y → Z) (hg : continuous g) : (f.comap g).map h = (f.map h).comap g :=
 by { ext, simp [hg] }
 
@@ -293,6 +297,17 @@ begin
     by simpa only [hX, dif_neg, not_false_iff, and_false],
     simp }
 end
+end
+/- Comment below indicate how this will be applied to Prop 9.2 -/
+variables
+  /- this will be M_{≤ r'c}^a -/
+  {X : Type*} [topological_space X] [compact_space X]
+  /- this will be M_{≤ c}^a -/
+  {Y : Type*} [topological_space Y] [compact_space Y]
+  /- This will be inclusion -/
+  {e : X → Y} (he : embedding e)
+  /- This is used only for premilinary lemma not need the T action on V -/
+  {G : Type*} [semi_normed_group G]
 
 variables
   (φ : X → Y) -- this will be φ is T⁻¹ : M_{≤ r'c}^a → M_{≤ c}^a
@@ -300,7 +315,8 @@ variables
 
 include r
 
-lemma locally_constant.norm_map_aut (g : locally_constant Y V) : ∥g.map T.hom∥ = r*∥g∥ :=
+lemma locally_constant.norm_map_aut
+(g : locally_constant Y V) : ∥g.map T.hom∥ = r*∥g∥ :=
 begin
   by_cases hY : nonempty Y,
   { resetI,
@@ -322,7 +338,7 @@ begin
 end
 
 open locally_constant
-variables {φ} (hφ : continuous φ)
+variables [t2_space Y] [totally_disconnected_space Y] {φ} (hφ : continuous φ)
 
 include hφ
 

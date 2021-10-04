@@ -34,16 +34,16 @@ namespace CLC
 lemma map_norm_noninc {M₁ M₂} (f : M₁ ⟶ M₂) : ((CLC V).map f).norm_noninc :=
 Completion_map_norm_noninc _ $ LC.map_norm_noninc _ _
 
-def T [normed_with_aut r V] [fact (0 < r)] : CLC V ≅ CLC V :=
+def T [normed_with_aut r V] : CLC V ≅ CLC V :=
 ((whiskering_right _ _ _).obj _).map_iso (LC.T r V)
 
 lemma norm_T_le [normed_with_aut r V] [fact (0 < r)] (A) : ∥(T r V).hom.app A∥ ≤ r :=
 le_trans (normed_group_hom.norm_completion_le _) $ LC.norm_T_le _ _ _
 
-def T_inv [normed_with_aut r V] [fact (0 < r)] : CLC V ⟶ CLC V :=
+def T_inv [normed_with_aut r V] : CLC V ⟶ CLC V :=
 whisker_right (LC.T_inv r V) Completion
 
-lemma T_inv_eq [normed_with_aut r V] [fact (0 < r)] : (T r V).inv = T_inv r V := rfl
+lemma T_inv_eq [normed_with_aut r V] : (T r V).inv = T_inv r V := rfl
 
 lemma norm_T_inv_le [normed_with_aut r V] [fact (0 < r)] (A) : ∥(T_inv r V).app A∥ ≤ r⁻¹ :=
 le_trans (normed_group_hom.norm_completion_le _) $ LC.norm_T_inv_le _ _ _
@@ -95,7 +95,7 @@ Completion_map_norm_noninc _ $ LCFP.res_norm_noninc _ _ _ _ _ _
 section Tinv
 -- kmb commented out the next line
 --open profinitely_filtered_pseudo_normed_group_with_Tinv
-variables [fact (0 < r')] [fact (c₂ ≤ r' * c₁)]
+variables [fact (c₂ ≤ r' * c₁)]
 
 -- @[simps obj {fully_applied := ff}]
 def Tinv : CLCFP V r' c₁ n ⟶ CLCFP V r' c₂ n :=
@@ -121,7 +121,7 @@ end Tinv
 
 section T_inv
 
-variables [normed_with_aut r V] [fact (0 < r)]
+variables [normed_with_aut r V]
 
 @[simps {fully_applied := ff}]
 def T : CLCFP V r' c n ≅ CLCFP V r' c n :=
@@ -131,12 +131,12 @@ def T : CLCFP V r' c n ≅ CLCFP V r' c n :=
 def T_inv : CLCFP V r' c n ⟶ CLCFP V r' c n :=
 whisker_left (FiltrationPow r' c n).op (CLC.T_inv r V)
 
-lemma T_inv_eq [normed_with_aut r V] [fact (0 < r)] : (T r V r' c n).inv = T_inv r V r' c n := rfl
+lemma T_inv_eq : (T r V r' c n).inv = T_inv r V r' c n := rfl
 
 lemma T_inv_def : T_inv r V r' c n = (whisker_right (LCFP.T_inv r V r' c n) Completion : _) :=
 rfl
 
-lemma T_inv_app [fact (0 < r)] (M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ) :
+lemma T_inv_app (M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ) :
   (T_inv r V r' c n).app M =
     (CLC.T_inv r V).app ((FiltrationPow r' c n).op.obj M) :=
 rfl
@@ -212,21 +212,21 @@ lemma res_comp_eval_CLCFP
 by { dsimp only [CLC, res], simp only [eval_CLCFP, ← whisker_right_comp, ← whisker_right_twice],
      congr' 1, apply res_comp_eval_LCFP }
 
-lemma Tinv_comp_eval_CLCFP [fact (0 < r')] [fact (c₂ ≤ r' * c₁)] [fact (c₄ ≤ r' * c₃)]
+lemma Tinv_comp_eval_CLCFP [fact (c₂ ≤ r' * c₁)] [fact (c₄ ≤ r' * c₃)]
   [ϕ.suitable c₃ c₁] [ϕ.suitable c₄ c₂] :
   Tinv V r' c₁ c₂ n ≫ ϕ.eval_CLCFP V r' c₂ c₄ =
     ϕ.eval_CLCFP V r' c₁ c₃ ≫ Tinv V r' c₃ c₄ m :=
 by simp only [eval_CLCFP, Tinv_def, ← whisker_right_comp]; congr' 1; apply Tinv_comp_eval_LCFP
 
-lemma T_inv_comp_eval_CLCFP [normed_with_aut r V] [fact (0 < r)] [ϕ.suitable c₂ c₁] :
+lemma T_inv_comp_eval_CLCFP [normed_with_aut r V] [ϕ.suitable c₂ c₁] :
   T_inv r V r' c₁ n ≫ ϕ.eval_CLCFP V r' c₁ c₂ =
     ϕ.eval_CLCFP V r' c₁ c₂ ≫ T_inv r V r' c₂ m :=
 by simp only [eval_CLCFP, T_inv_def, ← whisker_right_comp, T_inv_comp_eval_LCFP]
 
-lemma norm_eval_CLCFP_le [normed_with_aut r V] [fact (0 < r)] [ϕ.suitable c₂ c₁]
+lemma norm_eval_CLCFP_le [ϕ.suitable c₂ c₁]
   (N : ℕ) (h : ϕ.bound_by N) (M) :
   ∥(ϕ.eval_CLCFP V r' c₁ c₂).app M∥ ≤ N :=
-le_trans (normed_group_hom.norm_completion_le _) $ norm_eval_LCFP_le _ _ _ _ _ _ _ h _
+le_trans (normed_group_hom.norm_completion_le _) $ norm_eval_LCFP_le _ _ _ _ _ _ h _
 
 end universal_map
 

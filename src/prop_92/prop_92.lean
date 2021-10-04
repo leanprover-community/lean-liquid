@@ -8,13 +8,14 @@ open_locale nnreal
 namespace CLCFP
 
 variables (r r' : ℝ≥0) (V : SemiNormedGroup) [normed_with_aut r V] (c c₁ c₂ : ℝ≥0) (n : ℕ)
-variables [fact (0 < r)] [fact (0 < r')] [fact (r' ≤ 1)] [fact (c₂ ≤ r' * c₁)] [fact (c₂ ≤ c₁)]
+variables [fact (c₂ ≤ r' * c₁)] [fact (c₂ ≤ c₁)]
 variables (M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ)
 
 include r
 
 def T_inv_sub_Tinv :=
 CLCFP.res V r' c₁ c₂ n ≫ CLCFP.T_inv r V r' c₂ n - CLCFP.Tinv V r' c₁ c₂ n
+variables [fact (0 < r)]
 
 lemma norm_T_inv_sub_Tinv_le : ∥(T_inv_sub_Tinv r r' V c₁ c₂ n).app M∥ ≤ (1 + r⁻¹) :=
 begin
@@ -30,7 +31,7 @@ begin
       (res_norm_noninc V r' c₁ c₂ n M) } },
 end
 
-variables {V c n M}
+variables {V c n M} [fact (r' ≤ 1)]
 
 open profinitely_filtered_pseudo_normed_group profinitely_filtered_pseudo_normed_group_with_Tinv
 open locally_constant category_theory
@@ -41,9 +42,9 @@ lemma T_inv_sub_Tinv_exists_preimage [hr1 : fact (r < 1)]
   ∃ g : (CLCFP V r' c n).obj M, (T_inv_sub_Tinv r r' V c (r' * c) n).app M g = f ∧
     (∥g∥ ≤ (r / (1 - r) + ε) * ∥f∥) :=
 begin
-  obtain ⟨g, hg1, hg2⟩ := @concrete_92 _ _ _ _ _ _ _ _
+  obtain ⟨g, hg1, hg2⟩ := @concrete_92 _ _ _ _ _ _
     ((FiltrationPow.cast_le _ _ _ _).app _) (embedding_cast_le _ _)
-    ((FiltrationPow.Tinv r' (r' * c) c _).app _) r V _ (Tinv₀_continuous _ _) hr1 _ f ε hε,
+    ((FiltrationPow.Tinv r' (r' * c) c _).app _) r V _ _ _ (Tinv₀_continuous _ _) hr1 _ f ε hε,
   refine ⟨g, _, hg2⟩,
   rw ← hg1, clear hg1,
   dsimp only [T_inv_sub_Tinv, CLC, T_inv, CLC.T_inv, Tinv, CLCFP.res,

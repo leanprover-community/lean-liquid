@@ -281,3 +281,4 @@ normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.2 $ coker.norm_lift_le 
 
 end SemiNormedGroup
 #lint- only unused_arguments def_lemma doc_blame
+#lint

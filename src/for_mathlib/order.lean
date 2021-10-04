@@ -63,3 +63,4 @@ begin
   refine hx _ ⟨e, _⟩,
   tidy
 end
+#lint

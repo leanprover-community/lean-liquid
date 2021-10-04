@@ -17,7 +17,7 @@ open_locale big_operators
 section saturated
 -- PR #8137
 
-variables {G G₁ G₂ : Type*} [group G] [add_comm_group G₁] [add_comm_group G₂]
+variables {G G₁ G₂ : Type*} [group G] [add_group G₁] [add_comm_group G₂]
 
 namespace subgroup
 
@@ -37,12 +37,13 @@ end saturated
 
 namespace polyhedral_lattice
 
-variables {Λ : Type*} [polyhedral_lattice Λ] (L : add_subgroup Λ)
+section semi_normed_group
+variables {Λ : Type*} [semi_normed_group Λ] (L : add_subgroup Λ)
 
-instance : is_closed (L : set Λ) :=
+instance [discrete_topology Λ] : is_closed (L : set Λ) :=
 is_closed_discrete _
 
-instance : normed_group (quotient_add_group.quotient L) :=
+instance [discrete_topology Λ] : normed_group (quotient_add_group.quotient L) :=
 add_subgroup.normed_group_quotient _
 
 lemma π_apply_eq_zero_iff (x) : L.normed_mk x = 0 ↔ x ∈ L :=
@@ -61,7 +62,9 @@ instance [H : fact L.saturated] : no_zero_smul_divisors ℤ (quotient_add_group.
     have := H.1, exact this h
   end }
 
-instance quotient_finite [H : fact L.saturated] : module.finite ℤ (quotient_add_group.quotient L) :=
+end semi_normed_group
+variables {Λ : Type*} [polyhedral_lattice Λ] (L : add_subgroup Λ)
+instance quotient_finite : module.finite ℤ (quotient_add_group.quotient L) :=
 begin
   apply module.finite.of_surjective (L.normed_mk).to_add_monoid_hom.to_int_linear_map,
   exact quotient.surjective_quotient_mk'

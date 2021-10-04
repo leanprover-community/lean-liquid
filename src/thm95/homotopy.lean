@@ -61,7 +61,7 @@ end
 else 0
 
 lemma norm_NSH_h_le {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ}
-  (q : ℕ) (hqm : q ≤ m) (c : ℝ≥0) [fact (c₀ r r' BD κ κ' m Λ ≤ c)] :
+  (q : ℕ) (hqm : q ≤ m) (c : ℝ≥0) :
   ∥@NSH_h BD r r' _ _ _ _ V _ κ κ' _ _ m M q (q+1) c∥ ≤ (H r r' BD κ' m) :=
 begin
   rw [NSH_h, dif_pos (nat.succ_le_succ hqm)],
@@ -89,7 +89,7 @@ def NSH_δ_res {BD : data} [BD.suitable κ]
   (N : ℕ) [fact (k' κ' m ≤ 2 ^ N)] (c : ℝ≥0) {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ} :
   ((BD.system κ r V r').obj M).obj (op c) ⟶
     ((BD.system (rescale_constants κ (2 ^ N)) r V r').obj M).obj (op (k' κ' m * c)) :=
-{ f := λ i, (@CLCFPTinv.res r V _ _ r' _ _ _ _ _ (NSH_δ_res' _ _ _)).app M,
+{ f := λ i, (@CLCFPTinv.res r V _ r' _ _ _ _ _ _ (NSH_δ_res' _ _ _)).app M,
   comm' :=
   begin
     intros i j hij,
@@ -113,7 +113,7 @@ begin
     (r ^ (b r r' BD κ' m)) (N r r' BD κ' m) _ (mul_comm _ _) _ _) _,
   { apply universal_map.norm_eval_CLCFPTinv₂_le,
     apply universal_map.proj_bound_by },
-  { refine @CLCFPTinv.norm_res_le_pow r V _ _ r' _ _ _ _ _ _ _ ⟨_⟩ _,
+  { refine @CLCFPTinv.norm_res_le_pow r V _ r' _ _ _ _ _ _ _ _ ⟨_⟩ _,
     dsimp only [unop_op, rescale_constants],
     simp only [← mul_assoc, mul_right_comm _ c],
     simp only [mul_right_comm _ (κ q)],
@@ -131,7 +131,7 @@ end
 
 def NSH_aux' (M) (hδ) : NSH_aux_type BD r r' V κ κ' m Λ (N₂ r r' BD κ' m) M :=
 { h := λ q q' c, NSH_h q q' c,
-  norm_h_le := by { rintro q q' hqm rfl, apply_mod_cast norm_NSH_h_le Λ q hqm},
+  norm_h_le := by { rintro q q' hqm rfl, apply_mod_cast norm_NSH_h_le q hqm},
   δ := NSH_δ,
   hδ := hδ,
   norm_δ_le := λ c hc q hqm, by apply norm_NSH_δ_le }

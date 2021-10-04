@@ -10,7 +10,7 @@ open category_theory
 
 namespace ProFiltPseuNormGrpWithTinv
 
-variables (r' : ℝ≥0) [fact (0 < r')]
+variables (r' : ℝ≥0)
 variables (c : ℝ≥0) (m n : ℕ)
 variables (M : ProFiltPseuNormGrpWithTinv r')
 
@@ -113,7 +113,7 @@ begin
   rw subtype.coe_mk
 end
 
-def Pow_rescale : Pow r' m ⋙ rescale r' c ≅ rescale r' c ⋙ Pow r' m :=
+def Pow_rescale  [fact (0 < r')] : Pow r' m ⋙ rescale r' c ≅ rescale r' c ⋙ Pow r' m :=
 nat_iso.of_components
   (λ X, begin
     dsimp,
@@ -131,7 +131,7 @@ nat_iso.of_components
   end
 
 /-- A very specific isomorphism -/
-def Pow_rescale_Pow_iso :
+def Pow_rescale_Pow_iso [fact (0 < r')] :
   Pow r' m ⋙ rescale r' c ⋙ Pow r' n ≅ Pow r' n ⋙ Pow r' m ⋙ rescale r' c :=
 calc Pow r' m ⋙ rescale r' c ⋙ Pow r' n
       ≅ Pow r' m ⋙ Pow r' n ⋙ rescale r' c : iso_whisker_left (Pow r' m) (Pow_rescale r' c n).symm

@@ -1,3 +1,4 @@
+import generalisation_linter
 import category_theory.preadditive
 import algebraic_topology.cech_nerve
 
@@ -225,3 +226,4 @@ end contracting_homotopy
 end arrow
 
 end category_theory
+#lint only generalisation_linter

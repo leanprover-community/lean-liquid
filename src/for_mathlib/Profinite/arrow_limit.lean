@@ -1,3 +1,4 @@
+import generalisation_linter
 import category_theory.limits.concrete_category
 import topology.category.Profinite.as_limit
 import for_mathlib.Profinite.compat_discrete_quotient
@@ -293,3 +294,4 @@ def Cech_cone_is_limit (n : ℕ) : limits.is_limit (Cech_cone F surj n) :=
   end }.
 
 end Profinite
+#lint only generalisation_linter

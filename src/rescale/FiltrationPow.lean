@@ -12,7 +12,7 @@ universe variables u
   ((Filtration r').obj (c * N⁻¹)).obj (of r' M) := rfl
 
 @[simps hom inv]
-noncomputable def Filtration_cast_eq (r' c₁ c₂ : ℝ≥0) (h : c₁ = c₂) [fact (0 < r')] (M) :
+noncomputable def Filtration_cast_eq (r' c₁ c₂ : ℝ≥0) (h : c₁ = c₂) (M) :
   ((Filtration r').obj c₁).obj M ≅
   ((Filtration r').obj c₂).obj M :=
 ((Filtration r').map_iso $ category_theory.eq_to_iso h).app M

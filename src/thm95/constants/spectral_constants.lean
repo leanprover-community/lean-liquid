@@ -1,3 +1,4 @@
+import generalisation_linter
 import polyhedral_lattice.cosimplicial
 /-!
 # Explicit formulas for the constants in theorem 9.5
@@ -39,3 +40,4 @@ instance one_le_K₀ : ∀ m K [fact (1 ≤ K)], fact (1 ≤ K₀ m K)
 
 end normed_spectral
 end system_of_double_complexes
+#lint only generalisation_linter

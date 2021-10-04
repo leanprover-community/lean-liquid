@@ -1,3 +1,4 @@
+import generalisation_linter
 import category_theory.limits.shapes.binary_products
 import topology.category.Profinite
 
@@ -47,3 +48,4 @@ noncomputable def prod_iso : X ⨯ Y ≅ Profinite.of (X × Y) :=
 (limit.is_limit _).cone_point_unique_up_to_iso (is_limit_prod_cone X Y)
 
 end Profinite
+#lint only generalisation_linter

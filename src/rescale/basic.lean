@@ -22,3 +22,4 @@ instance [i : add_comm_group V] : add_comm_group (rescale N V) := i
 def of : V ≃ rescale N V := equiv.refl _
 
 end rescale
+#lint

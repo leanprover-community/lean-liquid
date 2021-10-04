@@ -110,4 +110,3 @@ ProFiltPseuNormGrpWithTinv.iso_of_equiv_of_strict'
 
 end polyhedral_lattice
 
-#lint-

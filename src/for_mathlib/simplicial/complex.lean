@@ -1,9 +1,11 @@
+import generalisation_linter
 import data.fintype.card
 import algebra.module.hom
 import algebra.big_operators
 import algebraic_topology.simplicial_object
 
 import algebra.homology.homological_complex
+import generalisation_linter
 
 namespace category_theory
 
@@ -159,3 +161,4 @@ end augmented
 end cosimplicial_object
 
 end category_theory
+#lint only generalisation_linter

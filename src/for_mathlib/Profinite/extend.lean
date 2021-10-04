@@ -1,3 +1,4 @@
+import generalisation_linter
 import topology.category.Profinite.as_limit
 import for_mathlib.discrete_quotient
 import for_mathlib.Fintype
@@ -122,3 +123,4 @@ begin
 end
 
 end Profinite
+#lint only generalisation_linter

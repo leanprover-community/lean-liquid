@@ -1,5 +1,7 @@
+import generalisation_linter
 import topology.category.Profinite.cofiltered_limit
 import topology.discrete_quotient
+import generalisation_linter
 
 import for_mathlib.order
 
@@ -119,3 +121,5 @@ begin
 end
 
 end Profinite
+#lint
+#lint only generalisation_linter

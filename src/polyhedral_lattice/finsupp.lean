@@ -19,13 +19,13 @@ noncomputable theory
 
 open_locale big_operators classical
 
-variables (ι Λ : Type*) [fintype ι]
+variables (ι Λ : Type*)
 
 namespace finsupp
 
-section normed_group
+section semi_normed_group
 
-variables [normed_group Λ]
+variables [semi_normed_group Λ]
 
 instance : has_norm (ι →₀ Λ) := ⟨λ x, x.sum $ λ _, norm⟩
 
@@ -34,9 +34,11 @@ variables {ι Λ}
 lemma norm_def (x : ι →₀ Λ) : ∥x∥ = x.sum (λ _, norm) := rfl
 
 @[simp] lemma norm_single (i : ι) (l : Λ) : ∥single i l∥ = ∥l∥ :=
-by simp only [norm_def, sum_single_index, norm_zero]
+by simp [norm_def, sum_single_index, norm_zero]
+end semi_normed_group
+section normed_group
 
-variables (ι Λ)
+variables (ι Λ) [fintype ι] [normed_group Λ]
 
 instance : normed_group (ι →₀ Λ) :=
 normed_group.of_core _ $
@@ -76,12 +78,13 @@ namespace generates_norm
 
 open finsupp
 
-variables [polyhedral_lattice Λ]
-variables {J : Type*} [fintype J] (x : J → Λ) (hx : generates_norm x)
+variables
+variables {J : Type*} (x : J → Λ)
 
-def finsupp_generators : ι × J → (ι →₀ Λ) := λ j, single j.1 (x j.2)
+def finsupp_generators [has_zero Λ] : ι × J → (ι →₀ Λ) := λ j, single j.1 (x j.2)
+variables [fintype J] [semi_normed_group Λ] (hx : generates_norm x)
 
-variables {Λ x}
+variables {Λ x} [fintype ι]
 
 include hx
 

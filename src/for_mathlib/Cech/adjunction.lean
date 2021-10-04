@@ -1,3 +1,4 @@
+import generalisation_linter
 import algebraic_topology.cech_nerve
 
 universe u
@@ -83,3 +84,4 @@ end
 end simplicial_object
 
 end category_theory
+#lint only generalisation_linter

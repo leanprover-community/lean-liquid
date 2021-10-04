@@ -18,16 +18,16 @@ namespace generates_norm
 
 open rescale
 
-variables (N : ℝ≥0) (Λ : Type*) [polyhedral_lattice Λ]
-variables {J : Type*} [fintype J] (x : J → Λ) (hx : generates_norm x)
+variables (N : ℝ≥0) (Λ : Type*)
 
-def rescale_generators : J → (rescale N Λ) := x
+def rescale_generators {J : Type*} (x : J → Λ) : J → (rescale N Λ) := x
+variables [add_comm_monoid Λ] [has_norm Λ] {J : Type*} [fintype J] (x : J → Λ) (hx : generates_norm x)
 
 variables {Λ x}
 
 include hx
 
-lemma rescale [hN : fact (0 < N)] : generates_norm (rescale_generators N Λ x) :=
+lemma rescale : generates_norm (rescale_generators N Λ x) :=
 begin
   intro l,
   obtain ⟨c, H1, H2⟩ := hx l,

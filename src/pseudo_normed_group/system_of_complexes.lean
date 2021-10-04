@@ -40,7 +40,7 @@ namespace data
 section
 variables (BD : breen_deligne.data) (κ : ℕ → ℝ≥0)
 variables (r : ℝ≥0) (V : SemiNormedGroup) [normed_with_aut r V] [fact (0 < r)]
-variables (r' : ℝ≥0) [fact (0 < r')] [fact (r' ≤ 1)]
+variables (r' : ℝ≥0) [fact (r' ≤ 1)]
 variables (M : ProFiltPseuNormGrpWithTinv.{u} r') (c : ℝ≥0)
 
 /-- The object for the complex of seminormed groups
@@ -48,12 +48,12 @@ variables (M : ProFiltPseuNormGrpWithTinv.{u} r') (c : ℝ≥0)
 def complex₂_X (a b : ℕ → ℝ≥0) [∀ i, fact (b i ≤ r' * a i)] (i : ℕ) :
   (ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ SemiNormedGroup :=
 CLCFPTinv₂ r V r' (a i) (b i) (BD.X i)
-
 /-- The object for the complex of seminormed groups
 `V-hat(M_{≤c})^{T⁻¹} ⟶ V-hat(M_{≤c_1c}^2)^{T⁻¹} ⟶ …` -/
 def complex_X (i : ℕ) : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ SemiNormedGroup :=
 complex₂_X BD r V r' (λ i, c * κ i) (λ i, r' * (c * κ i)) i
 
+variable [fact (0 < r')]
 variables [BD.suitable κ]
 
 /-- The differential for the complex of seminormed groups

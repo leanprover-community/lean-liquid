@@ -21,7 +21,7 @@ open_locale big_operators classical nnreal
 
 section generates_norm
 
-variables {Λ ι : Type*} [semi_normed_group Λ] [fintype ι]
+variables {Λ ι : Type*} [add_comm_monoid Λ] [has_norm Λ] [fintype ι]
 
 /-- A finite family `x : ι → Λ` generates the norm on `Λ`
 if for every `l : Λ` there exist coefficients `c : ι → ℕ`
@@ -29,6 +29,11 @@ such that `l = ∑ i, c i • x i` and `∥l∥ = ∑ i, (c i) * ∥x i∥`.
 -/
 def generates_norm (x : ι → Λ) :=
 ∀ l : Λ, ∃ (c : ι → ℕ), (l = ∑ i, c i • x i) ∧ (∥l∥ = ∑ i, c i * ∥x i∥)
+end generates_norm
+
+section generates_norm
+
+variables {Λ ι : Type*} [semi_normed_group Λ] [fintype ι]
 
 lemma generates_norm_iff_generates_nnnorm (x : ι → Λ) :
   generates_norm x ↔

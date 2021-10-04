@@ -23,7 +23,7 @@ universe variables u v w
 namespace thm95
 
 variables (BD : breen_deligne.data) (κ : ℕ → ℝ≥0) [BD.suitable κ]
-variables (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)]
+variables (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')]
 variables (V : SemiNormedGroup.{u}) [normed_with_aut r V]
 variables (Λ : PolyhedralLattice.{u}) (M : ProFiltPseuNormGrpWithTinv.{u} r')
 variables (N : ℕ) [fact (0 < N)]
@@ -51,6 +51,7 @@ begin
   refl
 end
 
+variable [fact (r' ≤ 1)]
 def cosimplicial_system_of_complexes : cosimplicial_object.augmented system_of_complexes.{u} :=
 (cosimplicial_object.augmented.whiskering_obj.{u} _ _ (BD.system κ r V r')).obj
   (Cech_nerve r' Λ M N)
@@ -87,7 +88,7 @@ open_locale nat
 -- so that the vertical differentials become norm-nonincreasing
 
 set_option pp.universes true
-
+variable [fact (r' ≤ 1)]
 @[simps X d]
 def double_complex_aux_rescaled : cochain_complex system_of_complexes ℕ :=
 @homological_complex.modify _ _ _ _ _ _ _ _
@@ -140,21 +141,21 @@ end thm95
 namespace thm95
 
 variables (BD : breen_deligne.data)
-variables (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)]
+variables (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r' ≤ 1)]
 variables (V : SemiNormedGroup.{u}) [normed_with_aut r V]
-variables (κ : ℕ → ℝ≥0) [BD.very_suitable r r' κ]
+variables (κ : ℕ → ℝ≥0)
 variables (Λ : PolyhedralLattice.{u}) (M : ProFiltPseuNormGrpWithTinv.{u} r')
 variables (N : ℕ) [fact (0 < N)]
 
 variables {r r' V κ Λ M N}
 
-lemma double_complex.row_admissible :
+lemma double_complex.row_admissible [BD.very_suitable r r' κ] :
   ∀ m, ((double_complex BD κ r r' V Λ M N).row m).admissible
 | 0     := BD.system_admissible
 | 1     := BD.system_admissible
 | (m+2) := system_of_complexes.rescale_admissible _ _ BD.system_admissible
 
-lemma double_complex.d_one_norm_noninc (c : ℝ≥0) (q : ℕ) :
+lemma double_complex.d_one_norm_noninc (c : ℝ≥0) (q : ℕ) [BD.suitable κ] :
   (@system_of_double_complexes.d (double_complex BD κ r r' V Λ M N) c 1 2 q).norm_noninc :=
 begin
   apply normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.2,
@@ -178,7 +179,7 @@ begin
 end
 .
 
-lemma double_complex.d_two_norm_noninc (c : ℝ≥0) (p q : ℕ) :
+lemma double_complex.d_two_norm_noninc (c : ℝ≥0) (p q : ℕ) [BD.suitable κ] :
   (@system_of_double_complexes.d (double_complex BD κ r r' V Λ M N) c (p+2) (p+3) q).norm_noninc :=
 begin
   apply normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.2,
@@ -206,14 +207,14 @@ begin
   apply breen_deligne.data.complex.map_norm_noninc
 end
 
-lemma double_complex.d_norm_noninc (c : ℝ≥0) (q : ℕ) :
+lemma double_complex.d_norm_noninc (c : ℝ≥0) (q : ℕ) [BD.suitable κ] :
   ∀ p, (@system_of_double_complexes.d (double_complex BD κ r r' V Λ M N) c p (p+1) q).norm_noninc
 | 0     := breen_deligne.data.complex.map_norm_noninc _ _ _ _ _ _ _ _
 | 1     := double_complex.d_one_norm_noninc _ _ _
 | (p+2) := double_complex.d_two_norm_noninc _ _ _ _
 
 -- see above: currently we can only prove this for the columns
-lemma double_complex_admissible :
+lemma double_complex_admissible [BD.very_suitable r r' κ] :
   (double_complex BD κ r r' V Λ M N).admissible :=
 system_of_double_complexes.admissible.mk' (double_complex.row_admissible _)
   (by { rintro _ _ _ _ rfl, apply double_complex.d_norm_noninc })

@@ -69,3 +69,4 @@ def pow_equiv {A B : Type*} (e : A ≃ B) {n : ℕ} : A^n ≃ B^n :=
   right_inv := λ g, funext (λ i, equiv.apply_symm_apply _ _) }
 
 #lint- only unused_arguments def_lemma doc_blame
+#lint

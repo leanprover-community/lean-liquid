@@ -1,3 +1,4 @@
+import generalisation_linter
 import analysis.special_functions.pow
 
 import combinatorial_lemma
@@ -182,12 +183,12 @@ abbreviation ε : ℝ≥0 := normed_spectral.ε m (K₁ m)
 
 instance ε_pos : fact (0 < ε m) := ⟨normed_spectral.ε_pos _ _⟩
 
-variables [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)]
-
 -- in the PDF `b` is *positive*, we might need to make that explicit
 
 /-- `b κ' r r' m` is the smallest `b` such that `2 * (k' m) * (r / r') ^ b ≤ (ε m)` -/
 def b : ℕ := helper.b r r' (k' m) (ε m)
+
+variables [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)]
 
 lemma b_spec :
   (2 * k' m) * (r / r') ^ (b m) ≤ ε m :=
@@ -417,3 +418,4 @@ end universal_constants
 end thm95
 
 end
+#lint only generalisation_linter

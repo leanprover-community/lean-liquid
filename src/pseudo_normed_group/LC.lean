@@ -69,10 +69,10 @@ begin
 end
 
 @[simps {fully_applied := ff}]
-def T_inv [normed_with_aut r V] [fact (0 < r)] : LC V ⟶ LC V :=
+def T_inv [normed_with_aut r V] : LC V ⟶ LC V :=
 (LocallyConstant.map (normed_with_aut.T.inv : V ⟶ V) : _)
 
-lemma T_inv_eq [normed_with_aut r V] [fact (0 < r)] : (T r V).inv = T_inv r V := rfl
+lemma T_inv_eq [normed_with_aut r V] : (T r V).inv = T_inv r V := rfl
 
 lemma T_inv_eq' [normed_with_aut r V] [fact (0 < r)] (A) :
   (T_inv r V).app A = normed_with_aut.T.inv := rfl
@@ -116,7 +116,6 @@ locally_constant.comap_hom_norm_noninc _ _
 
 section Tinv
 open profinitely_filtered_pseudo_normed_group_with_Tinv
-variables [fact (0 < r')]
 
 @[simps {fully_applied := ff}]
 def Tinv [fact (c₂ ≤ r' * c₁)] : LCFP V r' c₁ n ⟶ LCFP V r' c₂ n :=
@@ -146,16 +145,16 @@ instance [fact (0 < r)] (M) : normed_with_aut r ((LCFP V r' c n).obj M) :=
 LC.obj.normed_with_aut _ _ _
 
 @[simps {fully_applied := ff}]
-def T [fact (0 < r)] : LCFP V r' c n ≅ LCFP V r' c n :=
-((whiskering_left _ _ _).obj _).map_iso $ LC.T _ _
+def T : LCFP V r' c n ≅ LCFP V r' c n :=
+((whiskering_left _ _ _).obj _).map_iso $ LC.T r _
 
 @[simps app_apply {fully_applied := ff}]
-def T_inv [fact (0 < r)] : LCFP V r' c n ⟶ LCFP V r' c n :=
+def T_inv : LCFP V r' c n ⟶ LCFP V r' c n :=
 (whisker_left _ (LC.T_inv r V) : _)
 
-lemma T_inv_eq [fact (0 < r)] : (T r V r' c n).inv = T_inv r V r' c n := rfl
+lemma T_inv_eq : (T r V r' c n).inv = T_inv r V r' c n := rfl
 
-lemma T_inv_def [fact (0 < r)] :
+lemma T_inv_def :
   T_inv r V r' c n = (whisker_left  (FiltrationPow r' c n).op
       (LocallyConstant.map (normed_with_aut.T.inv : V ⟶ V)) : _) :=
 rfl
@@ -215,13 +214,13 @@ lemma res_comp_eval_LCFP
 by simp only [res, eval_LCFP, ← whisker_right_comp, ← nat_trans.op_comp,
   cast_le_comp_eval_FP _ c₄ c₃ c₂ c₁]
 
-lemma Tinv_comp_eval_LCFP [fact (0 < r')] [fact (c₂ ≤ r' * c₁)] [fact (c₄ ≤ r' * c₃)]
+lemma Tinv_comp_eval_LCFP [fact (c₂ ≤ r' * c₁)] [fact (c₄ ≤ r' * c₃)]
   [ϕ.suitable c₄ c₂] [ϕ.suitable c₃ c₁] :
   Tinv V r' c₁ c₂ n ≫ ϕ.eval_LCFP V r' c₂ c₄ = ϕ.eval_LCFP V r' c₁ c₃ ≫ Tinv V r' c₃ c₄ m :=
 by simp only [Tinv, eval_LCFP, ← whisker_right_comp, ← nat_trans.op_comp,
   Tinv_comp_eval_FP _ _ c₄ c₃ c₂ c₁]
 
-lemma T_inv_comp_eval_LCFP [normed_with_aut r V] [fact (0 < r)] [ϕ.suitable c₂ c₁] :
+lemma T_inv_comp_eval_LCFP [normed_with_aut r V] [ϕ.suitable c₂ c₁] :
   T_inv r V r' c₁ n ≫ ϕ.eval_LCFP V r' c₁ c₂ = ϕ.eval_LCFP V r' c₁ c₂ ≫ T_inv r V r' c₂ m :=
 begin
   ext M : 2,
@@ -369,7 +368,7 @@ begin
   apply g.res_comp_eval_LCFP V r' c₁ c₂ c₃ c₄
 end
 
-lemma Tinv_comp_eval_LCFP [fact (0 < r')] [fact (c₂ ≤ r' * c₁)] [fact (c₄ ≤ r' * c₃)]
+lemma Tinv_comp_eval_LCFP [fact (c₂ ≤ r' * c₁)] [fact (c₄ ≤ r' * c₃)]
   [ϕ.suitable c₃ c₁] [ϕ.suitable c₄ c₂] :
   Tinv V r' c₁ c₂ n ≫ ϕ.eval_LCFP V r' c₂ c₄ = ϕ.eval_LCFP V r' c₁ c₃ ≫ Tinv V r' c₃ c₄ m :=
 begin
@@ -385,7 +384,7 @@ begin
   apply basic_universal_map.Tinv_comp_eval_LCFP V r'
 end
 
-lemma T_inv_comp_eval_LCFP [normed_with_aut r V] [fact (0 < r)] [ϕ.suitable c₂ c₁] :
+lemma T_inv_comp_eval_LCFP [normed_with_aut r V] [ϕ.suitable c₂ c₁] :
   T_inv r V r' c₁ n ≫ ϕ.eval_LCFP V r' c₁ c₂ =
     ϕ.eval_LCFP V r' c₁ c₂ ≫ T_inv r V r' c₂ m :=
 begin
@@ -400,7 +399,7 @@ begin
   apply basic_universal_map.T_inv_comp_eval_LCFP r V r'
 end
 
-lemma norm_eval_LCFP_le [normed_with_aut r V] [fact (0 < r)] [ϕ.suitable c₂ c₁]
+lemma norm_eval_LCFP_le [ϕ.suitable c₂ c₁]
   (N : ℕ) (h : ϕ.bound_by N) (M) :
   ∥(ϕ.eval_LCFP V r' c₁ c₂).app M∥ ≤ N :=
 begin

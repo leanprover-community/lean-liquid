@@ -19,7 +19,7 @@ open_locale nnreal big_operators
 open pseudo_normed_group combinatorial_lemma
 
 variables (Λ : Type*) (r' : ℝ≥0) (S : Type*)
-variables [fintype S] [polyhedral_lattice Λ]
+variables [fintype S]
 
 section
 
@@ -27,7 +27,7 @@ variables {S Λ r'}
 
 -- ugly name
 @[simps]
-def Mbar.mk_aux'
+def Mbar.mk_aux' [add_zero_class Λ]
   (x : Λ →+ Mbar r' S) (y : S → ℕ → Λ →+ ℤ)
   (h : ∀ s n l, (y s n l).nat_abs ≤ (x l s n).nat_abs) :
   Λ →+ Mbar r' S :=
@@ -50,7 +50,7 @@ add_monoid_hom.mk' (λ l,
 
 -- jmc: It seems to me that we cannot easily define this using `Mbar.mk_aux'` above
 @[simps]
-def Mbar.mk_aux
+def Mbar.mk_aux [polyhedral_lattice Λ]
   {ι : Type} [fintype ι] {l : ι → Λ} (hl : generates_norm l)
   (x : Λ →+ Mbar r' S) (y : S → ℕ → Λ →+ ℤ)
   (h : ∀ s n i, (y s n (l i)).nat_abs ≤ (x (l i) s n).nat_abs) :
@@ -98,7 +98,7 @@ end
 
 variables {Λ r' S}
 
-lemma Mbar.mk_aux_mem_filtration
+lemma Mbar.mk_aux_mem_filtration [polyhedral_lattice Λ]
   (ι : Type) (c : ℝ≥0) (N : ℕ) (hN : 0 < N) [fintype ι]
   {l : ι → Λ} (hl : generates_norm l)
   {x : Λ →+ Mbar r' S}
@@ -137,17 +137,17 @@ begin
 end
 
 @[simps]
-def Mbar.mk_of_add_monoid_hom [fact (r' < 1)] (x : S → ℕ → Λ →+ ℤ) (a : Λ →+ ℤ)
+def Mbar.mk_of_add_monoid_hom [add_zero_class Λ] [fact (r' < 1)] (x : S → ℕ → Λ →+ ℤ) (a : Λ →+ ℤ)
   [∀ s n, decidable (x s n = a)] :
   Mbar r' S :=
 Mbar.of_mask (Mbar.geom r' S) $ λ s n, x s n = a
 
 @[simps apply]
-lemma Mbar.mk_tensor (a : Λ →+ ℤ) (x : Mbar r' S) : Λ →+ Mbar r' S :=
+lemma Mbar.mk_tensor [add_zero_class Λ] (a : Λ →+ ℤ) (x : Mbar r' S) : Λ →+ Mbar r' S :=
 add_monoid_hom.mk' (λ l, a l • x) $ λ l₁ l₂, by rw [a.map_add, add_smul]
 
 -- better name?
-lemma lem_98_aux [fact (r' < 1)] (A : finset (Λ →+ ℤ))
+lemma lem_98_aux [add_zero_class Λ] [fact (r' < 1)] (A : finset (Λ →+ ℤ))
   (x₁' : S → ℕ → Λ →+ ℤ) [∀ s n a, decidable (x₁' s n = a)]
   (hx₁' : ∀ s n, x₁' s n ∈ A) (x₁ : Λ →+ Mbar r' S)
   (hx₁ : ∀ l s n, x₁ l s n = x₁' s n l) (l : Λ) :
@@ -263,7 +263,7 @@ begin
       dsimp only [y, Mbar.of_mask], congr, convert rfl, } }
 end
 
-lemma lem98_aux' [fact (r' < 1)] (N : ℕ)
+lemma lem98_aux' [pseudo_normed_group Λ] [fact (r' < 1)] (N : ℕ)
   (A : finset (Λ →+ ℤ))
   (x x₀ x₁ : Λ →+ Mbar r' S)
   (x' x₀' x₁' : S → ℕ → Λ →+ ℤ) [∀ s n a, decidable (x₁' s n = a)]
@@ -287,7 +287,7 @@ begin
     fintype.card_fin, finset.sum_comm, ← hx₀],
 end
 
-lemma lem98_crux [fact (r' < 1)] {ι : Type} {l : ι → Λ}
+lemma lem98_crux [add_zero_class Λ] [fact (r' < 1)] {ι : Type} {l : ι → Λ}
   (N : ℕ) (hN : 0 < N) (A : finset (Λ →+ ℤ))
   (x x₀ x₁ : Λ →+ Mbar r' S)
   (x' x₀' x₁' : S → ℕ → Λ →+ ℤ) [∀ s n a, decidable (x₁' s n = a)]
@@ -344,26 +344,26 @@ namespace lem98
 def ι (Λ : Type*) [polyhedral_lattice Λ] : Type :=
 (polyhedral_lattice.polyhedral Λ).some
 
-instance : fintype (ι Λ) := (polyhedral_lattice.polyhedral Λ).some_spec.some
+instance [polyhedral_lattice Λ] : fintype (ι Λ) := (polyhedral_lattice.polyhedral Λ).some_spec.some
 
 variables (Λ)
 
-def l : ι Λ → Λ := (polyhedral_lattice.polyhedral Λ).some_spec.some_spec.some
+def l [polyhedral_lattice Λ] : ι Λ → Λ := (polyhedral_lattice.polyhedral Λ).some_spec.some_spec.some
 
-lemma hl : generates_norm (l Λ) :=
+lemma hl [polyhedral_lattice Λ] : generates_norm (l Λ) :=
 by convert (polyhedral_lattice.polyhedral Λ).some_spec.some_spec.some_spec.1
 
-lemma hl' : ∀ i, l Λ i ≠ 0 :=
+lemma hl' [polyhedral_lattice Λ] : ∀ i, l Λ i ≠ 0 :=
 (polyhedral_lattice.polyhedral Λ).some_spec.some_spec.some_spec.2
 
-def A (N : ℕ) [hN : fact (0 < N)] := (lem97' N hN.1 (l Λ)).some
+def A [polyhedral_lattice Λ] (N : ℕ) [hN : fact (0 < N)] := (lem97' N hN.1 (l Λ)).some
 
-lemma hA (N : ℕ) [hN : fact (0 < N)] (x : Λ →+ ℤ) :
+lemma hA [polyhedral_lattice Λ] (N : ℕ) [hN : fact (0 < N)] (x : Λ →+ ℤ) :
   ∃ x' (H : x' ∈ A Λ N) y, x = N • y + x' ∧
     ∀ i, (x (l Λ i)).nat_abs = N * (y (l Λ i)).nat_abs + (x' (l Λ i)).nat_abs :=
 (lem97' N hN.1 (l Λ)).some_spec x
 
-def d  (N : ℕ) [hN : fact (0 < N)] : ℝ≥0 :=
+def d [polyhedral_lattice Λ] (N : ℕ) [hN : fact (0 < N)] : ℝ≥0 :=
 finset.univ.sup (λ i, ∑ a in A Λ N, ∥a (l Λ i)∥₊ / ∥l Λ i∥₊)
 
 end lem98

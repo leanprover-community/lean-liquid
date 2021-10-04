@@ -24,7 +24,7 @@ by simp only [nnnorm_one, mem_filtration_iff]
 
 section
 
-variables {Λ : Type*} [polyhedral_lattice Λ]
+variables {Λ : Type*} [semi_normed_group Λ]
 variables {M : Type*} [pseudo_normed_group M]
 
 lemma generates_norm.add_monoid_hom_mem_filtration_iff {ι : Type} [fintype ι]
@@ -49,6 +49,7 @@ end
 
 namespace polyhedral_lattice
 
+section polyhedral_lattice
 variables (Λ : Type*) (r' : ℝ≥0) (M : Type*) [polyhedral_lattice Λ]
 variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M]
 
@@ -179,6 +180,10 @@ instance profinitely_filtered_pseudo_normed_group :
   .. add_monoid_hom.pseudo_normed_group }
 
 end add_monoid_hom
+end polyhedral_lattice
+section Tinv'_def
+variables (Λ : Type*) (r' : ℝ≥0) (M : Type*) [pseudo_normed_group Λ]
+variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M]
 
 variables {Λ r' M}
 
@@ -188,6 +193,7 @@ def Tinv' : (Λ →+ M) →+ (Λ →+ M) :=
 add_monoid_hom.comp_hom
   (@Tinv r' M _).to_add_monoid_hom
 
+include r'
 @[simp] lemma Tinv'_apply (f : Λ →+ M) (l : Λ) :
   Tinv' f l = Tinv (f l) := rfl
 
@@ -199,11 +205,16 @@ begin
   apply Tinv_mem_filtration,
   exact hf hl
 end
+end Tinv'_def
 
-variables (Λ r' M)
+variables (Λ : Type*) (r' : ℝ≥0) (M : Type*) [polyhedral_lattice Λ]
+variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M]
+
 
 open profinitely_filtered_pseudo_normed_group
+open profinitely_filtered_pseudo_normed_group_with_Tinv
 variables [fact (0 < r')]
+include r'
 
 def Tinv : profinitely_filtered_pseudo_normed_group_hom (Λ →+ M) (Λ →+ M) :=
 profinitely_filtered_pseudo_normed_group_hom.mk' Tinv'

@@ -433,7 +433,7 @@ begin
     simp }
 end
 
-lemma finset.mem_span_iff {R M : Type*} [ring R] [add_comm_monoid M] [module R M] (S : finset M)
+lemma finset.mem_span_iff {R M : Type*} [semiring R] [add_comm_monoid M] [module R M] (S : finset M)
   (x : M) :
   x ∈ submodule.span R (S : set M) ↔ ∃ (w : M → R), ∑ i in S, w i • i = x :=
 begin
@@ -442,7 +442,7 @@ end
 
 set_option pp.proofs true
 
-lemma missing [fintype α] (w : α → ℤ) (n : ℕ) :
+lemma missing (w : α → ℤ) (n : ℕ) :
   to_rational_point (n • w) = (n : ℚ≥0) • to_rational_point w :=
 begin
   simp only [nsmul_eq_mul],

@@ -1,5 +1,6 @@
+import generalisation_linter
 import algebraic_topology.simplicial_object
-
+import generalisation_linter
 open opposite category_theory category_theory.limits
 open simplex_category
 
@@ -62,3 +63,6 @@ end augmented
 end simplicial_object
 
 end category_theory
+
+#lint
+#lint only generalisation_linter

@@ -3,15 +3,17 @@ import linear_algebra.dual
 import for_mathlib.nnrat
 
 universe u
-variables {Λ : Type u} [add_comm_group Λ]
+variables {Λ : Type u}
 variable {ι : Type*}
 
 open_locale big_operators
 open_locale nnreal
 
 variable {α : Type*}
+section
+variable [add_comm_monoid Λ]
 
-def nnrat_module {Λ : Type*} [add_comm_group Λ] [module ℚ Λ] : module (ℚ≥0) Λ :=
+def nnrat_module [module ℚ Λ] : module (ℚ≥0) Λ :=
 restrict_scalars.module (ℚ≥0) ℚ Λ
 
 local attribute [instance] nnrat_module
@@ -159,7 +161,12 @@ begin
   rintro x hx ⟨i, hi⟩,
   apply hi ⟨_, hx⟩,
 end
+end
 
+variable [add_comm_group Λ]
+variable [module ℚ Λ]
+open module
+local attribute [instance] nnrat_module
 noncomputable def down_two [finite_dimensional ℚ Λ] :
   submodule (ℚ≥0) (dual ℚ (dual ℚ Λ)) → submodule (ℚ≥0) Λ :=
 submodule.comap (linear_equiv.restrict_scalars (ℚ≥0) (eval_equiv ℚ Λ))

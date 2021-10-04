@@ -10,7 +10,7 @@ def normed_group_hom.surjective_on_with {G H : Type*} [semi_normed_group G] [sem
   (f : normed_group_hom G H) (K : add_subgroup H) (C : ℝ) : Prop :=
  ∀ h ∈ K, ∃ g, f g = h ∧ ∥g∥ ≤ C*∥h∥
 
-variables {G : Type*} [normed_group G]
+variables {G : Type*} [semi_normed_group G]
 variables {H : Type*} [normed_group H]
 
 lemma controlled_closure_of_complete [complete_space G] {f : normed_group_hom G H} {K : add_subgroup H}
@@ -86,3 +86,5 @@ begin
     exact hyp k },
   exact controlled_closure_of_complete hC hε hyp
 end
+
+#lint

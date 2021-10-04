@@ -333,3 +333,4 @@ end compact_domain
 end locally_constant
 
 #lint- only unused_arguments def_lemma doc_blame
+#lint

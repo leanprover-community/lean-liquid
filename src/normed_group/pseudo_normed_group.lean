@@ -32,3 +32,4 @@ show ∥v∥₊ ≤ ∥v∥₊, from le_rfl
   v ∈ filtration V c ↔ ∥v∥₊ ≤ c := iff.rfl
 
 end semi_normed_group
+#lint
