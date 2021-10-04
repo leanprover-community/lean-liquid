@@ -26,7 +26,10 @@ lemma six_term_exact_seq (n : ℕ) (A : short_exact_sequence C) (B : C) :
     ((«Ext» R C n).map A.g.op).app B, ((«Ext» R C n).map A.f.op).app B,
     δ R n A B,
     ((«Ext» R C (n+1)).map A.g.op).app B, ((«Ext» R C (n+1)).map A.f.op).app B
-    ] := sorry
--- this need `exact_seq.unop`
+    ] :=
+begin
+  apply exact_seq.of_op,
+  exact functor.left_derived.six_term_exact_seq _ n A,
+end
 
 end «Ext»
