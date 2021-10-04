@@ -92,12 +92,80 @@ begin
   refine exact_seq.cons _ _ hfg _ (congr hL (arrow_congr.cons rfl H)),
 end
 
-section
+lemma append : ∀ {L₁ L₂ L₃ : list (arrow 𝒞)}
+  (h₁₂ : exact_seq 𝒞 (L₁ ++ L₂)) (h₂₃ : exact_seq 𝒞 (L₂ ++ L₃)) (h₂ : L₂ ≠ []),
+  exact_seq 𝒞 (L₁ ++ L₂ ++ L₃)
+| L₁         []      L₃ h₁₂                 h₂₃ h := (h rfl).elim
+| []         L₂      L₃ h₁₂                 h₂₃ h := by rwa list.nil_append
+| (_::[])    (_::L₂) L₃ (cons f g hfg L hL) h₂₃ h := cons f g hfg _ h₂₃
+| (_::_::L₁) L₂      L₃ (cons f g hfg L hL) h₂₃ h :=
+suffices exact_seq 𝒞 ([f] ++ ([g] ++ L₁ ++ L₂) ++ L₃), { simpa only [list.append_assoc] },
+cons _ _ hfg _ $
+suffices exact_seq 𝒞 ((g :: L₁) ++ L₂ ++ L₃), { simpa only [list.append_assoc] },
+append (by simpa only using hL) h₂₃ h
 
-lemma of_op : ∀ {L : list (arrow 𝒜)}, exact_seq 𝒜ᵒᵖ (L.reverse.map (λ f, sorry)) →
-  exact_seq 𝒜 L := sorry
+end exact_seq
 
+namespace arrow
+
+open opposite
+
+variables {C : Type*} [category C]
+
+@[simps]
+def op (f : arrow C) : arrow Cᵒᵖ :=
+{ left := op f.right,
+  right := op f.left,
+  hom := f.hom.op }
+
+@[simps]
+def unop (f : arrow Cᵒᵖ) : arrow C :=
+{ left := unop f.right,
+  right := unop f.left,
+  hom := f.hom.unop }
+
+@[simp] lemma op_unop (f : arrow C)   : f.op.unop = f := by { cases f, dsimp [op, unop], refl }
+@[simp] lemma unop_op (f : arrow Cᵒᵖ) : f.unop.op = f := by { cases f, dsimp [op, unop], refl }
+
+@[simp] lemma op_comp_unop : (op ∘ unop : arrow Cᵒᵖ → arrow Cᵒᵖ) = id := by { ext, exact unop_op _ }
+@[simp] lemma unop_comp_op : (unop ∘ op : arrow C   → arrow C  ) = id := by { ext, exact op_unop _ }
+
+end arrow
+
+namespace exact_seq
+
+lemma op : ∀ {L : list (arrow 𝒜)}, exact_seq 𝒜 L → exact_seq 𝒜ᵒᵖ (L.reverse.map arrow.op)
+| _ nil                 := nil
+| _ (single f)          := single f.op
+| _ (cons f g hfg L hL) :=
+begin
+  have hgf : exact g.op f.op, { resetI, apply_instance },
+  have := op hL,
+  simp only [list.reverse_cons, list.map_append] at this ⊢,
+  refine this.append _ (list.cons_ne_nil _ _),
+  exact cons _ _ hgf _ (single _),
 end
+
+lemma unop : ∀ {L : list (arrow 𝒜ᵒᵖ)}, exact_seq 𝒜ᵒᵖ L → exact_seq 𝒜 (L.reverse.map arrow.unop)
+| _ nil                 := nil
+| _ (single f)          := single f.unop
+| _ (cons f g hfg L hL) :=
+begin
+  have hgf : exact g.unop f.unop, { resetI, apply_instance },
+  have := unop hL,
+  simp only [list.reverse_cons, list.map_append] at this ⊢,
+  refine this.append _ (list.cons_ne_nil _ _),
+  exact cons _ _ hgf _ (single _),
+end
+
+lemma of_op {L : list (arrow 𝒜)} (h : exact_seq 𝒜ᵒᵖ (L.reverse.map arrow.op)) : exact_seq 𝒜 L :=
+by simpa only [list.map_reverse, list.reverse_reverse, list.map_map,
+  arrow.unop_comp_op, list.map_id] using h.unop
+
+lemma of_unop {L : list (arrow 𝒜ᵒᵖ)} (h : exact_seq 𝒜 (L.reverse.map arrow.unop)) :
+  exact_seq 𝒜ᵒᵖ L :=
+by simpa only [list.map_reverse, list.reverse_reverse, list.map_map,
+  arrow.op_comp_unop, list.map_id] using h.op
 
 end exact_seq
 
