@@ -1,9 +1,4 @@
-import banach
-import real_measures
-import condensed.ab
-import category_theory.abelian.ext
-import for_mathlib.Profinite.extend
-import for_mathlib.abelian_category
+import challenge_notations
 
 /-!
 # Liquid Tensor Experiment
@@ -22,25 +17,11 @@ for `i ≥ 1`.
 
 -/
 
-noncomputable theory
-
-open_locale nnreal
-open opposite category_theory
+open_locale nnreal liquid_tensor_experiment
 
 namespace liquid_tensor_experiment
 
 variables (p' p : ℝ≥0) [fact (0 < p')] [fact (p' ≤ 1)] [fact (p' < p)] [fact (p ≤ 1)]
-
-def real_measures.condensed : Profinite ⥤ Condensed Ab :=
-Profinite.extend (real_measures.functor p') ⋙ CompHausFiltPseuNormGrp₁.to_Condensed
-
-local notation `ℳ_{` p' `}` S := (real_measures.condensed p').obj S
-
-abbreviation Ext (i : ℕ) (A B : Condensed Ab) :=
-((Ext ℤ (Condensed Ab) i).obj (op A)).obj B
-
-instance : has_coe (pBanach p) (Condensed Ab) :=
-{ coe := λ V, Condensed.of_top_ab V }
 
 variables (S : Profinite.{1})
 variables (V : pBanach p)
