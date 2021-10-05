@@ -167,6 +167,8 @@ apply_nolint category_theory.SheafOfTypes.terminal_sheaf.to doc_blame
 apply_nolint category_theory.functor.left_derived.δ doc_blame
 
 -- for_mathlib/exact_seq.lean
+apply_nolint category_theory.arrow.op doc_blame
+apply_nolint category_theory.arrow.unop doc_blame
 apply_nolint category_theory.exact.quiver.hom.op.exact unused_arguments
 apply_nolint category_theory.exact.quiver.hom.unop.exact unused_arguments
 apply_nolint category_theory.exact_seq.arrow_congr doc_blame
