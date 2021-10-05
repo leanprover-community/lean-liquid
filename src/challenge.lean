@@ -36,14 +36,14 @@ Profinite.extend (real_measures.functor p') ⋙ CompHausFiltPseuNormGrp₁.to_Co
 
 local notation `ℳ` p' := real_measures.condensed p'
 
-abbreviation Ext (i : ℕ) (AB : Condensed Ab × Condensed Ab) :=
-((Ext ℤ (Condensed Ab) i).obj (op AB.1)).obj AB.2
+abbreviation Ext (i : ℕ) (A B : Condensed Ab) :=
+((Ext ℤ (Condensed Ab) i).obj (op A)).obj B
 
 variables (S : Profinite.{1})
 variables (V : Type 1) [normed_group V] [module ℝ V] [normed_space' ℝ p V] -- `V` is a `p`-Banach
 
 theorem main_challenge (i : ℕ) (hi : 0 < i) :
-  is_zero (Ext i ((ℳ p').obj S, Condensed.of_top_ab V)) :=
+  Ext i ((ℳ p').obj S) (Condensed.of_top_ab V) ≅ 0 :=
 sorry
 
 end liquid_tensor_experiment
