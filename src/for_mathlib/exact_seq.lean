@@ -107,6 +107,29 @@ begin
   simp,
 end
 
+def kernel_unop_iso {C B : 𝒜ᵒᵖ} (f : C ⟶ B) : opposite.op (kernel f.unop) ≅ cokernel f :=
+{ hom := (kernel.lift _ (cokernel.π f).unop (by simp [← unop_comp])).op ≫
+    eq_to_hom (opposite.op_unop (cokernel f)),
+  inv := cokernel.desc _ (eq_to_hom (opposite.op_unop _).symm ≫ (kernel.ι f.unop).op) begin
+    dsimp,
+    rw [← f.op_unop, category.id_comp, ← op_comp, f.op_unop, kernel.condition],
+    refl,
+  end,
+  hom_inv_id' := begin
+    dsimp,
+    simp,
+    rw [← (cokernel.desc f (kernel.ι f.unop).op _).op_unop, ← op_comp, ← op_id],
+    congr' 1,
+    apply limits.equalizer.hom_ext,
+    dsimp,
+    simp [← unop_comp],
+  end,
+  inv_hom_id' := begin
+    apply limits.coequalizer.hom_ext,
+    dsimp,
+    simp [← op_comp],
+  end }
+
 instance {C B A : 𝒜ᵒᵖ} (g : C ⟶ B) (f : B ⟶ A) [exact g f] : exact f.unop g.unop := sorry
 
 end exact
