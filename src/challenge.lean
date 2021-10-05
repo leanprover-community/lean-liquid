@@ -27,17 +27,23 @@ noncomputable theory
 open_locale nnreal
 open opposite category_theory
 
+namespace liquid_tensor_experiment
+
 variables (p' p : ℝ≥0) [fact (0 < p')] [fact (p' ≤ 1)] [fact (p' < p)] [fact (p ≤ 1)]
-variables (S : Profinite.{1})
-variables (V : Type 1) [normed_group V] [module ℝ V] [normed_space' ℝ p V] -- `V` is a `p`-Banach
 
 def real_measures.condensed : Profinite ⥤ Condensed Ab :=
 Profinite.extend (real_measures.functor p') ⋙ CompHausFiltPseuNormGrp₁.to_Condensed
 
 local notation `ℳ` p' := real_measures.condensed p'
 
-local notation `Ext` i `,` A `,` B := ((Ext ℤ (Condensed Ab) i).obj (op A)).obj B
+abbreviation Ext (i : ℕ) (AB : Condensed Ab × Condensed Ab) :=
+((Ext ℤ (Condensed Ab) i).obj (op AB.1)).obj AB.2
+
+variables (S : Profinite.{1})
+variables (V : Type 1) [normed_group V] [module ℝ V] [normed_space' ℝ p V] -- `V` is a `p`-Banach
 
 theorem main_challenge (i : ℕ) (hi : 0 < i) :
-  is_zero (Ext i , (ℳ p').obj S , Condensed.of_top_ab V) :=
+  is_zero (Ext i ((ℳ p').obj S, Condensed.of_top_ab V)) :=
 sorry
+
+end liquid_tensor_experiment
