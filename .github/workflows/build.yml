@@ -123,8 +123,8 @@ jobs:
           echo "$HOME/.elan/bin" >> $GITHUB_PATH
 
       - name: lint
-        # Uncomment the following line to make the build succeed even if there are linting errors
-        # continue-on-error: true
+        # The following line makes the build succeed even if there are linting errors
+        continue-on-error: true
         run: |
           ./scripts/mk_all.sh
           lean --run scripts/lint_project.lean
