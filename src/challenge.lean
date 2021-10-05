@@ -18,16 +18,11 @@ for `i ≥ 1`.
 -/
 
 open_locale nnreal liquid_tensor_experiment
-
-namespace liquid_tensor_experiment
+open liquid_tensor_experiment
 
 variables (p' p : ℝ≥0) [fact (0 < p')] [fact (p' ≤ 1)] [fact (p' < p)] [fact (p ≤ 1)]
+variables (S : Profinite.{1}) (V : pBanach p)
 
-variables (S : Profinite.{1})
-variables (V : pBanach p)
-
-theorem main_challenge (i : ℕ) (hi : 0 < i) :
+theorem liquid_tensor_experiment (i : ℕ) (hi : 0 < i) :
   Ext i (ℳ_{p'} S) V ≅ 0 :=
 sorry
-
-end liquid_tensor_experiment
