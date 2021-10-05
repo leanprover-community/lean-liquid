@@ -123,3 +123,23 @@ instance (𝕜 : Type*) (V : Type*) [normed_field 𝕜] [normed_group V] [module
   end }
 
 end as_normed_space'
+
+variables (p : ℝ≥0)
+
+structure pBanach :=
+(V : Type 1)
+(is_normed_group : normed_group V)
+(is_module : module ℝ V)
+(is_normed_space' : normed_space' ℝ p V)
+
+namespace pBanach
+
+instance : has_coe_to_sort (pBanach p) :=
+{ S := Type 1,
+  coe := λ X, X.V }
+
+instance (X : pBanach p) : normed_group X := X.is_normed_group
+instance (X : pBanach p) : module ℝ X := X.is_module
+instance (X : pBanach p) : normed_space' ℝ p X := X.is_normed_space'
+
+end pBanach

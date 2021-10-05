@@ -34,24 +34,10 @@ variables (p' p : ℝ≥0) [fact (0 < p')] [fact (p' ≤ 1)] [fact (p' < p)] [fa
 def real_measures.condensed : Profinite ⥤ Condensed Ab :=
 Profinite.extend (real_measures.functor p') ⋙ CompHausFiltPseuNormGrp₁.to_Condensed
 
-local notation `ℳ` p' := real_measures.condensed p'
+local notation `ℳ_{` p' `}` S := (real_measures.condensed p').obj S
 
 abbreviation Ext (i : ℕ) (A B : Condensed Ab) :=
 ((Ext ℤ (Condensed Ab) i).obj (op A)).obj B
-
-structure pBanach :=
-(V : Type 1)
-(normed_group : normed_group V)
-(module : module ℝ V)
-(normed_space' : normed_space' ℝ p V)
-
-instance : has_coe_to_sort (pBanach p) :=
-{ S := Type 1,
-  coe := λ X, X.V }
-
-instance (X : pBanach p) : normed_group X := X.normed_group
-instance (X : pBanach p) : module ℝ X := X.module
-instance (X : pBanach p) : normed_space' ℝ p X := X.normed_space'
 
 instance : has_coe (pBanach p) (Condensed Ab) :=
 { coe := λ V, Condensed.of_top_ab V }
@@ -60,7 +46,7 @@ variables (S : Profinite.{1})
 variables (V : pBanach p)
 
 theorem main_challenge (i : ℕ) (hi : 0 < i) :
-  Ext i ((ℳ p').obj S) V ≅ 0 :=
+  Ext i (ℳ_{p'} S) V ≅ 0 :=
 sorry
 
 end liquid_tensor_experiment
