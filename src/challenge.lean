@@ -24,6 +24,6 @@ variables (p' p : ℝ≥0) [fact (0 < p')] [fact (p' ≤ 1)] [fact (p' < p)] [fa
 
 set_option pp.universes true
 
-theorem liquid_tensor_experiment (S : Profinite) (V : pBanach p) (i : ℕ) (hi : 0 < i) :
+theorem liquid_tensor_experiment (S : Profinite.{1}) (V : pBanach.{1} p) (i : ℕ) (hi : 0 < i) :
   Ext i (ℳ_{p'} S) V ≅ 0 :=
 sorry
