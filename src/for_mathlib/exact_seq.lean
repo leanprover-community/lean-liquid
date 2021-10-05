@@ -130,7 +130,53 @@ def kernel_unop_iso {C B : 𝒜ᵒᵖ} (f : C ⟶ B) : opposite.op (kernel f.uno
     simp [← op_comp],
   end }
 
-instance {C B A : 𝒜ᵒᵖ} (g : C ⟶ B) (f : B ⟶ A) [exact g f] : exact f.unop g.unop := sorry
+def cokernel_unop_iso {C B : 𝒜ᵒᵖ} (f : C ⟶ B) : opposite.op (cokernel f.unop) ≅ kernel f :=
+{ hom := kernel.lift _ ((cokernel.π f.unop).op ≫ eq_to_hom (opposite.op_unop _)) begin
+    dsimp,
+    rw [← f.op_unop, category.comp_id, ← op_comp, f.op_unop, cokernel.condition],
+    refl,
+  end,
+  inv := eq_to_hom (opposite.op_unop _).symm ≫
+    (cokernel.desc _ (kernel.ι f).unop (by simp [← unop_comp])).op,
+  hom_inv_id' := begin
+    dsimp,
+    rw category.id_comp,
+    rw [← (kernel.lift f ((cokernel.π f.unop).op ≫ 𝟙 C) _).op_unop, ← op_comp, ← op_id],
+    congr' 1,
+    apply limits.coequalizer.hom_ext,
+    dsimp,
+    simp [← unop_comp],
+  end,
+  inv_hom_id' := begin
+    apply limits.equalizer.hom_ext,
+    dsimp,
+    simp [← op_comp]
+  end }
+
+@[simp]
+lemma cokernel.π_unop {C B : 𝒜ᵒᵖ} (f : C ⟶ B) : (cokernel.π f.unop).op =
+  (cokernel_unop_iso f).hom ≫ kernel.ι f ≫ eq_to_hom (opposite.op_unop _).symm :=
+begin
+  dsimp [cokernel_unop_iso],
+  simp,
+end
+
+@[simp]
+lemma kernel.ι_unop {C B : 𝒜ᵒᵖ} (f : C ⟶ B) : (kernel.ι f.unop).op =
+  eq_to_hom (opposite.op_unop _) ≫ cokernel.π f ≫ (kernel_unop_iso f).inv :=
+begin
+  dsimp [kernel_unop_iso],
+  simp,
+end
+
+instance {C B A : 𝒜ᵒᵖ} (g : C ⟶ B) (f : B ⟶ A) [exact g f] : exact f.unop g.unop :=
+begin
+  rw abelian.exact_iff,
+  refine ⟨by simp [← unop_comp], _⟩,
+  apply_fun quiver.hom.op,
+  swap, { exact quiver.hom.op_inj },
+  simp,
+end
 
 end exact
 
