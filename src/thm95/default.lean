@@ -82,8 +82,8 @@ def NSC (IH : ∀ m' < m, thm95.IH r r' BD V κ κ' M m')
 include BD κ κ' r r' m
 
 /-- A variant of Theorem 9.5 in [Analytic] using weak bounded exactness. -/
-theorem thm95' : ∀ (Λ : PolyhedralLattice.{0}) (S : Type) [fintype S]
-  (V : SemiNormedGroup.{0}) [normed_with_aut r V],
+theorem thm95' : ∀ (Λ : PolyhedralLattice.{u}) (S : Type u) [fintype S]
+  (V : SemiNormedGroup.{u}) [normed_with_aut r V],
   ​((BD.data.system κ r V r').obj (op $ Hom Λ (Mbar r' S))).is_weak_bounded_exact
     (k κ' m) (K r r' BD κ' m) m (c₀ r r' BD κ κ' m Λ) :=
 begin
@@ -92,7 +92,7 @@ begin
   haveI : pseudo_normed_group.splittable
     (Λ →+ (of r' (Mbar r' S))) (N r r' BD κ' m) (lem98.d Λ (N r r' BD κ' m)) :=
     lem98 Λ S (N r r' BD κ' m),
-  let cond := NSC.{0} r r' BD V κ κ' (of r' $ Mbar r' S) m Λ _,
+  let cond := NSC.{u} r r' BD V κ κ' (of r' $ Mbar r' S) m Λ _,
   swap,
   { introsI m' hm' Λ,
     apply IH, assumption },
@@ -102,8 +102,8 @@ end
 omit BD κ κ' r r' m
 
 /-- Theorem 9.5 in [Analytic] -/
-theorem thm95 (Λ : PolyhedralLattice.{0}) (S : Type) [fintype S]
-  (V : SemiNormedGroup.{0}) [normed_with_aut r V] :
+theorem thm95 (Λ : PolyhedralLattice.{u}) (S : Type u) [fintype S]
+  (V : SemiNormedGroup.{u}) [normed_with_aut r V] :
   ((BD.data.system κ r V r').obj (op $ Hom Λ (Mbar r' S))).is_bounded_exact
     (k κ' m ^ 2) (K r r' BD κ' m + 1) m (c₀ r r' BD κ κ' m Λ) :=
 begin
@@ -129,10 +129,10 @@ theorem thm95'' (BD : package)
   (κ : ℕ → ℝ≥0) [BD.data.very_suitable r r' κ] [∀ (i : ℕ), fact (0 < κ i)] :
   ∀ m : ℕ,
   ∃ (k K : ℝ≥0) (hk : fact (1 ≤ k)),
-  ∀ (Λ : Type) [polyhedral_lattice Λ],
+  ∀ (Λ : Type u) [polyhedral_lattice Λ],
   ∃ c₀ : ℝ≥0,
-  ∀ (S : Type) [fintype S],
-  ∀ (V : SemiNormedGroup.{0}) [normed_with_aut r V],
+  ∀ (S : Type u) [fintype S],
+  ∀ (V : SemiNormedGroup.{u}) [normed_with_aut r V],
     by exactI system_of_complexes.is_weak_bounded_exact
     (​(BD.data.system κ r V r').obj (op $ Hom Λ (Mbar r' S))) k K m c₀ :=
 begin

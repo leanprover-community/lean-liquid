@@ -127,7 +127,7 @@ end as_normed_space'
 variables (p : ℝ≥0)
 
 structure pBanach :=
-(V : Type 1)
+(V : Type*)
 (is_normed_group : normed_group V)
 (is_module : module ℝ V)
 (is_normed_space' : normed_space' ℝ p V)
@@ -135,7 +135,7 @@ structure pBanach :=
 namespace pBanach
 
 instance : has_coe_to_sort (pBanach p) :=
-{ S := Type 1,
+{ S := Type*,
   coe := λ X, X.V }
 
 instance (X : pBanach p) : normed_group X := X.is_normed_group

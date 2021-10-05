@@ -21,8 +21,9 @@ open_locale nnreal liquid_tensor_experiment
 open liquid_tensor_experiment
 
 variables (p' p : ℝ≥0) [fact (0 < p')] [fact (p' ≤ 1)] [fact (p' < p)] [fact (p ≤ 1)]
-variables (S : Profinite.{1}) (V : pBanach p)
 
-theorem liquid_tensor_experiment (i : ℕ) (hi : 0 < i) :
+set_option pp.universes true
+
+theorem liquid_tensor_experiment (S : Profinite) (V : pBanach p) (i : ℕ) (hi : 0 < i) :
   Ext i (ℳ_{p'} S) V ≅ 0 :=
 sorry

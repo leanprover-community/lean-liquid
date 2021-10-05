@@ -20,6 +20,8 @@ we'll explain more about how to find out more about it below.
 Once we have fixed this data, we can state the theorem.
 -/
 
+universe variables u
+
 open_locale nnreal -- enable the notation `ℝ≥0` for the nonnegative real numbers.
 
 open category_theory ProFiltPseuNormGrpWithTinv polyhedral_lattice opposite
