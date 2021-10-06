@@ -7,338 +7,83 @@ apply_nolint Mbar.map_strict unused_arguments
 apply_nolint Mbar.map_zero unused_arguments
 
 -- breen_deligne/category.lean
-apply_nolint breen_deligne.FreeMat.iso_mk' doc_blame
 apply_nolint breen_deligne.FreeMat.kronecker_map_reindex_left unused_arguments
 apply_nolint breen_deligne.FreeMat.kronecker_map_reindex_right unused_arguments
-apply_nolint breen_deligne.FreeMat.mul_functor doc_blame
-apply_nolint breen_deligne.FreeMat.mul_mul_iso doc_blame
-apply_nolint breen_deligne.FreeMat.one_mul_iso doc_blame
-apply_nolint breen_deligne.data.hom_pow' doc_blame
-apply_nolint breen_deligne.data.mul doc_blame
-apply_nolint breen_deligne.data.mul_mul_iso doc_blame
-apply_nolint breen_deligne.data.mul_one_iso doc_blame
-apply_nolint breen_deligne.data.pow'_iso_mul doc_blame
-apply_nolint breen_deligne.data.proj doc_blame
-apply_nolint breen_deligne.data.sum doc_blame
-
--- breen_deligne/functorial_map.lean
-apply_nolint breen_deligne.equiv_of_equiv doc_blame
-apply_nolint breen_deligne.functorial_map.add doc_blame
-apply_nolint breen_deligne.functorial_map.neg doc_blame
-apply_nolint breen_deligne.functorial_map.zero doc_blame
-apply_nolint breen_deligne.punit_equiv doc_blame
-apply_nolint breen_deligne.universal_map.from_functorial_map doc_blame
-apply_nolint breen_deligne.universal_map.to_functorial_map doc_blame
-
--- breen_deligne/homotopy.lean
-apply_nolint breen_deligne.data.homotopy_mul doc_blame
-apply_nolint breen_deligne.data.homotopy_pow' doc_blame
-apply_nolint breen_deligne.data.homotopy_two_mul doc_blame
-apply_nolint breen_deligne.package.adept doc_blame
 
 -- breen_deligne/suitable.lean
 apply_nolint breen_deligne.basic_universal_map.suitable class_structure
 apply_nolint breen_deligne.universal_map.suitable class_structure
 apply_nolint breen_deligne.universal_map.very_suitable class_structure
 
--- breen_deligne/universal_map.lean
-apply_nolint breen_deligne.basic_universal_map.mul doc_blame
-apply_nolint breen_deligne.basic_universal_map.mul_mul_hom doc_blame
-apply_nolint breen_deligne.basic_universal_map.mul_mul_inv doc_blame
-apply_nolint breen_deligne.basic_universal_map.one_mul_hom doc_blame
-apply_nolint breen_deligne.basic_universal_map.one_mul_inv doc_blame
-apply_nolint breen_deligne.basic_universal_map.pre_eval doc_blame
-apply_nolint breen_deligne.basic_universal_map.proj doc_blame
-apply_nolint breen_deligne.basic_universal_map.proj_aux doc_blame
-apply_nolint breen_deligne.universal_map.bound doc_blame
-apply_nolint breen_deligne.universal_map.bound_by doc_blame
-apply_nolint breen_deligne.universal_map.mul doc_blame
-apply_nolint breen_deligne.universal_map.proj doc_blame
-apply_nolint breen_deligne.universal_map.sum doc_blame
-
 -- challenge.lean
-apply_nolint main_challenge unused_arguments
-apply_nolint real_measures.condensed doc_blame
+apply_nolint liquid_tensor_experiment def_lemma unused_arguments
+
+-- challenge_notations.lean
+apply_nolint Condensed.has_coe unused_arguments
 
 -- combinatorial_lemma/default.lean
-apply_nolint Mbar.mk_aux doc_blame
-apply_nolint Mbar.mk_aux' doc_blame
-apply_nolint Mbar.mk_of_add_monoid_hom doc_blame
 apply_nolint Mbar.mk_tensor def_lemma
 apply_nolint lem98 def_lemma
-apply_nolint lem98.A doc_blame
-apply_nolint lem98.d doc_blame
-apply_nolint lem98.l doc_blame
-apply_nolint lem98.ι doc_blame
-
--- combinatorial_lemma/lem97.lean
-apply_nolint fintype_sign_vectors doc_blame
-apply_nolint nonzero_sign doc_blame
-apply_nolint sign_vectors doc_blame
-
--- condensed/ab.lean
-apply_nolint CompHausFiltPseuNormGrp₁.Presheaf doc_blame
-apply_nolint CompHausFiltPseuNormGrp₁.Presheaf.map doc_blame
-apply_nolint CompHausFiltPseuNormGrp₁.presheaf doc_blame
-apply_nolint CompHausFiltPseuNormGrp₁.presheaf.comap doc_blame
-apply_nolint CompHausFiltPseuNormGrp₁.presheaf.gsmul doc_blame
-apply_nolint CompHausFiltPseuNormGrp₁.presheaf.map doc_blame
-apply_nolint CompHausFiltPseuNormGrp₁.presheaf.nsmul doc_blame
-apply_nolint CompHausFiltPseuNormGrp₁.to_Condensed doc_blame
-apply_nolint Condensed.forget_to_CondensedType doc_blame
-apply_nolint Condensed.of_top_ab.presheaf doc_blame
 
 -- condensed/basic.lean
-apply_nolint category_theory.functor.preserves_binary_products doc_blame unused_arguments
-apply_nolint category_theory.functor.preserves_terminal doc_blame unused_arguments
-apply_nolint condensed_type_condition doc_blame
-apply_nolint embed_Top doc_blame
-apply_nolint natural_fork doc_blame
-
--- condensed/proetale_site_as_small.lean
-apply_nolint from_point doc_blame
-apply_nolint mk_pullback doc_blame
-apply_nolint point doc_blame
-apply_nolint proetale_topology doc_blame
+apply_nolint category_theory.functor.preserves_binary_products unused_arguments
+apply_nolint category_theory.functor.preserves_terminal unused_arguments
 
 -- facts/int.lean
 apply_nolint fact_le_of_add_one_le fails_quickly
 
--- for_mathlib/Cech/adjunction.lean
-apply_nolint category_theory.simplicial_object.augmented_cech_nerve.left_obj_zero_iso doc_blame
-
 -- for_mathlib/Gordan.lean
-apply_nolint dual_finset doc_blame
-apply_nolint explicit_dual_set doc_blame
-apply_nolint floor_point doc_blame
-apply_nolint intersect_halfspaces doc_blame
-apply_nolint intersect_halfspaces_set doc_blame
-apply_nolint is_integer doc_blame
-apply_nolint is_integer_point doc_blame
-apply_nolint lattice_restrict doc_blame
 apply_nolint missing unused_arguments
-apply_nolint scale_factor doc_blame
-apply_nolint scale_up doc_blame
-apply_nolint to_rational_point doc_blame
-apply_nolint upgrade_functional doc_blame
-
--- for_mathlib/Profinite/arrow_limit.lean
-apply_nolint Profinite.Cech_cone doc_blame
-apply_nolint Profinite.Cech_cone_diagram doc_blame
-apply_nolint Profinite.Cech_cone_diagram_inclusion doc_blame
-apply_nolint Profinite.Cech_cone_diagram_proj doc_blame
-apply_nolint Profinite.Cech_cone_is_limit doc_blame
-apply_nolint Profinite.is_limit_left_arrow_cone doc_blame
-apply_nolint Profinite.is_limit_right_arrow_cone doc_blame
-apply_nolint Profinite.left_arrow_cone doc_blame
-apply_nolint Profinite.left_arrow_cone_iso doc_blame
-apply_nolint Profinite.right_arrow_cone doc_blame
-apply_nolint Profinite.right_arrow_cone_iso doc_blame
-apply_nolint Profinite.swap_cone_left doc_blame
-apply_nolint Profinite.swap_cone_right doc_blame
 
 -- for_mathlib/Profinite/clopen_limit.lean
 apply_nolint Profinite.exists_image inhabited_nonempty
 apply_nolint Profinite.image_stabilizes inhabited_nonempty
 
 -- for_mathlib/abelian_category.lean
-apply_nolint category_theory.is_zero doc_blame
-apply_nolint category_theory.is_zero.eq_of_src def_lemma doc_blame
-apply_nolint category_theory.is_zero.eq_of_tgt def_lemma doc_blame
-apply_nolint category_theory.is_zero.iso doc_blame
-apply_nolint category_theory.is_zero.iso_zero doc_blame
-
--- for_mathlib/abelian_group_object.lean
-apply_nolint category_theory.SheafOfTypes.Ab doc_blame
-apply_nolint category_theory.SheafOfTypes.Group doc_blame
-apply_nolint category_theory.SheafOfTypes.product_cone doc_blame
-apply_nolint category_theory.SheafOfTypes.product_cone_is_limit doc_blame
-apply_nolint category_theory.SheafOfTypes.product_sheaf doc_blame
-apply_nolint category_theory.SheafOfTypes.product_sheaf.fst doc_blame
-apply_nolint category_theory.SheafOfTypes.product_sheaf.lift doc_blame
-apply_nolint category_theory.SheafOfTypes.product_sheaf.snd doc_blame
-apply_nolint category_theory.SheafOfTypes.product_sheaf.swap doc_blame
-apply_nolint category_theory.SheafOfTypes.terminal_cone doc_blame
-apply_nolint category_theory.SheafOfTypes.terminal_cone_is_limit doc_blame
-apply_nolint category_theory.SheafOfTypes.terminal_sheaf doc_blame
-apply_nolint category_theory.SheafOfTypes.terminal_sheaf.to doc_blame
-
--- for_mathlib/derived_functor.lean
-apply_nolint category_theory.functor.left_derived.δ doc_blame
-
--- for_mathlib/exact_seq.lean
-apply_nolint category_theory.arrow.op doc_blame
-apply_nolint category_theory.arrow.unop doc_blame
-apply_nolint category_theory.exact.quiver.hom.op.exact unused_arguments
-apply_nolint category_theory.exact.quiver.hom.unop.exact unused_arguments
-apply_nolint category_theory.exact_seq.arrow_congr doc_blame
-
--- for_mathlib/ext.lean
-apply_nolint Ext.δ doc_blame
+apply_nolint category_theory.is_zero.eq_of_src def_lemma
+apply_nolint category_theory.is_zero.eq_of_tgt def_lemma
 
 -- for_mathlib/fin_functor.lean
-apply_nolint category_theory.fin3_functor_mk doc_blame
-apply_nolint category_theory.fin3_functor_mk.map' doc_blame
-apply_nolint category_theory.fin3_functor_mk.map'_comp def_lemma doc_blame
-apply_nolint category_theory.fin4_functor_mk doc_blame
-apply_nolint category_theory.fin4_functor_mk.map' doc_blame
-apply_nolint category_theory.fin4_functor_mk.map'_comp def_lemma doc_blame
+apply_nolint category_theory.fin3_functor_mk.map'_comp def_lemma
+apply_nolint category_theory.fin4_functor_mk.map'_comp def_lemma
 
 -- for_mathlib/homological_complex.lean
-apply_nolint homological_complex.Fst doc_blame unused_arguments
-apply_nolint homological_complex.Fst_Snd doc_blame
-apply_nolint homological_complex.Snd doc_blame unused_arguments
-apply_nolint homological_complex.Snd_Trd doc_blame
-apply_nolint homological_complex.Trd doc_blame unused_arguments
-apply_nolint homological_complex.cycles_to_homology doc_blame
-apply_nolint homological_complex.homology_to_mod_boundaries doc_blame
-apply_nolint homological_complex.mod_boundaries doc_blame unused_arguments
-apply_nolint homological_complex.mod_boundaries_functor doc_blame
-apply_nolint homological_complex.mod_boundaries_map doc_blame
-apply_nolint homological_complex.mod_boundaries_to_cycles doc_blame
-apply_nolint homological_complex.snake_diagram doc_blame
-apply_nolint homological_complex.snake_input doc_blame
-apply_nolint homological_complex.δ doc_blame
+apply_nolint homological_complex.Fst unused_arguments
+apply_nolint homological_complex.Snd unused_arguments
+apply_nolint homological_complex.Trd unused_arguments
+apply_nolint homological_complex.mod_boundaries unused_arguments
 
 -- for_mathlib/horseshoe.lean
-apply_nolint short_exact_sequence.biprod_factors def_lemma doc_blame unused_arguments
-apply_nolint short_exact_sequence.horseshoe doc_blame
-apply_nolint short_exact_sequence.horseshoe_base doc_blame
-apply_nolint short_exact_sequence.horseshoe_base_π doc_blame
-apply_nolint short_exact_sequence.horseshoe_d doc_blame
-apply_nolint short_exact_sequence.horseshoe_ker doc_blame unused_arguments
-apply_nolint short_exact_sequence.horseshoe_ker_ι doc_blame
-apply_nolint short_exact_sequence.horseshoe_obj doc_blame
-apply_nolint short_exact_sequence.horseshoe_step doc_blame
-apply_nolint short_exact_sequence.horseshoe_to_single₁ doc_blame
-apply_nolint short_exact_sequence.horseshoe_π doc_blame
-
--- for_mathlib/is_locally_constant.lean
-apply_nolint indexed_partition.discrete_quotient doc_blame
-apply_nolint indexed_partition.discrete_quotient_equiv doc_blame
+apply_nolint short_exact_sequence.biprod_factors def_lemma unused_arguments
+apply_nolint short_exact_sequence.horseshoe_ker unused_arguments
 
 -- for_mathlib/order.lean
 apply_nolint Inter_eq inhabited_nonempty
 apply_nolint eventually_constant inhabited_nonempty
 apply_nolint exists_le_finset inhabited_nonempty
 
--- for_mathlib/projectives.lean
-apply_nolint chain_complex.is_projective_resolution doc_blame
-apply_nolint chain_complex.is_projective_resolution.mk_ProjectiveResolution doc_blame
-
--- for_mathlib/pullbacks.lean
-apply_nolint category_theory.equivalence.is_limit_pullback_cone doc_blame
-apply_nolint category_theory.equivalence.pullback_cone doc_blame
-
 -- for_mathlib/rational_cones.lean
-apply_nolint down_two doc_blame
-apply_nolint extended_half_spaces doc_blame
-apply_nolint extended_half_spaces_index doc_blame
 apply_nolint extended_le_span unused_arguments
-apply_nolint index_up_one doc_blame
-apply_nolint nnrat_module doc_blame
-apply_nolint set_down_one doc_blame
-apply_nolint set_up_one doc_blame
-apply_nolint up_two doc_blame
 
 -- for_mathlib/short_exact_sequence.lean
-apply_nolint category_theory.functor.map_short_exact_sequence_of_split doc_blame
-apply_nolint category_theory.short_exact_sequence doc_blame
-apply_nolint category_theory.short_exact_sequence.Fst doc_blame
-apply_nolint category_theory.short_exact_sequence.Functor doc_blame
-apply_nolint category_theory.short_exact_sequence.Snd doc_blame
-apply_nolint category_theory.short_exact_sequence.Trd doc_blame
-apply_nolint category_theory.short_exact_sequence.aux_tac doc_blame
-apply_nolint category_theory.short_exact_sequence.comp doc_blame
-apply_nolint category_theory.short_exact_sequence.f_nat doc_blame
-apply_nolint category_theory.short_exact_sequence.functor doc_blame
-apply_nolint category_theory.short_exact_sequence.functor_map doc_blame
-apply_nolint category_theory.short_exact_sequence.g_nat doc_blame
-apply_nolint category_theory.short_exact_sequence.hom doc_blame
-apply_nolint category_theory.short_exact_sequence.hom_inj doc_blame
-apply_nolint category_theory.short_exact_sequence.id doc_blame
-apply_nolint category_theory.short_exact_sequence.iso_of_components doc_blame
-apply_nolint category_theory.short_exact_sequence.iso_of_components' doc_blame
-apply_nolint category_theory.short_exact_sequence.left_split.splitting doc_blame
-apply_nolint category_theory.short_exact_sequence.mk_of_split doc_blame
-apply_nolint category_theory.short_exact_sequence.mk_of_split' doc_blame
-apply_nolint category_theory.short_exact_sequence.mk_split doc_blame
-apply_nolint category_theory.short_exact_sequence.right_split.splitting doc_blame
 apply_nolint category_theory.short_exact_sequence.snd_is_iso unused_arguments
 
 -- for_mathlib/simplicial/iso.lean
 apply_nolint category_theory.simplicial_object.is_iso_of fails_quickly
 
 -- for_mathlib/snake_lemma.lean
-apply_nolint category_theory.has_snake_lemma doc_blame
-apply_nolint category_theory.is_snake_input doc_blame
-apply_nolint category_theory.is_snake_input.aux_simp doc_blame
-apply_nolint category_theory.is_snake_input.bottom_left_cokernel_to doc_blame
-apply_nolint category_theory.is_snake_input.bottom_right_to_coker_row₂ doc_blame
-apply_nolint category_theory.is_snake_input.cokernel_to doc_blame
-apply_nolint category_theory.is_snake_input.cokernel_to_top_right_kernel_to_right_kernel doc_blame
-apply_nolint category_theory.is_snake_input.from_δ_aux doc_blame
-apply_nolint category_theory.is_snake_input.ker_row₁_to_top_left doc_blame
-apply_nolint category_theory.is_snake_input.left_cokernel_to_kernel_bottom_left_cokernel_to doc_blame
-apply_nolint category_theory.is_snake_input.to_kernel doc_blame
-apply_nolint category_theory.is_snake_input.to_top_right_kernel doc_blame
-apply_nolint category_theory.is_snake_input.to_δ_aux doc_blame
-apply_nolint category_theory.is_snake_input.δ doc_blame
-apply_nolint category_theory.is_snake_input.δ_aux doc_blame
-apply_nolint category_theory.snake_diagram.hom doc_blame
-apply_nolint category_theory.snake_diagram.hom_tac doc_blame
-apply_nolint category_theory.snake_diagram.map_tac doc_blame
-apply_nolint category_theory.snake_diagram.mk_functor doc_blame
-apply_nolint category_theory.snake_diagram.mk_functor' doc_blame
-apply_nolint category_theory.snake_diagram.mk_functor'' doc_blame
-apply_nolint category_theory.snake_diagram.mk_functor.col doc_blame
-apply_nolint category_theory.snake_diagram.mk_functor.map' doc_blame
-apply_nolint category_theory.snake_diagram.mk_functor.row doc_blame
-apply_nolint category_theory.snake_diagram.mk_functor.square_commutes doc_blame
 apply_nolint category_theory.snake_diagram.mk_functor.square_commutes_col unused_arguments
 apply_nolint category_theory.snake_diagram.mk_functor.square_commutes_comp_col unused_arguments
 apply_nolint category_theory.snake_diagram.mk_functor.square_commutes_comp_row unused_arguments
 apply_nolint category_theory.snake_diagram.mk_functor.square_commutes_row unused_arguments
-apply_nolint category_theory.snake_diagram.mk_of_short_exact_sequence_hom doc_blame
-apply_nolint category_theory.snake_diagram.o doc_blame
-apply_nolint category_theory.snake_input doc_blame
-apply_nolint category_theory.snake_input.kernel_sequence doc_blame
-apply_nolint category_theory.snake_input.mk_of_short_exact_sequence_hom doc_blame
-apply_nolint category_theory.snake_input.proj doc_blame
-apply_nolint category_theory.snake_lemma.δ doc_blame
-apply_nolint eq.lhs doc_blame unused_arguments
-apply_nolint eq.rhs doc_blame unused_arguments
+apply_nolint eq.lhs unused_arguments
+apply_nolint eq.rhs unused_arguments
 
 -- for_mathlib/topology.lean
-apply_nolint homeomorph.totally_disconnected_space def_lemma doc_blame
-
--- hacks_and_tricks/by_exactI_hack.lean
-apply_nolint exact_notation doc_blame
-
--- laurent_measures/basic.lean
-apply_nolint laurent_measures doc_blame
-apply_nolint laurent_measures.add doc_blame
-apply_nolint laurent_measures.finset_map doc_blame
-apply_nolint laurent_measures.functor doc_blame
-apply_nolint laurent_measures.laurent_measures_bdd_equiv doc_blame
-apply_nolint laurent_measures.laurent_measures_bdd_functor doc_blame
-apply_nolint laurent_measures.laurent_measures_bdd_homeo doc_blame
-apply_nolint laurent_measures.map doc_blame
-apply_nolint laurent_measures.map_hom doc_blame
-apply_nolint laurent_measures.mk_seq doc_blame
-apply_nolint laurent_measures.neg doc_blame
-apply_nolint laurent_measures.sub doc_blame
-apply_nolint laurent_measures.transition doc_blame
-apply_nolint laurent_measures.truncate doc_blame
-apply_nolint laurent_measures.zero doc_blame
-
--- laurent_measures/bounded.lean
-apply_nolint laurent_measures_bdd doc_blame
-apply_nolint laurent_measures_bdd.map doc_blame
+apply_nolint homeomorph.totally_disconnected_space def_lemma
 
 -- laurent_measures/thm69.lean
-apply_nolint laurent_measures.to_Rfct doc_blame
-apply_nolint thm71.aux_y doc_blame unused_arguments
+apply_nolint thm71.aux_y unused_arguments
 apply_nolint thm71.eventually_le ge_or_gt
 apply_nolint thm71.eventually_le_one ge_or_gt
 apply_nolint thm71.eventually_pos_floor ge_or_gt
@@ -351,59 +96,16 @@ apply_nolint SemiNormedGroup.normed_with_aut_LocallyConstant fails_quickly
 -- normed_group/pseudo_normed_group.lean
 apply_nolint semi_normed_group.pseudo_normed_group instance_priority
 
--- normed_spectral.lean
-apply_nolint system_of_double_complexes.normed_spectral_conditions.h_truncate doc_blame
-apply_nolint system_of_double_complexes.normed_spectral_conditions.of_le doc_blame
-apply_nolint system_of_double_complexes.normed_spectral_conditions.truncate doc_blame
-apply_nolint system_of_double_complexes.normed_spectral_conditions.δ_truncate doc_blame
-apply_nolint system_of_double_complexes.normed_spectral_homotopy doc_blame
-apply_nolint system_of_double_complexes.normed_spectral_homotopy.of_iso doc_blame
-apply_nolint system_of_double_complexes.truncate doc_blame
-apply_nolint system_of_double_complexes.truncate.quotient_map doc_blame
-
--- polyhedral_lattice/basic.lean
-apply_nolint polyhedral_lattice doc_blame
-apply_nolint polyhedral_lattice_hom.to_normed_group_hom doc_blame
-
--- polyhedral_lattice/category.lean
-apply_nolint PolyhedralLattice.iso_mk doc_blame
-apply_nolint PolyhedralLattice.to_SemiNormedGroup doc_blame
-
 -- polyhedral_lattice/cech.lean
-apply_nolint PolyhedralLattice.Cech_augmentation_map doc_blame unused_arguments
-apply_nolint PolyhedralLattice.Cech_conerve doc_blame unused_arguments
-apply_nolint PolyhedralLattice.Cech_conerve.finsupp_fin_one_iso doc_blame
-apply_nolint PolyhedralLattice.Cech_conerve.map_succ_zero doc_blame
-apply_nolint PolyhedralLattice.Cech_conerve.map_succ_zero_aux doc_blame
-apply_nolint PolyhedralLattice.Cech_conerve.obj doc_blame
-apply_nolint PolyhedralLattice.Cech_conerve.obj_zero_iso doc_blame
+apply_nolint PolyhedralLattice.Cech_augmentation_map unused_arguments
+apply_nolint PolyhedralLattice.Cech_conerve unused_arguments
 apply_nolint PolyhedralLattice.Cech_conerve.preorder_hom_eq_id simp_var_head
-apply_nolint PolyhedralLattice.Cech_conerve.π_hom doc_blame
 apply_nolint PolyhedralLattice.augmentation_map_equalizes unused_arguments
-apply_nolint PolyhedralLattice.augmented_Cech_conerve doc_blame unused_arguments
-apply_nolint polyhedral_lattice.conerve.L doc_blame
-apply_nolint polyhedral_lattice.conerve.lift' doc_blame
-apply_nolint polyhedral_lattice.conerve.map doc_blame
-apply_nolint polyhedral_lattice.conerve.map_add_hom doc_blame
-apply_nolint polyhedral_lattice.conerve.obj doc_blame
-apply_nolint polyhedral_lattice.conerve.π doc_blame
-
--- polyhedral_lattice/cosimplicial.lean
-apply_nolint PolyhedralLattice.augmented_cosimplicial doc_blame
-apply_nolint PolyhedralLattice.cosimplicial doc_blame
-apply_nolint PolyhedralLattice.cosimplicial_augmentation_map doc_blame
-apply_nolint PolyhedralLattice.cosimplicial_lift doc_blame
-apply_nolint PolyhedralLattice.diagonal_embedding doc_blame
-apply_nolint PolyhedralLattice.rescaled_power doc_blame
+apply_nolint PolyhedralLattice.augmented_Cech_conerve unused_arguments
 
 -- polyhedral_lattice/finsupp.lean
 apply_nolint finsupp.has_norm unused_arguments
-apply_nolint generates_norm.finsupp_generators doc_blame unused_arguments
-
--- polyhedral_lattice/pseudo_normed_group.lean
-apply_nolint polyhedral_lattice.Tinv doc_blame
-apply_nolint polyhedral_lattice.Tinv' doc_blame
-apply_nolint polyhedral_lattice.add_monoid_hom.incl doc_blame
+apply_nolint generates_norm.finsupp_generators unused_arguments
 
 -- polyhedral_lattice/quotient.lean
 apply_nolint polyhedral_lattice.quotient_finite unused_arguments
@@ -412,384 +114,105 @@ apply_nolint polyhedral_lattice.quotient_finite unused_arguments
 apply_nolint polyhedral_lattice.discrete_topology instance_priority
 apply_nolint polyhedral_lattice.profinitely_filtered_pseudo_normed_group instance_priority
 
--- prop819/strict_complex_iso.lean
-apply_nolint SemiNormedGroup.strict_iso doc_blame
-apply_nolint strict_iso doc_blame
-
 -- prop_92/concrete.lean
-apply_nolint embedding.g doc_blame
-apply_nolint embedding.h doc_blame
 apply_nolint locally_constant.comap_map unused_arguments
 apply_nolint locally_constant.map_zero unused_arguments
 apply_nolint locally_constant.norm_map_aut unused_arguments
 apply_nolint partial_sum_geom unused_arguments
 apply_nolint semi_normed_group.inhabited instance_priority
 
--- prop_92/extension_profinite.lean
-apply_nolint embedding.discrete_quotient_equiv doc_blame
-apply_nolint embedding.discrete_quotient_map doc_blame
-apply_nolint embedding.extend doc_blame
-apply_nolint embedding.locally_constant_extend doc_blame
-
 -- prop_92/prop_92.lean
-apply_nolint CLCFP.T_inv_sub_Tinv doc_blame unused_arguments
+apply_nolint CLCFP.T_inv_sub_Tinv unused_arguments
 
 -- pseudo_normed_group/CLC.lean
-apply_nolint CLC.T doc_blame unused_arguments
-apply_nolint CLC.T_inv doc_blame
-apply_nolint CLCFP.T doc_blame
-apply_nolint CLCFP.T_inv doc_blame
+apply_nolint CLC.T unused_arguments
 apply_nolint CLCFP.T_inv_app unused_arguments
 apply_nolint CLCFP.T_inv_eq unused_arguments
-apply_nolint CLCFP.Tinv doc_blame unused_arguments
-apply_nolint CLCFP.res doc_blame
-apply_nolint breen_deligne.universal_map.eval_CLCFP doc_blame
-
--- pseudo_normed_group/FP.lean
-apply_nolint Filtration doc_blame
-apply_nolint Filtration.Tinv₀ doc_blame
-apply_nolint Filtration.cast_le doc_blame
-apply_nolint Filtration.pi_iso doc_blame
-apply_nolint Filtration.res doc_blame
-apply_nolint FiltrationPow.Tinv doc_blame
-apply_nolint FiltrationPow.cast_le doc_blame
-apply_nolint FiltrationPow.mul_iso doc_blame
-apply_nolint Pow_Pow_X doc_blame
-apply_nolint Pow_mul doc_blame
-apply_nolint breen_deligne.basic_universal_map.eval_FP doc_blame
-apply_nolint profinitely_filtered_pseudo_normed_group_with_Tinv.Tinv₀_hom doc_blame
-apply_nolint pseudo_normed_group.filtration_obj doc_blame
+apply_nolint CLCFP.Tinv unused_arguments
 
 -- pseudo_normed_group/LC.lean
-apply_nolint LC.T doc_blame
-apply_nolint LC.T_inv doc_blame unused_arguments
+apply_nolint LC.T_inv unused_arguments
 apply_nolint LC.obj.normed_with_aut fails_quickly
-apply_nolint LCFP.T doc_blame unused_arguments
-apply_nolint LCFP.T_inv doc_blame
-apply_nolint LCFP.Tinv doc_blame unused_arguments
+apply_nolint LCFP.T unused_arguments
+apply_nolint LCFP.Tinv unused_arguments
 apply_nolint LCFP.obj.normed_with_aut fails_quickly
-apply_nolint LCFP.res doc_blame
-apply_nolint breen_deligne.basic_universal_map.eval_LCFP doc_blame
-apply_nolint breen_deligne.basic_universal_map.eval_LCFP' doc_blame
-apply_nolint breen_deligne.universal_map.eval_LCFP doc_blame
-apply_nolint breen_deligne.universal_map.eval_LCFP' doc_blame
 apply_nolint breen_deligne.universal_map.norm_eval_LCFP_le unused_arguments
 
 -- pseudo_normed_group/Tinv.lean
-apply_nolint CLCFPTinv.res doc_blame
-apply_nolint CLCFPTinv₂ doc_blame unused_arguments
+apply_nolint CLCFPTinv₂ unused_arguments
 apply_nolint CLCFPTinv₂.map_norm_noninc unused_arguments
-apply_nolint CLCFPTinv₂.res doc_blame unused_arguments
-apply_nolint CLCTinv doc_blame
-apply_nolint CLCTinv.F doc_blame
-apply_nolint CLCTinv.map doc_blame
-apply_nolint CLCTinv.map_comp_ι def_lemma doc_blame
-apply_nolint CLCTinv.map_iso doc_blame
-apply_nolint CLCTinv.map_nat doc_blame
-apply_nolint CLCTinv.map_nat_iso doc_blame
-apply_nolint CLCTinv.ι doc_blame
-apply_nolint SemiNormedGroup.equalizer doc_blame
-apply_nolint SemiNormedGroup.equalizer.F doc_blame
-apply_nolint SemiNormedGroup.equalizer.map doc_blame
+apply_nolint CLCFPTinv₂.res unused_arguments
+apply_nolint CLCTinv.map_comp_ι def_lemma
 apply_nolint SemiNormedGroup.equalizer.map_id unused_arguments
-apply_nolint SemiNormedGroup.equalizer.map_nat doc_blame
-apply_nolint SemiNormedGroup.equalizer.ι doc_blame
-apply_nolint breen_deligne.universal_map.eval_CLCFPTinv doc_blame
 apply_nolint breen_deligne.universal_map.eval_CLCFPTinv_norm_noninc unused_arguments
-apply_nolint breen_deligne.universal_map.eval_CLCFPTinv₂ doc_blame
 apply_nolint breen_deligne.universal_map.norm_eval_CLCFPTinv_le unused_arguments
 
 -- pseudo_normed_group/basic.lean
-apply_nolint pseudo_normed_group.level doc_blame
-apply_nolint pseudo_normed_group.splittable doc_blame
 apply_nolint pseudo_normed_group.to_add_comm_group instance_priority
 
--- pseudo_normed_group/category.lean
-apply_nolint CompHausFiltPseuNormGrp.bundled_hom doc_blame
-apply_nolint CompHausFiltPseuNormGrp₁.cone_point doc_blame
-apply_nolint CompHausFiltPseuNormGrp₁.cone_point_type doc_blame
-apply_nolint CompHausFiltPseuNormGrp₁.cone_point_type.filt doc_blame
-apply_nolint CompHausFiltPseuNormGrp₁.cone_point_type.filt_equiv doc_blame
-apply_nolint CompHausFiltPseuNormGrp₁.cone_point_type.filt_homeo doc_blame
-apply_nolint CompHausFiltPseuNormGrp₁.cone_point_type.incl doc_blame
-apply_nolint CompHausFiltPseuNormGrp₁.cone_point_type.index doc_blame
-apply_nolint CompHausFiltPseuNormGrp₁.cone_point_type.preimage doc_blame
-apply_nolint CompHausFiltPseuNormGrp₁.cone_point_type_filt doc_blame
-apply_nolint CompHausFiltPseuNormGrp₁.cone_point_type_filt.add' doc_blame
-apply_nolint CompHausFiltPseuNormGrp₁.cone_point_type_filt.trans doc_blame
-apply_nolint CompHausFiltPseuNormGrp₁.cone_point_type_setoid doc_blame
-apply_nolint CompHausFiltPseuNormGrp₁.enlarging_functor doc_blame
-apply_nolint CompHausFiltPseuNormGrp₁.index doc_blame
-apply_nolint CompHausFiltPseuNormGrp₁.level doc_blame
-apply_nolint CompHausFiltPseuNormGrp₁.limit_cone doc_blame
-apply_nolint CompHausFiltPseuNormGrp₁.limit_cone_is_limit doc_blame
-apply_nolint CompHausFiltPseuNormGrp₁.limit_cone_lift doc_blame
-apply_nolint CompHausFiltPseuNormGrp₁.limit_cone_lift_map doc_blame
-apply_nolint CompHausFiltPseuNormGrp₁.preimage doc_blame
-apply_nolint CompHausFiltPseuNormGrp₁.proj doc_blame
-apply_nolint ProFiltPseuNormGrp.bundled_hom doc_blame
-apply_nolint ProFiltPseuNormGrp.to_CompHausFilt doc_blame
-apply_nolint ProFiltPseuNormGrpWithTinv.Pow doc_blame
-apply_nolint ProFiltPseuNormGrpWithTinv.Pow_Pow_X doc_blame
-apply_nolint ProFiltPseuNormGrpWithTinv.Pow_Pow_X_equiv doc_blame
-apply_nolint ProFiltPseuNormGrpWithTinv.Pow_mul doc_blame
-apply_nolint ProFiltPseuNormGrpWithTinv.iso_of_equiv_of_strict' doc_blame
-apply_nolint ProFiltPseuNormGrpWithTinv₁ doc_blame
-apply_nolint ProFiltPseuNormGrpWithTinv₁.Tinv_limit doc_blame
-apply_nolint ProFiltPseuNormGrpWithTinv₁.Tinv_limit_add_monoid_hom doc_blame
-apply_nolint ProFiltPseuNormGrpWithTinv₁.Tinv_limit_fun doc_blame
-apply_nolint ProFiltPseuNormGrpWithTinv₁.Tinv_limit_fun' doc_blame
-apply_nolint ProFiltPseuNormGrpWithTinv₁.Tinv_limit_fun_aux doc_blame
-apply_nolint ProFiltPseuNormGrpWithTinv₁.enlarging_functor doc_blame
-apply_nolint ProFiltPseuNormGrpWithTinv₁.limit_cone doc_blame
-apply_nolint ProFiltPseuNormGrpWithTinv₁.limit_cone_is_limit doc_blame
-apply_nolint ProFiltPseuNormGrpWithTinv₁.to_PFPNG₁ doc_blame
-apply_nolint ProFiltPseuNormGrp₁ doc_blame
-apply_nolint ProFiltPseuNormGrp₁.enlarging_functor doc_blame
-apply_nolint ProFiltPseuNormGrp₁.limit_cone doc_blame
-apply_nolint ProFiltPseuNormGrp₁.limit_cone_is_limit doc_blame
-apply_nolint ProFiltPseuNormGrp₁.to_CHFPNG₁ doc_blame
-
--- pseudo_normed_group/homotopy.lean
-apply_nolint breen_deligne.BD_map doc_blame
-apply_nolint breen_deligne.BD_map₂ doc_blame
-apply_nolint breen_deligne.BD_system_map doc_blame
-
 -- pseudo_normed_group/profinitely_filtered.lean
-apply_nolint comphaus_filtered_pseudo_normed_group.filtration_pi_homeo doc_blame
-apply_nolint comphaus_filtered_pseudo_normed_group.pi_map doc_blame
-apply_nolint comphaus_filtered_pseudo_normed_group.pi_proj doc_blame
-apply_nolint comphaus_filtered_pseudo_normed_group.prod_pi_homeo_pi_prod doc_blame unused_arguments
-apply_nolint comphaus_filtered_pseudo_normed_group_hom doc_blame
-apply_nolint comphaus_filtered_pseudo_normed_group_hom.add doc_blame
-apply_nolint comphaus_filtered_pseudo_normed_group_hom.bound_by doc_blame
-apply_nolint comphaus_filtered_pseudo_normed_group_hom.neg doc_blame
-apply_nolint comphaus_filtered_pseudo_normed_group_hom.strict doc_blame
-apply_nolint comphaus_filtered_pseudo_normed_group_hom.strict.to_schfpsng_hom doc_blame
-apply_nolint comphaus_filtered_pseudo_normed_group_hom.sub doc_blame
-apply_nolint comphaus_filtered_pseudo_normed_group_hom.to_add_monoid_hom_hom doc_blame
-apply_nolint strict_comphaus_filtered_pseudo_normed_group_hom doc_blame
-apply_nolint strict_comphaus_filtered_pseudo_normed_group_hom.level doc_blame
-apply_nolint strict_comphaus_filtered_pseudo_normed_group_hom.to_add_monoid_hom doc_blame
-apply_nolint strict_comphaus_filtered_pseudo_normed_group_hom.to_chfpsng_hom doc_blame
-
--- pseudo_normed_group/sum_hom.lean
-apply_nolint profinitely_filtered_pseudo_normed_group.rescale_proj doc_blame
-apply_nolint profinitely_filtered_pseudo_normed_group.sum_hom doc_blame
-apply_nolint profinitely_filtered_pseudo_normed_group.unrescale doc_blame
-apply_nolint profinitely_filtered_pseudo_normed_group_with_Tinv.sum_hom doc_blame
-
--- pseudo_normed_group/with_Tinv.lean
-apply_nolint profinitely_filtered_pseudo_normed_group_with_Tinv.Tinv₀ doc_blame
-apply_nolint profinitely_filtered_pseudo_normed_group_with_Tinv.pi_map doc_blame
-apply_nolint profinitely_filtered_pseudo_normed_group_with_Tinv.pi_proj doc_blame
-apply_nolint profinitely_filtered_pseudo_normed_group_with_Tinv_hom doc_blame
-apply_nolint profinitely_filtered_pseudo_normed_group_with_Tinv_hom.mk' doc_blame
+apply_nolint comphaus_filtered_pseudo_normed_group.prod_pi_homeo_pi_prod unused_arguments
 
 -- real_measures.lean
-apply_nolint real_measures doc_blame
-apply_nolint real_measures.functor doc_blame
-apply_nolint real_measures.map doc_blame
-apply_nolint real_measures.map_hom doc_blame unused_arguments
+apply_nolint real_measures.map_hom unused_arguments
 apply_nolint real_measures.nnnorm_apply_le_of_nnnorm_le unused_arguments
 
 -- rescale/FiltrationPow.lean
-apply_nolint Filtration_cast_eq doc_blame unused_arguments
+apply_nolint Filtration_cast_eq unused_arguments
 
 -- rescale/basic.lean
-apply_nolint rescale doc_blame
 apply_nolint rescale.add_comm_group fails_quickly
 apply_nolint rescale.add_comm_monoid fails_quickly
-apply_nolint rescale.of doc_blame
-
--- rescale/normed_group.lean
-apply_nolint SemiNormedGroup.iso_rescale doc_blame
-apply_nolint SemiNormedGroup.of_rescale doc_blame
-apply_nolint SemiNormedGroup.rescale doc_blame
-apply_nolint SemiNormedGroup.scale doc_blame
-apply_nolint SemiNormedGroup.to_rescale doc_blame
 
 -- rescale/polyhedral_lattice.lean
-apply_nolint PolyhedralLattice.rescale doc_blame
-apply_nolint generates_norm.rescale_generators doc_blame unused_arguments
+apply_nolint generates_norm.rescale_generators unused_arguments
 
 -- rescale/pseudo_normed_group.lean
-apply_nolint ProFiltPseuNormGrpWithTinv.rescale doc_blame
-apply_nolint rescale.Tinv doc_blame
-apply_nolint rescale.Tinv' doc_blame
 apply_nolint rescale.comphaus_filtered_pseudo_normed_group fails_quickly
 apply_nolint rescale.profinitely_filtered_pseudo_normed_group fails_quickly
 apply_nolint rescale.profinitely_filtered_pseudo_normed_group_with_Tinv fails_quickly
 apply_nolint rescale.pseudo_normed_group fails_quickly
 
 -- statement.lean
-apply_nolint first_target_stmt doc_blame unused_arguments
-
--- system_of_complexes/completion.lean
-apply_nolint system_of_complexes.completion doc_blame
-
--- system_of_complexes/rescale.lean
-apply_nolint nnreal.MulLeft doc_blame
-apply_nolint nnreal.MulRight doc_blame
-apply_nolint system_of_complexes.ScaleIndexLeft doc_blame
-apply_nolint system_of_complexes.ScaleIndexRight doc_blame
-apply_nolint system_of_complexes.rescale doc_blame
-apply_nolint system_of_complexes.rescale_functor doc_blame
-apply_nolint system_of_complexes.rescale_nat_trans doc_blame
-apply_nolint system_of_complexes.scale doc_blame
-apply_nolint system_of_complexes.scale_index_left doc_blame
-apply_nolint system_of_complexes.scale_index_right doc_blame
-apply_nolint system_of_complexes.to_rescale doc_blame
-apply_nolint thm95.rescale_functor' doc_blame
-apply_nolint thm95.rescale_nat_trans' doc_blame
-apply_nolint thm95.scale' doc_blame
-apply_nolint thm95.to_rescale' doc_blame
-
--- system_of_complexes/truncate.lean
-apply_nolint SemiNormedGroup.truncate doc_blame
-apply_nolint SemiNormedGroup.truncate.X doc_blame
-apply_nolint SemiNormedGroup.truncate.d doc_blame
-apply_nolint SemiNormedGroup.truncate.map doc_blame
-apply_nolint SemiNormedGroup.truncate.map_f doc_blame
-apply_nolint SemiNormedGroup.truncate.obj doc_blame
-apply_nolint system_of_complexes.truncate doc_blame
+apply_nolint first_target_stmt unused_arguments
 
 -- thm95/col_exact.lean
-apply_nolint thm95.CLCFP' doc_blame unused_arguments
-apply_nolint thm95.Cech_nerve' doc_blame
-apply_nolint thm95.Cech_nerve_level doc_blame
-apply_nolint thm95.Cech_nerve_level_hom doc_blame
-apply_nolint thm95.Cech_nerve_level_hom' doc_blame
-apply_nolint thm95.Cech_nerve_level_hom.s doc_blame
-apply_nolint thm95.Cech_nerve_level_hom.s' doc_blame
-apply_nolint thm95.Cech_nerve_level_hom.z doc_blame
-apply_nolint thm95.Cech_nerve_level_hom.z' doc_blame
-apply_nolint thm95.Cech_nerve_level_hom.z₀ doc_blame
-apply_nolint thm95.Cech_nerve_level_hom.z₀' doc_blame
-apply_nolint thm95.Cech_nerve_level_inv' doc_blame
-apply_nolint thm95.Cech_nerve_level_iso doc_blame
+apply_nolint thm95.CLCFP' unused_arguments
 apply_nolint thm95.FLC_arrow_hom' unused_arguments
-apply_nolint thm95.FLC_arrow_iso doc_blame
-apply_nolint thm95.FLC_arrow_iso_aux doc_blame
-apply_nolint thm95.FLC_complex_aug_iso doc_blame
-apply_nolint thm95.FLC_complex_aug_iso_obj doc_blame
-apply_nolint thm95.aug_map doc_blame
-apply_nolint thm95.col_complex doc_blame
-apply_nolint thm95.col_complex_aux doc_blame
-apply_nolint thm95.col_complex_iso doc_blame
-apply_nolint thm95.col_complex_iso_aux2 doc_blame
-apply_nolint thm95.col_complex_iso_obj doc_blame
-apply_nolint thm95.col_complex_level doc_blame
-apply_nolint thm95.col_complex_level_iso doc_blame
-apply_nolint thm95.col_complex_level_iso_obj doc_blame
-apply_nolint thm95.col_complex_level_iso_obj_X doc_blame
-apply_nolint thm95.col_complex_obj_iso_X_zero doc_blame
-apply_nolint thm95.col_complex_rescaled doc_blame
-apply_nolint thm95.col_complex_rescaled.T_inv_sub_Tinv doc_blame
-apply_nolint thm95.col_complex_rescaled.T_inv_sub_Tinv' doc_blame
-apply_nolint thm95.col_complex_rescaled.T_inv_sub_Tinv_f doc_blame
-apply_nolint thm95.col_complex_rescaled.T_inv_sub_Tinv_f_succ doc_blame unused_arguments
+apply_nolint thm95.col_complex_rescaled.T_inv_sub_Tinv_f_succ unused_arguments
 apply_nolint thm95.col_complex_rescaled.move_pls2 unused_arguments
 apply_nolint thm95.col_exact'_aux1 unused_arguments
 apply_nolint thm95.col_exact'_aux2 unused_arguments
-apply_nolint thm95.double_complex.col' doc_blame
-apply_nolint thm95.double_complex.col'_aux doc_blame
-apply_nolint thm95.double_complex.col_iso doc_blame
-apply_nolint thm95.double_complex.col_iso_obj_X doc_blame
-apply_nolint thm95.double_complex.col_ι doc_blame
-apply_nolint thm95.double_complex.col_ι_f doc_blame
-apply_nolint thm95.double_complex.col_ι_f_succ doc_blame
-apply_nolint thm95.scale_factorial doc_blame
-
--- thm95/col_exact_prep.lean
-apply_nolint system_of_complexes.norm_exact_complex doc_blame
-apply_nolint thm95.FLC_complex doc_blame
-apply_nolint thm95.FLC_complex.AuxSpace doc_blame
-apply_nolint thm95.FLC_complex.AuxSpace.fst doc_blame
-apply_nolint thm95.FLC_complex.AuxSpace.fstₐ doc_blame
-apply_nolint thm95.FLC_complex.AuxSpace.snd doc_blame
-apply_nolint thm95.FLC_complex.AuxSpace.ι doc_blame
-apply_nolint thm95.FLC_complex.aux_space doc_blame
-apply_nolint thm95.FLC_complex.fstₐ_sum_homₐ doc_blame
-apply_nolint thm95.FLC_complex.sum_hom₀ doc_blame
-apply_nolint thm95.FLC_complex.sum_homₐ doc_blame
-apply_nolint thm95.FLC_complex.sum_homₐ_fstₐ doc_blame
-apply_nolint thm95.FLC_complex_arrow doc_blame
 
 -- thm95/constants/default.lean
-apply_nolint helper.N₂ doc_blame
-apply_nolint helper.b doc_blame
-apply_nolint thm95.universal_constants.H' doc_blame
-apply_nolint thm95.universal_constants.K doc_blame
-apply_nolint thm95.universal_constants.K₁ doc_blame
 apply_nolint thm95.universal_constants.K₁_spec unused_arguments
 apply_nolint thm95.universal_constants.b unused_arguments
-apply_nolint thm95.universal_constants.c₀ doc_blame
-apply_nolint thm95.universal_constants.c₀_aux doc_blame unused_arguments
+apply_nolint thm95.universal_constants.c₀_aux unused_arguments
 apply_nolint thm95.universal_constants.fact_κ'_le_k' impossible_instance
-apply_nolint thm95.universal_constants.k doc_blame
-apply_nolint thm95.universal_constants.k₁ doc_blame
-apply_nolint thm95.universal_constants.k₁_sqrt doc_blame
-apply_nolint thm95.universal_constants.y doc_blame
-
--- thm95/constants/spectral_constants.lean
-apply_nolint system_of_double_complexes.normed_spectral.K₀ doc_blame
-apply_nolint system_of_double_complexes.normed_spectral.k₀ doc_blame
-apply_nolint system_of_double_complexes.normed_spectral.ε doc_blame
 
 -- thm95/default.lean
-apply_nolint NSC doc_blame
-apply_nolint thm95.IH doc_blame unused_arguments
+apply_nolint thm95.IH unused_arguments
 
 -- thm95/double_complex.lean
-apply_nolint thm95.Cech_augmentation_map doc_blame
-apply_nolint thm95.Cech_nerve doc_blame unused_arguments
-apply_nolint thm95.cosimplicial_system_of_complexes doc_blame unused_arguments
-apply_nolint thm95.double_complex doc_blame
-apply_nolint thm95.double_complex' doc_blame
-apply_nolint thm95.double_complex_aux doc_blame
-apply_nolint thm95.double_complex_aux_rescaled doc_blame
+apply_nolint thm95.Cech_nerve unused_arguments
+apply_nolint thm95.cosimplicial_system_of_complexes unused_arguments
 
 -- thm95/homotopy.lean
-apply_nolint NSC_htpy doc_blame
-apply_nolint NSH_aux doc_blame
-apply_nolint NSH_aux' doc_blame
-apply_nolint NSH_aux_type doc_blame
-apply_nolint NSH_h doc_blame
-apply_nolint NSH_δ doc_blame unused_arguments
-apply_nolint NSH_δ_res doc_blame unused_arguments
+apply_nolint NSH_δ unused_arguments
+apply_nolint NSH_δ_res unused_arguments
 apply_nolint norm_NSH_h_le unused_arguments
 
--- thm95/modify_complex.lean
-apply_nolint homological_complex.modify doc_blame
-apply_nolint homological_complex.modify_functor doc_blame
-
 -- thm95/pfpng_iso.lean
-apply_nolint ProFiltPseuNormGrpWithTinv.Pow_comm doc_blame
-apply_nolint ProFiltPseuNormGrpWithTinv.Pow_mul_comm doc_blame
-apply_nolint ProFiltPseuNormGrpWithTinv.Pow_mul_comm_obj doc_blame
-apply_nolint ProFiltPseuNormGrpWithTinv.Pow_mul_comm_obj_equiv doc_blame unused_arguments
-apply_nolint ProFiltPseuNormGrpWithTinv.Pow_rescale doc_blame
-apply_nolint ProFiltPseuNormGrpWithTinv.Pow_rescale_aux doc_blame unused_arguments
+apply_nolint ProFiltPseuNormGrpWithTinv.Pow_mul_comm_obj_equiv unused_arguments
+apply_nolint ProFiltPseuNormGrpWithTinv.Pow_rescale_aux unused_arguments
 
 -- thm95/polyhedral_iso.lean
-apply_nolint PolyhedralLattice.Hom_cosimplicial_zero_iso doc_blame
-apply_nolint PolyhedralLattice.Hom_cosimplicial_zero_iso' doc_blame
-apply_nolint PolyhedralLattice.Hom_cosimplicial_zero_iso_aux doc_blame unused_arguments
-apply_nolint PolyhedralLattice.Hom_finsupp_equiv doc_blame unused_arguments
-apply_nolint PolyhedralLattice.Hom_finsupp_iso doc_blame
-apply_nolint PolyhedralLattice.Hom_rescale_hom doc_blame
-apply_nolint PolyhedralLattice.Hom_rescale_iso doc_blame
-apply_nolint PolyhedralLattice.Hom_sum doc_blame unused_arguments
-apply_nolint PolyhedralLattice.rescale_proj doc_blame
-apply_nolint PolyhedralLattice.unrescale doc_blame
+apply_nolint PolyhedralLattice.Hom_cosimplicial_zero_iso_aux unused_arguments
+apply_nolint PolyhedralLattice.Hom_finsupp_equiv unused_arguments
+apply_nolint PolyhedralLattice.Hom_sum unused_arguments
 
 -- thm95/row_iso.lean
-apply_nolint FiltrationPow_rescale_iso doc_blame unused_arguments
-apply_nolint complex_rescale_iso doc_blame
-apply_nolint system_rescale_iso doc_blame
+apply_nolint FiltrationPow_rescale_iso unused_arguments
 apply_nolint thm95.eval_FP_mul unused_arguments
-apply_nolint thm95.mul_complex_iso doc_blame unused_arguments
-apply_nolint thm95.mul_rescale_iso_row_one doc_blame
-apply_nolint thm95.mul_system_iso doc_blame
+apply_nolint thm95.mul_complex_iso unused_arguments
 apply_nolint thm95.quux unused_arguments
