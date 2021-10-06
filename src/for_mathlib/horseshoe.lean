@@ -55,10 +55,7 @@ begin
   rw snake_diagram.mk_functor_map_f1,
   exact A.mono',
 end
-begin
-  dsimp [snake_input.mk_of_short_exact_sequence_hom, snake_diagram.mk_of_short_exact_sequence_hom],
-  refine is_zero_of_iso_of_zero (is_zero_zero _) (limits.cokernel.of_epi _).symm,
-end
+$ is_zero_of_iso_of_zero (is_zero_zero _) (limits.cokernel.of_epi _).symm
 
 def horseshoe_ker_ι [epi f.1] : horseshoe_ker f ⟶ A :=
 { fst := kernel.ι _,
