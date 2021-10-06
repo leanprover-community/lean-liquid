@@ -52,7 +52,7 @@ lemma is_zero_of_top_le_bot [has_zero_object C] (X : C)
     exact subobject.factors_of_le f h (subobject.top_factors f),
   end }
 
-lemma is_zero_of_iso_of_zero {C : Type*} [category C] [has_zero_morphisms C] [has_zero_object C]
+lemma is_zero_of_iso_of_zero {C : Type*} [category C] [has_zero_morphisms C]
   {X : C} (hX : is_zero X) {Y : C} (h : X ≅ Y) : is_zero Y :=
 begin
   refine ⟨λ Z f, _, λ Z f, _⟩,
