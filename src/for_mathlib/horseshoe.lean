@@ -56,7 +56,8 @@ begin
   exact A.mono',
 end
 begin
-  sorry -- this sorry should follow from the `epi` assumption on `f.1`.
+  dsimp [snake_input.mk_of_short_exact_sequence_hom, snake_diagram.mk_of_short_exact_sequence_hom],
+  refine is_zero_of_iso_of_zero (is_zero_zero _) (limits.cokernel.of_epi _).symm,
 end
 
 def horseshoe_ker_ι [epi f.1] : horseshoe_ker f ⟶ A :=
