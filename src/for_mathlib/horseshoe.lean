@@ -127,6 +127,10 @@ begin
     horseshoe_step_comp_eq_zero_assoc, horseshoe_ker_ι_comp_base_π],
 end
 
+local attribute [instance] abelian.pseudoelement.over_to_sort
+  abelian.pseudoelement.hom_to_fun
+  abelian.pseudoelement.has_zero
+
 def horseshoe_to_single₁ :=
 (chain_complex.to_single₀_equiv ((homological_complex.Fst C).obj (horseshoe A)) A.1).symm
 ⟨(short_exact_sequence.Fst C).map (horseshoe_π A),
@@ -151,12 +155,20 @@ lemma horseshoe_is_projective_resolution₁ (A : short_exact_sequence C) :
         abelian.pseudoelement.zero_apply] },
     { obtain ⟨b, hb⟩ := is_snake_input.exists_of_exact exact_kernel_ι _ ha,
       obtain ⟨c, hc⟩ := abelian.pseudoelement.pseudo_surjective_of_epi
-        (horseshoe_base_π (horseshoe_ker (horseshoe_base_π A))).1 b,
+        (horseshoe_base_π (horseshoe_ker _)).1 b,
       refine ⟨c, _⟩,
       rw [short_exact_sequence.comp_fst, abelian.pseudoelement.comp_apply, hc, ← hb],
       refl }
   end,
-  exact := sorry,
+  exact := λ n,
+  begin
+    dsimp [horseshoe_to_single₁],
+    erw [chain_complex.of_d, chain_complex.of_d],
+    refine abelian.pseudoelement.exact_of_pseudo_exact _ _ ⟨λ a , _, λ a ha, _⟩,
+    { rw [← abelian.pseudoelement.comp_apply, ← short_exact_sequence.comp_fst, horseshoe_d_d,
+        short_exact_sequence.hom_zero_fst, abelian.pseudoelement.zero_apply] },
+    { sorry }
+  end,
   epi := show epi (projective.π _), from infer_instance }
 
 end short_exact_sequence
