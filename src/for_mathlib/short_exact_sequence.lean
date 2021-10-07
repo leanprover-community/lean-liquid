@@ -110,11 +110,11 @@ instance : has_zero_morphisms (short_exact_sequence 𝒞) :=
   zero_comp' := by { intros, ext; apply zero_comp }, }
 .
 
-@[simp] lemma zero_fst : (0 : A ⟶ B).2 = 0 := rfl
+@[simp] lemma hom_zero_fst : (0 : A ⟶ B).2 = 0 := rfl
 
-@[simp] lemma zero_snd : (0 : A ⟶ B).2 = 0 := rfl
+@[simp] lemma hom_zero_snd : (0 : A ⟶ B).2 = 0 := rfl
 
-@[simp] lemma zero_trd : (0 : A ⟶ B).3 = 0 := rfl
+@[simp] lemma hom_zero_trd : (0 : A ⟶ B).3 = 0 := rfl
 
 variables {𝒞}
 
