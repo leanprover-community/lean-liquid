@@ -139,7 +139,23 @@ lemma horseshoe_is_projective_resolution₁ (A : short_exact_sequence C) :
   chain_complex.is_projective_resolution
     ((homological_complex.Fst C).obj (horseshoe A)) A.1 (horseshoe_to_single₁ A) :=
 { projective := by rintro (_|n); { show projective (projective.over _), apply_instance },
-  exact₀ := sorry,
+  exact₀ :=
+  begin
+    dsimp [horseshoe_to_single₁, chain_complex.to_single₀_equiv, horseshoe_π],
+    erw [chain_complex.of_d],
+    dsimp [horseshoe_d, horseshoe_step],
+    rw [category.id_comp, ← short_exact_sequence.comp_fst],
+    refine abelian.pseudoelement.exact_of_pseudo_exact _ _ ⟨λ a , _, λ a ha, _⟩,
+    { rw [← abelian.pseudoelement.comp_apply, ← short_exact_sequence.comp_fst, category.assoc,
+        horseshoe_ker_ι_comp_base_π, comp_zero, short_exact_sequence.hom_zero_fst,
+        abelian.pseudoelement.zero_apply] },
+    { obtain ⟨b, hb⟩ := is_snake_input.exists_of_exact exact_kernel_ι _ ha,
+      obtain ⟨c, hc⟩ := abelian.pseudoelement.pseudo_surjective_of_epi
+        (horseshoe_base_π (horseshoe_ker (horseshoe_base_π A))).1 b,
+      refine ⟨c, _⟩,
+      rw [short_exact_sequence.comp_fst, abelian.pseudoelement.comp_apply, hc, ← hb],
+      refl }
+  end,
   exact := sorry,
   epi := show epi (projective.π _), from infer_instance }
 
