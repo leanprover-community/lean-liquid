@@ -57,6 +57,12 @@ begin
 end
 $ is_zero_of_iso_of_zero (is_zero_zero _) (limits.cokernel.of_epi _).symm
 
+@[simp] lemma horseshoe_ker_fst [epi f.1] : (horseshoe_ker f).1 = kernel f.1 := rfl
+
+@[simp] lemma horseshoe_ker_snd [epi f.1] : (horseshoe_ker f).2 = kernel f.2 := rfl
+
+@[simp] lemma horseshoe_ker_trd [epi f.1] : (horseshoe_ker f).3 = kernel f.3 := rfl
+
 def horseshoe_ker_ι [epi f.1] : horseshoe_ker f ⟶ A :=
 { fst := kernel.ι _,
   snd := kernel.ι _,
@@ -139,6 +145,40 @@ begin
   rwa [functor.map_comp, functor.map_zero] at this,
 end⟩
 
+lemma exact_of_epi_comp_kernel.ι_comp_mono {X Y Z W : C} (g : Y ⟶ Z) (h : Z ⟶ W)
+  (f : X ⟶ kernel g) (i : kernel g ⟶ Y) (hf : epi f) (hh : mono h) (hi : i = kernel.ι g) :
+  exact (f ≫ i) (g ≫ h) :=
+begin
+  suffices : exact i g,
+  { letI := hf,
+    letI := hh,
+    letI := this,
+    letI : exact (f ≫ i) g := exact_epi_comp,
+    exact exact_comp_mono },
+  rw [hi],
+  exact exact_kernel_ι
+end
+
+lemma horseshoe_exact₁ (A : short_exact_sequence C) (n : ℕ) :
+  exact (((homological_complex.Fst C).obj (horseshoe A)).d (n + 2) (n + 1))
+    (((homological_complex.Fst C).obj (horseshoe A)).d (n + 1) n) :=
+begin
+  dsimp [horseshoe_to_single₁],
+  erw [chain_complex.of_d, chain_complex.of_d],
+  dsimp [horseshoe_d, horseshoe_step],
+
+  set f := horseshoe_base_π (horseshoe_step A n).1,
+  set g := (horseshoe_step A n).2.2.2.1,
+
+  cases n;
+  convert exact_of_epi_comp_kernel.ι_comp_mono f.1 _ (horseshoe_base_π (horseshoe_ker f)).1 _
+    infer_instance _ _ using 1,
+  sorry,
+  sorry,
+  sorry,
+  sorry,
+end
+
 lemma horseshoe_is_projective_resolution₁ (A : short_exact_sequence C) :
   chain_complex.is_projective_resolution
     ((homological_complex.Fst C).obj (horseshoe A)) A.1 (horseshoe_to_single₁ A) :=
@@ -160,15 +200,7 @@ lemma horseshoe_is_projective_resolution₁ (A : short_exact_sequence C) :
       rw [short_exact_sequence.comp_fst, abelian.pseudoelement.comp_apply, hc, ← hb],
       refl }
   end,
-  exact := λ n,
-  begin
-    dsimp [horseshoe_to_single₁],
-    erw [chain_complex.of_d, chain_complex.of_d],
-    refine abelian.pseudoelement.exact_of_pseudo_exact _ _ ⟨λ a , _, λ a ha, _⟩,
-    { rw [← abelian.pseudoelement.comp_apply, ← short_exact_sequence.comp_fst, horseshoe_d_d,
-        short_exact_sequence.hom_zero_fst, abelian.pseudoelement.zero_apply] },
-    { sorry }
-  end,
+  exact := λ n, horseshoe_exact₁ A n,
   epi := show epi (projective.π _), from infer_instance }
 
 end short_exact_sequence
