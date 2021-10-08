@@ -13,6 +13,21 @@ namespace short_exact_sequence
 variables {C : Type u} [category.{v} C] [abelian C] [enough_projectives C]
 
 -- move this
+lemma exact_of_epi_comp_kernel.ι_comp_mono {C : Type u} [category.{v} C] [abelian C] {X Y Z W : C}
+  (g : Y ⟶ Z) (h : Z ⟶ W) (f : X ⟶ kernel g) (i : kernel g ⟶ Y) (hf : epi f) (hh : mono h)
+  (hi : i = kernel.ι g) : exact (f ≫ i) (g ≫ h) :=
+begin
+  suffices : exact i g,
+  { letI := hf,
+    letI := hh,
+    letI := this,
+    letI : exact (f ≫ i) g := exact_epi_comp,
+    exact exact_comp_mono },
+  rw [hi],
+  exact exact_kernel_ι
+end
+
+-- move this
 def biprod_factors (A B : C) [projective A] [projective B]
   (E X : C) (f : A ⊞ B ⟶ X) (e : E ⟶ X) [epi e] :
   ∃ f' : A ⊞ B ⟶ E, f' ≫ e = f :=
@@ -45,6 +60,13 @@ def horseshoe_base_π : horseshoe_base A ⟶ A :=
 
 instance epi_horseshoe_base_π_1 : epi (horseshoe_base_π A).1 :=
 show epi (projective.π _), by apply_instance
+
+instance epi_horseshoe_base_π_2 : epi (horseshoe_base_π A).2 := sorry
+
+instance epi_horseshoe_base_π_3 : epi (horseshoe_base_π A).3 :=
+show epi (projective.π _), by apply_instance
+
+--show epi (biprod.desc (projective.π _ ≫ A.f) ((projective.factor_thru (projective.π _) A.g))), by apply_instance
 
 variables {A B}
 
@@ -178,10 +200,6 @@ begin
     horseshoe_step_comp_eq_zero_assoc, horseshoe_ker_ι_comp_base_π],
 end
 
-local attribute [instance] abelian.pseudoelement.over_to_sort
-  abelian.pseudoelement.hom_to_fun
-  abelian.pseudoelement.has_zero
-
 def horseshoe_to_single₁ :=
 (chain_complex.to_single₀_equiv ((homological_complex.Fst C).obj (horseshoe A)) A.1).symm
 ⟨(short_exact_sequence.Fst C).map (horseshoe_π A),
@@ -190,19 +208,21 @@ begin
   rwa [functor.map_comp, functor.map_zero] at this,
 end⟩
 
-lemma exact_of_epi_comp_kernel.ι_comp_mono {X Y Z W : C} (g : Y ⟶ Z) (h : Z ⟶ W)
-  (f : X ⟶ kernel g) (i : kernel g ⟶ Y) (hf : epi f) (hh : mono h) (hi : i = kernel.ι g) :
-  exact (f ≫ i) (g ≫ h) :=
+def horseshoe_to_single₂ :=
+(chain_complex.to_single₀_equiv ((homological_complex.Snd C).obj (horseshoe A)) A.2).symm
+⟨(short_exact_sequence.Snd C).map (horseshoe_π A),
 begin
-  suffices : exact i g,
-  { letI := hf,
-    letI := hh,
-    letI := this,
-    letI : exact (f ≫ i) g := exact_epi_comp,
-    exact exact_comp_mono },
-  rw [hi],
-  exact exact_kernel_ι
-end
+  have := horseshoe_d_π A, apply_fun (λ f, (short_exact_sequence.Snd C).map f) at this,
+  rwa [functor.map_comp, functor.map_zero] at this,
+end⟩
+
+def horseshoe_to_single₃ :=
+(chain_complex.to_single₀_equiv ((homological_complex.Trd C).obj (horseshoe A)) A.3).symm
+⟨(short_exact_sequence.Trd C).map (horseshoe_π A),
+begin
+  have := horseshoe_d_π A, apply_fun (λ f, (short_exact_sequence.Trd C).map f) at this,
+  rwa [functor.map_comp, functor.map_zero] at this,
+end⟩
 
 lemma horseshoe_exact₁ (A : short_exact_sequence C) (n : ℕ) :
   exact (((homological_complex.Fst C).obj (horseshoe A)).d (n + 2) (n + 1))
@@ -221,6 +241,46 @@ begin
   { simp [step_fst_mono] },
   { simpa },
   { simp [step_fst_mono] },
+  { simpa }
+end
+
+lemma horseshoe_exact₂ (A : short_exact_sequence C) (n : ℕ) :
+  exact (((homological_complex.Snd C).obj (horseshoe A)).d (n + 2) (n + 1))
+    (((homological_complex.Snd C).obj (horseshoe A)).d (n + 1) n) :=
+begin
+  dsimp [horseshoe_to_single₂],
+  erw [chain_complex.of_d, chain_complex.of_d],
+  dsimp [horseshoe_d, horseshoe_step],
+
+  set f := horseshoe_base_π (horseshoe_step A n).1,
+  set g := (horseshoe_step A n).2.2.2.1,
+
+  cases n;
+  convert exact_of_epi_comp_kernel.ι_comp_mono f.2 _ (horseshoe_base_π (horseshoe_ker f)).2 _
+    infer_instance _ _ using 1,
+  { simp [step_snd_mono] },
+  { simpa },
+  { simp [step_snd_mono] },
+  { simpa }
+end
+
+lemma horseshoe_exact₃ (A : short_exact_sequence C) (n : ℕ) :
+  exact (((homological_complex.Trd C).obj (horseshoe A)).d (n + 2) (n + 1))
+    (((homological_complex.Trd C).obj (horseshoe A)).d (n + 1) n) :=
+begin
+  dsimp [horseshoe_to_single₃],
+  erw [chain_complex.of_d, chain_complex.of_d],
+  dsimp [horseshoe_d, horseshoe_step],
+
+  set f := horseshoe_base_π (horseshoe_step A n).1,
+  set g := (horseshoe_step A n).2.2.2.1,
+
+  cases n;
+  convert exact_of_epi_comp_kernel.ι_comp_mono f.3 _ (horseshoe_base_π (horseshoe_ker f)).3 _
+    infer_instance _ _ using 1,
+  { simp [step_trd_mono] },
+  { simpa },
+  { simp [step_trd_mono] },
   { simpa }
 end
 
@@ -246,6 +306,30 @@ lemma horseshoe_is_projective_resolution₁ (A : short_exact_sequence C) :
       refl }
   end,
   exact := λ n, horseshoe_exact₁ A n,
+  epi := show epi (projective.π _), from infer_instance }
+
+lemma horseshoe_is_projective_resolution₃ (A : short_exact_sequence C) :
+  chain_complex.is_projective_resolution
+    ((homological_complex.Trd C).obj (horseshoe A)) A.3 (horseshoe_to_single₃ A) :=
+{ projective := by rintro (_|n); { show projective (projective.over _), apply_instance },
+  exact₀ :=
+  begin
+    dsimp [horseshoe_to_single₃, chain_complex.to_single₀_equiv, horseshoe_π],
+    erw [chain_complex.of_d],
+    dsimp [horseshoe_d, horseshoe_step],
+    rw [category.id_comp, ← short_exact_sequence.comp_trd],
+    refine abelian.pseudoelement.exact_of_pseudo_exact _ _ ⟨λ a , _, λ a ha, _⟩,
+    { rw [← abelian.pseudoelement.comp_apply, ← short_exact_sequence.comp_trd, category.assoc,
+        horseshoe_ker_ι_comp_base_π, comp_zero, short_exact_sequence.hom_zero_trd,
+        abelian.pseudoelement.zero_apply] },
+    { obtain ⟨b, hb⟩ := is_snake_input.exists_of_exact exact_kernel_ι _ ha,
+      obtain ⟨c, hc⟩ := abelian.pseudoelement.pseudo_surjective_of_epi
+        (horseshoe_base_π (horseshoe_ker _)).3 b,
+      refine ⟨c, _⟩,
+      rw [short_exact_sequence.comp_trd, abelian.pseudoelement.comp_apply, hc, ← hb],
+      refl }
+  end,
+  exact := λ n, horseshoe_exact₃ A n,
   epi := show epi (projective.π _), from infer_instance }
 
 end short_exact_sequence
