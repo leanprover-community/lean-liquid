@@ -219,9 +219,9 @@ begin
   convert exact_of_epi_comp_kernel.ι_comp_mono f.1 _ (horseshoe_base_π (horseshoe_ker f)).1 _
     infer_instance _ _ using 1,
   { simp [step_fst_mono] },
-  sorry,
-  sorry,
-  sorry,
+  { simpa },
+  { simp [step_fst_mono] },
+  { simpa }
 end
 
 lemma horseshoe_is_projective_resolution₁ (A : short_exact_sequence C) :
