@@ -62,8 +62,6 @@ instance epi_horseshoe_base_π_2 : epi (horseshoe_base_π A).2 := sorry
 instance epi_horseshoe_base_π_3 : epi (horseshoe_base_π A).3 :=
 show epi (projective.π _), by apply_instance
 
---show epi (biprod.desc (projective.π _ ≫ A.f) ((projective.factor_thru (projective.π _) A.g))), by apply_instance
-
 variables {A B}
 
 def horseshoe_ker [epi f.1] : short_exact_sequence C :=
