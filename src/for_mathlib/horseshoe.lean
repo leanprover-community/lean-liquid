@@ -83,6 +83,12 @@ def horseshoe_ker_ι [epi f.1] : horseshoe_ker f ⟶ A :=
   end }
 .
 
+lemma horseshoe_ker_ι_fst [epi f.1] : (horseshoe_ker_ι f).1 = kernel.ι f.1 := rfl
+
+lemma horseshoe_ker_ι_snd [epi f.1] : (horseshoe_ker_ι f).2 = kernel.ι f.2 := rfl
+
+lemma horseshoe_ker_ι_trd [epi f.1] : (horseshoe_ker_ι f).3 = kernel.ι f.3 := rfl
+
 variables (A)
 
 lemma horseshoe_ker_ι_comp_base_π :
@@ -103,6 +109,45 @@ def horseshoe_step (A : short_exact_sequence C) :
   ∀ n, (horseshoe_step A n).2.2.2.1 ≫ (horseshoe_step A n).2.2.2.2 = 0
 | 0     := horseshoe_ker_ι_comp_base_π _
 | (n+1) := horseshoe_ker_ι_comp_base_π _
+
+lemma step_fst_mono (n : ℕ) : mono (horseshoe_step A n).2.2.2.1.1 :=
+begin
+  cases n,
+  { dsimp [horseshoe_step, horseshoe_ker_ι],
+    apply_instance },
+  { dsimp [horseshoe_step],
+    cases n, --Why do I have to do this again?!
+    { rw [horseshoe_ker_ι_fst],
+      apply_instance },
+    { rw [horseshoe_ker_ι_fst],
+      apply_instance }  }
+end
+
+lemma step_snd_mono (n : ℕ) : mono (horseshoe_step A n).2.2.2.1.2 :=
+begin
+  cases n,
+  { dsimp [horseshoe_step, horseshoe_ker_ι],
+    apply_instance },
+  { dsimp [horseshoe_step],
+    cases n, --Why do I have to do this again?!
+    { rw [horseshoe_ker_ι_snd],
+      apply_instance },
+    { rw [horseshoe_ker_ι_snd],
+      apply_instance }  }
+end
+
+lemma step_trd_mono (n : ℕ) : mono (horseshoe_step A n).2.2.2.1.3 :=
+begin
+  cases n,
+  { dsimp [horseshoe_step, horseshoe_ker_ι],
+    apply_instance },
+  { dsimp [horseshoe_step],
+    cases n, --Why do I have to do this again?!
+    { rw [horseshoe_ker_ι_trd],
+      apply_instance },
+    { rw [horseshoe_ker_ι_trd],
+      apply_instance }  }
+end
 
 def horseshoe_obj (n : ℕ) := (horseshoe_step A n).2.1
 
@@ -173,7 +218,7 @@ begin
   cases n;
   convert exact_of_epi_comp_kernel.ι_comp_mono f.1 _ (horseshoe_base_π (horseshoe_ker f)).1 _
     infer_instance _ _ using 1,
-  sorry,
+  { simp [step_fst_mono] },
   sorry,
   sorry,
   sorry,
