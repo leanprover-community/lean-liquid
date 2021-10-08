@@ -65,9 +65,8 @@ local attribute [instance] limits.has_zero_object.has_zero
 
 instance epi_horseshoe_base_π_2 : epi (horseshoe_base_π A).2 :=
 begin
-  let B := (horseshoe_base A),
   let φ := horseshoe_base_π A,
-  have h : φ.3 ≫ (0 : A.3 ⟶ 0) = (0 : B.3 ⟶ 0) ≫ (0 : 0 ⟶ 0) := by simp,
+  have h : φ.3 ≫ (0 : A.3 ⟶ 0) = (0 : _ ⟶ 0) ≫ (0 : 0 ⟶ 0) := by simp,
   refine category_theory.abelian.epi_of_epi_of_epi_of_mono φ.sq1' φ.sq2' h _ _ _,
   all_goals { apply_instance },
 end
