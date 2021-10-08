@@ -94,7 +94,7 @@ begin
   { use λ x, (f x - g x) / N,
     refine funext (λ z, (_ : f z = g z + N * ((f z - f z % N) / N))),
     rw [nat.mul_div_cancel' (nat.dvd_sub_mod _)],
-    exact (nat.add_sub_cancel' (nat.mod_le _ _)).symm },
+    exact (add_sub_cancel_of_le (nat.mod_le _ _)).symm },
   set x' := ∑ (i : Λ →+ ℤ) in S₀, (g i).val • i with hx',
   have H : x' ∈ B,
   { refine finset.mem_image.mpr ⟨g ∘ val, finset.mem_univ _, _⟩,
