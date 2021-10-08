@@ -36,10 +36,6 @@ def biprod_factors (A B : C) [projective A] [projective B]
   (projective.factor_thru (biprod.inr ≫ f) e),
   by ext; simp only [projective.factor_thru_comp, biprod.inl_desc_assoc, biprod.inr_desc_assoc]⟩
 
--- move this
-instance projective_biprod (A B : C) [projective A] [projective B] : projective (A ⊞ B) :=
-{ factors := λ E X f e he, by exactI biprod_factors A B E X f e }
-
 variables (A B : short_exact_sequence C) (f : A ⟶ B)
 
 def horseshoe_base : short_exact_sequence C :=
@@ -307,6 +303,31 @@ lemma horseshoe_is_projective_resolution₁ (A : short_exact_sequence C) :
   end,
   exact := λ n, horseshoe_exact₁ A n,
   epi := show epi (projective.π _), from infer_instance }
+
+lemma horseshoe_is_projective_resolution₂ (A : short_exact_sequence C) :
+  chain_complex.is_projective_resolution
+    ((homological_complex.Snd C).obj (horseshoe A)) A.2 (horseshoe_to_single₂ A) :=
+{ projective := by rintro (_|n); { show projective (projective.over _ ⊞ projective.over _),
+    apply_instance },
+  exact₀ :=
+  begin
+    dsimp [horseshoe_to_single₂, chain_complex.to_single₀_equiv, horseshoe_π],
+    erw [chain_complex.of_d],
+    dsimp [horseshoe_d, horseshoe_step],
+    rw [category.id_comp, ← short_exact_sequence.comp_snd],
+    refine abelian.pseudoelement.exact_of_pseudo_exact _ _ ⟨λ a , _, λ a ha, _⟩,
+    { rw [← abelian.pseudoelement.comp_apply, ← short_exact_sequence.comp_snd, category.assoc,
+        horseshoe_ker_ι_comp_base_π, comp_zero, short_exact_sequence.hom_zero_snd,
+        abelian.pseudoelement.zero_apply] },
+    { obtain ⟨b, hb⟩ := is_snake_input.exists_of_exact exact_kernel_ι _ ha,
+      obtain ⟨c, hc⟩ := abelian.pseudoelement.pseudo_surjective_of_epi
+        (horseshoe_base_π (horseshoe_ker _)).2 b,
+      refine ⟨c, _⟩,
+      rw [short_exact_sequence.comp_snd, abelian.pseudoelement.comp_apply, hc, ← hb],
+      refl }
+  end,
+  exact := λ n, horseshoe_exact₂ A n,
+  epi := show epi (horseshoe_base_π _).2, from infer_instance }
 
 lemma horseshoe_is_projective_resolution₃ (A : short_exact_sequence C) :
   chain_complex.is_projective_resolution
