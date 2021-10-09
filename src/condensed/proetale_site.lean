@@ -4,7 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
 
-/-
 import topology.category.Profinite
 import category_theory.sites.pretopology
 import category_theory.sites.sheaf_of_types
@@ -112,4 +111,3 @@ proetale_pretopology.to_grothendieck _
 -- TODO (BM): We either want to generalise this topology to coherent? categories, or (less
 -- generally) appropriate concrete categories; or (even less generally) repeat the construction for
 -- ED and CH.
--/

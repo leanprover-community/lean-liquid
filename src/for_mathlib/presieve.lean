@@ -49,6 +49,10 @@ variables {D : Type u'} [category.{v'} D]
 def is_sheaf'' (P : Cᵒᵖ ⥤ D) (J : grothendieck_topology C) : Prop :=
 ∀ (T : D), category_theory.presieve.is_sheaf' (P ⋙ coyoneda.obj (op T)) J
 
+lemma is_sheaf''_def (P : Cᵒᵖ ⥤ D) (J : grothendieck_topology C) :
+  is_sheaf'' P J ↔
+  ∀ (T : D), category_theory.presieve.is_sheaf' (P ⋙ coyoneda.obj (op T)) J := iff.rfl
+
 end category_theory.presheaf
 
 namespace category_theory

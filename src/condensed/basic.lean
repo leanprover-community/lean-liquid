@@ -1,4 +1,5 @@
-import condensed.proetale_site_as_small
+import for_mathlib.presieve
+import condensed.proetale_site
 
 /-!
 # Condensed sets
@@ -6,21 +7,81 @@ import condensed.proetale_site_as_small
 Defines the category of condensed sets and condensed structures.
 *Strictly speaking* these are pyknotic, but we hope that in the context of Lean's type theory they
 serve the same purpose.
-
-## Implementation notes regarding universe levels.
-`proetale_topology.{u}` is the pro-etale topology on the small category
-`as_small.{u+1} Profinite.{u} : Type (u+1)`.
-The category of condensed (actually, pyknotic sets, see above), is defined as the category of
-`Type (u+1)`-valued sheaves on `proetale_topology.{u}`.
-Similarly, the category of condensed abelian groups will be defined as `Ab.{u+1}`-valued sheaves.
 -/
 
-open category_theory category_theory.limits
+open category_theory category_theory.limits opposite
 
-universes v u
+universes w v u
 
-variables {C : Type (u+1)} [category.{v} C]
+variables (C : Type u) [category.{v} C]
 
+@[derive category]
+def condensed := {F : Profinite.{w}ᵒᵖ ⥤ C |
+  ∀ ⦃B : Profinite.{w}⦄ (R : presieve B) (T : C),
+    R ∈ proetale_pretopology B → R.is_sheaf_for' (F ⋙ coyoneda.obj (op T)) }
+
+example : category (condensed.{w} (Type u)) := infer_instance
+example : category (condensed.{u} (Type (u+37))) := infer_instance
+
+def is_proetale_sheaf_of_types (P : Profinite.{w}ᵒᵖ ⥤ Type u) : Prop := ∀
+-- a finite family of morphisms with base B
+(α : Type w) [fintype α] (B : Profinite.{w}) (X : α → Profinite.{w}) (f : Π a, X a ⟶ B)
+-- jointly surjective
+(surj : ∀ b : B, ∃ a (x : X a), f a x = b)
+-- family of terms
+(x : Π a, P.obj (op (X a)))
+-- which is compatible
+(compat : ∀ (a b : α) (Z : Profinite.{w}) (g₁ : Z ⟶ X a) (g₂ : Z ⟶ X b),
+  P.map g₁.op (x a) = P.map g₂.op (x b)),
+-- the actual condition
+∃! t : P.obj (op B), ∀ a : α, P.map (f a).op t = x a
+
+theorem is_proetale_sheaf_of_types_iff (P : Profinite.{w}ᵒᵖ ⥤ Type u) :
+  is_proetale_sheaf_of_types P ↔
+  (∀ (B : Profinite.{w}) (R : presieve B), R ∈ proetale_pretopology B → R.is_sheaf_for' P) :=
+begin
+  split,
+  { intros h B S hS,
+
+    sorry,
+  },
+  { intros h,
+    sorry,
+  }
+end
+
+def is_proetale_sheaf (P : Profinite.{w}ᵒᵖ ⥤ C) : Prop := ∀
+-- a finite family of morphisms with base B
+(α : Type w) [fintype α] (B : Profinite.{w}) (X : α → Profinite.{w}) (f : Π a, X a ⟶ B)
+-- jointly surjective
+(surj : ∀ b : B, ∃ a (x : X a), f a x = b)
+-- test object
+(T : C)
+-- family of moprhisms
+(x : Π a, T ⟶ P.obj (op (X a)))
+-- which is compatible
+(compat : ∀ (a b : α) (Z : Profinite.{w}) (g₁ : Z ⟶ X a) (g₂ : Z ⟶ X b),
+  x a ≫ P.map g₁.op = x b ≫ P.map g₂.op),
+-- the actual condition
+∃! t : T ⟶ P.obj (op B), ∀ a : α, t ≫ P.map (f a).op = x a
+
+theorem is_proetale_sheaf_iff (P : Profinite.{w}ᵒᵖ ⥤ C) :
+  is_proetale_sheaf C P ↔
+  (∀ (T : C) (B : Profinite.{w}) (R : presieve B),
+    R ∈ proetale_pretopology B → R.is_sheaf_for' (P ⋙ coyoneda.obj (op T))) :=
+begin
+  split,
+  { intros h T,
+    rw ← is_proetale_sheaf_of_types_iff,
+    introsI α _ B X f surj x compat,
+    exact h α B X f surj T x compat },
+  { introsI h α _ B X f surj T x compat,
+    specialize h T,
+    rw ← is_proetale_sheaf_of_types_iff at h,
+    exact h α B X f surj x compat }
+end
+
+/-
 /-- The category of condensed sets. -/
 @[derive category]
 def CondensedSet : Type (u+2) := SheafOfTypes.{u+1} proetale_topology.{u}
@@ -88,3 +149,4 @@ def embed_Top : Top.{u} ⥤ CondensedSet.{u} :=
 lemma embed_Top_faithful : faithful embed_Top := sorry
 
 -- TODO: Construct the left adjoint to `embed_Top` as in the second part of Proposition 1.7.
+-/
