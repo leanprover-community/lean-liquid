@@ -32,7 +32,7 @@ def is_proetale_sheaf_of_types (P : Profinite.{w}ᵒᵖ ⥤ Type u) : Prop := �
 (x : Π a, P.obj (op (X a)))
 -- which is compatible
 (compat : ∀ (a b : α) (Z : Profinite.{w}) (g₁ : Z ⟶ X a) (g₂ : Z ⟶ X b),
-  P.map g₁.op (x a) = P.map g₂.op (x b)),
+  (g₁ ≫ f a = g₂ ≫ f b) → P.map g₁.op (x a) = P.map g₂.op (x b)),
 -- the actual condition
 ∃! t : P.obj (op B), ∀ a : α, P.map (f a).op t = x a
 
@@ -42,12 +42,76 @@ theorem is_proetale_sheaf_of_types_iff (P : Profinite.{w}ᵒᵖ ⥤ Type u) :
 begin
   split,
   { intros h B S hS,
-
-    sorry,
-  },
-  { intros h,
-    sorry,
-  }
+    obtain ⟨α, _, X, f, surj, rfl⟩ := hS,
+    resetI,
+    intros x hx,
+    specialize h α B X f surj,
+    dsimp [presieve.family_of_elements'] at x,
+    let y : Π (a : α), P.obj (op (X a)) := λ a, x (f a) _,
+    swap,
+    { rw presieve.mem_of_arrows_iff, use [a, rfl], simp },
+    specialize h y _,
+    { intros a b Z g₁ g₂ hh,
+      dsimp [presieve.family_of_elements'.compatible] at hx,
+      apply hx,
+      assumption },
+    convert h,
+    ext t,
+    split,
+    { intro hh,
+      intros a,
+      apply hh },
+    { intros hh Y g hg,
+      rw presieve.mem_of_arrows_iff at hg,
+      obtain ⟨u,rfl,rfl⟩ := hg,
+      simp [hh] } },
+  { introsI h α _ B X f surj x compat,
+    let R : presieve B := presieve.of_arrows X f,
+    have hR : R ∈ proetale_pretopology B := ⟨α, infer_instance, X, f, surj, rfl⟩,
+    have hhh : ∀ ⦃Y⦄ (g : Y ⟶ B) (hg : R g), ∃ (a : α) (ha : Y = X a), g = eq_to_hom ha ≫ f a,
+    { intros Y g hg,
+      rcases hg with ⟨a⟩,
+      use [a, rfl],
+      simp },
+    let aa : Π ⦃Y⦄ (g : Y ⟶ B) (hg : R g), α := λ Y g hg, (hhh g hg).some,
+    have haa : ∀ ⦃Y⦄ (g : Y ⟶ B) (hg : R g), Y = X (aa g hg) :=
+      λ Y g hg, (hhh g hg).some_spec.some,
+    have haa' : ∀ ⦃Y⦄ (g : Y ⟶ B) (hg : R g), g = eq_to_hom (haa g hg) ≫ f (aa g hg) :=
+      λ Y g hg, (hhh g hg).some_spec.some_spec,
+    let y : R.family_of_elements' P := λ Y g hg, P.map (eq_to_hom (haa g hg)).op (x (aa g hg)),
+    specialize h B R hR y _,
+    { rintros Y₁ Y₂ Z g₁ g₂ f₁ f₂ ⟨a⟩ ⟨b⟩ hh,
+      change (P.map _ ≫ P.map _) _ = (P.map _ ≫ P.map _) _,
+      simp_rw [← P.map_comp, ← op_comp],
+      apply compat,
+      simp,
+      convert hh,
+      all_goals {
+        symmetry,
+        apply haa' } },
+    convert h,
+    ext t,
+    split,
+    { intros hh Y g hg,
+      dsimp [y],
+      conv_lhs { rw haa' g hg },
+      dsimp,
+      simp [hh] },
+    { intros hh a,
+      have : R (f a),
+      { dsimp [R],
+        rw presieve.mem_of_arrows_iff,
+        use [a, rfl],
+        simp },
+      rw hh (f a) this,
+      specialize haa (f a) this,
+      dsimp [y],
+      specialize compat (aa (f a) this) a (X a) (eq_to_hom _) (𝟙 _) _,
+      apply haa,
+      simp,
+      symmetry,
+      apply haa',
+      simpa using compat } }
 end
 
 def is_proetale_sheaf (P : Profinite.{w}ᵒᵖ ⥤ C) : Prop := ∀
@@ -61,7 +125,7 @@ def is_proetale_sheaf (P : Profinite.{w}ᵒᵖ ⥤ C) : Prop := ∀
 (x : Π a, T ⟶ P.obj (op (X a)))
 -- which is compatible
 (compat : ∀ (a b : α) (Z : Profinite.{w}) (g₁ : Z ⟶ X a) (g₂ : Z ⟶ X b),
-  x a ≫ P.map g₁.op = x b ≫ P.map g₂.op),
+  (g₁ ≫ f a = g₂ ≫ f b) → x a ≫ P.map g₁.op = x b ≫ P.map g₂.op),
 -- the actual condition
 ∃! t : T ⟶ P.obj (op B), ∀ a : α, t ≫ P.map (f a).op = x a
 
