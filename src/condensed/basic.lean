@@ -15,6 +15,18 @@ universes w v u
 
 variables (C : Type u) [category.{v} C]
 
+/-
+We have defined `condensed C` in an ad-hoc way because there are some universe restrictions
+in mathlib's definition of a sheaf which prohibit us from defining `Type (u+1)`-valued
+sheaves on `Profinite.{u}`.
+
+We made sure to mimic the definition of a sheaf as it appears in mathlib so that if/when
+these universe restrictions are removed, it should be easy to define `consdensed C` as
+`Sheaf proetale_topology C`.
+
+See the theorems `is_proetale_sheaf_iff_is_sheaf` and `is_proetale_sheaf_iff`.
+-/
+
 @[derive category]
 def condensed := {F : Profinite.{w}ᵒᵖ ⥤ C |
   ∀ ⦃B : Profinite.{w}⦄ (R : presieve B) (T : C),
@@ -139,6 +151,15 @@ begin
     specialize h T,
     rw ← is_proetale_sheaf_of_types_iff at h,
     exact h α B X f surj x compat }
+end
+
+theorem is_proetale_sheaf_iff_is_sheaf (P : Profinite.{v}ᵒᵖ ⥤ C) :
+  is_proetale_sheaf C P ↔ presheaf.is_sheaf proetale_topology P :=
+begin
+  rw is_proetale_sheaf_iff,
+  dsimp [proetale_topology],
+  apply forall_congr (λ T, _),
+  erw ← presieve.is_sheaf_pretopology proetale_pretopology,
 end
 
 /-
