@@ -1,4 +1,5 @@
 import topology.continuous_function.algebra
+import data.int.interval
 import analysis.normed_space.basic
 import ring_theory.finiteness
 import linear_algebra.free_module.finite
@@ -356,13 +357,13 @@ lemma bounded_lattice_thing [fintype α] {k : α → ℕ} (C : set (α → ℤ))
 begin
   classical,
   let C' : finset (α → ℤ) :=
-    (finset.univ.pi (λ i, finset.Ico_ℤ (-k i) (k i+1))).image (λ f a, f a (finset.mem_univ _)),
+    (finset.univ.pi (λ i, finset.Ico (-(k i : ℤ)) (k i+1))).image (λ f a, f a (finset.mem_univ _)),
   have : C ⊆ C',
   { intros x hx,
     simp only [set.mem_image, finset.mem_univ, finset.mem_pi, forall_true_left, finset.mem_coe,
-      finset.Ico_ℤ.mem, finset.coe_image],
+      finset.mem_Ico, finset.coe_image],
     refine ⟨λ a _, x a, λ a _, _, _⟩,
-    { simp only [finset.Ico_ℤ.mem],
+    { simp only [finset.mem_Ico],
       have : abs (x a) ≤ k a,
       { rw int.abs_eq_nat_abs,
         exact_mod_cast hC x a hx },
