@@ -1,4 +1,3 @@
-import data.fintype.intervals
 import analysis.specific_limits
 import category_theory.Fintype
 import analysis.normed_space.basic
