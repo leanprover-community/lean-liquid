@@ -1,4 +1,4 @@
-import data.fintype.intervals
+import data.int.interval
 import algebra.big_operators.ring
 import data.fintype.card
 import category_theory.Fintype
@@ -68,8 +68,6 @@ instance : has_zero (Mbar_bdd r' S c M) :=
 
 instance : inhabited (Mbar_bdd r' S c M) := ⟨0⟩
 
-open finset
-
 lemma coeff_bound [h0r : fact (0 < r')] (F : S → fin (M + 1) → ℤ)
   (hF : ∑ s i, (↑(F s i).nat_abs * r'^(i : ℕ)) ≤ c) (n : fin (M + 1)) (s : S) :
   ↑(F s n).nat_abs ≤ c / min (r' ^ M) 1 :=
@@ -78,10 +76,10 @@ begin
   apply le_mul_inv_of_mul_le ((lt_min (pow_pos h0r.out _) zero_lt_one).ne.symm),
   calc ↑(F s n).nat_abs * min (r' ^ M) 1 ≤ ↑(F s n).nat_abs * r' ^ (n:ℕ) : _ -- see below for proof
   ... ≤ ∑ i, (↑(F s i).nat_abs * r' ^ (i:ℕ)) :
-    single_le_sum (λ (i : fin (M + 1)) _, _) (mem_univ n)
+    finset.single_le_sum (λ (i : fin (M + 1)) _, _) (finset.mem_univ n)
   ... ≤ ∑ s i, (↑(F s i).nat_abs * r'^(i:ℕ)) :
-    by { refine single_le_sum (λ _ _, _) (mem_univ s),
-      exact sum_nonneg (λ _ _, (subtype.property (_ : ℝ≥0))) }
+    by { refine finset.single_le_sum (λ _ _, _) (finset.mem_univ s),
+      exact finset.sum_nonneg (λ _ _, (subtype.property (_ : ℝ≥0))) }
   ... ≤ c : hF,
   { refine mul_le_mul_of_nonneg_left _ (subtype.property (_ : ℝ≥0)),
     cases le_or_lt r' 1 with hr1 hr1,
@@ -213,7 +211,7 @@ def add (F : Mbar_bdd r' S c₁ M) (G : Mbar_bdd r' S c₂ M) : Mbar_bdd r' S (c
     rw ← finset.sum_add_distrib,
     refine finset.sum_le_sum _,
     rintro s -,
-    rw ← sum_add_distrib,
+    rw ← finset.sum_add_distrib,
     refine finset.sum_le_sum _,
     rintro i -,
     rw ← add_mul,
