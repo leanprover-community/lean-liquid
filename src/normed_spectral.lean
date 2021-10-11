@@ -222,9 +222,10 @@ lemma hδ_truncate (c : ℝ≥0) [fact (c₀ ≤ c)] : ∀ (q : ℕ) (hq : q ≤
 | (q+2) h := condM.htpy.hδ _ _ (nat.succ_le_succ h)
 | 0     h :=
 begin
-  ext1 x, dsimp,
+  ext x, dsimp,
   let π := λ c p, @SemiNormedGroup.coker.π _ _ (@d' M c p 0 1),
-  obtain ⟨x, rfl⟩ : ∃ x', π _ _ x' = x := SemiNormedGroup.coker.π_surjective x,
+  obtain ⟨y, hy⟩ : ∃ x', π _ _ x' = (SemiNormedGroup.explicit_cokernel_π _ x) :=
+    SemiNormedGroup.coker.π_surjective (SemiNormedGroup.explicit_cokernel_π _ x),
   transitivity π _ _ ((condM.htpy.δ c).f 1 (M.res x)), { refl },
   erw condM.htpy.hδ_apply _ _ (nat.succ_le_succ h) x,
   simp only [nat.zero_sub, d'_self_apply, add_zero, row_d,
