@@ -16,7 +16,7 @@ namespace system_of_double_complexes
 @[simps]
 def truncate : system_of_double_complexes.{u} ⥤ system_of_double_complexes.{u} :=
 (whiskering_right _ _ _).obj $
-  @functor.map_homological_complex _ _ _ _ _ _ _ _ SemiNormedGroup.truncate.additive.{u u} _
+  @functor.map_homological_complex _ _ _ _ _ _ _ _ SemiNormedGroup.truncate.additive.{u} _
 -- TODO: why do I need to give the instance manually? ↑ ↑ ↑
 
 namespace truncate
