@@ -1,4 +1,5 @@
 import analysis.normed_space.SemiNormedGroup
+import analysis.normed_space.SemiNormedGroup.kernels
 import analysis.normed_space.normed_group_quotient
 
 import algebra.punit_instances
@@ -91,15 +92,12 @@ variables {A B C : SemiNormedGroup.{u}}
 
 /-- The cokernel of a morphism of seminormed groups. -/
 @[simp]
-noncomputable
-def coker (f : A ⟶ B) : SemiNormedGroup := SemiNormedGroup.of $
-  quotient_add_group.quotient f.range
+def coker (f : A ⟶ B) : SemiNormedGroup := explicit_cokernel f
 
 /-- The projection onto the cokernel. -/
 @[simp]
-noncomputable
 def coker.π {f : A ⟶ B} : B ⟶ coker f :=
-f.range.normed_mk
+explicit_cokernel_π _
 
 lemma coker.π_surjective {f : A ⟶ B} :
   function.surjective (coker.π : B → coker f) :=
@@ -107,45 +105,33 @@ surjective_quot_mk _
 
 lemma coker.π_is_quotient {f : A ⟶ B} :
   normed_group_hom.is_quotient (coker.π : B ⟶ coker f) :=
-normed_group_hom.is_quotient_quotient _
+is_quotient_explicit_cokernel_π _
 
 lemma coker.π_norm_noninc {f : A ⟶ B} :
   (coker.π : B ⟶ coker f).norm_noninc :=
-SemiNormedGroup.coker.π_is_quotient.norm_le
+norm_noninc_explicit_cokernel_π _
 
 instance coker.π_epi {f : A ⟶ B} : epi (coker.π : B ⟶ coker f) :=
 begin
   constructor,
   intros Z g h H,
   ext x,
-  rcases coker.π_surjective x with ⟨x,rfl⟩,
+  obtain ⟨x, hx⟩ := coker.π_surjective (explicit_cokernel_π f x),
   change (coker.π ≫ g) _ = _,
   rw [H],
-  refl,
+  refl
 end
 
 open normed_group_hom
 
 /-- Lift (aka descend) a morphism to the cokernel. -/
-noncomputable
 def coker.lift {f : A ⟶ B} {g : B ⟶ C} (cond : f ≫ g = 0) : coker f ⟶ C :=
-normed_group_hom.lift _ g (begin
-  rintros _ ⟨b,rfl⟩,
-  change (f ≫ g) b = 0,
-  simp [cond]
-end)
+explicit_cokernel_desc cond
 
 @[simp]
 lemma coker.lift_comp_π {f : A ⟶ B} {g : B ⟶ C} {cond : f ≫ g = 0} :
   coker.π ≫ coker.lift cond = g :=
-begin
-  ext,
-  rw ← normed_group_hom.lift_mk f.range g,
-  refl,
-  rintro _ ⟨b,rfl⟩,
-  change (f ≫ g) b = 0,
-  simp [cond],
-end
+explicit_cokernel_π_desc cond
 
 @[simp]
 lemma coker.lift_comp_π_apply {f : A ⟶ B} {g : B ⟶ C} {cond : f ≫ g = 0} (x : B) :
@@ -153,14 +139,11 @@ lemma coker.lift_comp_π_apply {f : A ⟶ B} {g : B ⟶ C} {cond : f ≫ g = 0} 
 show (coker.π ≫ coker.lift cond) x = g x, by rw coker.lift_comp_π
 
 lemma coker.lift_unique {f : A ⟶ B} {g : B ⟶ C} {cond : f ≫ g = 0} {h : coker f ⟶ C} :
-  coker.π ≫ h = g → h = coker.lift cond := normed_group_hom.lift_unique _ _ _ _
+  coker.π ≫ h = g → h = coker.lift cond :=
+explicit_cokernel_desc_unique cond h
 
 lemma coker.comp_pi_eq_zero {f : A ⟶ B} : f ≫ (coker.π : B ⟶ coker f) = 0 :=
-begin
-  ext a,
-  rw [coe_zero, pi.zero_apply, coe_comp, coker.π, ← mem_ker, f.range.ker_normed_mk],
-  exact set.mem_range_self a
-end
+comp_explicit_cokernel_π _
 
 @[simp]
 lemma coker.pi_apply_dom_eq_zero {f : A ⟶ B} (x : A) : (coker.π : B ⟶ coker f) (f x) = 0 :=
@@ -181,30 +164,10 @@ section
 open_locale nnreal
 
 -- maybe prove this for `normed_group_hom` first, without the category lib
-lemma coker.norm_lift_le {f : A ⟶ B} {g : B ⟶ C} {cond : f ≫ g = 0} {c : ℝ}
+lemma coker.norm_lift_le {f : A ⟶ B} {g : B ⟶ C} {cond : f ≫ g = 0} {c : ℝ≥0}
   (hg : ∥g∥ ≤ c) :
   ∥coker.lift cond∥ ≤ c :=
-begin
-  refine op_norm_le_bound _ (le_trans (norm_nonneg g) hg) (λ x, _),
-  by_cases hc : c = 0,
-  { simp only [hc, nnreal.coe_zero, zero_mul] at hg ⊢,
-    obtain ⟨x, rfl⟩ := coker.π_surjective x,
-    show ∥g x∥ ≤ 0,
-    calc ∥g x∥ ≤ 0 * ∥x∥ : le_of_op_norm_le _ hg x
-    ... = 0 : zero_mul _ },
-  { replace hc : 0 < c := lt_of_le_of_ne (le_trans (norm_nonneg g) hg) (ne.symm hc),
-    apply le_of_forall_pos_le_add,
-    intros ε hε,
-    have aux : 0 < (ε / c) := div_pos hε hc,
-    obtain ⟨x, rfl, Hx⟩ : ∃ x', coker.π x' = x ∧ ∥x'∥ < ∥x∥ + (ε / c) :=
-      coker.π_is_quotient.norm_lift aux _,
-    rw coker.lift_comp_π_apply,
-    calc ∥g x∥ ≤ c * ∥x∥ : le_of_op_norm_le _ hg x
-    ... ≤ c * (∥coker.π x∥ + ε / c) : (mul_le_mul_left _).mpr Hx.le
-    ... = c * _ + ε : _,
-    { exact_mod_cast hc },
-    { rw [mul_add, mul_div_cancel'], exact_mod_cast hc.ne' } },
-end
+explicit_cokernel_desc_norm_le_of_norm_le cond c hg
 
 end
 
@@ -273,8 +236,11 @@ variables {V₁ V₂ V₃ : SemiNormedGroup.{u}} {f : V₁ ⟶ V₂} {g : V₂ �
 lemma coker.lift_norm_noninc {cond : f ≫ g = 0}
   (hg : g.norm_noninc) :
   (coker.lift cond).norm_noninc :=
-normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.2 $ coker.norm_lift_le $
-  normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.1 hg
+begin
+  refine normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.2 _,
+  rw [← nnreal.coe_one],
+  exact coker.norm_lift_le (normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.1 hg)
+end
 
 
 end SemiNormedGroup
