@@ -139,7 +139,12 @@ snake_diagram.mk_functor''
 
 lemma snake_diagram_is_snake_input (n : ℕ) : is_snake_input (snake_diagram C n A) :=
 sorry
--- { row_exact₁ := _,
+-- { row_exact₁ :=
+--   begin
+--     dsimp [snake_diagram, snake_diagram.mk_functor'', snake_diagram.mk_functor'],
+--     simp only [snake_diagram.mk_functor_map_g1, snake_diagram.mk_functor_map_f1],
+--     show exact ((mod_boundaries_functor (n+1)).map _) ((mod_boundaries_functor (n+1)).map _),
+--   end,
 --   row_exact₂ := _,
 --   col_exact₁ := _,
 --   col_exact₂ := _,
