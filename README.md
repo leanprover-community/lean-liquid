@@ -73,7 +73,9 @@ leanproject get lean-liquid
 code lean-liquid
 ```
 For detailed instructions on how to work with Lean projects,
-see [this](https://leanprover-community.github.io/install/project.html).
+see [this](https://leanprover-community.github.io/install/project.html). The script `scripts/get-cache.sh`
+in the folder `lean-liquid` will download the `olean` files created by our continuous integration. This
+will save you some time by not havig to do `leanproject build`.
 
 ### Reading the project
 
