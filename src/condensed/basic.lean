@@ -1,5 +1,6 @@
 import condensed.proetale_site
 import for_mathlib.presieve
+import topology.category.Profinite.projective
 
 /-!
 # Condensed sets
@@ -60,6 +61,17 @@ def category_theory.functor.is_proetale_sheaf_of_types_pullback : Prop := ∀
   P.map (pullback.fst : pullback (f a) (f b) ⟶ _).op (x a) = P.map pullback.snd.op (x b)),
 -- the actual condition
 ∃! t : P.obj (op B), ∀ a : α, P.map (f a).op t = x a
+
+def category_theory.functor.is_proetale_sheaf_of_types_projective : Prop := ∀
+-- a finite family of projective objects
+(α : Type w) [fintype α] (X : α → Profinite.{w}) [∀ a, projective (X a)],
+function.bijective (λ (x : P.obj (op ∐ X)) (a : α), P.map (sigma.ι _ a).op x)
+
+theorem category_theory.functor.is_proetale_sheaf_of_types_projective_iff :
+  P.is_proetale_sheaf_of_types_projective ↔ P.is_proetale_sheaf_of_types :=
+begin
+  sorry
+end
 
 def category_theory.functor.is_proetale_sheaf (P : Profinite.{w}ᵒᵖ ⥤ C) : Prop := ∀
 -- a finite family of morphisms with base B
