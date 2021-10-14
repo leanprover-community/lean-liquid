@@ -8,12 +8,6 @@ Defines the category of condensed sets and condensed structures.
 *Strictly speaking* these are pyknotic, but we hope that in the context of Lean's type theory they
 serve the same purpose.
 
-## Implementation notes regarding universe levels.
-`proetale_topology.{u}` is the pro-etale topology on the small category
-`as_small.{u+1} Profinite.{u} : Type (u+1)`.
-The category of condensed (actually, pyknotic sets, see above), is defined as the category of
-`Type (u+1)`-valued sheaves on `proetale_topology.{u}`.
-Similarly, the category of condensed abelian groups will be defined as `Ab.{u+1}`-valued sheaves.
 -/
 
 open category_theory category_theory.limits
@@ -29,11 +23,14 @@ def CondensedSet : Type (u+2) := SheafOfTypes.{u+1} proetale_topology.{u}
 /-- The category of condensed `A`. Applying this to `A = Type*` is *equivalent* but not the same
 as `CondensedSet`. -/
 @[derive category]
-def Condensed (A : Type (u+2)) [large_category A] : Type (u+2) :=
-  Sheaf proetale_topology.{u} A
+def Condensed (C : Type u) [category.{v} C] := Sheaf proetale_topology.{w} C
 
-example : category.{u+1} (Condensed Ab.{u+1}) := infer_instance
-example : category.{u+1} (Condensed Ring.{u+1}) := infer_instance
+example : category.{u+1} (Condensed.{u} Ab.{u+1}) := infer_instance
+example : category.{u+37} (Condensed.{u} Ring.{u+37}) := infer_instance
+
+/-- The category of condensed abelian groups. -/
+@[derive category]
+def CondensedAb : Type (u+2) := Condensed.{u} Ab.{u+1}
 
 open opposite
 
@@ -55,7 +52,22 @@ def category_theory.functor.is_proetale_sheaf_of_types : Prop := ∀
 -- the actual condition
 ∃! t : P.obj (op B), ∀ a : α, P.map (f a).op t = x a
 
-theorem is_proetale_sheaf_of_types_iff (P : Profinite.{w}ᵒᵖ ⥤ Type u) :
+def category_theory.functor.is_proetale_sheaf (P : Profinite.{w}ᵒᵖ ⥤ C) : Prop := ∀
+-- a finite family of morphisms with base B
+(α : Type w) [fintype α] (B : Profinite.{w}) (X : α → Profinite.{w}) (f : Π a, X a ⟶ B)
+-- jointly surjective
+(surj : ∀ b : B, ∃ a (x : X a), f a x = b)
+-- test object
+(T : C)
+-- family of moprhisms
+(x : Π a, T ⟶ P.obj (op (X a)))
+-- which is compatible
+(compat : ∀ (a b : α) (Z : Profinite.{w}) (g₁ : Z ⟶ X a) (g₂ : Z ⟶ X b),
+  (g₁ ≫ f a = g₂ ≫ f b) → x a ≫ P.map g₁.op = x b ≫ P.map g₂.op),
+-- the actual condition
+∃! t : T ⟶ P.obj (op B), ∀ a : α, t ≫ P.map (f a).op = x a
+
+theorem category_theory.functor.is_proetale_sheaf_of_types_iff (P : Profinite.{w}ᵒᵖ ⥤ Type u) :
   P.is_proetale_sheaf_of_types ↔ presieve.is_sheaf proetale_topology P :=
 begin
   erw presieve.is_sheaf_pretopology,
@@ -129,6 +141,19 @@ begin
       simpa using compat } }
 end
 
+theorem category_theory.functor.is_proetale_sheaf_iff (P : Profinite.{w}ᵒᵖ ⥤ C) :
+  P.is_proetale_sheaf ↔ presheaf.is_sheaf proetale_topology P :=
+begin
+  split,
+  { intros h T,
+    rw ← (P ⋙ coyoneda.obj (op T)).is_proetale_sheaf_of_types_iff,
+    introsI α _ B X f surj x compat,
+    exact h α B X f surj T x compat },
+  { introsI h α _ B X f surj T x compat,
+    specialize h T,
+    rw ← (P ⋙ coyoneda.obj (op T)).is_proetale_sheaf_of_types_iff at h,
+    exact h α B X f surj x compat }
+end
 
 lemma maps_comm {S S' : Profinite.{u}} (f : S' ⟶ S) :
   X.map f.op ≫ X.map (pullback.fst : pullback f f ⟶ S').op = X.map f.op ≫ X.map pullback.snd.op :=
