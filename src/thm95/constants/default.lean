@@ -194,7 +194,8 @@ lemma b_spec :
 begin
   suffices : 2 * (k' κ' m : ℝ) * (r / r') ^ b r r' BD κ' m ≤ ε r r' BD κ' m,
   exact_mod_cast this,
-  apply helper.b_spec ; norm_cast ; apply fact.out,
+  apply helper.b_spec ‹fact (0 < r)›.out ‹fact (0 < r')›.out ‹fact (r < r')›.out ; norm_cast ;
+  apply fact.out
 end
 
 /-- `N₂ κ' r r' m` is the smallest `N₂` such that `N = 2 ^ N₂` satisfies
@@ -205,7 +206,8 @@ lemma N₂_spec : (k' m) / (2 ^ (N₂ m)) ≤ r' ^ b m :=
 begin
   suffices : (k' κ' m : ℝ) / 2 ^ N₂ r r' BD κ' m ≤ r' ^ (b r r' BD κ' m : ℝ),
   exact_mod_cast this,
-  apply helper.N₂_spec ; norm_cast ; apply fact.out
+  apply helper.N₂_spec ‹fact (0 < r')›.out ; norm_cast ;
+  apply fact.out
 end
 
 lemma N₂_spec_of_pos' (h : 0 < N₂ m) :
@@ -215,7 +217,7 @@ begin
   exact_mod_cast this,
   apply helper.N₂_spec_of_pos' h,
   { norm_cast,
-    apply fact.out },
+    exact ‹fact (0 < r')›.out },
   apply nnreal.coe_nonneg
 end
 
