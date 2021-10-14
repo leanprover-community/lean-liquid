@@ -19,7 +19,7 @@ begin
     rwa [← nnreal.coe_lt_coe, nnreal.coe_pow, nnreal.coe_inv] },
   refine exists_pow_lt_of_lt_one _ hr.out,
   simp only [nnreal.coe_pos, inv_pos],
-  exact _inst_1.out
+  exact ‹fact (0 < x)›.out
 end
 
 /-- The smallest `b` such that `r ^ b ≤ x⁻¹`.  -/
