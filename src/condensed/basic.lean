@@ -93,7 +93,24 @@ def category_theory.functor.is_proetale_sheaf_pullback (P : Profinite.{w}ᵒᵖ 
 
 theorem category_theory.functor.is_proetale_sheaf_of_types_pullback_iff
   (P : Profinite.{w}ᵒᵖ ⥤ Type u) :
-  P.is_proetale_sheaf_of_types ↔ P.is_proetale_sheaf_of_types_pullback := sorry
+  P.is_proetale_sheaf_of_types ↔ P.is_proetale_sheaf_of_types_pullback :=
+begin
+  split,
+  { introsI h α _ B X f surj x compat,
+    apply h α B X f surj x,
+    intros a b Z g₁ g₂ h,
+    let g : Z ⟶ pullback (f a) (f b) := pullback.lift _ _ h,
+    rw (show g₁ = g ≫ pullback.fst, by simp [g]),
+    rw (show g₂ = g ≫ pullback.snd, by simp [g]),
+    simp only [op_comp, P.map_comp],
+    dsimp,
+    rw compat },
+  { introsI h α _ B X f surj x compat,
+    apply h α B X f surj x,
+    intros a b,
+    apply compat,
+    exact pullback.condition }
+end
 
 theorem category_theory.functor.is_prroetale_sheaf_pullback_iff (P : Profinite.{w}ᵒᵖ ⥤ C) :
   P.is_proetale_sheaf ↔ P.is_proetale_sheaf_pullback :=
