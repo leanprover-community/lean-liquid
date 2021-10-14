@@ -1,4 +1,4 @@
-import analysis.normed_space.normed_group_quotient
+import analysis.normed.group.quotient
 import linear_algebra.free_module.pid
 import linear_algebra.free_module.finite
 
