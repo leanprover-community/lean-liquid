@@ -91,11 +91,11 @@ end
 
 /-- An auxiliary function used to prove finiteness of `Mbar_bdd r' S c M`. -/
 private def temp_map [fact (0 < r')] (F : Mbar_bdd r' S c M) (n : fin (M + 1)) (s : S) :
-  Icc (ceil (-(c / min (r' ^ M) 1) : ℝ)) (floor (c / min (r' ^ M) 1 : ℝ)) :=
+  Icc (⌈(-(c / min (r' ^ M) 1) : ℝ)⌉) (⌊(c / min (r' ^ M) 1 : ℝ)⌋) :=
 have h : (-(c / min (r' ^ M) 1) : ℝ) ≤ F s n ∧ (F s n : ℝ) ≤ (c / min (r' ^ M) 1 : ℝ),
 by { rw [← abs_le, ← real.coe_nnabs, ← real.cast_nat_abs_eq_nnabs_cast],
     exact_mod_cast coeff_bound F F.sum_le n s },
-⟨F s n, ceil_le.2 $ h.1, le_floor.2 h.2⟩
+⟨F s n, int.ceil_le.2 h.1, int.le_floor.2 h.2⟩
 
 instance [fact (0 < r')] : fintype (Mbar_bdd r' S c M) :=
 fintype.of_injective temp_map
