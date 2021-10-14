@@ -166,7 +166,7 @@ def mk_of_bound (f : M₁ →+ M₂) (C : ℝ≥0)
 
   /-- Make a profinitely filtered pseudo-normed group hom
 from a group hom and a proof that it is bounded and continuous. -/
-def mk_of_strict (f : M₁ →+ M₂)
+noncomputable def mk_of_strict (f : M₁ →+ M₂)
   (h : ∀ c, ∃ (H : ∀ x, x ∈ filtration M₁ c → f x ∈ filtration M₂ c),
     @continuous (filtration M₁ c) (filtration M₂ c) _ _ (λ x, ⟨f x, H x x.2⟩)) :
   comphaus_filtered_pseudo_normed_group_hom M₁ M₂ :=
@@ -229,10 +229,10 @@ variables {f g}
 @[ext] theorem ext (H : ∀ x, f x = g x) : f = g :=
 by cases f; cases g; congr'; exact funext H
 
-instance : has_zero (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :=
+noncomputable instance : has_zero (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :=
 ⟨mk_of_bound (0 : M₁ →+ M₂) 0 (λ c, ⟨λ _ _, zero_mem_filtration _, @continuous_const _ _ _ _ 0⟩)⟩
 
-instance : inhabited (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) := ⟨0⟩
+noncomputable instance : inhabited (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) := ⟨0⟩
 
 lemma zero_bound_by_zero : (0 : comphaus_filtered_pseudo_normed_group_hom M₁ M₂).bound_by 0 :=
 mk_of_bound_bound_by _ _ _
@@ -242,7 +242,7 @@ lemma coe_inj ⦃f g : comphaus_filtered_pseudo_normed_group_hom M₁ M₂⦄ (h
 by cases f; cases g; cases h; refl
 
 /-- The identity function as `profinitely_filtered_pseudo_normed_group_hom`. -/
-@[simps] def id : comphaus_filtered_pseudo_normed_group_hom M M :=
+@[simps] noncomputable  def id : comphaus_filtered_pseudo_normed_group_hom M M :=
 mk_of_bound (add_monoid_hom.id _) 1 $
 begin
   refine λ c, ⟨_, _⟩,
@@ -401,7 +401,7 @@ by cases f; cases g; cases h; refl
   continuous' := λ c, (g.level_continuous c).comp (f.level_continuous c),
   ..(g.to_add_monoid_hom.comp f.to_add_monoid_hom) }
 
-def to_chfpsng_hom (f : strict_comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :
+noncomputable def to_chfpsng_hom (f : strict_comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :
   comphaus_filtered_pseudo_normed_group_hom M₁ M₂ :=
 comphaus_filtered_pseudo_normed_group_hom.mk_of_strict f.to_add_monoid_hom $
 λ c, ⟨λ x h, f.strict h, f.level_continuous _⟩
@@ -633,13 +633,14 @@ instance : has_sub (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) := ⟨s
 
 instance : has_neg (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) := ⟨neg⟩
 
-instance : add_comm_group (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :=
+noncomputable instance : add_comm_group (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :=
 function.injective.add_comm_group
   comphaus_filtered_pseudo_normed_group_hom.to_add_monoid_hom
   (λ f g h, by { ext, rw add_monoid_hom.ext_iff at h, exact h x })
   rfl (λ _ _, rfl) (λ _, rfl) (λ _ _, rfl)
 
 @[simps]
+noncomputable
 def to_add_monoid_hom_hom : (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) →+ (M₁ →+ M₂) :=
 { to_fun := to_add_monoid_hom,
   map_zero' := rfl,
@@ -816,6 +817,7 @@ instance pi : comphaus_filtered_pseudo_normed_group (Π i, M i) :=
 variables {M}
 
 @[simps]
+noncomputable
 def pi_proj (i : ι) : comphaus_filtered_pseudo_normed_group_hom (Π i, M i) (M i) :=
 comphaus_filtered_pseudo_normed_group_hom.mk_of_bound (pi.eval_add_monoid_hom M i) 1 $
 begin
