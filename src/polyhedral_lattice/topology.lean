@@ -37,7 +37,7 @@ begin
   ... ≤ ∑ (i : ι), ↑(c i) * ∥l i∥₊ : _,
   { rw [← nnreal.div_le_iff aux.ne', ← nnreal.coe_le_coe],
     simp only [coe_nnnorm, nnreal.coe_nat_abs, nnreal.coe_div],
-    refine (le_ceil _).trans (le_abs_self _), },
+    refine (int.le_ceil _).trans (le_abs_self _), },
   { rw mul_lt_mul_right aux,
     { exact_mod_cast H }, },
   { refine @finset.single_le_sum _ _ _ _ _ _ i (finset.mem_univ _),
