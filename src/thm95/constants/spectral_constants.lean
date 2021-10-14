@@ -19,7 +19,7 @@ lemma ε_pos : ∀ m K [fact (1 ≤ K)], 0 < ε m K
 | 0     K hK := nnreal.inv_pos.mpr (mul_pos zero_lt_two (lt_of_lt_of_le zero_lt_one hK.out))
 | (m+1) K hK := by { dsimp [ε], exactI ε_pos m _ }
 
---noncomputable
+noncomputable
 def k₀ : Π (m : ℕ) (k : ℝ≥0), ℝ≥0
 | 0     k := k
 | (m+1) k := k₀ m (k * k * k)
