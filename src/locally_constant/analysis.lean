@@ -1,5 +1,5 @@
 import topology.locally_constant.algebra
-import analysis.normed_space.normed_group_hom
+import analysis.normed.group.hom
 
 /-!
 # Analysis of locally constant maps
