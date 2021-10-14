@@ -79,90 +79,9 @@ section cokernels
 
 variables {A B C : SemiNormedGroup.{u}}
 
-/-- The cokernel of a morphism of seminormed groups. -/
-@[simp]
-def coker (f : A ⟶ B) : SemiNormedGroup := explicit_cokernel f
-
-/-- The projection onto the cokernel. -/
-@[simp]
-def coker.π {f : A ⟶ B} : B ⟶ coker f :=
-explicit_cokernel_π _
-
-lemma coker.π_surjective {f : A ⟶ B} :
-  function.surjective (coker.π : B → coker f) :=
-surjective_quot_mk _
-
-lemma coker.π_is_quotient {f : A ⟶ B} :
-  normed_group_hom.is_quotient (coker.π : B ⟶ coker f) :=
-is_quotient_explicit_cokernel_π _
-
-lemma coker.π_norm_noninc {f : A ⟶ B} :
-  (coker.π : B ⟶ coker f).norm_noninc :=
-norm_noninc_explicit_cokernel_π _
-
-instance coker.π_epi {f : A ⟶ B} : epi (coker.π : B ⟶ coker f) :=
-begin
-  constructor,
-  intros Z g h H,
-  ext x,
-  obtain ⟨x, hx⟩ := coker.π_surjective (explicit_cokernel_π f x),
-  change (coker.π ≫ g) _ = _,
-  rw [H],
-  refl
-end
-
 open normed_group_hom
 
-/-- Lift (aka descend) a morphism to the cokernel. -/
-def coker.lift {f : A ⟶ B} {g : B ⟶ C} (cond : f ≫ g = 0) : coker f ⟶ C :=
-explicit_cokernel_desc cond
-
-@[simp]
-lemma coker.lift_comp_π {f : A ⟶ B} {g : B ⟶ C} {cond : f ≫ g = 0} :
-  coker.π ≫ coker.lift cond = g :=
-explicit_cokernel_π_desc cond
-
-@[simp]
-lemma coker.lift_comp_π_apply {f : A ⟶ B} {g : B ⟶ C} {cond : f ≫ g = 0} (x : B) :
-  coker.lift cond (coker.π x) = g x :=
-show (coker.π ≫ coker.lift cond) x = g x, by rw coker.lift_comp_π
-
-lemma coker.lift_unique {f : A ⟶ B} {g : B ⟶ C} {cond : f ≫ g = 0} {h : coker f ⟶ C} :
-  coker.π ≫ h = g → h = coker.lift cond :=
-explicit_cokernel_desc_unique cond h
-
-lemma coker.comp_pi_eq_zero {f : A ⟶ B} : f ≫ (coker.π : B ⟶ coker f) = 0 :=
-comp_explicit_cokernel_π _
-
-@[simp]
-lemma coker.pi_apply_dom_eq_zero {f : A ⟶ B} (x : A) : (coker.π : B ⟶ coker f) (f x) = 0 :=
-show (f ≫ (coker.π : B ⟶ coker f)) x = 0, by { rw [coker.comp_pi_eq_zero], refl }
-
 variable {D : SemiNormedGroup.{u}}
-
-lemma coker.lift_comp_eq_lift {f : A ⟶ B} {g : B ⟶ C} {h : C ⟶ D} {cond : f ≫ g = 0} :
-  coker.lift cond ≫ h = coker.lift (show f ≫ (g ≫ h) = 0,
-    by rw [← category_theory.category.assoc, cond, limits.zero_comp]) :=
-coker.lift_unique $ by rw [← category_theory.category.assoc, coker.lift_comp_π]
-
-lemma coker.lift_zero {f : A ⟶ B} :
-  coker.lift (show f ≫ (0 : B ⟶ C) = 0, from category_theory.limits.comp_zero) = 0 :=
-eq.symm $ coker.lift_unique category_theory.limits.comp_zero
-
-section
-open_locale nnreal
-
--- maybe prove this for `normed_group_hom` first, without the category lib
-lemma coker.norm_lift_le {f : A ⟶ B} {g : B ⟶ C} {cond : f ≫ g = 0} {c : ℝ≥0}
-  (hg : ∥g∥ ≤ c) :
-  ∥coker.lift cond∥ ≤ c :=
-explicit_cokernel_desc_norm_le_of_norm_le cond c hg
-
-end
-
--- maybe prove this for `normed_group_hom` first, without the category lib
-lemma neg_norm_noninc (f : A ⟶ B) (hf : f.norm_noninc) : (-f).norm_noninc :=
-λ x, (norm_neg (f x)).le.trans (hf x)
 
 -- The next two declarations are available for any category with cokernels in #7623
 -- as `cokernel.map` and `cokernel.map_desc`.
@@ -176,9 +95,13 @@ lemma neg_norm_noninc (f : A ⟶ B) (hf : f.norm_noninc) : (-f).norm_noninc :=
     C ----> D ---> coker
  -/
 noncomputable def coker.map {fab : A ⟶ B} {fbd : B ⟶ D} {fac : A ⟶ C} {fcd : C ⟶ D}
-  (h : fab ≫ fbd = fac ≫ fcd) : coker fab ⟶ coker fcd :=
-coker.lift (show fab ≫ fbd ≫ coker.π = 0, by rw [← category_theory.category.assoc, h,
-  category_theory.category.assoc, coker.comp_pi_eq_zero, limits.comp_zero])
+  (h : fab ≫ fbd = fac ≫ fcd) : explicit_cokernel fab ⟶ explicit_cokernel fcd :=
+explicit_cokernel_desc (show fab ≫ fbd ≫ (explicit_cokernel_π _) = 0,
+  begin
+    rw [← category_theory.category.assoc, h, category_theory.category.assoc,
+      comp_explicit_cokernel_π, limits.comp_zero],
+  end
+  )
 
 /-
 If this commutes
@@ -203,34 +126,13 @@ lemma coker.map_lift_comm {B' D' : SemiNormedGroup}
   {h : fab ≫ fbd = fac ≫ fcd} {fbb' : B ⟶ B'} {fdd' : D ⟶ D'}
   {condb : fab ≫ fbb' = 0} {condd : fcd ≫ fdd' = 0} {g : B' ⟶ D'}
   (h' : fbb' ≫ g = fbd ≫ fdd'):
-  coker.lift condb ≫ g = coker.map h ≫ coker.lift condd :=
+  explicit_cokernel_desc condb ≫ g = coker.map h ≫ explicit_cokernel_desc condd :=
 begin
   delta coker.map,
-  simp only [← cancel_epi (coker.π : _ ⟶ coker fab), ← category.assoc, coker.lift_comp_π, h'],
-  rw [category.assoc, coker.lift_comp_π]
-end
-
-lemma coker.lift_comp_eq_zero {f : A ⟶ B} {g : B ⟶ C} {h : C ⟶ D} (cond : f ≫ g = 0)
-  (cond2 : g ≫ h = 0) : coker.lift cond ≫ h = 0 :=
-begin
-  rw [← cancel_epi (coker.π : _ ⟶ coker f), ← category.assoc, coker.lift_comp_π],
-  simp [cond2],
+  simp [← cancel_epi (explicit_cokernel_π fab), category.assoc, explicit_cokernel_π_desc, h']
 end
 
 end cokernels
-
-variables {V₁ V₂ V₃ : SemiNormedGroup.{u}} {f : V₁ ⟶ V₂} {g : V₂ ⟶ V₃}
-
--- maybe prove this for `normed_group_hom` first, without the category lib
-lemma coker.lift_norm_noninc {cond : f ≫ g = 0}
-  (hg : g.norm_noninc) :
-  (coker.lift cond).norm_noninc :=
-begin
-  refine normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.2 _,
-  rw [← nnreal.coe_one],
-  exact coker.norm_lift_le (normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.1 hg)
-end
-
 
 end SemiNormedGroup
 #lint- only unused_arguments def_lemma doc_blame
