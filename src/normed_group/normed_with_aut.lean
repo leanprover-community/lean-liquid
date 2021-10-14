@@ -33,7 +33,7 @@ begin
   { rw [normed_with_aut.norm_T, inv_mul_cancel_left₀],
     apply ne_of_gt,
     rw nnreal.coe_pos,
-    exact _inst_2.out },
+    exact ‹fact (0 < r)›.out },
   { rw [← category_theory.comp_apply, T.inv_hom_id], refl }
 end
 
