@@ -4,7 +4,7 @@ import topology.category.Profinite
 import topology.algebra.group_completion
 import topology.metric_space.completion
 
-import analysis.normed_space.normed_group_hom_completion
+import analysis.normed.group.hom_completion
 
 import locally_constant.SemiNormedGroup
 
