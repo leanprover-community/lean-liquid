@@ -28,10 +28,6 @@ def Condensed (C : Type u) [category.{v} C] := Sheaf proetale_topology.{w} C
 example : category.{u+1} (Condensed.{u} Ab.{u+1}) := infer_instance
 example : category.{u+37} (Condensed.{u} Ring.{u+37}) := infer_instance
 
-/-- The category of condensed abelian groups. -/
-@[derive category]
-def CondensedAb : Type (u+2) := Condensed.{u} Ab.{u+1}
-
 open opposite
 
 noncomputable theory
