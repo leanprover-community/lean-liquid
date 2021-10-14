@@ -63,6 +63,40 @@ def category_theory.functor.is_proetale_sheaf (P : Profinite.{w}ᵒᵖ ⥤ C) : 
 -- the actual condition
 ∃! t : T ⟶ P.obj (op B), ∀ a : α, t ≫ P.map (f a).op = x a
 
+def category_theory.functor.is_proetale_sheaf_pullback (P : Profinite.{w}ᵒᵖ ⥤ C) : Prop := ∀
+-- a finite family of morphisms with base B
+(α : Type w) [fintype α] (B : Profinite.{w}) (X : α → Profinite.{w}) (f : Π a, X a ⟶ B)
+-- jointly surjective
+(surj : ∀ b : B, ∃ a (x : X a), f a x = b)
+-- test object
+(T : C)
+-- family of moprhisms
+(x : Π a, T ⟶ P.obj (op (X a)))
+-- which is compatible
+(compat : ∀ (a b : α),
+  x a ≫ P.map (pullback.fst : pullback (f a) (f b) ⟶ _).op = x b ≫ P.map pullback.snd.op),
+-- the actual condition
+∃! t : T ⟶ P.obj (op B), ∀ a : α, t ≫ P.map (f a).op = x a
+
+theorem category_theory.functor.is_prroetale_sheaf_pullback_iff (P : Profinite.{w}ᵒᵖ ⥤ C) :
+  P.is_proetale_sheaf ↔ P.is_proetale_sheaf_pullback :=
+begin
+  split,
+  { introsI h α _ B X f surj T x compat,
+    apply h α B X f surj T x,
+    intros a b Z g₁ g₂ h,
+    specialize compat a b,
+    let g : Z ⟶ pullback (f a) (f b) := pullback.lift g₁ g₂ h,
+    rw (show g₁ = g ≫ pullback.fst, by simp [g]),
+    rw (show g₂ = g ≫ pullback.snd, by simp [g]),
+    simp only [op_comp, P.map_comp, reassoc_of compat] },
+  { introsI h α _ B X f surj T x compat,
+    apply h α B X f surj T x,
+    intros a b,
+    apply compat,
+    exact pullback.condition }
+end
+
 theorem category_theory.functor.is_proetale_sheaf_of_types_iff (P : Profinite.{w}ᵒᵖ ⥤ Type u) :
   P.is_proetale_sheaf_of_types ↔ presieve.is_sheaf proetale_topology P :=
 begin
