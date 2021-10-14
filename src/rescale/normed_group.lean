@@ -82,7 +82,7 @@ begin
   erw [rescale.norm_def, rescale.norm_def, equiv.symm_apply_apply, ← mul_div_assoc],
   refine div_le_div (mul_nonneg (le_trans (norm_nonneg _) hf) (norm_nonneg _))
     (normed_group_hom.le_of_op_norm_le _ hf _) _ le_rfl,
-  rw nnreal.coe_pos, exact _inst_3.out
+  rw nnreal.coe_pos, exact ‹fact (0 < r)›.out
 end
 
 lemma rescale_map_isometry [fact (0 < r)]
