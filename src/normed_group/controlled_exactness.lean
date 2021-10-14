@@ -1,4 +1,4 @@
-import analysis.normed_space.normed_group_hom_completion
+import analysis.normed.group.hom_completion
 
 /-!
 
