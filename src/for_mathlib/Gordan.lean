@@ -383,8 +383,8 @@ finset.le_sum_of_subadditive _ rfl int.nat_abs_add_le _ _
 lemma floor_add_floor_le {α : Type*} [linear_ordered_ring α] [floor_ring α] (x y : α) :
   ⌊x⌋ + ⌊y⌋ ≤ ⌊x + y⌋ :=
 begin
-  rw [le_floor, int.cast_add],
-  apply add_le_add (floor_le x) (floor_le y),
+  rw [int.le_floor, int.cast_add],
+  apply add_le_add (int.floor_le x) (int.floor_le y),
 end
 
 lemma finset.floor_le {α : Type*} [linear_ordered_ring α] [floor_ring α] {ι : Type*} (s : finset ι)
@@ -401,8 +401,8 @@ end
 lemma ceil_add_le {α : Type*} [linear_ordered_ring α] [floor_ring α] (x y : α) :
   ⌈x + y⌉ ≤ ⌈x⌉ + ⌈y⌉ :=
 begin
-  rw [ceil_le, int.cast_add],
-  apply add_le_add (le_ceil x) (le_ceil y),
+  rw [int.ceil_le, int.cast_add],
+  apply add_le_add (int.le_ceil x) (int.le_ceil y),
 end
 
 lemma finset.le_ceil {α : Type*} [linear_ordered_ring α] [floor_ring α] {ι : Type*} (s : finset ι)
@@ -511,7 +511,7 @@ begin
       { intro i,
         change (int.nat_abs _ : ℤ) = _,
         rw [←int.abs_eq_nat_abs, abs_of_nonneg],
-        rw [floor_nonneg],
+        rw [int.floor_nonneg],
         apply (f' i).2 },
       have hg' : ∀ i, (g' i : ℚ) = f' i - ns i,
       { intros i,
@@ -523,7 +523,7 @@ begin
         suffices : ((int.nat_abs ⌊(f' i : ℚ)⌋ : ℤ) : ℚ) ≤ f' i,
         { simpa using this },
         rw ns',
-        apply floor_le },
+        apply int.floor_le },
       change ∑ x in s, f' x • to_rational_point (w x) = to_rational_point x at hf,
       -- have :  ≤ ↑(f' i) - ↑(ns i)
       have : ∀ i, (ns i : ℚ≥0) + g' i = f' i,
@@ -542,7 +542,7 @@ begin
           suffices : (f' i : ℚ) - ((ns i : ℤ) : ℚ) < 1,
           { simpa using this },
           rw ns',
-          apply fract_lt_one },
+          apply int.fract_lt_one },
         rw linear_map.map_sub,
         rw linear_map.map_sum,
         rw eq_sub_iff_add_eq',
