@@ -172,7 +172,8 @@ lemma nnnorm_apply_le_of_nnnorm_le (F : ℳ p S) (s : S) (c : ℝ≥0) (h : ∥F
 begin
   calc ∥F s∥₊ = (∥F s∥₊ ^ (p:ℝ)) ^ (p⁻¹ : ℝ) : _
   ... ≤ c ^ (p⁻¹ : ℝ) : _,
-  { rw_mod_cast [← nnreal.rpow_mul, mul_inv_cancel, nnreal.rpow_one], exact ne_of_gt (fact.out _) },
+  { rw_mod_cast [← nnreal.rpow_mul, mul_inv_cancel, nnreal.rpow_one],
+    exact ne_of_gt (‹fact (0 < p)›.out) },
   { apply nnreal.rpow_le_rpow _ (inv_pos.mpr _).le,
     { refine le_trans _ h,
       have aux := finset.sum_pi_single' s (∥F s∥₊ ^ (p:ℝ)) finset.univ,
@@ -181,7 +182,7 @@ begin
       apply finset.sum_le_sum,
       rintro t -,
       split_ifs, { subst t }, { exact zero_le' } },
-    { norm_cast, exact (fact.out _), } }
+    { norm_cast, exact ‹fact (0 < p)›.out } }
 end
 
 lemma apply_mem_Icc_of_nnnorm_le (F : ℳ p S) (s : S) (c : ℝ≥0) (h : ∥F∥₊ ≤ c) :
