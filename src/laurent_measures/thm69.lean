@@ -37,9 +37,9 @@ begin
   { rw [hm, pow_zero, div_one] at h_mz,
     rw [← h_mz, y, le_max_iff],
     apply or.intro_left,
-    exact floor_le x },
+    exact int.floor_le x },
   rw ← h_mz,
-  apply (floor_le _).trans,
+  apply (int.floor_le _).trans,
   obtain ⟨k, hk⟩ : ∃ k : ℕ, m = k + 1 := nat.exists_eq_succ_of_ne_zero hm,
   rw [hk, y],
   have : ξ ^ k ≠ 0 := ne_of_gt (pow_pos (fact.out _) k),
@@ -52,16 +52,16 @@ begin
         ... ≤ 1 / ξ : div_le_div_of_le (le_of_lt _) (le_of_lt _)
         ... ≤ max x ξ ⁻¹ : by {field_simp},
   exact fact.out _,
-  {rw [sub_lt_iff_lt_add, add_comm], from (lt_floor_add_one _)},
+  {rw [sub_lt_iff_lt_add, add_comm], from (int.lt_floor_add_one _)},
 end
 
 lemma eventually_pos_y : ∀ n : ℕ, n ≥ 1 → y ξ x n ≥ 0 :=
 begin
   have h_pos : ∀ n : ℕ, n ≥ 1 → ξ ^ n > 0 := λ n _, pow_pos (fact.out _) n,
-  have : ∀ n : ℕ, n ≥ 1 →  (y ξ x n) / ξ ^ n ≥ ⌊(((y ξ x n) / ξ ^ n) : ℝ)⌋ := λ n _, floor_le _,
+  have : ∀ n : ℕ, n ≥ 1 →  (y ξ x n) / ξ ^ n ≥ ⌊(((y ξ x n) / ξ ^ n) : ℝ)⌋ := λ n _, int.floor_le _,
   intros n hn₁,
   by_cases hn₀ : n = 1,
-  { rw [hn₀, y,pow_zero, div_one, mul_one, ge_iff_le, sub_nonneg], apply floor_le },
+  { rw [hn₀, y,pow_zero, div_one, mul_one, ge_iff_le, sub_nonneg], apply int.floor_le },
   { replace hn₁ : n > 1, {apply (lt_of_le_of_ne hn₁), tauto },
     obtain ⟨m, hm⟩ : ∃ m : ℕ, m ≥ 1 ∧ n = m + 1,
     use ⟨n - 1, and.intro (nat.le_pred_of_lt hn₁) (nat.sub_add_cancel (le_of_lt hn₁)).symm⟩,
@@ -75,7 +75,7 @@ begin
   have h_pos : ∀ n : ℕ, n ≥ 1 → ξ ^ n > 0 := λ n _, pow_pos (fact.out _) n,
   intros n hn,
   norm_cast,
-  apply floor_nonneg.mpr,
+  apply int.floor_nonneg.mpr,
   exact div_nonneg (eventually_pos_y ξ x n hn) (le_of_lt (h_pos n hn)),
 end
 
@@ -244,13 +244,14 @@ lemma limit_y [fact (ξ < 1)]: tendsto (λ n, y ξ x n) at_top (𝓝 0) :=
 begin
   have h_pos : 0 < ξ := fact.out _,
   let ξ₀ : ℝ≥0 := ⟨ξ, le_of_lt (fact.out _)⟩,
-  have h_right : ∀ n, n ≥ 1 → (⌊(y ξ x n / ξ ^ n)⌋ : ℝ) ≤ (y ξ x n / ξ ^ n) := (λ _ _, floor_le _),
+  have h_right : ∀ n, n ≥ 1 → (⌊(y ξ x n / ξ ^ n)⌋ : ℝ) ≤ (y ξ x n / ξ ^ n) :=
+    (λ _ _, int.floor_le _),
   replace h_right : ∀ n, n ≥ 1 → (⌊(y ξ x n / ξ ^ n)⌋ : ℝ) * ξ ^ n  ≤ y ξ x n :=
     (λ n hn, (le_div_iff (pow_pos h_pos n)).mp (h_right n hn)),
   replace h_right : ∀ᶠ n in at_top, (⌊(y ξ x n / ξ ^ n)⌋ : ℝ) * ξ ^ n  ≤ y ξ x n,
   { simp only [ge_iff_le, eventually_at_top], use [1, h_right] },
   have h_left : ∀ n, n ≥ 1 → (y ξ x n / ξ ^ n) - 1 ≤ ⌊(y ξ x n / ξ ^ n)⌋ :=
-    (λ n hn, le_of_lt (sub_one_lt_floor _)),
+    (λ n hn, le_of_lt (int.sub_one_lt_floor _)),
   replace h_left : ∀ n, n ≥ 1 → (y ξ x n - ξ ^ n) ≤ ⌊(y ξ x n / ξ ^ n)⌋ * ξ ^ n,
   { have h_one : ∀ n : ℕ, 0 < ξ ^ n := (λ n, pow_pos h_pos n),
     intros n hn,
