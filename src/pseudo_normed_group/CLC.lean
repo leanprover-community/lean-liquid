@@ -1,5 +1,5 @@
 import pseudo_normed_group.LC
-import analysis.normed_space.normed_group_hom_completion
+import analysis.normed.group.hom_completion
 
 /-!
 
