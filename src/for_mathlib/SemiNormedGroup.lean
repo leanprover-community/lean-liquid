@@ -1,6 +1,6 @@
-import analysis.normed_space.SemiNormedGroup
-import analysis.normed_space.SemiNormedGroup.kernels
-import analysis.normed_space.normed_group_quotient
+import analysis.normed.group.SemiNormedGroup
+import analysis.normed.group.SemiNormedGroup.kernels
+import analysis.normed.group.quotient
 
 import algebra.punit_instances
 import category_theory.concrete_category.bundled_hom
@@ -23,17 +23,6 @@ This file would sit well in mathlib.
 noncomputable theory
 
 universes u v
-
--- move this
-section for_mathlib
-
--- move this, better name?
-lemma norm_le_add_norm_add {V : Type*} [semi_normed_group V] (x y : V) :
-  ∥x∥ ≤ ∥x + y∥ + ∥y∥ :=
-calc ∥x∥ = ∥x + y - y∥ : by rw add_sub_cancel
-... ≤ ∥x + y∥ + ∥y∥ : norm_sub_le _ _
-
-end for_mathlib
 
 open category_theory
 
