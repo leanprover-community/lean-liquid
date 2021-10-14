@@ -48,6 +48,19 @@ def category_theory.functor.is_proetale_sheaf_of_types : Prop := ∀
 -- the actual condition
 ∃! t : P.obj (op B), ∀ a : α, P.map (f a).op t = x a
 
+def category_theory.functor.is_proetale_sheaf_of_types_pullbackk : Prop := ∀
+-- a finite family of morphisms with base B
+(α : Type w) [fintype α] (B : Profinite.{w}) (X : α → Profinite.{w}) (f : Π a, X a ⟶ B)
+-- jointly surjective
+(surj : ∀ b : B, ∃ a (x : X a), f a x = b)
+-- family of terms
+(x : Π a, P.obj (op (X a)))
+-- which is compatible
+(compat : ∀ (a b : α),
+  P.map (pullback.fst : pullback (f a) (f b) ⟶ _).op (x a) = P.map pullback.snd.op (x b)),
+-- the actual condition
+∃! t : P.obj (op B), ∀ a : α, P.map (f a).op t = x a
+
 def category_theory.functor.is_proetale_sheaf (P : Profinite.{w}ᵒᵖ ⥤ C) : Prop := ∀
 -- a finite family of morphisms with base B
 (α : Type w) [fintype α] (B : Profinite.{w}) (X : α → Profinite.{w}) (f : Π a, X a ⟶ B)
