@@ -65,12 +65,12 @@ rfl
 
 def map_f {C₁ C₂ : cochain_complex SemiNormedGroup ℕ} (f : C₁ ⟶ C₂) :
   Π i:ℕ, X C₁ i ⟶ X C₂ i
-| 0     := coker.map (f.comm 0 1).symm
+| 0     := explicit_cokernel.map (f.comm 0 1).symm
 | (i+1) := f.f (i+2)
 
 lemma map_comm {C₁ C₂ : cochain_complex SemiNormedGroup.{u} ℕ} (f : C₁ ⟶ C₂) :
   Π i j, i + 1 = j → map_f f i ≫ d C₂ i j = d C₁ i j ≫ map_f f j
-| 0     1     rfl := (coker.map_lift_comm (f.comm 1 2).symm).symm
+| 0     1     rfl := (explicit_coker.map_desc (f.comm 1 2).symm).symm
 | (i+1) (j+1) rfl := f.comm (i+2) (j+2)
 
 @[simps]
