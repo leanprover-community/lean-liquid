@@ -29,7 +29,7 @@ namespace helper
 
 open real
 
-def b (r r' k' ε : ℝ): ℕ := nat_ceil ((log $ ε/(2 * k'))/log (r/r'))
+def b (r r' k' ε : ℝ): ℕ := nat.ceil ((log $ ε/(2 * k'))/log (r/r'))
 
 lemma b_spec {r r' k' ε : ℝ} (hr : 0 < r) ( hr' : 0 < r') (hrr' : r < r')
   (hk' : 0 < k') (hε : 0 < ε) : (2 * k') * (r / r') ^ (b r r' k' ε) ≤ ε :=
@@ -39,10 +39,10 @@ begin
   have f₃ : 0 < r/r' := div_pos hr hr',
   have f₄ :0 < (r / r') ^ b r r' k' ε := pow_pos f₃ _,
   rw [← le_div_iff' f₁, ← log_le_log f₄ (div_pos hε f₁), log_pow f₃, ← div_le_iff_of_neg (log_neg f₃ f₂)],
-  exact le_nat_ceil (log (ε / (2 * k')) / log (r / r')),
+  exact nat.le_ceil (log (ε / (2 * k')) / log (r / r')),
 end
 
-def N₂ (r' k' b : ℝ) := nat_ceil (log (k'/r'^b)/ log 2)
+def N₂ (r' k' b : ℝ) := nat.ceil (log (k'/r'^b)/ log 2)
 
 lemma N₂_spec {r' k' b : ℝ} (hr' : 0 < r') (hk' : 0 < k') : k'/ (2 ^ (N₂ r' k' b)) ≤ r' ^ b :=
 begin
@@ -51,15 +51,15 @@ begin
   have f₃ : 0 < k' / r' ^ b := div_pos hk' f₂,
   have f₄ : 0 < log 2 := log_pos one_lt_two,
   rw [div_le_iff' f₁, ← div_le_iff f₂,  ← log_le_log f₃ f₁, log_pow zero_lt_two, ← div_le_iff f₄],
-  apply le_nat_ceil,
+  apply nat.le_ceil,
 end
 
 lemma N₂_spec_of_pos' {r' k' b} (h : 0 < N₂ r' k' b) (hr' : 0 < r') (hk' : 0 ≤ k') :
   r' ^ b < 2 * k'  / 2 ^ N₂ r' k' b :=
 begin
-  have h' := lt_nat_ceil.mp h,
+  have h' := nat.lt_ceil.mp h,
   have : 0 < log (k'/r'^b)/ log 2,
-  { exact_mod_cast lt_nat_ceil.mp h },
+  { exact_mod_cast nat.lt_ceil.mp h },
   have f₁ : 0 < 2 ^ N₂ r' k' b := pow_pos zero_lt_two _,
   have Hk' : k' ≠ 0,
   { intro H,
@@ -68,7 +68,7 @@ begin
 
   have f₃ : 0 < k' / r' ^ b := div_pos ((ne.symm Hk').le_iff_lt.mp hk') f₂,
   have f₃' : k' / r' ^ b ≠ 0 := f₃.ne.symm,
-  have f₄ : (N₂ r' k' b : ℝ) < _ := nat_ceil_lt_add_one this.le,
+  have f₄ : (N₂ r' k' b : ℝ) < _ := nat.ceil_lt_add_one this.le,
 
   rwa [lt_div_iff, ← lt_div_iff', mul_div_assoc, ← log_lt_log_iff, log_mul, log_pow,
        ← lt_div_iff (log_pos one_lt_two), add_div, div_self (log_pos one_lt_two).ne.symm, add_comm],
