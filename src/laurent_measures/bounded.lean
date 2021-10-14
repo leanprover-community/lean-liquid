@@ -148,8 +148,8 @@ open_locale classical
 instance (r : ℝ≥0) [fact (0 < r)] (S : Fintype) (T : finset ℤ) :
   fintype (laurent_measures_bdd r S T c) :=
 begin
-  let lb : T → ℤ := λ i, floor (-((c : ℝ) * ((r : ℝ)^(i : ℤ))⁻¹)),
-  let ub : T → ℤ := λ i, ceil ((c : ℝ) * ((r : ℝ)^(i : ℤ))⁻¹),
+  let lb : T → ℤ := λ i, int.floor (-((c : ℝ) * ((r : ℝ)^(i : ℤ))⁻¹)),
+  let ub : T → ℤ := λ i, int.ceil ((c : ℝ) * ((r : ℝ)^(i : ℤ))⁻¹),
   let ι : laurent_measures_bdd r S T c →
     (Π (s : S) (i : T), Icc (lb i) (ub i)) :=
     λ F s i, ⟨F s i, _⟩,
@@ -162,8 +162,8 @@ begin
     change (abs (F s i) : ℝ) ≤ _ at this,
     rw abs_le at this,
     split,
-    { exact_mod_cast le_trans (floor_le _) this.1 },
-    { exact_mod_cast le_trans this.2 (le_ceil _) } }
+    { exact_mod_cast le_trans (int.floor_le _) this.1 },
+    { exact_mod_cast le_trans this.2 (int.le_ceil _) } }
 end
 
 instance : topological_space (laurent_measures_bdd r S T c) := ⊥
