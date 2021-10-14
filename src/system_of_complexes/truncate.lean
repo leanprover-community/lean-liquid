@@ -33,11 +33,11 @@ variables (C : cochain_complex SemiNormedGroup.{u} ℕ)
 open category_theory.preadditive
 
 def X : ℕ → SemiNormedGroup.{u}
-| 0     := coker (C.d 0 1)
+| 0     := explicit_cokernel (C.d 0 1)
 | (n+1) := C.X (n+2)
 
 def d : Π i j, X C i ⟶ X C j
-| 0     1     := coker.lift (C.d_comp_d 0 1 2)
+| 0     1     := explicit_cokernel_desc (C.d_comp_d 0 1 2)
 | (i+1) (j+1) := C.d (i+2) (j+2)
 | _     _     := 0
 
@@ -49,7 +49,7 @@ lemma d_eq_zero : ∀ ⦃i j : ℕ⦄, ¬(complex_shape.up ℕ).rel i j → d C 
 | (i+1) (j+1) h := C.shape _ _ $ λ H, h $ nat.succ_injective $ H
 
 lemma d_comp_d : Π i j k, i + 1 = j → j + 1 = k → d C i j ≫ d C j k = 0
-| 0     1     2     rfl rfl := coker.lift_comp_eq_zero _ (C.d_comp_d _ _ _)
+| 0     1     2     rfl rfl := explicit_cokernel_desc_comp_eq_zero _ (C.d_comp_d _ _ _)
 | (i+1) (j+1) (k+1) rfl rfl := C.d_comp_d _ _ _
 
 @[simps]
@@ -105,7 +105,7 @@ def truncate : system_of_complexes ⥤ system_of_complexes :=
 (whiskering_right _ _ _).obj $ SemiNormedGroup.truncate
 
 @[simp] lemma truncate_obj_d_zero_one (c : ℝ≥0) (y : C c 1) :
-  (truncate.obj C).d 0 1 (SemiNormedGroup.coker.π y) = C.d 1 2 y := rfl
+  (truncate.obj C).d 0 1 (SemiNormedGroup.explicit_cokernel_π _ y) = C.d 1 2 y := rfl
 
 @[simp] lemma truncate_obj_d_succ_succ (c : ℝ≥0) (i j : ℕ) (x: truncate.obj C c (i+1)) :
   (truncate.obj C).d (i+1) (j+1) x = C.d (i+2) (j+2) x := rfl
@@ -115,15 +115,15 @@ lemma truncate_admissible (hC : C.admissible) :
 { d_norm_noninc' :=
   begin
     rintro c (i|i) j rfl,
-    { apply SemiNormedGroup.coker.lift_norm_noninc,
+    { apply SemiNormedGroup.explicit_cokernel_desc_norm_noninc,
       exact hC.d_norm_noninc _ _ 1 2 },
     { exact hC.d_norm_noninc _ _ (i+2) (i+3) }
   end,
   res_norm_noninc :=
   begin
     rintro c₁ c₂ (i|i) h x,
-    { apply SemiNormedGroup.coker.lift_norm_noninc,
-      exact SemiNormedGroup.coker.π_norm_noninc.comp (hC.res_norm_noninc _ _ _ _) },
+    { apply SemiNormedGroup.explicit_cokernel_desc_norm_noninc _,
+      exact (SemiNormedGroup.norm_noninc_explicit_cokernel_π _).comp (hC.res_norm_noninc _ _ _ _) },
     { exact hC.res_norm_noninc _ _ _ _ x }
   end }
 
@@ -134,25 +134,25 @@ lemma truncate_is_weak_bounded_exact (hC : C.is_weak_bounded_exact k K (m+1) c�
   (truncate.obj C).is_weak_bounded_exact k K m c₀
 | c hc 0 hi x ε hε :=
 begin
-  let π := λ c, @SemiNormedGroup.coker.π _ _ (@d C c 0 1),
-  obtain ⟨x, rfl⟩ : ∃ x', π _ x' = x := SemiNormedGroup.coker.π_surjective x,
+  let π := λ c, SemiNormedGroup.explicit_cokernel_π (@d C c 0 1),
+  obtain ⟨x, rfl⟩ : ∃ x', π _ x' = x := SemiNormedGroup.explicit_cokernel_π_surjective x,
   obtain ⟨i₀, -, hi₀, rfl, y, hy⟩ := hC c hc _ (nat.succ_le_succ hi) x ε hε,
   obtain rfl : i₀ = 0, { rwa nat.sub_self at hi₀ }, clear hi,
   refine ⟨0, _, rfl, rfl, 0, _⟩,
   simp only [normed_group_hom.map_zero, sub_zero,
     normed_group_hom.map_neg, truncate_obj_d_zero_one, norm_neg],
   calc _ = ∥π c (res x - C.d 0 1 y)∥ : _
-  ... ≤ ∥res x - C.d 0 1 y∥ : SemiNormedGroup.coker.π_norm_noninc _
+  ... ≤ ∥res x - C.d 0 1 y∥ : SemiNormedGroup.norm_noninc_explicit_cokernel_π _ _
   ... ≤ _ : hy,
   have hπy : π c (C.d 0 1 y) = 0,
-  { show (C.d 0 1 ≫ π c) y = 0, rw [SemiNormedGroup.coker.comp_pi_eq_zero], refl },
+  { show (C.d 0 1 ≫ π c) y = 0, rw [SemiNormedGroup.comp_explicit_cokernel_π], refl },
   simp only [normed_group_hom.map_sub, hπy, sub_zero], refl
 end
 | c hc (i+1) hi x ε hε :=
 begin
   obtain ⟨_, _, rfl, rfl, y, hy⟩ := hC c hc _ (nat.succ_le_succ hi) x ε hε,
   refine ⟨i, _, rfl, rfl, _⟩,
-  cases i; [exact ⟨SemiNormedGroup.coker.π y, hy⟩, exact ⟨y, hy⟩],
+  cases i; [exact ⟨SemiNormedGroup.explicit_cokernel_π _ y, hy⟩, exact ⟨y, hy⟩],
 end
 
 lemma is_weak_bounded_exact_of_truncate (IH : C.is_weak_bounded_exact k K m c₀)
@@ -161,12 +161,12 @@ lemma is_weak_bounded_exact_of_truncate (IH : C.is_weak_bounded_exact k K m c₀
 | c hc 0 hi x ε hε := IH c hc 0 (nat.zero_le _) x ε hε
 | c hc 1 hi x ε hε :=
 begin
-  let π := λ c, @SemiNormedGroup.coker.π _ _ (@d C c 0 1),
+  let π := λ c, SemiNormedGroup.explicit_cokernel_π (@d C c 0 1),
   let δ := ε / 2,
   have hδε : δ + δ = ε, { dsimp [δ], rw [← add_div, half_add_self] },
   have hδ : 0 < δ := div_pos hε zero_lt_two,
   obtain ⟨x', Hxx', Hx'⟩ : ∃ x', π c x' = π c (res x) ∧ ∥x'∥ < ∥π c (res x)∥ + δ :=
-    SemiNormedGroup.coker.π_is_quotient.norm_lift hδ _,
+    (SemiNormedGroup.is_quotient_explicit_cokernel_π _).norm_lift hδ _,
   obtain ⟨y, hy⟩ : ∃ y : C c 0, C.d 0 1 y = res x - x',
   { erw [quotient_add_group.eq, add_comm, ← sub_eq_add_neg, set.mem_range] at Hxx',
     exact Hxx' },
@@ -184,8 +184,8 @@ begin
   obtain ⟨_, _, rfl, rfl, y, hy⟩ := hC c hc (i+1) (nat.pred_le_pred hi) x ε hε,
   refine ⟨i+1, _, rfl, rfl, _⟩,
   cases i,
-  { let π := λ c, @SemiNormedGroup.coker.π _ _ (@d C c 0 1),
-    obtain ⟨y, rfl⟩ : ∃ y', π _ y' = y := SemiNormedGroup.coker.π_surjective y,
+  { let π := λ c, SemiNormedGroup.explicit_cokernel_π (@d C c 0 1),
+    obtain ⟨y, rfl⟩ : ∃ y', π _ y' = y := SemiNormedGroup.explicit_cokernel_π_surjective y,
     exact ⟨y, hy⟩ },
   { exact ⟨y, hy⟩ },
 end
