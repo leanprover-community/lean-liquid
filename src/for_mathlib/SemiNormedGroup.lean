@@ -94,14 +94,9 @@ variable {D : SemiNormedGroup.{u}}
    \/      \/
     C ----> D ---> coker
  -/
-noncomputable def coker.map {fab : A ⟶ B} {fbd : B ⟶ D} {fac : A ⟶ C} {fcd : C ⟶ D}
+noncomputable def explicit_coker.map {fab : A ⟶ B} {fbd : B ⟶ D} {fac : A ⟶ C} {fcd : C ⟶ D}
   (h : fab ≫ fbd = fac ≫ fcd) : explicit_cokernel fab ⟶ explicit_cokernel fcd :=
-explicit_cokernel_desc (show fab ≫ fbd ≫ (explicit_cokernel_π _) = 0,
-  begin
-    rw [← category_theory.category.assoc, h, category_theory.category.assoc,
-      comp_explicit_cokernel_π, limits.comp_zero],
-  end
-  )
+@explicit_cokernel_desc _ _ _ fab (fbd ≫ explicit_cokernel_π _) $ by simp [reassoc_of h]
 
 /-
 If this commutes
@@ -121,14 +116,14 @@ coker (A → B) ----> B'
 coker (C → D) ----> D'
 -/
 
-lemma coker.map_lift_comm {B' D' : SemiNormedGroup}
+lemma explicit_coker.map_lift_comm {B' D' : SemiNormedGroup}
   {fab : A ⟶ B} {fbd : B ⟶ D} {fac : A ⟶ C} {fcd : C ⟶ D}
   {h : fab ≫ fbd = fac ≫ fcd} {fbb' : B ⟶ B'} {fdd' : D ⟶ D'}
   {condb : fab ≫ fbb' = 0} {condd : fcd ≫ fdd' = 0} {g : B' ⟶ D'}
   (h' : fbb' ≫ g = fbd ≫ fdd'):
-  explicit_cokernel_desc condb ≫ g = coker.map h ≫ explicit_cokernel_desc condd :=
+  explicit_cokernel_desc condb ≫ g = explicit_coker.map h ≫ explicit_cokernel_desc condd :=
 begin
-  delta coker.map,
+  delta explicit_coker.map,
   simp [← cancel_epi (explicit_cokernel_π fab), category.assoc, explicit_cokernel_π_desc, h']
 end
 
