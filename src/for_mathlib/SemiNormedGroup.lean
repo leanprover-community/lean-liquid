@@ -94,7 +94,7 @@ variable {D : SemiNormedGroup.{u}}
    \/      \/
     C ----> D ---> coker
  -/
-noncomputable def explicit_coker.map {fab : A ⟶ B} {fbd : B ⟶ D} {fac : A ⟶ C} {fcd : C ⟶ D}
+noncomputable def explicit_cokernel.map {fab : A ⟶ B} {fbd : B ⟶ D} {fac : A ⟶ C} {fcd : C ⟶ D}
   (h : fab ≫ fbd = fac ≫ fcd) : explicit_cokernel fab ⟶ explicit_cokernel fcd :=
 @explicit_cokernel_desc _ _ _ fab (fbd ≫ explicit_cokernel_π _) $ by simp [reassoc_of h]
 
@@ -116,14 +116,14 @@ coker (A → B) ----> B'
 coker (C → D) ----> D'
 -/
 
-lemma explicit_coker.map_lift_comm {B' D' : SemiNormedGroup}
+lemma explicit_coker.map_desc {B' D' : SemiNormedGroup}
   {fab : A ⟶ B} {fbd : B ⟶ D} {fac : A ⟶ C} {fcd : C ⟶ D}
   {h : fab ≫ fbd = fac ≫ fcd} {fbb' : B ⟶ B'} {fdd' : D ⟶ D'}
   {condb : fab ≫ fbb' = 0} {condd : fcd ≫ fdd' = 0} {g : B' ⟶ D'}
   (h' : fbb' ≫ g = fbd ≫ fdd'):
-  explicit_cokernel_desc condb ≫ g = explicit_coker.map h ≫ explicit_cokernel_desc condd :=
+  explicit_cokernel_desc condb ≫ g = explicit_cokernel.map h ≫ explicit_cokernel_desc condd :=
 begin
-  delta explicit_coker.map,
+  delta explicit_cokernel.map,
   simp [← cancel_epi (explicit_cokernel_π fab), category.assoc, explicit_cokernel_π_desc, h']
 end
 
