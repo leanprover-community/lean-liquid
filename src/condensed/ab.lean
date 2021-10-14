@@ -47,7 +47,7 @@ def of_top_ab.presheaf : Profiniteᵒᵖ ⥤ Ab :=
 
 /-- The condensed abelian group associated with a topological abelian group -/
 def of_top_ab : Condensed.{u} Ab :=
-{ val := as_small.down.op ⋙ (of_top_ab.presheaf A),
+{ val := of_top_ab.presheaf A,
   property := sorry }
 
 end
@@ -186,9 +186,9 @@ lemma Presheaf.map_comp {A B C : CompHausFiltPseuNormGrp₁} (f : A ⟶ B) (g : 
 set_option pp.universes true
 
 def to_Condensed : CompHausFiltPseuNormGrp₁.{u+1} ⥤ Condensed.{u} Ab :=
-{ obj := λ A, { val := as_small.down.op ⋙ Presheaf A,
+{ obj := λ A, { val := Presheaf A,
   property := sorry }, -- ← this one will be hard
-  map := λ A B f, whisker_left _ $ Presheaf.map f,
+  map := λ A B f, Presheaf.map f,
   map_id' := λ X, by { ext : 2, dsimp, simpa },
   map_comp' := λ X Y Z f g, by { ext : 2, dsimp, simpa } }
 
