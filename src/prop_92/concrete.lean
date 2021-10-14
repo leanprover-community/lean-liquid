@@ -2,7 +2,7 @@ import pseudo_normed_group.profinitely_filtered
 import prop_92.extension_profinite
 import normed_group.normed_with_aut
 
-import analysis.normed_space.normed_group_hom_completion
+import analysis.normed.group.hom_completion
 
 import locally_constant.analysis
 
