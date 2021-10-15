@@ -12,10 +12,22 @@ open category_theory opposite
 variables {C : Type u} [category.{v} C] (Q : Profinite.{w}ᵒᵖ ⥤ C)
 variables (P : Profinite.{w}ᵒᵖ ⥤ Type u)
 
-def preserves_finite_products : Prop := ∀
+def finite_product_condition : Prop := ∀
 (α : Fintype.{w}) (X : α → Profinite.{w}),
 function.bijective (λ (x : P.obj (op (Profinite.sigma X))) (a : α),
   P.map (Profinite.sigma.ι X a).op x)
+
+def map_to_equalizer {W X B : Profinite.{w}} (f : X ⟶ B) (g₁ g₂ : W ⟶ X)
+  (w : g₁ ≫ f = g₂ ≫ f) :
+  P.obj (op B) → { x : P.obj (op X) | P.map g₁.op x = P.map g₂.op x } :=
+λ t, ⟨P.map f.op t, by { change (P.map _ ≫ P.map _) _ = (P.map _ ≫ P.map _) _,
+  simp_rw [← P.map_comp, ← op_comp, w] }⟩
+
+def equalizer_condition : Prop := ∀
+(X B : Profinite.{w}) (π : X ⟶ B) (surj : function.surjective π),
+function.bijective (λ x : P.obj (op B),
+  map_to_equalizer P π (Profinite.pullback.fst π π) (Profinite.pullback.snd π π)
+    (Profinite.pullback.condition _ _))
 
 -- Should we make this `unique` instead of `subsingleton`?
 def subsingleton_empty : Prop := ∀
@@ -48,6 +60,20 @@ def is_proetale_sheaf_of_types_pullback : Prop := ∀
 -- the actual condition
 ∃! t : P.obj (op B), ∀ a : α, P.map (f a).op t = x a
 
+def is_proetale_sheaf_of_types_explicit_pullback : Prop := ∀
+-- a finite family of morphisms with base B
+(α : Type w) [fintype α] (B : Profinite.{w}) (X : α → Profinite.{w}) (f : Π a, X a ⟶ B)
+-- jointly surjective
+(surj : ∀ b : B, ∃ a (x : X a), f a x = b)
+-- family of terms
+(x : Π a, P.obj (op (X a)))
+-- which is compatible
+(compat : ∀ (a b : α),
+  P.map (Profinite.pullback.fst (f a) (f b)).op (x a) =
+  P.map (Profinite.pullback.snd _ _).op (x b)),
+-- the actual condition
+∃! t : P.obj (op B), ∀ a : α, P.map (f a).op t = x a
+
 def is_proetale_sheaf_of_types_projective : Prop := ∀
 -- a finite family of projective objects
 (α : Fintype.{w}) (X : α → Profinite.{w}) [∀ a, projective (X a)],
@@ -68,7 +94,7 @@ begin
 end
 
 theorem preserves_finite_products_of_is_proetale_sheaf_of_types
-  (h : P.is_proetale_sheaf_of_types) : P.preserves_finite_products :=
+  (h : P.is_proetale_sheaf_of_types) : P.finite_product_condition :=
 begin
   intros α X,
   split,
@@ -214,6 +240,25 @@ begin
     exact limits.pullback.condition }
 end
 
+theorem is_proetale_sheaf_of_types_explicit_pullback_iff :
+  P.is_proetale_sheaf_of_types ↔ P.is_proetale_sheaf_of_types_explicit_pullback :=
+begin
+  split,
+  { introsI h α _ B X f surj x compat,
+    apply h α B X f surj x,
+    intros a b Z g₁ g₂ h,
+    let g : Z ⟶ Profinite.pullback (f a) (f b) := Profinite.pullback.lift (f a) (f b) g₁ g₂ h,
+    rw (show g₁ = g ≫ Profinite.pullback.fst (f a) (f b), by simp [g]),
+    rw (show g₂ = g ≫ Profinite.pullback.snd (f a) (f b), by simp [g]),
+    simp only [op_comp, P.map_comp],
+    dsimp,
+    rw compat },
+  { introsI h α _ B X f surj x compat,
+    apply h α B X f surj x,
+    intros a b,
+    apply compat,
+    exact Profinite.pullback.condition _ _ }
+end
 
 def is_proetale_sheaf : Prop := ∀
 -- a finite family of morphisms with base B

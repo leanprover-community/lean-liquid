@@ -23,10 +23,10 @@ namespace Profinite
 universe u
 variables {α : Type u} [fintype α] (X : α → Profinite.{u})
 
-def empty : Profinite := Profinite.of pempty
-def empty.elim (X : Profinite) : empty ⟶ X :=  { to_fun := pempty.elim }
+def empty : Profinite.{u} := Profinite.of pempty
+def empty.elim (X : Profinite.{u}) : empty ⟶ X :=  { to_fun := pempty.elim }
 
-def sigma : Profinite :=
+def sigma : Profinite.{u} :=
 Profinite.of $ Σ a, X a
 
 def sigma.ι (a : α) : X a ⟶ sigma X :=
@@ -71,37 +71,37 @@ def sigma_cofan_is_colimit : limits.is_colimit (sigma_cofan X) :=
     simp,
   end }
 
-def pullback {X Y B : Profinite} (f : X ⟶ B) (g : Y ⟶ B) : Profinite :=
+def pullback {X Y B : Profinite.{u}} (f : X ⟶ B) (g : Y ⟶ B) : Profinite :=
 { to_CompHaus :=
   { to_Top := Top.of { a : X × Y | f a.1 = g a.2 },
     is_compact := sorry,
     is_hausdorff := sorry },
   is_totally_disconnected := sorry }
 
-def pullback.fst {X Y B : Profinite} (f : X ⟶ B) (g : Y ⟶ B) :
+def pullback.fst {X Y B : Profinite.{u}} (f : X ⟶ B) (g : Y ⟶ B) :
   pullback f g ⟶ X := { to_fun := λ a, a.1.1 }
 
-def pullback.snd {X Y B : Profinite} (f : X ⟶ B) (g : Y ⟶ B) :
+def pullback.snd {X Y B : Profinite.{u}} (f : X ⟶ B) (g : Y ⟶ B) :
   pullback f g ⟶ Y := { to_fun := λ a, a.1.2 }
 
-lemma pullback.condition {X Y B : Profinite} (f : X ⟶ B) (g : Y ⟶ B) :
+lemma pullback.condition {X Y B : Profinite.{u}} (f : X ⟶ B) (g : Y ⟶ B) :
   pullback.fst f g ≫ f = pullback.snd f g ≫ g := by { ext ⟨t,ht⟩, exact ht }
 
-def pullback.lift {W X Y B : Profinite} (f : X ⟶ B) (g : Y ⟶ B)
+def pullback.lift {W X Y B : Profinite.{u}} (f : X ⟶ B) (g : Y ⟶ B)
   (e₁ : W ⟶ X) (e₂ : W ⟶ Y) (w : e₁ ≫ f = e₂ ≫ g) : W ⟶ pullback f g :=
 { to_fun := λ t, ⟨(e₁ t, e₂ t), by { apply_fun (λ ee, ee t) at w, exact w }⟩ }
 
 @[simp, reassoc]
-lemma pullback.lift_fst {W X Y B : Profinite} (f : X ⟶ B) (g : Y ⟶ B)
+lemma pullback.lift_fst {W X Y B : Profinite.{u}} (f : X ⟶ B) (g : Y ⟶ B)
   (e₁ : W ⟶ X) (e₂ : W ⟶ Y) (w : e₁ ≫ f = e₂ ≫ g) :
   pullback.lift f g e₁ e₂ w ≫ pullback.fst f g = e₁ := by { ext, refl }
 
 @[simp, reassoc]
-lemma pullback.lift_snd {W X Y B : Profinite} (f : X ⟶ B) (g : Y ⟶ B)
+lemma pullback.lift_snd {W X Y B : Profinite.{u}} (f : X ⟶ B) (g : Y ⟶ B)
   (e₁ : W ⟶ X) (e₂ : W ⟶ Y) (w : e₁ ≫ f = e₂ ≫ g) :
   pullback.lift f g e₁ e₂ w ≫ pullback.snd f g = e₂ := by { ext, refl }
 
-lemma pullback.hom_ext {W X Y B : Profinite} (f : X ⟶ B) (g : Y ⟶ B) (e₁ e₂ : W ⟶ pullback f g)
+lemma pullback.hom_ext {W X Y B : Profinite.{u}} (f : X ⟶ B) (g : Y ⟶ B) (e₁ e₂ : W ⟶ pullback f g)
   (w₁ : e₁ ≫ pullback.fst f g = e₂ ≫ pullback.fst f g)
   (w₂ : e₁ ≫ pullback.snd f g = e₂ ≫ pullback.snd f g) : e₁ = e₂ :=
 begin
@@ -112,24 +112,24 @@ end
 
 --TODO: Finish off the api for the explicit pullback
 
-def equalizer {X Y : Profinite} (f g : X ⟶ Y) : Profinite :=
+def equalizer {X Y : Profinite.{u}} (f g : X ⟶ Y) : Profinite :=
 { to_CompHaus :=
   { to_Top := Top.of { x | f x = g x },
     is_compact := sorry,
     is_hausdorff := sorry },
   is_totally_disconnected := sorry }
 
-def equalizer.ι {X Y : Profinite} (f g : X ⟶ Y) : equalizer f g ⟶ X := { to_fun := λ x, x.1 }
+def equalizer.ι {X Y : Profinite.{u}} (f g : X ⟶ Y) : equalizer f g ⟶ X := { to_fun := λ x, x.1 }
 
-def equalizer.lift {W X Y : Profinite} (f g : X ⟶ Y) (e : W ⟶ X) (w : e ≫ f = e ≫ g) :
+def equalizer.lift {W X Y : Profinite.{u}} (f g : X ⟶ Y) (e : W ⟶ X) (w : e ≫ f = e ≫ g) :
   W ⟶ equalizer f g :=
 { to_fun := λ t, ⟨e t, by { apply_fun (λ ee, ee t) at w, exact w }⟩ }
 
 @[simp, reassoc]
-def equalizer.lift_ι {W X Y : Profinite} (f g : X ⟶ Y) (e : W ⟶ X)
+def equalizer.lift_ι {W X Y : Profinite.{u}} (f g : X ⟶ Y) (e : W ⟶ X)
   (w : e ≫ f = e ≫ g) : equalizer.lift f g e w ≫ equalizer.ι f g = e := by { ext, refl }
 
-def equalizer.hom_ext {W X Y : Profinite} (f g : X ⟶ Y) (e₁ e₂ : W ⟶ equalizer f g)
+def equalizer.hom_ext {W X Y : Profinite.{u}} (f g : X ⟶ Y) (e₁ e₂ : W ⟶ equalizer f g)
   (w : e₁ ≫ equalizer.ι f g = e₂ ≫ equalizer.ι f g) : e₁ = e₂ :=
 begin
   ext t,
