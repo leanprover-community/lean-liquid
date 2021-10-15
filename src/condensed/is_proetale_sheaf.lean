@@ -25,8 +25,7 @@ def map_to_equalizer {W X B : Profinite.{w}} (f : X ⟶ B) (g₁ g₂ : W ⟶ X)
 
 def equalizer_condition : Prop := ∀
 (X B : Profinite.{w}) (π : X ⟶ B) (surj : function.surjective π),
-function.bijective (λ x : P.obj (op B),
-  map_to_equalizer P π (Profinite.pullback.fst π π) (Profinite.pullback.snd π π)
+function.bijective (map_to_equalizer P π (Profinite.pullback.fst π π) (Profinite.pullback.snd π π)
     (Profinite.pullback.condition _ _))
 
 -- Should we make this `unique` instead of `subsingleton`?
@@ -93,7 +92,7 @@ begin
   cc,
 end
 
-theorem preserves_finite_products_of_is_proetale_sheaf_of_types
+theorem finite_product_condition_of_is_proetale_sheaf_of_types
   (h : P.is_proetale_sheaf_of_types) : P.finite_product_condition :=
 begin
   intros α X,
@@ -258,6 +257,45 @@ begin
     intros a b,
     apply compat,
     exact Profinite.pullback.condition _ _ }
+end
+
+theorem equalizer_condition_of_is_proetale_sheaf_of_types
+  (h : P.is_proetale_sheaf_of_types) : P.equalizer_condition :=
+begin
+  intros X B π surj,
+  rw is_proetale_sheaf_of_types_explicit_pullback_iff at h,
+  specialize h punit B (λ _, X) (λ _, π) _,
+  { intros b,
+    use punit.star,
+    apply surj },
+  dsimp at h,
+  split,
+  { intros x y hh,
+    dsimp [map_to_equalizer] at hh,
+    apply_fun (λ e, e.val) at hh,
+    specialize h (λ _, P.map π.op x) _,
+    { intros,
+      dsimp,
+      change (P.map _ ≫ P.map _) _ = (P.map _ ≫ P.map _) _,
+      simp_rw [← P.map_comp, ← op_comp, Profinite.pullback.condition] },
+    obtain ⟨t,ht1,ht2⟩ := h,
+    have hx : x = t,
+    { apply ht2,
+      intros,
+      refl },
+    have hy : y = t,
+    { apply ht2,
+      intros a,
+      exact hh.symm },
+    rw [hx, ← hy] },
+  { rintros ⟨x,hx⟩,
+    specialize h (λ _, x) _,
+    { intros,
+      exact hx },
+    obtain ⟨t,ht1,ht2⟩ := h,
+    use [t],
+    ext1,
+    exact ht1 punit.star }
 end
 
 def is_proetale_sheaf : Prop := ∀
