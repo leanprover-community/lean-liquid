@@ -12,6 +12,15 @@ open category_theory opposite
 variables {C : Type u} [category.{v} C] (Q : Profinite.{w}ᵒᵖ ⥤ C)
 variables (P : Profinite.{w}ᵒᵖ ⥤ Type u)
 
+def preserves_finite_products : Prop := ∀
+(α : Fintype.{w}) (X : α → Profinite.{w}),
+function.bijective (λ (x : P.obj (op (Profinite.sigma X))) (a : α),
+  P.map (Profinite.sigma.ι X a).op x)
+
+-- Should we make this `unique` instead of `subsingleton`?
+def subsingleton_empty : Prop := ∀
+(Z : Profinite.{w}) [is_empty Z], subsingleton (P.obj (op Z))
+
 def is_proetale_sheaf_of_types : Prop := ∀
 -- a finite family of morphisms with base B
 (α : Type w) [fintype α] (B : Profinite.{w}) (X : α → Profinite.{w}) (f : Π a, X a ⟶ B)
@@ -44,6 +53,72 @@ def is_proetale_sheaf_of_types_projective : Prop := ∀
 (α : Fintype.{w}) (X : α → Profinite.{w}) [∀ a, projective (X a)],
 function.bijective (λ (x : P.obj (op $ Profinite.sigma X)) (a : α),
   P.map (Profinite.sigma.ι _ a).op x)
+
+theorem subsingleton_empty_of_is_proetale_sheaf_of_types
+  (h : P.is_proetale_sheaf_of_types) : P.subsingleton_empty :=
+begin
+  intros Z hZ,
+  specialize h pempty Z pempty.elim (λ a, a.elim) hZ.elim (λ a, a.elim) (λ a, a.elim),
+  obtain ⟨t,ht1,ht2⟩ := h,
+  constructor,
+  intros x y,
+  have : x = t, { apply ht2, exact λ a, a.elim },
+  have : y = t, { apply ht2, exact λ a, a.elim },
+  cc,
+end
+
+theorem preserves_finite_products_of_is_proetale_sheaf_of_types
+  (h : P.is_proetale_sheaf_of_types) : P.preserves_finite_products :=
+begin
+  intros α X,
+  split,
+  { intros x y hh,
+    dsimp at hh,
+    specialize h α (Profinite.sigma X) X (Profinite.sigma.ι X)
+      (Profinite.sigma.ι_jointly_surjective X)
+      (λ a, P.map (Profinite.sigma.ι X a).op x) _,
+    { intros a b Z g₁ g₂ hhh,
+      dsimp,
+      change (P.map _ ≫ P.map _) _ = (P.map _ ≫ P.map _) _,
+      simp_rw [← P.map_comp, ← op_comp, hhh] },
+    obtain ⟨t,ht1,ht2⟩ := h,
+    have hx : x = t,
+    { apply ht2,
+      intros a,
+      refl },
+    have hy : y = t,
+    { apply ht2,
+      intros a,
+      apply_fun (λ e, e a) at hh,
+      exact hh.symm },
+    rw [hx, ← hy] },
+  { intros bb,
+    dsimp,
+    specialize h α (Profinite.sigma X) X (Profinite.sigma.ι X)
+      (Profinite.sigma.ι_jointly_surjective X) bb _,
+    { intros a b Z g₁ g₂ hhh,
+      by_cases hZ : is_empty Z,
+      { haveI := hZ,
+        haveI := subsingleton_empty_of_is_proetale_sheaf_of_types P h Z,
+        apply subsingleton.elim },
+      simp at hZ,
+      obtain ⟨z⟩ := hZ,
+      have : a = b,
+      { apply_fun (λ e, (e z).1) at hhh,
+        exact hhh },
+      subst this,
+      have : g₁ = g₂,
+      { ext1 t,
+        apply_fun (Profinite.sigma.ι X a),
+        swap, { exact Profinite.sigma.ι_injective X a },
+        apply_fun (λ e, e t) at hhh,
+        exact hhh },
+      rw this },
+    obtain ⟨t,ht1,ht2⟩ := h,
+    use t,
+    ext,
+    apply ht1 }
+end
 
 theorem is_proetale_sheaf_of_types_iff :
   P.is_proetale_sheaf_of_types ↔ presieve.is_sheaf proetale_topology P :=
