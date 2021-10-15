@@ -2,6 +2,7 @@ import condensed.proetale_site
 import for_mathlib.presieve
 import topology.category.Profinite.projective
 import for_mathlib.Profinite.disjoint_union
+import condensed.is_proetale_sheaf
 
 /-!
 # Condensed sets
@@ -37,38 +38,7 @@ noncomputable theory
 variables (X : Profinite.{u}ᵒᵖ ⥤ Type (u+1))
 variables (P : Profinite.{w}ᵒᵖ ⥤ Type u)
 
-def category_theory.functor.is_proetale_sheaf_of_types : Prop := ∀
--- a finite family of morphisms with base B
-(α : Type w) [fintype α] (B : Profinite.{w}) (X : α → Profinite.{w}) (f : Π a, X a ⟶ B)
--- jointly surjective
-(surj : ∀ b : B, ∃ a (x : X a), f a x = b)
--- family of terms
-(x : Π a, P.obj (op (X a)))
--- which is compatible
-(compat : ∀ (a b : α) (Z : Profinite.{w}) (g₁ : Z ⟶ X a) (g₂ : Z ⟶ X b),
-  (g₁ ≫ f a = g₂ ≫ f b) → P.map g₁.op (x a) = P.map g₂.op (x b)),
--- the actual condition
-∃! t : P.obj (op B), ∀ a : α, P.map (f a).op t = x a
-
-def category_theory.functor.is_proetale_sheaf_of_types_pullback : Prop := ∀
--- a finite family of morphisms with base B
-(α : Type w) [fintype α] (B : Profinite.{w}) (X : α → Profinite.{w}) (f : Π a, X a ⟶ B)
--- jointly surjective
-(surj : ∀ b : B, ∃ a (x : X a), f a x = b)
--- family of terms
-(x : Π a, P.obj (op (X a)))
--- which is compatible
-(compat : ∀ (a b : α),
-  P.map (pullback.fst : pullback (f a) (f b) ⟶ _).op (x a) = P.map pullback.snd.op (x b)),
--- the actual condition
-∃! t : P.obj (op B), ∀ a : α, P.map (f a).op t = x a
-
-def category_theory.functor.is_proetale_sheaf_of_types_projective : Prop := ∀
--- a finite family of projective objects
-(α : Fintype.{w}) (X : α → Profinite.{w}) [∀ a, projective (X a)],
-function.bijective (λ (x : P.obj (op $ Profinite.sigma X)) (a : α),
-  P.map (Profinite.sigma.ι _ a).op x)
-
+-- TODO: Move this
 lemma subsingleton_of_is_proetale_sheaf_of_types
   (h : P.is_proetale_sheaf_of_types) (Z : Profinite) (hZ : is_empty Z) :
   subsingleton (P.obj (op Z)) :=
@@ -82,6 +52,7 @@ begin
   cc,
 end
 
+-- TODO: Move this
 theorem category_theory.functor.is_proetale_sheaf_of_types_prod_of_is_proetale_sheaf_of_types
   (h : P.is_proetale_sheaf_of_types) (α : Type w) [fintype α] (X : α → Profinite.{w}) :
   function.bijective (λ (x : P.obj (op $ Profinite.sigma X)) (a : α),
@@ -134,6 +105,7 @@ begin
     apply ht1 }
 end
 
+-- TODO: Move this
 theorem category_theory.functor.is_proetale_sheaf_of_types_projective_iff :
   P.is_proetale_sheaf_of_types_projective ↔ P.is_proetale_sheaf_of_types :=
 begin
@@ -144,164 +116,6 @@ begin
     sorry },
   { intros h α X _,
     apply P.is_proetale_sheaf_of_types_prod_of_is_proetale_sheaf_of_types h α X }
-end
-
-def category_theory.functor.is_proetale_sheaf (P : Profinite.{w}ᵒᵖ ⥤ C) : Prop := ∀
--- a finite family of morphisms with base B
-(α : Type w) [fintype α] (B : Profinite.{w}) (X : α → Profinite.{w}) (f : Π a, X a ⟶ B)
--- jointly surjective
-(surj : ∀ b : B, ∃ a (x : X a), f a x = b)
--- test object
-(T : C)
--- family of moprhisms
-(x : Π a, T ⟶ P.obj (op (X a)))
--- which is compatible
-(compat : ∀ (a b : α) (Z : Profinite.{w}) (g₁ : Z ⟶ X a) (g₂ : Z ⟶ X b),
-  (g₁ ≫ f a = g₂ ≫ f b) → x a ≫ P.map g₁.op = x b ≫ P.map g₂.op),
--- the actual condition
-∃! t : T ⟶ P.obj (op B), ∀ a : α, t ≫ P.map (f a).op = x a
-
-def category_theory.functor.is_proetale_sheaf_pullback (P : Profinite.{w}ᵒᵖ ⥤ C) : Prop := ∀
--- a finite family of morphisms with base B
-(α : Type w) [fintype α] (B : Profinite.{w}) (X : α → Profinite.{w}) (f : Π a, X a ⟶ B)
--- jointly surjective
-(surj : ∀ b : B, ∃ a (x : X a), f a x = b)
--- test object
-(T : C)
--- family of moprhisms
-(x : Π a, T ⟶ P.obj (op (X a)))
--- which is compatible
-(compat : ∀ (a b : α),
-  x a ≫ P.map (pullback.fst : pullback (f a) (f b) ⟶ _).op = x b ≫ P.map pullback.snd.op),
--- the actual condition
-∃! t : T ⟶ P.obj (op B), ∀ a : α, t ≫ P.map (f a).op = x a
-
-theorem category_theory.functor.is_proetale_sheaf_of_types_pullback_iff
-  (P : Profinite.{w}ᵒᵖ ⥤ Type u) :
-  P.is_proetale_sheaf_of_types ↔ P.is_proetale_sheaf_of_types_pullback :=
-begin
-  split,
-  { introsI h α _ B X f surj x compat,
-    apply h α B X f surj x,
-    intros a b Z g₁ g₂ h,
-    let g : Z ⟶ pullback (f a) (f b) := pullback.lift _ _ h,
-    rw (show g₁ = g ≫ pullback.fst, by simp [g]),
-    rw (show g₂ = g ≫ pullback.snd, by simp [g]),
-    simp only [op_comp, P.map_comp],
-    dsimp,
-    rw compat },
-  { introsI h α _ B X f surj x compat,
-    apply h α B X f surj x,
-    intros a b,
-    apply compat,
-    exact pullback.condition }
-end
-
-theorem category_theory.functor.is_prroetale_sheaf_pullback_iff (P : Profinite.{w}ᵒᵖ ⥤ C) :
-  P.is_proetale_sheaf ↔ P.is_proetale_sheaf_pullback :=
-begin
-  split,
-  { introsI h α _ B X f surj T x compat,
-    apply h α B X f surj T x,
-    intros a b Z g₁ g₂ h,
-    specialize compat a b,
-    let g : Z ⟶ pullback (f a) (f b) := pullback.lift g₁ g₂ h,
-    rw (show g₁ = g ≫ pullback.fst, by simp [g]),
-    rw (show g₂ = g ≫ pullback.snd, by simp [g]),
-    simp only [op_comp, P.map_comp, reassoc_of compat] },
-  { introsI h α _ B X f surj T x compat,
-    apply h α B X f surj T x,
-    intros a b,
-    apply compat,
-    exact pullback.condition }
-end
-
-theorem category_theory.functor.is_proetale_sheaf_of_types_iff (P : Profinite.{w}ᵒᵖ ⥤ Type u) :
-  P.is_proetale_sheaf_of_types ↔ presieve.is_sheaf proetale_topology P :=
-begin
-  erw presieve.is_sheaf_pretopology,
-  split,
-  { intros h B S hS,
-    obtain ⟨α, _, X, f, surj, rfl⟩ := hS,
-    resetI,
-    intros x hx,
-    dsimp [presieve.family_of_elements] at x,
-    let y : Π (a : α), P.obj (op (X a)) := λ a, x (f a) _,
-    swap,
-    { rw presieve.mem_of_arrows_iff, use [a, rfl], simp },
-    specialize h α B X f surj y _,
-    { intros a b Z g₁ g₂ hh,
-      dsimp [presieve.family_of_elements.compatible] at hx,
-      apply hx,
-      assumption },
-    convert h,
-    ext t,
-    split,
-    { intro hh,
-      intros a,
-      apply hh },
-    { intros hh Y g hg,
-      rw presieve.mem_of_arrows_iff at hg,
-      obtain ⟨u,rfl,rfl⟩ := hg,
-      simp [hh] } },
-  { introsI h α _ B X f surj x compat,
-    let R : presieve B := presieve.of_arrows X f,
-    have hR : R ∈ proetale_pretopology B := ⟨α, infer_instance, X, f, surj, rfl⟩,
-    have hhh : ∀ ⦃Y⦄ (g : Y ⟶ B) (hg : R g), ∃ (a : α) (ha : Y = X a), g = eq_to_hom ha ≫ f a,
-    { intros Y g hg,
-      rcases hg with ⟨a⟩,
-      use [a, rfl],
-      simp },
-    let aa : Π ⦃Y⦄ (g : Y ⟶ B) (hg : R g), α := λ Y g hg, (hhh g hg).some,
-    have haa : ∀ ⦃Y⦄ (g : Y ⟶ B) (hg : R g), Y = X (aa g hg) :=
-      λ Y g hg, (hhh g hg).some_spec.some,
-    have haa' : ∀ ⦃Y⦄ (g : Y ⟶ B) (hg : R g), g = eq_to_hom (haa g hg) ≫ f (aa g hg) :=
-      λ Y g hg, (hhh g hg).some_spec.some_spec,
-    let y : R.family_of_elements P := λ Y g hg, P.map (eq_to_hom (haa g hg)).op (x (aa g hg)),
-    specialize h R hR y _,
-    { rintros Y₁ Y₂ Z g₁ g₂ f₁ f₂ ⟨a⟩ ⟨b⟩ hh,
-      change (P.map _ ≫ P.map _) _ = (P.map _ ≫ P.map _) _,
-      simp_rw [← P.map_comp, ← op_comp],
-      apply compat,
-      simp_rw category.assoc,
-      convert hh,
-      all_goals {
-        symmetry,
-        apply haa' } },
-    convert h,
-    ext t,
-    split,
-    { intros hh Y g hg,
-      conv_lhs { rw haa' g hg },
-      dsimp [y],
-      simp [hh] },
-    { intros hh a,
-      have : R (f a),
-      { dsimp [R],
-        rw presieve.mem_of_arrows_iff,
-        use [a, rfl],
-        simp },
-      rw hh (f a) this,
-      dsimp [y],
-      specialize compat (aa (f a) this) a (X a) (eq_to_hom _) (𝟙 _) _,
-      { apply haa },
-      rw category.id_comp,
-      apply (haa' _ _).symm,
-      simpa using compat } }
-end
-
-theorem category_theory.functor.is_proetale_sheaf_iff (P : Profinite.{w}ᵒᵖ ⥤ C) :
-  P.is_proetale_sheaf ↔ presheaf.is_sheaf proetale_topology P :=
-begin
-  split,
-  { intros h T,
-    rw ← (P ⋙ coyoneda.obj (op T)).is_proetale_sheaf_of_types_iff,
-    introsI α _ B X f surj x compat,
-    exact h α B X f surj T x compat },
-  { introsI h α _ B X f surj T x compat,
-    specialize h T,
-    rw ← (P ⋙ coyoneda.obj (op T)).is_proetale_sheaf_of_types_iff at h,
-    exact h α B X f surj x compat }
 end
 
 lemma maps_comm {S S' : Profinite.{u}} (f : S' ⟶ S) :
