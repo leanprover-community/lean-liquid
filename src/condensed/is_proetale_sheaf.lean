@@ -298,6 +298,103 @@ begin
     exact ht1 punit.star }
 end
 
+noncomputable theory
+
+def sigma_pi_equiv {α : Fintype.{w}} (X : α → Profinite.{w}) (h : P.finite_product_condition) :
+  P.obj (op $ Profinite.sigma X) ≃ Π a, P.obj (op $ X a) :=
+equiv.of_bijective _ (h α X)
+
+def equalizer_equiv {S₁ S₂ : Profinite}
+  (h : P.equalizer_condition) (f : S₁ ⟶ S₂) (surj : function.surjective f) :
+  P.obj (op S₂) ≃ { x : P.obj (op S₁) |
+    P.map (Profinite.pullback.fst f f).op x = P.map (Profinite.pullback.snd f f).op x } :=
+equiv.of_bijective _ (h _ _ _ surj)
+
+lemma equalizes_of_compat {α : Fintype.{w}} {B} {X : α → Profinite.{w}}
+  (h : P.finite_product_condition) (f : Π a, X a ⟶ B) (x : Π a, P.obj (op $ X a))
+  (compat : ∀ a b, P.map (Profinite.pullback.fst (f a) (f b)).op (x a) =
+    P.map (Profinite.pullback.snd (f a) (f b)).op (x b)) :
+  P.map (Profinite.pullback.fst (Profinite.sigma.desc X f) (Profinite.sigma.desc X f)).op
+    ((sigma_pi_equiv P X h).symm x) =
+  P.map (Profinite.pullback.snd (Profinite.sigma.desc X f) (Profinite.sigma.desc X f)).op
+    ((sigma_pi_equiv P X h).symm x) :=
+begin
+  let I := Profinite.sigma_pullback_to_pullback_sigma X f,
+  apply_fun P.map I.op,
+  swap, {
+    intros i j hh,
+    apply_fun P.map (category_theory.inv I).op at hh,
+    change (P.map _ ≫ P.map _) _ = (P.map _ ≫ P.map _) _ at hh,
+    simp_rw [← P.map_comp, ← op_comp] at hh,
+    simpa using hh },
+  change (P.map _ ≫ P.map _) _ = (P.map _ ≫ P.map _) _,
+  simp_rw [← P.map_comp, ← op_comp],
+  erw Profinite.sigma_pullback_to_pullback_sigma_fst,
+  erw Profinite.sigma_pullback_to_pullback_sigma_snd,
+  let E := sigma_pi_equiv P X h,
+  specialize h ⟨α × α⟩ (λ a, Profinite.pullback (f a.1) (f a.2)),
+  let E' := equiv.of_bijective _ h,
+  apply_fun E',
+  ext1 ⟨a,b⟩,
+  dsimp [E'],
+  change (P.map _ ≫ P.map _) _ = (P.map _ ≫ P.map _) _,
+  simp_rw [← P.map_comp, ← op_comp, Profinite.sigma.ι_desc],
+  dsimp,
+  simp_rw [P.map_comp],
+  convert compat a b,
+  all_goals { dsimp [coe_comp],
+    congr' 1,
+    change ((E ∘ E.symm) x) _ = _,
+    simp },
+end
+
+theorem is_proetale_sheaf_of_finite_product_condition_of_equalizer_condition
+  (h1 : P.finite_product_condition) (h2 : P.equalizer_condition) :
+  P.is_proetale_sheaf_of_types :=
+begin
+  rw is_proetale_sheaf_of_types_explicit_pullback_iff,
+  introsI α _ B X f surj x compat,
+  let A : Fintype := Fintype.of α,
+  change Π (x : A), _ at x,
+  change Π (x : A), _ at f,
+  change ∀ (a b : A), _ at compat,
+  change A → _ at X,
+  let E := sigma_pi_equiv P X h1,
+  let F := equalizer_equiv P h2 (Profinite.sigma.desc X f)
+    (Profinite.sigma.desc_surjective _ _ surj),
+  let π1 := Profinite.pullback.fst (Profinite.sigma.desc X f) (Profinite.sigma.desc X f),
+  let π2 := Profinite.pullback.snd (Profinite.sigma.desc X f) (Profinite.sigma.desc X f),
+  let S := P.obj (op $ Profinite.sigma X),
+  let x' : { t : S | P.map π1.op t = P.map π2.op t } := ⟨E.symm x, _⟩,
+  swap, { exact equalizes_of_compat P h1 f x compat },
+  use F.symm x',
+  split,
+  { dsimp,
+    intros a,
+    have : P.map (f a).op = ((λ u : Π a, P.obj (op $ X a), u a) ∘
+      (λ u : { t : S | P.map π1.op t = P.map π2.op t }, E u.val) ∘ F),
+    { ext t, dsimp [E, F, sigma_pi_equiv, equalizer_equiv, map_to_equalizer],
+      change _ = (P.map _ ≫ P.map _) _,
+      simp_rw [← P.map_comp, ← op_comp, Profinite.sigma.ι_desc] },
+    rw this,
+    change ((λ u : Π a, P.obj (op $ X a), u a) ∘
+      (λ u : { t : S | P.map π1.op t = P.map π2.op t }, E u.val) ∘ F ∘ F.symm) x' = _,
+    simp },
+  { intros y hy,
+    apply_fun F,
+    change _ = (F ∘ F.symm) x',
+    simp only [equiv.self_comp_symm, id.def],
+    ext1,
+    apply_fun E,
+    change _ = (E ∘ E.symm) _,
+    simp only [equiv.self_comp_symm, id.def],
+    dsimp [E,F, sigma_pi_equiv, equalizer_equiv, map_to_equalizer],
+    ext a,
+    change (P.map _ ≫ P.map _) _ = _,
+    simp_rw [← P.map_comp, ← op_comp, Profinite.sigma.ι_desc, hy a] }
+end
+
+
 def is_proetale_sheaf : Prop := ∀
 -- a finite family of morphisms with base B
 (α : Type w) [fintype α] (B : Profinite.{w}) (X : α → Profinite.{w}) (f : Π a, X a ⟶ B)

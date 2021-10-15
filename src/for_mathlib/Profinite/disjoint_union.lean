@@ -43,6 +43,14 @@ def sigma.desc {Y} (f : Π a, X a ⟶ Y) : sigma X ⟶ Y :=
 { to_fun := λ ⟨a,t⟩, f a t,
   continuous_to_fun := sorry }
 
+lemma sigma.desc_surjective {Y} (f : Π a, X a ⟶ Y) (surj : ∀ y, ∃ a (x : X a), f a x = y) :
+  function.surjective (sigma.desc X f) :=
+begin
+  intros y,
+  obtain ⟨a,x,hx⟩ := surj y,
+  exact ⟨⟨a,x⟩,hx⟩,
+end
+
 @[simp, reassoc]
 lemma sigma.ι_desc {Y} (a) (f : Π a, X a ⟶ Y) : sigma.ι X a ≫ sigma.desc X f = f a :=
 by { ext, refl }
@@ -109,6 +117,35 @@ begin
   { apply_fun (λ e, e t) at w₁, exact w₁ },
   { apply_fun (λ e, e t) at w₂, exact w₂ },
 end
+
+def sigma_pullback_to_pullback_sigma {B} (f : Π a, X a ⟶ B) :
+  sigma (λ a : α × α, pullback (f a.1) (f a.2)) ⟶ pullback (sigma.desc X f) (sigma.desc X f) :=
+sigma.desc _ $ λ a, pullback.lift _ _
+  (pullback.fst _ _ ≫ sigma.ι _ _) (pullback.snd _ _ ≫ sigma.ι _ _) begin
+    cases a, dsimp at *, ext1, cases x, assumption,
+  end
+
+instance {B} (f : Π a, X a ⟶ B) : is_iso (sigma_pullback_to_pullback_sigma X f) :=
+is_iso_of_bijective _
+begin
+  split,
+  { rintros ⟨⟨a,b⟩,⟨⟨x₁,x₂⟩,hx⟩⟩ ⟨⟨a',b'⟩,⟨⟨x'₁,x'₂⟩,hx'⟩⟩ h,
+    dsimp [sigma_pullback_to_pullback_sigma, sigma.desc, pullback.lift,
+      sigma.ι, pullback.fst, pullback.snd] at *,
+    tidy },
+  { rintros ⟨⟨⟨a,x⟩,⟨b,y⟩⟩,h⟩,
+    refine ⟨⟨⟨a,b⟩,⟨⟨x,y⟩,h⟩⟩,rfl⟩ }
+end
+
+@[simp]
+lemma sigma_pullback_to_pullback_sigma_fst {B} (f : Π a, X a ⟶ B) :
+  sigma_pullback_to_pullback_sigma X f ≫ pullback.fst _ _ =
+  sigma.desc _ (λ a, pullback.fst _ _ ≫ sigma.ι _ a.1) := by ext ⟨_,_⟩; refl
+
+@[simp]
+lemma sigma_pullback_to_pullback_sigma_snd {B} (f : Π a, X a ⟶ B) :
+  sigma_pullback_to_pullback_sigma X f ≫ pullback.snd _ _ =
+  sigma.desc _ (λ a, pullback.snd _ _ ≫ sigma.ι _ a.2) := by ext ⟨_,_⟩; refl
 
 --TODO: Finish off the api for the explicit pullback
 
