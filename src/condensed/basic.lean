@@ -1,6 +1,7 @@
 import condensed.proetale_site
 import for_mathlib.presieve
 import topology.category.Profinite.projective
+import for_mathlib.Profinite.disjoint_union
 
 /-!
 # Condensed sets
@@ -64,13 +65,82 @@ def category_theory.functor.is_proetale_sheaf_of_types_pullback : Prop := ∀
 
 def category_theory.functor.is_proetale_sheaf_of_types_projective : Prop := ∀
 -- a finite family of projective objects
-(α : Type w) [fintype α] (X : α → Profinite.{w}) [∀ a, projective (X a)],
-function.bijective (λ (x : P.obj (op ∐ X)) (a : α), P.map (sigma.ι _ a).op x)
+(α : Fintype.{w}) (X : α → Profinite.{w}) [∀ a, projective (X a)],
+function.bijective (λ (x : P.obj (op $ Profinite.sigma X)) (a : α),
+  P.map (Profinite.sigma.ι _ a).op x)
+
+lemma subsingleton_of_is_proetale_sheaf_of_types
+  (h : P.is_proetale_sheaf_of_types) (Z : Profinite) (hZ : is_empty Z) :
+  subsingleton (P.obj (op Z)) :=
+begin
+  specialize h pempty Z pempty.elim (λ a, a.elim) hZ.elim (λ a, a.elim) (λ a, a.elim),
+  obtain ⟨t,ht1,ht2⟩ := h,
+  constructor,
+  intros x y,
+  have : x = t, { apply ht2, exact λ a, a.elim },
+  have : y = t, { apply ht2, exact λ a, a.elim },
+  cc,
+end
+
+theorem category_theory.functor.is_proetale_sheaf_of_types_prod_of_is_proetale_sheaf_of_types
+  (h : P.is_proetale_sheaf_of_types) (α : Type w) [fintype α] (X : α → Profinite.{w}) :
+  function.bijective (λ (x : P.obj (op $ Profinite.sigma X)) (a : α),
+    P.map (Profinite.sigma.ι _ a).op x) :=
+begin
+  split,
+  { intros x y hh,
+    dsimp at hh,
+    specialize h α (Profinite.sigma X) X (Profinite.sigma.ι X)
+      (Profinite.sigma.ι_jointly_surjective X)
+      (λ a, P.map (Profinite.sigma.ι X a).op x) _,
+    { intros a b Z g₁ g₂ hhh,
+      dsimp,
+      change (P.map _ ≫ P.map _) _ = (P.map _ ≫ P.map _) _,
+      simp_rw [← P.map_comp, ← op_comp, hhh] },
+    obtain ⟨t,ht1,ht2⟩ := h,
+    have hx : x = t,
+    { apply ht2,
+      intros a,
+      refl },
+    have hy : y = t,
+    { apply ht2,
+      intros a,
+      apply_fun (λ e, e a) at hh,
+      exact hh.symm },
+    rw [hx, ← hy] },
+  { intros bb,
+    dsimp,
+    specialize h α (Profinite.sigma X) X (Profinite.sigma.ι X)
+      (Profinite.sigma.ι_jointly_surjective X) bb _,
+    { intros a b Z g₁ g₂ hhh,
+      by_cases hZ : is_empty Z,
+      { haveI := subsingleton_of_is_proetale_sheaf_of_types P h Z hZ, apply subsingleton.elim },
+      simp at hZ,
+      obtain ⟨z⟩ := hZ,
+      have : a = b,
+      { apply_fun (λ e, (e z).1) at hhh,
+        exact hhh },
+      subst this,
+      have : g₁ = g₂,
+      { ext1 t,
+        apply_fun (Profinite.sigma.ι X a),
+        swap, { exact Profinite.sigma.ι_injective X a },
+        apply_fun (λ e, e t) at hhh,
+        exact hhh },
+      rw this },
+    obtain ⟨t,ht1,ht2⟩ := h,
+    use t,
+    ext,
+    apply ht1 }
+end
 
 theorem category_theory.functor.is_proetale_sheaf_of_types_projective_iff :
   P.is_proetale_sheaf_of_types_projective ↔ P.is_proetale_sheaf_of_types :=
 begin
-  sorry
+  split,
+  { sorry },
+  { intros h α X _,
+    apply P.is_proetale_sheaf_of_types_prod_of_is_proetale_sheaf_of_types h α X }
 end
 
 def category_theory.functor.is_proetale_sheaf (P : Profinite.{w}ᵒᵖ ⥤ C) : Prop := ∀
