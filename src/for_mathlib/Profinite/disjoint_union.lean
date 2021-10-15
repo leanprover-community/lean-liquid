@@ -57,12 +57,11 @@ begin
 end
 
 open category_theory
-open category_theory.limits
 
-def sigma_cofan : cofan X :=
-cofan.mk (sigma X) (sigma.ι X)
+def sigma_cofan : limits.cofan X :=
+limits.cofan.mk (sigma X) (sigma.ι X)
 
-def sigma_cofan_is_colimit : is_colimit (sigma_cofan X) :=
+def sigma_cofan_is_colimit : limits.is_colimit (sigma_cofan X) :=
 { desc := λ S, sigma.desc _ $ λ a, S.ι.app a,
   uniq' := begin
     intros S m h,
@@ -72,25 +71,34 @@ def sigma_cofan_is_colimit : is_colimit (sigma_cofan X) :=
     simp,
   end }
 
-def explicit_pullback {X Y B : Profinite} (f : X ⟶ B) (g : Y ⟶ B) : Profinite :=
+def pullback {X Y B : Profinite} (f : X ⟶ B) (g : Y ⟶ B) : Profinite :=
 { to_CompHaus :=
   { to_Top := Top.of { a : X × Y | f a.1 = g a.2 },
     is_compact := sorry,
     is_hausdorff := sorry },
   is_totally_disconnected := sorry }
 
-def explicit_pullback.fst {X Y B : Profinite} (f : X ⟶ B) (g : Y ⟶ B) :
-  explicit_pullback f g ⟶ X := { to_fun := λ a, a.1.1 }
+def pullback.fst {X Y B : Profinite} (f : X ⟶ B) (g : Y ⟶ B) :
+  pullback f g ⟶ X := { to_fun := λ a, a.1.1 }
 
-def explicit_pullback.snd {X Y B : Profinite} (f : X ⟶ B) (g : Y ⟶ B) :
-  explicit_pullback f g ⟶ Y := { to_fun := λ a, a.1.2 }
+def pullback.snd {X Y B : Profinite} (f : X ⟶ B) (g : Y ⟶ B) :
+  pullback f g ⟶ Y := { to_fun := λ a, a.1.2 }
 
-lemma explicit_pullback.condition {X Y B : Profinite} (f : X ⟶ B) (g : Y ⟶ B) :
-  explicit_pullback.fst f g ≫ f = explicit_pullback.snd f g ≫ g := by { ext ⟨t,ht⟩, exact ht }
+lemma pullback.condition {X Y B : Profinite} (f : X ⟶ B) (g : Y ⟶ B) :
+  pullback.fst f g ≫ f = pullback.snd f g ≫ g := by { ext ⟨t,ht⟩, exact ht }
 
-def explicit_pullback.lift {W X Y B : Profinite} (f : X ⟶ B) (g : Y ⟶ B)
-  (e₁ : W ⟶ X) (e₂ : W ⟶ Y) (w : e₁ ≫ f = e₂ ≫ g) : W ⟶ explicit_pullback f g :=
+def pullback.lift {W X Y B : Profinite} (f : X ⟶ B) (g : Y ⟶ B)
+  (e₁ : W ⟶ X) (e₂ : W ⟶ Y) (w : e₁ ≫ f = e₂ ≫ g) : W ⟶ pullback f g :=
 { to_fun := λ t, ⟨(e₁ t, e₂ t), by { apply_fun (λ ee, ee t) at w, exact w }⟩ }
+
+lemma pullback.hom_ext {W X Y B : Profinite} (f : X ⟶ B) (g : Y ⟶ B) (e₁ e₂ : W ⟶ pullback f g)
+  (w₁ : e₁ ≫ pullback.fst f g = e₂ ≫ pullback.fst f g)
+  (w₂ : e₁ ≫ pullback.snd f g = e₂ ≫ pullback.snd f g) : e₁ = e₂ :=
+begin
+  ext t,
+  { apply_fun (λ e, e t) at w₁, exact w₁ },
+  { apply_fun (λ e, e t) at w₂, exact w₂ },
+end
 
 --TODO: Finish off the api for the explicit pullback
 
