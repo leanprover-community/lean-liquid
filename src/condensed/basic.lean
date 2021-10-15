@@ -138,7 +138,10 @@ theorem category_theory.functor.is_proetale_sheaf_of_types_projective_iff :
   P.is_proetale_sheaf_of_types_projective ↔ P.is_proetale_sheaf_of_types :=
 begin
   split,
-  { sorry },
+  { introsI h α _ B X f surj x compat,
+    let T := Profinite.sigma X,
+    let π := Profinite.sigma.desc X f,
+    sorry },
   { intros h α X _,
     apply P.is_proetale_sheaf_of_types_prod_of_is_proetale_sheaf_of_types h α X }
 end

@@ -72,4 +72,26 @@ def sigma_cofan_is_colimit : is_colimit (sigma_cofan X) :=
     simp,
   end }
 
+def explicit_pullback {X Y B : Profinite} (f : X ⟶ B) (g : Y ⟶ B) : Profinite :=
+{ to_CompHaus :=
+  { to_Top := Top.of { a : X × Y | f a.1 = g a.2 },
+    is_compact := sorry,
+    is_hausdorff := sorry },
+  is_totally_disconnected := sorry }
+
+def explicit_pullback.fst {X Y B : Profinite} (f : X ⟶ B) (g : Y ⟶ B) :
+  explicit_pullback f g ⟶ X := { to_fun := λ a, a.1.1 }
+
+def explicit_pullback.snd {X Y B : Profinite} (f : X ⟶ B) (g : Y ⟶ B) :
+  explicit_pullback f g ⟶ Y := { to_fun := λ a, a.1.2 }
+
+lemma explicit_pullback.condition {X Y B : Profinite} (f : X ⟶ B) (g : Y ⟶ B) :
+  explicit_pullback.fst f g ≫ f = explicit_pullback.snd f g ≫ g := by { ext ⟨t,ht⟩, exact ht }
+
+def explicit_pullback.lift {W X Y B : Profinite} (f : X ⟶ B) (g : Y ⟶ B)
+  (e₁ : W ⟶ X) (e₂ : W ⟶ Y) (w : e₁ ≫ f = e₂ ≫ g) : W ⟶ explicit_pullback f g :=
+{ to_fun := λ t, ⟨(e₁ t, e₂ t), by { apply_fun (λ ee, ee t) at w, exact w }⟩ }
+
+--TODO: Finish off the api for the explicit pullback
+
 end Profinite
