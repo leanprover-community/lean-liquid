@@ -18,7 +18,9 @@ Profinite.extend (real_measures.functor p') ⋙ CompHausFiltPseuNormGrp₁.to_Co
 localized "notation `ℳ_{` p' `}` S := (real_measures.condensed p').obj S"
   in liquid_tensor_experiment
 
-abbreviation liquid_tensor_experiment.Ext (i : ℕ) (A B : Condensed Ab) :=
+universe u
+
+abbreviation liquid_tensor_experiment.Ext (i : ℕ) (A B : Condensed.{u} Ab.{u+1}) :=
 ((Ext ℤ (Condensed Ab) i).obj (op A)).obj B
 
 instance : has_coe (pBanach p) (Condensed Ab) :=
