@@ -394,6 +394,28 @@ begin
     simp_rw [← P.map_comp, ← op_comp, Profinite.sigma.ι_desc, hy a] }
 end
 
+theorem is_proetale_sheaf_of_types_tfae :
+  [ presieve.is_sheaf proetale_topology P
+  , P.is_proetale_sheaf_of_types
+  , P.is_proetale_sheaf_of_types_pullback
+  , P.is_proetale_sheaf_of_types_explicit_pullback
+  , P.finite_product_condition ∧ P.equalizer_condition
+  ].tfae :=
+begin
+  tfae_have : 1 ↔ 2, { exact P.is_proetale_sheaf_of_types_iff.symm },
+  tfae_have : 2 ↔ 3, { exact P.is_proetale_sheaf_of_types_pullback_iff },
+  tfae_have : 2 ↔ 4, { exact P.is_proetale_sheaf_of_types_explicit_pullback_iff },
+  tfae_have : 2 → 5, {
+    intros h,
+    split,
+    { exact finite_product_condition_of_is_proetale_sheaf_of_types _ h },
+    { exact equalizer_condition_of_is_proetale_sheaf_of_types _ h } },
+  tfae_have : 5 → 2, {
+    rintros ⟨h1,h2⟩,
+    apply is_proetale_sheaf_of_finite_product_condition_of_equalizer_condition,
+    assumption' },
+  tfae_finish
+end
 
 def is_proetale_sheaf : Prop := ∀
 -- a finite family of morphisms with base B
