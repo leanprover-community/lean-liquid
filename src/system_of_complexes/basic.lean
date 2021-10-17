@@ -1,8 +1,8 @@
 import category_theory.preadditive.functor_category
 import algebra.homology.additive
 import algebra.homology.homological_complex
+import analysis.normed.group.SemiNormedGroup.kernels
 
-import for_mathlib.SemiNormedGroup
 import for_mathlib.SemiNormedGroup_Completion
 
 import facts

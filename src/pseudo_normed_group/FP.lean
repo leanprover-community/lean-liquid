@@ -1,5 +1,5 @@
 import pseudo_normed_group.breen_deligne
-import for_mathlib.SemiNormedGroup
+import analysis.normed.group.SemiNormedGroup.kernels
 
 /-!
 
