@@ -1,6 +1,5 @@
 import topology.continuous_function.algebra
 import data.int.interval
-import analysis.normed_space.basic
 import ring_theory.finiteness
 import linear_algebra.free_module.finite
 
