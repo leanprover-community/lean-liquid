@@ -507,22 +507,19 @@ limits.equalizer.lift (Q.map f.op) begin
 end
 
 def equalizer_condition' [limits.has_equalizers C] : Prop := ∀ (X Y : Profinite.{w})
-  (f : Y ⟶ X) (hf : function.surjective f),
+  (f : X ⟶ Y) (hf : function.surjective f),
   is_iso (Q.map_to_equalizer' f (Profinite.pullback.fst f f) (Profinite.pullback.snd f f)
     (Profinite.pullback.condition _ _))
 
-lemma empty_of_is_proetale_sheaf [limits.has_terminal C] :
-  Q.is_proetale_sheaf → Q.empty_condition' :=
+lemma empty_of_empty_coyoneda [limits.has_terminal C] :
+  (∀ X : C, (Q ⋙ coyoneda.obj (op X)).empty_condition) → Q.empty_condition' :=
 begin
   intro h,
-  rw is_proetale_sheaf_iff at h,
   have hh := h (⊤_ C),
   have hh' := h (Q.obj (op $ Profinite.empty)),
-  rw (Q ⋙ coyoneda.obj (op $ ⊤_ C)).is_proetale_sheaf_of_types_tfae.out 0 5 at hh,
   let P := Q ⋙ coyoneda.obj (op $ Q.obj (op $ Profinite.empty)),
-  rw P.is_proetale_sheaf_of_types_tfae.out 0 5 at hh',
-  rcases hh with ⟨⟨h1,h2⟩,-,-⟩,
-  rcases hh' with ⟨⟨h1',h2'⟩,-,-⟩,
+  rcases hh with ⟨h1,h2⟩,
+  rcases hh' with ⟨h1',h2'⟩,
   dsimp [empty_condition'],
   obtain ⟨f,-⟩ := h2 punit.star,
   use f,
@@ -531,20 +528,36 @@ begin
   simp
 end
 
-lemma product_of_is_proetale_sheaf [limits.has_binary_products C] :
-  Q.is_proetale_sheaf → Q.product_condition' :=
+lemma empty_coyoneda_of_empty [limits.has_terminal C] :
+  Q.empty_condition' → (∀ X : C, (Q ⋙ coyoneda.obj (op X)).empty_condition) :=
+begin
+  intros h X,
+  let e := limits.terminal.from (Q.obj (op $ Profinite.empty)),
+  change is_iso e at h,
+  resetI,
+  split,
+  { rintros f g -,
+    dsimp [coyoneda, empty_condition'] at f g,
+    suffices : f ≫ e = g ≫ e, {
+      apply_fun (λ t, t ≫ category_theory.inv e) at this,
+      simp_rw [category.assoc] at this,
+      simpa only [category.comp_id, is_iso.hom_inv_id] using this },
+    simp only [eq_iff_true_of_subsingleton] },
+  { rintros a,
+    dsimp [coyoneda],
+    use limits.terminal.from X ≫ category_theory.inv e,
+    simp }
+end
+
+lemma prroduct_of_product_coyoneda [limits.has_binary_products C] :
+  (∀ X : C, (Q ⋙ coyoneda.obj (op X)).product_condition) → Q.product_condition' :=
 begin
   intro h,
-  rw is_proetale_sheaf_iff at h,
   intros X Y,
   have hh := h (Q.obj (op X) ⨯ Q.obj (op Y)),
   have hh' := h (Q.obj (op $ Profinite.sum X Y)),
   let P1 := Q ⋙ coyoneda.obj (op $ Q.obj (op X) ⨯ Q.obj (op Y)),
   let P2 := Q ⋙ coyoneda.obj (op $ Q.obj (op $ Profinite.sum X Y)),
-  rw P1.is_proetale_sheaf_of_types_tfae.out 0 5 at hh,
-  rw P2.is_proetale_sheaf_of_types_tfae.out 0 5 at hh',
-  rcases hh with ⟨-,hh,-⟩,
-  rcases hh' with ⟨-,hh',-⟩,
   specialize hh X Y,
   specialize hh' X Y,
   dsimp [P1,P2, coyoneda] at hh hh',
@@ -561,8 +574,82 @@ begin
   simp [hf1,hf2]
 end
 
-lemma equalizer_of_is_proetale_sheaf [limits.has_equalizers C] :
-  Q.is_proetale_sheaf → Q.equalizer_condition' := sorry
+lemma product_coyoneda_of_product [limits.has_binary_products C] :
+  Q.product_condition' → (∀ X : C, (Q ⋙ coyoneda.obj (op X)).product_condition) :=
+begin
+  intros h X A B,
+  specialize h A B,
+  let e := limits.prod.lift (Q.map (Profinite.sum.inl A B).op) (Q.map (Profinite.sum.inr A B).op),
+  change is_iso e at h,
+  resetI,
+  split,
+  { intros f g hh,
+    dsimp at f g hh,
+    simp only [prod.mk.inj_iff] at hh,
+    rcases hh with ⟨hl,hr⟩,
+    suffices : f ≫ e = g ≫ e,
+    { apply_fun (λ t, t ≫ category_theory.inv e) at this,
+      simp_rw category.assoc at this,
+      simpa using this },
+    apply limits.prod.hom_ext,
+    { simp [hl] },
+    { simp [hr] } },
+  { rintros ⟨a,b⟩,
+    dsimp at a b ⊢,
+    use limits.prod.lift a b ≫ category_theory.inv e,
+    have ha : category_theory.inv e ≫ Q.map (Profinite.sum.inl A B).op = limits.prod.fst,
+    { simp [is_iso.inv_comp_eq,e] },
+    have hb : category_theory.inv e ≫ Q.map (Profinite.sum.inr A B).op = limits.prod.snd,
+    { simp [is_iso.inv_comp_eq,e] },
+    simp [ha,hb] }
+end
+
+lemma equalizer_of_equalizer_coyoneda [limits.has_equalizers C] :
+  (∀ X : C, (Q ⋙ coyoneda.obj (op X)).equalizer_condition) → Q.equalizer_condition' :=
+begin
+  intros h X B f hf,
+  let h1 := h (Q.obj (opposite.op B)) X B f hf,
+  let π1 := Profinite.pullback.fst f f,
+  let π2 := Profinite.pullback.snd f f,
+  let h2 := h (limits.equalizer (Q.map π1.op) (Q.map π2.op)) X B f hf,
+  dsimp [map_to_equalizer] at h1 h2,
+  obtain ⟨e,he⟩ := h2.2 ⟨limits.equalizer.ι _ _, _⟩,
+  swap, { dsimp [π1,π2], simp [limits.equalizer.condition] },
+  use e,
+  dsimp [map_to_equalizer'] at *,
+  simp at he,
+  split,
+  { apply h1.1,
+    simp [he] },
+  { apply limits.equalizer.hom_ext, simp [he], }
+end
+
+lemma equalizer_coyoneda_of_equalizer [limits.has_equalizers C] :
+  Q.equalizer_condition' → (∀ X : C, (Q ⋙ coyoneda.obj (op X)).equalizer_condition) :=
+begin
+  intros h X A B f hf,
+  specialize h A B f hf,
+  let e := Q.map_to_equalizer' f (Profinite.pullback.fst f f) (Profinite.pullback.snd f f)
+    (Profinite.pullback.condition _ _),
+  change is_iso e at h,
+  resetI,
+  split,
+  { intros a b hh,
+    dsimp [map_to_equalizer] at a b hh,
+    simp at hh,
+    suffices : a ≫ e = b ≫ e, {
+      apply_fun (λ t, t ≫ category_theory.inv e) at this,
+      simp_rw [category.assoc] at this,
+      simpa using this },
+    apply limits.equalizer.hom_ext,
+    simpa [e, map_to_equalizer'] },
+  { rintros ⟨a,ha⟩,
+    dsimp at a ha,
+    use limits.equalizer.lift a ha ≫ category_theory.inv e,
+    have : category_theory.inv e ≫ Q.map f.op = limits.equalizer.ι _ _,
+    { simp [e,is_iso.comp_inv_eq, map_to_equalizer'] },
+    simp [map_to_equalizer, this] }
+end
 
 theorem is_proetale_sheaf_of_empty_of_product_of_equalizer
   [limits.has_terminal C] [limits.has_binary_products C] [limits.has_equalizers C] :
@@ -572,23 +659,10 @@ begin
   rw is_proetale_sheaf_iff,
   intros X,
   rw (Q ⋙ coyoneda.obj (op X)).is_proetale_sheaf_of_types_tfae.out 0 5,
-  split,
-  { let e := limits.terminal.from (Q.obj (op $ Profinite.empty)),
-    change is_iso e at h1,
-    resetI,
-    split,
-    { rintros f g -,
-      dsimp [coyoneda, empty_condition'] at f g,
-      suffices : f ≫ e = g ≫ e, {
-        apply_fun (λ t, t ≫ category_theory.inv e) at this,
-        simp_rw [category.assoc] at this,
-        simpa only [category.comp_id, is_iso.hom_inv_id] using this },
-      simp only [eq_iff_true_of_subsingleton] },
-    { rintros a,
-      dsimp [coyoneda],
-      use limits.terminal.from X ≫ category_theory.inv e,
-      simp } },
-  { sorry },
+  refine ⟨_,_,_⟩,
+  { apply empty_coyoneda_of_empty, exact h1 },
+  { apply product_coyoneda_of_product, exact h2 },
+  { apply equalizer_coyoneda_of_equalizer, exact h3 }
 end
 
 end category_theory.functor
