@@ -589,7 +589,6 @@ begin
       use limits.terminal.from X ≫ category_theory.inv e,
       simp } },
   { sorry },
-  { sorry }
 end
 
 end category_theory.functor
