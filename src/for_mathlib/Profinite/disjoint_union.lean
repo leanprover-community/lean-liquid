@@ -16,6 +16,10 @@ instance {α : Type*} [fintype α] (X : α → Type*) [∀ a, topological_space 
 instance {α : Type*} [fintype α] (X : α → Type*) [∀ a, topological_space (X a)]
   [∀ a, totally_disconnected_space (X a)] : totally_disconnected_space (Σ a, X a) := sorry
 
+instance {X Y : Type*} [topological_space X] [topological_space Y]
+  [totally_disconnected_space X] [totally_disconnected_space Y] :
+  totally_disconnected_space (X ⊕ Y) := sorry
+
 end topology
 
 namespace Profinite
@@ -25,6 +29,36 @@ variables {α : Type u} [fintype α] (X : α → Profinite.{u})
 
 def empty : Profinite.{u} := Profinite.of pempty
 def empty.elim (X : Profinite.{u}) : empty ⟶ X :=  { to_fun := pempty.elim }
+
+def sum (X Y : Profinite.{u}) : Profinite.{u} :=
+Profinite.of $ X ⊕ Y
+
+def sum.inl (X Y : Profinite.{u}) : X ⟶ sum X Y :=
+{ to_fun := _root_.sum.inl }
+
+def sum.inr (X Y : Profinite.{u}) : Y ⟶ sum X Y :=
+{ to_fun := _root_.sum.inr }
+
+def sum.desc {Z} (X Y : Profinite.{u}) (f : X ⟶ Z) (g : Y ⟶ Z) : sum X Y ⟶ Z :=
+{ to_fun := λ x, _root_.sum.rec_on x f g,
+  continuous_to_fun := sorry }
+
+@[simp]
+lemma sum.inl_desc {Z} (X Y : Profinite.{u}) (f : X ⟶ Z) (g : Y ⟶ Z) :
+  sum.inl X Y ≫ sum.desc X Y f g = f := by { ext, refl }
+
+@[simp]
+lemma sum.inr_desc {Z} (X Y : Profinite.{u}) (f : X ⟶ Z) (g : Y ⟶ Z) :
+  sum.inr X Y ≫ sum.desc X Y f g = g := by { ext, refl }
+
+lemma sum.hom_ext {Z} (X Y : Profinite.{u}) (e₁ e₂ : sum X Y ⟶ Z)
+  (hl : sum.inl X Y ≫ e₁ = sum.inl X Y ≫ e₂) (hr : sum.inr X Y ≫ e₁ = sum.inr X Y ≫ e₂) :
+  e₁ = e₂ :=
+begin
+  ext (u|u),
+  { apply_fun (λ e, e u) at hl, exact hl },
+  { apply_fun (λ e, e u) at hr, exact hr },
+end
 
 def sigma : Profinite.{u} :=
 Profinite.of $ Σ a, X a
