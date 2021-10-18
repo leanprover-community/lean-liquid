@@ -130,9 +130,17 @@ def sigma_cofan_is_colimit : limits.is_colimit (sigma_cofan X) :=
 def pullback {X Y B : Profinite.{u}} (f : X ⟶ B) (g : Y ⟶ B) : Profinite :=
 { to_CompHaus :=
   { to_Top := Top.of { a : X × Y | f a.1 = g a.2 },
-    is_compact := sorry,
-    is_hausdorff := sorry },
-  is_totally_disconnected := sorry }
+    is_compact := begin
+      erw ← is_compact_iff_compact_space,
+      apply is_closed.is_compact,
+      apply is_closed_eq,
+      all_goals { continuity },
+    end,
+    is_hausdorff := begin
+      change t2_space { a : X × Y | f a.1 = g a.2 },
+      apply_instance
+    end },
+  is_totally_disconnected := subtype.totally_disconnected_space }
 
 def pullback.fst {X Y B : Profinite.{u}} (f : X ⟶ B) (g : Y ⟶ B) :
   pullback f g ⟶ X := { to_fun := λ a, a.1.1 }
@@ -200,9 +208,18 @@ lemma sigma_pullback_to_pullback_sigma_snd {B} (f : Π a, X a ⟶ B) :
 def equalizer {X Y : Profinite.{u}} (f g : X ⟶ Y) : Profinite :=
 { to_CompHaus :=
   { to_Top := Top.of { x | f x = g x },
-    is_compact := sorry,
-    is_hausdorff := sorry },
-  is_totally_disconnected := sorry }
+    is_compact := begin
+      erw ← is_compact_iff_compact_space,
+      apply is_closed.is_compact,
+      apply is_closed_eq,
+      exact f.continuous,
+      exact g.continuous
+    end,
+    is_hausdorff := begin
+      change t2_space { x | f x = g x },
+      apply_instance
+    end },
+  is_totally_disconnected := subtype.totally_disconnected_space }
 
 def equalizer.ι {X Y : Profinite.{u}} (f g : X ⟶ Y) : equalizer f g ⟶ X := { to_fun := λ x, x.1 }
 
