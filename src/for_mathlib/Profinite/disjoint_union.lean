@@ -41,7 +41,11 @@ def sum.inr (X Y : Profinite.{u}) : Y ⟶ sum X Y :=
 
 def sum.desc {Z} (X Y : Profinite.{u}) (f : X ⟶ Z) (g : Y ⟶ Z) : sum X Y ⟶ Z :=
 { to_fun := λ x, _root_.sum.rec_on x f g,
-  continuous_to_fun := sorry }
+  continuous_to_fun := begin
+    apply continuous_sup_dom,
+    { apply continuous_coinduced_dom, exact f.continuous },
+    { apply continuous_coinduced_dom, exact g.continuous }
+  end }
 
 @[simp]
 lemma sum.inl_desc {Z} (X Y : Profinite.{u}) (f : X ⟶ Z) (g : Y ⟶ Z) :
@@ -65,7 +69,11 @@ Profinite.of $ Σ a, X a
 
 def sigma.ι (a : α) : X a ⟶ sigma X :=
 { to_fun := λ t, ⟨_,t⟩,
-  continuous_to_fun := sorry }
+  continuous_to_fun := begin
+    apply continuous_Sup_rng,
+    exact ⟨a,rfl⟩,
+    apply continuous_coinduced_rng,
+  end }
 
 lemma sigma.ι_injective (a : α) : function.injective (sigma.ι X a) :=
 by { dsimp [sigma.ι], exact sigma_mk_injective }
@@ -75,7 +83,13 @@ by { rcases t with ⟨a,t⟩, exact ⟨a,t,rfl⟩ }
 
 def sigma.desc {Y} (f : Π a, X a ⟶ Y) : sigma X ⟶ Y :=
 { to_fun := λ ⟨a,t⟩, f a t,
-  continuous_to_fun := sorry }
+  continuous_to_fun := begin
+    apply continuous_Sup_dom,
+    rintros _ ⟨a,rfl⟩,
+    resetI,
+    apply continuous_coinduced_dom,
+    exact (f a).continuous
+  end }
 
 lemma sigma.desc_surjective {Y} (f : Π a, X a ⟶ Y) (surj : ∀ y, ∃ a (x : X a), f a x = y) :
   function.surjective (sigma.desc X f) :=
