@@ -462,7 +462,7 @@ def is_proetale_sheaf_pullback : Prop := ∀
 -- the actual condition
 ∃! t : T ⟶ Q.obj (op B), ∀ a : α, t ≫ Q.map (f a).op = x a
 
-theorem is_prroetale_sheaf_pullback_iff : Q.is_proetale_sheaf ↔ Q.is_proetale_sheaf_pullback :=
+theorem is_proetale_sheaf_pullback_iff : Q.is_proetale_sheaf ↔ Q.is_proetale_sheaf_pullback :=
 begin
   split,
   { introsI h α _ B X f surj T x compat,
@@ -549,7 +549,7 @@ begin
     simp }
 end
 
-lemma prroduct_of_product_coyoneda [limits.has_binary_products C] :
+lemma product_of_product_coyoneda [limits.has_binary_products C] :
   (∀ X : C, (Q ⋙ coyoneda.obj (op X)).product_condition) → Q.product_condition' :=
 begin
   intro h,
@@ -663,6 +663,44 @@ begin
   { apply empty_coyoneda_of_empty, exact h1 },
   { apply product_coyoneda_of_product, exact h2 },
   { apply equalizer_coyoneda_of_equalizer, exact h3 }
+end
+
+theorem is_proetale_sheaf_tfae [limits.has_terminal C] [limits.has_binary_products C]
+  [limits.has_equalizers C] :
+  [ presheaf.is_sheaf proetale_topology Q,
+    Q.is_proetale_sheaf,
+    Q.is_proetale_sheaf_pullback,
+    Q.empty_condition' ∧ Q.product_condition' ∧ Q.equalizer_condition'
+  ].tfae :=
+begin
+  tfae_have : 1 ↔ 2, { exact Q.is_proetale_sheaf_iff.symm },
+  tfae_have : 2 ↔ 3, { exact Q.is_proetale_sheaf_pullback_iff },
+  tfae_have : 1 → 4,
+  { intros h,
+    refine ⟨_,_,_⟩,
+    { apply empty_of_empty_coyoneda,
+      intros X,
+      specialize h X,
+      rw (Q ⋙ coyoneda.obj (op X)).is_proetale_sheaf_of_types_tfae.out 0 5 at h,
+      exact h.1 },
+    { apply product_of_product_coyoneda,
+      intros X,
+      specialize h X,
+      rw (Q ⋙ coyoneda.obj (op X)).is_proetale_sheaf_of_types_tfae.out 0 5 at h,
+      exact h.2.1 },
+    { apply equalizer_of_equalizer_coyoneda,
+      intros X,
+      specialize h X,
+      rw (Q ⋙ coyoneda.obj (op X)).is_proetale_sheaf_of_types_tfae.out 0 5 at h,
+      exact h.2.2 } },
+  tfae_have : 4 → 1,
+  { intros h X,
+    rw (Q ⋙ coyoneda.obj (op X)).is_proetale_sheaf_of_types_tfae.out 0 5,
+    refine ⟨_,_,_⟩,
+    { apply empty_coyoneda_of_empty, exact h.1 },
+    { apply product_coyoneda_of_product, exact h.2.1 },
+    { apply equalizer_coyoneda_of_equalizer, exact h.2.2 } },
+  tfae_finish
 end
 
 end category_theory.functor
