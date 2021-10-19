@@ -1,7 +1,6 @@
-import for_mathlib.SemiNormedGroup_Completion
-
 import locally_constant.SemiNormedGroup
 import normed_group.normed_with_aut
+import analysis.normed.group.SemiNormedGroup.completion
 
 /-
 
@@ -30,7 +29,7 @@ open_locale nnreal
 universe u
 
 namespace SemiNormedGroup
-open uniform_space opposite category_theory
+open uniform_space opposite category_theory Completion
 
 instance normed_with_aut_Completion (V : SemiNormedGroup.{u}) (r : ℝ≥0) [normed_with_aut r V] :
   normed_with_aut r (Completion.obj V) :=
@@ -88,7 +87,7 @@ lemma LCC_obj_map_norm_noninc (V : SemiNormedGroup) {X Y : Profiniteᵒᵖ} (f :
   ((LCC.obj V).map f).norm_noninc :=
 begin
   rw LCC_obj_map',
-  exact (Completion_map_norm_noninc _ $ LocallyConstant_obj_map_norm_noninc _ _ _ _)
+  exact (Completion.map_norm_noninc $ LocallyConstant_obj_map_norm_noninc _ _ _ _)
 end
 
 variables (S : Type*) [topological_space S] [compact_space S]
