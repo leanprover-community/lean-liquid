@@ -135,6 +135,7 @@ quotient.surjective_quotient_mk'
 lemma norm_π_one_eq (l : fin 1 →₀ Λ') : ∥(π f 1) l∥ = ∥l∥ :=
 begin
   delta π, dsimp,
+  show ∥(quotient_add_group.mk' (L f 1)) l∥ = ∥l∥,
   rw quotient_norm_mk_eq (L f 1) l,
   simp only [L_one, set.image_singleton, add_zero, cInf_singleton, add_subgroup.coe_bot],
 end
