@@ -44,6 +44,7 @@ apply_nolint Profinite.equalizer.hom_ext def_lemma
 apply_nolint Profinite.equalizer.lift_ι def_lemma
 apply_nolint topology.sigma.compact_space unused_arguments
 apply_nolint topology.sigma.totally_disconnected_space unused_arguments
+apply_nolint topology.sum.totally_disconnected_space unused_arguments
 
 -- for_mathlib/abelian_category.lean
 apply_nolint category_theory.is_zero.eq_of_src def_lemma
