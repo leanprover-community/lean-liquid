@@ -33,7 +33,7 @@ LC V ⋙ Completion
 namespace CLC
 
 lemma map_norm_noninc {M₁ M₂} (f : M₁ ⟶ M₂) : ((CLC V).map f).norm_noninc :=
-Completion_map_norm_noninc _ $ LC.map_norm_noninc _ _
+Completion.map_norm_noninc $ LC.map_norm_noninc _ _
 
 def T [normed_with_aut r V] [fact (0 < r)] : CLC V ≅ CLC V :=
 ((whiskering_right _ _ _).obj _).map_iso (LC.T r V)
@@ -91,7 +91,7 @@ by simp only [res, ← whisker_right_comp, FiltrationPow.cast_le_comp, ← nat_t
 
 lemma res_norm_noninc [fact (c₂ ≤ c₁)] (M) :
   ((res V r' c₁ c₂ n).app M).norm_noninc :=
-Completion_map_norm_noninc _ $ LCFP.res_norm_noninc _ _ _ _ _ _
+Completion.map_norm_noninc $ LCFP.res_norm_noninc _ _ _ _ _ _
 
 section Tinv
 -- kmb commented out the next line
