@@ -8,17 +8,124 @@ In this file we show that a finite disjoint union of profinite sets agrees with 
 
 -/
 
-namespace topology
+section topology
+variables {α β : Type*}
+
+lemma set.nonempty.preimage' {s : set β} (hs : s.nonempty) {f : α → β} (hf : s ⊆ set.range f) :
+  (f ⁻¹' s).nonempty :=
+let ⟨y, hy⟩ := hs, ⟨x, hx⟩ := hf hy in ⟨x, set.mem_preimage.2 $ hx.symm ▸ hy⟩
+
+lemma set.image_preimage_eq' {f : α → β} {s : set β} (h : s ⊆ set.range f) : f '' (f ⁻¹' s) = s :=
+(set.image_preimage_subset f s).antisymm
+  (λ x hx, let ⟨y, e⟩ := h hx in ⟨y, (e.symm ▸ hx : f y ∈ s), e⟩)
+
+
+lemma is_preconnected.preimage [topological_space α] [topological_space β] {s : set β}
+  (hs : is_preconnected s) {f : α → β} (hf : continuous_on f (f ⁻¹' s)) (hsf : s ⊆ set.range f) :
+  is_preconnected (f ⁻¹' s) := sorry
+
+lemma is_connected.preimage [topological_space α] [topological_space β] {s : set β}
+  (hs : is_connected s) {f : α → β} (hf : continuous_on f (f ⁻¹' s)) (hsf : s ⊆ set.range f) :
+  is_connected (f ⁻¹' s) :=
+⟨hs.nonempty.preimage' hsf, hs.is_preconnected.preimage hf hsf⟩
+
+lemma sigma.univ (X : α → Type*) :
+  (set.univ : set (Σ a, X a)) = ⋃ a, sigma.mk _ '' (set.univ : set (X a)) :=
+by { ext, simp only [set.image_univ, set.mem_preimage, set.mem_Union, set.mem_univ,
+  set.mem_singleton_iff, set.range_sigma_mk, exists_eq'] }
+
+lemma clopen_range_sigma_mk {X : α → Type*} [∀ a, topological_space (X a)] {a : α} :
+  is_clopen (set.range (@sigma.mk α X a)) :=
+⟨open_embedding_sigma_mk.open_range, closed_embedding_sigma_mk.closed_range⟩
+
+lemma sigma.is_connected_iff {X : α → Type*} [∀ a, topological_space (X a)]
+  {s : set (Σ a, X a)} :
+  is_connected s ↔ ∃ (a : α) (t : set (X a)), is_connected t ∧ s = sigma.mk _ '' t :=
+begin
+  refine ⟨λ hs, _, _⟩,
+  { obtain ⟨⟨a, x⟩, hx⟩ := hs.nonempty,
+    have : s ⊆ set.range (sigma.mk a) := sorry,
+    exact ⟨a, sigma.mk a ⁻¹' s, hs.preimage continuous_sigma_mk.continuous_on this,
+      (set.image_preimage_eq' this).symm⟩ },
+  { rintro ⟨a, t, ht, rfl⟩,
+    exact ht.image _ continuous_sigma_mk.continuous_on }
+end
+
+lemma sigma.is_preconnected_iff [hα : nonempty α] {X : α → Type*}
+  [∀ a, topological_space (X a)] {s : set (Σ a, X a)} :
+  is_preconnected s ↔ ∃ (a : α) (t : set (X a)), is_preconnected t ∧ s = sigma.mk _ '' t :=
+begin
+  refine ⟨λ hs, _, _⟩,
+  { obtain rfl | h := s.eq_empty_or_nonempty,
+    { exact ⟨classical.choice hα, ∅, is_preconnected_empty, (set.image_empty _).symm⟩ },
+    { obtain ⟨a, t, ht, rfl⟩ := sigma.is_connected_iff.1 ⟨h, hs⟩,
+      refine ⟨a, t, ht.is_preconnected, rfl⟩ } },
+  { rintro ⟨a, t, ht, rfl⟩,
+    exact ht.image _ continuous_sigma_mk.continuous_on }
+end
+
+lemma sum.is_connected_iff {X Y : Type*} [topological_space X] [topological_space Y]
+  {s : set (X ⊕ Y)} :
+  is_connected s ↔
+    (∃ t, is_connected t ∧ s = sum.inl '' t) ∨ ∃ t, is_connected t ∧ s = sum.inr '' t :=
+begin
+  refine ⟨λ hs, _, _⟩,
+  { obtain ⟨x | x, hx⟩ := hs.nonempty,
+    { refine or.inl ⟨sum.inl ⁻¹' s, _, _⟩,
+      sorry,
+      sorry },
+    { refine or.inr ⟨sum.inr ⁻¹' s, _, _⟩,
+      sorry,
+      sorry } },
+  { rintro (⟨t, ht, rfl⟩ | ⟨t, ht, rfl⟩),
+    { exact ht.image _ continuous_inl.continuous_on },
+    { exact ht.image _ continuous_inr.continuous_on } }
+end
+
+lemma sum.is_preconnected_iff {X Y : Type*} [topological_space X] [topological_space Y]
+  {s : set (X ⊕ Y)} :
+  is_preconnected s ↔
+    (∃ t, is_preconnected t ∧ s = sum.inl '' t) ∨ ∃ t, is_preconnected t ∧ s = sum.inr '' t :=
+begin
+  refine ⟨λ hs, _, _⟩,
+  { obtain rfl | h := s.eq_empty_or_nonempty,
+    { exact or.inl ⟨∅, is_preconnected_empty, (set.image_empty _).symm⟩ },
+    obtain ⟨t, ht, rfl⟩ | ⟨t, ht, rfl⟩ := sum.is_connected_iff.1 ⟨h, hs⟩,
+    { exact or.inl ⟨t, ht.is_preconnected, rfl⟩ },
+    { exact or.inr ⟨t, ht.is_preconnected, rfl⟩ } },
+  { rintro (⟨t, ht, rfl⟩ | ⟨t, ht, rfl⟩),
+    { exact ht.image _ continuous_inl.continuous_on },
+    { exact ht.image _ continuous_inr.continuous_on } }
+end
 
 instance {α : Type*} [fintype α] (X : α → Type*) [∀ a, topological_space (X a)]
-  [∀ a, compact_space (X a)] : compact_space (Σ a, X a) := sorry
+  [∀ a, compact_space (X a)] : compact_space (Σ a, X a) :=
+begin
+  refine ⟨_⟩,
+  rw sigma.univ,
+  exact compact_Union (λ i, compact_univ.image continuous_sigma_mk),
+end
 
 instance {α : Type*} [fintype α] (X : α → Type*) [∀ a, topological_space (X a)]
-  [∀ a, totally_disconnected_space (X a)] : totally_disconnected_space (Σ a, X a) := sorry
+  [∀ a, totally_disconnected_space (X a)] :
+  totally_disconnected_space (Σ a, X a) :=
+begin
+  refine ⟨λ s _ hs, _⟩,
+  obtain rfl | h := s.eq_empty_or_nonempty,
+  { exact set.subsingleton_empty },
+  { obtain ⟨a, t, ht, rfl⟩ := sigma.is_connected_iff.1 ⟨h, hs⟩,
+    exact ht.is_preconnected.subsingleton.image _ }
+end
 
 instance {X Y : Type*} [topological_space X] [topological_space Y]
   [totally_disconnected_space X] [totally_disconnected_space Y] :
-  totally_disconnected_space (X ⊕ Y) := sorry
+  totally_disconnected_space (X ⊕ Y) :=
+begin
+  refine ⟨λ s _ hs, _⟩,
+  obtain (⟨t, ht, rfl⟩ | ⟨t, ht, rfl⟩) := sum.is_preconnected_iff.1 hs,
+  { exact ht.subsingleton.image _ },
+  { exact ht.subsingleton.image _ }
+end
 
 end topology
 
