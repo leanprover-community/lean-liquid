@@ -140,7 +140,7 @@ def iso_rescale [fact (0 < r)] : 𝟭 _ ≅ (rescale r) :=
 { hom := to_rescale r,
   inv := of_rescale r, }
 
-open category_theory
+open _root_.category_theory
 
 lemma iso_rescale_isometry [fact (0 < r)] (h : r = 1) (V : SemiNormedGroup) :
   isometry ((iso_rescale r).app V).hom :=

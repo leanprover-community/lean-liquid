@@ -29,7 +29,8 @@ open_locale nnreal
 universe u
 
 namespace SemiNormedGroup
-open uniform_space opposite category_theory Completion
+
+open uniform_space _root_.opposite _root_.category_theory Completion
 
 instance normed_with_aut_Completion (V : SemiNormedGroup.{u}) (r : ℝ≥0) [normed_with_aut r V] :
   normed_with_aut r (Completion.obj V) :=

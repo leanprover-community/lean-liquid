@@ -265,7 +265,7 @@ namespace PolyhedralLattice
 
 universe variables u
 
-open polyhedral_lattice simplex_category category_theory
+open polyhedral_lattice simplex_category _root_.category_theory
 
 variables {Λ Λ' : PolyhedralLattice.{u}} (f : Λ ⟶ Λ') [fact f.to_add_monoid_hom.range.saturated]
 

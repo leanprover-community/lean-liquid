@@ -246,7 +246,7 @@ end exact_seq
 
 namespace arrow
 
-open opposite
+open _root_.opposite
 
 variables {C : Type*} [category C]
 
