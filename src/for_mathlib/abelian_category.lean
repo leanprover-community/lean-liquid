@@ -68,7 +68,7 @@ lemma is_zero_of_exact_zero_zero {C : Type*} [category C] [abelian C]
   {X Y Z : C} (h : exact (0 : X ⟶ Y) (0 : Y ⟶ Z)) : is_zero Y :=
 is_zero_of_top_le_bot _
 begin
-  rw abelian.exact_iff'' at h,
+  rw abelian.exact_iff_image_eq_kernel at h,
   rw [← @kernel_subobject_zero _ _ _ Y Z, ← @image_subobject_zero _ _ _ _ X Y, h],
 end
 

@@ -1267,7 +1267,7 @@ begin
     ... = (1 + r⁻¹) * (r * r⁻¹) * (1 - r)⁻¹ : by rw [mul_inv_cancel hr0, mul_one]
     ... = ((1 + r⁻¹) * r) * (r⁻¹ * (1 - r)⁻¹) : by simp only [mul_assoc]
     ... = (r + 1) * (r * (1 - r))⁻¹ : _,
-    { rw [← add_mul, add_comm, sub_add_cancel_of_le, one_mul], exact fact.out _ },
+    { rw [← add_mul, add_comm, tsub_add_cancel_of_le, one_mul], exact fact.out _ },
     { rw [add_mul, one_mul, inv_mul_cancel, mul_inv₀],
       exact ne_of_gt (fact.out _) } },
   { intros c i, apply double_complex.col_ι_isometry, }
