@@ -1,7 +1,7 @@
 import topology.continuous_function.algebra
 import data.int.interval
 import ring_theory.finiteness
-import linear_algebra.free_module.finite
+import linear_algebra.free_module.finite.basic
 
 import for_mathlib.nnrat
 import for_mathlib.rational_cones

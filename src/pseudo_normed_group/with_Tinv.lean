@@ -161,7 +161,7 @@ variables (f)
 
 /-- The `profinitely_filtered_pseudo_normed_group_hom` underlying a
 `profinitely_filtered_pseudo_normed_group_with_Tinv_hom`. -/
-noncomputable def to_profinitely_filtered_pseudo_normed_group_hom :
+def to_profinitely_filtered_pseudo_normed_group_hom :
   comphaus_filtered_pseudo_normed_group_hom M₁ M₂ :=
 comphaus_filtered_pseudo_normed_group_hom.mk_of_strict f.to_add_monoid_hom
 (λ c, ⟨λ x h, f.strict h, f.level_continuous c⟩)
@@ -225,7 +225,7 @@ end profinitely_filtered_pseudo_normed_group_with_Tinv_hom
 
 namespace punit
 
-noncomputable instance profinitely_filtered_pseudo_normed_group_with_Tinv (r' : ℝ≥0) :
+instance profinitely_filtered_pseudo_normed_group_with_Tinv (r' : ℝ≥0) :
   profinitely_filtered_pseudo_normed_group_with_Tinv r' punit :=
 { Tinv := comphaus_filtered_pseudo_normed_group_hom.id,
   Tinv_mem_filtration := λ c x h, set.mem_univ _,
