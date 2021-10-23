@@ -47,7 +47,7 @@ variables {r' : ℝ≥0} {S : Type u} [fintype S]
 
 namespace Mbar
 
-instance has_coe_to_fun : has_coe_to_fun (Mbar r' S) := ⟨_, Mbar.to_fun⟩
+instance has_coe_to_fun : has_coe_to_fun (Mbar r' S) (λ _, S → ℕ → ℤ) := ⟨Mbar.to_fun⟩
 
 @[simp] lemma coe_mk (x h₁ h₂) : ((⟨x, h₁, h₂⟩ : Mbar r' S) : S → ℕ → ℤ) = x := rfl
 
@@ -61,7 +61,7 @@ lemma summable_coe_real (x : Mbar r' S) (s : S) :
 by simpa only [← nnreal.summable_coe, nnreal.coe_nat_cast, nnreal.coe_nat_abs,
   nnreal.coe_mul, nnreal.coe_pow] using x.summable s
 
-@[ext] lemma ext (x y : Mbar r' S) (h : ⇑x = y) : x = y :=
+@[ext] lemma ext (x y : Mbar r' S) (h : (⇑x: S → ℕ → ℤ) = y) : x = y :=
 by { cases x, cases y, congr, exact h }
 
 lemma ext_iff (x y : Mbar r' S) : x = y ↔ (x : S → ℕ → ℤ) = y :=

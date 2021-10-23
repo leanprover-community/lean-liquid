@@ -134,9 +134,7 @@ structure pBanach :=
 
 namespace pBanach
 
-instance : has_coe_to_sort (pBanach p) :=
-{ S := Type*,
-  coe := λ X, X.V }
+instance : has_coe_to_sort (pBanach p) (Type*) := ⟨λ X, X.V⟩
 
 instance (X : pBanach p) : normed_group X := X.is_normed_group
 instance (X : pBanach p) : module ℝ X := X.is_module

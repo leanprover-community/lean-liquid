@@ -11,8 +11,9 @@ universe variables u
 open category_theory
 
 /-- The category of polyhedral lattices and bounded group homomorphisms. -/
-@[derive has_coe_to_sort]
 def PolyhedralLattice : Type (u+1) := bundled polyhedral_lattice
+
+instance : has_coe_to_sort PolyhedralLattice Type* := bundled.has_coe_to_sort
 
 namespace PolyhedralLattice
 
@@ -26,7 +27,7 @@ instance bundled_hom : bundled_hom @polyhedral_lattice_hom :=
 ⟨@polyhedral_lattice_hom.to_fun,
 @polyhedral_lattice_hom.id, @polyhedral_lattice_hom.comp, @polyhedral_lattice_hom.coe_inj⟩
 
-attribute [derive [has_coe_to_sort, large_category, concrete_category]] PolyhedralLattice
+attribute [derive [large_category, concrete_category]] PolyhedralLattice
 
 /-- Construct a bundled `PolyhedralLattice` from the underlying type and typeclass. -/
 def of (Λ : Type u) [polyhedral_lattice Λ] : PolyhedralLattice := bundled.of Λ

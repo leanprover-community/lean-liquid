@@ -38,7 +38,7 @@ namespace Mbar_le
 
 instance has_coe : has_coe (Mbar_le r' S c) (Mbar r' S) := ⟨subtype.val⟩
 
-instance has_coe_to_fun : has_coe_to_fun (Mbar_le r' S c) := ⟨λ F, S → ℕ → ℤ, λ F, F.1⟩
+instance has_coe_to_fun : has_coe_to_fun (Mbar_le r' S c) (λ F, S → ℕ → ℤ) := ⟨λ F, F.1⟩
 
 @[simp] lemma coe_coe_to_fun (F : Mbar_le r' S c) : ⇑(F : Mbar r' S) = F := rfl
 
@@ -73,7 +73,7 @@ begin
   rw h,
 end
 
-@[ext] lemma ext (x y : Mbar_le r' S c) (h : ⇑x = y) : x = y :=
+@[ext] lemma ext (x y : Mbar_le r' S c) (h : (⇑x: S → ℕ → ℤ) = y) : x = y :=
 by { ext:2, exact h }
 
 instance : has_zero (Mbar_le r' S c) := ⟨⟨0, zero_mem_filtration _⟩⟩

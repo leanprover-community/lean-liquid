@@ -37,7 +37,9 @@ def bundled_hom : bundled_hom @comphaus_filtered_pseudo_normed_group_hom :=
  @comphaus_filtered_pseudo_normed_group_hom.coe_inj⟩
 
 local attribute [instance] bundled_hom
-attribute [derive [has_coe_to_sort, large_category, concrete_category]] CompHausFiltPseuNormGrp
+attribute [derive [large_category, concrete_category]] CompHausFiltPseuNormGrp
+
+instance : has_coe_to_sort CompHausFiltPseuNormGrp Type* := bundled.has_coe_to_sort
 
 instance (M : CompHausFiltPseuNormGrp) : comphaus_filtered_pseudo_normed_group M := M.str
 
@@ -56,7 +58,7 @@ structure CompHausFiltPseuNormGrp₁ : Type (u+1) :=
 
 namespace CompHausFiltPseuNormGrp₁
 
-instance : has_coe_to_sort CompHausFiltPseuNormGrp₁ := ⟨Type*, λ M, M.M⟩
+instance : has_coe_to_sort CompHausFiltPseuNormGrp₁ Type* := ⟨λ M, M.M⟩
 instance (M : CompHausFiltPseuNormGrp₁) : comphaus_filtered_pseudo_normed_group M := M.str
 
 lemma exhaustive (M : CompHausFiltPseuNormGrp₁) (m : M) :
@@ -123,10 +125,11 @@ namespace cone_point_type_filt
 
 variable {G}
 
-instance (c : ℝ≥0) : has_coe_to_fun (cone_point_type_filt G c) :=
-⟨λ x, Π j : J, filtration (G.obj j) c, λ x, x.1⟩
+instance (c : ℝ≥0) : has_coe_to_fun (cone_point_type_filt G c)
+  (λ x, Π j : J, filtration (G.obj j) c) := ⟨λ x, x.1⟩
 
-@[ext] lemma ext {c} (x y : cone_point_type_filt G c) : ⇑x = y → x = y := subtype.ext
+@[ext] lemma ext {c} (x y : cone_point_type_filt G c) :
+  (⇑x : Π j : J, filtration (G.obj j) c) = y → x = y := subtype.ext
 
 @[simp] lemma level_apply {c : ℝ≥0} {i j : J} (x : cone_point_type_filt G c) (e : i ⟶ j) :
   (G.map e).level (x i) = x j := x.2 e
@@ -749,7 +752,9 @@ def bundled_hom : bundled_hom.parent_projection
 
 local attribute [instance] bundled_hom
 
-attribute [derive [has_coe_to_sort, large_category, concrete_category]] ProFiltPseuNormGrp
+attribute [derive [large_category, concrete_category]] ProFiltPseuNormGrp
+
+instance : has_coe_to_sort ProFiltPseuNormGrp Type* := bundled.has_coe_to_sort
 
 instance : has_forget₂ ProFiltPseuNormGrp CompHausFiltPseuNormGrp := bundled_hom.forget₂ _ _
 
@@ -797,7 +802,7 @@ structure ProFiltPseuNormGrp₁ : Type (u+1) :=
 
 namespace ProFiltPseuNormGrp₁
 
-instance : has_coe_to_sort ProFiltPseuNormGrp₁ := ⟨Type*, λ M, M.M⟩
+instance : has_coe_to_sort ProFiltPseuNormGrp₁ Type* := ⟨λ M, M.M⟩
 instance (M : ProFiltPseuNormGrp₁) : profinitely_filtered_pseudo_normed_group M := M.str
 
 lemma exhaustive (M : ProFiltPseuNormGrp₁) (m : M) :
@@ -905,7 +910,8 @@ instance bundled_hom : bundled_hom (@profinitely_filtered_pseudo_normed_group_wi
  @profinitely_filtered_pseudo_normed_group_with_Tinv_hom.comp r',
  @profinitely_filtered_pseudo_normed_group_with_Tinv_hom.coe_inj r'⟩
 
-attribute [derive [has_coe_to_sort, large_category, concrete_category]] ProFiltPseuNormGrpWithTinv
+attribute [derive [λ α, has_coe_to_sort α (Sort*), large_category, concrete_category]]
+  ProFiltPseuNormGrpWithTinv
 
 /-- Construct a bundled `ProFiltPseuNormGrpWithTinv` from the underlying type and typeclass. -/
 def of (r' : ℝ≥0) (M : Type u) [profinitely_filtered_pseudo_normed_group_with_Tinv r' M] :
@@ -1082,7 +1088,7 @@ namespace ProFiltPseuNormGrpWithTinv₁
 
 variable (r : ℝ≥0)
 
-instance : has_coe_to_sort (ProFiltPseuNormGrpWithTinv₁ r) := ⟨Type*, λ M, M.M⟩
+instance : has_coe_to_sort (ProFiltPseuNormGrpWithTinv₁ r) Type* := ⟨λ M, M.M⟩
 instance (M : ProFiltPseuNormGrpWithTinv₁ r) :
   profinitely_filtered_pseudo_normed_group_with_Tinv r M := M.str
 

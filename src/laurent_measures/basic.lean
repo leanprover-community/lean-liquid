@@ -26,8 +26,8 @@ structure laurent_measures (r : ℝ≥0) (S : Fintype) :=
 
 variables {r : ℝ≥0} {S S' : Fintype.{u}}
 
-instance : has_coe_to_fun (laurent_measures r S) :=
-⟨λ F, S → ℤ → ℤ, λ F, F.to_fun⟩
+instance : has_coe_to_fun (laurent_measures r S) (λ F, S → ℤ → ℤ) :=
+⟨λ F, F.to_fun⟩
 
 @[ext]
 lemma laurent_measures.ext (F G : laurent_measures r S) : (F : S → ℤ → ℤ) = G → F = G :=

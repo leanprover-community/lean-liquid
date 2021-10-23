@@ -43,7 +43,8 @@ namespace Mbar_bdd
 
 variables {r' : ℝ≥0} {S : Fintype} {c c₁ c₂ : ℝ≥0} {M : ℕ}
 
-instance has_coe_to_fun : has_coe_to_fun (Mbar_bdd r' S c M) := ⟨_, Mbar_bdd.to_fun⟩
+instance has_coe_to_fun : has_coe_to_fun (Mbar_bdd r' S c M) (λ _, S → fin (M + 1) → ℤ) :=
+⟨Mbar_bdd.to_fun⟩
 
 @[simp] lemma coe_mk (x h₁ h₂) : ((⟨x, h₁, h₂⟩ : Mbar_bdd r' S c M) : S → ℕ → ℤ) = x := rfl
 
@@ -56,7 +57,7 @@ protected lemma sum_le (x : Mbar_bdd r' S c M) :
 protected def cast_le [hc : fact (c₁ ≤ c₂)] (x : Mbar_bdd r' S c₁ M) : Mbar_bdd r' S c₂ M :=
 ⟨x.1, x.coeff_zero, x.sum_le.trans hc.out⟩
 
-@[ext] lemma ext (x y : Mbar_bdd r' S c M) (h : ⇑x = y) : x = y :=
+@[ext] lemma ext (x y : Mbar_bdd r' S c M) (h : (⇑x : S → fin (M + 1) → ℤ) = y) : x = y :=
 by { cases x, cases y, congr, exact h }
 
 instance : has_zero (Mbar_bdd r' S c M) :=

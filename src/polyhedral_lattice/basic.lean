@@ -125,17 +125,17 @@ variables {Λ Λ₁ Λ₂ Λ₃ : Type*}
 variables [polyhedral_lattice Λ] [polyhedral_lattice Λ₁] [polyhedral_lattice Λ₂] [polyhedral_lattice Λ₃]
 variables {f g : polyhedral_lattice_hom Λ₁ Λ₂}
 
-instance : has_coe_to_fun (polyhedral_lattice_hom Λ₁ Λ₂) := ⟨_, polyhedral_lattice_hom.to_fun⟩
+instance : has_coe_to_fun (polyhedral_lattice_hom Λ₁ Λ₂) (λ _, Λ₁ → Λ₂):= ⟨polyhedral_lattice_hom.to_fun⟩
 
 initialize_simps_projections polyhedral_lattice_hom (to_fun → apply)
 
-lemma coe_inj (H : ⇑f = g) : f = g :=
+lemma coe_inj (H : (⇑f: Λ₁ → Λ₂) = g) : f = g :=
 by cases f; cases g; congr'; exact funext H
 
 lemma coe_injective : @function.injective (polyhedral_lattice_hom Λ₁ Λ₂) (Λ₁ → Λ₂) coe_fn :=
 by apply coe_inj
 
-lemma coe_inj_iff : f = g ↔ ⇑f = g := ⟨congr_arg _, coe_inj⟩
+lemma coe_inj_iff : f = g ↔ (⇑f: Λ₁ → Λ₂) = g := ⟨congr_arg _, coe_inj⟩
 
 @[ext] lemma ext (H : ∀ x, f x = g x) : f = g := coe_inj $ funext H
 

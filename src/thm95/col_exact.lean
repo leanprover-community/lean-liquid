@@ -527,11 +527,11 @@ open profinitely_filtered_pseudo_normed_group
 def FLC_arrow_iso_aux :
   ((ProFiltPseuNormGrpWithTinv.Pow r' n).obj
     (unop ((Cech_nerve r' Λ M N).right.obj (mk 0)))) ≅
-  ProFiltPseuNormGrpWithTinv.of r' (rescale ↑N (((↥Λ →+ ↥M) ^ n) ^ N)) :=
+  ProFiltPseuNormGrpWithTinv.of r' (rescale ↑N (((↥Λ →+ (↥M: Type u)) ^ n) ^ N)) :=
 (ProFiltPseuNormGrpWithTinv.Pow r' n).map_iso
     (Hom_cosimplicial_zero_iso Λ N r' M N rfl) ≪≫
   (ProFiltPseuNormGrpWithTinv.Pow_rescale_Pow_iso.{u u} r' N N n).app
-    (polyhedral_lattice.Hom ↥Λ ↥M)
+    (polyhedral_lattice.Hom ↥Λ (↥M: Type u))
 .
 
 section open ProFiltPseuNormGrpWithTinv

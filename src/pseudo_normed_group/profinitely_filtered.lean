@@ -117,8 +117,8 @@ variables [comphaus_filtered_pseudo_normed_group M₂]
 variables [comphaus_filtered_pseudo_normed_group M₃]
 variables (f g : comphaus_filtered_pseudo_normed_group_hom M₁ M₂)
 
-instance : has_coe_to_fun (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :=
-⟨_, comphaus_filtered_pseudo_normed_group_hom.to_fun⟩
+instance : has_coe_to_fun (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) (λ _, M₁ → M₂):=
+⟨comphaus_filtered_pseudo_normed_group_hom.to_fun⟩
 
 @[simp] lemma coe_mk (f) (h₁) (h₂) (h₃) (h₄) :
   ⇑(⟨f, h₁, h₂, h₃, h₄⟩ : comphaus_filtered_pseudo_normed_group_hom M₁ M₂) = f :=
@@ -285,8 +285,8 @@ variables [comphaus_filtered_pseudo_normed_group M₂]
 variables [comphaus_filtered_pseudo_normed_group M₃]
 variables (f g : strict_comphaus_filtered_pseudo_normed_group_hom M₁ M₂)
 
-instance : has_coe_to_fun (strict_comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :=
-⟨_, strict_comphaus_filtered_pseudo_normed_group_hom.to_fun⟩
+instance : has_coe_to_fun (strict_comphaus_filtered_pseudo_normed_group_hom M₁ M₂) (λ _, M₁ → M₂) :=
+⟨strict_comphaus_filtered_pseudo_normed_group_hom.to_fun⟩
 
 @[simp] lemma coe_mk (f) (h₁) (h₂) (h₃) (h₄) :
   ⇑(⟨f, h₁, h₂, h₃, h₄⟩ : strict_comphaus_filtered_pseudo_normed_group_hom M₁ M₂) = f :=

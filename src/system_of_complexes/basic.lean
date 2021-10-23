@@ -48,15 +48,15 @@ def system_of_complexes : Type* := ℝ≥0ᵒᵖ ⥤ (cochain_complex SemiNormed
 
 variables {M M' N : system_of_complexes.{u}} (f : M ⟶ M') (g : M' ⟶ N)
 
-instance : has_coe_to_fun system_of_complexes :=
-⟨λ C, ℝ≥0 → ℕ → SemiNormedGroup, λ C c i, (C.obj $ op c).X i⟩
+instance : has_coe_to_fun system_of_complexes (λ C, ℝ≥0 → ℕ → SemiNormedGroup) :=
+⟨λ C c i, (C.obj $ op c).X i⟩
 
 /-- `f.apply c i` is application of the natural transformation `f`: $f_c^i : M_c^i ⟶ N_c^i$. -/
 def quiver.hom.apply (f : M ⟶ N) {c : ℝ≥0} {i : ℕ} : M c i ⟶ N c i :=
 (f.app (op c)).f i
 
-instance hom_to_fun : has_coe_to_fun (M ⟶ N) :=
-⟨λ f, Π {c : ℝ≥0} {i : ℕ}, M c i → N c i, λ f {c} {i} x, f.apply x⟩
+instance hom_to_fun : has_coe_to_fun (M ⟶ N) (λ f, Π {c : ℝ≥0} {i : ℕ}, M c i → N c i) :=
+⟨λ f {c} {i} x, f.apply x⟩
 
 lemma system_of_complexes.hom_apply (f : M ⟶ N) {c : ℝ≥0} {i : ℕ} (x : M c i) : f x = f.apply x :=
 rfl

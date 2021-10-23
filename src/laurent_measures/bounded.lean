@@ -19,8 +19,8 @@ namespace laurent_measures_bdd
 
 variables {r : ℝ≥0} {S S' S'' : Fintype.{u}} {T : finset ℤ} {c : ℝ≥0}
 
-instance : has_coe_to_fun (laurent_measures_bdd r S T c) :=
-⟨λ _, S → T → ℤ, λ F, F.1⟩
+instance : has_coe_to_fun (laurent_measures_bdd r S T c) (λ _, S → T → ℤ) :=
+⟨λ F, F.1⟩
 
 instance : has_norm (laurent_measures_bdd r S T c) :=
 ⟨λ F, ∑ s i, ∥ F s i ∥ * (r : ℝ)^(i : ℤ)⟩

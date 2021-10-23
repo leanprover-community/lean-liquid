@@ -80,8 +80,9 @@ variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₂]
 variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₃]
 variables (f g : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂)
 
-instance : has_coe_to_fun (profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂) :=
-⟨_, profinitely_filtered_pseudo_normed_group_with_Tinv_hom.to_fun⟩
+instance : has_coe_to_fun (profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂)
+  (λ _, M₁ → M₂):=
+⟨profinitely_filtered_pseudo_normed_group_with_Tinv_hom.to_fun⟩
 
 @[simp] lemma coe_mk (f) (h₁) (h₂) (h₃) (h₄) (h₅) :
   ⇑(⟨f, h₁, h₂, h₃, h₄, h₅⟩ : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂) = f :=
