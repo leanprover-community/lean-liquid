@@ -42,9 +42,8 @@ apply_nolint Profinite.image_stabilizes inhabited_nonempty
 -- for_mathlib/Profinite/disjoint_union.lean
 apply_nolint Profinite.equalizer.hom_ext def_lemma
 apply_nolint Profinite.equalizer.lift_ι def_lemma
-apply_nolint topology.sigma.compact_space unused_arguments
-apply_nolint topology.sigma.totally_disconnected_space unused_arguments
-apply_nolint topology.sum.totally_disconnected_space unused_arguments
+apply_nolint is_preconnected.preimage unused_arguments
+apply_nolint sigma.totally_disconnected_space unused_arguments
 
 -- for_mathlib/abelian_category.lean
 apply_nolint category_theory.is_zero.eq_of_src def_lemma
