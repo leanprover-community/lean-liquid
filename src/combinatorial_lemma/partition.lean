@@ -61,7 +61,7 @@ attribute [instance] recursion_data.dec_inst
 /-- The starting point for recursively constructing subsequences of a sequence of real numbers
 such that all the subsequences sum to be roughly the same size:
 we start by placing the first element of the sequence into the subsequence `0`. -/
-noncomputable def recursion_data_zero (N : ℕ) (hN : 0 < N) (f : ℕ → ℝ≥0) (hf : ∀ n, f n ≤ 1) :
+def recursion_data_zero (N : ℕ) (hN : 0 < N) (f : ℕ → ℝ≥0) (hf : ∀ n, f n ≤ 1) :
   recursion_data N hN f hf 0 :=
 { m := λ j, j = ⟨0, hN⟩,
   hm := ⟨_, rfl, λ _, id⟩,
@@ -77,7 +77,7 @@ noncomputable def recursion_data_zero (N : ℕ) (hN : 0 < N) (f : ℕ → ℝ≥
     { exact zero_le' }
   end }
 
-noncomputable instance (N : ℕ) (hN : 0 < N) (f : ℕ → ℝ≥0) (hf : ∀ n, f n ≤ 1) :
+instance (N : ℕ) (hN : 0 < N) (f : ℕ → ℝ≥0) (hf : ∀ n, f n ≤ 1) :
   inhabited (recursion_data N hN f hf 0) := ⟨recursion_data_zero N hN f hf⟩
 
 /-- Given partial sums of subsequences up to the `k`-th element in a sequence of real numbers,
