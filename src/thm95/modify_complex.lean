@@ -1,9 +1,9 @@
 import algebra.homology.homological_complex
 import category_theory.preadditive.additive_functor
 
-namespace homological_complex
+open category_theory category_theory.limits
 
-open _root_.category_theory _root_.category_theory.limits
+namespace homological_complex
 
 variables {ι : Type} {V₁ V₂ : Type*} {c : complex_shape ι}
 variables [category V₁] [category V₂] [preadditive V₁] [preadditive V₂]
