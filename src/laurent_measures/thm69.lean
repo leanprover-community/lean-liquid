@@ -1,7 +1,13 @@
+import algebra.category.Module.basic
 import category_theory.Fintype
 import data.real.nnreal
 import laurent_measures.basic
 import order.filter.at_top_bot
+import pseudo_normed_group.basic
+import pseudo_normed_group.category
+import real_measures
+import ring_theory.principal_ideal_domain
+import for_mathlib.short_exact_sequence
 
 /-
 We define the map θ : (laurent_measures r `singleton`) → ℝ and we show it is surjective.
@@ -293,7 +299,8 @@ end summability
 
 section theta_surj
 
-/--The map `θ` defined in Theorem 6.9 of Analytic.pdf -/
+/--The map `θ` defined in Theorem 6.9 of Analytic.pdf. The variable `ξ` here corresponds to `r'`
+*ibid*, so that `θ ξ` is `θ_r'` as a map from `r`-convergent Laurent measures to `ℝ`. -/
 def θ (r : ℝ≥0) : (laurent_measures r (Fintype.of punit)) → ℝ :=
   λ F, tsum (λ n, (F.to_Rfct r n) * ξ ^ n)
 
@@ -332,4 +339,100 @@ begin
 end
 
 end theta_surj
+
+section ker_theta
+open submodule linear_map
+
+variable (r : ℝ≥0)
+
+lemma θ_is_linear : is_linear_map ℤ (θ ξ r) := sorry
+
+def θ.to_linear : (laurent_measures r (Fintype.of punit)) →ₗ[ℤ] ℝ :=
+{ to_fun := θ ξ r,
+  map_add' := (θ_is_linear ξ r).1,
+  map_smul' := (θ_is_linear ξ r).2 }
+
+lemma ker_θ_principal : submodule.is_principal (θ.to_linear ξ r).ker := sorry
+
+def ker_generator : (laurent_measures r (Fintype.of punit)) :=
+  @submodule.is_principal.generator _ _ _ _ _ (ker (θ.to_linear ξ r)) (ker_θ_principal ξ r)
+
+/- [FAE] The following lemma needs that `(laurent_measures r (Fintype.of punit))` have a `mul`; but
+I don't know if the lemma is actually needed -/
+-- lemma ker_generator_non_zerodivisor : is_regular (ker_generator ξ) :=
+
+instance (S : Fintype) : has_scalar (laurent_measures r (Fintype.of punit)) (laurent_measures r S) :=
+{ smul :=
+  begin
+    intros f G,
+    constructor,
+    intro s,
+    sorry,
+    intros s n,
+    use (f punit.star n) * (G s n),
+  end }
+
+end ker_theta
+
+section SES_thm69
+
+universe u
+
+open  category_theory category_theory.limits
+local notation `ℳ` := real_measures
+
+variables {r : ℝ≥0} [fact (0 < r)]
+variables (p : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)] [fact ((ξ : ℝ) ^ (p : ℝ) = r)]
+
+include ξ
+
+/-- This `to_meas_θ` is the "measurification" of the map `θ` of
+Theorem 6.9. Thus, `to_meas_θ` is the map inducing the isomorphism of Theorem 6.9 (2)-/
+def to_meas_θ (S : Fintype) : laurent_measures r S → ℳ p S :=
+λ F s, θ ξ r ⟨(λ _, F s), (λ _, F.2 s)⟩
+
+@[simp] lemma to_meas_θ_zero (S : Fintype)  :
+ (to_meas_θ ξ p S (0 : laurent_measures r S)) = 0 := sorry
+
+@[simp] lemma to_meas_θ_add (S : Fintype) (F G : laurent_measures r S) :
+ (to_meas_θ ξ p S (F + G)) = (to_meas_θ ξ p S F) + (to_meas_θ ξ p S G) := sorry
+
+def Θ (S : Fintype) : comphaus_filtered_pseudo_normed_group_hom (laurent_measures r S) (ℳ p S) :=
+{ to_fun := to_meas_θ ξ p S,
+  map_zero' := to_meas_θ_zero ξ p S,
+  map_add' := to_meas_θ_add ξ p S,
+  bound' := sorry, -- this is precisely Prop 7.2 (3) of `Analytic.pdf`
+  continuous' := sorry } -- [FAE] I guess that this is Prop 7.2 (4) of `Analytic.pdf`
+
+--[FAE] Don't we already know that CompHausFiltPseuNormGrp is "nice"?
+variable [imCHFPNG : has_images (CompHausFiltPseuNormGrp.{u})]
+variable [zerCHFPNG : has_zero_morphisms (CompHausFiltPseuNormGrp.{u})]
+variable [kerCHFPNG : has_kernels (CompHausFiltPseuNormGrp.{u})]
+
+
+variables (S : Fintype) (F : laurent_measures r S)
+#check (ker_generator ξ r) • F
+
+def SES_thm69 (S : Fintype) : @category_theory.short_exact_sequence CompHausFiltPseuNormGrp.{u} _
+  imCHFPNG zerCHFPNG kerCHFPNG :=
+{ fst := bundled.of (laurent_measures r S),
+  snd := bundled.of (laurent_measures r S),
+  trd := bundled.of (ℳ p S),
+  f :=
+  begin
+    let φ := λ (F : laurent_measures r S), (ker_generator ξ r) • F,
+    use φ,
+    sorry,
+    sorry,
+    sorry,
+    sorry,-- [FAE] These four are the properties that the scalar multiplication by a measure on the
+    --singleton (as endomorphism of S-measures) must satisfy
+  end,
+  g := @Θ ξ r _ p _ _ _ S,
+  mono' := sorry,
+  epi' := sorry,
+  exact' := sorry }
+
+end SES_thm69
+
 end thm71
