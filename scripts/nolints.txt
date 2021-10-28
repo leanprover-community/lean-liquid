@@ -88,12 +88,16 @@ apply_nolint eq.rhs unused_arguments
 -- for_mathlib/topology.lean
 apply_nolint homeomorph.totally_disconnected_space def_lemma
 
+-- laurent_measures/theta.lean
+apply_nolint theta.aux_y unused_arguments
+apply_nolint theta.eventually_le ge_or_gt
+apply_nolint theta.eventually_le_one ge_or_gt
+apply_nolint theta.eventually_pos_floor ge_or_gt
+apply_nolint theta.eventually_pos_y ge_or_gt
+
 -- laurent_measures/thm69.lean
-apply_nolint thm71.aux_y unused_arguments
-apply_nolint thm71.eventually_le ge_or_gt
-apply_nolint thm71.eventually_le_one ge_or_gt
-apply_nolint thm71.eventually_pos_floor ge_or_gt
-apply_nolint thm71.eventually_pos_y ge_or_gt
+apply_nolint thm_69.laurent_measures.has_scalar unused_arguments
+apply_nolint thm_69.to_meas_θ unused_arguments
 
 -- locally_constant/Vhat.lean
 apply_nolint SemiNormedGroup.normed_with_aut_LCC fails_quickly
