@@ -20,8 +20,8 @@ def coboundary (n : ℕ) : M.obj [n] ⟶ M.obj [n+1] :=
 
 lemma coboundary_zero : coboundary M 0 = (M.δ 0) - (M.δ 1) :=
 begin
-  simp only [coboundary, fin.sum_univ_succ, fin.default_eq_zero, fin.coe_zero, one_gsmul,
-    fin.coe_succ, univ_unique, neg_gsmul, pow_one, fin.succ_zero_eq_one, sum_singleton,
+  simp only [coboundary, fin.sum_univ_succ, fin.default_eq_zero, fin.coe_zero, one_zsmul,
+    fin.coe_succ, univ_unique, neg_zsmul, pow_one, fin.succ_zero_eq_one, sum_singleton,
     pow_zero, sub_eq_add_neg]
 end
 
@@ -39,7 +39,7 @@ begin
         + (∑ ij in sᶜ, (-1:ℤ)^(ij.1+ij.2:ℕ) • ((M.δ ij.1) ≫ (M.δ ij.2))) :
         by rw sum_add_sum_compl
   ... = 0 : _,
-  { simp only [map_sum, map_gsmul, finset_sum_apply, smul_apply, smul_sum, pow_add, mul_smul],
+  { simp only [map_sum, map_zsmul, finset_sum_apply, smul_apply, smul_sum, pow_add, mul_smul],
     refl, },
   erw [← eq_neg_iff_add_eq_zero, ← finset.sum_neg_distrib],
   -- The sums are equal because we can give a bijection
@@ -59,7 +59,7 @@ begin
     dsimp at hij ⊢,
     rw [δ_comp_δ], swap,
     { rwa ← fin.coe_fin_le },
-    rw [← neg_gsmul],
+    rw [← neg_zsmul],
     congr' 1,
     calc (-1) ^ (i + j : ℕ)
         = - (-1) ^ (i + j + 1 : ℕ) : _
@@ -98,7 +98,7 @@ def cocomplex : cosimplicial_object C ⥤ cochain_complex C ℕ :=
       rintro i j (rfl : i + 1 = j),
       dsimp [to_cocomplex, cochain_complex.of],
       simp only [if_pos rfl, category.comp_id, eq_to_hom_refl, coboundary, δ,
-        preadditive.sum_comp, preadditive.comp_sum, comp_gsmul, gsmul_comp, nat_trans.naturality],
+        preadditive.sum_comp, preadditive.comp_sum, comp_zsmul, zsmul_comp, nat_trans.naturality],
     end } }
 
 namespace augmented
@@ -145,7 +145,7 @@ def cocomplex : augmented C ⥤ cochain_complex C ℕ :=
         erw [← nat_trans.comp_app, ← f.w],
         refl },
       { dsimp [to_cocomplex_d, coboundary],
-        simp only [preadditive.sum_comp, preadditive.comp_sum, comp_gsmul, gsmul_comp],
+        simp only [preadditive.sum_comp, preadditive.comp_sum, comp_zsmul, zsmul_comp],
         apply fintype.sum_congr,
         intro i,
         erw (drop.map f).naturality,

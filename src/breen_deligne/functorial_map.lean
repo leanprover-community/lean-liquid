@@ -109,7 +109,7 @@ def punit_equiv : ℤ[punit] ≃+ ℤ :=
     (λ x, punit.cases_on x (by simp))
     (λ x, punit.cases_on x (by simp))
     (λ x y hx hy, by { simp only [add_monoid_hom.map_add, add_smul] at *, rw [hx, hy]}),
-  right_inv := λ n, by { rw [add_monoid_hom.map_int_module_smul, lift.of], exact gsmul_int_one n},
+  right_inv := λ n, by { rw [add_monoid_hom.map_int_module_smul, lift.of], exact zsmul_int_one n},
   map_add' := add_monoid_hom.map_add _ }
 
 -- this is now on `free-abelian-group-equivs` branch
@@ -153,10 +153,10 @@ begin
   { simp },
   { intros i hi,
     simp only [add_smul, ←hi, free_abelian_group.lift.of,
-      add_monoid_hom.map_add, add_left_inj, one_gsmul], },
+      add_monoid_hom.map_add, add_left_inj, one_zsmul], },
   { intros i hi,
     simp only [add_monoid_hom.map_neg, neg_inj, int.cast_neg, neg_smul, int.cast_sub] at *,
-    simp only [sub_smul, ←hi, free_abelian_group.lift.of, one_gsmul,
+    simp only [sub_smul, ←hi, free_abelian_group.lift.of, one_zsmul,
       add_monoid_hom.map_neg, add_monoid_hom.map_sub, neg_inj, neg_smul, sub_left_inj] }
 end
 
@@ -293,7 +293,7 @@ begin
     rw @fintype.sum_apply (fin m) _ (fin m) _ _ j'
       (λ j, b i j • (λ (j_1 : fin m), ite (j = j_1) (free_abelian_group.of punit.star) 0)),
     dsimp,
-    simp only [finset.mem_univ, if_true, finset.sum_ite_eq', gsmul_eq_mul, mul_ite, mul_zero], },
+    simp only [finset.mem_univ, if_true, finset.sum_ite_eq', zsmul_eq_mul, mul_ite, mul_zero], },
   { simp },
   { intros u v hu hv,
     simp * at * }

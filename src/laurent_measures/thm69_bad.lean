@@ -209,7 +209,7 @@
 --   --     suffices : floor_seq_half_temp x k = ⌊2 ^ k * x⌋₊ - 2 * ⌊2 ^ (k - 1) * x⌋₊,
 --   --     rw this,
 --   --     simp only [int.cast_coe_nat, int.cast_bit0, int.cast_mul, int.cast_one, int.cast_sub,
---   --       gpow_coe_nat],by admit,
+--   --       zpow_coe_nat],by admit,
 
 
 --   --     -- have try : floor_seq_half_temp x 0 = ⌊x⌋₊, refl,
@@ -247,7 +247,7 @@
 --   --   rw mul_comm,
 --   --   rw div_pow,
 --   --   rw one_pow,
---   --   rw ← gpow_coe_nat,
+--   --   rw ← zpow_coe_nat,
 --   --   rw mul_eq_mul_left_iff,
 --   --   apply or.intro_left,
 --   --   field_simp,
@@ -263,14 +263,14 @@
 --   --   -- apply_fun (coe : ℤ → ℚ) at this,
 --   --   -- rw [int.cast_sub, int.cast_mul] at this,
 --   --   -- rw this,
---   --   -- simp only [int.cast_coe_nat, int.cast_bit0, int.cast_one, gpow_coe_nat],
+--   --   -- simp only [int.cast_coe_nat, int.cast_bit0, int.cast_one, zpow_coe_nat],
 --   --   -- simp only [cast_one, cast_bit0],
---   --   -- rw gpow_coe_nat,
+--   --   -- rw zpow_coe_nat,
 --   --   -- simp,
---   --   -- rw gpow_coe_nat,
+--   --   -- rw zpow_coe_nat,
 
 --   --   -- rw int.cast_one,
---   --   -- rw nsmul_eq_gsmul,
+--   --   -- rw nsmul_eq_zsmul,
 --   --   -- rw ← int.nat_cast_eq_coe_nat,
 --   --   -- rw [← cast_mul 2 ⌊2 ^ (↑k - 1) * x⌋₊],
 --   --   -- refl,
@@ -286,7 +286,7 @@
 --   --     nth_rewrite 0 div_pow,
 --   --     nth_rewrite 0 div_pow,
 --   --     repeat {rw one_pow},
---   --     rw ← gpow_coe_nat,
+--   --     rw ← zpow_coe_nat,
 --   --     have : 1 / (1 / 2 : ℚ) = ⌊ 1 / (1 / 2 : ℚ)⌋₊,by admit,
 --   --     rw this,
 --   --     refl,
@@ -339,7 +339,7 @@
 --   apply (@function.injective.has_sum_iff _ _ _ _ _ _ x _ hinj h_range).mp,
 --   have H : (λ (n : ℤ), ((coe ∘ floor_seq_rat r' x) n * (r' : ℝ) ^ n)) ∘ coe =
 --     (λ (n : ℕ), (coe ∘ floor_seq_rat r' x) n * r' ^ n) := by {funext,--want to change  (r' : ℝ) ^ n?
---       simp only [comp_app, gpow_coe_nat] },
+--       simp only [comp_app, zpow_coe_nat] },
 --   rw H,
 --   have h_pos : ∀ n : ℕ, (coe ∘ floor_seq_rat r' x) n * (r' : ℝ) ^ n ≥ 0,
 --   { intro n,
@@ -388,7 +388,7 @@
 --   apply (@function.injective.has_sum_iff _ _ _ _ _ _ x _ hinj h_range).mp,
 --   have H : (λ (n : ℤ), ((coe ∘ floor_seq_half x) n * ((1 / 2) : ℝ) ^ n)) ∘ coe =
 --     (λ (n : ℕ), (coe ∘ floor_seq_half x) n * (1 / 2) ^ n) := by {funext,--want to change  (r' : ℝ) ^ n?
---       simp only [comp_app, gpow_coe_nat] },
+--       simp only [comp_app, zpow_coe_nat] },
 --   rw H,
 --   have h_pos : ∀ n : ℕ, (coe ∘ floor_seq_half x) n * ((1 / 2) : ℝ) ^ n ≥ 0,
 --   { intro n,
@@ -452,7 +452,7 @@
 -- begin
 --   cases n,
 --   apply nnreal.coe_pow,
---   simp only [gpow_neg_succ_of_nat, inv_pow', nnreal.coe_pow, nnreal.coe_inv],
+--   simp only [zpow_neg_succ_of_nat, inv_pow', nnreal.coe_pow, nnreal.coe_inv],
 -- end
 
 
@@ -719,7 +719,7 @@
 -- --   by admit,
 -- --   -- apply (nnreal.has_sum_iff_tendsto_nat).mpr,
 -- -- --   funext a,
--- -- --   simp only [function.comp_app, gpow_coe_nat],
+-- -- --   simp only [function.comp_app, zpow_coe_nat],
 -- -- --   suffices : φ a = 1,
 -- -- --   rw [this, one_mul],
 -- -- --   refl,

@@ -247,7 +247,7 @@ noncomputable def upgrade_functional {α : Type*} [fintype α] (f : (α → ℤ)
     suffices :
       f ((m.denom * scale_factor x) • scale_up (m • x)) =
         f ((scale_factor (m • x) * m.num : ℤ) • scale_up x),
-    { simp only [add_monoid_hom.map_gsmul, add_monoid_hom.map_nsmul] at this,
+    { simp only [add_monoid_hom.map_zsmul, add_monoid_hom.map_nsmul] at this,
       simp only [int.coe_nat_mul],
       simp only [algebra.id.smul_eq_mul, rat.num_div_denom, nsmul_eq_mul, int.nat_cast_eq_coe_nat,
         int.coe_nat_mul] at this,
@@ -569,8 +569,8 @@ end
 
 end
 
-instance {α : Type*} [fintype α] : finite_dimensional ℚ (α → ℚ) :=
-@is_noetherian_pi _ _ _ _ _ _ _ (λ i, infer_instance)
+-- instance {α : Type*} [fintype α] : finite_dimensional ℚ (α → ℚ) :=
+-- @is_noetherian_pi _ _ _ _ _ _ _ (λ i, infer_instance)
 
 lemma finset_Gordan_aux_pi {α : Type*} [fintype α] (S : finset ((α → ℤ) →+ ℤ)) :
   (intersect_halfspaces_set (S : set ((α → ℤ) →+ ℤ))).fg  :=

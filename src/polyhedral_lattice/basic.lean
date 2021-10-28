@@ -65,7 +65,7 @@ instance no_zero_smul_divisors_int : no_zero_smul_divisors ℤ Λ :=
 module.free.no_zero_smul_divisors ℤ Λ
 
 instance no_zero_smul_divisors_nat : no_zero_smul_divisors ℕ Λ :=
-⟨λ n l h, by { rw [← gsmul_coe_nat, smul_eq_zero] at h,
+⟨λ n l h, by { rw [← zsmul_coe_nat, smul_eq_zero] at h,
   refine h.imp _ id, simp only [imp_self, int.coe_nat_eq_zero] }⟩
 
 lemma polyhedral :
@@ -178,7 +178,7 @@ f.to_add_monoid_hom.map_sum _ _
 
 @[simp] lemma map_neg (x) : f (-x) = -(f x) := f.to_add_monoid_hom.map_neg _
 
-@[simp] lemma map_gsmul (n : ℤ) (x) : f (n • x) = n • (f x) := f.to_add_monoid_hom.map_gsmul _ _
+@[simp] lemma map_zsmul (n : ℤ) (x) : f (n • x) = n • (f x) := f.to_add_monoid_hom.map_zsmul _ _
 
 instance : has_zero (polyhedral_lattice_hom Λ₁ Λ₂) :=
 ⟨(0 : Λ₁ →+ Λ₂).mk_polyhedral_lattice_hom (by simp [le_refl])⟩

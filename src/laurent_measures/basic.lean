@@ -39,8 +39,8 @@ protected lemma laurent_measures.summable (F : laurent_measures r S) (s : S) : s
 namespace laurent_measures
 
 -- Move me
-lemma nonneg_of_norm_mul_fpow (k n : ℤ) (r : ℝ≥0) : 0 ≤ ∥ k ∥ * (r : ℝ)^n :=
-mul_nonneg (norm_nonneg _) (fpow_nonneg (nnreal.coe_nonneg _) _)
+lemma nonneg_of_norm_mul_zpow (k n : ℤ) (r : ℝ≥0) : 0 ≤ ∥ k ∥ * (r : ℝ)^n :=
+mul_nonneg (norm_nonneg _) (zpow_nonneg (nnreal.coe_nonneg _) _)
 
 def map (f : S ⟶ S') : laurent_measures r S → laurent_measures r S' := λ F,
 { to_fun := λ s' k, ∑ s in finset.univ.filter (λ t, f t = s'), F s k,
@@ -50,7 +50,7 @@ def map (f : S ⟶ S') : laurent_measures r S → laurent_measures r S' := λ F,
       ∑ s in finset.univ.filter (λ t, f t = s'), ∥ F s n ∥ * (r : ℝ)^n := λ n,
     calc ∥ ∑ s in finset.univ.filter (λ t, f t = s'), F s n ∥ * (r : ℝ)^n ≤
       (∑ s in finset.univ.filter (λ t, f t = s'), ∥ F s n ∥) * (r : ℝ)^n :
-        mul_le_mul (norm_sum_le _ _) (le_refl _) (fpow_nonneg (nnreal.coe_nonneg _) _)
+        mul_le_mul (norm_sum_le _ _) (le_refl _) (zpow_nonneg (nnreal.coe_nonneg _) _)
         (finset.sum_nonneg $ λ s _, norm_nonneg _)
       ... = _ : by rw finset.sum_mul,
     apply summable_of_nonneg_of_le _ this,
@@ -58,7 +58,7 @@ def map (f : S ⟶ S') : laurent_measures r S → laurent_measures r S' := λ F,
       rintros s -,
       exact F.summable s },
     { intros n,
-      apply nonneg_of_norm_mul_fpow }
+      apply nonneg_of_norm_mul_zpow }
   end }
 
 @[simp]
@@ -104,7 +104,7 @@ def add : laurent_measures r S → laurent_measures r S → laurent_measures r S
       rw ← add_mul,
       refine mul_le_mul (norm_add_le _ _) (le_refl _) _
         (add_nonneg (norm_nonneg _) (norm_nonneg _)),
-      refine fpow_nonneg _ _,
+      refine zpow_nonneg _ _,
       exact nnreal.coe_nonneg r },
     apply summable_of_nonneg_of_le _ this,
     { apply summable.add,
@@ -112,7 +112,7 @@ def add : laurent_measures r S → laurent_measures r S → laurent_measures r S
       exact G.summable s },
     { intros n,
       refine mul_nonneg (norm_nonneg _) _,
-      refine fpow_nonneg _ _,
+      refine zpow_nonneg _ _,
       exact nnreal.coe_nonneg r }
   end }
 
@@ -175,13 +175,13 @@ instance : add_comm_group (laurent_measures r S) :=
 { neg := neg,
   sub := sub,
   sub_eq_add_neg := λ F G, by { ext, refl },
-  gsmul := λ n F,
-  { to_fun := λ s m, gsmul n (F s m),
+  zsmul := λ n F,
+  { to_fun := λ s m, zsmul n (F s m),
     summable' := begin
       intro s,
       have := summable.mul_left (↑n : ℝ) (F.2 s),
       simp only [pi.has_mul, ← mul_assoc, int.norm_eq_abs, ← int.cast_abs] at this,
-      simp only [int.norm_eq_abs, ← int.cast_abs, gsmul_eq_smul, abs_gsmul],
+      simp only [int.norm_eq_abs, ← int.cast_abs, zsmul_eq_smul, abs_zsmul],
       by_cases hn : n ≥ 0,
       { simp only [abs_of_nonneg hn, smul_eq_mul, int.cast_mul],
         exact this },
@@ -189,11 +189,11 @@ instance : add_comm_group (laurent_measures r S) :=
         int.cast_neg, neg_mul_eq_neg_mul_symm],
         apply summable.neg this },
     end },
-  gsmul_zero' := λ F, by { ext, simpa, },
-  gsmul_succ' := λ n F, by { ext, simpa [add_apply, int.coe_nat_succ, int.of_nat_eq_coe,
-    gsmul_eq_smul, smul_eq_mul, add_mul, add_comm, one_mul], },
-  gsmul_neg' := λ n F, by { ext, simp only [int.coe_nat_succ, int.of_nat_eq_coe,
-    int.neg_succ_of_nat_coe, add_comm, gsmul_eq_smul, smul_eq_mul], ring_nf},
+  zsmul_zero' := λ F, by { ext, simpa, },
+  zsmul_succ' := λ n F, by { ext, simpa [add_apply, int.coe_nat_succ, int.of_nat_eq_coe,
+    zsmul_eq_smul, smul_eq_mul, add_mul, add_comm, one_mul], },
+  zsmul_neg' := λ n F, by { ext, simp only [int.coe_nat_succ, int.of_nat_eq_coe,
+    int.neg_succ_of_nat_coe, add_comm, zsmul_eq_smul, smul_eq_mul], ring_nf},
   add_left_neg := λ F, by { ext, simp, },
   add_comm := λ a b, by { ext, dsimp, rw add_comm },
   ..(infer_instance : add_comm_monoid _),
@@ -222,13 +222,13 @@ lemma map_bound (f : S ⟶ S') (F : laurent_measures r S) :
       ∑ (s : S.α) in finset.univ.filter (λ (t : S.α), f t = s'), ∥F s b∥ * (r : ℝ) ^ b,
   { intros b,
     rw ← finset.sum_mul,
-    refine mul_le_mul _ (le_refl _) (fpow_nonneg (nnreal.coe_nonneg _) _)
+    refine mul_le_mul _ (le_refl _) (zpow_nonneg (nnreal.coe_nonneg _) _)
       (finset.sum_nonneg $ λ _ _, norm_nonneg _),
     apply norm_sum_le },
   apply tsum_le_tsum h2 _ h1,
   { apply summable_of_nonneg_of_le _ h2,
     exact h1,
-    intro b, apply nonneg_of_norm_mul_fpow }
+    intro b, apply nonneg_of_norm_mul_zpow }
 end
 ... = ∑ s', ∑ s in finset.univ.filter (λ t, f t = s'), ∑' n, ∥ F s n ∥ * (r : ℝ)^n : begin
   apply finset.sum_congr rfl,
@@ -264,7 +264,7 @@ begin
   { intros b,
     dsimp,
     rw ← add_mul,
-    refine mul_le_mul (norm_add_le _ _) (le_refl _) (fpow_nonneg (nnreal.coe_nonneg _) _)
+    refine mul_le_mul (norm_add_le _ _) (le_refl _) (zpow_nonneg (nnreal.coe_nonneg _) _)
       (add_nonneg (norm_nonneg _) (norm_nonneg _)) }
 end
 
@@ -277,7 +277,7 @@ begin
     rintros s -,
     apply tsum_nonneg,
     intros n,
-    refine mul_nonneg (norm_nonneg _) (fpow_nonneg _ _),
+    refine mul_nonneg (norm_nonneg _) (zpow_nonneg _ _),
     exact nnreal.coe_nonneg r, },
   { sorry },
 end
@@ -295,7 +295,7 @@ begin
   have : ∥ F s n ∥ * r ^ n ≤ ∑' k, ∥ F s k ∥ * r ^ k,
   { apply le_tsum (F.summable s),
     rintros k -,
-    refine mul_nonneg (norm_nonneg _) (fpow_nonneg _ _),
+    refine mul_nonneg (norm_nonneg _) (zpow_nonneg _ _),
     exact nnreal.coe_nonneg r },
   replace this := lt_of_le_of_lt (le_trans this _) h,
   have hr₁ : 0 < (r : ℝ)^n := lt_of_le_of_lt (nnreal.coe_nonneg c) h,
@@ -311,7 +311,7 @@ begin
       dsimp,
       apply tsum_nonneg,
       intros k,
-      refine mul_nonneg (norm_nonneg _) (fpow_nonneg _ _),
+      refine mul_nonneg (norm_nonneg _) (zpow_nonneg _ _),
       exact nnreal.coe_nonneg r },
     { simp } }
 end
@@ -331,7 +331,7 @@ def truncate {c : ℝ≥0} (A : finset ℤ) :
     { conv_rhs {rw ← finset.sum_attach},
       refl },
     { intros b hb,
-      refine mul_nonneg (norm_nonneg _) (fpow_nonneg _ _),
+      refine mul_nonneg (norm_nonneg _) (zpow_nonneg _ _),
       exact nnreal.coe_nonneg r },
   end }
 
@@ -368,7 +368,7 @@ def transition {c : ℝ≥0} {A B : finset ℤ} (h : B ≤ A) :
   apply finset.sum_le_sum_of_subset_of_nonneg,
   { apply finset.subset_univ },
   { rintros i - -,
-    refine mul_nonneg (norm_nonneg _) (fpow_nonneg _ _),
+    refine mul_nonneg (norm_nonneg _) (zpow_nonneg _ _),
     exact nnreal.coe_nonneg r }
 end⟩
 
@@ -396,7 +396,7 @@ begin
   apply summable_of_sum_le,
   { intro k,
     dsimp,
-    refine mul_nonneg (norm_nonneg _) (fpow_nonneg (nnreal.coe_nonneg _) _) },
+    refine mul_nonneg (norm_nonneg _) (zpow_nonneg (nnreal.coe_nonneg _) _) },
   { intros A,
     rw ← finset.sum_attach,
     refine le_trans _ (F A).bound,
@@ -407,7 +407,7 @@ begin
     rintro s -,
     apply finset.sum_nonneg,
     rintros a -,
-    refine mul_nonneg (norm_nonneg _) (fpow_nonneg (nnreal.coe_nonneg _) _) },
+    refine mul_nonneg (norm_nonneg _) (zpow_nonneg (nnreal.coe_nonneg _) _) },
 end
 
 lemma mk_seq_compat_sum_le {c} (F : Π (A : finset ℤ), laurent_measures_bdd r S A c)
@@ -606,7 +606,7 @@ instance pfpng_laurent_measures [fact (0 < r)] :
       intros j hj,
       rw ← add_mul,
       refine mul_le_mul (norm_add_le _ _) (le_refl _)
-        (fpow_nonneg (nnreal.coe_nonneg _) _) (add_nonneg (norm_nonneg _) (norm_nonneg _)) },
+        (zpow_nonneg (nnreal.coe_nonneg _) _) (add_nonneg (norm_nonneg _) (norm_nonneg _)) },
     have :
       (truncate A : _ → laurent_measures_bdd r S A (c₁ + c₂)) ∘ pseudo_normed_group.add' =
       E ∘ (prod.map (truncate A) (truncate A)),

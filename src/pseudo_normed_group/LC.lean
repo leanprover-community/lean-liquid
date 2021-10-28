@@ -357,11 +357,11 @@ begin
   simp only [eval_LCFP, comp_sum, sum_comp],
   apply finset.sum_congr rfl,
   rintros ⟨g, hg⟩ -,
-  -- instead of this crazy `show`, we shoul prove `comp_gsmul` and `gsmul_comp`
+  -- instead of this crazy `show`, we shoul prove `comp_zsmul` and `zsmul_comp`
   -- for preadditive categories
   show @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ SemiNormedGroup) _ _ _ _ _ _ _ =
     @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ SemiNormedGroup) _ _ _ _ _ _ _,
-  simp only [add_monoid_hom.map_gsmul, add_monoid_hom.smul_apply],
+  simp only [add_monoid_hom.map_zsmul, add_monoid_hom.smul_apply],
   haveI : g.suitable c₃ c₁ := suitable_of_mem_support ϕ _ _ g hg,
   haveI : g.suitable c₄ c₂ := suitable_of_mem_support ϕ _ _ g hg,
   congr' 1,
@@ -377,7 +377,7 @@ begin
   rintros ⟨g, hg⟩ -,
   show @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ SemiNormedGroup) _ _ _ _ _ _ _ =
     @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ SemiNormedGroup) _ _ _ _ _ _ _,
-  simp only [add_monoid_hom.map_gsmul, add_monoid_hom.smul_apply],
+  simp only [add_monoid_hom.map_zsmul, add_monoid_hom.smul_apply],
   haveI : g.suitable c₃ c₁ := suitable_of_mem_support ϕ _ _ g hg,
   haveI : g.suitable c₄ c₂ := suitable_of_mem_support ϕ _ _ g hg,
   congr' 1,
@@ -393,7 +393,7 @@ begin
   rintros ⟨g, hg⟩ -,
   show @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ SemiNormedGroup) _ _ _ _ _ _ _ =
     @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ SemiNormedGroup) _ _ _ _ _ _ _,
-  simp only [add_monoid_hom.map_gsmul, add_monoid_hom.smul_apply],
+  simp only [add_monoid_hom.map_zsmul, add_monoid_hom.smul_apply],
   haveI : g.suitable c₂ c₁ := suitable_of_mem_support ϕ _ _ g hg,
   congr' 1,
   apply basic_universal_map.T_inv_comp_eval_LCFP r V r'
@@ -410,7 +410,7 @@ begin
   refine le_trans (norm_sum_le_of_le ϕ.support _) this,
   intros g hg,
   have aux := ϕ.suitable_of_mem_support c₂ c₁ g hg,
-  refine le_trans (norm_gsmul_le _ _) _,
+  refine le_trans (norm_zsmul_le _ _) _,
   suffices : ∥(nat_trans.app_hom M) (basic_universal_map.eval_LCFP' V r' g c₁ c₂)∥ ≤ 1,
   { have aux₁ : ∥(coeff g) ϕ∥ = ↑(((coeff g) ϕ).nat_abs),
     { rw [@coe_coe ℕ ℤ ℝ _ _ _, ← int.abs_eq_nat_abs, int.cast_abs],

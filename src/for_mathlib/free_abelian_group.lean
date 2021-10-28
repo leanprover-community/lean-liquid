@@ -30,7 +30,7 @@ begin
   apply finset.subset.antisymm,
   { apply finset.subset.trans (support_add _ _),
     intros y,
-    simp only [finset.mem_union, finset.mem_insert, support_gsmul n hn, support_of, or_comm (y = x),
+    simp only [finset.mem_union, finset.mem_insert, support_zsmul n hn, support_of, or_comm (y = x),
       finset.mem_singleton, imp_self] },
   { intros y,
     simp only [finset.mem_insert],
@@ -39,17 +39,17 @@ begin
       simp only [coeff, add_monoid_hom.coe_comp, finsupp.apply_add_hom_apply,
         function.comp_app] at hxa,
       simp only [support, add_monoid_hom.map_add, pi.add_apply, finsupp.mem_support_iff,
-        ne.def, finsupp.coe_add, hxa, zero_add, add_monoid_hom.map_gsmul,
+        ne.def, finsupp.coe_add, hxa, zero_add, add_monoid_hom.map_zsmul,
         to_finsupp_of],
-      rw [← finsupp.single_add_hom_apply, ← add_monoid_hom.map_gsmul, gsmul_one],
+      rw [← finsupp.single_add_hom_apply, ← add_monoid_hom.map_zsmul, zsmul_one],
       simpa only [int.cast_id, finsupp.single_eq_same, finsupp.single_add_hom_apply] },
     { rw not_mem_support_iff at hxa,
       rw mem_support_iff at hya,
       simp only [coeff, add_monoid_hom.coe_comp, finsupp.apply_add_hom_apply,
         function.comp_app, ne.def] at hxa hya,
       simp only [support, add_monoid_hom.map_add, pi.add_apply, finsupp.mem_support_iff,
-        ne.def, finsupp.coe_add, add_monoid_hom.map_gsmul, to_finsupp_of],
-      rwa [← finsupp.single_add_hom_apply, ← add_monoid_hom.map_gsmul, gsmul_one,
+        ne.def, finsupp.coe_add, add_monoid_hom.map_zsmul, to_finsupp_of],
+      rwa [← finsupp.single_add_hom_apply, ← add_monoid_hom.map_zsmul, zsmul_one,
         finsupp.single_add_hom_apply, finsupp.single_apply, if_neg, add_zero],
       rintro rfl, contradiction } }
 end
@@ -65,7 +65,7 @@ begin
   by_cases hn : n x = 0,
   { simp only [hn, finset.empty_union, zero_smul, support_zero],
     apply finset.subset.trans IH (finset.subset_insert x s) },
-  rw [support_gsmul _ hn, support_of],
+  rw [support_zsmul _ hn, support_of],
   intros y hy,
   simp only [finset.mem_union, finset.mem_singleton] at hy,
   simp only [finset.mem_insert],
@@ -83,10 +83,10 @@ begin
   apply (equiv_finsupp X).injective,
   simp only [equiv_finsupp_apply],
   rw [← finsupp.sum_single a.to_finsupp, finsupp.sum],
-  simp only [add_monoid_hom.map_sum, add_monoid_hom.map_gsmul, to_finsupp_of],
+  simp only [add_monoid_hom.map_sum, add_monoid_hom.map_zsmul, to_finsupp_of],
   apply finset.sum_congr rfl,
   intros x hx,
-  simp only [← finsupp.single_add_hom_apply, ← add_monoid_hom.map_gsmul, gsmul_one, coeff,
+  simp only [← finsupp.single_add_hom_apply, ← add_monoid_hom.map_zsmul, zsmul_one, coeff,
     int.cast_id, add_monoid_hom.comp_apply, finsupp.apply_add_hom_apply]
 end
 
@@ -158,20 +158,20 @@ def add_subgroup (h : free_predicate Q) : add_subgroup (free_abelian_group X) :=
   add_mem' := λ a b ha hb, h.add ha hb,
   neg_mem' := λ a ha, h.neg ha }
 
-lemma gsmul (h : free_predicate Q) (n : ℤ) (ha : Q a) : Q (n • a) :=
-add_subgroup.gsmul_mem h.add_subgroup ha n
+lemma zsmul (h : free_predicate Q) (n : ℤ) (ha : Q a) : Q (n • a) :=
+add_subgroup.zsmul_mem h.add_subgroup ha n
 
-lemma of_gsmul (h : free_predicate Q) (n : ℤ) (hn : n ≠ 0) (ha : Q (n • a)) : Q a :=
-by { rw h at ha ⊢, simpa only [support_gsmul n hn] using ha }
+lemma of_zsmul (h : free_predicate Q) (n : ℤ) (hn : n ≠ 0) (ha : Q (n • a)) : Q a :=
+by { rw h at ha ⊢, simpa only [support_zsmul n hn] using ha }
 
-lemma gsmul_iff (h : free_predicate Q) (n : ℤ) (hn : n ≠ 0) : Q (n • a) ↔ Q a :=
-⟨h.of_gsmul n hn, h.gsmul n⟩
+lemma zsmul_iff (h : free_predicate Q) (n : ℤ) (hn : n ≠ 0) : Q (n • a) ↔ Q a :=
+⟨h.of_zsmul n hn, h.zsmul n⟩
 
 lemma smul (h : free_predicate Q) (n : ℤ) (ha : Q a) : Q (n • a) :=
-by { rw ← gsmul_eq_smul, apply h.gsmul _ ha }
+by { rw ← zsmul_eq_smul, apply h.zsmul _ ha }
 
 lemma of_smul (h : free_predicate Q) (n : ℤ) (hn : n ≠ 0) (ha : Q (n • a)) : Q a :=
-by rwa [h.gsmul_iff n hn] at ha
+by rwa [h.zsmul_iff n hn] at ha
 
 lemma smul_iff (h : free_predicate Q) (n : ℤ) (hn : n ≠ 0) : Q (n • a) ↔ Q a :=
 ⟨h.of_smul n hn, h.smul n⟩
@@ -245,7 +245,7 @@ begin
     simp only [finset.not_mem_empty, exists_false, support_zero,
       add_monoid_hom.map_zero, false_and], },
   { intros n hn x y,
-    simp only [hn, add_monoid_hom.map_int_module_smul, map_of_apply, support_gsmul, support_of,
+    simp only [hn, add_monoid_hom.map_int_module_smul, map_of_apply, support_zsmul, support_of,
       exists_eq_left, ne.def, not_false_iff, finset.mem_singleton], },
   { rintro a n hn x hx IH - y,
     simp only [add_monoid_hom.map_int_module_smul, add_monoid_hom.map_add, map_of_apply,

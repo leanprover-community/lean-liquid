@@ -68,7 +68,7 @@ begin
   constructor,
   rw add_subgroup.saturated_iff_nsmul,
   rintro n l' ⟨hl', Hl'⟩,
-  simp only [gsmul_eq_smul, finsupp.smul_apply, ← finset.smul_sum, smul_eq_zero] at hl' Hl',
+  simp only [zsmul_eq_smul, finsupp.smul_apply, ← finset.smul_sum, smul_eq_zero] at hl' Hl',
   rw or_iff_not_imp_left,
   intro hn,
   refine ⟨hl'.resolve_left hn, λ i, _⟩,

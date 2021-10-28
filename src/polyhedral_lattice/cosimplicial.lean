@@ -74,14 +74,14 @@ begin
   exact h
 end
 
-lemma gsmul_rescaled_power (n : ℤ) (l : Λ.rescaled_power N) :
+lemma zsmul_rescaled_power (n : ℤ) (l : Λ.rescaled_power N) :
   n • (@rescale.of N ((fin N) →₀ Λ)).symm l = (@rescale.of N ((fin N) →₀ Λ)).symm (n • l) :=
 rfl
 
 instance : fact (polyhedral_lattice_hom.to_add_monoid_hom (Λ.diagonal_embedding N)).range.saturated :=
 begin
   constructor,
-  rw add_subgroup.saturated_iff_gsmul,
+  rw add_subgroup.saturated_iff_zsmul,
   intros n l' h,
   by_cases hn : n = 0, { exact or.inl hn },
   let l₀ : ↥Λ := ((@rescale.of N ((fin N) →₀ Λ)).symm l' : fin N →₀ Λ) ⟨0, hN.1⟩,
@@ -89,9 +89,9 @@ begin
   simp only [polyhedral_lattice_hom.coe_to_add_monoid_hom, add_monoid_hom.mem_range] at h ⊢,
   obtain ⟨l, hl⟩ := h,
   refine @smul_right_injective ℤ _ _ _ _ _ n hn _ _ _, dsimp,
-  rw [← hl, ← polyhedral_lattice_hom.map_gsmul],
+  rw [← hl, ← polyhedral_lattice_hom.map_zsmul],
   dsimp only [l₀],
-  rw [← finsupp.smul_apply, gsmul_rescaled_power _ _ n l', ← hl, diagonal_embedding_apply],
+  rw [← finsupp.smul_apply, zsmul_rescaled_power _ _ n l', ← hl, diagonal_embedding_apply],
 end
 
 def cosimplicial : cosimplicial_object PolyhedralLattice.{u} :=

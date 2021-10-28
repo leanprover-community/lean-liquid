@@ -107,7 +107,7 @@ f.to_add_monoid_hom.map_sum _ _
 
 @[simp] lemma map_neg (x) : f (-x) = -(f x) := f.to_add_monoid_hom.map_neg _
 
-@[simp] lemma map_gsmul (n : ℤ) (x) : f (n • x) = n • (f x) := f.to_add_monoid_hom.map_gsmul _ _
+@[simp] lemma map_zsmul (n : ℤ) (x) : f (n • x) = n • (f x) := f.to_add_monoid_hom.map_zsmul _ _
 
 lemma strict : ∀ ⦃c x⦄, x ∈ filtration M₁ c → f x ∈ filtration M₂ c := f.strict'
 

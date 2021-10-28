@@ -111,7 +111,7 @@ begin
   sorry
 end⟩
 
-protected def gsmul (n : ℤ) (f : presheaf A S) : presheaf A S :=
+protected def zsmul (n : ℤ) (f : presheaf A S) : presheaf A S :=
 ⟨n • f.1,
 begin
   obtain ⟨_, c, f, hf, rfl⟩ := f,
@@ -125,7 +125,7 @@ instance : add_comm_group (presheaf A S) :=
 { zero := 0,
   add := (+),
   nsmul := presheaf.nsmul,
-  gsmul := presheaf.gsmul,
+  zsmul := presheaf.zsmul,
   add_assoc := sorry,
   zero_add := sorry,
   add_zero := sorry,
@@ -134,9 +134,9 @@ instance : add_comm_group (presheaf A S) :=
   sub_eq_add_neg := sorry,
   nsmul_zero' := sorry,
   nsmul_succ' := sorry,
-  gsmul_zero' := sorry,
-  gsmul_succ' := sorry,
-  gsmul_neg' := sorry,
+  zsmul_zero' := sorry,
+  zsmul_succ' := sorry,
+  zsmul_neg' := sorry,
   .. presheaf.has_sub A S, .. presheaf.has_neg A S }
 
 def comap (A : CompHausFiltPseuNormGrp₁) {S T : Profinite} (φ : S ⟶ T) :

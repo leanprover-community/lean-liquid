@@ -48,7 +48,7 @@ def map (f : S ⟶ S') : laurent_measures_bdd r S T c → laurent_measures_bdd r
     apply finset.sum_le_sum,
     intros i hi,
     rw ← finset.sum_mul,
-    refine mul_le_mul _ (le_refl _) (fpow_nonneg (nnreal.coe_nonneg _) _)
+    refine mul_le_mul _ (le_refl _) (zpow_nonneg (nnreal.coe_nonneg _) _)
       (finset.sum_nonneg $ λ _ _, norm_nonneg _),
     apply norm_sum_le,
   end
@@ -117,10 +117,10 @@ begin
   suffices : ∥ F s i ∥ * (r : ℝ)^(i : ℤ) ≤ c,
   { have hh : 0 < ((r : ℝ)^(i : ℤ))⁻¹,
     { rw [inv_pos],
-      refine fpow_pos_of_pos _ _,
+      refine zpow_pos_of_pos _ _,
       exact_mod_cast hr.out },
     have hh' : (r : ℝ)^(i : ℤ) ≠ 0,
-    { apply fpow_ne_zero,
+    { apply zpow_ne_zero,
       apply ne_of_gt,
       exact_mod_cast hr.out },
     convert mul_le_mul this (le_refl _) (le_of_lt hh) _,
@@ -132,13 +132,13 @@ begin
     { rintros s -,
       apply finset.sum_nonneg,
       rintros i -,
-      refine mul_nonneg (norm_nonneg _) (fpow_nonneg _ _),
+      refine mul_nonneg (norm_nonneg _) (zpow_nonneg _ _),
       exact nnreal.coe_nonneg r },
     { simp } },
   refine le_trans _ this,
   apply @finset.single_le_sum T ℝ _ (λ i, ∥ F s i∥ * (r : ℝ)^(i : ℤ)),
   { rintros i -,
-    refine mul_nonneg (norm_nonneg _) (fpow_nonneg _ _),
+    refine mul_nonneg (norm_nonneg _) (zpow_nonneg _ _),
     exact nnreal.coe_nonneg r },
   { simp }
 end

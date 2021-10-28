@@ -57,7 +57,7 @@ add_monoid_hom.mk' (λ f, pi_lift (λ j, ∑ i, f j i • pi_proj i)
     { rw ← finset.sum_mul, exact mul_le_mul' (finset.le_sup (finset.mem_univ j)) (one_mul c).le },
     refine filtration_mono this _,
     simp only [← coe_to_add_monoid_hom, ← to_add_monoid_hom_hom_apply,
-      add_monoid_hom.map_sum, add_monoid_hom.map_gsmul, add_monoid_hom.finset_sum_apply],
+      add_monoid_hom.map_sum, add_monoid_hom.map_zsmul, add_monoid_hom.finset_sum_apply],
     refine sum_mem_filtration _ _ _ _,
     rintro i -,
     refine int_smul_mem_filtration _ _ _ _,
@@ -70,7 +70,7 @@ add_monoid_hom.mk' (λ f, pi_lift (λ j, ∑ i, f j i • pi_proj i)
       add_monoid_hom.map_add, add_monoid_hom.add_apply, pi.add_apply],
     simp only [coe_to_add_monoid_hom, to_add_monoid_hom_hom_apply],
     simp only [pi_lift_to_fun, mk_to_pi_apply, ← to_add_monoid_hom_hom_apply,
-      add_monoid_hom.map_sum, add_monoid_hom.map_gsmul, add_monoid_hom.finset_sum_apply],
+      add_monoid_hom.map_sum, add_monoid_hom.map_zsmul, add_monoid_hom.finset_sum_apply],
     rw ← finset.sum_add_distrib,
     simp only [pi_proj_to_fun, to_add_monoid_hom_hom_apply, coe_smul,
       coe_to_add_monoid_hom, pi.smul_apply, add_smul],
@@ -81,7 +81,7 @@ lemma eval_png_apply (x : M^m) : eval_png M f x = λ j, ∑ i, f j i • (x i) :
 begin
   ext j,
   simp only [eval_png, mk'_apply, pi_lift_to_fun, mk_to_pi_apply, ← to_add_monoid_hom_hom_apply],
-  simp only [add_monoid_hom.map_sum, add_monoid_hom.map_gsmul,
+  simp only [add_monoid_hom.map_sum, add_monoid_hom.map_zsmul,
     add_monoid_hom.finset_sum_apply],
   refl
 end
@@ -98,7 +98,7 @@ begin
   { rw ← finset.sum_mul, exact mul_le_mul' (finset.le_sup (finset.mem_univ j)) (one_mul c).le },
   refine filtration_mono this _,
   simp only [← coe_to_add_monoid_hom, ← to_add_monoid_hom_hom_apply,
-    add_monoid_hom.map_sum, add_monoid_hom.map_gsmul, add_monoid_hom.finset_sum_apply],
+    add_monoid_hom.map_sum, add_monoid_hom.map_zsmul, add_monoid_hom.finset_sum_apply],
   refine sum_mem_filtration _ _ _ _,
   rintro i -,
   refine int_smul_mem_filtration _ _ _ _,

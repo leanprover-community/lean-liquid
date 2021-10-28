@@ -60,8 +60,8 @@ begin
   rw [sub_nonpos.symm, sub_eq_add_neg, ← add_monoid_hom.neg_apply, ← finset.sum_neg_distrib,
     add_monoid_hom.finset_sum_apply, add_monoid_hom.finset_sum_apply, ← finset.sum_add_distrib],
   swap, apply_instance,
-  simp only [← add_monoid_hom.add_apply, ← nsmul_eq_smul, ← gsmul_coe_nat, ← neg_gsmul,
-     gsmul_eq_smul, ← add_smul],
+  simp only [← add_monoid_hom.add_apply, ← nsmul_eq_smul, ← zsmul_coe_nat, ← neg_zsmul,
+     zsmul_eq_smul, ← add_smul],
   simp only [add_monoid_hom.add_apply, add_monoid_hom.smul_apply, pi.add_apply, pi.neg_apply,
      int.coe_nat_mod, pi.smul_apply, add_monoid_hom.neg_apply],
   apply finset.sum_nonpos,
@@ -73,7 +73,7 @@ begin
   simp only [- add_neg_le_iff_le_add', tactic.ring.add_neg_eq_sub, smul_sub],
   rw sub_smul,
   rw [← int.coe_nat_mod, sub_le_iff_le_add, zero_add],
-  simp only [has_scalar.smul, gsmul_int_int],
+  simp only [has_scalar.smul, zsmul_int_int],
   exact (mul_le_mul_of_nonneg_right (int.coe_nat_le.mpr (nat.mod_le (f z) N)) hz),
 end
 
@@ -145,7 +145,7 @@ lemma pos_vector_nonneg (l : ι → Λ) (x : Λ →+ ℤ) (j : ι) :
   0 ≤ x ((pos_vector l x • l) j) :=
 begin
   rw [pos_vector, nonzero_sign],
-  simp only [has_scalar.smul, add_monoid_hom.map_gsmul, gsmul_int_int],
+  simp only [has_scalar.smul, add_monoid_hom.map_zsmul, zsmul_int_int],
   split_ifs,
   { convert h, simp },
   { simp, linarith }
@@ -160,7 +160,7 @@ lemma pos_vector_id_if_nonneg (l : ι → Λ) (x : Λ →+ ℤ) (i : ι) : 0 ≤
 begin
   intro hx,
   simp only [pos_vector, nonzero_sign, has_scalar.smul, id.def],
-  rw [if_pos hx],-- units.coe_one, one_gsmul],
+  rw [if_pos hx],-- units.coe_one, one_zsmul],
   simp,
 end
 

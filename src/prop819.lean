@@ -155,7 +155,7 @@ def FLC_iso : strict_iso ((Completion.map_homological_complex _).obj (FL F M)) (
         rw [Completion.map_sum],
         congr,
         funext k,
-        rw [Completion.map_gsmul],
+        rw [Completion.map_zsmul],
         congr' 1,
         apply FLC_iso_helper }
     end,

@@ -195,7 +195,7 @@ def eval_FP [ϕ.suitable c₁ c₂] : FiltrationPow.{u} r' c₁ m ⟶ Filtration
     dsimp only [FiltrationPow_map, Filtration_obj_map_to_fun,basic_universal_map.eval_png₀_coe,
       profinitely_filtered_pseudo_normed_group_with_Tinv_hom.level_coe,
       comp_to_fun, coe_to_add_monoid_hom],
-    simp only [basic_universal_map.eval_png_apply, pi_map_to_fun, f.map_sum, f.map_gsmul],
+    simp only [basic_universal_map.eval_png_apply, pi_map_to_fun, f.map_sum, f.map_zsmul],
   end }
 
 lemma eval_FP_comp (g : basic_universal_map m n) (f : basic_universal_map l m)
@@ -221,7 +221,7 @@ begin
   ext j,
   dsimp,
   simp only [eval_png_apply, comphaus_filtered_pseudo_normed_group_hom.map_sum,
-    comphaus_filtered_pseudo_normed_group_hom.map_gsmul, pi_Tinv_apply],
+    comphaus_filtered_pseudo_normed_group_hom.map_zsmul, pi_Tinv_apply],
 end
 .
 

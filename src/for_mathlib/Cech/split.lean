@@ -139,7 +139,7 @@ begin
     contracting_homotopy],
   simp_rw fin.sum_univ_succ,
   simp only [fin.coe_zero, fin.sum_univ_zero, fin.coe_one,
-    one_gsmul, preadditive.add_comp, pow_one, fin.succ_zero_eq_one,
+    one_zsmul, preadditive.add_comp, pow_one, fin.succ_zero_eq_one,
     category.id_comp, neg_smul, category.comp_id, preadditive.neg_comp, pow_zero ],
   rw [add_assoc],
   congr' 1,
@@ -192,7 +192,7 @@ begin
   congr' 1,
   { delta conerve,
     dsimp [to_cocomplex_obj, contracting_homotopy],
-    simp only [category_theory.category.comp_id, one_gsmul, pow_zero],
+    simp only [category_theory.category.comp_id, one_zsmul, pow_zero],
     simp_rw [← M.map_id, ← M.map_comp, ← op_comp, ← op_id],
     congr' 2,
     apply cech_splitting_face_zero },
@@ -203,8 +203,8 @@ begin
       add_zero,
       functor.comp_map,
       fin.coe_succ,
-      preadditive.comp_gsmul,
-      preadditive.gsmul_comp],
+      preadditive.comp_zsmul,
+      preadditive.zsmul_comp],
     suffices :
       (drop.obj (conerve M f)).map (simplex_category.δ i.succ) ≫ contracting_homotopy M f (n+2) =
           contracting_homotopy M f (n+1) ≫ (drop.obj (conerve M f)).map (simplex_category.δ i),

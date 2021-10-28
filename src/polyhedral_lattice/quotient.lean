@@ -34,9 +34,9 @@ instance [H : fact L.saturated] : no_zero_smul_divisors ℤ (quotient_add_group.
   begin
     intros n x h,
     obtain ⟨x, rfl⟩ : ∃ y, L.normed_mk y = x := quotient.surjective_quotient_mk' x,
-    have : L.normed_mk (n • x) = n • L.normed_mk x := L.normed_mk.to_add_monoid_hom.map_gsmul x n,
+    have : L.normed_mk (n • x) = n • L.normed_mk x := L.normed_mk.to_add_monoid_hom.map_zsmul x n,
     simp only [← this, π_apply_eq_zero_iff] at h ⊢,
-    exact add_subgroup.saturated_iff_gsmul.mp H.1 _ _ h,
+    exact add_subgroup.saturated_iff_zsmul.mp H.1 _ _ h,
   end }
 
 instance quotient_finite [H : fact L.saturated] : module.finite ℤ (quotient_add_group.quotient L) :=
