@@ -315,7 +315,7 @@ end summability
 
 section theta_surj
 
-/--The map `θ` defined in Theorem 6.9 of Analytic.pdf. -/
+/--The map `θ` defined in Theorem 6.9 of Analytic.pdf. Given the definition of `tsum` we do not need to require that `r ≤ ξ` to simply define `θ`.-/
 def θ (r : ℝ≥0) : (laurent_measures r (Fintype.of punit)) → ℝ :=
   λ F, tsum (λ n, (F.to_Rfct r n) * ξ ^ n)
 
@@ -366,6 +366,14 @@ def θ.to_linear : (laurent_measures r (Fintype.of punit)) →ₗ[ℤ] ℝ :=
 { to_fun := θ ξ r,
   map_add' := (θ_is_linear ξ r).1,
   map_smul' := (θ_is_linear ξ r).2 }
+
+lemma harbater_15 [fact (0 < r)] [fact (r < 1)] [fact (0 < ξ)] [fact (ξ < (r : ℝ))] :
+  ∃ f : (laurent_measures 1 (Fintype.of punit)),
+    -- f = 1 + f: still need to add that f is congruent to 1 modulo T
+    θ ξ 1 f  = 0 ∧ -- or θ ξ r f
+    ∀ ζ : ℝ≥0, ζ ≤ r → (ζ : ℝ) ≠ ξ → θ ζ 1 f ≠ 0 :=
+begin sorry,
+end
 
 lemma ker_θ_principal : submodule.is_principal (θ.to_linear ξ r).ker := sorry
 
