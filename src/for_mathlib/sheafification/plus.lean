@@ -122,23 +122,34 @@ noncomputable theory
 
 open opposite
 
+def cover.index {X : C} (S : J.cover X) : multipair.index S.fst S.snd D :=
+{ L := λ I, P.obj (op I.Y),
+  R := λ I, P.obj (op I.Z),
+  F := λ I, P.map I.g₁.op,
+  S := λ I, P.map I.g₂.op }
+
+def cover.multifork {X : C} (S : J.cover X) :
+  multifork (S.index P) :=
+multifork.of_ι _ (P.obj (op X)) (λ I, P.map I.f.op) begin
+  intros II,
+  dsimp [cover.index],
+  simp_rw [← P.map_comp, ← op_comp],
+  congr' 2,
+  apply II.w,
+end
+
 def cover.diagram_obj {X : C} (S : J.cover X) [has_limits D] : D :=
-multiequalizer
-S.fst S.snd
-(λ I : S.left, P.obj (op I.Y))
-(λ I : S.right, P.obj (op I.Z))
-(λ I, P.map I.g₁.op)
-(λ I, P.map I.g₂.op)
+multiequalizer (S.index P)
 
 def cover.diagram_map [has_limits D] {X : C} (S T : J.cover X) (h : S ⟶ T) :
   T.diagram_obj P ⟶ S.diagram_obj P :=
-multiequalizer.lift _ _ _ _ _ _
-(λ I, multiequalizer.ι _ _ _ _ _ _ (cover.left_map h I) ≫ P.map (𝟙 _)) begin
+multiequalizer.lift _
+(λ I, multiequalizer.ι _ (cover.left_map h I) ≫ P.map (𝟙 _)) begin
   intros I,
   dsimp,
-  simpa using multiequalizer.condition T.fst T.snd
-    (λ I, P.obj (op I.Y)) (λ I, P.obj (op I.Z))
-    (λ I, P.map I.g₁.op) (λ I, P.map I.g₂.op)  (cover.right_map h I),
+  simp only [functor.map_id, category.assoc],
+  erw [category.id_comp, category.id_comp],
+  apply multiequalizer.condition
 end
 
 variable (J)
@@ -149,8 +160,8 @@ def cover_diagram [has_limits D] (X : C) : (J.cover X)ᵒᵖ ⥤ D :=
     intros I,
     dsimp [cover.diagram_map],
     ext T,
-    dsimp,
     simp only [functor.map_id, multiequalizer.lift_ι, category.id_comp, category.comp_id],
+    erw category.comp_id,
     congr' 1,
     tidy,
   end,
@@ -158,28 +169,24 @@ def cover_diagram [has_limits D] (X : C) : (J.cover X)ᵒᵖ ⥤ D :=
     intros A B C e h,
     dsimp [cover.diagram_map],
     ext T,
-    dsimp,
+    simp only [functor.map_id, multiequalizer.lift_ι, multiequalizer.lift_ι_assoc, category.assoc],
+    erw [category.comp_id, category.comp_id, category.comp_id],
     simpa,
   end }
 
 def cover_diagram.map [has_limits D] {X Y : C} (f : X ⟶ Y) :
    cover_diagram J P Y ⟶ (cover.map J f).op ⋙ cover_diagram J P X :=
-{ app := λ I, multiequalizer.lift _ _ _ _ _ _
-    (λ t, multiequalizer.ι _ _ _ _ _ _ (cover.map_left f _ t)) begin
+{ app := λ I, multiequalizer.lift _
+    (λ t, multiequalizer.ι _ (cover.map_left f _ t)) begin
       intros II,
-      dsimp,
-      exact multiequalizer.condition I.unop.fst I.unop.snd
-        (λ (I_1 : (unop I).left), P.obj (op I_1.Y))
-        (λ (b : (unop I).right), P.obj (op b.Z))
-        (λ (I_1 : (unop I).right), P.map I_1.g₁.op)
-        (λ (I_1 : (unop I).right), P.map I_1.g₂.op) (cover.map_right _ _ II),
+      exact multiequalizer.condition _ (cover.map_right _ _ II),
     end,
   naturality' := begin
     intros A B h,
     dsimp [cover_diagram, cover.diagram_map],
     ext t,
-    dsimp,
-    simpa,
+    simp only [functor.map_id, multiequalizer.lift_ι, multiequalizer.lift_ι_assoc, category.assoc],
+    erw [category.comp_id],
   end }
 
 def plus_obj [has_limits D] [has_colimits D] (X : C) : D :=
@@ -207,6 +214,7 @@ def plus [has_limits D] [has_colimits D] : Cᵒᵖ ⥤ D :=
     dsimp [cover_diagram, cover.diagram_map],
     simp only [functor.map_id, multiequalizer.lift_ι, category.id_comp,
       category.comp_id, category.assoc],
+    erw [category.comp_id, multiequalizer.lift_ι],
     congr' 1,
     tidy,
   end,
@@ -223,20 +231,17 @@ def plus [has_limits D] [has_colimits D] : Cᵒᵖ ⥤ D :=
     ext,
     dsimp [cover_diagram.map, cover_diagram, cover.diagram_map],
     simp only [functor.map_id, multiequalizer.lift_ι, category.comp_id, category.assoc],
+    erw [category.comp_id, multiequalizer.lift_ι],
     congr' 1,
     tidy,
   end }
 
 def to_plus_app [has_limits D] [has_colimits D] (X : C) :
   P.obj (op X) ⟶ plus_obj J P X :=
-multiequalizer.lift (cover.fst _) (cover.snd _)
-  (λ I, P.obj (op I.Y))
-  (λ I, P.obj (op I.Z))
-  (λ I, P.map I.g₁.op)
-  (λ I, P.map I.g₂.op)
-  (λ I, P.map I.f.op)
+multiequalizer.lift ((cover.top J X).index P) (λ I, P.map I.f.op)
   begin
     intros I,
+    dsimp [cover.index],
     simp_rw [← P.map_comp, ← op_comp],
     congr' 2,
     apply I.w
@@ -257,9 +262,11 @@ def to_plus [has_limits D] [has_colimits D] :
     congr' 1,
     dsimp [cover_diagram, cover.diagram_map],
     ext,
-    simpa only [cover.map_left_f, functor.map_id,
+    simp only [cover.map_left_f, functor.map_id,
       multiequalizer.lift_ι, op_comp, category.comp_id,
       quiver.hom.op_unop, functor.map_comp, category.assoc],
+    erw [category.comp_id, multiequalizer.lift_ι],
+    refl,
   end }
 
 end grothendieck_topology

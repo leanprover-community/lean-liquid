@@ -48,19 +48,25 @@ end walking_multipair
 
 variables {α β : Type v} {fst snd : β → α}
 
-def multipair (L : α → C) (R : β → C)
-  (F : Π b, L (fst b) ⟶ R b) (S : Π b, L (snd b) ⟶ R b) :
-  walking_multipair fst snd ⥤ C :=
+structure multipair.index (fst snd : β → α) (C : Type u) [category.{v} C] :=
+(L : α → C)
+(R : β → C)
+(F : Π b, L (fst b) ⟶ R b)
+(S : Π b, L (snd b) ⟶ R b)
+
+variable (I : multipair.index fst snd C)
+
+def multipair : walking_multipair fst snd ⥤ C :=
 { obj := λ x,
   match x with
-  | walking_multipair.zero a := L a
-  | walking_multipair.one b := R b
+  | walking_multipair.zero a := I.L a
+  | walking_multipair.one b := I.R b
   end,
   map := λ x y f,
   match x, y, f with
   | _, _, walking_multipair.hom.id x := 𝟙 _
-  | _, _, walking_multipair.hom.fst b := F _
-  | _, _, walking_multipair.hom.snd b := S _
+  | _, _, walking_multipair.hom.fst b := I.F _
+  | _, _, walking_multipair.hom.snd b := I.S _
   end,
   map_id' := begin
     rintros (_|_),
@@ -71,52 +77,59 @@ def multipair (L : α → C) (R : β → C)
     tidy,
   end }
 
-variables (L : α → C) (R : β → C) (F : Π b, L (fst b) ⟶ R b) (S : Π b, L (snd b) ⟶ R b)
+--variables (L : α → C) (R : β → C) (F : Π b, L (fst b) ⟶ R b) (S : Π b, L (snd b) ⟶ R b)
 
 @[simp]
-lemma multipair_obj_zero (a) : (multipair _ _ F S).obj (walking_multipair.zero a) = L a := rfl
+lemma multipair_obj_zero (a) : (multipair I).obj (walking_multipair.zero a) = I.L a := rfl
 
 @[simp]
-lemma multipair_obj_one (a) : (multipair _ _ F S).obj (walking_multipair.one a) = R a := rfl
+lemma multipair_obj_one (a) : (multipair I).obj (walking_multipair.one a) = I.R a := rfl
 
 @[simp]
-lemma multipair_map_fst (a) : (multipair _ _ F S).map (walking_multipair.hom.fst a) =
-  F a := rfl
+lemma multipair_map_fst (a) : (multipair I).map (walking_multipair.hom.fst a) =
+  I.F a := rfl
 
 @[simp]
-lemma multipair_map_snd (a) : (multipair _ _ F S).map (walking_multipair.hom.snd a) =
-  S a := rfl
+lemma multipair_map_snd (a) : (multipair I).map (walking_multipair.hom.snd a) =
+  I.S a := rfl
 
-def multifork := cone (multipair _ _ F S)
+--variables (fst snd)
 
-variables {L R F S}
+def multifork := cone (multipair I)
 
-def multifork.ι (K : multifork _ _ F S) (a : α) : K.X ⟶ L a :=
+--variables {fst snd}
+
+--variables {L R F S}
+variable {I}
+
+def multifork.ι (K : multifork I) (a : α) : K.X ⟶ I.L a :=
 K.π.app (walking_multipair.zero a)
 
 @[simp]
-lemma multifork.ι_eq_app_zero (K : multifork _ _ F S) (a : α) : K.ι a =
+lemma multifork.ι_eq_app_zero (K : multifork I) (a : α) : K.ι a =
   K.π.app (walking_multipair.zero a) := rfl
 
 @[simp]
-lemma multifork.app_zero_fst (K : multifork _ _ F S) (b : β) :
-  K.π.app (walking_multipair.zero (fst b)) ≫ F b = K.π.app (walking_multipair.one b) :=
+lemma multifork.app_zero_fst (K : multifork I) (b : β) :
+  K.π.app (walking_multipair.zero (fst b)) ≫ I.F b = K.π.app (walking_multipair.one b) :=
 by { rw [← K.w (walking_multipair.hom.fst b)], refl }
 
 @[simp]
-lemma multifork.app_one_snd (K : multifork _ _ F S) (b : β) :
-  K.π.app (walking_multipair.zero (snd b)) ≫ S b = K.π.app (walking_multipair.one b) :=
+lemma multifork.app_one_snd (K : multifork I) (b : β) :
+  K.π.app (walking_multipair.zero (snd b)) ≫ I.S b = K.π.app (walking_multipair.one b) :=
 by { rw [← K.w (walking_multipair.hom.snd b)], refl }
 
+--variables (fst snd L R F S)
+variable (I)
 @[simps]
-def multifork.of_ι {P : C} (ι : Π a, P ⟶ L a) (w : ∀ b, ι (fst b) ≫ F b = ι (snd b) ≫ S b) :
-  multifork _ _ F S :=
+def multifork.of_ι (P : C) (ι : Π a, P ⟶ I.L a) (w : ∀ b, ι (fst b) ≫ I.F b = ι (snd b) ≫ I.S b) :
+  multifork I :=
 { X := P,
   π :=
   { app := λ x,
     match x with
     | walking_multipair.zero a := ι _
-    | walking_multipair.one b := ι (fst b) ≫ F b
+    | walking_multipair.one b := ι (fst b) ≫ I.F b
     end,
     naturality' := begin
       rintros (_|_) (_|_) (_|_|_),
@@ -124,62 +137,67 @@ def multifork.of_ι {P : C} (ι : Π a, P ⟶ L a) (w : ∀ b, ι (fst b) ≫ F 
       { dsimp, rw category.id_comp, refl },
       { dsimp, rw category.id_comp, apply w }
     end } }
+--variables {fst snd L R F S}
+
+variable {I}
 
 @[reassoc]
-lemma multifork.condition (K : multifork _ _ F S) (b : β) :
-  K.ι (fst b) ≫ F b = K.ι (snd b) ≫ S b := by simp
+lemma multifork.condition (K : multifork I) (b : β) :
+  K.ι (fst b) ≫ I.F b = K.ι (snd b) ≫ I.S b := by simp
 
-variables (fst snd L R F S)
+--variables (fst snd L R F S)
 
-abbreviation has_multiequalizer := has_limit (multipair _ _ F S)
+variable (I)
 
-variables [has_multiequalizer fst snd L R F S]
+abbreviation has_multiequalizer := has_limit (multipair I)
+
+variables [has_multiequalizer I]
 
 noncomputable theory
 
-abbreviation multiequalizer := limit (multipair _ _ F S)
+abbreviation multiequalizer := limit (multipair I)
 
-abbreviation multiequalizer.ι (a) : multiequalizer _ _ _ _ F S ⟶ L a :=
+abbreviation multiequalizer.ι (a) : multiequalizer I ⟶ I.L a :=
 limit.π _ (walking_multipair.zero _)
 
-abbreviation multiequalizer.multifork : multifork _ _ F S := limit.cone _
+abbreviation multiequalizer.multifork : multifork I := limit.cone _
 
 @[simp]
 lemma multiequalizer.multifork_ι (a) :
-  (multiequalizer.multifork _ _ _ _ F S).ι a = multiequalizer.ι _ _ _ _ F S a := rfl
+  (multiequalizer.multifork I).ι a = multiequalizer.ι I a := rfl
 
 @[simp]
 lemma multiequalizer.multifork_π_app_zero (a) :
-  (multiequalizer.multifork _ _ _ _ F S).π.app (walking_multipair.zero a) =
-  multiequalizer.ι _ _ _ _ F S a := rfl
+  (multiequalizer.multifork I).π.app (walking_multipair.zero a) =
+  multiequalizer.ι I a := rfl
 
 @[reassoc]
 lemma multiequalizer.condition (b) :
-  multiequalizer.ι _ _ _ _ F S (fst b) ≫ F b =
-  multiequalizer.ι _ _ _ _ F S (snd b) ≫ S b :=
+  multiequalizer.ι I (fst b) ≫ I.F b =
+  multiequalizer.ι I (snd b) ≫ I.S b :=
 multifork.condition _ _
 
-abbreviation multiequalizer.lift {W : C} (k : Π a, W ⟶ L a)
-  (h : ∀ b, k (fst b) ≫ F b = k (snd b) ≫ S b) :
-  W ⟶ multiequalizer _ _ _ _ F S :=
-limit.lift _ (multifork.of_ι k h)
+abbreviation multiequalizer.lift {W : C} (k : Π a, W ⟶ I.L a)
+  (h : ∀ b, k (fst b) ≫ I.F b = k (snd b) ≫ I.S b) :
+  W ⟶ multiequalizer I :=
+limit.lift _ (multifork.of_ι I _ k h)
 
 @[simp, reassoc]
-lemma multiequalizer.lift_ι {W : C} (k : Π a, W ⟶ L a)
-  (h : ∀ b, k (fst b) ≫ F b = k (snd b) ≫ S b) (a) :
-  multiequalizer.lift _ _ _ _ F S k h ≫ multiequalizer.ι _ _ _ _ F S a = k _ :=
+lemma multiequalizer.lift_ι {W : C} (k : Π a, W ⟶ I.L a)
+  (h : ∀ b, k (fst b) ≫ I.F b = k (snd b) ≫ I.S b) (a) :
+  multiequalizer.lift I k h ≫ multiequalizer.ι I a = k _ :=
 limit.lift_π _ _
 
 @[ext]
-lemma multiequalizer.hom_ext {W : C} (i j : W ⟶ multiequalizer _ _ _ _ F S)
-  (h : ∀ a, i ≫ multiequalizer.ι _ _ _ _ F S a =
-  j ≫ multiequalizer.ι _ _ _ _ F S a) :
+lemma multiequalizer.hom_ext {W : C} (i j : W ⟶ multiequalizer I)
+  (h : ∀ a, i ≫ multiequalizer.ι I a =
+  j ≫ multiequalizer.ι I a) :
   i = j :=
 limit.hom_ext
 begin
   rintro (a|b),
   { apply h },
-  simp_rw [← limit.w (multipair _ _ F S) (walking_multipair.hom.fst b), ← category.assoc, h],
+  simp_rw [← limit.w (multipair I) (walking_multipair.hom.fst b), ← category.assoc, h],
 end
 
 end category_theory.limits
