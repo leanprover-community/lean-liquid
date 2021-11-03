@@ -16,7 +16,7 @@ apply_nolint breen_deligne.universal_map.suitable class_structure
 apply_nolint breen_deligne.universal_map.very_suitable class_structure
 
 -- challenge.lean
-apply_nolint liquid_tensor_experiment def_lemma unused_arguments
+apply_nolint liquid_tensor_experiment def_lemma
 
 -- challenge_notations.lean
 apply_nolint Condensed.has_coe unused_arguments
@@ -24,10 +24,6 @@ apply_nolint Condensed.has_coe unused_arguments
 -- combinatorial_lemma/default.lean
 apply_nolint Mbar.mk_tensor def_lemma
 apply_nolint lem98 def_lemma
-
--- condensed/basic.lean
-apply_nolint category_theory.functor.preserves_binary_products unused_arguments
-apply_nolint category_theory.functor.preserves_terminal unused_arguments
 
 -- facts/int.lean
 apply_nolint fact_le_of_add_one_le fails_quickly
@@ -42,7 +38,6 @@ apply_nolint Profinite.image_stabilizes inhabited_nonempty
 -- for_mathlib/Profinite/disjoint_union.lean
 apply_nolint Profinite.equalizer.hom_ext def_lemma
 apply_nolint Profinite.equalizer.lift_ι def_lemma
-apply_nolint is_preconnected.preimage unused_arguments
 apply_nolint sigma.totally_disconnected_space unused_arguments
 
 -- for_mathlib/abelian_category.lean
@@ -70,9 +65,6 @@ apply_nolint exists_le_finset inhabited_nonempty
 
 -- for_mathlib/rational_cones.lean
 apply_nolint extended_le_span unused_arguments
-
--- for_mathlib/short_exact_sequence.lean
-apply_nolint category_theory.short_exact_sequence.snd_is_iso unused_arguments
 
 -- for_mathlib/simplicial/iso.lean
 apply_nolint category_theory.simplicial_object.is_iso_of fails_quickly
