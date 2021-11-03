@@ -129,49 +129,51 @@ def multifork.of_ι {P : C} (ι : Π a, P ⟶ L a) (w : ∀ b, ι (fst b) ≫ F 
 lemma multifork.condition (K : multifork _ _ F S) (b : β) :
   K.ι (fst b) ≫ F b = K.ι (snd b) ≫ S b := by simp
 
-variables (L R F S)
+variables (fst snd L R F S)
 
 abbreviation has_multiequalizer := has_limit (multipair _ _ F S)
 
-variables [has_multiequalizer L R F S]
+variables [has_multiequalizer fst snd L R F S]
 
 noncomputable theory
 
 abbreviation multiequalizer := limit (multipair _ _ F S)
 
-abbreviation multiequalizer.ι (a) : multiequalizer _ _ F S ⟶ L a :=
+abbreviation multiequalizer.ι (a) : multiequalizer _ _ _ _ F S ⟶ L a :=
 limit.π _ (walking_multipair.zero _)
 
 abbreviation multiequalizer.multifork : multifork _ _ F S := limit.cone _
 
 @[simp]
 lemma multiequalizer.multifork_ι (a) :
-  (multiequalizer.multifork _ _ F S).ι a = multiequalizer.ι _ _ F S a := rfl
+  (multiequalizer.multifork _ _ _ _ F S).ι a = multiequalizer.ι _ _ _ _ F S a := rfl
 
 @[simp]
 lemma multiequalizer.multifork_π_app_zero (a) :
-  (multiequalizer.multifork _ _ F S).π.app (walking_multipair.zero a) =
-  multiequalizer.ι _ _ F S a := rfl
+  (multiequalizer.multifork _ _ _ _ F S).π.app (walking_multipair.zero a) =
+  multiequalizer.ι _ _ _ _ F S a := rfl
 
 @[reassoc]
 lemma multiequalizer.condition (b) :
-  multiequalizer.ι _ _ F S (fst b) ≫ F b = multiequalizer.ι _ _ F S (snd b) ≫ S b :=
+  multiequalizer.ι _ _ _ _ F S (fst b) ≫ F b =
+  multiequalizer.ι _ _ _ _ F S (snd b) ≫ S b :=
 multifork.condition _ _
 
 abbreviation multiequalizer.lift {W : C} (k : Π a, W ⟶ L a)
   (h : ∀ b, k (fst b) ≫ F b = k (snd b) ≫ S b) :
-  W ⟶ multiequalizer _ _ F S :=
+  W ⟶ multiequalizer _ _ _ _ F S :=
 limit.lift _ (multifork.of_ι k h)
 
 @[simp, reassoc]
 lemma multiequalizer.lift_ι {W : C} (k : Π a, W ⟶ L a)
   (h : ∀ b, k (fst b) ≫ F b = k (snd b) ≫ S b) (a) :
-  multiequalizer.lift _ _ F S k h ≫ multiequalizer.ι _ _ F S a = k _ :=
+  multiequalizer.lift _ _ _ _ F S k h ≫ multiequalizer.ι _ _ _ _ F S a = k _ :=
 limit.lift_π _ _
 
 @[ext]
-lemma multiequalizer.hom_ext {W : C} (i j : W ⟶ multiequalizer _ _ F S)
-  (h : ∀ a, i ≫ multiequalizer.ι _ _ F S a = j ≫ multiequalizer.ι _ _ F S a) :
+lemma multiequalizer.hom_ext {W : C} (i j : W ⟶ multiequalizer _ _ _ _ F S)
+  (h : ∀ a, i ≫ multiequalizer.ι _ _ _ _ F S a =
+  j ≫ multiequalizer.ι _ _ _ _ F S a) :
   i = j :=
 limit.hom_ext
 begin
