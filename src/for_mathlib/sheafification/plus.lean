@@ -19,8 +19,25 @@ instance (X : C) : has_coe (J.cover X) (sieve X) := ⟨λ S, S.1⟩
 instance (X : C) : has_coe_to_fun (J.cover X) (λ S, Π ⦃Y⦄ (f : Y ⟶ X), Prop) :=
 ⟨λ S Y f, (S : sieve X) f⟩
 
+@[ext]
+lemma cover.ext (X : C) (S T : J.cover X) (h : (S : sieve X) = T) : S = T :=
+subtype.ext h
+
 variable {J}
 lemma cover.condition {X : C} (S : J.cover X) : (S : sieve X) ∈ J X := S.2
+variable (J)
+
+@[simps]
+def cover_map {X Y : C} (f : X ⟶ Y) : J.cover Y ⥤ J.cover X :=
+{ obj := λ S, ⟨(S : sieve Y).pullback f, J.pullback_stable _ S.condition⟩,
+  map := λ S T h, hom_of_le $ sieve.pullback_monotone _ $ le_of_hom h }
+
+def cover_map_id (X : C) : cover_map J (𝟙 X) ≅ 𝟭 _ :=
+nat_iso.of_components (λ I, eq_to_iso $ by { ext, simp }) $ by tidy
+
+def cover_map_comp {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) :
+  cover_map J (f ≫ g) ≅ cover_map J g ⋙ cover_map J f :=
+nat_iso.of_components (λ I, eq_to_iso $ by { ext, simp }) $ by tidy
 
 instance (X : C) : is_cofiltered (J.cover X) :=
 { cocone_objs := λ A B, ⟨⟨A ⊓ B, J.intersection_covering A.condition B.condition⟩,
