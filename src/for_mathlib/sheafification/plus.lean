@@ -138,6 +138,19 @@ multifork.of_ι _ (P.obj (op X)) (λ I, P.map I.f.op) begin
   apply II.w,
 end
 
+def cover.family_of_elements {X : C} (S : J.cover X) (K : multifork (S.index P)) :
+  presieve.family_of_elements (P ⋙ coyoneda.obj (op K.X)) S :=
+λ Y f hf, K.ι ⟨Y,f,hf⟩
+
+lemma cover.compatible {X : C} (S : J.cover X) (K : multifork (S.index P)) :
+  (S.family_of_elements P K).compatible :=
+begin
+  intros Y₁ Y₂ Z g₁ g₂ f₁ f₂ h₁ h₂ w,
+  dsimp [cover.family_of_elements],
+  erw K.w (walking_multipair.hom.fst ⟨Y₁, Y₂, Z, g₁, g₂, f₁, f₂, h₁, h₂, w⟩),
+  erw K.w (walking_multipair.hom.snd ⟨Y₁, Y₂, Z, g₁, g₂, f₁, f₂, h₁, h₂, w⟩),
+end
+
 def cover.diagram_obj {X : C} (S : J.cover X) [has_limits D] : D :=
 multiequalizer (S.index P)
 
