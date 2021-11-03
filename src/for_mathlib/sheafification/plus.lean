@@ -85,6 +85,11 @@ def cover.map_right {X Y : C} (f : X ⟶ Y) (S : J.cover Y) :
 λ I, ⟨I.Y₁, I.Y₂, I.Z, I.g₁, I.g₂, I.f₁ ≫ f, I.f₂ ≫ f, I.h₁, I.h₂, by simp [reassoc_of I.w]⟩
 
 @[simp]
+lemma cover.map_left_f {X Y : C} (f : X ⟶ Y) (S : J.cover Y)
+  (t : ((cover.map J f).obj S).left) :
+  (cover.map_left f S t).f = t.f ≫ f := rfl
+
+@[simp]
 lemma cover.fst_right_map {X : C} {S T : J.cover X} (h : S ⟶ T) (x : S.right) :
    (cover.left_map h) (cover.fst _ x) = cover.fst _ (cover.right_map h x) := rfl
 
@@ -148,11 +153,70 @@ def cover_diagram [has_limits D] (X : C) : (J.cover X)ᵒᵖ ⥤ D :=
     simpa,
   end }
 
+def cover_diagram.map [has_limits D] {X Y : C} (f : X ⟶ Y) :
+   cover_diagram J P Y ⟶ (cover.map J f).op ⋙ cover_diagram J P X :=
+{ app := λ I, multiequalizer.lift _ _ _ _ _ _
+    (λ t, multiequalizer.ι _ _ _ _ _ _ (cover.map_left f _ t)) begin
+      intros II,
+      dsimp,
+      exact multiequalizer.condition I.unop.fst I.unop.snd
+        (λ (I_1 : (unop I).left), P.obj (op I_1.Y))
+        (λ (b : (unop I).right), P.obj (op b.Z))
+        (λ (I_1 : (unop I).right), P.map I_1.g₁.op)
+        (λ (I_1 : (unop I).right), P.map I_1.g₂.op) (cover.map_right _ _ II),
+    end,
+  naturality' := begin
+    intros A B h,
+    dsimp [cover_diagram, cover.diagram_map],
+    ext t,
+    dsimp,
+    simpa,
+  end }
+
 def plus_obj [has_limits D] [has_colimits D] (X : C) : D :=
 colimit (J.cover_diagram P X)
 
 def plus_map [has_limits D] [has_colimits D] {X Y : C} (f : X ⟶ Y) :
-J.plus_obj P Y ⟶ J.plus_obj P X := sorry
+J.plus_obj P Y ⟶ J.plus_obj P X :=
+colim_map (cover_diagram.map J P f) ≫ colimit.pre _ _
+
+def plus [has_limits D] [has_colimits D] : Cᵒᵖ ⥤ D :=
+{ obj := λ X, plus_obj J P X.unop,
+  map := λ X Y f, plus_map J P f.unop,
+  map_id' := begin
+    intros X,
+    ext I,
+    dsimp [plus_map],
+    simp only [colimit.ι_pre, ι_colim_map_assoc],
+    let e : I ≅ (cover.map J (𝟙 (unop X))).op.obj I :=
+      (nat_iso.op (cover.map_id J X.unop)).app I,
+    erw [← colimit.w (J.cover_diagram P X.unop) e.inv, category.comp_id, ← category.assoc],
+    convert category.id_comp _ using 1,
+    congr' 1,
+    dsimp [cover_diagram.map],
+    ext,
+    dsimp [cover_diagram, cover.diagram_map],
+    simp only [functor.map_id, multiequalizer.lift_ι, category.id_comp,
+      category.comp_id, category.assoc],
+    congr' 1,
+    tidy,
+  end,
+  map_comp' := begin
+    intros A B C e h,
+    ext I,
+    dsimp [plus_map],
+    simp only [colimit.ι_pre_assoc, colimit.ι_pre, ι_colim_map_assoc, category.assoc],
+    let e : (cover.map J h.unop).op.obj ((cover.map J e.unop).op.obj I) ≅
+      (cover.map J (h.unop ≫ e.unop)).op.obj I :=
+      (nat_iso.op (cover.map_comp J _ _)).app I,
+    simp_rw [← colimit.w (J.cover_diagram P _) e.inv, ← category.assoc],
+    congr' 1,
+    ext,
+    dsimp [cover_diagram.map, cover_diagram, cover.diagram_map],
+    simp only [functor.map_id, multiequalizer.lift_ι, category.comp_id, category.assoc],
+    congr' 1,
+    tidy,
+  end }
 
 end grothendieck_topology
 end category_theory
