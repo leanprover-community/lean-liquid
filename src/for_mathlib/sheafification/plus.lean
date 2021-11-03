@@ -128,6 +128,16 @@ def cover.index {X : C} (S : J.cover X) : multipair.index S.fst S.snd D :=
   F := λ I, P.map I.g₁.op,
   S := λ I, P.map I.g₂.op }
 
+def cover.to_multiequalizer [has_limits D] {X : C} (S : J.cover X) :
+  P.obj (op X) ⟶ multiequalizer (S.index P) :=
+multiequalizer.lift _ (λ I, P.map I.f.op) begin
+  intros I,
+  dsimp [cover.index],
+  simp_rw [← P.map_comp, ← op_comp],
+  congr' 2,
+  apply I.w,
+end
+
 def cover.multifork {X : C} (S : J.cover X) :
   multifork (S.index P) :=
 multifork.of_ι _ (P.obj (op X)) (λ I, P.map I.f.op) begin

@@ -107,6 +107,30 @@ begin
         apply hy } } }
 end
 
+theorem is_sheaf_iff_multifork' [has_limits D] : presheaf.is_sheaf J P ↔ ∀ (X : C) (S : J.cover X),
+  is_iso (S.to_multiequalizer P) :=
+begin
+  rw is_sheaf_iff_multifork,
+  apply forall_congr (λ X, _),
+  apply forall_congr (λ S, _),
+  split,
+  { intros h,
+    obtain ⟨h⟩ := h,
+    let e : P.obj (op X) ≅ multiequalizer (S.index P) :=
+      ((limit.is_limit _).cone_point_unique_up_to_iso h).symm,
+    change is_iso e.hom,
+    apply_instance },
+  { introsI h,
+    constructor,
+    apply limits.is_limit.of_iso_limit (limit.is_limit _) (cones.ext _ _),
+    swap, { apply (@as_iso _ _ _ _ _ h).symm },
+    rintros a,
+    symmetry,
+    erw is_iso.inv_comp_eq,
+    change _ = limit.lift _ _ ≫ _,
+    simp }
+end
+
 end presheaf
 
 end category_theory
