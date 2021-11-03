@@ -45,6 +45,8 @@ instance (X : C) : is_cofiltered (J.cover X) :=
   cocone_maps := λ A B f g, ⟨A, 𝟙 _, rfl⟩,
   nonempty := ⟨⟨⊤, J.top_mem _⟩⟩ }
 
+variable {J}
+
 @[ext]
 structure cover.left {X : C} (S : J.cover X) : Type (max v u) :=
 (Y : C)
@@ -73,6 +75,14 @@ def cover.fst {X : C} (S : J.cover X) : S.right → S.left :=
 
 def cover.snd {X : C} (S : J.cover X) : S.right → S.left :=
 λ I, ⟨I.Y₂, I.f₂, I.h₂⟩
+
+@[simp]
+lemma cover.fst_right_map {X : C} {S T : J.cover X} (h : S ⟶ T) (x : S.right) :
+  cover.fst _ (cover.right_map h x) = (cover.left_map h) (cover.fst _ x) := rfl
+
+@[simp]
+lemma cover.snd_right_map {X : C} {S T : J.cover X} (h : S ⟶ T) (x : S.right) :
+  cover.snd _ (cover.right_map h x) = (cover.left_map h) (cover.snd _ x) := rfl
 
 noncomputable theory
 
