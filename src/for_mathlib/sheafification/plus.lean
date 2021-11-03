@@ -28,15 +28,15 @@ lemma cover.condition {X : C} (S : J.cover X) : (S : sieve X) ∈ J X := S.2
 variable (J)
 
 @[simps]
-def cover_map {X Y : C} (f : X ⟶ Y) : J.cover Y ⥤ J.cover X :=
+def cover.map {X Y : C} (f : X ⟶ Y) : J.cover Y ⥤ J.cover X :=
 { obj := λ S, ⟨(S : sieve Y).pullback f, J.pullback_stable _ S.condition⟩,
   map := λ S T h, hom_of_le $ sieve.pullback_monotone _ $ le_of_hom h }
 
-def cover_map_id (X : C) : cover_map J (𝟙 X) ≅ 𝟭 _ :=
+def cover.map_id (X : C) : cover.map J (𝟙 X) ≅ 𝟭 _ :=
 nat_iso.of_components (λ I, eq_to_iso $ by { ext, simp }) $ by tidy
 
-def cover_map_comp {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) :
-  cover_map J (f ≫ g) ≅ cover_map J g ⋙ cover_map J f :=
+def cover.map_comp {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) :
+  cover.map J (f ≫ g) ≅ cover.map J g ⋙ cover.map J f :=
 nat_iso.of_components (λ I, eq_to_iso $ by { ext, simp }) $ by tidy
 
 instance (X : C) : is_cofiltered (J.cover X) :=
@@ -76,13 +76,33 @@ def cover.fst {X : C} (S : J.cover X) : S.right → S.left :=
 def cover.snd {X : C} (S : J.cover X) : S.right → S.left :=
 λ I, ⟨I.Y₂, I.f₂, I.h₂⟩
 
+def cover.map_left {X Y : C} (f : X ⟶ Y) (S : J.cover Y) :
+  ((cover.map J f).obj S).left → S.left :=
+λ I, ⟨I.Y, I.f ≫ f, I.hf⟩
+
+def cover.map_right {X Y : C} (f : X ⟶ Y) (S : J.cover Y) :
+  ((cover.map J f).obj S).right → S.right :=
+λ I, ⟨I.Y₁, I.Y₂, I.Z, I.g₁, I.g₂, I.f₁ ≫ f, I.f₂ ≫ f, I.h₁, I.h₂, by simp [reassoc_of I.w]⟩
+
 @[simp]
 lemma cover.fst_right_map {X : C} {S T : J.cover X} (h : S ⟶ T) (x : S.right) :
-  cover.fst _ (cover.right_map h x) = (cover.left_map h) (cover.fst _ x) := rfl
+   (cover.left_map h) (cover.fst _ x) = cover.fst _ (cover.right_map h x) := rfl
 
 @[simp]
 lemma cover.snd_right_map {X : C} {S T : J.cover X} (h : S ⟶ T) (x : S.right) :
-  cover.snd _ (cover.right_map h x) = (cover.left_map h) (cover.snd _ x) := rfl
+   (cover.left_map h) (cover.snd _ x) = cover.snd _ (cover.right_map h x) := rfl
+
+@[simp]
+lemma cover.map_left_map {X Y : C} (f : X ⟶ Y) (S T : J.cover Y) (h : S ⟶ T)
+  (t : ((cover.map J f).obj S).left) :
+  cover.map_left f _ (cover.left_map ((cover.map J f).map h) t) =
+  cover.left_map h (cover.map_left f _ t) := rfl
+
+@[simp]
+lemma cover.map_right_map {X Y : C} (f : X ⟶ Y) (S T : J.cover Y) (h : S ⟶ T)
+  (t : ((cover.map J f).obj S).right) :
+  cover.map_right f _ (cover.right_map ((cover.map J f).map h) t) =
+  cover.right_map h (cover.map_right f _ t) := rfl
 
 noncomputable theory
 
