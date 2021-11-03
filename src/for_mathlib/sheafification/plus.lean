@@ -261,15 +261,7 @@ def plus [has_limits D] [has_colimits D] : Cᵒᵖ ⥤ D :=
 
 def to_plus_app [has_limits D] [has_colimits D] (X : C) :
   P.obj (op X) ⟶ plus_obj J P X :=
-multiequalizer.lift ((cover.top J X).index P) (λ I, P.map I.f.op)
-  begin
-    intros I,
-    dsimp [cover.index],
-    simp_rw [← P.map_comp, ← op_comp],
-    congr' 2,
-    apply I.w
-  end
-≫ colimit.ι (J.cover_diagram P X) (op $ cover.top _ _)
+(cover.top J X).to_multiequalizer P ≫ colimit.ι (J.cover_diagram P X) (op $ cover.top _ _)
 
 def to_plus [has_limits D] [has_colimits D] :
   P ⟶ plus J P :=
@@ -288,7 +280,9 @@ def to_plus [has_limits D] [has_colimits D] :
     simp only [cover.map_left_f, functor.map_id,
       multiequalizer.lift_ι, op_comp, category.comp_id,
       quiver.hom.op_unop, functor.map_comp, category.assoc],
-    erw [category.comp_id, multiequalizer.lift_ι],
+    dsimp [cover.to_multiequalizer],
+    erw [category.comp_id, multiequalizer.lift_ι, multiequalizer.lift_ι,
+      ← P.map_comp],
     refl,
   end }
 
