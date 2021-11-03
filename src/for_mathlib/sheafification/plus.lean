@@ -39,11 +39,20 @@ def cover.map_comp {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) :
   cover.map J (f ≫ g) ≅ cover.map J g ⋙ cover.map J f :=
 nat_iso.of_components (λ I, eq_to_iso $ by { ext, simp }) $ by tidy
 
+def cover.top (X : C) : J.cover X := ⟨⊤, J.top_mem _⟩
+
+def cover.map_top {X Y : C} (f : X ⟶ Y) :
+  (cover.map J f).obj (cover.top _ _) ≅ cover.top _ _ :=
+eq_to_iso rfl
+
+def cover.to_top (X : C) (S : J.cover X) : S ⟶ cover.top _ _ :=
+⟨⟨le_top⟩⟩
+
 instance (X : C) : is_cofiltered (J.cover X) :=
 { cocone_objs := λ A B, ⟨⟨A ⊓ B, J.intersection_covering A.condition B.condition⟩,
     hom_of_le inf_le_left, hom_of_le inf_le_right, by tauto⟩,
   cocone_maps := λ A B f g, ⟨A, 𝟙 _, rfl⟩,
-  nonempty := ⟨⟨⊤, J.top_mem _⟩⟩ }
+  nonempty := ⟨cover.top J X⟩ }
 
 variable {J}
 
@@ -216,6 +225,41 @@ def plus [has_limits D] [has_colimits D] : Cᵒᵖ ⥤ D :=
     simp only [functor.map_id, multiequalizer.lift_ι, category.comp_id, category.assoc],
     congr' 1,
     tidy,
+  end }
+
+def to_plus_app [has_limits D] [has_colimits D] (X : C) :
+  P.obj (op X) ⟶ plus_obj J P X :=
+multiequalizer.lift (cover.fst _) (cover.snd _)
+  (λ I, P.obj (op I.Y))
+  (λ I, P.obj (op I.Z))
+  (λ I, P.map I.g₁.op)
+  (λ I, P.map I.g₂.op)
+  (λ I, P.map I.f.op)
+  begin
+    intros I,
+    simp_rw [← P.map_comp, ← op_comp],
+    congr' 2,
+    apply I.w
+  end
+≫ colimit.ι (J.cover_diagram P X) (op $ cover.top _ _)
+
+def to_plus [has_limits D] [has_colimits D] :
+  P ⟶ plus J P :=
+{ app := λ X, to_plus_app J P X.unop,
+  naturality' := begin
+    intros X Y f,
+    dsimp [to_plus_app, plus, plus_map],
+    simp,
+    dsimp [cover_diagram.map],
+    let e : (cover.map J f.unop).obj (cover.top J X.unop)
+      ⟶ cover.top J Y.unop := cover.to_top _ _ _,
+    simp_rw [← colimit.w _ e.op, ← category.assoc],
+    congr' 1,
+    dsimp [cover_diagram, cover.diagram_map],
+    ext,
+    simpa only [cover.map_left_f, functor.map_id,
+      multiequalizer.lift_ι, op_comp, category.comp_id,
+      quiver.hom.op_unop, functor.map_comp, category.assoc],
   end }
 
 end grothendieck_topology
