@@ -19,8 +19,4 @@ begin
     simp, }
 end
 
-@[simp, norm_cast] lemma nnreal.coe_zpow (x : ℝ≥0) (n : ℤ) : ((x ^ n : ℝ≥0) : ℝ) = x ^ n :=
-begin
-  induction n with n ih;
-  simp only [int.of_nat_eq_coe, nnreal.coe_pow, zpow_coe_nat, zpow_neg_succ_of_nat, nnreal.coe_inv]
-end
+attribute [norm_cast] nnreal.coe_zpow
