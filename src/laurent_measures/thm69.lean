@@ -16,15 +16,7 @@ variables (r : ℝ≥0) [fact (0 < r)]
 noncomputable theory
 
 instance (S : Fintype) : has_scalar (laurent_measures r (Fintype.of punit)) (laurent_measures r S) :=
-{ smul :=
-  begin
-    intros f G,
-    constructor,
-    intro s,
-    sorry,
-    intros s n,
-    use (f punit.star n) * (G s n),
-  end }
+{ smul := sorry}
 
 section SES_thm69
 
