@@ -175,6 +175,17 @@ multiequalizer.lift _
   apply multiequalizer.condition
 end
 
+@[simp]
+lemma cover.to_equalizer_diagram_map [has_limits D] {X : C} {S T : J.cover X} (h : S ⟶ T) :
+  T.to_multiequalizer P ≫ cover.diagram_map _ _ _ h = S.to_multiequalizer P :=
+begin
+  ext,
+  dsimp [cover.to_multiequalizer, cover.diagram_map],
+  simp only [functor.map_id, multiequalizer.lift_ι, multiequalizer.lift_ι_assoc, category.assoc],
+  erw category.comp_id,
+  refl,
+end
+
 variable (J)
 def cover_diagram [has_limits D] (X : C) : (J.cover X)ᵒᵖ ⥤ D :=
 { obj := λ I, I.unop.diagram_obj P,
