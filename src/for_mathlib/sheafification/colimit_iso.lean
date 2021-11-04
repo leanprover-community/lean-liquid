@@ -31,7 +31,7 @@ def is_initial.is_colimit_colimit_cocone {j : J} (hj : is_initial j)
   is_colimit (hj.colimit_cocone F) :=
 { desc := λ S, S.ι.app _ }
 
-lemma colimit.is_iso_ι_of_forall_is_iso {j : J} (hj : is_initial j)
+lemma is_initial.is_iso_ι {j : J} (hj : is_initial j)
   [has_colimit F] [∀ (a b : J) (f : a ⟶ b), is_iso (F.map f)] :
   is_iso (colimit.ι F j) :=
 begin

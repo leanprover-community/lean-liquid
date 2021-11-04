@@ -297,5 +297,68 @@ def to_plus [has_limits D] [has_colimits D] :
     refl,
   end }
 
+def plus_functor_map [has_limits D] [has_colimits D] {P Q : Cᵒᵖ ⥤ D}
+  (η : P ⟶ Q) : plus J P ⟶ plus J Q :=
+{ app := λ X, colim_map $
+  { app := λ I, multiequalizer.lift _
+      (λ II, multiequalizer.ι _ II ≫ η.app (op II.Y)) begin
+        intros II,
+        dsimp [cover.index],
+        simp,
+        simp_rw [← η.naturality, ← category.assoc],
+        congr' 1,
+        apply multiequalizer.condition,
+      end,
+    naturality' := begin
+      intros I J h,
+      dsimp [cover_diagram, cover.diagram_map],
+      ext,
+      simp,
+      erw [category.comp_id, category.id_comp],
+      refl,
+    end },
+  naturality' := begin
+    intros X Y f,
+    ext I,
+    dsimp [plus, plus_map],
+    simp,
+    simp_rw ← category.assoc,
+    congr' 1,
+    dsimp [cover_diagram.map],
+    ext,
+    simp,
+    erw [multiequalizer.lift_ι, multiequalizer.lift_ι,
+      multiequalizer.lift_ι, ← category.assoc,
+      multiequalizer.lift_ι],
+    refl,
+  end } .
+
+def plus_functor [has_limits D] [has_colimits D] :
+  (Cᵒᵖ ⥤ D) ⥤ Cᵒᵖ ⥤ D :=
+{ obj := λ F, plus J F,
+  map := λ P Q η, plus_functor_map _ η,
+  map_id' := begin
+    intros F,
+    ext I II,
+    dsimp [plus_functor_map],
+    simp only [ι_colim_map],
+    erw [category.comp_id],
+    convert category.id_comp _ using 1,
+    congr' 1,
+    ext,
+    simp only [multiequalizer.lift_ι, category.id_comp],
+    erw category.comp_id,
+  end,
+  map_comp' := begin
+    intros P Q R η γ,
+    ext I II,
+    dsimp [plus_functor_map],
+    simp only [ι_colim_map, ι_colim_map_assoc],
+    simp_rw ← category.assoc,
+    congr' 1,
+    ext,
+    simp,
+  end }
+
 end grothendieck_topology
 end category_theory
