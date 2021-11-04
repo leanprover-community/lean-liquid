@@ -88,7 +88,6 @@ apply_nolint theta.eventually_pos_floor ge_or_gt
 apply_nolint theta.eventually_pos_y ge_or_gt
 
 -- laurent_measures/thm69.lean
-apply_nolint thm_69.laurent_measures.has_scalar unused_arguments
 apply_nolint thm_69.to_meas_θ unused_arguments
 
 -- locally_constant/Vhat.lean
