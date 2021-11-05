@@ -176,7 +176,7 @@ instance : add_comm_group (laurent_measures r S) :=
   sub := sub,
   sub_eq_add_neg := λ F G, by { ext, refl },
   zsmul := λ n F,
-  { to_fun := λ s m, zsmul n (F s m),
+  { to_fun := λ s m, n • (F s m),
     summable' := begin
       intro s,
       have := summable.mul_left (↑n : ℝ) (F.2 s),

@@ -280,7 +280,7 @@ begin
 end
 
 lemma nnnorm_nsmul (x : Mbar r' S) (N : ℕ) : ∥N • x∥₊ = N • ∥x∥₊ :=
-by { rw [← zsmul_coe_nat, nnnorm_zsmul, nsmul_eq_mul, ← nnreal.coe_nat_abs], refl, }
+by { rw [← coe_nat_zsmul, nnnorm_zsmul, nsmul_eq_mul, ← nnreal.coe_nat_abs], refl, }
 
 section Tinv
 

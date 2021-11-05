@@ -65,7 +65,7 @@ instance no_zero_smul_divisors_int : no_zero_smul_divisors ℤ Λ :=
 module.free.no_zero_smul_divisors ℤ Λ
 
 instance no_zero_smul_divisors_nat : no_zero_smul_divisors ℕ Λ :=
-⟨λ n l h, by { rw [← zsmul_coe_nat, smul_eq_zero] at h,
+⟨λ n l h, by { rw  [← coe_nat_zsmul, smul_eq_zero] at h,
   refine h.imp _ id, simp only [imp_self, int.coe_nat_eq_zero] }⟩
 
 lemma polyhedral :
