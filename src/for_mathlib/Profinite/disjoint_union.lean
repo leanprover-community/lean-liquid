@@ -144,19 +144,37 @@ begin
     exact ht.image _ continuous_sigma_mk.continuous_on }
 end
 
+lemma sum.inl_is_open_map {X Y : Type*} [topological_space X] [topological_space Y] :
+  is_open_map (sum.inl : X → X ⊕ Y) :=
+open_embedding.is_open_map open_embedding_inl
+
+
+lemma sum.inr_is_open_map {X Y : Type*} [topological_space X] [topological_space Y] :
+  is_open_map (sum.inr : Y → X ⊕ Y) :=
+open_embedding.is_open_map open_embedding_inr
+
 lemma sum.is_connected_iff {X Y : Type*} [topological_space X] [topological_space Y]
   {s : set (X ⊕ Y)} :
   is_connected s ↔
     (∃ t, is_connected t ∧ s = sum.inl '' t) ∨ ∃ t, is_connected t ∧ s = sum.inr '' t :=
 begin
   refine ⟨λ hs, _, _⟩,
-  { obtain ⟨x | x, hx⟩ := hs.nonempty,
-    { refine or.inl ⟨sum.inl ⁻¹' s, _, _⟩,
-      sorry,
-      sorry },
-    { refine or.inr ⟨sum.inr ⁻¹' s, _, _⟩,
-      sorry,
-      sorry } },
+  { let u : set (X ⊕ Y):= set.range sum.inl,
+    let v : set (X ⊕ Y) := set.range sum.inr,
+    have hu : is_open u, exact is_open_range_inl,
+    obtain ⟨x | x, hx⟩ := hs.nonempty,
+    { have h := is_preconnected.subset_left_of_subset_union_of_inter_left_nonempty
+        is_open_range_inl is_open_range_inr set.range_inl_inter_range_inr
+        (show s ⊆ set.range sum.inl ∪ set.range sum.inr, by simp) ⟨sum.inl x, hx, x, rfl⟩ hs.2,
+      refine or.inl ⟨sum.inl ⁻¹' s, _, _⟩,
+      { exact is_connected.preimage hs sum.inl_injective sum.inl_is_open_map h },
+      { exact (set.image_preimage_eq' h).symm } },
+    { have h := is_preconnected.subset_right_of_subset_union_of_inter_right_nonempty
+        is_open_range_inl is_open_range_inr set.range_inl_inter_range_inr
+        (show s ⊆ set.range sum.inl ∪ set.range sum.inr, by simp) ⟨sum.inr x, hx, x, rfl⟩ hs.2,
+      refine or.inr ⟨sum.inr ⁻¹' s, _, _⟩,
+      { exact is_connected.preimage hs sum.inr_injective sum.inr_is_open_map h },
+      { exact (set.image_preimage_eq' h).symm } } },
   { rintro (⟨t, ht, rfl⟩ | ⟨t, ht, rfl⟩),
     { exact ht.image _ continuous_inl.continuous_on },
     { exact ht.image _ continuous_inr.continuous_on } }
