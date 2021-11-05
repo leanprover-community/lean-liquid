@@ -19,15 +19,28 @@ lemma set.image_preimage_eq' {f : α → β} {s : set β} (h : s ⊆ set.range f
 (set.image_preimage_subset f s).antisymm
   (λ x hx, let ⟨y, e⟩ := h hx in ⟨y, (e.symm ▸ hx : f y ∈ s), e⟩)
 
-
 lemma is_preconnected.preimage [topological_space α] [topological_space β] {s : set β}
-  (hs : is_preconnected s) {f : α → β} (hf : continuous_on f (f ⁻¹' s)) (hsf : s ⊆ set.range f) :
-  is_preconnected (f ⁻¹' s) := sorry
+  (hs : is_preconnected s) {f : α → β}   (hfinj : function.injective f) (hfopen : is_open_map f)
+  (hsf : s ⊆ set.range f) : is_preconnected (f ⁻¹' s) := λ u v hu hv hsuv hsu hsv,
+begin
+  specialize hs (f '' u) (f '' v) (hfopen u hu) (hfopen v hv) _ _ _,
+  { have := set.image_subset f hsuv,
+    rwa [set.image_preimage_eq' hsf, set.image_union] at this },
+  { obtain ⟨x, hx1, hx2⟩ := hsu,
+    exact ⟨f x, hx1, x, hx2, rfl⟩ },
+  { obtain ⟨y, hy1, hy2⟩ := hsv,
+    exact ⟨f y, hy1, y, hy2, rfl⟩ },
+  { obtain ⟨b, hbs, hbu, hbv⟩ := hs,
+    obtain ⟨a, rfl⟩ := hsf hbs,
+    rw function.injective.mem_set_image hfinj at hbu hbv,
+    exact ⟨a, hbs, hbu, hbv⟩ }
+end
 
 lemma is_connected.preimage [topological_space α] [topological_space β] {s : set β}
-  (hs : is_connected s) {f : α → β} (hf : continuous_on f (f ⁻¹' s)) (hsf : s ⊆ set.range f) :
+  (hs : is_connected s) {f : α → β}
+  (hfinj : function.injective f) (hfopen : is_open_map f) (hsf : s ⊆ set.range f) :
   is_connected (f ⁻¹' s) :=
-⟨hs.nonempty.preimage' hsf, hs.is_preconnected.preimage hf hsf⟩
+⟨hs.nonempty.preimage' hsf, hs.is_preconnected.preimage hfinj hfopen hsf⟩
 
 lemma sigma.univ (X : α → Type*) :
   (set.univ : set (Σ a, X a)) = ⋃ a, sigma.mk _ '' (set.univ : set (X a)) :=
@@ -45,7 +58,8 @@ begin
   refine ⟨λ hs, _, _⟩,
   { obtain ⟨⟨a, x⟩, hx⟩ := hs.nonempty,
     have : s ⊆ set.range (sigma.mk a) := sorry,
-    exact ⟨a, sigma.mk a ⁻¹' s, hs.preimage continuous_sigma_mk.continuous_on this,
+    exact ⟨a, sigma.mk a ⁻¹' s,
+      hs.preimage sigma_mk_injective is_open_map_sigma_mk this,
       (set.image_preimage_eq' this).symm⟩ },
   { rintro ⟨a, t, ht, rfl⟩,
     exact ht.image _ continuous_sigma_mk.continuous_on }
