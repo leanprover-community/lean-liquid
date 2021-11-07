@@ -126,7 +126,6 @@ begin
   { sorry }
 end
 
-#exit
 def map_to_equalizer {W X B : Profinite.{w}} (f : X ⟶ B) (g₁ g₂ : W ⟶ X)
   (w : g₁ ≫ f = g₂ ≫ f) :
   P.obj (op B) → { x : P.obj (op X) | P.map g₁.op x = P.map g₂.op x } :=
