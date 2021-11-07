@@ -1,3 +1,4 @@
+import category_theory.sites.sheaf_of_types
 import category_theory.sites.grothendieck
 import category_theory.filtered
 import category_theory.limits.shapes.multiequalizer
@@ -74,6 +75,26 @@ def index (S : J.cover X) : multicospan_index D :=
   right := λ I, P.obj (op I.Z),
   fst := λ I, P.map I.g₁.op,
   snd := λ I, P.map I.g₂.op }
+
+def multifork (S : J.cover X) : multifork (S.index P) :=
+multifork.of_ι _ (P.obj (op X)) (λ I, P.map I.f.op) begin
+  intros I,
+  dsimp [index],
+  simp only [← P.map_comp, ← op_comp, I.w]
+end
+
+def family_of_elements (S : J.cover X) (E : limits.multifork (S.index P)) :
+  presieve.family_of_elements (P ⋙ coyoneda.obj (op E.X)) S :=
+λ Y f hf, E.ι ⟨_,f,hf⟩
+
+lemma compatible (S : J.cover X) (E : limits.multifork (S.index P)) :
+  (S.family_of_elements P E).compatible :=
+begin
+  intros Y₁ Y₂ Z g₁ g₂ f₁ f₂ h₁ h₂ w,
+  dsimp [family_of_elements],
+  erw E.w (walking_multicospan.hom.fst ⟨Y₁, Y₂, Z, g₁, g₂, f₁, f₂, h₁, h₂, w⟩),
+  erw E.w (walking_multicospan.hom.snd ⟨Y₁, Y₂, Z, g₁, g₂, f₁, f₂, h₁, h₂, w⟩),
+end
 
 noncomputable abbreviation to_multiequalizer (S : J.cover X)
   [has_multiequalizer (S.index P)] : P.obj (op X) ⟶ multiequalizer (S.index P) :=
