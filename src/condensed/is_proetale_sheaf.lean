@@ -12,6 +12,12 @@ open category_theory opposite
 variables {C : Type u} [category.{v} C] (Q : Profinite.{w}ᵒᵖ ⥤ C)
 variables (P : Profinite.{w}ᵒᵖ ⥤ Type u)
 
+/-- A presheaf of types `P` on `Profinite` satisfies the finite product
+condition if given any finite collection of topological spaces `X i`
+indexed by `i` in `(α : Fintype)`, the map from `P (∑ i, X i)`
+to `Π (a : α), P (X a)` sending `x` to the dependent function sending
+`a : α` to  `P (the inclusion X a → Σ i, X i), evaluated at x`,
+is a bijection. -/
 def finite_product_condition : Prop := ∀
 (α : Fintype.{w}) (X : α → Profinite.{w}),
 function.bijective (λ (x : P.obj (op (Profinite.sigma X))) (a : α),
@@ -25,9 +31,102 @@ def product_condition : Prop := ∀ (X Y : Profinite.{w}),
     ((P.map (Profinite.sum.inl X Y).op t, P.map (Profinite.sum.inr X Y).op t) :
       P.obj (op X) × P.obj (op Y)))
 
-lemma finite_product_condition_iff_empty_condition_product_condition :
-  P.finite_product_condition ↔ P.empty_condition ∧ P.product_condition := sorry
+-- should this be in mathlib in some form?
+section is_singleton
 
+-- is_singleton X is [nonempty X] [subsingleton X]
+
+theorem is_singleton_iff_forall_bijective_to_punit (X : Sort*) :
+  nonempty X ∧ subsingleton X ↔ ∀ f : X → punit, function.bijective f :=
+begin
+  split,
+  { rintro ⟨h1, h2⟩ f,
+    haveI := h2,
+    exact ⟨λ a b h, subsingleton.elim _ _, λ s, ⟨h1.some, subsingleton.elim _ _⟩⟩ },
+  { intro h,
+    cases h (λ x, punit.star) with finj fsurj,
+    choose g hg using fsurj,
+    refine ⟨⟨g punit.star⟩, subsingleton.intro $ λ a b, finj rfl⟩, }
+end
+
+theorem is_singleton_iff_forall_bijective_to_is_singleton (X : Sort*) :
+  nonempty X ∧ subsingleton X ↔ ∀ (Y : Sort*) [nonempty Y] [subsingleton Y]
+  (f : X → Y), function.bijective f :=
+begin
+  split,
+  { rintro ⟨⟨x⟩, hx⟩ Y hY1 hY2 f,
+    haveI := hY2,
+    haveI := hx,
+    refine ⟨λ a b h, subsingleton.elim a b, λ s, ⟨x, subsingleton.elim _ _⟩⟩ },
+  { intro h,
+    cases h punit (λ x, punit.star) with finj fsurj,
+    choose g hg using fsurj,
+    refine ⟨⟨g punit.star⟩, subsingleton.intro $ λ a b, finj rfl⟩, }
+end
+
+theorem is_singleton_iff_exists_bijective_to_punit (X : Sort*) :
+  nonempty X ∧ subsingleton X ↔ ∃ f : X → punit, function.bijective f :=
+begin
+  split,
+  { rintro ⟨⟨x⟩, hx⟩,
+    haveI := hx,
+    use (λ x, punit.star),
+    refine ⟨λ a b _, subsingleton.elim a b,
+      λ a, ⟨x, subsingleton.elim _ _⟩⟩ },
+  { rintro ⟨f, finj, fsurj⟩,
+    choose g hg using fsurj,
+    refine ⟨⟨g punit.star⟩, subsingleton.intro $ λ a b, finj $ subsingleton.elim _ _⟩, }
+end
+
+theorem is_singleton_iff_exists_bijective_to_is_singleton (X : Sort*) :
+  nonempty X ∧ subsingleton X ↔ ∃ (Y : Sort*) [nonempty Y] [subsingleton Y] (f : X → Y), function.bijective f :=
+begin
+  split,
+  { rintro ⟨⟨x⟩, hx⟩,
+    haveI := hx,
+    use [punit, infer_instance, infer_instance, (λ x, punit.star)],
+    refine ⟨λ a b _, subsingleton.elim a b,
+      λ a, ⟨x, subsingleton.elim _ _⟩⟩ },
+  { rintro ⟨Y, hY1, hY2, f, finj, fsurj⟩,
+    choose g hg using fsurj,
+    haveI := hY2,
+    refine ⟨⟨g hY1.some⟩, ⟨λ a b, finj $ subsingleton.elim _ _⟩⟩, },
+end
+
+lemma subsingleton.map_equiv {X Y : Type*} (e : X ≃ Y) : subsingleton X → subsingleton Y :=
+λ h, ⟨λ a b, e.symm.injective $ @subsingleton.elim _ h _ _⟩
+
+end is_singleton
+
+lemma finite_product_condition_iff_empty_condition_product_condition :
+  P.finite_product_condition ↔ P.empty_condition ∧ P.product_condition :=
+begin
+  split,
+  { intro h_prod,
+    split,
+    { specialize h_prod (Fintype.of pempty) (λ x, Profinite.empty),
+      suffices hs : nonempty (P.obj (op Profinite.empty)) ∧ subsingleton (P.obj (op Profinite.empty)),
+      { rw is_singleton_iff_forall_bijective_to_punit at hs,
+        apply hs },
+      let e : Profinite.sigma.{w} (λ (x : ↥(Fintype.of.{w} pempty)), Profinite.empty) ≅ Profinite.empty :=
+      { hom := Profinite.sigma.desc _ (λ i, by cases i),
+        inv := Profinite.empty.elim _,
+        hom_inv_id' := by {ext1 x, rcases x with ⟨⟨⟩⟩ },
+        inv_hom_id' := by {ext1 x, cases x } },
+      let e2 := category_theory.iso.op e,
+      let e3 := category_theory.functor.map_iso P e2,
+      let e4 := category_theory.iso.to_equiv e3,
+      have := (is_singleton_iff_exists_bijective_to_is_singleton _).2 ⟨_, _, _, _, h_prod⟩,
+      { exact ⟨nonempty.map e4.symm this.1, subsingleton.map_equiv e4.symm this.2⟩ },
+      { exact ⟨λ x, by rcases x with ⟨⟨⟩⟩⟩ },
+      { exact ⟨λ f g, by {ext x, rcases x with ⟨⟨⟩⟩ }⟩ } },
+    {
+      sorry
+    } },
+  { sorry }
+end
+
+#exit
 def map_to_equalizer {W X B : Profinite.{w}} (f : X ⟶ B) (g₁ g₂ : W ⟶ X)
   (w : g₁ ≫ f = g₂ ≫ f) :
   P.obj (op B) → { x : P.obj (op X) | P.map g₁.op x = P.map g₂.op x } :=
