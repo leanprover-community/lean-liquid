@@ -91,7 +91,7 @@ begin
     simp }
 end
 
-theorem is_iso_of_is_sheaf [has_limits D] [has_colimits D] :
+theorem is_iso_to_plus_app_of_is_sheaf [has_limits D] [has_colimits D] :
   is_sheaf J P → is_iso (J.to_plus_app P) :=
 begin
   rw is_sheaf_iff_multiequalizer,
