@@ -120,6 +120,7 @@ def eval_functor.obj (M : 𝒜) : chain_complex 𝒜 ℕ :=
     convert universal_map.eval_Pow_zero_app _ _ using 3,
   end }
 
+@[simps {fully_applied := ff}]
 def eval_functor : 𝒜 ⥤ chain_complex 𝒜 ℕ :=
 { obj := eval_functor.obj BD F,
   map := λ A B f,
@@ -127,6 +128,15 @@ def eval_functor : 𝒜 ⥤ chain_complex 𝒜 ℕ :=
     comm' := λ m n h, by simp only [eval_functor.obj_d, nat_trans.naturality] },
   map_id' := λ A, by { ext n, exact category_theory.functor.map_id _ _ },
   map_comp' := λ A B C f g, by { ext n, exact category_theory.functor.map_comp _ _ _ } }
+
+@[simps {fully_applied := ff}]
+def map_eval_functor {BD₁ BD₂ : data} (φ : BD₁ ⟶ BD₂) :
+  BD₁.eval_functor F ⟶ BD₂.eval_functor F :=
+{ app := λ A,
+  { f := λ i, (universal_map.eval_Pow F (φ.f i)).app A,
+    comm' := by { intros, dsimp only [eval_functor_obj, eval_functor.obj_d],
+      simp only [← nat_trans.comp_app, ← eval_Pow_comp F], congr' 2, apply φ.comm } },
+  naturality' := λ A B f, by { ext i : 2, apply nat_trans.naturality } }
 
 end data
 
