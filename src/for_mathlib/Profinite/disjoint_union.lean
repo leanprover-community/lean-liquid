@@ -204,7 +204,7 @@ begin
   exact compact_Union (λ i, compact_univ.image continuous_sigma_mk),
 end
 
-instance {α : Type*} [fintype α] (X : α → Type*) [∀ a, topological_space (X a)]
+instance {α : Type*} (X : α → Type*) [∀ a, topological_space (X a)]
   [∀ a, totally_disconnected_space (X a)] :
   totally_disconnected_space (Σ a, X a) :=
 begin
@@ -433,10 +433,10 @@ def equalizer.lift {W X Y : Profinite.{u}} (f g : X ⟶ Y) (e : W ⟶ X) (w : e 
 { to_fun := λ t, ⟨e t, by { apply_fun (λ ee, ee t) at w, exact w }⟩ }
 
 @[simp, reassoc]
-def equalizer.lift_ι {W X Y : Profinite.{u}} (f g : X ⟶ Y) (e : W ⟶ X)
+lemma equalizer.lift_ι {W X Y : Profinite.{u}} (f g : X ⟶ Y) (e : W ⟶ X)
   (w : e ≫ f = e ≫ g) : equalizer.lift f g e w ≫ equalizer.ι f g = e := by { ext, refl }
 
-def equalizer.hom_ext {W X Y : Profinite.{u}} (f g : X ⟶ Y) (e₁ e₂ : W ⟶ equalizer f g)
+lemma equalizer.hom_ext {W X Y : Profinite.{u}} (f g : X ⟶ Y) (e₁ e₂ : W ⟶ equalizer f g)
   (w : e₁ ≫ equalizer.ι f g = e₂ ≫ equalizer.ι f g) : e₁ = e₂ :=
 begin
   ext t,
