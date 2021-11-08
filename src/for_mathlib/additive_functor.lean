@@ -10,11 +10,11 @@ namespace category_theory
 namespace functor
 
 variables {𝒜 ℬ : Type*} [category 𝒜] [category ℬ]
-variables [preadditive 𝒜] [has_binary_biproducts 𝒜] [preadditive ℬ]
+variables [preadditive 𝒜] [preadditive ℬ]
 variables (F : 𝒜 ⥤ ℬ)
 
 
-lemma additive_of_map_fst_add_snd
+lemma additive_of_map_fst_add_snd [has_binary_biproducts 𝒜]
   (h : ∀ A : 𝒜, F.map (biprod.fst + biprod.snd : A ⊞ A ⟶ A) =
     F.map biprod.fst + F.map biprod.snd) :
   F.additive :=
