@@ -2,6 +2,7 @@ import condensed.proetale_site
 import for_mathlib.presieve
 import topology.category.Profinite.projective
 import for_mathlib.Profinite.disjoint_union
+import tactic.derive_fintype -- for pbool
 
 universes w v u
 
@@ -98,6 +99,16 @@ lemma subsingleton.map_equiv {X Y : Type*} (e : X ≃ Y) : subsingleton X → su
 
 end is_singleton
 
+section pbool
+
+@[derive fintype]
+inductive pbool : Type u
+| ff : pbool
+| tt : pbool
+
+end pbool
+
+-- Kevin is working on this
 lemma finite_product_condition_iff_empty_condition_product_condition :
   P.finite_product_condition ↔ P.empty_condition ∧ P.product_condition :=
 begin
@@ -120,7 +131,37 @@ begin
       { exact ⟨nonempty.map e4.symm this.1, subsingleton.map_equiv e4.symm this.2⟩ },
       { exact ⟨λ x, by rcases x with ⟨⟨⟩⟩⟩ },
       { exact ⟨λ f g, by {ext x, rcases x with ⟨⟨⟩⟩ }⟩ } },
-    {
+    { specialize h_prod (Fintype.of pbool),
+      /-
+      ∀ (X : ↥(Fintype.of (ulift (fin 2))) → Profinite), function.bijective
+       (λ (x : P.obj (opposite.op (Profinite.sigma X))) (a : ↥(Fintype.of (ulift (fin 2)))), P.map (Profinite.sigma.ι X a).op x)
+
+      For all X : pbool -> Profinite, the obvious map from
+      P(Σ X) to Π (a : pbool), P (X a) is bijective
+      -/
+      intros S T,
+      let X : ↥(Fintype.of pbool) → Profinite :=
+        λ a, pbool.rec S T a,
+      specialize h_prod X,
+      /-
+      hypothesis : if X : pbool -> Profinite sends ff to S
+      and tt to T, then the obvious map from
+      P(Σ X) to Π (a : pbool), P (X a) is bijective.
+
+      Goal: the obvious map from P (S ⊕ T) to P S × P T is bijective
+
+      plan : triangle S → Σ X ≃ S ⊕ T commutes;
+      triangle T → Σ X ≃ S ⊕ T commutes;
+
+      Claim: the obvious map from P (S ⊕ T) to P S × P T
+      is the obvious map from P (S ⊕ T) to Π (a : pbool), P (X a)
+      composed with the obvious bijection
+        from Π a, P (X a) to P S × P T.
+
+      Reid says work with the commutative square, i.e. the two maps
+      P (Σ a, X a) ⟶ P S × P T
+
+      -/
       sorry
     } },
   { sorry }
