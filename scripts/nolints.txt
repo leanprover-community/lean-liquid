@@ -58,6 +58,9 @@ apply_nolint homological_complex.mod_boundaries unused_arguments
 apply_nolint short_exact_sequence.biprod_factors def_lemma unused_arguments
 apply_nolint short_exact_sequence.horseshoe_ker unused_arguments
 
+-- for_mathlib/is_iso_iota.lean
+apply_nolint category_theory.limits.is_initial.colimit_cocone unused_arguments
+
 -- for_mathlib/order.lean
 apply_nolint Inter_eq inhabited_nonempty
 apply_nolint eventually_constant inhabited_nonempty
