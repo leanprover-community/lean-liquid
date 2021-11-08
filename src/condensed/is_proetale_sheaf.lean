@@ -133,8 +133,8 @@ begin
       { exact ⟨λ f g, by {ext x, rcases x with ⟨⟨⟩⟩ }⟩ } },
     { specialize h_prod (Fintype.of pbool),
       /-
-      ∀ (X : ↥(Fintype.of (ulift (fin 2))) → Profinite), function.bijective
-       (λ (x : P.obj (opposite.op (Profinite.sigma X))) (a : ↥(Fintype.of (ulift (fin 2)))), P.map (Profinite.sigma.ι X a).op x)
+      ∀ (X : ↥(Fintype.of pbool)) → Profinite), function.bijective
+       (λ (x : P.obj (opposite.op (Profinite.sigma X))) (a : ↥(Fintype.of pbool)), P.map (Profinite.sigma.ι X a).op x)
 
       For all X : pbool -> Profinite, the obvious map from
       P(Σ X) to Π (a : pbool), P (X a) is bijective
