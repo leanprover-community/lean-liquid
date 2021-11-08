@@ -19,15 +19,75 @@ lemma set.image_preimage_eq' {f : α → β} {s : set β} (h : s ⊆ set.range f
 (set.image_preimage_subset f s).antisymm
   (λ x hx, let ⟨y, e⟩ := h hx in ⟨y, (e.symm ▸ hx : f y ∈ s), e⟩)
 
-
 lemma is_preconnected.preimage [topological_space α] [topological_space β] {s : set β}
-  (hs : is_preconnected s) {f : α → β} (hf : continuous_on f (f ⁻¹' s)) (hsf : s ⊆ set.range f) :
-  is_preconnected (f ⁻¹' s) := sorry
+  (hs : is_preconnected s) {f : α → β}   (hfinj : function.injective f) (hfopen : is_open_map f)
+  (hsf : s ⊆ set.range f) : is_preconnected (f ⁻¹' s) := λ u v hu hv hsuv hsu hsv,
+begin
+  specialize hs (f '' u) (f '' v) (hfopen u hu) (hfopen v hv) _ _ _,
+  { have := set.image_subset f hsuv,
+    rwa [set.image_preimage_eq' hsf, set.image_union] at this },
+  { obtain ⟨x, hx1, hx2⟩ := hsu,
+    exact ⟨f x, hx1, x, hx2, rfl⟩ },
+  { obtain ⟨y, hy1, hy2⟩ := hsv,
+    exact ⟨f y, hy1, y, hy2, rfl⟩ },
+  { obtain ⟨b, hbs, hbu, hbv⟩ := hs,
+    obtain ⟨a, rfl⟩ := hsf hbs,
+    rw function.injective.mem_set_image hfinj at hbu hbv,
+    exact ⟨a, hbs, hbu, hbv⟩ }
+end
 
 lemma is_connected.preimage [topological_space α] [topological_space β] {s : set β}
-  (hs : is_connected s) {f : α → β} (hf : continuous_on f (f ⁻¹' s)) (hsf : s ⊆ set.range f) :
+  (hs : is_connected s) {f : α → β}
+  (hfinj : function.injective f) (hfopen : is_open_map f) (hsf : s ⊆ set.range f) :
   is_connected (f ⁻¹' s) :=
-⟨hs.nonempty.preimage' hsf, hs.is_preconnected.preimage hf hsf⟩
+⟨hs.nonempty.preimage' hsf, hs.is_preconnected.preimage hfinj hfopen hsf⟩
+
+lemma set.subset_left_of_subset_union_of_inter_right_empty {s u v : set α}
+  (hsuv : s ⊆ u ∪ v) (hsv : s ∩ v = ∅) : s ⊆ u :=
+λ x hxs, (hsuv hxs).elim id $ λ hxv, false.elim $ show x ∈ (∅ : set α), from hsv ▸ ⟨hxs, hxv⟩
+
+lemma set.subset_right_of_subset_union_of_inter_left_empty {s u v : set α}
+  (hsuv : s ⊆ u ∪ v) (hsv : s ∩ u = ∅) : s ⊆ v :=
+λ x hxs, (hsuv hxs).elim (λ hxu, false.elim $ show x ∈ (∅ : set α), from hsv ▸ ⟨hxs, hxu⟩) id
+
+-- lemma is_preconnected.subset_of_subset_union [topological_space α] {s u v : set α}
+--   (hu : is_open u) (hv : is_open v) (huv : u ∩ v = ∅) (hsuv : s ⊆ u ∪ v) (hs : is_preconnected s) :
+--   s ⊆ u ∨ s ⊆ v :=
+-- begin
+--   specialize hs u v hu hv hsuv,
+--   by_cases hsu : (s ∩ u).nonempty,
+--   { left,
+--     specialize hs hsu,
+--     replace hs := mt hs,
+--     simp only [set.not_nonempty_iff_eq_empty, huv, set.inter_empty] at hs,
+--     exact set.subset_left_of_subset_union_of_inter_right_empty hsuv (hs rfl) },
+--   { right,
+--     exact set.subset_right_of_subset_union_of_inter_left_empty hsuv
+--       (set.not_nonempty_iff_eq_empty.mp hsu),
+--   },
+-- end
+
+lemma is_preconnected.subset_left_of_subset_union_of_inter_left_nonempty [topological_space α]
+  {s u v : set α} (hu : is_open u) (hv : is_open v) (huv : u ∩ v = ∅) (hsuv : s ⊆ u ∪ v)
+  (hsu : (s ∩ u).nonempty) (hs : is_preconnected s) : s ⊆ u :=
+set.subset_left_of_subset_union_of_inter_right_empty hsuv
+begin
+  by_contra hsv,
+  replace hsv := set.ne_empty_iff_nonempty.1 hsv,
+  obtain ⟨x, hxs, hxuv⟩ := hs u v hu hv hsuv hsu hsv,
+  rwa huv at hxuv,
+end
+
+lemma is_preconnected.subset_right_of_subset_union_of_inter_right_nonempty [topological_space α]
+  {s u v : set α} (hu : is_open u) (hv : is_open v) (huv : u ∩ v = ∅) (hsuv : s ⊆ u ∪ v)
+  (hsv : (s ∩ v).nonempty) (hs : is_preconnected s) : s ⊆ v :=
+set.subset_right_of_subset_union_of_inter_left_empty hsuv
+begin
+  by_contra hsu,
+  replace hsu := set.ne_empty_iff_nonempty.1 hsu,
+  obtain ⟨x, hxs, hxuv⟩ := hs u v hu hv hsuv hsu hsv,
+  rwa huv at hxuv,
+end
 
 lemma sigma.univ (X : α → Type*) :
   (set.univ : set (Σ a, X a)) = ⋃ a, sigma.mk _ '' (set.univ : set (X a)) :=
@@ -38,14 +98,34 @@ lemma clopen_range_sigma_mk {X : α → Type*} [∀ a, topological_space (X a)] 
   is_clopen (set.range (@sigma.mk α X a)) :=
 ⟨open_embedding_sigma_mk.open_range, closed_embedding_sigma_mk.closed_range⟩
 
+lemma is_open_sigma_fst_preimage {X : α → Type*} [∀ a, topological_space (X a)] (s : set α) :
+  is_open (sigma.fst ⁻¹' s : set (Σ a, X a)) :=
+begin
+  rw is_open_sigma_iff,
+  intros a,
+  by_cases h : a ∈ s,
+  { convert is_open_univ,
+    ext x,
+    simp only [h, set.mem_preimage, set.mem_univ] },
+  { convert is_open_empty,
+    ext x,
+    simp only [h, set.mem_empty_eq, set.mem_preimage] },
+end
+
 lemma sigma.is_connected_iff {X : α → Type*} [∀ a, topological_space (X a)]
   {s : set (Σ a, X a)} :
   is_connected s ↔ ∃ (a : α) (t : set (X a)), is_connected t ∧ s = sigma.mk _ '' t :=
 begin
   refine ⟨λ hs, _, _⟩,
   { obtain ⟨⟨a, x⟩, hx⟩ := hs.nonempty,
-    have : s ⊆ set.range (sigma.mk a) := sorry,
-    exact ⟨a, sigma.mk a ⁻¹' s, hs.preimage continuous_sigma_mk.continuous_on this,
+    have : s ⊆ set.range (sigma.mk a),
+    { have h : set.range (sigma.mk a) = sigma.fst ⁻¹' {a}, by {ext, simp},
+      rw h,
+      exact is_preconnected.subset_left_of_subset_union_of_inter_left_nonempty
+        (is_open_sigma_fst_preimage _) (is_open_sigma_fst_preimage {x | x ≠ a}) (by {ext, simp})
+        (λ y hy, by simp [classical.em]) ⟨⟨a, x⟩, hx, rfl⟩ hs.2 },
+    exact ⟨a, sigma.mk a ⁻¹' s,
+      hs.preimage sigma_mk_injective is_open_map_sigma_mk this,
       (set.image_preimage_eq' this).symm⟩ },
   { rintro ⟨a, t, ht, rfl⟩,
     exact ht.image _ continuous_sigma_mk.continuous_on }
@@ -64,19 +144,37 @@ begin
     exact ht.image _ continuous_sigma_mk.continuous_on }
 end
 
+lemma sum.inl_is_open_map {X Y : Type*} [topological_space X] [topological_space Y] :
+  is_open_map (sum.inl : X → X ⊕ Y) :=
+open_embedding.is_open_map open_embedding_inl
+
+
+lemma sum.inr_is_open_map {X Y : Type*} [topological_space X] [topological_space Y] :
+  is_open_map (sum.inr : Y → X ⊕ Y) :=
+open_embedding.is_open_map open_embedding_inr
+
 lemma sum.is_connected_iff {X Y : Type*} [topological_space X] [topological_space Y]
   {s : set (X ⊕ Y)} :
   is_connected s ↔
     (∃ t, is_connected t ∧ s = sum.inl '' t) ∨ ∃ t, is_connected t ∧ s = sum.inr '' t :=
 begin
   refine ⟨λ hs, _, _⟩,
-  { obtain ⟨x | x, hx⟩ := hs.nonempty,
-    { refine or.inl ⟨sum.inl ⁻¹' s, _, _⟩,
-      sorry,
-      sorry },
-    { refine or.inr ⟨sum.inr ⁻¹' s, _, _⟩,
-      sorry,
-      sorry } },
+  { let u : set (X ⊕ Y):= set.range sum.inl,
+    let v : set (X ⊕ Y) := set.range sum.inr,
+    have hu : is_open u, exact is_open_range_inl,
+    obtain ⟨x | x, hx⟩ := hs.nonempty,
+    { have h := is_preconnected.subset_left_of_subset_union_of_inter_left_nonempty
+        is_open_range_inl is_open_range_inr set.range_inl_inter_range_inr
+        (show s ⊆ set.range sum.inl ∪ set.range sum.inr, by simp) ⟨sum.inl x, hx, x, rfl⟩ hs.2,
+      refine or.inl ⟨sum.inl ⁻¹' s, _, _⟩,
+      { exact is_connected.preimage hs sum.inl_injective sum.inl_is_open_map h },
+      { exact (set.image_preimage_eq' h).symm } },
+    { have h := is_preconnected.subset_right_of_subset_union_of_inter_right_nonempty
+        is_open_range_inl is_open_range_inr set.range_inl_inter_range_inr
+        (show s ⊆ set.range sum.inl ∪ set.range sum.inr, by simp) ⟨sum.inr x, hx, x, rfl⟩ hs.2,
+      refine or.inr ⟨sum.inr ⁻¹' s, _, _⟩,
+      { exact is_connected.preimage hs sum.inr_injective sum.inr_is_open_map h },
+      { exact (set.image_preimage_eq' h).symm } } },
   { rintro (⟨t, ht, rfl⟩ | ⟨t, ht, rfl⟩),
     { exact ht.image _ continuous_inl.continuous_on },
     { exact ht.image _ continuous_inr.continuous_on } }
@@ -106,7 +204,7 @@ begin
   exact compact_Union (λ i, compact_univ.image continuous_sigma_mk),
 end
 
-instance {α : Type*} [fintype α] (X : α → Type*) [∀ a, topological_space (X a)]
+instance {α : Type*} (X : α → Type*) [∀ a, topological_space (X a)]
   [∀ a, totally_disconnected_space (X a)] :
   totally_disconnected_space (Σ a, X a) :=
 begin
@@ -335,10 +433,10 @@ def equalizer.lift {W X Y : Profinite.{u}} (f g : X ⟶ Y) (e : W ⟶ X) (w : e 
 { to_fun := λ t, ⟨e t, by { apply_fun (λ ee, ee t) at w, exact w }⟩ }
 
 @[simp, reassoc]
-def equalizer.lift_ι {W X Y : Profinite.{u}} (f g : X ⟶ Y) (e : W ⟶ X)
+lemma equalizer.lift_ι {W X Y : Profinite.{u}} (f g : X ⟶ Y) (e : W ⟶ X)
   (w : e ≫ f = e ≫ g) : equalizer.lift f g e w ≫ equalizer.ι f g = e := by { ext, refl }
 
-def equalizer.hom_ext {W X Y : Profinite.{u}} (f g : X ⟶ Y) (e₁ e₂ : W ⟶ equalizer f g)
+lemma equalizer.hom_ext {W X Y : Profinite.{u}} (f g : X ⟶ Y) (e₁ e₂ : W ⟶ equalizer f g)
   (w : e₁ ≫ equalizer.ι f g = e₂ ≫ equalizer.ι f g) : e₁ = e₂ :=
 begin
   ext t,

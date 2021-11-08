@@ -150,13 +150,13 @@ lemma int_smul_mem_filtration (n : ℤ) (m : M) (c : ℝ≥0) (h : m ∈ filtrat
 begin
   by_cases hn : 0 ≤ n,
   { lift n to ℕ using hn,
-    simp only [int.nat_abs_of_nat, ← zsmul_eq_smul, zsmul_coe_nat, nsmul_eq_smul],
+    simp only [int.nat_abs_of_nat, ← zsmul_eq_smul, coe_nat_zsmul, nsmul_eq_smul],
     exact pseudo_normed_group.nat_smul_mem_filtration n m c h },
   { push_neg at hn, rw ← neg_pos at hn,
     lift -n to ℕ using hn.le with k hk,
     rw [← neg_neg n, int.nat_abs_neg, ← hk, int.nat_abs_of_nat, neg_smul],
     apply neg_mem_filtration,
-    simp only [neg_smul, ← zsmul_eq_smul, zsmul_coe_nat, nsmul_eq_smul],
+    simp only [neg_smul, ← zsmul_eq_smul, coe_nat_zsmul, nsmul_eq_smul],
     exact pseudo_normed_group.nat_smul_mem_filtration k m c h }
 end
 

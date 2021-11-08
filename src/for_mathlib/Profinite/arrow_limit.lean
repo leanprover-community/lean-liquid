@@ -164,8 +164,13 @@ limits.cones.ext (as_iso $ (limit_cone_is_limit $ right_arrow_diagram F surj).li
 /-- The isomorphism of cones showing that arrow_cone is a limit cone. -/
 @[simps]
 def arrow_cone_iso : arrow_cone F surj ≅ (arrow_limit_cone F surj).cone :=
-limits.cones.ext (as_iso $ (arrow_limit_cone F surj).is_limit.lift (arrow_cone F surj))
-  (λ _, rfl)
+begin
+  haveI := arrow.is_iso_of_iso_left_of_is_iso_right
+    ((arrow_limit_cone F surj).is_limit.lift (arrow_cone F surj)),
+  exact limits.cones.ext
+    (as_iso $ (arrow_limit_cone F surj).is_limit.lift (arrow_cone F surj))
+    (λ _, rfl)
+end
 
 /-- arrow_cone is a limit cone. -/
 @[simps]

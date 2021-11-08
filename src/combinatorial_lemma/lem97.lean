@@ -60,7 +60,7 @@ begin
   rw [sub_nonpos.symm, sub_eq_add_neg, ← add_monoid_hom.neg_apply, ← finset.sum_neg_distrib,
     add_monoid_hom.finset_sum_apply, add_monoid_hom.finset_sum_apply, ← finset.sum_add_distrib],
   swap, apply_instance,
-  simp only [← add_monoid_hom.add_apply, ← nsmul_eq_smul, ← zsmul_coe_nat, ← neg_zsmul,
+  simp only [← add_monoid_hom.add_apply, ← nsmul_eq_smul, ← coe_nat_zsmul, ← neg_zsmul,
      zsmul_eq_smul, ← add_smul],
   simp only [add_monoid_hom.add_apply, add_monoid_hom.smul_apply, pi.add_apply, pi.neg_apply,
      int.coe_nat_mod, pi.smul_apply, add_monoid_hom.neg_apply],

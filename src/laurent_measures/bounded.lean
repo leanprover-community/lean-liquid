@@ -162,8 +162,10 @@ begin
     change (abs (F s i) : ℝ) ≤ _ at this,
     rw abs_le at this,
     split,
-    { exact_mod_cast le_trans (int.floor_le _) this.1 },
-    { exact_mod_cast le_trans this.2 (int.le_ceil _) } }
+    { replace := le_trans (int.floor_le _) this.1,
+      rwa int.cast_le at this, },
+    { replace := le_trans this.2 (int.le_ceil _),
+      rwa int.cast_le at this, } }
 end
 
 instance : topological_space (laurent_measures_bdd r S T c) := ⊥
