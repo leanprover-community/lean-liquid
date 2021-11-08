@@ -1,8 +1,11 @@
-import breen_deligne.homotopy
-import category_theory.preadditive
+import category_theory.preadditive.functor_category
 import category_theory.limits.shapes.finite_products
 
+import breen_deligne.homotopy
+
 noncomputable theory
+
+open_locale big_operators
 
 open category_theory category_theory.limits
 
@@ -19,6 +22,9 @@ def Pow (n : ℕ) : 𝒜 ⥤ 𝒜 :=
   map_id' := λ A, by { ext i j, simp only [biproduct.ι_map, category.id_comp, category.comp_id], },
   map_comp' := λ A B C f g, by { ext i j, simp only [biproduct.ι_map_assoc, category.assoc], } }
 
+-- move this
+attribute [simps] comp_hom
+
 end preadditive
 end category_theory
 
@@ -32,7 +38,7 @@ variables (F : 𝒜 ⥤ 𝒜)
 
 namespace basic_universal_map
 
-variables {m n : ℕ} (f : basic_universal_map m n)
+variables {m n o : ℕ} (f : basic_universal_map m n) (g : basic_universal_map n o)
 
 @[simps {fully_applied := ff}]
 def eval_Pow : (Pow m : 𝒜 ⥤ 𝒜) ⟶ Pow n :=
@@ -44,42 +50,69 @@ def eval_Pow : (Pow m : 𝒜 ⥤ 𝒜) ⟶ Pow n :=
       comp_zsmul, zsmul_comp, category.comp_id, category.id_comp],
   end }
 
+@[simp] lemma eval_Pow_comp : @eval_Pow 𝒜 _ _ _ _ _ (comp g f) = f.eval_Pow ≫ g.eval_Pow :=
+begin
+  ext A i j,
+  simp only [eval_Pow_app, nat_trans.comp_app, category.assoc,
+    biproduct.ι_desc_assoc, biproduct.lift_π, biproduct.lift_desc_assoc, sum_comp,
+    zsmul_comp, comp_zsmul, category.comp_id],
+  simp only [comp, add_monoid_hom.mk'_apply, matrix.mul, matrix.dot_product,
+    finset.sum_smul, mul_smul],
+  rw [← (@equiv.ulift (fin n)).symm.sum_comp, finset.sum_congr rfl],
+  rintros j -,
+  rw smul_comm, refl,
+end
+
 end basic_universal_map
 
 namespace universal_map
 
 variables {m n o : ℕ} (f : universal_map m n) (g : universal_map n o)
 
--- @[simps {fully_applied := ff}]
-def eval_Pow : Pow m ⋙ F ⟶ Pow n ⋙ F :=
-{ app := λ A, free_abelian_group.lift (λ g, F.map ((basic_universal_map.eval_Pow g).app A)) f,
-  naturality' := begin
-    intros A B φ,
-    dsimp,
-    -- need to rewrite `free_abelian_group.lift` as a `finset.sum`.
-    sorry
-  end }
+def eval_Pow : universal_map m n →+ (Pow m ⋙ F ⟶ Pow n ⋙ F) :=
+free_abelian_group.lift $ λ g : basic_universal_map m n, whisker_right g.eval_Pow F
 
-lemma eval_Pow_zero_app (A : 𝒜) : (eval_Pow F (0 : universal_map m n)).app A = 0 :=
-add_monoid_hom.map_zero _
+lemma eval_Pow_of (g : basic_universal_map m n) :
+  eval_Pow F (free_abelian_group.of g) = whisker_right g.eval_Pow F :=
+free_abelian_group.lift.of _ _
 
 @[simp] lemma eval_Pow_zero : eval_Pow F (0 : universal_map m n) = 0 :=
-by { ext A, rw eval_Pow_zero_app, refl }
+add_monoid_hom.map_zero _
+
+lemma eval_Pow_zero_app (A : 𝒜) : (eval_Pow F (0 : universal_map m n)).app A = 0 :=
+by rw [eval_Pow_zero, zero_app]
+
+lemma eval_Pow_comp : eval_Pow F (universal_map.comp g f) = eval_Pow F f ≫ eval_Pow F g :=
+begin
+  rw [← add_monoid_hom.comp_apply, ← add_monoid_hom.comp_hom_apply_apply,
+    ← add_monoid_hom.comp_apply, eq_comm,
+    ← category_theory.preadditive.comp_hom_apply_apply, ← add_monoid_hom.flip_apply,
+    ← add_monoid_hom.comp_apply, ← add_monoid_hom.comp_hom_apply_apply,
+    ← add_monoid_hom.flip_apply _ _ (eval_Pow F),
+    ← add_monoid_hom.comp_apply, ← add_monoid_hom.comp_hom_apply_apply,
+    ← add_monoid_hom.comp_apply, ← add_monoid_hom.comp_hom_apply_apply],
+  congr' 2,
+  clear f g,
+  ext g f : 2,
+  simp only [add_monoid_hom.comp_hom_apply_apply, add_monoid_hom.comp_apply,
+    add_monoid_hom.flip_apply, category_theory.preadditive.comp_hom_apply_apply,
+    comp_of, eval_Pow_of, whisker_right_comp, basic_universal_map.eval_Pow_comp],
+end
 
 lemma eval_Pow_comp_app (A : 𝒜) :
   (eval_Pow F (universal_map.comp g f)).app A = (eval_Pow F f).app A ≫ (eval_Pow F g).app A :=
-sorry
-
-lemma eval_Pow_comp : eval_Pow F (universal_map.comp g f) = eval_Pow F f ≫ eval_Pow F g :=
-by { ext A, rw eval_Pow_comp_app, refl }
+by rw [eval_Pow_comp, nat_trans.comp_app]
 
 end universal_map
 
 namespace data
 
+open universal_map
+
+@[simps]
 def eval_functor.obj (M : 𝒜) : chain_complex 𝒜 ℕ :=
 { X := λ n, (Pow (BD.X n) ⋙ F).obj M,
-  d := λ m n, ((BD.d m n).eval_Pow F).app M,
+  d := λ m n, (eval_Pow F (BD.d m n)).app M,
   shape' := λ i j h, by rw [BD.shape i j h, universal_map.eval_Pow_zero_app],
   d_comp_d' := λ i j k hij hjk, begin
     rw [← universal_map.eval_Pow_comp_app],
@@ -91,7 +124,7 @@ def eval_functor : 𝒜 ⥤ chain_complex 𝒜 ℕ :=
 { obj := eval_functor.obj BD F,
   map := λ A B f,
   { f := λ n, (Pow (BD.X n) ⋙ F).map f,
-    comm' := λ m n h, sorry },
+    comm' := λ m n h, by simp only [eval_functor.obj_d, nat_trans.naturality] },
   map_id' := λ A, by { ext n, exact category_theory.functor.map_id _ _ },
   map_comp' := λ A B C f g, by { ext n, exact category_theory.functor.map_comp _ _ _ } }
 
