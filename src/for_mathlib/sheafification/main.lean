@@ -570,4 +570,28 @@ adjunction.mk_of_hom_equiv
     simpa,
   end }
 
+def sheafification_iso (P : Sheaf J D) : P ≅
+  (presheaf_to_Sheaf D J).obj ((Sheaf_to_presheaf J D).obj P) :=
+{ hom := (to_sheafify D J).app _,
+  inv := lift _ _ (𝟙 _) P.2,
+  hom_inv_id' := comp_lift _ _ _ _,
+  inv_hom_id' := begin
+    dsimp only [lift],
+    erw category.assoc,
+    change _ ≫ (iso_sheafify D J _).inv ≫ (iso_sheafify D J P.2).hom = _,
+    rw [iso.inv_hom_id, category.comp_id],
+    erw (J.plus ⋙ J.plus).map_id,
+    refl,
+  end }
+
+instance (P : Sheaf J D) : is_iso ((adjunction D J).counit.app P) :=
+begin
+  dsimp [adjunction],
+  change is_iso (sheafification_iso D J P).inv,
+  apply_instance
+end
+
+lemma reflective : is_iso (adjunction D J).counit :=
+nat_iso.is_iso_of_is_iso_app _
+
 end category_theory.grothendieck_topology
