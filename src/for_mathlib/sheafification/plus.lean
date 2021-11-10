@@ -297,4 +297,51 @@ def to_plus [has_limits D] [has_colimits D] :
     apply η.naturality,
   end }
 
+lemma map_to_plus [has_limits D] [has_colimits D] (P : Cᵒᵖ ⥤ D) :
+  J.plus_map (J.to_plus_app P) = J.to_plus_app _ :=
+begin
+  -- TODO: GOLF THIS!
+  ext X j,
+  dsimp,
+  simp,
+  let e : j.unop ⟶ ⊤ := hom_of_le (semilattice_inf_top.le_top _),
+  rw ← colimit.w _ e.op,
+  simp only [← category.assoc],
+  congr' 1,
+  ext I,
+  dsimp,
+  simp,
+  dsimp [multifork.of_ι],
+  simp,
+  delta cover.to_multiequalizer,
+  dsimp [cover.map_L],
+  let ee : (J.pullback I.f).obj (unop j) ⟶ ⊤ := hom_of_le (semilattice_inf_top.le_top _),
+  rw ← colimit.w _ ee.op,
+  simp only [← category.assoc],
+  congr' 1,
+  ext II,
+  dsimp,
+  simp,
+  dsimp [multifork.of_ι, cover.map_L],
+  let RR : j.unop.R :=
+  { Y₁ := _,
+    Y₂ := _,
+    Z := _,
+    g₁ := II.f,
+    g₂ := 𝟙 _,
+    f₁ := I.f,
+    f₂ := II.f ≫ I.f,
+    h₁ := I.hf,
+    h₂ := sieve.downward_closed _ I.hf _,
+    w := by simp },
+  convert multiequalizer.condition (j.unop.index P) RR,
+  { cases I, refl },
+  { dsimp [cover.index, RR],
+    simpa }
+end
+
+lemma plus_map_to_plus_app [has_limits D] [has_colimits D] (P : Cᵒᵖ ⥤ D) :
+  J.plus.map (J.to_plus.app P) = J.to_plus.app (J.plus.obj P) :=
+map_to_plus _ _
+
 end category_theory.grothendieck_topology

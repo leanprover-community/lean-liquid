@@ -2,6 +2,7 @@ import category_theory.limits.concrete_category
 import for_mathlib.sheafification.plus_sheaf_condition
 import for_mathlib.concrete_filtered
 import for_mathlib.concrete_multiequalizer
+import for_mathlib.is_sheaf
 
 noncomputable theory
 
@@ -472,17 +473,100 @@ end
 
 end plus
 
-variable (J)
+variables (D J)
 
-def sheafification_aux : (Cᵒᵖ ⥤ D) ⥤ (Cᵒᵖ ⥤ D) :=
-plus J ⋙ plus J
+def sheafify : (Cᵒᵖ ⥤ D) ⥤ Cᵒᵖ ⥤ D :=
+(plus J ⋙ plus J)
 
-theorem sheafification_aux_is_sheaf (P : Cᵒᵖ ⥤ D) :
-  presheaf.is_sheaf J ((sheafification_aux J).obj P) :=
-plus.is_sheaf_plus_plus J P
+def to_sheafify : 𝟭 _ ⟶ sheafify D J :=
+J.to_plus ≫ whisker_right J.to_plus J.plus
 
-def sheafification : (Cᵒᵖ ⥤ D) ⥤ Sheaf J D :=
-{ obj := λ P, ⟨(sheafification_aux J).obj P, sheafification_aux_is_sheaf _ _⟩,
-  map := λ P Q η, (sheafification_aux J).map η }
+lemma is_iso_to_sheafify {P : Cᵒᵖ ⥤ D} (hP : presheaf.is_sheaf J P) :
+  is_iso ((to_sheafify D J).app P) :=
+begin
+  dsimp [to_sheafify],
+  haveI : is_iso (J.to_plus_app P) := by { apply presheaf.is_iso_to_plus_app_of_is_sheaf hP },
+  haveI : is_iso (J.plus.map (J.to_plus_app P)) := by { apply functor.map_is_iso },
+  exact @is_iso.comp_is_iso _ _ _ _ _ (J.to_plus_app P)
+    (J.plus.map (J.to_plus_app P)) _ _,
+end
+
+def iso_sheafify {P : Cᵒᵖ ⥤ D} (hP : presheaf.is_sheaf J P) :
+  P ≅ (sheafify D J).obj P :=
+by letI := is_iso_to_sheafify D J hP; exactI as_iso ((to_sheafify D J).app P)
+
+def lift {P Q : Cᵒᵖ ⥤ D} (η : P ⟶ Q) (hQ : presheaf.is_sheaf J Q) :
+  (sheafify D J).obj P ⟶ Q :=
+(plus J ⋙ plus J).map η ≫ (iso_sheafify D J hQ).inv
+
+lemma comp_lift {P Q : Cᵒᵖ ⥤ D} (η : P ⟶ Q) (hQ : presheaf.is_sheaf J Q) :
+  (to_sheafify D J).app P ≫ lift D J η hQ = η :=
+begin
+  dsimp only [lift],
+  rw ← category.assoc,
+  rw iso.comp_inv_eq,
+  dsimp only [iso_sheafify, as_iso],
+  erw (to_sheafify D J).naturality,
+  refl,
+end
+
+lemma lift_unique {P Q : Cᵒᵖ ⥤ D} (η : P ⟶ Q) (hQ : presheaf.is_sheaf J Q)
+  (γ : (sheafify D J).obj P ⟶ Q) :
+  (to_sheafify D J).app P ≫ γ = η → γ = lift D J η hQ :=
+begin
+  intros h,
+  dsimp only [lift],
+  symmetry,
+  rw iso.comp_inv_eq,
+  change (sheafify D J).map η = _,
+  rw ← h,
+  rw (sheafify D J).map_comp,
+  dsimp only [iso_sheafify, as_iso],
+  change _ = (𝟭 _).map γ ≫ _,
+  rw (to_sheafify D J).naturality,
+  congr' 1,
+  dsimp only [sheafify, to_sheafify],
+  dsimp only [functor.comp_map, functor.map_comp, nat_trans.comp_app, whisker_right_app],
+  simp only [functor.map_comp],
+  simpa only [plus_map_to_plus_app],
+end
+
+def presheaf_to_Sheaf : (Cᵒᵖ ⥤ D) ⥤ Sheaf J D :=
+{ obj := λ P, ⟨(sheafify D J).obj P, plus.is_sheaf_plus_plus _ _⟩,
+  map := λ P Q η, (sheafify D J).map η,
+  map_id' := (sheafify D J).map_id,
+  map_comp' := λ _ _ _, (sheafify D J).map_comp }
+
+def adjunction : (presheaf_to_Sheaf D J) ⊣ (Sheaf_to_presheaf J D) :=
+adjunction.mk_of_hom_equiv
+{ hom_equiv := λ P Q,
+  { to_fun := λ e, (to_sheafify D J).app P ≫ e,
+    inv_fun := λ e, lift _ _ e Q.2,
+    left_inv := begin
+      intros e,
+      dsimp,
+      symmetry,
+      apply lift_unique,
+      refl,
+    end,
+    right_inv := begin
+      intros e,
+      dsimp,
+      apply comp_lift,
+    end },
+  hom_equiv_naturality_left_symm' := begin
+    intros P Q W f g,
+    dsimp,
+    symmetry,
+    apply lift_unique,
+    erw [← category.assoc, ← (to_sheafify D J).naturality],
+    dsimp only [functor.id_map],
+    rw [category.assoc, comp_lift],
+  end,
+  hom_equiv_naturality_right' := begin
+    intros P Q W f g,
+    dsimp,
+    simpa,
+  end }
 
 end category_theory.grothendieck_topology
