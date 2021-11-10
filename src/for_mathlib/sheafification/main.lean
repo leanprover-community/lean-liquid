@@ -461,6 +461,7 @@ begin
     refl }
 end
 
+variable (J)
 theorem is_sheaf_plus_plus (P : Cᵒᵖ ⥤ D) :
   presheaf.is_sheaf J (J.plus_obj (J.plus_obj P)) :=
 begin
@@ -470,4 +471,18 @@ begin
 end
 
 end plus
+
+variable (J)
+
+def sheafification_aux : (Cᵒᵖ ⥤ D) ⥤ (Cᵒᵖ ⥤ D) :=
+plus J ⋙ plus J
+
+theorem sheafification_aux_is_sheaf (P : Cᵒᵖ ⥤ D) :
+  presheaf.is_sheaf J ((sheafification_aux J).obj P) :=
+plus.is_sheaf_plus_plus J P
+
+def sheafification : (Cᵒᵖ ⥤ D) ⥤ Sheaf J D :=
+{ obj := λ P, ⟨(sheafification_aux J).obj P, sheafification_aux_is_sheaf _ _⟩,
+  map := λ P Q η, (sheafification_aux J).map η }
+
 end category_theory.grothendieck_topology
