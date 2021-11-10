@@ -424,6 +424,41 @@ begin
   swap, { rw hee },
   convert s.condition' IR,
   cases I, refl,
+end .
+
+theorem is_sheaf_of_sep (P : Cᵒᵖ ⥤ D)
+  (sep : ∀ (X : C) (S : J.cover X) (x y : P.obj (op X)),
+    (∀ I : S.L, P.map I.f.op x = P.map I.f.op y) → x = y) :
+  presheaf.is_sheaf J (J.plus_obj P) :=
+begin
+  rw presheaf.is_sheaf_iff_multiequalizer,
+  intros X S,
+  apply is_iso_of_reflects_iso _ (forget D),
+  rw is_iso_iff_bijective,
+  split,
+  { intros x y h,
+    apply injective P S _ _,
+    intros I,
+    apply_fun (meq.equiv _ _) at h,
+    apply_fun (λ e, e I) at h,
+    convert h,
+    { rw meq.equiv_apply,
+      erw [← comp_apply, multiequalizer.lift_ι] },
+    { rw meq.equiv_apply,
+      erw [← comp_apply, multiequalizer.lift_ι] } },
+  { rintros (x : (multiequalizer (S.index _) : D)),
+    obtain ⟨t,ht⟩ := surjective P sep X S (meq.equiv _ _ x),
+    use t,
+    apply_fun meq.equiv _ _,
+    swap, { apply_instance },
+    swap, { apply_instance },
+    swap, { apply_instance },
+    swap, { apply_instance },
+    rw ← ht,
+    ext i,
+    dsimp,
+    erw [← comp_apply, multiequalizer.lift_ι],
+    refl }
 end
 
 end plus
