@@ -461,5 +461,13 @@ begin
     refl }
 end
 
+theorem is_sheaf_plus_plus (P : Cᵒᵖ ⥤ D) :
+  presheaf.is_sheaf J (J.plus_obj (J.plus_obj P)) :=
+begin
+  apply is_sheaf_of_sep,
+  intros X S x y,
+  apply injective,
+end
+
 end plus
 end category_theory.grothendieck_topology
