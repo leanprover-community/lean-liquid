@@ -165,7 +165,8 @@ def diagram_pullback [has_limits D] {X Y : C} (f : X ⟶ Y) :
 
 -- TODO: Change to `has_filtered_colimits`
 @[simps]
-def plus_obj [has_limits D] [has_colimits D] : Cᵒᵖ ⥤ D :=
+def plus_obj [has_limits D]
+  [∀ (X : C), has_colimits_of_shape (J.cover X)ᵒᵖ D] : Cᵒᵖ ⥤ D :=
 { obj := λ X, colimit (J.diagram P X.unop),
   map := λ X Y f, colim_map (J.diagram_pullback P f.unop) ≫ colimit.pre _ _,
   map_id' := begin
@@ -202,7 +203,9 @@ def plus_obj [has_limits D] [has_colimits D] : Cᵒᵖ ⥤ D :=
   end } .
 
 @[simps]
-def plus_map [has_limits D] [has_colimits D] {P Q : Cᵒᵖ ⥤ D} (η : P ⟶ Q) :
+def plus_map [has_limits D]
+  [∀ (X : C), has_colimits_of_shape (J.cover X)ᵒᵖ D]
+  {P Q : Cᵒᵖ ⥤ D} (η : P ⟶ Q) :
   plus_obj J P ⟶ plus_obj J Q :=
 { app := λ X, colim_map $
   { app := λ I, multiequalizer.lift _ _ (λ II, multiequalizer.ι _ II ≫ η.app _) begin
@@ -231,7 +234,8 @@ def plus_map [has_limits D] [has_colimits D] {P Q : Cᵒᵖ ⥤ D} (η : P ⟶ Q
   end }
 
 @[simps]
-def plus [has_limits D] [has_colimits D] : (Cᵒᵖ ⥤ D) ⥤ (Cᵒᵖ ⥤ D) :=
+def plus [has_limits D]
+  [∀ (X : C), has_colimits_of_shape (J.cover X)ᵒᵖ D] : (Cᵒᵖ ⥤ D) ⥤ (Cᵒᵖ ⥤ D) :=
 { obj := λ F, plus_obj J F,
   map := λ F G η, plus_map J η,
   map_id' := begin
@@ -257,7 +261,7 @@ def plus [has_limits D] [has_colimits D] : (Cᵒᵖ ⥤ D) ⥤ (Cᵒᵖ ⥤ D) :
   end }
 
 @[simps]
-def to_plus_app [has_limits D] [has_colimits D] :
+def to_plus_app [has_limits D] [∀ (X : C), has_colimits_of_shape (J.cover X)ᵒᵖ D] :
   P ⟶ (plus_obj J P) :=
 { app := λ X, cover.to_multiequalizer P (⊤ : J.cover X.unop) ≫
     colimit.ι (J.diagram P X.unop) (op ⊤),
@@ -278,7 +282,7 @@ def to_plus_app [has_limits D] [has_colimits D] :
   end } .
 
 @[simps]
-def to_plus [has_limits D] [has_colimits D] :
+def to_plus [has_limits D] [∀ (X : C), has_colimits_of_shape (J.cover X)ᵒᵖ D] :
   (𝟭 (Cᵒᵖ ⥤ D)) ⟶ plus J :=
 { app := λ F, to_plus_app _ _,
   naturality' := begin
@@ -297,7 +301,7 @@ def to_plus [has_limits D] [has_colimits D] :
     apply η.naturality,
   end }
 
-lemma map_to_plus [has_limits D] [has_colimits D] (P : Cᵒᵖ ⥤ D) :
+lemma map_to_plus [has_limits D] [∀ (X : C), has_colimits_of_shape (J.cover X)ᵒᵖ D] (P : Cᵒᵖ ⥤ D) :
   J.plus_map (J.to_plus_app P) = J.to_plus_app _ :=
 begin
   -- TODO: GOLF THIS!
@@ -340,7 +344,8 @@ begin
     simpa }
 end
 
-lemma plus_map_to_plus_app [has_limits D] [has_colimits D] (P : Cᵒᵖ ⥤ D) :
+lemma plus_map_to_plus_app [has_limits D]
+ [∀ (X : C), has_colimits_of_shape (J.cover X)ᵒᵖ D] (P : Cᵒᵖ ⥤ D) :
   J.plus.map (J.to_plus.app P) = J.to_plus.app (J.plus.obj P) :=
 map_to_plus _ _
 

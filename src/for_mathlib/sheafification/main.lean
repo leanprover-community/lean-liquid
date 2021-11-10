@@ -16,7 +16,7 @@ universes w v u
 variables {C : Type u} [category.{v} C] {D : Type w}
   [category.{max v u} D] {J : grothendieck_topology C}
 
-variables [has_limits D] [has_colimits D]
+variables [has_limits D] [∀ (X : C), has_colimits_of_shape (J.cover X)ᵒᵖ D]
 variables [concrete_category.{max v u} D]
 variables [preserves_limits (forget D)]
 variables [∀ (X : C), preserves_colimits_of_shape (J.cover X)ᵒᵖ (forget D)]
@@ -229,6 +229,7 @@ begin
   simp only [comp_apply],
   congr' 1,
   apply_fun (meq.equiv P ⊤),
+  swap, { apply_instance },
   swap, { apply_instance },
   simp only [equiv.apply_symm_apply],
   ext i,
