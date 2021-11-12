@@ -15,10 +15,6 @@ lemma set.nonempty.preimage' {s : set β} (hs : s.nonempty) {f : α → β} (hf 
   (f ⁻¹' s).nonempty :=
 let ⟨y, hy⟩ := hs, ⟨x, hx⟩ := hf hy in ⟨x, set.mem_preimage.2 $ hx.symm ▸ hy⟩
 
-lemma set.image_preimage_eq' {f : α → β} {s : set β} (h : s ⊆ set.range f) : f '' (f ⁻¹' s) = s :=
-(set.image_preimage_subset f s).antisymm
-  (λ x hx, let ⟨y, e⟩ := h hx in ⟨y, (e.symm ▸ hx : f y ∈ s), e⟩)
-
 lemma disjoint.subset_left_of_subset_union {a b c : set α} (h : a ⊆ b ∪ c) (hac : disjoint a c) :
   a ⊆ b :=
 hac.left_le_of_le_sup_right h
@@ -29,11 +25,13 @@ hab.left_le_of_le_sup_left h
 
 lemma is_preconnected.preimage [topological_space α] [topological_space β] {s : set β}
   (hs : is_preconnected s) {f : α → β}   (hfinj : function.injective f) (hfopen : is_open_map f)
-  (hsf : s ⊆ set.range f) : is_preconnected (f ⁻¹' s) := λ u v hu hv hsuv hsu hsv,
+  (hsf : s ⊆ set.range f) :
+  is_preconnected (f ⁻¹' s) :=
+λ u v hu hv hsuv hsu hsv,
 begin
   specialize hs (f '' u) (f '' v) (hfopen u hu) (hfopen v hv) _ _ _,
   { have := set.image_subset f hsuv,
-    rwa [set.image_preimage_eq' hsf, set.image_union] at this },
+    rwa [set.image_preimage_eq_of_subset hsf, set.image_union] at this },
   { obtain ⟨x, hx1, hx2⟩ := hsu,
     exact ⟨f x, hx1, x, hx2, rfl⟩ },
   { obtain ⟨y, hy1, hy2⟩ := hsv,
@@ -121,7 +119,7 @@ begin
         (λ y hy, by simp [classical.em]) ⟨⟨a, x⟩, hx, rfl⟩ hs.2 },
     exact ⟨a, sigma.mk a ⁻¹' s,
       hs.preimage sigma_mk_injective is_open_map_sigma_mk this,
-      (set.image_preimage_eq' this).symm⟩ },
+      (set.image_preimage_eq_of_subset this).symm⟩ },
   { rintro ⟨a, t, ht, rfl⟩,
     exact ht.image _ continuous_sigma_mk.continuous_on }
 end
@@ -154,13 +152,13 @@ begin
         (show s ⊆ set.range sum.inl ∪ set.range sum.inr, by simp) ⟨sum.inl x, hx, x, rfl⟩ hs.2,
       refine or.inl ⟨sum.inl ⁻¹' s, _, _⟩,
       { exact is_connected.preimage hs sum.inl_injective open_embedding_inl.is_open_map h },
-      { exact (set.image_preimage_eq' h).symm } },
+      { exact (set.image_preimage_eq_of_subset h).symm } },
     { have h := is_preconnected.subset_right_of_subset_union
         is_open_range_inl is_open_range_inr set.is_compl_range_inl_range_inr.disjoint
         (show s ⊆ set.range sum.inl ∪ set.range sum.inr, by simp) ⟨sum.inr x, hx, x, rfl⟩ hs.2,
       refine or.inr ⟨sum.inr ⁻¹' s, _, _⟩,
       { exact is_connected.preimage hs sum.inr_injective open_embedding_inr.is_open_map h },
-      { exact (set.image_preimage_eq' h).symm } } },
+      { exact (set.image_preimage_eq_of_subset h).symm } } },
   { rintro (⟨t, ht, rfl⟩ | ⟨t, ht, rfl⟩),
     { exact ht.image _ continuous_inl.continuous_on },
     { exact ht.image _ continuous_inr.continuous_on } }
