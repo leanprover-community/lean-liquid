@@ -375,7 +375,7 @@ lemma aux_b_half (f : polynomial ℝ) (k : ℕ) : | coeff ℝ k (harb_b f) | ≤
 
 variable (b : power_series ℝ)
 -- variable (k : ℕ)
-#check λ k, (power_series.coeff ℝ k b) * ξ ^ k
+-- #check λ k, (power_series.coeff ℝ k b) * ξ ^ k
 
 def eval_blah (b : power_series ℝ) : ℝ → (ℕ → ℝ) := λ x k,
   (power_series.coeff ℝ k b) * x ^ k
