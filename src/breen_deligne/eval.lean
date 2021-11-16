@@ -240,13 +240,117 @@ begin
   ext ⟨i⟩;
   simp only [biproduct.ι_map, Biprod_iso_Pow_two_components_hom, Biprod_map, Pow_map,
     biprod.inl_map_assoc, biprod.inl_desc_assoc, biprod.inr_map_assoc, biprod.inr_desc_assoc,
-    biprod.inr_map, category.assoc]; sorry
+    biprod.inr_map, category.assoc, biprod.inr_desc],
 end
+.
 
--- def aux :
---   (data.eval_functor' F).obj ((data.mul 2).obj BD'.data) ≅
---   Biprod ⋙ (data.eval_functor' F).obj BD'.data :=
--- sorry
+@[simp] lemma _root_.ulift.up_inj {α : Type*} (a b : α) : ulift.up a = ulift.up b ↔ a = b :=
+⟨congr_arg ulift.down, congr_arg ulift.up⟩
+
+@[simp] lemma _root_.ulift.down_inj {α : Type*} (a b : ulift α) : a.down = b.down ↔ a = b :=
+⟨by { cases a, cases b, exact congr_arg ulift.up }, congr_arg ulift.down⟩
+
+@[simps]
+def Pow_comp_Pow_components (m n : ℕ) (A : 𝒜) :
+  (Pow n).obj ((Pow m).obj A) ≅ (Pow (m * n)).obj A :=
+{ hom := biproduct.desc $ λ j, biproduct.desc $ λ i,
+    biproduct.ι (λ i : ulift (fin _), A) ⟨fin_prod_fin_equiv (i.down, j.down)⟩,
+  inv := biproduct.lift $ λ j, biproduct.lift $ λ i,
+    biproduct.π (λ i : ulift (fin _), A) ⟨fin_prod_fin_equiv (i.down, j.down)⟩,
+  hom_inv_id' := begin
+    ext ⟨j⟩ ⟨i⟩ ⟨j'⟩ ⟨i'⟩ : 4,
+    erw [biproduct.ι_desc_assoc, category.comp_id],
+    simp only [biproduct.ι_desc_assoc, category.assoc, biproduct.lift_π],
+    by_cases hj : j = j',
+    { subst hj, rw [biproduct.ι_π_self_assoc],
+      by_cases hi : i = i',
+      { subst hi, rw [biproduct.ι_π_self, biproduct.ι_π_self] },
+      { rw [biproduct.ι_π_ne, biproduct.ι_π_ne],
+        { exact mt (congr_arg ulift.down) hi },
+        { simpa only [equiv.apply_eq_iff_eq, and_true, prod.mk.inj_iff, eq_self_iff_true,
+            ulift.up_inj, ne.def] using hi, } } },
+    { rw [biproduct.ι_π_ne, biproduct.ι_π_ne_assoc, zero_comp, comp_zero],
+      { exact mt (congr_arg ulift.down) hj },
+      { simp only [equiv.apply_eq_iff_eq, prod.mk.inj_iff, _root_.ulift.up_inj, ne.def, hj,
+          not_false_iff, and_false], } }
+  end,
+  inv_hom_id' := begin
+    ext ⟨k⟩ ⟨k'⟩ : 2,
+    erw [category.comp_id],
+    simp only [category.assoc, biproduct.lift_desc, sum_comp, comp_sum],
+    by_cases h : k = k',
+    { subst h,
+      rw [biproduct.ι_π_self,
+        finset.sum_eq_single (⟨(fin_prod_fin_equiv.symm k).snd⟩ : ulift (fin _)),
+        finset.sum_eq_single (⟨(fin_prod_fin_equiv.symm k).fst⟩ : ulift (fin _))],
+      { dsimp [- fin_prod_fin_equiv_symm_apply],
+        rw [prod.mk.eta, equiv.apply_symm_apply, biproduct.ι_π_self, biproduct.ι_π_self_assoc], },
+      { rintro ⟨i⟩ - hi,
+        rw [biproduct.ι_π_ne_assoc, zero_comp],
+        dsimp [- fin_prod_fin_equiv_symm_apply],
+        simp only [ulift.up_inj, ne.def, ← equiv.symm_apply_eq,
+          prod.ext_iff, not_and_distrib] at hi ⊢,
+        exact or.inl (ne.symm hi) },
+      { intro h, exact (h (finset.mem_univ _)).elim },
+      { rintro ⟨j⟩ - hj,
+        rw finset.sum_eq_zero,
+        rintro ⟨i⟩ -,
+        rw [biproduct.ι_π_ne_assoc, zero_comp],
+        dsimp [- fin_prod_fin_equiv_symm_apply],
+        simp only [ulift.up_inj, ne.def, ← equiv.symm_apply_eq,
+          prod.ext_iff, not_and_distrib] at hj ⊢,
+        exact or.inr (ne.symm hj) },
+      { intro h, exact (h (finset.mem_univ _)).elim } },
+    { rw [biproduct.ι_π_ne, finset.sum_eq_zero],
+      { rintro ⟨j⟩ -,
+        rw [finset.sum_eq_zero],
+        rintro ⟨i⟩ -,
+        by_cases hk : k = fin_prod_fin_equiv (i,j),
+        { subst hk,
+          rw [biproduct.ι_π_self_assoc, biproduct.ι_π_ne],
+          simpa only [ulift.up_inj, ne.def] using h, },
+        { rw [biproduct.ι_π_ne_assoc, zero_comp],
+          dsimp [- fin_prod_fin_equiv_symm_apply],
+          simpa only [ulift.up_inj, ne.def] using h, } },
+      { rw [ne.def, ulift.up_inj], exact h } },
+  end }
+.
+
+def Pow_comp_Pow (m n : ℕ) : (Pow m ⋙ Pow n : 𝒜 ⥤ 𝒜) ≅ Pow (m * n) :=
+nat_iso.of_components (Pow_comp_Pow_components m n) $ λ A B f,
+begin
+  ext ⟨j⟩ ⟨i⟩ ⟨k⟩,
+  simp only [biproduct.ι_map, Pow_comp_Pow_components_hom, Pow_map, functor.comp_map,
+    biproduct.ι_map_assoc, category.assoc, biproduct.map_π, biproduct.ι_desc_assoc],
+end
+.
+
+def aux :
+  (data.eval_functor' F).obj ((data.mul 2).obj BD'.data) ≅
+  Biprod ⋙ (data.eval_functor' F).obj BD'.data :=
+nat_iso.of_components (λ A,
+  homological_complex.hom.iso_of_components (λ i, begin
+      refine F.map_iso _,
+      refine (Pow_comp_Pow 2 (BD'.data.X i)).symm.app A ≪≫ _,
+      refine (Pow _).map_iso (Biprod_iso_Pow_two.symm.app A)
+    end) $ λ i j hij, begin
+      -- dsimp,
+      -- simp only [functor.map_comp, category.assoc, ← whisker_right_app],
+
+      sorry; dsimp [data.eval_functor', data.eval_functor, eval_Pow],
+    end) $ λ A B f, begin
+      ext i,
+      dsimp only [data.eval_functor', data.eval_functor, eval_Pow, eval_Pow_functor_obj,
+        functor.map_iso_hom, functor.comp_obj, functor.comp_map, functor.flip_obj_map,
+        functor.map_homological_complex_obj_X,
+        homological_complex.functor_eval_map_app_f,
+        homological_complex.comp_f,
+        homological_complex.hom.iso_of_components_hom_f],
+      rw [← F.map_comp, ← F.map_comp],
+      congr' 1,
+      sorry
+      --  dsimp, dsimp [data.eval_functor', data.eval_functor, eval_Pow], sorry
+  end
 
 -- def foo (A : 𝒜) : _root_.homotopy
 --   (((data.eval_functor' F).obj BD'.data).map (biprod.fst + biprod.snd : A ⊞ A ⟶ A))
