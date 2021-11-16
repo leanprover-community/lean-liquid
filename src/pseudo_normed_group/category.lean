@@ -1051,7 +1051,8 @@ iso_of_equiv_of_strict'
     { intros i j, exact h (fin_prod_fin_equiv (j, i)) },
     { intro ij,
       have := h (fin_prod_fin_equiv.symm ij).2 (fin_prod_fin_equiv.symm ij).1,
-      dsimp at this, simpa only [prod.mk.eta, equiv.apply_symm_apply] using this, },
+      dsimp [-fin_prod_fin_equiv_symm_apply] at this,
+      simpa only [prod.mk.eta, equiv.apply_symm_apply] using this, },
   end
   begin
     intro c, dsimp,

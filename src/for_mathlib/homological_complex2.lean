@@ -8,8 +8,7 @@ namespace homological_complex
 variables {ι X 𝒜 : Type*} [category X] [category 𝒜] [preadditive 𝒜] {c : complex_shape ι}
 
 instance evaluation_additive (x : X) : ((evaluation X 𝒜).obj x).additive :=
-{ map_zero' := sorry, -- redundant
-  map_add' := λ F G f g, by simp only [evaluation_obj_map, nat_trans.app_add] }
+{ map_add' := λ F G f g, by simp only [evaluation_obj_map, nat_trans.app_add] }
 
 @[simps]
 def functor_eval.obj (x : X) : homological_complex (X ⥤ 𝒜) c ⥤ homological_complex 𝒜 c :=

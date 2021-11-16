@@ -175,7 +175,7 @@ begin
   dunfold up_two down_two,
   rw linear_equiv.map_eq_comap,
   rw ←submodule.comap_comp,
-  simp only [linear_equiv.refl_to_linear_map, linear_equiv.trans_symm, linear_equiv.comp_coe,
+  simp only [linear_equiv.refl_to_linear_map, linear_equiv.self_trans_symm, linear_equiv.comp_coe,
     submodule.comap_id],
 end
 

@@ -198,7 +198,7 @@ instance proj_suitable (N : ℕ) (k : fin N) (c : ℝ≥0) : (proj n k).suitable
 begin
   intro i,
   apply le_of_eq,
-  dsimp [proj, matrix.kronecker, proj_aux],
+  dsimp [proj, matrix.kronecker, proj_aux, - fin_prod_fin_equiv_symm_apply],
   rw [finset.sum_eq_single (fin_prod_fin_equiv (k, i))],
   { simp only [equiv.symm_apply_apply, if_pos rfl, matrix.one_apply_eq,
       nat.cast_one, int.nat_abs_one, one_mul] },
@@ -222,7 +222,7 @@ begin
     finset.sum_comm],
   apply fintype.sum_congr,
   intro j,
-  dsimp [mul, matrix.kronecker],
+  dsimp [mul, matrix.kronecker, - fin_prod_fin_equiv_symm_apply],
   rw finset.sum_eq_single (fin_prod_fin_equiv.symm i).1,
   { congr' 2,
     simp only [one_mul, equiv.symm_apply_apply, matrix.one_apply_eq] },

@@ -70,8 +70,7 @@ def rescale (r : ℝ≥0) [hr : fact (0 < r)] : SemiNormedGroup ⥤ SemiNormedGr
   map_comp' := λ V₁ V₂ V₃ f g, rfl /- defeq abuse -/ }
 
 instance rescale.additive [fact (0 < r)] : (rescale r).additive :=
-{ map_zero' := λ V W, rfl, -- defeq abuse
-  map_add' := λ V W f g, rfl /- defeq abuse -/ }
+{ map_add' := λ V W f g, rfl /- defeq abuse -/ }
 
 lemma norm_rescale_map_le [fact (0 < r)] {V₁ V₂ : SemiNormedGroup}
   {f : V₁ ⟶ V₂} {C : ℝ} (hf : ∥f∥ ≤ C) :

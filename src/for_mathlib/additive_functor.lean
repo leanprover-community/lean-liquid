@@ -18,8 +18,7 @@ lemma additive_of_map_fst_add_snd [has_binary_biproducts 𝒜]
   (h : ∀ A : 𝒜, F.map (biprod.fst + biprod.snd : A ⊞ A ⟶ A) =
     F.map biprod.fst + F.map biprod.snd) :
   F.additive :=
-{ map_zero' := sorry, -- redundant field, a mathlib PR removes it
-  map_add' := λ A B f g,
+{ map_add' := λ A B f g,
   begin
     have : f + g = biprod.lift f g ≫ (biprod.fst + biprod.snd),
     { rw [preadditive.comp_add, biprod.lift_fst, biprod.lift_snd] },

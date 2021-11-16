@@ -41,8 +41,7 @@ lemma rescale_d (r c : ℝ≥0) [fact (0 < r)] (C : system_of_complexes) (i j : 
 rfl
 
 instance rescale.additive (r : ℝ≥0) [fact (0 < r)] : (rescale r).additive :=
-{ map_zero' := λ X Y, by { ext, refl }, -- ext can be removed but it makes the proof longer
-  map_add' := λ X Y f g, by { ext, refl } } -- a heavy refl
+{ map_add' := λ X Y f g, by { ext, refl } } -- a heavy refl
 .
 
 -- can we golf this? speed it up?

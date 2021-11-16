@@ -89,8 +89,7 @@ def truncate : cochain_complex SemiNormedGroup.{u} ℕ ⥤ cochain_complex SemiN
   map_comp' := λ C₁ C₂ C₃ f g, by ext (n|n) ⟨x⟩; refl }
 
 instance truncate.additive : truncate.additive :=
-{ map_zero' := by { intros, ext (n|n) ⟨⟩; refl },
-  map_add' := by { intros, ext (n|n) ⟨⟩; refl } }
+{ map_add' := by { intros, ext (n|n) ⟨⟩; refl } }
 
 end SemiNormedGroup
 

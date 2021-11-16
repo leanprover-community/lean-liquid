@@ -51,16 +51,14 @@ def mul_functor (N : ℕ) : FreeMat ⥤ FreeMat :=
   begin
     dsimp [basic_universal_map.mul, basic_universal_map.id],
     ext i j,
-    simp only [matrix.kronecker_map_one_one, matrix.minor_apply, matrix.one_apply,
+    simp only [matrix.one_kronecker_one, matrix.minor_apply, matrix.one_apply,
       equiv.apply_eq_iff_eq, eq_self_iff_true],
-    split_ifs;
-    simpa [matrix.one_apply]
+    congr,
   end,
   map_comp' := λ l m n f g, mul_comp _ _ _ }
 .
 instance mul_functor.additive (N : ℕ) : (mul_functor N).additive :=
-{ map_zero' := λ m n, add_monoid_hom.map_zero _,
-  map_add' := λ m n f g, add_monoid_hom.map_add _ _ _ }
+{ map_add' := λ m n f g, add_monoid_hom.map_add _ _ _ }
 
 @[simps] def iso_mk' {m n : FreeMat}
   (f : basic_universal_map m n) (g : basic_universal_map n m)
@@ -127,16 +125,20 @@ begin
     basic_universal_map.mul, basic_universal_map.mul_mul_hom, matrix.mul_reindex_linear_equiv_one],
   rw [← matrix.reindex_linear_equiv_mul, matrix.one_mul,
     ← matrix.reindex_linear_equiv_one ℕ _ (@fin_prod_fin_equiv m n)],
-  rw [matrix.reindex_linear_equiv_apply],
-  rw [matrix.reindex_linear_equiv_apply],
-  rw [matrix.reindex_linear_equiv_apply],
-  rw [matrix.reindex_linear_equiv_apply],
-  rw [matrix.reindex_linear_equiv_apply],
+  simp only [matrix.reindex_linear_equiv_apply],
   rw [kronecker_map_reindex_left, kronecker_map_reindex_right, ← matrix.kronecker_assoc],
-  simp only [matrix.reindex_linear_equiv_comp_apply],
-  congr' 3,
-  ext,
-  simp,
+  simp only [← equiv.trans_apply, matrix.reindex_trans, matrix.one_kronecker_one,
+    equiv.trans_refl],
+  congr' 3, swap 3, { apply_instance },
+  { ext ⟨⟨a, b⟩, c⟩,
+    simp only [equiv.trans_apply, equiv.symm_apply_apply, equiv.apply_symm_apply,
+      equiv.prod_assoc_apply, equiv.prod_assoc_symm_apply, equiv.prod_congr_apply,
+      prod.map_def, equiv.refl_apply], },
+  { ext ⟨⟨a, b⟩, c⟩,
+    simp only [equiv.trans_apply, equiv.symm_apply_apply, equiv.apply_symm_apply,
+      equiv.prod_assoc_apply, equiv.prod_assoc_symm_apply, equiv.prod_congr_apply,
+      prod.map_def, equiv.refl_apply, equiv.symm_trans_apply, equiv.symm_symm,
+      equiv.prod_congr_symm, equiv.refl_symm], },
 end
 
 def mul_mul_iso (m n : ℕ) : mul_functor n ⋙ mul_functor m ≅ mul_functor (m * n) :=

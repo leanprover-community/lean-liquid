@@ -139,8 +139,7 @@ def eval_Pow_functor : FreeMat ⥤ (𝒜 ⥤ 𝒜) :=
   map_comp' := λ m n o f g, eval_Pow_comp F _ _ }
 
 instance eval_Pow_functor_additive : (eval_Pow_functor F).additive :=
-{ map_zero' := sorry, -- redundant
-  map_add' := λ m n f g, by { dsimp [eval_Pow], rw add_monoid_hom.map_add } }
+{ map_add' := λ m n f g, by { dsimp [eval_Pow], rw add_monoid_hom.map_add } }
 
 end universal_map
 

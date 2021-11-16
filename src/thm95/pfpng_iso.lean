@@ -48,7 +48,7 @@ begin
   { intros h i,
     apply h, },
   { intros h i,
-    simpa using h (fin_prod_fin_equiv ((fin_prod_fin_equiv.symm) i).swap), }
+    simpa [- fin_prod_fin_equiv_symm_apply] using h (fin_prod_fin_equiv ((fin_prod_fin_equiv.symm) i).swap), }
 end
 
 lemma Pow_mul_comm_obj_equiv_ctu (X : ProFiltPseuNormGrpWithTinv r') (c : ℝ≥0) :
@@ -59,7 +59,7 @@ begin
     ← (filtration_pi_homeo _ c).symm.comp_continuous_iff'],
   apply continuous_pi,
   intro i,
-  dsimp,
+  dsimp [- fin_prod_fin_equiv_symm_apply],
   convert continuous_apply (fin_prod_fin_equiv ((fin_prod_fin_equiv.symm) i).swap) using 1,
   ext x,
   rw subtype.coe_mk,
