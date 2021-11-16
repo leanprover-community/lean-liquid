@@ -356,49 +356,49 @@ end
 
 end theta_surj
 
-section harbater
-open polynomial power_series
+-- section harbater
+-- open polynomial power_series
 
-def harb_f (n : ℕ) : polynomial ℝ := sorry
+-- def harb_f (n : ℕ) : polynomial ℝ := sorry
 
-lemma aux_harb_f₁ (n : ℕ) (x : ℝ) (abs x ≤ abs ξ) (x ≠ ξ) :
-  root_multiplicity x (harb_f n) = 0 := sorry
--- [fact (0 < r)] [fact (r < 1)] [fact (0 < ξ)]
+-- lemma aux_harb_f₁ (n : ℕ) (x : ℝ) (abs x ≤ abs ξ) (x ≠ ξ) :
+--   root_multiplicity x (harb_f n) = 0 := sorry
+-- -- [fact (0 < r)] [fact (r < 1)] [fact (0 < ξ)]
 
-lemma aux_harb_f₂ (n : ℕ) : root_multiplicity ξ (harb_f n) = 1 := sorry
+-- lemma aux_harb_f₂ (n : ℕ) : root_multiplicity ξ (harb_f n) = 1 := sorry
 
-lemma aux_harb_f₃ (n : ℕ) : (harb_f n) %ₘ (X)^n = 1 := sorry
+-- lemma aux_harb_f₃ (n : ℕ) : (harb_f n) %ₘ (X)^n = 1 := sorry
 
-def harb_b (f : polynomial ℝ) : power_series ℝ := sorry
+-- def harb_b (f : polynomial ℝ) : power_series ℝ := sorry
 
-lemma aux_b_half (f : polynomial ℝ) (k : ℕ) : | coeff ℝ k (harb_b f) | ≤ 1 / 2 := sorry
+-- lemma aux_b_half (f : polynomial ℝ) (k : ℕ) : | coeff ℝ k (harb_b f) | ≤ 1 / 2 := sorry
 
-variable (b : power_series ℝ)
--- variable (k : ℕ)
--- #check λ k, (power_series.coeff ℝ k b) * ξ ^ k
+-- variable (b : power_series ℝ)
+-- -- variable (k : ℕ)
+-- -- #check λ k, (power_series.coeff ℝ k b) * ξ ^ k
 
-def eval_blah (b : power_series ℝ) : ℝ → (ℕ → ℝ) := λ x k,
-  (power_series.coeff ℝ k b) * x ^ k
+-- def eval_blah (b : power_series ℝ) : ℝ → (ℕ → ℝ) := λ x k,
+--   (power_series.coeff ℝ k b) * x ^ k
 
-instance : has_coe (power_series ℤ) (power_series ℝ) := ⟨λ F n, ⟨F n⟩⟩
+-- instance : has_coe (power_series ℤ) (power_series ℝ) := ⟨λ F n, ⟨F n⟩⟩
 
-lemma aux_b_conv (f : polynomial ℝ) (x : ℝ) (hx : abs x ≤ 1) :
-  summable (eval_blah (harb_b f) x) := sorry
+-- lemma aux_b_conv (f : polynomial ℝ) (x : ℝ) (hx : abs x ≤ 1) :
+--   summable (eval_blah (harb_b f) x) := sorry
 
-lemma aux_b_int (f : polynomial ℝ) (k : ℕ) : coeff ℝ k ((f : power_series ℝ) * (harb_b f))
-  ∈ set.range (coe : ℤ → ℝ) :=
- begin sorry,
- end
+-- lemma aux_b_int (f : polynomial ℝ) (k : ℕ) : coeff ℝ k ((f : power_series ℝ) * (harb_b f))
+--   ∈ set.range (coe : ℤ → ℝ) :=
+--  begin sorry,
+--  end
 
-lemma aux_b_disk (s : ℕ) (x : ℝ) (hx : abs x ≤ abs ξ) : tsum (eval_blah (harb_b (harb_f s))) ≠ 0 :=
-sorry
+-- lemma aux_b_disk (s : ℕ) (x : ℝ) (hx : abs x ≤ abs ξ) : tsum (eval_blah (harb_b (harb_f s))) ≠ 0 :=
+-- sorry
 
--- theorem harbater_15 : ∃ F : power_series ℤ,
--- eval_blah (F : power_series ℝ) = 0 :=
+-- -- theorem harbater_15 : ∃ F : power_series ℤ,
+-- -- eval_blah (F : power_series ℝ) = 0 :=
 
-end harbater
+-- end harbater
 
-section ker_theta
+section ker_theta_half
 open submodule linear_map polynomial power_series
 
 variable (r : ℝ≥0)
@@ -409,15 +409,45 @@ def θ.to_linear : (laurent_measures r (Fintype.of punit)) →ₗ[ℤ] ℝ :=
 { to_fun := θ ξ r,
   map_add' := (θ_is_linear ξ r).1,
   map_smul' := (θ_is_linear ξ r).2 }
-lemma ker_θ_principal : submodule.is_principal (θ.to_linear ξ r).ker := sorry
 
-def ker_generator : (laurent_measures r (Fintype.of punit)) :=
-  @submodule.is_principal.generator _ _ _ _ _ (ker (θ.to_linear ξ r)) (ker_θ_principal ξ r)
+def θ₂.to_linear : (laurent_measures r (Fintype.of punit)) →ₗ[ℤ] ℝ := θ.to_linear (1/2 : ℝ) r
+
+lemma ker_θ₂_principal : submodule.is_principal ((θ₂.to_linear r).ker) :=
+begin
+  constructor,
+  let pos : ℕ → ℤ := λ n, (if n = 0 then -1 else if n = 1 then 2 else 0),
+  let f₀ : ℤ → ℤ := λ d : ℤ, int.rec_on d (pos) (λ n, 0),
+  use (λ s, f₀),
+  sorry,
+  ext,
+  split,
+  swap,
+  intro h_x,
+  obtain ⟨a, h_ax⟩ := mem_span_singleton.mp h_x,
+  apply mem_ker.mpr,
+  rw ← h_ax,
+  -- squeeze_simp,
+  simp,
+  apply or.intro_right,
+  rw θ₂.to_linear,
+  rw θ.to_linear,
+  simp,
+  rw θ,
+  simp,
+  let s : set ℤ := {0, 1},
+  have hf : support f₀ ⊆ s, sorry,
+  -- rw ← [has_sum_subtype_iff_of_support_subset hf],
+  sorry, sorry,
+end
+
+
+def ker_θ₂_generator : (laurent_measures r (Fintype.of punit)) :=
+  @submodule.is_principal.generator _ _ _ _ _ (ker (θ₂.to_linear r)) (ker_θ₂_principal r)
 
 /- [FAE] The following lemma needs that `(laurent_measures r (Fintype.of punit))` have a `mul`; but
 I don't know if the lemma is actually needed -/
 -- lemma ker_generator_non_zerodivisor : is_regular (ker_generator ξ) :=
 
-end ker_theta
+end ker_theta_half
 
 end theta
