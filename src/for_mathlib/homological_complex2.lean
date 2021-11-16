@@ -1,22 +1,19 @@
-import algebra.homology.homological_complex
+import algebra.homology.additive
+import category_theory.preadditive.functor_category
 
 open category_theory category_theory.limits
 
 namespace homological_complex
 
-variables {ι X 𝒜 : Type*} [category X] [category 𝒜] [has_zero_morphisms 𝒜] {c : complex_shape ι}
+variables {ι X 𝒜 : Type*} [category X] [category 𝒜] [preadditive 𝒜] {c : complex_shape ι}
+
+instance evaluation_additive (x : X) : ((evaluation X 𝒜).obj x).additive :=
+{ map_zero' := sorry, -- redundant
+  map_add' := λ F G f g, by simp only [evaluation_obj_map, nat_trans.app_add] }
 
 @[simps]
 def functor_eval.obj (x : X) : homological_complex (X ⥤ 𝒜) c ⥤ homological_complex 𝒜 c :=
-{ obj := λ C,
-  { X := λ i, (C.X i).obj x,
-    d := λ i j, (C.d i j).app x,
-    shape' := λ i j hij, by rw [C.shape i j hij, zero_app],
-    d_comp_d' := λ i j k hij hjk, by rw [← nat_trans.comp_app, C.d_comp_d, zero_app] },
-  map := λ C D f,
-  { f := λ i, (f.f i).app x,
-    comm' := λ i j hij, by rw [← nat_trans.comp_app, ← nat_trans.comp_app, f.comm] } }
-.
+((evaluation X 𝒜).obj x).map_homological_complex _
 
 @[simps]
 def functor_eval : X ⥤ homological_complex (X ⥤ 𝒜) c ⥤ homological_complex 𝒜 c :=

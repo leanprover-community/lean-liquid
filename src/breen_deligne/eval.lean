@@ -1,5 +1,6 @@
 import category_theory.preadditive.functor_category
 import category_theory.limits.shapes.finite_products
+import category_theory.limits.shapes.biproducts
 
 import for_mathlib.homological_complex2
 
@@ -29,6 +30,19 @@ attribute [simps] comp_hom
 
 end preadditive
 end category_theory
+
+namespace homotopy
+
+variables {ι 𝒜 : Type*} [category 𝒜] [preadditive 𝒜] {c : complex_shape ι}
+variables {C D : homological_complex 𝒜 c} {f g : C ⟶ D}
+
+@[simps]
+def congr (h : homotopy f g) (f' g' : C ⟶ D) (hf : f = f') (hg : g = g') :
+  homotopy f' g' :=
+{ comm := by simpa only [hf, hg] using h.comm,
+  .. h }
+
+end homotopy
 
 namespace breen_deligne
 
@@ -137,8 +151,8 @@ open universal_map
 def eval_functor : data ⥤ chain_complex (𝒜 ⥤ 𝒜) ℕ :=
 (eval_Pow_functor F).map_homological_complex _
 
-def eval_functor.obj (A : 𝒜) : data ⥤ chain_complex 𝒜 ℕ :=
-eval_functor F ⋙ homological_complex.functor_eval.obj A
+def eval_functor' : data ⥤ 𝒜 ⥤ chain_complex 𝒜 ℕ :=
+eval_functor F ⋙ homological_complex.functor_eval.flip
 
 -- @[simps]
 -- def eval_functor.obj (M : 𝒜) : chain_complex 𝒜 ℕ :=
@@ -175,14 +189,89 @@ namespace package
 
 open universal_map
 
-variables (BD' : package)
+variables (BD' : package) (A : 𝒜)
 
 def eval_homotopy := (eval_Pow_functor F).map_homotopy BD'.homotopy
+
+def eval_homotopy' (A : 𝒜) :=
+(eval_Pow_functor F ⋙ (evaluation _ _).obj A).map_homotopy BD'.homotopy
+
+local attribute [instance] has_binary_biproducts_of_finite_biproducts
+
+@[simps]
+def Biprod : 𝒜 ⥤ 𝒜 :=
+{ obj := λ A, A ⊞ A,
+  map := λ A B f, biprod.map f f,
+  map_id' := λ A,
+    by ext; simp only [biprod.inl_map, biprod.inr_map, category.id_comp, category.comp_id],
+  map_comp' := λ A B C f g,
+    by ext; simp only [biprod.inl_map_assoc, biprod.inr_map_assoc, category.assoc] }
+.
+
+@[simps {fully_applied := ff}]
+def Biprod_iso_Pow_two_components (A : 𝒜) : A ⊞ A ≅ (Pow 2).obj A :=
+{ hom := biprod.desc
+    (biproduct.ι (λ i : ulift (fin 2), A) ⟨0⟩)
+    (biproduct.ι (λ i : ulift (fin 2), A) ⟨1⟩),
+  inv := biprod.lift (biproduct.π _ ⟨0⟩) (biproduct.π _ ⟨1⟩),
+  hom_inv_id' := begin
+    ext;
+    simp only [biprod.lift_fst, biprod.lift_snd, biprod.inl_desc_assoc, biprod.inr_desc_assoc,
+      biproduct.ι_π_self, category.assoc];
+    erw category.id_comp;
+    simp only [biprod.inl_fst, biprod.inl_snd, biprod.inr_fst, biprod.inr_snd];
+    rw [biproduct.ι_π_ne]; dec_trivial
+  end,
+  inv_hom_id' := begin
+    ext ⟨i⟩ ⟨j⟩,
+    erw [category.comp_id],
+    simp only [add_comp, comp_add, biprod.lift_desc, category.assoc],
+    fin_cases i with [0,1];
+    rw [biproduct.ι_π_self_assoc, biproduct.ι_π_ne_assoc, zero_comp],
+    swap 2, { dec_trivial },
+    swap 3, { dec_trivial },
+    { rw add_zero },
+    { rw zero_add }
+  end }
+.
+
+def Biprod_iso_Pow_two : (Biprod : 𝒜 ⥤ 𝒜) ≅ Pow 2 :=
+nat_iso.of_components Biprod_iso_Pow_two_components $ λ A B f,
+begin
+  ext ⟨i⟩;
+  simp only [biproduct.ι_map, Biprod_iso_Pow_two_components_hom, Biprod_map, Pow_map,
+    biprod.inl_map_assoc, biprod.inl_desc_assoc, biprod.inr_map_assoc, biprod.inr_desc_assoc,
+    biprod.inr_map, category.assoc]; sorry
+end
+
+-- def aux :
+--   (data.eval_functor' F).obj ((data.mul 2).obj BD'.data) ≅
+--   Biprod ⋙ (data.eval_functor' F).obj BD'.data :=
+-- sorry
+
+-- def foo (A : 𝒜) : _root_.homotopy
+--   (((data.eval_functor' F).obj BD'.data).map (biprod.fst + biprod.snd : A ⊞ A ⟶ A))
+--   (((data.eval_functor' F).obj BD'.data).map (biprod.fst : A ⊞ A ⟶ A) +
+--     ((data.eval_functor' F).obj BD'.data).map (biprod.snd : A ⊞ A ⟶ A)) :=
+-- begin
+--   let H := eval_homotopy' F BD' A,
+--   sorry
+-- end
+
 
 -- #check eval_homotopy F BD'
 -- eval_homotopy F BD' :
 --  homotopy (((eval_Pow_functor F).map_homological_complex (complex_shape.down ℕ)).map (BD'.data.proj 2))
 --    (((eval_Pow_functor F).map_homological_complex (complex_shape.down ℕ)).map (BD'.data.sum 2))
+
+-- #check eval_homotopy' F BD' A
+-- eval_homotopy' F BD' A :
+--   homotopy
+--     (((eval_Pow_functor F ⋙ (evaluation 𝒜 𝒜).obj A).map_homological_complex (complex_shape.down ℕ)).map
+--        (BD'.data.proj 2))
+--     (((eval_Pow_functor F ⋙ (evaluation 𝒜 𝒜).obj A).map_homological_complex (complex_shape.down ℕ)).map
+--        (BD'.data.sum 2))
+
 
 end package
 
