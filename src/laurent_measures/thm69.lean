@@ -1,15 +1,16 @@
-import for_mathlib.short_exact_sequence
+-- import for_mathlib.short_exact_sequence
 import laurent_measures.basic
 import laurent_measures.theta
 
 
 namespace thm_69
 
-open category_theory category_theory.limits theta laurent_measures
+-- open category_theory category_theory.limits
+open theta laurent_measures
 open_locale nnreal classical big_operators
 
 
-universe u
+-- universe u
 -- variable (ξ : ℝ)
 variables (r : ℝ≥0) [fact (0 < r)]
 
@@ -17,6 +18,60 @@ noncomputable theory
 
 instance (S : Fintype) : has_scalar (laurent_measures r (Fintype.of punit)) (laurent_measures r S) :=
 { smul := sorry}
+
+
+section ker_theta_half
+-- open submodule linear_map
+
+lemma θ_is_linear (ξ : ℝ) : is_linear_map ℤ (θ ξ r) := sorry
+
+noncomputable def θ₂.to_linear : (laurent_measures r (Fintype.of punit)) →ₗ[ℤ] ℝ :=
+{ to_fun := θ (1 / 2) r,
+  map_add' := (θ_is_linear r (1 / 2)).1,
+  map_smul' := (θ_is_linear r (1 / 2) ).2 }
+
+lemma ker_θ₂_principal : submodule.is_principal ((θ₂.to_linear r).ker) :=
+begin
+  -- constructor,
+  let pos : ℕ → ℤ := λ n, (if n = 0 then -1 else if n = 1 then 2 else 0),
+  let f₀ : ℤ → ℤ := λ d : ℤ, int.rec_on d (pos) (λ n, 0),
+  use (λ s, f₀),
+  sorry,
+  ext,
+  split,
+  swap,
+  sorry,
+  sorry,
+--   intro h_x,
+--   obtain ⟨a, h_ax⟩ := mem_span_singleton.mp h_x,
+--   apply mem_ker.mpr,
+--   rw ← h_ax,
+--   -- squeeze_simp,
+--   simp,
+--   apply or.intro_right,
+--   rw θ₂.to_linear,
+--   -- rw θ.to_linear,
+--   simp,
+--   rw θ,
+--   simp,
+--   simp_rw [laurent_measures.to_Rfct],
+--   let S : finset ℤ := {0, 1},
+--   have hf : function.support f₀ ⊆ S, sorry,
+--   have hf₀ : ∀ s ∉ S, ((f₀ s) : ℝ) * ((2 ^ s) : ℝ)⁻¹ = (0 : ℝ), sorry,
+--   rw [tsum_eq_sum hf₀],
+--   -- rw ← [has_sum_subtype_iff_of_support_subset hf],
+--   sorry, sorry,
+end
+
+
+def ker_θ₂_generator : (laurent_measures r (Fintype.of punit)) :=
+  @submodule.is_principal.generator _ _ _ _ _ (linear_map.ker (θ₂.to_linear r)) (ker_θ₂_principal r)
+
+/- [FAE] The following lemma needs that `(laurent_measures r (Fintype.of punit))` have a `mul`; but
+I don't know if the lemma is actually needed -/
+-- lemma ker_generator_non_zerodivisor : is_regular (ker_generator ξ) :=
+
+end ker_theta_half
 
 section SES_thm69
 
@@ -75,31 +130,31 @@ end
 /-
 From here onwards, the bundled version
 -/
-variable [imCHFPNG : has_images (CompHausFiltPseuNormGrp.{u})]
-variable [zerCHFPNG : has_zero_morphisms (CompHausFiltPseuNormGrp.{u})]
-variable [kerCHFPNG : has_kernels (CompHausFiltPseuNormGrp.{u})]
+-- variable [imCHFPNG : has_images (CompHausFiltPseuNormGrp.{u})]
+-- variable [zerCHFPNG : has_zero_morphisms (CompHausFiltPseuNormGrp.{u})]
+-- variable [kerCHFPNG : has_kernels (CompHausFiltPseuNormGrp.{u})]
 
 
 
-def SES_thm69 (S : Fintype) : @category_theory.short_exact_sequence CompHausFiltPseuNormGrp.{u} _
-  imCHFPNG zerCHFPNG kerCHFPNG :=
-{ fst := bundled.of (laurent_measures r S),
-  snd := bundled.of (laurent_measures r S),
-  trd := bundled.of (ℳ p S),
-  f :=
-  begin
-    let φ := λ (F : laurent_measures r S), (ker_θ₂_generator r) • F,
-    use φ,
-    sorry,
-    sorry,
-    sorry,
-    sorry,-- [FAE] These four are the properties that the scalar multiplication by a measure on the
-    --singleton (as endomorphism of S-measures) must satisfy
-  end,
-  g := @Θ r _ S p _ _ _,
-  mono' := sorry,
-  epi' := sorry,
-  exact' := sorry }
+-- def SES_thm69 (S : Fintype) : @category_theory.short_exact_sequence CompHausFiltPseuNormGrp.{u} _
+--   imCHFPNG zerCHFPNG kerCHFPNG :=
+-- { fst := bundled.of (laurent_measures r S),
+--   snd := bundled.of (laurent_measures r S),
+--   trd := bundled.of (ℳ p S),
+--   f :=
+--   begin
+--     let φ := λ (F : laurent_measures r S), (ker_θ₂_generator r) • F,
+--     use φ,
+--     sorry,
+--     sorry,
+--     sorry,
+--     sorry,-- [FAE] These four are the properties that the scalar multiplication by a measure on the
+--     --singleton (as endomorphism of S-measures) must satisfy
+--   end,
+--   g := @Θ r _ S p _ _ _,
+--   mono' := sorry,
+--   epi' := sorry,
+--   exact' := sorry }
 
 end SES_thm69
 
