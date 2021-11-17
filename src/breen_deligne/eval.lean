@@ -420,14 +420,24 @@ nat_iso.of_components (λ A,
         nat_trans.naturality],
   end
 .
--- def foo (A : 𝒜) : _root_.homotopy
---   (((data.eval_functor' F).obj BD'.data).map (biprod.fst + biprod.snd : A ⊞ A ⟶ A))
---   (((data.eval_functor' F).obj BD'.data).map (biprod.fst : A ⊞ A ⟶ A) +
---     ((data.eval_functor' F).obj BD'.data).map (biprod.snd : A ⊞ A ⟶ A)) :=
--- begin
---   let H := eval_homotopy' F BD' A,
---   sorry
--- end
+
+lemma foo (A : 𝒜) : _root_.homotopy
+  (((data.eval_functor' F).obj BD'.data).map (biprod.fst + biprod.snd : A ⊞ A ⟶ A))
+  (((data.eval_functor' F).obj BD'.data).map (biprod.fst : A ⊞ A ⟶ A) +
+    ((data.eval_functor' F).obj BD'.data).map (biprod.snd : A ⊞ A ⟶ A)) :=
+begin
+  refine ((eval_homotopy' F BD' A).symm.comp_left ((aux F BD').inv.app A)).congr _ _ _ _,
+  sorry,
+  { ext i,
+    dsimp [aux, eval_Pow_functor, data.eval_functor', data.eval_functor],
+    erw [nat_iso.of_components.inv_app,
+      homological_complex.hom.iso_of_components_inv_f],
+    dsimp [proj],
+    rw [add_monoid_hom.map_sum, fin.sum_univ_two, eval_Pow_of, eval_Pow_of,
+      nat_trans.app_add, whisker_right_app, whisker_right_app, comp_add,
+      ← F.map_comp, ← F.map_comp],
+    sorry }
+end
 
 
 -- #check eval_homotopy F BD'
