@@ -434,8 +434,10 @@ begin
   simp,
   rw θ,
   simp,
-  let s : set ℤ := {0, 1},
-  have hf : support f₀ ⊆ s, sorry,
+  -- let S : finset ℤ := {0, 1},
+  -- have hf : support f₀ ⊆ S, sorry,
+  -- have hf₀ : ∀ s ∉ S, f₀ s = 0, sorry,
+  -- rw [tsum_eq_sum hf₀],
   -- rw ← [has_sum_subtype_iff_of_support_subset hf],
   sorry, sorry,
 end
