@@ -11,8 +11,18 @@ open_locale nnreal classical big_operators
 
 
 -- universe u
--- variable (ξ : ℝ)
-variables (r : ℝ≥0) [fact (0 < r)]
+variables (p : ℝ≥0) [fact (0 < p)] [fact (p < 1)]
+variables (r : ℝ≥0) [fact (0 < r)] [fact (r < 1)]
+-- variables (r : ℝ≥0) [fact ((1 / 2 : ℝ) ^ p.1 = r)]
+
+lemma r_pos : 0 < r ∧ r < 1 := sorry
+
+lemma r_one : r < 1 := sorry
+
+lemma half_ineq : (1 / 2 : ℝ) < r :=
+begin
+  sorry,
+end
 
 noncomputable theory
 
@@ -23,14 +33,30 @@ instance (S : Fintype) : has_scalar (laurent_measures r (Fintype.of punit)) (lau
 section ker_theta_half
 -- open submodule linear_map
 
-lemma θ_is_linear (ξ : ℝ) : is_linear_map ℤ (θ ξ r) := sorry
+def θₗ : (laurent_measures r (Fintype.of punit)) →ₗ[ℤ] ℝ :=
+{ to_fun := λ F, tsum (λ n, (F punit.star n) * (1 / 2 : ℝ) ^ n),
+  map_add' :=
+   begin
+    intros F G,
+    rw ← tsum_add,
+    apply tsum_congr,
+    intro m,
+    rw [← add_mul, mul_eq_mul_right_iff],
+    apply or.intro_left,
+    rw [← int.cast_add, int.cast_inj],
+    apply laurent_measures.add_apply,
+    sorry, sorry,
+  end,
+  map_smul' := sorry }
 
-noncomputable def θ₂.to_linear : (laurent_measures r (Fintype.of punit)) →ₗ[ℤ] ℝ :=
-{ to_fun := θ (1 / 2) r,
-  map_add' := (θ_is_linear r (1 / 2)).1,
-  map_smul' := (θ_is_linear r (1 / 2) ).2 }
+-- lemma θ_is_linear (ξ : ℝ) : is_linear_map ℤ (θ ξ r) := sorry
 
-lemma ker_θ₂_principal : submodule.is_principal ((θ₂.to_linear r).ker) :=
+-- noncomputable def θ₂.to_linear : (laurent_measures r (Fintype.of punit)) →ₗ[ℤ] ℝ :=
+-- { to_fun := θ (1 / 2) r,
+--   map_add' := (θ_is_linear r (1 / 2)).1,
+--   map_smul' := (θ_is_linear r (1 / 2) ).2 }
+
+lemma ker_θ₂_principal : submodule.is_principal ((θₗ r).ker) :=
 begin
   -- constructor,
   let pos : ℕ → ℤ := λ n, (if n = 0 then -1 else if n = 1 then 2 else 0),
@@ -40,18 +66,18 @@ begin
   ext,
   split,
   swap,
-  sorry,
-  sorry,
---   intro h_x,
---   obtain ⟨a, h_ax⟩ := mem_span_singleton.mp h_x,
---   apply mem_ker.mpr,
---   rw ← h_ax,
---   -- squeeze_simp,
---   simp,
---   apply or.intro_right,
+  intro h_x,
+  -- sorry,
+  -- sorry,
+  obtain ⟨a, h_ax⟩ := mem_span_singleton.mp h_x,
+  apply mem_ker.mpr,
+  rw ← h_ax,
+  simp,
+  apply or.intro_right,
+  -- rw θₗ,
 --   rw θ₂.to_linear,
 --   -- rw θ.to_linear,
---   simp,
+  -- simp,
 --   rw θ,
 --   simp,
 --   simp_rw [laurent_measures.to_Rfct],
@@ -65,7 +91,7 @@ end
 
 
 def ker_θ₂_generator : (laurent_measures r (Fintype.of punit)) :=
-  @submodule.is_principal.generator _ _ _ _ _ (linear_map.ker (θ₂.to_linear r)) (ker_θ₂_principal r)
+  @submodule.is_principal.generator _ _ _ _ _ (linear_map.ker (θₗ r)) (ker_θ₂_principal r)
 
 /- [FAE] The following lemma needs that `(laurent_measures r (Fintype.of punit))` have a `mul`; but
 I don't know if the lemma is actually needed -/
@@ -78,43 +104,43 @@ section SES_thm69
 local notation `ℳ` := real_measures
 local notation `𝑓` := (ker_θ₂_generator r)
 variable (S : Fintype)
-variables (p : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)] [fact ((1/2 : ℝ) ^ (p : ℝ) = r)]
+-- variables (p : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)] [fact ((1/2 : ℝ) ^ (p : ℝ) = r)]
 
 include r
 
-/-- This `θ₂` is the "measurification" of the map `θ₂.to_linear` of
+/-- This `θ₂` is the "measurification" of the map `θₗ` of
 Theorem 6.9. Thus, `to_meas_θ` is the map inducing the isomorphism of Theorem 6.9 (2)-/
 def θ₂ : laurent_measures r S → ℳ p S :=
-λ F s, θ₂.to_linear r ⟨(λ _, F s), (λ _, F.2 s)⟩
+λ F s, θₗ r ⟨(λ _, F s), (λ _, F.2 s)⟩
 
 lemma θ₂_zero :
- (θ₂ r S p (0 : laurent_measures r S)) = 0 := sorry
+ (θ₂ p r S (0 : laurent_measures r S)) = 0 := sorry
 
 lemma θ₂_add (F G : laurent_measures r S) :
- (θ₂ r S p (F + G)) = (θ₂ r S p F) + (θ₂ r S p G) := sorry
+ (θ₂ p r S (F + G)) = (θ₂ p r S F) + (θ₂ p r S G) := sorry
 
 /--This `lemma to_meas_θ_bound` is precisely Prop 7.2 (3) of `Analytic.pdf`-/
 lemma θ₂_bound : ∃ (C : ℝ≥0), ∀ (c : ℝ≥0) (F : laurent_measures r S),
-  ∥ F ∥ ≤ c → ∥ θ₂ r S p F ∥₊ ≤ C * c := sorry
+  ∥ F ∥ ≤ c → ∥ θ₂ p r S F ∥₊ ≤ C * c := sorry
 
 def to_add_hom_θ₂ : add_hom (laurent_measures r S) (ℳ p S) :=
-add_monoid_hom.mk' (λ F, θ₂ r S p F)
+add_monoid_hom.mk' (λ F, θ₂ p r S F)
 begin
     intros a b,
-    have := θ₂_add r S p a b,
+    have := θ₂_add p r S a b,
     exact this,
   end
 
 def Θ : comphaus_filtered_pseudo_normed_group_hom (laurent_measures r S) (ℳ p S) :=
-  { to_fun := θ₂ r S p,
-    bound' := θ₂_bound r S p,
+  { to_fun := θ₂ p r S,
+    bound' := θ₂_bound p r S,
     continuous' := sorry, -- [FAE] I guess that this is Prop 7.2 (4) of `Analytic.pdf`
     -- .. to_add_hom_meas_θ ξ r S p,
-    map_add' := (to_add_hom_θ₂ r S p).2,
+    map_add' := (to_add_hom_θ₂ p r S).2,
     map_zero' := sorry }
 
 
-lemma chain_complex_thm69 (F : laurent_measures r S) : Θ r S p (𝑓 • F) = 0 :=
+lemma chain_complex_thm69 (F : laurent_measures r S) : Θ p r S (𝑓 • F) = 0 :=
 begin
   funext s,
   sorry,
