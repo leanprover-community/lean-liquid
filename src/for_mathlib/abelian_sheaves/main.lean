@@ -357,15 +357,6 @@ begin
   rw coim_to_im_eq,
   suffices : is_iso (coim_to_im' η),
   { resetI, apply is_iso.comp_is_iso },
-  dsimp only [coim_to_im'],
-  /-
-  suffices : is_iso (coim_to_im'_aux η),
-  { resetI,
-    have hh := J.is_iso_sheafify_lift_of_is_iso (coim_to_im'_aux η) (kernel_sheaf _).2,
-    obtain ⟨e,h1,h2⟩ := hh,
-    use [e, h1, h2] },
-  dsimp [coim_to_im'_aux],
-  -/
   sorry
 end
 
