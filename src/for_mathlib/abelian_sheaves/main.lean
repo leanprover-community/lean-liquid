@@ -153,6 +153,18 @@ def cokernel_iso_cokernel_sheaf {F G : Sheaf J A} (η : F ⟶ G) :
   limits.cokernel η ≅ cokernel_sheaf η :=
 (limits.colimit.is_colimit _).cocone_point_unique_up_to_iso (is_colimit_cokernel_cofork _)
 
+@[simp]
+lemma cokernel_iso_cokernel_sheaf_hom_π {F G : Sheaf J A} (η : F ⟶ G) :
+  limits.cokernel.π η ≫ (cokernel_iso_cokernel_sheaf η).hom = cokernel_π _ :=
+((limits.colimit.is_colimit _).unique_up_to_iso (is_colimit_cokernel_cofork η)).hom.w
+  limits.walking_parallel_pair.one
+
+@[simp]
+lemma cokernel_iso_cokernel_sheaf_inv_π {F G : Sheaf J A} (η : F ⟶ G) :
+  cokernel_π η ≫ (cokernel_iso_cokernel_sheaf η).inv = limits.cokernel.π η :=
+by simp only [← cokernel_iso_cokernel_sheaf_hom_π,
+  category.assoc, iso.hom_inv_id, category.comp_id]
+
 end cokernels
 
 end Sheaf
