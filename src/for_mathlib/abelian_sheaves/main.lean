@@ -352,12 +352,25 @@ variables [∀ (X : C), limits.has_colimits_of_shape (J.cover X)ᵒᵖ A]
 variables [∀ (X : C), limits.preserves_colimits_of_shape (J.cover X)ᵒᵖ (forget A)]
 variables [reflects_isomorphisms (forget A)]
 
+def kernel_cokernel_π_iso {F G : Sheaf J A} (η : F ⟶ G) :
+  J.sheafify (limits.kernel (limits.cokernel.π ((Sheaf_to_presheaf J A).map η))) ≅
+  limits.kernel ((Sheaf_to_presheaf J A).map (cokernel_π η)) := sorry
+
+open grothendieck_topology
+
+lemma coim_to_im'_eq {F G : Sheaf J A} (η : F ⟶ G) :
+  (Sheaf_to_presheaf J A).map (coim_to_im' η) =
+  (sheafification J A).map (coim_to_im _) ≫ (kernel_cokernel_π_iso η).hom := sorry
+
 instance is_iso_coim_to_im {F G : Sheaf J A} (η : F ⟶ G) : is_iso (coim_to_im η) :=
 begin
   rw coim_to_im_eq,
   suffices : is_iso (coim_to_im' η),
   { resetI, apply is_iso.comp_is_iso },
-  sorry
+  suffices : is_iso ((Sheaf_to_presheaf J A).map (coim_to_im' η)),
+  { resetI, apply is_iso_of_fully_faithful (Sheaf_to_presheaf J A) },
+  rw coim_to_im'_eq,
+  apply is_iso.comp_is_iso,
 end
 
 instance : abelian (Sheaf J A) :=
