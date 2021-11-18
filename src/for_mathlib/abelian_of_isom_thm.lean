@@ -12,8 +12,10 @@ variables {C : Type*} [category C] [additive_category C] [has_kernels C] [has_co
 
 noncomputable theory
 
-abbreviation coim {X Y : C} (f : X ⟶ Y) := cokernel (kernel.ι f)
-abbreviation im {X Y : C} (f : X ⟶ Y) := kernel (cokernel.π f)
+abbreviation coim {C : Type*} [category C] [has_zero_morphisms C]
+  [has_kernels C] [has_cokernels C] {X Y : C} (f : X ⟶ Y) := cokernel (kernel.ι f)
+abbreviation im {C : Type*} [category C] [has_zero_morphisms C]
+  [has_kernels C] [has_cokernels C] {X Y : C} (f : X ⟶ Y) := kernel (cokernel.π f)
 
 @[simps]
 def im_mono_factorisation {X Y : C} (f : X ⟶ Y) : mono_factorisation f :=
@@ -29,8 +31,11 @@ def im_mono_factorisation {X Y : C} (f : X ⟶ Y) : mono_factorisation f :=
   kernel.ι f ≫ F.e = 0 :=
 by rw [← cancel_mono F.m, zero_comp, category.assoc, F.fac, kernel.condition]
 
-def coim_to_im {X Y : C} (f : X ⟶ Y) : coim f ⟶ im f :=
-cokernel.desc _ (im_mono_factorisation f).e $ (im_mono_factorisation f).kernel_ι_comp
+def coim_to_im {C : Type*} [category C] [has_zero_morphisms C]
+  [has_kernels C] [has_cokernels C] {X Y : C} (f : X ⟶ Y) : coim f ⟶ im f :=
+cokernel.desc _ (kernel.lift _ f (cokernel.condition f)) $ by { ext, simp }
+
+--cokernel.desc _ (im_mono_factorisation f).e $ (im_mono_factorisation f).kernel_ι_comp
 
 def im_image_factorisation {X Y : C} (f : X ⟶ Y) [is_iso (coim_to_im f)] :
   image_factorisation f :=
