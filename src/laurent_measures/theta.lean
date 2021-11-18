@@ -318,7 +318,8 @@ section theta_surj
 
 /--The map `θ` defined in Theorem 6.9 of Analytic.pdf. Given the definition of `tsum` we do not need to require that `r ≤ ξ` to simply define `θ`.-/
 def θ (r : ℝ≥0) : (laurent_measures r (Fintype.of punit)) → ℝ :=
-  λ F, tsum (λ n, (F.to_Rfct r n) * ξ ^ n)
+  λ F, tsum (λ n, (F punit.star n) * ξ ^ n)
+
 
 theorem θ_surjective (x : ℝ) (r : ℝ≥0) [fact (r < 1)] [fact (0 < ξ)] [fact (ξ < 1)] :
   ∃ (F : laurent_measures r (Fintype.of punit)), (θ ξ r F) = x :=
@@ -356,47 +357,6 @@ end
 
 end theta_surj
 
--- section harbater
--- open polynomial power_series
-
--- def harb_f (n : ℕ) : polynomial ℝ := sorry
-
--- lemma aux_harb_f₁ (n : ℕ) (x : ℝ) (abs x ≤ abs ξ) (x ≠ ξ) :
---   root_multiplicity x (harb_f n) = 0 := sorry
--- -- [fact (0 < r)] [fact (r < 1)] [fact (0 < ξ)]
-
--- lemma aux_harb_f₂ (n : ℕ) : root_multiplicity ξ (harb_f n) = 1 := sorry
-
--- lemma aux_harb_f₃ (n : ℕ) : (harb_f n) %ₘ (X)^n = 1 := sorry
-
--- def harb_b (f : polynomial ℝ) : power_series ℝ := sorry
-
--- lemma aux_b_half (f : polynomial ℝ) (k : ℕ) : | coeff ℝ k (harb_b f) | ≤ 1 / 2 := sorry
-
--- variable (b : power_series ℝ)
--- -- variable (k : ℕ)
--- -- #check λ k, (power_series.coeff ℝ k b) * ξ ^ k
-
--- def eval_blah (b : power_series ℝ) : ℝ → (ℕ → ℝ) := λ x k,
---   (power_series.coeff ℝ k b) * x ^ k
-
--- instance : has_coe (power_series ℤ) (power_series ℝ) := ⟨λ F n, ⟨F n⟩⟩
-
--- lemma aux_b_conv (f : polynomial ℝ) (x : ℝ) (hx : abs x ≤ 1) :
---   summable (eval_blah (harb_b f) x) := sorry
-
--- lemma aux_b_int (f : polynomial ℝ) (k : ℕ) : coeff ℝ k ((f : power_series ℝ) * (harb_b f))
---   ∈ set.range (coe : ℤ → ℝ) :=
---  begin sorry,
---  end
-
--- lemma aux_b_disk (s : ℕ) (x : ℝ) (hx : abs x ≤ abs ξ) : tsum (eval_blah (harb_b (harb_f s))) ≠ 0 :=
--- sorry
-
--- -- theorem harbater_15 : ∃ F : power_series ℤ,
--- -- eval_blah (F : power_series ℝ) = 0 :=
-
--- end harbater
 
 
 end theta
