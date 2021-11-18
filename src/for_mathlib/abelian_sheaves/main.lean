@@ -99,5 +99,61 @@ by simp only [← kernel_iso_kernel_sheaf_hom_ι, iso.inv_hom_id_assoc]
 
 end kernels
 
+section cokernels
+
+variables [limits.has_zero_morphisms A]
+-- TODO: Add some instances that derive the following from `[has_cokernels A]`.
+variables [limits.has_colimits_of_shape limits.walking_parallel_pair A]
+
+-- We will need to sheafify....
+variables [concrete_category.{max v u} A]
+variables [∀ (P : Cᵒᵖ ⥤ A) (X : C) (S : J.cover X), limits.has_multiequalizer (S.index P)]
+variables [limits.preserves_limits (forget A)]
+variables [∀ (X : C), limits.has_colimits_of_shape (J.cover X)ᵒᵖ A]
+variables [∀ (X : C), limits.preserves_colimits_of_shape (J.cover X)ᵒᵖ (forget A)]
+variables [reflects_isomorphisms (forget A)]
+
+def cokernel_sheaf {F G : Sheaf J A} (η : F ⟶ G) : Sheaf J A :=
+{ val := J.sheafify (limits.cokernel ((Sheaf_to_presheaf J A).map η)), -- ;-)
+  property := grothendieck_topology.plus.is_sheaf_plus_plus _ _ }
+
+def cokernel_π {F G : Sheaf J A} (η : F ⟶ G) : G ⟶ cokernel_sheaf η :=
+show (Sheaf_to_presheaf J A).obj G ⟶ J.sheafify (limits.cokernel ((Sheaf_to_presheaf J A).map η)),
+from limits.cokernel.π ((Sheaf_to_presheaf J A).map η) ≫
+  J.to_sheafify (limits.cokernel ((Sheaf_to_presheaf J A).map η))
+
+def cokernel_cofork {F G : Sheaf J A} (η : F ⟶ G) : limits.cofork η 0 :=
+limits.cofork.of_π (cokernel_π η) begin
+  dsimp only [cokernel_π],
+  erw [← category.assoc, limits.cokernel.condition],
+  simp,
+end
+
+def is_colimit_cokernel_cofork {F G : Sheaf J A} (η : F ⟶ G) :
+  limits.is_colimit (cokernel_cofork η) :=
+limits.is_colimit_aux _ (λ S,
+  J.sheafify_lift (limits.cokernel.desc ((Sheaf_to_presheaf J A).map η) S.π S.condition) (S.X.2))
+begin
+  intros S,
+  change (_ ≫ _) ≫ _ = _,
+  rw [category.assoc, J.to_sheafify_sheafify_lift, limits.cokernel.π_desc],
+end begin
+  intros S m hm,
+  apply J.sheafify_lift_unique,
+  change (_ ≫ _) ≫ _ = _ at hm,
+  rw category.assoc at hm,
+  ext1,
+  rw [hm, limits.cokernel.π_desc],
+end
+
+-- Sanity check
+example : limits.has_cokernels (Sheaf J A) := by apply_instance
+
+def cokernel_iso_cokernel_sheaf {F G : Sheaf J A} (η : F ⟶ G) :
+  limits.cokernel η ≅ cokernel_sheaf η :=
+(limits.colimit.is_colimit _).cocone_point_unique_up_to_iso (is_colimit_cokernel_cofork _)
+
+end cokernels
+
 end Sheaf
 end category_theory
