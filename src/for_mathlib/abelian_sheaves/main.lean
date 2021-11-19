@@ -400,7 +400,7 @@ begin
   apply is_iso.comp_is_iso,
 end
 
-instance : abelian (Sheaf J A) :=
+instance abelian : abelian (Sheaf J A) :=
 abelian_of_coim_to_im (λ F G η, infer_instance)
 
 end abelian

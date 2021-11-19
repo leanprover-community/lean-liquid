@@ -1,6 +1,10 @@
 import category_theory.abelian.projective
 import pseudo_normed_group.category
 import topology.continuous_function.algebra
+import algebra.category.Group.abelian
+import algebra.category.Group.filtered_colimits
+
+import for_mathlib.abelian_sheaves.main
 
 import condensed.basic
 
@@ -15,9 +19,24 @@ universes v u
 
 namespace Condensed
 
-instance : preadditive (Condensed Ab.{u+1}) := sorry
+--instance : preadditive (Condensed Ab.{u+1}) := sorry
 
-instance : abelian (Condensed Ab.{u+1}) := sorry
+noncomputable theory
+
+example {J : Type (u+1)} [small_category J] [is_filtered J] :
+  limits.preserves_colimits_of_shape J (forget Ab.{u+1}) := by apply_instance
+
+-- I don't know why this is needed...
+instance (X : Profinite.{u}): limits.preserves_colimits_of_shape (proetale_topology.cover X)ᵒᵖ
+  (forget Ab.{u+1}) := infer_instance
+
+instance : abelian (Condensed Ab.{u+1}) :=
+begin
+  delta Condensed,
+  -- I don't know why this is needed either...
+  apply @category_theory.Sheaf.abelian.{(u+2) u (u+1)}
+    Profinite.{u} _ proetale_topology Ab.{u+1} _ _ _ _ _ _ _ _,
+end
 
 instance : enough_projectives (Condensed Ab.{u+1}) := sorry
 
