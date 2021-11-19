@@ -352,11 +352,38 @@ variables [∀ (X : C), limits.has_colimits_of_shape (J.cover X)ᵒᵖ A]
 variables [∀ (X : C), limits.preserves_colimits_of_shape (J.cover X)ᵒᵖ (forget A)]
 variables [reflects_isomorphisms (forget A)]
 
+open grothendieck_topology
+
 def kernel_cokernel_π_iso {F G : Sheaf J A} (η : F ⟶ G) :
   J.sheafify (limits.kernel (limits.cokernel.π ((Sheaf_to_presheaf J A).map η))) ≅
   limits.kernel ((Sheaf_to_presheaf J A).map (cokernel_π η)) := sorry
-
-open grothendieck_topology
+/-
+{ hom := J.sheafify_lift (limits.kernel.map _ _ (𝟙 _) (J.to_sheafify _) sorry) sorry,
+  inv := begin
+    let e : J.sheafify ((Sheaf_to_presheaf J A).obj G) ⟶
+      J.sheafify (limits.cokernel ((Sheaf_to_presheaf J A).map η)) :=
+        (sheafification J A).map (limits.cokernel.π _),
+    let ee : limits.kernel ((Sheaf_to_presheaf J A).map (cokernel_π η)) ⟶ limits.kernel e,
+    { refine limits.kernel.map _ _ (J.to_sheafify _) (𝟙 _) _,
+      rw category.comp_id,
+      dsimp only [e],
+      rw ← grothendieck_topology.to_sheafification_app,
+      rw ← (to_sheafification J A).naturality,
+      refl },
+    refine ee ≫ _,
+    dsimp only [e],
+    change limits.kernel ((Sheaf_to_presheaf J A).map ((presheaf_to_Sheaf J A).map _)) ⟶ _,
+    refine (Sheaf_to_presheaf J A).map (kernel_iso_kernel_sheaf _).inv ≫ _,
+    change _ ⟶ (Sheaf_to_presheaf J A).obj ((presheaf_to_Sheaf J A).obj _),
+    refine (Sheaf_to_presheaf J A).map _,
+    haveI : is_left_adjoint (presheaf_to_Sheaf J A) := sorry,
+    -- Now we need to use the fact that finite limits commute with sheafification,
+    -- i.e. that sheafification is left exact.
+    sorry
+  end,
+  hom_inv_id' := sorry,
+  inv_hom_id' := sorry }
+-/
 
 lemma coim_to_im'_eq {F G : Sheaf J A} (η : F ⟶ G) :
   (Sheaf_to_presheaf J A).map (coim_to_im' η) =
