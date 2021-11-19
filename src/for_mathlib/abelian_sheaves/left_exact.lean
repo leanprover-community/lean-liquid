@@ -17,8 +17,37 @@ variables [∀ (X : C), has_colimits_of_shape (J.cover X)ᵒᵖ D]
 variables [∀ (X : C), preserves_colimits_of_shape (J.cover X)ᵒᵖ (forget D)]
 variables [reflects_isomorphisms (forget D)]
 
-instance {K : Type (max v u)} [small_category K] [fin_category K] :
-  preserves_limits_of_shape K (J.plus_functor D) := sorry
+def is_limit_evaluation_map_plus_functor
+  {K : Type (max v u)} [small_category K] [fin_category K] [has_limits_of_shape K D]
+  {F : K ⥤ Cᵒᵖ ⥤ D} (E : cone F) (hE : is_limit E) (X : Cᵒᵖ)
+  (T : is_limit (((evaluation Cᵒᵖ D).obj X).map_cone E)) :
+  is_limit (((evaluation Cᵒᵖ D).obj X).map_cone ((J.plus_functor D).map_cone E)) := sorry
+
+noncomputable def is_limit_plus_of_is_limit {K : Type (max v u)}
+  [small_category K] [fin_category K] [has_limits_of_shape K D]
+  {F : K ⥤ Cᵒᵖ ⥤ D} (E : cone F) (hE : is_limit E) :
+  is_limit ((J.plus_functor D).map_cone E) :=
+begin
+  apply evaluation_jointly_reflects_limits,
+  intros X,
+  apply is_limit_evaluation_map_plus_functor _ _ hE,
+  swap, apply_instance,
+  apply is_limit_of_preserves _ hE,
+  apply_instance,
+end
+
+noncomputable
+instance {K : Type (max v u)} [small_category K] [fin_category K] [has_limits_of_shape K D] :
+  preserves_limits_of_shape K (J.plus_functor D) :=
+begin
+  constructor,
+  dsimp,
+  intros F,
+  constructor,
+  intros E hE,
+  apply is_limit_plus_of_is_limit _ _ hE,
+  apply_instance,
+end
 
 noncomputable
 instance preserves_limit_of_shape_presheaf_to_Sheaf {K : Type (max v u)} [small_category K]
