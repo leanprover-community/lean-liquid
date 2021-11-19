@@ -34,19 +34,29 @@ def mk_cone_aux {K : Type (max v u)} [small_category K] [fin_category K] [has_li
 
 open opposite
 
---noncomputable
+/-
+noncomputable
+def test {K : Type (max v u)} [small_category K] [fin_category K]
+  [has_limits_of_shape K D] {F : K ⥤ Cᵒᵖ ⥤ D} (X : Cᵒᵖ) :
+  K × (J.cover X.unop) ⥤ D :=
+{ obj := λ t, (J.diagram (F.obj t.1) X.unop).obj (op t.2),
+  map := λ t1 t2 f, _ ≫ (J.diagram (F.obj t2.1) X.unop).map f.2.op ≫ _,
+  map_id' := _,
+  map_comp' := _ }
+-/
+
 def is_limit_mk_cone_aux {K : Type (max v u)} [small_category K] [fin_category K]
   [has_limits_of_shape K D] {F : K ⥤ Cᵒᵖ ⥤ D} (E : cone F) (hE : is_limit E) (X : Cᵒᵖ) :
   is_limit (mk_cone_aux J E X) := sorry
 /-
 { lift := λ S, begin
     dsimp [mk_cone_aux],
+
   end,
   fac' := _,
   uniq' := _ }
 -/
 
---noncomputable
 def is_limit_evaluation_map_plus_functor
   {K : Type (max v u)} [small_category K] [fin_category K] [has_limits_of_shape K D]
   {F : K ⥤ Cᵒᵖ ⥤ D} (E : cone F) (hE : is_limit E) (X : Cᵒᵖ) :
