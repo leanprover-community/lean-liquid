@@ -17,11 +17,45 @@ variables [∀ (X : C), has_colimits_of_shape (J.cover X)ᵒᵖ D]
 variables [∀ (X : C), preserves_colimits_of_shape (J.cover X)ᵒᵖ (forget D)]
 variables [reflects_isomorphisms (forget D)]
 
+noncomputable
+def mk_cone_aux {K : Type (max v u)} [small_category K] [fin_category K] [has_limits_of_shape K D]
+  {F : K ⥤ Cᵒᵖ ⥤ D} (E : cone F) (X : Cᵒᵖ) :
+  cone (F ⋙ J.plus_functor D ⋙ (evaluation _ _).obj X) :=
+{ X := (J.plus_obj E.X).obj X,
+  π :=
+  { app := λ k, ((J.plus_functor D).map (E.π.app k)).app X,
+    naturality' := begin
+      intros i j f,
+      dsimp only [functor.comp_map, evaluation],
+      conv_lhs { congr, dsimp },
+      erw category.id_comp,
+      rw [← nat_trans.comp_app, ← (J.plus_functor D).map_comp, E.w f],
+    end } }
+
+open opposite
+
+--noncomputable
+def is_limit_mk_cone_aux {K : Type (max v u)} [small_category K] [fin_category K]
+  [has_limits_of_shape K D] {F : K ⥤ Cᵒᵖ ⥤ D} (E : cone F) (hE : is_limit E) (X : Cᵒᵖ) :
+  is_limit (mk_cone_aux J E X) := sorry
+/-
+{ lift := λ S, begin
+    dsimp [mk_cone_aux],
+  end,
+  fac' := _,
+  uniq' := _ }
+-/
+
+--noncomputable
 def is_limit_evaluation_map_plus_functor
   {K : Type (max v u)} [small_category K] [fin_category K] [has_limits_of_shape K D]
-  {F : K ⥤ Cᵒᵖ ⥤ D} (E : cone F) (hE : is_limit E) (X : Cᵒᵖ)
-  (T : is_limit (((evaluation Cᵒᵖ D).obj X).map_cone E)) :
-  is_limit (((evaluation Cᵒᵖ D).obj X).map_cone ((J.plus_functor D).map_cone E)) := sorry
+  {F : K ⥤ Cᵒᵖ ⥤ D} (E : cone F) (hE : is_limit E) (X : Cᵒᵖ) :
+  is_limit (((evaluation Cᵒᵖ D).obj X).map_cone ((J.plus_functor D).map_cone E)) :=
+begin
+  change is_limit ((J.plus_functor D ⋙ (evaluation Cᵒᵖ D).obj X).map_cone E),
+  apply is_limit_mk_cone_aux _ _ hE,
+  apply_instance
+end
 
 noncomputable def is_limit_plus_of_is_limit {K : Type (max v u)}
   [small_category K] [fin_category K] [has_limits_of_shape K D]
@@ -32,8 +66,9 @@ begin
   intros X,
   apply is_limit_evaluation_map_plus_functor _ _ hE,
   swap, apply_instance,
-  apply is_limit_of_preserves _ hE,
-  apply_instance,
+  --intros Y,
+  --apply is_limit_of_preserves _ hE,
+  --apply_instance,
 end
 
 noncomputable
