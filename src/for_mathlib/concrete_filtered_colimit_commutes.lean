@@ -49,21 +49,66 @@ def forget_colimit_limit_iso :
   (colimit.is_colimit _) ≪≫ has_colimit.iso_of_nat_iso (limit_forget_iso_forget_limit F)
 
 noncomputable
-def colimit_forget_iso_forget_colimit : (curry.obj F ⋙ colim) ⋙ forget D ≅
-  (curry.obj (F ⋙ forget D) ⋙ colim) :=
-nat_iso.of_components _ _
+def colimit_forget_iso_forget_colimit :
+  (curry.obj (F ⋙ forget D) ⋙ colim) ≅ (curry.obj F ⋙ colim) ⋙ forget D :=
+nat_iso.of_components (λ X,
+  (colimit.is_colimit ((curry.obj F).obj X ⋙ forget D)).cocone_point_unique_up_to_iso
+  (is_colimit_of_preserves (forget D) (colimit.is_colimit _)))
+begin
+  intros x y f,
+  ext1 k,
+  have := ((is_colimit_of_preserves (forget D) (colimit.is_colimit
+    ((curry.obj F).obj y))).unique_up_to_iso
+    (colimit.is_colimit ((curry.obj F).obj y ⋙ forget D))).inv.w k,
+  dsimp [is_colimit.cocone_point_unique_up_to_iso, functor.map_cocone, cocones.functoriality],
+  dsimp at this,
+  simp,
+  erw [this, colimit.ι_desc_assoc],
+  dsimp,
+  erw [← (forget D).map_comp, ← (forget D).map_comp],
+  congr' 1,
+  simp,
+end
 
 noncomputable
 def forget_limit_colimit_iso :
   (forget D).obj (limit (curry.obj F ⋙ colim)) ≅
     limit (curry.obj (F ⋙ forget D) ⋙ colim) :=
 (is_limit_of_preserves (forget D) (limit.is_limit _)).cone_point_unique_up_to_iso
-  (limit.is_limit _) ≪≫ has_limit.iso_of_nat_iso (colimit_forget_iso_forget_colimit F)
+  (limit.is_limit _) ≪≫ has_limit.iso_of_nat_iso (colimit_forget_iso_forget_colimit F).symm
 
 lemma forget_colimit_limit_to_limit_colimit_eq :
   (forget D).map (colimit_limit_to_limit_colimit F) =
   (forget_colimit_limit_iso F).hom ≫ colimit_limit_to_limit_colimit (F ⋙ forget D) ≫
-  (forget_limit_colimit_iso F).inv := sorry
+  (forget_limit_colimit_iso F).inv :=
+begin
+  rw ← iso.inv_comp_eq,
+  rw iso.eq_comp_inv,
+  ext k j : 2,
+  dsimp [forget_colimit_limit_iso, forget_limit_colimit_iso,
+    is_colimit.cocone_point_unique_up_to_iso, is_limit.cone_point_unique_up_to_iso],
+  simp only [category.assoc, colimit.ι_desc_assoc, colimit.ι_desc,
+    limit.lift_π, limit.lift_π_assoc, ι_colimit_limit_to_limit_colimit_π,
+    has_limit.iso_of_nat_iso_hom_π],
+  dsimp [functor.map_cone],
+  dsimp [has_colimit.iso_of_nat_iso, is_colimit.map],
+  rw colimit.ι_desc_assoc,
+  dsimp [cocones.precompose, limit_forget_iso_forget_limit, nat_iso.of_components,
+    is_limit.cone_point_unique_up_to_iso, colimit_forget_iso_forget_colimit,
+    is_colimit.cocone_point_unique_up_to_iso],
+  simp only [category.assoc, colimit.ι_desc_assoc],
+  dsimp [functor.map_cocone],
+  slice_lhs 2 4 { erw [← (forget D).map_comp, ← (forget D).map_comp,
+    ι_colimit_limit_to_limit_colimit_π] },
+  rw [(forget D).map_comp, category.assoc],
+  have := (is_colimit_of_preserves (forget D) (colimit.is_colimit ((curry.obj F).obj j))).fac
+    (colimit.cocone _) k,
+  erw [this, ← category.assoc], clear this,
+  have := (is_limit_of_preserves (forget D)
+    (limit.is_limit ((curry.obj (prod.swap K J ⋙ F)).obj k))).fac (limit.cone _) j,
+  erw [this], clear this,
+  refl,
+end
 
 instance [is_filtered K] [fin_category J] :
   is_iso (colimit_limit_to_limit_colimit F) :=
