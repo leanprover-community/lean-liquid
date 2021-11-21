@@ -151,6 +151,67 @@ begin
   apply_instance
 end
 
+@[simps]
+noncomputable def flip_lim_cone (F : J ⥤ K ⥤ D) :
+  cone F :=
+{ X := F.flip ⋙ lim,
+  π :=
+  { app := λ i, { app := λ k, limit.π _ _ },
+    naturality' := begin
+      intros i j f,
+      ext,
+      have := limit.w (F.flip.obj x) f,
+      dsimp at *,
+      simp [this],
+    end } }
+
+@[simps]
+noncomputable def is_limit_flip_lim_cone (F : J ⥤ K ⥤ D) :
+  is_limit (flip_lim_cone F) :=
+evaluation_jointly_reflects_limits _ (λ k,
+  is_limit.of_iso_limit (limit.is_limit (F.flip.obj k))
+    (cones.ext (has_limit.iso_of_nat_iso $ nat_iso.of_components
+      (λ j, eq_to_iso rfl) (by tidy)) (by tidy)))
+
+@[simps]
+noncomputable
+def flip_lim_iso_limit (F : J ⥤ K ⥤ D) :
+  F.flip ⋙ lim ≅ limit F :=
+(is_limit_flip_lim_cone F).cone_point_unique_up_to_iso (limit.is_limit _)
+
+@[simps]
+noncomputable def colim_cocone (F : J ⥤ K ⥤ D) :
+  cocone F.flip :=
+{ X := F ⋙ colim,
+  ι :=
+  { app := λ i, { app := λ k, colimit.ι _ i },
+  naturality' := λ i j f, by { ext, dsimp, simp } } }
+
+@[simps]
+noncomputable
+def is_colimit_colim_cocone (F : J ⥤ K ⥤ D) :
+  is_colimit (colim_cocone F) :=
+evaluation_jointly_reflects_colimits _ $ λ j,
+  is_colimit.of_iso_colimit (colimit.is_colimit _)
+  (cocones.ext (has_colimit.iso_of_nat_iso $ nat_iso.of_components
+    (λ k, eq_to_iso rfl) (by tidy)) (by tidy))
+
+noncomputable
+def colim_iso_colimit (F : J ⥤ K ⥤ D) :
+  F ⋙ colim ≅ colimit F.flip :=
+(is_colimit_colim_cocone F).cocone_point_unique_up_to_iso (colimit.is_colimit _)
+
+noncomputable
+def colimit_limit_to_limit_colimit' (F : J ⥤ K ⥤ D) :
+  colimit (limit F) ⟶ limit (colimit F.flip) :=
+(has_colimit.iso_of_nat_iso (flip_lim_iso_limit F)).inv ≫
+curried_colimit_limit_to_limit_colimit F ≫
+(has_limit.iso_of_nat_iso (colim_iso_colimit F)).hom
+
+instance [is_filtered K] [fin_category J] (F : J ⥤ K ⥤ D) :
+  is_iso (colimit_limit_to_limit_colimit' F) :=
+by { unfold colimit_limit_to_limit_colimit', apply_instance }
+
 end limits
 
 end category_theory
