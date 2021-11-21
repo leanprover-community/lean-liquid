@@ -1,5 +1,7 @@
 import category_theory.sites.limits
 
+import for_mathlib.concrete_filtered_colimit_commutes
+
 namespace category_theory.grothendieck_topology
 
 open category_theory
@@ -19,12 +21,126 @@ variables [reflects_isomorphisms (forget D)]
 
 noncomputable theory
 
+@[simps]
+def map_diagram {P Q : Cᵒᵖ ⥤ D} (η : P ⟶ Q) (X : C) :
+  J.diagram P X ⟶ J.diagram Q X :=
+{ app := λ W, multiequalizer.lift _ _ (λ i, multiequalizer.ι _ i ≫ η.app _) sorry,
+  naturality' := sorry }
+
+@[simps]
+def lim_diagram {K : Type (max v u)}
+  [small_category K] [fin_category K] (F : K ⥤ Cᵒᵖ ⥤ D) (X : Cᵒᵖ) :
+  K ⥤ (J.cover X.unop)ᵒᵖ ⥤ D :=
+{ obj := λ i, J.diagram (F.obj i) _,
+  map := λ i j e, J.map_diagram (F.map e) _,
+  map_id' := sorry,
+  map_comp' := sorry }
+
+def lim_diagram_cone_eval {K : Type (max v u)}
+  [small_category K] [fin_category K]
+  --[has_limits_of_shape K D]
+  {F : K ⥤ Cᵒᵖ ⥤ D}
+  (E : cone F) (X : Cᵒᵖ) (W : (J.cover X.unop)ᵒᵖ) :
+  cone ((J.lim_diagram F X).flip.obj W) :=
+{ X := (J.diagram E.X X.unop).obj W,
+  π :=
+  { app := λ k, (J.map_diagram (E.π.app k) _).app W,
+    naturality' := sorry } }
+
+open opposite
+
+def is_limit_lim_diagram_cone_eval {K : Type (max v u)}
+  [small_category K] [fin_category K]
+  [has_limits_of_shape K D]
+  {F : K ⥤ Cᵒᵖ ⥤ D}
+  (E : cone F) (hE : is_limit E) (X : Cᵒᵖ) (W : (J.cover X.unop)ᵒᵖ) :
+  is_limit (J.lim_diagram_cone_eval E X W) :=
+{ lift := λ S, multiequalizer.lift _ _ (λ i,
+    (is_limit_of_preserves ((evaluation _ D).obj (op i.Y)) hE).lift ⟨S.X,
+    { app := λ k, S.π.app k ≫ multiequalizer.ι _ i,
+      naturality' := sorry }⟩) sorry,
+  fac' := sorry,
+  uniq' := sorry }
+
+def lim_diagram_cone {K : Type (max v u)}
+  [small_category K] [fin_category K]
+  --[has_limits_of_shape K D]
+  {F : K ⥤ Cᵒᵖ ⥤ D}
+  (E : cone F) (X : Cᵒᵖ) : cone (J.lim_diagram F X) :=
+{ X := J.diagram E.X X.unop,
+  π :=
+  { app := λ k, J.map_diagram (E.π.app _) _,
+    naturality' := sorry } }
+
+def is_limit_lim_diagram_cone {K : Type (max v u)}
+  [small_category K] [fin_category K]
+  [has_limits_of_shape K D]
+  {F : K ⥤ Cᵒᵖ ⥤ D}
+  (E : cone F) (hE : is_limit E) (X : Cᵒᵖ) :
+  is_limit (J.lim_diagram_cone E X) :=
+{ lift := λ S,
+  { app := λ W, (J.is_limit_lim_diagram_cone_eval E hE X W).lift ⟨S.X.obj W,
+    { app := λ k, (S.π.app k).app W,
+      naturality' := sorry }⟩,
+    naturality' := sorry },
+  fac' := sorry,
+  uniq' := sorry }
+
+/-
+@[simps]
+def lim_diagram_cone {K : Type (max v u)}
+  [small_category K] [fin_category K] (F : K ⥤ Cᵒᵖ ⥤ D) (X : Cᵒᵖ)
+  (E : cone F) : cone (J.lim_diagram F X) :=
+{ X := J.diagram E.X X.unop,
+  π :=
+  { app := λ k, J.map_diagram (E.π.app _) _,
+    naturality' := sorry } }
+
+@[simps]
+def is_limit_lim_diagram {K : Type (max v u)}
+  [small_category K] [fin_category K] (F : K ⥤ Cᵒᵖ ⥤ D) (X : Cᵒᵖ)
+  (E : cone F) (hE : is_limit E) : is_limit (J.lim_diagram_cone F X E) :=
+{ lift := λ S,
+  { app := λ W, multiequalizer.lift _ _ begin
+      intros a,
+      have := hE.lift,
+    end _,
+    naturality' := _ },
+  fac' := _,
+  uniq' := _ }
+-/
+
+def is_limit_evaluation_plus_of_is_limit (K : Type (max v u))
+  [small_category K] [fin_category K] [has_limits_of_shape K D] {F : K ⥤ Cᵒᵖ ⥤ D}
+  (E : cone F) (hE : is_limit E)
+  (X : Cᵒᵖ) : is_limit ((J.plus_functor D ⋙ (evaluation _ _).obj X).map_cone E) :=
+{ lift := λ S, begin
+    dsimp,
+    change S.X ⟶ colimit (J.lim_diagram_cone E X).X,
+    have := J.is_limit_lim_diagram_cone E hE X,
+
+    -- now use iso above to replace this with colimit (limit _),
+    -- then use colimit limit = limit colimit
+    -- the use limit.lift.
+    sorry
+  end,
+  fac' := sorry,
+  uniq' := sorry }
+
+
 instance plus_functor_preserves_finite_limits (K : Type (max v u))
-  [small_category K] [fin_category K] :
-  preserves_limits_of_shape K (J.plus_functor D) := sorry
+  [small_category K] [fin_category K] [has_limits_of_shape K D] :
+  preserves_limits_of_shape K (J.plus_functor D) :=
+begin
+  constructor, intros F, constructor, intros E hE,
+  apply evaluation_jointly_reflects_limits,
+  intros X,
+  apply is_limit_evaluation_plus_of_is_limit _ _ _ hE,
+  apply_instance
+end
 
 instance sheafification_preserves_finite_limits (K : Type (max v u))
-  [small_category K] [fin_category K] :
+  [small_category K] [fin_category K] [has_limits_of_shape K D] :
   preserves_limits_of_shape K (sheafification J D) :=
 by { delta sheafification, apply_instance }
 

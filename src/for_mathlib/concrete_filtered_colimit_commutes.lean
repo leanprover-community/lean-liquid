@@ -121,6 +121,36 @@ begin
   apply category_theory.limits.colimit_limit_to_limit_colimit_is_iso,
 end
 
+@[simps]
+noncomputable
+def flip_lim_iso_curry_swap_uncurry_lim (F : J ⥤ K ⥤ D) :
+  F.flip ⋙ lim ≅ curry.obj (prod.swap K J ⋙ uncurry.obj F) ⋙ lim :=
+nat_iso.of_components (λ k, has_limit.iso_of_nat_iso $
+  nat_iso.of_components (λ t, eq_to_iso rfl) $ λ i j f, by { dsimp, simp }) $ λ i j f,
+      by { ext, dsimp, simp, dsimp, simp }
+
+@[simps]
+noncomputable
+def colim_iso_curry_uncurry_colim (F : J ⥤ K ⥤ D) :
+  F ⋙ colim ≅ curry.obj (uncurry.obj F) ⋙ colim :=
+nat_iso.of_components (λ k, has_colimit.iso_of_nat_iso $
+  nat_iso.of_components (λ t, eq_to_iso rfl) $ λ i j f, by { dsimp, simp }) $ λ i j f,
+    by { ext, dsimp, simp }
+
+noncomputable
+def curried_colimit_limit_to_limit_colimit (F : J ⥤ K ⥤ D) :
+  colimit (F.flip ⋙ lim) ⟶ limit (F ⋙ colim) :=
+(has_colimit.iso_of_nat_iso (flip_lim_iso_curry_swap_uncurry_lim F)).hom ≫
+colimit_limit_to_limit_colimit (uncurry.obj F) ≫
+(has_limit.iso_of_nat_iso (colim_iso_curry_uncurry_colim F)).inv
+
+instance [is_filtered K] [fin_category J] (F : J ⥤ K ⥤ D) :
+  is_iso (curried_colimit_limit_to_limit_colimit F) :=
+begin
+  dsimp only [curried_colimit_limit_to_limit_colimit],
+  apply_instance
+end
+
 end limits
 
 end category_theory
