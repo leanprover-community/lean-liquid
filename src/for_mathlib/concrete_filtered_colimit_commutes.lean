@@ -144,10 +144,30 @@ def curried_colimit_limit_to_limit_colimit (F : J ⥤ K ⥤ D) :
 colimit_limit_to_limit_colimit (uncurry.obj F) ≫
 (has_limit.iso_of_nat_iso (colim_iso_curry_uncurry_colim F)).inv
 
+@[simp, reassoc]
+lemma ι_curried_colimit_limit_to_limit_colimit_π (F : J ⥤ K ⥤ D) (k) (j) :
+  colimit.ι (F.flip ⋙ lim) k ≫ curried_colimit_limit_to_limit_colimit F ≫
+  limit.π (F ⋙ colim) j = limit.π _ j ≫ colimit.ι (F.obj j) k :=
+begin
+  delta curried_colimit_limit_to_limit_colimit,
+  dsimp [has_colimit.iso_of_nat_iso, has_limit.iso_of_nat_iso,
+    is_colimit.map, is_limit.map],
+  simp only [ι_colimit_limit_to_limit_colimit_π_assoc,
+    flip_lim_iso_curry_swap_uncurry_lim_hom_app, limit.lift_π,
+    cones.postcompose_obj_π, has_limit.iso_of_nat_iso_hom_π_assoc,
+    colimit.ι_desc_assoc, limit.cone_π, colimit.cocone_ι, nat_iso.of_components.hom_app,
+    cocones.precompose_obj_ι, nat_trans.comp_app, category.assoc,
+    colim_iso_curry_uncurry_colim_inv_app],
+  rw [← category.assoc, ← category.assoc, iso.comp_inv_eq],
+  dsimp [has_colimit.iso_of_nat_iso, has_limit.iso_of_nat_iso,
+    is_colimit.map, is_limit.map],
+  simp,
+end
+
 instance [is_filtered K] [fin_category J] (F : J ⥤ K ⥤ D) :
   is_iso (curried_colimit_limit_to_limit_colimit F) :=
 begin
-  dsimp only [curried_colimit_limit_to_limit_colimit],
+  delta curried_colimit_limit_to_limit_colimit,
   apply_instance
 end
 
@@ -196,6 +216,7 @@ evaluation_jointly_reflects_colimits _ $ λ j,
   (cocones.ext (has_colimit.iso_of_nat_iso $ nat_iso.of_components
     (λ k, eq_to_iso rfl) (by tidy)) (by tidy))
 
+@[simps]
 noncomputable
 def colim_iso_colimit (F : J ⥤ K ⥤ D) :
   F ⋙ colim ≅ colimit F.flip :=
@@ -208,9 +229,35 @@ def colimit_limit_to_limit_colimit' (F : J ⥤ K ⥤ D) :
 curried_colimit_limit_to_limit_colimit F ≫
 (has_limit.iso_of_nat_iso (colim_iso_colimit F)).hom
 
+@[simp]
+lemma ι_colimit_limit_to_limit_colimit'_π (F : J ⥤ K ⥤ D) (k) (j) :
+  colimit.ι (limit F) k ≫ colimit_limit_to_limit_colimit' F ≫
+  limit.π (colimit F.flip) j = (limit.π F j).app k ≫ (colimit.ι F.flip k).app j :=
+begin
+  dsimp only [colimit_limit_to_limit_colimit',
+    has_colimit.iso_of_nat_iso, has_limit.iso_of_nat_iso,
+    is_colimit.map, is_limit.map, is_colimit.cocone_points_iso_of_nat_iso,
+    is_limit.cone_points_iso_of_nat_iso],
+  simp only [category.assoc],
+  erw limit.lift_π,
+  erw colimit.ι_desc_assoc,
+  dsimp only [cocones.precompose, cones.postcompose,
+    nat_trans.comp_app],
+  simp only [category.assoc],
+  erw ι_curried_colimit_limit_to_limit_colimit_π_assoc F,
+  dsimp [nat_iso.of_components, has_limit.iso_of_nat_iso, has_colimit.iso_of_nat_iso,
+    is_limit.map, is_colimit.map],
+  simp only [cones.postcompose_obj_π, colimit.ι_desc_assoc, limit.cone_π, limit.lift_π_assoc,
+    whisker_right_app, colimit.cocone_ι, colimit.ι_desc, evaluation_obj_map, category.id_comp,
+    cocones.precompose_obj_ι, nat_trans.comp_app, category.assoc],
+  dsimp,
+  erw [limit.lift_π_assoc, category.id_comp],
+  refl,
+end
+
 instance [is_filtered K] [fin_category J] (F : J ⥤ K ⥤ D) :
   is_iso (colimit_limit_to_limit_colimit' F) :=
-by { unfold colimit_limit_to_limit_colimit', apply_instance }
+by { delta colimit_limit_to_limit_colimit', apply_instance }
 
 end limits
 
