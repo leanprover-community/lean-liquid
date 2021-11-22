@@ -23,6 +23,7 @@ namespace Condensed
 
 noncomputable theory
 
+-- Sanity check
 example {J : Type (u+1)} [small_category J] [is_filtered J] :
   limits.preserves_colimits_of_shape J (forget Ab.{u+1}) := by apply_instance
 
@@ -32,7 +33,6 @@ instance (X : Profinite.{u}): limits.preserves_colimits_of_shape (proetale_topol
 
 instance : abelian (Condensed Ab.{u+1}) :=
 begin
-  delta Condensed,
   -- I don't know why this is needed either...
   apply @category_theory.Sheaf.abelian.{(u+2) u (u+1)}
     Profinite.{u} _ proetale_topology Ab.{u+1} _ _ _ _ _ _ _ _,
