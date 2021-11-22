@@ -259,6 +259,35 @@ instance [is_filtered K] [fin_category J] (F : J ⥤ K ⥤ D) :
   is_iso (colimit_limit_to_limit_colimit' F) :=
 by { delta colimit_limit_to_limit_colimit', apply_instance }
 
+noncomputable
+def colimit_limit_to_limit_colimit_of_is_limit (F : J ⥤ K ⥤ D)
+  (E : cone F) (hE : is_limit E) :
+  colimit E.X ⟶ limit (colimit F.flip) :=
+(has_colimit.iso_of_nat_iso (hE.cone_point_unique_up_to_iso (limit.is_limit _))).hom ≫
+colimit_limit_to_limit_colimit' F
+
+@[simp]
+lemma ι_colimit_limit_to_limit_colimit_of_is_limit_π (F : J ⥤ K ⥤ D)
+  (E : cone F) (hE : is_limit E) (k) (j) :
+  colimit.ι E.X k ≫ colimit_limit_to_limit_colimit_of_is_limit F E hE ≫
+  limit.π (colimit F.flip) j = (E.π.app j).app k ≫ (colimit.ι F.flip k).app j :=
+begin
+  dsimp only [colimit_limit_to_limit_colimit_of_is_limit,
+    has_colimit.iso_of_nat_iso, is_colimit.cocone_points_iso_of_nat_iso,
+    is_colimit.map],
+  simp_rw ← category.assoc,
+  erw colimit.ι_desc,
+  dsimp only [cocones.precompose, is_limit.cone_point_unique_up_to_iso, functor.map_iso,
+    cones.forget, nat_trans.comp_app],
+  simp_rw category.assoc,
+  erw [ι_colimit_limit_to_limit_colimit'_π, ← category.assoc, ← nat_trans.comp_app,
+    (hE.unique_up_to_iso (limit.is_limit F)).hom.w j],
+end
+
+instance [is_filtered K] [fin_category J] (F : J ⥤ K ⥤ D) (E : limit_cone F) :
+  is_iso (colimit_limit_to_limit_colimit_of_is_limit F E.cone E.is_limit) :=
+by { delta colimit_limit_to_limit_colimit_of_is_limit, apply_instance }
+
 end limits
 
 end category_theory
