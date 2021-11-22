@@ -2,6 +2,7 @@ import category_theory.sites.limits
 
 import for_mathlib.abelian_sheaves.functor_category
 import for_mathlib.sheaf
+import for_mathlib.abelian_sheaves.left_exact
 
 namespace category_theory
 namespace Sheaf
@@ -354,9 +355,57 @@ variables [reflects_isomorphisms (forget A)]
 
 open grothendieck_topology
 
+def parallel_pair_sheafification {F G : Sheaf J A} (η : F ⟶ G) : limits.parallel_pair
+  (limits.cokernel.π ((Sheaf_to_presheaf J A).map η)) 0 ⋙ J.sheafification A ≅
+  limits.parallel_pair (cokernel_π η) 0 :=
+nat_iso.of_components
+(λ x,
+match x with
+| limits.walking_parallel_pair.zero := by { dsimp, refine (J.iso_sheafify G.2).symm }
+| limits.walking_parallel_pair.one := by { dsimp, exact eq_to_iso rfl }
+end)
+begin
+  -- This proof is SLOW :-(
+  rintros (a|a) (b|b) (f|f|f),
+  { dsimp [parallel_pair_sheafification._match_1],
+    simp only [iso.eq_inv_comp, functor.map_id],
+    dsimp [grothendieck_topology.iso_sheafify],
+    rw [← category.assoc, is_iso.comp_inv_eq, category.id_comp],
+    change J.to_sheafify _ ≫ (sheafification J A).map _ = _,
+    erw [functor.map_id, category.comp_id] },
+  { dsimp [parallel_pair_sheafification._match_1],
+    rw [category.comp_id, iso.eq_inv_comp],
+    dsimp [grothendieck_topology.iso_sheafify, cokernel_π],
+    change (to_sheafification J A).app _ ≫ (sheafification J A).map _ = _,
+    rw ← (to_sheafification J A).naturality,
+    refl },
+  { dsimp [parallel_pair_sheafification._match_1],
+    simp only [limits.comp_zero, category.comp_id],
+    change (sheafification J A).map _ = _,
+    apply J.sheafify_hom_ext,
+    { exact plus.is_sheaf_plus_plus J (limits.cokernel η) },
+    erw ← (to_sheafification J A).naturality,
+    simp },
+  { dsimp [parallel_pair_sheafification._match_1],
+    simp only [limits.comp_zero, category.id_comp, category.comp_id],
+    change (sheafification J A).map _ = _,
+    simp only [functor.map_id],
+    erw (sheafification J A).map_id, refl },
+end .
+
 def kernel_cokernel_π_iso {F G : Sheaf J A} (η : F ⟶ G) :
   J.sheafify (limits.kernel (limits.cokernel.π ((Sheaf_to_presheaf J A).map η))) ≅
-  limits.kernel ((Sheaf_to_presheaf J A).map (cokernel_π η)) := sorry
+  limits.kernel ((Sheaf_to_presheaf J A).map (cokernel_π η)) :=
+begin
+  let e := (limits.is_limit_of_preserves (sheafification J A) (limits.limit.is_limit
+      (limits.parallel_pair (limits.cokernel.π
+      ((Sheaf_to_presheaf J A).map η)) 0))).cone_point_unique_up_to_iso (limits.limit.is_limit _),
+  refine e ≪≫ _,
+  change limits.limit _ ≅ _,
+  refine limits.has_limit.iso_of_nat_iso _,
+  apply parallel_pair_sheafification,
+end
+
 /-
 { hom := J.sheafify_lift (limits.kernel.map _ _ (𝟙 _) (J.to_sheafify _) sorry) sorry,
   inv := begin
@@ -387,7 +436,10 @@ def kernel_cokernel_π_iso {F G : Sheaf J A} (η : F ⟶ G) :
 
 lemma coim_to_im'_eq {F G : Sheaf J A} (η : F ⟶ G) :
   (Sheaf_to_presheaf J A).map (coim_to_im' η) =
-  (sheafification J A).map (coim_to_im _) ≫ (kernel_cokernel_π_iso η).hom := sorry
+  (sheafification J A).map (coim_to_im _) ≫ (kernel_cokernel_π_iso η).hom :=
+begin
+  sorry
+end
 
 instance is_iso_coim_to_im {F G : Sheaf J A} (η : F ⟶ G) : is_iso (coim_to_im η) :=
 begin
