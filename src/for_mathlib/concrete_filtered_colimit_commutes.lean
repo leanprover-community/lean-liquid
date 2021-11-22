@@ -266,7 +266,7 @@ def colimit_limit_to_limit_colimit_of_is_limit (F : J ⥤ K ⥤ D)
 (has_colimit.iso_of_nat_iso (hE.cone_point_unique_up_to_iso (limit.is_limit _))).hom ≫
 colimit_limit_to_limit_colimit' F
 
-@[simp]
+@[simp, reassoc]
 lemma ι_colimit_limit_to_limit_colimit_of_is_limit_π (F : J ⥤ K ⥤ D)
   (E : cone F) (hE : is_limit E) (k) (j) :
   colimit.ι E.X k ≫ colimit_limit_to_limit_colimit_of_is_limit F E hE ≫

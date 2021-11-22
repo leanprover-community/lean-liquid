@@ -24,8 +24,20 @@ noncomputable theory
 @[simps]
 def map_diagram {P Q : Cᵒᵖ ⥤ D} (η : P ⟶ Q) (X : C) :
   J.diagram P X ⟶ J.diagram Q X :=
-{ app := λ W, multiequalizer.lift _ _ (λ i, multiequalizer.ι _ i ≫ η.app _) sorry,
-  naturality' := sorry }
+{ app := λ W, multiequalizer.lift _ _ (λ i, multiequalizer.ι _ i ≫ η.app _) begin
+    intros i,
+    dsimp,
+    simp,
+    erw [← η.naturality, ← η.naturality, ← category.assoc,
+      ← category.assoc, multiequalizer.condition],
+    refl,
+  end,
+  naturality' := begin
+    intros A B f,
+    dsimp [diagram],
+    ext,
+    simpa,
+  end }
 
 @[simps]
 def lim_diagram {K : Type (max v u)}
@@ -33,8 +45,19 @@ def lim_diagram {K : Type (max v u)}
   K ⥤ (J.cover X.unop)ᵒᵖ ⥤ D :=
 { obj := λ i, J.diagram (F.obj i) _,
   map := λ i j e, J.map_diagram (F.map e) _,
-  map_id' := sorry,
-  map_comp' := sorry }
+  map_id' := begin
+    intros k,
+    ext,
+    dsimp,
+    simp,
+    erw category.comp_id,
+  end,
+  map_comp' := begin
+    intros i j k f g,
+    ext,
+    dsimp,
+    simp,
+  end }
 
 def lim_diagram_cone_eval {K : Type (max v u)}
   [small_category K] [fin_category K]
@@ -86,30 +109,6 @@ def is_limit_lim_diagram_cone {K : Type (max v u)}
   fac' := sorry,
   uniq' := sorry }
 
-/-
-@[simps]
-def lim_diagram_cone {K : Type (max v u)}
-  [small_category K] [fin_category K] (F : K ⥤ Cᵒᵖ ⥤ D) (X : Cᵒᵖ)
-  (E : cone F) : cone (J.lim_diagram F X) :=
-{ X := J.diagram E.X X.unop,
-  π :=
-  { app := λ k, J.map_diagram (E.π.app _) _,
-    naturality' := sorry } }
-
-@[simps]
-def is_limit_lim_diagram {K : Type (max v u)}
-  [small_category K] [fin_category K] (F : K ⥤ Cᵒᵖ ⥤ D) (X : Cᵒᵖ)
-  (E : cone F) (hE : is_limit E) : is_limit (J.lim_diagram_cone F X E) :=
-{ lift := λ S,
-  { app := λ W, multiequalizer.lift _ _ begin
-      intros a,
-      have := hE.lift,
-    end _,
-    naturality' := _ },
-  fac' := _,
-  uniq' := _ }
--/
-
 def colimit_lim_diagram_iso {K : Type (max v u)}
   [small_category K] [fin_category K] (F : K ⥤ Cᵒᵖ ⥤ D) (X : Cᵒᵖ) :
   colimit (J.lim_diagram F X).flip ≅ F ⋙ J.plus_functor D ⋙ (evaluation Cᵒᵖ D).obj X :=
@@ -139,8 +138,43 @@ def is_limit_evaluation_plus_of_is_limit (K : Type (max v u))
     refine _ ≫ (has_limit.iso_of_nat_iso (J.colimit_lim_diagram_iso F X)).inv,
     refine limit.lift _ S,
   end,
-  fac' := sorry,
-  uniq' := sorry }
+  fac' := begin
+    intros S j,
+    dsimp only,
+    rw ← (limit.is_limit (F ⋙ J.plus_functor D ⋙ (evaluation Cᵒᵖ D).obj X)).fac S j,
+    simp only [category.assoc],
+    congr' 1,
+    simp only [iso.inv_comp_eq],
+    dsimp,
+    ext W : 2,
+    dsimp [has_limit.iso_of_nat_iso, is_limit.map],
+    simp,
+    have := ι_colimit_limit_to_limit_colimit_of_is_limit_π (J.lim_diagram F X)
+      (J.lim_diagram_cone E X) (J.is_limit_lim_diagram_cone E hE X) W j,
+    slice_rhs 1 3 { erw this },
+    dsimp,
+    simp,
+    congr' 1,
+    erw colimit_obj_iso_colimit_comp_evaluation_ι_app_hom,
+    refl,
+  end,
+  uniq' := begin
+    intros S m hm,
+    dsimp only,
+    rw [iso.eq_comp_inv, iso.eq_comp_inv],
+    ext,
+    dsimp,
+    simp,
+    rw ← hm,
+    congr' 1,
+    ext W,
+    simp,
+    erw ι_colimit_limit_to_limit_colimit_of_is_limit_π_assoc (J.lim_diagram F X)
+      (J.lim_diagram_cone E X) (J.is_limit_lim_diagram_cone E hE X) W j,
+    congr' 1,
+    erw colimit_obj_iso_colimit_comp_evaluation_ι_app_hom,
+    refl,
+  end }
 
 instance plus_functor_preserves_finite_limits (K : Type (max v u))
   [small_category K] [fin_category K] [has_limits_of_shape K D] :
