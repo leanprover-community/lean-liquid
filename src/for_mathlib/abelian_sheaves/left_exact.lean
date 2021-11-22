@@ -168,7 +168,13 @@ def lim_diagram_cone {K : Type (max v u)}
 { X := J.diagram E.X X.unop,
   π :=
   { app := λ k, J.map_diagram (E.π.app _) _,
-    naturality' := sorry } }
+    naturality' := begin
+      intros i j f,
+      ext,
+      dsimp [diagram, map_diagram],
+      simp,
+      rw [← nat_trans.comp_app, E.w],
+    end } }
 
 def is_limit_lim_diagram_cone {K : Type (max v u)}
   [small_category K] [fin_category K]
@@ -179,10 +185,76 @@ def is_limit_lim_diagram_cone {K : Type (max v u)}
 { lift := λ S,
   { app := λ W, (J.is_limit_lim_diagram_cone_eval E hE X W).lift ⟨S.X.obj W,
     { app := λ k, (S.π.app k).app W,
-      naturality' := sorry }⟩,
-    naturality' := sorry },
-  fac' := sorry,
-  uniq' := sorry }
+      naturality' := begin
+        intros i j f,
+        ext a,
+        dsimp,
+        simp only [multiequalizer.lift_ι, category.id_comp, category.assoc],
+        have := S.w f,
+        apply_fun (λ e, e.app W ≫ multiequalizer.ι _ a) at this,
+        dsimp at this,
+        simp only [multiequalizer.lift_ι, category.assoc] at this,
+        rw [← category.assoc, ← this, category.assoc],
+      end }⟩,
+    naturality' := begin
+      intros A B f,
+      apply (J.is_limit_lim_diagram_cone_eval E hE X B).hom_ext,
+      intros k,
+      simp only [nat_trans.naturality, is_limit.fac, category.assoc],
+      ext,
+      dsimp [lim_diagram_cone, lim_diagram_cone_eval, diagram],
+      simp only [multiequalizer.lift_ι,
+        multiequalizer.lift_ι_assoc, category.assoc],
+      let T := ((evaluation _ D).obj A).map_cone S,
+      erw ← (J.is_limit_lim_diagram_cone_eval E hE X A).fac T k,
+      simp_rw category.assoc,
+      congr' 1,
+      dsimp [lim_diagram_cone_eval],
+      rw [multiequalizer.lift_ι],
+      refl,
+    end },
+  fac' := begin
+    intros S j,
+    ext W,
+    dsimp,
+    simp only [category.assoc],
+    dsimp [lim_diagram_cone],
+    rw multiequalizer.lift_ι,
+    erw ← (J.is_limit_lim_diagram_cone_eval E hE X W).fac
+      (((evaluation _ D).obj W).map_cone S) j,
+    simp_rw [category.assoc],
+    dsimp [lim_diagram_cone_eval],
+    rw multiequalizer.lift_ι,
+    refl,
+  end,
+  uniq' := begin
+    intros S m hm,
+    ext W i,
+    dsimp [is_limit_lim_diagram_cone_eval],
+    rw multiequalizer.lift_ι,
+    change _ = _ ≫ _,
+    dsimp [evaluate_combined_cones],
+    erw [category.assoc, category.id_comp],
+    have : (hE.lift (combine_cones F (λ (k : Cᵒᵖ),
+      get_limit_cone (F ⋙ (evaluation Cᵒᵖ D).obj k)))).app (op i.Y) =
+      (is_limit_of_preserves ((evaluation _ D).obj (op i.Y)) hE).lift _,
+    { apply (is_limit_of_preserves ((evaluation _ D).obj (op i.Y)) hE).hom_ext,
+      intros j,
+      change _ = (_ ≫ _) ≫ _,
+      dsimp [evaluate_combined_cones],
+      simp only [category.assoc],
+      erw [category.id_comp, ← nat_trans.comp_app, hE.fac],
+      dsimp [combine_cones],
+      erw [limit.lift_π] },
+    rw this,
+    apply (is_limit_of_preserves ((evaluation Cᵒᵖ D).obj (op i.Y)) hE).hom_ext,
+    intros k,
+    specialize hm k,
+    apply_fun (λ e, e.app W ≫ multiequalizer.ι _ i) at hm,
+    dsimp [lim_diagram_cone] at hm,
+    rw [category.assoc, multiequalizer.lift_ι] at hm,
+    erw [category.assoc, hm, category.assoc, is_limit.fac, limit.lift_π],
+  end } .
 
 def colimit_lim_diagram_iso {K : Type (max v u)}
   [small_category K] [fin_category K] (F : K ⥤ Cᵒᵖ ⥤ D) (X : Cᵒᵖ) :
