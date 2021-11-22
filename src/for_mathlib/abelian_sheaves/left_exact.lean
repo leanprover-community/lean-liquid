@@ -110,23 +110,37 @@ def is_limit_lim_diagram {K : Type (max v u)}
   uniq' := _ }
 -/
 
+def colimit_lim_diagram_iso {K : Type (max v u)}
+  [small_category K] [fin_category K] (F : K ⥤ Cᵒᵖ ⥤ D) (X : Cᵒᵖ) :
+  colimit (J.lim_diagram F X).flip ≅ F ⋙ J.plus_functor D ⋙ (evaluation Cᵒᵖ D).obj X :=
+nat_iso.of_components (λ k,
+  let h := is_colimit_of_preserves ((evaluation _ D).obj k)
+    (colimit.is_colimit ((J.lim_diagram F X).flip)) in
+  h.cocone_point_unique_up_to_iso (colimit.is_colimit _))
+begin
+  intros a b f,
+  ext1,
+  dsimp [is_colimit.cocone_point_unique_up_to_iso, colim_map, is_colimit.map],
+  rw ← (colimit.ι (J.lim_diagram F X).flip j).naturality_assoc,
+  erw [colimit_obj_iso_colimit_comp_evaluation_ι_app_hom,
+    colimit_obj_iso_colimit_comp_evaluation_ι_app_hom_assoc,
+    colimit.ι_desc],
+  refl,
+end
+
 def is_limit_evaluation_plus_of_is_limit (K : Type (max v u))
   [small_category K] [fin_category K] [has_limits_of_shape K D] {F : K ⥤ Cᵒᵖ ⥤ D}
   (E : cone F) (hE : is_limit E)
   (X : Cᵒᵖ) : is_limit ((J.plus_functor D ⋙ (evaluation _ _).obj X).map_cone E) :=
 { lift := λ S, begin
-    dsimp,
-    change S.X ⟶ colimit (J.lim_diagram_cone E X).X,
-    have := J.is_limit_lim_diagram_cone E hE X,
-
-    -- now use iso above to replace this with colimit (limit _),
-    -- then use colimit limit = limit colimit
-    -- the use limit.lift.
-    sorry
+    let e := colimit_limit_iso (J.lim_diagram F X)
+      (J.lim_diagram_cone E X) (J.is_limit_lim_diagram_cone E hE X),
+    refine _ ≫ e.inv,
+    refine _ ≫ (has_limit.iso_of_nat_iso (J.colimit_lim_diagram_iso F X)).inv,
+    refine limit.lift _ S,
   end,
   fac' := sorry,
   uniq' := sorry }
-
 
 instance plus_functor_preserves_finite_limits (K : Type (max v u))
   [small_category K] [fin_category K] [has_limits_of_shape K D] :

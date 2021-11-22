@@ -284,9 +284,18 @@ begin
     (hE.unique_up_to_iso (limit.is_limit F)).hom.w j],
 end
 
-instance [is_filtered K] [fin_category J] (F : J ⥤ K ⥤ D) (E : limit_cone F) :
-  is_iso (colimit_limit_to_limit_colimit_of_is_limit F E.cone E.is_limit) :=
+lemma is_iso_colimit_limit_to_limit_colimit_of_is_limit
+  [is_filtered K] [fin_category J] (F : J ⥤ K ⥤ D) (E : cone F) (hE : is_limit E) :
+  is_iso (colimit_limit_to_limit_colimit_of_is_limit F E hE) :=
 by { delta colimit_limit_to_limit_colimit_of_is_limit, apply_instance }
+
+@[simps hom inv]
+noncomputable
+def colimit_limit_iso [is_filtered K] [fin_category J]
+  (F : J ⥤ K ⥤ D) (E : cone F) (hE : is_limit E) :
+  colimit E.X ≅ limit (colimit F.flip) :=
+by letI := is_iso_colimit_limit_to_limit_colimit_of_is_limit F E hE;
+  exact as_iso (colimit_limit_to_limit_colimit_of_is_limit F E hE)
 
 end limits
 
