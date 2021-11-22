@@ -68,7 +68,13 @@ def lim_diagram_cone_eval {K : Type (max v u)}
 { X := (J.diagram E.X X.unop).obj W,
   π :=
   { app := λ k, (J.map_diagram (E.π.app k) _).app W,
-    naturality' := sorry } }
+    naturality' := begin
+      intros i k f,
+      ext,
+      dsimp,
+      simp,
+      rw [← nat_trans.comp_app, E.w],
+    end } }
 
 open opposite
 
