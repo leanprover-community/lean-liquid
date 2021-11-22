@@ -438,7 +438,33 @@ lemma coim_to_im'_eq {F G : Sheaf J A} (η : F ⟶ G) :
   (Sheaf_to_presheaf J A).map (coim_to_im' η) =
   (sheafification J A).map (coim_to_im _) ≫ (kernel_cokernel_π_iso η).hom :=
 begin
-  sorry
+  dsimp only [kernel_cokernel_π_iso, limits.is_limit.cone_point_unique_up_to_iso,
+    functor.map_iso, iso.trans_hom],
+  simp only [category.assoc],
+  dsimp only [id, limits.is_limit.unique_up_to_iso, limits.cones.forget,
+    limits.is_limit.lift_cone_morphism, functor.map_cone],
+  apply limits.equalizer.hom_ext,
+  simp only [category.assoc],
+  --delta limits.equalizer.ι,
+  erw limits.has_limit.iso_of_nat_iso_hom_π,
+  dsimp only [parallel_pair_sheafification, nat_iso.of_components, id, iso_sheafify,
+    as_iso, iso.symm],
+  simp only [← category.assoc],
+  rw is_iso.eq_comp_inv,
+  simp only [category.assoc],
+  erw limits.limit.lift_π,
+  dsimp [limits.cones.functoriality],
+  simp_rw [← plus_functor_map, ← functor.comp_map, ← functor.map_comp],
+  dsimp [coim_to_im', coim_to_im, coim_to_im'_aux],
+  apply J.sheafify_hom_ext,
+  { exact plus.is_sheaf_plus_plus J ↑G, },
+  simp_rw ← category.assoc,
+  erw J.to_sheafify_sheafify_lift,
+  change _ = (to_sheafification J A).app _ ≫ (sheafification J A).map _,
+  erw ← (to_sheafification J A).naturality,
+  simp only [category.assoc, limits.kernel.lift_ι],
+  dsimp,
+  erw category.assoc,
 end
 
 instance is_iso_coim_to_im {F G : Sheaf J A} (η : F ⟶ G) : is_iso (coim_to_im η) :=
