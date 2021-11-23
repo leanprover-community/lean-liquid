@@ -147,9 +147,11 @@ namespace data
 
 open universal_map
 
+@[simps {fully_applied := ff}]
 def eval_functor : data ⥤ chain_complex (𝒜 ⥤ 𝒜) ℕ :=
 (eval_Pow_functor F).map_homological_complex _
 
+@[simps {fully_applied := ff}]
 def eval_functor' : data ⥤ 𝒜 ⥤ chain_complex 𝒜 ℕ :=
 eval_functor F ⋙ homological_complex.functor_eval.flip
 
@@ -234,6 +236,7 @@ def Biprod_iso_Pow_two_components (A : 𝒜) : A ⊞ A ≅ (Pow 2).obj A :=
   end }
 .
 
+@[simps {fully_applied := ff}]
 def Biprod_iso_Pow_two : (Biprod : 𝒜 ⥤ 𝒜) ≅ Pow 2 :=
 nat_iso.of_components Biprod_iso_Pow_two_components $ λ A B f,
 begin
@@ -316,6 +319,7 @@ def Pow_comp_Pow_components (m n : ℕ) (A : 𝒜) :
   end }
 .
 
+@[simps {fully_applied := ff}]
 def Pow_comp_Pow (m n : ℕ) : (Pow m ⋙ Pow n : 𝒜 ⥤ 𝒜) ≅ Pow (m * n) :=
 nat_iso.of_components (Pow_comp_Pow_components m n) $ λ A B f,
 begin
@@ -397,7 +401,9 @@ begin
     simp only [add_monoid_hom.map_add, functor.map_add, comp_add, add_comp, nat_trans.app_add],
     abel }
 end
+.
 
+@[simps {fully_applied := ff}]
 def aux :
   (data.eval_functor' F).obj ((data.mul 2).obj BD'.data) ≅
   Biprod ⋙ (data.eval_functor' F).obj BD'.data :=
@@ -421,22 +427,77 @@ nat_iso.of_components (λ A,
   end
 .
 
+-- move this up
+lemma quux (n : ℕ) {N : ℕ} (k : fin N) (A : 𝒜) :
+  (basic_universal_map.proj n k).eval_Pow.app A =
+  biproduct.matrix (λ i j, if i.down = fin_prod_fin_equiv (k, j.down) then 𝟙 A else 0) :=
+begin
+  apply category_theory.limits.biproduct.hom_ext,
+  rintro ⟨j⟩,
+  apply category_theory.limits.biproduct.hom_ext',
+  refine equiv.ulift.forall_congr_left'.mpr _,
+  refine fin_prod_fin_equiv.forall_congr_left.mp _,
+  rintro ⟨l, i⟩,
+  dsimp only [basic_universal_map.eval_Pow_app],
+  rw [biproduct.matrix_π, biproduct.matrix_π, biproduct.ι_desc, biproduct.ι_desc],
+  dsimp only [basic_universal_map.proj, basic_universal_map.proj_aux,
+    matrix.reindex_linear_equiv_apply, matrix.reindex_apply, matrix.minor,
+    matrix.kronecker_map],
+  simp only [ite_mul, ite_smul, one_mul, one_smul, zero_mul, zero_smul, matrix.one_apply],
+  rw [← ite_and],
+  congr' 1,
+  apply propext,
+  rw [← equiv.symm_apply_eq, prod.ext_iff],
+  apply and_congr iff.rfl,
+  dsimp only [equiv.punit_prod_symm_apply],
+  rw [eq_comm],
+end
+.
+
 lemma foo (A : 𝒜) : _root_.homotopy
   (((data.eval_functor' F).obj BD'.data).map (biprod.fst + biprod.snd : A ⊞ A ⟶ A))
   (((data.eval_functor' F).obj BD'.data).map (biprod.fst : A ⊞ A ⟶ A) +
     ((data.eval_functor' F).obj BD'.data).map (biprod.snd : A ⊞ A ⟶ A)) :=
 begin
   refine ((eval_homotopy' F BD' A).symm.comp_left ((aux F BD').inv.app A)).congr _ _ _ _,
-  sorry,
   { ext i,
-    dsimp [aux, eval_Pow_functor, data.eval_functor', data.eval_functor],
-    erw [nat_iso.of_components.inv_app,
-      homological_complex.hom.iso_of_components_inv_f],
-    dsimp [proj],
+    rw [homological_complex.comp_f, aux_inv_app_f,
+      functor.map_homological_complex_map_f, functor.comp_map, eval_Pow_functor_map,
+      evaluation_obj_map, data.eval_functor'_obj_map_f],
+    dsimp only [data.sum, universal_map.sum],
+    rw [eval_Pow_of, whisker_right_app, ← F.map_comp, fin.sum_univ_two],
+    congr' 1,
+    sorry
+     },
+  sorry; -- remove this when the proof is done
+  { ext i,
+    rw [homological_complex.comp_f, aux_inv_app_f,
+      functor.map_homological_complex_map_f, functor.comp_map, eval_Pow_functor_map,
+      evaluation_obj_map,
+      homological_complex.add_f_apply,
+      data.eval_functor'_obj_map_f, data.eval_functor'_obj_map_f],
+    dsimp only [data.proj, proj],
     rw [add_monoid_hom.map_sum, fin.sum_univ_two, eval_Pow_of, eval_Pow_of,
       nat_trans.app_add, whisker_right_app, whisker_right_app, comp_add,
-      ← F.map_comp, ← F.map_comp],
-    sorry }
+      ← F.map_comp, ← F.map_comp, quux, quux],
+    congr' 2;
+    { apply category_theory.limits.biproduct.hom_ext, rintro ⟨n⟩,
+      rw [biproduct.map_π, category.assoc, biproduct.matrix_π],
+      apply category_theory.limits.biproduct.hom_ext', rintro ⟨m⟩,
+      rw [biproduct.ι_desc_assoc, category.assoc],
+      apply category_theory.limits.biprod.hom_ext';
+      [rw [biprod.inl_desc_assoc], rw [biprod.inr_desc_assoc]],
+      all_goals
+      { rw [biproduct.ι_desc_assoc, biproduct.ι_desc];
+        simp only [true_and, equiv.apply_eq_iff_eq, prod.mk.inj_iff,
+          eq_self_iff_true, ulift.up_inj, ulift.down_inj];
+        by_cases hmn : m = n,
+        { cases hmn,
+          simp only [biproduct.ι_π_self_assoc, eq_self_iff_true, if_true, if_false,
+            biprod.inl_fst, biprod.inr_fst, biprod.inl_snd, biprod.inr_snd,
+            zero_ne_one, one_ne_zero, false_and], },
+        { rw biproduct.ι_π_ne_assoc, swap, { rw [ne.def, ulift.up_inj], exact hmn },
+          simp only [hmn, if_false, and_false, zero_comp, comp_zero] } } } }
 end
 
 
