@@ -454,7 +454,17 @@ begin
 end
 .
 
-lemma foo (A : 𝒜) : _root_.homotopy
+-- move this up
+lemma eval_Pow_add {m n : ℕ} (f g : basic_universal_map m n) (A : 𝒜) :
+  (f + g).eval_Pow.app A = f.eval_Pow.app A + g.eval_Pow.app A :=
+begin
+  dsimp [basic_universal_map.eval_Pow_app],
+  ext ⟨i⟩ ⟨j⟩,
+  simp only [biproduct.ι_matrix, biproduct.lift_π, comp_add, add_comp, add_zsmul],
+end
+.
+
+def eval_functor'_homotopy (A : 𝒜) : _root_.homotopy
   (((data.eval_functor' F).obj BD'.data).map (biprod.fst + biprod.snd : A ⊞ A ⟶ A))
   (((data.eval_functor' F).obj BD'.data).map (biprod.fst : A ⊞ A ⟶ A) +
     ((data.eval_functor' F).obj BD'.data).map (biprod.snd : A ⊞ A ⟶ A)) :=
@@ -465,11 +475,26 @@ begin
       functor.map_homological_complex_map_f, functor.comp_map, eval_Pow_functor_map,
       evaluation_obj_map, data.eval_functor'_obj_map_f],
     dsimp only [data.sum, universal_map.sum],
-    rw [eval_Pow_of, whisker_right_app, ← F.map_comp, fin.sum_univ_two],
+    rw [eval_Pow_of, whisker_right_app, ← F.map_comp, fin.sum_univ_two,
+      eval_Pow_add, quux, quux],
     congr' 1,
-    sorry
-     },
-  sorry; -- remove this when the proof is done
+    apply category_theory.limits.biproduct.hom_ext', rintro ⟨m⟩,
+    rw [biproduct.ι_desc_assoc, biproduct.ι_map, category.assoc],
+    apply category_theory.limits.biproduct.hom_ext, rintro ⟨n⟩,
+    rw [category.assoc],
+    apply category_theory.limits.biprod.hom_ext';
+    [rw [biprod.inl_desc_assoc], rw [biprod.inr_desc_assoc]];
+    rw [category.assoc, biproduct.ι_desc_assoc, add_comp, comp_add,
+      biproduct.matrix_π, biproduct.matrix_π, biproduct.ι_desc, biproduct.ι_desc,
+      category.assoc, add_comp, comp_add];
+    simp only [biprod.inl_fst_assoc, biprod.inl_snd_assoc,
+      biprod.inr_fst_assoc, biprod.inr_snd_assoc, zero_comp, add_zero, zero_add,
+      true_and, equiv.apply_eq_iff_eq, prod.mk.inj_iff, one_ne_zero,
+      fin.zero_eq_one_iff, fin.one_eq_zero_iff, eq_self_iff_true, if_false, false_and],
+      all_goals
+      { by_cases hmn : m = n,
+        { cases hmn, rw [if_pos rfl, biproduct.ι_π_self], },
+        { rw [if_neg, biproduct.ι_π_ne]; [rw [ne.def, ulift.up_inj], skip]; exact hmn } } },
   { ext i,
     rw [homological_complex.comp_f, aux_inv_app_f,
       functor.map_homological_complex_map_f, functor.comp_map, eval_Pow_functor_map,
@@ -499,21 +524,7 @@ begin
         { rw biproduct.ι_π_ne_assoc, swap, { rw [ne.def, ulift.up_inj], exact hmn },
           simp only [hmn, if_false, and_false, zero_comp, comp_zero] } } } }
 end
-
-
--- #check eval_homotopy F BD'
--- eval_homotopy F BD' :
---  homotopy (((eval_Pow_functor F).map_homological_complex (complex_shape.down ℕ)).map (BD'.data.proj 2))
---    (((eval_Pow_functor F).map_homological_complex (complex_shape.down ℕ)).map (BD'.data.sum 2))
-
--- #check eval_homotopy' F BD' A
--- eval_homotopy' F BD' A :
---   homotopy
---     (((eval_Pow_functor F ⋙ (evaluation 𝒜 𝒜).obj A).map_homological_complex (complex_shape.down ℕ)).map
---        (BD'.data.proj 2))
---     (((eval_Pow_functor F ⋙ (evaluation 𝒜 𝒜).obj A).map_homological_complex (complex_shape.down ℕ)).map
---        (BD'.data.sum 2))
-
+.
 
 end package
 
