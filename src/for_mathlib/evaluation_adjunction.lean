@@ -2,6 +2,7 @@ import category_theory.types
 import category_theory.const
 import category_theory.functor_category
 import category_theory.limits.shapes.products
+import category_theory.epi_mono
 
 namespace category_theory
 
@@ -51,5 +52,15 @@ adjunction.adjunction_of_equiv_left _ _
 noncomputable
 instance (a : C) : is_right_adjoint ((evaluation C D).obj a) :=
 ⟨_, evaluation_adjunction _ _⟩
+
+lemma mono_iff_app_mono {F G : C ⥤ D} (η : F ⟶ G) :
+  mono η ↔ (∀ X, mono (η.app X)) :=
+begin
+  split,
+  { intros h X,
+    change mono (((evaluation _ _).obj X).map η),
+    apply right_adjoint_preserves_mono,
+  }
+end
 
 end category_theory
