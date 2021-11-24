@@ -1,6 +1,7 @@
 -- import for_mathlib.short_exact_sequence
 import laurent_measures.basic
 import laurent_measures.theta
+import linear_algebra.basic
 
 
 namespace thm_69
@@ -26,8 +27,8 @@ end
 
 noncomputable theory
 
-instance (S : Fintype) : has_scalar (laurent_measures r (Fintype.of punit)) (laurent_measures r S) :=
-{ smul := sorry}
+-- instance (S : Fintype) : has_scalar (laurent_measures r (Fintype.of punit)) (laurent_measures r S) :=
+-- { smul := sorry}
 
 
 section ker_theta_half
@@ -56,42 +57,91 @@ def θₗ : (laurent_measures r (Fintype.of punit)) →ₗ[ℤ] ℝ :=
 --   map_add' := (θ_is_linear r (1 / 2)).1,
 --   map_smul' := (θ_is_linear r (1 / 2) ).2 }
 
-lemma ker_θ₂_principal : submodule.is_principal ((θₗ r).ker) :=
-begin
-  -- constructor,
-  let pos : ℕ → ℤ := λ n, (if n = 0 then -1 else if n = 1 then 2 else 0),
-  let f₀ : ℤ → ℤ := λ d : ℤ, int.rec_on d (pos) (λ n, 0),
-  use (λ s, f₀),
-  sorry,
-  ext,
-  split,
-  swap,
-  intro h_x,
-  -- sorry,
-  -- sorry,
-  obtain ⟨a, h_ax⟩ := mem_span_singleton.mp h_x,
-  apply mem_ker.mpr,
-  rw ← h_ax,
-  simp,
-  apply or.intro_right,
-  -- rw θₗ,
---   rw θ₂.to_linear,
---   -- rw θ.to_linear,
-  -- simp,
---   rw θ,
+-- lemma ker_θ₂_principal : submodule.is_principal ((θₗ r).ker) :=
+-- begin
+--   -- constructor,
+--   let pos : ℕ → ℤ := λ n, (if n = 0 then -1 else if n = 1 then 2 else 0),
+--   let f₀ : ℤ → ℤ := λ d : ℤ, int.rec_on d (pos) (λ n, 0),
+--   use (λ s, f₀),
+--   sorry,
+--   ext,
+--   split,
+--   swap,
+--   intro h_x,
+--   sorry,
+--   -- sorry,
+--   obtain ⟨a, h_ax⟩ := mem_span_singleton.mp h_x,
+--   apply mem_ker.mpr,
+--   rw ← h_ax,
 --   simp,
---   simp_rw [laurent_measures.to_Rfct],
---   let S : finset ℤ := {0, 1},
---   have hf : function.support f₀ ⊆ S, sorry,
---   have hf₀ : ∀ s ∉ S, ((f₀ s) : ℝ) * ((2 ^ s) : ℝ)⁻¹ = (0 : ℝ), sorry,
---   rw [tsum_eq_sum hf₀],
---   -- rw ← [has_sum_subtype_iff_of_support_subset hf],
---   sorry, sorry,
+--   apply or.intro_right,
+--   -- rw θₗ,
+-- --   rw θ₂.to_linear,
+-- --   -- rw θ.to_linear,
+--   -- simp,
+-- --   rw θ,
+-- --   simp,
+-- --   simp_rw [laurent_measures.to_Rfct],
+-- --   let S : finset ℤ := {0, 1},
+-- --   have hf : function.support f₀ ⊆ S, sorry,
+-- --   have hf₀ : ∀ s ∉ S, ((f₀ s) : ℝ) * ((2 ^ s) : ℝ)⁻¹ = (0 : ℝ), sorry,
+-- --   rw [tsum_eq_sum hf₀],
+-- --   -- rw ← [has_sum_subtype_iff_of_support_subset hf],
+-- --   sorry, sorry,
+-- end
+
+def ker_θₗ_generator : (laurent_measures r (Fintype.of punit)) :=
+begin
+  let f₀ : ℕ → ℤ := λ n, (if n = 0 then -1 else if n = 1 then 2 else 0),
+  let f : ℤ → ℤ := λ d : ℤ, int.rec_on d (f₀) (λ n, 0),
+  use λ _ : (Fintype.of punit), f,
+  intro s,
+  let A : finset ℤ := {0, 1},
+  have hf : ∀ a ∉ A, ∥(f a)∥ * ((r ^ a) : ℝ) = (0 : ℝ),
+  { intros a ha,
+    suffices : f a = 0, by {simp only [this, norm_zero, zero_mul, implies_true_iff,
+      eq_self_iff_true]},
+    cases a,
+    { have H : a ≠ 0 ∧ a ≠ 1,
+      { dsimp only [A] at ha,
+        have := (not_iff_not.mpr (@finset.mem_insert _ _ ↑a 0 {1})).mp ha,
+        rw [decidable.not_or_iff_and_not, finset.mem_singleton] at this,
+        tauto },
+      dsimp only [f, f₀],
+      rw [if_neg H.1, if_neg H.2] },
+    simp only [eq_self_iff_true] },
+  apply summable_of_ne_finset_zero hf,
 end
 
+local notation `𝑓` := (ker_θₗ_generator r)
 
-def ker_θ₂_generator : (laurent_measures r (Fintype.of punit)) :=
-  @submodule.is_principal.generator _ _ _ _ _ (linear_map.ker (θₗ r)) (ker_θ₂_principal r)
+variable (s : Fintype.of punit)
+
+lemma aux₁ (s : Fintype.of punit) : function.support (𝑓 s) = {0, 1} := sorry
+
+-- lemma ker_principal' (g : laurent_measures r (Fintype.of punit)) (hz_g : θₗ r g = 0) :
+--   g ∈ ((submodule.span ℤ {𝑓}) : (submodule ℤ (laurent_measures r (Fintype.of punit)))) :=
+-- begin
+--   sorry,
+-- end
+
+lemma gen_mem_kernel : θₗ r 𝑓 = 0 :=
+begin
+  dsimp only [θₗ],
+  simp only [one_div, zpow_neg₀, linear_map.coe_mk, inv_zpow'],
+  dsimp only [ker_θₗ_generator],
+  sorry,
+end
+
+-- lemma ker_principal : (θₗ r).ker = ℤ · 𝑓 :=
+-- lemma ker_principal : (θₗ r).ker = submodule.span ℤ { 𝑓 } :=
+-- begin
+--   ext g,
+--   split,
+--   rw submodule.mem_span_singleton,sorry,
+--   simp only [linear_map.mem_ker],
+--   rw submodule.mem_span_singleton,
+-- end
 
 /- [FAE] The following lemma needs that `(laurent_measures r (Fintype.of punit))` have a `mul`; but
 I don't know if the lemma is actually needed -/
@@ -102,7 +152,7 @@ end ker_theta_half
 section SES_thm69
 
 local notation `ℳ` := real_measures
-local notation `𝑓` := (ker_θ₂_generator r)
+
 variable (S : Fintype)
 -- variables (p : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)] [fact ((1/2 : ℝ) ^ (p : ℝ) = r)]
 
@@ -140,17 +190,17 @@ def Θ : comphaus_filtered_pseudo_normed_group_hom (laurent_measures r S) (ℳ p
     map_zero' := sorry }
 
 
-lemma chain_complex_thm69 (F : laurent_measures r S) : Θ p r S (𝑓 • F) = 0 :=
-begin
-  funext s,
-  sorry,
-  -- simp only [real_measures.zero_apply],
-  -- dsimp [Θ],
-  -- dsimp [to_meas_θ],
-  -- dsimp [θ],
-  -- dsimp [has_scalar],
-  -- rw pi.has_scalar,
-end
+-- lemma chain_complex_thm69 (F : laurent_measures r S) : Θ p r S (𝑓 • F) = 0 :=
+-- begin
+--   funext s,
+--   sorry,
+--   -- simp only [real_measures.zero_apply],
+--   -- dsimp [Θ],
+--   -- dsimp [to_meas_θ],
+--   -- dsimp [θ],
+--   -- dsimp [has_scalar],
+--   -- rw pi.has_scalar,
+-- end
 
 
 /-
