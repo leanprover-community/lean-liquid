@@ -58,9 +58,8 @@ lemma mono_iff_app_mono {F G : C ⥤ D} (η : F ⟶ G) :
 begin
   split,
   { intros h X,
-    change mono (((evaluation _ _).obj X).map η),
-    apply right_adjoint_preserves_mono,
-  }
+    exact right_adjoint_preserves_mono (evaluation_adjunction _ _) h },
+  { introsI _, apply nat_trans.mono_app_of_mono }
 end
 
 end category_theory
