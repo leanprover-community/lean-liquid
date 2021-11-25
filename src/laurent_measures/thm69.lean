@@ -27,12 +27,60 @@ end
 
 noncomputable theory
 
--- instance (S : Fintype) : has_scalar (laurent_measures r (Fintype.of punit)) (laurent_measures r S) :=
--- { smul := sorry}
-
-
 section ker_theta_half
--- open submodule linear_map
+
+example (a : ℤ) : ∥ (2 : ℝ) * a ∥ = 2 * ∥ a ∥ :=
+begin
+  rw normed_field.norm_mul,
+  rw real.norm_two,
+  field_simp,
+  exact int.norm_cast_real a,
+  -- simp only [normed_field.norm_mul, mul_eq_mul_left_iff, or_false, bit0_eq_zero, one_ne_zero, real.norm_two],
+end
+
+def ϕ : (laurent_measures r (Fintype.of punit)) → (laurent_measures r (Fintype.of punit)) :=
+begin
+  rintro ⟨f,hF⟩,
+  let f₁ : (Fintype.of punit) → ℤ → ℤ := λ s n, 2* f s (n - 1) - f s n,
+  use f₁,
+  intro s,
+  let g₁ : ℤ → ℝ := λ n, ∥ 2 * f s (n - 1) ∥ * r ^ n + ∥ f s n ∥ * r ^ n,
+  have Hf_le_g : ∀ b : ℤ, ∥ f₁ s b ∥ * r ^ b ≤ g₁ b,
+  { intro b,
+    dsimp [f₁, g₁],
+    rw ← add_mul,
+    have rpow_pos : 0 < (r : ℝ) ^ b := by { apply zpow_pos_of_pos, rw nnreal.coe_pos,
+      exact fact.out _ },
+    apply (mul_le_mul_right rpow_pos).mpr,
+    exact norm_sub_le (2 * f s (b - 1)) (f s b) },
+  apply summable_of_nonneg_of_le _ Hf_le_g,
+  { apply summable.add,
+    have : ∀ b : ℤ, ∥ f s (b - 1) ∥ * r ^ b = r * ∥ f s (b - 1) ∥ * r ^ (b - 1),
+    { intro b,
+      nth_rewrite_rhs 0 mul_assoc,
+      nth_rewrite_rhs 0 mul_comm,
+      nth_rewrite_rhs 0 mul_assoc,
+      rw [← zpow_add_one₀, sub_add_cancel b 1],
+      rw [ne.def, nnreal.coe_eq_zero],
+      apply ne_of_gt,
+      exact fact.out _ },
+    simp_rw [← int.norm_cast_real, int.cast_mul, normed_field.norm_mul, int.norm_cast_real,
+      mul_assoc],
+    apply @summable.mul_left ℝ _ _ _ _ (λ (b : ℤ), ∥f s (b - 1) ∥ * ↑r ^ b ) (∥ (2 : ℤ) ∥),
+    simp_rw [this, mul_assoc],
+    apply @summable.mul_left ℝ _ _ _ _ (λ (b : ℤ), ∥f s (b - 1)∥ * ↑r ^ (b - 1)) r,
+    have h_comp : (λ (b : ℤ), ∥f s (b - 1)∥ * ↑r ^ (b - 1)) =
+      (λ (b : ℤ), ∥f s b∥ * ↑r ^ b) ∘ (λ n, n - 1) := rfl,
+    rw h_comp,
+    apply summable.comp_injective _ sub_left_injective,
+    repeat {apply_instance},
+    repeat {specialize hF s, exact hF}, },
+  { intro b,
+    apply mul_nonneg,
+    apply norm_nonneg,
+    rw ← nnreal.coe_zpow,
+    exact (r ^ b).2 },
+end
 
 def θₗ : (laurent_measures r (Fintype.of punit)) →ₗ[ℤ] ℝ :=
 { to_fun := λ F, tsum (λ n, (F punit.star n) * (1 / 2 : ℝ) ^ n),
@@ -50,102 +98,19 @@ def θₗ : (laurent_measures r (Fintype.of punit)) →ₗ[ℤ] ℝ :=
   end,
   map_smul' := sorry }
 
--- lemma θ_is_linear (ξ : ℝ) : is_linear_map ℤ (θ ξ r) := sorry
-
--- noncomputable def θ₂.to_linear : (laurent_measures r (Fintype.of punit)) →ₗ[ℤ] ℝ :=
--- { to_fun := θ (1 / 2) r,
---   map_add' := (θ_is_linear r (1 / 2)).1,
---   map_smul' := (θ_is_linear r (1 / 2) ).2 }
-
--- lemma ker_θ₂_principal : submodule.is_principal ((θₗ r).ker) :=
--- begin
---   -- constructor,
---   let pos : ℕ → ℤ := λ n, (if n = 0 then -1 else if n = 1 then 2 else 0),
---   let f₀ : ℤ → ℤ := λ d : ℤ, int.rec_on d (pos) (λ n, 0),
---   use (λ s, f₀),
---   sorry,
---   ext,
---   split,
---   swap,
---   intro h_x,
---   sorry,
---   -- sorry,
---   obtain ⟨a, h_ax⟩ := mem_span_singleton.mp h_x,
---   apply mem_ker.mpr,
---   rw ← h_ax,
---   simp,
---   apply or.intro_right,
---   -- rw θₗ,
--- --   rw θ₂.to_linear,
--- --   -- rw θ.to_linear,
---   -- simp,
--- --   rw θ,
--- --   simp,
--- --   simp_rw [laurent_measures.to_Rfct],
--- --   let S : finset ℤ := {0, 1},
--- --   have hf : function.support f₀ ⊆ S, sorry,
--- --   have hf₀ : ∀ s ∉ S, ((f₀ s) : ℝ) * ((2 ^ s) : ℝ)⁻¹ = (0 : ℝ), sorry,
--- --   rw [tsum_eq_sum hf₀],
--- --   -- rw ← [has_sum_subtype_iff_of_support_subset hf],
--- --   sorry, sorry,
--- end
-
-def ker_θₗ_generator : (laurent_measures r (Fintype.of punit)) :=
+lemma θ_ϕ_complex (F : laurent_measures r (Fintype.of punit)) : (θₗ r ∘ ϕ r) F = 0 :=
 begin
-  let f₀ : ℕ → ℤ := λ n, (if n = 0 then -1 else if n = 1 then 2 else 0),
-  let f : ℤ → ℤ := λ d : ℤ, int.rec_on d (f₀) (λ n, 0),
-  use λ _ : (Fintype.of punit), f,
-  intro s,
-  let A : finset ℤ := {0, 1},
-  have hf : ∀ a ∉ A, ∥(f a)∥ * ((r ^ a) : ℝ) = (0 : ℝ),
-  { intros a ha,
-    suffices : f a = 0, by {simp only [this, norm_zero, zero_mul, implies_true_iff,
-      eq_self_iff_true]},
-    cases a,
-    { have H : a ≠ 0 ∧ a ≠ 1,
-      { dsimp only [A] at ha,
-        have := (not_iff_not.mpr (@finset.mem_insert _ _ ↑a 0 {1})).mp ha,
-        rw [decidable.not_or_iff_and_not, finset.mem_singleton] at this,
-        tauto },
-      dsimp only [f, f₀],
-      rw [if_neg H.1, if_neg H.2] },
-    simp only [eq_self_iff_true] },
-  apply summable_of_ne_finset_zero hf,
-end
-
-local notation `𝑓` := (ker_θₗ_generator r)
-
-variable (s : Fintype.of punit)
-
-lemma aux₁ (s : Fintype.of punit) : function.support (𝑓 s) = {0, 1} := sorry
-
--- lemma ker_principal' (g : laurent_measures r (Fintype.of punit)) (hz_g : θₗ r g = 0) :
---   g ∈ ((submodule.span ℤ {𝑓}) : (submodule ℤ (laurent_measures r (Fintype.of punit)))) :=
--- begin
---   sorry,
--- end
-
-lemma gen_mem_kernel : θₗ r 𝑓 = 0 :=
-begin
-  dsimp only [θₗ],
-  simp only [one_div, zpow_neg₀, linear_map.coe_mk, inv_zpow'],
-  dsimp only [ker_θₗ_generator],
+  rcases F with ⟨f, hf⟩,
+  -- simp,
+  dsimp [ϕ, θₗ],
   sorry,
+
 end
 
--- lemma ker_principal : (θₗ r).ker = ℤ · 𝑓 :=
--- lemma ker_principal : (θₗ r).ker = submodule.span ℤ { 𝑓 } :=
--- begin
---   ext g,
---   split,
---   rw submodule.mem_span_singleton,sorry,
---   simp only [linear_map.mem_ker],
---   rw submodule.mem_span_singleton,
--- end
 
-/- [FAE] The following lemma needs that `(laurent_measures r (Fintype.of punit))` have a `mul`; but
-I don't know if the lemma is actually needed -/
--- lemma ker_generator_non_zerodivisor : is_regular (ker_generator ξ) :=
+lemma θ_ϕ_exact (F : laurent_measures r (Fintype.of punit)) (hF : θₗ r F = 0) :
+  ∃ G, ϕ r G = F := sorry
+
 
 end ker_theta_half
 
