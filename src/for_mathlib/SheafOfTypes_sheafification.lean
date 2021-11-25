@@ -32,4 +32,16 @@ show presheaf_to_Sheaf J _ ⋙ (Sheaf_equiv_SheafOfTypes J).functor ⊣
 from adjunction.comp _ _ (sheafification_adjunction _ _) $
   (Sheaf_equiv_SheafOfTypes J).to_adjunction
 
+instance is_iso_sheafification_types_adjunction_counit_app (X : SheafOfTypes J) :
+  is_iso ((sheafification_adjunction_types J).counit.app X) :=
+begin
+  apply is_iso_of_reflects_iso _ (Sheaf_equiv_SheafOfTypes J).inverse,
+  change is_iso ((sheafification_adjunction J (Type (max v u))).counit.app
+    ((Sheaf_equiv_SheafOfTypes J).inverse.obj X)),
+  apply_instance
+end
+
+instance sheafification_types_reflective : is_iso (sheafification_adjunction_types J).counit :=
+nat_iso.is_iso_of_is_iso_app _
+
 end category_theory
