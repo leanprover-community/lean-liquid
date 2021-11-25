@@ -1,6 +1,7 @@
 import condensed.ab
 import for_mathlib.SheafOfTypes_sheafification
 import for_mathlib.sheafify_forget
+import for_mathlib.whisker_adjunction
 import algebra.category.Group.adjunctions
 
 open category_theory
@@ -171,6 +172,14 @@ def presheaf_to_Type_forget_iso (S : Profiniteᵒᵖ ⥤ Ab) :
   inv := (sheafify_forget proetale_topology S).inv,
   hom_inv_id' := (sheafify_forget proetale_topology S).hom_inv_id,
   inv_hom_id' := (sheafify_forget proetale_topology S).inv_hom_id, }
+
+def whisker_Ab_adj : ((whiskering_right Profiniteᵒᵖ Type* Ab).obj AddCommGroup.free) ⊣
+  ((whiskering_right Profiniteᵒᵖ Ab Type*).obj (forget _)) :=
+AddCommGroup.adj.whiskering_right _
+
+def Ab_Type_lift {S : CondensedSet} {T : Condensed Ab} (η : S ⟶ Ab_to_Type.obj T) :
+  Type_to_Ab.obj S ⟶ T :=
+proetale_topology.sheafify_lift ((whisker_Ab_adj.hom_equiv _ _).symm η) T.2
 
 def Ab_to_Type_adjunction : Type_to_Ab ⊣ Ab_to_Type :=
 sorry
