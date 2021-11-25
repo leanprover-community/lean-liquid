@@ -322,7 +322,18 @@ end
 
 lemma Ab_Type_lift_unique {S : CondensedSet} {T : Condensed Ab} (η : S ⟶ Ab_to_Type.obj T)
   (g : Type_to_Ab.obj S ⟶ T) (h : to_Type_to_Ab S ≫ (Ab_to_Type.map g) = η) :
-  g = Ab_Type_lift η := sorry
+  g = Ab_Type_lift η :=
+begin
+  apply Ab_presheaf_lift_unique,
+  apply Ab_presheaf_presheaf_lift_unique,
+  dsimp only [to_Type_to_Ab, Ab_to_Type] at h,
+  rw presheaf_to_Type_forget_iso_hom at h,
+  rw map_Type_presheaf_lift at h,
+  erw [← category.assoc, from_Type_to_presheaf_inv_lift] at h,
+  dsimp at h,
+  erw category.assoc at h,
+  exact h,
+end
 
 lemma Ab_Type_hom_ext {S : CondensedSet} {T : Condensed Ab}
   (f g : Type_to_Ab.obj S ⟶ T)
@@ -330,71 +341,44 @@ lemma Ab_Type_hom_ext {S : CondensedSet} {T : Condensed Ab}
   f = g :=
 by rw [Ab_Type_lift_unique _ f rfl, Ab_Type_lift_unique _ g rfl, h]
 
-/-
-def Ab_to_Type : Condensed Ab ⥤ CondensedSet :=
-{ obj := λ S, ⟨Ab_to_presheaf.obj S ⋙ forget _, begin
-    rw [← is_sheaf_iff_is_sheaf_of_type, ← presheaf.is_sheaf_iff_is_sheaf_forget],
-    exact S.2
-  end⟩,
-  map := λ A B f, whisker_right (Ab_to_presheaf.map f) _,
-  map_id' := λ A, whisker_right_id _,
-  map_comp' := λ A B C f g, whisker_right_comp _ _ _ }
-
-def Type_to_Ab : CondensedSet ⥤ Condensed Ab :=
-{ obj := λ S, presheaf_to_Ab.obj $ Type_to_presheaf.obj S ⋙ AddCommGroup.free,
-  map := λ S T f, presheaf_to_Ab.map $ whisker_right (Type_to_presheaf.map f) _,
-  map_id' := λ S, by erw [Type_to_presheaf.map_id, whisker_right_id, presheaf_to_Ab.map_id],
-  map_comp' := λ S T W f g,
-    by rw [Type_to_presheaf.map_comp, whisker_right_comp, presheaf_to_Ab.map_comp] }
-
-def presheaf_to_Type_forget_iso (S : Profiniteᵒᵖ ⥤ Ab) :
-   presheaf_to_Type.obj (S ⋙ forget _) ≅ Ab_to_Type.obj (presheaf_to_Ab.obj S) :=
-{ hom := (sheafify_forget proetale_topology S).hom,
-  inv := (sheafify_forget proetale_topology S).inv,
-  hom_inv_id' := (sheafify_forget proetale_topology S).hom_inv_id,
-  inv_hom_id' := (sheafify_forget proetale_topology S).inv_hom_id, }
-
-lemma presheaf_to_Type_forget_iso_hom' (S : Profiniteᵒᵖ ⥤ Ab) :
-  (presheaf_to_Type_forget_iso S).hom = proetale_topology.sheafify_lift
-    (whisker_right (to_presheaf_to_Ab _) _)
-begin
-  erw ← presheaf.is_sheaf_iff_is_sheaf_forget,
-  exact (presheaf_to_Ab.obj S).2
-end := sheafify_forget_hom _ _
-
-lemma presheaf_to_Type_forget_iso_hom (S : Profiniteᵒᵖ ⥤ Ab) :
-  (presheaf_to_Type_forget_iso S).hom =
-  Type_presheaf_lift (whisker_right (to_presheaf_to_Ab _) _) :=
-presheaf_to_Type_forget_iso_hom' _
-
-def Ab_Type_lift {S : CondensedSet} {T : Condensed Ab} (η : S ⟶ Ab_to_Type.obj T) :
-  Type_to_Ab.obj S ⟶ T :=
-proetale_topology.sheafify_lift (Ab_presheaf_presheaf_lift (Type_to_presheaf.map η)) T.2
-
-def to_Type_to_Ab (S : CondensedSet) : S ⟶ Ab_to_Type.obj (Type_to_Ab.obj S) :=
-inv (from_Type_to_presheaf S) ≫ presheaf_to_Type.map (to_presheaf_to_Ab_presheaf _) ≫
-(presheaf_to_Type_forget_iso _).hom
-
-lemma to_Type_to_Ab_Ab_Type_lift {S : CondensedSet} {T : Condensed Ab} (η : S ⟶ Ab_to_Type.obj T) :
-  to_Type_to_Ab S ≫ (Ab_to_Type.map (Ab_Type_lift η)) = η :=
-begin
-  dsimp only [to_Type_to_Ab],
-  rw [category.assoc, presheaf_to_Type_forget_iso_hom],
-  rw map_Type_presheaf_lift,
-  erw [← category.assoc, from_Type_to_presheaf_inv_lift],
-  dsimp [Ab_Type_lift],
-
-
-  apply Type_presheaf_hom_ext,
-  erw ← category.assoc,
-
-  --erw to_presheaf_to_Type_map,
-end
-
 def Ab_to_Type_adjunction : Type_to_Ab ⊣ Ab_to_Type :=
-sorry
+adjunction.mk_of_hom_equiv
+{ hom_equiv := λ S T,
+  { to_fun := λ f, to_Type_to_Ab S ≫ Ab_to_Type.map f,
+    inv_fun := λ f, Ab_Type_lift f,
+    left_inv := begin
+      intros f,
+      dsimp,
+      symmetry,
+      apply Ab_Type_lift_unique,
+      refl,
+    end,
+    right_inv := begin
+      intros f,
+      dsimp,
+      apply to_Type_to_Ab_Ab_Type_lift,
+    end },
+  hom_equiv_naturality_left_symm' := begin
+    sorry
+    /-
+    intros A B C f g,
+    dsimp,
+    symmetry,
+    apply Ab_Type_lift_unique,
+    dsimp only [to_Type_to_Ab, Ab_to_Type],
+    rw presheaf_to_Type_forget_iso_hom,
+    rw map_Type_presheaf_lift,
+    erw from_Type_to_presheaf_inv_lift,
+    dsimp,
+    ext : 2,
+    erw nat_trans.comp_app,
+    erw nat_trans.comp_app,
+    dsimp only [whisker_right_app],
+    rw [category.assoc, ← (forget Ab).map_comp],
+    -/
+  end,
+  hom_equiv_naturality_right' := sorry }
 
--/
 end Ab_to_Type
 
 end Condensed
