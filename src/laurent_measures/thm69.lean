@@ -41,10 +41,10 @@ end
 def ϕ : (laurent_measures r (Fintype.of punit)) → (laurent_measures r (Fintype.of punit)) :=
 begin
   rintro ⟨f,hF⟩,
-  let f₁ : (Fintype.of punit) → ℤ → ℤ := λ s n, f s (n - 1) - 2 * f s n,
+  let f₁ : (Fintype.of punit) → ℤ → ℤ := λ s n, 2* f s (n - 1) - f s n,
   use f₁,
   intro s,
-  let g₁ : ℤ → ℝ := λ n, ∥ f s (n - 1) ∥ * r ^ n + ∥ 2 * f s n ∥ * r ^ n,
+  let g₁ : ℤ → ℝ := λ n, ∥ 2 * f s (n - 1) ∥ * r ^ n + ∥ f s n ∥ * r ^ n,
   have Hf_le_g : ∀ b : ℤ, ∥ f₁ s b ∥ * r ^ b ≤ g₁ b,
   { intro b,
     dsimp [f₁, g₁],
@@ -52,7 +52,7 @@ begin
     have rpow_pos : 0 < (r : ℝ) ^ b := by { apply zpow_pos_of_pos, rw nnreal.coe_pos,
       exact fact.out _ },
     apply (mul_le_mul_right rpow_pos).mpr,
-    exact norm_sub_le (f s (b - 1)) (2 * f s b) },
+    exact norm_sub_le (2 * f s (b - 1)) (f s b) },
   apply summable_of_nonneg_of_le _ Hf_le_g,
   { apply summable.add,
     have : ∀ b : ℤ, ∥ f s (b - 1) ∥ * r ^ b = r * ∥ f s (b - 1) ∥ * r ^ (b - 1),
@@ -64,6 +64,9 @@ begin
       rw [ne.def, nnreal.coe_eq_zero],
       apply ne_of_gt,
       exact fact.out _ },
+    simp_rw [← int.norm_cast_real, int.cast_mul, normed_field.norm_mul, int.norm_cast_real,
+      mul_assoc],
+    apply @summable.mul_left ℝ _ _ _ _ (λ (b : ℤ), ∥f s (b - 1) ∥ * ↑r ^ b ) (∥ (2 : ℤ) ∥),
     simp_rw [this, mul_assoc],
     apply @summable.mul_left ℝ _ _ _ _ (λ (b : ℤ), ∥f s (b - 1)∥ * ↑r ^ (b - 1)) r,
     have h_comp : (λ (b : ℤ), ∥f s (b - 1)∥ * ↑r ^ (b - 1)) =
@@ -71,10 +74,6 @@ begin
     rw h_comp,
     apply summable.comp_injective _ sub_left_injective,
     repeat {apply_instance},
-    swap,
-    simp_rw [← int.norm_cast_real, int.cast_mul, normed_field.norm_mul, int.norm_cast_real,
-      mul_assoc],
-    apply @summable.mul_left ℝ _ _ _ _ (λ (b : ℤ), ∥f s b∥ * ↑r ^ b) (∥ (2 : ℤ) ∥),
     repeat {specialize hF s, exact hF}, },
   { intro b,
     apply mul_nonneg,
@@ -99,7 +98,15 @@ def θₗ : (laurent_measures r (Fintype.of punit)) →ₗ[ℤ] ℝ :=
   end,
   map_smul' := sorry }
 
-lemma θ_ϕ_complex (F : laurent_measures r (Fintype.of punit)) : (θₗ r ∘ ϕ r) F = 0 := sorry
+lemma θ_ϕ_complex (F : laurent_measures r (Fintype.of punit)) : (θₗ r ∘ ϕ r) F = 0 :=
+begin
+  rcases F with ⟨f, hf⟩,
+  -- simp,
+  dsimp [ϕ, θₗ],
+  sorry,
+
+end
+
 
 lemma θ_ϕ_exact (F : laurent_measures r (Fintype.of punit)) (hF : θₗ r F = 0) :
   ∃ G, ϕ r G = F := sorry
