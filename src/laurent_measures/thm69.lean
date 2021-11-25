@@ -98,11 +98,65 @@ def θₗ : (laurent_measures r (Fintype.of punit)) →ₗ[ℤ] ℝ :=
   end,
   map_smul' := sorry }
 
+--for MATHLIB?
+variables [α : Type*] [add_group α] [topological_space α] [has_continuous_add α] [has_sub α]
+
+-- lemma has_sum.int_even_add_odd {f : ℤ → α} {a b : α} (he : has_sum (λ k, f (2 * k)) a)
+--   (ho : has_sum (λ k, f (2 * k + 1)) b) :
+--   has_sum f (a + b) :=
+-- begin
+--   have := mul_right_injective₀ (@two_ne_zero ℤ _ _),
+--   replace he := this.has_sum_range_iff.2 he,
+--   replace ho := ((add_left_injective 1).comp this).has_sum_range_iff.2 ho,
+--   refine he.add_is_compl _ ho,
+--   simpa [(∘)] using int.is_compl_even_odd,
+-- end
+--
+
 lemma θ_ϕ_complex (F : laurent_measures r (Fintype.of punit)) : (θₗ r ∘ ϕ r) F = 0 :=
 begin
   rcases F with ⟨f, hf⟩,
-  -- simp,
-  dsimp [ϕ, θₗ],
+  convert_to ∑' (n : ℤ), ((2 * f punit.star (n - 1) - f punit.star n) : ℝ) * (1 / 2) ^ n = 0,
+  { apply tsum_congr,
+    intro b,
+    rw ← inv_eq_one_div,
+    apply (mul_left_inj' (@zpow_ne_zero ℝ _ _ b (inv_ne_zero two_ne_zero))).mpr,
+    have : (2 : ℝ) * (f punit.star (b - 1)) = ((2 : ℤ) * (f punit.star (b -1))) := by {rw [← int.cast_one, int.cast_bit0] },
+    rw [this, ← int.cast_mul, ← int.cast_sub],
+    refl },
+  have h_neg : summable (λ n, ((f punit.star n) : ℝ) * (1 / 2) ^ n),
+  { specialize hf punit.star,
+    apply summable_of_summable_norm,
+    --`[FAE]` if the sum were over ℕ, life would be easy
+    sorry},
+  have h_pos : has_sum (λ n, ((2 * f punit.star (n - 1)) : ℝ) * (1 / 2) ^ n) h_neg.some,
+  { have div_half : ∀ b : ℤ, (1 / 2 : ℝ) ^ b * (2 : ℝ) = (1 / 2) ^ ( b - 1),
+    { intro b,
+      rw [← inv_eq_one_div, @zpow_sub_one₀ ℝ _ _ (inv_ne_zero two_ne_zero) b],
+      apply (mul_right_inj' (@zpow_ne_zero ℝ _ _ b (inv_ne_zero two_ne_zero))).mpr,
+      exact (inv_inv₀ 2).symm },
+    have h_comp : (λ (b : ℤ), ((f punit.star (b - 1)) : ℝ ) * (1 / 2) ^ (b - 1)) =
+      (λ (b : ℤ), ((f punit.star b) : ℝ) * (1 / 2) ^ b) ∘ (λ n, n - 1) := rfl,
+    simp_rw [mul_comm, ← mul_assoc, div_half, mul_comm, h_comp],
+    let e : ℤ ≃ ℤ := ⟨λ n : ℤ, n - 1, λ n, n + 1, by {intro, simp}, by {intro, simp}⟩,
+    apply (equiv.has_sum_iff e).mpr,
+    exact h_neg.some_spec },
+  simp_rw [sub_mul, tsum_sub h_pos.summable h_neg, sub_eq_zero],
+  --'[FAE]' It should now just be a matter of combining h_neg with h_pos (which says that the two sums coincide, so their difference is 0)
+  -- have foo := h_pos.tsum_eq,
+  -- have boo := h_neg.has_sum.tsum_eq,
+  -- have too := h_pos.unique foo,
+  -- rw foo,
+
+  -- apply boo.unique,
+  -- apply tsum.eq,
+  -- exact boo,
+
+  -- have := tsum_sub h_pos h_neg,
+  -- rw this,
+  -- simp_rw ← sub_mul at this,
+  -- apply tsum_sub (λ s n, 2 * f s (n - 1)) (λ s n, f s n),
+  -- simp [pi.has_sub],
   sorry,
 
 end
