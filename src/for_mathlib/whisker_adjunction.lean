@@ -5,7 +5,7 @@ namespace category_theory.adjunction
 
 open category_theory
 
-variables {C D E : Type*} [category C] [category D] [category E]
+variables (C : Type*) {D E : Type*} [category C] [category D] [category E]
   {F : D ⥤ E} {G : E ⥤ D}
 
 def whiskering_right (adj : F ⊣ G) :
