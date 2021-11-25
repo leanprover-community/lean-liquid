@@ -341,6 +341,13 @@ lemma Ab_Type_hom_ext {S : CondensedSet} {T : Condensed Ab}
   f = g :=
 by rw [Ab_Type_lift_unique _ f rfl, Ab_Type_lift_unique _ g rfl, h]
 
+lemma Ab_to_Type_map_lift {A B : CondensedSet} {C : Condensed Ab} (f : A ⟶ B)
+  (g : B ⟶ Ab_to_Type.obj C) : Type_to_Ab.map f ≫ Ab_Type_lift g = Ab_Type_lift (f ≫ g) := sorry
+
+lemma to_Type_to_Ab_map_lift {A B : CondensedSet} {C : Condensed Ab} (f : A ⟶ B)
+  (g : B ⟶ Ab_to_Type.obj C) :
+  to_Type_to_Ab A ≫ Ab_to_Type.map (Ab_Type_lift (f ≫ g)) = f ≫ g := sorry
+
 def Ab_to_Type_adjunction : Type_to_Ab ⊣ Ab_to_Type :=
 adjunction.mk_of_hom_equiv
 { hom_equiv := λ S T,
@@ -359,25 +366,13 @@ adjunction.mk_of_hom_equiv
       apply to_Type_to_Ab_Ab_Type_lift,
     end },
   hom_equiv_naturality_left_symm' := begin
-    sorry
-    /-
     intros A B C f g,
     dsimp,
     symmetry,
     apply Ab_Type_lift_unique,
-    dsimp only [to_Type_to_Ab, Ab_to_Type],
-    rw presheaf_to_Type_forget_iso_hom,
-    rw map_Type_presheaf_lift,
-    erw from_Type_to_presheaf_inv_lift,
-    dsimp,
-    ext : 2,
-    erw nat_trans.comp_app,
-    erw nat_trans.comp_app,
-    dsimp only [whisker_right_app],
-    rw [category.assoc, ← (forget Ab).map_comp],
-    -/
+    rw [Ab_to_Type_map_lift, to_Type_to_Ab_map_lift],
   end,
-  hom_equiv_naturality_right' := sorry }
+  hom_equiv_naturality_right' := λ A B C f g, rfl }
 
 end Ab_to_Type
 
