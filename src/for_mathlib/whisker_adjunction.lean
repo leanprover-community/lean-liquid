@@ -20,6 +20,16 @@ mk_of_unit_counit
       whisker_left X adj.counit ≫ (functor.right_unitor _).hom,
     naturality' := by { intros, ext, dsimp, simp } },
   left_triangle' := by { ext, dsimp, simp },
-  right_triangle' := by { ext, dsimp, simp } }
+  right_triangle' := by { ext, dsimp, simp } } .
+
+@[simp]
+lemma whiskering_right_unit (adj : F ⊣ G) (X : C ⥤ D) :
+  (adj.whiskering_right C).unit.app X =
+  (functor.right_unitor _).inv ≫ whisker_left X adj.unit ≫ (functor.associator _ _ _).inv := rfl
+
+@[simp]
+lemma whiskering_right_counit (adj : F ⊣ G) (X : C ⥤ E) :
+  (adj.whiskering_right C).counit.app X =
+  (functor.associator _ _ _).hom ≫ whisker_left X adj.counit ≫ (functor.right_unitor _).hom := rfl
 
 end category_theory.adjunction
