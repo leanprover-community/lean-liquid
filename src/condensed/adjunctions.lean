@@ -187,6 +187,14 @@ begin
   simp,
 end
 
+lemma presheaf_to_Ab_map_lift {S T : Profiniteᵒᵖ ⥤ Ab} {W : Condensed Ab}
+  (f : S ⟶ T) (g : T ⟶ Ab_to_presheaf.obj W) :
+  presheaf_to_Ab.map f ≫ Ab_presheaf_lift g = Ab_presheaf_lift (f ≫ g) :=
+begin
+  dsimp only [Ab_presheaf_lift],
+  simp,
+end
+
 end Ab_to_presheaf
 
 section Ab_presheaf
@@ -247,6 +255,16 @@ begin
   dsimp [to_presheaf_to_Ab_presheaf],
   simp,
 end
+
+lemma presheaf_to_Ab_presheaf_map_lift {S T : Profiniteᵒᵖ ⥤ Type*} {W : Profiniteᵒᵖ ⥤ Ab}
+  (f : S ⟶ T) (g : T ⟶ Ab_presheaf_to_presheaf.obj W) :
+  presheaf_to_Ab_presheaf.map f ≫ Ab_presheaf_presheaf_lift g =
+  Ab_presheaf_presheaf_lift (f ≫ g) :=
+begin
+  dsimp only [Ab_presheaf_presheaf_lift],
+  simp only [adjunction.hom_equiv_naturality_left_symm],
+end
+
 
 end Ab_presheaf
 
@@ -341,12 +359,86 @@ lemma Ab_Type_hom_ext {S : CondensedSet} {T : Condensed Ab}
   f = g :=
 by rw [Ab_Type_lift_unique _ f rfl, Ab_Type_lift_unique _ g rfl, h]
 
-lemma Ab_to_Type_map_lift {A B : CondensedSet} {C : Condensed Ab} (f : A ⟶ B)
-  (g : B ⟶ Ab_to_Type.obj C) : Type_to_Ab.map f ≫ Ab_Type_lift g = Ab_Type_lift (f ≫ g) := sorry
 
-lemma to_Type_to_Ab_map_lift {A B : CondensedSet} {C : Condensed Ab} (f : A ⟶ B)
-  (g : B ⟶ Ab_to_Type.obj C) :
-  to_Type_to_Ab A ≫ Ab_to_Type.map (Ab_Type_lift (f ≫ g)) = f ≫ g := sorry
+lemma Ab_to_Type_map_lift {A B : CondensedSet} {C : Condensed Ab} (f : A ⟶ B)
+  (g : B ⟶ Ab_to_Type.obj C) : Type_to_Ab.map f ≫ Ab_Type_lift g = Ab_Type_lift (f ≫ g) :=
+begin
+  apply Ab_Type_lift_unique,
+  dsimp only [to_Type_to_Ab],
+  rw presheaf_to_Type_forget_iso_hom,
+  rw map_Type_presheaf_lift,
+  erw from_Type_to_presheaf_inv_lift,
+  dsimp [Ab_to_Type, Ab_Type_lift, Type_to_Ab],
+  ext : 2,
+  erw [nat_trans.comp_app],
+  erw [nat_trans.comp_app],
+  dsimp only [whisker_right_app],
+  erw [category.assoc, ← (forget Ab).map_comp, ← nat_trans.comp_app],
+  rw presheaf_to_Ab_map_lift,
+  rw to_presheaf_to_Ab_map_lift,
+  rw presheaf_to_Ab_presheaf_map_lift,
+  change _ ≫ (whisker_right (Ab_presheaf_presheaf_lift
+    (Type_to_presheaf.map f ≫ Type_to_presheaf.map g)) (forget Ab)).app _ = _,
+  rw ← nat_trans.comp_app,
+  congr' 1,
+  dsimp only [Ab_presheaf_presheaf_lift],
+  simp only [adjunction.hom_equiv_naturality_left_symm, whisker_right_comp,
+    adjunction.hom_equiv_counit],
+  --dsimp [presheaf_to_Ab_presheaf],
+  simp_rw [← whisker_right_comp, ← Type_to_presheaf.map_comp],
+  dsimp [to_presheaf_to_Ab_presheaf, Ab_presheaf_to_presheaf_adjunction],
+  ext t : 2,
+  dsimp [functor.right_unitor],
+  simp only [category.id_comp, category.comp_id],
+  erw category.id_comp,
+  erw category.id_comp,
+  dsimp [presheaf_to_Ab_presheaf],
+  --erw ← category.assoc,
+  erw ← AddCommGroup.adj.hom_equiv_counit,
+  erw AddCommGroup.adj.hom_equiv_naturality_left_symm,
+  change _ ≫ (forget Ab).map _ = _,
+  rw [(forget Ab).map_comp, ← category.assoc],
+  erw ← AddCommGroup.adj.unit.naturality,
+  dsimp [functor.id_map],
+  rw category.assoc,
+  change _ ≫ _ ≫ (forget Ab).map _ = _,
+  erw [AddCommGroup.adj.hom_equiv_counit, (forget Ab).map_comp],
+  erw nat_trans.comp_app,
+  congr' 1,
+  rw ← category.assoc,
+  erw ← AddCommGroup.adj.unit.naturality,
+  dsimp [functor.id_map],
+  rw category.assoc,
+  change _ ≫ _ ≫ (forget Ab).map _ = _,
+  conv_rhs {rw ← category.comp_id (g.app t) },
+  congr' 1,
+  change AddCommGroup.adj.unit.app ((forget Ab).obj _) ≫
+    (forget Ab).map (AddCommGroup.adj.counit.app _) = _,
+  have := AddCommGroup.adj.right_triangle,
+  apply_fun (λ e, e.app (C.1.obj t)) at this,
+  exact this,
+
+  -- sigh
+
+  /-
+  Found by library_search! ;)
+  exact zero_add
+  (λ (x : ↥((Ab_to_presheaf.obj C).obj t)),
+     multiplicative.to_add
+       ((λ (x : (forget AddCommGroup).obj ((Ab_to_presheaf.obj C).obj t) × bool),
+           cond x.snd (𝟙 ((forget AddCommGroup).obj ((Ab_to_presheaf.obj C).obj t)) x.fst)
+             (𝟙 ((forget AddCommGroup).obj ((Ab_to_presheaf.obj C).obj t)) x.fst)⁻¹)
+          (x, tt))),
+  -/
+  --simp,
+end
+
+--lemma to_Type_to_Ab_map_lift {A B : CondensedSet} {C : Condensed Ab} (f : A ⟶ B)
+--  (g : B ⟶ Ab_to_Type.obj C) :
+--  to_Type_to_Ab A ≫ Ab_to_Type.map (Ab_Type_lift (f ≫ g)) = f ≫ g :=
+--begin
+--  sorry
+--end
 
 def Ab_to_Type_adjunction : Type_to_Ab ⊣ Ab_to_Type :=
 adjunction.mk_of_hom_equiv
@@ -369,8 +461,7 @@ adjunction.mk_of_hom_equiv
     intros A B C f g,
     dsimp,
     symmetry,
-    apply Ab_Type_lift_unique,
-    rw [Ab_to_Type_map_lift, to_Type_to_Ab_map_lift],
+    apply Ab_to_Type_map_lift,
   end,
   hom_equiv_naturality_right' := λ A B C f g, rfl }
 
