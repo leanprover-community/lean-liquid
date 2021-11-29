@@ -39,6 +39,7 @@ def cone.d [decidable_rel c.rel] : Π (i j : ι), cone.X A B i ⟶ cone.X A B j 
   (biprod.desc (f.next _ ≫ (B.X_next_iso hij).hom)       (B.d _ _))
 else 0
 
+/-- The mapping cone of a morphism `f : A → B` of homological complexes. -/
 def cone [decidable_rel c.rel] : homological_complex V c :=
 { X := cone.X A B,
   d := cone.d f,

@@ -104,10 +104,42 @@ begin
       category.id_comp, category.comp_id, comp_iso_eq_inl, iso_comp_eq_snd_assoc, iso.inv_hom_id], }
 end
 
+lemma exact_of_split {A B C : 𝒜} (f : A ⟶ B) (g : B ⟶ C) (χ : C ⟶ B) (φ : B ⟶ A)
+  (hfg : f ≫ g = 0) (H : φ ≫ f + g ≫ χ = 𝟙 B) : exact f g :=
+{ w := hfg,
+  epi :=
+  begin
+    let ψ : (kernel_subobject g : 𝒜) ⟶ image_subobject f :=
+      subobject.arrow _ ≫ φ ≫ factor_thru_image_subobject f,
+    suffices : ψ ≫ image_to_kernel f g hfg = 𝟙 _,
+    { convert epi_of_epi ψ _, rw this, apply_instance },
+    rw ← cancel_mono (subobject.arrow _), swap, { apply_instance },
+    simp only [image_to_kernel_arrow, image_subobject_arrow_comp, category.id_comp, category.assoc],
+    calc (kernel_subobject g).arrow ≫ φ ≫ f
+        = (kernel_subobject g).arrow ≫ 𝟙 B : _
+    ... = (kernel_subobject g).arrow        : category.comp_id _,
+    rw [← H, preadditive.comp_add],
+    simp only [add_zero, zero_comp, kernel_subobject_arrow_comp_assoc],
+  end }
+
+-- move this
+instance exact_inl_snd (A B : 𝒜) : exact (biprod.inl : A ⟶ A ⊞ B) biprod.snd :=
+exact_of_split _ _ biprod.inr biprod.fst biprod.inl_snd biprod.total
+
 lemma short_exact (h : splitting f g) : short_exact f g :=
 { mono := by { rw ← h.inl_comp_iso_eq, exact mono_comp _ _ },
   epi := by { rw ← h.iso_comp_snd_eq, exact epi_comp _ _ },
-  exact := sorry }
+  exact :=
+  begin
+    rw exact_iff_exact_of_iso f g (biprod.inl : A ⟶ A ⊞ C) (biprod.snd : A ⊞ C ⟶ C) _ _ _,
+    { apply_instance },
+    { refine arrow.iso_mk (iso.refl _) h.iso _,
+      simp only [iso.refl_hom, arrow.mk_hom, category.id_comp, comp_iso_eq_inl], },
+    { refine arrow.iso_mk h.iso (iso.refl _) _,
+      simp only [iso.refl_hom, arrow.mk_hom, category.comp_id, iso_comp_snd_eq],
+      erw category.comp_id /- why ?? -/ },
+    { refl }
+  end }
 
 
 -- TODO: this should be generalized to isoms of short sequences,
