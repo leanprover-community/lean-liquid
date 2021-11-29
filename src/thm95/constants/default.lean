@@ -285,7 +285,7 @@ lemma bound_by_H {q : ℕ} (h : q ≤ m) :
 begin
   rw [H, H', universal_map.bound_by, le_max_iff],
   right,
-  refine @le_sup _ _ _ (range $ m+1)
+  refine @le_sup _ _ _ _ (range $ m+1)
     (λ q, ((BD.data.homotopy_mul BD.homotopy (N₂ r r' BD κ' m)).hom q (q + 1)).bound) _ _,
   rwa [mem_range, nat.lt_succ_iff],
 end

@@ -1,7 +1,7 @@
 import analysis.special_functions.pow
 import analysis.specific_limits
 import analysis.normed_space.basic
-import analysis.mean_inequalities
+import analysis.mean_inequalities_pow
 import category_theory.Fintype
 
 import pseudo_normed_group.basic

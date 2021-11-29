@@ -2,6 +2,7 @@ import linear_algebra.matrix
 import group_theory.free_abelian_group
 import algebra.direct_sum.basic
 import algebra.big_operators.finsupp
+import data.matrix.dmatrix
 
 import for_mathlib.free_abelian_group
 import data.matrix.kronecker

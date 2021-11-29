@@ -1,5 +1,5 @@
 import analysis.normed_space.banach
-import analysis.mean_inequalities
+import analysis.mean_inequalities_pow
 
 /-!
 # p-Banach spaces

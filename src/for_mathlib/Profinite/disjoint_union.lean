@@ -12,17 +12,6 @@ In this file we show that a finite disjoint union of profinite sets agrees with 
 section topology
 variables {α β : Type*}
 
-lemma set.nonempty.preimage' {s : set β} (hs : s.nonempty) {f : α → β} (hf : s ⊆ set.range f) :
-  (f ⁻¹' s).nonempty :=
-let ⟨y, hy⟩ := hs, ⟨x, hx⟩ := hf hy in ⟨x, set.mem_preimage.2 $ hx.symm ▸ hy⟩
-
-lemma disjoint.subset_left_of_subset_union {a b c : set α} (h : a ⊆ b ∪ c) (hac : disjoint a c) :
-  a ⊆ b :=
-hac.left_le_of_le_sup_right h
-
-lemma disjoint.subset_right_of_subset_union {a b c : set α} (h : a ⊆ b ∪ c) (hab : disjoint a b) :
-  a ⊆ c :=
-hab.left_le_of_le_sup_left h
 
 lemma is_preconnected.preimage [topological_space α] [topological_space β] {s : set β}
   (hs : is_preconnected s) {f : α → β}   (hfinj : function.injective f) (hfopen : is_open_map f)
@@ -48,41 +37,6 @@ lemma is_connected.preimage [topological_space α] [topological_space β] {s : s
   (hfinj : function.injective f) (hfopen : is_open_map f) (hsf : s ⊆ set.range f) :
   is_connected (f ⁻¹' s) :=
 ⟨hs.nonempty.preimage' hsf, hs.is_preconnected.preimage hfinj hfopen hsf⟩
-
-lemma is_preconnected.subset_or_subset [topological_space α] {s u v : set α} (hu : is_open u)
-  (hv : is_open v) (huv : disjoint u v) (hsuv : s ⊆ u ∪ v) (hs : is_preconnected s) :
-  s ⊆ u ∨ s ⊆ v :=
-begin
-  specialize hs u v hu hv hsuv,
-  obtain hsu | hsu := (s ∩ u).eq_empty_or_nonempty,
-  { exact or.inr ((set.disjoint_iff_inter_eq_empty.2 hsu).subset_right_of_subset_union hsuv) },
-  { replace hs := mt (hs hsu),
-    simp_rw [set.not_nonempty_iff_eq_empty, ←set.disjoint_iff_inter_eq_empty,
-      set.disjoint_iff_inter_eq_empty.1 huv] at hs,
-    exact or.inl ((hs s.disjoint_empty).subset_left_of_subset_union hsuv) }
-end
-
-lemma is_preconnected.subset_left_of_subset_union [topological_space α] {s u v : set α}
-  (hu : is_open u) (hv : is_open v) (huv : disjoint u v) (hsuv : s ⊆ u ∪ v)
-  (hsu : (s ∩ u).nonempty) (hs : is_preconnected s) : s ⊆ u :=
-disjoint.subset_left_of_subset_union hsuv
-begin
-  by_contra hsv,
-  rw set.not_disjoint_iff_nonempty_inter at hsv,
-  obtain ⟨x, _, hx⟩ := hs u v hu hv hsuv hsu hsv,
-  exact set.disjoint_iff.1 huv hx,
-end
-
-lemma is_preconnected.subset_right_of_subset_union [topological_space α] {s u v : set α}
-  (hu : is_open u) (hv : is_open v) (huv : disjoint u v) (hsuv : s ⊆ u ∪ v)
-  (hsv : (s ∩ v).nonempty) (hs : is_preconnected s) : s ⊆ v :=
-disjoint.subset_right_of_subset_union hsuv
-begin
-  by_contra hsu,
-  rw set.not_disjoint_iff_nonempty_inter at hsu,
-  obtain ⟨x, _, hx⟩ := hs u v hu hv hsuv hsu hsv,
-  exact set.disjoint_iff.1 huv hx,
-end
 
 lemma sigma.univ (X : α → Type*) : (set.univ : set (Σ a, X a)) = ⋃ a, sigma.mk a '' set.univ :=
 by { ext, simp only [set.image_univ, set.mem_preimage, set.mem_Union, set.mem_univ,
@@ -429,7 +383,6 @@ begin
   exact w,
 end
 
-#check setoid.ker
 /-- Descend a morphism along a surjective morphism. -/
 noncomputable
 def descend {X B Y : Profinite} (π : X ⟶ B) (t : X ⟶ Y) (hπ : function.surjective π)

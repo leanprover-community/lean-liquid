@@ -301,7 +301,7 @@ lemma le_factor (f : universal_map m n) (g : basic_universal_map m n)
   (∑ j, ↑(g i j).nat_abs) ≤ f.factor :=
 begin
   transitivity, swap,
-  refine @finset.le_sup _ _ _ (f.support.product (finset.univ : finset (fin n)))
+  refine @finset.le_sup _ _ _ _ (f.support.product (finset.univ : finset (fin n)))
      (λ gi, (∑ j, ↑(gi.1 gi.2 j).nat_abs)) (g, i) _,
   { simp only [and_true, finset.mem_univ, finset.mem_product, hg] },
   { exact le_rfl }

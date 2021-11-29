@@ -520,7 +520,7 @@ begin
         { cases hmn,
           simp only [biproduct.ι_π_self_assoc, eq_self_iff_true, if_true, if_false,
             biprod.inl_fst, biprod.inr_fst, biprod.inl_snd, biprod.inr_snd,
-            zero_ne_one, one_ne_zero, false_and], },
+            zero_ne_one, one_ne_zero, false_and, fin.one_eq_zero_iff, fin.zero_eq_one_iff], },
         { rw biproduct.ι_π_ne_assoc, swap, { rw [ne.def, ulift.up_inj], exact hmn },
           simp only [hmn, if_false, and_false, zero_comp, comp_zero] } } } }
 end

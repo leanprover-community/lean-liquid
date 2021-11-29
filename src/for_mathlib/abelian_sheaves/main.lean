@@ -46,10 +46,10 @@ section kernels
 
 variables [limits.has_zero_morphisms A]
 -- TODO: Add some instances that derive the following from `[has_kernels A]`.
-variables [limits.has_limits_of_shape limits.walking_parallel_pair A]
+variables [limits.has_limits_of_shape.{_ (max v u)} limits.walking_parallel_pair A]
 
 def kernel_sheaf {F G : Sheaf J A} (η : F ⟶ G) : Sheaf J A :=
-{ val := limits.kernel ((Sheaf_to_presheaf J A).map η),
+{ val := limits.kernel.{(max v u)} ((Sheaf_to_presheaf J A).map η),
   property := begin
     haveI : limits.has_limit (limits.parallel_pair η 0 ⋙ Sheaf_to_presheaf J A) := begin
       apply limits.has_limit_of_iso (parallel_pair_iso _ _).symm,
@@ -104,7 +104,7 @@ section cokernels
 
 variables [limits.has_zero_morphisms A]
 -- TODO: Add some instances that derive the following from `[has_cokernels A]`.
-variables [limits.has_colimits_of_shape limits.walking_parallel_pair A]
+variables [limits.has_colimits_of_shape.{_ (max v u)} limits.walking_parallel_pair A]
 
 -- We will need to sheafify....
 variables [concrete_category.{max v u} A]
@@ -172,8 +172,8 @@ section kernels_and_cokernels
 
 variables [limits.has_zero_morphisms A]
 -- TODO: use has kernels and cokernels, when possible... see above
-variables [limits.has_colimits_of_shape limits.walking_parallel_pair A]
-variables [limits.has_limits_of_shape limits.walking_parallel_pair A]
+variables [limits.has_colimits_of_shape.{_ (max v u)} limits.walking_parallel_pair A]
+variables [limits.has_limits_of_shape.{_ (max v u)} limits.walking_parallel_pair A]
 
 -- We will need to sheafify....
 variables [concrete_category.{max v u} A]

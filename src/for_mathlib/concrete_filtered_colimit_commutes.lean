@@ -140,9 +140,9 @@ nat_iso.of_components (λ k, has_colimit.iso_of_nat_iso $
 noncomputable
 def curried_colimit_limit_to_limit_colimit (F : J ⥤ K ⥤ D) :
   colimit (F.flip ⋙ lim) ⟶ limit (F ⋙ colim) :=
-(has_colimit.iso_of_nat_iso (flip_lim_iso_curry_swap_uncurry_lim F)).hom ≫
+(has_colimit.iso_of_nat_iso (flip_lim_iso_curry_swap_uncurry_lim.{v} F)).hom ≫
 colimit_limit_to_limit_colimit (uncurry.obj F) ≫
-(has_limit.iso_of_nat_iso (colim_iso_curry_uncurry_colim F)).inv
+(has_limit.iso_of_nat_iso (colim_iso_curry_uncurry_colim.{v} F)).inv
 
 @[simp, reassoc]
 lemma ι_curried_colimit_limit_to_limit_colimit_π (F : J ⥤ K ⥤ D) (k) (j) :
@@ -225,9 +225,9 @@ def colim_iso_colimit (F : J ⥤ K ⥤ D) :
 noncomputable
 def colimit_limit_to_limit_colimit' (F : J ⥤ K ⥤ D) :
   colimit (limit F) ⟶ limit (colimit F.flip) :=
-(has_colimit.iso_of_nat_iso (flip_lim_iso_limit F)).inv ≫
+(has_colimit.iso_of_nat_iso (flip_lim_iso_limit.{v} F)).inv ≫
 curried_colimit_limit_to_limit_colimit F ≫
-(has_limit.iso_of_nat_iso (colim_iso_colimit F)).hom
+(has_limit.iso_of_nat_iso (colim_iso_colimit.{v} F)).hom
 
 @[simp]
 lemma ι_colimit_limit_to_limit_colimit'_π (F : J ⥤ K ⥤ D) (k) (j) :

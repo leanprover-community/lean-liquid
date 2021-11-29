@@ -198,10 +198,10 @@ instance : canonically_linear_ordered_add_monoid ℚ≥0 :=
 
 instance : distrib_lattice ℚ≥0 := by apply_instance
 
-instance : semilattice_inf_bot ℚ≥0 :=
+instance : semilattice_inf ℚ≥0 :=
 { .. nnrat.order_bot, .. nnrat.distrib_lattice }
 
-instance : semilattice_sup_bot ℚ≥0 :=
+instance : semilattice_sup ℚ≥0 :=
 { .. nnrat.order_bot, .. nnrat.distrib_lattice }
 
 instance : linear_ordered_semiring ℚ≥0 :=
