@@ -10,9 +10,6 @@ apply_nolint Mbar.map_zero unused_arguments
 apply_nolint breen_deligne.FreeMat.kronecker_map_reindex_left unused_arguments
 apply_nolint breen_deligne.FreeMat.kronecker_map_reindex_right unused_arguments
 
--- breen_deligne/eval.lean
-apply_nolint breen_deligne.package.foo def_lemma
-
 -- breen_deligne/suitable.lean
 apply_nolint breen_deligne.basic_universal_map.suitable class_structure
 apply_nolint breen_deligne.universal_map.suitable class_structure
@@ -73,6 +70,9 @@ apply_nolint exists_le_finset inhabited_nonempty
 
 -- for_mathlib/rational_cones.lean
 apply_nolint extended_le_span unused_arguments
+
+-- for_mathlib/sheafify_forget.lean
+apply_nolint category_theory.multicospan_forget unused_arguments
 
 -- for_mathlib/topology.lean
 apply_nolint homeomorph.totally_disconnected_space def_lemma
