@@ -2,13 +2,57 @@
 import laurent_measures.basic
 import laurent_measures.theta
 import linear_algebra.basic
+import analysis.special_functions.log
+import analysis.special_functions.exp
 
+
+/-
+This file introduces the maps
+* `θ₀`, which is the specialization of evaluation-at-ξ map `ϑ` from `laurent_measures.theta`
+  at `ξ=1/2`. Observe that both `ϑ` and `θ₀` evaluate only at Laurent measures supported on the
+  singleton
+* `ϕ₀` which corresponds to multiplying a Laurent series by `2T-1`: here, Laurent series are seen as
+  Laurent measures on the singleton
+* `ψ₀` corresponds to multiplying a Laurent series by `(2T-1)^-1`: again, Laurent series are seen as
+  Laurent measures on the singleton. It is defined only on series vanishing at `1/2`, so that it
+  again takes values in `laurent_measures r (Finitype.of punit)`.
+* The maps `θ`, `ϕ` and `ψ` are the analogous of `θ₀`, `ϕ₀` and `ψ₀`, respectively, for Laurent
+  measures on an arbitrary finite set `S`.
+* The maps `Θ`, `Φ` and `Ψ` are the "measurifications" of `θ`, `ϕ` and `ψ` in the right category.
+
+**The main results are ...**
+-/
+
+open theta laurent_measures
+open_locale nnreal classical big_operators
+
+-- namespace laurent_measures
+
+-- open filter real
+
+-- lemma bdd_bounds (c : ℝ) (r : ℝ≥0) : bdd_below {n : ℤ | (c : ℝ) < (r : ℝ) ^ n} :=
+-- begin
+--   use ⌊ (log c / log (r : ℝ)) ⌋ + 1,
+--   rintros a ha,
+--   rw le_sub_iff_add_le.symm,
+--   rw ← @int.cast_le ℝ _ _ _ _ ,
+--   apply_fun exp_order_iso,
+--   apply_fun (coe : Ioi (0 : ℝ) → ℝ),
+--   -- apply coe_exp_order_iso_apply,
+--   have := (coe_exp_order_iso_apply ⌊ (log c / log (r : ℝ)) ⌋),
+--   -- rw ← exp_order_iso_apply,
+--   -- rw exp_log,
+
+-- end
+
+-- --For every F, d F is the bound whose existence is establised in  `eq_zero_of_filtration`
+-- def d (F : laurent_measures r S) : ℤ := Exists.some (bdd_bounds ∥ F ∥ r)
+
+-- end laurent_measures
 
 namespace thm_69
 
 -- open category_theory category_theory.limits
-open theta laurent_measures
-open_locale nnreal classical big_operators
 
 
 -- universe u
@@ -29,16 +73,7 @@ noncomputable theory
 
 section ker_theta_half
 
-example (a : ℤ) : ∥ (2 : ℝ) * a ∥ = 2 * ∥ a ∥ :=
-begin
-  rw normed_field.norm_mul,
-  rw real.norm_two,
-  field_simp,
-  exact int.norm_cast_real a,
-  -- simp only [normed_field.norm_mul, mul_eq_mul_left_iff, or_false, bit0_eq_zero, one_ne_zero, real.norm_two],
-end
-
-def ϕ : (laurent_measures r (Fintype.of punit)) → (laurent_measures r (Fintype.of punit)) :=
+def ϕ₀ : (laurent_measures r (Fintype.of punit)) → (laurent_measures r (Fintype.of punit)) :=
 begin
   rintro ⟨f,hF⟩,
   let f₁ : (Fintype.of punit) → ℤ → ℤ := λ s n, 2* f s (n - 1) - f s n,
@@ -82,38 +117,26 @@ begin
     exact (r ^ b).2 },
 end
 
-def θₗ : (laurent_measures r (Fintype.of punit)) →ₗ[ℤ] ℝ :=
-{ to_fun := λ F, tsum (λ n, (F punit.star n) * (1 / 2 : ℝ) ^ n),
-  map_add' :=
-   begin
-    intros F G,
-    rw ← tsum_add,
-    apply tsum_congr,
-    intro m,
-    rw [← add_mul, mul_eq_mul_right_iff],
-    apply or.intro_left,
-    rw [← int.cast_add, int.cast_inj],
-    apply laurent_measures.add_apply,
-    sorry, sorry,
-  end,
-  map_smul' := sorry }
+def θ₀ : (laurent_measures r (Fintype.of punit)) → ℝ := ϑ (1 / 2 : ℝ) r
 
---for MATHLIB?
-variables [α : Type*] [add_group α] [topological_space α] [has_continuous_add α] [has_sub α]
+-- def θₗ : (laurent_measures r (Fintype.of punit)) →ₗ[ℤ] ℝ :=
+-- { to_fun := λ F, tsum (λ n, (F punit.star n) * (1 / 2 : ℝ) ^ n),
+--   map_add' :=
+--    begin
+--     intros F G,
+--     rw ← tsum_add,
+--     apply tsum_congr,
+--     intro m,
+--     rw [← add_mul, mul_eq_mul_right_iff],
+--     apply or.intro_left,
+--     rw [← int.cast_add, int.cast_inj],
+--     apply laurent_measures.add_apply,
+--     sorry, sorry,
+--   end,
+--   map_smul' := sorry }
 
--- lemma has_sum.int_even_add_odd {f : ℤ → α} {a b : α} (he : has_sum (λ k, f (2 * k)) a)
---   (ho : has_sum (λ k, f (2 * k + 1)) b) :
---   has_sum f (a + b) :=
--- begin
---   have := mul_right_injective₀ (@two_ne_zero ℤ _ _),
---   replace he := this.has_sum_range_iff.2 he,
---   replace ho := ((add_left_injective 1).comp this).has_sum_range_iff.2 ho,
---   refine he.add_is_compl _ ho,
---   simpa [(∘)] using int.is_compl_even_odd,
--- end
---
 
-lemma θ_ϕ_complex (F : laurent_measures r (Fintype.of punit)) : (θₗ r ∘ ϕ r) F = 0 :=
+lemma θ₀_ϕ₀_complex (F : laurent_measures r (Fintype.of punit)) : (θ₀ r ∘ ϕ₀ r) F = 0 :=
 begin
   rcases F with ⟨f, hf⟩,
   convert_to ∑' (n : ℤ), ((2 * f punit.star (n - 1) - f punit.star n) : ℝ) * (1 / 2) ^ n = 0,
@@ -161,9 +184,17 @@ begin
 
 end
 
+def ψ₀ (F : laurent_measures r (Fintype.of punit)) (hF : θ₀ r F = 0) :
+  laurent_measures r (Fintype.of punit) :=
+begin
+  sorry,
+  -- rcases F with ⟨f, hf⟩,
+  -- let g : Fintype.of punit → ℤ → ℤ := λ s n, d F,
+end
 
-lemma θ_ϕ_exact (F : laurent_measures r (Fintype.of punit)) (hF : θₗ r F = 0) :
-  ∃ G, ϕ r G = F := sorry
+
+lemma θ_ϕ_exact (F : laurent_measures r (Fintype.of punit)) (hF : θ₀ r F = 0) :
+  ∃ G, ϕ₀ r G = F := sorry
 
 
 end ker_theta_half
@@ -179,33 +210,33 @@ include r
 
 /-- This `θ₂` is the "measurification" of the map `θₗ` of
 Theorem 6.9. Thus, `to_meas_θ` is the map inducing the isomorphism of Theorem 6.9 (2)-/
-def θ₂ : laurent_measures r S → ℳ p S :=
-λ F s, θₗ r ⟨(λ _, F s), (λ _, F.2 s)⟩
+def θ : laurent_measures r S → ℳ p S :=
+λ F s, θ₀ r ⟨(λ _, F s), (λ _, F.2 s)⟩
 
-lemma θ₂_zero :
- (θ₂ p r S (0 : laurent_measures r S)) = 0 := sorry
+lemma θ_zero :
+ (θ p r S (0 : laurent_measures r S)) = 0 := sorry
 
-lemma θ₂_add (F G : laurent_measures r S) :
- (θ₂ p r S (F + G)) = (θ₂ p r S F) + (θ₂ p r S G) := sorry
+lemma θ_add (F G : laurent_measures r S) :
+ (θ p r S (F + G)) = (θ p r S F) + (θ p r S G) := sorry
 
 /--This `lemma to_meas_θ_bound` is precisely Prop 7.2 (3) of `Analytic.pdf`-/
-lemma θ₂_bound : ∃ (C : ℝ≥0), ∀ (c : ℝ≥0) (F : laurent_measures r S),
-  ∥ F ∥ ≤ c → ∥ θ₂ p r S F ∥₊ ≤ C * c := sorry
+lemma θ_bound : ∃ (C : ℝ≥0), ∀ (c : ℝ≥0) (F : laurent_measures r S),
+  ∥ F ∥ ≤ c → ∥ θ p r S F ∥₊ ≤ C * c := sorry
 
-def to_add_hom_θ₂ : add_hom (laurent_measures r S) (ℳ p S) :=
-add_monoid_hom.mk' (λ F, θ₂ p r S F)
+def to_add_hom_θ : add_hom (laurent_measures r S) (ℳ p S) :=
+add_monoid_hom.mk' (λ F, θ p r S F)
 begin
     intros a b,
-    have := θ₂_add p r S a b,
+    have := θ_add p r S a b,
     exact this,
   end
 
 def Θ : comphaus_filtered_pseudo_normed_group_hom (laurent_measures r S) (ℳ p S) :=
-  { to_fun := θ₂ p r S,
-    bound' := θ₂_bound p r S,
+  { to_fun := θ p r S,
+    bound' := θ_bound p r S,
     continuous' := sorry, -- [FAE] I guess that this is Prop 7.2 (4) of `Analytic.pdf`
     -- .. to_add_hom_meas_θ ξ r S p,
-    map_add' := (to_add_hom_θ₂ p r S).2,
+    map_add' := (to_add_hom_θ p r S).2,
     map_zero' := sorry }
 
 
