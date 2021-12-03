@@ -453,7 +453,7 @@ begin
   rw is_iso.eq_comp_inv,
   simp only [category.assoc],
   erw limits.limit.lift_π,
-  dsimp [limits.cones.functoriality],
+  dsimp [limits.cones.functoriality, sheafify_map],
   simp_rw [← plus_functor_map, ← functor.comp_map, ← functor.map_comp],
   dsimp [coim_to_im', coim_to_im, coim_to_im'_aux],
   apply J.sheafify_hom_ext,
