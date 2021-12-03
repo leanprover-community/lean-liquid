@@ -403,7 +403,7 @@ begin
   rw category.assoc,
   change _ ≫ _ ≫ (forget Ab).map _ = _,
   erw [AddCommGroup.adj.hom_equiv_counit, (forget Ab).map_comp],
-  erw nat_trans.comp_app,
+  --erw nat_trans.comp_app,
   congr' 1,
   rw ← category.assoc,
   erw ← AddCommGroup.adj.unit.naturality,
