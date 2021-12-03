@@ -208,7 +208,7 @@ def to_Condensed : CompHausFiltPseuNormGrp₁.{u+1} ⥤ Condensed.{u} Ab :=
 { obj := λ A, { val := Presheaf A,
   property := sorry }, -- ← this one will be hard
   map := λ A B f, Presheaf.map f,
-  map_id' := λ X, by { ext : 2, dsimp, simpa },
-  map_comp' := λ X Y Z f g, by { ext : 2, dsimp, simpa } }
+  map_id' := λ X, by { ext : 2, dsimp, simp },
+  map_comp' := λ X Y Z f g, by { ext : 2, dsimp, simp } }
 
 end CompHausFiltPseuNormGrp₁
