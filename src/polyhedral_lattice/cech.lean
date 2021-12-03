@@ -111,7 +111,7 @@ end
 begin
   rw eq_bot_iff,
   rintro l' ⟨hl', Hl'⟩,
-  simp only [fin.default_eq_zero, univ_unique, finset.sum_singleton] at hl',
+  simp only [fin.default_eq_zero, finset.univ_unique, finset.sum_singleton] at hl',
   simp only [add_subgroup.mem_bot, finsupp.ext_iff, coe_zero, pi.zero_apply],
   intro i, fin_cases i, exact hl'
 end
