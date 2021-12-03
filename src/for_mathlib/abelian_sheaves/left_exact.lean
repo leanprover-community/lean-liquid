@@ -298,8 +298,8 @@ def is_limit_evaluation_plus_of_is_limit (K : Type (max v u))
     simp,
     have := ι_colimit_limit_to_limit_colimit_of_is_limit_π (J.lim_diagram F X)
       (J.lim_diagram_cone E X) (J.is_limit_lim_diagram_cone E hE X) W j,
-    slice_rhs 1 3 { erw this },
-    dsimp,
+    slice_rhs 1 3 { erw this }, clear this,
+    dsimp [plus_map], -- TODO: Add a `colimit_ι_plus_map` lemma.
     simp,
     congr' 1,
     erw colimit_obj_iso_colimit_comp_evaluation_ι_app_hom,
@@ -315,6 +315,7 @@ def is_limit_evaluation_plus_of_is_limit (K : Type (max v u))
     rw ← hm,
     congr' 1,
     ext W,
+    dsimp [plus_map], -- Again, the API for `plus` needs some work.
     simp,
     erw ι_colimit_limit_to_limit_colimit_of_is_limit_π_assoc (J.lim_diagram F X)
       (J.lim_diagram_cone E X) (J.is_limit_lim_diagram_cone E hE X) W j,

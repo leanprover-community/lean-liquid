@@ -37,7 +37,7 @@ begin
     { exact grothendieck_topology.plus.is_sheaf_plus_plus J F },
     simp only [← category.assoc, J.to_sheafify_sheafify_lift, is_iso.hom_inv_id,
       category.id_comp, category.comp_id] },
-  { simp [J.to_sheafify_sheafify_lift] }
+  { simp only [category.assoc, J.to_sheafify_sheafify_lift, is_iso.inv_hom_id] }
 end
 
 end category_theory.presheaf
