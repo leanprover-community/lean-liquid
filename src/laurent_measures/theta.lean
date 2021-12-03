@@ -336,7 +336,7 @@ begin
     n ∉ set.range (coe : ℕ → ℤ) → (F₀ punit.star n : ℝ) * ξ ^ n = 0,
   swap,
   have h_range_norm : ∀ n : ℤ,
-    n ∉ set.range (coe : ℕ → ℤ) → ∥F₀ punit.star n ∥ * r ^ n = 0, --sorry,
+    n ∉ set.range (coe : ℕ → ℤ) → ∥F₀ punit.star n ∥ * r ^ n = 0,
   swap,
   { have HF₀ : ∀ (s : Fintype.of punit), summable (λ (n : ℤ), ∥F₀ s n∥ * r ^ n),
     { intro s,

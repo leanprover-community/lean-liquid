@@ -1,9 +1,10 @@
 -- import for_mathlib.short_exact_sequence
+import analysis.special_functions.log
+import analysis.special_functions.exp
+import data.int.interval
 import laurent_measures.basic
 import laurent_measures.theta
 import linear_algebra.basic
-import analysis.special_functions.log
-import analysis.special_functions.exp
 
 
 /-
@@ -23,12 +24,13 @@ This file introduces the maps
 **The main results are ...**
 -/
 
-open theta laurent_measures
-open_locale nnreal classical big_operators
 
--- namespace laurent_measures
 
--- open filter real
+namespace laurent_measures
+
+open_locale nnreal
+
+variables {r : ℝ≥0} {S : Fintype}
 
 -- lemma bdd_bounds (c : ℝ) (r : ℝ≥0) : bdd_below {n : ℤ | (c : ℝ) < (r : ℝ) ^ n} :=
 -- begin
@@ -46,14 +48,16 @@ open_locale nnreal classical big_operators
 -- end
 
 -- --For every F, d F is the bound whose existence is establised in  `eq_zero_of_filtration`
--- def d (F : laurent_measures r S) : ℤ := Exists.some (bdd_bounds ∥ F ∥ r)
+noncomputable def d (F : laurent_measures r S) : ℤ := ⌊ (real.log ∥ F ∥ / real.log (r : ℝ)) ⌋ + 1
+--Exists.some (bdd_bounds ∥ F ∥ r)
 
--- end laurent_measures
+end laurent_measures
 
 namespace thm_69
 
 -- open category_theory category_theory.limits
-
+open theta laurent_measures
+open_locale nnreal classical big_operators
 
 -- universe u
 variables (p : ℝ≥0) [fact (0 < p)] [fact (p < 1)]
@@ -184,12 +188,45 @@ begin
 
 end
 
+example (A : set ℤ) (a : ℤ) : a ∉ A ↔ a ∈ Aᶜ :=
+begin
+  exact (set.mem_compl_iff A a).symm,
+end
+
+
 def ψ₀ (F : laurent_measures r (Fintype.of punit)) (hF : θ₀ r F = 0) :
   laurent_measures r (Fintype.of punit) :=
 begin
-  sorry,
-  -- rcases F with ⟨f, hf⟩,
-  -- let g : Fintype.of punit → ℤ → ℤ := λ s n, d F,
+  let A : (set ℤ) := {n : ℤ | n + d F ≥ 0},
+  have h_nneg : ∀ n : ℤ, n ∈ A → ∀ k : ℤ, k ∈ finset.Icc (- (d F)) n → k ≥ (0 : ℤ), sorry,
+  -- have h_nneg : ∀ n : ℤ, (n + d F) ≥ 0 → ∀ (k ∈ finset.Icc (- (laurent_measures.d F)) n), k ≥ (0 : ℤ), sorry,
+  -- have n : ℤ, sorry,
+  -- have hn : n ∈ A, sorry,
+  -- have k : (finset.Icc (- (laurent_measures.d F)) n), sorry,
+  -- have hk : k ∈ (finset.Icc (- (laurent_measures.d F)) n), sorry,
+  -- have := h_nneg n hn k,
+  let f₀ : Fintype.of punit → ℤ → ℤ := λ s n,
+    if hn : n ∈ A then - (∑ k : (finset.Icc (- (d F)) n : set ℤ),
+    2 ^ ((int.eq_coe_of_zero_le (h_nneg n hn k (finset.coe_mem _))).some) * F.to_fun s (n - k))
+    else 0,
+  use f₀,
+  intro s,
+  have h_supp : ∀ n : ℤ, n ∉ A → ∥ f₀ s n ∥ * r ^n = 0, sorry,
+  apply (@summable_subtype_and_compl _ _ _ _ _ _ _ A).mp,
+  split,
+  { sorry,
+
+  },
+  {convert_to summable (λ x : {n : ℤ // n ∉ A}, ∥ f₀ s x ∥ * r ^ (x.1)),
+    sorry,
+  },
+  sorry,sorry,
+  -- repeat { apply_instance },
+  -- -- have h_supp : ∀ n : ℤ, n < - d F → ∥ f₀ s n ∥ * r ^n = 0, sorry,
+  -- have da_togliere : (function.support (λ n, ∥ f₀ s n ∥ * r ^ n )) ⊆ A, sorry,--bleah
+  -- apply ((has_sum_subtype_iff_of_support_subset da_togliere).mp (summable.has_sum _)).summable,
+  -- have h_inj : function.injective (coe : A → ℤ), sorry,
+  -- apply h_inj.summable_iff,
 end
 
 
