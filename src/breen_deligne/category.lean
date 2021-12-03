@@ -218,7 +218,7 @@ begin
   simp only [hom_pow', category.comp_id],
   show (BD.pow'_iso_mul 0).inv.f n = (BD.sum 1).f n,
   dsimp only [sum_f, universal_map.sum],
-  simp only [fin.default_eq_zero, univ_unique, finset.sum_singleton],
+  simp only [fin.default_eq_zero, finset.univ_unique, finset.sum_singleton],
   refine congr_arg of _,
   apply basic_universal_map.one_mul_hom_eq_proj,
 end
