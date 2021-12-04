@@ -80,7 +80,8 @@ begin
 end
 
 theorem is_singleton_iff_exists_bijective_to_is_singleton (X : Sort*) :
-  nonempty X ∧ subsingleton X ↔ ∃ (Y : Sort*) [nonempty Y] [subsingleton Y] (f : X → Y), function.bijective f :=
+  nonempty X ∧ subsingleton X ↔
+    ∃ (Y : Sort*) [nonempty Y] [subsingleton Y] (f : X → Y), function.bijective f :=
 begin
   split,
   { rintro ⟨⟨x⟩, hx⟩,
@@ -99,73 +100,171 @@ lemma subsingleton.map_equiv {X Y : Type*} (e : X ≃ Y) : subsingleton X → su
 
 end is_singleton
 
-section pbool
+#print Profinite.sigma
+#print sigma.topological_space
 
-@[derive fintype]
-inductive pbool : Type u
-| ff : pbool
-| tt : pbool
+instance : fintype bool := infer_instance
+/-
+def sigma : Profinite.{u} :=
+Profinite.of $ Σ a, X a
+-/
 
-end pbool
+instance (S T : Type) [topological_space S] [topological_space T] :
+∀ (b : bool), topological_space (cond b S T) := λ b, bool.rec
+  (show topological_space T, from infer_instance)
+  (show topological_space S, from infer_instance) b
 
--- Kevin is working on this
+-- should be elsewhere
+def continuous_of_equiv {X Y : Type*} [topological_space X] [topological_space Y]
+[compact_space X] [t2_space Y]
+  {f : X ≃ Y} (hf : continuous f) : continuous f.symm :=
+begin
+  rw continuous_iff_is_closed,
+  intros C hC,
+  convert (hC.is_compact.image hf).is_closed using 1,
+  ext y,
+  exact ⟨λ h, ⟨f.symm y, h, f.right_inv y⟩, by {rintro ⟨x, hx, rfl⟩, simp [hx]}⟩,
+end
+
+def homeo_of_equiv {X Y : Type*} [topological_space X] [topological_space Y]
+[compact_space X] [t2_space Y]
+  {f : X ≃ Y} (hf : continuous f) : X ≃ₜ Y :=
+{ continuous_to_fun := hf,
+  continuous_inv_fun := continuous_of_equiv hf,
+  ..f }
+
+lemma empty_condition_of_finite_product_condition
+  (h : P.finite_product_condition) : P.empty_condition :=
+begin
+  specialize h (Fintype.of pempty) (λ x, Profinite.empty),
+  suffices hs : nonempty (P.obj (op Profinite.empty)) ∧
+    subsingleton (P.obj (op Profinite.empty)),
+  { rw is_singleton_iff_forall_bijective_to_punit at hs,
+    apply hs },
+  let e : Profinite.sigma.{w} (λ (x : ↥(Fintype.of.{w} pempty)), Profinite.empty) ≅
+    Profinite.empty :=
+  { hom := Profinite.sigma.desc _ (λ i, by cases i),
+    inv := Profinite.empty.elim _,
+    hom_inv_id' := by {ext1 x, rcases x with ⟨⟨⟩⟩ },
+    inv_hom_id' := by {ext1 x, cases x } },
+  let e4 := (category_theory.functor.map_iso P e.op).to_equiv,
+  have := (is_singleton_iff_exists_bijective_to_is_singleton _).2 ⟨_, _, _, _, h⟩,
+  { exact ⟨nonempty.map e4.symm this.1, subsingleton.map_equiv e4.symm this.2⟩ },
+  { exact ⟨λ x, by rcases x with ⟨⟨⟩⟩⟩ },
+  { exact ⟨λ f g, by {ext x, rcases x with ⟨⟨⟩⟩ }⟩ }
+end
+
+lemma product_condition_of_finite_product_condition
+  (h : P.finite_product_condition) : P.product_condition :=
+begin
+  specialize h (Fintype.of (ulift bool)),
+  /-
+  Know:
+
+  For all X : bool -> Profinite, the obvious map from
+  P(Σ X) to Π (a : pbool), P (X a) is bijective
+  -/
+  intros S T,
+  /-
+  let X : bool -> Profinite send tt to S and ff to T.
+  -/
+  let X : ↥(Fintype.of (ulift bool)) → Profinite := λ a, cond (ulift.down a) S T,
+--      have hXtt : X (ulift.up tt) = S := rfl,
+--      have hXfft.up ff) = T := rfl,
+  specialize h X, -- h now says f1 below is bijective, and goal is f4 bijective.
+  /-
+                f1
+  P(Σ X) --------------> Π a, P (X a)
+     |                         |
+     |  f2                     | f3
+     |                         |
+     \/                        \/
+  P(S ⊕ T) ------------> P(S) × P(T)
+                f4
+  -/
+  let f1 : P.obj (op (Profinite.sigma X)) → Π (a : ulift bool), P.obj (op (X a)) :=
+  λ x b, P.map (quiver.hom.op (Profinite.sigma.ι X b)) x,
+  let f2 : P.obj (op (Profinite.sigma X)) → P.obj (op (Profinite.sum S T)) :=
+  P.map ((Profinite.sum.desc S T (Profinite.sigma.ι X (ulift.up tt))
+              (Profinite.sigma.ι X (ulift.up ff))).op),
+  let f3 : (Π a, P.obj (op (X a))) → P.obj (op S) × P.obj (op T) :=
+  λ Y, (Y (ulift.up tt), Y (ulift.up ff)),
+  let f4 : P.obj (op (Profinite.sum S T)) → P.obj (op S) × P.obj (op T) :=
+  λ x, (P.map (quiver.hom.op (Profinite.sum.inl S T)) x,
+          P.map (quiver.hom.op (Profinite.sum.inr S T)) x),
+
+  change function.bijective f1 at h,
+  change function.bijective f4,
+  /-
+  plan : triangle S → Σ X ≃ S ⊕ T commutes;
+  triangle T → Σ X ≃ S ⊕ T commutes;
+  -/
+--  have foo := Profinite.sigma.ι_desc X (ulift.up tt) (λ ub, Profinite.sigma.desc X _),
+  /-
+  Claim: the obvious map from P (S ⊕ T) to P S × P T
+  is the obvious map from P (S ⊕ T) to Π (a : pbool), P (X a)
+  composed with the obvious bijection
+    from Π a, P (X a) to P S × P T.
+
+  Reid says work with the commutative square, i.e. the two maps
+  P (Σ a, X a) ⟶ P S × P T
+
+  -/
+
+  /-
+  The second map is induced by an iso Profinite.sum S T ≅ Profinite.sigma X
+  -/
+  let f2helper : Profinite.sum S T ⟶ Profinite.sigma X :=
+    Profinite.sum.desc S T (Profinite.sigma.ι X (ulift.up tt))
+              (Profinite.sigma.ι X (ulift.up ff)),
+  have foo : function.bijective f2helper,
+  { split,
+    { rintros (a|a) (b|b) h,
+      { cases h, refl },
+      { cases h, },
+      { cases h, },
+      { cases h, refl } },
+    { rintro ⟨⟨(_|_)⟩, z⟩,
+      { use sum.inr z,
+        ext, refl, refl },
+      { use sum.inl z,
+        ext, refl, refl } },
+  },
+  let e : Profinite.sum S T ≅ Profinite.sigma X := Profinite.iso_of_bijective f2helper foo,
+  let e2 := category_theory.iso.op e,
+  let e3 := category_theory.functor.map_iso P e2,
+  let e4 := category_theory.iso.to_equiv e3,
+  let f : P.obj (opposite.op (S.sum T)) → P.obj (op S) × P.obj (op T) :=
+    λ x, (P.map (quiver.hom.op (Profinite.sum.inl S T)) x,
+          P.map (quiver.hom.op (Profinite.sum.inr S T)) x),
+  let foo2 : P.obj (op (Profinite.sigma X)) → P.obj (op S) × P.obj (op T) :=
+    λ x, f (e4 x),
+  have : ∀ x, foo2 x = f4 (f2 x) := λ x, rfl,
+  -- plan : foo1=foo2
+  change function.bijective f,
+  -- idea: prove foo1 bijective using h
+  -- prove foo1=foo2 because projections are equal
+  -- deduce foo2 bijective
+  -- then e4 is bijective so f is bijective as foo2 = f ∘ e4
+  -- prove foo1 bijective using h;
+  -- h says P(Σ X) ≃ Π (a : bool), P (X a)
+  -- foo1 is (obivous map) ∘ h
+  -- obvious map is Π (a : bool), P (X a) → P (X tt) × P (X ff)
+  sorry,
+end
+
 lemma finite_product_condition_iff_empty_condition_product_condition :
   P.finite_product_condition ↔ P.empty_condition ∧ P.product_condition :=
 begin
   split,
   { intro h_prod,
     split,
-    { specialize h_prod (Fintype.of pempty) (λ x, Profinite.empty),
-      suffices hs : nonempty (P.obj (op Profinite.empty)) ∧ subsingleton (P.obj (op Profinite.empty)),
-      { rw is_singleton_iff_forall_bijective_to_punit at hs,
-        apply hs },
-      let e : Profinite.sigma.{w} (λ (x : ↥(Fintype.of.{w} pempty)), Profinite.empty) ≅ Profinite.empty :=
-      { hom := Profinite.sigma.desc _ (λ i, by cases i),
-        inv := Profinite.empty.elim _,
-        hom_inv_id' := by {ext1 x, rcases x with ⟨⟨⟩⟩ },
-        inv_hom_id' := by {ext1 x, cases x } },
-      let e2 := category_theory.iso.op e,
-      let e3 := category_theory.functor.map_iso P e2,
-      let e4 := category_theory.iso.to_equiv e3,
-      have := (is_singleton_iff_exists_bijective_to_is_singleton _).2 ⟨_, _, _, _, h_prod⟩,
-      { exact ⟨nonempty.map e4.symm this.1, subsingleton.map_equiv e4.symm this.2⟩ },
-      { exact ⟨λ x, by rcases x with ⟨⟨⟩⟩⟩ },
-      { exact ⟨λ f g, by {ext x, rcases x with ⟨⟨⟩⟩ }⟩ } },
-    { specialize h_prod (Fintype.of pbool),
-      /-
-      ∀ (X : ↥(Fintype.of pbool)) → Profinite), function.bijective
-       (λ (x : P.obj (opposite.op (Profinite.sigma X))) (a : ↥(Fintype.of pbool)), P.map (Profinite.sigma.ι X a).op x)
-
-      For all X : pbool -> Profinite, the obvious map from
-      P(Σ X) to Π (a : pbool), P (X a) is bijective
-      -/
-      intros S T,
-      let X : ↥(Fintype.of pbool) → Profinite :=
-        λ a, pbool.rec S T a,
-      specialize h_prod X,
-      /-
-      hypothesis : if X : pbool -> Profinite sends ff to S
-      and tt to T, then the obvious map from
-      P(Σ X) to Π (a : pbool), P (X a) is bijective.
-
-      Goal: the obvious map from P (S ⊕ T) to P S × P T is bijective
-
-      plan : triangle S → Σ X ≃ S ⊕ T commutes;
-      triangle T → Σ X ≃ S ⊕ T commutes;
-
-      Claim: the obvious map from P (S ⊕ T) to P S × P T
-      is the obvious map from P (S ⊕ T) to Π (a : pbool), P (X a)
-      composed with the obvious bijection
-        from Π a, P (X a) to P S × P T.
-
-      Reid says work with the commutative square, i.e. the two maps
-      P (Σ a, X a) ⟶ P S × P T
-
-      -/
-      sorry
-    } },
-  { sorry }
+    { exact empty_condition_of_finite_product_condition P h_prod },
+    { exact product_condition_of_finite_product_condition P h_prod } },
+  { sorry },
 end
+
+#exit
 
 def map_to_equalizer {W X B : Profinite.{w}} (f : X ⟶ B) (g₁ g₂ : W ⟶ X)
   (w : g₁ ≫ f = g₂ ≫ f) :
