@@ -1,6 +1,6 @@
-import topology.category.Profinite
 import category_theory.limits.shapes.products
 import for_mathlib.Profinite.compat_discrete_quotient
+import topology.category.Profinite
 
 /-!
 
@@ -8,42 +8,6 @@ In this file we show that a finite disjoint union of profinite sets agrees with 
 *Note:* The existence of the coproduct is currently shown using some abstract nonsense.
 
 -/
-
-section topology
-variables {α β : Type*}
-
-/-
-lemma is_preconnected.preimage [topological_space α] [topological_space β] {s : set β}
-  (hs : is_preconnected s) {f : α → β}   (hfinj : function.injective f) (hfopen : is_open_map f)
-  (hsf : s ⊆ set.range f) :
-  is_preconnected (f ⁻¹' s) :=
-λ u v hu hv hsuv hsu hsv,
-begin
-  specialize hs (f '' u) (f '' v) (hfopen u hu) (hfopen v hv) _ _ _,
-  { have := set.image_subset f hsuv,
-    rwa [set.image_preimage_eq_of_subset hsf, set.image_union] at this },
-  { obtain ⟨x, hx1, hx2⟩ := hsu,
-    exact ⟨f x, hx1, x, hx2, rfl⟩ },
-  { obtain ⟨y, hy1, hy2⟩ := hsv,
-    exact ⟨f y, hy1, y, hy2, rfl⟩ },
-  { obtain ⟨b, hbs, hbu, hbv⟩ := hs,
-    obtain ⟨a, rfl⟩ := hsf hbs,
-    rw function.injective.mem_set_image hfinj at hbu hbv,
-    exact ⟨a, hbs, hbu, hbv⟩ }
-end
-
-lemma is_connected.preimage [topological_space α] [topological_space β] {s : set β}
-  (hs : is_connected s) {f : α → β}
-  (hfinj : function.injective f) (hfopen : is_open_map f) (hsf : s ⊆ set.range f) :
-  is_connected (f ⁻¹' s) :=
-⟨hs.nonempty.preimage' hsf, hs.is_preconnected.preimage hfinj hfopen hsf⟩
-
-lemma sigma.univ (X : α → Type*) : (set.univ : set (Σ a, X a)) = ⋃ a, sigma.mk a '' set.univ :=
-by { ext, simp only [set.image_univ, set.mem_preimage, set.mem_Union, set.mem_univ,
-  set.mem_singleton_iff, set.range_sigma_mk, exists_eq'] }
--/
-
-end topology
 
 namespace Profinite
 
