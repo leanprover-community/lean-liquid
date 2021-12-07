@@ -56,8 +56,8 @@ end laurent_measures
 namespace thm_69
 
 -- open category_theory category_theory.limits
-open theta laurent_measures
-open_locale nnreal classical big_operators
+open theta laurent_measures filter
+open_locale nnreal classical big_operators topological_space
 
 -- universe u
 variables (p : ℝ≥0) [fact (0 < p)] [fact (p < 1)]
@@ -76,6 +76,8 @@ end
 noncomputable theory
 
 section ker_theta_half
+
+open finset
 
 def ϕ₀ : (laurent_measures r (Fintype.of punit)) → (laurent_measures r (Fintype.of punit)) :=
 begin
@@ -188,17 +190,38 @@ begin
 
 end
 
-example (A : set ℤ) (a : ℤ) : a ∉ A ↔ a ∈ Aᶜ :=
+lemma Icc_nneg (d : ℤ) : ∀ n : ℤ, (n + d) ≥ 0 → ∀ (k ∈ finset.Icc (- d) n), n - k ≥ (0 : ℤ) := sorry
+
+
+-- Icc_sum_integer is the n-th coefficient b_m of ψ₀(F)
+def Icc_sum_integer (f : ℤ → ℤ) (d m : ℤ) (hm : (m + d) ≥ 0) : ℤ :=
+  (∑ k : (Icc (- d) m : set ℤ),
+    2 ^ ((int.eq_coe_of_zero_le (Icc_nneg d m hm k (coe_mem _))).some) * f (- k))
+
+lemma Icc_sum_eq_tail (f : ℤ → ℤ) (d : ℤ)
+  (hf : (has_sum (λ x : {a : ℤ // a ≥ -d}, (f x : ℝ) * (1 / 2) ^ x.1) 0))
+  (m : ℤ) (hm : (m + d) ≥ 0) : - ((Icc_sum_integer f d m hm) : ℝ) =
+  2 ^ m * tsum (λ x : {a : ℤ // a ≥ m + 1}, (f x : ℝ) * (1 / 2) ^ x.1) :=
 begin
-  exact (set.mem_compl_iff A a).symm,
+  sorry,
 end
 
+-- `[FAE]` To prove the next lemma I certainly need that r > (1/2).
+lemma tail_little_oh (f : ℤ → ℤ) (n d : ℤ) (h_sum : summable (λ n : ℤ, ∥ f n ∥ * r ^n)) :
+ tendsto (λ m, (r : ℝ) ^ m * ∥ tsum (λ x : {a : ℤ // a ≥ m + 1}, (f x : ℝ) * (1 / 2) ^ x.1) ∥ )
+  at_top (𝓝 0) :=
+begin
+  sorry
+end
 
-def ψ₀ (F : laurent_measures r (Fintype.of punit)) (hF : θ₀ r F = 0) :
+-- `[FAE]` I am adding the assumption r > (1/2) but it might be better to incorporate it in the
+-- whole file
+def ψ₀ (F : laurent_measures r (Fintype.of punit)) (hF : θ₀ r F = 0) (hr : r < 1 / 2):
   laurent_measures r (Fintype.of punit) :=
 begin
+  -- classical,
   let A : (set ℤ) := {n : ℤ | n + d F ≥ 0},
-  have h_nneg : ∀ n : ℤ, n ∈ A → ∀ k : ℤ, k ∈ finset.Icc (- (d F)) n → k ≥ (0 : ℤ), sorry,
+  -- have h_nneg : ∀ n : ℤ, n ∈ A → ∀ k : ℤ, k ∈ Icc (- (d F)) n → k ≥ (0 : ℤ), sorry,
   -- have h_nneg : ∀ n : ℤ, (n + d F) ≥ 0 → ∀ (k ∈ finset.Icc (- (laurent_measures.d F)) n), k ≥ (0 : ℤ), sorry,
   -- have n : ℤ, sorry,
   -- have hn : n ∈ A, sorry,
@@ -206,27 +229,37 @@ begin
   -- have hk : k ∈ (finset.Icc (- (laurent_measures.d F)) n), sorry,
   -- have := h_nneg n hn k,
   let f₀ : Fintype.of punit → ℤ → ℤ := λ s n,
-    if hn : n ∈ A then - (∑ k : (finset.Icc (- (d F)) n : set ℤ),
-    2 ^ ((int.eq_coe_of_zero_le (h_nneg n hn k (finset.coe_mem _))).some) * F.to_fun s (n - k))
+    if hn : n ∈ A then - (Icc_sum_integer (F.to_fun s) F.d n hn)
+    -- - (∑ k : (finset.Icc (- (d F)) n : set ℤ),
+    -- 2 ^ ((int.eq_coe_of_zero_le (Icc_nneg F.d n hn k (coe_mem _))).some) * F.to_fun s (n - k))
     else 0,
   use f₀,
   intro s,
-  have h_supp : ∀ n : ℤ, n ∉ A → ∥ f₀ s n ∥ * r ^n = 0, sorry,
   apply (@summable_subtype_and_compl _ _ _ _ _ _ _ A).mp,
   split,
-  { sorry,
+  { -- have := F.2 s,
+    -- have h_dec : decidable_eq A, sorry,
+    -- apply has_sum.summable _, sorry,
+    -- let x : ℤ → Prop → ℤ := λ n : ℤ, n ∈ A → - (∑ k : (finset.Icc (- (d F)) n : set ℤ), 2 ^ ((int.eq_coe_of_zero_le (h_nneg n _ k (finset.coe_mem _))).some) * F.to_fun s (n - k)),
+    dsimp only [f₀],
+    -- have : ∀ x : A, (x : ℤ) + F.d ≥ 0, sorry,
+    simp only [*, dif_pos, subtype.coe_prop, coe_mem, norm_neg],--, Icc_sum_integer],
+    have per_ipotesi : has_sum (λ (x : {a // a ≥ -F.d}), ↑(F.to_fun s x) * (1 / 2 : ℝ) ^ x.1) 0, sorry,
+    have := Icc_sum_eq_tail (F.to_fun s) F.d per_ipotesi,
+    sorry,
+    -- simp_rw this,
+    -- apply summable_congr this _,
+    -- simp_rw [this _],
+
+
+    -- apply tsum_dite_left,-- P,
 
   },
-  {convert_to summable (λ x : {n : ℤ // n ∉ A}, ∥ f₀ s x ∥ * r ^ (x.1)),
-    sorry,
-  },
-  sorry,sorry,
-  -- repeat { apply_instance },
-  -- -- have h_supp : ∀ n : ℤ, n < - d F → ∥ f₀ s n ∥ * r ^n = 0, sorry,
-  -- have da_togliere : (function.support (λ n, ∥ f₀ s n ∥ * r ^ n )) ⊆ A, sorry,--bleah
-  -- apply ((has_sum_subtype_iff_of_support_subset da_togliere).mp (summable.has_sum _)).summable,
-  -- have h_inj : function.injective (coe : A → ℤ), sorry,
-  -- apply h_inj.summable_iff,
+  { convert_to summable (λ x : {n : ℤ // n ∉ A}, ∥ f₀ s x ∥ * r ^ (x.1)),
+    have h_supp : ∀ n : {x : ℤ // x ∉ A}, ∥ f₀ s n ∥ * r ^ n.1 = 0, sorry,
+    simp_rw h_supp,
+    apply summable_zero },
+  repeat { apply_instance },
 end
 
 
