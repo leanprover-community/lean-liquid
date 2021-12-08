@@ -71,9 +71,6 @@ apply_nolint exists_le_finset inhabited_nonempty
 -- for_mathlib/rational_cones.lean
 apply_nolint extended_le_span unused_arguments
 
--- for_mathlib/sheafify_forget.lean
-apply_nolint category_theory.multicospan_forget unused_arguments
-
 -- for_mathlib/topology.lean
 apply_nolint homeomorph.totally_disconnected_space def_lemma
 
