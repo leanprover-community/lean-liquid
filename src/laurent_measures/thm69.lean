@@ -194,37 +194,41 @@ def θ : (laurent_measures r S) → ℳ p S := ϑ (1 / 2 : ℝ) r p S
 --     sorry, sorry,
 --   end,
 --   map_smul' := sorry }
-
+lemma sum_smaller_radius (F : laurent_measures r S) (s : S) :
+  summable (λ n, ∥ F s n ∥ * (1 / 2 : ℝ) ^ n) := sorry
 
 lemma θ₀_ϕ₀_complex (F : laurent_measures r (Fintype.of punit)) : (θ₀ r ∘ ϕ₀ r) F = 0 :=
 begin
-  rcases F with ⟨f, hf⟩,
-  convert_to ∑' (n : ℤ), ((2 * f punit.star (n - 1) - f punit.star n) : ℝ) * (1 / 2) ^ n = 0,
-  { apply tsum_congr,
-    intro b,
-    rw ← inv_eq_one_div,
-    apply (mul_left_inj' (@zpow_ne_zero ℝ _ _ b (inv_ne_zero two_ne_zero))).mpr,
-    have : (2 : ℝ) * (f punit.star (b - 1)) = ((2 : ℤ) * (f punit.star (b -1))) := by {rw [← int.cast_one, int.cast_bit0] },
-    rw [this, ← int.cast_mul, ← int.cast_sub],
-    refl },
-  have h_neg : summable (λ n, ((f punit.star n) : ℝ) * (1 / 2) ^ n),
-  { specialize hf punit.star,
-    apply summable_of_summable_norm,
-    --`[FAE]` if the sum were over ℕ, life would be easy
-    sorry},
-  have h_pos : has_sum (λ n, ((2 * f punit.star (n - 1)) : ℝ) * (1 / 2) ^ n) h_neg.some,
-  { have div_half : ∀ b : ℤ, (1 / 2 : ℝ) ^ b * (2 : ℝ) = (1 / 2) ^ ( b - 1),
-    { intro b,
-      rw [← inv_eq_one_div, @zpow_sub_one₀ ℝ _ _ (inv_ne_zero two_ne_zero) b],
-      apply (mul_right_inj' (@zpow_ne_zero ℝ _ _ b (inv_ne_zero two_ne_zero))).mpr,
-      exact (inv_inv₀ 2).symm },
-    have h_comp : (λ (b : ℤ), ((f punit.star (b - 1)) : ℝ ) * (1 / 2) ^ (b - 1)) =
-      (λ (b : ℤ), ((f punit.star b) : ℝ) * (1 / 2) ^ b) ∘ (λ n, n - 1) := rfl,
-    simp_rw [mul_comm, ← mul_assoc, div_half, mul_comm, h_comp],
-    let e : ℤ ≃ ℤ := ⟨λ n : ℤ, n - 1, λ n, n + 1, by {intro, simp}, by {intro, simp}⟩,
-    apply (equiv.has_sum_iff e).mpr,
-    exact h_neg.some_spec },
-  simp_rw [sub_mul, tsum_sub h_pos.summable h_neg, sub_eq_zero],
+  sorry,
+  -- rcases F with ⟨f, hf⟩,
+  -- convert_to ∑' (n : ℤ), ((2 * f punit.star (n - 1) - f punit.star n) : ℝ) * (1 / 2) ^ n = 0,
+  -- { apply tsum_congr,
+  --   intro b,
+  --   rw ← inv_eq_one_div,
+  --   apply (mul_left_inj' (@zpow_ne_zero ℝ _ _ b (inv_ne_zero two_ne_zero))).mpr,
+  --   have : (2 : ℝ) * (f punit.star (b - 1)) = ((2 : ℤ) * (f punit.star (b -1))) := by {rw [← int.cast_one, int.cast_bit0] },
+  --   rw [this, ← int.cast_mul, ← int.cast_sub],
+  --   refl },
+  -- have h_neg : summable (λ n, ((f punit.star n) : ℝ) * (1 / 2) ^ n),
+  -- { --specialize hf punit.star,
+  --   apply summable_of_summable_norm,
+  --   simp_rw normed_field.norm_mul,
+  --   exact sum_smaller_radius r (Fintype.of punit) ⟨f, hf⟩ (punit.star), },
+  -- have h_pos : has_sum (λ n, ((2 * f punit.star (n - 1)) : ℝ) * (1 / 2) ^ n) h_neg.some,
+  -- { have div_half : ∀ b : ℤ, (1 / 2 : ℝ) ^ b * (2 : ℝ) = (1 / 2) ^ ( b - 1),
+  --   { intro b,
+  --     rw [← inv_eq_one_div, @zpow_sub_one₀ ℝ _ _ (inv_ne_zero two_ne_zero) b],
+  --     apply (mul_right_inj' (@zpow_ne_zero ℝ _ _ b (inv_ne_zero two_ne_zero))).mpr,
+  --     exact (inv_inv₀ 2).symm },
+  --   have h_comp : (λ (b : ℤ), ((f punit.star (b - 1)) : ℝ ) * (1 / 2) ^ (b - 1)) =
+  --     (λ (b : ℤ), ((f punit.star b) : ℝ) * (1 / 2) ^ b) ∘ (λ n, n - 1) := rfl,
+  --   simp_rw [mul_comm, ← mul_assoc, div_half, mul_comm, h_comp],
+  --   let e : ℤ ≃ ℤ := ⟨λ n : ℤ, n - 1, λ n, n + 1, by {intro, simp}, by {intro, simp}⟩,
+  --   apply (equiv.has_sum_iff e).mpr,
+  --   exact h_neg.some_spec },
+  -- simp_rw [sub_mul, tsum_sub h_pos.summable h_neg, sub_eq_zero],
+
+
   --'[FAE]' It should now just be a matter of combining h_neg with h_pos (which says that the two sums coincide, so their difference is 0)
   -- have foo := h_pos.tsum_eq,
   -- have boo := h_neg.has_sum.tsum_eq,
@@ -240,7 +244,7 @@ begin
   -- simp_rw ← sub_mul at this,
   -- apply tsum_sub (λ s n, 2 * f s (n - 1)) (λ s n, f s n),
   -- simp [pi.has_sub],
-  sorry,
+  -- sorry,
 
 end
 
@@ -332,7 +336,7 @@ include r
 
 /-- This `θ₂` is the "measurification" of the map `θₗ` of
 Theorem 6.9. Thus, `to_meas_θ` is the map inducing the isomorphism of Theorem 6.9 (2)-/
-def θ : laurent_measures r S → ℳ p S :=
+def θ' : laurent_measures r S → ℳ p S :=
 λ F s, θ₀ r ⟨(λ _, F s), (λ _, F.2 s)⟩
 
 lemma θ_zero :
