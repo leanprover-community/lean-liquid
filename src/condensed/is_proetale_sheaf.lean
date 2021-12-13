@@ -108,6 +108,17 @@ inductive pbool : Type u
 
 end pbool
 
+variables (S T : Type)
+def X : pbool → Type := λ a, pbool.rec S T a
+
+def e : S ⊕ T ≃ Σ a, X S T a :=
+      { to_fun := λ st, sum.rec (λ s, (⟨pbool.ff, s⟩ : Σ a, X S T a) )
+        (λ t, (⟨pbool.tt, t⟩ : Σ a, X S T a) ) st,
+        inv_fun := λ x, sigma.rec (λ b s_or_t, @pbool.rec _ (sum.inl s_or_t) (sum.inr s_or_t) b) x,
+        --pbool.rec (sum.inl (x.2 : X pbool.ff)) (sum.inr x.2) x.1,
+        left_inv := sorry,
+        right_inv := sorry }
+#exit
 -- Kevin is working on this
 lemma finite_product_condition_iff_empty_condition_product_condition :
   P.finite_product_condition ↔ P.empty_condition ∧ P.product_condition :=
@@ -131,18 +142,9 @@ begin
       { exact ⟨nonempty.map e4.symm this.1, subsingleton.map_equiv e4.symm this.2⟩ },
       { exact ⟨λ x, by rcases x with ⟨⟨⟩⟩⟩ },
       { exact ⟨λ f g, by {ext x, rcases x with ⟨⟨⟩⟩ }⟩ } },
-    { specialize h_prod (Fintype.of pbool),
-      /-
-      ∀ (X : ↥(Fintype.of pbool)) → Profinite), function.bijective
-       (λ (x : P.obj (opposite.op (Profinite.sigma X))) (a : ↥(Fintype.of pbool)), P.map (Profinite.sigma.ι X a).op x)
-
-      For all X : pbool -> Profinite, the obvious map from
-      P(Σ X) to Π (a : pbool), P (X a) is bijective
-      -/
-      intros S T,
-      let X : ↥(Fintype.of pbool) → Profinite :=
-        λ a, pbool.rec S T a,
-      specialize h_prod X,
+    { intros S T,
+      let X : ↥(Fintype.of pbool) → Profinite := λ a, pbool.rec S T a,
+      specialize h_prod (Fintype.of pbool) X,
       /-
       hypothesis : if X : pbool -> Profinite sends ff to S
       and tt to T, then the obvious map from
@@ -162,10 +164,23 @@ begin
       P (Σ a, X a) ⟶ P S × P T
 
       -/
+      -- do we have a function beefing up a continuous equiv in Profinite
+      -- to a homeomorphism?
+      let e : S ⊕ T ≃ₜ Σ a, X a :=
+      { to_fun := λ st, sum.rec (λ s, (⟨pbool.ff, s⟩ : Σ a, X a) )
+        (λ t, (⟨pbool.tt, t⟩ : Σ a, X a) ) st,
+        inv_fun := λ x, sigma.rec (λ b s_or_t, pbool.rec (sum.inl s_or_t) (sum.inr s_or_t) b) x,
+        --pbool.rec (sum.inl (x.2 : X pbool.ff)) (sum.inr x.2) x.1,
+        left_inv := _,
+        right_inv := _,
+        continuous_to_fun := _,
+        continuous_inv_fun := _ },
       sorry
     } },
   { sorry }
 end
+
+#exit
 
 def map_to_equalizer {W X B : Profinite.{w}} (f : X ⟶ B) (g₁ g₂ : W ⟶ X)
   (w : g₁ ≫ f = g₂ ≫ f) :
