@@ -32,8 +32,8 @@ noncomputable theory
 open set filter function classical finset nat
 open_locale topological_space classical nnreal big_operators
 
-def laurent_measures.to_Rfct (r : ℝ≥0) :
-  (laurent_measures r (Fintype.of punit)) → (ℤ → ℤ) := λ ⟨F, _⟩, (F punit.star)
+-- def laurent_measures.to_Rfct (r : ℝ≥0) :
+--   (laurent_measures r (Fintype.of punit)) → (ℤ → ℤ) := λ ⟨F, _⟩, (F punit.star)
 
 namespace theta
 
@@ -316,47 +316,86 @@ end summability
 
 section theta_surj
 
+
 /--The map `ϑ` defined in Theorem 6.9 of Analytic.pdf. Given the definition of `tsum` we do not need to require that `r ≤ ξ` to simply define `θ`.-/
-def ϑ (r : ℝ≥0) : (laurent_measures r (Fintype.of punit)) → ℝ :=
-  λ F, tsum (λ n, (F punit.star n) * ξ ^ n)
+def ϑ (r p : ℝ≥0) (S : Fintype) : (laurent_measures r S) → real_measures p S := λ F s, tsum (λ n, (F s n) * ξ ^ n)
 
 
-theorem ϑ_surjective (x : ℝ) (r : ℝ≥0) [fact (r < 1)] [fact (0 < ξ)] [fact (ξ < 1)] :
-  ∃ (F : laurent_measures r (Fintype.of punit)), (ϑ ξ r F) = x :=
+theorem ϑ_surjective (r p : ℝ≥0) (S : Fintype) (g : real_measures p S) [fact (r < 1)] [fact (0 < ξ)] [fact (ξ < 1)] :
+  ∃ (F : laurent_measures r S), (ϑ ξ r p S F) = g :=
 begin
-  let f₀ : ℤ → ℤ := λ m, int.rec_on m (λ i, ⌊((y ξ x i) / ξ ^ i)⌋) (0),
-  let F₀ : Fintype.of punit → ℤ → ℤ := λ a, f₀,
+  let F₀ : S → ℤ → ℤ := λ s m, int.rec_on m (λ i, ⌊((y ξ (g s) i) / ξ ^ i)⌋) (0),
   have hinj : function.injective (coe : ℕ → ℤ) := by {apply int.coe_nat_inj},
-  have h_aux : ∀ n : ℤ, n ∉ set.range (coe : ℕ → ℤ) → f₀ n = 0,
-  { rintro ( _ | _ ),
+  have h_aux : ∀ s : S, ∀ n : ℤ, n ∉ set.range (coe : ℕ → ℤ) → F₀ s n = 0,
+  { rintros s ( _ | _ ),
     simp only [forall_false_left, set.mem_range_self, not_true, int.of_nat_eq_coe],
     intro,
     refl },
-  have h_range : ∀ n : ℤ,
-    n ∉ set.range (coe : ℕ → ℤ) → (F₀ punit.star n : ℝ) * ξ ^ n = 0,
+  have h_range : ∀ s : S, ∀ n : ℤ,
+    n ∉ set.range (coe : ℕ → ℤ) → (F₀ s n : ℝ) * ξ ^ n = 0,
   swap,
-  have h_range_norm : ∀ n : ℤ,
-    n ∉ set.range (coe : ℕ → ℤ) → ∥F₀ punit.star n ∥ * r ^ n = 0,
+  have h_range_norm : ∀ s : S, ∀ n : ℤ,
+    n ∉ set.range (coe : ℕ → ℤ) → ∥F₀ s n ∥ * r ^ n = 0,
   swap,
-  { have HF₀ : ∀ (s : Fintype.of punit), summable (λ (n : ℤ), ∥F₀ s n∥ * r ^ n),
+  { have HF₀ : ∀ s : S, summable (λ (n : ℤ), ∥F₀ s n∥ * r ^ n),
     { intro s,
-      apply (@function.injective.summable_iff _ _ _ _ _ _ _ hinj h_range_norm).mp,
-      apply summable_norm ξ x r (fact.out _) },
-    let F : laurent_measures r (Fintype.of punit) := ⟨F₀, HF₀⟩,
+      apply (@function.injective.summable_iff _ _ _ _ _ _ _ hinj (h_range_norm s)).mp,
+      apply summable_norm ξ (g s) r (fact.out _) },
+    let F : laurent_measures r S := ⟨F₀, HF₀⟩,
     use F,
-    have : has_sum (λ n, ((F₀ punit.star n) : ℝ) * ξ ^ n) x,
-    { apply (@function.injective.has_sum_iff _ _ _ _ _ _ x _ hinj h_range).mp,
-      exact has_sum_x ξ x },
+    have : ∀ s : S, has_sum (λ n, ((F₀ s n) : ℝ) * ξ ^ n) (g s),
+    { intro s,
+      apply (@function.injective.has_sum_iff _ _ _ _ _ _ (g s) _ hinj (h_range s)).mp,
+      exact has_sum_x ξ (g s) },
+    funext,
     apply has_sum.tsum_eq,
-    exact this },
+    exact this s},
   all_goals { intros n hn,
     specialize h_aux n hn,
     simp only [h_aux, int.cast_eq_zero, mul_eq_zero, norm_eq_zero],
     tauto },
 end
 
+def ϑ₀ (r : ℝ≥0) : (laurent_measures r (Fintype.of punit)) → ℝ :=
+  λ F, tsum (λ n, (F punit.star n) * ξ ^ n)--TODO: remove this
+
 end theta_surj
 
 
+
+
+-- theorem ϑ₀_surjective (x : ℝ) (r : ℝ≥0) [fact (r < 1)] [fact (0 < ξ)] [fact (ξ < 1)] :
+--   ∃ (F : laurent_measures r (Fintype.of punit)), (ϑ₀ ξ r F) = x :=
+-- begin
+--   let f₀ : ℤ → ℤ := λ m, int.rec_on m (λ i, ⌊((y ξ x i) / ξ ^ i)⌋) (0),
+--   let F₀ : Fintype.of punit → ℤ → ℤ := λ a, f₀,
+--   have hinj : function.injective (coe : ℕ → ℤ) := by {apply int.coe_nat_inj},
+--   have h_aux : ∀ n : ℤ, n ∉ set.range (coe : ℕ → ℤ) → f₀ n = 0,
+--   { rintro ( _ | _ ),
+--     simp only [forall_false_left, set.mem_range_self, not_true, int.of_nat_eq_coe],
+--     intro,
+--     refl },
+--   have h_range : ∀ n : ℤ,
+--     n ∉ set.range (coe : ℕ → ℤ) → (F₀ punit.star n : ℝ) * ξ ^ n = 0,
+--   swap,
+--   have h_range_norm : ∀ n : ℤ,
+--     n ∉ set.range (coe : ℕ → ℤ) → ∥F₀ punit.star n ∥ * r ^ n = 0,
+--   swap,
+--   { have HF₀ : ∀ (s : Fintype.of punit), summable (λ (n : ℤ), ∥F₀ s n∥ * r ^ n),
+--     { intro s,
+--       apply (@function.injective.summable_iff _ _ _ _ _ _ _ hinj h_range_norm).mp,
+--       apply summable_norm ξ x r (fact.out _) },
+--     let F : laurent_measures r (Fintype.of punit) := ⟨F₀, HF₀⟩,
+--     use F,
+--     have : has_sum (λ n, ((F₀ punit.star n) : ℝ) * ξ ^ n) x,
+--     { apply (@function.injective.has_sum_iff _ _ _ _ _ _ x _ hinj h_range).mp,
+--       exact has_sum_x ξ x },
+--     apply has_sum.tsum_eq,
+--     exact this },
+--   all_goals { intros n hn,
+--     specialize h_aux n hn,
+--     simp only [h_aux, int.cast_eq_zero, mul_eq_zero, norm_eq_zero],
+--     tauto },
+-- end
 
 end theta

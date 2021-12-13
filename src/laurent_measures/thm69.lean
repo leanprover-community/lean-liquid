@@ -62,6 +62,7 @@ open_locale nnreal classical big_operators topological_space
 -- universe u
 variables (p : ℝ≥0) [fact (0 < p)] [fact (p < 1)]
 variables (r : ℝ≥0) [fact (0 < r)] [fact (r < 1)]
+variables (S : Fintype)
 -- variables (r : ℝ≥0) [fact ((1 / 2 : ℝ) ^ p.1 = r)]
 
 lemma r_pos : 0 < r ∧ r < 1 := sorry
@@ -74,6 +75,8 @@ begin
 end
 
 noncomputable theory
+
+local notation `ℳ` := real_measures
 
 section ker_theta_half
 
@@ -123,7 +126,58 @@ begin
     exact (r ^ b).2 },
 end
 
-def θ₀ : (laurent_measures r (Fintype.of punit)) → ℝ := ϑ (1 / 2 : ℝ) r
+def ϕ : (laurent_measures r S) → (laurent_measures r S) :=
+begin
+  rintro ⟨f,hF⟩,
+  let f₁ : S → ℤ → ℤ := λ s n, 2* f s (n - 1) - f s n,
+  use f₁,
+  intro s,
+  let g₁ : ℤ → ℝ := λ n, ∥ 2 * f s (n - 1) ∥ * r ^ n + ∥ f s n ∥ * r ^ n,
+  have Hf_le_g : ∀ b : ℤ, ∥ f₁ s b ∥ * r ^ b ≤ g₁ b,
+  { intro b,
+    dsimp [f₁, g₁],
+    rw ← add_mul,
+    have rpow_pos : 0 < (r : ℝ) ^ b := by { apply zpow_pos_of_pos, rw nnreal.coe_pos,
+      exact fact.out _ },
+    apply (mul_le_mul_right rpow_pos).mpr,
+    exact norm_sub_le (2 * f s (b - 1)) (f s b) },
+  apply summable_of_nonneg_of_le _ Hf_le_g,
+  { apply summable.add,
+    have : ∀ b : ℤ, ∥ f s (b - 1) ∥ * r ^ b = r * ∥ f s (b - 1) ∥ * r ^ (b - 1),
+    { intro b,
+      nth_rewrite_rhs 0 mul_assoc,
+      nth_rewrite_rhs 0 mul_comm,
+      nth_rewrite_rhs 0 mul_assoc,
+      rw [← zpow_add_one₀, sub_add_cancel b 1],
+      rw [ne.def, nnreal.coe_eq_zero],
+      apply ne_of_gt,
+      exact fact.out _ },
+    simp_rw [← int.norm_cast_real, int.cast_mul, normed_field.norm_mul, int.norm_cast_real,
+      mul_assoc],
+    apply @summable.mul_left ℝ _ _ _ _ (λ (b : ℤ), ∥f s (b - 1) ∥ * ↑r ^ b ) (∥ (2 : ℤ) ∥),
+    simp_rw [this, mul_assoc],
+    apply @summable.mul_left ℝ _ _ _ _ (λ (b : ℤ), ∥f s (b - 1)∥ * ↑r ^ (b - 1)) r,
+    have h_comp : (λ (b : ℤ), ∥f s (b - 1)∥ * ↑r ^ (b - 1)) =
+      (λ (b : ℤ), ∥f s b∥ * ↑r ^ b) ∘ (λ n, n - 1) := rfl,
+    rw h_comp,
+    apply summable.comp_injective _ sub_left_injective,
+    repeat {apply_instance},
+    repeat {specialize hF s, exact hF}, },
+  { intro b,
+    apply mul_nonneg,
+    apply norm_nonneg,
+    rw ← nnreal.coe_zpow,
+    exact (r ^ b).2 },
+end
+
+def θ₀ : (laurent_measures r (Fintype.of punit)) → ℝ := ϑ₀ (1 / 2 : ℝ) r
+
+def θ : (laurent_measures r S) → ℳ p S := ϑ (1 / 2 : ℝ) r p S
+-- begin
+--   intros f s,
+--   let := ϑ (1 / 2 : ℝ) r,
+--   -- use ϑ (1 / 2 : ℝ) r (F s),
+-- end
 
 -- def θₗ : (laurent_measures r (Fintype.of punit)) →ₗ[ℤ] ℝ :=
 -- { to_fun := λ F, tsum (λ n, (F punit.star n) * (1 / 2 : ℝ) ^ n),
@@ -273,8 +327,6 @@ section SES_thm69
 
 local notation `ℳ` := real_measures
 
-variable (S : Fintype)
--- variables (p : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)] [fact ((1/2 : ℝ) ^ (p : ℝ) = r)]
 
 include r
 
