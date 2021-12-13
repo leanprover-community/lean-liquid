@@ -49,13 +49,30 @@ Sheaf_forget _
 def CondensedSet_to_Condensed_Ab : CondensedSet ⥤ Condensed Ab :=
 Sheaf.compose_and_sheafify_from_types _ AddCommGroup.free
 
--- TODO: I think `unit_app` and `counit_app` need some adjusting...
--- It's hard to write down a good statement for these, precisely because there is no
--- separation between morphisms of sheaves and morphisms of underlying presheaves.
 @[simps unit_app counit_app]
 def Condensed_Ab_CondensedSet_adjunction :
   CondensedSet_to_Condensed_Ab ⊣ Condensed_Ab_to_CondensedSet :=
 Sheaf.adjunction_to_types _ AddCommGroup.adj
+
+/-
+TODO: I think the automatically generated `unit_app` and `counit_app` need some adjusting...
+It's hard to write down a good statement for these, precisely because there is no
+separation between morphisms of sheaves and morphisms of underlying presheaves.
+
+Namely:
+
+This typechecks
+example (X : CondensedSet) :
+  CondensedSet_to_presheaf.map (Condensed_Ab_CondensedSet_adjunction.unit.app X) =
+  (AddCommGroup.adj.whisker_right _).unit.app _ ≫
+  whisker_right (proetale_topology.to_sheafify _) (forget Ab) := sorry
+
+This does not
+example (X : CondensedSet) :
+  Condensed_Ab_CondensedSet_adjunction.unit.app X =
+  (AddCommGroup.adj.whisker_right _).unit.app _ ≫
+  whisker_right (proetale_topology.to_sheafify _) (forget Ab) := sorry
+-/
 
 @[simp]
 lemma Condensed_Ab_CondensedSet_adjunction_hom_equiv_apply (X : CondensedSet)
