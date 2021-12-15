@@ -122,7 +122,8 @@ begin
     exact (r ^ b).2 },
 end
 
-lemma aux_sum_almost_natural {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ) (hf : ∀ n : ℤ, -d < n → f n = 0) : summable (λ n, ∥ f n ∥ * ρ ^ n) ↔ summable (λ n : ℕ, ∥ f n ∥ * ρ ^ n) := sorry
+lemma aux_sum_almost_natural {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ) (hf : ∀ n : ℤ, -d < n → f n = 0) :
+  summable (λ n, ∥ f n ∥ * ρ ^ n) ↔ summable (λ n : ℕ, ∥ f n ∥ * ρ ^ n) := sorry
   --   suffices sum_pos : summable (λ n : ℕ, ∥ ((F.to_fun s n) : ℝ) ∥ * (1 / 2) ^ n),
   -- { let A : (set ℤ) := {n : ℤ | n + F.d ≥ 0},
   --   apply (@summable_subtype_and_compl _ _ _ _ _ _ _ A).mp,
@@ -209,16 +210,46 @@ end
 
 -- for `mathlib`
 
-open finset nat
+open finset nat set
 open_locale classical big_operators
 
-def cauchy_product' (a b : ℕ → ℝ) : ℕ → ℝ :=
-  λ n, (∑ p : (finset.nat.antidiagonal n), (a p.1.fst) * (b p.1.snd))
+-- def cauchy_product' (a b : ℕ → ℝ) : ℕ → ℝ :=
+--   λ n, (∑ p : (finset.nat.antidiagonal n), (a p.1.fst) * (b p.1.snd))
 
-lemma has_sum.cauchy_product {a b : ℕ → ℝ} {A B : ℝ} (ha : has_sum (λ n, abs a n)A) (hb : has_sum (λ n, b n) B) : has_sum (cauchy_product' a b) (A * B) :=  sorry
--- use things around has_sum_iff_tendsto_nat_of_summable_norm to derive the above from the actual cauchy_product statement
+-- lemma has_sum.cauchy_product {a b : ℕ → ℝ} {A B : ℝ} (ha : has_sum (λ n, abs a n)A) (hb : has_sum (λ n, b n) B) : has_sum (cauchy_product' a b) (A * B) :=  sorry
+-- -- use things around has_sum_iff_tendsto_nat_of_summable_norm to derive the above from the actual cauchy_product statement
 
-lemma summable.cauchy_product {a b : ℕ → ℝ} (ha : summable (λ n, abs a n)) (hb : summable (λ n, b n)) : summable (cauchy_product' a b) := (ha.has_sum.cauchy_product hb.has_sum).summable
+-- lemma summable.cauchy_product {a b : ℕ → ℝ} (ha : summable (λ n, abs a n)) (hb : summable (λ n, b n)) : summable (cauchy_product' a b) := (ha.has_sum.cauchy_product hb.has_sum).summable
+
+lemma order_iso.order_bot_if {α β : Type* } [preorder α] [partial_order β]
+  [order_bot α] (f : α ≃o β) : order_bot β :=
+begin
+  use f ⊥,
+  intro a,
+  obtain ⟨_, hx⟩ : ∃ x : α, f.1 x = a := by {apply f.1.surjective},
+  rw ← hx,
+  apply f.map_rel_iff.mpr bot_le,
+end
+
+lemma order_iso.restrict {α β : Type} [linear_order α] [preorder β] (e : α ≃o β) (s : set α) :
+  s ≃o e '' s := strict_mono_on.order_iso e.1 s (λ _ _ _ _ h, (e.strict_mono) h)
+
+-- def exp_range_restrict := (real.exp_order_iso).restrict  (range (coe : ℕ → ℝ))
+-- def ν := strict_mono.order_iso (coe : ℕ → ℝ) (@strict_mono_cast ℝ _ _)
+def natexp := (strict_mono.order_iso (coe : ℕ → ℝ)
+  (@strict_mono_cast ℝ _ _)).trans ((real.exp_order_iso).restrict (range (coe : ℕ → ℝ)))
+
+instance : order_bot ↥(⇑real.exp_order_iso '' range (coe : ℕ → ℝ)) := natexp.order_bot_if
+instance : has_bot ↥(⇑real.exp_order_iso '' range (coe : ℕ → ℝ)) := by apply_instance
+
+lemma has_bot_support (F : ℒ S) (s : S) : has_bot (function.support (F s)) :=
+begin
+  /- The proof should just be a restatement of `laurent_measures.eq_zero_of_filtration` using the
+  above instances that guarantee that the image of n ↦ exp n has a ⊥. The second instance actually
+  must be improved, and must prove that the image of n ↦ r ^ n - c has a ⊥, for all c.
+  -/
+  sorry,
+end
 
 -- end `mathlib`
 
