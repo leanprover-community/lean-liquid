@@ -32,8 +32,22 @@ namespace laurent_measures
 open_locale nnreal
 
 --For every F, d F is the bound whose existence is establised in  `eq_zero_of_filtration`
-def d {r : ℝ≥0} {S : Fintype} (F : laurent_measures r S) : ℤ :=
-  ⌊ (real.log ∥ F ∥ / real.log (r : ℝ)) ⌋ + 1
+lemma exists_bdd_filtration {r : ℝ≥0} {S : Fintype} (F : laurent_measures r S) : ∃ d : ℤ,
+∀ s : S, ∀ (n : ℤ), n ≤ -d → F s n = 0 :=
+begin
+  let c := ⌊ (real.log ∥ F ∥ / real.log (r : ℝ)) ⌋₊ + 1,
+  have hF : ∥ F ∥ ≤ (c : ℝ≥0), sorry,
+  use c,
+  intros s n hn,
+  replace hn : (c : ℝ)  < (r : ℝ)^n, sorry,
+  rw ← nnreal.coe_nat_cast at hn,
+  apply eq_zero_of_filtration F (c : ℝ≥0) hF s n hn,
+end
+
+def d {r : ℝ≥0} {S : Fintype} (F : laurent_measures r S) : ℤ := (exists_bdd_filtration F).some
+
+lemma le_bdd_zero {r : ℝ≥0} {S : Fintype} (F : laurent_measures r S) (s : S) (n : ℤ) :
+  n ≤ -F.d → F s n = 0 := (exists_bdd_filtration F).some_spec s n
 
 
 -- lemma bdd_bounds (c : ℝ) (r : ℝ≥0) : bdd_below {n : ℤ | (c : ℝ) < (r : ℝ) ^ n} :=
