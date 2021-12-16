@@ -29,25 +29,48 @@ noncomputable theory
 
 namespace laurent_measures
 
-open_locale nnreal
+open_locale nnreal ennreal
+
 
 --For every F, d F is the bound whose existence is establised in  `eq_zero_of_filtration`
 lemma exists_bdd_filtration {r : ℝ≥0} {S : Fintype} (F : laurent_measures r S) : ∃ d : ℤ,
-∀ s : S, ∀ (n : ℤ), n ≤ -d → F s n = 0 :=
+∀ s : S, ∀ (n : ℤ), n < -d → F s n = 0 :=
 begin
-  let c := ⌊ (real.log ∥ F ∥ / real.log (r : ℝ)) ⌋₊ + 1,
-  have hF : ∥ F ∥ ≤ (c : ℝ≥0), sorry,
-  use c,
+  let d := ⌊ (real.log ∥ F ∥ / real.log (r : ℝ)) ⌋,
+  -- have hd : 0 ≤ (d : ℝ), sorry,
+  -- use ((r : ℝ) ^ d),
+  --have : 0 ≤ ∥ F ∥ := laurent_measures.norm_nonneg F,
+  have : ∥ F ∥ ≤ (⟨∥ F ∥, laurent_measures.norm_nonneg F⟩ : ℝ≥0) := by {simp only [subtype.coe_mk]},
+  use d,
   intros s n hn,
-  replace hn : (c : ℝ)  < (r : ℝ)^n, sorry,
-  rw ← nnreal.coe_nat_cast at hn,
-  apply eq_zero_of_filtration F (c : ℝ≥0) hF s n hn,
+  replace hn : (n : ℝ) < d, sorry,
+  replace hn : ∥ F ∥  < (r : ℝ) ^ n, sorry,
+  -- apply_fun (λ x, r ^ x) at hn,
+  -- have easy1 : 0 < r,sorry,
+  -- have easy2 : r<1,sorry,
+  -- have H1 := nnreal.rpow_lt_rpow_of_exponent_gt easy1 easy2 hn,
+  -- have H2 : ∥ F ∥ ≤ r ^ d, sorry,
+  -- dsimp only [d] at this,
+  -- { have hd1 : 0 ≤ d, sorry,
+  --   have hd : 0 ≤ (-d : ℝ), sorry,
+  --   have mah1 : (real.log (r : ℝ)) ≤ (1 / d) * (real.log ∥ F ∥),sorry,
+  --   have mah2 := real.le_rpow_of_log_le _ _ mah1,
+  --   replace mah2 := (inv_le_inv _ _).mpr mah2,
+  --   replace mah2 : ((⟨∥ F ∥, laurent_measures.norm_nonneg F⟩ : ℝ≥0) ^ (1 / d))⁻¹ ≤ r ⁻¹, sorry,
+  --   have mah3 := nnreal.rpow_le_rpow mah2 hd,
+  --   -- replace mah3 : ∥F∥ ^ (1 / d)⁻¹ ^ -d ≤ r⁻¹ ^ -d,
+  --   rw ← ennreal.inv_pow at mah3,
+  --   rw real.pow_pow at this,
+  --   replace mah2 : (r : ℝ) ^ d ≥ ∥ F ∥,
+  --   -- apply
+  -- },
+  apply eq_zero_of_filtration F (⟨∥ F ∥, laurent_measures.norm_nonneg F⟩) this s n hn,
 end
 
 def d {r : ℝ≥0} {S : Fintype} (F : laurent_measures r S) : ℤ := (exists_bdd_filtration F).some
 
 lemma le_bdd_zero {r : ℝ≥0} {S : Fintype} (F : laurent_measures r S) (s : S) (n : ℤ) :
-  n ≤ -F.d → F s n = 0 := (exists_bdd_filtration F).some_spec s n
+  n < -F.d → F s n = 0 := (exists_bdd_filtration F).some_spec s n
 
 
 -- lemma bdd_bounds (c : ℝ) (r : ℝ≥0) : bdd_below {n : ℤ | (c : ℝ) < (r : ℝ) ^ n} :=
