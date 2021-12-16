@@ -206,6 +206,14 @@ instance : has_norm (laurent_measures r S) :=
 @[simp]
 lemma norm_def (F : laurent_measures r S) : ∥ F ∥ = ∑ s, ∑' n, ∥ F s n ∥ * (r : ℝ)^n := rfl
 
+--should we put a normed_group structure on laurent_measures, rather?
+@[simp]
+lemma laurent_measures.norm_nonneg (F : laurent_measures r S) : 0 ≤ ∥ F ∥ :=
+  finset.sum_nonneg $ λ s _, tsum_nonneg (λ b, mul_nonneg (norm_nonneg (F s b))
+    (zpow_nonneg nnreal.zero_le_coe b))
+
+
+
 lemma map_bound (f : S ⟶ S') (F : laurent_measures r S) :
   ∥ map f F ∥ ≤ ∥ F ∥ := calc
 ∥ map f F ∥ = ∑ s', ∑' n, ∥ ∑ s in finset.univ.filter (λ t, f t = s'), F s n ∥ * _ : rfl
