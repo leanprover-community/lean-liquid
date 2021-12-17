@@ -1,3 +1,5 @@
+import analysis.special_functions.pow
+import analysis.special_functions.log
 import analysis.specific_limits
 import category_theory.Fintype
 import analysis.normed_space.basic
@@ -320,6 +322,62 @@ begin
       refine mul_nonneg (norm_nonneg _) (zpow_nonneg _ _),
       exact nnreal.coe_nonneg r },
     { simp } }
+end
+
+-- move me
+lemma zpow_strict_anti {K : Type} [linear_ordered_field K] {x : K} (hx₀ : 0 < x) (hx₁ : x < 1) :
+  strict_anti (λ n:ℤ, x ^ n) :=
+begin
+  intros n m H,
+  rw [← inv_inv₀ x],
+  simp only [inv_zpow₀ x⁻¹, inv_lt_inv (zpow_pos_of_pos (inv_pos.mpr hx₀) _)
+    (zpow_pos_of_pos (inv_pos.mpr hx₀) _)],
+  exact zpow_strict_mono (one_lt_inv hx₀ hx₁) H,
+end
+
+open real
+
+--For every F, d F is a bound whose existence is established in `eq_zero_of_filtration`
+lemma exists_bdd_filtration {r : ℝ≥0} {S : Fintype} (hr₀ : 0 < (r : ℝ)) (hr₁ : (r : ℝ) < 1)
+  (F : laurent_measures r S) : ∃ d : ℤ, ∀ s : S, ∀ (n : ℤ), n < d → F s n = 0 :=
+begin
+  have h_logr : (log r) < 0 := log_neg hr₀ hr₁,
+  { let d := if log ∥ F ∥ ≥ 0 then ⌊ (log ∥ F ∥ / log (r : ℝ)) ⌋ - 1 else -1,
+    have hF : ∥ F ∥ ≤ (⟨∥ F ∥, laurent_measures.norm_nonneg F⟩ : ℝ≥0) :=
+      by {simp only [subtype.coe_mk]},
+    use d,
+    intros s n hn,
+    have H1 := zpow_strict_anti hr₀ hr₁ hn,
+    have H2 : ∥ F ∥ < r ^ d,
+    { have hd1 : 0 < -(d : ℝ),
+      { rw [lt_neg, neg_zero, ← int.cast_zero, int.cast_lt],
+        apply int.lt_of_le_sub_one,
+        dsimp only [d],
+        split_ifs,
+        { rw [tsub_le_iff_right, sub_add, sub_self, sub_zero],
+          exact int.floor_nonpos (div_nonpos_of_nonneg_of_nonpos h(le_of_lt h_logr)) },
+        { simp only [zero_sub] }},
+      have hFd1 : (log ∥ F ∥) < d * (log (r : ℝ)),
+      { rw ← zsmul_eq_mul,
+        rw ite_smul,
+        split_ifs,
+        { rw zsmul_eq_mul,
+          calc (log ∥F∥) = (log ∥F∥/log r) * log r :
+                                            (div_mul_cancel (log ∥F∥) (ne_of_lt h_logr)).symm
+                          ... ≤ ⌊ (log ∥F∥)/log r⌋ * log r :
+                                              (mul_le_mul_right_of_neg h_logr).mpr (int.floor_le _)
+                          ... < (⌊ (log ∥F∥)/log r⌋ - 1) * log r :
+                                                (mul_lt_mul_right_of_neg h_logr).mpr (sub_one_lt _)
+                          ... = ↑(⌊ (log ∥F∥)/log r⌋ - 1) * log r :
+                                                        by simp only [int.cast_one, int.cast_sub] },
+        { rw [neg_smul, one_smul],
+          rw [ge_iff_le, not_le] at h,
+          apply h.trans,
+          rwa [lt_neg, neg_zero] }},
+      have := (real.lt_rpow_of_log_lt (laurent_measures.norm_nonneg F) hr₀ hFd1),
+      rwa [real.rpow_int_cast _ d] at this },
+    replace H2 := H2.trans H1,
+    apply eq_zero_of_filtration F (⟨∥ F ∥, laurent_measures.norm_nonneg F⟩) hF s n H2 },
 end
 
 section profinite_structure

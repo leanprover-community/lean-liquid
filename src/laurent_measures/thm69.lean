@@ -1,6 +1,4 @@
 -- import for_mathlib.short_exact_sequence
-import analysis.special_functions.log
-import analysis.special_functions.exp
 import data.int.interval
 import data.finset.nat_antidiagonal
 import laurent_measures.basic
@@ -10,149 +8,41 @@ import linear_algebra.basic
 
 /-
 This file introduces the maps
-* `θ₀`, which is the specialization of evaluation-at-ξ map `ϑ` from `laurent_measures.theta`
-  at `ξ=1/2`. Observe that both `ϑ` and `θ₀` evaluate only at Laurent measures supported on the
-  singleton
-* `ϕ₀` which corresponds to multiplying a Laurent series by `2T-1`: here, Laurent series are seen as
-  Laurent measures on the singleton
-* `ψ₀` corresponds to multiplying a Laurent series by `(2T-1)^-1`: again, Laurent series are seen as
-  Laurent measures on the singleton. It is defined only on series vanishing at `1/2`, so that it
-  again takes values in `laurent_measures r (Finitype.of punit)`.
-* The maps `θ`, `ϕ` and `ψ` are the analogous of `θ₀`, `ϕ₀` and `ψ₀`, respectively, for Laurent
-  measures on an arbitrary finite set `S`.
-* The maps `Θ`, `Φ` and `Ψ` are the "measurifications" of `θ`, `ϕ` and `ψ` in the right category.
+* `θ`, which is the specialization of evaluation-at-ξ map `ϑ` from `laurent_measures.theta`
+  at `ξ=1/2`.
+* `ϕ` which corresponds to multiplying a Laurent series in `ℒ S = (laurent_measures r S)`
+  for `r = 2^(1/p)` by `2T-1`.
+* `ψ` corresponds to multiplying a Laurent series by `(2T-1)^-1`. It is defined only on series
+  vanishing at `1/2`, so that it again takes values in `ℒ S`
+* The maps `Θ`, `Φ` and `Ψ` are the "measurifications" of `θ`, `ϕ` and `ψ`,
+  so they are morphisms in the right category.
 
 **The main results are ...**
 -/
 
 noncomputable theory
 
-namespace laurent_measures
-
-open_locale nnreal real
-
-
---For every F, d F is the bound whose existence is establised in  `eq_zero_of_filtration`
--- trasformare ℝ in K : ordered_field
-lemma zpow_strict_anti {K : Type} [linear_ordered_field K] {x : K} (hx₀ : 0 < x) (hx₁ : x < 1) :
-  strict_anti (λ n:ℤ, x ^ n) :=
-begin
-  intros n m H,
-  rw [← inv_inv₀ x],
-  simp only [inv_zpow₀ x⁻¹, inv_lt_inv (zpow_pos_of_pos (inv_pos.mpr hx₀) _)
-    (zpow_pos_of_pos (inv_pos.mpr hx₀) _)],
-  exact zpow_strict_mono (one_lt_inv hx₀ hx₁) H,
-end
-
-example (x : ℝ) : x > x - 1 :=
-begin
-  exact sub_one_lt x
-end
-
-
-lemma exists_bdd_filtration {r : ℝ≥0} {S : Fintype} (F : laurent_measures r S) : ∃ d : ℤ,
-∀ s : S, ∀ (n : ℤ), n < d → F s n = 0 :=
-begin
-  have easy0 : 0 < (r : ℝ),sorry,--this will be proven below, or should be a fact
-  have easy1 : (r : ℝ) < 1,sorry,--this will be proven below, or should be a fact
-  have h_logr : (real.log r) < 0 := real.log_neg easy0 easy1,
-  by_cases zF : ∥ F ∥ = 0, --useful?
-  sorry,
-  { let d := if real.log ∥ F ∥ ≥ 0 then ⌊ (real.log ∥ F ∥ / real.log (r : ℝ)) ⌋ - 1 else -1,
-    have hF : ∥ F ∥ ≤ (⟨∥ F ∥, laurent_measures.norm_nonneg F⟩ : ℝ≥0) :=
-      by {simp only [subtype.coe_mk]},
-    use d,
-    intros s n hn,
-    have H1 := zpow_strict_anti easy0 easy1 hn,
-    have H2 : ∥ F ∥ < r ^ d,
-    { --have hd : (d : ℝ) < 0, sorry,
-      have hd1 : 0 < -(d : ℝ),
-      { rw [lt_neg, neg_zero, ← int.cast_zero, int.cast_lt],
-        apply int.lt_of_le_sub_one,
-        dsimp only [d],
-        split_ifs,
-        { --have : (real.log ∥F∥) > 0, sorry,
-          -- rw zero_sub,
-          -- sorry,
-          rw [tsub_le_iff_right, sub_add, sub_self, sub_zero],sorry,
-        },
-        { simp only [zero_sub] },
-        -- rw floor_le
-        -- simp only [neg_le_sub_iff_le_add, le_add_iff_nonneg_left],
-        -- rw le_add_iff_non
-        -- rw zero_sub,
-        -- rw neg_le_sub_iff_le
-
-      },
-      -- have hFd : (real.log (r : ℝ)) < (1 / d) * (real.log ∥ F ∥), sorry,
-      have hFd1 : (real.log ∥ F ∥) < d * (real.log (r : ℝ)),
-      { rw ← zsmul_eq_mul,
-        rw ite_smul,
-        split_ifs,
-        { rw zsmul_eq_mul,
-          calc (real.log ∥F∥) = (real.log ∥F∥/real.log r) * real.log r :
-                                            (div_mul_cancel (real.log ∥F∥) (ne_of_lt h_logr)).symm
-                          ... ≤ ⌊ (real.log ∥F∥)/real.log r⌋ * real.log r :
-                                              (mul_le_mul_right_of_neg h_logr).mpr (int.floor_le _)
-                          ... < (⌊ (real.log ∥F∥)/real.log r⌋ - 1) * real.log r :
-                                                (mul_lt_mul_right_of_neg h_logr).mpr (sub_one_lt _)
-                          ... = ↑(⌊ (real.log ∥F∥)/real.log r⌋ - 1) * real.log r :
-                                                        by simp only [int.cast_one, int.cast_sub] },
-        { rw [neg_smul, one_smul],
-          rw [ge_iff_le, not_le] at h,
-          apply h.trans,
-          rwa [lt_neg, neg_zero] }},
-      have mah1 := (real.lt_rpow_of_log_lt (laurent_measures.norm_nonneg F) easy0 hFd1),
-      rwa [real.rpow_int_cast _ d] at mah1 },
-    replace H2 := H2.trans H1,
-    apply eq_zero_of_filtration F (⟨∥ F ∥, laurent_measures.norm_nonneg F⟩) hF s n H2 },
-end
-
-def d {r : ℝ≥0} {S : Fintype} (F : laurent_measures r S) : ℤ := (exists_bdd_filtration F).some
-
-lemma le_bdd_zero {r : ℝ≥0} {S : Fintype} (F : laurent_measures r S) (s : S) (n : ℤ) :
-  n < F.d → F s n = 0 := (exists_bdd_filtration F).some_spec s n
-
-
--- lemma bdd_bounds (c : ℝ) (r : ℝ≥0) : bdd_below {n : ℤ | (c : ℝ) < (r : ℝ) ^ n} :=
--- begin
---   use ⌊ (log c / log (r : ℝ)) ⌋ + 1,
---   rintros a ha,
---   rw le_sub_iff_add_le.symm,
---   rw ← @int.cast_le ℝ _ _ _ _ ,
---   apply_fun exp_order_iso,
---   apply_fun (coe : Ioi (0 : ℝ) → ℝ),
---   -- apply coe_exp_order_iso_apply,
---   have := (coe_exp_order_iso_apply ⌊ (log c / log (r : ℝ)) ⌋),
---   -- rw ← exp_order_iso_apply,
---   -- rw exp_log,
-
--- end
-
-
-end laurent_measures
-
--- namespace thm_69
-
-noncomputable theory
-
-section finite_set
-
 open nnreal theta laurent_measures
 open_locale nnreal classical big_operators topological_space
 
+section thm69
 
 parameter {p : ℝ≥0}
 def r : ℝ≥0 := (1 / 2) ^ ( 1 / p.1)
 variables [fact(0 < p)] [fact (p < 1)]
 variable (S : Fintype)
 
-lemma r_ineq : 0 < r ∧ r < 1 := sorry
+lemma r_ineq : 0 < (r : ℝ) ∧ (r : ℝ) < 1:= sorry
 
 lemma r_half : 1 / 2 < r := sorry
 
 local notation `ℳ` := real_measures p
 local notation `ℒ` := laurent_measures r
+
+def laurent_measures.d {S}(F : ℒ S) : ℤ := (exists_bdd_filtration r_ineq.1 r_ineq.2 F).some
+
+lemma lt_d_eq_zero (F : ℒ S) (s : S) (n : ℤ) :
+  n < F.d → F s n = 0 := (exists_bdd_filtration r_ineq.1 r_ineq.2 F).some_spec s n
 
 def θ : ℒ S → ℳ S := ϑ (1 / 2 : ℝ) r p S
 
@@ -200,7 +90,7 @@ begin
     exact (r ^ b).2 },
 end
 
-lemma aux_sum_almost_natural {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ) (hf : ∀ n : ℤ, -d < n → f n = 0) :
+lemma aux_sum_almost_natural {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ) (hf : ∀ n : ℤ, n < d → f n = 0) :
   summable (λ n, ∥ f n ∥ * ρ ^ n) ↔ summable (λ n : ℕ, ∥ f n ∥ * ρ ^ n) := sorry
   --   suffices sum_pos : summable (λ n : ℕ, ∥ ((F.to_fun s n) : ℝ) ∥ * (1 / 2) ^ n),
   -- { let A : (set ℤ) := {n : ℤ | n + F.d ≥ 0},
@@ -217,15 +107,16 @@ lemma aux_sum_almost_natural {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ) (hf : �
 lemma sum_smaller_radius (F : ℒ S) (s : S) :
   summable (λ n, (F.to_fun s n : ℝ) * (1 / 2) ^ n) :=
 begin
---  have hF :
  suffices abs_sum : summable (λ n, ∥ ((F.to_fun s n) : ℝ) ∥ * (1 / 2) ^ n),
   { apply summable_of_summable_norm,
-    simp_rw [normed_field.norm_mul, normed_field.norm_zpow, normed_field.norm_div, real.norm_two, norm_one, abs_sum] },
+    simp_rw [normed_field.norm_mul, normed_field.norm_zpow, normed_field.norm_div, real.norm_two,
+      norm_one, abs_sum] },
     have temp := F.2 s,
     have h_nat_r := (aux_sum_almost_natural F.d _).mp (F.2 s),
-    have h_nat_half : summable (λ n : ℕ, ∥ F.to_fun s n ∥ * (1 / 2 : ℝ≥0) ^ n), sorry,--`[FAE]` Use here that we are summing over ℕ and (1/2) < r
-    apply (@aux_sum_almost_natural (F s) (1 / 2) F.d _).mpr h_nat_half,
-    all_goals {sorry},--`[FAE]` This is just a matter of making `eq_zero_of_filtration` more explicit
+    have h_nat_half : summable (λ n : ℕ, ∥ F.to_fun s n ∥ * (1 / 2 : ℝ≥0) ^ n), sorry,
+      --`[FAE]` Use here that we are summing over ℕ and (1/2) < r
+    apply (aux_sum_almost_natural F.d _).mpr h_nat_half,
+    all_goals {apply lt_d_eq_zero},
 end
 
 lemma θ_ϕ_complex (F : ℒ S) : (θ S ∘ ϕ S) F = 0 :=
@@ -262,7 +153,8 @@ open finset filter
 open_locale big_operators topological_space
 
 
--- **[FAE]** Use tsum_mul_tsum_eq_tsum_sum_antidiagonal instead!!!
+-- **[FAE]** Use `tsum_mul_tsum_eq_tsum_sum_antidiagonal` or even better
+-- `tsum_mul_tsum_eq_tsum_sum_antidiagonal_of_summable_norm` instead!!!
 lemma Icc_nneg (d : ℤ) : ∀ n : ℤ, (n + d) ≥ 0 → ∀ (k ∈ finset.Icc (- d) n), n - k ≥ (0 : ℤ) := sorry
 
 -- Icc_sum_integer is the m-th coefficient b_m of ψ₀(F)
@@ -334,7 +226,7 @@ end
 def ψ₀ (F : ℒ S) (hF : θ S F = 0) : ℒ S :=
 begin
   -- classical,
-  let A : (set ℤ) := {n : ℤ | n + d F ≥ 0},
+  let A : (set ℤ) := {n : ℤ | n + F.d ≥ 0},
   -- have h_nneg : ∀ n : ℤ, n ∈ A → ∀ k : ℤ, k ∈ Icc (- (d F)) n → k ≥ (0 : ℤ), sorry,
   -- have h_nneg : ∀ n : ℤ, (n + d F) ≥ 0 → ∀ (k ∈ finset.Icc (- (laurent_measures.d F)) n), k ≥ (0 : ℤ), sorry,
   -- have n : ℤ, sorry,
@@ -382,16 +274,8 @@ end
 
 theorem θ_ϕ_exact (F : ℒ S) (hF : θ S F = 0) : ∃ G, ϕ S G = F := sorry
 
-end finite_set
-
--- #where
--- end
--- section SES_thm69
-
--- local notation `ℳ` := real_measures
 
 
--- include r
 
 -- This `θ₂` is the "measurification" of the map `θₗ` of
 -- Theorem 6.9. Thus, `to_meas_θ` is the map inducing the isomorphism of Theorem 6.9 (2)
@@ -465,4 +349,5 @@ end finite_set
 --   epi' := sorry,
 --   exact' := sorry }
 -- end SES_thm69
--- end thm_696
+
+end thm69
