@@ -33,38 +33,36 @@ open_locale nnreal ennreal
 
 
 --For every F, d F is the bound whose existence is establised in  `eq_zero_of_filtration`
+-- trasformare ℝ in K : ordered_field
+lemma zpow_strict_anti {x : ℝ} (hx : x < 1) : strict_anti (λ n:ℤ, x ^ n) :=
+sorry -- use zpow_strict_mono
+
+lemma zpow_strict_anti' {n : ℝ} (hn : n < 0): strict_anti (λ x:ℝ, x ^ n) :=
+sorry -- use zpow_strict_mono
+
+
 lemma exists_bdd_filtration {r : ℝ≥0} {S : Fintype} (F : laurent_measures r S) : ∃ d : ℤ,
-∀ s : S, ∀ (n : ℤ), n < -d → F s n = 0 :=
+∀ s : S, ∀ (n : ℤ), n < d → F s n = 0 :=
 begin
-  let d := ⌊ (real.log ∥ F ∥ / real.log (r : ℝ)) ⌋,
-  -- have hd : 0 ≤ (d : ℝ), sorry,
-  -- use ((r : ℝ) ^ d),
-  --have : 0 ≤ ∥ F ∥ := laurent_measures.norm_nonneg F,
-  have : ∥ F ∥ ≤ (⟨∥ F ∥, laurent_measures.norm_nonneg F⟩ : ℝ≥0) := by {simp only [subtype.coe_mk]},
+  let d := ⌊ (real.log ∥ F ∥ / real.log (r : ℝ)) ⌋ - 1,
+  have hF : ∥ F ∥ ≤ (⟨∥ F ∥, laurent_measures.norm_nonneg F⟩ : ℝ≥0) :=
+    by {simp only [subtype.coe_mk]},
   use d,
   intros s n hn,
-  replace hn : (n : ℝ) < d, sorry,
-  replace hn : ∥ F ∥  < (r : ℝ) ^ n, sorry,
-  -- apply_fun (λ x, r ^ x) at hn,
-  -- have easy1 : 0 < r,sorry,
-  -- have easy2 : r<1,sorry,
-  -- have H1 := nnreal.rpow_lt_rpow_of_exponent_gt easy1 easy2 hn,
-  -- have H2 : ∥ F ∥ ≤ r ^ d, sorry,
-  -- dsimp only [d] at this,
-  -- { have hd1 : 0 ≤ d, sorry,
-  --   have hd : 0 ≤ (-d : ℝ), sorry,
-  --   have mah1 : (real.log (r : ℝ)) ≤ (1 / d) * (real.log ∥ F ∥),sorry,
-  --   have mah2 := real.le_rpow_of_log_le _ _ mah1,
-  --   replace mah2 := (inv_le_inv _ _).mpr mah2,
-  --   replace mah2 : ((⟨∥ F ∥, laurent_measures.norm_nonneg F⟩ : ℝ≥0) ^ (1 / d))⁻¹ ≤ r ⁻¹, sorry,
-  --   have mah3 := nnreal.rpow_le_rpow mah2 hd,
-  --   -- replace mah3 : ∥F∥ ^ (1 / d)⁻¹ ^ -d ≤ r⁻¹ ^ -d,
-  --   rw ← ennreal.inv_pow at mah3,
-  --   rw real.pow_pow at this,
-  --   replace mah2 : (r : ℝ) ^ d ≥ ∥ F ∥,
-  --   -- apply
-  -- },
-  apply eq_zero_of_filtration F (⟨∥ F ∥, laurent_measures.norm_nonneg F⟩) this s n hn,
+  have easy : (r : ℝ) < 1,sorry,--this will be proven below, or should be a fact
+  have H1 := zpow_strict_anti easy hn,
+  have H2 : ∥ F ∥ < r ^ d,
+  { have hd : (d : ℝ) < 0, sorry,
+    have hFd : (real.log (r : ℝ)) < (1 / d) * (real.log ∥ F ∥), sorry,
+    replace hFd := zpow_strict_anti' hd (real.lt_rpow_of_log_lt r.2 _ hFd),
+    dsimp only at hFd,
+    have mah3 := (real.rpow_mul (laurent_measures.norm_nonneg F) (1 / d : ℝ) d).symm,
+    rwa [← (real.rpow_mul (laurent_measures.norm_nonneg F) (1 / d : ℝ) d),
+      (eq_div_iff (ne_of_lt hd)).mp rfl, real.rpow_one, (real.rpow_int_cast _ d)] at hFd,
+    sorry,
+  },
+  replace H2 := H2.trans H1,
+  apply eq_zero_of_filtration F (⟨∥ F ∥, laurent_measures.norm_nonneg F⟩) hF s n H2,
 end
 
 def d {r : ℝ≥0} {S : Fintype} (F : laurent_measures r S) : ℤ := (exists_bdd_filtration F).some
