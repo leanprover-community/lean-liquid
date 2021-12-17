@@ -29,46 +29,89 @@ noncomputable theory
 
 namespace laurent_measures
 
-open_locale nnreal ennreal
+open_locale nnreal real
 
 
 --For every F, d F is the bound whose existence is establised in  `eq_zero_of_filtration`
 -- trasformare ℝ in K : ordered_field
-lemma zpow_strict_anti {x : ℝ} (hx : x < 1) : strict_anti (λ n:ℤ, x ^ n) :=
-sorry -- use zpow_strict_mono
+lemma zpow_strict_anti {K : Type} [linear_ordered_field K] {x : K} (hx₀ : 0 < x) (hx₁ : x < 1) :
+  strict_anti (λ n:ℤ, x ^ n) :=
+begin
+  intros n m H,
+  rw [← inv_inv₀ x],
+  simp only [inv_zpow₀ x⁻¹, inv_lt_inv (zpow_pos_of_pos (inv_pos.mpr hx₀) _)
+    (zpow_pos_of_pos (inv_pos.mpr hx₀) _)],
+  exact zpow_strict_mono (one_lt_inv hx₀ hx₁) H,
+end
 
-lemma zpow_strict_anti' {n : ℝ} (hn : n < 0): strict_anti (λ x:ℝ, x ^ n) :=
-sorry -- use zpow_strict_mono
+example (x : ℝ) : x > x - 1 :=
+begin
+  exact sub_one_lt x
+end
 
 
 lemma exists_bdd_filtration {r : ℝ≥0} {S : Fintype} (F : laurent_measures r S) : ∃ d : ℤ,
 ∀ s : S, ∀ (n : ℤ), n < d → F s n = 0 :=
 begin
-  let d := ⌊ (real.log ∥ F ∥ / real.log (r : ℝ)) ⌋ - 1,
-  have hF : ∥ F ∥ ≤ (⟨∥ F ∥, laurent_measures.norm_nonneg F⟩ : ℝ≥0) :=
-    by {simp only [subtype.coe_mk]},
-  use d,
-  intros s n hn,
-  have easy : (r : ℝ) < 1,sorry,--this will be proven below, or should be a fact
-  have H1 := zpow_strict_anti easy hn,
-  have H2 : ∥ F ∥ < r ^ d,
-  { have hd : (d : ℝ) < 0, sorry,
-    have hFd : (real.log (r : ℝ)) < (1 / d) * (real.log ∥ F ∥), sorry,
-    replace hFd := zpow_strict_anti' hd (real.lt_rpow_of_log_lt r.2 _ hFd),
-    dsimp only at hFd,
-    have mah3 := (real.rpow_mul (laurent_measures.norm_nonneg F) (1 / d : ℝ) d).symm,
-    rwa [← (real.rpow_mul (laurent_measures.norm_nonneg F) (1 / d : ℝ) d),
-      (eq_div_iff (ne_of_lt hd)).mp rfl, real.rpow_one, (real.rpow_int_cast _ d)] at hFd,
-    sorry,
-  },
-  replace H2 := H2.trans H1,
-  apply eq_zero_of_filtration F (⟨∥ F ∥, laurent_measures.norm_nonneg F⟩) hF s n H2,
+  have easy0 : 0 < (r : ℝ),sorry,--this will be proven below, or should be a fact
+  have easy1 : (r : ℝ) < 1,sorry,--this will be proven below, or should be a fact
+  have h_logr : (real.log r) < 0 := real.log_neg easy0 easy1,
+  by_cases zF : ∥ F ∥ = 0, --useful?
+  sorry,
+  { let d := if real.log ∥ F ∥ ≥ 0 then ⌊ (real.log ∥ F ∥ / real.log (r : ℝ)) ⌋ - 1 else -1,
+    have hF : ∥ F ∥ ≤ (⟨∥ F ∥, laurent_measures.norm_nonneg F⟩ : ℝ≥0) :=
+      by {simp only [subtype.coe_mk]},
+    use d,
+    intros s n hn,
+    have H1 := zpow_strict_anti easy0 easy1 hn,
+    have H2 : ∥ F ∥ < r ^ d,
+    { --have hd : (d : ℝ) < 0, sorry,
+      have hd1 : 0 < -(d : ℝ),
+      { rw [lt_neg, neg_zero, ← int.cast_zero, int.cast_lt],
+        apply int.lt_of_le_sub_one,
+        dsimp only [d],
+        split_ifs,
+        { --have : (real.log ∥F∥) > 0, sorry,
+          -- rw zero_sub,
+          -- sorry,
+          rw [tsub_le_iff_right, sub_add, sub_self, sub_zero],sorry,
+        },
+        { simp only [zero_sub] },
+        -- rw floor_le
+        -- simp only [neg_le_sub_iff_le_add, le_add_iff_nonneg_left],
+        -- rw le_add_iff_non
+        -- rw zero_sub,
+        -- rw neg_le_sub_iff_le
+
+      },
+      -- have hFd : (real.log (r : ℝ)) < (1 / d) * (real.log ∥ F ∥), sorry,
+      have hFd1 : (real.log ∥ F ∥) < d * (real.log (r : ℝ)),
+      { rw ← zsmul_eq_mul,
+        rw ite_smul,
+        split_ifs,
+        { rw zsmul_eq_mul,
+          calc (real.log ∥F∥) = (real.log ∥F∥/real.log r) * real.log r :
+                                            (div_mul_cancel (real.log ∥F∥) (ne_of_lt h_logr)).symm
+                          ... ≤ ⌊ (real.log ∥F∥)/real.log r⌋ * real.log r :
+                                              (mul_le_mul_right_of_neg h_logr).mpr (int.floor_le _)
+                          ... < (⌊ (real.log ∥F∥)/real.log r⌋ - 1) * real.log r :
+                                                (mul_lt_mul_right_of_neg h_logr).mpr (sub_one_lt _)
+                          ... = ↑(⌊ (real.log ∥F∥)/real.log r⌋ - 1) * real.log r :
+                                                        by simp only [int.cast_one, int.cast_sub] },
+        { rw [neg_smul, one_smul],
+          rw [ge_iff_le, not_le] at h,
+          apply h.trans,
+          rwa [lt_neg, neg_zero] }},
+      have mah1 := (real.lt_rpow_of_log_lt (laurent_measures.norm_nonneg F) easy0 hFd1),
+      rwa [real.rpow_int_cast _ d] at mah1 },
+    replace H2 := H2.trans H1,
+    apply eq_zero_of_filtration F (⟨∥ F ∥, laurent_measures.norm_nonneg F⟩) hF s n H2 },
 end
 
 def d {r : ℝ≥0} {S : Fintype} (F : laurent_measures r S) : ℤ := (exists_bdd_filtration F).some
 
 lemma le_bdd_zero {r : ℝ≥0} {S : Fintype} (F : laurent_measures r S) (s : S) (n : ℤ) :
-  n < -F.d → F s n = 0 := (exists_bdd_filtration F).some_spec s n
+  n < F.d → F s n = 0 := (exists_bdd_filtration F).some_spec s n
 
 
 -- lemma bdd_bounds (c : ℝ) (r : ℝ≥0) : bdd_below {n : ℤ | (c : ℝ) < (r : ℝ) ^ n} :=
