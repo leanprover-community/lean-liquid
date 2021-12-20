@@ -157,6 +157,34 @@ open_locale big_operators topological_space
 -- `tsum_mul_tsum_eq_tsum_sum_antidiagonal_of_summable_norm` instead!!!
 lemma Icc_nneg (d : ℤ) : ∀ n : ℤ, (n + d) ≥ 0 → ∀ (k ∈ finset.Icc (- d) n), n - k ≥ (0 : ℤ) := sorry
 
+def g : ℕ → ℝ := λ n, ∥ (2 : ℝ) ^ (- n : ℝ) ∥
+
+example (F : ℒ S) (s : S) (k : ℕ) : Prop :=
+  -- summable (λ n,
+begin
+  have menouno := F.2 s,
+  have zero := lt_d_eq_zero S F s,
+  have uno := (aux_sum_almost_natural F.d zero).mp menouno,
+  have due : (r : ℝ) = ∥ (r : ℝ) ∥, sorry,
+  rw due at uno,
+  -- rw [← int.norm_cast_real, normed_field.norm_mul] at uno,
+  simp_rw [← normed_field.norm_pow, ← int.norm_cast_real] at uno,
+  have h_mul : ∀ n : ℕ, ∥ ((F s n) : ℝ) ∥ * ∥ (r : ℝ) ^ n ∥ = ∥ ((F s n) : ℝ) * (r ^ n) ∥ := λ n, (normed_field.norm_mul _ _).symm,
+  simp_rw h_mul at uno,
+  have quattro : summable g, sorry,
+  -- simp_rw (λ n, exact (normed_field.norm_mul _ _).symm) at uno,
+  -- simp_rw [← norm_mul] at uno,/
+  -- simp_rw [normed_field.norm_mul, normed_field.norm_zpow, normed_field.norm_div, real.norm_two,
+  --     norm_one, abs_sum] at this,
+
+  --simp_rw [← int.norm_cast_real, int.cast_mul, normed_field.norm_mul, int.norm_cast_real,
+      -- mul_assoc],
+  have := tsum_mul_tsum_eq_tsum_sum_antidiagonal_of_summable_norm uno quattro,
+
+  --joke
+  use 0 = 0 ,
+end
+
 -- Icc_sum_integer is the m-th coefficient b_m of ψ₀(F)
 def Icc_sum_integer (f : ℤ → ℤ) (d m : ℤ) (hm : (m + d) ≥ 0) : ℤ :=
   (∑ k : (Icc (- d) m : set ℤ),
