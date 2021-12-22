@@ -90,7 +90,7 @@ begin
     exact (r ^ b).2 },
 end
 
-lemma aux_sum_almost_natural {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ) (hf : ∀ n : ℤ, n < d → f n = 0) :
+lemma aux_summable_iff_on_nat {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ) (hf : ∀ n : ℤ, n < d → f n = 0) :
   summable (λ n, ∥ f n ∥ * ρ ^ n) ↔ summable (λ n : ℕ, ∥ f n ∥ * ρ ^ n) := sorry
   --   suffices sum_pos : summable (λ n : ℕ, ∥ ((F.to_fun s n) : ℝ) ∥ * (1 / 2) ^ n),
   -- { let A : (set ℤ) := {n : ℤ | n + F.d ≥ 0},
@@ -111,11 +111,18 @@ begin
   { apply summable_of_summable_norm,
     simp_rw [normed_field.norm_mul, normed_field.norm_zpow, normed_field.norm_div, real.norm_two,
       norm_one, abs_sum] },
-    have temp := F.2 s,
-    have h_nat_r := (aux_sum_almost_natural F.d _).mp (F.2 s),
-    have h_nat_half : summable (λ n : ℕ, ∥ F.to_fun s n ∥ * (1 / 2 : ℝ≥0) ^ n), sorry,
-      --`[FAE]` Use here that we are summing over ℕ and (1/2) < r
-    apply (aux_sum_almost_natural F.d _).mpr h_nat_half,
+    have pos_half : ∀ n : ℕ, 0 ≤ ∥ F s n ∥ * (1 / 2) ^ n,
+    { intro n,
+      apply mul_nonneg (norm_nonneg (F s n)),
+      simp only [one_div, zero_le_one, inv_nonneg, zero_le_bit0, pow_nonneg] },
+    have half_le_r : ∀ n : ℕ, ∥ F s n ∥ * (1 / 2) ^ n ≤ ∥ F s n ∥ * r ^ n,
+    { intro n,
+      apply monotone_mul_left_of_nonneg (norm_nonneg (F s n)),
+      apply pow_le_pow_of_le_left,
+      simp only [one_div, zero_le_one, inv_nonneg, zero_le_bit0],
+      exact le_of_lt r_half },
+    have h_nat_half : summable (λ n : ℕ, ∥ F.to_fun s n ∥ * (1 / 2 : ℝ≥0) ^ n) := summable_of_nonneg_of_le pos_half half_le_r ((aux_summable_iff_on_nat F.d _).mp (F.2 s)),
+    apply (aux_summable_iff_on_nat F.d _).mpr h_nat_half,
     all_goals {apply lt_d_eq_zero},
 end
 
@@ -164,7 +171,7 @@ example (F : ℒ S) (s : S) (k : ℕ) : Prop :=
 begin
   have menouno := F.2 s,
   have zero := lt_d_eq_zero S F s,
-  have uno := (aux_sum_almost_natural F.d zero).mp menouno,
+  have uno := (aux_summable_iff_on_nat F.d zero).mp menouno,
   have due : (r : ℝ) = ∥ (r : ℝ) ∥, sorry,
   rw due at uno,
   -- rw [← int.norm_cast_real, normed_field.norm_mul] at uno,
