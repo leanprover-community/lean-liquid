@@ -22,7 +22,7 @@ This file introduces the maps
 
 noncomputable theory
 
-open nnreal theta laurent_measures
+open nnreal theta laurent_measures finset
 open_locale nnreal classical big_operators topological_space
 
 section thm69
@@ -258,53 +258,43 @@ end
 
 -- end `mathlib`
 
-def ψ₀ (F : ℒ S) (hF : θ S F = 0) : ℒ S :=
+lemma summable_convolution (f : ℤ → ℤ) (hf : summable (λ n, ∥ f n ∥ * r ^ n)) : summable
+  (λ n : ℕ, tsum (λ i : ℕ, ((f (n + i)) : ℝ) * (1 / 2) ^ i) * r ^ n) :=
 begin
-  -- classical,
-  let A : (set ℤ) := {n : ℤ | n + F.d ≥ 0},
-  -- have h_nneg : ∀ n : ℤ, n ∈ A → ∀ k : ℤ, k ∈ Icc (- (d F)) n → k ≥ (0 : ℤ), sorry,
-  -- have h_nneg : ∀ n : ℤ, (n + d F) ≥ 0 → ∀ (k ∈ finset.Icc (- (laurent_measures.d F)) n), k ≥ (0 : ℤ), sorry,
-  -- have n : ℤ, sorry,
-  -- have hn : n ∈ A, sorry,
-  -- have k : (finset.Icc (- (laurent_measures.d F)) n), sorry,
-  -- have hk : k ∈ (finset.Icc (- (laurent_measures.d F)) n), sorry,
-  -- have := h_nneg n hn k,
+  sorry,
+end
+
+def ψ (F : ℒ S) (hF : θ S F = 0) : ℒ S :=
+begin
   let f₀ : S → ℤ → ℤ := λ s n,
-    if hn : n ∈ A then - (Icc_sum_integer (F.to_fun s) F.d n hn)
-    -- - (∑ k : (finset.Icc (- (d F)) n : set ℤ),
-    -- 2 ^ ((int.eq_coe_of_zero_le (Icc_nneg F.d n hn k (coe_mem _))).some) * F.to_fun s (n - k))
+    -- if hn : n - F.d ≥ 0 then - ∑ l in range ((int.eq_coe_of_zero_le hn).some), (2 ^ (n - l)) * (F s l)
+    if hn : n - F.d ≥ 0 then - ∑ kl in nat.antidiagonal ((int.eq_coe_of_zero_le hn).some), (2 ^ kl.snd) * (F s kl.fst)
     else 0,
   use f₀,
   intro s,
-  apply (@summable_subtype_and_compl _ _ _ _ _ _ _ A).mp,
-  split,
-  { -- have := F.2 s,
-    -- have h_dec : decidable_eq A, sorry,
-    -- apply has_sum.summable _, sorry,
-    -- let x : ℤ → Prop → ℤ := λ n : ℤ, n ∈ A → - (∑ k : (finset.Icc (- (d F)) n : set ℤ), 2 ^ ((int.eq_coe_of_zero_le (h_nneg n _ k (finset.coe_mem _))).some) * F.to_fun s (n - k)),
-    dsimp only [f₀],
-    -- have : ∀ x : A, (x : ℤ) + F.d ≥ 0, sorry,
-    simp only [*, dif_pos, subtype.coe_prop, coe_mem, norm_neg],--, Icc_sum_integer],
-    have per_ipotesi : has_sum (λ (x : {a // a ≥ -F.d}), ↑(F.to_fun s x) * (1 / 2 : ℝ) ^ x.1) 0, sorry,
-    have := Icc_sum_eq_tail (F.to_fun s) F.d per_ipotesi,
-    sorry,
-    -- simp_rw this,
-    -- apply summable_congr this _,
-    -- simp_rw [this _],
-
-
-    -- apply tsum_dite_left,-- P,
-
-  },
-  { convert_to summable (λ x : {n : ℤ // n ∉ A}, ∥ f₀ s x ∥ * r ^ (x.1)),
-    have h_supp : ∀ n : {x : ℤ // x ∉ A}, ∥ f₀ s n ∥ * r ^ n.1 = 0,
-    { rintros ⟨n, hn⟩,
-      simp only [norm_eq_zero, subtype.coe_mk, mul_eq_zero] at *,
+  apply (aux_summable_iff_on_nat F.d _).mpr,
+  { have h_θ : ∀ m : ℕ, ∥ f₀ s m ∥ * r ^ m  =
+      tsum (λ l : ℕ, ((F s (m + l)) : ℝ) * (1 / 2) ^ l) * r ^ m,
+    { intro m,
+      have h_event : ↑m - F.d ≥ 0, sorry,--it will be false
+      dsimp only [f₀],
+      rw dif_pos h_event,
+      simp only [one_div, inv_pow₀, mul_eq_mul_right_iff, norm_neg],
       apply or.intro_left,
-      exact dif_neg hn },
-    simp_rw h_supp,
-    apply summable_zero },
-  repeat { apply_instance },
+      rw nat.sum_antidiagonal_eq_sum_range_succ (λ a b, 2 ^ b * (F s a)) _,
+      dsimp only,
+      have h_terms_nonneg : ∀ x : ℕ, x ∈ range ((int.eq_coe_of_zero_le h_event).some).succ → (↑(2 ^ (((int.eq_coe_of_zero_le h_event).some) - x) * (F s x)) : ℝ) ≥ 0, sorry,
+      have h_sum_nonneg := sum_nonneg h_terms_nonneg,
+      dsimp only at h_sum_nonneg,
+      rw [← int.norm_cast_real, int.cast_sum, real.norm_eq_abs, (abs_eq_self.mpr h_sum_nonneg)],
+      simp_rw [int.cast_mul, int.cast_pow, ← zpow_coe_nat],
+      convert_to ∑ (x : ℕ) in range ((int.eq_coe_of_zero_le h_event).some).succ, ((2 : ℤ) : ℝ) ^ ((((int.eq_coe_of_zero_le h_event).some - x) : ℕ) : ℤ) * (F s x) = 2 ^ ((int.eq_coe_of_zero_le h_event).some) * ∑ (x : ℕ) in range ((int.eq_coe_of_zero_le h_event).some).succ, ((2 : ℤ) : ℝ) ^ (- x : ℤ) * (F s x),
+
+      sorry,
+      sorry,
+    },
+    apply (summable_congr h_θ).mpr (summable_convolution (F s) (F.2 s)) },
+  { exact λ _ hn, dif_neg ((lt_iff_not_ge _ _).mp (sub_neg.mpr hn)) },
 end
 
 theorem θ_ϕ_exact (F : ℒ S) (hF : θ S F = 0) : ∃ G, ϕ S G = F := sorry
