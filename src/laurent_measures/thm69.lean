@@ -258,11 +258,20 @@ end
 
 -- end `mathlib`
 
+-- lemma rearraging_of_kerθ (f : ℤ → ℤ)
+--   (hf : has_sum (λ n, ((f n) : ℝ) * (1 / 2) ^ n) 0) (N : ℕ) :
+--   ∑ (i : ℕ) in range (N + 1), ((f i) : ℝ) * (1 / 2) ^ i = ∑'
+
 lemma summable_convolution (f : ℤ → ℤ) (hf : summable (λ n, ∥ f n ∥ * r ^ n)) : summable
   (λ n : ℕ, tsum (λ i : ℕ, ((f (n + i)) : ℝ) * (1 / 2) ^ i) * r ^ n) :=
 begin
   sorry,
 end
+
+-- example (a n : ℤ) (x : ℝ) : x ^ a = x ^ (a + n - n) :=
+-- begin
+--   rw tsub_cancel_righ
+-- end
 
 def ψ (F : ℒ S) (hF : θ S F = 0) : ℒ S :=
 begin
@@ -275,20 +284,26 @@ begin
   apply (aux_summable_iff_on_nat F.d _).mpr,
   { have h_θ : ∀ m : ℕ, ∥ f₀ s m ∥ * r ^ m  =
       tsum (λ l : ℕ, ((F s (m + l)) : ℝ) * (1 / 2) ^ l) * r ^ m,
-    { intro m,
-      have h_event : ↑m - F.d ≥ 0, sorry,--it will be false
+    { intro n,
+      have h_event : ↑n - F.d ≥ 0, sorry,--it will be false
+      let m := (int.eq_coe_of_zero_le h_event).some,
       dsimp only [f₀],
       rw dif_pos h_event,
       simp only [one_div, inv_pow₀, mul_eq_mul_right_iff, norm_neg],
       apply or.intro_left,
       rw nat.sum_antidiagonal_eq_sum_range_succ (λ a b, 2 ^ b * (F s a)) _,
       dsimp only,
-      have h_terms_nonneg : ∀ x : ℕ, x ∈ range ((int.eq_coe_of_zero_le h_event).some).succ → (↑(2 ^ (((int.eq_coe_of_zero_le h_event).some) - x) * (F s x)) : ℝ) ≥ 0, sorry,
+      have h_terms_nonneg : ∀ x : ℕ, x ∈ range m.succ → (↑(2 ^ (m - x) * (F s x)) : ℝ) ≥ 0, sorry,
       have h_sum_nonneg := sum_nonneg h_terms_nonneg,
       dsimp only at h_sum_nonneg,
-      rw [← int.norm_cast_real, int.cast_sum, real.norm_eq_abs, (abs_eq_self.mpr h_sum_nonneg)],
+      rw [← int.norm_cast_real, int.cast_sum, real.norm_eq_abs, abs_eq_self.mpr h_sum_nonneg],--, ()],--,  ],
       simp_rw [int.cast_mul, int.cast_pow, ← zpow_coe_nat],
-      convert_to ∑ (x : ℕ) in range ((int.eq_coe_of_zero_le h_event).some).succ, ((2 : ℤ) : ℝ) ^ ((((int.eq_coe_of_zero_le h_event).some - x) : ℕ) : ℤ) * (F s x) = 2 ^ ((int.eq_coe_of_zero_le h_event).some) * ∑ (x : ℕ) in range ((int.eq_coe_of_zero_le h_event).some).succ, ((2 : ℤ) : ℝ) ^ (- x : ℤ) * (F s x),
+      convert_to ∑ (x : ℕ) in range m.succ,
+        ((2 : ℤ) : ℝ) ^ (((m - x) : ℕ) : ℤ) * (F s x)
+        = 2 ^ m * ∑ (x : ℕ) in range m.succ, ((2 : ℤ) : ℝ) ^ (- x : ℤ) * (F s x),
+      -- calc ∑ (x : ℕ) in range ((int.eq_coe_of_zero_le h_event).some).succ,
+      --   ((2 : ℤ) : ℝ) ^ ((((int.eq_coe_of_zero_le h_event).some - x) : ℕ) : ℤ) * (F s x) =
+      -- rw add_tsub_cancel_right
 
       sorry,
       sorry,
