@@ -18,7 +18,7 @@ namespace SheafOfTypes
 @[simps]
 def terminal_sheaf : SheafOfTypes.{w} T :=
 { val := (functor.const _).obj punit,
-  property := sorry }
+  cond := sorry }
 
 def terminal_cone : cone (functor.empty (SheafOfTypes.{w} T)) :=
 { X := terminal_sheaf T,
@@ -26,7 +26,7 @@ def terminal_cone : cone (functor.empty (SheafOfTypes.{w} T)) :=
 
 variables {T}
 def terminal_sheaf.to (F : SheafOfTypes.{w} T) : F ⟶ terminal_sheaf T :=
-{ app := λ X t, punit.star }
+⟨{ app := λ X t, punit.star }⟩
 variables (T)
 
 def terminal_cone_is_limit : is_limit (terminal_cone T) :=
@@ -39,20 +39,20 @@ def product_sheaf (F G : SheafOfTypes.{w} T) : SheafOfTypes.{w} T :=
 { val :=
   { obj := λ X, F.val.obj X × G.val.obj X,
     map := λ X Y f t, (F.val.map f t.1, G.val.map f t.2) },
-  property := sorry }
+  cond := sorry }
 
 @[simps]
 def product_sheaf.swap (F G : SheafOfTypes.{w} T) : product_sheaf F G ≅ product_sheaf G F :=
-{ hom := { app := λ X, _root_.prod.swap },
-  inv := { app := λ X, _root_.prod.swap } }
+{ hom := ⟨{ app := λ X, _root_.prod.swap }⟩,
+  inv := ⟨{ app := λ X, _root_.prod.swap }⟩ }
 
 @[simps]
 def product_sheaf.fst (F G : SheafOfTypes.{w} T) : product_sheaf F G ⟶ F :=
-{ app := λ X, _root_.prod.fst }
+⟨{ app := λ X, _root_.prod.fst }⟩
 
 @[simps]
 def product_sheaf.snd (F G : SheafOfTypes.{w} T) : product_sheaf F G ⟶ G :=
-{ app := λ X, _root_.prod.snd }
+⟨{ app := λ X, _root_.prod.snd }⟩
 
 @[simps]
 def product_cone (F G : SheafOfTypes.{w} T) : binary_fan F G :=
@@ -61,15 +61,17 @@ binary_fan.mk (product_sheaf.fst F G) (product_sheaf.snd F G)
 @[simps]
 def product_sheaf.lift {F G H : SheafOfTypes.{w} T} (f : H ⟶ F) (g : H ⟶ G) :
   H ⟶ product_sheaf F G :=
-{ app := λ X t, (f.app X t, g.app X t),
+⟨{ app := λ X t, (f.val.app X t, g.val.app X t),
   naturality' := begin
     intros X Y e,
     ext t,
-    { change (H.val.map e ≫ f.app Y) t = _,
-      simpa [f.naturality] },
-    { change (H.val.map e ≫ g.app Y) t = _,
-      simpa [g.naturality] },
-  end }
+    { change (H.val.map e ≫ f.val.app Y) t = _,
+      rw f.val.naturality,
+      simp only [product_sheaf_val_map, types_comp_apply] },
+    { change (H.val.map e ≫ g.val.app Y) t = _,
+      rw g.val.naturality,
+      simp only [product_sheaf_val_map, types_comp_apply], },
+  end }⟩
 
 @[simps]
 def product_cone_is_limit (F G : SheafOfTypes.{w} T) : is_limit (product_cone F G) :=
@@ -80,14 +82,14 @@ def product_cone_is_limit (F G : SheafOfTypes.{w} T) : is_limit (product_cone F 
   end,
   uniq' := begin
     intros S m h,
-    ext X t : 4,
+    ext X t : 5,
     { specialize h walking_pair.left,
       dsimp,
-      apply_fun (λ e, e.app X t) at h,
+      apply_fun (λ e, e.val.app X t) at h,
       exact h },
     { specialize h walking_pair.right,
       dsimp,
-      apply_fun (λ e, e.app X t) at h,
+      apply_fun (λ e, e.val.app X t) at h,
       exact h },
   end }
 

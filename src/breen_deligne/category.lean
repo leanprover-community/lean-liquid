@@ -92,11 +92,11 @@ begin
     basic_universal_map.mul, basic_universal_map.one_mul_hom,
     add_monoid_hom.comp_hom_apply_apply, add_monoid_hom.comp_apply, add_monoid_hom.flip_apply,
     iso_mk'_hom],
-  rw [← matrix.reindex_linear_equiv_mul, ← matrix.reindex_linear_equiv_mul,
+  rw [matrix.reindex_linear_equiv_mul, matrix.reindex_linear_equiv_mul,
     matrix.one_mul, matrix.mul_one],
 end
 
-/--
+/-
 Should `kronecker_reindex_left` and `kronecker_reindex_right` land into `mathlib`?
 -/
 
@@ -123,7 +123,7 @@ lemma mul_mul_iso_aux (m n i j : ℕ) (f : basic_universal_map i j) :
 begin
   simp only [comp_of, mul_of, basic_universal_map.comp, add_monoid_hom.mk'_apply,
     basic_universal_map.mul, basic_universal_map.mul_mul_hom, matrix.mul_reindex_linear_equiv_one],
-  rw [← matrix.reindex_linear_equiv_mul, matrix.one_mul,
+  rw [matrix.reindex_linear_equiv_mul, matrix.one_mul,
     ← matrix.reindex_linear_equiv_one ℕ _ (@fin_prod_fin_equiv m n)],
   simp only [matrix.reindex_linear_equiv_apply],
   rw [kronecker_map_reindex_left, kronecker_map_reindex_right, ← matrix.kronecker_assoc],

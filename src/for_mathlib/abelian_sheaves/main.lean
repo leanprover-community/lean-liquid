@@ -19,16 +19,16 @@ section has_zero_morphisms
 variables [limits.has_zero_morphisms A]
 
 instance : limits.has_zero_morphisms (Sheaf J A) :=
-{ has_zero := λ X Y, show has_zero (X.1 ⟶ Y.1), by apply_instance,
-  comp_zero' := λ X Y f Z, limits.has_zero_morphisms.comp_zero _ _,
-  zero_comp' := λ X Y Z f, limits.has_zero_morphisms.zero_comp _ _ }
+{ has_zero := λ X Y, ⟨⟨0⟩⟩,
+  comp_zero' := λ X Y f Z, Sheaf.hom.ext _ _ $ limits.comp_zero,
+  zero_comp' := λ X Y Z f, Sheaf.hom.ext _ _ $ limits.zero_comp }
 
 end has_zero_morphisms
 
 section parallel_pair
 
 def parallel_pair_iso {F G : Sheaf J A} (η γ : F ⟶ G) :
-  limits.parallel_pair η γ ⋙ Sheaf_to_presheaf J A ≅ limits.parallel_pair η γ :=
+  limits.parallel_pair η γ ⋙ Sheaf_to_presheaf J A ≅ limits.parallel_pair η.val γ.val :=
 nat_iso.of_components
 (λ x,
 match x with
@@ -50,34 +50,33 @@ variables [limits.has_limits_of_shape.{_ (max v u)} limits.walking_parallel_pair
 
 def kernel_sheaf {F G : Sheaf J A} (η : F ⟶ G) : Sheaf J A :=
 { val := limits.kernel.{(max v u)} ((Sheaf_to_presheaf J A).map η),
-  property := begin
+  cond := begin
     haveI : limits.has_limit (limits.parallel_pair η 0 ⋙ Sheaf_to_presheaf J A) := begin
       apply limits.has_limit_of_iso (parallel_pair_iso _ _).symm,
       apply_instance,
     end,
     let e : limits.limit (limits.parallel_pair η 0 ⋙ Sheaf_to_presheaf J A) ≅
-      limits.kernel η := limits.has_limit.iso_of_nat_iso (parallel_pair_iso _ _),
+      limits.kernel η.val := limits.has_limit.iso_of_nat_iso (parallel_pair_iso _ _),
     apply presheaf.is_sheaf_of_iso J e.symm,
     apply is_sheaf_of_is_limit,
     apply limits.limit.is_limit,
   end }
 
 def kernel_ι {F G : Sheaf J A} (η : F ⟶ G) : kernel_sheaf η ⟶ F :=
-limits.kernel.ι _
+⟨limits.kernel.ι _⟩
 
 def kernel_fork {F G : Sheaf J A} (η : F ⟶ G) : limits.fork η 0 :=
-limits.fork.of_ι (kernel_ι η) $ by { simp only [limits.comp_zero], apply limits.kernel.condition }
+limits.fork.of_ι (kernel_ι η) $
+by { simp only [limits.comp_zero], ext1, apply limits.kernel.condition }
 
 def is_limit_kernel_fork {F G : Sheaf J A} (η : F ⟶ G) : limits.is_limit (kernel_fork η) :=
-limits.is_limit_aux _ (λ S, limits.kernel.lift _ S.ι S.condition)
+limits.is_limit_aux _ (λ S, ⟨limits.kernel.lift _ S.ι.val $ congr_arg Sheaf.hom.val S.condition⟩)
+(by { intros S, ext1, apply limits.kernel.lift_ι, })
 begin
-  intros S,
-  apply limits.kernel.lift_ι,
-end begin
   intros S m hm,
-  ext1,
-  erw hm,
-  simp
+  ext : 2,
+  simp only [limits.kernel.lift_ι],
+  exact congr_arg Sheaf.hom.val hm,
 end
 
 -- Sanity check
@@ -116,31 +115,37 @@ variables [reflects_isomorphisms (forget A)]
 
 def cokernel_sheaf {F G : Sheaf J A} (η : F ⟶ G) : Sheaf J A :=
 { val := J.sheafify (limits.cokernel ((Sheaf_to_presheaf J A).map η)), -- ;-)
-  property := grothendieck_topology.plus.is_sheaf_plus_plus _ _ }
+  cond := grothendieck_topology.plus.is_sheaf_plus_plus _ _ }
 
 def cokernel_π {F G : Sheaf J A} (η : F ⟶ G) : G ⟶ cokernel_sheaf η :=
-show (Sheaf_to_presheaf J A).obj G ⟶ J.sheafify (limits.cokernel ((Sheaf_to_presheaf J A).map η)),
+⟨show (Sheaf_to_presheaf J A).obj G ⟶ J.sheafify (limits.cokernel ((Sheaf_to_presheaf J A).map η)),
 from limits.cokernel.π ((Sheaf_to_presheaf J A).map η) ≫
-  J.to_sheafify (limits.cokernel ((Sheaf_to_presheaf J A).map η))
+  J.to_sheafify (limits.cokernel ((Sheaf_to_presheaf J A).map η))⟩
 
 def cokernel_cofork {F G : Sheaf J A} (η : F ⟶ G) : limits.cofork η 0 :=
 limits.cofork.of_π (cokernel_π η) begin
+  ext1,
+  rw [limits.zero_comp],
   dsimp only [cokernel_π],
-  erw [← category.assoc, limits.cokernel.condition],
-  simp,
+  show η.val ≫ _ = 0,
+  erw [← category.assoc, limits.cokernel.condition, limits.zero_comp],
 end
 
 def is_colimit_cokernel_cofork {F G : Sheaf J A} (η : F ⟶ G) :
   limits.is_colimit (cokernel_cofork η) :=
 limits.is_colimit_aux _ (λ S,
-  J.sheafify_lift (limits.cokernel.desc ((Sheaf_to_presheaf J A).map η) S.π S.condition) (S.X.2))
+  ⟨J.sheafify_lift
+    (limits.cokernel.desc ((Sheaf_to_presheaf J A).map η) S.π.val $
+      congr_arg Sheaf.hom.val S.condition)
+    (S.X.2)⟩)
 begin
-  intros S,
+  intros S, ext1,
   change (_ ≫ _) ≫ _ = _,
   rw [category.assoc, J.to_sheafify_sheafify_lift, limits.cokernel.π_desc],
 end begin
-  intros S m hm,
+  intros S m hm, ext1,
   apply J.sheafify_lift_unique,
+  rw Sheaf.hom.ext_iff at hm,
   change (_ ≫ _) ≫ _ = _ at hm,
   rw category.assoc at hm,
   ext1,
@@ -193,54 +198,54 @@ end)
 
 def coim_to_im' {F G : Sheaf J A} (η : F ⟶ G) :
   cokernel_sheaf (kernel_ι η) ⟶ kernel_sheaf (cokernel_π η) :=
-J.sheafify_lift (coim_to_im'_aux η) (kernel_sheaf _).2
+⟨J.sheafify_lift (coim_to_im'_aux η) (kernel_sheaf _).2⟩
 
 def kernel_sheaf_cokernel_π_iso {F G : Sheaf J A} (η : F ⟶ G) :
   kernel_sheaf (limits.cokernel.π η) ≅ kernel_sheaf (cokernel_π η) :=
-{ hom := limits.kernel.map _ _ (𝟙 _)
+{ hom := ⟨limits.kernel.map _ _ (𝟙 _)
     ((Sheaf_to_presheaf J A).map (cokernel_iso_cokernel_sheaf η).hom) begin
       rw ← functor.map_comp,
       dsimp [cokernel_iso_cokernel_sheaf, limits.is_colimit.cocone_point_unique_up_to_iso,
         cokernel_cofork],
-      simp,
-    end,
-  inv := limits.kernel.map _ _ (𝟙 _)
+      show Sheaf.hom.val (limits.cokernel.π η ≫ _) = _,
+      simp only [limits.coequalizer.π_desc, category.id_comp],
+    end⟩,
+  inv := ⟨limits.kernel.map _ _ (𝟙 _)
     ((Sheaf_to_presheaf J A).map (cokernel_iso_cokernel_sheaf η).inv) begin
       rw ← functor.map_comp,
       dsimp [cokernel_iso_cokernel_sheaf, limits.is_colimit.cocone_point_unique_up_to_iso,
         cokernel_π, is_colimit_cokernel_cofork, limits.is_colimit_aux],
       erw [category.id_comp, category.assoc, J.to_sheafify_sheafify_lift,
         limits.cokernel.π_desc],
-    end,
+    end⟩,
   hom_inv_id' := begin
-    ext1,
-    dsimp,
+    ext : 2,
     delta limits.kernel.map,
-    conv_rhs { erw category.id_comp },
+    dsimp,
     erw [category.assoc, limits.kernel.lift_ι, ← category.assoc, limits.kernel.lift_ι,
-      category.comp_id, category.comp_id],
+      category.comp_id, category.comp_id, category.id_comp],
   end,
   inv_hom_id' := begin
-    ext1,
-    dsimp,
+    ext : 2,
     delta limits.kernel.map,
-    conv_rhs { erw category.id_comp },
+    dsimp,
     erw [category.assoc, limits.kernel.lift_ι, ← category.assoc, limits.kernel.lift_ι,
-      category.comp_id, category.comp_id],
+      category.comp_id, category.comp_id, category.id_comp],
   end }
 
 def cokernel_sheaf_kernel_ι_iso {F G : Sheaf J A} (η : F ⟶ G) :
   cokernel_sheaf (limits.kernel.ι η) ≅ cokernel_sheaf (kernel_ι η) :=
-{ hom := J.sheafify_lift
+{ hom := ⟨J.sheafify_lift
     (limits.cokernel.map _ _ ((Sheaf_to_presheaf J A).map (kernel_iso_kernel_sheaf η).hom) (𝟙 _)
       (by rw [category.comp_id, ← functor.map_comp, kernel_iso_kernel_sheaf_hom_ι])
-      ≫ J.to_sheafify _) (cokernel_sheaf _).2,
-  inv := J.sheafify_lift
+      ≫ J.to_sheafify _) (cokernel_sheaf _).2⟩,
+  inv := ⟨J.sheafify_lift
     (limits.cokernel.map _ _ ((Sheaf_to_presheaf J A).map (kernel_iso_kernel_sheaf η).inv) (𝟙 _)
       (by rw [category.comp_id, ← functor.map_comp, kernel_iso_kernel_sheaf_inv_ι])
       ≫ J.to_sheafify _)
-    (cokernel_sheaf _).2,
+    (cokernel_sheaf _).2⟩,
   hom_inv_id' := begin
+    ext1,
     apply J.sheafify_hom_ext _ _ (cokernel_sheaf _).2,
     erw [← category.assoc, J.to_sheafify_sheafify_lift, category.assoc,
       J.to_sheafify_sheafify_lift, ← category.assoc],
@@ -252,6 +257,7 @@ def cokernel_sheaf_kernel_ι_iso {F G : Sheaf J A} (η : F ⟶ G) :
       limits.coequalizer.π_desc, category.id_comp, category.comp_id],
   end,
   inv_hom_id' := begin
+    ext1,
     apply J.sheafify_hom_ext _ _ (cokernel_sheaf _).2,
     erw [← category.assoc, J.to_sheafify_sheafify_lift, category.assoc,
       J.to_sheafify_sheafify_lift, ← category.assoc],
@@ -276,6 +282,7 @@ begin
     limits.is_colimit.cocone_point_unique_up_to_iso,
     limits.is_limit.cone_point_unique_up_to_iso],
   delta limits.kernel.map limits.cokernel.map,
+  ext1,
   apply J.sheafify_lift_unique,
   ext : 2,
   conv_rhs {
@@ -286,7 +293,7 @@ begin
     (limits.equalizer.ι ((Sheaf_to_presheaf J A).map (cokernel_π η)) _) },
   erw [limits.kernel.lift_ι],
   erw [← category.assoc _ _ (𝟙 G.1), kernel_iso_kernel_sheaf_hom_ι],
-  erw [← category.assoc _ _ (𝟙 G.1), ← category.assoc (J.to_sheafify _),
+  erw [← category.assoc _ _ (𝟙 G.1), ← Sheaf.hom.comp_val, ← category.assoc (J.to_sheafify _),
     J.to_sheafify_sheafify_lift, ← category.assoc (limits.cokernel.π _),
     ← category.assoc (limits.cokernel.π _),
     limits.cokernel.π_desc, category.id_comp, category.comp_id],

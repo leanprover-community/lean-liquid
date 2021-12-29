@@ -116,7 +116,7 @@ lemma norm_sub_le_mul_norm_add_rhs {k' K K' r₁ r₂ c c₁ : ℝ≥0} {ε₁ �
   ∥(N.d i' i ((N.d i'' i') n₂ + nnew₁) : N c i)∥ ≤
     K * K' * r₁ * r₂ * ∥(N.d i (i+1)) (f m)∥ + K' * r₁ * r₂ * ε₁ + r₂ * ε₂ :=
 calc ∥(N.d i' i ((N.d i'' i') n₂ + nnew₁) : N c i)∥
-      = ∥N.d i' i nnew₁∥ : by simp only [map_add, zero_add, d_d]
+      = ∥N.d i' i nnew₁∥ : by simp only [normed_group_hom.map_add, zero_add, d_d]
   ... ≤ r₂ * ∥g (res n₁ - (N.d i'' i') n₂)∥ : trans (hN_adm.d_norm_noninc _ _ i' i nnew₁) hnormnnew₁
   ... = r₂ * ∥res (g n₁) - P.d i'' i' (g n₂)∥ :
     by rw [hom_apply, normed_group_hom.map_sub, ←hom_apply, ←hom_apply, ←res_apply _ _ g, ←d_apply]

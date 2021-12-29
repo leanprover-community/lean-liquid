@@ -165,6 +165,11 @@ noncomputable def down_two [finite_dimensional ℚ Λ] :
   submodule (ℚ≥0) (dual ℚ (dual ℚ Λ)) → submodule (ℚ≥0) Λ :=
 submodule.comap (linear_equiv.restrict_scalars (ℚ≥0) (eval_equiv ℚ Λ) : Λ →ₗ[ℚ≥0] dual ℚ (dual ℚ Λ))
 
+lemma down_two_def [finite_dimensional ℚ Λ] (C : submodule (ℚ≥0) (dual ℚ (dual ℚ Λ))) :
+  down_two C =
+  C.comap (linear_equiv.restrict_scalars (ℚ≥0) (eval_equiv ℚ Λ) : Λ →ₗ[ℚ≥0] dual ℚ (dual ℚ Λ)) :=
+rfl
+
 noncomputable def up_two [finite_dimensional ℚ Λ] :
   submodule (ℚ≥0) Λ → submodule (ℚ≥0) (dual ℚ (dual ℚ Λ)) :=
 submodule.map (linear_equiv.restrict_scalars (ℚ≥0) (eval_equiv ℚ Λ) : Λ →ₗ[ℚ≥0] dual ℚ (dual ℚ Λ))
@@ -326,11 +331,10 @@ begin
     intro a,
     apply le_rfl },
   { rintro ⟨h₁, h₂⟩,
-    ext i,
+    ext1 i,
     apply le_antisymm,
     { apply h₂ i },
-    { apply h₁ i }
-     }
+    { apply h₁ i } }
 end⟩
 
 lemma is_polyhedral_cone_bot [finite_dimensional ℚ Λ] :
@@ -550,15 +554,11 @@ lemma fg_of_is_polyhedral_cone [finite_dimensional ℚ Λ] (C : submodule (ℚ�
   C.fg :=
 begin
   have t := dual_fg_of_cone _ (is_polyhedral_cone_of_fg _ (dual_fg_of_cone _ hC)),
-  have t2 :
-    (submodule.map
-      (((eval_equiv ℚ Λ).restrict_scalars (ℚ≥0)).symm : dual ℚ (dual ℚ Λ) →ₗ[ℚ≥0] Λ) _).fg :=
-    submodule.fg_map t,
-  rw linear_equiv.map_eq_comap at t2,
-  simp only [linear_equiv.symm_symm] at t2,
-  change (down_two _).fg at t2,
-  rw down_two_up_one_up_one_cone _ hC at t2,
-  assumption
+  have t2 : (submodule.map
+      (((eval_equiv ℚ Λ).restrict_scalars (ℚ≥0)).symm : dual ℚ (dual ℚ Λ) →ₗ[ℚ≥0] Λ) _).fg,
+  { refine submodule.fg.map _ t, },
+  rwa [linear_equiv.map_eq_comap, linear_equiv.symm_symm, ← down_two_def,
+    down_two_up_one_up_one_cone _ hC] at t2,
 end
 
 lemma fg_iff_is_polyhedral_cone [finite_dimensional ℚ Λ] (C : submodule (ℚ≥0) Λ) :

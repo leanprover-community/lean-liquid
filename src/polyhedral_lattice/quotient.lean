@@ -20,7 +20,7 @@ variables {Λ : Type*} [polyhedral_lattice Λ] (L : add_subgroup Λ)
 instance : is_closed (L : set Λ) :=
 is_closed_discrete _
 
-instance : normed_group (quotient_add_group.quotient L) :=
+instance : normed_group (Λ ⧸ L) :=
 add_subgroup.normed_group_quotient _
 
 lemma π_apply_eq_zero_iff (x) : L.normed_mk x = 0 ↔ x ∈ L :=
@@ -29,7 +29,7 @@ quotient_add_group.eq_zero_iff _
 lemma π_is_quotient : L.normed_mk.is_quotient :=
 normed_group_hom.is_quotient_quotient _
 
-instance [H : fact L.saturated] : no_zero_smul_divisors ℤ (quotient_add_group.quotient L) :=
+instance [H : fact L.saturated] : no_zero_smul_divisors ℤ (Λ ⧸ L) :=
 { eq_zero_or_eq_zero_of_smul_eq_zero :=
   begin
     intros n x h,
@@ -39,13 +39,13 @@ instance [H : fact L.saturated] : no_zero_smul_divisors ℤ (quotient_add_group.
     exact add_subgroup.saturated_iff_zsmul.mp H.1 _ _ h,
   end }
 
-instance quotient_finite [H : fact L.saturated] : module.finite ℤ (quotient_add_group.quotient L) :=
+instance quotient_finite [H : fact L.saturated] : module.finite ℤ (Λ ⧸ L) :=
 begin
   apply module.finite.of_surjective (L.normed_mk).to_add_monoid_hom.to_int_linear_map,
   exact quotient.surjective_quotient_mk'
 end
 
-instance quotient_free [H : fact L.saturated] : module.free ℤ (quotient_add_group.quotient L) :=
+instance quotient_free [H : fact L.saturated] : module.free ℤ (Λ ⧸ L) :=
 begin
   let φ := L.normed_mk.to_add_monoid_hom.to_int_linear_map,
   suffices : submodule.span ℤ (set.range (φ ∘ (module.free.choose_basis ℤ Λ))) = ⊤,
@@ -58,7 +58,7 @@ end
 
 open pseudo_normed_group
 
-lemma norm_lift (y : quotient_add_group.quotient L) :
+lemma norm_lift (y : Λ ⧸ L) :
   ∃ x, L.normed_mk x = y ∧ ∥x∥ = ∥y∥ :=
 begin
   have hq : L.normed_mk.is_quotient := normed_group_hom.is_quotient_quotient _,
@@ -102,7 +102,7 @@ begin
     exact ⟨x₀, ⟨hx₀.1, (hx₀.2.trans key.le).trans (H.ge.trans hx.2)⟩, rfl⟩, }
 end
 
-instance [H : fact L.saturated] : polyhedral_lattice (quotient_add_group.quotient L) :=
+instance [H : fact L.saturated] : polyhedral_lattice (Λ ⧸ L) :=
 { polyhedral' :=
   begin
     obtain ⟨ι, _inst_ι, l, hl, hl'⟩ := polyhedral_lattice.polyhedral Λ, resetI,

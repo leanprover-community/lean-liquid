@@ -13,13 +13,13 @@ noncomputable theory
 def presheaf_to_SheafOfTypes : (Cᵒᵖ ⥤ Type (max v u)) ⥤ SheafOfTypes J :=
 { obj := λ P,
   { val := J.sheafify P,
-    property := begin
+    cond := begin
       rw ← is_sheaf_iff_is_sheaf_of_type,
       exact grothendieck_topology.plus.is_sheaf_plus_plus J P,
     end },
-  map := λ P Q η, J.sheafify_map η,
-  map_id' := λ P, J.sheafify_map_id _,
-  map_comp' := λ P Q R η γ, J.sheafify_map_comp _ _ }
+  map := λ P Q η, ⟨J.sheafify_map η⟩,
+  map_id' := λ P, SheafOfTypes.hom.ext _ _ $ J.sheafify_map_id _,
+  map_comp' := λ P Q R η γ, SheafOfTypes.hom.ext _ _ $ J.sheafify_map_comp _ _ }
 
 -- Sanity check
 def presheaf_to_SheafOfTypes_iso : presheaf_to_SheafOfTypes J ≅
@@ -37,12 +37,12 @@ from adjunction.comp _ _ (sheafification_adjunction _ _) $
 lemma sheafification_adjunction_types_hom_equiv_apply (X : Cᵒᵖ ⥤ Type (max v u))
   (Y : SheafOfTypes J) (e : (presheaf_to_SheafOfTypes _).obj X ⟶ Y) :
   (sheafification_adjunction_types J).hom_equiv _ _ e =
-  J.to_sheafify _ ≫ e := rfl
+  J.to_sheafify _ ≫ e.val := rfl
 
 @[simp]
 lemma sheafification_adjunction_types_hom_equiv_symm_apply (X : Cᵒᵖ ⥤ Type (max v u))
   (Y : SheafOfTypes J) (e : X ⟶ (SheafOfTypes_to_presheaf _).obj Y) :
-  ((sheafification_adjunction_types J).hom_equiv _ _).symm e =
+  (((sheafification_adjunction_types J).hom_equiv _ _).symm e).val =
   J.sheafify_lift e (by { rw is_sheaf_iff_is_sheaf_of_type, exact Y.2 }) := rfl
 
 @[simp]
@@ -51,7 +51,7 @@ lemma sheafification_adjunction_types_unit_app (X : Cᵒᵖ ⥤ Type (max v u)) 
 
 @[simp]
 lemma sheafification_adjunction_types_counit_app (Y : SheafOfTypes J) :
-  (sheafification_adjunction_types J).counit.app Y =
+  ((sheafification_adjunction_types J).counit.app Y).val =
   J.sheafify_lift (𝟙 _) (by { rw is_sheaf_iff_is_sheaf_of_type, exact Y.2 }) := rfl
 
 instance is_iso_sheafification_types_adjunction_counit_app (X : SheafOfTypes J) :

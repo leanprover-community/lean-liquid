@@ -41,3 +41,20 @@ begin
 end
 
 end category_theory.presheaf
+
+namespace category_theory
+
+namespace Sheaf
+
+variables {C : Type*} [category C]
+variables {J : grothendieck_topology C}
+variables {A : Type*} [category A]
+
+@[simp] lemma hom.id_val (X : Sheaf J A) : Sheaf.hom.val (𝟙 X) = 𝟙 X.val := rfl
+
+lemma hom.comp_val {X Y Z : Sheaf J A} (f : X ⟶ Y) (g : Y ⟶ Z) :
+  (f ≫ g).val = f.val ≫ g.val := rfl
+
+end Sheaf
+
+end category_theory

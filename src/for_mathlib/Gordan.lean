@@ -91,16 +91,8 @@ variables {α : Type*}
 
 def to_rational_point : (α → ℤ) →ₗ[ℤ] (α → ℚ) :=
 { to_fun := λ f x, f x,
-  map_add' := λ f g,
-  begin
-    ext x,
-    simp,
-  end,
-  map_smul' := λ m f,
-  begin
-    ext x,
-    simp,
-  end }
+  map_add' := λ f g, by { ext1 x, simp only [int.cast_add, pi.add_apply] },
+  map_smul' := λ m f, by { ext1 x, simp, } }
 
 @[simp] lemma to_rational_point_apply (x : α → ℤ) (i : α) :
   to_rational_point x i = x i := rfl
@@ -143,7 +135,7 @@ def floor_point (x : α → ℚ) : α → ℤ := λ i, ⌊x i⌋
 lemma floor_point_eq_of_is_integer_point (x : α → ℚ) (hx : is_integer_point x) :
   (λ i, floor_point x i : α → ℚ) = x :=
 begin
-  ext i,
+  ext1 i,
   obtain ⟨z, hz⟩ := hx i,
   simp [floor_point, hz],
 end
@@ -209,7 +201,7 @@ end
 lemma to_rational_point_scale_up {α : Type*} [fintype α] (x : α → ℚ) :
   to_rational_point (scale_up x) = scale_factor x • x :=
 begin
-  ext i,
+  ext1 i,
   simp [scale_up_coord],
 end
 
@@ -229,7 +221,7 @@ noncomputable def upgrade_functional {α : Type*} [fintype α] (f : (α → ℤ)
       rw this,
       apply mul_comm },
     congr' 1,
-    ext a,
+    ext1 a,
     simp only [pi.add_apply, pi.smul_apply],
     simp only [nsmul_eq_mul, int.nat_cast_eq_coe_nat, int.coe_nat_mul, mul_add],
     rw ←rat.coe_int_inj,
@@ -253,7 +245,7 @@ noncomputable def upgrade_functional {α : Type*} [fintype α] (f : (α → ℤ)
         int.coe_nat_mul] at this,
       rw [mul_comm (f _), this, mul_comm _ m.num, mul_right_comm] },
     congr' 1,
-    ext a,
+    ext1 a,
     simp only [pi.smul_apply],
     simp only [algebra.id.smul_eq_mul, nsmul_eq_mul, int.nat_cast_eq_coe_nat, int.coe_nat_mul],
     rw ←rat.coe_int_inj,
@@ -307,7 +299,7 @@ begin
       have : y ∈ submodule.span (ℚ≥0) (S : set (α → ℚ)) := submodule.subset_span hy,
       have z := submodule.smul_mem _ (scale_factor y : ℚ≥0) this,
       convert z using 1,
-      ext i,
+      ext1 i,
       simp only [nsmul_eq_mul, pi.smul_apply],
       change _ = _ * _,
       congr' 1,
@@ -324,7 +316,7 @@ begin
         submodule.subset_span this,
       have hx₂ := submodule.smul_mem _ ((scale_factor x)⁻¹ : ℚ≥0) this,
       convert hx₂ using 1,
-      ext i,
+      ext1 i,
       simp only [nsmul_eq_mul, pi.mul_apply, pi.smul_apply],
       change _ = _ * (_ * _),
       simp,
@@ -599,7 +591,7 @@ begin
     λ f, f.comp e.symm.to_linear_map.to_add_monoid_hom,
   let L := (intersect_halfspaces_set ↑(S.image e')).map
     (e.symm : (module.free.choose_basis_index ℤ Λ → ℤ) →ₗ[ℕ] Λ),
-  have : L.fg := submodule.fg_map (finset_Gordan_aux_pi (S.image e')),
+  have : L.fg := submodule.fg.map _ (finset_Gordan_aux_pi (S.image e')),
   suffices : L = intersect_halfspaces_set (S : set (Λ →+ ℤ)),
   { rwa ←this },
   ext x,

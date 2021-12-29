@@ -118,7 +118,7 @@ lemma Cech_nerve_level_left_map' (c : ℝ≥0) (i j : simplex_categoryᵒᵖ) (g
   (x : ((Cech_nerve_level r' Λ M N n).obj c).left.obj i) (k : fin n) :
   (((Cech_nerve_level r' Λ M N n).obj c).left.map g x).1 k =
     add_monoid_hom.comp (x.1 k) (polyhedral_lattice.conerve.map
-      (Λ.diagonal_embedding N) ⇑(hom.to_preorder_hom g.unop)).to_add_monoid_hom :=
+      (Λ.diagonal_embedding N) ⇑(hom.to_order_hom g.unop)).to_add_monoid_hom :=
 rfl
 
 lemma Cech_nerve_level_hom_app (c : ℝ≥0) :

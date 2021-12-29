@@ -68,7 +68,7 @@ sorry
 -- TODO: Double check this definition...
 def embed_Top : Top.{u} ⥤ CondensedSet.{u} :=
 { obj := λ T, ⟨Profinite.to_Top.op ⋙ yoneda.obj T ⋙ ulift_functor.{u+1}, sorry⟩,
-  map := λ T₁ T₂ f, whisker_left _ $ whisker_right (yoneda.map f) _ }
+  map := λ T₁ T₂ f, ⟨whisker_left _ $ whisker_right (yoneda.map f) _⟩ }
 
 /-
 -- TODO: State `sheaf_condition_iff` for presheaves taking values in `A` for `A` with appropriate

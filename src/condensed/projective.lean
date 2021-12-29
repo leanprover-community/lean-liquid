@@ -15,7 +15,7 @@ open category_theory
 
 def Profinite.to_Condensed (T : Profinite.{u}) : CondensedSet :=
 { val := yoneda.obj T ⋙ ulift_functor.{u+1},
-  property := begin
+  cond := begin
     rw (functor.is_proetale_sheaf_of_types_tfae (yoneda.obj T ⋙ ulift_functor.{u+1})).out 0 5,
     refine ⟨_,_,_⟩,
     { dsimp [functor.empty_condition],

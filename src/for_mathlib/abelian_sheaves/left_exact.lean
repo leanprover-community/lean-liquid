@@ -351,8 +351,9 @@ begin
     { let d := lifted_limit_maps_to_original h,
       let dd := (cones.forget _).map_iso d,
       fapply cones.ext,
-      { exact ⟨dd.hom, dd.inv, dd.hom_inv_id, dd.inv_hom_id⟩ },
-      { intros j, exact (d.hom.w j).symm } },
+      { exact ⟨⟨dd.hom⟩, ⟨dd.inv⟩,
+          Sheaf.hom.ext _ _ $ dd.hom_inv_id, Sheaf.hom.ext _ _ $ dd.inv_hom_id⟩ },
+      { intros j, ext1, exact (d.hom.w j).symm } },
     apply is_limit.of_iso_limit e ee },
   apply is_limit_of_preserves (sheafification J D) hE,
 end

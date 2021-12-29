@@ -1,5 +1,9 @@
 import breen_deligne.universal_map
 
+/-
+
+This file is a big slow mess
+
 /-!
 
 # Universality of universal maps
@@ -224,24 +228,23 @@ begin
   -- Use the fact that the original functorial map is functorial for `φ`, and
   -- evaluate the corresponding commutative diagram at the identity matrix in `(ℤ^m)^m`.
   have h := F.functorial φ,
-  let id_mat : (ℤ[punit]^m)^m := λ i j, if i = j then free_abelian_group.of punit.star else 0,
+  set id_mat : (ℤ[punit]^m)^m :=
+    λ i j, if i = j then free_abelian_group.of punit.star else 0,
   replace h := congr_fun h (free_abelian_group.of id_mat),
   -- The corresponding equation is almost what we have to prove.
-  convert h,
+  simp only [free_abelian_group.map_of_apply, function.comp_app, coe_comp] at h,
+  convert h using 3,
   { clear h,
-    rw add_monoid_hom.comp_apply,
     -- Of the two things left to do, the first follows from the following assertion
     -- (letting t be the image of the identity map under φ)
-    suffices : ∀ (t : ℤ[(ℤ[punit] ^ m) ^ n]),
-      breen_deligne.universal_map.eval
-        A
-        (free_abelian_group.lift (λ (y : fin n → fin m → ℤ[punit]), free_abelian_group.of (λ (i : fin n) (j : fin m), punit_equiv (y i j))) t)
-        (free_abelian_group.of x) =
-      (free_abelian_group.map ⇑(φ.pow n)) t,
-    rw ← this, refl,
+    dsimp only [from_functorial_map, to_functorial_map],
+    generalize : (F.f (ℤ[punit] ^ m)) (free_abelian_group.of id_mat) = t,
+    -- show eval A (free_abelian_group.lift
+    --   (λ (y : fin n → fin m → ℤ[punit]),
+    --     free_abelian_group.of (λ (i : fin n) (j : fin m), punit_equiv (y i j))) _)
+    --       (free_abelian_group.of x) = _,
     -- and by linearity this assertion only needs to be verified for `t` an `m × n`
     -- matrix (rather than a ℤ-linear combination of them)
-    intro t,
     apply free_abelian_group.induction_on t,
     { simp only [map_zero, zero_apply]},
     { clear t, intro t,
@@ -263,11 +266,10 @@ begin
     -- from the definitions.
     ext i,
     simp only [id_mat, add_monoid_hom.pow, φ, pow_hom, coe_mk, function.comp_app],
-    symmetry,
-    convert finset.sum_ite_eq (finset.univ : finset (fin m)) i x,
-    swap, rw if_pos (finset.mem_univ _),
+    convert (finset.sum_ite_eq (finset.univ : finset (fin m)) i x).symm using 2,
+    { rw if_pos (finset.mem_univ _) },
     ext j,
-    split_ifs; simp },
+    split_ifs; simp only [free_abelian_group.lift.of, map_zero] },
 end
 
 -- set_option pp.universes true
@@ -288,6 +290,7 @@ begin
     ext i j',
     -- and it boils down to checking that a sum over j of `b i j` times `delta j j'` is b i j'.
     convert punit_equiv.right_inv (b i j'),
+    simp only [add_equiv.neg_fun_eq_symm, add_equiv.to_fun_eq_coe, add_equiv.apply_symm_apply, zsmul_eq_mul],
     apply _root_.congr_arg,
     change _ = (b i j') • _,
     rw @fintype.sum_apply (fin m) _ (fin m) _ _ j'
@@ -330,3 +333,5 @@ def universal_map_equiv_functorial_map (m n : ℕ) : universal_map m n ≃+ func
 end universal_map
 
 end breen_deligne
+
+-/
