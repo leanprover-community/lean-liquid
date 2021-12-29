@@ -86,16 +86,32 @@ def kernel_iso_kernel_sheaf {F G : Sheaf J A} (η : F ⟶ G) :
   limits.kernel η ≅ kernel_sheaf η :=
 (limits.limit.is_limit _).cone_point_unique_up_to_iso (is_limit_kernel_fork _)
 
-@[simp]
+@[simp, reassoc]
 lemma kernel_iso_kernel_sheaf_hom_ι {F G : Sheaf J A} (η : F ⟶ G) :
   (kernel_iso_kernel_sheaf η).hom ≫ kernel_ι η = limits.kernel.ι _ :=
 ((limits.limit.is_limit _).unique_up_to_iso (is_limit_kernel_fork η)).hom.w
   limits.walking_parallel_pair.zero
 
-@[simp]
+@[simp, reassoc]
+lemma kernel_iso_kernel_sheaf_hom_ι_val {F G : Sheaf J A} (η : F ⟶ G) :
+  (kernel_iso_kernel_sheaf η).hom.val ≫ (kernel_ι η).val = (limits.kernel.ι η).val :=
+begin
+  change ((kernel_iso_kernel_sheaf η).hom ≫ (kernel_ι η)).val = (limits.kernel.ι η).val,
+  simp,
+end
+
+@[simp, reassoc]
 lemma kernel_iso_kernel_sheaf_inv_ι {F G : Sheaf J A} (η : F ⟶ G) :
   (kernel_iso_kernel_sheaf η).inv ≫ limits.kernel.ι _ = kernel_ι η :=
 by simp only [← kernel_iso_kernel_sheaf_hom_ι, iso.inv_hom_id_assoc]
+
+@[simp, reassoc]
+lemma kernel_iso_kernel_sheaf_inv_ι_val {F G : Sheaf J A} (η : F ⟶ G) :
+  (kernel_iso_kernel_sheaf η).inv.val ≫ (limits.kernel.ι η).val = (kernel_ι η).val :=
+begin
+  change ((kernel_iso_kernel_sheaf η).inv ≫ (limits.kernel.ι η)).val = (kernel_ι η).val,
+  simp,
+end
 
 end kernels
 
@@ -288,23 +304,18 @@ begin
   conv_rhs {
     erw [← category.assoc, limits.cokernel.π_desc,
       category.assoc, limits.kernel.lift_ι, limits.kernel.lift_ι] },
-  simp only [category.assoc],
-  iterate 4 { erw category.assoc _ _
-    (limits.equalizer.ι ((Sheaf_to_presheaf J A).map (cokernel_π η)) _) },
-  erw [limits.kernel.lift_ι],
-  erw [← category.assoc _ _ (𝟙 G.1), kernel_iso_kernel_sheaf_hom_ι],
-  erw [← category.assoc _ _ (𝟙 G.1), ← Sheaf.hom.comp_val, ← category.assoc (J.to_sheafify _),
-    J.to_sheafify_sheafify_lift, ← category.assoc (limits.cokernel.π _),
-    ← category.assoc (limits.cokernel.π _),
-    limits.cokernel.π_desc, category.id_comp, category.comp_id],
-  dsimp [cokernel_iso_cokernel_sheaf,
-    limits.is_colimit.cocone_point_unique_up_to_iso,
+  dsimp,
+  simp only [category.assoc, category.comp_id, category.id_comp,
+    J.to_sheafify_sheafify_lift_assoc, kernel_iso_kernel_sheaf_hom_ι_val,
+      limits.kernel.lift_ι, limits.cokernel.π_desc_assoc],
+  dsimp [cokernel_iso_cokernel_sheaf, limits.is_colimit.cocone_point_unique_up_to_iso,
     is_colimit_cokernel_cofork, limits.is_colimit_aux],
-  rw [category.assoc, ← category.assoc (J.to_sheafify _),
-    J.to_sheafify_sheafify_lift],
-  simp only [← category.assoc, limits.cokernel.π_desc],
-  erw [limits.cokernel.π_desc (limits.kernel.ι η),
-    limits.kernel.lift_ι (limits.cokernel.π η)],
+  rw J.to_sheafify_sheafify_lift_assoc,
+  simp only [limits.cokernel.π_desc_assoc, ← category.assoc, ← Sheaf.hom.comp_val,
+    limits.cokernel.π_desc],
+  simp only [category_theory.category_comp_val, category.assoc],
+  erw kernel_iso_kernel_sheaf_hom_ι_val,
+  rw [← Sheaf.hom.comp_val, limits.kernel.lift_ι],
 end
 
 lemma coim_to_im_eq {F G : Sheaf J A} (η : F ⟶ G) :
@@ -328,9 +339,26 @@ section preadditive
 variable [preadditive A]
 
 instance : preadditive (Sheaf J A) :=
-{ hom_group := λ P Q, show (add_comm_group (P.1 ⟶ Q.1)), by apply_instance,
-  add_comp' := λ P Q R f g h, preadditive.add_comp _ _ _ _ _ _,
-  comp_add' := λ P Q R f g h, preadditive.comp_add _ _ _ _ _ _ }
+{ hom_group := λ P Q,
+  { add := λ f g, ⟨f.val + g.val⟩,
+    add_assoc := by { intros, ext1, apply add_assoc },
+    zero := ⟨0⟩,
+    zero_add := by { intros, ext1, apply zero_add },
+    add_zero := by { intros, ext1, apply add_zero },
+    nsmul := λ n f, ⟨n • f.val⟩,
+    nsmul_zero' := by { intros, ext1, simpa },
+    nsmul_succ' := by { intros, ext1, simpa },
+    neg := λ f, ⟨-f.val⟩,
+    sub := λ f g, ⟨f.val - g.val⟩,
+    sub_eq_add_neg := by { intros, ext1, apply sub_eq_add_neg },
+    zsmul := λ n f, ⟨n • f.val⟩,
+    zsmul_zero' := by { intros, ext1, simpa },
+    zsmul_succ' := by { intros, ext1, simpa },
+    zsmul_neg' := by { intros, ext1, simpa },
+    add_left_neg := by { intros, ext1, apply add_left_neg },
+    add_comm := by { intros, ext1, apply add_comm } },
+  add_comp' := λ P Q R f g h, by { ext1, apply preadditive.add_comp },
+  comp_add' := λ P Q R f g h, by { ext1, apply preadditive.comp_add } }
 
 end preadditive
 
