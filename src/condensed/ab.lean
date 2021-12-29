@@ -50,7 +50,7 @@ def forget_to_CondensedType : Condensed Ab.{u+1} ⥤ CondensedSet :=
     assumption,
     apply_instance
   end ⟩,
-  map := λ A B f, whisker_right f _ }
+  map := λ A B f, ⟨whisker_right f.val _⟩ }
 
 instance : is_right_adjoint forget_to_CondensedType := sorry
 
