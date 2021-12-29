@@ -391,8 +391,8 @@ variables [reflects_isomorphisms (forget A)]
 open grothendieck_topology
 
 def parallel_pair_sheafification {F G : Sheaf J A} (η : F ⟶ G) : limits.parallel_pair
-  (limits.cokernel.π ((Sheaf_to_presheaf J A).map η)) 0 ⋙ J.sheafification A ≅
-  limits.parallel_pair (cokernel_π η) 0 :=
+  (limits.cokernel.π η.val) 0 ⋙ J.sheafification A ≅
+  limits.parallel_pair (cokernel_π η).val 0 :=
 nat_iso.of_components
 (λ x,
 match x with
@@ -418,7 +418,7 @@ begin
     simp only [limits.comp_zero, category.comp_id],
     change (sheafification J A).map _ = _,
     apply J.sheafify_hom_ext,
-    { exact plus.is_sheaf_plus_plus J (limits.cokernel η) },
+    { exact plus.is_sheaf_plus_plus J (limits.cokernel η.val) },
     erw ← (to_sheafification J A).naturality,
     simp },
   { dsimp [parallel_pair_sheafification._match_1],
@@ -492,7 +492,7 @@ begin
   simp_rw [← plus_functor_map, ← functor.comp_map, ← functor.map_comp],
   dsimp [coim_to_im', coim_to_im, coim_to_im'_aux],
   apply J.sheafify_hom_ext,
-  { exact plus.is_sheaf_plus_plus J ↑G, },
+  { exact plus.is_sheaf_plus_plus J G.val, },
   simp_rw ← category.assoc,
   erw J.to_sheafify_sheafify_lift,
   change _ = (to_sheafification J A).app _ ≫ (sheafification J A).map _,
