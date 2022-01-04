@@ -91,7 +91,7 @@ begin
 end
 
 lemma aux_summable_iff_on_nat {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ) (hf : ∀ n : ℤ, n < d → f n = 0) :
-  summable (λ n, ∥ f n ∥ * ρ ^ n) ↔ summable (λ n : ℕ, ∥ f n ∥ * ρ ^ n) := sorry
+  summable (λ n, ∥ f n ∥ * ρ ^ n) ↔ summable (λ n : ℕ, ∥ f n ∥ * ρ ^ (n : ℤ)) := sorry
   --   suffices sum_pos : summable (λ n : ℕ, ∥ ((F.to_fun s n) : ℝ) ∥ * (1 / 2) ^ n),
   -- { let A : (set ℤ) := {n : ℤ | n + F.d ≥ 0},
   --   apply (@summable_subtype_and_compl _ _ _ _ _ _ _ A).mp,
@@ -174,9 +174,9 @@ begin
   have uno := (aux_summable_iff_on_nat F.d zero).mp menouno,
   have due : (r : ℝ) = ∥ (r : ℝ) ∥, sorry,
   rw due at uno,
-  -- rw [← int.norm_cast_real, normed_field.norm_mul] at uno,
-  simp_rw [← normed_field.norm_pow, ← int.norm_cast_real] at uno,
-  have h_mul : ∀ n : ℕ, ∥ ((F s n) : ℝ) ∥ * ∥ (r : ℝ) ^ n ∥ = ∥ ((F s n) : ℝ) * (r ^ n) ∥ := λ n, (normed_field.norm_mul _ _).symm,
+  simp_rw [← normed_field.norm_zpow, ← int.norm_cast_real] at uno,
+  have h_mul : ∀ n : ℕ, ∥ ((F s n) : ℝ) ∥ * ∥ (r : ℝ) ^ (n : ℤ) ∥ = ∥ ((F s n) : ℝ) * (r ^ n) ∥ :=
+    λ n, (normed_field.norm_mul _ _).symm,
   simp_rw h_mul at uno,
   have quattro : summable g, sorry,
   -- simp_rw (λ n, exact (normed_field.norm_mul _ _).symm) at uno,
@@ -268,10 +268,15 @@ begin
   sorry,
 end
 
--- example (a n : ℤ) (x : ℝ) : x ^ a = x ^ (a + n - n) :=
--- begin
---   rw tsub_cancel_righ
--- end
+example : (0 : ℝ) ^ 0 = 1 := pow_zero 0
+
+example (x : ℝ) (hx : x ≠ 0) (a b : ℤ) : x ^ (a - b) = x ^ a * x ^(-b):=
+begin
+  rw sub_eq_add_neg,
+  apply zpow_add₀ hx,
+  -- rw zpow_neg₀,
+  -- squeeze_simp,
+end
 
 def ψ (F : ℒ S) (hF : θ S F = 0) : ℒ S :=
 begin
@@ -282,8 +287,8 @@ begin
   use f₀,
   intro s,
   apply (aux_summable_iff_on_nat F.d _).mpr,
-  { have h_θ : ∀ m : ℕ, ∥ f₀ s m ∥ * r ^ m  =
-      tsum (λ l : ℕ, ((F s (m + l)) : ℝ) * (1 / 2) ^ l) * r ^ m,
+  { have h_θ : ∀ m : ℕ, ∥ f₀ s m ∥ * r ^ (m : ℤ)  =
+      tsum (λ l : ℕ, ((F s (m + l)) : ℝ) * (1 / 2) ^ l) * r ^ (m : ℤ),
     { intro n,
       have h_event : ↑n - F.d ≥ 0, sorry,--it will be false
       let m := (int.eq_coe_of_zero_le h_event).some,
@@ -292,15 +297,27 @@ begin
       simp only [one_div, inv_pow₀, mul_eq_mul_right_iff, norm_neg],
       apply or.intro_left,
       rw nat.sum_antidiagonal_eq_sum_range_succ (λ a b, 2 ^ b * (F s a)) _,
+      have h_sub_antidiag : ∀ (k : range m.succ), (2 ^ (m - k) : ℝ) = 2 ^ ((m : ℤ) - (k : ℤ)),
+        sorry,
       dsimp only,
-      have h_terms_nonneg : ∀ x : ℕ, x ∈ range m.succ → (↑(2 ^ (m - x) * (F s x)) : ℝ) ≥ 0, sorry,
-      have h_sum_nonneg := sum_nonneg h_terms_nonneg,
-      dsimp only at h_sum_nonneg,
-      rw [← int.norm_cast_real, int.cast_sum, real.norm_eq_abs, abs_eq_self.mpr h_sum_nonneg],--, ()],--,  ],
-      simp_rw [int.cast_mul, int.cast_pow, ← zpow_coe_nat],
-      convert_to ∑ (x : ℕ) in range m.succ,
-        ((2 : ℤ) : ℝ) ^ (((m - x) : ℕ) : ℤ) * (F s x)
-        = 2 ^ m * ∑ (x : ℕ) in range m.succ, ((2 : ℤ) : ℝ) ^ (- x : ℤ) * (F s x),
+      rw [← int.norm_cast_real, int.cast_sum],
+      simp_rw [int.cast_mul, int.cast_pow, int.cast_two],
+      rw [real.norm_eq_abs, abs_eq_self.mpr],
+      have aux_mul := @mul_sum ℕ ℝ (range m.succ) (2 ^ (m : ℤ)) (λ x, 2 ^ - (x : ℤ) * (F s x)) _,
+      simp_rw [← mul_assoc] at aux_mul,
+      rw ← sum_attach,
+      simp_rw h_sub_antidiag,
+      simp_rw sub_eq_add_neg,
+      simp_rw (zpow_add₀ (@two_ne_zero ℝ _ _)),
+      have aux_coe : ∑ (x : {x : ℕ // x ∈ range m.succ}) in (range m.succ).attach,
+        (2 : ℝ) ^ (↑m : ℤ) * 2 ^ -(↑x : ℤ) * (F s (↑(↑x : ℕ) : ℤ)) = ∑ (x : {x : ℕ // x ∈ range m.succ}) in (range m.succ).attach,
+        2 ^ (↑m : ℤ) * 2 ^ -(↑(↑x : ℕ) : ℤ) * (F s (↑(↑x : ℕ) : ℤ)), sorry,
+      rw [aux_coe, @sum_attach ℝ ℕ (range m.succ) _
+        (λ x, (2 : ℝ) ^ (m : ℤ) * 2 ^ - (x : ℤ) * (F s x)), ← aux_mul],
+
+      -- convert_to ∑ (x : ℕ) in range m.succ,
+      --   ((2 : ℤ) : ℝ) ^ (((m - x) : ℕ) : ℤ) * (F s x)
+      --   = 2 ^ m * ∑ (x : ℕ) in range m.succ, ((2 : ℤ) : ℝ) ^ (- x : ℤ) * (F s x),
       -- calc ∑ (x : ℕ) in range ((int.eq_coe_of_zero_le h_event).some).succ,
       --   ((2 : ℤ) : ℝ) ^ ((((int.eq_coe_of_zero_le h_event).some - x) : ℕ) : ℤ) * (F s x) =
       -- rw add_tsub_cancel_right
