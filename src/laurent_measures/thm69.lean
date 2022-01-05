@@ -332,7 +332,8 @@ begin
         have aux_mul := @mul_sum ℕ ℝ (range m.succ) (2 ^ (m : ℤ)) (λ x, 2 ^ - (x : ℤ) * (F s x)) _,
         simp_rw [← mul_assoc] at aux_mul,
         rw [aux_coe, @sum_attach ℝ ℕ (range m.succ) _
-          (λ x, (2 : ℝ) ^ (m : ℤ) * 2 ^ - (x : ℤ) * (F s x)), ← aux_mul], --tsum_reindex],
+          (λ x, (2 : ℝ) ^ (m : ℤ) * 2 ^ - (x : ℤ) * (F s x)), ← aux_mul],
+        rw tsum_reindex,
 
 
 -- ∑' (l : ℕ), ↑(⇑F s (n + ↑l)) * (2 ^ l)⁻¹ = 0
