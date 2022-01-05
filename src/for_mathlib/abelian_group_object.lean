@@ -5,6 +5,10 @@ import category_theory.limits.types
 import algebra.category.Group
 import category_theory.sites.sheaf_of_types
 
+-- This approach has been abandoned
+
+/-
+
 namespace category_theory
 open category_theory.limits category_theory.monoidal_category
 
@@ -18,7 +22,7 @@ namespace SheafOfTypes
 @[simps]
 def terminal_sheaf : SheafOfTypes.{w} T :=
 { val := (functor.const _).obj punit,
-  cond := sorry }
+  cond := by admit }
 
 def terminal_cone : cone (functor.empty (SheafOfTypes.{w} T)) :=
 { X := terminal_sheaf T,
@@ -39,7 +43,7 @@ def product_sheaf (F G : SheafOfTypes.{w} T) : SheafOfTypes.{w} T :=
 { val :=
   { obj := λ X, F.val.obj X × G.val.obj X,
     map := λ X Y f t, (F.val.map f t.1, G.val.map f t.2) },
-  cond := sorry }
+  cond := by admit }
 
 @[simps]
 def product_sheaf.swap (F G : SheafOfTypes.{w} T) : product_sheaf F G ≅ product_sheaf G F :=
@@ -115,3 +119,5 @@ structure Ab extends CommMon_ (SheafOfTypes.{w} T) :=
 end SheafOfTypes
 
 end category_theory
+
+-/
