@@ -164,48 +164,48 @@ open_locale big_operators topological_space
 
 -- **[FAE]** Use `tsum_mul_tsum_eq_tsum_sum_antidiagonal` or even better
 -- `tsum_mul_tsum_eq_tsum_sum_antidiagonal_of_summable_norm` instead!!!
-lemma Icc_nneg (d : ℤ) : ∀ n : ℤ, (n + d) ≥ 0 → ∀ (k ∈ finset.Icc (- d) n), n - k ≥ (0 : ℤ) := sorry
+-- lemma Icc_nneg (d : ℤ) : ∀ n : ℤ, (n + d) ≥ 0 → ∀ (k ∈ finset.Icc (- d) n), n - k ≥ (0 : ℤ) := sorry
 
-def g : ℕ → ℝ := λ n, ∥ (2 : ℝ) ^ (- n : ℝ) ∥
+-- def g : ℕ → ℝ := λ n, ∥ (2 : ℝ) ^ (- n : ℝ) ∥
 
-example (F : ℒ S) (s : S) (k : ℕ) : Prop :=
-  -- summable (λ n,
-begin
-  have menouno := F.2 s,
-  have zero := lt_d_eq_zero S F s,
-  have uno := (aux_summable_iff_on_nat F.d zero).mp menouno,
-  have due : (r : ℝ) = ∥ (r : ℝ) ∥, sorry,
-  rw due at uno,
-  simp_rw [← normed_field.norm_zpow, ← int.norm_cast_real] at uno,
-  have h_mul : ∀ n : ℕ, ∥ ((F s n) : ℝ) ∥ * ∥ (r : ℝ) ^ (n : ℤ) ∥ = ∥ ((F s n) : ℝ) * (r ^ n) ∥ :=
-    λ n, (normed_field.norm_mul _ _).symm,
-  simp_rw h_mul at uno,
-  have quattro : summable g, sorry,
-  -- simp_rw (λ n, exact (normed_field.norm_mul _ _).symm) at uno,
-  -- simp_rw [← norm_mul] at uno,/
-  -- simp_rw [normed_field.norm_mul, normed_field.norm_zpow, normed_field.norm_div, real.norm_two,
-  --     norm_one, abs_sum] at this,
+-- example (F : ℒ S) (s : S) (k : ℕ) : Prop :=
+--   -- summable (λ n,
+-- begin
+--   have menouno := F.2 s,
+--   have zero := lt_d_eq_zero S F s,
+--   have uno := (aux_summable_iff_on_nat F.d zero).mp menouno,
+--   have due : (r : ℝ) = ∥ (r : ℝ) ∥, sorry,
+--   rw due at uno,
+--   simp_rw [← normed_field.norm_zpow, ← int.norm_cast_real] at uno,
+--   have h_mul : ∀ n : ℕ, ∥ ((F s n) : ℝ) ∥ * ∥ (r : ℝ) ^ (n : ℤ) ∥ = ∥ ((F s n) : ℝ) * (r ^ n) ∥ :=
+--     λ n, (normed_field.norm_mul _ _).symm,
+--   simp_rw h_mul at uno,
+--   have quattro : summable g, sorry,
+--   -- simp_rw (λ n, exact (normed_field.norm_mul _ _).symm) at uno,
+--   -- simp_rw [← norm_mul] at uno,/
+--   -- simp_rw [normed_field.norm_mul, normed_field.norm_zpow, normed_field.norm_div, real.norm_two,
+--   --     norm_one, abs_sum] at this,
 
-  --simp_rw [← int.norm_cast_real, int.cast_mul, normed_field.norm_mul, int.norm_cast_real,
-      -- mul_assoc],
-  have := tsum_mul_tsum_eq_tsum_sum_antidiagonal_of_summable_norm uno quattro,
+--   --simp_rw [← int.norm_cast_real, int.cast_mul, normed_field.norm_mul, int.norm_cast_real,
+--       -- mul_assoc],
+--   have := tsum_mul_tsum_eq_tsum_sum_antidiagonal_of_summable_norm uno quattro,
 
-  --joke
-  use 0 = 0 ,
-end
+--   --joke
+--   use 0 = 0 ,
+-- end
 
 -- Icc_sum_integer is the m-th coefficient b_m of ψ₀(F)
-def Icc_sum_integer (f : ℤ → ℤ) (d m : ℤ) (hm : (m + d) ≥ 0) : ℤ :=
-  (∑ k : (Icc (- d) m : set ℤ),
-    2 ^ ((int.eq_coe_of_zero_le (Icc_nneg d m hm k (coe_mem _))).some) * f (- k))
+-- def Icc_sum_integer (f : ℤ → ℤ) (d m : ℤ) (hm : (m + d) ≥ 0) : ℤ :=
+--   (∑ k : (Icc (- d) m : set ℤ),
+--     2 ^ ((int.eq_coe_of_zero_le (Icc_nneg d m hm k (coe_mem _))).some) * f (- k))
 
-lemma Icc_sum_eq_tail (f : ℤ → ℤ) (d : ℤ)
-  (hf : (has_sum (λ x : {a : ℤ // a ≥ -d}, (f x : ℝ) * (1 / 2) ^ x.1) 0))
-  (m : ℤ) (hm : (m + d) ≥ 0) : - ((Icc_sum_integer f d m hm) : ℝ) =
-  2 ^ m * tsum (λ x : {a : ℤ // a ≥ m + 1}, (f x : ℝ) * (1 / 2) ^ x.1) :=
-begin
-  sorry,
-end
+-- lemma Icc_sum_eq_tail (f : ℤ → ℤ) (d : ℤ)
+--   (hf : (has_sum (λ x : {a : ℤ // a ≥ -d}, (f x : ℝ) * (1 / 2) ^ x.1) 0))
+--   (m : ℤ) (hm : (m + d) ≥ 0) : - ((Icc_sum_integer f d m hm) : ℝ) =
+--   2 ^ m * tsum (λ x : {a : ℤ // a ≥ m + 1}, (f x : ℝ) * (1 / 2) ^ x.1) :=
+-- begin
+--   sorry,
+-- end
 
 
 -- lemma tail_little_o (f : ℤ → ℤ) (n d : ℤ) (h_sum : summable (λ n : ℤ, ∥ f n ∥ * r ^n)) :
@@ -218,45 +218,45 @@ end
 -- for `mathlib`
 
 open finset nat set
-open_locale classical big_operators
+-- open_locale classical big_operators
 
--- def cauchy_product' (a b : ℕ → ℝ) : ℕ → ℝ :=
---   λ n, (∑ p : (finset.nat.antidiagonal n), (a p.1.fst) * (b p.1.snd))
+-- -- def cauchy_product' (a b : ℕ → ℝ) : ℕ → ℝ :=
+-- --   λ n, (∑ p : (finset.nat.antidiagonal n), (a p.1.fst) * (b p.1.snd))
 
--- lemma has_sum.cauchy_product {a b : ℕ → ℝ} {A B : ℝ} (ha : has_sum (λ n, abs a n)A) (hb : has_sum (λ n, b n) B) : has_sum (cauchy_product' a b) (A * B) :=  sorry
--- -- use things around has_sum_iff_tendsto_nat_of_summable_norm to derive the above from the actual cauchy_product statement
+-- -- lemma has_sum.cauchy_product {a b : ℕ → ℝ} {A B : ℝ} (ha : has_sum (λ n, abs a n)A) (hb : has_sum (λ n, b n) B) : has_sum (cauchy_product' a b) (A * B) :=  sorry
+-- -- -- use things around has_sum_iff_tendsto_nat_of_summable_norm to derive the above from the actual cauchy_product statement
 
--- lemma summable.cauchy_product {a b : ℕ → ℝ} (ha : summable (λ n, abs a n)) (hb : summable (λ n, b n)) : summable (cauchy_product' a b) := (ha.has_sum.cauchy_product hb.has_sum).summable
+-- -- lemma summable.cauchy_product {a b : ℕ → ℝ} (ha : summable (λ n, abs a n)) (hb : summable (λ n, b n)) : summable (cauchy_product' a b) := (ha.has_sum.cauchy_product hb.has_sum).summable
 
-lemma order_iso.order_bot_if {α β : Type* } [preorder α] [partial_order β]
-  [order_bot α] (f : α ≃o β) : order_bot β :=
-begin
-  use f ⊥,
-  intro a,
-  obtain ⟨_, hx⟩ : ∃ x : α, f.1 x = a := by {apply f.1.surjective},
-  rw ← hx,
-  apply f.map_rel_iff.mpr bot_le,
-end
+-- lemma order_iso.order_bot_if {α β : Type* } [preorder α] [partial_order β]
+--   [order_bot α] (f : α ≃o β) : order_bot β :=
+-- begin
+--   use f ⊥,
+--   intro a,
+--   obtain ⟨_, hx⟩ : ∃ x : α, f.1 x = a := by {apply f.1.surjective},
+--   rw ← hx,
+--   apply f.map_rel_iff.mpr bot_le,
+-- end
 
-lemma order_iso.restrict {α β : Type} [linear_order α] [preorder β] (e : α ≃o β) (s : set α) :
-  s ≃o e '' s := strict_mono_on.order_iso e.1 s (λ _ _ _ _ h, (e.strict_mono) h)
+-- lemma order_iso.restrict {α β : Type} [linear_order α] [preorder β] (e : α ≃o β) (s : set α) :
+--   s ≃o e '' s := strict_mono_on.order_iso e.1 s (λ _ _ _ _ h, (e.strict_mono) h)
 
--- def exp_range_restrict := (real.exp_order_iso).restrict  (range (coe : ℕ → ℝ))
--- def ν := strict_mono.order_iso (coe : ℕ → ℝ) (@strict_mono_cast ℝ _ _)
-def natexp := (strict_mono.order_iso (coe : ℕ → ℝ)
-  (@strict_mono_cast ℝ _ _)).trans ((real.exp_order_iso).restrict (range (coe : ℕ → ℝ)))
+-- -- def exp_range_restrict := (real.exp_order_iso).restrict  (range (coe : ℕ → ℝ))
+-- -- def ν := strict_mono.order_iso (coe : ℕ → ℝ) (@strict_mono_cast ℝ _ _)
+-- def natexp := (strict_mono.order_iso (coe : ℕ → ℝ)
+--   (@strict_mono_cast ℝ _ _)).trans ((real.exp_order_iso).restrict (range (coe : ℕ → ℝ)))
 
-instance : order_bot ↥(⇑real.exp_order_iso '' range (coe : ℕ → ℝ)) := natexp.order_bot_if
-instance : has_bot ↥(⇑real.exp_order_iso '' range (coe : ℕ → ℝ)) := by apply_instance
+-- instance : order_bot ↥(⇑real.exp_order_iso '' range (coe : ℕ → ℝ)) := natexp.order_bot_if
+-- instance : has_bot ↥(⇑real.exp_order_iso '' range (coe : ℕ → ℝ)) := by apply_instance
 
-lemma has_bot_support (F : ℒ S) (s : S) : has_bot (function.support (F s)) :=
-begin
-  /- The proof should just be a restatement of `laurent_measures.eq_zero_of_filtration` using the
-  above instances that guarantee that the image of n ↦ exp n has a ⊥. The second instance actually
-  must be improved, and must prove that the image of n ↦ r ^ n - c has a ⊥, for all c.
-  -/
-  sorry,
-end
+-- lemma has_bot_support (F : ℒ S) (s : S) : has_bot (function.support (F s)) :=
+-- begin
+--   /- The proof should just be a restatement of `laurent_measures.eq_zero_of_filtration` using the
+--   above instances that guarantee that the image of n ↦ exp n has a ⊥. The second instance actually
+--   must be improved, and must prove that the image of n ↦ r ^ n - c has a ⊥, for all c.
+--   -/
+--   sorry,
+-- end
 
 -- end `mathlib`
 
@@ -284,75 +284,70 @@ begin
   use b,
   intro s,
   -- apply (aux_summable_iff_on_nat F.d _).mpr,
-  have h_θ : ∀ m : ℤ, ∥ b s m ∥ * r ^ (m : ℤ)  = --it was ∀ m : ℕ,
-      tsum (λ l : ℕ, ((F s (m + l)) : ℝ) * (1 / 2) ^ l) * r ^ (m : ℤ),
-    { dsimp only [b],--needed?
-      intro n,
-      by_cases h_event : n - F.d < 0,
-      { replace h_event := not_le_of_gt h_event,
-        rw dif_neg h_event,
-        simp only [one_div, norm_zero, zero_mul, inv_pow₀, zero_eq_mul, zpow_coe_nat],
-        apply or.intro_left,
-        rw tsum_reindex,
-        simp only [subtype.val_eq_coe, mul_eq_zero],
+  have h_θ : ∀ n : ℤ, ∥ b s n ∥ * r ^ (n : ℤ)  = --it was ∀ m : ℕ,
+      tsum (λ l : ℕ, ((F s (n + 1 + l)) : ℝ) * (1 / 2) ^ l) * r ^ (n : ℤ),
+  { dsimp only [b],--needed?
+    intro n,
+    simp only [one_div, sub_nonneg, ge_iff_le, inv_pow₀, mul_eq_mul_right_iff],
+    apply or.intro_left,
+    by_cases h_event : n - F.d < 0,
+    { replace h_event := not_le_of_gt h_event,
+      rw dif_neg h_event,
+      rw tsum_reindex,
+      simp only [subtype.val_eq_coe, norm_zero],
+      suffices : ∑' (m : {m // n + 1 ≤ m}), (F s ↑m : ℝ) * (2 ^ ↑m)⁻¹ =
+        ∑' (m : ℤ), (F s m) * (2 ^ m)⁻¹,
+      { rw this,
+        dsimp only [θ, ϑ] at hF,
+        simp only [one_div, zpow_neg₀, inv_zpow'] at hF,
+        replace hF := congr_fun hF s,
+        rw real_measures.zero_apply at hF,
+        simp only [zero_eq_mul],
         apply or.intro_right,
-        suffices : ∑' (m : {m // n ≤ m}), (F s ↑m : ℝ) * (2 ^ ↑m)⁻¹ =
-          ∑' (m : ℤ), (F s m) * (2 ^ m)⁻¹,
-        { rw this,
-          dsimp only [θ, ϑ] at hF,
-          simp only [one_div, zpow_neg₀, inv_zpow'] at hF,
-          replace hF := congr_fun hF s,
-          rw real_measures.zero_apply at hF,
-          apply hF, },
-        { rw tsum_eq_tsum_of_has_sum_iff_has_sum,
-          intro z,
-          apply @has_sum_subtype_iff_of_support_subset _ _ _ _ (λ m, (F s m : ℝ) * (2 ^ m)⁻¹) z
-            {m : ℤ | n ≤ m},
-          rw function.support_subset_iff',
-          intros a ha,
-          simp only [int.cast_eq_zero, inv_eq_zero, mul_eq_zero],
-          apply or.intro_left,
-          apply lt_d_eq_zero,
-          simp only [not_le, mem_set_of_eq] at ha,
-          replace h_event := sub_neg.mp (not_le.mp h_event),
-          exact ha.trans h_event } },
-      { rw not_lt at h_event,
-        let m := (int.eq_coe_of_zero_le h_event).some,
-        rw dif_pos h_event,
-        simp only [one_div, inv_pow₀, mul_eq_mul_right_iff, norm_neg],
+        apply hF, },
+      { rw tsum_eq_tsum_of_has_sum_iff_has_sum,
+        intro z,
+        apply @has_sum_subtype_iff_of_support_subset _ _ _ _ (λ m, (F s m : ℝ) * (2 ^ m)⁻¹) z
+          {m : ℤ | n + 1 ≤ m},
+        rw function.support_subset_iff',
+        intros a ha,
+        simp only [int.cast_eq_zero, inv_eq_zero, mul_eq_zero],
         apply or.intro_left,
-        rw nat.sum_antidiagonal_eq_sum_range_succ (λ x y, 2 ^ y * (F s x)) _,
-        have h_sub_antidiag : ∀ (k : range m.succ), (2 ^ (m - k) : ℝ) = 2 ^ ((m : ℤ) - (k : ℤ)),
-          sorry,
-        dsimp only,--needed?
-        rw [← int.norm_cast_real, int.cast_sum],
-        simp_rw [int.cast_mul, int.cast_pow, int.cast_two],
-        rw [real.norm_eq_abs, abs_eq_self.mpr],
-        have aux_mul := @mul_sum ℕ ℝ (range m.succ) (2 ^ (m : ℤ)) (λ x, 2 ^ - (x : ℤ) * (F s x)) _,
-        simp_rw [← mul_assoc] at aux_mul,
-        rw ← sum_attach,
-        simp_rw h_sub_antidiag,
-        simp_rw sub_eq_add_neg,
-        simp_rw (zpow_add₀ (@two_ne_zero ℝ _ _)),
+        simp only [not_le, mem_set_of_eq, int.lt_add_one_iff] at ha,
+        apply lt_d_eq_zero,
+        replace h_event := sub_neg.mp (not_le.mp h_event),
+        exact lt_of_le_of_lt ha h_event, } },
+    { rw not_lt at h_event,
+      let m := (int.eq_coe_of_zero_le h_event).some,
+      rw [dif_pos h_event, nat.sum_antidiagonal_eq_sum_range_succ (λ x y, 2 ^ y * (F s x)) _],
+      have h_sub_antidiag : ∀ (k : range m.succ), (2 ^ (m - k) : ℝ) = 2 ^ ((m : ℤ) - (k : ℤ)),
+        sorry,
+      simp_rw [← int.norm_cast_real, int.cast_neg, int.cast_sum, int.cast_mul, int.cast_pow,
+        int.cast_two],
+      rw [real.norm_eq_abs, abs_eq_self.mpr, ← sum_attach],
+      { simp_rw [h_sub_antidiag, sub_eq_add_neg, (zpow_add₀ (@two_ne_zero ℝ _ _))],
         have aux_coe : ∑ (x : {x : ℕ // x ∈ range m.succ}) in (range m.succ).attach,
           (2 : ℝ) ^ (↑m : ℤ) * 2 ^ -(↑x : ℤ) * (F s (↑(↑x : ℕ) : ℤ)) = ∑ (x : {x : ℕ // x ∈ range m.succ}) in (range m.succ).attach,
           2 ^ (↑m : ℤ) * 2 ^ -(↑(↑x : ℕ) : ℤ) * (F s (↑(↑x : ℕ) : ℤ)), sorry,
+        have aux_mul := @mul_sum ℕ ℝ (range m.succ) (2 ^ (m : ℤ)) (λ x, 2 ^ - (x : ℤ) * (F s x)) _,
+        simp_rw [← mul_assoc] at aux_mul,
         rw [aux_coe, @sum_attach ℝ ℕ (range m.succ) _
-          (λ x, (2 : ℝ) ^ (m : ℤ) * 2 ^ - (x : ℤ) * (F s x)), ← aux_mul],
+          (λ x, (2 : ℝ) ^ (m : ℤ) * 2 ^ - (x : ℤ) * (F s x)), ← aux_mul], --tsum_reindex],
+
 
 -- ∑' (l : ℕ), ↑(⇑F s (n + ↑l)) * (2 ^ l)⁻¹ = 0
 
 
-        -- convert_to ∑ (x : ℕ) in range m.succ,
-        --   ((2 : ℤ) : ℝ) ^ (((m - x) : ℕ) : ℤ) * (F s x)
-        --   = 2 ^ m * ∑ (x : ℕ) in range m.succ, ((2 : ℤ) : ℝ) ^ (- x : ℤ) * (F s x),
-        -- calc ∑ (x : ℕ) in range ((int.eq_coe_of_zero_le h_event).some).succ,
-        --   ((2 : ℤ) : ℝ) ^ ((((int.eq_coe_of_zero_le h_event).some - x) : ℕ) : ℤ) * (F s x) =
-        -- rw add_tsub_cancel_right
+      -- convert_to ∑ (x : ℕ) in range m.succ,
+      --   ((2 : ℤ) : ℝ) ^ (((m - x) : ℕ) : ℤ) * (F s x)
+      --   = 2 ^ m * ∑ (x : ℕ) in range m.succ, ((2 : ℤ) : ℝ) ^ (- x : ℤ) * (F s x),
+      -- calc ∑ (x : ℕ) in range ((int.eq_coe_of_zero_le h_event).some).succ,
+      --   ((2 : ℤ) : ℝ) ^ ((((int.eq_coe_of_zero_le h_event).some - x) : ℕ) : ℤ) * (F s x) =
+      -- rw add_tsub_cancel_right
 
-        sorry,
-        sorry,
-    }},
+      sorry},
+      {sorry},
+  }},
   replace h_θ : ∀ m : ℕ, ∥ b s m ∥ * r ^ (m : ℤ)  =
     tsum (λ l : ℕ, ((F s (m + l)) : ℝ) * (1 / 2) ^ l) * r ^ (m : ℤ),
     { sorry--not clear if first proving it ∀ m : ℤ and then specializing to ∀ m : ℕ was a good idea
@@ -363,8 +358,6 @@ begin
 end
 
 theorem θ_ϕ_exact (F : ℒ S) (hF : θ S F = 0) : ∃ G, ϕ S G = F := sorry
-
-
 
 
 -- This `θ₂` is the "measurification" of the map `θₗ` of
