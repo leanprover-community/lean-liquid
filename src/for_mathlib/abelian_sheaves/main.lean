@@ -2,7 +2,7 @@ import category_theory.sites.limits
 
 import for_mathlib.abelian_sheaves.functor_category
 import for_mathlib.sheaf
-import for_mathlib.abelian_sheaves.left_exact
+import category_theory.sites.left_exact
 
 namespace category_theory
 namespace Sheaf
@@ -432,7 +432,8 @@ def kernel_cokernel_π_iso {F G : Sheaf J A} (η : F ⟶ G) :
   J.sheafify (limits.kernel (limits.cokernel.π ((Sheaf_to_presheaf J A).map η))) ≅
   limits.kernel ((Sheaf_to_presheaf J A).map (cokernel_π η)) :=
 begin
-  let e := (limits.is_limit_of_preserves (sheafification J A) (limits.limit.is_limit
+  let e := (limits.is_limit_of_preserves (sheafification J A)
+      (limits.limit.is_limit
       (limits.parallel_pair (limits.cokernel.π
       ((Sheaf_to_presheaf J A).map η)) 0))).cone_point_unique_up_to_iso (limits.limit.is_limit _),
   refine e ≪≫ _,
