@@ -52,26 +52,15 @@ lemma coe_nonneg (r : ℚ≥0) : (0 : ℚ) ≤ r := r.2
 @[norm_cast]
 theorem coe_mk (a : ℚ) (ha) : ((⟨a, ha⟩ : ℚ≥0) : ℚ) = a := rfl
 
-example : has_zero ℚ≥0  := by apply_instance
-example : has_one ℚ≥0   := by apply_instance
-example : has_add ℚ≥0   := by apply_instance
-example : has_sub ℚ≥0   := by apply_instance
-example : has_mul ℚ≥0   := by apply_instance
-example : has_inv ℚ≥0   := by apply_instance
-example : has_div ℚ≥0   := by apply_instance
-example : has_le ℚ≥0    := by apply_instance
-example : has_bot ℚ≥0   := by apply_instance
-example : inhabited ℚ≥0 := by apply_instance
-
 protected lemma coe_injective : function.injective (coe : ℚ≥0 → ℚ) := subtype.coe_injective
 @[simp, norm_cast] protected lemma coe_eq {r₁ r₂ : ℚ≥0} : (r₁ : ℚ) = r₂ ↔ r₁ = r₂ :=
 nnrat.coe_injective.eq_iff
-@[simp, norm_cast] protected lemma coe_zero : ((0 : ℚ≥0) : ℚ) = 0 := rfl
-@[simp, norm_cast] protected lemma coe_one  : ((1 : ℚ≥0) : ℚ) = 1 := rfl
-@[simp, norm_cast] protected lemma coe_add (r₁ r₂ : ℚ≥0) : ((r₁ + r₂ : ℚ≥0) : ℚ) = r₁ + r₂ := rfl
-@[simp, norm_cast] protected lemma coe_mul (r₁ r₂ : ℚ≥0) : ((r₁ * r₂ : ℚ≥0) : ℚ) = r₁ * r₂ := rfl
-@[simp, norm_cast] protected lemma coe_inv (r : ℚ≥0) : ((r⁻¹ : ℚ≥0) : ℚ) = r⁻¹ := rfl
-@[simp, norm_cast] protected lemma coe_div (r₁ r₂ : ℚ≥0) : ((r₁ / r₂ : ℚ≥0) : ℚ) = r₁ / r₂ := rfl
+protected lemma coe_zero : ((0 : ℚ≥0) : ℚ) = 0 := rfl
+protected lemma coe_one  : ((1 : ℚ≥0) : ℚ) = 1 := rfl
+protected lemma coe_add (r₁ r₂ : ℚ≥0) : ((r₁ + r₂ : ℚ≥0) : ℚ) = r₁ + r₂ := rfl
+protected lemma coe_mul (r₁ r₂ : ℚ≥0) : ((r₁ * r₂ : ℚ≥0) : ℚ) = r₁ * r₂ := rfl
+protected lemma coe_inv (r : ℚ≥0) : ((r⁻¹ : ℚ≥0) : ℚ) = r⁻¹ := rfl
+protected lemma coe_div (r₁ r₂ : ℚ≥0) : ((r₁ / r₂ : ℚ≥0) : ℚ) = r₁ / r₂ := rfl
 @[simp, norm_cast] protected lemma coe_bit0 (r : ℚ≥0) : ((bit0 r : ℚ≥0) : ℚ) = bit0 r := rfl
 @[simp, norm_cast] protected lemma coe_bit1 (r : ℚ≥0) : ((bit1 r : ℚ≥0) : ℚ) = bit1 r := rfl
 
@@ -83,8 +72,6 @@ max_eq_left $ le_sub.2 $ by simp [show (r₂ : ℚ) ≤ r₁, from h]
 @[simp] protected lemma coe_eq_zero (r : ℚ≥0) : ↑r = (0 : ℚ) ↔ r = 0 := by norm_cast
 lemma coe_ne_zero {r : ℚ≥0} : (r : ℚ) ≠ 0 ↔ r ≠ 0 := by norm_cast
 
-example : comm_semiring ℚ≥0 := by apply_instance
-
 /-- Coercion `ℚ≥0 → ℚ` as a `ring_hom`. -/
 def to_rational_hom : ℚ≥0 →+* ℚ :=
 ⟨coe, nnrat.coe_one, nnrat.coe_mul, nnrat.coe_zero, nnrat.coe_add⟩
@@ -92,9 +79,11 @@ def to_rational_hom : ℚ≥0 →+* ℚ :=
 /-- The rational numbers are an algebra over the non-negative rationals. -/
 instance : algebra ℚ≥0 ℚ := to_rational_hom.to_algebra
 
-@[simp] lemma coe_to_rational_hom : ⇑to_rational_hom = coe := rfl
+/-- A `module` over `ℚ` restricts to a `module` over `ℚ≥0`. -/
+instance {M : Type*} [add_comm_monoid M] [module ℚ M] : module ℚ≥0 M :=
+module.comp_hom M to_rational_hom
 
-example : comm_group_with_zero ℚ≥0 := by apply_instance
+@[simp] lemma coe_to_rational_hom : ⇑to_rational_hom = coe := rfl
 
 @[simp, norm_cast] lemma coe_indicator {α} (s : set α) (f : α → ℚ≥0) (a : α) :
   ((s.indicator f a : ℚ≥0) : ℚ) = s.indicator (λ x, f x) a :=
@@ -147,9 +136,6 @@ to_rational_hom.to_add_monoid_hom.map_nsmul _ _
 @[simp, norm_cast] protected lemma coe_nat_cast (n : ℕ) : (↑(↑n : ℚ≥0) : ℚ) = n :=
 to_rational_hom.map_nat_cast n
 
-example : linear_order ℚ≥0 :=
-by apply_instance
-
 @[simp, norm_cast] protected lemma coe_le_coe {r₁ r₂ : ℚ≥0} : (r₁ : ℚ) ≤ r₂ ↔ r₁ ≤ r₂ := iff.rfl
 @[simp, norm_cast] protected lemma coe_lt_coe {r₁ r₂ : ℚ≥0} : (r₁ : ℚ) < r₂ ↔ r₁ < r₂ := iff.rfl
 @[simp, norm_cast] protected lemma coe_pos {r : ℚ≥0} : (0 : ℚ) < r ↔ 0 < r := iff.rfl
@@ -173,35 +159,6 @@ protected def gi : galois_insertion nnrat.of_rat coe :=
 galois_insertion.monotone_intro nnrat.coe_mono nnrat.of_rat_mono
   le_coe_of_rat (λ _, of_rat_coe)
 
-example : order_bot ℚ≥0 :=
-by apply_instance
-
-example : canonically_linear_ordered_add_monoid ℚ≥0 :=
-by apply_instance
-
-example : distrib_lattice ℚ≥0 := by apply_instance
-
-example : semilattice_inf ℚ≥0 :=
-by apply_instance
-
-example : semilattice_sup ℚ≥0 :=
-by apply_instance
-
-example : linear_ordered_semiring ℚ≥0 :=
-by apply_instance
-
-example : linear_ordered_comm_group_with_zero ℚ≥0 :=
-by apply_instance
-
-example : canonically_ordered_comm_semiring ℚ≥0 :=
-by apply_instance
-
-example : densely_ordered ℚ≥0 :=
-by apply_instance
-
-example : no_top_order ℚ≥0 :=
-by apply_instance
-
 -- TODO: why are these three instances necessary? why aren't they inferred? (same for `ℝ≥0`)
 instance covariant_add : covariant_class ℚ≥0 ℚ≥0 (+) (≤) :=
 ordered_add_comm_monoid.to_covariant_class_left ℚ≥0
@@ -212,9 +169,6 @@ ordered_cancel_add_comm_monoid.to_contravariant_class_left ℚ≥0
 instance covariant_mul : covariant_class ℚ≥0 ℚ≥0 (*) (≤) :=
 ordered_comm_monoid.to_covariant_class_left ℚ≥0
 
-instance is_scalar_tower : is_scalar_tower ℕ ℚ≥0 ℚ :=
-add_comm_monoid.nat_is_scalar_tower
-
 lemma bdd_above_coe {s : set ℚ≥0} : bdd_above ((coe : ℚ≥0 → ℚ) '' s) ↔ bdd_above s :=
 iff.intro
   (assume ⟨b, hb⟩, ⟨nnrat.of_rat b, assume ⟨y, hy⟩ hys, show y ≤ max b 0, from
@@ -223,9 +177,6 @@ iff.intro
 
 lemma bdd_below_coe (s : set ℚ≥0) : bdd_below ((coe : ℚ≥0 → ℚ) '' s) :=
 ⟨0, assume r ⟨q, _, eq⟩, eq ▸ q.2⟩
-
-example : archimedean ℚ≥0 :=
-by apply_instance
 
 lemma le_of_forall_pos_le_add {a b : ℚ≥0} (h : ∀ε, 0 < ε → a ≤ b + ε) : a ≤ b :=
 le_of_forall_le_of_dense $ assume x hxb,
