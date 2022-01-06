@@ -354,11 +354,8 @@ begin
   { intros x s hx ih t,
     rcases finset.eq_empty_or_nonempty s with (rfl | hs),
     { simp },
-    -- simp only [finset.min'_insert x _ hs],
-    simp_rw [finset.image_insert],
-    rw [finset.min'_insert, ←ih hs, ←nnrat.coe_min],
-    congr' 1,
-    convert finset.min'_insert x s hs }
+    simp_rw [finset.image_insert, finset.min'_insert x s hs, nnrat.coe_min, ih hs,
+      ← finset.min'_insert] }
 end
 
 def extended_half_spaces_index {ι : Type*} (s : ι → Λ →ₗ[ℚ] ℚ) (x : Λ) : Type* :=
