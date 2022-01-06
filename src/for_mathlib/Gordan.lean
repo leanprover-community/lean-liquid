@@ -106,8 +106,7 @@ begin
   simpa using h
 end
 
-def lattice_restrict (S : submodule (ℚ≥0) (α → ℚ)) :
-  submodule ℕ (α → ℤ) :=
+def lattice_restrict (S : submodule ℚ≥0 (α → ℚ)) : submodule ℕ (α → ℤ) :=
 { carrier := to_rational_point ⁻¹' (S : set (α → ℚ)),
   zero_mem' :=
     by simp only [linear_map.map_zero, set.mem_preimage, set_like.mem_coe, submodule.zero_mem],

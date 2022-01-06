@@ -1,8 +1,8 @@
-import algebra.order.with_zero
 import algebra.big_operators.ring
 import data.real.basic
 import algebra.indicator_function
 import algebra.algebra.basic
+import algebra.order.nonneg
 
 /-!
 # Nonnegative rationals
@@ -13,6 +13,9 @@ noncomputable theory
 open_locale classical big_operators
 
 /-- Nonnegative rational numbers. -/
+@[derive [canonically_ordered_comm_semiring, canonically_linear_ordered_add_monoid,
+  linear_ordered_comm_group_with_zero, linear_ordered_semiring, has_sub, has_ordered_sub,
+  densely_ordered, archimedean, inhabited]]
 def nnrat := {q : ℚ // 0 ≤ q}
 localized "notation ` ℚ≥0 ` := nnrat" in nnreal
 
@@ -49,16 +52,16 @@ lemma coe_nonneg (r : ℚ≥0) : (0 : ℚ) ≤ r := r.2
 @[norm_cast]
 theorem coe_mk (a : ℚ) (ha) : ((⟨a, ha⟩ : ℚ≥0) : ℚ) = a := rfl
 
-instance : has_zero ℚ≥0  := ⟨⟨0, le_refl 0⟩⟩
-instance : has_one ℚ≥0   := ⟨⟨1, zero_le_one⟩⟩
-instance : has_add ℚ≥0   := ⟨λa b, ⟨a + b, add_nonneg a.2 b.2⟩⟩
-instance : has_sub ℚ≥0   := ⟨λa b, nnrat.of_rat (a - b)⟩
-instance : has_mul ℚ≥0   := ⟨λa b, ⟨a * b, mul_nonneg a.2 b.2⟩⟩
-instance : has_inv ℚ≥0   := ⟨λa, ⟨(a.1)⁻¹, inv_nonneg.2 a.2⟩⟩
-instance : has_div ℚ≥0   := ⟨λa b, ⟨a / b, div_nonneg a.2 b.2⟩⟩
-instance : has_le ℚ≥0    := ⟨λ r s, (r:ℚ) ≤ s⟩
-instance : has_bot ℚ≥0   := ⟨0⟩
-instance : inhabited ℚ≥0 := ⟨0⟩
+example : has_zero ℚ≥0  := by apply_instance
+example : has_one ℚ≥0   := by apply_instance
+example : has_add ℚ≥0   := by apply_instance
+example : has_sub ℚ≥0   := by apply_instance
+example : has_mul ℚ≥0   := by apply_instance
+example : has_inv ℚ≥0   := by apply_instance
+example : has_div ℚ≥0   := by apply_instance
+example : has_le ℚ≥0    := by apply_instance
+example : has_bot ℚ≥0   := by apply_instance
+example : inhabited ℚ≥0 := by apply_instance
 
 protected lemma coe_injective : function.injective (coe : ℚ≥0 → ℚ) := subtype.coe_injective
 @[simp, norm_cast] protected lemma coe_eq {r₁ r₂ : ℚ≥0} : (r₁ : ℚ) = r₂ ↔ r₁ = r₂ :=
@@ -80,12 +83,7 @@ max_eq_left $ le_sub.2 $ by simp [show (r₂ : ℚ) ≤ r₁, from h]
 @[simp] protected lemma coe_eq_zero (r : ℚ≥0) : ↑r = (0 : ℚ) ↔ r = 0 := by norm_cast
 lemma coe_ne_zero {r : ℚ≥0} : (r : ℚ) ≠ 0 ↔ r ≠ 0 := by norm_cast
 
-instance : comm_semiring ℚ≥0 :=
-{ zero := 0,
-  add := (+),
-  one := 1,
-  mul := (*),
-  .. nnrat.coe_injective.comm_semiring _ rfl rfl (λ _ _, rfl) (λ _ _, rfl) }
+example : comm_semiring ℚ≥0 := by apply_instance
 
 /-- Coercion `ℚ≥0 → ℚ` as a `ring_hom`. -/
 def to_rational_hom : ℚ≥0 →+* ℚ :=
@@ -96,13 +94,7 @@ instance : algebra ℚ≥0 ℚ := to_rational_hom.to_algebra
 
 @[simp] lemma coe_to_rational_hom : ⇑to_rational_hom = coe := rfl
 
-instance : comm_group_with_zero ℚ≥0 :=
-{ zero := 0,
-  mul := (*),
-  one := 1,
-  inv := has_inv.inv,
-  div := (/),
-  .. nnrat.coe_injective.comm_group_with_zero _ rfl rfl (λ _ _, rfl) (λ _, rfl) (λ _ _, rfl) }
+example : comm_group_with_zero ℚ≥0 := by apply_instance
 
 @[simp, norm_cast] lemma coe_indicator {α} (s : set α) (f : α → ℚ≥0) (a : α) :
   ((s.indicator f a : ℚ≥0) : ℚ) = s.indicator (λ x, f x) a :=
@@ -155,8 +147,8 @@ to_rational_hom.to_add_monoid_hom.map_nsmul _ _
 @[simp, norm_cast] protected lemma coe_nat_cast (n : ℕ) : (↑(↑n : ℚ≥0) : ℚ) = n :=
 to_rational_hom.map_nat_cast n
 
-instance : linear_order ℚ≥0 :=
-linear_order.lift (coe : ℚ≥0 → ℚ) nnrat.coe_injective
+example : linear_order ℚ≥0 :=
+by apply_instance
 
 @[simp, norm_cast] protected lemma coe_le_coe {r₁ r₂ : ℚ≥0} : (r₁ : ℚ) ≤ r₂ ↔ r₁ ≤ r₂ := iff.rfl
 @[simp, norm_cast] protected lemma coe_lt_coe {r₁ r₂ : ℚ≥0} : (r₁ : ℚ) < r₂ ↔ r₁ < r₂ := iff.rfl
@@ -181,58 +173,47 @@ protected def gi : galois_insertion nnrat.of_rat coe :=
 galois_insertion.monotone_intro nnrat.coe_mono nnrat.of_rat_mono
   le_coe_of_rat (λ _, of_rat_coe)
 
-instance : order_bot ℚ≥0 :=
-{ bot := ⊥, bot_le := assume ⟨a, h⟩, h, .. nnrat.linear_order }
+example : order_bot ℚ≥0 :=
+by apply_instance
 
-instance : canonically_linear_ordered_add_monoid ℚ≥0 :=
-{ add_le_add_left       := assume a b h c, @add_le_add_left ℚ _ _ _ _ _ h c,
-  le_iff_exists_add     := assume ⟨a, ha⟩ ⟨b, hb⟩,
-    iff.intro
-      (assume h : a ≤ b,
-        ⟨⟨b - a, le_sub_iff_add_le.2 $ by simp [h]⟩,
-          nnrat.eq $ show b = a + (b - a), by rw [add_sub_cancel'_right]⟩)
-      (assume ⟨⟨c, hc⟩, eq⟩, eq.symm ▸ show a ≤ a + c, from (le_add_iff_nonneg_right a).2 hc),
-  ..nnrat.comm_semiring,
-  ..nnrat.order_bot,
-  ..nnrat.linear_order }
+example : canonically_linear_ordered_add_monoid ℚ≥0 :=
+by apply_instance
 
-instance : distrib_lattice ℚ≥0 := by apply_instance
+example : distrib_lattice ℚ≥0 := by apply_instance
 
-instance : semilattice_inf ℚ≥0 :=
-{ .. nnrat.order_bot, .. nnrat.distrib_lattice }
+example : semilattice_inf ℚ≥0 :=
+by apply_instance
 
-instance : semilattice_sup ℚ≥0 :=
-{ .. nnrat.order_bot, .. nnrat.distrib_lattice }
+example : semilattice_sup ℚ≥0 :=
+by apply_instance
 
-instance : linear_ordered_semiring ℚ≥0 :=
-{ add_left_cancel            := assume a b c h, nnrat.eq $
-    @add_left_cancel ℚ _ a b c (nnrat.eq_iff.2 h),
-  le_of_add_le_add_left      := assume a b c, @le_of_add_le_add_left ℚ _ _ _ a b c,
-  mul_lt_mul_of_pos_left     := assume a b c, @mul_lt_mul_of_pos_left ℚ _ a b c,
-  mul_lt_mul_of_pos_right    := assume a b c, @mul_lt_mul_of_pos_right ℚ _ a b c,
-  zero_le_one                := @zero_le_one ℚ _,
-  exists_pair_ne             := ⟨0, 1, ne_of_lt (@zero_lt_one ℚ _ _)⟩,
-  .. nnrat.canonically_linear_ordered_add_monoid,
-  .. nnrat.comm_semiring, }
+example : linear_ordered_semiring ℚ≥0 :=
+by apply_instance
 
-instance : linear_ordered_comm_group_with_zero ℚ≥0 :=
-{ mul_le_mul_left := assume a b h c, mul_le_mul (le_refl c) h (zero_le a) (zero_le c),
-  zero_le_one := zero_le 1,
-  .. nnrat.linear_ordered_semiring,
-  .. nnrat.comm_group_with_zero }
+example : linear_ordered_comm_group_with_zero ℚ≥0 :=
+by apply_instance
 
-instance : canonically_ordered_comm_semiring ℚ≥0 :=
-{ .. nnrat.canonically_linear_ordered_add_monoid,
-  .. nnrat.comm_semiring,
-  .. (show no_zero_divisors ℚ≥0, by apply_instance),
-  .. nnrat.comm_group_with_zero }
+example : canonically_ordered_comm_semiring ℚ≥0 :=
+by apply_instance
 
-instance : densely_ordered ℚ≥0 :=
-⟨assume a b (h : (a : ℚ) < b), let ⟨c, hac, hcb⟩ := exists_between h in
-  ⟨⟨c, le_trans a.property $ le_of_lt $ hac⟩, hac, hcb⟩⟩
+example : densely_ordered ℚ≥0 :=
+by apply_instance
 
-instance : no_top_order ℚ≥0 :=
-⟨assume a, let ⟨b, hb⟩ := no_top (a:ℚ) in ⟨⟨b, le_trans a.property $ le_of_lt $ hb⟩, hb⟩⟩
+example : no_top_order ℚ≥0 :=
+by apply_instance
+
+-- TODO: why are these three instances necessary? why aren't they inferred? (same for `ℝ≥0`)
+instance covariant_add : covariant_class ℚ≥0 ℚ≥0 (+) (≤) :=
+ordered_add_comm_monoid.to_covariant_class_left ℚ≥0
+
+instance contravariant_add : contravariant_class ℚ≥0 ℚ≥0 (+) (<) :=
+ordered_cancel_add_comm_monoid.to_contravariant_class_left ℚ≥0
+
+instance covariant_mul : covariant_class ℚ≥0 ℚ≥0 (*) (≤) :=
+ordered_comm_monoid.to_covariant_class_left ℚ≥0
+
+instance is_scalar_tower : is_scalar_tower ℕ ℚ≥0 ℚ :=
+add_comm_monoid.nat_is_scalar_tower
 
 lemma bdd_above_coe {s : set ℚ≥0} : bdd_above ((coe : ℚ≥0 → ℚ) '' s) ↔ bdd_above s :=
 iff.intro
@@ -243,10 +224,8 @@ iff.intro
 lemma bdd_below_coe (s : set ℚ≥0) : bdd_below ((coe : ℚ≥0 → ℚ) '' s) :=
 ⟨0, assume r ⟨q, _, eq⟩, eq ▸ q.2⟩
 
-instance : archimedean ℚ≥0 :=
-⟨ assume x y pos_y,
-  let ⟨n, hr⟩ := archimedean.arch (x:ℚ) (pos_y : (0 : ℚ) < y) in
-  ⟨n, show (x:ℚ) ≤ (n • y : ℚ≥0), by simp [*, -nsmul_eq_mul, nsmul_coe]⟩ ⟩
+example : archimedean ℚ≥0 :=
+by apply_instance
 
 lemma le_of_forall_pos_le_add {a b : ℚ≥0} (h : ∀ε, 0 < ε → a ≤ b + ε) : a ≤ b :=
 le_of_forall_le_of_dense $ assume x hxb,
