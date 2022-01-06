@@ -106,9 +106,10 @@ lemma aux_summable_iff_on_nat {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ) (hf : �
   --   repeat {apply_instance}, },
   -- sorry,
 
-lemma sum_smaller_radius (F : ℒ S) (s : S) :
+lemma summable_smaller_radius (F : ℒ S) (s : S) :
   summable (λ n, (F.to_fun s n : ℝ) * (1 / 2) ^ n) :=
 begin
+  -- the proof breaks with `summable (λ n, (F s n : ℝ) * (1 / 2) ^ n) :=`
  suffices abs_sum : summable (λ n, ∥ ((F.to_fun s n) : ℝ) ∥ * (1 / 2) ^ n),
   { apply summable_of_summable_norm,
     simp_rw [normed_field.norm_mul, normed_field.norm_zpow, normed_field.norm_div, real.norm_two,
@@ -141,7 +142,8 @@ begin
       by {rw [← int.cast_one, int.cast_bit0] },
     rw [this, ← int.cast_mul, ← int.cast_sub],
     refl },
-  have h_pos : has_sum (λ n, ((2 * f s (n - 1)) : ℝ) * (1 / 2) ^ n) (sum_smaller_radius S ⟨f, hf⟩ s).some,
+  have h_pos : has_sum (λ n, ((2 * f s (n - 1)) : ℝ) * (1 / 2) ^ n)
+    (summable_smaller_radius S ⟨f, hf⟩ s).some,
   { have div_half : ∀ b : ℤ, (1 / 2 : ℝ) ^ b * (2 : ℝ) = (1 / 2) ^ ( b - 1),
     { intro b,
       rw [← inv_eq_one_div, @zpow_sub_one₀ ℝ _ _ (inv_ne_zero two_ne_zero) b],
@@ -152,10 +154,12 @@ begin
     simp_rw [mul_comm, ← mul_assoc, div_half, mul_comm, h_comp],
     let e : ℤ ≃ ℤ := ⟨λ n : ℤ, n - 1, λ n, n + 1, by {intro, simp}, by {intro, simp}⟩,
     apply (equiv.has_sum_iff e).mpr,
-    exact (sum_smaller_radius S ⟨f, hf⟩ s).some_spec },
+    exact (summable_smaller_radius S ⟨f, hf⟩ s).some_spec },
+    -- sorry},--the `exact` above was ok with the old version of summable_smaller_radius
   simp_rw [sub_mul],
   rw [tsum_sub h_pos.summable, sub_eq_zero, h_pos.tsum_eq],
-  exacts [(sum_smaller_radius S ⟨f, hf⟩ s).some_spec.tsum_eq.symm, (sum_smaller_radius S ⟨f, hf⟩ s)],
+  exacts [(summable_smaller_radius S ⟨f, hf⟩ s).some_spec.tsum_eq.symm,
+    (summable_smaller_radius S ⟨f, hf⟩ s)],
 end
 
 open finset filter
@@ -279,6 +283,7 @@ lemma tsum_reindex (F : ℒ S) (N : ℤ) (s : S) : ∑' (l : ℕ), (F s (N + l) 
 
 def ψ (F : ℒ S) (hF : θ S F = 0) : ℒ S :=
 begin
+  classical,
   let b : S → ℤ → ℤ := λ s n,
     if hn : n - F.d ≥ 0 then - ∑ l in range ((int.eq_coe_of_zero_le hn).some.succ),
       (F s (n -l) * (2 ^ l))
@@ -302,8 +307,8 @@ begin
       suffices : ∑' (m : {m // n ≤ m}), (F s ↑m : ℝ) * (2 ^ ↑m)⁻¹ =
         ∑' (m : ℤ), (F s m) * (2 ^ m)⁻¹,
       { rw this,
-        dsimp only [θ, ϑ] at hF,
-        simp only [one_div, zpow_neg₀, inv_zpow'] at hF,
+        --dsimp only [θ, ϑ] at hF,
+        simp only [θ, ϑ, one_div, zpow_neg₀, inv_zpow'] at hF,
         replace hF := congr_fun hF s,
         rw real_measures.zero_apply at hF,
         simp only [zero_eq_mul],
@@ -330,12 +335,27 @@ begin
       rw sum_range_sum_Icc (F s) n F.d h_event,
       rw sum_Icc_sum_tail (F s) n F.d _ h_event,
       {sorry},
-      { dsimp only [θ, ϑ] at hF,
-        simp only [one_div, zpow_neg₀, inv_zpow'] at hF,
+      { --dsimp only [θ, ϑ] at hF,
+        simp only [θ, ϑ, one_div, zpow_neg₀, inv_zpow'] at hF,
         replace hF := congr_fun hF s,
-        rw real_measures.zero_apply at hF,
-        simp only at hF,
-        simp [tsum] at hF,
+        -- rw real_measures.zero_apply at hF,
+        simp only [real_measures.zero_apply, tsum] at hF,
+        have aux_summable := summable_smaller_radius S F s,
+        simp_rw [← inv_eq_one_div, inv_zpow₀] at aux_summable,
+        have := @dif_pos _ _ aux_summable ℝ classical.some
+          (λ (h : ¬summable (λ (n : ℤ), ((F s n) : ℝ) * (2 ^ n)⁻¹)), 0),
+        --**[FAE]**see classical_difference notes
+
+        -- rw hF at this,
+        -- let temp := dite (summable (λ (n : ℤ), ((F s n) : ℝ) * (2 ^ n)⁻¹)) classical.some
+        --   (λ (h : ¬summable (λ (n : ℤ), ((F s n) : ℝ) * (2 ^ n)⁻¹)), 0),
+        -- rw this at temp,
+        -- rw [dif_pos aux_summable] at hF,
+
+        -- rw inv_pow
+        -- have := F.2 s,
+        -- have := summable_convolution (F s) (F.2 s),
+        -- simp [tsum] at hF,
         sorry,
                 -- apply hF,
        },
