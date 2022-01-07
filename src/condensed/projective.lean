@@ -56,6 +56,14 @@ def Profinite.to_Condensed (T : Profinite.{u}) : CondensedSet :=
         apply Profinite.π_descend } }
   end } .
 
+@[simps]
+def Profinite_to_Condensed : Profinite ⥤ CondensedSet :=
+{ obj := λ X, X.to_Condensed,
+  map := λ X Y f, ⟨whisker_right (yoneda.map f) _⟩,
+  map_id' := λ X, by { ext1, dsimp, erw [yoneda.map_id, whisker_right_id], refl },
+  map_comp' := λ X Y Z f g, by { ext1, dsimp,
+    erw [yoneda.map_comp, whisker_right_comp] } }
+
 def Top.to_Condensed (T : Top.{u}) : CondensedSet :=
 { val := Profinite.to_Top.op ⋙ yoneda.obj T ⋙ ulift_functor.{u+1},
   cond := begin
@@ -97,12 +105,31 @@ def Top.to_Condensed (T : Top.{u}) : CondensedSet :=
         apply_fun (λ e, e.val.down t) at h,
         exact h },
       { rintros ⟨⟨t⟩,ht⟩,
-        refine ⟨⟨Profinite.descend π t hh _⟩, _⟩,
+        refine ⟨⟨Profinite.descend_to_Top π t hh _⟩, _⟩,
         dsimp at ht,
         apply_fun (λ e, e.down) at ht,
         exact ht,
         dsimp [yoneda, ulift_functor, functor.map_to_equalizer],
         ext : 2,
         dsimp,
-        apply Profinite.π_descend } }
+        apply Profinite.π_descend_to_Top,
+      } }
+  end }
+
+@[simps]
+def Top_to_Condensed : Top ⥤ CondensedSet :=
+{ obj := λ X, X.to_Condensed,
+  map := λ X Y f, ⟨whisker_left _ $ whisker_right (yoneda.map f) _⟩,
+  map_id' := begin
+    intros X,
+    ext1,
+    dsimp,
+    erw [yoneda.map_id, whisker_right_id, whisker_left_id],
+    refl,
+  end,
+  map_comp' := begin
+    intros X Y Z f g,
+    ext1,
+    dsimp,
+    erw [yoneda.map_comp, whisker_right_comp, whisker_left_comp],
   end }
