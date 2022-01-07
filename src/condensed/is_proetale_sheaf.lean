@@ -101,6 +101,9 @@ end is_singleton
 
 section pbool
 
+-- The category theory library has a type called `walking_pair` which accomplishes the same thing.
+-- It's used in the API for binary (co)products.
+
 @[derive fintype]
 inductive pbool : Type u
 | ff : pbool
