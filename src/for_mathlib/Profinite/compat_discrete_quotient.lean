@@ -3,6 +3,8 @@ import topology.category.Profinite
 import category_theory.arrow
 import data.setoid.partition
 
+import for_mathlib.Profinite.quotient_map
+
 open category_theory
 
 namespace discrete_quotient
@@ -48,28 +50,6 @@ by {ext, refl}
 
 variable (f)
 
--- A surjective map of compact Hausdorff spaces is a quotient map
--- TODO: This certainly belongs in mathlib, if not already there...
-lemma quotient_map : quotient_map f :=
-begin
-  rw quotient_map_iff,
-  refine ⟨surj,_⟩,
-  intro S,
-  refine ⟨λ hS, hS.preimage f.continuous, λ hS, _⟩,
-  rw ← is_closed_compl_iff at *,
-  rw ← set.preimage_compl at hS,
-  have : Sᶜ = f '' (f ⁻¹' Sᶜ),
-  { ext,
-    split,
-    { intro h,
-      obtain ⟨y,rfl⟩ := surj x,
-      refine ⟨y,h,rfl⟩ },
-    { rintro ⟨y,h,rfl⟩,
-      exact h } },
-  rw this,
-  exact Profinite.is_closed_map f (⇑f ⁻¹' Sᶜ) hS
-end
-
 /-- Given a discrete quotient S of f.left, this is the compatible quotient
  of f where f.right is as large as possible. -/
 def make (S : discrete_quotient X) : discrete_quotient Y :=
@@ -87,7 +67,7 @@ def make (S : discrete_quotient X) : discrete_quotient Y :=
     haveI : discrete_topology (S.make_quotient f surj) := ⟨rfl⟩,
     suffices : continuous (S.make_proj f surj),
     { refine ⟨is_open.preimage this trivial, is_closed.preimage this ⟨trivial⟩⟩ },
-    rw [(quotient_map f surj).continuous_iff, S.make_proj_comm f surj],
+    rw [(Profinite.quotient_map f surj).continuous_iff, S.make_proj_comm f surj],
     exact continuous_bot.comp (proj_continuous S),
   end }
 
