@@ -1,6 +1,7 @@
 import category_theory.limits.shapes.products
 import for_mathlib.Profinite.compat_discrete_quotient
 import topology.category.Profinite
+import for_mathlib.quotient_map
 
 /-!
 
@@ -230,17 +231,15 @@ end
 noncomputable
 def descend {X B Y : Profinite} (π : X ⟶ B) (t : X ⟶ Y) (hπ : function.surjective π)
   (w : pullback.fst π π ≫ t = pullback.snd π π ≫ t) : B ⟶ Y :=
-{ to_fun := let e := setoid.quotient_ker_equiv_of_surjective _ hπ in
-    (λ (i : quotient (setoid.ker π)), quotient.lift_on' i t begin
-      rintros a b (h : π _ = π _),
-      let c : Profinite.pullback π π := ⟨(a,b),h⟩,
-      apply_fun (λ e, e c) at w,
-      exact w,
-    end) ∘ e.symm,
+{ to_fun := (λ i, quotient.lift_on' i t begin
+    rintros a b (h : π _ = π _),
+    apply_fun (λ e, e ⟨(a,b),h⟩) at w,
+    exact w,
+  end : quotient (setoid.ker π) → Y) ∘ (Profinite.quotient_map π hπ).homeomorph.symm,
   continuous_to_fun := begin
-    -- This should follow from the following...
-    have := quotient_map π hπ,
-    sorry,
+    apply continuous.comp,
+    { apply continuous_quot_lift, exact t.continuous },
+    { exact (quotient_map π hπ).homeomorph.symm.continuous }
   end }
 
 @[simp]
@@ -250,7 +249,7 @@ lemma π_descend {X B Y : Profinite} (π : X ⟶ B) (t : X ⟶ Y) (hπ : functio
 begin
   ext i,
   dsimp [descend, setoid.quotient_ker_equiv_of_surjective,
-    setoid.quotient_ker_equiv_of_right_inverse],
+    setoid.quotient_ker_equiv_of_right_inverse, quotient_map.homeomorph],
   let c : pullback π π := ⟨(function.surj_inv hπ (π i), i), function.surj_inv_eq hπ (π i)⟩,
   apply_fun (λ e, e c) at w,
   exact w,
