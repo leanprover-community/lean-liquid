@@ -65,10 +65,13 @@ lemma sheaf_condition_iff :
   presieve.is_sheaf proetale_topology X ↔ condensed_type_condition X :=
 sorry
 
+-- See `Top_to_Condensed` in `condensed/top_comparison.lean`.
+/-
 -- TODO: Double check this definition...
 def embed_Top : Top.{u} ⥤ CondensedSet.{u} :=
 { obj := λ T, ⟨Profinite.to_Top.op ⋙ yoneda.obj T ⋙ ulift_functor.{u+1}, sorry⟩,
   map := λ T₁ T₂ f, ⟨whisker_left _ $ whisker_right (yoneda.map f) _⟩ }
+-/
 
 /-
 -- TODO: State `sheaf_condition_iff` for presheaves taking values in `A` for `A` with appropriate
@@ -84,6 +87,6 @@ def embed_Top : Top.{u} ⥤ CondensedSet.{u} :=
 -/
 
 -- TODO: Use the above to prove the first part of Proposition 1.7:
-lemma embed_Top_faithful : faithful embed_Top := sorry
+-- lemma embed_Top_faithful : faithful embed_Top := sorry
 
 -- TODO: Construct the left adjoint to `embed_Top` as in the second part of Proposition 1.7.
