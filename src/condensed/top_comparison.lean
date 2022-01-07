@@ -7,7 +7,7 @@ import for_mathlib.SheafOfTypes_sheafification
 
 --import category_theory.sites.sheafification
 
-import condensed.ab
+--import condensed.ab
 
 universe u
 
