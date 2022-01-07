@@ -213,6 +213,17 @@ begin
   sorry,
 end
 
+-- **[FAE]** Use `tsum_mul_tsum_eq_tsum_sum_antidiagonal` or even better
+-- `tsum_mul_tsum_eq_tsum_sum_antidiagonal_of_summable_norm` instead!!!
+lemma aux_summable_convolution (f : ℤ → ℤ) (hf : summable (λ n, ∥ f n ∥ * r ^ n)) : summable
+  (λ n : ℤ, 2⁻¹ * ∥ tsum (λ i : ℕ, ((f (n + 1 + i)) : ℝ) * (1 / 2) ^ i) ∥ * r ^ n) :=
+begin
+  sorry,
+  -- have one := @tsum_mul_tsum_eq_tsum_sum_antidiagonal_of_summable_norm,
+  -- -- have two := summable_norm_sum_mul_range_of_summable_norm
+  -- have three := _root_.has_sum_nat_add_iff',
+end
+
 
 -- lemma tail_little_o (f : ℤ → ℤ) (n d : ℤ) (h_sum : summable (λ n : ℤ, ∥ f n ∥ * r ^n)) :
 --  tendsto (λ m, (r : ℝ) ^ m * ∥ tsum (λ x : {a : ℤ // a ≥ m + 1}, (f x : ℝ) * (1 / 2) ^ x.1) ∥ )
@@ -266,20 +277,36 @@ open finset nat set
 
 -- end `mathlib`
 
--- lemma rearraging_of_kerθ (f : ℤ → ℤ)
+-- lemma kerθ_rewrite (f : ℤ → ℤ)
 --   (hf : has_sum (λ n, ((f n) : ℝ) * (1 / 2) ^ n) 0) (N : ℕ) :
 --   ∑ (i : ℕ) in range (N + 1), ((f i) : ℝ) * (1 / 2) ^ i = ∑'
 
-lemma summable_convolution (f : ℤ → ℤ) (hf : summable (λ n, ∥ f n ∥ * r ^ n)) : summable
-  (λ n : ℕ, tsum (λ i : ℕ, ((f (n + i)) : ℝ) * (2 ^ i)⁻¹) * r ^ n) :=
-begin
-  sorry,
-end
+
+
+-- example (g : ℕ → ℝ) (n : ℕ) (h : summable (λ x, g x)) : (2 : ℝ) ^ n * ∑' (x : {a // a ≥ n.succ}),
+-- (g x) * (2 ^ x.val)⁻¹ =
+--   2⁻¹ * ∑' (i : ℕ), g (n + 1 + i) * (2 ^ i)⁻¹ :=
+-- begin
+--   have one := (@tsum_smul_const ℝ ℕ ℝ _ _ _ _ _ _ g _ (2 ^ n) h).symm,
+--   rw [smul_eq_mul, mul_comm] at one,
+--   simp_rw [smul_eq_mul] at one,sorry,
+--   -- have two
+
+--   -- have one := λ a : ℝ, @finset.has_sum_compl_iff ℝ ℕ _ _ _ g a (range n.succ),
+--   -- have two := @tsum_eq_tsum_of_has_sum_iff_has_sum ℝ ℕ _ _ _ _ _ _ one,
+--   -- refine tsum_eq_tsum_of_has_sum_iff_has_sum one,
+-- end
+
+-- example (f g : ℕ → ℝ) (a b : ℝ) (h : has_sum (λ x, f x) = has_sum (λ x, g x)) :
+--   ∑' (x : ℕ), f x = ∑' (x : ℕ), g x :=
+-- begin
+--   simp,
+--   -- have hg.tsum_eq,
+-- end
 
 
 lemma tsum_reindex (F : ℒ S) (N : ℤ) (s : S) : ∑' (l : ℕ), (F s (N + l) : ℝ) * (2 ^ l)⁻¹ =
  2 ^ N * ∑' (m : {m : ℤ // N ≤ m}), (F s m : ℝ) * (2 ^ m.1) ⁻¹ := sorry
-
 
 def ψ (F : ℒ S) (hF : θ S F = 0) : ℒ S :=
 begin
@@ -293,8 +320,10 @@ begin
   use b,
   intro s,
   -- apply (aux_summable_iff_on_nat F.d _).mpr,
-  have h_θ : ∀ n : ℤ, ∥ b s n ∥ * r ^ (n : ℤ)  = --it was ∀ m : ℕ,
-      tsum (λ l : ℕ, ((F s (n + l)) : ℝ) * (1 / 2) ^ l) * r ^ (n : ℤ),
+  -- have h_θ : ∀ n : ℤ, ∥ b s n ∥ * r ^ (n : ℤ)  =
+  --   2⁻¹ * tsum (λ i : ℕ, ((F s (n + 1 + i)) : ℝ) * (1 / 2) ^ i) * r ^ (n : ℤ), sorry,
+  have h_θ : ∀ n : ℤ, ∥ b s n ∥ * r ^ (n : ℤ)  =
+    2⁻¹ * ∥ tsum (λ i : ℕ, ((F s (n + 1 + i)) : ℝ) * (1 / 2) ^ i) ∥ * r ^ (n : ℤ),
   { dsimp only [b],--needed?
     intro n,
     simp only [one_div, sub_nonneg, ge_iff_le, inv_pow₀, mul_eq_mul_right_iff],
@@ -304,20 +333,19 @@ begin
       rw dif_neg h_event,
       rw tsum_reindex,
       simp only [subtype.val_eq_coe, norm_zero],
-      suffices : ∑' (m : {m // n ≤ m}), (F s ↑m : ℝ) * (2 ^ ↑m)⁻¹ =
+      suffices : ∑' (m : {m // n + 1 ≤ m}), (F s ↑m : ℝ) * (2 ^ ↑m)⁻¹ =
         ∑' (m : ℤ), (F s m) * (2 ^ m)⁻¹,
       { rw this,
-        --dsimp only [θ, ϑ] at hF,
         simp only [θ, ϑ, one_div, zpow_neg₀, inv_zpow'] at hF,
         replace hF := congr_fun hF s,
         rw real_measures.zero_apply at hF,
-        simp only [zero_eq_mul],
-        apply or.intro_right,
+        simp only [zero_eq_mul, mul_eq_zero, norm_eq_zero],
+        repeat {apply or.intro_right},
         apply hF, },
       { rw tsum_eq_tsum_of_has_sum_iff_has_sum,
         intro z,
         apply @has_sum_subtype_iff_of_support_subset _ _ _ _ (λ m, (F s m : ℝ) * (2 ^ m)⁻¹) z
-          {m : ℤ | n ≤ m},
+          {m : ℤ | n + 1 ≤ m},
         rw function.support_subset_iff',
         intros a ha,
         simp only [int.cast_eq_zero, inv_eq_zero, mul_eq_zero],
@@ -325,64 +353,34 @@ begin
         simp only [not_le, mem_set_of_eq, int.lt_add_one_iff] at ha,
         apply lt_d_eq_zero,
         replace h_event := sub_neg.mp (not_le.mp h_event),
-        -- exact lt_of_le_of_lt ha h_event,
-        exact ha.trans h_event, } },
+        exact lt_of_le_of_lt ha h_event,
+        -- exact ha.trans h_event,
+        } },
     { rw not_lt at h_event,
       let m := (int.eq_coe_of_zero_le h_event).some,
       rw dif_pos h_event,
       simp_rw [← int.norm_cast_real, int.cast_neg, int.cast_sum, int.cast_mul, int.cast_pow,
         int.cast_two],
-      rw sum_range_sum_Icc (F s) n F.d h_event,
-      rw sum_Icc_sum_tail (F s) n F.d _ h_event,
-      {sorry},
-      { --dsimp only [θ, ϑ] at hF,
-        simp only [θ, ϑ, one_div, zpow_neg₀, inv_zpow'] at hF,
-        replace hF := congr_fun hF s,
-        -- rw real_measures.zero_apply at hF,
-        simp only [real_measures.zero_apply, tsum] at hF,
-        have aux_summable := summable_smaller_radius S F s,
-        simp_rw [← inv_eq_one_div, inv_zpow₀] at aux_summable,
-        have := @dif_pos _ _ aux_summable ℝ classical.some
-          (λ (h : ¬summable (λ (n : ℤ), ((F s n) : ℝ) * (2 ^ n)⁻¹)), 0),
-        --**[FAE]**see classical_difference notes
-
-        -- rw hF at this,
-        -- let temp := dite (summable (λ (n : ℤ), ((F s n) : ℝ) * (2 ^ n)⁻¹)) classical.some
-        --   (λ (h : ¬summable (λ (n : ℤ), ((F s n) : ℝ) * (2 ^ n)⁻¹)), 0),
-        -- rw this at temp,
-        -- rw [dif_pos aux_summable] at hF,
-
-        -- rw inv_pow
-        -- have := F.2 s,
-        -- have := summable_convolution (F s) (F.2 s),
-        -- simp [tsum] at hF,
+      rw [sum_range_sum_Icc (F s) n F.d h_event, sum_Icc_sum_tail (F s) n F.d _ h_event],
+      { --have pos_two := inv_nonneg.mpr (@zero_le_two ℝ _),
+        -- have := abs_eq_self.mpr (inv_nonneg.mpr (@zero_le_two ℝ _)),
+        rw [← (abs_eq_self.mpr (inv_nonneg.mpr (@zero_le_two ℝ _))), ← real.norm_eq_abs,
+          ← normed_field.norm_mul, real.norm_eq_abs, real.norm_eq_abs, abs_eq_abs],
+        apply or.intro_left,
         sorry,
-                -- apply hF,
-       },
-      -- rw [dif_pos h_event, nat.sum_antidiagonal_eq_sum_range_succ (λ x y, 2 ^ y * (F s x)) _],
-      -- have h_sub_antidiag : ∀ (k : range m.succ), (2 ^ (m - k) : ℝ) = 2 ^ ((m : ℤ) - (k : ℤ)),
-      --   sorry,
-      -- simp_rw [← int.norm_cast_real, int.cast_neg, int.cast_sum, int.cast_mul, int.cast_pow,
-      --   int.cast_two],
-      -- rw [real.norm_eq_abs, abs_eq_self.mpr, ← sum_attach],
-      -- { simp_rw [h_sub_antidiag, sub_eq_add_neg, (zpow_add₀ (@two_ne_zero ℝ _ _))],
-      --   have aux_coe : ∑ (x : {x : ℕ // x ∈ range m.succ}) in (range m.succ).attach,
-      --     (2 : ℝ) ^ (↑m : ℤ) * 2 ^ -(↑x : ℤ) * (F s (↑(↑x : ℕ) : ℤ)) = ∑ (x : {x : ℕ // x ∈ range m.succ}) in (range m.succ).attach,
-      --     2 ^ (↑m : ℤ) * 2 ^ -(↑(↑x : ℕ) : ℤ) * (F s (↑(↑x : ℕ) : ℤ)), sorry,
-      --   have aux_mul := @mul_sum ℕ ℝ (range m.succ) (2 ^ (m : ℤ)) (λ x, 2 ^ - (x : ℤ) * (F s x)) _,
-      --   simp_rw [← mul_assoc] at aux_mul,
-      --   rw [aux_coe, @sum_attach ℝ ℕ (range m.succ) _
-      --     (λ x, (2 : ℝ) ^ (m : ℤ) * 2 ^ - (x : ℤ) * (F s x)), ← aux_mul],
-      --   rw tsum_reindex,
-      }},
-  replace h_θ : ∀ m : ℕ, ∥ b s m ∥ * r ^ (m : ℤ)  =
-    tsum (λ l : ℕ, ((F s (m + l)) : ℝ) * (1 / 2) ^ l) * r ^ (m : ℤ),
-    { sorry--not clear if first proving it ∀ m : ℤ and then specializing to ∀ m : ℕ was a good idea
       },
-  apply (aux_summable_iff_on_nat F.d _).mpr,
-  sorry,
-  -- apply (summable_congr h_θ).mpr (summable_convolution (F s) (F.2 s)),
-  exact λ _ hn, dif_neg ((lt_iff_not_ge _ _).mp (sub_neg.mpr hn)),
+      { simp only [θ, ϑ, one_div] at hF,
+        replace hF := congr_fun hF s,
+        simp only [real_measures.zero_apply, inv_eq_one_div] at hF,
+        simp_rw [← inv_zpow₀, inv_eq_one_div],
+        exact (summable.has_sum_iff (summable_smaller_radius S F s)).mpr hF }}},
+
+  apply (summable_congr h_θ).mpr,
+  -- have := (summable_congr h_θ').mpr,
+  -- rw [real.norm_eq_abs (r : ℝ)] at this,
+  have := aux_summable_convolution (F s) (F.2 s),
+  exact this,
+  -- exact (summable_congr h_θ).mpr (aux_summable_convolution (F s) (F.2 s)),
 end
 
 theorem θ_ϕ_exact (F : ℒ S) (hF : θ S F = 0) : ∃ G, ϕ S G = F := sorry
