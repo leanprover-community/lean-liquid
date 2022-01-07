@@ -242,6 +242,7 @@ def descend {X B Y : Profinite} (π : X ⟶ B) (t : X ⟶ Y) (hπ : function.sur
     { exact (quotient_map π hπ).homeomorph.symm.continuous }
   end }
 
+-- TODO: Define `foo_to_Top` analogues for the colimit-like constructions above.
 noncomputable
 def descend_to_Top {X B : Profinite} {Y : Top} (π : X ⟶ B) (t : Profinite.to_Top.obj X ⟶ Y)
   (hπ : function.surjective π)
