@@ -239,7 +239,7 @@ def descend {X B Y : Profinite} (π : X ⟶ B) (t : X ⟶ Y) (hπ : function.sur
     end) ∘ e.symm,
   continuous_to_fun := begin
     -- This should follow from the following...
-    have := discrete_quotient.quotient_map π hπ, -- TODO: This is in the wrong namespace :-/
+    have := quotient_map π hπ,
     sorry,
   end }
 
