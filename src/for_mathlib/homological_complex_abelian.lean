@@ -1,5 +1,6 @@
 import algebra.homology.additive
 import category_theory.abelian.basic
+import category_theory.limits.constructions.epi_mono
 
 open category_theory category_theory.limits
 
@@ -380,30 +381,15 @@ begin
 end
 .
 
-section mathlib_PR_10780
+-- move this
+lemma has_pullback_of_size (C : Type u) [category.{v} C] [has_pullbacks C] :
+  has_limits_of_shape walking_cospan.{w} C :=
+has_limits_of_shape_of_equivalence walking_cospan_equiv.{v}
 
-universes v₁ v₂ u₁ u₂
-
-variables {C : Type u₁} {D : Type u₂} [category.{v₁} C] [category.{v₂} D]
-variables (F : C ⥤ D)
-
-instance _root_.category_theory.preserves_mono
-  {X Y : C} (f : X ⟶ Y) [preserves_limit (cospan f f) F] [mono f] : mono (F.map f) :=
-sorry
-
-instance _root_.category_theory.preserves_epi
-  {X Y : C} (f : X ⟶ Y) [preserves_colimit (span f f) F] [epi f] : epi (F.map f) :=
-sorry
-
-variable (C)
-
-lemma has_pullback_of_size [has_pullbacks C] : has_limits_of_shape walking_cospan.{w} C :=
-sorry
-
-lemma has_pushout_of_size [has_pushouts C] : has_colimits_of_shape walking_span.{w} C :=
-sorry
-
-end mathlib_PR_10780
+-- move this
+lemma has_pushout_of_size (C : Type u) [category.{v} C] [has_pushouts C] :
+  has_colimits_of_shape walking_span.{w} C :=
+has_colimits_of_shape_of_equivalence walking_span_equiv.{v}
 
 -- move this
 instance [mono f] (i : ι) : mono (f.f i) :=
@@ -411,6 +397,17 @@ begin
   change mono ((eval V c i).map f),
   haveI := has_pullback_of_size.{max u' v} V,
   exact category_theory.preserves_mono _ f,
+end
+
+-- move this
+instance _root_.category_theory.preserves_epi {C : Type u} {D : Type u'}
+  [category.{v} C] [category.{v'} D]
+  (F : C ⥤ D) {X Y : C} (f : X ⟶ Y) [preserves_colimit (span f f) F] [epi f] :
+  epi (F.map f) :=
+begin
+  have := is_colimit_pushout_cocone_map_of_is_colimit F _ (pushout_cocone.is_colimit_mk_id_id f),
+  simp_rw [F.map_id] at this,
+  apply pushout_cocone.epi_of_is_colimit_mk_id_id _ this,
 end
 
 -- move this

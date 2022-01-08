@@ -222,8 +222,8 @@ omit comm
 --     ext; simp [h₁.zero _ _ r', h₂.zero _ _ r] } }
 
 -- I suppose this is not true?
-def cone.map_homotopy_of_homotopy' (comm' : homotopy (f ≫ i₂) (i₁ ≫ f')) :
-  homotopy (cone.map comm) (cone.map comm') := sorry
+-- def cone.map_homotopy_of_homotopy' (comm' : homotopy (f ≫ i₂) (i₁ ≫ f')) :
+--   homotopy (cone.map comm) (cone.map comm') := sorry
 
 @[simps]
 def cone.triangleₕ_map : cone.triangleₕ f ⟶ cone.triangleₕ f' :=
@@ -264,17 +264,17 @@ def cone.triangle_functorial :
 
 
 -- I suppose this is also not true?
-def cone.triangleₕ_functorial :
-  arrow (homotopy_category V (complex_shape.up ℤ)) ⥤
-    triangulated.triangle (homotopy_category V (complex_shape.up ℤ)) :=
-{ obj := λ f, cone.triangleₕ f.hom.out,
-  map := λ f g c, @cone.triangleₕ_map _ _ _ _ _ _ _ _ _ c.left.out c.right.out
-  begin
-    refine homotopy_category.homotopy_of_eq _ _ _,
-    simpa [-arrow.w] using c.w.symm
-  end,
-  map_id' := sorry,
-  map_comp' := sorry }
+-- def cone.triangleₕ_functorial :
+--   arrow (homotopy_category V (complex_shape.up ℤ)) ⥤
+--     triangulated.triangle (homotopy_category V (complex_shape.up ℤ)) :=
+-- { obj := λ f, cone.triangleₕ f.hom.out,
+--   map := λ f g c, @cone.triangleₕ_map _ _ _ _ _ _ _ _ _ c.left.out c.right.out
+--   begin
+--     refine homotopy_category.homotopy_of_eq _ _ _,
+--     simpa [-arrow.w] using c.w.symm
+--   end,
+--   map_id' := sorry,
+--   map_comp' := sorry }
 
 variables {C : cochain_complex V ℤ} (g : B ⟶ C)
 
