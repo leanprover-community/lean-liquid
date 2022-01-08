@@ -506,6 +506,4 @@ def triangleₕ_map_splittings_iso (h h' : ∀ (i : ℤ), splitting (f.f i) (g.f
 
 end termwise_split_exact
 
-example (n : ℤ) := let a := (-1 : units ℤ) • f in by { }
-
 end homological_complex
