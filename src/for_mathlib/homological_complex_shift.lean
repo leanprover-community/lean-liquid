@@ -14,7 +14,9 @@ by { delta neg_one_pow, rw zpow_add, simp }
 
 @[simp] lemma neg_one_pow_one : neg_one_pow 1 = -1 := rfl
 
-@[simp] lemma neg_one_pow_neg_one : neg_one_pow (-1) = -1 := rfl
+-- This lemma is provable by `neg_one_pow_neg`, but it is nice to have a rfl-lemma for this.
+-- The priority is thus higher to silence the linter.
+@[simp, priority 1100] lemma neg_one_pow_neg_one : neg_one_pow (-1) = -1 := rfl
 
 @[simp] lemma neg_one_pow_neg_zero : neg_one_pow 0 = 1 := rfl
 
@@ -26,6 +28,18 @@ begin
   { rw [sub_eq_add_neg, neg_one_pow_add],
     simp [h, apply_ite has_neg.neg] with parity_simps }
 end
+
+lemma neg_one_pow_even {n : ℤ} (h : even n) : neg_one_pow n = 1 :=
+by rw [neg_one_pow_ite, if_pos h]
+
+lemma neg_one_pow_odd {n : ℤ} (h : odd n) : neg_one_pow n = -1 :=
+by rw [neg_one_pow_ite, if_neg (odd_iff_not_even.mp h)]
+
+@[simp] lemma neg_one_pow_bit0 (n : ℤ) : neg_one_pow (bit0 n) = 1 :=
+neg_one_pow_even (even_bit0 n)
+
+@[simp] lemma neg_one_pow_bit1 (n : ℤ) : neg_one_pow (bit1 n) = -1 :=
+neg_one_pow_odd (odd_bit1 n)
 
 lemma neg_one_pow_eq_pow_abs (n : ℤ) : neg_one_pow n = (-1) ^ n.nat_abs :=
 begin
@@ -80,17 +94,7 @@ def shift_functor (n : ℤ) : cochain_complex V ℤ ⥤ cochain_complex V ℤ :=
       rwa complex_shape.up_add_right_cancel } },
   map := λ X Y f, { f := λ i, f.f _ } }
 
-.
-
 variables {V} {ι : Type*} {c : complex_shape ι}
-
--- @[simps]
--- def iso_of_components {X Y : homological_complex V c} (e : Π i, X.X i ≅ Y.X i)
---   (h : ∀ i j, c.rel i j → (e i).hom ≫ Y.d i j = X.d i j ≫ (e j).hom) : X ≅ Y :=
--- { hom := { f := λ i, (e i).hom },
---   inv := { f := λ i, (e i).inv,
---     comm' := λ i j r, by { rwa [iso.inv_comp_eq, ← category.assoc, iso.eq_comp_inv, h] } } }
--- .
 
 def X_eq_to_iso (X : homological_complex V c) {i j : ι} (h : i = j) : X.X i ≅ X.X j :=
 eq_to_iso $ congr_arg X.X h
@@ -138,7 +142,6 @@ has_shift_mk _ _
   associativity := λ m₁ m₂ m₃ X, by { ext, dsimp, simp [X_eq_to_iso] },
   left_unitality := λ n X, by { ext, dsimp, simpa [X_eq_to_iso] },
   right_unitality := λ n X, by { ext, dsimp, simpa [X_eq_to_iso] } }
-.
 
 local attribute[instance] endofunctor_monoidal_category
 
@@ -212,7 +215,6 @@ begin
     simp only [functor.comp_map, ← functor.map_comp],
     congr' 1, ext, dsimp, simp }
 end
-.
 
 @[simp]
 lemma homotopy_category.shift_functor_obj_as {X : cochain_complex V ℤ} (n : ℤ) :
@@ -240,7 +242,7 @@ has_shift_mk _ _
   right_unitality := λ n ⟨X⟩, by { dsimp [homotopy_category.shift_ε,
     homotopy_category.shift_functor_add], rw quotient_eq_to_hom, simp only [← functor.map_comp],
     congr' 1, ext, simp [X_eq_to_iso] } }
-.
+
 @[simp] lemma homotopy_category.quotient_obj_shift (X : cochain_complex V ℤ) (n : ℤ) :
   ((homotopy_category.quotient V _).obj X)⟦n⟧ = ⟨X⟦n⟧⟩ := rfl
 
@@ -250,5 +252,26 @@ has_shift_mk _ _
 @[simp] lemma homotopy_category.quotient_map_shift {X Y : cochain_complex V ℤ} (f : X ⟶ Y) (n : ℤ) :
   ((homotopy_category.quotient V _).map f)⟦n⟧' = (homotopy_category.quotient V _).map (f⟦n⟧') := rfl
 
+local attribute [reducible] discrete.add_monoidal
+
+@[simp] lemma shift_μ_hom_app_f (A : cochain_complex V ℤ) (i j k : ℤ) :
+  hom.f (((shift_monoidal_functor _ ℤ).μ i j).app A) k =
+    (A.X_eq_to_iso $ by { dsimp, ring }).hom := rfl
+
+@[simp] lemma shift_ε_hom_app_f (A : cochain_complex V ℤ) (i : ℤ) :
+  hom.f ((shift_monoidal_functor _ ℤ).ε.app A) i = (A.X_eq_to_iso $ by { dsimp, ring }).hom :=
+rfl
+
+@[simp]
+lemma shift_μ_inv_app_f (A : cochain_complex V ℤ) (i : ℤ) :
+  hom.f ((shift_monoidal_functor _ ℤ).ε_iso.inv.app A) i =
+    (A.X_eq_to_iso $ by { dsimp, ring }).hom :=
+begin
+  haveI : epi (hom.f ((shift_monoidal_functor _ ℤ).ε.app A) i),
+  { rw shift_ε_hom_app_f, apply_instance },
+  rw [← cancel_epi (hom.f ((shift_monoidal_functor _ ℤ).ε.app A) i), ← comp_f,
+    category_theory.ε_hom_inv_app, homological_complex.id_f],
+  dsimp, simpa
+end
 
 end homological_complex

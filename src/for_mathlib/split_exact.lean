@@ -82,26 +82,77 @@ namespace splitting
 
 attribute [simp, reassoc] comp_iso_eq_inl iso_comp_snd_eq
 
-variables {f g}
+variables {f g} (h : splitting f g)
 
-@[simp, reassoc] lemma inl_comp_iso_eq (h : splitting f g) : biprod.inl ≫ h.iso.inv = f :=
+@[simp, reassoc] lemma inl_comp_iso_eq : biprod.inl ≫ h.iso.inv = f :=
 by rw [iso.comp_inv_eq, h.comp_iso_eq_inl]
 
-@[simp, reassoc] lemma iso_comp_eq_snd (h : splitting f g) : h.iso.inv ≫ g = biprod.snd :=
+@[simp, reassoc] lemma iso_comp_eq_snd : h.iso.inv ≫ g = biprod.snd :=
 by rw [iso.inv_comp_eq, h.iso_comp_snd_eq]
+
+def _root_.category_theory.splitting.section : C ⟶ B := biprod.inr ≫ h.iso.inv
+
+def retraction : B ⟶ A := h.iso.hom ≫ biprod.fst
+
+@[simp, reassoc] lemma section_π : h.section ≫ g = 𝟙 _ := by { delta splitting.section, simp }
+
+@[simp, reassoc] lemma ι_retraction : f ≫ h.retraction = 𝟙 _ := by { delta retraction, simp }
+
+@[simp, reassoc] lemma section_retraction : h.section ≫ h.retraction = 0 :=
+by { delta splitting.section retraction, simp }
+
+lemma split_add : h.retraction ≫ f + g ≫ h.section = 𝟙 _ :=
+begin
+  delta splitting.section retraction,
+  rw [← cancel_mono h.iso.hom, ← cancel_epi h.iso.inv],
+  simp
+end
+
+@[reassoc]
+lemma retraction_ι_eq_id_sub :
+  h.retraction ≫ f = 𝟙 _ - g ≫ h.section :=
+eq_sub_iff_add_eq.mpr h.split_add
+
+@[reassoc]
+lemma π_section_eq_id_sub :
+  g ≫ h.section = 𝟙 _ - h.retraction ≫ f :=
+eq_sub_iff_add_eq.mpr ((add_comm _ _).trans h.split_add)
+
+protected lemma mono (h : splitting f g) : mono f :=
+begin
+  apply mono_of_mono _ h.retraction,
+  rw h.ι_retraction,
+  apply_instance
+end
+
+protected lemma epi (h : splitting f g) : epi g :=
+begin
+  apply_with (epi_of_epi h.section) { instances := ff },
+  rw h.section_π,
+  apply_instance
+end
+
+instance (h : splitting f g) : mono h.section :=
+by { delta splitting.section, apply_instance }
+
+instance (h : splitting f g) : epi h.retraction :=
+by { delta retraction, apply epi_comp }
+
+lemma splittings_comm (h h' : splitting f g) :
+  h'.section ≫ h.retraction = - h.section ≫ h'.retraction :=
+begin
+  haveI := h.mono,
+  rw ← cancel_mono f,
+  simp [retraction_ι_eq_id_sub],
+end
 
 lemma split (h : splitting f g) : split f g :=
 begin
   let φ := h.iso.hom ≫ biprod.fst,
   let χ := biprod.inr ≫ h.iso.inv,
-  refine ⟨⟨φ, χ, _, _, _, _, _⟩⟩,
-  { rw [h.comp_iso_eq_inl_assoc, biprod.inl_fst], },
-  { rw [category.assoc, iso_comp_eq_snd, biprod.inr_snd], },
-  { rw [← h.inl_comp_iso_eq, category.assoc, h.iso_comp_eq_snd, biprod.inl_snd], },
-  { simp only [iso.inv_hom_id_assoc, biprod.inr_fst, category.assoc], },
-  { rw [← cancel_mono h.iso.hom, ← cancel_epi h.iso.inv],
-    simp only [comp_add, add_comp, category.assoc, iso.inv_hom_id_assoc, biprod.total,
-      category.id_comp, category.comp_id, comp_iso_eq_inl, iso_comp_eq_snd_assoc, iso.inv_hom_id], }
+  refine ⟨⟨h.retraction, h.section, h.ι_retraction, h.section_π, _,
+    h.section_retraction, h.split_add⟩⟩,
+  rw [← h.inl_comp_iso_eq, category.assoc, h.iso_comp_eq_snd, biprod.inl_snd],
 end
 
 lemma exact_of_split {A B C : 𝒜} (f : A ⟶ B) (g : B ⟶ C) (χ : C ⟶ B) (φ : B ⟶ A)
