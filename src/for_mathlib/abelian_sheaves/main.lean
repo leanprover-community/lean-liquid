@@ -209,7 +209,7 @@ coim ((Sheaf_to_presheaf J A).map η) ⟶ (Sheaf_to_presheaf J A).obj (kernel_sh
 (coim_to_im _ ≫ limits.kernel.lift _ (limits.kernel.ι _) begin
   dsimp [cokernel_π],
   rw [← category.assoc, limits.kernel.condition],
-  simp,
+  simp only [limits.zero_comp],
 end)
 
 def coim_to_im' {F G : Sheaf J A} (η : F ⟶ G) :
