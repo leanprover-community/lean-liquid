@@ -170,34 +170,6 @@ open_locale big_operators topological_space
 -- `tsum_mul_tsum_eq_tsum_sum_antidiagonal_of_summable_norm` instead!!!
 -- lemma Icc_nneg (d : ℤ) : ∀ n : ℤ, (n + d) ≥ 0 → ∀ (k ∈ finset.Icc (- d) n), n - k ≥ (0 : ℤ) := sorry
 
--- def g : ℕ → ℝ := λ n, ∥ (2 : ℝ) ^ (- n : ℝ) ∥
-
--- example (F : ℒ S) (s : S) (k : ℕ) : Prop :=
---   -- summable (λ n,
--- begin
---   have menouno := F.2 s,
---   have zero := lt_d_eq_zero S F s,
---   have uno := (aux_summable_iff_on_nat F.d zero).mp menouno,
---   have due : (r : ℝ) = ∥ (r : ℝ) ∥, sorry,
---   rw due at uno,
---   simp_rw [← normed_field.norm_zpow, ← int.norm_cast_real] at uno,
---   have h_mul : ∀ n : ℕ, ∥ ((F s n) : ℝ) ∥ * ∥ (r : ℝ) ^ (n : ℤ) ∥ = ∥ ((F s n) : ℝ) * (r ^ n) ∥ :=
---     λ n, (normed_field.norm_mul _ _).symm,
---   simp_rw h_mul at uno,
---   have quattro : summable g, sorry,
---   -- simp_rw (λ n, exact (normed_field.norm_mul _ _).symm) at uno,
---   -- simp_rw [← norm_mul] at uno,/
---   -- simp_rw [normed_field.norm_mul, normed_field.norm_zpow, normed_field.norm_div, real.norm_two,
---   --     norm_one, abs_sum] at this,
-
---   --simp_rw [← int.norm_cast_real, int.cast_mul, normed_field.norm_mul, int.norm_cast_real,
---       -- mul_assoc],
---   have := tsum_mul_tsum_eq_tsum_sum_antidiagonal_of_summable_norm uno quattro,
-
---   --joke
---   use 0 = 0 ,
--- end
-
 lemma sum_range_sum_Icc (f : ℤ → ℤ) (n d : ℤ) (hn : 0 ≤ n - d) :
  ∑ l in (range (int.eq_coe_of_zero_le hn).some.succ), (f (n - l) : ℝ) * 2 ^ l =
  ∑ k in (Icc d n), ((f k) : ℝ) * 2 ^ (n - k) :=
@@ -224,58 +196,10 @@ begin
   -- have three := _root_.has_sum_nat_add_iff',
 end
 
-
--- lemma tail_little_o (f : ℤ → ℤ) (n d : ℤ) (h_sum : summable (λ n : ℤ, ∥ f n ∥ * r ^n)) :
---  tendsto (λ m, (r : ℝ) ^ m * ∥ tsum (λ x : {a : ℤ // a ≥ m + 1}, (f x : ℝ) * (1 / 2) ^ x.1) ∥ )
---   at_top (𝓝 0) :=
--- begin
---   sorry
--- end
-
 -- for `mathlib`
 
 open finset nat set
--- open_locale classical big_operators
 
--- -- def cauchy_product' (a b : ℕ → ℝ) : ℕ → ℝ :=
--- --   λ n, (∑ p : (finset.nat.antidiagonal n), (a p.1.fst) * (b p.1.snd))
-
--- -- lemma has_sum.cauchy_product {a b : ℕ → ℝ} {A B : ℝ} (ha : has_sum (λ n, abs a n)A) (hb : has_sum (λ n, b n) B) : has_sum (cauchy_product' a b) (A * B) :=  sorry
--- -- -- use things around has_sum_iff_tendsto_nat_of_summable_norm to derive the above from the actual cauchy_product statement
-
--- -- lemma summable.cauchy_product {a b : ℕ → ℝ} (ha : summable (λ n, abs a n)) (hb : summable (λ n, b n)) : summable (cauchy_product' a b) := (ha.has_sum.cauchy_product hb.has_sum).summable
-
--- lemma order_iso.order_bot_if {α β : Type* } [preorder α] [partial_order β]
---   [order_bot α] (f : α ≃o β) : order_bot β :=
--- begin
---   use f ⊥,
---   intro a,
---   obtain ⟨_, hx⟩ : ∃ x : α, f.1 x = a := by {apply f.1.surjective},
---   rw ← hx,
---   apply f.map_rel_iff.mpr bot_le,
--- end
-
--- lemma order_iso.restrict {α β : Type} [linear_order α] [preorder β] (e : α ≃o β) (s : set α) :
---   s ≃o e '' s := strict_mono_on.order_iso e.1 s (λ _ _ _ _ h, (e.strict_mono) h)
-
--- -- def exp_range_restrict := (real.exp_order_iso).restrict  (range (coe : ℕ → ℝ))
--- -- def ν := strict_mono.order_iso (coe : ℕ → ℝ) (@strict_mono_cast ℝ _ _)
--- def natexp := (strict_mono.order_iso (coe : ℕ → ℝ)
---   (@strict_mono_cast ℝ _ _)).trans ((real.exp_order_iso).restrict (range (coe : ℕ → ℝ)))
-
--- instance : order_bot ↥(⇑real.exp_order_iso '' range (coe : ℕ → ℝ)) := natexp.order_bot_if
--- instance : has_bot ↥(⇑real.exp_order_iso '' range (coe : ℕ → ℝ)) := by apply_instance
-
--- lemma has_bot_support (F : ℒ S) (s : S) : has_bot (function.support (F s)) :=
--- begin
---   /- The proof should just be a restatement of `laurent_measures.eq_zero_of_filtration` using the
---   above instances that guarantee that the image of n ↦ exp n has a ⊥. The second instance actually
---   must be improved, and must prove that the image of n ↦ r ^ n - c has a ⊥, for all c.
---   -/
---   sorry,
--- end
-
--- end `mathlib`
 
 -- lemma kerθ_rewrite (f : ℤ → ℤ)
 --   (hf : has_sum (λ n, ((f n) : ℝ) * (1 / 2) ^ n) 0) (N : ℕ) :
@@ -297,13 +221,54 @@ open finset nat set
 --   -- refine tsum_eq_tsum_of_has_sum_iff_has_sum one,
 -- end
 
--- example (f g : ℕ → ℝ) (a b : ℝ) (h : has_sum (λ x, f x) = has_sum (λ x, g x)) :
---   ∑' (x : ℕ), f x = ∑' (x : ℕ), g x :=
+lemma equiv_bdd_integer_nat (N : ℤ) : ℕ ≃ {x // N ≤ x} :=
+begin
+  fconstructor,
+  { intro n,
+    use n + N,
+    rw le_add_iff_nonneg_left,
+    exact int.coe_nat_nonneg n },
+  { rintro ⟨x, hx⟩,
+    use (int.eq_coe_of_zero_le (sub_nonneg.mpr hx)).some },
+  { intro a,
+    simp_rw [add_tsub_cancel_right],
+    exact (int.coe_nat_inj $ Exists.some_spec $ int.eq_coe_of_zero_le $ int.of_nat_nonneg a).symm },
+  { rintro ⟨_, hx⟩,
+    simp only,
+    apply add_eq_of_eq_sub,
+    exact ((int.eq_coe_of_zero_le (sub_nonneg.mpr hx)).some_spec).symm }
+end
+
+lemma nat_sum_shift' (f : ℕ → ℝ) (N : ℕ) (h : summable f):
+  ∑' (x : ℕ), f (x + N) = ∑' (x : {x // x ∉ finset.range N}), f x :=
+begin
+  apply has_sum.tsum_eq,
+  apply (@equiv.has_sum_iff ℝ _ ℕ _ _ (f ∘ coe) _ ((not_mem_range_equiv N).symm)).mpr,
+  rw (h.comp_injective (@subtype.coe_injective _ (∉ finset.range N))).has_sum_iff,
+end
+
+-- lemma nat_sum_shift (f : ℕ → ℝ) (N : ℕ) (h : summable f)
+--   (e : {x // N ≤ x} ≃ ℕ := (λ x , x.1 +N)) :
+--   ∑' (x : ℕ), f (x + N) = ∑' (x : {x // N ≤ x}), f x :=
 -- begin
---   simp,
---   -- have hg.tsum_eq,
+--   apply has_sum.tsum_eq,
+--   have := (@equiv.has_sum_iff ℝ _ ℕ _ _ (f ∘ coe) _ ((e).symm)).mpr,
+--   rw (h.comp_injective (@subtype.coe_injective _ (∉ finset.range N))).has_sum_iff,
 -- end
 
+-- lemma int_sum_shift (f : ℤ → ℝ) (N : ℤ) (h : summable f):
+--   ∑' (x : ℕ), f (x + N) = ∑' (x : {x // x ∉ finset.range N}), f x :=
+
+lemma nat_tsum_reindex (f : ℕ → ℤ) (N : ℕ) (h : summable f) :
+  ∑' (l : ℕ), (f (N + l) : ℝ) * (2 ^ l)⁻¹ =
+    2 ^ N * ∑' (m : {m : ℕ // N ≤ m}), (f m : ℝ) * (2 ^ m.1) ⁻¹ :=
+begin
+  have h_shift := @_root_.has_sum_nat_add_iff ℤ _ _ _ f N h.some,
+
+  sorry; {have h_compl := @sum_add_tsum_compl ℤ ℕ _ _ _ f _ (range N.succ) h,
+  have h_shift := @_root_.has_sum_nat_add_iff ℤ _ _ _ f N,
+  have h_shift' := @tsum_eq_tsum_of_has_sum_iff_has_sum ℤ ℕ ℕ _ _ _ f f,}
+end
 
 lemma tsum_reindex (F : ℒ S) (N : ℤ) (s : S) : ∑' (l : ℕ), (F s (N + l) : ℝ) * (2 ^ l)⁻¹ =
  2 ^ N * ∑' (m : {m : ℤ // N ≤ m}), (F s m : ℝ) * (2 ^ m.1) ⁻¹ := sorry
