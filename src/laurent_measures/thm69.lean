@@ -109,7 +109,6 @@ lemma aux_summable_iff_on_nat {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ) (hf : �
 lemma summable_smaller_radius (F : ℒ S) (s : S) :
   summable (λ n, (F.to_fun s n : ℝ) * (1 / 2) ^ n) :=
 begin
-  -- the proof breaks with `summable (λ n, (F s n : ℝ) * (1 / 2) ^ n) :=`
  suffices abs_sum : summable (λ n, ∥ ((F.to_fun s n) : ℝ) ∥ * (1 / 2) ^ n),
   { apply summable_of_summable_norm,
     simp_rw [normed_field.norm_mul, normed_field.norm_zpow, normed_field.norm_div, real.norm_two,
@@ -155,7 +154,6 @@ begin
     let e : ℤ ≃ ℤ := ⟨λ n : ℤ, n - 1, λ n, n + 1, by {intro, simp}, by {intro, simp}⟩,
     apply (equiv.has_sum_iff e).mpr,
     exact (summable_smaller_radius S ⟨f, hf⟩ s).some_spec },
-    -- sorry},--the `exact` above was ok with the old version of summable_smaller_radius
   simp_rw [sub_mul],
   rw [tsum_sub h_pos.summable, sub_eq_zero, h_pos.tsum_eq],
   exacts [(summable_smaller_radius S ⟨f, hf⟩ s).some_spec.tsum_eq.symm,
@@ -166,9 +164,9 @@ open finset filter
 open_locale big_operators topological_space
 
 
--- **[FAE]** Use `tsum_mul_tsum_eq_tsum_sum_antidiagonal` or even better
--- `tsum_mul_tsum_eq_tsum_sum_antidiagonal_of_summable_norm` instead!!!
--- lemma Icc_nneg (d : ℤ) : ∀ n : ℤ, (n + d) ≥ 0 → ∀ (k ∈ finset.Icc (- d) n), n - k ≥ (0 : ℤ) := sorry
+/-**[FAE]** Use `tsum_mul_tsum_eq_tsum_sum_antidiagonal` or even better
+`tsum_mul_tsum_eq_tsum_sum_antidiagonal_of_summable_norm` instead!!!
+-/
 
 lemma sum_range_sum_Icc (f : ℤ → ℤ) (n d : ℤ) (hn : 0 ≤ n - d) :
  ∑ l in (range (int.eq_coe_of_zero_le hn).some.succ), (f (n - l) : ℝ) * 2 ^ l =
@@ -186,7 +184,7 @@ begin
 end
 
 -- **[FAE]** Use `tsum_mul_tsum_eq_tsum_sum_antidiagonal` or even better
--- `tsum_mul_tsum_eq_tsum_sum_antidiagonal_of_summable_norm` instead!!!
+-- `tsum_mul_tsum_eq_tsum_sum_antidiagonal_of_summable_norm` instead
 lemma aux_summable_convolution (f : ℤ → ℤ) (hf : summable (λ n, ∥ f n ∥ * r ^ n)) : summable
   (λ n : ℤ, 2⁻¹ * ∥ tsum (λ i : ℕ, ((f (n + 1 + i)) : ℝ) * (1 / 2) ^ i) ∥ * r ^ n) :=
 begin
@@ -196,32 +194,8 @@ begin
   -- have three := _root_.has_sum_nat_add_iff',
 end
 
--- for `mathlib`
-
-open finset nat set
-
-
--- lemma kerθ_rewrite (f : ℤ → ℤ)
---   (hf : has_sum (λ n, ((f n) : ℝ) * (1 / 2) ^ n) 0) (N : ℕ) :
---   ∑ (i : ℕ) in range (N + 1), ((f i) : ℝ) * (1 / 2) ^ i = ∑'
-
-
-
--- example (g : ℕ → ℝ) (n : ℕ) (h : summable (λ x, g x)) : (2 : ℝ) ^ n * ∑' (x : {a // a ≥ n.succ}),
--- (g x) * (2 ^ x.val)⁻¹ =
---   2⁻¹ * ∑' (i : ℕ), g (n + 1 + i) * (2 ^ i)⁻¹ :=
--- begin
---   have one := (@tsum_smul_const ℝ ℕ ℝ _ _ _ _ _ _ g _ (2 ^ n) h).symm,
---   rw [smul_eq_mul, mul_comm] at one,
---   simp_rw [smul_eq_mul] at one,sorry,
---   -- have two
-
---   -- have one := λ a : ℝ, @finset.has_sum_compl_iff ℝ ℕ _ _ _ g a (range n.succ),
---   -- have two := @tsum_eq_tsum_of_has_sum_iff_has_sum ℝ ℕ _ _ _ _ _ _ one,
---   -- refine tsum_eq_tsum_of_has_sum_iff_has_sum one,
--- end
-
-lemma equiv_bdd_integer_nat (N : ℤ) : ℕ ≃ {x // N ≤ x} :=
+--for `mathlib`?
+def equiv_bdd_integer_nat (N : ℤ) : ℕ ≃ {x // N ≤ x} :=
 begin
   fconstructor,
   { intro n,
@@ -239,69 +213,53 @@ begin
     exact ((int.eq_coe_of_zero_le (sub_nonneg.mpr hx)).some_spec).symm }
 end
 
-lemma nat_sum_shift' (f : ℕ → ℝ) (N : ℕ) (h : summable f):
-  ∑' (x : ℕ), f (x + N) = ∑' (x : {x // x ∉ finset.range N}), f x :=
+--for mathlib?
+lemma int_tsum_shift (f : ℤ → ℝ) (N : ℤ) (h : summable f) :
+  ∑' (x : ℕ), f (x + N) = ∑' (x : {x // N ≤ x}), f x :=
 begin
-  apply has_sum.tsum_eq,
-  apply (@equiv.has_sum_iff ℝ _ ℕ _ _ (f ∘ coe) _ ((not_mem_range_equiv N).symm)).mpr,
-  rw (h.comp_injective (@subtype.coe_injective _ (∉ finset.range N))).has_sum_iff,
-end
-
--- lemma nat_sum_shift (f : ℕ → ℝ) (N : ℕ) (h : summable f)
---   (e : {x // N ≤ x} ≃ ℕ := (λ x , x.1 +N)) :
---   ∑' (x : ℕ), f (x + N) = ∑' (x : {x // N ≤ x}), f x :=
--- begin
---   apply has_sum.tsum_eq,
---   have := (@equiv.has_sum_iff ℝ _ ℕ _ _ (f ∘ coe) _ ((e).symm)).mpr,
---   rw (h.comp_injective (@subtype.coe_injective _ (∉ finset.range N))).has_sum_iff,
--- end
-
--- lemma int_sum_shift (f : ℤ → ℝ) (N : ℤ) (h : summable f):
---   ∑' (x : ℕ), f (x + N) = ∑' (x : {x // x ∉ finset.range N}), f x :=
-
-lemma nat_tsum_reindex (f : ℕ → ℤ) (N : ℕ) (h : summable f) :
-  ∑' (l : ℕ), (f (N + l) : ℝ) * (2 ^ l)⁻¹ =
-    2 ^ N * ∑' (m : {m : ℕ // N ≤ m}), (f m : ℝ) * (2 ^ m.1) ⁻¹ :=
-begin
-  have h_shift := @_root_.has_sum_nat_add_iff ℤ _ _ _ f N h.some,
-
-  sorry; {have h_compl := @sum_add_tsum_compl ℤ ℕ _ _ _ f _ (range N.succ) h,
-  have h_shift := @_root_.has_sum_nat_add_iff ℤ _ _ _ f N,
-  have h_shift' := @tsum_eq_tsum_of_has_sum_iff_has_sum ℤ ℕ ℕ _ _ _ f f,}
+  apply (equiv.refl ℝ).tsum_eq_tsum_of_has_sum_iff_has_sum rfl,
+  intro _,
+  apply (@equiv.has_sum_iff ℝ _ ℕ _ _ (f ∘ coe) _ ((equiv_bdd_integer_nat N))),
 end
 
 lemma tsum_reindex (F : ℒ S) (N : ℤ) (s : S) : ∑' (l : ℕ), (F s (N + l) : ℝ) * (2 ^ l)⁻¹ =
- 2 ^ N * ∑' (m : {m : ℤ // N ≤ m}), (F s m : ℝ) * (2 ^ m.1) ⁻¹ := sorry
+ 2 ^ N * ∑' (m : {m : ℤ // N ≤ m}), (F s m : ℝ) * (2 ^ m.1)⁻¹ :=
+begin
+  have h_sum := summable_smaller_radius S F s,
+  simp_rw [one_div, inv_zpow'] at h_sum,
+  have h_shift := int_tsum_shift (λ n, (F s n : ℝ) * (2 ^ (-n))) N h_sum,
+  simp only at h_shift,
+  simp_rw [subtype.val_eq_coe, ← zpow_neg₀],
+  rw [← h_shift, ← _root_.tsum_mul_left, tsum_congr],
+  intro n,
+  nth_rewrite_rhs 0 [mul_comm],
+  rw [mul_assoc, ← (zpow_add₀ (@two_ne_zero ℝ _ _)), neg_add_rev, neg_add_cancel_comm, zpow_neg₀,
+    zpow_coe_nat, add_comm],
+end
 
 def ψ (F : ℒ S) (hF : θ S F = 0) : ℒ S :=
 begin
-  classical,
   let b : S → ℤ → ℤ := λ s n,
     if hn : n - F.d ≥ 0 then - ∑ l in range ((int.eq_coe_of_zero_le hn).some.succ),
       (F s (n -l) * (2 ^ l))
-    -- if hn : n - F.d ≥ 0 then - ∑ kl in nat.antidiagonal ((int.eq_coe_of_zero_le hn).some),
-    --   (2 ^ kl.snd) * (F s kl.fst)
     else 0,
   use b,
   intro s,
-  -- apply (aux_summable_iff_on_nat F.d _).mpr,
-  -- have h_θ : ∀ n : ℤ, ∥ b s n ∥ * r ^ (n : ℤ)  =
-  --   2⁻¹ * tsum (λ i : ℕ, ((F s (n + 1 + i)) : ℝ) * (1 / 2) ^ i) * r ^ (n : ℤ), sorry,
   have h_θ : ∀ n : ℤ, ∥ b s n ∥ * r ^ (n : ℤ)  =
     2⁻¹ * ∥ tsum (λ i : ℕ, ((F s (n + 1 + i)) : ℝ) * (1 / 2) ^ i) ∥ * r ^ (n : ℤ),
-  { dsimp only [b],--needed?
+  { dsimp only [b],
     intro n,
     simp only [one_div, sub_nonneg, ge_iff_le, inv_pow₀, mul_eq_mul_right_iff],
     apply or.intro_left,
     by_cases h_event : n - F.d < 0,
     { replace h_event := not_le_of_gt h_event,
-      rw dif_neg h_event,
-      rw tsum_reindex,
+      rw [dif_neg h_event, tsum_reindex],
       simp only [subtype.val_eq_coe, norm_zero],
-      suffices : ∑' (m : {m // n + 1 ≤ m}), (F s ↑m : ℝ) * (2 ^ ↑m)⁻¹ =
-        ∑' (m : ℤ), (F s m) * (2 ^ m)⁻¹,
-      { rw this,
-        simp only [θ, ϑ, one_div, zpow_neg₀, inv_zpow'] at hF,
+      suffices : ∑' (m : {m // n + 1 ≤ m}), (F s ↑m : ℝ) * (2 ^ (- ↑m)) =
+        ∑' (m : ℤ), (F s m) * (2 ^ (-m)),
+      { simp_rw [← zpow_neg₀],
+        rw this,
+        simp only [θ, ϑ, one_div, inv_zpow'] at hF,
         replace hF := congr_fun hF s,
         rw real_measures.zero_apply at hF,
         simp only [zero_eq_mul, mul_eq_zero, norm_eq_zero],
@@ -309,17 +267,16 @@ begin
         apply hF, },
       { rw tsum_eq_tsum_of_has_sum_iff_has_sum,
         intro z,
-        apply @has_sum_subtype_iff_of_support_subset _ _ _ _ (λ m, (F s m : ℝ) * (2 ^ m)⁻¹) z
+        apply @has_sum_subtype_iff_of_support_subset _ _ _ _ (λ m, (F s m : ℝ) * (2 ^ (- m))) z
           {m : ℤ | n + 1 ≤ m},
         rw function.support_subset_iff',
         intros a ha,
         simp only [int.cast_eq_zero, inv_eq_zero, mul_eq_zero],
         apply or.intro_left,
-        simp only [not_le, mem_set_of_eq, int.lt_add_one_iff] at ha,
+        simp only [not_le, set.mem_set_of_eq, int.lt_add_one_iff] at ha,
         apply lt_d_eq_zero,
         replace h_event := sub_neg.mp (not_le.mp h_event),
         exact lt_of_le_of_lt ha h_event,
-        -- exact ha.trans h_event,
         } },
     { rw not_lt at h_event,
       let m := (int.eq_coe_of_zero_le h_event).some,
@@ -327,25 +284,20 @@ begin
       simp_rw [← int.norm_cast_real, int.cast_neg, int.cast_sum, int.cast_mul, int.cast_pow,
         int.cast_two],
       rw [sum_range_sum_Icc (F s) n F.d h_event, sum_Icc_sum_tail (F s) n F.d _ h_event],
-      { --have pos_two := inv_nonneg.mpr (@zero_le_two ℝ _),
-        -- have := abs_eq_self.mpr (inv_nonneg.mpr (@zero_le_two ℝ _)),
-        rw [← (abs_eq_self.mpr (inv_nonneg.mpr (@zero_le_two ℝ _))), ← real.norm_eq_abs,
-          ← normed_field.norm_mul, real.norm_eq_abs, real.norm_eq_abs, abs_eq_abs],
+      { rw [← (abs_eq_self.mpr (inv_nonneg.mpr (@zero_le_two ℝ _))), ← real.norm_eq_abs,
+          ← normed_field.norm_mul, real.norm_eq_abs, real.norm_eq_abs, abs_eq_abs,
+          ← (sub_add_cancel n 1), (sub_eq_add_neg n 1), (add_assoc n _), (add_comm n _),
+          (add_assoc (-1 : ℤ) _ _), (add_comm 1 n), zpow_add₀ (@two_ne_zero ℝ _ _),
+          ← (add_assoc (-1 : ℤ) _ _), neg_add_cancel_comm, ← int.succ, mul_assoc, zpow_neg₀,
+          zpow_one],
         apply or.intro_left,
-        sorry,
-      },
+        rw ← tsum_reindex S F n.succ s },
       { simp only [θ, ϑ, one_div] at hF,
         replace hF := congr_fun hF s,
         simp only [real_measures.zero_apply, inv_eq_one_div] at hF,
         simp_rw [← inv_zpow₀, inv_eq_one_div],
         exact (summable.has_sum_iff (summable_smaller_radius S F s)).mpr hF }}},
-
-  apply (summable_congr h_θ).mpr,
-  -- have := (summable_congr h_θ').mpr,
-  -- rw [real.norm_eq_abs (r : ℝ)] at this,
-  have := aux_summable_convolution (F s) (F.2 s),
-  exact this,
-  -- exact (summable_congr h_θ).mpr (aux_summable_convolution (F s) (F.2 s)),
+  exact (summable_congr h_θ).mpr (aux_summable_convolution (F s) (F.2 s)),
 end
 
 theorem θ_ϕ_exact (F : ℒ S) (hF : θ S F = 0) : ∃ G, ϕ S G = F := sorry
