@@ -109,7 +109,7 @@ instance extend_preserves_limit (X : Profinite) : preserves_limit X.diagram (ext
       dsimp,
       let D'' : cone X.diagram := X.as_limit_cone,
       let f' : X ⟶ D.X := hD.lift D'',
-      sorry
+      admit
     end,
     fac' := _,
     uniq' := _ } }

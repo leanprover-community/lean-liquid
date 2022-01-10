@@ -287,7 +287,7 @@ begin
     intros n,
     refine mul_nonneg (norm_nonneg _) (zpow_nonneg _ _),
     exact nnreal.coe_nonneg r, },
-  { sorry },
+  { admit },
 end
 -/
 
@@ -636,7 +636,7 @@ def c_measures_to_oc (r : ℝ≥0) (c : ℝ≥0) (S : Type*) (hS : fintype S) :
 
 lemma laurent_measures_are_c (r : ℝ≥0) (S : Type*) (hS : fintype S) (F : laurent_measures r S hS) :
   ∃ (c : ℝ≥0) (f : c_measures r c S hS),
-  c_measures_to_oc r c S hS f = F := sorry
+  c_measures_to_oc r c S hS f = F := by admit
 -/
 
 --needed?

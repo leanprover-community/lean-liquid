@@ -223,7 +223,7 @@ omit comm
 
 -- I suppose this is not true?
 -- def cone.map_homotopy_of_homotopy' (comm' : homotopy (f ≫ i₂) (i₁ ≫ f')) :
---   homotopy (cone.map comm) (cone.map comm') := sorry
+--   homotopy (cone.map comm) (cone.map comm') := by admit
 
 @[simps]
 def cone.triangleₕ_map : cone.triangleₕ f ⟶ cone.triangleₕ f' :=
@@ -273,7 +273,7 @@ def cone.triangle_functorial :
 --     refine homotopy_category.homotopy_of_eq _ _ _,
 --     simpa [-arrow.w] using c.w.symm
 --   end,
---   map_id' := sorry,
+--   map_id' := by admit,
 --   map_comp' := sorry }
 
 variables {C : cochain_complex V ℤ} (g : B ⟶ C)

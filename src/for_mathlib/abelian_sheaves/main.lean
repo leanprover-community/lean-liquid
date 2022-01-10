@@ -444,7 +444,7 @@ begin
 end
 
 /-
-{ hom := J.sheafify_lift (limits.kernel.map _ _ (𝟙 _) (J.to_sheafify _) sorry) sorry,
+{ hom := J.sheafify_lift (limits.kernel.map _ _ (𝟙 _) (J.to_sheafify _) (by admit)) (by admit),
   inv := begin
     let e : J.sheafify ((Sheaf_to_presheaf J A).obj G) ⟶
       J.sheafify (limits.cokernel ((Sheaf_to_presheaf J A).map η)) :=
@@ -462,13 +462,13 @@ end
     refine (Sheaf_to_presheaf J A).map (kernel_iso_kernel_sheaf _).inv ≫ _,
     change _ ⟶ (Sheaf_to_presheaf J A).obj ((presheaf_to_Sheaf J A).obj _),
     refine (Sheaf_to_presheaf J A).map _,
-    haveI : is_left_adjoint (presheaf_to_Sheaf J A) := sorry,
+    haveI : is_left_adjoint (presheaf_to_Sheaf J A) := by admit,
     -- Now we need to use the fact that finite limits commute with sheafification,
     -- i.e. that sheafification is left exact.
-    sorry
+    admit
   end,
-  hom_inv_id' := sorry,
-  inv_hom_id' := sorry }
+  hom_inv_id' := by admit,
+  inv_hom_id' := by admit }
 -/
 
 lemma coim_to_im'_eq {F G : Sheaf J A} (η : F ⟶ G) :
