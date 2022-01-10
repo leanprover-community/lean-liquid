@@ -17,6 +17,7 @@ open category_theory
 def Profinite.to_Condensed (T : Profinite.{u}) : CondensedSet :=
 { val := yoneda.obj T ⋙ ulift_functor.{u+1},
   cond := begin
+    rw is_sheaf_iff_is_sheaf_of_type,
     rw (functor.is_proetale_sheaf_of_types_tfae (yoneda.obj T ⋙ ulift_functor.{u+1})).out 0 5,
     refine ⟨_,_,_⟩,
     { dsimp [functor.empty_condition],
@@ -68,6 +69,7 @@ def Profinite_to_Condensed : Profinite ⥤ CondensedSet :=
 def Top.to_Condensed (T : Top.{u}) : CondensedSet :=
 { val := Profinite.to_Top.op ⋙ yoneda.obj T ⋙ ulift_functor.{u+1},
   cond := begin
+    rw is_sheaf_iff_is_sheaf_of_type,
     rw (functor.is_proetale_sheaf_of_types_tfae
       (Profinite.to_Top.op ⋙ yoneda.obj T ⋙ ulift_functor.{u+1})).out 0 5,
     refine ⟨_,_,_⟩,
@@ -139,11 +141,21 @@ open opposite
 
 @[simps]
 def CondensedSet.evaluation (S : Profinite) : CondensedSet.{u} ⥤ Type (u+1) :=
-SheafOfTypes_to_presheaf _ ⋙ (evaluation _ _).obj (op S)
+Sheaf_to_presheaf _ _ ⋙ (evaluation _ _).obj (op S)
 
-instance (S : Profinite) : limits.preserves_limits (CondensedSet.evaluation S) :=
+noncomputable instance (S : Profinite.{u}) :
+  limits.preserves_limits (CondensedSet.evaluation S) :=
 begin
   apply_with limits.comp_preserves_limits { instances := ff },
   swap, apply_instance,
-  apply_instance,
+  have e : creates_limits (Sheaf_to_presheaf proetale_topology.{u} (Type (u+1))) :=
+     Sheaf.category_theory.Sheaf_to_presheaf.category_theory.creates_limits.{(u+2) u (u+1)},
+  apply_with category_theory.preserves_limits_of_creates_limits_and_has_limits { instances := ff },
+  exact e,
+  apply_instance
 end
+
+/- TODO: We need to use something about the sheaf condition in
+terms of extr. disc. sets to obtain this. -/
+instance (S : Profinite.{u}) [projective S] :
+  limits.preserves_colimits (CondensedSet.evaluation S) := sorry
