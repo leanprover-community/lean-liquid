@@ -91,7 +91,7 @@ begin
   introsI m IH Λ S _S_fin V _V_r,
   haveI : pseudo_normed_group.splittable
     (Λ →+ (of r' (Mbar r' S))) (N r r' BD κ' m) (lem98.d Λ (N r r' BD κ' m)) :=
-    lem98 Λ S (N r r' BD κ' m),
+    lem98_finite Λ S (N r r' BD κ' m),
   let cond := NSC.{u} r r' BD V κ κ' (of r' $ Mbar r' S) m Λ _,
   swap,
   { introsI m' hm' Λ,
