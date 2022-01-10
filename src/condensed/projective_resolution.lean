@@ -23,8 +23,55 @@ A -> B epi, Hom(Z[S],A) -> Hom(Z[S],B) -- A(S) -> B(S) WTS: surjective.
 
 -/
 
-local notation `ℤ[`S`]` := -- might want to make a few more definitions instead of just notation
-CondensedSet_to_Condensed_Ab.obj $ S.to_Condensed
+noncomputable theory
+
+def Condensed_Ab.free (S : CondensedSet) : Condensed Ab :=
+CondensedSet_to_Condensed_Ab.obj $ S
+
+local notation `ℤ[`S`]` := Condensed_Ab.free S.to_Condensed
+
+def Condensed.forget_Ab (S : Condensed Ab) : CondensedSet :=
+Condensed_Ab_to_CondensedSet.obj S
+
+def quiver.hom.forget_Ab {S T : Condensed Ab} (e : S ⟶ T) :
+  S.forget_Ab ⟶ T.forget_Ab :=
+Condensed_Ab_to_CondensedSet.map e
+
+namespace Condensed_Ab
+
+def to_free (S : CondensedSet) : S ⟶ Condensed_Ab_to_CondensedSet.obj (free S) :=
+Condensed_Ab_CondensedSet_adjunction.hom_equiv _ _ $ 𝟙 _
+
+def free_lift {S : CondensedSet} {A : Condensed Ab} (e : S ⟶ A.forget_Ab) :
+  free S ⟶ A :=
+(Condensed_Ab_CondensedSet_adjunction.hom_equiv _ _).symm e
+
+@[simp]
+lemma to_free_free_lift {S : CondensedSet} {A : Condensed Ab} (e : S ⟶ A.forget_Ab) :
+  to_free S ≫ (free_lift e).forget_Ab = e :=
+begin
+  dsimp only [Condensed.forget_Ab, to_free, free_lift, quiver.hom.forget_Ab],
+  rw [adjunction.hom_equiv_unit, adjunction.hom_equiv_counit, category.assoc,
+    category_theory.functor.map_id, category.id_comp, functor.map_comp,
+    Condensed_Ab_CondensedSet_adjunction.unit_naturality_assoc,
+    adjunction.right_triangle_components, category.comp_id],
+end
+
+lemma free_lift_unique {S : CondensedSet} {A : Condensed Ab} (e : S ⟶ A.forget_Ab) (f : free S ⟶ A)
+  (h : to_free S ≫ f.forget_Ab = e) : f = free_lift e :=
+begin
+  apply_fun (Condensed_Ab_CondensedSet_adjunction.hom_equiv _ _),
+  dsimp [free_lift],
+  rw equiv.apply_symm_apply,
+  exact h
+end
+
+@[ext]
+lemma free_hom_ext {S : CondensedSet} {A : Condensed Ab} (f g : free S ⟶ A)
+  (h : to_free S ≫ f.forget_Ab = to_free S ≫ g.forget_Ab) : f = g :=
+by rw [free_lift_unique _ f rfl, free_lift_unique _ g rfl, h]
+
+end Condensed_Ab
 
 noncomputable
 def hom_equiv_evaluation (S : Profinite.{u}) (A : Condensed Ab) :
