@@ -21,7 +21,7 @@ variables {C : Type u} [category.{v} C]
 
 /-- The category of condensed sets. -/
 @[derive category]
-def CondensedSet : Type (u+2) := SheafOfTypes.{u+1} proetale_topology.{u}
+def CondensedSet : Type (u+2) := Sheaf proetale_topology.{u} (Type (u+1))
 
 /-- The category of condensed `A`. Applying this to `A = Type*` is *equivalent* but not the same
 as `CondensedSet`. -/

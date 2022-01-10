@@ -5,7 +5,8 @@ import algebra.category.Group.adjunctions
 import for_mathlib.SheafOfTypes_sheafification
 --import algebra.category.Group.filtered_colimits
 
---import category_theory.sites.sheafification
+import category_theory.limits.functor_category
+import category_theory.sites.limits
 
 --import condensed.ab
 
@@ -133,3 +134,16 @@ def Top_to_Condensed : Top ⥤ CondensedSet :=
     dsimp,
     erw [yoneda.map_comp, whisker_right_comp, whisker_left_comp],
   end }
+
+open opposite
+
+@[simps]
+def CondensedSet.evaluation (S : Profinite) : CondensedSet.{u} ⥤ Type (u+1) :=
+SheafOfTypes_to_presheaf _ ⋙ (evaluation _ _).obj (op S)
+
+instance (S : Profinite) : limits.preserves_limits (CondensedSet.evaluation S) :=
+begin
+  apply_with limits.comp_preserves_limits { instances := ff },
+  swap, apply_instance,
+  apply_instance,
+end

@@ -17,14 +17,14 @@ noncomputable theory
 
 @[simps obj map]
 def CondensedSet_to_presheaf : CondensedSet ⥤ Profiniteᵒᵖ ⥤ Type* :=
-SheafOfTypes_to_presheaf _
+Sheaf_to_presheaf _ _
 
 @[simps obj_val map]
 def presheaf_to_CondensedSet : (Profiniteᵒᵖ ⥤ Type*) ⥤ CondensedSet :=
-presheaf_to_SheafOfTypes _
+presheaf_to_Sheaf _ _
 
 def CondensedSet_presheaf_adjunction : presheaf_to_CondensedSet ⊣ CondensedSet_to_presheaf :=
-sheafification_adjunction_types _
+sheafification_adjunction proetale_topology (Type (u+1))
 
 @[simp]
 lemma CondensedSet_presheaf_adjunction_hom_equiv_apply (X : Profiniteᵒᵖ ⥤ Type*)
@@ -36,7 +36,7 @@ lemma CondensedSet_presheaf_adjunction_hom_equiv_apply (X : Profiniteᵒᵖ ⥤ 
 lemma CondensedSet_presheaf_adjunction_hom_equiv_symm_apply (X : Profiniteᵒᵖ ⥤ Type*)
   (Y : CondensedSet) (e : X ⟶ CondensedSet_to_presheaf.obj Y) :
   ((CondensedSet_presheaf_adjunction.hom_equiv _ _).symm e).val =
-  proetale_topology.sheafify_lift e (by { rw is_sheaf_iff_is_sheaf_of_type, exact Y.2 }) := rfl
+  proetale_topology.sheafify_lift e Y.cond := rfl
 
 @[simp]
 lemma CondensedSet_presheaf_adjunction_unit_app (X : Profiniteᵒᵖ ⥤ Type*) :
@@ -46,7 +46,7 @@ lemma CondensedSet_presheaf_adjunction_unit_app (X : Profiniteᵒᵖ ⥤ Type*) 
 @[simp]
 lemma CondensedSet_presheaf_adjunction_counit_app (Y : CondensedSet) :
   (CondensedSet_presheaf_adjunction.counit.app Y).val =
-  proetale_topology.sheafify_lift (𝟙 _) (by { rw is_sheaf_iff_is_sheaf_of_type, exact Y.2 }) := rfl
+  proetale_topology.sheafify_lift (𝟙 _) Y.cond := rfl
 
 -- I don't know why this is needed...
 instance (X : Profinite.{u}): limits.preserves_colimits_of_shape (proetale_topology.cover X)ᵒᵖ
@@ -62,16 +62,16 @@ end
 
 @[simps obj_val map]
 def Condensed_Ab_to_CondensedSet : Condensed Ab ⥤ CondensedSet :=
-Sheaf_forget _
+Sheaf_compose _ (forget _)
 
 @[simps obj_val map]
 def CondensedSet_to_Condensed_Ab : CondensedSet ⥤ Condensed Ab :=
-Sheaf.compose_and_sheafify_from_types _ AddCommGroup.free
+Sheaf.compose_and_sheafify _ AddCommGroup.free
 
 @[simps unit_app counit_app]
 def Condensed_Ab_CondensedSet_adjunction :
   CondensedSet_to_Condensed_Ab ⊣ Condensed_Ab_to_CondensedSet :=
-Sheaf.adjunction_to_types _ AddCommGroup.adj
+Sheaf.adjunction _ AddCommGroup.adj
 
 @[simp]
 lemma Condensed_Ab_CondensedSet_adjunction_hom_equiv_apply (X : CondensedSet)
