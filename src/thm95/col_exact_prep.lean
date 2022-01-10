@@ -2,6 +2,7 @@ import pseudo_normed_group.FP
 import system_of_complexes.basic
 import prop819
 import pseudo_normed_group.sum_hom
+import pseudo_normed_group.splittable
 
 noncomputable theory
 
