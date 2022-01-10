@@ -28,17 +28,20 @@ structure laurent_measures (r : ℝ≥0) (S : Fintype) :=
 
 variables {r : ℝ≥0} {S S' : Fintype.{u}}
 
+namespace laurent_measures
+
 instance : has_coe_to_fun (laurent_measures r S) (λ F, S → ℤ → ℤ) :=
 ⟨λ F, F.to_fun⟩
 
+@[simp] lemma coe_mk (f : S → ℤ → ℤ) (hf) (s : S) (n : ℤ) :
+  (@laurent_measures.mk r S f hf) s n = f s n := rfl
+
 @[ext]
-lemma laurent_measures.ext (F G : laurent_measures r S) : (F : S → ℤ → ℤ) = G → F = G :=
+lemma ext (F G : laurent_measures r S) : (F : S → ℤ → ℤ) = G → F = G :=
 by { intros h, cases F, cases G, simpa }
 
-protected lemma laurent_measures.summable (F : laurent_measures r S) (s : S) : summable (λ n, ∥ F s n ∥ * r ^ n) :=
+protected lemma summable (F : laurent_measures r S) (s : S) : summable (λ n, ∥ F s n ∥ * r ^ n) :=
   F.2 _
-
-namespace laurent_measures
 
 -- Move me
 lemma nonneg_of_norm_mul_zpow (k n : ℤ) (r : ℝ≥0) : 0 ≤ ∥ k ∥ * (r : ℝ)^n :=
@@ -191,9 +194,9 @@ instance : add_comm_group (laurent_measures r S) :=
         int.cast_neg, neg_mul_eq_neg_mul_symm],
         apply summable.neg this },
     end },
-  zsmul_zero' := λ F, by { ext, simpa, },
-  zsmul_succ' := λ n F, by { ext, simpa [add_apply, int.coe_nat_succ, int.of_nat_eq_coe,
-    zsmul_eq_smul, smul_eq_mul, add_mul, add_comm, one_mul], },
+  zsmul_zero' := λ F, by { ext, simp, },
+  zsmul_succ' := λ n F, by { ext, simp only [add_apply, int.coe_nat_succ, int.of_nat_eq_coe,
+    zsmul_eq_smul, smul_eq_mul, add_mul, add_comm, one_mul, coe_mk], },
   zsmul_neg' := λ n F, by { ext, simp only [int.coe_nat_succ, int.of_nat_eq_coe,
     int.neg_succ_of_nat_coe, add_comm, zsmul_eq_smul, smul_eq_mul], ring_nf},
   add_left_neg := λ F, by { ext, simp, },
