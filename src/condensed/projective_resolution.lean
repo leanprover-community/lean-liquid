@@ -73,14 +73,11 @@ by rw [free_lift_unique _ f rfl, free_lift_unique _ g rfl, h]
 
 end Condensed_Ab
 
-#check yoneda_equiv
-noncomputable
 def hom_equiv_evaluation (S : Profinite.{u}) (A : Condensed Ab) :
   (ℤ[S] ⟶ A) ≃ ((Condensed_Ab_to_CondensedSet ⋙ CondensedSet.evaluation S).obj A) :=
 begin
   refine (Condensed_Ab_CondensedSet_adjunction.hom_equiv S.to_Condensed A).trans _,
   refine (equiv_of_fully_faithful $ Sheaf_to_presheaf.{u} _ _).trans _,
-  dsimp [Profinite.to_Condensed],
   apply yoneda'_equiv,
 end
 
