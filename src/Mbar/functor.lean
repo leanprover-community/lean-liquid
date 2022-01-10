@@ -41,8 +41,10 @@ lemma map_Tinv (f : S₁ → S₂) (x : Mbar r' S₁) :
 by ext s ⟨_|n⟩; simp only [map_to_fun, Tinv_zero, Tinv_succ, finset.sum_const_zero]
 
 /-- `Mbar r' S` is functorial in the finite type `S`. -/
-def fintype_functor : Fintype ⥤ ProFiltPseuNormGrpWithTinv r' :=
-{ obj := λ S, ProFiltPseuNormGrpWithTinv.of r' (Mbar r' S),
+def fintype_functor : Fintype ⥤ ProFiltPseuNormGrpWithTinv₁ r' :=
+{ obj := λ S,
+  { M := Mbar r' S,
+    exhaustive' := λ x, ⟨∥x∥₊, by rw Mbar.mem_filtration_iff⟩ },
   map := λ S₁ S₂ f,
   { to_fun := map f,
     map_zero' := map_zero r' f,
@@ -53,11 +55,11 @@ def fintype_functor : Fintype ⥤ ProFiltPseuNormGrpWithTinv r' :=
   map_id' := by { intros, ext1 x, exact map_id x },
   map_comp' := by { intros X Y Z f g, ext1 x, exact map_comp f x g } }
 
-instance (X : Profinite) : has_limit (X.fintype_diagram ⋙ fintype_functor r') :=
-sorry
+example (X : Profinite) : has_limit (X.fintype_diagram ⋙ fintype_functor r') :=
+by apply_instance
 
 /-- `Mbar r' S` extends to a functor in `S`, for profinite `S`. -/
-def functor : Profinite ⥤ ProFiltPseuNormGrpWithTinv r' :=
+def functor : Profinite ⥤ ProFiltPseuNormGrpWithTinv₁ r' :=
 Profinite.extend (fintype_functor r')
 
 end Mbar
