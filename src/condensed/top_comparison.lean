@@ -3,6 +3,7 @@ import condensed.basic
 import condensed.is_proetale_sheaf
 import algebra.category.Group.adjunctions
 import for_mathlib.SheafOfTypes_sheafification
+import for_mathlib.yoneda
 --import algebra.category.Group.filtered_colimits
 
 import category_theory.limits.functor_category
@@ -15,10 +16,10 @@ universe u
 open category_theory
 
 def Profinite.to_Condensed (T : Profinite.{u}) : CondensedSet :=
-{ val := yoneda.obj T ⋙ ulift_functor.{u+1},
+{ val := yoneda'.{u+1}.obj T, --⋙ ulift_functor.{u+1},
   cond := begin
     rw is_sheaf_iff_is_sheaf_of_type,
-    rw (functor.is_proetale_sheaf_of_types_tfae (yoneda.obj T ⋙ ulift_functor.{u+1})).out 0 5,
+    rw (functor.is_proetale_sheaf_of_types_tfae (yoneda'.obj T)).out 0 5,
     refine ⟨_,_,_⟩,
     { dsimp [functor.empty_condition],
       split,
@@ -67,11 +68,11 @@ def Profinite_to_Condensed : Profinite ⥤ CondensedSet :=
     erw [yoneda.map_comp, whisker_right_comp] } }
 
 def Top.to_Condensed (T : Top.{u}) : CondensedSet :=
-{ val := Profinite.to_Top.op ⋙ yoneda.obj T ⋙ ulift_functor.{u+1},
+{ val := Profinite.to_Top.op ⋙ yoneda'.{u+1}.obj T,
   cond := begin
     rw is_sheaf_iff_is_sheaf_of_type,
     rw (functor.is_proetale_sheaf_of_types_tfae
-      (Profinite.to_Top.op ⋙ yoneda.obj T ⋙ ulift_functor.{u+1})).out 0 5,
+      (Profinite.to_Top.op ⋙ yoneda'.obj T)).out 0 5,
     refine ⟨_,_,_⟩,
     { dsimp [functor.empty_condition],
       split,

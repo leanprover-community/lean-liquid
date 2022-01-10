@@ -73,16 +73,15 @@ by rw [free_lift_unique _ f rfl, free_lift_unique _ g rfl, h]
 
 end Condensed_Ab
 
+#check yoneda_equiv
 noncomputable
 def hom_equiv_evaluation (S : Profinite.{u}) (A : Condensed Ab) :
   (ℤ[S] ⟶ A) ≃ ((Condensed_Ab_to_CondensedSet ⋙ CondensedSet.evaluation S).obj A) :=
 begin
   refine (Condensed_Ab_CondensedSet_adjunction.hom_equiv S.to_Condensed A).trans _,
   refine (equiv_of_fully_faithful $ Sheaf_to_presheaf.{u} _ _).trans _,
-  dsimp,
-  -- and now we're stuck because `yoneda_equiv` has quite restrictive universes
-  -- refine (@yoneda_equiv _ _ S (A.val ⋙ forget Ab)).trans _,
-  sorry
+  dsimp [Profinite.to_Condensed],
+  apply yoneda'_equiv,
 end
 
 instance (S : Profinite) [projective S] :
@@ -98,6 +97,7 @@ instance (S : Profinite) [projective S] :
       refine eq.trans _ hφ,
       sorry },
     rw ← epi_iff_surjective,
+    sorry,
     -- it's a map in `Type`, not in `Ab`, aahrg
     -- apply preadditive.epi_of_cokernel_iso_zero,
   end }
