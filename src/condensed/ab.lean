@@ -177,8 +177,8 @@ open opposite
 def Presheaf (A : CompHausFiltPseuNormGrp₁) : Profiniteᵒᵖ ⥤ Ab :=
 { obj := λ S, ⟨presheaf A (unop S)⟩,
   map := λ S T φ, presheaf.comap A φ.unop,
-  map_id' := sorry,
-  map_comp' := sorry }
+  map_id' := by { intros, ext, refl },
+  map_comp' := by { intros, ext, refl } }
 
 def Presheaf.map {A B : CompHausFiltPseuNormGrp₁} (φ : A ⟶ B) :
   Presheaf A ⟶ Presheaf B :=
