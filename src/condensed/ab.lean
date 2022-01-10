@@ -1,12 +1,10 @@
 import category_theory.abelian.projective
 import pseudo_normed_group.category
 import topology.continuous_function.algebra
-import algebra.category.Group.abelian
-import algebra.category.Group.filtered_colimits
 
 import for_mathlib.abelian_sheaves.main
 
-import condensed.basic
+import condensed.adjunctions
 
 /-!
 # Properties of the category of condensed abelian groups
@@ -27,20 +25,11 @@ noncomputable theory
 example {J : Type (u+1)} [small_category J] [is_filtered J] :
   limits.preserves_colimits_of_shape J (forget Ab.{u+1}) := by apply_instance
 
--- I don't know why this is needed...
-instance (X : Profinite.{u}): limits.preserves_colimits_of_shape (proetale_topology.cover X)ᵒᵖ
-  (forget Ab.{u+1}) := infer_instance
-
-instance : abelian (Condensed Ab.{u+1}) :=
-begin
-  -- I don't know why this is needed either...
-  apply @category_theory.Sheaf.abelian.{(u+2) u (u+1)}
-    Profinite.{u} _ proetale_topology Ab.{u+1} _ _ _ _ _ _ _ _,
-end
-
 instance : enough_projectives (Condensed Ab.{u+1}) := sorry
 
-instance : is_right_adjoint (Sheaf_to_presheaf _ _ : Condensed Ab.{u+1} ⥤ _) := sorry
+instance : is_right_adjoint (Sheaf_to_presheaf _ _ : Condensed Ab.{u+1} ⥤ _) :=
+{ left := presheaf_to_Sheaf _ _,
+  adj := (sheafification_adjunction _ _) }
 
 def forget_to_CondensedType : Condensed Ab.{u+1} ⥤ CondensedSet :=
 { obj := λ F, ⟨F.val ⋙ forget _, begin
@@ -52,7 +41,9 @@ def forget_to_CondensedType : Condensed Ab.{u+1} ⥤ CondensedSet :=
   end ⟩,
   map := λ A B f, ⟨whisker_right f.val _⟩ }
 
-instance : is_right_adjoint forget_to_CondensedType := sorry
+instance : is_right_adjoint forget_to_CondensedType :=
+{ left := CondensedSet_to_Condensed_Ab,
+  adj := Condensed_Ab_CondensedSet_adjunction }
 
 section
 
@@ -127,7 +118,7 @@ protected def nsmul (n : ℕ) (f : presheaf A S) : presheaf A S :=
 begin
   obtain ⟨_, c, f, hf, rfl⟩ := f,
   refine ⟨n * c, λ s, ⟨n • f s, nat_smul_mem_filtration _ _ _ (f s).2⟩, _, rfl⟩,
-  sorry
+  exact continuous_nsmul _ _ _ hf,
 end⟩
 
 protected def zsmul (n : ℤ) (f : presheaf A S) : presheaf A S :=
@@ -135,7 +126,7 @@ protected def zsmul (n : ℤ) (f : presheaf A S) : presheaf A S :=
 begin
   obtain ⟨_, c, f, hf, rfl⟩ := f,
   refine ⟨n.nat_abs * c, λ s, ⟨n • f s, int_smul_mem_filtration _ _ _ (f s).2⟩, _, rfl⟩,
-  sorry
+  exact continuous_zsmul _ _ _ hf,
 end⟩
 
 variables (A S)

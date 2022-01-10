@@ -5,6 +5,7 @@ import pseudo_normed_group.basic
 
 import hacks_and_tricks.type_pow
 import facts
+
 /-!
 
 # profinitely_filtered_pseudo_normed_group
@@ -17,6 +18,15 @@ open pseudo_normed_group
 open_locale nnreal big_operators
 
 local attribute [instance] type_pow
+
+-- move this
+lemma int.induction_nonneg_or_nonpos {P : ℤ → Prop} (n : ℤ)
+  (h₁ : ∀ n : ℕ, P n) (h₂ : ∀ n : ℕ, P (-n)) : P n :=
+begin
+  rcases le_or_lt 0 n with hn|hn,
+  { lift n to ℕ using hn, exact h₁ n },
+  { lift (-n) to ℕ using neg_nonneg.mpr hn.le with k hk, simpa only [hk, neg_neg] using h₂ k },
+end
 
 /-- A *complete Hausdorff filtered pseudo-normed topological group* is
 * an abelian group `M` with an increasing filtration `filtration M c, c : ℝ≥0` such that
@@ -72,6 +82,50 @@ closed_embedding_of_continuous_injective_closed
 lemma embedding_cast_le (c₁ c₂) [h : fact (c₁ ≤ c₂)] :
   embedding (@pseudo_normed_group.cast_le M _ _ _ h) :=
 (closed_embedding_cast_le c₁ c₂).to_embedding
+
+lemma continuous_add {X : Type*} [topological_space X] (c₁ c₂ : ℝ≥0)
+  (f : X → filtration M c₁) (hf : continuous f)
+  (g : X → filtration M c₂) (hg : continuous g) :
+  continuous (λ x, ⟨f x + g x, add_mem_filtration (f x).2 (g x).2⟩ : X → filtration M (c₁ + c₂)) :=
+begin
+  have : continuous (λ x, (f x, g x)) := hf.prod_mk hg,
+  exact (continuous_add' c₁ c₂).comp this,
+end
+
+lemma continuous_neg {X : Type*} [topological_space X] (c : ℝ≥0)
+  (f : X → filtration M c) (hf : continuous f) :
+  continuous (λ x, ⟨-f x, neg_mem_filtration (f x).2⟩ : X → filtration M c) :=
+(continuous_neg' c).comp hf
+
+lemma continuous_nsmul {X : Type*} [topological_space X] (n : ℕ) (c : ℝ≥0)
+  (f : X → filtration M c) (hf : continuous f) :
+  continuous (λ x, ⟨n • f x, nat_smul_mem_filtration n _ _ (f x).2⟩ : X → filtration M (n * c)) :=
+begin
+  induction n with n ih,
+  { simp only [zero_smul],
+    exact @continuous_const _ {x // x ∈ filtration M (↑0 * c)} _ _ ⟨0, zero_mem_filtration _⟩, },
+  { simp only [nat.succ_eq_add_one, succ_nsmul'],
+    haveI aux1 : fact (↑n * c ≤ n • c) := ⟨by simp only [le_refl, nsmul_eq_mul]⟩,
+    haveI aux2 : fact (n • c + c ≤ ↑n.succ * c) := ⟨by simp [le_refl, nsmul_eq_mul, add_mul]⟩,
+    exact (continuous_cast_le (n • c + c) ((n.succ) * c)).comp (continuous_add (n • c) c _
+      ((continuous_cast_le _ _).comp ih) _ hf), }
+end
+
+lemma continuous_zsmul {X : Type*} [topological_space X] (n : ℤ) (c : ℝ≥0)
+  (f : X → filtration M c) (hf : continuous f) :
+  continuous (λ x, ⟨n • f x, int_smul_mem_filtration n _ _ (f x).2⟩ :
+     X → filtration M (n.nat_abs * c)) :=
+begin
+  induction n using int.induction_nonneg_or_nonpos,
+  { simp only [coe_nat_zsmul], exact continuous_nsmul n c f hf },
+  { simp only [neg_smul],
+    haveI : fact (↑n * c ≤ (-n : ℤ).nat_abs * c) :=
+      ⟨by simp only [int.nat_abs_of_nat, int.nat_abs_neg]⟩,
+    convert continuous_neg _ _ ((continuous_cast_le (n * c) ((-n : ℤ).nat_abs * c)).comp
+      (continuous_nsmul n c f hf)) using 1,
+    ext x,
+    simp only [coe_cast_le, coe_nat_zsmul, subtype.coe_mk], }
+end
 
 end comphaus_filtered_pseudo_normed_group
 
