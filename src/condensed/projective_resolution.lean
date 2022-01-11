@@ -75,11 +75,8 @@ end Condensed_Ab
 
 def hom_equiv_evaluation (S : Profinite.{u}) (A : Condensed Ab) :
   (ℤ[S] ⟶ A) ≃ ((Condensed_Ab_to_CondensedSet ⋙ CondensedSet.evaluation S).obj A) :=
-begin
-  refine (Condensed_Ab_CondensedSet_adjunction.hom_equiv S.to_Condensed A).trans _,
-  refine (equiv_of_fully_faithful $ Sheaf_to_presheaf.{u} _ _).trans _,
-  apply yoneda'_equiv,
-end
+(Condensed_Ab_CondensedSet_adjunction.hom_equiv S.to_Condensed A).trans $
+  (equiv_of_fully_faithful $ Sheaf_to_presheaf.{u} _ _).trans $ yoneda'_equiv _ _
 
 instance (S : Profinite) [projective S] :
   projective (ℤ[S]) :=
