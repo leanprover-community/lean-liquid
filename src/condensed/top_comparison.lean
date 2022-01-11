@@ -141,6 +141,24 @@ def Top_to_Condensed : Top ⥤ CondensedSet :=
 open opposite
 
 @[simps]
+def Condensed.evaluation (C : Type*) [category C] (S : Profinite) :
+  Condensed C ⥤ C :=
+Sheaf_to_presheaf _ _ ⋙ (evaluation _ _).obj (op S)
+
+noncomputable instance {C : Type*} [category C]
+  [limits.has_limits C] (S : Profinite.{u}) :
+  limits.preserves_limits (Condensed.evaluation C S) :=
+begin
+  apply_with limits.comp_preserves_limits { instances := ff },
+  swap, apply_instance,
+  have e : creates_limits (Sheaf_to_presheaf proetale_topology.{u} C) :=
+     Sheaf.category_theory.Sheaf_to_presheaf.category_theory.creates_limits.{(u+2) u (u+1)},
+  apply_with category_theory.preserves_limits_of_creates_limits_and_has_limits { instances := ff },
+  exact e,
+  apply_instance
+end
+
+@[simps]
 def CondensedSet.evaluation (S : Profinite) : CondensedSet.{u} ⥤ Type (u+1) :=
 Sheaf_to_presheaf _ _ ⋙ (evaluation _ _).obj (op S)
 
@@ -156,7 +174,9 @@ begin
   apply_instance
 end
 
-/- TODO: We need to use something about the sheaf condition in
-terms of extr. disc. sets to obtain this. -/
 instance (S : Profinite.{u}) [projective S] :
-  limits.preserves_colimits (CondensedSet.evaluation S) := sorry
+  limits.preserves_colimits (Condensed.evaluation Ab.{u+1} S) := sorry
+
+/- TODO:  this is wrong... -/
+--instance (S : Profinite.{u}) [projective S] :
+--  limits.preserves_colimits (CondensedSet.evaluation S) := sorry
