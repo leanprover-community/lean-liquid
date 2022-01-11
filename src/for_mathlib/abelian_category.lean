@@ -76,4 +76,25 @@ lemma is_zero_of_exact_zero_zero' {C : Type*} [category C] [abelian C]
   {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) (h : exact f g) (hf : f = 0) (hg : g = 0) : is_zero Y :=
 by { rw [hf, hg] at h, exact is_zero_of_exact_zero_zero h }
 
+lemma is_zero_cokernel_of_epi {C : Type*} [category C] [abelian C] {X Y : C}
+  (f : X ⟶ Y) [epi f] : is_zero (cokernel f) := sorry
+
+lemma epi_iff_is_zero_cokernel {C : Type*} [category C] [abelian C] {X Y : C}
+  (f : X ⟶ Y) : epi f ↔ is_zero (cokernel f) := sorry
+
+lemma is_zero_kernel_of_mono {C : Type*} [category C] [abelian C] {X Y : C}
+  (f : X ⟶ Y) [mono f] : is_zero (kernel f) := sorry
+
+lemma mono_iff_is_zero_kernel {C : Type*} [category C] [abelian C] {X Y : C}
+  (f : X ⟶ Y) : mono f ↔ is_zero (kernel f) := sorry
+
+class preserves_zero_objects {C D : Type*} [category C] [has_zero_morphisms C]
+  [category D] [has_zero_morphisms D] (F : C ⥤ D) : Prop :=
+(preserves : ∀ (X : C), is_zero X → is_zero (F.obj X))
+
+lemma is_zero_of_preserves {C D : Type*} [category C] [has_zero_morphisms C]
+  [category D] [has_zero_morphisms D] {X : C} (F : C ⥤ D)
+  [preserves_zero_objects F] (e : is_zero X) : is_zero (F.obj X) :=
+preserves_zero_objects.preserves _ e
+
 end category_theory
