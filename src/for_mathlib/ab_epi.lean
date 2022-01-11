@@ -49,7 +49,7 @@ end
 
 open category_theory
 
-theorem surjective_of_epi {A B : AddCommGroup} (f : A ⟶ B) [epi f] :
+theorem AddCommGroup.surjective_of_epi {A B : AddCommGroup} (f : A ⟶ B) [epi f] :
   function.surjective f :=
 begin
   apply surjective_of_comp_inl_eq_comp_inr,

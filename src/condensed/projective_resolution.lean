@@ -2,6 +2,7 @@ import condensed.ab
 import condensed.top_comparison
 
 import for_mathlib.abelian_category
+import for_mathlib.ab_epi
 
 universe u
 
@@ -109,7 +110,10 @@ instance (S : Profinite.{u}) [projective S] :
     dsimp [Condensed.evaluation] at hg,
     replace hg := is_zero_of_iso_of_zero hg e,
     rw ← epi_iff_is_zero_cokernel at hg,
-    replace hg : function.surjective (g.val.app (op S)) := sorry, -- follows from hg.
+    replace hg : function.surjective (g.val.app (op S)) := begin
+      resetI,
+      apply AddCommGroup.surjective_of_epi,
+    end,
     let f₁ := hom_equiv_evaluation _ _ f,
     dsimp at f₁,
     obtain ⟨f',h⟩ := hg f₁,
