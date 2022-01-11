@@ -153,8 +153,8 @@ begin
     refl, },
   simp_rw [sub_mul],
   rw [tsum_sub h_pos.summable, sub_eq_zero, h_pos.tsum_eq],
-  exacts [(summable_smaller_radius S ⟨f, hf⟩ s).some_spec.tsum_eq.symm,
-    (summable_smaller_radius S ⟨f, hf⟩ s)],
+  exacts [(summable_smaller_radius S F s).some_spec.tsum_eq.symm,
+    (summable_smaller_radius S F s)],
 end
 
 open finset filter
