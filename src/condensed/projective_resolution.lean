@@ -95,7 +95,16 @@ instance (S : Profinite.{u}) [projective S] :
 { factors := λ A B f g hg, begin
     rw epi_iff_is_zero_cokernel at hg,
     -- this follows from the fact that evaluation preserves colimits.
-    let e : (cokernel g).val.obj (op S) ≅ cokernel (g.val.app (op S)) := sorry,
+    let e : (cokernel g).val.obj (op S) ≅ cokernel (g.val.app (op S)) := begin
+      refine (is_colimit_of_preserves (Condensed.evaluation Ab S)
+      (colimit.is_colimit _)).cocone_point_unique_up_to_iso
+        (colimit.is_colimit _) ≪≫ has_colimit.iso_of_nat_iso _,
+      refine nat_iso.of_components _ _,
+      { rintros (a|b), exact eq_to_iso rfl, exact eq_to_iso rfl },
+      rintros (a|b) (c|d) (e|e),
+      all_goals { dsimp },
+      all_goals { simp, try { refl } },
+    end,
     replace hg := is_zero_of_preserves (Condensed.evaluation Ab.{u+1} S) hg,
     dsimp [Condensed.evaluation] at hg,
     replace hg := is_zero_of_iso_of_zero hg e,
