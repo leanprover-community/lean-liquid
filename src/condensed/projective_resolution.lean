@@ -1,6 +1,8 @@
 import condensed.ab
 import condensed.top_comparison
 
+import for_mathlib.abelian_category
+
 universe u
 
 open category_theory
@@ -73,25 +75,49 @@ by rw [free_lift_unique _ f rfl, free_lift_unique _ g rfl, h]
 
 end Condensed_Ab
 
+@[simps]
 def hom_equiv_evaluation (S : Profinite.{u}) (A : Condensed Ab) :
   (ℤ[S] ⟶ A) ≃ ((Condensed_Ab_to_CondensedSet ⋙ CondensedSet.evaluation S).obj A) :=
 (Condensed_Ab_CondensedSet_adjunction.hom_equiv S.to_Condensed A).trans $
   (equiv_of_fully_faithful $ Sheaf_to_presheaf.{u} _ _).trans $ yoneda'_equiv _ _
 
-instance (S : Profinite) [projective S] :
+local attribute [instance] limits.has_zero_object.has_zero
+
+open category_theory.limits
+open opposite
+
+-- Move this
+instance (S : Profinite.{u}) : preserves_zero_objects (Condensed.evaluation Ab.{u+1} S) :=
+sorry
+
+instance (S : Profinite.{u}) [projective S] :
   projective (ℤ[S]) :=
 { factors := λ A B f g hg, begin
-    let fS := (Condensed_Ab_to_CondensedSet ⋙ CondensedSet.evaluation S).map g,
-    suffices hfS : function.surjective fS,
-    { let f' := hom_equiv_evaluation S B f,
-      obtain ⟨φ, hφ⟩ := hfS f',
-      let φ' := (hom_equiv_evaluation S A).symm φ,
-      refine ⟨φ', _⟩,
-      apply (hom_equiv_evaluation S B).injective,
-      refine eq.trans _ hφ,
-      sorry },
-    rw ← epi_iff_surjective,
-    sorry,
-    -- it's a map in `Type`, not in `Ab`, aahrg
-    -- apply preadditive.epi_of_cokernel_iso_zero,
+    rw epi_iff_is_zero_cokernel at hg,
+    -- this follows from the fact that evaluation preserves colimits.
+    let e : (cokernel g).val.obj (op S) ≅ cokernel (g.val.app (op S)) := sorry,
+    replace hg := is_zero_of_preserves (Condensed.evaluation Ab.{u+1} S) hg,
+    dsimp [Condensed.evaluation] at hg,
+    replace hg := is_zero_of_iso_of_zero hg e,
+    rw ← epi_iff_is_zero_cokernel at hg,
+    replace hg : function.surjective (g.val.app (op S)) := sorry, -- follows from hg.
+    let f₁ := hom_equiv_evaluation _ _ f,
+    dsimp at f₁,
+    obtain ⟨f',h⟩ := hg f₁,
+    use (hom_equiv_evaluation _ _).symm f',
+    apply_fun (hom_equiv_evaluation _ _),
+    change _ = f₁,
+    rw [← h, hom_equiv_evaluation_apply, Sheaf.hom.comp_val, nat_trans.comp_app],
+    erw [← comp_apply, ← comp_apply, category.id_comp, ← nat_trans.comp_app, ← nat_trans.comp_app],
+    dsimp [hom_equiv_evaluation],
+    simp_rw [← category.assoc, ← nat_trans.comp_app],
+    rw proetale_topology.to_sheafify_sheafify_lift,
+    rw adjunction.hom_equiv_counit,
+    dsimp,
+    simp only [category.assoc, adjunction.whisker_right_counit_app_app],
+    simp_rw [comp_apply],
+    congr' 1,
+    dsimp [functor.preimage, yoneda'_equiv, full.preimage, AddCommGroup.adj, ulift_functor],
+    change (free_abelian_group.lift id) (_ <$> free_abelian_group.of _) = _,
+    simp,
   end }
