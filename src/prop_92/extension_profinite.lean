@@ -76,7 +76,7 @@ begin
   choose V hV using this,
   rw forall_and_distrib at hV,
   cases hV with V_cl hV,
-  let s₀ := S.proj (default X),
+  let s₀ := S.proj default,
   let W : S → set Y := λ s, (V s) \ (⋃ s' (h : s' ≠ s), V s'),
   have W_dis : ∀ {s s'}, s ≠ s' → disjoint (W s) (W s'),
   { rintros s s' hss x ⟨⟨hxs_in, hxs_out⟩, ⟨hxs'_in, hxs'_out⟩⟩,
@@ -195,7 +195,7 @@ by {
   let T := he.discrete_quotient_map ff.discrete_quotient,
   let ee : ff.discrete_quotient ≃ T := he.discrete_quotient_equiv ff.discrete_quotient,
   exact ff.lift ∘ ee.symm ∘ T.proj }
-else λ y, default Z
+else λ y, default
 
 /- lemma embedding.extend_eq {e : X → Y} (he : embedding e) {f : X → Z} (hf : is_locally_constant f) :
   he.extend f = (hf.discrete_quotient_map) ∘ (he.discrete_quotient_equiv hf.discrete_quotient).symm ∘ (he.discrete_quotient_map hf.discrete_quotient).proj

@@ -240,7 +240,7 @@ begin
   { apply cSup_le,
     { inhabit ↥(F.right),
       dsimp only [unop_op],
-      refine ⟨∥g.to_fun _∥, default _, rfl⟩, },
+      refine ⟨∥g.to_fun _∥, default, rfl⟩, },
     { rintros z ⟨z,rfl⟩,
       obtain ⟨z,rfl⟩ := (prop819_degree_zero_helper _ surj) z,
       change ∥g.to_fun _∥ ≤ _,

@@ -134,7 +134,7 @@ end
 to_rational_hom.to_add_monoid_hom.map_nsmul _ _
 
 @[simp, norm_cast] protected lemma coe_nat_cast (n : ℕ) : (↑(↑n : ℚ≥0) : ℚ) = n :=
-to_rational_hom.map_nat_cast n
+map_nat_cast to_rational_hom n
 
 @[simp, norm_cast] protected lemma coe_le_coe {r₁ r₂ : ℚ≥0} : (r₁ : ℚ) ≤ r₂ ↔ r₁ ≤ r₂ := iff.rfl
 @[simp, norm_cast] protected lemma coe_lt_coe {r₁ r₂ : ℚ≥0} : (r₁ : ℚ) < r₂ ↔ r₁ < r₂ := iff.rfl

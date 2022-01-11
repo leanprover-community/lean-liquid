@@ -7,7 +7,7 @@ lemma exists_le_finset {α : Type*} [inhabited α] [semilattice_inf α]
 begin
   by_cases h : G.nonempty,
   { exact ⟨finset.inf' G h id, λ g, finset.inf'_le _⟩ },
-  { exact ⟨default α, λ g hg, false.elim $ h ⟨_, hg⟩⟩ }
+  { exact ⟨default, λ g hg, false.elim $ h ⟨_, hg⟩⟩ }
 end
 
 lemma Inter_eq {α β : Type*} [inhabited α] [fintype β] [semilattice_inf α]

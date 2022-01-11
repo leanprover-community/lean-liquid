@@ -61,7 +61,7 @@ begin
       have := exists_le_finset (insert i GG),
       obtain ⟨j0,hj0⟩ := this,
       obtain ⟨x0,rfl⟩ := cond j0 (hj0 _ (finset.mem_insert_self _ _)),
-      let z : P := λ e, if h : j0 ≤ e then F.map (hom_of_le h) x0 else (default _),
+      let z : P := λ e, if h : j0 ≤ e then F.map (hom_of_le h) x0 else default,
       use z,
       refine ⟨trivial, _⟩,
       rintros S ⟨e,rfl⟩,

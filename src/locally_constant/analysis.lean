@@ -133,7 +133,7 @@ protected def pseudo_metric_space [pseudo_metric_space Y] :
     casesI is_empty_or_nonempty X,
     { show Sup _ ≤ Sup _ + Sup _, simp only [set.range_eq_empty, real.Sup_empty, add_zero] },
     refine cSup_le _ _,
-    { inhabit X, exact ⟨_, set.mem_range_self (default X)⟩ },
+    { inhabit X, exact ⟨_, set.mem_range_self default⟩ },
     rintro r ⟨x, rfl⟩,
     calc dist (f x) (h x) ≤ dist (f x) (g x) + dist (g x) (h x) : dist_triangle _ _ _
     ... ≤ dist f g + dist g h : add_le_add (dist_apply_le _ _ _) (dist_apply_le _ _ _)
@@ -166,7 +166,7 @@ protected def metric_space [metric_space Y] : metric_space (locally_constant X Y
     casesI is_empty_or_nonempty X,
     { show Sup _ ≤ Sup _ + Sup _, simp only [set.range_eq_empty, real.Sup_empty, add_zero] },
     refine cSup_le _ _,
-    { inhabit X, exact ⟨_, set.mem_range_self (default X)⟩ },
+    { inhabit X, exact ⟨_, set.mem_range_self default⟩ },
     rintro r ⟨x, rfl⟩,
     calc dist (f x) (h x) ≤ dist (f x) (g x) + dist (g x) (h x) : dist_triangle _ _ _
     ... ≤ dist f g + dist g h : add_le_add (dist_apply_le _ _ _) (dist_apply_le _ _ _)
@@ -213,7 +213,7 @@ def map_hom (f : normed_group_hom V₁ V₂) :
     { casesI is_empty_or_nonempty X,
       { simp only [set.range_eq_empty, real.Sup_empty] },
       refine cSup_le _ _,
-      { inhabit X, exact ⟨_, set.mem_range_self (default X)⟩ },
+      { inhabit X, exact ⟨_, set.mem_range_self default⟩ },
       rintro _ ⟨x, rfl⟩,
       calc ∥f (g x)∥ ≤ C * ∥g x∥ : hC _
       ... ≤ Sup _ : le_cSup _ _,
@@ -265,7 +265,7 @@ add_monoid_hom.mk_normed_group_hom
       casesI is_empty_or_nonempty Y,
       { simp only [set.range_eq_empty, real.Sup_empty] },
       inhabit Y,
-      calc 0 ≤ ∥g (default Y)∥ : norm_nonneg _
+      calc 0 ≤ ∥g default∥ : norm_nonneg _
          ... ≤ _ : _,
       apply le_cSup,
       { apply exists_upper_bound_image,
