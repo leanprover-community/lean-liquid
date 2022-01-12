@@ -32,62 +32,77 @@ open_locale nnreal classical big_operators topological_space
 
 section aux_lemmas
 
-example (A B : finset ℕ) (e : A ≃ B) (f g : ℕ → ℝ) : ∑ x in A, f ↑x = ∑ x in B, g ↑x :=
+-- for mathlib?
+def range_equiv_Icc {n d : ℤ} (hn : 0 ≤ n - d) :
+  range (int.eq_coe_of_zero_le hn).some.succ ≃ (Icc d n) :=
 begin
-  have := @fintype.sum_equiv A B ℝ _ _ _ e (f ∘ coe) (g ∘ coe),
-  nth_rewrite_lhs 0 [← sum_finset_coe],
-  nth_rewrite_rhs 0 [← sum_finset_coe],
-  simp only [univ_eq_attach, nat.cast_id],
-  apply fintype.sum_equiv e,
-  sorry,
+  let m := (int.eq_coe_of_zero_le hn).some,
+  fconstructor,
+  { intro a,
+    use a + d,
+    simp only [mem_Icc],
+    split,
+    { rw le_add_iff_nonneg_left,
+      exact int.of_nat_nonneg (a : ℕ) },
+    { apply_rules [add_le_of_le_sub_right, (int.coe_nat_le.mpr (nat.le_of_lt_succ $
+        (@mem_range m.succ a).mp _)).trans, le_of_eq],
+      exacts [(Exists.some_spec (int.eq_coe_of_zero_le hn)).symm, a.2] }},
+  { intro a,
+    have ha := sub_nonneg.mpr ((mem_Icc).mp a.2).1,
+    use (int.eq_coe_of_zero_le ha).some,
+    apply mem_range_succ_iff.mpr,
+    rw [← int.coe_nat_le, ← Exists.some_spec (int.eq_coe_of_zero_le ha),
+      ← Exists.some_spec (int.eq_coe_of_zero_le hn), sub_le_sub_iff_right],
+    exact ((mem_Icc).mp a.2).2 },
+  { intro _,
+    simp_rw [subtype.val_eq_coe, add_sub_cancel],
+    ext,
+    simp only [int.coe_nat_inj', subtype.coe_mk, coe_coe, exists_eq],
+    exact ((@exists_eq' _ _).some_spec).symm },
+  { intro x,
+    have hx : 0 ≤ (x : ℤ) - d := sub_nonneg.mpr (mem_Icc.mp x.2).1,
+    simp_rw [subtype.val_eq_coe, coe_coe, subtype.coe_mk,
+      (Exists.some_spec (int.eq_coe_of_zero_le hx)).symm, sub_add_cancel],
+    simp only [subtype.coe_eta] },
 end
 
-
-
-
--- for mathlib?
+--for mathlib?
 lemma sum_range_sum_Icc (f : ℤ → ℤ) (n d : ℤ) (hn : 0 ≤ n - d) :
- ∑ l in (range (int.eq_coe_of_zero_le hn).some.succ), (f (n - l) : ℝ) * 2 ^ l =
+ ∑ l in (range (int.eq_coe_of_zero_le hn).some.succ), (f (n - l) : ℝ) * 2 ^ (l : ℤ) =
  ∑ k in (Icc d n), ((f k) : ℝ) * 2 ^ (n - k) :=
 begin
--- let e : ℤ ≃ ℤ := ⟨λ n : ℤ, n - 1, λ n, n + 1, by {intro, simp}, by {intro, simp}⟩,
   let m := (int.eq_coe_of_zero_le hn).some,
-  let e : (range m.succ) ≃ (Icc d n),
-  sorry; { fconstructor,
-    { intro a,
-      use a + d,
-      simp only [mem_Icc],
-      split,
-      { rw le_add_iff_nonneg_left,
-        exact int.of_nat_nonneg (a : ℕ) },
-      { apply_rules [add_le_of_le_sub_right, (int.coe_nat_le.mpr (nat.le_of_lt_succ $
-          (@mem_range m.succ a).mp _)).trans, le_of_eq],
-        exacts [(Exists.some_spec (int.eq_coe_of_zero_le hn)).symm, a.2] }},
-    { intro a,
-      have ha := sub_nonneg.mpr ((mem_Icc).mp a.2).1,
-      use (int.eq_coe_of_zero_le ha).some,
-      apply mem_range_succ_iff.mpr,
-      rw [← int.coe_nat_le, ← Exists.some_spec (int.eq_coe_of_zero_le ha),
-        ← Exists.some_spec (int.eq_coe_of_zero_le hn), sub_le_sub_iff_right],
-      exact ((mem_Icc).mp a.2).2 },
-    { intro _,
-      simp_rw [subtype.val_eq_coe, add_sub_cancel],
-      ext,
-      simp only [int.coe_nat_inj', subtype.coe_mk, coe_coe, exists_eq],
-      exact ((@exists_eq' _ _).some_spec).symm },
-    { intro x,
-      have hx : 0 ≤ (x : ℤ) - d := sub_nonneg.mpr (mem_Icc.mp x.2).1,
-      simp_rw [subtype.val_eq_coe, coe_coe, subtype.coe_mk,
-        (Exists.some_spec (int.eq_coe_of_zero_le hx)).symm, sub_add_cancel],
-      simp only [subtype.coe_eta] } },
-  -- rw sum_subtype, sorry,sorry,
-  have := fintype.sum_equiv e (λ l, (f (n - l) : ℝ) * 2 ^ (l : ℤ)) (λ k, (f k : ℝ) * 2 ^ (n - k)),
-  have uff := sum_finset_coe (λ l : ℕ, (f (n - l) : ℝ) * 2 ^ (l : ℕ)) (range m.succ),
-  sorry,
-  -- rw [← sum_subtype (range m.succ)] at this,
+  have sum_swap : ∑ (l : ℕ) in range m.succ, (f (n - l) : ℝ) * 2 ^ (l : ℤ) =
+    ∑ (l : ℕ) in range m.succ, (f (l + d) : ℝ) * 2 ^ (m - l),
+  { rw ← sub_add_cancel n d,
+    rw Exists.some_spec (int.eq_coe_of_zero_le hn),
+    rw [← @nat.sum_antidiagonal_eq_sum_range_succ ℝ _ (λ i j, ((f (i + d) : ℝ) * 2 ^ j)) m,
+      ← nat.sum_antidiagonal_swap],
+    simp only [prod.fst_swap, prod.snd_swap, zpow_coe_nat],
+    simp_rw mul_comm,
+    rw @nat.sum_antidiagonal_eq_sum_range_succ ℝ _ (λ i j, (2 ^ i) *
+      (f (j + d) : ℝ)) m,
+    simp only,
+    apply sum_congr rfl,
+    intros x hx,
+    rw mul_eq_mul_left_iff,
+    apply or.intro_left,
+    have := @nat.cast_sub ℤ _ _ _ _ (mem_range_succ_iff.mp hx),
+    simp only [*, int.nat_cast_eq_coe_nat, sub_left_inj, subtype.val_eq_coe] at *,
+    rw [sub_eq_add_neg, add_assoc, add_comm d _, ← add_assoc, ← sub_eq_add_neg] },
+  rw sum_swap,
+  nth_rewrite_lhs 0 [← sum_finset_coe],
+  nth_rewrite_rhs 0 [← sum_finset_coe],
+  apply fintype.sum_equiv (range_equiv_Icc hn),
+  intro x,
+  dsimp [range_equiv_Icc],
+  apply_rules [mul_eq_mul_left_iff.mpr, or.intro_left],
+  rw [← sub_sub, sub_right_comm, ← zpow_coe_nat],
+  apply congr_arg,
+  have := @nat.cast_sub ℤ _ _ _ _ (mem_range_succ_iff.mp x.2),
+  simp only [*, int.nat_cast_eq_coe_nat, sub_left_inj, subtype.val_eq_coe] at *,
+  exact (Exists.some_spec (int.eq_coe_of_zero_le hn)).symm,
 end
-
-#exit
 
 lemma sum_Icc_sum_tail (f : ℤ → ℤ) (n d : ℤ)
   (hf : (has_sum (λ x : ℤ, (f x : ℝ) * (2 ^ x)⁻¹) 0))
