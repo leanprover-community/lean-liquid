@@ -1,7 +1,7 @@
 import category_theory.preadditive
 import category_theory.abelian.exact
 import algebra.homology.exact
-
+import category_theory.limits.preserves.shapes.terminal
 
 namespace category_theory
 
@@ -125,6 +125,32 @@ is_zero_of_iso_of_zero (is_zero_zero _) $
 class preserves_zero_objects {C D : Type*} [category C] [has_zero_morphisms C]
   [category D] [has_zero_morphisms D] (F : C ⥤ D) : Prop :=
 (preserves : ∀ (X : C), is_zero X → is_zero (F.obj X))
+
+instance preserves_zero_of_preserves_initial {C D : Type*} [category C] [abelian C]
+  [category D] [abelian D] (F : C ⥤ D) [preserves_colimit (functor.empty C) F] :
+  preserves_zero_objects F := preserves_zero_objects.mk $ λ X hX,
+begin
+  have e : X ≅ ⊥_ _ := hX.iso is_zero_initial,
+  replace e : F.obj X ≅ F.obj ⊥_ _ := F.map_iso e,
+  apply is_zero_of_iso_of_zero _ e.symm,
+  have : F.obj ⊥_ _ ≅ ⊥_ _,
+  { apply_with limits.preserves_initial.iso { instances := ff }, assumption },
+  apply is_zero_of_iso_of_zero _ this.symm,
+  exact is_zero_initial,
+end
+
+instance preserves_zero_of_preserves_terminal {C D : Type*} [category C] [abelian C]
+  [category D] [abelian D] (F : C ⥤ D) [preserves_limit (functor.empty C) F] :
+  preserves_zero_objects F := preserves_zero_objects.mk $ λ X hX,
+begin
+  have e : X ≅ ⊤_ _ := hX.iso is_zero_terminal,
+  replace e : F.obj X ≅ F.obj ⊤_ _ := F.map_iso e,
+  apply is_zero_of_iso_of_zero _ e.symm,
+  have : F.obj ⊤_ _ ≅ ⊤_ _,
+  { apply_with limits.preserves_terminal.iso { instances := ff }, assumption },
+  apply is_zero_of_iso_of_zero _ this.symm,
+  exact is_zero_terminal,
+end
 
 lemma is_zero_of_preserves {C D : Type*} [category C] [has_zero_morphisms C]
   [category D] [has_zero_morphisms D] {X : C} (F : C ⥤ D)
