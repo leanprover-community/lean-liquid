@@ -68,11 +68,11 @@ end
 
 --for mathlib?
 lemma sum_range_sum_Icc (f : ℤ → ℤ) (n d : ℤ) (hn : 0 ≤ n - d) :
- ∑ l in (range (int.eq_coe_of_zero_le hn).some.succ), (f (n - l) : ℝ) * 2 ^ (l : ℤ) =
+ ∑ l in (range (int.eq_coe_of_zero_le hn).some.succ), (f (n - l) : ℝ) * 2 ^ l =
  ∑ k in (Icc d n), ((f k) : ℝ) * 2 ^ (n - k) :=
 begin
   let m := (int.eq_coe_of_zero_le hn).some,
-  have sum_swap : ∑ (l : ℕ) in range m.succ, (f (n - l) : ℝ) * 2 ^ (l : ℤ) =
+  have sum_swap : ∑ (l : ℕ) in range m.succ, (f (n - l) : ℝ) * 2 ^ l =
     ∑ (l : ℕ) in range m.succ, (f (l + d) : ℝ) * 2 ^ (m - l),
   { rw ← sub_add_cancel n d,
     rw Exists.some_spec (int.eq_coe_of_zero_le hn),
@@ -118,8 +118,10 @@ lemma aux_summable_convolution {r : ℝ≥0} (f : ℤ → ℤ) (hf : summable (�
   summable (λ n : ℤ, 2⁻¹ * ∥ tsum (λ i : ℕ, ((f (n + 1 + i)) : ℝ) * (1 / 2) ^ i) ∥ * r ^ n) :=
 begin
   sorry,
-  -- have one := @tsum_mul_tsum_eq_tsum_sum_antidiagonal_of_summable_norm,
-  -- -- have two := summable_norm_sum_mul_range_of_summable_norm
+  -- replace hf : summable (λ n : ℕ, ∥ (f n : ℝ)* r ^ n ∥), sorry,
+  -- have h_geom : summable (λ n : ℕ, ∥ (2 : ℝ) ^ n ∥), sorry,
+  -- have one := @tsum_mul_tsum_eq_tsum_sum_antidiagonal_of_summable_norm ℝ _ _ _ _ hf h_geom,
+  -- simp_rw nat.sum_antidiagonal_eq_sum_range_succ_mk at one,
   -- have three := _root_.has_sum_nat_add_iff',
 end
 
@@ -221,7 +223,18 @@ def ϕ : ℒ S → ℒ S :=
 
 -- ``[FAE]`` For this lemma, use results from ```### Sums on subtypes``` of `infinite_sum.lean`
 lemma aux_summable_iff_on_nat {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ) (hf : ∀ n : ℤ, n < d → f n = 0) :
-  summable (λ n, ∥ f n ∥ * ρ ^ n) ↔ summable (λ n : ℕ, ∥ f n ∥ * ρ ^ (n : ℤ)) := sorry
+  summable (λ n, ∥ f n ∥ * ρ ^ n) ↔ summable (λ n : ℕ, ∥ f n ∥ * ρ ^ (n : ℤ)) :=
+begin
+  sorry,
+  -- have hf : function.support (λ n : ℤ, ∥ f n ∥ * ρ ^ n) ⊆ { a : ℤ | d ≤ a},sorry,
+  -- have := @has_sum_subtype_iff_of_support_subset ℝ ℤ _ _ (λ n : ℤ, ∥ f n ∥ * ρ ^ n) _ _ hf,
+  -- split,
+  -- { intro h,
+  --   simp,
+
+  -- },
+  -- sorry,
+end
   --   suffices sum_pos : summable (λ n : ℕ, ∥ ((F.to_fun s n) : ℝ) ∥ * (1 / 2) ^ n),
   -- { let A : (set ℤ) := {n : ℤ | n + F.d ≥ 0},
   --   apply (@summable_subtype_and_compl _ _ _ _ _ _ _ A).mp,
@@ -320,6 +333,7 @@ begin
     apply or.intro_left,
     by_cases h_event : n - F.d < 0,
     { replace h_event := not_le_of_gt h_event,
+      rw [sub_nonneg] at h_event,
       rw [dif_neg h_event, tsum_reindex],
       simp only [subtype.val_eq_coe, norm_zero],
       suffices : ∑' (m : {m // n + 1 ≤ m}), (F s ↑m : ℝ) * (2 ^ (- ↑m)) =
@@ -342,12 +356,11 @@ begin
         apply or.intro_left,
         simp only [not_le, set.mem_set_of_eq, int.lt_add_one_iff] at ha,
         apply lt_d_eq_zero,
-        replace h_event := sub_neg.mp (not_le.mp h_event),
-        exact lt_of_le_of_lt ha h_event,
+        exact lt_of_le_of_lt ha (not_le.mp h_event),
         } },
     { rw not_lt at h_event,
       let m := (int.eq_coe_of_zero_le h_event).some,
-      rw dif_pos h_event,
+      rw dif_pos (sub_nonneg.mp h_event),
       simp_rw [← int.norm_cast_real, int.cast_neg, int.cast_sum, int.cast_mul, int.cast_pow,
         int.cast_two],
       rw [sum_range_sum_Icc (F s) n F.d h_event, sum_Icc_sum_tail (F s) n F.d _ h_event],
