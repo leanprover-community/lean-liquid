@@ -112,6 +112,16 @@ begin
     apply h.eq_zero_of_src }
 end
 
+lemma is_zero_initial {C : Type*} [category C] [abelian C] : is_zero (⊥_ C) :=
+is_zero_of_iso_of_zero (is_zero_zero _) $
+{ hom := 0,
+  inv := 0 }
+
+lemma is_zero_terminal {C : Type*} [category C] [abelian C] : is_zero (⊤_ C) :=
+is_zero_of_iso_of_zero (is_zero_zero _) $
+{ hom := 0,
+  inv := 0 }
+
 class preserves_zero_objects {C D : Type*} [category C] [has_zero_morphisms C]
   [category D] [has_zero_morphisms D] (F : C ⥤ D) : Prop :=
 (preserves : ∀ (X : C), is_zero X → is_zero (F.obj X))
