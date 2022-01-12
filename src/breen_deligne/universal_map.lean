@@ -239,7 +239,6 @@ begin
   simp only [matrix.one_apply, prod.mk.inj_iff, @eq_comm _ _ j],
   simp only [true_and, mul_boole, if_true, prod.mk.inj_iff,
     eq_self_iff_true, eq_iff_true_of_subsingleton],
-  convert rfl
 end
 .
 
@@ -251,7 +250,6 @@ begin
   ext ⟨i, i'⟩ ⟨j, j'⟩ : 2,
   dsimp [matrix.reindex_linear_equiv_apply, matrix.kronecker, proj_aux],
   simp only [equiv.apply_eq_iff_eq, boole_mul, prod.mk.inj_iff, ← ite_and],
-  congr' 1,
 end
 
 lemma proj_aux_apply (a : fin m) (b : fin m) : proj_aux a punit.star b = ite (a = b) 1 0 :=
@@ -470,7 +468,6 @@ begin
   simp only [comp_hom_apply_apply, function.comp_app, coe_comp, mul, coeff, to_finsupp_of,
     map_of_apply, finsupp.apply_add_hom_apply, finsupp.single_apply,
     (basic_universal_map.mul_injective N hN).eq_iff],
-  convert rfl
 end
 
 end mul

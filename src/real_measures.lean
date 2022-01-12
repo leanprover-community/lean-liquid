@@ -148,7 +148,7 @@ begin
       { ext s,
         simp only [true_and, finset.mem_univ, finset.mem_bUnion, iff_true,
           exists_true_left, finset.mem_filter],
-        refine ⟨_, finset.mem_univ _, rfl⟩, },
+        refine ⟨_, rfl⟩, },
       { intros, refl } },
     { rintro x - y - h i hi,
       apply h,

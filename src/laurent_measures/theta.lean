@@ -231,7 +231,6 @@ begin
       forall_exists_index, nnreal.zero_le_coe, ge_iff_le, set.mem_set_of_eq, implies_true_iff,
       nonempty_of_inhabited, subtype.forall, pow_nonneg, finset.mem_range, subtype.val_eq_coe] at *,
     intros a ha,
-    rw [finset.range_one, finset.mem_singleton] at ha,
     rw [subtype.coe_mk, int.norm_eq_abs],
     replace ha : a ≥ 1 := le_of_not_gt ((not_iff_not.mpr nat.lt_one_iff).mpr ha),
     rwa [abs_eq_self.mpr (eventually_pos_floor ξ x a ha)],
