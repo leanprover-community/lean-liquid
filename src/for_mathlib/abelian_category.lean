@@ -85,7 +85,14 @@ begin
 end
 
 lemma epi_iff_is_zero_cokernel {C : Type*} [category C] [abelian C] {X Y : C}
-  (f : X ⟶ Y) : epi f ↔ is_zero (cokernel f) := sorry
+  (f : X ⟶ Y) : epi f ↔ is_zero (cokernel f) :=
+begin
+  split,
+  { introsI, apply is_zero_cokernel_of_epi },
+  { intros h,
+    rw abelian.epi_iff_cokernel_π_eq_zero,
+    apply h.eq_zero_of_tgt }
+end
 
 lemma is_zero_kernel_of_mono {C : Type*} [category C] [abelian C] {X Y : C}
   (f : X ⟶ Y) [mono f] : is_zero (kernel f) :=
@@ -96,7 +103,14 @@ begin
 end
 
 lemma mono_iff_is_zero_kernel {C : Type*} [category C] [abelian C] {X Y : C}
-  (f : X ⟶ Y) : mono f ↔ is_zero (kernel f) := sorry
+  (f : X ⟶ Y) : mono f ↔ is_zero (kernel f) :=
+begin
+  split,
+  { introsI, apply is_zero_kernel_of_mono },
+  { intros h,
+    rw abelian.mono_iff_kernel_ι_eq_zero,
+    apply h.eq_zero_of_src }
+end
 
 class preserves_zero_objects {C D : Type*} [category C] [has_zero_morphisms C]
   [category D] [has_zero_morphisms D] (F : C ⥤ D) : Prop :=
