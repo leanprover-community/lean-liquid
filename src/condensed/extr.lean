@@ -161,7 +161,43 @@ adjunction.mk_of_hom_equiv $
     left_inv := λ f, by { ext, dsimp, simp },
     right_inv := λ f, by { ext, dsimp, simp } },
   hom_equiv_naturality_left_symm' := λ _ _ _ _ _, by { ext, dsimp, simp },
-  hom_equiv_naturality_right' := λ _ _ _ _ _, by { ext, dsimp, simp } }
+  hom_equiv_naturality_right' := λ _ _ _ _ _, by { ext, dsimp, simp } } .
+
+@[simps]
+def sigma {ι : Type u} [fintype ι] (X : ι → ExtrDisc) : ExtrDisc :=
+{ val := Profinite.sigma $ λ i : ι, (X i).val,
+  cond := begin
+    let Z := Profinite.sigma (λ i : ι, (X i).val),
+    let e : Z ≅ ∐ (λ i, (X i).val) :=
+      (Profinite.sigma_cofan_is_colimit _).cocone_point_unique_up_to_iso
+      (limits.colimit.is_colimit _),
+    apply projective.of_iso e.symm,
+    apply_instance,
+  end }
+
+@[simps]
+def sigma.ι {ι : Type u} [fintype ι] (X : ι → ExtrDisc) (i : ι) :
+  X i ⟶ sigma X := ⟨Profinite.sigma.ι _ i⟩
+
+@[simps]
+def sigma.desc {Y : ExtrDisc} {ι : Type u} [fintype ι] (X : ι → ExtrDisc)
+  (f : Π i, X i ⟶ Y) : sigma X ⟶ Y := ⟨Profinite.sigma.desc _ $ λ i, (f i).val⟩
+
+@[simp, reassoc]
+lemma sigma.ι_desc {Y} {ι : Type u} (i : ι) [fintype ι] (X : ι → ExtrDisc) (f : Π a, X a ⟶ Y) :
+  sigma.ι X i ≫ sigma.desc X f = f _ := by { ext1, simp }
+
+@[ext]
+lemma sigma.hom_ext {Y} {ι : Type u} [fintype ι] (X : ι → ExtrDisc) (f g : sigma X ⟶ Y)
+  (w : ∀ i, sigma.ι X i ≫ f = sigma.ι X i ≫ g) : f = g :=
+begin
+  ext1,
+  apply Profinite.sigma.hom_ext,
+  intros i,
+  specialize w i,
+  apply_fun (λ e, e.val) at w,
+  exact w,
+end
 
 end ExtrDisc
 
