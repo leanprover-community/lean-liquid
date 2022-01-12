@@ -87,9 +87,9 @@ local attribute [instance] limits.has_zero_object.has_zero
 open category_theory.limits
 open opposite
 
--- Move this
-instance (S : Profinite.{u}) : preserves_zero_objects (Condensed.evaluation Ab.{u+1} S) :=
-sorry
+-- sanity check
+example (S : Profinite.{u}) : preserves_zero_objects (Condensed.evaluation Ab.{u+1} S) :=
+infer_instance
 
 instance (S : Profinite.{u}) [projective S] :
   projective (ℤ[S]) :=
