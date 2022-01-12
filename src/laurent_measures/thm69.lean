@@ -22,8 +22,109 @@ This file introduces the maps
 
 noncomputable theory
 
-open nnreal theta laurent_measures finset
+open nnreal theta laurent_measures finset --filter
 open_locale nnreal classical big_operators topological_space
+
+
+/-**[FAE]** Use `tsum_mul_tsum_eq_tsum_sum_antidiagonal` or even better
+`tsum_mul_tsum_eq_tsum_sum_antidiagonal_of_summable_norm` instead!!!
+-/
+
+section aux_lemmas
+
+-- example (a b : ℤ) : a - b + b = a := sub_add_cancel a b
+
+-- for mathlib?
+lemma sum_range_sum_Icc (f : ℤ → ℤ) (n d : ℤ) (hn : 0 ≤ n - d) :
+ ∑ l in (range (int.eq_coe_of_zero_le hn).some.succ), (f (n - l) : ℝ) * 2 ^ l =
+ ∑ k in (Icc d n), ((f k) : ℝ) * 2 ^ (n - k) :=
+begin
+-- let e : ℤ ≃ ℤ := ⟨λ n : ℤ, n - 1, λ n, n + 1, by {intro, simp}, by {intro, simp}⟩,
+  let m := (int.eq_coe_of_zero_le hn).some,
+  let e : (range m.succ) ≃ (Icc d n),
+  { fconstructor,
+    { intro a,
+      use a + d,
+      simp only [mem_Icc],
+      split,
+      { rw le_add_iff_nonneg_left,
+        exact int.of_nat_nonneg (a : ℕ) },
+      { apply_rules [add_le_of_le_sub_right, (int.coe_nat_le.mpr (nat.le_of_lt_succ $
+          (@mem_range m.succ a).mp _)).trans, le_of_eq],
+        exacts [(Exists.some_spec (int.eq_coe_of_zero_le hn)).symm, a.2] }},
+    { intro a,
+      have ha := sub_nonneg.mpr ((mem_Icc).mp a.2).1,
+      use (int.eq_coe_of_zero_le ha).some,
+      apply mem_range_succ_iff.mpr,
+      rw [← int.coe_nat_le, ← Exists.some_spec (int.eq_coe_of_zero_le ha),
+        ← Exists.some_spec (int.eq_coe_of_zero_le hn), sub_le_sub_iff_right],
+      exact ((mem_Icc).mp a.2).2 },
+    { intro _,
+      simp_rw [subtype.val_eq_coe, add_sub_cancel],
+      ext,
+      simp only [int.coe_nat_inj', subtype.coe_mk, coe_coe, exists_eq],
+      exact ((@exists_eq' _ _).some_spec).symm },
+    { intro x,
+      have hx : 0 ≤ (x : ℤ) - d := sub_nonneg.mpr (mem_Icc.mp x.2).1,
+      simp_rw [subtype.val_eq_coe, coe_coe, subtype.coe_mk,
+        (Exists.some_spec (int.eq_coe_of_zero_le hx)).symm, sub_add_cancel],
+      simp only [subtype.coe_eta] } },
+  -- rw sum_subtype, sorry,sorry,
+  have := fintype.sum_equiv e (λ l, (f (n - l) : ℝ) * 2 ^ (l : ℤ)) (λ k, (f k : ℝ) * 2 ^ (n - k)),
+  have uff := sum_finset_coe (λ l : ℕ, (f (n - l) : ℝ) * 2 ^ (l : ℕ)) (range m.succ),
+  sorry,
+  -- rw [← sum_subtype (range m.succ)] at this,
+end
+
+lemma sum_Icc_sum_tail (f : ℤ → ℤ) (n d : ℤ)
+  (hf : (has_sum (λ x : ℤ, (f x : ℝ) * (2 ^ x)⁻¹) 0))
+  (hn : 0 ≤ n - d) : - ∑ k in (Icc d n), ((f k) : ℝ) * 2 ^ (n - k) =
+  2 ^ n * tsum (λ x : {a : ℤ // a ≥ n.succ}, (f x : ℝ) * (2 ^ x.1)⁻¹) :=
+begin
+  sorry,
+end
+
+-- **[FAE]** Use `tsum_mul_tsum_eq_tsum_sum_antidiagonal` or even better
+-- `tsum_mul_tsum_eq_tsum_sum_antidiagonal_of_summable_norm` instead
+lemma aux_summable_convolution {r : ℝ≥0} (f : ℤ → ℤ) (hf : summable (λ n, ∥ f n ∥ * r ^ n)) :
+  summable (λ n : ℤ, 2⁻¹ * ∥ tsum (λ i : ℕ, ((f (n + 1 + i)) : ℝ) * (1 / 2) ^ i) ∥ * r ^ n) :=
+begin
+  sorry,
+  -- have one := @tsum_mul_tsum_eq_tsum_sum_antidiagonal_of_summable_norm,
+  -- -- have two := summable_norm_sum_mul_range_of_summable_norm
+  -- have three := _root_.has_sum_nat_add_iff',
+end
+
+--for `mathlib`?
+def equiv_bdd_integer_nat (N : ℤ) : ℕ ≃ {x // N ≤ x} :=
+begin
+  fconstructor,
+  { intro n,
+    use n + N,
+    rw le_add_iff_nonneg_left,
+    exact int.coe_nat_nonneg n },
+  { rintro ⟨x, hx⟩,
+    use (int.eq_coe_of_zero_le (sub_nonneg.mpr hx)).some },
+  { intro a,
+    simp_rw [add_tsub_cancel_right],
+    exact (int.coe_nat_inj $ Exists.some_spec $ int.eq_coe_of_zero_le $ int.of_nat_nonneg a).symm },
+  { rintro ⟨_, hx⟩,
+    simp only,
+    apply add_eq_of_eq_sub,
+    exact ((int.eq_coe_of_zero_le (sub_nonneg.mpr hx)).some_spec).symm }
+end
+
+--for mathlib?
+lemma int_tsum_shift (f : ℤ → ℝ) (N : ℤ) (h : summable f) :
+  ∑' (x : ℕ), f (x + N) = ∑' (x : {x // N ≤ x}), f x :=
+begin
+  apply (equiv.refl ℝ).tsum_eq_tsum_of_has_sum_iff_has_sum rfl,
+  intro _,
+  apply (@equiv.has_sum_iff ℝ _ ℕ _ _ (f ∘ coe) _ ((equiv_bdd_integer_nat N))),
+end
+
+end aux_lemmas
+
 
 section thm69
 
@@ -122,7 +223,8 @@ begin
       apply pow_le_pow_of_le_left,
       simp only [one_div, zero_le_one, inv_nonneg, zero_le_bit0],
       exact le_of_lt r_half },
-    have h_nat_half : summable (λ n : ℕ, ∥ F s n ∥ * (1 / 2 : ℝ≥0) ^ n) := summable_of_nonneg_of_le pos_half half_le_r ((aux_summable_iff_on_nat F.d _).mp (F.2 s)),
+    have h_nat_half : summable (λ n : ℕ, ∥ F s n ∥ * (1 / 2 : ℝ≥0) ^ n) :=
+      summable_of_nonneg_of_le pos_half half_le_r ((aux_summable_iff_on_nat F.d _).mp (F.2 s)),
     apply (aux_summable_iff_on_nat F.d _).mpr h_nat_half,
     all_goals {apply lt_d_eq_zero},
 end
@@ -157,67 +259,7 @@ begin
     (summable_smaller_radius S F s)],
 end
 
-open finset filter
-open_locale big_operators topological_space
 
-
-/-**[FAE]** Use `tsum_mul_tsum_eq_tsum_sum_antidiagonal` or even better
-`tsum_mul_tsum_eq_tsum_sum_antidiagonal_of_summable_norm` instead!!!
--/
-
-lemma sum_range_sum_Icc (f : ℤ → ℤ) (n d : ℤ) (hn : 0 ≤ n - d) :
- ∑ l in (range (int.eq_coe_of_zero_le hn).some.succ), (f (n - l) : ℝ) * 2 ^ l =
- ∑ k in (Icc d n), ((f k) : ℝ) * 2 ^ (n - k) :=
-begin
-  sorry,
-end
-
-lemma sum_Icc_sum_tail (f : ℤ → ℤ) (n d : ℤ)
-  (hf : (has_sum (λ x : ℤ, (f x : ℝ) * (2 ^ x)⁻¹) 0))
-  (hn : 0 ≤ n - d) : - ∑ k in (Icc d n), ((f k) : ℝ) * 2 ^ (n - k) =
-  2 ^ n * tsum (λ x : {a : ℤ // a ≥ n.succ}, (f x : ℝ) * (2 ^ x.1)⁻¹) :=
-begin
-  sorry,
-end
-
--- **[FAE]** Use `tsum_mul_tsum_eq_tsum_sum_antidiagonal` or even better
--- `tsum_mul_tsum_eq_tsum_sum_antidiagonal_of_summable_norm` instead
-lemma aux_summable_convolution (f : ℤ → ℤ) (hf : summable (λ n, ∥ f n ∥ * r ^ n)) : summable
-  (λ n : ℤ, 2⁻¹ * ∥ tsum (λ i : ℕ, ((f (n + 1 + i)) : ℝ) * (1 / 2) ^ i) ∥ * r ^ n) :=
-begin
-  sorry,
-  -- have one := @tsum_mul_tsum_eq_tsum_sum_antidiagonal_of_summable_norm,
-  -- -- have two := summable_norm_sum_mul_range_of_summable_norm
-  -- have three := _root_.has_sum_nat_add_iff',
-end
-
---for `mathlib`?
-def equiv_bdd_integer_nat (N : ℤ) : ℕ ≃ {x // N ≤ x} :=
-begin
-  fconstructor,
-  { intro n,
-    use n + N,
-    rw le_add_iff_nonneg_left,
-    exact int.coe_nat_nonneg n },
-  { rintro ⟨x, hx⟩,
-    use (int.eq_coe_of_zero_le (sub_nonneg.mpr hx)).some },
-  { intro a,
-    simp_rw [add_tsub_cancel_right],
-    exact (int.coe_nat_inj $ Exists.some_spec $ int.eq_coe_of_zero_le $ int.of_nat_nonneg a).symm },
-  { rintro ⟨_, hx⟩,
-    simp only,
-    apply add_eq_of_eq_sub,
-    exact ((int.eq_coe_of_zero_le (sub_nonneg.mpr hx)).some_spec).symm }
-end
-
---for mathlib?
-lemma int_tsum_shift (f : ℤ → ℝ) (N : ℤ) (h : summable f) :
-  ∑' (x : ℕ), f (x + N) = ∑' (x : {x // N ≤ x}), f x :=
-begin
-  apply (equiv.refl ℝ).tsum_eq_tsum_of_has_sum_iff_has_sum rfl,
-  intro _,
-  apply (@equiv.has_sum_iff ℝ _ ℕ _ _ (f ∘ coe) _ ((equiv_bdd_integer_nat N))),
-end
 
 lemma tsum_reindex (F : ℒ S) (N : ℤ) (s : S) : ∑' (l : ℕ), (F s (N + l) : ℝ) * (2 ^ l)⁻¹ =
  2 ^ N * ∑' (m : {m : ℤ // N ≤ m}), (F s m : ℝ) * (2 ^ m.1)⁻¹ :=
