@@ -1,6 +1,16 @@
 import topology.category.Profinite.projective
 import for_mathlib.Profinite.product
 
+@[simp]
+lemma ultrafilter_extend_extends_apply {α X : Type*}
+  [topological_space X] [t2_space X]
+  (f : α → X) (a : α) :
+  ultrafilter.extend f (pure a) = f a :=
+begin
+  change (ultrafilter.extend _ ∘ pure) _ = _,
+  rw ultrafilter_extend_extends,
+end
+
 open category_theory
 
 universe u
@@ -83,18 +93,24 @@ def free (α : Type u) : ExtrDisc.{u} :=
 def free.ι (α : Type u) : α → free α :=
 λ t, (pure t : ultrafilter α)
 
+@[simp]
+lemma free.ι_apply {α : Type u} (a : α) : free.ι α a = (pure a : ultrafilter α) := rfl
+
 noncomputable
 def free.lift {X : ExtrDisc.{u}} {α : Type u} (f : α → X) : free α ⟶ X :=
 ⟨⟨ultrafilter.extend f, continuous_ultrafilter_extend _⟩⟩
+
+@[simp]
+lemma free.lift_apply {X : ExtrDisc.{u}} {α : Type u} (f : α → X) (F : free α) :
+  free.lift f F = ultrafilter.extend f F := rfl
 
 @[simp]
 lemma free.ι_lift {X : ExtrDisc.{u}} {α : Type u} (f : α → X) :
   free.lift f ∘ free.ι _ = f :=
 begin
   ext,
-  dsimp [free.lift, free.ι],
-  change (ultrafilter.extend _ ∘ pure) _ = _,
-  rw ultrafilter_extend_extends,
+  dsimp,
+  simp,
 end
 
 @[simp]
@@ -120,5 +136,29 @@ end
 lemma free.hom_ext {X : ExtrDisc.{u}} {α : Type u} (f g : free α ⟶ X)
   (h : f ∘ (free.ι α) = g ∘ (free.ι α)) : f = g :=
 by rw [free.lift_unique _ f rfl, free.lift_unique _ g rfl, h]
+
+@[simps]
+noncomputable
+def free_functor : Type u ⥤ ExtrDisc.{u} :=
+{ obj := λ α, free α,
+  map := λ α β f, free.lift $ (free.ι _) ∘ f,
+  map_id' := by tidy,
+  map_comp' := begin
+    intros α β γ f g,
+    ext : 2,
+    dsimp,
+    simp,
+  end } .
+
+noncomputable
+def adjunction : free_functor ⊣ forget _ :=
+adjunction.mk_of_hom_equiv $
+{ hom_equiv := λ α X,
+  { to_fun := λ f, f ∘ free.ι _,
+    inv_fun := λ f, free.lift f,
+    left_inv := λ f, by { ext, dsimp, simp },
+    right_inv := λ f, by { ext, dsimp, simp } },
+  hom_equiv_naturality_left_symm' := λ _ _ _ _ _, by { ext, dsimp, simp },
+  hom_equiv_naturality_right' := λ _ _ _ _ _, by { ext, dsimp, simp } }
 
 end ExtrDisc
