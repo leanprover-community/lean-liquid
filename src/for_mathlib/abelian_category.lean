@@ -77,13 +77,23 @@ lemma is_zero_of_exact_zero_zero' {C : Type*} [category C] [abelian C]
 by { rw [hf, hg] at h, exact is_zero_of_exact_zero_zero h }
 
 lemma is_zero_cokernel_of_epi {C : Type*} [category C] [abelian C] {X Y : C}
-  (f : X ⟶ Y) [epi f] : is_zero (cokernel f) := sorry
+  (f : X ⟶ Y) [epi f] : is_zero (cokernel f) :=
+begin
+  have h1 : cokernel.π f = 0, by rwa ← abelian.epi_iff_cokernel_π_eq_zero,
+  have h2 : exact (cokernel.π f) 0 := category_theory.exact_epi_zero (cokernel.π f),
+  exact is_zero_of_exact_zero_zero' (cokernel.π f) 0 h2 h1 rfl,
+end
 
 lemma epi_iff_is_zero_cokernel {C : Type*} [category C] [abelian C] {X Y : C}
   (f : X ⟶ Y) : epi f ↔ is_zero (cokernel f) := sorry
 
 lemma is_zero_kernel_of_mono {C : Type*} [category C] [abelian C] {X Y : C}
-  (f : X ⟶ Y) [mono f] : is_zero (kernel f) := sorry
+  (f : X ⟶ Y) [mono f] : is_zero (kernel f) :=
+begin
+  have h1 : kernel.ι f = 0, by rwa ← abelian.mono_iff_kernel_ι_eq_zero,
+  have h2 : exact 0 (kernel.ι f) := category_theory.exact_zero_mono (kernel.ι f),
+  exact is_zero_of_exact_zero_zero' 0 (kernel.ι f) h2 rfl h1
+end
 
 lemma mono_iff_is_zero_kernel {C : Type*} [category C] [abelian C] {X Y : C}
   (f : X ⟶ Y) : mono f ↔ is_zero (kernel f) := sorry
