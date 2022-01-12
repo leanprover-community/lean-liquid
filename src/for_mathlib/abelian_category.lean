@@ -122,12 +122,15 @@ is_zero_of_iso_of_zero (is_zero_zero _) $
 { hom := 0,
   inv := 0 }
 
+universes v u₁ u₂
+
 class preserves_zero_objects {C D : Type*} [category C] [has_zero_morphisms C]
   [category D] [has_zero_morphisms D] (F : C ⥤ D) : Prop :=
 (preserves : ∀ (X : C), is_zero X → is_zero (F.obj X))
 
-instance preserves_zero_of_preserves_initial {C D : Type*} [category C] [abelian C]
-  [category D] [abelian D] (F : C ⥤ D) [preserves_colimit (functor.empty C) F] :
+instance preserves_zero_of_preserves_initial {C : Type u₁} {D : Type u₂}
+  [category.{v} C] [abelian C] [category.{v} D] [abelian D] (F : C ⥤ D)
+  [preserves_colimit (functor.empty C) F] :
   preserves_zero_objects F := preserves_zero_objects.mk $ λ X hX,
 begin
   have e : X ≅ ⊥_ _ := hX.iso is_zero_initial,
@@ -139,8 +142,14 @@ begin
   exact is_zero_initial,
 end
 
-instance preserves_zero_of_preserves_terminal {C D : Type*} [category C] [abelian C]
-  [category D] [abelian D] (F : C ⥤ D) [preserves_limit (functor.empty C) F] :
+-- sanity check
+example {C : Type u₁} {D : Type u₂}
+  [category.{v} C] [abelian C] [category.{v} D] [abelian D] (F : C ⥤ D)
+  [preserves_colimits F] : preserves_zero_objects F := infer_instance
+
+instance preserves_zero_of_preserves_terminal {C : Type u₁} {D : Type u₂}
+  [category.{v} C] [abelian C] [category.{v} D] [abelian D] (F : C ⥤ D)
+  [preserves_limit (functor.empty C) F] :
   preserves_zero_objects F := preserves_zero_objects.mk $ λ X hX,
 begin
   have e : X ≅ ⊤_ _ := hX.iso is_zero_terminal,
@@ -151,6 +160,11 @@ begin
   apply is_zero_of_iso_of_zero _ this.symm,
   exact is_zero_terminal,
 end
+
+-- sanity check
+example {C : Type u₁} {D : Type u₂}
+  [category.{v} C] [abelian C] [category.{v} D] [abelian D] (F : C ⥤ D)
+  [preserves_limits F] : preserves_zero_objects F := infer_instance
 
 lemma is_zero_of_preserves {C D : Type*} [category C] [has_zero_morphisms C]
   [category D] [has_zero_morphisms D] {X : C} (F : C ⥤ D)
