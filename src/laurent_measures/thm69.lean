@@ -32,7 +32,18 @@ open_locale nnreal classical big_operators topological_space
 
 section aux_lemmas
 
--- example (a b : ℤ) : a - b + b = a := sub_add_cancel a b
+example (A B : finset ℕ) (e : A ≃ B) (f g : ℕ → ℝ) : ∑ x in A, f ↑x = ∑ x in B, g ↑x :=
+begin
+  have := @fintype.sum_equiv A B ℝ _ _ _ e (f ∘ coe) (g ∘ coe),
+  nth_rewrite_lhs 0 [← sum_finset_coe],
+  nth_rewrite_rhs 0 [← sum_finset_coe],
+  simp only [univ_eq_attach, nat.cast_id],
+  apply fintype.sum_equiv e,
+  sorry,
+end
+
+
+
 
 -- for mathlib?
 lemma sum_range_sum_Icc (f : ℤ → ℤ) (n d : ℤ) (hn : 0 ≤ n - d) :
@@ -42,7 +53,7 @@ begin
 -- let e : ℤ ≃ ℤ := ⟨λ n : ℤ, n - 1, λ n, n + 1, by {intro, simp}, by {intro, simp}⟩,
   let m := (int.eq_coe_of_zero_le hn).some,
   let e : (range m.succ) ≃ (Icc d n),
-  { fconstructor,
+  sorry; { fconstructor,
     { intro a,
       use a + d,
       simp only [mem_Icc],
@@ -75,6 +86,8 @@ begin
   sorry,
   -- rw [← sum_subtype (range m.succ)] at this,
 end
+
+#exit
 
 lemma sum_Icc_sum_tail (f : ℤ → ℤ) (n d : ℤ)
   (hf : (has_sum (λ x : ℤ, (f x : ℝ) * (2 ^ x)⁻¹) 0))
@@ -292,7 +305,6 @@ begin
     apply or.intro_left,
     by_cases h_event : n - F.d < 0,
     { replace h_event := not_le_of_gt h_event,
-      rw [sub_nonneg] at h_event,
       rw [dif_neg h_event, tsum_reindex],
       simp only [subtype.val_eq_coe, norm_zero],
       suffices : ∑' (m : {m // n + 1 ≤ m}), (F s ↑m : ℝ) * (2 ^ (- ↑m)) =
@@ -315,10 +327,12 @@ begin
         apply or.intro_left,
         simp only [not_le, set.mem_set_of_eq, int.lt_add_one_iff] at ha,
         apply lt_d_eq_zero,
-        exact lt_of_le_of_lt ha (not_le.mp h_event), } },
+        replace h_event := sub_neg.mp (not_le.mp h_event),
+        exact lt_of_le_of_lt ha h_event,
+        } },
     { rw not_lt at h_event,
       let m := (int.eq_coe_of_zero_le h_event).some,
-      rw dif_pos (sub_nonneg.mp h_event),
+      rw dif_pos h_event,
       simp_rw [← int.norm_cast_real, int.cast_neg, int.cast_sum, int.cast_mul, int.cast_pow,
         int.cast_two],
       rw [sum_range_sum_Icc (F s) n F.d h_event, sum_Icc_sum_tail (F s) n F.d _ h_event],
