@@ -1,5 +1,5 @@
 import topology.category.Profinite.projective
-import for_mathlib.Profinite.product
+import for_mathlib.Profinite.disjoint_union
 
 @[simp]
 lemma ultrafilter_extend_extends_apply {α X : Type*}
@@ -21,16 +21,24 @@ structure ExtrDisc :=
 
 namespace ExtrDisc
 
+@[ext]
+structure hom (X Y : ExtrDisc) := mk :: (val : X.val ⟶ Y.val)
+
+def of (X : Profinite) [projective X] : ExtrDisc := ⟨X⟩
+
+@[simp]
+def of_val (X : Profinite) [projective X] : (of X).val = X := rfl
+
 @[simps]
 instance : category ExtrDisc :=
-{ hom := λ X Y, X.val ⟶ Y.val,
-  id := λ X, 𝟙 _,
-  comp := λ X Y Z f g, f ≫ g }
+{ hom := hom,
+  id := λ X, ⟨𝟙 _⟩,
+  comp := λ X Y Z f g, ⟨f.val ≫ g.val⟩ }
 
 @[simps]
 def _root_.ExtrDisc_to_Profinite : ExtrDisc ⥤ Profinite :=
 { obj := val,
-  map := λ X Y f, f }
+  map := λ X Y f, f.val }
 
 instance : concrete_category ExtrDisc.{u} :=
 { forget := ExtrDisc_to_Profinite ⋙ forget _,
@@ -40,7 +48,7 @@ instance : has_coe_to_sort ExtrDisc Type* :=
 concrete_category.has_coe_to_sort _
 
 instance {X Y : ExtrDisc} : has_coe_to_fun (X ⟶ Y) (λ f, X → Y) :=
-⟨λ f, f⟩
+⟨λ f, f.val⟩
 
 instance (X : ExtrDisc) : projective X.val := X.cond
 
@@ -51,10 +59,9 @@ noncomputable
 def split {X Y : ExtrDisc} (f : X ⟶ Y) (hf : function.surjective f) :
   Y ⟶ X :=
 begin
-  let f' : X.val ⟶ Y.val := f,
-  have : epi f', by  rwa Profinite.epi_iff_surjective f',
+  have : epi f.val, by  rwa Profinite.epi_iff_surjective f.val,
   resetI,
-  choose g h using projective.factors (𝟙 Y.val) f,
+  choose g h using projective.factors (𝟙 Y.val) f.val,
   exact ⟨g⟩,
 end
 
@@ -62,10 +69,10 @@ end
 lemma splitting_is_splitting {X Y : ExtrDisc} (f : X ⟶ Y)
   (hf : function.surjective f) : split f hf ≫ f = 𝟙 _ :=
 begin
-  let f' : X.val ⟶ Y.val := f,
-  have : epi f', by  rwa Profinite.epi_iff_surjective f',
+  have : epi f.val, by  rwa Profinite.epi_iff_surjective f.val,
   resetI,
-  exact (projective.factors (𝟙 Y.val) f).some_spec,
+  ext1,
+  exact (projective.factors (𝟙 Y.val) f.val).some_spec,
 end
 
 instance (X : ExtrDisc) : topological_space X :=
@@ -92,7 +99,7 @@ lemma free.ι_apply {α : Type u} (a : α) : free.ι α a = (pure a : ultrafilte
 
 noncomputable
 def free.lift {X : ExtrDisc.{u}} {α : Type u} (f : α → X) : free α ⟶ X :=
-⟨ultrafilter.extend f, continuous_ultrafilter_extend _⟩
+⟨⟨ultrafilter.extend f, continuous_ultrafilter_extend _⟩⟩
 
 @[simp]
 lemma free.lift_apply {X : ExtrDisc.{u}} {α : Type u} (f : α → X) (F : free α) :
@@ -118,11 +125,12 @@ begin
   letI hh : topological_space α := ⊥,
   have : dense_range (free.ι α) := dense_range_pure,
   rw ← free.ι_lift f at h,
-  ext1,
+  ext : 2,
   have := this.equalizer _ _ h,
   erw this,
-  exact g.continuous,
-  exact (free.lift f).continuous,
+  refl,
+  exact g.val.continuous,
+  exact (free.lift f).val.continuous,
 end
 
 @[ext]
@@ -143,6 +151,7 @@ def free_functor : Type u ⥤ ExtrDisc.{u} :=
     simp,
   end } .
 
+@[simps]
 noncomputable
 def adjunction : free_functor ⊣ forget _ :=
 adjunction.mk_of_hom_equiv $
@@ -155,3 +164,40 @@ adjunction.mk_of_hom_equiv $
   hom_equiv_naturality_right' := λ _ _ _ _ _, by { ext, dsimp, simp } }
 
 end ExtrDisc
+
+namespace Profinite
+
+instance (Y : Profinite) : t2_space Y := infer_instance
+
+def free_pres (X : Profinite.{u}) : ExtrDisc.{u} :=
+ExtrDisc.free X
+
+noncomputable
+def free_pres_π (X : Profinite.{u}) :
+  X.free_pres.val ⟶ X :=
+⟨ultrafilter.extend id, continuous_ultrafilter_extend _⟩
+
+noncomputable
+def map_free_pres {X Y : Profinite.{u}} (f : X ⟶ Y) : X.free_pres ⟶ Y.free_pres :=
+ExtrDisc.free_functor.map f
+
+-- functoriality of the presentation
+@[simp]
+lemma map_free_pres_π {X Y : Profinite.{u}} (f : X ⟶ Y) :
+  (map_free_pres f).val ≫ Y.free_pres_π = X.free_pres_π ≫ f :=
+begin
+  apply_fun (λ e, (forget Profinite).map e),
+  swap, { exact (forget Profinite).map_injective },
+  dsimp [free_pres_π, map_free_pres, ExtrDisc.free.lift, ExtrDisc.free.ι],
+  have : dense_range (ExtrDisc.free.ι _ : X → X.free_pres) := dense_range_pure,
+  refine this.equalizer _ _ _,
+  continuity,
+  exact continuous_ultrafilter_extend id,
+  apply continuous_ultrafilter_extend,
+  exact continuous_ultrafilter_extend id,
+  ext,
+  dsimp,
+  simp,
+end
+
+end Profinite
