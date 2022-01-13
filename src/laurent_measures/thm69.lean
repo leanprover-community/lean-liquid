@@ -217,30 +217,29 @@ def ϕ : ℒ S → ℒ S :=
 
 
 -- ``[FAE]`` For this lemma, use results from ```### Sums on subtypes``` of `infinite_sum.lean`
-lemma aux_summable_iff_on_nat {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ) (hf : ∀ n : ℤ, n < d → f n = 0) :
-  summable (λ n, ∥ f n ∥ * ρ ^ n) ↔ summable (λ n : ℕ, ∥ f n ∥ * ρ ^ (n : ℤ)) :=
+lemma aux_summable_iff_on_nat' {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ) (h : ∀ n : ℤ, n < d → f n = 0) :
+  summable (λ n, ∥ f n ∥ * ρ ^ n) ↔ summable (λ n : ℕ, ∥ f (n + d) ∥ * ρ ^ (n + d : ℤ)) :=
 begin
-  sorry,
-  -- have hf : function.support (λ n : ℤ, ∥ f n ∥ * ρ ^ n) ⊆ { a : ℤ | d ≤ a},sorry,
-  -- have := @has_sum_subtype_iff_of_support_subset ℝ ℤ _ _ (λ n : ℤ, ∥ f n ∥ * ρ ^ n) _ _ hf,
-  -- split,
-  -- { intro h,
-  --   simp,
-
-  -- },
-  -- sorry,
+  have hf : function.support (λ n : ℤ, ∥ f n ∥ * ρ ^ n) ⊆ { a : ℤ | d ≤ a},
+  { rw function.support_subset_iff,
+    intro x,
+    rw [← not_imp_not, not_not, mul_eq_zero],
+    intro hx,
+    simp only [not_le, set.mem_set_of_eq] at hx,
+    apply or.intro_left,
+    rw norm_eq_zero,
+    exact h x hx },
+  have h1 := λ a : ℝ,
+    @has_sum_subtype_iff_of_support_subset ℝ ℤ _ _ (λ n : ℤ, ∥ f n ∥ * ρ ^ n) _ _ hf,
+  have h2 := λ a : ℝ,
+    @equiv.has_sum_iff ℝ {b : ℤ // d ≤ b} ℕ _ _ ((λ n, ∥ f n ∥ * ρ ^ n) ∘ coe) _
+    (equiv_bdd_integer_nat d),
+  exact exists_congr (λ a, ((h2 a).trans (h1 a)).symm),
 end
-  --   suffices sum_pos : summable (λ n : ℕ, ∥ ((F.to_fun s n) : ℝ) ∥ * (1 / 2) ^ n),
-  -- { let A : (set ℤ) := {n : ℤ | n + F.d ≥ 0},
-  --   apply (@summable_subtype_and_compl _ _ _ _ _ _ _ A).mp,
-  --   have h_supp : ∀ n : {x : ℤ // x ∉ A}, ∥ F s n ∥ * (1 / 2 : ℝ) ^ n.1 = 0, sorry,
-  --   split,
-  --   {sorry},
-  --   { convert_to summable (λ x : {n : ℤ // n ∉ A}, ∥ F s x ∥ * (1 / 2 : ℝ) ^ (x.1)),
-  --     simp_rw h_supp,
-  --     apply summable_zero },
-  --   repeat {apply_instance}, },
-  -- sorry,
+
+
+lemma aux_summable_iff_on_nat {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ) (h : ∀ n : ℤ, n < d → f n = 0) :
+  summable (λ n, ∥ f n ∥ * ρ ^ n) ↔ summable (λ n : ℕ, ∥ f n ∥ * ρ ^ (n : ℤ)) := sorry
 
 lemma summable_smaller_radius (F : ℒ S) (s : S) :
   summable (λ n, (F s n : ℝ) * (1 / 2) ^ n) :=
