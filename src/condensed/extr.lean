@@ -459,6 +459,22 @@ theorem ExtrSheaf.extend_is_sheaf (F : ExtrSheaf.{u} C) : presheaf.is_sheaf proe
 def ExtrSheaf.extend (F : ExtrSheaf.{u} C) : Condensed C :=
 ⟨F.extend_to_presheaf, F.extend_is_sheaf⟩
 
+def ExtrSheaf.extend_restrict_hom (F : ExtrSheaf.{u} C) :
+  F ⟶ (Condensed_to_ExtrSheaf C).obj F.extend := ExtrSheaf.hom.mk $
+{ app := λ X, limits.equalizer.lift
+    (F.val.map $ eq_to_hom (X.op_unop).symm ≫ quiver.hom.op ⟨X.unop.val.pres_π⟩) sorry,
+  naturality' := sorry }
+
+instance (F : ExtrSheaf.{u} C) (X : ExtrDiscᵒᵖ) : is_iso (F.extend_restrict_hom.val.app X) := sorry
+
+instance (F : ExtrSheaf.{u} C) : is_iso F.extend_restrict_hom :=
+begin
+  haveI : is_iso F.extend_restrict_hom.val := nat_iso.is_iso_of_is_iso_app _,
+  use ⟨inv F.extend_restrict_hom.val⟩,
+  split,
+  all_goals { ext1, dsimp, simp }
+end
+
 def ExtrSheaf.extend_nat_trans {F G : ExtrSheaf.{u} C} (η : F ⟶ G) :
   F.extend_to_presheaf ⟶ G.extend_to_presheaf :=
 { app := λ X, limits.equalizer.lift
