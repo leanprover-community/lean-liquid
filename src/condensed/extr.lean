@@ -13,7 +13,7 @@ end
 
 open category_theory
 
-universe u
+universes w v u
 
 structure ExtrDisc :=
 (val : Profinite.{u})
@@ -278,7 +278,28 @@ def empty.elim (X : ExtrDisc) : empty ⟶ X :=
 def empty.hom_ext {X : ExtrDisc} (f g : empty ⟶ X) : f = g :=
 by { ext x, cases x }
 
+open opposite
+
+variables {C : Type v} [category.{w} C] (F : ExtrDisc.{u}ᵒᵖ ⥤ C)
+
+def terminal_condition [limits.has_terminal C] : Prop :=
+  is_iso (limits.terminal.from (F.obj (op empty)))
+
+def binary_product_condition [limits.has_binary_products C] : Prop := ∀ (X Y : ExtrDisc.{u}),
+  is_iso (limits.prod.lift (F.map (sum.inl X Y).op) (F.map (sum.inr X Y).op))
+
 end ExtrDisc
+
+section
+
+variables (C : Type v) [category.{w} C] [limits.has_terminal C] [limits.has_binary_products C]
+
+structure ExtrSheaf :=
+(val : ExtrDisc.{u}ᵒᵖ ⥤ C)
+(terminal : ExtrDisc.terminal_condition val)
+(binary_product : ExtrDisc.binary_product_condition val)
+
+end
 
 namespace Profinite
 
