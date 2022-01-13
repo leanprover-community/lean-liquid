@@ -292,6 +292,43 @@ def binary_product_condition [limits.has_binary_products C] : Prop := ∀ (X Y :
 
 end ExtrDisc
 
+namespace Profinite
+
+instance (Y : Profinite) : t2_space Y := infer_instance
+
+def free_pres (X : Profinite.{u}) : ExtrDisc.{u} :=
+ExtrDisc.free X
+
+noncomputable
+def free_pres_π (X : Profinite.{u}) :
+  X.free_pres.val ⟶ X :=
+⟨ultrafilter.extend id, continuous_ultrafilter_extend _⟩
+
+noncomputable
+def map_free_pres {X Y : Profinite.{u}} (f : X ⟶ Y) : X.free_pres ⟶ Y.free_pres :=
+ExtrDisc.free_functor.map f
+
+-- functoriality of the presentation
+@[simp]
+lemma map_free_pres_π {X Y : Profinite.{u}} (f : X ⟶ Y) :
+  (map_free_pres f).val ≫ Y.free_pres_π = X.free_pres_π ≫ f :=
+begin
+  apply_fun (λ e, (forget Profinite).map e),
+  swap, { exact (forget Profinite).map_injective },
+  dsimp [free_pres_π, map_free_pres, ExtrDisc.free.lift, ExtrDisc.free.ι],
+  have : dense_range (ExtrDisc.free.ι _ : X → X.free_pres) := dense_range_pure,
+  refine this.equalizer _ _ _,
+  continuity,
+  exact continuous_ultrafilter_extend id,
+  apply continuous_ultrafilter_extend,
+  exact continuous_ultrafilter_extend id,
+  ext,
+  dsimp,
+  simp,
+end
+
+end Profinite
+
 section
 
 variables (C : Type v) [category.{w} C] [limits.has_terminal C] [limits.has_binary_products C]
@@ -347,40 +384,3 @@ def Condensed_to_ExtrSheaf : Condensed C ⥤ ExtrSheaf C :=
   map := λ F G η, ⟨ whisker_left _ η.val ⟩ }
 
 end
-
-namespace Profinite
-
-instance (Y : Profinite) : t2_space Y := infer_instance
-
-def free_pres (X : Profinite.{u}) : ExtrDisc.{u} :=
-ExtrDisc.free X
-
-noncomputable
-def free_pres_π (X : Profinite.{u}) :
-  X.free_pres.val ⟶ X :=
-⟨ultrafilter.extend id, continuous_ultrafilter_extend _⟩
-
-noncomputable
-def map_free_pres {X Y : Profinite.{u}} (f : X ⟶ Y) : X.free_pres ⟶ Y.free_pres :=
-ExtrDisc.free_functor.map f
-
--- functoriality of the presentation
-@[simp]
-lemma map_free_pres_π {X Y : Profinite.{u}} (f : X ⟶ Y) :
-  (map_free_pres f).val ≫ Y.free_pres_π = X.free_pres_π ≫ f :=
-begin
-  apply_fun (λ e, (forget Profinite).map e),
-  swap, { exact (forget Profinite).map_injective },
-  dsimp [free_pres_π, map_free_pres, ExtrDisc.free.lift, ExtrDisc.free.ι],
-  have : dense_range (ExtrDisc.free.ι _ : X → X.free_pres) := dense_range_pure,
-  refine this.equalizer _ _ _,
-  continuity,
-  exact continuous_ultrafilter_extend id,
-  apply continuous_ultrafilter_extend,
-  exact continuous_ultrafilter_extend id,
-  ext,
-  dsimp,
-  simp,
-end
-
-end Profinite
