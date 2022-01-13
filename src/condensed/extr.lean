@@ -322,7 +322,7 @@ def map_pres {X Y : Profinite.{u}} (f : X ⟶ Y) : X.pres ⟶ Y.pres :=
 ExtrDisc.free_functor.map f
 
 -- functoriality of the presentation
-@[simp]
+@[simp, reassoc]
 lemma map_pres_π {X Y : Profinite.{u}} (f : X ⟶ Y) :
   (map_pres f).val ≫ Y.pres_π = X.pres_π ≫ f :=
 begin
@@ -340,25 +340,39 @@ begin
   simp,
 end
 
+@[simps]
 def rels (X : Profinite.{u}) : ExtrDisc.{u} :=
 (Profinite.pullback X.pres_π X.pres_π).pres
 
+@[simps]
 def rels_fst (X : Profinite.{u}) : X.rels ⟶ X.pres :=
 ⟨pres_π _ ≫ Profinite.pullback.fst _ _⟩
 
+@[simps]
 def rels_snd (X : Profinite.{u}) : X.rels ⟶ X.pres :=
 ⟨pres_π _ ≫ Profinite.pullback.snd _ _⟩
 
 def map_rels {X Y : Profinite.{u}} (f : X ⟶ Y) : X.rels ⟶ Y.rels :=
 map_pres $ pullback.lift _ _
   (pullback.fst _ _ ≫ (map_pres f).val)
-  (pullback.snd _ _ ≫ (map_pres f).val) sorry
+  (pullback.snd _ _ ≫ (map_pres f).val) $
+by simp [pullback.condition_assoc]
 
 lemma rels_fst_map {X Y : Profinite.{u}} (f : X ⟶ Y) :
-  X.rels_fst ≫ map_pres f = map_rels f ≫ Y.rels_fst := sorry
+  X.rels_fst ≫ map_pres f = map_rels f ≫ Y.rels_fst :=
+begin
+  apply ExtrDisc.hom.ext,
+  dsimp [map_rels],
+  simp,
+end
 
 lemma rels_snd_map {X Y : Profinite.{u}} (f : X ⟶ Y) :
-  X.rels_snd ≫ map_pres f = map_rels f ≫ Y.rels_snd := sorry
+  X.rels_snd ≫ map_pres f = map_rels f ≫ Y.rels_snd :=
+begin
+  apply ExtrDisc.hom.ext,
+  dsimp [map_rels],
+  simp,
+end
 
 /-
 
