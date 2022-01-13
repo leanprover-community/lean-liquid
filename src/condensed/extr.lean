@@ -1,5 +1,7 @@
 import topology.category.Profinite.projective
 import for_mathlib.Profinite.disjoint_union
+import condensed.is_proetale_sheaf
+import condensed.basic
 
 @[simp]
 lemma ultrafilter_extend_extends_apply {α X : Type*}
@@ -298,6 +300,51 @@ structure ExtrSheaf :=
 (val : ExtrDisc.{u}ᵒᵖ ⥤ C)
 (terminal : ExtrDisc.terminal_condition val)
 (binary_product : ExtrDisc.binary_product_condition val)
+
+namespace ExtrSheaf
+
+variable {C}
+
+@[ext] structure hom (X Y : ExtrSheaf C) := mk :: (val : X.val ⟶ Y.val)
+
+@[simps]
+instance : category (ExtrSheaf C) :=
+{ hom := hom,
+  id := λ X, ⟨𝟙 _⟩,
+  comp := λ A B C f g, ⟨f.val ≫ g.val⟩,
+  id_comp' := λ X Y η, by { ext1, simp },
+  comp_id' := λ X Y γ, by { ext1, simp },
+  assoc' := λ X Y Z W a b c, by { ext1, simp } }
+
+end ExtrSheaf
+
+@[simps]
+def ExtrSheaf_to_presheaf : ExtrSheaf C ⥤ ExtrDiscᵒᵖ ⥤ C :=
+{ obj := λ X, X.val,
+  map := λ X Y f, f.val }
+
+instance : full (ExtrSheaf_to_presheaf C) := ⟨λ _ _ f, ⟨f⟩, λ X Y f, by { ext1, refl }⟩
+instance : faithful (ExtrSheaf_to_presheaf C) := ⟨⟩
+
+variable [limits.has_equalizers C]
+
+@[simps]
+def Condensed_to_ExtrSheaf : Condensed C ⥤ ExtrSheaf C :=
+{ obj := λ F,
+  { val := ExtrDisc_to_Profinite.op ⋙ F.val,
+    terminal := begin
+      have hF := F.cond,
+      rw (functor.is_proetale_sheaf_tfae F.val).out 0 3 at hF,
+      exact hF.1,
+    end,
+    binary_product := begin
+      have hF := F.cond,
+      rw (functor.is_proetale_sheaf_tfae F.val).out 0 3 at hF,
+      rcases hF with ⟨h1,h2,h3⟩,
+      intros X Y,
+      apply h2,
+    end },
+  map := λ F G η, ⟨ whisker_left _ η.val ⟩ }
 
 end
 
