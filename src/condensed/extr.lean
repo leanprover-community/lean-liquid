@@ -199,6 +199,30 @@ begin
   exact w,
 end
 
+def sigma.cofan {ι : Type u} [fintype ι] (X : ι → ExtrDisc) : limits.cofan X :=
+limits.cofan.mk (sigma X) $ λ i, sigma.ι _ i
+
+@[simps]
+def sigma.is_colimit {ι : Type u} [fintype ι] (X : ι → ExtrDisc) :
+  limits.is_colimit (sigma.cofan X) :=
+{ desc := λ S, sigma.desc _ $ λ i, S.ι.app i,
+  fac' := λ S i, sigma.ι_desc _ _ _,
+  uniq' := begin
+    intros S m h,
+    apply sigma.hom_ext,
+    intros i,
+    simpa using h i,
+  end }
+
+def sum (X Y : ExtrDisc.{u}) : ExtrDisc.{u} :=
+{ val := Profinite.sum X.val Y.val,
+  cond := begin
+    let Z := Profinite.sum X.val Y.val,
+    let e : Z ≅ X.val ⨿ Y.val := sorry,
+    apply projective.of_iso e.symm,
+    apply_instance,
+  end }
+
 end ExtrDisc
 
 namespace Profinite
