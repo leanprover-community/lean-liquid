@@ -465,12 +465,30 @@ def ExtrSheaf.extend_restrict_hom (F : ExtrSheaf.{u} C) :
     (F.val.map $ eq_to_hom (X.op_unop).symm ≫ quiver.hom.op ⟨X.unop.val.pres_π⟩) sorry,
   naturality' := sorry }
 
-instance (F : ExtrSheaf.{u} C) (X : ExtrDiscᵒᵖ) : is_iso (F.extend_restrict_hom.val.app X) := sorry
+instance extend_restrict_hom_app_is_iso (F : ExtrSheaf.{u} C) (X : ExtrDiscᵒᵖ) :
+  is_iso (F.extend_restrict_hom.val.app X) := sorry
 
-instance (F : ExtrSheaf.{u} C) : is_iso F.extend_restrict_hom :=
+instance extend_restrict_hom (F : ExtrSheaf.{u} C) : is_iso F.extend_restrict_hom :=
 begin
   haveI : is_iso F.extend_restrict_hom.val := nat_iso.is_iso_of_is_iso_app _,
   use ⟨inv F.extend_restrict_hom.val⟩,
+  split,
+  all_goals { ext1, dsimp, simp }
+end
+
+def Condensed.restrict_extend_hom (F : Condensed.{u} C) :
+  F ⟶ ((Condensed_to_ExtrSheaf C).obj F).extend := Sheaf.hom.mk $
+{ app := λ X, limits.equalizer.lift (F.val.map X.unop.pres_π.op) sorry,
+  naturality' := sorry }
+
+instance restrict_extend_hom_app_is_iso (F : Condensed.{u} C) (X : Profiniteᵒᵖ) :
+  is_iso (F.restrict_extend_hom.val.app X) := sorry
+
+instance restrict_extend_hom_is_iso (F : Condensed.{u} C) :
+  is_iso F.restrict_extend_hom :=
+begin
+  haveI : is_iso F.restrict_extend_hom.val := nat_iso.is_iso_of_is_iso_app _,
+  use ⟨inv F.restrict_extend_hom.val⟩,
   split,
   all_goals { ext1, dsimp, simp }
 end
@@ -490,11 +508,25 @@ lemma ExtrSheaf.extend_nat_trans_comp {F G H : ExtrSheaf.{u} C} (η : F ⟶ G) (
   ExtrSheaf.extend_nat_trans (η ≫ γ) =
   ExtrSheaf.extend_nat_trans η ≫ ExtrSheaf.extend_nat_trans γ := sorry
 
+variable (C)
 @[simps]
 def ExtrSheaf_to_Condensed : ExtrSheaf.{u} C ⥤ Condensed.{u} C :=
 { obj := λ F, F.extend,
   map := λ F G η, ⟨ExtrSheaf.extend_nat_trans η⟩,
   map_id' := λ X, by { ext1, apply ExtrSheaf.extend_nat_trans_id },
   map_comp' := λ X Y Z f g, by { ext1, apply ExtrSheaf.extend_nat_trans_comp } }
+
+def ExtrSheaf_Condensed_equivalence : ExtrSheaf.{u} C ≌ Condensed.{u} C :=
+equivalence.mk (ExtrSheaf_to_Condensed C) (Condensed_to_ExtrSheaf C)
+(nat_iso.of_components (λ X,
+  { hom := X.extend_restrict_hom,
+    inv := let e := inv X.extend_restrict_hom in e,
+    hom_inv_id' := is_iso.hom_inv_id _,
+    inv_hom_id' := is_iso.inv_hom_id _ }) sorry)
+(nat_iso.of_components (λ X,
+  { hom := let e := inv X.restrict_extend_hom in e,
+    inv := X.restrict_extend_hom,
+    hom_inv_id' := is_iso.inv_hom_id _,
+    inv_hom_id' := is_iso.hom_inv_id _ }) sorry)
 
 end
