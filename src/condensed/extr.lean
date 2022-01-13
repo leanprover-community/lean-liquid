@@ -214,6 +214,7 @@ def sigma.is_colimit {ι : Type u} [fintype ι] (X : ι → ExtrDisc) :
     simpa using h i,
   end }
 
+@[simps]
 def sum (X Y : ExtrDisc.{u}) : ExtrDisc.{u} :=
 { val := Profinite.sum X.val Y.val,
   cond := begin
@@ -222,6 +223,60 @@ def sum (X Y : ExtrDisc.{u}) : ExtrDisc.{u} :=
     apply projective.of_iso e.symm,
     apply_instance,
   end }
+
+@[simps]
+def sum.inl (X Y : ExtrDisc) : X ⟶ sum X Y :=
+⟨Profinite.sum.inl _ _⟩
+
+@[simps]
+def sum.inr (X Y : ExtrDisc) : Y ⟶ sum X Y :=
+⟨Profinite.sum.inr _ _⟩
+
+@[simps]
+def sum.desc {X Y Z : ExtrDisc} (f : X ⟶ Z) (g : Y ⟶ Z) :
+  sum X Y ⟶ Z :=
+⟨Profinite.sum.desc _ _ f.val g.val⟩
+
+@[simp]
+lemma sum.inl_desc {X Y Z : ExtrDisc} (f : X ⟶ Z) (g : Y ⟶ Z) :
+  sum.inl X Y ≫ sum.desc f g = f :=
+by { ext1, dsimp, simp }
+
+@[simp]
+lemma sum.inr_desc {X Y Z : ExtrDisc} (f : X ⟶ Z) (g : Y ⟶ Z) :
+  sum.inr X Y ≫ sum.desc f g = g :=
+by { ext1, dsimp, simp }
+
+@[ext]
+lemma sum.hom_ext {X Y Z : ExtrDisc} (f g : sum X Y ⟶ Z)
+  (hl : sum.inl X Y ≫ f = sum.inl X Y ≫ g)
+  (hr : sum.inr X Y ≫ f = sum.inr X Y ≫ g) : f = g :=
+begin
+  ext1,
+  apply Profinite.sum.hom_ext,
+  { apply_fun (λ e, e.val) at hl, exact hl },
+  { apply_fun (λ e, e.val) at hr, exact hr }
+end
+
+@[simps]
+def empty : ExtrDisc :=
+{ val := Profinite.empty,
+  cond := begin
+    let e : Profinite.empty ≅ ⊥_ _ := sorry,
+    apply projective.of_iso e.symm,
+    -- apply_instance, <-- missing instance : projective (⊥_ _)
+    constructor,
+    introsI A B f g _,
+    refine ⟨limits.initial.to A, by simp⟩,
+  end }
+
+@[simps]
+def empty.elim (X : ExtrDisc) : empty ⟶ X :=
+⟨Profinite.empty.elim _⟩
+
+@[ext]
+def empty.hom_ext {X : ExtrDisc} (f g : empty ⟶ X) : f = g :=
+by { ext x, cases x }
 
 end ExtrDisc
 
