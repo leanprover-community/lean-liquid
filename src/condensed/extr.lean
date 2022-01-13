@@ -216,13 +216,25 @@ def sigma.is_colimit {ι : Type u} [fintype ι] (X : ι → ExtrDisc) :
     simpa using h i,
   end }
 
+.-- move this
+-- @[simps]
+noncomputable def _root_.Profinite.sum_iso_coprod (X Y : Profinite.{u}) :
+  Profinite.sum X Y ≅ X ⨿ Y :=
+{ hom := Profinite.sum.desc _ _ limits.coprod.inl limits.coprod.inr,
+  inv := limits.coprod.desc (Profinite.sum.inl _ _) (Profinite.sum.inr _ _),
+  hom_inv_id' := by { apply Profinite.sum.hom_ext;
+    simp only [← category.assoc, category.comp_id, Profinite.sum.inl_desc,
+      limits.coprod.inl_desc, Profinite.sum.inr_desc, limits.coprod.inr_desc] },
+  inv_hom_id' := by { apply limits.coprod.hom_ext;
+    simp only [← category.assoc, category.comp_id, Profinite.sum.inl_desc,
+      limits.coprod.inl_desc, Profinite.sum.inr_desc, limits.coprod.inr_desc] } }
+
 @[simps]
 def sum (X Y : ExtrDisc.{u}) : ExtrDisc.{u} :=
 { val := Profinite.sum X.val Y.val,
   cond := begin
     let Z := Profinite.sum X.val Y.val,
-    let e : Z ≅ X.val ⨿ Y.val := sorry,
-    apply projective.of_iso e.symm,
+    apply projective.of_iso (Profinite.sum_iso_coprod X.val Y.val).symm,
     apply_instance,
   end }
 
@@ -260,11 +272,16 @@ begin
   { apply_fun (λ e, e.val) at hr, exact hr }
 end
 
+-- move this
+lemma _root_.Profinite.empty_is_initial : limits.is_initial Profinite.empty.{u} :=
+@limits.is_initial.of_unique.{u} _ _ _ (λ Y, ⟨⟨Profinite.empty.elim _⟩, λ f, by { ext, cases x, }⟩)
+
 @[simps]
 def empty : ExtrDisc :=
 { val := Profinite.empty,
   cond := begin
-    let e : Profinite.empty ≅ ⊥_ _ := sorry,
+    let e : Profinite.empty ≅ ⊥_ _ :=
+    Profinite.empty_is_initial.unique_up_to_iso limits.initial_is_initial,
     apply projective.of_iso e.symm,
     -- apply_instance, <-- missing instance : projective (⊥_ _)
     constructor,
