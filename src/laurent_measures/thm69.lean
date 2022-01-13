@@ -118,11 +118,6 @@ lemma aux_summable_convolution {r : ℝ≥0} (f : ℤ → ℤ) (hf : summable (�
   summable (λ n : ℤ, 2⁻¹ * ∥ tsum (λ i : ℕ, ((f (n + 1 + i)) : ℝ) * (1 / 2) ^ i) ∥ * r ^ n) :=
 begin
   sorry,
-  -- replace hf : summable (λ n : ℕ, ∥ (f n : ℝ)* r ^ n ∥), sorry,
-  -- have h_geom : summable (λ n : ℕ, ∥ (2 : ℝ) ^ n ∥), sorry,
-  -- have one := @tsum_mul_tsum_eq_tsum_sum_antidiagonal_of_summable_norm ℝ _ _ _ _ hf h_geom,
-  -- simp_rw nat.sum_antidiagonal_eq_sum_range_succ_mk at one,
-  -- have three := _root_.has_sum_nat_add_iff',
 end
 
 --for `mathlib`?
@@ -386,43 +381,18 @@ end
 
 theorem θ_ϕ_exact (F : ℒ S) (hF : θ S F = 0) : ∃ G, ϕ S G = F := sorry
 
-
--- This `θ₂` is the "measurification" of the map `θₗ` of
--- Theorem 6.9. Thus, `to_meas_θ` is the map inducing the isomorphism of Theorem 6.9 (2)
--- def θ' : laurent_measures r S → ℳ p S :=
--- λ F s, θ₀ r ⟨(λ _, F s), (λ _, F.2 s)⟩
-
--- lemma θ_zero :
---  (θ p r S (0 : laurent_measures r S)) = 0 := sorry
-
--- lemma θ_add (F G : laurent_measures r S) :
---  (θ p r S (F + G)) = (θ p r S F) + (θ p r S G) := sorry
-
--- This `lemma to_meas_θ_bound` is precisely Prop 7.2 (3) of `Analytic.pdf`
--- lemma θ_bound : ∃ (C : ℝ≥0), ∀ (c : ℝ≥0) (F : laurent_measures r S),
---   ∥ F ∥ ≤ c → ∥ θ p r S F ∥₊ ≤ C * c := sorry
-
--- def to_add_hom_θ : add_hom (laurent_measures r S) (ℳ p S) :=
--- add_monoid_hom.mk' (λ F, θ p r S F)
--- begin
---     intros a b,
---     have := θ_add p r S a b,
---     exact this,
---   end
-
 -- def Θ : comphaus_filtered_pseudo_normed_group_hom (laurent_measures r S) (ℳ p S) :=
 --   { to_fun := θ p r S,
 --     bound' := θ_bound p r S,
---     continuous' := sorry, -- [FAE] I guess that this is Prop 7.2 (4) of `Analytic.pdf`
+--     continuous' := , -- [FAE] I guess that this is Prop 7.2 (4) of `Analytic.pdf`
 --     -- .. to_add_hom_meas_θ ξ r S p,
 --     map_add' := (to_add_hom_θ p r S).2,
---     map_zero' := sorry }
+--     map_zero' :=  }
 
 
 -- lemma chain_complex_thm69 (F : laurent_measures r S) : Θ p r S (𝑓 • F) = 0 :=
 -- begin
 --   funext s,
---   sorry,
 --   -- simp only [real_measures.zero_apply],
 --   -- dsimp [Θ],
 --   -- dsimp [to_meas_θ],
@@ -447,17 +417,13 @@ theorem θ_ϕ_exact (F : ℒ S) (hF : θ S F = 0) : ∃ G, ϕ S G = F := sorry
 --   f :=
 --   begin
 --     let φ := λ (F : laurent_measures r S), (ker_θ₂_generator r) • F,
---     use φ,
---     sorry,
---     sorry,
---     sorry,
---     sorry,-- [FAE] These four are the properties that the scalar multiplication by a measure on the
+--     use φ,-- [FAE] These four are the properties that the scalar multiplication by a measure on the
 --     --singleton (as endomorphism of S-measures) must satisfy
 --   end,
 --   g := @Θ r _ S p _ _ _,
---   mono' := sorry,
---   epi' := sorry,
---   exact' := sorry }
+--   mono' :=
+--   epi' :=
+--   exact' := }
 -- end SES_thm69
 
 end thm69
