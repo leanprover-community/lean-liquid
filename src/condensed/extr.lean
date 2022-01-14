@@ -465,8 +465,40 @@ def ExtrSheaf.extend_to_presheaf (F : ExtrSheaf.{u} C) : Profiniteᵒᵖ ⥤ C :
   map_id' := sorry,
   map_comp' := sorry }
 
+@[simps]
+def ExtrDisc.via_pullback_fst {X Y Z : ExtrDisc} (f : Y ⟶ X)
+  (g : Z.val ⟶ Profinite.pullback f.val f.val) :
+  Z ⟶ Y := ⟨g ≫ Profinite.pullback.fst f.val f.val⟩
+
+@[simps]
+def ExtrDisc.via_pullback_snd {X Y Z : ExtrDisc} (f : Y ⟶ X)
+  (g : Z.val ⟶ Profinite.pullback f.val f.val) :
+  Z ⟶ Y := ⟨g ≫ Profinite.pullback.snd f.val f.val⟩
+
+@[reassoc]
+lemma ExtrDisc.via_pullback_condition {X Y Z : ExtrDisc} (f : Y ⟶ X)
+  (g : Z.val ⟶ Profinite.pullback f.val f.val) :
+  ExtrDisc.via_pullback_fst f g ≫ f = ExtrDisc.via_pullback_snd f g ≫ f := sorry
+
+open opposite
+
+def ExtrSheaf.map_to_equalizer (F : ExtrSheaf.{u} C) {X Y Z : ExtrDisc}
+  (f : Y ⟶ X) (g : Z.val ⟶ Profinite.pullback f.val f.val) :
+  F.val.obj (op X) ⟶
+  limits.equalizer (F.val.map (ExtrDisc.via_pullback_fst f g).op)
+  (F.val.map (ExtrDisc.via_pullback_snd f g).op) :=
+limits.equalizer.lift (F.val.map f.op) $
+by simp only [← F.val.map_comp, ← op_comp, ExtrDisc.via_pullback_condition]
+
+-- This should follow from the projectivity of the objects involved.
+lemma ExtrSheaf.equalizer_condition (F : ExtrSheaf.{u} C) {X Y Z : ExtrDisc}
+  (f : Y ⟶ Z) (hf : function.surjective f) (g : Z.val ⟶ Profinite.pullback f.val f.val)
+  (hg : function.surjective g) :
+  is_iso (F.map_to_equalizer f g) := sorry
+
 -- This will be a bit hard... One should use the proetale sheaf condition involving
 -- binary products, the empty profinite set, and equalizers.
+-- One should presumably also use `ExtrSheaf.equalizer_condition`.
 theorem ExtrSheaf.extend_is_sheaf (F : ExtrSheaf.{u} C) : presheaf.is_sheaf proetale_topology
   F.extend_to_presheaf := sorry
 
