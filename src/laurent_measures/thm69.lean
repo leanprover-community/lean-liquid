@@ -308,41 +308,68 @@ begin
   simpa [← filter.map_map, aux_coe_nat_int_at_top],
 end
 
-lemma map_zadd_at_top_eq_nat (k : ℤ) :
+lemma map_add_at_top_eq_int (k : ℤ) :
   map (λ a : ℤ, a + k) (at_top : filter ℤ) = (at_top : filter ℤ) := sorry
 -- map_at_top_eq_of_gc (λa, a - k) k
 --   (assume a b h, add_le_add_right h k)
 --   (assume a b h, (le_tsub_iff_right h).symm)
 --   (assume a h, by rw [tsub_add_cancel_of_le h])
 
-lemma pluto (f : ℤ → ℝ) (d : ℤ) (a : ℝ) : tendsto (λ n : ℕ, f n) at_top (𝓝 a) ↔
+lemma tendsto_add_top_iff_int (f : ℤ → ℝ) (d : ℤ) (a : ℝ) : tendsto (λ n : ℕ, f n) at_top (𝓝 a) ↔
   tendsto (λ n : ℕ, f (n + d)) at_top (𝓝 a) :=
 begin
   rw aux_int_filter,
-  let g := λ n, f (n + d),
-  convert_to tendsto f at_top (𝓝 a) ↔ tendsto g at_top (𝓝 a),
-  sorry,--apply aux_int_filter,
-  rw iff.comm,
-  rw ← tendsto_map'_iff,
-  rw (map_zadd_at_top_eq_nat ),
+  convert_to tendsto f at_top (𝓝 a) ↔ tendsto (λ n, f (n + d)) at_top (𝓝 a),
+  have := @aux_int_filter _ (λ n, f (n + d)) (𝓝 a),
+  { simp only at this,
+    rwa ← iff_eq_eq },
+  { rw [iff.comm, ← tendsto_map'_iff, map_add_at_top_eq_int] },
 end
 
-lemma pippo (k : ℕ) : map (λa, a + k) at_top = at_top :=
-map_at_top_eq_of_gc (λa, a - k) k
-  (assume a b h, add_le_add_right h k)
-  (assume a b h, (le_tsub_iff_right h).symm)
-  (assume a h, by rw [tsub_add_cancel_of_le h])
-
-
--- #exit
+-- set_option trace.simp_lemmas true
 
 lemma aux_summable_iff_on_nat {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ) (h : ∀ n : ℤ, n < d → f n = 0) :
   summable (λ n, ∥ f n ∥ * ρ ^ n) ↔ summable (λ n : ℕ, ∥ f n ∥ * ρ ^ (n : ℤ)) :=
 begin
-  sorry,
-  -- apply (aux_summable_iff_on_nat' d h).trans,
-  -- simpa using [(tendsto_add_at_top_iff_nat d).symm],
+  apply (aux_summable_iff_on_nat' d h).trans,
+  let g : ℕ → ℝ := λ n, ∥ f n ∥ * ρ ^ (n : ℤ),
+  by_cases hd : 0 ≤ d,
+  { set m := (int.eq_coe_of_zero_le hd).some,
+    convert_to summable (λ (n : ℕ), g (n + m)) ↔ summable g,
+    { congr,
+      funext n,
+      dsimp only [g],
+      rw [Exists.some_spec (int.eq_coe_of_zero_le hd)],
+      refl, },
+    exact summable_nat_add_iff m },
+  { sorry,
+    -- let T : finset ℤ := Icc d 0,
+    -- apply T.summable_compl_iff,
+  },
+  -- have := @summable.comp_injective _ _ _ _ _ _ (λ n : ℕ, ∥f (↑n)∥ * ρ ^ (↑n)) _,
+  -- refine iff.trans _ ((Icc d 0).has_sum_compl_iff),
+  -- let := (λ s : finset ℤ, ∑ b in s, (λ n, ∥ f n ∥ * ρ ^ n ) b),
+  -- have := tendsto_add_top_iff_int (λ n, ∥ f n ∥ * ρ ^ n) d,
+  -- have := tendsto_add_top_iff_int (λ s : finset _, ∑ b in s, ((λ n, ∥ f n ∥ * ρ ^ n) b)),
+  -- rw iff.comm,
+  -- have also := exists_congr this,
+  -- simp only at also,
+  -- -- exact also.rfl,
+  -- split,
+  -- intro H,
+  -- simp at H,
+  -- apply has_sum.summable,
+  -- -- have pluto := H.has_sum,
+  -- have too := also.1 H,
+  -- simp [*] at *,
+  -- simpa,
+  -- have poi := exists_congr (λ a, has_sum.summable _),
+  -- exact also,
+  -- simpa,
+  -- simpa using [pluto d],
 end
+
+#exit
 
 lemma summable_smaller_radius (F : ℒ S) (s : S) :
   summable (λ n, (F s n : ℝ) * (1 / 2) ^ n) :=
