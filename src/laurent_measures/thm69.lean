@@ -4,6 +4,7 @@ import data.finset.nat_antidiagonal
 import laurent_measures.basic
 import laurent_measures.theta
 import linear_algebra.basic
+import order.filter.at_top_bot tactic.linarith
 
 
 /-
@@ -104,12 +105,34 @@ begin
   exact (Exists.some_spec (int.eq_coe_of_zero_le hn)).symm,
 end
 
+-- import order.filter.at_top_bot tactic.linarith
+
+
 lemma sum_Icc_sum_tail (f : ℤ → ℤ) (n d : ℤ)
   (hf : (has_sum (λ x : ℤ, (f x : ℝ) * (2 ^ x)⁻¹) 0))
+  (hd : ∀ n : ℤ, n < d → f n = 0)
   (hn : 0 ≤ n - d) : - ∑ k in (Icc d n), ((f k) : ℝ) * 2 ^ (n - k) =
   2 ^ n * tsum (λ x : {a : ℤ // a ≥ n.succ}, (f x : ℝ) * (2 ^ x.1)⁻¹) :=
 begin
-  sorry,
+  sorry;{
+  replace hf : (has_sum (λ x : ℤ, ∥ f x ∥ * (2 ^ x)⁻¹) 0), sorry,
+  have H_supp : function.support (λ n : ℤ, ∥ f n ∥ * (2 ^ n)⁻¹) ⊆ { a : ℤ | d ≤ a},
+  { rw function.support_subset_iff,
+    intro x,
+    rw [← not_imp_not, not_not, mul_eq_zero],
+    intro hx,
+    simp only [not_le, set.mem_set_of_eq] at hx,
+    apply or.intro_left,
+    rw norm_eq_zero,
+    exact hd x hx },
+  -- rw has_sum_subtype_support,
+  have h1 := --λ a : ℝ,
+    @has_sum_subtype_iff_of_support_subset ℝ ℤ _ _ (λ n : ℤ, ∥ f n ∥ * (2 ^ n)⁻¹) _ _ H_supp,
+  rw ← h1 at hf,
+  let g := (λ n : {x : ℤ // d ≤ x}, ∥ f n ∥ * (2 ^ n.1)⁻¹),
+  let T : finset {x : ℤ // d ≤ x} := Icc ⟨d, le_of_eq _⟩ ⟨n, int.le_of_sub_nonneg hn⟩,--⟨d, le_of_eq _⟩,
+  have := @sum_add_tsum_compl _ _ _ _ _ g _ {x | x < 0},
+  }
 end
 
 -- **[FAE]** Use `tsum_mul_tsum_eq_tsum_sum_antidiagonal` or even better
@@ -235,7 +258,6 @@ def ϕ : ℒ S → ℒ S :=
   end }
 
 
--- ``[FAE]`` For this lemma, use results from ```### Sums on subtypes``` of `infinite_sum.lean`
 lemma aux_summable_iff_on_nat' {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ) (h : ∀ n : ℤ, n < d → f n = 0) :
   summable (λ n, ∥ f n ∥ * ρ ^ n) ↔ summable (λ n : ℕ, ∥ f (n + d) ∥ * ρ ^ (n + d : ℤ)) :=
 begin
@@ -256,9 +278,71 @@ begin
   exact exists_congr (λ a, ((h2 a).trans (h1 a)).symm),
 end
 
+open filter
+open_locale filter
+
+lemma aux_coe_nat_int_at_top : map (coe : ℕ → ℤ) at_top = at_top :=
+begin
+  ext s,
+  simp only [set.mem_preimage, mem_at_top_sets, ge_iff_le, filter.mem_map],
+  split,
+  { rintros ⟨a, ha⟩,
+    use a,
+    intros b hb,
+    lift b to ℕ,
+    apply ha,
+    exact_mod_cast hb,
+    linarith },
+  { rintro ⟨a, ha⟩,
+    use a.nat_abs,
+    intros b hb,
+    apply ha,
+    apply int.le_nat_abs.trans,
+    exact_mod_cast hb }
+end
+
+lemma aux_int_filter {X : Type*} {f : ℤ → X} (F : filter X) : tendsto (λ n : ℕ, f n) at_top F ↔
+  tendsto f at_top F :=
+begin
+  convert_to map (f ∘ coe) (at_top : filter ℕ) ≤ F ↔ tendsto f at_top F,
+  simpa [← filter.map_map, aux_coe_nat_int_at_top],
+end
+
+lemma map_zadd_at_top_eq_nat (k : ℤ) :
+  map (λ a : ℤ, a + k) (at_top : filter ℤ) = (at_top : filter ℤ) := sorry
+-- map_at_top_eq_of_gc (λa, a - k) k
+--   (assume a b h, add_le_add_right h k)
+--   (assume a b h, (le_tsub_iff_right h).symm)
+--   (assume a h, by rw [tsub_add_cancel_of_le h])
+
+lemma pluto (f : ℤ → ℝ) (d : ℤ) (a : ℝ) : tendsto (λ n : ℕ, f n) at_top (𝓝 a) ↔
+  tendsto (λ n : ℕ, f (n + d)) at_top (𝓝 a) :=
+begin
+  rw aux_int_filter,
+  let g := λ n, f (n + d),
+  convert_to tendsto f at_top (𝓝 a) ↔ tendsto g at_top (𝓝 a),
+  sorry,--apply aux_int_filter,
+  rw iff.comm,
+  rw ← tendsto_map'_iff,
+  rw (map_zadd_at_top_eq_nat ),
+end
+
+lemma pippo (k : ℕ) : map (λa, a + k) at_top = at_top :=
+map_at_top_eq_of_gc (λa, a - k) k
+  (assume a b h, add_le_add_right h k)
+  (assume a b h, (le_tsub_iff_right h).symm)
+  (assume a h, by rw [tsub_add_cancel_of_le h])
+
+
+-- #exit
 
 lemma aux_summable_iff_on_nat {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ) (h : ∀ n : ℤ, n < d → f n = 0) :
-  summable (λ n, ∥ f n ∥ * ρ ^ n) ↔ summable (λ n : ℕ, ∥ f n ∥ * ρ ^ (n : ℤ)) := sorry
+  summable (λ n, ∥ f n ∥ * ρ ^ n) ↔ summable (λ n : ℕ, ∥ f n ∥ * ρ ^ (n : ℤ)) :=
+begin
+  sorry,
+  -- apply (aux_summable_iff_on_nat' d h).trans,
+  -- simpa using [(tendsto_add_at_top_iff_nat d).symm],
+end
 
 lemma summable_smaller_radius (F : ℒ S) (s : S) :
   summable (λ n, (F s n : ℝ) * (1 / 2) ^ n) :=
@@ -380,7 +464,8 @@ begin
       simp_rw [← int.norm_cast_real, int.cast_neg, int.cast_sum, int.cast_mul, int.cast_pow,
         int.cast_two],
       rw ← sub_nonneg at h_event,
-      rw [sum_range_sum_Icc (F s) n F.d h_event, sum_Icc_sum_tail (F s) n F.d _ h_event],
+      rw [sum_range_sum_Icc (F s) n F.d h_event,
+        sum_Icc_sum_tail (F s) n F.d _ (lt_d_eq_zero S F s) h_event],
       { rw [← (abs_eq_self.mpr (inv_nonneg.mpr (@zero_le_two ℝ _))), ← real.norm_eq_abs,
           ← normed_field.norm_mul, real.norm_eq_abs, real.norm_eq_abs, abs_eq_abs,
           ← (sub_add_cancel n 1), (sub_eq_add_neg n 1), (add_assoc n _), (add_comm n _),
