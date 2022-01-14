@@ -78,14 +78,14 @@ instance fact_one_le_pow {n : ℕ} {a : ℝ≥0} [h : fact (1 ≤ a)] : fact (1 
 begin
   cases n,
   { simpa only [pow_zero] using nnreal.fact_le_refl _ },
-  { rwa one_le_pow_iff, apply nat.succ_ne_zero }
+  { rwa @one_le_pow_iff _ _ _ nnreal.covariant_mul, apply nat.succ_ne_zero }
 end
 
 instance fact_pow_le_one {n : ℕ} {a : ℝ≥0} [h : fact (a ≤ 1)] : fact (a^n ≤ 1) :=
 begin
   cases n,
   { simpa only [pow_zero] using nnreal.fact_le_refl _ },
-  { rwa pow_le_one_iff, apply nat.succ_ne_zero }
+  { rwa @pow_le_one_iff _ _ _ nnreal.covariant_mul, apply nat.succ_ne_zero }
 end
 
 lemma fact_le_pow_mul_of_le_pow_succ_mul {n : ℕ} (r : ℝ≥0)
