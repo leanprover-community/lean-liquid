@@ -318,6 +318,27 @@ def pres_π (X : Profinite.{u}) :
 def map_pres {X Y : Profinite.{u}} (f : X ⟶ Y) : X.pres ⟶ Y.pres :=
 ExtrDisc.free_functor.map f
 
+@[simp]
+lemma map_pres_id (X : Profinite.{u}) : map_pres (𝟙 X) = 𝟙 _ :=
+begin
+  dsimp [map_pres],
+  symmetry,
+  apply ExtrDisc.free.lift_unique,
+  refl,
+end
+
+@[simp]
+lemma map_pres_comp {X Y Z : Profinite.{u}} (f : X ⟶ Y) (g : Y ⟶ Z) :
+  map_pres (f ≫ g) = map_pres f ≫ map_pres g :=
+begin
+  dsimp [map_pres],
+  symmetry,
+  apply ExtrDisc.free.lift_unique,
+  ext1,
+  dsimp,
+  simp,
+end
+
 -- functoriality of the presentation
 @[simp, reassoc]
 lemma map_pres_π {X Y : Profinite.{u}} (f : X ⟶ Y) :
@@ -459,7 +480,12 @@ end
 def ExtrSheaf.extend_to_presheaf (F : ExtrSheaf.{u} C) : Profiniteᵒᵖ ⥤ C :=
 { obj := λ X, F.extend_to_obj X.unop,
   map := λ X Y f, F.extend_to_hom f.unop,
-  map_id' := sorry,
+  map_id' := begin
+    intros X,
+    dsimp [ExtrSheaf.extend_to_hom],
+    ext1,
+    simp,
+  end,
   map_comp' := sorry }
 
 @[simps]
