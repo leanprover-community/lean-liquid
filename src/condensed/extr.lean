@@ -59,23 +59,20 @@ instance (X : ExtrDisc) : projective X.val := X.cond
 example (X : ExtrDisc) : projective (ExtrDisc_to_Profinite.obj X) :=
 by { dsimp, apply_instance }
 
-def split {X Y : ExtrDisc} (f : X ⟶ Y) (hf : function.surjective f) :
-  Y ⟶ X :=
+def split {X : Profinite} {Y : ExtrDisc} (f : X ⟶ Y.val) (hf : function.surjective f) :
+  Y.val ⟶ X :=
 begin
-  have : epi f.val, by  rwa Profinite.epi_iff_surjective f.val,
-  resetI,
-  choose g h using projective.factors (𝟙 Y.val) f.val,
+  haveI : epi f := by rwa Profinite.epi_iff_surjective f,
+  choose g h using projective.factors (𝟙 Y.val) f,
   exact ⟨g⟩,
 end
 
 @[simp, reassoc]
-lemma splitting_is_splitting {X Y : ExtrDisc} (f : X ⟶ Y)
+lemma split_is_splitting {X : Profinite} {Y : ExtrDisc} (f : X ⟶ Y.val)
   (hf : function.surjective f) : split f hf ≫ f = 𝟙 _ :=
 begin
-  have : epi f.val, by  rwa Profinite.epi_iff_surjective f.val,
-  resetI,
-  ext1,
-  exact (projective.factors (𝟙 Y.val) f.val).some_spec,
+  haveI : epi f := by rwa Profinite.epi_iff_surjective f,
+  apply (projective.factors (𝟙 Y.val) f).some_spec,
 end
 
 instance (X : ExtrDisc) : topological_space X :=
@@ -492,9 +489,32 @@ by simp only [← F.val.map_comp, ← op_comp, ExtrDisc.via_pullback_condition]
 
 -- This should follow from the projectivity of the objects involved.
 lemma ExtrSheaf.equalizer_condition (F : ExtrSheaf.{u} C) {X Y Z : ExtrDisc}
-  (f : Y ⟶ Z) (hf : function.surjective f) (g : Z.val ⟶ Profinite.pullback f.val f.val)
+  (f : Y ⟶ X) (hf : function.surjective f) (g : Z.val ⟶ Profinite.pullback f.val f.val)
   (hg : function.surjective g) :
-  is_iso (F.map_to_equalizer f g) := sorry
+  is_iso (F.map_to_equalizer f g) :=
+begin
+  let s : X ⟶ Y := ⟨ExtrDisc.split _ hf⟩,
+  have hs : s ≫ f = 𝟙 _ := by {ext1, apply ExtrDisc.split_is_splitting},
+  let W :=
+    limits.equalizer (F.val.map (ExtrDisc.via_pullback_fst f g).op)
+    (F.val.map (ExtrDisc.via_pullback_snd f g).op),
+  let i : W ⟶ F.val.obj (op X) := limits.equalizer.ι _ _ ≫ F.val.map s.op,
+  use i,
+  split,
+  { dsimp [ExtrSheaf.map_to_equalizer, i],
+    simp [← F.val.map_comp, ← op_comp, hs] },
+  { dsimp [ExtrSheaf.map_to_equalizer, i],
+    ext1,
+    simp,
+    simp only [← F.val.map_comp, ← op_comp, hs],
+    /-
+    TODO:
+    It seems that this is not true in full generality.
+    I think we need `C` to be concrete where `forget C` preserves equalizers.
+    -/
+    sorry
+  }
+end
 
 -- This will be a bit hard... One should use the proetale sheaf condition involving
 -- binary products, the empty profinite set, and equalizers.
