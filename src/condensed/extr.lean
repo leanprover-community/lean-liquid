@@ -507,7 +507,13 @@ def ExtrDisc.via_pullback_snd {X Y Z : ExtrDisc} (f : Y ⟶ X)
 @[reassoc]
 lemma ExtrDisc.via_pullback_condition {X Y Z : ExtrDisc} (f : Y ⟶ X)
   (g : Z.val ⟶ Profinite.pullback f.val f.val) :
-  ExtrDisc.via_pullback_fst f g ≫ f = ExtrDisc.via_pullback_snd f g ≫ f := sorry
+  ExtrDisc.via_pullback_fst f g ≫ f = ExtrDisc.via_pullback_snd f g ≫ f :=
+begin
+  dsimp [ExtrDisc.via_pullback_fst, ExtrDisc.via_pullback_snd],
+  ext1,
+  dsimp,
+  simp [Profinite.pullback.condition],
+end
 
 open opposite
 
