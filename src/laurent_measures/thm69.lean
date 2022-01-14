@@ -154,13 +154,32 @@ end aux_lemmas
 section thm69
 
 parameter {p : ℝ≥0}
-def r : ℝ≥0 := (1 / 2) ^ ( 1 / p.1)
+
+def r : ℝ≥0 := (1 / 2) ^ (p:ℝ)
+
 variables [fact(0 < p)] [fact (p < 1)]
 variable (S : Fintype)
 
-lemma r_ineq : 0 < (r : ℝ) ∧ (r : ℝ) < 1:= sorry
+lemma r_half : 1 / 2 < r :=
+begin
+  calc (1/2:ℝ≥0)
+      = (1/2) ^ (1:ℝ) : (rpow_one (1/2:ℝ≥0)).symm
+  ... < r : rpow_lt_rpow_of_exponent_gt (half_pos zero_lt_one) (half_lt_self one_ne_zero) _,
+  rw [← nnreal.coe_one, nnreal.coe_lt_coe],
+  exact fact.out _
+end
 
-lemma r_half : 1 / 2 < r := sorry
+lemma r_pos : 0 < r := lt_of_le_of_lt zero_le' r_half
+
+lemma r_lt_one : r < 1 :=
+begin
+  refine rpow_lt_one zero_le' (half_lt_self one_ne_zero) _,
+  rw nnreal.coe_pos,
+  exact fact.out _
+end
+
+lemma r_ineq : 0 < (r : ℝ) ∧ (r : ℝ) < 1:=
+by { rw [nnreal.coe_pos, ← nnreal.coe_one, nnreal.coe_lt_coe], exact ⟨r_pos, r_lt_one⟩ }
 
 local notation `ℳ` := real_measures p
 local notation `ℒ` := laurent_measures r
