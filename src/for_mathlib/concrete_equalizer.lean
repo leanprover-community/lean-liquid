@@ -64,6 +64,11 @@ let h1 := limit.is_limit (parallel_pair f g),
     E := h2.cone_point_unique_up_to_iso (types.limit_cone_is_limit _) in
 E.to_equiv.trans $ concrete.equalizer_equiv_aux _ _
 
+@[simp]
+lemma concrete.equalizer_equiv_apply {X Y : C} (f g : X ⟶ Y) [has_equalizer f g]
+  [preserves_limit (parallel_pair f g) (forget C)] (x : equalizer f g):
+  (concrete.equalizer_equiv f g x : X) = equalizer.ι f g x := rfl
+
 end equalizer
 
 end category_theory.limits
