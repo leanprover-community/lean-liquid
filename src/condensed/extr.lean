@@ -477,6 +477,7 @@ begin
     ← category.assoc, this],
 end
 
+@[simps]
 def ExtrSheaf.extend_to_presheaf (F : ExtrSheaf.{u} C) : Profiniteᵒᵖ ⥤ C :=
 { obj := λ X, F.extend_to_obj X.unop,
   map := λ X Y f, F.extend_to_hom f.unop,
@@ -486,7 +487,12 @@ def ExtrSheaf.extend_to_presheaf (F : ExtrSheaf.{u} C) : Profiniteᵒᵖ ⥤ C :
     ext1,
     simp,
   end,
-  map_comp' := sorry }
+  map_comp' := begin
+    intros X Y Z f g,
+    dsimp [ExtrSheaf.extend_to_hom],
+    ext1,
+    simp,
+  end }
 
 @[simps]
 def ExtrDisc.via_pullback_fst {X Y Z : ExtrDisc} (f : Y ⟶ X)
