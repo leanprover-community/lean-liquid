@@ -667,12 +667,22 @@ def ExtrSheaf.extend_nat_trans {F G : ExtrSheaf.{u} C} (η : F ⟶ G) :
 
 @[simp]
 lemma ExtrSheaf.extend_nat_trans_id (F : ExtrSheaf.{u} C) :
-  ExtrSheaf.extend_nat_trans (𝟙 F) = 𝟙 _ := sorry
+  ExtrSheaf.extend_nat_trans (𝟙 F) = 𝟙 _ :=
+begin
+  ext S,
+  dsimp [ExtrSheaf.extend_nat_trans],
+  simp,
+end
 
 @[simp]
 lemma ExtrSheaf.extend_nat_trans_comp {F G H : ExtrSheaf.{u} C} (η : F ⟶ G) (γ : G ⟶ H) :
   ExtrSheaf.extend_nat_trans (η ≫ γ) =
-  ExtrSheaf.extend_nat_trans η ≫ ExtrSheaf.extend_nat_trans γ := sorry
+  ExtrSheaf.extend_nat_trans η ≫ ExtrSheaf.extend_nat_trans γ :=
+begin
+  ext,
+  dsimp [ExtrSheaf.extend_nat_trans],
+  simp,
+end
 
 variable (C)
 @[simps]
