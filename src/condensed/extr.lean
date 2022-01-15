@@ -644,8 +644,23 @@ end
 
 def Condensed.restrict_extend_hom (F : Condensed.{u} C) :
   F ⟶ ((Condensed_to_ExtrSheaf C).obj F).extend := Sheaf.hom.mk $
-{ app := λ X, limits.equalizer.lift (F.val.map X.unop.pres_π.op) sorry,
-  naturality' := sorry }
+{ app := λ X, limits.equalizer.lift (F.val.map X.unop.pres_π.op) begin
+    dsimp [Condensed_to_ExtrSheaf],
+    simp only [← F.val.map_comp, ← op_comp, category.assoc,
+      Profinite.pullback.condition],
+  end,
+  naturality' := begin
+    intros S T f,
+    ext,
+    dsimp [Condensed_to_ExtrSheaf],
+    simp only [limits.equalizer.lift_ι, category.assoc],
+    erw [limits.equalizer.lift_ι],
+    erw [limits.equalizer.lift_ι_assoc],
+    dsimp,
+    simp only [← F.val.map_comp, ← op_comp],
+    rw Profinite.map_pres_π,
+    refl,
+  end }
 
 instance restrict_extend_hom_app_is_iso (F : Condensed.{u} C) (X : Profiniteᵒᵖ) :
   is_iso (F.restrict_extend_hom.val.app X) := sorry
