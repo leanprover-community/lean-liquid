@@ -662,8 +662,16 @@ end
 def ExtrSheaf.extend_nat_trans {F G : ExtrSheaf.{u} C} (η : F ⟶ G) :
   F.extend_to_presheaf ⟶ G.extend_to_presheaf :=
 { app := λ X, limits.equalizer.lift
-    (limits.equalizer.ι _ _ ≫ η.val.app _) sorry,
-  naturality' := sorry }
+    (limits.equalizer.ι _ _ ≫ η.val.app _) begin
+      simp only [category.assoc, ← η.val.naturality,
+        limits.equalizer.condition_assoc],
+    end,
+  naturality' := begin
+    intros S T f,
+    dsimp [ExtrSheaf.extend_to_hom],
+    ext,
+    simp,
+  end }
 
 @[simp]
 lemma ExtrSheaf.extend_nat_trans_id (F : ExtrSheaf.{u} C) :
