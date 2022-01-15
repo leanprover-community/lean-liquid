@@ -748,11 +748,23 @@ equivalence.mk (ExtrSheaf_to_Condensed C) (Condensed_to_ExtrSheaf C)
   { hom := X.extend_restrict_hom,
     inv := let e := inv X.extend_restrict_hom in e,
     hom_inv_id' := is_iso.hom_inv_id _,
-    inv_hom_id' := is_iso.inv_hom_id _ }) sorry)
+    inv_hom_id' := is_iso.inv_hom_id _ }) begin
+      intros X Y f,
+      ext,
+      dsimp [ExtrSheaf.extend_restrict_hom, ExtrSheaf.extend_nat_trans],
+      simp,
+    end)
 (nat_iso.of_components (λ X,
   { hom := let e := inv X.restrict_extend_hom in e,
     inv := X.restrict_extend_hom,
     hom_inv_id' := is_iso.inv_hom_id _,
-    inv_hom_id' := is_iso.hom_inv_id _ }) sorry)
+    inv_hom_id' := is_iso.hom_inv_id _ }) begin
+      intros X Y f,
+      dsimp,
+      rw [is_iso.comp_inv_eq, category.assoc, is_iso.eq_inv_comp],
+      ext,
+      dsimp [Condensed.restrict_extend_hom, ExtrSheaf.extend_nat_trans],
+      simp,
+    end)
 
 end
