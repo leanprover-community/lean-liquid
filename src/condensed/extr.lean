@@ -628,8 +628,27 @@ def ExtrSheaf.extend (F : ExtrSheaf.{u} C) : Condensed C :=
 def ExtrSheaf.extend_restrict_hom (F : ExtrSheaf.{u} C) :
   F ⟶ (Condensed_to_ExtrSheaf C).obj F.extend := ExtrSheaf.hom.mk $
 { app := λ X, limits.equalizer.lift
-    (F.val.map $ eq_to_hom (X.op_unop).symm ≫ quiver.hom.op ⟨X.unop.val.pres_π⟩) sorry,
-  naturality' := sorry }
+    (F.val.map $ eq_to_hom (X.op_unop).symm ≫ quiver.hom.op ⟨X.unop.val.pres_π⟩) begin
+      dsimp [Profinite.rels_fst, Profinite.rels_snd],
+      simp only [← F.val.map_comp, category.id_comp, ← op_comp],
+      congr' 2,
+      apply ExtrDisc.hom.ext,
+      dsimp,
+      simp [Profinite.pullback.condition],
+    end,
+  naturality' := begin
+    intros A B f,
+    ext,
+    dsimp [Condensed_to_ExtrSheaf],
+    simp only [limits.equalizer.lift_ι, category.id_comp, category.assoc],
+    dsimp [ExtrSheaf.extend, ExtrSheaf.extend_to_hom],
+    simp only [limits.equalizer.lift_ι, limits.equalizer.lift_ι_assoc],
+    simp only [← F.val.map_comp, ← op_comp],
+    rw [← f.op_unop, ← op_comp],
+    congr' 2,
+    apply ExtrDisc.hom.ext,
+    exact (Profinite.map_pres_π f.unop.val).symm,
+  end }
 
 instance extend_restrict_hom_app_is_iso (F : ExtrSheaf.{u} C) (X : ExtrDiscᵒᵖ) :
   is_iso (F.extend_restrict_hom.val.app X) := sorry
@@ -663,7 +682,15 @@ def Condensed.restrict_extend_hom (F : Condensed.{u} C) :
   end }
 
 instance restrict_extend_hom_app_is_iso (F : Condensed.{u} C) (X : Profiniteᵒᵖ) :
-  is_iso (F.restrict_extend_hom.val.app X) := sorry
+  is_iso (F.restrict_extend_hom.val.app X) :=
+begin
+  dsimp [Condensed.restrict_extend_hom],
+  have := F.2,
+  rw F.val.is_proetale_sheaf_tfae.out 0 3 at this,
+  obtain ⟨_,_,h⟩ := this,
+  -- We want to use `h` now.
+  sorry
+end
 
 instance restrict_extend_hom_is_iso (F : Condensed.{u} C) :
   is_iso F.restrict_extend_hom :=
