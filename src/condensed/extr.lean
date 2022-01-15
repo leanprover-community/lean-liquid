@@ -59,6 +59,23 @@ instance (X : ExtrDisc) : projective X.val := X.cond
 example (X : ExtrDisc) : projective (ExtrDisc_to_Profinite.obj X) :=
 by { dsimp, apply_instance }
 
+def lift {X Y : Profinite} {P : ExtrDisc} (f : X ⟶ Y)
+  (hf : function.surjective f) (e : P.val ⟶ Y) : P.val ⟶ X :=
+begin
+  haveI : epi f := by rwa Profinite.epi_iff_surjective f,
+  choose g h using projective.factors e f,
+  exact g,
+end
+
+@[simp]
+lemma lift_lifts {X Y : Profinite} {P : ExtrDisc} (f : X ⟶ Y)
+  (hf : function.surjective f) (e : P.val ⟶ Y) :
+  lift f hf e ≫ f = e :=
+begin
+  haveI : epi f := by rwa Profinite.epi_iff_surjective f,
+  apply (projective.factors e f).some_spec,
+end
+
 def split {X : Profinite} {Y : ExtrDisc} (f : X ⟶ Y.val) (hf : function.surjective f) :
   Y.val ⟶ X :=
 begin
@@ -531,27 +548,45 @@ lemma ExtrSheaf.equalizer_condition (F : ExtrSheaf.{u} C) {X Y Z : ExtrDisc}
   (hg : function.surjective g) :
   is_iso (F.map_to_equalizer f g) :=
 begin
+  --TODO: Add general stuff about split (co)equalizers.
+  --This is a fun proof!
   let s : X ⟶ Y := ⟨ExtrDisc.split _ hf⟩,
-  have hs : s ≫ f = 𝟙 _ := by {ext1, apply ExtrDisc.split_is_splitting},
-  let W :=
-    limits.equalizer (F.val.map (ExtrDisc.via_pullback_fst f g).op)
-    (F.val.map (ExtrDisc.via_pullback_snd f g).op),
-  let i : W ⟶ F.val.obj (op X) := limits.equalizer.ι _ _ ≫ F.val.map s.op,
+  have hs : s ≫ f = 𝟙 _ := by { ext1, apply ExtrDisc.split_is_splitting },
+  let e : Y.val ⟶ Profinite.pullback f.val f.val :=
+    Profinite.pullback.lift _ _ (𝟙 _) (f.val ≫ s.val) _,
+  swap, { apply_fun (λ e, e.val) at hs, change s.val ≫ f.val = 𝟙 _ at hs, simp [hs] },
+  let t : Y ⟶ Z := ⟨ExtrDisc.lift _ hg e⟩,
+  have ht : t.val ≫ g = e := by apply ExtrDisc.lift_lifts,
+  let e₁ := (F.val.map (ExtrDisc.via_pullback_fst f g).op),
+  let e₂ := (F.val.map (ExtrDisc.via_pullback_snd f g).op),
+  let i : limits.equalizer e₁ e₂ ⟶ F.val.obj (op X) :=
+    limits.equalizer.ι e₁ e₂ ≫ F.val.map s.op,
   use i,
   split,
   { dsimp [ExtrSheaf.map_to_equalizer, i],
-    simp [← F.val.map_comp, ← op_comp, hs] },
-  { dsimp [ExtrSheaf.map_to_equalizer, i],
-    ext1,
-    simp,
-    simp only [← F.val.map_comp, ← op_comp, hs],
-    /-
-    TODO:
-    It seems that this is not true in full generality.
-    I think we need `C` to be concrete where `forget C` preserves equalizers.
-    -/
-    sorry
-  }
+    simp only [limits.equalizer.lift_ι_assoc, ← F.val.map_comp, ← op_comp, hs,
+      op_id, F.val.map_id] },
+  { ext,
+    dsimp [i, ExtrSheaf.map_to_equalizer],
+    simp only [limits.equalizer.lift_ι, category.id_comp, category.assoc,
+      ← F.val.map_comp, ← op_comp],
+    have : f ≫ s = t ≫ ExtrDisc.via_pullback_snd f g,
+    { ext1,
+      dsimp [ExtrDisc.via_pullback_snd],
+      rw reassoc_of ht,
+      dsimp only [e],
+      simp },
+    dsimp only [e₁, e₂],
+    rw [this, op_comp, F.val.map_comp, ← category.assoc, ← limits.equalizer.condition,
+      category.assoc, ← F.val.map_comp, ← op_comp],
+    have : t ≫ ExtrDisc.via_pullback_fst f g = 𝟙 _,
+    { dsimp only [ExtrDisc.via_pullback_fst],
+      ext1,
+      change t.val ≫ g ≫ _ = 𝟙 _,
+      rw reassoc_of ht,
+      dsimp [e],
+      simp },
+    rw [this, op_id, F.val.map_id, category.comp_id] }
 end
 
 -- This will be a bit hard... One should use the proetale sheaf condition involving
