@@ -550,23 +550,50 @@ lemma ExtrSheaf.equalizer_condition (F : ExtrSheaf.{u} C) {X Y Z : ExtrDisc}
 begin
   --TODO: Add general stuff about split (co)equalizers.
   --This is a fun proof!
+
+  -- First, let's split the surjective `Y ⟶ X`.
   let s : X ⟶ Y := ⟨ExtrDisc.split _ hf⟩,
   have hs : s ≫ f = 𝟙 _ := by { ext1, apply ExtrDisc.split_is_splitting },
+
+  -- Now, consider the map from `Y` to the pullback of `f` with itself
+  -- given by `𝟙 X` on one component and `f ≫ s` on the other.
   let e : Y.val ⟶ Profinite.pullback f.val f.val :=
     Profinite.pullback.lift _ _ (𝟙 _) (f.val ≫ s.val) _,
   swap, { apply_fun (λ e, e.val) at hs, change s.val ≫ f.val = 𝟙 _ at hs, simp [hs] },
+
+  -- Since `g`, the map from `Z` to this pullback, is surjective (hence epic),
+  -- we can use the projectivity of `Y` to lift `e` above to a morphism
+  -- `t : Y ⟶ Z`.
+  -- The universal property ensures that `t` composed with the first projection
+  -- is the identity (i.e. `t` splits the map from `Z` to the pullback via `g`),
+  -- and `t` composed with the second projection becomes `f ≫ s`.
+
+  -- We have thus obtained the basic setting of a split equalizer,
+  -- Once we apply `F` (which is a presheaf), we obtain a split coequalizer.
+  -- Now we simply need to use the fact that the cofork point of a split
+  -- coequalizer is the coequalizer of the diagram, and the proof below does
+  -- essentially this.
+
   let t : Y ⟶ Z := ⟨ExtrDisc.lift _ hg e⟩,
   have ht : t.val ≫ g = e := by apply ExtrDisc.lift_lifts,
+
+  -- Just some abbreviations for the stuff below.
   let e₁ := (F.val.map (ExtrDisc.via_pullback_fst f g).op),
   let e₂ := (F.val.map (ExtrDisc.via_pullback_snd f g).op),
+
+  -- This will become the inverse of the canonical map from the cofork point...
   let i : limits.equalizer e₁ e₂ ⟶ F.val.obj (op X) :=
     limits.equalizer.ι e₁ e₂ ≫ F.val.map s.op,
+
+  -- so we use it!
   use i,
   split,
-  { dsimp [ExtrSheaf.map_to_equalizer, i],
+  { -- The first step of the proof follows simply from the fact that `s` splits `f`.
+    dsimp [ExtrSheaf.map_to_equalizer, i],
     simp only [limits.equalizer.lift_ι_assoc, ← F.val.map_comp, ← op_comp, hs,
       op_id, F.val.map_id] },
-  { ext,
+  { -- The rest of the proof uses the properties of `t` mentioned above.
+    ext,
     dsimp [i, ExtrSheaf.map_to_equalizer],
     simp only [limits.equalizer.lift_ι, category.id_comp, category.assoc,
       ← F.val.map_comp, ← op_comp],
