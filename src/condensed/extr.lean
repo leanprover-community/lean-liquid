@@ -625,9 +625,13 @@ begin
     rw [this, op_id, F.val.map_id, category.comp_id] }
 end
 
+-- Note for AT:
 -- This will be a bit hard... One should use the proetale sheaf condition involving
 -- binary products, the empty profinite set, and equalizers.
--- One should presumably also use `ExtrSheaf.equalizer_condition`.
+-- One should presumably also use `ExtrSheaf.equalizer_condition` above.
+-- Essentially, this proof is about various limits commuting with other limits.
+-- I think it will be easiest to just construct the inverses needed for preserving empty,
+-- products and equalizers in terms of `limit.lift` for various kinds of limits.
 theorem ExtrSheaf.extend_is_sheaf (F : ExtrSheaf.{u} C) : presheaf.is_sheaf proetale_topology
   F.extend_to_presheaf := sorry
 
@@ -659,6 +663,7 @@ def ExtrSheaf.extend_restrict_hom (F : ExtrSheaf.{u} C) :
     exact (Profinite.map_pres_π f.unop.val).symm,
   end }
 
+-- This should follow from the equalizer condition which is proved for `ExtrSheaf` above.
 instance extend_restrict_hom_app_is_iso (F : ExtrSheaf.{u} C) (X : ExtrDiscᵒᵖ) :
   is_iso (F.extend_restrict_hom.val.app X) := sorry
 
