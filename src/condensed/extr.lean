@@ -709,36 +709,40 @@ begin
     (F.val.map (Profinite.pullback.fst f f).op)
     (F.val.map (Profinite.pullback.snd f f).op),
   let E₂ := limits.equalizer
-    (F.val.map (Profinite.pullback.fst f f).op ≫ F.val.map g.op)
-    (F.val.map (Profinite.pullback.snd f f).op ≫ F.val.map g.op),
-  let E₃ := limits.equalizer
     (F.val.map (g ≫ Profinite.pullback.fst f f).op)
     (F.val.map (g ≫ Profinite.pullback.snd f f).op),
-  let e₁ : E₁ ⟶ E₂ :=
+  let e : E₁ ⟶ E₂ :=
     limits.equalizer.lift (limits.equalizer.ι _ _) (by simp [limits.equalizer.condition_assoc]),
-  let e₂ : E₂ ⟶ E₃ :=
-    limits.equalizer.lift (limits.equalizer.ι _ _) _,
-  swap, { simp [limits.equalizer.condition],  },
-  haveI : is_iso e₁ := begin
+  haveI : is_iso e := begin
     let i : E₂ ⟶ E₁ :=
       limits.equalizer.lift (limits.equalizer.ι _ _) _,
-    swap, { sorry },
+    swap,
+    { haveI : mono (F.val.map g.op) := F.mono_map_of_surjective _ hg,
+      rw ← cancel_mono (F.val.map g.op),
+      dsimp, simp only [category.assoc, ← F.val.map_comp, ← op_comp],
+      apply limits.equalizer.condition },
     use i,
     split,
-    { dsimp [i, e₁], ext, simp },
-    { dsimp [i, e₁], ext, simp },
+    { dsimp [i, e], ext, simp },
+    { dsimp [i, e], ext, simp, dsimp, simp, },
   end,
-  haveI : is_iso e₂ := sorry,   -- This is general nonsense.
   let t := F.val.map_to_equalizer' f
     (g ≫ Profinite.pullback.fst f f)
     (g ≫ Profinite.pullback.snd f f) _,
-  swap, { sorry },
+  swap, { simp [Profinite.pullback.condition] },
   change is_iso t,
-  suffices : is_iso (t ≫ inv e₂ ≫ inv e₁),
-  { sorry },
-  have : t ≫ inv e₂ ≫ inv e₁ =
+  suffices : is_iso (t ≫ inv e),
+  { resetI,
+    use inv e ≫ inv (t ≫ inv e),
+    split,
+    { simp only [← category.assoc, is_iso.hom_inv_id] },
+    { simp } },
+  have : t ≫ inv e =
     F.val.map_to_equalizer' f (Profinite.pullback.fst f f) (Profinite.pullback.snd f f) _,
-  { sorry },
+  { rw is_iso.comp_inv_eq,
+    ext,
+    dsimp [t, e, functor.map_to_equalizer'],
+    simp },
   -- Closes the other goal because proof appears in assumption.
   rwa this,
 end
