@@ -690,9 +690,26 @@ def Condensed.restrict_extend_hom (F : Condensed.{u} C) :
     refl,
   end }
 
--- This map is an equalize inclusion, and so is a mono.
+-- This map is an equalizer inclusion, and so is a mono.
 lemma Condensed.mono_map_of_surjective (F : Condensed.{u} C) {X Y : Profinite}
-  (f : Y ⟶ X) (hf : function.surjective f) : mono (F.val.map f.op) := sorry
+  (f : Y ⟶ X) (hf : function.surjective f) : mono (F.val.map f.op) :=
+begin
+  have := F.2,
+  rw F.val.is_proetale_sheaf_tfae.out 0 3 at this,
+  obtain ⟨_,_,h⟩ := this,
+  let t :=
+    F.val.map_to_equalizer' f (Profinite.pullback.fst f f)
+      (Profinite.pullback.snd f f) _,
+  have : F.val.map f.op = t ≫ limits.equalizer.ι _ _,
+  { dsimp [t, functor.map_to_equalizer'],
+    simp },
+  rw this,
+  specialize h _ _ f hf,
+  change is_iso t at h,
+  resetI,
+  have := mono_comp t (limits.equalizer.ι _ _),
+  apply this,
+end
 
 lemma Condensed.equalizer_condition (F : Condensed.{u} C) {X Y Z : Profinite}
   (f : Y ⟶ X) (hf : function.surjective f) (g : Z ⟶ Profinite.pullback f f)
