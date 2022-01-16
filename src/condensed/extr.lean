@@ -690,8 +690,10 @@ def Condensed.restrict_extend_hom (F : Condensed.{u} C) :
     refl,
   end }
 
-#check functor.map_to_equalizer'
-#print functor.equalizer_condition'
+-- This map is an equalize inclusion, and so is a mono.
+lemma Condensed.mono_map_of_surjective (F : Condensed.{u} C) {X Y : Profinite}
+  (f : Y ⟶ X) (hf : function.surjective f) : mono (F.val.map f.op) := sorry
+
 lemma Condensed.equalizer_condition (F : Condensed.{u} C) {X Y Z : Profinite}
   (f : Y ⟶ X) (hf : function.surjective f) (g : Z ⟶ Profinite.pullback f f)
   (hg : function.surjective g) :
