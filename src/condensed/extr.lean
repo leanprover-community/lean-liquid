@@ -719,7 +719,15 @@ begin
   let e₂ : E₂ ⟶ E₃ :=
     limits.equalizer.lift (limits.equalizer.ι _ _) _,
   swap, { simp [limits.equalizer.condition],  },
-  haveI : is_iso e₁ := sorry, -- This follows from surjectivity of `g`.
+  haveI : is_iso e₁ := begin
+    let i : E₂ ⟶ E₁ :=
+      limits.equalizer.lift (limits.equalizer.ι _ _) _,
+    swap, { sorry },
+    use i,
+    split,
+    { dsimp [i, e₁], ext, simp },
+    { dsimp [i, e₁], ext, simp },
+  end,
   haveI : is_iso e₂ := sorry,   -- This is general nonsense.
   let t := F.val.map_to_equalizer' f
     (g ≫ Profinite.pullback.fst f f)
