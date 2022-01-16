@@ -27,10 +27,6 @@ open nnreal theta laurent_measures finset --filter
 open_locale nnreal classical big_operators topological_space
 
 
-/-**[FAE]** Use `tsum_mul_tsum_eq_tsum_sum_antidiagonal` or even better
-`tsum_mul_tsum_eq_tsum_sum_antidiagonal_of_summable_norm` instead!!!
--/
-
 section aux_lemmas
 
 -- for mathlib?
@@ -198,92 +194,43 @@ end
 
 -- example (p q r : Prop) (h : p ↔ q) : (r ↔ p) → (r ↔ q) := by library_search
 
+def equiv_Icc_bdd (d : ℤ) (hd : 0 ≤ d) : {x // d ≤ x } ≃
+  {x // x ∉ range (int.eq_coe_of_zero_le hd).some}:=
+begin
+  fconstructor,
+  { rintro ⟨_, h⟩,
+    have := Exists.some_spec (int.eq_coe_of_zero_le (hd.trans h)),
+    rw [Exists.some_spec (int.eq_coe_of_zero_le hd),
+      this, int.coe_nat_le, ← not_lt, ← mem_range] at h,
+    exact ⟨_, h⟩ },
+  { rintro ⟨_, h⟩,
+    rw [mem_range, nat.lt_iff_add_one_le, not_le, nat.lt_add_one_iff, ← int.coe_nat_le,
+      ← Exists.some_spec (int.eq_coe_of_zero_le hd)] at h,
+    exact ⟨_, h⟩ },
+  sorry, sorry,
+end
+
+lemma equiv_Icc_bdd_apply (d : ℤ) (hd : 0 ≤ d) (x : {x // d ≤ x}) :
+  ((equiv_Icc_bdd d hd x) : ℤ) = x.1 :=
+begin
+  sorry,
+end
+
+
+
 lemma aux_summable_iff_on_nat {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ) (h : ∀ n : ℤ, n < d → f n = 0) :
   summable (λ n, ∥ f n ∥ * ρ ^ n) ↔ summable (λ n : ℕ, ∥ f n ∥ * ρ ^ (n : ℤ)) :=
 begin
   apply (aux_summable_iff_on_nat' d h).trans,
-  have := @summable_shift (λ n, ∥ f n ∥ * ρ ^n) d,
-  simp only [*, zpow_coe_nat],
-  -- rw summable.compl
-  -- apply this,
-  -- have := @equiv.summable_iff _ _ _ _ _ (λ n : {n : ℤ // d ≤ n}, ∥ f n ∥ * ρ ^ (n : ℤ))
-  --   (equiv_bdd_integer_nat d),
-  -- dsimp [equiv_bdd_integer_nat] at this,
-  -- -- simp at this,
-  -- have := int_tsum_shift (λ n, ∥ f n ∥ * ρ ^n) d,
-  -- simp at this,
-  -- split,
-  -- { intro H,
-  --   -- have := @tsum_apply _ _ _ _ _ _ (λ n, ∥ f n ∥ * ρ ^n),
-  --   replace H := H.has_sum,
-  --   rw this at H,
-  --   -- rw tsum at H,
-  --   sorry,
-  --   -- rw tsum_apply at H,
-  -- },
-  -- { have dopo : summable (λ n : {n : ℤ // d ≤ n}, ∥ f n ∥ * ρ ^ (n : ℤ)),sorry,
-  --   replace dopo := dopo.has_sum,
-  --   rw ← this at dopo,
-  --   have due := (@equiv.has_sum_iff _ _ _ _ _ (λ n : {n : ℤ // d ≤ n}, ∥ f n ∥ * ρ ^ (n : ℤ)) _
-  --     (equiv_bdd_integer_nat d)).mpr dopo,
-  --   have tre := due.tsum_eq,
-  -- },
-  -- let g : ℕ → ℝ := λ n, ∥ f n ∥ * ρ ^ (n : ℤ),
+  simp only [@summable_shift (λ n, ∥ f n ∥ * ρ ^n) d, zpow_coe_nat],
   by_cases hd : 0 ≤ d,
   { set m := (int.eq_coe_of_zero_le hd).some,
-    let e : {x // x ∉ range m.succ} ≃ {x // m ≤ x } := sorry,
-    --⟨λ x, x, λ x, x, sorry, sorry⟩,
-    -- {
-
-    -- },
-    have h_fin := @finset.summable_compl_iff _ _ _ _ _ (λ n : ℕ, ∥ f n ∥ * ρ ^ n) (range m.succ),
-    -- simp at h_fin,
-    --**[FAE]** Too tired for the righ combination of iff.symm, iff.trans, etc, golf it later!
-    suffices h_le_not_mem : summable (λ (n : {x // x ∉ range m.succ}), ∥f (n : ℕ)∥ * ρ ^ (n : ℕ)) ↔ summable (λ (n : {x // m ≤ x}), ∥f (n : ℕ)∥ * ρ ^ (n : ℕ)),
-    rw h_le_not_mem at h_fin,
-    convert h_fin using 1,
-    sorry,--to be golfed
-    convert e.summable_iff,
-    funext,--needs the explicit def of e
-    sorry,
-    -- apply summable.congr,
-  },
+    convert (@equiv.summable_iff _ _ _ _ _ (λ x : {x : ℕ // x ∉ range m},
+      ∥ f x ∥ * ρ ^ (x : ℤ)) (equiv_Icc_bdd d hd)).trans (@finset.summable_compl_iff _ _ _ _ _
+      (λ n : ℕ, ∥ f n ∥ * ρ ^ n) (range m)),
+    ext ⟨_, _⟩,
+    simp only [function.comp_app, subtype.coe_mk, ← zpow_coe_nat, ← coe_coe, equiv_Icc_bdd_apply] },
   sorry,
-    -- apply iff.symm (iff.trans h_fin.symm),
-  --   simp [mem_range_succ_iff] at h_fin,
-  --   have h_sub := @summable.summable_compl_iff,
-  --   convert_to summable (λ (n : ℕ), g (n + m)) ↔ summable g,
-  --   { congr,
-  --     funext n,
-  --     dsimp only [g],
-  --     rw [Exists.some_spec (int.eq_coe_of_zero_le hd)],
-  --     refl, },
-  --   exact summable_nat_add_iff m },
-  -- { sorry,
-  --   -- let T : finset ℤ := Icc d 0,
-  --   -- apply T.summable_compl_iff,
-  -- },
-  -- -- have := @summable.comp_injective _ _ _ _ _ _ (λ n : ℕ, ∥f (↑n)∥ * ρ ^ (↑n)) _,
-  -- refine iff.trans _ ((Icc d 0).has_sum_compl_iff),
-  -- let := (λ s : finset ℤ, ∑ b in s, (λ n, ∥ f n ∥ * ρ ^ n ) b),
-  -- have := tendsto_add_top_iff_int (λ n, ∥ f n ∥ * ρ ^ n) d,
-  -- have := tendsto_add_top_iff_int (λ s : finset _, ∑ b in s, ((λ n, ∥ f n ∥ * ρ ^ n) b)),
-  -- rw iff.comm,
-  -- have also := exists_congr this,
-  -- simp only at also,
-  -- -- exact also.rfl,
-  -- split,
-  -- intro H,
-  -- simp at H,
-  -- apply has_sum.summable,
-  -- -- have pluto := H.has_sum,
-  -- have too := also.1 H,
-  -- simp [*] at *,
-  -- simpa,
-  -- have poi := exists_congr (λ a, has_sum.summable _),
-  -- exact also,
-  -- simpa,
-  -- simpa using [pluto d],
 end
 
 end aux_lemmas
@@ -424,9 +371,6 @@ end
 -- set_option trace.simp_lemmas true
 -/
 
-
-#exit
-
 lemma summable_smaller_radius (F : ℒ S) (s : S) :
   summable (λ n, (F s n : ℝ) * (1 / 2) ^ n) :=
 begin
@@ -480,7 +424,7 @@ begin
     (summable_smaller_radius S F s)],
 end
 
-
+#exit -- FAE need to check why int_tsum_shift below breaks
 
 lemma tsum_reindex (F : ℒ S) (N : ℤ) (s : S) : ∑' (l : ℕ), (F s (N + l) : ℝ) * (2 ^ l)⁻¹ =
  2 ^ N * ∑' (m : {m : ℤ // N ≤ m}), (F s m : ℝ) * (2 ^ m.1)⁻¹ :=
