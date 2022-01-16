@@ -323,7 +323,41 @@ end ExtrDisc
 
 namespace Profinite
 
-instance (Y : Profinite) : t2_space Y := infer_instance
+--instance (Y : Profinite) : t2_space Y := infer_instance
+
+structure presentation (B : Profinite) :=
+(G : ExtrDisc)
+(π : G.val ⟶ B)
+(hπ : function.surjective π)
+(R : ExtrDisc)
+(r : R.val ⟶ Profinite.pullback π π)
+(hr : function.surjective r)
+
+def presentation.fst {B : Profinite} (X : B.presentation) :
+  X.R ⟶ X.G := ⟨X.r ≫ pullback.fst _ _⟩
+
+def presentation.snd {B : Profinite} (X : B.presentation) :
+  X.R ⟶ X.G := ⟨X.r ≫ pullback.snd _ _⟩
+
+def presentation.map_G {B₁ B₂ : Profinite} (X₁ : B₁.presentation)
+  (X₂ : B₂.presentation) (f : B₁ ⟶ B₂) : X₁.G ⟶ X₂.G :=
+⟨ExtrDisc.lift X₂.π X₂.hπ (X₁.π ≫ f)⟩
+
+@[simp, reassoc]
+lemma presentation.map_G_π {B₁ B₂ : Profinite} (X₁ : B₁.presentation)
+  (X₂ : B₂.presentation) (f : B₁ ⟶ B₂) :
+  (X₁.map_G X₂ f).val ≫ X₂.π = X₁.π ≫ f :=
+begin
+  dsimp [presentation.map_G],
+  simp,
+end
+
+def presentation.map_R {B₁ B₂ : Profinite} (X₁ : B₁.presentation)
+  (X₂ : B₂.presentation) (f : B₁ ⟶ B₂) : X₁.R ⟶ X₂.R :=
+⟨ExtrDisc.lift _ X₂.hr $ X₁.r ≫ pullback.lift _ _
+  (pullback.fst _ _ ≫ (X₁.map_G X₂ f).val)
+  (pullback.snd _ _ ≫ (X₁.map_G X₂ f).val)
+  (by simp [pullback.condition_assoc])⟩
 
 def pres (X : Profinite.{u}) : ExtrDisc.{u} :=
 ExtrDisc.free X
@@ -340,6 +374,14 @@ begin
   dsimp [Profinite.pres_π],
   simp,
 end
+
+def free_presentation (X : Profinite) : X.presentation :=
+{ G := X.pres,
+  π := X.pres_π,
+  hπ := X.pres_π_surjective,
+  R := (Profinite.pullback X.pres_π X.pres_π).pres,
+  r := (Profinite.pullback X.pres_π X.pres_π).pres_π,
+  hr := (Profinite.pullback X.pres_π X.pres_π).pres_π_surjective, }
 
 def map_pres {X Y : Profinite.{u}} (f : X ⟶ Y) : X.pres ⟶ Y.pres :=
 ExtrDisc.free_functor.map f
