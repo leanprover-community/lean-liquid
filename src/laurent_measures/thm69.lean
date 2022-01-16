@@ -112,7 +112,7 @@ lemma sum_Icc_sum_tail (f : ℤ → ℤ) (n d : ℤ)
   (hf : (has_sum (λ x : ℤ, (f x : ℝ) * (2 ^ x)⁻¹) 0))
   (hd : ∀ n : ℤ, n < d → f n = 0)
   (hn : 0 ≤ n - d) : - ∑ k in (Icc d n), ((f k) : ℝ) * 2 ^ (n - k) =
-  2 ^ n * tsum (λ x : {a : ℤ // a ≥ n.succ}, (f x : ℝ) * (2 ^ x.1)⁻¹) :=
+  2 ^ n * tsum (λ x : {a : ℤ // n.succ ≤ a }, (f x : ℝ) * (2 ^ x.1)⁻¹) :=
 begin
   sorry;{
   replace hf : (has_sum (λ x : ℤ, ∥ f x ∥ * (2 ^ x)⁻¹) 0), sorry,
@@ -163,12 +163,127 @@ begin
 end
 
 --for mathlib?
-lemma int_tsum_shift (f : ℤ → ℝ) (N : ℤ) (h : summable f) :
+lemma summable_shift (f : ℤ → ℝ) (N : ℤ) :
+  summable (λ x : ℕ, f (x + N)) ↔ summable (λ x : {x // N ≤ x}, f x) :=
+@equiv.summable_iff _ _ _ _ _ (λ x : {x // N ≤ x}, f x) (equiv_bdd_integer_nat N)
+
+
+lemma int_tsum_shift (f : ℤ → ℝ) (N : ℤ) :
   ∑' (x : ℕ), f (x + N) = ∑' (x : {x // N ≤ x}), f x :=
 begin
   apply (equiv.refl ℝ).tsum_eq_tsum_of_has_sum_iff_has_sum rfl,
   intro _,
   apply (@equiv.has_sum_iff ℝ _ ℕ _ _ (f ∘ coe) _ ((equiv_bdd_integer_nat N))),
+end
+
+lemma aux_summable_iff_on_nat' {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ) (h : ∀ n : ℤ, n < d → f n = 0) :
+  summable (λ n, ∥ f n ∥ * ρ ^ n) ↔ summable (λ n : ℕ, ∥ f (n + d) ∥ * ρ ^ (n + d : ℤ)) :=
+begin
+  have hf : function.support (λ n : ℤ, ∥ f n ∥ * ρ ^ n) ⊆ { a : ℤ | d ≤ a},
+  { rw function.support_subset_iff,
+    intro x,
+    rw [← not_imp_not, not_not, mul_eq_zero],
+    intro hx,
+    simp only [not_le, set.mem_set_of_eq] at hx,
+    apply or.intro_left,
+    rw norm_eq_zero,
+    exact h x hx },
+  have h1 := λ a : ℝ,
+    @has_sum_subtype_iff_of_support_subset ℝ ℤ _ _ (λ n : ℤ, ∥ f n ∥ * ρ ^ n) _ _ hf,
+  have h2 := λ a : ℝ,
+    @equiv.has_sum_iff ℝ {b : ℤ // d ≤ b} ℕ _ _ ((λ n, ∥ f n ∥ * ρ ^ n) ∘ coe) _
+    (equiv_bdd_integer_nat d),
+  exact exists_congr (λ a, ((h2 a).trans (h1 a)).symm),
+end
+
+-- example (p q r : Prop) (h : p ↔ q) : (r ↔ p) → (r ↔ q) := by library_search
+
+lemma aux_summable_iff_on_nat {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ) (h : ∀ n : ℤ, n < d → f n = 0) :
+  summable (λ n, ∥ f n ∥ * ρ ^ n) ↔ summable (λ n : ℕ, ∥ f n ∥ * ρ ^ (n : ℤ)) :=
+begin
+  apply (aux_summable_iff_on_nat' d h).trans,
+  have := @summable_shift (λ n, ∥ f n ∥ * ρ ^n) d,
+  simp only [*, zpow_coe_nat],
+  -- rw summable.compl
+  -- apply this,
+  -- have := @equiv.summable_iff _ _ _ _ _ (λ n : {n : ℤ // d ≤ n}, ∥ f n ∥ * ρ ^ (n : ℤ))
+  --   (equiv_bdd_integer_nat d),
+  -- dsimp [equiv_bdd_integer_nat] at this,
+  -- -- simp at this,
+  -- have := int_tsum_shift (λ n, ∥ f n ∥ * ρ ^n) d,
+  -- simp at this,
+  -- split,
+  -- { intro H,
+  --   -- have := @tsum_apply _ _ _ _ _ _ (λ n, ∥ f n ∥ * ρ ^n),
+  --   replace H := H.has_sum,
+  --   rw this at H,
+  --   -- rw tsum at H,
+  --   sorry,
+  --   -- rw tsum_apply at H,
+  -- },
+  -- { have dopo : summable (λ n : {n : ℤ // d ≤ n}, ∥ f n ∥ * ρ ^ (n : ℤ)),sorry,
+  --   replace dopo := dopo.has_sum,
+  --   rw ← this at dopo,
+  --   have due := (@equiv.has_sum_iff _ _ _ _ _ (λ n : {n : ℤ // d ≤ n}, ∥ f n ∥ * ρ ^ (n : ℤ)) _
+  --     (equiv_bdd_integer_nat d)).mpr dopo,
+  --   have tre := due.tsum_eq,
+  -- },
+  -- let g : ℕ → ℝ := λ n, ∥ f n ∥ * ρ ^ (n : ℤ),
+  by_cases hd : 0 ≤ d,
+  { set m := (int.eq_coe_of_zero_le hd).some,
+    let e : {x // x ∉ range m.succ} ≃ {x // m ≤ x } := sorry,
+    --⟨λ x, x, λ x, x, sorry, sorry⟩,
+    -- {
+
+    -- },
+    have h_fin := @finset.summable_compl_iff _ _ _ _ _ (λ n : ℕ, ∥ f n ∥ * ρ ^ n) (range m.succ),
+    -- simp at h_fin,
+    --**[FAE]** Too tired for the righ combination of iff.symm, iff.trans, etc, golf it later!
+    suffices h_le_not_mem : summable (λ (n : {x // x ∉ range m.succ}), ∥f (n : ℕ)∥ * ρ ^ (n : ℕ)) ↔ summable (λ (n : {x // m ≤ x}), ∥f (n : ℕ)∥ * ρ ^ (n : ℕ)),
+    rw h_le_not_mem at h_fin,
+    convert h_fin using 1,
+    sorry,--to be golfed
+    convert e.summable_iff,
+    funext,--needs the explicit def of e
+    sorry,
+    -- apply summable.congr,
+  },
+  sorry,
+    -- apply iff.symm (iff.trans h_fin.symm),
+  --   simp [mem_range_succ_iff] at h_fin,
+  --   have h_sub := @summable.summable_compl_iff,
+  --   convert_to summable (λ (n : ℕ), g (n + m)) ↔ summable g,
+  --   { congr,
+  --     funext n,
+  --     dsimp only [g],
+  --     rw [Exists.some_spec (int.eq_coe_of_zero_le hd)],
+  --     refl, },
+  --   exact summable_nat_add_iff m },
+  -- { sorry,
+  --   -- let T : finset ℤ := Icc d 0,
+  --   -- apply T.summable_compl_iff,
+  -- },
+  -- -- have := @summable.comp_injective _ _ _ _ _ _ (λ n : ℕ, ∥f (↑n)∥ * ρ ^ (↑n)) _,
+  -- refine iff.trans _ ((Icc d 0).has_sum_compl_iff),
+  -- let := (λ s : finset ℤ, ∑ b in s, (λ n, ∥ f n ∥ * ρ ^ n ) b),
+  -- have := tendsto_add_top_iff_int (λ n, ∥ f n ∥ * ρ ^ n) d,
+  -- have := tendsto_add_top_iff_int (λ s : finset _, ∑ b in s, ((λ n, ∥ f n ∥ * ρ ^ n) b)),
+  -- rw iff.comm,
+  -- have also := exists_congr this,
+  -- simp only at also,
+  -- -- exact also.rfl,
+  -- split,
+  -- intro H,
+  -- simp at H,
+  -- apply has_sum.summable,
+  -- -- have pluto := H.has_sum,
+  -- have too := also.1 H,
+  -- simp [*] at *,
+  -- simpa,
+  -- have poi := exists_congr (λ a, has_sum.summable _),
+  -- exact also,
+  -- simpa,
+  -- simpa using [pluto d],
 end
 
 end aux_lemmas
@@ -257,27 +372,7 @@ def ϕ : ℒ S → ℒ S :=
       exact (r ^ b).2 },
   end }
 
-
-lemma aux_summable_iff_on_nat' {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ) (h : ∀ n : ℤ, n < d → f n = 0) :
-  summable (λ n, ∥ f n ∥ * ρ ^ n) ↔ summable (λ n : ℕ, ∥ f (n + d) ∥ * ρ ^ (n + d : ℤ)) :=
-begin
-  have hf : function.support (λ n : ℤ, ∥ f n ∥ * ρ ^ n) ⊆ { a : ℤ | d ≤ a},
-  { rw function.support_subset_iff,
-    intro x,
-    rw [← not_imp_not, not_not, mul_eq_zero],
-    intro hx,
-    simp only [not_le, set.mem_set_of_eq] at hx,
-    apply or.intro_left,
-    rw norm_eq_zero,
-    exact h x hx },
-  have h1 := λ a : ℝ,
-    @has_sum_subtype_iff_of_support_subset ℝ ℤ _ _ (λ n : ℤ, ∥ f n ∥ * ρ ^ n) _ _ hf,
-  have h2 := λ a : ℝ,
-    @equiv.has_sum_iff ℝ {b : ℤ // d ≤ b} ℕ _ _ ((λ n, ∥ f n ∥ * ρ ^ n) ∘ coe) _
-    (equiv_bdd_integer_nat d),
-  exact exists_congr (λ a, ((h2 a).trans (h1 a)).symm),
-end
-
+/-
 open filter
 open_locale filter
 
@@ -327,47 +422,8 @@ begin
 end
 
 -- set_option trace.simp_lemmas true
+-/
 
-lemma aux_summable_iff_on_nat {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ) (h : ∀ n : ℤ, n < d → f n = 0) :
-  summable (λ n, ∥ f n ∥ * ρ ^ n) ↔ summable (λ n : ℕ, ∥ f n ∥ * ρ ^ (n : ℤ)) :=
-begin
-  apply (aux_summable_iff_on_nat' d h).trans,
-  let g : ℕ → ℝ := λ n, ∥ f n ∥ * ρ ^ (n : ℤ),
-  by_cases hd : 0 ≤ d,
-  { set m := (int.eq_coe_of_zero_le hd).some,
-    convert_to summable (λ (n : ℕ), g (n + m)) ↔ summable g,
-    { congr,
-      funext n,
-      dsimp only [g],
-      rw [Exists.some_spec (int.eq_coe_of_zero_le hd)],
-      refl, },
-    exact summable_nat_add_iff m },
-  { sorry,
-    -- let T : finset ℤ := Icc d 0,
-    -- apply T.summable_compl_iff,
-  },
-  -- have := @summable.comp_injective _ _ _ _ _ _ (λ n : ℕ, ∥f (↑n)∥ * ρ ^ (↑n)) _,
-  -- refine iff.trans _ ((Icc d 0).has_sum_compl_iff),
-  -- let := (λ s : finset ℤ, ∑ b in s, (λ n, ∥ f n ∥ * ρ ^ n ) b),
-  -- have := tendsto_add_top_iff_int (λ n, ∥ f n ∥ * ρ ^ n) d,
-  -- have := tendsto_add_top_iff_int (λ s : finset _, ∑ b in s, ((λ n, ∥ f n ∥ * ρ ^ n) b)),
-  -- rw iff.comm,
-  -- have also := exists_congr this,
-  -- simp only at also,
-  -- -- exact also.rfl,
-  -- split,
-  -- intro H,
-  -- simp at H,
-  -- apply has_sum.summable,
-  -- -- have pluto := H.has_sum,
-  -- have too := also.1 H,
-  -- simp [*] at *,
-  -- simpa,
-  -- have poi := exists_congr (λ a, has_sum.summable _),
-  -- exact also,
-  -- simpa,
-  -- simpa using [pluto d],
-end
 
 #exit
 
