@@ -332,6 +332,15 @@ def pres_π (X : Profinite.{u}) :
   X.pres.val ⟶ X :=
 ⟨ultrafilter.extend id, continuous_ultrafilter_extend _⟩
 
+lemma pres_π_surjective (X : Profinite.{u}) :
+  function.surjective X.pres_π :=
+begin
+  intros i,
+  use (pure i : ultrafilter _),
+  dsimp [Profinite.pres_π],
+  simp,
+end
+
 def map_pres {X Y : Profinite.{u}} (f : X ⟶ Y) : X.pres ⟶ Y.pres :=
 ExtrDisc.free_functor.map f
 
@@ -681,15 +690,57 @@ def Condensed.restrict_extend_hom (F : Condensed.{u} C) :
     refl,
   end }
 
+#check functor.map_to_equalizer'
+#print functor.equalizer_condition'
+lemma Condensed.equalizer_condition (F : Condensed.{u} C) {X Y Z : Profinite}
+  (f : Y ⟶ X) (hf : function.surjective f) (g : Z ⟶ Profinite.pullback f f)
+  (hg : function.surjective g) :
+  is_iso (F.val.map_to_equalizer' f (g ≫ Profinite.pullback.fst _ _)
+    (g ≫ Profinite.pullback.snd _ _) $ by simp [Profinite.pullback.condition] ) :=
+begin
+  have := F.2,
+  rw F.val.is_proetale_sheaf_tfae.out 0 3 at this,
+  obtain ⟨_,_,h⟩ := this,
+  specialize h Y X f hf,
+  -- TODO: generalize these isomorphisms between various equalizers.
+  let E₁ := limits.equalizer
+    (F.val.map (Profinite.pullback.fst f f).op)
+    (F.val.map (Profinite.pullback.snd f f).op),
+  let E₂ := limits.equalizer
+    (F.val.map (Profinite.pullback.fst f f).op ≫ F.val.map g.op)
+    (F.val.map (Profinite.pullback.snd f f).op ≫ F.val.map g.op),
+  let E₃ := limits.equalizer
+    (F.val.map (g ≫ Profinite.pullback.fst f f).op)
+    (F.val.map (g ≫ Profinite.pullback.snd f f).op),
+  let e₁ : E₁ ⟶ E₂ :=
+    limits.equalizer.lift (limits.equalizer.ι _ _) (by simp [limits.equalizer.condition_assoc]),
+  let e₂ : E₂ ⟶ E₃ :=
+    limits.equalizer.lift (limits.equalizer.ι _ _) _,
+  swap, { simp [limits.equalizer.condition],  },
+  haveI : is_iso e₁ := sorry, -- This follows from surjectivity of `g`.
+  haveI : is_iso e₂ := sorry,   -- This is general nonsense.
+  let t := F.val.map_to_equalizer' f
+    (g ≫ Profinite.pullback.fst f f)
+    (g ≫ Profinite.pullback.snd f f) _,
+  swap, { sorry },
+  change is_iso t,
+  suffices : is_iso (t ≫ inv e₂ ≫ inv e₁),
+  { sorry },
+  have : t ≫ inv e₂ ≫ inv e₁ =
+    F.val.map_to_equalizer' f (Profinite.pullback.fst f f) (Profinite.pullback.snd f f) _,
+  { sorry },
+  -- Closes the other goal because proof appears in assumption.
+  rwa this,
+end
+
 instance restrict_extend_hom_app_is_iso (F : Condensed.{u} C) (X : Profiniteᵒᵖ) :
   is_iso (F.restrict_extend_hom.val.app X) :=
 begin
   dsimp [Condensed.restrict_extend_hom],
-  have := F.2,
-  rw F.val.is_proetale_sheaf_tfae.out 0 3 at this,
-  obtain ⟨_,_,h⟩ := this,
-  -- We want to use `h` now.
-  sorry
+  have := F.equalizer_condition,
+  apply this,
+  apply Profinite.pres_π_surjective,
+  apply Profinite.pres_π_surjective,
 end
 
 instance restrict_extend_hom_is_iso (F : Condensed.{u} C) :
