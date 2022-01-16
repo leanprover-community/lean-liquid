@@ -632,8 +632,58 @@ end
 -- Essentially, this proof is about various limits commuting with other limits.
 -- I think it will be easiest to just construct the inverses needed for preserving empty,
 -- products and equalizers in terms of `limit.lift` for various kinds of limits.
+
+
+lemma ExtrSheaf.empty_condition_extend (F : ExtrSheaf.{u} C) :
+  F.extend_to_presheaf.empty_condition' :=
+begin
+  dsimp [functor.empty_condition'],
+  have := F.terminal,
+  dsimp [ExtrDisc.terminal_condition] at this,
+  resetI,
+  let t : Profinite.empty.pres.{u} ⟶ ExtrDisc.empty.{u} :=
+    ⟨Profinite.empty.pres_π⟩,
+  haveI : is_iso t := begin
+    use ExtrDisc.empty.elim _,
+    split,
+    { ext ⟨a⟩ : 2 },
+    { ext ⟨a⟩ : 2 },
+  end,
+  let i : ⊤_ C ⟶ F.extend_to_obj Profinite.empty :=
+    limits.equalizer.lift _ _,
+  rotate,
+  { exact inv (limits.terminal.from (F.val.obj (op ExtrDisc.empty))) ≫ F.val.map t.op, },
+  { simp only [is_iso.eq_inv_comp, is_iso.hom_inv_id_assoc, category.assoc],
+    simp only [← F.val.map_comp, ← op_comp],
+    congr' 2,
+    ext ⟨⟨a,b⟩,_⟩,
+    apply pempty.elim,
+    exact Profinite.empty.pres_π a },
+  { use i,
+    split,
+    { dsimp [i],
+      ext,
+      simp,
+      haveI : is_iso (F.val.map t.op) := is_iso_of_op (F.val.map (quiver.hom.op t)),
+      rw [← category.assoc, ← is_iso.eq_comp_inv, is_iso.comp_inv_eq],
+      apply subsingleton.elim },
+    { dsimp [i],
+      apply subsingleton.elim } }
+end
+
+lemma ExtrSheaf.product_condition_extend (F : ExtrSheaf.{u} C) :
+  F.extend_to_presheaf.product_condition' := sorry
+
+lemma ExtrSheaf.equalizer_condition_extend (F : ExtrSheaf.{u} C) :
+  F.extend_to_presheaf.equalizer_condition' := sorry
+
 theorem ExtrSheaf.extend_is_sheaf (F : ExtrSheaf.{u} C) : presheaf.is_sheaf proetale_topology
-  F.extend_to_presheaf := sorry
+  F.extend_to_presheaf :=
+begin
+  rw F.extend_to_presheaf.is_proetale_sheaf_tfae.out 0 3,
+  refine ⟨F.empty_condition_extend, F.product_condition_extend,
+    F.equalizer_condition_extend⟩,
+end
 
 def ExtrSheaf.extend (F : ExtrSheaf.{u} C) : Condensed C :=
 ⟨F.extend_to_presheaf, F.extend_is_sheaf⟩
