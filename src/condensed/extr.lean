@@ -5,6 +5,7 @@ import condensed.basic
 
 noncomputable theory
 
+-- Move this
 @[simp]
 lemma ultrafilter_extend_extends_apply {α X : Type*}
   [topological_space X] [t2_space X]
@@ -16,6 +17,16 @@ begin
 end
 
 open category_theory
+
+-- Move this
+lemma category_theory.is_iso.is_iso_of_is_iso_comp
+  {C : Type*} [category C] {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z)
+  [is_iso f] [is_iso (f ≫ g)] : is_iso g := sorry
+
+-- Move this
+lemma category_theory.is_iso.is_iso_of_comp_is_iso
+  {C : Type*} [category C] {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z)
+  [is_iso g] [is_iso (f ≫ g)] : is_iso f := sorry
 
 universes u w v
 
@@ -200,6 +211,9 @@ def presentation.fst {B : Profinite} (X : B.presentation) :
 @[simps]
 def presentation.snd {B : Profinite} (X : B.presentation) :
   X.R ⟶ X.G := ⟨X.r ≫ pullback.snd _ _⟩
+
+lemma presentation.condition {B : Profinite} (X : B.presentation) :
+  X.fst.val ≫ X.π = X.snd.val ≫ X.π := sorry
 
 @[simps]
 def presentation.map_G {B₁ B₂ : Profinite} (X₁ : B₁.presentation)
@@ -517,7 +531,12 @@ lemma ExtrSheaf.extend_to_hom_unique
 @[simp]
 lemma ExtrSheaf.extend_to_hom_id
   (F : ExtrSheaf.{u} C) {X : Profinite.{u}} (P : X.presentation) :
-  F.extend_to_hom P.id = 𝟙 _ := sorry
+  F.extend_to_hom P.id = 𝟙 _ :=
+begin
+  ext,
+  dsimp [ExtrSheaf.extend_to_hom, Profinite.presentation.id],
+  simp,
+end
 
 @[simp]
 lemma ExtrSheaf.extend_to_hom_comp
@@ -525,7 +544,12 @@ lemma ExtrSheaf.extend_to_hom_comp
   {P : X.presentation} {Q : Y.presentation} {R : Z.presentation}
   (f : X ⟶ Y) (g : Y ⟶ Z)
   (a : P.hom_over Q f) (b : Q.hom_over R g) :
-  F.extend_to_hom (a.comp b) = F.extend_to_hom b ≫ F.extend_to_hom a := sorry
+  F.extend_to_hom (a.comp b) = F.extend_to_hom b ≫ F.extend_to_hom a :=
+begin
+  ext,
+  dsimp [ExtrSheaf.extend_to_hom, Profinite.presentation.hom_over.comp],
+  simp,
+end
 
 @[simp]
 lemma ExtrSheaf.extend_to_hom_map
@@ -533,7 +557,11 @@ lemma ExtrSheaf.extend_to_hom_map
   (f g : X ⟶ Y)
   (e : P.hom_over Q f)
   (h : f = g) :
-  F.extend_to_hom (e.map f g h) = F.extend_to_hom e := sorry
+  F.extend_to_hom (e.map f g h) = F.extend_to_hom e :=
+begin
+  cases h,
+  refl,
+end
 
 instance ExtrSheaf.extend_to_hom_is_iso
   (F : ExtrSheaf.{u} C) {X Y : Profinite.{u}}
@@ -556,6 +584,15 @@ begin
     rw ← F.extend_to_hom_map (f ≫ inv f) (𝟙 _) _ (by simp),
     apply F.extend_to_hom_unique }
 end
+
+def ExtrSheaf.extend_to_iso
+  (F : ExtrSheaf.{u} C) {X Y : Profinite.{u}}
+  (P : X.presentation) (Q : Y.presentation) (e : X ≅ Y) :
+  F.extend_to_obj Q ≅ F.extend_to_obj P :=
+{ hom := F.extend_to_hom (P.lift _ e.hom),
+  inv := F.extend_to_hom (Q.lift _ e.inv),
+  hom_inv_id' := sorry,
+  inv_hom_id' := sorry }
 
 @[simps]
 def ExtrSheaf.extend_to_presheaf (F : ExtrSheaf.{u} C) : Profiniteᵒᵖ ⥤ C :=
@@ -605,8 +642,55 @@ begin
   apply_instance,
 end
 
+def ExtrSheaf.sum_equalizer (F : ExtrSheaf.{u} C) {X Y : Profinite.{u}}
+  (P : X.presentation) (Q : Y.presentation) : C :=
+let e₁₁ : F.val.obj (op P.G) ⟶ F.val.obj (op P.R) := F.val.map P.fst.op,
+    e₁₂ : F.val.obj (op P.G) ⟶ F.val.obj (op P.R) := F.val.map P.snd.op,
+    e₂₁ : F.val.obj (op Q.G) ⟶ F.val.obj (op Q.R) := F.val.map Q.fst.op,
+    e₂₂ : F.val.obj (op Q.G) ⟶ F.val.obj (op Q.R) := F.val.map Q.snd.op,
+    i₁ : F.val.obj (op P.G) ⨯ F.val.obj (op Q.G) ⟶
+      F.val.obj (op P.R) ⨯ F.val.obj (op Q.R) :=
+      prod.lift (limits.prod.fst ≫ e₁₁) (limits.prod.snd ≫ e₂₁),
+    i₂ : F.val.obj (op P.G) ⨯ F.val.obj (op Q.G) ⟶
+      F.val.obj (op P.R) ⨯ F.val.obj (op Q.R) :=
+      prod.lift (limits.prod.fst ≫ e₁₂) (limits.prod.snd ≫ e₂₂) in
+equalizer i₁ i₂
+
+def ExtrSheaf.prod_iso (F : ExtrSheaf.{u} C) (X Y : ExtrDisc.{u}) :
+  F.val.obj (op $ X.sum Y) ≅ F.val.obj (op X) ⨯ F.val.obj (op Y) :=
+begin
+  letI := F.3 X Y,
+  exact as_iso
+    (prod.lift (F.val.map (ExtrDisc.sum.inl X Y).op) (F.val.map (ExtrDisc.sum.inr X Y).op)),
+end
+
+def ExtrSheaf.sum_equalizer_iso (F : ExtrSheaf.{u} C) {X Y : Profinite.{u}}
+  (P : X.presentation) (Q : Y.presentation) :
+  -- equalizer of F of sums
+  F.extend_to_obj (P.sum Q) ≅ F.sum_equalizer P Q :=
+{ hom := equalizer.ι _ _ ≫ equalizer.lift (F.prod_iso _ _).hom sorry,
+  inv := equalizer.ι _ _ ≫ equalizer.lift (F.prod_iso _ _).inv sorry,
+  hom_inv_id' := sorry,
+  inv_hom_id' := sorry }
+
 lemma ExtrSheaf.product_condition_extend (F : ExtrSheaf.{u} C) :
-  F.extend_to_presheaf.product_condition' := sorry
+  F.extend_to_presheaf.product_condition' :=
+begin
+  intros X Y,
+  have := F.3,
+  dsimp [ExtrDisc.binary_product_condition] at this,
+  let t := prod.lift
+    (F.extend_to_presheaf.map (Profinite.sum.inl X Y).op)
+    (F.extend_to_presheaf.map (Profinite.sum.inr X Y).op),
+  dsimp [ExtrSheaf.extend_to_presheaf] at t,
+  change is_iso t,
+  let e : F.extend_to_obj (X.sum Y).pres ≅ F.extend_to_obj (X.pres.sum Y.pres) :=
+    F.extend_to_iso _ _ (iso.refl _),
+  let q : F.extend_to_obj (X.pres.sum Y.pres) ≅ F.sum_equalizer _ _ :=
+    F.sum_equalizer_iso _ _,
+  have : t = e.hom ≫ q.hom ≫ _,
+  sorry,
+end
 
 lemma ExtrSheaf.equalizer_condition_extend (F : ExtrSheaf.{u} C) :
   F.extend_to_presheaf.equalizer_condition' := sorry
