@@ -194,7 +194,7 @@ end
 
 -- example (p q r : Prop) (h : p ↔ q) : (r ↔ p) → (r ↔ q) := by library_search
 
-def equiv_Icc_bdd (d : ℤ) (hd : 0 ≤ d) : {x // d ≤ x } ≃
+def equiv_Icc_bdd_nonneg (d : ℤ) (hd : 0 ≤ d) : {x // d ≤ x } ≃
   {x // x ∉ range (int.eq_coe_of_zero_le hd).some}:=
 begin
   fconstructor,
@@ -207,16 +207,23 @@ begin
     rw [mem_range, nat.lt_iff_add_one_le, not_le, nat.lt_add_one_iff, ← int.coe_nat_le,
       ← Exists.some_spec (int.eq_coe_of_zero_le hd)] at h,
     exact ⟨_, h⟩ },
-  sorry, sorry,
+  { rintro ⟨_, h⟩,
+    simp only [int.coe_nat_inj', int.of_nat_eq_coe],
+    exact (Exists.some_spec (int.eq_coe_of_zero_le (hd.trans h))).symm, },
+  { rintro ⟨_, h⟩,
+    simp only [int.coe_nat_inj', int.of_nat_eq_coe],
+    exact ((@exists_eq' _ _).some_spec).symm },
 end
 
-lemma equiv_Icc_bdd_apply (d : ℤ) (hd : 0 ≤ d) (x : {x // d ≤ x}) :
-  ((equiv_Icc_bdd d hd x) : ℤ) = x.1 :=
+lemma equiv_Icc_bdd_nonneg_apply (d : ℤ) (hd : 0 ≤ d) (x : {x // d ≤ x}) :
+  ((equiv_Icc_bdd_nonneg d hd x) : ℤ) = x.1 :=
 begin
-  sorry,
+  rcases x with ⟨_, h⟩,
+  exact (Exists.some_spec (int.eq_coe_of_zero_le (hd.trans h))).symm,
 end
 
-
+-- def equiv_Icc_bdd_neg (d : ℤ) (hd : d < 0) : {x // d ≤ x } ≃
+--   {x // x ∉ range (int.eq_coe_of_zero_le hd).some}:=
 
 lemma aux_summable_iff_on_nat {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ) (h : ∀ n : ℤ, n < d → f n = 0) :
   summable (λ n, ∥ f n ∥ * ρ ^ n) ↔ summable (λ n : ℕ, ∥ f n ∥ * ρ ^ (n : ℤ)) :=
@@ -226,10 +233,11 @@ begin
   by_cases hd : 0 ≤ d,
   { set m := (int.eq_coe_of_zero_le hd).some,
     convert (@equiv.summable_iff _ _ _ _ _ (λ x : {x : ℕ // x ∉ range m},
-      ∥ f x ∥ * ρ ^ (x : ℤ)) (equiv_Icc_bdd d hd)).trans (@finset.summable_compl_iff _ _ _ _ _
+      ∥ f x ∥ * ρ ^ (x : ℤ)) (equiv_Icc_bdd_nonneg d hd)).trans (@finset.summable_compl_iff _ _ _ _ _
       (λ n : ℕ, ∥ f n ∥ * ρ ^ n) (range m)),
     ext ⟨_, _⟩,
-    simp only [function.comp_app, subtype.coe_mk, ← zpow_coe_nat, ← coe_coe, equiv_Icc_bdd_apply] },
+    simp only [function.comp_app, subtype.coe_mk, ← zpow_coe_nat, ← coe_coe,
+      equiv_Icc_bdd_nonneg_apply] },
   sorry,
 end
 
@@ -424,14 +432,13 @@ begin
     (summable_smaller_radius S F s)],
 end
 
-#exit -- FAE need to check why int_tsum_shift below breaks
 
 lemma tsum_reindex (F : ℒ S) (N : ℤ) (s : S) : ∑' (l : ℕ), (F s (N + l) : ℝ) * (2 ^ l)⁻¹ =
  2 ^ N * ∑' (m : {m : ℤ // N ≤ m}), (F s m : ℝ) * (2 ^ m.1)⁻¹ :=
 begin
   have h_sum := summable_smaller_radius S F s,
   simp_rw [one_div, inv_zpow'] at h_sum,
-  have h_shift := int_tsum_shift (λ n, (F s n : ℝ) * (2 ^ (-n))) N h_sum,
+  have h_shift := int_tsum_shift (λ n, (F s n : ℝ) * (2 ^ (-n))) N,
   simp only at h_shift,
   simp_rw [subtype.val_eq_coe, ← zpow_neg₀],
   rw [← h_shift, ← _root_.tsum_mul_left, tsum_congr],
