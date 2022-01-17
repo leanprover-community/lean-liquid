@@ -525,28 +525,46 @@ begin
   have := F.2,
   dsimp [ExtrDisc.terminal_condition] at this,
   resetI,
-  let i : ⊤_ C ⟶ F.extend_to_obj Profinite.empty :=
-    inv (terminal.from (F.val.obj (op ExtrDisc.empty))) ≫
-    equalizer.lift _ _,
-  rotate,
-  { apply F.val.map, apply quiver.hom.op,
-    exact (Profinite.empty.pres.lift Profinite.presentation.terminal (𝟙 _)).g },
-  { simp only [is_iso.eq_inv_comp, is_iso.hom_inv_id_assoc, category.assoc,
-      ← F.val.map_comp, ← op_comp],
-    congr' 2,
-    let R := (Profinite.empty.pres.lift Profinite.presentation.terminal (𝟙 _)).relate
-      (Profinite.empty.pres.lift Profinite.presentation.terminal (𝟙 _)),
-    rw [← R.fst, ← R.snd],
-    congr' 1,
-    ext x, cases x },
-  use i,
-  split,
-  { dsimp only [i],
-    ext,
-    simp,
-    rw ← category.assoc,
-  },
-  { apply subsingleton.elim }
+  let e : F.extend_to_obj Profinite.empty ⟶ F.val.obj (op ExtrDisc.empty) :=
+    equalizer.ι _ _ ≫ F.val.map (ExtrDisc.empty.elim _).op,
+  haveI : is_iso e := begin
+    let i : F.val.obj (op ExtrDisc.empty) ⟶ F.extend_to_obj Profinite.empty :=
+      equalizer.lift _ _,
+    rotate,
+    { apply F.val.map, apply quiver.hom.op,
+      use (Profinite.empty.pres.lift Profinite.presentation.terminal (𝟙 _)).g },
+    { simp only [← F.val.map_comp, ← op_comp],
+      congr' 2,
+      let R := (Profinite.empty.pres.lift Profinite.presentation.terminal
+          (𝟙 Profinite.empty)).relate
+        (Profinite.empty.pres.lift Profinite.presentation.terminal (𝟙 Profinite.empty)),
+      rw [← R.fst, ← R.snd],
+      congr' 1,
+      ext x, cases x },
+    use i,
+    split,
+    { dsimp [i, e],
+      ext,
+      simp only [equalizer.lift_ι, category.id_comp, category.assoc],
+      rw [← F.val.map_comp, ← op_comp],
+      convert category.comp_id _ using 2,
+      rw [← F.val.map_id, ← op_id],
+      congr' 2,
+      ext x : 2,
+      apply pempty.elim (Profinite.empty.pres.π x) },
+    { dsimp [i,e],
+      rw [equalizer.lift_ι_assoc, ← F.val.map_comp, ← op_comp, ← F.val.map_id, ← op_id],
+      congr' 2,
+      ext ⟨x⟩ }
+  end,
+  suffices : is_iso (inv e ≫ terminal.from (F.extend_to_obj Profinite.empty)),
+  { resetI,
+    use inv (inv e ≫ terminal.from (F.extend_to_obj Profinite.empty)) ≫ inv e,
+    split, { rw [← category.assoc, is_iso.comp_inv_eq], simp, }, { simp } },
+  have : inv e ≫ terminal.from (F.extend_to_obj Profinite.empty) =
+    terminal.from _, by apply subsingleton.elim,
+  rw this,
+  apply_instance,
 end
 
 lemma ExtrSheaf.product_condition_extend (F : ExtrSheaf.{u} C) :
@@ -566,6 +584,7 @@ end
 def ExtrSheaf.extend (F : ExtrSheaf.{u} C) : Condensed C :=
 ⟨F.extend_to_presheaf, F.extend_is_sheaf⟩
 
+/-
 def ExtrSheaf.extend_restrict_hom (F : ExtrSheaf.{u} C) :
   F ⟶ (Condensed_to_ExtrSheaf C).obj F.extend := ExtrSheaf.hom.mk $
 { app := λ X, limits.equalizer.lift
@@ -780,5 +799,6 @@ equivalence.mk (ExtrSheaf_to_Condensed C) (Condensed_to_ExtrSheaf C)
       dsimp [Condensed.restrict_extend_hom, ExtrSheaf.extend_nat_trans],
       simp,
     end)
+-/
 
 end
