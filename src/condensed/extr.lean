@@ -751,6 +751,46 @@ def ExtrSheaf.equalizer_of_products_iso (F : ExtrSheaf.{u} C) {X Y : Profinite.{
     simp,
   end }
 
+def ExtrSheaf.equalizer_of_products_iso_extend_sum (F : ExtrSheaf.{u} C) {X Y : Profinite.{u}}
+  (P : X.presentation) (Q : Y.presentation) :
+  F.equalizer_of_products P Q ≅ F.extend_to_obj (P.sum Q) :=
+{ hom := equalizer.lift (equalizer.ι _ _ ≫ (F.prod_iso _ _).inv) begin
+    simp only [category.assoc],
+    have : (F.prod_iso P.G Q.G).inv ≫ F.val.map (P.sum Q).fst.op =
+      prod.lift (limits.prod.fst ≫ F.val.map P.fst.op) (limits.prod.snd ≫ F.val.map Q.fst.op)
+      ≫ (F.prod_iso _ _).inv,
+    { rw [iso.eq_comp_inv, category.assoc, iso.inv_comp_eq],
+      ext,
+      { dsimp [ExtrSheaf.prod_iso],
+        simp only [prod.lift_fst_comp_snd_comp, prod.comp_lift, prod.lift_fst, prod.lift_map,
+          ← F.val.map_comp, ← op_comp],
+        refl },
+      { dsimp [ExtrSheaf.prod_iso],
+        simp only [prod.lift_fst_comp_snd_comp, prod.comp_lift, prod.lift_snd, prod.lift_map,
+          ← F.val.map_comp, ← op_comp],
+        refl } },
+    rw this, clear this,
+    have : (F.prod_iso P.G Q.G).inv ≫ F.val.map (P.sum Q).snd.op =
+      prod.lift (limits.prod.fst ≫ F.val.map P.snd.op) (limits.prod.snd ≫ F.val.map Q.snd.op)
+      ≫ (F.prod_iso _ _).inv,
+    { rw [iso.eq_comp_inv, category.assoc, iso.inv_comp_eq],
+      ext,
+      { dsimp [ExtrSheaf.prod_iso],
+        simp only [prod.lift_fst_comp_snd_comp, prod.comp_lift, prod.lift_fst, prod.lift_map,
+          ← F.val.map_comp, ← op_comp],
+        refl },
+      { dsimp [ExtrSheaf.prod_iso],
+        simp only [prod.lift_fst_comp_snd_comp, prod.comp_lift, prod.lift_snd, prod.lift_map,
+          ← F.val.map_comp, ← op_comp],
+        refl } },
+    rw [this, equalizer.condition_assoc],
+  end,
+  inv := equalizer.ι _ _ ≫ equalizer.lift (F.prod_iso _ _).hom begin
+    sorry,
+  end,
+  hom_inv_id' := sorry,
+  inv_hom_id' := sorry }
+
 lemma ExtrSheaf.product_condition_extend (F : ExtrSheaf.{u} C) :
   F.extend_to_presheaf.product_condition' :=
 begin
