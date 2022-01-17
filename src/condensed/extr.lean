@@ -755,7 +755,6 @@ def ExtrSheaf.equalizer_of_products_iso_extend_sum (F : ExtrSheaf.{u} C) {X Y : 
   (P : X.presentation) (Q : Y.presentation) :
   F.equalizer_of_products P Q ≅ F.extend_to_obj (P.sum Q) :=
 { hom := equalizer.lift (equalizer.ι _ _ ≫ (F.prod_iso _ _).inv) begin
-    /-
     simp only [category.assoc],
     have : (F.prod_iso P.G Q.G).inv ≫ F.val.map (P.sum Q).fst.op =
       prod.lift (limits.prod.fst ≫ F.val.map P.fst.op) (limits.prod.snd ≫ F.val.map Q.fst.op)
@@ -785,12 +784,8 @@ def ExtrSheaf.equalizer_of_products_iso_extend_sum (F : ExtrSheaf.{u} C) {X Y : 
           ← F.val.map_comp, ← op_comp],
         refl } },
     rw [this, equalizer.condition_assoc],
-    -/
-    sorry
   end,
   inv := equalizer.lift (equalizer.ι _ _ ≫ (F.prod_iso _ _).hom) begin
-    sorry
-    /-
     ext,
     { simp only [prod.lift_fst_comp_snd_comp, prod.map_fst,
         ExtrSheaf.prod_iso_fst_assoc, category.assoc, limits.prod.map_fst],
@@ -814,10 +809,18 @@ def ExtrSheaf.equalizer_of_products_iso_extend_sum (F : ExtrSheaf.{u} C) {X Y : 
       { simp only [← F.val.map_comp, ← op_comp], refl },
       rw this, clear this,
       apply equalizer.condition_assoc },
-    -/
   end,
-  hom_inv_id' := sorry,
-  inv_hom_id' := sorry }
+  hom_inv_id' := begin
+    ext,
+    iterate 2
+    { slice_lhs 2 3 { rw equalizer.lift_ι },
+      slice_lhs 1 2 { rw equalizer.lift_ι },
+      simp },
+  end,
+  inv_hom_id' := begin
+    ext,
+    simp,
+  end }
 
 lemma ExtrSheaf.product_condition_extend (F : ExtrSheaf.{u} C) :
   F.extend_to_presheaf.product_condition' :=
