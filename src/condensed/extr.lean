@@ -417,8 +417,9 @@ begin
     rw [this, op_id, F.val.map_id, category.comp_id], }
 end
 
+-- We now use a totally noncomputable presentation! (This should be generalizable...)
 def ExtrSheaf.extend_to_obj (F : ExtrSheaf.{u} C) (X : Profinite.{u}) : C :=
-limits.equalizer (F.val.map X.free_presentation.fst.op) (F.val.map X.free_presentation.snd.op)
+limits.equalizer (F.val.map X.pres.fst.op) (F.val.map X.pres.snd.op)
 
 def ExtrSheaf.extend_to_hom (F : ExtrSheaf.{u} C) {X Y : Profinite.{u}} (f : X ⟶ Y) :
   F.extend_to_obj Y ⟶ F.extend_to_obj X :=
