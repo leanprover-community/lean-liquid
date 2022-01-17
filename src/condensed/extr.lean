@@ -423,11 +423,14 @@ limits.equalizer (F.val.map X.pres.fst.op) (F.val.map X.pres.snd.op)
 
 def ExtrSheaf.extend_to_hom (F : ExtrSheaf.{u} C) {X Y : Profinite.{u}} (f : X ⟶ Y) :
   F.extend_to_obj Y ⟶ F.extend_to_obj X :=
-limits.equalizer.lift (limits.equalizer.ι _ _ ≫ F.val.map (X.free_presentation.map_G _ f).op)
+limits.equalizer.lift (limits.equalizer.ι _ _ ≫ F.val.map (X.pres.map_G Y.pres f).op)
 begin
-  simp only [category.assoc, ← F.val.map_comp, ← op_comp,
-    ← Profinite.presentation.map_R_snd, ← Profinite.presentation.map_R_fst],
-  simp only [F.val.map_comp, op_comp, limits.equalizer.condition_assoc],
+  simp only [category.assoc, ← F.val.map_comp, ← op_comp],
+  have h1 := Profinite.presentation.map_R_fst X.pres Y.pres f
+    (X.pres.map_G Y.pres f) (X.pres.map_G Y.pres f) (by simp) (by simp),
+  have h2 := Profinite.presentation.map_R_snd X.pres Y.pres f
+    (X.pres.map_G Y.pres f) (X.pres.map_G Y.pres f) (by simp) (by simp),
+  simp only [← h1, ← h2, F.val.map_comp, op_comp, limits.equalizer.condition_assoc],
 end
 
 @[simps]
