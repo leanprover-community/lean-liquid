@@ -277,6 +277,14 @@ def presentation.hom_over.comp {B₁ B₂ B₃ : Profinite}
 { g := e₁.g ≫ e₂.g,
   w := by simp [e₂.w, reassoc_of e₁.w], }
 
+def presentation.hom_over.map {B₁ B₂ : Profinite}
+  {X₁ : B₁.presentation}
+  {X₂ : B₂.presentation}
+  (f₁ f₂ : B₁ ⟶ B₂)
+  (e : X₁.hom_over X₂ f₁)
+  (h : f₁ = f₂) :
+  X₁.hom_over X₂ f₂ := by rwa ← h
+
 structure presentation.hom_over.relator {B₁ B₂ : Profinite} {X₁ : B₁.presentation}
   {X₂ : B₂.presentation} {f : B₁ ⟶ B₂} (e₁ e₂ : X₁.hom_over X₂ f) :=
 (r : X₁.R ⟶ X₂.R)
@@ -292,7 +300,7 @@ def presentation.hom_over.relate {B₁ B₂ : Profinite} {X₁ : B₁.presentati
   {X₂ : B₂.presentation} {f : B₁ ⟶ B₂} (e₁ e₂ : X₁.hom_over X₂ f) : e₁.relator e₂ :=
 (e₁.exists_relator e₂).some
 
-def presentation.terminal : Profinite.empty.presentation :=
+def presentation.terminal : ExtrDisc.empty.val.presentation :=
 { G := ExtrDisc.empty,
   π := ⟨λ x, pempty.elim x, continuous_bot⟩,
   hπ := by tidy,
@@ -470,13 +478,13 @@ begin
     rw [this, op_id, F.val.map_id, category.comp_id], }
 end
 
--- We now use a totally noncomputable presentation! (This should be generalizable...)
-def ExtrSheaf.extend_to_obj (F : ExtrSheaf.{u} C) (X : Profinite.{u}) : C :=
-limits.equalizer (F.val.map X.pres.fst.op) (F.val.map X.pres.snd.op)
+def ExtrSheaf.extend_to_obj (F : ExtrSheaf.{u} C) {X : Profinite.{u}} (P : X.presentation) : C :=
+limits.equalizer (F.val.map P.fst.op) (F.val.map P.snd.op)
 
-def ExtrSheaf.extend_to_hom (F : ExtrSheaf.{u} C) {X Y : Profinite.{u}} (f : X ⟶ Y)
-  (e : X.pres.hom_over Y.pres f) :
-  F.extend_to_obj Y ⟶ F.extend_to_obj X :=
+def ExtrSheaf.extend_to_hom (F : ExtrSheaf.{u} C) {X Y : Profinite.{u}}
+  {P : X.presentation} {Q : Y.presentation} {f : X ⟶ Y}
+  (e : P.hom_over Q f) :
+  F.extend_to_obj Q ⟶ F.extend_to_obj P :=
 limits.equalizer.lift (limits.equalizer.ι _ _ ≫ F.val.map e.g.op)
 begin
   simp only [category.assoc, ← F.val.map_comp, ← op_comp],
@@ -484,29 +492,69 @@ begin
     op_comp, limits.equalizer.condition_assoc],
 end
 
-lemma ExtrSheaf.extend_to_hom_unique (F : ExtrSheaf.{u} C) {X Y : Profinite.{u}} (f : X ⟶ Y)
-  (e₁ e₂ : X.pres.hom_over Y.pres f) :
-  F.extend_to_hom f e₁ = F.extend_to_hom f e₂ := sorry
+-- Use relators here
+lemma ExtrSheaf.extend_to_hom_unique
+  (F : ExtrSheaf.{u} C) {X Y : Profinite.{u}}
+  {P : X.presentation} {Q : Y.presentation} (f : X ⟶ Y)
+  (e₁ e₂ : P.hom_over Q f) :
+  F.extend_to_hom e₁ = F.extend_to_hom e₂ := sorry
+
+@[simp]
+lemma ExtrSheaf.extend_to_hom_id
+  (F : ExtrSheaf.{u} C) {X : Profinite.{u}} (P : X.presentation) :
+  F.extend_to_hom P.id = 𝟙 _ := sorry
+
+@[simp]
+lemma ExtrSheaf.extend_to_hom_comp
+  (F : ExtrSheaf.{u} C) {X Y Z : Profinite.{u}}
+  {P : X.presentation} {Q : Y.presentation} {R : Z.presentation}
+  (f : X ⟶ Y) (g : Y ⟶ Z)
+  (a : P.hom_over Q f) (b : Q.hom_over R g) :
+  F.extend_to_hom (a.comp b) = F.extend_to_hom b ≫ F.extend_to_hom a := sorry
+
+@[simp]
+lemma ExtrSheaf.extend_to_hom_map
+  (F : ExtrSheaf.{u} C) {X Y : Profinite.{u}} {P : X.presentation} {Q : Y.presentation}
+  (f g : X ⟶ Y)
+  (e : P.hom_over Q f)
+  (h : f = g) :
+  F.extend_to_hom (e.map f g h) = F.extend_to_hom e := sorry
+
+instance ExtrSheaf.extend_to_hom_is_iso
+  (F : ExtrSheaf.{u} C) {X Y : Profinite.{u}}
+  {P : X.presentation} {Q : Y.presentation} (f : X ⟶ Y)
+  [is_iso f]
+  (e : P.hom_over Q f) : is_iso (F.extend_to_hom e) :=
+begin
+  use F.extend_to_hom (Q.lift P (inv f)),
+  split,
+  { rw ← ExtrSheaf.extend_to_hom_comp,
+    rw ← ExtrSheaf.extend_to_hom_id,
+    let i : Q.hom_over Q (𝟙 _) :=
+      ((Q.lift P (inv f)).comp e).map _ _ (by simp),
+    rw ← F.extend_to_hom_map (inv f ≫ f) (𝟙 _) _ (by simp),
+    apply F.extend_to_hom_unique },
+  { rw ← ExtrSheaf.extend_to_hom_comp,
+    rw ← ExtrSheaf.extend_to_hom_id,
+    let i : P.hom_over P (𝟙 _) :=
+      (e.comp (Q.lift P (inv f))).map _ _ (by simp),
+    rw ← F.extend_to_hom_map (f ≫ inv f) (𝟙 _) _ (by simp),
+    apply F.extend_to_hom_unique }
+end
 
 @[simps]
 def ExtrSheaf.extend_to_presheaf (F : ExtrSheaf.{u} C) : Profiniteᵒᵖ ⥤ C :=
-{ obj := λ X, F.extend_to_obj X.unop,
-  map := λ X Y f, F.extend_to_hom f.unop $ Y.unop.pres.lift X.unop.pres f.unop,
+{ obj := λ X, F.extend_to_obj X.unop.pres,
+  map := λ X Y f, F.extend_to_hom (Y.unop.pres.lift X.unop.pres f.unop),
   map_id' := begin
     intros X,
-    erw F.extend_to_hom_unique _ (X.unop.pres.lift X.unop.pres (𝟙 _)) X.unop.pres.id,
-    ext1,
-    dsimp [ExtrSheaf.extend_to_hom, Profinite.presentation.id],
-    simp,
+    rw ← F.extend_to_hom_id,
+    apply F.extend_to_hom_unique,
   end,
   map_comp' := begin
     intros X Y Z f g,
-    erw F.extend_to_hom_unique _ (Z.unop.pres.lift X.unop.pres (g.unop ≫ f.unop))
-      ((Z.unop.pres.lift Y.unop.pres g.unop).comp
-        (Y.unop.pres.lift X.unop.pres f.unop)),
-    ext1,
-    dsimp [ExtrSheaf.extend_to_hom, Profinite.presentation.hom_over.comp],
-    simp,
+    rw ← F.extend_to_hom_comp,
+    apply F.extend_to_hom_unique,
   end }
 
 -- Note for AT:
@@ -517,6 +565,9 @@ def ExtrSheaf.extend_to_presheaf (F : ExtrSheaf.{u} C) : Profiniteᵒᵖ ⥤ C :
 -- I think it will be easiest to just construct the inverses needed for preserving empty,
 -- products and equalizers in terms of `limit.lift` for various kinds of limits.
 
+instance ExtrSheaf.equalizer_ι_is_iso
+  (F : ExtrSheaf.{u} C) {X : ExtrDisc.{u}} (P : X.val.presentation) :
+  is_iso (F.map_to_equalizer P) := ExtrSheaf.equalizer_condition _ _
 
 lemma ExtrSheaf.empty_condition_extend (F : ExtrSheaf.{u} C) :
   F.extend_to_presheaf.empty_condition' :=
@@ -525,44 +576,16 @@ begin
   have := F.2,
   dsimp [ExtrDisc.terminal_condition] at this,
   resetI,
-  let e : F.extend_to_obj Profinite.empty ⟶ F.val.obj (op ExtrDisc.empty) :=
-    equalizer.ι _ _ ≫ F.val.map (ExtrDisc.empty.elim _).op,
-  haveI : is_iso e := begin
-    let i : F.val.obj (op ExtrDisc.empty) ⟶ F.extend_to_obj Profinite.empty :=
-      equalizer.lift _ _,
-    rotate,
-    { apply F.val.map, apply quiver.hom.op,
-      use (Profinite.empty.pres.lift Profinite.presentation.terminal (𝟙 _)).g },
-    { simp only [← F.val.map_comp, ← op_comp],
-      congr' 2,
-      let R := (Profinite.empty.pres.lift Profinite.presentation.terminal
-          (𝟙 Profinite.empty)).relate
-        (Profinite.empty.pres.lift Profinite.presentation.terminal (𝟙 Profinite.empty)),
-      rw [← R.fst, ← R.snd],
-      congr' 1,
-      ext x, cases x },
-    use i,
-    split,
-    { dsimp [i, e],
-      ext,
-      simp only [equalizer.lift_ι, category.id_comp, category.assoc],
-      rw [← F.val.map_comp, ← op_comp],
-      convert category.comp_id _ using 2,
-      rw [← F.val.map_id, ← op_id],
-      congr' 2,
-      ext x : 2,
-      apply pempty.elim (Profinite.empty.pres.π x) },
-    { dsimp [i,e],
-      rw [equalizer.lift_ι_assoc, ← F.val.map_comp, ← op_comp, ← F.val.map_id, ← op_id],
-      congr' 2,
-      ext ⟨x⟩ }
-  end,
-  suffices : is_iso (inv e ≫ terminal.from (F.extend_to_obj Profinite.empty)),
-  { resetI,
-    use inv (inv e ≫ terminal.from (F.extend_to_obj Profinite.empty)) ≫ inv e,
-    split, { rw [← category.assoc, is_iso.comp_inv_eq], simp, }, { simp } },
-  have : inv e ≫ terminal.from (F.extend_to_obj Profinite.empty) =
-    terminal.from _, by apply subsingleton.elim,
+  let e : F.val.obj (op ExtrDisc.empty) ⟶ F.extend_to_obj Profinite.presentation.terminal :=
+    F.map_to_equalizer _,
+  let i : Profinite.empty.pres.hom_over Profinite.presentation.terminal (𝟙 _) :=
+    Profinite.empty.pres.lift _ _,
+  let t : F.extend_to_obj Profinite.presentation.terminal ⟶
+    F.extend_to_obj Profinite.empty.pres :=
+    F.extend_to_hom i,
+  have : terminal.from (F.extend_to_obj Profinite.empty.pres) =
+    inv t ≫ inv e ≫ terminal.from (F.val.obj (op ExtrDisc.empty)),
+    by apply subsingleton.elim,
   rw this,
   apply_instance,
 end
