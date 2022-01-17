@@ -76,6 +76,22 @@ begin
   apply (projective.factors e f).some_spec,
 end
 
+def split {X : Profinite} {Y : ExtrDisc} (f : X ⟶ Y.val) (hf : function.surjective f) :
+  Y.val ⟶ X :=
+begin
+  haveI : epi f := by rwa Profinite.epi_iff_surjective f,
+  choose g h using projective.factors (𝟙 Y.val) f,
+  exact ⟨g⟩,
+end
+
+@[simp, reassoc]
+lemma split_is_splitting {X : Profinite} {Y : ExtrDisc} (f : X ⟶ Y.val)
+  (hf : function.surjective f) : split f hf ≫ f = 𝟙 _ :=
+begin
+  haveI : epi f := by rwa Profinite.epi_iff_surjective f,
+  apply (projective.factors (𝟙 Y.val) f).some_spec,
+end
+
 instance (X : ExtrDisc) : topological_space X :=
 show topological_space X.val, by apply_instance
 
@@ -87,6 +103,130 @@ show t2_space X.val, by apply_instance
 
 instance (X : ExtrDisc) : totally_disconnected_space X :=
 show totally_disconnected_space X.val, by apply_instance
+
+def free (α : Type u) : ExtrDisc.{u} :=
+{ val := Profinite.of $ ultrafilter α,
+  cond := Profinite.projective_ultrafilter α }
+
+def free.ι (α : Type u) : α → free α :=
+λ t, (pure t : ultrafilter α)
+
+@[simp]
+lemma free.ι_apply {α : Type u} (a : α) : free.ι α a = (pure a : ultrafilter α) := rfl
+
+def free.lift {X : ExtrDisc.{u}} {α : Type u} (f : α → X) : free α ⟶ X :=
+⟨⟨ultrafilter.extend f, continuous_ultrafilter_extend _⟩⟩
+
+@[simp]
+lemma free.lift_apply {X : ExtrDisc.{u}} {α : Type u} (f : α → X) (F : free α) :
+  free.lift f F = ultrafilter.extend f F := rfl
+
+@[simp]
+lemma free.ι_lift {X : ExtrDisc.{u}} {α : Type u} (f : α → X) :
+  free.lift f ∘ free.ι _ = f :=
+begin
+  ext,
+  dsimp,
+  simp,
+end
+
+@[simp]
+lemma free.ι_lift_apply {X : ExtrDisc.{u}} {α : Type u} (f : α → X) (a : α) :
+  free.lift f (free.ι α a) = f a :=
+show (free.lift f ∘ free.ι α) a = f a, by simp
+
+lemma free.lift_unique {X : ExtrDisc.{u}} {α : Type u} (f : α → X)
+  (g : free α ⟶ X) (h : g ∘ free.ι α = f) : g = free.lift f :=
+begin
+  letI hh : topological_space α := ⊥,
+  have : dense_range (free.ι α) := dense_range_pure,
+  rw ← free.ι_lift f at h,
+  ext : 2,
+  have := this.equalizer _ _ h,
+  erw this,
+  refl,
+  exact g.val.continuous,
+  exact (free.lift f).val.continuous,
+end
+
+@[ext]
+lemma free.hom_ext {X : ExtrDisc.{u}} {α : Type u} (f g : free α ⟶ X)
+  (h : f ∘ (free.ι α) = g ∘ (free.ι α)) : f = g :=
+by rw [free.lift_unique _ f rfl, free.lift_unique _ g rfl, h]
+
+@[simps]
+def free_functor : Type u ⥤ ExtrDisc.{u} :=
+{ obj := λ α, free α,
+  map := λ α β f, free.lift $ (free.ι _) ∘ f,
+  map_id' := by tidy,
+  map_comp' := begin
+    intros α β γ f g,
+    ext : 2,
+    dsimp,
+    simp,
+  end } .
+
+@[simps]
+def adjunction : free_functor ⊣ forget _ :=
+adjunction.mk_of_hom_equiv $
+{ hom_equiv := λ α X,
+  { to_fun := λ f, f ∘ free.ι _,
+    inv_fun := λ f, free.lift f,
+    left_inv := λ f, by { ext, dsimp, simp },
+    right_inv := λ f, by { ext, dsimp, simp } },
+  hom_equiv_naturality_left_symm' := λ _ _ _ _ _, by { ext, dsimp, simp },
+  hom_equiv_naturality_right' := λ _ _ _ _ _, by { ext, dsimp, simp } } .
+
+@[simps]
+def sigma {ι : Type u} [fintype ι] (X : ι → ExtrDisc) : ExtrDisc :=
+{ val := Profinite.sigma $ λ i : ι, (X i).val,
+  cond := begin
+    let Z := Profinite.sigma (λ i : ι, (X i).val),
+    let e : Z ≅ ∐ (λ i, (X i).val) :=
+      (Profinite.sigma_cofan_is_colimit _).cocone_point_unique_up_to_iso
+      (limits.colimit.is_colimit _),
+    apply projective.of_iso e.symm,
+    apply_instance,
+  end }
+
+@[simps]
+def sigma.ι {ι : Type u} [fintype ι] (X : ι → ExtrDisc) (i : ι) :
+  X i ⟶ sigma X := ⟨Profinite.sigma.ι _ i⟩
+
+@[simps]
+def sigma.desc {Y : ExtrDisc} {ι : Type u} [fintype ι] (X : ι → ExtrDisc)
+  (f : Π i, X i ⟶ Y) : sigma X ⟶ Y := ⟨Profinite.sigma.desc _ $ λ i, (f i).val⟩
+
+@[simp, reassoc]
+lemma sigma.ι_desc {Y} {ι : Type u} (i : ι) [fintype ι] (X : ι → ExtrDisc) (f : Π a, X a ⟶ Y) :
+  sigma.ι X i ≫ sigma.desc X f = f _ := by { ext1, simp }
+
+@[ext]
+lemma sigma.hom_ext {Y} {ι : Type u} [fintype ι] (X : ι → ExtrDisc) (f g : sigma X ⟶ Y)
+  (w : ∀ i, sigma.ι X i ≫ f = sigma.ι X i ≫ g) : f = g :=
+begin
+  ext1,
+  apply Profinite.sigma.hom_ext,
+  intros i,
+  specialize w i,
+  apply_fun (λ e, e.val) at w,
+  exact w,
+end
+
+def sigma.cofan {ι : Type u} [fintype ι] (X : ι → ExtrDisc) : limits.cofan X :=
+limits.cofan.mk (sigma X) $ λ i, sigma.ι _ i
+
+@[simps]
+def sigma.is_colimit {ι : Type u} [fintype ι] (X : ι → ExtrDisc) :
+  limits.is_colimit (sigma.cofan X) :=
+{ desc := λ S, sigma.desc _ $ λ i, S.ι.app i,
+  fac' := λ S i, sigma.ι_desc _ _ _,
+  uniq' := begin
+    intros S m h,
+    apply sigma.hom_ext,
+    intros i,
+    simpa using h i,
+  end }
 
 .-- move this
 -- @[simps]
@@ -215,41 +355,142 @@ begin
   simp,
 end
 
--- this is essentially a truncated simplicial homotopy between `σ₁` and `σ₂`.
 @[simps]
 def presentation.map_R {B₁ B₂ : Profinite} (X₁ : B₁.presentation)
-  (X₂ : B₂.presentation) (f : B₁ ⟶ B₂)
-  (σ₁ σ₂ : X₁.G ⟶ X₂.G)
-  (w₁ : σ₁.val ≫ X₂.π = X₁.π ≫ f)
-  (w₂ : σ₂.val ≫ X₂.π = X₁.π ≫ f) : X₁.R ⟶ X₂.R :=
+  (X₂ : B₂.presentation) (f : B₁ ⟶ B₂) : X₁.R ⟶ X₂.R :=
 ⟨ExtrDisc.lift _ X₂.hr $ X₁.r ≫ pullback.lift _ _
-  (pullback.fst _ _ ≫ σ₁.val)
-  (pullback.snd _ _ ≫ σ₂.val)
-  (by simp [pullback.condition_assoc, w₁, w₂] )⟩
+  (pullback.fst _ _ ≫ (X₁.map_G X₂ f).val)
+  (pullback.snd _ _ ≫ (X₁.map_G X₂ f).val)
+  (by simp [pullback.condition_assoc])⟩
 
 @[simp, reassoc]
 lemma presentation.map_R_fst {B₁ B₂ : Profinite} (X₁ : B₁.presentation)
-  (X₂ : B₂.presentation) (f : B₁ ⟶ B₂) (σ₁ σ₂ : X₁.G ⟶ X₂.G)
-  (w₁ : σ₁.val ≫ X₂.π = X₁.π ≫ f)
-  (w₂ : σ₂.val ≫ X₂.π = X₁.π ≫ f) :
-  X₁.map_R X₂ f σ₁ σ₂ w₁ w₂ ≫ X₂.fst = X₁.fst ≫ σ₁ := sorry
+  (X₂ : B₂.presentation) (f : B₁ ⟶ B₂) :
+  X₁.map_R X₂ f ≫ X₂.fst = X₁.fst ≫ X₁.map_G _ f := sorry
 
 @[simp, reassoc]
 lemma presentation.map_R_snd {B₁ B₂ : Profinite} (X₁ : B₁.presentation)
-  (X₂ : B₂.presentation) (f : B₁ ⟶ B₂) (σ₁ σ₂ : X₁.G ⟶ X₂.G)
-  (w₁ : σ₁.val ≫ X₂.π = X₁.π ≫ f)
-  (w₂ : σ₂.val ≫ X₂.π = X₁.π ≫ f) :
-  X₁.map_R X₂ f σ₁ σ₂ w₁ w₂ ≫ X₂.snd = X₁.snd ≫ σ₂ := sorry
+  (X₂ : B₂.presentation) (f : B₁ ⟶ B₂) :
+  X₁.map_R X₂ f ≫ X₂.snd = X₁.snd ≫ X₁.map_G _ f := sorry
 
--- Use the free stuff.
-lemma exists_presentation (X : Profinite) : ∃ (P : X.presentation), true := sorry
+def pres (X : Profinite.{u}) : ExtrDisc.{u} :=
+ExtrDisc.free X
 
-def pres (X : Profinite.{u}) : X.presentation :=
-X.exists_presentation.some
+def pres_π (X : Profinite.{u}) :
+  X.pres.val ⟶ X :=
+⟨ultrafilter.extend id, continuous_ultrafilter_extend _⟩
+
+lemma pres_π_surjective (X : Profinite.{u}) :
+  function.surjective X.pres_π :=
+begin
+  intros i,
+  use (pure i : ultrafilter _),
+  dsimp [Profinite.pres_π],
+  simp,
+end
+
+@[simps]
+def free_presentation (X : Profinite) : X.presentation :=
+{ G := X.pres,
+  π := X.pres_π,
+  hπ := X.pres_π_surjective,
+  R := (Profinite.pullback X.pres_π X.pres_π).pres,
+  r := (Profinite.pullback X.pres_π X.pres_π).pres_π,
+  hr := (Profinite.pullback X.pres_π X.pres_π).pres_π_surjective, }
+
+def map_pres {X Y : Profinite.{u}} (f : X ⟶ Y) : X.pres ⟶ Y.pres :=
+ExtrDisc.free_functor.map f
+
+@[simp]
+lemma map_pres_id (X : Profinite.{u}) : map_pres (𝟙 X) = 𝟙 _ :=
+begin
+  dsimp [map_pres],
+  symmetry,
+  apply ExtrDisc.free.lift_unique,
+  refl,
+end
+
+@[simp]
+lemma map_pres_comp {X Y Z : Profinite.{u}} (f : X ⟶ Y) (g : Y ⟶ Z) :
+  map_pres (f ≫ g) = map_pres f ≫ map_pres g :=
+begin
+  dsimp [map_pres],
+  symmetry,
+  apply ExtrDisc.free.lift_unique,
+  ext1,
+  dsimp,
+  simp,
+end
+
+-- functoriality of the presentation
+@[simp, reassoc]
+lemma map_pres_π {X Y : Profinite.{u}} (f : X ⟶ Y) :
+  (map_pres f).val ≫ Y.pres_π = X.pres_π ≫ f :=
+begin
+  apply_fun (λ e, (forget Profinite).map e),
+  swap, { exact (forget Profinite).map_injective },
+  dsimp [pres_π, map_pres, ExtrDisc.free.lift, ExtrDisc.free.ι],
+  have : dense_range (ExtrDisc.free.ι _ : X → X.pres) := dense_range_pure,
+  refine this.equalizer _ _ _,
+  continuity,
+  exact continuous_ultrafilter_extend id,
+  apply continuous_ultrafilter_extend,
+  exact continuous_ultrafilter_extend id,
+  ext,
+  dsimp,
+  simp,
+end
+
+@[simps]
+def rels (X : Profinite.{u}) : ExtrDisc.{u} :=
+(Profinite.pullback X.pres_π X.pres_π).pres
+
+@[simps]
+def rels_fst (X : Profinite.{u}) : X.rels ⟶ X.pres :=
+⟨pres_π _ ≫ Profinite.pullback.fst _ _⟩
+
+@[simps]
+def rels_snd (X : Profinite.{u}) : X.rels ⟶ X.pres :=
+⟨pres_π _ ≫ Profinite.pullback.snd _ _⟩
+
+def map_rels {X Y : Profinite.{u}} (f : X ⟶ Y) : X.rels ⟶ Y.rels :=
+map_pres $ pullback.lift _ _
+  (pullback.fst _ _ ≫ (map_pres f).val)
+  (pullback.snd _ _ ≫ (map_pres f).val) $
+by simp [pullback.condition_assoc]
+
+lemma rels_fst_map {X Y : Profinite.{u}} (f : X ⟶ Y) :
+  X.rels_fst ≫ map_pres f = map_rels f ≫ Y.rels_fst :=
+begin
+  apply ExtrDisc.hom.ext,
+  dsimp [map_rels],
+  simp,
+end
+
+lemma rels_snd_map {X Y : Profinite.{u}} (f : X ⟶ Y) :
+  X.rels_snd ≫ map_pres f = map_rels f ≫ Y.rels_snd :=
+begin
+  apply ExtrDisc.hom.ext,
+  dsimp [map_rels],
+  simp,
+end
+
+/-
+
+Given `X : Profinite`, this is the diagram
+
+β(βX ×_X βX) ⇉ βX
+
+whose colimit is isomorphic to `X`, except here we consider it as a diagram in `ExtrDisc`.
+
+Notation: `βX` = the Stone Cech compactification of `X^δ` (= the set `X` as a discrete space).
+
+-/
+def extr_diagram (X : Profinite) : limits.walking_parallel_pair.{u} ⥤ ExtrDisc.{u} :=
+limits.parallel_pair X.rels_fst X.rels_snd
 
 end Profinite
 
---- Start here...
 section
 
 variables (C : Type v) [category.{w} C] [limits.has_terminal C] [limits.has_binary_products C]
@@ -306,7 +547,6 @@ def Condensed_to_ExtrSheaf : Condensed C ⥤ ExtrSheaf C :=
 
 variable {C}
 
-/-
 @[simps]
 def ExtrDisc.via_pullback_fst {X Y Z : ExtrDisc} (f : Y ⟶ X)
   (g : Z.val ⟶ Profinite.pullback f.val f.val) :
@@ -327,39 +567,35 @@ begin
   dsimp,
   simp [Profinite.pullback.condition],
 end
--/
 
 open opposite
 
-def ExtrSheaf.map_to_equalizer (F : ExtrSheaf.{u} C) {B : ExtrDisc}
-  (P : B.val.presentation) : F.val.obj (op B) ⟶
-  limits.equalizer (F.val.map P.fst.op) (F.val.map P.snd.op) :=
-limits.equalizer.lift (F.val.map (quiver.hom.op ⟨P.π⟩)) $
-begin
-  simp only [← F.val.map_comp, ← op_comp],
-  congr' 2,
-  ext1,
-  simp [Profinite.pullback.condition],
-end
+def ExtrSheaf.map_to_equalizer (F : ExtrSheaf.{u} C) {X Y Z : ExtrDisc}
+  (f : Y ⟶ X) (g : Z.val ⟶ Profinite.pullback f.val f.val) :
+  F.val.obj (op X) ⟶
+  limits.equalizer (F.val.map (ExtrDisc.via_pullback_fst f g).op)
+  (F.val.map (ExtrDisc.via_pullback_snd f g).op) :=
+limits.equalizer.lift (F.val.map f.op) $
+by simp only [← F.val.map_comp, ← op_comp, ExtrDisc.via_pullback_condition]
 
 -- This should follow from the projectivity of the objects involved.
-lemma ExtrSheaf.equalizer_condition (F : ExtrSheaf.{u} C) {B : ExtrDisc}
-  (P : B.val.presentation) :
-  is_iso (F.map_to_equalizer P) :=
+lemma ExtrSheaf.equalizer_condition (F : ExtrSheaf.{u} C) {X Y Z : ExtrDisc}
+  (f : Y ⟶ X) (hf : function.surjective f) (g : Z.val ⟶ Profinite.pullback f.val f.val)
+  (hg : function.surjective g) :
+  is_iso (F.map_to_equalizer f g) :=
 begin
   --TODO: Add general stuff about split (co)equalizers.
   --This is a fun proof!
 
-  -- First, let's split the surjective `π : P.G ⟶ B`.
-  let s : B ⟶ P.G := ⟨ExtrDisc.lift _ P.hπ (𝟙 _)⟩,
-  have hs : s ≫ ⟨P.π⟩ = 𝟙 _ := by { ext1, apply ExtrDisc.lift_lifts },
+  -- First, let's split the surjective `Y ⟶ X`.
+  let s : X ⟶ Y := ⟨ExtrDisc.split _ hf⟩,
+  have hs : s ≫ f = 𝟙 _ := by { ext1, apply ExtrDisc.split_is_splitting },
 
-  -- Now, consider the map from `P.G` to the pullback of `P.π` with itself
-  -- given by `𝟙 B` on one component and `f ≫ s` on the other.
-  let e : P.G.val ⟶ Profinite.pullback P.π P.π :=
-    Profinite.pullback.lift _ _ (𝟙 _) (P.π ≫ s.val) _,
-  swap,
-  { apply_fun (λ e, e.val) at hs, change s.val ≫ P.π = 𝟙 _ at hs, simp [hs] },
+  -- Now, consider the map from `Y` to the pullback of `f` with itself
+  -- given by `𝟙 X` on one component and `f ≫ s` on the other.
+  let e : Y.val ⟶ Profinite.pullback f.val f.val :=
+    Profinite.pullback.lift _ _ (𝟙 _) (f.val ≫ s.val) _,
+  swap, { apply_fun (λ e, e.val) at hs, change s.val ≫ f.val = 𝟙 _ at hs, simp [hs] },
 
   -- Since `g`, the map from `Z` to this pullback, is surjective (hence epic),
   -- we can use the projectivity of `Y` to lift `e` above to a morphism
@@ -374,15 +610,15 @@ begin
   -- coequalizer is the coequalizer of the diagram, and the proof below does
   -- essentially this.
 
-  let t : P.G ⟶ P.R := ⟨ExtrDisc.lift _ P.hr e⟩,
-  have ht : t.val ≫ P.r = e := by apply ExtrDisc.lift_lifts,
+  let t : Y ⟶ Z := ⟨ExtrDisc.lift _ hg e⟩,
+  have ht : t.val ≫ g = e := by apply ExtrDisc.lift_lifts,
 
   -- Just some abbreviations for the stuff below.
-  let e₁ := F.val.map P.fst.op,
-  let e₂ := F.val.map P.snd.op,
+  let e₁ := (F.val.map (ExtrDisc.via_pullback_fst f g).op),
+  let e₂ := (F.val.map (ExtrDisc.via_pullback_snd f g).op),
 
   -- This will become the inverse of the canonical map from the cofork point...
-  let i : limits.equalizer e₁ e₂ ⟶ F.val.obj (op B) :=
+  let i : limits.equalizer e₁ e₂ ⟶ F.val.obj (op X) :=
     limits.equalizer.ι e₁ e₂ ≫ F.val.map s.op,
 
   -- so we use it!
@@ -397,24 +633,23 @@ begin
     dsimp [i, ExtrSheaf.map_to_equalizer],
     simp only [limits.equalizer.lift_ι, category.id_comp, category.assoc,
       ← F.val.map_comp, ← op_comp],
-    let π' : P.G ⟶ B := ⟨P.π⟩,
-    have : π' ≫ s = t ≫ P.snd,
+    have : f ≫ s = t ≫ ExtrDisc.via_pullback_snd f g,
     { ext1,
-      dsimp [π'],
+      dsimp [ExtrDisc.via_pullback_snd],
       rw reassoc_of ht,
       dsimp only [e],
       simp },
     dsimp only [e₁, e₂],
     rw [this, op_comp, F.val.map_comp, ← category.assoc, ← limits.equalizer.condition,
       category.assoc, ← F.val.map_comp, ← op_comp],
-    have : t ≫ P.fst = 𝟙 _,
-    { ext1,
-      dsimp,
-      change t.val ≫ _ ≫ _ = 𝟙 _,
+    have : t ≫ ExtrDisc.via_pullback_fst f g = 𝟙 _,
+    { dsimp only [ExtrDisc.via_pullback_fst],
+      ext1,
+      change t.val ≫ g ≫ _ = 𝟙 _,
       rw reassoc_of ht,
       dsimp [e],
-      simp, },
-    rw [this, op_id, F.val.map_id, category.comp_id], }
+      simp },
+    rw [this, op_id, F.val.map_id, category.comp_id] }
 end
 
 def ExtrSheaf.extend_to_obj (F : ExtrSheaf.{u} C) (X : Profinite.{u}) : C :=
