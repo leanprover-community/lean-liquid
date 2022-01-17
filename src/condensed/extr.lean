@@ -308,6 +308,21 @@ def presentation.terminal : ExtrDisc.empty.val.presentation :=
   r := ⟨λ x, pempty.elim x, continuous_bot⟩,
   hr := by tidy }
 
+def presentation.sum {X Y : Profinite.{u}} (P : X.presentation) (Q : Y.presentation) :
+  (X.sum Y).presentation :=
+{ G := P.G.sum Q.G,
+  π := Profinite.sum.desc _ _ (P.π ≫ Profinite.sum.inl _ _) (Q.π ≫ Profinite.sum.inr _ _),
+  hπ := sorry,
+  R := P.R.sum Q.R,
+  r := Profinite.sum.desc _ _
+    (pullback.lift _ _
+      (P.r ≫ pullback.fst _ _ ≫ Profinite.sum.inl _ _)
+      (P.r ≫ pullback.snd _ _ ≫ Profinite.sum.inl _ _ ) sorry)
+    (pullback.lift _ _
+      (Q.r ≫ pullback.fst _ _ ≫ Profinite.sum.inr _ _ )
+      (Q.r ≫ pullback.snd _ _ ≫ Profinite.sum.inr _ _ ) sorry),
+  hr := sorry }
+
 end Profinite
 
 --- Start here...
