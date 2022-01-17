@@ -337,6 +337,16 @@ def presentation.sum {X Y : Profinite.{u}} (P : X.presentation) (Q : Y.presentat
       (Q.r ≫ pullback.snd _ _ ≫ Profinite.sum.inr _ _ ) sorry),
   hr := sorry }
 
+def presentation.sum_inl {X Y : Profinite.{u}} (P : X.presentation) (Q : Y.presentation) :
+  P.hom_over (P.sum Q) (Profinite.sum.inl _ _) :=
+{ g := ExtrDisc.sum.inl _ _,
+  w := sorry }
+
+def presentation.sum_inr {X Y : Profinite.{u}} (P : X.presentation) (Q : Y.presentation) :
+  Q.hom_over (P.sum Q) (Profinite.sum.inr _ _) :=
+{ g := ExtrDisc.sum.inr _ _,
+  w := sorry }
+
 end Profinite
 
 --- Start here...
@@ -822,26 +832,68 @@ def ExtrSheaf.equalizer_of_products_iso_extend_sum (F : ExtrSheaf.{u} C) {X Y : 
     simp,
   end }
 
+@[reassoc]
+lemma ExtrSheaf.equalizer_ι_comp_map_g (F : ExtrSheaf.{u} C) {X Y : Profinite} {P : X.presentation}
+  {Q : Y.presentation} {f : X ⟶ Y} (e : P.hom_over Q f) :
+  (equalizer.ι _ _ : F.extend_to_obj Q ⟶ _) ≫ F.val.map e.g.op =
+  F.extend_to_hom e ≫ equalizer.ι _ _ :=
+begin
+  dsimp [ExtrSheaf.extend_to_hom],
+  simp,
+end
+
 lemma ExtrSheaf.product_condition_extend (F : ExtrSheaf.{u} C) :
   F.extend_to_presheaf.product_condition' :=
 begin
-  sorry,
-  /-
   intros X Y,
-  have := F.3,
-  dsimp [ExtrDisc.binary_product_condition] at this,
-  let t := prod.lift
-    (F.extend_to_presheaf.map (Profinite.sum.inl X Y).op)
-    (F.extend_to_presheaf.map (Profinite.sum.inr X Y).op),
-  dsimp [ExtrSheaf.extend_to_presheaf] at t,
+  let t := prod.lift (F.extend_to_presheaf.map
+    (Profinite.sum.inl X Y).op) (F.extend_to_presheaf.map (Profinite.sum.inr X Y).op),
   change is_iso t,
-  let e : F.extend_to_obj (X.sum Y).pres ≅ F.extend_to_obj (X.pres.sum Y.pres) :=
-    F.extend_to_iso _ _ (iso.refl _),
-  let q : F.extend_to_obj (X.pres.sum Y.pres) ≅ F.sum_equalizer _ _ :=
-    F.sum_equalizer_iso _ _,
-  have : t = e.hom ≫ q.hom ≫ _,
-  sorry,
-  -/
+  dsimp [ExtrSheaf.extend_to_presheaf] at t,
+  let e₁ : F.extend_to_obj (X.sum Y).pres ≅
+    F.extend_to_obj (X.pres.sum Y.pres) := F.extend_to_iso _ _ (iso.refl _),
+  let e₂ : F.extend_to_obj (X.pres.sum Y.pres) ≅ F.equalizer_of_products X.pres Y.pres :=
+    (F.equalizer_of_products_iso_extend_sum _ _).symm,
+  let e₃ : F.equalizer_of_products X.pres Y.pres ≅
+    F.extend_to_obj X.pres ⨯ F.extend_to_obj Y.pres :=
+    (F.equalizer_of_products_iso _ _).symm,
+  have : t = e₁.hom ≫ e₂.hom ≫ e₃.hom,
+  { dsimp [e₁,e₂,e₃],
+    simp only [← category.assoc, iso.eq_comp_inv],
+    simp only [category.assoc],
+    dsimp [ExtrSheaf.extend_to_iso, ExtrSheaf.equalizer_of_products_iso_extend_sum,
+      ExtrSheaf.equalizer_of_products_iso, t, ExtrSheaf.extend_to_hom],
+    ext,
+    simp,
+    rw iso.comp_inv_eq,
+    dsimp [ExtrSheaf.prod_iso],
+    ext,
+    { simp,
+      rw [← F.val.map_comp, ← op_comp],
+      let E : X.pres.hom_over (X.sum Y).pres (Profinite.sum.inl _ _ ≫ 𝟙 _) :=
+        (X.pres.sum_inl Y.pres).comp ((X.pres.sum Y.pres).lift (X.sum Y).pres (𝟙 (X.sum Y))),
+      change _ = equalizer.ι _ _ ≫ F.val.map E.g.op,
+      simp_rw [ExtrSheaf.equalizer_ι_comp_map_g],
+      congr' 1,
+      let E' : X.pres.hom_over (X.sum Y).pres (Profinite.sum.inl _ _) :=
+        E.map _ _ (by simp),
+      have : F.extend_to_hom E = F.extend_to_hom E', by simp [ExtrSheaf.extend_to_hom_map],
+      rw this,
+      apply F.extend_to_hom_unique },
+    { simp,
+      rw [← F.val.map_comp, ← op_comp],
+      let E : Y.pres.hom_over (X.sum Y).pres (Profinite.sum.inr _ _ ≫ 𝟙 _) :=
+        (X.pres.sum_inr Y.pres).comp ((X.pres.sum Y.pres).lift (X.sum Y).pres (𝟙 (X.sum Y))),
+      change _ = equalizer.ι _ _ ≫ F.val.map E.g.op,
+      simp_rw [ExtrSheaf.equalizer_ι_comp_map_g],
+      congr' 1,
+      let E' : Y.pres.hom_over (X.sum Y).pres (Profinite.sum.inr _ _) :=
+        E.map _ _ (by simp),
+      have : F.extend_to_hom E = F.extend_to_hom E', by simp [ExtrSheaf.extend_to_hom_map],
+      rw this,
+      apply F.extend_to_hom_unique } },
+  rw this,
+  apply_instance,
 end
 
 lemma ExtrSheaf.equalizer_condition_extend (F : ExtrSheaf.{u} C) :
