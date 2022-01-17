@@ -755,6 +755,7 @@ def ExtrSheaf.equalizer_of_products_iso_extend_sum (F : ExtrSheaf.{u} C) {X Y : 
   (P : X.presentation) (Q : Y.presentation) :
   F.equalizer_of_products P Q ≅ F.extend_to_obj (P.sum Q) :=
 { hom := equalizer.lift (equalizer.ι _ _ ≫ (F.prod_iso _ _).inv) begin
+    /-
     simp only [category.assoc],
     have : (F.prod_iso P.G Q.G).inv ≫ F.val.map (P.sum Q).fst.op =
       prod.lift (limits.prod.fst ≫ F.val.map P.fst.op) (limits.prod.snd ≫ F.val.map Q.fst.op)
@@ -784,9 +785,36 @@ def ExtrSheaf.equalizer_of_products_iso_extend_sum (F : ExtrSheaf.{u} C) {X Y : 
           ← F.val.map_comp, ← op_comp],
         refl } },
     rw [this, equalizer.condition_assoc],
+    -/
+    sorry
   end,
-  inv := equalizer.ι _ _ ≫ equalizer.lift (F.prod_iso _ _).hom begin
-    sorry,
+  inv := equalizer.lift (equalizer.ι _ _ ≫ (F.prod_iso _ _).hom) begin
+    sorry
+    /-
+    ext,
+    { simp only [prod.lift_fst_comp_snd_comp, prod.map_fst,
+        ExtrSheaf.prod_iso_fst_assoc, category.assoc, limits.prod.map_fst],
+      have : F.val.map (ExtrDisc.sum.inl P.G Q.G).op ≫ F.val.map P.fst.op =
+        F.val.map (P.sum Q).fst.op ≫ F.val.map (ExtrDisc.sum.inl _ _).op,
+      { simp only [← F.val.map_comp, ← op_comp], refl },
+      rw this, clear this,
+      have : F.val.map (ExtrDisc.sum.inl P.G Q.G).op ≫ F.val.map P.snd.op =
+        F.val.map (P.sum Q).snd.op ≫ F.val.map (ExtrDisc.sum.inl _ _).op,
+      { simp only [← F.val.map_comp, ← op_comp], refl },
+      rw this, clear this,
+      apply equalizer.condition_assoc },
+    { simp only [prod.map_snd, prod.lift_fst_comp_snd_comp,
+        ExtrSheaf.prod_iso_snd_assoc, category.assoc, limits.prod.map_snd],
+      have : F.val.map (ExtrDisc.sum.inr P.G Q.G).op ≫ F.val.map Q.fst.op =
+        F.val.map (P.sum Q).fst.op ≫ F.val.map (ExtrDisc.sum.inr _ _).op,
+      { simp only [← F.val.map_comp, ← op_comp], refl },
+      rw this, clear this,
+      have : F.val.map (ExtrDisc.sum.inr P.G Q.G).op ≫ F.val.map Q.snd.op =
+        F.val.map (P.sum Q).snd.op ≫ F.val.map (ExtrDisc.sum.inr _ _).op,
+      { simp only [← F.val.map_comp, ← op_comp], refl },
+      rw this, clear this,
+      apply equalizer.condition_assoc },
+    -/
   end,
   hom_inv_id' := sorry,
   inv_hom_id' := sorry }
