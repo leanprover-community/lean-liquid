@@ -310,14 +310,28 @@ def presentation.hom_over.map {B₁ B₂ : Profinite}
 
 structure presentation.hom_over.relator {B₁ B₂ : Profinite} {X₁ : B₁.presentation}
   {X₂ : B₂.presentation} {f : B₁ ⟶ B₂} (e₁ e₂ : X₁.hom_over X₂ f) :=
-(r : X₁.R ⟶ X₂.R)
-(fst : r ≫ X₂.fst = X₁.fst ≫ e₁.g)
-(snd : r ≫ X₂.snd = X₁.snd ≫ e₁.g)
+(r : X₁.G ⟶ X₂.R)
+(fst : r ≫ X₂.fst = e₁.g)
+(snd : r ≫ X₂.snd = e₂.g)
 
 lemma presentation.hom_over.exists_relator {B₁ B₂ : Profinite} {X₁ : B₁.presentation}
   {X₂ : B₂.presentation} {f : B₁ ⟶ B₂} (e₁ e₂ : X₁.hom_over X₂ f) :
   ∃ (r : e₁.relator e₂), true :=
-sorry
+⟨⟨⟨ExtrDisc.lift X₂.r X₂.hr $ Profinite.pullback.lift _ _ e₁.g.val e₂.g.val begin
+  simp [e₁.w, e₂.w],
+end⟩,begin
+  ext1,
+  dsimp,
+  rw ← category.assoc,
+  rw ExtrDisc.lift_lifts,
+  simp,
+end, begin
+  ext1,
+  dsimp,
+  rw ← category.assoc,
+  rw ExtrDisc.lift_lifts,
+  simp,
+end⟩,trivial⟩
 
 @[irreducible]
 def presentation.hom_over.relate {B₁ B₂ : Profinite} {X₁ : B₁.presentation}
@@ -543,8 +557,30 @@ def ExtrSheaf.extend_to_hom (F : ExtrSheaf.{u} C) {X Y : Profinite.{u}}
 limits.equalizer.lift (limits.equalizer.ι _ _ ≫ F.val.map e.g.op)
 begin
   simp only [category.assoc, ← F.val.map_comp, ← op_comp],
-  simp only [← (e.relate e).fst, ← (e.relate e).snd, F.val.map_comp,
-    op_comp, limits.equalizer.condition_assoc],
+  let t : P.R ⟶ Q.R := ⟨ExtrDisc.lift _ Q.hr (Profinite.pullback.lift _ _ _ _ _)⟩,
+  rotate,
+  { exact P.fst.val ≫ e.g.val },
+  { exact P.snd.val ≫ e.g.val },
+  { simp [e.w, Profinite.pullback.condition_assoc] },
+  have : F.val.map (P.fst ≫ e.g).op = F.val.map Q.fst.op ≫ F.val.map t.op,
+  { dsimp [t],
+    simp only [← F.val.map_comp, ← op_comp],
+    congr' 2,
+    ext1,
+    dsimp,
+    rw [← category.assoc, ExtrDisc.lift_lifts],
+    simp },
+  rw this, clear this,
+  have : F.val.map (P.snd ≫ e.g).op = F.val.map Q.snd.op ≫ F.val.map t.op,
+  { dsimp [t],
+    simp only [← F.val.map_comp, ← op_comp],
+    congr' 2,
+    ext1,
+    dsimp,
+    rw [← category.assoc, ExtrDisc.lift_lifts],
+    simp },
+  rw this, clear this,
+  rw equalizer.condition_assoc,
 end
 
 -- Use relators here
@@ -552,7 +588,13 @@ lemma ExtrSheaf.extend_to_hom_unique
   (F : ExtrSheaf.{u} C) {X Y : Profinite.{u}}
   {P : X.presentation} {Q : Y.presentation} (f : X ⟶ Y)
   (e₁ e₂ : P.hom_over Q f) :
-  F.extend_to_hom e₁ = F.extend_to_hom e₂ := sorry
+  F.extend_to_hom e₁ = F.extend_to_hom e₂ :=
+begin
+  let R := e₁.relate e₂,
+  dsimp [ExtrSheaf.extend_to_hom],
+  ext,
+  simp [← R.fst, ← R.snd, equalizer.condition_assoc],
+end
 
 @[simp]
 lemma ExtrSheaf.extend_to_hom_id
