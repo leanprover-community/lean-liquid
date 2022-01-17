@@ -213,8 +213,13 @@ def presentation.snd {B : Profinite} (X : B.presentation) :
   X.R ⟶ X.G := ⟨X.r ≫ pullback.snd _ _⟩
 
 lemma presentation.condition {B : Profinite} (X : B.presentation) :
-  X.fst.val ≫ X.π = X.snd.val ≫ X.π := sorry
+  X.fst.val ≫ X.π = X.snd.val ≫ X.π :=
+begin
+  dsimp [presentation.fst, presentation.snd],
+  simp [pullback.condition],
+end
 
+/-
 @[simps]
 def presentation.map_G {B₁ B₂ : Profinite} (X₁ : B₁.presentation)
   (X₂ : B₂.presentation) (f : B₁ ⟶ B₂) : X₁.G ⟶ X₂.G :=
@@ -248,15 +253,18 @@ lemma presentation.map_R_fst {B₁ B₂ : Profinite} (X₁ : B₁.presentation)
   (w₂ : σ₂.val ≫ X₂.π = X₁.π ≫ f) :
   X₁.map_R X₂ f σ₁ σ₂ w₁ w₂ ≫ X₂.fst = X₁.fst ≫ σ₁ := sorry
 
+
 @[simp, reassoc]
 lemma presentation.map_R_snd {B₁ B₂ : Profinite} (X₁ : B₁.presentation)
   (X₂ : B₂.presentation) (f : B₁ ⟶ B₂) (σ₁ σ₂ : X₁.G ⟶ X₂.G)
   (w₁ : σ₁.val ≫ X₂.π = X₁.π ≫ f)
   (w₂ : σ₂.val ≫ X₂.π = X₁.π ≫ f) :
   X₁.map_R X₂ f σ₁ σ₂ w₁ w₂ ≫ X₂.snd = X₁.snd ≫ σ₂ := sorry
+-/
 
 -- Use the free stuff.
-lemma exists_presentation (X : Profinite) : ∃ (P : X.presentation), true := sorry
+lemma exists_presentation (X : Profinite) : ∃ (P : X.presentation), true :=
+sorry
 
 @[irreducible]
 def pres (X : Profinite.{u}) : X.presentation :=
@@ -269,7 +277,8 @@ structure presentation.hom_over {B₁ B₂ : Profinite}
 
 lemma presentation.exists_lift {B₁ B₂ : Profinite}
   (X₁ : B₁.presentation) (X₂ : B₂.presentation) (f : B₁ ⟶ B₂) :
-  ∃ F : X₁.hom_over X₂ f, true := sorry
+  ∃ F : X₁.hom_over X₂ f, true :=
+sorry
 
 @[irreducible]
 def presentation.lift {B₁ B₂ : Profinite}
@@ -307,7 +316,8 @@ structure presentation.hom_over.relator {B₁ B₂ : Profinite} {X₁ : B₁.pre
 
 lemma presentation.hom_over.exists_relator {B₁ B₂ : Profinite} {X₁ : B₁.presentation}
   {X₂ : B₂.presentation} {f : B₁ ⟶ B₂} (e₁ e₂ : X₁.hom_over X₂ f) :
-  ∃ (r : e₁.relator e₂), true := sorry
+  ∃ (r : e₁.relator e₂), true :=
+sorry
 
 @[irreducible]
 def presentation.hom_over.relate {B₁ B₂ : Profinite} {X₁ : B₁.presentation}
@@ -340,12 +350,18 @@ def presentation.sum {X Y : Profinite.{u}} (P : X.presentation) (Q : Y.presentat
 def presentation.sum_inl {X Y : Profinite.{u}} (P : X.presentation) (Q : Y.presentation) :
   P.hom_over (P.sum Q) (Profinite.sum.inl _ _) :=
 { g := ExtrDisc.sum.inl _ _,
-  w := sorry }
+  w := begin
+    dsimp [presentation.sum],
+    simp,
+  end }
 
 def presentation.sum_inr {X Y : Profinite.{u}} (P : X.presentation) (Q : Y.presentation) :
   Q.hom_over (P.sum Q) (Profinite.sum.inr _ _) :=
 { g := ExtrDisc.sum.inr _ _,
-  w := sorry }
+  w := begin
+    dsimp [presentation.sum],
+    simp,
+  end }
 
 end Profinite
 
