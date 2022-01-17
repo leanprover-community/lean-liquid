@@ -194,7 +194,7 @@ end
 
 -- example (p q r : Prop) (h : p ↔ q) : (r ↔ p) → (r ↔ q) := by library_search
 
-def equiv_Icc_bdd_nonneg (d : ℤ) (hd : 0 ≤ d) : {x // d ≤ x } ≃
+def equiv_Icc_bdd_nonneg {d : ℤ} (hd : 0 ≤ d) : {x // d ≤ x } ≃
   {x // x ∉ range (int.eq_coe_of_zero_le hd).some}:=
 begin
   fconstructor,
@@ -216,14 +216,49 @@ begin
 end
 
 lemma equiv_Icc_bdd_nonneg_apply (d : ℤ) (hd : 0 ≤ d) (x : {x // d ≤ x}) :
-  ((equiv_Icc_bdd_nonneg d hd x) : ℤ) = x.1 :=
+  ((equiv_Icc_bdd_nonneg hd x) : ℤ) = x.1 :=
 begin
   rcases x with ⟨_, h⟩,
   exact (Exists.some_spec (int.eq_coe_of_zero_le (hd.trans h))).symm,
 end
 
--- def equiv_Icc_bdd_neg (d : ℤ) (hd : d < 0) : {x // d ≤ x } ≃
---   {x // x ∉ range (int.eq_coe_of_zero_le hd).some}:=
+def T {d : ℤ} (hd : d < 0) : finset {x : ℤ // d ≤ x} := Icc ⟨d, le_of_eq rfl⟩ ⟨0, le_of_lt hd⟩
+
+def equiv_Icc_nat_neg {d : ℤ} (hd : d < 0) : { y : {x : ℤ // d ≤ x } // y ∉ T hd } ≃ ℕ :=
+begin
+  sorry;
+  {have h_mem := @mem_Icc {x : ℤ // d ≤ x } _ _ ⟨d, le_of_eq rfl⟩ ⟨0, le_of_lt hd⟩ _,
+  rw ← not_iff_not at h_mem,
+  fconstructor,
+  { rintro ⟨⟨a, ha⟩, hx⟩,
+
+    rw h_mem at hx,
+    -- have := h_mem.symm,
+
+  },
+  }
+end
+
+/-
+    let e : {x // x ∉ range m.succ} ≃ {x // m ≤ x } := sorry,
+    --⟨λ x, x, λ x, x, sorry, sorry⟩,
+    -- {
+
+    -- },
+    have h_fin := @finset.summable_compl_iff _ _ _ _ _ (λ n : ℕ, ∥ f n ∥ * ρ ^ n) (range m.succ),
+    -- simp at h_fin,
+    --**[FAE]** Too tired for the righ combination of iff.symm, iff.trans, etc, golf it later!
+    suffices h_le_not_mem : summable (λ (n : {x // x ∉ range m.succ}), ∥f (n : ℕ)∥ * ρ ^ (n : ℕ)) ↔ summable (λ (n : {x // m ≤ x}), ∥f (n : ℕ)∥ * ρ ^ (n : ℕ)),
+    rw h_le_not_mem at h_fin,
+    convert h_fin using 1,
+    sorry,--to be golfed
+    convert e.summable_iff,
+    funext,--needs the explicit def of e
+    sorry,
+    -- apply summable.congr,
+  },
+
+-/
 
 lemma aux_summable_iff_on_nat {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ) (h : ∀ n : ℤ, n < d → f n = 0) :
   summable (λ n, ∥ f n ∥ * ρ ^ n) ↔ summable (λ n : ℕ, ∥ f n ∥ * ρ ^ (n : ℤ)) :=
@@ -233,12 +268,22 @@ begin
   by_cases hd : 0 ≤ d,
   { set m := (int.eq_coe_of_zero_le hd).some,
     convert (@equiv.summable_iff _ _ _ _ _ (λ x : {x : ℕ // x ∉ range m},
-      ∥ f x ∥ * ρ ^ (x : ℤ)) (equiv_Icc_bdd_nonneg d hd)).trans (@finset.summable_compl_iff _ _ _ _ _
+      ∥ f x ∥ * ρ ^ (x : ℤ)) (equiv_Icc_bdd_nonneg hd)).trans (@finset.summable_compl_iff _ _ _ _ _
       (λ n : ℕ, ∥ f n ∥ * ρ ^ n) (range m)),
     ext ⟨_, _⟩,
     simp only [function.comp_app, subtype.coe_mk, ← zpow_coe_nat, ← coe_coe,
       equiv_Icc_bdd_nonneg_apply] },
-  sorry,
+  { rw not_le at hd,
+    have T : finset {x : ℤ // d ≤ x } := Icc ⟨d, le_of_eq rfl⟩ ⟨0, le_of_lt hd⟩,
+    have h_fin := @finset.summable_compl_iff _ _ _ _ _
+      (λ n : {x // d ≤ x }, ∥ f n ∥ * ρ ^ (n : ℤ)) T,
+    simp at h_fin,
+    apply iff.trans h_fin.symm,
+    have h_equiv := @equiv.summable_iff _ _ _ _ _ (λ n : ℕ, ∥ f n ∥ * ρ ^ n)
+      (equiv_Icc_nat_neg hd),
+    refine iff.trans _ h_equiv,
+    sorry,
+  }
 end
 
 end aux_lemmas
@@ -516,7 +561,11 @@ begin
   exact (summable_congr h_θ).mpr (aux_summable_convolution (F s) (F.2 s)),
 end
 
-theorem θ_ϕ_exact (F : ℒ S) (hF : θ S F = 0) : ∃ G, ϕ S G = F := sorry
+theorem θ_ϕ_exact (F : ℒ S) (hF : θ S F = 0) : ∃ G, ϕ S G = F :=
+begin
+  use ψ S F hF,
+  sorry,
+end
 
 -- def Θ : comphaus_filtered_pseudo_normed_group_hom (laurent_measures r S) (ℳ p S) :=
 --   { to_fun := θ p r S,
