@@ -671,22 +671,6 @@ lemma ExtrSheaf.prod_iso_fst (F : ExtrSheaf.{u} C) (X Y : ExtrDisc.{u}) :
 lemma ExtrSheaf.prod_iso_snd (F : ExtrSheaf.{u} C) (X Y : ExtrDisc.{u}) :
   (F.prod_iso X Y).hom ≫ limits.prod.snd = F.val.map (ExtrDisc.sum.inr _ _).op := sorry
 
-@[reassoc]
-lemma ExtrSheaf.fst_prod_condition (F : ExtrSheaf.{u} C) {X Y : Profinite.{u}}
-  (P : X.presentation) (Q : Y.presentation) :
-  (limits.prod.fst : F.val.obj (op P.G) ⨯ F.val.obj (op Q.G) ⟶ _) ≫
-    F.val.map P.fst.op = limits.prod.fst ≫ F.val.map P.snd.op :=
-begin
-  sorry,
-end
-
-@[reassoc]
-lemma ExtrSheaf.snd_prod_condition (F : ExtrSheaf.{u} C) {X Y : Profinite.{u}}
-  (P : X.presentation) (Q : Y.presentation) :
-  (limits.prod.snd : F.val.obj (op P.G) ⨯ F.val.obj (op Q.G) ⟶ _) ≫
-    F.val.map Q.fst.op = limits.prod.snd ≫ F.val.map Q.snd.op :=
-sorry
-
 def ExtrSheaf.equalizer_of_products (F : ExtrSheaf.{u} C) {X Y : Profinite.{u}}
   (P : X.presentation) (Q : Y.presentation) : C :=
 let e₁₁ : F.val.obj (op P.G) ⟶ F.val.obj (op P.R) := F.val.map P.fst.op,
@@ -708,14 +692,64 @@ def ExtrSheaf.equalizer_of_products_iso (F : ExtrSheaf.{u} C) {X Y : Profinite.{
 { hom := equalizer.lift
     (prod.lift
       (limits.prod.fst ≫ equalizer.ι _ _)
-      (limits.prod.snd ≫ equalizer.ι _ _)) $ sorry, --by ext; simp [equalizer.condition],
+      (limits.prod.snd ≫ equalizer.ι _ _)) $ by ext; simp [equalizer.condition],
   inv := prod.lift
-    (equalizer.ι _ _ ≫ equalizer.lift limits.prod.fst (F.fst_prod_condition P Q))
-    (equalizer.ι _ _ ≫ equalizer.lift limits.prod.snd (F.snd_prod_condition P Q)),
-  hom_inv_id' := sorry,
-  inv_hom_id' := sorry }
-
-
+    (equalizer.lift (equalizer.ι _ _ ≫ limits.prod.fst) begin
+      simp only [category.assoc],
+      have :
+        (limits.prod.fst : F.val.obj (op P.G) ⨯ F.val.obj (op Q.G) ⟶ F.val.obj (op P.G))
+         ≫ F.val.map P.fst.op =
+        (prod.lift
+          (limits.prod.fst ≫ F.val.map P.fst.op)
+          (limits.prod.snd ≫ F.val.map Q.fst.op)) ≫ limits.prod.fst,
+      { simp },
+      slice_lhs 2 4 { rw this },
+      clear this,
+      have :
+        (limits.prod.fst : F.val.obj (op P.G) ⨯ F.val.obj (op Q.G) ⟶ F.val.obj (op P.G))
+         ≫ F.val.map P.snd.op =
+        (prod.lift
+          (limits.prod.fst ≫ F.val.map P.snd.op)
+          (limits.prod.snd ≫ F.val.map Q.snd.op)) ≫ limits.prod.fst,
+      { simp },
+      slice_rhs 2 4 { rw this },
+      rw equalizer.condition_assoc,
+    end)
+    (equalizer.lift (equalizer.ι _ _ ≫ limits.prod.snd) begin
+      simp only [category.assoc],
+      have :
+        (limits.prod.snd : F.val.obj (op P.G) ⨯ F.val.obj (op Q.G) ⟶ F.val.obj (op Q.G))
+         ≫ F.val.map Q.fst.op =
+        (prod.lift
+          (limits.prod.fst ≫ F.val.map P.fst.op)
+          (limits.prod.snd ≫ F.val.map Q.fst.op)) ≫ limits.prod.snd,
+      { simp },
+      slice_lhs 2 4 { rw this },
+      clear this,
+      have :
+        (limits.prod.snd : F.val.obj (op P.G) ⨯ F.val.obj (op Q.G) ⟶ F.val.obj (op Q.G))
+         ≫ F.val.map Q.snd.op =
+        (prod.lift
+          (limits.prod.fst ≫ F.val.map P.snd.op)
+          (limits.prod.snd ≫ F.val.map Q.snd.op)) ≫ limits.prod.snd,
+      { simp },
+      slice_rhs 2 4 { rw this },
+      rw equalizer.condition_assoc,
+    end),
+  hom_inv_id' := begin
+    ext,
+    simp only [equalizer.lift_ι, category.id_comp, equalizer.lift_ι_assoc,
+      prod.lift_fst, category.assoc],
+    slice_lhs 2 3 { rw limits.prod.lift_snd },
+    simp,
+  end,
+  inv_hom_id' := begin
+    ext,
+    simp only [equalizer.lift_ι, prod.lift_fst_comp_snd_comp, category.id_comp,
+      prod.lift_fst, prod.lift_map, category.assoc],
+    slice_lhs 2 3 { rw equalizer.lift_ι },
+    simp,
+  end }
 
 lemma ExtrSheaf.product_condition_extend (F : ExtrSheaf.{u} C) :
   F.extend_to_presheaf.product_condition' :=
