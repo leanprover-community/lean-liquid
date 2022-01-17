@@ -621,6 +621,10 @@ instance ExtrSheaf.equalizer_ι_is_iso
   (F : ExtrSheaf.{u} C) {X : ExtrDisc.{u}} (P : X.val.presentation) :
   is_iso (F.map_to_equalizer P) := ExtrSheaf.equalizer_condition _ _
 
+def ExtrSheaf.equalizer_iso (F : ExtrSheaf.{u} C) {X : ExtrDisc.{u}} (P : X.val.presentation) :
+  F.val.obj (op X) ≅ F.extend_to_obj P :=
+as_iso (F.map_to_equalizer P)
+
 lemma ExtrSheaf.empty_condition_extend (F : ExtrSheaf.{u} C) :
   F.extend_to_presheaf.empty_condition' :=
 begin
@@ -642,7 +646,48 @@ begin
   apply_instance,
 end
 
-def ExtrSheaf.sum_equalizer (F : ExtrSheaf.{u} C) {X Y : Profinite.{u}}
+@[simp, reassoc]
+def ExtrSheaf.equalizer_iso_hom_ι (F : ExtrSheaf.{u} C) {X : ExtrDisc.{u}}
+  (P : X.val.presentation) : (F.equalizer_iso P).hom ≫ equalizer.ι _ _ =
+  F.val.map (quiver.hom.op $ ⟨P.π⟩) :=
+begin
+  dsimp [ExtrSheaf.equalizer_iso, ExtrSheaf.map_to_equalizer],
+  simp,
+end
+
+def ExtrSheaf.prod_iso (F : ExtrSheaf.{u} C) (X Y : ExtrDisc.{u}) :
+  F.val.obj (op $ X.sum Y) ≅ F.val.obj (op X) ⨯ F.val.obj (op Y) :=
+begin
+  letI := F.3 X Y,
+  exact as_iso
+    (prod.lift (F.val.map (ExtrDisc.sum.inl X Y).op) (F.val.map (ExtrDisc.sum.inr X Y).op)),
+end
+
+@[simp, reassoc]
+lemma ExtrSheaf.prod_iso_fst (F : ExtrSheaf.{u} C) (X Y : ExtrDisc.{u}) :
+  (F.prod_iso X Y).hom ≫ limits.prod.fst = F.val.map (ExtrDisc.sum.inl _ _).op := sorry
+
+@[simp, reassoc]
+lemma ExtrSheaf.prod_iso_snd (F : ExtrSheaf.{u} C) (X Y : ExtrDisc.{u}) :
+  (F.prod_iso X Y).hom ≫ limits.prod.snd = F.val.map (ExtrDisc.sum.inr _ _).op := sorry
+
+@[reassoc]
+lemma ExtrSheaf.fst_prod_condition (F : ExtrSheaf.{u} C) {X Y : Profinite.{u}}
+  (P : X.presentation) (Q : Y.presentation) :
+  (limits.prod.fst : F.val.obj (op P.G) ⨯ F.val.obj (op Q.G) ⟶ _) ≫
+    F.val.map P.fst.op = limits.prod.fst ≫ F.val.map P.snd.op :=
+begin
+  sorry,
+end
+
+@[reassoc]
+lemma ExtrSheaf.snd_prod_condition (F : ExtrSheaf.{u} C) {X Y : Profinite.{u}}
+  (P : X.presentation) (Q : Y.presentation) :
+  (limits.prod.snd : F.val.obj (op P.G) ⨯ F.val.obj (op Q.G) ⟶ _) ≫
+    F.val.map Q.fst.op = limits.prod.snd ≫ F.val.map Q.snd.op :=
+sorry
+
+def ExtrSheaf.equalizer_of_products (F : ExtrSheaf.{u} C) {X Y : Profinite.{u}}
   (P : X.presentation) (Q : Y.presentation) : C :=
 let e₁₁ : F.val.obj (op P.G) ⟶ F.val.obj (op P.R) := F.val.map P.fst.op,
     e₁₂ : F.val.obj (op P.G) ⟶ F.val.obj (op P.R) := F.val.map P.snd.op,
@@ -656,26 +701,27 @@ let e₁₁ : F.val.obj (op P.G) ⟶ F.val.obj (op P.R) := F.val.map P.fst.op,
       prod.lift (limits.prod.fst ≫ e₁₂) (limits.prod.snd ≫ e₂₂) in
 equalizer i₁ i₂
 
-def ExtrSheaf.prod_iso (F : ExtrSheaf.{u} C) (X Y : ExtrDisc.{u}) :
-  F.val.obj (op $ X.sum Y) ≅ F.val.obj (op X) ⨯ F.val.obj (op Y) :=
-begin
-  letI := F.3 X Y,
-  exact as_iso
-    (prod.lift (F.val.map (ExtrDisc.sum.inl X Y).op) (F.val.map (ExtrDisc.sum.inr X Y).op)),
-end
-
-def ExtrSheaf.sum_equalizer_iso (F : ExtrSheaf.{u} C) {X Y : Profinite.{u}}
+-- Equalizers commute with products.
+def ExtrSheaf.equalizer_of_products_iso (F : ExtrSheaf.{u} C) {X Y : Profinite.{u}}
   (P : X.presentation) (Q : Y.presentation) :
-  -- equalizer of F of sums
-  F.extend_to_obj (P.sum Q) ≅ F.sum_equalizer P Q :=
-{ hom := equalizer.ι _ _ ≫ equalizer.lift (F.prod_iso _ _).hom sorry,
-  inv := equalizer.ι _ _ ≫ equalizer.lift (F.prod_iso _ _).inv sorry,
+  F.extend_to_obj P ⨯ F.extend_to_obj Q ≅ F.equalizer_of_products P Q :=
+{ hom := equalizer.lift
+    (prod.lift
+      (limits.prod.fst ≫ equalizer.ι _ _)
+      (limits.prod.snd ≫ equalizer.ι _ _)) $ sorry, --by ext; simp [equalizer.condition],
+  inv := prod.lift
+    (equalizer.ι _ _ ≫ equalizer.lift limits.prod.fst (F.fst_prod_condition P Q))
+    (equalizer.ι _ _ ≫ equalizer.lift limits.prod.snd (F.snd_prod_condition P Q)),
   hom_inv_id' := sorry,
   inv_hom_id' := sorry }
+
+
 
 lemma ExtrSheaf.product_condition_extend (F : ExtrSheaf.{u} C) :
   F.extend_to_presheaf.product_condition' :=
 begin
+  sorry,
+  /-
   intros X Y,
   have := F.3,
   dsimp [ExtrDisc.binary_product_condition] at this,
@@ -690,6 +736,7 @@ begin
     F.sum_equalizer_iso _ _,
   have : t = e.hom ≫ q.hom ≫ _,
   sorry,
+  -/
 end
 
 lemma ExtrSheaf.equalizer_condition_extend (F : ExtrSheaf.{u} C) :
