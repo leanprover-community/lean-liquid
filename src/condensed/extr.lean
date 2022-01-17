@@ -659,8 +659,20 @@ def ExtrSheaf.extend_to_iso
   F.extend_to_obj Q ≅ F.extend_to_obj P :=
 { hom := F.extend_to_hom (P.lift _ e.hom),
   inv := F.extend_to_hom (Q.lift _ e.inv),
-  hom_inv_id' := sorry,
-  inv_hom_id' := sorry }
+  hom_inv_id' := begin
+    rw ← F.extend_to_hom_id,
+    rw ← F.extend_to_hom_comp,
+    rw ← F.extend_to_hom_map,
+    rotate 2, { exact 𝟙 _ }, swap, { simp },
+    apply F.extend_to_hom_unique,
+  end,
+  inv_hom_id' := begin
+    rw ← F.extend_to_hom_id,
+    rw ← F.extend_to_hom_comp,
+    rw ← F.extend_to_hom_map,
+    rotate 2, { exact 𝟙 _ }, swap, { simp },
+    apply F.extend_to_hom_unique,
+  end }
 
 @[simps]
 def ExtrSheaf.extend_to_presheaf (F : ExtrSheaf.{u} C) : Profiniteᵒᵖ ⥤ C :=
@@ -733,11 +745,19 @@ end
 
 @[simp, reassoc]
 lemma ExtrSheaf.prod_iso_fst (F : ExtrSheaf.{u} C) (X Y : ExtrDisc.{u}) :
-  (F.prod_iso X Y).hom ≫ limits.prod.fst = F.val.map (ExtrDisc.sum.inl _ _).op := sorry
+  (F.prod_iso X Y).hom ≫ limits.prod.fst = F.val.map (ExtrDisc.sum.inl _ _).op :=
+begin
+  dsimp [ExtrSheaf.prod_iso],
+  simp,
+end
 
 @[simp, reassoc]
 lemma ExtrSheaf.prod_iso_snd (F : ExtrSheaf.{u} C) (X Y : ExtrDisc.{u}) :
-  (F.prod_iso X Y).hom ≫ limits.prod.snd = F.val.map (ExtrDisc.sum.inr _ _).op := sorry
+  (F.prod_iso X Y).hom ≫ limits.prod.snd = F.val.map (ExtrDisc.sum.inr _ _).op :=
+begin
+  dsimp [ExtrSheaf.prod_iso],
+  simp,
+end
 
 def ExtrSheaf.equalizer_of_products (F : ExtrSheaf.{u} C) {X Y : Profinite.{u}}
   (P : X.presentation) (Q : Y.presentation) : C :=
