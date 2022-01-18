@@ -222,21 +222,31 @@ begin
   exact (Exists.some_spec (int.eq_coe_of_zero_le (hd.trans h))).symm,
 end
 
-def T {d : ℤ} (hd : d < 0) : finset {x : ℤ // d ≤ x} := Icc ⟨d, le_of_eq rfl⟩ ⟨0, le_of_lt hd⟩
+def T {d : ℤ} (hd : d < 0) : finset {x : ℤ // d ≤ x} := Ico ⟨d, le_of_eq rfl⟩ ⟨0, le_of_lt hd⟩
 
-def equiv_Icc_nat_neg {d : ℤ} (hd : d < 0) : { y : {x : ℤ // d ≤ x } // y ∉ T hd } ≃ ℕ :=
+-- '[FAE]' No, it should be stated with Ico because 0 : ℕ (change T above)
+def equiv_Ico_nat_neg {d : ℤ} (hd : d < 0) : { y : {x : ℤ // d ≤ x } // y ∉ T hd } ≃ ℕ :=
 begin
-  sorry;
-  {have h_mem := @mem_Icc {x : ℤ // d ≤ x } _ _ ⟨d, le_of_eq rfl⟩ ⟨0, le_of_lt hd⟩ _,
-  rw ← not_iff_not at h_mem,
   fconstructor,
   { rintro ⟨⟨a, ha⟩, hx⟩,
+    have := (not_iff_not_of_iff mem_Ico).mp hx,
+    sorry,--`[FAE]` the proof below was OK for Icc, it only needs to be slightly adapted to Ico
+    -- simp only [and_iff_not_or_not, not_not, not_le, subtype.mk_le_mk, not_le, ha, false_or,
+    --   not_true] at *,
+    -- use (int.eq_coe_of_zero_le (le_of_lt this)).some
+    },
+  sorry;{ intro n,
+    use n,
+    swap,
+    have : d ≤ n,
+    swap,
+    apply (not_iff_not_of_iff mem_Icc).mpr,
+    simp only [*, true_and, subtype.mk_le_mk, int.coe_nat_pos, not_le] at *,
+    sorry,--there is a problem, n = 0 must be allowed!
+    all_goals{ exact le_of_lt (lt_of_lt_of_le hd (int.of_nat_nonneg n)),}
 
-    rw h_mem at hx,
-    -- have := h_mem.symm,
-
-  },
-  }
+    },
+    sorry,sorry,
 end
 
 /-
@@ -274,13 +284,13 @@ begin
     simp only [function.comp_app, subtype.coe_mk, ← zpow_coe_nat, ← coe_coe,
       equiv_Icc_bdd_nonneg_apply] },
   { rw not_le at hd,
-    have T : finset {x : ℤ // d ≤ x } := Icc ⟨d, le_of_eq rfl⟩ ⟨0, le_of_lt hd⟩,
+    have T : finset {x : ℤ // d ≤ x } := Ico ⟨d, le_of_eq rfl⟩ ⟨0, le_of_lt hd⟩,
     have h_fin := @finset.summable_compl_iff _ _ _ _ _
       (λ n : {x // d ≤ x }, ∥ f n ∥ * ρ ^ (n : ℤ)) T,
     simp at h_fin,
     apply iff.trans h_fin.symm,
     have h_equiv := @equiv.summable_iff _ _ _ _ _ (λ n : ℕ, ∥ f n ∥ * ρ ^ n)
-      (equiv_Icc_nat_neg hd),
+      (equiv_Ico_nat_neg hd),
     refine iff.trans _ h_equiv,
     sorry,
   }
