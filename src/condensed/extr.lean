@@ -78,7 +78,7 @@ begin
   exact g,
 end
 
-@[simp]
+@[simp, reassoc]
 lemma lift_lifts {X Y : Profinite} {P : ExtrDisc} (f : X ⟶ Y)
   (hf : function.surjective f) (e : P.val ⟶ Y) :
   lift f hf e ≫ f = e :=
@@ -194,6 +194,23 @@ end ExtrDisc
 
 namespace Profinite
 
+lemma exists_ExtrDisc (B : Profinite.{u}) :
+  ∃ (X : ExtrDisc.{u}) (f : X.val ⟶ B), function.surjective f :=
+begin
+  obtain ⟨⟨X',hX,f,hf⟩⟩ := enough_projectives.presentation B,
+  dsimp at hX hf,
+  resetI,
+  refine ⟨⟨X'⟩,f,_⟩,
+  rwa ← Profinite.epi_iff_surjective,
+end
+
+def E (B : Profinite.{u}) : ExtrDisc := B.exists_ExtrDisc.some
+
+def π (B : Profinite.{u}) : B.E.val ⟶ B := B.exists_ExtrDisc.some_spec.some
+
+lemma π_surjective (B : Profinite.{u}) :
+  function.surjective B.π := B.exists_ExtrDisc.some_spec.some_spec
+
 --instance (Y : Profinite) : t2_space Y := infer_instance
 
 structure presentation (B : Profinite) :=
@@ -262,9 +279,18 @@ lemma presentation.map_R_snd {B₁ B₂ : Profinite} (X₁ : B₁.presentation)
   X₁.map_R X₂ f σ₁ σ₂ w₁ w₂ ≫ X₂.snd = X₁.snd ≫ σ₂ := sorry
 -/
 
--- Use the free stuff.
+@[simps G π]
+def pres_with (B : Profinite) {X : ExtrDisc} (π : X.val ⟶ B) (hπ : function.surjective π) :
+  B.presentation :=
+{ G := X,
+  π := π,
+  hπ := hπ,
+  R := (Profinite.pullback π π).E,
+  r := (Profinite.pullback π π).π,
+  hr := (Profinite.pullback π π).π_surjective }
+
 lemma exists_presentation (X : Profinite) : ∃ (P : X.presentation), true :=
-sorry
+⟨X.pres_with X.π X.π_surjective, trivial⟩
 
 @[irreducible]
 def pres (X : Profinite.{u}) : X.presentation :=
@@ -275,10 +301,43 @@ structure presentation.hom_over {B₁ B₂ : Profinite}
 (g : X₁.G ⟶ X₂.G)
 (w : ExtrDisc.hom.val g ≫ X₂.π = X₁.π ≫ f)
 
+def presentation.hom_over.r {B₁ B₂ : Profinite}
+  {X₁ : B₁.presentation} {X₂ : B₂.presentation} {f : B₁ ⟶ B₂}
+  (e : X₁.hom_over X₂ f) : X₁.R ⟶ X₂.R :=
+⟨ExtrDisc.lift _ X₂.hr $ Profinite.pullback.lift _ _
+  (X₁.fst.val ≫ e.g.val) (X₁.snd.val ≫ e.g.val)
+  (by { simp [e.w, Profinite.pullback.condition_assoc] })⟩
+
+@[simp, reassoc]
+lemma presentation.hom_over.r_fst  {B₁ B₂ : Profinite}
+  {X₁ : B₁.presentation} {X₂ : B₂.presentation} {f : B₁ ⟶ B₂}
+  (e : X₁.hom_over X₂ f) : e.r ≫ X₂.fst = X₁.fst ≫ e.g :=
+begin
+  dsimp only [presentation.hom_over.r],
+  ext1,
+  dsimp,
+  simp,
+end
+
+@[simp, reassoc]
+lemma presentation.hom_over.r_snd  {B₁ B₂ : Profinite}
+  {X₁ : B₁.presentation} {X₂ : B₂.presentation} {f : B₁ ⟶ B₂}
+  (e : X₁.hom_over X₂ f) : e.r ≫ X₂.snd = X₁.snd ≫ e.g :=
+begin
+  dsimp only [presentation.hom_over.r],
+  ext1,
+  dsimp,
+  simp,
+end
+
 lemma presentation.exists_lift {B₁ B₂ : Profinite}
   (X₁ : B₁.presentation) (X₂ : B₂.presentation) (f : B₁ ⟶ B₂) :
   ∃ F : X₁.hom_over X₂ f, true :=
-sorry
+begin
+  refine ⟨⟨⟨ExtrDisc.lift _ X₂.hπ (X₁.π ≫ f)⟩,_⟩, trivial⟩,
+  ext1,
+  simp,
+end
 
 @[irreducible]
 def presentation.lift {B₁ B₂ : Profinite}
