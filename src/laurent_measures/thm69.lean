@@ -230,10 +230,8 @@ begin
   fconstructor,
   { rintro ⟨⟨a, ha⟩, hx⟩,
     have := (not_iff_not_of_iff mem_Ico).mp hx,
-    sorry,--`[FAE]` the proof below was OK for Icc, it only needs to be slightly adapted to Ico
-    -- simp only [and_iff_not_or_not, not_not, not_le, subtype.mk_le_mk, not_le, ha, false_or,
-    --   not_true] at *,
-    -- use (int.eq_coe_of_zero_le (le_of_lt this)).some
+    simp only [subtype.mk_le_mk, subtype.mk_lt_mk, not_and, not_lt, ha, forall_true_left] at *,
+    use (int.eq_coe_of_zero_le this).some,
     },
   sorry;{ intro n,
     use n,
