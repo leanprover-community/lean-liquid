@@ -1094,6 +1094,12 @@ begin
   have he₃snd : e₃ ≫ Profinite.pullback.snd _ _ =
     G.snd.val ≫ e₂ := sorry,
 
+  -- Now we promote `e₁`, `e₂` and `e₃` to presentations of the corresponding objects
+  let E₁ : B.presentation := B.pres_with e₁ he₁,
+  let E₂ : X.presentation := X.pres_with e₂ he₂,
+  let E₃ : (Profinite.pullback f f).presentation := (Profinite.pullback f f).pres_with e₃ he₃,
+
+
   sorry
 
 end
