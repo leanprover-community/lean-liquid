@@ -65,6 +65,10 @@ concrete_category.has_coe_to_sort _
 instance {X Y : ExtrDisc} : has_coe_to_fun (X ⟶ Y) (λ f, X → Y) :=
 ⟨λ f, f.val⟩
 
+@[simp]
+lemma coe_fun_eq {X Y : ExtrDisc} (f : X ⟶ Y) (x : X) :
+  f x = f.val x := rfl
+
 instance (X : ExtrDisc) : projective X.val := X.cond
 
 example (X : ExtrDisc) : projective (ExtrDisc_to_Profinite.obj X) :=
@@ -1051,10 +1055,26 @@ begin
   let G₂toP₁ := P₁.π,
   have hG₂toP₁ : function.surjective G₂toP₁ := P₁.π_surjective,
   let e₂ : G₂.val ⟶ X := G₂toP₁ ≫ Profinite.pullback.fst _ _,
-  have he₂ : function.surjective e₂ := sorry,
+  have he₂ : function.surjective e₂,
+  { intros t,
+    obtain ⟨g,hg⟩ := he₁ (f t),
+    obtain ⟨i,hi⟩ := hG₂toP₁ ⟨⟨t,g⟩,hg.symm⟩,
+    use i,
+    dsimp [e₂],
+    rw hi,
+    refl },
   let π : G₂ ⟶ G₁ := ⟨G₂toP₁ ≫ Profinite.pullback.snd _ _⟩,
-  have hπ : function.surjective π := sorry,
-  have hπe₁e₂f : π.val ≫ e₁ = e₂ ≫ f := sorry,
+  have hπ : function.surjective π,
+  { intros g,
+    obtain ⟨x,hx⟩ := hf (e₁ g),
+    obtain ⟨i,hi⟩ := hG₂toP₁ ⟨⟨x,g⟩,hx⟩,
+    use i,
+    dsimp [π],
+    rw hi,
+    refl },
+  have hπe₁e₂f : π.val ≫ e₁ = e₂ ≫ f,
+  { dsimp only [π, e₁],
+    rw [category.assoc, ← Profinite.pullback.condition, ← category.assoc] },
 
   /- We now have the following diagram
                π
@@ -1076,8 +1096,27 @@ begin
   let G : G₁.val.presentation := ⟨G₂,π.val,hπ,G₃,G₃toP₂,hG₃toP₂⟩,
 
   let e₃ : G₃.val ⟶ Profinite.pullback f f :=
-    Profinite.pullback.lift _ _ (G.fst.val ≫ e₂) (G.snd.val ≫ e₂) sorry,
-  have he₃ : function.surjective e₃ := sorry,
+    Profinite.pullback.lift _ _ (G.fst.val ≫ e₂) (G.snd.val ≫ e₂) _,
+  swap,
+  { slice_lhs 2 4 { erw ← hπe₁e₂f },
+    slice_rhs 2 4 { erw ← hπe₁e₂f },
+    dsimp only [G, Profinite.presentation.fst, Profinite.presentation.snd],
+    slice_lhs 2 4 { rw Profinite.pullback.condition },
+    simp only [category.assoc] },
+  have he₃ : function.surjective e₃,
+  { rintros ⟨⟨x,y⟩,h⟩,
+    obtain ⟨a,ha⟩ := he₁ (f x),
+    obtain ⟨b,hb⟩ := he₁ (f y),
+    let t₁ : P₁ := ⟨⟨x,a⟩,ha.symm⟩,
+    let t₂ : P₁ := ⟨⟨y,a⟩,_⟩,
+    swap, { dsimp at h ⊢, rw [← h, ← ha] },
+    obtain ⟨u₁,hu₁⟩ := hG₂toP₁ t₁,
+    obtain ⟨u₂,hu₂⟩ := hG₂toP₁ t₂,
+    let u : P₂ := ⟨⟨u₁,u₂⟩,_⟩,
+    swap, { dsimp, rw [hu₁, hu₂], refl },
+    obtain ⟨v,hv⟩ := hG₃toP₂ u,
+    use v,
+    sorry },
 
   /- We now have the following diagram
                π
@@ -1089,16 +1128,13 @@ begin
   -/
 
   -- Some compatibility with the relations...
-  have he₃fst : e₃ ≫ Profinite.pullback.fst _ _ =
-    G.fst.val ≫ e₂ := sorry,
-  have he₃snd : e₃ ≫ Profinite.pullback.snd _ _ =
-    G.snd.val ≫ e₂ := sorry,
+  have he₃fst : e₃ ≫ Profinite.pullback.fst _ _ = G.fst.val ≫ e₂ := sorry,
+  have he₃snd : e₃ ≫ Profinite.pullback.snd _ _ = G.snd.val ≫ e₂ := sorry,
 
   -- Now we promote `e₁`, `e₂` and `e₃` to presentations of the corresponding objects
   let E₁ : B.presentation := B.pres_with e₁ he₁,
   let E₂ : X.presentation := X.pres_with e₂ he₂,
   let E₃ : (Profinite.pullback f f).presentation := (Profinite.pullback f f).pres_with e₃ he₃,
-
 
   sorry
 
