@@ -381,14 +381,10 @@ lemma presentation.hom_over.exists_relator {B₁ B₂ : Profinite} {X₁ : B₁.
 end⟩,begin
   ext1,
   dsimp,
-  rw ← category.assoc,
-  rw ExtrDisc.lift_lifts,
   simp,
 end, begin
   ext1,
   dsimp,
-  rw ← category.assoc,
-  rw ExtrDisc.lift_lifts,
   simp,
 end⟩,trivial⟩
 
