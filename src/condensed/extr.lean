@@ -605,6 +605,14 @@ end
 def ExtrSheaf.extend_to_obj (F : ExtrSheaf.{u} C) {X : Profinite.{u}} (P : X.presentation) : C :=
 limits.equalizer (F.val.map P.fst.op) (F.val.map P.snd.op)
 
+def ExtrSheaf.equalizer_condition' (F : ExtrSheaf.{u} C) {X : ExtrDisc.{u}}
+  (P : X.val.presentation) :
+  F.val.obj (op X) ≅ F.extend_to_obj P :=
+begin
+  haveI : is_iso (F.map_to_equalizer P) := F.equalizer_condition _,
+  exact as_iso (F.map_to_equalizer P),
+end
+
 def ExtrSheaf.extend_to_hom (F : ExtrSheaf.{u} C) {X Y : Profinite.{u}}
   {P : X.presentation} {Q : Y.presentation} {f : X ⟶ Y}
   (e : P.hom_over Q f) :
@@ -1019,7 +1027,76 @@ begin
 end
 
 lemma ExtrSheaf.equalizer_condition_extend (F : ExtrSheaf.{u} C) :
-  F.extend_to_presheaf.equalizer_condition' := sorry
+  F.extend_to_presheaf.equalizer_condition' :=
+begin
+  /-
+  We have a diagram of the following form
+
+  X ×_B X → X -f→ B (two arrows on the left)
+  -/
+  intros X B f hf,
+  -- We set up the diagram...
+  let G₁ := B.E,
+  let e₁ : G₁.val ⟶ B := B.π,
+  have he₁ : function.surjective e₁ := B.π_surjective,
+  /- We now have the following diagram
+                G₁
+                |e₁
+                v
+  X ×_B X → X → B
+              f
+  -/
+  let P₁ := Profinite.pullback f B.π,
+  let G₂ := P₁.E,
+  let G₂toP₁ := P₁.π,
+  have hG₂toP₁ : function.surjective G₂toP₁ := P₁.π_surjective,
+  let e₂ : G₂.val ⟶ X := G₂toP₁ ≫ Profinite.pullback.fst _ _,
+  have he₂ : function.surjective e₂ := sorry,
+  let π : G₂ ⟶ G₁ := ⟨G₂toP₁ ≫ Profinite.pullback.snd _ _⟩,
+  have hπ : function.surjective π := sorry,
+  have hπe₁e₂f : π.val ≫ e₁ = e₂ ≫ f := sorry,
+
+  /- We now have the following diagram
+               π
+            G₂ → G₁
+          e₂|    |e₁
+            v    v
+  X ×_B X → X  → B
+              f
+  -/
+
+  let P₂ := Profinite.pullback π.val π.val,
+  let G₃ := P₂.E,
+  let G₃toP₂ : G₃.val ⟶ P₂ := P₂.π,
+  have hG₃toP₂ : function.surjective G₃toP₂ := P₂.π_surjective,
+
+  -- We view G₃ and G₂ as part of a presentation of G₁, so that
+  -- we will be able to identify `F(G₁)` with the equalizer associated to
+  -- this presentation.
+  let G : G₁.val.presentation := ⟨G₂,π.val,hπ,G₃,G₃toP₂,hG₃toP₂⟩,
+
+  let e₃ : G₃.val ⟶ Profinite.pullback f f :=
+    Profinite.pullback.lift _ _ (G.fst.val ≫ e₂) (G.snd.val ≫ e₂) sorry,
+  have he₃ : function.surjective e₃ := sorry,
+
+  /- We now have the following diagram
+               π
+  G₃  → →   G₂ → G₁    <--- This is really a presentation of `G₁`, bundled as `G`.
+  |       e₂|    |e₁
+  v         v    v
+  X ×_B X → X  → B
+              f
+  -/
+
+  -- Some compatibility with the relations...
+  have he₃fst : e₃ ≫ Profinite.pullback.fst _ _ =
+    G.fst.val ≫ e₂ := sorry,
+  have he₃snd : e₃ ≫ Profinite.pullback.snd _ _ =
+    G.snd.val ≫ e₂ := sorry,
+
+  sorry
+
+end
 
 theorem ExtrSheaf.extend_is_sheaf (F : ExtrSheaf.{u} C) : presheaf.is_sheaf proetale_topology
   F.extend_to_presheaf :=
