@@ -661,13 +661,13 @@ begin
   { simp only [← F.val.map_comp, ← op_comp],
     congr' 2,
     ext1,
-    simp },
+    simp [e.fst, e.snd] },
   rw this, clear this,
   have : F.val.map (P.snd ≫ e.g).op = F.val.map Q.snd.op ≫ F.val.map e.r.op,
   { simp only [← F.val.map_comp, ← op_comp],
     congr' 2,
     ext1,
-    simp },
+    simp [e.fst, e.snd] },
   rw this, clear this,
   rw equalizer.condition_assoc,
 end
@@ -1205,20 +1205,22 @@ begin
   simp,
 end
 
+-- TODO: We want the maps on the level of relations to be an equalizer as well...
 -- Now we promote `e₁`, `e₂` and `e₃` to presentations of the corresponding objects
-def E₁ : B.presentation := B.pres_with e₁ he₁
-def E₂ : X.presentation := X.pres_with e₂ he₂
+def E₁ : B.presentation := B.pres_with e₁ he₁ -- <-- change this
+def E₂ : X.presentation := X.pres_with e₂ he₂ -- <-- change this
 def E₃ : (Profinite.pullback f f).presentation := (Profinite.pullback f f).pres_with e₃ he₃
+--  ^--- change this
 
 -- Now we bundle the morphisms using `hom_over`.
 def π' : E₂.hom_over E₁ f :=
-⟨π, hπe₁e₂f⟩
+⟨π, hπe₁e₂f, sorry, sorry, sorry⟩
 
 def fst' : E₃.hom_over E₂ (Profinite.pullback.fst _ _) :=
-⟨G.fst, he₃fst.symm⟩
+⟨G.fst, he₃fst.symm, sorry, sorry, sorry⟩
 
 def snd' : E₃.hom_over E₂ (Profinite.pullback.snd _ _) :=
-⟨G.snd, he₃snd.symm⟩
+⟨G.snd, he₃snd.symm, sorry, sorry, sorry⟩
 
 /-
 In the diagram:
