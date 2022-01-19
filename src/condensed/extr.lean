@@ -21,12 +21,22 @@ open category_theory
 -- Move this
 lemma category_theory.is_iso.is_iso_of_is_iso_comp
   {C : Type*} [category C] {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z)
-  [is_iso f] [is_iso (f ≫ g)] : is_iso g := sorry
+  [is_iso f] [is_iso (f ≫ g)] : is_iso g :=
+begin
+  have : g = (inv f) ≫ (f ≫ g), by simp,
+  rw this,
+  apply_instance
+end
 
 -- Move this
 lemma category_theory.is_iso.is_iso_of_comp_is_iso
   {C : Type*} [category C] {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z)
-  [is_iso g] [is_iso (f ≫ g)] : is_iso f := sorry
+  [is_iso g] [is_iso (f ≫ g)] : is_iso f :=
+begin
+  have : f = f ≫ g ≫ inv g, by simp,
+  rw [this, ← category.assoc],
+  apply_instance,
+end
 
 universes u w v
 
