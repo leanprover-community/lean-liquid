@@ -322,7 +322,7 @@ begin
     exact int.cast_eq_zero.mpr (hd _ hx), },
   rw ← (@has_sum_subtype_iff_of_support_subset ℝ ℤ _ _ (λ n : ℤ, ( f n ) * (2 ^ n)⁻¹) _ _ H_supp) at hf,
   let g := (λ n : {x : ℤ // d ≤ x}, ( f n : ℝ) * (2 ^ n.1)⁻¹),
-  have hg : has_sum g 0, sorry,--use aux_summable_iff_on_nat' (although it is expressed with ∥ - ∥....)
+  have hg : has_sum g 0 := hf,
   have := @sum_add_tsum_compl _ _ _ _ _ g _ (R hn) hg.summable,
   rw [hg.tsum_eq, add_eq_zero_iff_eq_neg] at this,
   replace this := neg_eq_iff_neg_eq.mpr this.symm,
@@ -339,7 +339,6 @@ begin
     all_goals { intro _, refl } },
   { dsimp only [g],
     refine eq.trans _ (@equiv.tsum_eq _ _ _ _ _ _ (equiv_compl_R_bdd hn) (λ x, (f x : ℝ) * (2 ^ (x.1 : ℤ))⁻¹)),
-
     apply tsum_congr,
     intro x,
     simp_rw [← coe_coe],
