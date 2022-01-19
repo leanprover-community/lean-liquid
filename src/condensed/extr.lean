@@ -1206,8 +1206,18 @@ def E₁ : B.presentation := B.pres_with e₁ he₁
 def E₂ : X.presentation := X.pres_with e₂ he₂
 def E₃ : (Profinite.pullback f f).presentation := (Profinite.pullback f f).pres_with e₃ he₃
 
+-- Now we bundle the morphisms using `hom_over`.
+def π' : E₂.hom_over E₁ f :=
+⟨π, hπe₁e₂f⟩
+
+def fst' : E₃.hom_over E₂ (Profinite.pullback.fst _ _) :=
+⟨G.fst, he₃fst.symm⟩
+
+def snd' : E₃.hom_over E₂ (Profinite.pullback.snd _ _) :=
+⟨G.snd, he₃snd.symm⟩
+
 /-
-In the above diagram:
+In the diagram:
 
      ----->
 G₃   ----->   G₂  ---π-->   G₁
