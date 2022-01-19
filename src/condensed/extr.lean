@@ -314,43 +314,25 @@ structure presentation.hom_over {B₁ B₂ : Profinite}
   (X₁ : B₁.presentation) (X₂ : B₂.presentation) (f : B₁ ⟶ B₂) :=
 (g : X₁.G ⟶ X₂.G)
 (w : ExtrDisc.hom.val g ≫ X₂.π = X₁.π ≫ f)
-
-def presentation.hom_over.r {B₁ B₂ : Profinite}
-  {X₁ : B₁.presentation} {X₂ : B₂.presentation} {f : B₁ ⟶ B₂}
-  (e : X₁.hom_over X₂ f) : X₁.R ⟶ X₂.R :=
-⟨ExtrDisc.lift _ X₂.hr $ Profinite.pullback.lift _ _
-  (X₁.fst.val ≫ e.g.val) (X₁.snd.val ≫ e.g.val)
-  (by { simp [e.w, Profinite.pullback.condition_assoc] })⟩
-
-@[simp, reassoc]
-lemma presentation.hom_over.r_fst  {B₁ B₂ : Profinite}
-  {X₁ : B₁.presentation} {X₂ : B₂.presentation} {f : B₁ ⟶ B₂}
-  (e : X₁.hom_over X₂ f) : e.r ≫ X₂.fst = X₁.fst ≫ e.g :=
-begin
-  dsimp only [presentation.hom_over.r],
-  ext1,
-  dsimp,
-  simp,
-end
-
-@[simp, reassoc]
-lemma presentation.hom_over.r_snd  {B₁ B₂ : Profinite}
-  {X₁ : B₁.presentation} {X₂ : B₂.presentation} {f : B₁ ⟶ B₂}
-  (e : X₁.hom_over X₂ f) : e.r ≫ X₂.snd = X₁.snd ≫ e.g :=
-begin
-  dsimp only [presentation.hom_over.r],
-  ext1,
-  dsimp,
-  simp,
-end
+(r : X₁.R ⟶ X₂.R)
+(fst : r ≫ X₂.fst = X₁.fst ≫ g)
+(snd : r ≫ X₂.snd = X₁.snd ≫ g)
 
 lemma presentation.exists_lift {B₁ B₂ : Profinite}
   (X₁ : B₁.presentation) (X₂ : B₂.presentation) (f : B₁ ⟶ B₂) :
   ∃ F : X₁.hom_over X₂ f, true :=
 begin
-  refine ⟨⟨⟨ExtrDisc.lift _ X₂.hπ (X₁.π ≫ f)⟩,_⟩, trivial⟩,
-  ext1,
-  simp,
+  /-
+  let g : X₁.G ⟶ X₂.G := ⟨ExtrDisc.lift _ X₂.hπ (X₁.π ≫ f)⟩,
+  let r' : X₁.R.val ⟶
+  refine ⟨⟨⟨ExtrDisc.lift _ X₂.hπ (X₁.π ≫ f)⟩, _, ⟨ExtrDisc.lift _ X₂.hr _⟩, _, _⟩, trivial⟩,
+  { ext1,
+    simp },
+  { refine pullback.lift _ _ _ _ _,
+    exact X₁.fst ≫
+  }
+  -/
+  sorry
 end
 
 @[irreducible]
@@ -361,7 +343,10 @@ def presentation.lift {B₁ B₂ : Profinite}
 def presentation.id {B : Profinite} (X : B.presentation) :
   X.hom_over X (𝟙 _) :=
 { g := 𝟙 _,
-  w := by simp }
+  w := by simp,
+  r := 𝟙 _,
+  fst := by simp,
+  snd := by simp }
 
 def presentation.hom_over.comp {B₁ B₂ B₃ : Profinite}
   {X₁ : B₁.presentation}
@@ -371,7 +356,10 @@ def presentation.hom_over.comp {B₁ B₂ B₃ : Profinite}
   {f₂ : B₂ ⟶ B₃}
   (e₁ : X₁.hom_over X₂ f₁) (e₂ : X₂.hom_over X₃ f₂) : X₁.hom_over X₃ (f₁ ≫ f₂) :=
 { g := e₁.g ≫ e₂.g,
-  w := by simp [e₂.w, reassoc_of e₁.w], }
+  w := by simp [e₂.w, reassoc_of e₁.w],
+  r := e₁.r ≫ e₂.r,
+  fst := by simp [e₂.fst, reassoc_of e₁.fst],
+  snd := by simp [e₂.snd, reassoc_of e₁.snd] }
 
 def presentation.hom_over.map {B₁ B₂ : Profinite}
   {X₁ : B₁.presentation}
@@ -465,7 +453,10 @@ def presentation.sum_inl {X Y : Profinite.{u}} (P : X.presentation) (Q : Y.prese
   w := begin
     dsimp [presentation.sum],
     simp,
-  end }
+  end,
+  r := ExtrDisc.sum.inl _ _,
+  fst := sorry,
+  snd := sorry }
 
 def presentation.sum_inr {X Y : Profinite.{u}} (P : X.presentation) (Q : Y.presentation) :
   Q.hom_over (P.sum Q) (Profinite.sum.inr _ _) :=
@@ -473,7 +464,10 @@ def presentation.sum_inr {X Y : Profinite.{u}} (P : X.presentation) (Q : Y.prese
   w := begin
     dsimp [presentation.sum],
     simp,
-  end }
+  end,
+  r := ExtrDisc.sum.inr _ _,
+  fst := sorry,
+  snd := sorry }
 
 end Profinite
 
@@ -1351,6 +1345,61 @@ def ExtrSheaf.eq_iso (F : ExtrSheaf.{u} C) :
     simp only [equalizer.lift_ι, category.id_comp, equalizer.lift_ι_assoc, category.assoc],
     erw [iso.inv_hom_id, category.comp_id],
   end }
+
+def eq_iso'_hom_aux' (F : ExtrSheaf.{u} C) :
+  equalizer (F.extend_to_hom fst') (F.extend_to_hom snd') ⟶ F.val.obj (op E₁.G) :=
+begin
+  refine _ ≫ (F.equalizer_iso G).inv,
+  refine equalizer.lift _ _,
+  refine equalizer.ι _ _ ≫ equalizer.ι _ _,
+  simp only [category.assoc],
+  have : equalizer.ι (F.val.map E₂.fst.op) (F.val.map E₂.snd.op) ≫ F.val.map G.fst.op =
+    F.extend_to_hom fst' ≫ equalizer.ι _ _,
+  { dsimp [ExtrSheaf.extend_to_hom],
+    simpa },
+  rw this, clear this,
+  have : equalizer.ι (F.val.map E₂.fst.op) (F.val.map E₂.snd.op) ≫ F.val.map G.snd.op =
+    F.extend_to_hom snd' ≫ equalizer.ι _ _,
+  { dsimp [ExtrSheaf.extend_to_hom],
+    simpa },
+  rw this, clear this,
+  rw equalizer.condition_assoc,
+end
+
+def ExtrSheaf.eq_iso'_hom_aux (F : ExtrSheaf.{u} C) :
+  equalizer (F.extend_to_hom fst') (F.extend_to_hom snd') ⟶
+  F.extend_to_obj E₁ :=
+equalizer.lift (eq_iso'_hom_aux' F) begin
+  dsimp only [eq_iso'_hom_aux'],
+  simp only [category.assoc],
+
+  /-
+  let lfst : E₁.R ⟶ E₂.G := ⟨ExtrDisc.lift _ G.hπ E₁.fst.val⟩,
+  let lsnd : E₁.R ⟶ E₂.G := ⟨ExtrDisc.lift _ G.hπ E₁.snd.val⟩,
+  have : (F.equalizer_iso G).inv ≫ F.val.map E₁.fst.op =
+    equalizer.ι _ _ ≫ F.val.map (quiver.hom.op lfst),
+  { sorry },
+  rw this, clear this,
+  have : (F.equalizer_iso G).inv ≫ F.val.map E₁.snd.op =
+    equalizer.ι _ _ ≫ F.val.map (quiver.hom.op lsnd),
+  { sorry },
+  rw this, clear this,
+  simp,
+  let t : G.G ⟶ G.R := ⟨ExtrDisc.lift _ G.hr $ Profinite.pullback.lift _ _ (𝟙 _) (𝟙 _) rfl⟩,
+  have : equalizer.ι (F.val.map E₂.fst.op) (F.val.map E₂.snd.op) ≫ F.val.map lfst.op =
+    F.extend_to_hom fst' ≫ equalizer.ι _ _ ≫ F.val.map t.op ≫ F.val.map lfst.op,
+  { sorry },
+  rw this, clear this,
+  have : equalizer.ι (F.val.map E₂.fst.op) (F.val.map E₂.snd.op) ≫ F.val.map lsnd.op =
+    F.extend_to_hom snd' ≫ equalizer.ι _ _ ≫ F.val.map t.op ≫ F.val.map lsnd.op,
+  { sorry },
+  rw this, clear this,
+  rw equalizer.condition_assoc,
+  congr' 2,
+  have : F.val.map t.op ≫ F.val.map lfst.op = F.val.map E₃.fst.op ≫ F.val.map (quiver.hom.op _),
+  -/
+  sorry
+end
 
 end equalizer_condition
 
