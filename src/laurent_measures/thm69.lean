@@ -215,7 +215,7 @@ begin
     exact ((@exists_eq' _ _).some_spec).symm },
 end
 
-lemma equiv_Icc_bdd_nonneg_apply (d : ℤ) (hd : 0 ≤ d) (x : {x // d ≤ x}) :
+lemma equiv_Icc_bdd_nonneg_apply {d : ℤ} (hd : 0 ≤ d) (x : {x // d ≤ x}) :
   ((equiv_Icc_bdd_nonneg hd x) : ℤ) = x.1 :=
 begin
   rcases x with ⟨_, h⟩,
@@ -233,40 +233,29 @@ begin
     simp only [subtype.mk_le_mk, subtype.mk_lt_mk, not_and, not_lt, ha, forall_true_left] at *,
     use (int.eq_coe_of_zero_le this).some,
     },
-  sorry;{ intro n,
+  { intro n,
     use n,
-    swap,
     have : d ≤ n,
-    swap,
-    apply (not_iff_not_of_iff mem_Icc).mpr,
-    simp only [*, true_and, subtype.mk_le_mk, int.coe_nat_pos, not_le] at *,
-    sorry,--there is a problem, n = 0 must be allowed!
-    all_goals{ exact le_of_lt (lt_of_lt_of_le hd (int.of_nat_nonneg n)),}
-
-    },
-    sorry,sorry,
+    repeat { exact le_of_lt (lt_of_lt_of_le hd (int.of_nat_nonneg n))},
+    apply (not_iff_not_of_iff mem_Ico).mpr,
+    simp only [subtype.mk_lt_mk, not_and, not_lt, implies_true_iff, int.coe_nat_nonneg] at * },
+    { rintro ⟨⟨x, hx⟩, h⟩,
+      simp only,
+      have := (not_iff_not_of_iff mem_Ico).mp h,
+      simp only [subtype.mk_le_mk, not_and, not_lt, hx, forall_true_left] at this,
+      exact (Exists.some_spec (int.eq_coe_of_zero_le this)).symm },
+    { intro n,
+      simp only [int.coe_nat_inj'],
+      exact ((@exists_eq' _ _).some_spec).symm },
 end
 
-/-
-    let e : {x // x ∉ range m.succ} ≃ {x // m ≤ x } := sorry,
-    --⟨λ x, x, λ x, x, sorry, sorry⟩,
-    -- {
-
-    -- },
-    have h_fin := @finset.summable_compl_iff _ _ _ _ _ (λ n : ℕ, ∥ f n ∥ * ρ ^ n) (range m.succ),
-    -- simp at h_fin,
-    --**[FAE]** Too tired for the righ combination of iff.symm, iff.trans, etc, golf it later!
-    suffices h_le_not_mem : summable (λ (n : {x // x ∉ range m.succ}), ∥f (n : ℕ)∥ * ρ ^ (n : ℕ)) ↔ summable (λ (n : {x // m ≤ x}), ∥f (n : ℕ)∥ * ρ ^ (n : ℕ)),
-    rw h_le_not_mem at h_fin,
-    convert h_fin using 1,
-    sorry,--to be golfed
-    convert e.summable_iff,
-    funext,--needs the explicit def of e
-    sorry,
-    -- apply summable.congr,
-  },
-
--/
+lemma equiv_Ico_nat_neg_apply {d : ℤ} (hd : d < 0) {y : {x : ℤ // d ≤ x}} (h : y ∉ T hd) : y.1 = (equiv_Ico_nat_neg hd) ⟨y, h⟩ :=
+begin
+  rcases y with ⟨_, hy⟩,
+  have := (not_iff_not_of_iff mem_Ico).mp h,
+  simp only [subtype.mk_le_mk, subtype.mk_lt_mk, not_and, not_lt, hy, forall_true_left] at this,
+  exact (Exists.some_spec (int.eq_coe_of_zero_le this))
+end
 
 lemma aux_summable_iff_on_nat {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ) (h : ∀ n : ℤ, n < d → f n = 0) :
   summable (λ n, ∥ f n ∥ * ρ ^ n) ↔ summable (λ n : ℕ, ∥ f n ∥ * ρ ^ (n : ℤ)) :=
@@ -282,16 +271,15 @@ begin
     simp only [function.comp_app, subtype.coe_mk, ← zpow_coe_nat, ← coe_coe,
       equiv_Icc_bdd_nonneg_apply] },
   { rw not_le at hd,
-    have T : finset {x : ℤ // d ≤ x } := Ico ⟨d, le_of_eq rfl⟩ ⟨0, le_of_lt hd⟩,
     have h_fin := @finset.summable_compl_iff _ _ _ _ _
-      (λ n : {x // d ≤ x }, ∥ f n ∥ * ρ ^ (n : ℤ)) T,
-    simp at h_fin,
-    apply iff.trans h_fin.symm,
-    have h_equiv := @equiv.summable_iff _ _ _ _ _ (λ n : ℕ, ∥ f n ∥ * ρ ^ n)
-      (equiv_Ico_nat_neg hd),
-    refine iff.trans _ h_equiv,
-    sorry,
-  }
+      (λ n : {x // d ≤ x }, ∥ f n ∥ * ρ ^ (n : ℤ)) (T hd),
+    apply ((@finset.summable_compl_iff _ _ _ _ _
+      (λ n : {x // d ≤ x }, ∥ f n ∥ * ρ ^ (n : ℤ)) (T hd)).symm).trans,
+    refine iff.trans _ (@equiv.summable_iff _ _ _ _ _ (λ n : ℕ, ∥ f n ∥ * ρ ^ n)
+      (equiv_Ico_nat_neg hd)),
+    apply summable_congr,
+    rintro ⟨⟨x, hx⟩, h⟩,
+    simp only [function.comp_app, subtype.coe_mk, ← (equiv_Ico_nat_neg_apply hd h), subtype.val_eq_coe, ← zpow_coe_nat] }
 end
 
 end aux_lemmas
@@ -355,10 +343,7 @@ def ϕ : ℒ S → ℒ S :=
     { apply summable.add,
       have : ∀ b : ℤ, ∥ F s (b - 1) ∥ * r ^ b = r * ∥ F s (b - 1) ∥ * r ^ (b - 1),
       { intro b,
-        nth_rewrite_rhs 0 mul_assoc,
-        nth_rewrite_rhs 0 mul_comm,
-        nth_rewrite_rhs 0 mul_assoc,
-        rw [← zpow_add_one₀, sub_add_cancel b 1],
+        rw [mul_assoc, mul_comm (r : ℝ), mul_assoc, ← zpow_add_one₀, sub_add_cancel b 1],
         rw [ne.def, nnreal.coe_eq_zero],
         apply ne_of_gt,
         exact r_ineq.1 },
