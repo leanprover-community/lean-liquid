@@ -420,17 +420,33 @@ def presentation.sum {X Y : Profinite.{u}} (P : X.presentation) (Q : Y.presentat
     (pullback.lift _ _
       (P.r ≫ pullback.fst _ _ ≫ Profinite.sum.inl _ _)
       (P.r ≫ pullback.snd _ _ ≫ Profinite.sum.inl _ _ ) begin
-        simp [Profinite.pullback.condition_assoc],
+        simp only [category.assoc, Profinite.pullback.condition_assoc,
+          sum.inl_desc, sum.inr_desc],
       end)
     (pullback.lift _ _
       (Q.r ≫ pullback.fst _ _ ≫ Profinite.sum.inr _ _ )
       (Q.r ≫ pullback.snd _ _ ≫ Profinite.sum.inr _ _ ) begin
-        simp [Profinite.pullback.condition_assoc],
+        simp only [category.assoc, Profinite.pullback.condition_assoc,
+          sum.inl_desc, sum.inr_desc],
       end),
   hr := begin
     rintros ⟨⟨(a|a),(b|b)⟩,h⟩,
-    all_goals { dsimp at h },
-    all_goals { sorry },
+    { dsimp [sum.desc] at h,
+      let t : Profinite.pullback P.π P.π := ⟨⟨a,b⟩, sum.inl.inj h⟩,
+      obtain ⟨A,hA⟩ := P.hr t,
+      use A,
+      dsimp [sum.desc, pullback.lift],
+      congr,
+      all_goals { rw hA, refl } },
+    { exact false.elim (_root_.sum.inl_ne_inr h) },
+    { exact false.elim (_root_.sum.inl_ne_inr h.symm) },
+    { dsimp [sum.desc] at h,
+      let t : Profinite.pullback Q.π Q.π := ⟨⟨a,b⟩, sum.inr.inj h⟩,
+      obtain ⟨A,hA⟩ := Q.hr t,
+      use _root_.sum.inr A,
+      dsimp [sum.desc, pullback.lift],
+      congr,
+      all_goals { rw hA, refl } }
   end }
 
 def presentation.sum_inl {X Y : Profinite.{u}} (P : X.presentation) (Q : Y.presentation) :
