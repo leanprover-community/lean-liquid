@@ -409,16 +409,29 @@ def presentation.sum {X Y : Profinite.{u}} (P : X.presentation) (Q : Y.presentat
   (X.sum Y).presentation :=
 { G := P.G.sum Q.G,
   π := Profinite.sum.desc _ _ (P.π ≫ Profinite.sum.inl _ _) (Q.π ≫ Profinite.sum.inr _ _),
-  hπ := sorry,
+  hπ := begin
+    rintros (a|a),
+    { obtain ⟨a,rfl⟩ := P.hπ a, use a, refl },
+    { obtain ⟨a,rfl⟩ := Q.hπ a,
+      refine ⟨_root_.sum.inr a, rfl⟩ },
+  end,
   R := P.R.sum Q.R,
   r := Profinite.sum.desc _ _
     (pullback.lift _ _
       (P.r ≫ pullback.fst _ _ ≫ Profinite.sum.inl _ _)
-      (P.r ≫ pullback.snd _ _ ≫ Profinite.sum.inl _ _ ) sorry)
+      (P.r ≫ pullback.snd _ _ ≫ Profinite.sum.inl _ _ ) begin
+        simp [Profinite.pullback.condition_assoc],
+      end)
     (pullback.lift _ _
       (Q.r ≫ pullback.fst _ _ ≫ Profinite.sum.inr _ _ )
-      (Q.r ≫ pullback.snd _ _ ≫ Profinite.sum.inr _ _ ) sorry),
-  hr := sorry }
+      (Q.r ≫ pullback.snd _ _ ≫ Profinite.sum.inr _ _ ) begin
+        simp [Profinite.pullback.condition_assoc],
+      end),
+  hr := begin
+    rintros ⟨⟨(a|a),(b|b)⟩,h⟩,
+    all_goals { dsimp at h },
+    all_goals { sorry },
+  end }
 
 def presentation.sum_inl {X Y : Profinite.{u}} (P : X.presentation) (Q : Y.presentation) :
   P.hom_over (P.sum Q) (Profinite.sum.inl _ _) :=
