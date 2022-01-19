@@ -101,35 +101,6 @@ begin
   exact (Exists.some_spec (int.eq_coe_of_zero_le hn)).symm,
 end
 
--- import order.filter.at_top_bot tactic.linarith
-
-
-lemma sum_Icc_sum_tail (f : ℤ → ℤ) (n d : ℤ)
-  (hf : (has_sum (λ x : ℤ, (f x : ℝ) * (2 ^ x)⁻¹) 0))
-  (hd : ∀ n : ℤ, n < d → f n = 0)
-  (hn : 0 ≤ n - d) : - ∑ k in (Icc d n), ((f k) : ℝ) * 2 ^ (n - k) =
-  2 ^ n * tsum (λ x : {a : ℤ // n.succ ≤ a }, (f x : ℝ) * (2 ^ x.1)⁻¹) :=
-begin
-  sorry;{
-  replace hf : (has_sum (λ x : ℤ, ∥ f x ∥ * (2 ^ x)⁻¹) 0), sorry,
-  have H_supp : function.support (λ n : ℤ, ∥ f n ∥ * (2 ^ n)⁻¹) ⊆ { a : ℤ | d ≤ a},
-  { rw function.support_subset_iff,
-    intro x,
-    rw [← not_imp_not, not_not, mul_eq_zero],
-    intro hx,
-    simp only [not_le, set.mem_set_of_eq] at hx,
-    apply or.intro_left,
-    rw norm_eq_zero,
-    exact hd x hx },
-  -- rw has_sum_subtype_support,
-  have h1 := --λ a : ℝ,
-    @has_sum_subtype_iff_of_support_subset ℝ ℤ _ _ (λ n : ℤ, ∥ f n ∥ * (2 ^ n)⁻¹) _ _ H_supp,
-  rw ← h1 at hf,
-  let g := (λ n : {x : ℤ // d ≤ x}, ∥ f n ∥ * (2 ^ n.1)⁻¹),
-  let T : finset {x : ℤ // d ≤ x} := Icc ⟨d, le_of_eq _⟩ ⟨n, int.le_of_sub_nonneg hn⟩,--⟨d, le_of_eq _⟩,
-  have := @sum_add_tsum_compl _ _ _ _ _ g _ {x | x < 0},
-  }
-end
 
 -- **[FAE]** Use `tsum_mul_tsum_eq_tsum_sum_antidiagonal` or even better
 -- `tsum_mul_tsum_eq_tsum_sum_antidiagonal_of_summable_norm` instead
@@ -224,7 +195,6 @@ end
 
 def T {d : ℤ} (hd : d < 0) : finset {x : ℤ // d ≤ x} := Ico ⟨d, le_of_eq rfl⟩ ⟨0, le_of_lt hd⟩
 
--- '[FAE]' No, it should be stated with Ico because 0 : ℕ (change T above)
 def equiv_Ico_nat_neg {d : ℤ} (hd : d < 0) : { y : {x : ℤ // d ≤ x } // y ∉ T hd } ≃ ℕ :=
 begin
   fconstructor,
@@ -280,6 +250,109 @@ begin
     apply summable_congr,
     rintro ⟨⟨x, hx⟩, h⟩,
     simp only [function.comp_app, subtype.coe_mk, ← (equiv_Ico_nat_neg_apply hd h), subtype.val_eq_coe, ← zpow_coe_nat] }
+end
+
+def R {d n : ℤ} (hn : 0 ≤ n - d) : finset {x : ℤ // d ≤ x} := Icc ⟨d, le_of_eq rfl⟩ ⟨n, int.le_of_sub_nonneg hn⟩
+
+
+def equiv_Icc_R {d n : ℤ} (hn : 0 ≤ n - d) : Icc d n ≃ R hn :=
+begin
+  fconstructor,
+  { rintro ⟨m, hm⟩,
+    replace hm := mem_Icc.mp hm,
+    use ⟨m, hm.1⟩,
+    dsimp [R],
+    rw mem_Icc,
+    use and.intro (subtype.mk_le_mk.mpr hm.1) (subtype.mk_le_mk.mpr hm.2) },
+  { dsimp [R],
+    rintro ⟨⟨x, hx⟩, h⟩,
+    rw mem_Icc at h,
+    use x,
+    rw mem_Icc,
+    use and.intro hx (subtype.mk_le_mk.mp h.2) },
+  { simp only [id.def],
+    rintro ⟨⟨x, hx⟩, h⟩,
+    all_goals {simp only}, },
+  { simp only [id.def],
+    dsimp [R],
+    rintro ⟨⟨x, hx⟩, h⟩,
+    simp only },
+end
+
+lemma equiv_Icc_R_apply {d n : ℤ} (hn : 0 ≤ n - d) (x : Icc d n) : ((equiv_Icc_R hn x) : ℤ) = (x : ℤ) := by {rcases x, refl}
+
+example (n : ℤ) : n ≤ n + 1:=
+begin
+  simp only [zero_le_one, le_add_iff_nonneg_right],
+end
+
+def equiv_compl_R_bdd {d n : ℤ} (hn : 0 ≤ n - d): {a : ℤ // n.succ ≤ a } ≃ ((R hn)ᶜ : set {x : ℤ // d ≤ x}) :=
+begin
+  fconstructor,
+  { rintro ⟨m, hm⟩,
+    have hd : d ≤ m := (int.le_add_one (int.le_of_sub_nonneg hn)).trans hm,
+    use ⟨m, hd⟩,
+    dsimp only [R],
+    simpa [mem_coe, set.mem_compl_eq, mem_Icc, subtype.mk_le_mk, not_and, hd, forall_true_left, not_le, int.lt_iff_add_one_le, hm] },
+  { rintro ⟨⟨x, hx⟩, h_mem⟩,
+    dsimp only [R] at h_mem,
+    simp only [subtype.mk_le_mk, coe_Icc, not_and, not_le, set.mem_compl_eq, set.mem_Icc, hx, forall_true_left, int.lt_iff_add_one_le] at h_mem,
+    use ⟨x, h_mem⟩ },
+  { rintro ⟨_, _⟩, simp only [id.def] },
+  { rintro ⟨⟨_, _⟩, _⟩, simpa }
+end
+
+lemma equiv_compl_R_bdd_apply {d n : ℤ} (hn : 0 ≤ n - d) (x : {a : ℤ // n.succ ≤ a }) : (equiv_compl_R_bdd hn x : ℤ) = (x : ℤ) := by {rcases x with ⟨y, hy⟩, simpa}
+
+lemma sum_Icc_sum_tail (f : ℤ → ℤ) (n d : ℤ)
+  (hf : (has_sum (λ x : ℤ, (f x : ℝ) * (2 ^ x)⁻¹) 0))
+  (hd : ∀ n : ℤ, n < d → f n = 0)
+  (hn : 0 ≤ n - d) : - ∑ k in (Icc d n), ((f k) : ℝ) * 2 ^ (n - k) =
+  2 ^ n * tsum (λ x : {a : ℤ // n.succ ≤ a }, (f x : ℝ) * (2 ^ x.1)⁻¹) :=
+begin
+  simp_rw [zpow_sub₀ (@two_ne_zero ℝ _ _), div_eq_mul_inv, ← mul_assoc, (mul_comm _ ((2 : ℝ) ^ n)), mul_assoc, ← mul_sum, neg_mul_eq_mul_neg, mul_eq_mul_left_iff],
+  apply or.intro_left,
+  have H_supp : function.support (λ n : ℤ, (f n  : ℝ) * (2 ^ n)⁻¹) ⊆ { a : ℤ | d ≤ a},
+  { rw function.support_subset_iff,
+    intro _,
+    rw [← not_imp_not, not_not, mul_eq_zero],
+    intro hx,
+    simp only [not_le, set.mem_set_of_eq] at hx,
+    apply or.intro_left,
+    exact int.cast_eq_zero.mpr (hd _ hx), },
+  rw ← (@has_sum_subtype_iff_of_support_subset ℝ ℤ _ _ (λ n : ℤ, ( f n ) * (2 ^ n)⁻¹) _ _ H_supp) at hf,
+  let g := (λ n : {x : ℤ // d ≤ x}, ( f n : ℝ) * (2 ^ n.1)⁻¹),
+  have hg : has_sum g 0, sorry,--use aux_summable_iff_on_nat' (although it is expressed with ∥ - ∥....)
+  have := @sum_add_tsum_compl _ _ _ _ _ g _ (R hn) hg.summable,
+  rw [hg.tsum_eq, add_eq_zero_iff_eq_neg] at this,
+  replace this := neg_eq_iff_neg_eq.mpr this.symm,
+  convert this using 1,
+  { simp only [neg_inj],
+    have h_R := @fintype.sum_equiv (Icc d n) (R hn) _ _ _ _ (equiv_Icc_R hn) ((λ x : ℤ, ((f x : ℝ) * (2 ^ x)⁻¹)) ∘ coe) (g ∘ coe),
+    rw @sum_subtype ℝ ℤ _ (∈ Icc d n) _ (Icc d n) _ (λ x, ((f x) : ℝ) * (2 ^x)⁻¹),
+    rw @sum_subtype ℝ _ _ (∈ R hn) _ (R hn) _ (λ x, g x),
+    simp only,
+    refine h_R _,
+    { intro x,
+      dsimp [g],
+      rw [← coe_coe, equiv_Icc_R_apply hn x] },
+    all_goals { intro _, refl } },
+  { dsimp only [g],
+    refine eq.trans _ (@equiv.tsum_eq _ _ _ _ _ _ (equiv_compl_R_bdd hn) (λ x, (f x : ℝ) * (2 ^ (x.1 : ℤ))⁻¹)),
+
+    apply tsum_congr,
+    intro x,
+    simp_rw [← coe_coe],
+    nth_rewrite_rhs 0 [subtype.val_eq_coe],
+    rw [← coe_coe, equiv_compl_R_bdd_apply hn x, ← subtype.val_eq_coe], }
+end
+
+
+example (α : Type) (s : finset α) (f : α → ℝ) : ∑ x in s, f x = ∑ (x : (s : Type)), f x :=
+begin
+  rw sum_subtype,
+  refl,
+  exact (λ _, refl _),
 end
 
 end aux_lemmas
