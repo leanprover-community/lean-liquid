@@ -629,8 +629,30 @@ end
 theorem θ_ϕ_exact (F : ℒ S) (hF : θ S F = 0) : ∃ G, ϕ S G = F :=
 begin
   use ψ S F hF,
-  sorry,
+  ext s n,
+  dsimp [ϕ, ψ],
+  simp,
+  by_cases hn : F.d ≤ n - 1,
+  { --have hx' := hx.trans (sub_le_self x zero_le_one),
+    rw [dif_pos hn, dif_pos $ hn.trans $ sub_le_self n zero_le_one, neg_eq_neg_one_mul, ← mul_assoc, mul_comm (2 : ℤ) (-1 : ℤ), mul_assoc, mul_sum, ← neg_eq_neg_one_mul],
+    simp only [neg_sub_neg],
+    sorry,--OK it is a telescopic sum, use either `finset.sum_range_sub ` or `finset.sum_range_sub'`
+  },
+  { rw [dif_neg hn, mul_zero, zero_sub],
+    by_cases hn' : F.d ≤ n,
+    { rw dif_pos hn',
+      rw neg_neg,
+      sorry,
+
+    },
+    { rw dif_neg hn',
+    sorry,
+
+    }
+
+  }
 end
+
 
 -- def Θ : comphaus_filtered_pseudo_normed_group_hom (laurent_measures r S) (ℳ p S) :=
 --   { to_fun := θ p r S,
