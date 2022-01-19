@@ -1237,7 +1237,7 @@ e₃            e₂            e₁
 |             |             |
 V             V             v
 
-X×X  ----->   G₂  ---f-->   G₁
+X×X  ----->   X   ---f-->   B
  B   ----->
 
 The columns have been completed to bundled presentations `E₁, E₂, E₃`
@@ -1245,12 +1245,121 @@ and the top row a bundled presentation `G`.
 
 -/
 
+def ExtrSheaf.eq_iso_hom_aux (F : ExtrSheaf.{u} C) :
+  equalizer
+    (F.extend_to_presheaf.map (Profinite.pullback.fst f f).op)
+    (F.extend_to_presheaf.map (Profinite.pullback.snd f f).op) ⟶
+  equalizer
+    (F.extend_to_hom fst')
+    (F.extend_to_hom snd') :=
+equalizer.lift (equalizer.ι _ _ ≫ (F.extend_to_iso _ _ (iso.refl _)).hom)
+begin
+  -- this proof is much harder than it neeeds to be...
+  let ee : F.extend_to_obj E₃ ≅ F.extend_to_obj (Profinite.pullback f f).pres :=
+    F.extend_to_iso _ _ (iso.refl _),
+  apply_fun (λ e, e ≫ ee.hom),
+  swap,
+  { intros a b h,
+    apply_fun (λ e, e ≫ ee.inv) at h,
+    simpa using h },
+  dsimp [ee, ExtrSheaf.extend_to_iso],
+  simp only [category.assoc, ← F.extend_to_hom_comp],
+  let fst'' : (Profinite.pullback f f).pres.hom_over X.pres
+    (Profinite.pullback.fst f f) :=
+    (((Profinite.pullback f f).pres.lift E₃
+      (𝟙 (Profinite.pullback f f))).comp
+      (fst'.comp (E₂.lift X.pres (𝟙 X)))).map _ _ (by simp),
+  let snd'' : (Profinite.pullback f f).pres.hom_over X.pres
+    (Profinite.pullback.snd f f) :=
+    (((Profinite.pullback f f).pres.lift E₃
+      (𝟙 (Profinite.pullback f f))).comp
+      (snd'.comp (E₂.lift X.pres (𝟙 X)))).map _ _ (by simp),
+  have : F.extend_to_hom
+    (((Profinite.pullback f f).pres.lift E₃ (𝟙 (Profinite.pullback f f))).comp
+    (fst'.comp (E₂.lift X.pres (𝟙 X)))) = F.extend_to_hom fst'', by simp, rw this, clear this,
+  have : F.extend_to_hom
+    (((Profinite.pullback f f).pres.lift E₃ (𝟙 (Profinite.pullback f f))).comp
+    (snd'.comp (E₂.lift X.pres (𝟙 X)))) = F.extend_to_hom snd'', by simp, rw this, clear this,
+  have : F.extend_to_hom fst'' =
+    F.extend_to_hom ((Profinite.pullback f f).pres.lift X.pres (Profinite.pullback.fst f f)),
+    by apply F.extend_to_hom_unique, rw this, clear this,
+  have : F.extend_to_hom snd'' =
+    F.extend_to_hom ((Profinite.pullback f f).pres.lift X.pres (Profinite.pullback.snd f f)),
+    by apply F.extend_to_hom_unique, rw this, clear this,
+  apply equalizer.condition,
+end
+
+def ExtrSheaf.eq_iso_inv_aux (F : ExtrSheaf.{u} C) :
+  equalizer
+    (F.extend_to_hom fst')
+    (F.extend_to_hom snd') ⟶
+  equalizer
+    (F.extend_to_presheaf.map (Profinite.pullback.fst f f).op)
+    (F.extend_to_presheaf.map (Profinite.pullback.snd f f).op) :=
+equalizer.lift (equalizer.ι _ _ ≫ (F.extend_to_iso _ _ (iso.refl _)).inv)
+begin
+  let ee : F.extend_to_obj (Profinite.pullback f f).pres ≅ F.extend_to_obj E₃ :=
+    F.extend_to_iso _ _ (iso.refl _),
+  apply_fun (λ e, e ≫ ee.hom),
+  swap,
+  { intros a b h,
+    apply_fun (λ e, e ≫ ee.inv) at h,
+    simpa using h },
+  dsimp [ee, ExtrSheaf.extend_to_iso],
+  simp only [category.assoc, ← F.extend_to_hom_comp],
+  let fst'' : E₃.hom_over E₂ (Profinite.pullback.fst f f) :=
+    ((E₃.lift (Profinite.pullback f f).pres (𝟙 (Profinite.pullback f f))).comp
+    (((Profinite.pullback f f).pres.lift X.pres
+    (Profinite.pullback.fst f f)).comp (X.pres.lift E₂ (𝟙 X)))).map _ _ (by simp),
+  let snd'' : E₃.hom_over E₂ (Profinite.pullback.snd f f) :=
+    ((E₃.lift (Profinite.pullback f f).pres (𝟙 (Profinite.pullback f f))).comp
+    (((Profinite.pullback f f).pres.lift X.pres
+    (Profinite.pullback.snd f f)).comp (X.pres.lift E₂ (𝟙 X)))).map _ _ (by simp),
+  have : F.extend_to_hom ((E₃.lift (Profinite.pullback f f).pres (𝟙 (Profinite.pullback f f))).comp
+    (((Profinite.pullback f f).pres.lift X.pres
+    (Profinite.pullback.fst f f)).comp (X.pres.lift E₂ (𝟙 X)))) = F.extend_to_hom fst'',
+    by simp, rw this, clear this,
+  have : F.extend_to_hom ((E₃.lift (Profinite.pullback f f).pres (𝟙 (Profinite.pullback f f))).comp
+    (((Profinite.pullback f f).pres.lift X.pres
+    (Profinite.pullback.snd f f)).comp (X.pres.lift E₂ (𝟙 X)))) = F.extend_to_hom snd'',
+    by simp, rw this, clear this,
+  have : F.extend_to_hom fst'' = F.extend_to_hom fst', by apply F.extend_to_hom_unique,
+  rw this, clear this,
+  have : F.extend_to_hom snd'' = F.extend_to_hom snd', by apply F.extend_to_hom_unique,
+  rw this, clear this,
+  apply equalizer.condition,
+end
+
+def ExtrSheaf.eq_iso (F : ExtrSheaf.{u} C) :
+  equalizer
+    (F.extend_to_presheaf.map (Profinite.pullback.fst f f).op)
+    (F.extend_to_presheaf.map (Profinite.pullback.snd f f).op) ≅
+  equalizer
+    (F.extend_to_hom fst')
+    (F.extend_to_hom snd') :=
+{ hom := F.eq_iso_hom_aux _ _ _ _,
+  inv := F.eq_iso_inv_aux _ _ _ _,
+  hom_inv_id' := begin
+    dsimp only [ExtrSheaf.eq_iso_hom_aux, ExtrSheaf.eq_iso_inv_aux],
+    ext1,
+    simp only [equalizer.lift_ι, category.id_comp, equalizer.lift_ι_assoc, category.assoc],
+    erw [iso.hom_inv_id, category.comp_id],
+  end,
+  inv_hom_id' := begin
+    dsimp only [ExtrSheaf.eq_iso_hom_aux, ExtrSheaf.eq_iso_inv_aux],
+    ext1,
+    simp only [equalizer.lift_ι, category.id_comp, equalizer.lift_ι_assoc, category.assoc],
+    erw [iso.inv_hom_id, category.comp_id],
+  end }
+
 end equalizer_condition
 
 lemma ExtrSheaf.equalizer_condition_extend (F : ExtrSheaf.{u} C) :
   F.extend_to_presheaf.equalizer_condition' :=
 begin
-  sorry
+  intros X B f hf,
+  dsimp only [functor.map_to_equalizer'],
+  sorry,
 end
 
 
