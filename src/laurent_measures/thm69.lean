@@ -640,17 +640,18 @@ begin
   },
   { rw [dif_neg hn, mul_zero, zero_sub],
     by_cases hn' : F.d ≤ n,
-    { rw dif_pos hn',
-      rw neg_neg,
+    { rw [dif_pos hn', neg_neg],
+      have hn'' : F.d = n,
+      -- rw not_le at hn,
+      apply eq_of_le_of_not_lt hn',
+      rw not_lt,
+      exact int.le_of_sub_one_lt (not_le.mp hn),
+      -- rw neg_neg,
       sorry,
 
     },
     { rw dif_neg hn',
-    sorry,
-
-    }
-
-  }
+      exact (lt_d_eq_zero S F s n (not_le.mp hn')).symm }}
 end
 
 
