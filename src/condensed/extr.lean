@@ -1030,19 +1030,19 @@ begin
   apply_instance,
 end
 
-lemma ExtrSheaf.equalizer_condition_extend (F : ExtrSheaf.{u} C) :
-  F.extend_to_presheaf.equalizer_condition' :=
-begin
-  /-
-  We have a diagram of the following form
+section equalizer_condition
+/-!
+Now we prove the eualizer condition...
+-/
 
-  X ×_B X → X -f→ B (two arrows on the left)
-  -/
-  intros X B f hf,
-  -- We set up the diagram...
-  let G₁ := B.E,
-  let e₁ : G₁.val ⟶ B := B.π,
-  have he₁ : function.surjective e₁ := B.π_surjective,
+parameters (X B : Profinite.{u}) (f : X ⟶ B) (hf : function.surjective f)
+include hf
+
+def G₁ := B.E
+
+def e₁ : G₁.val ⟶ B := B.π
+lemma he₁ : function.surjective e₁ := B.π_surjective
+
   /- We now have the following diagram
                 G₁
                 |e₁
@@ -1050,31 +1050,45 @@ begin
   X ×_B X → X → B
               f
   -/
-  let P₁ := Profinite.pullback f B.π,
-  let G₂ := P₁.E,
-  let G₂toP₁ := P₁.π,
-  have hG₂toP₁ : function.surjective G₂toP₁ := P₁.π_surjective,
-  let e₂ : G₂.val ⟶ X := G₂toP₁ ≫ Profinite.pullback.fst _ _,
-  have he₂ : function.surjective e₂,
-  { intros t,
-    obtain ⟨g,hg⟩ := he₁ (f t),
-    obtain ⟨i,hi⟩ := hG₂toP₁ ⟨⟨t,g⟩,hg.symm⟩,
-    use i,
-    dsimp [e₂],
-    rw hi,
-    refl },
-  let π : G₂ ⟶ G₁ := ⟨G₂toP₁ ≫ Profinite.pullback.snd _ _⟩,
-  have hπ : function.surjective π,
-  { intros g,
-    obtain ⟨x,hx⟩ := hf (e₁ g),
-    obtain ⟨i,hi⟩ := hG₂toP₁ ⟨⟨x,g⟩,hx⟩,
-    use i,
-    dsimp [π],
-    rw hi,
-    refl },
-  have hπe₁e₂f : π.val ≫ e₁ = e₂ ≫ f,
-  { dsimp only [π, e₁],
-    rw [category.assoc, ← Profinite.pullback.condition, ← category.assoc] },
+
+def P₁ := Profinite.pullback f B.π
+def G₂ := P₁.E
+
+def G₂toP₁ := P₁.π
+lemma hG₂toP₁ : function.surjective G₂toP₁ := P₁.π_surjective
+
+def e₂ : G₂.val ⟶ X := G₂toP₁ ≫ Profinite.pullback.fst _ _
+
+lemma he₂ : function.surjective e₂ :=
+begin
+  intros t,
+  obtain ⟨g,hg⟩ := he₁ (f t),
+  obtain ⟨i,hi⟩ := hG₂toP₁ ⟨⟨t,g⟩,hg.symm⟩,
+  use i,
+  dsimp [e₂],
+  rw hi,
+  refl
+end
+
+def π : G₂ ⟶ G₁ := ⟨G₂toP₁ ≫ Profinite.pullback.snd _ _⟩
+lemma hπ : function.surjective π :=
+begin
+  intros g,
+  obtain ⟨x,hx⟩ := hf (e₁ g),
+  obtain ⟨i,hi⟩ := hG₂toP₁ ⟨⟨x,g⟩,hx⟩,
+  use i,
+  dsimp [π],
+  rw hi,
+  refl
+end
+
+lemma hπe₁e₂f : π.val ≫ e₁ = e₂ ≫ f :=
+begin
+  dsimp only [π, e₁],
+  rw [category.assoc, ← Profinite.pullback.condition, ← category.assoc],
+  refl,
+end
+
 
   /- We now have the following diagram
                π
@@ -1085,38 +1099,56 @@ begin
               f
   -/
 
-  let P₂ := Profinite.pullback π.val π.val,
-  let G₃ := P₂.E,
-  let G₃toP₂ : G₃.val ⟶ P₂ := P₂.π,
-  have hG₃toP₂ : function.surjective G₃toP₂ := P₂.π_surjective,
+def P₂ := Profinite.pullback π.val π.val
+def G₃ := P₂.E
+def G₃toP₂ : G₃.val ⟶ P₂ := P₂.π
+lemma hG₃toP₂ : function.surjective G₃toP₂ := P₂.π_surjective
 
-  -- We view G₃ and G₂ as part of a presentation of G₁, so that
-  -- we will be able to identify `F(G₁)` with the equalizer associated to
-  -- this presentation.
-  let G : G₁.val.presentation := ⟨G₂,π.val,hπ,G₃,G₃toP₂,hG₃toP₂⟩,
+def G : G₁.val.presentation := ⟨G₂,π.val,hπ,G₃,G₃toP₂,hG₃toP₂⟩
 
-  let e₃ : G₃.val ⟶ Profinite.pullback f f :=
-    Profinite.pullback.lift _ _ (G.fst.val ≫ e₂) (G.snd.val ≫ e₂) _,
-  swap,
+def e₃ : G₃.val ⟶ Profinite.pullback f f :=
+  Profinite.pullback.lift _ _ (G.fst.val ≫ e₂) (G.snd.val ≫ e₂)
+  begin
   { slice_lhs 2 4 { erw ← hπe₁e₂f },
     slice_rhs 2 4 { erw ← hπe₁e₂f },
     dsimp only [G, Profinite.presentation.fst, Profinite.presentation.snd],
-    slice_lhs 2 4 { rw Profinite.pullback.condition },
+    slice_lhs 2 4 { rw Profinite.pullback.condition_assoc },
     simp only [category.assoc] },
-  have he₃ : function.surjective e₃,
-  { rintros ⟨⟨x,y⟩,h⟩,
-    obtain ⟨a,ha⟩ := he₁ (f x),
-    obtain ⟨b,hb⟩ := he₁ (f y),
-    let t₁ : P₁ := ⟨⟨x,a⟩,ha.symm⟩,
-    let t₂ : P₁ := ⟨⟨y,a⟩,_⟩,
-    swap, { dsimp at h ⊢, rw [← h, ← ha] },
-    obtain ⟨u₁,hu₁⟩ := hG₂toP₁ t₁,
-    obtain ⟨u₂,hu₂⟩ := hG₂toP₁ t₂,
-    let u : P₂ := ⟨⟨u₁,u₂⟩,_⟩,
-    swap, { dsimp, rw [hu₁, hu₂], refl },
-    obtain ⟨v,hv⟩ := hG₃toP₂ u,
-    use v,
-    sorry },
+  end
+
+lemma he₃ : function.surjective e₃ :=
+begin
+  rintros ⟨⟨x,y⟩,h⟩,
+  obtain ⟨a,ha⟩ := he₁ (f x),
+  obtain ⟨b,hb⟩ := he₁ (f y),
+  let t₁ : P₁ := ⟨⟨x,a⟩,ha.symm⟩,
+  let t₂ : P₁ := ⟨⟨y,a⟩,_⟩,
+  swap, { dsimp at h ⊢, rw [← h, ← ha], refl },
+  obtain ⟨u₁,hu₁⟩ := hG₂toP₁ t₁,
+  obtain ⟨u₂,hu₂⟩ := hG₂toP₁ t₂,
+  let u : P₂ := ⟨⟨u₁,u₂⟩,_⟩,
+  swap, { dsimp [π], rw [hu₁, hu₂], refl },
+  obtain ⟨v,hv⟩ := hG₃toP₂ u,
+  use v,
+  let t : P₂ ⟶ Profinite.pullback f f := Profinite.pullback.lift _ _
+    (Profinite.pullback.fst _ _ ≫ e₂)
+    (Profinite.pullback.snd _ _ ≫ e₂) _,
+  swap,
+  { simp only [category.assoc, ← hπe₁e₂f, Profinite.pullback.condition_assoc] },
+  have : e₃ = G₃toP₂ ≫ t,
+  { apply Profinite.pullback.hom_ext,
+    { dsimp [e₃, t], simpa },
+    { dsimp [e₃, t], simpa } },
+  rw this,
+  change t _ = _,
+  rw hv,
+  dsimp [t, u, Profinite.pullback.lift, Profinite.pullback.fst,
+    Profinite.pullback.snd],
+  have : e₂ = G₂toP₁ ≫ Profinite.pullback.fst _ _, refl,
+  congr,
+  { rw this, dsimp, rw hu₁, refl },
+  { rw this, dsimp, rw hu₂, refl }
+end
 
   /- We now have the following diagram
                π
@@ -1127,18 +1159,51 @@ begin
               f
   -/
 
-  -- Some compatibility with the relations...
-  have he₃fst : e₃ ≫ Profinite.pullback.fst _ _ = G.fst.val ≫ e₂ := sorry,
-  have he₃snd : e₃ ≫ Profinite.pullback.snd _ _ = G.snd.val ≫ e₂ := sorry,
-
-  -- Now we promote `e₁`, `e₂` and `e₃` to presentations of the corresponding objects
-  let E₁ : B.presentation := B.pres_with e₁ he₁,
-  let E₂ : X.presentation := X.pres_with e₂ he₂,
-  let E₃ : (Profinite.pullback f f).presentation := (Profinite.pullback f f).pres_with e₃ he₃,
-
-  sorry
-
+-- Some compatibility with the relations...
+lemma he₃fst : e₃ ≫ Profinite.pullback.fst _ _ = G.fst.val ≫ e₂ :=
+begin
+  dsimp [e₂, e₃, G, Profinite.presentation.fst],
+  simp,
 end
+
+lemma he₃snd : e₃ ≫ Profinite.pullback.snd _ _ = G.snd.val ≫ e₂ :=
+begin
+  dsimp [e₂, e₃, G, Profinite.presentation.fst],
+  simp,
+end
+
+-- Now we promote `e₁`, `e₂` and `e₃` to presentations of the corresponding objects
+def E₁ : B.presentation := B.pres_with e₁ he₁
+def E₂ : X.presentation := X.pres_with e₂ he₂
+def E₃ : (Profinite.pullback f f).presentation := (Profinite.pullback f f).pres_with e₃ he₃
+
+/-
+In the above diagram:
+
+     ----->
+G₃   ----->   G₂  ---π-->   G₁
+
+|             |             |
+e₃            e₂            e₁
+|             |             |
+V             V             v
+
+X×X  ----->   G₂  ---f-->   G₁
+ B   ----->
+
+The columns have been completed to bundled presentations `E₁, E₂, E₃`
+and the top row a bundled presentation `G`.
+
+-/
+
+end equalizer_condition
+
+lemma ExtrSheaf.equalizer_condition_extend (F : ExtrSheaf.{u} C) :
+  F.extend_to_presheaf.equalizer_condition' :=
+begin
+  sorry
+end
+
 
 theorem ExtrSheaf.extend_is_sheaf (F : ExtrSheaf.{u} C) : presheaf.is_sheaf proetale_topology
   F.extend_to_presheaf :=
