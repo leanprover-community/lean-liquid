@@ -235,20 +235,29 @@ structure presentation (B : Profinite) :=
 (r : R.val ⟶ Profinite.pullback π π)
 (hr : function.surjective r)
 
-@[simps]
 def presentation.fst {B : Profinite} (X : B.presentation) :
   X.R ⟶ X.G := ⟨X.r ≫ pullback.fst _ _⟩
 
-@[simps]
 def presentation.snd {B : Profinite} (X : B.presentation) :
   X.R ⟶ X.G := ⟨X.r ≫ pullback.snd _ _⟩
 
+def presentation.base {B : Profinite} (X : B.presentation) :
+  X.R.val ⟶ B := X.snd.val ≫ X.π
+
+@[simp]
+lemma presentation.fst_comp_π {B : Profinite} (X : B.presentation) :
+  X.fst.val ≫ X.π = X.base :=
+by { dsimp [presentation.base, presentation.fst, presentation.snd], simp [pullback.condition] }
+
+@[simp]
+lemma presentation.snd_comp_π {B : Profinite} (X : B.presentation) :
+  X.snd.val ≫ X.π = X.base :=
+rfl
+
+@[reassoc]
 lemma presentation.condition {B : Profinite} (X : B.presentation) :
   X.fst.val ≫ X.π = X.snd.val ≫ X.π :=
-begin
-  dsimp [presentation.fst, presentation.snd],
-  simp [pullback.condition],
-end
+by simp
 
 /-
 @[simps]
@@ -382,11 +391,11 @@ lemma presentation.hom_over.exists_relator {B₁ B₂ : Profinite} {X₁ : B₁.
   simp [e₁.w, e₂.w],
 end⟩,begin
   ext1,
-  dsimp,
+  dsimp [presentation.fst],
   simp,
 end, begin
   ext1,
-  dsimp,
+  dsimp [presentation.snd],
   simp,
 end⟩,trivial⟩
 
@@ -622,7 +631,7 @@ begin
     let π' : P.G ⟶ B := ⟨P.π⟩,
     have : π' ≫ s = t ≫ P.snd,
     { ext1,
-      dsimp [π'],
+      dsimp [π', Profinite.presentation.snd],
       rw reassoc_of ht,
       dsimp only [e],
       simp },
@@ -1063,7 +1072,9 @@ begin
   apply_instance,
 end
 
-section equalizer_condition
+/-
+section
+
 /-!
 Now we prove the eualizer condition...
 -/
@@ -1205,9 +1216,32 @@ begin
   simp,
 end
 
+def R₁ := (Profinite.pullback e₁ e₁).E
+
+def r₁ : R₁.val ⟶ Profinite.pullback e₁ e₁ := (Profinite.pullback e₁ e₁).π
+
+lemma hr₁ : function.surjective r₁ := (Profinite.pullback e₁ e₁).π_surjective
+
+def E₁ : B.presentation := ⟨G₁,e₁,he₁,R₁,r₁,hr₁⟩
+
+def R₂ := (
+  Profinite.pullback
+    (r₁ ≫ Profinite.pullback.fst e₁ e₁ ≫ e₁)
+    ((Profinite.pullback.fst e₂ e₂) ≫ e₂ ≫ f)
+  ).E
+
+def r₂ : R₂.val ⟶ Profinite.pullback e₂ e₂ :=
+  ( Profinite.pullback
+      (r₁ ≫ Profinite.pullback.fst e₁ e₁ ≫ e₁)
+      ((Profinite.pullback.fst e₂ e₂) ≫ e₂ ≫ f)
+  ).π ≫ Profinite.pullback.lift _ _
+    (Profinite.pullback.snd _ _ ≫ Profinite.pullback.fst _ _)
+    (Profinite.pullback.snd _ _ ≫ Profinite.pullback.snd _ _) begin
+      simp [Profinite.pullback.condition],
+    end
+
 -- TODO: We want the maps on the level of relations to be an equalizer as well...
 -- Now we promote `e₁`, `e₂` and `e₃` to presentations of the corresponding objects
-def E₁ : B.presentation := B.pres_with e₁ he₁ -- <-- change this
 def E₂ : X.presentation := X.pres_with e₂ he₂ -- <-- change this
 def E₃ : (Profinite.pullback f f).presentation := (Profinite.pullback f f).pres_with e₃ he₃
 --  ^--- change this
@@ -1221,6 +1255,26 @@ def fst' : E₃.hom_over E₂ (Profinite.pullback.fst _ _) :=
 
 def snd' : E₃.hom_over E₂ (Profinite.pullback.snd _ _) :=
 ⟨G.snd, he₃snd.symm, sorry, sorry, sorry⟩
+
+/-
+
+
+             G₂xG₂ -----> G₁xG₁
+               X            B
+               |            |
+               |            |
+               V            V
+     ----->
+G₃   ----->   G₂  ---π-->   G₁
+
+|             |             |
+e₃            e₂            e₁
+|             |             |
+V             V             v
+
+X×X  ----->   X   ---f-->   B
+ B   ----->
+-/
 
 /-
 In the diagram:
@@ -1403,7 +1457,46 @@ equalizer.lift (eq_iso'_hom_aux' F) begin
   sorry
 end
 
-end equalizer_condition
+section
+-/
+
+section
+
+parameters (X B : Profinite.{u}) (f : X ⟶ B) (hf : function.surjective f)
+include hf
+
+-- The rightmost presentation
+
+def G₁ := B.E
+
+def π₁ : G₁.val ⟶ B := B.π
+
+lemma hπ₁ : function.surjective π₁ := B.π_surjective
+
+def Q₁ := Profinite.pullback π₁ π₁
+
+def R₁ := Q₁.E
+
+def rq₁ : R₁.val ⟶ Q₁ := Q₁.π
+
+lemma hrq₁ : function.surjective rq₁ := Q₁.π_surjective
+
+def E₁ : B.presentation :=
+⟨G₁,π₁,hπ₁,R₁,rq₁,hrq₁⟩
+
+-- Now let's work on the middle column
+
+def P₂ := Profinite.pullback f π₁
+
+def Q₂ := Profinite.pullback f (E₁.fst.val ≫ π₁)
+
+def G₂ := P₂.E
+
+def gp₂ : G₂.val ⟶ P₂ := P₂.π
+
+lemma hgp₂ : function.surjective gp₂ := P₂.π_surjective
+
+end
 
 lemma ExtrSheaf.equalizer_condition_extend (F : ExtrSheaf.{u} C) :
   F.extend_to_presheaf.equalizer_condition' :=
