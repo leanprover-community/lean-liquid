@@ -21,6 +21,22 @@ def prepresentation.snd {B : Profinite.{u}} (P : B.prepresentation) :
   P.R ⟶ P.G :=
 P.r ≫ Profinite.pullback.snd _ _
 
+lemma prepresentation.fst_surjective {B : Profinite.{u}} (P : B.prepresentation) :
+  function.surjective P.fst :=
+begin
+  apply function.surjective.comp _ P.hr,
+  intros x,
+  exact ⟨⟨⟨x,x⟩,rfl⟩,rfl⟩,
+end
+
+lemma prepresentation.snd_surjective {B : Profinite.{u}} (P : B.prepresentation) :
+  function.surjective P.snd :=
+begin
+  apply function.surjective.comp _ P.hr,
+  intros x,
+  exact ⟨⟨⟨x,x⟩,rfl⟩,rfl⟩,
+end
+
 structure prepresentation.hom_over {B₁ B₂ : Profinite.{u}}
   (X₁ : B₁.prepresentation) (X₂ : B₂.prepresentation) (f : B₁ ⟶ B₂) :=
 (g : X₁.G ⟶ X₂.G)
@@ -29,12 +45,12 @@ structure prepresentation.hom_over {B₁ B₂ : Profinite.{u}}
 (fst : r ≫ X₂.fst = X₁.fst ≫ g)
 (snd : r ≫ X₂.snd = X₁.snd ≫ g)
 
-attribute [simp, reassoc]
+attribute [simp, reassoc, elementwise]
   prepresentation.hom_over.hg
   prepresentation.hom_over.fst
   prepresentation.hom_over.snd
 
-local attribute [simp]
+local attribute [simp, elementwise]
   Profinite.pullback.condition
   Profinite.pullback.condition_assoc
 
@@ -42,15 +58,18 @@ def prepresentation.base {B : Profinite.{u}} (P : B.prepresentation) :
   P.R ⟶ B :=
 P.snd ≫ P.π
 
-@[simp, reassoc]
+@[simp, reassoc, elementwise]
 lemma prepresentation.base_fst {B : Profinite.{u}} (P : B.prepresentation) :
   P.fst ≫ P.π = P.base :=
 by { dsimp [prepresentation.fst, prepresentation.snd, prepresentation.base],
   simp [Profinite.pullback.condition] }
 
-@[simp, reassoc]
+@[simp, reassoc, elementwise]
 lemma prepresentation.base_snd {B : Profinite.{u}} (P : B.prepresentation) :
   P.snd ≫ P.π = P.base := rfl
+
+lemma prepresentation.base_surjective {B : Profinite.{u}} (P : B.prepresentation) :
+  function.surjective P.base := function.surjective.comp P.hπ P.snd_surjective
 
 def prepresentation.pullback {X B : Profinite} (f : X ⟶ B) (hf : function.surjective f)
   (P : B.prepresentation) : X.prepresentation :=
@@ -84,6 +103,44 @@ def prepresentation.pullback {X B : Profinite} (f : X ⟶ B) (hf : function.surj
       congr,
       { simp [hd] },
       { simp [hd] } },
+  end } .
+
+def prepresentation.pullback_hom_over {X B : Profinite}
+  (f : X ⟶ B) (hf : function.surjective f)
+  (P : B.prepresentation) : (P.pullback f hf).hom_over P f :=
+{ g := Profinite.pullback.snd _ _,
+  hg := begin
+    dsimp [prepresentation.pullback],
+    simp,
+  end,
+  r := Profinite.pullback.snd _ _,
+  fst := begin
+    dsimp [prepresentation.pullback, prepresentation.fst],
+    simp,
+  end,
+  snd := begin
+    dsimp [prepresentation.pullback, prepresentation.snd],
+    simp,
   end }
+
+lemma prepresentation.pullback_hom_over_g_surjective {X B : Profinite}
+  (f : X ⟶ B) (hf : function.surjective f)
+  (P : B.prepresentation) :
+  function.surjective (P.pullback_hom_over f hf).g :=
+begin
+  intros x,
+  obtain ⟨y,hy⟩ := hf (P.π x),
+  exact ⟨⟨⟨y,x⟩,hy⟩,rfl⟩,
+end
+
+lemma prepresentation.pullback_hom_over_r_surjective {X B : Profinite}
+  (f : X ⟶ B) (hf : function.surjective f)
+  (P : B.prepresentation) :
+  function.surjective (P.pullback_hom_over f hf).r :=
+begin
+  intros x,
+  obtain ⟨y,hy⟩ := hf (P.base x),
+  exact ⟨⟨⟨y,x⟩,hy⟩,rfl⟩
+end
 
 end Profinite
