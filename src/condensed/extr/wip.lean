@@ -76,6 +76,8 @@ begin
     rw ← presieve.is_sheaf_for_iff_generate at H,
     let t : S.family_of_elements F := presieve.mk_family_of_elements_of_arrows X f F x,
     have ht : t.compatible := presieve.mk_family_of_elements_of_arrows_compatible X f F x hx,
+    specialize H t ht,
+    -- now use H.
     sorry,
   },
   { sorry }

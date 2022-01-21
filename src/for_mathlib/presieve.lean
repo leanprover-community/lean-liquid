@@ -29,9 +29,10 @@ def eq_obj_of_arrows {ι} {B Y} {X : ι → C} {f : Π i, X i ⟶ B} {g : Y ⟶ 
   (h : of_arrows X f g) : Y = X (index_of_arrows h) :=
 ((mem_of_arrows_iff X f g).mp h).some_spec.some
 
-lemma eq_hom_ofarrows {ι} {B Y} {X : ι → C} {f : Π i, X i ⟶ B} {g : Y ⟶ B}
-  (h : of_arrows X f g) : g = eq_to_hom (eq_obj_of_arrows h) ≫ f _ :=
-((mem_of_arrows_iff X f g).mp h).some_spec.some_spec
+@[simp]
+lemma eq_hom_of_arrows {ι} {B Y} {X : ι → C} {f : Π i, X i ⟶ B} {g : Y ⟶ B}
+  (h : of_arrows X f g) : eq_to_hom (eq_obj_of_arrows h) ≫ f _ = g :=
+((mem_of_arrows_iff X f g).mp h).some_spec.some_spec.symm
 
 def mk_family_of_elements_of_arrows {ι} {B} (X : ι → C) (f : Π i, X i ⟶ B)
   (F : Cᵒᵖ ⥤ Type w) (x : Π i, F.obj (op (X i))) :
@@ -49,8 +50,7 @@ begin
   dsimp [mk_family_of_elements_of_arrows],
   specialize hx (index_of_arrows h₁) (index_of_arrows h₂) Z
     (g₁ ≫ eq_to_hom (eq_obj_of_arrows h₁))
-    (g₂ ≫ eq_to_hom (eq_obj_of_arrows h₂)) _,
-  { sorry },
+    (g₂ ≫ eq_to_hom (eq_obj_of_arrows h₂)) (by simpa),
   convert hx using 1; simp,
 end
 
@@ -68,7 +68,7 @@ begin
   dsimp [mk_family_of_elements_of_arrows],
   specialize hx i (index_of_arrows (presieve.of_arrows.mk i)),
   rotate 3, exact X, exact f,
-  specialize hx (X i) (𝟙 _) (eq_to_hom this) sorry,
+  specialize hx (X i) (𝟙 _) (eq_to_hom this) (by simp),
   simp at hx,
   simpa using hx.symm,
 end
