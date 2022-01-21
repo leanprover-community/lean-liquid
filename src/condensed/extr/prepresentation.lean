@@ -221,6 +221,4 @@ begin
   exact ⟨⟨⟨y,x⟩,hy⟩,rfl⟩
 end
 
-
-
 end Profinite

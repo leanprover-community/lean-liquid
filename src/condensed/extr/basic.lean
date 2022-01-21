@@ -32,6 +32,10 @@ def _root_.ExtrDisc_to_Profinite : ExtrDisc ⥤ Profinite :=
 { obj := val,
   map := λ X Y f, f.val }
 
+instance : full ExtrDisc_to_Profinite := { preimage := λ X Y f, ⟨f⟩ }
+
+instance : faithful ExtrDisc_to_Profinite := { }
+
 instance : concrete_category ExtrDisc.{u} :=
 { forget := ExtrDisc_to_Profinite ⋙ forget _,
   forget_faithful := ⟨⟩ }
