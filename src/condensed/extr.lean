@@ -623,7 +623,8 @@ def presentation.pullback_fst {X B : Profinite} (P : B.presentation)
 { g := ⟨(Profinite.pullback f P.π).π ≫ pullback.snd _ _⟩,
   w := begin
     dsimp [presentation.pullback,
-      prepresentation.mk_presentation, presentation.pre_pullback],
+      prepresentation.mk_presentation, presentation.pre_pullback,
+      mk_presentation_setup.π],
     simp [pullback.condition],
   end,
   r := ⟨π _ ≫ pullback.snd _ _ ≫ pullback.snd _ _⟩,
