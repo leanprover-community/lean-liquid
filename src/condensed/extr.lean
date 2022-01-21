@@ -478,6 +478,166 @@ def presentation.sum_inr {X Y : Profinite.{u}} (P : X.presentation) (Q : Y.prese
   fst := sorry,
   snd := sorry }
 
+structure prepresentation (B : Profinite) :=
+(G : Profinite)
+(π : G ⟶ B)
+(hπ : function.surjective π)
+(R : Profinite)
+(r : R ⟶ Profinite.pullback π π)
+(hr : function.surjective r)
+
+def prepresentation.base {B : Profinite} (P : B.prepresentation) :
+  P.R ⟶ B :=
+P.r ≫ pullback.snd _ _ ≫ P.π
+
+local attribute [simp] Profinite.pullback.condition Profinite.pullback.condition_assoc
+
+namespace mk_presentation_setup
+section mk_presentation_setup
+
+parameters {B : Profinite} (P : B.prepresentation)
+
+def G := P.G.E
+
+def π : G.val ⟶ B := P.G.π ≫ P.π
+
+lemma π_surjective : function.surjective π :=
+function.surjective.comp P.hπ P.G.π_surjective
+
+def PP := Profinite.pullback (Profinite.pullback.snd π π ≫ π) P.base
+
+def R := PP.E
+
+def r : R.val ⟶ Profinite.pullback π π :=
+Profinite.pullback.lift _ _
+(PP.π ≫ Profinite.pullback.fst _ _ ≫ Profinite.pullback.fst _ _)
+(PP.π ≫ Profinite.pullback.fst _ _ ≫ Profinite.pullback.snd _ _) $
+by { dsimp [mk_presentation_setup.PP], simp }
+
+lemma hr : function.surjective r :=
+begin
+  rintros ⟨⟨a,b⟩,h⟩,
+  dsimp [π] at h,
+  let t : Profinite.pullback P.π P.π := ⟨⟨P.G.π a, P.G.π b⟩, h⟩,
+  obtain ⟨w,hw⟩ := P.hr t,
+  let q : PP P := ⟨⟨⟨⟨a,b⟩,h⟩,w⟩,_⟩,
+  swap, { dsimp [Profinite.pullback.snd, prepresentation.base], rw hw, refl },
+  obtain ⟨e,he⟩ := (PP P).π_surjective q,
+  use e,
+  dsimp [Profinite.pullback.lift, r, prepresentation.base],
+  congr,
+  all_goals { rw he, refl },
+end
+
+end mk_presentation_setup
+end mk_presentation_setup
+
+def prepresentation.mk_presentation {B : Profinite} (P : B.prepresentation) : B.presentation :=
+{ G := mk_presentation_setup.G P,
+  π := mk_presentation_setup.π P,
+  hπ := mk_presentation_setup.π_surjective P,
+  R := mk_presentation_setup.R P,
+  r := mk_presentation_setup.r P,
+  hr := mk_presentation_setup.hr P }
+
+def presentation.to_prepresentation {B : Profinite} (P : B.presentation) : B.prepresentation :=
+{ G := P.G.val,
+  π := P.π,
+  hπ := P.hπ,
+  R := P.R.val,
+  r := P.r,
+  hr := P.hr }
+
+namespace pullback_setup
+
+section
+
+parameters {X B : Profinite.{u}} (f : X ⟶ B) (hf : function.surjective f) (P : B.prepresentation)
+
+def G := Profinite.pullback f P.π
+
+def π : G ⟶ X := Profinite.pullback.fst _ _
+
+lemma hπ : function.surjective π :=
+begin
+  intros x,
+  obtain ⟨g,hg⟩ := P.hπ (f x),
+  exact ⟨⟨⟨x,g⟩,hg.symm⟩,rfl⟩
+end
+
+end
+
+end pullback_setup
+
+-- TODO: this structure is ridiculously slow to elaborate. Speed it up!
+def presentation.pre_pullback {X B : Profinite}
+  (P : B.presentation)
+  (f : X ⟶ B) (hf : function.surjective f) : X.prepresentation :=
+{ G := Profinite.pullback f P.π,
+  π := Profinite.pullback.fst _ _,
+  hπ := begin
+    rintros a,
+    obtain ⟨b,hb⟩ := P.hπ (f a),
+    refine ⟨⟨⟨a,b⟩,hb.symm⟩,rfl⟩,
+  end,
+  R := Profinite.pullback f P.base,
+  r := Profinite.pullback.lift _ _
+    (Profinite.pullback.lift _ _
+      (Profinite.pullback.fst _ _)
+      (Profinite.pullback.snd _ _ ≫ P.fst.val) $
+      by simp [Profinite.pullback.condition, Profinite.pullback.condition_assoc])
+    (Profinite.pullback.lift _ _
+      (Profinite.pullback.fst _ _)
+      (Profinite.pullback.snd _ _ ≫ P.snd.val) $
+      by simp [Profinite.pullback.condition, Profinite.pullback.condition_assoc]) $
+    by simp [Profinite.pullback.condition, Profinite.pullback.condition_assoc],
+  hr := begin
+    rintros ⟨⟨⟨⟨a₁,a₂⟩,h₁⟩,⟨⟨b₁,b₂⟩,h₂⟩⟩,h⟩,
+    dsimp [pullback.fst] at h₁ h₂ h,
+    let w : pullback P.π P.π := ⟨⟨a₂,b₂⟩,_⟩, swap,
+    { dsimp,
+      rw [← h₂, ← h₁, h] },
+    obtain ⟨w',hw'⟩ := P.hr w,
+    let t : pullback f P.base := ⟨⟨a₁,w'⟩,_⟩,
+    swap,
+    { dsimp only [presentation.base, presentation.snd],
+      dsimp,
+      rw hw',
+      dsimp [pullback.snd],
+      rwa h },
+    use t,
+    dsimp [t, pullback.lift, pullback.fst, pullback.snd, presentation.fst, presentation.snd],
+    congr,
+    { simp [hw'] },
+    { exact h },
+    { simp [hw'] },
+  end } .
+
+def presentation.pullback {X B : Profinite}
+  (P : B.presentation) (f : X ⟶ B) (hf : function.surjective f) : X.presentation :=
+(P.pre_pullback f hf).mk_presentation
+
+def presentation.pullback_fst {X B : Profinite} (P : B.presentation)
+  (f : X ⟶ B) (hf : function.surjective f) :
+  (P.pullback f hf).hom_over P f :=
+{ g := ⟨(Profinite.pullback f P.π).π ≫ pullback.snd _ _⟩,
+  w := begin
+    dsimp [presentation.pullback,
+      prepresentation.mk_presentation, presentation.pre_pullback],
+    simp [pullback.condition],
+  end,
+  r := ⟨π _ ≫ pullback.snd _ _ ≫ pullback.snd _ _⟩,
+  fst := sorry,
+  snd := sorry }
+
+lemma presentation.pullback.fst_g_surjective {X B : Profinite}
+  (P : B.presentation) (f : X ⟶ B) (hf : function.surjective f) :
+  function.surjective (P.pullback_fst f hf).g := sorry
+
+lemma presentation.pullback.fst_r_surjective {X B : Profinite}
+  (P : B.presentation) (f : X ⟶ B) (hf : function.surjective f) :
+  function.surjective (P.pullback_fst f hf).r := sorry
+
 end Profinite
 
 --- Start here...
@@ -1486,15 +1646,23 @@ def E₁ : B.presentation :=
 
 -- Now let's work on the middle column
 
-def P₂ := Profinite.pullback f π₁
+-- X ×_B E₁.G
+def XG₁ := Profinite.pullback f E₁.π
 
-def Q₂ := Profinite.pullback f (E₁.fst.val ≫ π₁)
+-- X ×_B E₁.R
+def XR₁ := Profinite.pullback f E₁.base
 
-def G₂ := P₂.E
+def XR₁_fst : XR₁ ⟶ XG₁ :=
+Profinite.pullback.lift _ _
+(Profinite.pullback.fst _ _)
+(Profinite.pullback.snd _ _ ≫ E₁.fst.val) sorry
 
-def gp₂ : G₂.val ⟶ P₂ := P₂.π
+def XR₁_snd : XR₁ ⟶ XG₁ :=
+Profinite.pullback.lift _ _
+(Profinite.pullback.fst _ _)
+(Profinite.pullback.snd _ _ ≫ E₁.snd.val) sorry
 
-lemma hgp₂ : function.surjective gp₂ := P₂.π_surjective
+
 
 end
 
