@@ -9,7 +9,6 @@ universes u v' u'
 
 set_option pp.universes true
 
-#check cover_dense
 def ExtrDisc.cover_dense :
   cover_dense proetale_topology.{u} ExtrDisc_to_Profinite.{u} :=
   cover_dense.mk $ λ U,
