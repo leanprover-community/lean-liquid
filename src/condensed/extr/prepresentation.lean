@@ -143,4 +143,15 @@ begin
   exact ⟨⟨⟨y,x⟩,hy⟩,rfl⟩
 end
 
+def prepresentation.hom_over.comp {B₁ B₂ B₃ : Profinite.{u}}
+  {X₁ : B₁.prepresentation} {X₂ : B₂.prepresentation} {X₃ : B₃.prepresentation}
+  {f₁ : B₁ ⟶ B₂} {f₂ : B₂ ⟶ B₃}
+  (e₁ : X₁.hom_over X₂ f₁) (e₂ : X₂.hom_over X₃ f₂) :
+  X₁.hom_over X₃ (f₁ ≫ f₂) :=
+{ g := e₁.g ≫ e₂.g,
+  hg := by simp,
+  r := e₁.r ≫ e₂.r,
+  fst := by simp,
+  snd := by simp }
+
 end Profinite
