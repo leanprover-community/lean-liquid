@@ -1,6 +1,7 @@
 -- import for_mathlib.short_exact_sequence
 import data.int.interval
 import data.finset.nat_antidiagonal
+import laurent_measures.aux_lemmas
 import laurent_measures.basic
 import laurent_measures.theta
 import linear_algebra.basic
@@ -23,7 +24,7 @@ This file introduces the maps
 
 noncomputable theory
 
-open nnreal theta laurent_measures finset --filter
+open nnreal theta laurent_measures finset
 open_locale nnreal classical big_operators topological_space
 
 
@@ -102,14 +103,6 @@ begin
 end
 
 
--- **[FAE]** Use `tsum_mul_tsum_eq_tsum_sum_antidiagonal` or even better
--- `tsum_mul_tsum_eq_tsum_sum_antidiagonal_of_summable_norm` instead
-lemma aux_summable_convolution {r : ℝ≥0} (f : ℤ → ℤ) (hf : summable (λ n, ∥ f n ∥ * r ^ n)) :
-  summable (λ n : ℤ, 2⁻¹ * ∥ tsum (λ i : ℕ, ((f (n + 1 + i)) : ℝ) * (1 / 2) ^ i) ∥ * r ^ n) :=
-begin
-  sorry,
-end
-
 --for `mathlib`?
 def equiv_bdd_integer_nat (N : ℤ) : ℕ ≃ {x // N ≤ x} :=
 begin
@@ -162,8 +155,6 @@ begin
     (equiv_bdd_integer_nat d),
   exact exists_congr (λ a, ((h2 a).trans (h1 a)).symm),
 end
-
--- example (p q r : Prop) (h : p ↔ q) : (r ↔ p) → (r ↔ q) := by library_search
 
 def equiv_Icc_bdd_nonneg {d : ℤ} (hd : 0 ≤ d) : {x // d ≤ x } ≃
   {x // x ∉ range (int.eq_coe_of_zero_le hd).some}:=
@@ -281,11 +272,6 @@ end
 
 lemma equiv_Icc_R_apply {d n : ℤ} (hn : 0 ≤ n - d) (x : Icc d n) : ((equiv_Icc_R hn x) : ℤ) = (x : ℤ) := by {rcases x, refl}
 
-example (n : ℤ) : n ≤ n + 1:=
-begin
-  simp only [zero_le_one, le_add_iff_nonneg_right],
-end
-
 def equiv_compl_R_bdd {d n : ℤ} (hn : 0 ≤ n - d): {a : ℤ // n.succ ≤ a } ≃ ((R hn)ᶜ : set {x : ℤ // d ≤ x}) :=
 begin
   fconstructor,
@@ -347,12 +333,37 @@ begin
 end
 
 
-example (α : Type) (s : finset α) (f : α → ℝ) : ∑ x in s, f x = ∑ (x : (s : Type)), f x :=
-begin
-  rw sum_subtype,
-  refl,
-  exact (λ _, refl _),
-end
+/-
+**[FAE]** Use `tsum_mul_tsum_eq_tsum_sum_antidiagonal` or even better
+-- `tsum_mul_tsum_eq_tsum_sum_antidiagonal_of_summable_norm` instead
+
+
+Also:
+lemma summable_geometric_of_norm_lt_1 (h : ∥ξ∥ < 1) : summable (λn:ℕ, ξ ^ n) :=
+⟨_, has_sum_geometric_of_norm_lt_1 h⟩
+
+lemma tsum_geometric_of_norm_lt_1 (h : ∥ξ∥ < 1) : ∑'n:ℕ, ξ ^ n = (1 - ξ)⁻¹ :=
+(has_sum_geometric_of_norm_lt_1 h).tsum_eq
+-/
+
+-- lemma aux_summable_convolution {r : ℝ≥0} (f : ℤ → ℤ) (d : ℤ) (hf : summable (λ n, ∥ f n ∥ * r ^ n)) (hd : ∀ n : ℤ, n < d → f n = 0) :
+--   summable (λ n : ℤ, (1 / 2) * ∥ tsum (λ i : ℕ, ((f (n + 1 + i)) : ℝ) * (1 / 2) ^ i) ∥ * r ^ n) :=
+-- begin
+--   ;{
+
+--   -- apply (aux_summable_iff_on_nat d hd).mpr,
+--   -- apply (@aux_summable_iff_on_nat f (1/2 : ℝ≥0) d hd).mpr,
+--   -- replace hf : summable (λ n, ∥ (f n : ℝ) ∥ * (1 ^ n ),
+--   replace hf : summable (λ n, ∥ (f n : ℝ) * r ^ n ∥),
+--   replace hf : summable (λ n : ℕ, ∥ (f n : ℝ) * r ^ n ∥), --   have h_geom : summable (λ n : ℕ, ∥ (1 / (2 * r) : ℝ) ^ n ∥),
+--   have h_cauchy := tsum_mul_tsum_eq_tsum_sum_antidiagonal_of_summable_norm hf h_geom,
+--   simp only at h_cauchy,
+--   -- have h_cauchy := @tsum_mul_tsum_eq_tsum_sum_antidiagonal_of_summable_norm _ _ _ _ _ hf h_geom,
+
+
+
+--   }
+-- end
 
 end aux_lemmas
 
@@ -469,7 +480,7 @@ begin
 end
 
 lemma map_add_at_top_eq_int (k : ℤ) :
-  map (λ a : ℤ, a + k) (at_top : filter ℤ) = (at_top : filter ℤ) := sorry
+  map (λ a : ℤ, a + k) (at_top : filter ℤ) = (at_top : filter ℤ) :=
 -- map_at_top_eq_of_gc (λa, a - k) k
 --   (assume a b h, add_le_add_right h k)
 --   (assume a b h, (le_tsub_iff_right h).symm)
@@ -567,7 +578,7 @@ begin
   use b,
   intro s,
   have h_θ : ∀ n : ℤ, ∥ b s n ∥ * r ^ (n : ℤ)  =
-    2⁻¹ * ∥ tsum (λ i : ℕ, ((F s (n + 1 + i)) : ℝ) * (1 / 2) ^ i) ∥ * r ^ (n : ℤ),
+    (1 / 2) * ∥ tsum (λ i : ℕ, ((F s (n + 1 + i)) : ℝ) * (1 / 2) ^ i) ∥ * r ^ (n : ℤ),
   { dsimp only [b],
     intro n,
     simp only [one_div, sub_nonneg, ge_iff_le, inv_pow₀, mul_eq_mul_right_iff],
@@ -623,7 +634,7 @@ begin
         simp only [real_measures.zero_apply, inv_eq_one_div] at hF,
         simp_rw [← inv_zpow₀, inv_eq_one_div],
         exact (summable.has_sum_iff (summable_smaller_radius S F s)).mpr hF }}},
-  exact (summable_congr h_θ).mpr (aux_summable_convolution (F s) (F.2 s)),
+  exact (summable_congr h_θ).mpr (aux_thm69.summable_convolution (F s) F.d (F.2 s) (lt_d_eq_zero S F s)),
 end
 
 theorem θ_ϕ_exact (F : ℒ S) (hF : θ S F = 0) : ∃ G, ϕ S G = F :=
