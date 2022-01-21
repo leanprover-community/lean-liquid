@@ -43,12 +43,37 @@ def Condensed_ExtrSheaf_equiv (C : Type u') [category.{u+1} C] [limits.has_limit
 --cover_dense.Sheaf_equiv C (ExtrDisc.cover_dense.{u})  <--- universe issues.
 -- Will be fixed using mathlib PR #11588
 
+--theorem ExtrSheaf_iff (C : Type u') [category.{v'} C] [limits.has_limits C]
+--  (F : ExtrDiscᵒᵖ ⥤ C) : presheaf.is_sheaf ExtrDisc.proetale_topology F ↔
+
+open opposite
+
+def is_ExtrSheaf_of_types (P : ExtrDisc.{u}ᵒᵖ ⥤ Type u') : Prop :=
+∀ (B : ExtrDisc.{u}) (ι : Type u) [fintype ι] (α : ι → ExtrDisc.{u})
+  (f : Π i, α i ⟶ B) (hf : ∀ b : B, ∃ i (x : α i), f i x = b)
+  (x : Π i, P.obj (op (α i)))
+  (hx : ∀ (i j : ι) (Z : ExtrDisc) (g₁ : Z ⟶ α i) (g₂ : Z ⟶ α j),
+    g₁ ≫ f _ = g₂ ≫ f _ → P.map g₁.op (x _) = P.map g₂.op (x _)),
+∃! t : P.obj (op B), ∀ i, P.map (f i).op t = x _
+
 -- This is more or less proved in the profinite case, along with a condition
 -- that equalizers should be compatible, while the equalizer condition in the
 -- ExtrDisc case can be found (in some form) in `condensed/extr.lean`.
 -- It will take some time to convert these proofs to this case, but this is
 -- very doable!
-theorem ExtrSheaf_iff (C : Type u') [category.{v'} C] [limits.has_limits C]
-  (F : ExtrDiscᵒᵖ ⥤ C) :
-  presheaf.is_sheaf ExtrDisc.proetale_topology F ↔
-  (ExtrDisc.terminal_condition F ∧ ExtrDisc.binary_product_condition F) := sorry
+theorem ExtrSheaf_iff_is_ExtrSheaf_of_types
+  (F : ExtrDiscᵒᵖ ⥤ Type u') :
+  presieve.is_sheaf ExtrDisc.proetale_topology F ↔
+  is_ExtrSheaf_of_types F :=
+begin
+  split,
+  { introsI H B ι _ X f hf x hx,
+    let S : presieve B := presieve.of_arrows X f,
+    specialize H (sieve.generate S) _,
+    { sorry },
+    rw ← presieve.is_sheaf_for_iff_generate at H,
+    let t : S.family_of_elements F := sorry,
+    sorry,
+  },
+  { sorry }
+end
