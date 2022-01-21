@@ -41,3 +41,14 @@ def ExtrSheaf (C : Type u') [category.{v'} C] := Sheaf ExtrDisc.proetale_topolog
 def Condensed_ExtrSheaf_equiv (C : Type u') [category.{u+1} C] [limits.has_limits C] :
   ExtrSheaf.{u} C ≌ Condensed.{u} C := sorry
 --cover_dense.Sheaf_equiv C (ExtrDisc.cover_dense.{u})  <--- universe issues.
+-- Will be fixed using mathlib PR #11588
+
+-- This is more or less proved in the profinite case, along with a condition
+-- that equalizers should be compatible, while the equalizer condition in the
+-- ExtrDisc case can be found (in some form) in `condensed/extr.lean`.
+-- It will take some time to convert these proofs to this case, but this is
+-- very doable!
+theorem ExtrSheaf_iff (C : Type u') [category.{v'} C] [limits.has_limits C]
+  (F : ExtrDiscᵒᵖ ⥤ C) :
+  presheaf.is_sheaf ExtrDisc.proetale_topology F ↔
+  (ExtrDisc.terminal_condition F ∧ ExtrDisc.binary_product_condition F) := sorry
