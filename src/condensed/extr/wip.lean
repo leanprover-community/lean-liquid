@@ -284,3 +284,8 @@ begin
     dsimp,
     simp [Profinite.pullback.condition] }
 end
+
+theorem is_ExtrSheaf_of_types_iff (F : ExtrDiscᵒᵖ ⥤ Type u') :
+  is_ExtrSheaf_of_types F ↔ presieve.is_sheaf ExtrDisc.proetale_topology F :=
+⟨λ H, is_sheaf_ExtrDisc_proetale_topology_of_is_ExtrSheaf_of_types _ H,
+  λ H, is_ExtrSheaf_of_types_of_is_sheaf_ExtrDisc_proetale_topology _ H⟩
