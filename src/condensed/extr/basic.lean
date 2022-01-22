@@ -165,6 +165,40 @@ def empty.elim (X : ExtrDisc) : empty ⟶ X :=
 def empty.hom_ext {X : ExtrDisc} (f g : empty ⟶ X) : f = g :=
 by { ext x, cases x }
 
+def sigma {ι : Type u} [fintype ι] (X : ι → ExtrDisc) : ExtrDisc :=
+{ val := Profinite.sigma $ λ i, (X i).val,
+  cond := begin
+    let e : Profinite.sigma (λ i, (X i).val) ≅ ∐ (λ i, (X i).val) :=
+      (Profinite.sigma_cofan_is_colimit _).cocone_point_unique_up_to_iso
+      (limits.colimit.is_colimit _),
+    apply projective.of_iso e.symm,
+    apply_instance,
+  end }
+
+def sigma.ι {ι : Type u} [fintype ι] (X : ι → ExtrDisc) (i) :
+  X i ⟶ sigma X := ⟨Profinite.sigma.ι _ i⟩
+
+def sigma.desc {ι : Type u} {Y : ExtrDisc} [fintype ι] (X : ι → ExtrDisc)
+  (f : Π i, X i ⟶ Y) : sigma X ⟶ Y := ⟨Profinite.sigma.desc _ $ λ i, (f i).val⟩
+
+lemma sigma.ι_desc {ι : Type u} {Y : ExtrDisc} [fintype ι] (X : ι → ExtrDisc)
+  (f : Π i, X i ⟶ Y) (i) : sigma.ι X i ≫ sigma.desc X f = f i :=
+begin
+  ext1,
+  apply Profinite.sigma.ι_desc,
+end
+
+lemma sigma.hom_ext {ι : Type u} {Y : ExtrDisc} [fintype ι] (X : ι → ExtrDisc)
+  (a b : sigma X ⟶ Y) (w : ∀ i, sigma.ι X i ≫ a = sigma.ι X i ≫ b) : a = b :=
+begin
+  ext1,
+  apply Profinite.sigma.hom_ext,
+  intros i,
+  specialize w i,
+  apply_fun (λ e, e.val) at w,
+  exact w,
+end
+
 open opposite
 
 variables {C : Type v} [category.{w} C] (F : ExtrDisc.{u}ᵒᵖ ⥤ C)
