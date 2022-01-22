@@ -199,7 +199,7 @@ begin
   exact w,
 end
 
-lemma sigma.ι_jointly_surjective {ι : Type u} {Y : ExtrDisc} [fintype ι] (X : ι → ExtrDisc)
+lemma sigma.ι_jointly_surjective {ι : Type u} [fintype ι] (X : ι → ExtrDisc)
   (x : sigma X) : ∃ i (t : X i), sigma.ι X i t = x :=
 Profinite.sigma.ι_jointly_surjective _ _
 
@@ -222,8 +222,7 @@ begin
   exact is_iso (limits.pi.lift t)
 end
 
-def finite_product_condition_for_types [limits.has_finite_products C]
-  (F : ExtrDisc.{u}ᵒᵖ ⥤ Type w) : Prop :=
+def finite_product_condition_for_types (F : ExtrDisc.{u}ᵒᵖ ⥤ Type w) : Prop :=
   ∀ (ι : Type u) [fintype ι] (X : ι → ExtrDisc),
 begin
   resetI,
@@ -266,3 +265,59 @@ def is_ExtrSheaf_of_types (P : ExtrDisc.{u}ᵒᵖ ⥤ Type w) : Prop :=
   (hx : ∀ (i j : ι) (Z : ExtrDisc) (g₁ : Z ⟶ α i) (g₂ : Z ⟶ α j),
     g₁ ≫ f _ = g₂ ≫ f _ → P.map g₁.op (x _) = P.map g₂.op (x _)),
 ∃! t : P.obj (op B), ∀ i, P.map (f i).op t = x _
+
+lemma finite_product_condition_for_types_of_is_ExtrSheaf_of_types
+  (F : ExtrDisc.{u}ᵒᵖ ⥤ Type w) (hF : is_ExtrSheaf_of_types F) :
+    ExtrDisc.finite_product_condition_for_types F :=
+begin
+  introsI ι _ X,
+  have hF' := hF,
+  dsimp,
+  specialize hF (ExtrDisc.sigma X) ι X (ExtrDisc.sigma.ι _)
+    (ExtrDisc.sigma.ι_jointly_surjective _),
+  split,
+  { intros x y hh,
+    dsimp at hh,
+    have hx := hF (λ i, F.map (ExtrDisc.sigma.ι X i).op x) _,
+    swap,
+    { intros i j Z g₁ g₂ hh,
+      dsimp,
+      change (F.map _ ≫ F.map _) _ = (F.map _ ≫ F.map _) _,
+      simp only [← F.map_comp, ← op_comp],
+      rw hh },
+    have hy := hF (λ i, F.map (ExtrDisc.sigma.ι X i).op y) _,
+    swap,
+    { intros i j Z g₁ g₂ hh,
+      dsimp,
+      change (F.map _ ≫ F.map _) _ = (F.map _ ≫ F.map _) _,
+      simp only [← F.map_comp, ← op_comp],
+      rw hh },
+    obtain ⟨tx,htx1,htx2⟩ := hx,
+    obtain ⟨ty,hty1,hty2⟩ := hy,
+    have : x = tx,
+    { apply htx2,
+      intros i,
+      refl },
+    rw this,
+    symmetry,
+    apply htx2,
+    intros i,
+    apply_fun (λ e, e i) at hh,
+    exact hh.symm },
+  { intros x,
+    have hx := hF x _,
+    swap,
+    { intros i j Z g₁ g₂ hh,
+      sorry },
+    obtain ⟨t,ht,_⟩ := hx,
+    use t,
+    ext1,
+    apply ht }
+end
+
+theorem is_ExtrSheaf_of_types_of_finite_product_condition_for_types
+  (F : ExtrDisc.{u}ᵒᵖ ⥤ Type w) (hF : ExtrDisc.finite_product_condition_for_types F) :
+  is_ExtrSheaf_of_types F :=
+begin
+  sorry
+end
