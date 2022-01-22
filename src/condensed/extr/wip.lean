@@ -40,13 +40,13 @@ def ExtrDisc.proetale_topology : grothendieck_topology ExtrDisc.{u} :=
 @[derive category]
 def ExtrSheaf (C : Type u') [category.{v'} C] := Sheaf ExtrDisc.proetale_topology.{u} C
 
+-- TODO: cover_densed.Sheaf_equiv still has unecessary universe restrictions that can be relaxed.
+noncomputable
 def Condensed_ExtrSheaf_equiv (C : Type u') [category.{u+1} C] [limits.has_limits C] :
-  ExtrSheaf.{u} C ≌ Condensed.{u} C := sorry
---cover_dense.Sheaf_equiv C (ExtrDisc.cover_dense.{u})  <--- universe issues.
--- Will be fixed using mathlib PR #11588
-
---theorem ExtrSheaf_iff (C : Type u') [category.{v'} C] [limits.has_limits C]
---  (F : ExtrDiscᵒᵖ ⥤ C) : presheaf.is_sheaf ExtrDisc.proetale_topology F ↔
+  ExtrSheaf.{u} C ≌ Condensed.{u} C :=
+ExtrDisc.cover_dense.Sheaf_equiv_of_cover_preserving_cover_lifting
+  ExtrDisc.cover_dense.locally_cover_dense.induced_topology_cover_preserving
+  ExtrDisc.cover_dense.locally_cover_dense.induced_topology_cover_lifting
 
 open opposite
 
