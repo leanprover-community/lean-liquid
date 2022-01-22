@@ -100,11 +100,6 @@ begin
     apply presieve.mk_family_of_elements_of_arrows_eval _ _ _ _ hx }
 end
 
--- This is more or less proved in the profinite case, along with a condition
--- that equalizers should be compatible, while the equalizer condition in the
--- ExtrDisc case can be found (in some form) in `condensed/extr.lean`.
--- It will take some time to convert these proofs to this case, but this is
--- very doable!
 theorem is_seprated_of_is_ExtrSheaf_of_types
   (F : ExtrDiscᵒᵖ ⥤ Type u') (H : is_ExtrSheaf_of_types F) :
   presieve.is_separated ExtrDisc.proetale_topology F :=
