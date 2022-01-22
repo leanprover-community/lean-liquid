@@ -105,12 +105,59 @@ end
 -- ExtrDisc case can be found (in some form) in `condensed/extr.lean`.
 -- It will take some time to convert these proofs to this case, but this is
 -- very doable!
+theorem is_seprated_of_is_ExtrSheaf_of_types
+  (F : ExtrDiscᵒᵖ ⥤ Type u') (H : is_ExtrSheaf_of_types F) :
+  presieve.is_separated ExtrDisc.proetale_topology F :=
+begin
+  intros B S hS x t₁ t₂ h₁ h₂,
+  change proetale_topology _ _ at hS,
+  rw ExtrDisc.cover_dense.locally_cover_dense.pushforward_cover_iff_cover_pullback at hS,
+  obtain ⟨⟨T,hT⟩,rfl⟩ := hS,
+  obtain ⟨R,hR,hRT⟩ := hT,
+  obtain ⟨ι, _, X, f, surj, rfl⟩ := hR,
+  resetI,
+  let XX : ι → ExtrDisc := λ i, (X i).pres,
+  let ff : Π i, (XX i) ⟶ B := λ i, ⟨(X i).pres_π ≫ f i⟩,
+  have surjff : ∀ b : B, ∃ (i : ι) (q : XX i), (ff i) q = b,
+  { intros b,
+    obtain ⟨i,y,rfl⟩ := surj b,
+    obtain ⟨z,rfl⟩ := (X i).pres_π_surjective y,
+    use [i,z,rfl] },
+  have hff : ∀ i, T (ff i).val,
+  { intros i,
+    dsimp [ff],
+    apply sieve.downward_closed,
+    apply hRT,
+    exact presieve.of_arrows.mk i },
+  let xx : Π i, F.obj (op (XX i)) := λ i, x _ _,
+  swap, { exact ff i },
+  swap, { exact hff i },
+  specialize H B ι XX ff surjff xx _,
+  { intros i j Z g₁ g₂ h,
+    have hxcompat : x.compatible,
+    { apply  presieve.is_compatible_of_exists_amalgamation,
+      exact ⟨t₁, h₁⟩ },
+    dsimp [presieve.family_of_elements.compatible] at hxcompat,
+    dsimp [xx],
+    specialize hxcompat g₁ g₂,
+    apply hxcompat,
+    exact h },
+  obtain ⟨t,ht,ht'⟩ := H,
+  have ht₁ : t₁ = t,
+  { apply ht',
+    intros i,
+    apply h₁ },
+  have ht₂ : t₂ = t,
+  { apply ht',
+    intros i,
+    apply h₂ },
+  rw [ht₁, ht₂]
+end
+
 theorem ExtrSheaf_iff_is_ExtrSheaf_of_types
   (F : ExtrDiscᵒᵖ ⥤ Type u') (H : is_ExtrSheaf_of_types F) :
   presieve.is_sheaf ExtrDisc.proetale_topology F :=
 begin
-  sorry
-  /-
   intros B S hS,
   change proetale_topology _ _ at hS,
   rw ExtrDisc.cover_dense.locally_cover_dense.pushforward_cover_iff_cover_pullback at hS,
@@ -119,13 +166,47 @@ begin
   dsimp,
   let R' := presieve.functor_pullback ExtrDisc_to_Profinite R,
   have : R' ≤ sieve.functor_pullback ExtrDisc_to_Profinite T,
-  { sorry },
+  { -- missing sieve.functor_pullback_mono?
+    intros Y f hf,
+    apply hRT,
+    exact hf },
   have h : sieve.generate R' ≤ sieve.functor_pullback ExtrDisc_to_Profinite T,
-  { sorry },
-  apply category_theory.presieve.is_sheaf_for_subsieve,
-  rotate 2,
+  { -- Should we just have a general lemma for this?
+    apply sieve.gi_generate.gc.monotone_u,
+    rwa sieve.sets_iff_generate },
+  obtain ⟨ι, _, X, f, surj, rfl⟩ := hR,
+  resetI,
+
+  apply category_theory.presieve.is_sheaf_for_subsieve_aux,
+  rotate 3,
   exact sieve.generate R',
   exact h,
+  { intros x hx,
+    let XX : ι → ExtrDisc := λ i, (X i).pres,
+    let ff : Π i, XX i ⟶ B := λ i, ⟨(X i).pres_π ≫ f i⟩,
+    have surj' : ∀ b : B, ∃ i (a : XX i), ff i a = b, sorry,
+    have hff : ∀ i, (sieve.generate R') (ff i), sorry,
+    let y : Π i, F.obj (op (XX i)) := λ i, x _ (hff i),
+    have HH := H B ι XX ff surj' y _,
+    swap, { sorry },
+    obtain ⟨tt,htt1,htt2⟩ := HH,
+    refine ⟨tt,_,_⟩,
+    { dsimp,
+      intros Y g hg,
+      obtain ⟨W,gg,hh,Hhh,hgghh⟩ := hg,
+      change presieve.of_arrows X f _ at Hhh,
+      rw presieve.mem_of_arrows_iff at Hhh,
+      obtain ⟨i₀,hi₀,Hhh⟩ := Hhh,
+      unfold presieve.family_of_elements.compatible at hx,
+      specialize htt1 i₀,
+      dsimp [y] at htt1,
+      specialize hx
+    },
+    { sorry },
+
+  },
+  { sorry },
+  /-
   intros Y f,
   let R'' : presieve Y := sorry,
   have : sieve.pullback f (sieve.generate R') =
@@ -153,8 +234,11 @@ begin
     rw presieve.mem_of_arrows_iff at hr,
     obtain ⟨i,e,hh⟩ := hr,
     dsimp [y] at h1,
+    haveI : projective (X i) := sorry,
+    let X' : ExtrDisc := ⟨X i⟩,
+    have : Q = X', sorry,
     specialize h1 i,
-    specialize hx q g,
+    specialize hx (q ≫ eq_to_hom this) g,
 
   },
   { intros a ha,
