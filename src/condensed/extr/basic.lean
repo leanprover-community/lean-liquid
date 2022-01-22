@@ -209,6 +209,16 @@ def terminal_condition [limits.has_terminal C] : Prop :=
 def binary_product_condition [limits.has_binary_products C] : Prop := ∀ (X Y : ExtrDisc.{u}),
   is_iso (limits.prod.lift (F.map (sum.inl X Y).op) (F.map (sum.inr X Y).op))
 
+
+def finite_product_condition [limits.has_finite_products C] (F : ExtrDisc.{u}ᵒᵖ ⥤ C) :
+  Prop := ∀ (ι : Type u) [fintype ι] (X : ι → ExtrDisc),
+begin
+  -- Lean is being annoying here...
+  resetI,
+  let t : Π i, F.obj (op (sigma X)) ⟶ F.obj (op (X i)) := λ i, F.map (sigma.ι X i).op,
+  exact is_iso (limits.pi.lift t)
+end
+
 end ExtrDisc
 
 namespace Profinite
