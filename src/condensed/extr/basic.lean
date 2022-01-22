@@ -1,5 +1,6 @@
 import topology.category.Profinite.projective
 import for_mathlib.Profinite.disjoint_union
+import for_mathlib.concrete_equalizer
 
 noncomputable theory
 
@@ -229,6 +230,80 @@ begin
   let t : Π i, F.obj (op (sigma X)) → F.obj (op (X i)) := λ i, F.map (sigma.ι X i).op,
   let tt : F.obj (op (sigma X)) → Π i, F.obj (op (X i)) := λ x i, t i x,
   exact function.bijective tt
+end
+
+def equalizer_condition [limits.has_equalizers C] (F : ExtrDisc.{u}ᵒᵖ ⥤ C) : Prop :=
+  ∀ {R X B : ExtrDisc} (f : X ⟶ B) (hf : function.surjective f)
+    (g : R.val ⟶ Profinite.pullback f.val f.val) (hg : function.surjective g),
+  let e₁ : R ⟶ X := ⟨g ≫ Profinite.pullback.fst _ _⟩,
+      e₂ : R ⟶ X := ⟨g ≫ Profinite.pullback.snd _ _⟩,
+      w : e₁ ≫ f = e₂ ≫ f := sorry,
+      h : F.map f.op ≫ F.map e₁.op = F.map f.op ≫ F.map e₂.op := sorry in
+  is_iso (limits.equalizer.lift _ h)
+
+def equalizer_condition_for_types (F : ExtrDisc.{u}ᵒᵖ ⥤ Type w) : Prop :=
+  ∀ {R X B : ExtrDisc} (f : X ⟶ B) (hf : function.surjective f)
+    (g : R.val ⟶ Profinite.pullback f.val f.val) (hg : function.surjective g),
+  let e₁ : R ⟶ X := ⟨g ≫ Profinite.pullback.fst _ _⟩,
+      e₂ : R ⟶ X := ⟨g ≫ Profinite.pullback.snd _ _⟩,
+      w : e₁ ≫ f = e₂ ≫ f := sorry,
+      E := { x : F.obj (op X) // F.map e₁.op x = F.map e₂.op x },
+      t : F.obj (op B) → E := λ x, ⟨F.map f.op x, sorry⟩ in
+    function.bijective t
+
+lemma equalizer_condition_holds [limits.has_equalizers C] (F : ExtrDisc.{u}ᵒᵖ ⥤ C) :
+  equalizer_condition F :=
+begin
+  intros R X B f hf g hg,
+  dsimp,
+  let e₁ : R ⟶ X := ⟨g ≫ Profinite.pullback.fst _ _⟩,
+  let e₂ : R ⟶ X := ⟨g ≫ Profinite.pullback.snd _ _⟩,
+  let σ : B ⟶ X := ⟨ExtrDisc.lift _ hf (𝟙 _)⟩,
+  let t : X ⟶ R := ⟨ExtrDisc.lift _ hg _⟩,
+  swap,
+  { refine Profinite.pullback.lift _ _ (𝟙 _) (f.val ≫ σ.val) _,
+    dsimp, simp },
+  have h₁ : t ≫ e₁ = 𝟙 _, by { ext1, dsimp, simp },
+  have h₂ : t ≫ e₂ = f ≫ σ, by { ext1, dsimp, simp, },
+  have hh : σ ≫ f = 𝟙 _, by { ext1, dsimp, simp },
+  use (limits.equalizer.ι _ _ ≫ F.map σ.op),
+  split,
+  { simp only [limits.equalizer.lift_ι_assoc],
+    simp only [← F.map_comp, ← op_comp, hh],
+    simp },
+  { ext,
+    simp only [limits.equalizer.lift_ι, category.id_comp, category.assoc],
+    simp only [← F.map_comp, ← op_comp],
+    erw [← h₂, op_comp, F.map_comp],
+    dsimp [e₂],
+    erw ← limits.equalizer.condition_assoc,
+    change _ ≫ F.map e₁.op ≫ F.map t.op = _,
+    rw [← F.map_comp, ← op_comp, h₁],
+    simp }
+end
+
+lemma equalization_condition_for_types_hold (F : ExtrDisc.{u}ᵒᵖ ⥤ Type w) :
+  equalizer_condition_for_types F :=
+begin
+  -- Should be fairly easy, just mimic the proof in the general case above.
+   intros R X B f hf g hg,
+  dsimp,
+  let e₁ : R ⟶ X := ⟨g ≫ Profinite.pullback.fst _ _⟩,
+  let e₂ : R ⟶ X := ⟨g ≫ Profinite.pullback.snd _ _⟩,
+  have w : e₁ ≫ f = e₂ ≫ f := sorry,
+  have h : F.map f.op ≫ F.map e₁.op = F.map f.op ≫ F.map e₂.op := sorry,
+  let E := { x : F.obj (op X) // F.map e₁.op x = F.map e₂.op x },
+  let t : F.obj (op B) → E := λ x, ⟨F.map f.op x, sorry⟩,
+  change function.bijective t,
+  let ee := limits.concrete.equalizer_equiv (F.map e₁.op) (F.map e₂.op),
+  suffices : function.bijective (ee.symm ∘ t),
+    by exact (equiv.comp_bijective t (equiv.symm ee)).mp this,
+  have : ee.symm ∘ t = limits.equalizer.lift _ h,
+  { sorry },
+  rw this,
+  rw ← is_iso_iff_bijective,
+  apply equalizer_condition_holds,
+  assumption'
 end
 
 end ExtrDisc
