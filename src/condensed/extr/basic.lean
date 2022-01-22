@@ -199,6 +199,10 @@ begin
   exact w,
 end
 
+lemma sigma.ι_jointly_surjective {ι : Type u} {Y : ExtrDisc} [fintype ι] (X : ι → ExtrDisc)
+  (x : sigma X) : ∃ i (t : X i), sigma.ι X i t = x :=
+Profinite.sigma.ι_jointly_surjective _ _
+
 open opposite
 
 variables {C : Type v} [category.{w} C] (F : ExtrDisc.{u}ᵒᵖ ⥤ C)
@@ -209,7 +213,6 @@ def terminal_condition [limits.has_terminal C] : Prop :=
 def binary_product_condition [limits.has_binary_products C] : Prop := ∀ (X Y : ExtrDisc.{u}),
   is_iso (limits.prod.lift (F.map (sum.inl X Y).op) (F.map (sum.inr X Y).op))
 
-
 def finite_product_condition [limits.has_finite_products C] (F : ExtrDisc.{u}ᵒᵖ ⥤ C) :
   Prop := ∀ (ι : Type u) [fintype ι] (X : ι → ExtrDisc),
 begin
@@ -217,6 +220,16 @@ begin
   resetI,
   let t : Π i, F.obj (op (sigma X)) ⟶ F.obj (op (X i)) := λ i, F.map (sigma.ι X i).op,
   exact is_iso (limits.pi.lift t)
+end
+
+def finite_product_condition_for_types [limits.has_finite_products C]
+  (F : ExtrDisc.{u}ᵒᵖ ⥤ Type w) : Prop :=
+  ∀ (ι : Type u) [fintype ι] (X : ι → ExtrDisc),
+begin
+  resetI,
+  let t : Π i, F.obj (op (sigma X)) → F.obj (op (X i)) := λ i, F.map (sigma.ι X i).op,
+  let tt : F.obj (op (sigma X)) → Π i, F.obj (op (X i)) := λ x i, t i x,
+  exact function.bijective tt
 end
 
 end ExtrDisc
@@ -243,3 +256,13 @@ lemma pres_π_surjective (B : Profinite.{u}) :
 B.exists_projective_presentation.some_spec.some_spec
 
 end Profinite
+
+open opposite
+
+def is_ExtrSheaf_of_types (P : ExtrDisc.{u}ᵒᵖ ⥤ Type w) : Prop :=
+∀ (B : ExtrDisc.{u}) (ι : Type u) [fintype ι] (α : ι → ExtrDisc.{u})
+  (f : Π i, α i ⟶ B) (hf : ∀ b : B, ∃ i (x : α i), f i x = b)
+  (x : Π i, P.obj (op (α i)))
+  (hx : ∀ (i j : ι) (Z : ExtrDisc) (g₁ : Z ⟶ α i) (g₂ : Z ⟶ α j),
+    g₁ ≫ f _ = g₂ ≫ f _ → P.map g₁.op (x _) = P.map g₂.op (x _)),
+∃! t : P.obj (op B), ∀ i, P.map (f i).op t = x _

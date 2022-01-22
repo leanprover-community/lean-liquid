@@ -53,14 +53,6 @@ ExtrDisc.cover_dense.Sheaf_equiv_of_cover_preserving_cover_lifting
 
 open opposite
 
-def is_ExtrSheaf_of_types (P : ExtrDisc.{u}ᵒᵖ ⥤ Type u') : Prop :=
-∀ (B : ExtrDisc.{u}) (ι : Type u) [fintype ι] (α : ι → ExtrDisc.{u})
-  (f : Π i, α i ⟶ B) (hf : ∀ b : B, ∃ i (x : α i), f i x = b)
-  (x : Π i, P.obj (op (α i)))
-  (hx : ∀ (i j : ι) (Z : ExtrDisc) (g₁ : Z ⟶ α i) (g₂ : Z ⟶ α j),
-    g₁ ≫ f _ = g₂ ≫ f _ → P.map g₁.op (x _) = P.map g₂.op (x _)),
-∃! t : P.obj (op B), ∀ i, P.map (f i).op t = x _
-
 theorem is_ExtrSheaf_of_types_of_is_sheaf_ExtrDisc_proetale_topology
   (F : ExtrDiscᵒᵖ ⥤ Type u') (H : presieve.is_sheaf ExtrDisc.proetale_topology F) :
   is_ExtrSheaf_of_types F :=
