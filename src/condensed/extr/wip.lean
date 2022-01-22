@@ -109,31 +109,57 @@ theorem ExtrSheaf_iff_is_ExtrSheaf_of_types
   (F : ExtrDiscᵒᵖ ⥤ Type u') (H : is_ExtrSheaf_of_types F) :
   presieve.is_sheaf ExtrDisc.proetale_topology F :=
 begin
-  intros B S hS x hx,
-  obtain ⟨R,hR,hRS⟩ := hS,
-  obtain ⟨ι,hh,X,f,surj,rfl⟩ := hR,
-  resetI,
-  dsimp [sieve.functor_pushforward, presieve.functor_pushforward] at hRS,
-  have : ∀ i : ι, ∃ (G : ExtrDisc) (π : G ⟶ B)
-    (g : X i ⟶ G.val) (hπ : S π), (f i) = g ≫ π.val,
-  { intros i,
-    specialize hRS (X i) (presieve.of_arrows.mk i),
-    obtain ⟨G,π,g,hπ,hhh⟩ := hRS,
-    use [G,π,g,hπ,hhh] },
-  choose G π g hπ hhh using this,
-  specialize H B ι G π _,
+  sorry
+  /-
+  intros B S hS,
+  change proetale_topology _ _ at hS,
+  rw ExtrDisc.cover_dense.locally_cover_dense.pushforward_cover_iff_cover_pullback at hS,
+  obtain ⟨⟨T,hT⟩,rfl⟩ := hS,
+  obtain ⟨R,hR,hRT⟩ := hT,
+  dsimp,
+  let R' := presieve.functor_pullback ExtrDisc_to_Profinite R,
+  have : R' ≤ sieve.functor_pullback ExtrDisc_to_Profinite T,
   { sorry },
-  let y : Π (i : ι), F.obj (op (G i)) := λ i, x (π i) (hπ _),
-  specialize H y _,
-  { intros i j W e₁ e₂,
-    apply hx },
-  obtain ⟨t,ht1,ht2⟩ := H,
-  refine ⟨t,_,_⟩,
-  { intros Z f hf,
-    sorry },
-  { intros z hz,
-    apply ht2,
-    intros i,
-    apply hz }
+  have h : sieve.generate R' ≤ sieve.functor_pullback ExtrDisc_to_Profinite T,
+  { sorry },
+  apply category_theory.presieve.is_sheaf_for_subsieve,
+  rotate 2,
+  exact sieve.generate R',
+  exact h,
+  intros Y f,
+  let R'' : presieve Y := sorry,
+  have : sieve.pullback f (sieve.generate R') =
+    sieve.generate R'' := sorry,
+  intros x hx,
+  dsimp [R'] at x,
+  obtain ⟨ι,_,X,π,surj,rfl⟩ := hR,
+  resetI,
+  -- Now choose a projective presentation of (P i) for all i, and project onto the first object.
+  -- This gives a cover of Y, which we can plug in to H.
+  let PP : ι → ExtrDisc := λ i, (Profinite.pullback f.val (π i)).pres,
+  let pp : Π i, PP i ⟶ Y := λ i,
+    ⟨(Profinite.pullback f.val (π i)).pres_π ≫ Profinite.pullback.fst _ _⟩,
+  let y : Π i, F.obj (op (PP i)) := λ i, x (pp i) sorry,
 
+  specialize H Y ι PP pp sorry y sorry,
+
+  obtain ⟨t,h1,h2⟩ := H,
+  refine ⟨t,_,_⟩,
+  { dsimp,
+    intros W g hg,
+    change ∃ Q, _ at hg,
+    obtain ⟨Q,q,r,hr,hq⟩ := hg,
+    change (presieve.of_arrows _ _) _ at hr,
+    rw presieve.mem_of_arrows_iff at hr,
+    obtain ⟨i,e,hh⟩ := hr,
+    dsimp [y] at h1,
+    specialize h1 i,
+    specialize hx q g,
+
+  },
+  { intros a ha,
+    apply h2,
+    intros i,
+    apply ha }
+  -/
 end

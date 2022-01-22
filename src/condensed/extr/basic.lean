@@ -176,3 +176,26 @@ def binary_product_condition [limits.has_binary_products C] : Prop := ∀ (X Y :
   is_iso (limits.prod.lift (F.map (sum.inl X Y).op) (F.map (sum.inr X Y).op))
 
 end ExtrDisc
+
+namespace Profinite
+
+lemma exists_projective_presentation (B : Profinite.{u}) :
+  ∃ (X : ExtrDisc) (π : X.val ⟶ B), function.surjective π :=
+begin
+  obtain ⟨⟨X,h,π,hπ⟩⟩ := enough_projectives.presentation B,
+  resetI,
+  use [⟨X⟩, π],
+  rwa ← epi_iff_surjective
+end
+
+def pres (B : Profinite.{u}) : ExtrDisc :=
+  B.exists_projective_presentation.some
+
+def pres_π (B : Profinite.{u}) : B.pres.val ⟶ B :=
+  B.exists_projective_presentation.some_spec.some
+
+lemma pres_π_surjective (B : Profinite.{u}) :
+  function.surjective B.pres_π :=
+B.exists_projective_presentation.some_spec.some_spec
+
+end Profinite
