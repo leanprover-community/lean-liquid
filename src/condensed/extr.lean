@@ -1,3 +1,7 @@
+-- Comment from AT: This approach could work, but is too complicated for now.
+-- I have opted to use the comparison lemma instead.
+-- See the folder `condensed/extr/`.
+/-
 import topology.category.Profinite.projective
 import for_mathlib.Profinite.disjoint_union
 import condensed.is_proetale_sheaf
@@ -1905,3 +1909,4 @@ equivalence.mk (ExtrSheaf_to_Condensed C) (Condensed_to_ExtrSheaf C)
 -/
 
 end
+-/

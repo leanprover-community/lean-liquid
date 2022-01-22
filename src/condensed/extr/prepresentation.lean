@@ -1,5 +1,6 @@
 -- From AT: This approach could work, but seems too complicated for now.
 -- I have opted to use the comparison lemma instead.
+-- See the folder `condensed/extr/`.
 /-
 import topology.category.Profinite
 import for_mathlib.Profinite.disjoint_union
