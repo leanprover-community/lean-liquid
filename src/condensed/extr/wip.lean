@@ -154,7 +154,7 @@ begin
   rw [ht₁, ht₂]
 end
 
-theorem ExtrSheaf_iff_is_ExtrSheaf_of_types
+theorem is_sheaf_ExtrDisc_proetale_topology_of_is_ExtrSheaf_of_types
   (F : ExtrDiscᵒᵖ ⥤ Type u') (H : is_ExtrSheaf_of_types F) :
   presieve.is_sheaf ExtrDisc.proetale_topology F :=
 begin
