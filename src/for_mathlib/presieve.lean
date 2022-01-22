@@ -54,7 +54,6 @@ begin
   convert hx using 1; simp,
 end
 
-@[simp]
 lemma mk_family_of_elements_of_arrows_eval
   {ι} {B} (X : ι → C) (f : Π i, X i ⟶ B)
   (F : Cᵒᵖ ⥤ Type w) (x : Π i, F.obj (op (X i)))
