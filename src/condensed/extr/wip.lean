@@ -48,6 +48,11 @@ ExtrDisc.cover_dense.Sheaf_equiv_of_cover_preserving_cover_lifting
   ExtrDisc.cover_dense.locally_cover_dense.induced_topology_cover_preserving
   ExtrDisc.cover_dense.locally_cover_dense.induced_topology_cover_lifting
 
+-- Sanity check
+@[simp] lemma Condensed_ExtrSheaf_equiv_inverse_val (C : Type u') [category.{u+1} C]
+  [limits.has_limits C] (F : Condensed.{u} C) :
+  ((Condensed_ExtrSheaf_equiv C).inverse.obj F).val = ExtrDisc_to_Profinite.op ⋙ F.val := rfl
+
 open opposite
 
 def is_ExtrSheaf_of_types (P : ExtrDisc.{u}ᵒᵖ ⥤ Type u') : Prop :=
