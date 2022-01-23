@@ -9,10 +9,6 @@ universes w' w v v' u u'
 variables {V : Type u} [category.{v} V] {J : Type w} [category.{w'} J]
 variables {ι : Type u'} {c : complex_shape ι}
 
---move this
-lemma congr_f [has_zero_morphisms V] {X Y : homological_complex V c} {f g : X ⟶ Y}
-  (h : f = g) (x : ι) : f.f x = g.f x := congr_arg _ h
-
 -- move this
 section
 variables {C : Type u} [category.{v} C] {Z : C → Prop}

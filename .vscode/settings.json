@@ -8,5 +8,6 @@
   "files.trimFinalNewlines": true,
   "files.trimTrailingWhitespace": true,
   "search.usePCRE2": true,
-  "workbench.startupEditor": "none"
+  "workbench.startupEditor": "none",
+  "editor.hover.delay": 2000
 }
