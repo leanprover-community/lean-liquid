@@ -83,7 +83,7 @@ end
 
 instance : pretriangulated 𝒦 :=
 { distinguished_triangles := distinguished_triangles V,
-  isomorphic_distinguished := sorry,
+  isomorphic_distinguished := λ T₁ hT T₂ e, mem_distinguished_of_iso e.symm hT,
   contractible_distinguished := begin
     rintro ⟨X⟩,
     use [X, X, 0, 𝟙 _, 0, λ i, (splitting_of_is_iso_zero (𝟙 (X.X i)) : _)],
