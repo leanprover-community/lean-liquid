@@ -557,6 +557,28 @@ begin
   apply QX_symm_ι_aux hP X q,
 end
 
+lemma QX_QG_compat_fst (q : Π i, P.obj (op (X i))) (i : ι × ι) :
+  QG (P.map rfst.op (QX.symm q)) i = P.map (gfst i).op (q i.fst) :=
+begin
+  dsimp [QG],
+  change (P.map _ ≫ P.map _) _ = _,
+  simp only [← P.map_comp, ← op_comp, ι_rfst],
+  simp only [P.map_comp, op_comp],
+  dsimp,
+  rw QX_symm_ι,
+end
+
+lemma QX_QG_compat_snd (q : Π i, P.obj (op (X i))) (i : ι × ι) :
+  QG (P.map rsnd.op (QX.symm q)) i = P.map (gsnd i).op (q i.snd) :=
+begin
+  dsimp [QG],
+  change (P.map _ ≫ P.map _) _ = _,
+  simp only [← P.map_comp, ← op_comp, ι_rsnd],
+  simp only [P.map_comp, op_comp],
+  dsimp,
+  rw QX_symm_ι,
+end
+
 end
 end product_condition_setup
 
@@ -590,12 +612,21 @@ begin
       equiv.of_bijective _ (hE X f surj),
   let x' : F.obj (op (ExtrDisc.sigma X)) := (QX hF X).symm x,
   -- Should follow from hx,
-  have hx' : F.map (rfst X f).op x' = F.map (rsnd X f).op x' := sorry,
+  have hx' : F.map (rfst X f).op x' = F.map (rsnd X f).op x',
+  { apply_fun (QG hF X f),
+    funext ii,
+    rw QX_QG_compat_fst,
+    rw QX_QG_compat_snd,
+    apply hx,
+    ext1,
+    dsimp [gfst, gsnd],
+    simp [Profinite.pullback.condition] },
   let b : F.obj (op B) := EE.symm ⟨x',hx'⟩,
   use b,
   have hb : ∀ i, F.map (f i).op b = x i,
   { intros i,
-    have : f i = ExtrDisc.sigma.ι X i ≫ (π X f) := sorry, -- simple
+    have : f i = ExtrDisc.sigma.ι X i ≫ (π X f),
+    { dsimp [π], rw ExtrDisc.sigma.ι_desc },
     rw [this, op_comp, F.map_comp],
     dsimp,
     have : F.map (π X f).op b = x',
