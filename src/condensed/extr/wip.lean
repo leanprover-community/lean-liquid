@@ -281,3 +281,98 @@ theorem is_ExtrSheaf_of_types_iff (F : ExtrDiscᵒᵖ ⥤ Type u') :
   is_ExtrSheaf_of_types F ↔ presieve.is_sheaf ExtrDisc.proetale_topology F :=
 ⟨λ H, is_sheaf_ExtrDisc_proetale_topology_of_is_ExtrSheaf_of_types _ H,
   λ H, is_ExtrSheaf_of_types_of_is_sheaf_ExtrDisc_proetale_topology _ H⟩
+
+theorem is_ExtrSheaf_iff (C : Type u') [category.{v'} C]
+  (F : ExtrDiscᵒᵖ ⥤ C) :
+  is_ExtrSheaf F ↔ presheaf.is_sheaf ExtrDisc.proetale_topology F :=
+begin
+  rw is_ExtrSheaf_iff_forall_yoneda,
+  apply forall_congr (λ T, _),
+  apply is_ExtrSheaf_of_types_iff,
+end
+
+theorem is_sheaf_ExtrDisc_proetale_iff_product_condition
+  (C : Type u') [category.{v'} C] [limits.has_finite_products C]
+  (F : ExtrDiscᵒᵖ ⥤ C) :
+  presheaf.is_sheaf ExtrDisc.proetale_topology F ↔ ExtrDisc.finite_product_condition F :=
+begin
+  rw ← is_ExtrSheaf_iff,
+  rw is_ExtrSheaf_iff_product_condition,
+end
+
+structure ExtrSheafProd (C : Type.{u'}) [category.{v'} C] [limits.has_finite_products C] :=
+(val : ExtrDisc.{u}ᵒᵖ ⥤ C)
+(cond : ExtrDisc.finite_product_condition val)
+
+namespace ExtrSheafProd
+
+variables (C : Type.{u'}) [category.{v'} C] [limits.has_finite_products C]
+
+@[ext]
+structure hom (X Y : ExtrSheafProd C) :=
+mk :: (val : X.val ⟶ Y.val)
+
+@[simps]
+instance : category (ExtrSheafProd C) :=
+{ hom := hom C,
+  id := λ X, ⟨𝟙 _⟩,
+  comp := λ X Y Z f g, ⟨f.val ≫ g.val⟩ }
+
+end ExtrSheafProd
+
+-- TODO: Break up this structure into individual components... it's too slow as is.
+def ExtrSheaf_ExtrSheafProd_equiv (C : Type.{u'}) [category.{v'} C] [limits.has_finite_products C] :
+  ExtrSheaf C ≌ ExtrSheafProd C :=
+{ functor :=
+  { obj := λ F, ⟨F.val,
+      (is_sheaf_ExtrDisc_proetale_iff_product_condition _ _).mp F.2⟩,
+    map := λ F G f, ⟨f.val⟩,
+    map_id' := λ X, by { ext1, refl },
+    map_comp' := λ X Y Z f g, by { ext1, refl } },
+  inverse :=
+  { obj := λ F, ⟨F.val,
+      (is_sheaf_ExtrDisc_proetale_iff_product_condition _ _).mpr F.2⟩,
+    map := λ F G f, ⟨f.val⟩,
+    map_id' := λ X, by { ext1, refl },
+    map_comp' := λ X Y Z f g, by { ext1, refl } },
+  unit_iso := nat_iso.of_components
+    (λ X,
+    { hom := ⟨𝟙 _⟩,
+      inv := ⟨𝟙 _⟩,
+      hom_inv_id' := by { ext1, dsimp, simp },
+      inv_hom_id' := by { ext1, dsimp, simp } })
+    begin
+      intros X Y f,
+      ext1,
+      dsimp,
+      simp,
+    end,
+  counit_iso := nat_iso.of_components
+    (λ X,
+    { hom := ⟨𝟙 _⟩,
+      inv := ⟨𝟙 _⟩,
+      hom_inv_id' := by { ext1, dsimp, simp },
+      inv_hom_id' := by { ext1, dsimp, simp } })
+    begin
+      intros X Y f,
+      ext1,
+      dsimp,
+      simp,
+    end,
+  functor_unit_iso_comp' := begin
+    intros,
+    ext1,
+    dsimp,
+    simp,
+  end } .
+
+noncomputable
+def Condensed_ExtrSheafProd_equiv (C : Type.{u'}) [category.{u+1} C] [limits.has_limits C] :
+  Condensed.{u} C ≌ ExtrSheafProd.{u} C :=
+(Condensed_ExtrSheaf_equiv C).symm.trans (ExtrSheaf_ExtrSheafProd_equiv C)
+
+-- Sanity check
+@[simp]
+lemma Condensed_ExtrSheafProd_equiv_functor_obj_val
+  {C : Type.{u'}} [category.{u+1} C] [limits.has_limits C] (F : Condensed C) :
+  ((Condensed_ExtrSheafProd_equiv C).functor.obj F).val = ExtrDisc_to_Profinite.op ⋙ F.val := rfl
