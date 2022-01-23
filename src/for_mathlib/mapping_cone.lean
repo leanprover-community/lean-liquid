@@ -743,7 +743,7 @@ def termwise_split_of_termwise_split_mono [H : ∀ i, split_mono (f.f i)] (i : �
   splitting (f.f i)
     ((@@homological_complex.normal_mono _ _ f (mono_of_eval _)).g.f i) :=
 begin
-  apply left_split.splitting, -- This uses a sorrry :(
+  apply left_split.splitting,
   dsimp only [normal_mono, cokernel_complex_π],
   haveI : exact (f.f i) (cokernel.π (f.f i)) := abelian.exact_cokernel _,
   constructor,
