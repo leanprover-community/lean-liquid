@@ -237,8 +237,9 @@ def equalizer_condition [limits.has_equalizers C] (F : ExtrDisc.{u}ᵒᵖ ⥤ C)
     (g : R.val ⟶ Profinite.pullback f.val f.val) (hg : function.surjective g),
   let e₁ : R ⟶ X := ⟨g ≫ Profinite.pullback.fst _ _⟩,
       e₂ : R ⟶ X := ⟨g ≫ Profinite.pullback.snd _ _⟩,
-      w : e₁ ≫ f = e₂ ≫ f := sorry,
-      h : F.map f.op ≫ F.map e₁.op = F.map f.op ≫ F.map e₂.op := sorry in
+      w : e₁ ≫ f = e₂ ≫ f := by { ext1, dsimp [e₁, e₂], simp [Profinite.pullback.condition] },
+      h : F.map f.op ≫ F.map e₁.op = F.map f.op ≫ F.map e₂.op :=
+        by { simp only [← F.map_comp, ← op_comp, w] } in
   is_iso (limits.equalizer.lift _ h)
 
 def equalizer_condition_for_types (F : ExtrDisc.{u}ᵒᵖ ⥤ Type w) : Prop :=
@@ -246,9 +247,14 @@ def equalizer_condition_for_types (F : ExtrDisc.{u}ᵒᵖ ⥤ Type w) : Prop :=
     (g : R.val ⟶ Profinite.pullback f.val f.val) (hg : function.surjective g),
   let e₁ : R ⟶ X := ⟨g ≫ Profinite.pullback.fst _ _⟩,
       e₂ : R ⟶ X := ⟨g ≫ Profinite.pullback.snd _ _⟩,
-      w : e₁ ≫ f = e₂ ≫ f := sorry,
+      w : e₁ ≫ f = e₂ ≫ f := by { ext1, dsimp [e₁, e₂], simp [Profinite.pullback.condition] },
+      h : F.map f.op ≫ F.map e₁.op = F.map f.op ≫ F.map e₂.op :=
+        by { simp only [← F.map_comp, ← op_comp, w] },
       E := { x : F.obj (op X) // F.map e₁.op x = F.map e₂.op x },
-      t : F.obj (op B) → E := λ x, ⟨F.map f.op x, sorry⟩ in
+      t : F.obj (op B) → E := λ x, ⟨F.map f.op x, begin
+        change (F.map f.op ≫ F.map e₁.op) x = (F.map f.op ≫ F.map e₂.op) x,
+        rw h,
+      end⟩ in
     function.bijective t
 
 lemma equalizer_condition_holds [limits.has_equalizers C] (F : ExtrDisc.{u}ᵒᵖ ⥤ C) :
