@@ -282,7 +282,7 @@ begin
     simp }
 end
 
-lemma equalization_condition_for_types_hold (F : ExtrDisc.{u}ᵒᵖ ⥤ Type w) :
+lemma equalizer_condition_for_types_holds (F : ExtrDisc.{u}ᵒᵖ ⥤ Type w) :
   equalizer_condition_for_types F :=
 begin
   -- Should be fairly easy, just mimic the proof in the general case above.
@@ -341,6 +341,19 @@ def is_ExtrSheaf_of_types (P : ExtrDisc.{u}ᵒᵖ ⥤ Type w) : Prop :=
     g₁ ≫ f _ = g₂ ≫ f _ → P.map g₁.op (x _) = P.map g₂.op (x _)),
 ∃! t : P.obj (op B), ∀ i, P.map (f i).op t = x _
 
+lemma subsingleton_of_empty_of_is_ExtrSheaf_of_types
+  (F : ExtrDisc.{u}ᵒᵖ ⥤ Type w) (hF : is_ExtrSheaf_of_types F) (Z : ExtrDisc)
+  [hZ : is_empty Z] : subsingleton (F.obj (op Z)) :=
+begin
+  constructor,
+  intros a b,
+  specialize hF Z pempty pempty.elim (λ a, a.elim) hZ.elim (λ a, a.elim) (λ a, a.elim),
+  obtain ⟨t,h1,h2⟩ := hF,
+  have : a = t, { apply h2, intros i, exact i.elim },
+  have : b = t, { apply h2, intros i, exact i.elim },
+  cc,
+end
+
 lemma finite_product_condition_for_types_of_is_ExtrSheaf_of_types
   (F : ExtrDisc.{u}ᵒᵖ ⥤ Type w) (hF : is_ExtrSheaf_of_types F) :
     ExtrDisc.finite_product_condition_for_types F :=
@@ -383,7 +396,22 @@ begin
     have hx := hF x _,
     swap,
     { intros i j Z g₁ g₂ hh,
-      sorry },
+      by_cases hZ : nonempty Z,
+      { obtain ⟨z⟩ := hZ,
+        have : i = j,
+        { apply_fun (λ e, (e z).1) at hh, exact hh },
+        subst this,
+        have : g₁ = g₂,
+        { ext t : 2,
+          apply_fun ExtrDisc.sigma.ι X i,
+          swap,
+          { apply Profinite.sigma.ι_injective },
+          apply_fun (λ e, e t) at hh,
+          exact hh },
+        rw this },
+      { simp at hZ, resetI,
+        haveI := subsingleton_of_empty_of_is_ExtrSheaf_of_types F hF' Z,
+        apply subsingleton.elim } },
     obtain ⟨t,ht,_⟩ := hx,
     use t,
     ext1,
