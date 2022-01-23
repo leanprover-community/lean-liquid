@@ -353,6 +353,8 @@ end Profinite
 
 open opposite
 
+variables {C : Type v} [category.{w} C] (F : ExtrDisc.{u}ᵒᵖ ⥤ C)
+
 def is_ExtrSheaf_of_types (P : ExtrDisc.{u}ᵒᵖ ⥤ Type w) : Prop :=
 ∀ (B : ExtrDisc.{u}) (ι : Type u) [fintype ι] (α : ι → ExtrDisc.{u})
   (f : Π i, α i ⟶ B) (hf : ∀ b : B, ∃ i (x : α i), f i x = b)
@@ -360,6 +362,15 @@ def is_ExtrSheaf_of_types (P : ExtrDisc.{u}ᵒᵖ ⥤ Type w) : Prop :=
   (hx : ∀ (i j : ι) (Z : ExtrDisc) (g₁ : Z ⟶ α i) (g₂ : Z ⟶ α j),
     g₁ ≫ f _ = g₂ ≫ f _ → P.map g₁.op (x _) = P.map g₂.op (x _)),
 ∃! t : P.obj (op B), ∀ i, P.map (f i).op t = x _
+
+-- We encode the general condition essentially using Yoneda.
+def is_ExtrSheaf (P : ExtrDisc.{u}ᵒᵖ ⥤ C) : Prop :=
+∀ (B : ExtrDisc.{u}) (ι : Type u) [fintype ι] (α : ι → ExtrDisc.{u})
+  (f : Π i, α i ⟶ B) (hf : ∀ b : B, ∃ i (x : α i), f i x = b)
+  (T : C) (x : Π i, T ⟶ P.obj (op (α i)))
+  (hx : ∀ (i j : ι) (Z : ExtrDisc) (g₁ : Z ⟶ α i) (g₂ : Z ⟶ α j),
+    g₁ ≫ f _ = g₂ ≫ f _ → x _ ≫ P.map g₁.op = x _ ≫ P.map g₂.op),
+∃! t : T ⟶ P.obj (op B), ∀ i, t ≫ P.map (f i).op = x _
 
 lemma subsingleton_of_empty_of_is_ExtrSheaf_of_types
   (F : ExtrDisc.{u}ᵒᵖ ⥤ Type w) (hF : is_ExtrSheaf_of_types F) (Z : ExtrDisc)
@@ -517,4 +528,80 @@ begin
     funext i,
     change (F.map _ ≫ F.map _) _ = (F.map _ ≫ F.map _) _,
     simp only [← F.map_comp, ← op_comp, ExtrDisc.sigma.ι_desc, hb, hb'] }
+end
+
+theorem is_ExtrSheaf_of_types_iff_product_condition_for_types (F : ExtrDisc.{u}ᵒᵖ ⥤ Type w) :
+  is_ExtrSheaf_of_types F ↔ ExtrDisc.finite_product_condition_for_types F :=
+begin
+  split,
+  { intro h, exact finite_product_condition_for_types_of_is_ExtrSheaf_of_types _ h },
+  { intro h, exact is_ExtrSheaf_of_types_of_finite_product_condition_for_types _ h }
+end
+
+lemma is_ExtrSheaf_iff_forall_yoneda (F : ExtrDisc.{u}ᵒᵖ ⥤ C) :
+  is_ExtrSheaf F ↔ (∀ (T : C), is_ExtrSheaf_of_types (F ⋙ coyoneda.obj (op T))) :=
+begin
+  split,
+  { introsI h T B ι _ X f surj x hx,
+    exact h B ι X f surj T x hx },
+  { introsI h B ι _ X f surj T x hx,
+    exact h T B ι X f surj x hx }
+end
+
+theorem finite_product_condition_iff_forall_yoneda [limits.has_finite_products C]
+  (F : ExtrDisc.{u}ᵒᵖ ⥤ C) :
+  ExtrDisc.finite_product_condition F ↔
+  (∀ (T : C), ExtrDisc.finite_product_condition_for_types (F ⋙ coyoneda.obj (op T))) :=
+begin
+  split,
+  { introsI h T ι _ X,
+    let t : F.obj (op (ExtrDisc.sigma X)) ⟶ ∏ λ (i : ι), F.obj (op (X i)) :=
+      limits.pi.lift (λ (i : ι), F.map (ExtrDisc.sigma.ι X i).op),
+    specialize h ι X,
+    dsimp at h ⊢,
+    change is_iso t at h,
+    resetI,
+    split,
+    { intros a b hab,
+      dsimp at hab,
+      suffices : a ≫ t = b ≫ t,
+      { apply_fun (λ e, e ≫ inv t) at this, simpa using this },
+      ext1,
+      rw function.funext_iff at hab,
+      simp [hab] },
+    { intros a,
+      use limits.pi.lift a ≫ inv t,
+      dsimp,
+      funext i,
+      have : inv t ≫ F.map (ExtrDisc.sigma.ι X i).op = limits.pi.π _ i,
+      { simp [is_iso.inv_comp_eq] },
+      simp [this] } },
+  { introsI h ι _ X,
+    dsimp,
+    let h₁ := h (∏ λ (i : ι), F.obj (op (X i))) ι X,
+    let h₂ := h (F.obj (op (ExtrDisc.sigma X))) ι X,
+    dsimp at h₁ h₂,
+    replace h₁ := h₁.2,
+    replace h₂ := h₂.1,
+    obtain ⟨s,hs⟩ := h₁ (λ i, limits.pi.π _ i),
+    use s,
+    rw function.funext_iff at hs,
+    dsimp at *,
+    split,
+    { apply h₂,
+      ext1 i,
+      dsimp,
+      simp [hs i] },
+    { ext1 i,
+      simp [hs i] } }
+end
+
+theorem is_ExtrSheaf_iff_product_condition
+  [limits.has_finite_products C] (F : ExtrDisc.{u}ᵒᵖ ⥤ C) :
+  is_ExtrSheaf F ↔ ExtrDisc.finite_product_condition F :=
+begin
+  rw is_ExtrSheaf_iff_forall_yoneda,
+  rw finite_product_condition_iff_forall_yoneda,
+  apply forall_congr (λ T, _),
+  apply is_ExtrSheaf_of_types_iff_product_condition_for_types
 end
