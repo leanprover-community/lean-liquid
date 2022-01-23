@@ -1,5 +1,6 @@
 import algebra.homology.exact
 import category_theory.abelian.basic
+import category_theory.abelian.diagram_lemmas.four
 
 noncomputable theory
 
@@ -12,12 +13,33 @@ variables {𝒜 : Type*} [category 𝒜]
 namespace category_theory
 
 variables [abelian 𝒜]
-variables {A B C : 𝒜} (f : A ⟶ B) (g : B ⟶ C)
+variables {A B C A' B' C' : 𝒜} (f : A ⟶ B) (g : B ⟶ C) (f' : A' ⟶ B') (g' : B' ⟶ C')
 
 structure short_exact : Prop :=
 [mono  : mono f]
 [epi   : epi g]
 [exact : exact f g]
+
+open_locale zero_object
+
+instance zero_to_zero_is_iso {C : Type*} [category C] [has_zero_object C] (f : (0 : C) ⟶ 0) :
+  is_iso f :=
+by convert (show is_iso (𝟙 (0 : C)), by apply_instance)
+
+
+lemma is_iso_of_short_exact_of_is_iso_of_is_iso (h : short_exact f g) (h' : short_exact f' g')
+  (i₁ : A ⟶ A') (i₂ : B ⟶ B') (i₃ : C ⟶ C')
+  (comm₁ : i₁ ≫ f' = f ≫ i₂) (comm₂ : i₂ ≫ g' = g ≫ i₃) [is_iso i₁] [is_iso i₃] :
+  is_iso i₂ :=
+begin
+  obtain ⟨_, _, _⟩ := h,
+  obtain ⟨_, _, _⟩ := h',
+  resetI,
+  refine @abelian.is_iso_of_is_iso_of_is_iso_of_is_iso_of_is_iso 𝒜 _ _ 0 _ _ _ 0 _ _ _
+    0 f g 0 f' g' 0 i₁ i₂ i₃ _ comm₁ comm₂ 0 0 0 0 0 _ _ _ _ _ _ _ _ _ _ _; simp,
+end
+
+
 
 /-- An exact sequence `A -f⟶ B -g⟶ C` is *left split*
 if there exists a morphism `φ : B ⟶ A` such that `f ≫ φ = 𝟙 A` and `g` is epi.
@@ -144,9 +166,9 @@ eq_sub_iff_add_eq.mpr ((add_comm _ _).trans h.split_add)
 
 @[simp, reassoc] lemma iso_hom_fst : h.iso.hom ≫ biprod.fst = h.retraction := rfl
 
-protected lemma split_mono : split_mono f := ⟨h.retraction, by simp⟩
+protected def split_mono : split_mono f := ⟨h.retraction, by simp⟩
 
-protected lemma split_epi : split_epi g := ⟨h.section, by simp⟩
+protected def split_epi : split_epi g := ⟨h.section, by simp⟩
 
 include h
 
@@ -202,6 +224,7 @@ begin
   { refl }
 end
 
+protected
 lemma short_exact : short_exact f g :=
 { mono := h.mono, epi := h.epi, exact := h.exact }
 
@@ -215,13 +238,14 @@ a *morphism* `i : B ⟶ A ⊞ C` such that `f ≫ i` is the canonical map `A ⟶
 together with proofs that `f` is mono and `g` is epi.
 
 The morphism `i` is than automatically an isomorphism. -/
-def mk' (i : B ⟶ A ⊞ C) (h1 : f ≫ i = biprod.inl) (h2 : i ≫ biprod.snd = g) :
+def mk' (h : short_exact f g) (i : B ⟶ A ⊞ C) (h1 : f ≫ i = biprod.inl) (h2 : i ≫ biprod.snd = g) :
   splitting f g :=
 { iso :=
   begin
     refine @as_iso _ _ _ _ i (id _),
-    -- use five lemma, or snake lemma, or whatever
-    sorry
+    refine is_iso_of_short_exact_of_is_iso_of_is_iso f g _ _ h _ _ _ _
+      (h1.trans (category.id_comp _).symm).symm (h2.trans (category.comp_id _).symm),
+    split,
   end,
   comp_iso_eq_inl := by { rwa as_iso_hom, },
   iso_comp_snd_eq := h2 }
@@ -230,7 +254,7 @@ end splitting
 
 /-- A short exact sequence that is left split admits a splitting. -/
 def left_split.splitting {f : A ⟶ B} {g : B ⟶ C} (h : left_split f g) : splitting f g :=
-splitting.mk' (biprod.lift h.left_split.some g)
+splitting.mk' h.short_exact (biprod.lift h.left_split.some g)
 (by { ext,
   { simpa only [biprod.inl_fst, biprod.lift_fst, category.assoc] using h.left_split.some_spec },
   { simp only [biprod.inl_snd, biprod.lift_snd, category.assoc, h.exact.w], } })

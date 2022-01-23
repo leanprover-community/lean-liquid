@@ -44,7 +44,7 @@ lemma triangleₕ_of_termwise_split_mem_distinguished_triangles (X Y Z : cochain
     triangleₕ_of_termwise_split f g h ∈ distinguished_triangles V :=
 ⟨_, _, _, _, _, _, ⟨iso.refl _⟩⟩
 
-lemma cone_triangeₕ_mem_distinguished_triangles (X Y Z : cochain_complex V ℤ)
+lemma cone_triangeₕ_mem_distinguished_triangles (X Y : cochain_complex V ℤ)
   (f : X ⟶ Y) : (neg₃_functor _).obj (cone.triangleₕ f) ∈ distinguished_triangles V :=
 (mem_distinguished_iff_exists_iso_cone _).mpr ⟨_, _, _, ⟨iso.refl _⟩⟩
 
