@@ -442,5 +442,79 @@ theorem is_ExtrSheaf_of_types_of_finite_product_condition_for_types
   (F : ExtrDisc.{u}ᵒᵖ ⥤ Type w) (hF : ExtrDisc.finite_product_condition_for_types F) :
   is_ExtrSheaf_of_types F :=
 begin
-  sorry
+  introsI B ι _ X f surj x hx,
+  have hF' := hF,
+  specialize hF ι X,
+  let G : ι × ι → ExtrDisc := λ ii, (Profinite.pullback (f ii.1).val (f ii.2).val).pres,
+  let gfst : Π ii : ι × ι, G ii ⟶ X ii.1 :=
+    λ ii, ⟨Profinite.pres_π _ ≫ Profinite.pullback.fst _ _⟩,
+  let gsnd : Π ii : ι × ι, G ii ⟶ X ii.2 :=
+    λ ii, ⟨Profinite.pres_π _ ≫ Profinite.pullback.snd _ _⟩,
+  specialize hF' (ι × ι) G,
+  dsimp at hF hF',
+  let π : ExtrDisc.sigma X ⟶ B := ExtrDisc.sigma.desc X f,
+  have hπ : function.surjective π := sorry, -- follows from surj
+  let r : (ExtrDisc.sigma G).val ⟶ Profinite.pullback π.val π.val :=
+    Profinite.pullback.lift _ _ _ _ _,
+  rotate,
+  { refine Profinite.sigma.desc _ _,
+    intros ii,
+    refine _ ≫ Profinite.sigma.ι _ ii.1,
+    refine (gfst _).val },
+  { refine Profinite.sigma.desc _ _,
+    intros ii,
+    refine _ ≫ Profinite.sigma.ι _ ii.2,
+    dsimp,
+    refine (gsnd _).val },
+  { apply Profinite.sigma.hom_ext,
+    rintros ⟨i,j⟩,
+    dsimp [π, ExtrDisc.sigma.desc],
+    simp [Profinite.pullback.condition] },
+  -- follows essentially from the surjectivity of `pres_π`.
+  have hr : function.surjective r := sorry,
+  have hE := ExtrDisc.equalizer_condition_for_types_holds F π hπ r hr,
+  dsimp at hE,
+  let P : F.obj (op (ExtrDisc.sigma X)) ≃ Π i, F.obj (op (X i)) :=
+    equiv.of_bijective _ hF,
+  let Q : F.obj (op (ExtrDisc.sigma G)) ≃ Π ii, F.obj (op (G ii)) :=
+    equiv.of_bijective _ hF',
+  let rfst : ExtrDisc.sigma G ⟶ ExtrDisc.sigma X :=
+    ⟨r ≫ Profinite.pullback.fst _ _⟩,
+  let rsnd : ExtrDisc.sigma G ⟶ ExtrDisc.sigma X :=
+    ⟨r ≫ Profinite.pullback.snd _ _⟩,
+  have hrgfst : ∀ (q : Π i, F.obj (op (X i))), Q (F.map rfst.op (P.symm q)) =
+    (λ ii, F.map (gfst ii).op (q ii.1)), sorry, -- should be easy
+  have hrgsnd : ∀ (q : Π i, F.obj (op (X i))), Q (F.map rsnd.op (P.symm q)) =
+    (λ ii, F.map (gsnd ii).op (q ii.2)), sorry, -- should be easy
+  let EE : F.obj (op B) ≃
+    { t : F.obj (op (ExtrDisc.sigma X)) // F.map rfst.op t = F.map rsnd.op t } :=
+      equiv.of_bijective _ hE,
+  let x' : F.obj (op (ExtrDisc.sigma X)) := P.symm x,
+  -- Should follow from hx,
+  have hx' : F.map rfst.op x' = F.map rsnd.op x' := sorry,
+  let b : F.obj (op B) := EE.symm ⟨x',hx'⟩,
+  use b,
+  have hb : ∀ i, F.map (f i).op b = x i,
+  { intros i,
+    have : f i = ExtrDisc.sigma.ι X i ≫ π := sorry, -- simple
+    rw [this, op_comp, F.map_comp],
+    dsimp,
+    have : F.map π.op b = x',
+    { change ↑(EE b) = x',
+      dsimp only [b],
+      rw equiv.apply_symm_apply,
+      refl },
+    rw this,
+    dsimp [x'],
+    change (P (P.symm x)) _ = _,
+    rw equiv.apply_symm_apply },
+  refine ⟨hb, _⟩,
+  { intros b' hb',
+    apply_fun EE,
+    ext1,
+    apply_fun P,
+    dsimp [EE, P],
+    funext i,
+    change (F.map _ ≫ F.map _) _ = (F.map _ ≫ F.map _) _,
+    simp only [← F.map_comp, ← op_comp, ExtrDisc.sigma.ι_desc, hb, hb'] }
 end
