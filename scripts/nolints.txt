@@ -28,14 +28,13 @@ apply_nolint lem98_finite def_lemma
 -- combinatorial_lemma/profinite.lean
 apply_nolint lem98 def_lemma
 
--- condensed/extr.lean
+-- condensed/extr/basic.lean
 apply_nolint ExtrDisc.empty.hom_ext def_lemma
 apply_nolint ExtrDisc.of_val def_lemma
-apply_nolint ExtrSheaf.equalizer_iso_hom_ι def_lemma
-apply_nolint ExtrSheaf.prod_iso unused_arguments
-apply_nolint G₁ unused_arguments
 apply_nolint Profinite.empty_is_initial def_lemma
-apply_nolint P₁ unused_arguments
+
+-- condensed/extr/wip.lean
+apply_nolint ExtrDisc.cover_dense def_lemma
 
 -- facts/int.lean
 apply_nolint fact_le_of_add_one_le fails_quickly
@@ -98,6 +97,9 @@ apply_nolint homological_complex.termwise_split_mono_section unused_arguments
 apply_nolint Inter_eq inhabited_nonempty
 apply_nolint eventually_constant inhabited_nonempty
 apply_nolint exists_le_finset inhabited_nonempty
+
+-- for_mathlib/presieve.lean
+apply_nolint category_theory.presieve.eq_obj_of_arrows def_lemma
 
 -- for_mathlib/rational_cones.lean
 apply_nolint extended_le_span unused_arguments
