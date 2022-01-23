@@ -252,18 +252,56 @@ has_shift_mk _ _
 @[simp] lemma homotopy_category.quotient_map_shift {X Y : cochain_complex V ℤ} (f : X ⟶ Y) (n : ℤ) :
   ((homotopy_category.quotient V _).map f)⟦n⟧' = (homotopy_category.quotient V _).map (f⟦n⟧') := rfl
 
+@[simp] lemma shift_ε_app (X : cochain_complex V ℤ) :
+  (shift_monoidal_functor _ ℤ).ε.app ((homotopy_category.quotient _ _).obj X) =
+    (homotopy_category.quotient _ _).map ((shift_monoidal_functor _ ℤ).ε.app X) := rfl
+
+@[simp]
+lemma shift_ε_inv_app (X : cochain_complex V ℤ) :
+  (shift_monoidal_functor _ ℤ).ε_iso.inv.app ((homotopy_category.quotient _ _).obj X) =
+    (homotopy_category.quotient _ _).map ((shift_monoidal_functor _ ℤ).ε_iso.inv.app X) :=
+begin
+  rw [← cancel_mono ((shift_monoidal_functor _ ℤ).ε.app ((homotopy_category.quotient _ _).obj X)),
+    ε_inv_hom_app, shift_ε_app, ← functor.map_comp, ε_inv_hom_app],
+  refl
+end
+
+@[simp] lemma shift_μ_app (i j : ℤ) (X : cochain_complex V ℤ) :
+  ((shift_monoidal_functor _ ℤ).μ i j).app ((homotopy_category.quotient _ _).obj X) =
+    (homotopy_category.quotient _ _).map (((shift_monoidal_functor _ ℤ).μ i j).app X) := rfl
+
+@[simp]
+lemma shift_μ_inv_app (i j : ℤ) (X : cochain_complex V ℤ) :
+  ((shift_monoidal_functor _ ℤ).μ_iso i j).inv.app ((homotopy_category.quotient _ _).obj X) =
+    (homotopy_category.quotient _ _).map (((shift_monoidal_functor _ ℤ).μ_iso i j).inv.app X) :=
+begin
+  rw [← cancel_mono (((shift_monoidal_functor _ ℤ).μ i j).app
+      ((homotopy_category.quotient _ _).obj X)),
+    μ_inv_hom_app, shift_μ_app, ← functor.map_comp, μ_inv_hom_app],
+  refl
+end
 local attribute [reducible] discrete.add_monoidal
 
 @[simp] lemma shift_μ_hom_app_f (A : cochain_complex V ℤ) (i j k : ℤ) :
   hom.f (((shift_monoidal_functor _ ℤ).μ i j).app A) k =
     (A.X_eq_to_iso $ by { dsimp, ring }).hom := rfl
 
+@[simp] lemma shift_μ_inv_app_f (A : cochain_complex V ℤ) (i j k : ℤ) :
+  hom.f (((shift_monoidal_functor _ ℤ).μ_iso i j).inv.app A) k =
+    (A.X_eq_to_iso $ by { dsimp, ring }).hom :=
+begin
+  generalize_proofs h,
+  rw ← cancel_epi (A.X_eq_to_iso h.symm).hom,
+  conv_lhs { rw [← shift_μ_hom_app_f, ← comp_f] },
+  simpa [-comp_f]
+end
+
 @[simp] lemma shift_ε_hom_app_f (A : cochain_complex V ℤ) (i : ℤ) :
   hom.f ((shift_monoidal_functor _ ℤ).ε.app A) i = (A.X_eq_to_iso $ by { dsimp, ring }).hom :=
 rfl
 
 @[simp]
-lemma shift_μ_inv_app_f (A : cochain_complex V ℤ) (i : ℤ) :
+lemma shift_ε_inv_app_f (A : cochain_complex V ℤ) (i : ℤ) :
   hom.f ((shift_monoidal_functor _ ℤ).ε_iso.inv.app A) i =
     (A.X_eq_to_iso $ by { dsimp, ring }).hom :=
 begin

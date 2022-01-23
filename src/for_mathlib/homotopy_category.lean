@@ -1,4 +1,5 @@
 import algebra.homology.homotopy_category
+import for_mathlib.homological_complex_shift
 
 universes v u
 
@@ -124,5 +125,21 @@ instance : preadditive (homotopy_category V c) :=
   end }
 
 instance quotient.additive : (quotient V c).additive := {}
+
+attribute[derive [full]] quotient
+
+open_locale zero_object
+
+instance [has_zero_object V] : has_zero_object (homotopy_category V c) :=
+{ zero := ⟨0⟩,
+  unique_to := λ X, ⟨⟨0⟩, λ f, by { induction f using quot.induction_on, dsimp, erw quot_mk,
+    rw [← (quotient V c).map_zero], congr, ext }⟩,
+  unique_from := λ X, ⟨⟨0⟩, λ f, by { induction f using quot.induction_on, dsimp, erw quot_mk,
+    rw [← (quotient V c).map_zero], congr, ext }⟩ }
+
+instance shift_functor_additive (n : ℤ) :
+  (category_theory.shift_functor (homotopy_category V (complex_shape.up ℤ)) n).additive :=
+{}
+
 
 end homotopy_category

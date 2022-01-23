@@ -392,14 +392,6 @@ lemma has_pushout_of_size (C : Type u) [category.{v} C] [has_pushouts C] :
 has_colimits_of_shape_of_equivalence walking_span_equiv.{v}
 
 -- move this
-instance [mono f] (i : ι) : mono (f.f i) :=
-begin
-  change mono ((eval V c i).map f),
-  haveI := has_pullback_of_size.{max u' v} V,
-  exact category_theory.preserves_mono _ f,
-end
-
--- move this
 instance _root_.category_theory.preserves_epi {C : Type u} {D : Type u'}
   [category.{v} C] [category.{v'} D]
   (F : C ⥤ D) {X Y : C} (f : X ⟶ Y) [preserves_colimit (span f f) F] [epi f] :
@@ -410,13 +402,43 @@ begin
   apply pushout_cocone.epi_of_is_colimit_mk_id_id _ this,
 end
 
--- move this
+instance [mono f] (i : ι) : mono (f.f i) :=
+begin
+  change mono ((eval V c i).map f),
+  haveI := has_pullback_of_size.{max u' v} V,
+  exact category_theory.preserves_mono _ f,
+end
+
+lemma mono_of_eval [∀ i, mono (f.f i)] : mono f :=
+begin
+  constructor,
+  intros Z g h r,
+  ext i,
+  rw ← cancel_mono (f.f i),
+  exact congr_f r i
+end
+
+lemma mono_iff_eval : mono f ↔ ∀ i, mono (f.f i) :=
+⟨λ _ i, by exactI infer_instance, λ _, by exactI mono_of_eval f⟩
+
 instance [epi f] (i : ι) : epi (f.f i) :=
 begin
   change epi ((eval V c i).map f),
   haveI := has_pushout_of_size.{max u' v} V,
   exact category_theory.preserves_epi _ f,
 end
+
+lemma epi_of_eval [∀ i, epi (f.f i)] : epi f :=
+begin
+  constructor,
+  intros Z g h r,
+  ext i,
+  rw ← cancel_epi (f.f i),
+  exact congr_f r i
+end
+
+lemma epi_iff_eval : epi f ↔ ∀ i, epi (f.f i) :=
+⟨λ _ i, by exactI infer_instance, λ _, by exactI epi_of_eval f⟩
 
 def normal_mono [mono f] : normal_mono f :=
 { Z := cokernel_complex f,
