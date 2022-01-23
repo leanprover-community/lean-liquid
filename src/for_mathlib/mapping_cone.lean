@@ -64,7 +64,7 @@ def cone : cochain_complex V ℤ :=
   d_comp_d' := λ i j k (hij : _ = _) (hjk : _ = _),
   begin
     substs hij hjk,
-    ext; simp [cone.d],
+    apply biprod.hom_ext; ext; simp [cone.d],
   end }
 
 @[simp]
@@ -519,7 +519,9 @@ begin
   let h₂' := (h₃.trans $ homotopy.of_eq (zero_comp : 0 ≫ 𝟙 _ = 0).symm),
   refine ((of_termwise_split_epi_homotopy h₁').symm.comp
     (of_termwise_split_mono_homotopy h₂')).trans (homotopy.of_eq _),
-  ext i,
+  apply hom.ext,
+  apply funext,
+  intro i,
   exact comp_eq_zero_of_exact (f.f i) (g.f i)
     (congr_f ((of_termwise_split_epi_commutes h₁').trans comp_zero) i)
     (congr_f ((of_termwise_split_mono_commutes h₂').trans zero_comp) i)
