@@ -60,9 +60,9 @@ begin
 end
 
 --for mathlib?
-lemma sum_range_sum_Icc (f : ℤ → ℤ) (n d : ℤ) (hn : 0 ≤ n - d) :
- ∑ l in (range (int.eq_coe_of_zero_le hn).some.succ), (f (n - l) : ℝ) * 2 ^ l =
- ∑ k in (Icc d n), ((f k) : ℝ) * 2 ^ (n - k) :=
+lemma sum_range_sum_Icc (f : ℤ → ℝ) (n d : ℤ) (hn : 0 ≤ n - d) :
+ ∑ l in (range (int.eq_coe_of_zero_le hn).some.succ), (f (n - l)) * 2 ^ l =
+ ∑ k in (Icc d n), (f k) * 2 ^ (n - k) :=
 begin
   let m := (int.eq_coe_of_zero_le hn).some,
   have sum_swap : ∑ (l : ℕ) in range m.succ, (f (n - l) : ℝ) * 2 ^ l =
@@ -96,7 +96,6 @@ begin
   simp only [*, int.nat_cast_eq_coe_nat, sub_left_inj, subtype.val_eq_coe] at *,
   exact (Exists.some_spec (int.eq_coe_of_zero_le hn)).symm,
 end
-
 
 --for `mathlib`?
 def equiv_bdd_integer_nat (N : ℤ) : ℕ ≃ {x // N ≤ x} :=
@@ -614,7 +613,7 @@ begin
       simp_rw [← int.norm_cast_real, int.cast_neg, int.cast_sum, int.cast_mul, int.cast_pow,
         int.cast_two],
       rw ← sub_nonneg at h_event,
-      rw [sum_range_sum_Icc (F s) n F.d h_event,
+      rw [sum_range_sum_Icc (coe ∘ (F s)) n F.d h_event,
         sum_Icc_sum_tail (F s) n F.d _ (lt_d_eq_zero S F s) h_event],
       { rw [← (abs_eq_self.mpr (inv_nonneg.mpr (@zero_le_two ℝ _))), ← real.norm_eq_abs,
           ← normed_field.norm_mul, real.norm_eq_abs, real.norm_eq_abs, abs_eq_abs,
