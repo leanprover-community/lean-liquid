@@ -82,6 +82,30 @@ def hom_equiv_evaluation (S : Profinite.{u}) (A : Condensed Ab) :
 (Condensed_Ab_CondensedSet_adjunction.hom_equiv S.to_Condensed A).trans $
   (equiv_of_fully_faithful $ Sheaf_to_presheaf.{u} _ _).trans $ yoneda'_equiv _ _
 
+lemma hom_equiv_evaluation_apply_eq_app_id (S : Profinite.{u}) (A : Condensed Ab)
+  (f : ℤ[S] ⟶ A) : hom_equiv_evaluation S A f =
+  (Condensed_Ab.to_free _ ≫ Condensed_Ab_to_CondensedSet.map f).val.app _ ⟨𝟙 _⟩ := rfl
+
+lemma exists_hom_equiv_evaluation_symm_app_eq
+  (S : Profinite.{u}) (A : Condensed Ab)
+  (f : A.val.obj (opposite.op S)) : ∃ (t : ℤ[S].val.obj (opposite.op S)),
+  ((hom_equiv_evaluation S A).symm f).val.app _ t = f :=
+begin
+  -- This proof can probably be made simpler using some adjunction voodoo...
+  use (hom_equiv_evaluation _ _) (𝟙 _),
+  dsimp [hom_equiv_evaluation, adjunction.whisker_right],
+  simp_rw [← comp_apply, ← nat_trans.comp_app],
+  erw [category.comp_id, proetale_topology.to_sheafify_sheafify_lift],
+  dsimp [functor.preimage, full.preimage, yoneda'_equiv],
+  simp only [comp_apply, AddCommGroup.free_map_coe, category.id_comp, category.comp_id],
+  dsimp [functor.right_unitor, AddCommGroup.adj, applicative.to_functor],
+  erw equiv.apply_symm_apply,
+  simp,
+  change _ + _ = _,
+  rw zero_add,
+  refl,
+end
+
 local attribute [instance] limits.has_zero_object.has_zero
 
 open category_theory.limits
