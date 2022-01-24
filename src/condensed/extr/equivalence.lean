@@ -417,17 +417,90 @@ def P₀ : C := ∏ (λ i,  KC.obj (op (X i)))
 def P : C := ∏ (λ i : ulift.{u+1} ι,  KC.obj (op (X i.down)))
 def S : C := ⨁ (λ i : ulift.{u+1} ι, KC.obj (op (X i.down)))
 
-def prod_iso : P₀ ≅ P :=
+def prod_iso_P : P₀ ≅ P :=
 { hom := pi.lift $ λ i, pi.π _ _,
   inv := pi.lift $ λ i, pi.π _ ⟨i⟩ ≫ (iso.refl _).hom } .
 
-def biprod_iso : P ≅ S :=
+def biprod_iso_P : P ≅ S :=
 { hom := biproduct.lift $ λ b, pi.π _ _,
   inv := pi.lift $ λ b, biproduct.π _ _,
   inv_hom_id' := begin
     apply biproduct.hom_ext, -- we need to choose the correct extensionality lemma here...
     intros i,
     simp,
+  end }
+
+def Q₀ (j : J) : C := ∏ (λ i : ι, (K.obj j).val.obj (op (X i)))
+def Q (j : J) : C := ∏ (λ i : ulift.{u+1} ι, (K.obj j).val.obj (op (X i.down)))
+def T (j : J) : C := ⨁ (λ i : ulift.{u+1} ι, (K.obj j).val.obj (op (X i.down)))
+
+def prod_iso_Q (j : J) : Q₀ j ≅ Q j :=
+{ hom := pi.lift $ λ b, pi.π _ _,
+  inv := pi.lift $ λ b, pi.π _ ⟨b⟩ ≫ (iso.refl _).hom }
+
+def biprod_iso_Q (j : J) : Q j ≅ T j :=
+{ hom := biproduct.lift $ λ b, pi.π _ _,
+  inv := pi.lift $ λ b, biproduct.π _ _,
+  inv_hom_id' := begin
+    apply biproduct.hom_ext, -- we need to choose the correct extensionality lemma here...
+    intros i,
+    simp,
+  end }
+
+def KCE (j) : (K.obj j).val.obj (op (ExtrDisc.sigma X)) ≅ Q₀ j :=
+begin
+  -- Lean is being annoying... again...
+  let t : (K.obj j).val.obj (op (ExtrDisc.sigma X)) ⟶ Q₀ K X j :=
+    pi.lift (λ (i : ι), (K.obj j).val.map (ExtrDisc.sigma.ι X i).op),
+  haveI : is_iso t := (K.obj j).cond ι X,
+  exact as_iso t,
+end
+
+def map_Q₀ {i j : J} (f : i ⟶ j) : Q₀ i ⟶ Q₀ j :=
+  pi.lift $ λ a, pi.π _ a ≫ (K.map f).val.app _
+
+def map_Q {i j : J} (f : i ⟶ j) : Q i ⟶ Q j :=
+  pi.lift $ λ a, pi.π _ a ≫ (K.map f).val.app _
+
+def map_T {i j : J} (f : i ⟶ j) : T i ⟶ T j :=
+  biproduct.lift $ λ a, biproduct.π _ a ≫ (K.map f).val.app _
+
+def Q₀_functor : J ⥤ C :=
+{ obj := Q₀,
+  map := λ i j f, map_Q₀ f,
+  map_id' := begin
+    intros i,
+    dsimp [map_Q₀],
+    ext1,
+    simp,
+  end,
+  map_comp' := begin
+    intros i j k f g,
+    dsimp [map_Q₀],
+    ext1,
+    simp,
+  end }
+
+def Q_functor : J ⥤ C :=
+{ obj := Q,
+  map := λ i j f, map_Q f,
+  map_id' := begin
+    intros i, dsimp [map_Q], ext1, simp,
+  end,
+  map_comp' := begin
+    intros i j k f g, dsimp [map_Q], ext1, simp
+  end }
+
+def T_functor : J ⥤ C :=
+{ obj := T,
+  map := λ i j f, map_T f,
+  map_id' := by { intros i, dsimp [map_T], apply biproduct.hom_ext, intros a, simp },
+  map_comp' := begin
+    intros i j k f g,
+    dsimp [map_T],
+    apply biproduct.hom_ext,
+    intros a,
+    simp
   end }
 
 end
