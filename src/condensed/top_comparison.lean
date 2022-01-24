@@ -1,6 +1,7 @@
 import category_theory.yoneda
 import condensed.basic
 import condensed.is_proetale_sheaf
+import condensed.extr.equivalence
 import algebra.category.Group.adjunctions
 import for_mathlib.SheafOfTypes_sheafification
 import for_mathlib.yoneda
@@ -174,9 +175,43 @@ begin
   apply_instance
 end
 
-instance (S : Profinite.{u}) [projective S] :
-  limits.preserves_colimits (Condensed.evaluation Ab.{u+1} S) := sorry
+universe w
+open category_theory.limits
 
-/- TODO:  this is wrong... -/
---instance (S : Profinite.{u}) [projective S] :
---  limits.preserves_colimits (CondensedSet.evaluation S) := sorry
+variables (C : Type w) [category.{u+1} C]
+
+noncomputable
+instance preserves_colimits_Condensed_evaluation
+  (S : ExtrDisc.{u}) (C : Type w) [category.{u+1} C]
+  [has_limits C] [has_colimits C] [has_zero_morphisms C] [has_finite_biproducts C] :
+  limits.preserves_colimits (Condensed.evaluation C S.val) :=
+begin
+  change preserves_colimits
+    (((Sheaf_to_presheaf _ _ : Condensed C ⥤ _) ⋙
+    ((whiskering_left _ _ _).obj ExtrDisc_to_Profinite.op)) ⋙
+    (evaluation _ _).obj (op S)),
+  apply_with limits.comp_preserves_colimits { instances := ff },
+  apply category_theory.preserves_colimits_of_creates_colimits_and_has_colimits,
+  apply_instance,
+end
+
+noncomputable
+instance preserves_colimits_Condensed_evaluation'
+  (S : Profinite.{u}) [projective S] (C : Type w) [category.{u+1} C]
+  [has_limits C] [has_colimits C] [has_zero_morphisms C] [has_finite_biproducts C] :
+  limits.preserves_colimits (Condensed.evaluation C S) :=
+preserves_colimits_Condensed_evaluation ⟨S⟩ _
+
+
+-- TODO: Move this
+instance : has_finite_biproducts Ab :=
+has_finite_biproducts.of_has_finite_products
+
+-- sanity check
+noncomputable example (S : ExtrDisc.{u}) :
+  limits.preserves_colimits (Condensed.evaluation Ab.{u+1} S.val) :=
+preserves_colimits_Condensed_evaluation _ _
+
+noncomputable example (S : Profinite.{u}) [projective S] :
+  limits.preserves_colimits (Condensed.evaluation Ab.{u+1} S) :=
+preserves_colimits_Condensed_evaluation' _ _
