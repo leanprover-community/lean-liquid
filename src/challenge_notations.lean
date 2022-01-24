@@ -1,6 +1,6 @@
 import banach
 import real_measures
-import condensed.ab
+import condensed.projective_resolution
 import category_theory.abelian.ext
 import for_mathlib.Profinite.extend
 import for_mathlib.abelian_category
