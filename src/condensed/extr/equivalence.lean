@@ -622,7 +622,20 @@ lemma key_lemma : t =
   (has_colimit.iso_of_nat_iso Q₀Q_nat_iso).hom ≫
   (has_colimit.iso_of_nat_iso QT_nat_iso).hom ≫
   colimit_T_iso.hom ≫ CT_iso.hom ≫
-  biprod_iso_P.inv ≫ prod_iso_P.inv := sorry
+  biprod_iso_P.inv ≫ prod_iso_P.inv :=
+begin
+  dsimp [prod_iso_P, biprod_iso_P, CT_iso, colimit_T_iso, colimit_KQ₀_nat_iso_eval, t,
+    colimit_KQ₀_nat_iso, KC, ct_iso],
+  ext : 2,
+  simp,
+  erw colimit.ι_desc_assoc,
+  dsimp [cocones.precompose, KQ₀_nat_iso, Q₀Q_nat_iso, QT_nat_iso, KQ₀,
+    prod_iso_Q, biprod_iso_Q],
+  simp,
+  erw colimit.ι_desc,
+  dsimp,
+  simp,
+end
 
 theorem main : is_iso t :=
 begin
