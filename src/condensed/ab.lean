@@ -17,7 +17,7 @@ universes v u
 
 namespace Condensed
 
---instance : preadditive (Condensed Ab.{u+1}) := sorry
+--instance : preadditive (Condensed Ab.{u+1}) := by admit
 
 noncomputable theory
 
@@ -26,7 +26,7 @@ example {J : Type (u+1)} [small_category J] [is_filtered J] :
   limits.preserves_colimits_of_shape J (forget Ab.{u+1}) := by apply_instance
 
 -- this is now available in `condensed/projective_resolutions.lean`...
---instance : enough_projectives (Condensed Ab.{u+1}) := sorry
+--instance : enough_projectives (Condensed Ab.{u+1}) := by admit
 
 instance : is_right_adjoint (Sheaf_to_presheaf _ _ : Condensed Ab.{u+1} ⥤ _) :=
 { left := presheaf_to_Sheaf _ _,
