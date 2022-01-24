@@ -1,5 +1,8 @@
 import condensed.ab
 import condensed.top_comparison
+import condensed.extr.equivalence
+import category_theory.sites.limits
+import algebra.category.Group.filtered_colimits
 
 import for_mathlib.abelian_category
 import for_mathlib.ab_epi
@@ -158,3 +161,106 @@ instance (S : Profinite.{u}) [projective S] :
     change (free_abelian_group.lift id) (_ <$> free_abelian_group.of _) = _,
     simp,
   end }
+
+lemma is_zero_iff_forall_zero {A : Condensed.{u} Ab.{u+1}} :
+  is_zero A ↔ ∀ (S : ExtrDisc), is_zero (A.val.obj (op S.val)) :=
+begin
+  split,
+  { intros h S,
+    apply is_zero_of_preserves (Condensed.evaluation Ab.{u+1} S.val),
+    assumption },
+  { intro h,
+    let FF := ((Sheaf_to_presheaf _ _ : Condensed Ab ⥤ _) ⋙
+      (whiskering_left _ _ _).obj (ExtrDisc_to_Profinite.op)),
+    haveI : creates_colimits FF :=
+      by apply Condensed_to_ExtrDisc_presheaf_creates_colimits,
+    suffices : A ≅ ⊥_ _, by { apply is_zero_of_iso_of_zero _ this.symm, exact is_zero_initial },
+    let e : Π S : ExtrDisc, (A.val.obj (op S.val)) ≅ ⊥_ _ :=
+      λ S, is_zero.iso (h S) is_zero_initial,
+    symmetry,
+    apply (colimit.is_colimit _).cocone_point_unique_up_to_iso (_ : is_colimit (as_empty_cocone _)),
+    apply is_colimit_of_reflects FF,
+    apply evaluation_jointly_reflects_colimits,
+    intros S,
+    have := is_colimit_empty_cocone_equiv Ab (as_empty_cocone (A.val.obj (op S.unop.val)))
+      (((evaluation ExtrDiscᵒᵖ Ab).obj S).map_cocone (FF.map_cocone (as_empty_cocone A)))
+      (eq_to_iso rfl),
+    apply this.to_fun,
+    specialize e S.unop,
+    let t : as_empty_cocone (A.val.obj (op (unop S).val)) ≅ as_empty_cocone (⊥_ _) :=
+      cocones.ext e (by tidy),
+    apply is_colimit.of_iso_colimit _ t.symm,
+    refine ⟨λ r, _, _, _⟩,
+    { dsimp, refine initial.to r.X, },
+    { tidy },
+    { tidy } }
+end
+
+lemma is_epi_iff_forall_surjective {A B : Condensed.{u} Ab.{u+1}} (f : A ⟶ B) :
+  epi f ↔ ∀ (S : ExtrDisc), function.surjective (f.val.app (op S.val)) :=
+begin
+  rw epi_iff_is_zero_cokernel,
+  rw is_zero_iff_forall_zero,
+  apply forall_congr (λ S, _),
+  let FF := Condensed.evaluation Ab.{u+1} S.val,
+  haveI : preserves_colimits FF := infer_instance,
+  let e : (cokernel f).val.obj (op S.val) ≅ cokernel (f.val.app (op S.val)) := begin
+    change FF.obj (cokernel f) ≅ cokernel (FF.map f),
+    change (FF.map_cocone _).X ≅ _,
+    refine (is_colimit_of_preserves FF (colimit.is_colimit _)).cocone_point_unique_up_to_iso
+      (colimit.is_colimit _) ≪≫ _,
+    dsimp,
+    apply has_colimit.iso_of_nat_iso,
+    -- This isomorphism is probably somewhere in mathlib... or somewhere in this repo.
+    refine nat_iso.of_components _ _,
+    { rintros (i|i),
+      { exact iso.refl _ },
+      { exact iso.refl _ } },
+    { rintros (i|i) (j|j) (f|f),
+      { dsimp, simpa, },
+      { dsimp, simp, },
+      { dsimp, simpa, },
+      { dsimp, simpa, } },
+  end,
+  have : is_zero ((cokernel f).val.obj (op S.val)) ↔ is_zero (cokernel (f.val.app (op S.val))),
+  { split,
+    { intro h, apply is_zero_of_iso_of_zero h e, },
+    { intro h, apply is_zero_of_iso_of_zero h e.symm, } },
+  rw [this, ← epi_iff_is_zero_cokernel],
+  clear e,
+  split,
+  { introsI h, apply AddCommGroup.surjective_of_epi },
+  { intros h, exact concrete_category.epi_of_surjective (f.val.app (op S.val)) h}
+end
+
+theorem Condensed_Ab_has_enough_projectives_aux (A : Condensed.{u} Ab.{u+1}) :
+  ∃ (B : Condensed Ab) (hB : projective B) (f : B ⟶ A), epi f :=
+begin
+  let II := Σ (S : ExtrDisc), A.val.obj (op S.val),
+  let X : II → Condensed Ab := λ i, ℤ[i.1.val],
+  let f : Π i, X i ⟶ A := λ i, (hom_equiv_evaluation i.1.val A).symm i.2,
+  -- Move this.
+  haveI : has_colimits (Condensed.{u} Ab.{u+1}) := begin
+    change has_colimits (Sheaf _ _),
+    exact category_theory.Sheaf.category_theory.limits.has_colimits.{(u+2) u (u+1)},
+  end,
+  use [∐ X, infer_instance, sigma.desc f],
+  rw is_epi_iff_forall_surjective,
+  intros S t,
+  obtain ⟨w,hw⟩ := exists_hom_equiv_evaluation_symm_app_eq S.val A t,
+  use (sigma.ι X ⟨S,t⟩).val.app (op S.val) w,
+  rw [← comp_apply, ← nat_trans.comp_app],
+  change (((sigma.ι X ⟨S,t⟩) ≫ sigma.desc f).val.app (op S.val)) w = _,
+  erw colimit.ι_desc,
+  exact hw,
+end
+
+instance Condensed_Ab_has_enough_projective : enough_projectives (Condensed.{u} Ab.{u+1}) :=
+begin
+  constructor,
+  intros B,
+  obtain ⟨X,hX,f,hf⟩ := Condensed_Ab_has_enough_projectives_aux B,
+  resetI,
+  constructor,
+  refine ⟨X,hX,f,hf⟩,
+end
