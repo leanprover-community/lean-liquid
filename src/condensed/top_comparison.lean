@@ -181,16 +181,38 @@ open category_theory.limits
 variables (C : Type w) [category.{u+1} C]
   [has_limits C] [has_zero_morphisms C] [has_finite_biproducts C]
 
+noncomputable
 instance preserves_colimits_Condensed_evaluation
-  (S : Profinite.{u}) (C : Type w) [category.{u+1} C]
-  [has_limits C] [has_zero_morphisms C] [has_finite_biproducts C] :
-  limits.preserves_colimits (Condensed.evaluation C S) := sorry
+  (S : ExtrDisc.{u}) (C : Type w) [category.{u+1} C]
+  [has_limits C] [has_colimits C] [has_zero_morphisms C] [has_finite_biproducts C] :
+  limits.preserves_colimits (Condensed.evaluation C S.val) :=
+begin
+  change preserves_colimits
+    (((Sheaf_to_presheaf _ _ : Condensed C ⥤ _) ⋙
+    ((whiskering_left _ _ _).obj ExtrDisc_to_Profinite.op)) ⋙
+    (evaluation _ _).obj (op S)),
+  apply_with limits.comp_preserves_colimits { instances := ff },
+  apply category_theory.preserves_colimits_of_creates_colimits_and_has_colimits,
+  apply_instance,
+end
+
+noncomputable
+instance preserves_colimits_Condensed_evaluation'
+  (S : Profinite.{u}) [projective S] (C : Type w) [category.{u+1} C]
+  [has_limits C] [has_colimits C] [has_zero_morphisms C] [has_finite_biproducts C] :
+  limits.preserves_colimits (Condensed.evaluation C S) :=
+preserves_colimits_Condensed_evaluation ⟨S⟩ _
+
 
 -- TODO: Move this
 instance : has_finite_biproducts Ab :=
 has_finite_biproducts.of_has_finite_products
 
 -- sanity check
-example (S : Profinite.{u}) [projective S] :
+noncomputable example (S : ExtrDisc.{u}) :
+  limits.preserves_colimits (Condensed.evaluation Ab.{u+1} S.val) :=
+preserves_colimits_Condensed_evaluation _ _
+
+noncomputable example (S : Profinite.{u}) [projective S] :
   limits.preserves_colimits (Condensed.evaluation Ab.{u+1} S) :=
-preserves_colimits_Condensed_evaluation S Ab
+preserves_colimits_Condensed_evaluation' _ _
