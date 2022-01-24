@@ -447,7 +447,7 @@ def biprod_iso_Q (j : J) : Q j ≅ T j :=
     simp,
   end }
 
-def KCE (j) : (K.obj j).val.obj (op (ExtrDisc.sigma X)) ≅ Q₀ j :=
+def KQ₀ (j) : (K.obj j).val.obj (op (ExtrDisc.sigma X)) ≅ Q₀ j :=
 begin
   -- Lean is being annoying... again...
   let t : (K.obj j).val.obj (op (ExtrDisc.sigma X)) ⟶ Q₀ K X j :=
@@ -502,6 +502,34 @@ def T_functor : J ⥤ C :=
     intros a,
     simp
   end }
+
+def KQ₀_nat_iso :
+  K ⋙ ExtrSheafProd_to_presheaf _ ⋙ (evaluation _ _).obj (op (ExtrDisc.sigma X)) ≅ Q₀_functor :=
+nat_iso.of_components (λ j, KQ₀ _)
+begin
+  intros i j f,
+  dsimp [ExtrSheafProd_to_presheaf, Q₀_functor, KQ₀, map_Q₀],
+  ext,
+  simp,
+end
+
+def Q₀Q_nat_iso : Q₀_functor ≅ Q_functor :=
+nat_iso.of_components (λ j, prod_iso_Q _)
+begin
+  intros i j f,
+  dsimp [Q₀_functor, prod_iso_Q, map_Q₀, Q_functor, map_Q],
+  ext1,
+  simp,
+end
+
+def QT_nat_iso : Q_functor ≅ T_functor :=
+nat_iso.of_components (λ j, biprod_iso_Q _)
+begin
+  intros i j f,
+  dsimp [Q_functor, biprod_iso_Q, map_T, T_functor, map_Q],
+  apply biproduct.hom_ext, intros i,
+  simp,
+end
 
 end
 end finite_product_colimit_setup
