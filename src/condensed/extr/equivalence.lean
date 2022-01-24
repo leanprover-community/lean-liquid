@@ -541,12 +541,27 @@ def colimit_KQ₀_nat_iso_eval : KC.obj (op (ExtrDisc.sigma X)) ≅
   colimit (K ⋙ ExtrSheafProd_to_presheaf _ ⋙ (evaluation _ _).obj (op (ExtrDisc.sigma X))) :=
 colimit_KQ₀_nat_iso.app _
 
--- We want this to be an isomorphism.
-def t : KC.obj (op (ExtrDisc.sigma X)) ⟶ P₀ :=
-  pi.lift $ λ i, KC.map (ExtrDisc.sigma.ι _ _).op
-
 def CT : C := ⨁ (λ i : ulift.{u+1} ι,
     colimit (K ⋙ ExtrSheafProd_to_presheaf _ ⋙ (evaluation _ _).obj (op (X i.down))))
+
+def ct_iso (i : ulift.{u+1} ι) :
+  (colimit (K ⋙ ExtrSheafProd_to_presheaf _)).obj (op (X i.down)) ≅
+  colimit (K ⋙ ExtrSheafProd_to_presheaf _ ⋙ (evaluation _ _).obj (op (X i.down))) :=
+colimit_KQ₀_nat_iso.app _
+
+def CT_iso : CT ≅ S :=
+{ hom := biproduct.map $ λ b, (ct_iso _).inv,
+  inv := biproduct.map $ λ b, (ct_iso _).hom,
+  hom_inv_id' := begin
+    ext1,
+    simp,
+    erw category.comp_id,
+  end,
+  inv_hom_id' := begin
+    ext1,
+    simp,
+    erw category.comp_id,
+  end }
 
 -- This is the main point where we prove that colimits commute with biproducts.
 -- The rest is glue.
@@ -597,9 +612,23 @@ def colimit_T_iso : colimit T_functor ≅ CT :=
     erw category.comp_id,
   end }
 
---lemma main_aux_1 : colimit_KQ₀_nat_iso_eval.inv = _
+-- We want this to be an isomorphism.
+def t : KC.obj (op (ExtrDisc.sigma X)) ⟶ P₀ :=
+  pi.lift $ λ i, KC.map (ExtrDisc.sigma.ι _ _).op
 
-theorem main : is_iso t := sorry
+lemma key_lemma : t =
+  colimit_KQ₀_nat_iso_eval.hom ≫
+  (has_colimit.iso_of_nat_iso KQ₀_nat_iso).hom ≫
+  (has_colimit.iso_of_nat_iso Q₀Q_nat_iso).hom ≫
+  (has_colimit.iso_of_nat_iso QT_nat_iso).hom ≫
+  colimit_T_iso.hom ≫ CT_iso.hom ≫
+  biprod_iso_P.inv ≫ prod_iso_P.inv := sorry
+
+theorem main : is_iso t :=
+begin
+  rw key_lemma,
+  apply is_iso.comp_is_iso, -- ;-)
+end
 
 end
 end finite_product_colimit_setup
