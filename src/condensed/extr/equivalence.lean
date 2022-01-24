@@ -386,10 +386,12 @@ def ExtrSheafProd_to_presheaf (C : Type.{u'}) [category.{v'} C]
   map_comp' := λ X Y Z f g, rfl }
 
 instance (C : Type.{u'}) [category.{v'} C]
-  [limits.has_finite_products C] : full (ExtrSheafProd_to_presheaf C) := sorry
+  [limits.has_finite_products C] : full (ExtrSheafProd_to_presheaf C) :=
+{ preimage := λ X Y f, ⟨f⟩,
+  witness' := λ _ _ _, rfl }
 
 instance (C : Type.{u'}) [category.{v'} C]
-  [limits.has_finite_products C] : faithful (ExtrSheafProd_to_presheaf C) := sorry
+  [limits.has_finite_products C] : faithful (ExtrSheafProd_to_presheaf C) := {}
 
 open category_theory.limits
 --set_option pp.universes true
