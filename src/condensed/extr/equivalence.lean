@@ -376,3 +376,82 @@ def Condensed_ExtrSheafProd_equiv (C : Type.{u'}) [category.{u+1} C] [limits.has
 lemma Condensed_ExtrSheafProd_equiv_functor_obj_val
   {C : Type.{u'}} [category.{u+1} C] [limits.has_limits C] (F : Condensed C) :
   ((Condensed_ExtrSheafProd_equiv C).functor.obj F).val = ExtrDisc_to_Profinite.op ⋙ F.val := rfl
+
+def ExtrSheafProd_to_presheaf (C : Type.{u'}) [category.{v'} C]
+  [limits.has_finite_products C] :
+  ExtrSheafProd.{u} C ⥤ ExtrDisc.{u}ᵒᵖ ⥤ C :=
+{ obj := λ F, F.val,
+  map := λ F G f, f.val,
+  map_id' := λ X, rfl,
+  map_comp' := λ X Y Z f g, rfl }
+
+instance (C : Type.{u'}) [category.{v'} C]
+  [limits.has_finite_products C] : full (ExtrSheafProd_to_presheaf C) := sorry
+
+instance (C : Type.{u'}) [category.{v'} C]
+  [limits.has_finite_products C] : faithful (ExtrSheafProd_to_presheaf C) := sorry
+
+open category_theory.limits
+--set_option pp.universes true
+
+section
+variables {C : Type u'} [category.{u+1} C] [has_limits C]
+  [has_zero_morphisms C] [has_finite_biproducts C]
+
+open_locale classical
+
+lemma finite_product_condition_holds_for_colimit
+  {J : Type (u+1)} [small_category J] (K : J ⥤ ExtrSheafProd.{u} C)
+  [has_colimit (K ⋙ ExtrSheafProd_to_presheaf C)] :
+  ExtrDisc.finite_product_condition (colimit (K ⋙ ExtrSheafProd_to_presheaf C)) :=
+begin
+  sorry
+end
+
+noncomputable
+instance ExtrSheafProd_to_presheaf_creates_colimit
+  {J : Type (u+1)} [small_category J] (K : J ⥤ ExtrSheafProd.{u} C)
+  [has_colimit (K ⋙ ExtrSheafProd_to_presheaf _)]:
+  creates_colimit K (ExtrSheafProd_to_presheaf.{u} C) :=
+creates_colimit_of_fully_faithful_of_iso
+⟨colimit (K ⋙ ExtrSheafProd_to_presheaf _), finite_product_condition_holds_for_colimit _⟩ $
+eq_to_iso rfl
+
+noncomputable
+instance ExtrSheafProd_to_presheaf_creates_colimits_of_shape
+  {J : Type (u+1)} [small_category J] :
+  creates_colimits_of_shape J (ExtrSheafProd_to_presheaf.{u} C) :=
+⟨λ K,
+{ reflects := begin
+    intros c hc,
+    haveI : has_colimit (K ⋙ ExtrSheafProd_to_presheaf C) := has_colimit.mk ⟨_,hc⟩,
+    apply is_colimit_of_reflects (ExtrSheafProd_to_presheaf.{u} C),
+    assumption,
+  end,
+  lifts := λ c hc,
+  { lifted_cocone := begin
+      haveI : has_colimit (K ⋙ ExtrSheafProd_to_presheaf C) := has_colimit.mk ⟨_,hc⟩,
+      exact lift_colimit hc,
+    end,
+    valid_lift := begin
+      haveI : has_colimit (K ⋙ ExtrSheafProd_to_presheaf C) := has_colimit.mk ⟨_,hc⟩,
+      apply lifted_colimit_maps_to_original,
+    end } }⟩
+
+noncomputable
+instance ExtrSheafProd_to_presheaf_creates_colimits :
+  creates_colimits (ExtrSheafProd_to_presheaf.{u} C) := by constructor
+
+-- Forgetting to presheaves, and restricting to `ExtrDisc` creates colimits.
+noncomputable
+instance Condensed_to_ExtrDisc_presheaf_creates_colimits :
+  creates_colimits
+  ((Sheaf_to_presheaf _ _ : Condensed C ⥤ _) ⋙
+  (whiskering_left _ _ _).obj (ExtrDisc_to_Profinite.op)) :=
+begin
+  change creates_colimits
+    ((Condensed_ExtrSheafProd_equiv C).functor ⋙ ExtrSheafProd_to_presheaf C),
+  apply_with category_theory.comp_creates_colimits { instances := ff}; apply_instance
+end
+
+end

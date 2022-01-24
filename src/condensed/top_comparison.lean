@@ -1,6 +1,7 @@
 import category_theory.yoneda
 import condensed.basic
 import condensed.is_proetale_sheaf
+import condensed.extr.equivalence
 import algebra.category.Group.adjunctions
 import for_mathlib.SheafOfTypes_sheafification
 import for_mathlib.yoneda
@@ -174,9 +175,22 @@ begin
   apply_instance
 end
 
-instance (S : Profinite.{u}) [projective S] :
-  limits.preserves_colimits (Condensed.evaluation Ab.{u+1} S) := sorry
+universe w
+open category_theory.limits
 
-/- TODO:  this is wrong... -/
---instance (S : Profinite.{u}) [projective S] :
---  limits.preserves_colimits (CondensedSet.evaluation S) := sorry
+variables (C : Type w) [category.{u+1} C]
+  [has_limits C] [has_zero_morphisms C] [has_finite_biproducts C]
+
+instance preserves_colimits_Condensed_evaluation
+  (S : Profinite.{u}) (C : Type w) [category.{u+1} C]
+  [has_limits C] [has_zero_morphisms C] [has_finite_biproducts C] :
+  limits.preserves_colimits (Condensed.evaluation C S) := sorry
+
+-- TODO: Move this
+instance : has_finite_biproducts Ab :=
+has_finite_biproducts.of_has_finite_products
+
+-- sanity check
+example (S : Profinite.{u}) [projective S] :
+  limits.preserves_colimits (Condensed.evaluation Ab.{u+1} S) :=
+preserves_colimits_Condensed_evaluation S Ab
