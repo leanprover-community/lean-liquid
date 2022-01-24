@@ -25,6 +25,8 @@ noncomputable theory
 example {J : Type (u+1)} [small_category J] [is_filtered J] :
   limits.preserves_colimits_of_shape J (forget Ab.{u+1}) := by apply_instance
 
+-- this is now available in `condensed/projective_resolutions.lean`...
+-- We need to rearrange some files to avoid circular imports.
 instance : enough_projectives (Condensed Ab.{u+1}) := sorry
 
 instance : is_right_adjoint (Sheaf_to_presheaf _ _ : Condensed Ab.{u+1} ⥤ _) :=
