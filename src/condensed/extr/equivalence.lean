@@ -404,16 +404,41 @@ open_locale classical
 
 lemma finite_product_condition_holds_for_colimit
   {J : Type (u+1)} [small_category J] (K : J ⥤ ExtrSheafProd.{u} C)
-  [has_colimit (K ⋙ ExtrSheafProd_to_presheaf C)] :
+  [has_colimits C] :
   ExtrDisc.finite_product_condition (colimit (K ⋙ ExtrSheafProd_to_presheaf C)) :=
 begin
-  sorry
+  introsI ι _ X f,
+  let e : ι → C := λ (i : ι), (colimit (K ⋙ ExtrSheafProd_to_presheaf C)).obj (op (X i)),
+  let e' : ulift.{u+1} ι → C := λ i, e i.down,
+  let P := ∏ e,
+  let P' := ∏ e',
+  let S := ⨁ e',
+  let P'S : P' ≅ S := (limit.is_limit _).cone_point_unique_up_to_iso (biproduct.is_limit _),
+  let PP' : P ≅ P' := ⟨_,_,_,_⟩,
+  rotate,
+  { refine pi.lift _,
+    intros i,
+    exact pi.π _ _ },
+  { refine pi.lift _,
+    rintros i,
+    refine pi.π _ ⟨i⟩ ≫ (iso.refl _).hom },
+  { dsimp, ext, dsimp, simp },
+  { dsimp, ext ⟨i⟩, dsimp, simp },
+  let t : (colimit (K ⋙ ExtrSheafProd_to_presheaf C)).obj (op (ExtrDisc.sigma X)) ⟶ P :=
+    pi.lift f,
+  change is_iso t,
+  let T : (colimit (K ⋙ ExtrSheafProd_to_presheaf C)).obj (op (ExtrDisc.sigma X)) ≅
+    colimit (K ⋙ ExtrSheafProd_to_presheaf C ⋙ (evaluation _ _).obj (op (ExtrDisc.sigma X))) :=
+      sorry,
+  let q : P ⟶ (colimit (K ⋙ ExtrSheafProd_to_presheaf C)).obj (op (ExtrDisc.sigma X)) :=
+    PP'.hom ≫ P'S.hom ≫ biproduct.desc
+    (λ b, _),
+  sorry,
 end
 
 noncomputable
 instance ExtrSheafProd_to_presheaf_creates_colimit
-  {J : Type (u+1)} [small_category J] (K : J ⥤ ExtrSheafProd.{u} C)
-  [has_colimit (K ⋙ ExtrSheafProd_to_presheaf _)]:
+  {J : Type (u+1)} [small_category J] (K : J ⥤ ExtrSheafProd.{u} C) [has_colimits C] :
   creates_colimit K (ExtrSheafProd_to_presheaf.{u} C) :=
 creates_colimit_of_fully_faithful_of_iso
 ⟨colimit (K ⋙ ExtrSheafProd_to_presheaf _), finite_product_condition_holds_for_colimit _⟩ $
@@ -421,7 +446,7 @@ eq_to_iso rfl
 
 noncomputable
 instance ExtrSheafProd_to_presheaf_creates_colimits_of_shape
-  {J : Type (u+1)} [small_category J] :
+  {J : Type (u+1)} [small_category J] [has_colimits C] :
   creates_colimits_of_shape J (ExtrSheafProd_to_presheaf.{u} C) :=
 ⟨λ K,
 { reflects := begin
@@ -441,12 +466,12 @@ instance ExtrSheafProd_to_presheaf_creates_colimits_of_shape
     end } }⟩
 
 noncomputable
-instance ExtrSheafProd_to_presheaf_creates_colimits :
+instance ExtrSheafProd_to_presheaf_creates_colimits [has_colimits C] :
   creates_colimits (ExtrSheafProd_to_presheaf.{u} C) := by constructor
 
 -- Forgetting to presheaves, and restricting to `ExtrDisc` creates colimits.
 noncomputable
-instance Condensed_to_ExtrDisc_presheaf_creates_colimits :
+instance Condensed_to_ExtrDisc_presheaf_creates_colimits [has_colimits C] :
   creates_colimits
   ((Sheaf_to_presheaf _ _ : Condensed C ⥤ _) ⋙
   (whiskering_left _ _ _).obj (ExtrDisc_to_Profinite.op)) :=

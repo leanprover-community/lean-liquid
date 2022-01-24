@@ -179,7 +179,6 @@ universe w
 open category_theory.limits
 
 variables (C : Type w) [category.{u+1} C]
-  [has_limits C] [has_zero_morphisms C] [has_finite_biproducts C]
 
 noncomputable
 instance preserves_colimits_Condensed_evaluation
