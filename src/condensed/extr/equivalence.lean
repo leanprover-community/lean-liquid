@@ -5,6 +5,9 @@ import category_theory.sites.induced_topology
 
 import for_mathlib.presieve
 
+
+noncomputable theory
+
 open category_theory
 
 universes u v' u'
@@ -39,7 +42,6 @@ def ExtrDisc.proetale_topology : grothendieck_topology ExtrDisc.{u} :=
 def ExtrSheaf (C : Type u') [category.{v'} C] := Sheaf ExtrDisc.proetale_topology.{u} C
 
 -- TODO: cover_densed.Sheaf_equiv still has unecessary universe restrictions that can be relaxed.
-noncomputable
 def Condensed_ExtrSheaf_equiv (C : Type u') [category.{u+1} C] [limits.has_limits C] :
   ExtrSheaf.{u} C ≌ Condensed.{u} C :=
 ExtrDisc.cover_dense.Sheaf_equiv_of_cover_preserving_cover_lifting
@@ -366,7 +368,6 @@ def ExtrSheaf_ExtrSheafProd_equiv (C : Type.{u'}) [category.{v'} C] [limits.has_
     simp,
   end } .
 
-noncomputable
 def Condensed_ExtrSheafProd_equiv (C : Type.{u'}) [category.{u+1} C] [limits.has_limits C] :
   Condensed.{u} C ≌ ExtrSheafProd.{u} C :=
 (Condensed_ExtrSheaf_equiv C).symm.trans (ExtrSheaf_ExtrSheafProd_equiv C)
@@ -397,17 +398,51 @@ open category_theory.limits
 --set_option pp.universes true
 
 section
-variables {C : Type u'} [category.{u+1} C] [has_limits C]
-  [has_zero_morphisms C] [has_finite_biproducts C]
 
 open_locale classical
 
+namespace finite_product_colimit_setup
+section
+
+parameters {C : Type u'} [category.{u+1} C] [has_limits C] [has_colimits C]
+  [has_zero_morphisms C] [has_finite_biproducts C]
+
+parameters {J : Type (u+1)} [small_category J] (K : J ⥤ ExtrSheafProd.{u} C)
+
+parameters {ι : Type u} [fintype ι] (X : ι → ExtrDisc.{u})
+
+def KC : ExtrDisc.{u}ᵒᵖ ⥤ C := colimit (K ⋙ ExtrSheafProd_to_presheaf C)
+
+def P₀ : C := ∏ (λ i,  KC.obj (op (X i)))
+def P : C := ∏ (λ i : ulift.{u+1} ι,  KC.obj (op (X i.down)))
+def S : C := ⨁ (λ i : ulift.{u+1} ι, KC.obj (op (X i.down)))
+
+def prod_iso : P₀ ≅ P :=
+{ hom := pi.lift $ λ i, pi.π _ _,
+  inv := pi.lift $ λ i, pi.π _ ⟨i⟩ ≫ (iso.refl _).hom } .
+
+def biprod_iso : P ≅ S :=
+{ hom := biproduct.lift $ λ b, pi.π _ _,
+  inv := pi.lift $ λ b, biproduct.π _ _,
+  inv_hom_id' := begin
+    apply biproduct.hom_ext, -- we need to choose the correct extensionality lemma here...
+    intros i,
+    simp,
+  end }
+
+end
+end finite_product_colimit_setup
+
+variables {C : Type u'} [category.{u+1} C] [has_limits C] [has_colimits C]
+  [has_zero_morphisms C] [has_finite_biproducts C]
+
 lemma finite_product_condition_holds_for_colimit
-  {J : Type (u+1)} [small_category J] (K : J ⥤ ExtrSheafProd.{u} C)
-  [has_colimits C] :
+  {J : Type (u+1)} [small_category J] (K : J ⥤ ExtrSheafProd.{u} C) [has_colimits C] :
   ExtrDisc.finite_product_condition (colimit (K ⋙ ExtrSheafProd_to_presheaf C)) :=
 begin
-  introsI ι _ X f,
+  /-
+  introsI ι _ X,
+  dsimp,
   let e : ι → C := λ (i : ι), (colimit (K ⋙ ExtrSheafProd_to_presheaf C)).obj (op (X i)),
   let e' : ulift.{u+1} ι → C := λ i, e i.down,
   let P := ∏ e,
@@ -429,14 +464,16 @@ begin
   change is_iso t,
   let T : (colimit (K ⋙ ExtrSheafProd_to_presheaf C)).obj (op (ExtrDisc.sigma X)) ≅
     colimit (K ⋙ ExtrSheafProd_to_presheaf C ⋙ (evaluation _ _).obj (op (ExtrDisc.sigma X))) :=
-      sorry,
+    (is_colimit_of_preserves ((evaluation _ _).obj _) (colimit.is_colimit _)).cocone_point_unique_up_to_iso
+    (colimit.is_colimit _),
   let q : P ⟶ (colimit (K ⋙ ExtrSheafProd_to_presheaf C)).obj (op (ExtrDisc.sigma X)) :=
-    PP'.hom ≫ P'S.hom ≫ biproduct.desc
-    (λ b, _),
+    PP'.hom ≫ P'S.hom ≫ biproduct.desc (λ b, _) ≫ T.inv,
   sorry,
+  sorry,
+  -/
+  sorry
 end
 
-noncomputable
 instance ExtrSheafProd_to_presheaf_creates_colimit
   {J : Type (u+1)} [small_category J] (K : J ⥤ ExtrSheafProd.{u} C) [has_colimits C] :
   creates_colimit K (ExtrSheafProd_to_presheaf.{u} C) :=
@@ -444,7 +481,6 @@ creates_colimit_of_fully_faithful_of_iso
 ⟨colimit (K ⋙ ExtrSheafProd_to_presheaf _), finite_product_condition_holds_for_colimit _⟩ $
 eq_to_iso rfl
 
-noncomputable
 instance ExtrSheafProd_to_presheaf_creates_colimits_of_shape
   {J : Type (u+1)} [small_category J] [has_colimits C] :
   creates_colimits_of_shape J (ExtrSheafProd_to_presheaf.{u} C) :=
@@ -465,12 +501,10 @@ instance ExtrSheafProd_to_presheaf_creates_colimits_of_shape
       apply lifted_colimit_maps_to_original,
     end } }⟩
 
-noncomputable
 instance ExtrSheafProd_to_presheaf_creates_colimits [has_colimits C] :
   creates_colimits (ExtrSheafProd_to_presheaf.{u} C) := by constructor
 
 -- Forgetting to presheaves, and restricting to `ExtrDisc` creates colimits.
-noncomputable
 instance Condensed_to_ExtrDisc_presheaf_creates_colimits [has_colimits C] :
   creates_colimits
   ((Sheaf_to_presheaf _ _ : Condensed C ⥤ _) ⋙
