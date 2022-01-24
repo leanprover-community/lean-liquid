@@ -32,8 +32,12 @@ apply_nolint lem98 def_lemma
 apply_nolint ExtrDisc.empty.hom_ext def_lemma
 apply_nolint ExtrDisc.of_val def_lemma
 apply_nolint Profinite.empty_is_initial def_lemma
+apply_nolint product_condition_setup.G unused_arguments
+apply_nolint product_condition_setup.hE def_lemma
+apply_nolint product_condition_setup.hG def_lemma
+apply_nolint product_condition_setup.hX def_lemma
 
--- condensed/extr/wip.lean
+-- condensed/extr/equivalence.lean
 apply_nolint ExtrDisc.cover_dense def_lemma
 
 -- facts/int.lean
@@ -85,8 +89,6 @@ apply_nolint short_exact_sequence.horseshoe_ker unused_arguments
 apply_nolint category_theory.limits.is_initial.colimit_cocone unused_arguments
 
 -- for_mathlib/mapping_cone.lean
-apply_nolint homological_complex.split_epi_of_splitting def_lemma
-apply_nolint homological_complex.split_mono_of_splitting def_lemma
 apply_nolint homological_complex.termwise_split_epi_lift unused_arguments
 apply_nolint homological_complex.termwise_split_epi_retraction unused_arguments
 apply_nolint homological_complex.termwise_split_mono_desc unused_arguments
