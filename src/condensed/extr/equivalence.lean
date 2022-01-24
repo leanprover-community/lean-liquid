@@ -463,7 +463,8 @@ def map_Q {i j : J} (f : i ⟶ j) : Q i ⟶ Q j :=
   pi.lift $ λ a, pi.π _ a ≫ (K.map f).val.app _
 
 def map_T {i j : J} (f : i ⟶ j) : T i ⟶ T j :=
-  biproduct.lift $ λ a, biproduct.π _ a ≫ (K.map f).val.app _
+  biproduct.map $ λ a, (K.map f).val.app _
+--λ a, biproduct.π _ a ≫ (K.map f).val.app _
 
 def Q₀_functor : J ⥤ C :=
 { obj := Q₀,
@@ -494,7 +495,8 @@ def Q_functor : J ⥤ C :=
 def T_functor : J ⥤ C :=
 { obj := T,
   map := λ i j f, map_T f,
-  map_id' := by { intros i, dsimp [map_T], apply biproduct.hom_ext, intros a, simp },
+  map_id' := by { intros i, dsimp [map_T],
+    apply biproduct.hom_ext, intros a, simp, erw category.id_comp },
   map_comp' := begin
     intros i j k f g,
     dsimp [map_T],
@@ -531,6 +533,74 @@ begin
   simp,
 end
 
+def colimit_KQ₀_nat_iso :
+  KC ≅ ((K ⋙ ExtrSheafProd_to_presheaf _).flip ⋙ colim) :=
+colimit_iso_flip_comp_colim (K ⋙ ExtrSheafProd_to_presheaf C)
+
+def colimit_KQ₀_nat_iso_eval : KC.obj (op (ExtrDisc.sigma X)) ≅
+  colimit (K ⋙ ExtrSheafProd_to_presheaf _ ⋙ (evaluation _ _).obj (op (ExtrDisc.sigma X))) :=
+colimit_KQ₀_nat_iso.app _
+
+-- We want this to be an isomorphism.
+def t : KC.obj (op (ExtrDisc.sigma X)) ⟶ P₀ :=
+  pi.lift $ λ i, KC.map (ExtrDisc.sigma.ι _ _).op
+
+def CT : C := ⨁ (λ i : ulift.{u+1} ι,
+    colimit (K ⋙ ExtrSheafProd_to_presheaf _ ⋙ (evaluation _ _).obj (op (X i.down))))
+
+-- This is the main point where we prove that colimits commute with biproducts.
+-- The rest is glue.
+def colimit_T_iso : colimit T_functor ≅ CT :=
+{ hom := colimit.desc T_functor ⟨CT,
+  { app := λ j, biproduct.map $ λ i,
+      colimit.ι (K ⋙ ExtrSheafProd_to_presheaf C ⋙
+      (evaluation ExtrDiscᵒᵖ C).obj (op (X i.down))) j,
+    naturality' := begin
+      intros a b f,
+      dsimp [T_functor, map_T],
+      apply biproduct.hom_ext',
+      intros i,
+      simp,
+      rw ← colimit.w _ f,
+      simp only [category.assoc],
+      refl,
+    end }⟩,
+  inv := biproduct.desc $ λ b,
+    colimit.desc (K ⋙ ExtrSheafProd_to_presheaf _ ⋙
+    (evaluation _ _).obj (op (X b.down))) ⟨colimit T_functor,
+  { app := λ j, begin
+      dsimp [ExtrSheafProd_to_presheaf, T_functor, T],
+      apply biproduct.ι _ b,
+    end ≫ colimit.ι _ j,
+    naturality' := begin
+      intros i j f,
+      dsimp [ExtrSheafProd_to_presheaf],
+      simp,
+      rw ← colimit.w _ f,
+      dsimp only [T_functor, map_T],
+      simp,
+    end }⟩,
+  hom_inv_id' := begin
+    ext1 j,
+    dsimp,
+    apply biproduct.hom_ext',
+    intros b,
+    simp,
+  end,
+  inv_hom_id' := begin
+    apply biproduct.hom_ext',
+    intros b,
+    simp,
+    apply colimit.hom_ext,
+    intros j,
+    simp,
+    erw category.comp_id,
+  end }
+
+--lemma main_aux_1 : colimit_KQ₀_nat_iso_eval.inv = _
+
+theorem main : is_iso t := sorry
+
 end
 end finite_product_colimit_setup
 
@@ -541,38 +611,9 @@ lemma finite_product_condition_holds_for_colimit
   {J : Type (u+1)} [small_category J] (K : J ⥤ ExtrSheafProd.{u} C) [has_colimits C] :
   ExtrDisc.finite_product_condition (colimit (K ⋙ ExtrSheafProd_to_presheaf C)) :=
 begin
-  /-
   introsI ι _ X,
   dsimp,
-  let e : ι → C := λ (i : ι), (colimit (K ⋙ ExtrSheafProd_to_presheaf C)).obj (op (X i)),
-  let e' : ulift.{u+1} ι → C := λ i, e i.down,
-  let P := ∏ e,
-  let P' := ∏ e',
-  let S := ⨁ e',
-  let P'S : P' ≅ S := (limit.is_limit _).cone_point_unique_up_to_iso (biproduct.is_limit _),
-  let PP' : P ≅ P' := ⟨_,_,_,_⟩,
-  rotate,
-  { refine pi.lift _,
-    intros i,
-    exact pi.π _ _ },
-  { refine pi.lift _,
-    rintros i,
-    refine pi.π _ ⟨i⟩ ≫ (iso.refl _).hom },
-  { dsimp, ext, dsimp, simp },
-  { dsimp, ext ⟨i⟩, dsimp, simp },
-  let t : (colimit (K ⋙ ExtrSheafProd_to_presheaf C)).obj (op (ExtrDisc.sigma X)) ⟶ P :=
-    pi.lift f,
-  change is_iso t,
-  let T : (colimit (K ⋙ ExtrSheafProd_to_presheaf C)).obj (op (ExtrDisc.sigma X)) ≅
-    colimit (K ⋙ ExtrSheafProd_to_presheaf C ⋙ (evaluation _ _).obj (op (ExtrDisc.sigma X))) :=
-    (is_colimit_of_preserves ((evaluation _ _).obj _) (colimit.is_colimit _)).cocone_point_unique_up_to_iso
-    (colimit.is_colimit _),
-  let q : P ⟶ (colimit (K ⋙ ExtrSheafProd_to_presheaf C)).obj (op (ExtrDisc.sigma X)) :=
-    PP'.hom ≫ P'S.hom ≫ biproduct.desc (λ b, _) ≫ T.inv,
-  sorry,
-  sorry,
-  -/
-  sorry
+  apply finite_product_colimit_setup.main,
 end
 
 instance ExtrSheafProd_to_presheaf_creates_colimit
