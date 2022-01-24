@@ -36,22 +36,17 @@ def range_equiv_Icc {n d : ℤ} (hn : 0 ≤ n - d) :
 begin
   let m := (int.eq_coe_of_zero_le hn).some,
   fconstructor,
+  { refine λ a, ⟨a + d, mem_Icc.mpr ⟨_, _⟩⟩,
+    { exact (le_add_iff_nonneg_left _).mpr (int.of_nat_nonneg _) },
+    { refine add_le_of_le_sub_right _,
+      refine le_trans (int.coe_nat_le.mpr (nat.le_of_lt_succ $ (@mem_range m.succ a).mp a.2)) _,
+      exact (Exists.some_spec (int.eq_coe_of_zero_le hn)).ge } },
   { intro a,
-    use a + d,
-    simp only [mem_Icc],
-    split,
-    { rw le_add_iff_nonneg_left,
-      exact int.of_nat_nonneg (a : ℕ) },
-    { apply_rules [add_le_of_le_sub_right, (int.coe_nat_le.mpr (nat.le_of_lt_succ $
-        (@mem_range m.succ a).mp _)).trans, le_of_eq],
-      exacts [(Exists.some_spec (int.eq_coe_of_zero_le hn)).symm, a.2] }},
-  { intro a,
-    have ha := sub_nonneg.mpr ((mem_Icc).mp a.2).1,
-    use (int.eq_coe_of_zero_le ha).some,
-    apply mem_range_succ_iff.mpr,
-    rw [← int.coe_nat_le, ← Exists.some_spec (int.eq_coe_of_zero_le ha),
+    have ha := int.eq_coe_of_zero_le (sub_nonneg.mpr ((mem_Icc).mp a.2).1),
+    refine ⟨ha.some, mem_range_succ_iff.mpr _⟩,
+    rw [← int.coe_nat_le, ← Exists.some_spec ha,
       ← Exists.some_spec (int.eq_coe_of_zero_le hn), sub_le_sub_iff_right],
-    exact ((mem_Icc).mp a.2).2 },
+    exact (mem_Icc.mp a.2).2 },
   { intro _,
     simp_rw [subtype.val_eq_coe, add_sub_cancel],
     ext,
@@ -61,7 +56,7 @@ begin
     have hx : 0 ≤ (x : ℤ) - d := sub_nonneg.mpr (mem_Icc.mp x.2).1,
     simp_rw [subtype.val_eq_coe, coe_coe, subtype.coe_mk,
       (Exists.some_spec (int.eq_coe_of_zero_le hx)).symm, sub_add_cancel],
-    simp only [subtype.coe_eta] },
+    simp only [subtype.coe_eta] }
 end
 
 --for mathlib?
