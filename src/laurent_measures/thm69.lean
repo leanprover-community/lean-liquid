@@ -73,8 +73,7 @@ begin
       ← nat.sum_antidiagonal_swap],
     simp only [prod.fst_swap, prod.snd_swap, zpow_coe_nat],
     simp_rw mul_comm,
-    rw @nat.sum_antidiagonal_eq_sum_range_succ ℝ _ (λ i j, (2 ^ i) *
-      (f (j + d) : ℝ)) m,
+    rw @nat.sum_antidiagonal_eq_sum_range_succ ℝ _ (λ i j, (2 ^ i) * (f (j + d) : ℝ)) m,
     simp only,
     apply sum_congr rfl,
     intros x hx,
