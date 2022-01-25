@@ -13,6 +13,7 @@ noncomputable theory
 
 open category_theory
 open category_theory.limits
+open_locale pseudoelement
 
 universe variables v u
 
@@ -787,7 +788,7 @@ cokernel.desc _ (kernel.lift _ (kernel.ι _ ≫ (_ ⟶[D] _)) begin
   rw [category.assoc, ← D.map_comp],
   have : hom (1,1) (1,2) ≫ hom (1,2) (2,2) = hom (1,1) (2,2) := rfl,
   rw this, clear this,
-  ext, simp [abelian.pseudoelement.comp_apply],
+  simp [abelian.pseudoelement.comp_apply],
 end) begin
   dsimp [to_top_right_kernel],
   ext a,
@@ -882,7 +883,7 @@ kernel.lift _ (cokernel.desc _ ((_ ⟶[D] _) ≫ cokernel.π _) begin
   rw [← category.assoc, ← D.map_comp],
   have : hom (1,0) (2,0) ≫ hom (2,0) (2,1) = hom _ _ := rfl,
   rw this, clear this,
-  ext, simp [abelian.pseudoelement.comp_apply],
+  simp [abelian.pseudoelement.comp_apply],
 end) begin
   dsimp [bottom_left_cokernel_to],
   ext a,
@@ -944,7 +945,6 @@ cokernel.desc _ (kernel.lift _ (kernel.ι _ ≫ (_ ⟶[D] _) ≫ cokernel.π _) 
   rw ← D.map_comp,
   have : hom (1,1) (2,1) ≫ hom (2,1) (2,2) = hom _ _ := rfl,
   rw this,
-  ext,
   simp [abelian.pseudoelement.comp_apply],
 end)
 begin

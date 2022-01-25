@@ -14,7 +14,7 @@ variables {Y : Type*}
 
 lemma is_locally_constant_iff_clopen_fibers {f : X → Y} :
   is_locally_constant f ↔ ∀ y, is_clopen (f ⁻¹' {y}) :=
-⟨λ h y, h.is_clopen_fiber y, λ h s, (by { rw [← bUnion_of_singleton s, preimage_bUnion],
+⟨λ h y, h.is_clopen_fiber y, λ h s, (by { rw [← bUnion_of_singleton s, preimage_Union₂],
                                           exact is_open_bUnion (λ x _, (h x).1) })⟩
 end
 

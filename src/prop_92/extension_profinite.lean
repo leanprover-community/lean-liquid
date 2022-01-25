@@ -60,7 +60,7 @@ begin
   { apply subset.antisymm,
     exact image_subset_iff.mp hI,
     have : (⋃ i ∈ I, Z i) ⊆ ⋃ i, Z i,
-      from bUnion_subset_Union _ _,
+      from Union₂_subset_Union _ _,
     rw [← hfW, hWZ],
     mono },
 end
