@@ -69,7 +69,7 @@ sorry
 /-
 -- TODO: Double check this definition...
 def embed_Top : Top.{u} ⥤ CondensedSet.{u} :=
-{ obj := λ T, ⟨Profinite.to_Top.op ⋙ yoneda.obj T ⋙ ulift_functor.{u+1}, sorry⟩,
+{ obj := λ T, ⟨Profinite.to_Top.op ⋙ yoneda.obj T ⋙ ulift_functor.{u+1}, by admit⟩,
   map := λ T₁ T₂ f, ⟨whisker_left _ $ whisker_right (yoneda.map f) _⟩ }
 -/
 
@@ -81,12 +81,12 @@ def embed_Top : Top.{u} ⥤ CondensedSet.{u} :=
 { obj := λ T, ⟨Profinite.to_Top.op ⋙ yoneda.obj T,
   begin
     rw sheaf_condition_iff, refine ⟨⟨_⟩, ⟨_⟩, _⟩,
-    all_goals { sorry }
+    all_goals { admit }
   end⟩,
   map := λ T₁ T₂ f, whisker_left Profinite.to_Top.op (yoneda.map f) }
 -/
 
 -- TODO: Use the above to prove the first part of Proposition 1.7:
--- lemma embed_Top_faithful : faithful embed_Top := sorry
+-- lemma embed_Top_faithful : faithful embed_Top := by admit
 
 -- TODO: Construct the left adjoint to `embed_Top` as in the second part of Proposition 1.7.
