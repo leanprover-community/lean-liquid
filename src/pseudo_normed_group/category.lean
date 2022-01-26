@@ -433,6 +433,13 @@ instance {c} : compact_space (filt G c) :=
 instance {c} : t2_space (filt G c) :=
 (filt_homeo G c).symm.t2_space
 
+def filt_iso (c : ℝ≥0) : CompHaus.of (filt G c) ≅
+  (CompHaus.limit_cone (((cone_point_diagram G).obj (as_small.up.obj c)))).X :=
+{ hom := (filt_homeo G c).to_continuous_map,
+  inv := (filt_homeo G c).symm.to_continuous_map,
+  hom_inv_id' := by { ext1, simp },
+  inv_hom_id' := by { ext1, simp } }
+
 variable {G}
 
 @[simp] lemma incl_neg {c} (x : cone_point_type_filt G c) :
@@ -730,6 +737,38 @@ instance : has_limit G := has_limit.mk ⟨limit_cone _, limit_cone_is_limit _⟩
 
 instance : has_limits CompHausFiltPseuNormGrp₁ :=
 ⟨λ J hJ, { has_limit := λ G, by resetI; apply_instance }⟩
+
+instance (c : ℝ≥0) : preserves_limit G (level.obj c) :=
+preserves_limit_of_preserves_limit_cone (limit_cone_is_limit _)
+{ lift := λ S,
+    (CompHaus.limit_cone_is_limit ((cone_point_diagram G).obj (as_small.up.obj c))).lift
+    _ ≫ (cone_point_type.filt_iso _ _).inv,
+  fac' := begin
+    intros S j,
+    dsimp,
+    rw category.assoc,
+    convert (CompHaus.limit_cone_is_limit
+      ((cone_point_diagram G).obj (as_small.up.obj c))).fac S j,
+    ext ⟨t,ht⟩,
+    dsimp [limit_cone, cone_point_type.filt_iso, cone_point_type.filt_homeo,
+      homeomorph.homeomorph_of_continuous_open, cone_point_type.filt_equiv,
+      level, proj, CompHaus.limit_cone, Top.limit_cone],
+    simpa,
+  end,
+  uniq' := begin
+    intros S m hm,
+    rw iso.eq_comp_inv,
+    apply (CompHaus.limit_cone_is_limit ((cone_point_diagram G).obj (as_small.up.obj c))).uniq,
+    intros j,
+    rw [← hm, category.assoc],
+    congr' 1,
+    rw ← iso.eq_inv_comp,
+    ext ⟨t,ht⟩,
+    dsimp [limit_cone, cone_point_type.filt_iso, cone_point_type.filt_homeo,
+      homeomorph.homeomorph_of_continuous_open, cone_point_type.filt_equiv,
+      level, proj, CompHaus.limit_cone, Top.limit_cone],
+    simpa,
+  end }
 
 end limits
 
