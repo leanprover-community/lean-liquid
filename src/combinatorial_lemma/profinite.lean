@@ -19,51 +19,59 @@ def foo (M : Type*) [profinitely_filtered_pseudo_normed_group_with_Tinv r M] :
 #check polyhedral_lattice.add_monoid_hom.profinitely_filtered_pseudo_normed_group_with_Tinv
 #print foo
 
--- NOTE: We can use the commented out proofs.
+lemma polyhedral_exhaustive
+  (M : ProFiltPseuNormGrpWithTinv₁ r) (x : Λ →+ M) :
+  ∃ c : ℝ≥0, x ∈ pseudo_normed_group.filtration (Λ →+ M) c :=
+begin
+  obtain ⟨ι,hι,l,hl,h⟩ := polyhedral_lattice.polyhedral Λ,
+  resetI,
+  let cs : ι → ℝ≥0 := λ i, (M.exhaustive r (x (l i))).some,
+  -- This should be easy, using the fact that (l i) ≠ 0.
+  have : ∃ c : ℝ≥0, ∀ i, cs i ≤ c * ∥l i∥₊, sorry,
+  obtain ⟨c,hc⟩ := this,
+  use c,
+  rw generates_norm.add_monoid_hom_mem_filtration_iff hl x,
+  intros i,
+  apply pseudo_normed_group.filtration_mono (hc i),
+  apply (M.exhaustive r (x (l i))).some_spec,
+end
+
+def polyhedral_postcompose {M N : ProFiltPseuNormGrpWithTinv₁ r} (f : M ⟶ N) :
+  profinitely_filtered_pseudo_normed_group_with_Tinv_hom r
+  (Λ →+ M) (Λ →+ N) :=
+{ to_fun := λ x, f.to_add_monoid_hom.comp x,
+  map_zero' := by simp,
+  map_add' := by { intros, ext, dsimp, erw [f.to_add_monoid_hom.map_add], refl, },
+  strict' := begin
+      obtain ⟨ι,hι,l,hl,h⟩ := polyhedral_lattice.polyhedral Λ,
+      resetI,
+      intros c x hx,
+      erw generates_norm.add_monoid_hom_mem_filtration_iff hl at hx ⊢,
+      intros i,
+      apply f.strict,
+      exact hx i,
+    end,
+  continuous' := sorry,
+  map_Tinv' := sorry }
+
+/-- the functor `M ↦ Hom(Λ, M), where both are considered as objects in
+  `ProFiltPseuNormGrpWithTinv₁.{u} r` -/
 def hom_functor : ProFiltPseuNormGrpWithTinv₁.{u} r ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r :=
 { obj := λ M,
   { M := Λ →+ M,
     str := infer_instance,
-    exhaustive' := begin
-      /-
-      intros m,
-      obtain ⟨ι,hι,l,hl,h⟩ := polyhedral_lattice.polyhedral Λ,
-      resetI,
-      have := ProFiltPseuNormGrpWithTinv₁.exhaustive r,
-      let cs : ι → ℝ≥0 := λ i, (M.exhaustive r (m (l i))).some,
-      -- This should be easy, using the fact that (l i) ≠ 0.
-      have : ∃ c : ℝ≥0, ∀ i, cs i ≤ c * ∥l i∥₊, sorry,
-      obtain ⟨c,hc⟩ := this,
-      use c,
-      rw generates_norm.add_monoid_hom_mem_filtration_iff hl m,
-      intros i,
-      apply pseudo_normed_group.filtration_mono (hc i),
-      apply (M.exhaustive r (m (l i))).some_spec,
-      -/
-      sorry
-    end },
-  map := λ M N f,
-  { to_fun := λ m, f.to_add_monoid_hom.comp m,
-    map_zero' := sorry, -- by simp,
-    map_add' := λ _ _, sorry, --by { ext, simp },
-    strict' := begin
-      /-
-      intros c m hm,
-      obtain ⟨ι,hι,l,hl,h⟩ := polyhedral_lattice.polyhedral Λ,
-      resetI,
-      erw generates_norm.add_monoid_hom_mem_filtration_iff hl at hm ⊢,
-      intros i,
-      dsimp,
-      apply f.strict,
-      apply hm,
-      -/
-      sorry
-    end,
-    continuous' := sorry,
-    map_Tinv' := sorry },
-  map_id' := λ M, sorry, -- by { ext, dsimp, simp },
-  map_comp' := λ M N L f g, sorry -- by { ext, dsimp, simp }
-}
+    exhaustive' := by { apply polyhedral_exhaustive } },
+  map := λ M N f, polyhedral_postcompose _ _ f,
+  map_id' := λ M, begin
+    ext,
+    dsimp [polyhedral_postcompose],
+    simp,
+  end,
+  map_comp' := λ M N L f g, begin
+    ext,
+    dsimp [polyhedral_postcompose],
+    simp,
+  end }
 
 open category_theory.limits
 
@@ -72,7 +80,7 @@ open category_theory.limits
 Hom(Λ, lim_i A_i)_{≤ c} should be "the same" as
 lim_i Hom(Λ, A_i)_{≤ c}
 
-Is this correct? (Recall that `lim_i A_i` is really `colim_t (lim_i A_{i,≤t})`.)
+I'm fairly sure this is correct, but this will be a bit of a challenge to prove...
 
 -/
 
