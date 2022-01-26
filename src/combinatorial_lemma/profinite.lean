@@ -76,7 +76,7 @@ Is this correct? (Recall that `lim_i A_i` is really `colim_t (lim_i A_{i,≤t})`
 
 -/
 
-instance (c) : preserves_finite_limits (
+instance (c) : preserves_limits (
   hom_functor r Λ ⋙
   ProFiltPseuNormGrpWithTinv₁.to_PFPNG₁ r ⋙
   ProFiltPseuNormGrp₁.level.obj c ) := sorry
