@@ -12,13 +12,6 @@ universe u
 section
 variables (r : ℝ≥0) [fact (0 < r)] (Λ : Type u) [polyhedral_lattice Λ]
 
-def foo (M : Type*) [profinitely_filtered_pseudo_normed_group_with_Tinv r M] :
-  profinitely_filtered_pseudo_normed_group_with_Tinv r (Λ →+ M) :=
-  by apply_instance
-
-#check polyhedral_lattice.add_monoid_hom.profinitely_filtered_pseudo_normed_group_with_Tinv
-#print foo
-
 lemma polyhedral_exhaustive
   (M : ProFiltPseuNormGrpWithTinv₁ r) (x : Λ →+ M) :
   ∃ c : ℝ≥0, x ∈ pseudo_normed_group.filtration (Λ →+ M) c :=
