@@ -33,7 +33,7 @@ lemma summable_convolution {r : ℝ≥0} (f : ℤ → ℤ) (d : ℤ)
   (hf : summable (λ n, ∥ f n ∥ * r ^ n)) (hd : ∀ n : ℤ, n < d → f n = 0) :
   summable (λ n : ℤ, (1 / 2) * ∥ tsum (λ i : ℕ, ((f (n + 1 + i)) : ℝ) * (1 / 2) ^ i) ∥ * r ^ n) :=
 begin
-  -- sorry;{
+  sorry;{
 
   suffices h_on_nat : summable (λ (n : ℕ),
     (1 / 2) * ∥∑' (i : ℕ), (1 / 2 : ℝ) ^ i * (f (n + 1 + i))∥ * (r : ℝ) ^ n),
@@ -63,6 +63,19 @@ begin
       simp_rw [← tsum_mul_left, ← mul_assoc, ← zpow_add₀ $ one_div_ne_zero $ @two_ne_zero ℝ _ _, add_assoc,
         neg_add_cancel_left],
       refl },
+      suffices : summable (λ (n : ℕ), (2 * ↑r) ^ n * ∥∑' (x : ℕ), (1 / 2) ^ (↑x + 1) *
+        (f (1 + ↑x))∥),
+      sorry,-- **[FAE]** this is a reduction to a subtype, and it has already been proven
+      --somewhere as aux lemma
+
+
+      have H1 : summable (λ x : ℕ, (1 / 2 : ℝ) ^ (x + 1 : ℤ) * (f (1 + x) : ℝ)), sorry,
+      replace H1 := H1.has_sum,
+      have H2 : summable (λ n : ℕ, (2 * r : ℝ) ^ n), sorry,
+      replace H2 := H2.has_sum,
+      have H3 := H2.mul_eq H1,
+      --hf.has_sum.mul_eq hg.has_sum hfg.has_sum
+
       -- **[FAE]** Now it is the product of a convergent geometric series and a convergent gadget
     -- have h_bdd : ∀ n : ℕ, ∥ tsum (λ i : ℕ, (1 / 2) ^ i * (f (n + 1 + i))) ∥ ≤
     -- ∥ tsum (λ i : ℕ, (1 / 2) ^ i * (f (1 + i))) ∥,
@@ -80,7 +93,7 @@ begin
 
 
 
-  -- }
+  }
 end
 
 end summable
