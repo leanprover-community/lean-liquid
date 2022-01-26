@@ -937,6 +937,14 @@ end
 lemma coe_comp_apply {A B C : ProFiltPseuNormGrp₁} (f : A ⟶ B) (g : B ⟶ C) (x : A) :
   (f ≫ g) x = g (f x) := rfl
 
+def level : ℝ≥0 ⥤ ProFiltPseuNormGrp₁ ⥤ Profinite :=
+{ obj := λ c,
+  { obj := λ M, Profinite.of $ pseudo_normed_group.filtration M c,
+    map := λ A B f, ⟨_, f.level_continuous _⟩ },
+  map := λ c₁ c₂ h,
+  { app := λ M, by letI : fact (c₁ ≤ c₂) := ⟨h.le⟩;
+      exact ⟨_, comphaus_filtered_pseudo_normed_group.continuous_cast_le _ _⟩ } } .
+
 end ProFiltPseuNormGrp₁
 
 namespace ProFiltPseuNormGrpWithTinv
