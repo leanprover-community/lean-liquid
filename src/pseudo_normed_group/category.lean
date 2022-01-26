@@ -772,6 +772,52 @@ preserves_limit_of_preserves_limit_cone (limit_cone_is_limit _)
 
 end limits
 
+section products
+
+/-!
+In this section, we construct explicit finite products.
+-/
+
+def product {α : Type u} [fintype α] (X : α → CompHausFiltPseuNormGrp₁) :
+  CompHausFiltPseuNormGrp₁ :=
+{ M := Π i, X i,
+  exhaustive' := begin
+    intro m,
+    choose cs hcs using (λ i, (X i).exhaustive (m i)),
+    have : ∃ c : ℝ≥0, ∀ i, cs i ≤ c, sorry,
+    obtain ⟨c,hc⟩ := this,
+    refine ⟨c, λ i, pseudo_normed_group.filtration_mono (hc i) (hcs i)⟩,
+  end }
+
+def product.π {α : Type u} [fintype α] (X : α → CompHausFiltPseuNormGrp₁) (i : α) :
+  product X ⟶ X i :=
+{ to_fun := λ m, m i,
+  map_zero' := rfl,
+  map_add' := λ x y, rfl,
+  strict' := λ c x hx, hx i,
+  continuous' := begin
+    -- This can be golfed.
+    intros c,
+    have h : inducing (pseudo_normed_group.filtration_pi_equiv (λ i, X i) c) := ⟨rfl⟩,
+    let e : ↥(pseudo_normed_group.filtration ↥(product X) c) →
+      ↥(pseudo_normed_group.filtration ↥(X i) c) :=
+      pseudo_normed_group.level (λ (m : ↥(product X)), m i) _ c,
+    swap,
+    { intros c x hx,
+      apply hx },
+    change continuous e,
+    have : e = _ ∘ (pseudo_normed_group.filtration_pi_equiv (λ i, X i) c),
+    rotate 2,
+    { intros x, exact x i },
+    { ext, refl },
+    erw [this],
+    apply continuous.comp,
+    apply continuous_apply,
+    refine inducing.continuous h
+  end }
+
+end products
+
 end CompHausFiltPseuNormGrp₁
 
 /-- The category of profinitely filtered pseudo-normed groups. -/

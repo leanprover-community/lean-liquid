@@ -1,7 +1,7 @@
 import Mbar.functor
 import combinatorial_lemma.finite
 
-import category_theory.limits.preserves.finite
+import category_theory.limits.shapes.products
 
 noncomputable theory
 
@@ -67,6 +67,10 @@ def hom_functor : ProFiltPseuNormGrpWithTinv₁.{u} r ⥤ ProFiltPseuNormGrpWith
   end }
 
 open category_theory.limits
+
+def hom_functor_obj_iso_of_basis {α : Type*} [fintype α] (e : basis α ℤ Λ)
+  (M : ProFiltPseuNormGrpWithTinv₁ r) :
+  (hom_functor r Λ).obj M ≅ ∏ (λ a : α, M)
 
 /-
 
