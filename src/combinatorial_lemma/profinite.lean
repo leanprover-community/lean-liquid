@@ -67,7 +67,19 @@ def hom_functor : ProFiltPseuNormGrpWithTinv₁.{u} r ⥤ ProFiltPseuNormGrpWith
 
 open category_theory.limits
 
---instance : preserves_finite_limits (hom_functor r Λ ⋙ ProFiltPseuNormGrpTinv₁) := sorry
+/-
+
+Hom(Λ, lim_i A_i)_{≤ c} should be "the same" as
+lim_i Hom(Λ, A_i)_{≤ c}
+
+Is this correct? (Recall that `lim_i A_i` is really `colim_t (lim_i A_{i,≤t})`.)
+
+-/
+
+instance (c) : preserves_finite_limits (
+  hom_functor r Λ ⋙
+  ProFiltPseuNormGrpWithTinv₁.to_PFPNG₁ r ⋙
+  ProFiltPseuNormGrp₁.level.obj c ) := sorry
 
 end
 
