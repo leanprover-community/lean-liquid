@@ -19,9 +19,12 @@ begin
   obtain ⟨ι,hι,l,hl,h⟩ := polyhedral_lattice.polyhedral Λ,
   resetI,
   let cs : ι → ℝ≥0 := λ i, (M.exhaustive r (x (l i))).some,
+  let c := finset.univ.sup (λ i, cs i / ∥l i∥₊),
   -- This should be easy, using the fact that (l i) ≠ 0.
-  have : ∃ c : ℝ≥0, ∀ i, cs i ≤ c * ∥l i∥₊, sorry,
-  obtain ⟨c,hc⟩ := this,
+  have hc : ∀ i, cs i ≤ c * ∥l i∥₊,
+  { intro i, rw ← mul_inv_le_iff₀,
+    { exact finset.le_sup (finset.mem_univ i), },
+    { rw [ne.def, nnnorm_eq_zero], exact h i }, },
   use c,
   rw generates_norm.add_monoid_hom_mem_filtration_iff hl x,
   intros i,
@@ -33,7 +36,7 @@ def polyhedral_postcompose {M N : ProFiltPseuNormGrpWithTinv₁ r} (f : M ⟶ N)
   profinitely_filtered_pseudo_normed_group_with_Tinv_hom r
   (Λ →+ M) (Λ →+ N) :=
 { to_fun := λ x, f.to_add_monoid_hom.comp x,
-  map_zero' := by simp,
+  map_zero' := by simp only [add_monoid_hom.comp_zero],
   map_add' := by { intros, ext, dsimp, erw [f.to_add_monoid_hom.map_add], refl, },
   strict' := begin
       obtain ⟨ι,hι,l,hl,h⟩ := polyhedral_lattice.polyhedral Λ,
@@ -45,7 +48,7 @@ def polyhedral_postcompose {M N : ProFiltPseuNormGrpWithTinv₁ r} (f : M ⟶ N)
       exact hx i,
     end,
   continuous' := sorry,
-  map_Tinv' := sorry }
+  map_Tinv' := λ x, by { ext l, dsimp, rw f.map_Tinv, } }
 
 /-- the functor `M ↦ Hom(Λ, M), where both are considered as objects in
   `ProFiltPseuNormGrpWithTinv₁.{u} r` -/
