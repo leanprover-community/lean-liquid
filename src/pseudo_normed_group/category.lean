@@ -937,13 +937,26 @@ end
 lemma coe_comp_apply {A B C : ProFiltPseuNormGrp₁} (f : A ⟶ B) (g : B ⟶ C) (x : A) :
   (f ≫ g) x = g (f x) := rfl
 
-def level : ℝ≥0 ⥤ ProFiltPseuNormGrp₁ ⥤ Profinite :=
+def level : ℝ≥0 ⥤ ProFiltPseuNormGrp₁.{u} ⥤ Profinite.{u} :=
 { obj := λ c,
   { obj := λ M, Profinite.of $ pseudo_normed_group.filtration M c,
     map := λ A B f, ⟨_, f.level_continuous _⟩ },
   map := λ c₁ c₂ h,
   { app := λ M, by letI : fact (c₁ ≤ c₂) := ⟨h.le⟩;
       exact ⟨_, comphaus_filtered_pseudo_normed_group.continuous_cast_le _ _⟩ } } .
+
+instance {J : Type u} [small_category J] (K : J ⥤ ProFiltPseuNormGrp₁.{u}) (c : ℝ≥0) :
+  limits.preserves_limit K (level.obj c) :=
+begin
+  constructor,
+  intros E hE,
+  apply limits.is_limit_of_reflects Profinite_to_CompHaus,
+  change limits.is_limit ((CompHausFiltPseuNormGrp₁.level.obj c).map_cone
+    (to_CHFPNG₁.map_cone E)),
+  apply limits.is_limit_of_preserves,
+  apply limits.is_limit_of_preserves,
+  assumption
+end
 
 end ProFiltPseuNormGrp₁
 
