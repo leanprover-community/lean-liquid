@@ -772,6 +772,52 @@ preserves_limit_of_preserves_limit_cone (limit_cone_is_limit _)
 
 end limits
 
+section products
+
+/-!
+In this section, we construct explicit finite products.
+-/
+
+def product {α : Type u} [fintype α] (X : α → CompHausFiltPseuNormGrp₁) :
+  CompHausFiltPseuNormGrp₁ :=
+{ M := Π i, X i,
+  exhaustive' := begin
+    intro m,
+    choose cs hcs using (λ i, (X i).exhaustive (m i)),
+    have : ∃ c : ℝ≥0, ∀ i, cs i ≤ c, sorry,
+    obtain ⟨c,hc⟩ := this,
+    refine ⟨c, λ i, pseudo_normed_group.filtration_mono (hc i) (hcs i)⟩,
+  end }
+
+def product.π {α : Type u} [fintype α] (X : α → CompHausFiltPseuNormGrp₁) (i : α) :
+  product X ⟶ X i :=
+{ to_fun := λ m, m i,
+  map_zero' := rfl,
+  map_add' := λ x y, rfl,
+  strict' := λ c x hx, hx i,
+  continuous' := begin
+    -- This can be golfed.
+    intros c,
+    have h : inducing (pseudo_normed_group.filtration_pi_equiv (λ i, X i) c) := ⟨rfl⟩,
+    let e : ↥(pseudo_normed_group.filtration ↥(product X) c) →
+      ↥(pseudo_normed_group.filtration ↥(X i) c) :=
+      pseudo_normed_group.level (λ (m : ↥(product X)), m i) _ c,
+    swap,
+    { intros c x hx,
+      apply hx },
+    change continuous e,
+    have : e = _ ∘ (pseudo_normed_group.filtration_pi_equiv (λ i, X i) c),
+    rotate 2,
+    { intros x, exact x i },
+    { ext, refl },
+    erw [this],
+    apply continuous.comp,
+    apply continuous_apply,
+    refine inducing.continuous h
+  end }
+
+end products
+
 end CompHausFiltPseuNormGrp₁
 
 /-- The category of profinitely filtered pseudo-normed groups. -/
@@ -936,6 +982,27 @@ end
 
 lemma coe_comp_apply {A B C : ProFiltPseuNormGrp₁} (f : A ⟶ B) (g : B ⟶ C) (x : A) :
   (f ≫ g) x = g (f x) := rfl
+
+def level : ℝ≥0 ⥤ ProFiltPseuNormGrp₁.{u} ⥤ Profinite.{u} :=
+{ obj := λ c,
+  { obj := λ M, Profinite.of $ pseudo_normed_group.filtration M c,
+    map := λ A B f, ⟨_, f.level_continuous _⟩ },
+  map := λ c₁ c₂ h,
+  { app := λ M, by letI : fact (c₁ ≤ c₂) := ⟨h.le⟩;
+      exact ⟨_, comphaus_filtered_pseudo_normed_group.continuous_cast_le _ _⟩ } } .
+
+instance {J : Type u} [small_category J] (K : J ⥤ ProFiltPseuNormGrp₁.{u}) (c : ℝ≥0) :
+  limits.preserves_limit K (level.obj c) :=
+begin
+  constructor,
+  intros E hE,
+  apply limits.is_limit_of_reflects Profinite_to_CompHaus,
+  change limits.is_limit ((CompHausFiltPseuNormGrp₁.level.obj c).map_cone
+    (to_CHFPNG₁.map_cone E)),
+  apply limits.is_limit_of_preserves,
+  apply limits.is_limit_of_preserves,
+  assumption
+end
 
 end ProFiltPseuNormGrp₁
 

@@ -226,4 +226,8 @@ instance : profinitely_filtered_pseudo_normed_group_with_Tinv r' (Λ →+ M) :=
   Tinv_mem_filtration := Tinv'_mem_filtration,
   .. add_monoid_hom.profinitely_filtered_pseudo_normed_group Λ r' M }
 
+@[simp] lemma Tinv_apply (x : Λ →+ M) (l : Λ) :
+  (profinitely_filtered_pseudo_normed_group_with_Tinv.Tinv x) l =
+  profinitely_filtered_pseudo_normed_group_with_Tinv.Tinv (x l) := rfl
+
 end polyhedral_lattice
