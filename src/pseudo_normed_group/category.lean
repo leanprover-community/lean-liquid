@@ -784,11 +784,13 @@ def product {α : Type u} [fintype α] (X : α → CompHausFiltPseuNormGrp₁) :
   exhaustive' := begin
     intro m,
     choose cs hcs using (λ i, (X i).exhaustive (m i)),
+    -- Recall that α is finite.
     have : ∃ c : ℝ≥0, ∀ i, cs i ≤ c, sorry,
     obtain ⟨c,hc⟩ := this,
     refine ⟨c, λ i, pseudo_normed_group.filtration_mono (hc i) (hcs i)⟩,
   end }
 
+@[simps]
 def product.π {α : Type u} [fintype α] (X : α → CompHausFiltPseuNormGrp₁) (i : α) :
   product X ⟶ X i :=
 { to_fun := λ m, m i,
@@ -815,6 +817,40 @@ def product.π {α : Type u} [fintype α] (X : α → CompHausFiltPseuNormGrp₁
     apply continuous_apply,
     refine inducing.continuous h
   end }
+
+@[simps]
+def product.lift {α : Type u} [fintype α] (X : α → CompHausFiltPseuNormGrp₁)
+  (M : CompHausFiltPseuNormGrp₁) (f : Π i, M ⟶ X i) :
+  M ⟶ product X :=
+{ to_fun := λ m i, f _ m,
+  map_zero' := by { ext, simp },
+  map_add' := by { intros, ext, simp },
+  strict' := λ c x hx i, (f i).strict hx,
+  continuous' := begin
+    intros c,
+    have h : inducing (pseudo_normed_group.filtration_pi_equiv (λ i, X i) c) := ⟨rfl⟩,
+    rw [h.continuous_iff, continuous_pi_iff],
+    intros i,
+    exact (f i).continuous' c,
+  end }
+
+@[simp, reassoc]
+lemma product.lift_π {α : Type u} [fintype α] (X : α → CompHausFiltPseuNormGrp₁)
+  (M : CompHausFiltPseuNormGrp₁) (f : Π i, M ⟶ X i) (i) :
+  product.lift X M f ≫ product.π X i = f i := by { ext, simp }
+
+lemma product.lift_unique {α : Type u} [fintype α] (X : α → CompHausFiltPseuNormGrp₁)
+  (M : CompHausFiltPseuNormGrp₁) (f : Π i, M ⟶ X i) (g : M ⟶ product X)
+  (hg : ∀ i, g ≫ product.π X i = f i) : g = product.lift X M f :=
+by { ext, simp [← hg] }
+
+lemma product.hom_ext {α : Type u} [fintype α] (X : α → CompHausFiltPseuNormGrp₁)
+  (M : CompHausFiltPseuNormGrp₁) (g₁ g₂ : M ⟶ product X)
+  (h : ∀ i, g₁ ≫ product.π X i = g₂ ≫ product.π X i) : g₁ = g₂ :=
+begin
+  rw [product.lift_unique X M _ g₁ (λ i, rfl), product.lift_unique X M _ g₂ (λ i, rfl)],
+  simp [h],
+end
 
 end products
 
