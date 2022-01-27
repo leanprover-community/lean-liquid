@@ -22,18 +22,21 @@ end equivalences
 
 section summable
 
-example (a x : ℤ) : -a + (a + x + 1 ) = x+1:=
+lemma goofy {r : ℝ≥0} (f : ℤ → ℤ) (hf : summable (λ n, ∥ f n ∥ * r ^ n)) (b : ℕ)
+: (λ n : ℕ, (2 * r : ℝ) ^ n * ∥∑' (x : ℕ), (1 / 2 : ℝ) ^ (n + x + 1 : ℤ) * (f (n + x + 1 : ℤ))∥) b ≤
+  (λ n : ℕ, (2 * r : ℝ) ^ n * ∥∑' (x : ℕ), (1 / 2) ^ (↑x + 1) * (f (1 + ↑x))∥) b:=
 begin
-  rw add_assoc,
-  rw neg_add_cancel_left,
+  sorry,
 end
 
+lemma aux_pos_terms {r : ℝ≥0} (f : ℤ → ℤ) (n : ℕ) : 0 ≤ (2 * r : ℝ) ^ n *
+  ∥∑' (x : ℕ), (1 / 2 : ℝ) ^ (n + x + 1) * ↑(f (n + 1 + x))∥ := sorry
 
-lemma summable_convolution {r : ℝ≥0} (f : ℤ → ℤ) (d : ℤ)
+lemma summable_convolution {r : ℝ≥0} (hr₀: 0 < r) (f : ℤ → ℤ) (d : ℤ)
   (hf : summable (λ n, ∥ f n ∥ * r ^ n)) (hd : ∀ n : ℤ, n < d → f n = 0) :
   summable (λ n : ℤ, (1 / 2) * ∥ tsum (λ i : ℕ, ((f (n + 1 + i)) : ℝ) * (1 / 2) ^ i) ∥ * r ^ n) :=
 begin
-  sorry;{
+  -- sorry;{
 
   suffices h_on_nat : summable (λ (n : ℕ),
     (1 / 2) * ∥∑' (i : ℕ), (1 / 2 : ℝ) ^ i * (f (n + 1 + i))∥ * (r : ℝ) ^ n),
@@ -63,6 +66,24 @@ begin
       simp_rw [← tsum_mul_left, ← mul_assoc, ← zpow_add₀ $ one_div_ne_zero $ @two_ne_zero ℝ _ _, add_assoc,
         neg_add_cancel_left],
       refl },
+      -- let g := λ b : ℕ, (2 * r : ℝ) ^ b * ∥∑' (x : ℕ), (1 / 2 : ℝ) ^ (↑x + 1) * f (1 + ↑x)∥,
+      -- have := @summable_of_nonneg_of_le _ _ _ _ (goofy f hf),
+      -- simp only at this,
+      apply summable_of_nonneg_of_le,
+      { intro b, exact aux_pos_terms f b},
+      { intro b,
+        have : (0 : ℝ) < (2 * ↑r) ^ b,
+        { apply pow_pos,
+          apply mul_pos,
+          simp only [zero_lt_bit0, zero_lt_one],
+          simpa only [nnreal.coe_pos],},
+      simp only [one_div] },
+      -- squeeze_simp [(mul_le_mul_left this).mpr (goofy f hf b)],
+      -- have fine := (mul_le_mul_left this).mpr (goofy f hf b),
+      -- simp only at fine },
+
+
+
       suffices : summable (λ (n : ℕ), (2 * ↑r) ^ n * ∥∑' (x : ℕ), (1 / 2) ^ (↑x + 1) *
         (f (1 + ↑x))∥),
       sorry,-- **[FAE]** this is a reduction to a subtype, and it has already been proven
@@ -93,7 +114,7 @@ begin
 
 
 
-  }
+  -- }
 end
 
 end summable
