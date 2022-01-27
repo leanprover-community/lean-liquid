@@ -778,8 +778,8 @@ section products
 In this section, we construct explicit finite products.
 -/
 
-def product {α : Type u} [fintype α] (X : α → CompHausFiltPseuNormGrp₁) :
-  CompHausFiltPseuNormGrp₁ :=
+def product {α : Type u} [fintype α] (X : α → CompHausFiltPseuNormGrp₁.{u}) :
+  CompHausFiltPseuNormGrp₁.{u} :=
 { M := Π i, X i,
   exhaustive' := begin
     intro m,
@@ -791,7 +791,7 @@ def product {α : Type u} [fintype α] (X : α → CompHausFiltPseuNormGrp₁) :
   end }
 
 @[simps]
-def product.π {α : Type u} [fintype α] (X : α → CompHausFiltPseuNormGrp₁) (i : α) :
+def product.π {α : Type u} [fintype α] (X : α → CompHausFiltPseuNormGrp₁.{u}) (i : α) :
   product X ⟶ X i :=
 { to_fun := λ m, m i,
   map_zero' := rfl,
@@ -819,8 +819,8 @@ def product.π {α : Type u} [fintype α] (X : α → CompHausFiltPseuNormGrp₁
   end }
 
 @[simps]
-def product.lift {α : Type u} [fintype α] (X : α → CompHausFiltPseuNormGrp₁)
-  (M : CompHausFiltPseuNormGrp₁) (f : Π i, M ⟶ X i) :
+def product.lift {α : Type u} [fintype α] (X : α → CompHausFiltPseuNormGrp₁.{u})
+  (M : CompHausFiltPseuNormGrp₁.{u}) (f : Π i, M ⟶ X i) :
   M ⟶ product X :=
 { to_fun := λ m i, f _ m,
   map_zero' := by { ext, simp },
@@ -835,17 +835,17 @@ def product.lift {α : Type u} [fintype α] (X : α → CompHausFiltPseuNormGrp�
   end }
 
 @[simp, reassoc]
-lemma product.lift_π {α : Type u} [fintype α] (X : α → CompHausFiltPseuNormGrp₁)
-  (M : CompHausFiltPseuNormGrp₁) (f : Π i, M ⟶ X i) (i) :
+lemma product.lift_π {α : Type u} [fintype α] (X : α → CompHausFiltPseuNormGrp₁.{u})
+  (M : CompHausFiltPseuNormGrp₁.{u}) (f : Π i, M ⟶ X i) (i) :
   product.lift X M f ≫ product.π X i = f i := by { ext, simp }
 
-lemma product.lift_unique {α : Type u} [fintype α] (X : α → CompHausFiltPseuNormGrp₁)
-  (M : CompHausFiltPseuNormGrp₁) (f : Π i, M ⟶ X i) (g : M ⟶ product X)
+lemma product.lift_unique {α : Type u} [fintype α] (X : α → CompHausFiltPseuNormGrp₁.{u})
+  (M : CompHausFiltPseuNormGrp₁.{u}) (f : Π i, M ⟶ X i) (g : M ⟶ product X)
   (hg : ∀ i, g ≫ product.π X i = f i) : g = product.lift X M f :=
 by { ext, simp [← hg] }
 
-lemma product.hom_ext {α : Type u} [fintype α] (X : α → CompHausFiltPseuNormGrp₁)
-  (M : CompHausFiltPseuNormGrp₁) (g₁ g₂ : M ⟶ product X)
+lemma product.hom_ext {α : Type u} [fintype α] (X : α → CompHausFiltPseuNormGrp₁.{u})
+  (M : CompHausFiltPseuNormGrp₁.{u}) (g₁ g₂ : M ⟶ product X)
   (h : ∀ i, g₁ ≫ product.π X i = g₂ ≫ product.π X i) : g₁ = g₂ :=
 begin
   rw [product.lift_unique X M _ g₁ (λ i, rfl), product.lift_unique X M _ g₂ (λ i, rfl)],
@@ -1042,34 +1042,34 @@ end
 
 section explicit_product
 
-def product {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrp₁) :
-  ProFiltPseuNormGrp₁ :=
+def product {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrp₁.{u}) :
+  ProFiltPseuNormGrp₁.{u} :=
 { M := Π i, X i,
   str := infer_instance,
   exhaustive' := (CompHausFiltPseuNormGrp₁.product (λ i, (to_CHFPNG₁.obj (X i)))).exhaustive' }
 
 @[simps]
-def product.π {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrp₁) (i) :
+def product.π {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrp₁.{u}) (i) :
   product X ⟶ X i :=
 CompHausFiltPseuNormGrp₁.product.π (λ i, (to_CHFPNG₁.obj (X i))) i
 
 @[simps]
-def product.lift {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrp₁)
-  (M : ProFiltPseuNormGrp₁) (f : Π i, M ⟶ X i) : M ⟶ product X :=
+def product.lift {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrp₁.{u})
+  (M : ProFiltPseuNormGrp₁.{u}) (f : Π i, M ⟶ X i) : M ⟶ product X :=
 CompHausFiltPseuNormGrp₁.product.lift (λ i, (to_CHFPNG₁.obj (X i))) (to_CHFPNG₁.obj M) f
 
 @[simp, reassoc]
-lemma product.lift_π {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrp₁)
-  (M : ProFiltPseuNormGrp₁) (f : Π i, M ⟶ X i) (i) :
+lemma product.lift_π {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrp₁.{u})
+  (M : ProFiltPseuNormGrp₁.{u}) (f : Π i, M ⟶ X i) (i) :
   product.lift X M f ≫ product.π X i = f i := by { ext, simp }
 
-lemma product.lift_unique {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrp₁)
-  (M : ProFiltPseuNormGrp₁) (f : Π i, M ⟶ X i) (g : M ⟶ product X)
+lemma product.lift_unique {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrp₁.{u})
+  (M : ProFiltPseuNormGrp₁.{u}) (f : Π i, M ⟶ X i) (g : M ⟶ product X)
   (hg : ∀ i, g ≫ product.π X i = f i) : g = product.lift X M f :=
 by { ext, simp [← hg] }
 
-lemma product.hom_ext {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrp₁)
-  (M : ProFiltPseuNormGrp₁) (g₁ g₂ : M ⟶ product X)
+lemma product.hom_ext {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrp₁.{u})
+  (M : ProFiltPseuNormGrp₁.{u}) (g₁ g₂ : M ⟶ product X)
   (h : ∀ i, g₁ ≫ product.π X i = g₂ ≫ product.π X i) : g₁ = g₂ :=
 begin
   rw [product.lift_unique X M _ g₁ (λ i, rfl), product.lift_unique X M _ g₂ (λ i, rfl)],
@@ -1535,22 +1535,22 @@ has_limits_of_has_limits_creates_limits (to_PFPNG₁ r)
 
 section explicit_products
 
-def product {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrpWithTinv₁ r) :
-  ProFiltPseuNormGrpWithTinv₁ r :=
+def product {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrpWithTinv₁.{u} r) :
+  ProFiltPseuNormGrpWithTinv₁.{u} r :=
 { M := Π i, X i,
   -- Why couldn't typeclass inference find this?
   str := profinitely_filtered_pseudo_normed_group_with_Tinv.pi _ _,
   exhaustive' := (ProFiltPseuNormGrp₁.product (λ i, ((to_PFPNG₁ r).obj (X i)))).exhaustive' } .
 
 @[simps]
-def product.π {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrpWithTinv₁ r) (i) :
+def product.π {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrpWithTinv₁.{u} r) (i) :
   product r X ⟶ X i :=
 { map_Tinv' := λ x, rfl,
   ..(ProFiltPseuNormGrp₁.product.π (λ i, (to_PFPNG₁ r).obj (X i))) i }
 
 @[simps]
-def product.lift {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrpWithTinv₁ r)
-  (M : ProFiltPseuNormGrpWithTinv₁ r) (f : Π i, M ⟶ X i) : M ⟶ product r X :=
+def product.lift {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrpWithTinv₁.{u} r)
+  (M : ProFiltPseuNormGrpWithTinv₁.{u} r) (f : Π i, M ⟶ X i) : M ⟶ product r X :=
 { map_Tinv' := begin
     intros x,
     ext i,
@@ -1566,17 +1566,17 @@ def product.lift {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrpWithTi
       (λ i, (to_PFPNG₁ r).map (f i))) }
 
 @[simp, reassoc]
-lemma product.lift_π {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrpWithTinv₁ r)
-  (M : ProFiltPseuNormGrpWithTinv₁ r) (f : Π i, M ⟶ X i) (i) :
+lemma product.lift_π {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrpWithTinv₁.{u} r)
+  (M : ProFiltPseuNormGrpWithTinv₁.{u} r) (f : Π i, M ⟶ X i) (i) :
   product.lift r X M f ≫ product.π r X i = f i := by { ext, simpa }
 
-lemma product.lift_unique {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrpWithTinv₁ r)
-  (M : ProFiltPseuNormGrpWithTinv₁ r) (f : Π i, M ⟶ X i) (g : M ⟶ product r X)
+lemma product.lift_unique {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrpWithTinv₁.{u} r)
+  (M : ProFiltPseuNormGrpWithTinv₁.{u} r) (f : Π i, M ⟶ X i) (g : M ⟶ product r X)
   (hg : ∀ i, g ≫ product.π r X i = f i) : g = product.lift r X M f :=
 by { ext, simpa [← hg] }
 
-lemma product.hom_ext {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrpWithTinv₁ r)
-  (M : ProFiltPseuNormGrpWithTinv₁ r) (g₁ g₂ : M ⟶ product r X)
+lemma product.hom_ext {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrpWithTinv₁.{u} r)
+  (M : ProFiltPseuNormGrpWithTinv₁.{u} r) (g₁ g₂ : M ⟶ product r X)
   (h : ∀ i, g₁ ≫ product.π r X i = g₂ ≫ product.π r X i) : g₁ = g₂ :=
 begin
   rw [product.lift_unique r X M _ g₁ (λ i, rfl), product.lift_unique r X M _ g₂ (λ i, rfl)],

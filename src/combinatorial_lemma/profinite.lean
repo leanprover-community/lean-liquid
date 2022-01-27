@@ -80,18 +80,20 @@ def hom_functor : ProFiltPseuNormGrpWithTinv₁.{u} r ⥤ ProFiltPseuNormGrpWith
 open category_theory.limits
 
 -- This should be the functor sending `M` to `α → M`.
-def pi_functor {α : Type u} [fintype α] :
-  ProFiltPseuNormGrpWithTinv₁ r ⥤ ProFiltPseuNormGrpWithTinv₁ r := sorry
+def pi_functor (α : Type u) [fintype α] :
+  ProFiltPseuNormGrpWithTinv₁.{u} r ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r :=
+{ obj := λ M, ProFiltPseuNormGrpWithTinv₁.product r (λ i : α, M),
+  map := λ M N f, ProFiltPseuNormGrpWithTinv₁.product.lift _ _ _ $
+    λ i, ProFiltPseuNormGrpWithTinv₁.product.π _ _ i ≫ f } .
 
-noncomputable
-def hom_basis_iso {α M : Type*} (e : basis α ℤ Λ) [add_comm_group M] :
-  (α → M) ≃+ (Λ →+ M) :=
-{ to_fun := λ f, (e.constr ℤ f).to_add_monoid_hom,
-  -- TODO: Make `M` an explicit variable in `basis.constr`?
-  inv_fun := λ f, (e.constr ℤ : (α → M) ≃ₗ[ℤ] _).symm f.to_int_linear_map,
-  left_inv := sorry,
-  right_inv := sorry,
-  map_add' := λ x y, by { ext, simp } }
+def hom_functor_forget_iso {α : Type u} [fintype α] (e : basis α ℤ Λ) :
+  pi_functor r α ⋙ forget _ ≅ hom_functor r Λ ⋙ forget _ :=
+nat_iso.of_components
+(λ X,
+  { hom := λ (f : α → X), (e.constr ℤ f).to_add_monoid_hom,
+    inv := λ (f : Λ →+ X), (e.constr ℤ : (α → X) ≃ₗ[ℤ] _).symm f.to_int_linear_map,
+    hom_inv_id' := sorry,
+    inv_hom_id' := sorry }) sorry
 
 /-
 
@@ -122,9 +124,20 @@ that the functor `level.obj c` preserves limits to obtain the desired result.
 -/
 
 -- See note above.
-instance hom_functor_forget_preserves_limits :
-  preserves_limits (hom_functor r Λ ⋙ forget _) := sorry
+instance pi_functor_forget_preserves_limits {α : Type u} [fintype α] :
+  preserves_limits (pi_functor r α ⋙ forget _) := sorry
 
+instance hom_functor_forget_preserves_limits :
+  preserves_limits (hom_functor r Λ ⋙ forget _) :=
+begin
+  -- Λ is finite free.
+  have : ∃ (α : Type u) (hα : fintype α) (e : basis α ℤ Λ), true := sorry,
+  choose α hα e h using this,
+  resetI,
+  let e : (pi_functor r α ⋙ forget _) ≅ (hom_functor r Λ ⋙ forget _) :=
+    (hom_functor_forget_iso r Λ e),
+  apply preserves_limits_of_nat_iso e,
+end
 
 instance hom_functor_level_preserves_limits (c) : preserves_limits (
   hom_functor r Λ ⋙
