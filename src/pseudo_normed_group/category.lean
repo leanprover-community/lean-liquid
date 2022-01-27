@@ -1533,4 +1533,56 @@ limits.is_limit_of_reflects (to_PFPNG₁ r) (ProFiltPseuNormGrp₁.limit_cone_is
 instance : limits.has_limits (ProFiltPseuNormGrpWithTinv₁.{u} r) :=
 has_limits_of_has_limits_creates_limits (to_PFPNG₁ r)
 
+section explicit_products
+
+def product {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrpWithTinv₁ r) :
+  ProFiltPseuNormGrpWithTinv₁ r :=
+{ M := Π i, X i,
+  -- Why couldn't typeclass inference find this?
+  str := profinitely_filtered_pseudo_normed_group_with_Tinv.pi _ _,
+  exhaustive' := (ProFiltPseuNormGrp₁.product (λ i, ((to_PFPNG₁ r).obj (X i)))).exhaustive' } .
+
+@[simps]
+def product.π {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrpWithTinv₁ r) (i) :
+  product r X ⟶ X i :=
+{ map_Tinv' := λ x, rfl,
+  ..(ProFiltPseuNormGrp₁.product.π (λ i, (to_PFPNG₁ r).obj (X i))) i }
+
+@[simps]
+def product.lift {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrpWithTinv₁ r)
+  (M : ProFiltPseuNormGrpWithTinv₁ r) (f : Π i, M ⟶ X i) : M ⟶ product r X :=
+{ map_Tinv' := begin
+    intros x,
+    ext i,
+    change ⇑(product.lift (λ (i : α), (to_PFPNG₁ r).obj (X i)) ((to_PFPNG₁ r).obj M)
+      (λ (i : α), (to_PFPNG₁ r).map (f i))) (Tinv x) i = _,
+    rw ProFiltPseuNormGrp₁.product.lift_to_fun,
+    change (f i) _ = _,
+    simpa [(f i).map_Tinv],
+  end,
+  ..(ProFiltPseuNormGrp₁.product.lift
+      (λ i, (to_PFPNG₁ r).obj (X i))
+      ((to_PFPNG₁ r).obj M)
+      (λ i, (to_PFPNG₁ r).map (f i))) }
+
+@[simp, reassoc]
+lemma product.lift_π {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrpWithTinv₁ r)
+  (M : ProFiltPseuNormGrpWithTinv₁ r) (f : Π i, M ⟶ X i) (i) :
+  product.lift r X M f ≫ product.π r X i = f i := by { ext, simpa }
+
+lemma product.lift_unique {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrpWithTinv₁ r)
+  (M : ProFiltPseuNormGrpWithTinv₁ r) (f : Π i, M ⟶ X i) (g : M ⟶ product r X)
+  (hg : ∀ i, g ≫ product.π r X i = f i) : g = product.lift r X M f :=
+by { ext, simpa [← hg] }
+
+lemma product.hom_ext {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrpWithTinv₁ r)
+  (M : ProFiltPseuNormGrpWithTinv₁ r) (g₁ g₂ : M ⟶ product r X)
+  (h : ∀ i, g₁ ≫ product.π r X i = g₂ ≫ product.π r X i) : g₁ = g₂ :=
+begin
+  rw [product.lift_unique r X M _ g₁ (λ i, rfl), product.lift_unique r X M _ g₂ (λ i, rfl)],
+  simp [h],
+end
+
+end explicit_products
+
 end ProFiltPseuNormGrpWithTinv₁
