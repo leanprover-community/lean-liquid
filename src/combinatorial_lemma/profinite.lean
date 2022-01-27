@@ -139,10 +139,21 @@ begin
   apply preserves_limits_of_nat_iso e,
 end
 
+instance hom_functor_level_forget_preserves_limits (c) : preserves_limits (
+  hom_functor r Λ ⋙
+  ProFiltPseuNormGrpWithTinv₁.to_PFPNG₁ r ⋙
+  ProFiltPseuNormGrp₁.level.obj c ⋙
+  forget _ ) := sorry
+
 instance hom_functor_level_preserves_limits (c) : preserves_limits (
   hom_functor r Λ ⋙
   ProFiltPseuNormGrpWithTinv₁.to_PFPNG₁ r ⋙
-  ProFiltPseuNormGrp₁.level.obj c ) := sorry
+  ProFiltPseuNormGrp₁.level.obj c ) :=
+begin
+  apply preserves_limits_of_reflects_of_preserves _ (forget Profinite),
+  -- A hack, to avoid functor composition associativity...
+  apply hom_functor_level_forget_preserves_limits,
+end
 
 end
 
