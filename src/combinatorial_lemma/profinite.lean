@@ -1,5 +1,6 @@
 import Mbar.functor
 import combinatorial_lemma.finite
+import algebra.module.linear_map
 
 import category_theory.limits.shapes.products
 
@@ -77,6 +78,16 @@ def hom_functor : ProFiltPseuNormGrpWithTinv₁.{u} r ⥤ ProFiltPseuNormGrpWith
   end }
 
 open category_theory.limits
+
+noncomputable
+def hom_basis_iso {α M : Type*} (e : basis α ℤ Λ) [add_comm_group M] :
+  (α → M) ≃+ (Λ →+ M) :=
+{ to_fun := λ f, (e.constr ℤ f).to_add_monoid_hom,
+  -- TODO: Make `M` an explicit variable in `basis.constr`?
+  inv_fun := λ f, (e.constr ℤ : (α → M) ≃ₗ[ℤ] _).symm f.to_int_linear_map,
+  left_inv := sorry,
+  right_inv := sorry,
+  map_add' := λ x y, by { ext, simp } }
 
 /-
 
