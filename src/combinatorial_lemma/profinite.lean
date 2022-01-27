@@ -12,6 +12,13 @@ universe u
 section
 variables (r : ℝ≥0) [fact (0 < r)] (Λ : Type u) [polyhedral_lattice Λ]
 
+open category_theory
+open category_theory.limits
+
+-- Mathlib PR: #11690
+instance Profinite_forget_creates_limits : creates_limits
+  (forget Profinite.{u}) := sorry
+
 lemma polyhedral_exhaustive
   (M : ProFiltPseuNormGrpWithTinv₁ r) (x : Λ →+ M) :
   ∃ c : ℝ≥0, x ∈ pseudo_normed_group.filtration (Λ →+ M) c :=
@@ -70,10 +77,6 @@ def hom_functor : ProFiltPseuNormGrpWithTinv₁.{u} r ⥤ ProFiltPseuNormGrpWith
   end }
 
 open category_theory.limits
-
-def hom_functor_obj_iso_of_basis {α : Type*} [fintype α] (e : basis α ℤ Λ)
-  (M : ProFiltPseuNormGrpWithTinv₁ r) :
-  (hom_functor r Λ).obj M ≅ ∏ (λ a : α, M)
 
 /-
 
