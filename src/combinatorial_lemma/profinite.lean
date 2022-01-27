@@ -96,6 +96,25 @@ lim_i Hom(Λ, A_i)_{≤ c}
 
 I'm fairly sure this is correct, but this will be a bit of a challenge to prove...
 
+Idea:
+
+Since the forgetful functor on profinite creates limits, it suffices to prove this for the
+underlying sets.
+
+Now, choose a finite basis `e` for `Λ`, and a family `m : ι → Λ` generating the norm for `Λ`.
+This gives us a map
+`Hom(Λ,M) → (ι → M)`
+given by composition with `m`.
+
+Since `Λ` has a finite basis `e`, it follows that `Hom(Λ,-)` commutes with limits.
+One might expect this to be true in general, but there is a subtlety in how limits are defined
+in `ProFiltPseuNormGroupWithTinv₁`, as they are essentially of the form `colim_c (lim_i M_{i,c})`,
+so one needs to use the fact that finite limits commute with filtered colimits to obtain this
+(and this is where the finiteness of the basis is used).
+Similarly, `ι` is finite, so that `(ι → M)` commutes with limits in the variable `M`.
+
+Now we can identify `(ι → M)` with the categorical product in `ProFilt...₁`, and use the fact
+that the functor `level.obj c` preserves limits to obtain the desired result.
 -/
 
 instance (c) : preserves_limits (
