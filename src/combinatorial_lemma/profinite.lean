@@ -79,6 +79,10 @@ def hom_functor : ProFiltPseuNormGrpWithTinv₁.{u} r ⥤ ProFiltPseuNormGrpWith
 
 open category_theory.limits
 
+-- This should be the functor sending `M` to `α → M`.
+def pi_functor {α : Type u} [fintype α] :
+  ProFiltPseuNormGrpWithTinv₁ r ⥤ ProFiltPseuNormGrpWithTinv₁ r := sorry
+
 noncomputable
 def hom_basis_iso {α M : Type*} (e : basis α ℤ Λ) [add_comm_group M] :
   (α → M) ≃+ (Λ →+ M) :=
@@ -117,7 +121,12 @@ Now we can identify `(ι → M)` with the categorical product in `ProFilt...₁`
 that the functor `level.obj c` preserves limits to obtain the desired result.
 -/
 
-instance (c) : preserves_limits (
+-- See note above.
+instance hom_functor_forget_preserves_limits :
+  preserves_limits (hom_functor r Λ ⋙ forget _) := sorry
+
+
+instance hom_functor_level_preserves_limits (c) : preserves_limits (
   hom_functor r Λ ⋙
   ProFiltPseuNormGrpWithTinv₁.to_PFPNG₁ r ⋙
   ProFiltPseuNormGrp₁.level.obj c ) := sorry
