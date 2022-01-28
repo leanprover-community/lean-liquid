@@ -3,6 +3,7 @@ import combinatorial_lemma.finite
 import algebra.module.linear_map
 
 import category_theory.limits.shapes.products
+import topology.category.Compactum
 
 noncomputable theory
 
@@ -16,9 +17,9 @@ variables (r : ℝ≥0) [fact (0 < r)] (Λ : Type u) [polyhedral_lattice Λ]
 open category_theory
 open category_theory.limits
 
--- Mathlib PR: #11690
-instance Profinite_forget_creates_limits : creates_limits
-  (forget Profinite.{u}) := sorry
+-- Sanity check using Mathlib PR: #11690
+example : creates_limits
+  (forget Profinite.{u}) := infer_instance
 
 lemma polyhedral_exhaustive
   (M : ProFiltPseuNormGrpWithTinv₁ r) (x : Λ →+ M) :
