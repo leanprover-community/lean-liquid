@@ -41,6 +41,7 @@ begin
   apply (M.exhaustive r (x (l i))).some_spec,
 end
 
+@[simps]
 def polyhedral_postcompose {M N : ProFiltPseuNormGrpWithTinv₁ r} (f : M ⟶ N) :
   profinitely_filtered_pseudo_normed_group_with_Tinv_hom r
   (Λ →+ M) (Λ →+ N) :=
@@ -61,6 +62,7 @@ def polyhedral_postcompose {M N : ProFiltPseuNormGrpWithTinv₁ r} (f : M ⟶ N)
 
 /-- the functor `M ↦ Hom(Λ, M), where both are considered as objects in
   `ProFiltPseuNormGrpWithTinv₁.{u} r` -/
+@[simps]
 def hom_functor : ProFiltPseuNormGrpWithTinv₁.{u} r ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r :=
 { obj := λ M,
   { M := Λ →+ M,
@@ -81,7 +83,7 @@ def hom_functor : ProFiltPseuNormGrpWithTinv₁.{u} r ⥤ ProFiltPseuNormGrpWith
 open category_theory.limits
 
 -- This should be the functor sending `M` to `α → M`.
-def pi_functor (α : Type u) [fintype α] :
+@[simps] def pi_functor (α : Type u) [fintype α] :
   ProFiltPseuNormGrpWithTinv₁.{u} r ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r :=
 { obj := λ M, ProFiltPseuNormGrpWithTinv₁.product r (λ i : α, M),
   map := λ M N f, ProFiltPseuNormGrpWithTinv₁.product.lift _ _ _ $
@@ -93,8 +95,23 @@ nat_iso.of_components
 (λ X,
   { hom := λ (f : α → X), (e.constr ℤ f).to_add_monoid_hom,
     inv := λ (f : Λ →+ X), (e.constr ℤ : (α → X) ≃ₗ[ℤ] _).symm f.to_int_linear_map,
-    hom_inv_id' := sorry,
-    inv_hom_id' := sorry }) sorry
+    hom_inv_id' := by { ext1 f, exact (e.constr ℤ : (α → X) ≃ₗ[ℤ] _).symm_apply_apply f },
+    inv_hom_id' := begin
+      ext1 f,
+      have := (e.constr ℤ : (α → X) ≃ₗ[ℤ] _).apply_symm_apply f.to_int_linear_map,
+      convert congr_arg linear_map.to_add_monoid_hom this using 1,
+      ext, refl,
+    end })
+begin
+  intros M₁ M₂ f,
+  ext x l,
+  dsimp,
+  simp only [basis.constr_apply_fintype, f.map_sum, map_zsmul],
+  apply fintype.sum_congr,
+  intro i,
+  rw profinitely_filtered_pseudo_normed_group_with_Tinv_hom.map_zsmul,
+  refl
+end
 
 /-
 
