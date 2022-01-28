@@ -139,11 +139,59 @@ begin
   apply preserves_limits_of_nat_iso e,
 end
 
+-- NOTE: `polyhedral_lattice.polyhedral` uses `ι : Type` instead of a universe polymorphic variant.
+-- We mimic `ι : Type` here...
+def hom_functor_level_forget_aux {ι : Type} [fintype ι] (m : ι → Λ)
+  (hm : generates_norm m) (c : ℝ≥0) :
+  ProFiltPseuNormGrpWithTinv₁.{u} r ⥤ Type u :=
+{ obj := λ M,
+    { f : Λ →+ M | ∀ i : ι, f (m i) ∈ pseudo_normed_group.filtration M (c * ∥ m i ∥₊) },
+  map := λ M N f t, ⟨f.to_add_monoid_hom.comp t, λ i, f.strict (t.2 i)⟩,
+  map_id' := λ M, by { ext, refl },
+  map_comp' := by { intros, ext, refl } }
+
+-- This instance can probably be proved by hand.
+instance hom_functor_level_forget_aux_preserves_iso {ι : Type} [fintype ι] (m : ι → Λ)
+  (hm : generates_norm m) (c : ℝ≥0) :
+  preserves_limits (hom_functor_level_forget_aux r Λ m hm c) := sorry
+
+-- This is more-or-less by definition!
+-- TODO: The definition of this nat_iso can be broken up a bit.
+-- for example, the isomorphism of the individual types is essentially just
+-- and equivalence of subtypes defined by equivalent predicates. I'm sure
+-- we have some general equivalence we can use here, but one would still
+-- have to convert a type equivalence to an isomoprhism in the category `Type u`.
+def hom_functor_level_forget_iso {ι : Type} [fintype ι] (m : ι → Λ)
+  (hm : generates_norm m) (c : ℝ≥0) :
+  hom_functor_level_forget_aux r Λ m hm c ≅
+  hom_functor r Λ ⋙
+  ProFiltPseuNormGrpWithTinv₁.to_PFPNG₁ r ⋙
+  ProFiltPseuNormGrp₁.level.obj c ⋙
+  forget _ :=
+nat_iso.of_components (λ M,
+{ hom := λ t, ⟨t.1, begin
+    erw generates_norm.add_monoid_hom_mem_filtration_iff hm,
+    intros i,
+    apply t.2,
+  end⟩,
+  inv := λ t, ⟨t.1, begin
+    dsimp,
+    erw ← generates_norm.add_monoid_hom_mem_filtration_iff hm,
+    exact t.2,
+  end⟩,
+  hom_inv_id' := by { ext, refl },
+  inv_hom_id' := by { ext, refl } }) $ by { intros, ext, refl }
+
 instance hom_functor_level_forget_preserves_limits (c) : preserves_limits (
   hom_functor r Λ ⋙
   ProFiltPseuNormGrpWithTinv₁.to_PFPNG₁ r ⋙
   ProFiltPseuNormGrp₁.level.obj c ⋙
-  forget _ ) := sorry
+  forget _ ) :=
+begin
+  choose ι hι m hm h using polyhedral_lattice.polyhedral Λ,
+  resetI,
+  apply preserves_limits_of_nat_iso (hom_functor_level_forget_iso r Λ m hm c),
+end
 
 instance hom_functor_level_preserves_limits (c) : preserves_limits (
   hom_functor r Λ ⋙
