@@ -57,7 +57,14 @@ def polyhedral_postcompose {M N : ProFiltPseuNormGrpWithTinv₁ r} (f : M ⟶ N)
       apply f.strict,
       exact hx i,
     end,
-  continuous' := sorry,
+  continuous' := λ c, begin
+    rw polyhedral_lattice.add_monoid_hom.continuous_iff,
+    intro l,
+    simp only,
+    have aux1 := polyhedral_lattice.add_monoid_hom.incl_continuous Λ r M c,
+    have aux2 := f.level_continuous (c * ∥l∥₊),
+    exact (aux2.comp (continuous_apply l)).comp aux1,
+  end,
   map_Tinv' := λ x, by { ext l, dsimp, rw f.map_Tinv, } }
 
 /-- the functor `M ↦ Hom(Λ, M), where both are considered as objects in
