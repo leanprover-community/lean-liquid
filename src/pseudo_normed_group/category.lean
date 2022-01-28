@@ -861,8 +861,10 @@ def product {α : Type u} [fintype α] (X : α → CompHausFiltPseuNormGrp₁.{u
   exhaustive' := begin
     intro m,
     choose cs hcs using (λ i, (X i).exhaustive (m i)),
-    -- Recall that α is finite.
-    have : ∃ c : ℝ≥0, ∀ i, cs i ≤ c, sorry,
+    have : ∃ c : ℝ≥0, ∀ i, cs i ≤ c,
+    { use finset.univ.sup cs,
+      intros i,
+      apply finset.le_sup (finset.mem_univ i) },
     obtain ⟨c,hc⟩ := this,
     refine ⟨c, λ i, pseudo_normed_group.filtration_mono (hc i) (hcs i)⟩,
   end }
