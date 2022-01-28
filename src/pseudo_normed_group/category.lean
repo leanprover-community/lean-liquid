@@ -1086,6 +1086,14 @@ begin
   assumption
 end
 
+lemma mem_filtration_iff_of_is_limit {J : Type u} [small_category J]
+  (K : J ⥤ ProFiltPseuNormGrp₁.{u}) (C : limits.cone K)
+  (hC : limits.is_limit C) (c : ℝ≥0) (x : C.X) :
+  x ∈ pseudo_normed_group.filtration C.X c ↔
+  (∀ j : J, C.π.app j x ∈ pseudo_normed_group.filtration (K.obj j) c) :=
+CompHausFiltPseuNormGrp₁.mem_filtration_iff_of_is_limit (K ⋙ to_CHFPNG₁)
+  (to_CHFPNG₁.map_cone C) (limits.is_limit_of_preserves _ hC) _ _
+
 section explicit_product
 
 def product {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrp₁.{u}) :
