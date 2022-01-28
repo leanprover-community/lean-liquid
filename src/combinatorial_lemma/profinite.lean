@@ -3,6 +3,7 @@ import combinatorial_lemma.finite
 import algebra.module.linear_map
 
 import category_theory.limits.shapes.products
+import topology.category.Compactum
 
 noncomputable theory
 
@@ -16,9 +17,9 @@ variables (r : ℝ≥0) [fact (0 < r)] (Λ : Type u) [polyhedral_lattice Λ]
 open category_theory
 open category_theory.limits
 
--- Mathlib PR: #11690
-instance Profinite_forget_creates_limits : creates_limits
-  (forget Profinite.{u}) := sorry
+-- Sanity check using Mathlib PR: #11690
+example : creates_limits
+  (forget Profinite.{u}) := infer_instance
 
 lemma polyhedral_exhaustive
   (M : ProFiltPseuNormGrpWithTinv₁ r) (x : Λ →+ M) :
@@ -40,6 +41,7 @@ begin
   apply (M.exhaustive r (x (l i))).some_spec,
 end
 
+@[simps]
 def polyhedral_postcompose {M N : ProFiltPseuNormGrpWithTinv₁ r} (f : M ⟶ N) :
   profinitely_filtered_pseudo_normed_group_with_Tinv_hom r
   (Λ →+ M) (Λ →+ N) :=
@@ -55,11 +57,19 @@ def polyhedral_postcompose {M N : ProFiltPseuNormGrpWithTinv₁ r} (f : M ⟶ N)
       apply f.strict,
       exact hx i,
     end,
-  continuous' := sorry,
+  continuous' := λ c, begin
+    rw polyhedral_lattice.add_monoid_hom.continuous_iff,
+    intro l,
+    simp only,
+    have aux1 := polyhedral_lattice.add_monoid_hom.incl_continuous Λ r M c,
+    have aux2 := f.level_continuous (c * ∥l∥₊),
+    exact (aux2.comp (continuous_apply l)).comp aux1,
+  end,
   map_Tinv' := λ x, by { ext l, dsimp, rw f.map_Tinv, } }
 
 /-- the functor `M ↦ Hom(Λ, M), where both are considered as objects in
   `ProFiltPseuNormGrpWithTinv₁.{u} r` -/
+@[simps]
 def hom_functor : ProFiltPseuNormGrpWithTinv₁.{u} r ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r :=
 { obj := λ M,
   { M := Λ →+ M,
@@ -80,7 +90,7 @@ def hom_functor : ProFiltPseuNormGrpWithTinv₁.{u} r ⥤ ProFiltPseuNormGrpWith
 open category_theory.limits
 
 -- This should be the functor sending `M` to `α → M`.
-def pi_functor (α : Type u) [fintype α] :
+@[simps] def pi_functor (α : Type u) [fintype α] :
   ProFiltPseuNormGrpWithTinv₁.{u} r ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r :=
 { obj := λ M, ProFiltPseuNormGrpWithTinv₁.product r (λ i : α, M),
   map := λ M N f, ProFiltPseuNormGrpWithTinv₁.product.lift _ _ _ $
@@ -92,8 +102,23 @@ nat_iso.of_components
 (λ X,
   { hom := λ (f : α → X), (e.constr ℤ f).to_add_monoid_hom,
     inv := λ (f : Λ →+ X), (e.constr ℤ : (α → X) ≃ₗ[ℤ] _).symm f.to_int_linear_map,
-    hom_inv_id' := sorry,
-    inv_hom_id' := sorry }) sorry
+    hom_inv_id' := by { ext1 f, exact (e.constr ℤ : (α → X) ≃ₗ[ℤ] _).symm_apply_apply f },
+    inv_hom_id' := begin
+      ext1 f,
+      have := (e.constr ℤ : (α → X) ≃ₗ[ℤ] _).apply_symm_apply f.to_int_linear_map,
+      convert congr_arg linear_map.to_add_monoid_hom this using 1,
+      ext, refl,
+    end })
+begin
+  intros M₁ M₂ f,
+  ext x l,
+  dsimp,
+  simp only [basis.constr_apply_fintype, f.map_sum, map_zsmul],
+  apply fintype.sum_congr,
+  intro i,
+  rw profinitely_filtered_pseudo_normed_group_with_Tinv_hom.map_zsmul,
+  refl
+end
 
 /-
 
@@ -123,27 +148,125 @@ Now we can identify `(ι → M)` with the categorical product in `ProFilt...₁`
 that the functor `level.obj c` preserves limits to obtain the desired result.
 -/
 
--- See note above.
+-- See note above. This relies on the fact that filtered colimits
+-- commute with finite products.
 instance pi_functor_forget_preserves_limits {α : Type u} [fintype α] :
   preserves_limits (pi_functor r α ⋙ forget _) := sorry
 
 instance hom_functor_forget_preserves_limits :
   preserves_limits (hom_functor r Λ ⋙ forget _) :=
 begin
-  -- Λ is finite free.
-  have : ∃ (α : Type u) (hα : fintype α) (e : basis α ℤ Λ), true := sorry,
-  choose α hα e h using this,
-  resetI,
-  let e : (pi_functor r α ⋙ forget _) ≅ (hom_functor r Λ ⋙ forget _) :=
-    (hom_functor_forget_iso r Λ e),
+  -- Λ is finite free
+  let b := module.free.choose_basis ℤ Λ,
+  let e : (pi_functor r _ ⋙ forget _) ≅ (hom_functor r Λ ⋙ forget _) :=
+    (hom_functor_forget_iso r Λ b),
   apply preserves_limits_of_nat_iso e,
 end
+
+-- NOTE: `polyhedral_lattice.polyhedral` uses `ι : Type` instead of a universe polymorphic variant.
+-- We mimic `ι : Type` here...
+def hom_functor_level_forget_aux {ι : Type} [fintype ι] (m : ι → Λ)
+  (hm : generates_norm m) (c : ℝ≥0) :
+  ProFiltPseuNormGrpWithTinv₁.{u} r ⥤ Type u :=
+{ obj := λ M,
+    { f : Λ →+ M | ∀ i : ι, f (m i) ∈ pseudo_normed_group.filtration M (c * ∥ m i ∥₊) },
+  map := λ M N f t, ⟨f.to_add_monoid_hom.comp t, λ i, f.strict (t.2 i)⟩,
+  map_id' := λ M, by { ext, refl },
+  map_comp' := by { intros, ext, refl } }
+
+def hom_functor_level_forget_aux_incl {ι : Type} [fintype ι] (m : ι → Λ)
+  (hm : generates_norm m) (c : ℝ≥0) :
+  hom_functor_level_forget_aux r Λ m hm c ⟶ hom_functor r Λ ⋙ forget _:=
+{ app := λ X t, t.1,
+  naturality' := λ M N f, by { ext, refl } }
+
+-- This instance can probably be proved by hand.
+instance hom_functor_level_forget_aux_preserves_limits {ι : Type} [fintype ι] (m : ι → Λ)
+  (hm : generates_norm m) (c : ℝ≥0) :
+  preserves_limits (hom_functor_level_forget_aux r Λ m hm c) :=
+begin
+  constructor, introsI J hJ, constructor, intros K, constructor, intros C hC,
+  -- `Hom(Λ,C.X)` is the limit of of `Hom(Λ,K.obj j)`.
+  let hC' := is_limit_of_preserves (hom_functor r Λ ⋙ forget _) hC,
+  -- `C.X_{≤ c}` is the limit of of `(K.obj j)_{≤ c}`, when considered as sets.
+  let hC'' :=
+    is_limit_of_preserves (ProFiltPseuNormGrpWithTinv₁.to_PFPNG₁ r) hC,
+  let η : K ⋙ hom_functor_level_forget_aux r Λ m hm c ⟶
+      K ⋙ (hom_functor r Λ ⋙ forget _) :=
+      whisker_left _ (hom_functor_level_forget_aux_incl r Λ m hm c),
+  have key : ∀ S (j : J) x (q : Λ),
+    (C.π.app j) ((hC'.lift ((cones.postcompose η).obj S) x : Λ →+ _).to_fun q) =
+    (S.π.app j x).val q,
+  { intros S j x q,
+    have := hC'.fac ((cones.postcompose η).obj S) j,
+    dsimp [hom_functor_level_forget_aux_incl] at this,
+    apply_fun (λ e, e x q) at this,
+    dsimp at this,
+    erw ← this,
+    refl },
+  refine ⟨λ S, _, _, _⟩,
+  { let T := (cones.postcompose η).obj S,
+    let t := hC'.lift T,
+    refine (λ x, ⟨t x, _⟩),
+    intros i,
+    let tt := t x,
+    dsimp at tt,
+    erw ProFiltPseuNormGrp₁.mem_filtration_iff_of_is_limit _ _ hC'',
+    intros j,
+    change (C.π.app j) _ ∈ pseudo_normed_group.filtration (K.obj j) _,
+    have hx := (S.π.app j x).2 i,
+    convert hx,
+    apply key },
+  { intros S j,
+    ext x q : 3,
+    apply key },
+  { intros S w hw,
+    ext x q : 3,
+    dsimp,
+    apply ProFiltPseuNormGrpWithTinv₁.is_limit_ext r _ _ hC,
+    intros j,
+    erw key,
+    rw ← hw,
+    refl }
+end
+
+-- This is more-or-less by definition!
+-- TODO: The definition of this nat_iso can be broken up a bit.
+-- for example, the isomorphism of the individual types is essentially just
+-- and equivalence of subtypes defined by equivalent predicates. I'm sure
+-- we have some general equivalence we can use here, but one would still
+-- have to convert a type equivalence to an isomoprhism in the category `Type u`.
+def hom_functor_level_forget_iso {ι : Type} [fintype ι] (m : ι → Λ)
+  (hm : generates_norm m) (c : ℝ≥0) :
+  hom_functor_level_forget_aux r Λ m hm c ≅
+  hom_functor r Λ ⋙
+  ProFiltPseuNormGrpWithTinv₁.to_PFPNG₁ r ⋙
+  ProFiltPseuNormGrp₁.level.obj c ⋙
+  forget _ :=
+nat_iso.of_components (λ M,
+{ hom := λ t, ⟨t.1, begin
+    erw generates_norm.add_monoid_hom_mem_filtration_iff hm,
+    intros i,
+    apply t.2,
+  end⟩,
+  inv := λ t, ⟨t.1, begin
+    dsimp,
+    erw ← generates_norm.add_monoid_hom_mem_filtration_iff hm,
+    exact t.2,
+  end⟩,
+  hom_inv_id' := by { ext, refl },
+  inv_hom_id' := by { ext, refl } }) $ by { intros, ext, refl }
 
 instance hom_functor_level_forget_preserves_limits (c) : preserves_limits (
   hom_functor r Λ ⋙
   ProFiltPseuNormGrpWithTinv₁.to_PFPNG₁ r ⋙
   ProFiltPseuNormGrp₁.level.obj c ⋙
-  forget _ ) := sorry
+  forget _ ) :=
+begin
+  choose ι hι m hm h using polyhedral_lattice.polyhedral Λ,
+  resetI,
+  apply preserves_limits_of_nat_iso (hom_functor_level_forget_iso r Λ m hm c),
+end
 
 instance hom_functor_level_preserves_limits (c) : preserves_limits (
   hom_functor r Λ ⋙

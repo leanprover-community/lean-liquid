@@ -768,7 +768,84 @@ preserves_limit_of_preserves_limit_cone (limit_cone_is_limit _)
       homeomorph.homeomorph_of_continuous_open, cone_point_type.filt_equiv,
       level, proj, CompHaus.limit_cone, Top.limit_cone],
     simpa,
-  end }
+  end } .
+
+lemma mem_filtration_iff_of_is_limit (C : cone G) (hC : is_limit C) (c : ℝ≥0) (x : C.X) :
+  x ∈ pseudo_normed_group.filtration C.X c ↔
+  (∀ j : J, C.π.app j x ∈ pseudo_normed_group.filtration (G.obj j) c) :=
+begin
+  split,
+  { intros h j,
+    apply (C.π.app j).strict h },
+  { intro h,
+    let E := limit_cone G,
+    let e : C ≅ E := hC.unique_up_to_iso (limit_cone_is_limit _),
+    let eX : C.X ≅ E.X := (cones.forget _).map_iso e,
+    let w := eX.hom x,
+    have hw : ∀ j, E.π.app j w ∈ filtration (G.obj j) c,
+    { intros j,
+      dsimp only [w],
+      change (eX.hom ≫ E.π.app _) _ ∈ _,
+      dsimp only [eX, functor.map_iso, cones.forget],
+      convert h j,
+      simp },
+    suffices : w ∈ filtration (limit_cone G).X c,
+    { convert eX.inv.strict this,
+      change _ = (eX.hom ≫ eX.inv) x,
+      rw iso.hom_inv_id,
+      refl },
+    change ∃ z, _,
+    refine ⟨⟨λ j, ⟨_, hw _⟩, _⟩, _⟩,
+    { intros i j f,
+      ext1,
+      dsimp,
+      change (E.π.app i ≫ G.map f) _ = _,
+      rw E.w },
+    { obtain ⟨i,z,hz⟩ := cone_point_type.incl_jointly_surjective w,
+      let d : ℝ≥0 := i ⊔ c,
+      conv_rhs { rw ← hz },
+      rw ← cone_point_type.incl_trans (le_sup_left : i ≤ d),
+      rw ← cone_point_type.incl_trans (le_sup_right : c ≤ d),
+      congr' 1,
+      dsimp [cone_point_type_filt.trans],
+      ext j,
+      dsimp,
+      change E.π.app j _ = _,
+      rw ← hz,
+      dsimp [E, limit_cone, proj],
+      simp } }
+end
+
+lemma is_limit_ext (C : cone G) (hC : is_limit C) (x y : C.X)
+  (h : ∀ j, C.π.app j x = C.π.app j y) : x = y :=
+begin
+  let E := limit_cone G,
+  let e : C ≅ E := hC.unique_up_to_iso (limit_cone_is_limit _),
+  let eX : C.X ≅ E.X := (cones.forget _).map_iso e,
+  apply_fun eX.hom,
+  swap,
+  { intros a b hh,
+    apply_fun (λ e, eX.inv e) at hh,
+    change (eX.hom ≫ eX.inv) _ = (eX.hom ≫ eX.inv) _ at hh,
+    simpa only [iso.hom_inv_id] using hh },
+  have hh : ∀ j, (E.π.app j) (eX.hom x) = (E.π.app j) (eX.hom y),
+  { intros j,
+    change (eX.hom ≫ E.π.app j) x = (eX.hom ≫ E.π.app j) y,
+    convert h j using 2,
+    all_goals { simp } },
+  obtain ⟨ca,a,ha⟩ := cone_point_type.incl_jointly_surjective (eX.hom x),
+  obtain ⟨cb,b,hb⟩ := cone_point_type.incl_jointly_surjective (eX.hom y),
+  rw [← ha, ← hb] at ⊢ hh,
+  let d : ℝ≥0 := ca ⊔ cb,
+  rw ← cone_point_type.incl_trans (le_sup_left : ca ≤ d) at ⊢ hh,
+  rw ← cone_point_type.incl_trans (le_sup_right : cb ≤ d) at ⊢ hh,
+  congr' 1,
+  ext j,
+  specialize hh j,
+  convert hh using 1,
+  all_goals { dsimp [E, limit_cone, proj],
+    simp },
+end
 
 end limits
 
@@ -784,8 +861,10 @@ def product {α : Type u} [fintype α] (X : α → CompHausFiltPseuNormGrp₁.{u
   exhaustive' := begin
     intro m,
     choose cs hcs using (λ i, (X i).exhaustive (m i)),
-    -- Recall that α is finite.
-    have : ∃ c : ℝ≥0, ∀ i, cs i ≤ c, sorry,
+    have : ∃ c : ℝ≥0, ∀ i, cs i ≤ c,
+    { use finset.univ.sup cs,
+      intros i,
+      apply finset.le_sup (finset.mem_univ i) },
     obtain ⟨c,hc⟩ := this,
     refine ⟨c, λ i, pseudo_normed_group.filtration_mono (hc i) (hcs i)⟩,
   end }
@@ -1039,6 +1118,20 @@ begin
   apply limits.is_limit_of_preserves,
   assumption
 end
+
+lemma mem_filtration_iff_of_is_limit {J : Type u} [small_category J]
+  (K : J ⥤ ProFiltPseuNormGrp₁.{u}) (C : limits.cone K)
+  (hC : limits.is_limit C) (c : ℝ≥0) (x : C.X) :
+  x ∈ pseudo_normed_group.filtration C.X c ↔
+  (∀ j : J, C.π.app j x ∈ pseudo_normed_group.filtration (K.obj j) c) :=
+CompHausFiltPseuNormGrp₁.mem_filtration_iff_of_is_limit (K ⋙ to_CHFPNG₁)
+  (to_CHFPNG₁.map_cone C) (limits.is_limit_of_preserves _ hC) _ _
+
+lemma is_limit_ext {J : Type u} [small_category J]
+  (K : J ⥤ ProFiltPseuNormGrp₁.{u}) (C : limits.cone K)
+  (hC : limits.is_limit C) (x y : C.X)
+  (h : ∀ j, C.π.app j x = C.π.app j y) : x = y :=
+CompHausFiltPseuNormGrp₁.is_limit_ext _ _ (limits.is_limit_of_preserves to_CHFPNG₁ hC) _ _ h
 
 section explicit_product
 
@@ -1532,6 +1625,12 @@ limits.is_limit_of_reflects (to_PFPNG₁ r) (ProFiltPseuNormGrp₁.limit_cone_is
 
 instance : limits.has_limits (ProFiltPseuNormGrpWithTinv₁.{u} r) :=
 has_limits_of_has_limits_creates_limits (to_PFPNG₁ r)
+
+lemma is_limit_ext {J : Type u} [small_category J]
+  (K : J ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r) (C : limits.cone K)
+  (hC : limits.is_limit C) (x y : C.X)
+  (h : ∀ j, C.π.app j x = C.π.app j y) : x = y :=
+ProFiltPseuNormGrp₁.is_limit_ext _ _ (limits.is_limit_of_preserves (to_PFPNG₁ r) hC) _ _ h
 
 section explicit_products
 
