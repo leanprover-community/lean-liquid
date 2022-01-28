@@ -24,7 +24,7 @@ section summable
 
 lemma goofy {r : ℝ≥0} (f : ℤ → ℤ) (hf : summable (λ n, ∥ f n ∥ * r ^ n)) (b : ℕ)
 : (λ n : ℕ, (2 * r : ℝ) ^ n * ∥∑' (x : ℕ), (1 / 2 : ℝ) ^ (n + x + 1 : ℤ) * (f (n + x + 1 : ℤ))∥) b ≤
-  (λ n : ℕ, (2 * r : ℝ) ^ n * ∥∑' (x : ℕ), (1 / 2) ^ (↑x + 1) * (f (1 + ↑x))∥) b:=
+  (λ n : ℕ, (2 * r : ℝ) ^ n * ∥∑' (x : ℕ), (1 / 2 : ℝ) ^ (x + 1) * (f (x + 1))∥) b:=
 begin
   sorry,
 end
@@ -67,8 +67,9 @@ begin
         neg_add_cancel_left],
       refl },
       -- let g := λ b : ℕ, (2 * r : ℝ) ^ b * ∥∑' (x : ℕ), (1 / 2 : ℝ) ^ (↑x + 1) * f (1 + ↑x)∥,
-      -- have := @summable_of_nonneg_of_le _ _ _ _ (goofy f hf),
-      -- simp only at this,
+      have := @summable_of_nonneg_of_le _ _ _ _ (goofy f hf),
+      simp only at this,
+      apply this,
       apply summable_of_nonneg_of_le,
       { intro b, exact aux_pos_terms f b},
       { intro b,
