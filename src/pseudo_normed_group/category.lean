@@ -816,6 +816,9 @@ begin
       simp } }
 end
 
+lemma is_limit_ext (C : cone G) (hC : is_limit C) (x y : C.X)
+  (h : ∀ j, C.π.app j x = C.π.app j y) : x = y := sorry
+
 end limits
 
 section products
@@ -1093,6 +1096,11 @@ lemma mem_filtration_iff_of_is_limit {J : Type u} [small_category J]
   (∀ j : J, C.π.app j x ∈ pseudo_normed_group.filtration (K.obj j) c) :=
 CompHausFiltPseuNormGrp₁.mem_filtration_iff_of_is_limit (K ⋙ to_CHFPNG₁)
   (to_CHFPNG₁.map_cone C) (limits.is_limit_of_preserves _ hC) _ _
+
+lemma is_limit_ext {J : Type u} [small_category J]
+  (K : J ⥤ ProFiltPseuNormGrp₁.{u}) (C : limits.cone K)
+  (hC : limits.is_limit C) (x y : C.X)
+  (h : ∀ j, C.π.app j x = C.π.app j y) : x = y := sorry
 
 section explicit_product
 
@@ -1586,6 +1594,11 @@ limits.is_limit_of_reflects (to_PFPNG₁ r) (ProFiltPseuNormGrp₁.limit_cone_is
 
 instance : limits.has_limits (ProFiltPseuNormGrpWithTinv₁.{u} r) :=
 has_limits_of_has_limits_creates_limits (to_PFPNG₁ r)
+
+lemma is_limit_ext {J : Type u} [small_category J]
+  (K : J ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r) (C : limits.cone K)
+  (hC : limits.is_limit C) (x y : C.X)
+  (h : ∀ j, C.π.app j x = C.π.app j y) : x = y := sorry
 
 section explicit_products
 

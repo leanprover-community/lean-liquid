@@ -188,21 +188,38 @@ begin
   -- `Hom(Λ,C.X)` is the limit of of `Hom(Λ,K.obj j)`.
   let hC' := is_limit_of_preserves (hom_functor r Λ ⋙ forget _) hC,
   -- `C.X_{≤ c}` is the limit of of `(K.obj j)_{≤ c}`, when considered as sets.
-  let hC'' := λ (c : ℝ≥0),
-    is_limit_of_preserves (ProFiltPseuNormGrpWithTinv₁.to_PFPNG₁ r ⋙
-      ProFiltPseuNormGrp₁.level.obj c ⋙ forget _) hC,
-  refine ⟨λ S, _, _, _⟩,
-  { let η : K ⋙ hom_functor_level_forget_aux r Λ m hm c ⟶
+  let hC'' :=
+    is_limit_of_preserves (ProFiltPseuNormGrpWithTinv₁.to_PFPNG₁ r) hC,
+  let η : K ⋙ hom_functor_level_forget_aux r Λ m hm c ⟶
       K ⋙ (hom_functor r Λ ⋙ forget _) :=
       whisker_left _ (hom_functor_level_forget_aux_incl r Λ m hm c),
-    let T := (cones.postcompose η).obj S,
+  have key : ∀ S (j : J) x (q : Λ),
+    (C.π.app j) ((hC'.lift ((cones.postcompose η).obj S) x : Λ →+ _).to_fun q) =
+    (S.π.app j x).val q, sorry,
+  refine ⟨λ S, _, _, _⟩,
+  { let T := (cones.postcompose η).obj S,
     let t := hC'.lift T,
     refine (λ x, ⟨t x, _⟩),
     intros i,
-    -- Now we should use hC''
-    sorry },
-  { sorry },
-  { sorry }
+    let tt := t x,
+    dsimp at tt,
+    erw ProFiltPseuNormGrp₁.mem_filtration_iff_of_is_limit _ _ hC'',
+    intros j,
+    change (C.π.app j) _ ∈ pseudo_normed_group.filtration (K.obj j) _,
+    have hx := (S.π.app j x).2 i,
+    convert hx,
+    apply key },
+  { intros S j,
+    ext x q : 3,
+    apply key },
+  { intros S w hw,
+    ext x q : 3,
+    dsimp,
+    apply ProFiltPseuNormGrpWithTinv₁.is_limit_ext r _ _ hC,
+    intros j,
+    erw key,
+    rw ← hw,
+    refl }
 end
 
 -- This is more-or-less by definition!
