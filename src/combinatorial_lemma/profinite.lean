@@ -151,10 +151,37 @@ def hom_functor_level_forget_aux {ι : Type} [fintype ι] (m : ι → Λ)
   map_id' := λ M, by { ext, refl },
   map_comp' := by { intros, ext, refl } }
 
--- This instance can probably be proved by hand.
-instance hom_functor_level_forget_aux_preserves_iso {ι : Type} [fintype ι] (m : ι → Λ)
+def hom_functor_level_forget_aux_incl {ι : Type} [fintype ι] (m : ι → Λ)
   (hm : generates_norm m) (c : ℝ≥0) :
-  preserves_limits (hom_functor_level_forget_aux r Λ m hm c) := sorry
+  hom_functor_level_forget_aux r Λ m hm c ⟶ hom_functor r Λ ⋙ forget _:=
+{ app := λ X t, t.1,
+  naturality' := λ M N f, by { ext, refl } }
+
+-- This instance can probably be proved by hand.
+instance hom_functor_level_forget_aux_preserves_limits {ι : Type} [fintype ι] (m : ι → Λ)
+  (hm : generates_norm m) (c : ℝ≥0) :
+  preserves_limits (hom_functor_level_forget_aux r Λ m hm c) :=
+begin
+  constructor, introsI J hJ, constructor, intros K, constructor, intros C hC,
+  -- `Hom(Λ,C.X)` is the limit of of `Hom(Λ,K.obj j)`.
+  let hC' := is_limit_of_preserves (hom_functor r Λ ⋙ forget _) hC,
+  -- `C.X_{≤ c}` is the limit of of `(K.obj j)_{≤ c}`, when considered as sets.
+  let hC'' := λ (c : ℝ≥0),
+    is_limit_of_preserves (ProFiltPseuNormGrpWithTinv₁.to_PFPNG₁ r ⋙
+      ProFiltPseuNormGrp₁.level.obj c ⋙ forget _) hC,
+  refine ⟨λ S, _, _, _⟩,
+  { let η : K ⋙ hom_functor_level_forget_aux r Λ m hm c ⟶
+      K ⋙ (hom_functor r Λ ⋙ forget _) :=
+      whisker_left _ (hom_functor_level_forget_aux_incl r Λ m hm c),
+    let T := (cones.postcompose η).obj S,
+    let t := hC'.lift T,
+    refine (λ x, ⟨t x, _⟩),
+    intros i,
+    -- Now we should use hC''
+    sorry },
+  { sorry },
+  { sorry }
+end
 
 -- This is more-or-less by definition!
 -- TODO: The definition of this nat_iso can be broken up a bit.
