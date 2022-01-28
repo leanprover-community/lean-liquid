@@ -1128,7 +1128,8 @@ CompHausFiltPseuNormGrp₁.mem_filtration_iff_of_is_limit (K ⋙ to_CHFPNG₁)
 lemma is_limit_ext {J : Type u} [small_category J]
   (K : J ⥤ ProFiltPseuNormGrp₁.{u}) (C : limits.cone K)
   (hC : limits.is_limit C) (x y : C.X)
-  (h : ∀ j, C.π.app j x = C.π.app j y) : x = y := sorry
+  (h : ∀ j, C.π.app j x = C.π.app j y) : x = y :=
+CompHausFiltPseuNormGrp₁.is_limit_ext _ _ (limits.is_limit_of_preserves to_CHFPNG₁ hC) _ _ h
 
 section explicit_product
 
@@ -1626,7 +1627,8 @@ has_limits_of_has_limits_creates_limits (to_PFPNG₁ r)
 lemma is_limit_ext {J : Type u} [small_category J]
   (K : J ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r) (C : limits.cone K)
   (hC : limits.is_limit C) (x y : C.X)
-  (h : ∀ j, C.π.app j x = C.π.app j y) : x = y := sorry
+  (h : ∀ j, C.π.app j x = C.π.app j y) : x = y :=
+ProFiltPseuNormGrp₁.is_limit_ext _ _ (limits.is_limit_of_preserves (to_PFPNG₁ r) hC) _ _ h
 
 section explicit_products
 
