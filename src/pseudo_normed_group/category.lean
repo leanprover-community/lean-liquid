@@ -768,7 +768,53 @@ preserves_limit_of_preserves_limit_cone (limit_cone_is_limit _)
       homeomorph.homeomorph_of_continuous_open, cone_point_type.filt_equiv,
       level, proj, CompHaus.limit_cone, Top.limit_cone],
     simpa,
-  end }
+  end } .
+
+lemma mem_filtration_iff_of_is_limit (C : cone G) (hC : is_limit C) (c : ℝ≥0) (x : C.X) :
+  x ∈ pseudo_normed_group.filtration C.X c ↔
+  (∀ j : J, C.π.app j x ∈ pseudo_normed_group.filtration (G.obj j) c) :=
+begin
+  split,
+  { intros h j,
+    apply (C.π.app j).strict h },
+  { intro h,
+    let E := limit_cone G,
+    let e : C ≅ E := hC.unique_up_to_iso (limit_cone_is_limit _),
+    let eX : C.X ≅ E.X := (cones.forget _).map_iso e,
+    let w := eX.hom x,
+    have hw : ∀ j, E.π.app j w ∈ filtration (G.obj j) c,
+    { intros j,
+      dsimp only [w],
+      change (eX.hom ≫ E.π.app _) _ ∈ _,
+      dsimp only [eX, functor.map_iso, cones.forget],
+      convert h j,
+      simp },
+    suffices : w ∈ filtration (limit_cone G).X c,
+    { convert eX.inv.strict this,
+      change _ = (eX.hom ≫ eX.inv) x,
+      rw iso.hom_inv_id,
+      refl },
+    change ∃ z, _,
+    refine ⟨⟨λ j, ⟨_, hw _⟩, _⟩, _⟩,
+    { intros i j f,
+      ext1,
+      dsimp,
+      change (E.π.app i ≫ G.map f) _ = _,
+      rw E.w },
+    { obtain ⟨i,z,hz⟩ := cone_point_type.incl_jointly_surjective w,
+      let d : ℝ≥0 := i ⊔ c,
+      conv_rhs { rw ← hz },
+      rw ← cone_point_type.incl_trans (le_sup_left : i ≤ d),
+      rw ← cone_point_type.incl_trans (le_sup_right : c ≤ d),
+      congr' 1,
+      dsimp [cone_point_type_filt.trans],
+      ext j,
+      dsimp,
+      change E.π.app j _ = _,
+      rw ← hz,
+      dsimp [E, limit_cone, proj],
+      simp } }
+end
 
 end limits
 
