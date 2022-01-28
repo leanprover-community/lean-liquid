@@ -148,12 +148,10 @@ instance pi_functor_forget_preserves_limits {α : Type u} [fintype α] :
 instance hom_functor_forget_preserves_limits :
   preserves_limits (hom_functor r Λ ⋙ forget _) :=
 begin
-  -- Λ is finite free.
-  have : ∃ (α : Type u) (hα : fintype α) (e : basis α ℤ Λ), true := sorry,
-  choose α hα e h using this,
-  resetI,
-  let e : (pi_functor r α ⋙ forget _) ≅ (hom_functor r Λ ⋙ forget _) :=
-    (hom_functor_forget_iso r Λ e),
+  -- Λ is finite free
+  let b := module.free.choose_basis ℤ Λ,
+  let e : (pi_functor r _ ⋙ forget _) ≅ (hom_functor r Λ ⋙ forget _) :=
+    (hom_functor_forget_iso r Λ b),
   apply preserves_limits_of_nat_iso e,
 end
 
