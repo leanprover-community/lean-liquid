@@ -27,6 +27,8 @@ apply_nolint lem98_finite def_lemma
 
 -- combinatorial_lemma/profinite.lean
 apply_nolint lem98 def_lemma
+apply_nolint pi_functor unused_arguments
+apply_nolint polyhedral_exhaustive unused_arguments
 
 -- condensed/extr/basic.lean
 apply_nolint ExtrDisc.empty.hom_ext def_lemma
