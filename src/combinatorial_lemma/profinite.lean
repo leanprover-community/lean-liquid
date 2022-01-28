@@ -148,7 +148,8 @@ Now we can identify `(ι → M)` with the categorical product in `ProFilt...₁`
 that the functor `level.obj c` preserves limits to obtain the desired result.
 -/
 
--- See note above.
+-- See note above. This relies on the fact that filtered colimits
+-- commute with finite products.
 instance pi_functor_forget_preserves_limits {α : Type u} [fintype α] :
   preserves_limits (pi_functor r α ⋙ forget _) := sorry
 

@@ -817,7 +817,35 @@ begin
 end
 
 lemma is_limit_ext (C : cone G) (hC : is_limit C) (x y : C.X)
-  (h : ∀ j, C.π.app j x = C.π.app j y) : x = y := sorry
+  (h : ∀ j, C.π.app j x = C.π.app j y) : x = y :=
+begin
+  let E := limit_cone G,
+  let e : C ≅ E := hC.unique_up_to_iso (limit_cone_is_limit _),
+  let eX : C.X ≅ E.X := (cones.forget _).map_iso e,
+  apply_fun eX.hom,
+  swap,
+  { intros a b hh,
+    apply_fun (λ e, eX.inv e) at hh,
+    change (eX.hom ≫ eX.inv) _ = (eX.hom ≫ eX.inv) _ at hh,
+    simpa only [iso.hom_inv_id] using hh },
+  have hh : ∀ j, (E.π.app j) (eX.hom x) = (E.π.app j) (eX.hom y),
+  { intros j,
+    change (eX.hom ≫ E.π.app j) x = (eX.hom ≫ E.π.app j) y,
+    convert h j using 2,
+    all_goals { simp } },
+  obtain ⟨ca,a,ha⟩ := cone_point_type.incl_jointly_surjective (eX.hom x),
+  obtain ⟨cb,b,hb⟩ := cone_point_type.incl_jointly_surjective (eX.hom y),
+  rw [← ha, ← hb] at ⊢ hh,
+  let d : ℝ≥0 := ca ⊔ cb,
+  rw ← cone_point_type.incl_trans (le_sup_left : ca ≤ d) at ⊢ hh,
+  rw ← cone_point_type.incl_trans (le_sup_right : cb ≤ d) at ⊢ hh,
+  congr' 1,
+  ext j,
+  specialize hh j,
+  convert hh using 1,
+  all_goals { dsimp [E, limit_cone, proj],
+    simp },
+end
 
 end limits
 
