@@ -148,20 +148,30 @@ Now we can identify `(ι → M)` with the categorical product in `ProFilt...₁`
 that the functor `level.obj c` preserves limits to obtain the desired result.
 -/
 
--- See note above. This relies on the fact that filtered colimits
--- commute with finite products.
-instance pi_functor_forget_preserves_limits {α : Type u} [fintype α] :
-  preserves_limits (pi_functor r α ⋙ forget _) := sorry
-
-instance hom_functor_forget_preserves_limits :
-  preserves_limits (hom_functor r Λ ⋙ forget _) :=
+instance pi_functor_preserves_limits {α : Type u} [fintype α] :
+  preserves_limits (pi_functor r α) :=
 begin
-  -- Λ is finite free
-  let b := module.free.choose_basis ℤ Λ,
-  let e : (pi_functor r _ ⋙ forget _) ≅ (hom_functor r Λ ⋙ forget _) :=
-    (hom_functor_forget_iso r Λ b),
-  apply preserves_limits_of_nat_iso e,
+  constructor, introsI J _, constructor, intros K, constructor, intros C hC,
+  refine ⟨λ S, _,_,_⟩,
+  { refine ProFiltPseuNormGrpWithTinv₁.product.lift _ _ _ _,
+    intros i,
+    refine hC.lift ⟨_,_,_⟩,
+    { intros j,
+      refine S.π.app _ ≫ ProFiltPseuNormGrpWithTinv₁.product.π _ _ i },
+    { sorry } },
+  { sorry },
+  { sorry }
 end
+
+--instance hom_functor_forget_preserves_limits :
+--preserves_limits (hom_functor r Λ ⋙ forget _) :=
+--begin
+--  -- Λ is finite free
+--  let b := module.free.choose_basis ℤ Λ,
+--  let e : (pi_functor r _ ⋙ forget _) ≅ (hom_functor r Λ ⋙ forget _) :=
+--    (hom_functor_forget_iso r Λ b),
+--  apply preserves_limits_of_nat_iso e,
+--end
 
 -- NOTE: `polyhedral_lattice.polyhedral` uses `ι : Type` instead of a universe polymorphic variant.
 -- We mimic `ι : Type` here...
@@ -186,6 +196,25 @@ instance hom_functor_level_forget_aux_preserves_limits {ι : Type} [fintype ι] 
   preserves_limits (hom_functor_level_forget_aux r Λ m hm c) :=
 begin
   constructor, introsI J hJ, constructor, intros K, constructor, intros C hC,
+  let ι := module.free.choose_basis_index ℤ Λ,
+  let ℬ : basis ι _ _ := module.free.choose_basis ℤ Λ,
+  let C' := (pi_functor r ι).map_cone C,
+  let hC' : is_limit C' := is_limit_of_preserves (pi_functor r ι) hC,
+  let η : K ⋙ pi_functor r ι ⋙ forget _ ≅ K ⋙ hom_functor r Λ ⋙ forget _ :=
+    iso_whisker_left _ (hom_functor_forget_iso r Λ ℬ),
+  let γ : K ⋙ hom_functor_level_forget_aux r Λ m hm c ⟶ K ⋙ (hom_functor r Λ ⋙ forget _) :=
+      whisker_left _ (hom_functor_level_forget_aux_incl r Λ m hm c),
+  let δ := γ ≫ η.inv,
+
+  refine ⟨λ S, _, _, _⟩,
+
+  { sorry },
+
+  { sorry },
+
+  { sorry }
+
+  /-
   -- `Hom(Λ,C.X)` is the limit of of `Hom(Λ,K.obj j)`.
   let hC' := is_limit_of_preserves (hom_functor r Λ ⋙ forget _) hC,
   -- `C.X_{≤ c}` is the limit of of `(K.obj j)_{≤ c}`, when considered as sets.
@@ -228,6 +257,7 @@ begin
     erw key,
     rw ← hw,
     refl }
+  -/
 end
 
 -- This is more-or-less by definition!
