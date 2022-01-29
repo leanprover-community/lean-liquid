@@ -7,16 +7,6 @@ open category_theory.limits
 universe u
 variables {J : Type u} [small_category J]
 
-namespace Ab
-
-lemma comp_apply {A B C : Ab} (f : A ⟶ B) (g : B ⟶ C) (a : A) :
-  (f ≫ g) a = g (f a) := rfl
-
-lemma is_limit_ext {K : J ⥤ Ab.{u}} (C : limit_cone K) (x y : C.cone.X)
-  (h : ∀ j : J, C.cone.π.app j x = C.cone.π.app j y) : x = y := sorry
-
-end Ab
-
 -- We can develop all this stuff for `CompHausFiltPseuNormGrp₁` as well, if needed.
 namespace ProFiltPseuNormGrp₁
 
