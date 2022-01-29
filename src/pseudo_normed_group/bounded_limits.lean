@@ -53,9 +53,7 @@ def bounded_elements.filtration_equiv (c : nnreal) :
   bounded_elements.filtration C c ≃ (Profinite.limit_cone (K ⋙ level.obj c)).X :=
 { to_fun := λ t, ⟨λ j, ⟨C.cone.π.app _ t.1.1, sorry⟩, sorry⟩,
   inv_fun := λ t,
-    let e := (Ab.explicit_limit_cone_is_limit (K ⋙ to_Ab)).cone_point_unique_up_to_iso
-      (C.2 : is_limit C.1) in
-  { val := ⟨e.hom ⟨λ j, (t.1 j).1, sorry⟩, sorry⟩,
+  { val := ⟨C.2.lift (Ab.explicit_limit_cone _) ⟨λ j, (t.1 j).1, sorry⟩, sorry⟩,
     property := sorry },
   left_inv := sorry,
   right_inv := sorry }
