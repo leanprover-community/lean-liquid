@@ -2,12 +2,12 @@ import algebra.category.Group.limits
 
 universe u
 
-namespace AddCommGroup
+namespace Ab
 
 open category_theory
 open category_theory.limits
 
-variables {J : Type u} [category_theory.small_category J] (K : J ⥤ AddCommGroup.{u})
+variables {J : Type u} [category_theory.small_category J] (K : J ⥤ Ab.{u})
 
 instance : add_comm_group (K ⋙ category_theory.forget _).sections :=
 { add := λ u v, ⟨ u + v, sorry⟩,
@@ -45,4 +45,4 @@ def explicit_limit_cone_is_limit : is_limit (explicit_limit_cone K) :=
   fac' := sorry,
   uniq' := sorry }
 
-end AddCommGroup
+end Ab
