@@ -344,4 +344,59 @@ lemma const_smul_hom_int_mem_filtration (n : ℤ) (c : ℝ≥0) (h : ↑(n.nat_a
 
 end add_monoid_hom
 
+structure strict_pseudo_normed_group_hom (M N : Type*)
+  [pseudo_normed_group M] [pseudo_normed_group N] extends M →+ N :=
+(strict' : ∀ c x, x ∈ pseudo_normed_group.filtration M c →
+  to_fun x ∈ pseudo_normed_group.filtration N c)
+
+namespace strict_pseudo_normed_group_hom
+
+variables {M N : Type*} [pseudo_normed_group M] [pseudo_normed_group N]
+  (f g : strict_pseudo_normed_group_hom M N)
+
+instance : has_coe_to_fun (strict_pseudo_normed_group_hom M N)
+  (λ _, M → N) := ⟨λ f, f.to_fun⟩
+
+@[simp]
+lemma map_zero : f 0 = 0 := f.to_add_monoid_hom.map_zero
+
+@[simp]
+lemma map_add (x y) : f (x + y) = f x + f y := f.to_add_monoid_hom.map_add _ _
+
+@[simp]
+lemma map_neg (x) : f (-x) = - f x := f.to_add_monoid_hom.map_neg _
+
+lemma strict ⦃x c⦄ (h : x ∈ filtration M c) : f x ∈ filtration N c :=
+  f.strict' _ _ h
+
+@[ext]
+lemma ext (h : ∀ x, f x = g x) : f = g :=
+by { cases f, cases g, congr, ext, apply h }
+
+def id (M : Type*) [pseudo_normed_group M] : strict_pseudo_normed_group_hom M M :=
+{ to_fun := id,
+  map_zero' := rfl,
+  map_add' := λ _ _, rfl,
+  strict' := λ _ _ h, h }
+
+def comp {A B C : Type*} [pseudo_normed_group A] [pseudo_normed_group B] [pseudo_normed_group C]
+  (f : strict_pseudo_normed_group_hom A B) (g : strict_pseudo_normed_group_hom B C) :
+  strict_pseudo_normed_group_hom A C :=
+{ to_fun := λ x, g $ f x,
+  map_zero' := by simp,
+  map_add' := λ _ _, by simp,
+  strict' := λ c x h, g.strict $ f.strict h }
+
+@[simp]
+lemma id_apply (A : Type*) [pseudo_normed_group A] (a : A) :
+  strict_pseudo_normed_group_hom.id A a = a := rfl
+
+@[simp]
+lemma comp_apply {A B C : Type*}
+  [pseudo_normed_group A] [pseudo_normed_group B] [pseudo_normed_group C]
+  (f : strict_pseudo_normed_group_hom A B) (g : strict_pseudo_normed_group_hom B C) (a : A) :
+  f.comp g a = g (f a) := rfl
+
+end strict_pseudo_normed_group_hom
+
 -- #lint- only unused_arguments def_lemma doc_blame
