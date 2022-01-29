@@ -190,11 +190,37 @@ def hom_functor_level_forget_aux_incl {ι : Type} [fintype ι] (m : ι → Λ)
 { app := λ X t, t.1,
   naturality' := λ M N f, by { ext, refl } }
 
+-- Easy, use `mem_filtration_iff_of_is_limit` from the other file.
+lemma mem_filtration_iff_of_is_limit {J : Type u}
+  [small_category J] {ι : Type} [fintype ι]
+  {K : J ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r}
+  (m : ι → Λ)
+  (hm : generates_norm m) (c : ℝ≥0)
+  (C : cone K) (hC : is_limit C) (f : Λ →+ C.X) (i : ι) :
+  f (m i) ∈ pseudo_normed_group.filtration C.X c ↔
+  (∀ (j : J), (C.π.app j) (f (m i)) ∈
+    pseudo_normed_group.filtration (K.obj j) (c * ∥ m i ∥₊)) := sorry
+
+def hom_functor_level_forget_aux_cone_is_limit {J : Type u}
+  [small_category J] {ι : Type} [fintype ι]
+  {K : J ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r}
+  (m : ι → Λ)
+  (B : Type u)
+  [fintype B]
+  (e : basis B ℤ Λ)
+  (hm : generates_norm m)
+  (c : ℝ≥0)
+  (C : cone K) (hC : is_limit C) :
+  is_limit ((hom_functor_level_forget_aux r Λ m hm c).map_cone C) :=
+sorry
+
 -- This instance can probably be proved by hand.
 instance hom_functor_level_forget_aux_preserves_limits {ι : Type} [fintype ι] (m : ι → Λ)
   (hm : generates_norm m) (c : ℝ≥0) :
   preserves_limits (hom_functor_level_forget_aux r Λ m hm c) :=
 begin
+  sorry
+  /-
   constructor, introsI J hJ, constructor, intros K, constructor, intros C hC,
   let ι := module.free.choose_basis_index ℤ Λ,
   let ℬ : basis ι _ _ := module.free.choose_basis ℤ Λ,
@@ -213,6 +239,7 @@ begin
   { sorry },
 
   { sorry }
+  -/
 
   /-
   -- `Hom(Λ,C.X)` is the limit of of `Hom(Λ,K.obj j)`.
