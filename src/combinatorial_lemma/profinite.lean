@@ -145,6 +145,8 @@ def Ab.limit_cone' {J : Type u} [small_category J] (K : J ⥤ Ab.{u}) :
   limit_cone K :=
 ⟨Ab.explicit_limit_cone _, Ab.explicit_limit_cone_is_limit _⟩
 
+attribute [simps] to_Ab Ab.limit_cone'
+
 def hom_functor'_cone_iso_hom :
   bounded_cone_point (Ab.limit_cone' ((K ⋙ hom_functor' Λ) ⋙ _)) ⟶
   (hom_functor' Λ).obj (bounded_cone_point (Ab.limit_cone' (K ⋙ _))) :=
@@ -152,8 +154,20 @@ def hom_functor'_cone_iso_hom :
   { to_fun := λ q,
     { val :=
       { val := λ j, (f.1.1 j).1 q,
-        property := sorry },
-      property := sorry },
+        property := begin
+          intros i j g,
+          let h := f.1.2,
+          specialize h g,
+          dsimp at h ⊢,
+          rw ← h,
+          refl,
+        end },
+      property := begin
+        obtain ⟨c,hc⟩ := f.2,
+        -- we don't choose `c`, but rather a large enough `c'`
+        -- taking into account some `m` generating the norm of `Λ`.
+        sorry
+      end },
     map_zero' := sorry,
     map_add' := sorry },
   map_zero' := sorry,
@@ -209,7 +223,33 @@ def drop_Profinite_Tinv :
     exhaustive' := M.exhaustive r },
   map := λ X Y f, { strict' := λ c x h, f.strict h .. f.to_add_monoid_hom } }
 
-instance : preserves_limits (drop_Profinite_Tinv r) := sorry
+def drop_Profinite :
+  ProFiltPseuNormGrp₁ ⥤ PseuNormGrp₁ :=
+{ obj := λ M,
+  { carrier := M,
+    exhaustive' := M.exhaustive },
+  map := λ X Y f, { strict' := λ c x h, f.strict h .. f.to_add_monoid_hom } }
+
+instance : preserves_limits drop_Profinite :=
+begin
+  constructor, introsI J hJ, constructor, intros K,
+  apply preserves_limit_of_preserves_limit_cone
+    (ProFiltPseuNormGrp₁.bounded_cone_is_limit (Ab.limit_cone' _)),
+  let e : drop_Profinite.map_cone
+    (ProFiltPseuNormGrp₁.bounded_cone (Ab.limit_cone' _)) ≅
+    bounded_cone (Ab.limit_cone' _),
+  rotate,
+  apply is_limit.of_iso_limit (bounded_cone_is_limit _) e.symm,
+  sorry,
+end
+
+def drop_Profinite_drop_Tinv :
+  ProFiltPseuNormGrpWithTinv₁.to_PFPNG₁ r ⋙ drop_Profinite ≅
+  drop_Profinite_Tinv r :=
+nat_iso.of_components (λ X, iso.refl _) $ by tidy
+
+instance : preserves_limits (drop_Profinite_Tinv r) :=
+preserves_limits_of_nat_iso (drop_Profinite_drop_Tinv r)
 
 def hom_functor'_forget_iso (c) :
   drop_Profinite_Tinv r ⋙ hom_functor' Λ ⋙ PseuNormGrp₁.level.obj c ≅
