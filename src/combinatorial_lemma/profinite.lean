@@ -270,12 +270,7 @@ instance (K : J ⥤ ProFiltPseuNormGrp₁.{u}) : creates_limit K drop_Profinite 
       { app := λ j,
         { continuous' := sorry,
           ..(S.π.app j) },
-        naturality' := begin
-          intros i j f,
-          ext, dsimp [drop_Profinite],
-          rw ← S.w f,
-          refl,
-        end } },
+        naturality' := sorry } },
     valid_lift := cones.ext
       { hom :=
         { to_fun := id,
