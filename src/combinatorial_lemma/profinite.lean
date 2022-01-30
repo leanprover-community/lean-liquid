@@ -147,47 +147,137 @@ def Ab.limit_cone' {J : Type u} [small_category J] (K : J ⥤ Ab.{u}) :
 
 attribute [simps] to_Ab Ab.limit_cone'
 
+abbreviation hom_functor'_cone_iso_hom_to_fun_aux_to_fun_aux_val_aux (Λ : Type u) {J : Type u}
+  [polyhedral_lattice Λ]
+  [small_category J]
+  (K : J ⥤ PseuNormGrp₁)
+  (f : ↥(bounded_cone_point
+            (Ab.limit_cone' ((K ⋙ hom_functor' Λ) ⋙ to_Ab))))
+  (q : Λ) :
+  ↥((Ab.limit_cone' (K ⋙ to_Ab)).cone.X) :=
+{ val := λ j, (f.1.1 j).1 q,
+  property := begin
+    intros a b g,
+    have := f.1.2 g,
+    dsimp at this ⊢,
+    rw ← this, refl,
+  end }
+
+abbreviation hom_functor'_cone_iso_hom_to_fun_aux_to_fun_aux (Λ : Type u) {J : Type u}
+  [polyhedral_lattice Λ]
+  [small_category J]
+  (K : J ⥤ PseuNormGrp₁)
+  (f : ↥(bounded_cone_point
+            (Ab.limit_cone' ((K ⋙ hom_functor' Λ) ⋙ to_Ab)))) :
+  Λ → ↥(bounded_cone_point (Ab.limit_cone' (K ⋙ to_Ab))) := λ q,
+{ val := hom_functor'_cone_iso_hom_to_fun_aux_to_fun_aux_val_aux Λ _ f q,
+  property := begin
+    obtain ⟨c,hc⟩ := f.2,
+    obtain ⟨d,hd⟩ : ∃ d : nnreal, q ∈ pseudo_normed_group.filtration Λ d :=
+      sorry,
+    use c * d,
+    intros j,
+    apply hc _ hd,
+  end }
+
+abbreviation hom_functor'_cone_iso_hom_to_fun_aux
+  (Λ : Type u) {J : Type u}
+  [polyhedral_lattice Λ]
+  [small_category J]
+  (K : J ⥤ PseuNormGrp₁) :
+  ↥(bounded_cone_point
+       (Ab.limit_cone' ((K ⋙ hom_functor' Λ) ⋙ to_Ab))) →
+  ↥((hom_functor' Λ).obj
+       (bounded_cone_point (Ab.limit_cone' (K ⋙ to_Ab)))) := λ f,
+{ to_fun := hom_functor'_cone_iso_hom_to_fun_aux_to_fun_aux _ _ f,
+  map_zero' := by { ext, simpa },
+  map_add' := λ x y, by { ext, simpa } }
+
 def hom_functor'_cone_iso_hom :
   bounded_cone_point (Ab.limit_cone' ((K ⋙ hom_functor' Λ) ⋙ _)) ⟶
   (hom_functor' Λ).obj (bounded_cone_point (Ab.limit_cone' (K ⋙ _))) :=
-{ to_fun := λ f,
-  { to_fun := λ q,
-    { val :=
-      { val := λ j, (f.1.1 j).1 q,
-        property := begin
-          intros i j g,
-          let h := f.1.2,
-          specialize h g,
-          dsimp at h ⊢,
-          rw ← h,
-          refl,
-        end },
-      property := begin
-        obtain ⟨c,hc⟩ := f.2,
-        -- we don't choose `c`, but rather a large enough `c'`
-        -- taking into account some `m` generating the norm of `Λ`.
-        sorry
-      end },
-    map_zero' := sorry,
-    map_add' := sorry },
-  map_zero' := sorry,
-  map_add' := sorry,
-  strict' := sorry }
+{ to_fun := hom_functor'_cone_iso_hom_to_fun_aux _ _,
+  map_zero' := by { ext, simpa },
+  map_add' := λ x y, by { ext, simpa },
+  strict' := begin
+    intros c x hx,
+    obtain ⟨⟨d,hc⟩,rfl⟩ := hx,
+    intros e q hq,
+    dsimp [bounded_elements.filt_incl],
+    delta hom_functor'_cone_iso_hom_to_fun_aux_to_fun_aux,
+    delta hom_functor'_cone_iso_hom_to_fun_aux_to_fun_aux_val_aux,
+    refine ⟨⟨_,_⟩,rfl⟩,
+    intros j,
+    apply hc _ hq,
+  end }
+
+abbreviation hom_functor'_cone_iso_inv_to_fun_aux_val_aux_val_aux
+  (Λ : Type u) {J : Type u}
+  [polyhedral_lattice Λ]
+  [small_category J]
+  (K : J ⥤ PseuNormGrp₁)
+  (f : ↥((hom_functor' Λ).obj
+            (bounded_cone_point (Ab.limit_cone' (K ⋙ to_Ab))))) :
+  Π (j : J), (((K ⋙ hom_functor' Λ) ⋙ to_Ab) ⋙ forget Ab).obj j := λ j,
+{ to_fun := λ q, (f.1 q).1.1 j,
+  map_zero' := by simpa,
+  map_add' := λ x y, by simpa }
+
+abbreviation hom_functor'_cone_iso_inv_to_fun_aux_val_aux
+  (Λ : Type u) {J : Type u}
+  [polyhedral_lattice Λ]
+  [small_category J]
+  (K : J ⥤ PseuNormGrp₁)
+  (f : ↥((hom_functor' Λ).obj
+            (bounded_cone_point (Ab.limit_cone' (K ⋙ to_Ab))))) :
+  ↥((Ab.limit_cone' ((K ⋙ hom_functor' Λ) ⋙ to_Ab)).cone.X) :=
+{ val := hom_functor'_cone_iso_inv_to_fun_aux_val_aux_val_aux _ _ f,
+  property := begin
+    intros i j g,
+    ext q,
+    change Λ →+ _ at f,
+    exact (f q).1.2 g,
+  end }
+
+abbreviation hom_functor'_cone_iso_inv_to_fun_aux (Λ : Type u) {J : Type u}
+  [polyhedral_lattice Λ]
+  [small_category J]
+  (K : J ⥤ PseuNormGrp₁) :
+  ↥((hom_functor' Λ).obj
+       (bounded_cone_point (Ab.limit_cone' (K ⋙ to_Ab)))) →
+  ↥(bounded_cone_point
+       (Ab.limit_cone' ((K ⋙ hom_functor' Λ) ⋙ to_Ab))) := λ f,
+{ val := hom_functor'_cone_iso_inv_to_fun_aux_val_aux _ _ f,
+  property := begin
+    obtain ⟨c,hc⟩ :=
+      ((hom_functor' Λ).obj (bounded_cone_point
+      (Ab.limit_cone' (K ⋙ to_Ab)))).exhaustive f,
+    use c,
+    intros j d q hq,
+    dsimp,
+    specialize hc hq,
+    obtain ⟨t,ht⟩ := hc,
+    rw ← ht,
+    apply t.2,
+  end }
 
 def hom_functor'_cone_iso_inv :
   (hom_functor' Λ).obj (bounded_cone_point (Ab.limit_cone' (K ⋙ _))) ⟶
   bounded_cone_point (Ab.limit_cone' ((K ⋙ hom_functor' Λ) ⋙ _)) :=
-{ to_fun := λ f,
-  { val :=
-    { val := λ j,
-      { to_fun := λ q, (f.1 q).1.1 j,
-        map_zero' := sorry,
-        map_add' := sorry },
-      property := sorry },
-    property := sorry },
-  map_zero' := sorry,
-  map_add' := sorry,
-  strict' := sorry }
+{ to_fun := hom_functor'_cone_iso_inv_to_fun_aux _ _,
+  map_zero' := by { ext, simpa },
+  map_add' := λ x y, by { ext, simpa },
+  strict' := begin
+    intros c x hx,
+    dsimp,
+    refine ⟨⟨_,_⟩,rfl⟩,
+    intros j d q hq,
+    dsimp,
+    specialize hx hq,
+    obtain ⟨t,ht⟩ := hx,
+    rw ← ht,
+    apply t.2,
+  end }
 
 def hom_functor'_cone_iso_aux :
   bounded_cone_point (Ab.limit_cone' ((K ⋙ hom_functor' Λ) ⋙ _)) ≅
