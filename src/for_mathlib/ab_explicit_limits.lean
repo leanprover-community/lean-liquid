@@ -1,4 +1,5 @@
 import algebra.category.Group.limits
+import category_theory.limits.concrete_category
 
 universe u
 
@@ -67,6 +68,7 @@ def explicit_limit_cone_is_limit : is_limit (explicit_limit_cone K) :=
   end }
 
 lemma is_limit_ext {K : J ⥤ Ab.{u}} (C : limit_cone K) (x y : C.cone.X)
-  (h : ∀ j : J, C.cone.π.app j x = C.cone.π.app j y) : x = y := sorry
+  (h : ∀ j : J, C.cone.π.app j x = C.cone.π.app j y) : x = y :=
+limits.concrete.is_limit_ext  _ C.2 _ _ h
 
 end Ab
