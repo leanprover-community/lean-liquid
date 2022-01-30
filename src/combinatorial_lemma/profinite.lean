@@ -224,24 +224,81 @@ def drop_Profinite_Tinv :
   map := λ X Y f, { strict' := λ c x h, f.strict h .. f.to_add_monoid_hom } }
 
 def drop_Profinite :
-  ProFiltPseuNormGrp₁ ⥤ PseuNormGrp₁ :=
+  ProFiltPseuNormGrp₁.{u} ⥤ PseuNormGrp₁.{u} :=
 { obj := λ M,
   { carrier := M,
     exhaustive' := M.exhaustive },
   map := λ X Y f, { strict' := λ c x h, f.strict h .. f.to_add_monoid_hom } }
 
-instance : preserves_limits drop_Profinite :=
-begin
-  constructor, introsI J hJ, constructor, intros K,
-  apply preserves_limit_of_preserves_limit_cone
-    (ProFiltPseuNormGrp₁.bounded_cone_is_limit (Ab.limit_cone' _)),
-  let e : drop_Profinite.map_cone
-    (ProFiltPseuNormGrp₁.bounded_cone (Ab.limit_cone' _)) ≅
-    bounded_cone (Ab.limit_cone' _),
-  rotate,
-  apply is_limit.of_iso_limit (bounded_cone_is_limit _) e.symm,
-  sorry,
-end
+instance (K : J ⥤ ProFiltPseuNormGrp₁.{u}) : creates_limit K drop_Profinite :=
+{ reflects := λ C hC,
+  { lift := λ S,
+    { continuous' := sorry,
+      .. hC.lift (drop_Profinite.map_cone S) },
+    fac' := sorry,
+    uniq' := sorry },
+  lifts := λ S hS,
+  { lifted_cone :=
+    { X :=
+      { M := S.X,
+        str :=
+        { topology := λ c,
+            let
+              S' : cone (K ⋙ ProFiltPseuNormGrp₁.level.obj c ⋙ forget _) :=
+                (cones.postcompose_equivalence $ eq_to_iso rfl).functor.obj
+                ((PseuNormGrp₁.level.obj c).map_cone S),
+              hS₁ : is_limit ((PseuNormGrp₁.level.obj c).map_cone S) :=
+                is_limit_of_preserves _ hS,
+              hS' : is_limit S' :=
+                (is_limit.postcompose_hom_equiv _ _).symm hS₁,
+              T : cone (K ⋙ ProFiltPseuNormGrp₁.level.obj c) :=
+                lift_limit hS',
+              hT : is_limit T := lifted_limit_is_limit _,
+              E : (forget _).map_cone T ≅ S' := lifted_limit_maps_to_original _,
+              e : (forget _).obj T.X ≅ S'.X := (cones.forget _).map_iso E in
+              show topological_space S'.X, from
+                topological_space.induced e.inv (infer_instance : topological_space T.X),
+          t2 := sorry,
+          compact := sorry,
+          continuous_add' := sorry,
+          continuous_neg' := sorry,
+          continuous_cast_le := sorry,
+          td := sorry,
+          ..(infer_instance : pseudo_normed_group S.X) },
+          exhaustive' := λ m, S.X.exhaustive _ },
+      π :=
+      { app := λ j,
+        { continuous' := sorry,
+          ..(S.π.app j) },
+        naturality' := begin
+          intros i j f,
+          ext, dsimp [drop_Profinite],
+          rw ← S.w f,
+          refl,
+        end } },
+    valid_lift := cones.ext
+      { hom :=
+        { to_fun := id,
+          map_zero' := rfl,
+          map_add' := λ _ _, rfl,
+          strict' := λ _ _ h, h },
+        inv :=
+        { to_fun := id,
+          map_zero' := rfl,
+          map_add' := λ _ _, rfl,
+          strict' := λ _ _ h, h },
+        hom_inv_id' := by { ext, refl },
+        inv_hom_id' := by { ext, refl } }
+      begin
+        intros j,
+        ext, refl,
+      end } }
+
+instance : creates_limits drop_Profinite :=
+by { constructor, introsI J _, constructor }
+
+instance : preserves_limits drop_Profinite.{u} :=
+category_theory.preserves_limits_of_creates_limits_and_has_limits _
 
 def drop_Profinite_drop_Tinv :
   ProFiltPseuNormGrpWithTinv₁.to_PFPNG₁ r ⋙ drop_Profinite ≅
