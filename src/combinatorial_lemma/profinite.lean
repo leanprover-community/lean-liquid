@@ -1,6 +1,7 @@
 import Mbar.functor
 import combinatorial_lemma.finite
 import algebra.module.linear_map
+import pseudo_normed_group.bounded_limits
 
 import category_theory.limits.shapes.products
 import topology.category.Compactum
@@ -17,6 +18,7 @@ variables (r : ℝ≥0) [fact (0 < r)] (Λ : Type u) [polyhedral_lattice Λ]
 open category_theory
 open category_theory.limits
 
+/-
 -- Sanity check using Mathlib PR: #11690
 example : creates_limits
   (forget Profinite.{u}) := infer_instance
@@ -39,6 +41,29 @@ begin
   intros i,
   apply pseudo_normed_group.filtration_mono (hc i),
   apply (M.exhaustive r (x (l i))).some_spec,
+end
+-/
+
+lemma polyhedral_exhaustive
+  (M : Type*) [pseudo_normed_group M]
+  (e : ∀ x : M, ∃ c, x ∈ pseudo_normed_group.filtration M c)
+  (x : Λ →+ M) :
+  ∃ c : ℝ≥0, x ∈ pseudo_normed_group.filtration (Λ →+ M) c :=
+begin
+  obtain ⟨ι,hι,l,hl,h⟩ := polyhedral_lattice.polyhedral Λ,
+  resetI,
+  let cs : ι → ℝ≥0 := λ i, (e (x (l i))).some,
+  let c := finset.univ.sup (λ i, cs i / ∥l i∥₊),
+  -- This should be easy, using the fact that (l i) ≠ 0.
+  have hc : ∀ i, cs i ≤ c * ∥l i∥₊,
+  { intro i, rw ← mul_inv_le_iff₀,
+    { exact finset.le_sup (finset.mem_univ i), },
+    { rw [ne.def, nnnorm_eq_zero], exact h i }, },
+  use c,
+  rw generates_norm.add_monoid_hom_mem_filtration_iff hl x,
+  intros i,
+  apply pseudo_normed_group.filtration_mono (hc i),
+  apply (e (x (l i))).some_spec,
 end
 
 @[simps]
@@ -74,7 +99,7 @@ def hom_functor : ProFiltPseuNormGrpWithTinv₁.{u} r ⥤ ProFiltPseuNormGrpWith
 { obj := λ M,
   { M := Λ →+ M,
     str := infer_instance,
-    exhaustive' := by { apply polyhedral_exhaustive } },
+    exhaustive' := by { apply polyhedral_exhaustive, apply M.exhaustive r } },
   map := λ M N f, polyhedral_postcompose _ _ f,
   map_id' := λ M, begin
     ext,
@@ -85,10 +110,127 @@ def hom_functor : ProFiltPseuNormGrpWithTinv₁.{u} r ⥤ ProFiltPseuNormGrpWith
     ext,
     dsimp [polyhedral_postcompose],
     simp,
-  end }
+  end } .
 
-open category_theory.limits
+@[simps]
+def polyhedral_postcompose' {M N : PseuNormGrp₁} (f : M ⟶ N) :
+  strict_pseudo_normed_group_hom (Λ →+ M) (Λ →+ N) :=
+{ to_fun := λ x, f.to_add_monoid_hom.comp x,
+  map_zero' := by simp only [add_monoid_hom.comp_zero],
+  map_add' := by { intros, ext, dsimp, erw [f.to_add_monoid_hom.map_add], refl, },
+  strict' := begin
+      obtain ⟨ι,hι,l,hl,h⟩ := polyhedral_lattice.polyhedral Λ,
+      resetI,
+      intros c x hx,
+      erw generates_norm.add_monoid_hom_mem_filtration_iff hl at hx ⊢,
+      intros i,
+      apply f.strict,
+      exact hx i,
+    end }
 
+@[simps]
+def hom_functor' : PseuNormGrp₁.{u} ⥤ PseuNormGrp₁.{u} :=
+{ obj := λ M,
+  { carrier := Λ →+ M ,
+    exhaustive' := by { apply polyhedral_exhaustive, apply M.exhaustive } },
+  map := λ M N f, polyhedral_postcompose' _ f,
+  map_id' := λ X, by { ext, refl },
+  map_comp' := λ X Y Z f g, by { ext, refl } }
+
+open category_theory.limits PseuNormGrp₁
+
+variables {J : Type u} [small_category J] (K : J ⥤ PseuNormGrp₁.{u})
+
+def Ab.limit_cone' {J : Type u} [small_category J] (K : J ⥤ Ab.{u}) :
+  limit_cone K :=
+⟨Ab.explicit_limit_cone _, Ab.explicit_limit_cone_is_limit _⟩
+
+def hom_functor'_cone_iso_hom :
+  bounded_cone_point (Ab.limit_cone' ((K ⋙ hom_functor' Λ) ⋙ _)) ⟶
+  (hom_functor' Λ).obj (bounded_cone_point (Ab.limit_cone' (K ⋙ _))) :=
+{ to_fun := λ f,
+  { to_fun := λ q,
+    { val :=
+      { val := λ j, (f.1.1 j).1 q,
+        property := sorry },
+      property := sorry },
+    map_zero' := sorry,
+    map_add' := sorry },
+  map_zero' := sorry,
+  map_add' := sorry,
+  strict' := sorry }
+
+def hom_functor'_cone_iso_inv :
+  (hom_functor' Λ).obj (bounded_cone_point (Ab.limit_cone' (K ⋙ _))) ⟶
+  bounded_cone_point (Ab.limit_cone' ((K ⋙ hom_functor' Λ) ⋙ _)) :=
+{ to_fun := λ f,
+  { val :=
+    { val := λ j,
+      { to_fun := λ q, (f.1 q).1.1 j,
+        map_zero' := sorry,
+        map_add' := sorry },
+      property := sorry },
+    property := sorry },
+  map_zero' := sorry,
+  map_add' := sorry,
+  strict' := sorry }
+
+def hom_functor'_cone_iso_aux :
+  bounded_cone_point (Ab.limit_cone' ((K ⋙ hom_functor' Λ) ⋙ _)) ≅
+  (hom_functor' Λ).obj (bounded_cone_point (Ab.limit_cone' (K ⋙ _))) :=
+{ hom := hom_functor'_cone_iso_hom _ _,
+  inv := hom_functor'_cone_iso_inv _ _,
+  hom_inv_id' := by { ext, refl },
+  inv_hom_id' := by { ext, refl } }
+
+def hom_functor_cone_iso :
+  bounded_cone (Ab.limit_cone' ((K ⋙ hom_functor' Λ) ⋙ _)) ≅
+  (hom_functor' Λ).map_cone (bounded_cone (Ab.limit_cone' (K ⋙ _))) :=
+cones.ext
+(hom_functor'_cone_iso_aux _ _) $ λ j, by { ext, refl }
+
+instance : preserves_limits (hom_functor' Λ) :=
+begin
+  constructor, introsI J hJ, constructor, intros K,
+  apply preserves_limit_of_preserves_limit_cone
+    (PseuNormGrp₁.bounded_cone_is_limit ⟨_,Ab.explicit_limit_cone_is_limit _⟩),
+  refine is_limit.of_iso_limit (PseuNormGrp₁.bounded_cone_is_limit
+    ⟨_,Ab.explicit_limit_cone_is_limit _⟩) _,
+  apply hom_functor_cone_iso,
+end
+
+instance (c) : preserves_limits (hom_functor' Λ ⋙ PseuNormGrp₁.level.obj c) :=
+limits.comp_preserves_limits _ _
+
+def drop_Profinite_Tinv :
+  ProFiltPseuNormGrpWithTinv₁ r ⥤ PseuNormGrp₁ :=
+{ obj := λ M,
+  { carrier := M,
+    exhaustive' := M.exhaustive r },
+  map := λ X Y f, { strict' := λ c x h, f.strict h .. f.to_add_monoid_hom } }
+
+instance : preserves_limits (drop_Profinite_Tinv r) := sorry
+
+def hom_functor'_forget_iso (c) :
+  drop_Profinite_Tinv r ⋙ hom_functor' Λ ⋙ PseuNormGrp₁.level.obj c ≅
+  hom_functor _ Λ ⋙ ProFiltPseuNormGrpWithTinv₁.to_PFPNG₁ r ⋙
+    ProFiltPseuNormGrp₁.level.obj c ⋙ forget _ :=
+nat_iso.of_components (λ X, eq_to_iso rfl) $ by tidy
+
+instance hom_functor_level_preserves_limits (c) : preserves_limits (
+  hom_functor r Λ ⋙
+  ProFiltPseuNormGrpWithTinv₁.to_PFPNG₁ r ⋙
+  ProFiltPseuNormGrp₁.level.obj c ) :=
+begin
+  apply preserves_limits_of_reflects_of_preserves _ (forget Profinite),
+  apply preserves_limits_of_nat_iso (hom_functor'_forget_iso _ _ _),
+  change preserves_limits (drop_Profinite_Tinv r ⋙ (hom_functor' Λ ⋙
+    PseuNormGrp₁.level.obj c)),
+  apply limits.comp_preserves_limits,
+end
+
+
+/- #########
 -- This should be the functor sending `M` to `α → M`.
 @[simps] def pi_functor (α : Type u) [fintype α] :
   ProFiltPseuNormGrpWithTinv₁.{u} r ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r :=
@@ -324,16 +466,7 @@ begin
   resetI,
   apply preserves_limits_of_nat_iso (hom_functor_level_forget_iso r Λ m hm c),
 end
-
-instance hom_functor_level_preserves_limits (c) : preserves_limits (
-  hom_functor r Λ ⋙
-  ProFiltPseuNormGrpWithTinv₁.to_PFPNG₁ r ⋙
-  ProFiltPseuNormGrp₁.level.obj c ) :=
-begin
-  apply preserves_limits_of_reflects_of_preserves _ (forget Profinite),
-  -- A hack, to avoid functor composition associativity...
-  apply hom_functor_level_forget_preserves_limits,
-end
+####### -/
 
 end
 
