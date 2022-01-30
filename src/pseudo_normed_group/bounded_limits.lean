@@ -197,6 +197,111 @@ begin
     refine ⟨⟨_,hw⟩,rfl⟩ }
 end
 
+@[simps]
+def _root_.strict_pseudo_normed_group_hom.level {M N : Type*}
+  [pseudo_normed_group M] [pseudo_normed_group N]
+  (f : strict_pseudo_normed_group_hom M N) (c) :
+  filtration M c → filtration N c :=
+λ x, ⟨f x, f.strict x.2⟩
+
+@[simp]
+lemma _root_.strict_pseudo_normed_group_hom.level_id
+  (M : Type*) [pseudo_normed_group M] (c) :
+  (strict_pseudo_normed_group_hom.id M).level c = id := by { ext, refl }
+
+@[simp]
+def _root_.strict_pseudo_normed_group_hom.level_comp {M N L : Type*}
+  [pseudo_normed_group M] [pseudo_normed_group N] [pseudo_normed_group L]
+  (f : strict_pseudo_normed_group_hom M N) (g : strict_pseudo_normed_group_hom N L) (c) :
+  (f.comp g).level c = g.level c ∘ f.level c := by { ext, refl }
+
+@[simps]
+def level : nnreal ⥤ PseuNormGrp₁.{u} ⥤ Type u :=
+{ obj := λ c,
+  { obj := λ M, filtration M c,
+    map := λ X Y f, f.level _,
+    map_id' := λ M, strict_pseudo_normed_group_hom.level_id M _,
+    map_comp' := λ M N L f g, f.level_comp g c },
+  map := λ c₁ c₂ h,
+  { app := λ M, pseudo_normed_group.cast_le' h.le } } .
+
+def level_cone_iso_hom (c) (t : (level.obj c).obj (bounded_cone_point C)) :
+  (K ⋙ level.obj c).sections :=
+{ val := λ j,
+  { val := C.cone.π.app j t.1.1,
+    property := begin
+      obtain ⟨w,hw⟩ := t.2,
+      apply_fun (λ e, e.val) at hw,
+      rw ← hw,
+      apply w.2
+    end },
+  property := begin
+    intros i j f,
+    ext,
+    dsimp,
+    rw ← C.cone.w f,
+    refl,
+  end }
+
+def level_cone_iso_inv (c) (t : (K ⋙ level.obj c).sections) :
+  (level.obj c).obj (bounded_cone_point C) :=
+{ val :=
+  { val := C.2.lift (Ab.explicit_limit_cone _) ⟨λ j, (t.1 j).1, begin
+      intros i j f,
+      dsimp,
+      change _ = (t.val _).val,
+      rw ← t.2 f,
+      refl,
+    end⟩,
+    property := begin
+      use c,
+      intros j,
+      rw [← Ab.comp_apply, C.2.fac],
+      dsimp [Ab.explicit_limit_cone],
+      apply (t.1 j).2,
+    end },
+  property := begin
+    refine ⟨⟨_,_⟩,rfl⟩,
+    intros j,
+    dsimp,
+    rw [← Ab.comp_apply, C.2.fac],
+    dsimp [Ab.explicit_limit_cone],
+    apply (t.1 j).2,
+  end } .
+
+def level_cone_iso (c) :
+  (level.obj c).map_cone (bounded_cone C) ≅ types.limit_cone _ :=
+cones.ext
+{ hom := level_cone_iso_hom _ _,
+  inv := level_cone_iso_inv _ _,
+  hom_inv_id' := begin
+    ext,
+    dsimp [level_cone_iso_inv, level_cone_iso_hom],
+    apply Ab.is_limit_ext,
+    intros j,
+    rw [← Ab.comp_apply, C.2.fac],
+    refl,
+  end,
+  inv_hom_id' := begin
+    ext,
+    dsimp [level_cone_iso_inv, level_cone_iso_hom],
+    rw [← Ab.comp_apply, C.2.fac],
+    refl,
+  end }
+begin
+  intros j,
+  ext,
+  refl,
+end
+
+instance (c) : preserves_limits (level.obj c) :=
+begin
+  constructor, introsI J hJ, constructor, intros K,
+  apply preserves_limit_of_preserves_limit_cone
+    (bounded_cone_is_limit ⟨_, Ab.explicit_limit_cone_is_limit _⟩),
+  apply is_limit.of_iso_limit (types.limit_cone_is_limit _) (level_cone_iso _ _).symm,
+end
+
 end PseuNormGrp₁
 
 -- We can develop all this stuff for `CompHausFiltPseuNormGrp₁` as well, if needed.
