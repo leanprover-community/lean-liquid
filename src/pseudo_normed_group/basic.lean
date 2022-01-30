@@ -355,7 +355,16 @@ variables {M N : Type*} [pseudo_normed_group M] [pseudo_normed_group N]
   (f g : strict_pseudo_normed_group_hom M N)
 
 instance : has_coe_to_fun (strict_pseudo_normed_group_hom M N)
-  (λ _, M → N) := ⟨λ f, f.to_fun⟩
+  (λ _, M → N) := ⟨λ f, f.to_add_monoid_hom⟩
+
+@[simp] lemma coe_mk (f) (h) :
+  ⇑(⟨f,h⟩ : strict_pseudo_normed_group_hom M N) = f := rfl
+
+@[simp] lemma mk_to_monoid_hom (f) (h) :
+  (⟨f, h⟩ : strict_pseudo_normed_group_hom M N).to_add_monoid_hom = f := rfl
+
+@[simp]
+lemma coe_to_add_monoid_hom : ⇑f.to_add_monoid_hom = f := rfl
 
 @[simp]
 lemma map_zero : f 0 = 0 := f.to_add_monoid_hom.map_zero
