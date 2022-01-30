@@ -161,6 +161,42 @@ def bounded_cone_is_limit : is_limit (bounded_cone C) :=
     refl,
   end }
 
+instance : has_limits PseuNormGrp₁ :=
+begin
+  constructor, introsI J hJ, constructor, intros K,
+  exact has_limit.mk ⟨_, bounded_cone_is_limit ⟨_,limit.is_limit _⟩⟩,
+end
+
+open pseudo_normed_group
+
+lemma mem_filtration_iff_of_is_limit (C : cone K) (hC : is_limit C)
+  (x : C.X) (c : nnreal) :
+  x ∈ pseudo_normed_group.filtration C.X c ↔
+  (∀ j : J, C.π.app j x ∈ pseudo_normed_group.filtration (K.obj j) c) :=
+begin
+  split,
+  { intros h j,
+    exact (C.π.app j).strict h },
+  { intros h,
+    let E := bounded_cone ⟨_, Ab.explicit_limit_cone_is_limit _⟩,
+    let e : C ≅ E := hC.unique_up_to_iso (bounded_cone_is_limit _),
+    let eX : C.X ≅ E.X := (cones.forget _).map_iso e,
+    let w := eX.hom x,
+    have hw : ∀ j, E.π.app j w ∈ filtration (K.obj j) c,
+    { intros j,
+      dsimp only [w],
+      change (eX.hom ≫ E.π.app _) _ ∈ _,
+      dsimp only [eX, functor.map_iso, cones.forget],
+      convert h j,
+      simp },
+    suffices : w ∈ filtration E.X c,
+    { convert eX.inv.strict this,
+      change _ = (eX.hom ≫ eX.inv) x,
+      rw iso.hom_inv_id,
+      refl },
+    refine ⟨⟨_,hw⟩,rfl⟩ }
+end
+
 end PseuNormGrp₁
 
 -- We can develop all this stuff for `CompHausFiltPseuNormGrp₁` as well, if needed.
