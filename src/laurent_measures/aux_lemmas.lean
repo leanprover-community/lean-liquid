@@ -133,14 +133,16 @@ begin
   { rintro ⟨⟨_, _⟩, _⟩, simpa }
 end
 
--- def nat_lt_nat := { x : ℕ × ℕ // x.snd < x.fst }
--- local notation `𝒮` := nat_lt_nat
+def nat_lt_nat := { x : ℕ × ℕ // x.snd < x.fst }
+local notation `𝒮` := nat_lt_nat
 
--- lemma summable.summable_on_𝒮 (f g : ℕ → ℝ) (hf : summable (λ n, ∥ f n ∥))
---   (hg : summable (λ n, ∥ g n ∥)) : summable (λ x : ℕ × ℕ, f (x.fst + 1 + x.snd) * g (x.snd)) :=
--- begin
---   sorry
--- end
+--move me in the section below
+lemma summable.summable_on_𝒮 (f g : ℕ → ℝ) (hf : summable (λ n, ∥ f n ∥))
+  (hg : summable (λ n, ∥ g n ∥)) : summable (λ x : ℕ × ℕ, f (x.fst + 1 + x.snd) * g (x.snd)) :=
+begin
+  sorry
+end
+
 end equivalences_def
 
 section equivalences_lemma
@@ -268,7 +270,27 @@ begin
   apply (@equiv.has_sum_iff ℝ _ ℕ _ _ (f ∘ coe) _ ((equiv_bdd_integer_nat N))),
 end
 
-lemma aux_summable_iff_on_nat' {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ) (h : ∀ n : ℤ, n < d → f n = 0) :
+-- lemma aux_summable_iff_on_nat' {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ) (h : ∀ n : ℤ, n < d → f n = 0) :
+--   summable (λ n, ∥ f n ∥ * ρ ^ n) ↔ summable (λ n : ℕ, ∥ f (n + d) ∥ * ρ ^ (n + d : ℤ)) :=
+-- begin
+--   have hf : function.support (λ n : ℤ, ∥ f n ∥ * ρ ^ n) ⊆ { a : ℤ | d ≤ a},
+--   { rw function.support_subset_iff,
+--     intro x,
+--     rw [← not_imp_not, not_not, mul_eq_zero],
+--     intro hx,
+--     simp only [not_le, set.mem_set_of_eq] at hx,
+--     apply or.intro_left,
+--     rw norm_eq_zero,
+--     exact h x hx },
+--   have h1 := λ a : ℝ,
+--     @has_sum_subtype_iff_of_support_subset ℝ ℤ _ _ (λ n : ℤ, ∥ f n ∥ * ρ ^ n) _ _ hf,
+--   have h2 := λ a : ℝ,
+--     @equiv.has_sum_iff ℝ {b : ℤ // d ≤ b} ℕ _ _ ((λ n, ∥ f n ∥ * ρ ^ n) ∘ coe) _
+--     (equiv_bdd_integer_nat d),
+--   exact exists_congr (λ a, ((h2 a).trans (h1 a)).symm),
+-- end
+
+lemma aux_summable_iff_on_nat {f : ℤ → ℝ} {ρ : ℝ≥0} (d : ℤ) (h : ∀ n : ℤ, n < d → f n = 0) :
   summable (λ n, ∥ f n ∥ * ρ ^ n) ↔ summable (λ n : ℕ, ∥ f (n + d) ∥ * ρ ^ (n + d : ℤ)) :=
 begin
   have hf : function.support (λ n : ℤ, ∥ f n ∥ * ρ ^ n) ⊆ { a : ℤ | d ≤ a},
@@ -289,10 +311,11 @@ begin
 end
 
 
-lemma aux_summable_iff_on_nat {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ) (h : ∀ n : ℤ, n < d → f n = 0) :
-  summable (λ n, ∥ f n ∥ * ρ ^ n) ↔ summable (λ n : ℕ, ∥ f n ∥ * ρ ^ (n : ℤ)) :=
+lemma summable_iff_on_nat {f : ℤ → ℝ} {ρ : ℝ≥0} (d : ℤ) (h : ∀ n : ℤ, n < d → f n = 0) :
+  summable (λ n, ∥ f n ∥ * ρ ^ n) ↔ summable (λ n : ℕ, ∥ f n ∥ * ρ ^ (n : ℤ)) := --sorry
 begin
-  apply (aux_summable_iff_on_nat' d h).trans,
+  apply (aux_summable_iff_on_nat d h).trans,
+  -- apply (aux_summable_iff_on_nat' d h).trans,
   simp only [@summable_shift (λ n, ∥ f n ∥ * ρ ^n) d, zpow_coe_nat],
   by_cases hd : 0 ≤ d,
   { set m := (int.eq_coe_of_zero_le hd).some,
@@ -315,8 +338,12 @@ begin
       subtype.val_eq_coe, ← zpow_coe_nat] }
 end
 
-lemma aux_summable_iff_on_nat_coe {f : ℤ → ℝ} {ρ : ℝ≥0} (d : ℤ) (h : ∀ n : ℤ, n < d → f n = 0) :
-  summable (λ n, ∥ f n ∥ * ρ ^ n) ↔ summable (λ n : ℕ, ∥ f n ∥ * ρ ^ (n : ℤ)) := sorry
+lemma int.summable_iff_on_nat {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ) (h : ∀ n : ℤ, n < d → f n = 0) :
+summable (λ n, ∥ f n ∥ * ρ ^ n) ↔ summable (λ n : ℕ, ∥ f n ∥ * ρ ^ (n : ℤ)) :=
+  begin
+    apply summable_iff_on_nat d,
+    simpa only [int.cast_eq_zero],
+  end
 
 lemma goofy {r : ℝ≥0} (f : ℤ → ℤ) (hf : summable (λ n, ∥ f n ∥ * r ^ n)) (b : ℕ)
 : (λ n : ℕ, (2 * r : ℝ) ^ n * ∥∑' (x : ℕ), (1 / 2 : ℝ) ^ (n + 1 + x : ℤ) * (f (n + 1 + x : ℤ))∥) b
@@ -328,23 +355,27 @@ end
 lemma aux_pos_terms {r : ℝ≥0} (f : ℤ → ℤ) (n : ℕ) : 0 ≤ (2 * r : ℝ) ^ n *
   ∥∑' (x : ℕ), (1 / 2 : ℝ) ^ (n + 1 + x) * ↑(f (n + 1 + x))∥ := sorry
 
--- lemma aux_summable_iff_on_nat {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ) (h : ∀ n : ℤ, n < d → f n = 0) :
-  -- summable (λ n, ∥ f n ∥ * ρ ^ n) ↔ summable (λ n : ℕ, ∥ f n ∥ * ρ ^ (n : ℤ)) :=
 
 lemma summable_convolution {r : ℝ≥0} (hr₀: 0 < r) (hr₂ : 1 / 2 < r) (f : ℤ → ℤ) (d : ℤ)
   (hf : summable (λ n, ∥ f n ∥ * r ^ n)) (hd : ∀ n : ℤ, n < d → f n = 0) :
   summable (λ n : ℤ, (1 / 2) * ∥ tsum (λ i : ℕ, ((f (n + 1 + i)) : ℝ) * (1 / 2) ^ i) ∥ * r ^ n) :=
 begin
-  -- sorry;{
+  have half_ne_zero : (1 / 2 : ℝ) ≠ 0 := by {simp only [one_div, ne.def, inv_eq_zero, bit0_eq_zero,
+    one_ne_zero, not_false_iff]},
+  simp_rw mul_assoc,
+  rw [← summable_mul_left_iff half_ne_zero],
+  -- apply summable.summable_on_𝒮,
+
+  sorry;{
 
   suffices h_on_nat : summable (λ (n : ℕ),
     (1 / 2) * ∥∑' (i : ℕ), (f (n + 1 + i) : ℝ) * (1 / 2) ^ i∥ * (r : ℝ) ^ n),
-  { have half_ne_zero: (1 / 2 : ℝ) ≠ 0 := by {simp only [one_div, ne.def, inv_eq_zero, bit0_eq_zero, one_ne_zero,
-    not_false_iff]},
-    simp_rw mul_assoc at ⊢ h_on_nat,
+  { simp_rw mul_assoc at ⊢ h_on_nat,
     rw [← summable_mul_left_iff half_ne_zero] at ⊢ h_on_nat,
-    refine (@aux_summable_iff_on_nat_coe (λ n, ∑' (i : ℕ), (f (n + 1 + i) : ℝ) * (1 / 2) ^ i)
+    refine (@summable_iff_on_nat (λ n, ∑' (i : ℕ), (f (n + 1 + i) : ℝ) * (1 / 2) ^ i)
       r d _).mpr h_on_nat,
+    intros n hn,
+    simp only,
     sorry,
     },
 
@@ -369,8 +400,8 @@ begin
       nth_rewrite_rhs 0 [inv_eq_one_div],
       rw [neg_one_mul, int.of_nat_eq_coe, half_norm, ← normed_field.norm_zpow,
         ← normed_field.norm_mul ((1 / 2 : ℝ) ^ (- ↑n)) _, ← half_norm],
-      simp_rw [← tsum_mul_left, ← mul_assoc, ← zpow_add₀ $ one_div_ne_zero $ @two_ne_zero ℝ _ _, add_assoc,
-        neg_add_cancel_left, add_comm _ 1],
+      simp_rw [← tsum_mul_left, ← mul_assoc, ← zpow_add₀ $ one_div_ne_zero $ @two_ne_zero ℝ _ _,
+       add_assoc, neg_add_cancel_left, add_comm _ 1],
       refl },
       apply summable_of_nonneg_of_le _ (goofy f hf),
       { have temp : ∥ (2 * r : ℝ) ∥ < 1, sorry,
@@ -386,6 +417,7 @@ begin
           simp only [zero_lt_bit0, zero_lt_one, nnreal.coe_pos],
           simpa only [nnreal.coe_pos] },
       exact aux_pos_terms f b }},
+  }
 end
 
 end summability
