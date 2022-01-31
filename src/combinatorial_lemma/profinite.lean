@@ -227,7 +227,7 @@ abbreviation hom_functor'_cone_iso_inv_to_fun_aux (Λ : Type u) {J : Type u}
       (Ab.limit_cone' (K ⋙ to_Ab)))).exhaustive f,
     use c,
     intros j d q hq,
-    dsimp,
+    dsimp [Ab.explicit_limit_cone],
     specialize hc hq,
     obtain ⟨t,ht⟩ := hc,
     rw ← ht,
@@ -245,7 +245,7 @@ def hom_functor'_cone_iso_inv :
     dsimp,
     refine ⟨⟨_,_⟩,rfl⟩,
     intros j d q hq,
-    dsimp,
+    dsimp [Ab.explicit_limit_cone],
     specialize hx hq,
     obtain ⟨t,ht⟩ := hx,
     rw ← ht,
@@ -279,13 +279,14 @@ end
 instance (c) : preserves_limits (hom_functor' Λ ⋙ PseuNormGrp₁.level.obj c) :=
 limits.comp_preserves_limits _ _
 
-def drop_Profinite_Tinv :
+def ProFiltPseuNormGrpWithTinv₁.to_PNG₁ :
   ProFiltPseuNormGrpWithTinv₁ r ⥤ PseuNormGrp₁ :=
 { obj := λ M,
   { carrier := M,
     exhaustive' := M.exhaustive r },
   map := λ X Y f, { strict' := λ c x h, f.strict h .. f.to_add_monoid_hom } }
 
+/-
 def drop_Profinite :
   ProFiltPseuNormGrp₁.{u} ⥤ PseuNormGrp₁.{u} :=
 { obj := λ M,
@@ -358,16 +359,19 @@ by { constructor, introsI J _, constructor }
 instance : preserves_limits drop_Profinite.{u} :=
 category_theory.preserves_limits_of_creates_limits_and_has_limits _
 
+-/
+
 def drop_Profinite_drop_Tinv :
-  ProFiltPseuNormGrpWithTinv₁.to_PFPNG₁ r ⋙ drop_Profinite ≅
-  drop_Profinite_Tinv r :=
+  ProFiltPseuNormGrpWithTinv₁.to_PFPNG₁ r ⋙ ProFiltPseuNormGrp₁.to_PNG₁ ≅
+  ProFiltPseuNormGrpWithTinv₁.to_PNG₁ r :=
 nat_iso.of_components (λ X, iso.refl _) $ by tidy
 
-instance : preserves_limits (drop_Profinite_Tinv r) :=
+instance : preserves_limits (ProFiltPseuNormGrpWithTinv₁.to_PNG₁ r) :=
 preserves_limits_of_nat_iso (drop_Profinite_drop_Tinv r)
 
 def hom_functor'_forget_iso (c) :
-  drop_Profinite_Tinv r ⋙ hom_functor' Λ ⋙ PseuNormGrp₁.level.obj c ≅
+  ProFiltPseuNormGrpWithTinv₁.to_PNG₁ r ⋙ hom_functor' Λ ⋙
+  PseuNormGrp₁.level.obj c ≅
   hom_functor _ Λ ⋙ ProFiltPseuNormGrpWithTinv₁.to_PFPNG₁ r ⋙
     ProFiltPseuNormGrp₁.level.obj c ⋙ forget _ :=
 nat_iso.of_components (λ X, eq_to_iso rfl) $ by tidy
@@ -379,8 +383,8 @@ instance hom_functor_level_preserves_limits (c) : preserves_limits (
 begin
   apply preserves_limits_of_reflects_of_preserves _ (forget Profinite),
   apply preserves_limits_of_nat_iso (hom_functor'_forget_iso _ _ _),
-  change preserves_limits (drop_Profinite_Tinv r ⋙ (hom_functor' Λ ⋙
-    PseuNormGrp₁.level.obj c)),
+  change preserves_limits (ProFiltPseuNormGrpWithTinv₁.to_PNG₁ r ⋙
+    (hom_functor' Λ ⋙ PseuNormGrp₁.level.obj c)),
   apply limits.comp_preserves_limits,
 end
 

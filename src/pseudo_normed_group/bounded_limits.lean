@@ -307,6 +307,16 @@ end PseuNormGrp₁
 -- We can develop all this stuff for `CompHausFiltPseuNormGrp₁` as well, if needed.
 namespace ProFiltPseuNormGrp₁
 
+def to_PNG₁ :
+  ProFiltPseuNormGrp₁.{u} ⥤ PseuNormGrp₁.{u} :=
+{ obj := λ M,
+  { carrier := M,
+    exhaustive' := M.exhaustive },
+  map := λ X Y f, { strict' := λ c x h, f.strict h .. f.to_add_monoid_hom } }
+
+instance : creates_limits to_PNG₁ := sorry
+
+/-
 @[simp]
 lemma id_apply {A : ProFiltPseuNormGrp₁} (a : A) : (𝟙 A : A ⟶ A) a = a := rfl
 
@@ -487,4 +497,5 @@ def bounded_cone_is_limit : is_limit (bounded_cone C) :=
     refl,
   end }
 
+-/
 end ProFiltPseuNormGrp₁
