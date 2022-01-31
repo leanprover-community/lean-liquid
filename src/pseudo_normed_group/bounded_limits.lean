@@ -408,7 +408,30 @@ lemma bounded_cone_point_continuous_add'_aux {J : Type u}
   (pseudo_normed_group.add' :
     (pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) c₁) ×
     (pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) c₂) →
-    (pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) (c₁ + c₂))) := sorry
+    (pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) (c₁ + c₂))) :=
+begin
+  intros c₁ c₂,
+  let g : (pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) c₁) ×
+    (pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) c₂) →
+    (pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) (c₁ + c₂)) :=
+    pseudo_normed_group.add',
+  change continuous g,
+  suffices : continuous ((filtration_homeo C _) ∘ g), by simpa using this,
+  apply continuous_subtype_mk,
+  apply continuous_pi,
+  intros j,
+  let e := pseudo_normed_group.add' ∘ (prod.map (level_π C j c₁) (level_π C j c₂)),
+  have he : continuous e,
+  { apply continuous.comp,
+    apply comphaus_filtered_pseudo_normed_group.continuous_add',
+    apply continuous.prod_map,
+    apply level_π_continuous,
+    apply level_π_continuous },
+  convert he,
+  ext,
+  dsimp,
+  simpa,
+end
 
 lemma bounded_cone_point_continuous_neg'_aux {J : Type u}
   [small_category J]
@@ -450,7 +473,26 @@ lemma bounded_cone_point_continuous_cast_le_aux {J : Type u}
   ∀ (c₁ c₂ : nnreal) (h : c₁ ≤ c₂), continuous
   (pseudo_normed_group.cast_le' h :
     (pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) c₁) →
-    (pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) c₂)) := sorry
+    (pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) c₂)) :=
+begin
+  intros c₁ c₂ h,
+  let g : (pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) c₁) →
+    (pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) c₂) :=
+    pseudo_normed_group.cast_le' h,
+  change continuous g,
+  suffices : continuous ((filtration_homeo C _) ∘ g), by simpa using this,
+  apply continuous_subtype_mk,
+  apply continuous_pi,
+  intros j,
+  dsimp [g],
+  let e := pseudo_normed_group.cast_le' h ∘ level_π C j c₁,
+  have he : continuous e,
+  { apply continuous.comp,
+    haveI : fact (c₁ ≤ c₂) := ⟨h⟩,
+    apply comphaus_filtered_pseudo_normed_group.continuous_cast_le,
+    apply level_π_continuous },
+  exact he,
+end
 
 def bounded_cone_point : ProFiltPseuNormGrp₁ :=
 { M := PseuNormGrp₁.bounded_cone_point C,
