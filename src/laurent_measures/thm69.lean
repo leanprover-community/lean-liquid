@@ -179,8 +179,8 @@ begin
       simp only [one_div, zero_le_one, inv_nonneg, zero_le_bit0],
       exact le_of_lt r_half },
     have h_nat_half : summable (λ n : ℕ, ∥ F s n ∥ * (1 / 2 : ℝ≥0) ^ n) :=
-      summable_of_nonneg_of_le pos_half half_le_r ((aux_summable_iff_on_nat F.d _).mp (F.2 s)),
-    apply (aux_summable_iff_on_nat F.d _).mpr h_nat_half,
+      summable_of_nonneg_of_le pos_half half_le_r ((int.summable_iff_on_nat F.d _).mp (F.2 s)),
+    apply (int.summable_iff_on_nat F.d _).mpr h_nat_half,
     all_goals {apply lt_d_eq_zero},
 end
 
@@ -295,6 +295,20 @@ begin
         simp only [real_measures.zero_apply, inv_eq_one_div] at hF,
         simp_rw [← inv_zpow₀, inv_eq_one_div],
         exact (summable.has_sum_iff (summable_smaller_radius S F s)).mpr hF }}},
+  have : ∀ (n : ℤ), n < F.d → 1 / 2 * ∥∑' (i : ℕ), (F s (n + 1 + i) : ℝ) * (1 / 2) ^ i∥ *
+    r ^ n = 0,
+  { intros n hn,
+    rw ← sub_neg at hn,
+    replace hn := not_le_of_gt hn,
+    specialize h_θ n,
+    rw ← h_θ,
+    rw mul_eq_zero,
+    rw norm_eq_zero,
+    apply or.intro_left,
+    sorry,
+    -- rw dif_neg hn,
+    -- simp only [ge_iff_le, sub_nonneg, mul_eq_zero, norm_eq_zero, dite_eq_right_iff, neg_eq_zero],
+    },
   refine (summable_congr h_θ).mpr
     (aux_thm69.summable_convolution r_pos r_half (F s) F.d (F.2 s) (lt_d_eq_zero S F s)),
 end
