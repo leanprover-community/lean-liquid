@@ -623,9 +623,76 @@ def to_PNG₁ :
     exhaustive' := M.exhaustive },
   map := λ X Y f, { strict' := λ c x h, f.strict h .. f.to_add_monoid_hom } }
 
-variable (K : J ⥤ ProFiltPseuNormGrp₁.{u})
+variable {K : J ⥤ ProFiltPseuNormGrp₁.{u}}
+variable (C : limits.limit_cone ((K ⋙ to_PNG₁) ⋙ PseuNormGrp₁.to_Ab))
 
-instance : preserves_limit K to_PNG₁ := sorry
+def filtration_equiv (c : nnreal) :
+  pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) c
+  ≃ (Profinite.limit_cone (K ⋙ level.obj c)).X :=
+((cones.forget _).map_iso (PseuNormGrp₁.level_cone_iso C c)).to_equiv
+
+instance (c) :
+  topological_space (pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) c) :=
+topological_space.induced (filtration_equiv C c) infer_instance
+
+def filtration_homeo (c : nnreal) :
+  pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) c
+  ≃ₜ (Profinite.limit_cone (K ⋙ level.obj c)).X :=
+homeomorph.homeomorph_of_continuous_open (filtration_equiv _ _) continuous_induced_dom
+begin
+  intros U hU,
+  have : inducing (filtration_equiv C c) := ⟨rfl⟩,
+  rw this.is_open_iff at hU,
+  obtain ⟨U,hU,rfl⟩ := hU,
+  simpa,
+end
+
+instance (c) : t2_space
+  (pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) c) :=
+(filtration_homeo C c).symm.t2_space
+
+instance (c) : compact_space
+  (pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) c) :=
+(filtration_homeo C c).symm.compact_space
+
+instance (c) : totally_disconnected_space
+  (pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) c) :=
+(filtration_homeo C c).symm.totally_disconnected_space
+
+def bounded_cone_point : ProFiltPseuNormGrp₁ :=
+{ M := PseuNormGrp₁.bounded_cone_point C,
+  str :=
+  { continuous_add' := sorry,
+    continuous_neg' := sorry,
+    continuous_cast_le := sorry,
+    ..(infer_instance : pseudo_normed_group (PseuNormGrp₁.bounded_cone_point C)) },
+  exhaustive' := (PseuNormGrp₁.bounded_cone_point C).exhaustive }
+
+def bounded_cone : cone K :=
+{ X := bounded_cone_point C,
+  π :=
+  { app := λ j,
+    { continuous' := sorry,
+      ..((PseuNormGrp₁.bounded_cone C).π.app j) },
+    naturality' := begin
+      intros i j f,
+      ext,
+      dsimp,
+      rw ← (PseuNormGrp₁.bounded_cone C).w f,
+      refl,
+    end } }
+
+def bounded_cone_is_limit : is_limit (bounded_cone C) := sorry
+
+instance : preserves_limit K to_PNG₁ :=
+
+begin
+  apply preserves_limit_of_preserves_limit_cone,
+  rotate 2,
+  exact bounded_cone ⟨_,Ab.explicit_limit_cone_is_limit _⟩,
+  exact bounded_cone_is_limit _,
+  exact PseuNormGrp₁.bounded_cone_is_limit _,
+end
 
 instance : preserves_limits to_PNG₁ :=
 begin
