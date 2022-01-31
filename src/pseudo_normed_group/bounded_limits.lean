@@ -426,10 +426,21 @@ def to_PNG₁_lift_is_limit {C : cone K} (hC : is_limit (to_PNG₁.map_cone C)) 
     refl,
   end }
 
+namespace liftable_cone_of_is_limit_aux
+
+variable (C : limits.limit_cone (K ⋙ to_PNG₁))
+include C
+
+def lifted_cone : cone K := sorry
+
+def valid_lift : to_PNG₁.map_cone (lifted_cone K C) ≅ C.cone := sorry
+
+end liftable_cone_of_is_limit_aux
+
 def liftable_cone_of_is_limit (C : cone (K ⋙ to_PNG₁)) (hC : is_limit C) :
   liftable_cone K to_PNG₁ C :=
-{ lifted_cone := sorry,
-  valid_lift := sorry }
+{ lifted_cone := liftable_cone_of_is_limit_aux.lifted_cone _ ⟨_,hC⟩,
+  valid_lift := liftable_cone_of_is_limit_aux.valid_lift _ _ }
 
 instance : creates_limit K to_PNG₁ :=
 { reflects := λ C, to_PNG₁_lift_is_limit _,
