@@ -1,6 +1,8 @@
 import pseudo_normed_group.category
 import for_mathlib.ab_explicit_limits
 
+import topology.category.Compactum
+
 open category_theory
 open category_theory.limits
 
@@ -307,6 +309,13 @@ end PseuNormGrp₁
 -- We can develop all this stuff for `CompHausFiltPseuNormGrp₁` as well, if needed.
 namespace ProFiltPseuNormGrp₁
 
+@[simp]
+lemma id_apply {A : ProFiltPseuNormGrp₁} (a : A) : (𝟙 A : A ⟶ A) a = a := rfl
+
+@[simp]
+lemma comp_apply {A B C : ProFiltPseuNormGrp₁} (f : A ⟶ B) (g : B ⟶ C) (a : A) :
+  (f ≫ g) a = g (f a) := rfl
+
 def to_PNG₁ :
   ProFiltPseuNormGrp₁.{u} ⥤ PseuNormGrp₁.{u} :=
 { obj := λ M,
@@ -314,8 +323,120 @@ def to_PNG₁ :
     exhaustive' := M.exhaustive },
   map := λ X Y f, { strict' := λ c x h, f.strict h .. f.to_add_monoid_hom } }
 
-instance : creates_limits to_PNG₁ := sorry
+variable (K : J ⥤ ProFiltPseuNormGrp₁.{u})
 
+def to_PNG₁_level (c) :
+  to_PNG₁ ⋙ PseuNormGrp₁.level.obj c ≅ level.obj c ⋙ forget _ :=
+nat_iso.of_components (λ x, iso.refl _) $ by tidy
+
+lemma level_eq_level_map {A B : PseuNormGrp₁} (f : A ⟶ B)
+  (c : nnreal) : (PseuNormGrp₁.level.obj c).map f =
+  pseudo_normed_group.level f (λ a b c, f.strict c) c := rfl
+
+instance {J : Type u} (c : nnreal)
+  [small_category J]
+  (K : J ⥤ ProFiltPseuNormGrp₁)
+  (S : cone K) : topological_space ((PseuNormGrp₁.level.obj c).obj (to_PNG₁.map_cone S).X) :=
+begin
+  change topological_space ((level.obj c).obj S.X),
+  apply_instance
+end
+
+lemma to_PNG₁_lift_is_limit_continuous_aux {J : Type u} (c : nnreal)
+  [small_category J]
+  (K : J ⥤ ProFiltPseuNormGrp₁.{u})
+  {C : cone K}
+  (hC : is_limit (to_PNG₁.map_cone C))
+  (S : cone K) :
+  continuous
+    ((PseuNormGrp₁.level.obj c).map (hC.lift (to_PNG₁.map_cone S))) :=
+begin
+  let C₁ : cone ((K ⋙ to_PNG₁) ⋙ PseuNormGrp₁.level.obj c):=
+      (PseuNormGrp₁.level.obj c).map_cone (to_PNG₁.map_cone C),
+  let hC₁ : is_limit C₁ := is_limit_of_preserves (PseuNormGrp₁.level.obj c) hC,
+  let η : (K ⋙ to_PNG₁) ⋙ PseuNormGrp₁.level.obj c ≅
+    (K ⋙ level.obj c) ⋙ forget _ := iso_whisker_left K (to_PNG₁_level c),
+  let C₂ : cone ((K ⋙ level.obj c) ⋙ forget _) :=
+    (forget _).map_cone ((level.obj c).map_cone C),
+  let hC₂ : is_limit C₂ := (is_limit.postcompose_hom_equiv η _).symm hC₁,
+  let C₃ : cone (K ⋙ level.obj c) := (level.obj c).map_cone C,
+  let hC₃ : is_limit C₃ := is_limit_of_reflects (forget _) hC₂,
+  have : (PseuNormGrp₁.level.obj c).map (hC.lift (to_PNG₁.map_cone S)) =
+    (forget _).map (hC₃.lift ((level.obj c).map_cone S)),
+  { have : (PseuNormGrp₁.level.obj c).map (hC.lift (to_PNG₁.map_cone S)) =
+      hC₁.lift ((PseuNormGrp₁.level.obj c).map_cone (to_PNG₁.map_cone S)),
+    { apply hC₁.uniq ((PseuNormGrp₁.level.obj c).map_cone (to_PNG₁.map_cone S)),
+      intros j,
+      dsimp,
+      simp only [← functor.map_comp],
+      congr' 1,
+      erw hC.fac,
+      refl },
+    rw this,
+    symmetry,
+    apply (hC₁.uniq ((PseuNormGrp₁.level.obj c).map_cone (to_PNG₁.map_cone S))),
+    intros j,
+    have : (forget Profinite).map (hC₃.lift ((level.obj c).map_cone S)) =
+      hC₂.lift ((forget _).map_cone (((level.obj c).map_cone S))),
+    { apply  hC₂.uniq ((forget Profinite).map_cone ((level.obj c).map_cone S)),
+      intros j,
+      dsimp,
+      change (forget _).map _ ≫ (forget _).map _ = (forget _).map _,
+      simp only [← functor.map_comp],
+      congr' 1,
+      erw hC₃.fac,
+      refl },
+    rw this, clear this,
+    erw hC₂.fac,
+    refl },
+  rw this,
+  change continuous (hC₃.lift ((level.obj c).map_cone S)),
+  continuity
+end
+
+def to_PNG₁_lift_is_limit {C : cone K} (hC : is_limit (to_PNG₁.map_cone C)) : is_limit C :=
+{ lift := λ S,
+  { continuous' := λ c, begin
+      dsimp,
+      erw ← level_eq_level_map,
+      apply to_PNG₁_lift_is_limit_continuous_aux,
+    end,
+    ..(hC.lift (to_PNG₁.map_cone S)) },
+  fac' := begin
+    intros S j,
+    ext,
+    dsimp,
+    have := hC.fac (to_PNG₁.map_cone S) j,
+    apply_fun (λ e, e x) at this,
+    exact this,
+  end,
+  uniq' := begin
+    intros S m hm,
+    dsimp,
+    have : to_PNG₁.map m = hC.lift (to_PNG₁.map_cone S),
+    { apply hC.uniq (to_PNG₁.map_cone S),
+      intros j,
+      ext x,
+      specialize hm j,
+      apply_fun (λ e, e x) at hm,
+      exact hm },
+    ext x,
+    change (to_PNG₁.map m) x = _,
+    rw this,
+    refl,
+  end }
+
+def liftable_cone_of_is_limit (C : cone (K ⋙ to_PNG₁)) (hC : is_limit C) :
+  liftable_cone K to_PNG₁ C :=
+{ lifted_cone := sorry,
+  valid_lift := sorry }
+
+instance : creates_limit K to_PNG₁ :=
+{ reflects := λ C, to_PNG₁_lift_is_limit _,
+  lifts := λ c hc, liftable_cone_of_is_limit _ _ hc }
+
+instance : creates_limits to_PNG₁ :=
+{ creates_limits_of_shape := by { introsI J _, constructor, } }
 /-
 @[simp]
 lemma id_apply {A : ProFiltPseuNormGrp₁} (a : A) : (𝟙 A : A ⟶ A) a = a := rfl
