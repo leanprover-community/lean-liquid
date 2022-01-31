@@ -375,7 +375,7 @@ lemma map_add (x y) : f (x + y) = f x + f y := f.to_add_monoid_hom.map_add _ _
 @[simp]
 lemma map_neg (x) : f (-x) = - f x := f.to_add_monoid_hom.map_neg _
 
-lemma strict ⦃x c⦄ (h : x ∈ filtration M c) : f x ∈ filtration N c :=
+lemma strict ⦃c x⦄ (h : x ∈ filtration M c) : f x ∈ filtration N c :=
   f.strict' _ _ h
 
 @[ext]

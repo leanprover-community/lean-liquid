@@ -227,6 +227,11 @@ def level : nnreal ⥤ PseuNormGrp₁.{u} ⥤ Type u :=
   map := λ c₁ c₂ h,
   { app := λ M, pseudo_normed_group.cast_le' h.le } } .
 
+lemma level_map {X Y : PseuNormGrp₁} (f : X ⟶ Y) (c) : (level.obj c).map f = f.level _ := rfl
+
+lemma level_map' {X Y : PseuNormGrp₁} (f : X ⟶ Y) (c) : (level.obj c).map f =
+  pseudo_normed_group.level f f.strict c := rfl
+
 def level_cone_iso_hom (c) (t : (level.obj c).obj (bounded_cone_point C)) :
   (K ⋙ level.obj c).sections :=
 { val := λ j,
@@ -304,6 +309,15 @@ begin
   apply is_limit.of_iso_limit (types.limit_cone_is_limit _) (level_cone_iso _ _).symm,
 end
 
+def neg_nat_trans (c) : level.obj.{u} c ⟶ level.obj.{u} c :=
+{ app := λ X, pseudo_normed_group.neg',
+  naturality' := begin
+    intros A B f,
+    ext,
+    dsimp [level, neg'],
+    simp,
+  end }
+
 end PseuNormGrp₁
 
 -- We can develop all this stuff for `CompHausFiltPseuNormGrp₁` as well, if needed.
@@ -323,300 +337,152 @@ def to_PNG₁ :
     exhaustive' := M.exhaustive },
   map := λ X Y f, { strict' := λ c x h, f.strict h .. f.to_add_monoid_hom } }
 
-variable (K : J ⥤ ProFiltPseuNormGrp₁.{u})
-
-def to_PNG₁_level (c) :
-  to_PNG₁ ⋙ PseuNormGrp₁.level.obj c ≅ level.obj c ⋙ forget _ :=
-nat_iso.of_components (λ x, iso.refl _) $ by tidy
-
-lemma level_eq_level_map {A B : PseuNormGrp₁} (f : A ⟶ B)
-  (c : nnreal) : (PseuNormGrp₁.level.obj c).map f =
-  pseudo_normed_group.level f (λ a b c, f.strict c) c := rfl
-
-instance {J : Type u} (c : nnreal)
-  [small_category J]
-  (K : J ⥤ ProFiltPseuNormGrp₁)
-  (S : cone K) : topological_space ((PseuNormGrp₁.level.obj c).obj (to_PNG₁.map_cone S).X) :=
+instance : faithful to_PNG₁.{u} := faithful.mk $
 begin
-  change topological_space ((level.obj c).obj S.X),
-  apply_instance
+  intros X Y f g h,
+  ext,
+  apply_fun (λ e, e x) at h,
+  exact h
 end
-
-lemma to_PNG₁_lift_is_limit_continuous_aux {J : Type u} (c : nnreal)
-  [small_category J]
-  (K : J ⥤ ProFiltPseuNormGrp₁.{u})
-  {C : cone K}
-  (hC : is_limit (to_PNG₁.map_cone C))
-  (S : cone K) :
-  continuous
-    ((PseuNormGrp₁.level.obj c).map (hC.lift (to_PNG₁.map_cone S))) :=
-begin
-  let C₁ : cone ((K ⋙ to_PNG₁) ⋙ PseuNormGrp₁.level.obj c):=
-      (PseuNormGrp₁.level.obj c).map_cone (to_PNG₁.map_cone C),
-  let hC₁ : is_limit C₁ := is_limit_of_preserves (PseuNormGrp₁.level.obj c) hC,
-  let η : (K ⋙ to_PNG₁) ⋙ PseuNormGrp₁.level.obj c ≅
-    (K ⋙ level.obj c) ⋙ forget _ := iso_whisker_left K (to_PNG₁_level c),
-  let C₂ : cone ((K ⋙ level.obj c) ⋙ forget _) :=
-    (forget _).map_cone ((level.obj c).map_cone C),
-  let hC₂ : is_limit C₂ := (is_limit.postcompose_hom_equiv η _).symm hC₁,
-  let C₃ : cone (K ⋙ level.obj c) := (level.obj c).map_cone C,
-  let hC₃ : is_limit C₃ := is_limit_of_reflects (forget _) hC₂,
-  have : (PseuNormGrp₁.level.obj c).map (hC.lift (to_PNG₁.map_cone S)) =
-    (forget _).map (hC₃.lift ((level.obj c).map_cone S)),
-  { have : (PseuNormGrp₁.level.obj c).map (hC.lift (to_PNG₁.map_cone S)) =
-      hC₁.lift ((PseuNormGrp₁.level.obj c).map_cone (to_PNG₁.map_cone S)),
-    { apply hC₁.uniq ((PseuNormGrp₁.level.obj c).map_cone (to_PNG₁.map_cone S)),
-      intros j,
-      dsimp,
-      simp only [← functor.map_comp],
-      congr' 1,
-      erw hC.fac,
-      refl },
-    rw this,
-    symmetry,
-    apply (hC₁.uniq ((PseuNormGrp₁.level.obj c).map_cone (to_PNG₁.map_cone S))),
-    intros j,
-    have : (forget Profinite).map (hC₃.lift ((level.obj c).map_cone S)) =
-      hC₂.lift ((forget _).map_cone (((level.obj c).map_cone S))),
-    { apply  hC₂.uniq ((forget Profinite).map_cone ((level.obj c).map_cone S)),
-      intros j,
-      dsimp,
-      change (forget _).map _ ≫ (forget _).map _ = (forget _).map _,
-      simp only [← functor.map_comp],
-      congr' 1,
-      erw hC₃.fac,
-      refl },
-    rw this, clear this,
-    erw hC₂.fac,
-    refl },
-  rw this,
-  change continuous (hC₃.lift ((level.obj c).map_cone S)),
-  continuity
-end
-
-def to_PNG₁_lift_is_limit {C : cone K} (hC : is_limit (to_PNG₁.map_cone C)) : is_limit C :=
-{ lift := λ S,
-  { continuous' := λ c, begin
-      dsimp,
-      erw ← level_eq_level_map,
-      apply to_PNG₁_lift_is_limit_continuous_aux,
-    end,
-    ..(hC.lift (to_PNG₁.map_cone S)) },
-  fac' := begin
-    intros S j,
-    ext,
-    dsimp,
-    have := hC.fac (to_PNG₁.map_cone S) j,
-    apply_fun (λ e, e x) at this,
-    exact this,
-  end,
-  uniq' := begin
-    intros S m hm,
-    dsimp,
-    have : to_PNG₁.map m = hC.lift (to_PNG₁.map_cone S),
-    { apply hC.uniq (to_PNG₁.map_cone S),
-      intros j,
-      ext x,
-      specialize hm j,
-      apply_fun (λ e, e x) at hm,
-      exact hm },
-    ext x,
-    change (to_PNG₁.map m) x = _,
-    rw this,
-    refl,
-  end }
-
-def liftable_cone_of_is_limit (C : cone (K ⋙ to_PNG₁)) (hC : is_limit C) :
-  liftable_cone K to_PNG₁ C :=
-{ lifted_cone := sorry,
-  valid_lift := sorry }
-
-instance : creates_limit K to_PNG₁ :=
-{ reflects := λ C, to_PNG₁_lift_is_limit _,
-  lifts := λ c hc, liftable_cone_of_is_limit _ _ hc }
-
-instance : creates_limits to_PNG₁ :=
-{ creates_limits_of_shape := by { introsI J _, constructor, } }
-/-
-@[simp]
-lemma id_apply {A : ProFiltPseuNormGrp₁} (a : A) : (𝟙 A : A ⟶ A) a = a := rfl
-
-@[simp]
-lemma comp_apply {A B C : ProFiltPseuNormGrp₁} (f : A ⟶ B) (g : B ⟶ C) (a : A) :
-  (f ≫ g) a = g (f a) := rfl
-
-attribute [simps] level Ab.explicit_limit_cone
-
-def to_Ab : ProFiltPseuNormGrp₁.{u} ⥤ Ab.{u} :=
-{ obj := λ M, AddCommGroup.of M,
-  map := λ M N f, f.to_add_monoid_hom }
 
 variable {K : J ⥤ ProFiltPseuNormGrp₁.{u}}
-variable (C : limits.limit_cone (K ⋙ to_Ab))
+variable (C : limits.limit_cone ((K ⋙ to_PNG₁) ⋙ PseuNormGrp₁.to_Ab))
 
-def bounded_elements : add_subgroup C.cone.X :=
-{ carrier := { x | ∃ c, ∀ j, C.cone.π.app j x ∈ pseudo_normed_group.filtration (K.obj j) c },
-  zero_mem' := ⟨0, λ j, by { simp, apply pseudo_normed_group.zero_mem_filtration } ⟩,
-  add_mem' := λ a b ha hb, begin
-    obtain ⟨c,hc⟩ := ha,
-    obtain ⟨d,hd⟩ := hb,
-    use c + d,
-    intros j,
-    simp,
-    apply pseudo_normed_group.add_mem_filtration,
-    apply hc,
-    apply hd,
-  end,
-  neg_mem' := λ a ha, begin
-    obtain ⟨c,hc⟩ := ha,
-    use c,
-    intros j,
-    simp,
-    apply pseudo_normed_group.neg_mem_filtration,
-    apply hc,
-  end }
+def filtration_equiv (c : nnreal) :
+  pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) c
+  ≃ (Profinite.limit_cone (K ⋙ level.obj c)).X :=
+((cones.forget _).map_iso (PseuNormGrp₁.level_cone_iso C c)).to_equiv
 
-def bounded_elements.filt (c : nnreal) : set C.cone.X :=
-{ x | ∀ j, C.cone.π.app j x ∈ pseudo_normed_group.filtration (K.obj j) c }
+instance (c) :
+  topological_space (pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) c) :=
+topological_space.induced (filtration_equiv C c) infer_instance
 
-def bounded_elements.filt_incl (c : nnreal) :
-  bounded_elements.filt C c → bounded_elements C :=
-λ x, ⟨x, c, x.2⟩
+def filtration_homeo (c : nnreal) :
+  pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) c
+  ≃ₜ (Profinite.limit_cone (K ⋙ level.obj c)).X :=
+homeomorph.homeomorph_of_continuous_open (filtration_equiv _ _) continuous_induced_dom
+begin
+  intros U hU,
+  have : inducing (filtration_equiv C c) := ⟨rfl⟩,
+  rw this.is_open_iff at hU,
+  obtain ⟨U,hU,rfl⟩ := hU,
+  simpa,
+end
 
-def bounded_elements.filtration (c : nnreal) : set (bounded_elements C) :=
-set.range (bounded_elements.filt_incl _ c)
+instance (c) : t2_space
+  (pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) c) :=
+(filtration_homeo C c).symm.t2_space
 
-@[simps]
-def bounded_elements.filtration_to_Profinite_limit_cone (c : nnreal) :
-  bounded_elements.filtration C c → (Profinite.limit_cone (K ⋙ level.obj c)).X :=
-λ t, ⟨λ j, ⟨C.cone.π.app _ t.1.1, by { rcases t with ⟨_,w,rfl⟩, apply w.2}⟩,
-    by { intros i j f, ext, dsimp, rw ← C.cone.w f, refl }⟩
+instance (c) : compact_space
+  (pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) c) :=
+(filtration_homeo C c).symm.compact_space
 
-@[simps]
-def bounded_elements.Profinite_limit_cone_to_filtration (c : nnreal) :
-(Profinite.limit_cone (K ⋙ level.obj c)).X → bounded_elements.filtration C c := λ t,
-{ val := ⟨C.2.lift (Ab.explicit_limit_cone _) ⟨λ j, (t.1 j).1,
-  by { intros i j f, dsimp, change _ = (t.val _).val, rw ← t.2 f, refl }⟩,
-  by { use c, intros j, dsimp, rw [← Ab.comp_apply, C.2.fac], exact (t.1 j).2 }⟩,
-  property := by { refine ⟨⟨C.2.lift (Ab.explicit_limit_cone _) ⟨λ j, (t.1 j).1,
-    by { intros i j f, dsimp, change _ = (t.val _).val, rw ← t.2 f, refl }⟩, _⟩, _⟩,
-    { intros j, rw [← Ab.comp_apply, C.2.fac], exact (t.1 j).2 },
-    { ext, refl } } }
-
-def bounded_elements.filtration_equiv (c : nnreal) :
-  bounded_elements.filtration C c ≃ (Profinite.limit_cone (K ⋙ level.obj c)).X :=
-{ to_fun := bounded_elements.filtration_to_Profinite_limit_cone C c,
-  inv_fun := bounded_elements.Profinite_limit_cone_to_filtration C c,
-  left_inv := by { rintros ⟨⟨f,h2⟩,h3⟩, ext, dsimp, apply Ab.is_limit_ext,
-    intros j, rw [← Ab.comp_apply, C.2.fac], refl },
-  right_inv := by { rintros ⟨f,hf⟩, ext, dsimp, rw [← Ab.comp_apply, C.2.fac], refl } }
-
-instance (c : nnreal) :
-  topological_space (bounded_elements.filtration C c) :=
-topological_space.induced (bounded_elements.filtration_equiv C c) infer_instance
-
-instance (c : nnreal) :
-  t2_space (bounded_elements.filtration C c) := sorry
-
-instance (c : nnreal) :
-  compact_space (bounded_elements.filtration C c) := sorry
-
-instance (c : nnreal) :
-  totally_disconnected_space (bounded_elements.filtration C c) := sorry
+instance (c) : totally_disconnected_space
+  (pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) c) :=
+(filtration_homeo C c).symm.totally_disconnected_space
 
 def bounded_cone_point : ProFiltPseuNormGrp₁ :=
-{ M := bounded_elements C,
+{ M := PseuNormGrp₁.bounded_cone_point C,
   str :=
-  { filtration := bounded_elements.filtration _,
-    filtration_mono := begin
-      intros c₁ c₂ h x hx,
-      obtain ⟨t,rfl⟩ := hx, refine ⟨⟨t,_⟩,rfl⟩, intros i,
-      apply pseudo_normed_group.filtration_mono h, apply t.2,
-    end,
-    zero_mem_filtration := begin
-      intros c, refine ⟨⟨0,λ i, _⟩,rfl⟩, simp,
-        apply pseudo_normed_group.zero_mem_filtration
-    end,
-    neg_mem_filtration := begin
-      intros c x hx,
-      obtain ⟨t,rfl⟩ := hx, refine ⟨⟨-t, λ i, _⟩, rfl⟩, simp,
-      apply pseudo_normed_group.neg_mem_filtration, apply t.2
-    end,
-    add_mem_filtration := begin
-      intros c₁ c₂ x₁ x₂ h₁ h₂,
-      obtain ⟨t₁,rfl⟩ := h₁, obtain ⟨t₂,rfl⟩ := h₂,
-      refine ⟨⟨t₁ + t₂, λ i, _⟩, rfl⟩, simp,
-      apply pseudo_normed_group.add_mem_filtration, apply t₁.2, apply t₂.2,
-    end,
-    continuous_add' := sorry,
+  { continuous_add' := sorry,
     continuous_neg' := sorry,
-    continuous_cast_le := sorry },
-    exhaustive' := begin
-      intros m,
-      obtain ⟨c,hc⟩ := m.2,
-      refine ⟨c,⟨m.1, hc⟩, by { ext, refl }⟩,
-    end }
+    continuous_cast_le := sorry,
+    ..(infer_instance : pseudo_normed_group (PseuNormGrp₁.bounded_cone_point C)) },
+  exhaustive' := (PseuNormGrp₁.bounded_cone_point C).exhaustive }
+
+def level_π (j c) : pseudo_normed_group.filtration (bounded_cone_point C) c →
+  pseudo_normed_group.filtration (K.obj j) c :=
+(PseuNormGrp₁.level.obj c).map ((PseuNormGrp₁.bounded_cone C).π.app j)
+
+lemma level_π_continuous (j c) : continuous (level_π C j c) :=
+begin
+  have : level_π C j c ∘ (filtration_homeo C c).symm =
+    (Profinite.limit_cone _).π.app j,
+  { ext,
+    change (C.is_limit.lift _ ≫ C.cone.π.app j) _ = _,
+    rw C.is_limit.fac,
+    refl },
+  suffices : continuous (level_π C j c ∘ (filtration_homeo C c).symm),
+    by simpa using this,
+  rw this,
+  continuity,
+end
 
 def bounded_cone : cone K :=
 { X := bounded_cone_point C,
   π :=
   { app := λ j,
-    { to_fun := λ x, C.cone.π.app _ x.1,
-      map_zero' := by simp,
-      map_add' := λ x y, by simp,
-      strict' := begin
-        rintros c x ⟨x,rfl⟩,
-        apply x.2,
-      end,
-      continuous' := sorry },
+    { continuous' := λ c, level_π_continuous _ _ _,
+      ..((PseuNormGrp₁.bounded_cone C).π.app j) },
     naturality' := begin
       intros i j f,
       ext,
       dsimp,
-      rw ← C.cone.w f,
+      rw ← (PseuNormGrp₁.bounded_cone C).w f,
       refl,
     end } }
 
-def bounded_cone_lift (S : cone K) : S.X ⟶ bounded_cone_point C :=
-{ to_fun := λ x, ⟨C.2.lift (to_Ab.map_cone S) x, begin
-    obtain ⟨c,hc⟩ := S.X.exhaustive x,
-    use c,
-    intros j,
-    rw [← Ab.comp_apply, C.2.fac],
-    apply (S.π.app j).strict,
-    exact hc,
-  end⟩,
-  map_zero' := by { ext, simp },
-  map_add' := λ x y, by { ext, simp },
-  strict' := begin
-    intros c x hx,
-    refine ⟨⟨_, λ j, _⟩,rfl⟩,
-    erw [← Ab.comp_apply, C.2.fac],
-    apply (S.π.app j).strict,
-    exact hx,
-  end,
-  continuous' := sorry }
-
 def bounded_cone_is_limit : is_limit (bounded_cone C) :=
-{ lift := λ S, bounded_cone_lift C S,
+{ lift := λ S,
+  { continuous' := begin
+      intros c,
+      let t : pseudo_normed_group.filtration S.X c →
+        pseudo_normed_group.filtration (bounded_cone C).X c :=
+        (((PseuNormGrp₁.bounded_cone_is_limit C).lift (to_PNG₁.map_cone S)).level _),
+      change continuous t,
+      suffices : continuous ((filtration_homeo C c) ∘ t), by simpa using this,
+      have : ⇑(filtration_homeo C c) ∘ t =
+        (Profinite.limit_cone_is_limit _).lift ((level.obj c).map_cone S),
+      { ext,
+        change (C.is_limit.lift _ ≫ C.cone.π.app _) _ = _,
+        rw C.is_limit.fac, refl },
+      rw this,
+      continuity,
+    end,
+    ..((PseuNormGrp₁.bounded_cone_is_limit C).lift (to_PNG₁.map_cone S)) },
   fac' := begin
     intros S j,
     ext,
-    dsimp [bounded_cone_lift, bounded_cone],
-    rw [← Ab.comp_apply, C.2.fac],
+    dsimp [bounded_cone],
+    change ((PseuNormGrp₁.bounded_cone_is_limit C).lift (to_PNG₁.map_cone S) ≫
+      (PseuNormGrp₁.bounded_cone C).π.app j) _ = _,
+    rw (PseuNormGrp₁.bounded_cone_is_limit C).fac,
     refl,
   end,
   uniq' := begin
     intros S m hm,
     ext,
-    dsimp [bounded_cone_lift, bounded_cone],
-    apply Ab.is_limit_ext,
-    intros j,
-    rw [← Ab.comp_apply, C.2.fac],
     dsimp,
-    rw ← hm,
+    have : to_PNG₁.map m =
+      (PseuNormGrp₁.bounded_cone_is_limit C).lift (to_PNG₁.map_cone S),
+    { apply (PseuNormGrp₁.bounded_cone_is_limit C).uniq (to_PNG₁.map_cone S),
+      intros j,
+      ext t,
+      specialize hm j,
+      apply_fun (λ e, e t) at hm,
+      exact hm },
+    rw ← this,
     refl,
   end }
 
+instance : preserves_limit K to_PNG₁ :=
+
+begin
+  apply preserves_limit_of_preserves_limit_cone,
+  rotate 2,
+  exact bounded_cone ⟨_,Ab.explicit_limit_cone_is_limit _⟩,
+  exact bounded_cone_is_limit _,
+  exact PseuNormGrp₁.bounded_cone_is_limit _,
+end
+
+/-
+Remark: This functor even creates limits, as can be shown using the fact that the forgetful
+functor from `Profinite` to `Type*` creates limits.
+I don't think we actually need that strong statement, so we only prove the following.
 -/
+instance : preserves_limits to_PNG₁ :=
+begin
+  constructor, introsI J hJ, constructor
+end
+
 end ProFiltPseuNormGrp₁
