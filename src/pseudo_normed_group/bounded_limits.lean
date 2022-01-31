@@ -381,6 +381,24 @@ instance (c) : totally_disconnected_space
   (pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) c) :=
 (filtration_homeo C c).symm.totally_disconnected_space
 
+def level_π (j c) : pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) c →
+  pseudo_normed_group.filtration (K.obj j) c :=
+(PseuNormGrp₁.level.obj c).map ((PseuNormGrp₁.bounded_cone C).π.app j)
+
+lemma level_π_continuous (j c) : continuous (level_π C j c) :=
+begin
+  have : level_π C j c ∘ (filtration_homeo C c).symm =
+    (Profinite.limit_cone _).π.app j,
+  { ext,
+    change (C.is_limit.lift _ ≫ C.cone.π.app j) _ = _,
+    rw C.is_limit.fac,
+    refl },
+  suffices : continuous (level_π C j c ∘ (filtration_homeo C c).symm),
+    by simpa using this,
+  rw this,
+  continuity,
+end
+
 lemma bounded_cone_point_continuous_add'_aux {J : Type u}
   [small_category J]
   {K : J ⥤ ProFiltPseuNormGrp₁}
@@ -400,7 +418,29 @@ lemma bounded_cone_point_continuous_neg'_aux {J : Type u}
   ∀ (c : nnreal), continuous
   (pseudo_normed_group.neg' :
     (pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) c) →
-    (pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) c)) := sorry
+    (pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) c)) :=
+begin
+  intros c,
+  let g : (pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) c) →
+    (pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) c) :=
+    pseudo_normed_group.neg',
+  change continuous g,
+  suffices : continuous ((filtration_homeo C c) ∘ g),
+    by simpa using this,
+  apply continuous_subtype_mk,
+  apply continuous_pi,
+  dsimp [g],
+  intros j,
+  let e := pseudo_normed_group.neg' ∘ level_π C j c,
+  have he : continuous e,
+  { apply continuous.comp,
+    apply comphaus_filtered_pseudo_normed_group.continuous_neg',
+    apply level_π_continuous },
+  convert he,
+  ext,
+  dsimp,
+  simpa,
+end
 
 lemma bounded_cone_point_continuous_cast_le_aux {J : Type u}
   [small_category J]
@@ -420,24 +460,6 @@ def bounded_cone_point : ProFiltPseuNormGrp₁ :=
     continuous_cast_le := λ _ _ h, bounded_cone_point_continuous_cast_le_aux _ _ _ h.out,
     ..(infer_instance : pseudo_normed_group (PseuNormGrp₁.bounded_cone_point C)) },
   exhaustive' := (PseuNormGrp₁.bounded_cone_point C).exhaustive }
-
-def level_π (j c) : pseudo_normed_group.filtration (bounded_cone_point C) c →
-  pseudo_normed_group.filtration (K.obj j) c :=
-(PseuNormGrp₁.level.obj c).map ((PseuNormGrp₁.bounded_cone C).π.app j)
-
-lemma level_π_continuous (j c) : continuous (level_π C j c) :=
-begin
-  have : level_π C j c ∘ (filtration_homeo C c).symm =
-    (Profinite.limit_cone _).π.app j,
-  { ext,
-    change (C.is_limit.lift _ ≫ C.cone.π.app j) _ = _,
-    rw C.is_limit.fac,
-    refl },
-  suffices : continuous (level_π C j c ∘ (filtration_homeo C c).symm),
-    by simpa using this,
-  rw this,
-  continuity,
-end
 
 def bounded_cone : cone K :=
 { X := bounded_cone_point C,
