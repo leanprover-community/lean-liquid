@@ -370,6 +370,45 @@ def _root_.nat.fold_product (n : nat) :
 
 example (T : Profinite.{u}) (n : nat) : Profinite := n.fold_product.obj T
 
+-- Missing comphaus_filt_pseudo_normed_group.continuous_sum',
+-- and comphaus_filt_pseudo_normed_group.sum'
+def sum {c₁ c₂ : ℝ≥0} (n : nat) (h : ↑n * c₁ ≤ c₂) :
+  (lvl r').obj c₁ ⋙ n.fold_product ⟶ (lvl r').obj c₂ :=
+{ app := λ X,
+  { to_fun := λ t, ⟨∑ i : fin n, (t i).1, begin
+      refine pseudo_normed_group.filtration_mono _ _,
+      rotate 2,
+      apply pseudo_normed_group.sum_mem_filtration,
+      rotate 1,
+      exact λ i, c₁,
+      rotate 1,
+      intros i hi,
+      exact (t i).2,
+      simpa,
+    end⟩,
+    continuous_to_fun := begin
+      -- Missing comphaus_filt_pseudo_normed_group.continuous_sum',
+      sorry
+    end },
+  naturality' := begin
+    intros  X Y f,
+    ext,
+    dsimp [nat.fold_product, ProFiltPseuNormGrp₁.level, to_PFPNG₁,
+      Profinite.product.lift, Profinite.product.π],
+    rw f.map_sum,
+  end } .
+
+-- A functorial version of `cast_le`.
+def le {c₁ c₂ : ℝ≥0} (h : c₁ ≤ c₂) :
+  (lvl r').obj c₁ ⟶ (lvl r').obj c₂ :=
+{ app := λ X,
+  { to_fun := pseudo_normed_group.cast_le' h,
+    continuous_to_fun := begin
+      haveI : fact (c₁ ≤ c₂) := ⟨h⟩,
+      apply comphaus_filtered_pseudo_normed_group.continuous_cast_le,
+    end },
+  naturality' := λ A B f, by { ext, refl } }
+
 end lem98
 
 /-- Lemma 9.8 of [Analytic] -/
