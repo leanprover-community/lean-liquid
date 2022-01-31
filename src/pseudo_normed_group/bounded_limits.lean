@@ -428,26 +428,71 @@ def to_PNG₁_lift_is_limit {C : cone K} (hC : is_limit (to_PNG₁.map_cone C)) 
 
 namespace liftable_cone_of_is_limit_aux
 
+variable {K}
 variable (C : limits.limit_cone (K ⋙ to_PNG₁))
-include C
+
+section
+parameter (c : nnreal)
+
+
+def D := (PseuNormGrp₁.level.obj c).map_cone C.cone
+def hD : is_limit (D C) := is_limit_of_preserves _ C.2
+
+def E : cone ((K ⋙ level.obj c) ⋙ forget _) :=
+  let η : (K ⋙ to_PNG₁) ⋙ PseuNormGrp₁.level.obj c ≅
+    (K ⋙ level.obj c) ⋙ forget _ := iso_whisker_left K (to_PNG₁_level c) in
+  (cones.postcompose_equivalence η).functor.obj (D C)
+
+def hE : is_limit (E C) := (is_limit.postcompose_hom_equiv _ _).symm (hD C)
+
+noncomputable theory
+
+def F : cone (K ⋙ level.obj c) := lift_limit (hE C)
+
+def hF : is_limit (F C) := lifted_limit_is_limit _
+
+def FE : (forget _).map_cone (F C) ≅ (E C) := lifted_limit_maps_to_original _
+
+def fe : (forget _).obj (F C).X ≅ (E C).X := (cones.forget _).map_iso (FE C)
+
+def fe' : (F C).X ≃ (E C).X := iso.to_equiv (fe C)
+
+instance : topological_space (E C).X :=
+  topological_space.induced (fe' C).symm infer_instance
+
+def homeo : (E C).X ≃ₜ (F C).X :=
+homeomorph.homeomorph_of_continuous_open (fe' C).symm continuous_induced_dom
+begin
+  intros U hU,
+  have : inducing (fe' c C).symm := ⟨rfl⟩,
+  rw this.is_open_iff at hU,
+  obtain ⟨U,hU,rfl⟩ := hU,
+  simpa,
+end
+
+end
 
 instance (c : nnreal) :
-  topological_space (pseudo_normed_group.filtration C.cone.X c) := sorry
+  topological_space (pseudo_normed_group.filtration C.cone.X c) :=
+show topological_space (E c C).X, by apply_instance
 
 instance (c : nnreal) :
-  t2_space (pseudo_normed_group.filtration C.cone.X c) := sorry
+  t2_space (pseudo_normed_group.filtration C.cone.X c) :=
+(homeo c C).symm.t2_space
 
 instance (c : nnreal) :
-  compact_space (pseudo_normed_group.filtration C.cone.X c) := sorry
+  compact_space (pseudo_normed_group.filtration C.cone.X c) :=
+(homeo c C).symm.compact_space
 
 instance (c : nnreal) :
-  totally_disconnected_space (pseudo_normed_group.filtration C.cone.X c) := sorry
+  totally_disconnected_space (pseudo_normed_group.filtration C.cone.X c) :=
+(homeo c C).symm.totally_disconnected_space
 
 def π_level (c) (j) : pseudo_normed_group.filtration C.cone.X c →
   pseudo_normed_group.filtration (K.obj j) c :=
 pseudo_normed_group.level (C.cone.π.app j) (C.cone.π.app j).strict _
 
-lemma continuous_π_level (c) (j) : continuous (π_level K C c j) := sorry
+lemma continuous_π_level (c) (j) : continuous (π_level C c j) := sorry
 
 lemma continuous_pseudo_normed_group_add' (c₁ c₂ : nnreal) :
   continuous (pseudo_normed_group.add' :
@@ -465,9 +510,9 @@ lemma continuous_pseudo_normed_group_cast_le' (c₁ c₂ : nnreal) (h : c₁ ≤
     pseudo_normed_group.filtration C.cone.X c₂) := sorry
 
 instance : profinitely_filtered_pseudo_normed_group C.cone.X :=
-{ continuous_add' := continuous_pseudo_normed_group_add' _ _,
-  continuous_neg' := continuous_pseudo_normed_group_neg' _ _ ,
-  continuous_cast_le := λ c₁ c₂ h, continuous_pseudo_normed_group_cast_le' _ _ c₁ c₂ h.out,
+{ continuous_add' := continuous_pseudo_normed_group_add' _,
+  continuous_neg' := continuous_pseudo_normed_group_neg' _ ,
+  continuous_cast_le := λ c₁ c₂ h, continuous_pseudo_normed_group_cast_le' _ c₁ c₂ h.out,
   ..(infer_instance : pseudo_normed_group C.cone.X) }
 
 def lifted_cone : cone K :=
@@ -476,7 +521,7 @@ def lifted_cone : cone K :=
     exhaustive' := C.cone.X.exhaustive },
   π :=
   { app := λ j,
-    { continuous' := λ c, continuous_π_level K C c j,
+    { continuous' := λ c, continuous_π_level C c j,
       ..(C.cone.π.app j)},
     naturality' := begin
       intros i j f,
@@ -486,7 +531,7 @@ def lifted_cone : cone K :=
       refl,
     end } }
 
-def valid_lift : to_PNG₁.map_cone (lifted_cone K C) ≅ C.cone :=
+def valid_lift : to_PNG₁.map_cone (lifted_cone C) ≅ C.cone :=
 cones.ext
 { hom :=
   { to_fun := id,
@@ -503,8 +548,8 @@ end liftable_cone_of_is_limit_aux
 
 def liftable_cone_of_is_limit (C : cone (K ⋙ to_PNG₁)) (hC : is_limit C) :
   liftable_cone K to_PNG₁ C :=
-{ lifted_cone := liftable_cone_of_is_limit_aux.lifted_cone _ ⟨_,hC⟩,
-  valid_lift := liftable_cone_of_is_limit_aux.valid_lift _ _ }
+{ lifted_cone := liftable_cone_of_is_limit_aux.lifted_cone ⟨_,hC⟩,
+  valid_lift := liftable_cone_of_is_limit_aux.valid_lift _ }
 
 instance : creates_limit K to_PNG₁ :=
 { reflects := λ C, to_PNG₁_lift_is_limit _,
