@@ -623,6 +623,14 @@ def to_PNG₁ :
     exhaustive' := M.exhaustive },
   map := λ X Y f, { strict' := λ c x h, f.strict h .. f.to_add_monoid_hom } }
 
+instance : faithful to_PNG₁.{u} := faithful.mk $
+begin
+  intros X Y f g h,
+  ext,
+  apply_fun (λ e, e x) at h,
+  exact h
+end
+
 variable {K : J ⥤ ProFiltPseuNormGrp₁.{u}}
 variable (C : limits.limit_cone ((K ⋙ to_PNG₁) ⋙ PseuNormGrp₁.to_Ab))
 
@@ -682,7 +690,34 @@ def bounded_cone : cone K :=
       refl,
     end } }
 
-def bounded_cone_is_limit : is_limit (bounded_cone C) := sorry
+def bounded_cone_is_limit : is_limit (bounded_cone C) :=
+{ lift := λ S,
+  { continuous' := sorry,
+    ..((PseuNormGrp₁.bounded_cone_is_limit C).lift (to_PNG₁.map_cone S)) },
+  fac' := begin
+    intros S j,
+    ext,
+    dsimp [bounded_cone],
+    change ((PseuNormGrp₁.bounded_cone_is_limit C).lift (to_PNG₁.map_cone S) ≫
+      (PseuNormGrp₁.bounded_cone C).π.app j) _ = _,
+    rw (PseuNormGrp₁.bounded_cone_is_limit C).fac,
+    refl,
+  end,
+  uniq' := begin
+    intros S m hm,
+    ext,
+    dsimp,
+    have : to_PNG₁.map m =
+      (PseuNormGrp₁.bounded_cone_is_limit C).lift (to_PNG₁.map_cone S),
+    { apply (PseuNormGrp₁.bounded_cone_is_limit C).uniq (to_PNG₁.map_cone S),
+      intros j,
+      ext t,
+      specialize hm j,
+      apply_fun (λ e, e t) at hm,
+      exact hm },
+    rw ← this,
+    refl,
+  end }
 
 instance : preserves_limit K to_PNG₁ :=
 
