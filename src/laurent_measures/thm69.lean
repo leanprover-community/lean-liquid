@@ -618,7 +618,8 @@ begin
         simp only [real_measures.zero_apply, inv_eq_one_div] at hF,
         simp_rw [← inv_zpow₀, inv_eq_one_div],
         exact (summable.has_sum_iff (summable_smaller_radius S F s)).mpr hF }}},
-  exact (summable_congr h_θ).mpr (aux_thm69.summable_convolution (F s) F.d (F.2 s) (lt_d_eq_zero S F s)),
+  refine (summable_congr h_θ).mpr
+    (aux_thm69.summable_convolution r_pos r_half (F s) F.d (F.2 s) (lt_d_eq_zero S F s)),
 end
 
 theorem θ_ϕ_exact (F : ℒ S) (hF : θ S F = 0) : ∃ G, ϕ S G = F :=
