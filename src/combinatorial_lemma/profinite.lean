@@ -2,6 +2,7 @@ import Mbar.functor
 import combinatorial_lemma.finite
 import algebra.module.linear_map
 import pseudo_normed_group.bounded_limits
+import for_mathlib.Profinite.disjoint_union
 
 import category_theory.limits.shapes.products
 import topology.category.Compactum
@@ -321,19 +322,55 @@ open category_theory
 open category_theory.limits
 open ProFiltPseuNormGrpWithTinv₁
 
+namespace lem98
+
+
 variables (r' : ℝ≥0) [fact (0 < r')] [fact (r' < 1)]
   (Λ : Type u) [polyhedral_lattice Λ] (S : Profinite.{u}) (N : ℕ) [hN : fact (0 < N)]
 
+/-- `X ↦ X_{≤ c}`, (functorially in both `X` and `c`). -/
+abbreviation lvl : ℝ≥0 ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r' ⥤ Profinite.{u} :=
+functor.flip $ to_PFPNG₁ _ ⋙ (ProFiltPseuNormGrp₁.level).flip
+
+/-- The functor sending a discrerte quotient of `S`, say `T`, to `Hom(Λ,Mbar T)_{≤ c}`. -/
 def hom_diagram (c : nnreal) : discrete_quotient S ⥤ Profinite :=
 S.fintype_diagram ⋙ Mbar.fintype_functor.{u u} r' ⋙ hom_functor r' Λ ⋙
   to_PFPNG₁ r' ⋙ ProFiltPseuNormGrp₁.level.obj c
 
+/-- The cone over `hom_diagram` whose cone point is defeq to `Hom(Λ, Mbar S)_{≤ c}`.
+See lemma below. -/
 def hom_Mbar_cone (c) : cone (hom_diagram r' Λ S c) :=
 (hom_functor r' Λ ⋙ to_PFPNG₁ r' ⋙ ProFiltPseuNormGrp₁.level.obj c).map_cone
   (limit.cone (S.fintype_diagram ⋙ Mbar.fintype_functor.{u u} r'))
 
+@[simp]
+lemma hom_Mbar_cone_X (c) : (hom_Mbar_cone r' Λ S c).X =
+  ((lvl r').obj c).obj ((hom_functor.{u} r' Λ).obj ((Mbar.functor.{u u} r').obj S)) := rfl
+
+/-- The cone with cone point `Hom(Λ, Mbar S)_{≤ c}` is indeed a limit cone. -/
 def hom_Mbar_cone_is_limit (c) : is_limit (hom_Mbar_cone r' Λ S c) :=
 is_limit_of_preserves _ $ limit.is_limit _
+
+/-- the functor sending `T` to `T^n`. We use a custom `Profinite.product`
+so we don't have to resort to `ulift (fin n)`. -/
+def _root_.nat.fold_product (n : nat) :
+  Profinite.{u} ⥤ Profinite.{u} :=
+{ obj := λ T, Profinite.product (λ i : fin n, T),
+  map := λ X Y f, Profinite.product.lift _ $ λ i, Profinite.product.π _ i ≫ f,
+  map_id' := begin
+    intros X,
+    apply Profinite.product.hom_ext,
+    simp,
+  end,
+  map_comp' := begin
+    intros X Y Z f g,
+    apply Profinite.product.hom_ext,
+    simp,
+  end }
+
+example (T : Profinite.{u}) (n : nat) : Profinite := n.fold_product.obj T
+
+end lem98
 
 /-- Lemma 9.8 of [Analytic] -/
 lemma lem98 (r' : ℝ≥0) [fact (0 < r')] [fact (r' < 1)]
