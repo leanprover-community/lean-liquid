@@ -431,9 +431,58 @@ namespace liftable_cone_of_is_limit_aux
 variable (C : limits.limit_cone (K ⋙ to_PNG₁))
 include C
 
-def lifted_cone : cone K := sorry
+instance (c : nnreal) :
+  topological_space (pseudo_normed_group.filtration C.cone.X c) := sorry
 
-def valid_lift : to_PNG₁.map_cone (lifted_cone K C) ≅ C.cone := sorry
+instance (c : nnreal) :
+  t2_space (pseudo_normed_group.filtration C.cone.X c) := sorry
+
+instance (c : nnreal) :
+  compact_space (pseudo_normed_group.filtration C.cone.X c) := sorry
+
+instance (c : nnreal) :
+  totally_disconnected_space (pseudo_normed_group.filtration C.cone.X c) := sorry
+
+def π_level (c) (j) : pseudo_normed_group.filtration C.cone.X c →
+  pseudo_normed_group.filtration (K.obj j) c :=
+pseudo_normed_group.level (C.cone.π.app j) (C.cone.π.app j).strict _
+
+lemma continuous_π_level (c) (j) : continuous (π_level K C c j) := sorry
+
+instance : profinitely_filtered_pseudo_normed_group C.cone.X :=
+{ continuous_add' := sorry,
+  continuous_neg' := sorry,
+  continuous_cast_le := sorry,
+  ..(infer_instance : pseudo_normed_group C.cone.X) }
+
+def lifted_cone : cone K :=
+{ X :=
+  { M := C.cone.X,
+    exhaustive' := C.cone.X.exhaustive },
+  π :=
+  { app := λ j,
+    { continuous' := λ c, continuous_π_level K C c j,
+      ..(C.cone.π.app j)},
+    naturality' := begin
+      intros i j f,
+      ext,
+      dsimp,
+      rw ← (C.cone.w f),
+      refl,
+    end } }
+
+def valid_lift : to_PNG₁.map_cone (lifted_cone K C) ≅ C.cone :=
+cones.ext
+{ hom :=
+  { to_fun := id,
+    map_zero' := rfl,
+    map_add' := λ _ _, rfl,
+    strict' := λ _ _ h, h },
+  inv :=
+  { to_fun := id,
+    map_zero' := rfl,
+    map_add' := λ _ _, rfl,
+    strict' := λ _ _ h, h } } $ by tidy
 
 end liftable_cone_of_is_limit_aux
 
@@ -448,6 +497,7 @@ instance : creates_limit K to_PNG₁ :=
 
 instance : creates_limits to_PNG₁ :=
 { creates_limits_of_shape := by { introsI J _, constructor, } }
+
 /-
 @[simp]
 lemma id_apply {A : ProFiltPseuNormGrp₁} (a : A) : (𝟙 A : A ⟶ A) a = a := rfl
