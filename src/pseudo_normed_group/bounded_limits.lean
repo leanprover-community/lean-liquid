@@ -227,6 +227,11 @@ def level : nnreal ⥤ PseuNormGrp₁.{u} ⥤ Type u :=
   map := λ c₁ c₂ h,
   { app := λ M, pseudo_normed_group.cast_le' h.le } } .
 
+lemma level_map {X Y : PseuNormGrp₁} (f : X ⟶ Y) (c) : (level.obj c).map f = f.level _ := rfl
+
+lemma level_map' {X Y : PseuNormGrp₁} (f : X ⟶ Y) (c) : (level.obj c).map f =
+  pseudo_normed_group.level f f.strict c := rfl
+
 def level_cone_iso_hom (c) (t : (level.obj c).obj (bounded_cone_point C)) :
   (K ⋙ level.obj c).sections :=
 { val := λ j,
@@ -419,7 +424,21 @@ def bounded_cone : cone K :=
 
 def bounded_cone_is_limit : is_limit (bounded_cone C) :=
 { lift := λ S,
-  { continuous' := sorry,
+  { continuous' := begin
+      intros c,
+      let t : pseudo_normed_group.filtration S.X c →
+        pseudo_normed_group.filtration (bounded_cone C).X c :=
+        (((PseuNormGrp₁.bounded_cone_is_limit C).lift (to_PNG₁.map_cone S)).level _),
+      change continuous t,
+      suffices : continuous ((filtration_homeo C c) ∘ t), by simpa using this,
+      have : ⇑(filtration_homeo C c) ∘ t =
+        (Profinite.limit_cone_is_limit _).lift ((level.obj c).map_cone S),
+      { ext,
+        change (C.is_limit.lift _ ≫ C.cone.π.app _) _ = _,
+        rw C.is_limit.fac, refl },
+      rw this,
+      continuity,
+    end,
     ..((PseuNormGrp₁.bounded_cone_is_limit C).lift (to_PNG₁.map_cone S)) },
   fac' := begin
     intros S j,
