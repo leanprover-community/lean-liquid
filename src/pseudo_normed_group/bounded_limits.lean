@@ -449,10 +449,25 @@ pseudo_normed_group.level (C.cone.π.app j) (C.cone.π.app j).strict _
 
 lemma continuous_π_level (c) (j) : continuous (π_level K C c j) := sorry
 
+lemma continuous_pseudo_normed_group_add' (c₁ c₂ : nnreal) :
+  continuous (pseudo_normed_group.add' :
+    pseudo_normed_group.filtration C.cone.X c₁ × pseudo_normed_group.filtration C.cone.X c₂ →
+    pseudo_normed_group.filtration C.cone.X (c₁ + c₂)) := sorry
+
+lemma continuous_pseudo_normed_group_neg' (c : nnreal) :
+  continuous (pseudo_normed_group.neg' :
+    pseudo_normed_group.filtration C.cone.X c →
+    pseudo_normed_group.filtration C.cone.X c) := sorry
+
+lemma continuous_pseudo_normed_group_cast_le' (c₁ c₂ : nnreal) (h : c₁ ≤ c₂) :
+  continuous (pseudo_normed_group.cast_le' h :
+    pseudo_normed_group.filtration C.cone.X c₁ →
+    pseudo_normed_group.filtration C.cone.X c₂) := sorry
+
 instance : profinitely_filtered_pseudo_normed_group C.cone.X :=
-{ continuous_add' := sorry,
-  continuous_neg' := sorry,
-  continuous_cast_le := sorry,
+{ continuous_add' := continuous_pseudo_normed_group_add' _ _,
+  continuous_neg' := continuous_pseudo_normed_group_neg' _ _ ,
+  continuous_cast_le := λ c₁ c₂ h, continuous_pseudo_normed_group_cast_le' _ _ c₁ c₂ h.out,
   ..(infer_instance : pseudo_normed_group C.cone.X) }
 
 def lifted_cone : cone K :=
