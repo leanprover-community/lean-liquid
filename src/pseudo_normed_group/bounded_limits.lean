@@ -492,7 +492,19 @@ def π_level (c) (j) : pseudo_normed_group.filtration C.cone.X c →
   pseudo_normed_group.filtration (K.obj j) c :=
 pseudo_normed_group.level (C.cone.π.app j) (C.cone.π.app j).strict _
 
-lemma continuous_π_level (c) (j) : continuous (π_level C c j) := sorry
+lemma π_level_eq (c j) : π_level C c j =
+  (F c C).π.app _ ∘ homeo _ _ :=
+begin
+  suffices : (π_level C c j) ∘ (homeo _ _).symm = (F c C).π.app _,
+  { rw ← this, ext, simp },
+  ext x,
+  have := (FE c C).hom.w j,
+  apply_fun (λ e, (e x).val) at this,
+  exact this,
+end
+
+lemma continuous_π_level (c) (j) : continuous (π_level C c j) :=
+by { rw π_level_eq, continuity }
 
 lemma continuous_pseudo_normed_group_add' (c₁ c₂ : nnreal) :
   continuous (pseudo_normed_group.add' :
