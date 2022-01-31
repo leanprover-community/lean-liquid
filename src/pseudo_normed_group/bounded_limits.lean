@@ -381,12 +381,43 @@ instance (c) : totally_disconnected_space
   (pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) c) :=
 (filtration_homeo C c).symm.totally_disconnected_space
 
+lemma bounded_cone_point_continuous_add'_aux {J : Type u}
+  [small_category J]
+  {K : J ⥤ ProFiltPseuNormGrp₁}
+  (C : category_theory.limits.limit_cone
+         ((K ⋙ to_PNG₁) ⋙ PseuNormGrp₁.to_Ab)) :
+  ∀ (c₁ c₂ : nnreal), continuous
+  (pseudo_normed_group.add' :
+    (pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) c₁) ×
+    (pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) c₂) →
+    (pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) (c₁ + c₂))) := sorry
+
+lemma bounded_cone_point_continuous_neg'_aux {J : Type u}
+  [small_category J]
+  {K : J ⥤ ProFiltPseuNormGrp₁}
+  (C : category_theory.limits.limit_cone
+         ((K ⋙ to_PNG₁) ⋙ PseuNormGrp₁.to_Ab)) :
+  ∀ (c : nnreal), continuous
+  (pseudo_normed_group.neg' :
+    (pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) c) →
+    (pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) c)) := sorry
+
+lemma bounded_cone_point_continuous_cast_le_aux {J : Type u}
+  [small_category J]
+  {K : J ⥤ ProFiltPseuNormGrp₁}
+  (C : category_theory.limits.limit_cone
+         ((K ⋙ to_PNG₁) ⋙ PseuNormGrp₁.to_Ab)) :
+  ∀ (c₁ c₂ : nnreal) (h : c₁ ≤ c₂), continuous
+  (pseudo_normed_group.cast_le' h :
+    (pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) c₁) →
+    (pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) c₂)) := sorry
+
 def bounded_cone_point : ProFiltPseuNormGrp₁ :=
 { M := PseuNormGrp₁.bounded_cone_point C,
   str :=
-  { continuous_add' := sorry,
-    continuous_neg' := sorry,
-    continuous_cast_le := sorry,
+  { continuous_add' := bounded_cone_point_continuous_add'_aux _,
+    continuous_neg' := bounded_cone_point_continuous_neg'_aux _,
+    continuous_cast_le := λ _ _ h, bounded_cone_point_continuous_cast_le_aux _ _ _ h.out,
     ..(infer_instance : pseudo_normed_group (PseuNormGrp₁.bounded_cone_point C)) },
   exhaustive' := (PseuNormGrp₁.bounded_cone_point C).exhaustive }
 
