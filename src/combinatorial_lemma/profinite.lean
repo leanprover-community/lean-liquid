@@ -315,11 +315,35 @@ end
 
 end
 
+section
+
+open category_theory
+open category_theory.limits
+open ProFiltPseuNormGrpWithTinv₁
+
+variables (r' : ℝ≥0) [fact (0 < r')] [fact (r' < 1)]
+  (Λ : Type u) [polyhedral_lattice Λ] (S : Profinite.{u}) (N : ℕ) [hN : fact (0 < N)]
+
+def hom_diagram (c : nnreal) : discrete_quotient S ⥤ Profinite :=
+S.fintype_diagram ⋙ Mbar.fintype_functor.{u u} r' ⋙ hom_functor r' Λ ⋙
+  to_PFPNG₁ r' ⋙ ProFiltPseuNormGrp₁.level.obj c
+
+def hom_Mbar_cone (c) : cone (hom_diagram r' Λ S c) :=
+(hom_functor r' Λ ⋙ to_PFPNG₁ r' ⋙ ProFiltPseuNormGrp₁.level.obj c).map_cone
+  (limit.cone (S.fintype_diagram ⋙ Mbar.fintype_functor.{u u} r'))
+
+def hom_Mbar_cone_is_limit (c) : is_limit (hom_Mbar_cone r' Λ S c) :=
+is_limit_of_preserves _ $ limit.is_limit _
+
 /-- Lemma 9.8 of [Analytic] -/
 lemma lem98 (r' : ℝ≥0) [fact (0 < r')] [fact (r' < 1)]
   (Λ : Type*) [polyhedral_lattice Λ] (S : Profinite) (N : ℕ) [hN : fact (0 < N)] :
   pseudo_normed_group.splittable (Λ →+ (Mbar.functor r').obj S) N (lem98.d Λ N) :=
 begin
+  constructor,
+  intros c x hx,
   -- This reduces to `lem98_finite`: See the first lines of the proof in [Analytic].
   sorry
+end
+
 end

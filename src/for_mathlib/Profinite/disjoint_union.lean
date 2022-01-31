@@ -287,4 +287,31 @@ begin
   exact w,
 end
 
+def product {α : Type u} (X : α → Profinite.{u}) : Profinite :=
+  Profinite.of $ Π a, X a
+
+def product.π {α : Type u} (X : α → Profinite.{u}) (a : α) :
+  product X ⟶ X a := ⟨λ t, t a, continuous_apply _⟩
+
+def product.lift {α : Type u} {Y : Profinite.{u}} (X : α → Profinite.{u})
+  (f : Π a, Y ⟶ X a) : Y ⟶ product X :=
+⟨λ y a, f a y, begin
+  apply continuous_pi,
+  intros i,
+  exact (f i).2,
+end⟩
+
+@[simp, reassoc]
+lemma product.lift_π {α : Type u} {Y : Profinite.{u}} (X : α → Profinite.{u})
+  (f : Π a, Y ⟶ X a) (a) : product.lift X f ≫ product.π X a = f _ := by { ext, refl }
+
+lemma product.hom_ext {α : Type u} {Y : Profinite.{u}} (X : α → Profinite.{u})
+  (f g : Y ⟶ product X) (h : ∀ a, f ≫ product.π X a = g ≫ product.π X a) : f = g :=
+begin
+  ext y a,
+  specialize h a,
+  apply_fun (λ e, e y) at h,
+  exact h,
+end
+
 end Profinite
