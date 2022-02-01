@@ -264,6 +264,23 @@ begin
   simp only [← category.assoc], congr' 2, ext,
 end
 
+lemma gadget_cone_lift_aux {J : Type u} [small_category J]
+  {K : J ⥤ ProFiltPseuNormGrpWithTinv₁ r'} (C : cone K)
+  (hC : ∀ a : ℝ≥0, is_limit (((level r').obj a).map_cone C))
+  (N : ℕ) [fact (0 < N)] (c d : ℝ≥0) (t : Profinite.punit.{u} ⟶ C.X.lvl c)
+  (S : cone (gadget_diagram C N c d t)) :
+  let S' := λ i, (cones.postcompose (gadget_diagram_fst_fst C N c d t i)).obj S,
+      F : Π i, S.X ⟶ _  := λ i, (hC _).lift (S' i),
+      S'' :=  (cones.postcompose (gadget_diagram_fst_snd C N c d t)).obj S in
+  Profinite.product.lift (λ (i : fin N), C.X.lvl (c / ↑N + d)) F ≫
+    C.X.sum N (le₁ _ _ _) = (hC c).lift S'' ≫ C.X.cast_lvl (le₂ _ _ _) :=
+begin
+  dsimp,
+  rw gadget_cone_lift_fst_snd,
+  ext x, dsimp,
+  sorry
+end
+
 -- lemma gadget_cone_lift_fst_fst {J : Type u} [small_category J]
 --   {K : J ⥤ ProFiltPseuNormGrpWithTinv₁ r'} (C : cone K)
 --   (hC : ∀ a : ℝ≥0, is_limit (((level r').obj a).map_cone C))
@@ -298,11 +315,7 @@ def gadget_cone_is_limit {J : Type u} [small_category J]
           (λ i, (hC _).lift
             ((cones.postcompose (gadget_diagram_fst_fst C N c d t i)).obj S)))
         ((hC _).lift ((cones.postcompose (gadget_diagram_fst_snd C N c d t)).obj S))
-        begin
-          rw gadget_cone_lift_fst_snd,
-          ext x, dsimp,
-          sorry
-        end)
+        (gadget_cone_lift_aux _ _ _ _ _ _ _))
       (Profinite.punit.elim _)
       (by rw [Profinite.pullback.lift_snd, eq_comm, gadget_cone_lift_fst_snd]),
   fac' := λ S j, begin
