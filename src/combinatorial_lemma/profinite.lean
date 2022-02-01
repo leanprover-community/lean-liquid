@@ -12,6 +12,9 @@ noncomputable theory
 
 universe u
 
+variables (r' : ℝ≥0) [fact (0 < r')] [fact (r' < 1)]
+  (Λ : Type u) [polyhedral_lattice Λ] (S : Profinite.{u})
+
 namespace pseudo_normed_group
 
 def sum' {c₁ c₂ : ℝ≥0} {M : Type u} [pseudo_normed_group M]
@@ -37,14 +40,110 @@ lemma continuous_sum' {c₁ c₂ : ℝ≥0} {M : Type u} [comphaus_filtered_pseu
 
 end comphaus_filtered_pseudo_normed_group
 
+
+namespace Profinite
+
+def pow (X : Profinite.{u}) (n : ℕ) : Profinite.{u} :=
+Profinite.product (λ i : fin n, X)
+
+def map_pow {X Y : Profinite.{u}} (f : X ⟶ Y) (n : ℕ) :
+  X.pow n ⟶ Y.pow n :=
+Profinite.product.lift _ $ λ n, Profinite.product.π _ n ≫ f
+
+end Profinite
+
+namespace ProFiltPseuNormGrpWithTinv₁
+
+def level : ℝ≥0 ⥤ ProFiltPseuNormGrpWithTinv₁ r' ⥤ Profinite :=
+{ obj := λ c,
+  { obj := λ X, Profinite.of $ pseudo_normed_group.filtration X c,
+    map := λ X Y f, ⟨f.level _, f.continuous' _⟩,
+    map_id' := sorry,
+    map_comp' := sorry },
+  map := λ c₁ c₂ h,
+  { app := λ X, ⟨pseudo_normed_group.cast_le' h.le, begin
+      haveI : fact (c₁ ≤ c₂) := ⟨h.le⟩,
+      apply comphaus_filtered_pseudo_normed_group.continuous_cast_le,
+    end ⟩,
+    naturality' := sorry },
+  map_id' := sorry,
+  map_comp' := sorry }
+
+variable {r'}
+
+abbreviation lvl (X : ProFiltPseuNormGrpWithTinv₁.{u} r') (c : ℝ≥0) : Profinite.{u} :=
+((level r').obj c).obj X
+
+abbreviation map_lvl {X Y : ProFiltPseuNormGrpWithTinv₁.{u} r'} (f : X ⟶ Y) (c : ℝ≥0) :
+  X.lvl c ⟶ Y.lvl c := ((level r').obj c).map f
+
+abbreviation cast_lvl {c₁ c₂ : ℝ≥0} (X : ProFiltPseuNormGrpWithTinv₁.{u} r') (h : c₁ ≤ c₂) :
+  X.lvl c₁ ⟶ X.lvl c₂ := ((level r').map h.hom).app _
+
+def sum {c₁ c₂ : ℝ≥0} (X : ProFiltPseuNormGrpWithTinv₁.{u} r') (n : ℕ) (h : ↑n * c₁ ≤ c₂) :
+  (X.lvl c₁).pow n ⟶ X.lvl c₂ :=
+⟨pseudo_normed_group.sum' _ h,
+  comphaus_filtered_pseudo_normed_group.continuous_sum' _ _⟩
+
+lemma le₁ (N : ℕ) [fact (0 < N)] (c d : ℝ≥0) :
+  ↑N * (c / ↑N + d) ≤ c + ↑N * d := sorry
+
+lemma le₂ (N : ℕ) (c d : ℝ≥0) :
+  c ≤ c + ↑N * d := le_self_add
+
+/--
+Given a `N : ℕ`, `c : ℝ≥0`, an `X : ProFiltPseuNormGrpWithTing₁ r'`, and a
+  `t : Profinite.punit ⟶ X.lvl c`, this constructs the pullback of `t` along the projection
+  `(X.lvl (c/N + d))^n ×_{X.lvl (c + N * d)} X.lvl c → X.lvl c`.
+-/
+def _root_.ProFiltPseuNormGrpWithTinv₁.gadget (X : ProFiltPseuNormGrpWithTinv₁.{u} r')
+  (N : ℕ) [fact (0 < N)] (c d : ℝ≥0) (t : Profinite.punit.{u} ⟶ X.lvl c) : Profinite.{u} :=
+Profinite.pullback
+(Profinite.pullback.snd (X.sum N (le₁ N c d)) (X.cast_lvl (le₂ N c d ))) t
+
+def map_gadget {X Y : ProFiltPseuNormGrpWithTinv₁.{u} r'}
+  (f : X ⟶ Y) (N : ℕ) [fact (0 < N)] (c d : ℝ≥0) (t : Profinite.punit.{u} ⟶ X.lvl c)
+  (t' : Profinite.punit.{u} ⟶ Y.lvl c) (w : t ≫ map_lvl f c = t') :
+  X.gadget N c d t ⟶ Y.gadget N c d t' :=
+Profinite.pullback.lift _ _
+(Profinite.pullback.fst _ _ ≫
+  Profinite.pullback.lift _ _
+  (Profinite.pullback.fst _ _ ≫
+    Profinite.product.lift _ (λ i, Profinite.product.π _ i ≫ map_lvl f _))
+  (Profinite.pullback.snd _ _ ≫ map_lvl f _) sorry)
+(Profinite.pullback.snd _ _) sorry
+
+def gadget_diagram {J : Type u} [small_category J]
+  {K : J ⥤ ProFiltPseuNormGrpWithTinv₁ r'} (C : cone K)
+  (N : ℕ) [fact (0 < N)] (c d : ℝ≥0) (t : Profinite.punit.{u} ⟶ C.X.lvl c) :
+  J ⥤ Profinite.{u} :=
+{ obj := λ j, (K.obj j).gadget N c d (t ≫ map_lvl (C.π.app _) c),
+  map := λ i j f, map_gadget (K.map f) _ _ _ _ _ sorry,
+  map_id' := sorry,
+  map_comp' := sorry }
+
+def gadget_cone {J : Type u} [small_category J]
+  {K : J ⥤ ProFiltPseuNormGrpWithTinv₁ r'} (C : cone K)
+  (N : ℕ) [fact (0 < N)] (c d : ℝ≥0) (t : Profinite.punit.{u} ⟶ C.X.lvl c) :
+  cone (gadget_diagram C N c d t) :=
+{ X := C.X.gadget N c d t,
+  π :=
+  { app := λ j, map_gadget (C.π.app _) _ _ _ _ _ rfl,
+    naturality' := sorry } }
+
+def gadget_cone_is_limit {J : Type u} [small_category J]
+  {K : J ⥤ ProFiltPseuNormGrpWithTinv₁ r'} (C : cone K) (hC : is_limit C)
+  (N : ℕ) [fact (0 < N)] (c d : ℝ≥0) (t : Profinite.punit.{u} ⟶ C.X.lvl c) :
+  is_limit (gadget_cone C N c d t) :=
+{ lift := λ S, sorry,
+  fac' := sorry,
+  uniq' := sorry }
+
+end ProFiltPseuNormGrpWithTinv₁
+
 namespace lem98
 
-variables (r' : ℝ≥0) [fact (0 < r')] [fact (r' < 1)]
-  (Λ : Type u) [polyhedral_lattice Λ] (S : Profinite.{u}) (N : ℕ) [hN : fact (0 < N)]
-
-/-- `X ↦ X_{≤ c}`, (functorially in both `X` and `c`). -/
-abbreviation lvl : ℝ≥0 ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r' ⥤ Profinite.{u} :=
-functor.flip $ to_PFPNG₁ _ ⋙ (ProFiltPseuNormGrp₁.level).flip
+open ProFiltPseuNormGrpWithTinv₁
 
 /-- The functor sending a discrerte quotient of `S`, say `T`, to `Hom(Λ,Mbar T)_{≤ c}`. -/
 def hom_diagram (c : nnreal) : discrete_quotient S ⥤ Profinite :=
@@ -59,56 +158,11 @@ def hom_Mbar_cone (c) : cone (hom_diagram r' Λ S c) :=
 
 @[simp]
 lemma hom_Mbar_cone_X (c) : (hom_Mbar_cone r' Λ S c).X =
-  ((lvl r').obj c).obj ((hom_functor.{u} r' Λ).obj ((Mbar.functor.{u u} r').obj S)) := rfl
+  ((hom_functor.{u} r' Λ).obj ((Mbar.functor.{u u} r').obj S)).lvl c := rfl
 
 /-- The cone with cone point `Hom(Λ, Mbar S)_{≤ c}` is indeed a limit cone. -/
 def hom_Mbar_cone_is_limit (c) : is_limit (hom_Mbar_cone r' Λ S c) :=
 is_limit_of_preserves _ $ limit.is_limit _
-
-/-- the functor sending `T` to `T^n`. We use a custom `Profinite.product`
-so we don't have to resort to `ulift (fin n)`. -/
-def _root_.nat.fold_product (n : nat) :
-  Profinite.{u} ⥤ Profinite.{u} :=
-{ obj := λ T, Profinite.product (λ i : fin n, T),
-  map := λ X Y f, Profinite.product.lift _ $ λ i, Profinite.product.π _ i ≫ f,
-  map_id' := begin
-    intros X,
-    apply Profinite.product.hom_ext,
-    simp,
-  end,
-  map_comp' := begin
-    intros X Y Z f g,
-    apply Profinite.product.hom_ext,
-    simp,
-  end }
-
-example (T : Profinite.{u}) (n : nat) : Profinite := n.fold_product.obj T
-
--- Missing comphaus_filt_pseudo_normed_group.continuous_sum',
--- and comphaus_filt_pseudo_normed_group.sum'
-def sum {c₁ c₂ : ℝ≥0} (n : nat) (h : ↑n * c₁ ≤ c₂) :
-  (lvl r').obj c₁ ⋙ n.fold_product ⟶ (lvl r').obj c₂ :=
-{ app := λ X,
-  { to_fun := pseudo_normed_group.sum' n h,
-    continuous_to_fun := comphaus_filtered_pseudo_normed_group.continuous_sum' _ _ },
-  naturality' := begin
-    intros  X Y f,
-    ext,
-    dsimp [nat.fold_product, ProFiltPseuNormGrp₁.level, to_PFPNG₁,
-      Profinite.product.lift, Profinite.product.π, pseudo_normed_group.sum'],
-    rw f.map_sum,
-  end } .
-
--- A functorial version of `cast_le`.
-def le {c₁ c₂ : ℝ≥0} (h : c₁ ≤ c₂) :
-  (lvl r').obj c₁ ⟶ (lvl r').obj c₂ :=
-{ app := λ X,
-  { to_fun := pseudo_normed_group.cast_le' h,
-    continuous_to_fun := begin
-      haveI : fact (c₁ ≤ c₂) := ⟨h⟩,
-      apply comphaus_filtered_pseudo_normed_group.continuous_cast_le,
-    end },
-  naturality' := λ A B f, by { ext, refl } }
 
 end lem98
 
