@@ -300,7 +300,6 @@ begin
   { ext x,
     dsimp,
     erw (C.π.app j).to_add_monoid_hom.map_sum,
-    apply finset.sum_congr rfl (λ a _, _),
     refl },
   rw this,
   erw ← Profinite.pullback.condition,
