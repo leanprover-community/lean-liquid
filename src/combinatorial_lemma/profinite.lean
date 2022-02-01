@@ -269,16 +269,49 @@ lemma gadget_cone_lift_aux {J : Type u} [small_category J]
   (hC : ∀ a : ℝ≥0, is_limit (((level r').obj a).map_cone C))
   (N : ℕ) [fact (0 < N)] (c d : ℝ≥0) (t : Profinite.punit.{u} ⟶ C.X.lvl c)
   (S : cone (gadget_diagram C N c d t)) :
-  let S' := λ i, (cones.postcompose (gadget_diagram_fst_fst C N c d t i)).obj S,
+  let η := λ i, (gadget_diagram_fst_fst C N c d t i),
+      γ := gadget_diagram_fst_snd C N c d t,
+      S' := λ i, (cones.postcompose (η i)).obj S,
       F : Π i, S.X ⟶ _  := λ i, (hC _).lift (S' i),
-      S'' :=  (cones.postcompose (gadget_diagram_fst_snd C N c d t)).obj S in
+      S'' :=  (cones.postcompose γ).obj S in
   Profinite.product.lift (λ (i : fin N), C.X.lvl (c / ↑N + d)) F ≫
     C.X.sum N (le₁ _ _ _) = (hC c).lift S'' ≫ C.X.cast_lvl (le₂ _ _ _) :=
 begin
+  have h₁ := le₁ N c d,
+  have h₂ := le₂ N c d,
+  rintros η γ S' F S'',
+  let γ' : gadget_diagram C N c d t ⟶ K ⋙ (level r').obj (c + ↑N * d) :=
+    γ ≫ whisker_left _ ((level r').map h₂.hom),
+  let T'' := (cones.postcompose γ').obj S,
+  have : (hC c).lift S'' ≫ C.X.cast_lvl h₂ = (hC _).lift T'',
+  { apply (hC _).uniq T'',
+    intros j,
+    have := (hC c).fac S'' j,
+    dsimp at this ⊢,
+    simp [category.assoc, ← reassoc_of this] },
+  rw this,
+  apply (hC (c + ↑N * d)).uniq T'',
+  intros j,
   dsimp,
-  rw gadget_cone_lift_fst_snd,
-  ext x, dsimp,
-  sorry
+  simp only [category.assoc],
+  have : C.X.sum N h₁ ≫ ((level r').obj (c + ↑N * d)).map (C.π.app j) =
+    Profinite.product.lift _ (λ i, Profinite.product.π _ i ≫ map_lvl (C.π.app _) _) ≫
+    ProFiltPseuNormGrpWithTinv₁.sum _ N h₁,
+  { ext x,
+    dsimp,
+    erw (C.π.app j).to_add_monoid_hom.map_sum,
+    apply finset.sum_congr rfl (λ a _, _),
+    refl },
+  rw this,
+  erw ← Profinite.pullback.condition,
+  simp only [← category.assoc],
+  congr' 1,
+  apply Profinite.product.hom_ext,
+  intros a,
+  dsimp [F],
+  simp only [category.assoc, Profinite.product.lift_π, Profinite.product.lift_π_assoc],
+  erw (hC (c / ↑N + d)).fac (S' a) j,
+  refl,
 end
 
 -- lemma gadget_cone_lift_fst_fst {J : Type u} [small_category J]
