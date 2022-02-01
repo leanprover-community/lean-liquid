@@ -194,7 +194,19 @@ Profinite.pullback.lift _ _
   end)
 (Profinite.pullback.snd _ _)
 (by rw [category.assoc, Profinite.pullback.lift_snd, Profinite.pullback.condition_assoc, w])
+.
 
+lemma map_gadget_comp {X Y Z : ProFiltPseuNormGrpWithTinv₁.{u} r'}
+  (f : X ⟶ Y) (g : Y ⟶ Z) (N : ℕ) [fact (0 < N)] (c d : ℝ≥0) (t : Profinite.punit.{u} ⟶ X.lvl c)
+  (t' : Profinite.punit.{u} ⟶ Y.lvl c) (t'' : Profinite.punit.{u} ⟶ Z.lvl c)
+  (w : t ≫ map_lvl f c = t') (w' : t' ≫ map_lvl g c = t'') :
+  map_gadget f N c d t t' w ≫ map_gadget g N c d t' t'' w' =
+  map_gadget (f ≫ g) N c d t t'' (by { subst t'', subst t', rw [category.assoc, map_lvl_comp] }) :=
+begin
+  sorry
+end
+
+@[simps]
 def gadget_diagram {J : Type u} [small_category J]
   {K : J ⥤ ProFiltPseuNormGrpWithTinv₁ r'} (C : cone K)
   (N : ℕ) [fact (0 < N)] (c d : ℝ≥0) (t : Profinite.punit.{u} ⟶ C.X.lvl c) :
@@ -209,7 +221,7 @@ def gadget_diagram_fst_snd {J : Type u} [small_category J]
   (N : ℕ) [fact (0 < N)] (c d : ℝ≥0) (t : Profinite.punit.{u} ⟶ C.X.lvl c) :
   gadget_diagram C N c d t ⟶ K ⋙ (level r').obj c :=
 { app := λ j, Profinite.pullback.fst _ _ ≫ Profinite.pullback.snd _ _,
-  naturality' := sorry }
+  naturality' := λ i j h, by { ext; refl } }
 
 def gadget_diagram_fst_fst {J : Type u} [small_category J]
   {K : J ⥤ ProFiltPseuNormGrpWithTinv₁ r'} (C : cone K)
@@ -218,7 +230,7 @@ def gadget_diagram_fst_fst {J : Type u} [small_category J]
   gadget_diagram C N c d t ⟶ K ⋙ (level r').obj (c / ↑N + d) :=
 { app := λ j, Profinite.pullback.fst _ _ ≫ Profinite.pullback.fst _ _ ≫
     Profinite.product.π _ i,
-  naturality' := sorry }
+  naturality' := λ i j h, by { ext; refl } }
 
 def gadget_cone {J : Type u} [small_category J]
   {K : J ⥤ ProFiltPseuNormGrpWithTinv₁ r'} (C : cone K)
@@ -227,7 +239,8 @@ def gadget_cone {J : Type u} [small_category J]
 { X := C.X.gadget N c d t,
   π :=
   { app := λ j, map_gadget (C.π.app _) _ _ _ _ _ rfl,
-    naturality' := sorry } }
+    naturality' := λ i j h,
+      by { dsimp, rw [category.id_comp, map_gadget_comp], congr, rw cone.w, } } }
 
 def gadget_cone_is_limit {J : Type u} [small_category J]
   {K : J ⥤ ProFiltPseuNormGrpWithTinv₁ r'} (C : cone K)
