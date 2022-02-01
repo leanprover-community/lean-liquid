@@ -130,6 +130,22 @@ def gadget_diagram {J : Type u} [small_category J]
   map_id' := sorry,
   map_comp' := sorry }
 
+def gadget_diagram_fst_snd {J : Type u} [small_category J]
+  {K : J ⥤ ProFiltPseuNormGrpWithTinv₁ r'} (C : cone K)
+  (N : ℕ) [fact (0 < N)] (c d : ℝ≥0) (t : Profinite.punit.{u} ⟶ C.X.lvl c) :
+  gadget_diagram C N c d t ⟶ K ⋙ (level r').obj c :=
+{ app := λ j, Profinite.pullback.fst _ _ ≫ Profinite.pullback.snd _ _,
+  naturality' := sorry }
+
+def gadget_diagram_fst_fst {J : Type u} [small_category J]
+  {K : J ⥤ ProFiltPseuNormGrpWithTinv₁ r'} (C : cone K)
+  (N : ℕ) [fact (0 < N)] (c d : ℝ≥0) (t : Profinite.punit.{u} ⟶ C.X.lvl c)
+  (i : fin N) :
+  gadget_diagram C N c d t ⟶ K ⋙ (level r').obj (c / ↑N + d) :=
+{ app := λ j, Profinite.pullback.fst _ _ ≫ Profinite.pullback.fst _ _ ≫
+    Profinite.product.π _ i,
+  naturality' := sorry }
+
 def gadget_cone {J : Type u} [small_category J]
   {K : J ⥤ ProFiltPseuNormGrpWithTinv₁ r'} (C : cone K)
   (N : ℕ) [fact (0 < N)] (c d : ℝ≥0) (t : Profinite.punit.{u} ⟶ C.X.lvl c) :
@@ -143,7 +159,15 @@ def gadget_cone_is_limit {J : Type u} [small_category J]
   {K : J ⥤ ProFiltPseuNormGrpWithTinv₁ r'} (C : cone K) (hC : is_limit C)
   (N : ℕ) [fact (0 < N)] (c d : ℝ≥0) (t : Profinite.punit.{u} ⟶ C.X.lvl c) :
   is_limit (gadget_cone C N c d t) :=
-{ lift := λ S, sorry,
+{ lift := λ S,
+    Profinite.pullback.lift _ _
+      (Profinite.pullback.lift _ _
+        (Profinite.product.lift _
+          (λ i, (is_limit_of_preserves ((level r').obj (c / ↑N + d)) hC).lift
+            ((cones.postcompose (gadget_diagram_fst_fst C N c d t i)).obj S)))
+        ((is_limit_of_preserves ((level r').obj c) hC).lift
+          ((cones.postcompose (gadget_diagram_fst_snd C N c d t)).obj S)) sorry)
+      (Profinite.punit.elim _) sorry,
   fac' := sorry,
   uniq' := sorry }
 
