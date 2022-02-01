@@ -336,8 +336,10 @@ def gadget_cone_is_limit {J : Type u} [small_category J]
     refine (hC (c / N + d)).uniq
       ((cones.postcompose (gadget_diagram_fst_fst.{u} C N c d t i)).obj S) _ _,
     intro j,
-    -- dsimp,
-    sorry
+    dsimp,
+    rw ← h,
+    dsimp [gadget_cone, map_gadget],
+    simp,
   end }
 
 end ProFiltPseuNormGrpWithTinv₁
