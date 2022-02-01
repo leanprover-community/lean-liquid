@@ -26,9 +26,10 @@ apply_nolint Mbar.mk_tensor def_lemma
 apply_nolint lem98_finite def_lemma
 
 -- combinatorial_lemma/profinite.lean
+apply_nolint ProFiltPseuNormGrpWithTinv₁.to_PNG₁ unused_arguments
 apply_nolint lem98 def_lemma
-apply_nolint pi_functor unused_arguments
-apply_nolint polyhedral_exhaustive unused_arguments
+apply_nolint lem98.hom_diagram unused_arguments
+apply_nolint lem98.lvl unused_arguments
 
 -- condensed/extr/basic.lean
 apply_nolint ExtrDisc.empty.hom_ext def_lemma
@@ -62,6 +63,9 @@ apply_nolint missing unused_arguments
 -- for_mathlib/Profinite/clopen_limit.lean
 apply_nolint Profinite.exists_image inhabited_nonempty
 apply_nolint Profinite.image_stabilizes inhabited_nonempty
+
+-- for_mathlib/Profinite/disjoint_union.lean
+apply_nolint Profinite.punit.hom_ext def_lemma
 
 -- for_mathlib/abelian_category.lean
 apply_nolint category_theory.is_zero.eq_of_src def_lemma
@@ -209,6 +213,9 @@ apply_nolint breen_deligne.universal_map.norm_eval_CLCFPTinv_le unused_arguments
 
 -- pseudo_normed_group/basic.lean
 apply_nolint pseudo_normed_group.to_add_comm_group instance_priority
+
+-- pseudo_normed_group/bounded_limits.lean
+apply_nolint strict_pseudo_normed_group_hom.level_comp def_lemma
 
 -- pseudo_normed_group/profinitely_filtered.lean
 apply_nolint comphaus_filtered_pseudo_normed_group.prod_pi_homeo_pi_prod unused_arguments
