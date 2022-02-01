@@ -295,22 +295,19 @@ begin
         simp only [real_measures.zero_apply, inv_eq_one_div] at hF,
         simp_rw [← inv_zpow₀, inv_eq_one_div],
         exact (summable.has_sum_iff (summable_smaller_radius S F s)).mpr hF }}},
-  have : ∀ (n : ℤ), n < F.d → 1 / 2 * ∥∑' (i : ℕ), (F s (n + 1 + i) : ℝ) * (1 / 2) ^ i∥ *
-    r ^ n = 0,
+  have : ∀ (n : ℤ), n < F.d → ∥∑' (i : ℕ), (F s (n + 1 + i) : ℝ) * (1 / 2) ^ i∥ = 0,
   { intros n hn,
-    rw ← sub_neg at hn,
-    replace hn := not_le_of_gt hn,
+    replace hn := not_le_of_gt (sub_neg.mpr hn),
     specialize h_θ n,
-    rw ← h_θ,
-    rw mul_eq_zero,
-    rw norm_eq_zero,
-    apply or.intro_left,
-    sorry,
-    -- rw dif_neg hn,
-    -- simp only [ge_iff_le, sub_nonneg, mul_eq_zero, norm_eq_zero, dite_eq_right_iff, neg_eq_zero],
-    },
+    simp only [mul_eq_mul_right_iff, zpow_ne_zero n (nnreal.coe_ne_zero.mpr (ne_of_lt r_pos).symm),
+      or_false] at h_θ,
+    convert_to 1 / 2 * ∥∑' (i : ℕ), (F s (n + 1 + i) : ℝ) * (1 / 2) ^ i∥ = 0 using 0,
+    simp only [one_div, mul_eq_zero, inv_eq_zero, bit0_eq_zero, one_ne_zero, false_or],
+    rw [← h_θ, norm_eq_zero],
+    dsimp [b],
+    rw dif_neg hn },
   refine (summable_congr h_θ).mpr
-    (aux_thm69.summable_convolution r_pos r_half (F s) F.d (F.2 s) (lt_d_eq_zero S F s)),
+    (aux_thm69.summable_convolution r_pos r_half (F s) F.d (F.2 s) this),
 end
 
 theorem θ_ϕ_exact (F : ℒ S) (hF : θ S F = 0) : ∃ G, ϕ S G = F :=
