@@ -220,6 +220,7 @@ def gadget_diagram {J : Type u} [small_category J]
   map_id' := λ i, by { simp only [K.map_id], ext; refl },
   map_comp' := λ i j k h₁ h₂, by { simp only [K.map_comp], ext; refl } }
 
+@[simps]
 def gadget_diagram_fst_snd {J : Type u} [small_category J]
   {K : J ⥤ ProFiltPseuNormGrpWithTinv₁ r'} (C : cone K)
   (N : ℕ) [fact (0 < N)] (c d : ℝ≥0) (t : Profinite.punit.{u} ⟶ C.X.lvl c) :
@@ -259,9 +260,16 @@ def gadget_cone_is_limit {J : Type u} [small_category J]
             ((cones.postcompose (gadget_diagram_fst_fst C N c d t i)).obj S)))
         ((hC _).lift ((cones.postcompose (gadget_diagram_fst_snd C N c d t)).obj S))
         begin
+          -- ext1 x, dsimp,
           sorry
         end)
-      (Profinite.punit.elim _) sorry,
+      (Profinite.punit.elim _)
+      begin
+        rw [Profinite.pullback.lift_snd, eq_comm],
+        refine (hC c).uniq ((cones.postcompose (gadget_diagram_fst_snd.{u} C N c d t)).obj S) _ _,
+        intro j, dsimp, rw Profinite.pullback.condition,
+        simp only [← category.assoc], congr' 2, ext,
+      end,
   fac' := sorry,
   uniq' := sorry }
 
