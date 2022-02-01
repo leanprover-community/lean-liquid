@@ -28,15 +28,55 @@ def sum' {c₁ c₂ : ℝ≥0} {M : Type u} [pseudo_normed_group M]
   simpa,
 end⟩
 
+lemma sum'_zero {c₁ c₂ : ℝ≥0} {M : Type u} [pseudo_normed_group M] (h : ↑0 * c₁ ≤ c₂) :
+  (sum' 0 h :
+    (Π i : fin 0, pseudo_normed_group.filtration M c₁) → pseudo_normed_group.filtration M c₂) =
+  (λ _, 0) :=
+begin
+  ext t,
+  simp only [sum', fintype.univ_of_is_empty, subtype.val_eq_coe, finset.sum_empty,
+    subtype.coe_mk, filtration.coe_zero],
+end
+
+lemma sum'_succ {c₁ c₂ : ℝ≥0} {M : Type u} [pseudo_normed_group M] (n : ℕ) (h : ↑(n+1) * c₁ ≤ c₂) :
+  (sum' (n+1) h :
+    (Π i : fin (n+1), pseudo_normed_group.filtration M c₁) → pseudo_normed_group.filtration M c₂) =
+  cast_le' (by simpa [add_mul] using h) ∘ add' ∘ (λ t, ⟨sum' n le_rfl (fin.tail t), t 0⟩) :=
+begin
+  ext t,
+  simp only [sum', subtype.val_eq_coe, subtype.coe_mk, coe_cast_le', add'_eq],
+  rw [fin.sum_univ_succ, add_comm],
+  refl
+end
+
 end pseudo_normed_group
 
 namespace comphaus_filtered_pseudo_normed_group
+
+open pseudo_normed_group
 
 lemma continuous_sum' {c₁ c₂ : ℝ≥0} {M : Type u} [comphaus_filtered_pseudo_normed_group M]
   (n : ℕ) (h : ↑n * c₁ ≤ c₂) :
   continuous (pseudo_normed_group.sum' n h :
     (Π (i : fin n), pseudo_normed_group.filtration M c₁) →
-    pseudo_normed_group.filtration M c₂) := sorry
+    pseudo_normed_group.filtration M c₂) :=
+begin
+  have : @pseudo_normed_group.sum' _ _ M _ n h =
+    pseudo_normed_group.cast_le' h ∘ pseudo_normed_group.sum' n le_rfl,
+  { ext, refl },
+  rw this,
+  refine (@comphaus_filtered_pseudo_normed_group.continuous_cast_le _ _ _ _ ⟨h⟩).comp _,
+  clear this h c₂,
+  induction n with n ih,
+  { rw [pseudo_normed_group.sum'_zero], exact continuous_const },
+  rw pseudo_normed_group.sum'_succ,
+  haveI : fact (↑n * c₁ + c₁ ≤ ↑(n.succ) * c₁) :=
+    by simp only [nat.cast_succ, add_mul, one_mul]; apply_instance,
+  refine (comphaus_filtered_pseudo_normed_group.continuous_cast_le _ _).comp
+    ((comphaus_filtered_pseudo_normed_group.continuous_add' _ _).comp _),
+  refine continuous.prod_mk (ih.comp _) (continuous_apply _),
+  exact continuous_pi (λ i, continuous_apply _),
+end
 
 end comphaus_filtered_pseudo_normed_group
 
@@ -124,7 +164,10 @@ Profinite.pullback.lift _ _
   Profinite.pullback.lift _ _
   (Profinite.pullback.fst _ _ ≫
     Profinite.product.lift _ (λ i, Profinite.product.π _ i ≫ map_lvl f _))
-  (Profinite.pullback.snd _ _ ≫ map_lvl f _) sorry)
+  (Profinite.pullback.snd _ _ ≫ map_lvl f _)
+  begin
+    sorry
+  end)
 (Profinite.pullback.snd _ _) sorry
 
 def gadget_diagram {J : Type u} [small_category J]
