@@ -228,6 +228,7 @@ def gadget_diagram_fst_snd {J : Type u} [small_category J]
 { app := λ j, Profinite.pullback.fst _ _ ≫ Profinite.pullback.snd _ _,
   naturality' := λ i j h, by { ext; refl } }
 
+@[simps]
 def gadget_diagram_fst_fst {J : Type u} [small_category J]
   {K : J ⥤ ProFiltPseuNormGrpWithTinv₁ r'} (C : cone K)
   (N : ℕ) [fact (0 < N)] (c d : ℝ≥0) (t : Profinite.punit.{u} ⟶ C.X.lvl c)
@@ -237,6 +238,7 @@ def gadget_diagram_fst_fst {J : Type u} [small_category J]
     Profinite.product.π _ i,
   naturality' := λ i j h, by { ext; refl } }
 
+@[simps]
 def gadget_cone {J : Type u} [small_category J]
   {K : J ⥤ ProFiltPseuNormGrpWithTinv₁ r'} (C : cone K)
   (N : ℕ) [fact (0 < N)] (c d : ℝ≥0) (t : Profinite.punit.{u} ⟶ C.X.lvl c) :
@@ -246,6 +248,43 @@ def gadget_cone {J : Type u} [small_category J]
   { app := λ j, map_gadget (C.π.app _) _ _ _ _ _ rfl,
     naturality' := λ i j h,
       by { dsimp, rw [category.id_comp, map_gadget_comp], congr, rw cone.w, } } }
+
+lemma gadget_cone_lift_fst_snd {J : Type u} [small_category J]
+  {K : J ⥤ ProFiltPseuNormGrpWithTinv₁ r'} (C : cone K)
+  (hC : ∀ a : ℝ≥0, is_limit (((level r').obj a).map_cone C))
+  (N : ℕ) [fact (0 < N)] (c d : ℝ≥0) (t : Profinite.punit.{u} ⟶ C.X.lvl c)
+  (S : cone (gadget_diagram C N c d t)) :
+  (hC c).lift ((cones.postcompose (gadget_diagram_fst_snd C N c d t)).obj S) =
+    Profinite.punit.elim S.X ≫ t :=
+begin
+  refine ((hC c).uniq ((cones.postcompose (gadget_diagram_fst_snd.{u} C N c d t)).obj S) _ _).symm,
+  intro j,
+  simp only [functor.map_cone_π_app, cones.postcompose_obj_π, nat_trans.comp_app,
+    gadget_diagram_fst_snd_app, Profinite.pullback.condition],
+  simp only [← category.assoc], congr' 2, ext,
+end
+
+-- lemma gadget_cone_lift_fst_fst {J : Type u} [small_category J]
+--   {K : J ⥤ ProFiltPseuNormGrpWithTinv₁ r'} (C : cone K)
+--   (hC : ∀ a : ℝ≥0, is_limit (((level r').obj a).map_cone C))
+--   (N : ℕ) [fact (0 < N)] (c d : ℝ≥0) (t : Profinite.punit.{u} ⟶ C.X.lvl c)
+--   (S : cone (gadget_diagram C N c d t)) (i : fin N) (j : J)
+--   (g : ((K.obj j).lvl (c / ↑N + d)).pow N ⟶ (((level r').obj (c / ↑N + d)).map_cone C).X) :
+--   (hC (c / N + d)).lift ((cones.postcompose (gadget_diagram_fst_fst C N c d t i)).obj S) =
+--     S.π.app j ≫ Profinite.pullback.fst
+--       (Profinite.pullback.snd ((K.obj j).sum N _) ((K.obj j).cast_lvl _))
+--       (t ≫ map_lvl (C.π.app j) c) ≫
+--         Profinite.pullback.fst ((K.obj j).sum N _) ((K.obj j).cast_lvl _) ≫ g :=
+-- begin
+--   refine ((hC _).uniq
+--     ((cones.postcompose (gadget_diagram_fst_fst.{u} C N c d t i)).obj S) _ _).symm,
+--   intro j,
+--   have := (hC _).fac ((cones.postcompose (gadget_diagram_fst_fst.{u} C N c d t i)).obj S),
+--   simp only [functor.map_cone_π_app, cones.postcompose_obj_π,
+--     nat_trans.comp_app, gadget_diagram_fst_snd_app],
+--   rw Profinite.pullback.condition,
+--   simp only [← category.assoc], congr' 2, ext,
+-- end
 
 def gadget_cone_is_limit {J : Type u} [small_category J]
   {K : J ⥤ ProFiltPseuNormGrpWithTinv₁ r'} (C : cone K)
@@ -260,18 +299,46 @@ def gadget_cone_is_limit {J : Type u} [small_category J]
             ((cones.postcompose (gadget_diagram_fst_fst C N c d t i)).obj S)))
         ((hC _).lift ((cones.postcompose (gadget_diagram_fst_snd C N c d t)).obj S))
         begin
-          -- ext1 x, dsimp,
+          rw gadget_cone_lift_fst_snd,
+          ext x, dsimp,
           sorry
         end)
       (Profinite.punit.elim _)
-      begin
-        rw [Profinite.pullback.lift_snd, eq_comm],
-        refine (hC c).uniq ((cones.postcompose (gadget_diagram_fst_snd.{u} C N c d t)).obj S) _ _,
-        intro j, dsimp, rw Profinite.pullback.condition,
-        simp only [← category.assoc], congr' 2, ext,
-      end,
-  fac' := sorry,
-  uniq' := sorry }
+      (by rw [Profinite.pullback.lift_snd, eq_comm, gadget_cone_lift_fst_snd]),
+  fac' := λ S j, begin
+    dsimp only [gadget_cone_π_app, map_gadget],
+    apply Profinite.pullback.hom_ext;
+      simp only [category.assoc, Profinite.pullback.lift_fst, Profinite.pullback.lift_snd,
+        Profinite.pullback.lift_fst_assoc, Profinite.pullback.lift_snd_assoc],
+    swap, { ext },
+    apply Profinite.pullback.hom_ext;
+      simp only [category.assoc, Profinite.pullback.lift_fst, Profinite.pullback.lift_snd,
+        Profinite.pullback.lift_fst_assoc, Profinite.pullback.lift_snd_assoc],
+    { apply Profinite.product.hom_ext, intro i,
+      simp only [category.assoc, Profinite.product.lift_π, Profinite.product.lift_π_assoc],
+      exact (hC _).fac ((cones.postcompose (gadget_diagram_fst_fst.{u} C N c d t i)).obj S) j, },
+    { rw [gadget_cone_lift_fst_snd, Profinite.pullback.condition],
+      simp only [← category.assoc], congr' 2, ext, }
+  end,
+  uniq' := λ S f h, begin
+    apply Profinite.pullback.hom_ext;
+      simp only [category.assoc, Profinite.pullback.lift_fst, Profinite.pullback.lift_snd,
+        Profinite.pullback.lift_fst_assoc, Profinite.pullback.lift_snd_assoc],
+    swap, { ext },
+    apply Profinite.pullback.hom_ext;
+      simp only [category.assoc, Profinite.pullback.lift_fst, Profinite.pullback.lift_snd,
+        Profinite.pullback.lift_fst_assoc, Profinite.pullback.lift_snd_assoc],
+    swap,
+    { rw [Profinite.pullback.condition, gadget_cone_lift_fst_snd, ←category.assoc], congr' 1, ext },
+    apply Profinite.product.hom_ext,
+    intro i,
+    rw [Profinite.product.lift_π],
+    refine (hC (c / N + d)).uniq
+      ((cones.postcompose (gadget_diagram_fst_fst.{u} C N c d t i)).obj S) _ _,
+    intro j,
+    -- dsimp,
+    sorry
+  end }
 
 end ProFiltPseuNormGrpWithTinv₁
 
