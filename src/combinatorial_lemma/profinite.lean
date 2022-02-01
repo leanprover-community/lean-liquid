@@ -57,16 +57,16 @@ def level : ℝ≥0 ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r' ⥤ Profinite.{u} :
 { obj := λ c,
   { obj := λ X, Profinite.of $ pseudo_normed_group.filtration X c,
     map := λ X Y f, ⟨f.level _, f.continuous' _⟩,
-    map_id' := sorry,
-    map_comp' := sorry },
+    map_id' := λ M, by { ext, refl },
+    map_comp' := λ M₁ M₂ M₃ f g, by { ext, refl } },
   map := λ c₁ c₂ h,
   { app := λ X, ⟨pseudo_normed_group.cast_le' h.le, begin
       haveI : fact (c₁ ≤ c₂) := ⟨h.le⟩,
       apply comphaus_filtered_pseudo_normed_group.continuous_cast_le,
-    end ⟩,
-    naturality' := sorry },
-  map_id' := sorry,
-  map_comp' := sorry }
+    end⟩,
+    naturality' := λ M₁ M₂ f, by { ext, refl } },
+  map_id' := λ c, by { ext, refl },
+  map_comp' := λ c₁ c₂ c₃ h₁₂ h₂₃, by { ext, refl } }
 
 instance (c) : preserves_limits ((level r').obj c) :=
 begin
@@ -94,7 +94,13 @@ def sum {c₁ c₂ : ℝ≥0} (X : ProFiltPseuNormGrpWithTinv₁.{u} r') (n : �
   comphaus_filtered_pseudo_normed_group.continuous_sum' _ _⟩
 
 lemma le₁ (N : ℕ) [fact (0 < N)] (c d : ℝ≥0) :
-  ↑N * (c / ↑N + d) ≤ c + ↑N * d := sorry
+  ↑N * (c / ↑N + d) ≤ c + ↑N * d :=
+begin
+  apply eq.le,
+  rw [mul_add, add_left_inj, mul_div_cancel'],
+  norm_cast,
+  exact ne_of_gt (fact.out _)
+end
 
 lemma le₂ (N : ℕ) (c d : ℝ≥0) :
   c ≤ c + ↑N * d := le_self_add
@@ -127,7 +133,7 @@ def gadget_diagram {J : Type u} [small_category J]
   J ⥤ Profinite.{u} :=
 { obj := λ j, (K.obj j).gadget N c d (t ≫ map_lvl (C.π.app _) c),
   map := λ i j f, map_gadget (K.map f) _ _ _ _ _ sorry,
-  map_id' := sorry,
+  map_id' := λ i, by { sorry },
   map_comp' := sorry }
 
 def gadget_diagram_fst_snd {J : Type u} [small_category J]
