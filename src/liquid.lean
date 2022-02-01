@@ -76,3 +76,25 @@ The proof reduces to `thm95''` (a variant of Theorem 9.5).
 
 example : first_target_stmt r r' BD κ :=
 first_target r r' BD κ
+
+
+/-- Theorem 9.4 in [Analytic] -/
+theorem thnm94 :
+  ∀ m : ℕ, ∃ (k K : ℝ≥0) (hk : fact (1 ≤ k)) (c₀ : ℝ≥0),
+  ∀ (S : Profinite) (V : SemiNormedGroup.{0}) [normed_with_aut r V],
+    ​((BD.data.system κ r V r').obj (op $ of r' ((Mbar.functor.{0 0} r').obj S)))
+      .is_weak_bounded_exact k K m c₀ :=
+begin
+  intro m,
+  obtain ⟨k, K, hk, H⟩ := thm95''.profinite BD r r' κ m,
+  obtain ⟨c₀, H⟩ := H ℤ,
+  use [k, K, hk, c₀],
+  introsI S V hV,
+  specialize H S V,
+  let i := (BD.data.system κ r V r').map_iso (HomZ_iso (of r' $ (Mbar.functor.{0 0} r').obj S)).op,
+  refine H.of_iso i.symm _,
+  intros c n,
+  rw ← system_of_complexes.apply_hom_eq_hom_apply,
+  apply SemiNormedGroup.iso_isometry_of_norm_noninc;
+  apply breen_deligne.data.complex.map_norm_noninc
+end

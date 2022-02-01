@@ -203,7 +203,11 @@ lemma map_gadget_comp {X Y Z : ProFiltPseuNormGrpWithTinv₁.{u} r'}
   map_gadget f N c d t t' w ≫ map_gadget g N c d t' t'' w' =
   map_gadget (f ≫ g) N c d t t'' (by { subst t'', subst t', rw [category.assoc, map_lvl_comp] }) :=
 begin
-  sorry
+  dsimp only [map_gadget],
+  refine Profinite.pullback.hom_ext _ _ _ _ _ _;
+  simp only [category.assoc, Profinite.pullback.lift_fst, Profinite.pullback.lift_snd,
+    Profinite.pullback.lift_fst_assoc, Profinite.pullback.lift_snd_assoc],
+  refl
 end
 
 @[simps]
@@ -253,7 +257,10 @@ def gadget_cone_is_limit {J : Type u} [small_category J]
         (Profinite.product.lift _
           (λ i, (hC _).lift
             ((cones.postcompose (gadget_diagram_fst_fst C N c d t i)).obj S)))
-        ((hC _).lift ((cones.postcompose (gadget_diagram_fst_snd C N c d t)).obj S)) sorry)
+        ((hC _).lift ((cones.postcompose (gadget_diagram_fst_snd C N c d t)).obj S))
+        begin
+          sorry
+        end)
       (Profinite.punit.elim _) sorry,
   fac' := sorry,
   uniq' := sorry }
@@ -307,6 +314,7 @@ begin
   swap, apply_instance,
   obtain ⟨e,he1,he2⟩ := h,
   -- Now use `e`, `t'`, `he1` and `he2` to finish off the proof...
+  -- refine ⟨⟨⟨⟨(_, _), _⟩, _⟩, _⟩⟩,
   sorry,
 end
 
@@ -337,6 +345,7 @@ begin
     apply_instance },
 end
 
+/-- Lemma 9.8 of [Analytic], with somewhat restrictive universes -/
 theorem main (r' : ℝ≥0) [fact (0 < r')] [fact (r' < 1)]
   (Λ : Type u) [polyhedral_lattice Λ] (S : Profinite.{u}) (N : ℕ) [hN : fact (0 < N)] :
   pseudo_normed_group.splittable (Λ →+ (Mbar.functor.{u u} r').obj S) N (d Λ N) :=
@@ -362,15 +371,14 @@ end
 
 end lem98
 
-/-- Lemma 9.8 of [Analytic] -/
-lemma lem98 (r' : ℝ≥0) [fact (0 < r')] [fact (r' < 1)]
-  (Λ : Type*) [polyhedral_lattice Λ] (S : Profinite) (N : ℕ) [hN : fact (0 < N)] :
-  pseudo_normed_group.splittable (Λ →+ (Mbar.functor r').obj S) N (lem98.d Λ N) :=
-begin
-  constructor,
-  intros c x hx,
-  -- This reduces to `lem98_finite`: See the first lines of the proof in [Analytic].
-  sorry
-end
+-- A version with less restrictive universes. But we don't need that. Who cares about universes.
+
+-- /-- Lemma 9.8 of [Analytic] -/
+-- lemma lem98 (r' : ℝ≥0) [fact (0 < r')] [fact (r' < 1)]
+--   (Λ : Type*) [polyhedral_lattice Λ] (S : Profinite) (N : ℕ) [hN : fact (0 < N)] :
+--   pseudo_normed_group.splittable (Λ →+ (Mbar.functor r').obj S) N (lem98.d Λ N) :=
+-- begin
+--   admit
+-- end
 
 end

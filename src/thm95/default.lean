@@ -2,6 +2,7 @@ import breen_deligne.constants
 import system_of_complexes.completion
 import thm95.homotopy
 import thm95.col_exact
+import combinatorial_lemma.profinite
 
 
 noncomputable theory
@@ -99,6 +100,26 @@ begin
   exact normed_spectral cond
 end
 
+set_option pp.universes true
+
+/-- A variant of Theorem 9.5 in [Analytic] using weak bounded exactness. -/
+theorem thm95'.profinite : ∀ (Λ : PolyhedralLattice.{u}) (S : Profinite.{u})
+  (V : SemiNormedGroup.{u}) [normed_with_aut r V],
+  ​((BD.data.system κ r V r').obj (op $ Hom Λ ((Mbar.functor.{u u} r').obj S))).is_weak_bounded_exact
+    (k κ' m) (K r r' BD κ' m) m (c₀ r r' BD κ κ' m Λ) :=
+begin
+  apply nat.strong_induction_on m; clear m,
+  introsI m IH Λ S V _V_r,
+  haveI : pseudo_normed_group.splittable
+    (Λ →+ (of r' ((Mbar.functor.{u u} r').obj S))) (N r r' BD κ' m) (lem98.d Λ (N r r' BD κ' m)) :=
+    lem98.main r' Λ S (N r r' BD κ' m),
+  let cond := NSC.{u} r r' BD V κ κ' (of r' $ (Mbar.functor.{u u} r').obj S) m Λ _,
+  swap,
+  { introsI m' hm' Λ,
+    apply IH, assumption },
+  exact normed_spectral cond
+end
+
 omit BD κ κ' r r' m
 
 /-- Theorem 9.5 in [Analytic] -/
@@ -109,6 +130,17 @@ theorem thm95 (Λ : PolyhedralLattice.{u}) (S : Type u) [fintype S]
 begin
   refine system_of_complexes.is_weak_bounded_exact.strong_of_complete
     _ (thm95' r r' BD κ κ' m Λ S V) _ 1 zero_lt_one,
+  apply data.system_admissible
+end
+
+/-- Theorem 9.5 in [Analytic] -/
+theorem thm95.profinite (Λ : PolyhedralLattice.{u}) (S : Profinite.{u})
+  (V : SemiNormedGroup.{u}) [normed_with_aut r V] :
+  ((BD.data.system κ r V r').obj (op $ Hom Λ ((Mbar.functor.{u u} r').obj S))).is_bounded_exact
+    (k κ' m ^ 2) (K r r' BD κ' m + 1) m (c₀ r r' BD κ κ' m Λ) :=
+begin
+  refine system_of_complexes.is_weak_bounded_exact.strong_of_complete
+    _ (thm95'.profinite r r' BD κ κ' m Λ S V) _ 1 zero_lt_one,
   apply data.system_admissible
 end
 
@@ -142,4 +174,25 @@ begin
   refine ⟨(k κ' m), (K r r' BD κ' m), infer_instance, λ Λ _inst_Λ, _⟩,
   refine ⟨c₀ r r' BD κ κ' m (@PolyhedralLattice.of Λ _inst_Λ), λ S _inst_S V _inst_V, _⟩,
   apply thm95'
+end
+
+/-- Theorem 9.5 in [Analytic] -/
+theorem thm95''.profinite (BD : package)
+  (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r < 1)] [fact (r' < 1)]
+  (κ : ℕ → ℝ≥0) [BD.data.very_suitable r r' κ] [∀ (i : ℕ), fact (0 < κ i)] :
+  ∀ m : ℕ,
+  ∃ (k K : ℝ≥0) (hk : fact (1 ≤ k)),
+  ∀ (Λ : Type u) [polyhedral_lattice Λ],
+  ∃ c₀ : ℝ≥0,
+  ∀ (S : Profinite.{u}),
+  ∀ (V : SemiNormedGroup.{u}) [normed_with_aut r V],
+    by exactI system_of_complexes.is_weak_bounded_exact
+    (​(BD.data.system κ r V r').obj (op $ Hom Λ ((Mbar.functor.{u u} r').obj S))) k K m c₀ :=
+begin
+  intro m,
+  let κ' := package.κ' BD κ,
+  haveI _inst_κ' : package.adept BD κ κ' := package.κ'_adept BD κ,
+  refine ⟨(k κ' m), (K r r' BD κ' m), infer_instance, λ Λ _inst_Λ, _⟩,
+  refine ⟨c₀ r r' BD κ κ' m (@PolyhedralLattice.of Λ _inst_Λ), λ S _inst_S V _inst_V, _⟩,
+  apply thm95'.profinite
 end
