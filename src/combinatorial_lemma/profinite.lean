@@ -40,7 +40,6 @@ lemma continuous_sum' {c₁ c₂ : ℝ≥0} {M : Type u} [comphaus_filtered_pseu
 
 end comphaus_filtered_pseudo_normed_group
 
-
 namespace Profinite
 
 def pow (X : Profinite.{u}) (n : ℕ) : Profinite.{u} :=
@@ -54,7 +53,7 @@ end Profinite
 
 namespace ProFiltPseuNormGrpWithTinv₁
 
-def level : ℝ≥0 ⥤ ProFiltPseuNormGrpWithTinv₁ r' ⥤ Profinite :=
+def level : ℝ≥0 ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r' ⥤ Profinite.{u} :=
 { obj := λ c,
   { obj := λ X, Profinite.of $ pseudo_normed_group.filtration X c,
     map := λ X Y f, ⟨f.level _, f.continuous' _⟩,
@@ -68,6 +67,15 @@ def level : ℝ≥0 ⥤ ProFiltPseuNormGrpWithTinv₁ r' ⥤ Profinite :=
     naturality' := sorry },
   map_id' := sorry,
   map_comp' := sorry }
+
+instance (c) : preserves_limits ((level r').obj c) :=
+begin
+  change preserves_limits (to_PFPNG₁.{u} r' ⋙ ProFiltPseuNormGrp₁.level.obj.{u} c),
+  apply_with limits.comp_preserves_limits { instances := ff },
+  constructor, constructor, introsI J _, constructor,
+  -- <-- looks like we have `preserves_limit` and not `preserves_limits`, but
+  -- it should be trivial to add, if needed.
+end
 
 variable {r'}
 
@@ -96,7 +104,7 @@ Given a `N : ℕ`, `c : ℝ≥0`, an `X : ProFiltPseuNormGrpWithTing₁ r'`, and
   `t : Profinite.punit ⟶ X.lvl c`, this constructs the pullback of `t` along the projection
   `(X.lvl (c/N + d))^n ×_{X.lvl (c + N * d)} X.lvl c → X.lvl c`.
 -/
-def _root_.ProFiltPseuNormGrpWithTinv₁.gadget (X : ProFiltPseuNormGrpWithTinv₁.{u} r')
+def gadget (X : ProFiltPseuNormGrpWithTinv₁.{u} r')
   (N : ℕ) [fact (0 < N)] (c d : ℝ≥0) (t : Profinite.punit.{u} ⟶ X.lvl c) : Profinite.{u} :=
 Profinite.pullback
 (Profinite.pullback.snd (X.sum N (le₁ N c d)) (X.cast_lvl (le₂ N c d ))) t
