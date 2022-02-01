@@ -210,7 +210,18 @@ end .
 -- This should follow from the finite case of lem98.
 lemma gadget_nonempty (N : ℕ) [fact (0 < N)] (T : discrete_quotient S)
   (c) (t) : nonempty ((gadget_diagram (hom_Mbar_cone r' Λ _) N c (d Λ N) t).obj T) :=
-sorry
+begin
+  obtain ⟨h⟩ := lem98_finite Λ T N,
+  specialize h c,
+  let u : (hom_Mbar_cone r' Λ S).X ⟶ (hom_diagram r' Λ S).obj T :=
+    ((hom_Mbar_cone r' Λ S).π.app T),
+  let t' := t ≫ ((level r').obj c).map u,
+  specialize h (t' punit.star).1 (t' punit.star).2,
+  swap, apply_instance,
+  obtain ⟨e,he1,he2⟩ := h,
+  -- Now use `e`, `t'`, `he1` and `he2` to finish off the proof...
+  sorry,
+end
 
 -- This should follow from Tychonoff and `gadget_nonempty`.
 lemma key (N : ℕ) [fact (0 < N)] (c) (t) :
