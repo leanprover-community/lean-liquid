@@ -28,6 +28,10 @@ def sum' {c₁ c₂ : ℝ≥0} {M : Type u} [pseudo_normed_group M]
   simpa,
 end⟩
 
+@[simp] lemma coe_sum' {c₁ c₂ : ℝ≥0} {M : Type u} [pseudo_normed_group M]
+  (n : ℕ) (h : ↑n * c₁ ≤ c₂) (t : Π i : fin n, pseudo_normed_group.filtration M c₁) :
+  (sum' n h t : M) = ∑ i : fin n, (t i : M) := rfl
+
 lemma sum'_zero {c₁ c₂ : ℝ≥0} {M : Type u} [pseudo_normed_group M] (h : ↑0 * c₁ ≤ c₂) :
   (sum' 0 h :
     (Π i : fin 0, pseudo_normed_group.filtration M c₁) → pseudo_normed_group.filtration M c₂) =
@@ -93,6 +97,7 @@ end Profinite
 
 namespace ProFiltPseuNormGrpWithTinv₁
 
+@[simps]
 def level : ℝ≥0 ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r' ⥤ Profinite.{u} :=
 { obj := λ c,
   { obj := λ X, Profinite.of $ pseudo_normed_group.filtration X c,
@@ -125,13 +130,26 @@ abbreviation lvl (X : ProFiltPseuNormGrpWithTinv₁.{u} r') (c : ℝ≥0) : Prof
 abbreviation map_lvl {X Y : ProFiltPseuNormGrpWithTinv₁.{u} r'} (f : X ⟶ Y) (c : ℝ≥0) :
   X.lvl c ⟶ Y.lvl c := ((level r').obj c).map f
 
+@[reassoc] lemma map_lvl_comp {X Y Z : ProFiltPseuNormGrpWithTinv₁.{u} r'}
+  (f : X ⟶ Y) (g : Y ⟶ Z) (c : ℝ≥0) :
+  map_lvl f c ≫ map_lvl g c = map_lvl (f ≫ g) c :=
+by { ext, refl }
+
 abbreviation cast_lvl {c₁ c₂ : ℝ≥0} (X : ProFiltPseuNormGrpWithTinv₁.{u} r') (h : c₁ ≤ c₂) :
   X.lvl c₁ ⟶ X.lvl c₂ := ((level r').map h.hom).app _
+
+@[reassoc] lemma map_lvl_cast_lvl_eq {X Y : ProFiltPseuNormGrpWithTinv₁.{u} r'}
+  (f : X ⟶ Y) (c₁ c₂ : ℝ≥0) (h : c₁ ≤ c₂) :
+  map_lvl f c₁ ≫ cast_lvl Y h = cast_lvl X h ≫ map_lvl f c₂ :=
+by { ext, refl }
 
 def sum {c₁ c₂ : ℝ≥0} (X : ProFiltPseuNormGrpWithTinv₁.{u} r') (n : ℕ) (h : ↑n * c₁ ≤ c₂) :
   (X.lvl c₁).pow n ⟶ X.lvl c₂ :=
 ⟨pseudo_normed_group.sum' _ h,
   comphaus_filtered_pseudo_normed_group.continuous_sum' _ _⟩
+
+@[simp] lemma coe_sum {c₁ c₂ : ℝ≥0} (X : ProFiltPseuNormGrpWithTinv₁.{u} r')
+  (n : ℕ) (h : ↑n * c₁ ≤ c₂) : ⇑(X.sum n h) = pseudo_normed_group.sum' n h := rfl
 
 lemma le₁ (N : ℕ) [fact (0 < N)] (c d : ℝ≥0) :
   ↑N * (c / ↑N + d) ≤ c + ↑N * d :=
@@ -146,14 +164,14 @@ lemma le₂ (N : ℕ) (c d : ℝ≥0) :
   c ≤ c + ↑N * d := le_self_add
 
 /--
-Given a `N : ℕ`, `c : ℝ≥0`, an `X : ProFiltPseuNormGrpWithTing₁ r'`, and a
-  `t : Profinite.punit ⟶ X.lvl c`, this constructs the pullback of `t` along the projection
+Given a `N : ℕ`, `c : ℝ≥0`, an `X : ProFiltPseuNormGrpWithTinv₁ r'`, and a
+  `t : Profinite.punit ⟶ X.lvl c`, this constructs the pullback of `t` along the 2nd projection
   `(X.lvl (c/N + d))^n ×_{X.lvl (c + N * d)} X.lvl c → X.lvl c`.
 -/
 def gadget (X : ProFiltPseuNormGrpWithTinv₁.{u} r')
   (N : ℕ) [fact (0 < N)] (c d : ℝ≥0) (t : Profinite.punit.{u} ⟶ X.lvl c) : Profinite.{u} :=
 Profinite.pullback
-(Profinite.pullback.snd (X.sum N (le₁ N c d)) (X.cast_lvl (le₂ N c d ))) t
+(Profinite.pullback.snd (X.sum N (le₁ N c d)) (X.cast_lvl (le₂ N c d))) t
 
 def map_gadget {X Y : ProFiltPseuNormGrpWithTinv₁.{u} r'}
   (f : X ⟶ Y) (N : ℕ) [fact (0 < N)] (c d : ℝ≥0) (t : Profinite.punit.{u} ⟶ X.lvl c)
@@ -166,18 +184,25 @@ Profinite.pullback.lift _ _
     Profinite.product.lift _ (λ i, Profinite.product.π _ i ≫ map_lvl f _))
   (Profinite.pullback.snd _ _ ≫ map_lvl f _)
   begin
-    sorry
+    simp only [category.assoc, map_lvl_cast_lvl_eq, ← Profinite.pullback.condition_assoc],
+    ext ⟨⟨x₁, x₂⟩, hx⟩,
+    simp only [category.assoc, Profinite.coe_comp, function.comp_app, nat_trans.naturality],
+    dsimp [Profinite.pullback.fst, Profinite.pullback.snd],
+    rw [f.map_sum, finset.sum_congr rfl],
+    rintro i -,
+    refl
   end)
-(Profinite.pullback.snd _ _) sorry
+(Profinite.pullback.snd _ _)
+(by rw [category.assoc, Profinite.pullback.lift_snd, Profinite.pullback.condition_assoc, w])
 
 def gadget_diagram {J : Type u} [small_category J]
   {K : J ⥤ ProFiltPseuNormGrpWithTinv₁ r'} (C : cone K)
   (N : ℕ) [fact (0 < N)] (c d : ℝ≥0) (t : Profinite.punit.{u} ⟶ C.X.lvl c) :
   J ⥤ Profinite.{u} :=
 { obj := λ j, (K.obj j).gadget N c d (t ≫ map_lvl (C.π.app _) c),
-  map := λ i j f, map_gadget (K.map f) _ _ _ _ _ sorry,
-  map_id' := λ i, by { sorry },
-  map_comp' := sorry }
+  map := λ i j f, map_gadget (K.map f) _ _ _ _ _ (by rw [category.assoc, map_lvl_comp, cone.w]),
+  map_id' := λ i, by { simp only [K.map_id], ext; refl },
+  map_comp' := λ i j k h₁ h₂, by { simp only [K.map_comp], ext; refl } }
 
 def gadget_diagram_fst_snd {J : Type u} [small_category J]
   {K : J ⥤ ProFiltPseuNormGrpWithTinv₁ r'} (C : cone K)
