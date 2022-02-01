@@ -314,8 +314,12 @@ begin
   swap, apply_instance,
   obtain ⟨e,he1,he2⟩ := h,
   -- Now use `e`, `t'`, `he1` and `he2` to finish off the proof...
-  -- refine ⟨⟨⟨⟨(_, _), _⟩, _⟩, _⟩⟩,
-  sorry,
+  refine ⟨⟨⟨⟨(_, _), _⟩, _⟩, _⟩⟩,
+  { intro i, refine ⟨e i, he2 i⟩, },
+  { let x := t' punit.star, exact ⟨x.1, x.2⟩, },
+  { apply subtype.ext, exact he1.symm },
+  { exact punit.star },
+  { apply subtype.ext, refl, },
 end
 
 -- This should follow from Tychonoff and `gadget_nonempty`.
