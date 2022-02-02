@@ -354,55 +354,67 @@ summable (λ n, ∥ f n ∥ * ρ ^ n) ↔ summable (λ n : ℕ, ∥ f n ∥ * ρ
 -- lemma half_ne_zero : (1 / 2 : ℝ) ≠ 0 := by {simp only [one_div, ne.def, inv_eq_zero, bit0_eq_zero,
 --     one_ne_zero, not_false_iff]}
 
-lemma heather {r : ℝ≥0} (f : ℤ → ℤ) : --(h : summable (λ kl: ℕ × ℕ, (1 / 2 : ℝ) *
-  -- ∥ f (kl.fst + 1 + kl.snd) ∥ * r ^ (kl.snd) )) :
-  summable (λ (n : ℕ), 1 / 2 * ∑' (i : ℕ), (f (n + 1 + i) : ℝ) * (1 / 2) ^ i * ↑r ^ n) :=
-begin
-  have easy : ∀ (n : ℕ), summable (λ (i : ℕ), (f (n + 1 + i) : ℝ) *
-    (1 / 2) ^ i * ↑r ^ n),
-  { intro n,
-    apply summable.mul_right,
-    sorry,
-  },
-  set ϕ := (λ lj: ℕ × ℕ, (1 / 2 : ℝ) * f (lj.fst + 1 + lj.snd) * (1 / 2)^(lj.snd) * r ^ (lj.fst) ),
-  set ψ := (λ n : ℕ, (1/2 : ℝ) * ∑' (i : ℕ), (f (n + 1 + i) : ℝ) * (1 / 2)^i * r^n),
-  have crux : summable ϕ, sorry,
-  have H : ∀ b : ℕ, has_sum (λ i : ℕ, ϕ(b, i)) (ψ b),
-  { intro n,
-    dsimp [ϕ, ψ, tsum],
-    rw [dif_pos (easy n)],
-    simp_rw mul_assoc,
-    rw [← has_sum_mul_left_iff (ne_of_gt (@one_half_pos ℝ _))],
-    exact Exists.some_spec _, },
-  have := has_sum.prod_fiberwise crux.has_sum H,
-  -- have hope := @has_sum.prod_fiberwise _ _ _ _ _ _ _ ϕ ψ (∑' mn : ℕ × ℕ, ϕ mn) crux.has_sum H,
-  exact this.summable,
-end
+-- lemma heather {r : ℝ≥0} (f : ℤ → ℤ) : --(h : summable (λ kl: ℕ × ℕ, (1 / 2 : ℝ) *
+--   -- ∥ f (kl.fst + 1 + kl.snd) ∥ * r ^ (kl.snd) )) :
+--   summable (λ (n : ℕ), 1 / 2 * ∑' (i : ℕ), (f (n + 1 + i) : ℝ) * (1 / 2) ^ i * ↑r ^ n) :=
+-- begin
+--   have easy : ∀ (n : ℕ), summable (λ (i : ℕ), (f (n + 1 + i) : ℝ) *
+--     (1 / 2) ^ i * ↑r ^ n),
+--   { intro n,
+--     apply summable.mul_right,
+--     sorry,
+--   },
+--   set ϕ := (λ lj: ℕ × ℕ, (1 / 2 : ℝ) * f (lj.fst + 1 + lj.snd) * (1 / 2)^(lj.snd) * r ^ (lj.fst) ),
+--   set ψ := (λ n : ℕ, (1/2 : ℝ) * ∑' (i : ℕ), (f (n + 1 + i) : ℝ) * (1 / 2)^i * r^n),
+--   have crux : summable ϕ, --   have H : ∀ b : ℕ, has_sum (λ i : ℕ, ϕ(b, i)) (ψ b),
+--   { intro n,
+--     dsimp [ϕ, ψ, tsum],
+--     rw [dif_pos (easy n)],
+--     simp_rw mul_assoc,
+--     rw [← has_sum_mul_left_iff (ne_of_gt (@one_half_pos ℝ _))],
+--     exact Exists.some_spec _, },
+--   have := has_sum.prod_fiberwise crux.has_sum H,
+--   -- have := has_sum.prod_fiberwise crux.has_sum H,
+--   -- have hope := @has_sum.prod_fiberwise _ _ _ _ _ _ _ ϕ ψ (∑' mn : ℕ × ℕ, ϕ mn) crux.has_sum H,
+--   exact this.summable,
+-- end
 
-lemma heather' {r : ℝ≥0} (f : ℤ → ℤ) :
+lemma heather_norm {r : ℝ≥0} (f : ℤ → ℤ) :
   summable (λ (n : ℕ), 1 / 2 * ∥ ∑' (i : ℕ), (f (n + 1 + i) : ℝ) * (1 / 2) ^ i ∥ * ↑r ^ n) :=
 begin
-  have easy : ∀ (n : ℕ), summable (λ (i : ℕ), ∥ (f (n + 1 + i) : ℝ) *
+  -- both **easy** and **temp** follow from the hyp on f (to be added), that λ n, ∥ f n ∥ * r ^ n is
+    -- summable
+  have easy : ∀ (n : ℕ), summable (λ (i : ℕ), (1 / 2) * ∥ (f (n + 1 + i) : ℝ) *
     (1 / 2) ^ i ∥ * ↑r ^ n),
   { intro n,
     apply summable.mul_right,
     sorry,
   },
-  set ϕ := (λ lj: ℕ × ℕ, (1 / 2 : ℝ) * ∥ f (lj.fst + 1 + lj.snd) * (1/2)^(lj.snd) ∥ * r ^ (lj.fst) ),
-  set ψ := (λ n : ℕ, (1/2 : ℝ) * ∥ ∑' (i : ℕ), (f (n + 1 + i) : ℝ) * (1/2)^i ∥ * r^n),
+  set ϕ := (λ lj: ℕ × ℕ, (1 / 2 : ℝ) * ∥ (f (lj.fst + 1 + lj.snd) : ℝ) * (1/2)^(lj.snd) ∥ *
+    r ^ (lj.fst) ),
+  -- set ψ := (λ n : ℕ, (1/2 : ℝ) * ∥ ∑' (i : ℕ), (f (n + 1 + i) : ℝ) * (1/2)^i ∥ * r^n),
   have crux : summable ϕ, sorry,
-  have H : ∀ b : ℕ, has_sum (λ i : ℕ, ϕ(b, i)) (ψ b),
+  have H : ∀ b : ℕ, summable (λ i : ℕ, ϕ(b, i)),
   { intro n,
-    dsimp [ϕ, ψ, tsum],
-    sorry,
-    -- rw [dif_pos (easy n)],
-    -- simp_rw mul_assoc,
-    -- rw [← has_sum_mul_left_iff (ne_of_gt (@one_half_pos ℝ _))],
-    --exact Exists.some_spec _,
-    },
-  have := has_sum.prod_fiberwise crux.has_sum H,
+    dsimp [ϕ, tsum],
+    exact easy n },
+  have := has_sum.prod_fiberwise crux.has_sum (λ b, (H b).has_sum),
   -- have hope := @has_sum.prod_fiberwise _ _ _ _ _ _ _ ϕ ψ (∑' mn : ℕ × ℕ, ϕ mn) crux.has_sum H,
-  exact this.summable,
+  replace this := this.summable,
+  dsimp [ϕ] at this,
+  -- dsimp [ψ],
+  apply summable_of_nonneg_of_le _ _ this,
+  { sorry },
+  { intro b,
+    simp_rw mul_assoc,
+    rw tsum_mul_left,
+    rw [mul_le_mul_left (@one_half_pos ℝ _)],
+    have r_pos : 0 < (r : ℝ) ^ b, sorry,
+    rw tsum_mul_right,
+    rw [mul_le_mul_right r_pos],
+    have temp : summable (λ j : ℕ, ∥ (f (b + 1 + j) : ℝ) * (1 / 2)^j∥),sorry,
+    exact norm_tsum_le_tsum_norm temp, },
+  -- rw [summable_mul_left_iff (ne_of_gt (@one_half_pos ℝ _))] at this,
 end
 
 -- lemma aux_pos_terms {r : ℝ≥0} (f : ℤ → ℤ) (n : ℕ) : 0 ≤ (2 * r : ℝ) ^ n *
@@ -422,7 +434,7 @@ begin
       r d _).mpr h_on_nat,
     intros n hn,
     exact norm_eq_zero.mp (hd n hn) },
-  apply heather',
+  apply heather_norm,
 end
 
 #exit
