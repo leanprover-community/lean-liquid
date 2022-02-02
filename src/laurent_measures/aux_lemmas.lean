@@ -345,15 +345,88 @@ summable (λ n, ∥ f n ∥ * ρ ^ n) ↔ summable (λ n : ℕ, ∥ f n ∥ * ρ
     simpa only [int.cast_eq_zero],
   end
 
-lemma goofy {r : ℝ≥0} (f : ℤ → ℤ) (hf : summable (λ n, ∥ f n ∥ * r ^ n)) (b : ℕ)
-: (λ n : ℕ, (2 * r : ℝ) ^ n * ∥∑' (x : ℕ), (1 / 2 : ℝ) ^ (n + 1 + x : ℤ) * (f (n + 1 + x : ℤ))∥) b
-  ≤ (λ n : ℕ, (2 * r : ℝ) ^ n * ∥∑' (x : ℕ), (1 / 2 : ℝ) ^ (x + 1) * (f (x + 1))∥) b:=
+-- lemma goofy {r : ℝ≥0} (f : ℤ → ℤ) (hf : summable (λ n, ∥ f n ∥ * r ^ n)) (b : ℕ)
+-- : (λ n : ℕ, (2 * r : ℝ) ^ n * ∥∑' (x : ℕ), (1 / 2 : ℝ) ^ (n + 1 + x : ℤ) * (f (n + 1 + x : ℤ))∥) b
+--   ≤ (λ n : ℕ, (2 * r : ℝ) ^ n * ∥∑' (x : ℕ), (1 / 2 : ℝ) ^ (x + 1) * (f (x + 1))∥) b:=
+-- begin
+-- end
+
+-- lemma half_ne_zero : (1 / 2 : ℝ) ≠ 0 := by {simp only [one_div, ne.def, inv_eq_zero, bit0_eq_zero,
+--     one_ne_zero, not_false_iff]}
+
+lemma heather {r : ℝ≥0} (f : ℤ → ℤ) (h : summable (λ kl: ℕ × ℕ, (1 / 2 : ℝ) *
+  ∥ f (kl.fst + 1 + kl.snd) ∥ * r ^ (kl.snd) )) :
+  summable (λ (n : ℕ), 1 / 2 * ∑' (i : ℕ), (f (n + 1 + i) : ℝ) * (1 / 2) ^ i * ↑r ^ n) :=
 begin
-  sorry,
+  have easy : ∀ (n : ℕ), summable (λ (i : ℕ), (f (n + 1 + i) : ℝ) *
+    (1 / 2) ^ i * ↑r ^ n),
+  { intro n,
+    apply summable.mul_right,
+    sorry,
+  },
+  set ϕ := (λ lj: ℕ × ℕ, (1 / 2 : ℝ) * f (lj.fst + 1 + lj.snd) * (1/2)^(lj.snd) * r ^ (lj.fst) ),
+  set ψ := (λ n : ℕ, (1/2 : ℝ) * ∑' (i : ℕ), (f (n + 1 + i) : ℝ) * (1/2)^i * r^n),
+  have crux : summable ϕ, sorry,
+  have H : ∀ b : ℕ, has_sum (λ i : ℕ, ϕ(b, i)) (ψ b),
+  { intro n,
+    dsimp [ϕ, ψ, tsum],
+    rw [dif_pos (easy n)],
+    simp_rw mul_assoc,
+    rw [← has_sum_mul_left_iff (ne_of_gt (@one_half_pos ℝ _))],
+    exact Exists.some_spec _, },
+  have := has_sum.prod_fiberwise crux.has_sum H,
+  -- have hope := @has_sum.prod_fiberwise _ _ _ _ _ _ _ ϕ ψ (∑' mn : ℕ × ℕ, ϕ mn) crux.has_sum H,
+  exact this.summable,
 end
 
-lemma aux_pos_terms {r : ℝ≥0} (f : ℤ → ℤ) (n : ℕ) : 0 ≤ (2 * r : ℝ) ^ n *
-  ∥∑' (x : ℕ), (1 / 2 : ℝ) ^ (n + 1 + x) * ↑(f (n + 1 + x))∥ := sorry
+lemma heather' {r : ℝ≥0} (f : ℤ → ℤ) (h : summable (λ kl: ℕ × ℕ, (1 / 2 : ℝ) *
+  ∥ f (kl.fst + 1 + kl.snd) ∥ * r ^ (kl.snd) )) :
+  summable (λ (n : ℕ), 1 / 2 * ∥ ∑' (i : ℕ), (f (n + 1 + i) : ℝ) * (1 / 2) ^ i ∥ * ↑r ^ n) :=
+begin
+  have easy : ∀ (n : ℕ), summable (λ (i : ℕ), ∥ (f (n + 1 + i) : ℝ) *
+    (1 / 2) ^ i ∥ * ↑r ^ n),
+  { intro n,
+    apply summable.mul_right,
+    sorry,
+  },
+  set ϕ := (λ lj: ℕ × ℕ, (1 / 2 : ℝ) * ∥ f (lj.fst + 1 + lj.snd) * (1/2)^(lj.snd) ∥ * r ^ (lj.fst) ),
+  set ψ := (λ n : ℕ, (1/2 : ℝ) * ∥ ∑' (i : ℕ), (f (n + 1 + i) : ℝ) * (1/2)^i ∥ * r^n),
+  have crux : summable ϕ, sorry,
+  have H : ∀ b : ℕ, has_sum (λ i : ℕ, ϕ(b, i)) (ψ b),
+  { intro n,
+    dsimp [ϕ, ψ, tsum],
+    sorry,
+    -- rw [dif_pos (easy n)],
+    -- simp_rw mul_assoc,
+    -- rw [← has_sum_mul_left_iff (ne_of_gt (@one_half_pos ℝ _))],
+    --exact Exists.some_spec _,
+    },
+  have := has_sum.prod_fiberwise crux.has_sum H,
+  -- have hope := @has_sum.prod_fiberwise _ _ _ _ _ _ _ ϕ ψ (∑' mn : ℕ × ℕ, ϕ mn) crux.has_sum H,
+  exact this.summable,
+end
+
+-- lemma heather_with_norm {r : ℝ≥0} (f : ℤ → ℤ) (h : summable (λ kl: ℕ × ℕ, (1 / 2 : ℝ) *
+--   ∥ f (kl.fst + 1 + kl.snd) ∥ * r ^ (kl.snd) )) :
+--   summable (λ (n : ℕ), 1 / 2 * ∥ ∑' (i : ℕ), (f (n + 1 + i) : ℝ) * (1 / 2) ^ i ∥ * ↑r ^ n) :=
+-- begin
+--   have H := heather f h,
+--   have half_norm : (1 / 2 : ℝ) = ∥ (1 / 2  : ℝ) ∥ := by { simp only [one_div,
+--     normed_field.norm_inv, real.norm_two]},
+--   -- have r_norm : (r : ℝ) ^ b = ∥ (r : ℝ) ^ b ∥, sorry,
+--   rw half_norm,
+--   rw r_norm,
+--   rw [← normed_field.norm_mul],
+--   rw [← normed_field.norm_mul],
+
+--   -- rw abs_mul
+--   -- simp_rw
+--   -- simp_rw mul_assoc,
+
+-- end
+
+-- lemma aux_pos_terms {r : ℝ≥0} (f : ℤ → ℤ) (n : ℕ) : 0 ≤ (2 * r : ℝ) ^ n *
+--   ∥∑' (x : ℕ), (1 / 2 : ℝ) ^ (n + 1 + x) * ↑(f (n + 1 + x))∥ :=
 
 lemma summable_convolution {r : ℝ≥0} (hr₀: 0 < r) (hr₂ : 1 / 2 < r) (f : ℤ → ℤ) (d : ℤ)
   (hf : summable (λ n, ∥ f n ∥ * r ^ n)) --(hd : ∀ n : ℤ, n < d → f n = 0)
@@ -361,23 +434,16 @@ lemma summable_convolution {r : ℝ≥0} (hr₀: 0 < r) (hr₂ : 1 / 2 < r) (f :
     :
   summable (λ n : ℤ, (1 / 2) * ∥ tsum (λ i : ℕ, ((f (n + 1 + i)) : ℝ) * (1 / 2) ^ i) ∥ * r ^ n) :=
 begin
-  have half_ne_zero : (1 / 2 : ℝ) ≠ 0 := by {simp only [one_div, ne.def, inv_eq_zero, bit0_eq_zero,
-    one_ne_zero, not_false_iff]},
-  -- simp_rw mul_assoc,
-  -- rw [← summable_mul_left_iff half_ne_zero],
-  -- -- apply summable.summable_on_𝒮,
-
-  -- sorry;{
-
   suffices h_on_nat : summable (λ (n : ℕ),
     (1 / 2) * ∥∑' (i : ℕ), (f (n + 1 + i) : ℝ) * (1 / 2) ^ i∥ * (r : ℝ) ^ n),
   { simp_rw mul_assoc at ⊢ h_on_nat,
-    rw [← summable_mul_left_iff half_ne_zero] at ⊢ h_on_nat,
-    refine (@summable_iff_on_nat (λ n, ∑' (i : ℕ),  (f (n + 1 + i)) * (1 / 2) ^ i)
+    rw [← summable_mul_left_iff (ne_of_gt (@one_half_pos ℝ _))] at ⊢ h_on_nat,
+    refine (@summable_iff_on_nat (λ n, ∑' (i : ℕ), (f (n + 1 + i)) * (1 / 2) ^ i)
       r d _).mpr h_on_nat,
     intros n hn,
     exact norm_eq_zero.mp (hd n hn) },
 
+sorry;{
   { have half_norm : (1 / 2 : ℝ) = ∥ (1 / 2  : ℝ) ∥ := by { simp only [one_div,
     normed_field.norm_inv, real.norm_two]},
     rw half_norm,
@@ -429,7 +495,7 @@ begin
     --       simpa only [nnreal.coe_pos] },
     --   exact aux_pos_terms f b }},
 
-  -- }
+  }
 end
 
 end summability
