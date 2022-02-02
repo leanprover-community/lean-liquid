@@ -26,10 +26,12 @@ apply_nolint Mbar.mk_tensor def_lemma
 apply_nolint lem98_finite def_lemma
 
 -- combinatorial_lemma/profinite.lean
-apply_nolint ProFiltPseuNormGrpWithTinv₁.to_PNG₁ unused_arguments
-apply_nolint lem98 def_lemma
+apply_nolint ProFiltPseuNormGrpWithTinv₁.level unused_arguments
 apply_nolint lem98.hom_diagram unused_arguments
-apply_nolint lem98.lvl unused_arguments
+apply_nolint lem98.main def_lemma
+
+-- combinatorial_lemma/profinite_setup.lean
+apply_nolint ProFiltPseuNormGrpWithTinv₁.to_PNG₁ unused_arguments
 
 -- condensed/extr/basic.lean
 apply_nolint ExtrDisc.empty.hom_ext def_lemma
