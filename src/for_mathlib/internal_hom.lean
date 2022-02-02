@@ -8,18 +8,23 @@ open category_theory
 open category_theory.monoidal_category
 
 universes v u
-variables {C : Type u} [category.{v} C]
-  [monoidal_category.{v} C] [monoidal_closed.{v} C] [symmetric_category.{v} C]
+variables {C : Type u} [category.{v} C] [monoidal_category.{v} C]
 
-instance (X : C) : is_left_adjoint (tensor_left X) :=
-closed.is_adj
+class right_closed (X : C) :=
+(is_adj : is_left_adjoint (tensor_right X))
 
-def braiding_nat_iso (X : C) : tensor_left X ≅ tensor_right X :=
-nat_iso.of_components (λ X, β_ _ _) $ by tidy
+attribute [instance, priority 100] right_closed.is_adj
 
-instance (X : C) : is_left_adjoint (tensor_right X) :=
-⟨right_adjoint (tensor_left X),
-adjunction.of_nat_iso_left (adjunction.of_left_adjoint _) $ braiding_nat_iso _⟩
+variable (C)
+
+class monoidal_closed_right :=
+(closed : Π (X : C), right_closed X)
+
+attribute [instance, priority 100] monoidal_closed_right.closed
+
+variable [monoidal_closed_right.{v} C]
+
+variable {C}
 
 def internal_hom (X Y : C) : C :=
 (right_adjoint (tensor_right X)).obj Y
