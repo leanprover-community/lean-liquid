@@ -161,6 +161,7 @@ end
 -- set_option trace.simp_lemmas true
 -/
 
+
 lemma summable_smaller_radius (F : ℒ S) (s : S) :
   summable (λ n, (F s n : ℝ) * (1 / 2) ^ n) :=
 begin
@@ -307,7 +308,8 @@ begin
     dsimp [b],
     rw dif_neg hn },
   refine (summable_congr h_θ).mpr
-    (aux_thm69.summable_convolution r_pos r_half (F s) F.d (F.2 s) this),
+    (aux_thm69.summable_convolution r_pos r_half (F s) F.d (F.2 s) (lt_d_eq_zero S F s)
+    this),
 end
 
 theorem θ_ϕ_exact (F : ℒ S) (hF : θ S F = 0) : ∃ G, ϕ S G = F :=

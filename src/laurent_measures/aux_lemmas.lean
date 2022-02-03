@@ -310,9 +310,8 @@ begin
   exact exists_congr (λ a, ((h2 a).trans (h1 a)).symm),
 end
 
-
 lemma summable_iff_on_nat {f : ℤ → ℝ} {ρ : ℝ≥0} (d : ℤ) (h : ∀ n : ℤ, n < d → f n = 0) :
-  summable (λ n, ∥ f n ∥ * ρ ^ n) ↔ summable (λ n : ℕ, ∥ f n ∥ * ρ ^ (n : ℤ)) := --sorry
+  summable (λ n, ∥ f n ∥ * ρ ^ n) ↔ summable (λ n : ℕ, ∥ f n ∥ * ρ ^ (n : ℤ)) :=
 begin
   apply (aux_summable_iff_on_nat d h).trans,
   -- apply (aux_summable_iff_on_nat' d h).trans,
@@ -344,6 +343,19 @@ summable (λ n, ∥ f n ∥ * ρ ^ n) ↔ summable (λ n : ℕ, ∥ f n ∥ * ρ
     apply summable_iff_on_nat d,
     simpa only [int.cast_eq_zero],
   end
+
+
+-- **[FAE]** Need to copy the proof of summable_smaller_radius, split it into two lemmas
+  -- and remove it altogether from `thm69.lean`
+lemma summable_smaller_radius_norm {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ)
+(hf : summable (λ n : ℤ, ∥ f n ∥ * ρ ^ n))
+  (hd : ∀ n : ℤ, n < d → f n = 0) : --(F : ℒ S) (s : S) :
+  summable (λ n, ∥ f n ∥ * (1 / 2) ^ n) := sorry
+
+lemma summable_smaller_radius' {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ)
+(hf : summable (λ n : ℤ, ∥ f n ∥ * ρ ^ n))
+  (hd : ∀ n : ℤ, n < d → f n = 0) (hρ : (1 / 2) < ρ) : --(F : ℒ S) (s : S) :
+  summable (λ n, (f n : ℝ) * (1 / 2) ^ n) := sorry
 
 -- lemma goofy {r : ℝ≥0} (f : ℤ → ℤ) (hf : summable (λ n, ∥ f n ∥ * r ^ n)) (b : ℕ)
 -- : (λ n : ℕ, (2 * r : ℝ) ^ n * ∥∑' (x : ℕ), (1 / 2 : ℝ) ^ (n + 1 + x : ℤ) * (f (n + 1 + x : ℤ))∥) b
@@ -379,50 +391,63 @@ summable (λ n, ∥ f n ∥ * ρ ^ n) ↔ summable (λ n : ℕ, ∥ f n ∥ * ρ
 --   exact this.summable,
 -- end
 
-lemma heather_norm {r : ℝ≥0} (f : ℤ → ℤ) :
+lemma prod_nat_summable {f : ℤ → ℤ} {r : ℝ≥0} --(d : ℤ)
+  --(r_pos : 0 < r)
+  (hf : summable (λ n : ℤ, ∥ f n ∥ * r ^ n))
+  --(hd : ∀ n : ℤ, n < d → f n = 0)
+  : summable (λ lj: ℕ × ℕ, (1 / 2 : ℝ) * ∥ (f (lj.fst + 1 + lj.snd) : ℝ)
+    * (1/2)^(lj.snd) ∥ * r ^ (lj.fst)) := sorry
+
+lemma heather_norm {f : ℤ → ℤ} {r : ℝ≥0} (d : ℤ)
+(r_pos : 0 < r) (hf : summable (λ n : ℤ, ∥ f n ∥ * r ^ n))
+  (hd : ∀ n : ℤ, n < d → f n = 0) :
   summable (λ (n : ℕ), 1 / 2 * ∥ ∑' (i : ℕ), (f (n + 1 + i) : ℝ) * (1 / 2) ^ i ∥ * ↑r ^ n) :=
 begin
-  -- both **easy** and **temp** follow from the hyp on f (to be added), that λ n, ∥ f n ∥ * r ^ n is
-    -- summable
-  have easy : ∀ (n : ℕ), summable (λ (i : ℕ), (1 / 2) * ∥ (f (n + 1 + i) : ℝ) *
-    (1 / 2) ^ i ∥ * ↑r ^ n),
-  { intro n,
-    apply summable.mul_right,
-    sorry,
-  },
+  replace r_pos : ∀ (b : ℕ), 0 < (r : ℝ) ^ b := pow_pos r_pos,
+  have smaller_shift : ∀ (b : ℕ), summable (λ j : ℕ, ∥ (f (b + 1 + j) : ℝ)  * (1 / 2 ) ^ j ∥),
+  { intro b,
+    have b_half_norm : ∥ (1 / 2 : ℝ) ^ (b + 1) ∥ ≠ 0,
+    { simp only [one_div, normed_field.norm_inv, normed_field.norm_pow, real.norm_two, ne.def,
+      inv_eq_zero, pow_eq_zero_iff, nat.succ_pos', bit0_eq_zero, one_ne_zero, not_false_iff] },
+    rw [summable_mul_right_iff b_half_norm],
+    simp_rw [← normed_field.norm_mul, mul_assoc, ← pow_add, add_comm _ (b + 1), ← zpow_coe_nat,
+      int.coe_nat_add, int.coe_nat_one],
+    have half_coe : ((1 / 2 : ℝ≥0) : ℝ) = (1 / 2 : ℝ),
+    { rw [one_div, nonneg.coe_inv, nnreal.coe_bit0,
+      nonneg.coe_one, one_div] },
+    have := (@int.summable_iff_on_nat f (1 / 2 : ℝ≥0) d hd).mp,
+    simp_rw half_coe at this,
+    replace := this (summable_smaller_radius_norm d hf hd),
+    convert (summable.comp_injective this (add_right_injective (b + 1))),
+    funext n,
+    rw [add_comm, add_comm],
+    simp only [function.comp_app, int.coe_nat_add, int.coe_nat_succ, normed_field.norm_mul,
+      normed_field.norm_zpow, one_div, normed_field.norm_inv, real.norm_two, mul_eq_mul_right_iff,
+      int.norm_cast_real, eq_self_iff_true, true_or], },
   set ϕ := (λ lj: ℕ × ℕ, (1 / 2 : ℝ) * ∥ (f (lj.fst + 1 + lj.snd) : ℝ) * (1/2)^(lj.snd) ∥ *
     r ^ (lj.fst) ),
-  -- set ψ := (λ n : ℕ, (1/2 : ℝ) * ∥ ∑' (i : ℕ), (f (n + 1 + i) : ℝ) * (1/2)^i ∥ * r^n),
-  have crux : summable ϕ, sorry,
   have H : ∀ b : ℕ, summable (λ i : ℕ, ϕ(b, i)),
   { intro n,
-    dsimp [ϕ, tsum],
-    exact easy n },
-  have := has_sum.prod_fiberwise crux.has_sum (λ b, (H b).has_sum),
-  -- have hope := @has_sum.prod_fiberwise _ _ _ _ _ _ _ ϕ ψ (∑' mn : ℕ × ℕ, ϕ mn) crux.has_sum H,
-  replace this := this.summable,
+    exact (summable_mul_right_iff (ne_of_gt (r_pos n))).mp ((smaller_shift n).mul_left (1 / 2)) },
+  have := (has_sum.prod_fiberwise (prod_nat_summable hf).has_sum (λ b, (H b).has_sum)).summable,
   dsimp [ϕ] at this,
-  -- dsimp [ψ],
   apply summable_of_nonneg_of_le _ _ this,
-  { sorry },
+  { intro b,
+    apply mul_nonneg (mul_nonneg _ (norm_nonneg _)) (le_of_lt (r_pos b)),
+    simp only [one_div, inv_nonneg, zero_le_bit0, zero_le_one] },
   { intro b,
     simp_rw mul_assoc,
-    rw tsum_mul_left,
-    rw [mul_le_mul_left (@one_half_pos ℝ _)],
-    have r_pos : 0 < (r : ℝ) ^ b, sorry,
-    rw tsum_mul_right,
-    rw [mul_le_mul_right r_pos],
-    have temp : summable (λ j : ℕ, ∥ (f (b + 1 + j) : ℝ) * (1 / 2)^j∥),sorry,
-    exact norm_tsum_le_tsum_norm temp, },
-  -- rw [summable_mul_left_iff (ne_of_gt (@one_half_pos ℝ _))] at this,
+    rw [tsum_mul_left, mul_le_mul_left (@one_half_pos ℝ _), tsum_mul_right,
+      mul_le_mul_right (r_pos b)],
+    exact norm_tsum_le_tsum_norm (smaller_shift b), },
 end
 
 -- lemma aux_pos_terms {r : ℝ≥0} (f : ℤ → ℤ) (n : ℕ) : 0 ≤ (2 * r : ℝ) ^ n *
 --   ∥∑' (x : ℕ), (1 / 2 : ℝ) ^ (n + 1 + x) * ↑(f (n + 1 + x))∥ :=
 
-lemma summable_convolution {r : ℝ≥0} (hr₀: 0 < r) (hr₂ : 1 / 2 < r) (f : ℤ → ℤ) (d : ℤ)
-  (hf : summable (λ n, ∥ f n ∥ * r ^ n)) --(hd : ∀ n : ℤ, n < d → f n = 0)
-  (hd : ∀ (n : ℤ), n < d → ∥∑' (i : ℕ), (f (n + 1 + i) : ℝ) * (1 / 2) ^ i∥ = 0)
+lemma summable_convolution {r : ℝ≥0} (r_pos: 0 < r) (r_half : 1 / 2 < r) (f : ℤ → ℤ) (d : ℤ)
+  (hf : summable (λ n, ∥ f n ∥ * r ^ n)) (hd : ∀ n : ℤ, n < d → f n = 0)
+  (hd_shift : ∀ (n : ℤ), n < d → ∥∑' (i : ℕ), (f (n + 1 + i) : ℝ) * (1 / 2) ^ i∥ = 0)
     :
   summable (λ n : ℤ, (1 / 2) * ∥ tsum (λ i : ℕ, ((f (n + 1 + i)) : ℝ) * (1 / 2) ^ i) ∥ * r ^ n) :=
 begin
@@ -433,8 +458,8 @@ begin
     refine (@summable_iff_on_nat (λ n, ∑' (i : ℕ), (f (n + 1 + i)) * (1 / 2) ^ i)
       r d _).mpr h_on_nat,
     intros n hn,
-    exact norm_eq_zero.mp (hd n hn) },
-  apply heather_norm,
+    exact norm_eq_zero.mp (hd_shift n hn) },
+  apply heather_norm d r_pos hf hd,
 end
 
 #exit
