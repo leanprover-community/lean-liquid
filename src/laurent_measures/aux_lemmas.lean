@@ -355,7 +355,13 @@ lemma summable_smaller_radius_norm {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ)
 lemma summable_smaller_radius' {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ)
 (hf : summable (λ n : ℤ, ∥ f n ∥ * ρ ^ n))
   (hd : ∀ n : ℤ, n < d → f n = 0) (hρ : (1 / 2) < ρ) : --(F : ℒ S) (s : S) :
-  summable (λ n, (f n : ℝ) * (1 / 2) ^ n) := sorry
+  summable (λ n, (f n : ℝ) * (1 / 2) ^ n) :=
+  begin
+  apply summable_of_summable_norm,
+  simp_rw [normed_field.norm_mul, normed_field.norm_zpow, normed_field.norm_div, real.norm_two,
+      norm_one],
+  exact summable_smaller_radius_norm d hf hd,
+  end
 
 -- lemma goofy {r : ℝ≥0} (f : ℤ → ℤ) (hf : summable (λ n, ∥ f n ∥ * r ^ n)) (b : ℕ)
 -- : (λ n : ℕ, (2 * r : ℝ) ^ n * ∥∑' (x : ℕ), (1 / 2 : ℝ) ^ (n + 1 + x : ℤ) * (f (n + 1 + x : ℤ))∥) b
