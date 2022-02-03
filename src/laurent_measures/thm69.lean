@@ -54,16 +54,16 @@ begin
   exact fact.out _
 end
 
-lemma r_ineq : 0 < (r : ℝ) ∧ (r : ℝ) < 1:=
-by { rw [nnreal.coe_pos, ← nnreal.coe_one, nnreal.coe_lt_coe], exact ⟨r_pos, r_lt_one⟩ }
+-- lemma r_ineq : 0 < (r : ℝ) ∧ (r : ℝ) < 1:=
+-- by { rw [nnreal.coe_pos, ← nnreal.coe_one, nnreal.coe_lt_coe], exact ⟨r_pos, r_lt_one⟩ }
 
 local notation `ℳ` := real_measures p
 local notation `ℒ` := laurent_measures r
 
-def laurent_measures.d {S}(F : ℒ S) : ℤ := (exists_bdd_filtration r_ineq.1 r_ineq.2 F).some
+def laurent_measures.d {S}(F : ℒ S) : ℤ := (exists_bdd_filtration r_pos r_lt_one F).some
 
 lemma lt_d_eq_zero (F : ℒ S) (s : S) (n : ℤ) :
-  n < F.d → F s n = 0 := (exists_bdd_filtration r_ineq.1 r_ineq.2 F).some_spec s n
+  n < F.d → F s n = 0 := (exists_bdd_filtration r_pos r_lt_one F).some_spec s n
 
 def θ : ℒ S → ℳ S := ϑ (1 / 2 : ℝ) r p S
 
@@ -78,7 +78,7 @@ def ϕ : ℒ S → ℒ S :=
       dsimp [f₁, g₁],
       rw ← add_mul,
       have rpow_pos : 0 < (r : ℝ) ^ b := by { apply zpow_pos_of_pos, rw nnreal.coe_pos,
-        exact r_ineq.1, },
+        exact r_pos, },
       apply (mul_le_mul_right rpow_pos).mpr,
       exact norm_sub_le (2 * F s (b - 1)) (F s b) },
     apply summable_of_nonneg_of_le _ Hf_le_g,
@@ -88,7 +88,7 @@ def ϕ : ℒ S → ℒ S :=
         rw [mul_assoc, mul_comm (r : ℝ), mul_assoc, ← zpow_add_one₀, sub_add_cancel b 1],
         rw [ne.def, nnreal.coe_eq_zero],
         apply ne_of_gt,
-        exact r_ineq.1 },
+        exact r_pos },
       simp_rw [← int.norm_cast_real, int.cast_mul, normed_field.norm_mul, int.norm_cast_real,
         mul_assoc],
       apply @summable.mul_left ℝ _ _ _ _ (λ (b : ℤ), ∥F s (b - 1) ∥ * ↑r ^ b ) (∥ (2 : ℤ) ∥),
@@ -107,8 +107,37 @@ def ϕ : ℒ S → ℒ S :=
       exact (r ^ b).2 },
   end }
 
-lemma injective_ϕ (F : ℒ S) (H : ϕ S F = 0) : F = 0 := sorry
+lemma injective_ϕ (F : ℒ S) (H : ϕ S F = 0) : F = 0 :=
+begin
+  dsimp only [ϕ] at H,
+  replace H : ∀ n : ℤ, ∀ s : S, 2 * F s (n - 1) = F s n,
+  { intros n s,
+    apply_fun to_fun at H,
+    have := congr_fun (congr_fun H s) n,
+    simp only at this,
+    rwa [← sub_eq_zero, this],
+    refl},
+  ext s n,
+  simp only [zero_apply],
+  apply int.induction_on' n (F.d - 1),
+  { apply lt_d_eq_zero _ _ _ (F.d - 1),
+    simp only [sub_lt_self_iff, zero_lt_one] },
+  { intros k h hk₀,
+    specialize H (k + 1) s,
+    rw [← H, add_sub_cancel, hk₀, mul_zero] },
+  { intros k h hk₀,
+    specialize H k s,
+    simp only [hk₀, mul_eq_zero, (@two_ne_zero ℝ _ _), bit0_eq_zero, one_ne_zero, false_or] at H,
+    exact H },
+end
 
+
+
+
+
+
+
+-- #exit
 /-
 open filter
 open_locale filter
@@ -197,7 +226,6 @@ begin
     { rw [← int.cast_one, int.cast_bit0] },
     rw [this, ← int.cast_mul, ← int.cast_sub],
     refl },
-  -- have fae := @summable_smaller_radius _ _ F.d (F.2 s) (lt_d_eq_zero _ _ _) r_half,
   have h_pos : has_sum (λ n, ((2 * F s (n - 1)) : ℝ) * (1 / 2) ^ n)
     (@summable_smaller_radius _ _ F.d (F.2 s) (lt_d_eq_zero _ _ _) r_half).some,
   { let e : ℤ ≃ ℤ := ⟨λ n : ℤ, n - 1, λ n, n + 1, by {intro, simp}, by {intro, simp}⟩,
@@ -323,8 +351,7 @@ begin
   dsimp [ϕ, ψ],
   simp,
   by_cases hn : F.d ≤ n - 1,
-  { --have hx' := hx.trans (sub_le_self x zero_le_one),
-    rw [dif_pos hn, dif_pos $ hn.trans $ sub_le_self n zero_le_one, neg_eq_neg_one_mul, ← mul_assoc,
+  { rw [dif_pos hn, dif_pos $ hn.trans $ sub_le_self n zero_le_one, neg_eq_neg_one_mul, ← mul_assoc,
       mul_comm (2 : ℤ) (-1 : ℤ), mul_assoc, mul_sum, ← neg_eq_neg_one_mul,
       neg_sub_neg, finset.sum_range_succ', sub_eq_iff_eq_add'],
     simp only [pow_zero, sub_zero, mul_one, int.coe_nat_zero, int.coe_nat_add, int.coe_nat_one,
@@ -347,16 +374,15 @@ begin
     by_cases hn' : F.d ≤ n,
     { rw [dif_pos hn', neg_neg],
       have hn'' : F.d = n,
-      -- rw not_le at hn,
-      apply eq_of_le_of_not_lt hn',
-      rw not_lt,
-      exact int.le_of_sub_one_lt (not_le.mp hn),
-      -- rw neg_neg,
-      sorry,
-
-    },
+      { apply eq_of_le_of_not_lt hn',
+        rw not_lt,
+        exact int.le_of_sub_one_lt (not_le.mp hn) },
+      replace hn'' : n - F.d = 0 := by {rw [hn'', sub_self]},
+      simp_rw [hn'', ← int.coe_nat_zero, int.coe_nat_inj', (@exists_eq' ℕ 0).some_spec.symm,
+        sum_range_one],
+      simp only [int.coe_nat_zero, sub_zero, pow_zero, mul_one] },
     { rw dif_neg hn',
-      exact (lt_d_eq_zero S F s n (not_le.mp hn')).symm }}
+      exact (lt_d_eq_zero S F s n (not_le.mp hn')).symm }},
 end
 
 end mem_exact
