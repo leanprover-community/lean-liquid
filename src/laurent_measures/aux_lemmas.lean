@@ -347,12 +347,29 @@ summable (λ n, ∥ f n ∥ * ρ ^ n) ↔ summable (λ n : ℕ, ∥ f n ∥ * ρ
 
 -- **[FAE]** Need to copy the proof of summable_smaller_radius, split it into two lemmas
   -- and remove it altogether from `thm69.lean`
-lemma summable_smaller_radius_norm {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ)
+lemma summable_smaller_radius_norm {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ) (ρ_half : 1 / 2 < ρ)
 (hf : summable (λ n : ℤ, ∥ f n ∥ * ρ ^ n))
   (hd : ∀ n : ℤ, n < d → f n = 0) : --(F : ℒ S) (s : S) :
-  summable (λ n, ∥ f n ∥ * (1 / 2) ^ n) := sorry
+  summable (λ n, ∥ f n ∥ * (1 / 2) ^ n) :=
+begin
+  have pos_half : ∀ n : ℕ, 0 ≤ ∥ f n ∥ * (1 / 2) ^ n,
+  { intro n,
+    apply mul_nonneg (norm_nonneg (f n)),
+    simp only [one_div, zero_le_one, inv_nonneg, zero_le_bit0, pow_nonneg] },
+  have half_le_ρ : ∀ n : ℕ, ∥ f n ∥ * (1 / 2) ^ n ≤ ∥ f n ∥ * ρ ^ n,
+  { intro n,
+    apply monotone_mul_left_of_nonneg (norm_nonneg (f n)),
+    apply pow_le_pow_of_le_left,
+    simp only [one_div, zero_le_one, inv_nonneg, zero_le_bit0],
+    exact le_of_lt ρ_half },
+  have h_nat_half : summable (λ n : ℕ, ∥ f n ∥ * (1 / 2 : ℝ≥0) ^ n) :=
+    summable_of_nonneg_of_le pos_half half_le_ρ ((int.summable_iff_on_nat d _).mp hf),
+  apply (int.summable_iff_on_nat d _).mpr h_nat_half,
+  all_goals {apply hd},
+end
 
-lemma summable_smaller_radius' {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ)
+
+lemma summable_smaller_radius {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ)
 (hf : summable (λ n : ℤ, ∥ f n ∥ * ρ ^ n))
   (hd : ∀ n : ℤ, n < d → f n = 0) (hρ : (1 / 2) < ρ) : --(F : ℒ S) (s : S) :
   summable (λ n, (f n : ℝ) * (1 / 2) ^ n) :=
@@ -360,7 +377,7 @@ lemma summable_smaller_radius' {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ)
   apply summable_of_summable_norm,
   simp_rw [normed_field.norm_mul, normed_field.norm_zpow, normed_field.norm_div, real.norm_two,
       norm_one],
-  exact summable_smaller_radius_norm d hf hd,
+  exact summable_smaller_radius_norm d hρ hf hd,
   end
 
 -- lemma goofy {r : ℝ≥0} (f : ℤ → ℤ) (hf : summable (λ n, ∥ f n ∥ * r ^ n)) (b : ℕ)
@@ -404,7 +421,7 @@ lemma prod_nat_summable {f : ℤ → ℤ} {r : ℝ≥0} --(d : ℤ)
   : summable (λ lj: ℕ × ℕ, (1 / 2 : ℝ) * ∥ (f (lj.fst + 1 + lj.snd) : ℝ)
     * (1/2)^(lj.snd) ∥ * r ^ (lj.fst)) := sorry
 
-lemma heather_norm {f : ℤ → ℤ} {r : ℝ≥0} (d : ℤ)
+lemma fiberwise_summable_norm {f : ℤ → ℤ} {r : ℝ≥0} (d : ℤ) (r_half : 1 / 2 < r)
 (r_pos : 0 < r) (hf : summable (λ n : ℤ, ∥ f n ∥ * r ^ n))
   (hd : ∀ n : ℤ, n < d → f n = 0) :
   summable (λ (n : ℕ), 1 / 2 * ∥ ∑' (i : ℕ), (f (n + 1 + i) : ℝ) * (1 / 2) ^ i ∥ * ↑r ^ n) :=
@@ -423,7 +440,7 @@ begin
       nonneg.coe_one, one_div] },
     have := (@int.summable_iff_on_nat f (1 / 2 : ℝ≥0) d hd).mp,
     simp_rw half_coe at this,
-    replace := this (summable_smaller_radius_norm d hf hd),
+    replace := this (summable_smaller_radius_norm d r_half hf hd),
     convert (summable.comp_injective this (add_right_injective (b + 1))),
     funext n,
     rw [add_comm, add_comm],
@@ -465,64 +482,66 @@ begin
       r d _).mpr h_on_nat,
     intros n hn,
     exact norm_eq_zero.mp (hd_shift n hn) },
-  apply heather_norm d r_pos hf hd,
+  apply fiberwise_summable_norm d r_half r_pos hf hd,
 end
 
-#exit
-sorry;{
-  { have half_norm : (1 / 2 : ℝ) = ∥ (1 / 2  : ℝ) ∥ := by { simp only [one_div,
-    normed_field.norm_inv, real.norm_two]},
-    rw half_norm,
-    simp_rw [mul_comm, ← normed_field.norm_mul, ← tsum_mul_left, ← mul_assoc],
-    rw ← half_norm,
-    simp_rw [← (pow_succ (1 / 2 : ℝ) _)],
-    convert_to summable (λ (lj : ℕ × ℕ), (1 / 2 : ℝ) * ∥ (f (lj.fst + 1 + lj.snd) : ℝ) *
-      (1 / 2) ^ (lj.snd) ∥ * r ^ (lj.fst)) using 0,
-    sorry,
-    sorry, },
-    -- convert_to summable (λ (n : ℕ), ∥∑' (x : ℕ), ( 1 / (2 * r : ℝ))^ (x + 1) * (r: ℝ) ^ (n + 1 + x : ℤ)
-    --   * (f (n + 1 + x))∥),
-    -- sorry,
+
+-- #exit
+-- sorry;{
+--   { have half_norm : (1 / 2 : ℝ) = ∥ (1 / 2  : ℝ) ∥ := by { simp only [one_div,
+--     normed_field.norm_inv, real.norm_two]},
+--     rw half_norm,
+--     simp_rw [mul_comm, ← normed_field.norm_mul, ← tsum_mul_left, ← mul_assoc],
+--     rw ← half_norm,
+--     simp_rw [← (pow_succ (1 / 2 : ℝ) _)],
+--     convert_to summable (λ (lj : ℕ × ℕ), (1 / 2 : ℝ) * ∥ (f (lj.fst + 1 + lj.snd) : ℝ) *
+--       (1 / 2) ^ (lj.snd) ∥ * r ^ (lj.fst)) using 0,
+--     sorry,
+--     sorry, },
+--     -- convert_to summable (λ (n : ℕ), ∥∑' (x : ℕ), ( 1 / (2 * r : ℝ))^ (x + 1) * (r: ℝ) ^ (n + 1 + x : ℤ)
+--     --   * (f (n + 1 + x))∥),
+--     -- sorry,
 
 
 
-    --wrong
-    -- convert_to summable (λ (n : ℕ), ((2 : ℝ) * r) ^ n * ∥∑' (x : ℕ), (1 / 2 : ℝ) ^ (n + 1 + x : ℤ)
-    --   * (f (n + 1 + x))∥),
-    -- { funext n,
-    --   nth_rewrite_rhs 0 [mul_pow],
-    --   nth_rewrite_rhs 1 [mul_comm],
-    --   nth_rewrite_rhs 0 [mul_assoc],
-    --   rw mul_eq_mul_left_iff,
-    --   apply or.intro_left,
-    --   nth_rewrite_rhs 0 [← inv_inv₀ (2 : ℝ)],
-    --   nth_rewrite_rhs 0 [← zpow_neg_one],
-    --   nth_rewrite_rhs 0 [← zpow_of_nat],
-    --   nth_rewrite_rhs 0 [← zpow_mul₀],
-    --   nth_rewrite_rhs 0 [inv_eq_one_div],
-    --   rw [neg_one_mul, int.of_nat_eq_coe, half_norm, ← normed_field.norm_zpow,
-    --     ← normed_field.norm_mul ((1 / 2 : ℝ) ^ (- ↑n)) _, ← half_norm],
-    --   simp_rw [← tsum_mul_left, ← mul_assoc, ← zpow_add₀ $ one_div_ne_zero $ @two_ne_zero ℝ _ _,
-    --    add_assoc, neg_add_cancel_left, add_comm _ 1],
-    --   refl },
+--     --wrong
+--     -- convert_to summable (λ (n : ℕ), ((2 : ℝ) * r) ^ n * ∥∑' (x : ℕ), (1 / 2 : ℝ) ^ (n + 1 + x : ℤ)
+--     --   * (f (n + 1 + x))∥),
+--     -- { funext n,
+--     --   nth_rewrite_rhs 0 [mul_pow],
+--     --   nth_rewrite_rhs 1 [mul_comm],
+--     --   nth_rewrite_rhs 0 [mul_assoc],
+--     --   rw mul_eq_mul_left_iff,
+--     --   apply or.intro_left,
+--     --   nth_rewrite_rhs 0 [← inv_inv₀ (2 : ℝ)],
+--     --   nth_rewrite_rhs 0 [← zpow_neg_one],
+--     --   nth_rewrite_rhs 0 [← zpow_of_nat],
+--     --   nth_rewrite_rhs 0 [← zpow_mul₀],
+--     --   nth_rewrite_rhs 0 [inv_eq_one_div],
+--     --   rw [neg_one_mul, int.of_nat_eq_coe, half_norm, ← normed_field.norm_zpow,
+--     --     ← normed_field.norm_mul ((1 / 2 : ℝ) ^ (- ↑n)) _, ← half_norm],
+--     --   simp_rw [← tsum_mul_left, ← mul_assoc, ← zpow_add₀ $ one_div_ne_zero $ @two_ne_zero ℝ _ _,
+--     --    add_assoc, neg_add_cancel_left, add_comm _ 1],
+--     --   refl },
 
-    --   apply summable_of_nonneg_of_le _ (goofy f hf),
-    --   { have temp : ∥ (2 * r : ℝ) ∥ < 1, sorry,
-    --     apply summable.mul_right,
-    --     exact summable_geometric_of_norm_lt_1 temp,
-    --     --refine (summable_geometric_of_norm_lt_1 _).mul_right,
-    --   -- apply geom
-    --     },--intro b, exact aux_pos_terms f b},
-    --   { intro b,
-    --     have : (0 : ℝ) < (2 * ↑r) ^ b,
-    --     { apply pow_pos,
-    --       apply mul_pos,
-    --       simp only [zero_lt_bit0, zero_lt_one, nnreal.coe_pos],
-    --       simpa only [nnreal.coe_pos] },
-    --   exact aux_pos_terms f b }},
+--     --   apply summable_of_nonneg_of_le _ (goofy f hf),
+--     --   { have temp : ∥ (2 * r : ℝ) ∥ < 1, sorry,
+--     --     apply summable.mul_right,
+--     --     exact summable_geometric_of_norm_lt_1 temp,
+--     --     --refine (summable_geometric_of_norm_lt_1 _).mul_right,
+--     --   -- apply geom
+--     --     },--intro b, exact aux_pos_terms f b},
+--     --   { intro b,
+--     --     have : (0 : ℝ) < (2 * ↑r) ^ b,
+--     --     { apply pow_pos,
+--     --       apply mul_pos,
+--     --       simp only [zero_lt_bit0, zero_lt_one, nnreal.coe_pos],
+--     --       simpa only [nnreal.coe_pos] },
+--     --   exact aux_pos_terms f b }},
 
-  }
-end
+--   }
+-- end
+
 
 end summability
 

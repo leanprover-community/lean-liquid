@@ -162,28 +162,28 @@ end
 -/
 
 
-lemma summable_smaller_radius (F : ℒ S) (s : S) :
-  summable (λ n, (F s n : ℝ) * (1 / 2) ^ n) :=
-begin
- suffices abs_sum : summable (λ n, ∥ ((F s n) : ℝ) ∥ * (1 / 2) ^ n),
-  { apply summable_of_summable_norm,
-    simp_rw [normed_field.norm_mul, normed_field.norm_zpow, normed_field.norm_div, real.norm_two,
-      norm_one, abs_sum] },
-    have pos_half : ∀ n : ℕ, 0 ≤ ∥ F s n ∥ * (1 / 2) ^ n,
-    { intro n,
-      apply mul_nonneg (norm_nonneg (F s n)),
-      simp only [one_div, zero_le_one, inv_nonneg, zero_le_bit0, pow_nonneg] },
-    have half_le_r : ∀ n : ℕ, ∥ F s n ∥ * (1 / 2) ^ n ≤ ∥ F s n ∥ * r ^ n,
-    { intro n,
-      apply monotone_mul_left_of_nonneg (norm_nonneg (F s n)),
-      apply pow_le_pow_of_le_left,
-      simp only [one_div, zero_le_one, inv_nonneg, zero_le_bit0],
-      exact le_of_lt r_half },
-    have h_nat_half : summable (λ n : ℕ, ∥ F s n ∥ * (1 / 2 : ℝ≥0) ^ n) :=
-      summable_of_nonneg_of_le pos_half half_le_r ((int.summable_iff_on_nat F.d _).mp (F.2 s)),
-    apply (int.summable_iff_on_nat F.d _).mpr h_nat_half,
-    all_goals {apply lt_d_eq_zero},
-end
+-- lemma summable_smaller_radius (F : ℒ S) (s : S) :
+--   summable (λ n, (F s n : ℝ) * (1 / 2) ^ n) :=
+-- begin
+--  suffices abs_sum : summable (λ n, ∥ ((F s n) : ℝ) ∥ * (1 / 2) ^ n),
+--   { apply summable_of_summable_norm,
+--     simp_rw [normed_field.norm_mul, normed_field.norm_zpow, normed_field.norm_div, real.norm_two,
+--       norm_one, abs_sum] },
+--     have pos_half : ∀ n : ℕ, 0 ≤ ∥ F s n ∥ * (1 / 2) ^ n,
+--     { intro n,
+--       apply mul_nonneg (norm_nonneg (F s n)),
+--       simp only [one_div, zero_le_one, inv_nonneg, zero_le_bit0, pow_nonneg] },
+--     have half_le_r : ∀ n : ℕ, ∥ F s n ∥ * (1 / 2) ^ n ≤ ∥ F s n ∥ * r ^ n,
+--     { intro n,
+--       apply monotone_mul_left_of_nonneg (norm_nonneg (F s n)),
+--       apply pow_le_pow_of_le_left,
+--       simp only [one_div, zero_le_one, inv_nonneg, zero_le_bit0],
+--       exact le_of_lt r_half },
+--     have h_nat_half : summable (λ n : ℕ, ∥ F s n ∥ * (1 / 2 : ℝ≥0) ^ n) :=
+--       summable_of_nonneg_of_le pos_half half_le_r ((int.summable_iff_on_nat F.d _).mp (F.2 s)),
+--     apply (int.summable_iff_on_nat F.d _).mpr h_nat_half,
+--     all_goals {apply lt_d_eq_zero},
+-- end
 
 lemma θ_ϕ_complex (F : ℒ S) : (θ S ∘ ϕ S) F = 0 :=
 begin
@@ -197,10 +197,12 @@ begin
     { rw [← int.cast_one, int.cast_bit0] },
     rw [this, ← int.cast_mul, ← int.cast_sub],
     refl },
+  -- have fae := @summable_smaller_radius _ _ F.d (F.2 s) (lt_d_eq_zero _ _ _) r_half,
   have h_pos : has_sum (λ n, ((2 * F s (n - 1)) : ℝ) * (1 / 2) ^ n)
-    (summable_smaller_radius S F s).some,
+    (@summable_smaller_radius _ _ F.d (F.2 s) (lt_d_eq_zero _ _ _) r_half).some,
   { let e : ℤ ≃ ℤ := ⟨λ n : ℤ, n - 1, λ n, n + 1, by {intro, simp}, by {intro, simp}⟩,
-    convert (equiv.has_sum_iff e).mpr (summable_smaller_radius S F s).some_spec using 1,
+    convert (equiv.has_sum_iff e).mpr (@summable_smaller_radius _ _ F.d (F.2 s)
+      (lt_d_eq_zero _ _ _) r_half).some_spec using 1,
     ext n,
     have div_half : ∀ b : ℤ, (1 / 2 : ℝ) ^ b * (2 : ℝ) = (1 / 2) ^ (b - 1),
     { intro b,
@@ -211,15 +213,16 @@ begin
     refl, },
   simp_rw [sub_mul],
   rw [tsum_sub h_pos.summable, sub_eq_zero, h_pos.tsum_eq],
-  exacts [(summable_smaller_radius S F s).some_spec.tsum_eq.symm,
-    (summable_smaller_radius S F s)],
+  exacts [(@summable_smaller_radius _ _ F.d (F.2 s)
+    (lt_d_eq_zero _ _ _) r_half).some_spec.tsum_eq.symm,
+    (@summable_smaller_radius _ _ F.d (F.2 s) (lt_d_eq_zero _ _ _) r_half)],
 end
 
 
 lemma tsum_reindex (F : ℒ S) (N : ℤ) (s : S) : ∑' (l : ℕ), (F s (N + l) : ℝ) * (2 ^ l)⁻¹ =
  2 ^ N * ∑' (m : {m : ℤ // N ≤ m}), (F s m : ℝ) * (2 ^ m.1)⁻¹ :=
 begin
-  have h_sum := summable_smaller_radius S F s,
+  have h_sum := @summable_smaller_radius _ _ F.d (F.2 s) (lt_d_eq_zero _ _ _) r_half,
   simp_rw [one_div, inv_zpow'] at h_sum,
   have h_shift := int_tsum_shift (λ n, (F s n : ℝ) * (2 ^ (-n))) N,
   simp only at h_shift,
@@ -295,7 +298,8 @@ begin
         replace hF := congr_fun hF s,
         simp only [real_measures.zero_apply, inv_eq_one_div] at hF,
         simp_rw [← inv_zpow₀, inv_eq_one_div],
-        exact (summable.has_sum_iff (summable_smaller_radius S F s)).mpr hF }}},
+        exact (summable.has_sum_iff (@summable_smaller_radius _ _ F.d (F.2 s) (lt_d_eq_zero _ _ _)
+          r_half)).mpr hF }}},
   have : ∀ (n : ℤ), n < F.d → ∥∑' (i : ℕ), (F s (n + 1 + i) : ℝ) * (1 / 2) ^ i∥ = 0,
   { intros n hn,
     replace hn := not_le_of_gt (sub_neg.mpr hn),
