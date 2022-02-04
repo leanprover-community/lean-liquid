@@ -555,29 +555,13 @@ def laurent_measures_bdd_homeo (c : ℝ≥0) [fact (0 < r)] : { F : ℒ S | ∥F
   ..(laurent_measures_bdd_equiv _ _ _) }
 
 instance (c : ℝ≥0) [fact (0 < r)] : t2_space { F : ℒ S | ∥F∥₊ ≤ c } :=
-⟨λ x y h, separated_by_continuous (laurent_measures_bdd_homeo r S c).continuous
-(λ cc, h $ by simpa using congr_arg (laurent_measures_bdd_homeo r S c).symm cc)⟩
+(laurent_measures_bdd_homeo r S c).symm.t2_space
 
-instance (c : ℝ≥0) [fact (0 < r)] : totally_disconnected_space
-  { F : ℒ S | ∥F∥₊ ≤ c } :=
-begin
-  constructor,
-  rintros A - hA,
-  suffices : ((laurent_measures_bdd_homeo r S c) '' A).subsingleton,
-  { intros x hx y hy,
-    apply_rules [(laurent_measures_bdd_homeo r S c).injective, this, set.mem_image_of_mem] },
-  obtain ⟨h⟩ := (infer_instance : totally_disconnected_space
-   (Profinite.limit_cone (laurent_measures_bdd_functor r S c ⋙ Fintype.to_Profinite)).X),
-  refine h _ (by tauto) (is_preconnected.image hA _ _),
-  exact (laurent_measures_bdd_homeo r S c).continuous.continuous_on,
-end
+instance (c : ℝ≥0) [fact (0 < r)] : totally_disconnected_space { F : ℒ S | ∥F∥₊ ≤ c } :=
+(laurent_measures_bdd_homeo r S c).symm.totally_disconnected_space
 
 instance (c : ℝ≥0) [fact (0 < r)] : compact_space {F : ℒ S | ∥F∥₊ ≤ c} :=
-begin
-  constructor,
-  rw (laurent_measures_bdd_homeo r S c).embedding.is_compact_iff_is_compact_image,
-  simp [compact_univ],
-end
+(laurent_measures_bdd_homeo r S c).symm.compact_space
 
 @[continuity]
 lemma truncate_continuous (c : ℝ≥0) [fact (0 < r)] (A : finset ℤ) :
