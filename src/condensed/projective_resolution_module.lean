@@ -32,7 +32,7 @@ A -> B epi, Hom(Z[S],A) -> Hom(Z[S],B) -- A(S) -> B(S) WTS: surjective.
 
 noncomputable theory
 
-variables (R : Type (u + 1)) [comm_ring R]
+variables (R : Type (u + 1)) [ring R]
 
 def CondensedMod.free (S : CondensedSet) : CondensedMod R :=
 (CondensedSet_to_CondensedMod R).obj $ S

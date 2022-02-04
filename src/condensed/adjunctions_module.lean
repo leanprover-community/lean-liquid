@@ -9,7 +9,7 @@ open category_theory.limits
 
 universe u
 
-variables (A : Type (u+1)) [comm_ring A]
+variables (A : Type (u+1)) [ring A]
 
 abbreviation CondensedMod := Condensed.{u} (Module.{u+1} A)
 
@@ -33,9 +33,12 @@ begin
   { ext t, change e (e.symm t) = t, rw linear_equiv.apply_symm_apply }
 end
 
+-- (AT) I will fix this in mathlib asap...
+instance : has_colimits (Module.{u+1} A) :=
+Module.colimits.has_colimits_Module.{(u+1) (u+1)}
+
 instance abelian_CondensedMod : abelian (CondensedMod A) :=
 begin
-  -- I don't know why this is needed either...
   apply @category_theory.Sheaf.abelian.{(u+2) u (u+1)}
     Profinite.{u} _ proetale_topology (Module.{u+1} A) _ _ _ _ _ _ _ _,
 end
