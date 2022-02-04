@@ -38,8 +38,8 @@ instance : category (endomorphism C) :=
   assoc' := by { intros, ext, exact category.assoc _ _ _ },
   ..(_ : category_struct (endomorphism C)) }
 
-instance [abelian C] : abelian (endomorphism C) :=
-sorry
+-- instance [abelian C] : abelian (endomorphism C) :=
+-- by admit
 
 end endomorphism
 
