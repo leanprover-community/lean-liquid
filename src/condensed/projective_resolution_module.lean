@@ -6,7 +6,7 @@ import category_theory.sites.limits
 import algebra.category.Group.filtered_colimits
 
 import for_mathlib.abelian_category
-import for_mathlib.ab_epi
+import for_mathlib.module_epi
 
 universe u
 
@@ -157,9 +157,7 @@ instance projective_free_CondensedMod (S : Profinite.{u}) [projective S] :
     rw ← epi_iff_is_zero_cokernel at hg,
     replace hg : function.surjective (g.val.app (op S)) := begin
       resetI,
-      -- missing Module.surjective_of_epi
-      --apply Module.surjective_of_epi,
-      sorry
+      apply Module.surjective_of_epi,
     end,
     let f₁ := hom_equiv_evaluation_Mod _ _ _ f,
     dsimp at f₁,
@@ -261,8 +259,7 @@ begin
   clear e,
   split,
   { introsI h,
-    -- missing Module.surjective_of_epi,
-    sorry },
+    apply Module.surjective_of_epi },
   { intros h, exact concrete_category.epi_of_surjective (f.val.app (op S.val)) h}
 end
 
