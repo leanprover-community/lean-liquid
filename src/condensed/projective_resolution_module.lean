@@ -110,20 +110,14 @@ begin
   erw [category.comp_id, proetale_topology.to_sheafify_sheafify_lift],
   dsimp [functor.preimage, full.preimage, yoneda'_equiv, CondensedMod_to_CondensedSet,
     functor.right_unitor, ulift_functor, Profinite.to_Condensed],
-  sorry
-
-  --dsimp [functor.preimage, full.preimage, yoneda'_equiv, Module.adj,
-  --  functor.right_unitor, finsupp.map_domain],
-
-  /-
-  simp only [comp_apply, Module.free_map_coe, category.id_comp, category.comp_id],
-  dsimp [functor.right_unitor, AddCommGroup.adj, applicative.to_functor],
-  erw equiv.apply_symm_apply,
+  have := (Module.adj R).right_triangle_components,
+  apply_fun (λ e, e f) at this,
+  dsimp at this,
+  convert this,
+  dsimp [Module.adj],
+  erw finsupp.lift_symm_apply ((A.val.obj (opposite.op S)) →₀ R) R _ linear_map.id f,
+  erw finsupp.lift_symm_apply (ulift (S ⟶ S) →₀ R) R _ linear_map.id (ulift.up (𝟙 S)),
   simp,
-  change _ + _ = _,
-  rw zero_add,
-  refl,
-  -/
 end
 
 local attribute [instance] limits.has_zero_object.has_zero
@@ -172,22 +166,18 @@ instance projective_free_CondensedMod (S : Profinite.{u}) [projective S] :
     erw proetale_topology.to_sheafify_sheafify_lift,
     dsimp [functor.preimage, full.preimage, yoneda'_equiv, ulift_functor,
       CondensedMod_to_CondensedSet, Profinite.to_Condensed],
-    -- same missing lemma as exists_hom_equiv_evaluation_symm_app_eq
-    sorry
 
-    --erw [← comp_apply, ← comp_apply, ← nat_trans.comp_app, ← nat_trans.comp_app],
-    --erw proetale_topology.to_sheafify_sheafify_lift,
-    /-
-    simp_rw [← category.assoc, ← nat_trans.comp_app],
-    rw adjunction.hom_equiv_counit,
-    dsimp,
-    simp only [category.assoc, adjunction.whisker_right_counit_app_app],
-    simp_rw [comp_apply],
     congr' 1,
-    dsimp [functor.preimage, yoneda'_equiv, full.preimage, AddCommGroup.adj, ulift_functor],
-    change (free_abelian_group.lift id) (_ <$> free_abelian_group.of _) = _,
+    have := (Module.adj R).right_triangle_components,
+    apply_fun (λ e, e f') at this,
+    dsimp at this,
+    convert this,
+
+    dsimp [Module.adj],
+    erw finsupp.lift_symm_apply ((A.val.obj (opposite.op S)) →₀ R) R _ linear_map.id f',
+    erw finsupp.lift_symm_apply (ulift (S ⟶ S) →₀ R) R _ linear_map.id (ulift.up (𝟙 S)),
+
     simp,
-    -/
   end } .
 
 lemma is_zero_iff_forall_zero_Mod {A : CondensedMod R} :
