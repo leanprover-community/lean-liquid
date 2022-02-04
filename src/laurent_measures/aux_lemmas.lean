@@ -423,10 +423,10 @@ end
 -- end
 
 
-lemma prod_nat_summable {f : ℤ → ℤ} {r : ℝ≥0} --(d : ℤ)
+lemma prod_nat_summable {f : ℤ → ℤ} {r : ℝ≥0} (d : ℤ)
   (r_pos : 0 < r)
   (hf : summable (λ n : ℤ, ∥ f n ∥ * r ^ n))
-  --(hd : ∀ n : ℤ, n < d → f n = 0)
+  (hd : ∀ n : ℤ, n < d → f n = 0)
   : summable (λ lj: ℕ × ℕ, (1 / 2 : ℝ) * ∥ (f (lj.fst + 1 + lj.snd) : ℝ)
     * (1/2)^(lj.snd) ∥ * r ^ (lj.fst)) :=
 begin
@@ -461,8 +461,26 @@ begin
     funext,
     rw [half_norm, ← normed_field.norm_mul, ← half_norm, r_norm lj.fst, ← normed_field.norm_mul,
       ← mul_assoc, mul_comm (1 / 2 : ℝ) _, mul_assoc, mul_assoc, ← mul_assoc (1 / 2 : ℝ) _,
-        aux_rw lj],
+        aux_rw lj],--, normed_field.norm_mul],
   end,
+  have hf_real : summable (λ n : ℕ, ∥ ((f n) : ℝ) * r ^ n ∥), sorry,
+  -- have hd_real : (hd : ∀ n : ℤ, n < d → f n = 0)
+  have geom : summable (λ n : ℕ, ∥ 1 / (2 * r : ℝ) ^ n ∥),
+  { conv
+    begin
+      congr,
+      funext,
+      rw normed_field.norm_div,
+      rw norm_one,
+      rw normed_field.norm_pow,
+      --rw one_pow,
+      -- rw ← div_pow,
+    end,
+    sorry
+    --apply summable_geometric_iff_norm_lt_1.mpr
+  },
+  have almost_there := hf_real.mul_norm geom,
+  simp only at almost_there,
   sorry,
 end
 
@@ -498,7 +516,7 @@ begin
   have H : ∀ b : ℕ, summable (λ i : ℕ, ϕ(b, i)),
   { intro n,
     exact (summable_mul_right_iff (ne_of_gt (r_pos n))).mp ((smaller_shift n).mul_left (1 / 2)) },
-  have := (has_sum.prod_fiberwise (prod_nat_summable r_pos' hf).has_sum (λ b, (H b).has_sum)).summable,
+  have := (has_sum.prod_fiberwise (prod_nat_summable d r_pos' hf hd).has_sum (λ b, (H b).has_sum)).summable,
   dsimp [ϕ] at this,
   apply summable_of_nonneg_of_le _ _ this,
   { intro b,
