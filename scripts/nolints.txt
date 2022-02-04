@@ -104,6 +104,10 @@ apply_nolint homological_complex.complex_to_functor_functor unused_arguments
 apply_nolint short_exact_sequence.biprod_factors def_lemma unused_arguments
 apply_nolint short_exact_sequence.horseshoe_ker unused_arguments
 
+-- for_mathlib/internal_hom.lean
+apply_nolint category_theory.monoidal.split_left unused_arguments
+apply_nolint category_theory.monoidal.split_right unused_arguments
+
 -- for_mathlib/is_iso_iota.lean
 apply_nolint category_theory.limits.is_initial.colimit_cocone unused_arguments
 
