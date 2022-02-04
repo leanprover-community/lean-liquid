@@ -247,6 +247,11 @@ begin
   rwa [← nnreal.val_eq_coe, abs_eq_self.mpr r.2],
 end
 
+lemma summable_nnnorm (r : ℝ≥0) (hr₁ : r < 1) :
+      summable (λ i, ∥⌊(y ξ x i / ξ ^ i : ℝ)⌋∥₊ * (r ^ i)) :=
+by simpa only [← nnreal.summable_coe, nonneg.coe_mul, coe_nnnorm, nnreal.coe_pow]
+  using summable_norm ξ x r hr₁
+
 lemma summable_floor (r : ℝ≥0) (hr₁ : r < 1) :
    summable (λ i, (⌊(y ξ x i / ξ ^ i : ℝ)⌋ : ℝ) * r ^ i) :=
 begin
@@ -334,12 +339,12 @@ begin
     n ∉ set.range (coe : ℕ → ℤ) → (F₀ s n : ℝ) * ξ ^ n = 0,
   swap,
   have h_range_norm : ∀ s : S, ∀ n : ℤ,
-    n ∉ set.range (coe : ℕ → ℤ) → ∥F₀ s n ∥ * r ^ n = 0,
+    n ∉ set.range (coe : ℕ → ℤ) → ∥F₀ s n ∥₊ * r ^ n = 0,
   swap,
-  { have HF₀ : ∀ s : S, summable (λ (n : ℤ), ∥F₀ s n∥ * r ^ n),
+  { have HF₀ : ∀ s : S, summable (λ (n : ℤ), ∥F₀ s n∥₊ * r ^ n),
     { intro s,
       apply (@function.injective.summable_iff _ _ _ _ _ _ _ hinj (h_range_norm s)).mp,
-      apply summable_norm ξ (g s) r (fact.out _) },
+      apply summable_nnnorm ξ (g s) r (fact.out _) },
     let F : laurent_measures r S := ⟨F₀, HF₀⟩,
     use F,
     have : ∀ s : S, has_sum (λ n, ((F₀ s n) : ℝ) * ξ ^ n) (g s),
@@ -351,7 +356,7 @@ begin
     exact this s},
   all_goals { intros n hn,
     specialize h_aux n hn,
-    simp only [h_aux, int.cast_eq_zero, mul_eq_zero, norm_eq_zero],
+    simp only [h_aux, int.cast_eq_zero, mul_eq_zero, nnnorm_eq_zero],
     tauto },
 end
 

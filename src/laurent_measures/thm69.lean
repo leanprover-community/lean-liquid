@@ -34,7 +34,7 @@ parameter {p : ℝ≥0}
 def r : ℝ≥0 := (1 / 2) ^ (p:ℝ)
 
 variables [fact(0 < p)] [fact (p < 1)]
-variable (S : Fintype)
+variable {S : Fintype}
 
 lemma r_half : 1 / 2 < r :=
 begin
@@ -60,67 +60,37 @@ end
 local notation `ℳ` := real_measures p
 local notation `ℒ` := laurent_measures r
 
-def laurent_measures.d {S}(F : ℒ S) : ℤ := (exists_bdd_filtration r_pos r_lt_one F).some
+variables {S}
+
+def laurent_measures.d (F : ℒ S) : ℤ := (exists_bdd_filtration r_pos r_lt_one F).some
 
 lemma lt_d_eq_zero (F : ℒ S) (s : S) (n : ℤ) :
   n < F.d → F s n = 0 := (exists_bdd_filtration r_pos r_lt_one F).some_spec s n
 
 def θ : ℒ S → ℳ S := ϑ (1 / 2 : ℝ) r p S
 
-def ϕ : ℒ S → ℒ S :=
-λ F,
-{ to_fun := λ s n, 2 * F s (n - 1) - F s n,
-  summable' := λ s, begin
-    let f₁ : S → ℤ → ℤ := λ s n, 2 * F s (n - 1) - F s n,
-    let g₁ : ℤ → ℝ := λ n, ∥ 2 * F s (n - 1) ∥ * r ^ n + ∥ F s n ∥ * r ^ n,
-    have Hf_le_g : ∀ b : ℤ, ∥ f₁ s b ∥ * r ^ b ≤ g₁ b,
-    { intro b,
-      dsimp [f₁, g₁],
-      rw ← add_mul,
-      have rpow_pos : 0 < (r : ℝ) ^ b := by { apply zpow_pos_of_pos, rw nnreal.coe_pos,
-        exact r_pos, },
-      apply (mul_le_mul_right rpow_pos).mpr,
-      exact norm_sub_le (2 * F s (b - 1)) (F s b) },
-    apply summable_of_nonneg_of_le _ Hf_le_g,
-    { apply summable.add,
-      have : ∀ b : ℤ, ∥ F s (b - 1) ∥ * r ^ b = r * ∥ F s (b - 1) ∥ * r ^ (b - 1),
-      { intro b,
-        rw [mul_assoc, mul_comm (r : ℝ), mul_assoc, ← zpow_add_one₀, sub_add_cancel b 1],
-        rw [ne.def, nnreal.coe_eq_zero],
-        apply ne_of_gt,
-        exact r_pos },
-      simp_rw [← int.norm_cast_real, int.cast_mul, normed_field.norm_mul, int.norm_cast_real,
-        mul_assoc],
-      apply @summable.mul_left ℝ _ _ _ _ (λ (b : ℤ), ∥F s (b - 1) ∥ * ↑r ^ b ) (∥ (2 : ℤ) ∥),
-      simp_rw [this, mul_assoc],
-      apply @summable.mul_left ℝ _ _ _ _ (λ (b : ℤ), ∥F s (b - 1)∥ * ↑r ^ (b - 1)) r,
-      have h_comp : (λ (b : ℤ), ∥F s (b - 1)∥ * ↑r ^ (b - 1)) =
-        (λ (b : ℤ), ∥F s b∥ * ↑r ^ b) ∘ (λ n, n - 1) := rfl,
-      rw h_comp,
-      apply summable.comp_injective _ sub_left_injective,
-      repeat {apply_instance},
-      repeat {exact F.summable s}, },
-    { intro b,
-      apply mul_nonneg,
-      apply norm_nonneg,
-      rw ← nnreal.coe_zpow,
-      exact (r ^ b).2 },
-  end }
+variables [fact (0 < r)]
 
-lemma injective_ϕ (F : ℒ S) (H : ϕ S F = 0) : F = 0 :=
+def ϕ : ℒ S → ℒ S :=
+λ F, 2 • shift (-1) F - F
+
+lemma ϕ_apply (F : ℒ S) (s : S) (n : ℤ) : ϕ F s n = 2 * F s (n-1) - F s n :=
+by simp only [ϕ, sub_apply, nsmul_apply, shift_to_fun_to_fun, nsmul_eq_mul]; refl
+
+lemma injective_ϕ (F : ℒ S) (H : ϕ F = 0) : F = 0 :=
 begin
-  dsimp only [ϕ] at H,
+  dsimp only [ϕ] at H, rw [sub_eq_zero] at H,
   replace H : ∀ n : ℤ, ∀ s : S, 2 * F s (n - 1) = F s n,
   { intros n s,
-    apply_fun to_fun at H,
-    have := congr_fun (congr_fun H s) n,
-    simp only at this,
-    rwa [← sub_eq_zero, this],
-    refl},
+    conv_rhs { rw ← H },
+    simp only [nsmul_apply, shift_to_fun_to_fun, int.add_neg_one, nsmul_eq_mul,
+      int.nat_cast_eq_coe_nat, int.coe_nat_bit0, int.coe_nat_succ, int.coe_nat_zero, zero_add,
+      mul_eq_mul_left_iff, eq_self_iff_true, bit0_eq_zero, one_ne_zero, or_false],
+    refl },
   ext s n,
   simp only [zero_apply],
   apply int.induction_on' n (F.d - 1),
-  { apply lt_d_eq_zero _ _ _ (F.d - 1),
+  { apply lt_d_eq_zero _ _ (F.d - 1),
     simp only [sub_lt_self_iff, zero_lt_one] },
   { intros k h hk₀,
     specialize H (k + 1) s,
@@ -131,13 +101,9 @@ begin
     exact H },
 end
 
-
-
-
-
-
-
 -- #exit
+/-
+
 /-
 open filter
 open_locale filter
@@ -224,8 +190,7 @@ begin
     apply (mul_left_inj' (@zpow_ne_zero ℝ _ _ b (inv_ne_zero two_ne_zero))).mpr,
     have : (2 : ℝ) * (F s (b - 1)) = ((2 : ℤ) * (F s (b - 1))),
     { rw [← int.cast_one, int.cast_bit0] },
-    rw [this, ← int.cast_mul, ← int.cast_sub],
-    refl },
+    rw [this, ← int.cast_mul, ← int.cast_sub, ϕ_apply], },
   have h_pos : has_sum (λ n, ((2 * F s (n - 1)) : ℝ) * (1 / 2) ^ n)
     (@summable_smaller_radius _ _ F.d (F.2 s) (lt_d_eq_zero _ _ _) r_half).some,
   { let e : ℤ ≃ ℤ := ⟨λ n : ℤ, n - 1, λ n, n + 1, by {intro, simp}, by {intro, simp}⟩,
@@ -384,6 +349,8 @@ begin
     { rw dif_neg hn',
       exact (lt_d_eq_zero S F s n (not_le.mp hn')).symm }},
 end
+
+-/
 
 end mem_exact
 
