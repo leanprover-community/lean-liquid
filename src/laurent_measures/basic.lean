@@ -555,29 +555,13 @@ def laurent_measures_bdd_homeo (c : ℝ≥0) [fact (0 < r)] : { F : ℒ S | ∥F
   ..(laurent_measures_bdd_equiv _ _ _) }
 
 instance (c : ℝ≥0) [fact (0 < r)] : t2_space { F : ℒ S | ∥F∥₊ ≤ c } :=
-⟨λ x y h, separated_by_continuous (laurent_measures_bdd_homeo r S c).continuous
-(λ cc, h $ by simpa using congr_arg (laurent_measures_bdd_homeo r S c).symm cc)⟩
+(laurent_measures_bdd_homeo r S c).symm.t2_space
 
-instance (c : ℝ≥0) [fact (0 < r)] : totally_disconnected_space
-  { F : ℒ S | ∥F∥₊ ≤ c } :=
-begin
-  constructor,
-  rintros A - hA,
-  suffices : ((laurent_measures_bdd_homeo r S c) '' A).subsingleton,
-  { intros x hx y hy,
-    apply_rules [(laurent_measures_bdd_homeo r S c).injective, this, set.mem_image_of_mem] },
-  obtain ⟨h⟩ := (infer_instance : totally_disconnected_space
-   (Profinite.limit_cone (laurent_measures_bdd_functor r S c ⋙ Fintype.to_Profinite)).X),
-  refine h _ (by tauto) (is_preconnected.image hA _ _),
-  exact (laurent_measures_bdd_homeo r S c).continuous.continuous_on,
-end
+instance (c : ℝ≥0) [fact (0 < r)] : totally_disconnected_space { F : ℒ S | ∥F∥₊ ≤ c } :=
+(laurent_measures_bdd_homeo r S c).symm.totally_disconnected_space
 
 instance (c : ℝ≥0) [fact (0 < r)] : compact_space {F : ℒ S | ∥F∥₊ ≤ c} :=
-begin
-  constructor,
-  rw (laurent_measures_bdd_homeo r S c).embedding.is_compact_iff_is_compact_image,
-  simp [compact_univ],
-end
+(laurent_measures_bdd_homeo r S c).symm.compact_space
 
 @[continuity]
 lemma truncate_continuous (c : ℝ≥0) [fact (0 < r)] (A : finset ℤ) :
@@ -768,47 +752,29 @@ instance [fact (0 < r)] :
   end,
   .. (_: profinitely_filtered_pseudo_normed_group (ℒ S))}
 
+@[simp] lemma Tinv_apply [fact (0 < r)] (F : ℒ S) :
+  profinitely_filtered_pseudo_normed_group_with_Tinv.Tinv F = shift 1 F := rfl
+
 variable {α : Type*}
 
 open pseudo_normed_group profinitely_filtered_pseudo_normed_group
   comphaus_filtered_pseudo_normed_group
 
 def map_hom [fact (0 < r)] (f : S ⟶ S') :
-  comphaus_filtered_pseudo_normed_group_hom (ℒ S) (ℒ S') :=
+  profinitely_filtered_pseudo_normed_group_with_Tinv_hom r (ℒ S) (ℒ S') :=
 { to_fun := map f,
-  map_zero' := begin
-    ext F s i,
-    simp,
-  end,
-  map_add' := begin
-    intros F G,
-    ext s i,
-    simp [← finset.sum_bUnion, ← finset.sum_add_distrib],
-  end,
-  bound' := begin
-    -- should we introduce strict morphisms, and the strict category, so we can have limits?
-    use 1,
-    rintros c F (hF : ∥F∥₊ ≤ c),
-    exact le_trans (map_bound _ _) (by simpa),
-  end,
-  continuous' := begin
-    intros c₁ c₂ f₀ h,
-    haveI h₂ : fact (c₂ ≤ c₁ ⊔ c₂) := ⟨le_sup_right⟩,
-    let e : filtration (ℒ S') c₂ → filtration (ℒ S') (c₁ ⊔ c₂) :=
-      cast_le,
-    suffices : continuous (e ∘ f₀),
-    { rwa (embedding_cast_le _ _).to_inducing.continuous_iff },
+  map_zero' := by { ext, simp only [map_apply, zero_apply, finset.sum_const_zero], },
+  map_add' := λ F G, by { ext s i, simp only [←finset.sum_add_distrib, map_apply, add_apply], },
+  map_Tinv' := λ F, by { ext s i, simp only [map_apply, Tinv_apply, shift_to_fun_to_fun] },
+  strict' := λ c F (hF : ∥F∥₊ ≤ c), (map_bound _ _).trans hF,
+  continuous' := λ c, begin
     rw continuous_iff,
     intros T,
-    let e' : laurent_measures_bdd r S T c₁ → laurent_measures_bdd r S T (c₁ ⊔ c₂) :=
-      λ F, ⟨F, le_trans F.bound $ by exact_mod_cast le_sup_left⟩,
-    have : truncate T ∘ e ∘ f₀ = laurent_measures_bdd.map f ∘ e' ∘ truncate T,
-    { ext F s' t,
-      change (f₀ F : ℒ S') s' t = _,
-      rw ← h,
-      refl },
+    let f₀ : (filtration (laurent_measures r S) c) → (filtration (laurent_measures r S') c) :=
+      level (map f) (λ c F (hF : ∥F∥₊ ≤ c), (map_bound f F).trans hF) c,
+    have : truncate T ∘ f₀ = laurent_measures_bdd.map f ∘ truncate T, { ext F s' t, refl },
     rw this,
-    continuity,
+    exact continuous_of_discrete_topology.comp (truncate_continuous r S _ T),
   end }
 
 end laurent_measures
