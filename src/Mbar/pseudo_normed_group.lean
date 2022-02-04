@@ -28,6 +28,9 @@ instance : profinitely_filtered_pseudo_normed_group_with_Tinv r' (Mbar r' S) :=
   Tinv_mem_filtration := λ c x hx, Mbar.Tinv_mem_filtration hx,
   .. Mbar.profinitely_filtered_pseudo_normed_group }
 
+@[simp] lemma Tinv_apply (F : Mbar r' S) :
+  profinitely_filtered_pseudo_normed_group_with_Tinv.Tinv F = F.Tinv := rfl
+
 end Mbar
 
 #lint-
