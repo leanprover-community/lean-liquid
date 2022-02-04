@@ -102,7 +102,6 @@ begin
 end
 
 -- #exit
-/-
 
 /-
 open filter
@@ -180,7 +179,7 @@ end
 --     all_goals {apply lt_d_eq_zero},
 -- end
 
-lemma θ_ϕ_complex (F : ℒ S) : (θ S ∘ ϕ S) F = 0 :=
+lemma θ_ϕ_complex (F : ℒ S) : (θ ∘ ϕ) F = 0 :=
 begin
   funext s,
   convert_to ∑' (n : ℤ), ((2 * F s (n - 1) - F s n) : ℝ) * (1 / 2) ^ n = 0,
@@ -192,10 +191,10 @@ begin
     { rw [← int.cast_one, int.cast_bit0] },
     rw [this, ← int.cast_mul, ← int.cast_sub, ϕ_apply], },
   have h_pos : has_sum (λ n, ((2 * F s (n - 1)) : ℝ) * (1 / 2) ^ n)
-    (@summable_smaller_radius _ _ F.d (F.2 s) (lt_d_eq_zero _ _ _) r_half).some,
+    (@summable_smaller_radius _ _ F.d (F.summable s) (lt_d_eq_zero _ _) r_half).some,
   { let e : ℤ ≃ ℤ := ⟨λ n : ℤ, n - 1, λ n, n + 1, by {intro, simp}, by {intro, simp}⟩,
-    convert (equiv.has_sum_iff e).mpr (@summable_smaller_radius _ _ F.d (F.2 s)
-      (lt_d_eq_zero _ _ _) r_half).some_spec using 1,
+    convert (equiv.has_sum_iff e).mpr (@summable_smaller_radius _ _ F.d (F.summable s)
+      (lt_d_eq_zero _ _) r_half).some_spec using 1,
     ext n,
     have div_half : ∀ b : ℤ, (1 / 2 : ℝ) ^ b * (2 : ℝ) = (1 / 2) ^ (b - 1),
     { intro b,
@@ -206,16 +205,16 @@ begin
     refl, },
   simp_rw [sub_mul],
   rw [tsum_sub h_pos.summable, sub_eq_zero, h_pos.tsum_eq],
-  exacts [(@summable_smaller_radius _ _ F.d (F.2 s)
-    (lt_d_eq_zero _ _ _) r_half).some_spec.tsum_eq.symm,
-    (@summable_smaller_radius _ _ F.d (F.2 s) (lt_d_eq_zero _ _ _) r_half)],
+  exacts [(@summable_smaller_radius _ _ F.d (F.summable s)
+    (lt_d_eq_zero _ _) r_half).some_spec.tsum_eq.symm,
+    (@summable_smaller_radius _ _ F.d (F.summable s) (lt_d_eq_zero _ _) r_half)],
 end
 
 
 lemma tsum_reindex (F : ℒ S) (N : ℤ) (s : S) : ∑' (l : ℕ), (F s (N + l) : ℝ) * (2 ^ l)⁻¹ =
  2 ^ N * ∑' (m : {m : ℤ // N ≤ m}), (F s m : ℝ) * (2 ^ m.1)⁻¹ :=
 begin
-  have h_sum := @summable_smaller_radius _ _ F.d (F.2 s) (lt_d_eq_zero _ _ _) r_half,
+  have h_sum := @summable_smaller_radius _ _ F.d (F.summable s) (lt_d_eq_zero _ _) r_half,
   simp_rw [one_div, inv_zpow'] at h_sum,
   have h_shift := int_tsum_shift (λ n, (F s n : ℝ) * (2 ^ (-n))) N,
   simp only at h_shift,
@@ -227,7 +226,7 @@ begin
     zpow_coe_nat, add_comm],
 end
 
-def ψ (F : ℒ S) (hF : θ S F = 0) : ℒ S :=
+def ψ (F : ℒ S) (hF : θ F = 0) : ℒ S :=
 begin
   let b : S → ℤ → ℤ := λ s n,
     if hn : n - F.d ≥ 0 then - ∑ l in range ((int.eq_coe_of_zero_le hn).some.succ),
@@ -278,7 +277,7 @@ begin
         int.cast_two],
       rw ← sub_nonneg at h_event,
       rw [sum_range_sum_Icc (coe ∘ (F s)) n F.d h_event,
-        sum_Icc_sum_tail (F s) n F.d _ (lt_d_eq_zero S F s) h_event],
+        sum_Icc_sum_tail (F s) n F.d _ (lt_d_eq_zero F s) h_event],
       { rw [← (abs_eq_self.mpr (inv_nonneg.mpr (@zero_le_two ℝ _))), ← real.norm_eq_abs,
           ← normed_field.norm_mul, real.norm_eq_abs, real.norm_eq_abs, abs_eq_abs,
           ← (sub_add_cancel n 1), (sub_eq_add_neg n 1), (add_assoc n _), (add_comm n _),
@@ -286,13 +285,13 @@ begin
           ← (add_assoc (-1 : ℤ) _ _), neg_add_cancel_comm, ← int.succ, mul_assoc, zpow_neg₀,
           zpow_one],
         apply or.intro_left,
-        rw ← tsum_reindex S F n.succ s },
+        rw ← tsum_reindex F n.succ s },
       { simp only [θ, ϑ, one_div] at hF,
         replace hF := congr_fun hF s,
         simp only [real_measures.zero_apply, inv_eq_one_div] at hF,
         simp_rw [← inv_zpow₀, inv_eq_one_div],
-        exact (summable.has_sum_iff (@summable_smaller_radius _ _ F.d (F.2 s) (lt_d_eq_zero _ _ _)
-          r_half)).mpr hF }}},
+        exact (summable.has_sum_iff
+          (@summable_smaller_radius _ _ F.d (F.summable s) (lt_d_eq_zero _ _) r_half)).mpr hF }}},
   have : ∀ (n : ℤ), n < F.d → ∥∑' (i : ℕ), (F s (n + 1 + i) : ℝ) * (1 / 2) ^ i∥ = 0,
   { intros n hn,
     replace hn := not_le_of_gt (sub_neg.mpr hn),
@@ -304,14 +303,13 @@ begin
     rw [← h_θ, norm_eq_zero],
     dsimp [b],
     rw dif_neg hn },
-  refine (summable_congr h_θ).mpr
-    (aux_thm69.summable_convolution r_pos r_half (F s) F.d (F.2 s) (lt_d_eq_zero S F s)
-    this),
+  simp only [←nnreal.summable_coe, nonneg.coe_mul, _root_.coe_nnnorm, coe_zpow, summable_congr h_θ],
+  exact aux_thm69.summable_convolution r_pos r_half (F s) F.d (F.summable s) (lt_d_eq_zero F s) this
 end
 
-theorem θ_ϕ_exact (F : ℒ S) (hF : θ S F = 0) : ∃ G, ϕ S G = F :=
+theorem θ_ϕ_exact (F : ℒ S) (hF : θ F = 0) : ∃ G, ϕ G = F :=
 begin
-  use ψ S F hF,
+  use ψ F hF,
   ext s n,
   dsimp [ϕ, ψ],
   simp,
@@ -347,10 +345,8 @@ begin
         sum_range_one],
       simp only [int.coe_nat_zero, sub_zero, pow_zero, mul_one] },
     { rw dif_neg hn',
-      exact (lt_d_eq_zero S F s n (not_le.mp hn')).symm }},
+      exact (lt_d_eq_zero F s n (not_le.mp hn')).symm }},
 end
-
--/
 
 end mem_exact
 
