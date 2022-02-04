@@ -88,33 +88,42 @@ by rw [free_lift_unique _ _ f rfl, free_lift_unique _ _ g rfl, h]
 end CondensedMod
 
 @[simps]
-def hom_equiv_evaluation (S : Profinite.{u}) (A : CondensedMod R) :
+def hom_equiv_evaluation_Mod (S : Profinite.{u}) (A : CondensedMod R) :
   (R[S] ⟶ A) ≃ ((CondensedMod_to_CondensedSet R ⋙ CondensedSet.evaluation S).obj A) :=
 ((CondensedMod_CondensedSet_adjunction R).hom_equiv S.to_Condensed A).trans $
   (equiv_of_fully_faithful $ Sheaf_to_presheaf.{u} _ _).trans $ yoneda'_equiv _ _ .
 
-lemma hom_equiv_evaluation_apply_eq_app_id (S : Profinite.{u}) (A : CondensedMod R)
-  (f : R[S] ⟶ A) : hom_equiv_evaluation S A f =
+lemma hom_equiv_evaluation_Mod_apply_eq_app_id (S : Profinite.{u}) (A : CondensedMod R)
+  (f : R[S] ⟶ A) : hom_equiv_evaluation_Mod R S A f =
   (CondensedMod.to_free R _ ≫ (CondensedMod_to_CondensedSet R).map f).val.app _ ⟨𝟙 _⟩ := rfl
 
-lemma exists_hom_equiv_evaluation_symm_app_eq
+open_locale big_operators
+lemma exists_hom_equiv_Mod_evaluation_symm_app_eq
   (S : Profinite.{u}) (A : CondensedMod R)
   (f : A.val.obj (opposite.op S)) : ∃ (t : R[S].val.obj (opposite.op S)),
-  ((hom_equiv_evaluation S A).symm f).val.app _ t = f :=
+  ((hom_equiv_evaluation_Mod R S A).symm f).val.app _ t = f :=
 begin
   -- This proof can probably be made simpler using some adjunction voodoo...
-  use (hom_equiv_evaluation _ _) (𝟙 _),
-  dsimp [hom_equiv_evaluation, adjunction.whisker_right],
+  use (hom_equiv_evaluation_Mod _ _ _) (𝟙 _),
+  dsimp [hom_equiv_evaluation_Mod, adjunction.whisker_right],
   simp_rw [← comp_apply, ← nat_trans.comp_app],
   erw [category.comp_id, proetale_topology.to_sheafify_sheafify_lift],
-  dsimp [functor.preimage, full.preimage, yoneda'_equiv],
-  simp only [comp_apply, AddCommGroup.free_map_coe, category.id_comp, category.comp_id],
+  dsimp [functor.preimage, full.preimage, yoneda'_equiv, CondensedMod_to_CondensedSet,
+    functor.right_unitor, ulift_functor, Profinite.to_Condensed],
+  sorry
+
+  --dsimp [functor.preimage, full.preimage, yoneda'_equiv, Module.adj,
+  --  functor.right_unitor, finsupp.map_domain],
+
+  /-
+  simp only [comp_apply, Module.free_map_coe, category.id_comp, category.comp_id],
   dsimp [functor.right_unitor, AddCommGroup.adj, applicative.to_functor],
   erw equiv.apply_symm_apply,
   simp,
   change _ + _ = _,
   rw zero_add,
   refl,
+  -/
 end
 
 local attribute [instance] limits.has_zero_object.has_zero
@@ -123,16 +132,17 @@ open category_theory.limits
 open opposite
 
 -- sanity check
-example (S : Profinite.{u}) : preserves_zero_objects (Condensed.evaluation Ab.{u+1} S) :=
+example (S : Profinite.{u}) : preserves_zero_objects
+  (Condensed.evaluation (Module.{u+1} R) S) :=
 infer_instance
 
-instance (S : Profinite.{u}) [projective S] :
-  projective (ℤ[S]) :=
+instance projective_free_CondensedMod (S : Profinite.{u}) [projective S] :
+  projective (R[S]) :=
 { factors := λ A B f g hg, begin
     rw epi_iff_is_zero_cokernel at hg,
     -- this follows from the fact that evaluation preserves colimits.
     let e : (cokernel g).val.obj (op S) ≅ cokernel (g.val.app (op S)) := begin
-      refine (is_colimit_of_preserves (Condensed.evaluation Ab S)
+      refine (is_colimit_of_preserves (Condensed.evaluation (Module R) S)
       (colimit.is_colimit _)).cocone_point_unique_up_to_iso
         (colimit.is_colimit _) ≪≫ has_colimit.iso_of_nat_iso _,
       refine nat_iso.of_components _ _,
@@ -141,25 +151,36 @@ instance (S : Profinite.{u}) [projective S] :
       all_goals { dsimp },
       all_goals { simp, try { refl } },
     end,
-    replace hg := is_zero_of_preserves (Condensed.evaluation Ab.{u+1} S) hg,
+    replace hg := is_zero_of_preserves (Condensed.evaluation (Module.{u+1} R) S) hg,
     dsimp [Condensed.evaluation] at hg,
     replace hg := is_zero_of_iso_of_zero hg e,
     rw ← epi_iff_is_zero_cokernel at hg,
     replace hg : function.surjective (g.val.app (op S)) := begin
       resetI,
-      apply AddCommGroup.surjective_of_epi,
+      -- missing Module.surjective_of_epi
+      --apply Module.surjective_of_epi,
+      sorry
     end,
-    let f₁ := hom_equiv_evaluation _ _ f,
+    let f₁ := hom_equiv_evaluation_Mod _ _ _ f,
     dsimp at f₁,
     obtain ⟨f',h⟩ := hg f₁,
-    use (hom_equiv_evaluation _ _).symm f',
-    apply_fun (hom_equiv_evaluation _ _),
+    use (hom_equiv_evaluation_Mod _ _ _).symm f',
+    apply_fun (hom_equiv_evaluation_Mod _ _ _),
     change _ = f₁,
-    rw [← h, hom_equiv_evaluation_apply, Sheaf.hom.comp_val, nat_trans.comp_app],
-    erw [← comp_apply, ← comp_apply, category.id_comp, ← nat_trans.comp_app, ← nat_trans.comp_app],
-    dsimp [hom_equiv_evaluation],
+    rw [← h, hom_equiv_evaluation_Mod_apply, Sheaf.hom.comp_val, nat_trans.comp_app],
+    dsimp [hom_equiv_evaluation_Mod, adjunction.whisker_right, functor.associator],
+    erw [category.id_comp, ← comp_apply, ← comp_apply, ← category.assoc, ← nat_trans.comp_app,
+      ← nat_trans.comp_app],
+    erw proetale_topology.to_sheafify_sheafify_lift,
+    dsimp [functor.preimage, full.preimage, yoneda'_equiv, ulift_functor,
+      CondensedMod_to_CondensedSet, Profinite.to_Condensed],
+    -- same missing lemma as exists_hom_equiv_evaluation_symm_app_eq
+    sorry
+
+    --erw [← comp_apply, ← comp_apply, ← nat_trans.comp_app, ← nat_trans.comp_app],
+    --erw proetale_topology.to_sheafify_sheafify_lift,
+    /-
     simp_rw [← category.assoc, ← nat_trans.comp_app],
-    rw proetale_topology.to_sheafify_sheafify_lift,
     rw adjunction.hom_equiv_counit,
     dsimp,
     simp only [category.assoc, adjunction.whisker_right_counit_app_app],
@@ -168,17 +189,18 @@ instance (S : Profinite.{u}) [projective S] :
     dsimp [functor.preimage, yoneda'_equiv, full.preimage, AddCommGroup.adj, ulift_functor],
     change (free_abelian_group.lift id) (_ <$> free_abelian_group.of _) = _,
     simp,
-  end }
+    -/
+  end } .
 
-lemma is_zero_iff_forall_zero {A : Condensed.{u} Ab.{u+1}} :
+lemma is_zero_iff_forall_zero_Mod {A : CondensedMod R} :
   is_zero A ↔ ∀ (S : ExtrDisc), is_zero (A.val.obj (op S.val)) :=
 begin
   split,
   { intros h S,
-    apply is_zero_of_preserves (Condensed.evaluation Ab.{u+1} S.val),
+    apply is_zero_of_preserves (Condensed.evaluation (Module.{u+1} R) S.val),
     assumption },
   { intro h,
-    let FF := ((Sheaf_to_presheaf _ _ : Condensed Ab ⥤ _) ⋙
+    let FF := ((Sheaf_to_presheaf _ _ : CondensedMod R ⥤ _) ⋙
       (whiskering_left _ _ _).obj (ExtrDisc_to_Profinite.op)),
     haveI : creates_colimits FF :=
       by apply Condensed_to_ExtrDisc_presheaf_creates_colimits,
@@ -190,8 +212,9 @@ begin
     apply is_colimit_of_reflects FF,
     apply evaluation_jointly_reflects_colimits,
     intros S,
-    have := is_colimit_empty_cocone_equiv Ab (as_empty_cocone (A.val.obj (op S.unop.val)))
-      (((evaluation ExtrDiscᵒᵖ Ab).obj S).map_cocone (FF.map_cocone (as_empty_cocone A)))
+    have := is_colimit_empty_cocone_equiv (Module R)
+      (as_empty_cocone (A.val.obj (op S.unop.val)))
+      (((evaluation ExtrDiscᵒᵖ (Module R)).obj S).map_cocone (FF.map_cocone (as_empty_cocone A)))
       (eq_to_iso rfl),
     apply this.to_fun,
     specialize e S.unop,
@@ -204,13 +227,13 @@ begin
     { tidy } }
 end
 
-lemma is_epi_iff_forall_surjective {A B : Condensed.{u} Ab.{u+1}} (f : A ⟶ B) :
+lemma is_epi_iff_forall_surjective_Mod {A B : CondensedMod R} (f : A ⟶ B) :
   epi f ↔ ∀ (S : ExtrDisc), function.surjective (f.val.app (op S.val)) :=
 begin
   rw epi_iff_is_zero_cokernel,
-  rw is_zero_iff_forall_zero,
+  rw is_zero_iff_forall_zero_Mod,
   apply forall_congr (λ S, _),
-  let FF := Condensed.evaluation Ab.{u+1} S.val,
+  let FF := Condensed.evaluation (Module.{u+1} R) S.val,
   haveI : preserves_colimits FF := infer_instance,
   let e : (cokernel f).val.obj (op S.val) ≅ cokernel (f.val.app (op S.val)) := begin
     change FF.obj (cokernel f) ≅ cokernel (FF.map f),
@@ -237,25 +260,31 @@ begin
   rw [this, ← epi_iff_is_zero_cokernel],
   clear e,
   split,
-  { introsI h, apply AddCommGroup.surjective_of_epi },
+  { introsI h,
+    -- missing Module.surjective_of_epi,
+    sorry },
   { intros h, exact concrete_category.epi_of_surjective (f.val.app (op S.val)) h}
 end
 
-theorem Condensed_Ab_has_enough_projectives_aux (A : Condensed.{u} Ab.{u+1}) :
-  ∃ (B : Condensed Ab) (hB : projective B) (f : B ⟶ A), epi f :=
+theorem CondensedMod_has_enough_projectives_aux (A : CondensedMod R) :
+  ∃ (B : CondensedMod R) (hB : projective B) (f : B ⟶ A), epi f :=
 begin
   let II := Σ (S : ExtrDisc), A.val.obj (op S.val),
-  let X : II → Condensed Ab := λ i, ℤ[i.1.val],
-  let f : Π i, X i ⟶ A := λ i, (hom_equiv_evaluation i.1.val A).symm i.2,
+  let X : II → CondensedMod R := λ i, R[i.1.val],
+  let f : Π i, X i ⟶ A := λ i, (hom_equiv_evaluation_Mod _ i.1.val A).symm i.2,
+
   -- Move this.
-  haveI : has_colimits (Condensed.{u} Ab.{u+1}) := begin
+  haveI : has_colimits (CondensedMod R) := begin
     change has_colimits (Sheaf _ _),
     exact category_theory.Sheaf.category_theory.limits.has_colimits.{(u+2) u (u+1)},
   end,
+
   use [∐ X, infer_instance, sigma.desc f],
-  rw is_epi_iff_forall_surjective,
+
+  rw is_epi_iff_forall_surjective_Mod,
+
   intros S t,
-  obtain ⟨w,hw⟩ := exists_hom_equiv_evaluation_symm_app_eq S.val A t,
+  obtain ⟨w,hw⟩ := exists_hom_equiv_Mod_evaluation_symm_app_eq R S.val A t,
   use (sigma.ι X ⟨S,t⟩).val.app (op S.val) w,
   rw [← comp_apply, ← nat_trans.comp_app],
   change (((sigma.ι X ⟨S,t⟩) ≫ sigma.desc f).val.app (op S.val)) w = _,
@@ -263,11 +292,11 @@ begin
   exact hw,
 end
 
-instance Condensed_Ab_has_enough_projective : enough_projectives (Condensed.{u} Ab.{u+1}) :=
+instance CondensedMod_has_enough_projective : enough_projectives (CondensedMod R) :=
 begin
   constructor,
   intros B,
-  obtain ⟨X,hX,f,hf⟩ := Condensed_Ab_has_enough_projectives_aux B,
+  obtain ⟨X,hX,f,hf⟩ := CondensedMod_has_enough_projectives_aux R B,
   resetI,
   constructor,
   refine ⟨X,hX,f,hf⟩,
