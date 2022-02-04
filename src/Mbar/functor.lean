@@ -41,7 +41,7 @@ lemma map_Tinv (f : S₁ → S₂) (x : Mbar r' S₁) :
 by ext s ⟨_|n⟩; simp only [map_to_fun, Tinv_zero, Tinv_succ, finset.sum_const_zero]
 
 /-- `Mbar r' S` is functorial in the finite type `S`. -/
-def fintype_functor : Fintype ⥤ ProFiltPseuNormGrpWithTinv₁ r' :=
+@[simps] def fintype_functor : Fintype ⥤ ProFiltPseuNormGrpWithTinv₁ r' :=
 { obj := λ S,
   { M := Mbar r' S,
     exhaustive' := λ x, ⟨∥x∥₊, by rw Mbar.mem_filtration_iff⟩ },

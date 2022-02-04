@@ -49,7 +49,33 @@ sorry
   map_add' := λ F G, by { ext, simp only [to_Mbar_to_fun, add_apply, Mbar.coe_add, pi.add_apply],
     split_ifs, { rw add_zero }, { refl } },
   strict' := λ c F (hF : ∥F∥₊ ≤ c), (nnnorm_to_Mbar r' S F).trans hF,
-  continuous' := sorry,
+  continuous' := λ c, begin
+    let f : _ := _, show continuous f,
+    rw Mbar_le.continuous_iff,
+    intros N,
+    let e : ℕ ↪ ℤ := ⟨coe, int.coe_nat_injective⟩,
+    let T : finset ℤ := (finset.range (N + 1)).map e,
+    let g : laurent_measures_bdd r' S T c → Mbar_bdd r' ⟨S⟩ c N := λ F,
+    { to_fun := λ s n, if n = 0 then 0 else F s ⟨n, _⟩,
+      coeff_zero' := λ s, if_pos rfl,
+      sum_le' := _ },
+    have : Mbar_le.truncate N ∘ f = g ∘ truncate T,
+    { dsimp [f], ext F s ⟨(_|n), hn⟩, { simp only [fin.mk_zero, Mbar_bdd.coeff_zero], },
+      simp only [Mbar_le.truncate_to_fun, Mbar_bdd.coe_mk, coe_coe, int.coe_nat_succ,
+        truncate_to_fun, subtype.coe_mk, subtype.ext_iff, fin.coe_zero, nat.succ_ne_zero, if_false],
+      exact to_Mbar_to_fun r' S F s (n+1), },
+    { rw this, exact continuous_of_discrete_topology.comp (truncate_continuous _ _ _ _) },
+    { simpa only [coe_coe, finset.mem_map, finset.mem_range, function.embedding.coe_fn_mk,
+        int.coe_nat_inj', exists_prop, exists_eq_right] using n.2, },
+    { cases S, refine le_trans (finset.sum_le_sum _) F.bound, dsimp,
+      rintro s -,
+      erw [finset.sum_attach', finset.sum_map, ← fin.sum_univ_eq_sum_range],
+      refine finset.sum_le_sum (λ i hi, _),
+      simp only [finset.mem_map, finset.mem_range, exists_prop, exists_eq_right, nnreal.coe_nat_abs,
+        embedding_like.apply_eq_iff_eq, function.embedding.coe_fn_mk, subtype.coe_mk, zpow_coe_nat],
+      rw dif_pos, swap, { exact i.2 },
+      split_ifs, { rw [nnnorm_zero, zero_mul], exact zero_le' }, { refl } }
+  end,
   map_Tinv' := λ F, begin
     simp only [Tinv_apply, Mbar.Tinv_apply],
     ext s (_|n),
@@ -61,6 +87,16 @@ sorry
 @[simps]
 def to_Mbar_fintype_nattrans : laurent_measures.fintype_functor r' ⟶ Mbar.fintype_functor r' :=
 { app := λ S, to_Mbar_hom r' S,
-  naturality' := sorry }
+  naturality' := λ S₁ S₂ f, begin
+    ext,
+    simp only [fintype_functor_map, category_theory.comp_apply, to_Mbar_hom_to_fun, to_Mbar_to_fun,
+      Mbar.fintype_functor_map_to_fun, Mbar.map_to_fun, map_hom, map_apply,
+      profinitely_filtered_pseudo_normed_group_with_Tinv_hom.coe_mk],
+    split_ifs, { simp only [finset.sum_const_zero], }, { refl }
+  end }
+
+@[simps]
+def to_Mbar_nattrans : laurent_measures.functor r' ⟶ Mbar.functor r' :=
+Profinite.extend_nat_trans $ to_Mbar_fintype_nattrans r'
 
 end laurent_measures
