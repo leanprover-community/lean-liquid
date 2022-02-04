@@ -5,6 +5,8 @@ import condensed.extr.equivalence
 import algebra.category.Group.adjunctions
 import for_mathlib.SheafOfTypes_sheafification
 import for_mathlib.yoneda
+import algebra.category.Module.abelian
+import algebra.category.Module.colimits
 --import algebra.category.Group.filtered_colimits
 
 import category_theory.limits.functor_category
@@ -202,10 +204,14 @@ instance preserves_colimits_Condensed_evaluation'
   limits.preserves_colimits (Condensed.evaluation C S) :=
 preserves_colimits_Condensed_evaluation ⟨S⟩ _
 
-
 -- TODO: Move this
 instance : has_finite_biproducts Ab :=
 has_finite_biproducts.of_has_finite_products
+
+-- It looks like this was not needed for `Module A`, even though it was needed for `Ab`.
+-- We're missing an instance for `Ab` in mathlib.
+--instance (A : Type u) [comm_ring A] : has_finite_biproducts (Module.{u} A) :=
+--has_finite_biproducts.of_has_finite_products
 
 -- sanity check
 noncomputable example (S : ExtrDisc.{u}) :
@@ -214,4 +220,12 @@ preserves_colimits_Condensed_evaluation _ _
 
 noncomputable example (S : Profinite.{u}) [projective S] :
   limits.preserves_colimits (Condensed.evaluation Ab.{u+1} S) :=
+preserves_colimits_Condensed_evaluation' _ _
+
+noncomputable example (A : Type (u+1)) [comm_ring A] (S : ExtrDisc.{u}) :
+  limits.preserves_colimits (Condensed.evaluation (Module.{u+1} A) S.val) :=
+preserves_colimits_Condensed_evaluation _ _
+
+noncomputable example (A : Type (u+1)) [comm_ring A] (S : Profinite.{u}) [projective S] :
+  limits.preserves_colimits (Condensed.evaluation (Module.{u+1} A) S) :=
 preserves_colimits_Condensed_evaluation' _ _
