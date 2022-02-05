@@ -36,10 +36,30 @@ namespace laurent_measures
   end }
 
 lemma to_Mbar_surjective : function.surjective (to_Mbar r' S) :=
-sorry
+begin
+  intro G,
+  refine ⟨⟨λ s n, G s n.to_nat, λ s, _⟩, _⟩,
+  { rw ← int.coe_nat_injective.summable_iff,
+    { refine nnreal.summable_of_le _ (G.summable s),
+      intro n,
+      simp only [nnreal.coe_nat_abs, function.comp_app, int.to_nat_coe_nat, zpow_coe_nat] },
+    { rintro (n|n),
+      { simp only [int.of_nat_eq_coe, set.mem_range_self, not_true, forall_false_left], },
+      { intro, dsimp [int.to_nat], simp only [Mbar.coeff_zero, nnnorm_zero, zero_mul], } } },
+  { ext s (_|n), { exact (G.coeff_zero s).symm }, { dsimp, exact if_neg (nat.succ_ne_zero n), } }
+end
 
 lemma nnnorm_to_Mbar (F : laurent_measures r' S) : ∥to_Mbar r' S F∥₊ ≤ ∥F∥₊ :=
-sorry
+begin
+  rw [nnnorm_def, Mbar.nnnorm_def],
+  refine finset.sum_le_sum (λ s hs, _),
+  have := nnreal.summable_comp_injective (F.nnreal_summable s) int.coe_nat_injective,
+  refine (tsum_le_tsum _ ((to_Mbar r' S F).summable s) this).trans
+    (nnreal.tsum_comp_le_tsum_of_inj (F.nnreal_summable s) int.coe_nat_injective),
+  intro n,
+  simp only [nnreal.coe_nat_abs, to_Mbar_to_fun, function.comp_app, zpow_coe_nat],
+  split_ifs, { rw [nnnorm_zero, zero_mul], exact zero_le' }, { refl }
+end
 
 @[simps] def to_Mbar_hom : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r'
   (laurent_measures r' S) (Mbar r' S) :=
