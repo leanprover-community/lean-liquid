@@ -6,6 +6,9 @@ apply_nolint Mbar.map_add unused_arguments
 apply_nolint Mbar.map_strict unused_arguments
 apply_nolint Mbar.map_zero unused_arguments
 
+-- Mbar/ses.lean
+apply_nolint laurent_measures.to_Mbar unused_arguments
+
 -- breen_deligne/category.lean
 apply_nolint breen_deligne.FreeMat.kronecker_map_reindex_left unused_arguments
 apply_nolint breen_deligne.FreeMat.kronecker_map_reindex_right unused_arguments
@@ -158,6 +161,7 @@ apply_nolint r_half unused_arguments
 apply_nolint r_lt_one unused_arguments
 apply_nolint tsum_reindex unused_arguments
 apply_nolint θ unused_arguments
+apply_nolint ϕ unused_arguments
 
 -- locally_constant/Vhat.lean
 apply_nolint SemiNormedGroup.normed_with_aut_LCC fails_quickly
