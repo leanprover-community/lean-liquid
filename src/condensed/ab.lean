@@ -2,6 +2,8 @@ import category_theory.abelian.projective
 import pseudo_normed_group.category
 import topology.continuous_function.algebra
 
+import algebra.group.ulift
+
 import for_mathlib.abelian_sheaves.main
 
 import condensed.adjunctions
@@ -14,6 +16,16 @@ import condensed.adjunctions
 open category_theory category_theory.limits
 
 universes v u
+
+-- Move this!
+def Ab.ulift : Ab.{u} ⥤ Ab.{max v u} :=
+{ obj := λ M, AddCommGroup.of $ ulift.{v} M,
+  map := λ M N f,
+  { to_fun := λ x, ⟨f x.down⟩,
+    map_zero' := by { ext1, apply f.map_zero },
+    map_add' := λ x y, by { ext1, apply f.map_add } },
+  map_id' := by { intros, ext, dsimp, simp },
+  map_comp' := by { intros, ext, dsimp, simp } }
 
 namespace Condensed
 
@@ -46,17 +58,17 @@ instance : is_right_adjoint forget_to_CondensedType :=
 
 section
 
-variables (A : Type (u+1)) [add_comm_group A] [topological_space A] [topological_add_group A]
+variables (A : Type u) [add_comm_group A] [topological_space A] [topological_add_group A]
 
-def of_top_ab.presheaf : Profiniteᵒᵖ ⥤ Ab :=
+def of_top_ab.presheaf : Profinite.{u}ᵒᵖ ⥤ Ab.{u} :=
 { obj := λ S, ⟨C(S.unop, A)⟩,
   map := λ S₁ S₂ f, add_monoid_hom.mk' (λ g, g.comp f.unop) $ λ g₁ g₂, rfl,
   map_id' := by { intros, ext, refl },
   map_comp' := by { intros, ext, refl } }
 
 /-- The condensed abelian group associated with a topological abelian group -/
-def of_top_ab : Condensed.{u} Ab :=
-{ val := of_top_ab.presheaf A,
+def of_top_ab : Condensed.{u} Ab.{u+1} :=
+{ val := of_top_ab.presheaf A ⋙ Ab.ulift.{u+1},
   cond := sorry }
 
 end
@@ -68,12 +80,12 @@ namespace CompHausFiltPseuNormGrp₁
 open_locale nnreal
 open pseudo_normed_group comphaus_filtered_pseudo_normed_group
 
-def presheaf (A : CompHausFiltPseuNormGrp₁) (S : Profinite) : Type* :=
+def presheaf (A : CompHausFiltPseuNormGrp₁.{u}) (S : Profinite.{u}) : Type u :=
 { f : S → A // ∃ (c : ℝ≥0) (f₀ : S → filtration A c), continuous f₀ ∧ f = coe ∘ f₀ }
 
 namespace presheaf
 
-variables (A : CompHausFiltPseuNormGrp₁) (S : Profinite)
+variables (A : CompHausFiltPseuNormGrp₁.{u}) (S : Profinite.{u})
 
 @[ext]
 lemma ext {A : CompHausFiltPseuNormGrp₁} {S : Profinite} (f g : presheaf A S) : f.1 = g.1 → f = g :=
@@ -173,7 +185,7 @@ end presheaf
 open opposite
 
 -- we need to use `as_small Profiniteᵒᵖ`
-def Presheaf (A : CompHausFiltPseuNormGrp₁) : Profiniteᵒᵖ ⥤ Ab :=
+def Presheaf (A : CompHausFiltPseuNormGrp₁.{u}) : Profinite.{u}ᵒᵖ ⥤ Ab :=
 { obj := λ S, ⟨presheaf A (unop S)⟩,
   map := λ S T φ, presheaf.comap A φ.unop,
   map_id' := by { intros, ext, refl },
@@ -194,11 +206,11 @@ lemma Presheaf.map_comp {A B C : CompHausFiltPseuNormGrp₁} (f : A ⟶ B) (g : 
 
 set_option pp.universes true
 
-def to_Condensed : CompHausFiltPseuNormGrp₁.{u+1} ⥤ Condensed.{u} Ab :=
+def to_Condensed : CompHausFiltPseuNormGrp₁.{u} ⥤ Condensed.{u} Ab.{u+1} :=
 { obj := λ A,
-  { val := Presheaf A,
+  { val := Presheaf A ⋙ Ab.ulift.{u+1},
     cond := sorry }, -- ← this one will be hard
-  map := λ A B f, ⟨Presheaf.map f⟩,
+  map := λ A B f, ⟨whisker_right (Presheaf.map f) _⟩,
   map_id' := λ X, by { ext : 2, dsimp, simp },
   map_comp' := λ X Y Z f g, by { ext : 2, dsimp, simp } }
 
