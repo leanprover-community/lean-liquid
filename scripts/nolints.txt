@@ -1,6 +1,10 @@
 import .all
 run_cmd tactic.skip
 
+-- Mbar/ext.lean
+apply_nolint Mbar.Ext_iso_zero def_lemma
+apply_nolint Mbar.condensed unused_arguments
+
 -- Mbar/functor.lean
 apply_nolint Mbar.map_add unused_arguments
 apply_nolint Mbar.map_strict unused_arguments
