@@ -17,9 +17,15 @@ This file introduces the maps
 * `ψ` corresponds to multiplying a Laurent series by `(2T-1)^-1`. It is defined only on series
   vanishing at `1/2`, so that it again takes values in `ℒ S`
 * The maps `Θ`, `Φ` and `Ψ` are the "measurifications" of `θ`, `ϕ` and `ψ`,
-  so they are morphisms in the right category.
+  so they are morphisms in the right category (**[FAE]** Not here any more!)
 
-**The main results are ...**
+The main results are
+* `injective_ϕ` stating that `ϕ` is injective;
+* `θ_ϕ_complex` stating that `ϕ ∘ θ = 0`; and
+* `θ_ϕ_exact` stating that the kernel of `θ` coincides with the image of `ϕ`.
+Together with `ϑ_surjective` from `laurent_measures.theta` (specialized at `ξ=1/2`, so that `ϑ` is
+`θ`) this is the statement of Theorem 6.9 of `Analytic.pdf` of interest to us, although only "on
+elements" and not yet as a Short Exact Sequence in the right category.
 -/
 
 noncomputable theory
@@ -64,6 +70,9 @@ def laurent_measures.d (F : ℒ S) : ℤ := (exists_bdd_filtration r_pos r_lt_on
 
 lemma lt_d_eq_zero (F : ℒ S) (s : S) (n : ℤ) :
   n < F.d → F s n = 0 := (exists_bdd_filtration r_pos r_lt_one F).some_spec s n
+
+lemma laurent_measures.summable_half (F : ℒ S) (s : S) : summable (λ n, ((F s n) : ℝ) *
+  (1 / 2) ^ n) := @summable_smaller_radius _ _ F.d (F.summable s) (lt_d_eq_zero _ _) r_half
 
 def θ : ℒ S → ℳ S := ϑ (1 / 2 : ℝ) r p S
 
@@ -112,10 +121,9 @@ begin
     { rw [← int.cast_one, int.cast_bit0] },
     rw [this, ← int.cast_mul, ← int.cast_sub, ϕ_apply], },
   have h_pos : has_sum (λ n, ((2 * F s (n - 1)) : ℝ) * (1 / 2) ^ n)
-    (@summable_smaller_radius _ _ F.d (F.summable s) (lt_d_eq_zero _ _) r_half).some,
+    (F.summable_half s).some,
   { let e : ℤ ≃ ℤ := ⟨λ n : ℤ, n - 1, λ n, n + 1, by {intro, simp}, by {intro, simp}⟩,
-    convert (equiv.has_sum_iff e).mpr (@summable_smaller_radius _ _ F.d (F.summable s)
-      (lt_d_eq_zero _ _) r_half).some_spec using 1,
+    convert (equiv.has_sum_iff e).mpr (F.summable_half s).some_spec using 1,
     ext n,
     have div_half : ∀ b : ℤ, (1 / 2 : ℝ) ^ b * (2 : ℝ) = (1 / 2) ^ (b - 1),
     { intro b,
@@ -126,16 +134,15 @@ begin
     refl, },
   simp_rw [sub_mul],
   rw [tsum_sub h_pos.summable, sub_eq_zero, h_pos.tsum_eq],
-  exacts [(@summable_smaller_radius _ _ F.d (F.summable s)
-    (lt_d_eq_zero _ _) r_half).some_spec.tsum_eq.symm,
-    (@summable_smaller_radius _ _ F.d (F.summable s) (lt_d_eq_zero _ _) r_half)],
+  exacts [(F.summable_half s).some_spec.tsum_eq.symm,
+    (F.summable_half s)],
 end
 
 
 lemma tsum_reindex (F : ℒ S) (N : ℤ) (s : S) : ∑' (l : ℕ), (F s (N + l) : ℝ) * (2 ^ l)⁻¹ =
  2 ^ N * ∑' (m : {m : ℤ // N ≤ m}), (F s m : ℝ) * (2 ^ m.1)⁻¹ :=
 begin
-  have h_sum := @summable_smaller_radius _ _ F.d (F.summable s) (lt_d_eq_zero _ _) r_half,
+  have h_sum := F.summable_half s,
   simp_rw [one_div, inv_zpow'] at h_sum,
   have h_shift := int_tsum_shift (λ n, (F s n : ℝ) * (2 ^ (-n))) N,
   simp only at h_shift,
@@ -212,7 +219,7 @@ begin
         simp only [real_measures.zero_apply, inv_eq_one_div] at hF,
         simp_rw [← inv_zpow₀, inv_eq_one_div],
         exact (summable.has_sum_iff
-          (@summable_smaller_radius _ _ F.d (F.summable s) (lt_d_eq_zero _ _) r_half)).mpr hF }}},
+          (F.summable_half s)).mpr hF }}},
   have : ∀ (n : ℤ), n < F.d → ∥∑' (i : ℕ), (F s (n + 1 + i) : ℝ) * (1 / 2) ^ i∥ = 0,
   { intros n hn,
     replace hn := not_le_of_gt (sub_neg.mpr hn),
@@ -239,7 +246,7 @@ begin
       mul_comm (2 : ℤ) (-1 : ℤ), mul_assoc, mul_sum, ← neg_eq_neg_one_mul,
       neg_sub_neg, finset.sum_range_succ', sub_eq_iff_eq_add'],
     simp only [pow_zero, sub_zero, mul_one, int.coe_nat_zero, int.coe_nat_add, int.coe_nat_one,
-      add_comm _ (1:ℤ), ← sub_sub n 1],
+      add_comm _ (1 : ℤ), ← sub_sub n 1],
     congr' 1,
     refine finset.sum_congr _ _,
     { congr' 1,
