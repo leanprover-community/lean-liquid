@@ -61,7 +61,7 @@ begin
   split_ifs, { rw [nnnorm_zero, zero_mul], exact zero_le' }, { refl }
 end
 
-@[simps] def to_Mbar_hom : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r'
+@[simps] def to_Mbar_hom : comphaus_filtered_pseudo_normed_group_with_Tinv_hom r'
   (laurent_measures r' S) (Mbar r' S) :=
 { to_fun := to_Mbar r' S,
   map_zero' := by { ext,
@@ -111,7 +111,7 @@ def to_Mbar_fintype_nattrans : laurent_measures.fintype_functor r' ⟶ Mbar.fint
     ext,
     simp only [fintype_functor_map, category_theory.comp_apply, to_Mbar_hom_to_fun, to_Mbar_to_fun,
       Mbar.fintype_functor_map_to_fun, Mbar.map_to_fun, map_hom, map_apply,
-      profinitely_filtered_pseudo_normed_group_with_Tinv_hom.coe_mk],
+      comphaus_filtered_pseudo_normed_group_with_Tinv_hom.coe_mk],
     split_ifs, { simp only [finset.sum_const_zero], }, { refl }
   end }
 

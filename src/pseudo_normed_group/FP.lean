@@ -180,7 +180,7 @@ namespace basic_universal_map
 
 variables (r' c c₁ c₂ c₃ c₄ : ℝ≥0) {l m n : ℕ} (ϕ : basic_universal_map m n)
 
-open FiltrationPow profinitely_filtered_pseudo_normed_group_with_Tinv_hom
+open FiltrationPow comphaus_filtered_pseudo_normed_group_with_Tinv_hom
 
 @[simps]
 def eval_FP [ϕ.suitable c₁ c₂] : FiltrationPow.{u} r' c₁ m ⟶ FiltrationPow r' c₂ n :=
@@ -193,7 +193,7 @@ def eval_FP [ϕ.suitable c₁ c₂] : FiltrationPow.{u} r' c₁ m ⟶ Filtration
       (FiltrationPow r' c₂ n).map f (ϕ.eval_png₀ M₁ c₁ c₂ x),
     ext j,
     dsimp only [FiltrationPow_map, Filtration_obj_map_to_fun,basic_universal_map.eval_png₀_coe,
-      profinitely_filtered_pseudo_normed_group_with_Tinv_hom.level_coe,
+      comphaus_filtered_pseudo_normed_group_with_Tinv_hom.level_coe,
       comp_to_fun, coe_to_add_monoid_hom],
     simp only [basic_universal_map.eval_png_apply, pi_map_to_fun, f.map_sum, f.map_zsmul],
   end }

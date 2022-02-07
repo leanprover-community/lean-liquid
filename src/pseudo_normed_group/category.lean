@@ -1177,11 +1177,11 @@ namespace ProFiltPseuNormGrpWithTinv
 
 variables (r' : ℝ≥0)
 
-instance bundled_hom : bundled_hom (@profinitely_filtered_pseudo_normed_group_with_Tinv_hom r') :=
-⟨@profinitely_filtered_pseudo_normed_group_with_Tinv_hom.to_fun r',
- @profinitely_filtered_pseudo_normed_group_with_Tinv_hom.id r',
- @profinitely_filtered_pseudo_normed_group_with_Tinv_hom.comp r',
- @profinitely_filtered_pseudo_normed_group_with_Tinv_hom.coe_inj r'⟩
+instance bundled_hom : bundled_hom (@comphaus_filtered_pseudo_normed_group_with_Tinv_hom r') :=
+⟨@comphaus_filtered_pseudo_normed_group_with_Tinv_hom.to_fun r',
+ @comphaus_filtered_pseudo_normed_group_with_Tinv_hom.id r',
+ @comphaus_filtered_pseudo_normed_group_with_Tinv_hom.comp r',
+ @comphaus_filtered_pseudo_normed_group_with_Tinv_hom.coe_inj r'⟩
 
 attribute [derive [λ α, has_coe_to_sort α (Sort*), large_category, concrete_category]]
   ProFiltPseuNormGrpWithTinv
@@ -1232,7 +1232,7 @@ end
 --   map_comp' := by { intros, ext, refl } }
 
 
-open pseudo_normed_group profinitely_filtered_pseudo_normed_group_with_Tinv_hom
+open pseudo_normed_group comphaus_filtered_pseudo_normed_group_with_Tinv_hom
 
 open profinitely_filtered_pseudo_normed_group_with_Tinv (Tinv)
 
@@ -1240,7 +1240,7 @@ variables {r'}
 variables {M M₁ M₂ : ProFiltPseuNormGrpWithTinv.{u} r'}
 variables {f : M₁ ⟶ M₂}
 
-/-- The isomorphism induced by a bijective `profinitely_filtered_pseudo_normed_group_with_Tinv_hom`
+/-- The isomorphism induced by a bijective `comphaus_filtered_pseudo_normed_group_with_Tinv_hom`
 whose inverse is strict. -/
 def iso_of_equiv_of_strict (e : M₁ ≃+ M₂) (he : ∀ x, f x = e x)
   (strict : ∀ ⦃c x⦄, x ∈ filtration M₂ c → e.symm x ∈ filtration M₁ c) :
@@ -1370,8 +1370,8 @@ lemma exhaustive (M : ProFiltPseuNormGrpWithTinv₁ r) (m : M) : ∃ c : ℝ≥0
   m ∈ pseudo_normed_group.filtration M c := M.exhaustive' m
 
 instance : large_category (ProFiltPseuNormGrpWithTinv₁.{u} r) :=
-{ hom := λ A B, profinitely_filtered_pseudo_normed_group_with_Tinv_hom r A B,
-  id := λ A, profinitely_filtered_pseudo_normed_group_with_Tinv_hom.id,
+{ hom := λ A B, comphaus_filtered_pseudo_normed_group_with_Tinv_hom r A B,
+  id := λ A, comphaus_filtered_pseudo_normed_group_with_Tinv_hom.id,
   comp := λ A B C f g, g.comp f } .
 
 def enlarging_functor : (ProFiltPseuNormGrpWithTinv₁.{u} r) ⥤ (ProFiltPseuNormGrpWithTinv.{u} r) :=

@@ -60,8 +60,8 @@ open profinitely_filtered_pseudo_normed_group
 variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M] [fact (0 < r')] [fact (0 < N)]
 
 def sum_hom :
-  profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' (rescale N (M ^ N)) M :=
-profinitely_filtered_pseudo_normed_group_with_Tinv_hom.mk'
+  comphaus_filtered_pseudo_normed_group_with_Tinv_hom r' (rescale N (M ^ N)) M :=
+comphaus_filtered_pseudo_normed_group_with_Tinv_hom.mk'
   (sum_hom M N)
   (sum_hom_strict M N).bound_by_one
   (λ x, by { simp only [sum_hom, comphaus_filtered_pseudo_normed_group_hom.sum_apply,

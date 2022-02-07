@@ -761,7 +761,7 @@ open pseudo_normed_group profinitely_filtered_pseudo_normed_group
   comphaus_filtered_pseudo_normed_group
 
 def map_hom [fact (0 < r)] (f : S ⟶ S') :
-  profinitely_filtered_pseudo_normed_group_with_Tinv_hom r (ℒ S) (ℒ S') :=
+  comphaus_filtered_pseudo_normed_group_with_Tinv_hom r (ℒ S) (ℒ S') :=
 { to_fun := map f,
   map_zero' := by { ext, simp only [map_apply, zero_apply, finset.sum_const_zero], },
   map_add' := λ F G, by { ext s i, simp only [←finset.sum_add_distrib, map_apply, add_apply], },

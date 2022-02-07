@@ -13,6 +13,11 @@ open_locale nnreal big_operators
 
 local attribute [instance] type_pow
 
+class comphaus_filtered_pseudo_normed_group_with_Tinv (r' : out_param $ ℝ≥0) (M : Type*)
+  extends comphaus_filtered_pseudo_normed_group M :=
+(Tinv : comphaus_filtered_pseudo_normed_group_hom M M)
+(Tinv_mem_filtration : ∀ c x, x ∈ filtration c → Tinv x ∈ filtration (r'⁻¹ * c))
+
 /-- A *profinitely filtered pseudo-normed topological group with action by `T⁻¹`* is
 a profinitely filtered pseudo-normed topological group `M` together with a
 nonnegative real `r'` and homomorphism `Tinv : M → M` such that
@@ -49,6 +54,10 @@ Tinv.continuous _ $ λ x, rfl
 
 lemma Tinv_bound_by : (@Tinv _ M _).bound_by (r'⁻¹) := Tinv_mem_filtration
 
+instance (M : Type*) [profinitely_filtered_pseudo_normed_group_with_Tinv r' M] :
+  comphaus_filtered_pseudo_normed_group_with_Tinv r' M :=
+{ ..(infer_instance : profinitely_filtered_pseudo_normed_group_with_Tinv r' M) }
+
 end profinitely_filtered_pseudo_normed_group_with_Tinv
 
 section
@@ -56,7 +65,7 @@ set_option old_structure_cmd true
 
 open profinitely_filtered_pseudo_normed_group_with_Tinv
 
-structure profinitely_filtered_pseudo_normed_group_with_Tinv_hom (r' : ℝ≥0) (M₁ M₂ : Type*)
+structure comphaus_filtered_pseudo_normed_group_with_Tinv_hom (r' : ℝ≥0) (M₁ M₂ : Type*)
   [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₁]
   [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₂]
   extends M₁ →+ M₂ :=
@@ -66,10 +75,10 @@ structure profinitely_filtered_pseudo_normed_group_with_Tinv_hom (r' : ℝ≥0) 
 
 end
 
-attribute [nolint doc_blame] profinitely_filtered_pseudo_normed_group_with_Tinv_hom.mk
-  profinitely_filtered_pseudo_normed_group_with_Tinv_hom.to_add_monoid_hom
+attribute [nolint doc_blame] comphaus_filtered_pseudo_normed_group_with_Tinv_hom.mk
+  comphaus_filtered_pseudo_normed_group_with_Tinv_hom.to_add_monoid_hom
 
-namespace profinitely_filtered_pseudo_normed_group_with_Tinv_hom
+namespace comphaus_filtered_pseudo_normed_group_with_Tinv_hom
 
 open profinitely_filtered_pseudo_normed_group_with_Tinv
 
@@ -78,19 +87,19 @@ variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M]
 variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₁]
 variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₂]
 variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₃]
-variables (f g : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂)
+variables (f g : comphaus_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂)
 
-instance : has_coe_to_fun (profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂)
+instance : has_coe_to_fun (comphaus_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂)
   (λ _, M₁ → M₂):=
-⟨profinitely_filtered_pseudo_normed_group_with_Tinv_hom.to_fun⟩
+⟨comphaus_filtered_pseudo_normed_group_with_Tinv_hom.to_fun⟩
 
 @[simp] lemma coe_mk (f) (h₁) (h₂) (h₃) (h₄) (h₅) :
-  ⇑(⟨f, h₁, h₂, h₃, h₄, h₅⟩ : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂) = f :=
+  ⇑(⟨f, h₁, h₂, h₃, h₄, h₅⟩ : comphaus_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂) = f :=
 rfl
 
 @[simp] lemma mk_to_monoid_hom (f) (h₁) (h₂) (h₃) (h₄) (h₅) :
   (⟨f, h₁, h₂, h₃, h₄, h₅⟩ :
-    profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂).to_add_monoid_hom =
+    comphaus_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂).to_add_monoid_hom =
     ⟨f, h₁, h₂⟩ := rfl
 
 @[simp] lemma coe_to_add_monoid_hom : ⇑f.to_add_monoid_hom = f := rfl
@@ -112,7 +121,7 @@ f.to_add_monoid_hom.map_sum _ _
 lemma strict : ∀ ⦃c x⦄, x ∈ filtration M₁ c → f x ∈ filtration M₂ c := f.strict'
 
 /-- `f.level c` is the function `filtration M₁ c → filtration M₂ c`
-induced by a `profinitely_filtered_pseudo_normed_group_with_Tinv_hom M₁ M₂`. -/
+induced by a `comphaus_filtered_pseudo_normed_group_with_Tinv_hom M₁ M₂`. -/
 @[simps] def level : ∀ (c : ℝ≥0), filtration M₁ c → filtration M₂ c :=
 pseudo_normed_group.level f f.strict
 
@@ -125,31 +134,31 @@ variables {f g}
 @[ext] theorem ext (H : ∀ x, f x = g x) : f = g :=
 by cases f; cases g; congr'; exact funext H
 
-instance : has_zero (profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂) :=
+instance : has_zero (comphaus_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂) :=
 ⟨{ strict' := λ c x h, zero_mem_filtration _,
    continuous' := λ c, @continuous_const _ (filtration M₂ c) _ _ 0,
    map_Tinv' := λ x, show 0 = Tinv (0 : M₂), from Tinv.map_zero.symm,
    .. (0 : M₁ →+ M₂) }⟩
 
-instance : inhabited (profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂) := ⟨0⟩
+instance : inhabited (comphaus_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂) := ⟨0⟩
 
-lemma coe_inj ⦃f g : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂⦄
+lemma coe_inj ⦃f g : comphaus_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂⦄
   (h : (f : M₁ → M₂) = g) :
   f = g :=
 by cases f; cases g; cases h; refl
 
-/-- The identity function as `profinitely_filtered_pseudo_normed_group_with_Tinv_hom`. -/
-@[simps] def id : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M M :=
+/-- The identity function as `comphaus_filtered_pseudo_normed_group_with_Tinv_hom`. -/
+@[simps] def id : comphaus_filtered_pseudo_normed_group_with_Tinv_hom r' M M :=
 { strict' := λ c x, id,
   continuous' := λ c, by { convert continuous_id, ext, refl },
   map_Tinv' := λ x, rfl,
   .. add_monoid_hom.id _ }
 
-/-- The composition of `profinitely_filtered_pseudo_normed_group_with_Tinv_hom`s. -/
+/-- The composition of `comphaus_filtered_pseudo_normed_group_with_Tinv_hom`s. -/
 @[simps] def comp
-  (g : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₂ M₃)
-  (f : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂) :
-  profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₃ :=
+  (g : comphaus_filtered_pseudo_normed_group_with_Tinv_hom r' M₂ M₃)
+  (f : comphaus_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂) :
+  comphaus_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₃ :=
 { strict' := λ c x hx, g.strict (f.strict hx),
   continuous' := λ c, (g.level_continuous c).comp (f.level_continuous c),
   map_Tinv' := λ x,
@@ -160,7 +169,7 @@ by cases f; cases g; cases h; refl
 variables (f)
 
 /-- The `profinitely_filtered_pseudo_normed_group_hom` underlying a
-`profinitely_filtered_pseudo_normed_group_with_Tinv_hom`. -/
+`comphaus_filtered_pseudo_normed_group_with_Tinv_hom`. -/
 def to_profinitely_filtered_pseudo_normed_group_hom :
   comphaus_filtered_pseudo_normed_group_hom M₁ M₂ :=
 comphaus_filtered_pseudo_normed_group_hom.mk_of_strict f.to_add_monoid_hom
@@ -174,7 +183,7 @@ variables {f}
 
 def mk' (f : comphaus_filtered_pseudo_normed_group_hom M₁ M₂)
   (hf1 : f.bound_by 1) (hfT) :
-  profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂ :=
+  comphaus_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂ :=
 { to_fun := f,
   strict' := λ c x hx, by simpa only [one_mul] using hf1 hx,
   continuous' := λ c, f.continuous _ (λ x, rfl),
@@ -185,11 +194,11 @@ def mk' (f : comphaus_filtered_pseudo_normed_group_hom M₁ M₂)
   (f : comphaus_filtered_pseudo_normed_group_hom M₁ M₂) (hf1) (hfT) (x : M₁) :
   @mk' r' _ _ _ _ f hf1 hfT x = f x := rfl
 
-/-- If the inverse of `profinitely_filtered_pseudo_normed_group_with_Tinv_hom` is strict, then it
-is a `profinitely_filtered_pseudo_normed_group_with_Tinv_hom`. -/
+/-- If the inverse of `comphaus_filtered_pseudo_normed_group_with_Tinv_hom` is strict, then it
+is a `comphaus_filtered_pseudo_normed_group_with_Tinv_hom`. -/
 def inv_of_equiv_of_strict (e : M₁ ≃+ M₂) (he : ∀ x, f x = e x)
   (strict : ∀ ⦃c x⦄, x ∈ filtration M₂ c → e.symm x ∈ filtration M₁ c) :
-  profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' M₂ M₁ :=
+  comphaus_filtered_pseudo_normed_group_with_Tinv_hom r' M₂ M₁ :=
 { strict' := strict,
   continuous' := λ c,
   begin
@@ -221,7 +230,7 @@ lemma inv_of_equiv_of_strict_symm.apply (x : M₂) (e : M₁ ≃+ M₂) (he : �
   (strict : ∀ ⦃c x⦄, x ∈ filtration M₂ c → e.symm x ∈ filtration M₁ c) :
   f (inv_of_equiv_of_strict e he strict x) = x := by simp [inv_of_equiv_of_strict, he]
 
-end profinitely_filtered_pseudo_normed_group_with_Tinv_hom
+end comphaus_filtered_pseudo_normed_group_with_Tinv_hom
 
 namespace punit
 
@@ -260,7 +269,7 @@ include r'
 omit r'
 
 @[simps {fully_applied := ff}]
-def pi_proj (i : ι) : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' (Π i, M i) (M i) :=
+def pi_proj (i : ι) : comphaus_filtered_pseudo_normed_group_with_Tinv_hom r' (Π i, M i) (M i) :=
 { to_fun := pi.eval_add_monoid_hom M i,
   strict' := λ c x hx, hx i,
   continuous' := λ c, (continuous_apply i).comp (filtration_pi_homeo M c).continuous,
@@ -271,8 +280,8 @@ def pi_proj (i : ι) : profinitely_filtered_pseudo_normed_group_with_Tinv_hom r'
 profinitely filtered pseudo-normed groups with `T⁻¹`-action -/
 @[simps {fully_applied := ff}]
 def pi_lift {N : Type*} [profinitely_filtered_pseudo_normed_group_with_Tinv r' N]
-  (f : Π i, profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' N (M i)) :
-  profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' N (Π i, M i) :=
+  (f : Π i, comphaus_filtered_pseudo_normed_group_with_Tinv_hom r' N (M i)) :
+  comphaus_filtered_pseudo_normed_group_with_Tinv_hom r' N (Π i, M i) :=
 { to_fun := add_monoid_hom.mk_to_pi (λ i, (f i).to_add_monoid_hom),
   strict' := λ c x hx i, (f i).strict hx,
   continuous' :=
@@ -287,8 +296,8 @@ def pi_lift {N : Type*} [profinitely_filtered_pseudo_normed_group_with_Tinv r' N
   .. add_monoid_hom.mk_to_pi (λ i, (f i).to_add_monoid_hom) }
 
 @[simps {fully_applied := ff}]
-def pi_map (f : Π i, profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' (M₁ i) (M₂ i)) :
-  profinitely_filtered_pseudo_normed_group_with_Tinv_hom r' (Π i, M₁ i) (Π i, M₂ i) :=
+def pi_map (f : Π i, comphaus_filtered_pseudo_normed_group_with_Tinv_hom r' (M₁ i) (M₂ i)) :
+  comphaus_filtered_pseudo_normed_group_with_Tinv_hom r' (Π i, M₁ i) (Π i, M₂ i) :=
 pi_lift r' _ $ λ i, (f i).comp (pi_proj r' _ i)
 
 end

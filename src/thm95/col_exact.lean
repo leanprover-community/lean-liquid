@@ -220,7 +220,7 @@ def aug_map :=
 ((ProFiltPseuNormGrpWithTinv.Pow r' n).map (Cech_augmentation_map r' Λ M N))
   .to_profinitely_filtered_pseudo_normed_group_hom
 
-section open profinitely_filtered_pseudo_normed_group_with_Tinv_hom
+section open comphaus_filtered_pseudo_normed_group_with_Tinv_hom
 lemma aug_map_strict : (aug_map r' Λ M N n).strict :=
 to_profinitely_filtered_pseudo_normed_group_hom_strict _
 end
@@ -296,10 +296,10 @@ begin
     cosimplicial_object.augment_right, Cech_conerve_map,
     Filtration_obj_map_to_fun, ProFiltPseuNormGrpWithTinv.Pow_map,
     Hom_obj, Hom_map_to_fun, polyhedral_lattice.Hom,
-    profinitely_filtered_pseudo_normed_group_with_Tinv_hom.level,
+    comphaus_filtered_pseudo_normed_group_with_Tinv_hom.level,
     profinitely_filtered_pseudo_normed_group_with_Tinv.pi_map_to_fun,
     profinitely_filtered_pseudo_normed_group_with_Tinv.pi_lift_to_fun,
-    profinitely_filtered_pseudo_normed_group_with_Tinv_hom.comp_to_fun,
+    comphaus_filtered_pseudo_normed_group_with_Tinv_hom.comp_to_fun,
     pseudo_normed_group.level, finsupp.single_add_hom_apply,
     subtype.coe_mk, add_monoid_hom.coe_mk_from_pi, add_monoid_hom.comp_apply] at h ⊢,
   erw [Cech_conerve.map_const_obj_zero_iso] at h,
@@ -379,7 +379,7 @@ begin
   dsimp only [augmented.to_arrow_obj_hom],
   rw [Cech_nerve_level_hom_app],
   dsimp only [Filtration_obj_map_to_fun, Cech_augmentation_map,
-    profinitely_filtered_pseudo_normed_group_with_Tinv_hom.level,
+    comphaus_filtered_pseudo_normed_group_with_Tinv_hom.level,
     pseudo_normed_group.level,
     ProFiltPseuNormGrpWithTinv.Pow_map,
     profinitely_filtered_pseudo_normed_group_with_Tinv.pi_map_to_fun,
@@ -563,14 +563,14 @@ begin
   dsimp only [FLC_complex_arrow, arrow.mk_hom,
     Filtration_obj_map_to_fun, comp_apply,
     continuous_map.coe_mk, pseudo_normed_group.level, subtype.coe_mk,
-    profinitely_filtered_pseudo_normed_group_with_Tinv_hom.to_profinitely_filtered_pseudo_normed_group_hom,
+    comphaus_filtered_pseudo_normed_group_with_Tinv_hom.to_profinitely_filtered_pseudo_normed_group_hom,
     comphaus_filtered_pseudo_normed_group_hom.mk_of_strict,
     comphaus_filtered_pseudo_normed_group_hom.mk_of_bound,
     comphaus_filtered_pseudo_normed_group_hom.coe_mk,
     add_monoid_hom.to_fun_eq_coe,
-    profinitely_filtered_pseudo_normed_group_with_Tinv_hom.coe_to_add_monoid_hom,
+    comphaus_filtered_pseudo_normed_group_with_Tinv_hom.coe_to_add_monoid_hom,
     ProFiltPseuNormGrpWithTinv.Pow_map, nat_iso.of_components.hom_app, id,
-    profinitely_filtered_pseudo_normed_group_with_Tinv_hom.level_coe],
+    comphaus_filtered_pseudo_normed_group_with_Tinv_hom.level_coe],
   erw [comp_apply, comp_apply, iso_of_equiv_of_strict'_hom_apply],
   dsimp only [profinitely_filtered_pseudo_normed_group_with_Tinv.pi_map_to_fun,
     ProFiltPseuNormGrpWithTinv.Pow_mul_inv, Pow_comm, Pow_mul_comm,

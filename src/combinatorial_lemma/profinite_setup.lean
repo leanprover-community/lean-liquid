@@ -43,7 +43,7 @@ end
 
 @[simps]
 def polyhedral_postcompose {M N : ProFiltPseuNormGrpWithTinv₁ r} (f : M ⟶ N) :
-  profinitely_filtered_pseudo_normed_group_with_Tinv_hom r
+  comphaus_filtered_pseudo_normed_group_with_Tinv_hom r
   (Λ →+ M) (Λ →+ N) :=
 { to_fun := λ x, f.to_add_monoid_hom.comp x,
   map_zero' := by simp only [add_monoid_hom.comp_zero],

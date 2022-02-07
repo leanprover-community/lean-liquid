@@ -65,7 +65,7 @@ namespace polyhedral_lattice
 In the remainder of the file, we show that `Hom(ℤ, M)` is isomorphic to `M`.
 -/
 
-open pseudo_normed_group profinitely_filtered_pseudo_normed_group_with_Tinv_hom
+open pseudo_normed_group comphaus_filtered_pseudo_normed_group_with_Tinv_hom
 
 variables {r' : ℝ≥0} [fact (0 < r')]
 variables (M  : ProFiltPseuNormGrpWithTinv.{u} r')
