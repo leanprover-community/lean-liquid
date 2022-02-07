@@ -337,7 +337,7 @@ end
 
 lemma summable_smaller_radius {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ)
 (hf : summable (λ n : ℤ, ∥ f n ∥ * ρ ^ n))
-  (hd : ∀ n : ℤ, n < d → f n = 0) (hρ : (1 / 2) < ρ) : --(F : ℒ S) (s : S) :
+  (hd : ∀ n : ℤ, n < d → f n = 0) (hρ : (1 / 2) < ρ) :
   summable (λ n, (f n : ℝ) * (1 / 2) ^ n) :=
   begin
   apply summable_of_summable_norm,
