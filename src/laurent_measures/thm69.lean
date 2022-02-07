@@ -54,8 +54,6 @@ begin
   exact fact.out _
 end
 
--- lemma r_ineq : 0 < (r : ℝ) ∧ (r : ℝ) < 1:=
--- by { rw [nnreal.coe_pos, ← nnreal.coe_one, nnreal.coe_lt_coe], exact ⟨r_pos, r_lt_one⟩ }
 
 local notation `ℳ` := real_measures p
 local notation `ℒ` := laurent_measures r
@@ -101,83 +99,6 @@ begin
     exact H },
 end
 
--- #exit
-
-/-
-open filter
-open_locale filter
-
-lemma aux_coe_nat_int_at_top : map (coe : ℕ → ℤ) at_top = at_top :=
-begin
-  ext s,
-  simp only [set.mem_preimage, mem_at_top_sets, ge_iff_le, filter.mem_map],
-  split,
-  { rintros ⟨a, ha⟩,
-    use a,
-    intros b hb,
-    lift b to ℕ,
-    apply ha,
-    exact_mod_cast hb,
-    linarith },
-  { rintro ⟨a, ha⟩,
-    use a.nat_abs,
-    intros b hb,
-    apply ha,
-    apply int.le_nat_abs.trans,
-    exact_mod_cast hb }
-end
-
-lemma aux_int_filter {X : Type*} {f : ℤ → X} (F : filter X) : tendsto (λ n : ℕ, f n) at_top F ↔
-  tendsto f at_top F :=
-begin
-  convert_to map (f ∘ coe) (at_top : filter ℕ) ≤ F ↔ tendsto f at_top F,
-  simpa [← filter.map_map, aux_coe_nat_int_at_top],
-end
-
-lemma map_add_at_top_eq_int (k : ℤ) :
-  map (λ a : ℤ, a + k) (at_top : filter ℤ) = (at_top : filter ℤ) :=
--- map_at_top_eq_of_gc (λa, a - k) k
---   (assume a b h, add_le_add_right h k)
---   (assume a b h, (le_tsub_iff_right h).symm)
---   (assume a h, by rw [tsub_add_cancel_of_le h])
-
-lemma tendsto_add_top_iff_int (f : ℤ → ℝ) (d : ℤ) (a : ℝ) : tendsto (λ n : ℕ, f n) at_top (𝓝 a) ↔
-  tendsto (λ n : ℕ, f (n + d)) at_top (𝓝 a) :=
-begin
-  rw aux_int_filter,
-  convert_to tendsto f at_top (𝓝 a) ↔ tendsto (λ n, f (n + d)) at_top (𝓝 a),
-  have := @aux_int_filter _ (λ n, f (n + d)) (𝓝 a),
-  { simp only at this,
-    rwa ← iff_eq_eq },
-  { rw [iff.comm, ← tendsto_map'_iff, map_add_at_top_eq_int] },
-end
-
--- set_option trace.simp_lemmas true
--/
-
-
--- lemma summable_smaller_radius (F : ℒ S) (s : S) :
---   summable (λ n, (F s n : ℝ) * (1 / 2) ^ n) :=
--- begin
---  suffices abs_sum : summable (λ n, ∥ ((F s n) : ℝ) ∥ * (1 / 2) ^ n),
---   { apply summable_of_summable_norm,
---     simp_rw [normed_field.norm_mul, normed_field.norm_zpow, normed_field.norm_div, real.norm_two,
---       norm_one, abs_sum] },
---     have pos_half : ∀ n : ℕ, 0 ≤ ∥ F s n ∥ * (1 / 2) ^ n,
---     { intro n,
---       apply mul_nonneg (norm_nonneg (F s n)),
---       simp only [one_div, zero_le_one, inv_nonneg, zero_le_bit0, pow_nonneg] },
---     have half_le_r : ∀ n : ℕ, ∥ F s n ∥ * (1 / 2) ^ n ≤ ∥ F s n ∥ * r ^ n,
---     { intro n,
---       apply monotone_mul_left_of_nonneg (norm_nonneg (F s n)),
---       apply pow_le_pow_of_le_left,
---       simp only [one_div, zero_le_one, inv_nonneg, zero_le_bit0],
---       exact le_of_lt r_half },
---     have h_nat_half : summable (λ n : ℕ, ∥ F s n ∥ * (1 / 2 : ℝ≥0) ^ n) :=
---       summable_of_nonneg_of_le pos_half half_le_r ((int.summable_iff_on_nat F.d _).mp (F.2 s)),
---     apply (int.summable_iff_on_nat F.d _).mpr h_nat_half,
---     all_goals {apply lt_d_eq_zero},
--- end
 
 lemma θ_ϕ_complex (F : ℒ S) : (θ ∘ ϕ) F = 0 :=
 begin
@@ -349,48 +270,3 @@ begin
 end
 
 end mem_exact
-
--- def Θ : comphaus_filtered_pseudo_normed_group_hom (laurent_measures r S) (ℳ p S) :=
---   { to_fun := θ p r S,
---     bound' := θ_bound p r S,
---     continuous' := , -- [FAE] I guess that this is Prop 7.2 (4) of `Analytic.pdf`
---     -- .. to_add_hom_meas_θ ξ r S p,
---     map_add' := (to_add_hom_θ p r S).2,
---     map_zero' :=  }
-
-
--- lemma chain_complex_thm69 (F : laurent_measures r S) : Θ p r S (𝑓 • F) = 0 :=
--- begin
---   funext s,
---   -- simp only [real_measures.zero_apply],
---   -- dsimp [Θ],
---   -- dsimp [to_meas_θ],
---   -- dsimp [θ],
---   -- dsimp [has_scalar],
---   -- rw pi.has_scalar,
--- end
-
-
--- From here onwards, the bundled version
--- variable [imCHFPNG : has_images (CompHausFiltPseuNormGrp.{u})]
--- variable [zerCHFPNG : has_zero_morphisms (CompHausFiltPseuNormGrp.{u})]
--- variable [kerCHFPNG : has_kernels (CompHausFiltPseuNormGrp.{u})]
-
-
-
--- def SES_thm69 (S : Fintype) : @category_theory.short_exact_sequence CompHausFiltPseuNormGrp.{u} _
---   imCHFPNG zerCHFPNG kerCHFPNG :=
--- { fst := bundled.of (laurent_measures r S),
---   snd := bundled.of (laurent_measures r S),
---   trd := bundled.of (ℳ p S),
---   f :=
---   begin
---     let φ := λ (F : laurent_measures r S), (ker_θ₂_generator r) • F,
---     use φ,-- [FAE] These four are the properties that the scalar multiplication by a measure on the
---     --singleton (as endomorphism of S-measures) must satisfy
---   end,
---   g := @Θ r _ S p _ _ _,
---   mono' :=
---   epi' :=
---   exact' := }
--- end SES_thm69
