@@ -18,8 +18,8 @@ namespace Mbar
 
 open ProFiltPseuNormGrpWithTinv₁ ProFiltPseuNormGrp₁ CompHausFiltPseuNormGrp₁
 
-def condensed : Profinite ⥤ Condensed Ab.{u+1} :=
-Mbar.functor.{u+1 u+1} r' ⋙ to_PFPNG₁.{u+1} _ ⋙ to_CHFPNG₁.{u+1} ⋙ to_Condensed.{u}
+def condensed : Profinite.{u} ⥤ Condensed.{u} Ab.{u+1} :=
+Mbar.functor.{u u} r' ⋙ to_PFPNG₁.{u} _ ⋙ to_CHFPNG₁.{u} ⋙ to_Condensed.{u}
 
 /-
 WARNING/TODO:: We need the `ℤ[T⁻¹]`-linear version of the following statement,
@@ -27,8 +27,8 @@ instead of the `Ab`-version.
 -/
 
 /-- Thm 9.4bis of [Analytic]. More precisely: the first observation in the proof 9.4 => 9.1. -/
-theorem Ext_iso_zero (S : Profinite) (V : SemiNormedGroup) [normed_with_aut r V] (i : ℕ) :
-  ((Ext ℤ (Condensed Ab.{1}) i).obj
+theorem Ext_iso_zero (S : Profinite.{0}) (V : SemiNormedGroup.{0}) [normed_with_aut r V] (i : ℕ) :
+  ((Ext ℤ (Condensed.{0} Ab.{1}) i).obj
     (op $ (condensed.{0} r').obj S)).obj
       (Condensed.of_top_ab V) ≅ 0 :=
 sorry
