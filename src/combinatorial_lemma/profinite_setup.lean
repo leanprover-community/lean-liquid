@@ -65,7 +65,7 @@ def polyhedral_postcompose {M N : ProFiltPseuNormGrpWithTinv₁ r} (f : M ⟶ N)
     have aux2 := f.level_continuous (c * ∥l∥₊),
     exact (aux2.comp (continuous_apply l)).comp aux1,
   end,
-  map_Tinv' := λ x, by { ext l, dsimp, rw f.map_Tinv, } }
+  map_Tinv' := λ x, by { ext l, dsimp, erw f.map_Tinv, refl, } }
 
 /-- the functor `M ↦ Hom(Λ, M), where both are considered as objects in
   `ProFiltPseuNormGrpWithTinv₁.{u} r` -/

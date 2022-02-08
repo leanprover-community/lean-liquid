@@ -218,7 +218,7 @@ by { cases i; exact isometry_id }
 
 def aug_map :=
 ((ProFiltPseuNormGrpWithTinv.Pow r' n).map (Cech_augmentation_map r' Λ M N))
-  .to_profinitely_filtered_pseudo_normed_group_hom
+  .to_comphaus_filtered_pseudo_normed_group_hom
 
 section open comphaus_filtered_pseudo_normed_group_with_Tinv_hom
 lemma aug_map_strict : (aug_map r' Λ M N n).strict :=
@@ -538,7 +538,7 @@ def FLC_arrow_iso_aux :
 section open ProFiltPseuNormGrpWithTinv
 
 lemma FLC_arrow_hom' {M₁ M₂ : ProFiltPseuNormGrpWithTinv r'} (f : M₁ ⟶ M₂) (c : ℝ≥0) :
-  (FLC_complex_arrow f.to_profinitely_filtered_pseudo_normed_group_hom f.strict c).hom =
+  (FLC_complex_arrow f.to_comphaus_filtered_pseudo_normed_group_hom f.strict c).hom =
     ((Filtration r').obj c).map f :=
 rfl
 
@@ -563,7 +563,7 @@ begin
   dsimp only [FLC_complex_arrow, arrow.mk_hom,
     Filtration_obj_map_to_fun, comp_apply,
     continuous_map.coe_mk, pseudo_normed_group.level, subtype.coe_mk,
-    comphaus_filtered_pseudo_normed_group_with_Tinv_hom.to_profinitely_filtered_pseudo_normed_group_hom,
+    comphaus_filtered_pseudo_normed_group_with_Tinv_hom.to_comphaus_filtered_pseudo_normed_group_hom,
     comphaus_filtered_pseudo_normed_group_hom.mk_of_strict,
     comphaus_filtered_pseudo_normed_group_hom.mk_of_bound,
     comphaus_filtered_pseudo_normed_group_hom.coe_mk,

@@ -54,7 +54,8 @@ Tinv.continuous _ $ λ x, rfl
 
 lemma Tinv_bound_by : (@Tinv _ M _).bound_by (r'⁻¹) := Tinv_mem_filtration
 
-instance (M : Type*) [profinitely_filtered_pseudo_normed_group_with_Tinv r' M] :
+instance to_comphaus_filtered_pseudo_normed_group_with_Tinv
+  (M : Type*) [profinitely_filtered_pseudo_normed_group_with_Tinv r' M] :
   comphaus_filtered_pseudo_normed_group_with_Tinv r' M :=
 { ..(infer_instance : profinitely_filtered_pseudo_normed_group_with_Tinv r' M) }
 
@@ -63,11 +64,11 @@ end profinitely_filtered_pseudo_normed_group_with_Tinv
 section
 set_option old_structure_cmd true
 
-open profinitely_filtered_pseudo_normed_group_with_Tinv
+open comphaus_filtered_pseudo_normed_group_with_Tinv
 
 structure comphaus_filtered_pseudo_normed_group_with_Tinv_hom (r' : ℝ≥0) (M₁ M₂ : Type*)
-  [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₁]
-  [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₂]
+  [comphaus_filtered_pseudo_normed_group_with_Tinv r' M₁]
+  [comphaus_filtered_pseudo_normed_group_with_Tinv r' M₂]
   extends M₁ →+ M₂ :=
 (strict' : ∀ ⦃c x⦄, x ∈ filtration M₁ c → to_fun x ∈ filtration M₂ c)
 (continuous' : ∀ c, continuous (pseudo_normed_group.level to_fun strict' c))
@@ -80,13 +81,13 @@ attribute [nolint doc_blame] comphaus_filtered_pseudo_normed_group_with_Tinv_hom
 
 namespace comphaus_filtered_pseudo_normed_group_with_Tinv_hom
 
-open profinitely_filtered_pseudo_normed_group_with_Tinv
+open comphaus_filtered_pseudo_normed_group_with_Tinv
 
 variables {r' : ℝ≥0} {M M₁ M₂ M₃ : Type*}
-variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M]
-variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₁]
-variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₂]
-variables [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₃]
+variables [comphaus_filtered_pseudo_normed_group_with_Tinv r' M]
+variables [comphaus_filtered_pseudo_normed_group_with_Tinv r' M₁]
+variables [comphaus_filtered_pseudo_normed_group_with_Tinv r' M₂]
+variables [comphaus_filtered_pseudo_normed_group_with_Tinv r' M₃]
 variables (f g : comphaus_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂)
 
 instance : has_coe_to_fun (comphaus_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂)
@@ -168,15 +169,15 @@ by cases f; cases g; cases h; refl
 
 variables (f)
 
-/-- The `profinitely_filtered_pseudo_normed_group_hom` underlying a
+/-- The `comphaus_filtered_pseudo_normed_group_hom` underlying a
 `comphaus_filtered_pseudo_normed_group_with_Tinv_hom`. -/
-def to_profinitely_filtered_pseudo_normed_group_hom :
+def to_comphaus_filtered_pseudo_normed_group_hom :
   comphaus_filtered_pseudo_normed_group_hom M₁ M₂ :=
 comphaus_filtered_pseudo_normed_group_hom.mk_of_strict f.to_add_monoid_hom
 (λ c, ⟨λ x h, f.strict h, f.level_continuous c⟩)
 
 lemma to_profinitely_filtered_pseudo_normed_group_hom_strict :
-  f.to_profinitely_filtered_pseudo_normed_group_hom.strict :=
+  f.to_comphaus_filtered_pseudo_normed_group_hom.strict :=
 comphaus_filtered_pseudo_normed_group_hom.mk_of_strict_strict _ _
 
 variables {f}
@@ -245,6 +246,7 @@ end punit
 namespace profinitely_filtered_pseudo_normed_group_with_Tinv
 
 section
+-- TODO: Generalize this section to `comphaus_filtered...` as needed.
 /-! ## Powers -/
 
 noncomputable theory

@@ -97,7 +97,7 @@ end
       split_ifs, { rw [nnnorm_zero, zero_mul], exact zero_le' }, { refl } }
   end,
   map_Tinv' := λ F, begin
-    simp only [Tinv_apply, Mbar.Tinv_apply],
+    erw [Tinv_apply, Mbar.Tinv_apply],
     ext s (_|n),
     { simp only [to_Mbar_to_fun, eq_self_iff_true, if_true, Mbar.Tinv_zero], },
     { simp only [to_Mbar_to_fun, nat.succ_ne_zero, int.coe_nat_succ, shift_to_fun_to_fun,

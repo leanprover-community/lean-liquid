@@ -753,7 +753,7 @@ instance [fact (0 < r)] :
   .. (_: profinitely_filtered_pseudo_normed_group (ℒ S))}
 
 @[simp] lemma Tinv_apply [fact (0 < r)] (F : ℒ S) :
-  profinitely_filtered_pseudo_normed_group_with_Tinv.Tinv F = shift 1 F := rfl
+  comphaus_filtered_pseudo_normed_group_with_Tinv.Tinv F = shift 1 F := rfl
 
 variable {α : Type*}
 

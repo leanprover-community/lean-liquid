@@ -75,7 +75,7 @@ def Tinv_limit_fun'
     intros i j f,
     ext1,
     show (K.map f) (Tinv _) = Tinv _,
-    rw (K.map f).map_Tinv, congr' 1,
+    erw (K.map f).map_Tinv, congr' 1,
     simpa only [functor.comp_map, subtype.val_eq_coe, subtype.ext_iff] using x.2 f,
   end⟩
 
@@ -215,7 +215,6 @@ def limit_cone {J : Type u} [small_category J] (K : J ⥤ ProFiltPseuNormGrpWith
         rintro ⟨⟨c,x⟩⟩,
         dsimp [Tinv, Tinv_limit, Tinv_limit_fun, Tinv_limit_fun', Tinv_limit_fun_aux],
         dsimp [ProFiltPseuNormGrp₁.limit_cone, CompHausFiltPseuNormGrp₁.limit_cone],
-        erw quotient.map'_mk',
         change proj (K ⋙ to_PFPNG₁ r ⋙ to_CHFPNG₁) j (incl _ _) = _,
         change _ = Tinv (proj _ _ (incl _ _)),
         dsimp [proj],
@@ -312,8 +311,8 @@ def product.lift {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrpWithTi
     change ⇑(product.lift (λ (i : α), (to_PFPNG₁ r).obj (X i)) ((to_PFPNG₁ r).obj M)
       (λ (i : α), (to_PFPNG₁ r).map (f i))) (Tinv x) i = _,
     rw ProFiltPseuNormGrp₁.product.lift_to_fun,
-    change (f i) _ = _,
-    simpa [(f i).map_Tinv],
+    erw (f i).map_Tinv,
+    refl,
   end,
   ..(ProFiltPseuNormGrp₁.product.lift
       (λ i, (to_PFPNG₁ r).obj (X i))

@@ -13,10 +13,6 @@ local attribute [instance] type_pow
 def ProFiltPseuNormGrp : Type (u+1) :=
 bundled profinitely_filtered_pseudo_normed_group
 
-/-- The category of profinitely filtered pseudo-normed groups with action of `T⁻¹`. -/
-def ProFiltPseuNormGrpWithTinv (r : ℝ≥0) : Type (u+1) :=
-bundled (@profinitely_filtered_pseudo_normed_group_with_Tinv r)
-
 namespace ProFiltPseuNormGrp
 
 local attribute [instance] CompHausFiltPseuNormGrp.bundled_hom
