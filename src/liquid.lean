@@ -79,7 +79,7 @@ first_target r r' BD κ
 
 
 /-- Theorem 9.4 in [Analytic] -/
-theorem thnm94 :
+theorem thm94 :
   ∀ m : ℕ, ∃ (k K : ℝ≥0) (hk : fact (1 ≤ k)) (c₀ : ℝ≥0),
   ∀ (S : Profinite) (V : SemiNormedGroup.{0}) [normed_with_aut r V],
     ​((BD.data.system κ r V r').obj (op $ of r' ((Mbar.functor.{0 0} r').obj S)))
