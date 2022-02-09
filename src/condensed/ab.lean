@@ -7,6 +7,7 @@ import algebra.group.ulift
 import for_mathlib.abelian_sheaves.main
 
 import condensed.adjunctions
+import condensed.top_comparison
 
 /-!
 # Properties of the category of condensed abelian groups
@@ -69,7 +70,13 @@ def of_top_ab.presheaf : Profinite.{u}ᵒᵖ ⥤ Ab.{u} :=
 /-- The condensed abelian group associated with a topological abelian group -/
 def of_top_ab : Condensed.{u} Ab.{u+1} :=
 { val := of_top_ab.presheaf A ⋙ Ab.ulift.{u+1},
-  cond := sorry }
+  cond := begin
+    rw category_theory.presheaf.is_sheaf_iff_is_sheaf_forget _ _ (forget Ab),
+    swap, apply_instance,
+    let B := Top.of A,
+    change presheaf.is_sheaf _ B.to_Condensed.val,
+    exact B.to_Condensed.cond,
+  end }
 
 end
 
