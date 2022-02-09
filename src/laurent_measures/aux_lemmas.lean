@@ -2,6 +2,7 @@
 import data.finset.nat_antidiagonal
 import analysis.normed_space.basic
 import analysis.specific_limits
+import laurent_measures.clean
 
 noncomputable theory
 
@@ -32,63 +33,31 @@ end
 
 --for `mathlib`?
 def equiv_bdd_integer_nat (N : ℤ) : ℕ ≃ {x // N ≤ x} :=
-begin
-  fconstructor,
-  { exact λ n, ⟨n + N, le_add_of_nonneg_left (int.coe_nat_nonneg n)⟩ },
-  { rintro ⟨x, hx⟩,
-    use (int.eq_coe_of_zero_le (sub_nonneg.mpr hx)).some },
-  { intro a,
-    simp_rw [add_tsub_cancel_right],
-    exact (int.coe_nat_inj $ Exists.some_spec $ int.eq_coe_of_zero_le $ int.of_nat_nonneg a).symm },
-  { rintro ⟨_, hx⟩,
-    simp only,
-    exact add_eq_of_eq_sub ((int.eq_coe_of_zero_le (sub_nonneg.mpr hx)).some_spec).symm }
-end
+(int.nonneg_equiv_nat N).symm
 
 def equiv_Icc_bdd_nonneg {d : ℤ} (hd : 0 ≤ d) : {x // d ≤ x } ≃
   {x // x ∉ range (int.eq_coe_of_zero_le hd).some}:=
-begin
-  fconstructor,
-  { rintro ⟨_, h⟩,
-    have := (int.eq_coe_of_zero_le (hd.trans h)).some_spec,
-    rw [(int.eq_coe_of_zero_le hd).some_spec, this, int.coe_nat_le, ← not_lt, ← mem_range] at h,
-    exact ⟨_, h⟩ },
-  { rintro ⟨_, h⟩,
-    rw [mem_range, nat.lt_iff_add_one_le, not_le, nat.lt_add_one_iff, ← int.coe_nat_le,
-      ← (int.eq_coe_of_zero_le hd).some_spec] at h,
-    exact ⟨_, h⟩ },
-  { rintro ⟨_, h⟩,
-    simp only [int.coe_nat_inj', int.of_nat_eq_coe],
-    exact (int.eq_coe_of_zero_le (hd.trans h)).some_spec.symm },
-  { rintro ⟨_, h⟩,
-    simp only [int.coe_nat_inj', int.of_nat_eq_coe],
-    exact ((@exists_eq' _ _).some_spec).symm },
-end
+(equiv.add_neg d 0).trans (int_subtype_nonneg_equiv.trans $
+  (int.eq_coe_of_zero_le hd).some.le_equiv_nat.symm.trans (by simp))
 
 def T {d : ℤ} (hd : d < 0) : finset {x : ℤ // d ≤ x} := Ico ⟨d, le_of_eq rfl⟩ ⟨0, le_of_lt hd⟩
 
-def equiv_Ico_nat_neg {d : ℤ} (hd : d < 0) : { y : {x : ℤ // d ≤ x } // y ∉ T hd } ≃ ℕ :=
+lemma mem_Ico_nat_neg {d : ℤ} (hd : d < 0) (z : {y : {x : ℤ // d ≤ x } // y ∉ T hd}) :
+  (0 : ℤ) ≤ z :=
 begin
-  fconstructor,
-  { rintro ⟨⟨a, ha⟩, hx⟩,
-    have : 0 ≤ a,
-    simpa only [subtype.mk_le_mk, subtype.mk_lt_mk, not_and, not_lt, ha, forall_true_left] using (not_iff_not_of_iff mem_Ico).mp hx,
-    use (int.eq_coe_of_zero_le this).some },
-  { intro n,
-    use n,
-    have : d ≤ n,
-    repeat { exact le_of_lt (lt_of_lt_of_le hd (int.of_nat_nonneg n))},
-    apply (not_iff_not_of_iff mem_Ico).mpr,
-    simp only [subtype.mk_lt_mk, not_and, not_lt, implies_true_iff, int.coe_nat_nonneg] at * },
-    { rintro ⟨⟨x, hx⟩, h⟩,
-      simp only,
-      have := (not_iff_not_of_iff mem_Ico).mp h,
-      simp only [subtype.mk_le_mk, not_and, not_lt, hx, forall_true_left] at this,
-      exact (Exists.some_spec (int.eq_coe_of_zero_le this)).symm },
-    { intro n,
-      simp only [int.coe_nat_inj'],
-      exact ((@exists_eq' _ _).some_spec).symm },
+  rcases z with ⟨⟨z, dz⟩, hz⟩,
+  have : d ≤ z → 0 ≤ z, { simpa [T] using hz },
+  exact this dz
 end
+
+def equiv_Ico_int_nonneg {d : ℤ} (hd : d < 0) : {y // y ∉ T hd} ≃ {x : ℤ // 0 ≤ x} :=
+{ to_fun    := λ z, ⟨_, mem_Ico_nat_neg hd z⟩,
+  inv_fun   := λ n, ⟨⟨n, hd.le.trans n.2⟩, by { simp [T], exact λ h, n.2 }⟩,
+  left_inv  := λ n, by simp,
+  right_inv := λ n, by simp }
+
+def equiv_Ico_nat_neg {d : ℤ} (hd : d < 0) : { y : {x : ℤ // d ≤ x } // y ∉ T hd } ≃ ℕ :=
+(equiv_Ico_int_nonneg hd).trans int_subtype_nonneg_equiv
 
 def R {d n : ℤ} (hn : 0 ≤ n - d) : finset {x : ℤ // d ≤ x} := Icc ⟨d, le_of_eq rfl⟩ ⟨n, int.le_of_sub_nonneg hn⟩
 
@@ -190,18 +159,26 @@ sum_range_sum_Icc' f hn
 lemma equiv_Icc_bdd_nonneg_apply {d : ℤ} (hd : 0 ≤ d) (x : {x // d ≤ x}) :
   ((equiv_Icc_bdd_nonneg hd x) : ℤ) = x.1 :=
 begin
-  rcases x with ⟨_, h⟩,
+  have : ((equiv_Icc_bdd_nonneg hd) x : ℤ) = x,
+  simp,
+     simp [equiv_Icc_bdd_nonneg, int_subtype_nonneg_equiv, nat.le_equiv_nat ],
+  rcases x with ⟨x, hx⟩,
+  simp only [hx, equiv_Icc_bdd_nonneg, int_subtype_nonneg_equiv, nat.le_equiv_nat, zero_add,
+    subtype.coe_mk, eq_mpr_eq_cast, equiv.coe_trans, equiv.coe_fn_symm_mk, equiv.coe_fn_mk,
+    function.comp_app, equiv.add_neg_eval, coe_coe],
+    simp,
+cases x,
+  simp [equiv_Icc_bdd_nonneg],
+  simp [equiv_Icc_bdd_nonneg, int_subtype_nonneg_equiv, nat.le_equiv_nat],
+  dsimp,
+  refl,
+  simp [equiv_Icc_bdd_nonneg, int_subtype_nonneg_equiv, nat.le_equiv_nat],
   exact (Exists.some_spec (int.eq_coe_of_zero_le (hd.trans h))).symm,
 end
 
-
 lemma equiv_Ico_nat_neg_apply {d : ℤ} (hd : d < 0) {y : {x : ℤ // d ≤ x}} (h : y ∉ T hd) : y.1 = (equiv_Ico_nat_neg hd) ⟨y, h⟩ :=
-begin
-  rcases y with ⟨_, hy⟩,
-  have := (not_iff_not_of_iff mem_Ico).mp h,
-  simp only [subtype.mk_le_mk, subtype.mk_lt_mk, not_and, not_lt, hy, forall_true_left] at this,
-  exact (Exists.some_spec (int.eq_coe_of_zero_le this))
-end
+by simp only [equiv_Ico_nat_neg, equiv_Ico_int_nonneg, subtype.val_eq_coe, coe_coe, subtype.coe_mk,
+  equiv.coe_trans, equiv.coe_fn_mk, int_subtype_nonneg_equiv_eval]
 
 lemma equiv_Icc_R_apply {d n : ℤ} (hn : 0 ≤ n - d) (x : Icc d n) : ((equiv_Icc_R hn x) : ℤ) =
   (x : ℤ) := by {rcases x, refl}
