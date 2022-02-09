@@ -212,10 +212,97 @@ lemma Presheaf.map_comp {A B C : CompHausFiltPseuNormGrp₁} (f : A ⟶ B) (g : 
 
 set_option pp.universes true
 
+lemma Presheaf_comp_ulift_is_sheaf_aux_equalizer
+  (A : CompHausFiltPseuNormGrp₁.{u}) :
+  (A.Presheaf ⋙ Ab.ulift.{u+1 u} ⋙ forget.{u+2 u+1 u+1} Ab.{u+1}).equalizer_condition :=
+begin
+  intros X B π hh,
+  split,
+  { rintros ⟨x⟩ ⟨y⟩ h,
+    ext t,
+    obtain ⟨t,rfl⟩ := hh t,
+    apply_fun (λ e, e.val.down.val t) at h,
+    exact h },
+  { rintros ⟨⟨⟨t,c,t',ht',ht⟩⟩,h⟩,
+    let E : Top := Top.of (filtration A c),
+    let t'' : Profinite.to_Top.obj X ⟶ E := ⟨t',ht'⟩,
+    have hw : Profinite.to_Top.{u}.map (Profinite.pullback.fst.{u} π π) ≫ t'' =
+      Profinite.to_Top.{u}.map (Profinite.pullback.snd.{u} π π) ≫ t'',
+    { dsimp at h,
+      ext i,
+      dsimp [Profinite.pullback.fst, Profinite.pullback.snd],
+      apply_fun (λ e, e.down.val i) at h,
+      change (coe ∘ t') i.val.fst = (coe ∘ t') i.val.snd,
+      rw ← ht,
+      exact h },
+    let w := Profinite.descend_to_Top π t'' hh hw,
+    refine ⟨⟨⟨_,c,w,w.2,rfl⟩⟩,_⟩,
+    ext : 3,
+    dsimp,
+    rw ht,
+    ext i,
+    dsimp [CompHausFiltPseuNormGrp₁.Presheaf, Ab.ulift,
+      functor.map_to_equalizer],
+    have := Profinite.π_descend_to_Top π t'' hh hw,
+    apply_fun (λ e, (e i).val) at this, exact this }
+end
+
+lemma Presheaf_comp_ulift_is_sheaf (A : CompHausFiltPseuNormGrp₁.{u}):
+  presheaf.is_sheaf proetale_topology (Presheaf A ⋙ Ab.ulift.{u+1}) :=
+begin
+  rw category_theory.presheaf.is_sheaf_iff_is_sheaf_forget _ _ (forget Ab),
+  swap, apply_instance,
+  rw is_sheaf_iff_is_sheaf_of_type,
+  erw (functor.is_proetale_sheaf_of_types_tfae
+    (A.Presheaf ⋙ Ab.ulift.{u+1} ⋙ forget _)).out 0 5,
+  refine ⟨_,_,_⟩,
+  { dsimp [functor.empty_condition],
+    split,
+    { intros a b h, ext ⟨⟩ },
+    { intros x, dsimp,
+      refine ⟨⟨⟨λ x, x.elim, 0, λ x, x.elim, by continuity, _⟩⟩, _⟩,
+      { ext ⟨⟩ },
+      { cases x, refl } } },
+  { intros X Y,
+    split,
+    { rintros ⟨x⟩ ⟨y⟩ h, dsimp at h,
+      ext : 2,
+      dsimp,
+      ext (t|t),
+      { apply_fun (λ e, e.fst.down.val t) at h, exact h },
+      { apply_fun (λ e, e.snd.down.val t) at h, exact h } },
+    { rintros ⟨⟨f,c,f',hf',hf⟩,⟨g,d,g',hg',hg⟩⟩,
+      let p : X.sum Y → A := λ t, sum.rec_on t f g,
+      let e : ℝ≥0 := c ⊔ d,
+      haveI : fact (c ≤ e) := ⟨le_sup_left⟩,
+      haveI : fact (d ≤ e) := ⟨le_sup_right⟩,
+      let p' : X.sum Y → filtration A e :=
+        λ t, sum.rec_on t (cast_le ∘ f') (cast_le ∘ g'),
+      have hp' : continuous p',
+      { apply continuous_sup_dom,
+        { apply continuous_coinduced_dom,
+          have : p' ∘ sum.inl = cast_le ∘ f', by ext; refl,
+          rw this,
+          apply continuous.comp _ hf',
+          apply continuous_cast_le },
+        { apply continuous_coinduced_dom,
+          have : p' ∘ sum.inr = cast_le ∘ g', by ext; refl,
+          rw this,
+          apply continuous.comp _ hg',
+          apply continuous_cast_le } },
+      have hh : p = coe ∘ p',
+      { ext (a|a),
+        { apply_fun (λ u, u a) at hf, exact hf },
+        { apply_fun (λ u, u a) at hg, exact hg } },
+      refine ⟨⟨⟨p,e,p',hp',hh⟩⟩,_⟩,
+      ext; refl } },
+  { apply Presheaf_comp_ulift_is_sheaf_aux_equalizer }
+end
+
 def to_Condensed : CompHausFiltPseuNormGrp₁.{u} ⥤ Condensed.{u} Ab.{u+1} :=
 { obj := λ A,
   { val := Presheaf A ⋙ Ab.ulift.{u+1},
-    cond := sorry }, -- ← this one will be hard
+    cond := Presheaf_comp_ulift_is_sheaf _ }, -- ← this one will be hard
   map := λ A B f, ⟨whisker_right (Presheaf.map f) _⟩,
   map_id' := λ X, by { ext : 2, dsimp, simp },
   map_comp' := λ X Y Z f g, by { ext : 2, dsimp, simp } }
