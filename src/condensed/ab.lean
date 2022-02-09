@@ -191,7 +191,6 @@ end presheaf
 
 open opposite
 
--- we need to use `as_small Profiniteᵒᵖ`
 def Presheaf (A : CompHausFiltPseuNormGrp₁.{u}) : Profinite.{u}ᵒᵖ ⥤ Ab :=
 { obj := λ S, ⟨presheaf A (unop S)⟩,
   map := λ S T φ, presheaf.comap A φ.unop,
