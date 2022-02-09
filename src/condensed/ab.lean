@@ -302,7 +302,7 @@ end
 def to_Condensed : CompHausFiltPseuNormGrp₁.{u} ⥤ Condensed.{u} Ab.{u+1} :=
 { obj := λ A,
   { val := Presheaf A ⋙ Ab.ulift.{u+1},
-    cond := Presheaf_comp_ulift_is_sheaf _ }, -- ← this one will be hard
+    cond := Presheaf_comp_ulift_is_sheaf _ },
   map := λ A B f, ⟨whisker_right (Presheaf.map f) _⟩,
   map_id' := λ X, by { ext : 2, dsimp, simp },
   map_comp' := λ X Y Z f g, by { ext : 2, dsimp, simp } }
