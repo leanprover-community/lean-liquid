@@ -1,7 +1,7 @@
 import category_theory.abelian.ext
 
 import liquid
-import Mbar.functor
+import Lbar.functor
 import condensed.projective_resolution
 
 noncomputable theory
@@ -14,12 +14,12 @@ open_locale nnreal
 variables (r r' : ℝ≥0)
 variables [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r < 1)] [fact (r' < 1)]
 
-namespace Mbar
+namespace Lbar
 
 open ProFiltPseuNormGrpWithTinv₁ ProFiltPseuNormGrp₁ CompHausFiltPseuNormGrp₁
 
 def condensed : Profinite.{u} ⥤ Condensed.{u} Ab.{u+1} :=
-Mbar.functor.{u u} r' ⋙ to_PFPNG₁.{u} _ ⋙ to_CHFPNG₁.{u} ⋙ to_Condensed.{u}
+Lbar.functor.{u u} r' ⋙ to_PFPNG₁.{u} _ ⋙ to_CHFPNG₁.{u} ⋙ to_Condensed.{u}
 
 /-
 WARNING/TODO:: We need the `ℤ[T⁻¹]`-linear version of the following statement,
@@ -33,4 +33,4 @@ theorem Ext_iso_zero (S : Profinite.{0}) (V : SemiNormedGroup.{0}) [normed_with_
       (Condensed.of_top_ab V) ≅ 0 :=
 sorry
 
-end Mbar
+end Lbar

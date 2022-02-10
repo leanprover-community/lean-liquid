@@ -1,17 +1,17 @@
 import .all
 run_cmd tactic.skip
 
--- Mbar/ext.lean
-apply_nolint Mbar.Ext_iso_zero def_lemma
-apply_nolint Mbar.condensed unused_arguments
+-- Lbar/ext.lean
+apply_nolint Lbar.Ext_iso_zero def_lemma
+apply_nolint Lbar.condensed unused_arguments
 
--- Mbar/functor.lean
-apply_nolint Mbar.map_add unused_arguments
-apply_nolint Mbar.map_strict unused_arguments
-apply_nolint Mbar.map_zero unused_arguments
+-- Lbar/functor.lean
+apply_nolint Lbar.map_add unused_arguments
+apply_nolint Lbar.map_strict unused_arguments
+apply_nolint Lbar.map_zero unused_arguments
 
--- Mbar/ses.lean
-apply_nolint laurent_measures.to_Mbar unused_arguments
+-- Lbar/ses.lean
+apply_nolint laurent_measures.to_Lbar unused_arguments
 
 -- breen_deligne/category.lean
 apply_nolint breen_deligne.FreeMat.kronecker_map_reindex_left unused_arguments
@@ -29,7 +29,7 @@ apply_nolint liquid_tensor_experiment def_lemma
 apply_nolint Condensed.has_coe unused_arguments
 
 -- combinatorial_lemma/finite.lean
-apply_nolint Mbar.mk_tensor def_lemma
+apply_nolint Lbar.mk_tensor def_lemma
 apply_nolint lem98_finite def_lemma
 
 -- combinatorial_lemma/profinite.lean

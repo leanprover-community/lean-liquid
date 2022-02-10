@@ -8,7 +8,7 @@ Both types come with useful machinery, and the purpose of this file
 is to transport some of the machinery from one to the other.
 
 We also define a new induction principle on `free_abelian_group X`,
-needed for proving that the maps in `Mbar_complex` compose the way they should.
+needed for proving that the maps in `Lbar_complex` compose the way they should.
 This induction principle is `induction_on_free_predicate` below.
 A `free_predicate` on a free abelian group is a predicate that contains
 `a : free_abelian_group X` if and only if it contains all the summands of `a`.

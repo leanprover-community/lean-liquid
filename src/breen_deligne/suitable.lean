@@ -51,7 +51,7 @@ namespace basic_universal_map
 
 variables (f : basic_universal_map m n)
 
-/-- Addition goes from `Mbar r' S c` to `Mbar r' S κ` for suitable `κ`.
+/-- Addition goes from `Lbar r' S c` to `Lbar r' S κ` for suitable `κ`.
 This predicate says what *suitable* means for basic universal maps.
 See Lemma 9.11 of [Analytic]. -/
 def suitable (f : basic_universal_map m n) (c₁ c₂ : ℝ≥0) : Prop :=

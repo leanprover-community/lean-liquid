@@ -37,7 +37,7 @@ include r r' BD κ
 theorem first_target :
   ∀ m : ℕ, ∃ (k K : ℝ≥0) (hk : fact (1 ≤ k)) (c₀ : ℝ≥0),
   ∀ (S : Type) [fintype S] (V : SemiNormedGroup.{0}) [normed_with_aut r V],
-    ​((BD.data.system κ r V r').obj (op $ of r' (Mbar r' S))).is_weak_bounded_exact k K m c₀ :=
+    ​((BD.data.system κ r V r').obj (op $ of r' (Lbar r' S))).is_weak_bounded_exact k K m c₀ :=
 begin
   intro m,
   obtain ⟨k, K, hk, H⟩ := thm95'' BD r r' κ m,
@@ -45,7 +45,7 @@ begin
   use [k, K, hk, c₀],
   introsI S hS V hV,
   specialize H S V,
-  let i := (BD.data.system κ r V r').map_iso (HomZ_iso (of r' $ Mbar r' S)).op,
+  let i := (BD.data.system κ r V r').map_iso (HomZ_iso (of r' $ Lbar r' S)).op,
   refine H.of_iso i.symm _,
   intros c n,
   rw ← system_of_complexes.apply_hom_eq_hom_apply,
@@ -67,7 +67,7 @@ The proof reduces to `thm95''` (a variant of Theorem 9.5).
   See also the "Brief note on type theory" in `README.md`.
 * `[normed_with_aut r V]` adds the assumption that `V` is endowed with an automorphism `T`
   that scales elements `v` of `V` by the positive scalar `r`: `∥T(v)∥ = r * ∥v∥`.
-* `Mbar_system` is the system of complexes of seminormed groups
+* `Lbar_system` is the system of complexes of seminormed groups
   occuring in Theorems 9.4/9.5 of [Analytic].
 * `is_bounded_exact` is the assertion that a system of complexes
   of seminormed groups satisfies a suitable exactness criterion of being
@@ -82,7 +82,7 @@ first_target r r' BD κ
 theorem thm94 :
   ∀ m : ℕ, ∃ (k K : ℝ≥0) (hk : fact (1 ≤ k)) (c₀ : ℝ≥0),
   ∀ (S : Profinite) (V : SemiNormedGroup.{0}) [normed_with_aut r V],
-    ​((BD.data.system κ r V r').obj (op $ of r' ((Mbar.functor.{0 0} r').obj S)))
+    ​((BD.data.system κ r V r').obj (op $ of r' ((Lbar.functor.{0 0} r').obj S)))
       .is_weak_bounded_exact k K m c₀ :=
 begin
   intro m,
@@ -91,7 +91,7 @@ begin
   use [k, K, hk, c₀],
   introsI S V hV,
   specialize H S V,
-  let i := (BD.data.system κ r V r').map_iso (HomZ_iso (of r' $ (Mbar.functor.{0 0} r').obj S)).op,
+  let i := (BD.data.system κ r V r').map_iso (HomZ_iso (of r' $ (Lbar.functor.{0 0} r').obj S)).op,
   refine H.of_iso i.symm _,
   intros c n,
   rw ← system_of_complexes.apply_hom_eq_hom_apply,

@@ -1,5 +1,5 @@
 import pseudo_normed_group.system_of_complexes
-import Mbar.pseudo_normed_group
+import Lbar.pseudo_normed_group
 import breen_deligne.homotopy
 
 .
@@ -20,4 +20,4 @@ def first_target_stmt : Prop :=
   ∃ c₀ : ℝ≥0,
   ∀ (S : Type) [fintype S],
   ∀ (V : SemiNormedGroup.{0}) [normed_with_aut r V],
-    ​((BD.data.system κ r V r').obj (op $ of r' (Mbar r' S))).is_weak_bounded_exact k K m c₀
+    ​((BD.data.system κ r V r').obj (op $ of r' (Lbar r' S))).is_weak_bounded_exact k K m c₀

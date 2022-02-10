@@ -35,7 +35,7 @@ The statement can be found in [`src/liquid.lean`](https://github.com/leanprover-
 theorem first_target :
   ∀ m : ℕ, ∃ (k K : ℝ≥0) [fact (1 ≤ k)] (c₀ : ℝ≥0),
   ∀ (S : Type) [fintype S] (V : SemiNormedGroup.{0}) [normed_with_aut r V],
-    ​((BD.data.system κ r V r').obj (op $ of r' (Mbar r' S))).is_weak_bounded_exact k K m c₀ := _
+    ​((BD.data.system κ r V r').obj (op $ of r' (Lbar r' S))).is_weak_bounded_exact k K m c₀ := _
 ```
 
 See [`src/liquid.lean`](https://github.com/leanprover-community/lean-liquid/blob/master/src/liquid.lean#40)
@@ -84,7 +84,7 @@ you are all set to start exploring the code.
 There are two pieces of functionality that help a lot when browsing through Lean code:
 
 * "Go to definition": If you right-click on a name of a definition or lemma
-  (such as `Mbar`, or `Tinv_continuous`), then you can choose "Go to definition" from the menu,
+  (such as `Lbar`, or `Tinv_continuous`), then you can choose "Go to definition" from the menu,
   and you will be taken to the relevant location in the source files.
   This also works by `Ctrl`-clicking on the name.
 * "Goal view": in the event that you would like to read a *proof*,
@@ -108,7 +108,7 @@ There are two pieces of functionality that help a lot when browsing through Lean
     of seminormed groups indexed by nonnegative real numbers.
     It also contains the definition of `is_bounded_exact`,
     which is the exactness condition claimed in the main theorem.
-  - `Mbar/*.lean` contains a definition of the spaces ![](svg/VhatMbar.svg)
+  - `Lbar/*.lean` contains a definition of the spaces ![](svg/VhatLbar.svg)
     and how they fit together in the system of complexes
     that occurs in the statement of the theorem.
 

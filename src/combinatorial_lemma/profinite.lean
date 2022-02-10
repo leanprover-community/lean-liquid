@@ -400,23 +400,23 @@ begin
 end
 
 def hom_diagram : discrete_quotient S ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r' :=
-S.fintype_diagram ⋙ Mbar.fintype_functor.{u u} r' ⋙ hom_functor r' Λ
+S.fintype_diagram ⋙ Lbar.fintype_functor.{u u} r' ⋙ hom_functor r' Λ
 
-/-- The cone over `hom_diagram` whose cone point is defeq to `Hom(Λ, Mbar S)`.
+/-- The cone over `hom_diagram` whose cone point is defeq to `Hom(Λ, Lbar S)`.
 See lemma below. -/
-def hom_Mbar_cone : cone (hom_diagram r' Λ S) :=
+def hom_Lbar_cone : cone (hom_diagram r' Λ S) :=
 (hom_functor r' Λ).map_cone
-  (limit.cone (S.fintype_diagram ⋙ Mbar.fintype_functor.{u u} r'))
+  (limit.cone (S.fintype_diagram ⋙ Lbar.fintype_functor.{u u} r'))
 
 @[simp]
-lemma hom_Mbar_cone_X : (hom_Mbar_cone r' Λ S ).X =
-  ((hom_functor.{u} r' Λ).obj ((Mbar.functor.{u u} r').obj S)) := rfl
+lemma hom_Lbar_cone_X : (hom_Lbar_cone r' Λ S ).X =
+  ((hom_functor.{u} r' Λ).obj ((Lbar.functor.{u u} r').obj S)) := rfl
 
-/-- The cone with cone point `Hom(Λ, Mbar S)_{≤ c}` is indeed a limit cone. -/
-def hom_Mbar_cone_is_limit (c) : is_limit (((level r').obj c).map_cone
-  (hom_Mbar_cone r' Λ S)) :=
+/-- The cone with cone point `Hom(Λ, Lbar S)_{≤ c}` is indeed a limit cone. -/
+def hom_Lbar_cone_is_limit (c) : is_limit (((level r').obj c).map_cone
+  (hom_Lbar_cone r' Λ S)) :=
 begin
-  let E := (limit.cone (S.fintype_diagram ⋙ Mbar.fintype_functor.{u u} r')),
+  let E := (limit.cone (S.fintype_diagram ⋙ Lbar.fintype_functor.{u u} r')),
   change is_limit (((hom_functor.{u} r' Λ ⋙ (level r').obj c)).map_cone E),
   apply is_limit_of_preserves (hom_functor.{u} r' Λ ⋙ (level r').obj c)
     (limit.is_limit _),
@@ -425,12 +425,12 @@ end .
 
 -- This should follow from the finite case of lem98.
 lemma gadget_nonempty (N : ℕ) [fact (0 < N)] (T : discrete_quotient S)
-  (c) (t) : nonempty ((gadget_diagram (hom_Mbar_cone r' Λ _) N c (d Λ N) t).obj T) :=
+  (c) (t) : nonempty ((gadget_diagram (hom_Lbar_cone r' Λ _) N c (d Λ N) t).obj T) :=
 begin
   obtain ⟨h⟩ := lem98_finite Λ T N,
   specialize h c,
-  let u : (hom_Mbar_cone r' Λ S).X ⟶ (hom_diagram r' Λ S).obj T :=
-    ((hom_Mbar_cone r' Λ S).π.app T),
+  let u : (hom_Lbar_cone r' Λ S).X ⟶ (hom_diagram r' Λ S).obj T :=
+    ((hom_Lbar_cone r' Λ S).π.app T),
   let t' := t ≫ ((level r').obj c).map u,
   specialize h (t' punit.star).1 (t' punit.star).2,
   swap, apply_instance,
@@ -446,14 +446,14 @@ end
 
 -- This should follow from Tychonoff and `gadget_nonempty`.
 lemma key (N : ℕ) [fact (0 < N)] (c) (t) :
-  nonempty (((hom_functor r' Λ).obj ((Mbar.functor.{u u} r').obj S)).gadget N c (d Λ N) t) :=
+  nonempty (((hom_functor r' Λ).obj ((Lbar.functor.{u u} r').obj S)).gadget N c (d Λ N) t) :=
 begin
-  let E := gadget_cone (hom_Mbar_cone r' Λ _) N c (d Λ N) t,
+  let E := gadget_cone (hom_Lbar_cone r' Λ _) N c (d Λ N) t,
   let hE : is_limit E := gadget_cone_is_limit _ _ _ _ _ _,
-  swap, { intros a, apply hom_Mbar_cone_is_limit },
+  swap, { intros a, apply hom_Lbar_cone_is_limit },
   let E' := Profinite.to_Top.map_cone E,
   let hE' : is_limit E' := is_limit_of_preserves _ hE,
-  let G := gadget_diagram (hom_Mbar_cone r' Λ S) N c (d Λ N) t ⋙ Profinite.to_Top,
+  let G := gadget_diagram (hom_Lbar_cone r' Λ S) N c (d Λ N) t ⋙ Profinite.to_Top,
   let T : E'.X ≅ (Top.limit_cone G).X :=
     hE'.cone_point_unique_up_to_iso (Top.limit_cone_is_limit G),
   suffices : nonempty (Top.limit_cone G).X,
@@ -463,22 +463,22 @@ begin
   { intros, apply gadget_nonempty, },
   { intros j,
     change compact_space
-      ((gadget_diagram (hom_Mbar_cone r' Λ S) N c (d Λ N) t).obj j),
+      ((gadget_diagram (hom_Lbar_cone r' Λ S) N c (d Λ N) t).obj j),
     apply_instance },
   { intros j,
     change t2_space
-      ((gadget_diagram (hom_Mbar_cone r' Λ S) N c (d Λ N) t).obj j),
+      ((gadget_diagram (hom_Lbar_cone r' Λ S) N c (d Λ N) t).obj j),
     apply_instance },
 end
 
 /-- Lemma 9.8 of [Analytic], with somewhat restrictive universes -/
 theorem main (r' : ℝ≥0) [fact (0 < r')] [fact (r' < 1)]
   (Λ : Type u) [polyhedral_lattice Λ] (S : Profinite.{u}) (N : ℕ) [hN : fact (0 < N)] :
-  pseudo_normed_group.splittable (Λ →+ (Mbar.functor.{u u} r').obj S) N (d Λ N) :=
+  pseudo_normed_group.splittable (Λ →+ (Lbar.functor.{u u} r').obj S) N (d Λ N) :=
 begin
   constructor,
   intros c u hu,
-  let t : Profinite.punit ⟶ ((hom_functor r' Λ).obj ((Mbar.functor.{u u} r').obj S)).lvl c :=
+  let t : Profinite.punit ⟶ ((hom_functor r' Λ).obj ((Lbar.functor.{u u} r').obj S)).lvl c :=
     Profinite.from_punit ⟨u,hu⟩,
   obtain ⟨K,hK⟩ := key r' Λ S N c t,
   rcases K with ⟨⟨⟨K₁,K₂⟩,hhK⟩,⟨⟩⟩,
@@ -502,7 +502,7 @@ end lem98
 -- /-- Lemma 9.8 of [Analytic] -/
 -- lemma lem98 (r' : ℝ≥0) [fact (0 < r')] [fact (r' < 1)]
 --   (Λ : Type*) [polyhedral_lattice Λ] (S : Profinite) (N : ℕ) [hN : fact (0 < N)] :
---   pseudo_normed_group.splittable (Λ →+ (Mbar.functor r').obj S) N (lem98.d Λ N) :=
+--   pseudo_normed_group.splittable (Λ →+ (Lbar.functor r').obj S) N (lem98.d Λ N) :=
 -- begin
 --   admit
 -- end

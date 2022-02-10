@@ -85,15 +85,15 @@ include BD κ κ' r r' m
 /-- A variant of Theorem 9.5 in [Analytic] using weak bounded exactness. -/
 theorem thm95' : ∀ (Λ : PolyhedralLattice.{u}) (S : Type u) [fintype S]
   (V : SemiNormedGroup.{u}) [normed_with_aut r V],
-  ​((BD.data.system κ r V r').obj (op $ Hom Λ (Mbar r' S))).is_weak_bounded_exact
+  ​((BD.data.system κ r V r').obj (op $ Hom Λ (Lbar r' S))).is_weak_bounded_exact
     (k κ' m) (K r r' BD κ' m) m (c₀ r r' BD κ κ' m Λ) :=
 begin
   apply nat.strong_induction_on m; clear m,
   introsI m IH Λ S _S_fin V _V_r,
   haveI : pseudo_normed_group.splittable
-    (Λ →+ (of r' (Mbar r' S))) (N r r' BD κ' m) (lem98.d Λ (N r r' BD κ' m)) :=
+    (Λ →+ (of r' (Lbar r' S))) (N r r' BD κ' m) (lem98.d Λ (N r r' BD κ' m)) :=
     lem98_finite Λ S (N r r' BD κ' m),
-  let cond := NSC.{u} r r' BD V κ κ' (of r' $ Mbar r' S) m Λ _,
+  let cond := NSC.{u} r r' BD V κ κ' (of r' $ Lbar r' S) m Λ _,
   swap,
   { introsI m' hm' Λ,
     apply IH, assumption },
@@ -105,15 +105,15 @@ set_option pp.universes true
 /-- A variant of Theorem 9.5 in [Analytic] using weak bounded exactness. -/
 theorem thm95'.profinite : ∀ (Λ : PolyhedralLattice.{u}) (S : Profinite.{u})
   (V : SemiNormedGroup.{u}) [normed_with_aut r V],
-  ​((BD.data.system κ r V r').obj (op $ Hom Λ ((Mbar.functor.{u u} r').obj S))).is_weak_bounded_exact
+  ​((BD.data.system κ r V r').obj (op $ Hom Λ ((Lbar.functor.{u u} r').obj S))).is_weak_bounded_exact
     (k κ' m) (K r r' BD κ' m) m (c₀ r r' BD κ κ' m Λ) :=
 begin
   apply nat.strong_induction_on m; clear m,
   introsI m IH Λ S V _V_r,
   haveI : pseudo_normed_group.splittable
-    (Λ →+ (of r' ((Mbar.functor.{u u} r').obj S))) (N r r' BD κ' m) (lem98.d Λ (N r r' BD κ' m)) :=
+    (Λ →+ (of r' ((Lbar.functor.{u u} r').obj S))) (N r r' BD κ' m) (lem98.d Λ (N r r' BD κ' m)) :=
     lem98.main r' Λ S (N r r' BD κ' m),
-  let cond := NSC.{u} r r' BD V κ κ' (of r' $ (Mbar.functor.{u u} r').obj S) m Λ _,
+  let cond := NSC.{u} r r' BD V κ κ' (of r' $ (Lbar.functor.{u u} r').obj S) m Λ _,
   swap,
   { introsI m' hm' Λ,
     apply IH, assumption },
@@ -125,7 +125,7 @@ omit BD κ κ' r r' m
 /-- Theorem 9.5 in [Analytic] -/
 theorem thm95 (Λ : PolyhedralLattice.{u}) (S : Type u) [fintype S]
   (V : SemiNormedGroup.{u}) [normed_with_aut r V] :
-  ((BD.data.system κ r V r').obj (op $ Hom Λ (Mbar r' S))).is_bounded_exact
+  ((BD.data.system κ r V r').obj (op $ Hom Λ (Lbar r' S))).is_bounded_exact
     (k κ' m ^ 2) (K r r' BD κ' m + 1) m (c₀ r r' BD κ κ' m Λ) :=
 begin
   refine system_of_complexes.is_weak_bounded_exact.strong_of_complete
@@ -136,7 +136,7 @@ end
 /-- Theorem 9.5 in [Analytic] -/
 theorem thm95.profinite (Λ : PolyhedralLattice.{u}) (S : Profinite.{u})
   (V : SemiNormedGroup.{u}) [normed_with_aut r V] :
-  ((BD.data.system κ r V r').obj (op $ Hom Λ ((Mbar.functor.{u u} r').obj S))).is_bounded_exact
+  ((BD.data.system κ r V r').obj (op $ Hom Λ ((Lbar.functor.{u u} r').obj S))).is_bounded_exact
     (k κ' m ^ 2) (K r r' BD κ' m + 1) m (c₀ r r' BD κ κ' m Λ) :=
 begin
   refine system_of_complexes.is_weak_bounded_exact.strong_of_complete
@@ -166,7 +166,7 @@ theorem thm95'' (BD : package)
   ∀ (S : Type u) [fintype S],
   ∀ (V : SemiNormedGroup.{u}) [normed_with_aut r V],
     by exactI system_of_complexes.is_weak_bounded_exact
-    (​(BD.data.system κ r V r').obj (op $ Hom Λ (Mbar r' S))) k K m c₀ :=
+    (​(BD.data.system κ r V r').obj (op $ Hom Λ (Lbar r' S))) k K m c₀ :=
 begin
   intro m,
   let κ' := package.κ' BD κ,
@@ -187,7 +187,7 @@ theorem thm95''.profinite (BD : package)
   ∀ (S : Profinite.{u}),
   ∀ (V : SemiNormedGroup.{u}) [normed_with_aut r V],
     by exactI system_of_complexes.is_weak_bounded_exact
-    (​(BD.data.system κ r V r').obj (op $ Hom Λ ((Mbar.functor.{u u} r').obj S))) k K m c₀ :=
+    (​(BD.data.system κ r V r').obj (op $ Hom Λ ((Lbar.functor.{u u} r').obj S))) k K m c₀ :=
 begin
   intro m,
   let κ' := package.κ' BD κ,
