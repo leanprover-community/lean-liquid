@@ -1,6 +1,7 @@
 import data.finset.nat_antidiagonal
 import analysis.normed_space.basic
 import analysis.specific_limits
+import laurent_measures.int_nat_shifts
 
 noncomputable theory
 
@@ -318,20 +319,13 @@ lemma summable_smaller_radius_norm {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ) (�
   (hd : ∀ n : ℤ, n < d → f n = 0) : --(F : ℒ S) (s : S) :
   summable (λ n, ∥ f n ∥ * (1 / 2) ^ n) :=
 begin
-  have pos_half : ∀ n : ℕ, 0 ≤ ∥ f n ∥ * (1 / 2) ^ n,
-  { intro n,
-    apply mul_nonneg (norm_nonneg (f n)),
-    simp only [one_div, zero_le_one, inv_nonneg, zero_le_bit0, pow_nonneg] },
-  have half_le_ρ : ∀ n : ℕ, ∥ f n ∥ * (1 / 2) ^ n ≤ ∥ f n ∥ * ρ ^ n,
-  { intro n,
-    apply monotone_mul_left_of_nonneg (norm_nonneg (f n)),
-    apply pow_le_pow_of_le_left,
-    simp only [one_div, zero_le_one, inv_nonneg, zero_le_bit0],
-    exact le_of_lt ρ_half },
-  have h_nat_half : summable (λ n : ℕ, ∥ f n ∥ * (1 / 2 : ℝ≥0) ^ n) :=
-    summable_of_nonneg_of_le pos_half half_le_ρ ((int.summable_iff_on_nat d _).mp hf),
-  apply (int.summable_iff_on_nat d _).mpr h_nat_half,
-  all_goals {apply hd},
+  refine int_summable_iff.mpr ⟨_, _⟩,
+  { apply summable_smaller_radius ρ_half.le (by simp) (int_summable_iff.mp hf).1 },
+  { refine summable_of_norm_bounded_eventually _ summable_zero _,
+    suffices : {x : ℕ | 0 < ∥f (-x - 1)∥ * 2 ^ (1 + x)}.finite, by simpa,
+    apply (range (int.to_nat (-d))).finite_to_set.subset _,
+    refine λ x h, mem_coe.mpr (mem_range.mpr (int.lt_to_nat.mpr (not_le.mp (λ H, _)))),
+    simpa [hd _ (int.sub_one_lt_iff.mpr (neg_le.mp H))] using h }
 end
 
 
