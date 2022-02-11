@@ -1,10 +1,12 @@
 import category_theory.preadditive
 import category_theory.abelian.projective
+import category_theory.abelian.diagram_lemmas.four
 
 import data.matrix.notation
 
 import for_mathlib.abelian_category
 import for_mathlib.fin_functor
+import for_mathlib.split_exact
 
 noncomputable theory
 
@@ -168,15 +170,30 @@ end
   map_id' := λ A, by { ext i, fin_cases i; refl },
   map_comp' := λ A B C f g, by { ext i, fin_cases i; refl } }
 
-variables {𝒞}
+end short_exact_sequence
+
+namespace short_exact_sequence
+
+variables {𝒞} [abelian 𝒞]
+variables {A B C : short_exact_sequence 𝒞} (f : A ⟶ B) (g : B ⟶ C)
 
 section iso
 
 variables {A B C} (f g)
 
+open_locale zero_object
+
 /-- One form of the five lemma: if a morphism of short exact sequences has isomorphisms
 as first and third component, then the second component is also an isomorphism. -/
-lemma snd_is_iso (h1 : is_iso f.1) (h3 : is_iso f.3) : is_iso f.2 := sorry
+lemma snd_is_iso (h1 : is_iso f.1) (h3 : is_iso f.3) : is_iso f.2 :=
+@abelian.is_iso_of_is_iso_of_is_iso_of_is_iso_of_is_iso 𝒞 _ _
+  0 A.1 A.2 A.3
+  0 B.1 B.2 B.3
+  0 A.f A.g
+  0 B.f B.g
+  0 f.1 f.2 f.3 (by rw [zero_comp, zero_comp]) f.sq1 f.sq2
+  0 0
+  0 0 0 (by rw [comp_zero, comp_zero]) _ _ _ _ _ _ _ _ _ _
 
 /-- One form of the five lemma: if a morphism `f` of short exact sequences has isomorphisms
 as first and third component, then `f` itself is an isomorphism. -/

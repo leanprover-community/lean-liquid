@@ -12,6 +12,7 @@ universes v u
 namespace short_exact_sequence
 
 variables {C : Type u} [category.{v} C] [abelian C] [enough_projectives C]
+variables {D : Type*} [category D] [abelian D]
 
 -- move this
 lemma exact_of_epi_comp_kernel.ι_comp_mono {C : Type u} [category.{v} C] [abelian C] {X Y Z W : C}
@@ -359,5 +360,17 @@ lemma horseshoe_is_projective_resolution₃ (A : short_exact_sequence C) :
   end,
   exact := λ n, horseshoe_exact₃ A n,
   epi := show epi (projective.π _), from infer_instance }
+.
+
+lemma horseshoe_split (A : short_exact_sequence C) (n : ℕ) :
+  ((horseshoe A).X n).split :=
+begin
+  cases n;
+  exact ⟨biprod.fst, biprod.inr, biprod.inl_fst, biprod.inr_snd, biprod.inr_fst, biprod.total⟩
+end
+
+def horseshoe_mapped (A : short_exact_sequence C) (F : C ⥤ D) [F.additive] (n : ℕ) :
+  short_exact_sequence D :=
+functor.map_short_exact_sequence_of_split _ F ((horseshoe A).X n) (horseshoe_split A n)
 
 end short_exact_sequence
