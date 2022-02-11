@@ -82,20 +82,20 @@ end
 
 end Condensed
 
-namespace CompHausFiltPseuNormGrp₁
+namespace CompHausFiltPseuNormGrp
 
 open_locale nnreal
 open pseudo_normed_group comphaus_filtered_pseudo_normed_group
 
-def presheaf (A : CompHausFiltPseuNormGrp₁.{u}) (S : Profinite.{u}) : Type u :=
+def presheaf (A : CompHausFiltPseuNormGrp.{u}) (S : Profinite.{u}) : Type u :=
 { f : S → A // ∃ (c : ℝ≥0) (f₀ : S → filtration A c), continuous f₀ ∧ f = coe ∘ f₀ }
 
 namespace presheaf
 
-variables (A : CompHausFiltPseuNormGrp₁.{u}) (S : Profinite.{u})
+variables (A : CompHausFiltPseuNormGrp.{u}) (S : Profinite.{u})
 
 @[ext]
-lemma ext {A : CompHausFiltPseuNormGrp₁} {S : Profinite} (f g : presheaf A S) : f.1 = g.1 → f = g :=
+lemma ext {A : CompHausFiltPseuNormGrp} {S : Profinite} (f g : presheaf A S) : f.1 = g.1 → f = g :=
 subtype.ext
 
 instance : has_zero (presheaf A S) := ⟨⟨0, 0, 0, continuous_zero, rfl⟩⟩
@@ -167,7 +167,7 @@ instance : add_comm_group (presheaf A S) :=
   zsmul_neg' := by { intros, ext, exact add_comm_group.zsmul_neg' _ _ },
   .. presheaf.has_sub A S, .. presheaf.has_neg A S }
 
-def comap (A : CompHausFiltPseuNormGrp₁) {S T : Profinite} (φ : S ⟶ T) :
+def comap (A : CompHausFiltPseuNormGrp) {S T : Profinite} (φ : S ⟶ T) :
   presheaf A T →+ presheaf A S :=
 { to_fun := λ f, ⟨f.1 ∘ φ,
   begin
@@ -177,12 +177,16 @@ def comap (A : CompHausFiltPseuNormGrp₁) {S T : Profinite} (φ : S ⟶ T) :
   map_zero' := rfl,
   map_add' := by { intros, refl } }
 
-def map {A B : CompHausFiltPseuNormGrp₁} (φ : A ⟶ B) (S : Profinite) :
+def map {A B : CompHausFiltPseuNormGrp} (φ : A ⟶ B) (S : Profinite) :
   presheaf A S →+ presheaf B S :=
 { to_fun := λ f, ⟨φ ∘ f.1,
   begin
     obtain ⟨_, c, f, hf, rfl⟩ := f,
-    refine ⟨c, (level.obj c).map φ ∘ f, (φ.level_continuous c).comp hf, rfl⟩,
+    obtain ⟨d,hd⟩ := φ.bound,
+    let e : filtration A c → filtration B (d * c) := λ t, ⟨φ t, hd t.2⟩,
+    have he : continuous e,
+    { apply φ.continuous, intros, refl },
+    refine ⟨d * c, e ∘ f, he.comp hf, rfl⟩,
   end⟩,
   map_zero' := by { ext, exact φ.map_zero },
   map_add' := by { intros, ext, exact φ.map_add _ _ } }
@@ -191,29 +195,29 @@ end presheaf
 
 open opposite
 
-def Presheaf (A : CompHausFiltPseuNormGrp₁.{u}) : Profinite.{u}ᵒᵖ ⥤ Ab :=
+def Presheaf (A : CompHausFiltPseuNormGrp.{u}) : Profinite.{u}ᵒᵖ ⥤ Ab :=
 { obj := λ S, ⟨presheaf A (unop S)⟩,
   map := λ S T φ, presheaf.comap A φ.unop,
   map_id' := by { intros, ext, refl },
   map_comp' := by { intros, ext, refl } }
 
-def Presheaf.map {A B : CompHausFiltPseuNormGrp₁} (φ : A ⟶ B) :
+def Presheaf.map {A B : CompHausFiltPseuNormGrp} (φ : A ⟶ B) :
   Presheaf A ⟶ Presheaf B :=
 { app := λ S, presheaf.map φ (unop S),
   naturality' := by { intros, refl } }
 
 @[simp]
-lemma Presheaf.map_id (A : CompHausFiltPseuNormGrp₁) :
+lemma Presheaf.map_id (A : CompHausFiltPseuNormGrp) :
   Presheaf.map (𝟙 A) = 𝟙 _ := by { ext, refl }
 
 @[simp]
-lemma Presheaf.map_comp {A B C : CompHausFiltPseuNormGrp₁} (f : A ⟶ B) (g : B ⟶ C) :
+lemma Presheaf.map_comp {A B C : CompHausFiltPseuNormGrp} (f : A ⟶ B) (g : B ⟶ C) :
   Presheaf.map (f ≫ g) = Presheaf.map f ≫ Presheaf.map g := by { ext, refl }
 
 set_option pp.universes true
 
 lemma Presheaf_comp_ulift_is_sheaf_aux_equalizer
-  (A : CompHausFiltPseuNormGrp₁.{u}) :
+  (A : CompHausFiltPseuNormGrp.{u}) :
   (A.Presheaf ⋙ Ab.ulift.{u+1 u} ⋙ forget.{u+2 u+1 u+1} Ab.{u+1}).equalizer_condition :=
 begin
   intros X B π hh,
@@ -241,13 +245,13 @@ begin
     dsimp,
     rw ht,
     ext i,
-    dsimp [CompHausFiltPseuNormGrp₁.Presheaf, Ab.ulift,
+    dsimp [CompHausFiltPseuNormGrp.Presheaf, Ab.ulift,
       functor.map_to_equalizer],
     have := Profinite.π_descend_to_Top π t'' hh hw,
     apply_fun (λ e, (e i).val) at this, exact this }
 end
 
-lemma Presheaf_comp_ulift_is_sheaf (A : CompHausFiltPseuNormGrp₁.{u}):
+lemma Presheaf_comp_ulift_is_sheaf (A : CompHausFiltPseuNormGrp.{u}):
   presheaf.is_sheaf proetale_topology (Presheaf A ⋙ Ab.ulift.{u+1}) :=
 begin
   rw category_theory.presheaf.is_sheaf_iff_is_sheaf_forget _ _ (forget Ab),
@@ -299,7 +303,7 @@ begin
   { apply Presheaf_comp_ulift_is_sheaf_aux_equalizer }
 end
 
-def to_Condensed : CompHausFiltPseuNormGrp₁.{u} ⥤ Condensed.{u} Ab.{u+1} :=
+def to_Condensed : CompHausFiltPseuNormGrp.{u} ⥤ Condensed.{u} Ab.{u+1} :=
 { obj := λ A,
   { val := Presheaf A ⋙ Ab.ulift.{u+1},
     cond := Presheaf_comp_ulift_is_sheaf _ },
@@ -307,4 +311,8 @@ def to_Condensed : CompHausFiltPseuNormGrp₁.{u} ⥤ Condensed.{u} Ab.{u+1} :=
   map_id' := λ X, by { ext : 2, dsimp, simp },
   map_comp' := λ X Y Z f g, by { ext : 2, dsimp, simp } }
 
-end CompHausFiltPseuNormGrp₁
+end CompHausFiltPseuNormGrp
+
+def CompHausFiltPseuNormGrp₁.to_Condensed :
+  CompHausFiltPseuNormGrp₁.{u} ⥤ Condensed.{u} Ab.{u+1} :=
+CompHausFiltPseuNormGrp₁.enlarging_functor ⋙ CompHausFiltPseuNormGrp.to_Condensed
