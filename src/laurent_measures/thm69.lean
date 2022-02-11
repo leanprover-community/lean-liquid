@@ -72,7 +72,7 @@ lemma lt_d_eq_zero (F : ℒ S) (s : S) (n : ℤ) :
   n < F.d → F s n = 0 := (exists_bdd_filtration r_pos r_lt_one F).some_spec s n
 
 lemma laurent_measures.summable_half (F : ℒ S) (s : S) : summable (λ n, ((F s n) : ℝ) *
-  (1 / 2) ^ n) := @summable_smaller_radius _ _ F.d (F.summable s) (lt_d_eq_zero _ _) r_half
+  (1 / 2) ^ n) := @aux_thm69.summable_smaller_radius _ _ F.d (F.summable s) (lt_d_eq_zero _ _) r_half
 
 def θ : ℒ S → ℳ S := ϑ (1 / 2 : ℝ) r p S
 
