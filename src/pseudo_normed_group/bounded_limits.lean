@@ -583,7 +583,6 @@ end
 
 end CompHausFiltPseuNormGrp₁
 
--- We can develop all this stuff for `CompHausFiltPseuNormGrp₁` as well, if needed.
 namespace ProFiltPseuNormGrp₁
 
 @[simp]
