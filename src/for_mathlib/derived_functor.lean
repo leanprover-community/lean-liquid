@@ -41,17 +41,9 @@ def functor.left_derived_obj_iso' (F : C ⥤ D) [F.additive] (n : ℕ)
 (F.left_derived_obj_iso n (h.mk_ProjectiveResolution P X π) : _)
 .
 
-def δ_snake [F.additive] (n : ℕ) (A : short_exact_sequence C) :
-  snake_diagram ⥤ D :=
-snake_diagram.mk_of_short_exact_sequence_hom
-  (horseshoe_mapped A F (n+1)) (horseshoe_mapped A F n)
-  ⟨F.map ((horseshoe A).d (n+1) n).1,
-   F.map ((horseshoe A).d (n+1) n).2,
-   F.map ((horseshoe A).d (n+1) n).3, sorry, sorry⟩
-
 def δ [F.additive] (n : ℕ) (A : short_exact_sequence C) :
   (F.left_derived (n+1)).obj A.3 ⟶ (F.left_derived n).obj A.1 :=
-sorry
+sorry -- use `for_mathlib/homological_complex.lean`
 
 lemma six_term_exact_seq [F.additive] (n : ℕ) (A : short_exact_sequence C) :
   exact_seq D [
