@@ -53,6 +53,8 @@ end
 
 lemma r_pos : 0 < r := lt_of_le_of_lt zero_le' r_half
 
+instance : fact (0 < r) := { out := r_pos }
+
 lemma r_lt_one : r < 1 :=
 begin
   refine rpow_lt_one zero_le' (half_lt_self one_ne_zero) _,
@@ -64,8 +66,6 @@ end
 local notation `ℳ` := real_measures p
 local notation `ℒ` := laurent_measures r
 
-variables {S}
-
 def laurent_measures.d (F : ℒ S) : ℤ := (exists_bdd_filtration r_pos r_lt_one F).some
 
 lemma lt_d_eq_zero (F : ℒ S) (s : S) (n : ℤ) :
@@ -75,8 +75,6 @@ lemma laurent_measures.summable_half (F : ℒ S) (s : S) : summable (λ n, ((F s
   (1 / 2) ^ n) := @aux_thm69.summable_smaller_radius _ _ F.d (F.summable s) (lt_d_eq_zero _ _) r_half
 
 def θ : ℒ S → ℳ S := ϑ (1 / 2 : ℝ) r p S
-
-variables [fact (0 < r)]
 
 def ϕ : ℒ S → ℒ S :=
 λ F, 2 • shift (-1) F - F

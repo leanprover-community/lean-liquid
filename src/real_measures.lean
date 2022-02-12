@@ -84,7 +84,7 @@ begin
     (@nnreal.rpow_add_le_add_rpow p (∥F s∥₊) (∥G s∥₊) h0p' hp1'),
 end
 
---needed?
+--needed? [FAE] Yes!
 instance png_real_measures [fact (0 < p)] [fact (p ≤ 1)] : pseudo_normed_group (ℳ p S) :=
 { filtration := λ c, { F | ∥F∥₊ ≤ c },
   filtration_mono := λ c₁ c₂ h F hF, by {dsimp at *, exact le_trans hF h},
