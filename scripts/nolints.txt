@@ -165,7 +165,6 @@ apply_nolint r_half unused_arguments
 apply_nolint r_lt_one unused_arguments
 apply_nolint tsum_reindex unused_arguments
 apply_nolint θ unused_arguments
-apply_nolint ϕ unused_arguments
 
 -- locally_constant/Vhat.lean
 apply_nolint SemiNormedGroup.normed_with_aut_LCC fails_quickly
