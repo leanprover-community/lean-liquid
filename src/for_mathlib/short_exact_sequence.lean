@@ -388,9 +388,9 @@ def mk_morphism_of_split {A B : short_exact_sequence 𝒞} (hA : A.split) (hB : 
 { fst := f₁,
   snd :=
   begin
-    have sA := (nonempty.some (((tfae_split A).out 2 3).1 hA)),
-    have sB := (nonempty.some (((tfae_split B).out 2 3).1 hB)),
-    refine sA.1.hom.2 ≫ (biprod.map f₁ f₃) ≫ sB.1.symm.hom.2,
+    choose φ₁ χ₁ H₁ using hA,
+    choose φ₃ χ₃ H₃ using hB,
+    exact A.g ≫ f₃ ≫ χ₃ + φ₁ ≫ f₁ ≫ B.f,
   end,
   trd := f₃,
   sq1' := sorry,
