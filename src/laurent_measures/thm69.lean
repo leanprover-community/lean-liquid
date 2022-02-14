@@ -39,7 +39,6 @@ parameter {p : ℝ≥0}
 
 def r : ℝ≥0 := (1 / 2) ^ (p:ℝ)
 
-
 variable {S : Fintype}
 
 section p_lt_one
@@ -81,9 +80,8 @@ begin
   simp_rw [subtype.val_eq_coe, ← zpow_neg₀],
   rw [← h_shift, ← _root_.tsum_mul_left, tsum_congr],
   intro n,
-  nth_rewrite_rhs 0 [mul_comm],
-  rw [mul_assoc, ← (zpow_add₀ (@two_ne_zero ℝ _ _)), neg_add_rev, neg_add_cancel_comm, zpow_neg₀,
-    zpow_coe_nat, add_comm],
+  rw [mul_comm (_ ^ N), mul_assoc, ← (zpow_add₀ (@two_ne_zero ℝ _ _)), neg_add_rev,
+    neg_add_cancel_comm, zpow_neg₀, zpow_coe_nat, add_comm],
 end
 
 variable [fact(0 < p)]
@@ -95,13 +93,16 @@ begin
   exact fact.out _
 end
 
+/--  Let `F : ℒ S` be a Laurent measure.  `laurent_measures.d` chooses a bound `d ∈ ℤ` for `F`,
+such that, for all `s : S`, the sequence `F s` is zero from `d-1` and below. -/
 def laurent_measures.d (F : ℒ S) : ℤ := (exists_bdd_filtration r_pos r_lt_one F).some
 
 lemma lt_d_eq_zero (F : ℒ S) (s : S) (n : ℤ) :
   n < F.d → F s n = 0 := (exists_bdd_filtration r_pos r_lt_one F).some_spec s n
 
-lemma laurent_measures.summable_half [fact (p < 1)] (F : ℒ S) (s : S) : summable (λ n, ((F s n) : ℝ) *
-  (1 / 2) ^ n) := @aux_thm69.summable_smaller_radius _ _ F.d (F.summable s) (lt_d_eq_zero _ _) r_half
+lemma laurent_measures.summable_half [fact (p < 1)] (F : ℒ S) (s : S) :
+  summable (λ n, ((F s n) : ℝ) * (1 / 2) ^ n) :=
+aux_thm69.summable_smaller_radius F.d (F.summable s) (lt_d_eq_zero _ _) r_half
 
 lemma injective_ϕ (F : ℒ S) (H : ϕ F = 0) : F = 0 :=
 begin
