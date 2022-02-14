@@ -16,4 +16,7 @@ class is_acyclic (X : 𝒦) : Prop :=
 class is_K_projective (X : 𝒦) : Prop :=
 (cond : ∀ (Y : 𝒦) [is_acyclic Y] (f : X ⟶ Y), f = 0)
 
+class is_quasi_iso {X Y : 𝒦} (f : X ⟶ Y) : Prop :=
+(cond : ∀ i, is_iso ((homotopy_category.homology_functor _ _ i).map f))
+
 end homological_complex
