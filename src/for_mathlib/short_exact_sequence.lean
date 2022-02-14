@@ -362,6 +362,34 @@ begin
   tfae_have : 2 → 4, { intro h, exact ⟨h.splitting⟩ },
   tfae_finish
 end
+lemma mk_of_split_split {A B C : 𝒜} (f : A ⟶ B) (g : B ⟶ C) (φ : B ⟶ A) (χ : C ⟶ B)
+  (hfg : f ≫ g = 0) (hφ : f ≫ φ = 𝟙 A) (hχ : χ ≫ g = 𝟙 C) (H : φ ≫ f + g ≫ χ = 𝟙 B) :
+  (mk_of_split f g φ χ hfg hφ hχ H).split :=
+((tfae_split (mk_of_split f g φ χ hfg hφ hχ H)).out 0 2).1 ⟨φ, hφ⟩
+
+lemma mk_of_split'_split {A B C : 𝒜} (f : A ⟶ B) (g : B ⟶ C)
+  (H : ∃ (φ : B ⟶ A) (χ : C ⟶ B), f ≫ g = 0 ∧ f ≫ φ = 𝟙 A ∧ χ ≫ g = 𝟙 C ∧ φ ≫ f + g ≫ χ = 𝟙 B) :
+  (mk_of_split' f g H).split :=
+begin
+  have := H, obtain ⟨φ, χ, h⟩ := this,
+  refine ((tfae_split (mk_of_split' f g H)).out 0 2).1 ⟨φ, h.2.1⟩,
+end
+
+def mk_split_morphism {A₁ A₃ B₁ B₃ : 𝒞} (f₁ : A₁ ⟶ B₁) (f₃ : A₃ ⟶ B₃) :
+  mk_split A₁ A₃ ⟶ mk_split B₁ B₃ :=
+{ fst := f₁,
+  snd := biprod.map f₁ f₃,
+  trd := f₃,
+  sq1' := by {dsimp, simp},
+  sq2' := by {dsimp, simp} }
+
+def mk_morphism_of_split {A B : short_exact_sequence 𝒞} (hA : A.split) (hB : B.split)
+  (f₁ : A.1 ⟶ B.1) (f₃ : A.3 ⟶ B.3) : A ⟶ B :=
+begin
+  have sA := nonempty.some (((tfae_split A).out 2 3).1 hA),
+  have sB := nonempty.some (((tfae_split B).out 2 3).1 hB),
+  exact sA.1.hom ≫ (mk_split_morphism f₁ f₃) ≫ sB.1.symm.hom
+end
 
 end split
 
@@ -436,6 +464,26 @@ begin
   { rw [← F.map_comp, hφ, F.map_id], },
   { rw [← F.map_comp, hχ, F.map_id], },
   { rw [← F.map_comp, ← F.map_comp, ← F.map_add, H, F.map_id], },
+end
+
+lemma map_short_exact_sequence_of_split.split [F.additive] {A : short_exact_sequence 𝒞}
+  (h : A.split) : (map_short_exact_sequence_of_split 𝒞 F _ h).split :=
+short_exact_sequence.mk_of_split'_split _ _ _
+
+def morphism_short_exact_sequence_of_split [F.additive] {A : short_exact_sequence 𝒞}
+  {B : short_exact_sequence 𝒞} (hA : A.split) (hB : B.split) (f : A ⟶ B) :
+  map_short_exact_sequence_of_split 𝒞 F _ hA ⟶ map_short_exact_sequence_of_split 𝒞 F _ hB :=
+short_exact_sequence.mk_morphism_of_split
+    (map_short_exact_sequence_of_split.split _ _ _) (map_short_exact_sequence_of_split.split _ _ _)
+    (F.map f.1) (F.map f.3)
+
+def map_complex_short_exact_sequence_of_split [F.additive]
+  (C : chain_complex (short_exact_sequence 𝒞) ℕ) (h : ∀ i, (C.X i).split) :
+  chain_complex (short_exact_sequence 𝒟) ℕ :=
+begin
+  refine chain_complex.of (λ i, map_short_exact_sequence_of_split _ F _ (h i)) (λ i, _) (λ i, _),
+  { exact morphism_short_exact_sequence_of_split _ _ _ _ (C.d _ _) },
+  { sorry }
 end
 
 end functor
