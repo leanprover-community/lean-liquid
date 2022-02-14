@@ -148,9 +148,9 @@ structure pBanach' (V : Type*) (p : ℝ) [fact (0 < p)] [fact (p ≤ 1)] [add_co
     [topological_add_group V]:=
 (exists_p_norm : inhabited (has_p_norm V p))
 
-lemma pBanach'_is_qBanach' (V: Type*) (p : ℝ) [fact (0 < p)] [fact (p ≤ 1)] (q : ℝ) [fact (0 < q)]
+def pBanach'_is_qBanach' (V: Type*) (p : ℝ) [fact (0 < p)] [fact (p ≤ 1)] (q : ℝ) [fact (0 < q)]
   [fact (q ≤ 1)] [add_comm_group V] [module ℝ V] [topological_space V] [has_continuous_smul ℝ V]
-    [topological_add_group V] [hp : pBanach' V p] : pBanach' V q :=
+    [topological_add_group V] (hp : pBanach' V p) : pBanach' V q :=
 begin
   rcases hp with ⟨H_p_norm, _⟩,
   let ψ := H_p_norm.norm,
@@ -162,8 +162,6 @@ begin
     (real.rpow_nonneg_of_nonneg (abs_nonneg α) p), hp_nonneg_norm v,
     (λ _, (real.rpow_nonneg_of_nonneg (hp_nonneg_norm _) _))],
 end
-
-
 
 namespace pBanach
 

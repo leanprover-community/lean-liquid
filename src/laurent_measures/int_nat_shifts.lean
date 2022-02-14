@@ -1,10 +1,15 @@
 import topology.algebra.infinite_sum
 import analysis.normed_space.basic
 import topology.instances.ennreal
+import analysis.specific_limits
 
-open function
-open metric finset nnreal
+/- These are lemmas that are used in the proof of either auxilliary facts for Theorem 6.9 or
+for Theorem 6.9 directly. -/
+
+open function metric finset nnreal normed_field
 open_locale nnreal classical big_operators topological_space
+
+namespace aux_thm69
 
 section group_add_neg
 variables {G : Type*} [group G] [has_le G] [covariant_class G G ((*)) (≤)]
@@ -181,11 +186,54 @@ end
 
 end uniform
 
-lemma summable_smaller_radius {f : ℕ → ℝ} {ρ σ : ℝ≥0}
-  (σρ : σ ≤ ρ) (f0 : ∀ n, 0 ≤ f n) (hf : summable (λ n, f n * ρ ^ n)) :
+lemma _root_.summable.smaller_radius {f : ℕ → ℝ} {ρ σ : ℝ≥0}
+  (hf : summable (λ n, f n * ρ ^ n)) (σρ : σ ≤ ρ) (f0 : ∀ n, 0 ≤ f n) :
   summable (λ n, f n * σ ^ n) :=
 begin
   refine summable_of_nonneg_of_le (λ b, mul_nonneg (f0 _) (pow_nonneg zero_le_coe _)) _ hf,
   exact λ b, mul_le_mul rfl.le
     (pow_le_pow_of_le_left zero_le_coe σρ b) (pow_nonneg zero_le_coe b) (f0 b)
 end
+
+/--  A technical equivalence, useful in the proof of `prod_nat_summable_1`. -/
+def equiv_nat_diag : {x : ℕ × ℕ // x.2 ≤ x.1} ≃ ℕ × ℕ :=
+{ to_fun    := λ x, (x.1.1 - x.1.2, x.1.2 ),
+  inv_fun   := λ x, ⟨(x.1 + x.2, x.2), by simp⟩,
+  left_inv  := by { rintros ⟨x, hx⟩, simp only [nat.sub_add_cancel hx, prod.mk.eta] },
+  right_inv := by { rintros ⟨x, y⟩, simp only [add_tsub_cancel_right] } }
+
+lemma _root_.summable.prod_nat {f : ℤ → ℝ} {g : ℕ → ℝ} (hf : summable f) (f0 : ∀ n, 0 ≤ f n)
+  (hg : summable g) (g0 : ∀ n, 0 ≤ g n) :
+  summable (λ lj: ℕ × ℕ, f (lj.fst + lj.snd) * g lj.snd) :=
+begin
+  apply (equiv.summable_iff equiv_nat_diag).mp,
+  suffices : summable (λ (lj : {x : ℕ × ℕ // x.2 ≤ x.1}), f lj.1.fst * g lj.1.snd),
+  { convert this,
+    ext ⟨⟨x, y⟩, hx⟩,
+    suffices : f (↑(x - y) + ↑y) * g y = f ↑x * g y, by simpa [equiv_nat_diag],
+    rw_mod_cast nat.sub_add_cancel hx },
+  apply summable.subtype (_ : summable (λ (lj : ℕ × ℕ), f lj.fst * g lj.snd)),
+  convert summable_mul_of_summable_norm (_ : summable (λ i : ℕ, ∥f i∥)) _,
+  { conv { congr, funext, rw [real.norm_of_nonneg (f0 _)] },
+    apply ((int_summable_iff).mp hf).1 },
+  { conv { congr, funext, rw [real.norm_of_nonneg (g0 _)] },
+    exact hg }
+end
+
+lemma prod_nat_summable_aux {f : ℤ → ℝ} {s r : ℝ≥0}
+  (s1 : s < 1) (hf : summable (λ n : ℤ, ∥ f n ∥ * r ^ n)) :
+  summable (λ lj: ℕ × ℕ, ∥(f (lj.fst + 1 + lj.snd)) * r ^ (lj.fst + 1 + lj.snd)∥ * s^ lj.snd) :=
+begin
+  apply summable_of_summable_norm,
+  simp_rw [norm_mul, norm_norm],
+  convert (_ : summable (λ n, ∥f (n + 1)∥ * r ^ (n + 1))).prod_nat _ (by simpa) (pow_nonneg s.2),
+  { simpa only [norm_pow, norm_eq, val_eq_coe, add_right_comm _ (1 : ℤ), add_right_comm _ 1 _] },
+  { let add_one : ℤ ≃ ℤ := ⟨λ x, x - 1, λ x, x + 1, λ x, by simp, λ x, by simp⟩,
+    apply add_one.summable_iff.mp,
+    convert hf,
+    ext,
+    simp },
+  { exact λ n, mul_nonneg (norm_nonneg _) (zpow_nonneg r.2 _) },
+end
+
+end aux_thm69

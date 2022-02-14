@@ -39,8 +39,10 @@ parameter {p : ℝ≥0}
 
 def r : ℝ≥0 := (1 / 2) ^ (p:ℝ)
 
-variables [fact(0 < p)] [fact (p < 1)]
 variable {S : Fintype}
+
+section p_lt_one
+variables [fact (p < 1)]
 
 lemma r_half : 1 / 2 < r :=
 begin
@@ -51,28 +53,16 @@ begin
   exact fact.out _
 end
 
-lemma r_pos : 0 < r := lt_of_le_of_lt zero_le' r_half
+end p_lt_one
+
+lemma r_pos : 0 < r :=
+suffices 0 < (2 : ℝ≥0)⁻¹ ^ (p : ℝ), by simpa [r],
+rpow_pos (nnreal.inv_pos.mpr zero_lt_two)
 
 instance : fact (0 < r) := { out := r_pos }
 
-lemma r_lt_one : r < 1 :=
-begin
-  refine rpow_lt_one zero_le' (half_lt_self one_ne_zero) _,
-  rw nnreal.coe_pos,
-  exact fact.out _
-end
-
-
 local notation `ℳ` := real_measures p
 local notation `ℒ` := laurent_measures r
-
-def laurent_measures.d (F : ℒ S) : ℤ := (exists_bdd_filtration r_pos r_lt_one F).some
-
-lemma lt_d_eq_zero (F : ℒ S) (s : S) (n : ℤ) :
-  n < F.d → F s n = 0 := (exists_bdd_filtration r_pos r_lt_one F).some_spec s n
-
-lemma laurent_measures.summable_half (F : ℒ S) (s : S) : summable (λ n, ((F s n) : ℝ) *
-  (1 / 2) ^ n) := @aux_thm69.summable_smaller_radius _ _ F.d (F.summable s) (lt_d_eq_zero _ _) r_half
 
 def θ : ℒ S → ℳ S := ϑ (1 / 2 : ℝ) r p S
 
@@ -81,6 +71,38 @@ def ϕ : ℒ S → ℒ S :=
 
 lemma ϕ_apply (F : ℒ S) (s : S) (n : ℤ) : ϕ F s n = 2 * F s (n-1) - F s n :=
 by simp only [ϕ, sub_apply, nsmul_apply, shift_to_fun_to_fun, nsmul_eq_mul]; refl
+
+lemma tsum_reindex (F : ℒ S) (N : ℤ) (s : S) : ∑' (l : ℕ), (F s (N + l) : ℝ) * (2 ^ l)⁻¹ =
+ 2 ^ N * ∑' (m : {m : ℤ // N ≤ m}), (F s m : ℝ) * (2 ^ m.1)⁻¹ :=
+begin
+  have h_shift := int_tsum_shift (λ n, (F s n : ℝ) * (2 ^ (-n))) N,
+  simp only at h_shift,
+  simp_rw [subtype.val_eq_coe, ← zpow_neg₀],
+  rw [← h_shift, ← _root_.tsum_mul_left, tsum_congr],
+  intro n,
+  rw [mul_comm (_ ^ N), mul_assoc, ← (zpow_add₀ (@two_ne_zero ℝ _ _)), neg_add_rev,
+    neg_add_cancel_comm, zpow_neg₀, zpow_coe_nat, add_comm],
+end
+
+variable [fact(0 < p)]
+
+lemma r_lt_one : r < 1 :=
+begin
+  refine rpow_lt_one zero_le' (half_lt_self one_ne_zero) _,
+  rw nnreal.coe_pos,
+  exact fact.out _
+end
+
+/--  Let `F : ℒ S` be a Laurent measure.  `laurent_measures.d` chooses a bound `d ∈ ℤ` for `F`,
+such that, for all `s : S`, the sequence `F s` is zero from `d-1` and below. -/
+def laurent_measures.d (F : ℒ S) : ℤ := (exists_bdd_filtration r_pos r_lt_one F).some
+
+lemma lt_d_eq_zero (F : ℒ S) (s : S) (n : ℤ) :
+  n < F.d → F s n = 0 := (exists_bdd_filtration r_pos r_lt_one F).some_spec s n
+
+lemma laurent_measures.summable_half [fact (p < 1)] (F : ℒ S) (s : S) :
+  summable (λ n, ((F s n) : ℝ) * (1 / 2) ^ n) :=
+aux_thm69.summable_smaller_radius F.d (F.summable s) (lt_d_eq_zero _ _) r_half
 
 lemma injective_ϕ (F : ℒ S) (H : ϕ F = 0) : F = 0 :=
 begin
@@ -93,63 +115,39 @@ begin
       mul_eq_mul_left_iff, eq_self_iff_true, bit0_eq_zero, one_ne_zero, or_false],
     refl },
   ext s n,
-  simp only [zero_apply],
   apply int.induction_on' n (F.d - 1),
   { apply lt_d_eq_zero _ _ (F.d - 1),
     simp only [sub_lt_self_iff, zero_lt_one] },
   { intros k h hk₀,
-    specialize H (k + 1) s,
-    rw [← H, add_sub_cancel, hk₀, mul_zero] },
+    simp [← H (k + 1) s, add_sub_cancel, hk₀, mul_zero] },
   { intros k h hk₀,
-    specialize H k s,
-    simp only [hk₀, mul_eq_zero, (@two_ne_zero ℝ _ _), bit0_eq_zero, one_ne_zero, false_or] at H,
-    exact H },
+    simpa only [hk₀, mul_eq_zero, bit0_eq_zero, one_ne_zero, false_or, zero_apply] using H k s }
 end
 
+variables [fact (p < 1)]
 
 lemma θ_ϕ_complex (F : ℒ S) : (θ ∘ ϕ) F = 0 :=
 begin
+  have t0 : (2 : ℝ)⁻¹ ≠ 0 := inv_ne_zero two_ne_zero,
   funext s,
   convert_to ∑' (n : ℤ), ((2 * F s (n - 1) - F s n) : ℝ) * (1 / 2) ^ n = 0,
   { apply tsum_congr,
     intro b,
     rw ← inv_eq_one_div,
-    apply (mul_left_inj' (@zpow_ne_zero ℝ _ _ b (inv_ne_zero two_ne_zero))).mpr,
-    have : (2 : ℝ) * (F s (b - 1)) = ((2 : ℤ) * (F s (b - 1))),
-    { rw [← int.cast_one, int.cast_bit0] },
-    rw [this, ← int.cast_mul, ← int.cast_sub, ϕ_apply], },
+    apply (mul_left_inj' (@zpow_ne_zero ℝ _ _ b t0)).mpr,
+    rw_mod_cast ϕ_apply },
   have h_pos : has_sum (λ n, ((2 * F s (n - 1)) : ℝ) * (1 / 2) ^ n)
     (F.summable_half s).some,
   { let e : ℤ ≃ ℤ := ⟨λ n : ℤ, n - 1, λ n, n + 1, by {intro, simp}, by {intro, simp}⟩,
     convert (equiv.has_sum_iff e).mpr (F.summable_half s).some_spec using 1,
     ext n,
-    have div_half : ∀ b : ℤ, (1 / 2 : ℝ) ^ b * (2 : ℝ) = (1 / 2) ^ (b - 1),
-    { intro b,
-      rw [← inv_eq_one_div, @zpow_sub_one₀ ℝ _ _ (inv_ne_zero two_ne_zero) b],
-      apply (mul_right_inj' (@zpow_ne_zero ℝ _ _ b (inv_ne_zero two_ne_zero))).mpr,
-      exact (inv_inv₀ 2).symm },
-    rw [mul_comm, ← mul_assoc, div_half, mul_comm],
-    refl, },
+    suffices : (2 : ℝ) * ↑(F s (n - 1)) * 2⁻¹ ^ n = ↑(F s (n - 1)) * (2⁻¹ ^ n * 2⁻¹⁻¹),
+    { simpa only [one_div, zpow_neg₀, equiv.coe_fn_mk, function.comp_app, e, zpow_sub_one₀ t0] },
+    ring },
   simp_rw [sub_mul],
   rw [tsum_sub h_pos.summable, sub_eq_zero, h_pos.tsum_eq],
   exacts [(F.summable_half s).some_spec.tsum_eq.symm,
     (F.summable_half s)],
-end
-
-
-lemma tsum_reindex (F : ℒ S) (N : ℤ) (s : S) : ∑' (l : ℕ), (F s (N + l) : ℝ) * (2 ^ l)⁻¹ =
- 2 ^ N * ∑' (m : {m : ℤ // N ≤ m}), (F s m : ℝ) * (2 ^ m.1)⁻¹ :=
-begin
-  have h_sum := F.summable_half s,
-  simp_rw [one_div, inv_zpow'] at h_sum,
-  have h_shift := int_tsum_shift (λ n, (F s n : ℝ) * (2 ^ (-n))) N,
-  simp only at h_shift,
-  simp_rw [subtype.val_eq_coe, ← zpow_neg₀],
-  rw [← h_shift, ← _root_.tsum_mul_left, tsum_congr],
-  intro n,
-  nth_rewrite_rhs 0 [mul_comm],
-  rw [mul_assoc, ← (zpow_add₀ (@two_ne_zero ℝ _ _)), neg_add_rev, neg_add_cancel_comm, zpow_neg₀,
-    zpow_coe_nat, add_comm],
 end
 
 def ψ (F : ℒ S) (hF : θ F = 0) : ℒ S :=

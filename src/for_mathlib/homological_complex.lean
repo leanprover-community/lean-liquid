@@ -137,21 +137,110 @@ snake_diagram.mk_functor''
   (Fst_Snd C) (Snd_Trd C)
   (homology_to_mod_boundaries (n+1)) (mod_boundaries_to_cycles n) (cycles_to_homology n)
 
+lemma exact_mod_boundaries_functor_map (n : ℕ) : exact
+  ((mod_boundaries_functor n).map ((Fst_Snd C).app A))
+  ((mod_boundaries_functor n).map ((Snd_Trd C).app A)) :=
+begin
+  sorry
+end
+
+lemma epi_mod_boundaries_functor_map (n : ℕ) :
+  epi ((mod_boundaries_functor n).map ((Snd_Trd C).app A)) :=
+begin
+  sorry
+end
+
+lemma exact_cycles_functor_map (n : ℕ) : exact
+  ((cycles_functor _ _ n).map ((Fst_Snd C).app A))
+  ((cycles_functor _ _ n).map ((Snd_Trd C).app A)) :=
+begin
+  sorry
+end
+
+lemma mono_cycles_functor_map (n : ℕ) : mono ((cycles_functor _ _ n).map ((Fst_Snd C).app A)) :=
+begin
+  sorry
+end
+
+lemma mono_homology_to_mod_boundaries (A : chain_complex C ℕ) (n : ℕ) :
+  mono ((homology_to_mod_boundaries n).app A) :=
+begin
+  sorry
+end
+
+lemma exact_homology_to_mod_boundaries_to_cycles (A : chain_complex C ℕ) (n : ℕ) :
+  exact ((homology_to_mod_boundaries (n+1)).app A) ((mod_boundaries_to_cycles n).app A) :=
+begin
+  sorry
+end
+
+lemma exact_mod_boundaries_to_cycles_to_homology (A : chain_complex C ℕ) (n : ℕ) :
+  exact ((mod_boundaries_to_cycles n).app A) ((cycles_to_homology n).app A)  :=
+begin
+  sorry
+end
+
+lemma epi_cycles_to_homology (A : chain_complex C ℕ) (n : ℕ) :
+  epi ((cycles_to_homology n).app A) :=
+begin
+  sorry
+end
+
 lemma snake_diagram_is_snake_input (n : ℕ) : is_snake_input (snake_diagram C n A) :=
-sorry
--- { row_exact₁ :=
---   begin
---     dsimp [snake_diagram, snake_diagram.mk_functor'', snake_diagram.mk_functor'],
---     simp only [snake_diagram.mk_functor_map_g1, snake_diagram.mk_functor_map_f1],
---     show exact ((mod_boundaries_functor (n+1)).map _) ((mod_boundaries_functor (n+1)).map _),
---   end,
---   row_exact₂ := _,
---   col_exact₁ := _,
---   col_exact₂ := _,
---   col_mono := _,
---   col_epi := _,
---   row_mono := _,
---   row_epi := _ }
+{ row_exact₁ := begin
+    dsimp [snake_diagram, snake_diagram.mk_functor'', snake_diagram.mk_functor'],
+    simp only [snake_diagram.mk_functor_map_f1, snake_diagram.mk_functor_map_g1],
+    exact exact_mod_boundaries_functor_map _ _ _,
+  end,
+  row_exact₂ := begin
+    dsimp [snake_diagram, snake_diagram.mk_functor'', snake_diagram.mk_functor'],
+    simp only [snake_diagram.mk_functor_map_f2, snake_diagram.mk_functor_map_g2],
+    exact exact_cycles_functor_map _ _ _,
+  end,
+  col_exact₁ := begin
+    intro j,
+    dsimp [snake_diagram, snake_diagram.mk_functor'', snake_diagram.mk_functor'],
+    fin_cases j with [0, 1, 2];
+    simp only [snake_diagram.mk_functor_map_a0, snake_diagram.mk_functor_map_a1,
+      snake_diagram.mk_functor_map_b0, snake_diagram.mk_functor_map_b1,
+      snake_diagram.mk_functor_map_c0, snake_diagram.mk_functor_map_c1];
+    exact exact_homology_to_mod_boundaries_to_cycles _ _ _,
+  end,
+  col_exact₂ := begin
+    intro j,
+    dsimp [snake_diagram, snake_diagram.mk_functor'', snake_diagram.mk_functor'],
+    fin_cases j with [0, 1, 2];
+    simp only [snake_diagram.mk_functor_map_a1, snake_diagram.mk_functor_map_a2,
+      snake_diagram.mk_functor_map_b1, snake_diagram.mk_functor_map_b2,
+      snake_diagram.mk_functor_map_c1, snake_diagram.mk_functor_map_c2];
+    exact exact_mod_boundaries_to_cycles_to_homology _ _ _,
+  end,
+  col_mono := begin
+    intro j,
+    dsimp [snake_diagram, snake_diagram.mk_functor'', snake_diagram.mk_functor'],
+    fin_cases j with [0, 1, 2];
+    simp only [snake_diagram.mk_functor_map_a0, snake_diagram.mk_functor_map_b0,
+      snake_diagram.mk_functor_map_c0];
+    exact mono_homology_to_mod_boundaries _ _ _,
+  end,
+  col_epi := begin
+    intro j,
+    dsimp [snake_diagram, snake_diagram.mk_functor'', snake_diagram.mk_functor'],
+    fin_cases j with [0, 1, 2];
+    simp only [snake_diagram.mk_functor_map_a2, snake_diagram.mk_functor_map_b2,
+      snake_diagram.mk_functor_map_c2];
+    exact epi_cycles_to_homology _ _ _,
+  end,
+  row_mono := begin
+    dsimp [snake_diagram, snake_diagram.mk_functor'', snake_diagram.mk_functor'],
+    simp only [snake_diagram.mk_functor_map_f2],
+    exact mono_cycles_functor_map _ _ _
+  end,
+  row_epi := begin
+    dsimp [snake_diagram, snake_diagram.mk_functor'', snake_diagram.mk_functor'],
+    simp only [snake_diagram.mk_functor_map_g1],
+    exact epi_mod_boundaries_functor_map _ _ _
+  end }
 
 def snake_input {C : Type*} [category C] [abelian C] (n : ℕ) :
   chain_complex (short_exact_sequence C) ℕ → snake_input C :=
