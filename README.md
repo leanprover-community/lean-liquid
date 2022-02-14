@@ -47,7 +47,8 @@ for details on how to read this statement.
 
 Below we explain how to engage with the Lean code directly.
 We also provide a [blueprint](https://leanprover-community.github.io/liquid/)
-including a [dependency graph](https://leanprover-community.github.io/liquid/dep_graph.html)
+including two [dependency](https://leanprover-community.github.io/liquid/dep_graph_section_1.html)
+[graphs](https://leanprover-community.github.io/liquid/dep_graph_section_2.html)
 of the main ingredients in the repository.
 This blueprint is developed in sync with the Lean formalization,
 and will hence see frequent updates during the length of the project.
