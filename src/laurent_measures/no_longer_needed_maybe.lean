@@ -3,6 +3,8 @@ import analysis.normed_space.basic
 import analysis.specific_limits
 import laurent_measures.aux_lemmas
 
+/-  These lemmas seem to no longer be needed for Theorem 6.9 or anywhere else in LTE. -/
+
 open aux_thm69
 open metric finset normed_field
 open_locale nnreal classical big_operators topological_space

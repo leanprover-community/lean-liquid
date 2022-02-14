@@ -3,6 +3,9 @@ import analysis.normed_space.basic
 import topology.instances.ennreal
 import analysis.specific_limits
 
+/- These are lemmas that are used in the proof of either auxilliary facts for Theorem 6.9 or
+for Theorem 6.9 directly. -/
+
 open function metric finset nnreal normed_field
 open_locale nnreal classical big_operators topological_space
 
