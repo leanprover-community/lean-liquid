@@ -17,7 +17,7 @@ universe u
 
 namespace laurent_measures_ses
 
-open nnreal laurent_measures pseudo_normed_group comphaus_filtered_pseudo_normed_group comphaus_filtered_pseudo_normed_group_hom
+open laurent_measures pseudo_normed_group comphaus_filtered_pseudo_normed_group comphaus_filtered_pseudo_normed_group_hom
 open_locale big_operators nnreal
 
 section homs
@@ -108,8 +108,11 @@ begin
   exact aux_thm69.summable_smaller_radius_norm G.d r_half (G.summable s) (lt_d_eq_zero _ _),
 end
 
-lemma θ_bound : ∃ C, ∀ c : ℝ≥0, ∀ F : (ℒ S), F ∈ filtration (ℒ S) c → (θ F) ∈ filtration (ℳ S) (C * c) :=
+lemma θ_bound : ∃ C, ∀ c : ℝ≥0, ∀ F : (ℒ S), F ∈ filtration (ℒ S) c → (θ F) ∈ filtration (ℳ S)
+  (C * c) :=
 begin
+    have h_two : 0 ≤ (2 : ℝ)⁻¹ , sorry,
+    have r_coe : (1 / 2 : ℝ) ^ (p : ℝ) = r, sorry,
     use 1,
     intros c F hF,
     rw one_mul,
@@ -119,14 +122,41 @@ begin
     dsimp only [real_measures.has_nnnorm, θ, theta.ϑ],
     let T := S.2.1,
     -- convert_to ∑ s in T, ∥∑' (n : ℤ), ((F s n) : ℝ) * (1 / 2) ^ n∥₊ ^ (p : ℝ) ≤ c,
-    have ineq : ∀ (s ∈ T), ∥∑' (n : ℤ), ((F s n) : ℝ) * (1 / 2) ^ n∥₊ ^ (p : ℝ) ≤ ∑' (n : ℤ), ∥ ((F s n) : ℝ) * (1 / 2) ^ n∥₊ ^ (p : ℝ), sorry,
+    have ineq : ∀ (s ∈ T), ∥∑' (n : ℤ), ((F s n) : ℝ) * (1 / 2) ^ n∥₊ ^ (p : ℝ) ≤ ∑' (n : ℤ),
+      ∥ ((F s n) : ℝ) * (1 / 2) ^ n∥₊ ^ (p : ℝ), sorry,
     apply (finset.sum_le_sum ineq).trans,
     simp_rw normed_field.nnnorm_mul,
     simp_rw ← inv_eq_one_div,
     simp_rw normed_field.nnnorm_zpow,
     simp_rw normed_field.nnnorm_inv,
-    simp_rw mul_rpow,
+    simp_rw nnreal.mul_rpow,
+    simp_rw [real.nnnorm_two],
+    simp_rw ← nnreal.coe_le_coe,
+    simp_rw nnreal.coe_sum,
+    simp_rw nnreal.coe_tsum,
+    simp_rw nnreal.coe_mul,
+    simp_rw nnreal.coe_rpow,
+    simp_rw nnreal.coe_zpow,
+    simp_rw nnreal.coe_inv,
+    simp only [_root_.coe_nnnorm, nnreal.coe_bit0, nonneg.coe_one],
+    simp_rw [← real.rpow_int_cast],
+    simp_rw [← real.rpow_mul h_two],
+    simp_rw [mul_comm _ (p : ℝ)],
+    simp_rw [real.rpow_mul h_two],
+    simp_rw [inv_eq_one_div],
+    simp_rw r_coe,
+    --put together all the `simp_rw` above
+    simp_rw [← nnreal.coe_le_coe] at hF,
+    simp_rw nnreal.coe_sum at hF,
+    simp_rw nnreal.coe_tsum at hF,
+    simp_rw nnreal.coe_mul at hF,
+    simp_rw nnreal.coe_zpow at hF,
+    simp only [_root_.coe_nnnorm] at hF,
+    have le_p_pow : ∀ s : S, ∀ a : ℤ, ∥ (F s a : ℝ) ∥ ^ (p : ℝ) ≤  ∥ F s a ∥, sorry,
+
     sorry,
+    sorry,
+    -- simp [norm_int_cast],
     -- simp_rw real.rpow_eq_pow,
     -- apply norm_tsum_le_tsum_norm,
     -- conv
