@@ -43,7 +43,14 @@ def functor.left_derived_obj_iso' (F : C ⥤ D) [F.additive] (n : ℕ)
 
 def δ [F.additive] (n : ℕ) (A : short_exact_sequence C) :
   (F.left_derived (n+1)).obj A.3 ⟶ (F.left_derived n).obj A.1 :=
-sorry -- use `for_mathlib/homological_complex.lean`
+begin
+  have f₃ := functor.left_derived_obj_iso' F (n+1) _ _ _ (horseshoe_is_projective_resolution₃ A),
+  have f₁ := functor.left_derived_obj_iso' F n _ _ _ (horseshoe_is_projective_resolution₁ A),
+  refine f₃.hom ≫ _ ≫ f₁.symm.hom,
+  convert homological_complex.δ n (map_complex_short_exact_sequence_of_split C F _
+    (λ i, horseshoe_split A i)),
+end
+-- use `for_mathlib/homological_complex.lean`
 
 lemma six_term_exact_seq [F.additive] (n : ℕ) (A : short_exact_sequence C) :
   exact_seq D [
