@@ -132,6 +132,38 @@ structure pBanach :=
 (is_module : module ℝ V)
 (is_normed_space' : normed_space' ℝ p V)
 
+
+
+/-[FAE] Another try at pBanach: in the `def`, `nonneg_norm` must be restated in terms of a
+compatibility with the topology, and its relation with a distance
+-/
+
+structure has_p_norm (V : Type*) (p : ℝ) [fact (0 < p)] [fact (p ≤ 1)]
+  extends has_norm V, add_comm_group V, module ℝ V, topological_space V, has_continuous_smul ℝ V,
+    topological_add_group V :=
+(p_norm : ∀ (α : ℝ) (v : V), ∥ α • v ∥ = | α | ^ p • ∥ v ∥)
+(nonneg_norm : ∀ (v : V), 0 ≤ ∥ v ∥)
+
+structure pBanach' (V : Type*) (p : ℝ) [fact (0 < p)] [fact (p ≤ 1)] :=
+(exists_p_norm : inhabited (has_p_norm V p))
+
+lemma pBanach'_is_qBanach' (V: Type*) (p : ℝ) [fact (0 < p)] [fact (p ≤ 1)] (q : ℝ) [fact (0 < q)]
+  [fact (q ≤ 1)] [hp : pBanach' V p] : pBanach' V q :=
+begin
+  rcases hp with ⟨H_p_norm, _⟩,
+  let ψ := H_p_norm.norm,
+  use λ v : V, (ψ v)^(q/p),--[FAE] Why λ v, ((h_p_norm.norm) v)^(q/p) does not work?
+  assumption',
+  intros α v,
+  dsimp only [ψ],
+  rw [hp_p_norm α v, smul_eq_mul, real.mul_rpow, ← real.rpow_mul, mul_div_cancel'],
+  exacts [refl _, ne_of_gt (fact.out _), abs_nonneg α,
+    (real.rpow_nonneg_of_nonneg (abs_nonneg α) p), hp_nonneg_norm v,
+    (λ _, (real.rpow_nonneg_of_nonneg (hp_nonneg_norm _) _))],
+end
+
+
+
 namespace pBanach
 
 instance : has_coe_to_sort (pBanach p) (Type*) := ⟨λ X, X.V⟩
