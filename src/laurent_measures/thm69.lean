@@ -76,6 +76,8 @@ lemma laurent_measures.summable_half (F : ℒ S) (s : S) : summable (λ n, ((F s
 
 def θ : ℒ S → ℳ S := ϑ (1 / 2 : ℝ) r p S
 
+variables [fact (0 < r)]
+
 def ϕ : ℒ S → ℒ S :=
 λ F, 2 • shift (-1) F - F
 
@@ -93,43 +95,34 @@ begin
       mul_eq_mul_left_iff, eq_self_iff_true, bit0_eq_zero, one_ne_zero, or_false],
     refl },
   ext s n,
-  simp only [zero_apply],
   apply int.induction_on' n (F.d - 1),
   { apply lt_d_eq_zero _ _ (F.d - 1),
     simp only [sub_lt_self_iff, zero_lt_one] },
   { intros k h hk₀,
-    specialize H (k + 1) s,
-    rw [← H, add_sub_cancel, hk₀, mul_zero] },
+    simp [← H (k + 1) s, add_sub_cancel, hk₀, mul_zero] },
   { intros k h hk₀,
-    specialize H k s,
-    simp only [hk₀, mul_eq_zero, (@two_ne_zero ℝ _ _), bit0_eq_zero, one_ne_zero, false_or] at H,
-    exact H },
+    simpa only [hk₀, mul_eq_zero, bit0_eq_zero, one_ne_zero, false_or, zero_apply] using H k s }
 end
 
 
 lemma θ_ϕ_complex (F : ℒ S) : (θ ∘ ϕ) F = 0 :=
 begin
+  have t0 : (2 : ℝ)⁻¹ ≠ 0 := inv_ne_zero two_ne_zero,
   funext s,
   convert_to ∑' (n : ℤ), ((2 * F s (n - 1) - F s n) : ℝ) * (1 / 2) ^ n = 0,
   { apply tsum_congr,
     intro b,
     rw ← inv_eq_one_div,
-    apply (mul_left_inj' (@zpow_ne_zero ℝ _ _ b (inv_ne_zero two_ne_zero))).mpr,
-    have : (2 : ℝ) * (F s (b - 1)) = ((2 : ℤ) * (F s (b - 1))),
-    { rw [← int.cast_one, int.cast_bit0] },
-    rw [this, ← int.cast_mul, ← int.cast_sub, ϕ_apply], },
+    apply (mul_left_inj' (@zpow_ne_zero ℝ _ _ b t0)).mpr,
+    rw_mod_cast ϕ_apply },
   have h_pos : has_sum (λ n, ((2 * F s (n - 1)) : ℝ) * (1 / 2) ^ n)
     (F.summable_half s).some,
   { let e : ℤ ≃ ℤ := ⟨λ n : ℤ, n - 1, λ n, n + 1, by {intro, simp}, by {intro, simp}⟩,
     convert (equiv.has_sum_iff e).mpr (F.summable_half s).some_spec using 1,
     ext n,
-    have div_half : ∀ b : ℤ, (1 / 2 : ℝ) ^ b * (2 : ℝ) = (1 / 2) ^ (b - 1),
-    { intro b,
-      rw [← inv_eq_one_div, @zpow_sub_one₀ ℝ _ _ (inv_ne_zero two_ne_zero) b],
-      apply (mul_right_inj' (@zpow_ne_zero ℝ _ _ b (inv_ne_zero two_ne_zero))).mpr,
-      exact (inv_inv₀ 2).symm },
-    rw [mul_comm, ← mul_assoc, div_half, mul_comm],
-    refl, },
+    suffices : (2 : ℝ) * ↑(F s (n - 1)) * 2⁻¹ ^ n = ↑(F s (n - 1)) * (2⁻¹ ^ n * 2⁻¹⁻¹),
+    { simpa only [one_div, zpow_neg₀, equiv.coe_fn_mk, function.comp_app, e, zpow_sub_one₀ t0] },
+    ring },
   simp_rw [sub_mul],
   rw [tsum_sub h_pos.summable, sub_eq_zero, h_pos.tsum_eq],
   exacts [(F.summable_half s).some_spec.tsum_eq.symm,
