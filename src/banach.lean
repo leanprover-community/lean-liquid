@@ -139,21 +139,22 @@ compatibility with the topology, and its relation with a distance
 -/
 
 structure has_p_norm (V : Type*) (p : ℝ) [fact (0 < p)] [fact (p ≤ 1)]
-  extends has_norm V, add_comm_group V, module ℝ V, topological_space V, has_continuous_smul ℝ V,
-    topological_add_group V :=
+  [add_comm_group V] [module ℝ V] [topological_space V] [has_continuous_smul ℝ V]
+    [topological_add_group V] extends has_norm V :=
 (p_norm : ∀ (α : ℝ) (v : V), ∥ α • v ∥ = | α | ^ p • ∥ v ∥)
 (nonneg_norm : ∀ (v : V), 0 ≤ ∥ v ∥)
 
-structure pBanach' (V : Type*) (p : ℝ) [fact (0 < p)] [fact (p ≤ 1)] :=
+structure pBanach' (V : Type*) (p : ℝ) [fact (0 < p)] [fact (p ≤ 1)] [add_comm_group V] [module ℝ V] [topological_space V] [has_continuous_smul ℝ V]
+    [topological_add_group V]:=
 (exists_p_norm : inhabited (has_p_norm V p))
 
 lemma pBanach'_is_qBanach' (V: Type*) (p : ℝ) [fact (0 < p)] [fact (p ≤ 1)] (q : ℝ) [fact (0 < q)]
-  [fact (q ≤ 1)] [hp : pBanach' V p] : pBanach' V q :=
+  [fact (q ≤ 1)] [add_comm_group V] [module ℝ V] [topological_space V] [has_continuous_smul ℝ V]
+    [topological_add_group V] [hp : pBanach' V p] : pBanach' V q :=
 begin
   rcases hp with ⟨H_p_norm, _⟩,
   let ψ := H_p_norm.norm,
   use λ v : V, (ψ v)^(q/p),--[FAE] Why λ v, ((h_p_norm.norm) v)^(q/p) does not work?
-  assumption',
   intros α v,
   dsimp only [ψ],
   rw [hp_p_norm α v, smul_eq_mul, real.mul_rpow, ← real.rpow_mul, mul_div_cancel'],
