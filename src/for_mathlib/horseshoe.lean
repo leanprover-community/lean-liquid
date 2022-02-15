@@ -373,4 +373,32 @@ def horseshoe_mapped (A : short_exact_sequence C) (F : C ⥤ D) [F.additive] (n 
   short_exact_sequence D :=
 functor.map_short_exact_sequence_of_split _ F ((horseshoe A).X n) (horseshoe_split A n)
 
+lemma horseshoe_f_comp_to_single₂_f (A : short_exact_sequence C) (i : ℕ) :
+  ((horseshoe A).X i).f ≫ (horseshoe_to_single₂ A).f i =
+  (horseshoe_to_single₁ A).f i ≫ ((chain_complex.single₀ C).map A.f).f i :=
+begin
+  cases i,
+  { dsimp [horseshoe_to_single₂, horseshoe_to_single₁, horseshoe, horseshoe_obj, horseshoe_step,
+      horseshoe_base, horseshoe_π, horseshoe_base_π, chain_complex.to_single₀_equiv],
+    simp },
+  { dsimp [horseshoe_to_single₂, horseshoe_to_single₁, horseshoe, horseshoe_obj, horseshoe_step,
+      horseshoe_base, horseshoe_π, horseshoe_base_π, chain_complex.to_single₀_equiv],
+    simp }
+end
+
+lemma horseshoe_g_comp_to_single₃_f (A : short_exact_sequence C) (i : ℕ) :
+  ((horseshoe A).X i).g ≫ (horseshoe_to_single₃ A).f i =
+  (horseshoe_to_single₂ A).f i ≫ ((chain_complex.single₀ C).map A.g).f i :=
+begin
+  cases i,
+  { dsimp [horseshoe_to_single₂, horseshoe_to_single₃, chain_complex.to_single₀_equiv, horseshoe,
+      horseshoe_obj, horseshoe_π, horseshoe_step, horseshoe_base, horseshoe_base_π],
+    ext,
+    { simp },
+    { simp  } },
+  { dsimp [horseshoe_to_single₂, horseshoe_to_single₃, horseshoe, horseshoe_obj, horseshoe_step,
+      horseshoe_base, horseshoe_π, horseshoe_base_π, chain_complex.to_single₀_equiv],
+    simp }
+end
+
 end short_exact_sequence
