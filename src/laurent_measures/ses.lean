@@ -26,6 +26,14 @@ parameter {p : ℝ≥0}
 
 def r : ℝ≥0 := (1 / 2) ^ (p:ℝ)
 
+lemma r_coe : (1 / 2 : ℝ) ^ (p : ℝ) = (r : ℝ) :=
+begin
+  have : (1/2 : ℝ) = ((1/2 : ℝ≥0) : ℝ),
+  simp only [one_div, nonneg.coe_inv, nnreal.coe_bit0, nonneg.coe_one],
+  rw [this, ← nnreal.coe_rpow, nnreal.coe_eq],
+  refl,
+end
+
 variables [fact(0 < p)] [fact (p < 1)]
 variables [fact (0 < r)] --not nice, turn it into an instance
 variable {S : Fintype}
@@ -108,71 +116,75 @@ begin
   exact aux_thm69.summable_smaller_radius_norm G.d r_half (G.summable s) (lt_d_eq_zero _ _),
 end
 
+--for mathlib
+lemma nnreal.rpow_int_cast (x : ℝ≥0) (n : ℤ) : x ^ n = x ^ (n : ℝ) := sorry
+
+-- lemma nnreal.mul_le_mul_left {a b c : ℝ≥0} : a * b ≤ a * c ↔ b ≤ c := sorry
+
+-- lemma nnreal.mul_le_mul_right {a b c : ℝ≥0} : b * a ≤ c * a ↔ b ≤ c := sorry
+
+lemma nnreal.rpow_le_rpow_of_exponent_le {x : ℝ≥0} {y z : ℝ} (hxyz : y ≤ z) :
+  x ^ y ≤ x ^ z := sorry
+
+-- lemma nnreal.rpow_le_rpow {x y: ℝ≥0} {z : ℝ} (h : x ≤ y) : x ^ z ≤ y ^ z := sorry
+-- begin
+--   rcases eq_or_lt_of_le h₁ with rfl|h₁', { refl },
+--   rcases eq_or_lt_of_le h₂ with rfl|h₂', { simp },
+--   exact le_of_lt (rpow_lt_rpow h h₁' h₂')
+-- end
+
+lemma nnreal.tsum_geom_arit_inequality (f: ℤ → ℝ) (r : ℝ) : ∥ tsum (λ n, (f n : ℝ)) ∥₊ ^ r ≤
+  tsum (λ n, ∥ (f n)∥₊ ^ r ) :=
+begin
+  sorry--asked Heather, use nnreal.rpow_sum_le_sum_rpow in `real_measures.lean`
+end
+
+
+lemma aux_bound (F : ℒ S) (s : S) : ∀ (b : ℤ), ∥(F s b : ℝ) ∥₊ ^ (p : ℝ) * (2⁻¹ ^ (p : ℝ)) ^ (b : ℝ) ≤
+∥F s b∥₊ * r ^ b :=
+begin
+  intro b,
+  -- simp only [r],
+  rw [inv_eq_one_div, nnreal.rpow_int_cast],
+  apply mul_le_mul_of_nonneg_right,
+  have p_le_one : (p : ℝ) ≤ 1,
+  { rw ← nnreal.coe_one,
+    exact ( le_of_lt $ nnreal.coe_lt_coe.mpr $ fact.out _) },
+  by_cases hF_nz : F s b = 0,
+  { rw [hF_nz, int.cast_zero, nnnorm_zero, nnnorm_zero, nnreal.zero_rpow],
+    rw [ne.def, ← nnreal.coe_zero, nnreal.coe_eq, ← ne.def],
+    exact ne_of_gt (fact.out _) },
+  { convert nnreal.rpow_le_rpow_of_exponent_le p_le_one,
+    rw nnreal.rpow_one,
+    refl },
+  simp only [zero_le'],
+end
+
 lemma θ_bound : ∃ C, ∀ c : ℝ≥0, ∀ F : (ℒ S), F ∈ filtration (ℒ S) c → (θ F) ∈ filtration (ℳ S)
   (C * c) :=
 begin
-    have h_two : 0 ≤ (2 : ℝ)⁻¹ , sorry,
-    have r_coe : (1 / 2 : ℝ) ^ (p : ℝ) = r, sorry,
-    use 1,
-    intros c F hF,
-    rw one_mul,
-    rw mem_filtration_iff at hF,
-    dsimp only [laurent_measures.has_nnnorm] at hF,
-    rw real_measures.mem_filtration_iff,
-    dsimp only [real_measures.has_nnnorm, θ, theta.ϑ],
-    let T := S.2.1,
-    -- convert_to ∑ s in T, ∥∑' (n : ℤ), ((F s n) : ℝ) * (1 / 2) ^ n∥₊ ^ (p : ℝ) ≤ c,
-    have ineq : ∀ (s ∈ T), ∥∑' (n : ℤ), ((F s n) : ℝ) * (1 / 2) ^ n∥₊ ^ (p : ℝ) ≤ ∑' (n : ℤ),
-      ∥ ((F s n) : ℝ) * (1 / 2) ^ n∥₊ ^ (p : ℝ), sorry,
-    apply (finset.sum_le_sum ineq).trans,
-    simp_rw normed_field.nnnorm_mul,
-    simp_rw ← inv_eq_one_div,
-    simp_rw normed_field.nnnorm_zpow,
-    simp_rw normed_field.nnnorm_inv,
-    simp_rw nnreal.mul_rpow,
-    simp_rw [real.nnnorm_two],
-    simp_rw ← nnreal.coe_le_coe,
-    simp_rw nnreal.coe_sum,
-    simp_rw nnreal.coe_tsum,
-    simp_rw nnreal.coe_mul,
-    simp_rw nnreal.coe_rpow,
-    simp_rw nnreal.coe_zpow,
-    simp_rw nnreal.coe_inv,
-    simp only [_root_.coe_nnnorm, nnreal.coe_bit0, nonneg.coe_one],
-    simp_rw [← real.rpow_int_cast],
-    simp_rw [← real.rpow_mul h_two],
-    simp_rw [mul_comm _ (p : ℝ)],
-    simp_rw [real.rpow_mul h_two],
-    simp_rw [inv_eq_one_div],
-    simp_rw r_coe,
-    --put together all the `simp_rw` above
-    simp_rw [← nnreal.coe_le_coe] at hF,
-    simp_rw nnreal.coe_sum at hF,
-    simp_rw nnreal.coe_tsum at hF,
-    simp_rw nnreal.coe_mul at hF,
-    simp_rw nnreal.coe_zpow at hF,
-    simp only [_root_.coe_nnnorm] at hF,
-    have le_p_pow : ∀ s : S, ∀ a : ℤ, ∥ (F s a : ℝ) ∥ ^ (p : ℝ) ≤  ∥ F s a ∥, sorry,
-
-    sorry,
-    sorry,
-    -- simp [norm_int_cast],
-    -- simp_rw real.rpow_eq_pow,
-    -- apply norm_tsum_le_tsum_norm,
-    -- conv
-    -- begin
-    --   -- apply ,
-    --   -- to_lhs,
-    --   congr,
-    --   skip,
-    --   funext,
-    --   rw normed_field.nnnorm_mul,
-    --   -- at_goal 1,
-    --   -- apply finset.sum_le_univ_sum_of_nonneg,
-
-    -- end,
-    -- rw [mul_assoc],
-    -- simp_rw [mul_assoc, normed_field.nnnorm_mul],
+  use 1,
+  intros c F hF,
+  rw mem_filtration_iff at hF,
+  dsimp only [laurent_measures.has_nnnorm] at hF,
+  rw [one_mul, real_measures.mem_filtration_iff],
+  dsimp only [real_measures.has_nnnorm, θ, theta.ϑ],
+  let T := S.2.1,
+  have ineq : ∀ (s ∈ T), ∥∑' (n : ℤ), ((F s n) : ℝ) * (1 / 2) ^ n∥₊ ^ (p : ℝ) ≤ ∑' (n : ℤ),
+    ∥ ((F s n) : ℝ) * (1 / 2) ^ n∥₊ ^ (p : ℝ),
+  { intros s hs,
+    apply nnreal.tsum_geom_arit_inequality (λ n, ((F s n) * (1 / 2) ^ n)) (p : ℝ), },
+  apply (finset.sum_le_sum ineq).trans,
+  simp_rw [normed_field.nnnorm_mul, ← inv_eq_one_div, normed_field.nnnorm_zpow,
+    normed_field.nnnorm_inv, nnreal.mul_rpow, real.nnnorm_two, nnreal.rpow_int_cast,
+    ← nnreal.rpow_mul (2 : ℝ≥0)⁻¹, mul_comm, nnreal.rpow_mul (2 : ℝ≥0)⁻¹],
+  apply le_trans _ hF,
+  apply finset.sum_le_sum,
+  intros s hs,
+  apply tsum_le_tsum,
+  exact aux_bound F s,
+  refine nnreal.summable_of_le _ (F.2 s),
+  exacts [aux_bound F s, F.2 s],
 end
 
 -- lemma θ_continuous (F G : ℒ S) : θ (F + G) = θ F + θ G := sorry
