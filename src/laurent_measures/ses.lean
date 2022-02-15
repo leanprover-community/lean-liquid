@@ -26,6 +26,14 @@ parameter {p : ℝ≥0}
 
 def r : ℝ≥0 := (1 / 2) ^ (p:ℝ)
 
+lemma r_coe : (1 / 2 : ℝ) ^ (p : ℝ) = (r : ℝ) :=
+begin
+  have : (1/2 : ℝ) = ((1/2 : ℝ≥0) : ℝ),
+  simp only [one_div, nonneg.coe_inv, nnreal.coe_bit0, nonneg.coe_one],
+  rw [this, ← nnreal.coe_rpow, nnreal.coe_eq],
+  refl,
+end
+
 variables [fact(0 < p)] [fact (p < 1)]
 variables [fact (0 < r)] --not nice, turn it into an instance
 variable {S : Fintype}
@@ -108,11 +116,23 @@ begin
   exact aux_thm69.summable_smaller_radius_norm G.d r_half (G.summable s) (lt_d_eq_zero _ _),
 end
 
+example (a : ℤ) (ha : a ≠ 0) : 1 ≤ |a| :=
+begin
+  rw int.abs_eq_nat_abs,
+  rw ← nat.cast_one,
+  apply int.coe_nat_le_coe_nat_of_le,
+  rw zero_add,
+  rw nat.one_le_iff_ne_zero,
+  rw ne.def,
+  rwa int.nat_abs_eq_zero,
+end
+
+
+
 lemma θ_bound : ∃ C, ∀ c : ℝ≥0, ∀ F : (ℒ S), F ∈ filtration (ℒ S) c → (θ F) ∈ filtration (ℳ S)
   (C * c) :=
 begin
     have h_two : 0 ≤ (2 : ℝ)⁻¹ , sorry,
-    have r_coe : (1 / 2 : ℝ) ^ (p : ℝ) = r, sorry,
     use 1,
     intros c F hF,
     rw one_mul,
@@ -125,26 +145,12 @@ begin
     have ineq : ∀ (s ∈ T), ∥∑' (n : ℤ), ((F s n) : ℝ) * (1 / 2) ^ n∥₊ ^ (p : ℝ) ≤ ∑' (n : ℤ),
       ∥ ((F s n) : ℝ) * (1 / 2) ^ n∥₊ ^ (p : ℝ), sorry,
     apply (finset.sum_le_sum ineq).trans,
-    simp_rw normed_field.nnnorm_mul,
-    simp_rw ← inv_eq_one_div,
-    simp_rw normed_field.nnnorm_zpow,
-    simp_rw normed_field.nnnorm_inv,
-    simp_rw nnreal.mul_rpow,
-    simp_rw [real.nnnorm_two],
-    simp_rw ← nnreal.coe_le_coe,
-    simp_rw nnreal.coe_sum,
-    simp_rw nnreal.coe_tsum,
-    simp_rw nnreal.coe_mul,
-    simp_rw nnreal.coe_rpow,
-    simp_rw nnreal.coe_zpow,
-    simp_rw nnreal.coe_inv,
+    simp_rw [normed_field.nnnorm_mul, ← inv_eq_one_div, normed_field.nnnorm_zpow,
+     normed_field.nnnorm_inv, nnreal.mul_rpow, real.nnnorm_two, ← nnreal.coe_le_coe, nnreal.coe_sum,
+     nnreal.coe_tsum, nnreal.coe_mul, nnreal.coe_rpow, nnreal.coe_zpow, nnreal.coe_inv],
     simp only [_root_.coe_nnnorm, nnreal.coe_bit0, nonneg.coe_one],
-    simp_rw [← real.rpow_int_cast],
-    simp_rw [← real.rpow_mul h_two],
-    simp_rw [mul_comm _ (p : ℝ)],
-    simp_rw [real.rpow_mul h_two],
-    simp_rw [inv_eq_one_div],
-    simp_rw r_coe,
+    simp_rw [← real.rpow_int_cast, ← real.rpow_mul h_two, mul_comm _ (p : ℝ), real.rpow_mul h_two,
+      inv_eq_one_div, r_coe],
     --put together all the `simp_rw` above
     simp_rw [← nnreal.coe_le_coe] at hF,
     simp_rw nnreal.coe_sum at hF,
@@ -152,27 +158,50 @@ begin
     simp_rw nnreal.coe_mul at hF,
     simp_rw nnreal.coe_zpow at hF,
     simp only [_root_.coe_nnnorm] at hF,
-    have le_p_pow : ∀ s : S, ∀ a : ℤ, ∥ (F s a : ℝ) ∥ ^ (p : ℝ) ≤  ∥ F s a ∥, sorry,
+    apply le_trans _ hF,
+    apply finset.sum_le_sum,
+    intros s hs,
+    apply tsum_le_tsum,
+    { intro b,
+      rw real.rpow_int_cast,
+      apply ordered_ring.mul_le_mul_of_nonneg_right,
+      -- rw cast_int
+      have p_le_one : (p : ℝ) ≤ 1,
+      { apply le_of_lt,
+        rw [← nnreal.coe_one, nnreal.coe_lt_coe],
+        exact fact.out _, },
+      by_cases hF_nz : F s b = 0,
+      { rw [hF_nz, int.cast_zero, norm_zero, norm_zero, real.zero_rpow],
+        rw [ne.def, ← nnreal.coe_zero, nnreal.coe_eq, ← ne.def],
+        exact ne_of_gt (fact.out _) },
+      convert real.rpow_le_rpow_of_exponent_le _ p_le_one,
+      { rw real.rpow_one, refl },
+      { rw real.norm_eq_abs,
+        sorry,
+        -- have : ((|F s b| : ℤ) : ℝ) = |(F s b : ℝ)|,
 
-    sorry,
-    sorry,
-    -- simp [norm_int_cast],
-    -- simp_rw real.rpow_eq_pow,
-    -- apply norm_tsum_le_tsum_norm,
-    -- conv
-    -- begin
-    --   -- apply ,
-    --   -- to_lhs,
-    --   congr,
-    --   skip,
-    --   funext,
-    --   rw normed_field.nnnorm_mul,
-    --   -- at_goal 1,
-    --   -- apply finset.sum_le_univ_sum_of_nonneg,
 
-    -- end,
-    -- rw [mul_assoc],
-    -- simp_rw [mul_assoc, normed_field.nnnorm_mul],
+        -- rw this,
+        -- rw real.coe_abs
+        -- rw int.abs_eq_nat_abs,
+        -- rw ← nat.cast_one,
+        -- apply int.coe_nat_le_coe_nat_of_le,
+        -- rw zero_add,
+        -- rw nat.one_le_iff_ne_zero,
+        -- rw ne.def,
+        -- rwa int.nat_abs_eq_zero,
+        -- -- apply le_one_nonz
+        -- squeeze_simp,
+        -- rw real.abs_one,
+        -- rw ← real.norm_coe_nat,
+
+      },sorry,
+
+      -- _ _,-- _ ((r : ℝ) ^ (b : ℝ)),
+      -- refine (mul_le_mul_iff_right ((r : ℝ) ^ (b : ℝ))).mpr,
+      },
+      sorry,
+
 end
 
 -- lemma θ_continuous (F G : ℒ S) : θ (F + G) = θ F + θ G := sorry
