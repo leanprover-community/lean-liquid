@@ -496,7 +496,7 @@ lemma map_short_exact_sequence_of_split.split [F.additive] {A : short_exact_sequ
   (h : A.split) : (map_short_exact_sequence_of_split 𝒞 F _ h).split :=
 short_exact_sequence.mk_of_split'_split _ _ _
 
-def morphism_short_exact_sequence_of_split [F.additive] {A B : short_exact_sequence 𝒞}
+@[simp] def morphism_short_exact_sequence_of_split [F.additive] {A B : short_exact_sequence 𝒞}
   (hA : A.split) (hB : B.split) (m : A ⟶ B) :
   map_short_exact_sequence_of_split 𝒞 F _ hA ⟶ map_short_exact_sequence_of_split 𝒞 F _ hB :=
 short_exact_sequence.mk_morphism_of_split
@@ -508,21 +508,19 @@ lemma morphism_short_exact_sequence_of_split_comp [F.additive] {A B C : short_ex
   morphism_short_exact_sequence_of_split 𝒞 F hA hB m₁ ≫
   morphism_short_exact_sequence_of_split 𝒞 F hB hC m₂ =
   morphism_short_exact_sequence_of_split 𝒞 F hA hC (m₁ ≫ m₂) :=
-by simp [morphism_short_exact_sequence_of_split, short_exact_sequence.mk_morphism_of_split_comp]
-
+by simp [short_exact_sequence.mk_morphism_of_split_comp]
 
 def map_complex_short_exact_sequence_of_split [F.additive]
   (C : chain_complex (short_exact_sequence 𝒞) ℕ) (h : ∀ i, (C.X i).split) :
   chain_complex (short_exact_sequence 𝒟) ℕ :=
 { X := λ i, map_short_exact_sequence_of_split 𝒞 F (C.X i) (h i),
   d := λ i j, morphism_short_exact_sequence_of_split _ _ _ _ (C.d i j),
-  shape' := λ i j hij, by simpa [morphism_short_exact_sequence_of_split, hij,
-    short_exact_sequence.mk_morphism_of_split, short_exact_sequence.mk_morphism_middle_of_split],
+  shape' := λ i j hij, by simpa [hij, short_exact_sequence.mk_morphism_of_split,
+    short_exact_sequence.mk_morphism_middle_of_split],
   d_comp_d' := λ i j k hij hjk,
   begin
     rw [morphism_short_exact_sequence_of_split_comp],
-    simpa [morphism_short_exact_sequence_of_split, morphism_short_exact_sequence_of_split,
-      short_exact_sequence.mk_morphism_of_split, short_exact_sequence.mk_morphism_middle_of_split]
+    simpa [short_exact_sequence.mk_morphism_of_split, short_exact_sequence.mk_morphism_middle_of_split]
   end }
 
 end functor
