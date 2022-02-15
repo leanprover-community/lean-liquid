@@ -75,10 +75,26 @@ variables {R : Type*} [ring R] [linear R C]
 
 -- Move me
 instance linear_yoneda_flip_additive (X : C) :
-  ((linear_yoneda R C).flip.obj (opposite.op X)).additive := sorry
+  ((linear_yoneda R C).flip.obj (opposite.op X)).additive :=
+by tidy
 
 -- Prove this using the above theorem.
 instance (X : C) : homological_functor ((linear_yoneda R C).flip.obj (opposite.op X)) :=
-sorry
+begin
+  constructor,
+  intros T hT,
+  rw Module.exact_iff,
+  apply le_antisymm,
+  { rintros _ ⟨(g : X ⟶ _),rfl⟩,
+    dsimp,
+    obtain ⟨e,h1,he⟩ := complete_distinguished_triangle_morphism
+      (contractible_triangle _ X) T (contractible_distinguished _) hT g (g ≫ T.mor₁)
+      (by { dsimp, simp }),
+    dsimp at he,
+    simp only [zero_comp] at he,
+    simp [← h1] },
+  { rintros (f : X ⟶ _) (hf : f ≫ _ = 0),
+    apply dist_triang_to_exact_complex _ hT _ _ hf }
+end
 
 end category_theory.triangulated
