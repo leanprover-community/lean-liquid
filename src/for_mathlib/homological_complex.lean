@@ -152,6 +152,9 @@ instance Fst_Snd_mono (n : ℕ) : mono (((Fst_Snd C).app A).f n) := (A.X n).mono
 
 instance Snd_Trd_epi (n : ℕ) : epi (((Snd_Trd C).app A).f n) := (A.X n).epi'
 
+instance Fst_Snd_Trd_exact (n : ℕ) : exact (((Fst_Snd C).app A).f n) (((Snd_Trd C).app A).f n) :=
+(A.X n).exact'
+
 instance uugh {A B : chain_complex C ℕ} (f : A ⟶ B) [∀ n, epi (f.f n)] (n : ℕ) :
   epi (f.prev n) :=
 begin
@@ -176,52 +179,6 @@ begin
   simp only [category.assoc, image_subobject_map_arrow, hom.sq_to_right,
     image_subobject_arrow_comp_assoc, hom.sq_to_left, image_subobject_arrow_comp, hom.comm_to],
 end
-
-instance (n : ℕ) : exact (((Fst_Snd C).app A).f n) (((Snd_Trd C).app A).f n) := (A.X n).exact'
-
-lemma exact_boundaries_map {A₁ A₂ A₃ : chain_complex C ℕ} (f : A₁ ⟶ A₂) (g : A₂ ⟶ A₃)
-  [∀ n, exact (f.f n) (g.f n)] (n : ℕ) :
-  exact (boundaries_map f n) (boundaries_map g n) :=
-begin
-  sorry
-end
-
-lemma exact_mod_boundaries_map (n : ℕ) :
-  exact (mod_boundaries_map ((Fst_Snd C).app A) n) (mod_boundaries_map ((Snd_Trd C).app A) n) :=
-begin
-  haveI : exact (boundaries_map ((Fst_Snd C).app A) n) (boundaries_map ((Snd_Trd C).app A) n) :=
-    exact_boundaries_map C _ _ n,
-  have S := snake.mk_of_sequence_hom
-    (↑(boundaries ((Fst C).obj A) n)) (↑(boundaries ((Snd C).obj A) n)) (↑(boundaries ((Trd C).obj A) n))
-          (((Fst C).obj A).X n)             (((Snd C).obj A).X n)             (((Trd C).obj A).X n)
-    (boundaries_map ((Fst_Snd C).app A) _) (boundaries_map ((Snd_Trd C).app A) _)
-    (boundaries _ _).arrow (boundaries _ _).arrow (boundaries _ _).arrow
-    (((Fst_Snd C).app A).f n) (((Snd_Trd C).app A).f n)
-    _ _,
-  { exact (S.six_term_exact_seq.drop 3).pair, },
-end
-
-lemma epi_mod_boundaries_map (n : ℕ) :
-  epi (mod_boundaries_map ((Snd_Trd C).app A) n) :=
-begin
-  apply_with (epi_of_epi (cokernel.π _)) { instances := ff },
-  haveI : epi (((Snd_Trd C).app A).f n) := (A.X n).epi',
-  have : cokernel.π _ ≫ mod_boundaries_map ((Snd_Trd C).app A) n =
-    ((Snd_Trd C).app A).f n ≫ cokernel.π _ := cokernel.π_desc _ _ _,
-  rw this,
-  apply epi_comp,
-end
-
--- lemma exact_cycles_map_app_zero :
---   exact (cycles_map ((Fst_Snd C).app A) 0) (cycles_map ((Snd_Trd C).app A) 0) :=
--- begin
---   delta cycles_map cycles,
---   simp only [nat_trans.map_homological_complex_app_f, short_exact_sequence.f_nat_app,
---     short_exact_sequence.g_nat_app],
---   suffices : ((Trd C).obj A).d_from 0 = 0,
---   { rw [this], }
---   -- dsimp,
--- end
 
 instance uuugher (A B : C) (f : A ⟶ B) : exact (kernel_subobject f).arrow f :=
 by { rw [← kernel_subobject_arrow, exact_iso_comp], apply_instance }
@@ -263,8 +220,10 @@ begin
     { apply_instance },
     { refine ⟨λ Z a b H, _⟩, apply (X_next_is_zero _ _).eq_of_tgt } },
   have : (complex_shape.down ℕ).rel n.succ n := rfl,
-  rw [hom.next_eq _ this, hom.next_eq _ this],
-  sorry
+  refine preadditive.exact_of_iso_of_exact' (f.f n) (g.f n) _ _
+    (X_next_iso A₁ this).symm (X_next_iso A₂ this).symm (X_next_iso A₃ this).symm
+    _ _ infer_instance;
+  simp only [hom.next_eq _ this, iso.symm_hom, iso.inv_hom_id_assoc],
 end
 
 lemma exact_cycles_map_app {A₁ A₂ A₃ : chain_complex C ℕ} (f : A₁ ⟶ A₂) (g : A₂ ⟶ A₃) (n : ℕ)
@@ -304,6 +263,39 @@ begin
   rw cycles_map_arrow,
   haveI : mono (((Fst_Snd C).app A).f n) := (A.X n).mono',
   apply mono_comp,
+end
+
+lemma exact_boundaries_map {A₁ A₂ A₃ : chain_complex C ℕ} (f : A₁ ⟶ A₂) (g : A₂ ⟶ A₃)
+  [∀ n, exact (f.f n) (g.f n)] (n : ℕ) :
+  exact (boundaries_map f n) (boundaries_map g n) :=
+begin
+  sorry
+end
+
+lemma exact_mod_boundaries_map (n : ℕ) :
+  exact (mod_boundaries_map ((Fst_Snd C).app A) n) (mod_boundaries_map ((Snd_Trd C).app A) n) :=
+begin
+  haveI : exact (boundaries_map ((Fst_Snd C).app A) n) (boundaries_map ((Snd_Trd C).app A) n) :=
+    exact_boundaries_map C _ _ n,
+  have S := snake.mk_of_sequence_hom
+    (↑(boundaries ((Fst C).obj A) n)) (↑(boundaries ((Snd C).obj A) n)) (↑(boundaries ((Trd C).obj A) n))
+          (((Fst C).obj A).X n)             (((Snd C).obj A).X n)             (((Trd C).obj A).X n)
+    (boundaries_map ((Fst_Snd C).app A) _) (boundaries_map ((Snd_Trd C).app A) _)
+    (boundaries _ _).arrow (boundaries _ _).arrow (boundaries _ _).arrow
+    (((Fst_Snd C).app A).f n) (((Snd_Trd C).app A).f n)
+    _ _,
+  { exact (S.six_term_exact_seq.drop 3).pair, },
+end
+
+lemma epi_mod_boundaries_map (n : ℕ) :
+  epi (mod_boundaries_map ((Snd_Trd C).app A) n) :=
+begin
+  apply_with (epi_of_epi (cokernel.π _)) { instances := ff },
+  haveI : epi (((Snd_Trd C).app A).f n) := (A.X n).epi',
+  have : cokernel.π _ ≫ mod_boundaries_map ((Snd_Trd C).app A) n =
+    ((Snd_Trd C).app A).f n ≫ cokernel.π _ := cokernel.π_desc _ _ _,
+  rw this,
+  apply epi_comp,
 end
 
 lemma mono_homology_to_mod_boundaries (A : chain_complex C ℕ) (n : ℕ) :
