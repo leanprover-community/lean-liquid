@@ -266,10 +266,30 @@ begin
 end
 
 lemma exact_boundaries_map {A₁ A₂ A₃ : chain_complex C ℕ} (f : A₁ ⟶ A₂) (g : A₂ ⟶ A₃)
-  [∀ n, exact (f.f n) (g.f n)] (n : ℕ) :
+  [∀ n, exact (f.f n) (g.f n)] [∀ n, mono (f.f n)] [∀ n, epi (g.f n)] (n : ℕ) :
   exact (boundaries_map f n) (boundaries_map g n) :=
 begin
-  sorry
+  have : (complex_shape.down ℕ).rel (n + 1) n := rfl,
+  suffices S : snake
+    (0:C) 0 0
+    (cycles A₁ (n+1)) (cycles A₂ (n+1)) (cycles A₃ (n+1))
+    (A₁.X_prev n) (A₂.X_prev n) (A₃.X_prev n)
+    (boundaries A₁ n) (boundaries A₂ n) (boundaries A₃ n)
+    0 0
+    0 0 0
+    (cycles_map f (n+1)) (cycles_map g (n+1))
+    ((cycles _ (n+1)).arrow ≫ (X_prev_iso _ this).inv) ((cycles _ (n+1)).arrow ≫ (X_prev_iso _ this).inv) ((cycles _ (n+1)).arrow ≫ (X_prev_iso _ this).inv)
+    (f.prev n) (g.prev n)
+    (factor_thru_image_subobject (A₁.d_to n)) (factor_thru_image_subobject (A₂.d_to n)) (factor_thru_image_subobject (A₃.d_to n))
+    (boundaries_map f n) (boundaries_map g n),
+  { exact (S.six_term_exact_seq.drop 3).pair, },
+  have : exact (cycles_map f (n + 1)) (cycles_map g (n + 1)) := exact_cycles_map_app _ _ _ _,
+  have : exact (hom.prev f n) (hom.prev g n) := sorry,
+  have : epi (cycles_map g (n + 1)) := sorry,
+  have : mono (hom.prev f n) := sorry,
+  resetI,
+  sorry,
+  -- fsplit,
 end
 
 lemma exact_mod_boundaries_map (n : ℕ) :
