@@ -139,7 +139,12 @@ snake_diagram.mk_functor''
 instance (n : ℕ) : epi (boundaries_map ((Snd_Trd C).app A) n) :=
 begin
   let sq := hom.sq_to ((Snd_Trd C).app A) n,
-  haveI : epi sq.left := by { dsimp, sorry /- Aahrg, we need an ugly case distinction -/ },
+  haveI : epi sq.left :=
+  by { dsimp, delta hom.prev X_prev, dsimp,
+    -- rcases (complex_shape.down ℕ).prev n with (_|⟨i, hi⟩),
+    -- { dsimp, sorry },
+    -- dsimp,
+    sorry /- Aahrg, we need an ugly case distinction -/ },
   apply_with (epi_of_epi (factor_thru_image_subobject _)) { instances := ff },
   suffices : factor_thru_image_subobject (((Snd C).obj A).d_to n) ≫
       boundaries_map ((Snd_Trd C).app A) n =
@@ -152,7 +157,7 @@ end
 
 instance (n : ℕ) : exact (((Fst_Snd C).app A).f n) (((Snd_Trd C).app A).f n) := (A.X n).exact'
 
-lemma exact_mod_boundaries_functor_app (n : ℕ) :
+lemma exact_mod_boundaries_map (n : ℕ) :
   exact (mod_boundaries_map ((Fst_Snd C).app A) n) (mod_boundaries_map ((Snd_Trd C).app A) n) :=
 begin
   haveI : mono (((Fst_Snd C).app A).f n) := by { dsimp, apply_instance },
@@ -169,26 +174,43 @@ begin
   { exact (S.six_term_exact_seq.drop 3).pair, },
 end
 
-lemma epi_mod_boundaries_functor_app (n : ℕ) :
+lemma epi_mod_boundaries_map (n : ℕ) :
   epi (mod_boundaries_map ((Snd_Trd C).app A) n) :=
 begin
   apply_with (epi_of_epi (cokernel.π _)) { instances := ff },
   haveI : epi (((Snd_Trd C).app A).f n) := (A.X n).epi',
-  suffices : cokernel.π _ ≫ mod_boundaries_map ((Snd_Trd C).app A) n =
-    ((Snd_Trd C).app A).f n ≫ cokernel.π _,
-  { rw this, apply epi_comp, },
-  apply cokernel.π_desc,
+  have : cokernel.π _ ≫ mod_boundaries_map ((Snd_Trd C).app A) n =
+    ((Snd_Trd C).app A).f n ≫ cokernel.π _ := cokernel.π_desc _ _ _,
+  rw this,
+  apply epi_comp,
 end
+
+-- lemma exact_cycles_map_app_zero :
+--   exact (cycles_map ((Fst_Snd C).app A) 0) (cycles_map ((Snd_Trd C).app A) 0) :=
+-- begin
+--   delta cycles_map cycles,
+--   simp only [nat_trans.map_homological_complex_app_f, short_exact_sequence.f_nat_app,
+--     short_exact_sequence.g_nat_app],
+--   suffices : ((Trd C).obj A).d_from 0 = 0,
+--   { rw [this], }
+--   -- dsimp,
+-- end
 
 lemma exact_cycles_map_app (n : ℕ) :
   exact (cycles_map ((Fst_Snd C).app A) n) (cycles_map ((Snd_Trd C).app A) n) :=
 begin
+  -- have aux : (complex_shape.down ℕ).rel (n+1) n := rfl,
+  -- let I₁ := cycles_iso_kernel ((Fst C).obj A) aux,
+  -- refine preadditive.exact_of_iso_of_exact _ _ _ _ _ _ _ _,
   sorry
 end
 
 lemma mono_cycles_map_app (n : ℕ) : mono (cycles_map ((Fst_Snd C).app A) n) :=
 begin
-  sorry
+  apply_with (mono_of_mono _ (subobject.arrow _)) { instances := ff },
+  rw cycles_map_arrow,
+  haveI : mono (((Fst_Snd C).app A).f n) := (A.X n).mono',
+  apply mono_comp,
 end
 
 lemma mono_homology_to_mod_boundaries (A : chain_complex C ℕ) (n : ℕ) :
@@ -198,9 +220,30 @@ cokernel.map_mono_of_epi_of_mono
   (boundaries A n) (A.X n)
   _ _ _ _ _
 
+open_locale zero_object
+
 lemma exact_homology_to_mod_boundaries_to_cycles (A : chain_complex C ℕ) (n : ℕ) :
   exact ((homology_to_mod_boundaries (n+1)).app A) ((mod_boundaries_to_cycles n).app A) :=
 begin
+  let Z := cokernel ((homology_to_mod_boundaries (n+1)).app A),
+  let φ : Z ⟶ (cycles A n) := cokernel.desc _
+    (cokernel.desc _
+      (factor_thru_image _ ≫ (boundaries_iso_image A rfl).inv ≫ boundaries_to_cycles _ _) _) _,
+  swap, { ext, simp only [category.assoc, boundaries_to_cycles_arrow, zero_comp], sorry },
+  swap, { ext, simp only [category.assoc, zero_comp, homology_to_mod_boundaries_app, comp_zero], sorry },
+  -- have S : snake
+  --   (0:C) 0 0
+  --   0 0 (kernel _)
+  --   (homology A (n+1)) (mod_boundaries A (n+1)) Z
+  --   (homology A (n+1)) (mod_boundaries A (n+1)) (cycles A n)
+  --   0 0
+  --   0 0 0
+  --   0 0
+  --   0 0 (kernel.ι φ)
+  --   ((homology_to_mod_boundaries (n+1)).app A) (cokernel.π ((homology_to_mod_boundaries (n+1)).app A))
+  --   (𝟙 _) (𝟙 _) φ
+  --   ((homology_to_mod_boundaries (n+1)).app A) ((mod_boundaries_to_cycles n).app A) :=
+  -- _,
   sorry
 end
 
@@ -218,7 +261,7 @@ lemma snake_diagram_is_snake_input (n : ℕ) : is_snake_input (snake_diagram C n
 { row_exact₁ := begin
     dsimp [snake_diagram, snake_diagram.mk_functor'', snake_diagram.mk_functor'],
     simp only [snake_diagram.mk_functor_map_f1, snake_diagram.mk_functor_map_g1],
-    exact exact_mod_boundaries_functor_app _ _ _,
+    exact exact_mod_boundaries_map _ _ _,
   end,
   row_exact₂ := begin
     dsimp [snake_diagram, snake_diagram.mk_functor'', snake_diagram.mk_functor'],
@@ -267,7 +310,7 @@ lemma snake_diagram_is_snake_input (n : ℕ) : is_snake_input (snake_diagram C n
   row_epi := begin
     dsimp [snake_diagram, snake_diagram.mk_functor'', snake_diagram.mk_functor'],
     simp only [snake_diagram.mk_functor_map_g1],
-    exact epi_mod_boundaries_functor_app _ _ _
+    exact epi_mod_boundaries_map _ _ _
   end }
 
 def snake_input {C : Type*} [category C] [abelian C] (n : ℕ) :
