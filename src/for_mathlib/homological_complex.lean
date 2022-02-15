@@ -1,6 +1,6 @@
 import data.matrix.notation
 
-import for_mathlib.snake_lemma
+import for_mathlib.snake_lemma2
 import for_mathlib.short_exact_sequence
 
 noncomputable theory
@@ -12,8 +12,7 @@ universes v u
 
 namespace homological_complex
 
-variables {C : Type u} [category.{v} C] [preadditive C]
-variables [has_zero_object C] [has_equalizers C] [has_images C] [has_image_maps C] [has_cokernels C]
+variables {C : Type u} [category.{v} C] [abelian C]
 variables {ι : Type*} {c : complex_shape ι}
 
 def mod_boundaries (A : homological_complex C c) (j : ι) : C :=
@@ -137,16 +136,48 @@ snake_diagram.mk_functor''
   (Fst_Snd C) (Snd_Trd C)
   (homology_to_mod_boundaries (n+1)) (mod_boundaries_to_cycles n) (cycles_to_homology n)
 
+instance (n : ℕ) : epi (boundaries_map ((Snd_Trd C).app A) n) :=
+begin
+  let sq := hom.sq_to ((Snd_Trd C).app A) n,
+  haveI : epi sq.left := by { dsimp, sorry /- Aahrg, we need an ugly case distinction -/ },
+  apply_with (epi_of_epi (factor_thru_image_subobject _)) { instances := ff },
+  suffices : factor_thru_image_subobject (((Snd C).obj A).d_to n) ≫
+      boundaries_map ((Snd_Trd C).app A) n =
+    sq.left ≫ factor_thru_image_subobject (((Trd C).obj A).d_to n),
+  { rw this, apply epi_comp, },
+  ext,
+  simp only [category.assoc, image_subobject_map_arrow, hom.sq_to_right,
+    image_subobject_arrow_comp_assoc, hom.sq_to_left, image_subobject_arrow_comp, hom.comm_to],
+end
+
+instance (n : ℕ) : exact (((Fst_Snd C).app A).f n) (((Snd_Trd C).app A).f n) := (A.X n).exact'
+
 lemma exact_mod_boundaries_functor_app (n : ℕ) :
   exact (mod_boundaries_map ((Fst_Snd C).app A) n) (mod_boundaries_map ((Snd_Trd C).app A) n) :=
 begin
-  sorry
+  haveI : mono (((Fst_Snd C).app A).f n) := by { dsimp, apply_instance },
+  haveI : epi (boundaries_map ((Snd_Trd C).app A) n) := by { dsimp, apply_instance },
+  haveI : exact (boundaries_map ((Fst_Snd C).app A) n) (boundaries_map ((Snd_Trd C).app A) n) :=
+  by { sorry },
+  have S := snake.mk_of_sequence_hom
+    (↑(boundaries ((Fst C).obj A) n)) (↑(boundaries ((Snd C).obj A) n)) (↑(boundaries ((Trd C).obj A) n))
+          (((Fst C).obj A).X n)             (((Snd C).obj A).X n)             (((Trd C).obj A).X n)
+    (boundaries_map ((Fst_Snd C).app A) _) (boundaries_map ((Snd_Trd C).app A) _)
+    (boundaries _ _).arrow (boundaries _ _).arrow (boundaries _ _).arrow
+    (((Fst_Snd C).app A).f n) (((Snd_Trd C).app A).f n)
+    _ _,
+  { exact (S.six_term_exact_seq.drop 3).pair, },
 end
 
 lemma epi_mod_boundaries_functor_app (n : ℕ) :
   epi (mod_boundaries_map ((Snd_Trd C).app A) n) :=
 begin
-  sorry
+  apply_with (epi_of_epi (cokernel.π _)) { instances := ff },
+  haveI : epi (((Snd_Trd C).app A).f n) := (A.X n).epi',
+  suffices : cokernel.π _ ≫ mod_boundaries_map ((Snd_Trd C).app A) n =
+    ((Snd_Trd C).app A).f n ≫ cokernel.π _,
+  { rw this, apply epi_comp, },
+  apply cokernel.π_desc,
 end
 
 lemma exact_cycles_map_app (n : ℕ) :
@@ -162,11 +193,10 @@ end
 
 lemma mono_homology_to_mod_boundaries (A : chain_complex C ℕ) (n : ℕ) :
   mono ((homology_to_mod_boundaries n).app A) :=
-begin
-  dsimp,
-  -- TODO: prove `cokernel.map_mono_of_epi_of_mono` using the snake lemma
-  sorry
-end
+cokernel.map_mono_of_epi_of_mono
+  (boundaries A n) (cycles A n)
+  (boundaries A n) (A.X n)
+  _ _ _ _ _
 
 lemma exact_homology_to_mod_boundaries_to_cycles (A : chain_complex C ℕ) (n : ℕ) :
   exact ((homology_to_mod_boundaries (n+1)).app A) ((mod_boundaries_to_cycles n).app A) :=
