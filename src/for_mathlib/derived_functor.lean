@@ -124,8 +124,7 @@ lemma six_term_exact_seq [F.additive] (n : ℕ) (A : short_exact_sequence C) :
     (F.left_derived n).map A.f, (F.left_derived n).map A.g] :=
 begin
   refine exact_seq.cons _ _ (two_term_exact_seq _ _ _) _ _,
-  refine exact_seq.cons _ _ _ _ _,
-  sorry
+  sorry,
 end
 
 end left_derived
