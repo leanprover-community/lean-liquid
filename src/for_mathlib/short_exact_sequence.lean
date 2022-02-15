@@ -383,18 +383,39 @@ def mk_split_morphism {A₁ A₃ B₁ B₃ : 𝒞} (f₁ : A₁ ⟶ B₁) (f₃ 
   sq1' := by {dsimp, simp},
   sq2' := by {dsimp, simp} }
 
+def _root_.category_theory.splitting_of_split {A : short_exact_sequence 𝒞} (h : A.split) :
+  category_theory.splitting A.f A.g :=
+begin
+  choose φ χ H using h,
+  refine category_theory.left_split.splitting ⟨⟨φ, H.1⟩⟩,
+end
+
+def mk_morphism_middle_of_split {A B : short_exact_sequence 𝒞} (hA : A.split) (hB : B.split)
+  (m₁ : A.1 ⟶ B.1) (m₃ : A.3 ⟶ B.3) : A.2 ⟶ B.2 :=
+((splitting_of_split hA).retraction ≫ m₁ ≫ B.f) + (A.g ≫ m₃ ≫ (splitting_of_split hB).section)
+
+lemma mk_morphism_middle_of_split_comp {A B C : short_exact_sequence 𝒞} (hA : A.split)
+  (hB : B.split) (hC : C.split) (f₁ : A.1 ⟶ B.1) (f₃ : A.3 ⟶ B.3) (g₁ : B.1 ⟶ C.1)
+  (g₃ : B.3 ⟶ C.3) :
+  mk_morphism_middle_of_split hA hB f₁ f₃ ≫ mk_morphism_middle_of_split hB hC g₁ g₃ =
+  mk_morphism_middle_of_split hA hC (f₁ ≫ g₁) (f₃ ≫ g₃) :=
+by simp only [mk_morphism_middle_of_split, comp_add, add_comp_assoc, category.assoc,
+  splitting.ι_retraction, category.comp_id, splitting.section_retraction, comp_zero, add_zero,
+  f_comp_g, splitting.section_π, zero_add]
+
 def mk_morphism_of_split {A B : short_exact_sequence 𝒞} (hA : A.split) (hB : B.split)
   (f₁ : A.1 ⟶ B.1) (f₃ : A.3 ⟶ B.3) : A ⟶ B :=
 { fst := f₁,
-  snd :=
-  begin
-    choose φ₁ χ₁ H₁ using hA,
-    choose φ₃ χ₃ H₃ using hB,
-    exact A.g ≫ f₃ ≫ χ₃ + φ₁ ≫ f₁ ≫ B.f,
-  end,
+  snd := mk_morphism_middle_of_split hA hB f₁ f₃,
   trd := f₃,
-  sq1' := sorry,
-  sq2' := sorry }
+  sq1' := by simp [mk_morphism_middle_of_split],
+  sq2' := by simp [mk_morphism_middle_of_split] }
+
+lemma mk_morphism_of_split_comp {A B C : short_exact_sequence 𝒞} (hA : A.split) (hB : B.split)
+  (hC : C.split) (f₁ : A.1 ⟶ B.1) (f₃ : A.3 ⟶ B.3) (g₁ : B.1 ⟶ C.1) (g₃ : B.3 ⟶ C.3) :
+  mk_morphism_of_split hA hB f₁ f₃ ≫ mk_morphism_of_split hB hC g₁ g₃ =
+  mk_morphism_of_split hA hC (f₁ ≫ g₁) (f₃ ≫ g₃) :=
+by simpa [mk_morphism_of_split, ← mk_morphism_middle_of_split_comp hA hB hC f₁ f₃ g₁ g₃]
 
 end split
 
@@ -475,20 +496,32 @@ lemma map_short_exact_sequence_of_split.split [F.additive] {A : short_exact_sequ
   (h : A.split) : (map_short_exact_sequence_of_split 𝒞 F _ h).split :=
 short_exact_sequence.mk_of_split'_split _ _ _
 
-def morphism_short_exact_sequence_of_split [F.additive] {A : short_exact_sequence 𝒞}
-  {B : short_exact_sequence 𝒞} (hA : A.split) (hB : B.split) (f : A ⟶ B) :
+@[simp] def morphism_short_exact_sequence_of_split [F.additive] {A B : short_exact_sequence 𝒞}
+  (hA : A.split) (hB : B.split) (m : A ⟶ B) :
   map_short_exact_sequence_of_split 𝒞 F _ hA ⟶ map_short_exact_sequence_of_split 𝒞 F _ hB :=
 short_exact_sequence.mk_morphism_of_split
     (map_short_exact_sequence_of_split.split _ _ _) (map_short_exact_sequence_of_split.split _ _ _)
-    (F.map f.1) (F.map f.3)
+    (F.map m.1) (F.map m.3)
+
+lemma morphism_short_exact_sequence_of_split_comp [F.additive] {A B C : short_exact_sequence 𝒞}
+  (hA : A.split) (hB : B.split) (hC : C.split) (m₁ : A ⟶ B) (m₂ : B ⟶ C) :
+  morphism_short_exact_sequence_of_split 𝒞 F hA hB m₁ ≫
+  morphism_short_exact_sequence_of_split 𝒞 F hB hC m₂ =
+  morphism_short_exact_sequence_of_split 𝒞 F hA hC (m₁ ≫ m₂) :=
+by simp [short_exact_sequence.mk_morphism_of_split_comp]
 
 def map_complex_short_exact_sequence_of_split [F.additive]
   (C : chain_complex (short_exact_sequence 𝒞) ℕ) (h : ∀ i, (C.X i).split) :
   chain_complex (short_exact_sequence 𝒟) ℕ :=
 { X := λ i, map_short_exact_sequence_of_split 𝒞 F (C.X i) (h i),
   d := λ i j, morphism_short_exact_sequence_of_split _ _ _ _ (C.d i j),
-  shape' := λ i j hij, sorry,
-  d_comp_d' := λ i j k hij hjk, sorry }
+  shape' := λ i j hij, by simpa [hij, short_exact_sequence.mk_morphism_of_split,
+    short_exact_sequence.mk_morphism_middle_of_split],
+  d_comp_d' := λ i j k hij hjk,
+  begin
+    rw [morphism_short_exact_sequence_of_split_comp],
+    simpa [short_exact_sequence.mk_morphism_of_split, short_exact_sequence.mk_morphism_middle_of_split]
+  end }
 
 end functor
 
