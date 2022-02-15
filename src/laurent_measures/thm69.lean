@@ -222,7 +222,16 @@ theorem θ_ϕ_exact (F : ℒ S) (hF : θ F = 0) : ∃ G, ϕ G = F :=
 begin
   use ψ F hF,
   ext s n,
-  simp [ϕ, ψ],
+--  `simp [ϕ, ψ]` works but it is somewhat slow:
+--  `1.15s` with `suffices : ..., simpa only [...]`
+--  `7.06s` with `simp [ϕ, ψ]`
+  suffices : 2 * dite (F.d ≤ n - 1) (λ (hn : F.d ≤ n - 1),
+    -∑ (l : ℕ) in range (int.eq_coe_of_zero_le (sub_nonneg.mpr hn)).some.succ,
+      F s (n - 1 - ↑l) * 2 ^ l)
+    (λ (hn : ¬F.d ≤ n - 1), 0) - dite (F.d ≤ n) (λ (hn : F.d ≤ n),
+    -∑ (l : ℕ) in range (int.eq_coe_of_zero_le (sub_nonneg.mpr hn)).some.succ,
+      F s (n - ↑l) * 2 ^ l) (λ (hn : ¬F.d ≤ n), 0) = F s n,
+  { simpa only [ϕ, ψ, sub_apply, nsmul_apply, nsmul_eq_mul] },
   by_cases hn : F.d ≤ n - 1,
   { rw [dif_pos hn, dif_pos $ hn.trans $ sub_le_self n zero_le_one, neg_eq_neg_one_mul, ← mul_assoc,
       mul_comm (2 : ℤ) (-1 : ℤ), mul_assoc, mul_sum, ← neg_eq_neg_one_mul, neg_sub_neg,
