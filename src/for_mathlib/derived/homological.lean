@@ -47,7 +47,16 @@ begin
     { simp },
     { simp } },
   { convert h1 using 1,
-    sorry },
+    congr' 1,
+    simp only [functor.map_comp, category.assoc],
+    rw shift_neg_shift',
+    simp only [category.assoc, ← functor.map_iso_inv, ← functor.map_iso_hom],
+    have : (shift_functor C 1).map_iso (shift_shift_neg T₂.obj₁ 1) =
+      shift_neg_shift T₂'.obj₃ 1, by { dsimp, simp }, rw this, clear this,
+    have : (shift_functor C 1).map_iso (shift_shift_neg T₁.obj₁ (1 : ℤ)) =
+      shift_neg_shift ((shift_functor C (1 : ℤ)).obj T₁.obj₁) (1 : ℤ),
+      by simp, rw this, clear this,
+    simp only [iso.inv_hom_id, iso.inv_hom_id_assoc, category.id_comp, category.comp_id] },
   { rw ← rotate_distinguished_triangle, exact h₁ },
   { rw ← rotate_distinguished_triangle, exact h₂ }
 end
