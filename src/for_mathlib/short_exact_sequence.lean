@@ -383,18 +383,24 @@ def mk_split_morphism {A₁ A₃ B₁ B₃ : 𝒞} (f₁ : A₁ ⟶ B₁) (f₃ 
   sq1' := by {dsimp, simp},
   sq2' := by {dsimp, simp} }
 
+def _root_.category_theory.splitting_of_split {A : short_exact_sequence 𝒞} (h : A.split) :
+  category_theory.splitting A.f A.g :=
+begin
+  choose φ χ H using h,
+  refine category_theory.left_split.splitting ⟨⟨φ, H.1⟩⟩,
+end
+
+def mk_morphism_middle_of_split {A B : short_exact_sequence 𝒞} (hA : A.split) (hB : B.split)
+  (m₁ : A.1 ⟶ B.1) (m₃ : A.3 ⟶ B.3) : A.2 ⟶ B.2 :=
+((splitting_of_split hA).retraction ≫ m₁ ≫ B.f) + (A.g ≫ m₃ ≫ (splitting_of_split hB).section)
+
 def mk_morphism_of_split {A B : short_exact_sequence 𝒞} (hA : A.split) (hB : B.split)
   (f₁ : A.1 ⟶ B.1) (f₃ : A.3 ⟶ B.3) : A ⟶ B :=
 { fst := f₁,
-  snd :=
-  begin
-    choose φ₁ χ₁ H₁ using hA,
-    choose φ₃ χ₃ H₃ using hB,
-    exact A.g ≫ f₃ ≫ χ₃ + φ₁ ≫ f₁ ≫ B.f,
-  end,
+  snd := mk_morphism_middle_of_split hA hB f₁ f₃,
   trd := f₃,
-  sq1' := sorry,
-  sq2' := sorry }
+  sq1' := by simp [mk_morphism_middle_of_split],
+  sq2' := by simp [mk_morphism_middle_of_split] }
 
 end split
 
