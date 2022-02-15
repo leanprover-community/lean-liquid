@@ -147,10 +147,8 @@ lemma cokernel.map_mono_of_epi_of_mono (sq : f₁ ≫ b₁ = a₁ ≫ f₂)
 begin
   have S := snake.mk_of_sequence_hom A₁ B₁ (cokernel f₁) A₂ B₂ (cokernel f₂)
     f₁ (cokernel.π _) a₁ b₁ (cokernel.map f₁ f₂ a₁ b₁ sq) f₂ (cokernel.π _) sq.symm (by simp),
-  apply (S.col_exact_c).pair.mono_of_eq_zero,
-  apply is_zero.eq_zero_of_src,
-  replace := (exact_iff_exact_seq _ _).mpr (S.six_term_exact_seq.extract 1 2),
-  exact is_zero_of_exact_is_zero_is_zero _ _ this
+  apply (S.col_exact_c).pair.mono_of_is_zero,
+  exact (S.six_term_exact_seq.drop 1).pair.is_zero_of_is_zero_is_zero
     (is_zero_kernel_of_mono _) (is_zero_cokernel_of_epi _),
 end
 
