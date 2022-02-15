@@ -21,8 +21,8 @@ structure c_measures (r : ℝ≥0) (c : ℝ≥0) (S : Fintype) :=
 -/
 
 structure laurent_measures (r : ℝ≥0) (S : Fintype) :=
-(to_fun     : S → ℤ → ℤ)
-(summable'   : ∀ s, summable (λ n, ∥to_fun s n∥₊ * r ^ n))
+(to_fun    : S → ℤ → ℤ)
+(summable' : ∀ s, summable (λ n, ∥to_fun s n∥₊ * r ^ n))
 
 variables {r : ℝ≥0} {S S' : Fintype.{u}}
 
