@@ -136,7 +136,7 @@ lemma nnreal.rpow_le_rpow_of_exponent_le {x : ℝ≥0} {y z : ℝ} (hxyz : y ≤
 lemma nnreal.tsum_geom_arit_inequality (f: ℤ → ℝ) (r : ℝ) : ∥ tsum (λ n, (f n : ℝ)) ∥₊ ^ r ≤
   tsum (λ n, ∥ (f n)∥₊ ^ r ) :=
 begin
-  sorry--asked Heather
+  sorry--asked Heather, use nnreal.rpow_sum_le_sum_rpow in `real_measures.lean`
 end
 
 
