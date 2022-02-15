@@ -76,6 +76,10 @@ lemma is_zero_of_exact_zero_zero' {C : Type*} [category C] [abelian C]
   {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) (h : exact f g) (hf : f = 0) (hg : g = 0) : is_zero Y :=
 by { rw [hf, hg] at h, exact is_zero_of_exact_zero_zero h }
 
+lemma is_zero_of_exact_is_zero_is_zero {C : Type*} [category C] [abelian C] {X Y Z : C}
+  (f : X ⟶ Y) (g : Y ⟶ Z) (h : exact f g) (hX : is_zero X) (hZ : is_zero Z) : is_zero Y :=
+is_zero_of_exact_zero_zero' f g h (hX.eq_zero_of_src f) (hZ.eq_zero_of_tgt g)
+
 lemma is_zero_cokernel_of_epi {C : Type*} [category C] [abelian C] {X Y : C}
   (f : X ⟶ Y) [epi f] : is_zero (cokernel f) :=
 begin

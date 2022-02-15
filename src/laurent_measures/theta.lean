@@ -321,12 +321,15 @@ end summability
 section theta_surj
 
 
-/--The map `ϑ` defined in Theorem 6.9 of Analytic.pdf. Given the definition of `tsum` we do not need to require that `r ≤ ξ` to simply define `θ`.-/
-def ϑ (r p : ℝ≥0) (S : Fintype) : (laurent_measures r S) → real_measures p S := λ F s, tsum (λ n, (F s n) * ξ ^ n)
+/--The map `ϑ` defined in Theorem 6.9 of Analytic.pdf. Given the definition of `tsum` we do not need
+ to require that `r ≤ ξ` to simply define `θ`.-/
+
+def ϑ (r p : ℝ≥0) (S : Fintype) : (laurent_measures r S) → real_measures p S :=
+  λ F s, tsum (λ n, (F s n) * ξ ^ n)
 
 
-theorem ϑ_surjective (r p : ℝ≥0) (S : Fintype) (g : real_measures p S) [fact (r < 1)] [fact (0 < ξ)] [fact (ξ < 1)] :
-  ∃ (F : laurent_measures r S), (ϑ ξ r p S F) = g :=
+theorem ϑ_surjective (r p : ℝ≥0) (S : Fintype) (g : real_measures p S) [fact (r < 1)] [fact (0 < ξ)]
+   [fact (ξ < 1)] : ∃ (F : laurent_measures r S), (ϑ ξ r p S F) = g :=
 begin
   let F₀ : S → ℤ → ℤ := λ s m, int.rec_on m (λ i, ⌊((y ξ (g s) i) / ξ ^ i)⌋) (0),
   have hinj : function.injective (coe : ℕ → ℤ) := by {apply int.coe_nat_inj},
