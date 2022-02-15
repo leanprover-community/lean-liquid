@@ -26,13 +26,6 @@ variables {C : Type u} [category.{v} C] {D : Type*} [category D]
 
 variables [abelian C] [enough_projectives C] [abelian D]
 
-lemma preadditive.exact_of_iso_of_exact' {A₁ B₁ C₁ A₂ B₂ C₂ : D}
-  (f₁ : A₁ ⟶ B₁) (g₁ : B₁ ⟶ C₁) (f₂ : A₂ ⟶ B₂) (g₂ : B₂ ⟶ C₂)
-  (α : A₁ ≅ A₂) (β : B₁ ≅ B₂) (γ : C₁ ≅ C₂) (hsq₁ : α.hom ≫ f₂ = f₁ ≫ β.hom)
-  (hsq₂ : β.hom ≫ g₂ = g₁ ≫ γ.hom)
-  (h : exact f₁ g₁) :
-  exact f₂ g₂ := sorry
-
 namespace functor
 namespace left_derived
 
