@@ -152,5 +152,4 @@ begin
     (is_zero_kernel_of_mono _) (is_zero_cokernel_of_epi _),
 end
 
-
 end category_theory
