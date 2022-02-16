@@ -201,8 +201,8 @@ variable (S)
 def θ_c (c : ℝ≥0) : (filtration (ℒ S) c) → (filtration (ℳ S) (1 * c)) :=
 λ f, ⟨θ f, θ_bound c f f.2⟩
 
-variable (c : ℝ≥0)
-#check filtration (ℒ S) c
+-- variable (c : ℝ≥0)
+-- #check filtration (ℒ S) c
 
 -- open theta
 -- #check ϑ (1/2) r p S
