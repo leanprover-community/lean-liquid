@@ -204,11 +204,6 @@ def θ_to_add : (ℒ S) →+ (ℳ S) :=
   map_zero' := θ_zero,
   map_add' := θ_add, }
 
-variable (S)
-
-def θ_c (c : ℝ≥0) : (filtration (ℒ S) c) → (filtration (ℳ S) (1 * c)) :=
-λ f, ⟨θ f, θ_bound c f f.2⟩
-
 -- variable (c : ℝ≥0)
 -- #check filtration (ℒ S) c
 
@@ -218,23 +213,96 @@ def θ_c (c : ℝ≥0) : (filtration (ℒ S) c) → (filtration (ℳ S) (1 * c))
 -- def ϑ_c (c : ℝ≥0) : (filtration (ℒ S) c) → (filtration (ℳ S) (1 * c)) :=
   --λ f, ⟨ϑ r r p S f, - ⟩
 -- lemma continuous_ϑ_c (c : ℝ≥0) : continuous
-instance : topological_space (ℳ S) :=
-begin
-  dsimp only [real_measures],
-  apply_instance,
-end
+-- instance : topological_space (ℳ S) :=
+-- begin
+--   dsimp only [real_measures],
+--   apply_instance,
+-- end
+
+-- example (c : ℝ≥0) : is_open ({F | ∥ F.1 ∥₊ < c} : set (filtration (ℒ S) c)) :=
 
 
-lemma aux5 (c : ℝ≥0) : continuous (coe ∘ (θ_c S c) : (filtration (ℒ S) c) → (ℳ S)) :=
+def cast_ℳ_c (c : ℝ≥0) : filtration (real_measures p S) (1 * c) →
+  (S → {x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c}) :=
 begin
-  rw continuous_pi_iff,
-  intro s,
-  rw continuous_iff_is_closed,
-  intros K hK,
+  intros F s,
+  refine ⟨F.1 s, _⟩,
   sorry,
 end
 
-theorem continuous_θ_c (c : ℝ≥0) : continuous (θ_c S c) := sorry
+--**[FAE]** Useless?
+def cast_ℳ_c_at_s (c : ℝ≥0) (s : S) : filtration (real_measures p S) (1 * c) →
+  {x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c} := (λ F, cast_ℳ_c c F s)
+
+
+lemma cont_at_cast_ℳ (c : ℝ≥0) {X : Type*} [topological_space X] (f : X → filtration (ℳ S) (1 * c)) :
+  continuous f ↔ continuous (cast_ℳ_c c ∘ f) := sorry
+
+--**[FAE]** Useless?
+lemma aux3' (c : ℝ≥0) {X : Type*} (s : S) [topological_space X] {f : X → filtration (ℳ S) (1 * c)} :
+  continuous f ↔ continuous (cast_ℳ_c_at_s c s ∘ f) := sorry
+
+open metric
+
+--**[FAE]** Useless?
+lemma aux4 (c : ℝ≥0) {X : Type*} [topological_space X]
+  {f : X → closed_ball (0 : ℝ) c} : continuous f ↔
+  ∀ a : ℝ≥0, ∀ (H : a ≤ c), is_closed
+    (f⁻¹' ((closed_ball ⟨(0 : ℝ), (mem_closed_ball_self c.2)⟩ a) : set ((closed_ball (0 : ℝ) c)))) :=
+ begin
+   sorry,
+ end
+
+--**[FAE]** Useless?
+-- lemma aux5 (c : ℝ≥0) : continuous (coe ∘ (θ_c S c) : (filtration (ℒ S) c) → (ℳ S)) :=
+-- begin
+--   rw continuous_pi_iff,
+--   intro s,
+--   -- apply (aux4 c).mpr,
+--   rw continuous_iff_is_closed,
+--   intros K hK,
+--   sorry,
+-- end
+
+def equiv_ball_ℓp (c : ℝ≥0) : {x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c} ≃ₜ
+  closed_ball (0 : ℝ) (c ^ (1 / p : ℝ)) :=
+begin
+  fconstructor,
+  {fconstructor,
+    { intro x,
+      use x,
+      rw mem_closed_ball_zero_iff,
+      sorry,
+
+    },
+  {sorry, },
+  {sorry, },
+  { sorry, },
+  },
+  sorry,
+  sorry,
+end
+
+
+variable (S)
+
+def θ_c (c : ℝ≥0) : (filtration (ℒ S) c) → (filtration (ℳ S) (1 * c)) :=
+λ f, ⟨θ f, θ_bound c f f.2⟩
+
+theorem continuous_θ_c (c : ℝ≥0) : continuous (θ_c S c) :=
+begin
+  dsimp only [θ_c],
+  apply (cont_at_cast_ℳ c (θ_c S c)).mpr,
+  apply continuous_pi,
+  intro s,
+  apply ((equiv_ball_ℓp c).comp_continuous_iff).mp,
+  dsimp [equiv_ball_ℓp, θ_c, cast_ℳ_c],
+  sorry,
+
+
+
+  all_goals {apply_instance},
+end
 
 def Θ : comphaus_filtered_pseudo_normed_group_hom (ℒ S) (ℳ S) :=
 mk_of_bound (θ_to_add) 1
