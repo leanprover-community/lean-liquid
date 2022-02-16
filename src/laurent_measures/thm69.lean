@@ -211,7 +211,7 @@ begin
     rw [← h_θ, norm_eq_zero],
     exact dif_neg (not_le_of_gt hn) },
   simp only [←nnreal.summable_coe, nonneg.coe_mul, _root_.coe_nnnorm, coe_zpow, summable_congr h_θ],
-  exact aux_thm69.summable_convolution r_pos r_half (F s) F.d (F.summable s) (lt_d_eq_zero F s) this
+  exact aux_thm69.summable_convolution r_half (F s) F.d (F.summable s) (lt_d_eq_zero F s) this
 end
 
 theorem θ_ϕ_exact (F : ℒ S) (hF : θ F = 0) : ∃ G, ϕ G = F :=
