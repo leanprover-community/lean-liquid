@@ -1,5 +1,6 @@
 -- import laurent_measures.functor
 import laurent_measures.thm69
+import analysis.special_functions.logb
 -- import data.real.basic
 
 /-
@@ -121,11 +122,14 @@ lemma nnreal.rpow_int_cast (x : ℝ≥0) (n : ℤ) : x ^ n = x ^ (n : ℝ) := by
 
 -- lemma nnreal.mul_le_mul_right {a b c : ℝ≥0} : b * a ≤ c * a ↔ b ≤ c := sorry
 
-lemma nnreal.rpow_le_rpow_of_exponent_le {x : ℝ≥0} {y z : ℝ} (hxyz : y ≤ z) :
+/-  This lemma seems to need extra assumptions, e.g. `0 ≤ y`.  See example below. -/
+lemma nnreal.rpow_le_rpow_of_exponent_le (x : ℝ≥0) {y z : ℝ} (hxyz : y ≤ z) :
   x ^ y ≤ x ^ z :=
-begin
-  sorry,
-end
+sorry
+
+example : ¬ (1 / 2 : ℝ≥0) ^ (-1 : ℝ) ≤ (1 / 2) ^ 1 :=
+by simp only [nnreal.rpow_neg_one, one_div, inv_inv₀, pow_one, nnreal.le_inv_iff_mul_le, ne.def,
+    bit0_eq_zero, one_ne_zero, not_false_iff, not_le, one_lt_mul one_le_two one_lt_two]
 
 -- lemma nnreal.rpow_le_rpow {x y: ℝ≥0} {z : ℝ} (h : x ≤ y) : x ^ z ≤ y ^ z := sorry
 -- begin
@@ -155,7 +159,7 @@ begin
   { rw [hF_nz, int.cast_zero, nnnorm_zero, nnnorm_zero, nnreal.zero_rpow],
     rw [ne.def, ← nnreal.coe_zero, nnreal.coe_eq, ← ne.def],
     exact ne_of_gt (fact.out _) },
-  { convert nnreal.rpow_le_rpow_of_exponent_le p_le_one,
+  { convert nnreal.rpow_le_rpow_of_exponent_le _ p_le_one,
     rw nnreal.rpow_one,
     refl },
   simp only [zero_le'],
