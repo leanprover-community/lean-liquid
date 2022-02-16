@@ -240,7 +240,7 @@ end
 
 instance pseudo_normed_group : pseudo_normed_group (Lbar r' S) :=
 { filtration := λ c, {F | ∥F∥₊ ≤ c},
-  filtration_mono := λ c₁ c₂ h F hF, le_trans (by exact hF) h, -- `by exact`, why??
+  filtration_mono := λ c₁ c₂ h F hF, le_trans hF h,
   zero_mem_filtration := λ c, by { dsimp, rw nnnorm_zero, apply zero_le' },
   neg_mem_filtration := λ c F hF, by { dsimp, rwa nnnorm_neg },
   add_mem_filtration := λ c₁ c₂ F₁ F₂ hF₁ hF₂,
