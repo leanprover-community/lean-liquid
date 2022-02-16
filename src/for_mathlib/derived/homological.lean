@@ -2,6 +2,7 @@ import category_theory.triangulated.pretriangulated
 import category_theory.abelian.exact
 import category_theory.linear.yoneda
 import algebra.category.Module.abelian
+import algebra.category.Group.abelian
 import category_theory.currying
 
 namespace category_theory.triangulated
@@ -80,6 +81,33 @@ begin
   simp,
 end
 
+-- Move me
+instance preadditive_yoneda_flip_additive (X : C) :
+  (preadditive_yoneda.flip.obj (opposite.op X)).additive :=
+by tidy
+
+instance preadditive_yoneda_flip_homological (X : C) :
+  homological_functor (preadditive_yoneda.flip.obj (opposite.op X)) :=
+begin
+  constructor,
+  intros T hT,
+  -- Missing `AddCommGroup.exact_iff`?
+  suffices : add_monoid_hom.range ((preadditive_yoneda.flip.obj (opposite.op X)).map T.mor₁) =
+    add_monoid_hom.ker ((preadditive_yoneda.flip.obj (opposite.op X)).map T.mor₂), sorry,
+  apply le_antisymm,
+  { rintros _ ⟨(g : X ⟶ _),rfl⟩,
+    dsimp,
+    obtain ⟨e,h1,he⟩ := complete_distinguished_triangle_morphism
+      (contractible_triangle _ X) T (contractible_distinguished _) hT g (g ≫ T.mor₁)
+      (by { dsimp, simp }),
+    dsimp at he,
+    simp only [zero_comp] at he,
+    change _ = _,
+    simp [← h1] },
+  { rintros (f : X ⟶ _) (hf : f ≫ _ = 0),
+    apply dist_triang_to_exact_complex _ hT _ _ hf }
+end
+
 variables {R : Type*} [ring R] [linear R C]
 
 -- Move me
@@ -88,7 +116,8 @@ instance linear_yoneda_flip_additive (X : C) :
 by tidy
 
 -- Prove this using the above theorem.
-instance (X : C) : homological_functor ((linear_yoneda R C).flip.obj (opposite.op X)) :=
+instance linear_yoneda_flip_homological (X : C) :
+  homological_functor ((linear_yoneda R C).flip.obj (opposite.op X)) :=
 begin
   constructor,
   intros T hT,
