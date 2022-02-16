@@ -1,5 +1,6 @@
 -- import laurent_measures.functor
 import laurent_measures.thm69
+import analysis.special_functions.logb
 -- import data.real.basic
 
 /-
@@ -117,14 +118,21 @@ begin
 end
 
 --for mathlib
-lemma nnreal.rpow_int_cast (x : ℝ≥0) (n : ℤ) : x ^ n = x ^ (n : ℝ) := sorry
+lemma nnreal.rpow_int_cast (x : ℝ≥0) (n : ℤ) : x ^ n = x ^ (n : ℝ) :=
+by { cases x with x hx, ext, simp }
 
 -- lemma nnreal.mul_le_mul_left {a b c : ℝ≥0} : a * b ≤ a * c ↔ b ≤ c := sorry
 
 -- lemma nnreal.mul_le_mul_right {a b c : ℝ≥0} : b * a ≤ c * a ↔ b ≤ c := sorry
 
-lemma nnreal.rpow_le_rpow_of_exponent_le {x : ℝ≥0} {y z : ℝ} (hxyz : y ≤ z) :
-  x ^ y ≤ x ^ z := sorry
+/-  This lemma seems to need extra assumptions, e.g. `0 ≤ y`.  See example below. -/
+lemma nnreal.rpow_le_rpow_of_exponent_le (x : ℝ≥0) {y z : ℝ} (hxyz : y ≤ z) :
+  x ^ y ≤ x ^ z :=
+sorry
+
+example : ¬ (1 / 2 : ℝ≥0) ^ (-1 : ℝ) ≤ (1 / 2) ^ 1 :=
+by simp only [nnreal.rpow_neg_one, one_div, inv_inv₀, pow_one, nnreal.le_inv_iff_mul_le, ne.def,
+    bit0_eq_zero, one_ne_zero, not_false_iff, not_le, one_lt_mul one_le_two one_lt_two]
 
 -- lemma nnreal.rpow_le_rpow {x y: ℝ≥0} {z : ℝ} (h : x ≤ y) : x ^ z ≤ y ^ z := sorry
 -- begin
