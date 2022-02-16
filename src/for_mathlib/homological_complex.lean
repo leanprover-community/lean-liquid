@@ -349,29 +349,43 @@ cokernel.map_mono_of_epi_of_mono
   (boundaries A n) (A.X n)
   _ _ _ _ _
 
+def delta_to_cycles (A : chain_complex C ℕ) (n : ℕ) : A.X (n+1) ⟶ (A.cycles n) :=
+(X_prev_iso A rfl).inv ≫ factor_thru_image_subobject _ ≫ boundaries_to_cycles _ _
+
 lemma exact_homology_to_mod_boundaries_to_cycles (A : chain_complex C ℕ) (n : ℕ) :
   exact ((homology_to_mod_boundaries (n+1)).app A) ((mod_boundaries_to_cycles n).app A) :=
 begin
-  let Z := cokernel ((homology_to_mod_boundaries (n+1)).app A),
-  let φ : Z ⟶ (cycles A n) := cokernel.desc _
-    (cokernel.desc _
-      (factor_thru_image _ ≫ (boundaries_iso_image A rfl).inv ≫ boundaries_to_cycles _ _) _) _,
-  swap, { ext, simp only [category.assoc, boundaries_to_cycles_arrow, zero_comp], sorry },
-  swap, { ext, simp only [category.assoc, zero_comp, homology_to_mod_boundaries_app, comp_zero], sorry },
-  -- have S : snake
-  --   (0:C) 0 0
-  --   0 0 (kernel _)
-  --   (homology A (n+1)) (mod_boundaries A (n+1)) Z
-  --   (homology A (n+1)) (mod_boundaries A (n+1)) (cycles A n)
-  --   0 0
-  --   0 0 0
-  --   0 0
-  --   0 0 (kernel.ι φ)
-  --   ((homology_to_mod_boundaries (n+1)).app A) (cokernel.π ((homology_to_mod_boundaries (n+1)).app A))
-  --   (𝟙 _) (𝟙 _) φ
-  --   ((homology_to_mod_boundaries (n+1)).app A) ((mod_boundaries_to_cycles n).app A) :=
-  -- _,
-  sorry
+  -- let Z := cokernel ((homology_to_mod_boundaries (n+1)).app A),
+  -- let φ : Z ⟶ (cycles A n) := cokernel.desc _
+  --   (cokernel.desc _
+  --     (factor_thru_image _ ≫ (boundaries_iso_image A rfl).inv ≫ boundaries_to_cycles _ _) _) _,
+  -- swap, { ext, simp only [category.assoc, boundaries_to_cycles_arrow, zero_comp], sorry },
+  -- swap, { ext, simp only [category.assoc, zero_comp, homology_to_mod_boundaries_app, comp_zero], sorry },
+  suffices S : snake
+    (0:C) 0 0
+    (A.boundaries (n+1)) (boundaries A (n+1)) 0
+    (A.cycles (n+1)) (A.X (n+1)) (A.cycles n)
+    (homology A (n+1)) (mod_boundaries A (n+1)) (A.cycles n)
+    0 0
+    0 0 0
+    (𝟙 _) 0
+    (boundaries_to_cycles _ _) (A.boundaries (n+1)).arrow 0
+    (A.cycles (n+1)).arrow _
+    _ _ _
+    _ _,
+    {
+      sorry,
+    },
+    {
+      sorry
+    },
+    {
+      sorry
+    },
+    all_goals {sorry},
+  -- { sorry,
+  --   --exact (S.six_term_exact_seq.drop 3).pair,
+  --  },
 end
 
 lemma exact_mod_boundaries_to_cycles_to_homology (A : chain_complex C ℕ) (n : ℕ) :
