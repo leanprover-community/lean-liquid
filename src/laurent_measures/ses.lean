@@ -18,27 +18,20 @@ universe u
 
 namespace laurent_measures_ses
 
-open laurent_measures pseudo_normed_group comphaus_filtered_pseudo_normed_group comphaus_filtered_pseudo_normed_group_hom
+open laurent_measures pseudo_normed_group comphaus_filtered_pseudo_normed_group
+  comphaus_filtered_pseudo_normed_group_hom
 open_locale big_operators nnreal
 
 section homs
 
 parameter {p : ℝ≥0}
 
-def r : ℝ≥0 := (1 / 2) ^ (p:ℝ)
-
-lemma r_coe : (1 / 2 : ℝ) ^ (p : ℝ) = (r : ℝ) :=
-begin
-  have : (1/2 : ℝ) = ((1/2 : ℝ≥0) : ℝ),
-  simp only [one_div, nonneg.coe_inv, nnreal.coe_bit0, nonneg.coe_one],
-  rw [this, ← nnreal.coe_rpow, nnreal.coe_eq],
-  refl,
-end
-
 variables [fact(0 < p)] [fact (p < 1)]
-variables [fact (0 < r)] --not nice, turn it into an instance
+
 variable {S : Fintype}
 
+
+local notation `r` := @r p
 local notation `ℳ` := real_measures p
 local notation `ℒ` := laurent_measures r
 
@@ -90,9 +83,13 @@ instance : add_comm_group (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) 
   add_left_neg := by {intros, ext, apply add_left_neg},
   add_comm := by {intros, ext, apply add_comm} }
 
+variable (S)
+
 def Φ : comphaus_filtered_pseudo_normed_group_hom (ℒ S) (ℒ S) := 2 • shift (-1) - id
 
-lemma Φ_eq_ϕ (F : ℒ S) : Φ F = ϕ F := rfl
+variable {S}
+
+lemma Φ_eq_ϕ (F : ℒ S) : Φ S F = ϕ F := rfl
 
 section theta
 
@@ -118,8 +115,8 @@ begin
 end
 
 --for mathlib
-lemma nnreal.rpow_int_cast (x : ℝ≥0) (n : ℤ) : x ^ n = x ^ (n : ℝ) :=
-by { cases x with x hx, ext, simp }
+lemma nnreal.rpow_int_cast (x : ℝ≥0) (n : ℤ) : x ^ n = x ^ (n : ℝ) := by {
+  rw [← nnreal.coe_eq, nnreal.coe_zpow, ← real.rpow_int_cast, ← nnreal.coe_rpow] }
 
 -- lemma nnreal.mul_le_mul_left {a b c : ℝ≥0} : a * b ≤ a * c ↔ b ≤ c := sorry
 
@@ -147,8 +144,8 @@ by simp only [nnreal.rpow_neg_one, one_div, inv_inv₀, pow_one, nnreal.le_inv_i
 --   exact le_of_lt (rpow_lt_rpow h h₁' h₂')
 -- end
 
-lemma nnreal.tsum_geom_arit_inequality (f: ℤ → ℝ) (r : ℝ) : ∥ tsum (λ n, (f n : ℝ)) ∥₊ ^ r ≤
-  tsum (λ n, ∥ (f n)∥₊ ^ r ) :=
+lemma nnreal.tsum_geom_arit_inequality (f: ℤ → ℝ) (r' : ℝ) : ∥ tsum (λ n, (f n : ℝ)) ∥₊ ^ r' ≤
+  tsum (λ n, ∥ (f n)∥₊ ^ r' ) :=
 begin
   sorry--asked Heather, use nnreal.rpow_sum_le_sum_rpow in `real_measures.lean`
 end
@@ -176,10 +173,9 @@ begin
       rwa [← nnreal.coe_lt_coe, ← nnnorm_norm, real.nnnorm_of_nonneg (norm_nonneg _)] at hf } }
 end
 
-lemma θ_bound : ∃ C, ∀ c : ℝ≥0, ∀ F : (ℒ S), F ∈ filtration (ℒ S) c → (θ F) ∈ filtration (ℳ S)
-  (C * c) :=
+lemma θ_bound : ∀ c : ℝ≥0, ∀ F : (ℒ S), F ∈ filtration (ℒ S) c → (θ F) ∈ filtration (ℳ S)
+  (1 * c) :=
 begin
-  use 1,
   intros c F hF,
   rw mem_filtration_iff at hF,
   dsimp only [laurent_measures.has_nnnorm] at hF,
@@ -203,17 +199,52 @@ begin
   exacts [aux_bound F s, F.2 s],
 end
 
--- lemma θ_continuous (F G : ℒ S) : θ (F + G) = θ F + θ G := sorry
-
-def Θ : comphaus_filtered_pseudo_normed_group_hom (ℒ S) (ℳ S) :=
+def θ_to_add : (ℒ S) →+ (ℳ S) :=
 { to_fun := λ F, θ F,
   map_zero' := θ_zero,
-  map_add' := θ_add,
-  bound' := θ_bound,
-  -- end,
-  continuous' := sorry }
+  map_add' := θ_add, }
+
+variable (S)
+
+def θ_c (c : ℝ≥0) : (filtration (ℒ S) c) → (filtration (ℳ S) (1 * c)) :=
+λ f, ⟨θ f, θ_bound c f f.2⟩
+
+-- variable (c : ℝ≥0)
+-- #check filtration (ℒ S) c
+
+-- open theta
+-- #check ϑ (1/2) r p S
+
+-- def ϑ_c (c : ℝ≥0) : (filtration (ℒ S) c) → (filtration (ℳ S) (1 * c)) :=
+  --λ f, ⟨ϑ r r p S f, - ⟩
+-- lemma continuous_ϑ_c (c : ℝ≥0) : continuous
+instance : topological_space (ℳ S) :=
+begin
+  dsimp only [real_measures],
+  apply_instance,
+end
 
 
+lemma aux5 (c : ℝ≥0) : continuous (coe ∘ (θ_c S c) : (filtration (ℒ S) c) → (ℳ S)) :=
+begin
+  rw continuous_pi_iff,
+  intro s,
+  rw continuous_iff_is_closed,
+  intros K hK,
+  sorry,
+end
+
+theorem continuous_θ_c (c : ℝ≥0) : continuous (θ_c S c) := sorry
+
+def Θ : comphaus_filtered_pseudo_normed_group_hom (ℒ S) (ℳ S) :=
+mk_of_bound (θ_to_add) 1
+begin
+  intro c,
+  use θ_bound c,
+  exact (continuous_θ_c S c),
+end
+
+variable {S}
 
 end theta
 
