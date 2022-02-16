@@ -125,14 +125,20 @@ by { cases x with x hx, ext, simp }
 
 -- lemma nnreal.mul_le_mul_right {a b c : ℝ≥0} : b * a ≤ c * a ↔ b ≤ c := sorry
 
-/-  This lemma seems to need extra assumptions, e.g. `0 ≤ y`.  See example below. -/
-lemma nnreal.rpow_le_rpow_of_exponent_le (x : ℝ≥0) {y z : ℝ} (hxyz : y ≤ z) :
+lemma nnreal.rpow_le_rpow_of_exponent_le {x : ℝ≥0} (x1 : 1 ≤ x) {y z : ℝ}
+  (hyz : y ≤ z) :
   x ^ y ≤ x ^ z :=
-sorry
+by { cases x with x hx, exact real.rpow_le_rpow_of_exponent_le x1 hyz }
+
+/-  This lemma seems to need extra assumptions, e.g. `0 ≤ y`.  See example below. -/
+--lemma nnreal.rpow_le_rpow_of_exponent_le (x : ℝ≥0) {y z : ℝ} (hxyz : y ≤ z) :
+--  x ^ y ≤ x ^ z :=
+--sorry
 
 example : ¬ (1 / 2 : ℝ≥0) ^ (-1 : ℝ) ≤ (1 / 2) ^ 1 :=
 by simp only [nnreal.rpow_neg_one, one_div, inv_inv₀, pow_one, nnreal.le_inv_iff_mul_le, ne.def,
     bit0_eq_zero, one_ne_zero, not_false_iff, not_le, one_lt_mul one_le_two one_lt_two]
+
 
 -- lemma nnreal.rpow_le_rpow {x y: ℝ≥0} {z : ℝ} (h : x ≤ y) : x ^ z ≤ y ^ z := sorry
 -- begin
@@ -152,20 +158,22 @@ lemma aux_bound (F : ℒ S) (s : S) : ∀ (b : ℤ), ∥(F s b : ℝ) ∥₊ ^ (
 ∥F s b∥₊ * r ^ b :=
 begin
   intro b,
-  -- simp only [r],
   rw [inv_eq_one_div, nnreal.rpow_int_cast],
-  apply mul_le_mul_of_nonneg_right,
+  refine mul_le_mul_of_nonneg_right _ (real.rpow_nonneg_of_nonneg (nnreal.coe_nonneg _) _),
   have p_le_one : (p : ℝ) ≤ 1,
   { rw ← nnreal.coe_one,
-    exact ( le_of_lt $ nnreal.coe_lt_coe.mpr $ fact.out _) },
+    exact (nnreal.coe_lt_coe.mpr $ fact.out _).le },
   by_cases hF_nz : F s b = 0,
   { rw [hF_nz, int.cast_zero, nnnorm_zero, nnnorm_zero, nnreal.zero_rpow],
     rw [ne.def, ← nnreal.coe_zero, nnreal.coe_eq, ← ne.def],
     exact ne_of_gt (fact.out _) },
   { convert nnreal.rpow_le_rpow_of_exponent_le _ p_le_one,
-    rw nnreal.rpow_one,
-    refl },
-  simp only [zero_le'],
+    { rw nnreal.rpow_one,
+      refl },
+    { refine not_lt.mp (λ hf, hF_nz (int.eq_zero_iff_abs_lt_one.mp _)),
+      suffices : (|F s b| : ℝ) < 1, exact_mod_cast this,
+      rw ← int.norm_eq_abs,
+      rwa [← nnreal.coe_lt_coe, ← nnnorm_norm, real.nnnorm_of_nonneg (norm_nonneg _)] at hf } }
 end
 
 lemma θ_bound : ∃ C, ∀ c : ℝ≥0, ∀ F : (ℒ S), F ∈ filtration (ℒ S) c → (θ F) ∈ filtration (ℳ S)
