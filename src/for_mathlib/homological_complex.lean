@@ -349,8 +349,16 @@ cokernel.map_mono_of_epi_of_mono
   (boundaries A n) (A.X n)
   _ _ _ _ _
 
+variables {C}
+
 def delta_to_cycles (A : chain_complex C ℕ) (n : ℕ) : A.X (n+1) ⟶ (A.cycles n) :=
 (X_prev_iso A rfl).inv ≫ factor_thru_image_subobject _ ≫ boundaries_to_cycles _ _
+
+lemma boundaries_arrow_comp_delta_to_cycles (A : chain_complex C ℕ) (n : ℕ) :
+  (boundaries _ _).arrow ≫ delta_to_cycles A n = 0 :=
+begin
+  sorry
+end
 
 lemma exact_homology_to_mod_boundaries_to_cycles (A : chain_complex C ℕ) (n : ℕ) :
   exact ((homology_to_mod_boundaries (n+1)).app A) ((mod_boundaries_to_cycles n).app A) :=
