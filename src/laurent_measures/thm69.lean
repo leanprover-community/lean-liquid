@@ -56,6 +56,14 @@ lemma r_pos : 0 < r :=
 suffices 0 < (2 : ℝ≥0)⁻¹ ^ (p : ℝ), by simpa [r],
 rpow_pos (nnreal.inv_pos.mpr zero_lt_two)
 
+lemma r_coe : (1 / 2 : ℝ) ^ (p : ℝ) = (r : ℝ) :=
+begin
+  have : (1/2 : ℝ) = ((1/2 : ℝ≥0) : ℝ),
+  simp only [one_div, nonneg.coe_inv, nnreal.coe_bit0, nonneg.coe_one],
+  rw [this, ← nnreal.coe_rpow, nnreal.coe_eq],
+  refl,
+end
+
 instance : fact (0 < r) := { out := r_pos }
 
 local notation `ℳ` := real_measures p
