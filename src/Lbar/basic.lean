@@ -127,20 +127,20 @@ instance : inhabited (Lbar r' S) := ⟨0⟩
 @[simp] lemma coe_sub (F G : Lbar r' S) : ⇑(F - G : Lbar r' S) = F - G := rfl
 @[simp] lemma coe_neg (F : Lbar r' S) : ⇑(-F : Lbar r' S) = -F := rfl
 
+--instance fff : topological_ring ℝ≥0 :=
+--{ continuous_add := continuous_add,
+--  continuous_mul := continuous_mul }
+
 /-- Tailored scalar multiplication by natural numbers. -/
 protected def nsmul (N : ℕ) (F : Lbar r' S) : Lbar r' S :=
 { to_fun := λ s n, N • F s n,
   coeff_zero' := λ s, by simp only [F.coeff_zero, smul_zero],
   summable' := λ s,
   begin
-    simp only [nsmul_eq_mul, int.nat_abs_mul, nat.cast_mul, mul_assoc, int.nat_abs_of_nat,
-      int.nat_cast_eq_coe_nat, nnreal.coe_nat_abs],
-    by_cases hN : N = 0,
-    { simpa only [hN, nat.cast_zero, zero_mul] using summable_zero },
-    simp only [← nnreal.summable_coe, nnreal.coe_mul],
-    rw [← summable_mul_left_iff],
-    { simp only [coe_nnnorm, nnreal.coe_nat_abs, nnreal.coe_pow], exact F.summable_coe_real s },
-    { exact_mod_cast hN }
+    convert @summable.mul_left _ _ _ _ _ _ ↑N (F.summable' s),
+    ext,
+    simp only [←mul_assoc, nsmul_eq_mul, int.nat_cast_eq_coe_nat, nonneg.coe_mul, int.nat_abs_mul],
+    norm_cast
   end }
 
 /-- Tailored scalar multiplication by integers. -/
@@ -149,13 +149,12 @@ protected def zsmul (N : ℤ) (F : Lbar r' S) : Lbar r' S :=
   coeff_zero' := λ s, by simp only [F.coeff_zero, smul_zero],
   summable' := λ s,
   begin
-    simp only [zsmul_eq_mul, int.nat_abs_mul, int.cast_id, nat.cast_mul, mul_assoc],
-    by_cases hN : N.nat_abs = 0,
-    { simpa only [hN, nat.cast_zero, zero_mul] using summable_zero },
-    simp only [← nnreal.summable_coe, nnreal.coe_mul],
-    rw [← summable_mul_left_iff],
-    { simp only [coe_nnnorm, nnreal.coe_nat_abs, nnreal.coe_pow], exact F.summable_coe_real s },
-    { exact_mod_cast hN }
+    rw ← nnreal.summable_coe,
+    obtain FF := nnreal.summable_coe.mpr (F.summable' s),
+    convert @summable.mul_left _ _ _ _ _ _ ↑N.nat_abs FF,
+    ext,
+    simp only [←mul_assoc, int.nat_abs_mul, smul_eq_mul, nat.cast_mul, nonneg.coe_mul],
+    norm_cast,
   end }
 .
 
