@@ -162,7 +162,7 @@ begin
   { rw [hF_nz, int.cast_zero, nnnorm_zero, nnnorm_zero, nnreal.zero_rpow],
     rw [ne.def, ← nnreal.coe_zero, nnreal.coe_eq, ← ne.def],
     exact ne_of_gt (fact.out _) },
-  { convert nnreal.rpow_le_rpow_of_exponent_le p_le_one,
+  { convert nnreal.rpow_le_rpow_of_exponent_le _ p_le_one,
     rw nnreal.rpow_one,
     refl },
   simp only [zero_le'],
