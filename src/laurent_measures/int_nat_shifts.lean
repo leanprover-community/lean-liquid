@@ -81,11 +81,19 @@ def int_subtype_nonneg_equiv : {x : ℤ // 0 ≤ x} ≃ ℕ :=
 
 @[simp]
 lemma int_subtype_nonneg_equiv_eval {z : {x : ℤ // 0 ≤ x}} :
-  (int_subtype_nonneg_equiv z : ℤ) = z :=
+  int_subtype_nonneg_equiv z = int.to_nat z :=
 begin
   rcases z with ⟨x | y, hz⟩,
   { refl },
   { exact ((int.neg_succ_not_nonneg _).mp hz).elim }
+end
+
+@[simp]
+lemma int.to_nat_subtype_nonneg {z : {x : ℤ // 0 ≤ x}} :
+  ((z : ℤ).to_nat : ℤ) = z :=
+begin
+  cases z with x hz,
+  simp [int.to_nat_of_nonneg hz],
 end
 
 @[simp]
