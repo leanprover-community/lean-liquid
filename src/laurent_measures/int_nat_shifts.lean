@@ -187,17 +187,10 @@ begin
   rw [← equiv.summable_iff int_subtype_nonneg_equiv, ← equiv.summable_iff oppo.symm],
   refine ⟨_, _⟩;
   rintro ⟨h1, h2⟩;
-  refine ⟨_, _⟩,
-  exact summable.congr ‹_› (λ b,
-    by {simp only [oppo_symm_eval, int_subtype_nonneg_equiv_eval, function.comp_app],
-    apply congr_arg, simp [b.2] }),
-  exact summable.congr ‹_› (λ b,
-    by {simp only [oppo_symm_eval, int_subtype_nonneg_equiv_eval, function.comp_app] }),
-  exact summable.congr ‹_› (λ b,
-    by {simp only [oppo_symm_eval, int_subtype_nonneg_equiv_eval, function.comp_app],
-    apply congr_arg, simp [b.2] }),
-  exact summable.congr ‹_› (λ b,
-    by {simp only [oppo_symm_eval, int_subtype_nonneg_equiv_eval, function.comp_app] })
+  refine ⟨_, _⟩;
+  refine summable.congr ‹_› (λ b, _);
+  simp only [oppo_symm_eval, int_subtype_nonneg_equiv_eval, function.comp_app];
+  { apply congr_arg, simp [b.2] }
 end
 
 end uniform
