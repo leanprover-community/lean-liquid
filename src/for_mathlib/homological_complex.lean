@@ -395,27 +395,19 @@ begin
   { simp only [kernel_comp_mono_hom, kernel.lift_ι] },
 end
 
--- lemma exact_cycles_arrow_delta_to_cycles (A : chain_complex C ℕ) (n : ℕ) :
---   exact (A.cycles (n+1)).arrow (delta_to_cycles A n) :=
--- begin
---   rw [category_theory.abelian.exact_iff_image_eq_kernel],
---   dsimp [delta_to_cycles, delta_to_boundaries],
---   simp,
---   simp_rw [← category.assoc, kernel_subobject_comp_eq_of_mono],
---   let g : A.X_next (n+1) ⟶ A.boundaries n := (X_next_iso _ _).hom ≫ delta_to_boundaries A n,
---   haveI : mono g := sorry,
---   delta cycles,
---   rw [← kernel_subobject_comp_eq_of_mono _ g],
-
---    ext, swap,
---   { refine (kernel_iso_of_eq _) ≪≫ (kernel_is_iso_comp _ _).symm ≪≫ (kernel_is_iso_comp _ _), },
-
--- end
-
 lemma exact_cycles_arrow_delta_to_cycles (A : chain_complex C ℕ) (n : ℕ) :
   exact (A.cycles (n+1)).arrow (delta_to_cycles A n) :=
 begin
-  sorry
+  rw [category_theory.abelian.exact_iff_image_eq_kernel],
+  dsimp [delta_to_cycles, delta_to_boundaries],
+  simp only [image_subobject_arrow, kernel_subobject_comp_eq_of_mono],
+  delta cycles,
+  have : (complex_shape.down ℕ).rel (n + 1) n := rfl,
+  let g : ↑(A.boundaries n) ⟶ X_next A (n + 1) := (A.boundaries n).arrow ≫ (X_next_iso _ this).inv,
+  haveI : mono g := mono_comp _ _,
+  suffices aux : delta_to_boundaries _ _ ≫ g = d_from A (n + 1),
+  { simp_rw [← aux, kernel_subobject_comp_eq_of_mono], refl, },
+  simp only [delta_to_boundaries_comp_arrow_assoc, iso.comp_inv_eq, d_from_comp_X_next_iso],
 end
 
 lemma exact_homology_to_mod_boundaries_to_cycles (A : chain_complex C ℕ) (n : ℕ) :
