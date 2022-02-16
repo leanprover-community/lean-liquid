@@ -360,6 +360,9 @@ begin
   sorry
 end
 
+lemma exact_cycles_arrow_delta_to_cycles (A : chain_complex C ℕ) (n : ℕ) :
+  exact (A.cycles (n+1)).arrow (delta_to_cycles A n) := sorry
+
 lemma exact_homology_to_mod_boundaries_to_cycles (A : chain_complex C ℕ) (n : ℕ) :
   exact ((homology_to_mod_boundaries (n+1)).app A) ((mod_boundaries_to_cycles n).app A) :=
 begin
@@ -369,6 +372,8 @@ begin
   --     (factor_thru_image _ ≫ (boundaries_iso_image A rfl).inv ≫ boundaries_to_cycles _ _) _) _,
   -- swap, { ext, simp only [category.assoc, boundaries_to_cycles_arrow, zero_comp], sorry },
   -- swap, { ext, simp only [category.assoc, zero_comp, homology_to_mod_boundaries_app, comp_zero], sorry },
+  let φ : homology A (n + 1) ⟶ mod_boundaries A (n + 1) :=
+    limits.cokernel.desc _ ((kernel_subobject _).arrow ≫ (cokernel.π _)) (by simp),
   suffices S : snake
     (0:C) 0 0
     (A.boundaries (n+1)) (boundaries A (n+1)) 0
@@ -378,22 +383,23 @@ begin
     0 0 0
     (𝟙 _) 0
     (boundaries_to_cycles _ _) (A.boundaries (n+1)).arrow 0
-    (A.cycles (n+1)).arrow _
-    _ _ _
-    _ _,
-    {
-      sorry,
-    },
-    {
-      sorry
-    },
-    {
-      sorry
-    },
-    all_goals {sorry},
-  -- { sorry,
-  --   --exact (S.six_term_exact_seq.drop 3).pair,
-  --  },
+    (A.cycles (n+1)).arrow (delta_to_cycles _ _)
+    (homology.π _ _ _) (cokernel.π _) (𝟙 _)
+    φ ((mod_boundaries_to_cycles n).app A),
+    { exact (S.six_term_exact_seq.drop 3).pair },
+  letI : exact (cycles A (n + 1)).arrow (delta_to_cycles A n) :=
+    exact_cycles_arrow_delta_to_cycles _ _,
+  letI : epi (homology.π (d_to A (n + 1)) (d_from A (n + 1)) _) := coequalizer.π_epi,
+  fsplit,
+  { sorry },
+  { sorry },
+  { sorry },
+  { simp },
+  { simp },
+  { simp },
+  { simp [boundaries_arrow_comp_delta_to_cycles] },
+  { sorry },
+  { sorry },
 end
 
 lemma exact_mod_boundaries_to_cycles_to_homology (A : chain_complex C ℕ) (n : ℕ) :
@@ -424,7 +430,7 @@ lemma snake_diagram_is_snake_input (n : ℕ) : is_snake_input (snake_diagram C n
     simp only [snake_diagram.mk_functor_map_a0, snake_diagram.mk_functor_map_a1,
       snake_diagram.mk_functor_map_b0, snake_diagram.mk_functor_map_b1,
       snake_diagram.mk_functor_map_c0, snake_diagram.mk_functor_map_c1];
-    exact exact_homology_to_mod_boundaries_to_cycles _ _ _,
+    exact exact_homology_to_mod_boundaries_to_cycles _ _,
   end,
   col_exact₂ := begin
     intro j,
@@ -433,7 +439,7 @@ lemma snake_diagram_is_snake_input (n : ℕ) : is_snake_input (snake_diagram C n
     simp only [snake_diagram.mk_functor_map_a1, snake_diagram.mk_functor_map_a2,
       snake_diagram.mk_functor_map_b1, snake_diagram.mk_functor_map_b2,
       snake_diagram.mk_functor_map_c1, snake_diagram.mk_functor_map_c2];
-    exact exact_mod_boundaries_to_cycles_to_homology _ _ _,
+    exact exact_mod_boundaries_to_cycles_to_homology _ _,
   end,
   col_mono := begin
     intro j,
@@ -449,7 +455,7 @@ lemma snake_diagram_is_snake_input (n : ℕ) : is_snake_input (snake_diagram C n
     fin_cases j with [0, 1, 2];
     simp only [snake_diagram.mk_functor_map_a2, snake_diagram.mk_functor_map_b2,
       snake_diagram.mk_functor_map_c2];
-    exact epi_cycles_to_homology _ _ _,
+    exact epi_cycles_to_homology _ _,
   end,
   row_mono := begin
     dsimp [snake_diagram, snake_diagram.mk_functor'', snake_diagram.mk_functor'],
@@ -464,7 +470,7 @@ lemma snake_diagram_is_snake_input (n : ℕ) : is_snake_input (snake_diagram C n
 
 def snake_input {C : Type*} [category C] [abelian C] (n : ℕ) :
   chain_complex (short_exact_sequence C) ℕ → snake_input C :=
-λ A, ⟨snake_diagram C n A, snake_diagram_is_snake_input C A n⟩
+λ A, ⟨snake_diagram C n A, snake_diagram_is_snake_input A n⟩
 
 def δ {C : Type*} [category C] [abelian C] (n : ℕ) (A : chain_complex (short_exact_sequence C) ℕ) :
   homology ((Trd C).obj A) (n+1) ⟶ homology ((Fst C).obj A) n :=
