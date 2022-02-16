@@ -12,14 +12,14 @@ import ring_theory.power_series.basic
 Everything takes place in the `namespace theta`
 
 * Section `aux_lemmas` contain some technicalities concerning convergent sequence
-* Section `summability` shows that the series defining `θ` converges
-* In Section `theta_surjective` We define the map θ : (laurent_measures r `singleton`) → ℝ and we
+* Section `summability` shows that the series defining `ϑ` converges
+* In Section `theta_surjective` We define the map ϑ : (laurent_measures r `S`) → ℝ and we
   show it is surjective.
-* Section `ker_theta` studies the kernel of `θ`, in particular showing it is principal.
+* Section `ker_theta` studies the kernel of `ϑ`, in particular showing it is principal.
 
    VARIABLES
-* The variable `ξ : ℝ` here corresponds to `r'` of `Analytic.pdf`, so that, for every `r`, `θ ξ` is
-`θ_r'` as a map from `r`-convergent Laurent measures to `ℝ`. It is supposed to be positive almost
+* The variable `ξ : ℝ` here corresponds to `r'` of `Analytic.pdf`, so that, for every `r`, `ϑ ξ r`
+  is`θ_r'` as a map from `r`-convergent Laurent measures to `ℝ`. It is supposed to be positive almost
 everywhere, and this is recorded as a `fact`.
 * The variable `x : ℝ` is defined globally in Sections `aux_lemmas` and `summability`.
 * The variable `r : ℝ≥0` (specifying the radius of convergency of `laurent_measures` makes its
@@ -322,7 +322,7 @@ section theta_surj
 
 
 /--The map `ϑ` defined in Theorem 6.9 of Analytic.pdf. Given the definition of `tsum` we do not need
- to require that `r ≤ ξ` to simply define `θ`.-/
+ to require that `r ≤ ξ` to simply define `ϑ`.-/
 
 def ϑ (r p : ℝ≥0) (S : Fintype) : (laurent_measures r S) → real_measures p S :=
   λ F s, tsum (λ n, (F s n) * ξ ^ n)
