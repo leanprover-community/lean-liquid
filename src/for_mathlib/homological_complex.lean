@@ -65,39 +65,57 @@ def homology_to_mod_boundaries (n : ℕ) :
   end }
 .
 
+section
+
+variables (A : chain_complex C ℕ) (n : ℕ)
+
+def delta_to_boundaries : A.X (n+1) ⟶ (A.boundaries n) :=
+(X_prev_iso A rfl).inv ≫ factor_thru_image_subobject _
+
+instance delta_to_boundaries_epi : epi (delta_to_boundaries A n) :=
+epi_comp _ _
+
+@[ext] lemma boundaries.ext {X : C} (f g : (boundaries A n : C) ⟶ X)
+  (h : delta_to_boundaries A n ≫ f = delta_to_boundaries A n ≫ g) : f = g :=
+by rwa ← cancel_epi (delta_to_boundaries A n)
+
+@[simp, reassoc] lemma delta_to_boundaries_comp_arrow :
+  (delta_to_boundaries A n) ≫ (boundaries A n).arrow = A.d (n + 1) n :=
+by rw [delta_to_boundaries, category.assoc, image_subobject_arrow_comp, X_prev_iso_comp_d_to]
+
+@[simp, reassoc] lemma boundaries_arrow_comp_delta_to_boundaries :
+  (boundaries _ _).arrow ≫ delta_to_boundaries A n = 0 :=
+begin
+  ext,
+  simp only [delta_to_boundaries_comp_arrow_assoc, category.assoc, delta_to_boundaries_comp_arrow,
+    d_comp_d, comp_zero, zero_comp],
+end
+
+def delta_to_cycles : A.X (n+1) ⟶ (A.cycles n) :=
+delta_to_boundaries _ _ ≫ boundaries_to_cycles _ _
+
+@[simp, reassoc] lemma delta_to_cycles_comp_arrow :
+  (delta_to_cycles A n) ≫ (cycles A n).arrow = A.d (n + 1) n :=
+by rw [delta_to_cycles, category.assoc, boundaries_to_cycles_arrow, delta_to_boundaries_comp_arrow]
+
+@[simp, reassoc] lemma boundaries_arrow_comp_delta_to_cycles :
+  (boundaries _ _).arrow ≫ delta_to_cycles A n = 0 :=
+by rw [delta_to_cycles, ← category.assoc, boundaries_arrow_comp_delta_to_boundaries, zero_comp]
+
+end
+
 -- generalize to chain complexes over other shapes
 @[simps]
 def mod_boundaries_to_cycles (n : ℕ) :
   mod_boundaries_functor (n+1) ⟶ cycles_functor C (complex_shape.down ℕ) n :=
-{ app := λ A, factor_thru_kernel_subobject _
-      (cokernel.desc _ (A.d _ _)
-      begin
-        rw [← boundaries_to_cycles_arrow, category.assoc],
-        convert comp_zero,
-        rw [cycles_eq_kernel_subobject, kernel_subobject_arrow_comp],
-        simp only [complex_shape.down_rel],
-      end)
-    begin
-      ext, show cokernel.π _ ≫ _ = cokernel.π _ ≫ _,
-      rw [cokernel.π_desc_assoc, comp_zero],
-      cases n,
-      { simp only [comp_zero, chain_complex.next_nat_zero, d_from_eq_zero] },
-      { rw [d_from_eq, d_comp_d_assoc, zero_comp], simp only [complex_shape.down_rel], },
-    end,
+{ app := λ A, cokernel.desc _ (delta_to_cycles _ _) (boundaries_arrow_comp_delta_to_cycles _ _),
   naturality' := λ A B f,
   begin
     ext, show cokernel.π _ ≫ _ = cokernel.π _ ≫ _,
     simp only [homology_functor_map, mod_boundaries_functor_map, homology.π_map_assoc],
     delta mod_boundaries_map homology.π cokernel.map,
-    simp only [cokernel.π_desc, cokernel.π_desc_assoc, comp_f, category.assoc,
-      kernel_subobject_map_arrow_assoc, hom.sq_from_left],
-    simp only [cycles_functor_map, factor_thru_kernel_subobject_comp_arrow,
-      cokernel.π_desc, hom.comm, cycles_map_arrow],
-    delta cycles,
-    simp only [cycles_functor_map, factor_thru_kernel_subobject_comp_arrow,
-      cokernel.π_desc, hom.comm],
-    simp only [← category.assoc], congr' 1,
-    simp only [factor_thru_kernel_subobject_comp_arrow, cokernel.π_desc, category.assoc],
+    simp only [category.assoc, cycles_functor_map, cycles_map_arrow, hom.comm,
+      cokernel.π_desc_assoc, delta_to_cycles_comp_arrow_assoc, delta_to_cycles_comp_arrow]
   end }
 .
 
@@ -285,13 +303,20 @@ begin
   { simp }
 end
 
+lemma exact.congr {X₁ X₂ Y Z₁ Z₂ : C} (f₁ : X₁ ⟶ Y) (g₁ : Y ⟶ Z₁) (f₂ : X₂ ⟶ Y) (g₂ : Y ⟶ Z₂)
+  (h : exact f₁ g₁) (him : image_subobject f₁ = image_subobject f₂)
+  (hker : kernel_subobject g₁ = kernel_subobject g₂) :
+  exact f₂ g₂ :=
+by rwa [abelian.exact_iff_image_eq_kernel, ← him, ← hker, ← abelian.exact_iff_image_eq_kernel]
+
 lemma exact_column (A : chain_complex C ℕ) (n : ℕ) :
 exact_seq C [(kernel.ι (A.d (n + 1) n)), (A.d (n + 1) n), (cokernel.π (A.boundaries n).arrow)] :=
 begin
   refine exact_seq.cons _ _ exact_kernel_ι _ _,
+  rw [← exact_iff_exact_seq],
   have : (complex_shape.down ℕ).rel (n + 1) n := rfl,
-  rw [← exact_iff_exact_seq, abelian.exact_iff_image_eq_kernel,
-    ← boundaries_eq_image_subobject A this, kernel_subobject_cokernel.π ]
+  refine exact.congr _ (boundaries A n).arrow _ _ _ infer_instance _ rfl,
+  rw [← boundaries_eq_image_subobject A this, image_subobject_arrow]
 end
 
 lemma exact_mod_boundaries_map (n : ℕ) :
@@ -351,15 +376,6 @@ cokernel.map_mono_of_epi_of_mono
 
 variables {C}
 
-def delta_to_cycles (A : chain_complex C ℕ) (n : ℕ) : A.X (n+1) ⟶ (A.cycles n) :=
-(X_prev_iso A rfl).inv ≫ factor_thru_image_subobject _ ≫ boundaries_to_cycles _ _
-
-lemma boundaries_arrow_comp_delta_to_cycles (A : chain_complex C ℕ) (n : ℕ) :
-  (boundaries _ _).arrow ≫ delta_to_cycles A n = 0 :=
-begin
-  sorry
-end
-
 lemma exact_cycles_arrow_delta_to_cycles (A : chain_complex C ℕ) (n : ℕ) :
   exact (A.cycles (n+1)).arrow (delta_to_cycles A n) := sorry
 
@@ -402,10 +418,27 @@ begin
   { sorry },
 end
 
+@[simp] lemma image_subobject_comp_eq_of_epi {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) [epi f] :
+  image_subobject (f ≫ g) = image_subobject g :=
+begin
+  delta image_subobject,
+  haveI : is_iso (image.pre_comp f g) := abelian.is_iso_of_mono_of_epi _,
+  ext, swap,
+  { exact as_iso (image.pre_comp f g) },
+  { simp only [as_iso_hom, image.pre_comp_ι], },
+end
+
 lemma exact_mod_boundaries_to_cycles_to_homology (A : chain_complex C ℕ) (n : ℕ) :
   exact ((mod_boundaries_to_cycles n).app A) ((cycles_to_homology n).app A)  :=
 begin
-  sorry
+  refine exact.congr _ (boundaries_to_cycles _ _) _ _ _ _ _ rfl,
+  { simp only [cycles_to_homology_app],
+    delta boundaries_to_cycles,
+    apply_instance },
+  { simp only [mod_boundaries_to_cycles_app],
+    delta delta_to_cycles,
+    rw [← image_subobject_comp_eq_of_epi (cokernel.π _)],
+    simp only [cokernel.π_desc, image_subobject_comp_eq_of_epi], }
 end
 
 lemma epi_cycles_to_homology (A : chain_complex C ℕ) (n : ℕ) :
