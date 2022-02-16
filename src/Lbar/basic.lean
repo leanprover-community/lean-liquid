@@ -188,7 +188,7 @@ instance : add_comm_group (Lbar r' S) :=
   begin
     ext,
     simp only [Lbar.zsmul, algebra.id.smul_eq_mul, coe_mk, pi.neg_apply, int.coe_nat_succ, coe_neg,
-      add_mul, one_mul, neg_add_rev, int.neg_succ_of_nat_coe, neg_mul_eq_neg_mul_symm, one_mul],
+      add_mul, one_mul, neg_add_rev, int.neg_succ_of_nat_coe, neg_mul],
   end }
 
 /-- The `coeff s n` is the additive homomorphism that sends `x : Lbar r' S`
