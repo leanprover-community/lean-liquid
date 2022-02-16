@@ -265,46 +265,70 @@ begin
   apply mono_comp,
 end
 
-lemma exact_boundaries_map {A₁ A₂ A₃ : chain_complex C ℕ} (f : A₁ ⟶ A₂) (g : A₂ ⟶ A₃)
-  [∀ n, exact (f.f n) (g.f n)] [∀ n, mono (f.f n)] [∀ n, epi (g.f n)] (n : ℕ) :
-  exact (boundaries_map f n) (boundaries_map g n) :=
+lemma image_subobject_arrow {X : C} (S : subobject X) :
+  image_subobject (S.arrow) = S :=
 begin
+  delta image_subobject,
+  ext,
+  swap,
+  { exact limits.image_mono_iso_source _ },
+  { simp }
+end
+
+lemma kernel_subobject_cokernel.π {X : C} (S : subobject X) :
+  kernel_subobject (cokernel.π S.arrow) = S :=
+begin
+  delta kernel_subobject,
+  ext,
+  swap,
+  { exact (abelian.image_iso_image _).trans (limits.image_mono_iso_source _) },
+  { simp }
+end
+
+lemma exact_column (A : chain_complex C ℕ) (n : ℕ) :
+exact_seq C [(kernel.ι (A.d (n + 1) n)), (A.d (n + 1) n), (cokernel.π (A.boundaries n).arrow)] :=
+begin
+  refine exact_seq.cons _ _ exact_kernel_ι _ _,
   have : (complex_shape.down ℕ).rel (n + 1) n := rfl,
-  suffices S : snake
-    (0:C) 0 0
-    (cycles A₁ (n+1)) (cycles A₂ (n+1)) (cycles A₃ (n+1))
-    (A₁.X_prev n) (A₂.X_prev n) (A₃.X_prev n)
-    (boundaries A₁ n) (boundaries A₂ n) (boundaries A₃ n)
-    0 0
-    0 0 0
-    (cycles_map f (n+1)) (cycles_map g (n+1))
-    ((cycles _ (n+1)).arrow ≫ (X_prev_iso _ this).inv) ((cycles _ (n+1)).arrow ≫ (X_prev_iso _ this).inv) ((cycles _ (n+1)).arrow ≫ (X_prev_iso _ this).inv)
-    (f.prev n) (g.prev n)
-    (factor_thru_image_subobject (A₁.d_to n)) (factor_thru_image_subobject (A₂.d_to n)) (factor_thru_image_subobject (A₃.d_to n))
-    (boundaries_map f n) (boundaries_map g n),
-  { exact (S.six_term_exact_seq.drop 3).pair, },
-  have : exact (cycles_map f (n + 1)) (cycles_map g (n + 1)) := exact_cycles_map_app _ _ _ _,
-  have : exact (hom.prev f n) (hom.prev g n) := sorry,
-  have : epi (cycles_map g (n + 1)) := sorry,
-  have : mono (hom.prev f n) := sorry,
-  resetI,
-  sorry,
-  -- fsplit,
+  rw [← exact_iff_exact_seq, abelian.exact_iff_image_eq_kernel,
+    ← boundaries_eq_image_subobject A this, kernel_subobject_cokernel.π ]
 end
 
 lemma exact_mod_boundaries_map (n : ℕ) :
-  exact (mod_boundaries_map ((Fst_Snd C).app A) n) (mod_boundaries_map ((Snd_Trd C).app A) n) :=
+  exact (mod_boundaries_map ((Fst_Snd C).app A) n) (mod_boundaries_map ((Snd_Trd C).app A) n)
+   :=
 begin
-  haveI : exact (boundaries_map ((Fst_Snd C).app A) n) (boundaries_map ((Snd_Trd C).app A) n) :=
-    exact_boundaries_map C _ _ n,
-  have S := snake.mk_of_sequence_hom
-    (↑(boundaries ((Fst C).obj A) n)) (↑(boundaries ((Snd C).obj A) n)) (↑(boundaries ((Trd C).obj A) n))
-          (((Fst C).obj A).X n)             (((Snd C).obj A).X n)             (((Trd C).obj A).X n)
-    (boundaries_map ((Fst_Snd C).app A) _) (boundaries_map ((Snd_Trd C).app A) _)
-    (boundaries _ _).arrow (boundaries _ _).arrow (boundaries _ _).arrow
-    (((Fst_Snd C).app A).f n) (((Snd_Trd C).app A).f n)
-    _ _,
-  { exact (S.six_term_exact_seq.drop 3).pair, },
+  have sq1 : ((Fst C).obj A).d (n + 1) n ≫ (A.X n).f =
+    (A.X (n+1)).f ≫ ((Snd C).obj A).d (n + 1) n,
+  { simp [(A.d (n + 1) n).sq1] },
+  have sq2 : ((Snd C).obj A).d (n + 1) n ≫ (A.X n).g =
+    (A.X (n+1)).g ≫ ((Trd C).obj A).d (n + 1) n,
+  { simp [(A.d (n + 1) n).sq2] },
+  suffices S : snake
+    (kernel _)                        (kernel _)                        (kernel _)
+    (((Fst C).obj A).X (n+1))         (((Snd C).obj A).X (n+1))         (((Trd C).obj A).X (n+1))
+    (((Fst C).obj A).X n)             (((Snd C).obj A).X n)             (((Trd C).obj A).X n)
+    (mod_boundaries _ n)              (mod_boundaries _ n)              (mod_boundaries _ n)
+    (kernel.map _ _ _ _ sq1)    (kernel.map _ _ _ _ sq2)
+    (kernel.ι $ ((Fst C).obj A).d (n+1) n)
+    (kernel.ι $ ((Snd C).obj A).d (n+1) n)
+    (kernel.ι $ ((Trd C).obj A).d (n+1) n)
+    (A.X (n+1)).f (A.X (n+1)).g
+    (((Fst C).obj A).d (n+1) n) (((Snd C).obj A).d (n+1) n) (((Trd C).obj A).d (n+1) n)
+    (A.X n).f (A.X n).g
+    (cokernel.π _) (cokernel.π _) (cokernel.π _)
+    (mod_boundaries_map ((Fst_Snd C).app A) n) (mod_boundaries_map ((Snd_Trd C).app A) n),
+  { exact (S.six_term_exact_seq.drop 3).pair },
+  fsplit,
+  { apply exact_column },
+  { apply exact_column },
+  { apply exact_column },
+  { simp },
+  { simp },
+  { exact sq1 },
+  { exact sq2 },
+  { simp [mod_boundaries_map] },
+  { simp [mod_boundaries_map] }
 end
 
 lemma epi_mod_boundaries_map (n : ℕ) :

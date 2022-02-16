@@ -12,7 +12,22 @@ open_locale nnreal classical big_operators topological_space
 namespace aux_thm69
 
 section group_add_neg
-variables {G : Type*} [group G] [has_le G] [covariant_class G G ((*)) (≤)]
+variables {G : Type*} [group G]
+
+/--  If `G` is a group and `g ∈ G` is an element, then `equiv.group_mul g` is the self-equivalence
+of `G` defined by `h ↦ g * h`. -/
+@[to_additive "If `G` is an additive group and `g ∈ G` is an element, then `equiv.add_group_add g`
+is the self-equivalence of `G` defined by `h ↦ g + h`."]
+def equiv.group_mul (g : G) : G ≃ G :=
+  ⟨λ x, g * x, λ x, g⁻¹ * x, by { intro, simp }, by { intro, simp }⟩
+
+@[simp, to_additive]
+lemma equiv.group_mul_apply {g h : G} : equiv.group_mul g h = g * h := rfl
+
+@[simp, to_additive]
+lemma equiv.group_mul_symm_apply {g h : G} : (equiv.group_mul g).symm h = g⁻¹ * h := rfl
+
+variables [has_le G] [covariant_class G G ((*)) (≤)]
 
 @[to_additive]
 lemma aux_ineq_mul {d e x : G} (hx : d ≤ x) : e ≤ e * d⁻¹ * x :=
@@ -81,11 +96,19 @@ def int_subtype_nonneg_equiv : {x : ℤ // 0 ≤ x} ≃ ℕ :=
 
 @[simp]
 lemma int_subtype_nonneg_equiv_eval {z : {x : ℤ // 0 ≤ x}} :
-  (int_subtype_nonneg_equiv z : ℤ) = z :=
+  int_subtype_nonneg_equiv z = int.to_nat z :=
 begin
   rcases z with ⟨x | y, hz⟩,
   { refl },
   { exact ((int.neg_succ_not_nonneg _).mp hz).elim }
+end
+
+@[simp]
+lemma int.to_nat_subtype_nonneg {z : {x : ℤ // 0 ≤ x}} :
+  ((z : ℤ).to_nat : ℤ) = z :=
+begin
+  cases z with x hz,
+  simp [int.to_nat_of_nonneg hz],
 end
 
 @[simp]
@@ -180,8 +203,9 @@ begin
   refine ⟨_, _⟩;
   rintro ⟨h1, h2⟩;
   refine ⟨_, _⟩;
-  exact summable.congr ‹_› (λ b,
-    by simp only [oppo_symm_eval, int_subtype_nonneg_equiv_eval, function.comp_app]),
+  refine summable.congr ‹_› (λ b, _);
+  simp only [oppo_symm_eval, int_subtype_nonneg_equiv_eval, function.comp_app];
+  { apply congr_arg, simp [b.2] }
 end
 
 end uniform
