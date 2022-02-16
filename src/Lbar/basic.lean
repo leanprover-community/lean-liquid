@@ -137,7 +137,7 @@ protected def nsmul (N : ℕ) (F : Lbar r' S) : Lbar r' S :=
   coeff_zero' := λ s, by simp only [F.coeff_zero, smul_zero],
   summable' := λ s,
   begin
-    convert @summable.mul_left _ _ _ _ _ _ ↑N (F.summable' s),
+    convert summable.mul_left ↑N (F.summable' s),
     ext,
     simp only [←mul_assoc, nsmul_eq_mul, int.nat_cast_eq_coe_nat, nonneg.coe_mul, int.nat_abs_mul],
     norm_cast
@@ -149,14 +149,12 @@ protected def zsmul (N : ℤ) (F : Lbar r' S) : Lbar r' S :=
   coeff_zero' := λ s, by simp only [F.coeff_zero, smul_zero],
   summable' := λ s,
   begin
-    rw ← nnreal.summable_coe,
-    obtain FF := nnreal.summable_coe.mpr (F.summable' s),
-    convert @summable.mul_left _ _ _ _ _ _ ↑N.nat_abs FF,
+    refine nnreal.summable_coe.mp _,
+    convert summable.mul_left ↑N.nat_abs (nnreal.summable_coe.mpr (F.summable' s)),
     ext,
     simp only [←mul_assoc, int.nat_abs_mul, smul_eq_mul, nat.cast_mul, nonneg.coe_mul],
     norm_cast,
   end }
-.
 
 instance : add_comm_group (Lbar r' S) :=
 { zero := 0, add := (+), sub := has_sub.sub, neg := has_neg.neg,
