@@ -200,6 +200,9 @@ begin
   exacts [aux_bound F s, F.2 s],
 end
 
+lemma θ_bound' :  ∀ c : ℝ≥0, ∀ F : (ℒ S), F ∈ filtration (ℒ S) c → (θ F) ∈ filtration (ℳ S)
+  c := by {simpa [one_mul] using θ_bound}
+
 def θ_to_add : (ℒ S) →+ (ℳ S) :=
 { to_fun := λ F, θ F,
   map_zero' := θ_zero,
@@ -222,52 +225,85 @@ def θ_to_add : (ℒ S) →+ (ℳ S) :=
 
 -- example (c : ℝ≥0) : is_open ({F | ∥ F.1 ∥₊ < c} : set (filtration (ℒ S) c)) :=
 
-structure box_ℒ_c (S : Fintype) (c : ℝ≥0) :=
-(to_fun : S → ℤ → ℤ )
-(summable' : ∀ s, summable (λ n, ∥ (to_fun s n : ℝ) ∥₊ * r ^n) )
-(bound' : ∀ (s : S), tsum (λ n, ∥ (to_fun s n : ℝ) ∥₊ * r ^n) ≤ c)
 
-instance (c : ℝ≥0) : topological_space (box_ℒ_c S c) :=
-begin
-  sorry,
-end
+variable (S)
 
-def cast_ℒ_c (c : ℝ≥0) : filtration (ℒ S) c → (box_ℒ_c S c) :=
+--**[FAE]** Useless?
+-- structure box_ℒ_c (S : Fintype) (c : ℝ≥0) :=
+-- (to_fun : S → ℤ → ℤ )
+-- (summable' : ∀ s, summable (λ n, ∥ (to_fun s n : ℝ) ∥₊ * r ^n) )
+-- (bound' : ∀ (s : S), tsum (λ n, ∥ (to_fun s n : ℝ) ∥₊ * r ^n) ≤ c)
+
+def sbox_ℒ_c (c : ℝ≥0) := filtration (laurent_measures r (Fintype.of punit)) c
+-- def sbox_ℒ_c (c : ℝ≥0) := {F : laurent_measures r (Fintype.of punit) // ∥ F ∥₊ ≤ c }
+-- (to_fun : ℤ → ℤ )
+-- (summable' : summable (λ n, ∥ (to_fun n : ℝ) ∥₊ * r ^n) )
+-- (bound' : tsum (λ n, ∥ (to_fun n : ℝ) ∥₊ * r ^n) ≤ c)
+
+--**[FAE]** Useless?
+-- instance (c : ℝ≥0) : topological_space (box_ℒ_c  c) :=
+-- begin
+--   sorry,
+-- end
+
+-- example (c : ℝ≥0) : topological_space (filtration (laurent_measures r (Fintype.of punit)) c) :=
+--   by refine cofinite_topology ↥(filtration (laurent_measures «r» (Fintype.of punit)) c)
+
+instance (c : ℝ≥0) : topological_space (sbox_ℒ_c c) := by refine
+  cofinite_topology ↥(filtration (laurent_measures r (Fintype.of punit)) c)
+-- begin
+--   unfold,
+--   apply_instance,
+-- end
+
+--**[FAE]** Useless?
+-- def cast_ℒ_c (c : ℝ≥0) : filtration (ℒ S) c → (box_ℒ_c S c) :=
+  -- (S → {f : ℤ → ℤ // summable (λ n, ∥ (f n : ℝ) ∥₊ * r ^n) ∧ tsum (λ n, ∥ f n ∥₊ * r ^n) ≤ c}) :=
+-- begin
+--   intro F,
+--   refine ⟨F.1, F.1.2, _⟩,
+--   sorry,
+-- end
+
+def scast_ℒ_c (c : ℝ≥0) (s : S) : filtration (ℒ S) c → (sbox_ℒ_c c) :=
   -- (S → {f : ℤ → ℤ // summable (λ n, ∥ (f n : ℝ) ∥₊ * r ^n) ∧ tsum (λ n, ∥ f n ∥₊ * r ^n) ≤ c}) :=
 begin
   intro F,
-  refine ⟨F.1, F.1.2, _⟩,
+  refine ⟨⟨(λ _, F.1 s), (λ _, F.1.2 s)⟩, _⟩,
   sorry,
 end
 
--- variable (S)
-
+--**[FAE]** Useless?
 -- lemma cont_cast_ℒ (c : ℝ≥0) : continuous (cast_ℒ_c c S:) := sorry
-lemma cont_cast_ℒ (c : ℝ≥0) : continuous ((cast_ℒ_c c) : filtration (ℒ S) c →  (box_ℒ_c S c)) := sorry
+-- lemma cont_cast_ℒ (c : ℝ≥0) : continuous ((cast_ℒ_c c) : filtration (ℒ S) c →  (box_ℒ_c S c)) := sorry
 
+lemma cont_scast_ℒ (c : ℝ≥0) (s : S) : continuous (scast_ℒ_c S c s) := sorry
+-- lemma cont_scast_ℒ (c : ℝ≥0) (s : S) : continuous ((scast_ℒ_c c s) : filtration (ℒ S) c →  (sbox_ℒ_c c)) := sorry
 
-def cast_ℳ_c (c : ℝ≥0) : filtration (ℳ S) (1 * c) →
-  (S → {x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c}) :=
+def cast_ℳ_c (c : ℝ≥0) : filtration (ℳ S) c →
+  (filtration (real_measures p (Fintype.of punit)) c) :=
 begin
-  intros F s,
-  refine ⟨F.1 s, _⟩,
   sorry,
+  -- intros F s,
+  -- refine ⟨F.1 s, _⟩,
+  -- sorry,
 end
 
 --**[FAE]** Useless?
-def cast_ℳ_c_at_s (c : ℝ≥0) (s : S) : filtration (real_measures p S) (1 * c) →
-  {x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c} := (λ F, cast_ℳ_c c F s)
-
-lemma cont_at_cast_ℳ (c : ℝ≥0) {X : Type*} [topological_space X] (f : X → filtration (ℳ S) (1 * c)) :
-  continuous (cast_ℳ_c c ∘ f) → continuous f := sorry
+-- def cast_ℳ_c_at_s (c : ℝ≥0) (s : S) : filtration (real_measures p S) (1 * c) →
+--   {x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c} := (λ F, cast_ℳ_c c F s)
 
 --**[FAE]** Useless?
-lemma aux3' (c : ℝ≥0) {X : Type*} (s : S) [topological_space X] {f : X → filtration (ℳ S) (1 * c)} :
-  continuous f ↔ continuous (cast_ℳ_c_at_s c s ∘ f) := sorry
+-- lemma cont_at_cast_ℳ (c : ℝ≥0) {X : Type*} [topological_space X] (f : X → filtration (ℳ S) (1 * c)) :
+--   continuous (cast_ℳ_c c ∘ f) → continuous f := sorry
+
+--**[FAE]** Useless?
+-- lemma aux3' (c : ℝ≥0) {X : Type*} (s : S) [topological_space X] {f : X → filtration (ℳ S) (1 * c)} :
+--   continuous f ↔ continuous (cast_ℳ_c_at_s c s ∘ f) := sorry
 
 open metric
 
-lemma cont_at_closed (c : ℝ≥0) {X : Type*} [topological_space X]
+lemma cont_iff_for_all_closed (c : ℝ≥0) {X : Type*} [topological_space X]
   (f : X → closed_ball (0 : ℝ) c) (H : ∀ a : ℝ≥0, ∀ (H : a ≤ c), is_closed
     (f⁻¹' ((closed_ball ⟨(0 : ℝ), (mem_closed_ball_self c.2)⟩ a) : set ((closed_ball (0 : ℝ) c)))))
     : continuous f :=
@@ -305,37 +341,65 @@ begin
   sorry,
 end
 
-variable (S)
 
-def θ_c (c : ℝ≥0) : (filtration (ℒ S) c) → (filtration (ℳ S) (1 * c)) :=
-λ f, ⟨θ f, θ_bound c f f.2⟩
+def θ_c (c : ℝ≥0) (T : Fintype) : (filtration (laurent_measures r T) c) →
+  (filtration (real_measures p T) c) :=
+begin
+  intro f,
+  rw [← one_mul c],
+  use ⟨θ f, θ_bound c f f.2⟩,
+end
+-- λ f, ⟨θ f, θ_bound c f f.2⟩
 
-def θ'_c (c : ℝ≥0) : (box_ℒ_c S c) → (S → {x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c}) := sorry
+
+--**[FAE]** Useless?
+-- def θ'_c (c : ℝ≥0) : (box_ℒ_c S c) → (S → {x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c}) := sorry
 -- def θ'_c (c : ℝ≥0) : (S → {f : ℤ → ℤ // summable (λ n, ∥ (f n : ℝ) ∥₊ * r ^n) ∧
 --   tsum (λ n, ∥ f n ∥₊ * r ^n) ≤ c}) → (S → {x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c}) := sorry
 
-lemma aux_commutative_θ (c : ℝ≥0) : (cast_ℳ_c c) ∘ (θ_c S c) = (θ'_c S c) ∘ (cast_ℒ_c c) := sorry
+-- lemma aux_commutative_θ (c : ℝ≥0) : (cast_ℳ_c c) ∘ (θ_c S c) = (θ'_c S c) ∘ (cast_ℒ_c c) := sorry
 
-lemma aux_commutative_pr (c : ℝ≥0) (s : S) : (cast_ℳ_c c) ∘ (θ_c S c) = (θ'_c S c) ∘ (cast_ℒ_c c) := sorry
+-- lemma aux_commutative_pr (c : ℝ≥0) (s : S) : (cast_ℳ_c c) ∘ (θ_c S c) = (θ'_c S c) ∘ (cast_ℒ_c c) := sorry
 
-lemma aux_6 (a c : ℝ≥0) (s : S) (ha : a ≤ c ^ (1 / p : ℝ)): ((equiv_ball_ℓp c) ∘
-  (λ a, (cast_ℳ_c c (θ_c S c a) s)))⁻¹'
-  (closed_ball ⟨(0 : ℝ), (mem_closed_ball_self (a.2.trans ha))⟩ a) = ∅ :=
+-- variables (a c : ℝ≥0)
+-- variable (s : S)
+-- variable (t : sbox_ℒ_c c)
+-- #check (θ_c c (Fintype.of punit)) ∘ (scast_ℒ_c S c s)
+-- #check sbox_ℒ_c c
+-- #check theta.ϑ₀ (1 / 2 ) r (t.1)
+-- #check θ_c c
+-- #check (cast_ℳ_c S c) ∘ (θ_c c S)
+
+--**[FAE]** Almost OK: ϑ₀ still lands in ℝ instead of in the small box, but otherwise it is OK
+lemma saux_commutative_pr (c : ℝ≥0) (s : S) (F : filtration (ℒ S) c):
+  -- (cast_ℳ_c S c (θ_c c S F) s) = (θ_c c (Fintype.of punit)) (scast_ℒ_c S c s F) :=
+  (θ_c c (Fintype.of punit)) ∘ (scast_ℒ_c S c s) = (cast_ℳ_c S c) ∘ (θ_c c S) :=
 begin
   sorry,
 end
 
+-- lemma aux_6 (a c : ℝ≥0) (s : S) (ha : a ≤ c ^ (1 / p : ℝ)): ((equiv_ball_ℓp c) ∘
+--   (λ F, (cast_ℳ_c c (θ_c S c F) s)))⁻¹'
+--   (closed_ball ⟨(0 : ℝ), (mem_closed_ball_self (a.2.trans ha))⟩ a) = ∅ :=
+-- begin
+--   sorry,
+-- end
 
 
-theorem continuous_θ_c (c : ℝ≥0) : continuous (θ_c S c) :=
+theorem continuous_θ_c (c : ℝ≥0) : continuous (θ_c c S) :=
 begin
-  -- dsimp only [θ_c],
-  apply cont_at_cast_ℳ c (θ_c S c),
-  rw aux_commutative_θ,
-  apply continuous.comp,
-  apply continuous_pi,
-  intro s,
   sorry,
+
+
+
+
+  -- dsimp only [θ_c],
+  -- apply cont_at_cast_ℳ c (θ_c S c),
+  -- rw aux_commutative_θ,
+  -- apply continuous.comp _ (cont_cast_ℒ c),
+  -- apply continuous_pi,
+  -- intro s,
+  -- sorry,
 
 
 
@@ -344,22 +408,22 @@ begin
 
 
   --**[FAE]** Old version
-  sorry;
-  {
-  dsimp only [θ_c],
-  apply cont_at_cast_ℳ c (θ_c S c),
-  apply continuous_pi,
-  intro s,
-  apply ((equiv_ball_ℓp c).comp_continuous_iff).mp,
-  let f := (equiv_ball_ℓp c) ∘ (λ a,
-    (cast_ℳ_c c ∘ θ_c S c) a s),
-  apply cont_at_closed (c ^ (1 / p : ℝ)) f,
-  intros a ha,
-  dsimp [f],
-  --from here, it is clearly broken
-  convert is_closed_empty,
-  apply aux_6 S a c s ha,
-  }
+  -- sorry;
+  -- {
+  -- dsimp only [θ_c],
+  -- apply cont_at_cast_ℳ c (θ_c S c),
+  -- apply continuous_pi,
+  -- intro s,
+  -- apply ((equiv_ball_ℓp c).comp_continuous_iff).mp,
+  -- let f := (equiv_ball_ℓp c) ∘ (λ a,
+  --   (cast_ℳ_c c ∘ θ_c S c) a s),
+  -- apply cont_at_closed (c ^ (1 / p : ℝ)) f,
+  -- intros a ha,
+  -- dsimp [f],
+  -- --from here, it is clearly broken
+  -- convert is_closed_empty,
+  -- apply aux_6 S a c s ha,
+  -- }
   -- unfold,
   -- dsimp [f, cast_ℳ_c, θ_c],
 
@@ -370,13 +434,15 @@ begin
   --all_goals {apply_instance},
 end
 
---perhaps try mk_of_strict since bound=1
+
 def Θ : comphaus_filtered_pseudo_normed_group_hom (ℒ S) (ℳ S) :=
-mk_of_bound (θ_to_add) 1
+mk_of_strict (θ_to_add)
 begin
   intro c,
-  use θ_bound c,
-  exact (continuous_θ_c S c),
+  use θ_bound' c,
+  convert continuous_θ_c S c,
+  simp only [θ_c, one_mul, eq_mpr_eq_cast, set_coe_cast],
+  refl,
 end
 
 variable {S}
