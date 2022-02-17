@@ -312,10 +312,20 @@ end category_theory
 
 namespace category_theory
 
+open functor
+
 variables {C : Type u} {D : Type v} [category.{w} C] [category.{w} D]
 variables {F : C ⥤ D} {A₁ A₂ A₃ X : C} {f : A₁ ⟶ A₂} {g : A₂ ⟶ A₃}
 variables [limits.preserves_finite_colimits F]
-variables [abelian C] [abelian D] (ex : exact_seq C [f, g, (0 : A₃ ⟶ X)])
+variables [abelian C] [abelian D] [additive F] (ex : exact_seq C [f, g, (0 : A₃ ⟶ X)])
+
+lemma abelian.exact_of_factor_thru (hz : f ≫ g = 0) (hg : epi g) (H : is_colimit
+  (cokernel_cofork.of_π (factor_thru_image g) (comp_factor_thru_image_eq_zero hz))) :
+  exact f g :=
+begin
+  refine (abelian.exact_iff _ _).2 ⟨hz, _⟩,
+  sorry
+end
 
 namespace functor.right_exact
 
@@ -323,14 +333,19 @@ include ex
 
 lemma preserves_exact_seq : exact_seq D [F.map f, F.map g, (0 : F.obj A₃ ⟶ F.obj X)] :=
 begin
+  haveI exact := (exact_iff_exact_seq _ _).2 (ex.extract 0 2),
+  haveI epi : epi g,
+  { replace ex : exact_seq C ([g, _]) := ex.extract 1 2,
+    rwa [← exact_iff_exact_seq, ← (abelian.tfae_epi X g).out 0 2] at ex },
+  have compz : F.map f ≫ F.map g = 0,
+    { rw [← F.map_comp, ((abelian.exact_iff _ _).1 exact).1, functor.map_zero] },
+
   refine exact_seq.cons _ _ _ _ _,
-  {
+  { refine abelian.exact_of_factor_thru compz (category_theory.preserves_epi _ _) _,
+    haveI := abelian.is_colimit_image f g,
     sorry
-  },
+     },
   rw [← exact_iff_exact_seq, ← (abelian.tfae_epi (F.obj X) (F.map g)).out 0 2],
-  replace ex : exact_seq C ([g, _]) := ex.extract 1 2,
-  rw [← exact_iff_exact_seq, ← (abelian.tfae_epi X g).out 0 2] at ex,
-  letI := ex,
   exact category_theory.preserves_epi _ _,
 end
 
