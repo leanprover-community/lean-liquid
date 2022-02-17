@@ -2,6 +2,7 @@ import algebra.homology.exact
 import category_theory.abelian.opposite
 import category_theory.abelian.exact
 import category_theory.limits.constructions.epi_mono
+import category_theory.abelian.pseudoelements
 
 noncomputable theory
 
@@ -319,16 +320,6 @@ variables {F : C ⥤ D} {A₁ A₂ A₃ X : C} {f : A₁ ⟶ A₂} {g : A₂ ⟶
 variables [limits.preserves_finite_colimits F]
 variables [abelian C] [abelian D] [additive F] (ex : exact_seq C [f, g, (0 : A₃ ⟶ X)])
 
-/-
-lemma abelian.exact_of_factor_thru (hz : f ≫ g = 0) (hg : epi g) (H : is_colimit
-  (cokernel_cofork.of_π (factor_thru_image g) (comp_factor_thru_image_eq_zero hz))) :
-  exact f g :=
-begin
-  refine (abelian.exact_iff _ _).2 ⟨hz, _⟩,
-  sorry
-end
--/
-
 namespace functor.right_exact
 
 variable (F)
@@ -383,28 +374,45 @@ variable {F}
 def cokernel_comparison : cokernel f ⟶ A₃ :=
   cokernel.desc f g $ comp_eq_zero ex
 
-instance : is_iso (cokernel_comparison ex) := sorry
+local attribute [instance] abelian.pseudoelement.over_to_sort
+  abelian.pseudoelement.hom_to_fun
+  abelian.pseudoelement.has_zero
+
+instance [epi g] : is_iso (cokernel_comparison ex) :=
+begin
+  refine (is_iso_iff_mono_and_epi _).2 ⟨_, limits.cokernel.desc_epi _ _ _⟩,
+  refine abelian.pseudoelement.mono_of_zero_of_map_zero _ (λ a ha, _),
+  obtain ⟨b, hb⟩ := abelian.pseudoelement.pseudo_surjective_of_epi (cokernel.π f) a,
+  have hbz : g b = 0,
+  { have : g = (cokernel.π f) ≫ (cokernel_comparison ex) := (cokernel.π_desc _ _ _).symm,
+    rw [this, abelian.pseudoelement.comp_apply, hb, ha] },
+  obtain ⟨c, hc : f c = b⟩ := abelian.pseudoelement.pseudo_exact_of_exact.2 _ hbz,
+  { rw [← hc, ← abelian.pseudoelement.comp_apply, cokernel.condition,
+      abelian.pseudoelement.zero_apply] at hb,
+    exact hb.symm },
+  { exact (exact_iff_exact_seq _ _).2 (ex.extract 0 2) }
+end
 
 @[simp, reassoc]
-lemma cokernel_comparison_inv : g ≫ inv (cokernel_comparison ex) = cokernel.π _ :=
+lemma cokernel_comparison_inv [epi g] :
+  g ≫ inv (cokernel_comparison ex) = cokernel.π _ :=
 begin
   rw is_iso.comp_inv_eq,
   dsimp [cokernel_comparison],
   simp,
 end
 
-lemma aux : F.map g ≫ (F.map $ inv (cokernel_comparison ex)) ≫ (preserves_cokernel _ _).hom =
+lemma aux [epi g] :
+  F.map g ≫ (F.map $ inv (cokernel_comparison ex)) ≫ (preserves_cokernel _ _).hom =
   cokernel.π (F.map f) :=
 by simp only [← category.assoc, ← F.map_comp, cokernel_comparison_inv, map_preserves_cokernel_hom]
 
 lemma preserves_exact_seq : exact_seq D [F.map f, F.map g, (0 : F.obj A₃ ⟶ F.obj X)] :=
 begin
-  haveI exact := (exact_iff_exact_seq _ _).2 (ex.extract 0 2),
+  have exact := (exact_iff_exact_seq _ _).2 (ex.extract 0 2),
   haveI epi : epi g,
   { replace ex : exact_seq C ([g, _]) := ex.extract 1 2,
     rwa [← exact_iff_exact_seq, ← (abelian.tfae_epi X g).out 0 2] at ex },
-  have compz : F.map f ≫ F.map g = 0,
-    { rw [← F.map_comp, ((abelian.exact_iff _ _).1 exact).1, functor.map_zero] },
   refine exact_seq.cons _ _ _ _ _,
   { let I : F.obj A₃ ≅ cokernel (F.map f) :=
       (F.map_iso $ (as_iso $ cokernel_comparison ex).symm) ≪≫ preserves_cokernel _ _,

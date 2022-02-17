@@ -324,7 +324,7 @@ section theta_surj
 /--The map `ϑ` defined in Theorem 6.9 of Analytic.pdf. Given the definition of `tsum` we do not need
  to require that `r ≤ ξ` to simply define `ϑ`.-/
 
-def eval_s (r : ℝ≥0) (S : Fintype) (s : S): (laurent_measures r S) →
+def seval {r : ℝ≥0} (S : Fintype) (s : S): (laurent_measures r S) →
   (laurent_measures r (Fintype.of punit)) := λ F, ⟨(λ _, F s), (λ _, F.2 s)⟩
 
 def ϑ₀ (r : ℝ≥0) : (laurent_measures r (Fintype.of punit)) → ℝ :=
@@ -334,7 +334,7 @@ def ϑ (r p : ℝ≥0) (S : Fintype) : (laurent_measures r S) → real_measures 
   λ F s, tsum (λ n, (F s n) * ξ ^ n)
 
 def ϑ' (r p : ℝ≥0) (S : Fintype) : (laurent_measures r S) → (S → ℝ) :=
-  λ F s, (ϑ₀ ξ r) (eval_s r S s F)
+  λ F s, (ϑ₀ ξ r) (seval S s F)
 
 lemma ϑ_eq_ϑ' : ϑ = ϑ' := rfl
 
