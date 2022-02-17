@@ -319,6 +319,7 @@ variables {F : C ⥤ D} {A₁ A₂ A₃ X : C} {f : A₁ ⟶ A₂} {g : A₂ ⟶
 variables [limits.preserves_finite_colimits F]
 variables [abelian C] [abelian D] [additive F] (ex : exact_seq C [f, g, (0 : A₃ ⟶ X)])
 
+/-
 lemma abelian.exact_of_factor_thru (hz : f ≫ g = 0) (hg : epi g) (H : is_colimit
   (cokernel_cofork.of_π (factor_thru_image g) (comp_factor_thru_image_eq_zero hz))) :
   exact f g :=
@@ -326,10 +327,75 @@ begin
   refine (abelian.exact_iff _ _).2 ⟨hz, _⟩,
   sorry
 end
+-/
 
 namespace functor.right_exact
 
+variable (F)
+def cokernel_diagram_iso
+  {A B : C}
+  (f : A ⟶ B) :
+  parallel_pair f 0 ⋙ F ≅ parallel_pair (F.map f) 0 :=
+nat_iso.of_components (λ X,
+  match X with
+  | walking_parallel_pair.zero := iso.refl _
+  | walking_parallel_pair.one := iso.refl _
+  end)
+begin
+  rintros (a|a) (b|b) (f|f),
+  tidy,
+end
+
+def preserves_cokernel {A B : C} (f : A ⟶ B) :
+  F.obj (cokernel f) ≅ cokernel (F.map f) :=
+(is_colimit_of_preserves _ (colimit.is_colimit _)).cocone_point_unique_up_to_iso
+  (colimit.is_colimit _) ≪≫ limits.has_colimit.iso_of_nat_iso
+  (cokernel_diagram_iso _ _)
+
+@[simp, reassoc]
+lemma map_preserves_cokernel_hom :
+  F.map (cokernel.π f) ≫ (preserves_cokernel F f).hom = cokernel.π (F.map f) :=
+begin
+  erw (is_colimit_of_preserves F (colimit.is_colimit (parallel_pair f 0))).fac_assoc,
+  dsimp, simp only [has_colimit.iso_of_nat_iso_ι_hom],
+  dsimp [cokernel_diagram_iso],
+  simp,
+end
+
+variable {F}
+
 include ex
+
+-- Do we have some API with `exact_seq` to get lemmas like this?
+lemma comp_eq_zero : f ≫ g = 0 :=
+begin
+  suffices : exact f g, by exact this.1,
+  rw exact_iff_exact_seq,
+  exact ex.extract 0 2,
+end
+
+variable (F)
+lemma map_comp_eq_zero : F.map f ≫ F.map g = 0 :=
+by { rw [← F.map_comp, comp_eq_zero ex], simp }
+
+variable {F}
+
+def cokernel_comparison : cokernel f ⟶ A₃ :=
+  cokernel.desc f g $ comp_eq_zero ex
+
+instance : is_iso (cokernel_comparison ex) := sorry
+
+@[simp, reassoc]
+lemma cokernel_comparison_inv : g ≫ inv (cokernel_comparison ex) = cokernel.π _ :=
+begin
+  rw is_iso.comp_inv_eq,
+  dsimp [cokernel_comparison],
+  simp,
+end
+
+lemma aux : F.map g ≫ (F.map $ inv (cokernel_comparison ex)) ≫ (preserves_cokernel _ _).hom =
+  cokernel.π (F.map f) :=
+by simp only [← category.assoc, ← F.map_comp, cokernel_comparison_inv, map_preserves_cokernel_hom]
 
 lemma preserves_exact_seq : exact_seq D [F.map f, F.map g, (0 : F.obj A₃ ⟶ F.obj X)] :=
 begin
@@ -339,12 +405,12 @@ begin
     rwa [← exact_iff_exact_seq, ← (abelian.tfae_epi X g).out 0 2] at ex },
   have compz : F.map f ≫ F.map g = 0,
     { rw [← F.map_comp, ((abelian.exact_iff _ _).1 exact).1, functor.map_zero] },
-
   refine exact_seq.cons _ _ _ _ _,
-  { refine abelian.exact_of_factor_thru compz (category_theory.preserves_epi _ _) _,
-    haveI := abelian.is_colimit_image f g,
-    sorry
-     },
+  { let I : F.obj A₃ ≅ cokernel (F.map f) :=
+      (F.map_iso $ (as_iso $ cokernel_comparison ex).symm) ≪≫ preserves_cokernel _ _,
+    suffices : category_theory.exact (F.map f) (F.map g ≫ I.hom), by rwa exact_comp_iso at this,
+    erw aux,
+    exact abelian.exact_cokernel (F.map f) },
   rw [← exact_iff_exact_seq, ← (abelian.tfae_epi (F.obj X) (F.map g)).out 0 2],
   exact category_theory.preserves_epi _ _,
 end
