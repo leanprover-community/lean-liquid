@@ -244,11 +244,20 @@ begin
 end
 
 -- lemma cont_cast_ℳ (c : ℝ≥0) : continuous (cast_ℳ_c S c) := sorry
-def equiv_ball_ℳ (c : ℝ≥0) : {x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c} ≃ₜ filtration (ℳ ϖ) c := sorry
+def equiv_ball_ℳ (c : ℝ≥0) : filtration (ℳ ϖ) c ≃ₜ {x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c} := sorry
 
-lemma seval_cast_ℳ_commute (c : ℝ≥0) (s : S) (x : filtration (ℳ S) c) :
- (equiv_ball_ℳ c) ∘ (λ x, (cast_ℳ_c S c x s)) = seval_ℳ_c S c s := sorry
+lemma seval_cast_ℳ_commute (c : ℝ≥0) (s : S) : --(x : filtration (ℳ S) c) :
+ (λ x, (cast_ℳ_c S c x s)) = (equiv_ball_ℳ c) ∘ seval_ℳ_c S c s := sorry
 
+lemma seval_cast_ℳ_commute' {X : Type*} (c : ℝ≥0) {f : X → filtration (ℳ S) c} (s : S)  :
+ (λ x, (cast_ℳ_c S c (f x) s)) = (equiv_ball_ℳ c) ∘ seval_ℳ_c S c s ∘ f :=
+ begin
+  ext z,
+  have h_commute := @seval_cast_ℳ_commute p _ _ S c s,
+  have := congr_fun h_commute (f z),
+  simp only at this,
+  rw this,
+ end
 
 -- lemma cont_iff_comp_cast_ℳ (c : ℝ≥0) {X : Type*} [topological_space X] (f : X → filtration (ℳ S) c) :
 --   continuous (cast_ℳ_c S c ∘ f) → continuous f :=
@@ -301,7 +310,7 @@ begin
   use ⟨θ f, θ_bound c f f.2⟩,
 end
 
-lemma seval_ℒ_ℳ_commute (c : ℝ≥0) (s : S) : --(F : filtration (ℒ S) c):
+lemma seval_ℒ_ℳ_commute (c : ℝ≥0) (s : S) :
   (θ_c c (Fintype.of punit)) ∘ (seval_ℒ_c S c s) = (seval_ℳ_c S c s) ∘ (θ_c c S) :=
 begin
   ext F x,
@@ -310,11 +319,15 @@ begin
   refl,
 end
 
-lemma aux_cont (c : ℝ≥0) {X : Type*} [topological_space X] {f : X → (filtration (ℳ S) c)} :
-  (∀ s : S, continuous ((seval_ℳ_c S c s) ∘ f)) → continuous f :=
+lemma continuous_of_seval_comp_continuous (c : ℝ≥0) {X : Type*} [topological_space X]
+  {f : X → (filtration (ℳ S) c)} : (∀ s, continuous ((seval_ℳ_c S c s) ∘ f)) → continuous f :=
 begin
   intro H,
-  replace H : ∀ (s : S), continuous (λ x : X, (cast_ℳ_c S c) (f x) s), sorry,
+  replace H : ∀ (s : S), continuous (λ x : X, (cast_ℳ_c S c) (f x) s),
+  { intro s,
+    rw @seval_cast_ℳ_commute' p _ _ S X c f s,
+    apply ((equiv_ball_ℳ c).comp_continuous_iff).mpr,
+    exact H s },
   rw ← continuous_pi_iff at H,
   convert_to (continuous (λ x, cast_ℳ_c S c (f x))) using 0,
   exacts [eq_iff_iff.mpr (inducing_cast_ℳ S c).continuous_iff, H],
@@ -322,7 +335,7 @@ begin
 
 lemma continuous_θ_c (c : ℝ≥0) : continuous (θ_c c S) :=
 begin
-  apply aux_cont,
+  apply continuous_of_seval_comp_continuous,
   intro s,
   rw ← seval_ℒ_ℳ_commute,
   refine continuous.comp _ (cont_seval_ℒ_c S c s),
