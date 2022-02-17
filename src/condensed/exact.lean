@@ -3,6 +3,7 @@ import for_mathlib.AddCommGroup.exact
 
 import condensed.ab
 import pseudo_normed_group.bounded_limits
+import condensed.extr.lift_comphaus
 
 .
 
@@ -60,7 +61,7 @@ namespace condensed
 
 open CompHausFiltPseuNormGrp₁
 
-lemma exact_iff_ExtrDisc  {A B C : Condensed.{u} Ab.{u+1}} (f : A ⟶ B) (g : B ⟶ C) :
+lemma exact_iff_ExtrDisc {A B C : Condensed.{u} Ab.{u+1}} (f : A ⟶ B) (g : B ⟶ C) :
   exact f g ↔ ∀ (S : ExtrDisc),
     exact (f.1.app $ ExtrDisc_to_Profinite.op.obj (op S))
           (g.1.app $ ExtrDisc_to_Profinite.op.obj (op S)) :=
@@ -102,9 +103,8 @@ begin
     let α : (CompHaus.of $ K) ⟶ (CompHaus.of $ filtration B (Cf * c)) :=
       ⟨cast_le ∘ (coe : K → filtration B c), (continuous_cast_le _ _).comp continuous_subtype_val⟩,
     let Z := pullback α f₀,
-    have hZ : epi (pullback.fst : Z ⟶ _),
-    { apply concrete_category.epi_of_surjective,
-      rintro (b : K),
+    have hZ : function.surjective (pullback.fst : Z ⟶ _),
+    { rintro (b : K),
       have hb : (b : B) ∈ g ⁻¹' {0} ∩ filtration B c,
       { refine ⟨_, b.1.2⟩, have := b.2, dsimp [K] at this,
         simp only [set.mem_preimage, set.mem_singleton_iff] at this ⊢,
@@ -122,17 +122,16 @@ begin
     let y₀' : S.val → K := λ s, ⟨y₀ s, _⟩,
     swap, { ext, rw subtype.ext_iff at hy, exact congr_fun hy s, },
     have hy₀' : continuous y₀' := continuous_subtype_mk _ hy₀,
-    let x : S.val → Z := sorry, -- use projectivity of `S.val` (do we have this for `CompHaus`?)
-    have hx : continuous x, sorry,
-    have hx' : (pullback.fst : Z ⟶ _) ∘ x = y₀', sorry,
+    let x : S.val.to_CompHaus ⟶ Z := ExtrDisc.lift' _ hZ ⟨y₀', hy₀'⟩,
+    have hx' : x ≫ (pullback.fst : Z ⟶ _) = ⟨y₀', hy₀'⟩ := ExtrDisc.lift_lifts' _ _ _,
     let x₀ : S.val → filtration A (Cf * c) := (pullback.snd : Z ⟶ _) ∘ x,
-    have hx₀ : continuous x₀ := (continuous_map.continuous _).comp hx,
+    have hx₀ : continuous x₀ := (continuous_map.continuous _).comp x.continuous,
     have hfx₀ : ∀ s : S.val, f (x₀ s) = y₀ s,
     { intro s,
       have := (@pullback.condition _ _ _ _ _ α f₀ _),
       rw continuous_map.ext_iff at this,
       convert (congr_arg (coe : filtration B _ → B) (this (x s))).symm using 1,
-      rw [function.funext_iff] at hx',
+      rw [continuous_map.ext_iff] at hx',
       simp only [coe_comp, function.comp_apply] at hx' ⊢,
       rw hx', refl },
     refine ⟨⟨_, _, x₀, hx₀, rfl⟩, _⟩,
