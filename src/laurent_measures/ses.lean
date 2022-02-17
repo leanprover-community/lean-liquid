@@ -35,6 +35,7 @@ variable {S : Fintype}
 local notation `r` := @r p
 local notation `ℳ` := real_measures p
 local notation `ℒ` := laurent_measures r
+local notation `ϖ` := Fintype.of punit
 
 variables {M₁ M₂ : Type u} [comphaus_filtered_pseudo_normed_group M₁] [comphaus_filtered_pseudo_normed_group M₂]
 
@@ -190,30 +191,76 @@ def θ_to_add : (ℒ S) →+ (ℳ S) :=
 
 variable (S)
 
-def sbox_ℒ_c (c : ℝ≥0) := filtration (laurent_measures r (Fintype.of punit)) c
+open theta metric
+
+-- def sbox_ℒ_c (c : ℝ≥0) := filtration (laurent_measures r (Fintype.of punit)) c
 
 
-instance (c : ℝ≥0) : topological_space (sbox_ℒ_c c) := by refine
-  cofinite_topology ↥(filtration (laurent_measures r (Fintype.of punit)) c)
+-- instance (c : ℝ≥0) : topological_space (sbox_ℒ_c c) := by refine
+--   cofinite_topology ↥(filtration (laurent_measures r (Fintype.of punit)) c)
 
 
-def scast_ℒ_c (c : ℝ≥0) (s : S) : filtration (ℒ S) c → (sbox_ℒ_c c) :=
+def seval_ℒ_c (c : ℝ≥0) (s : S) : filtration (ℒ S) c → (filtration (ℒ ϖ) c) :=
+λ F,
+  begin
+  refine ⟨seval S s F, _⟩,
+  have hF := F.2,
+  simp only [filtration, set.mem_set_of_eq, seval, nnnorm, laurent_measures.coe_mk,
+    fintype.univ_punit, finset.sum_singleton] at ⊢ hF,
+  have := finset.sum_le_sum_of_subset (finset.singleton_subset_iff.mpr $ finset.mem_univ_val _),
+  rw finset.sum_singleton at this,
+  apply le_trans this hF,
+end
+
+def seval_ℳ_c (c : ℝ≥0) (s : S) : filtration (ℳ S) c → (filtration (ℳ ϖ) c) :=
+λ x,
+  begin
+  refine ⟨(λ _, x.1 s), _⟩,
+  have hx := x.2,
+  simp only [filtration, set.mem_set_of_eq, seval, nnnorm, laurent_measures.coe_mk,
+    fintype.univ_punit, finset.sum_singleton] at ⊢ hx,
+  have := finset.sum_le_sum_of_subset (finset.singleton_subset_iff.mpr $ finset.mem_univ_val _),
+  rw finset.sum_singleton at this,
+  apply le_trans this hx,
+end
+
+--not sure if these are needed
+def cast_ℳ_c (c : ℝ≥0) : filtration (ℳ S) c → (S → {x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c}) :=
 begin
-  intro F,
-  refine ⟨⟨(λ _, F.1 s), (λ _, F.1.2 s)⟩, _⟩,
+  intros x s,
+  refine ⟨x.1 s, _⟩,
+  have hx := x.2,
+  simp only [filtration, set.mem_set_of_eq, seval, nnnorm, laurent_measures.coe_mk,
+    fintype.univ_punit, finset.sum_singleton] at hx,
+  have := finset.sum_le_sum_of_subset (finset.singleton_subset_iff.mpr $ finset.mem_univ_val _),
+  rw finset.sum_singleton at this,
+  apply le_trans this hx,
+end
+
+lemma inducing_cast_ℳ (c : ℝ≥0) : inducing (cast_ℳ_c S c) :=
+begin
+  fconstructor,
   sorry,
 end
 
-lemma cont_scast_ℒ (c : ℝ≥0) (s : S) : continuous (scast_ℒ_c S c s) := sorry
+-- lemma cont_cast_ℳ (c : ℝ≥0) : continuous (cast_ℳ_c S c) := sorry
+def equiv_ball_ℳ (c : ℝ≥0) : {x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c} ≃ₜ filtration (ℳ ϖ) c := sorry
 
-def cast_ℳ_c (c : ℝ≥0) : filtration (ℳ S) c →
-  (filtration (real_measures p (Fintype.of punit)) c) :=
-begin
-  sorry,
-  -- intros F s,
-  -- refine ⟨F.1 s, _⟩,
-  -- sorry,
-end
+lemma seval_cast_ℳ_commute (c : ℝ≥0) (s : S) (x : filtration (ℳ S) c) :
+ (equiv_ball_ℳ c) ∘ (λ x, (cast_ℳ_c S c x s)) = seval_ℳ_c S c s := sorry
+
+
+-- lemma cont_iff_comp_cast_ℳ (c : ℝ≥0) {X : Type*} [topological_space X] (f : X → filtration (ℳ S) c) :
+--   continuous (cast_ℳ_c S c ∘ f) → continuous f :=
+-- begin
+--   rw (aux0 S c).continuous_iff,
+--   simp,
+-- end
+---
+
+lemma cont_seval_ℒ_c (c : ℝ≥0) (s : S) : continuous (seval_ℒ_c S c s) := sorry
+
+lemma cont_seval_ℳ_c (c : ℝ≥0) (s : S) : continuous (seval_ℳ_c S c s) := sorry
 
 open metric
 
@@ -254,15 +301,31 @@ begin
   use ⟨θ f, θ_bound c f f.2⟩,
 end
 
-lemma saux_commutative_pr (c : ℝ≥0) (s : S) (F : filtration (ℒ S) c):
-  (θ_c c (Fintype.of punit)) ∘ (scast_ℒ_c S c s) = (cast_ℳ_c S c) ∘ (θ_c c S) :=
+lemma seval_ℒ_ℳ_commute (c : ℝ≥0) (s : S) : --(F : filtration (ℒ S) c):
+  (θ_c c (Fintype.of punit)) ∘ (seval_ℒ_c S c s) = (seval_ℳ_c S c s) ∘ (θ_c c S) :=
 begin
-  sorry,
+  ext F x,
+  simp only [seval_ℳ_c, seval_ℒ_c, seval, θ_c, one_mul, subtype.coe_mk, eq_mpr_eq_cast,
+    set_coe_cast],
+  refl,
 end
 
-
-theorem continuous_θ_c (c : ℝ≥0) : continuous (θ_c c S) :=
+lemma aux_cont (c : ℝ≥0) {X : Type*} [topological_space X] {f : X → (filtration (ℳ S) c)} :
+  (∀ s : S, continuous ((seval_ℳ_c S c s) ∘ f)) → continuous f :=
 begin
+  intro H,
+  replace H : ∀ (s : S), continuous (λ x : X, (cast_ℳ_c S c) (f x) s), sorry,
+  rw ← continuous_pi_iff at H,
+  convert_to (continuous (λ x, cast_ℳ_c S c (f x))) using 0,
+  exacts [eq_iff_iff.mpr (inducing_cast_ℳ S c).continuous_iff, H],
+  end
+
+lemma continuous_θ_c (c : ℝ≥0) : continuous (θ_c c S) :=
+begin
+  apply aux_cont,
+  intro s,
+  rw ← seval_ℒ_ℳ_commute,
+  refine continuous.comp _ (cont_seval_ℒ_c S c s),
   sorry,
 
 
