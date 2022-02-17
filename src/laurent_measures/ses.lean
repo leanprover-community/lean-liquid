@@ -222,8 +222,31 @@ def θ_to_add : (ℒ S) →+ (ℳ S) :=
 
 -- example (c : ℝ≥0) : is_open ({F | ∥ F.1 ∥₊ < c} : set (filtration (ℒ S) c)) :=
 
+structure box_ℒ_c (S : Fintype) (c : ℝ≥0) :=
+(to_fun : S → ℤ → ℤ )
+(summable' : ∀ s, summable (λ n, ∥ (to_fun s n : ℝ) ∥₊ * r ^n) )
+(bound' : ∀ (s : S), tsum (λ n, ∥ (to_fun s n : ℝ) ∥₊ * r ^n) ≤ c)
 
-def cast_ℳ_c (c : ℝ≥0) : filtration (real_measures p S) (1 * c) →
+instance (c : ℝ≥0) : topological_space (box_ℒ_c S c) :=
+begin
+  sorry,
+end
+
+def cast_ℒ_c (c : ℝ≥0) : filtration (ℒ S) c → (box_ℒ_c S c) :=
+  -- (S → {f : ℤ → ℤ // summable (λ n, ∥ (f n : ℝ) ∥₊ * r ^n) ∧ tsum (λ n, ∥ f n ∥₊ * r ^n) ≤ c}) :=
+begin
+  intro F,
+  refine ⟨F.1, F.1.2, _⟩,
+  sorry,
+end
+
+-- variable (S)
+
+-- lemma cont_cast_ℒ (c : ℝ≥0) : continuous (cast_ℒ_c c S:) := sorry
+lemma cont_cast_ℒ (c : ℝ≥0) : continuous ((cast_ℒ_c c) : filtration (ℒ S) c →  (box_ℒ_c S c)) := sorry
+
+
+def cast_ℳ_c (c : ℝ≥0) : filtration (ℳ S) (1 * c) →
   (S → {x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c}) :=
 begin
   intros F s,
@@ -234,7 +257,6 @@ end
 --**[FAE]** Useless?
 def cast_ℳ_c_at_s (c : ℝ≥0) (s : S) : filtration (real_measures p S) (1 * c) →
   {x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c} := (λ F, cast_ℳ_c c F s)
-
 
 lemma cont_at_cast_ℳ (c : ℝ≥0) {X : Type*} [topological_space X] (f : X → filtration (ℳ S) (1 * c)) :
   continuous (cast_ℳ_c c ∘ f) → continuous f := sorry
@@ -283,11 +305,18 @@ begin
   sorry,
 end
 
-
 variable (S)
 
 def θ_c (c : ℝ≥0) : (filtration (ℒ S) c) → (filtration (ℳ S) (1 * c)) :=
 λ f, ⟨θ f, θ_bound c f f.2⟩
+
+def θ'_c (c : ℝ≥0) : (box_ℒ_c S c) → (S → {x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c}) := sorry
+-- def θ'_c (c : ℝ≥0) : (S → {f : ℤ → ℤ // summable (λ n, ∥ (f n : ℝ) ∥₊ * r ^n) ∧
+--   tsum (λ n, ∥ f n ∥₊ * r ^n) ≤ c}) → (S → {x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c}) := sorry
+
+lemma aux_commutative_θ (c : ℝ≥0) : (cast_ℳ_c c) ∘ (θ_c S c) = (θ'_c S c) ∘ (cast_ℒ_c c) := sorry
+
+lemma aux_commutative_pr (c : ℝ≥0) (s : S) : (cast_ℳ_c c) ∘ (θ_c S c) = (θ'_c S c) ∘ (cast_ℒ_c c) := sorry
 
 lemma aux_6 (a c : ℝ≥0) (s : S) (ha : a ≤ c ^ (1 / p : ℝ)): ((equiv_ball_ℓp c) ∘
   (λ a, (cast_ℳ_c c (θ_c S c a) s)))⁻¹'
@@ -296,8 +325,27 @@ begin
   sorry,
 end
 
+
+
 theorem continuous_θ_c (c : ℝ≥0) : continuous (θ_c S c) :=
 begin
+  -- dsimp only [θ_c],
+  apply cont_at_cast_ℳ c (θ_c S c),
+  rw aux_commutative_θ,
+  apply continuous.comp,
+  apply continuous_pi,
+  intro s,
+  sorry,
+
+
+
+
+
+
+
+  --**[FAE]** Old version
+  sorry;
+  {
   dsimp only [θ_c],
   apply cont_at_cast_ℳ c (θ_c S c),
   apply continuous_pi,
@@ -311,6 +359,7 @@ begin
   --from here, it is clearly broken
   convert is_closed_empty,
   apply aux_6 S a c s ha,
+  }
   -- unfold,
   -- dsimp [f, cast_ℳ_c, θ_c],
 
