@@ -1,5 +1,6 @@
 import Lbar.functor
 import laurent_measures.functor
+import laurent_measures.aux_lemmas
 
 .
 
@@ -12,6 +13,7 @@ The short exact sequence
 
 noncomputable theory
 
+open aux_thm69
 open_locale nnreal
 
 variables (r' : ℝ≥0) [fact (0 < r')] (S : Fintype)
@@ -29,24 +31,23 @@ namespace laurent_measures
     have := nnreal.summable_comp_injective (F.nnreal_summable s) int.coe_nat_injective,
     refine nnreal.summable_of_le _ this,
     intros n,
-    simp only [function.comp_app, zpow_coe_nat],
     split_ifs,
-    { simp only [int.nat_abs_zero, nat.cast_zero, zero_mul, zero_le'], },
-    { simp only [nnreal.coe_nat_abs], }
+    { simp only [int.nat_abs_zero, nat.cast_zero, zero_mul, zero_le'] },
+    { simp only [function.comp_app, nnreal.coe_nat_abs, zpow_coe_nat] }
   end }
 
 lemma to_Lbar_surjective : function.surjective (to_Lbar r' S) :=
 begin
   intro G,
   refine ⟨⟨λ s n, G s n.to_nat, λ s, _⟩, _⟩,
-  { rw ← int.coe_nat_injective.summable_iff,
-    { refine nnreal.summable_of_le _ (G.summable s),
-      intro n,
-      simp only [nnreal.coe_nat_abs, function.comp_app, int.to_nat_coe_nat, zpow_coe_nat] },
-    { rintro (n|n),
-      { simp only [int.of_nat_eq_coe, set.mem_range_self, not_true, forall_false_left], },
-      { intro, dsimp [int.to_nat], simp only [Lbar.coeff_zero, nnnorm_zero, zero_mul], } } },
-  { ext s (_|n), { exact (G.coeff_zero s).symm }, { dsimp, exact if_neg (nat.succ_ne_zero n), } }
+  { refine nnreal.summable_coe.mp ((summable_iff_on_nat_less 0 (λ n n0, _)).mpr _),
+    { simp [int.to_nat_of_nonpos n0.le] },
+    { convert (nnreal.summable_coe.mpr (G.summable' s)),
+      ext,
+      simp only [int.norm_eq_abs, int.to_nat_coe_nat, zpow_coe_nat, nonneg.coe_mul,
+        _root_.coe_nnnorm, nnreal.coe_pow, nnreal.coe_nat_cast],
+      exact congr_arg (λ y, y * (r' : ℝ) ^ x) (by exact_mod_cast (G s x).abs_eq_nat_abs) } },
+  { ext s (_|n), { exact (G.coeff_zero s).symm }, { dsimp, exact if_neg n.succ_ne_zero } }
 end
 
 lemma nnnorm_to_Lbar (F : laurent_measures r' S) : ∥to_Lbar r' S F∥₊ ≤ ∥F∥₊ :=
