@@ -24,4 +24,13 @@ begin
         quotient_add_group.mk'_apply, quotient_add_group.eq_zero_iff, h] using hx, } }
 end
 
+theorem exact_iff' : exact f g ↔ f ≫ g = 0 ∧ g.ker ≤ f.range :=
+begin
+  rw [exact_iff, le_antisymm_iff],
+  refine and_congr _ iff.rfl,
+  split,
+  { intro h, ext x, exact h (add_monoid_hom.mem_range.mpr ⟨x, rfl⟩) },
+  { rintros h _ ⟨x, rfl⟩, exact add_monoid_hom.congr_fun h x }
+end
+
 end AddCommGroup
