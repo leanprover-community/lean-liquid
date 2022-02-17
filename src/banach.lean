@@ -148,7 +148,8 @@ structure pBanach' (V : Type*) (p : ℝ) [fact (0 < p)] [fact (p ≤ 1)] [add_co
  [uniform_space V] [has_continuous_smul ℝ V] [topological_add_group V] [complete_space V] :=
 (exists_p_norm : nonempty (has_p_norm V p))
 
-def pBanach'_is_qBanach' (V: Type*) (p : ℝ) [fact (0 < p)] [fact (p ≤ 1)] (q : ℝ) [fact (0 < q)]
+noncomputable
+lemma pBanach'_is_qBanach' (V: Type*) (p : ℝ) [fact (0 < p)] [fact (p ≤ 1)] (q : ℝ) [fact (0 < q)]
   [fact (q ≤ 1)] [add_comm_group V] [module ℝ V] [uniform_space V] [has_continuous_smul ℝ V]
   [topological_add_group V] [complete_space V] (hp : pBanach' V p) : pBanach' V q :=
 begin
