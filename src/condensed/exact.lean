@@ -4,6 +4,7 @@ import for_mathlib.AddCommGroup.exact
 import condensed.ab
 import pseudo_normed_group.bounded_limits
 import condensed.extr.lift_comphaus
+import condensed.projective_resolution
 
 .
 
@@ -61,11 +62,29 @@ namespace condensed
 
 open CompHausFiltPseuNormGrp₁
 
+lemma zero_iff_ExtrDisc {A B : Condensed.{u} Ab.{u+1}} (f : A ⟶ B) :
+  f = 0 ↔ (∀ S : ExtrDisc, f.val.app (op S.val) = 0) :=
+begin
+  split,
+  { rintros ⟨rfl⟩, simp },
+  { intros h,
+    let E : Condensed.{u} Ab.{u+1} ≌ ExtrSheafProd.{u} Ab.{u+1} :=
+      Condensed_ExtrSheafProd_equiv _,
+    apply_fun (λ e, E.functor.map e),
+    swap, { exact E.functor.map_injective },
+    apply_fun (λ e, (ExtrSheafProd_to_presheaf _).map e),
+    swap, { apply functor.map_injective },
+    ext : 2,
+    apply h }
+end
+
 lemma exact_iff_ExtrDisc {A B C : Condensed.{u} Ab.{u+1}} (f : A ⟶ B) (g : B ⟶ C) :
   exact f g ↔ ∀ (S : ExtrDisc),
     exact (f.1.app $ ExtrDisc_to_Profinite.op.obj (op S))
           (g.1.app $ ExtrDisc_to_Profinite.op.obj (op S)) :=
-sorry
+begin
+  sorry
+end
 
 open comphaus_filtered_pseudo_normed_group
 
