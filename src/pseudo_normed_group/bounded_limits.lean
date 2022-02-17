@@ -1,5 +1,5 @@
 import pseudo_normed_group.category
-import for_mathlib.ab_explicit_limits
+import for_mathlib.AddCommGroup.explicit_limits
 
 import topology.category.Compactum
 
