@@ -61,7 +61,7 @@ namespace condensed
 
 open CompHausFiltPseuNormGrp₁
 
-lemma exact_iff_ExtrDisc  {A B C : Condensed.{u} Ab.{u+1}} (f : A ⟶ B) (g : B ⟶ C) :
+lemma exact_iff_ExtrDisc {A B C : Condensed.{u} Ab.{u+1}} (f : A ⟶ B) (g : B ⟶ C) :
   exact f g ↔ ∀ (S : ExtrDisc),
     exact (f.1.app $ ExtrDisc_to_Profinite.op.obj (op S))
           (g.1.app $ ExtrDisc_to_Profinite.op.obj (op S)) :=
