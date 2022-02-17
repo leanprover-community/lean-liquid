@@ -466,7 +466,7 @@ def normal_epi [epi f] : normal_epi f :=
 end normal_mono
 
 instance [abelian V] : abelian (homological_complex V c) :=
-{ normal_mono := λ _ _, normal_mono,
-  normal_epi := λ _ _, normal_epi }
+{ normal_mono_of_mono := λ _ _, normal_mono,
+  normal_epi_of_epi := λ _ _, normal_epi }
 
 end homological_complex

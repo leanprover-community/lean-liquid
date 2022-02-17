@@ -380,7 +380,7 @@ variables {C}
   image_subobject (f ≫ g) = image_subobject g :=
 begin
   delta image_subobject,
-  haveI : is_iso (image.pre_comp f g) := abelian.is_iso_of_mono_of_epi _,
+  haveI : is_iso (image.pre_comp f g) := is_iso_of_mono_of_epi _,
   ext, swap,
   { exact as_iso (image.pre_comp f g) },
   { simp only [as_iso_hom, image.pre_comp_ι], },
