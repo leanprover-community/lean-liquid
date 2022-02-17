@@ -69,12 +69,8 @@ begin
   split,
   { rintros ⟨rfl⟩, simp },
   { intros h,
-    let E : Condensed.{u} Ab.{u+1} ≌ ExtrSheafProd.{u} Ab.{u+1} :=
-      Condensed_ExtrSheafProd_equiv _,
-    apply_fun (λ e, E.functor.map e),
-    swap, { exact E.functor.map_injective },
-    apply_fun (λ e, (ExtrSheafProd_to_presheaf _).map e),
-    swap, { apply functor.map_injective },
+    apply (Condensed_ExtrSheafProd_equiv Ab).functor.map_injective,
+    apply (ExtrSheafProd_to_presheaf Ab).map_injective,
     ext : 2,
     apply h }
 end
