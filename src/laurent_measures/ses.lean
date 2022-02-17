@@ -4,7 +4,8 @@ import analysis.special_functions.logb
 -- import data.real.basic
 
 /-
-This files introduces the maps `Θ`, `Φ` (***and `Ψ` ???***), which are the "measurifications" of `θ`, `ϕ` (*** and `ψ` ???***)
+This files introduces the maps `Θ`, `Φ` (***and `Ψ` ???***), which are the "measurifications" of
+`θ`, `ϕ` (*** and `ψ` ???***)
 `laurent_measures.thm69`, they are morphisms in the right category.
 
 We then prove in **???** that `θ_ϕ_exact` of `laurent_measures.thm69` becomes a short exact sequence
@@ -236,7 +237,7 @@ def cast_ℳ_c_at_s (c : ℝ≥0) (s : S) : filtration (real_measures p S) (1 * 
 
 
 lemma cont_at_cast_ℳ (c : ℝ≥0) {X : Type*} [topological_space X] (f : X → filtration (ℳ S) (1 * c)) :
-  continuous f ↔ continuous (cast_ℳ_c c ∘ f) := sorry
+  continuous (cast_ℳ_c c ∘ f) → continuous f := sorry
 
 --**[FAE]** Useless?
 lemma aux3' (c : ℝ≥0) {X : Type*} (s : S) [topological_space X] {f : X → filtration (ℳ S) (1 * c)} :
@@ -244,11 +245,10 @@ lemma aux3' (c : ℝ≥0) {X : Type*} (s : S) [topological_space X] {f : X → f
 
 open metric
 
---**[FAE]** Useless?
-lemma aux4 (c : ℝ≥0) {X : Type*} [topological_space X]
-  {f : X → closed_ball (0 : ℝ) c} : continuous f ↔
-  ∀ a : ℝ≥0, ∀ (H : a ≤ c), is_closed
-    (f⁻¹' ((closed_ball ⟨(0 : ℝ), (mem_closed_ball_self c.2)⟩ a) : set ((closed_ball (0 : ℝ) c)))) :=
+lemma cont_at_closed (c : ℝ≥0) {X : Type*} [topological_space X]
+  (f : X → closed_ball (0 : ℝ) c) (H : ∀ a : ℝ≥0, ∀ (H : a ≤ c), is_closed
+    (f⁻¹' ((closed_ball ⟨(0 : ℝ), (mem_closed_ball_self c.2)⟩ a) : set ((closed_ball (0 : ℝ) c)))))
+    : continuous f :=
  begin
    sorry,
  end
@@ -289,21 +289,39 @@ variable (S)
 def θ_c (c : ℝ≥0) : (filtration (ℒ S) c) → (filtration (ℳ S) (1 * c)) :=
 λ f, ⟨θ f, θ_bound c f f.2⟩
 
+lemma aux_6 (a c : ℝ≥0) (s : S) (ha : a ≤ c ^ (1 / p : ℝ)): ((equiv_ball_ℓp c) ∘
+  (λ a, (cast_ℳ_c c (θ_c S c a) s)))⁻¹'
+  (closed_ball ⟨(0 : ℝ), (mem_closed_ball_self (a.2.trans ha))⟩ a) = ∅ :=
+begin
+  sorry,
+end
+
 theorem continuous_θ_c (c : ℝ≥0) : continuous (θ_c S c) :=
 begin
   dsimp only [θ_c],
-  apply (cont_at_cast_ℳ c (θ_c S c)).mpr,
+  apply cont_at_cast_ℳ c (θ_c S c),
   apply continuous_pi,
   intro s,
   apply ((equiv_ball_ℓp c).comp_continuous_iff).mp,
-  dsimp [equiv_ball_ℓp, θ_c, cast_ℳ_c],
-  sorry,
+  let f := (equiv_ball_ℓp c) ∘ (λ a,
+    (cast_ℳ_c c ∘ θ_c S c) a s),
+  apply cont_at_closed (c ^ (1 / p : ℝ)) f,
+  intros a ha,
+  dsimp [f],
+  --from here, it is clearly broken
+  convert is_closed_empty,
+  apply aux_6 S a c s ha,
+  -- unfold,
+  -- dsimp [f, cast_ℳ_c, θ_c],
+
+  -- sorry,
 
 
 
-  all_goals {apply_instance},
+  --all_goals {apply_instance},
 end
 
+--perhaps try mk_of_strict since bound=1
 def Θ : comphaus_filtered_pseudo_normed_group_hom (ℒ S) (ℳ S) :=
 mk_of_bound (θ_to_add) 1
 begin
