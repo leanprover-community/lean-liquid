@@ -409,12 +409,10 @@ by simp only [← category.assoc, ← F.map_comp, cokernel_comparison_inv, map_p
 
 lemma preserves_exact_seq : exact_seq D [F.map f, F.map g, (0 : F.obj A₃ ⟶ F.obj X)] :=
 begin
-  haveI exact := (exact_iff_exact_seq _ _).2 (ex.extract 0 2),
+  have exact := (exact_iff_exact_seq _ _).2 (ex.extract 0 2),
   haveI epi : epi g,
   { replace ex : exact_seq C ([g, _]) := ex.extract 1 2,
     rwa [← exact_iff_exact_seq, ← (abelian.tfae_epi X g).out 0 2] at ex },
-  have compz : F.map f ≫ F.map g = 0,
-    { rw [← F.map_comp, ((abelian.exact_iff _ _).1 exact).1, functor.map_zero] },
   refine exact_seq.cons _ _ _ _ _,
   { let I : F.obj A₃ ≅ cokernel (F.map f) :=
       (F.map_iso $ (as_iso $ cokernel_comparison ex).symm) ≪≫ preserves_cokernel _ _,
