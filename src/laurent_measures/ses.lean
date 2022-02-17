@@ -134,7 +134,7 @@ by { cases x with x hx, exact real.rpow_le_rpow_of_exponent_le x1 hyz }
 --sorry
 
 example : ¬ (1 / 2 : ℝ≥0) ^ (-1 : ℝ) ≤ (1 / 2) ^ 1 :=
-by simp only [nnreal.rpow_neg_one, one_div, inv_inv₀, pow_one, nnreal.le_inv_iff_mul_le, ne.def,
+by simp only [nnreal.rpow_neg_one, one_div, inv_inv, pow_one, nnreal.le_inv_iff_mul_le, ne.def,
     bit0_eq_zero, one_ne_zero, not_false_iff, not_le, one_lt_mul one_le_two one_lt_two]
 
 

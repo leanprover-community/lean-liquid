@@ -320,7 +320,7 @@ lemma zpow_strict_anti {K : Type} [linear_ordered_field K] {x : K} (hx₀ : 0 < 
   strict_anti (λ n:ℤ, x ^ n) :=
 begin
   intros n m H,
-  rw [← inv_inv₀ x],
+  rw [← inv_inv x],
   simp only [inv_zpow₀ x⁻¹, inv_lt_inv (zpow_pos_of_pos (inv_pos.mpr hx₀) _)
     (zpow_pos_of_pos (inv_pos.mpr hx₀) _)],
   exact zpow_strict_mono (one_lt_inv hx₀ hx₁) H,
