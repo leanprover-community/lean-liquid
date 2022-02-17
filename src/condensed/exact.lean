@@ -1,5 +1,8 @@
 import for_mathlib.Profinite.extend
+import for_mathlib.split_exact
+
 import condensed.ab
+import pseudo_normed_group.bounded_limits
 
 .
 
@@ -7,16 +10,17 @@ universe u
 
 open_locale nnreal
 
-open category_theory pseudo_normed_group
+open category_theory opposite pseudo_normed_group
 
 namespace CompHausFiltPseuNormGrp₁
 
 variables {A B C : CompHausFiltPseuNormGrp₁.{u}}
 
-def exact_with_constants (f : A ⟶ B) (g : B ⟶ C) (Cf Cg : ℝ≥0) : Prop :=
-∀ c : ℝ≥0,
+structure exact_with_constants (f : A ⟶ B) (g : B ⟶ C) (Cf Cg : ℝ≥0) : Prop :=
+(exact : exact ((to_PNG₁ ⋙ PseuNormGrp₁.to_Ab).map f) ((to_PNG₁ ⋙ PseuNormGrp₁.to_Ab).map g))
+(cond : ∀ c : ℝ≥0,
   g ⁻¹' {0} ∩ (filtration B c) ⊂ f '' (filtration A (Cf * c)) ∧
-  filtration C c ⊆ g '' (filtration B (Cg * c))
+  filtration C c ⊆ g '' (filtration B (Cg * c)))
 
 lemma exact_with_constants_extend {A B C : Fintype ⥤ CompHausFiltPseuNormGrp₁.{u}}
   (f : A ⟶ B) (g : B ⟶ C) (Cf Cg : ℝ≥0)
@@ -31,11 +35,22 @@ namespace condensed
 
 open CompHausFiltPseuNormGrp₁
 
-variables {A B C : CompHausFiltPseuNormGrp₁.{u}}
+lemma exact_iff_ExtrDisc  {A B C : Condensed.{u} Ab.{u+1}} (f : A ⟶ B) (g : B ⟶ C) :
+  exact f g ↔ ∀ (S : ExtrDisc),
+    exact (f.1.app $ ExtrDisc_to_Profinite.op.obj (op S))
+          (g.1.app $ ExtrDisc_to_Profinite.op.obj (op S)) :=
+sorry
 
-lemma exact_of_exact_with_constants (f : A ⟶ B) (g : B ⟶ C) (Cf Cg : ℝ≥0)
+lemma exact_of_exact_with_constants {A B C : CompHausFiltPseuNormGrp₁.{u}}
+  (f : A ⟶ B) (g : B ⟶ C) (Cf Cg : ℝ≥0)
   (hfg : exact_with_constants f g Cf Cg) :
   exact (to_Condensed.map f) (to_Condensed.map g) :=
-sorry
+begin
+  rw exact_iff_ExtrDisc,
+  intro S,
+  simp only [subtype.val_eq_coe, CompHausFiltPseuNormGrp.presheaf.map_apply, to_Condensed_map,
+    whisker_right_app, CompHausFiltPseuNormGrp.Presheaf.map_app, Ab.exact_ulift_map],
+  sorry
+end
 
 end condensed

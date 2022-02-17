@@ -5,7 +5,7 @@ import category_theory.sites.limits
 import algebra.category.Group.filtered_colimits
 
 import for_mathlib.abelian_category
-import for_mathlib.ab_epi
+import for_mathlib.AddCommGroup.epi
 
 universe u
 
