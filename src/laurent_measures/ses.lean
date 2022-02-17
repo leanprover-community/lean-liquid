@@ -267,9 +267,11 @@ lemma seval_cast_ℳ_commute' {X : Type*} (c : ℝ≥0) {f : X → filtration (�
 -- end
 ---
 
+
 lemma cont_seval_ℒ_c (c : ℝ≥0) (s : S) : continuous (seval_ℒ_c S c s) := sorry
 
-lemma cont_seval_ℳ_c (c : ℝ≥0) (s : S) : continuous (seval_ℳ_c S c s) := sorry
+--**[FAE]** Useful?
+-- lemma cont_seval_ℳ_c (c : ℝ≥0) (s : S) : continuous (seval_ℳ_c S c s) := sorry
 
 open metric
 
