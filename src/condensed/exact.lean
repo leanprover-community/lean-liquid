@@ -2,6 +2,7 @@ import for_mathlib.Profinite.extend
 import for_mathlib.split_exact
 
 import condensed.ab
+import pseudo_normed_group.bounded_limits
 
 .
 
@@ -16,9 +17,7 @@ namespace CompHausFiltPseuNormGrp₁
 variables {A B C : CompHausFiltPseuNormGrp₁.{u}}
 
 structure exact_with_constants (f : A ⟶ B) (g : B ⟶ C) (Cf Cg : ℝ≥0) : Prop :=
-[mono : mono f]
-[epi : epi g]
--- [exact : exact f g] -- need exactness in `Ab`
+(exact : exact ((to_PNG₁ ⋙ PseuNormGrp₁.to_Ab).map f) ((to_PNG₁ ⋙ PseuNormGrp₁.to_Ab).map g))
 (cond : ∀ c : ℝ≥0,
   g ⁻¹' {0} ∩ (filtration B c) ⊂ f '' (filtration A (Cf * c)) ∧
   filtration C c ⊆ g '' (filtration B (Cg * c)))
