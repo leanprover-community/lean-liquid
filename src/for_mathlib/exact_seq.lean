@@ -1,13 +1,14 @@
 import algebra.homology.exact
 import category_theory.abelian.opposite
 import category_theory.abelian.exact
+import category_theory.limits.constructions.epi_mono
 
 noncomputable theory
 
 open category_theory
 open category_theory.limits
 
-universes v u
+universes w v u
 
 namespace list
 
@@ -306,5 +307,33 @@ by simpa only [list.map_reverse, list.reverse_reverse, list.map_map,
   arrow.op_comp_unop, list.map_id] using h.op
 
 end exact_seq
+
+end category_theory
+
+namespace category_theory
+
+variables {C : Type u} {D : Type v} [category.{w} C] [category.{w} D]
+variables {F : C ⥤ D} {A₁ A₂ A₃ X : C} {f : A₁ ⟶ A₂} {g : A₂ ⟶ A₃}
+variables [limits.preserves_finite_colimits F]
+variables [abelian C] [abelian D] (ex : exact_seq C [f, g, (0 : A₃ ⟶ X)])
+
+namespace functor.right_exact
+
+include ex
+
+lemma preserves_exact_seq : exact_seq D [F.map f, F.map g, (0 : F.obj A₃ ⟶ F.obj X)] :=
+begin
+  refine exact_seq.cons _ _ _ _ _,
+  {
+    sorry
+  },
+  rw [← exact_iff_exact_seq, ← (abelian.tfae_epi (F.obj X) (F.map g)).out 0 2],
+  replace ex : exact_seq C ([g, _]) := ex.extract 1 2,
+  rw [← exact_iff_exact_seq, ← (abelian.tfae_epi X g).out 0 2] at ex,
+  letI := ex,
+  exact category_theory.preserves_epi _ _,
+end
+
+end functor.right_exact
 
 end category_theory

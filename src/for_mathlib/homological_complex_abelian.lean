@@ -391,17 +391,6 @@ lemma has_pushout_of_size (C : Type u) [category.{v} C] [has_pushouts C] :
   has_colimits_of_shape walking_span.{w} C :=
 has_colimits_of_shape_of_equivalence walking_span_equiv.{v}
 
--- move this
-instance _root_.category_theory.preserves_epi {C : Type u} {D : Type u'}
-  [category.{v} C] [category.{v'} D]
-  (F : C ⥤ D) {X Y : C} (f : X ⟶ Y) [preserves_colimit (span f f) F] [epi f] :
-  epi (F.map f) :=
-begin
-  have := is_colimit_pushout_cocone_map_of_is_colimit F _ (pushout_cocone.is_colimit_mk_id_id f),
-  simp_rw [F.map_id] at this,
-  apply pushout_cocone.epi_of_is_colimit_mk_id_id _ this,
-end
-
 instance [mono f] (i : ι) : mono (f.f i) :=
 begin
   change mono ((eval V c i).map f),
