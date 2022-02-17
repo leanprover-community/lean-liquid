@@ -61,7 +61,7 @@ lemma summable_coe_real (x : Lbar r' S) (s : S) :
 by simpa only [← nnreal.summable_coe, nnreal.coe_nat_cast, nnreal.coe_nat_abs,
   nnreal.coe_mul, nnreal.coe_pow] using x.summable s
 
-@[ext] lemma ext (x y : Lbar r' S) (h : (⇑x: S → ℕ → ℤ) = y) : x = y :=
+@[ext] lemma ext (x y : Lbar r' S) (h : (⇑x : S → ℕ → ℤ) = y) : x = y :=
 by { cases x, cases y, congr, exact h }
 
 lemma ext_iff (x y : Lbar r' S) : x = y ↔ (x : S → ℕ → ℤ) = y :=
@@ -299,7 +299,7 @@ if_neg (nat.succ_ne_zero i)
 lemma Tinv_aux_summable [h0r : fact (0 < r')] (F : Lbar r' S) (s : S) :
   summable (λ n, (↑(Tinv_aux (F s) n).nat_abs * r' ^ n)) :=
 begin
-  have : ∀ n:ℕ, r' ^ n = r' ^ n * r' * r'⁻¹,
+  have : ∀ n : ℕ, r' ^ n = r' ^ n * r' * r'⁻¹,
   { intro, rw [mul_inv_cancel_right₀ h0r.out.ne'] },
   conv { congr, funext, rw [this, ← mul_assoc] },
   apply summable.mul_right,
