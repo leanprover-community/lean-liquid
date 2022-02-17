@@ -19,14 +19,19 @@ open category_theory category_theory.limits
 universes v u
 
 -- Move this!
+-- @[simps obj map {fully_applied := ff}] -- we probably don't want these as global simp lemmas
 def Ab.ulift : Ab.{u} ⥤ Ab.{max v u} :=
 { obj := λ M, AddCommGroup.of $ ulift.{v} M,
   map := λ M N f,
   { to_fun := λ x, ⟨f x.down⟩,
     map_zero' := by { ext1, apply f.map_zero },
     map_add' := λ x y, by { ext1, apply f.map_add } },
-  map_id' := by { intros, ext, dsimp, simp },
-  map_comp' := by { intros, ext, dsimp, simp } }
+  map_id' := by { intros, ext, refl },
+  map_comp' := by { intros, ext, refl } }
+
+@[simp] lemma Ab.exact_ulift_map {A B C : Ab} (f : A ⟶ B) (g : B ⟶ C) :
+  exact (Ab.ulift.map f) (Ab.ulift.map g) ↔ exact f g :=
+sorry
 
 namespace Condensed
 
@@ -45,6 +50,7 @@ instance : is_right_adjoint (Sheaf_to_presheaf _ _ : Condensed Ab.{u+1} ⥤ _) :
 { left := presheaf_to_Sheaf _ _,
   adj := (sheafification_adjunction _ _) }
 
+@[simps obj map {fully_applied := ff}]
 def forget_to_CondensedType : Condensed Ab.{u+1} ⥤ CondensedSet :=
 { obj := λ F, ⟨F.val ⋙ forget _, begin
     cases F with F hF,
@@ -167,6 +173,7 @@ instance : add_comm_group (presheaf A S) :=
   zsmul_neg' := by { intros, ext, exact add_comm_group.zsmul_neg' _ _ },
   .. presheaf.has_sub A S, .. presheaf.has_neg A S }
 
+@[simps apply {fully_applied := ff}]
 def comap (A : CompHausFiltPseuNormGrp) {S T : Profinite} (φ : S ⟶ T) :
   presheaf A T →+ presheaf A S :=
 { to_fun := λ f, ⟨f.1 ∘ φ,
@@ -177,6 +184,7 @@ def comap (A : CompHausFiltPseuNormGrp) {S T : Profinite} (φ : S ⟶ T) :
   map_zero' := rfl,
   map_add' := by { intros, refl } }
 
+@[simps apply {fully_applied := ff}]
 def map {A B : CompHausFiltPseuNormGrp} (φ : A ⟶ B) (S : Profinite) :
   presheaf A S →+ presheaf B S :=
 { to_fun := λ f, ⟨φ ∘ f.1,
@@ -195,12 +203,14 @@ end presheaf
 
 open opposite
 
+@[simps obj map {fully_applied := ff}]
 def Presheaf (A : CompHausFiltPseuNormGrp.{u}) : Profinite.{u}ᵒᵖ ⥤ Ab :=
 { obj := λ S, ⟨presheaf A (unop S)⟩,
   map := λ S T φ, presheaf.comap A φ.unop,
   map_id' := by { intros, ext, refl },
   map_comp' := by { intros, ext, refl } }
 
+@[simps app {fully_applied := ff}]
 def Presheaf.map {A B : CompHausFiltPseuNormGrp} (φ : A ⟶ B) :
   Presheaf A ⟶ Presheaf B :=
 { app := λ S, presheaf.map φ (unop S),
@@ -303,6 +313,7 @@ begin
   { apply Presheaf_comp_ulift_is_sheaf_aux_equalizer }
 end
 
+@[simps obj map {fully_applied := ff}]
 def to_Condensed : CompHausFiltPseuNormGrp.{u} ⥤ Condensed.{u} Ab.{u+1} :=
 { obj := λ A,
   { val := Presheaf A ⋙ Ab.ulift.{u+1},
@@ -313,6 +324,7 @@ def to_Condensed : CompHausFiltPseuNormGrp.{u} ⥤ Condensed.{u} Ab.{u+1} :=
 
 end CompHausFiltPseuNormGrp
 
+@[simps obj map {fully_applied := ff}]
 def CompHausFiltPseuNormGrp₁.to_Condensed :
   CompHausFiltPseuNormGrp₁.{u} ⥤ Condensed.{u} Ab.{u+1} :=
 CompHausFiltPseuNormGrp₁.enlarging_functor ⋙ CompHausFiltPseuNormGrp.to_Condensed
