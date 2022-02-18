@@ -760,6 +760,7 @@ variable {α : Type*}
 open pseudo_normed_group profinitely_filtered_pseudo_normed_group
   comphaus_filtered_pseudo_normed_group
 
+@[simps]
 def map_hom [fact (0 < r)] (f : S ⟶ S') :
   comphaus_filtered_pseudo_normed_group_with_Tinv_hom r (ℒ S) (ℒ S') :=
 { to_fun := map f,

@@ -402,16 +402,6 @@ begin
 end
 
 
-def Θ : comphaus_filtered_pseudo_normed_group_hom (ℒ S) (ℳ S) :=
-mk_of_strict (θ_to_add)
-begin
-  intro c,
-  use θ_bound' p c,
-  convert continuous_θ_c p S c,
-  simp only [θ_c, one_mul, eq_mpr_eq_cast, set_coe_cast],
-  refl,
-end
-
 variable {S}
 
 end theta
