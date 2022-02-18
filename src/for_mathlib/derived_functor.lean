@@ -200,32 +200,7 @@ open category_theory.functor
 
 variables {C : Type u} {D : Type v} [category.{w} C] [category.{w} D] [abelian C] [abelian D]
 variables (F : C ⥤ D) [additive F] {X : C}
-variables [limits.preserves_finite_colimits F] [enough_projectives C]
-
-lemma short_exact_of_resolution (P: ProjectiveResolution X) : exact_seq C
-  [P.complex.d 1 0, P.π.f 0, (0 : X ⟶ X)] :=
-begin
-  refine exact_seq.cons _ _ P.exact₀ _ _,
-  rw ← exact_iff_exact_seq,
-  exact ((abelian.tfae_epi X (P.π.f 0)).out 0 2).1 P.epi
-end
-
-lemma short_exact_of_resolution_functor (P: ProjectiveResolution X) : exact_seq D
-  [((F.map_homological_complex (complex_shape.down ℕ)).obj P.complex).d_to 0,
-  F.map (P.π.f 0), (0 : F.obj X ⟶ F.obj X)] :=
-begin
-  refine exact_seq.cons _ _ _ _ _,
-  { have : (complex_shape.down ℕ).rel 1 0 := rfl,
-    let f := (homological_complex.X_prev_iso ((F.map_homological_complex _).obj P.complex) this),
-    simp at this,
-    refine preadditive.exact_of_iso_of_exact' (F.map (P.complex.d 1 0)) (F.map (P.π.f 0)) _ _
-      f.symm (iso.refl _) (iso.refl _) (by simp) (by simp) _,
-    exact (exact_iff_exact_seq _ _ ).2
-      ((right_exact.preserves_exact_seq F (short_exact_of_resolution P)).extract 0 2) },
-  rw ← exact_iff_exact_seq,
-  refine ((abelian.tfae_epi (F.obj X) (F.map (P.π.f 0))).out 0 2).1
-    (category_theory.preserves_epi F _),
-end
+variables [limits.preserves_finite_colimits F]
 
 /-- The morphism `homology f (0 : Y ⟶ Z) ⟶ cokernel f`. -/
 def homology_cokernel {X Y Z : C} (f : X ⟶ Y) :
@@ -272,16 +247,40 @@ def cokernel_homology_iso {X Y Z : C} (f : X ⟶ Y) :
   homology f (0 : Y ⟶ Z) (by simp) ≅ cokernel f :=
 homology_iso_cokernel_lift _ _ _ ≪≫ cokernel_lift_iso_cokernel f
 
+lemma short_exact_of_resolution (P: ProjectiveResolution X) : exact_seq C
+  [P.complex.d 1 0, P.π.f 0, (0 : X ⟶ X)] :=
+begin
+  refine exact_seq.cons _ _ P.exact₀ _ _,
+  rw ← exact_iff_exact_seq,
+  exact ((abelian.tfae_epi X (P.π.f 0)).out 0 2).1 P.epi
+end
+
+lemma short_exact_of_resolution_functor (P: ProjectiveResolution X) : exact_seq D
+  [((F.map_homological_complex (complex_shape.down ℕ)).obj P.complex).d_to 0,
+  F.map (P.π.f 0), (0 : F.obj X ⟶ F.obj X)] :=
+begin
+  refine exact_seq.cons _ _ _ _ _,
+  { have : (complex_shape.down ℕ).rel 1 0 := rfl,
+    let f := (homological_complex.X_prev_iso ((F.map_homological_complex _).obj P.complex) this),
+    simp at this,
+    refine preadditive.exact_of_iso_of_exact' (F.map (P.complex.d 1 0)) (F.map (P.π.f 0)) _ _
+      f.symm (iso.refl _) (iso.refl _) (by simp) (by simp) _,
+    exact (exact_iff_exact_seq _ _ ).2
+      ((right_exact.preserves_exact_seq F (short_exact_of_resolution P)).extract 0 2) },
+  rw ← exact_iff_exact_seq,
+  refine ((abelian.tfae_epi (F.obj X) (F.map (P.π.f 0))).out 0 2).1
+    (category_theory.preserves_epi F _),
+end
+
 /-- The iso `(F.left_derived 0).obj X ≅ F.obj X`. -/
-def functor.left_derived.zero_iso [enough_projectives D] : (F.left_derived 0).obj X ≅ F.obj X :=
+def functor.left_derived.zero_iso [enough_projectives C] : (F.left_derived 0).obj X ≅ F.obj X :=
 begin
   refine (left_derived_obj_iso F 0 (ProjectiveResolution.of X)).trans (_ ≪≫
     (as_iso (right_exact.cokernel_comparison (short_exact_of_resolution_functor F
     (ProjectiveResolution.of X))))),
   show homology _ _ _ ≅ _,
   convert cokernel_homology_iso _,
-  simp only [homological_complex.d_from_eq_zero, chain_complex.next_nat_zero],
-  apply_instance,
+  simp
 end
 
 end category_theory
