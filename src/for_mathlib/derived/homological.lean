@@ -12,17 +12,25 @@ open category_theory.limits
 open pretriangulated
 
 universes v u
-variables {C : Type u} [category.{v} C]
-  [has_zero_object C]
-  [preadditive C]
-  [has_shift C ℤ]
-  [∀ (n : ℤ), (shift_functor C n).additive]
+variables {C : Type u} [category.{v} C] [preadditive C]
+
+-- Move me
+instance preadditive_yoneda_flip_additive (X : C) :
+  (preadditive_yoneda.flip.obj (opposite.op X)).additive :=
+by { fsplit, dsimp, intros, ext1, apply preadditive.comp_add }
+
+variables {R : Type*} [ring R] [linear R C]
+
+-- Move me
+instance linear_yoneda_flip_additive (X : C) :
+  ((linear_yoneda R C).flip.obj (opposite.op X)).additive :=
+by { fsplit, dsimp, intros, ext1, dsimp, apply preadditive.comp_add }
+
+variables [has_zero_object C] [has_shift C ℤ] [∀ (n : ℤ), (shift_functor C n).additive]
   [pretriangulated C]
 
-/-
-A -> B -> C -> A[1]
-then F(A) -> F(B) -> F(C) is exact.
--/
+/-- A functor `F` is a *homological* functor if for every distinguished triangle
+`A ⟶ B ⟶ C ⟶ A[1]` the sequence `F(A) ⟶ F(B) ⟶ F(C)` is exact. -/
 class homological_functor {A : Type*} [category A] [abelian A] (F : C ⥤ A) [F.additive] : Prop :=
 (cond : ∀ (T : triangle C) (hT : T ∈ dist_triang C), exact (F.map T.mor₁) (F.map T.mor₂))
 
@@ -81,11 +89,6 @@ begin
   simp,
 end
 
--- Move me
-instance preadditive_yoneda_flip_additive (X : C) :
-  (preadditive_yoneda.flip.obj (opposite.op X)).additive :=
-by tidy
-
 instance preadditive_yoneda_flip_homological (X : C) :
   homological_functor (preadditive_yoneda.flip.obj (opposite.op X)) :=
 begin
@@ -107,13 +110,6 @@ begin
   { rintros (f : X ⟶ _) (hf : f ≫ _ = 0),
     apply dist_triang_to_exact_complex _ hT _ _ hf }
 end
-
-variables {R : Type*} [ring R] [linear R C]
-
--- Move me
-instance linear_yoneda_flip_additive (X : C) :
-  ((linear_yoneda R C).flip.obj (opposite.op X)).additive :=
-by tidy
 
 -- Prove this using the above theorem.
 instance linear_yoneda_flip_homological (X : C) :
