@@ -27,7 +27,7 @@ open_locale nnreal -- enable the notation `ℝ≥0` for the nonnegative real num
 open category_theory ProFiltPseuNormGrpWithTinv polyhedral_lattice opposite
 
 variables (r r' : ℝ≥0)
-variables [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r < 1)] [fact (r' < 1)]
+variables [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' < 1)]
 variables (BD : breen_deligne.package) (κ : ℕ → ℝ≥0)
 variables [BD.data.very_suitable r r' κ] [∀ (i : ℕ), fact (0 < κ i)]
 
@@ -74,9 +74,7 @@ The proof reduces to `thm95''` (a variant of Theorem 9.5).
   `≤ k`-exact in degrees `≤ m` for `c ≥ c₀` (where `c` is an index to the system of complexes).
 -/
 
-example : first_target_stmt r r' BD κ :=
-first_target r r' BD κ
-
+example : first_target_stmt r r' BD κ := first_target r r' BD κ
 
 /-- Theorem 9.4 in [Analytic] -/
 theorem thm94 :
