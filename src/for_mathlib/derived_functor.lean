@@ -227,6 +227,7 @@ begin
     (category_theory.preserves_epi F _),
 end
 
+/-- The morphism `homology f (0 : Y ⟶ Z) ⟶ cokernel f`. -/
 def homology_cokernel {X Y Z : C} (f : X ⟶ Y) :
   homology f (0 : Y ⟶ Z) (by simp) ⟶ cokernel f :=
 homology.desc _ _ _ ((kernel_subobject 0).arrow ≫ cokernel.π _)
@@ -235,6 +236,7 @@ homology.desc _ _ _ ((kernel_subobject 0).arrow ≫ cokernel.π _)
     refine limits.image_subobject_arrow_comp_eq_zero (by simp)
   end
 
+/-- The morphism `cokernel f ⟶ homology f (0 : Y ⟶ Z)`. -/
 def cokernel_homology {X Y Z : C} (f : X ⟶ Y) :
   cokernel f ⟶ homology f (0 : Y ⟶ Z) (by simp) :=
 cokernel.desc _ (limits.factor_thru_kernel_subobject _ (𝟙 _) (by simp) ≫ (homology.π _ _ _))
@@ -242,6 +244,7 @@ begin
   sorry
 end
 
+/-- The iso `(F.left_derived 0).obj X ≅ F.obj X`. -/
 def zero_iso : (F.left_derived 0).obj X ≅ F.obj X :=
 begin
   sorry
