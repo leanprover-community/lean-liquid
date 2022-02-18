@@ -71,6 +71,9 @@ local notation `ℒ` := laurent_measures r
 
 def θ : ℒ S → ℳ S := ϑ (1 / 2 : ℝ) r p S
 
+lemma θ_natural (S T : Fintype) (f : S ⟶ T) [fact (0 < p)] [fact ( p ≤ 1)] :
+  θ ∘ laurent_measures.map_hom f = real_measures.map_hom f ∘ θ := sorry
+
 def ϕ : ℒ S → ℒ S :=
 λ F, 2 • shift (-1) F - F
 
