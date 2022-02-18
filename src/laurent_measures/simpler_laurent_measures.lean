@@ -79,7 +79,7 @@ def slm.to_laurent_measures (F : slm S) : ℒ S :=
 
 lemma slm_lm_to_fun_eq (F : slm S) : F.to_fun = F.to_laurent_measures.to_fun := rfl
 
-lemma lm_slm_to_fun_eq (F : ℒ S) : F.to_fun = F.to_slm.to_fun := rfl
+-- lemma lm_slm_to_fun_eq (F : ℒ S) : F.to_fun = F.to_slm.to_fun := rfl
 
 end new_stuff
 
