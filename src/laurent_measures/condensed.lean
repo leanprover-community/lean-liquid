@@ -11,7 +11,7 @@ open_locale nnreal
 
 -- move me
 @[simps]
-def ProFiltPseuNormGrpWithTinv₁.to_CompHausFiltPseuNormGrp₁ (r' : ℝ≥0) [fact (0 < r')] :
+def ProFiltPseuNormGrpWithTinv₁.to_CompHausFiltPseuNormGrp₁ (r' : ℝ≥0) :
   ProFiltPseuNormGrpWithTinv₁ r' ⥤ CompHausFiltPseuNormGrp₁ :=
 { obj := λ M,
   { M := M,
