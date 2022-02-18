@@ -68,7 +68,7 @@ def _root_.laurent_measures.to_slm (F : ℒ S) : slm r S :=
 /--  A Simple Laurent Measure `F : slm S` "usual" Laurent Measure of type `ℒ S`. -/
 --  The "main" input is `int_summable_iff`, proving that a series over `ℤ` is summable if and only
 --  if both its restrictions to `ℕ` and to "`-ℕ`" are summable.
-def slm.to_laurent_measures (F : slm r S) : ℒ S :=
+def slm.to_laurent_measures {r : ℝ≥0} (F : slm r S) : ℒ S :=
 { to_fun := F.to_fun,
   summable' := begin
     refine λ s, summable_coe.mp _,
