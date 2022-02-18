@@ -38,7 +38,7 @@ section phi
 parameter {r : ℝ≥0}
 
 local notation `ℒ` := laurent_measures r
-variables [fact (0 < r)] [fact (r < 1)]
+variables [fact (0 < r)]
 variable {S : Fintype}
 
 def ϕ : ℒ S → ℒ S :=
@@ -71,6 +71,7 @@ begin
     neg_add_cancel_comm, zpow_neg₀, zpow_coe_nat, add_comm],
 end
 
+variable [fact (r < 1)]
 
 lemma injective_ϕ (F : ℒ S) (H : ϕ F = 0) : F = 0 :=
 begin
@@ -100,6 +101,20 @@ parameter {p : ℝ≥0}
 
 def r : ℝ≥0 := (1 / 2) ^ (p:ℝ)
 
+lemma r_pos : 0 < r :=
+suffices 0 < (2 : ℝ≥0)⁻¹ ^ (p : ℝ), by simpa [r],
+rpow_pos (nnreal.inv_pos.mpr zero_lt_two)
+
+instance r_pos' : fact (0 < r) := ⟨r_pos⟩
+
+lemma r_coe : (1 / 2 : ℝ) ^ (p : ℝ) = (r : ℝ) :=
+begin
+  have : (1/2 : ℝ) = ((1/2 : ℝ≥0) : ℝ),
+  simp only [one_div, nonneg.coe_inv, nnreal.coe_bit0, nonneg.coe_one],
+  rw [this, ← nnreal.coe_rpow, nnreal.coe_eq],
+  refl,
+end
+
 variable [fact(0 < p)]
 
 lemma r_lt_one : r < 1 :=
@@ -109,23 +124,9 @@ begin
   exact fact.out _
 end
 
-lemma r_pos : 0 < r :=
-suffices 0 < (2 : ℝ≥0)⁻¹ ^ (p : ℝ), by simpa [r],
-rpow_pos (nnreal.inv_pos.mpr zero_lt_two)
-
 instance r_lt_one' : fact (r < 1) := ⟨r_lt_one⟩
-instance r_pos' : fact (0 < r) := ⟨r_pos⟩
 
 variable {S : Fintype}
-
-
-lemma r_coe : (1 / 2 : ℝ) ^ (p : ℝ) = (r : ℝ) :=
-begin
-  have : (1/2 : ℝ) = ((1/2 : ℝ≥0) : ℝ),
-  simp only [one_div, nonneg.coe_inv, nnreal.coe_bit0, nonneg.coe_one],
-  rw [this, ← nnreal.coe_rpow, nnreal.coe_eq],
-  refl,
-end
 
 local notation `ℒ` := laurent_measures r
 local notation `ℳ` := real_measures p
@@ -150,7 +151,7 @@ calc (1/2:ℝ≥0)
 ... < r : rpow_lt_rpow_of_exponent_gt (half_pos zero_lt_one) (half_lt_self one_ne_zero) $
 (nnreal.coe_lt_coe.mpr (fact.out _)).trans_le (nnreal.coe_one).le
 
-lemma laurent_measures.summable_half [fact (p < 1)] (F : ℒ S) (s : S) :
+lemma laurent_measures.summable_half (F : ℒ S) (s : S) :
   summable (λ n, ((F s n) : ℝ) * (1 / 2) ^ n) :=
 aux_thm69.summable_smaller_radius F.d (F.summable s) (λ n hn, lt_d_eq_zero _ _ _ hn) r_half
 
