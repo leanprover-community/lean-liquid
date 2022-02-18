@@ -253,13 +253,14 @@ end
 lemma inducing_cast_ℳ (c : ℝ≥0) : inducing (cast_ℳ_c S c) :=
 begin
   fconstructor,
-  sorry,
+  -- simp,
+  -- sorry,
 end
 
 -- lemma cont_cast_ℳ (c : ℝ≥0) : continuous (cast_ℳ_c S c) := sorry
 def equiv_ball_ℳ (c : ℝ≥0) : filtration (ℳ ϖ) c ≃ₜ {x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c} := sorry
 
-lemma seval_cast_ℳ_commute (c : ℝ≥0) (s : S) : --(x : filtration (ℳ S) c) :
+lemma seval_cast_ℳ_commute (c : ℝ≥0) (s : S) :
  (λ x, (cast_ℳ_c S c x s)) = (equiv_ball_ℳ c) ∘ seval_ℳ_c S c s := sorry
 
 lemma seval_cast_ℳ_commute' {X : Type*} (c : ℝ≥0) {f : X → filtration (ℳ S) c} (s : S)  :
@@ -281,7 +282,7 @@ lemma seval_cast_ℳ_commute' {X : Type*} (c : ℝ≥0) {f : X → filtration (�
 ---
 
 
-lemma cont_seval_ℒ_c (c : ℝ≥0) (s : S) : continuous (seval_ℒ_c S c s) := sorry
+lemma continuous_seval_ℒ_c (c : ℝ≥0) (s : S) : continuous (seval_ℒ_c S c s) := sorry
 
 --**[FAE]** Useful?
 -- lemma cont_seval_ℳ_c (c : ℝ≥0) (s : S) : continuous (seval_ℳ_c S c s) := sorry
@@ -353,7 +354,7 @@ begin
   apply continuous_of_seval_comp_continuous,
   intro s,
   rw ← seval_ℒ_ℳ_commute,
-  refine continuous.comp _ (cont_seval_ℒ_c p S c s),
+  refine continuous.comp _ (continuous_seval_ℒ_c p S c s),
   sorry,
 
 
@@ -414,7 +415,5 @@ end
 variable {S}
 
 end theta
-
--- end homs
 
 end laurent_measures_ses
