@@ -407,6 +407,8 @@ lemma aux [epi g] :
   cokernel.π (F.map f) :=
 by simp only [← category.assoc, ← F.map_comp, cokernel_comparison_inv, map_preserves_cokernel_hom]
 
+variable (F)
+
 lemma preserves_exact_seq : exact_seq D [F.map f, F.map g, (0 : F.obj A₃ ⟶ F.obj X)] :=
 begin
   have exact := (exact_iff_exact_seq _ _).2 (ex.extract 0 2),
