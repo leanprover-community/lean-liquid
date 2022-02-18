@@ -8,7 +8,6 @@ open_locale nnreal
 
 noncomputable theory
 
-namespace slm
 section slm
 
 --  This is the same as before, from here to...
@@ -34,14 +33,14 @@ local notation `ℒ` := laurent_measures r
 
 variables {S : Fintype}
 
-/--  Let `F : ℒ S` be a Laurent measure.  `laurent_measures.d` chooses a bound `d ∈ ℤ` for `F`,
-such that, for all `s : S`, the sequence `F s` is zero from `d-1` and below. -/
-def laurent_measures.d (F : ℒ S) : ℤ :=
-(exists_bdd_filtration (fact.out _ : 0 < r) (fact.out _ : r < 1) F).some
+-- /--  Let `F : ℒ S` be a Laurent measure.  `laurent_measures.d` chooses a bound `d ∈ ℤ` for `F`,
+-- such that, for all `s : S`, the sequence `F s` is zero from `d-1` and below. -/
+-- def laurent_measures.d (F : ℒ S) : ℤ :=
+-- (exists_bdd_filtration (fact.out _ : 0 < r) (fact.out _ : r < 1) F).some
 
-lemma lt_d_eq_zero (F : ℒ S) (s : S) (n : ℤ) :
-  n < F.d → F s n = 0 :=
-(exists_bdd_filtration (fact.out _ : 0 < r) (fact.out _ : r < 1) F).some_spec s n
+-- lemma lt_d_eq_zero (F : ℒ S) (s : S) (n : ℤ) :
+--   n < F.d → F s n = 0 :=
+-- (exists_bdd_filtration (fact.out _ : 0 < r) (fact.out _ : r < 1) F).some_spec s n
 --  ... here!
 
 
@@ -54,13 +53,13 @@ structure slm (r : ℝ≥0) (S : Fintype) :=
 (zero_lt_d : ∀ s n, n < d → to_fun s n = 0)
 
 /--  A "usual" Laurent Measure `F : ℒ S` gives rise to a Simple Laurent Measure of type `slm S`. -/
-def _root_.laurent_measures.to_slm (F : ℒ S) : slm S :=
+def _root_.laurent_measures.to_slm (F : ℒ S) : slm r S :=
 { to_fun    := F.to_fun,
   d         := F.d,
-  zero_lt_d := lt_d_eq_zero F,
+  zero_lt_d := λ n s, lt_d_eq_zero F _ _,
   summable' := begin
     refine λ s, summable_coe.mp _,
-    convert ((@int_summable_iff _ _ _ _ _ (λ (n : ℤ), ∥F.to_fun s n∥ * slm.r ^ n)).mp _).1,
+    convert ((@int_summable_iff _ _ _ _ _ (λ (n : ℤ), ∥F.to_fun s n∥ * r ^ n)).mp _).1,
     { ext, simp },
     { convert summable_coe.mpr (F.summable' s),
       simp }
@@ -80,11 +79,11 @@ def slm.to_laurent_measures (F : slm r S) : ℒ S :=
         simp },
       { simp [F.zero_lt_d s n nd] } }
   end }
-lemma slm_lm_to_fun_eq (F : slm S) : F.to_fun = F.to_laurent_measures.to_fun := rfl
 
--- lemma lm_slm_to_fun_eq (F : ℒ S) : F.to_fun = F.to_slm.to_fun := rfl
+lemma slm_lm_to_fun_eq (F : slm r S) : F.to_fun = F.to_laurent_measures.to_fun := rfl
+
+lemma lm_slm_to_fun_eq (F : ℒ S) : F.to_fun = F.to_slm.to_fun := rfl
 
 end new_stuff
 
-end slm
 end slm
