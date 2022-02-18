@@ -37,7 +37,7 @@ lemma map'_id : ∀ (i : fin 3), map' F a b i i le_rfl = 𝟙 _
 | ⟨2,hi⟩ := rfl
 | ⟨i+3,hi⟩ := by { exfalso, revert hi, dec_trivial }
 
-def map'_comp : Π (i j k : fin 3) (hij : i ≤ j) (hjk : j ≤ k),
+lemma map'_comp : Π (i j k : fin 3) (hij : i ≤ j) (hjk : j ≤ k),
   map' F a b i j hij ≫ map' F a b j k hjk = map' F a b i k (hij.trans hjk)
 | ⟨0, _⟩ ⟨0, _⟩ k _ _ := category.id_comp _
 | ⟨1, _⟩ ⟨1, _⟩ k _ _ := category.id_comp _
@@ -90,7 +90,7 @@ lemma map'_id : ∀ (i : fin 4), map' F a b c i i le_rfl = 𝟙 _
 | ⟨3,hi⟩ := rfl
 | ⟨i+4,hi⟩ := by { exfalso, revert hi, dec_trivial }
 
-def map'_comp : Π (i j k : fin 4) (hij : i ≤ j) (hjk : j ≤ k),
+lemma map'_comp : Π (i j k : fin 4) (hij : i ≤ j) (hjk : j ≤ k),
   map' F a b c i j hij ≫ map' F a b c j k hjk = map' F a b c i k (hij.trans hjk)
 | ⟨0, _⟩ ⟨0, _⟩ k _ _ := category.id_comp _
 | ⟨1, _⟩ ⟨1, _⟩ k _ _ := category.id_comp _

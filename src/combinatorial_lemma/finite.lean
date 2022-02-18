@@ -144,7 +144,7 @@ def Lbar.mk_of_add_monoid_hom [fact (r' < 1)] (x : S → ℕ → Λ →+ ℤ) (a
 Lbar.of_mask (Lbar.geom r' S) $ λ s n, x s n = a
 
 @[simps apply]
-lemma Lbar.mk_tensor (a : Λ →+ ℤ) (x : Lbar r' S) : Λ →+ Lbar r' S :=
+def Lbar.mk_tensor (a : Λ →+ ℤ) (x : Lbar r' S) : Λ →+ Lbar r' S :=
 add_monoid_hom.mk' (λ l, a l • x) $ λ l₁ l₂, by rw [a.map_add, add_smul]
 
 -- better name?
@@ -369,7 +369,7 @@ finset.univ.sup (λ i, ∑ a in A Λ N, ∥a (l Λ i)∥₊ / ∥l Λ i∥₊)
 
 end lem98
 
-lemma lem98_finite [fact (r' < 1)] (Λ : Type*) [polyhedral_lattice Λ] (S : Type*) [fintype S]
+theorem lem98_finite [fact (r' < 1)] (Λ : Type*) [polyhedral_lattice Λ] (S : Type*) [fintype S]
   (N : ℕ) [hN : fact (0 < N)] :
   pseudo_normed_group.splittable (Λ →+ Lbar r' S) N (lem98.d Λ N) :=
 begin

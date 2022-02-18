@@ -30,7 +30,7 @@ begin
 end
 
 -- move this
-def biprod_factors (A B : C) [projective A] [projective B]
+lemma biprod_factors (A B : C) [projective A] [projective B]
   (E X : C) (f : A ⊞ B ⟶ X) (e : E ⟶ X) [epi e] :
   ∃ f' : A ⊞ B ⟶ E, f' ≫ e = f :=
 ⟨biprod.desc
