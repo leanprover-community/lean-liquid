@@ -253,6 +253,7 @@ end
 lemma inducing_cast_ℳ (c : ℝ≥0) : inducing (cast_ℳ_c S c) :=
 begin
   fconstructor,
+  sorry,
   -- simp,
   -- sorry,
 end
