@@ -1,6 +1,7 @@
 -- import laurent_measures.functor
-import laurent_measures.thm69
 import analysis.special_functions.logb
+import for_mathlib.pi_induced
+import laurent_measures.thm69
 -- import data.real.basic
 
 /-
@@ -251,11 +252,20 @@ end
 -- example (ι : Type*) (X Y : ι → Type*) (f : Πi, X → Y) (hX : ∀ i:ι, topological_space (X i))
 --   (hY : ∀ i:ι, topological_space (Y i))
 
+-- open topological_space
+
 lemma inducing_cast_ℳ (c : ℝ≥0) : inducing (cast_ℳ_c S c) :=
 begin
+  -- let f :
+  -- let := cast_ℳ_c p S c,
+  -- let M := ℳ S,
+  -- unfold [ℳ S],
+  have := @pi_induced_induced S (λ i, ℝ) (λ i, { x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c}) _ ,--(cast_ℳ_c p S c),
   fconstructor,
   dsimp [real_measures.topological_space],
   sorry,
+  -- apply pi_induced_induced,
+  -- sorry,
   -- simp,
   -- sorry,
 end
@@ -361,7 +371,7 @@ lemma seval_ℒ_ℳ_commute (c : ℝ≥0) (s : S) :
   (θ_c c (Fintype.of punit)) ∘ (seval_ℒ_c c s) = (seval_ℳ_c S c s) ∘ (θ_c c S) :=
 begin
   ext F x,
-  simp only [seval_ℳ_c, seval_ℒ_c, seval, θ_c, one_mul, subtype.coe_mk, eq_mpr_eq_cast,
+  simp only [seval_ℳ_c, seval_ℒ_c, seval_ℒ, θ_c, one_mul, subtype.coe_mk, eq_mpr_eq_cast,
     set_coe_cast],
   refl,
 end
