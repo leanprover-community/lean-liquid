@@ -8,7 +8,7 @@ open_locale nnreal
 
 open category_theory ProFiltPseuNormGrpWithTinv opposite
 
-variables (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r < 1)] [fact (r' < 1)]
+variables (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' < 1)]
 variables (BD : breen_deligne.package) (κ : ℕ → ℝ≥0)
 variables [BD.data.very_suitable r r' κ] [∀ (i : ℕ), fact (0 < κ i)]
 
