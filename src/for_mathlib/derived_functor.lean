@@ -194,7 +194,7 @@ end category_theory
 
 section right_exact
 
-namespace category_theory.functor.left_derived
+namespace category_theory
 
 open category_theory.functor
 
@@ -239,17 +239,51 @@ homology.desc _ _ _ ((kernel_subobject 0).arrow ≫ cokernel.π _)
 /-- The morphism `cokernel f ⟶ homology f (0 : Y ⟶ Z)`. -/
 def cokernel_homology {X Y Z : C} (f : X ⟶ Y) :
   cokernel f ⟶ homology f (0 : Y ⟶ Z) (by simp) :=
-cokernel.desc _ (limits.factor_thru_kernel_subobject _ (𝟙 _) (by simp) ≫ (homology.π _ _ _))
-begin
-  sorry
-end
+cokernel.map _ _ ((𝟙 _) ≫ factor_thru_image_subobject _) ((𝟙 _) ≫
+  limits.factor_thru_kernel_subobject _ (𝟙 _) (by simp)) (by simp [image_to_kernel_zero_right])
+
+/-- The morphism `cokernel (kernel.lift (0 : Y ⟶ Z) f) ⟶ cokernel f`. -/
+@[simp] def cokernel_lift_to_cokernel {X Y Z : C} (f : X ⟶ Y) :
+  cokernel (kernel.lift (0 : Y ⟶ Z) f (by simp)) ⟶ cokernel f :=
+cokernel.desc _ ((kernel.ι 0) ≫ cokernel.π _) (by simp)
+
+/-- The morphism `cokernel f ⟶ cokernel (kernel.lift (0 : Y ⟶ Z) f)`. -/
+@[simp] def cokernel_to_cokernel_lift {X Y Z : C} (f : X ⟶ Y) :
+  cokernel f ⟶ cokernel (kernel.lift (0 : Y ⟶ Z) f (by simp)) :=
+cokernel.map _ _ (𝟙 _) (kernel.lift _ (𝟙 _) (by simp)) (by { ext, simp })
+
+/-- The isomorphism `cokernel f ≅ cokernel (kernel.lift (0 : Y ⟶ Z) f)`. -/
+def cokernel_lift_iso_cokernel {X Y Z : C} (f : X ⟶ Y) :
+  cokernel (kernel.lift (0 : Y ⟶ Z) f (by simp)) ≅ cokernel f :=
+{ hom := cokernel_lift_to_cokernel f,
+  inv := cokernel_to_cokernel_lift f,
+  hom_inv_id' :=
+  begin
+    ext,
+    simp only [cokernel_lift_to_cokernel, cokernel_to_cokernel_lift, coequalizer_as_cokernel,
+      cokernel.π_desc_assoc, category.assoc, cokernel.π_desc, category.comp_id],
+    rw [← kernel_zero_iso_source_hom, ← kernel_zero_iso_source_inv, ← category.assoc,
+      iso.hom_inv_id, category.id_comp],
+  end,
+  inv_hom_id' := by { ext, simp } }
+
+/-- The isomorphism `cokernel f ⟶ homology f (0 : Y ⟶ Z)`. -/
+def cokernel_homology_iso {X Y Z : C} (f : X ⟶ Y) :
+  homology f (0 : Y ⟶ Z) (by simp) ≅ cokernel f :=
+homology_iso_cokernel_lift _ _ _ ≪≫ cokernel_lift_iso_cokernel f
 
 /-- The iso `(F.left_derived 0).obj X ≅ F.obj X`. -/
-def zero_iso : (F.left_derived 0).obj X ≅ F.obj X :=
+def functor.left_derived.zero_iso [enough_projectives D] : (F.left_derived 0).obj X ≅ F.obj X :=
 begin
-  sorry
+  refine (left_derived_obj_iso F 0 (ProjectiveResolution.of X)).trans (_ ≪≫
+    (as_iso (right_exact.cokernel_comparison (short_exact_of_resolution_functor F
+    (ProjectiveResolution.of X))))),
+  show homology _ _ _ ≅ _,
+  convert cokernel_homology_iso _,
+  simp only [homological_complex.d_from_eq_zero, chain_complex.next_nat_zero],
+  apply_instance,
 end
 
-end category_theory.functor.left_derived
+end category_theory
 
 end right_exact
