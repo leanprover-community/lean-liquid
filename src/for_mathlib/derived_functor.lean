@@ -11,7 +11,7 @@ open category_theory
 open category_theory.limits
 open short_exact_sequence
 
-universes v u
+universes w v u
 
 namespace category_theory
 
@@ -191,3 +191,62 @@ end
 end left_derived
 end functor
 end category_theory
+
+section right_exact
+
+namespace category_theory.functor.left_derived
+
+open category_theory.functor
+
+variables {C : Type u} {D : Type v} [category.{w} C] [category.{w} D] [abelian C] [abelian D]
+variables (F : C ⥤ D) [additive F] {X : C}
+variables [limits.preserves_finite_colimits F] [enough_projectives C]
+
+lemma short_exact_of_resolution (P: ProjectiveResolution X) : exact_seq C
+  [P.complex.d 1 0, P.π.f 0, (0 : X ⟶ X)] :=
+begin
+  refine exact_seq.cons _ _ P.exact₀ _ _,
+  rw ← exact_iff_exact_seq,
+  exact ((abelian.tfae_epi X (P.π.f 0)).out 0 2).1 P.epi
+end
+
+lemma short_exact_of_resolution_functor (P: ProjectiveResolution X) : exact_seq D
+  [((F.map_homological_complex (complex_shape.down ℕ)).obj P.complex).d_to 0,
+  F.map (P.π.f 0), (0 : F.obj X ⟶ F.obj X)] :=
+begin
+  refine exact_seq.cons _ _ _ _ _,
+  { have : (complex_shape.down ℕ).rel 1 0 := rfl,
+    let f := (homological_complex.X_prev_iso ((F.map_homological_complex _).obj P.complex) this),
+    simp at this,
+    refine preadditive.exact_of_iso_of_exact' (F.map (P.complex.d 1 0)) (F.map (P.π.f 0)) _ _
+      f.symm (iso.refl _) (iso.refl _) (by simp) (by simp) _,
+    exact (exact_iff_exact_seq _ _ ).2
+      ((right_exact.preserves_exact_seq F (short_exact_of_resolution P)).extract 0 2) },
+  rw ← exact_iff_exact_seq,
+  refine ((abelian.tfae_epi (F.obj X) (F.map (P.π.f 0))).out 0 2).1
+    (category_theory.preserves_epi F _),
+end
+
+def homology_cokernel {X Y Z : C} (f : X ⟶ Y) :
+  homology f (0 : Y ⟶ Z) (by simp) ⟶ cokernel f :=
+homology.desc _ _ _ ((kernel_subobject 0).arrow ≫ cokernel.π _)
+  begin
+    simp only [image_to_kernel_arrow_assoc],
+    refine limits.image_subobject_arrow_comp_eq_zero (by simp)
+  end
+
+def cokernel_homology {X Y Z : C} (f : X ⟶ Y) :
+  cokernel f ⟶ homology f (0 : Y ⟶ Z) (by simp) :=
+cokernel.desc _ (limits.factor_thru_kernel_subobject _ (𝟙 _) (by simp) ≫ (homology.π _ _ _))
+begin
+  sorry
+end
+
+def zero_iso : (F.left_derived 0).obj X ≅ F.obj X :=
+begin
+  sorry
+end
+
+end category_theory.functor.left_derived
+
+end right_exact
