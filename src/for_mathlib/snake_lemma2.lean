@@ -46,7 +46,7 @@ structure snake : Prop :=
 
 namespace snake
 
-def mk_of_sequence_hom (sq₁ : a₁ ≫ f₂ = f₁ ≫ b₁) (sq₂ : b₁ ≫ g₂ = g₁ ≫ c₁)
+lemma mk_of_sequence_hom (sq₁ : a₁ ≫ f₂ = f₁ ≫ b₁) (sq₂ : b₁ ≫ g₂ = g₁ ≫ c₁)
   [exact f₁ g₁] [exact f₂ g₂] [epi g₁] [mono f₂] : snake
   (kernel a₁) (kernel b₁) (kernel c₁)
   A₁ B₁ C₁
