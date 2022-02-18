@@ -12,7 +12,7 @@ open category_theory
 
 universes u v' u'
 
-def ExtrDisc.cover_dense :
+lemma ExtrDisc.cover_dense :
   cover_dense proetale_topology.{u} ExtrDisc_to_Profinite.{u} :=
   cover_dense.mk $ λ U,
 begin

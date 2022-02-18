@@ -10,7 +10,8 @@ open category_theory
 open_locale nnreal
 
 -- move me
-def ProFiltPseuNormGrpWithTinv₁.to_CompHausFiltPseuNormGrp₁ (r' : ℝ≥0) [fact (0 < r')] :
+@[simps]
+def ProFiltPseuNormGrpWithTinv₁.to_CompHausFiltPseuNormGrp₁ (r' : ℝ≥0) :
   ProFiltPseuNormGrpWithTinv₁ r' ⥤ CompHausFiltPseuNormGrp₁ :=
 { obj := λ M,
   { M := M,

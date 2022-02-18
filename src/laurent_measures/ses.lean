@@ -23,17 +23,17 @@ open laurent_measures pseudo_normed_group comphaus_filtered_pseudo_normed_group
   comphaus_filtered_pseudo_normed_group_hom
 open_locale big_operators nnreal
 
-section homs
+section phi_to_hom
 
-parameter {p : ℝ≥0}
+-- parameter {p : ℝ≥0}
+-- variables [fact(0 < p)] [fact (p < 1)]
+-- local notation `r` := @r p
+-- local notation `ℳ` := real_measures p
 
-variables [fact(0 < p)] [fact (p < 1)]
-
+variable {r : ℝ≥0}
+variables [fact (0 < r)]
 variable {S : Fintype}
 
-
-local notation `r` := @r p
-local notation `ℳ` := real_measures p
 local notation `ℒ` := laurent_measures r
 local notation `ϖ` := Fintype.of punit
 
@@ -88,12 +88,39 @@ instance : add_comm_group (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) 
 variable (S)
 
 def Φ : comphaus_filtered_pseudo_normed_group_hom (ℒ S) (ℒ S) := 2 • shift (-1) - id
-
-variable {S}
+-- variable {S}
 
 lemma Φ_eq_ϕ (F : ℒ S) : Φ S F = ϕ F := rfl
 
+end phi_to_hom
+
 section theta
+
+open theta
+
+parameter (p : ℝ≥0)
+local notation `r` := @r p
+local notation `ℳ` := real_measures p
+local notation `ℒ` := laurent_measures r
+
+
+variable {S : Fintype}
+
+local notation `ϖ` := Fintype.of punit
+
+def seval_ℒ_c (c : ℝ≥0) (s : S) : filtration (ℒ S) c → (filtration (ℒ ϖ) c) :=
+λ F,
+  begin
+  refine ⟨seval S s F, _⟩,
+  have hF := F.2,
+  simp only [filtration, set.mem_set_of_eq, seval, nnnorm, laurent_measures.coe_mk,
+    fintype.univ_punit, finset.sum_singleton] at ⊢ hF,
+  have := finset.sum_le_sum_of_subset (finset.singleton_subset_iff.mpr $ finset.mem_univ_val _),
+  rw finset.sum_singleton at this,
+  apply le_trans this hF,
+end
+
+variable [fact (0 < p)]
 
 lemma θ_zero : θ (0 : ℒ S) = 0 :=
 begin
@@ -101,6 +128,8 @@ begin
   funext,
   simp only [zero_apply, int.cast_zero, zero_mul, tsum_zero, real_measures.zero_apply],
 end
+
+variable [fact (p < 1)]
 
 lemma θ_add (F G : ℒ S) : θ (F + G) = θ F + θ G :=
 begin
@@ -112,8 +141,8 @@ begin
     funext,
     rw add_mul },
   all_goals {apply summable_of_summable_norm, simp_rw [normed_field.norm_mul, normed_field.norm_inv, normed_field.norm_zpow, real.norm_two, ← inv_zpow₀, inv_eq_one_div] },
-  exact aux_thm69.summable_smaller_radius_norm F.d r_half (F.summable s) (lt_d_eq_zero _ _),
-  exact aux_thm69.summable_smaller_radius_norm G.d r_half (G.summable s) (lt_d_eq_zero _ _),
+  exact aux_thm69.summable_smaller_radius_norm F.d r_half (F.summable s) (λ n, lt_d_eq_zero _ _ _),
+  exact aux_thm69.summable_smaller_radius_norm G.d r_half (G.summable s) (λ n, lt_d_eq_zero _ _ _),
 end
 
 --for mathlib
@@ -133,8 +162,8 @@ begin
 end
 
 
-lemma aux_bound (F : ℒ S) (s : S) : ∀ (b : ℤ), ∥(F s b : ℝ) ∥₊ ^ (p : ℝ) * (2⁻¹ ^ (p : ℝ)) ^ (b : ℝ) ≤
-∥F s b∥₊ * r ^ b :=
+lemma aux_bound (F : ℒ S) (s : S) : ∀ (b : ℤ), ∥(F s b : ℝ) ∥₊ ^ (p : ℝ) *
+  (2⁻¹ ^ (p : ℝ)) ^ (b : ℝ) ≤ ∥F s b∥₊ * r ^ b :=
 begin
   intro b,
   rw [inv_eq_one_div, nnreal.rpow_int_cast],
@@ -176,13 +205,14 @@ begin
   apply finset.sum_le_sum,
   intros s hs,
   apply tsum_le_tsum,
-  exact aux_bound F s,
+  exact aux_bound p F s,
   refine nnreal.summable_of_le _ (F.2 s),
-  exacts [aux_bound F s, F.2 s],
+  exacts [aux_bound p F s, F.2 s],
 end
 
+
 lemma θ_bound' :  ∀ c : ℝ≥0, ∀ F : (ℒ S), F ∈ filtration (ℒ S) c → (θ F) ∈ filtration (ℳ S)
-  c := by {simpa [one_mul] using θ_bound}
+  c :=by { simpa [one_mul] using (θ_bound p)}
 
 def θ_to_add : (ℒ S) →+ (ℳ S) :=
 { to_fun := λ F, θ F,
@@ -192,25 +222,6 @@ def θ_to_add : (ℒ S) →+ (ℳ S) :=
 variable (S)
 
 open theta metric
-
--- def sbox_ℒ_c (c : ℝ≥0) := filtration (laurent_measures r (Fintype.of punit)) c
-
-
--- instance (c : ℝ≥0) : topological_space (sbox_ℒ_c c) := by refine
---   cofinite_topology ↥(filtration (laurent_measures r (Fintype.of punit)) c)
-
-
-def seval_ℒ_c (c : ℝ≥0) (s : S) : filtration (ℒ S) c → (filtration (ℒ ϖ) c) :=
-λ F,
-  begin
-  refine ⟨seval S s F, _⟩,
-  have hF := F.2,
-  simp only [filtration, set.mem_set_of_eq, seval, nnnorm, laurent_measures.coe_mk,
-    fintype.univ_punit, finset.sum_singleton] at ⊢ hF,
-  have := finset.sum_le_sum_of_subset (finset.singleton_subset_iff.mpr $ finset.mem_univ_val _),
-  rw finset.sum_singleton at this,
-  apply le_trans this hF,
-end
 
 def seval_ℳ_c (c : ℝ≥0) (s : S) : filtration (ℳ S) c → (filtration (ℳ ϖ) c) :=
 λ x,
@@ -237,27 +248,34 @@ begin
   apply le_trans this hx,
 end
 
+-- example (ι : Type*) (X Y : ι → Type*) (f : Πi, X → Y) (hX : ∀ i:ι, topological_space (X i))
+--   (hY : ∀ i:ι, topological_space (Y i))
+
 lemma inducing_cast_ℳ (c : ℝ≥0) : inducing (cast_ℳ_c S c) :=
 begin
   fconstructor,
+  dsimp [real_measures.topological_space],
   sorry,
+  -- simp,
+  -- sorry,
 end
 
 -- lemma cont_cast_ℳ (c : ℝ≥0) : continuous (cast_ℳ_c S c) := sorry
 def equiv_ball_ℳ (c : ℝ≥0) : filtration (ℳ ϖ) c ≃ₜ {x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c} := sorry
 
-lemma seval_cast_ℳ_commute (c : ℝ≥0) (s : S) : --(x : filtration (ℳ S) c) :
+lemma seval_cast_ℳ_commute (c : ℝ≥0) (s : S) :
  (λ x, (cast_ℳ_c S c x s)) = (equiv_ball_ℳ c) ∘ seval_ℳ_c S c s := sorry
 
 lemma seval_cast_ℳ_commute' {X : Type*} (c : ℝ≥0) {f : X → filtration (ℳ S) c} (s : S)  :
  (λ x, (cast_ℳ_c S c (f x) s)) = (equiv_ball_ℳ c) ∘ seval_ℳ_c S c s ∘ f :=
  begin
   ext z,
-  have h_commute := @seval_cast_ℳ_commute p _ _ S c s,
+  have h_commute := @seval_cast_ℳ_commute p S _ _ c s,
   have := congr_fun h_commute (f z),
   simp only at this,
   rw this,
  end
+
 
 -- lemma cont_iff_comp_cast_ℳ (c : ℝ≥0) {X : Type*} [topological_space X] (f : X → filtration (ℳ S) c) :
 --   continuous (cast_ℳ_c S c ∘ f) → continuous f :=
@@ -268,14 +286,22 @@ lemma seval_cast_ℳ_commute' {X : Type*} (c : ℝ≥0) {f : X → filtration (�
 ---
 
 
-lemma cont_seval_ℒ_c (c : ℝ≥0) (s : S) : continuous (seval_ℒ_c S c s) := sorry
+lemma continuous_seval_ℒ_c (c : ℝ≥0) (s : S) : continuous (seval_ℒ_c c s) :=
+begin
+  rw continuous_iff_is_closed,
+  intros K hK,
+  rw is_closed_induced_iff at ⊢ hK,
+  sorry,
+  -- apply continuous_iff_open,
+end
 
 --**[FAE]** Useful?
 -- lemma cont_seval_ℳ_c (c : ℝ≥0) (s : S) : continuous (seval_ℳ_c S c s) := sorry
 
 open metric
 
-lemma cont_iff_for_all_closed (c : ℝ≥0) {X : Type*} [topological_space X]
+--**[FAE]** Probably needed, but check before proving it!
+lemma continuous_iff_for_all_closed (c : ℝ≥0) {X : Type*} [topological_space X]
   (f : X → closed_ball (0 : ℝ) c) (H : ∀ a : ℝ≥0, ∀ (H : a ≤ c), is_closed
     (f⁻¹' ((closed_ball ⟨(0 : ℝ), (mem_closed_ball_self c.2)⟩ a) : set ((closed_ball (0 : ℝ) c)))))
     : continuous f :=
@@ -309,11 +335,11 @@ def θ_c (c : ℝ≥0) (T : Fintype) : (filtration (laurent_measures r T) c) →
 begin
   intro f,
   rw [← one_mul c],
-  use ⟨θ f, θ_bound c f f.2⟩,
+  use ⟨θ f, θ_bound p c f f.2⟩,
 end
 
 lemma seval_ℒ_ℳ_commute (c : ℝ≥0) (s : S) :
-  (θ_c c (Fintype.of punit)) ∘ (seval_ℒ_c S c s) = (seval_ℳ_c S c s) ∘ (θ_c c S) :=
+  (θ_c c (Fintype.of punit)) ∘ (seval_ℒ_c c s) = (seval_ℳ_c S c s) ∘ (θ_c c S) :=
 begin
   ext F x,
   simp only [seval_ℳ_c, seval_ℒ_c, seval, θ_c, one_mul, subtype.coe_mk, eq_mpr_eq_cast,
@@ -325,14 +351,14 @@ lemma continuous_of_seval_comp_continuous (c : ℝ≥0) {X : Type*} [topological
   {f : X → (filtration (ℳ S) c)} : (∀ s, continuous ((seval_ℳ_c S c s) ∘ f)) → continuous f :=
 begin
   intro H,
-  replace H : ∀ (s : S), continuous (λ x : X, (cast_ℳ_c S c) (f x) s),
+  replace H : ∀ (s : S), continuous (λ x : X, (cast_ℳ_c p S c) (f x) s),
   { intro s,
-    rw @seval_cast_ℳ_commute' p _ _ S X c f s,
-    apply ((equiv_ball_ℳ c).comp_continuous_iff).mpr,
+    rw @seval_cast_ℳ_commute' p S _ _ X c f s,
+    apply ((equiv_ball_ℳ p c).comp_continuous_iff).mpr,
     exact H s },
   rw ← continuous_pi_iff at H,
-  convert_to (continuous (λ x, cast_ℳ_c S c (f x))) using 0,
-  exacts [eq_iff_iff.mpr (inducing_cast_ℳ S c).continuous_iff, H],
+  convert_to (continuous (λ x, cast_ℳ_c p S c (f x))) using 0,
+  exacts [eq_iff_iff.mpr (inducing_cast_ℳ p S c).continuous_iff, H],
   end
 
 lemma continuous_θ_c (c : ℝ≥0) : continuous (θ_c c S) :=
@@ -340,7 +366,7 @@ begin
   apply continuous_of_seval_comp_continuous,
   intro s,
   rw ← seval_ℒ_ℳ_commute,
-  refine continuous.comp _ (cont_seval_ℒ_c S c s),
+  refine continuous.comp _ (continuous_seval_ℒ_c p S c s),
   sorry,
 
 
@@ -388,20 +414,8 @@ begin
 end
 
 
-def Θ : comphaus_filtered_pseudo_normed_group_hom (ℒ S) (ℳ S) :=
-mk_of_strict (θ_to_add)
-begin
-  intro c,
-  use θ_bound' c,
-  convert continuous_θ_c S c,
-  simp only [θ_c, one_mul, eq_mpr_eq_cast, set_coe_cast],
-  refl,
-end
-
 variable {S}
 
 end theta
-
-end homs
 
 end laurent_measures_ses

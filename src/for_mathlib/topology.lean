@@ -9,7 +9,7 @@ variables {α β : Type*} [topological_space α] [topological_space β]
 include e
 
 --TODO: Golf and add to mathlib
-protected def totally_disconnected_space : totally_disconnected_space β :=
+protected lemma totally_disconnected_space : totally_disconnected_space β :=
 begin
   constructor,
   rintros A - hA,

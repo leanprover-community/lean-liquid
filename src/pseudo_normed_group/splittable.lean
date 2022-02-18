@@ -8,7 +8,7 @@ namespace pseudo_normed_group
 
 section splittable
 
-class splittable (M : Type*) [pseudo_normed_group M] (N : ℕ) (d : ℝ≥0) :=
+class splittable (M : Type*) [pseudo_normed_group M] (N : ℕ) (d : ℝ≥0) : Prop :=
 (exists_sum : ∀ (c : ℝ≥0) (x : M) (hx : x ∈ filtration M c),
   ∃ y : fin N → M, (x = ∑ i, y i) ∧ (∀ i, y i ∈ filtration M (c/N + d)))
 

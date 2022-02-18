@@ -148,24 +148,24 @@ structure pBanach' (V : Type*) (p : ℝ) [fact (0 < p)] [fact (p ≤ 1)] [add_co
  [uniform_space V] [has_continuous_smul ℝ V] [topological_add_group V] [complete_space V] :=
 (exists_p_norm : nonempty (has_p_norm V p))
 
-noncomputable
-lemma pBanach'_is_qBanach' (V: Type*) (p : ℝ) [fact (0 < p)] [fact (p ≤ 1)] (q : ℝ) [fact (0 < q)]
-  [fact (q ≤ 1)] [add_comm_group V] [module ℝ V] [uniform_space V] [has_continuous_smul ℝ V]
-  [topological_add_group V] [complete_space V] (hp : pBanach' V p) : pBanach' V q :=
-begin
-  cases hp,
-  let Hp_norm := hp.some,
-  let ψ := Hp_norm.norm,
-  use λ v : V, (ψ v)^(q/p),--[FAE] Why λ v, ((h_p_norm.norm) v)^(q/p) does not work?
-  intros α v,
-  dsimp only [ψ],
-  sorry,
-  sorry,
+-- noncomputable
+-- def pBanach'_is_qBanach' (V: Type*) (p : ℝ) [fact (0 < p)] [fact (p ≤ 1)] (q : ℝ) [fact (0 < q)]
+--   [fact (q ≤ 1)] [add_comm_group V] [module ℝ V] [uniform_space V] [has_continuous_smul ℝ V]
+--   [topological_add_group V] [complete_space V] (hp : pBanach' V p) : pBanach' V q :=
+-- begin
+--   cases hp,
+--   let Hp_norm := hp.some,
+--   let ψ := Hp_norm.norm,
+--   use λ v : V, (ψ v)^(q/p),--[FAE] Why λ v, ((h_p_norm.norm) v)^(q/p) does not work?
+--   intros α v,
+--   dsimp only [ψ],
+--   sorry,
+--   sorry,
   -- rw [Hp_norm.p_norm α v, smul_eq_mul, real.mul_rpow, ← real.rpow_mul, mul_div_cancel'],
   -- exacts [refl _, ne_of_gt (fact.out _), abs_nonneg α,
   --   (real.rpow_nonneg_of_nonneg (abs_nonneg α) p), hp_nonneg_norm v,
   --   (λ _, (real.rpow_nonneg_of_nonneg (hp_nonneg_norm _) _))],
-end
+-- end
 
 namespace pBanach
 

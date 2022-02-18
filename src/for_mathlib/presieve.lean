@@ -25,7 +25,7 @@ def index_of_arrows {ι} {B Y} {X : ι → C} {f : Π i, X i ⟶ B} {g : Y ⟶ B
   (h : of_arrows X f g) : ι :=
 ((mem_of_arrows_iff X f g).mp h).some
 
-def eq_obj_of_arrows {ι} {B Y} {X : ι → C} {f : Π i, X i ⟶ B} {g : Y ⟶ B}
+lemma eq_obj_of_arrows {ι} {B Y} {X : ι → C} {f : Π i, X i ⟶ B} {g : Y ⟶ B}
   (h : of_arrows X f g) : Y = X (index_of_arrows h) :=
 ((mem_of_arrows_iff X f g).mp h).some_spec.some
 
