@@ -25,7 +25,7 @@ universe variables u u₀ uₘ
 namespace thm95
 
 variables (BD : breen_deligne.data) (κ : ℕ → ℝ≥0) [BD.suitable κ]
-variables (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' < 1)]
+variables (r r' : ℝ≥0)
 variables (V : SemiNormedGroup.{u})
 variables (Λ : PolyhedralLattice.{u}) (M : ProFiltPseuNormGrpWithTinv.{u} r')
 variables (N : ℕ) [fact (0 < N)] (n : ℕ)
@@ -89,7 +89,12 @@ lemma CLCFP'_obj_map (M₁ : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ) (c₁ c₂ :
       exact (CLCFP.res V r' c₁.unop c₂.unop n).app M₁) :=
 rfl
 
-def Cech_nerve' : cosimplicial_object.augmented (ℝ≥0ᵒᵖ ⥤ SemiNormedGroup) :=
+section
+
+variables [fact (0 < r')] [fact (r' ≤ 1)]
+
+def Cech_nerve' :
+  cosimplicial_object.augmented (ℝ≥0ᵒᵖ ⥤ SemiNormedGroup) :=
 (cosimplicial_object.augmented.whiskering_obj.{u} _ _ (CLCFP' r' V n)).obj
   (Cech_nerve r' Λ M N)
 
@@ -706,6 +711,8 @@ end
 
 end
 
+end
+
 namespace col_complex_rescaled
 
 open polyhedral_lattice (Hom)
@@ -714,8 +721,10 @@ open PolyhedralLattice (cosimplicial)
 instance move_pls (r' : ℝ≥0) (c : ℝ≥0ᵒᵖ) : fact (unop (r'.MulLeft.op.obj c) ≤ r' * unop c) :=
 ⟨le_rfl⟩
 
-instance move_pls2 (c : ℝ≥0ᵒᵖ) : fact (unop (r'.MulLeft.op.obj c) ≤ unop c) :=
+instance move_pls2 [fact (r' < 1)] (c : ℝ≥0ᵒᵖ) : fact (unop (r'.MulLeft.op.obj c) ≤ unop c) :=
 by { dsimp [nnreal.MulLeft], apply_instance }
+
+variables [fact (0 < r)] [fact (0 < r')] [fact (r' < 1)]
 
 def T_inv_sub_Tinv_f_succ [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) (i : ℕ) :
   ((col_complex_rescaled.{u} r' V Λ M N n).obj c).X (i + 1) ⟶
@@ -847,6 +856,8 @@ namespace double_complex
 open polyhedral_lattice (Hom)
 
 local attribute [semireducible] CLCFPTinv CLCFPTinv₂ CLCFP -- CLCTinv
+
+variables [fact (0 < r)] [fact (0 < r')] [fact (r' < 1)]
 
 @[simps obj map]
 def col'_aux [normed_with_aut r V] (n : ℕ) : system_of_complexes :=
@@ -1289,3 +1300,16 @@ begin
 end
 
 end thm95
+
+
+.
+/- The `unused_arguments` linter reports: -/
+/- UNUSED ARGUMENTS. -/
+#check @thm95.CLCFP' /- argument 2: [_inst_3 : fact (0 < r')], argument 3: [_inst_5 : fact (r' < 1)] -/
+#check @thm95.FLC_arrow_hom' /- argument 2: [_inst_3 : fact (0 < r')], argument 3: [_inst_5 : fact (r' < 1)] -/
+#check @thm95.col_complex_rescaled.move_pls2 /- argument 2: [_inst_3 : fact (0 < r')] -/
+#check @thm95.col_complex_rescaled.T_inv_sub_Tinv_f_succ /- argument 5: [_inst_4 : fact (r < r')] -/
+#check @thm95.col_exact'_aux1 /- argument 3: [_inst_1 : BD.suitable κ] -/
+#check @thm95.col_exact'_aux2 /- argument 3: [_inst_1 : BD.suitable κ] -/
+
+#lint
