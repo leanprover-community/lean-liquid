@@ -98,16 +98,11 @@ begin
   exact fact.out _
 end
 
-/--  Let `F : ℒ S` be a Laurent measure.  `laurent_measures.d` chooses a bound `d ∈ ℤ` for `F`,
-such that, for all `s : S`, the sequence `F s` is zero from `d-1` and below. -/
-def laurent_measures.d (F : ℒ S) : ℤ := (exists_bdd_filtration r_pos r_lt_one F).some
-
-lemma lt_d_eq_zero (F : ℒ S) (s : S) (n : ℤ) :
-  n < F.d → F s n = 0 := (exists_bdd_filtration r_pos r_lt_one F).some_spec s n
+instance r_lt_one' : fact (r < 1) := ⟨r_lt_one⟩
 
 lemma laurent_measures.summable_half [fact (p < 1)] (F : ℒ S) (s : S) :
   summable (λ n, ((F s n) : ℝ) * (1 / 2) ^ n) :=
-aux_thm69.summable_smaller_radius F.d (F.summable s) (lt_d_eq_zero _ _) r_half
+aux_thm69.summable_smaller_radius F.d (F.summable s) (λ n hn, lt_d_eq_zero _ _ _ hn) r_half
 
 lemma injective_ϕ (F : ℒ S) (H : ϕ F = 0) : F = 0 :=
 begin
@@ -121,8 +116,8 @@ begin
     refl },
   ext s n,
   apply int.induction_on' n (F.d - 1),
-  { apply lt_d_eq_zero _ _ (F.d - 1),
-    simp only [sub_lt_self_iff, zero_lt_one] },
+  { refine lt_d_eq_zero _ _ (F.d - 1) _,
+    simp only [sub_lt_self_iff, zero_lt_one], },
   { intros k h hk₀,
     simp [← H (k + 1) s, add_sub_cancel, hk₀, mul_zero] },
   { intros k h hk₀,
@@ -188,7 +183,7 @@ begin
         int.cast_two],
       rw ← sub_nonneg at h_event,
       rw [sum_range_sum_Icc (coe ∘ (F s)) n F.d h_event,
-        sum_Icc_sum_tail (F s) n F.d _ (lt_d_eq_zero F s) h_event],
+        sum_Icc_sum_tail (F s) n F.d _ (λ n, lt_d_eq_zero F s _) h_event],
       { rw [← (abs_eq_self.mpr (inv_nonneg.mpr (@zero_le_two ℝ _))), ← real.norm_eq_abs,
           ← normed_field.norm_mul, real.norm_eq_abs, real.norm_eq_abs, abs_eq_abs,
           ← (sub_add_cancel n 1), (sub_eq_add_neg n 1), (add_assoc n _), (add_comm n _),
@@ -213,7 +208,7 @@ begin
     rw [← h_θ, norm_eq_zero],
     exact dif_neg (not_le_of_gt hn) },
   simp only [←nnreal.summable_coe, nonneg.coe_mul, _root_.coe_nnnorm, coe_zpow, summable_congr h_θ],
-  exact aux_thm69.summable_convolution r_half (F s) F.d (F.summable s) (lt_d_eq_zero F s) this
+  exact aux_thm69.summable_convolution r_half (F s) F.d (F.summable s) (λ n, lt_d_eq_zero F s _) this
 end
 
 theorem θ_ϕ_exact (F : ℒ S) (hF : θ F = 0) : ∃ G, ϕ G = F :=
