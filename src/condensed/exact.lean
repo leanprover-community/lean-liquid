@@ -4,6 +4,8 @@ import for_mathlib.AddCommGroup.exact
 import condensed.ab
 import pseudo_normed_group.bounded_limits
 import condensed.extr.lift_comphaus
+import condensed.projective_resolution
+import condensed.kernel_comparison
 
 .
 
@@ -61,11 +63,51 @@ namespace condensed
 
 open CompHausFiltPseuNormGrp₁
 
+lemma zero_iff_ExtrDisc {A B : Condensed.{u} Ab.{u+1}} (f : A ⟶ B) :
+  f = 0 ↔ (∀ S : ExtrDisc, f.val.app (op S.val) = 0) :=
+begin
+  split,
+  { rintros ⟨rfl⟩, simp },
+  { intros h,
+    apply (Condensed_ExtrSheafProd_equiv Ab).functor.map_injective,
+    apply (ExtrSheafProd_to_presheaf Ab).map_injective,
+    ext : 2,
+    apply h }
+end
+
 lemma exact_iff_ExtrDisc {A B C : Condensed.{u} Ab.{u+1}} (f : A ⟶ B) (g : B ⟶ C) :
   exact f g ↔ ∀ (S : ExtrDisc),
     exact (f.1.app $ ExtrDisc_to_Profinite.op.obj (op S))
           (g.1.app $ ExtrDisc_to_Profinite.op.obj (op S)) :=
-sorry
+begin
+  simp only [abelian.exact_iff],
+  split,
+  { rintros ⟨h1,h2⟩ S,
+    split,
+    { rw zero_iff_ExtrDisc at h1, apply h1 },
+    { apply_fun (λ e, (kernel_iso g S).hom ≫ e ≫ (cokernel_iso f S).hom),
+      swap,
+      { intros a b h,
+        dsimp at h,
+        apply_fun (λ e, (kernel_iso g S).inv ≫ e ≫ (cokernel_iso f S).inv) at h,
+        simpa using h },
+      dsimp,
+      simp only [category.assoc, zero_comp, comp_zero],
+      erw kernel_iso_hom_assoc, erw cokernel_iso_hom,
+      simp only [← functor.map_comp, h2],
+      simpa } },
+  { intros h,
+    split,
+    { rw zero_iff_ExtrDisc, intros S, simpa using (h S).1 },
+    { rw zero_iff_ExtrDisc, intros S,
+      dsimp,
+      replace h := (h S).2,
+      apply_fun (λ e, (kernel_iso g S).hom ≫ e ≫ (cokernel_iso f S).hom) at h,
+      simp only [category.assoc, zero_comp, comp_zero] at h,
+      erw kernel_iso_hom_assoc at h, erw cokernel_iso_hom at h,
+      exact h
+    } }
+end
 
 open comphaus_filtered_pseudo_normed_group
 
