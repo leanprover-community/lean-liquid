@@ -40,14 +40,12 @@ lemma to_Lbar_surjective : function.surjective (to_Lbar r' S) :=
 begin
   intro G,
   refine ⟨⟨λ s n, G s n.to_nat, λ s, _⟩, _⟩,
-  { refine nnreal.summable_coe.mp ((summable_iff_on_nat_less 0 (λ n n0, _)).mpr _),
+  { refine (nnreal.summable_iff_on_nat_less 0 (λ n n0, _)).mpr _,
     { simp [int.to_nat_of_nonpos n0.le] },
-    { convert (nnreal.summable_coe.mpr (G.summable' s)),
-      ext,
-      simp only [int.norm_eq_abs, int.to_nat_coe_nat, zpow_coe_nat, nonneg.coe_mul,
-        _root_.coe_nnnorm, nnreal.coe_pow, nnreal.coe_nat_cast],
-      exact congr_arg (λ y, y * (r' : ℝ) ^ x) (by exact_mod_cast (G s x).abs_eq_nat_abs) } },
-  { ext s (_|n), { exact (G.coeff_zero s).symm }, { dsimp, exact if_neg n.succ_ne_zero } }
+    { simpa only [← nnreal.coe_nat_abs] using G.summable' s } },
+  { ext s (_|n),
+    { exact (G.coeff_zero s).symm },
+    { show ite (n.succ = 0) 0 (G s (n + 1)) = G s n.succ, from if_neg n.succ_ne_zero } }
 end
 
 lemma nnnorm_to_Lbar (F : laurent_measures r' S) : ∥to_Lbar r' S F∥₊ ≤ ∥F∥₊ :=
