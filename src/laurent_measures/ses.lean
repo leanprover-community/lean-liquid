@@ -23,17 +23,17 @@ open laurent_measures pseudo_normed_group comphaus_filtered_pseudo_normed_group
   comphaus_filtered_pseudo_normed_group_hom
 open_locale big_operators nnreal
 
-section homs
+section phi_to_hom
 
-parameter {p : ℝ≥0}
+-- parameter {p : ℝ≥0}
+-- variables [fact(0 < p)] [fact (p < 1)]
+-- local notation `r` := @r p
+-- local notation `ℳ` := real_measures p
 
-variables [fact(0 < p)] [fact (p < 1)]
-
+variable {r : ℝ≥0}
+variables [fact (0 < r)] [fact (r < 1)]
 variable {S : Fintype}
 
-
-local notation `r` := @r p
-local notation `ℳ` := real_measures p
 local notation `ℒ` := laurent_measures r
 local notation `ϖ` := Fintype.of punit
 
@@ -89,11 +89,23 @@ variable (S)
 
 def Φ : comphaus_filtered_pseudo_normed_group_hom (ℒ S) (ℒ S) := 2 • shift (-1) - id
 
-variable {S}
+-- variable {S}
 
 lemma Φ_eq_ϕ (F : ℒ S) : Φ S F = ϕ F := rfl
 
+end phi_to_hom
+
 section theta
+
+
+parameter (p : ℝ≥0)
+variables [fact (0 < p)] [fact (p < 1)]
+local notation `r` := @r p
+local notation `ℳ` := real_measures p
+local notation `ℒ` := laurent_measures r
+
+
+variable {S : Fintype}
 
 lemma θ_zero : θ (0 : ℒ S) = 0 :=
 begin
@@ -133,8 +145,8 @@ begin
 end
 
 
-lemma aux_bound (F : ℒ S) (s : S) : ∀ (b : ℤ), ∥(F s b : ℝ) ∥₊ ^ (p : ℝ) * (2⁻¹ ^ (p : ℝ)) ^ (b : ℝ) ≤
-∥F s b∥₊ * r ^ b :=
+lemma aux_bound (F : ℒ S) (s : S) : ∀ (b : ℤ), ∥(F s b : ℝ) ∥₊ ^ (p : ℝ) *
+  (2⁻¹ ^ (p : ℝ)) ^ (b : ℝ) ≤ ∥F s b∥₊ * r ^ b :=
 begin
   intro b,
   rw [inv_eq_one_div, nnreal.rpow_int_cast],
@@ -176,13 +188,14 @@ begin
   apply finset.sum_le_sum,
   intros s hs,
   apply tsum_le_tsum,
-  exact aux_bound F s,
+  exact aux_bound p F s,
   refine nnreal.summable_of_le _ (F.2 s),
-  exacts [aux_bound F s, F.2 s],
+  exacts [aux_bound p F s, F.2 s],
 end
 
+
 lemma θ_bound' :  ∀ c : ℝ≥0, ∀ F : (ℒ S), F ∈ filtration (ℒ S) c → (θ F) ∈ filtration (ℳ S)
-  c := by {simpa [one_mul] using θ_bound}
+  c :=by { simpa [one_mul] using (θ_bound p)}
 
 def θ_to_add : (ℒ S) →+ (ℳ S) :=
 { to_fun := λ F, θ F,
@@ -198,7 +211,7 @@ open theta metric
 
 -- instance (c : ℝ≥0) : topological_space (sbox_ℒ_c c) := by refine
 --   cofinite_topology ↥(filtration (laurent_measures r (Fintype.of punit)) c)
-
+local notation `ϖ` := Fintype.of punit
 
 def seval_ℒ_c (c : ℝ≥0) (s : S) : filtration (ℒ S) c → (filtration (ℒ ϖ) c) :=
 λ F,
@@ -309,7 +322,7 @@ def θ_c (c : ℝ≥0) (T : Fintype) : (filtration (laurent_measures r T) c) →
 begin
   intro f,
   rw [← one_mul c],
-  use ⟨θ f, θ_bound c f f.2⟩,
+  use ⟨θ f, θ_bound p c f f.2⟩,
 end
 
 lemma seval_ℒ_ℳ_commute (c : ℝ≥0) (s : S) :
@@ -325,14 +338,14 @@ lemma continuous_of_seval_comp_continuous (c : ℝ≥0) {X : Type*} [topological
   {f : X → (filtration (ℳ S) c)} : (∀ s, continuous ((seval_ℳ_c S c s) ∘ f)) → continuous f :=
 begin
   intro H,
-  replace H : ∀ (s : S), continuous (λ x : X, (cast_ℳ_c S c) (f x) s),
+  replace H : ∀ (s : S), continuous (λ x : X, (cast_ℳ_c p S c) (f x) s),
   { intro s,
     rw @seval_cast_ℳ_commute' p _ _ S X c f s,
-    apply ((equiv_ball_ℳ c).comp_continuous_iff).mpr,
+    apply ((equiv_ball_ℳ p c).comp_continuous_iff).mpr,
     exact H s },
   rw ← continuous_pi_iff at H,
-  convert_to (continuous (λ x, cast_ℳ_c S c (f x))) using 0,
-  exacts [eq_iff_iff.mpr (inducing_cast_ℳ S c).continuous_iff, H],
+  convert_to (continuous (λ x, cast_ℳ_c p S c (f x))) using 0,
+  exacts [eq_iff_iff.mpr (inducing_cast_ℳ p S c).continuous_iff, H],
   end
 
 lemma continuous_θ_c (c : ℝ≥0) : continuous (θ_c c S) :=
@@ -340,7 +353,7 @@ begin
   apply continuous_of_seval_comp_continuous,
   intro s,
   rw ← seval_ℒ_ℳ_commute,
-  refine continuous.comp _ (cont_seval_ℒ_c S c s),
+  refine continuous.comp _ (cont_seval_ℒ_c p S c s),
   sorry,
 
 
@@ -392,8 +405,8 @@ def Θ : comphaus_filtered_pseudo_normed_group_hom (ℒ S) (ℳ S) :=
 mk_of_strict (θ_to_add)
 begin
   intro c,
-  use θ_bound' c,
-  convert continuous_θ_c S c,
+  use θ_bound' p c,
+  convert continuous_θ_c p S c,
   simp only [θ_c, one_mul, eq_mpr_eq_cast, set_coe_cast],
   refl,
 end
@@ -402,6 +415,6 @@ variable {S}
 
 end theta
 
-end homs
+-- end homs
 
 end laurent_measures_ses

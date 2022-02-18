@@ -97,9 +97,10 @@ end phi
 section mem_exact
 
 parameter {p : ℝ≥0}
-variable [fact(0 < p)]
 
 def r : ℝ≥0 := (1 / 2) ^ (p:ℝ)
+
+variable [fact(0 < p)]
 
 lemma r_lt_one : r < 1 :=
 begin
