@@ -212,7 +212,7 @@ lemma _root_.strict_pseudo_normed_group_hom.level_id
   (strict_pseudo_normed_group_hom.id M).level c = id := by { ext, refl }
 
 @[simp]
-def _root_.strict_pseudo_normed_group_hom.level_comp {M N L : Type*}
+lemma _root_.strict_pseudo_normed_group_hom.level_comp {M N L : Type*}
   [pseudo_normed_group M] [pseudo_normed_group N] [pseudo_normed_group L]
   (f : strict_pseudo_normed_group_hom M N) (g : strict_pseudo_normed_group_hom N L) (c) :
   (f.comp g).level c = g.level c ∘ f.level c := by { ext, refl }

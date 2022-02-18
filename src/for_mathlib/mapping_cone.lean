@@ -349,7 +349,7 @@ instance (f : A ⟶ B) (i : ℤ) : split_mono ((termwise_split_mono_lift f).f i)
 
 -- generalize to epi
 @[simp]
-def termwise_split_mono_lift_desc (f : A ⟶ B) :
+lemma termwise_split_mono_lift_desc (f : A ⟶ B) :
   termwise_split_mono_lift f ≫ termwise_split_mono_desc f = f :=
 by { ext, simp }
 

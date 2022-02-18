@@ -20,7 +20,7 @@ structure hom (X Y : ExtrDisc) := mk :: (val : X.val ⟶ Y.val)
 def of (X : Profinite) [projective X] : ExtrDisc := ⟨X⟩
 
 @[simp]
-def of_val (X : Profinite) [projective X] : (of X).val = X := rfl
+lemma of_val (X : Profinite) [projective X] : (of X).val = X := rfl
 
 @[simps]
 instance : category ExtrDisc :=
@@ -142,7 +142,7 @@ begin
 end
 
 -- move this
-lemma _root_.Profinite.empty_is_initial : limits.is_initial Profinite.empty.{u} :=
+def _root_.Profinite.empty_is_initial : limits.is_initial Profinite.empty.{u} :=
 @limits.is_initial.of_unique.{u} _ _ _ (λ Y, ⟨⟨Profinite.empty.elim _⟩, λ f, by { ext, cases x, }⟩)
 
 @[simps]
@@ -163,7 +163,7 @@ def empty.elim (X : ExtrDisc) : empty ⟶ X :=
 ⟨Profinite.empty.elim _⟩
 
 @[ext]
-def empty.hom_ext {X : ExtrDisc} (f g : empty ⟶ X) : f = g :=
+lemma empty.hom_ext {X : ExtrDisc} (f g : empty ⟶ X) : f = g :=
 by { ext x, cases x }
 
 def sigma {ι : Type u} [fintype ι] (X : ι → ExtrDisc) : ExtrDisc :=
@@ -227,9 +227,10 @@ def finite_product_condition_for_types (F : ExtrDisc.{u}ᵒᵖ ⥤ Type w) : Pro
   ∀ (ι : Type u) [fintype ι] (X : ι → ExtrDisc),
 begin
   resetI,
-  let t : Π i, F.obj (op (sigma X)) → F.obj (op (X i)) := λ i, F.map (sigma.ι X i).op,
-  let tt : F.obj (op (sigma X)) → Π i, F.obj (op (X i)) := λ x i, t i x,
-  exact function.bijective tt
+  dsimp_result {
+    let t : Π i, F.obj (op (sigma X)) → F.obj (op (X i)) := λ i, F.map (sigma.ι X i).op,
+    let tt : F.obj (op (sigma X)) → Π i, F.obj (op (X i)) := λ x i, t i x,
+    exact function.bijective tt }
 end
 
 def equalizer_condition [limits.has_equalizers C] (F : ExtrDisc.{u}ᵒᵖ ⥤ C) : Prop :=
@@ -245,6 +246,7 @@ def equalizer_condition [limits.has_equalizers C] (F : ExtrDisc.{u}ᵒᵖ ⥤ C)
 def equalizer_condition_for_types (F : ExtrDisc.{u}ᵒᵖ ⥤ Type w) : Prop :=
   ∀ {R X B : ExtrDisc} (f : X ⟶ B) (hf : function.surjective f)
     (g : R.val ⟶ Profinite.pullback f.val f.val) (hg : function.surjective g),
+  by dsimp_result { exact
   let e₁ : R ⟶ X := ⟨g ≫ Profinite.pullback.fst _ _⟩,
       e₂ : R ⟶ X := ⟨g ≫ Profinite.pullback.snd _ _⟩,
       w : e₁ ≫ f = e₂ ≫ f := by { ext1, dsimp [e₁, e₂], simp [Profinite.pullback.condition] },
@@ -255,7 +257,7 @@ def equalizer_condition_for_types (F : ExtrDisc.{u}ᵒᵖ ⥤ Type w) : Prop :=
         change (F.map f.op ≫ F.map e₁.op) x = (F.map f.op ≫ F.map e₂.op) x,
         rw h,
       end⟩ in
-    function.bijective t
+    function.bijective t }
 
 lemma equalizer_condition_holds [limits.has_equalizers C] (F : ExtrDisc.{u}ᵒᵖ ⥤ C) :
   equalizer_condition F :=
@@ -293,7 +295,6 @@ lemma equalizer_condition_for_types_holds (F : ExtrDisc.{u}ᵒᵖ ⥤ Type w) :
 begin
   -- Should be fairly easy, just mimic the proof in the general case above.
    intros R X B f hf g hg,
-  dsimp,
   let e₁ : R ⟶ X := ⟨g ≫ Profinite.pullback.fst _ _⟩,
   let e₂ : R ⟶ X := ⟨g ≫ Profinite.pullback.snd _ _⟩,
   have w : e₁ ≫ f = e₂ ≫ f := begin
@@ -391,7 +392,6 @@ lemma finite_product_condition_for_types_of_is_ExtrSheaf_of_types
 begin
   introsI ι _ X,
   have hF' := hF,
-  dsimp,
   specialize hF (ExtrDisc.sigma X) ι X (ExtrDisc.sigma.ι _)
     (ExtrDisc.sigma.ι_jointly_surjective _),
   split,
@@ -459,8 +459,10 @@ def G : ι × ι → ExtrDisc := λ ii, (Profinite.pullback (f ii.1).val (f ii.2
 def gfst : Π ii : ι × ι, G ii ⟶ X ii.1 := λ ii, ⟨Profinite.pres_π _ ≫ Profinite.pullback.fst _ _⟩
 def gsnd : Π ii : ι × ι, G ii ⟶ X ii.2 := λ ii, ⟨Profinite.pres_π _ ≫ Profinite.pullback.snd _ _⟩
 
-def hX := hP ι X
-def hG := hP (ι × ι) G
+lemma hX : function.bijective
+  (λ (x : P.obj (op (ExtrDisc.sigma X))) (i : ι), P.map (ExtrDisc.sigma.ι X i).op x) := hP ι X
+lemma hG : function.bijective
+  (λ (x : P.obj (op (ExtrDisc.sigma G))) (i : ι × ι), P.map (ExtrDisc.sigma.ι G i).op x) := hP (ι × ι) G
 
 def π : ExtrDisc.sigma X ⟶ B := ExtrDisc.sigma.desc X f
 
@@ -510,6 +512,7 @@ begin
     rw hc, refl }
 end
 
+@[nolint def_lemma] -- this lemma has an extremely annoying type to write down
 def hE (surj : ∀ b : B, ∃ i (x : X i), f i x = b) :=
   ExtrDisc.equalizer_condition_for_types_holds P π (hπ surj) r hr
 
