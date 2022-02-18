@@ -213,10 +213,6 @@ apply_nolint rescale.pseudo_normed_group fails_quickly
 apply_nolint first_target_stmt unused_arguments
 
 -- thm95/col_exact.lean
-apply_nolint thm95.CLCFP' unused_arguments
-apply_nolint thm95.FLC_arrow_hom' unused_arguments
-apply_nolint thm95.col_complex_rescaled.T_inv_sub_Tinv_f_succ unused_arguments
-apply_nolint thm95.col_complex_rescaled.move_pls2 unused_arguments
 apply_nolint thm95.col_exact'_aux1 unused_arguments
 apply_nolint thm95.col_exact'_aux2 unused_arguments
 
@@ -225,9 +221,6 @@ apply_nolint thm95.universal_constants.K₁_spec unused_arguments
 apply_nolint thm95.universal_constants.b unused_arguments
 apply_nolint thm95.universal_constants.c₀_aux unused_arguments
 apply_nolint thm95.universal_constants.fact_κ'_le_k' impossible_instance
-
--- thm95/default.lean
-apply_nolint thm95.IH unused_arguments
 
 -- thm95/double_complex.lean
 apply_nolint thm95.Cech_nerve unused_arguments
