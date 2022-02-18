@@ -89,6 +89,11 @@ lemma CLCFP'_obj_map (M₁ : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ) (c₁ c₂ :
       exact (CLCFP.res V r' c₁.unop c₂.unop n).app M₁) :=
 rfl
 
+lemma FLC_arrow_hom' {M₁ M₂ : ProFiltPseuNormGrpWithTinv r'} (f : M₁ ⟶ M₂) (c : ℝ≥0) :
+  (FLC_complex_arrow f.to_comphaus_filtered_pseudo_normed_group_hom f.strict c).hom =
+    ((Filtration r').obj c).map f :=
+rfl
+
 section
 
 variables [fact (0 < r')] [fact (r' ≤ 1)]
@@ -542,11 +547,6 @@ def FLC_arrow_iso_aux :
 
 section open ProFiltPseuNormGrpWithTinv
 
-lemma FLC_arrow_hom' {M₁ M₂ : ProFiltPseuNormGrpWithTinv r'} (f : M₁ ⟶ M₂) (c : ℝ≥0) :
-  (FLC_complex_arrow f.to_comphaus_filtered_pseudo_normed_group_hom f.strict c).hom =
-    ((Filtration r').obj c).map f :=
-rfl
-
 --move this
 attribute [simps] linear_equiv.to_add_equiv
 
@@ -857,7 +857,7 @@ open polyhedral_lattice (Hom)
 
 local attribute [semireducible] CLCFPTinv CLCFPTinv₂ CLCFP -- CLCTinv
 
-variables [fact (0 < r)] [fact (0 < r')] [fact (r' < 1)]
+variables [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' < 1)]
 
 @[simps obj map]
 def col'_aux [normed_with_aut r V] (n : ℕ) : system_of_complexes :=
@@ -1149,6 +1149,8 @@ end double_complex
 
 namespace col_complex_rescaled
 
+variables [fact (0 < r')] [fact (r' ≤ 1)]
+
 lemma d_zero_norm_noninc (c : ℝ≥0) :
   (@system_of_complexes.d (col_complex_rescaled r' V Λ M N n) c 0 1).norm_noninc :=
 begin
@@ -1212,6 +1214,8 @@ lemma admissible : (col_complex_rescaled r' V Λ M N n).admissible :=
 
 end col_complex_rescaled
 
+variables [fact (0 < r)] [fact (0 < r')] [fact (r' < 1)]
+
 lemma col_exact'_aux1 [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) (i : ℕ) :
   ∀ x, ∥(((col_complex_rescaled.T_inv_sub_Tinv' r r' V Λ M N (BD.X n) (κ n)).app c).f i) x∥ ≤
     (1 + r⁻¹) * ∥x∥ :=
@@ -1222,6 +1226,8 @@ begin
     refine @SemiNormedGroup.norm_rescale_map_le _ _ _ _ _ (1 + r⁻¹) _,
     exact CLCFP.norm_T_inv_sub_Tinv_le _ _ _ _ _ _ _ }
 end
+
+variables [fact (r < r')]
 
 lemma col_exact'_aux2 [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) (i : ℕ) :
   ∀ y, ∃ x,
@@ -1300,16 +1306,3 @@ begin
 end
 
 end thm95
-
-
-.
-/- The `unused_arguments` linter reports: -/
-/- UNUSED ARGUMENTS. -/
-#check @thm95.CLCFP' /- argument 2: [_inst_3 : fact (0 < r')], argument 3: [_inst_5 : fact (r' < 1)] -/
-#check @thm95.FLC_arrow_hom' /- argument 2: [_inst_3 : fact (0 < r')], argument 3: [_inst_5 : fact (r' < 1)] -/
-#check @thm95.col_complex_rescaled.move_pls2 /- argument 2: [_inst_3 : fact (0 < r')] -/
-#check @thm95.col_complex_rescaled.T_inv_sub_Tinv_f_succ /- argument 5: [_inst_4 : fact (r < r')] -/
-#check @thm95.col_exact'_aux1 /- argument 3: [_inst_1 : BD.suitable κ] -/
-#check @thm95.col_exact'_aux2 /- argument 3: [_inst_1 : BD.suitable κ] -/
-
-#lint
