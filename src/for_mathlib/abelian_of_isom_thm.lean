@@ -107,7 +107,7 @@ instance iso_im_of_mono [has_images C] [has_equalizers C] [has_zero_object C]
   is_iso (im_mono_factorisation f).e :=
 by { rw im_mono_factorisaction.e_eq, exact is_iso.comp_is_iso }
 
-lemma normal_mono_of_mono' {X Y : C} (f : X ⟶ Y) [mono f]
+def normal_mono_of_mono' {X Y : C} (f : X ⟶ Y) [mono f]
   (h : ∀ ⦃X Y : C⦄ (f : X ⟶ Y), is_iso (coim_to_im f)) :
   normal_mono f :=
 { Z := cokernel f,
@@ -134,7 +134,7 @@ instance iso_im_of_epi [has_images C] [has_equalizers C] [has_zero_object C]
   is_iso (im_mono_factorisation f).m :=
 by { dsimp, apply_instance }
 
-lemma normal_epi_of_epi' {X Y : C} (f : X ⟶ Y) [epi f]
+def normal_epi_of_epi' {X Y : C} (f : X ⟶ Y) [epi f]
   (h : ∀ ⦃X Y : C⦄ (f : X ⟶ Y), is_iso (coim_to_im f)) :
   normal_epi f :=
 { W := kernel f,

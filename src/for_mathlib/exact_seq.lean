@@ -317,15 +317,12 @@ open functor
 
 variables {C : Type u} {D : Type v} [category.{w} C] [category.{w} D]
 variables {F : C ⥤ D} {A₁ A₂ A₃ X : C} {f : A₁ ⟶ A₂} {g : A₂ ⟶ A₃}
-variables [limits.preserves_finite_colimits F]
 variables [abelian C] [abelian D] [additive F] (ex : exact_seq C [f, g, (0 : A₃ ⟶ X)])
 
 namespace functor.right_exact
 
 variable (F)
-def cokernel_diagram_iso
-  {A B : C}
-  (f : A ⟶ B) :
+def cokernel_diagram_iso {A B : C} (f : A ⟶ B) :
   parallel_pair f 0 ⋙ F ≅ parallel_pair (F.map f) 0 :=
 nat_iso.of_components (λ X,
   match X with
@@ -334,17 +331,20 @@ nat_iso.of_components (λ X,
   end)
 begin
   rintros (a|a) (b|b) (f|f),
-  tidy,
+  work_on_goal 0 { dsimp at *, simp at *, dsimp at *, simp at * },
+  work_on_goal 0 { dsimp at *, unfold_aux, dsimp at *, simp at * },
+  work_on_goal 0 { dsimp at *, simp at * },
+  dsimp at *, simp at *, dsimp at *, simp at *,
 end
 
-def preserves_cokernel {A B : C} (f : A ⟶ B) :
+def preserves_cokernel [limits.preserves_finite_colimits F] {A B : C} (f : A ⟶ B) :
   F.obj (cokernel f) ≅ cokernel (F.map f) :=
 (is_colimit_of_preserves _ (colimit.is_colimit _)).cocone_point_unique_up_to_iso
   (colimit.is_colimit _) ≪≫ limits.has_colimit.iso_of_nat_iso
   (cokernel_diagram_iso _ _)
 
 @[simp, reassoc]
-lemma map_preserves_cokernel_hom :
+lemma map_preserves_cokernel_hom [limits.preserves_finite_colimits F] :
   F.map (cokernel.π f) ≫ (preserves_cokernel F f).hom = cokernel.π (F.map f) :=
 begin
   erw (is_colimit_of_preserves F (colimit.is_colimit (parallel_pair f 0))).fac_assoc,
@@ -402,14 +402,15 @@ begin
   simp,
 end
 
-lemma aux [epi g] :
+lemma aux [limits.preserves_finite_colimits F] [epi g] :
   F.map g ≫ (F.map $ inv (cokernel_comparison ex)) ≫ (preserves_cokernel _ _).hom =
   cokernel.π (F.map f) :=
 by simp only [← category.assoc, ← F.map_comp, cokernel_comparison_inv, map_preserves_cokernel_hom]
 
 variable (F)
 
-lemma preserves_exact_seq : exact_seq D [F.map f, F.map g, (0 : F.obj A₃ ⟶ F.obj X)] :=
+lemma preserves_exact_seq [limits.preserves_finite_colimits F] :
+  exact_seq D [F.map f, F.map g, (0 : F.obj A₃ ⟶ F.obj X)] :=
 begin
   have exact := (exact_iff_exact_seq _ _).2 (ex.extract 0 2),
   haveI epi : epi g,
