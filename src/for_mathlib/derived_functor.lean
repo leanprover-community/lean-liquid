@@ -202,21 +202,6 @@ variables {C : Type u} {D : Type v} [category.{w} C] [category.{w} D] [abelian C
 variables (F : C ⥤ D) [additive F] {X : C}
 variables [limits.preserves_finite_colimits F]
 
-/-- The morphism `homology f (0 : Y ⟶ Z) ⟶ cokernel f`. -/
-def homology_cokernel {X Y Z : C} (f : X ⟶ Y) :
-  homology f (0 : Y ⟶ Z) (by simp) ⟶ cokernel f :=
-homology.desc _ _ _ ((kernel_subobject 0).arrow ≫ cokernel.π _)
-  begin
-    simp only [image_to_kernel_arrow_assoc],
-    refine limits.image_subobject_arrow_comp_eq_zero (by simp)
-  end
-
-/-- The morphism `cokernel f ⟶ homology f (0 : Y ⟶ Z)`. -/
-def cokernel_homology {X Y Z : C} (f : X ⟶ Y) :
-  cokernel f ⟶ homology f (0 : Y ⟶ Z) (by simp) :=
-cokernel.map _ _ ((𝟙 _) ≫ factor_thru_image_subobject _) ((𝟙 _) ≫
-  limits.factor_thru_kernel_subobject _ (𝟙 _) (by simp)) (by simp [image_to_kernel_zero_right])
-
 /-- The morphism `cokernel (kernel.lift (0 : Y ⟶ Z) f) ⟶ cokernel f`. -/
 @[simp] def cokernel_lift_to_cokernel {X Y Z : C} (f : X ⟶ Y) :
   cokernel (kernel.lift (0 : Y ⟶ Z) f (by simp)) ⟶ cokernel f :=
@@ -275,9 +260,9 @@ end
 /-- The iso `(F.left_derived 0).obj X ≅ F.obj X`. -/
 def functor.left_derived.zero_iso [enough_projectives C] : (F.left_derived 0).obj X ≅ F.obj X :=
 begin
-  refine (left_derived_obj_iso F 0 (ProjectiveResolution.of X)).trans (_ ≪≫
-    (as_iso (right_exact.cokernel_comparison (short_exact_of_resolution_functor F
-    (ProjectiveResolution.of X))))),
+  let P := ProjectiveResolution.of X,
+  refine (left_derived_obj_iso F 0 P) ≪≫ (_ ≪≫ (as_iso $ right_exact.cokernel_comparison
+    $ short_exact_of_resolution_functor F P)),
   show homology _ _ _ ≅ _,
   convert cokernel_homology_iso _,
   simp
