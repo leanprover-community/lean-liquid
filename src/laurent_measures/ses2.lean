@@ -24,11 +24,11 @@ def Θ (S : Fintype.{u}) :
   (fintype_functor.{u u} r ⋙
     ProFiltPseuNormGrpWithTinv₁.to_CompHausFiltPseuNormGrp₁.{u u} r).obj S ⟶
   (real_measures.functor p).obj S :=
-strict_comphaus_filtered_pseudo_normed_group_hom.mk' (θ_to_add)
+strict_comphaus_filtered_pseudo_normed_group_hom.mk' (θ_to_add p)
 begin
   intro c,
-  use θ_bound' c,
-  convert continuous_θ_c S c,
+  use θ_bound' p c,
+  convert continuous_θ_c p S c,
   simp only [θ_c, one_mul, eq_mpr_eq_cast, set_coe_cast],
   refl,
 end

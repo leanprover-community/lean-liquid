@@ -133,10 +133,9 @@ local notation `ℳ` := real_measures p
 
 def θ : ℒ S → ℳ S := ϑ (1 / 2 : ℝ) r p S
 
-lemma θ_natural (S T : Fintype) (f : S ⟶ T) [fact (0 < p)] [fact ( p ≤ 1)] :
-  θ ∘ laurent_measures.map_hom f = real_measures.map_hom f ∘ θ :=
+lemma θ_natural [fact (0 < p)] [fact (p ≤ 1)] (S T : Fintype) (f : S ⟶ T) (F : ℒ S) (t : T) :
+  θ (map f F) t = real_measures.map f (θ F) t :=
 begin
-  ext F t,
   dsimp only [θ],
   rw ϑ_eq_ϑ',
   dsimp only [ϑ', seval],
