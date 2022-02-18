@@ -1,12 +1,14 @@
 import laurent_measures.basic
 import laurent_measures.aux_lemmas
 import analysis.special_functions.pow
+import laurent_measures.thm69
 
 open nnreal laurent_measures aux_thm69
 open_locale nnreal
 
 noncomputable theory
 
+namespace slm
 section slm
 
 --  This is the same as before, from here to...
@@ -38,6 +40,7 @@ lemma lt_d_eq_zero (F : ℒ S) (s : S) (n : ℤ) :
   n < F.d → F s n = 0 := (exists_bdd_filtration r_pos r_lt_one F).some_spec s n
 --  ... here!
 
+
 section new_stuff
 /--  Simpler Laurent measures? -/
 structure slm (S : Fintype) :=
@@ -47,14 +50,14 @@ structure slm (S : Fintype) :=
 (zero_lt_d : ∀ s n, n < d → to_fun s n = 0)
 
 /--  A "usual" Laurent Measure `F : ℒ S` gives rise to a Simple Laurent Measure of type `slm S`. -/
-def laurent_measures.to_slm (F : ℒ S) : slm S :=
+def _root_.laurent_measures.to_slm (F : ℒ S) : slm S :=
 { to_fun    := F.to_fun,
   d         := F.d,
   zero_lt_d := lt_d_eq_zero F,
   summable' := begin
     refine λ s, summable_coe.mp _,
-    convert ((@int_summable_iff _ _ _ _ _ (λ (n : ℤ), ∥F.to_fun s n∥ * r ^ n)).mp _).1,
-    { simp, },
+    convert ((@int_summable_iff _ _ _ _ _ (λ (n : ℤ), ∥F.to_fun s n∥ * slm.r ^ n)).mp _).1,
+    { ext, simp },
     { convert summable_coe.mpr (F.summable' s),
       simp }
   end }
@@ -73,11 +76,11 @@ def slm.to_laurent_measures (F : slm S) : ℒ S :=
         simp },
       { simp [F.zero_lt_d s n nd] } }
   end }
-
 lemma slm_lm_to_fun_eq (F : slm S) : F.to_fun = F.to_laurent_measures.to_fun := rfl
 
 lemma lm_slm_to_fun_eq (F : ℒ S) : F.to_fun = F.to_slm.to_fun := rfl
 
 end new_stuff
 
+end slm
 end slm
