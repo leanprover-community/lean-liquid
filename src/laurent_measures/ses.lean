@@ -1,6 +1,7 @@
 -- import laurent_measures.functor
-import laurent_measures.thm69
 import analysis.special_functions.logb
+import for_mathlib.pi_induced
+import laurent_measures.thm69
 -- import data.real.basic
 
 /-
@@ -111,9 +112,9 @@ local notation `ϖ` := Fintype.of punit
 def seval_ℒ_c (c : ℝ≥0) (s : S) : filtration (ℒ S) c → (filtration (ℒ ϖ) c) :=
 λ F,
   begin
-  refine ⟨seval S s F, _⟩,
+  refine ⟨seval_ℒ S s F, _⟩,
   have hF := F.2,
-  simp only [filtration, set.mem_set_of_eq, seval, nnnorm, laurent_measures.coe_mk,
+  simp only [filtration, set.mem_set_of_eq, seval_ℒ, nnnorm, laurent_measures.coe_mk,
     fintype.univ_punit, finset.sum_singleton] at ⊢ hF,
   have := finset.sum_le_sum_of_subset (finset.singleton_subset_iff.mpr $ finset.mem_univ_val _),
   rw finset.sum_singleton at this,
@@ -228,7 +229,7 @@ def seval_ℳ_c (c : ℝ≥0) (s : S) : filtration (ℳ S) c → (filtration (�
   begin
   refine ⟨(λ _, x.1 s), _⟩,
   have hx := x.2,
-  simp only [filtration, set.mem_set_of_eq, seval, nnnorm, laurent_measures.coe_mk,
+  simp only [filtration, set.mem_set_of_eq, seval_ℒ, nnnorm, laurent_measures.coe_mk,
     fintype.univ_punit, finset.sum_singleton] at ⊢ hx,
   have := finset.sum_le_sum_of_subset (finset.singleton_subset_iff.mpr $ finset.mem_univ_val _),
   rw finset.sum_singleton at this,
@@ -241,7 +242,7 @@ begin
   intros x s,
   refine ⟨x.1 s, _⟩,
   have hx := x.2,
-  simp only [filtration, set.mem_set_of_eq, seval, nnnorm, laurent_measures.coe_mk,
+  simp only [filtration, set.mem_set_of_eq, seval_ℒ, nnnorm, laurent_measures.coe_mk,
     fintype.univ_punit, finset.sum_singleton] at hx,
   have := finset.sum_le_sum_of_subset (finset.singleton_subset_iff.mpr $ finset.mem_univ_val _),
   rw finset.sum_singleton at this,
@@ -251,11 +252,20 @@ end
 -- example (ι : Type*) (X Y : ι → Type*) (f : Πi, X → Y) (hX : ∀ i:ι, topological_space (X i))
 --   (hY : ∀ i:ι, topological_space (Y i))
 
+-- open topological_space
+
 lemma inducing_cast_ℳ (c : ℝ≥0) : inducing (cast_ℳ_c S c) :=
 begin
+  -- let f :
+  -- let := cast_ℳ_c p S c,
+  -- let M := ℳ S,
+  -- unfold [ℳ S],
+  have := @pi_induced_induced S (λ i, ℝ) (λ i, { x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c}) _ ,--(cast_ℳ_c p S c),
   fconstructor,
   dsimp [real_measures.topological_space],
   sorry,
+  -- apply pi_induced_induced,
+  -- sorry,
   -- simp,
   -- sorry,
 end
@@ -285,14 +295,33 @@ lemma seval_cast_ℳ_commute' {X : Type*} (c : ℝ≥0) {f : X → filtration (�
 -- end
 ---
 
+def seval_ℒ_bdd (c : ℝ≥0) (S : Fintype) (A : finset ℤ) (s : S) :
+laurent_measures_bdd r S A c → laurent_measures_bdd r ϖ A c :=
+begin
+  intro F,
+  use λ _, F s,
+  have hF := F.2,
+  simp only [filtration, set.mem_set_of_eq, seval_ℒ, nnnorm, laurent_measures.coe_mk,
+    fintype.univ_punit, finset.sum_singleton] at ⊢ hF,
+  have := finset.sum_le_sum_of_subset (finset.singleton_subset_iff.mpr $ finset.mem_univ_val _),
+  rw finset.sum_singleton at this,
+  apply le_trans this hF,
+end
 
 lemma continuous_seval_ℒ_c (c : ℝ≥0) (s : S) : continuous (seval_ℒ_c c s) :=
 begin
-  rw continuous_iff_is_closed,
-  intros K hK,
-  rw is_closed_induced_iff at ⊢ hK,
-  sorry,
-  -- apply continuous_iff_open,
+  rw laurent_measures.continuous_iff,
+  intro A,
+  let := seval_ℒ_bdd p c S A s,
+  have h_trunc : (@truncate r ϖ c A) ∘ (seval_ℒ_c p c s) =
+    (seval_ℒ_bdd p c S A s) ∘ (@truncate r S c A),
+  { ext ⟨F, hF⟩ π k,
+    dsimp only [seval_ℒ_bdd, seval_ℒ_c],
+    refl },
+  rw h_trunc,
+  apply continuous.comp,
+  apply continuous_of_discrete_topology,
+  apply truncate_continuous,
 end
 
 --**[FAE]** Useful?
@@ -342,7 +371,7 @@ lemma seval_ℒ_ℳ_commute (c : ℝ≥0) (s : S) :
   (θ_c c (Fintype.of punit)) ∘ (seval_ℒ_c c s) = (seval_ℳ_c S c s) ∘ (θ_c c S) :=
 begin
   ext F x,
-  simp only [seval_ℳ_c, seval_ℒ_c, seval, θ_c, one_mul, subtype.coe_mk, eq_mpr_eq_cast,
+  simp only [seval_ℳ_c, seval_ℒ_c, seval_ℒ, θ_c, one_mul, subtype.coe_mk, eq_mpr_eq_cast,
     set_coe_cast],
   refl,
 end
