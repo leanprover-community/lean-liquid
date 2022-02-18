@@ -206,11 +206,6 @@ variable (S)
 
 open theta metric
 
--- def sbox_ℒ_c (c : ℝ≥0) := filtration (laurent_measures r (Fintype.of punit)) c
-
-
--- instance (c : ℝ≥0) : topological_space (sbox_ℒ_c c) := by refine
---   cofinite_topology ↥(filtration (laurent_measures r (Fintype.of punit)) c)
 local notation `ϖ` := Fintype.of punit
 
 def seval_ℒ_c (c : ℝ≥0) (s : S) : filtration (ℒ S) c → (filtration (ℒ ϖ) c) :=
@@ -250,9 +245,13 @@ begin
   apply le_trans this hx,
 end
 
+-- example (ι : Type*) (X Y : ι → Type*) (f : Πi, X → Y) (hX : ∀ i:ι, topological_space (X i))
+--   (hY : ∀ i:ι, topological_space (Y i))
+
 lemma inducing_cast_ℳ (c : ℝ≥0) : inducing (cast_ℳ_c S c) :=
 begin
   fconstructor,
+  dsimp [real_measures.topological_space],
   sorry,
   -- simp,
   -- sorry,
@@ -283,14 +282,19 @@ lemma seval_cast_ℳ_commute' {X : Type*} (c : ℝ≥0) {f : X → filtration (�
 ---
 
 
-lemma continuous_seval_ℒ_c (c : ℝ≥0) (s : S) : continuous (seval_ℒ_c S c s) := sorry
+lemma continuous_seval_ℒ_c (c : ℝ≥0) (s : S) : continuous (seval_ℒ_c S c s) :=
+begin
+  sorry,
+  -- apply continuous_iff_open,
+end
 
 --**[FAE]** Useful?
 -- lemma cont_seval_ℳ_c (c : ℝ≥0) (s : S) : continuous (seval_ℳ_c S c s) := sorry
 
 open metric
 
-lemma cont_iff_for_all_closed (c : ℝ≥0) {X : Type*} [topological_space X]
+--**[FAE]** Probably needed, but check before proving it!
+lemma continuous_iff_for_all_closed (c : ℝ≥0) {X : Type*} [topological_space X]
   (f : X → closed_ball (0 : ℝ) c) (H : ∀ a : ℝ≥0, ∀ (H : a ≤ c), is_closed
     (f⁻¹' ((closed_ball ⟨(0 : ℝ), (mem_closed_ball_self c.2)⟩ a) : set ((closed_ball (0 : ℝ) c)))))
     : continuous f :=

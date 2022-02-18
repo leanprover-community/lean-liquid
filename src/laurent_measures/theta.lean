@@ -76,13 +76,13 @@ begin
   {rw [sub_lt_iff_lt_add, add_comm], from (int.lt_floor_add_one _)},
 end
 
-lemma eventually_pos_y : ∀ n : ℕ, n ≥ 1 → y ξ x n ≥ 0 :=
+lemma eventually_pos_y : ∀ n : ℕ, n ≥ 1 → 0 ≤ y ξ x n :=
 begin
   have h_pos : ∀ n : ℕ, n ≥ 1 → ξ ^ n > 0 := λ n _, pow_pos (fact.out _) n,
   have : ∀ n : ℕ, n ≥ 1 →  (y ξ x n) / ξ ^ n ≥ ⌊(((y ξ x n) / ξ ^ n) : ℝ)⌋ := λ n _, int.floor_le _,
   intros n hn₁,
   by_cases hn₀ : n = 1,
-  { rw [hn₀, y,pow_zero, div_one, mul_one, ge_iff_le, sub_nonneg], apply int.floor_le },
+  { rw [hn₀, y,pow_zero, div_one, mul_one, sub_nonneg], apply int.floor_le },
   { replace hn₁ : n > 1, {apply (lt_of_le_of_ne hn₁), tauto },
     obtain ⟨m, hm⟩ : ∃ m : ℕ, m ≥ 1 ∧ n = m + 1,
     use ⟨n - 1, and.intro (nat.le_pred_of_lt hn₁) (nat.sub_add_cancel (le_of_lt hn₁)).symm⟩,
@@ -333,8 +333,10 @@ def ϑ₀ (r : ℝ≥0) : (laurent_measures r (Fintype.of punit)) → ℝ :=
 def ϑ (r p : ℝ≥0) (S : Fintype) : (laurent_measures r S) → real_measures p S :=
   λ F s, tsum (λ n, (F s n) * ξ ^ n)
 
-def ϑ' (r p : ℝ≥0) (S : Fintype) : (laurent_measures r S) → (S → ℝ) :=
+@[nolint unused_arguments]
+def ϑ' (r p: ℝ≥0) (S : Fintype) : (laurent_measures r S) → (S → ℝ) :=
   λ F s, (ϑ₀ ξ r) (seval S s F)
+
 
 lemma ϑ_eq_ϑ' : ϑ = ϑ' := rfl
 
