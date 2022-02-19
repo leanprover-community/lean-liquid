@@ -18,7 +18,7 @@ noncomputable theory
 
 open_locale big_operators classical
 
-variables (ι Λ : Type*) [fintype ι]
+variables (ι Λ : Type*)
 
 namespace finsupp
 
@@ -37,7 +37,7 @@ by simp only [norm_def, sum_single_index, norm_zero]
 
 variables (ι Λ)
 
-instance : normed_group (ι →₀ Λ) :=
+instance [fintype ι] : normed_group (ι →₀ Λ) :=
 normed_group.of_core _ $
 { norm_eq_zero_iff := λ x,
   begin
@@ -61,7 +61,7 @@ normed_group.of_core _ $
 
 variables {ι Λ}
 
-lemma nnnorm_def (x : ι →₀ Λ) : ∥x∥₊ = x.sum (λ _, nnnorm) :=
+lemma nnnorm_def [fintype ι] (x : ι →₀ Λ) : ∥x∥₊ = x.sum (λ _, nnnorm) :=
 begin
   ext,
   simpa only [coe_nnnorm, finsupp.sum, nnreal.coe_sum] using norm_def x,
@@ -76,15 +76,15 @@ namespace generates_norm
 open finsupp
 
 variables [polyhedral_lattice Λ]
-variables {J : Type*} [fintype J] (x : J → Λ) (hx : generates_norm x)
+variables {J : Type*} (x : J → Λ)
 
 def finsupp_generators : ι × J → (ι →₀ Λ) := λ j, single j.1 (x j.2)
 
-variables {Λ x}
+variables {Λ x} [fintype J] (hx : generates_norm x)
 
 include hx
 
-lemma finsupp : generates_norm (finsupp_generators ι Λ x) :=
+lemma finsupp [fintype ι] : generates_norm (finsupp_generators ι Λ x) :=
 begin
   dsimp only [finsupp_generators],
   intro l,

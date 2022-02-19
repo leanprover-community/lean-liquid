@@ -11,7 +11,7 @@ open category_theory
 open category_theory.limits
 open short_exact_sequence
 
-universes v u
+universes w v u
 
 namespace category_theory
 

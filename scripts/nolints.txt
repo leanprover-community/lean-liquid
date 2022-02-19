@@ -28,30 +28,18 @@ apply_nolint liquid_tensor_experiment def_lemma
 -- challenge_notations.lean
 apply_nolint Condensed.has_coe unused_arguments
 
--- combinatorial_lemma/finite.lean
-apply_nolint Lbar.mk_tensor def_lemma
-apply_nolint lem98_finite def_lemma
-
 -- combinatorial_lemma/profinite.lean
 apply_nolint ProFiltPseuNormGrpWithTinv₁.level unused_arguments
 apply_nolint lem98.hom_diagram unused_arguments
-apply_nolint lem98.main def_lemma
 
 -- combinatorial_lemma/profinite_setup.lean
 apply_nolint ProFiltPseuNormGrpWithTinv₁.to_PNG₁ unused_arguments
 
 -- condensed/extr/basic.lean
-apply_nolint ExtrDisc.empty.hom_ext def_lemma
-apply_nolint ExtrDisc.of_val def_lemma
-apply_nolint Profinite.empty_is_initial def_lemma
 apply_nolint product_condition_setup.G unused_arguments
-apply_nolint product_condition_setup.hE def_lemma
-apply_nolint product_condition_setup.hG def_lemma
-apply_nolint product_condition_setup.hX def_lemma
 
 -- condensed/extr/equivalence.lean
 apply_nolint Condensed_to_ExtrDisc_presheaf_creates_colimits unused_arguments
-apply_nolint ExtrDisc.cover_dense def_lemma
 apply_nolint ExtrSheafProd_to_presheaf_creates_colimit unused_arguments
 apply_nolint ExtrSheafProd_to_presheaf_creates_colimits unused_arguments
 apply_nolint ExtrSheafProd_to_presheaf_creates_colimits_of_shape unused_arguments
@@ -63,9 +51,6 @@ apply_nolint finite_product_colimit_setup.T unused_arguments
 apply_nolint finite_product_colimit_setup.ct_iso unused_arguments
 apply_nolint finite_product_condition_holds_for_colimit unused_arguments
 
--- facts/int.lean
-apply_nolint fact_le_of_add_one_le fails_quickly
-
 -- for_mathlib/Gordan.lean
 apply_nolint missing unused_arguments
 
@@ -73,12 +58,7 @@ apply_nolint missing unused_arguments
 apply_nolint Profinite.exists_image inhabited_nonempty
 apply_nolint Profinite.image_stabilizes inhabited_nonempty
 
--- for_mathlib/Profinite/disjoint_union.lean
-apply_nolint Profinite.punit.hom_ext def_lemma
-
 -- for_mathlib/abelian_category.lean
-apply_nolint category_theory.is_zero.eq_of_src def_lemma
-apply_nolint category_theory.is_zero.eq_of_tgt def_lemma
 apply_nolint category_theory.preserves_zero_of_preserves_initial instance_priority
 apply_nolint category_theory.preserves_zero_of_preserves_terminal instance_priority
 
@@ -88,27 +68,15 @@ apply_nolint category_theory.iso_im_of_epi unused_arguments
 apply_nolint category_theory.iso_im_of_mono unused_arguments
 apply_nolint category_theory.limits.mono_factorisation.kernel_ι_comp unused_arguments
 apply_nolint category_theory.nonempty instance_priority
-apply_nolint category_theory.normal_epi_of_epi def_lemma
-apply_nolint category_theory.normal_mono_of_mono def_lemma
 
 -- for_mathlib/abelian_sheaves/functor_category.lean
 apply_nolint category_theory.additive_category_of_abelian instance_priority
-
--- for_mathlib/fin_functor.lean
-apply_nolint category_theory.fin3_functor_mk.map'_comp def_lemma
-apply_nolint category_theory.fin4_functor_mk.map'_comp def_lemma
-
--- for_mathlib/homological_complex.lean
-apply_nolint homological_complex.Fst unused_arguments
-apply_nolint homological_complex.Snd unused_arguments
-apply_nolint homological_complex.Trd unused_arguments
-apply_nolint homological_complex.mod_boundaries unused_arguments
 
 -- for_mathlib/homological_complex_equiv_functor_category.lean
 apply_nolint homological_complex.complex_to_functor_functor unused_arguments
 
 -- for_mathlib/horseshoe.lean
-apply_nolint short_exact_sequence.biprod_factors def_lemma unused_arguments
+apply_nolint short_exact_sequence.biprod_factors unused_arguments
 apply_nolint short_exact_sequence.horseshoe_ker unused_arguments
 
 -- for_mathlib/internal_hom.lean
@@ -122,7 +90,6 @@ apply_nolint category_theory.limits.is_initial.colimit_cocone unused_arguments
 apply_nolint homological_complex.termwise_split_epi_lift unused_arguments
 apply_nolint homological_complex.termwise_split_epi_retraction unused_arguments
 apply_nolint homological_complex.termwise_split_mono_desc unused_arguments
-apply_nolint homological_complex.termwise_split_mono_lift_desc def_lemma
 apply_nolint homological_complex.termwise_split_mono_section unused_arguments
 
 -- for_mathlib/order.lean
@@ -130,25 +97,14 @@ apply_nolint Inter_eq inhabited_nonempty
 apply_nolint eventually_constant inhabited_nonempty
 apply_nolint exists_le_finset inhabited_nonempty
 
--- for_mathlib/presieve.lean
-apply_nolint category_theory.presieve.eq_obj_of_arrows def_lemma
-
 -- for_mathlib/rational_cones.lean
 apply_nolint extended_le_span unused_arguments
-
--- for_mathlib/simplicial/iso.lean
-apply_nolint category_theory.simplicial_object.is_iso_of fails_quickly
 
 -- for_mathlib/snake_lemma.lean
 apply_nolint category_theory.snake_diagram.mk_functor.square_commutes_col unused_arguments
 apply_nolint category_theory.snake_diagram.mk_functor.square_commutes_comp_col unused_arguments
 apply_nolint category_theory.snake_diagram.mk_functor.square_commutes_comp_row unused_arguments
 apply_nolint category_theory.snake_diagram.mk_functor.square_commutes_row unused_arguments
-apply_nolint eq.lhs unused_arguments
-apply_nolint eq.rhs unused_arguments
-
--- for_mathlib/topology.lean
-apply_nolint homeomorph.totally_disconnected_space def_lemma
 
 -- laurent_measures/basic.lean
 apply_nolint laurent_measures.laurent_measures.norm_nonneg dup_namespace
@@ -162,7 +118,6 @@ apply_nolint theta.eventually_pos_y ge_or_gt
 
 -- laurent_measures/thm69.lean
 apply_nolint r_half unused_arguments
-apply_nolint r_lt_one unused_arguments
 apply_nolint tsum_reindex unused_arguments
 apply_nolint θ unused_arguments
 
@@ -172,20 +127,6 @@ apply_nolint SemiNormedGroup.normed_with_aut_LocallyConstant fails_quickly
 
 -- normed_group/pseudo_normed_group.lean
 apply_nolint semi_normed_group.pseudo_normed_group instance_priority
-
--- polyhedral_lattice/cech.lean
-apply_nolint PolyhedralLattice.Cech_augmentation_map unused_arguments
-apply_nolint PolyhedralLattice.Cech_conerve unused_arguments
-apply_nolint PolyhedralLattice.Cech_conerve.preorder_hom_eq_id simp_var_head
-apply_nolint PolyhedralLattice.augmentation_map_equalizes unused_arguments
-apply_nolint PolyhedralLattice.augmented_Cech_conerve unused_arguments
-
--- polyhedral_lattice/finsupp.lean
-apply_nolint finsupp.has_norm unused_arguments
-apply_nolint generates_norm.finsupp_generators unused_arguments
-
--- polyhedral_lattice/quotient.lean
-apply_nolint polyhedral_lattice.quotient_finite unused_arguments
 
 -- polyhedral_lattice/topology.lean
 apply_nolint polyhedral_lattice.discrete_topology instance_priority
@@ -219,7 +160,6 @@ apply_nolint breen_deligne.universal_map.norm_eval_LCFP_le unused_arguments
 apply_nolint CLCFPTinv₂ unused_arguments
 apply_nolint CLCFPTinv₂.map_norm_noninc unused_arguments
 apply_nolint CLCFPTinv₂.res unused_arguments
-apply_nolint CLCTinv.map_comp_ι def_lemma
 apply_nolint SemiNormedGroup.equalizer.map_id unused_arguments
 apply_nolint breen_deligne.universal_map.eval_CLCFPTinv_norm_noninc unused_arguments
 apply_nolint breen_deligne.universal_map.norm_eval_CLCFPTinv_le unused_arguments
@@ -227,16 +167,13 @@ apply_nolint breen_deligne.universal_map.norm_eval_CLCFPTinv_le unused_arguments
 -- pseudo_normed_group/basic.lean
 apply_nolint pseudo_normed_group.to_add_comm_group instance_priority
 
--- pseudo_normed_group/bounded_limits.lean
-apply_nolint strict_pseudo_normed_group_hom.level_comp def_lemma
-
 -- pseudo_normed_group/profinitely_filtered.lean
 apply_nolint comphaus_filtered_pseudo_normed_group.prod_pi_homeo_pi_prod unused_arguments
 
 -- pseudo_normed_group/with_Tinv.lean
 apply_nolint profinitely_filtered_pseudo_normed_group_with_Tinv.to_comphaus_filtered_pseudo_normed_group_with_Tinv instance_priority
 
--- real_measures.lean
+-- real_measures/basic.lean
 apply_nolint real_measures.map_hom unused_arguments
 apply_nolint real_measures.nnnorm_apply_le_of_nnnorm_le unused_arguments
 
@@ -256,14 +193,7 @@ apply_nolint rescale.profinitely_filtered_pseudo_normed_group fails_quickly
 apply_nolint rescale.profinitely_filtered_pseudo_normed_group_with_Tinv fails_quickly
 apply_nolint rescale.pseudo_normed_group fails_quickly
 
--- statement.lean
-apply_nolint first_target_stmt unused_arguments
-
 -- thm95/col_exact.lean
-apply_nolint thm95.CLCFP' unused_arguments
-apply_nolint thm95.FLC_arrow_hom' unused_arguments
-apply_nolint thm95.col_complex_rescaled.T_inv_sub_Tinv_f_succ unused_arguments
-apply_nolint thm95.col_complex_rescaled.move_pls2 unused_arguments
 apply_nolint thm95.col_exact'_aux1 unused_arguments
 apply_nolint thm95.col_exact'_aux2 unused_arguments
 
@@ -272,9 +202,6 @@ apply_nolint thm95.universal_constants.K₁_spec unused_arguments
 apply_nolint thm95.universal_constants.b unused_arguments
 apply_nolint thm95.universal_constants.c₀_aux unused_arguments
 apply_nolint thm95.universal_constants.fact_κ'_le_k' impossible_instance
-
--- thm95/default.lean
-apply_nolint thm95.IH unused_arguments
 
 -- thm95/double_complex.lean
 apply_nolint thm95.Cech_nerve unused_arguments

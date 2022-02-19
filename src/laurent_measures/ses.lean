@@ -1,6 +1,7 @@
 -- import laurent_measures.functor
-import laurent_measures.thm69
 import analysis.special_functions.logb
+import for_mathlib.pi_induced
+import laurent_measures.thm69
 -- import data.real.basic
 
 /-
@@ -111,9 +112,9 @@ local notation `ϖ` := Fintype.of punit
 def seval_ℒ_c (c : ℝ≥0) (s : S) : filtration (ℒ S) c → (filtration (ℒ ϖ) c) :=
 λ F,
   begin
-  refine ⟨seval S s F, _⟩,
+  refine ⟨seval_ℒ S s F, _⟩,
   have hF := F.2,
-  simp only [filtration, set.mem_set_of_eq, seval, nnnorm, laurent_measures.coe_mk,
+  simp only [filtration, set.mem_set_of_eq, seval_ℒ, nnnorm, laurent_measures.coe_mk,
     fintype.univ_punit, finset.sum_singleton] at ⊢ hF,
   have := finset.sum_le_sum_of_subset (finset.singleton_subset_iff.mpr $ finset.mem_univ_val _),
   rw finset.sum_singleton at this,
@@ -228,7 +229,7 @@ def seval_ℳ_c (c : ℝ≥0) (s : S) : filtration (ℳ S) c → (filtration (�
   begin
   refine ⟨(λ _, x.1 s), _⟩,
   have hx := x.2,
-  simp only [filtration, set.mem_set_of_eq, seval, nnnorm, laurent_measures.coe_mk,
+  simp only [filtration, set.mem_set_of_eq, seval_ℒ, nnnorm, laurent_measures.coe_mk,
     fintype.univ_punit, finset.sum_singleton] at ⊢ hx,
   have := finset.sum_le_sum_of_subset (finset.singleton_subset_iff.mpr $ finset.mem_univ_val _),
   rw finset.sum_singleton at this,
@@ -241,21 +242,78 @@ begin
   intros x s,
   refine ⟨x.1 s, _⟩,
   have hx := x.2,
-  simp only [filtration, set.mem_set_of_eq, seval, nnnorm, laurent_measures.coe_mk,
+  simp only [filtration, set.mem_set_of_eq, seval_ℒ, nnnorm, laurent_measures.coe_mk,
     fintype.univ_punit, finset.sum_singleton] at hx,
   have := finset.sum_le_sum_of_subset (finset.singleton_subset_iff.mpr $ finset.mem_univ_val _),
   rw finset.sum_singleton at this,
   apply le_trans this hx,
 end
 
--- example (ι : Type*) (X Y : ι → Type*) (f : Πi, X → Y) (hX : ∀ i:ι, topological_space (X i))
---   (hY : ∀ i:ι, topological_space (Y i))
+
+-- **[FAE]** From here everything might be useless until `lemma inducing_cast_ℳ`: check
+-- also the `variable (c : ℝ≥0)` issue; the idea is to replace cast_ℳ_c with α, for which
+-- everything seems to work
+
+
+
+variable (c : ℝ≥0)
+
+def box := {F : (ℳ S) // ∀ s, ∥ F s ∥₊ ^ (p:ℝ) ≤ c }
+
+example : has_coe (filtration (ℳ S) c) (ℳ S) := infer_instance --already declared
+instance : has_coe (box S c) (ℳ S) := by {dsimp only [box], apply_instance}
+instance : topological_space (ℳ S) := by {dsimp only [real_measures], apply_instance}
+instance : topological_space (box S c) := by {dsimp only [box], apply_instance}
+
+lemma equiv_box_ϖ : (box S c) ≃ₜ Π (s : S), (filtration (ℳ ϖ) c) :=
+begin
+  sorry,
+end
+
+def α : filtration (ℳ S) c → box S c :=
+begin
+  intro x,
+  use x,
+  have hx := x.2,
+  intro s,
+  simp only [filtration, set.mem_set_of_eq, seval_ℒ, nnnorm, laurent_measures.coe_mk,
+    fintype.univ_punit, finset.sum_singleton] at hx,
+  have := finset.sum_le_sum_of_subset (finset.singleton_subset_iff.mpr $ finset.mem_univ_val _),
+  rw finset.sum_singleton at this,
+  apply le_trans this hx,
+end
+
+lemma coe_α_coe : (coe : (box S c) → (ℳ S)) ∘ (α S c) = coe := by {funext _, refl}
+
+example : inducing (α S c) :=
+begin
+  have ind_ind := @induced_compose _ _ (ℳ S) _ (α p S c) coe,
+  rw [coe_α_coe p S c] at ind_ind,
+  exact {induced := eq.symm ind_ind},
+end
+
+
+-- lemma M_inj : function.injective (cast_ℳ_c S c) :=
+-- begin
+--   rintros F G h,
+--   dsimp only [cast_ℳ_c] at h,
+--   ext s,
+--   have := congr_fun h s,
+--   simpa only,
+-- end
 
 lemma inducing_cast_ℳ (c : ℝ≥0) : inducing (cast_ℳ_c S c) :=
 begin
-  fconstructor,
-  dsimp [real_measures.topological_space],
+  -- let f :
+  -- let := cast_ℳ_c p S c,
+  -- let M := ℳ S,
+  -- unfold [ℳ S],
+  -- have := @pi_induced_induced S (λ i, ℝ) (λ i, { x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c}) _ ,--(cast_ℳ_c p S c),
+  -- fconstructor,
+  -- dsimp [real_measures.topological_space],
   sorry,
+  -- apply pi_induced_induced,
+  -- sorry,
   -- simp,
   -- sorry,
 end
@@ -276,6 +334,24 @@ lemma seval_cast_ℳ_commute' {X : Type*} (c : ℝ≥0) {f : X → filtration (�
   rw this,
  end
 
+-- #check α S c
+-- #check (λ x, λ s : S, (((α S c) x).1 s))
+-- #check cast_ℳ_c
+-- #check (λ s : S, seval_ℳ_c)
+
+-- lemma seval_α_commute (c : ℝ≥0) (s : S) :
+--  (λ x, (((α S c) x).1 s)) = (equiv_box_ϖ S c) ∘ seval_ℳ_c S c s := sorry
+
+--  lemma seval_α_commute' {X : Type*} (c : ℝ≥0) {f : X → filtration (ℳ S) c} (s : S)  :
+--  (λ x, ((α S c) (f x)).1 s) = (equiv_ball_ℳ c) ∘ seval_ℳ_c S c s ∘ f :=
+--  begin
+--   ext z,
+--   have h_commute := @seval_cast_ℳ_commute p S _ _ c s,
+--   have := congr_fun h_commute (f z),
+--   simp only at this,
+--   rw this,
+--  end
+
 
 -- lemma cont_iff_comp_cast_ℳ (c : ℝ≥0) {X : Type*} [topological_space X] (f : X → filtration (ℳ S) c) :
 --   continuous (cast_ℳ_c S c ∘ f) → continuous f :=
@@ -285,14 +361,34 @@ lemma seval_cast_ℳ_commute' {X : Type*} (c : ℝ≥0) {f : X → filtration (�
 -- end
 ---
 
+@[nolint unused_arguments]
+def seval_ℒ_bdd (c : ℝ≥0) (S : Fintype) (A : finset ℤ) (s : S) :
+laurent_measures_bdd r S A c → laurent_measures_bdd r ϖ A c :=
+begin
+  intro F,
+  use λ _, F s,
+  have hF := F.2,
+  simp only [filtration, set.mem_set_of_eq, seval_ℒ, nnnorm, laurent_measures.coe_mk,
+    fintype.univ_punit, finset.sum_singleton] at ⊢ hF,
+  have := finset.sum_le_sum_of_subset (finset.singleton_subset_iff.mpr $ finset.mem_univ_val _),
+  rw finset.sum_singleton at this,
+  apply le_trans this hF,
+end
 
 lemma continuous_seval_ℒ_c (c : ℝ≥0) (s : S) : continuous (seval_ℒ_c c s) :=
 begin
-  rw continuous_iff_is_closed,
-  intros K hK,
-  rw is_closed_induced_iff at ⊢ hK,
-  sorry,
-  -- apply continuous_iff_open,
+  rw laurent_measures.continuous_iff,
+  intro A,
+  let := seval_ℒ_bdd p c S A s,
+  have h_trunc : (@truncate r ϖ c A) ∘ (seval_ℒ_c p c s) =
+    (seval_ℒ_bdd p c S A s) ∘ (@truncate r S c A),
+  { ext ⟨F, hF⟩ π k,
+    dsimp only [seval_ℒ_bdd, seval_ℒ_c],
+    refl },
+  rw h_trunc,
+  apply continuous.comp,
+  apply continuous_of_discrete_topology,
+  apply truncate_continuous,
 end
 
 --**[FAE]** Useful?
@@ -342,12 +438,12 @@ lemma seval_ℒ_ℳ_commute (c : ℝ≥0) (s : S) :
   (θ_c c (Fintype.of punit)) ∘ (seval_ℒ_c c s) = (seval_ℳ_c S c s) ∘ (θ_c c S) :=
 begin
   ext F x,
-  simp only [seval_ℳ_c, seval_ℒ_c, seval, θ_c, one_mul, subtype.coe_mk, eq_mpr_eq_cast,
+  simp only [seval_ℳ_c, seval_ℒ_c, seval_ℒ, θ_c, one_mul, subtype.coe_mk, eq_mpr_eq_cast,
     set_coe_cast],
   refl,
 end
 
-lemma continuous_of_seval_comp_continuous (c : ℝ≥0) {X : Type*} [topological_space X]
+lemma continuous_of_seval_ℳ_comp_continuous (c : ℝ≥0) {X : Type*} [topological_space X]
   {f : X → (filtration (ℳ S) c)} : (∀ s, continuous ((seval_ℳ_c S c s) ∘ f)) → continuous f :=
 begin
   intro H,
@@ -363,7 +459,7 @@ begin
 
 lemma continuous_θ_c (c : ℝ≥0) : continuous (θ_c c S) :=
 begin
-  apply continuous_of_seval_comp_continuous,
+  apply continuous_of_seval_ℳ_comp_continuous,
   intro s,
   rw ← seval_ℒ_ℳ_commute,
   refine continuous.comp _ (continuous_seval_ℒ_c p S c s),

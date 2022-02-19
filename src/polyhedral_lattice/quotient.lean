@@ -39,7 +39,7 @@ instance [H : fact L.saturated] : no_zero_smul_divisors ℤ (Λ ⧸ L) :=
     exact add_subgroup.saturated_iff_zsmul.mp H.1 _ _ h,
   end }
 
-instance quotient_finite [H : fact L.saturated] : module.finite ℤ (Λ ⧸ L) :=
+instance quotient_finite : module.finite ℤ (Λ ⧸ L) :=
 begin
   apply module.finite.of_surjective (L.normed_mk).to_add_monoid_hom.to_int_linear_map,
   exact quotient.surjective_quotient_mk'
