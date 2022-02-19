@@ -174,7 +174,6 @@ begin
   refine exact_seq.cons _ _ _ _ _,
   { have : (complex_shape.down ℕ).rel 1 0 := rfl,
     let f := (homological_complex.X_prev_iso ((F.map_homological_complex _).obj P.complex) this),
-    simp at this,
     refine preadditive.exact_of_iso_of_exact' (F.map (P.complex.d 1 0)) (F.map (P.π.f 0)) _ _
       f.symm (iso.refl _) (iso.refl _) (by simp) (by simp) _,
     exact (exact_iff_exact_seq _ _ ).2
@@ -201,7 +200,10 @@ def functor.left_derived.zero_to_self [enough_projectives C] : nat_trans (F.left
     (homology_iso_cokernel_lift _ _ _).hom ≫ cokernel_lift_to_cokernel _ ≫
     (cokernel.desc _ (F.map ((ProjectiveResolution.of X).π.f 0))
     begin
-      sorry
+      have : (complex_shape.down ℕ).rel 1 0 := rfl,
+      rw [homological_complex.d_to_eq _ this, map_homological_complex_obj_d, category.assoc,
+      ← functor.map_comp],
+      simp
     end),
   naturality' := sorry }
 
