@@ -35,6 +35,25 @@ lemma finset.sum_summable {α M : Type*} [add_comm_group M] [topological_space M
   summable (λ a, f a) :=
 summable_of_ne_finset_zero (λ b hb, not_mem_support_iff.mp hb)
 
+/-- The norm of `F : Lbar r' S` as nonnegative real number.
+It is defined as `∑ s, ∑' n, (↑(F s n).nat_abs * r' ^ n)`. -/
+protected def nnnorm (r' : ℝ≥0) (S : Fintype) (F : S → (ℤ →₀ ℝ)) : ℝ≥0 :=
+∑ s, ∑' n, ∥F s n∥₊ * r' ^ n
+
+instance (r' : ℝ≥0) (S : Fintype) : has_nnnorm (S → (ℤ →₀ ℝ)) := --⟨laurent_measures.nnnorm r' S⟩
+{ nnnorm := laurent_measures.nnnorm r' S }
+
+/-
+def mymy (r' : ℝ≥0) (S : Fintype) : pseudo_normed_group (S → (ℤ →₀ ℝ)) :=
+{ filtration := λ c, {F | ∥F∥₊ ≤ c},
+  filtration_mono := λ c₁ c₂ h F hF, le_trans hF h,
+  zero_mem_filtration := λ c, by { dsimp, rw nnnorm_zero, apply zero_le' },
+  neg_mem_filtration := λ c F hF, by { dsimp, rwa nnnorm_neg },
+  add_mem_filtration := λ c₁ c₂ F₁ F₂ hF₁ hF₂,
+  by exact le_trans (nnnorm_add_le _ _) (add_le_add hF₁ hF₂) }
+-/
+
+
 def mymy (r' : ℝ≥0) (N : ℝ → ℝ≥0) (N0 : N 0 = 0) (N_neg : ∀ x, N (- x) = N x)
   (N_add : ∀ x y, N (x + y) ≤ N x + N y) : pseudo_normed_group (ℤ →₀ ℝ) :=
 { to_add_comm_group := finsupp.add_comm_group,
