@@ -14,6 +14,7 @@ variables [BD.data.very_suitable r r' κ] [∀ (i : ℕ), fact (0 < κ i)]
 
 include r r' BD κ
 
+@[nolint unused_arguments]
 def first_target_stmt : Prop :=
   ∀ m : ℕ,
   ∃ (k K : ℝ≥0) (hk : fact (1 ≤ k)),

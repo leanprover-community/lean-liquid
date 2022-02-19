@@ -21,7 +21,10 @@ namespace eq
 
 variables {X : Type*} {x y : X} (h : x = y)
 
+@[nolint unused_arguments]
 abbreviation lhs (h : x = y) := x
+
+@[nolint unused_arguments]
 abbreviation rhs (h : x = y) := y
 
 @[simp] lemma lhs_def : h.lhs = x := rfl

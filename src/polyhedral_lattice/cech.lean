@@ -308,10 +308,6 @@ def map_succ_zero (m : ℕ) (g : fin (m+2) →o fin 1) : obj f (m+1) ⟶ Λ' :=
   end,
   .. map_succ_zero_aux f m g }
 
--- PR #8135
-@[simp] lemma preorder_hom_eq_id (g : fin 1 →o fin 1) : g = order_hom.id :=
-by { ext1, exact subsingleton.elim _ _ }
-
 def finsupp_fin_one_iso : of (fin 1 →₀ Λ') ≅ Λ' :=
 iso.symm $ PolyhedralLattice.iso_mk
   (finsupp.single_add_hom 0) (finsupp.apply_add_hom 0)
@@ -370,8 +366,6 @@ end
 end Cech_conerve
 
 open Cech_conerve
-
-variables [fact f.to_add_monoid_hom.range.saturated]
 
 @[simps] def Cech_conerve : cosimplicial_object PolyhedralLattice :=
 { obj := λ n, obj f n.len,
