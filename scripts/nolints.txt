@@ -100,9 +100,6 @@ apply_nolint exists_le_finset inhabited_nonempty
 -- for_mathlib/rational_cones.lean
 apply_nolint extended_le_span unused_arguments
 
--- for_mathlib/simplicial/iso.lean
-apply_nolint category_theory.simplicial_object.is_iso_of fails_quickly
-
 -- for_mathlib/snake_lemma.lean
 apply_nolint category_theory.snake_diagram.mk_functor.square_commutes_col unused_arguments
 apply_nolint category_theory.snake_diagram.mk_functor.square_commutes_comp_col unused_arguments
