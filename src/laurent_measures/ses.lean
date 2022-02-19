@@ -249,74 +249,58 @@ begin
   apply le_trans this hx,
 end
 
---==prove
+
+-- **[FAE]** From here everything might be useless until `lemma inducing_cast_ℳ`: check
+-- also the `variable (c : ℝ≥0)` issue; the idea is to replace cast_ℳ_c with α, for which
+-- everything seems to work
+
+
+
 variable (c : ℝ≥0)
 
-lemma M_inj : function.injective (cast_ℳ_c S c) :=
+def box := {F : (ℳ S) // ∀ s, ∥ F s ∥₊ ^ (p:ℝ) ≤ c }
+
+example : has_coe (filtration (ℳ S) c) (ℳ S) := infer_instance --already declared
+instance : has_coe (box S c) (ℳ S) := by {dsimp only [box], apply_instance}
+instance : topological_space (ℳ S) := by {dsimp only [real_measures], apply_instance}
+instance : topological_space (box S c) := by {dsimp only [box], apply_instance}
+
+lemma equiv_box_ϖ : (box S c) ≃ₜ Π (s : S), (filtration (ℳ ϖ) c) :=
 begin
-  rintros F G h,
-  dsimp only [cast_ℳ_c] at h,
-  ext s,
-  have := congr_fun h s,
-  simpa only,
-end
-
--- #check seval_ℒ S
--- simp only [filtration, set.mem_set_of_eq, seval_ℒ, nnnorm, laurent_measures.coe_mk,
-  --   fintype.univ_punit, finset.sum_singleton] at hx,
-  -- have := finset.sum_le_sum_of_subset (finset.singleton_subset_iff.mpr $ finset.mem_univ_val _),
-  -- rw finset.sum_singleton at this,
-  -- apply le_trans this hx,
-
-
-instance : has_coe { F : (S → ℝ) // ∑ (s : S), ∥ F s ∥₊ ≤ c} (S → { x : ℝ // ∥ x ∥₊ ≤ c }) :=
-begin
-  -- constructor,
-  -- intros F s,
-  -- use F.1 s,
-  -- have := F.2,
-  -- have ll := finset.sum_le_sum_of_subset,
   sorry,
 end
 
--- example : { x : (S → ℝ) // ∑ (s : S), ∥ x s ∥₊ ≤ c} ≃ₜ (S → { x : ℝ // ∥ x ∥ ^ (p:ℝ) ≤ c }) :=
+def α : filtration (ℳ S) c → box S c :=
+begin
+  intro x,
+  use x,
+  have hx := x.2,
+  intro s,
+  simp only [filtration, set.mem_set_of_eq, seval_ℒ, nnnorm, laurent_measures.coe_mk,
+    fintype.univ_punit, finset.sum_singleton] at hx,
+  have := finset.sum_le_sum_of_subset (finset.singleton_subset_iff.mpr $ finset.mem_univ_val _),
+  rw finset.sum_singleton at this,
+  apply le_trans this hx,
+end
 
--- def pp : filtration (ℳ S) c → Prop := λ F, ∀ s, ∥ (seval_ℳ_c S c s F).1 ∥₊ ≤ c
+lemma coe_α_coe : (coe : (box S c) → (ℳ S)) ∘ (α S c) = coe := by {funext _, refl}
 
--- instance : topological_space ({F // pp S c F}) := infer_instance
--- instance : topological_space (S → { x : ℝ // ∥ x ∥ ^ (p:ℝ) ≤ c }) := infer_instance
+example : inducing (α S c) :=
+begin
+  have ind_ind := @induced_compose _ _ (ℳ S) _ (α p S c) coe,
+  rw [coe_α_coe p S c] at ind_ind,
+  exact {induced := eq.symm ind_ind},
+end
 
--- lemma mah : {F // pp S c F} ≃ₜ (S → { x : ℝ // ∥ x ∥ ^ (p:ℝ) ≤ c }) :=
+
+-- lemma M_inj : function.injective (cast_ℳ_c S c) :=
 -- begin
---   fconstructor,
---   { fconstructor,
---     intros F s,
---     use (F.1.1 s)^p,
---     have := F.2,
---     dsimp only [pp, seval_ℳ_c] at this,
-
---   },
+--   rintros F G h,
+--   dsimp only [cast_ℳ_c] at h,
+--   ext s,
+--   have := congr_fun h s,
+--   simpa only,
 -- end
-
-
--- example : embedding (cast_ℳ_c S c) :=
--- begin
---   constructor,
-
---   sorry,
---   exact M_inj p S c,
--- end
-
-
-
--- example (ι : Type*) (X Y : ι → Type*) (f : Πi, X → Y) (hX : ∀ i:ι, topological_space (X i))
---   (hY : ∀ i:ι, topological_space (Y i))
-
--- open topological_space
-
--- example (topological_space (ℳ S)) := by library_search
-
-
 
 lemma inducing_cast_ℳ (c : ℝ≥0) : inducing (cast_ℳ_c S c) :=
 begin
@@ -349,6 +333,24 @@ lemma seval_cast_ℳ_commute' {X : Type*} (c : ℝ≥0) {f : X → filtration (�
   simp only at this,
   rw this,
  end
+
+-- #check α S c
+-- #check (λ x, λ s : S, (((α S c) x).1 s))
+-- #check cast_ℳ_c
+-- #check (λ s : S, seval_ℳ_c)
+
+-- lemma seval_α_commute (c : ℝ≥0) (s : S) :
+--  (λ x, (((α S c) x).1 s)) = (equiv_box_ϖ S c) ∘ seval_ℳ_c S c s := sorry
+
+--  lemma seval_α_commute' {X : Type*} (c : ℝ≥0) {f : X → filtration (ℳ S) c} (s : S)  :
+--  (λ x, ((α S c) (f x)).1 s) = (equiv_ball_ℳ c) ∘ seval_ℳ_c S c s ∘ f :=
+--  begin
+--   ext z,
+--   have h_commute := @seval_cast_ℳ_commute p S _ _ c s,
+--   have := congr_fun h_commute (f z),
+--   simp only at this,
+--   rw this,
+--  end
 
 
 -- lemma cont_iff_comp_cast_ℳ (c : ℝ≥0) {X : Type*} [topological_space X] (f : X → filtration (ℳ S) c) :
