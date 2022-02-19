@@ -279,7 +279,7 @@ begin
   sorry,
 end
 
-example : { x : (S → ℝ) // ∑ (s : S), ∥ x s ∥₊ ≤ c} ≃ₜ (S → { x : ℝ // ∥ x ∥ ^ (p:ℝ) ≤ c }) :=
+-- example : { x : (S → ℝ) // ∑ (s : S), ∥ x s ∥₊ ≤ c} ≃ₜ (S → { x : ℝ // ∥ x ∥ ^ (p:ℝ) ≤ c }) :=
 
 -- def pp : filtration (ℳ S) c → Prop := λ F, ∀ s, ∥ (seval_ℳ_c S c s F).1 ∥₊ ≤ c
 
