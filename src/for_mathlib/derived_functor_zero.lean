@@ -128,27 +128,20 @@ begin
   exact category_theory.preserves_epi _ _,
 end
 
-/-- The morphism `cokernel (kernel.lift (0 : Y ⟶ Z) f) ⟶ cokernel f`. -/
-@[simp] def cokernel_lift_to_cokernel {X Y Z : C} (f : X ⟶ Y) :
-  cokernel (kernel.lift (0 : Y ⟶ Z) f (by simp)) ⟶ cokernel f :=
-cokernel.desc _ ((kernel.ι 0) ≫ cokernel.π _) (by simp)
+/-- The morphism `cokernel (kernel.lift g f) ⟶ cokernel f` assuming `f ≫ g = 0`. -/
+@[simp] def cokernel_lift_to_cokernel {X Y Z : C} {f : X ⟶ Y} {g : Y ⟶ Z} (w : f ≫ g = 0) :
+  cokernel (kernel.lift g f w) ⟶ cokernel f :=
+cokernel.desc _ ((kernel.ι g) ≫ cokernel.π _) (by simp)
 
 /-- The morphism `cokernel f ⟶ cokernel (kernel.lift (0 : Y ⟶ Z) f)`. -/
 @[simp] def cokernel_to_cokernel_lift {X Y Z : C} (f : X ⟶ Y) :
   cokernel f ⟶ cokernel (kernel.lift (0 : Y ⟶ Z) f (by simp)) :=
 cokernel.map _ _ (𝟙 _) (kernel.lift _ (𝟙 _) (by simp)) (by { ext, simp })
 
-def functor.left_derived.zero_to_self [enough_projectives C] : nat_trans (F.left_derived 0) F :=
-{ app := λ X,
-  begin
-    sorry
-  end,
-  naturality' := sorry }
-
 /-- The isomorphism `cokernel f ≅ cokernel (kernel.lift (0 : Y ⟶ Z) f)`. -/
 def cokernel_lift_iso_cokernel {X Y Z : C} (f : X ⟶ Y) :
   cokernel (kernel.lift (0 : Y ⟶ Z) f (by simp)) ≅ cokernel f :=
-{ hom := cokernel_lift_to_cokernel f,
+{ hom := cokernel_lift_to_cokernel (by simp),
   inv := cokernel_to_cokernel_lift f,
   hom_inv_id' :=
   begin
@@ -161,7 +154,7 @@ def cokernel_lift_iso_cokernel {X Y Z : C} (f : X ⟶ Y) :
   inv_hom_id' := by { ext, simp } }
 
 /-- The isomorphism `cokernel f ⟶ homology f (0 : Y ⟶ Z)`. -/
-def cokernel_homology_iso {X Y Z : C} (f : X ⟶ Y) :
+@[simp] def homology_iso_cokernel {X Y Z : C} (f : X ⟶ Y) :
   homology f (0 : Y ⟶ Z) (by simp) ≅ cokernel f :=
 homology_iso_cokernel_lift _ _ _ ≪≫ cokernel_lift_iso_cokernel f
 
@@ -199,9 +192,18 @@ begin
   refine (left_derived_obj_iso F 0 P) ≪≫ (_ ≪≫ (as_iso $ cokernel_comparison $ comp_eq_zero $
     short_exact_of_resolution_functor F P)),
   show homology _ _ _ ≅ _,
-  convert cokernel_homology_iso _,
+  convert homology_iso_cokernel _,
   simp
 end
+
+def functor.left_derived.zero_to_self [enough_projectives C] : nat_trans (F.left_derived 0) F :=
+{ app := λ X, ((left_derived_obj_iso F 0 (ProjectiveResolution.of X)).hom) ≫
+    (homology_iso_cokernel_lift _ _ _).hom ≫ cokernel_lift_to_cokernel _ ≫
+    (cokernel.desc _ (F.map ((ProjectiveResolution.of X).π.f 0))
+    begin
+      sorry
+    end),
+  naturality' := sorry }
 
 end functor.right_exact
 
