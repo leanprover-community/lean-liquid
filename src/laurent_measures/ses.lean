@@ -249,10 +249,74 @@ begin
   apply le_trans this hx,
 end
 
+--==prove
+variable (c : ℝ≥0)
+
+lemma M_inj : function.injective (cast_ℳ_c S c) :=
+begin
+  rintros F G h,
+  dsimp only [cast_ℳ_c] at h,
+  ext s,
+  have := congr_fun h s,
+  simpa only,
+end
+
+-- #check seval_ℒ S
+-- simp only [filtration, set.mem_set_of_eq, seval_ℒ, nnnorm, laurent_measures.coe_mk,
+  --   fintype.univ_punit, finset.sum_singleton] at hx,
+  -- have := finset.sum_le_sum_of_subset (finset.singleton_subset_iff.mpr $ finset.mem_univ_val _),
+  -- rw finset.sum_singleton at this,
+  -- apply le_trans this hx,
+
+
+instance : has_coe { F : (S → ℝ) // ∑ (s : S), ∥ F s ∥₊ ≤ c} (S → { x : ℝ // ∥ x ∥₊ ≤ c }) :=
+begin
+  -- constructor,
+  -- intros F s,
+  -- use F.1 s,
+  -- have := F.2,
+  -- have ll := finset.sum_le_sum_of_subset,
+  sorry,
+end
+
+example : { x : (S → ℝ) // ∑ (s : S), ∥ x s ∥₊ ≤ c} ≃ₜ (S → { x : ℝ // ∥ x ∥ ^ (p:ℝ) ≤ c }) :=
+
+-- def pp : filtration (ℳ S) c → Prop := λ F, ∀ s, ∥ (seval_ℳ_c S c s F).1 ∥₊ ≤ c
+
+-- instance : topological_space ({F // pp S c F}) := infer_instance
+-- instance : topological_space (S → { x : ℝ // ∥ x ∥ ^ (p:ℝ) ≤ c }) := infer_instance
+
+-- lemma mah : {F // pp S c F} ≃ₜ (S → { x : ℝ // ∥ x ∥ ^ (p:ℝ) ≤ c }) :=
+-- begin
+--   fconstructor,
+--   { fconstructor,
+--     intros F s,
+--     use (F.1.1 s)^p,
+--     have := F.2,
+--     dsimp only [pp, seval_ℳ_c] at this,
+
+--   },
+-- end
+
+
+-- example : embedding (cast_ℳ_c S c) :=
+-- begin
+--   constructor,
+
+--   sorry,
+--   exact M_inj p S c,
+-- end
+
+
+
 -- example (ι : Type*) (X Y : ι → Type*) (f : Πi, X → Y) (hX : ∀ i:ι, topological_space (X i))
 --   (hY : ∀ i:ι, topological_space (Y i))
 
 -- open topological_space
+
+-- example (topological_space (ℳ S)) := by library_search
+
+
 
 lemma inducing_cast_ℳ (c : ℝ≥0) : inducing (cast_ℳ_c S c) :=
 begin
@@ -260,9 +324,9 @@ begin
   -- let := cast_ℳ_c p S c,
   -- let M := ℳ S,
   -- unfold [ℳ S],
-  have := @pi_induced_induced S (λ i, ℝ) (λ i, { x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c}) _ ,--(cast_ℳ_c p S c),
-  fconstructor,
-  dsimp [real_measures.topological_space],
+  -- have := @pi_induced_induced S (λ i, ℝ) (λ i, { x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c}) _ ,--(cast_ℳ_c p S c),
+  -- fconstructor,
+  -- dsimp [real_measures.topological_space],
   sorry,
   -- apply pi_induced_induced,
   -- sorry,
@@ -376,7 +440,7 @@ begin
   refl,
 end
 
-lemma continuous_of_seval_comp_continuous (c : ℝ≥0) {X : Type*} [topological_space X]
+lemma continuous_of_seval_ℳ_comp_continuous (c : ℝ≥0) {X : Type*} [topological_space X]
   {f : X → (filtration (ℳ S) c)} : (∀ s, continuous ((seval_ℳ_c S c s) ∘ f)) → continuous f :=
 begin
   intro H,
@@ -392,7 +456,7 @@ begin
 
 lemma continuous_θ_c (c : ℝ≥0) : continuous (θ_c c S) :=
 begin
-  apply continuous_of_seval_comp_continuous,
+  apply continuous_of_seval_ℳ_comp_continuous,
   intro s,
   rw ← seval_ℒ_ℳ_commute,
   refine continuous.comp _ (continuous_seval_ℒ_c p S c s),
