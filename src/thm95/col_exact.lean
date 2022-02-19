@@ -25,7 +25,7 @@ universe variables u u₀ uₘ
 namespace thm95
 
 variables (BD : breen_deligne.data) (κ : ℕ → ℝ≥0) [BD.suitable κ]
-variables (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' < 1)]
+variables (r r' : ℝ≥0)
 variables (V : SemiNormedGroup.{u})
 variables (Λ : PolyhedralLattice.{u}) (M : ProFiltPseuNormGrpWithTinv.{u} r')
 variables (N : ℕ) [fact (0 < N)] (n : ℕ)
@@ -89,7 +89,17 @@ lemma CLCFP'_obj_map (M₁ : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ) (c₁ c₂ :
       exact (CLCFP.res V r' c₁.unop c₂.unop n).app M₁) :=
 rfl
 
-def Cech_nerve' : cosimplicial_object.augmented (ℝ≥0ᵒᵖ ⥤ SemiNormedGroup) :=
+lemma FLC_arrow_hom' {M₁ M₂ : ProFiltPseuNormGrpWithTinv r'} (f : M₁ ⟶ M₂) (c : ℝ≥0) :
+  (FLC_complex_arrow f.to_comphaus_filtered_pseudo_normed_group_hom f.strict c).hom =
+    ((Filtration r').obj c).map f :=
+rfl
+
+section
+
+variables [fact (0 < r')] [fact (r' ≤ 1)]
+
+def Cech_nerve' :
+  cosimplicial_object.augmented (ℝ≥0ᵒᵖ ⥤ SemiNormedGroup) :=
 (cosimplicial_object.augmented.whiskering_obj.{u} _ _ (CLCFP' r' V n)).obj
   (Cech_nerve r' Λ M N)
 
@@ -537,11 +547,6 @@ def FLC_arrow_iso_aux :
 
 section open ProFiltPseuNormGrpWithTinv
 
-lemma FLC_arrow_hom' {M₁ M₂ : ProFiltPseuNormGrpWithTinv r'} (f : M₁ ⟶ M₂) (c : ℝ≥0) :
-  (FLC_complex_arrow f.to_comphaus_filtered_pseudo_normed_group_hom f.strict c).hom =
-    ((Filtration r').obj c).map f :=
-rfl
-
 --move this
 attribute [simps] linear_equiv.to_add_equiv
 
@@ -706,6 +711,8 @@ end
 
 end
 
+end
+
 namespace col_complex_rescaled
 
 open polyhedral_lattice (Hom)
@@ -714,8 +721,10 @@ open PolyhedralLattice (cosimplicial)
 instance move_pls (r' : ℝ≥0) (c : ℝ≥0ᵒᵖ) : fact (unop (r'.MulLeft.op.obj c) ≤ r' * unop c) :=
 ⟨le_rfl⟩
 
-instance move_pls2 (c : ℝ≥0ᵒᵖ) : fact (unop (r'.MulLeft.op.obj c) ≤ unop c) :=
+instance move_pls2 [fact (r' < 1)] (c : ℝ≥0ᵒᵖ) : fact (unop (r'.MulLeft.op.obj c) ≤ unop c) :=
 by { dsimp [nnreal.MulLeft], apply_instance }
+
+variables [fact (0 < r)] [fact (0 < r')] [fact (r' < 1)]
 
 def T_inv_sub_Tinv_f_succ [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) (i : ℕ) :
   ((col_complex_rescaled.{u} r' V Λ M N n).obj c).X (i + 1) ⟶
@@ -847,6 +856,8 @@ namespace double_complex
 open polyhedral_lattice (Hom)
 
 local attribute [semireducible] CLCFPTinv CLCFPTinv₂ CLCFP -- CLCTinv
+
+variables [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' < 1)]
 
 @[simps obj map]
 def col'_aux [normed_with_aut r V] (n : ℕ) : system_of_complexes :=
@@ -1138,6 +1149,8 @@ end double_complex
 
 namespace col_complex_rescaled
 
+variables [fact (0 < r')] [fact (r' ≤ 1)]
+
 lemma d_zero_norm_noninc (c : ℝ≥0) :
   (@system_of_complexes.d (col_complex_rescaled r' V Λ M N n) c 0 1).norm_noninc :=
 begin
@@ -1201,6 +1214,8 @@ lemma admissible : (col_complex_rescaled r' V Λ M N n).admissible :=
 
 end col_complex_rescaled
 
+variables [fact (0 < r)] [fact (0 < r')] [fact (r' < 1)]
+
 lemma col_exact'_aux1 [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) (i : ℕ) :
   ∀ x, ∥(((col_complex_rescaled.T_inv_sub_Tinv' r r' V Λ M N (BD.X n) (κ n)).app c).f i) x∥ ≤
     (1 + r⁻¹) * ∥x∥ :=
@@ -1211,6 +1226,8 @@ begin
     refine @SemiNormedGroup.norm_rescale_map_le _ _ _ _ _ (1 + r⁻¹) _,
     exact CLCFP.norm_T_inv_sub_Tinv_le _ _ _ _ _ _ _ }
 end
+
+variables [fact (r < r')]
 
 lemma col_exact'_aux2 [normed_with_aut r V] (c : ℝ≥0ᵒᵖ) (i : ℕ) :
   ∀ y, ∃ x,

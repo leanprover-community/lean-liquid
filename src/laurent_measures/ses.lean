@@ -359,6 +359,7 @@ lemma seval_cast_ℳ_commute' {X : Type*} (c : ℝ≥0) {f : X → filtration (�
 -- end
 ---
 
+@[nolint unused_arguments]
 def seval_ℒ_bdd (c : ℝ≥0) (S : Fintype) (A : finset ℤ) (s : S) :
 laurent_measures_bdd r S A c → laurent_measures_bdd r ϖ A c :=
 begin

@@ -100,16 +100,11 @@ apply_nolint exists_le_finset inhabited_nonempty
 -- for_mathlib/rational_cones.lean
 apply_nolint extended_le_span unused_arguments
 
--- for_mathlib/simplicial/iso.lean
-apply_nolint category_theory.simplicial_object.is_iso_of fails_quickly
-
 -- for_mathlib/snake_lemma.lean
 apply_nolint category_theory.snake_diagram.mk_functor.square_commutes_col unused_arguments
 apply_nolint category_theory.snake_diagram.mk_functor.square_commutes_comp_col unused_arguments
 apply_nolint category_theory.snake_diagram.mk_functor.square_commutes_comp_row unused_arguments
 apply_nolint category_theory.snake_diagram.mk_functor.square_commutes_row unused_arguments
-apply_nolint eq.lhs unused_arguments
-apply_nolint eq.rhs unused_arguments
 
 -- laurent_measures/basic.lean
 apply_nolint laurent_measures.laurent_measures.norm_nonneg dup_namespace
@@ -132,20 +127,6 @@ apply_nolint SemiNormedGroup.normed_with_aut_LocallyConstant fails_quickly
 
 -- normed_group/pseudo_normed_group.lean
 apply_nolint semi_normed_group.pseudo_normed_group instance_priority
-
--- polyhedral_lattice/cech.lean
-apply_nolint PolyhedralLattice.Cech_augmentation_map unused_arguments
-apply_nolint PolyhedralLattice.Cech_conerve unused_arguments
-apply_nolint PolyhedralLattice.Cech_conerve.preorder_hom_eq_id simp_var_head
-apply_nolint PolyhedralLattice.augmentation_map_equalizes unused_arguments
-apply_nolint PolyhedralLattice.augmented_Cech_conerve unused_arguments
-
--- polyhedral_lattice/finsupp.lean
-apply_nolint finsupp.has_norm unused_arguments
-apply_nolint generates_norm.finsupp_generators unused_arguments
-
--- polyhedral_lattice/quotient.lean
-apply_nolint polyhedral_lattice.quotient_finite unused_arguments
 
 -- polyhedral_lattice/topology.lean
 apply_nolint polyhedral_lattice.discrete_topology instance_priority
@@ -212,14 +193,7 @@ apply_nolint rescale.profinitely_filtered_pseudo_normed_group fails_quickly
 apply_nolint rescale.profinitely_filtered_pseudo_normed_group_with_Tinv fails_quickly
 apply_nolint rescale.pseudo_normed_group fails_quickly
 
--- statement.lean
-apply_nolint first_target_stmt unused_arguments
-
 -- thm95/col_exact.lean
-apply_nolint thm95.CLCFP' unused_arguments
-apply_nolint thm95.FLC_arrow_hom' unused_arguments
-apply_nolint thm95.col_complex_rescaled.T_inv_sub_Tinv_f_succ unused_arguments
-apply_nolint thm95.col_complex_rescaled.move_pls2 unused_arguments
 apply_nolint thm95.col_exact'_aux1 unused_arguments
 apply_nolint thm95.col_exact'_aux2 unused_arguments
 
@@ -228,9 +202,6 @@ apply_nolint thm95.universal_constants.K₁_spec unused_arguments
 apply_nolint thm95.universal_constants.b unused_arguments
 apply_nolint thm95.universal_constants.c₀_aux unused_arguments
 apply_nolint thm95.universal_constants.fact_κ'_le_k' impossible_instance
-
--- thm95/default.lean
-apply_nolint thm95.IH unused_arguments
 
 -- thm95/double_complex.lean
 apply_nolint thm95.Cech_nerve unused_arguments

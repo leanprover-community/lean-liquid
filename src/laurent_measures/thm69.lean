@@ -139,7 +139,7 @@ lemma θ_natural [fact (0 < p)] [fact (p ≤ 1)] (S T : Fintype) (f : S ⟶ T) (
 begin
   dsimp only [θ],
   rw ϑ_eq_ϑ',
-  dsimp only [ϑ', seval],
+  dsimp only [ϑ', seval_ℒ],
   sorry,
 end
 
