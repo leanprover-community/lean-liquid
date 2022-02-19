@@ -68,6 +68,7 @@ def mymy (r' : ℝ≥0) (N : ℝ → ℝ≥0) (N0 : N 0 = 0) (N_neg : ∀ x, N (
       simp only [mem_support_iff, not_not] at hc,
       simp [hc, N0] } } }
 
+end laurent_measures
 /-
 #exit
 
