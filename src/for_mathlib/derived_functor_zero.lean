@@ -15,6 +15,7 @@ variables [abelian C] [abelian D] [additive F]
 
 namespace limits
 
+/-- The iso `parallel_pair f 0 ⋙ F ≅ parallel_pair (F.map f) 0`. -/
 def cokernel_diagram_iso {A B : C} (f : A ⟶ B) :
   parallel_pair f 0 ⋙ F ≅ parallel_pair (F.map f) 0 :=
 nat_iso.of_components (λ X,
@@ -30,6 +31,7 @@ begin
   dsimp at *, simp at *, dsimp at *, simp at *,
 end
 
+/-- A morphism `cokernel f ⟶ A₃` provided that `f ≫ g = 0`. -/
 def cokernel_comparison (w : f ≫ g = 0) : cokernel f ⟶ A₃ :=
 cokernel.desc f g w
 
@@ -39,6 +41,7 @@ namespace functor.right_exact
 
 open limits
 
+/-- The iso `F.obj (cokernel f) ≅ cokernel (F.map f)` if `preserves_finite_colimits F`. -/
 def preserves_cokernel [preserves_finite_colimits F] {A B : C} (f : A ⟶ B) :
   F.obj (cokernel f) ≅ cokernel (F.map f) :=
 (is_colimit_of_preserves _ (colimit.is_colimit _)).cocone_point_unique_up_to_iso
@@ -129,17 +132,17 @@ begin
 end
 
 /-- The morphism `cokernel (kernel.lift g f) ⟶ cokernel f` assuming `f ≫ g = 0`. -/
-@[simp] def cokernel_lift_to_cokernel {X Y Z : C} {f : X ⟶ Y} {g : Y ⟶ Z} (w : f ≫ g = 0) :
+def cokernel_lift_to_cokernel {X Y Z : C} {f : X ⟶ Y} {g : Y ⟶ Z} (w : f ≫ g = 0) :
   cokernel (kernel.lift g f w) ⟶ cokernel f :=
 cokernel.desc _ ((kernel.ι g) ≫ cokernel.π _) (by simp)
 
 /-- The morphism `cokernel f ⟶ cokernel (kernel.lift (0 : Y ⟶ Z) f)`. -/
-@[simp] def cokernel_to_cokernel_lift {X Y Z : C} (f : X ⟶ Y) :
+def cokernel_to_cokernel_lift {X Y Z : C} (f : X ⟶ Y) :
   cokernel f ⟶ cokernel (kernel.lift (0 : Y ⟶ Z) f (by simp)) :=
 cokernel.map _ _ (𝟙 _) (kernel.lift _ (𝟙 _) (by simp)) (by { ext, simp })
 
 /-- The isomorphism `cokernel f ≅ cokernel (kernel.lift (0 : Y ⟶ Z) f)`. -/
-@[simp] def cokernel_lift_iso_cokernel {X Y Z : C} (f : X ⟶ Y) :
+def cokernel_lift_iso_cokernel {X Y Z : C} (f : X ⟶ Y) :
   cokernel (kernel.lift (0 : Y ⟶ Z) f (by simp)) ≅ cokernel f :=
 { hom := cokernel_lift_to_cokernel (by simp),
   inv := cokernel_to_cokernel_lift f,
@@ -151,10 +154,10 @@ cokernel.map _ _ (𝟙 _) (kernel.lift _ (𝟙 _) (by simp)) (by { ext, simp })
     rw [← kernel_zero_iso_source_hom, ← kernel_zero_iso_source_inv, ← category.assoc,
       iso.hom_inv_id, category.id_comp],
   end,
-  inv_hom_id' := by { ext, simp } }
+  inv_hom_id' := by { ext, simp [cokernel_to_cokernel_lift, cokernel_lift_to_cokernel] } }
 
 /-- The isomorphism `homology f (0 : Y ⟶ Z) ≅ cokernel f`. -/
-@[simp] def homology_iso_cokernel {X Y Z : C} (f : X ⟶ Y) :
+def homology_iso_cokernel {X Y Z : C} (f : X ⟶ Y) :
   homology f (0 : Y ⟶ Z) (by simp) ≅ cokernel f :=
 homology_iso_cokernel_lift _ _ _ ≪≫ cokernel_lift_iso_cokernel f
 
@@ -196,11 +199,12 @@ begin
 end
 
 /-- Given `P : ProjectiveResolution X`, a morphism `(F.left_derived 0).obj X ⟶ F.obj X`. -/
-@[simp] def left_derived.zero_to_self_obj_hom [enough_projectives C] {X : C}
+@[nolint unused_arguments]
+def left_derived.zero_to_self_obj_hom [enough_projectives C] {X : C}
   (P : ProjectiveResolution X) : (F.left_derived 0).obj X ⟶ F.obj X :=
-((left_derived_obj_iso F 0 (ProjectiveResolution.of X)).hom) ≫
+((left_derived_obj_iso F 0 P).hom) ≫
     (homology_iso_cokernel_lift _ _ _).hom ≫ cokernel_lift_to_cokernel _ ≫
-    (cokernel.desc _ (F.map ((ProjectiveResolution.of X).π.f 0))
+    (cokernel.desc _ (F.map (P.π.f 0))
   begin
     have : (complex_shape.down ℕ).rel 1 0 := rfl,
     rw [homological_complex.d_to_eq _ this, map_homological_complex_obj_d, category.assoc,
@@ -212,12 +216,10 @@ end
 naturality of the square given by `left_derived.zero_to_self_obj_hom`. -/
 lemma left_derived.zero_to_self_obj_map [enough_projectives C] {X : C} {Y : C} (f : X ⟶ Y)
   (P : ProjectiveResolution X) (Q : ProjectiveResolution Y) :
-  (F.left_derived 0).map f ≫ left_derived.zero_to_self_obj_hom F (ProjectiveResolution.of Y) =
-  left_derived.zero_to_self_obj_hom F (ProjectiveResolution.of X) ≫ F.map f :=
+  (F.left_derived 0).map f ≫ left_derived.zero_to_self_obj_hom F Q =
+  left_derived.zero_to_self_obj_hom F P ≫ F.map f :=
 begin
-    let f₁ : P.complex ⟶ Q.complex := ProjectiveResolution.lift f P Q,
-    rw [left_derived_map_eq F 0 f f₁ (by simp)],
-    sorry
+  sorry
 end
 
 /-- The natural transformation `nat_trans (F.left_derived 0) F`. -/
