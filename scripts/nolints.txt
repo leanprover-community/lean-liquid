@@ -109,6 +109,11 @@ apply_nolint category_theory.snake_diagram.mk_functor.square_commutes_row unused
 -- laurent_measures/basic.lean
 apply_nolint laurent_measures.laurent_measures.norm_nonneg dup_namespace
 
+-- laurent_measures/ses.lean
+apply_nolint laurent_measures_ses.box unused_arguments
+apply_nolint laurent_measures_ses.equiv_box_ϖ def_lemma
+apply_nolint laurent_measures_ses.real_measures.topological_space unused_arguments
+
 -- laurent_measures/theta.lean
 apply_nolint theta.aux_y unused_arguments
 apply_nolint theta.eventually_le ge_or_gt
