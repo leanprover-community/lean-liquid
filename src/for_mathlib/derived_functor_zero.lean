@@ -220,6 +220,7 @@ begin
     sorry
 end
 
+/-- The natural transformation `nat_trans (F.left_derived 0) F`. -/
 def left_derived.zero_to_self [enough_projectives C] : nat_trans (F.left_derived 0) F :=
 { app := λ X, left_derived.zero_to_self_obj_hom F (ProjectiveResolution.of X),
   naturality' := λ X Y f, left_derived.zero_to_self_obj_map F f (ProjectiveResolution.of X)
