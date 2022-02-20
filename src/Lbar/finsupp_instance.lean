@@ -1,14 +1,122 @@
 import Lbar.ses
 
-open aux_thm69 finset finsupp
+open aux_thm69 finset finsupp laurent_measures
 open_locale nnreal big_operators
 
 noncomputable theory
 
 universes u v
 
-namespace laurent_measures
-variables (r' : ℝ≥0) [fact (0 < r')] (S : Fintype)
+section families_of_add_comm_groups
+
+variables (S A : Type*) [add_comm_group A]
+
+--instance pro : add_comm_group (S → A) := pi.add_comm_group
+/-
+#exit
+{ add := λ F G s, F s + G s,
+  add_assoc := λ F G H, by simp only [add_assoc],
+  zero := 0,
+  zero_add := λ F, by { simp only [pi.zero_apply, zero_add] },
+  add_zero := λ F, by { simp only [pi.zero_apply, add_zero] },
+  nsmul := λ N F s, N • F s,
+  nsmul_zero' := λ F, by { ext, simp only [pi.zero_apply, zero_smul] },
+  nsmul_succ' := λ N F, by { ext, simp only [succ_nsmul, pi.add_apply] },
+  neg := λ F s, - F s,
+  sub := λ F G s, F s - G s,
+  sub_eq_add_neg := λ F G, by { ext, simp only [sub_eq_add_neg, pi.add_apply] },
+  zsmul := _,
+  zsmul_zero' := _,
+  zsmul_succ' := _,
+  zsmul_neg' := _,
+  add_left_neg := _,
+  add_comm := _ }
+-/
+
+end families_of_add_comm_groups
+
+namespace flaurent
+section add_group_instance
+
+instance add_comm_group {α β γ : Type*} [add_comm_group γ] : add_comm_group (α → β →₀ γ) :=
+pi.add_comm_group
+
+instance new (S : Fintype) : add_comm_group (S → ℤ →₀ ℝ) := flaurent.add_comm_group
+
+end add_group_instance
+/-
+/-- Addition in `S → (ℤ →₀ ℝ)`, defined as pointwise addition. -/
+def add (F : S → (ℤ →₀ ℝ)) (G : S → (ℤ →₀ ℝ)) : S → (ℤ →₀ ℝ) :=
+λ s, F s + G s
+
+/-- Subtraction in `S → (ℤ →₀ ℝ)`, defined as pointwise subtraction. -/
+def sub (F : S → (ℤ →₀ ℝ)) (G : S → (ℤ →₀ ℝ)) : S → (ℤ →₀ ℝ) :=
+λ s, F s - G s
+
+/-- Negation in `S → (ℤ →₀ ℝ)`, defined as pointwise negation. -/
+def neg (F : S → (ℤ →₀ ℝ)) : S → (ℤ →₀ ℝ) :=
+λ s, - F s
+
+--instance : has_zero (S → (ℤ →₀ ℝ)) := by apply_instance
+instance : has_add (S → (ℤ →₀ ℝ)) := ⟨add⟩
+instance : has_sub (S → (ℤ →₀ ℝ)) := ⟨sub⟩
+instance : has_neg (S → (ℤ →₀ ℝ)) := ⟨neg⟩
+
+instance : inhabited (S → (ℤ →₀ ℝ)) := ⟨0⟩
+
+/-- Tailored scalar multiplication by natural numbers. -/
+protected def nsmul (N : ℕ) (F : S → (ℤ →₀ ℝ)) : S → (ℤ →₀ ℝ) :=
+λ s, N • F s
+
+/-- Tailored scalar multiplication by integers. -/
+protected def zsmul (N : ℤ) (F : S → (ℤ →₀ ℝ)) : S → (ℤ →₀ ℝ) :=
+λ s, N • F s
+
+instance : add_comm_group (S → (ℤ →₀ ℝ)) :=
+{
+  zero := 0, add := (+), neg := has_neg.neg, sub := has_sub.sub,
+  add_assoc := λ a b c, by { ext s n, simp only [pi.add_apply, finsupp.coe_add, add_assoc] },
+  zero_add := λ a, by { ext s n, simp only [pi.add_apply, pi.zero_apply, zero_add] },
+  add_zero := λ a, by { ext s n, simp only [pi.add_apply, pi.zero_apply, add_zero] },
+  nsmul := λ n F, flaurent.nsmul n F,
+  nsmul_zero' := λ a, by { ext s n, simp only [flaurent.nsmul, pi.zero_apply, zero_smul] },
+  nsmul_succ' := λ a F, by { ext s n, simp only [flaurent.nsmul, nat.succ_eq_add_one, add_smul,
+    one_smul, add_comm, pi.add_apply] },
+  sub_eq_add_neg := by { intros, ext, simp only
+    [sub_eq_add_neg, pi.add_apply, pi.sub_apply, pi.neg_apply] },
+  zsmul := λ n F, flaurent.zsmul n F,
+  zsmul_zero' := _,
+  zsmul_succ' := _,
+  zsmul_neg' := _,
+  add_left_neg := _,
+  add_comm := _ }
+-/
+
+variables (r' : ℝ≥0) (S : Fintype)
+
+/-- The norm of `F : S → (ℤ →₀ ℝ)` as nonnegative real number.
+It is defined as `∑ s, ∑' n, (↑(F s n).nat_abs * r' ^ n)`. -/
+protected def nnnorm (F : S → (ℤ →₀ ℝ)) : ℝ≥0 :=
+∑ s, ∑' n, ∥F s n∥₊ * r' ^ n
+
+/-- `Lfin S` is the set of finite sums `F_s = ∑ a_{s,n}T^n ∈ Tℤ[[T]]`. -/
+structure Lfin (S : Fintype) :=
+(to_fun : S → ℤ →₀ ℤ)
+(r'     : ℝ≥0)
+
+instance pro : inhabited (Lfin S) :=
+⟨{ to_fun := 0, r' := 0 }⟩
+
+local notation `ℒ₀ `:1000 S := flaurent.Lfin S
+
+instance : has_nnnorm ℒ₀ S :=
+⟨λ F, flaurent.nnnorm F.r' S (λ s, ⟨(F.to_fun s).support, coe ∘ (F.to_fun s), by simp⟩)⟩
+
+
+variable [fact (0 < r')]
+
+/-- `flaurent r' S` is the set of finite sums `F_s = ∑ a_{s,n}T^n ∈ ℤ[T⁻¹]`. -/
+local notation `ℒ₀` := (S → (ℤ →₀ ℝ))
 
 /-- `Lker r' S` is the set of finite sums `F_s = ∑ a_{s,n}T^n ∈ ℤ[T⁻¹]`. -/
 structure Lker (r' : ℝ≥0) (S : Fintype) :=
@@ -34,14 +142,6 @@ def Lbar_to_Lker [fact (r' < 1)] (F : laurent_measures r' S) :
 lemma finset.sum_summable {α M : Type*} [add_comm_group M] [topological_space M] (f : α →₀ M) :
   summable (λ a, f a) :=
 summable_of_ne_finset_zero (λ b hb, not_mem_support_iff.mp hb)
-
-/-- The norm of `F : Lbar r' S` as nonnegative real number.
-It is defined as `∑ s, ∑' n, (↑(F s n).nat_abs * r' ^ n)`. -/
-protected def nnnorm (r' : ℝ≥0) (S : Fintype) (F : S → (ℤ →₀ ℝ)) : ℝ≥0 :=
-∑ s, ∑' n, ∥F s n∥₊ * r' ^ n
-
-instance (r' : ℝ≥0) (S : Fintype) : has_nnnorm (S → (ℤ →₀ ℝ)) := --⟨laurent_measures.nnnorm r' S⟩
-{ nnnorm := laurent_measures.nnnorm r' S }
 
 /-
 def mymy (r' : ℝ≥0) (S : Fintype) : pseudo_normed_group (S → (ℤ →₀ ℝ)) :=
@@ -87,7 +187,7 @@ def mymy (r' : ℝ≥0) (N : ℝ → ℝ≥0) (N0 : N 0 = 0) (N_neg : ∀ x, N (
       simp only [mem_support_iff, not_not] at hc,
       simp [hc, N0] } } }
 
-end laurent_measures
+end flaurent
 /-
 #exit
 
