@@ -139,7 +139,7 @@ cokernel.desc _ ((kernel.ι g) ≫ cokernel.π _) (by simp)
 cokernel.map _ _ (𝟙 _) (kernel.lift _ (𝟙 _) (by simp)) (by { ext, simp })
 
 /-- The isomorphism `cokernel f ≅ cokernel (kernel.lift (0 : Y ⟶ Z) f)`. -/
-def cokernel_lift_iso_cokernel {X Y Z : C} (f : X ⟶ Y) :
+@[simp] def cokernel_lift_iso_cokernel {X Y Z : C} (f : X ⟶ Y) :
   cokernel (kernel.lift (0 : Y ⟶ Z) f (by simp)) ≅ cokernel f :=
 { hom := cokernel_lift_to_cokernel (by simp),
   inv := cokernel_to_cokernel_lift f,
@@ -153,7 +153,7 @@ def cokernel_lift_iso_cokernel {X Y Z : C} (f : X ⟶ Y) :
   end,
   inv_hom_id' := by { ext, simp } }
 
-/-- The isomorphism `cokernel f ⟶ homology f (0 : Y ⟶ Z)`. -/
+/-- The isomorphism `homology f (0 : Y ⟶ Z) ≅ cokernel f`. -/
 @[simp] def homology_iso_cokernel {X Y Z : C} (f : X ⟶ Y) :
   homology f (0 : Y ⟶ Z) (by simp) ≅ cokernel f :=
 homology_iso_cokernel_lift _ _ _ ≪≫ cokernel_lift_iso_cokernel f
@@ -195,17 +195,35 @@ begin
   simp
 end
 
-def functor.left_derived.zero_to_self [enough_projectives C] : nat_trans (F.left_derived 0) F :=
-{ app := λ X, ((left_derived_obj_iso F 0 (ProjectiveResolution.of X)).hom) ≫
+/-- Given `P : ProjectiveResolution X`, a morphism `(F.left_derived 0).obj X ⟶ F.obj X`. -/
+@[simp] def left_derived.zero_to_self_obj_hom [enough_projectives C] {X : C}
+  (P : ProjectiveResolution X) : (F.left_derived 0).obj X ⟶ F.obj X :=
+((left_derived_obj_iso F 0 (ProjectiveResolution.of X)).hom) ≫
     (homology_iso_cokernel_lift _ _ _).hom ≫ cokernel_lift_to_cokernel _ ≫
     (cokernel.desc _ (F.map ((ProjectiveResolution.of X).π.f 0))
-    begin
-      have : (complex_shape.down ℕ).rel 1 0 := rfl,
-      rw [homological_complex.d_to_eq _ this, map_homological_complex_obj_d, category.assoc,
+  begin
+    have : (complex_shape.down ℕ).rel 1 0 := rfl,
+    rw [homological_complex.d_to_eq _ this, map_homological_complex_obj_d, category.assoc,
       ← functor.map_comp],
-      simp
-    end),
-  naturality' := sorry }
+    simp
+  end)
+
+/-- Given `P : ProjectiveResolution X` and `Q : ProjectiveResolution Y` and a morphism `f : X ⟶ Y`,
+naturality of the square given by `left_derived.zero_to_self_obj_hom`. -/
+lemma left_derived.zero_to_self_obj_map [enough_projectives C] {X : C} {Y : C} (f : X ⟶ Y)
+  (P : ProjectiveResolution X) (Q : ProjectiveResolution Y) :
+  (F.left_derived 0).map f ≫ left_derived.zero_to_self_obj_hom F (ProjectiveResolution.of Y) =
+  left_derived.zero_to_self_obj_hom F (ProjectiveResolution.of X) ≫ F.map f :=
+begin
+    let f₁ : P.complex ⟶ Q.complex := ProjectiveResolution.lift f P Q,
+    rw [left_derived_map_eq F 0 f f₁ (by simp)],
+    sorry
+end
+
+def left_derived.zero_to_self [enough_projectives C] : nat_trans (F.left_derived 0) F :=
+{ app := λ X, left_derived.zero_to_self_obj_hom F (ProjectiveResolution.of X),
+  naturality' := λ X Y f, left_derived.zero_to_self_obj_map F f (ProjectiveResolution.of X)
+    (ProjectiveResolution.of Y) }
 
 end functor.right_exact
 
