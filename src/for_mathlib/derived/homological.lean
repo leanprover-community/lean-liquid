@@ -4,6 +4,7 @@ import category_theory.linear.yoneda
 import algebra.category.Module.abelian
 import algebra.category.Group.abelian
 import category_theory.currying
+import for_mathlib.exact_seq
 
 namespace category_theory.triangulated
 
@@ -32,7 +33,17 @@ variables [has_zero_object C] [has_shift C ℤ] [∀ (n : ℤ), (shift_functor C
 /-- A functor `F` is a *homological* functor if for every distinguished triangle
 `A ⟶ B ⟶ C ⟶ A[1]` the sequence `F(A) ⟶ F(B) ⟶ F(C)` is exact. -/
 class homological_functor {A : Type*} [category A] [abelian A] (F : C ⥤ A) [F.additive] : Prop :=
-(cond : ∀ (T : triangle C) (hT : T ∈ dist_triang C), exact (F.map T.mor₁) (F.map T.mor₂))
+(cond [] : ∀ (T : triangle C) (hT : T ∈ dist_triang C), exact (F.map T.mor₁) (F.map T.mor₂))
+
+lemma four_term_exact_seq {A : Type*} [category A] [abelian A] (F : C ⥤ A) [F.additive]
+  [homological_functor F] (T : triangle C) (hT : T ∈ dist_triang C):
+  exact_seq A [F.map T.mor₁, F.map T.mor₂, F.map T.mor₃] :=
+begin
+  apply exact_seq.cons,
+  apply homological_functor.cond F _ hT,
+  rw ← exact_iff_exact_seq,
+  apply homological_functor.cond F _ ((rotate_distinguished_triangle T).mp hT),
+end
 
 lemma complete_distinguished_triangle_morphism'
   (T₁ T₂ : triangle C)
