@@ -227,16 +227,6 @@ begin
 end
 ≫ F.map (𝟙 _)
 
--- (left_derived_obj_iso F 0 P).hom ≫ (homology_iso_cokernel_lift _ _ _).hom ≫
---   cokernel.desc _ (kernel.ι _ ≫ (F.map (P.π.f 0)))
---   begin
---     simp only [kernel.lift_ι_assoc],
---     have : (complex_shape.down ℕ).rel 1 0 := rfl,
---     rw [homological_complex.d_to_eq _ this, map_homological_complex_obj_d, category.assoc,
---       ← functor.map_comp],
---     simp
---   end
-
 /-- Given `P : ProjectiveResolution X` and `Q : ProjectiveResolution Y` and a morphism `f : X ⟶ Y`,
 naturality of the square given by `left_derived.zero_to_self_obj_hom. -/
 lemma left_derived.zero_to_self_natural [enough_projectives C] {X : C} {Y : C} (f : X ⟶ Y)
@@ -244,14 +234,21 @@ lemma left_derived.zero_to_self_natural [enough_projectives C] {X : C} {Y : C} (
   (F.left_derived 0).map f ≫ left_derived.zero_to_self_obj_hom F Q =
   left_derived.zero_to_self_obj_hom F P ≫ F.map f :=
 begin
-  dsimp [left_derived.zero_to_self_obj_hom],
-  rw [functor.left_derived_map_eq F 0 f (ProjectiveResolution.lift f P Q) (by simp),
+  dsimp only [left_derived.zero_to_self_obj_hom],
+  let f₁ := ProjectiveResolution.lift f P Q,
+  rw [functor.left_derived_map_eq F 0 f f₁ (by simp),
     category.assoc, category.assoc, ← category.assoc _ (F.left_derived_obj_iso 0 Q).hom,
     iso.inv_hom_id, category.id_comp, category.assoc, category.assoc],
   congr' 1,
   rw [functor.map_id, functor.map_id, category.id_comp, category.comp_id],
-
-  sorry
+  dsimp only [homology_functor_map],
+  ext,
+  simp only [homological_complex.hom.sq_to_right, map_homological_complex_map_f,
+    homology.π'_map_assoc, homology.desc'_π', kernel.lift_ι_assoc, category.assoc,
+    homology.desc'_π'_assoc],
+  rw [← functor.map_comp, ← functor.map_comp],
+  congr' 2,
+  exact homological_complex.congr_hom (ProjectiveResolution.lift_commutes f P Q) 0
 end
 
 /-- The natural transformation `nat_trans (F.left_derived 0) F`. -/
