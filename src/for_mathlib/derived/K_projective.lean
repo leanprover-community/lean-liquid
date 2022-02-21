@@ -93,4 +93,33 @@ lemma lift_ext {P X Y : 𝒦} [is_K_projective P] (g : X ⟶ Y) [is_quasi_iso g]
   (a b : P ⟶ X) (h : a ≫ g = b ≫ g) : a = b :=
 (hom_K_projective_bijective P g).1 h
 
+@[simps]
+def Ext0 : 𝒦ᵒᵖ ⥤ 𝒦 ⥤ Ab :=
+{ obj := λ X, preadditive_yoneda.flip.obj (opposite.op $ X.unop.replace),
+  map := λ X₁ X₂ f, preadditive_yoneda.flip.map (lift (X₂.unop.π ≫ f.unop) X₁.unop.π).op,
+  map_id' := begin
+    intros X,
+    ext Y e,
+    dsimp,
+    simp only [category.comp_id, id_apply],
+    convert category.id_comp _,
+    symmetry,
+    apply lift_unique,
+    simp,
+  end,
+  map_comp' := begin
+    intros X₁ X₂ X₃ f g,
+    ext Y e,
+    dsimp,
+    simp only [comp_apply, linear_map.to_add_monoid_hom_coe,
+      preadditive_yoneda_obj_map_apply, quiver.hom.unop_op, ← category.assoc],
+    congr' 1,
+    symmetry,
+    apply lift_unique,
+    simp,
+  end } .
+
+def Ext (i : ℤ) : 𝒦ᵒᵖ ⥤ 𝒦 ⥤ Ab :=
+Ext0 ⋙ (whiskering_left _ _ _).obj (shift_functor _ i)
+
 end homotopy_category
