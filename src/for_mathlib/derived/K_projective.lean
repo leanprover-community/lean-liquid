@@ -21,7 +21,15 @@ class is_K_projective (X : 𝒦) : Prop :=
 class is_quasi_iso {X Y : 𝒦} (f : X ⟶ Y) : Prop :=
 (cond : ∀ i, is_iso ((homotopy_category.homology_functor _ _ i).map f))
 
-instance homology_functor_additive : functor.additive HH := sorry
+-- Move this
+instance homology_functor_additive : functor.additive HH := functor.additive.mk $
+begin
+  rintros X Y ⟨f⟩ ⟨g⟩,
+  dsimp [homotopy_category.homology_functor],
+  erw ← (homology_functor _ _ _).map_add,
+  refl,
+  apply_instance,
+end
 
 instance homology_functor_homological : homological_functor HH := sorry
 
