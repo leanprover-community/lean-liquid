@@ -151,4 +151,8 @@ begin
     apply dist_triang_to_exact_complex _ hT _ _ hf }
 end
 
+theorem is_iso_of_is_iso_of_is_iso (T₁ T₂ : triangle C)
+  (h₁ : T₁ ∈ dist_triang C) (h₂ : T₂ ∈ dist_triang C)
+  (e : T₁ ⟶ T₂) [is_iso e.hom₁] [is_iso e.hom₂] : is_iso e := sorry
+
 end category_theory.triangulated
