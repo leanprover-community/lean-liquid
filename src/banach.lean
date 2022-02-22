@@ -1,6 +1,8 @@
 import analysis.normed_space.banach
 import analysis.mean_inequalities_pow
 
+import normed_group.normed_with_aut
+
 /-!
 # p-Banach spaces
 
@@ -34,6 +36,7 @@ variables (V : Type*) (p : ℝ) [fact (0 < p)] [add_comm_group V] [module ℝ V]
 def has_p_norm.semi_normed_group (h : has_p_norm V p) : semi_normed_group V :=
 { to_uniform_space := by apply_instance,
   uniformity_dist := h.uniformity,
+  to_add_comm_group := by apply_instance,
   .. @semi_normed_group.of_core V _ h.to_has_norm $
     have hp0 : p ≠ 0 := (fact.out _ : 0 < p).ne',
     { norm_zero := by simpa only [zero_smul, abs_zero, real.zero_rpow hp0] using h.norm_smul 0 0,
@@ -69,9 +72,30 @@ instance : _root_.topological_add_group V := V.p_banach'.topological_add_group
 instance : _root_.has_continuous_smul ℝ V := V.p_banach'.continuous_smul
 instance : _root_.complete_space V := V.p_banach'.complete
 
+variables {p}
+
 /-- Highly non-canonical! -/
 def choose_semi_normed_group : semi_normed_group V :=
-classical.choice $ nonempty.map (has_p_norm.semi_normed_group V p) V.p_banach'.exists_p_norm
+(classical.choice V.p_banach'.exists_p_norm).semi_normed_group V p
+
+@[simps] def smul_normed_hom (x : ℝ) :
+  @normed_group_hom V V V.choose_semi_normed_group V.choose_semi_normed_group :=
+{ to_fun := λ v, x • v,
+  map_add' := λ v₁ v₂, smul_add _ _ _,
+  bound' := ⟨|x|^p, λ v, by rw [has_p_norm.norm_smul, smul_eq_mul]⟩ }
+
+/-- Highly non-canonical! -/
+def choose_normed_with_aut (x : ℝ≥0) [fact (0 < x)] :
+  normed_with_aut (x ^ p) ⟨V, choose_semi_normed_group V⟩ :=
+{ T :=
+  { hom := smul_normed_hom V x,
+    inv := smul_normed_hom V (x⁻¹),
+    hom_inv_id' := by { ext v, dsimp, rw [← mul_smul, inv_mul_cancel, one_smul],
+      exact_mod_cast (fact.out _ : 0 < x).ne' },
+    inv_hom_id' := by { ext v, dsimp, rw [← mul_smul, mul_inv_cancel, one_smul],
+      exact_mod_cast (fact.out _ : 0 < x).ne' } } ,
+  norm_T := λ v, by { dsimp, rw [has_p_norm.norm_smul, smul_eq_mul], congr' 2,
+    rw abs_eq_self, exact x.coe_nonneg } }
 
 end pBanach
 
