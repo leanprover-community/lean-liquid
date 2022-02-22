@@ -34,7 +34,8 @@ It is known that:
 * `normed_spectral.K₀` always returns a number larger or equal to `1`.
 * `normed_spectral.ε` always returns a positive number.
 
-The inequalities are:
+The following inequalities are imposed on these constants
+by the normed homological algebra of the rest of the proof:
 
 * `1 < k₁ m`
 * `1 ≤ K₁ m`
