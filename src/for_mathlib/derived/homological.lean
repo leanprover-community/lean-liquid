@@ -6,6 +6,7 @@ import algebra.category.Group.abelian
 import category_theory.currying
 import for_mathlib.exact_seq
 import for_mathlib.preadditive_yoneda
+import for_mathlib.AddCommGroup.exact
 
 import category_theory.abelian.diagram_lemmas.four
 
@@ -117,9 +118,9 @@ instance preadditive_yoneda_flip_homological (X : C) :
 begin
   constructor,
   intros T hT,
-  -- Missing `AddCommGroup.exact_iff`?
   suffices : add_monoid_hom.range ((preadditive_yoneda.flip.obj (opposite.op X)).map T.mor₁) =
-    add_monoid_hom.ker ((preadditive_yoneda.flip.obj (opposite.op X)).map T.mor₂), sorry,
+    add_monoid_hom.ker ((preadditive_yoneda.flip.obj (opposite.op X)).map T.mor₂),
+  { rwa AddCommGroup.exact_iff },
   apply le_antisymm,
   { rintros _ ⟨(g : X ⟶ _),rfl⟩,
     dsimp,
