@@ -52,6 +52,14 @@ begin
   sorry
 end
 
+lemma _root_.category_theory.cochain_complex.exact_to_cone_in
+  (X Y : cochain_complex A ℤ) (f : X ⟶ Y) :
+  exact ((_root_.homology_functor _ _ 0).map f)
+    ((_root_.homology_functor _ _ 0).map (cone.in f)) :=
+begin
+  sorry
+end
+
 section
 
 local attribute [instance] abelian.pseudoelement.hom_to_fun
