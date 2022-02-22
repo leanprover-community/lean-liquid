@@ -5,7 +5,11 @@ import analysis.mean_inequalities_pow
 # p-Banach spaces
 
 A `p`-Banach space is just like an ordinary Banach space,
-except that the axiom `∥c • v∥ = ∥c∥ * ∥v∥` is replaced by `∥c • v∥ = ∥c∥^p * ∥v∥`
+except that the axiom `∥c • v∥ = ∥c∥ * ∥v∥` is replaced by `∥c • v∥ = ∥c∥^p * ∥v∥`.
+
+In other words, a `p`-Banach space is a complete topological vector space
+whose topology is induced by a `p`-norm.
+
 
 In this file, we define `p`-normed spaces, called `normed_space'`,
 and we prove that every `p`-normed space is also `p'`-normed, for `0 < p' ≤ p`.
@@ -15,6 +19,80 @@ and we prove that every `p`-normed space is also `p'`-normed, for `0 < p' ≤ p`
 noncomputable theory
 
 open_locale nnreal
+
+section
+
+structure has_p_norm (V : Type*) (p : ℝ)
+  [add_comm_group V] [module ℝ V] [uniform_space V] extends has_norm V :=
+(norm_smul : ∀ (α : ℝ) (v : V), ∥α • v∥ = |α|^p • ∥v∥)
+(triangle : ∀ (v w : V), ∥v+w∥ ≤ ∥v∥ + ∥w∥)
+(uniformity : uniformity V = ⨅ (ε : ℝ) (H : ε > 0),
+  filter.principal {p : V × V | ∥p.fst - p.snd∥ < ε})
+
+variables (V : Type*) (p : ℝ) [fact (0 < p)] [add_comm_group V] [module ℝ V] [uniform_space V]
+
+def has_p_norm.semi_normed_group (h : has_p_norm V p) : semi_normed_group V :=
+{ to_uniform_space := by apply_instance,
+  uniformity_dist := h.uniformity,
+  .. @semi_normed_group.of_core V _ h.to_has_norm $
+    have hp0 : p ≠ 0 := (fact.out _ : 0 < p).ne',
+    { norm_zero := by simpa only [zero_smul, abs_zero, real.zero_rpow hp0] using h.norm_smul 0 0,
+      triangle := h.triangle,
+      norm_neg := λ v, by simpa only [neg_smul, one_smul, abs_neg, abs_one, real.one_rpow]
+                            using h.norm_smul (-1) v } }
+
+structure p_banach : Prop :=
+(exists_p_norm : nonempty (has_p_norm V p))
+[topological_add_group : topological_add_group V]
+[continuous_smul : has_continuous_smul ℝ V]
+[complete: complete_space V]
+
+end
+
+structure pBanach (p : ℝ) [fact (0 < p)] :=
+(V : Type*)
+[add_comm_group' : add_comm_group V]
+[module' : module ℝ V]
+[uniform_space' : uniform_space V]
+(p_banach' : p_banach V p)
+
+namespace pBanach
+
+variables (p : ℝ) [fact (0 < p)] (V : pBanach p)
+
+instance : has_coe_to_sort (pBanach p) (Type*) := ⟨λ X, X.V⟩
+
+instance : _root_.add_comm_group V := V.add_comm_group'
+instance : _root_.module ℝ V := V.module'
+instance : _root_.uniform_space V := V.uniform_space'
+
+/-- Highly non-canonical! -/
+def choose_semi_normed_group : semi_normed_group V :=
+classical.choice $ nonempty.map (has_p_norm.semi_normed_group V p) V.p_banach'.exists_p_norm
+
+end pBanach
+
+-- noncomputable
+-- def pBanach'_is_qBanach' (V: Type*) (p : ℝ) [fact (0 < p)] [fact (p ≤ 1)] (q : ℝ) [fact (0 < q)]
+--   [fact (q ≤ 1)] [add_comm_group V] [module ℝ V] [uniform_space V] [has_continuous_smul ℝ V]
+--   [topological_add_group V] [complete_space V] (hp : pBanach' V p) : pBanach' V q :=
+-- begin
+--   cases hp,
+--   let Hp_norm := hp.some,
+--   let ψ := Hp_norm.norm,
+--   use λ v : V, (ψ v)^(q/p),--[FAE] Why λ v, ((h_p_norm.norm) v)^(q/p) does not work?
+--   intros α v,
+--   dsimp only [ψ],
+--   sorry,
+--   sorry,
+  -- rw [Hp_norm.p_norm α v, smul_eq_mul, real.mul_rpow, ← real.rpow_mul, mul_div_cancel'],
+  -- exacts [refl _, ne_of_gt (fact.out _), abs_nonneg α,
+  --   (real.rpow_nonneg_of_nonneg (abs_nonneg α) p), hp_nonneg_norm v,
+  --   (λ _, (real.rpow_nonneg_of_nonneg (hp_nonneg_norm _) _))],
+-- end
+
+
+section obsolete
 
 -- move this
 lemma real.add_rpow_le {x y r : ℝ}
@@ -124,55 +202,4 @@ instance (𝕜 : Type*) (V : Type*) [normed_field 𝕜] [normed_group V] [module
 
 end as_normed_space'
 
-variables (p : ℝ≥0)
-
-structure pBanach :=
-(V : Type*)
-(is_normed_group : normed_group V)
-(is_module : module ℝ V)
-(is_normed_space' : normed_space' ℝ p V)
-
-
-
-/-[FAE] Another try at pBanach: in the `def`, `nonneg_norm` must be restated in terms of a
-compatibility with the topology, and its relation with a distance
--/
-
-structure has_p_norm (V : Type*) (p : ℝ) [fact (0 < p)] [fact (p ≤ 1)]
-  [add_comm_group V] [module ℝ V] [topological_space V] [has_continuous_smul ℝ V]
-    [topological_add_group V] extends has_norm V :=
-(p_norm : ∀ (α : ℝ) (v : V), ∥ α • v ∥ = | α | ^ p • ∥ v ∥)
-(norm_top : ∀ (v : V), 0 ≤ ∥ v ∥)
-
-structure pBanach' (V : Type*) (p : ℝ) [fact (0 < p)] [fact (p ≤ 1)] [add_comm_group V] [module ℝ V]
- [uniform_space V] [has_continuous_smul ℝ V] [topological_add_group V] [complete_space V] :=
-(exists_p_norm : nonempty (has_p_norm V p))
-
--- noncomputable
--- def pBanach'_is_qBanach' (V: Type*) (p : ℝ) [fact (0 < p)] [fact (p ≤ 1)] (q : ℝ) [fact (0 < q)]
---   [fact (q ≤ 1)] [add_comm_group V] [module ℝ V] [uniform_space V] [has_continuous_smul ℝ V]
---   [topological_add_group V] [complete_space V] (hp : pBanach' V p) : pBanach' V q :=
--- begin
---   cases hp,
---   let Hp_norm := hp.some,
---   let ψ := Hp_norm.norm,
---   use λ v : V, (ψ v)^(q/p),--[FAE] Why λ v, ((h_p_norm.norm) v)^(q/p) does not work?
---   intros α v,
---   dsimp only [ψ],
---   sorry,
---   sorry,
-  -- rw [Hp_norm.p_norm α v, smul_eq_mul, real.mul_rpow, ← real.rpow_mul, mul_div_cancel'],
-  -- exacts [refl _, ne_of_gt (fact.out _), abs_nonneg α,
-  --   (real.rpow_nonneg_of_nonneg (abs_nonneg α) p), hp_nonneg_norm v,
-  --   (λ _, (real.rpow_nonneg_of_nonneg (hp_nonneg_norm _) _))],
--- end
-
-namespace pBanach
-
-instance : has_coe_to_sort (pBanach p) (Type*) := ⟨λ X, X.V⟩
-
-instance (X : pBanach p) : normed_group X := X.is_normed_group
-instance (X : pBanach p) : module ℝ X := X.is_module
-instance (X : pBanach p) : normed_space' ℝ p X := X.is_normed_space'
-
-end pBanach
+end obsolete
