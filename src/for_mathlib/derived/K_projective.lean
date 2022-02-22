@@ -49,6 +49,10 @@ lemma _root_.category_theory.cochain_complex.exact_cone_in_cone_out
   exact ((_root_.homology_functor _ _ 0).map (cone.in f))
     ((_root_.homology_functor _ _ 0).map (cone.out f)) :=
 begin
+  apply split.exact,
+  apply split.map,
+  apply splitting.split,
+  have := cone.termwise_split f,
   sorry
 end
 

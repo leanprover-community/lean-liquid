@@ -2,6 +2,8 @@ import algebra.homology.exact
 import category_theory.abelian.basic
 import category_theory.abelian.diagram_lemmas.four
 
+import category_theory.preadditive.additive_functor
+
 noncomputable theory
 
 universes v u
@@ -109,6 +111,18 @@ lemma exact_of_split {A B C : 𝒜} (f : A ⟶ B) (g : B ⟶ C) (χ : C ⟶ B) (
     rw [← H, preadditive.comp_add],
     simp only [add_zero, zero_comp, kernel_subobject_arrow_comp_assoc],
   end }
+
+lemma split.exact (h : split f g) : exact f g :=
+by { obtain ⟨φ, χ, -, -, h1, -, h2⟩ := h, exact exact_of_split f g χ φ h1 h2 }
+
+def split.map {𝒜 ℬ : Type*} [category 𝒜] [abelian 𝒜] [category ℬ] [abelian ℬ] (F : 𝒜 ⥤ ℬ)
+  [functor.additive F] {A B C : 𝒜} (f : A ⟶ B) (g : B ⟶ C) (h : split f g) :
+  split (F.map f) (F.map g) :=
+begin
+  obtain ⟨φ, χ, h1, h2, h3, h4, h5⟩ := h,
+  refine ⟨⟨F.map φ, F.map χ, _⟩⟩,
+  simp only [← F.map_comp, ← F.map_id, ← F.map_add, F.map_zero, *, eq_self_iff_true, and_true],
+end
 
 -- move this?
 instance exact_inl_snd (A B : 𝒜) : exact (biprod.inl : A ⟶ A ⊞ B) biprod.snd :=
