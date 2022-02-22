@@ -3,6 +3,7 @@ import for_mathlib.abelian_category
 import for_mathlib.derived.homological
 import category_theory.abelian.projective
 import for_mathlib.homology
+import for_mathlib.snake_lemma3
 
 open category_theory category_theory.limits category_theory.triangulated
 open homological_complex
@@ -49,7 +50,18 @@ lemma _root_.category_theory.cochain_complex.exact_cone_in_cone_out
   exact ((_root_.homology_functor _ _ 0).map (cone.in f))
     ((_root_.homology_functor _ _ 0).map (cone.out f)) :=
 begin
-  sorry
+  haveI : exact ((cone.in f).f (-1)) ((cone.out f).f (-1)) := sorry,
+  haveI : exact ((cone.in f).f 0) ((cone.out f).f 0) := sorry,
+  haveI : exact ((cone.in f).f 1) ((cone.out f).f 1) := sorry,
+  haveI : epi ((cone.out f).f (-1)) := sorry,
+  haveI : epi ((cone.out f).f 0) := sorry,
+  haveI : epi ((cone.out f).f 1) := sorry,
+  haveI : mono ((cone.in f).f (-1)) := sorry,
+  haveI : mono ((cone.in f).f 0) := sorry,
+  haveI : mono ((cone.in f).f 1) := sorry,
+  let S := snake.mk_of_homology Y (cone f) _ (cone.in _) (cone.out _),
+  rw exact_iff_exact_seq,
+  exact S.six_term_exact_seq.extract 3 4,
 end
 
 lemma _root_.category_theory.cochain_complex.exact_to_cone_in
