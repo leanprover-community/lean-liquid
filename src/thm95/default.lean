@@ -43,7 +43,6 @@ begin
   have hm' : m - 1 < m := nat.pred_lt h0m.ne',
   rcases i with (i|i|i),
   { rw thm95.double_complex.row_zero,
-  have := (IH (m-1) hm' Λ),
     refine (IH (m-1) hm' Λ).of_le BD.data.system_admissible _ _ le_rfl _,
     swap 3,
     { apply c₀_mono, },
