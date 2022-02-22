@@ -497,7 +497,7 @@ variables (h₂ : homotopy (b' ≫ g) 0) (h₃ : homotopy (f ≫ b) 0)
 include H₂ h₂ h₃
 
 /--
-If `A ⟶ B ⟶ C` is split exact, and `b ≫ g` and `f ≫ b'` are null-homotopic,
+If `A ⟶ B ⟶ C` is split exact, and `b' ≫ g` and `f ≫ b` are null-homotopic,
 then so is `b' ≫ b`.
 
         B''
