@@ -21,7 +21,7 @@ section
 variables (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' < 1)]
 variables (BD : package)
 variables (V : SemiNormedGroup.{u}) [normed_with_aut r V]
-variables (κ κ' : ℕ → ℝ≥0) [BD.data.very_suitable r r' κ] [package.adept BD κ κ']
+variables (κ κ' : ℕ → ℝ≥0) [BD.data.very_suitable r r' κ]
 variables (M : ProFiltPseuNormGrpWithTinv.{u} r')
 variables (m : ℕ)
 variables (Λ : PolyhedralLattice.{u})
@@ -61,6 +61,8 @@ begin
 end
 .
 
+variables [package.adept BD κ κ']
+
 def NSC (IH : ∀ m' < m, thm95.IH r r' BD V κ κ' M m')
   [pseudo_normed_group.splittable (Λ →+ M) (N r r' BD κ' m) (lem98.d Λ (N r r' BD κ' m))] :
   normed_spectral_conditions (thm95.double_complex BD.data κ r r' V Λ M (N r r' BD κ' m)) m
@@ -99,8 +101,6 @@ begin
     apply IH, assumption },
   exact normed_spectral cond
 end
-
-set_option pp.universes true
 
 /-- A variant of Theorem 9.5 in [Analytic] using weak bounded exactness. -/
 theorem thm95'.profinite : ∀ (Λ : PolyhedralLattice.{u}) (S : Profinite.{u})

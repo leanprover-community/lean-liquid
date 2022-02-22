@@ -24,7 +24,7 @@ section
 variables (BD : package)
 variables (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)]
 variables (V : SemiNormedGroup.{u}) [normed_with_aut r V]
-variables (κ κ' : ℕ → ℝ≥0) [BD.data.very_suitable r r' κ] [package.adept BD κ κ']
+variables (κ κ' : ℕ → ℝ≥0) [BD.data.very_suitable r r' κ]
 variables (M : ProFiltPseuNormGrpWithTinv.{u} r')
 variables (m : ℕ)
 variables (Λ : PolyhedralLattice.{u})
@@ -38,12 +38,9 @@ section
 
 variables {BD r r' V κ κ' m}
 
-lemma NSH_h_aux {c x : ℝ≥0} {q' : ℕ} (hqm : q' ≤ m+1) :
-  c * (κ' q' * x) ≤ k' κ' m * c * x :=
-calc c * (κ' q' * x)
-    = κ' q' * (c * x) : mul_left_comm _ _ _
-... ≤ k' κ' m * (c * x) : mul_le_mul' (κ'_le_k' _ _ hqm) le_rfl
-... = k' κ' m * c * x : (mul_assoc _ _ _).symm
+section NSH_h
+
+variables [package.adept BD κ κ']
 
 def NSH_h {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ} (q q' : ℕ) (c : ℝ≥0) :
   ((BD.data.system κ r V r').obj M) (k' κ' m * c) q' ⟶
@@ -55,19 +52,24 @@ begin
   refine (universal_map.eval_CLCFPTinv _ _ _ _ _ _).app _,
   { exact (data.homotopy_mul BD.data BD.homotopy (N₂ r r' BD κ' m)).hom q q' },
   { dsimp,
-    exact universal_map.suitable.le _ _ (c * (κ' q' * κ q')) _
-      infer_instance le_rfl (NSH_h_aux hqm), }
+    refine universal_map.suitable.le _ _ (c * (κ' q' * κ q')) _
+      infer_instance le_rfl _,
+    calc c * (κ' q' * κ q')
+        = κ' q' * (c * κ q') : mul_left_comm _ _ _
+    ... ≤ k' κ' m * (c * κ q') : mul_le_mul' (κ'_le_k' _ _ hqm) le_rfl
+    ... = k' κ' m * c * κ q' : (mul_assoc _ _ _).symm, }
 end
 else 0
 
-lemma norm_NSH_h_le {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ}
-  (q : ℕ) (hqm : q ≤ m) (c : ℝ≥0) [fact (c₀ r r' BD κ κ' m Λ ≤ c)] :
-  ∥@NSH_h BD r r' _ _ _ _ V _ κ κ' _ _ m M q (q+1) c∥ ≤ (H r r' BD κ' m) :=
+lemma norm_NSH_h_le {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ} (q : ℕ) (hqm : q ≤ m) (c : ℝ≥0) :
+  ∥@NSH_h BD r r' _ _ _ _ V _ κ κ' _ m _ M q (q+1) c∥ ≤ (H r r' BD κ' m) :=
 begin
   rw [NSH_h, dif_pos (nat.succ_le_succ hqm)],
   apply universal_map.norm_eval_CLCFPTinv₂_le,
   exact (bound_by_H r r' BD κ' _ hqm),
 end
+
+end NSH_h
 
 instance NSH_δ_res' (N i : ℕ) (c : ℝ≥0) [hN : fact (k' κ' m ≤ 2 ^ N)] :
   fact (k' κ' m * c * rescale_constants κ (2 ^ N) i ≤ c * κ i) :=
@@ -85,7 +87,8 @@ end
 variables (κ')
 
 @[simps f]
-def NSH_δ_res {BD : data} [BD.suitable κ]
+def NSH_δ_res {BD : data} [BD.suitable κ] {r r' : ℝ≥0}
+  [fact (0 < r)] [fact (0 < r')] [fact (r' ≤ 1)] {V : SemiNormedGroup.{u}} [normed_with_aut r V]
   (N : ℕ) [fact (k' κ' m ≤ 2 ^ N)] (c : ℝ≥0) {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ} :
   ((BD.system κ r V r').obj M).obj (op c) ⟶
     ((BD.system (rescale_constants κ (2 ^ N)) r V r').obj M).obj (op (k' κ' m * c)) :=
@@ -107,7 +110,7 @@ def NSH_δ {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ} (c : ℝ≥0) :
 NSH_δ_res κ' (N₂ r r' BD κ' m) _ ≫ (BD_map (BD.data.proj (2 ^ N₂ r r' BD κ' m)) _ _ r V _).app M
 
 lemma norm_NSH_δ_le {M : (ProFiltPseuNormGrpWithTinv r')ᵒᵖ} (c : ℝ≥0) (q : ℕ) :
-  ∥(@NSH_δ BD r r' _ _ _ _ V _ κ κ' _ _ m M c).f q∥ ≤ (ε r r' BD κ' m) :=
+  ∥(@NSH_δ BD r r' _ _ _ _ V _ κ κ' _ m M c).f q∥ ≤ (ε r r' BD κ' m) :=
 begin
   refine le_trans (normed_group_hom.norm_comp_le_of_le'
     (r ^ (b r r' BD κ' m)) (N r r' BD κ' m) _ (mul_comm _ _) _ _) _,
@@ -129,9 +132,11 @@ open homological_complex category_theory.preadditive
 
 end
 
+variables [package.adept BD κ κ']
+
 def NSH_aux' (M) (hδ) : NSH_aux_type BD r r' V κ κ' m Λ (N₂ r r' BD κ' m) M :=
 { h := λ q q' c, NSH_h q q' c,
-  norm_h_le := by { rintro q q' hqm rfl, apply_mod_cast norm_NSH_h_le Λ q hqm},
+  norm_h_le := by { rintro q q' hqm rfl c hc, rw nnreal.coe_nat_cast, exact norm_NSH_h_le q hqm c },
   δ := NSH_δ,
   hδ := hδ,
   norm_δ_le := λ c hc q hqm, by apply norm_NSH_δ_le }
