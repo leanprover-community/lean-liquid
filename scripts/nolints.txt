@@ -72,6 +72,10 @@ apply_nolint category_theory.nonempty instance_priority
 -- for_mathlib/abelian_sheaves/functor_category.lean
 apply_nolint category_theory.additive_category_of_abelian instance_priority
 
+-- for_mathlib/derived/K_projective.lean
+apply_nolint homotopy_category.lift unused_arguments
+apply_nolint homotopy_category.lift_ext unused_arguments
+
 -- for_mathlib/homological_complex_equiv_functor_category.lean
 apply_nolint homological_complex.complex_to_functor_functor unused_arguments
 
