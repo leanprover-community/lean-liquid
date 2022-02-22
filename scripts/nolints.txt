@@ -25,9 +25,6 @@ apply_nolint breen_deligne.universal_map.very_suitable class_structure
 -- challenge.lean
 apply_nolint liquid_tensor_experiment def_lemma
 
--- challenge_notations.lean
-apply_nolint Condensed.has_coe unused_arguments
-
 -- combinatorial_lemma/profinite.lean
 apply_nolint ProFiltPseuNormGrpWithTinv₁.level unused_arguments
 apply_nolint lem98.hom_diagram unused_arguments
@@ -75,6 +72,11 @@ apply_nolint category_theory.additive_category_of_abelian instance_priority
 -- for_mathlib/derived/K_projective.lean
 apply_nolint homotopy_category.lift unused_arguments
 apply_nolint homotopy_category.lift_ext unused_arguments
+
+-- for_mathlib/derived/homological.lean
+apply_nolint category_theory.triangulated.is_iso_of_is_iso_inv_rotate unused_arguments
+apply_nolint category_theory.triangulated.is_iso_of_is_iso_rotate unused_arguments
+apply_nolint category_theory.triangulated.is_iso_triangle_hom_of_is_iso unused_arguments
 
 -- for_mathlib/homological_complex_equiv_functor_category.lean
 apply_nolint homological_complex.complex_to_functor_functor unused_arguments
@@ -209,17 +211,11 @@ apply_nolint thm95.col_exact'_aux2 unused_arguments
 -- thm95/constants/default.lean
 apply_nolint thm95.universal_constants.K₁_spec unused_arguments
 apply_nolint thm95.universal_constants.b unused_arguments
-apply_nolint thm95.universal_constants.c₀_aux unused_arguments
 apply_nolint thm95.universal_constants.fact_κ'_le_k' impossible_instance
 
 -- thm95/double_complex.lean
 apply_nolint thm95.Cech_nerve unused_arguments
 apply_nolint thm95.cosimplicial_system_of_complexes unused_arguments
-
--- thm95/homotopy.lean
-apply_nolint NSH_δ unused_arguments
-apply_nolint NSH_δ_res unused_arguments
-apply_nolint norm_NSH_h_le unused_arguments
 
 -- thm95/pfpng_iso.lean
 apply_nolint ProFiltPseuNormGrpWithTinv.Pow_mul_comm_obj_equiv unused_arguments
