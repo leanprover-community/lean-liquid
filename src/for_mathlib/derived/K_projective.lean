@@ -64,6 +64,7 @@ begin
   exact S.six_term_exact_seq.extract 3 4,
 end
 
+/-
 lemma _root_.category_theory.cochain_complex.exact_to_cone_in
   (X Y : cochain_complex A ℤ) (f : X ⟶ Y) :
   exact ((_root_.homology_functor _ _ 0).map f)
@@ -71,6 +72,7 @@ lemma _root_.category_theory.cochain_complex.exact_to_cone_in
 begin
   sorry
 end
+-/
 
 section
 
