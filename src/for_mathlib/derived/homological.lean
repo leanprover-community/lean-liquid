@@ -258,4 +258,60 @@ begin
   all_goals { erw ← rotate_distinguished_triangle, assumption },
 end
 
+instance is_iso_hom₁ (T₁ T₂ : triangle C) (e : T₁ ⟶ T₂) [is_iso e] :
+  is_iso e.hom₁ :=
+⟨⟨(inv e).hom₁,
+  show (e ≫ inv e).hom₁ = _, by simpa only [is_iso.hom_inv_id],
+  show (inv e ≫ e).hom₁ = _, by simpa only [is_iso.inv_hom_id]⟩⟩
+
+instance is_iso_hom₂ (T₁ T₂ : triangle C) (e : T₁ ⟶ T₂) [is_iso e] :
+  is_iso e.hom₂ :=
+⟨⟨(inv e).hom₂,
+  show (e ≫ inv e).hom₂ = _, by simpa only [is_iso.hom_inv_id],
+  show (inv e ≫ e).hom₂ = _, by simpa only [is_iso.inv_hom_id]⟩⟩
+
+instance is_iso_hom₃ (T₁ T₂ : triangle C) (e : T₁ ⟶ T₂) [is_iso e] :
+  is_iso e.hom₃ :=
+⟨⟨(inv e).hom₃,
+  show (e ≫ inv e).hom₃ = _, by simpa only [is_iso.hom_inv_id],
+  show (inv e ≫ e).hom₃ = _, by simpa only [is_iso.inv_hom_id]⟩⟩
+
+lemma homological_of_exists_aux {A : Type*} [category A] [abelian A] (F : C ⥤ A) [F.additive]
+  (T₁ T₂ : triangle C) (e : T₁ ⟶ T₂) [is_iso e] [exact (F.map T₁.mor₁) (F.map T₁.mor₂)] :
+  exact (F.map T₂.mor₁) (F.map T₂.mor₂) :=
+begin
+  have : T₂.mor₁ = inv e.hom₁ ≫ T₁.mor₁ ≫ e.hom₂,
+  { rw is_iso.eq_inv_comp,
+    exact e.comm₁.symm },
+  rw this, clear this,
+  have : T₂.mor₂ = inv e.hom₂ ≫ T₁.mor₂ ≫ e.hom₃,
+  { rw is_iso.eq_inv_comp,
+    exact e.comm₂.symm },
+  rw this, clear this,
+  simp only [F.map_comp, F.map_inv],
+  simp only [exact_iso_comp],
+  simp only [← category.assoc],
+  simp only [exact_comp_iso],
+  change exact (_ ≫ (as_iso (F.map e.hom₂)).hom) ((as_iso (F.map e.hom₂)).inv ≫ _),
+  apply_instance,
+end
+
+lemma homological_of_exists {A : Type*} [category A] [abelian A] (F : C ⥤ A) [F.additive]
+  (h : ∀ (X Y : C) (f : X ⟶ Y),
+    (∃ (Z : C) (g : Y ⟶ Z) (h : Z ⟶ X⟦(1 : ℤ)⟧) (hT : triangle.mk _ f g h ∈ dist_triang C),
+    exact (F.map f) (F.map g))) : homological_functor F :=
+begin
+  constructor,
+  intros T hT,
+  specialize h T.obj₁ T.obj₂ T.mor₁,
+  obtain ⟨Z,g,h,hT',hE⟩ := h,
+  let T' := triangle.mk _ T.mor₁ g h,
+  obtain ⟨e,h1,h2⟩ := complete_distinguished_triangle_morphism T' T hT' hT (𝟙 _) (𝟙 _) (by simp),
+  let E : T' ⟶ T := ⟨𝟙 _, 𝟙 _, e, by simp, h1⟩,
+  haveI : is_iso E,
+  { apply is_iso_of_is_iso_of_is_iso' _ _ hT' hT },
+  haveI : exact (F.map T'.mor₁) (F.map T'.mor₂) := hE,
+  apply (homological_of_exists_aux F T' T E)
+end
+
 end category_theory.triangulated
