@@ -1,6 +1,9 @@
-import for_mathlib.derived_functor
 import category_theory.functor_category
+import category_theory.functor_category
+
 import for_mathlib.homology
+import for_mathlib.derived_functor
+
 
 universes w v u
 
@@ -80,7 +83,7 @@ local attribute [instance] abelian.pseudoelement.over_to_sort
   abelian.pseudoelement.hom_to_fun
   abelian.pseudoelement.has_zero
 
-instance (ex : exact_seq C [f, g, (0 : A₃ ⟶ X)]) :
+instance comparison_is_iso_of_exact (ex : exact_seq C [f, g, (0 : A₃ ⟶ X)]) :
   is_iso (cokernel_comparison (comp_eq_zero ex)) :=
 begin
   letI : epi g := ((abelian.tfae_epi X g).out 0 2).2 ((exact_iff_exact_seq _ _).2 $ ex.extract 1 2),
@@ -132,36 +135,6 @@ begin
   exact category_theory.preserves_epi _ _,
 end
 
-/-- The morphism `cokernel (kernel.lift g f) ⟶ cokernel f` assuming `f ≫ g = 0`. -/
-def cokernel_lift_to_cokernel {X Y Z : C} {f : X ⟶ Y} {g : Y ⟶ Z} (w : f ≫ g = 0) :
-  cokernel (kernel.lift g f w) ⟶ cokernel f :=
-cokernel.desc _ ((kernel.ι g) ≫ cokernel.π _) (by simp)
-
-/-- The morphism `cokernel f ⟶ cokernel (kernel.lift (0 : Y ⟶ Z) f)`. -/
-def cokernel_to_cokernel_lift {X Y Z : C} (f : X ⟶ Y) :
-  cokernel f ⟶ cokernel (kernel.lift (0 : Y ⟶ Z) f (by simp)) :=
-cokernel.map _ _ (𝟙 _) (kernel.lift _ (𝟙 _) (by simp)) (by { ext, simp })
-
-/-- The isomorphism `cokernel f ≅ cokernel (kernel.lift (0 : Y ⟶ Z) f)`. -/
-def cokernel_lift_iso_cokernel {X Y Z : C} (f : X ⟶ Y) :
-  cokernel (kernel.lift (0 : Y ⟶ Z) f (by simp)) ≅ cokernel f :=
-{ hom := cokernel_lift_to_cokernel (by simp),
-  inv := cokernel_to_cokernel_lift f,
-  hom_inv_id' :=
-  begin
-    ext,
-    simp only [cokernel_lift_to_cokernel, cokernel_to_cokernel_lift, coequalizer_as_cokernel,
-      cokernel.π_desc_assoc, category.assoc, cokernel.π_desc, category.comp_id],
-    rw [← kernel_zero_iso_source_hom, ← kernel_zero_iso_source_inv, ← category.assoc,
-      iso.hom_inv_id, category.id_comp],
-  end,
-  inv_hom_id' := by { ext, simp [cokernel_to_cokernel_lift, cokernel_lift_to_cokernel] } }
-
-/-- The isomorphism `homology f (0 : Y ⟶ Z) ≅ cokernel f`. -/
-def homology_iso_cokernel {X Y Z : C} (f : X ⟶ Y) :
-  homology f (0 : Y ⟶ Z) (by simp) ≅ cokernel f :=
-homology_iso_cokernel_lift _ _ _ ≪≫ cokernel_lift_iso_cokernel f
-
 lemma short_exact_of_resolution (P: ProjectiveResolution X) : exact_seq C
   [P.complex.d 1 0, P.π.f 0, (0 : X ⟶ X)] :=
 begin
@@ -187,36 +160,9 @@ begin
     (category_theory.preserves_epi F _),
 end
 
-/-- The iso `(F.left_derived 0).obj X ≅ F.obj X`. -/
-def functor.left_derived.zero_iso [enough_projectives C] [limits.preserves_finite_colimits F] :
-  (F.left_derived 0).obj X ≅ F.obj X :=
-begin
-  let P := ProjectiveResolution.of X,
-  refine (left_derived_obj_iso F 0 P) ≪≫ (_ ≪≫ (as_iso $ cokernel_comparison $ comp_eq_zero $
-    short_exact_of_resolution_functor F P)),
-  show homology _ _ _ ≅ _,
-  convert homology_iso_cokernel _,
-  simp
-end
-
 /-- Given `P : ProjectiveResolution X`, a morphism `(F.left_derived 0).obj X ⟶ F.obj X`. -/
 @[nolint unused_arguments]
-def left_derived.zero_to_self_obj_hom' [enough_projectives C] {X : C}
-  (P : ProjectiveResolution X) : (F.left_derived 0).obj X ⟶ F.obj X :=
-(left_derived_obj_iso F 0 P).hom ≫ cokernel.desc _ ((kernel_subobject _).arrow ≫
-  (F.map ((P.π.f 0))))
-  begin
-    simp only [image_to_kernel_arrow_assoc],
-    refine image_subobject_arrow_comp_eq_zero _,
-    have : (complex_shape.down ℕ).rel 1 0 := rfl,
-    rw [homological_complex.d_to_eq _ this, map_homological_complex_obj_d, category.assoc,
-      ← functor.map_comp],
-    simp,
-  end
-
-/-- Given `P : ProjectiveResolution X`, a morphism `(F.left_derived 0).obj X ⟶ F.obj X`. -/
-@[nolint unused_arguments]
-def left_derived.zero_to_self_obj_hom [enough_projectives C] {X : C}
+def left_derived.zero_to_self_app [enough_projectives C] {X : C}
   (P : ProjectiveResolution X) : (F.left_derived 0).obj X ⟶ F.obj X :=
 (left_derived_obj_iso F 0 P).hom ≫ homology.desc' _ _ _ (kernel.ι _ ≫ (F.map (P.π.f 0)))
 begin
@@ -227,14 +173,78 @@ begin
 end
 ≫ F.map (𝟙 _)
 
+/-- Given `P : ProjectiveResolution X`, a morphism `F.obj X ⟶ (F.left_derived 0).obj X` given
+`preserves_finite_colimits F`. -/
+@[nolint unused_arguments]
+def left_derived.zero_to_self_app_inv [enough_projectives C] [preserves_finite_colimits F] {X : C}
+  (P : ProjectiveResolution X) : F.obj X ⟶ (F.left_derived 0).obj X :=
+begin
+  refine ((@as_iso _ _ _ _ _ (category_theory.functor.right_exact.comparison_is_iso_of_exact
+    (short_exact_of_resolution_functor F P))).inv) ≫ _ ≫ (homology_iso_cokernel_lift _ _ _).inv ≫
+    (left_derived_obj_iso F 0 P).inv,
+  exact cokernel.map _ _ (𝟙 _) (kernel.lift _ (𝟙 _) (by simp)) (by { ext, simp }),
+end
+
+lemma left_derived.zero_to_self_app_comp_inv [enough_projectives C] [preserves_finite_colimits F]
+  {X : C} (P : ProjectiveResolution X) : left_derived.zero_to_self_app F P ≫
+  left_derived.zero_to_self_app_inv F P = 𝟙 _ :=
+begin
+  dsimp [left_derived.zero_to_self_app, left_derived.zero_to_self_app_inv],
+  rw [functor.map_id, category.comp_id, category.assoc],
+  refine (iso.eq_inv_comp _).1 _,
+  rw [← category.assoc, ← category.assoc, ← category.assoc],
+  refine (iso.comp_inv_eq _).2 _,
+  rw [category.comp_id, iso.inv_hom_id, iso.comp_inv_eq, category.id_comp],
+  ext,
+  simp only [category.assoc, homology.desc'_π'_assoc, cokernel_comparison_inv_assoc,
+    cokernel.π_desc, homology.π', iso.inv_hom_id, category.comp_id],
+  nth_rewrite 1 [← category.comp_id (cokernel.π _)],
+  refine congr_arg (category_struct.comp _) _,
+  dsimp [homology.desc'],
+  rw [← category.assoc, ← category.assoc, ← category.assoc, iso.inv_hom_id, category.id_comp],
+  ext,
+  simp only [coequalizer_as_cokernel, category.assoc, cokernel.π_desc_assoc,
+    cokernel_comparison_inv_assoc, cokernel.π_desc, category.comp_id],
+  rw [← category.assoc],
+  nth_rewrite 1 [← category.id_comp (cokernel.π _)],
+  refine congr_fun (congr_arg category_struct.comp _) _,
+  ext,
+  simp only [category.assoc, kernel.lift_ι, category.comp_id, category.id_comp],
+end
+
+lemma left_derived.zero_to_self_app_inv_comp [enough_projectives C] [preserves_finite_colimits F]
+  {X : C} (P : ProjectiveResolution X) : left_derived.zero_to_self_app_inv F P ≫
+  left_derived.zero_to_self_app F P = 𝟙 _ :=
+begin
+  dsimp [left_derived.zero_to_self_app, left_derived.zero_to_self_app_inv],
+  rw [functor.map_id, category.comp_id, category.assoc, category.assoc, category.assoc,
+    ← category.assoc (F.left_derived_obj_iso 0 P).inv, iso.inv_hom_id, category.id_comp,
+    is_iso.inv_comp_eq, category.comp_id],
+  ext,
+  simp only [cokernel.π_desc_assoc, category.assoc, cokernel.π_desc, homology.desc',
+    cokernel_comparison],
+  rw [← category.assoc, ← category.assoc (homology_iso_cokernel_lift _ _ _).inv, iso.inv_hom_id,
+    category.id_comp],
+  simp only [category.assoc, cokernel.π_desc, kernel.lift_ι_assoc, category.id_comp],
+end
+
+/-- Given `P : ProjectiveResolution X`, the isomorphism `(F.left_derived 0).obj X ≅ F.obj X` if
+`preserves_finite_colimits F`. -/
+def left_derived.zero_to_self_app_iso [enough_projectives C] [preserves_finite_colimits F]
+  {X : C} (P : ProjectiveResolution X) : (F.left_derived 0).obj X ≅ F.obj X :=
+{ hom := left_derived.zero_to_self_app _ P,
+  inv := left_derived.zero_to_self_app_inv _ P,
+  hom_inv_id' := left_derived.zero_to_self_app_comp_inv _ P,
+  inv_hom_id' := left_derived.zero_to_self_app_inv_comp _ P }
+
 /-- Given `P : ProjectiveResolution X` and `Q : ProjectiveResolution Y` and a morphism `f : X ⟶ Y`,
 naturality of the square given by `left_derived.zero_to_self_obj_hom. -/
 lemma left_derived.zero_to_self_natural [enough_projectives C] {X : C} {Y : C} (f : X ⟶ Y)
   (P : ProjectiveResolution X) (Q : ProjectiveResolution Y) :
-  (F.left_derived 0).map f ≫ left_derived.zero_to_self_obj_hom F Q =
-  left_derived.zero_to_self_obj_hom F P ≫ F.map f :=
+  (F.left_derived 0).map f ≫ left_derived.zero_to_self_app F Q =
+  left_derived.zero_to_self_app F P ≫ F.map f :=
 begin
-  dsimp only [left_derived.zero_to_self_obj_hom],
+  dsimp only [left_derived.zero_to_self_app],
   let f₁ := ProjectiveResolution.lift f P Q,
   rw [functor.left_derived_map_eq F 0 f f₁ (by simp),
     category.assoc, category.assoc, ← category.assoc _ (F.left_derived_obj_iso 0 Q).hom,
@@ -252,10 +262,16 @@ begin
 end
 
 /-- The natural transformation `nat_trans (F.left_derived 0) F`. -/
-def left_derived.zero_to_self [enough_projectives C] : nat_trans (F.left_derived 0) F :=
-{ app := λ X, left_derived.zero_to_self_obj_hom F (ProjectiveResolution.of X),
+def left_derived.zero_to_self [enough_projectives C] : (F.left_derived 0) ⟶ F :=
+{ app := λ X, left_derived.zero_to_self_app F (ProjectiveResolution.of X),
   naturality' := λ X Y f, left_derived.zero_to_self_natural F f (ProjectiveResolution.of X)
     (ProjectiveResolution.of Y) }
+
+/-- Given `preserves_finite_colimits F`, the natural isomorphism `(F.left_derived 0) ≅ F`. -/
+def left_derived.zero_iso_self [enough_projectives C] [preserves_finite_colimits F] :
+  (F.left_derived 0) ≅ F :=
+nat_iso.of_components (λ X, left_derived.zero_to_self_app_iso _ (ProjectiveResolution.of X))
+  (λ X Y f, left_derived.zero_to_self_natural _ _ _ _)
 
 end functor.right_exact
 
