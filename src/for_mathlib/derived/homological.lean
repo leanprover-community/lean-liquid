@@ -5,6 +5,9 @@ import algebra.category.Module.abelian
 import algebra.category.Group.abelian
 import category_theory.currying
 import for_mathlib.exact_seq
+import for_mathlib.preadditive_yoneda
+
+import category_theory.abelian.diagram_lemmas.four
 
 namespace category_theory.triangulated
 
@@ -151,8 +154,80 @@ begin
     apply dist_triang_to_exact_complex _ hT _ _ hf }
 end
 
+lemma is_iso_triangle_hom_of_is_iso (T₁ T₂ : triangle C)
+  (e : T₁ ⟶ T₂)
+  [is_iso e.hom₁]
+  [is_iso e.hom₂]
+  [is_iso e.hom₃] : is_iso e :=
+begin
+  constructor,
+  refine ⟨⟨inv e.hom₁, inv e.hom₂, inv e.hom₃, _, _⟩, _, _⟩,
+  { dsimp,
+    rw [is_iso.comp_inv_eq, category.assoc, is_iso.eq_inv_comp, e.comm₁] },
+  { dsimp,
+    rw [is_iso.comp_inv_eq, category.assoc, is_iso.eq_inv_comp, e.comm₂] },
+  { ext; dsimp; simp },
+  { ext; dsimp; simp },
+end
+
 theorem is_iso_of_is_iso_of_is_iso (T₁ T₂ : triangle C)
   (h₁ : T₁ ∈ dist_triang C) (h₂ : T₂ ∈ dist_triang C)
-  (e : T₁ ⟶ T₂) [is_iso e.hom₁] [is_iso e.hom₂] : is_iso e := sorry
+  (e : T₁ ⟶ T₂) [is_iso e.hom₁] [is_iso e.hom₃] : is_iso e :=
+begin
+  apply_with is_iso_triangle_hom_of_is_iso { instances := ff },
+  any_goals { apply_instance },
+  apply_instance,
+
+  apply_with is_iso_of_is_iso_preadditive_yoneda_map_app { instances := ff },
+  swap, apply_instance,
+  intros W,
+
+  let Y := (preadditive_yoneda.flip.obj (opposite.op W)),
+
+  have H1 := five_term_exact_seq Y _ h₁,
+  have H2 := five_term_exact_seq Y _ h₂,
+
+  have sq1 := e.inv_rotate.comm₁,
+  apply_fun (λ e, Y.map e) at sq1,
+  simp only [functor.map_comp] at sq1,
+
+  have sq2 := e.comm₁,
+  apply_fun (λ e, Y.map e) at sq2,
+  simp only [functor.map_comp] at sq2,
+
+  have sq3 := e.comm₂,
+  apply_fun (λ e, Y.map e) at sq3,
+  simp only [functor.map_comp] at sq3,
+
+  have sq4 := e.comm₃,
+  apply_fun (λ e, Y.map e) at sq4,
+  simp only [functor.map_comp] at sq4,
+
+  haveI : is_iso (Y.map (triangulated.triangle_morphism.inv_rotate e).hom₁),
+  { dsimp only [triangulated.triangle_morphism.inv_rotate],
+    rw ← functor.comp_map,
+    apply functor.map_is_iso },
+
+  haveI : is_iso (Y.map (triangulated.triangle_morphism.inv_rotate e).hom₂),
+  { dsimp only [triangulated.triangle_morphism.inv_rotate],
+    apply functor.map_is_iso },
+
+  haveI : is_iso (Y.map e.hom₃),
+  { apply functor.map_is_iso },
+
+  haveI : is_iso (Y.map ((shift_functor C (1 : ℤ)).map e.hom₁)),
+  { rw ← functor.comp_map,
+    apply functor.map_is_iso },
+
+  exact @abelian.is_iso_of_is_iso_of_is_iso_of_is_iso_of_is_iso _ _ _
+    _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+    sq1.symm sq2.symm sq3.symm _ _ _ _ _ sq4.symm
+    ((exact_iff_exact_seq _ _).mpr (H1.extract 0 2))
+    ((exact_iff_exact_seq _ _).mpr (H1.extract 1 2))
+    ((exact_iff_exact_seq _ _).mpr (H1.extract 2 3))
+    ((exact_iff_exact_seq _ _).mpr (H2.extract 0 2))
+    ((exact_iff_exact_seq _ _).mpr (H2.extract 1 2))
+    ((exact_iff_exact_seq _ _).mpr (H2.extract 2 3)) _ _ _ _,
+end
 
 end category_theory.triangulated
