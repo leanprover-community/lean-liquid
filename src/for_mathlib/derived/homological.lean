@@ -314,4 +314,30 @@ begin
   apply (homological_of_exists_aux F T' T E)
 end
 
+lemma homological_of_rotate {A : Type*} [category A] [abelian A] (F : C ⥤ A) [F.additive]
+  (h : ∀ (T : triangle C) (hT : T ∈ dist_triang C),
+    exact (F.map T.rotate.mor₁) (F.map T.rotate.mor₂)) : homological_functor F :=
+begin
+  constructor,
+  intros T hT,
+  specialize h T.inv_rotate (inv_rot_of_dist_triangle C T hT),
+  let E : T.inv_rotate.rotate ≅ T := inv_rot_comp_rot.app _,
+  apply homological_of_exists_aux _ _ _ E.hom,
+  apply_instance,
+  assumption
+end
+
+lemma homological_of_inv_rotate {A : Type*} [category A] [abelian A] (F : C ⥤ A) [F.additive]
+  (h : ∀ (T : triangle C) (hT : T ∈ dist_triang C),
+    exact (F.map T.inv_rotate.mor₁) (F.map T.inv_rotate.mor₂)) : homological_functor F :=
+begin
+  constructor,
+  intros T hT,
+  specialize h T.rotate (rot_of_dist_triangle C T hT),
+  let E : T.rotate.inv_rotate ≅ T := (rot_comp_inv_rot.app _).symm,
+  apply homological_of_exists_aux _ _ _ E.hom,
+  apply_instance,
+  assumption
+end
+
 end category_theory.triangulated
