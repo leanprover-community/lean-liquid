@@ -2,6 +2,7 @@ import for_mathlib.homotopy_category_pretriangulated
 import for_mathlib.abelian_category
 import for_mathlib.derived.homological
 import category_theory.abelian.projective
+import for_mathlib.homology
 
 open category_theory category_theory.limits category_theory.triangulated
 open homological_complex
@@ -43,7 +44,75 @@ begin
   apply_instance,
 end
 
-instance homology_functor_homological : homological_functor HH := sorry
+lemma _root_.category_theory.cochain_complex.exact_cone_in_cone_out
+  (X Y : cochain_complex A ℤ) (f : X ⟶ Y) :
+  exact ((_root_.homology_functor _ _ 0).map (cone.in f))
+    ((_root_.homology_functor _ _ 0).map (cone.out f)) :=
+begin
+  sorry
+end
+
+lemma _root_.category_theory.cochain_complex.exact_to_cone_in
+  (X Y : cochain_complex A ℤ) (f : X ⟶ Y) :
+  exact ((_root_.homology_functor _ _ 0).map f)
+    ((_root_.homology_functor _ _ 0).map (cone.in f)) :=
+begin
+  sorry
+end
+
+section
+
+local attribute [instance] abelian.pseudoelement.hom_to_fun
+  abelian.pseudoelement.has_zero abelian.pseudoelement.setoid
+
+lemma _root_.category_theory.abelian.exact_of_neg_right (X Y Z : A) (f : X ⟶ Y) (g : Y ⟶ Z)
+  [h : exact f g] : exact f (-g) :=
+begin
+  apply abelian.pseudoelement.exact_of_pseudo_exact,
+  split,
+  intros a,
+  rw ← abelian.pseudoelement.comp_apply,
+  simp,
+  intros b hb,
+  apply abelian.pseudoelement.pseudo_exact_of_exact.2 b (_ : g b = 0),
+  apply_instance,
+  rcases b,
+  apply abelian.pseudoelement.apply_eq_zero_of_comp_eq_zero g b.hom,
+  erw abelian.pseudoelement.pseudo_zero_iff at hb,
+  simpa using hb,
+end
+
+end
+
+instance homology_functor_homological : homological_functor HH :=
+begin
+  apply homological_of_rotate,
+  intros T hT,
+  erw mem_distinguished_iff_exists_iso_cone at hT,
+  obtain ⟨X,Y,f,⟨E⟩⟩ := hT,
+  let E' : T.rotate ≅
+    ((neg₃_functor (homotopy_category A (complex_shape.up ℤ))).obj (cone.triangleₕ f)).rotate :=
+    ⟨E.hom.rotate, E.inv.rotate, _, _⟩,
+  rotate,
+  { ext; dsimp,
+    { change (E.hom ≫ E.inv).hom₂ = _, rw iso.hom_inv_id, refl },
+    { change (E.hom ≫ E.inv).hom₃ = _, rw iso.hom_inv_id, refl },
+    { simp only [← functor.map_comp],
+      change (category_theory.shift_functor 𝒦 (1 : ℤ)).map ((E.hom ≫ E.inv).hom₁) = _,
+      rw iso.hom_inv_id, refl } },
+  { ext; dsimp,
+    { change (E.inv ≫ E.hom).hom₂ = _, rw iso.inv_hom_id, refl },
+    { change (E.inv ≫ E.hom).hom₃ = _, rw iso.inv_hom_id, refl },
+    { simp only [← functor.map_comp],
+      change (category_theory.shift_functor 𝒦 (1 : ℤ)).map ((E.inv ≫ E.hom).hom₁) = _,
+      rw iso.inv_hom_id, refl } },
+  apply homological_of_exists_aux _ _ _ E'.inv,
+  apply_instance,
+  dsimp,
+  simp only [functor.map_neg],
+  apply_with category_theory.abelian.exact_of_neg_right { instances := ff },
+  apply _root_.category_theory.cochain_complex.exact_cone_in_cone_out,
+end
 
 /--
 If `A → B → C → A[1]` is a distinguished triangle, and `A → B` is a quasi-isomorphism,
