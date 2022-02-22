@@ -38,23 +38,42 @@ lemma mk_of_homology (X Y Z : cochain_complex 𝒜 ℤ)
   ((homology_functor _ _ 0).obj X)
   ((homology_functor _ _ 0).obj Y)
   ((homology_functor _ _ 0).obj Z)
-  (kernel.lift _ (kernel.ι _ ≫ (f.prev _)) sorry)
-  (kernel.lift _ (kernel.ι _ ≫ (g.prev _)) sorry)
+  (kernel.lift _ (kernel.ι _ ≫ (f.prev _)) (by simp))
+  (kernel.lift _ (kernel.ι _ ≫ (g.prev _)) (by simp))
   (kernel.ι _)
   (kernel.ι _)
   (kernel.ι _)
   (f.prev _)
   (g.prev _)
-  (kernel.lift _ (X.d_to _) sorry)
-  (kernel.lift _ (Y.d_to _) sorry)
-  (kernel.lift _ (Z.d_to _) sorry)
-  (kernel.lift _ (kernel.ι _ ≫ f.f _) sorry)
-  (kernel.lift _ (kernel.ι _ ≫ g.f _) sorry)
+  (kernel.lift _ (X.d_to _) (by simp))
+  (kernel.lift _ (Y.d_to _) (by simp))
+  (kernel.lift _ (Z.d_to _) (by simp))
+  (kernel.lift _ (kernel.ι _ ≫ f.f _) (by simp))
+  (kernel.lift _ (kernel.ι _ ≫ g.f _) (by simp))
   (homology.π' _ _ _)
   (homology.π' _ _ _)
   (homology.π' _ _ _)
   ((homology_functor _ _ _).map f)
-  ((homology_functor _ _ _).map g) := sorry
+  ((homology_functor _ _ _).map g) :=
+{ row_exact₁ := sorry,
+  row_exact₂ := sorry,
+  row_epi := sorry,
+  row_mono := infer_instance,
+  col_exact_a := sorry,
+  col_exact_b := sorry,
+  col_exact_c := sorry,
+  col_mono_a := infer_instance,
+  col_mono_b := infer_instance,
+  col_mono_c := infer_instance,
+  col_epi_a := epi_comp _ _,
+  col_epi_b := epi_comp _ _,
+  col_epi_c := epi_comp _ _,
+  sq_a₀ := by simp,
+  sq_b₀ := by simp,
+  sq_a₁ := by { ext, simp },
+  sq_b₁ := by { ext, simp },
+  sq_a₂ := by simp,
+  sq_b₂ := by simp }
 
 end snake
 
