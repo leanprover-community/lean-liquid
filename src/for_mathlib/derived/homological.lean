@@ -171,6 +171,20 @@ begin
   { ext; dsimp; simp },
 end
 
+lemma is_iso_of_is_iso_rotate (T₁ T₂ : triangle C)
+  (e : T₁ ⟶ T₂) [h : is_iso (rotate.map e)] : is_iso e :=
+begin
+  haveI : is_iso (triangle_rotation.functor.map e) := h,
+  apply is_iso_of_fully_faithful (triangle_rotation.functor : triangle C ⥤ triangle C),
+end
+
+lemma is_iso_of_is_iso_inv_rotate (T₁ T₂ : triangle C)
+  (e : T₁ ⟶ T₂) [h : is_iso (inv_rotate.map e)] : is_iso e :=
+begin
+  haveI : is_iso (triangle_rotation.inverse.map e) := h,
+  apply is_iso_of_fully_faithful (triangle_rotation.inverse : triangle C ⥤ triangle C),
+end
+
 theorem is_iso_of_is_iso_of_is_iso (T₁ T₂ : triangle C)
   (h₁ : T₁ ∈ dist_triang C) (h₂ : T₂ ∈ dist_triang C)
   (e : T₁ ⟶ T₂) [is_iso e.hom₁] [is_iso e.hom₃] : is_iso e :=
@@ -229,6 +243,19 @@ begin
     ((exact_iff_exact_seq _ _).mpr (H2.extract 0 2))
     ((exact_iff_exact_seq _ _).mpr (H2.extract 1 2))
     ((exact_iff_exact_seq _ _).mpr (H2.extract 2 3)) _ _ _ _,
+end
+
+lemma is_iso_of_is_iso_of_is_iso' (T₁ T₂ : triangle C)
+  (h₁ : T₁ ∈ dist_triang C) (h₂ : T₂ ∈ dist_triang C)
+  (e : T₁ ⟶ T₂) [h1 : is_iso e.hom₁] [h2 : is_iso e.hom₂] : is_iso e :=
+begin
+  suffices : is_iso (rotate.map e),
+  { resetI, apply is_iso_of_is_iso_rotate },
+  haveI : is_iso (rotate.map e).hom₁ := h2,
+  haveI : is_iso (rotate.map e).hom₃,
+  { apply functor.map_is_iso },
+  apply is_iso_of_is_iso_of_is_iso,
+  all_goals { erw ← rotate_distinguished_triangle, assumption },
 end
 
 end category_theory.triangulated
