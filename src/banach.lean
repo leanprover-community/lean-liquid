@@ -45,7 +45,7 @@ structure p_banach : Prop :=
 (exists_p_norm : nonempty (has_p_norm V p))
 [topological_add_group : topological_add_group V]
 [continuous_smul : has_continuous_smul ℝ V]
-[complete: complete_space V]
+[complete : complete_space V]
 
 end
 
@@ -65,6 +65,9 @@ instance : has_coe_to_sort (pBanach p) (Type*) := ⟨λ X, X.V⟩
 instance : _root_.add_comm_group V := V.add_comm_group'
 instance : _root_.module ℝ V := V.module'
 instance : _root_.uniform_space V := V.uniform_space'
+instance : _root_.topological_add_group V := V.p_banach'.topological_add_group
+instance : _root_.has_continuous_smul ℝ V := V.p_banach'.continuous_smul
+instance : _root_.complete_space V := V.p_banach'.complete
 
 /-- Highly non-canonical! -/
 def choose_semi_normed_group : semi_normed_group V :=

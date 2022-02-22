@@ -12,7 +12,7 @@ universe u
 
 noncomputable theory
 
-variables (p' p : ℝ≥0) [fact (0 < p')] [fact (p' ≤ 1)] [fact (p' < p)] [fact (p ≤ 1)]
+variables (p' p : ℝ≥0) [fact (0 < p')] [fact (p' ≤ 1)] [fact (p' < p)]
 
 localized "notation `ℳ_{` p' `}` S := (real_measures.condensed p').obj S"
   in liquid_tensor_experiment
@@ -20,5 +20,5 @@ localized "notation `ℳ_{` p' `}` S := (real_measures.condensed p').obj S"
 abbreviation liquid_tensor_experiment.Ext (i : ℕ) (A B : Condensed.{u} Ab.{u+1}) :=
 ((Ext ℤ (Condensed Ab) i).obj (op A)).obj B
 
-instance : has_coe (pBanach p) (Condensed Ab) :=
+instance [fact (0 < (p:ℝ))] : has_coe (pBanach p) (Condensed Ab) :=
 { coe := λ V, Condensed.of_top_ab V }

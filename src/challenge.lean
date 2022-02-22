@@ -20,7 +20,8 @@ for `i ≥ 1`.
 open_locale nnreal liquid_tensor_experiment
 open liquid_tensor_experiment
 
-variables (p' p : ℝ≥0) [fact (0 < p')] [fact (p' ≤ 1)] [fact (p' < p)] [fact (p ≤ 1)]
+variables (p' p : ℝ≥0) [fact (0 < p')] [fact (0 < (p : ℝ))]
+variables [fact (p' < p)] [fact (p' ≤ 1)] [fact (p ≤ 1)]
 
 set_option pp.universes true
 
