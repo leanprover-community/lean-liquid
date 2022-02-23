@@ -140,8 +140,52 @@ begin
 end
 
 lemma finite_product_condition_of_pair_iff_product_condition :
-  P.finite_product_condition_of ⟨limits.walking_pair⟩ ↔ P.product_condition := sorry
-
+  P.finite_product_condition_of ⟨limits.walking_pair⟩ ↔ P.product_condition :=
+begin
+  split,
+  { intros h A B,
+    let f := _, show function.bijective f,
+    let X : limits.walking_pair → Profinite.{w} :=
+      λ i, limits.walking_pair.rec_on i A B,
+    specialize h X,
+    let g := _, change function.bijective g at h,
+    let e : P.obj (op (A.sum B)) ≃ P.obj (op (Profinite.sigma X)) :=
+      (P.map_iso (Profinite.sigma_walking_pair_iso X).op).to_equiv,
+    let q : (Π (a : limits.walking_pair), P.obj (op (X a))) ≃
+      P.obj (op A) × P.obj (op B) :=
+      ⟨λ f, ⟨f limits.walking_pair.left, f limits.walking_pair.right⟩,
+        λ x a, limits.walking_pair.rec_on a x.1 x.2, _, _⟩,
+    rotate, { intros a, ext ⟨x|x⟩, refl, refl }, { rintros ⟨a,b⟩, ext ⟨x|x⟩, refl, refl },
+    have : f = q ∘ g ∘ e,
+    { ext a,
+      all_goals
+      { dsimp [f,q,g,e],
+        simp_rw [← functor_to_types.map_comp_apply, ← op_comp],
+        refl } },
+    rw this,
+    exact q.bijective.comp (h.comp e.bijective) },
+  { intros h X,
+    let f := _, show function.bijective f,
+    specialize h (X limits.walking_pair.left) (X limits.walking_pair.right),
+    let g := _, change function.bijective g at h,
+    let e : P.obj (op (Profinite.sigma X)) ≃ P.obj (op (Profinite.sum _ _)) :=
+      (P.map_iso (Profinite.sigma_walking_pair_iso X).op).symm.to_equiv,
+    let q : P.obj (op (X limits.walking_pair.left)) × P.obj (op (X limits.walking_pair.right)) ≃
+      (Π a : limits.walking_pair, P.obj (op (X a))) :=
+        ⟨λ x a, limits.walking_pair.rec_on a x.1 x.2,
+          λ f, ⟨f limits.walking_pair.left, f limits.walking_pair.right⟩, _, _⟩,
+    rotate,
+    { rintros ⟨a,b⟩, ext ⟨x|x⟩, refl, refl },
+    { intros a, ext ⟨x|x⟩, refl, refl },
+    have : f = q ∘ g ∘ e,
+    { ext a ⟨x|x⟩,
+      all_goals
+      { dsimp [f,q,g,e],
+        simp_rw [← functor_to_types.map_comp_apply, ← op_comp],
+        refl } },
+    rw this,
+    exact q.bijective.comp (h.comp e.bijective) },
+end
 
 lemma finite_product_condition_of_sum (α β : Fintype.{w})
   (h1 : P.product_condition)
@@ -288,9 +332,10 @@ inductive pbool : Type u
 end pbool
 
 -- Kevin is working on this
-lemma finite_product_condition_iff_empty_condition_product_condition :
-  P.finite_product_condition ↔ P.empty_condition ∧ P.product_condition :=
-begin
+--lemma finite_product_condition_iff_empty_condition_product_condition :
+--  P.finite_product_condition ↔ P.empty_condition ∧ P.product_condition :=
+--begin
+  /-
   split,
   { intro h_prod,
     split,
@@ -344,7 +389,8 @@ begin
       sorry
     } },
   { sorry }
-end
+  -/
+--end
 
 def map_to_equalizer {W X B : Profinite.{w}} (f : X ⟶ B) (g₁ g₂ : W ⟶ X)
   (w : g₁ ≫ f = g₂ ≫ f) :
@@ -745,7 +791,7 @@ begin
     apply is_proetale_sheaf_of_finite_product_condition_of_equalizer_condition,
     assumption' },
   tfae_have : 5 ↔ 6, {
-    rw finite_product_condition_iff_empty_condition_product_condition,
+    rw finite_product_condition_iff_empty_product,
     rw and_assoc },
   tfae_finish
 end

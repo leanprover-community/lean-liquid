@@ -2,6 +2,7 @@ import category_theory.limits.shapes.products
 import for_mathlib.Profinite.compat_discrete_quotient
 import topology.category.Profinite
 import for_mathlib.quotient_map
+import category_theory.limits.shapes.finite_limits
 
 /-!
 
@@ -306,6 +307,22 @@ def sigma_punit_iso (X : (punit : Type u) → Profinite.{u}) :
   X punit.star ≅ sigma X :=
 { hom := sigma.ι _ _,
   inv := sigma.desc _ $ λ ⟨⟩, 𝟙 _ }
+
+--instance : fintype (limits.walking_pair.{u}) := sorry
+
+def sigma_walking_pair_iso (X : limits.walking_pair.{u} → Profinite.{u}) :
+  sigma X ≅ (X limits.walking_pair.left).sum (X limits.walking_pair.right) :=
+{ hom := sigma.desc _ $ λ a, limits.walking_pair.rec_on a (sum.inl _ _) (sum.inr _ _),
+  inv := sum.desc _ _ (sigma.ι _ _) (sigma.ι _ _),
+  hom_inv_id' := begin
+    apply sigma.hom_ext,
+    rintros (a|b),
+    all_goals { dsimp, simp }
+  end,
+  inv_hom_id' := begin
+    apply sum.hom_ext,
+    all_goals { dsimp, simp }
+  end }
 
 --TODO: Finish off the api for the explicit pullback
 
