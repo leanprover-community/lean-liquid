@@ -115,10 +115,40 @@ lemma finite_product_condition_of_empty_iff_empty_condition :
 lemma finite_product_condition_of_pair_iff_product_condition :
   P.finite_product_condition_of ⟨limits.walking_pair⟩ ↔ P.product_condition := sorry
 
+open opposite
+
 lemma finite_product_condition_of_sum (α β : Fintype.{w})
   (h1 : P.product_condition)
   (h2 : P.finite_product_condition_of α) :
-  P.finite_product_condition_of (Fintype.of $ α ⊕ (punit : Type w)) := sorry
+  P.finite_product_condition_of (Fintype.of $ α ⊕ (punit : Type w)) :=
+begin
+  intros X,
+  let f := _, show function.bijective f,
+  let I : Profinite.sigma X ≅ _ := Profinite.sigma_sum_iso' _,
+  let t : P.obj (opposite.op (Profinite.sigma X)) ≃ _ :=
+    (P.map_iso I.symm.op).to_equiv,
+  specialize h1 (Profinite.sigma (X ∘ sum.inl)) (Profinite.sigma (X ∘ sum.inr)),
+  let g := _, change function.bijective g at h1,
+  let e : (Π (a : ↥(Fintype.of (↥α ⊕ punit))), P.obj (opposite.op (X a))) ≃
+    (Π (a : α), P.obj (op (X (sum.inl a)))) × P.obj (op (X (sum.inr punit.star))) :=
+    ⟨ λ f, ⟨λ a, f (sum.inl a), f (sum.inr _)⟩,
+      λ f x, sum.rec_on x (λ a, f.1 a) (λ ⟨⟩, f.2), _, _⟩,
+  rotate, { sorry }, { sorry },
+  let l : P.obj (op (X (sum.inr punit.star))) ≃ P.obj (op (Profinite.sigma (X ∘ sum.inr))) :=
+    (P.map_iso (Profinite.sigma_punit_iso (X ∘ sum.inr)).op).symm.to_equiv,
+  specialize h2 (X ∘ sum.inl),
+  let p := _, change function.bijective p at h2,
+  let q :
+    P.obj (op (Profinite.sigma (X ∘ sum.inl))) × P.obj (op (Profinite.sigma (X ∘ sum.inr)))
+      → (Π (a : α), P.obj (op (X (sum.inl a)))) × P.obj (op (Profinite.sigma (X ∘ sum.inr))) :=
+    prod.map p id,
+  have hq : function.bijective q := sorry,
+  let r : (Π (a : α), P.obj (op (X (sum.inl a)))) × _ → _ × _ := prod.map id l.symm,
+  have hr : function.bijective r := sorry,
+  have : f = e.symm ∘ prod.map id l.symm ∘ q ∘ g ∘ t, sorry,
+  rw this,
+  exact e.symm.bijective.comp (hr.comp (hq.comp (h1.comp t.bijective))),
+end
 
 theorem finite_product_condition_iff_empty_product :
   P.finite_product_condition ↔ P.empty_condition ∧ P.product_condition :=

@@ -304,6 +304,11 @@ def sigma_sum_iso' {α β : Type u} [fintype α] [fintype β]
       intros, simp }
   end }
 
+def sigma_punit_iso (X : (punit : Type u) → Profinite.{u}) :
+  X punit.star ≅ sigma X :=
+{ hom := sigma.ι _ _,
+  inv := sigma.desc _ $ λ ⟨⟩, 𝟙 _ }
+
 --TODO: Finish off the api for the explicit pullback
 
 def equalizer {X Y : Profinite.{u}} (f g : X ⟶ Y) : Profinite :=
