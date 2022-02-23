@@ -30,8 +30,8 @@ Profinite.extend (fintype_functor.{u} r')
 --  (to_CompHausFiltPseuNormGrp₁.{u u} r') := sorry
 
 def profinite_comp_to_CompHausFiltPseuNormGrp₁ :
-  laurent_measures.profinite.{u} r' ⋙ to_CompHausFiltPseuNormGrp₁.{u u} r' ≅
-  Profinite.extend (fintype_functor.{u} r' ⋙ to_CompHausFiltPseuNormGrp₁.{u u} r') :=
+  laurent_measures.profinite.{u} r' ⋙ to_CompHausFiltPseuNormGrp₁.{u} r' ≅
+  Profinite.extend (fintype_functor.{u} r' ⋙ to_CompHausFiltPseuNormGrp₁.{u} r') :=
 Profinite.extend_commutes _ _
 
 end laurent_measures
