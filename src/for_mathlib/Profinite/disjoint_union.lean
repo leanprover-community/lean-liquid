@@ -281,6 +281,29 @@ def sigma_sum_iso {α β : Type u} [fintype α] [fintype β]
       simp },
   end }
 
+def sigma_sum_iso' {α β : Type u} [fintype α] [fintype β]
+  (X : α ⊕ β → Profinite.{u}) :
+  sigma X ≅ sum (sigma (X ∘ _root_.sum.inl)) (sigma (X ∘ _root_.sum.inr)) :=
+{ hom := sigma.desc _ $ λ x, sum.rec_on x (λ a, begin
+    exact sigma.ι (X ∘ _root_.sum.inl) a,
+  end ≫ sum.inl _ _) (λ b, begin
+    exact sigma.ι (X ∘ _root_.sum.inr) b
+  end ≫ sum.inr _ _),
+  inv := sum.desc _ _ (sigma.desc _ $ λ a, sigma.ι _ _) (sigma.desc _ $ λ b, sigma.ι _ _),
+  hom_inv_id' := begin
+    apply sigma.hom_ext,
+    rintros (a|b),
+    all_goals { dsimp, simp },
+  end,
+  inv_hom_id' := begin
+    apply sum.hom_ext,
+    all_goals
+    { dsimp,
+      simp,
+      apply sigma.hom_ext,
+      intros, simp }
+  end }
+
 --TODO: Finish off the api for the explicit pullback
 
 def equalizer {X Y : Profinite.{u}} (f g : X ⟶ Y) : Profinite :=
