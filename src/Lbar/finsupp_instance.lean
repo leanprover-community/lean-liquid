@@ -11,37 +11,105 @@ section families_of_add_comm_groups
 
 variables (S A : Type*) [add_comm_group A]
 
---instance pro : add_comm_group (S → A) := pi.add_comm_group
-/-
-#exit
-{ add := λ F G s, F s + G s,
-  add_assoc := λ F G H, by simp only [add_assoc],
-  zero := 0,
-  zero_add := λ F, by { simp only [pi.zero_apply, zero_add] },
-  add_zero := λ F, by { simp only [pi.zero_apply, add_zero] },
-  nsmul := λ N F s, N • F s,
-  nsmul_zero' := λ F, by { ext, simp only [pi.zero_apply, zero_smul] },
-  nsmul_succ' := λ N F, by { ext, simp only [succ_nsmul, pi.add_apply] },
-  neg := λ F s, - F s,
-  sub := λ F G s, F s - G s,
-  sub_eq_add_neg := λ F G, by { ext, simp only [sub_eq_add_neg, pi.add_apply] },
-  zsmul := _,
-  zsmul_zero' := _,
-  zsmul_succ' := _,
-  zsmul_neg' := _,
-  add_left_neg := _,
-  add_comm := _ }
--/
+-- by apply_instance works, but having this instance explicitly, allows
+-- `finsupp_add_group` to work.
+instance add_comm_group_finsupp {α β γ : Type*} [add_comm_group γ] : add_comm_group (α → β →₀ γ) :=
+pi.add_comm_group
+
+--  I had some trouble getting Lean to accept this instance, without the explicit instance
+--  `add_comm_group_finsupp`
+instance finsupp_add_group : add_comm_group (S → ℤ →₀ ℝ) := by apply_instance -- works
+
+/--  A function from a `Fintype` is automatically a `finsupp`, when the target has a zero. -/
+def finsupp_of_fintype_domain {α : Type*} [has_zero α] {S : Fintype} (F : S → α) : S →₀ α :=
+{ support            := (set.finite.of_fintype {s | F s ≠ 0}).to_finset,
+  to_fun             := F,
+  mem_support_to_fun := by simp }
+
+instance fintype.sum_nnnorm {S : Fintype} {α : Type*} [has_nnnorm α] : has_nnnorm (S → α) :=
+{ nnnorm := λ F, ∑ s, ∥F s∥₊ }
+
+lemma finset.sum_add {α β : Type*} [add_comm_monoid β] {F G : α → β} (s : finset α) :
+  ∑ x in s, (F x + G x) = ∑ x in s, F x + ∑ x in s, G x :=
+begin
+  classical,
+  refine finset.induction_on s (by simp) _,
+  intros a s as h,
+  rw [sum_insert as, sum_insert as, sum_insert as, h],
+  abel,
+end
+
+instance sum_nnnorm (S : Fintype) (α : Type*) [has_zero α] [has_nnnorm α] :
+  has_nnnorm (S → α) :=
+{ nnnorm := λ F, ∑ b, ∥F b∥₊ }
+
+lemma sum_nnnorm_add_le {S : Fintype} {β : Type*} [semi_normed_group β]
+  (F G : S → β) :
+  ∥F + G∥₊ ≤ ∥F∥₊ + ∥G∥₊ :=
+begin
+  simp only [nnnorm, finsupp.coe_add, pi.add_apply],
+  -- using dot-notation for le_trans seems to not work
+  exact le_trans (sum_le_sum (λ i hi, nnnorm_add_le _ _)) (finset.sum_add _).le,
+end
+
+structure with_r (r' : ℝ≥0) :=
+(ℤ →₀ ℝ)
+
+instance mymy (S : Fintype) (r' : ℝ≥0) : pseudo_normed_group (S → ℤ →₀ ℝ) :=
+{ to_add_comm_group := finsupp_add_group S,
+  filtration := λ c, by {
+    letI Q : has_nnnorm (S → (ℤ →₀ ℝ)) := @sum_nnnorm S (ℤ →₀ ℝ) _ (by
+      refine ⟨λ F, ∑' x, ∥F x∥₊ * r' ^ x⟩),
+    exact {F | ∥F∥₊ ≤ c}},
+  filtration_mono := λ c d cd x hx, by { rw set.mem_set_of_eq at hx ⊢, exact hx.trans cd },
+  zero_mem_filtration := λ c,
+    by simp only [nnnorm, set.mem_set_of_eq, support_zero, sum_empty, zero_le'],
+  neg_mem_filtration := λ c F hF,
+    by simpa only [set.mem_set_of_eq, nnnorm, norm_neg, support_neg, coe_neg, pi.neg_apply],
+  add_mem_filtration := λ c d F G hF hG,
+    by simpa using (sum_nnnorm_add_le F G).trans (add_le_add hF hG) }
+
+namespace works_but_not_what_I_want
+
+instance sum_nnnorm {α β : Type*} [has_zero α] [has_nnnorm α] : has_nnnorm (β →₀ α) :=
+{ nnnorm := λ F, ∑ b in F.support, ∥F b∥₊ }
+
+lemma sum_nnnorm_add_le {α β : Type*} [semi_normed_group β]
+--[ordered_add_comm_monoid β]
+-- [has_nnnorm β]
+  (F G : α →₀ β) :
+  ∥F + G∥₊ ≤ ∥F∥₊ + ∥G∥₊ :=
+begin
+  classical,
+  simp only [nnnorm, finsupp.coe_add, pi.add_apply],
+  refine le_trans (sum_le_sum_of_subset support_add) _,
+  refine le_trans (sum_le_sum (λ i hi, nnnorm_add_le _ _)) (le_of_eq _),
+  refine (F.support ∪ G.support).sum_add.trans _,
+  conv in (∑ x in _, ∥G x∥₊) { congr, rw union_comm },
+  congr' 1;
+  { rw [← union_sdiff_self_eq_union, sum_union disjoint_sdiff],
+    convert add_zero _,
+    simp only [sum_eq_zero_iff, mem_sdiff, mem_support_iff, ne.def, not_not, and_imp],
+    exact λ _ _ h, by simp only [h, nnnorm_zero] }
+end
+
+instance mymy (r' : ℝ≥0) : pseudo_normed_group (ℤ →₀ ℝ) :=
+{ to_add_comm_group := finsupp.add_comm_group,
+  filtration := λ c, {F | ∥F∥₊ ≤ c},
+  filtration_mono := λ c d cd x hx, by { rw set.mem_set_of_eq at hx ⊢, exact hx.trans cd },
+  zero_mem_filtration := λ c,
+    by simp only [nnnorm, set.mem_set_of_eq, support_zero, sum_empty, zero_le'],
+  neg_mem_filtration := λ c F hF,
+    by simpa only [set.mem_set_of_eq, nnnorm, norm_neg, support_neg, coe_neg, pi.neg_apply],
+  add_mem_filtration := λ c d F G hF hG,
+    by simpa using (sum_nnnorm_add_le F G).trans (add_le_add hF hG) }
+
+end works_but_not_what_I_want
 
 end families_of_add_comm_groups
 
 namespace flaurent
 section add_group_instance
-
-instance add_comm_group {α β γ : Type*} [add_comm_group γ] : add_comm_group (α → β →₀ γ) :=
-pi.add_comm_group
-
-instance new (S : Fintype) : add_comm_group (S → ℤ →₀ ℝ) := flaurent.add_comm_group
 
 end add_group_instance
 /-
@@ -71,28 +139,18 @@ protected def nsmul (N : ℕ) (F : S → (ℤ →₀ ℝ)) : S → (ℤ →₀ �
 /-- Tailored scalar multiplication by integers. -/
 protected def zsmul (N : ℤ) (F : S → (ℤ →₀ ℝ)) : S → (ℤ →₀ ℝ) :=
 λ s, N • F s
-
-instance : add_comm_group (S → (ℤ →₀ ℝ)) :=
-{
-  zero := 0, add := (+), neg := has_neg.neg, sub := has_sub.sub,
-  add_assoc := λ a b c, by { ext s n, simp only [pi.add_apply, finsupp.coe_add, add_assoc] },
-  zero_add := λ a, by { ext s n, simp only [pi.add_apply, pi.zero_apply, zero_add] },
-  add_zero := λ a, by { ext s n, simp only [pi.add_apply, pi.zero_apply, add_zero] },
-  nsmul := λ n F, flaurent.nsmul n F,
-  nsmul_zero' := λ a, by { ext s n, simp only [flaurent.nsmul, pi.zero_apply, zero_smul] },
-  nsmul_succ' := λ a F, by { ext s n, simp only [flaurent.nsmul, nat.succ_eq_add_one, add_smul,
-    one_smul, add_comm, pi.add_apply] },
-  sub_eq_add_neg := by { intros, ext, simp only
-    [sub_eq_add_neg, pi.add_apply, pi.sub_apply, pi.neg_apply] },
-  zsmul := λ n F, flaurent.zsmul n F,
-  zsmul_zero' := _,
-  zsmul_succ' := _,
-  zsmul_neg' := _,
-  add_left_neg := _,
-  add_comm := _ }
 -/
 
+
+
 variables (r' : ℝ≥0) (S : Fintype)
+def my_nnnorm {α β : Type*} [has_zero β] [has_nnnorm β] (ρ : ℝ≥0) (ex : α → ℤ) (F : α →₀ β) : ℝ≥0 :=
+∑' n, ∥F n∥₊ * ρ ^ ex n
+
+/-- The norm of `F : S → (ℤ →₀ ℝ)` as nonnegative real number.
+It is defined as `∑ s, ∑' n, (↑(F s n).nat_abs * r' ^ n)`. -/
+protected def nnnorm (F : S → (ℤ →₀ ℝ)) : ℝ≥0 :=
+my_nnnorm r' id (finsupp_of_fintype_domain F)
 
 /-- The norm of `F : S → (ℤ →₀ ℝ)` as nonnegative real number.
 It is defined as `∑ s, ∑' n, (↑(F s n).nat_abs * r' ^ n)`. -/
