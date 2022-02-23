@@ -2,6 +2,7 @@ import condensed.proetale_site
 import for_mathlib.presieve
 import topology.category.Profinite.projective
 import for_mathlib.Profinite.disjoint_union
+import for_mathlib.fintype_induction
 import tactic.derive_fintype -- for pbool
 
 universes w v u
@@ -24,11 +25,17 @@ def finite_product_condition : Prop := ∀
 function.bijective (λ (x : P.obj (op (Profinite.sigma X))) (a : α),
   P.map (Profinite.sigma.ι X a).op x)
 
+def finite_product_condition_of (α : Fintype.{w}) : Prop :=
+  ∀ (X : α → Profinite.{w}),
+  function.bijective (λ (x : P.obj (op (Profinite.sigma X))) (a : α),
+    P.map (Profinite.sigma.ι X a).op x)
+
 def finite_product_condition' : Prop := ∀
 (n : ℕ) (X : ulift.{w} (fin n) → Profinite.{w}),
 function.bijective (λ (x : P.obj (op (Profinite.sigma X))) (a : ulift (fin n)),
   P.map (Profinite.sigma.ι X a).op x)
 
+namespace finite_product_aux
 def obj_equiv {α β : Type*} (e : α ≃ β) (X : β → Profinite.{w}) (b : β) :
   X b ≅ X (e (e.symm b)) := eq_to_iso (congr_arg X (e.apply_symm_apply _).symm)
 
@@ -49,6 +56,27 @@ begin
   dsimp [product_equiv, sigma_equiv],
   simp only [← functor_to_types.map_comp_apply],
   refl,
+end
+
+end finite_product_aux
+
+open finite_product_aux
+
+lemma finite_product_condition_of_equiv (α β : Fintype.{w}) (e : α ≃ β)
+  (h : P.finite_product_condition_of α) : P.finite_product_condition_of β :=
+begin
+  intros X,
+  specialize h (X ∘ e),
+  let f := _, show function.bijective f,
+  let g := _, change function.bijective g at h,
+  have : f = (product_equiv _ _ _) ∘ g ∘ (sigma_equiv P e X).symm,
+  { suffices : (product_equiv _ _ _).symm ∘ f = g ∘ (sigma_equiv P e X).symm,
+    by { rw ← this, ext, simp },
+    symmetry,
+    ext a,
+    apply product_equiv_compatible },
+  rw this,
+  apply function.bijective.comp (equiv.bijective _) (h.comp (equiv.bijective _))
 end
 
 lemma finite_product_condition_iff_finite_product_condition' :
@@ -80,6 +108,40 @@ def product_condition : Prop := ∀ (X Y : Profinite.{w}),
   function.bijective (λ (t : P.obj (op $ Profinite.sum X Y)),
     ((P.map (Profinite.sum.inl X Y).op t, P.map (Profinite.sum.inr X Y).op t) :
       P.obj (op X) × P.obj (op Y)))
+
+lemma finite_product_condition_of_empty_iff_empty_condition :
+  P.finite_product_condition_of ⟨pempty⟩ ↔ P.empty_condition := sorry
+
+lemma finite_product_condition_of_pair_iff_product_condition :
+  P.finite_product_condition_of ⟨limits.walking_pair⟩ ↔ P.product_condition := sorry
+
+lemma finite_product_condition_of_sum (α β : Fintype.{w})
+  (h1 : P.product_condition)
+  (h2 : P.finite_product_condition_of α) :
+  P.finite_product_condition_of (Fintype.of $ α ⊕ (punit : Type w)) := sorry
+
+theorem finite_product_condition_iff_empty_product :
+  P.finite_product_condition ↔ P.empty_condition ∧ P.product_condition :=
+begin
+  split,
+  { intros h,
+    split,
+    rw ← finite_product_condition_of_empty_iff_empty_condition,
+    apply h,
+    rw ← finite_product_condition_of_pair_iff_product_condition,
+    apply h },
+  { rintros ⟨h1,h2⟩,
+    have := @Fintype.induction_empty_sum (λ (α : Fintype.{w}), P.finite_product_condition_of α),
+    apply this,
+    { intros α β e h,
+      apply finite_product_condition_of_equiv _ _ _ e h },
+    { erw finite_product_condition_of_empty_iff_empty_condition,
+      assumption },
+    { intros α h,
+      apply finite_product_condition_of_sum P α (Fintype.of punit),
+      assumption,
+      assumption } }
+end
 
 -- should this be in mathlib in some form?
 section is_singleton
