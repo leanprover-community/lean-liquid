@@ -84,14 +84,15 @@ def δ [F.additive] (n : ℕ) (A : short_exact_sequence C) :
 begin
   let f₃ := functor.left_derived_obj_iso' F (n+1) _ _ _ (horseshoe_is_projective_resolution₃ A),
   let f₁ := functor.left_derived_obj_iso' F n _ _ _ (horseshoe_is_projective_resolution₁ A),
-  exact f₃.hom ≫ (homological_complex.δ _ _ (exact_α_β_horseshoe F A) _) ≫ f₁.symm.hom,
+  exact f₃.hom ≫ (homological_complex.δ _ _ (exact_α_β_horseshoe F A) _ _ rfl) ≫ f₁.symm.hom,
 end
 
 lemma exact_of_short_exact [F.additive] (n : ℕ) (A : short_exact_sequence C) :
   exact ((F.left_derived n).map A.f) ((F.left_derived n).map A.g) :=
 begin
   let P := map_complex_short_exact_sequence_of_split C F _ (λ i, horseshoe_split A i),
-  have := ((homological_complex.six_term_exact_seq _ _ (exact_α_β_horseshoe F A) n).drop 3).pair,
+  have := ((homological_complex.six_term_exact_seq _ _
+    (exact_α_β_horseshoe F A) _ n rfl).drop 3).pair,
   have H₁₂ := functor.left_derived_map_eq' F n A.1 A.2 A.f
     ((homological_complex.Fst C).obj (horseshoe A)) (horseshoe_to_single₁ A)
     ((homological_complex.Snd C).obj (horseshoe A)) (horseshoe_to_single₂ A)
@@ -131,7 +132,8 @@ lemma exact_of_short_exact.δ_right [F.additive] (n : ℕ) (A : short_exact_sequ
   exact ((F.left_derived (n + 1)).map A.g) (δ F n A) :=
 begin
   let P := map_complex_short_exact_sequence_of_split C F _ (λ i, horseshoe_split A i),
-  have := ((homological_complex.six_term_exact_seq _ _ (exact_α_β_horseshoe F A) n).drop 1).pair,
+  have := ((homological_complex.six_term_exact_seq _ _
+    (exact_α_β_horseshoe F A) _ n rfl).drop 1).pair,
   have H₂₃ := functor.left_derived_map_eq' F (n+1) A.2 A.3 A.g
     ((homological_complex.Snd C).obj (horseshoe A)) (horseshoe_to_single₂ A)
     ((homological_complex.Trd C).obj (horseshoe A)) (horseshoe_to_single₃ A)
@@ -164,7 +166,8 @@ lemma exact_of_short_exact.δ_left [F.additive] (n : ℕ) (A : short_exact_seque
   exact (δ F n A) ((F.left_derived n).map A.f) :=
 begin
   let P := map_complex_short_exact_sequence_of_split C F _ (λ i, horseshoe_split A i),
-  have := ((homological_complex.six_term_exact_seq _ _ (exact_α_β_horseshoe F A) n).drop 2).pair,
+  have := ((homological_complex.six_term_exact_seq _ _
+    (exact_α_β_horseshoe F A) _ n rfl).drop 2).pair,
   have H₁₂ := functor.left_derived_map_eq' F n A.1 A.2 A.f
     ((homological_complex.Fst C).obj (horseshoe A)) (horseshoe_to_single₁ A)
     ((homological_complex.Snd C).obj (horseshoe A)) (horseshoe_to_single₂ A)
