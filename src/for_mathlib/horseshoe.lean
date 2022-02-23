@@ -370,10 +370,6 @@ begin
   exact ⟨biprod.fst, biprod.inr, biprod.inl_fst, biprod.inr_snd, biprod.inr_fst, biprod.total⟩
 end
 
-def horseshoe_mapped (A : short_exact_sequence C) (F : C ⥤ D) [F.additive] (n : ℕ) :
-  short_exact_sequence D :=
-functor.map_short_exact_sequence_of_split _ F ((horseshoe A).X n) (horseshoe_split A n)
-
 lemma horseshoe_f_comp_to_single₂_f (A : short_exact_sequence C) (i : ℕ) :
   ((horseshoe A).X i).f ≫ (horseshoe_to_single₂ A).f i =
   (horseshoe_to_single₁ A).f i ≫ ((chain_complex.single₀ C).map A.f).f i :=
