@@ -1,6 +1,7 @@
 import category_theory.abelian.diagram_lemmas.four
 import for_mathlib.projectives
 import for_mathlib.homological_complex
+import for_mathlib.snake_lemma2
 
 noncomputable theory
 

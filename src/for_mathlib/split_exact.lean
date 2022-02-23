@@ -112,8 +112,35 @@ lemma exact_of_split {A B C : 𝒜} (f : A ⟶ B) (g : B ⟶ C) (χ : C ⟶ B) (
     simp only [add_zero, zero_comp, kernel_subobject_arrow_comp_assoc],
   end }
 
+section
+
+variables {f g}
+
 lemma split.exact (h : split f g) : exact f g :=
 by { obtain ⟨φ, χ, -, -, h1, -, h2⟩ := h, exact exact_of_split f g χ φ h1 h2 }
+
+lemma split.left_split (h : split f g) : left_split f g :=
+{ left_split := by { obtain ⟨φ, χ, h1, -⟩ := h, exact ⟨φ, h1⟩, },
+  epi := begin
+    obtain ⟨φ, χ, -, h2, -⟩ := h,
+    have : epi (χ ≫ g), { rw h2, apply_instance },
+    exactI epi_of_epi χ g,
+  end,
+  exact := h.exact }
+
+lemma split.right_split (h : split f g) : right_split f g :=
+{ right_split := by { obtain ⟨φ, χ, -, h1, -⟩ := h, exact ⟨χ, h1⟩, },
+  mono := begin
+    obtain ⟨φ, χ, h1, -⟩ := h,
+    have : mono (f ≫ φ), { rw h1, apply_instance },
+    exactI mono_of_mono f φ,
+  end,
+  exact := h.exact }
+
+lemma split.short_exact (h : split f g) : short_exact f g :=
+h.left_split.short_exact
+
+end
 
 def split.map {𝒜 ℬ : Type*} [category 𝒜] [abelian 𝒜] [category ℬ] [abelian ℬ] (F : 𝒜 ⥤ ℬ)
   [functor.additive F] {A B C : 𝒜} (f : A ⟶ B) (g : B ⟶ C) (h : split f g) :
