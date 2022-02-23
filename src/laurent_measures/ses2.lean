@@ -45,18 +45,6 @@ def Θ_profinite : laurent_measures.functor.{u} r ⟶ real_measures.profinite.{u
 Profinite.extend_nat_trans (Θ_fintype_nat_trans.{u} p)
 .
 
-set_option pp.universes true
-
-variables (S : Profinite.{u})
-
-#check Θ_fintype_nat_trans.{u}
-
-#check (condensed r).obj S
-
-#check CompHausFiltPseuNormGrp₁.to_Condensed.{u}
-
-#check (real_measures.condensed p).obj S
-
 def Θ_condensed_nat_trans :
   condensed r ⟶ real_measures.condensed p :=
 whisker_right (Θ_profinite p) (CompHausFiltPseuNormGrp₁.to_Condensed)
