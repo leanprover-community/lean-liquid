@@ -35,11 +35,11 @@ def sum.desc {Z} (X Y : Profinite.{u}) (f : X ⟶ Z) (g : Y ⟶ Z) : sum X Y ⟶
     { apply continuous_coinduced_dom, exact g.continuous }
   end }
 
-@[simp]
+@[simp, reassoc]
 lemma sum.inl_desc {Z} (X Y : Profinite.{u}) (f : X ⟶ Z) (g : Y ⟶ Z) :
   sum.inl X Y ≫ sum.desc X Y f g = f := by { ext, refl }
 
-@[simp]
+@[simp, reassoc]
 lemma sum.inr_desc {Z} (X Y : Profinite.{u}) (f : X ⟶ Z) (g : Y ⟶ Z) :
   sum.inr X Y ≫ sum.desc X Y f g = g := by { ext, refl }
 
@@ -191,6 +191,83 @@ lemma sigma_pullback_to_pullback_sigma_fst {B} (f : Π a, X a ⟶ B) :
 lemma sigma_pullback_to_pullback_sigma_snd {B} (f : Π a, X a ⟶ B) :
   sigma_pullback_to_pullback_sigma X f ≫ pullback.snd _ _ =
   sigma.desc _ (λ a, pullback.snd _ _ ≫ sigma.ι _ a.2) := by ext ⟨_,_⟩; refl
+
+lemma sigma_iso_of_equiv_aux
+  {α β : Type u}
+  [fintype α]
+  [fintype β]
+  (e : α ≃ β)
+  (X : β → Profinite.{u})
+  (b : β)
+  (h : b = (e ((e.symm) b))) :
+  eq_to_hom (by rw h) ≫ sigma.ι _ _ = sigma.ι X b :=
+begin
+  induction h,
+  simp,
+end
+
+def sigma_iso_of_equiv {α β : Type u} [fintype α] [fintype β] (e : α ≃ β)
+  (X : β → Profinite.{u}) :
+  sigma (X ∘ e) ≅ sigma X :=
+{ hom := sigma.desc _ $ λ a, sigma.ι _ (e a),
+  inv := sigma.desc _ $ λ b, eq_to_hom (by simp) ≫ sigma.ι _ (e.symm b),
+  hom_inv_id' := begin
+    apply sigma.hom_ext,
+    intros a,
+    dsimp,
+    simp only [sigma.ι_desc_assoc, sigma.ι_desc, category.comp_id],
+    apply sigma_iso_of_equiv_aux,
+    simp,
+  end,
+  inv_hom_id' := begin
+    apply sigma.hom_ext,
+    intros b,
+    dsimp,
+    simp only [sigma.ι_desc_assoc, category.assoc, sigma.ι_desc, category.comp_id],
+    apply sigma_iso_of_equiv_aux,
+    simp,
+  end }
+
+def sigma_iso_empty : sigma pempty.elim ≅ empty :=
+{ hom := sigma.desc _ $ λ a, a.elim,
+  inv := empty.elim _,
+  hom_inv_id' := begin
+    apply sigma.hom_ext,
+    rintros ⟨⟩
+  end,
+  inv_hom_id' := begin
+    ext ⟨⟩
+  end }
+
+def sigma_sum_iso {α β : Type u} [fintype α] [fintype β]
+  (X : α → Profinite.{u}) (Y : β → Profinite.{u}) :
+  sigma (λ (x : α ⊕ β), sum.rec_on x X Y) ≅ sum (sigma X) (sigma Y) :=
+{ hom := sigma.desc _ $ λ x, sum.rec_on x
+    (λ a, by { dsimp, exact sigma.ι _ _ } ≫ Profinite.sum.inl _ _)
+    (λ b, by { dsimp, exact sigma.ι _ _ } ≫ Profinite.sum.inr _ _),
+  inv := sum.desc _ _
+    (sigma.desc _ $ λ a, begin
+        refine _ ≫ sigma.ι _ (_root_.sum.inl a),
+        exact 𝟙 _
+      end)
+    (sigma.desc _ $ λ b, begin
+        refine _ ≫ sigma.ι _ (_root_.sum.inr b),
+        exact 𝟙 _
+    end),
+  hom_inv_id' := begin
+    apply sigma.hom_ext,
+    rintros (a|b),
+    all_goals { dsimp, simp }
+  end,
+  inv_hom_id' := begin
+    apply sum.hom_ext,
+    all_goals
+    { dsimp,
+      simp,
+      apply sigma.hom_ext,
+      intros,
+      simp },
+  end }
 
 --TODO: Finish off the api for the explicit pullback
 
