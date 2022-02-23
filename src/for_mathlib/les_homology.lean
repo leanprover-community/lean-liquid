@@ -153,7 +153,17 @@ lemma prev_eq_zero {A₁ A₂ : homological_complex C c} (f : A₁ ⟶ A₂) (i 
   f.prev i = 0 :=
 (X_prev_is_zero _ _ hi).eq_zero_of_src _
 
-instance exact_next {A₁ A₂ A₃ : homological_complex C c} (f : A₁ ⟶ A₂) (g : A₂ ⟶ A₃) (i : ι)
+lemma exact_next {A₁ A₂ A₃ : homological_complex C c} (f : A₁ ⟶ A₂) (g : A₂ ⟶ A₃)
+  (i j : ι) (hij : c.rel i j) [exact (f.f j) (g.f j)] :
+  exact (f.next i) (g.next i) :=
+begin
+  refine preadditive.exact_of_iso_of_exact' (f.f j) (g.f j) _ _
+    (X_next_iso A₁ hij).symm (X_next_iso A₂ hij).symm (X_next_iso A₃ hij).symm
+    _ _ infer_instance;
+  simp only [hom.next_eq _ hij, iso.symm_hom, iso.inv_hom_id_assoc],
+end
+
+instance exact_next' {A₁ A₂ A₃ : homological_complex C c} (f : A₁ ⟶ A₂) (g : A₂ ⟶ A₃) (i : ι)
   [∀ n, exact (f.f n) (g.f n)] : exact (f.next i) (g.next i) :=
 begin
   rcases (c.next i).eq_none_or_eq_some with (hi | ⟨⟨j, hij⟩, hi⟩),
@@ -161,13 +171,20 @@ begin
     apply_with exact_zero_left_of_mono { instances := ff },
     { apply_instance },
     { refine ⟨λ Z a b H, _⟩, apply (X_next_is_zero _ _ hi).eq_of_tgt } },
-  refine preadditive.exact_of_iso_of_exact' (f.f j) (g.f j) _ _
-    (X_next_iso A₁ hij).symm (X_next_iso A₂ hij).symm (X_next_iso A₃ hij).symm
-    _ _ infer_instance;
-  simp only [hom.next_eq _ hij, iso.symm_hom, iso.inv_hom_id_assoc],
+  exact exact_next f g i j hij
 end
 
-instance exact_prev {A₁ A₂ A₃ : homological_complex C c} (f : A₁ ⟶ A₂) (g : A₂ ⟶ A₃) (j : ι)
+lemma exact_prev {A₁ A₂ A₃ : homological_complex C c} (f : A₁ ⟶ A₂) (g : A₂ ⟶ A₃)
+  (i j : ι) (hij : c.rel i j) [exact (f.f i) (g.f i)] :
+  exact (f.prev j) (g.prev j) :=
+begin
+  refine preadditive.exact_of_iso_of_exact' (f.f i) (g.f i) _ _
+    (X_prev_iso A₁ hij).symm (X_prev_iso A₂ hij).symm (X_prev_iso A₃ hij).symm
+    _ _ infer_instance;
+  simp only [hom.prev_eq _ hij, iso.symm_hom, iso.inv_hom_id_assoc],
+end
+
+instance exact_prev' {A₁ A₂ A₃ : homological_complex C c} (f : A₁ ⟶ A₂) (g : A₂ ⟶ A₃) (j : ι)
   [∀ n, exact (f.f n) (g.f n)] : exact (f.prev j) (g.prev j) :=
 begin
   rcases (c.prev j).eq_none_or_eq_some with (hj | ⟨⟨i, hij⟩, hj⟩),
@@ -175,34 +192,45 @@ begin
     apply_with exact_zero_left_of_mono { instances := ff },
     { apply_instance },
     { refine ⟨λ Z a b H, _⟩, apply (X_prev_is_zero _ _ hj).eq_of_tgt } },
-  refine preadditive.exact_of_iso_of_exact' (f.f i) (g.f i) _ _
-    (X_prev_iso A₁ hij).symm (X_prev_iso A₂ hij).symm (X_prev_iso A₃ hij).symm
-    _ _ infer_instance;
-  simp only [hom.prev_eq _ hij, iso.symm_hom, iso.inv_hom_id_assoc],
+  exact exact_prev f g i j hij
 end
 
-instance mono_next {A₁ A₂ : homological_complex C c} (f : A₁ ⟶ A₂)
-  (i : ι) [∀ n, mono (f.f n)] :
+lemma mono_next {A₁ A₂ : homological_complex C c} (f : A₁ ⟶ A₂)
+  (i j : ι) (hij : c.rel i j) [mono (f.f j)] :
   mono (f.next i) :=
 begin
-  rcases (c.next i).eq_none_or_eq_some with (hi | ⟨⟨j, hij⟩, hi⟩),
-  { refine ⟨λ Z a b H, _⟩, apply (X_next_is_zero _ _ hi).eq_of_tgt },
   rw hom.next_eq _ hij,
   apply_with mono_comp { instances := ff },
   { apply_instance },
   { apply mono_comp }
 end
 
-instance epi_prev {A₁ A₂ : homological_complex C c} (f : A₁ ⟶ A₂)
+instance mono_next' {A₁ A₂ : homological_complex C c} (f : A₁ ⟶ A₂)
+  (i : ι) [∀ n, mono (f.f n)] :
+  mono (f.next i) :=
+begin
+  rcases (c.next i).eq_none_or_eq_some with (hi | ⟨⟨j, hij⟩, hi⟩),
+  { refine ⟨λ Z a b H, _⟩, apply (X_next_is_zero _ _ hi).eq_of_tgt },
+  exact mono_next f i j hij
+end
+
+lemma epi_prev {A₁ A₂ : homological_complex C c} (f : A₁ ⟶ A₂)
+  (i j : ι) (hij : c.rel i j) [epi (f.f i)] :
+  epi (f.prev j) :=
+begin
+  rw hom.prev_eq _ hij,
+  apply_with epi_comp { instances := ff },
+  { apply_instance },
+  { apply epi_comp }
+end
+
+instance epi_prev' {A₁ A₂ : homological_complex C c} (f : A₁ ⟶ A₂)
   (j : ι) [∀ n, epi (f.f n)] :
   epi (f.prev j) :=
 begin
   rcases (c.prev j).eq_none_or_eq_some with (hj | ⟨⟨i, hij⟩, hj⟩),
   { refine ⟨λ Z a b H, _⟩, apply (X_prev_is_zero _ _ hj).eq_of_src },
-  rw hom.prev_eq _ hij,
-  apply_with epi_comp { instances := ff },
-  { apply_instance },
-  { apply epi_comp }
+  exact epi_prev f i j hij
 end
 
 instance {A B : homological_complex C c} (f : A ⟶ B) [∀ n, epi (f.f n)] (i : ι) :

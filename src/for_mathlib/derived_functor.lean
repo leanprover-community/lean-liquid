@@ -90,7 +90,6 @@ end
 lemma exact_of_short_exact [F.additive] (n : ℕ) (A : short_exact_sequence C) :
   exact ((F.left_derived n).map A.f) ((F.left_derived n).map A.g) :=
 begin
-  let P := map_complex_short_exact_sequence_of_split C F _ (λ i, horseshoe_split A i),
   have := ((homological_complex.six_term_exact_seq _ _
     (exact_α_β_horseshoe F A) _ n rfl).drop 3).pair,
   have H₁₂ := functor.left_derived_map_eq' F n A.1 A.2 A.f
@@ -131,7 +130,6 @@ end
 lemma exact_of_short_exact.δ_right [F.additive] (n : ℕ) (A : short_exact_sequence C) :
   exact ((F.left_derived (n + 1)).map A.g) (δ F n A) :=
 begin
-  let P := map_complex_short_exact_sequence_of_split C F _ (λ i, horseshoe_split A i),
   have := ((homological_complex.six_term_exact_seq _ _
     (exact_α_β_horseshoe F A) _ n rfl).drop 1).pair,
   have H₂₃ := functor.left_derived_map_eq' F (n+1) A.2 A.3 A.g
@@ -165,7 +163,6 @@ end
 lemma exact_of_short_exact.δ_left [F.additive] (n : ℕ) (A : short_exact_sequence C) :
   exact (δ F n A) ((F.left_derived n).map A.f) :=
 begin
-  let P := map_complex_short_exact_sequence_of_split C F _ (λ i, horseshoe_split A i),
   have := ((homological_complex.six_term_exact_seq _ _
     (exact_α_β_horseshoe F A) _ n rfl).drop 2).pair,
   have H₁₂ := functor.left_derived_map_eq' F n A.1 A.2 A.f
