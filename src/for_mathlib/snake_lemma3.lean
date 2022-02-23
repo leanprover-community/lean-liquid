@@ -57,7 +57,15 @@ lemma mk_of_homology (X Y Z : cochain_complex 𝒜 ℤ)
   ((homology_functor _ _ _).map g) :=
 { row_exact₁ := sorry,
   row_exact₂ := sorry,
-  row_epi := sorry,
+  row_epi := begin
+    rw g.prev_eq,
+    rotate 2, exact (-1),
+    swap, simp,
+    apply_with epi_comp { instances := ff },
+    swap,
+    apply_with epi_comp { instances := ff },
+    all_goals { apply_instance }
+  end,
   row_mono := infer_instance,
   col_exact_a := sorry,
   col_exact_b := sorry,
