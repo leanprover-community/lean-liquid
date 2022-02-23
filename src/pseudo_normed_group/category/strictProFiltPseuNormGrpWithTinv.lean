@@ -53,14 +53,8 @@ def to_PFPNG₁ : (ProFiltPseuNormGrpWithTinv₁.{u} r) ⥤ ProFiltPseuNormGrp�
 
 @[simps]
 def to_CompHausFiltPseuNormGrp₁ (r' : ℝ≥0) :
-  ProFiltPseuNormGrpWithTinv₁ r' ⥤ CompHausFiltPseuNormGrp₁ :=
-{ obj := λ M,
-  { M := M,
-    str := infer_instance,
-    exhaustive' := M.exhaustive _ },
-  map := λ M N f, {..f},
-  map_id' := λ M, by { ext, refl },
-  map_comp' := by { intros, ext, refl } }
+  ProFiltPseuNormGrpWithTinv₁.{u} r' ⥤ CompHausFiltPseuNormGrp₁.{u} :=
+to_PFPNG₁ r' ⋙ ProFiltPseuNormGrp₁.to_CHFPNG₁
 
 lemma coe_comp_apply {A B C : ProFiltPseuNormGrpWithTinv₁ r} (f : A ⟶ B) (g : B ⟶ C) (a : A) :
   (f ≫ g) a = g (f a) := rfl
@@ -284,6 +278,9 @@ instance {J : Type u} [small_category J] : creates_limits_of_shape J (to_PFPNG�
         (ProFiltPseuNormGrp₁.limit_cone_is_limit (K ⋙ to_PFPNG₁ r)).unique_up_to_iso hC } } }
 
 instance : creates_limits (to_PFPNG₁ r) := ⟨⟩
+
+instance (r') : creates_limits (to_CompHausFiltPseuNormGrp₁ r') :=
+category_theory.comp_creates_limits _ _
 
 def limit_cone_is_limit {J : Type u} [small_category J]
   (K : J ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r) : limits.is_limit (limit_cone r K) :=
