@@ -74,6 +74,10 @@ apply_nolint homotopy_category.lift unused_arguments
 apply_nolint homotopy_category.lift_ext unused_arguments
 
 -- for_mathlib/derived/homological.lean
+apply_nolint category_theory.triangulated.homological_of_exists_aux unused_arguments
+apply_nolint category_theory.triangulated.is_iso_hom₁ unused_arguments
+apply_nolint category_theory.triangulated.is_iso_hom₂ unused_arguments
+apply_nolint category_theory.triangulated.is_iso_hom₃ unused_arguments
 apply_nolint category_theory.triangulated.is_iso_of_is_iso_inv_rotate unused_arguments
 apply_nolint category_theory.triangulated.is_iso_of_is_iso_rotate unused_arguments
 apply_nolint category_theory.triangulated.is_iso_triangle_hom_of_is_iso unused_arguments
@@ -111,6 +115,9 @@ apply_nolint category_theory.snake_diagram.mk_functor.square_commutes_col unused
 apply_nolint category_theory.snake_diagram.mk_functor.square_commutes_comp_col unused_arguments
 apply_nolint category_theory.snake_diagram.mk_functor.square_commutes_comp_row unused_arguments
 apply_nolint category_theory.snake_diagram.mk_functor.square_commutes_row unused_arguments
+
+-- for_mathlib/split_exact.lean
+apply_nolint category_theory.split.map def_lemma
 
 -- laurent_measures/basic.lean
 apply_nolint laurent_measures.laurent_measures.norm_nonneg dup_namespace
