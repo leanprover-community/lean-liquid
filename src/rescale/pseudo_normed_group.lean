@@ -53,6 +53,7 @@ instance [comphaus_filtered_pseudo_normed_group M] :
 instance [profinitely_filtered_pseudo_normed_group M] :
   profinitely_filtered_pseudo_normed_group (rescale r M) := {}
 
+@[simps]
 def map_comphaus_filtered_pseudo_normed_group_hom {M₁ M₂ : Type*}
   [profinitely_filtered_pseudo_normed_group M₁] [profinitely_filtered_pseudo_normed_group M₂]
   (N : ℝ≥0) (f : comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :
@@ -108,6 +109,7 @@ instance : profinitely_filtered_pseudo_normed_group_with_Tinv r' (rescale r M) :
   Tinv_mem_filtration := Tinv'_mem_filtration r r' M,
   .. rescale.profinitely_filtered_pseudo_normed_group r M }
 
+@[simps]
 def map_comphaus_filtered_pseudo_normed_group_with_Tinv_hom {M₁ M₂ : Type*}
   [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₁]
   [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₂]
@@ -159,6 +161,7 @@ def rescale (N : ℝ≥0) [fact (0 < N)] :
   map := λ M₁ M₂ f, rescale.map_comphaus_filtered_pseudo_normed_group_with_Tinv_hom _ _ f, }
 .
 
+@[simps]
 def rescale_out (N : ℝ≥0) [fact (1 ≤ N)] :
   rescale r' N ⟶ 𝟭 _ :=
 { app := λ M,
