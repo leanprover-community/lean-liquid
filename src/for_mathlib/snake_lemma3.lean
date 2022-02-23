@@ -99,36 +99,21 @@ lemma mk_of_homology (X Y Z : cochain_complex 𝒜 ℤ)
   [epi (g.f 1)]
   [mono (f.f (-1))]
   [mono (f.f 0)]
-  [mono (f.f 1)] : snake
-  (kernel (X.d_to 0))
-  (kernel (Y.d_to 0))
-  (kernel (Z.d_to 0))
-  (X.X_prev 0)
-  (Y.X_prev 0)
-  (Z.X_prev 0)
-  (kernel (X.d_from 0))
-  (kernel (Y.d_from 0))
-  (kernel (Z.d_from 0))
-  ((homology_functor _ _ 0).obj X)
-  ((homology_functor _ _ 0).obj Y)
-  ((homology_functor _ _ 0).obj Z)
-  (kernel.lift _ (kernel.ι _ ≫ (f.prev _)) (by simp))
-  (kernel.lift _ (kernel.ι _ ≫ (g.prev _)) (by simp))
-  (kernel.ι _)
-  (kernel.ι _)
-  (kernel.ι _)
-  (f.prev _)
-  (g.prev _)
-  (kernel.lift _ (X.d_to _) (by simp))
-  (kernel.lift _ (Y.d_to _) (by simp))
-  (kernel.lift _ (Z.d_to _) (by simp))
-  (kernel.lift _ (kernel.ι _ ≫ f.f _) (by simp))
-  (kernel.lift _ (kernel.ι _ ≫ g.f _) (by simp))
-  (homology.π' _ _ _)
-  (homology.π' _ _ _)
-  (homology.π' _ _ _)
-  ((homology_functor _ _ _).map f)
-  ((homology_functor _ _ _).map g) :=
+  [mono (f.f 1)] :
+  snake
+  -- the objects
+         (kernel (X.d_to 0))             (kernel (Y.d_to 0))              (kernel (Z.d_to 0))
+            (X.X_prev 0)                    (Y.X_prev 0)                     (Z.X_prev 0)
+        (kernel (X.d_from 0))           (kernel (Y.d_from 0))            (kernel (Z.d_from 0))
+  ((homology_functor _ _ 0).obj X) ((homology_functor _ _ 0).obj Y) ((homology_functor _ _ 0).obj Z)
+  -- the maps
+  (kernel.map _ _ (f.prev _) (f.f _) (by simp)) (kernel.map _ _ (g.prev _) (g.f _) (by simp))
+  (kernel.ι _) (kernel.ι _) (kernel.ι _)
+  (f.prev _) (g.prev _)
+  (kernel.lift _ (X.d_to _) (by simp)) (kernel.lift _ (Y.d_to _) (by simp)) (kernel.lift _ (Z.d_to _) (by simp))
+  (kernel.map _ _ (f.f _) (f.next _) (by simp)) (kernel.map _ _ (g.f _) (g.next _) (by simp))
+  (homology.π' _ _ _) (homology.π' _ _ _) (homology.π' _ _ _)
+  ((homology_functor _ _ _).map f) ((homology_functor _ _ _).map g) :=
 { row_exact₁ := row_exact₁_aux _ _ _ _ _,
   row_exact₂ := row_exact₂_aux _ _ _ _ _,
   row_epi := begin
