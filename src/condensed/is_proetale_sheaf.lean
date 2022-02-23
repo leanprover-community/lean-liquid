@@ -109,13 +109,39 @@ def product_condition : Prop := ∀ (X Y : Profinite.{w}),
     ((P.map (Profinite.sum.inl X Y).op t, P.map (Profinite.sum.inr X Y).op t) :
       P.obj (op X) × P.obj (op Y)))
 
+open opposite
+
 lemma finite_product_condition_of_empty_iff_empty_condition :
-  P.finite_product_condition_of ⟨pempty⟩ ↔ P.empty_condition := sorry
+  P.finite_product_condition_of ⟨pempty⟩ ↔ P.empty_condition :=
+begin
+  split,
+  { intros h,
+    let f := _, show function.bijective f,
+    let X : (pempty : Type w) → Profinite.{w} := pempty.elim,
+    specialize h X,
+    let g := _, change function.bijective g at h,
+    let e : P.obj (opposite.op Profinite.empty) ≃ P.obj (op (Profinite.sigma X)) :=
+      (P.map_iso (Profinite.sigma_iso_empty' X).op).to_equiv,
+    let q : (Π (a : pempty), P.obj (op (X a))) ≃ punit :=
+      ⟨λ a, punit.star, λ _ a, a.elim, by { intros i, ext ⟨⟩ }, by { rintros ⟨⟩, refl }⟩,
+    have : f = q ∘ g ∘ e, { ext },
+    rw this,
+    exact q.bijective.comp (h.comp e.bijective) },
+  { intros h X,
+    let f := _, show function.bijective f,
+    let g := _, change function.bijective g at h,
+    let e : P.obj (op (Profinite.sigma X)) ≃ P.obj (op (Profinite.empty)) :=
+      (P.map_iso (Profinite.sigma_iso_empty' X).op).symm.to_equiv,
+    let q : punit ≃ (Π (a : pempty), P.obj (op (X a))) :=
+      ⟨λ _ a, a.elim, λ _, punit.star,  by { rintros ⟨⟩, refl }, by { intros i, ext ⟨⟩ }⟩,
+    have : f = q ∘ g ∘ e, { ext _ ⟨⟩ },
+    rw this,
+    exact q.bijective.comp (h.comp e.bijective) }
+end
 
 lemma finite_product_condition_of_pair_iff_product_condition :
   P.finite_product_condition_of ⟨limits.walking_pair⟩ ↔ P.product_condition := sorry
 
-open opposite
 
 lemma finite_product_condition_of_sum (α β : Fintype.{w})
   (h1 : P.product_condition)

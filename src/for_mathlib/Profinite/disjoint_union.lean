@@ -240,14 +240,12 @@ def sigma_iso_empty : sigma pempty.elim ≅ empty :=
   end }
 
 -- fin_zero_elim is terrible!
-def sigma_iso_empty' (X : ulift.{u} (fin 0) → Profinite.{u}) : sigma X ≅ (empty : Profinite.{u}) :=
-{ hom := sigma.desc _ $ λ i, @fin_zero_elim (λ _, X i ⟶ empty) i.down,
+def sigma_iso_empty' (X : (pempty : Type u) → Profinite.{u}) : sigma X ≅ (empty : Profinite.{u}) :=
+{ hom := sigma.desc _ $ λ i, i.elim,
   inv := empty.elim _,
   hom_inv_id' := begin
     apply sigma.hom_ext,
-    intros i,
-    exfalso,
-    exact @fin_zero_elim (λ _, false) i.down,
+    rintros ⟨⟩,
   end,
   inv_hom_id' := by { ext ⟨⟩ } }
 
