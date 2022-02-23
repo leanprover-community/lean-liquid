@@ -80,33 +80,16 @@ lemma exact_iff_ExtrDisc {A B C : Condensed.{u} Ab.{u+1}} (f : A ⟶ B) (g : B �
     exact (f.1.app $ ExtrDisc_to_Profinite.op.obj (op S))
           (g.1.app $ ExtrDisc_to_Profinite.op.obj (op S)) :=
 begin
-  simp only [abelian.exact_iff],
-  split,
-  { rintros ⟨h1,h2⟩ S,
-    split,
-    { rw zero_iff_ExtrDisc at h1, apply h1 },
-    { apply_fun (λ e, (kernel_iso g S).hom ≫ e ≫ (cokernel_iso f S).hom),
-      swap,
-      { intros a b h,
-        dsimp at h,
-        apply_fun (λ e, (kernel_iso g S).inv ≫ e ≫ (cokernel_iso f S).inv) at h,
-        simpa using h },
-      dsimp,
-      simp only [category.assoc, zero_comp, comp_zero],
-      erw kernel_iso_hom_assoc, erw cokernel_iso_hom,
-      simp only [← functor.map_comp, h2],
-      simpa } },
-  { intros h,
-    split,
-    { rw zero_iff_ExtrDisc, intros S, simpa using (h S).1 },
-    { rw zero_iff_ExtrDisc, intros S,
-      dsimp,
-      replace h := (h S).2,
-      apply_fun (λ e, (kernel_iso g S).hom ≫ e ≫ (cokernel_iso f S).hom) at h,
-      simp only [category.assoc, zero_comp, comp_zero] at h,
-      erw kernel_iso_hom_assoc at h, erw cokernel_iso_hom at h,
-      exact h
-    } }
+  simp only [abelian.exact_iff, zero_iff_ExtrDisc, forall_and_distrib],
+  refine and_congr iff.rfl _,
+  apply forall_congr,
+  intro S,
+  symmetry,
+  rw [← cancel_epi (kernel_iso g S).hom, ← cancel_mono (cokernel_iso f S).hom],
+  dsimp only [functor.op_obj, ExtrDisc_to_Profinite_obj],
+  simp only [category.assoc, zero_comp, comp_zero],
+  erw [kernel_iso_hom_assoc, cokernel_iso_hom],
+  exact iff.rfl,
 end
 
 open comphaus_filtered_pseudo_normed_group

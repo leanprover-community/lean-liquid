@@ -39,9 +39,24 @@ def Θ_fintype_nat_trans :
   (real_measures.functor p) :=
 { app := λ S, Θ p S,
   naturality' := λ S T f, by { ext x t, apply θ_natural, } }
+.
+
+set_option pp.universes true
+
+variables (S : Profinite.{u})
+
+-- #check Θ_fintype_nat_trans.{u}
+
+-- #check (condensed r).obj S
+
+-- #check CompHausFiltPseuNormGrp₁.to_Condensed.{u}
+
+-- #check (real_measures.condensed p).obj S
 
 def Θ_condensed (S : Profinite.{u}) :
   (condensed r).obj S ⟶ (real_measures.condensed p).obj S :=
-sorry
+CompHausFiltPseuNormGrp₁.to_Condensed.{u}.map $
+let foo := Profinite.extend_nat_trans (Θ_fintype_nat_trans.{u} p)
+in sorry
 
 end laurent_measures

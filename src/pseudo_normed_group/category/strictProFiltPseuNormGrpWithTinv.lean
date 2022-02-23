@@ -51,6 +51,17 @@ def to_PFPNG₁ : (ProFiltPseuNormGrpWithTinv₁.{u} r) ⥤ ProFiltPseuNormGrp�
     strict' := f.strict,
     continuous' := f.continuous' } }
 
+@[simps]
+def to_CompHausFiltPseuNormGrp₁ (r' : ℝ≥0) :
+  ProFiltPseuNormGrpWithTinv₁ r' ⥤ CompHausFiltPseuNormGrp₁ :=
+{ obj := λ M,
+  { M := M,
+    str := infer_instance,
+    exhaustive' := M.exhaustive _ },
+  map := λ M N f, {..f},
+  map_id' := λ M, by { ext, refl },
+  map_comp' := by { intros, ext, refl } }
+
 lemma coe_comp_apply {A B C : ProFiltPseuNormGrpWithTinv₁ r} (f : A ⟶ B) (g : B ⟶ C) (a : A) :
   (f ≫ g) a = g (f a) := rfl
 

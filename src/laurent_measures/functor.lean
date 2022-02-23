@@ -19,7 +19,8 @@ variables (r' : ℝ≥0) [fact (0 < r')]
   map_id' := λ S, by { ext1, simp only [map_hom, map_id], refl, },
   map_comp' := λ S S' S'' f g, by { ext1, simp only [map_hom, map_comp], refl } }
 
-@[simps] def functor : Profinite ⥤ ProFiltPseuNormGrpWithTinv₁ r' :=
-Profinite.extend (fintype_functor r')
+@[simps] def functor : Profinite ⥤ CompHausFiltPseuNormGrp₁ :=
+Profinite.extend
+  (fintype_functor r' ⋙ ProFiltPseuNormGrpWithTinv₁.to_CompHausFiltPseuNormGrp₁ r')
 
 end laurent_measures
