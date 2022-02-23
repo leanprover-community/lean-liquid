@@ -133,21 +133,32 @@ begin
     (Π (a : α), P.obj (op (X (sum.inl a)))) × P.obj (op (X (sum.inr punit.star))) :=
     ⟨ λ f, ⟨λ a, f (sum.inl a), f (sum.inr _)⟩,
       λ f x, sum.rec_on x (λ a, f.1 a) (λ ⟨⟩, f.2), _, _⟩,
-  rotate, { sorry }, { sorry },
+  rotate, { rintros x, ext (a|⟨⟨⟩⟩), refl, refl }, { rintros ⟨a,b⟩, ext ⟨a|⟨⟨⟩⟩⟩, refl, refl },
   let l : P.obj (op (X (sum.inr punit.star))) ≃ P.obj (op (Profinite.sigma (X ∘ sum.inr))) :=
     (P.map_iso (Profinite.sigma_punit_iso (X ∘ sum.inr)).op).symm.to_equiv,
   specialize h2 (X ∘ sum.inl),
   let p := _, change function.bijective p at h2,
   let q :
     P.obj (op (Profinite.sigma (X ∘ sum.inl))) × P.obj (op (Profinite.sigma (X ∘ sum.inr)))
-      → (Π (a : α), P.obj (op (X (sum.inl a)))) × P.obj (op (Profinite.sigma (X ∘ sum.inr))) :=
-    prod.map p id,
-  have hq : function.bijective q := sorry,
-  let r : (Π (a : α), P.obj (op (X (sum.inl a)))) × _ → _ × _ := prod.map id l.symm,
-  have hr : function.bijective r := sorry,
-  have : f = e.symm ∘ prod.map id l.symm ∘ q ∘ g ∘ t, sorry,
+      ≃ (Π (a : α), P.obj (op (X (sum.inl a)))) × P.obj (op (Profinite.sigma (X ∘ sum.inr))) :=
+    ⟨prod.map p id, prod.map (equiv.of_bijective p h2).symm id, _, _⟩,
+  rotate, { sorry }, { sorry },
+  let r : (Π (a : α), P.obj (op (X (sum.inl a)))) × _ ≃ _ × _ :=
+    ⟨prod.map id l.symm, prod.map id l, _, _⟩,
+  rotate, { sorry }, { sorry },
+  have : f = e.symm ∘ prod.map id l.symm ∘ q ∘ g ∘ t,
+  { ext x ⟨a|⟨⟨⟩⟩⟩,
+    ext i,
+    cases i,
+    { dsimp [f, e, q, g, t, p, I, Profinite.sigma_sum_iso'],
+      simp_rw [← functor_to_types.map_comp_apply, ← op_comp],
+      refl },
+    { cases i,
+      dsimp [f, e, q, g, t, p, I, Profinite.sigma_sum_iso'],
+      simp_rw [← functor_to_types.map_comp_apply, ← op_comp],
+      refl } },
   rw this,
-  exact e.symm.bijective.comp (hr.comp (hq.comp (h1.comp t.bijective))),
+  exact e.symm.bijective.comp (r.bijective.comp (q.bijective.comp (h1.comp t.bijective))),
 end
 
 theorem finite_product_condition_iff_empty_product :
