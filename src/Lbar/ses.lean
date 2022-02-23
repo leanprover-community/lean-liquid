@@ -104,7 +104,7 @@ end
   end }
 
 @[simps]
-def to_Lbar_fintype_nattrans : laurent_measures.fintype_functor r' ⟶ Lbar.fintype_functor r' :=
+def to_Lbar_fintype_nat_trans : laurent_measures.fintype_functor r' ⟶ Lbar.fintype_functor r' :=
 { app := λ S, to_Lbar_hom r' S,
   naturality' := λ S₁ S₂ f, begin
     ext,
@@ -115,7 +115,7 @@ def to_Lbar_fintype_nattrans : laurent_measures.fintype_functor r' ⟶ Lbar.fint
   end }
 
 @[simps]
-def to_Lbar_nattrans : laurent_measures.functor r' ⟶ Lbar.functor r' :=
-Profinite.extend_nat_trans $ to_Lbar_fintype_nattrans r'
+def to_Lbar_nat_trans : laurent_measures.profinite r' ⟶ Lbar.functor r' :=
+Profinite.extend_nat_trans $ to_Lbar_fintype_nat_trans r'
 
 end laurent_measures

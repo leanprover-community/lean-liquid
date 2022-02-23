@@ -18,11 +18,10 @@ variables (p : ℝ≥0) [fact (0 < p)] [fact (p < 1)]
 local notation `r` := @r p
 
 
-open laurent_measures_ses
+open laurent_measures_ses ProFiltPseuNormGrpWithTinv₁
 
 def Θ (S : Fintype.{u}) :
-  (fintype_functor.{u} r ⋙
-    ProFiltPseuNormGrpWithTinv₁.to_CompHausFiltPseuNormGrp₁.{u u} r).obj S ⟶
+  (fintype_functor.{u} r ⋙ to_CompHausFiltPseuNormGrp₁.{u u} r).obj S ⟶
   (real_measures.functor p).obj S :=
 strict_comphaus_filtered_pseudo_normed_group_hom.mk' (θ_to_add p)
 begin
@@ -34,15 +33,15 @@ begin
 end
 
 def Θ_fintype_nat_trans :
-  (fintype_functor.{u} r ⋙
-    ProFiltPseuNormGrpWithTinv₁.to_CompHausFiltPseuNormGrp₁.{u u} r) ⟶
-  (real_measures.functor.{u} p) :=
+  (fintype_functor.{u} r ⋙ to_CompHausFiltPseuNormGrp₁.{u u} r) ⟶ (real_measures.functor.{u} p) :=
 { app := λ S, Θ p S,
   naturality' := λ S T f, by { ext x t, apply θ_natural, } }
 .
 
-def Θ_profinite : laurent_measures.functor.{u} r ⟶ real_measures.profinite.{u} p :=
-Profinite.extend_nat_trans (Θ_fintype_nat_trans.{u} p)
+def Θ_profinite : profinite r ⋙ to_CompHausFiltPseuNormGrp₁.{u u} r ⟶
+    real_measures.profinite.{u} p :=
+(profinite_comp_to_CompHausFiltPseuNormGrp₁ r).hom ≫
+  Profinite.extend_nat_trans (Θ_fintype_nat_trans.{u} p)
 .
 
 def Θ_condensed_nat_trans :
