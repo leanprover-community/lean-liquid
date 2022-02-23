@@ -331,6 +331,7 @@ inductive pbool : Type u
 
 end pbool
 
+/-
 -- Kevin is working on this
 --lemma finite_product_condition_iff_empty_condition_product_condition :
 --  P.finite_product_condition ↔ P.empty_condition ∧ P.product_condition :=
@@ -391,6 +392,7 @@ end pbool
   { sorry }
   -/
 --end
+-/
 
 def map_to_equalizer {W X B : Profinite.{w}} (f : X ⟶ B) (g₁ g₂ : W ⟶ X)
   (w : g₁ ≫ f = g₂ ≫ f) :
