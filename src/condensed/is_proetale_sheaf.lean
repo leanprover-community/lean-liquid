@@ -141,11 +141,9 @@ begin
   let q :
     P.obj (op (Profinite.sigma (X ∘ sum.inl))) × P.obj (op (Profinite.sigma (X ∘ sum.inr)))
       ≃ (Π (a : α), P.obj (op (X (sum.inl a)))) × P.obj (op (Profinite.sigma (X ∘ sum.inr))) :=
-    ⟨prod.map p id, prod.map (equiv.of_bijective p h2).symm id, _, _⟩,
-  rotate, { sorry }, { sorry },
+    (equiv.of_bijective p h2).prod_congr (equiv.refl _),
   let r : (Π (a : α), P.obj (op (X (sum.inl a)))) × _ ≃ _ × _ :=
-    ⟨prod.map id l.symm, prod.map id l, _, _⟩,
-  rotate, { sorry }, { sorry },
+    (equiv.refl _).prod_congr l.symm,
   have : f = e.symm ∘ prod.map id l.symm ∘ q ∘ g ∘ t,
   { ext x ⟨a|⟨⟨⟩⟩⟩,
     ext i,
