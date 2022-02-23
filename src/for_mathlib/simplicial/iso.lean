@@ -16,7 +16,7 @@ variables {T : Type u₃} [category.{v₃} T]
 variables {L : A ⥤ T} {R : B ⥤ T}
 variables {X Y : comma L R} (f : X ⟶ Y)
 
-instance is_iso_of [is_iso f.left] [is_iso f.right] : is_iso f :=
+lemma is_iso_of [is_iso f.left] [is_iso f.right] : is_iso f :=
 { out := ⟨
   { left := inv f.left,
     right := inv f.right,
@@ -36,7 +36,7 @@ section
 
 variables {X Y : simplicial_object C} (f : X ⟶ Y)
 
-instance is_iso_of [hf : ∀ n, is_iso (f.app n)] : is_iso f :=
+lemma is_iso_of [hf : ∀ n, is_iso (f.app n)] : is_iso f :=
 { out :=
   begin
     let g : Y ⟶ X :=
@@ -50,12 +50,14 @@ instance is_iso_of [hf : ∀ n, is_iso (f.app n)] : is_iso f :=
 
 end
 
+local attribute [instance] category_theory.simplicial_object.is_iso_of
+
 namespace augmented
 
 variables {X Y : augmented C} (f : X ⟶ Y)
 
-instance is_iso_of [∀ n, is_iso (f.left.app n)] [is_iso f.right] : is_iso f :=
-infer_instance
+lemma is_iso_of [∀ n, is_iso (f.left.app n)] [is_iso f.right] : is_iso f :=
+category_theory.comma.is_iso_of _
 
 end augmented
 

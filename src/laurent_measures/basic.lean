@@ -320,7 +320,7 @@ lemma zpow_strict_anti {K : Type} [linear_ordered_field K] {x : K} (hx₀ : 0 < 
   strict_anti (λ n:ℤ, x ^ n) :=
 begin
   intros n m H,
-  rw [← inv_inv₀ x],
+  rw [← inv_inv x],
   simp only [inv_zpow₀ x⁻¹, inv_lt_inv (zpow_pos_of_pos (inv_pos.mpr hx₀) _)
     (zpow_pos_of_pos (inv_pos.mpr hx₀) _)],
   exact zpow_strict_mono (one_lt_inv hx₀ hx₁) H,
@@ -760,6 +760,7 @@ variable {α : Type*}
 open pseudo_normed_group profinitely_filtered_pseudo_normed_group
   comphaus_filtered_pseudo_normed_group
 
+@[simps]
 def map_hom [fact (0 < r)] (f : S ⟶ S') :
   comphaus_filtered_pseudo_normed_group_with_Tinv_hom r (ℒ S) (ℒ S') :=
 { to_fun := map f,
@@ -776,5 +777,13 @@ def map_hom [fact (0 < r)] (f : S ⟶ S') :
     rw this,
     exact continuous_of_discrete_topology.comp (truncate_continuous r S _ T),
   end }
+
+/--  Let `F : ℒ S` be a Laurent measure.  `laurent_measures.d` chooses a bound `d ∈ ℤ` for `F`,
+such that, for all `s : S`, the sequence `F s` is zero from `d-1` and below. -/
+def d (F : ℒ S) [h0 : fact (0 < r)] [h1 : fact (r < 1)] : ℤ :=
+(exists_bdd_filtration h0.out h1.out F).some
+
+lemma lt_d_eq_zero (F : ℒ S) (s : S) (n : ℤ) [h0 : fact (0 < r)] [h1 : fact (r < 1)] :
+  n < F.d → F s n = 0 := (exists_bdd_filtration h0.out h1.out F).some_spec s n
 
 end laurent_measures

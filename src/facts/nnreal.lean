@@ -11,6 +11,9 @@ instance fact_le_of_lt [h : fact (c₁ < c₂)] : fact (c₁ ≤ c₂) := ⟨h.1
 instance fact_pos_of_one_le [hk : fact (1 ≤ c)] : fact (0 < c) :=
 ⟨lt_of_lt_of_le zero_lt_one hk.1⟩
 
+instance fact_mul_pos [h1 : fact (0 < c₁)] [h2 : fact (0 < c₂)] : fact (0 < c₁ * c₂) :=
+⟨mul_pos h1.out h2.out⟩
+
 instance fact_le_mul_of_one_le_left [hk : fact (1 ≤ k)] [hc : fact (c₁ ≤ c₂)] :
   fact (c₁ ≤ k * c₂) :=
 ⟨calc c₁ = 1 * c₁ : (one_mul _).symm ... ≤ k * c₂ : mul_le_mul' hk.1 hc.1⟩

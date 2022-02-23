@@ -319,7 +319,7 @@ def punit : Profinite.{u} := Profinite.of punit
 def punit.elim (X : Profinite.{u}) : X ⟶ punit :=
 ⟨λ x, punit.star, by tidy⟩
 
-def punit.hom_ext (X : Profinite.{u}) (f g : X ⟶ punit) : f = g :=
+lemma punit.hom_ext (X : Profinite.{u}) (f g : X ⟶ punit) : f = g :=
 by ext
 
 def from_punit {X : Profinite.{u}} (x : X) : punit ⟶ X :=

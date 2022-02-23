@@ -1,5 +1,6 @@
 import Lbar.functor
 import laurent_measures.functor
+import laurent_measures.aux_lemmas
 
 .
 
@@ -12,6 +13,7 @@ The short exact sequence
 
 noncomputable theory
 
+open aux_thm69
 open_locale nnreal
 
 variables (r' : ℝ≥0) [fact (0 < r')] (S : Fintype)
@@ -29,24 +31,21 @@ namespace laurent_measures
     have := nnreal.summable_comp_injective (F.nnreal_summable s) int.coe_nat_injective,
     refine nnreal.summable_of_le _ this,
     intros n,
-    simp only [function.comp_app, zpow_coe_nat],
     split_ifs,
-    { simp only [int.nat_abs_zero, nat.cast_zero, zero_mul, zero_le'], },
-    { simp only [nnreal.coe_nat_abs], }
+    { simp only [int.nat_abs_zero, nat.cast_zero, zero_mul, zero_le'] },
+    { simp only [function.comp_app, nnreal.coe_nat_abs, zpow_coe_nat] }
   end }
 
 lemma to_Lbar_surjective : function.surjective (to_Lbar r' S) :=
 begin
   intro G,
   refine ⟨⟨λ s n, G s n.to_nat, λ s, _⟩, _⟩,
-  { rw ← int.coe_nat_injective.summable_iff,
-    { refine nnreal.summable_of_le _ (G.summable s),
-      intro n,
-      simp only [nnreal.coe_nat_abs, function.comp_app, int.to_nat_coe_nat, zpow_coe_nat] },
-    { rintro (n|n),
-      { simp only [int.of_nat_eq_coe, set.mem_range_self, not_true, forall_false_left], },
-      { intro, dsimp [int.to_nat], simp only [Lbar.coeff_zero, nnnorm_zero, zero_mul], } } },
-  { ext s (_|n), { exact (G.coeff_zero s).symm }, { dsimp, exact if_neg (nat.succ_ne_zero n), } }
+  { refine (nnreal.summable_iff_on_nat_less 0 (λ n n0, _)).mpr _,
+    { simp [int.to_nat_of_nonpos n0.le] },
+    { simpa only [← nnreal.coe_nat_abs] using G.summable' s } },
+  { ext s (_|n),
+    { exact (G.coeff_zero s).symm },
+    { show ite (n.succ = 0) 0 (G s (n + 1)) = G s n.succ, from if_neg n.succ_ne_zero } }
 end
 
 lemma nnnorm_to_Lbar (F : laurent_measures r' S) : ∥to_Lbar r' S F∥₊ ≤ ∥F∥₊ :=
@@ -105,7 +104,7 @@ end
   end }
 
 @[simps]
-def to_Lbar_fintype_nattrans : laurent_measures.fintype_functor r' ⟶ Lbar.fintype_functor r' :=
+def to_Lbar_fintype_nat_trans : laurent_measures.fintype_functor r' ⟶ Lbar.fintype_functor r' :=
 { app := λ S, to_Lbar_hom r' S,
   naturality' := λ S₁ S₂ f, begin
     ext,
@@ -116,7 +115,7 @@ def to_Lbar_fintype_nattrans : laurent_measures.fintype_functor r' ⟶ Lbar.fint
   end }
 
 @[simps]
-def to_Lbar_nattrans : laurent_measures.functor r' ⟶ Lbar.functor r' :=
-Profinite.extend_nat_trans $ to_Lbar_fintype_nattrans r'
+def to_Lbar_nat_trans : laurent_measures.profinite r' ⟶ Lbar.functor r' :=
+Profinite.extend_nat_trans $ to_Lbar_fintype_nat_trans r'
 
 end laurent_measures

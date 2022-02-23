@@ -33,49 +33,31 @@ noncomputable theory
 open nnreal theta laurent_measures aux_thm69 finset
 open_locale nnreal classical big_operators topological_space
 
-section mem_exact
+section phi
 
-parameter {p : ℝ≥0}
+parameter {r : ℝ≥0}
 
-def r : ℝ≥0 := (1 / 2) ^ (p:ℝ)
-
-variable {S : Fintype}
-
-section p_lt_one
-variables [fact (p < 1)]
-
-lemma r_half : 1 / 2 < r :=
-calc (1/2:ℝ≥0)
-    = (1/2) ^ (1:ℝ) : (rpow_one (1/2:ℝ≥0)).symm
-... < r : rpow_lt_rpow_of_exponent_gt (half_pos zero_lt_one) (half_lt_self one_ne_zero) $
-(nnreal.coe_lt_coe.mpr (fact.out _)).trans_le (nnreal.coe_one).le
-
-end p_lt_one
-
-lemma r_pos : 0 < r :=
-suffices 0 < (2 : ℝ≥0)⁻¹ ^ (p : ℝ), by simpa [r],
-rpow_pos (nnreal.inv_pos.mpr zero_lt_two)
-
-lemma r_coe : (1 / 2 : ℝ) ^ (p : ℝ) = (r : ℝ) :=
-begin
-  have : (1/2 : ℝ) = ((1/2 : ℝ≥0) : ℝ),
-  simp only [one_div, nonneg.coe_inv, nnreal.coe_bit0, nonneg.coe_one],
-  rw [this, ← nnreal.coe_rpow, nnreal.coe_eq],
-  refl,
-end
-
-instance : fact (0 < r) := { out := r_pos }
-
-local notation `ℳ` := real_measures p
 local notation `ℒ` := laurent_measures r
-
-def θ : ℒ S → ℳ S := ϑ (1 / 2 : ℝ) r p S
+variables [fact (0 < r)]
+variable {S : Fintype}
 
 def ϕ : ℒ S → ℒ S :=
 λ F, 2 • shift (-1) F - F
 
 lemma ϕ_apply (F : ℒ S) (s : S) (n : ℤ) : ϕ F s n = 2 * F s (n-1) - F s n :=
 by simp only [ϕ, sub_apply, nsmul_apply, shift_to_fun_to_fun, nsmul_eq_mul]; refl
+
+lemma ϕ_natural (S T : Fintype) (f : S ⟶ T) : --[fact (0 < p)] [fact ( p ≤ 1)] :
+  ϕ ∘ laurent_measures.map_hom f = laurent_measures.map_hom f ∘ ϕ :=
+begin
+  ext F t,
+  -- dsimp only [θ],
+  -- rw ϑ_eq_ϑ',
+  -- dsimp only [ϑ', seval],
+  sorry,
+end
+
+-- #check @ϕ
 
 lemma tsum_reindex (F : ℒ S) (N : ℤ) (s : S) : ∑' (l : ℕ), (F s (N + l) : ℝ) * (2 ^ l)⁻¹ =
  2 ^ N * ∑' (m : {m : ℤ // N ≤ m}), (F s m : ℝ) * (2 ^ m.1)⁻¹ :=
@@ -89,25 +71,7 @@ begin
     neg_add_cancel_comm, zpow_neg₀, zpow_coe_nat, add_comm],
 end
 
-variable [fact(0 < p)]
-
-lemma r_lt_one : r < 1 :=
-begin
-  refine rpow_lt_one zero_le' (half_lt_self one_ne_zero) _,
-  rw nnreal.coe_pos,
-  exact fact.out _
-end
-
-/--  Let `F : ℒ S` be a Laurent measure.  `laurent_measures.d` chooses a bound `d ∈ ℤ` for `F`,
-such that, for all `s : S`, the sequence `F s` is zero from `d-1` and below. -/
-def laurent_measures.d (F : ℒ S) : ℤ := (exists_bdd_filtration r_pos r_lt_one F).some
-
-lemma lt_d_eq_zero (F : ℒ S) (s : S) (n : ℤ) :
-  n < F.d → F s n = 0 := (exists_bdd_filtration r_pos r_lt_one F).some_spec s n
-
-lemma laurent_measures.summable_half [fact (p < 1)] (F : ℒ S) (s : S) :
-  summable (λ n, ((F s n) : ℝ) * (1 / 2) ^ n) :=
-aux_thm69.summable_smaller_radius F.d (F.summable s) (lt_d_eq_zero _ _) r_half
+variable [fact (r < 1)]
 
 lemma injective_ϕ (F : ℒ S) (H : ϕ F = 0) : F = 0 :=
 begin
@@ -121,15 +85,75 @@ begin
     refl },
   ext s n,
   apply int.induction_on' n (F.d - 1),
-  { apply lt_d_eq_zero _ _ (F.d - 1),
-    simp only [sub_lt_self_iff, zero_lt_one] },
+  { refine lt_d_eq_zero _ _ (F.d - 1) _,
+    simp only [sub_lt_self_iff, zero_lt_one], },
   { intros k h hk₀,
     simp [← H (k + 1) s, add_sub_cancel, hk₀, mul_zero] },
   { intros k h hk₀,
     simpa only [hk₀, mul_eq_zero, bit0_eq_zero, one_ne_zero, false_or, zero_apply] using H k s }
 end
 
+end phi
+
+section mem_exact
+
+parameter {p : ℝ≥0}
+
+def r : ℝ≥0 := (1 / 2) ^ (p:ℝ)
+
+lemma r_pos : 0 < r :=
+suffices 0 < (2 : ℝ≥0)⁻¹ ^ (p : ℝ), by simpa [r],
+rpow_pos (nnreal.inv_pos.mpr zero_lt_two)
+
+instance r_pos' : fact (0 < r) := ⟨r_pos⟩
+
+lemma r_coe : (1 / 2 : ℝ) ^ (p : ℝ) = (r : ℝ) :=
+begin
+  have : (1/2 : ℝ) = ((1/2 : ℝ≥0) : ℝ),
+  simp only [one_div, nonneg.coe_inv, nnreal.coe_bit0, nonneg.coe_one],
+  rw [this, ← nnreal.coe_rpow, nnreal.coe_eq],
+  refl,
+end
+
+variable [fact(0 < p)]
+
+lemma r_lt_one : r < 1 :=
+begin
+  refine rpow_lt_one zero_le' (half_lt_self one_ne_zero) _,
+  rw nnreal.coe_pos,
+  exact fact.out _
+end
+
+instance r_lt_one' : fact (r < 1) := ⟨r_lt_one⟩
+
+variable {S : Fintype}
+
+local notation `ℒ` := laurent_measures r
+local notation `ℳ` := real_measures p
+
+
+def θ : ℒ S → ℳ S := ϑ (1 / 2 : ℝ) r p S
+
+lemma θ_natural [fact (0 < p)] [fact (p ≤ 1)] (S T : Fintype) (f : S ⟶ T) (F : ℒ S) (t : T) :
+  θ (map f F) t = real_measures.map f (θ F) t :=
+begin
+  dsimp only [θ],
+  rw ϑ_eq_ϑ',
+  dsimp only [ϑ', seval_ℒ],
+  sorry,
+end
+
 variables [fact (p < 1)]
+
+lemma r_half : 1 / 2 < r :=
+calc (1/2:ℝ≥0)
+    = (1/2) ^ (1:ℝ) : (rpow_one (1/2:ℝ≥0)).symm
+... < r : rpow_lt_rpow_of_exponent_gt (half_pos zero_lt_one) (half_lt_self one_ne_zero) $
+(nnreal.coe_lt_coe.mpr (fact.out _)).trans_le (nnreal.coe_one).le
+
+lemma laurent_measures.summable_half (F : ℒ S) (s : S) :
+  summable (λ n, ((F s n) : ℝ) * (1 / 2) ^ n) :=
+aux_thm69.summable_smaller_radius F.d (F.summable s) (λ n hn, lt_d_eq_zero _ _ _ hn) r_half
 
 lemma θ_ϕ_complex (F : ℒ S) : (θ ∘ ϕ) F = 0 :=
 begin
@@ -148,6 +172,13 @@ begin
   exacts [(F.summable_half s).some_spec.tsum_eq.symm,
     (F.summable_half s)],
 end
+
+-- section p_lt_one
+-- variables [fact (p < 1)]
+
+
+
+-- end p_lt_one
 
 def ψ (F : ℒ S) (hF : θ F = 0) : ℒ S :=
 begin
@@ -188,7 +219,7 @@ begin
         int.cast_two],
       rw ← sub_nonneg at h_event,
       rw [sum_range_sum_Icc (coe ∘ (F s)) n F.d h_event,
-        sum_Icc_sum_tail (F s) n F.d _ (lt_d_eq_zero F s) h_event],
+        sum_Icc_sum_tail (F s) n F.d _ (λ n, lt_d_eq_zero F s _) h_event],
       { rw [← (abs_eq_self.mpr (inv_nonneg.mpr (@zero_le_two ℝ _))), ← real.norm_eq_abs,
           ← normed_field.norm_mul, real.norm_eq_abs, real.norm_eq_abs, abs_eq_abs,
           ← (sub_add_cancel n 1), (sub_eq_add_neg n 1), (add_assoc n _), (add_comm n _),
@@ -213,7 +244,7 @@ begin
     rw [← h_θ, norm_eq_zero],
     exact dif_neg (not_le_of_gt hn) },
   simp only [←nnreal.summable_coe, nonneg.coe_mul, _root_.coe_nnnorm, coe_zpow, summable_congr h_θ],
-  exact aux_thm69.summable_convolution r_half (F s) F.d (F.summable s) (lt_d_eq_zero F s) this
+  exact aux_thm69.summable_convolution r_half (F s) F.d (F.summable s) (λ n, lt_d_eq_zero F s _) this
 end
 
 theorem θ_ϕ_exact (F : ℒ S) (hF : θ F = 0) : ∃ G, ϕ G = F :=

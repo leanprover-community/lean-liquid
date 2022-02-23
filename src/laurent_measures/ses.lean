@@ -1,10 +1,12 @@
 -- import laurent_measures.functor
-import laurent_measures.thm69
 import analysis.special_functions.logb
+import for_mathlib.pi_induced
+import laurent_measures.thm69
 -- import data.real.basic
 
 /-
-This files introduces the maps `Θ`, `Φ` (***and `Ψ` ???***), which are the "measurifications" of `θ`, `ϕ` (*** and `ψ` ???***)
+This files introduces the maps `Θ`, `Φ` (***and `Ψ` ???***), which are the "measurifications" of
+`θ`, `ϕ` (*** and `ψ` ???***)
 `laurent_measures.thm69`, they are morphisms in the right category.
 
 We then prove in **???** that `θ_ϕ_exact` of `laurent_measures.thm69` becomes a short exact sequence
@@ -22,18 +24,19 @@ open laurent_measures pseudo_normed_group comphaus_filtered_pseudo_normed_group
   comphaus_filtered_pseudo_normed_group_hom
 open_locale big_operators nnreal
 
-section homs
+section phi_to_hom
 
-parameter {p : ℝ≥0}
+-- parameter {p : ℝ≥0}
+-- variables [fact(0 < p)] [fact (p < 1)]
+-- local notation `r` := @r p
+-- local notation `ℳ` := real_measures p
 
-variables [fact(0 < p)] [fact (p < 1)]
-
+variable {r : ℝ≥0}
+variables [fact (0 < r)]
 variable {S : Fintype}
 
-
-local notation `r` := @r p
-local notation `ℳ` := real_measures p
 local notation `ℒ` := laurent_measures r
+local notation `ϖ` := Fintype.of punit
 
 variables {M₁ M₂ : Type u} [comphaus_filtered_pseudo_normed_group M₁] [comphaus_filtered_pseudo_normed_group M₂]
 
@@ -86,12 +89,39 @@ instance : add_comm_group (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) 
 variable (S)
 
 def Φ : comphaus_filtered_pseudo_normed_group_hom (ℒ S) (ℒ S) := 2 • shift (-1) - id
-
-variable {S}
+-- variable {S}
 
 lemma Φ_eq_ϕ (F : ℒ S) : Φ S F = ϕ F := rfl
 
+end phi_to_hom
+
 section theta
+
+open theta
+
+parameter (p : ℝ≥0)
+local notation `r` := @r p
+local notation `ℳ` := real_measures p
+local notation `ℒ` := laurent_measures r
+
+
+variable {S : Fintype}
+
+local notation `ϖ` := Fintype.of punit
+
+def seval_ℒ_c (c : ℝ≥0) (s : S) : filtration (ℒ S) c → (filtration (ℒ ϖ) c) :=
+λ F,
+  begin
+  refine ⟨seval_ℒ S s F, _⟩,
+  have hF := F.2,
+  simp only [filtration, set.mem_set_of_eq, seval_ℒ, nnnorm, laurent_measures.coe_mk,
+    fintype.univ_punit, finset.sum_singleton] at ⊢ hF,
+  have := finset.sum_le_sum_of_subset (finset.singleton_subset_iff.mpr $ finset.mem_univ_val _),
+  rw finset.sum_singleton at this,
+  apply le_trans this hF,
+end
+
+variable [fact (0 < p)]
 
 lemma θ_zero : θ (0 : ℒ S) = 0 :=
 begin
@@ -99,6 +129,8 @@ begin
   funext,
   simp only [zero_apply, int.cast_zero, zero_mul, tsum_zero, real_measures.zero_apply],
 end
+
+variable [fact (p < 1)]
 
 lemma θ_add (F G : ℒ S) : θ (F + G) = θ F + θ G :=
 begin
@@ -110,39 +142,19 @@ begin
     funext,
     rw add_mul },
   all_goals {apply summable_of_summable_norm, simp_rw [normed_field.norm_mul, normed_field.norm_inv, normed_field.norm_zpow, real.norm_two, ← inv_zpow₀, inv_eq_one_div] },
-  exact aux_thm69.summable_smaller_radius_norm F.d r_half (F.summable s) (lt_d_eq_zero _ _),
-  exact aux_thm69.summable_smaller_radius_norm G.d r_half (G.summable s) (lt_d_eq_zero _ _),
+  exact aux_thm69.summable_smaller_radius_norm F.d r_half (F.summable s) (λ n, lt_d_eq_zero _ _ _),
+  exact aux_thm69.summable_smaller_radius_norm G.d r_half (G.summable s) (λ n, lt_d_eq_zero _ _ _),
 end
 
 --for mathlib
 lemma nnreal.rpow_int_cast (x : ℝ≥0) (n : ℤ) : x ^ n = x ^ (n : ℝ) := by {
   rw [← nnreal.coe_eq, nnreal.coe_zpow, ← real.rpow_int_cast, ← nnreal.coe_rpow] }
 
--- lemma nnreal.mul_le_mul_left {a b c : ℝ≥0} : a * b ≤ a * c ↔ b ≤ c := sorry
-
--- lemma nnreal.mul_le_mul_right {a b c : ℝ≥0} : b * a ≤ c * a ↔ b ≤ c := sorry
-
 lemma nnreal.rpow_le_rpow_of_exponent_le {x : ℝ≥0} (x1 : 1 ≤ x) {y z : ℝ}
   (hyz : y ≤ z) :
   x ^ y ≤ x ^ z :=
 by { cases x with x hx, exact real.rpow_le_rpow_of_exponent_le x1 hyz }
 
-/-  This lemma seems to need extra assumptions, e.g. `0 ≤ y`.  See example below. -/
---lemma nnreal.rpow_le_rpow_of_exponent_le (x : ℝ≥0) {y z : ℝ} (hxyz : y ≤ z) :
---  x ^ y ≤ x ^ z :=
---sorry
-
-example : ¬ (1 / 2 : ℝ≥0) ^ (-1 : ℝ) ≤ (1 / 2) ^ 1 :=
-by simp only [nnreal.rpow_neg_one, one_div, inv_inv₀, pow_one, nnreal.le_inv_iff_mul_le, ne.def,
-    bit0_eq_zero, one_ne_zero, not_false_iff, not_le, one_lt_mul one_le_two one_lt_two]
-
-
--- lemma nnreal.rpow_le_rpow {x y: ℝ≥0} {z : ℝ} (h : x ≤ y) : x ^ z ≤ y ^ z := sorry
--- begin
---   rcases eq_or_lt_of_le h₁ with rfl|h₁', { refl },
---   rcases eq_or_lt_of_le h₂ with rfl|h₂', { simp },
---   exact le_of_lt (rpow_lt_rpow h h₁' h₂')
--- end
 
 lemma nnreal.tsum_geom_arit_inequality (f: ℤ → ℝ) (r' : ℝ) : ∥ tsum (λ n, (f n : ℝ)) ∥₊ ^ r' ≤
   tsum (λ n, ∥ (f n)∥₊ ^ r' ) :=
@@ -151,8 +163,8 @@ begin
 end
 
 
-lemma aux_bound (F : ℒ S) (s : S) : ∀ (b : ℤ), ∥(F s b : ℝ) ∥₊ ^ (p : ℝ) * (2⁻¹ ^ (p : ℝ)) ^ (b : ℝ) ≤
-∥F s b∥₊ * r ^ b :=
+lemma aux_bound (F : ℒ S) (s : S) : ∀ (b : ℤ), ∥(F s b : ℝ) ∥₊ ^ (p : ℝ) *
+  (2⁻¹ ^ (p : ℝ)) ^ (b : ℝ) ≤ ∥F s b∥₊ * r ^ b :=
 begin
   intro b,
   rw [inv_eq_one_div, nnreal.rpow_int_cast],
@@ -194,75 +206,205 @@ begin
   apply finset.sum_le_sum,
   intros s hs,
   apply tsum_le_tsum,
-  exact aux_bound F s,
+  exact aux_bound p F s,
   refine nnreal.summable_of_le _ (F.2 s),
-  exacts [aux_bound F s, F.2 s],
+  exacts [aux_bound p F s, F.2 s],
 end
+
+
+lemma θ_bound' :  ∀ c : ℝ≥0, ∀ F : (ℒ S), F ∈ filtration (ℒ S) c → (θ F) ∈ filtration (ℳ S)
+  c :=by { simpa [one_mul] using (θ_bound p)}
 
 def θ_to_add : (ℒ S) →+ (ℳ S) :=
 { to_fun := λ F, θ F,
   map_zero' := θ_zero,
   map_add' := θ_add, }
 
--- variable (c : ℝ≥0)
--- #check filtration (ℒ S) c
+variable (S)
 
--- open theta
--- #check ϑ (1/2) r p S
+open theta metric
 
--- def ϑ_c (c : ℝ≥0) : (filtration (ℒ S) c) → (filtration (ℳ S) (1 * c)) :=
-  --λ f, ⟨ϑ r r p S f, - ⟩
--- lemma continuous_ϑ_c (c : ℝ≥0) : continuous
--- instance : topological_space (ℳ S) :=
--- begin
---   dsimp only [real_measures],
---   apply_instance,
--- end
+def seval_ℳ_c (c : ℝ≥0) (s : S) : filtration (ℳ S) c → (filtration (ℳ ϖ) c) :=
+λ x,
+  begin
+  refine ⟨(λ _, x.1 s), _⟩,
+  have hx := x.2,
+  simp only [filtration, set.mem_set_of_eq, seval_ℒ, nnnorm, laurent_measures.coe_mk,
+    fintype.univ_punit, finset.sum_singleton] at ⊢ hx,
+  have := finset.sum_le_sum_of_subset (finset.singleton_subset_iff.mpr $ finset.mem_univ_val _),
+  rw finset.sum_singleton at this,
+  apply le_trans this hx,
+end
 
--- example (c : ℝ≥0) : is_open ({F | ∥ F.1 ∥₊ < c} : set (filtration (ℒ S) c)) :=
-
-
-def cast_ℳ_c (c : ℝ≥0) : filtration (real_measures p S) (1 * c) →
-  (S → {x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c}) :=
+--not sure if these are needed
+def cast_ℳ_c (c : ℝ≥0) : filtration (ℳ S) c → (S → {x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c}) :=
 begin
-  intros F s,
-  refine ⟨F.1 s, _⟩,
+  intros x s,
+  refine ⟨x.1 s, _⟩,
+  have hx := x.2,
+  simp only [filtration, set.mem_set_of_eq, seval_ℒ, nnnorm, laurent_measures.coe_mk,
+    fintype.univ_punit, finset.sum_singleton] at hx,
+  have := finset.sum_le_sum_of_subset (finset.singleton_subset_iff.mpr $ finset.mem_univ_val _),
+  rw finset.sum_singleton at this,
+  apply le_trans this hx,
+end
+
+
+-- **[FAE]** From here everything might be useless until `lemma inducing_cast_ℳ`: check
+-- also the `variable (c : ℝ≥0)` issue; the idea is to replace cast_ℳ_c with α, for which
+-- everything seems to work
+
+
+
+variable (c : ℝ≥0)
+
+def box := {F : (ℳ S) // ∀ s, ∥ F s ∥₊ ^ (p:ℝ) ≤ c }
+
+example : has_coe (filtration (ℳ S) c) (ℳ S) := infer_instance --already declared
+instance : has_coe (box S c) (ℳ S) := by {dsimp only [box], apply_instance}
+instance : topological_space (ℳ S) := by {dsimp only [real_measures], apply_instance}
+instance : topological_space (box S c) := by {dsimp only [box], apply_instance}
+
+lemma equiv_box_ϖ : (box S c) ≃ₜ Π (s : S), (filtration (ℳ ϖ) c) :=
+begin
   sorry,
 end
 
---**[FAE]** Useless?
-def cast_ℳ_c_at_s (c : ℝ≥0) (s : S) : filtration (real_measures p S) (1 * c) →
-  {x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c} := (λ F, cast_ℳ_c c F s)
+def α : filtration (ℳ S) c → box S c :=
+begin
+  intro x,
+  use x,
+  have hx := x.2,
+  intro s,
+  simp only [filtration, set.mem_set_of_eq, seval_ℒ, nnnorm, laurent_measures.coe_mk,
+    fintype.univ_punit, finset.sum_singleton] at hx,
+  have := finset.sum_le_sum_of_subset (finset.singleton_subset_iff.mpr $ finset.mem_univ_val _),
+  rw finset.sum_singleton at this,
+  apply le_trans this hx,
+end
+
+lemma coe_α_coe : (coe : (box S c) → (ℳ S)) ∘ (α S c) = coe := by {funext _, refl}
+
+example : inducing (α S c) :=
+begin
+  have ind_ind := @induced_compose _ _ (ℳ S) _ (α p S c) coe,
+  rw [coe_α_coe p S c] at ind_ind,
+  exact {induced := eq.symm ind_ind},
+end
 
 
-lemma cont_at_cast_ℳ (c : ℝ≥0) {X : Type*} [topological_space X] (f : X → filtration (ℳ S) (1 * c)) :
-  continuous f ↔ continuous (cast_ℳ_c c ∘ f) := sorry
+-- lemma M_inj : function.injective (cast_ℳ_c S c) :=
+-- begin
+--   rintros F G h,
+--   dsimp only [cast_ℳ_c] at h,
+--   ext s,
+--   have := congr_fun h s,
+--   simpa only,
+-- end
 
---**[FAE]** Useless?
-lemma aux3' (c : ℝ≥0) {X : Type*} (s : S) [topological_space X] {f : X → filtration (ℳ S) (1 * c)} :
-  continuous f ↔ continuous (cast_ℳ_c_at_s c s ∘ f) := sorry
+lemma inducing_cast_ℳ (c : ℝ≥0) : inducing (cast_ℳ_c S c) :=
+begin
+  -- let f :
+  -- let := cast_ℳ_c p S c,
+  -- let M := ℳ S,
+  -- unfold [ℳ S],
+  -- have := @pi_induced_induced S (λ i, ℝ) (λ i, { x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c}) _ ,--(cast_ℳ_c p S c),
+  -- fconstructor,
+  -- dsimp [real_measures.topological_space],
+  sorry,
+  -- apply pi_induced_induced,
+  -- sorry,
+  -- simp,
+  -- sorry,
+end
+
+-- lemma cont_cast_ℳ (c : ℝ≥0) : continuous (cast_ℳ_c S c) := sorry
+def equiv_ball_ℳ (c : ℝ≥0) : filtration (ℳ ϖ) c ≃ₜ {x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c} := sorry
+
+lemma seval_cast_ℳ_commute (c : ℝ≥0) (s : S) :
+ (λ x, (cast_ℳ_c S c x s)) = (equiv_ball_ℳ c) ∘ seval_ℳ_c S c s := sorry
+
+lemma seval_cast_ℳ_commute' {X : Type*} (c : ℝ≥0) {f : X → filtration (ℳ S) c} (s : S)  :
+ (λ x, (cast_ℳ_c S c (f x) s)) = (equiv_ball_ℳ c) ∘ seval_ℳ_c S c s ∘ f :=
+ begin
+  ext z,
+  have h_commute := @seval_cast_ℳ_commute p S _ _ c s,
+  have := congr_fun h_commute (f z),
+  simp only at this,
+  rw this,
+ end
+
+-- #check α S c
+-- #check (λ x, λ s : S, (((α S c) x).1 s))
+-- #check cast_ℳ_c
+-- #check (λ s : S, seval_ℳ_c)
+
+-- lemma seval_α_commute (c : ℝ≥0) (s : S) :
+--  (λ x, (((α S c) x).1 s)) = (equiv_box_ϖ S c) ∘ seval_ℳ_c S c s := sorry
+
+--  lemma seval_α_commute' {X : Type*} (c : ℝ≥0) {f : X → filtration (ℳ S) c} (s : S)  :
+--  (λ x, ((α S c) (f x)).1 s) = (equiv_ball_ℳ c) ∘ seval_ℳ_c S c s ∘ f :=
+--  begin
+--   ext z,
+--   have h_commute := @seval_cast_ℳ_commute p S _ _ c s,
+--   have := congr_fun h_commute (f z),
+--   simp only at this,
+--   rw this,
+--  end
+
+
+-- lemma cont_iff_comp_cast_ℳ (c : ℝ≥0) {X : Type*} [topological_space X] (f : X → filtration (ℳ S) c) :
+--   continuous (cast_ℳ_c S c ∘ f) → continuous f :=
+-- begin
+--   rw (aux0 S c).continuous_iff,
+--   simp,
+-- end
+---
+
+@[nolint unused_arguments]
+def seval_ℒ_bdd (c : ℝ≥0) (S : Fintype) (A : finset ℤ) (s : S) :
+laurent_measures_bdd r S A c → laurent_measures_bdd r ϖ A c :=
+begin
+  intro F,
+  use λ _, F s,
+  have hF := F.2,
+  simp only [filtration, set.mem_set_of_eq, seval_ℒ, nnnorm, laurent_measures.coe_mk,
+    fintype.univ_punit, finset.sum_singleton] at ⊢ hF,
+  have := finset.sum_le_sum_of_subset (finset.singleton_subset_iff.mpr $ finset.mem_univ_val _),
+  rw finset.sum_singleton at this,
+  apply le_trans this hF,
+end
+
+lemma continuous_seval_ℒ_c (c : ℝ≥0) (s : S) : continuous (seval_ℒ_c c s) :=
+begin
+  rw laurent_measures.continuous_iff,
+  intro A,
+  let := seval_ℒ_bdd p c S A s,
+  have h_trunc : (@truncate r ϖ c A) ∘ (seval_ℒ_c p c s) =
+    (seval_ℒ_bdd p c S A s) ∘ (@truncate r S c A),
+  { ext ⟨F, hF⟩ π k,
+    dsimp only [seval_ℒ_bdd, seval_ℒ_c],
+    refl },
+  rw h_trunc,
+  apply continuous.comp,
+  apply continuous_of_discrete_topology,
+  apply truncate_continuous,
+end
+
+--**[FAE]** Useful?
+-- lemma cont_seval_ℳ_c (c : ℝ≥0) (s : S) : continuous (seval_ℳ_c S c s) := sorry
 
 open metric
 
---**[FAE]** Useless?
-lemma aux4 (c : ℝ≥0) {X : Type*} [topological_space X]
-  {f : X → closed_ball (0 : ℝ) c} : continuous f ↔
-  ∀ a : ℝ≥0, ∀ (H : a ≤ c), is_closed
-    (f⁻¹' ((closed_ball ⟨(0 : ℝ), (mem_closed_ball_self c.2)⟩ a) : set ((closed_ball (0 : ℝ) c)))) :=
+--**[FAE]** Probably needed, but check before proving it!
+lemma continuous_iff_for_all_closed (c : ℝ≥0) {X : Type*} [topological_space X]
+  (f : X → closed_ball (0 : ℝ) c) (H : ∀ a : ℝ≥0, ∀ (H : a ≤ c), is_closed
+    (f⁻¹' ((closed_ball ⟨(0 : ℝ), (mem_closed_ball_self c.2)⟩ a) : set ((closed_ball (0 : ℝ) c)))))
+    : continuous f :=
  begin
    sorry,
  end
 
---**[FAE]** Useless?
--- lemma aux5 (c : ℝ≥0) : continuous (coe ∘ (θ_c S c) : (filtration (ℒ S) c) → (ℳ S)) :=
--- begin
---   rw continuous_pi_iff,
---   intro s,
---   -- apply (aux4 c).mpr,
---   rw continuous_iff_is_closed,
---   intros K hK,
---   sorry,
--- end
 
 def equiv_ball_ℓp (c : ℝ≥0) : {x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c} ≃ₜ
   closed_ball (0 : ℝ) (c ^ (1 / p : ℝ)) :=
@@ -284,38 +426,92 @@ begin
 end
 
 
-variable (S)
-
-def θ_c (c : ℝ≥0) : (filtration (ℒ S) c) → (filtration (ℳ S) (1 * c)) :=
-λ f, ⟨θ f, θ_bound c f f.2⟩
-
-theorem continuous_θ_c (c : ℝ≥0) : continuous (θ_c S c) :=
+def θ_c (c : ℝ≥0) (T : Fintype) : (filtration (laurent_measures r T) c) →
+  (filtration (real_measures p T) c) :=
 begin
-  dsimp only [θ_c],
-  apply (cont_at_cast_ℳ c (θ_c S c)).mpr,
-  apply continuous_pi,
+  intro f,
+  rw [← one_mul c],
+  use ⟨θ f, θ_bound p c f f.2⟩,
+end
+
+lemma seval_ℒ_ℳ_commute (c : ℝ≥0) (s : S) :
+  (θ_c c (Fintype.of punit)) ∘ (seval_ℒ_c c s) = (seval_ℳ_c S c s) ∘ (θ_c c S) :=
+begin
+  ext F x,
+  simp only [seval_ℳ_c, seval_ℒ_c, seval_ℒ, θ_c, one_mul, subtype.coe_mk, eq_mpr_eq_cast,
+    set_coe_cast],
+  refl,
+end
+
+lemma continuous_of_seval_ℳ_comp_continuous (c : ℝ≥0) {X : Type*} [topological_space X]
+  {f : X → (filtration (ℳ S) c)} : (∀ s, continuous ((seval_ℳ_c S c s) ∘ f)) → continuous f :=
+begin
+  intro H,
+  replace H : ∀ (s : S), continuous (λ x : X, (cast_ℳ_c p S c) (f x) s),
+  { intro s,
+    rw @seval_cast_ℳ_commute' p S _ _ X c f s,
+    apply ((equiv_ball_ℳ p c).comp_continuous_iff).mpr,
+    exact H s },
+  rw ← continuous_pi_iff at H,
+  convert_to (continuous (λ x, cast_ℳ_c p S c (f x))) using 0,
+  exacts [eq_iff_iff.mpr (inducing_cast_ℳ p S c).continuous_iff, H],
+  end
+
+lemma continuous_θ_c (c : ℝ≥0) : continuous (θ_c c S) :=
+begin
+  apply continuous_of_seval_ℳ_comp_continuous,
   intro s,
-  apply ((equiv_ball_ℓp c).comp_continuous_iff).mp,
-  dsimp [equiv_ball_ℓp, θ_c, cast_ℳ_c],
+  rw ← seval_ℒ_ℳ_commute,
+  refine continuous.comp _ (continuous_seval_ℒ_c p S c s),
   sorry,
 
 
 
-  all_goals {apply_instance},
+
+  -- dsimp only [θ_c],
+  -- apply cont_at_cast_ℳ c (θ_c S c),
+  -- rw aux_commutative_θ,
+  -- apply continuous.comp _ (cont_cast_ℒ c),
+  -- apply continuous_pi,
+  -- intro s,
+  -- sorry,
+
+
+
+
+
+
+
+  --**[FAE]** Old version
+  -- sorry;
+  -- {
+  -- dsimp only [θ_c],
+  -- apply cont_at_cast_ℳ c (θ_c S c),
+  -- apply continuous_pi,
+  -- intro s,
+  -- apply ((equiv_ball_ℓp c).comp_continuous_iff).mp,
+  -- let f := (equiv_ball_ℓp c) ∘ (λ a,
+  --   (cast_ℳ_c c ∘ θ_c S c) a s),
+  -- apply cont_at_closed (c ^ (1 / p : ℝ)) f,
+  -- intros a ha,
+  -- dsimp [f],
+  -- --from here, it is clearly broken
+  -- convert is_closed_empty,
+  -- apply aux_6 S a c s ha,
+  -- }
+  -- unfold,
+  -- dsimp [f, cast_ℳ_c, θ_c],
+
+  -- sorry,
+
+
+
+  --all_goals {apply_instance},
 end
 
-def Θ : comphaus_filtered_pseudo_normed_group_hom (ℒ S) (ℳ S) :=
-mk_of_bound (θ_to_add) 1
-begin
-  intro c,
-  use θ_bound c,
-  exact (continuous_θ_c S c),
-end
 
 variable {S}
 
 end theta
-
-end homs
 
 end laurent_measures_ses

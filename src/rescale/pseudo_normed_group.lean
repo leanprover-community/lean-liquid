@@ -53,6 +53,23 @@ instance [comphaus_filtered_pseudo_normed_group M] :
 instance [profinitely_filtered_pseudo_normed_group M] :
   profinitely_filtered_pseudo_normed_group (rescale r M) := {}
 
+@[simps]
+def map_comphaus_filtered_pseudo_normed_group_hom {M₁ M₂ : Type*}
+  [profinitely_filtered_pseudo_normed_group M₁] [profinitely_filtered_pseudo_normed_group M₂]
+  (N : ℝ≥0) (f : comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :
+  comphaus_filtered_pseudo_normed_group_hom (rescale N M₁) (rescale N M₂) :=
+{ to_fun := rescale.of ∘ f ∘ rescale.of.symm,
+  map_zero' := f.map_zero,
+  map_add' := λ x y, f.map_add x y,
+  bound' := begin
+    obtain ⟨C, hC⟩ := f.bound,
+    refine ⟨C, λ c x hx, _⟩,
+    rw rescale.mem_filtration at hx ⊢,
+    simp only [function.comp_app, equiv.symm_apply_apply, mul_assoc],
+    exact hC hx,
+  end,
+  continuous' := λ c₁ c₂ f₀ hf₀, f.continuous f₀ hf₀, }
+
 end profinitely_filtered_pseudo_normed_group
 
 section profinitely_filtered_pseudo_normed_group_with_Tinv
@@ -92,6 +109,23 @@ instance : profinitely_filtered_pseudo_normed_group_with_Tinv r' (rescale r M) :
   Tinv_mem_filtration := Tinv'_mem_filtration r r' M,
   .. rescale.profinitely_filtered_pseudo_normed_group r M }
 
+@[simps]
+def map_comphaus_filtered_pseudo_normed_group_with_Tinv_hom {M₁ M₂ : Type*}
+  [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₁]
+  [profinitely_filtered_pseudo_normed_group_with_Tinv r' M₂]
+  (N : ℝ≥0) (f : comphaus_filtered_pseudo_normed_group_with_Tinv_hom r' M₁ M₂) :
+  comphaus_filtered_pseudo_normed_group_with_Tinv_hom r' (rescale N M₁) (rescale N M₂) :=
+{ to_fun := rescale.of ∘ f ∘ rescale.of.symm,
+  strict' := λ c x hx, begin
+    rw rescale.mem_filtration at hx ⊢,
+    simp only [function.comp_app, equiv.symm_apply_apply, mul_assoc],
+    exact f.strict hx,
+  end,
+  map_Tinv' := f.map_Tinv,
+  continuous' := λ c, f.continuous' (c * N⁻¹),
+  .. map_comphaus_filtered_pseudo_normed_group_hom N
+      f.to_comphaus_filtered_pseudo_normed_group_hom }
+
 end profinitely_filtered_pseudo_normed_group_with_Tinv
 
 end rescale
@@ -103,17 +137,39 @@ variables (r' : ℝ≥0) [fact (0 < r')]
 @[simps]
 def rescale (N : ℝ≥0) : ProFiltPseuNormGrpWithTinv r' ⥤ ProFiltPseuNormGrpWithTinv r' :=
 { obj := λ M, of r' $ rescale N M,
-  map := λ M₁ M₂ f,
-  { to_fun := λ x, @rescale.of N M₂ (f ((@rescale.of N M₁).symm x)),
-    map_zero' := f.map_zero,
-    map_add' := f.map_add,
-    strict' := λ c x hx,
-    begin
-      erw rescale.mem_filtration at hx ⊢,
-      rw [equiv.symm_apply_apply],
-      exact f.strict hx,
-    end,
-    continuous' := λ c, f.continuous' (c * N⁻¹),
-    map_Tinv' := f.map_Tinv } }
+  map := λ M₁ M₂ f, rescale.map_comphaus_filtered_pseudo_normed_group_with_Tinv_hom _ _ f }
 
 end ProFiltPseuNormGrpWithTinv
+
+namespace ProFiltPseuNormGrpWithTinv₁
+
+variables (r' : ℝ≥0) [fact (0 < r')]
+
+@[simps]
+def rescale (N : ℝ≥0) [fact (0 < N)] :
+  ProFiltPseuNormGrpWithTinv₁ r' ⥤ ProFiltPseuNormGrpWithTinv₁ r' :=
+{ obj := λ M,
+  { M := rescale N M,
+    exhaustive' := λ x,
+    begin
+      obtain ⟨c, hc⟩ := M.exhaustive r' (rescale.of.symm x),
+      refine ⟨c * N, _⟩,
+      rw rescale.mem_filtration,
+      rwa mul_inv_cancel_right₀,
+      exact (fact.out _ : 0 < N).ne'
+    end },
+  map := λ M₁ M₂ f, rescale.map_comphaus_filtered_pseudo_normed_group_with_Tinv_hom _ _ f, }
+.
+
+@[simps]
+def rescale_out (N : ℝ≥0) [fact (1 ≤ N)] :
+  rescale r' N ⟶ 𝟭 _ :=
+{ app := λ M,
+  { to_fun := (rescale.of.symm : _root_.rescale N M → M),
+    map_zero' := rfl,
+    map_add' := λ x y, rfl,
+    strict' := λ c x hx, pseudo_normed_group.filtration_mono (fact.out _) hx,
+    continuous' := λ c, comphaus_filtered_pseudo_normed_group.continuous_cast_le (c * N⁻¹) c,
+    map_Tinv' := λ x, rfl } }
+
+end ProFiltPseuNormGrpWithTinv₁

@@ -455,6 +455,7 @@ by cases f; cases g; cases h; refl
   continuous' := λ c, (g.level_continuous c).comp (f.level_continuous c),
   ..(g.to_add_monoid_hom.comp f.to_add_monoid_hom) }
 
+@[simps]
 def to_chfpsng_hom (f : strict_comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :
   comphaus_filtered_pseudo_normed_group_hom M₁ M₂ :=
 comphaus_filtered_pseudo_normed_group_hom.mk_of_strict f.to_add_monoid_hom $

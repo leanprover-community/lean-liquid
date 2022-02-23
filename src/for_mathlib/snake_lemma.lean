@@ -21,7 +21,10 @@ namespace eq
 
 variables {X : Type*} {x y : X} (h : x = y)
 
+@[nolint unused_arguments]
 abbreviation lhs (h : x = y) := x
+
+@[nolint unused_arguments]
 abbreviation rhs (h : x = y) := y
 
 @[simp] lemma lhs_def : h.lhs = x := rfl
@@ -866,8 +869,7 @@ begin
 end .
 
 instance : is_iso hD.cokernel_to_top_right_kernel_to_right_kernel :=
-abelian.is_iso_of_mono_of_epi _
---is_iso_of_mono_of_epi (cokernel_to_top_right_kernel_to_right_kernel hD)
+is_iso_of_mono_of_epi _
 
 def bottom_left_cokernel_to : cokernel ((1,0) ⟶[D] (2,1)) ⟶ D.obj (2,2) :=
 cokernel.desc _ (_ ⟶[D] _)
@@ -937,8 +939,7 @@ begin
 end
 
 instance : is_iso hD.left_cokernel_to_kernel_bottom_left_cokernel_to :=
-abelian.is_iso_of_mono_of_epi _
---is_iso_of_mono_of_epi (left_cokernel_to_kernel_bottom_left_cokernel_to hD)
+is_iso_of_mono_of_epi _
 
 def δ_aux : cokernel hD.to_top_right_kernel ⟶ kernel hD.bottom_left_cokernel_to :=
 cokernel.desc _ (kernel.lift _ (kernel.ι _ ≫ (_ ⟶[D] _) ≫ cokernel.π _) begin
@@ -979,8 +980,7 @@ begin
 end
 
 instance : is_iso hD.to_kernel :=
-abelian.is_iso_of_mono_of_epi _
---is_iso_of_mono_of_epi (to_kernel hD)
+is_iso_of_mono_of_epi _
 
 def cokernel_to : cokernel ((1,0) ⟶[D] (2,0)) ⟶ D.obj (3,0) :=
 cokernel.desc _ (_ ⟶[D] _) (hD.col_exact₂ _).1
@@ -1000,8 +1000,7 @@ begin
 end
 
 instance : is_iso hD.cokernel_to :=
-abelian.is_iso_of_mono_of_epi _
---is_iso_of_mono_of_epi (cokernel_to hD)
+is_iso_of_mono_of_epi _
 
 def δ : D.obj (0,2) ⟶ D.obj (3,0) :=
   hD.to_kernel ≫ inv hD.cokernel_to_top_right_kernel_to_right_kernel ≫  -- <-- this is an iso

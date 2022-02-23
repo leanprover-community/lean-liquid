@@ -28,6 +28,7 @@ instance : large_category CompHausFiltPseuNormGrp₁.{u} :=
   id := λ A, strict_comphaus_filtered_pseudo_normed_group_hom.id,
   comp := λ A B C f g, g.comp f }
 
+@[simps]
 def enlarging_functor : CompHausFiltPseuNormGrp₁ ⥤ CompHausFiltPseuNormGrp :=
 { obj := λ M, CompHausFiltPseuNormGrp.of M,
   map := λ M₁ M₂ f, f.to_chfpsng_hom }

@@ -3,6 +3,7 @@ import data.matrix.notation
 
 import for_mathlib.homological_complex
 import for_mathlib.horseshoe
+import for_mathlib.les_homology
 import for_mathlib.split_exact
 
 noncomputable theory
@@ -11,7 +12,7 @@ open category_theory
 open category_theory.limits
 open short_exact_sequence
 
-universes v u
+universes w v u
 
 namespace category_theory
 
@@ -59,21 +60,38 @@ begin
 end
 .
 
+abbreviation α [F.additive] :
+  ((short_exact_sequence.Fst C ⋙ F).map_homological_complex (complex_shape.down ℕ)) ⟶
+    ((short_exact_sequence.Snd C ⋙ F).map_homological_complex (complex_shape.down ℕ)) :=
+nat_trans.map_homological_complex (whisker_right (short_exact_sequence.f_nat _) _) _
+
+abbreviation β [F.additive] :
+  ((short_exact_sequence.Snd C ⋙ F).map_homological_complex (complex_shape.down ℕ)) ⟶
+    ((short_exact_sequence.Trd C ⋙ F).map_homological_complex (complex_shape.down ℕ)) :=
+    nat_trans.map_homological_complex (whisker_right (short_exact_sequence.g_nat _) _) _
+
+lemma exact_α_β_horseshoe [F.additive] (A : short_exact_sequence C) (n : ℕ) :
+  short_exact (((α F).app (horseshoe A)).f n) (((β F).app (horseshoe A)).f n) :=
+begin
+  apply split.short_exact,
+  apply split.map,
+  obtain ⟨φ, χ, h1, h2, h3, h4⟩ := horseshoe_split A n,
+  exact ⟨⟨φ, χ, h1, h2, short_exact_sequence.f_comp_g _, h3, h4⟩⟩,
+end
+
 def δ [F.additive] (n : ℕ) (A : short_exact_sequence C) :
   (F.left_derived (n+1)).obj A.3 ⟶ (F.left_derived n).obj A.1 :=
 begin
   let f₃ := functor.left_derived_obj_iso' F (n+1) _ _ _ (horseshoe_is_projective_resolution₃ A),
   let f₁ := functor.left_derived_obj_iso' F n _ _ _ (horseshoe_is_projective_resolution₁ A),
-  refine f₃.hom ≫ _ ≫ f₁.symm.hom,
-  apply homological_complex.δ n (map_complex_short_exact_sequence_of_split C F _
-    (λ i, horseshoe_split A i)),
+  exact f₃.hom ≫ (homological_complex.δ _ _ (exact_α_β_horseshoe F A) _ _ rfl) ≫ f₁.symm.hom,
 end
 
 lemma exact_of_short_exact [F.additive] (n : ℕ) (A : short_exact_sequence C) :
   exact ((F.left_derived n).map A.f) ((F.left_derived n).map A.g) :=
 begin
-  let P := map_complex_short_exact_sequence_of_split C F _ (λ i, horseshoe_split A i),
-  have := ((homological_complex.six_term_exact_seq n P).drop 3).pair,
+  have := ((homological_complex.six_term_exact_seq _ _
+    (exact_α_β_horseshoe F A) _ n rfl).drop 3).pair,
   have H₁₂ := functor.left_derived_map_eq' F n A.1 A.2 A.f
     ((homological_complex.Fst C).obj (horseshoe A)) (horseshoe_to_single₁ A)
     ((homological_complex.Snd C).obj (horseshoe A)) (horseshoe_to_single₂ A)
@@ -112,8 +130,8 @@ end
 lemma exact_of_short_exact.δ_right [F.additive] (n : ℕ) (A : short_exact_sequence C) :
   exact ((F.left_derived (n + 1)).map A.g) (δ F n A) :=
 begin
-  let P := map_complex_short_exact_sequence_of_split C F _ (λ i, horseshoe_split A i),
-  have := ((homological_complex.six_term_exact_seq n P).drop 1).pair,
+  have := ((homological_complex.six_term_exact_seq _ _
+    (exact_α_β_horseshoe F A) _ n rfl).drop 1).pair,
   have H₂₃ := functor.left_derived_map_eq' F (n+1) A.2 A.3 A.g
     ((homological_complex.Snd C).obj (horseshoe A)) (horseshoe_to_single₂ A)
     ((homological_complex.Trd C).obj (horseshoe A)) (horseshoe_to_single₃ A)
@@ -145,8 +163,8 @@ end
 lemma exact_of_short_exact.δ_left [F.additive] (n : ℕ) (A : short_exact_sequence C) :
   exact (δ F n A) ((F.left_derived n).map A.f) :=
 begin
-  let P := map_complex_short_exact_sequence_of_split C F _ (λ i, horseshoe_split A i),
-  have := ((homological_complex.six_term_exact_seq n P).drop 2).pair,
+  have := ((homological_complex.six_term_exact_seq _ _
+    (exact_α_β_horseshoe F A) _ n rfl).drop 2).pair,
   have H₁₂ := functor.left_derived_map_eq' F n A.1 A.2 A.f
     ((homological_complex.Fst C).obj (horseshoe A)) (horseshoe_to_single₁ A)
     ((homological_complex.Snd C).obj (horseshoe A)) (horseshoe_to_single₂ A)
@@ -180,13 +198,10 @@ lemma six_term_exact_seq [F.additive] (n : ℕ) (A : short_exact_sequence C) :
     (F.left_derived (n+1)).map A.f, (F.left_derived (n+1)).map A.g,
     δ F n A,
     (F.left_derived n).map A.f, (F.left_derived n).map A.g] :=
-begin
-  refine exact_seq.cons _ _ (exact_of_short_exact _ _ _) _ _,
-  refine exact_seq.cons _ _ (exact_of_short_exact.δ_right _ _ _) _ _,
-  refine exact_seq.cons _ _ (exact_of_short_exact.δ_left _ _ _) _ _,
-  refine exact_seq.cons _ _ (exact_of_short_exact _ _ _) _ _,
-  apply exact_seq.single,
-end
+(exact_of_short_exact _ _ _).cons $
+(exact_of_short_exact.δ_right _ _ _).cons $
+(exact_of_short_exact.δ_left _ _ _).cons $
+(exact_of_short_exact _ _ _).exact_seq
 
 end left_derived
 end functor

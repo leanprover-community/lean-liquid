@@ -349,7 +349,7 @@ instance (f : A ⟶ B) (i : ℤ) : split_mono ((termwise_split_mono_lift f).f i)
 
 -- generalize to epi
 @[simp]
-def termwise_split_mono_lift_desc (f : A ⟶ B) :
+lemma termwise_split_mono_lift_desc (f : A ⟶ B) :
   termwise_split_mono_lift f ≫ termwise_split_mono_desc f = f :=
 by { ext, simp }
 
@@ -497,7 +497,7 @@ variables (h₂ : homotopy (b' ≫ g) 0) (h₃ : homotopy (f ≫ b) 0)
 include H₂ h₂ h₃
 
 /--
-If `A ⟶ B ⟶ C` is split exact, and `b ≫ g` and `f ≫ b'` are null-homotopic,
+If `A ⟶ B ⟶ C` is split exact, and `b' ≫ g` and `f ≫ b` are null-homotopic,
 then so is `b' ≫ b`.
 
         B''

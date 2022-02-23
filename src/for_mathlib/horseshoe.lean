@@ -1,6 +1,7 @@
 import category_theory.abelian.diagram_lemmas.four
 import for_mathlib.projectives
 import for_mathlib.homological_complex
+import for_mathlib.snake_lemma2
 
 noncomputable theory
 
@@ -30,7 +31,7 @@ begin
 end
 
 -- move this
-def biprod_factors (A B : C) [projective A] [projective B]
+lemma biprod_factors (A B : C) [projective A] [projective B]
   (E X : C) (f : A ⊞ B ⟶ X) (e : E ⟶ X) [epi e] :
   ∃ f' : A ⊞ B ⟶ E, f' ≫ e = f :=
 ⟨biprod.desc
@@ -368,10 +369,6 @@ begin
   cases n;
   exact ⟨biprod.fst, biprod.inr, biprod.inl_fst, biprod.inr_snd, biprod.inr_fst, biprod.total⟩
 end
-
-def horseshoe_mapped (A : short_exact_sequence C) (F : C ⥤ D) [F.additive] (n : ℕ) :
-  short_exact_sequence D :=
-functor.map_short_exact_sequence_of_split _ F ((horseshoe A).X n) (horseshoe_split A n)
 
 lemma horseshoe_f_comp_to_single₂_f (A : short_exact_sequence C) (i : ℕ) :
   ((horseshoe A).X i).f ≫ (horseshoe_to_single₂ A).f i =

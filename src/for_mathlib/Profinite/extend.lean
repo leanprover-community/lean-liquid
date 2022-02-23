@@ -8,9 +8,10 @@ namespace Profinite
 open category_theory
 open category_theory.limits
 
-universes v u
+universes v u u'
 
 variables {C : Type u} [category.{v} C] (F : Fintype.{v} ⥤ C)
+variables {D : Type u'} [category.{v} D]
 
 /-- Change a cone with respect to a morphism from `Profinite`. -/
 @[simps]
@@ -138,6 +139,25 @@ begin
     functor.comp_map, functor.map_cone_π_app, change_cone_π_app, limit.cone_π,
     limit.lift_π_assoc, whisker_left_app, nat_trans.comp_app, category.assoc],
   simp only [← category.assoc, ← G.map_comp],
+  refl,
+end .
+
+def extend_commutes
+  (G : C ⥤ D)
+  [∀ X : Profinite.{v}, preserves_limits_of_shape (discrete_quotient X) G]
+  [∀ X : Profinite.{v}, has_limit (X.fintype_diagram ⋙ F ⋙ G)] :
+  extend F ⋙ G ≅ extend (F ⋙ G) :=
+nat_iso.of_components
+(λ X, (is_limit_of_preserves G (limit.is_limit _)).cone_point_unique_up_to_iso (limit.is_limit _))
+begin
+  intros X Y f,
+  ext,
+  dsimp,
+  simp only [category.assoc, limit.lift_π, change_cone_π_app,
+    limit.cone_π, functor.comp_map],
+  erw [limit.lift_π, limit.lift_π_assoc],
+  dsimp,
+  rw [← G.map_comp, limit.lift_π, ← G.map_comp],
   refl,
 end
 

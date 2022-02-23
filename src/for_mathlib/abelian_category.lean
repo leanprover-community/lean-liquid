@@ -13,11 +13,11 @@ structure is_zero (X : C) : Prop :=
 (eq_zero_of_src : ∀ {Y : C} (f : X ⟶ Y), f = 0)
 (eq_zero_of_tgt : Π {Y : C} (f : Y ⟶ X), f = 0)
 
-def is_zero.eq_of_src {C : Type*} [category C] [has_zero_morphisms C] {X Y : C}
+lemma is_zero.eq_of_src {C : Type*} [category C] [has_zero_morphisms C] {X Y : C}
   (hX : is_zero X) (f g : X ⟶ Y) : f = g :=
 (hX.eq_zero_of_src f).trans (hX.eq_zero_of_src g).symm
 
-def is_zero.eq_of_tgt {C : Type*} [category C] [has_zero_morphisms C] {X Y : C}
+lemma is_zero.eq_of_tgt {C : Type*} [category C] [has_zero_morphisms C] {X Y : C}
   (hX : is_zero X) (f g : Y ⟶ X) : f = g :=
 (hX.eq_zero_of_tgt f).trans (hX.eq_zero_of_tgt g).symm
 

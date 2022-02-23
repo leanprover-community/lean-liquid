@@ -248,6 +248,11 @@ lemma summable_iff_on_nat_less {f : ℤ → ℝ} (d : ℤ) (h : ∀ n : ℤ, n <
 int_summable_iff.trans $ and_iff_left_iff_imp.mpr $ λ hh, summable_of_eventually_zero f d $
   λ n nd, by simp [h _ nd]
 
+lemma nnreal.summable_iff_on_nat_less {f : ℤ → ℝ≥0} (d : ℤ) (h : ∀ {n : ℤ}, n < d → f n = 0) :
+  summable f ↔ summable (λ n : ℕ, f n) :=
+nnreal.summable_coe.symm.trans $ (summable_iff_on_nat_less d (λ n nd,
+  ((f n).coe_eq_zero.mpr (h nd)))).trans nnreal.summable_coe
+
 lemma int.summable_iff_on_nat {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ) (h : ∀ n : ℤ, n < d → f n = 0) :
 summable (λ n, ∥ f n ∥ * ρ ^ n) ↔ summable (λ n : ℕ, ∥ f n ∥ * ρ ^ (n : ℤ)) :=
 summable_iff_on_nat_less d (λ n nd, by simp [h _ nd])

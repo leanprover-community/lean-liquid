@@ -62,6 +62,13 @@ is_zero_of_exact_zero_zero' _ _ h hf hg
 lemma is_zero_of_is_zero_is_zero (h : exact f g) (hA : is_zero A) (hC : is_zero C) : is_zero B :=
 is_zero_of_exact_is_zero_is_zero _ _ h hA hC
 
+protected lemma exact_seq (h : exact f g) : exact_seq 𝒜 [f, g] :=
+(exact_iff_exact_seq _ _).mp h
+
+lemma cons (h : exact f g) {L : list (arrow 𝒜)} (hL : exact_seq 𝒜 (g :: L)) :
+  exact_seq 𝒜 (f :: g :: L) :=
+exact_seq.cons f g h L hL
+
 end exact
 
 end category_theory
