@@ -24,6 +24,55 @@ def finite_product_condition : Prop := ∀
 function.bijective (λ (x : P.obj (op (Profinite.sigma X))) (a : α),
   P.map (Profinite.sigma.ι X a).op x)
 
+def finite_product_condition' : Prop := ∀
+(n : ℕ) (X : ulift.{w} (fin n) → Profinite.{w}),
+function.bijective (λ (x : P.obj (op (Profinite.sigma X))) (a : ulift (fin n)),
+  P.map (Profinite.sigma.ι X a).op x)
+
+def obj_equiv {α β : Type*} (e : α ≃ β) (X : β → Profinite.{w}) (b : β) :
+  X b ≅ X (e (e.symm b)) := eq_to_iso (congr_arg X (e.apply_symm_apply _).symm)
+
+def product_equiv {α β : Type*} (e : α ≃ β) (X : β → Profinite.{w}) :
+  (Π (a : α), P.obj (opposite.op (X (e a)))) ≃ (Π b, P.obj (opposite.op (X b))) :=
+e.Pi_congr (λ b, equiv.refl _)
+
+def sigma_equiv {α β : Type w} [fintype α] [fintype β] (e : α ≃ β) (X : β → Profinite.{w}) :
+  P.obj (opposite.op (Profinite.sigma (X ∘ e))) ≃
+  P.obj (opposite.op (Profinite.sigma X)) :=
+(P.map_iso (Profinite.sigma_iso_of_equiv _ _).op).symm.to_equiv
+
+lemma product_equiv_compatible {α β : Type w} [fintype α] [fintype β]
+  (e : α ≃ β) (X : β → Profinite.{w}) (a) (b) :
+    P.map (Profinite.sigma.ι _ b).op ((sigma_equiv P e X).symm a) =
+    (product_equiv P e X).symm (λ b, P.map (Profinite.sigma.ι _ _).op a) b :=
+begin
+  dsimp [product_equiv, sigma_equiv],
+  simp only [← functor_to_types.map_comp_apply],
+  refl,
+end
+
+lemma finite_product_condition_iff_finite_product_condition' :
+  P.finite_product_condition ↔ P.finite_product_condition' :=
+begin
+  split,
+  { intros h n X,
+    apply h ⟨ulift (fin n)⟩ X },
+  { intros h α X,
+    let n := fintype.card α,
+    let e : ulift.{w} (fin n) ≃ α := equiv.ulift.trans (fintype.equiv_fin _).symm,
+    let f := _, show function.bijective f,
+    specialize h n (X ∘ e),
+    let g := _, change function.bijective g at h,
+    have : f = (product_equiv _ _ _) ∘ g ∘ (sigma_equiv P e X).symm,
+    { suffices : (product_equiv _ _ _).symm ∘ f = g ∘ (sigma_equiv P e X).symm,
+        by { rw ← this, ext, simp },
+      symmetry,
+      ext a,
+      apply product_equiv_compatible },
+    rw this,
+    apply function.bijective.comp (equiv.bijective _) (h.comp (equiv.bijective _)) }
+end
+
 def empty_condition : Prop :=
   function.bijective (λ t : P.obj (op Profinite.empty), punit.star.{u})
 
