@@ -57,9 +57,12 @@ variables (S : Profinite.{u})
 
 #check (real_measures.condensed p).obj S
 
+def Θ_condensed_nat_trans :
+  condensed r ⟶ real_measures.condensed p :=
+whisker_right (Θ_profinite p) (CompHausFiltPseuNormGrp₁.to_Condensed)
+
 def Θ_condensed (S : Profinite.{u}) :
   (condensed r).obj S ⟶ (real_measures.condensed p).obj S :=
-(whisker_right (Θ_profinite p) (CompHausFiltPseuNormGrp₁.to_Condensed)).app S
---CompHausFiltPseuNormGrp₁.to_Condensed.{u}.map $ Θ_profinite p
+(Θ_condensed_nat_trans p).app S
 
 end laurent_measures
