@@ -20,7 +20,15 @@ lemma col_exact_aux (X : cochain_complex 𝒜 ℤ) : exact_seq 𝒜
 , (kernel.lift (homological_complex.d_from X 0)
     (homological_complex.d_to X 0) (by simp))
 , (homology.π' (homological_complex.d_to X 0)
-    (homological_complex.d_from X 0) (by simp))] := sorry
+    (homological_complex.d_from X 0) (by simp))] :=
+begin
+  apply exact_seq.cons,
+  { sorry },
+  { rw ← exact_iff_exact_seq,
+    change exact _ (_ ≫ _),
+    rw exact_comp_iso,
+    apply abelian.exact_cokernel }
+end
 
 lemma row_exact₁_aux (X Y Z : cochain_complex 𝒜 ℤ)
   (f : X ⟶ Y)
