@@ -43,6 +43,8 @@ begin
   { intro c, exact set.subset.trans (set.inter_subset_right _ _) (hf c), }
 end
 
+variables (A) {C}
+
 lemma exact_with_constant_of_mono (g : B ⟶ C) [hg : mono ((to_PNG₁ ⋙ PseuNormGrp₁.to_Ab).map g)] :
   exact_with_constant (0 : A ⟶ B) g 1 :=
 begin
