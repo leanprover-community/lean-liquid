@@ -223,8 +223,23 @@ begin
   apply is_zero_of_exact_seq_of_is_iso_of_is_iso _ _ _ _ E,
 end
 
+lemma is_acyclic_shift (T : 𝒦) [h : is_acyclic T] (i : ℤ) : is_acyclic (T⟦i⟧) :=
+begin
+  rw ← is_acyclic_iff,
+  intros j,
+  let H := homology_functor A (complex_shape.up ℤ) 0,
+  let e : H.obj (T⟦i⟧⟦j⟧) ≅ (homology_functor A (complex_shape.up ℤ) (i+j)).obj T :=
+    _ ≪≫ (homology_shift_iso (i+j)).app T,
+  swap,
+  { let e := (iso_whisker_right (shift_functor_add _ i j).symm H).app T,
+    refine _ ≪≫ e,
+    refine iso.refl _ },
+  apply is_zero_of_iso_of_zero _ e.symm,
+  apply is_acyclic.cond,
+end
+
 lemma hom_K_projective_bijective {X Y : 𝒦} (P : 𝒦) [is_K_projective P]
-  (f : X ⟶ Y) [is_quasi_iso f] : function.bijective (λ e : P ⟶ X, e ≫ f) :=
+  (f : X ⟶ Y) [hf : is_quasi_iso f] : function.bijective (λ e : P ⟶ X, e ≫ f) :=
 begin
   /-
   Steps:
@@ -232,7 +247,51 @@ begin
   2. Use LES assoc. to `Hom(P,-)`, proved in `for_mathlib/derived/homological.lean`.
   3. Use lemma above + def of K-projective to see that `Hom(P,Z) = 0`.
   -/
-  sorry
+  obtain ⟨Z,g,h,hT⟩ := pretriangulated.distinguished_cocone_triangle _ _ f,
+  let T := triangle.mk _ f g h,
+  change T ∈ _ at hT,
+  let H : 𝒦 ⥤ Ab := preadditive_yoneda.flip.obj (opposite.op P),
+  have EE : exact_seq Ab [arrow.mk (H.map T.inv_rotate.mor₁), arrow.mk (H.map f), H.map g],
+  { apply exact_seq.cons,
+    apply homological_functor.cond H T.inv_rotate,
+    apply inv_rotate_mem_distinguished_triangles,
+    assumption,
+    rw ← exact_iff_exact_seq,
+    apply homological_functor.cond H T hT },
+  split,
+  { intros e₁ e₂ hh,
+    let ee := (EE.extract 0 2).pair,
+    rw AddCommGroup.exact_iff at ee,
+    dsimp at hh,
+    rw [← sub_eq_zero, ← preadditive.sub_comp] at hh,
+    change _ ∈ (H.map f).ker at hh,
+    rw ← ee at hh,
+    obtain ⟨g,hg⟩ := hh,
+    let g' : P ⟶ _ := g,
+    haveI : is_acyclic T.inv_rotate.obj₁,
+    { change is_acyclic ((T.obj₃)⟦(-1 : ℤ)⟧),
+      apply_with is_acyclic_shift { instances := ff },
+      haveI : is_quasi_iso T.mor₁ := hf,
+      apply is_acyclic_of_dist_triang_of_is_quasi_iso,
+      exact hT },
+    have : g' = 0,
+    { apply is_K_projective.cond },
+    change g' ≫ _ = _ at hg,
+    rw [this, zero_comp] at hg,
+    rw ← sub_eq_zero,
+    exact hg.symm },
+  { intros q,
+    have : q ≫ g = 0,
+    { haveI : is_acyclic Z,
+      { change is_acyclic T.obj₃,
+        apply_with is_acyclic_of_dist_triang_of_is_quasi_iso { instances := ff },
+        assumption,
+        exact hf },
+      apply is_K_projective.cond },
+    let ee := (EE.extract 1 3).pair,
+    rw AddCommGroup.exact_iff at ee,
+    change _ ∈ (H.map g).ker at this,
+    rwa ← ee at this }
 end
 
 variable [enough_projectives A]
