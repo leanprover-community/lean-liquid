@@ -176,7 +176,7 @@ If `A → B → C → A[1]` is a distinguished triangle, and `A → B` is a quas
 then `C` is acyclic.
 -/
 lemma is_acyclic_of_dist_triang_of_is_quasi_iso (T : triangle 𝒦) (hT : T ∈ dist_triang 𝒦)
-  [is_quasi_iso T.mor₁] : is_acyclic T.obj₃ :=
+  [h : is_quasi_iso T.mor₁] : is_acyclic T.obj₃ :=
 begin
   let H := homology_functor A (complex_shape.up ℤ) 0,
   rw ← is_acyclic_iff,
@@ -186,11 +186,40 @@ begin
   { apply pretriangulated.shift_of_dist_triangle, assumption },
   change is_zero (H.obj (S.obj₃)),
   let E : exact_seq A [H.map S.mor₁, H.map S.mor₂, H.map S.mor₃, H.map (S.rotate.mor₃)],
-  { sorry },
+  { apply exact_seq.cons,
+    apply homological_functor.cond H _ hS,
+    apply exact_seq.cons,
+    apply homological_functor.cond H S.rotate,
+    apply rotate_mem_distinguished_triangles _ hS,
+    rw ← exact_iff_exact_seq,
+    apply homological_functor.cond H S.rotate.rotate,
+    apply rotate_mem_distinguished_triangles,
+    apply rotate_mem_distinguished_triangles,
+    exact hS },
   haveI : is_iso (H.map S.mor₁),
-  { sorry },
+  { have hh := h,
+    rw ← is_quasi_iso_iff at h,
+    apply h },
   haveI : is_iso (H.map (S.rotate.mor₃)),
-  { sorry },
+  { dsimp [triangle.rotate],
+    rw functor.map_neg,
+    let f := _, show is_iso (- f),
+    suffices : is_iso f,
+    { resetI, use (-(inv f)), split, simp, simp },
+    let EE : (category_theory.shift_functor 𝒦 i ⋙ category_theory.shift_functor 𝒦 (1 : ℤ)) ⋙ H ≅
+      homology_functor _ _ (i + 1),
+    { refine iso_whisker_right _ _ ≪≫ homology_shift_iso (i + 1),
+      refine (shift_functor_add _ _ _).symm },
+    suffices : is_iso ((homology_functor _ _ (i+1)).map T.mor₁),
+    { have hhh := EE.hom.naturality T.mor₁,
+      rw ← is_iso.eq_comp_inv at hhh,
+      dsimp only [functor.comp_map] at hhh,
+      dsimp [f],
+      rw hhh,
+      apply_with is_iso.comp_is_iso { instances := ff },
+      apply_with is_iso.comp_is_iso { instances := ff },
+      all_goals { apply_instance <|> assumption } },
+    apply is_quasi_iso.cond },
   apply is_zero_of_exact_seq_of_is_iso_of_is_iso _ _ _ _ E,
 end
 
