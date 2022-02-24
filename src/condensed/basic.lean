@@ -64,7 +64,7 @@ structure condensed_type_condition : Prop :=
 -- (BM): I'm 90% sure this is true as stated, the forward direction is about halfway done.
 lemma sheaf_condition_iff :
   presieve.is_sheaf proetale_topology X ↔ condensed_type_condition X :=
-sorry
+by admit
 -/
 
 -- See `Top_to_Condensed` in `condensed/top_comparison.lean`.
