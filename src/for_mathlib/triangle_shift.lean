@@ -18,9 +18,6 @@ local attribute [instance, reducible] endofunctor_monoidal_category
 
 namespace triangle
 
--- TODO: This definition is slightly wrong...
--- We should introduce some `(-1)^i`s here so that
--- `T⟦1⟧` and `T.rotate` match!
 @[simps]
 def triangle_shift_obj (T : triangle C) (i : ℤ) : triangle C :=
 triangle.mk C
