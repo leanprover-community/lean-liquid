@@ -387,9 +387,9 @@ end pbool
       P (Σ a, X a) ⟶ P S × P T
 
       -/
-      sorry
+      admit
     } },
-  { sorry }
+  { admit }
   -/
 --end
 -/
