@@ -59,8 +59,8 @@ lemma is_zero_of_exact_seq_of_is_iso_of_is_iso {X₁ X₂ X₃ X₄ X₅ : A}
   (f₂ : X₂ ⟶ X₃)
   (f₃ : X₃ ⟶ X₄)
   (f₄ : X₄ ⟶ X₅)
-  [is_iso f₁]
-  [is_iso f₄]
+  [epi f₁]
+  [mono f₄]
   (e :  exact_seq A [f₁, f₂, f₃, f₄]) : is_zero X₃ :=
 begin
   have h1 : is_zero (cokernel f₁) := is_zero_cokernel_of_epi f₁,
