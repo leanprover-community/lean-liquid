@@ -18,6 +18,8 @@ local attribute [instance, reducible] endofunctor_monoidal_category
 
 namespace triangle
 
+-- TODO(?): add `(-1)^i` so that the signs in the morphisms
+-- in `T⟦1⟧` matches those of `T.rotate.rotate.rotate`.
 @[simps]
 def triangle_shift_obj (T : triangle C) (i : ℤ) : triangle C :=
 triangle.mk C
