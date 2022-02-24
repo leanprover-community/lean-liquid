@@ -38,16 +38,6 @@ if [ -e $dirs/.noisy_files ]; then
   rm $dirs/.noisy_files
 fi
 
-# Archives no longer contain .lean files, but they used to.
-# Extracting such an archive overwrites all .lean files, which is fine if we
-# downloaded an "equivalent" cache. However, since we might be using an older
-# cache, we must revert any changes made to the .lean files.
-#
-# The following commands don't make any changes to ignored files, so the .olean
-# files should be OK.
-git reset --hard HEAD
-git clean -f -d
-
 # Delete every <path>.olean without a matching <path>.lean.
 # n.b. this for loop will break if there are filenames with spaces
 for olean_file in `find $dirs -name "*.olean"`
