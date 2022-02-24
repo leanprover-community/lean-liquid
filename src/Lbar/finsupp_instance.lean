@@ -43,18 +43,88 @@ instance sum_nnnorm (S : Fintype) (α : Type*) [has_zero α] [has_nnnorm α] :
   has_nnnorm (S → α) :=
 { nnnorm := λ F, ∑ b, ∥F b∥₊ }
 
+@[simp]
+lemma sum_nnnorm_def {S : Fintype} {α : Type*} [has_zero α] [has_nnnorm α] (F : S → α) :
+  ∥F∥₊ = ∑ b, ∥F b∥₊ := rfl
+
 lemma sum_nnnorm_add_le {S : Fintype} {β : Type*} [semi_normed_group β]
   (F G : S → β) :
   ∥F + G∥₊ ≤ ∥F∥₊ + ∥G∥₊ :=
 begin
-  simp only [nnnorm, finsupp.coe_add, pi.add_apply],
-  -- using dot-notation for le_trans seems to not work
+  simp only [sum_nnnorm_def, pi.add_apply],
   exact le_trans (sum_le_sum (λ i hi, nnnorm_add_le _ _)) (finset.sum_add _).le,
 end
 
-structure with_r (r' : ℝ≥0) :=
-(ℤ →₀ ℝ)
+/-  Johan's version.
+@[nolint unused_arguments]
+def some_nice_name (r : ℝ≥0) (S : Fintype) := S → polynomial ℤ
+-/
 
+@[nolint unused_arguments, derive add_comm_group]
+def some_nice_name (r : ℝ≥0) (S : Fintype) := S → (ℤ →₀ ℝ)
+
+namespace some_nice_name
+
+instance (r : ℝ≥0) (S : Fintype) : has_nnnorm (some_nice_name r S) :=
+@sum_nnnorm S (ℤ →₀ ℝ) _ (⟨λ F, ∑' x, ∥F x∥₊ * r ^ x⟩)
+
+@[simp]
+lemma nnnorm_zero {r : ℝ≥0} {S : Fintype} : ∥(0 : some_nice_name r S)∥₊ = 0 :=
+by simp only [sum_nnnorm_def, pi.zero_apply, coe_zero, nnnorm_zero, zero_mul, tsum_zero,
+  sum_const_zero]
+
+@[simp]
+lemma nnnorm_neg (S : Fintype) (r : ℝ≥0) (F : some_nice_name r S) :
+  ∥-F∥₊ = ∥F∥₊ :=
+by simp only [_root_.nnnorm_neg, sum_nnnorm_def, pi.neg_apply, coe_neg]
+
+instance (S : Fintype) (r : ℝ≥0) : semi_normed_group (some_nice_name r S) :=
+{ norm := λ F, ∥F∥₊,
+  dist := λ F G, ∥F - G∥₊,
+  dist_self := λ F, by simp only [sub_self, nnnorm_zero, nonneg.coe_zero],
+  dist_comm := λ F G, by {
+    unfold dist,
+    norm_cast,
+    convert nnnorm_neg S r (G - F) using 2,
+    abel },
+  dist_triangle := _,
+  edist := _,
+  edist_dist := _,
+  to_uniform_space := _,
+  uniformity_dist := _,
+  dist_eq := _,
+  ..(infer_instance : add_comm_group _) }
+
+instance mymy (S : Fintype) (r : ℝ≥0) : pseudo_normed_group (some_nice_name r S) :=
+{ to_add_comm_group := finsupp_add_group S,
+  filtration := λ c, {F : some_nice_name r S | ∥F∥₊ ≤ c},
+  filtration_mono := λ c d cd x hx, by { rw set.mem_set_of_eq at hx ⊢, exact hx.trans cd },
+  zero_mem_filtration := λ c,
+    by { simp only [set.mem_set_of_eq, nnnorm_zero, zero_le'] },
+  neg_mem_filtration := λ c F hF,
+    by simpa only [sum_nnnorm_def, set.mem_set_of_eq, pi.neg_apply, coe_neg, _root_.nnnorm_neg],
+  add_mem_filtration := λ c d F G hF hG,
+    by {
+      simp only [sum_nnnorm_def, set.mem_set_of_eq, pi.add_apply, finsupp.coe_add],
+      refine le_trans _ (add_le_add hF hG),
+      apply sum_nnnorm_add_le F G,
+      --exact (sum_nnnorm_add_le F G).trans (add_le_add hF hG),
+      --simpa using (sum_nnnorm_add_le F G).trans (add_le_add hF hG)},
+     } }
+
+end some_nice_name
+
+#exit
+instance (r : ℝ≥0) (S : Fintype) : pseudo_normed_group (some_nice_name r S) :=
+{ to_add_comm_group := by { convert finsupp_add_group S,},
+  filtration := _,
+  filtration_mono := _,
+  zero_mem_filtration := _,
+  neg_mem_filtration := _,
+  add_mem_filtration := _ }
+
+--structure with_r (r' : ℝ≥0) :=
+--(ℤ →₀ ℝ)
 instance mymy (S : Fintype) (r' : ℝ≥0) : pseudo_normed_group (S → ℤ →₀ ℝ) :=
 { to_add_comm_group := finsupp_add_group S,
   filtration := λ c, by {
