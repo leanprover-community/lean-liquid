@@ -46,13 +46,14 @@ def natural_fork {S S' : Profinite.{u}} (f : S' ⟶ S) :
   fork (X.map pullback.fst.op) (X.map pullback.snd.op) :=
 fork.of_ι (X.map (quiver.hom.op f)) (maps_comm X f)
 
+/-
 -- TODO (BM): put this in mathlib (it's already in a mathlib branch with API)
 def category_theory.functor.preserves_terminal
-  (X : Profinite.{u}ᵒᵖ ⥤ Type (u+1)) : Prop := sorry
+  (X : Profinite.{u}ᵒᵖ ⥤ Type (u+1)) : Prop := by admit
 
 -- TODO (BM): put this in mathlib (it's already in a mathlib branch with API)
 def category_theory.functor.preserves_binary_products
-  (X : Profinite.{u}ᵒᵖ ⥤ Type (u+1)) : Prop := sorry
+  (X : Profinite.{u}ᵒᵖ ⥤ Type (u+1)) : Prop := by admit
 
 structure condensed_type_condition : Prop :=
 (empty : nonempty X.preserves_terminal)
@@ -64,6 +65,7 @@ structure condensed_type_condition : Prop :=
 lemma sheaf_condition_iff :
   presieve.is_sheaf proetale_topology X ↔ condensed_type_condition X :=
 sorry
+-/
 
 -- See `Top_to_Condensed` in `condensed/top_comparison.lean`.
 /-

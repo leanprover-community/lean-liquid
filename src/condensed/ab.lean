@@ -5,6 +5,7 @@ import topology.continuous_function.algebra
 import algebra.group.ulift
 
 import for_mathlib.abelian_sheaves.main
+import for_mathlib.AddCommGroup.exact
 
 import condensed.adjunctions
 import condensed.top_comparison
@@ -31,7 +32,45 @@ def Ab.ulift : Ab.{u} ⥤ Ab.{max v u} :=
 
 @[simp] lemma Ab.exact_ulift_map {A B C : Ab} (f : A ⟶ B) (g : B ⟶ C) :
   exact (Ab.ulift.map f) (Ab.ulift.map g) ↔ exact f g :=
-sorry
+begin
+  let F := Ab.ulift.map f,
+  let G := Ab.ulift.map g,
+  change exact F G ↔ _,
+  rw AddCommGroup.exact_iff,
+  rw AddCommGroup.exact_iff,
+  split,
+  { intro h,
+    apply le_antisymm,
+    { rintros _ ⟨x,rfl⟩,
+      have : ulift.up (f x) ∈ F.range := ⟨⟨x⟩, rfl⟩,
+      rw h at this,
+      change _ = _ at this,
+      apply_fun (λ e, e.down) at this,
+      exact this },
+    { rintros x hx, change _ = _ at hx,
+      have : ulift.up x ∈ G.ker, by { apply_fun ulift.up at hx, exact hx },
+      rw ← h at this,
+      obtain ⟨y,hy⟩ := this,
+      apply_fun (λ e, e.down) at hy,
+      rw ← hy,
+      use [y.down, rfl] } },
+  { intro h,
+    apply le_antisymm,
+    { rintros _ ⟨x,rfl⟩,
+      ext,
+      change _ ∈ g.ker,
+      rw ← h,
+      use [x.down, rfl] },
+    { intros x hx,
+      change _ = _ at hx,
+      apply_fun (λ e, e.down) at hx,
+      change _ ∈ g.ker at hx,
+      rw ← h at hx,
+      obtain ⟨y,hy⟩ := hx,
+      use y,
+      ext,
+      exact hy } },
+end
 
 namespace Condensed
 
