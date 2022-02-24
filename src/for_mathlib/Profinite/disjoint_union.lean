@@ -308,8 +308,6 @@ def sigma_punit_iso (X : (punit : Type u) → Profinite.{u}) :
 { hom := sigma.ι _ _,
   inv := sigma.desc _ $ λ ⟨⟩, 𝟙 _ }
 
---instance : fintype (limits.walking_pair.{u}) := sorry
-
 def sigma_walking_pair_iso (X : limits.walking_pair.{u} → Profinite.{u}) :
   sigma X ≅ (X limits.walking_pair.left).sum (X limits.walking_pair.right) :=
 { hom := sigma.desc _ $ λ a, limits.walking_pair.rec_on a (sum.inl _ _) (sum.inr _ _),
