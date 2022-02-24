@@ -5,11 +5,11 @@ namespace category_theory
 
 open category_theory.limits
 
-variables {A : Type*} [category A] [abelian A]
-  (X : cochain_complex A ℤ)
+variables {A ι : Type*} [category A] [abelian A] {c : complex_shape ι}
+  (X : homological_complex A c)
 
-variables (i j k : ℤ) (hij : (complex_shape.up ℤ).rel i j)
-  (hjk : (complex_shape.up ℤ).rel j k)
+variables (i j k :  ι) (hij : c.rel i j)
+  (hjk : c.rel j k)
 
 section
 
@@ -58,9 +58,10 @@ end
 
 end
 
+include hij hjk
+
 noncomputable
-def homology_iso (i j k : ℤ) (hij : (complex_shape.up ℤ).rel i j)
-  (hjk : (complex_shape.up ℤ).rel j k) :
+def homology_iso :
 (homology_functor A _ j).obj X ≅ homology _ _ (X.d_comp_d i j k) :=
 { hom := homology.desc' _ _ _ ((kernel_d_from_iso _ _ k hjk).hom ≫
     homology.π' _ _ _)
