@@ -65,8 +65,11 @@ def some_nice_name (r : ℝ≥0) (S : Fintype) := S → (ℤ →₀ ℝ)
 
 namespace some_nice_name
 
+--instance (r : ℝ≥0) (S : Fintype) : has_nnnorm (some_nice_name r S) :=
+--@sum_nnnorm S (ℤ →₀ ℝ) _ (⟨λ F, ∑' x, ∥F x∥₊ * r ^ x⟩)
+
 instance (r : ℝ≥0) (S : Fintype) : has_nnnorm (some_nice_name r S) :=
-@sum_nnnorm S (ℤ →₀ ℝ) _ (⟨λ F, ∑' x, ∥F x∥₊ * r ^ x⟩)
+@sum_nnnorm S (ℤ →₀ ℝ) _ (⟨λ F, ∑ x in F.support, ∥F x∥₊ * r ^ x⟩)
 
 @[simp]
 lemma nnnorm_zero {r : ℝ≥0} {S : Fintype} : ∥(0 : some_nice_name r S)∥₊ = 0 :=
@@ -74,23 +77,95 @@ by simp only [sum_nnnorm_def, pi.zero_apply, coe_zero, nnnorm_zero, zero_mul, ts
   sum_const_zero]
 
 @[simp]
-lemma nnnorm_neg (S : Fintype) (r : ℝ≥0) (F : some_nice_name r S) :
+lemma nnnorm_neg {r : ℝ≥0} {S : Fintype} (F : some_nice_name r S) :
   ∥-F∥₊ = ∥F∥₊ :=
-by simp only [_root_.nnnorm_neg, sum_nnnorm_def, pi.neg_apply, coe_neg]
+by simp only [_root_.nnnorm_neg, sum_nnnorm_def, pi.neg_apply, coe_neg, support_neg]
 
-instance (S : Fintype) (r : ℝ≥0) : semi_normed_group (some_nice_name r S) :=
+lemma nnnorm_sub {r : ℝ≥0} {S : Fintype} (F G : some_nice_name r S) :
+  ∥F - G∥₊ = ∥G - F∥₊ :=
+by rw [← nnnorm_neg (F - G), neg_sub]
+
+instance {r : ℝ≥0} {S : Fintype} : topological_space (some_nice_name r S) :=
+by simpa only [some_nice_name] using preorder.topology (↥S → ℤ →₀ ℝ)
+
+--instance : topological_space (ℤ →₀ ℝ) :=
+--preorder.topology (ℤ →₀ ℝ)
+
+--instance {r : ℝ≥0} {S : Fintype} : has_continuous_add (ℤ →₀ ℝ) :=
+--{ continuous_add := by {
+--sorry;  dunfold some_nice_name;
+--  sorry
+--} }
+
+--instance {r : ℝ≥0} {S : Fintype} : has_continuous_add (some_nice_name r S) :=
+--{ continuous_add := by {
+--  dunfold some_nice_name,
+--  sorry
+--} }
+
+lemma qui {l : ℤ →₀ ℝ} {s : finset ℤ} (ls : l.support ⊆ s) :
+  ∑ a in l.support, l a = ∑ a in s, l a :=
+sum_subset ls (by simp only [mem_support_iff, not_not, imp_self, implies_true_iff])
+
+open_locale classical
+lemma add_zero_dists {α β : Type*} [add_group β]
+  (x y z : α →₀ β) (l : α) (h : x l + y l + z l = 0)
+  (hl : l ∈ x.support) :
+  l ∈ y.support ∪ z.support :=
+begin
+  contrapose hl,
+  simp only [mem_support_iff, coe_sub, pi.sub_apply, ne.def, not_not, mem_union] at hl ⊢,
+  push_neg at hl,
+  cases hl with h1 h2,
+  rwa [h1, h2, add_zero, add_zero] at h,
+end
+
+lemma dists {α β : Type*} [add_group β]
+  (x y z : α →₀ β) (l : α)
+  (hl : l ∈ (x - z).support) :
+  l ∈ (x - y).support ∪ (y - z).support :=
+begin
+  have : l ∈ (- (x - z)).support,rwa support_neg,
+  refine add_zero_dists _ _ _ _ _ this,
+  simp only [neg_sub, coe_sub, pi.sub_apply, sub_add_sub_cancel, sub_self]
+end
+
+instance {r : ℝ≥0} {S : Fintype} : semi_normed_group (some_nice_name r S) :=
 { norm := λ F, ∥F∥₊,
   dist := λ F G, ∥F - G∥₊,
   dist_self := λ F, by simp only [sub_self, nnnorm_zero, nonneg.coe_zero],
-  dist_comm := λ F G, by {
-    unfold dist,
-    norm_cast,
-    convert nnnorm_neg S r (G - F) using 2,
-    abel },
-  dist_triangle := _,
-  edist := _,
+  dist_comm := λ F G, by simp only [dist, nnnorm_sub],
+  dist_triangle := λ x y z, by {simp only [sum_nnnorm_def, pi.sub_apply, coe_sub],
+  norm_cast,
+  rw ← finset.sum_add,
+  apply sum_le_sum,
+  intros i hi,
+--  have xy : (x i - y i).support ⊆ (x i - y i).support ∪ (y i - z i).support :=
+--    subset_union_left _ _,
+--  have yz : (y i - z i).support ⊆ (x i - y i).support ∪ (y i - z i).support :=
+--    subset_union_right _ _,
+
+  rw sum_subset (subset_union_left _ _ : _ ⊆ (x i - y i).support ∪ (y i - z i).support),
+  rw sum_subset (subset_union_right _ _ : _ ⊆ (x i - y i).support ∪ (y i - z i).support),
+  rw sum_subset (_ : _ ⊆ (x i - y i).support ∪ (y i - z i).support),
+  rw ← finset.sum_add,
+  apply sum_le_sum,
+  intros j hj,
+  rw ← add_mul,
+  refine mul_le_mul_of_nonneg_right _ (zero_le _),
+  apply nnreal.coe_le_coe.mp,
+  exact dist_triangle ((x i) j) _ _,
+  intros k hk hh,
+  simp only [mem_support_iff, coe_sub, pi.sub_apply, not_not] at hh,
+  convert zero_mul _,
+  simp only [hh, nnnorm_eq_zero],
+  intros l hl,
+  extract_goal,
+--  simp [hh],
+   },
+--  edist := _,
   edist_dist := _,
-  to_uniform_space := _,
+--  to_uniform_space := _,
   uniformity_dist := _,
   dist_eq := _,
   ..(infer_instance : add_comm_group _) }
