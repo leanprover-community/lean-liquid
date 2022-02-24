@@ -1,5 +1,4 @@
-import category_theory.preadditive.additive_functor
-import category_theory.triangulated.basic
+import category_theory.triangulated.pretriangulated
 
 noncomputable theory
 
@@ -141,5 +140,13 @@ lemma shift_hom₂ {T₁ T₂ : triangle C} (f : T₁ ⟶ T₂) (i : ℤ) : f⟦
 lemma shift_hom₃ {T₁ T₂ : triangle C} (f : T₁ ⟶ T₂) (i : ℤ) : f⟦i⟧'.hom₃ = f.hom₃⟦i⟧' := rfl
 
 end triangle
+
+namespace pretriangulated
+variables [has_zero_object C] [∀ (i : ℤ), (shift_functor C i).additive] [pretriangulated C]
+
+lemma shift_of_dist_triangle (T : triangle C) (hT : T ∈ dist_triang C) (i : ℤ) :
+  T⟦i⟧ ∈ dist_triang C := sorry
+
+end pretriangulated
 
 end category_theory.triangulated
