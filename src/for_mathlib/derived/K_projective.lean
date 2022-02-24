@@ -118,6 +118,55 @@ begin
   simp only [functor.map_neg],
   apply_with category_theory.abelian.exact_of_neg_right { instances := ff },
   apply _root_.category_theory.cochain_complex.exact_cone_in_cone_out,
+end .
+
+def homology_shift_iso (i : ℤ) :
+  category_theory.shift_functor 𝒦 i ⋙
+  homology_functor A (complex_shape.up ℤ) 0 ≅
+  homology_functor A (complex_shape.up ℤ) i := sorry
+
+lemma is_acyclic_iff (X : 𝒦) :
+  (∀ (i : ℤ), is_zero ((homotopy_category.homology_functor _ _ 0).obj (X⟦i⟧))) ↔
+  is_acyclic X :=
+begin
+  split,
+  { intros h,
+    constructor,
+    intros i,
+    apply is_zero_of_iso_of_zero (h i),
+    apply (homology_shift_iso i).app _ },
+  { introsI h i,
+    apply is_zero_of_iso_of_zero (is_acyclic.cond _ i),
+    apply ((homology_shift_iso _).app _).symm,
+    assumption },
+end
+
+lemma is_quasi_iso_iff {X Y : 𝒦} (f : X ⟶ Y) :
+  (∀ (i : ℤ), is_iso ((homotopy_category.homology_functor _ _ 0).map (f⟦i⟧'))) ↔
+  is_quasi_iso f :=
+begin
+  split,
+  { intros h,
+    constructor,
+    intros i,
+    specialize h i,
+    have := (homology_shift_iso i).hom.naturality f,
+    rw ← is_iso.inv_comp_eq at this,
+    rw ← this,
+    apply_with is_iso.comp_is_iso { instances := ff },
+    apply_instance,
+    apply_with is_iso.comp_is_iso { instances := ff },
+    exact h,
+    apply_instance },
+  { introsI h i,
+    have := (homology_shift_iso i).hom.naturality f,
+    rw ← is_iso.eq_comp_inv at this,
+    erw this,
+    apply_with is_iso.comp_is_iso { instances := ff },
+    apply_with is_iso.comp_is_iso { instances := ff },
+    apply_instance,
+    apply is_quasi_iso.cond,
+    apply_instance }
 end
 
 /--
@@ -125,7 +174,10 @@ If `A → B → C → A[1]` is a distinguished triangle, and `A → B` is a quas
 then `C` is acyclic.
 -/
 lemma is_acyclic_of_dist_triang_of_is_quasi_iso (T : triangle 𝒦) (hT : T ∈ dist_triang 𝒦)
-  [is_quasi_iso T.mor₁] : is_acyclic T.obj₃ := sorry
+  [is_quasi_iso T.mor₁] : is_acyclic T.obj₃ :=
+begin
+  sorry
+end
 
 lemma hom_K_projective_bijective {X Y : 𝒦} (P : 𝒦) [is_K_projective P]
   (f : X ⟶ Y) [is_quasi_iso f] : function.bijective (λ e : P ⟶ X, e ≫ f) :=
