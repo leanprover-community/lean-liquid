@@ -5,6 +5,8 @@ import category_theory.abelian.projective
 import for_mathlib.homology
 import for_mathlib.snake_lemma3
 import for_mathlib.les_homology
+import for_mathlib.exact_seq3
+import for_mathlib.triangle_shift
 
 open category_theory category_theory.limits category_theory.triangulated
 open homological_complex
@@ -176,7 +178,18 @@ then `C` is acyclic.
 lemma is_acyclic_of_dist_triang_of_is_quasi_iso (T : triangle 𝒦) (hT : T ∈ dist_triang 𝒦)
   [is_quasi_iso T.mor₁] : is_acyclic T.obj₃ :=
 begin
-  sorry
+  let H := homology_functor A (complex_shape.up ℤ) 0,
+  rw ← is_acyclic_iff,
+  intros i,
+  let S : triangle 𝒦 := T⟦i⟧,
+  change is_zero (H.obj (S.obj₃)),
+  let E : exact_seq A [H.map S.mor₁, H.map S.mor₂, H.map S.mor₃, H.map (S.rotate.mor₃)],
+  { sorry },
+  haveI : is_iso (H.map S.mor₁),
+  { sorry },
+  haveI : is_iso (H.map (S.rotate.mor₃)),
+  { sorry },
+  apply is_zero_of_exact_seq_of_is_iso_of_is_iso _ _ _ _ E,
 end
 
 lemma hom_K_projective_bijective {X Y : 𝒦} (P : 𝒦) [is_K_projective P]
