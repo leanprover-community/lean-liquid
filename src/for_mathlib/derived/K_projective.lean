@@ -182,6 +182,8 @@ begin
   rw ← is_acyclic_iff,
   intros i,
   let S : triangle 𝒦 := T⟦i⟧,
+  have hS : S ∈ dist_triang 𝒦,
+  { apply pretriangulated.shift_of_dist_triangle, assumption },
   change is_zero (H.obj (S.obj₃)),
   let E : exact_seq A [H.map S.mor₁, H.map S.mor₂, H.map S.mor₃, H.map (S.rotate.mor₃)],
   { sorry },
