@@ -71,31 +71,31 @@ have xz : l ∈ (- (x - z)).support, by rwa support_neg,
 add_zero_dists (by simp only [neg_sub, coe_sub, pi.sub_apply, sub_add_sub_cancel, sub_self]) xz
 
 @[nolint unused_arguments, reducible, derive add_comm_group]
-def prenice (r : ℝ≥0) := ℕ →₀ ℝ
+def nnreal.normed (r : ℝ≥0) := ℕ →₀ ℝ
 
-namespace prenice
+namespace nnreal.normed
 
-instance (r : ℝ≥0) : has_nnnorm (prenice r) :=
+instance (r : ℝ≥0) : has_nnnorm r.normed :=
 ⟨λ F, ∑ x in F.support, ∥F x∥₊ * r⁻¹ ^ x⟩
 
 @[simp]
-lemma nnnorm_zero {r : ℝ≥0} : ∥(0 : prenice r)∥₊ = 0 :=
+lemma nnnorm_zero {r : ℝ≥0} : ∥(0 : r.normed)∥₊ = 0 :=
 by simp only [has_nnnorm.nnnorm, support_zero, sum_empty]
 
 @[simp]
-lemma nnnorm_neg {r : ℝ≥0} (F : prenice r) :
+lemma nnnorm_neg {r : ℝ≥0} (F : r.normed) :
   ∥-F∥₊ = ∥F∥₊ :=
 by simp only [has_nnnorm.nnnorm, pi.neg_apply, coe_neg, support_neg, norm_neg]
 
-lemma nnnorm_sub {r : ℝ≥0} (F G : prenice r) :
+lemma nnnorm_sub {r : ℝ≥0} (F G : r.normed) :
   ∥F - G∥₊ = ∥G - F∥₊ :=
 by rw [← nnnorm_neg (F - G), neg_sub]
 
-instance {r : ℝ≥0} : topological_space (prenice r) :=
-by simpa only [prenice] using preorder.topology _
+instance {r : ℝ≥0} : topological_space r.normed :=
+by simpa only [nnreal.normed] using preorder.topology _
 
-/-  This instance, in particular, provides a `pseudo_metric_space` instance to `prenice r`. -/
-instance (r : ℝ≥0) : semi_normed_group (prenice r) :=
+/-  This instance, in particular, provides a `pseudo_metric_space` instance to `r.normed`. -/
+instance (r : ℝ≥0) : semi_normed_group r.normed :=
 { norm := coe ∘ has_nnnorm.nnnorm,
   dist := λ F G, ∥F - G∥₊,
   dist_self := λ F, by simp only [sub_self, nnnorm_zero, nonneg.coe_zero],
@@ -119,9 +119,9 @@ instance (r : ℝ≥0) : semi_normed_group (prenice r) :=
   ..(infer_instance : add_comm_group _) }
 
 /-  This instance does not appear to be needed.
-instance png (r : ℝ≥0) : pseudo_normed_group (prenice r) :=
+instance png (r : ℝ≥0) : pseudo_normed_group r.normed :=
 { to_add_comm_group := finsupp.add_comm_group,
-  filtration := λ c, {F : prenice r | ∥F∥₊ ≤ c},
+  filtration := λ c, {F : r.normed | ∥F∥₊ ≤ c},
   filtration_mono := λ c d cd x hx, by { rw set.mem_set_of_eq at hx ⊢, exact hx.trans cd },
   zero_mem_filtration := λ c,
     by { simp only [set.mem_set_of_eq, nnnorm_zero, zero_le'] },
@@ -129,18 +129,18 @@ instance png (r : ℝ≥0) : pseudo_normed_group (prenice r) :=
   add_mem_filtration := λ c d F G hF hG, begin
       simp only [sum_nnnorm_def, set.mem_set_of_eq, pi.add_apply, finsupp.coe_add],
       refine le_trans _ (add_le_add hF hG),
-      convert @nnnorm_add_le _ (prenice.semi_normed_group r) F G;
-      repeat { simp only [prenice.has_nnnorm],
+      convert @nnnorm_add_le _ (nnreal.normed.semi_normed_group r) F G;
+      repeat { simp only [nnreal.normed.has_nnnorm],
         congr,
         ext,
         refl }
     end }
 --/
 
-end prenice
+end nnreal.normed
 
 @[nolint unused_arguments, derive add_comm_group]
-def invpoly (r : ℝ≥0) (S : Fintype) := S → (prenice r)
+def invpoly (r : ℝ≥0) (S : Fintype) := S → r.normed
 
 namespace invpoly
 
@@ -149,12 +149,12 @@ instance (r : ℝ≥0) (S : Fintype) : has_nnnorm (invpoly r S) :=
 
 @[simp]
 lemma nnnorm_zero {r : ℝ≥0} {S : Fintype} : ∥(0 : invpoly r S)∥₊ = 0 :=
-by simp only [sum_nnnorm_def, pi.zero_apply, sum_const_zero, prenice.nnnorm_zero]
+by simp only [sum_nnnorm_def, pi.zero_apply, sum_const_zero, nnreal.normed.nnnorm_zero]
 
 @[simp]
 lemma nnnorm_neg {r : ℝ≥0} {S : Fintype} (F : invpoly r S) :
   ∥-F∥₊ = ∥F∥₊ :=
-by simp only [sum_nnnorm_def, pi.neg_apply, prenice.nnnorm_neg]
+by simp only [sum_nnnorm_def, pi.neg_apply, nnreal.normed.nnnorm_neg]
 
 lemma nnnorm_sub {r : ℝ≥0} {S : Fintype} (F G : invpoly r S) :
   ∥F - G∥₊ = ∥G - F∥₊ :=
