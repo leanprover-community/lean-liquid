@@ -677,7 +677,7 @@ homological_complex.single _ _ i ⋙ homotopy_category.quotient _ _
 def single (i : ℤ) : A ⥤ bounded_homotopy_category A :=
 { obj := λ X,
   { val := (homotopy_category.single i).obj X,
-    property := begin
+    bdd := begin
       use i+1,
       intros j hj,
       dsimp,
