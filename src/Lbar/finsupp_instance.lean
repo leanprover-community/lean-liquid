@@ -117,25 +117,6 @@ instance (r : ℝ≥0) : semi_normed_group r.normed :=
   dist_eq := λ x y, by simp only,
   ..(infer_instance : add_comm_group _) }
 
-/-  This instance does not appear to be needed.
-instance png (r : ℝ≥0) : pseudo_normed_group r.normed :=
-{ to_add_comm_group := finsupp.add_comm_group,
-  filtration := λ c, {F : r.normed | ∥F∥₊ ≤ c},
-  filtration_mono := λ c d cd x hx, by { rw set.mem_set_of_eq at hx ⊢, exact hx.trans cd },
-  zero_mem_filtration := λ c,
-    by { simp only [set.mem_set_of_eq, nnnorm_zero, zero_le'] },
-  neg_mem_filtration := λ c F hF, by simpa only [set.mem_set_of_eq, nnnorm_neg],
-  add_mem_filtration := λ c d F G hF hG, begin
-      simp only [sum_nnnorm_def, set.mem_set_of_eq, pi.add_apply, finsupp.coe_add],
-      refine le_trans _ (add_le_add hF hG),
-      convert @nnnorm_add_le _ (nnreal.normed.semi_normed_group r) F G;
-      repeat { simp only [nnreal.normed.has_nnnorm],
-        congr,
-        ext,
-        refl }
-    end }
---/
-
 end nnreal.normed
 
 @[nolint unused_arguments, derive add_comm_group]
