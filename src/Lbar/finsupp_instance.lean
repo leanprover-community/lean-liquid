@@ -31,8 +31,7 @@ lemma finset.sum_add {α β : Type*} [add_comm_monoid β] {F G : α → β} (s :
   ∑ x in s, (F x + G x) = ∑ x in s, F x + ∑ x in s, G x :=
 begin
   classical,
-  refine finset.induction_on s (by simp) _,
-  intros a s as h,
+  refine finset.induction_on s (by simp) (λ a s as h, _),
   rw [sum_insert as, sum_insert as, sum_insert as, h],
   abel,
 end
