@@ -11,14 +11,12 @@ section families_of_add_comm_groups
 
 variables (S A : Type*) [add_comm_group A]
 
--- by apply_instance works, but having this instance explicitly, allows
--- `finsupp_add_group` to work.
+-- `apply_instance` works.  Having this instance explicitly, allows `finsupp_add_group` to work.
 instance add_comm_group_finsupp {α β γ : Type*} [add_comm_group γ] : add_comm_group (α → β →₀ γ) :=
 pi.add_comm_group
 
---  I had some trouble getting Lean to accept this instance, without the explicit instance
---  `add_comm_group_finsupp`
-instance finsupp_add_group : add_comm_group (S → ℤ →₀ ℝ) := by apply_instance -- works
+--  Without the explicit instance `add_comm_group_finsupp`, this does not work
+instance finsupp_add_group : add_comm_group (S → ℤ →₀ ℝ) := by apply_instance
 
 /--  A function from a `Fintype` is automatically a `finsupp`, when the target has a zero. -/
 def finsupp_of_fintype_domain {α : Type*} [has_zero α] {S : Fintype} (F : S → α) : S →₀ α :=
@@ -76,7 +74,6 @@ add_zero_dists (by simp only [neg_sub, coe_sub, pi.sub_apply, sub_add_sub_cancel
 def prenice (r : ℝ≥0) := ℕ →₀ ℝ
 
 namespace prenice
---variable {α : Type*} ()
 
 instance (r : ℝ≥0) : has_nnnorm (prenice r) :=
 ⟨λ F, ∑ x in F.support, ∥F x∥₊ * r⁻¹ ^ x⟩
@@ -98,7 +95,7 @@ instance {r : ℝ≥0} : topological_space (prenice r) :=
 by simpa only [prenice] using preorder.topology _
 
 /-  This instance, in particular, provides a `pseudo_metric_space` instance to `prenice r`. -/
-instance sng (r : ℝ≥0) : semi_normed_group (prenice r) :=
+instance (r : ℝ≥0) : semi_normed_group (prenice r) :=
 { norm := coe ∘ has_nnnorm.nnnorm,
   dist := λ F G, ∥F - G∥₊,
   dist_self := λ F, by simp only [sub_self, nnnorm_zero, nonneg.coe_zero],
@@ -132,41 +129,41 @@ instance png (r : ℝ≥0) : pseudo_normed_group (prenice r) :=
   add_mem_filtration := λ c d F G hF hG, begin
       simp only [sum_nnnorm_def, set.mem_set_of_eq, pi.add_apply, finsupp.coe_add],
       refine le_trans _ (add_le_add hF hG),
-      convert @nnnorm_add_le _ (prenice.sng r) F G;
+      convert @nnnorm_add_le _ (prenice.semi_normed_group r) F G;
       repeat { simp only [prenice.has_nnnorm],
         congr,
         ext,
         refl }
     end }
--/
+--/
 
 end prenice
 
 @[nolint unused_arguments, derive add_comm_group]
-def some_nice_name (r : ℝ≥0) (S : Fintype) := S → (prenice r)
+def invpoly (r : ℝ≥0) (S : Fintype) := S → (prenice r)
 
-namespace some_nice_name
+namespace invpoly
 
-instance (r : ℝ≥0) (S : Fintype) : has_nnnorm (some_nice_name r S) :=
+instance (r : ℝ≥0) (S : Fintype) : has_nnnorm (invpoly r S) :=
 @sum_nnnorm S (ℕ →₀ ℝ) (⟨λ F, ∑ x in F.support, ∥F x∥₊ * r⁻¹ ^ x⟩)
 
 @[simp]
-lemma nnnorm_zero {r : ℝ≥0} {S : Fintype} : ∥(0 : some_nice_name r S)∥₊ = 0 :=
+lemma nnnorm_zero {r : ℝ≥0} {S : Fintype} : ∥(0 : invpoly r S)∥₊ = 0 :=
 by simp only [sum_nnnorm_def, pi.zero_apply, sum_const_zero, prenice.nnnorm_zero]
 
 @[simp]
-lemma nnnorm_neg {r : ℝ≥0} {S : Fintype} (F : some_nice_name r S) :
+lemma nnnorm_neg {r : ℝ≥0} {S : Fintype} (F : invpoly r S) :
   ∥-F∥₊ = ∥F∥₊ :=
 by simp only [sum_nnnorm_def, pi.neg_apply, prenice.nnnorm_neg]
 
-lemma nnnorm_sub {r : ℝ≥0} {S : Fintype} (F G : some_nice_name r S) :
+lemma nnnorm_sub {r : ℝ≥0} {S : Fintype} (F G : invpoly r S) :
   ∥F - G∥₊ = ∥G - F∥₊ :=
 by rw [← nnnorm_neg (F - G), neg_sub]
 
-instance {r : ℝ≥0} {S : Fintype} : topological_space (some_nice_name r S) :=
-by simpa only [some_nice_name] using preorder.topology _
+instance {r : ℝ≥0} {S : Fintype} : topological_space (invpoly r S) :=
+by simpa only [invpoly] using preorder.topology _
 
-instance {r : ℝ≥0} {S : Fintype} : semi_normed_group (some_nice_name r S) :=
+instance {r : ℝ≥0} {S : Fintype} : semi_normed_group (invpoly r S) :=
 { norm := coe ∘ has_nnnorm.nnnorm,
   dist := λ F G, ∥F - G∥₊,
   dist_self := λ F, by simp only [sub_self, nnnorm_zero, nonneg.coe_zero],
@@ -183,9 +180,9 @@ instance {r : ℝ≥0} {S : Fintype} : semi_normed_group (some_nice_name r S) :=
 
 --  There is some awkwardness in getting the fact that the `nnnorm` instances coincide.
 --  you can see this in the `convert sum_nnnorm_add_le F G` step.
-instance mymy (S : Fintype) (r : ℝ≥0) : pseudo_normed_group (some_nice_name r S) :=
-{ to_add_comm_group := by refine some_nice_name.add_comm_group r S,
-  filtration := λ c, {F : some_nice_name r S | ∥F∥₊ ≤ c},
+instance mymy (S : Fintype) (r : ℝ≥0) : pseudo_normed_group (invpoly r S) :=
+{ to_add_comm_group := by refine invpoly.add_comm_group r S,
+  filtration := λ c, {F : invpoly r S | ∥F∥₊ ≤ c},
   filtration_mono := λ c d cd x hx, by { rw set.mem_set_of_eq at hx ⊢, exact hx.trans cd },
   zero_mem_filtration := λ c,
     by { simp only [set.mem_set_of_eq, nnnorm_zero, zero_le'] },
@@ -196,12 +193,12 @@ instance mymy (S : Fintype) (r : ℝ≥0) : pseudo_normed_group (some_nice_name 
       convert sum_nnnorm_add_le F G,
       { ext s,
         simp only [pi.add_apply, _root_.coe_nnnorm],congr },
-      repeat { unfold some_nice_name.has_nnnorm,
+      repeat { unfold invpoly.has_nnnorm,
         congr,
         ext,
         refl },
     end }
 
-end some_nice_name
+end invpoly
 
 end families_of_add_comm_groups
