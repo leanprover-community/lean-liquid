@@ -424,9 +424,9 @@ has_shift_mk _ _
       erw [← nat_trans.comp_app, iso.inv_hom_id],
       refl,
     end },
-  associativity := sorry,
-  left_unitality := sorry,
-  right_unitality := sorry }
+  associativity := λ m₁ m₂ m₃ X, homotopy_category.has_shift_associativity_aux _ m₁ m₂ m₃ X.val,
+  left_unitality := λ n X, homotopy_category.has_shift_left_unitality_aux _ n X.val,
+  right_unitality := λ n X, homotopy_category.has_shift_right_unitality_aux _ n X.val } .
 
 instance : preadditive (bounded_homotopy_category A) :=
 { hom_group := λ A B, show add_comm_group (A.val ⟶ B.val), by apply_instance,
