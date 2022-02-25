@@ -218,10 +218,7 @@ by { delta homology.π' homology.ι homology_iso_kernel_desc, simp }
 @[simp, reassoc]
 lemma homology.π_ι :
   homology.π f g w ≫ homology.ι f g w = (kernel_subobject _).arrow ≫ cokernel.π _ :=
-begin
-  rw [← homology.π'_eq_π, category.assoc, homology.π'_ι, kernel_subobject_arrow_assoc],
-end
-
+by rw [← homology.π'_eq_π, category.assoc, homology.π'_ι, kernel_subobject_arrow_assoc]
 
 open_locale pseudoelement
 open category_theory.abelian
@@ -378,8 +375,8 @@ begin
   simp only [homology_functor_map, homology.map_comp],
   congr; ext; dsimp,
   { delta homological_complex.hom.prev, rw (complex_shape.up ℤ).prev_eq_some (sub_add_cancel _ _) },
-  { simp },
-  { simp },
+  { simp only [category.comp_id, category.id_comp] },
+  { simp only [category.comp_id, category.id_comp] },
   { delta homological_complex.hom.next, rw (complex_shape.up ℤ).next_eq_some rfl },
 end
 
