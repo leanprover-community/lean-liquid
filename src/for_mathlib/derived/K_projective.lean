@@ -434,7 +434,8 @@ instance : preadditive (bounded_homotopy_category A) :=
   comp_add' := λ P Q R f g h, preadditive.comp_add _ _ _ _ _ _ }
 
 instance shift_functor_additive (i : ℤ) :
-  (category_theory.shift_functor (bounded_homotopy_category A) i).additive := sorry
+  (category_theory.shift_functor (bounded_homotopy_category A) i).additive :=
+by constructor
 
 instance : triangulated.pretriangulated (bounded_homotopy_category A) :=
 { distinguished_triangles :=
