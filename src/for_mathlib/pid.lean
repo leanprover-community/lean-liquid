@@ -71,8 +71,42 @@ open submodule.is_principal set submodule
 
 universe u
 
-variables {ι : Type u} {R : Type*} [comm_ring R]
-variables {M : Type*} [add_comm_group M] [module R M] {b : ι → M}
+-- Equivalent of lt_of_lt_of_le for unbundled orders. (??)
+lemma lt_of_lt_of_le_unbundled {α : Type u} {r : α → α → Prop} [is_strict_total_order' α r] {a b c : α}
+  (hab : r a b) (hbc : ¬r c b) :
+r a c :=
+begin
+  have t : r b c ∨ b = c ∨ r c b := trichotomous b c,
+  cases t,
+  exact is_trans.trans a b c hab t,
+  cases t,
+  rw ←t,
+  exact hab,
+  exact false.elim (hbc t)
+end
+
+-- Characterization of le for unbundled orders. (??)
+lemma le_unbundled {α : Type u} {r : α → α → Prop} [is_strict_total_order' α r] {a b : α} :
+  r a b ∨ a = b ↔  ¬r b a :=
+begin
+  split,
+  intro h,
+  cases h,
+  by_contradiction h',
+  exact irrefl a (is_trans.trans _ _ _ h h'),
+  rw h,
+  exact irrefl b,
+  intro h,
+  have t : r a b ∨ a = b ∨ r b a := trichotomous a b,
+  cases t,
+  exact or.intro_left _ t,
+  cases t,
+  exact or.intro_right _ t,
+  exact false.elim (h t)
+end
+
+variables {R : Type*} [comm_ring R]
+variables {M : Type*} [add_comm_group M] [module R M]
 
 section aux_lemmas
 
@@ -195,8 +229,8 @@ end
 
 -- Auxiliary lemma for proving linear independence at successor ordinals.
 lemma lin_ind_succ
+  [is_domain R]
   {N : submodule R M}
-  {V : {i:ordinal // i < o} → submodule R N}
   {B : basis {i // i < o} R M}
   {BB : { i  // a i ≠ 0} → N}
   (hB_BB : ∀ i : ordinal, ∀ l : {i // a i ≠ 0} →₀ R,
@@ -262,9 +296,8 @@ begin
       },
       have h₃ : (B.coord ⟨j, hjo⟩) (finsupp.total good N R BB (finsupp.single j_good (-(l j_good)))) ≠ 0,
       have hlj : l j_good ≠ 0 := (l.3 j_good).1 hjsupp,
-      { simp only [hlj, finsupp.total_single, coe_smul_of_tower, basis.coord_apply, linear_equiv.map_smulₛₗ,
-                   ring_hom.id_apply, finsupp.coe_smul, pi.smul_apply, algebra.id.smul_eq_mul, ne.def,
-                   neg_eq_zero, mul_eq_zero, false_or],
+      { simp only [hlj, finsupp.total_single, coe_smul_of_tower, basis.coord_apply, linear_equiv.map_smulₛₗ, ring_hom.id_apply,
+                   finsupp.coe_smul, pi.smul_apply, algebra.id.smul_eq_mul, ne.def, neg_eq_zero, mul_eq_zero, false_or],
         have := hcoordB j_good,
         rw basis.coord_apply at this,
         exact this
@@ -542,7 +575,7 @@ begin
 end
 
 -- Equivalent of basis.reindex_apply for sets of indices.
-theorem basis.reindex_apply_image {ι' : Type*}
+theorem basis.reindex_apply_image {ι ι' : Type*}
   (b : basis ι R M) (e : ι ≃ ι') (s : set ι') :
 (b.reindex e) '' s = (b ∘ (e.symm)) '' s :=
 begin
@@ -553,40 +586,6 @@ begin
     simp only [basis.reindex_apply, function.comp_app, mem_image],
     refine ⟨y, ⟨hy, rfl⟩⟩
   }
-end
-
--- Equivalent of lt_of_lt_of_le for unbundled orders. (??)
-lemma lt_of_lt_of_le_unbundled {α : Type u} {r : α → α → Prop} [is_strict_total_order' α r] {a b c : α}
-  (hab : r a b) (hbc : ¬r c b) :
-r a c :=
-begin
-  have t : r b c ∨ b = c ∨ r c b := trichotomous b c,
-  cases t,
-  exact is_trans.trans a b c hab t,
-  cases t,
-  rw ←t,
-  exact hab,
-  exact false.elim (hbc t)
-end
-
--- Characterization of le for unbundled orders. (??)
-lemma le_unbundled {α : Type u} {r : α → α → Prop} [is_strict_total_order' α r] {a b : α} :
-  r a b ∨ a = b ↔  ¬r b a :=
-begin
-  split,
-  intro h,
-  cases h,
-  by_contradiction h',
-  exact irrefl a (is_trans.trans _ _ _ h h'),
-  rw h,
-  exact irrefl b,
-  intro h,
-  have t : r a b ∨ a = b ∨ r b a := trichotomous a b,
-  cases t,
-  exact or.intro_left _ t,
-  cases t,
-  exact or.intro_right _ t,
-  exact false.elim (h t)
 end
 
 -- Lemma on supports of finsupps, useful for finsupp.induction.
