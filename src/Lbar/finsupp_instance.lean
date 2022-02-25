@@ -79,7 +79,7 @@ namespace prenice
 --variable {α : Type*} ()
 
 instance (r : ℝ≥0) : has_nnnorm (prenice r) :=
-⟨λ F, ∑ x in F.support, ∥F x∥₊ * r ^ x⟩
+⟨λ F, ∑ x in F.support, ∥F x∥₊ * r⁻¹ ^ x⟩
 
 @[simp]
 lemma nnnorm_zero {r : ℝ≥0} : ∥(0 : prenice r)∥₊ = 0 :=
@@ -153,7 +153,7 @@ namespace some_nice_name
 --@sum_nnnorm S (ℕ →₀ ℝ) _ (⟨λ F, ∑' x, ∥F x∥₊ * r ^ x⟩)
 
 instance (r : ℝ≥0) (S : Fintype) : has_nnnorm (some_nice_name r S) :=
-@sum_nnnorm S (ℕ →₀ ℝ) (⟨λ F, ∑ x in F.support, ∥F x∥₊ * r ^ x⟩)
+@sum_nnnorm S (ℕ →₀ ℝ) (⟨λ F, ∑ x in F.support, ∥F x∥₊ * r⁻¹ ^ x⟩)
 
 @[simp]
 lemma nnnorm_zero {r : ℝ≥0} {S : Fintype} : ∥(0 : some_nice_name r S)∥₊ = 0 :=
