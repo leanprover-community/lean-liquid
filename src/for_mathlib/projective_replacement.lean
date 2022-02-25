@@ -375,8 +375,8 @@ begin
   simp only [homology_functor_map, homology.map_comp],
   congr; ext; dsimp,
   { delta homological_complex.hom.prev, rw (complex_shape.up ℤ).prev_eq_some (sub_add_cancel _ _) },
-  { simp },
-  { simp },
+  { simp only [category.comp_id, category.id_comp] },
+  { simp only [category.comp_id, category.id_comp] },
   { delta homological_complex.hom.next, rw (complex_shape.up ℤ).next_eq_some rfl },
 end
 
