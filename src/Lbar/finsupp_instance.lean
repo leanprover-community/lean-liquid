@@ -11,7 +11,18 @@ universes u v
 
 section families_of_add_comm_groups
 
-lemma finset.sum_add {α β : Type*} [add_comm_monoid β] {F G : α → β} (s : finset α) :
+variables {S : Fintype} {α β : Type*}
+
+lemma mem_union_support_of_mem_support_add [add_zero_class β] [decidable_eq α] {k : α}
+  (F G : α →₀ β) (hk : k ∈ (F + G).support) :
+  k ∈ F.support ∪ G.support :=
+begin
+  simp only [mem_union, mem_support_iff, ne.def, finsupp.coe_add, pi.add_apply] at ⊢ hk,
+  contrapose! hk,
+  simp only [hk, add_zero],
+end
+
+lemma finset.sum_add [add_comm_monoid β] {F G : α → β} (s : finset α) :
   ∑ x in s, (F x + G x) = ∑ x in s, F x + ∑ x in s, G x :=
 begin
   classical,
@@ -19,8 +30,6 @@ begin
   rw [sum_insert as, sum_insert as, sum_insert as, h],
   abel,
 end
-
-variables {S : Fintype} {α β : Type*}
 
 instance sum_nnnorm [has_nnnorm α] : has_nnnorm (S → α) :=
 { nnnorm := λ F, ∑ b, ∥F b∥₊ }
@@ -58,18 +67,16 @@ by rw [← nnnorm_neg (F - G), neg_sub]
 lemma nnnorm_add_le : ∥F + G∥₊ ≤ ∥F∥₊ + ∥G∥₊ :=
 begin
   unfold nnnorm,
-  rw [sum_subset (subset_union_left _ _  : _ ⊆ F.support ∪ G.support),
-      sum_subset (subset_union_right _ _ : _ ⊆ F.support ∪ G.support),
-      sum_subset ((λ k hk, _) : _ ⊆ F.support ∪ G.support), ← finset.sum_add],
+  rw [sum_subset (subset_union_left  F.support G.support),
+      sum_subset (subset_union_right F.support G.support),
+      sum_subset ((λ k, mem_union_support_of_mem_support_add F G) : _ ⊆ F.support ∪ G.support),
+      ← finset.sum_add],
   { refine sum_le_sum (λ j hj, _),
     rw ← add_mul,
-    refine mul_le_mul_of_nonneg_right _ (zero_le _),
-    exact nnreal.coe_le_coe.mp (norm_add_le _ _) },
+    exact mul_le_mul_of_nonneg_right (nnreal.coe_le_coe.mp (norm_add_le _ _)) (zero_le _) },
   repeat
-  { intros k _ h, convert zero_mul _, simpa only [mem_support_iff, not_not, norm_eq_zero] using h },
-  { simp only [mem_union, mem_support_iff, ne.def, finsupp.coe_add, pi.add_apply] at ⊢ hk,
-    contrapose! hk,
-    simp only [hk, add_zero] }
+  { simp only [mem_support_iff, not_not, norm_zero, mul_eq_zero, nonneg.mk_eq_zero,
+      eq_self_iff_true, true_or, implies_true_iff] {contextual := true} }
 end
 
 lemma nnnorm_triangle : ∥F - H∥₊ ≤ ∥F - G∥₊ + ∥G - H∥₊ :=
