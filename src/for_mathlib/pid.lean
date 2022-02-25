@@ -632,10 +632,10 @@ end
 
 -- Hacky lemma to extract the proof from set.cod_restrict hidden under a definition. The hwtf hypothesis
 -- allows to specify the cod_restrict function without repeating the proof and can be set to `@rfl _ fun`.
-lemma cod_restrict_mem {α : Type*} {β : Type*} {f : α → β} {s : set β} {h : ∀ (x : α), f x ∈ s}
-  (hwtf : set.cod_restrict f s h = set.cod_restrict f s h)
-  (a : α) :
-((set.cod_restrict f s h a) : β) ∈ s := h a
+-- lemma cod_restrict_mem {α : Type*} {β : Type*} {f : α → β} {s : set β} {h : ∀ (x : α), f x ∈ s}
+--   (hwtf : set.cod_restrict f s h = set.cod_restrict f s h)
+--   (a : α) :
+-- ((set.cod_restrict f s h a) : β) ∈ s := h a
 
 
 
@@ -736,7 +736,7 @@ begin
 
   have hV : ∀ i j, i ≤ j → V i ≤ V j := λ i j hij, submodule.comap_mono (hF i j hij),
 
-  have hBBN : ∀ i, (BB i : M) ∈ N := λ i, @cod_restrict_mem _ _ _ _ _ (@rfl _ BB) i,
+  have hBBN : ∀ i, (BB i : M) ∈ N := λ i, by {apply hU i.1, exact (hu i.1).1},
 
   have hBB : ∀ i, (BB i : M) ∈ F i,
   { intro i,
