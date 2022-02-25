@@ -542,6 +542,7 @@ begin
   obtain ⟨P,h1,h2,f,h3⟩ :=
     homotopy_category.exists_K_projective_replacement_of_bounded X.val,
   resetI,
+
   exact ⟨⟨P⟩, h1, f, h3⟩,
 end
 
