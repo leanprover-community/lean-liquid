@@ -14,9 +14,10 @@ import for_mathlib.projective_replacement
 open category_theory category_theory.limits category_theory.triangulated
 open homological_complex
 
-namespace homotopy_category
 universes v u
 variables {A : Type u} [category.{v} A] [abelian A]
+
+namespace homotopy_category
 
 local notation `𝒦` := homotopy_category A (complex_shape.up ℤ)
 local notation `HH` := homotopy_category.homology_functor A (complex_shape.up ℤ) 0
@@ -323,11 +324,12 @@ noncomputable theory
 
 lemma exists_K_projective_replacement_of_bounded (X : 𝒦)
   (H : ∃ a, ∀ i, a ≤ i → is_zero (X.as.X i)) :
-  ∃ (P : 𝒦) [is_K_projective P] (f : P ⟶ X), is_quasi_iso f :=
+  ∃ (P : 𝒦) [is_K_projective P] (h : ∃ a, ∀ i, a ≤ i → is_zero (P.as.X i))
+    (f : P ⟶ X), is_quasi_iso f :=
 begin
   obtain ⟨a, H⟩ := H,
   use projective.replacement X.as a H,
-  split,
+  refine ⟨_, _, _⟩,
   { constructor,
     intros Y hY f,
     convert eq_of_homotopy _ _ (projective.null_homotopic_of_projective_to_acyclic f.out a
@@ -335,6 +337,8 @@ begin
       (projective.replacement_is_bounded X.as a H)
       hY.1),
     simp },
+  { use a,
+    apply projective.replacement_is_bounded },
   { use (quotient _ _).map (projective.replacement.hom X.as a H),
     constructor,
     intro i,
@@ -342,15 +346,93 @@ begin
     apply_instance }
 end
 
+end homotopy_category
+
+variable (A)
+
+@[derive category]
+def bounded_homotopy_category :=
+  { X : homotopy_category A (complex_shape.up ℤ) // ∃ a, ∀ i, a ≤ i → is_zero (X.as.X i) }
+
+variable {A}
+
+namespace bounded_homotopy_category
+
+local attribute [instance] has_zero_object.has_zero
+
+instance : has_zero_object (bounded_homotopy_category A) :=
+{ zero := ⟨(0 : homotopy_category _ _), sorry⟩,
+  unique_to := λ X, has_zero_object.unique_to _,
+  unique_from := λ X, has_zero_object.unique_from _ }
+
+instance : has_shift (bounded_homotopy_category A) ℤ :=
+has_shift_mk _ _
+{ F := λ i,
+  { obj := λ X, ⟨X.val⟦(i : ℤ)⟧, sorry⟩,
+    map := λ X Y f, f⟦i⟧',
+    map_id' := λ X, (category_theory.shift_functor _ _).map_id _,
+    map_comp' := λ X Y Z f g, (category_theory.shift_functor _ _).map_comp _ _ },
+  ε :=
+  { hom :=
+    { app := λ X, (homotopy_category.shift_ε _).hom.app X.val,
+      naturality' := sorry }, --
+    inv :=
+    { app := λ X, (homotopy_category.shift_ε _).inv.app X.val,
+      naturality' := sorry },
+    hom_inv_id' := sorry,
+    inv_hom_id' := sorry },
+  μ := λ m n,
+  { hom :=
+    { app := λ X, (homotopy_category.shift_functor_add _ _ _).hom.app X.val,
+      naturality' := sorry },
+    inv :=
+    { app := λ X, (homotopy_category.shift_functor_add _ _ _).inv.app X.val,
+      naturality' := sorry },
+    hom_inv_id' := sorry,
+    inv_hom_id' := sorry },
+  associativity := sorry,
+  left_unitality := sorry,
+  right_unitality := sorry }
+
+instance : preadditive (bounded_homotopy_category A) :=
+{ hom_group := λ A B, show add_comm_group (A.val ⟶ B.val), by apply_instance,
+  add_comp' := λ P Q R f g h, preadditive.add_comp _ _ _ _ _ _,
+  comp_add' := λ P Q R f g h, preadditive.comp_add _ _ _ _ _ _ }
+
+instance shift_functor_additive (i : ℤ) :
+  (category_theory.shift_functor (bounded_homotopy_category A) i).additive := sorry
+
+instance : triangulated.pretriangulated (bounded_homotopy_category A) :=
+{ distinguished_triangles :=
+  { T | triangle.mk (homotopy_category _ _) T.mor₁ T.mor₂ T.mor₃ ∈
+    dist_triang (homotopy_category A (complex_shape.up ℤ)) },
+  isomorphic_distinguished := sorry,
+  contractible_distinguished := sorry,
+  distinguished_cocone_triangle := sorry,
+  rotate_distinguished_triangle := sorry,
+  complete_distinguished_triangle_morphism := sorry }
+
+local notation `𝒦` := bounded_homotopy_category A
+
+variable [enough_projectives A]
+
 -- Main theorem about existence of K-projective replacements.
 -- Perhaps all we need is this for bounded complexes, in which case we should
 -- add an additional typeclass parameter here.
 theorem exists_K_projective_replacement (X : 𝒦) :
-  ∃ (P : 𝒦) [is_K_projective P] (f : P ⟶ X), is_quasi_iso f := sorry
+  ∃ (P : 𝒦) [homotopy_category.is_K_projective P.val] (f : P ⟶ X),
+  homotopy_category.is_quasi_iso f :=
+begin
+  obtain ⟨P,h1,h2,f,h3⟩ :=
+    homotopy_category.exists_K_projective_replacement_of_bounded X.val X.prop,
+  exact ⟨⟨P, h2⟩, h1, f, h3⟩,
+end
+
+open homotopy_category
 
 def replace (X : 𝒦) : 𝒦 := (exists_K_projective_replacement X).some
 
-instance (X : 𝒦) : is_K_projective X.replace :=
+instance (X : 𝒦) : is_K_projective X.replace.val :=
 (exists_K_projective_replacement X).some_spec.some
 
 def π (X : 𝒦) : X.replace ⟶ X :=
@@ -359,25 +441,27 @@ def π (X : 𝒦) : X.replace ⟶ X :=
 instance (X : 𝒦) : is_quasi_iso X.π :=
 (exists_K_projective_replacement X).some_spec.some_spec.some_spec
 
-def lift {P X Y : 𝒦} [is_K_projective P] (f : P ⟶ Y) (g : X ⟶ Y) [is_quasi_iso g] :
+def lift {P X Y : 𝒦} [is_K_projective P.val] (f : P ⟶ Y) (g : X ⟶ Y) [is_quasi_iso g] :
   P ⟶ X :=
-((hom_K_projective_bijective P g).2 f).some
+((hom_K_projective_bijective P.val g).2 f).some
 
 @[simp, reassoc]
-lemma lift_lifts {P X Y : 𝒦} [is_K_projective P] (f : P ⟶ Y) (g : X ⟶ Y) [is_quasi_iso g] :
+lemma lift_lifts {P X Y : 𝒦} [is_K_projective P.val] (f : P ⟶ Y) (g : X ⟶ Y) [is_quasi_iso g] :
   lift f g ≫ g = f :=
-((hom_K_projective_bijective P g).2 f).some_spec
+((hom_K_projective_bijective P.val g).2 f).some_spec
 
-lemma lift_unique {P X Y : 𝒦} [is_K_projective P] (f : P ⟶ Y) (g : X ⟶ Y) [is_quasi_iso g]
+lemma lift_unique {P X Y : 𝒦} [is_K_projective P.val] (f : P ⟶ Y) (g : X ⟶ Y) [is_quasi_iso g]
   (e : P ⟶ X) (h : e ≫ g = f) : e = lift f g :=
 begin
-  apply (hom_K_projective_bijective P g).1,
-  simpa,
+  apply (hom_K_projective_bijective P.val g).1,
+  dsimp,
+  erw lift_lifts,
+  assumption
 end
 
-lemma lift_ext {P X Y : 𝒦} [is_K_projective P] (g : X ⟶ Y) [is_quasi_iso g]
+lemma lift_ext {P X Y : 𝒦} [is_K_projective P.val] (g : X ⟶ Y) [is_quasi_iso g]
   (a b : P ⟶ X) (h : a ≫ g = b ≫ g) : a = b :=
-(hom_K_projective_bijective P g).1 h
+(hom_K_projective_bijective P.val g).1 h
 
 @[simps]
 def Ext0 : 𝒦ᵒᵖ ⥤ 𝒦 ⥤ Ab :=
@@ -411,4 +495,4 @@ def Ext0 : 𝒦ᵒᵖ ⥤ 𝒦 ⥤ Ab :=
 def Ext (i : ℤ) : 𝒦ᵒᵖ ⥤ 𝒦 ⥤ Ab :=
 Ext0 ⋙ (whiskering_left _ _ _).obj (shift_functor _ i)
 
-end homotopy_category
+end bounded_homotopy_category
