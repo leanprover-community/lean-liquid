@@ -101,27 +101,28 @@ by rw [← nnnorm_neg (F - G), neg_sub]
 lemma norm_dist (r : ℝ≥0) (j : ℕ) (x y : r.normed) : ∥x j - y j∥ = dist (x j) (y j) :=
 by simp [has_norm.norm, has_dist.dist]
 
+lemma nnnorm_triangle {r : ℝ≥0} (x y z : r.normed) : ∥x - z∥₊ ≤ ∥x - y∥₊ + ∥y - z∥₊ :=
+begin
+  unfold has_nnnorm.nnnorm,
+  rw [sum_subset (subset_union_left _ _ : _ ⊆ (x - y).support ∪ (y - z).support),
+    sum_subset (subset_union_right _ _ : _ ⊆ (x - y).support ∪ (y - z).support),
+    sum_subset (λ l hl, dists hl : _ ⊆ (_ - y).support ∪ _), ← finset.sum_add],
+  { refine sum_le_sum (λ j hj, _),
+    rw ← add_mul,
+    refine mul_le_mul_of_nonneg_right _ (zero_le _),
+    apply nnreal.coe_le_coe.mp,
+    simpa only [coe_sub, pi.sub_apply, subtype.coe_mk, norm_dist] using dist_triangle _ _ _ },
+  repeat
+  { intros k _ h, convert zero_mul _, simpa only [mem_support_iff, not_not, norm_eq_zero] using h }
+end
+
 /-  This instance, in particular, provides a `pseudo_metric_space` instance to `r.normed`. -/
 instance (r : ℝ≥0) : semi_normed_group r.normed :=
 { norm          := coe ∘ has_nnnorm.nnnorm,
   dist          := λ F G, ∥F - G∥₊,
   dist_self     := λ F, by simp only [sub_self, nnnorm_zero, nonneg.coe_zero],
   dist_comm     := λ F G, by simp only [dist, nnnorm_sub],
-  dist_triangle := λ x y z, begin
-    unfold dist has_nnnorm.nnnorm,
-    norm_cast,
-    rw [sum_subset (subset_union_left _ _ : _ ⊆ (x - y).support ∪ (y - z).support),
-      sum_subset (subset_union_right _ _ : _ ⊆ (x - y).support ∪ (y - z).support),
-      sum_subset (λ l hl, dists hl : _ ⊆ (_ - y).support ∪ _), ← finset.sum_add],
-    { refine sum_le_sum (λ j hj, _),
-      rw ← add_mul,
-      refine mul_le_mul_of_nonneg_right _ (zero_le _),
-      apply nnreal.coe_le_coe.mp,
-      simpa only [coe_sub, pi.sub_apply, subtype.coe_mk, norm_dist] using dist_triangle _ _ _ },
-    repeat { intros k hk hh,
-      convert zero_mul _,
-      simpa only [mem_support_iff, not_not, norm_eq_zero] using hh }
-  end,
+  dist_triangle := λ x y z, nnnorm_triangle _ _ _,
   edist_dist := λ x y, by simp only [subtype.coe_eta, ennreal.of_real_coe_nnreal],
   dist_eq := λ x y, by simp only,
   ..(infer_instance : add_comm_group _) }
