@@ -636,7 +636,7 @@ lemma cod_restrict_mem {α : Type*} {β : Type*} {f : α → β} {s : set β} {h
 
 
 /-- A submodule of a free module over a principal ideal domain is free. -/
-theorem submodule.nonempty_basis_of_pid {ι : Type u}
+theorem submodule.nonempty_basis_of_pid' {ι : Type u}
   (b : basis ι R M) (N : submodule R M) :
   ∃ (B : Type (u+1)), nonempty (basis B R N) :=
 begin
