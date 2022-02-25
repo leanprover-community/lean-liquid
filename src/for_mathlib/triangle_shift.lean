@@ -89,7 +89,9 @@ nat_iso.of_components (λ T,
     (shift_zero _ _).symm
     (shift_zero _ _).symm
     (shift_zero _ _).symm
-    sorry sorry sorry)
+    ((shift_functor_zero _ _).inv.naturality _ )
+    ((shift_functor_zero _ _).inv.naturality _ )
+    sorry)
   sorry
 
 @[simps]
@@ -100,8 +102,10 @@ nat_iso.of_components (λ T,
     (shift_add _ _ _).symm
     (shift_add _ _ _).symm
     (shift_add _ _ _).symm
-    sorry sorry sorry)
-sorry
+    ((shift_functor_add _ _ _).inv.naturality _ )
+    ((shift_functor_add _ _ _).inv.naturality _ )
+    sorry)
+  sorry
 
 def triangle_shift_core : shift_mk_core (triangle C) ℤ :=
 { F := triangle_shift_functor _,
