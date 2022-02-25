@@ -145,11 +145,8 @@ instance {r : ℝ≥0} {S : Fintype} : semi_normed_group (some_nice_name r S) :=
       convert zero_mul _,
       simpa only [nnnorm_eq_zero, mem_support_iff, not_not] using hh }
   end,
---  edist := _,
-  edist_dist := _,
---  to_uniform_space := _,
-  uniformity_dist := _,
-  dist_eq := _,
+  edist_dist := λ x y, by simp only [subtype.coe_eta, ennreal.of_real_coe_nnreal],
+  dist_eq := λ x y, by simp only,
   ..(infer_instance : add_comm_group _) }
 
 instance mymy (S : Fintype) (r : ℝ≥0) : pseudo_normed_group (some_nice_name r S) :=
