@@ -39,12 +39,12 @@ begin
   abel,
 end
 
-instance sum_nnnorm (S : Fintype) (α : Type*) [has_zero α] [has_nnnorm α] :
+instance sum_nnnorm (S : Fintype) (α : Type*) [has_nnnorm α] :
   has_nnnorm (S → α) :=
 { nnnorm := λ F, ∑ b, ∥F b∥₊ }
 
 @[simp]
-lemma sum_nnnorm_def {S : Fintype} {α : Type*} [has_zero α] [has_nnnorm α] (F : S → α) :
+lemma sum_nnnorm_def {S : Fintype} {α : Type*} [has_nnnorm α] (F : S → α) :
   ∥F∥₊ = ∑ b, ∥F b∥₊ := rfl
 
 lemma sum_nnnorm_add_le {S : Fintype} {β : Type*} [semi_normed_group β]
@@ -69,7 +69,7 @@ namespace some_nice_name
 --@sum_nnnorm S (ℤ →₀ ℝ) _ (⟨λ F, ∑' x, ∥F x∥₊ * r ^ x⟩)
 
 instance (r : ℝ≥0) (S : Fintype) : has_nnnorm (some_nice_name r S) :=
-@sum_nnnorm S (ℤ →₀ ℝ) _ (⟨λ F, ∑ x in F.support, ∥F x∥₊ * r ^ x⟩)
+@sum_nnnorm S (ℤ →₀ ℝ) (⟨λ F, ∑ x in F.support, ∥F x∥₊ * r ^ x⟩)
 
 @[simp]
 lemma nnnorm_zero {r : ℝ≥0} {S : Fintype} : ∥(0 : some_nice_name r S)∥₊ = 0 :=
@@ -103,14 +103,12 @@ by simpa only [some_nice_name] using preorder.topology (↥S → ℤ →₀ ℝ)
 --  sorry
 --} }
 
-lemma qui {l : ℤ →₀ ℝ} {s : finset ℤ} (ls : l.support ⊆ s) :
-  ∑ a in l.support, l a = ∑ a in s, l a :=
-sum_subset ls (by simp only [mem_support_iff, not_not, imp_self, implies_true_iff])
+--lemma qui {l : ℤ →₀ ℝ} {s : finset ℤ} (ls : l.support ⊆ s) :
+--  ∑ a in l.support, l a = ∑ a in s, l a :=
+--sum_subset ls (by simp only [mem_support_iff, not_not, imp_self, implies_true_iff])
 
-open_locale classical
-lemma add_zero_dists {α β : Type*} [add_group β]
-  (x y z : α →₀ β) (l : α) (h : x l + y l + z l = 0)
-  (hl : l ∈ x.support) :
+lemma add_zero_dists {α β : Type*} [decidable_eq α] [add_zero_class β] {l : α} {x y z : α →₀ β}
+  (h : x l + y l + z l = 0) (hl : l ∈ x.support) :
   l ∈ y.support ∪ z.support :=
 begin
   contrapose hl,
@@ -120,49 +118,33 @@ begin
   rwa [h1, h2, add_zero, add_zero] at h,
 end
 
-lemma dists {α β : Type*} [add_group β]
-  (x y z : α →₀ β) (l : α)
+lemma dists {α β : Type*} [decidable_eq α] [add_group β] {l : α} {x y z : α →₀ β}
   (hl : l ∈ (x - z).support) :
   l ∈ (x - y).support ∪ (y - z).support :=
-begin
-  have : l ∈ (- (x - z)).support,rwa support_neg,
-  refine add_zero_dists _ _ _ _ _ this,
-  simp only [neg_sub, coe_sub, pi.sub_apply, sub_add_sub_cancel, sub_self]
-end
+have xz : l ∈ (- (x - z)).support, by rwa support_neg,
+add_zero_dists (by simp only [neg_sub, coe_sub, pi.sub_apply, sub_add_sub_cancel, sub_self]) xz
 
 instance {r : ℝ≥0} {S : Fintype} : semi_normed_group (some_nice_name r S) :=
 { norm := λ F, ∥F∥₊,
   dist := λ F G, ∥F - G∥₊,
   dist_self := λ F, by simp only [sub_self, nnnorm_zero, nonneg.coe_zero],
   dist_comm := λ F G, by simp only [dist, nnnorm_sub],
-  dist_triangle := λ x y z, by {simp only [sum_nnnorm_def, pi.sub_apply, coe_sub],
-  norm_cast,
-  rw ← finset.sum_add,
-  apply sum_le_sum,
-  intros i hi,
---  have xy : (x i - y i).support ⊆ (x i - y i).support ∪ (y i - z i).support :=
---    subset_union_left _ _,
---  have yz : (y i - z i).support ⊆ (x i - y i).support ∪ (y i - z i).support :=
---    subset_union_right _ _,
-
-  rw sum_subset (subset_union_left _ _ : _ ⊆ (x i - y i).support ∪ (y i - z i).support),
-  rw sum_subset (subset_union_right _ _ : _ ⊆ (x i - y i).support ∪ (y i - z i).support),
-  rw sum_subset (_ : _ ⊆ (x i - y i).support ∪ (y i - z i).support),
-  rw ← finset.sum_add,
-  apply sum_le_sum,
-  intros j hj,
-  rw ← add_mul,
-  refine mul_le_mul_of_nonneg_right _ (zero_le _),
-  apply nnreal.coe_le_coe.mp,
-  exact dist_triangle ((x i) j) _ _,
-  intros k hk hh,
-  simp only [mem_support_iff, coe_sub, pi.sub_apply, not_not] at hh,
-  convert zero_mul _,
-  simp only [hh, nnnorm_eq_zero],
-  intros l hl,
-  extract_goal,
---  simp [hh],
-   },
+  dist_triangle := λ x y z, begin
+    simp only [sum_nnnorm_def, pi.sub_apply, coe_sub],
+    norm_cast,
+    rw ← finset.sum_add,
+    refine sum_le_sum (λ i hi, _),
+    rw [sum_subset (subset_union_left _ _ : _ ⊆ (x i - y i).support ∪ (y i - z i).support),
+      sum_subset (subset_union_right _ _ : _ ⊆ (x i - y i).support ∪ (y i - z i).support),
+      sum_subset (λ l hl, dists hl : _ ⊆ (_ - y i).support ∪ _), ← finset.sum_add],
+    { refine sum_le_sum (λ j hj, _),
+      rw ← add_mul,
+      refine mul_le_mul_of_nonneg_right _ (zero_le _),
+      exact nnreal.coe_le_coe.mp (dist_triangle ((x i) j) _ _) },
+    repeat { intros k hk hh,
+      convert zero_mul _,
+      simpa only [nnnorm_eq_zero, mem_support_iff, not_not] using hh }
+  end,
 --  edist := _,
   edist_dist := _,
 --  to_uniform_space := _,
