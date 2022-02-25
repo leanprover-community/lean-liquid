@@ -113,6 +113,7 @@ begin
   simp,
 end
 
+/-- The functor `Y ↦ Hom(X,Y)` is homological. -/
 instance preadditive_yoneda_flip_homological (X : C) :
   homological_functor (preadditive_yoneda.flip.obj (opposite.op X)) :=
 begin
@@ -133,6 +134,42 @@ begin
     simp [← h1] },
   { rintros (f : X ⟶ _) (hf : f ≫ _ = 0),
     apply dist_triang_to_exact_complex _ hT _ _ hf }
+end
+
+/-- The functor `Y ↦ Hom(Y,X)` is homological. -/
+instance preadditive_yoneda_op_homological (X : C) :
+  homological_functor (preadditive_yoneda.obj X).right_op :=
+begin
+  constructor,
+  intros T hT,
+  dsimp,
+  let f := _, let g := _, show exact f g,
+  suffices : exact g.unop f.unop,
+  { resetI, rw ← f.op_unop, rw ← g.op_unop, apply_instance },
+  rw AddCommGroup.exact_iff,
+  apply le_antisymm,
+  { rintros _ ⟨q : _ ⟶ X, rfl⟩,
+    change _ ≫ _ = 0,
+    dsimp,
+    have := complete_distinguished_triangle_morphism
+      T.rotate (contractible_triangle _ X) _
+      (contractible_distinguished _) (T.mor₂ ≫ q) q (by { dsimp, simp }),
+    swap, rwa ← rotate_distinguished_triangle,
+    obtain ⟨c,h1,h2⟩ := this,
+    dsimp at h2,
+    simp at h2,
+    simp only [← functor.map_comp] at h2,
+    rw ← (shift_functor C (1 : ℤ)).map_zero at h2,
+    exact (shift_functor C (1 : ℤ)).map_injective h2 },
+  { rintros (q : _ ⟶ X) (hq : _ ≫ _ = 0),
+    change ∃ p, _,
+    dsimp at hq ⊢,
+    obtain ⟨c,h1,h2⟩ := complete_distinguished_triangle_morphism
+      T (contractible_triangle _ X).inv_rotate hT _ 0 q (by simp [hq]),
+    { use c,
+      simp only [h1, triangle.inv_rotate_mor₂, contractible_triangle_mor₁],
+      erw category.comp_id },
+    { apply inv_rot_of_dist_triangle, apply contractible_distinguished } },
 end
 
 -- Prove this using the above theorem.
