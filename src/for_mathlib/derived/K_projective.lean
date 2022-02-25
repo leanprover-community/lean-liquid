@@ -37,10 +37,13 @@ begin
 end
 
 class is_K_projective (X : 𝒦) : Prop :=
-(cond : ∀ (Y : 𝒦) [is_acyclic Y] (f : X ⟶ Y), f = 0)
+(cond [] : ∀ (Y : 𝒦) [is_acyclic Y] (f : X ⟶ Y), f = 0)
 
 class is_quasi_iso {X Y : 𝒦} (f : X ⟶ Y) : Prop :=
-(cond : ∀ i, is_iso ((homotopy_category.homology_functor _ _ i).map f))
+(cond [] : ∀ i, is_iso ((homotopy_category.homology_functor _ _ i).map f))
+
+class is_bounded_above (X : 𝒦) : Prop  :=
+(cond [] : ∃ a : ℤ, ∀ i, a ≤ i → is_zero (X.as.X i))
 
 -- Move this
 instance homology_functor_additive : functor.additive HH := functor.additive.mk $
@@ -319,15 +322,19 @@ begin
     rwa ← ee at this }
 end
 
+instance (X : 𝒦) [is_bounded_above X] (i : ℤ) : is_bounded_above (X⟦i⟧) := sorry
+
+instance (P : 𝒦) [is_K_projective P] (i : ℤ) : is_K_projective (P⟦i⟧) := sorry
+
 variable [enough_projectives A]
 noncomputable theory
 
 lemma exists_K_projective_replacement_of_bounded (X : 𝒦)
-  (H : ∃ a, ∀ i, a ≤ i → is_zero (X.as.X i)) :
-  ∃ (P : 𝒦) [is_K_projective P] (h : ∃ a, ∀ i, a ≤ i → is_zero (P.as.X i))
+  [is_bounded_above X] :
+  ∃ (P : 𝒦) [is_K_projective P] [is_bounded_above P]
     (f : P ⟶ X), is_quasi_iso f :=
 begin
-  obtain ⟨a, H⟩ := H,
+  obtain ⟨a, H⟩ := is_bounded_above.cond X,
   use projective.replacement X.as a H,
   refine ⟨_, _, _⟩,
   { constructor,
@@ -350,22 +357,37 @@ end homotopy_category
 
 variable (A)
 
-@[derive category]
-def bounded_homotopy_category :=
-  { X : homotopy_category A (complex_shape.up ℤ) // ∃ a, ∀ i, a ≤ i → is_zero (X.as.X i) }
+structure bounded_homotopy_category :=
+(val : homotopy_category A (complex_shape.up ℤ))
+[bdd : homotopy_category.is_bounded_above val]
 
 variable {A}
 
 namespace bounded_homotopy_category
 
+instance : category (bounded_homotopy_category A) :=
+{ hom := λ X Y, X.val ⟶ Y.val,
+  id := λ X, 𝟙 X.val,
+  comp := λ X Y Z f g, f ≫ g,
+  id_comp' := λ _ _ _, category.id_comp _,
+  comp_id' := λ _ _ _, category.comp_id _,
+  assoc' := λ _ _ _ _ _ _ _, category.assoc _ _ _ }
+
 local attribute [instance] has_zero_object.has_zero
 
+instance (X : bounded_homotopy_category A) : homotopy_category.is_bounded_above X.val := X.bdd
+
+def of (X : homotopy_category A (complex_shape.up ℤ)) [homotopy_category.is_bounded_above X] :
+  bounded_homotopy_category A := ⟨X⟩
+
 instance : has_zero_object (bounded_homotopy_category A) :=
-{ zero := ⟨(0 : homotopy_category _ _),
-    ⟨0, λ i _, by apply is_zero_zero⟩⟩,
+{ zero :=
+  { val := 0,
+    bdd := ⟨⟨0, λ i _, by apply is_zero_zero ⟩⟩ },
   unique_to := λ X, has_zero_object.unique_to _,
   unique_from := λ X, has_zero_object.unique_from _ }
 
+/-
 lemma is_bounded_shift (X : bounded_homotopy_category A) (i : ℤ) :
   ∃ (a : ℤ), ∀ j, a ≤ j → is_zero (X.val⟦i⟧.as.X j) :=
 begin
@@ -375,6 +397,7 @@ begin
   apply ha,
   linarith
 end
+-/
 
 local attribute [instance] endofunctor_monoidal_category
 local attribute [reducible] endofunctor_monoidal_category discrete.add_monoidal
@@ -382,7 +405,7 @@ local attribute [reducible] endofunctor_monoidal_category discrete.add_monoidal
 instance : has_shift (bounded_homotopy_category A) ℤ :=
 has_shift_mk _ _
 { F := λ i,
-  { obj := λ X, ⟨X.val⟦(i : ℤ)⟧, is_bounded_shift _ _⟩,
+  { obj := λ X, ⟨X.val⟦(i : ℤ)⟧⟩,
     map := λ X Y f, f⟦i⟧',
     map_id' := λ X, (category_theory.shift_functor _ _).map_id _,
     map_comp' := λ X Y Z f g, (category_theory.shift_functor _ _).map_comp _ _ },
@@ -472,7 +495,7 @@ instance : triangulated.pretriangulated (bounded_homotopy_category A) :=
     intros X Y f,
     let T := (neg₃_functor (homotopy_category A (complex_shape.up ℤ))).obj (cone.triangleₕ f.out),
     let E := T.obj₃,
-    refine ⟨⟨E, _⟩, T.mor₂, T.mor₃, _⟩,
+    haveI : homotopy_category.is_bounded_above E,
     { obtain ⟨a,ha⟩ := X.2,
       obtain ⟨b,hb⟩ := Y.2,
       use max (a - 1) b,
@@ -480,14 +503,16 @@ instance : triangulated.pretriangulated (bounded_homotopy_category A) :=
       apply is_zero_biprod,
       { apply ha, suffices : a - 1 ≤ i, by linarith, apply le_trans _ hi, apply le_max_left },
       { apply hb, apply le_trans _ hi, apply le_max_right } },
+    refine ⟨⟨E⟩, T.mor₂, T.mor₃, _⟩,
     { erw homotopy_category.mem_distinguished_iff_exists_iso_cone,
       use [X.val.as, Y.val.as, f.out],
+      unfreezingI {
       rcases X with ⟨⟨X⟩,hX⟩,
       rcases Y with ⟨⟨Y⟩,hY⟩,
       constructor,
       refine triangle.iso.of_components
         (iso.refl _) (iso.refl _) (iso.refl _) _ _ _,
-      all_goals { dsimp [T], simp } }
+      all_goals { dsimp [T], simp } } }
   end,
   rotate_distinguished_triangle := begin
     intros T,
@@ -515,8 +540,9 @@ theorem exists_K_projective_replacement (X : 𝒦) :
   homotopy_category.is_quasi_iso f :=
 begin
   obtain ⟨P,h1,h2,f,h3⟩ :=
-    homotopy_category.exists_K_projective_replacement_of_bounded X.val X.prop,
-  exact ⟨⟨P, h2⟩, h1, f, h3⟩,
+    homotopy_category.exists_K_projective_replacement_of_bounded X.val,
+  resetI,
+  exact ⟨⟨P⟩, h1, f, h3⟩,
 end
 
 open homotopy_category
