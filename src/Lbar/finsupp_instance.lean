@@ -73,9 +73,10 @@ have xz : l ∈ (- (x - z)).support, by rwa support_neg,
 add_zero_dists (by simp only [neg_sub, coe_sub, pi.sub_apply, sub_add_sub_cancel, sub_self]) xz
 
 @[nolint unused_arguments, reducible, derive add_comm_group]
-def prenice (r : ℝ≥0) := ℤ →₀ ℝ
+def prenice (r : ℝ≥0) := ℕ →₀ ℝ
 
 namespace prenice
+--variable {α : Type*} ()
 
 instance (r : ℝ≥0) : has_nnnorm (prenice r) :=
 ⟨λ F, ∑ x in F.support, ∥F x∥₊ * r ^ x⟩
@@ -94,9 +95,9 @@ lemma nnnorm_sub {r : ℝ≥0} (F G : prenice r) :
 by rw [← nnnorm_neg (F - G), neg_sub]
 
 instance {r : ℝ≥0} : topological_space (prenice r) :=
-by simpa only [prenice] using preorder.topology (ℤ →₀ ℝ)
+by simpa only [prenice] using preorder.topology _
 
-instance sng {r : ℝ≥0} {S : Fintype} : semi_normed_group (prenice r) :=
+instance sng (r : ℝ≥0) : semi_normed_group (prenice r) :=
 { norm := coe ∘ has_nnnorm.nnnorm,
   dist := λ F G, ∥F - G∥₊,
   dist_self := λ F, by simp only [sub_self, nnnorm_zero, nonneg.coe_zero],
@@ -119,7 +120,7 @@ instance sng {r : ℝ≥0} {S : Fintype} : semi_normed_group (prenice r) :=
   dist_eq := λ x y, by simp only,
   ..(infer_instance : add_comm_group _) }
 
-instance mymy (r : ℝ≥0) : pseudo_normed_group (prenice r) :=
+instance png (r : ℝ≥0) : pseudo_normed_group (prenice r) :=
 { to_add_comm_group := finsupp.add_comm_group,
   filtration := λ c, {F : prenice r | ∥F∥₊ ≤ c},
   filtration_mono := λ c d cd x hx, by { rw set.mem_set_of_eq at hx ⊢, exact hx.trans cd },
@@ -130,18 +131,11 @@ instance mymy (r : ℝ≥0) : pseudo_normed_group (prenice r) :=
     by {
       simp only [sum_nnnorm_def, set.mem_set_of_eq, pi.add_apply, finsupp.coe_add],
       refine le_trans _ (add_le_add hF hG),
-      apply _root_.nnnorm_add,
-      convert @sum_nnnorm_add_le S (ℤ →₀ ℝ) some_nice_name.sng F G,
-      work_on_goal 3 { exact r },
-      work_on_goal 3 { exact S },
-      ext,
-      sorry;simp,
-      simp [some_nice_name.has_nnnorm], triv,
-
-
-      --exact (sum_nnnorm_add_le F G).trans (add_le_add hF hG),
-      --simpa using (sum_nnnorm_add_le F G).trans (add_le_add hF hG)},
-     } }
+      convert @nnnorm_add_le _ (prenice.sng r) F G;
+      repeat { simp only [prenice.has_nnnorm],
+        congr,
+        ext,
+        refl } } }
 
 end prenice
 
@@ -151,15 +145,15 @@ def some_nice_name (r : ℝ≥0) (S : Fintype) := S → polynomial ℤ
 -/
 
 @[nolint unused_arguments, derive add_comm_group]
-def some_nice_name (r : ℝ≥0) (S : Fintype) := S → (ℤ →₀ ℝ)
+def some_nice_name (r : ℝ≥0) (S : Fintype) := S → (ℕ →₀ ℝ)
 
 namespace some_nice_name
 
 --instance (r : ℝ≥0) (S : Fintype) : has_nnnorm (some_nice_name r S) :=
---@sum_nnnorm S (ℤ →₀ ℝ) _ (⟨λ F, ∑' x, ∥F x∥₊ * r ^ x⟩)
+--@sum_nnnorm S (ℕ →₀ ℝ) _ (⟨λ F, ∑' x, ∥F x∥₊ * r ^ x⟩)
 
 instance (r : ℝ≥0) (S : Fintype) : has_nnnorm (some_nice_name r S) :=
-@sum_nnnorm S (ℤ →₀ ℝ) (⟨λ F, ∑ x in F.support, ∥F x∥₊ * r ^ x⟩)
+@sum_nnnorm S (ℕ →₀ ℝ) (⟨λ F, ∑ x in F.support, ∥F x∥₊ * r ^ x⟩)
 
 @[simp]
 lemma nnnorm_zero {r : ℝ≥0} {S : Fintype} : ∥(0 : some_nice_name r S)∥₊ = 0 :=
@@ -176,12 +170,12 @@ lemma nnnorm_sub {r : ℝ≥0} {S : Fintype} (F G : some_nice_name r S) :
 by rw [← nnnorm_neg (F - G), neg_sub]
 
 instance {r : ℝ≥0} {S : Fintype} : topological_space (some_nice_name r S) :=
-by simpa only [some_nice_name] using preorder.topology (↥S → ℤ →₀ ℝ)
+by simpa only [some_nice_name] using preorder.topology _
 
---instance : topological_space (ℤ →₀ ℝ) :=
---preorder.topology (ℤ →₀ ℝ)
+--instance : topological_space (ℕ →₀ ℝ) :=
+--preorder.topology (ℕ →₀ ℝ)
 
---instance {r : ℝ≥0} {S : Fintype} : has_continuous_add (ℤ →₀ ℝ) :=
+--instance {r : ℝ≥0} {S : Fintype} : has_continuous_add (ℕ →₀ ℝ) :=
 --{ continuous_add := by {
 --sorry;  dunfold some_nice_name;
 --  sorry
@@ -193,7 +187,7 @@ by simpa only [some_nice_name] using preorder.topology (↥S → ℤ →₀ ℝ)
 --  sorry
 --} }
 
---lemma qui {l : ℤ →₀ ℝ} {s : finset ℤ} (ls : l.support ⊆ s) :
+--lemma qui {l : ℕ →₀ ℝ} {s : finset ℤ} (ls : l.support ⊆ s) :
 --  ∑ a in l.support, l a = ∑ a in s, l a :=
 --sum_subset ls (by simp only [mem_support_iff, not_not, imp_self, implies_true_iff])
 
@@ -222,28 +216,31 @@ instance {r : ℝ≥0} {S : Fintype} : semi_normed_group (some_nice_name r S) :=
   dist_eq := λ x y, by simp only,
   ..(infer_instance : add_comm_group _) }
 
+--instance prnnn (r : ℝ≥0) : has_nnnorm (prenice r) := prenice.has_nnnorm r
+
+@[simp]
+lemma compat (S : Fintype) (r : ℝ≥0) :
+  some_nice_name.has_nnnorm r S = @sum_nnnorm S (prenice r) (prenice.has_nnnorm r) := rfl
+
 instance mymy (S : Fintype) (r : ℝ≥0) : pseudo_normed_group (some_nice_name r S) :=
-{ to_add_comm_group := finsupp_add_group S,
+{ to_add_comm_group := by refine some_nice_name.add_comm_group r S,
   filtration := λ c, {F : some_nice_name r S | ∥F∥₊ ≤ c},
   filtration_mono := λ c d cd x hx, by { rw set.mem_set_of_eq at hx ⊢, exact hx.trans cd },
   zero_mem_filtration := λ c,
     by { simp only [set.mem_set_of_eq, nnnorm_zero, zero_le'] },
   neg_mem_filtration := λ c F hF, by simpa only [set.mem_set_of_eq, nnnorm_neg],
-  add_mem_filtration := λ c d F G hF hG,
-    by {
+  add_mem_filtration := λ c d F G hF hG, begin
       simp only [sum_nnnorm_def, set.mem_set_of_eq, pi.add_apply, finsupp.coe_add],
       refine le_trans _ (add_le_add hF hG),
-      convert @sum_nnnorm_add_le S (ℤ →₀ ℝ) some_nice_name.sng F G,
-      work_on_goal 3 { exact r },
-      work_on_goal 3 { exact S },
-      ext,
-      sorry;simp,
-      simp [some_nice_name.has_nnnorm], triv,
-
-
-      --exact (sum_nnnorm_add_le F G).trans (add_le_add hF hG),
-      --simpa using (sum_nnnorm_add_le F G).trans (add_le_add hF hG)},
-     } }
+      letI := prenice.sng r,
+      convert sum_nnnorm_add_le F G,
+      { ext s,
+        simp only [pi.add_apply, _root_.coe_nnnorm],congr },
+      repeat { unfold some_nice_name.has_nnnorm,
+        congr,
+        ext,
+        refl },
+    end }
 
 end some_nice_name
 
