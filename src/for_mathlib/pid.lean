@@ -13,12 +13,13 @@ universes u v w
 variables {β : Type u} {α : Type v} {α' : Type w}  [comm_monoid β]
 
 @[simp, to_additive]
-lemma finset.prod_comap [decidable_eq α'] (s : finset α') (e : α → α') (f : α' → β)
+lemma finset.prod_comap (s : finset α') (e : α → α') (f : α' → β)
   (he : set.inj_on e (e ⁻¹' ↑s))
   (hs : (s : set α') ⊆ set.range e):
   (∏ x in (s.preimage e he), f (e x)) = ∏ x in s, f x :=
 begin
   haveI : Π (x : α'), decidable (x ∈ set.range e) := λ x, classical.prop_decidable _,
+  haveI := classical.type_decidable_eq α',
   have hs : s = finset.image e (s.preimage e he),
   { rw finset.image_preimage,
     ext,
@@ -52,11 +53,12 @@ variables [semiring R] [add_comm_monoid M] [module R M]
 
 variables {α' : Type*}
 
-lemma finsupp.total_comap_domain' [decidable_eq α']
+lemma finsupp.total_comap_domain'
   (v : α' → M) (f : α → α') (l : α' →₀ R) (hf : set.inj_on f (f ⁻¹' ↑l.support))
   (hsupp : (l.support : set α') ⊆ set.range f) :
 (finsupp.total α M R (v ∘ f)) (finsupp.comap_domain f l hf) = ∑ (i : α') in l.support, l i • v i :=
 begin
+  haveI := classical.type_decidable_eq α',
   rw finsupp.total_apply,
   simp [finsupp.sum, finsupp.comap_domain],
   exact finset.sum_comap l.support f (λ x, l x • v x) hf hsupp
@@ -589,7 +591,7 @@ begin
 end
 
 -- Lemma on supports of finsupps, useful for finsupp.induction.
-lemma finsupp.support_single_add {α : Type*} [decidable_eq α]
+lemma finsupp.support_single_add {α : Type*}
   {l : α →₀ M}
   {b : M} (hb : b ≠ 0)
   {i : α} (hi : i ∉ l.support)
@@ -597,6 +599,7 @@ lemma finsupp.support_single_add {α : Type*} [decidable_eq α]
   (h : (finsupp.support (finsupp.single i b + l) : set α) ⊆ s) :
 (finsupp.support l : set α) ⊆ s :=
 begin
+  haveI := classical.type_decidable_eq α,
   intros x hx,
   by_cases hx' : x = i,
   { have H : (finsupp.single i b + l) i ≠ 0 :=
@@ -613,7 +616,7 @@ begin
 end
 
 -- Lemma on supports of finsupps, useful for finsupp.induction.
-lemma finsupp.mem_support_of_support_single_add {α : Type*} [decidable_eq α]
+lemma finsupp.mem_support_of_support_single_add {α : Type*}
   {l : α →₀ M}
   {b : M} (hb : b ≠ 0)
   {i : α} (hi : i ∉ l.support)
@@ -621,6 +624,7 @@ lemma finsupp.mem_support_of_support_single_add {α : Type*} [decidable_eq α]
   (h : (finsupp.support (finsupp.single i b + l) : set α) ⊆ s) :
 i ∈ s :=
 begin
+  haveI := classical.type_decidable_eq α,
   have H : (finsupp.single i b + l) i ≠ 0 := by simpa only [finsupp.not_mem_support_iff.1 hi, finsupp.coe_add, pi.add_apply, finsupp.single_eq_same, add_zero,
   ne.def],
   exact mem_of_subset_of_mem h (finsupp.mem_support_iff.2 H)
