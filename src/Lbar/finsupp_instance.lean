@@ -153,8 +153,6 @@ instance (S : Fintype) (r : ℝ≥0) : pseudo_normed_group (invpoly r S) :=
   filtration_mono     := λ c d cd x (hx : ∥x∥₊ ≤ c), hx.trans cd,
   zero_mem_filtration := λ c, by simp only [set.mem_set_of_eq, nnnorm_zero, zero_le'],
   neg_mem_filtration  := λ c F hF, by simpa only [set.mem_set_of_eq, nnnorm_neg],
-  add_mem_filtration  := λ c d F G hF hG, show ∑ s, ∥F s + G s∥₊ ≤ c + d, by
-  { refine le_trans _ (add_le_add hF hG),
-    exact nnnorm_add_le F G } }
+  add_mem_filtration  := λ c d F G hF hG, (nnnorm_add_le F G).trans (add_le_add hF hG) }
 
 end invpoly
