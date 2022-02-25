@@ -20,7 +20,7 @@ begin
   abel,
 end
 
-variables {S : Fintype} {α : Type*}
+variables {S : Fintype} {α β : Type*}
 
 instance sum_nnnorm [has_nnnorm α] : has_nnnorm (S → α) :=
 { nnnorm := λ F, ∑ b, ∥F b∥₊ }
@@ -28,27 +28,7 @@ instance sum_nnnorm [has_nnnorm α] : has_nnnorm (S → α) :=
 @[simp]
 lemma sum_nnnorm_def [has_nnnorm α] (F : S → α) : ∥F∥₊ = ∑ b, ∥F b∥₊ := rfl
 
-lemma sum_nnnorm_add_le [semi_normed_group α] (F G : S → α) :
-  ∥F + G∥₊ ≤ ∥F∥₊ + ∥G∥₊ :=
-show ∑ s, ∥F s + G s∥₊ ≤ ∑ s, ∥F s∥₊ + ∑ s, ∥G s∥₊, from
-le_trans (sum_le_sum (λ i hi, nnnorm_add_le _ _)) univ.sum_add.le
-
 end families_of_add_comm_groups
-
-lemma add_zero_dists {α β : Type*} [decidable_eq α] [add_zero_class β] {l : α} {x y z : α →₀ β}
-  (h : x l + y l + z l = 0) (hl : l ∈ x.support) :
-  l ∈ y.support ∪ z.support :=
-begin
-  simp only [mem_support_iff, ne.def, mem_union] at hl ⊢,
-  contrapose! hl,
-  simpa only [hl, add_zero] using h,
-end
-
-lemma dists {α β : Type*} [decidable_eq α] [add_group β] {l : α} {x y z : α →₀ β}
-  (hl : l ∈ (x - z).support) :
-  l ∈ (x - y).support ∪ (y - z).support :=
-have xz : l ∈ (- (x - z)).support, by rwa support_neg,
-add_zero_dists (by simp only [neg_sub, coe_sub, pi.sub_apply, sub_add_sub_cancel, sub_self]) xz
 
 /--  Let `r : ℝ≥0` be a non-negative real number.  `nnreal.normed r` or `r.normed` is the type of
 finsupps `ℕ →₀ ℤ` with an extra parameter `r`.
