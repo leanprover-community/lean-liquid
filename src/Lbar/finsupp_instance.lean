@@ -78,7 +78,7 @@ begin
     simp only [hk, add_zero] }
 end
 
-lemma nnnorm_triangle {r : ℝ≥0} (x y z : r.normed) : ∥x - z∥₊ ≤ ∥x - y∥₊ + ∥y - z∥₊ :=
+lemma nnnorm_triangle (x y z : r.normed) : ∥x - z∥₊ ≤ ∥x - y∥₊ + ∥y - z∥₊ :=
 by { convert nnnorm_add_le _ _, simp only [sub_add_sub_cancel] }
 
 end nnreal.normed
@@ -90,7 +90,7 @@ end nnreal.normed
 def invpoly (r : ℝ≥0) (S : Fintype) := S → r.normed
 
 namespace invpoly
-variables {r : ℝ≥0} {S : Fintype}
+variables {r : ℝ≥0} {S : Fintype} (F G : invpoly r S)
 
 instance : inhabited (invpoly r S) := ⟨0⟩
 
@@ -102,22 +102,19 @@ lemma nnnorm_zero : ∥(0 : invpoly r S)∥₊ = 0 :=
 by simp only [sum_nnnorm_def, pi.zero_apply, sum_const_zero, nnreal.normed.nnnorm_zero]
 
 @[simp]
-lemma nnnorm_neg (F : invpoly r S) :
-  ∥-F∥₊ = ∥F∥₊ :=
+lemma nnnorm_neg : ∥-F∥₊ = ∥F∥₊ :=
 by simp only [sum_nnnorm_def, pi.neg_apply, nnreal.normed.nnnorm_neg]
 
-lemma nnnorm_sub (F G : invpoly r S) :
-  ∥F - G∥₊ = ∥G - F∥₊ :=
+lemma nnnorm_sub : ∥F - G∥₊ = ∥G - F∥₊ :=
 by rw [← nnnorm_neg (F - G), neg_sub]
 
-lemma nnnorm_add_le (F G : invpoly r S) :
-  ∥F + G∥₊ ≤ ∥F∥₊ + ∥G∥₊ :=
+lemma nnnorm_add_le : ∥F + G∥₊ ≤ ∥F∥₊ + ∥G∥₊ :=
 begin
   rw [sum_nnnorm_def, sum_nnnorm_def, sum_nnnorm_def, ← finset.sum_add],
   exact sum_le_sum (λ s hs, nnreal.normed.nnnorm_add_le _ _),
 end
 
-instance (S : Fintype) (r : ℝ≥0) : pseudo_normed_group (invpoly r S) :=
+instance : pseudo_normed_group (invpoly r S) :=
 { to_add_comm_group   := invpoly.add_comm_group r S,
   filtration          := λ c, {F : invpoly r S | ∥F∥₊ ≤ c},
   filtration_mono     := λ c d cd x (hx : ∥x∥₊ ≤ c), hx.trans cd,
