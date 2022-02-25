@@ -8,6 +8,7 @@ import for_mathlib.les_homology
 import for_mathlib.exact_seq3
 import for_mathlib.triangle_shift
 import for_mathlib.homology_iso
+import for_mathlib.projective_replacement
 -- import for_mathlib.arrow_preadditive
 
 open category_theory category_theory.limits category_theory.triangulated
@@ -319,6 +320,27 @@ end
 
 variable [enough_projectives A]
 noncomputable theory
+
+lemma exists_K_projective_replacement_of_bounded (X : 𝒦)
+  (H : ∃ a, ∀ i, a ≤ i → is_zero (X.as.X i)) :
+  ∃ (P : 𝒦) [is_K_projective P] (f : P ⟶ X), is_quasi_iso f :=
+begin
+  obtain ⟨a, H⟩ := H,
+  use projective.replacement X.as a H,
+  split,
+  { constructor,
+    intros Y hY f,
+    convert eq_of_homotopy _ _ (projective.null_homotopic_of_projective_to_acyclic f.out a
+      (projective.replacement_is_projective X.as a H)
+      (projective.replacement_is_bounded X.as a H)
+      hY.1),
+    simp },
+  { use (quotient _ _).map (projective.replacement.hom X.as a H),
+    constructor,
+    intro i,
+    erw ← homology_functor_map_factors,
+    apply_instance }
+end
 
 -- Main theorem about existence of K-projective replacements.
 -- Perhaps all we need is this for bounded complexes, in which case we should

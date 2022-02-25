@@ -2,7 +2,9 @@ import category_theory.abelian.projective
 import for_mathlib.homological_complex_shift
 import tactic.linarith
 import algebra.homology.quasi_iso
-import category_theory.abelian.diagram_lemmas.four
+import algebra.homology.homotopy
+import for_mathlib.abelian_category
+import for_mathlib.homology
 
 .
 
@@ -12,70 +14,47 @@ open_locale zero_object
 
 section zero_object
 
-variables {V : Type*} [category V] [has_zero_object V] [has_zero_morphisms V]
+variables {V : Type*} [category V] [has_zero_morphisms V]
 
-def is_zero_object (X : V) := is_iso (0 : X ⟶ 0)
-
-lemma is_zero_object_iff_eq {X : V} : is_zero_object X ↔ 𝟙 X = 0 :=
+lemma is_zero_iff_id_eq_zero {X : V} : is_zero X ↔ 𝟙 X = 0 :=
 begin
   split,
-  { rintro (h : is_iso _),
-    resetI,
-    rw ← cancel_mono (0 : X ⟶ 0),
-    simp },
+  { exact λ h, h.1 _, },
   { intro e,
-    use 0,
-    rw e,
-    split; simp }
+    exact ⟨λ _ _, by { rw [← cancel_epi (𝟙 _), e, comp_zero, zero_comp], apply_instance },
+      λ _ _, by { rw [← cancel_mono (𝟙 _), e, comp_zero, zero_comp], apply_instance }⟩, }
 end
 
-lemma is_zero_object.to_eq_zero {X Y : V} (h : is_zero_object Y) (f : X ⟶ Y) : f = 0 :=
-begin
-  rw [← cancel_mono (𝟙 _), (is_zero_object_iff_eq.mp h), comp_zero, comp_zero],
-  apply_instance
-end
+lemma is_zero_of_mono {X Y : V} (f : X ⟶ Y) [mono f] (h : is_zero Y) : is_zero X :=
+by rw [is_zero_iff_id_eq_zero, ← cancel_mono f, zero_comp, h.2 (𝟙 _ ≫ f)]
 
-lemma is_zero_object.from_eq_zero {X Y : V} (h : is_zero_object X) (f : X ⟶ Y) : f = 0 :=
-begin
-  rw [← cancel_epi (𝟙 _), is_zero_object_iff_eq.mp h, zero_comp, comp_zero],
-  apply_instance
-end
+lemma is_zero_of_epi {X Y : V} (f : X ⟶ Y) [epi f] (h : is_zero X) : is_zero Y :=
+by rw [is_zero_iff_id_eq_zero, ← cancel_epi f, comp_zero, h.1 (f ≫ 𝟙 Y)]
 
-lemma is_zero_object_of_mono {X Y : V} (f : X ⟶ Y) [mono f] (h : is_zero_object Y) :
-  is_zero_object X :=
-by rw [is_zero_object_iff_eq, ← cancel_mono f, zero_comp, h.to_eq_zero (𝟙 _ ≫ f)]
+lemma split_epi_of_is_zero {X Y : V} (f : X ⟶ Y) (h : is_zero Y) : split_epi f :=
+⟨0, by simp [is_zero_iff_id_eq_zero.mp h]⟩
 
-lemma is_zero_object_of_epi {X Y : V} (f : X ⟶ Y) [epi f] (h : is_zero_object X) :
-  is_zero_object Y :=
-by rw [is_zero_object_iff_eq, ← cancel_epi f, comp_zero, h.from_eq_zero (f ≫ 𝟙 Y)]
+lemma epi_of_is_zero {X Y : V} (f : X ⟶ Y) (h : is_zero Y) : epi f :=
+@@split_epi.epi _ _ (split_epi_of_is_zero f h)
 
-lemma zero_is_zero_object : is_zero_object (0 : V) :=
-by { rw is_zero_object_iff_eq, simp }
+lemma split_mono_of_is_zero {X Y : V} (f : X ⟶ Y) (h : is_zero X) : split_mono f :=
+⟨0, by simp [is_zero_iff_id_eq_zero.mp h]⟩
 
-lemma split_epi_of_is_zero_object {X Y : V} (f : X ⟶ Y) (h : is_zero_object Y) : split_epi f :=
-⟨0, by simp [is_zero_object_iff_eq.mp h]⟩
+lemma mono_of_is_zero_object {X Y : V} (f : X ⟶ Y) (h : is_zero X) : mono f :=
+@@split_mono.mono _ _ (split_mono_of_is_zero f h)
 
-lemma epi_of_is_zero_object {X Y : V} (f : X ⟶ Y) (h : is_zero_object Y) : epi f :=
-@@split_epi.epi _ _ (split_epi_of_is_zero_object f h)
-
-lemma split_mono_of_is_zero_object {X Y : V} (f : X ⟶ Y) (h : is_zero_object X) : split_mono f :=
-⟨0, by simp [is_zero_object_iff_eq.mp h]⟩
-
-lemma mono_of_is_zero_object {X Y : V} (f : X ⟶ Y) (h : is_zero_object X) : mono f :=
-@@split_mono.mono _ _ (split_mono_of_is_zero_object f h)
-
-lemma is_iso_of_is_zero_object {X Y : V} (f : X ⟶ Y)
-  (h₁ : is_zero_object X) (h₂ : is_zero_object Y) : is_iso f :=
+lemma is_iso_of_is_zero {X Y : V} (f : X ⟶ Y)
+  (h₁ : is_zero X) (h₂ : is_zero Y) : is_iso f :=
 begin
   use 0,
-  rw [is_zero_object_iff_eq.mp h₁, is_zero_object_iff_eq.mp h₂],
+  rw [is_zero_iff_id_eq_zero.mp h₁, is_zero_iff_id_eq_zero.mp h₂],
   split; simp
 end
 
 end zero_object
 
 variables {V : Type*} [category V] [abelian V] [enough_projectives V] (X : cochain_complex V ℤ)
-variables (a : ℤ) (H : ∀ i (h : a ≤ i), is_zero_object (X.X i))
+variables (a : ℤ) (H : ∀ i (h : a ≤ i), is_zero (X.X i))
 
 lemma comp_eq_to_hom_heq_iff {C : Type*} [category C] {X X' Y Y' Y'' : C}
   (f : X ⟶ Y) (f' : X' ⟶ Y') (e : Y = Y'') : f ≫ eq_to_hom e == f' ↔ f == f' :=
@@ -178,8 +157,7 @@ def replacement.hom : replacement X a H ⟶ X :=
     split_ifs with h',
     { rw [zero_comp, comp_zero] },
     { exfalso, linarith },
-    { haveI : is_iso (0 : X.X (i + 1) ⟶ 0) := H _ (le_of_lt h),
-      rw [← cancel_mono (0 : X.X (i + 1) ⟶ 0), comp_zero, comp_zero] },
+    { rw comp_zero, apply (H _ (le_of_lt h)).2 },
     { dsimp only [replacement],
       rw [dif_pos rfl, dif_neg h],
       simp only [← category.assoc, eq_to_hom_trans_assoc],
@@ -194,17 +172,6 @@ def replacement.hom : replacement X a H ⟶ X :=
       norm_num [← int.abs_eq_nat_abs],
       rw [abs_eq_self.mpr _, abs_eq_self.mpr _],
       all_goals { linarith } }
-  end }
-.
-noncomputable
-def replacement_nat : chain_complex V ℕ :=
-{ X := λ i, (replacement_aux X a H i).1.right,
-  d := λ i j, if h₁ : j + 1 = i then eq_to_hom (by { subst h₁, dsimp [replacement_aux], refl }) ≫
-    (replacement_aux X a H _).fst.hom else 0,
-  shape' := λ _ _ e, dif_neg e,
-  d_comp_d' := begin
-    rintros i j k (rfl : j+1 = i) (rfl : k+1 = j),
-    simp [replacement_aux_hom_eq]
   end }
 
 omit H
@@ -223,61 +190,8 @@ strong_epi_factor_thru_image_of_strong_epi_mono_factorisation $
 instance : epi (factor_thru_image f ≫ (image_subobject_iso f).inv) :=
 epi_comp _ _
 
-noncomputable
-def cokernel_lift_to_kernel_desc :
-  cokernel (kernel.lift g f w) ⟶ kernel (cokernel.desc f g w) :=
-cokernel.desc _ (kernel.lift _ (kernel.ι _ ≫ cokernel.π _) (by simp)) (by { ext, simp })
-.
-open_locale pseudoelement
-open category_theory.abelian
-
-lemma exists_preimage_of_cokernel_π (x : B) (e : cokernel.π f x = 0) : ∃ (y : A), f y = x :=
-(@pseudoelement.pseudo_exact_of_exact _ _ _ _ _ _ _ _(exact_cokernel _)).2 _ e
-
-instance : mono (cokernel_lift_to_kernel_desc f g w) :=
-begin
-  apply_with (mono_of_mono _ (kernel.ι _)) { instances := ff },
-  apply pseudoelement.mono_of_zero_of_map_zero,
-  intros x hx,
-  obtain ⟨x', rfl⟩ := abelian.pseudoelement.pseudo_surjective_of_epi (cokernel.π _) x,
-  replace hx : cokernel.π f (kernel.ι g x') = 0,
-  { simpa [← pseudoelement.comp_apply, cokernel_lift_to_kernel_desc] using hx },
-  obtain ⟨y, hy⟩ := exists_preimage_of_cokernel_π _ _ hx,
-  rw [(kernel.lift_ι g f w).symm, pseudoelement.comp_apply] at hy,
-  replace hy := pseudoelement.pseudo_injective_of_mono _ hy,
-  subst hy,
-  simp [← pseudoelement.comp_apply]
-end
-.
-instance : epi (cokernel_lift_to_kernel_desc f g w) :=
-begin
-  apply_with (epi_of_epi (cokernel.π _)) { instances := ff },
-  apply pseudoelement.epi_of_pseudo_surjective,
-  intro x,
-  obtain ⟨x', hx'⟩ := abelian.pseudoelement.pseudo_surjective_of_epi (cokernel.π _)
-    (kernel.ι (cokernel.desc f g w) x),
-  have hx : g x' = 0,
-  { simpa [← pseudoelement.comp_apply] using congr_arg (cokernel.desc f g w) hx' },
-  obtain ⟨y, rfl⟩ := (@pseudoelement.pseudo_exact_of_exact _ _ _ _ _ _ _ _ exact_kernel_ι).2 x' hx,
-  use y,
-  apply pseudoelement.pseudo_injective_of_mono (kernel.ι (cokernel.desc f g w)),
-  simpa [← pseudoelement.comp_apply, cokernel_lift_to_kernel_desc] using hx',
-end
-
-instance : is_iso (cokernel_lift_to_kernel_desc f g w) :=
-is_iso_of_mono_of_epi _
-
-noncomputable
-def cokernel_lift_iso_kernel_desc : cokernel (kernel.lift g f w) ≅ kernel (cokernel.desc f g w) :=
-as_iso (cokernel_lift_to_kernel_desc f g w)
-
-noncomputable
-def homology.to_cokernel :
-  homology f g w ⟶ cokernel f :=
-(homology_iso_cokernel_lift f g w).hom ≫ (cokernel_lift_iso_kernel_desc f g w).hom ≫ kernel.ι _
-
-instance : mono (homology.to_cokernel f g w) :=
-by { delta homology.to_cokernel, apply_instance }
+instance : mono (homology.ι f g w) :=
+by { delta homology.ι, apply_instance }
 
 @[simp, reassoc]
 lemma π_cokernel_iso_of_eq {f₁ f₂ : A ⟶ B} (e : f₁ = f₂) :
@@ -297,11 +211,15 @@ begin
 end
 
 @[simp, reassoc]
-lemma homology.π_to_cokernel :
-  homology.π f g w ≫ homology.to_cokernel f g w = (kernel_subobject _).arrow ≫ cokernel.π _ :=
+lemma homology.π'_ι :
+  homology.π' f g w ≫ homology.ι f g w = kernel.ι g ≫ cokernel.π f :=
+by { delta homology.π' homology.ι homology_iso_kernel_desc, simp }
+
+@[simp, reassoc]
+lemma homology.π_ι :
+  homology.π f g w ≫ homology.ι f g w = (kernel_subobject _).arrow ≫ cokernel.π _ :=
 begin
-  delta homology.to_cokernel cokernel_lift_iso_kernel_desc cokernel_lift_to_kernel_desc,
-  simp,
+  rw [← homology.π'_eq_π, category.assoc, homology.π'_ι, kernel_subobject_arrow_assoc],
 end
 
 
@@ -359,29 +277,9 @@ begin
   obtain ⟨y', rfl⟩ := (@pseudoelement.pseudo_exact_of_exact _ _ _ _ _ _ _ _
     exact_kernel_subobject_arrow).2 y e₁,
   use homology.π f g w y',
-  apply pseudoelement.pseudo_injective_of_mono (homology.to_cokernel f' g' w'),
+  apply pseudoelement.pseudo_injective_of_mono (homology.ι f' g' w'),
   simpa [← pseudoelement.comp_apply, p] using e₂,
 end
-
--- instance [H : epi (kernel.lift g' (kernel.ι g ≫ β.left)
---     (by { rw category.assoc, erw [β.w, kernel.condition_assoc], rw zero_comp }))]
---     (p : α.right = β.left) :
---   mono (homology.map w w' α β p) :=
--- begin
---   have := @abelian.mono_of_epi_of_mono_of_mono _ _ _ _ _ _ _ _ _ _ _
---     (kernel.lift _ _ w) (cokernel.π _ ≫ (homology_iso_cokernel_lift f g w).inv) (0 : _ ⟶ 0)
---     (kernel.lift _ _ w') (cokernel.π _ ≫ (homology_iso_cokernel_lift _ _ w').inv) (0 : _ ⟶ 0)
---     α.left _ _ 0 _ _ _ (show _, from _) (show _, from _) (show _, from _),
---   fapply abelian.mono_of_epi_of_mono_of_mono _ _ _ H,
---   swap 19,
---   apply abelian.exact_cokernel,
---   swap 6,
---   exact kernel.ι _,
---   swap 6,
---   exact kernel.ι _,
---   -- have := mono_of_mono_fac (homology.map_desc w w' α β p),
--- end
-.
 
 local attribute [instance] epi_comp mono_comp
 
@@ -400,8 +298,7 @@ lemma kernel_ι_replacement_aux_eq_zero (i : ℕ) :
     X.d (a - i) (a - i + 1) = 0 :=
 begin
   cases i,
-  { dsimp [replacement_aux], rw ← @@cancel_mono _ _ (@@is_iso.mono_of_iso _ _ (H _ _)),
-    { simp }, { linarith } },
+  { dsimp [replacement_aux], simp },
   { have : a - i.succ + 1 = a - i, { norm_num [sub_add] },
     rw [this, ← replacement_aux_snd_comm, kernel.condition_assoc, zero_comp] }
 end
@@ -411,8 +308,8 @@ instance replacement_kernel_map_epi (i : ℕ) : epi (kernel.lift (X.d (a - i) (a
     (by rw [category.assoc, kernel_ι_replacement_aux_eq_zero])) :=
 begin
   cases i,
-  { apply epi_of_is_zero_object,
-    apply is_zero_object_of_mono (kernel.ι _),
+  { apply epi_of_is_zero,
+    apply is_zero_of_mono (kernel.ι _),
     { apply H, simp },
     apply_instance },
   { apply pseudoelement.epi_of_pseudo_surjective,
@@ -447,7 +344,7 @@ end
 instance (i : ℕ) : epi (replacement_aux X a H i).snd :=
 begin
   cases i; dsimp [replacement_aux],
-  { apply epi_of_is_zero_object, apply H, simp },
+  { apply epi_of_is_zero, apply H, simp },
   { apply_with epi_comp { instances := ff },
     { apply_instance },
     apply_with epi_comp { instances := ff },
@@ -463,7 +360,6 @@ begin
     refine (eq_iff_iff.mp (congr_arg epi this)).mp _,
     apply_instance },
 end
--- example (n : ℤ) : n - 1 + 1 = n := by library_search
 
 noncomputable
 def homology_functor_obj_iso (X) (i : ℤ) :
@@ -509,14 +405,6 @@ begin
   rcases a with ⟨_, ⟨⟩, _⟩,
   congr,
 end
-.
-
--- def replacement_zero : (replacement X a H).X a = projective.over (X.X a) :=
--- by { dsimp [replacement], rw [if_neg (irrefl _), sub_self, int.nat_abs_zero],
---   dsimp [replacement_aux], refl, apply_instance }
-
-def replacement_pos (i : ℤ) (e : a < i) : (replacement X a H).X i = 0 :=
-if_pos e
 
 lemma replacement_aux_comp_eq_zero (i : ℕ) :
   (replacement_aux X a H (i+1)).fst.hom ≫ eq_to_hom (by { dsimp [replacement_aux], refl }) ≫
@@ -594,15 +482,6 @@ end
 
 instance (i : ℕ) : is_iso (replacement_homology_map X a H i) :=
 is_iso_of_mono_of_epi _
-
--- lemma eeoo (i : ℕ) :
---   homology.map ((replacement X a H).d_comp_d _ _ _) (X.d_comp_d _ _ _)
---     (arrow.hom_mk ((replacement.hom X a H).comm (a - i - 1) (a - i)))
---     (arrow.hom_mk ((replacement.hom X a H).comm (a - i) (a - i + 1))) rfl ==
---   replacement_homology_map X a H i :=
--- begin
---   delta replacement_hom
--- end
 
 lemma replacement_aux_eq_of_eq (i j : ℕ) (e : i + 1 = j) :
   (replacement_aux X a H j).1.right = (replacement_aux X a H i).1.left :=
@@ -699,12 +578,12 @@ end
 
 include H
 
-lemma homology_is_zero_object_of_bounded (i : ℤ) (e : a ≤ i) :
-  is_zero_object ((homology_functor V (complex_shape.up ℤ) i).obj X) :=
+lemma homology_is_zero_of_bounded (i : ℤ) (e : a ≤ i) :
+  is_zero ((homology_functor V (complex_shape.up ℤ) i).obj X) :=
 begin
-  apply is_zero_object_of_mono (homology_iso_cokernel_image_to_kernel' _ _ _).hom,
-  apply is_zero_object_of_epi (cokernel.π _),
-  apply is_zero_object_of_mono (kernel.ι _),
+  apply is_zero_of_mono (homology_iso_cokernel_image_to_kernel' _ _ _).hom,
+  apply is_zero_of_epi (cokernel.π _),
+  apply is_zero_of_mono (kernel.ι _),
   apply H i e,
   all_goals { apply_instance }
 end
@@ -724,20 +603,20 @@ instance (i : ℤ) : epi ((replacement.hom X a H).f i) :=
 begin
   dsimp [replacement.hom],
   split_ifs,
-  { apply epi_of_is_zero_object, apply H, exact le_of_lt h },
+  { apply epi_of_is_zero, apply H, exact le_of_lt h },
   { apply_instance }
 end
 
-lemma replacement_is_bounded : ∀ i (h : a ≤ i), is_zero_object ((replacement X a H).X i) :=
+lemma replacement_is_bounded : ∀ i (h : a ≤ i), is_zero ((replacement X a H).X i) :=
 begin
   intros i h,
   dsimp [replacement],
   split_ifs,
-  { exact zero_is_zero_object },
+  { exact is_zero_zero _ },
   { have : a = i := by linarith, subst this,
     rw [sub_self, int.nat_abs_zero],
     dsimp [replacement_aux],
-    exact zero_is_zero_object }
+    exact is_zero_zero _ }
 end
 
 instance : quasi_iso (replacement.hom X a H) :=
@@ -746,9 +625,9 @@ begin
   intro i,
   rw ← sub_add_cancel i a,
   induction (i - a) with i i,
-  { apply is_iso_of_is_zero_object,
-    exact homology_is_zero_object_of_bounded _ a (replacement_is_bounded X a H) _ (by simp),
-    exact homology_is_zero_object_of_bounded _ a H _ (by simp) },
+  { apply is_iso_of_is_zero,
+    exact homology_is_zero_of_bounded _ a (replacement_is_bounded X a H) _ (by simp),
+    exact homology_is_zero_of_bounded _ a H _ (by simp) },
   { rw (show (-[1+ i] + a) = (a - ↑(i + 1)), by { rw [add_comm], refl }),
     rw homology_functor_map_iso' _ (a - ↑(i + 1) - 1) (a - ↑(i + 1)) (a - i),
     { rw replacement_hom_homology_iso X a H i,
@@ -759,5 +638,140 @@ begin
 end
 .
 
+@[simps]
+def _root_.cochain_complex.as_nat_chain_complex (X : cochain_complex V ℤ) (a : ℤ) :
+  chain_complex V ℕ :=
+{ X := λ i, X.X (a - i),
+  d := λ i j, X.d _ _,
+  shape' := λ i j r, by { refine X.shape _ _ (λ e, r _), dsimp at e ⊢,
+    apply int.coe_nat_inj, dsimp, linarith },
+  d_comp_d' := λ i j k _ _, X.d_comp_d _ _ _ }
+
+@[simps]
+def _root_.cochain_complex.to_nat_chain_complex (a : ℤ) :
+  cochain_complex V ℤ ⥤ chain_complex V ℕ :=
+{ obj := λ X, X.as_nat_chain_complex a,
+  map := λ X Y f, { f := λ i, f.f _ } }
+
+lemma is_zero_iff_iso_zero (X : V) :
+  is_zero X ↔ nonempty (X ≅ 0) :=
+⟨λ e, ⟨e.iso_zero⟩, λ ⟨e⟩, is_zero_of_iso_of_zero (is_zero_zero _) e.symm⟩
+
+lemma preadditive.exact_iff_homology_is_zero {X Y Z : V} (f : X ⟶ Y) (g : Y ⟶ Z) :
+  exact f g ↔ ∃ w, is_zero (homology f g w) :=
+begin
+  rw preadditive.exact_iff_homology_zero,
+  simp_rw is_zero_iff_iso_zero,
+end
+
+noncomputable
+def null_homotopic_of_projective_to_acyclic_aux {X Y : cochain_complex V ℤ} (f : X ⟶ Y) (a : ℤ)
+  (h₁ : ∀ i, projective (X.X i))
+  (h₂ : ∀ i, a ≤ i → is_zero (X.X i))
+  (h₃ : ∀ i, is_zero ((homology_functor _ _ i).obj Y)) :
+  homotopy ((cochain_complex.to_nat_chain_complex a).map f) 0 :=
+begin
+  have h₄ : ∀ i, a ≤ i → f.f i = 0,
+  { intros i e, apply (h₂ i e).1 },
+  fapply homotopy.mk_inductive _ 0,
+  { dsimp, rw zero_comp, apply h₄, linarith },
+  all_goals { dsimp },
+  { have := f.comm (a - (0 + 1)) a,
+    rw [h₄ _ (le_of_eq rfl), comp_zero] at this,
+    refine projective.factor_thru (kernel.lift _ _ this) _,
+    exact kernel.lift _ _ (Y.d_comp_d _ _ _),
+    { apply_with kernel.lift.epi { instances := ff },
+      rw preadditive.exact_iff_homology_is_zero,
+      refine ⟨Y.d_comp_d _ _ _,
+        is_zero_of_iso_of_zero (h₃ (a - (0 + 1))) (homology_iso _ _ _ _ _ _)⟩,
+      all_goals { dsimp, abel } } },
+  { rw comp_zero, conv_rhs { rw [zero_add] },
+    slice_rhs 2 3 { rw ← kernel.lift_ι _ _ (Y.d_comp_d (a - (0 + 1 + 1)) (a - (0 + 1)) a) },
+    rw [← category.assoc, projective.factor_thru_comp, kernel.lift_ι] },
+  { rintros n ⟨g₁, g₂, e⟩, dsimp only,
+    have : X.d (a - (n + 1 + 1)) (a - (n + 1)) ≫
+      (f.f (a - (↑n + 1)) - g₂ ≫ Y.d (a - (↑n + 1 + 1)) (a - (↑n + 1))) = 0,
+    { rw ← sub_eq_iff_eq_add at e, rw [e, X.d_comp_d_assoc, zero_comp] },
+    rw [preadditive.comp_sub, ← f.comm, ← category.assoc, ← preadditive.sub_comp] at this,
+    fsplit,
+    { refine projective.factor_thru (kernel.lift _ _ this) _,
+      exact kernel.lift _ _ (Y.d_comp_d _ _ _),
+      apply_with kernel.lift.epi { instances := ff },
+      rw preadditive.exact_iff_homology_is_zero,
+      refine ⟨Y.d_comp_d _ _ _, is_zero_of_iso_of_zero (h₃ _) (homology_iso _ _ _ _ _ _)⟩,
+      all_goals { dsimp, abel } },
+    { rw ← sub_eq_iff_eq_add',
+      slice_rhs 2 3 { rw ← kernel.lift_ι (Y.d (a-(n+1+1)) (a-(n+1))) _ (Y.d_comp_d _ _ _) },
+      rw [← category.assoc, projective.factor_thru_comp, kernel.lift_ι] } }
+end
+
+noncomputable
+def null_homotopic_of_projective_to_acyclic {X Y : cochain_complex V ℤ} (f : X ⟶ Y) (a : ℤ)
+  (h₁ : ∀ i, projective (X.X i))
+  (h₂ : ∀ i, a ≤ i → is_zero (X.X i))
+  (h₃ : ∀ i, is_zero ((homology_functor _ _ i).obj Y)) :
+  homotopy f 0 :=
+{ hom := λ i j, if h : i ≤ a ∧ j ≤ a then begin
+    refine (X.X_eq_to_iso _).hom ≫ (null_homotopic_of_projective_to_acyclic_aux f a h₁ h₂ h₃).hom
+      (a - i).nat_abs (a - j).nat_abs ≫ (Y.X_eq_to_iso _).hom,
+    swap, symmetry,
+    all_goals { rw [← int.abs_eq_nat_abs, eq_sub_iff_add_eq, ← eq_sub_iff_add_eq', abs_eq_self],
+      cases h, rwa sub_nonneg }
+  end else 0,
+  zero' := begin
+    intros i j e,
+    split_ifs,
+    { cases h,
+      rw [(null_homotopic_of_projective_to_acyclic_aux f a h₁ h₂ h₃).zero, zero_comp, comp_zero],
+      intro e', apply e,
+      dsimp at e' ⊢,
+      apply_fun (coe : ℕ → ℤ) at e',
+      rw [int.coe_nat_add, ← int.abs_eq_nat_abs, ← int.abs_eq_nat_abs, abs_eq_self.mpr _,
+        abs_eq_self.mpr _, int.coe_nat_one, sub_add, sub_right_inj] at e',
+      rw [← e', sub_add_cancel],
+      all_goals { rwa sub_nonneg } },
+    { refl }
+  end,
+  comm := begin
+    intros i,
+    rw [d_next_eq _ (show (complex_shape.up ℤ).rel i (i+1), from rfl),
+      prev_d_eq _ (show (complex_shape.up ℤ).rel (i-1) i, from sub_add_cancel _ _)],
+    have e₁ : i + 1 ≤ a ∧ i ≤ a ↔ i + 1 ≤ a := by { rw and_iff_left_iff_imp, intro e, linarith },
+    have e₂ : i ≤ a ∧ i - 1 ≤ a ↔ i ≤ a := by { rw and_iff_left_iff_imp, intro e, linarith },
+    split_ifs; rw e₁ at h; rw e₂ at h_1,
+    { have e : a - (a - i).nat_abs = i,
+      { rw [← int.abs_eq_nat_abs, abs_eq_self.mpr _, ← sub_add, sub_self, zero_add],
+        rwa sub_nonneg },
+      rw [← cancel_mono (Y.X_eq_to_iso e.symm).hom, ← cancel_epi (X.X_eq_to_iso e).hom],
+      dsimp,
+      simp only [homological_complex.X_d_eq_to_iso_assoc, category.comp_id, add_zero,
+        homological_complex.X_d_eq_to_iso, category.id_comp,
+        homological_complex.X_eq_to_iso_d_assoc, homological_complex.X_eq_to_iso_trans_assoc,
+        preadditive.comp_add, category.assoc, homological_complex.X_eq_to_iso_d,
+        homological_complex.X_eq_to_iso_trans, homological_complex.X_eq_to_iso_f_assoc,
+        homological_complex.X_eq_to_iso_refl, preadditive.add_comp],
+      have := (null_homotopic_of_projective_to_acyclic_aux f a h₁ h₂ h₃).comm (a - i).nat_abs,
+      dsimp at this,
+      rw [this, add_zero],
+      congr' 1,
+      { apply d_next_eq, dsimp, apply int.coe_nat_inj, norm_num [← int.abs_eq_nat_abs],
+        rw [abs_eq_self.mpr _, abs_eq_self.mpr _, sub_add, add_sub_cancel],
+        all_goals { rwa sub_nonneg } },
+      { apply prev_d_eq, dsimp, apply int.coe_nat_inj, norm_num [← int.abs_eq_nat_abs],
+        rw [abs_eq_self.mpr _, abs_eq_self.mpr _, ← sub_add],
+        all_goals { rw sub_nonneg, linarith } } },
+    { exfalso, linarith },
+    { have : a = i := by linarith, subst this,
+      suffices : (null_homotopic_of_projective_to_acyclic_aux f a h₁ h₂ h₃).hom
+        (a - a).nat_abs (a - (a - 1)).nat_abs = 0,
+      { rw this,
+        simp only [add_zero, limits.comp_zero, homological_complex.zero_f_apply,
+          limits.zero_comp], apply (h₂ _ h_1).1 },
+        rw [← sub_add, sub_self, zero_add, int.nat_abs_zero, int.nat_abs_one],
+        dsimp [null_homotopic_of_projective_to_acyclic_aux, homotopy.mk_inductive],
+        rw [dif_pos (zero_add _), zero_comp, zero_comp] },
+    { simp only [add_zero, limits.comp_zero, homological_complex.zero_f_apply,
+        limits.zero_comp], apply (h₂ _ _).1, linarith }
+  end }
 
 end category_theory.projective
