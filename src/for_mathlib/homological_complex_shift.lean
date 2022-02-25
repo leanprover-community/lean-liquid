@@ -351,51 +351,42 @@ begin
   { dsimp, abel },
 end
 
+@[simp, reassoc]
 lemma homology.π'_ι {X Y Z : A} (f : X ⟶ Y) (g : Y ⟶ Z) (w : f ≫ g = 0) :
   homology.π' f g w ≫ homology.ι f g w = kernel.ι g ≫ cokernel.π f :=
 by { delta homology.π' homology.ι homology_iso_kernel_desc, simp }
 
+@[simp, reassoc]
+lemma homology.desc'_ι {X X' Y Z Z' : A} (f : X ⟶ Y) (g : Y ⟶ Z) (w : f ≫ g = 0)
+  (f' : X' ⟶ Y) (g' : Y ⟶ Z') (w' : f' ≫ g' = 0) (h₁) (h₂) (h₃) :
+  homology.desc' _ _ w (kernel.lift _ (kernel.ι _) h₁ ≫ homology.π' _ _ _) h₂ ≫
+  homology.ι _ _ w' = homology.ι _ _ _ ≫ cokernel.desc _ (cokernel.π _) h₃ :=
+by { ext, simp, }
+
+@[simp, reassoc]
+lemma homology.π'_lift {X X' Y Z Z' : A} (f : X ⟶ Y) (g : Y ⟶ Z) (w : f ≫ g = 0)
+  (f' : X' ⟶ Y) (g' : Y ⟶ Z') (w' : f' ≫ g' = 0) (h₁) (h₂) (h₃) :
+  homology.π' _ _ w ≫ homology.lift _ _ w' (homology.ι _ _ _ ≫
+    cokernel.desc _ (cokernel.π _) h₁) h₂ =
+  kernel.lift _ (kernel.ι _) h₃ ≫ homology.π' _ _ _ :=
+by { ext, simp }
+
 variable (A)
+
+@[simp]
+lemma shift_functor_eq (V : Type*) [category V] [preadditive V] (i) :
+  homological_complex.shift_functor V i = category_theory.shift_functor _ i := rfl
 
 noncomputable
 def homology_shift_iso (i j : ℤ) :
   shift_functor _ i ⋙ homology_functor A (complex_shape.up ℤ) j ≅
     homology_functor A (complex_shape.up ℤ) (j + i) :=
 nat_iso.of_components (λ X, homology_shift_obj_iso X i j : _)
-begin -- we seem to be missing loads of simp lemmas :(
+begin
   intros X Y f,
-  apply homology.hom_from_ext,
-  apply homology.hom_to_ext,
-  dsimp [homology_shift_obj_iso],
-  simp only [category.assoc],
-  erw homology.π'_map_assoc,
-  erw homology.desc'_π'_assoc,
-  erw homology.desc'_π'_assoc,
-  simp only [category.assoc],
-  erw homology.π'_map_assoc,
-  erw homology.π'_map_assoc,
-  erw homology.desc'_π'_assoc,
-  erw homology.desc'_π'_assoc,
-  simp only [category.assoc],
-  erw homology.π'_map_assoc,
-  rw homology.π'_ι,
-  erw kernel.lift_ι_assoc,
-  erw kernel.lift_ι_assoc,
-  rw category.assoc,
-  erw kernel.lift_ι_assoc,
-  erw kernel.lift_ι_assoc,
-  erw kernel.lift_ι_assoc,
-  rw category.assoc,
-  rw category.assoc,
-  erw kernel.lift_ι_assoc,
-  erw kernel.lift_ι_assoc,
-  rw category.assoc,
-  erw kernel.lift_ι_assoc,
-  congr' 1,
-  simp_rw ← category.assoc,
-  congr' 1,
-  dsimp,
-  simp
+  ext,
+  dsimp [homology_shift_obj_iso, homology_iso, homology.map_iso],
+  simp,
 end
 
 end homological_complex
