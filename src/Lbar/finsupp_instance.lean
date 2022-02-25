@@ -70,7 +70,7 @@ have xz : l ∈ (- (x - z)).support, by rwa support_neg,
 add_zero_dists (by simp only [neg_sub, coe_sub, pi.sub_apply, sub_add_sub_cancel, sub_self]) xz
 
 @[nolint unused_arguments, reducible, derive add_comm_group]
-def nnreal.normed (r : ℝ≥0) := ℕ →₀ ℝ
+def nnreal.normed (r : ℝ≥0) := ℕ →₀ ℤ
 
 namespace nnreal.normed
 
@@ -93,6 +93,9 @@ by rw [← nnnorm_neg (F - G), neg_sub]
 instance {r : ℝ≥0} : topological_space r.normed :=
 by simpa only [nnreal.normed] using preorder.topology _
 
+lemma norm_dist (r : ℝ≥0) (j : ℕ) (x y : r.normed) : ∥x j - y j∥ = dist (x j) (y j) :=
+by simp [has_norm.norm, has_dist.dist]
+
 /-  This instance, in particular, provides a `pseudo_metric_space` instance to `r.normed`. -/
 instance (r : ℝ≥0) : semi_normed_group r.normed :=
 { norm := coe ∘ has_nnnorm.nnnorm,
@@ -108,7 +111,8 @@ instance (r : ℝ≥0) : semi_normed_group r.normed :=
     { refine sum_le_sum (λ j hj, _),
       rw ← add_mul,
       refine mul_le_mul_of_nonneg_right _ (zero_le _),
-      exact nnreal.coe_le_coe.mp (dist_triangle (x j) _ _) },
+      apply nnreal.coe_le_coe.mp,
+      simpa only [coe_sub, pi.sub_apply, subtype.coe_mk, norm_dist] using dist_triangle _ _ _ },
     repeat { intros k hk hh,
       convert zero_mul _,
       simpa only [mem_support_iff, not_not, norm_eq_zero] using hh }
@@ -125,7 +129,7 @@ def invpoly (r : ℝ≥0) (S : Fintype) := S → r.normed
 namespace invpoly
 
 instance (r : ℝ≥0) (S : Fintype) : has_nnnorm (invpoly r S) :=
-@sum_nnnorm S (ℕ →₀ ℝ) (⟨λ F, ∑ x in F.support, ∥F x∥₊ * r⁻¹ ^ x⟩)
+@sum_nnnorm S r.normed (⟨λ F, ∑ x in F.support, ∥F x∥₊ * r⁻¹ ^ x⟩)
 
 @[simp]
 lemma nnnorm_zero {r : ℝ≥0} {S : Fintype} : ∥(0 : invpoly r S)∥₊ = 0 :=
