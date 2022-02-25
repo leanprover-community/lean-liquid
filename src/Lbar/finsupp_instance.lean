@@ -159,18 +159,6 @@ by rw [← nnnorm_neg (F - G), neg_sub]
 instance {r : ℝ≥0} {S : Fintype} : topological_space (invpoly r S) :=
 by simpa only [invpoly] using preorder.topology _
 
-instance {r : ℝ≥0} {S : Fintype} : semi_normed_group (invpoly r S) :=
-{ norm          := coe ∘ has_nnnorm.nnnorm,
-  dist          := λ F G, ∥F - G∥₊,
-  dist_self     := λ F, by simp only [sub_self, nnnorm_zero, nonneg.coe_zero],
-  dist_comm     := λ F G, by simp only [dist, nnnorm_sub],
-  dist_triangle := λ x y z, show ∑ s, ∥x s - z s∥₊ ≤ ∑ s, ∥x s - y s∥₊ + ∑ (x : ↥S), ∥y x - z x∥₊, by
-  { refine (sum_le_sum (λ s hs, _)).trans (finset.sum_add _).le,
-    exact dist_triangle (x s) (y s) (z s) },
-  edist_dist    := λ x y, by simp only [subtype.coe_eta, ennreal.of_real_coe_nnreal],
-  dist_eq       := λ x y, by simp only,
-  ..(infer_instance : add_comm_group _) }
-
 --  There is some awkwardness in getting the fact that the `nnnorm` instances coincide.
 --  you can see this in the `convert sum_nnnorm_add_le F G` step.
 instance (S : Fintype) (r : ℝ≥0) : pseudo_normed_group (invpoly r S) :=
