@@ -586,6 +586,32 @@ def Ext0 : 𝒦ᵒᵖ ⥤ 𝒦 ⥤ Ab :=
 def Ext (i : ℤ) : 𝒦ᵒᵖ ⥤ 𝒦 ⥤ Ab :=
 Ext0 ⋙ (whiskering_left _ _ _).obj (shift_functor _ i)
 
+-- why is this so slow?
+@[simps]
+def replacement_iso (P₁ P₂ X : 𝒦) [is_K_projective P₁.val] [is_K_projective P₂.val]
+  (f₁ : P₁ ⟶ X) (f₂ : P₂ ⟶ X) [is_quasi_iso f₁] [is_quasi_iso f₂] : P₁ ≅ P₂ :=
+{ hom := lift f₁ f₂,
+  inv := lift f₂ f₁,
+  hom_inv_id' := begin
+    have : 𝟙 P₁ = lift f₁ f₁,
+    { apply lift_unique, simp },
+    rw this,
+    apply lift_unique, simp,
+  end,
+  inv_hom_id' := begin
+    have : 𝟙 P₂ = lift f₂ f₂,
+    { apply lift_unique, simp },
+    rw this,
+    apply lift_unique, simp
+  end } .
+
+@[simps]
+def Ext_iso
+  (i : ℤ) (P X Y : 𝒦) [is_K_projective P.val]
+  (f : P ⟶ X) [is_quasi_iso f] :
+  ((Ext i).obj (opposite.op X)).obj Y ≅ AddCommGroup.of (P ⟶ Y⟦i⟧) :=
+(preadditive_yoneda.obj (Y⟦i⟧)).map_iso (replacement_iso _ _ _ f X.π).op
+
 -- Move this
 @[simps]
 def _root_.homotopy_category.single (i : ℤ) : A ⥤ homotopy_category A (complex_shape.up ℤ) :=
