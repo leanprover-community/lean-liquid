@@ -361,7 +361,8 @@ namespace bounded_homotopy_category
 local attribute [instance] has_zero_object.has_zero
 
 instance : has_zero_object (bounded_homotopy_category A) :=
-{ zero := ⟨(0 : homotopy_category _ _), sorry⟩,
+{ zero := ⟨(0 : homotopy_category _ _),
+    ⟨0, λ i _, by apply is_zero_zero⟩⟩,
   unique_to := λ X, has_zero_object.unique_to _,
   unique_from := λ X, has_zero_object.unique_from _ }
 
