@@ -71,7 +71,7 @@ open submodule.is_principal set submodule
 
 universe u
 
-variables {ι : Type u} {R : Type*} [comm_ring R] [is_domain R] [is_principal_ideal_ring R]
+variables {ι : Type u} {R : Type*} [comm_ring R]
 variables {M : Type*} [add_comm_group M] [module R M] {b : ι → M}
 
 section aux_lemmas
@@ -197,7 +197,6 @@ end
 lemma lin_ind_succ
   {N : submodule R M}
   {V : {i:ordinal // i < o} → submodule R N}
-  (hV : ∀ i j, i ≤ j → V i ≤ V j)
   {B : basis {i // i < o} R M}
   {BB : { i  // a i ≠ 0} → N}
   (hB_BB : ∀ i : ordinal, ∀ l : {i // a i ≠ 0} →₀ R,
@@ -630,17 +629,11 @@ begin
   exact mem_of_subset_of_mem h (finsupp.mem_support_iff.2 H)
 end
 
--- Hacky lemma to extract the proof from set.cod_restrict hidden under a definition. The hwtf hypothesis
--- allows to specify the cod_restrict function without repeating the proof and can be set to `@rfl _ fun`.
--- lemma cod_restrict_mem {α : Type*} {β : Type*} {f : α → β} {s : set β} {h : ∀ (x : α), f x ∈ s}
---   (hwtf : set.cod_restrict f s h = set.cod_restrict f s h)
---   (a : α) :
--- ((set.cod_restrict f s h a) : β) ∈ s := h a
-
 
 
 /-- A submodule of a free module over a principal ideal domain is free. -/
-theorem submodule.nonempty_basis_of_pid' {ι : Type u}
+theorem submodule.nonempty_basis_of_pid' [is_domain R] [is_principal_ideal_ring R]
+  {ι : Type u}
   (b : basis ι R M) (N : submodule R M) :
   ∃ (B : Type (u+1)), nonempty (basis B R N) :=
 begin
@@ -734,8 +727,6 @@ begin
     exact le_unbundled.1 goal
   },
 
-  have hV : ∀ i j, i ≤ j → V i ≤ V j := λ i j hij, submodule.comap_mono (hF i j hij),
-
   have hBBN : ∀ i, (BB i : M) ∈ N := λ i, by {apply hU i.1, exact (hu i.1).1},
 
   have hBB : ∀ i, (BB i : M) ∈ F i,
@@ -816,7 +807,7 @@ begin
     intros i H hio l hsupp hl,
     by_cases hlim : ordinal.is_limit i,
     { exact lin_ind_limit hio hlim H hsupp hl },
-    { exact lin_ind_succ hV hB_BB hcoordB hio hlim H hsupp hl },
+    { exact lin_ind_succ hB_BB hcoordB hio hlim H hsupp hl },
     exact hj
   },
 
