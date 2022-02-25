@@ -3,6 +3,11 @@ import algebra.homology.homological_complex
 import algebra.homology.homotopy_category
 import data.int.parity
 import tactic.ring
+import for_mathlib.homology_iso
+import category_theory.arrow
+import category_theory.preadditive
+
+local attribute [simp] category_theory.preadditive.zsmul_comp category_theory.preadditive.comp_zsmul
 
 -- move this section
 namespace int
@@ -65,6 +70,25 @@ by { delta neg_one_pow, simp }
   neg_one_pow n • neg_one_pow n • X = X :=
 by simp [smul_smul]
 
+open category_theory
+
+variables {A : Type*} [category A] [preadditive A]
+
+@[simps]
+def neg_one_pow_smul_iso (n : ℤ) {X Y : A} (e : X ≅ Y) : X ≅ Y :=
+{ hom := n.neg_one_pow • e.hom,
+  inv := n.neg_one_pow • e.inv }
+
+@[simps]
+def neg_one_pow_arrow_iso_left (n : ℤ) {X Y : A} (f : X ⟶ Y) :
+  arrow.mk f ≅ arrow.mk (n.neg_one_pow • f) :=
+arrow.iso_mk (n.neg_one_pow_smul_iso (iso.refl _)) (iso.refl _) (by { dsimp, simp })
+
+@[simps]
+def neg_one_pow_arrow_iso_right (n : ℤ) {X Y : A} (f : X ⟶ Y) :
+  arrow.mk f ≅ arrow.mk (n.neg_one_pow • f) :=
+arrow.iso_mk (iso.refl _) (n.neg_one_pow_smul_iso (iso.refl _)) (by { dsimp, simp })
+
 end int
 
 universes v u
@@ -82,8 +106,6 @@ by { dsimp, rw [add_assoc, add_comm k a, ← add_assoc], exact add_left_inj _ }
 lemma complex_shape.up_add_right_cancel {α : Type*} [add_cancel_comm_monoid α] [has_one α]
   {i j} (k : α) : (complex_shape.up α).rel (i+k) (j+k) ↔ (complex_shape.up α).rel i j :=
 complex_shape.up'_add_right_cancel 1 k
-
-local attribute [simp] zsmul_comp comp_zsmul
 
 @[simps]
 def shift_functor (n : ℤ) : cochain_complex V ℤ ⥤ cochain_complex V ℤ :=
@@ -310,6 +332,70 @@ begin
   rw [← cancel_epi (hom.f ((shift_monoidal_functor _ ℤ).ε.app A) i), ← comp_f,
     category_theory.ε_hom_inv_app, homological_complex.id_f],
   dsimp, simpa
+end
+
+open category_theory.abelian
+variables {A : Type u} [category.{v} A] [abelian A]
+
+noncomputable
+def homology_shift_obj_iso (X : cochain_complex A ℤ) (i j : ℤ) :
+  (homology_functor _ _ j).obj (X⟦i⟧) ≅ (homology_functor _ _ (j + i)).obj X :=
+begin
+  refine homology_iso _ (j-1) j (j+1) _ _ ≪≫ _ ≪≫
+    (homology_iso _ (j - 1 + i) (j+i) (j+1+i) _ _).symm,
+  { simp },
+  { simp },
+  { exact homology.map_iso _ _
+      (int.neg_one_pow_arrow_iso_left _ _).symm (int.neg_one_pow_arrow_iso_right _ _).symm rfl },
+  { dsimp, abel },
+  { dsimp, abel },
+end
+
+lemma homology.π'_ι {X Y Z : A} (f : X ⟶ Y) (g : Y ⟶ Z) (w : f ≫ g = 0) :
+  homology.π' f g w ≫ homology.ι f g w = kernel.ι g ≫ cokernel.π f :=
+by { delta homology.π' homology.ι homology_iso_kernel_desc, simp }
+
+variable (A)
+
+noncomputable
+def homology_shift_iso (i j : ℤ) :
+  shift_functor _ i ⋙ homology_functor A (complex_shape.up ℤ) j ≅
+    homology_functor A (complex_shape.up ℤ) (j + i) :=
+nat_iso.of_components (λ X, homology_shift_obj_iso X i j : _)
+begin -- we seem to be missing loads of simp lemmas :(
+  intros X Y f,
+  apply homology.hom_from_ext,
+  apply homology.hom_to_ext,
+  dsimp [homology_shift_obj_iso],
+  simp only [category.assoc],
+  erw homology.π'_map_assoc,
+  erw homology.desc'_π'_assoc,
+  erw homology.desc'_π'_assoc,
+  simp only [category.assoc],
+  erw homology.π'_map_assoc,
+  erw homology.π'_map_assoc,
+  erw homology.desc'_π'_assoc,
+  erw homology.desc'_π'_assoc,
+  simp only [category.assoc],
+  erw homology.π'_map_assoc,
+  rw homology.π'_ι,
+  erw kernel.lift_ι_assoc,
+  erw kernel.lift_ι_assoc,
+  rw category.assoc,
+  erw kernel.lift_ι_assoc,
+  erw kernel.lift_ι_assoc,
+  erw kernel.lift_ι_assoc,
+  rw category.assoc,
+  rw category.assoc,
+  erw kernel.lift_ι_assoc,
+  erw kernel.lift_ι_assoc,
+  rw category.assoc,
+  erw kernel.lift_ι_assoc,
+  congr' 1,
+  simp_rw ← category.assoc,
+  congr' 1,
+  dsimp,
+  simp
 end
 
 end homological_complex

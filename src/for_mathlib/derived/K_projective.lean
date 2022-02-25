@@ -7,6 +7,8 @@ import for_mathlib.snake_lemma3
 import for_mathlib.les_homology
 import for_mathlib.exact_seq3
 import for_mathlib.triangle_shift
+import for_mathlib.homology_iso
+-- import for_mathlib.arrow_preadditive
 
 open category_theory category_theory.limits category_theory.triangulated
 open homological_complex
@@ -122,10 +124,31 @@ begin
   apply _root_.category_theory.cochain_complex.exact_cone_in_cone_out,
 end .
 
-def homology_shift_iso (i : ℤ) :
-  category_theory.shift_functor 𝒦 i ⋙
-  homology_functor A (complex_shape.up ℤ) 0 ≅
-  homology_functor A (complex_shape.up ℤ) i := sorry
+variable (A)
+
+noncomputable
+def homology_shift_iso (i j : ℤ) :
+  category_theory.shift_functor (homotopy_category A (complex_shape.up ℤ)) i ⋙
+    homology_functor A (complex_shape.up ℤ) j ≅ homology_functor A (complex_shape.up ℤ) (j+i) :=
+nat_iso.of_components (λ (X : 𝒦), homology_shift_obj_iso X.as i j : _)
+begin
+  intros X Y f,
+  rw ← quotient_map_out f,
+  dsimp,
+  erw homotopy_category.shift_functor_map_quotient,
+  rw ← homology_functor_map_factors,
+  erw (homology_shift_iso A i j).hom.naturality,
+  erw ← homology_functor_map_factors,
+  refl
+end
+
+noncomputable
+def homology_zero_shift_iso (i : ℤ) :
+  category_theory.shift_functor (homotopy_category A (complex_shape.up ℤ)) i ⋙
+    homology_functor A (complex_shape.up ℤ) 0 ≅ homology_functor A (complex_shape.up ℤ) i :=
+homology_shift_iso _ _ _ ≪≫ (eq_to_iso (by rw zero_add))
+
+variable {A}
 
 lemma is_acyclic_iff (X : 𝒦) :
   (∀ (i : ℤ), is_zero ((homotopy_category.homology_functor _ _ 0).obj (X⟦i⟧))) ↔
@@ -136,10 +159,10 @@ begin
     constructor,
     intros i,
     apply is_zero_of_iso_of_zero (h i),
-    apply (homology_shift_iso i).app _ },
+    apply (homology_zero_shift_iso A i).app _ },
   { introsI h i,
     apply is_zero_of_iso_of_zero (is_acyclic.cond _ i),
-    apply ((homology_shift_iso _).app _).symm,
+    apply ((homology_zero_shift_iso A _).app _).symm,
     assumption },
 end
 
@@ -152,7 +175,7 @@ begin
     constructor,
     intros i,
     specialize h i,
-    have := (homology_shift_iso i).hom.naturality f,
+    have := (homology_zero_shift_iso A i).hom.naturality f,
     rw ← is_iso.inv_comp_eq at this,
     rw ← this,
     apply_with is_iso.comp_is_iso { instances := ff },
@@ -161,7 +184,7 @@ begin
     exact h,
     apply_instance },
   { introsI h i,
-    have := (homology_shift_iso i).hom.naturality f,
+    have := (homology_zero_shift_iso A i).hom.naturality f,
     rw ← is_iso.eq_comp_inv at this,
     erw this,
     apply_with is_iso.comp_is_iso { instances := ff },
@@ -208,7 +231,7 @@ begin
     { resetI, use (-(inv f)), split, simp, simp },
     let EE : (category_theory.shift_functor 𝒦 i ⋙ category_theory.shift_functor 𝒦 (1 : ℤ)) ⋙ H ≅
       homology_functor _ _ (i + 1),
-    { refine iso_whisker_right _ _ ≪≫ homology_shift_iso (i + 1),
+    { refine iso_whisker_right _ _ ≪≫ homology_zero_shift_iso _ (i + 1),
       refine (shift_functor_add _ _ _).symm },
     suffices : is_iso ((homology_functor _ _ (i+1)).map T.mor₁),
     { have hhh := EE.hom.naturality T.mor₁,
@@ -229,7 +252,7 @@ begin
   intros j,
   let H := homology_functor A (complex_shape.up ℤ) 0,
   let e : H.obj (T⟦i⟧⟦j⟧) ≅ (homology_functor A (complex_shape.up ℤ) (i+j)).obj T :=
-    _ ≪≫ (homology_shift_iso (i+j)).app T,
+    _ ≪≫ (homology_zero_shift_iso _ (i+j)).app T,
   swap,
   { let e := (iso_whisker_right (shift_functor_add _ i j).symm H).app T,
     refine _ ≪≫ e,
@@ -341,7 +364,8 @@ def Ext0 : 𝒦ᵒᵖ ⥤ 𝒦 ⥤ Ab :=
   map_id' := begin
     intros X,
     ext Y e,
-    dsimp,
+    dsimp [preadditive_yoneda, preadditive_yoneda_obj],
+    change _ ≫ e = e,
     simp only [category.comp_id, id_apply],
     convert category.id_comp _,
     symmetry,
@@ -353,7 +377,9 @@ def Ext0 : 𝒦ᵒᵖ ⥤ 𝒦 ⥤ Ab :=
     ext Y e,
     dsimp,
     simp only [comp_apply, linear_map.to_add_monoid_hom_coe,
-      preadditive_yoneda_obj_map_apply, quiver.hom.unop_op, ← category.assoc],
+      preadditive_yoneda_obj_map_apply, quiver.hom.unop_op],
+    change _ ≫ e = _ ≫ _ ≫ e,
+    conv_rhs { rw ← category.assoc },
     congr' 1,
     symmetry,
     apply lift_unique,
