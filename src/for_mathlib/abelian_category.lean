@@ -175,4 +175,7 @@ lemma is_zero_of_preserves {C D : Type*} [category C] [has_zero_morphisms C]
   [preserves_zero_objects F] (e : is_zero X) : is_zero (F.obj X) :=
 preserves_zero_objects.preserves _ e
 
+lemma is_zero_biprod {C : Type u₁} [category.{v} C] [abelian C] (X Y : C)
+  (hX : is_zero X) (hY : is_zero Y) : is_zero (biprod X Y) := sorry
+
 end category_theory

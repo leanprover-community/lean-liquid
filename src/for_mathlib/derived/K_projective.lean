@@ -441,11 +441,67 @@ instance : triangulated.pretriangulated (bounded_homotopy_category A) :=
 { distinguished_triangles :=
   { T | triangle.mk (homotopy_category _ _) T.mor₁ T.mor₂ T.mor₃ ∈
     dist_triang (homotopy_category A (complex_shape.up ℤ)) },
-  isomorphic_distinguished := sorry,
-  contractible_distinguished := sorry,
-  distinguished_cocone_triangle := sorry,
-  rotate_distinguished_triangle := sorry,
-  complete_distinguished_triangle_morphism := sorry }
+  isomorphic_distinguished := begin
+    intros T₁ hT₁ T₂ e,
+    let S₁ : triangle (homotopy_category _ _) := triangle.mk _ T₁.mor₁ T₁.mor₂ T₁.mor₃,
+    let S₂ : triangle (homotopy_category _ _) := triangle.mk _ T₂.mor₁ T₂.mor₂ T₂.mor₃,
+    let E : S₂ ≅ S₁ :=
+      triangle.iso.of_components
+        ⟨e.hom.hom₁,e.inv.hom₁,_,_⟩
+        ⟨e.hom.hom₂,e.inv.hom₂,_,_⟩
+        ⟨e.hom.hom₃,e.inv.hom₃,_,_⟩
+        _ _ _,
+    apply pretriangulated.isomorphic_distinguished _ _ _ E,
+    apply hT₁,
+
+    { show (e.hom ≫ e.inv).hom₁ = _, rw iso.hom_inv_id, refl },
+    { show (e.inv ≫ e.hom).hom₁ = _, rw iso.inv_hom_id, refl },
+
+    { show (e.hom ≫ e.inv).hom₂ = _, rw iso.hom_inv_id, refl },
+    { show (e.inv ≫ e.hom).hom₂ = _, rw iso.inv_hom_id, refl },
+
+    { show (e.hom ≫ e.inv).hom₃ = _, rw iso.hom_inv_id, refl },
+    { show (e.inv ≫ e.hom).hom₃ = _, rw iso.inv_hom_id, refl },
+
+    { exact e.hom.comm₁ },
+    { exact e.hom.comm₂ },
+    { exact e.hom.comm₃ }
+  end,
+  contractible_distinguished := λ X, pretriangulated.contractible_distinguished _,
+  distinguished_cocone_triangle := begin
+    intros X Y f,
+    let T := (neg₃_functor (homotopy_category A (complex_shape.up ℤ))).obj (cone.triangleₕ f.out),
+    let E := T.obj₃,
+    refine ⟨⟨E, _⟩, T.mor₂, T.mor₃, _⟩,
+    { obtain ⟨a,ha⟩ := X.2,
+      obtain ⟨b,hb⟩ := Y.2,
+      use max (a - 1) b,
+      intros i hi,
+      apply is_zero_biprod,
+      { apply ha, suffices : a - 1 ≤ i, by linarith, apply le_trans _ hi, apply le_max_left },
+      { apply hb, apply le_trans _ hi, apply le_max_right } },
+    { erw homotopy_category.mem_distinguished_iff_exists_iso_cone,
+      use [X.val.as, Y.val.as, f.out],
+      rcases X with ⟨⟨X⟩,hX⟩,
+      rcases Y with ⟨⟨Y⟩,hY⟩,
+      constructor,
+      refine triangle.iso.of_components
+        (iso.refl _) (iso.refl _) (iso.refl _) _ _ _,
+      all_goals { dsimp [T], simp } }
+  end,
+  rotate_distinguished_triangle := begin
+    intros T,
+    split,
+    { intros hT,
+      apply homotopy_category.rotate_mem_distinguished_triangles _ hT },
+    { intros hT,
+      erw pretriangulated.rotate_distinguished_triangle,
+      exact hT }
+  end,
+  complete_distinguished_triangle_morphism := begin
+    intros T₁ T₂ hT₁ hT₂ f g h,
+    apply pretriangulated.complete_distinguished_triangle_morphism _ _ hT₁ hT₂ f g h,
+  end }
 
 local notation `𝒦` := bounded_homotopy_category A
 
