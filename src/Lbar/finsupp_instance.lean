@@ -103,10 +103,10 @@ by simp [has_norm.norm, has_dist.dist]
 
 /-  This instance, in particular, provides a `pseudo_metric_space` instance to `r.normed`. -/
 instance (r : ℝ≥0) : semi_normed_group r.normed :=
-{ norm := coe ∘ has_nnnorm.nnnorm,
-  dist := λ F G, ∥F - G∥₊,
-  dist_self := λ F, by simp only [sub_self, nnnorm_zero, nonneg.coe_zero],
-  dist_comm := λ F G, by simp only [dist, nnnorm_sub],
+{ norm          := coe ∘ has_nnnorm.nnnorm,
+  dist          := λ F G, ∥F - G∥₊,
+  dist_self     := λ F, by simp only [sub_self, nnnorm_zero, nonneg.coe_zero],
+  dist_comm     := λ F G, by simp only [dist, nnnorm_sub],
   dist_triangle := λ x y z, begin
     unfold dist has_nnnorm.nnnorm,
     norm_cast,
@@ -159,39 +159,32 @@ instance {r : ℝ≥0} {S : Fintype} : topological_space (invpoly r S) :=
 by simpa only [invpoly] using preorder.topology _
 
 instance {r : ℝ≥0} {S : Fintype} : semi_normed_group (invpoly r S) :=
-{ norm := coe ∘ has_nnnorm.nnnorm,
-  dist := λ F G, ∥F - G∥₊,
-  dist_self := λ F, by simp only [sub_self, nnnorm_zero, nonneg.coe_zero],
-  dist_comm := λ F G, by simp only [dist, nnnorm_sub],
-  dist_triangle := λ x y z, begin
-    simp only [sum_nnnorm_def, pi.sub_apply, coe_sub],
-    norm_cast,
-    rw ← finset.sum_add,
-    exact sum_le_sum (λ i hi, dist_triangle (x i) (y i) (z i)),
-  end,
-  edist_dist := λ x y, by simp only [subtype.coe_eta, ennreal.of_real_coe_nnreal],
-  dist_eq := λ x y, by simp only,
+{ norm          := coe ∘ has_nnnorm.nnnorm,
+  dist          := λ F G, ∥F - G∥₊,
+  dist_self     := λ F, by simp only [sub_self, nnnorm_zero, nonneg.coe_zero],
+  dist_comm     := λ F G, by simp only [dist, nnnorm_sub],
+  dist_triangle := λ x y z, show ∑ s, ∥x s - z s∥₊ ≤ ∑ s, ∥x s - y s∥₊ + ∑ (x : ↥S), ∥y x - z x∥₊, by
+  { refine (sum_le_sum (λ s hs, _)).trans (finset.sum_add _).le,
+    exact dist_triangle (x s) (y s) (z s) },
+  edist_dist    := λ x y, by simp only [subtype.coe_eta, ennreal.of_real_coe_nnreal],
+  dist_eq       := λ x y, by simp only,
   ..(infer_instance : add_comm_group _) }
 
 --  There is some awkwardness in getting the fact that the `nnnorm` instances coincide.
 --  you can see this in the `convert sum_nnnorm_add_le F G` step.
 instance (S : Fintype) (r : ℝ≥0) : pseudo_normed_group (invpoly r S) :=
-{ to_add_comm_group := by refine invpoly.add_comm_group r S,
-  filtration := λ c, {F : invpoly r S | ∥F∥₊ ≤ c},
-  filtration_mono := λ c d cd x hx, by { rw set.mem_set_of_eq at hx ⊢, exact hx.trans cd },
+{ to_add_comm_group   := by refine invpoly.add_comm_group r S,
+  filtration          := λ c, {F : invpoly r S | ∥F∥₊ ≤ c},
+  filtration_mono     := λ c d cd x hx, by { rw set.mem_set_of_eq at hx ⊢, exact hx.trans cd },
   zero_mem_filtration := λ c,
     by { simp only [set.mem_set_of_eq, nnnorm_zero, zero_le'] },
-  neg_mem_filtration := λ c F hF, by simpa only [set.mem_set_of_eq, nnnorm_neg],
-  add_mem_filtration := λ c d F G hF hG, begin
+  neg_mem_filtration  := λ c F hF, by simpa only [set.mem_set_of_eq, nnnorm_neg],
+  add_mem_filtration  := λ c d F G hF hG, begin
       simp only [sum_nnnorm_def, set.mem_set_of_eq, pi.add_apply, finsupp.coe_add],
       refine le_trans _ (add_le_add hF hG),
       convert sum_nnnorm_add_le F G,
-      { ext s,
-        simp only [pi.add_apply, _root_.coe_nnnorm],congr },
-      repeat { unfold invpoly.has_nnnorm,
-        congr,
-        ext,
-        refl },
+      { ext s, simp only [pi.add_apply, _root_.coe_nnnorm], refl },
+      repeat { unfold invpoly.has_nnnorm, congr, ext, refl },
     end }
 
 end invpoly
