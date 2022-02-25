@@ -39,7 +39,7 @@ define `∥F∥₊ = ∑ x in F.support, ∥F x∥₊ * r⁻¹ ^ x`. -/
 def nnreal.normed (r : ℝ≥0) := ℕ →₀ ℤ
 
 namespace nnreal.normed
-variable {r : ℝ≥0}
+variables {r : ℝ≥0} (F G H : r.normed)
 
 instance (r : ℝ≥0) : has_nnnorm r.normed :=
 ⟨λ F, ∑ x in F.support, ∥F x∥₊ * r⁻¹ ^ x⟩
@@ -49,19 +49,13 @@ lemma nnnorm_zero : ∥(0 : r.normed)∥₊ = 0 :=
 by simp only [has_nnnorm.nnnorm, support_zero, sum_empty]
 
 @[simp]
-lemma nnnorm_neg (F : r.normed) :
-  ∥-F∥₊ = ∥F∥₊ :=
+lemma nnnorm_neg : ∥-F∥₊ = ∥F∥₊ :=
 by simp only [has_nnnorm.nnnorm, pi.neg_apply, coe_neg, support_neg, norm_neg]
 
-lemma nnnorm_sub (F G : r.normed) :
-  ∥F - G∥₊ = ∥G - F∥₊ :=
+lemma nnnorm_sub : ∥F - G∥₊ = ∥G - F∥₊ :=
 by rw [← nnnorm_neg (F - G), neg_sub]
 
-lemma norm_dist (r : ℝ≥0) (j : ℕ) (x y : r.normed) : ∥x j - y j∥ = dist (x j) (y j) :=
-by simp [has_norm.norm, has_dist.dist]
-
-lemma nnnorm_add_le (F G : r.normed) :
-  ∥F + G∥₊ ≤ ∥F∥₊ + ∥G∥₊ :=
+lemma nnnorm_add_le : ∥F + G∥₊ ≤ ∥F∥₊ + ∥G∥₊ :=
 begin
   unfold nnnorm,
   rw [sum_subset (subset_union_left _ _  : _ ⊆ F.support ∪ G.support),
@@ -78,7 +72,7 @@ begin
     simp only [hk, add_zero] }
 end
 
-lemma nnnorm_triangle (x y z : r.normed) : ∥x - z∥₊ ≤ ∥x - y∥₊ + ∥y - z∥₊ :=
+lemma nnnorm_triangle : ∥F - H∥₊ ≤ ∥F - G∥₊ + ∥G - H∥₊ :=
 by { convert nnnorm_add_le _ _, simp only [sub_add_sub_cancel] }
 
 end nnreal.normed
