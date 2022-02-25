@@ -33,24 +33,21 @@ begin
   abel,
 end
 
-instance fintype.sum_nnnorm {S : Fintype} {α : Type*} [has_nnnorm α] : has_nnnorm (S → α) :=
+variables {S : Fintype} {α : Type*}
+
+instance fintype.sum_nnnorm [has_nnnorm α] : has_nnnorm (S → α) :=
 { nnnorm := λ F, ∑ s, ∥F s∥₊ }
 
-instance sum_nnnorm (S : Fintype) (α : Type*) [has_nnnorm α] :
-  has_nnnorm (S → α) :=
+instance sum_nnnorm [has_nnnorm α] : has_nnnorm (S → α) :=
 { nnnorm := λ F, ∑ b, ∥F b∥₊ }
 
 @[simp]
-lemma sum_nnnorm_def {S : Fintype} {α : Type*} [has_nnnorm α] (F : S → α) :
-  ∥F∥₊ = ∑ b, ∥F b∥₊ := rfl
+lemma sum_nnnorm_def [has_nnnorm α] (F : S → α) : ∥F∥₊ = ∑ b, ∥F b∥₊ := rfl
 
-lemma sum_nnnorm_add_le {S : Fintype} {β : Type*} [semi_normed_group β]
-  (F G : S → β) :
+lemma sum_nnnorm_add_le [semi_normed_group α] (F G : S → α) :
   ∥F + G∥₊ ≤ ∥F∥₊ + ∥G∥₊ :=
-begin
-  simp only [sum_nnnorm_def, pi.add_apply],
-  exact le_trans (sum_le_sum (λ i hi, nnnorm_add_le _ _)) (finset.sum_add _).le,
-end
+show ∑ s, ∥F s + G s∥₊ ≤ ∑ s, ∥F s∥₊ + ∑ s, ∥G s∥₊, from
+le_trans (sum_le_sum (λ i hi, nnnorm_add_le _ _)) (finset.sum_add _).le
 
 end families_of_add_comm_groups
 
@@ -123,8 +120,8 @@ instance (r : ℝ≥0) : semi_normed_group r.normed :=
   dist_self     := λ F, by simp only [sub_self, nnnorm_zero, nonneg.coe_zero],
   dist_comm     := λ F G, by simp only [dist, nnnorm_sub],
   dist_triangle := λ x y z, nnnorm_triangle _ _ _,
-  edist_dist := λ x y, by simp only [subtype.coe_eta, ennreal.of_real_coe_nnreal],
-  dist_eq := λ x y, by simp only,
+  edist_dist    := λ x y, by simp only [subtype.coe_eta, ennreal.of_real_coe_nnreal],
+  dist_eq       := λ x y, by simp only,
   ..(infer_instance : add_comm_group _) }
 
 end nnreal.normed
