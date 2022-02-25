@@ -80,20 +80,26 @@ by rw [← nnnorm_neg (F - G), neg_sub]
 lemma norm_dist (r : ℝ≥0) (j : ℕ) (x y : r.normed) : ∥x j - y j∥ = dist (x j) (y j) :=
 by simp [has_norm.norm, has_dist.dist]
 
-lemma nnnorm_triangle {r : ℝ≥0} (x y z : r.normed) : ∥x - z∥₊ ≤ ∥x - y∥₊ + ∥y - z∥₊ :=
+lemma nnnorm_add_le (F G : r.normed) :
+  ∥F + G∥₊ ≤ ∥F∥₊ + ∥G∥₊ :=
 begin
-  unfold has_nnnorm.nnnorm,
-  rw [sum_subset (subset_union_left _ _  : _ ⊆ (x - y).support ∪ (y - z).support),
-      sum_subset (subset_union_right _ _ : _ ⊆ (x - y).support ∪ (y - z).support),
-    sum_subset (λ l hl, dists hl : _ ⊆ (x - y).support ∪ _), ← finset.sum_add],
+  unfold nnnorm,
+  rw [sum_subset (subset_union_left _ _  : _ ⊆ F.support ∪ G.support),
+      sum_subset (subset_union_right _ _ : _ ⊆ F.support ∪ G.support),
+      sum_subset ((λ k hk, _) : _ ⊆ F.support ∪ G.support), ← finset.sum_add],
   { refine sum_le_sum (λ j hj, _),
     rw ← add_mul,
     refine mul_le_mul_of_nonneg_right _ (zero_le _),
-    apply nnreal.coe_le_coe.mp,
-    simpa only [coe_sub, pi.sub_apply, subtype.coe_mk, norm_dist] using dist_triangle _ _ _ },
+    exact nnreal.coe_le_coe.mp (norm_add_le _ _) },
   repeat
-  { intros k _ h, convert zero_mul _, simpa only [mem_support_iff, not_not, norm_eq_zero] using h }
+  { intros k _ h, convert zero_mul _, simpa only [mem_support_iff, not_not, norm_eq_zero] using h },
+  { simp only [mem_union, mem_support_iff, ne.def, finsupp.coe_add, pi.add_apply] at ⊢ hk,
+    contrapose! hk,
+    simp only [hk, add_zero] }
 end
+
+lemma nnnorm_triangle {r : ℝ≥0} (x y z : r.normed) : ∥x - z∥₊ ≤ ∥x - y∥₊ + ∥y - z∥₊ :=
+by { convert nnnorm_add_le _ _, simp only [sub_add_sub_cancel] }
 
 end nnreal.normed
 
@@ -124,27 +130,11 @@ lemma nnnorm_sub (F G : invpoly r S) :
   ∥F - G∥₊ = ∥G - F∥₊ :=
 by rw [← nnnorm_neg (F - G), neg_sub]
 
---  There is some duplication between this lemma and `nnnorm_triangle`.
---  They can probably be unified.
 lemma nnnorm_add_le (F G : invpoly r S) :
   ∥F + G∥₊ ≤ ∥F∥₊ + ∥G∥₊ :=
 begin
-  simp only [sum_nnnorm_def, pi.add_apply],
-  rw ← finset.sum_add,
-  refine sum_le_sum (λ s hs, _),
-  simp only [has_nnnorm.nnnorm, finsupp.coe_add, pi.add_apply],
-  rw [sum_subset (subset_union_left _ _  : _ ⊆ (F s).support ∪ (G s).support),
-      sum_subset (subset_union_right _ _ : _ ⊆ (F s).support ∪ (G s).support),
-      sum_subset ((λ k hk, _) : _ ⊆ (F s).support ∪ (G s).support), ← finset.sum_add],
-  { refine sum_le_sum (λ j hj, _),
-    rw ← add_mul,
-    refine mul_le_mul_of_nonneg_right _ (zero_le _),
-    exact nnreal.coe_le_coe.mp (norm_add_le _ _) },
-  repeat
-  { intros k _ h, convert zero_mul _, simpa only [mem_support_iff, not_not, norm_eq_zero] using h },
-  { simp only [mem_union, mem_support_iff, ne.def, finsupp.coe_add, pi.add_apply] at ⊢ hk,
-    contrapose! hk,
-    simp only [hk, add_zero] }
+  rw [sum_nnnorm_def, sum_nnnorm_def, sum_nnnorm_def, ← finset.sum_add],
+  exact sum_le_sum (λ s hs, nnreal.normed.nnnorm_add_le _ _),
 end
 
 instance (S : Fintype) (r : ℝ≥0) : pseudo_normed_group (invpoly r S) :=
