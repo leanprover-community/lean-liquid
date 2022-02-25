@@ -251,19 +251,46 @@ lemma quotient_eq_to_hom {X Y : homotopy_category V (complex_shape.up ℤ)} (h :
   eq_to_hom h = (homotopy_category.quotient V (complex_shape.up ℤ)).map (eq_to_hom (by rw h)) :=
 by { subst h, simpa }
 
+lemma homotopy_category.has_shift_associativity_aux :
+  ∀ (m₁ m₂ m₃ : ℤ) (X : homotopy_category V (complex_shape.up ℤ)),
+    (homotopy_category.shift_functor V m₃).map
+          ((homotopy_category.shift_functor_add V m₁ m₂).hom.app X) ≫
+        (homotopy_category.shift_functor_add V (m₁ + m₂) m₃).hom.app X ≫
+          eq_to_hom (by rw add_assoc) =
+      (homotopy_category.shift_functor_add V m₂ m₃).hom.app
+          ((homotopy_category.shift_functor V m₁).obj X) ≫
+        (homotopy_category.shift_functor_add V m₁ (m₂ + m₃)).hom.app X :=
+λ m₁ m₂ m₃ ⟨X⟩, by { dsimp [homotopy_category.shift_functor_add],
+  rw quotient_eq_to_hom, simp only [← functor.map_comp], congr' 1, ext, simp [X_eq_to_iso] }
+
+lemma homotopy_category.has_shift_left_unitality_aux :
+  ∀ (n : ℤ) (X : homotopy_category V (complex_shape.up ℤ)),
+    (homotopy_category.shift_functor V n).map
+          ((homotopy_category.shift_ε V).hom.app X) ≫
+        (homotopy_category.shift_functor_add V 0 n).hom.app X =
+      eq_to_hom (by { dsimp, rw zero_add }) :=
+λ n ⟨X⟩, by { dsimp [homotopy_category.shift_ε,
+  homotopy_category.shift_functor_add], rw quotient_eq_to_hom, simp only [← functor.map_comp],
+  congr' 1, ext, simp [X_eq_to_iso] }
+
+lemma homotopy_category.has_shift_right_unitality_aux :
+  ∀ (n : ℤ) (X : homotopy_category V (complex_shape.up ℤ)),
+    (homotopy_category.shift_ε V).hom.app
+          ((homotopy_category.shift_functor V n).obj X) ≫
+        (homotopy_category.shift_functor_add V n 0).hom.app X =
+      eq_to_hom (by { dsimp, rw add_zero }) :=
+λ n ⟨X⟩, by { dsimp [homotopy_category.shift_ε,
+  homotopy_category.shift_functor_add], rw quotient_eq_to_hom, simp only [← functor.map_comp],
+  congr' 1, ext, simp [X_eq_to_iso] }
+
 instance homotopy_category.has_shift : has_shift (homotopy_category V (complex_shape.up ℤ)) ℤ :=
 has_shift_mk _ _
 { F := homotopy_category.shift_functor V,
   ε := homotopy_category.shift_ε V,
   μ := homotopy_category.shift_functor_add V,
-  associativity := λ m₁ m₂ m₃ ⟨X⟩, by { dsimp [homotopy_category.shift_functor_add],
-    rw quotient_eq_to_hom, simp only [← functor.map_comp], congr' 1, ext, simp [X_eq_to_iso] },
-  left_unitality := λ n ⟨X⟩, by { dsimp [homotopy_category.shift_ε,
-    homotopy_category.shift_functor_add], rw quotient_eq_to_hom, simp only [← functor.map_comp],
-    congr' 1, ext, simp [X_eq_to_iso] },
-  right_unitality := λ n ⟨X⟩, by { dsimp [homotopy_category.shift_ε,
-    homotopy_category.shift_functor_add], rw quotient_eq_to_hom, simp only [← functor.map_comp],
-    congr' 1, ext, simp [X_eq_to_iso] } }
+  associativity := homotopy_category.has_shift_associativity_aux _,
+  left_unitality := homotopy_category.has_shift_left_unitality_aux _,
+  right_unitality := homotopy_category.has_shift_right_unitality_aux _ }
 
 @[simp] lemma homotopy_category.quotient_obj_shift (X : cochain_complex V ℤ) (n : ℤ) :
   ((homotopy_category.quotient V _).obj X)⟦n⟧ = ⟨X⟦n⟧⟩ := rfl

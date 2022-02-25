@@ -366,31 +366,64 @@ instance : has_zero_object (bounded_homotopy_category A) :=
   unique_to := λ X, has_zero_object.unique_to _,
   unique_from := λ X, has_zero_object.unique_from _ }
 
+lemma is_bounded_shift (X : bounded_homotopy_category A) (i : ℤ) :
+  ∃ (a : ℤ), ∀ j, a ≤ j → is_zero (X.val⟦i⟧.as.X j) :=
+begin
+  obtain ⟨a,ha⟩ := X.2,
+  use a - i,
+  intros j hj,
+  apply ha,
+  linarith
+end
+
+local attribute [instance] endofunctor_monoidal_category
+local attribute [reducible] endofunctor_monoidal_category discrete.add_monoidal
+
 instance : has_shift (bounded_homotopy_category A) ℤ :=
 has_shift_mk _ _
 { F := λ i,
-  { obj := λ X, ⟨X.val⟦(i : ℤ)⟧, sorry⟩,
+  { obj := λ X, ⟨X.val⟦(i : ℤ)⟧, is_bounded_shift _ _⟩,
     map := λ X Y f, f⟦i⟧',
     map_id' := λ X, (category_theory.shift_functor _ _).map_id _,
     map_comp' := λ X Y Z f g, (category_theory.shift_functor _ _).map_comp _ _ },
   ε :=
   { hom :=
     { app := λ X, (homotopy_category.shift_ε _).hom.app X.val,
-      naturality' := sorry }, --
+      naturality' := λ _ _ _, (homotopy_category.shift_ε _).hom.naturality _ },
     inv :=
     { app := λ X, (homotopy_category.shift_ε _).inv.app X.val,
-      naturality' := sorry },
-    hom_inv_id' := sorry,
-    inv_hom_id' := sorry },
+      naturality' := λ _ _ _, (homotopy_category.shift_ε _).inv.naturality _ },
+    hom_inv_id' := begin
+      ext,
+      dsimp,
+      erw [← nat_trans.comp_app, iso.hom_inv_id],
+      refl,
+    end,
+    inv_hom_id' := begin
+      ext,
+      dsimp,
+      erw [← nat_trans.comp_app, iso.inv_hom_id],
+      refl,
+    end },
   μ := λ m n,
   { hom :=
     { app := λ X, (homotopy_category.shift_functor_add _ _ _).hom.app X.val,
-      naturality' := sorry },
+      naturality' := λ _ _ _, (homotopy_category.shift_functor_add _ _ _).hom.naturality _ },
     inv :=
     { app := λ X, (homotopy_category.shift_functor_add _ _ _).inv.app X.val,
-      naturality' := sorry },
-    hom_inv_id' := sorry,
-    inv_hom_id' := sorry },
+      naturality' := λ _ _ _, (homotopy_category.shift_functor_add _ _ _).inv.naturality _ },
+    hom_inv_id' := begin
+      ext,
+      dsimp,
+      erw [← nat_trans.comp_app, iso.hom_inv_id],
+      refl,
+    end,
+    inv_hom_id' := begin
+      ext,
+      dsimp,
+      erw [← nat_trans.comp_app, iso.inv_hom_id],
+      refl,
+    end },
   associativity := sorry,
   left_unitality := sorry,
   right_unitality := sorry }
