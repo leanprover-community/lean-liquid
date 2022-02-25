@@ -48,12 +48,18 @@ apply_nolint finite_product_colimit_setup.T unused_arguments
 apply_nolint finite_product_colimit_setup.ct_iso unused_arguments
 apply_nolint finite_product_condition_holds_for_colimit unused_arguments
 
+-- condensed/is_proetale_sheaf.lean
+apply_nolint category_theory.functor.finite_product_condition_of_sum unused_arguments
+
 -- for_mathlib/Gordan.lean
 apply_nolint missing unused_arguments
 
 -- for_mathlib/Profinite/clopen_limit.lean
 apply_nolint Profinite.exists_image inhabited_nonempty
 apply_nolint Profinite.image_stabilizes inhabited_nonempty
+
+-- for_mathlib/Profinite/disjoint_union.lean
+apply_nolint Profinite.sigma_iso_of_equiv_aux unused_arguments
 
 -- for_mathlib/abelian_category.lean
 apply_nolint category_theory.preserves_zero_of_preserves_initial instance_priority
@@ -82,8 +88,18 @@ apply_nolint category_theory.triangulated.is_iso_of_is_iso_inv_rotate unused_arg
 apply_nolint category_theory.triangulated.is_iso_of_is_iso_rotate unused_arguments
 apply_nolint category_theory.triangulated.is_iso_triangle_hom_of_is_iso unused_arguments
 
+-- for_mathlib/derived_functor.lean
+apply_nolint category_theory.functor.left_derived.α unused_arguments
+apply_nolint category_theory.functor.left_derived.β unused_arguments
+
+-- for_mathlib/exact_seq3.lean
+apply_nolint category_theory.exact_seq.w def_lemma
+
 -- for_mathlib/homological_complex_equiv_functor_category.lean
 apply_nolint homological_complex.complex_to_functor_functor unused_arguments
+
+-- for_mathlib/homology_iso.lean
+apply_nolint category_theory.kernel_lift_eq unused_arguments
 
 -- for_mathlib/horseshoe.lean
 apply_nolint short_exact_sequence.biprod_factors unused_arguments
@@ -107,6 +123,25 @@ apply_nolint Inter_eq inhabited_nonempty
 apply_nolint eventually_constant inhabited_nonempty
 apply_nolint exists_le_finset inhabited_nonempty
 
+-- for_mathlib/projective_replacement.lean
+apply_nolint category_theory.projective.category_theory.category_struct.comp.category_theory.epi unused_arguments
+apply_nolint category_theory.projective.category_theory.limits.factor_thru_image.category_theory.strong_epi unused_arguments
+apply_nolint category_theory.projective.cokernel_lift_to_kernel_desc unused_arguments
+apply_nolint category_theory.projective.exists_preimage_of_cokernel_π unused_arguments
+apply_nolint category_theory.projective.homology.π.category_theory.epi unused_arguments
+apply_nolint category_theory.projective.homology_functor_obj_iso unused_arguments
+apply_nolint category_theory.projective.homology_is_zero_object_of_bounded unused_arguments
+apply_nolint category_theory.projective.pseudoelement.id_apply unused_arguments
+apply_nolint category_theory.projective.pullback_comp_mono_iso unused_arguments
+apply_nolint category_theory.projective.replacement_aux unused_arguments
+apply_nolint category_theory.projective.replacement_aux_comp_eq_zero check_type
+apply_nolint category_theory.projective.replacement_aux_hom_eq check_type
+apply_nolint category_theory.projective.replacement_homology_eq def_lemma
+apply_nolint category_theory.projective.replacement_pos def_lemma
+apply_nolint category_theory.projective.π_cokernel_iso_of_eq unused_arguments
+apply_nolint split_epi_of_is_zero_object def_lemma
+apply_nolint split_mono_of_is_zero_object def_lemma
+
 -- for_mathlib/rational_cones.lean
 apply_nolint extended_le_span unused_arguments
 
@@ -116,8 +151,16 @@ apply_nolint category_theory.snake_diagram.mk_functor.square_commutes_comp_col u
 apply_nolint category_theory.snake_diagram.mk_functor.square_commutes_comp_row unused_arguments
 apply_nolint category_theory.snake_diagram.mk_functor.square_commutes_row unused_arguments
 
+-- for_mathlib/snake_lemma3.lean
+apply_nolint category_theory.snake.row_exact₁_aux unused_arguments
+apply_nolint category_theory.snake.row_exact₂_aux unused_arguments
+
 -- for_mathlib/split_exact.lean
 apply_nolint category_theory.split.map def_lemma
+
+-- for_mathlib/triangle_shift.lean
+apply_nolint category_theory.triangulated.triangle.iso.of_components unused_arguments
+apply_nolint category_theory.triangulated.triangle.triangle_shift_obj unused_arguments
 
 -- laurent_measures/basic.lean
 apply_nolint laurent_measures.laurent_measures.norm_nonneg dup_namespace
