@@ -251,7 +251,7 @@ begin
   apply is_zero_of_exact_seq_of_is_iso_of_is_iso _ _ _ _ E,
 end
 
-lemma is_acyclic_shift (T : 𝒦) [h : is_acyclic T] (i : ℤ) : is_acyclic (T⟦i⟧) :=
+instance is_acyclic_shift (T : 𝒦) [h : is_acyclic T] (i : ℤ) : is_acyclic (T⟦i⟧) :=
 begin
   rw ← is_acyclic_iff,
   intros j,
@@ -298,7 +298,7 @@ begin
     let g' : P ⟶ _ := g,
     haveI : is_acyclic T.inv_rotate.obj₁,
     { change is_acyclic ((T.obj₃)⟦(-1 : ℤ)⟧),
-      apply_with is_acyclic_shift { instances := ff },
+      apply_with homotopy_category.is_acyclic_shift { instances := ff },
       haveI : is_quasi_iso T.mor₁ := hf,
       apply is_acyclic_of_dist_triang_of_is_quasi_iso,
       exact hT },
@@ -322,9 +322,39 @@ begin
     rwa ← ee at this }
 end
 
-instance (X : 𝒦) [is_bounded_above X] (i : ℤ) : is_bounded_above (X⟦i⟧) := sorry
+instance (X : 𝒦) [is_bounded_above X] (i : ℤ) : is_bounded_above (X⟦i⟧) :=
+begin
+  obtain ⟨a,ha⟩ := is_bounded_above.cond X,
+  use a - i,
+  intros j hj,
+  apply ha,
+  linarith
+end
 
-instance (P : 𝒦) [is_K_projective P] (i : ℤ) : is_K_projective (P⟦i⟧) := sorry
+lemma is_K_projective_of_iso (P Q : 𝒦) [is_K_projective P] (e : P ≅ Q) : is_K_projective Q :=
+begin
+  constructor,
+  introsI Y _ f,
+  apply_fun (λ q, e.hom ≫ q),
+  dsimp,
+  rw comp_zero,
+  apply is_K_projective.cond,
+  intros a b h,
+  apply_fun (λ q, e.inv ≫ q) at h,
+  simpa using h,
+end
+
+instance (P : 𝒦) [is_K_projective P] (i : ℤ) : is_K_projective (P⟦i⟧) :=
+begin
+  constructor,
+  introsI Y _ f,
+  let e := (shift_functor_comp_shift_functor_neg _ i).app P,
+  dsimp at e,
+  haveI : is_K_projective (P⟦i⟧⟦-i⟧) := is_K_projective_of_iso _ _ e.symm,
+  apply (category_theory.shift_functor 𝒦 (-i)).map_injective,
+  simp,
+  apply is_K_projective.cond,
+end
 
 variable [enough_projectives A]
 noncomputable theory
