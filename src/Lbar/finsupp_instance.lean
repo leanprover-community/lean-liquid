@@ -1,6 +1,4 @@
-import pseudo_normed_group.basic
-import category_theory.Fintype
-import analysis.normed_space.basic
+import Lbar.standard_filtration
 
 open finset finsupp
 open_locale nnreal big_operators
@@ -8,36 +6,6 @@ open_locale nnreal big_operators
 noncomputable theory
 
 universes u v
-
-section families_of_add_comm_groups
-
-variables {S : Fintype} {α β : Type*}
-
-lemma mem_union_support_of_mem_support_add [add_zero_class β] [decidable_eq α] {k : α}
-  (F G : α →₀ β) (hk : k ∈ (F + G).support) :
-  k ∈ F.support ∪ G.support :=
-begin
-  simp only [mem_union, mem_support_iff, ne.def, finsupp.coe_add, pi.add_apply] at ⊢ hk,
-  contrapose! hk,
-  simp only [hk, add_zero],
-end
-
-lemma finset.sum_add [add_comm_monoid β] {F G : α → β} (s : finset α) :
-  ∑ x in s, (F x + G x) = ∑ x in s, F x + ∑ x in s, G x :=
-begin
-  classical,
-  refine finset.induction_on s (by simp) (λ a s as h, _),
-  rw [sum_insert as, sum_insert as, sum_insert as, h],
-  abel,
-end
-
-instance sum_nnnorm [has_nnnorm α] : has_nnnorm (S → α) :=
-{ nnnorm := λ F, ∑ b, ∥F b∥₊ }
-
-@[simp]
-lemma sum_nnnorm_def [has_nnnorm α] (F : S → α) : ∥F∥₊ = ∑ b, ∥F b∥₊ := rfl
-
-end families_of_add_comm_groups
 
 /--  Let `r : ℝ≥0` be a non-negative real number.  `nnreal.normed r` or `r.normed` is the type of
 finsupps `ℕ →₀ ℤ` with an extra parameter `r`.
@@ -61,16 +29,13 @@ by simp only [has_nnnorm.nnnorm, support_zero, sum_empty]
 lemma nnnorm_neg : ∥-F∥₊ = ∥F∥₊ :=
 by simp only [has_nnnorm.nnnorm, pi.neg_apply, coe_neg, support_neg, norm_neg]
 
-lemma nnnorm_sub : ∥F - G∥₊ = ∥G - F∥₊ :=
-by rw [← nnnorm_neg (F - G), neg_sub]
-
 lemma nnnorm_add_le : ∥F + G∥₊ ≤ ∥F∥₊ + ∥G∥₊ :=
 begin
   unfold nnnorm,
   rw [sum_subset (subset_union_left  F.support G.support),
       sum_subset (subset_union_right F.support G.support),
       sum_subset ((λ k, mem_union_support_of_mem_support_add F G) : _ ⊆ F.support ∪ G.support),
-      ← finset.sum_add],
+      ← finset.sum_add_distrib],
   { refine sum_le_sum (λ j hj, _),
     rw ← add_mul,
     exact mul_le_mul_of_nonneg_right (nnreal.coe_le_coe.mp (norm_add_le _ _)) (zero_le _) },
@@ -79,11 +44,18 @@ begin
       eq_self_iff_true, true_or, implies_true_iff] {contextual := true} }
 end
 
-lemma nnnorm_triangle : ∥F - H∥₊ ≤ ∥F - G∥₊ + ∥G - H∥₊ :=
-by { convert nnnorm_add_le _ _, simp only [sub_add_sub_cancel] }
+instance : nnnorm_add_class r.normed :=
+{ nnn_zero   := nnnorm_zero,
+  nnn_neg    := nnnorm_neg,
+  nnn_add_le := nnnorm_add_le,
+  ..(infer_instance : add_comm_group _) }
+
+instance : pseudo_normed_group r.normed :=
+std_flt.to_pseudo_normed_group
 
 end nnreal.normed
 
+open nnnorm_add_class
 /--  Let `r : ℝ≥0` be a non-negative real number and `S : Fintype` a finite type.
 `invpoly r S` is the type of `S`-indexed terms of type `r.normed`, that is, finsupps
 `ℕ →₀ ℤ` with norm defined using `r⁻¹`. -/
@@ -96,31 +68,18 @@ variables {r : ℝ≥0} {S : Fintype} (F G : invpoly r S)
 instance : inhabited (invpoly r S) := ⟨0⟩
 
 instance : has_nnnorm (invpoly r S) :=
-@sum_nnnorm S r.normed ⟨λ F, ∑ x in F.support, ∥F x∥₊ * r⁻¹ ^ x⟩
+@fintype.sum_nnnorm S r.normed ⟨λ F, ∑ x in F.support, ∥F x∥₊ * r⁻¹ ^ x⟩
 
-@[simp]
-lemma nnnorm_zero : ∥(0 : invpoly r S)∥₊ = 0 :=
-by simp only [sum_nnnorm_def, pi.zero_apply, sum_const_zero, nnreal.normed.nnnorm_zero]
+instance : nnnorm_add_class (invpoly r S) :=
+pi.nnnorm_add_class
 
-@[simp]
-lemma nnnorm_neg : ∥-F∥₊ = ∥F∥₊ :=
-by simp only [sum_nnnorm_def, pi.neg_apply, nnreal.normed.nnnorm_neg]
-
-lemma nnnorm_sub : ∥F - G∥₊ = ∥G - F∥₊ :=
-by rw [← nnnorm_neg (F - G), neg_sub]
-
-lemma nnnorm_add_le : ∥F + G∥₊ ≤ ∥F∥₊ + ∥G∥₊ :=
-begin
-  rw [sum_nnnorm_def, sum_nnnorm_def, sum_nnnorm_def, ← finset.sum_add],
-  exact sum_le_sum (λ s hs, nnreal.normed.nnnorm_add_le _ _),
-end
+/-  The three lemmas
+`@[simp] lemma nnnorm_zero : ∥(0 : invpoly r S)∥₊ = 0  := nnnorm_add_class.nnn_zero`
+`@[simp] lemma nnnorm_neg  : ∥-F∥₊ = ∥F∥₊              := nnnorm_add_class.nnnorm_neg _`
+`lemma nnnorm_add_le       : ∥F + G∥₊ ≤ ∥F∥₊ + ∥G∥₊    := nnnorm_add_class.nnnorm_add_le _ _`
+follow from `nnnorm_add_class α`. -/
 
 instance : pseudo_normed_group (invpoly r S) :=
-{ to_add_comm_group   := invpoly.add_comm_group r S,
-  filtration          := λ c, {F : invpoly r S | ∥F∥₊ ≤ c},
-  filtration_mono     := λ c d cd x (hx : ∥x∥₊ ≤ c), hx.trans cd,
-  zero_mem_filtration := λ c, by simp only [set.mem_set_of_eq, nnnorm_zero, zero_le'],
-  neg_mem_filtration  := λ c F hF, by simpa only [set.mem_set_of_eq, nnnorm_neg],
-  add_mem_filtration  := λ c d F G hF hG, (nnnorm_add_le F G).trans (add_le_add hF hG) }
+std_flt.to_pseudo_normed_group
 
 end invpoly
