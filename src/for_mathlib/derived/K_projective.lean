@@ -669,6 +669,51 @@ def Ext_iso
   ((Ext i).obj (opposite.op X)).obj Y ≅ AddCommGroup.of (P ⟶ Y⟦i⟧) :=
 (preadditive_yoneda.obj (Y⟦i⟧)).map_iso (replacement_iso _ _ _ f X.π).op
 
+instance ext_additive (i : ℤ) (X : 𝒦) : functor.additive ((Ext i).obj (opposite.op X)) :=
+begin
+  refine ⟨_⟩,
+  intros X Y f g,
+  ext h,
+  dsimp [Ext, preadditive_yoneda],
+  rw [(category_theory.shift_functor 𝒦 i).map_add, preadditive.comp_add],
+end
+
+instance ext_additive' (i : ℤ) (X : 𝒦) : functor.additive ((Ext i).flip.obj X).right_op :=
+begin
+  refine ⟨_⟩,
+  intros X Y f g,
+  dsimp [Ext, preadditive_yoneda],
+  rw ← op_add,
+  congr' 1,
+  ext h,
+  dsimp,
+  rw ← preadditive.add_comp,
+  congr' 1,
+  symmetry,
+  apply lift_unique,
+  simp,
+end .
+
+def hom_shift_right_iso (X : 𝒦) (i j : ℤ) (h : i + j = 0) :
+  category_theory.shift_functor 𝒦 i ⋙ preadditive_yoneda.flip.obj (opposite.op X) ≅
+  preadditive_yoneda.flip.obj (opposite.op (X⟦-i⟧)) := sorry
+
+def hom_shift_left_iso (X : 𝒦) (i j : ℤ) (h : i + j = 0) :
+  (category_theory.shift_functor 𝒦 i).op ⋙ preadditive_yoneda.obj X ≅
+  preadditive_yoneda.obj (X⟦j⟧) := sorry
+
+-- The LES for Ext in the second variable.
+instance (i : ℤ) (X : 𝒦) : homological_functor ((Ext i).obj (opposite.op X)) :=
+begin
+  show homological_functor (category_theory.shift_functor 𝒦 i ⋙ preadditive_yoneda.flip.obj _),
+  let E := hom_shift_right_iso X.replace i (-i) (by simp),
+  exact homological_of_nat_iso _ _ E.symm,
+end
+
+-- The LES for Ext in the first variable.
+-- We need K-projective replacements of triangles for this.
+instance (i : ℤ) (X : 𝒦) : homological_functor ((Ext i).flip.obj X).right_op := sorry
+
 -- Move this
 @[simps]
 def _root_.homotopy_category.single (i : ℤ) : A ⥤ homotopy_category A (complex_shape.up ℤ) :=

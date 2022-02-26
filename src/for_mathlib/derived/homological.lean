@@ -377,4 +377,19 @@ begin
   assumption
 end
 
+lemma homological_of_nat_iso {A : Type*} [category A] [abelian A] (F G : C ⥤ A)
+  [F.additive] [G.additive] [homological_functor F] (e : F ≅ G) : homological_functor G :=
+begin
+  constructor,
+  intros T hT,
+  have h₁ := e.hom.naturality T.mor₁,
+  have h₂ := e.hom.naturality T.mor₂,
+  rw ← is_iso.inv_comp_eq at h₁ h₂,
+  rw [← h₁, ← h₂, exact_iso_comp, ← category.assoc, exact_comp_iso],
+  let E := as_iso (e.hom.app T.obj₂),
+  change exact (F.map T.mor₁ ≫ E.hom) (E.inv ≫ _),
+  haveI : exact (F.map T.mor₁) (F.map T.mor₂) := by apply homological_functor.cond F _ hT,
+  apply_instance,
+end
+
 end category_theory.triangulated
