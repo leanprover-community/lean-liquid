@@ -1,5 +1,6 @@
 import Lbar.finsupp_instance
 
+--  The lemmas in this file are likely no longer needed
 open finset finsupp
 open_locale big_operators
 
@@ -11,7 +12,7 @@ variables {S : Fintype} {α β : Type*}
 lemma sum_nnnorm_add_le [semi_normed_group α] (F G : S → α) :
   ∥F + G∥₊ ≤ ∥F∥₊ + ∥G∥₊ :=
 show ∑ s, ∥F s + G s∥₊ ≤ ∑ s, ∥F s∥₊ + ∑ s, ∥G s∥₊, from
-le_trans (sum_le_sum (λ i hi, nnnorm_add_le _ _)) univ.sum_add.le
+le_trans (sum_le_sum (λ i hi, nnnorm_add_le _ _)) sum_add_distrib.le
 
 --  Not needed anymore: this was a helper lemma for the triangle inequality
 lemma add_zero_dists [decidable_eq α] [add_zero_class β] {l : α} {x y z : α →₀ β}
