@@ -63,7 +63,7 @@ open nnnorm_add_class
 def invpoly (r : ℝ≥0) (S : Fintype) := S → r.normed
 
 namespace invpoly
-variables {r : ℝ≥0} {S : Fintype} (F G : invpoly r S)
+variables {r : ℝ≥0} {S : Fintype}
 
 instance : inhabited (invpoly r S) := ⟨0⟩
 
@@ -74,6 +74,7 @@ instance : nnnorm_add_class (invpoly r S) :=
 pi.nnnorm_add_class
 
 /-  The three lemmas
+`variables (F G : invpoly r S)`
 `@[simp] lemma nnnorm_zero : ∥(0 : invpoly r S)∥₊ = 0  := nnnorm_add_class.nnn_zero`
 `@[simp] lemma nnnorm_neg  : ∥-F∥₊ = ∥F∥₊              := nnnorm_add_class.nnnorm_neg _`
 `lemma nnnorm_add_le       : ∥F + G∥₊ ≤ ∥F∥₊ + ∥G∥₊    := nnnorm_add_class.nnnorm_add_le _ _`
