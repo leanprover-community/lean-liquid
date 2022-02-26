@@ -153,8 +153,8 @@ instance {S : Fintype} : nnnorm_add_class (S → β) :=
   nnn_add_le := λ F G, le_trans (sum_le_sum (λ j hj, nnnorm_add_le _ _)) sum_add_distrib.le,
   ..(infer_instance : add_comm_group _) }
 
-/--  Given type `α` that is has a `nnnorm_add_class` instance, the standard filtration
-`std_flt α` endows `α` with a pseudo_normed_group` class. -/
+/--  Given a type `α` with a `nnnorm_add_class` instance, `std_flt.to_pseudo_normed_group`
+shows that the standard filtration `std_flt α` endows `α` with a `pseudo_normed_group` class. -/
 def std_flt.to_pseudo_normed_group [has_nnnorm α] [nnnorm_add_class α] : pseudo_normed_group α :=
 { filtration          := std_flt α,
   filtration_mono     := std_flt_mono α,
