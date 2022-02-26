@@ -3,7 +3,8 @@ import category_theory.Fintype
 import analysis.normed_space.basic
 
 /-!
-Let `α` be a type with the structure of an additive commutative group and a non-negative `∥_∥₊`.
+Let `α` be a type with the structure of an additive commutative group and
+a non-negative norm `∥_∥₊`.
 
 In this file, we introduce
 * the typeclass `nnnorm_add_class α`,
