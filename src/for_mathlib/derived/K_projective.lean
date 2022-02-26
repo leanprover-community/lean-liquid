@@ -383,6 +383,36 @@ begin
     apply_instance }
 end
 
+lemma K_projective_of_triangle (T : triangle 𝒦) (hT : T ∈ dist_triang 𝒦)
+  [is_K_projective T.obj₁] [is_K_projective T.obj₂] : is_K_projective T.obj₃ :=
+begin
+  constructor,
+  introsI Y _ f,
+  let H : 𝒦 ⥤ Abᵒᵖ := (preadditive_yoneda.obj Y).right_op,
+  haveI : homological_functor H := infer_instance, -- sanity check
+  have e := homological_functor.cond H T.rotate
+    (rotate_mem_distinguished_triangles _ hT),
+  dsimp [H] at e,
+  let a := _, let b := _, change exact a b at e, have e' : exact b.unop a.unop,
+  { resetI, apply_instance },
+  dsimp at e',
+  rw AddCommGroup.exact_iff at e',
+  let a' := _, let b' := _, change add_monoid_hom.range a' = add_monoid_hom.ker b' at e',
+  have : f ∈ b'.ker,
+  { change _  ≫ _ = 0,
+    apply_with is_K_projective.cond { instances := ff },
+    dsimp,
+    apply_instance,
+    apply_instance },
+  rw ← e' at this,
+  obtain ⟨g,hg⟩ := this,
+  dsimp at hg,
+  rw ← hg,
+  have : g = 0,
+  { apply is_K_projective.cond },
+  simp [this],
+end
+
 end homotopy_category
 
 variable (A)
