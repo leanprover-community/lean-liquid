@@ -481,10 +481,20 @@ begin
     apply_instance },
   haveI : is_iso (H.map (g.hom₁⟦(1 : ℤ)⟧')),
   { change is_iso (H.map (f.hom₁⟦i⟧'⟦(1 :ℤ)⟧')),
-    sorry },
+    have := (category_theory.shift_functor_add 𝒦 i 1).hom.naturality f.hom₁,
+    apply_fun (λ e, H.map e) at this,
+    simp only [H.map_comp, functor.comp_map] at this,
+    rw ← is_iso.inv_comp_eq at this,
+    rw ← this,
+    apply is_iso.comp_is_iso },
   haveI : is_iso (H.map (g.hom₂⟦(1 : ℤ)⟧')),
   { change is_iso (H.map (f.hom₂⟦i⟧'⟦(1 :ℤ)⟧')),
-    sorry },
+    have := (category_theory.shift_functor_add 𝒦 i 1).hom.naturality f.hom₂,
+    apply_fun (λ e, H.map e) at this,
+    simp only [H.map_comp, functor.comp_map] at this,
+    rw ← is_iso.inv_comp_eq at this,
+    rw ← this,
+    apply is_iso.comp_is_iso },
   refine @abelian.is_iso_of_is_iso_of_is_iso_of_is_iso_of_is_iso A _ _
     (H.obj S₁.obj₁) (H.obj S₁.obj₂) (H.obj S₁.obj₃) (H.obj (S₁.obj₁⟦(1 : ℤ)⟧))
     (H.obj S₂.obj₁) (H.obj S₂.obj₂) (H.obj S₂.obj₃) (H.obj (S₂.obj₁⟦(1 : ℤ)⟧))
