@@ -934,7 +934,16 @@ end
 
 -- The LES for Ext in the first variable.
 -- We need K-projective replacements of triangles for this.
-instance (i : ℤ) (X : 𝒦) : homological_functor ((Ext i).flip.obj X).right_op := sorry
+instance (i : ℤ) (X : 𝒦) : homological_functor ((Ext i).flip.obj X).right_op :=
+begin
+  constructor,
+  intros T hT,
+  have := homological_functor.cond
+    (preadditive_yoneda.obj (X⟦i⟧)).right_op
+    (replace_triangle T)
+    (distinguished_replace_triangle _ hT),
+  exact this,
+end
 
 -- Move this
 @[simps]
