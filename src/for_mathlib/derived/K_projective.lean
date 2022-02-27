@@ -507,12 +507,14 @@ begin
     (H.map (S₁.rotate.mor₃))
     (H.map (S₂.rotate.mor₃))
     (H.map (g.hom₂⟦(1 : ℤ)⟧')) _ _ _ _ _ _ _ _ _ _ _,
-  { sorry },
-  { sorry },
-  { sorry },
-  { sorry },
+  { simp only [← H.map_comp, g.comm₁] },
+  { simp only [← H.map_comp, g.comm₂] },
+  { simp only [← H.map_comp, g.comm₃] },
+  { simp only [← functor.map_comp],
+    congr' 1,
+    dsimp,
+    simp only [preadditive.comp_neg, preadditive.neg_comp, neg_inj, ← functor.map_comp, f.comm₁] },
 end
-
 
 end homotopy_category
 
