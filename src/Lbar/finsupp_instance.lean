@@ -1,4 +1,4 @@
-import Lbar.standard_filtration
+import Lbar.nnnorm_add_class
 
 open finset finsupp
 open_locale nnreal big_operators
