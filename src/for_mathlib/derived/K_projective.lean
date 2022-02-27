@@ -806,12 +806,28 @@ begin
     erw [category.assoc, lift_lifts, lift_lifts_assoc],
     exact sq3,
     assumption },
-  { sorry },
-  { sorry },
-  { sorry },
-  { sorry },
-  { sorry },
-  { sorry },
+  { dsimp, rw [category.id_comp, category.comp_id] },
+  { dsimp [S, replace_triangle],
+    rw category.id_comp,
+    apply lift_ext q,
+    erw [category.assoc, lift_lifts, lift_lifts, sq2],
+    assumption },
+  { dsimp [S, replace_triangle],
+    rw [category_theory.functor.map_id, category.comp_id],
+    haveI : is_quasi_iso
+      ((category_theory.shift_functor (bounded_homotopy_category A) (1 : ℤ)).map T.obj₁.π),
+    { show is_quasi_iso (T.obj₁.π⟦(1 : ℤ)⟧'), apply_instance }, -- strange.
+    apply lift_ext (T.obj₁.π⟦(1 : ℤ)⟧'),
+    erw [category.assoc, lift_lifts, sq3, lift_lifts_assoc],
+    assumption },
+  { ext; dsimp, rw category.id_comp, rw category.id_comp,
+    apply lift_ext q, erw [category.assoc, lift_lifts, lift_lifts, category.id_comp],
+    assumption },
+  { ext; dsimp, rw category.id_comp, rw category.id_comp,
+    apply lift_ext T.obj₃.π, erw [category.assoc, lift_lifts, lift_lifts, category.id_comp],
+    assumption },
+  { dsimp [W, S, replace_triangle],
+    rw lift_lifts },
 end
 
 @[simps]
@@ -918,7 +934,16 @@ end
 
 -- The LES for Ext in the first variable.
 -- We need K-projective replacements of triangles for this.
-instance (i : ℤ) (X : 𝒦) : homological_functor ((Ext i).flip.obj X).right_op := sorry
+instance (i : ℤ) (X : 𝒦) : homological_functor ((Ext i).flip.obj X).right_op :=
+begin
+  constructor,
+  intros T hT,
+  have := homological_functor.cond
+    (preadditive_yoneda.obj (X⟦i⟧)).right_op
+    (replace_triangle T)
+    (distinguished_replace_triangle _ hT),
+  exact this,
+end
 
 -- Move this
 @[simps]
