@@ -18,12 +18,9 @@ requires to prove the identities:
 * the nnnorm of a sum is at most the sum of the nnnorms: `∥x + y∥₊ ≤ ∥x∥₊ + ∥y∥₊`.
 
 ##  The standard filtration `std_flt α`
-Let `α` be a nnnormed type.  `std_flt α` is the function `ℝ≥0 → set α` taking a non-negative
-real number `c` to the subset of all the terms of `α` of nnnorm at most `c`:
-```
-std_flt α : ℝ≥0 →  set α
-            c ↦ {z : α | ∥z∥₊ ≤ c}
-```
+Let `α` be a nnnormed type.  We name `std_flt` is the function `ℝ≥0 → set α` taking a non-negative
+real number `c` to the subset of all the terms of `α` of nnnorm at most `c`, although we do not
+introduce the definition.
 
 The main construction is `std_flt.to_pseudo_normed_group` asserting that the typeclass
 `nnnorm_add_class α` (i.e. `α` is an additive commutative group with a compatible `∥_∥₊`),
@@ -103,27 +100,22 @@ open nnnorm_add_class
 section std_flt_lemmas
 variables (α : Type*) [has_nnnorm α]
 
-/--  Let `α` be a nnnormed type.  `std_flt α` is the function `ℝ≥0 → set α` taking a non-negative
-real number `c` to the subset of all the terms of `α` of nnnorm at most `c`. -/
-@[reducible]
-def std_flt : ℝ≥0 → set α := λ c, {z | ∥z∥₊ ≤ c}
-
 lemma std_flt_mono ⦃c d : ℝ≥0⦄ (cd : c ≤ d) :
-  std_flt α c ⊆ std_flt α d :=
+  {z : α | ∥z∥₊ ≤ c} ⊆ {z : α | ∥z∥₊ ≤ d} :=
 λ x (hx : ∥x∥₊ ≤ c), hx.trans cd
 
 lemma std_flt_zero_mem [has_zero α] (n0 : ∥(0 : α)∥₊ = 0) (c : ℝ≥0) :
-  (0 : α) ∈ std_flt α c :=
+  (0 : α) ∈ {z : α | ∥z∥₊ ≤ c} :=
 by simp only [n0, set.mem_set_of_eq, zero_le']
 
 lemma std_flt_neg_mem [has_neg α] (nn : ∀ {x : α}, ∥- x∥₊ = ∥x∥₊) ⦃c : ℝ≥0⦄ ⦃x : α⦄
-  (xc : x ∈ std_flt α c) :
-  - x ∈ std_flt α c :=
+  (xc : x ∈ {z : α | ∥z∥₊ ≤ c}) :
+  - x ∈ {z : α | ∥z∥₊ ≤ c} :=
 by simpa only [nn, set.mem_set_of_eq] using xc
 
 lemma std_flt_add_mem [has_add α] (n_le : ∀ {x y : α}, ∥x + y∥₊ ≤ ∥x∥₊ + ∥y∥₊) ⦃c d : ℝ≥0⦄ ⦃x y : α⦄
-  (xc : x ∈ std_flt α c) (yd : y ∈ std_flt α d) :
-  x + y ∈ std_flt α (c + d) :=
+  (xc : x ∈ {z : α | ∥z∥₊ ≤ c}) (yd : y ∈ {z : α | ∥z∥₊ ≤ d}) :
+  x + y ∈ {z : α | ∥z∥₊ ≤ c + d} :=
 n_le.trans (add_le_add xc yd)
 
 end std_flt_lemmas
@@ -155,9 +147,10 @@ instance {S : Fintype} : nnnorm_add_class (S → β) :=
   ..(infer_instance : add_comm_group _) }
 
 /--  Given a type `α` with a `nnnorm_add_class` instance, `std_flt.to_pseudo_normed_group`
-shows that the standard filtration `std_flt α` endows `α` with a `pseudo_normed_group` class. -/
+shows that the standard filtration `λ c, {z : α | ∥z∥₊ ≤ c}` endows `α` with a
+`pseudo_normed_group` class. -/
 def std_flt.to_pseudo_normed_group [has_nnnorm α] [nnnorm_add_class α] : pseudo_normed_group α :=
-{ filtration          := std_flt α,
+{ filtration          := λ c, {z : α | ∥z∥₊ ≤ c},
   filtration_mono     := std_flt_mono α,
   zero_mem_filtration := std_flt_zero_mem α nnn_zero,
   neg_mem_filtration  := std_flt_neg_mem α nnn_neg,
