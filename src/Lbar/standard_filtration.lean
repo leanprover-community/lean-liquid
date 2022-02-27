@@ -18,9 +18,12 @@ requires to prove the identities:
 * the nnnorm of a sum is at most the sum of the nnnorms: `∥x + y∥₊ ≤ ∥x∥₊ + ∥y∥₊`.
 
 ##  The standard filtration `std_flt α`
-Let `α` be a nnnormed type.  We name `std_flt` is the function `ℝ≥0 → set α` taking a non-negative
-real number `c` to the subset of all the terms of `α` of nnnorm at most `c`, although we do not
-introduce the definition.
+Let `α` be a nnnormed type.  We use the naming convention `std_flt` for the function `ℝ≥0 → set α`
+taking a non-negative real number `c` to the subset of all the terms of `α` of nnnorm at most `c`:
+```
+ℝ≥0 → set α
+  c ↦ {z : α | ∥z∥₊ ≤ c}.
+```
 
 The main construction is `std_flt.to_pseudo_normed_group` asserting that the typeclass
 `nnnorm_add_class α` (i.e. `α` is an additive commutative group with a compatible `∥_∥₊`),
