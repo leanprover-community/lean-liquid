@@ -370,63 +370,6 @@ begin
   apply is_K_projective.cond,
 end
 
-variable [enough_projectives A]
-noncomputable theory
-
-lemma exists_K_projective_replacement_of_bounded (X : 𝒦)
-  [is_bounded_above X] :
-  ∃ (P : 𝒦) [is_K_projective P] [is_bounded_above P]
-    (f : P ⟶ X), is_quasi_iso f :=
-begin
-  obtain ⟨a, H⟩ := is_bounded_above.cond X,
-  use projective.replacement X.as a H,
-  refine ⟨_, _, _⟩,
-  { constructor,
-    intros Y hY f,
-    convert eq_of_homotopy _ _ (projective.null_homotopic_of_projective_to_acyclic f.out a
-      (projective.replacement_is_projective X.as a H)
-      (projective.replacement_is_bounded X.as a H)
-      hY.1),
-    simp },
-  { use a,
-    apply projective.replacement_is_bounded },
-  { use (quotient _ _).map (projective.replacement.hom X.as a H),
-    constructor,
-    intro i,
-    erw ← homology_functor_map_factors,
-    apply_instance }
-end
-
-lemma K_projective_of_triangle (T : triangle 𝒦) (hT : T ∈ dist_triang 𝒦)
-  [is_K_projective T.obj₁] [is_K_projective T.obj₂] : is_K_projective T.obj₃ :=
-begin
-  constructor,
-  introsI Y _ f,
-  let H : 𝒦 ⥤ Abᵒᵖ := (preadditive_yoneda.obj Y).right_op,
-  haveI : homological_functor H := infer_instance, -- sanity check
-  have e := homological_functor.cond H T.rotate
-    (rotate_mem_distinguished_triangles _ hT),
-  dsimp [H] at e,
-  let a := _, let b := _, change exact a b at e, have e' : exact b.unop a.unop,
-  { resetI, apply_instance },
-  dsimp at e',
-  rw AddCommGroup.exact_iff at e',
-  let a' := _, let b' := _, change add_monoid_hom.range a' = add_monoid_hom.ker b' at e',
-  have : f ∈ b'.ker,
-  { change _  ≫ _ = 0,
-    apply_with is_K_projective.cond { instances := ff },
-    dsimp,
-    apply_instance,
-    apply_instance },
-  rw ← e' at this,
-  obtain ⟨g,hg⟩ := this,
-  dsimp at hg,
-  rw ← hg,
-  have : g = 0,
-  { apply is_K_projective.cond },
-  simp [this],
-end
-
 lemma is_quasi_iso_of_triangle
   (T₁ T₂ : triangle 𝒦)
   (h₁ : T₁ ∈ dist_triang 𝒦)
@@ -514,6 +457,63 @@ begin
     congr' 1,
     dsimp,
     simp only [preadditive.comp_neg, preadditive.neg_comp, neg_inj, ← functor.map_comp, f.comm₁] },
+end
+
+noncomputable theory
+variable [enough_projectives A]
+
+lemma exists_K_projective_replacement_of_bounded (X : 𝒦)
+  [is_bounded_above X] :
+  ∃ (P : 𝒦) [is_K_projective P] [is_bounded_above P]
+    (f : P ⟶ X), is_quasi_iso f :=
+begin
+  obtain ⟨a, H⟩ := is_bounded_above.cond X,
+  use projective.replacement X.as a H,
+  refine ⟨_, _, _⟩,
+  { constructor,
+    intros Y hY f,
+    convert eq_of_homotopy _ _ (projective.null_homotopic_of_projective_to_acyclic f.out a
+      (projective.replacement_is_projective X.as a H)
+      (projective.replacement_is_bounded X.as a H)
+      hY.1),
+    simp },
+  { use a,
+    apply projective.replacement_is_bounded },
+  { use (quotient _ _).map (projective.replacement.hom X.as a H),
+    constructor,
+    intro i,
+    erw ← homology_functor_map_factors,
+    apply_instance }
+end
+
+lemma K_projective_of_triangle (T : triangle 𝒦) (hT : T ∈ dist_triang 𝒦)
+  [is_K_projective T.obj₁] [is_K_projective T.obj₂] : is_K_projective T.obj₃ :=
+begin
+  constructor,
+  introsI Y _ f,
+  let H : 𝒦 ⥤ Abᵒᵖ := (preadditive_yoneda.obj Y).right_op,
+  haveI : homological_functor H := infer_instance, -- sanity check
+  have e := homological_functor.cond H T.rotate
+    (rotate_mem_distinguished_triangles _ hT),
+  dsimp [H] at e,
+  let a := _, let b := _, change exact a b at e, have e' : exact b.unop a.unop,
+  { resetI, apply_instance },
+  dsimp at e',
+  rw AddCommGroup.exact_iff at e',
+  let a' := _, let b' := _, change add_monoid_hom.range a' = add_monoid_hom.ker b' at e',
+  have : f ∈ b'.ker,
+  { change _  ≫ _ = 0,
+    apply_with is_K_projective.cond { instances := ff },
+    dsimp,
+    apply_instance,
+    apply_instance },
+  rw ← e' at this,
+  obtain ⟨g,hg⟩ := this,
+  dsimp at hg,
+  rw ← hg,
+  have : g = 0,
+  { apply is_K_projective.cond },
+  simp [this],
 end
 
 end homotopy_category
