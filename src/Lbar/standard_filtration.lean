@@ -8,7 +8,7 @@ a non-negative norm `∥_∥₊`.
 
 In this file, we introduce
 * the typeclass `nnnorm_add_class α`,
-* the standard filtration `std_flt α`.
+* a construction of `pseudo_normed_group` using the "standard filtration" `λ c, {z : α | ∥z∥₊ ≤ c}`.
 
 ##  The typeclass `nnnorm_add_class α`
 Given an additive commutative group `α` with a `nnnorm`, the typeclass `nnnorm_add_class α`
@@ -71,13 +71,17 @@ The class assumes `add_comm_group`, since this is what is required for `pseudo_n
 -/
 --class nnnorm_zero_class (α : Type u) extends has_zero α, has_add α, has_neg α, has_nnnorm α :=
 @[ancestor add_comm_group has_nnnorm]
-class nnnorm_add_class (α : Type*) [has_nnnorm α] extends add_comm_group α :=
+class nnnorm_add_class (α : Type*) [has_zero α] [has_add α] [has_neg α] [has_nnnorm α] :=
+--class nnnorm_add_class (α : Type*) [has_nnnorm α] extends add_comm_group α :=
 (nnn_zero   : ∥(0 : α)∥₊ = 0)
 (nnn_neg    : ∀ ⦃x : α⦄, ∥- x∥₊ = ∥x∥₊)
 (nnn_add_le : ∀ ⦃x y : α⦄, ∥x + y∥₊ ≤ ∥x∥₊ + ∥y∥₊)
 
 namespace nnnorm_add_class
-variables {α : Type*} [has_nnnorm α] [nnnorm_add_class α]
+variables {α : Type*}
+
+section def_lemmas
+variables [has_zero α] [has_add α] [has_neg α] [has_nnnorm α] [nnnorm_add_class α]
 
 @[simp] lemma nnnorm_zero : ∥(0 : α)∥₊ = 0 := nnn_zero
 
@@ -87,6 +91,9 @@ by apply nnn_neg
 lemma nnnorm_add_le (x y : α) : ∥x + y∥₊ ≤ ∥x∥₊ + ∥y∥₊ :=
 by apply nnn_add_le
 
+end def_lemmas
+
+variables [add_group α] [has_nnnorm α] [nnnorm_add_class α]
 lemma nnnorm_sub (x y : α) : ∥x - y∥₊ = ∥y - x∥₊ :=
 by rw [← nnnorm_neg, neg_sub]
 
@@ -121,7 +128,7 @@ n_le.trans (add_le_add xc yd)
 end std_flt_lemmas
 
 section std_flt_instances
-variables {α β : Type*} [has_nnnorm β] [nnnorm_add_class β]
+variables {α β : Type*} [add_group β] [has_nnnorm β] [nnnorm_add_class β]
 
 instance : nnnorm_add_class (α →₀ β) :=
 { nnn_zero   := by simp,
@@ -149,7 +156,8 @@ instance {S : Fintype} : nnnorm_add_class (S → β) :=
 /--  Given a type `α` with a `nnnorm_add_class` instance, `std_flt.to_pseudo_normed_group`
 shows that the standard filtration `λ c, {z : α | ∥z∥₊ ≤ c}` endows `α` with a
 `pseudo_normed_group` class. -/
-def std_flt.to_pseudo_normed_group [has_nnnorm α] [nnnorm_add_class α] : pseudo_normed_group α :=
+def std_flt.to_pseudo_normed_group [add_comm_group α] [has_nnnorm α] [nnnorm_add_class α] :
+  pseudo_normed_group α :=
 { filtration          := λ c, {z : α | ∥z∥₊ ≤ c},
   filtration_mono     := std_flt_mono α,
   zero_mem_filtration := std_flt_zero_mem α nnn_zero,
