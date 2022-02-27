@@ -11,6 +11,8 @@ import for_mathlib.homology_iso
 import for_mathlib.projective_replacement
 -- import for_mathlib.arrow_preadditive
 
+noncomputable theory
+
 open category_theory category_theory.limits category_theory.triangulated
 open homological_complex
 
@@ -131,7 +133,6 @@ end .
 
 variable (A)
 
-noncomputable
 def homology_shift_iso (i j : ℤ) :
   category_theory.shift_functor (homotopy_category A (complex_shape.up ℤ)) i ⋙
     homology_functor A (complex_shape.up ℤ) j ≅ homology_functor A (complex_shape.up ℤ) (j+i) :=
@@ -147,7 +148,6 @@ begin
   refl
 end
 
-noncomputable
 def homology_zero_shift_iso (i : ℤ) :
   category_theory.shift_functor (homotopy_category A (complex_shape.up ℤ)) i ⋙
     homology_functor A (complex_shape.up ℤ) 0 ≅ homology_functor A (complex_shape.up ℤ) i :=
@@ -472,7 +472,7 @@ begin
     simp only [preadditive.comp_neg, preadditive.neg_comp, neg_inj, ← functor.map_comp, f.comm₁] },
 end
 
-lemma K_projective_of_triangle (T : triangle 𝒦) (hT : T ∈ dist_triang 𝒦)
+lemma is_K_projective_of_triangle (T : triangle 𝒦) (hT : T ∈ dist_triang 𝒦)
   [is_K_projective T.obj₁] [is_K_projective T.obj₂] : is_K_projective T.obj₃ :=
 begin
   constructor,
@@ -529,8 +529,6 @@ begin
 end
 
 end homotopy_category
-
-noncomputable theory
 
 variable (A)
 
