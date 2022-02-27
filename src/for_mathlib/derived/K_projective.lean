@@ -199,6 +199,20 @@ begin
     apply_instance }
 end
 
+instance is_iso_of_is_quasi_iso' {X Y : 𝒦} (f : X ⟶ Y) [h : is_quasi_iso f] (i : ℤ) :
+  is_iso ((homotopy_category.homology_functor _ _ 0).map (f⟦i⟧')) :=
+begin
+  rw ← is_quasi_iso_iff at h,
+  apply h,
+end
+
+instance is_iso_of_is_quasi_iso {X Y : 𝒦} (f : X ⟶ Y)
+  [is_quasi_iso f] (i : ℤ) :
+  is_iso ((homotopy_category.homology_functor _ _ i).map f) :=
+begin
+  apply is_quasi_iso.cond,
+end
+
 /--
 If `A → B → C → A[1]` is a distinguished triangle, and `A → B` is a quasi-isomorphism,
 then `C` is acyclic.
@@ -411,6 +425,95 @@ begin
   have : g = 0,
   { apply is_K_projective.cond },
   simp [this],
+end
+
+lemma is_quasi_iso_of_triangle
+  (T₁ T₂ : triangle 𝒦)
+  (h₁ : T₁ ∈ dist_triang 𝒦)
+  (h₂ : T₂ ∈ dist_triang 𝒦)
+  (f : T₁ ⟶ T₂)
+  [is_quasi_iso f.hom₁]
+  [is_quasi_iso f.hom₂] :
+  is_quasi_iso f.hom₃ :=
+begin
+  -- Another application of the five lemma...
+  let H : 𝒦 ⥤ _ := homotopy_category.homology_functor _ _ 0,
+  rw ← is_quasi_iso_iff,
+  intros i,
+  let S₁ := T₁⟦i⟧,
+  let S₂ := T₂⟦i⟧,
+  let g : S₁ ⟶ S₂ := f⟦i⟧',
+  haveI : exact (H.map S₁.mor₁) (H.map S₁.mor₂),
+  { apply homological_functor.cond,
+    apply pretriangulated.shift_of_dist_triangle,
+    assumption },
+  haveI : exact (H.map S₁.mor₂) (H.map S₁.mor₃),
+  { apply homological_functor.cond H S₁.rotate,
+    apply pretriangulated.rot_of_dist_triangle,
+    apply pretriangulated.shift_of_dist_triangle,
+    assumption },
+  haveI : exact (H.map S₁.mor₃) (H.map S₁.rotate.mor₃),
+  { apply homological_functor.cond H S₁.rotate.rotate,
+    apply pretriangulated.rot_of_dist_triangle,
+    apply pretriangulated.rot_of_dist_triangle,
+    apply pretriangulated.shift_of_dist_triangle,
+    assumption },
+  haveI : exact (H.map S₂.mor₁) (H.map S₂.mor₂),
+  { apply homological_functor.cond,
+    apply pretriangulated.shift_of_dist_triangle,
+    assumption },
+  haveI : exact (H.map S₂.mor₂) (H.map S₂.mor₃),
+  { apply homological_functor.cond H S₂.rotate,
+    apply pretriangulated.rot_of_dist_triangle,
+    apply pretriangulated.shift_of_dist_triangle,
+    assumption },
+  haveI : exact (H.map S₂.mor₃) (H.map S₂.rotate.mor₃),
+  { apply homological_functor.cond H S₂.rotate.rotate,
+    apply pretriangulated.rot_of_dist_triangle,
+    apply pretriangulated.rot_of_dist_triangle,
+    apply pretriangulated.shift_of_dist_triangle,
+    assumption },
+  haveI : is_iso (H.map g.hom₁),
+  { change is_iso (H.map (f.hom₁⟦i⟧')),
+    apply_instance },
+  haveI : is_iso (H.map g.hom₂),
+  { change is_iso (H.map (f.hom₂⟦i⟧')),
+    apply_instance },
+  haveI : is_iso (H.map (g.hom₁⟦(1 : ℤ)⟧')),
+  { change is_iso (H.map (f.hom₁⟦i⟧'⟦(1 :ℤ)⟧')),
+    have := (category_theory.shift_functor_add 𝒦 i 1).hom.naturality f.hom₁,
+    apply_fun (λ e, H.map e) at this,
+    simp only [H.map_comp, functor.comp_map] at this,
+    rw ← is_iso.inv_comp_eq at this,
+    rw ← this,
+    apply is_iso.comp_is_iso },
+  haveI : is_iso (H.map (g.hom₂⟦(1 : ℤ)⟧')),
+  { change is_iso (H.map (f.hom₂⟦i⟧'⟦(1 :ℤ)⟧')),
+    have := (category_theory.shift_functor_add 𝒦 i 1).hom.naturality f.hom₂,
+    apply_fun (λ e, H.map e) at this,
+    simp only [H.map_comp, functor.comp_map] at this,
+    rw ← is_iso.inv_comp_eq at this,
+    rw ← this,
+    apply is_iso.comp_is_iso },
+  refine @abelian.is_iso_of_is_iso_of_is_iso_of_is_iso_of_is_iso A _ _
+    (H.obj S₁.obj₁) (H.obj S₁.obj₂) (H.obj S₁.obj₃) (H.obj (S₁.obj₁⟦(1 : ℤ)⟧))
+    (H.obj S₂.obj₁) (H.obj S₂.obj₂) (H.obj S₂.obj₃) (H.obj (S₂.obj₁⟦(1 : ℤ)⟧))
+    (H.map S₁.mor₁) (H.map S₁.mor₂) (H.map S₁.mor₃)
+    (H.map S₂.mor₁) (H.map S₂.mor₂) (H.map S₂.mor₃)
+    (H.map g.hom₁) (H.map g.hom₂) (H.map g.hom₃) (H.map (g.hom₁⟦(1 : ℤ)⟧'))
+    _ _ _
+    (H.obj (S₁.obj₂⟦(1 : ℤ)⟧))
+    (H.obj (S₂.obj₂⟦(1 : ℤ)⟧))
+    (H.map (S₁.rotate.mor₃))
+    (H.map (S₂.rotate.mor₃))
+    (H.map (g.hom₂⟦(1 : ℤ)⟧')) _ _ _ _ _ _ _ _ _ _ _,
+  { simp only [← H.map_comp, g.comm₁] },
+  { simp only [← H.map_comp, g.comm₂] },
+  { simp only [← H.map_comp, g.comm₃] },
+  { simp only [← functor.map_comp],
+    congr' 1,
+    dsimp,
+    simp only [preadditive.comp_neg, preadditive.neg_comp, neg_inj, ← functor.map_comp, f.comm₁] },
 end
 
 end homotopy_category
