@@ -17,7 +17,7 @@ requires to prove the identities:
 * the nnnorm of `-x` is equal to the nnnorm of `x`: `∥- x∥₊ = ∥x∥₊`;
 * the nnnorm of a sum is at most the sum of the nnnorms: `∥x + y∥₊ ≤ ∥x∥₊ + ∥y∥₊`.
 
-##  The standard filtration `std_flt α`
+##  The standard filtration `c : ℝ≥0 ↦ {z : α | ∥z∥₊ ≤ c}`
 Let `α` be a nnnormed type.  We use the naming convention `std_flt` for the function `ℝ≥0 → set α`
 taking a non-negative real number `c` to the subset of all the terms of `α` of nnnorm at most `c`:
 ```
@@ -74,7 +74,7 @@ The class assumes `add_comm_group`, since this is what is required for `pseudo_n
 -/
 --class nnnorm_zero_class (α : Type u) extends has_zero α, has_add α, has_neg α, has_nnnorm α :=
 @[ancestor add_comm_group has_nnnorm]
-class nnnorm_add_class (α : Type*) [has_zero α] [has_add α] [has_neg α] [has_nnnorm α] :=
+class nnnorm_add_class (α : Type*) [has_zero α] [has_add α] [has_neg α] [has_nnnorm α] : Prop :=
 --class nnnorm_add_class (α : Type*) [has_nnnorm α] extends add_comm_group α :=
 (nnn_zero   : ∥(0 : α)∥₊ = 0)
 (nnn_neg    : ∀ ⦃x : α⦄, ∥- x∥₊ = ∥x∥₊)
