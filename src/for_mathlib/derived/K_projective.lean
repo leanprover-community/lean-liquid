@@ -861,7 +861,7 @@ def single (i : ℤ) : A ⥤ bounded_homotopy_category A :=
       dsimp,
       erw if_neg,
       { apply is_zero_zero },
-      { linarith }
+      { exact ((i.lt_iff_add_one_le j).mpr hj).ne' }
     end },
   map := λ X Y f, (homotopy_category.single i).map f,
   map_id' := λ X, (homotopy_category.single i).map_id _,
