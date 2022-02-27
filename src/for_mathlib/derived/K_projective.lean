@@ -280,6 +280,19 @@ begin
   apply is_acyclic.cond,
 end
 
+instance is_quasi_iso_shift (X Y : 𝒦) (f : X ⟶ Y) [is_quasi_iso f] (i : ℤ) :
+  is_quasi_iso (f⟦i⟧') :=
+begin
+  rw ← is_quasi_iso_iff,
+  intros j,
+  have := (category_theory.shift_functor_add 𝒦 i j).hom.naturality f,
+  apply_fun (λ e, (homology_functor _ _ 0).map e) at this,
+  simp only [functor.map_comp, functor.comp_map] at this,
+  rw ← is_iso.inv_comp_eq at this,
+  rw ← this,
+  apply is_iso.comp_is_iso,
+end
+
 lemma hom_K_projective_bijective {X Y : 𝒦} (P : 𝒦) [is_K_projective P]
   (f : X ⟶ Y) [hf : is_quasi_iso f] : function.bijective (λ e : P ⟶ X, e ≫ f) :=
 begin
@@ -397,7 +410,7 @@ begin
     apply_instance }
 end
 
-lemma K_projective_of_triangle (T : triangle 𝒦) (hT : T ∈ dist_triang 𝒦)
+lemma is_K_projective_of_triangle (T : triangle 𝒦) (hT : T ∈ dist_triang 𝒦)
   [is_K_projective T.obj₁] [is_K_projective T.obj₂] : is_K_projective T.obj₃ :=
 begin
   constructor,
@@ -743,6 +756,64 @@ end
 lemma lift_ext {P X Y : 𝒦} [is_K_projective P.val] (g : X ⟶ Y) [is_quasi_iso g]
   (a b : P ⟶ X) (h : a ≫ g = b ≫ g) : a = b :=
 (hom_K_projective_bijective P.val g).1 h
+
+def replace_triangle (T : triangle 𝒦) : triangle 𝒦 :=
+{ obj₁ := T.obj₁.replace,
+  obj₂ := T.obj₂.replace,
+  obj₃ := T.obj₃.replace,
+  mor₁ := lift (T.obj₁.π ≫ T.mor₁) T.obj₂.π,
+  mor₂ := lift (T.obj₂.π ≫ T.mor₂) T.obj₃.π,
+  mor₃ := begin
+    have h : is_quasi_iso (T.obj₁.π⟦(1 : ℤ)⟧') := infer_instance,
+    exact @lift _ _ _ _ _ _ _ _ (T.obj₃.π ≫ T.mor₃) (T.obj₁.π⟦(1 : ℤ)⟧') h, -- What?
+  end }
+
+lemma distinguished_replace_triangle (T : triangle 𝒦) (hT : T ∈ dist_triang 𝒦) :
+  replace_triangle T ∈ dist_triang 𝒦 :=
+begin
+  let S := replace_triangle T,
+  change S ∈ _,
+  obtain ⟨Z,g,h,hW⟩ := pretriangulated.distinguished_cocone_triangle _ _ S.mor₁,
+  let W := triangle.mk (bounded_homotopy_category A) S.mor₁ g h,
+  change W ∈ _ at hW,
+  have hWT : W.mor₁ ≫ T.obj₂.π = T.obj₁.π ≫ T.mor₁ := _,
+  obtain ⟨q,sq2,sq3⟩ := pretriangulated.complete_distinguished_triangle_morphism _ _ hW hT
+    T.obj₁.π T.obj₂.π hWT,
+  let r : W ⟶ T := ⟨T.obj₁.π, T.obj₂.π, q, hWT, sq2, sq3⟩,
+  let W' := (triangle.mk (homotopy_category _ _) W.mor₁ W.mor₂ W.mor₃),
+  let T' := (triangle.mk (homotopy_category _ _) T.mor₁ T.mor₂ T.mor₃),
+  let r' : W' ⟶ T' := ⟨T.obj₁.π, T.obj₂.π, q, hWT, sq2, sq3⟩,
+  haveI : is_quasi_iso r.hom₃, { exact is_quasi_iso_of_triangle W' T' hW hT r' },
+  haveI : is_K_projective W.obj₃.val,
+  { haveI : is_K_projective W'.obj₁ := show is_K_projective T.obj₁.replace.val, by apply_instance,
+    haveI : is_K_projective W'.obj₂ := show is_K_projective T.obj₂.replace.val, by apply_instance,
+    exact homotopy_category.is_K_projective_of_triangle W' hW },
+  haveI : is_K_projective S.obj₁.val := show is_K_projective T.obj₁.replace.val, by apply_instance,
+  haveI : is_K_projective S.obj₂.val := show is_K_projective T.obj₂.replace.val, by apply_instance,
+  haveI : is_K_projective S.obj₃.val := show is_K_projective T.obj₃.replace.val, by apply_instance,
+  apply mem_distinguished_of_iso _ hW,
+  refine ⟨⟨𝟙 _,𝟙 _, lift q T.obj₃.π, _, _, _⟩,⟨𝟙 _,𝟙 _, lift T.obj₃.π q, _,_,_⟩,_,_⟩,
+  { dsimp, rw [category.comp_id, category.id_comp], },
+  { dsimp [S, replace_triangle],
+    rw category.id_comp,
+    apply lift_unique,
+    erw [category.assoc, lift_lifts], exact sq2, },
+  { dsimp [S, replace_triangle],
+    rw [category_theory.functor.map_id, category.comp_id],
+    haveI : is_quasi_iso
+      ((category_theory.shift_functor (bounded_homotopy_category A) (1 : ℤ)).map T.obj₁.π),
+    { show is_quasi_iso (T.obj₁.π⟦(1 : ℤ)⟧'), apply_instance }, -- strange.
+    apply lift_ext (T.obj₁.π⟦(1 : ℤ)⟧'),
+    erw [category.assoc, lift_lifts, lift_lifts_assoc],
+    exact sq3,
+    assumption },
+  { sorry },
+  { sorry },
+  { sorry },
+  { sorry },
+  { sorry },
+  { sorry },
+end
 
 @[simps]
 def Ext0 : 𝒦ᵒᵖ ⥤ 𝒦 ⥤ Ab :=
