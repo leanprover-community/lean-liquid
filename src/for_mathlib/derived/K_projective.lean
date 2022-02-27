@@ -199,6 +199,20 @@ begin
     apply_instance }
 end
 
+instance is_iso_of_is_quasi_iso' {X Y : 𝒦} (f : X ⟶ Y) [h : is_quasi_iso f] (i : ℤ) :
+  is_iso ((homotopy_category.homology_functor _ _ 0).map (f⟦i⟧')) :=
+begin
+  rw ← is_quasi_iso_iff at h,
+  apply h,
+end
+
+instance is_iso_of_is_quasi_iso {X Y : 𝒦} (f : X ⟶ Y)
+  [is_quasi_iso f] (i : ℤ) :
+  is_iso ((homotopy_category.homology_functor _ _ i).map f) :=
+begin
+  apply is_quasi_iso.cond,
+end
+
 /--
 If `A → B → C → A[1]` is a distinguished triangle, and `A → B` is a quasi-isomorphism,
 then `C` is acyclic.
@@ -459,10 +473,18 @@ begin
     apply pretriangulated.rot_of_dist_triangle,
     apply pretriangulated.shift_of_dist_triangle,
     assumption },
-  haveI : is_iso (H.map g.hom₁) := sorry,
-  haveI : is_iso (H.map g.hom₂) := sorry,
-  haveI : is_iso (H.map (g.hom₁⟦(1 : ℤ)⟧')) := sorry,
-  haveI : is_iso (H.map (g.hom₂⟦(1 : ℤ)⟧')) := sorry,
+  haveI : is_iso (H.map g.hom₁),
+  { change is_iso (H.map (f.hom₁⟦i⟧')),
+    apply_instance },
+  haveI : is_iso (H.map g.hom₂),
+  { change is_iso (H.map (f.hom₂⟦i⟧')),
+    apply_instance },
+  haveI : is_iso (H.map (g.hom₁⟦(1 : ℤ)⟧')),
+  { change is_iso (H.map (f.hom₁⟦i⟧'⟦(1 :ℤ)⟧')),
+    sorry },
+  haveI : is_iso (H.map (g.hom₂⟦(1 : ℤ)⟧')),
+  { change is_iso (H.map (f.hom₂⟦i⟧'⟦(1 :ℤ)⟧')),
+    sorry },
   refine @abelian.is_iso_of_is_iso_of_is_iso_of_is_iso_of_is_iso A _ _
     (H.obj S₁.obj₁) (H.obj S₁.obj₂) (H.obj S₁.obj₃) (H.obj (S₁.obj₁⟦(1 : ℤ)⟧))
     (H.obj S₂.obj₁) (H.obj S₂.obj₂) (H.obj S₂.obj₃) (H.obj (S₂.obj₁⟦(1 : ℤ)⟧))
