@@ -777,22 +777,25 @@ def Ext (i : ℤ) : 𝒦ᵒᵖ ⥤ 𝒦 ⥤ Ab :=
 Ext0 ⋙ (whiskering_left _ _ _).obj (shift_functor _ i)
 
 -- why is this so slow?
+-- DT: squeezing the simps made it very fast!
 @[simps]
 def replacement_iso (P₁ P₂ X : 𝒦) [is_K_projective P₁.val] [is_K_projective P₂.val]
   (f₁ : P₁ ⟶ X) (f₂ : P₂ ⟶ X) [is_quasi_iso f₁] [is_quasi_iso f₂] : P₁ ≅ P₂ :=
-{ hom := lift f₁ f₂,
-  inv := lift f₂ f₁,
+{ hom         := lift f₁ f₂,
+  inv         := lift f₂ f₁,
   hom_inv_id' := begin
     have : 𝟙 P₁ = lift f₁ f₁,
-    { apply lift_unique, simp },
+    { apply lift_unique, simp only [category.id_comp] },
     rw this,
-    apply lift_unique, simp,
+    apply lift_unique,
+    simp only [category.assoc, lift_lifts],
   end,
   inv_hom_id' := begin
     have : 𝟙 P₂ = lift f₂ f₂,
-    { apply lift_unique, simp },
-    rw this,
-    apply lift_unique, simp
+    { apply lift_unique, simp only [category.id_comp] },
+      rw this,
+    apply lift_unique,
+    simp only [category.assoc, lift_lifts],
   end } .
 
 @[simps]
@@ -824,7 +827,7 @@ begin
   congr' 1,
   symmetry,
   apply lift_unique,
-  simp,
+  simp only [preadditive.add_comp, lift_lifts, preadditive.comp_add],
 end .
 
 def hom_shift_right_iso (X : 𝒦) (i j : ℤ) (h : i + j = 0) :
