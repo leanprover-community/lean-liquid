@@ -25,6 +25,12 @@ finite sum, extending over all `s : S` and over `n : ℕ` contained in the (fini
 The reason for this choice of nnnorm is that it arises as the nnnorm on the "non-positive tails" of
 Laurent series, the kernel of the projection map from Laurent series to the series of their terms of
 strictly positive degree.
+
+##  Warning/Formalization note
+We use the `nnnorm_add_class` instance on `S → (ℕ →₀ ℤ)` to prove that the standard filtration
+determined a `pseudo_normed_group (S → (ℕ →₀ ℤ))`.  Note that the `semi_normed_group` instance on
+the same type is *not* the same: the norm on finitely indexed finsupps for the `semi_normed_group`
+is the `sup`norm and not the `sum_nnnorm`.
 -/
 
 open finset finsupp
