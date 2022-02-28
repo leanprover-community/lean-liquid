@@ -46,8 +46,9 @@ by apply nnn_add_le
 end def_lemmas
 
 variables [add_group α] [nnnorm_add_class α]
+
 lemma nnnorm_sub (x y : α) : ∥x - y∥₊ = ∥y - x∥₊ :=
-by rw [← nnnorm_neg, neg_sub]
+(nnnorm_neg _).symm.trans (congr_arg _ (neg_sub _ _))
 
 lemma nnnorm_triangle (x y z : α) : ∥x - z∥₊ ≤ ∥x - y∥₊ + ∥y - z∥₊ :=
 (le_of_eq (by simp only [sub_add_sub_cancel])).trans (nnnorm_add_le _ _)
