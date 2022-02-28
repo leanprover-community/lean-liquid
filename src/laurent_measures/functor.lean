@@ -26,9 +26,6 @@ open ProFiltPseuNormGrpWithTinv₁
 @[simps] def profinite : Profinite.{u} ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r' :=
 Profinite.extend (fintype_functor.{u} r')
 
---instance (X : Profinite) : limits.preserves_limits
---  (to_CompHausFiltPseuNormGrp₁.{u u} r') := sorry
-
 def profinite_comp_to_CompHausFiltPseuNormGrp₁ :
   laurent_measures.profinite.{u} r' ⋙ to_CompHausFiltPseuNormGrp₁.{u} r' ≅
   Profinite.extend (fintype_functor.{u} r' ⋙ to_CompHausFiltPseuNormGrp₁.{u} r') :=
