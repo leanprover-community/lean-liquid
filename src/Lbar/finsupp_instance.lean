@@ -68,7 +68,7 @@ variables {r : ℝ≥0} {S : Fintype}
 instance : inhabited (invpoly r S) := ⟨0⟩
 
 instance : has_nnnorm (invpoly r S) :=
-@fintype.sum_nnnorm S r.normed ⟨λ F, ∑ x in F.support, ∥F x∥₊ * r⁻¹ ^ x⟩
+@fintype.sum_nnnorm r.normed ⟨λ F, ∑ x in F.support, ∥F x∥₊ * r⁻¹ ^ x⟩ S
 
 instance : nnnorm_add_class (invpoly r S) :=
 pi.nnnorm_add_class

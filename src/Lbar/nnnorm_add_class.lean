@@ -33,11 +33,7 @@ gives rise to a `pseudo_normed_group α` under the standard filtration.
 open finset finsupp
 open_locale nnreal big_operators
 
-section families_of_add_comm_groups
-
-variables {S : Fintype} {α β : Type*}
-
-lemma mem_union_support_of_mem_support_add [add_zero_class β] [decidable_eq α] {k : α}
+lemma mem_union_support_of_mem_support_add {α β : Type*} [add_zero_class β] [decidable_eq α] {k : α}
   (F G : α →₀ β) (hk : k ∈ (F + G).support) :
   k ∈ F.support ∪ G.support :=
 begin
@@ -46,60 +42,8 @@ begin
   simp only [hk, add_zero],
 end
 
-variable [has_nnnorm α]
-instance fintype.sum_nnnorm : has_nnnorm (S → α) :=
-{ nnnorm := λ F, ∑ b, ∥F b∥₊ }
-
-@[simp]
-lemma fintype.sum_nnnorm_def (F : S → α) : ∥F∥₊ = ∑ b, ∥F b∥₊ := rfl
-
-end families_of_add_comm_groups
-
-section standard_filtration
-
-/--  A typeclass for an additive commutative group with a nnnorm.  Its fields assert that
-* the nnnorm of `0` is `0`;
-* the nnnorm of `-x` is equal to the nnnorm of `x`;
-* the nnnorm of a sum is at most the sum of the nnnorms.
-The class assumes `add_comm_group`, since this is what is required for `pseudo_normed_group`.
--/
---class nnnorm_zero_class (α : Type u) extends has_zero α, has_add α, has_neg α, has_nnnorm α :=
-@[ancestor add_comm_group has_nnnorm]
-class nnnorm_add_class (α : Type*) [has_zero α] [has_add α] [has_neg α] [has_nnnorm α] : Prop :=
---class nnnorm_add_class (α : Type*) [has_nnnorm α] extends add_comm_group α :=
-(nnn_zero   : ∥(0 : α)∥₊ = 0)
-(nnn_neg    : ∀ ⦃x : α⦄, ∥- x∥₊ = ∥x∥₊)
-(nnn_add_le : ∀ ⦃x y : α⦄, ∥x + y∥₊ ≤ ∥x∥₊ + ∥y∥₊)
-
-namespace nnnorm_add_class
-variables {α : Type*}
-
-section def_lemmas
-variables [has_zero α] [has_add α] [has_neg α] [has_nnnorm α] [nnnorm_add_class α]
-
-@[simp] lemma nnnorm_zero : ∥(0 : α)∥₊ = 0 := nnn_zero
-
-@[simp] lemma nnnorm_neg (x : α) : ∥- x∥₊ = ∥x∥₊ :=
-by apply nnn_neg
-
-lemma nnnorm_add_le (x y : α) : ∥x + y∥₊ ≤ ∥x∥₊ + ∥y∥₊ :=
-by apply nnn_add_le
-
-end def_lemmas
-
-variables [add_group α] [has_nnnorm α] [nnnorm_add_class α]
-lemma nnnorm_sub (x y : α) : ∥x - y∥₊ = ∥y - x∥₊ :=
-by rw [← nnnorm_neg, neg_sub]
-
-lemma nnnorm_triangle (x y z : α) : ∥x - z∥₊ ≤ ∥x - y∥₊ + ∥y - z∥₊ :=
-(le_of_eq (by simp only [sub_add_sub_cancel])).trans (nnnorm_add_le _ _)
-
-end nnnorm_add_class
-
-open nnnorm_add_class
-
-section std_flt_lemmas
 variables (α : Type*) [has_nnnorm α]
+section std_flt_lemmas
 
 lemma std_flt_mono ⦃c d : ℝ≥0⦄ (cd : c ≤ d) :
   {z : α | ∥z∥₊ ≤ c} ⊆ {z : α | ∥z∥₊ ≤ d} :=
@@ -121,10 +65,57 @@ n_le.trans (add_le_add xc yd)
 
 end std_flt_lemmas
 
-section std_flt_instances
-variables {α β : Type*} [add_group β] [has_nnnorm β] [nnnorm_add_class β]
+/--  A typeclass for an additive commutative group with a nnnorm.  Its fields assert that
+* the nnnorm of `0` is `0`;
+* the nnnorm of `-x` is equal to the nnnorm of `x`;
+* the nnnorm of a sum is at most the sum of the nnnorms.
+The class assumes `add_comm_group`, since this is what is required for `pseudo_normed_group`.
+-/
+@[ancestor add_comm_group has_nnnorm]
+class nnnorm_add_class [has_zero α] [has_add α] [has_neg α] : Prop :=
+(nnn_zero   : ∥(0 : α)∥₊ = 0)
+(nnn_neg    : ∀ ⦃x : α⦄, ∥- x∥₊ = ∥x∥₊)
+(nnn_add_le : ∀ ⦃x y : α⦄, ∥x + y∥₊ ≤ ∥x∥₊ + ∥y∥₊)
 
-instance {S : Fintype} : nnnorm_add_class (S → β) :=
+variables {α}
+namespace nnnorm_add_class
+
+section def_lemmas
+variables [has_zero α] [has_add α] [has_neg α] [nnnorm_add_class α]
+
+@[simp] lemma nnnorm_zero : ∥(0 : α)∥₊ = 0 := nnn_zero
+
+@[simp] lemma nnnorm_neg (x : α) : ∥- x∥₊ = ∥x∥₊ :=
+by apply nnn_neg
+
+lemma nnnorm_add_le (x y : α) : ∥x + y∥₊ ≤ ∥x∥₊ + ∥y∥₊ :=
+by apply nnn_add_le
+
+end def_lemmas
+
+variables [add_group α] [nnnorm_add_class α]
+lemma nnnorm_sub (x y : α) : ∥x - y∥₊ = ∥y - x∥₊ :=
+by rw [← nnnorm_neg, neg_sub]
+
+lemma nnnorm_triangle (x y z : α) : ∥x - z∥₊ ≤ ∥x - y∥₊ + ∥y - z∥₊ :=
+(le_of_eq (by simp only [sub_add_sub_cancel])).trans (nnnorm_add_le _ _)
+
+end nnnorm_add_class
+
+open nnnorm_add_class
+
+section std_flt_instances
+variables {S : Fintype}
+
+instance fintype.sum_nnnorm : has_nnnorm (S → α) :=
+{ nnnorm := λ F, ∑ b, ∥F b∥₊ }
+
+@[simp]
+lemma fintype.sum_nnnorm_def (F : S → α) : ∥F∥₊ = ∑ b, ∥F b∥₊ := rfl
+
+variables {β : Type*} [add_group β] [has_nnnorm β] [nnnorm_add_class β]
+
+instance : nnnorm_add_class (S → β) :=
 { nnn_zero   := by simp,
   nnn_neg    := λ x, by simp [fintype.sum_nnnorm_def, pi.neg_apply, nnn_neg],
   nnn_add_le := λ F G, le_trans (sum_le_sum (λ j hj, nnnorm_add_le _ _)) sum_add_distrib.le,
@@ -133,7 +124,7 @@ instance {S : Fintype} : nnnorm_add_class (S → β) :=
 /--  Given a type `α` with a `nnnorm_add_class` instance, `std_flt.to_pseudo_normed_group`
 shows that the standard filtration `λ c, {z : α | ∥z∥₊ ≤ c}` endows `α` with a
 `pseudo_normed_group` class. -/
-def std_flt.to_pseudo_normed_group [add_comm_group α] [has_nnnorm α] [nnnorm_add_class α] :
+def std_flt.to_pseudo_normed_group [add_comm_group α] [nnnorm_add_class α] :
   pseudo_normed_group α :=
 { filtration          := λ c, {z : α | ∥z∥₊ ≤ c},
   filtration_mono     := std_flt_mono α,
@@ -142,5 +133,3 @@ def std_flt.to_pseudo_normed_group [add_comm_group α] [has_nnnorm α] [nnnorm_a
   add_mem_filtration  := std_flt_add_mem α nnn_add_le }
 
 end std_flt_instances
-
-end standard_filtration
