@@ -2,8 +2,42 @@ import for_mathlib.Fintype
 import pseudo_normed_group.basic
 import Lbar.nnnorm_add_class
 
+/-!
+#  The standard filtration `c : ℝ≥0 ↦ {z : α | ∥z∥₊ ≤ c}`
+
+Let `α` be a nnnormed type.  We use the naming convention `std_flt` for the function `ℝ≥0 → set α`
+taking a non-negative real number `c` to the subset of all the terms of `α` of nnnorm at most `c`:
+```
+ℝ≥0 → set α
+  c ↦ {z : α | ∥z∥₊ ≤ c}.
+```
+The main construction is `std_flt.to_pseudo_normed_group` asserting that the typeclass
+`nnnorm_add_class α` (i.e. `α` is a Type with `∥_∥₊, 0, +, -` and compatibilities among them),
+gives rise to a `pseudo_normed_group α` under the standard filtration.
+
+We use `std_flt.to_pseudo_normed_group` to give a `pseudo_normed_group` instance on
+`S → (ℕ →₀ ℤ)`.
+
+For a fixed `r : ℝ≥0`, the nnnorm on `S → (ℕ →₀ ℤ)` is
+`∥(s ↦ (n ↦ F s n))∥₊ = ∑ s : S, ∑ n : ℕ, ∥F s n∥₊ r⁻¹ ^ n`, where the sum is "really" a finite sum,
+extending over all `s : S` and over `n : ℕ` contained in the (finite) support of `F n`.
+
+The reason for this choice of nnnorm is that it arises as the nnnorm on the "non-positive tails" of
+Laurent series, the kernel of the projection map from Laurent series to the series of their terms of
+strictly positive degree.
+-/
+
 open finset finsupp
 open_locale nnreal big_operators
+
+lemma mem_union_support_of_mem_support_add {α β : Type*} [add_zero_class β] [decidable_eq α] {k : α}
+  (F G : α →₀ β) (hk : k ∈ (F + G).support) :
+  k ∈ F.support ∪ G.support :=
+begin
+  simp only [finset.mem_union, finsupp.mem_support_iff, finsupp.coe_add, pi.add_apply] at ⊢ hk,
+  contrapose! hk,
+  simp only [hk, add_zero],
+end
 
 noncomputable theory
 
