@@ -19,8 +19,8 @@ We use `std_flt.to_pseudo_normed_group` to give a `pseudo_normed_group` instance
 `S → (ℕ →₀ ℤ)`.
 
 For a fixed `r : ℝ≥0`, the nnnorm on `S → (ℕ →₀ ℤ)` is
-`∥(s ↦ (n ↦ F s n))∥₊ = ∑ s : S, ∑ n : ℕ, ∥F s n∥₊ r⁻¹ ^ n`, where the sum is "really" a finite sum,
-extending over all `s : S` and over `n : ℕ` contained in the (finite) support of `F n`.
+`∥(s ↦ (n ↦ F s n))∥₊ = ∑ s : S, ∑ n in F.support, ∥F s n∥₊ * r⁻¹ ^ n`, where the sum is "really" a
+finite sum, extending over all `s : S` and over `n : ℕ` contained in the (finite) support of `F n`.
 
 The reason for this choice of nnnorm is that it arises as the nnnorm on the "non-positive tails" of
 Laurent series, the kernel of the projection map from Laurent series to the series of their terms of
