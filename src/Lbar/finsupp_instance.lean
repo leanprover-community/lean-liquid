@@ -6,6 +6,44 @@ open_locale nnreal big_operators
 
 noncomputable theory
 
+section std_flt_lemmas
+variables (α : Type*) [has_nnnorm α]
+
+lemma std_flt_mono ⦃c d : ℝ≥0⦄ (cd : c ≤ d) :
+  {z : α | ∥z∥₊ ≤ c} ⊆ {z : α | ∥z∥₊ ≤ d} :=
+λ x (hx : ∥x∥₊ ≤ c), hx.trans cd
+
+lemma std_flt_zero_mem [has_zero α] (n0 : ∥(0 : α)∥₊ = 0) (c : ℝ≥0) :
+  (0 : α) ∈ {z : α | ∥z∥₊ ≤ c} :=
+by simp only [n0, set.mem_set_of_eq, zero_le']
+
+lemma std_flt_neg_mem [has_neg α] (nn : ∀ {x : α}, ∥- x∥₊ = ∥x∥₊) ⦃c : ℝ≥0⦄ ⦃x : α⦄
+  (xc : x ∈ {z : α | ∥z∥₊ ≤ c}) :
+  - x ∈ {z : α | ∥z∥₊ ≤ c} :=
+by simpa only [nn, set.mem_set_of_eq] using xc
+
+lemma std_flt_add_mem [has_add α] (n_le : ∀ {x y : α}, ∥x + y∥₊ ≤ ∥x∥₊ + ∥y∥₊) ⦃c d : ℝ≥0⦄ ⦃x y : α⦄
+  (xc : x ∈ {z : α | ∥z∥₊ ≤ c}) (yd : y ∈ {z : α | ∥z∥₊ ≤ d}) :
+  x + y ∈ {z : α | ∥z∥₊ ≤ c + d} :=
+n_le.trans (add_le_add xc yd)
+
+open nnnorm_add_class
+variable {α}
+
+/--  Given a type `α` with a `nnnorm_add_class` instance, `std_flt.to_pseudo_normed_group`
+shows that the standard filtration `λ c, {z : α | ∥z∥₊ ≤ c}` endows `α` with a
+`pseudo_normed_group` class. -/
+def std_flt.to_pseudo_normed_group [add_comm_group α] [nnnorm_add_class α] :
+  pseudo_normed_group α :=
+{ filtration          := λ c, {z : α | ∥z∥₊ ≤ c},
+  filtration_mono     := std_flt_mono α,
+  zero_mem_filtration := std_flt_zero_mem α nnn_zero,
+  neg_mem_filtration  := std_flt_neg_mem α nnn_neg,
+  add_mem_filtration  := std_flt_add_mem α nnn_add_le }
+
+end std_flt_lemmas
+
+
 /--  Let `r : ℝ≥0` be a non-negative real number.  `nnreal.normed r` or `r.normed` is the type of
 finsupps `ℕ →₀ ℤ` with an extra parameter `r`.
 
