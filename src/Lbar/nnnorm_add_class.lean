@@ -18,9 +18,9 @@ open_locale nnreal
 variables (α : Type*) [has_nnnorm α]
 
 /--  A typeclass for an additive commutative group with a nnnorm.  Its fields assert that
-* the nnnorm of `0` is `0`;
-* the nnnorm of `-x` is equal to the nnnorm of `x`;
-* the nnnorm of a sum is at most the sum of the nnnorms.
+* (`nnn_zero`) the nnnorm of `0` is `0`;
+* (`nnn_neg`) the nnnorm of `-x` is equal to the nnnorm of `x`;
+* (`nnn_add_le`) the nnnorm of a sum is at most the sum of the nnnorms.
 The class only assumes that `α` has `0, +, -`. -/
 @[ancestor add_comm_group has_nnnorm]
 class nnnorm_add_class [has_zero α] [has_add α] [has_neg α] : Prop :=
