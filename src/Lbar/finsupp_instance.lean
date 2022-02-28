@@ -1,11 +1,10 @@
+import for_mathlib.Fintype
 import Lbar.nnnorm_add_class
 
 open finset finsupp
 open_locale nnreal big_operators
 
 noncomputable theory
-
-universes u v
 
 /--  Let `r : ℝ≥0` be a non-negative real number.  `nnreal.normed r` or `r.normed` is the type of
 finsupps `ℕ →₀ ℤ` with an extra parameter `r`.
@@ -56,6 +55,21 @@ std_flt.to_pseudo_normed_group
 end nnreal.normed
 
 open nnnorm_add_class
+
+variables {r : ℝ≥0} {α : Type*} [has_nnnorm α] {S : Fintype}
+
+instance fintype.sum_nnnorm : has_nnnorm (S → α) :=
+{ nnnorm := λ F, ∑ b, ∥F b∥₊ }
+
+@[simp]
+lemma fintype.sum_nnnorm_def (F : S → α) : ∥F∥₊ = ∑ b, ∥F b∥₊ := rfl
+
+instance [add_group α] [nnnorm_add_class α] : nnnorm_add_class (S → α) :=
+{ nnn_zero   := by simp,
+  nnn_neg    := λ x, by simp [fintype.sum_nnnorm_def, pi.neg_apply, nnn_neg],
+  nnn_add_le := λ F G, le_trans (sum_le_sum (λ j hj, nnnorm_add_le _ _)) sum_add_distrib.le,
+  ..(infer_instance : add_comm_group _) }
+
 /--  Let `r : ℝ≥0` be a non-negative real number and `S : Fintype` a finite type.
 `invpoly r S` is the type of `S`-indexed terms of type `r.normed`, that is, finsupps
 `ℕ →₀ ℤ` with norm defined using `r⁻¹`. -/
@@ -63,7 +77,6 @@ open nnnorm_add_class
 def invpoly (r : ℝ≥0) (S : Fintype) := S → r.normed
 
 namespace invpoly
-variables {r : ℝ≥0} {S : Fintype}
 
 instance : inhabited (invpoly r S) := ⟨0⟩
 

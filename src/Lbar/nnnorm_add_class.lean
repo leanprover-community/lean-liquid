@@ -1,5 +1,4 @@
 import pseudo_normed_group.basic
-import category_theory.Fintype
 import analysis.normed_space.basic
 
 /-!
@@ -30,40 +29,18 @@ The main construction is `std_flt.to_pseudo_normed_group` asserting that the typ
 gives rise to a `pseudo_normed_group α` under the standard filtration.
 -/
 
-open finset finsupp
-open_locale nnreal big_operators
+open_locale nnreal
 
 lemma mem_union_support_of_mem_support_add {α β : Type*} [add_zero_class β] [decidable_eq α] {k : α}
   (F G : α →₀ β) (hk : k ∈ (F + G).support) :
   k ∈ F.support ∪ G.support :=
 begin
-  simp only [mem_union, mem_support_iff, ne.def, finsupp.coe_add, pi.add_apply] at ⊢ hk,
+  simp only [finset.mem_union, finsupp.mem_support_iff, finsupp.coe_add, pi.add_apply] at ⊢ hk,
   contrapose! hk,
   simp only [hk, add_zero],
 end
 
 variables (α : Type*) [has_nnnorm α]
-section std_flt_lemmas
-
-lemma std_flt_mono ⦃c d : ℝ≥0⦄ (cd : c ≤ d) :
-  {z : α | ∥z∥₊ ≤ c} ⊆ {z : α | ∥z∥₊ ≤ d} :=
-λ x (hx : ∥x∥₊ ≤ c), hx.trans cd
-
-lemma std_flt_zero_mem [has_zero α] (n0 : ∥(0 : α)∥₊ = 0) (c : ℝ≥0) :
-  (0 : α) ∈ {z : α | ∥z∥₊ ≤ c} :=
-by simp only [n0, set.mem_set_of_eq, zero_le']
-
-lemma std_flt_neg_mem [has_neg α] (nn : ∀ {x : α}, ∥- x∥₊ = ∥x∥₊) ⦃c : ℝ≥0⦄ ⦃x : α⦄
-  (xc : x ∈ {z : α | ∥z∥₊ ≤ c}) :
-  - x ∈ {z : α | ∥z∥₊ ≤ c} :=
-by simpa only [nn, set.mem_set_of_eq] using xc
-
-lemma std_flt_add_mem [has_add α] (n_le : ∀ {x y : α}, ∥x + y∥₊ ≤ ∥x∥₊ + ∥y∥₊) ⦃c d : ℝ≥0⦄ ⦃x y : α⦄
-  (xc : x ∈ {z : α | ∥z∥₊ ≤ c}) (yd : y ∈ {z : α | ∥z∥₊ ≤ d}) :
-  x + y ∈ {z : α | ∥z∥₊ ≤ c + d} :=
-n_le.trans (add_le_add xc yd)
-
-end std_flt_lemmas
 
 /--  A typeclass for an additive commutative group with a nnnorm.  Its fields assert that
 * the nnnorm of `0` is `0`;
@@ -77,8 +54,8 @@ class nnnorm_add_class [has_zero α] [has_add α] [has_neg α] : Prop :=
 (nnn_neg    : ∀ ⦃x : α⦄, ∥- x∥₊ = ∥x∥₊)
 (nnn_add_le : ∀ ⦃x y : α⦄, ∥x + y∥₊ ≤ ∥x∥₊ + ∥y∥₊)
 
-variables {α}
 namespace nnnorm_add_class
+variables {α}
 
 section def_lemmas
 variables [has_zero α] [has_add α] [has_neg α] [nnnorm_add_class α]
@@ -104,23 +81,27 @@ end nnnorm_add_class
 
 open nnnorm_add_class
 
-section std_flt_instances
-variables {S : Fintype}
+section std_flt_lemmas
 
-instance fintype.sum_nnnorm : has_nnnorm (S → α) :=
-{ nnnorm := λ F, ∑ b, ∥F b∥₊ }
+lemma std_flt_mono ⦃c d : ℝ≥0⦄ (cd : c ≤ d) :
+  {z : α | ∥z∥₊ ≤ c} ⊆ {z : α | ∥z∥₊ ≤ d} :=
+λ x (hx : ∥x∥₊ ≤ c), hx.trans cd
 
-@[simp]
-lemma fintype.sum_nnnorm_def (F : S → α) : ∥F∥₊ = ∑ b, ∥F b∥₊ := rfl
+lemma std_flt_zero_mem [has_zero α] (n0 : ∥(0 : α)∥₊ = 0) (c : ℝ≥0) :
+  (0 : α) ∈ {z : α | ∥z∥₊ ≤ c} :=
+by simp only [n0, set.mem_set_of_eq, zero_le']
 
-variables {β : Type*} [add_group β] [has_nnnorm β] [nnnorm_add_class β]
+lemma std_flt_neg_mem [has_neg α] (nn : ∀ {x : α}, ∥- x∥₊ = ∥x∥₊) ⦃c : ℝ≥0⦄ ⦃x : α⦄
+  (xc : x ∈ {z : α | ∥z∥₊ ≤ c}) :
+  - x ∈ {z : α | ∥z∥₊ ≤ c} :=
+by simpa only [nn, set.mem_set_of_eq] using xc
 
-instance : nnnorm_add_class (S → β) :=
-{ nnn_zero   := by simp,
-  nnn_neg    := λ x, by simp [fintype.sum_nnnorm_def, pi.neg_apply, nnn_neg],
-  nnn_add_le := λ F G, le_trans (sum_le_sum (λ j hj, nnnorm_add_le _ _)) sum_add_distrib.le,
-  ..(infer_instance : add_comm_group _) }
+lemma std_flt_add_mem [has_add α] (n_le : ∀ {x y : α}, ∥x + y∥₊ ≤ ∥x∥₊ + ∥y∥₊) ⦃c d : ℝ≥0⦄ ⦃x y : α⦄
+  (xc : x ∈ {z : α | ∥z∥₊ ≤ c}) (yd : y ∈ {z : α | ∥z∥₊ ≤ d}) :
+  x + y ∈ {z : α | ∥z∥₊ ≤ c + d} :=
+n_le.trans (add_le_add xc yd)
 
+variable {α}
 /--  Given a type `α` with a `nnnorm_add_class` instance, `std_flt.to_pseudo_normed_group`
 shows that the standard filtration `λ c, {z : α | ∥z∥₊ ≤ c}` endows `α` with a
 `pseudo_normed_group` class. -/
@@ -132,4 +113,4 @@ def std_flt.to_pseudo_normed_group [add_comm_group α] [nnnorm_add_class α] :
   neg_mem_filtration  := std_flt_neg_mem α nnn_neg,
   add_mem_filtration  := std_flt_add_mem α nnn_add_le }
 
-end std_flt_instances
+end std_flt_lemmas
