@@ -17,10 +17,12 @@ open_locale nnreal
 
 variables (α : Type*) [has_nnnorm α]
 
-/--  A typeclass for an additive commutative group with a nnnorm.  Its fields assert that
-* (`nnn_zero`) the nnnorm of `0` is `0`;
-* (`nnn_neg`) the nnnorm of `-x` is equal to the nnnorm of `x`;
-* (`nnn_add_le`) the nnnorm of a sum is at most the sum of the nnnorms.
+/--  A typeclass for an additive monoid `α` with a nnnorm.
+Its fields `nnn_zero, nnn_neg, nnn_add_le` assert that
+* `∥0∥₊ = 0`;
+* `∥- x∥₊ = ∥x∥₊`;
+* `∥x + y∥₊ ≤ ∥x∥₊ + ∥y∥₊`.
+
 The class only assumes that `α` has `0, +, -`. -/
 @[ancestor add_comm_group has_nnnorm]
 class nnnorm_add_class [has_zero α] [has_add α] [has_neg α] : Prop :=

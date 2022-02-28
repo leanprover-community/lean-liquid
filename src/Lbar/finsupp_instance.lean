@@ -158,13 +158,6 @@ instance : has_nnnorm (invpoly r S) :=
 instance : nnnorm_add_class (invpoly r S) :=
 pi.nnnorm_add_class
 
-/-  The three lemmas
-`variables (F G : invpoly r S)`
-`@[simp] lemma nnnorm_zero : ∥(0 : invpoly r S)∥₊ = 0  := nnnorm_add_class.nnn_zero`
-`@[simp] lemma nnnorm_neg  : ∥-F∥₊ = ∥F∥₊              := nnnorm_add_class.nnnorm_neg _`
-`lemma nnnorm_add_le       : ∥F + G∥₊ ≤ ∥F∥₊ + ∥G∥₊    := nnnorm_add_class.nnnorm_add_le _ _`
-follow from `nnnorm_add_class α`. -/
-
 instance : pseudo_normed_group (invpoly r S) :=
 std_flt.to_pseudo_normed_group
 
