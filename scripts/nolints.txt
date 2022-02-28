@@ -78,7 +78,6 @@ apply_nolint category_theory.additive_category_of_abelian instance_priority
 -- for_mathlib/derived/K_projective.lean
 apply_nolint bounded_homotopy_category.lift unused_arguments
 apply_nolint bounded_homotopy_category.lift_ext unused_arguments
-apply_nolint homotopy_category.K_projective_of_triangle unused_arguments
 apply_nolint homotopy_category.single unused_arguments
 
 -- for_mathlib/derived/homological.lean
