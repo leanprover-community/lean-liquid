@@ -78,7 +78,6 @@ def std_flt.to_pseudo_normed_group [add_comm_group α] [nnnorm_add_class α] :
 
 end std_flt_lemmas
 
-
 /--  Let `r : ℝ≥0` be a non-negative real number.  `nnreal.normed r` or `r.normed` is the type of
 finsupps `ℕ →₀ ℤ` with an extra parameter `r`.
 
@@ -146,7 +145,7 @@ instance [add_group α] [nnnorm_add_class α] : nnnorm_add_class (S → α) :=
 /--  Let `r : ℝ≥0` be a non-negative real number and `S : Fintype` a finite type.
 `invpoly r S` is the type of `S`-indexed terms of type `r.normed`, that is, finsupps
 `ℕ →₀ ℤ` with norm defined using `r⁻¹`. -/
-@[nolint unused_arguments, derive add_comm_group]
+@[derive add_comm_group]
 def invpoly (r : ℝ≥0) (S : Fintype) := S → r.normed
 
 namespace invpoly
