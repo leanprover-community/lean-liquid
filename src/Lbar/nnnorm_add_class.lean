@@ -33,8 +33,6 @@ gives rise to a `pseudo_normed_group α` under the standard filtration.
 open finset finsupp
 open_locale nnreal big_operators
 
-noncomputable theory
-
 section families_of_add_comm_groups
 
 variables {S : Fintype} {α β : Type*}
@@ -54,13 +52,6 @@ instance fintype.sum_nnnorm : has_nnnorm (S → α) :=
 
 @[simp]
 lemma fintype.sum_nnnorm_def (F : S → α) : ∥F∥₊ = ∑ b, ∥F b∥₊ := rfl
-
-variable [has_zero α]
-instance sum_nnnorm : has_nnnorm (β →₀ α) :=
-{ nnnorm := λ F, F.support.sum (λ x, ∥F x∥₊) }
-
-@[simp]
-lemma sum_nnnorm_def (F : β →₀ α) : ∥F∥₊ = F.support.sum (λ x, ∥F x∥₊) := rfl
 
 end families_of_add_comm_groups
 
@@ -132,23 +123,6 @@ end std_flt_lemmas
 
 section std_flt_instances
 variables {α β : Type*} [add_group β] [has_nnnorm β] [nnnorm_add_class β]
-
-instance : nnnorm_add_class (α →₀ β) :=
-{ nnn_zero   := by simp,
-  nnn_neg    := λ f, by simp only [nnn_neg, coe_neg, pi.neg_apply, sum_nnnorm_def, support_neg],
-  nnn_add_le := λ F G, begin
-    classical,
-    unfold nnnorm,
-    rw [sum_subset (subset_union_left  F.support G.support),
-        sum_subset (subset_union_right F.support G.support),
-        sum_subset ((λ k, mem_union_support_of_mem_support_add F G) : _ ⊆ F.support ∪ G.support),
-      ← finset.sum_add_distrib],
-    { refine sum_le_sum (λ j hj, _),
-      apply nnn_add_le },
-    repeat { simp only [nnn_zero, mem_support_iff, not_not, mem_union, ne.def, finsupp.coe_add,
-      pi.add_apply, eq_self_iff_true, implies_true_iff]  {contextual := true} }
-  end,
-  ..(infer_instance : add_comm_group _) }
 
 instance {S : Fintype} : nnnorm_add_class (S → β) :=
 { nnn_zero   := by simp,
