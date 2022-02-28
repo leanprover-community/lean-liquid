@@ -1,4 +1,3 @@
-import pseudo_normed_group.basic
 import analysis.normed_space.basic
 
 /-!

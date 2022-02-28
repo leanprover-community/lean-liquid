@@ -1,4 +1,5 @@
 import for_mathlib.Fintype
+import pseudo_normed_group.basic
 import Lbar.nnnorm_add_class
 
 open finset finsupp
