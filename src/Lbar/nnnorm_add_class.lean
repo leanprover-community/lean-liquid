@@ -24,7 +24,6 @@ Its fields `nnn_zero, nnn_neg, nnn_add_le` assert that
 * `∥x + y∥₊ ≤ ∥x∥₊ + ∥y∥₊`.
 
 The class only assumes that `α` has `0, +, -`. -/
-@[ancestor add_comm_group has_nnnorm]
 class nnnorm_add_class [has_zero α] [has_add α] [has_neg α] : Prop :=
 (nnn_zero   : ∥(0 : α)∥₊ = 0)
 (nnn_neg    : ∀ ⦃x : α⦄, ∥- x∥₊ = ∥x∥₊)
