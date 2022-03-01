@@ -221,7 +221,7 @@ begin
       rw [sum_range_sum_Icc (coe ∘ (F s)) n F.d h_event,
         sum_Icc_sum_tail (F s) n F.d _ (λ n, lt_d_eq_zero F s _) h_event],
       { rw [← (abs_eq_self.mpr (inv_nonneg.mpr (@zero_le_two ℝ _))), ← real.norm_eq_abs,
-          ← normed_field.norm_mul, real.norm_eq_abs, real.norm_eq_abs, abs_eq_abs,
+          ← norm_mul, real.norm_eq_abs, real.norm_eq_abs, abs_eq_abs,
           ← (sub_add_cancel n 1), (sub_eq_add_neg n 1), (add_assoc n _), (add_comm n _),
           (add_assoc (-1 : ℤ) _ _), (add_comm 1 n), zpow_add₀ (@two_ne_zero ℝ _ _),
           ← (add_assoc (-1 : ℤ) _ _), neg_add_cancel_comm, ← int.succ, mul_assoc, zpow_neg₀,

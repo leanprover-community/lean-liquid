@@ -143,7 +143,7 @@ end
 
 -- move this
 def _root_.Profinite.empty_is_initial : limits.is_initial Profinite.empty.{u} :=
-@limits.is_initial.of_unique.{u} _ _ _ (λ Y, ⟨⟨Profinite.empty.elim _⟩, λ f, by { ext, cases x, }⟩)
+@limits.is_initial.of_unique.{u} _ _ _ (λ Y, ⟨⟨Profinite.empty.elim _⟩, λ f, by { ext x, cases x, }⟩)
 
 @[simps]
 def empty : ExtrDisc :=

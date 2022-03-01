@@ -1,4 +1,4 @@
-import category_theory.functor_category
+import category_theory.functor.category
 
 import for_mathlib.homology
 import for_mathlib.derived_functor

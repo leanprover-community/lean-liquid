@@ -4,7 +4,7 @@ import for_mathlib.Profinite.product
 import data.fintype.card
 import category_theory.limits.functor_category
 import category_theory.limits.shapes.binary_products
-import category_theory.currying
+import category_theory.functor.currying
 
 import facts
 import hacks_and_tricks.type_pow

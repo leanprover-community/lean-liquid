@@ -233,8 +233,7 @@ def biproduct_bicone_is_coprod : is_colimit (biproduct_bicone X Y).to_cocone :=
 .
 def biproduct_is_biprod : binary_biproduct_data X Y :=
 { bicone := biproduct_bicone X Y,
-  is_limit := biproduct_bicone_is_prod X Y,
-  is_colimit := biproduct_bicone_is_coprod X Y }
+  is_bilimit := ⟨biproduct_bicone_is_prod X Y, biproduct_bicone_is_coprod X Y⟩ }
 
 instance : has_binary_biproducts (homological_complex V c) :=
 ⟨λ X Y, ⟨⟨biproduct_is_biprod X Y⟩⟩⟩

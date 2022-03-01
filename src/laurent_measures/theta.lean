@@ -258,8 +258,7 @@ begin
   have h_norm_eq : (λ i : ℕ, (∥⌊y ξ x i / ξ ^ i⌋∥ * (r ^ i : ℝ))) =
     (λ i : ℕ, (∥(⌊y ξ x i / ξ ^ i⌋ : ℝ) * (r ^ i)∥)),
     { funext,
-      simp only [normed_field.norm_mul, nnreal.norm_eq, normed_field.norm_pow,
-        mul_eq_mul_right_iff],
+      simp only [norm_mul, norm_pow, nnreal.norm_eq, mul_eq_mul_right_iff],
       rw [real.norm_eq_abs, int.norm_eq_abs],
       tauto },
   have := summable_norm ξ x r hr₁,

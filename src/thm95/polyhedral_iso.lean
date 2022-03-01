@@ -107,7 +107,8 @@ def Hom_finsupp_equiv [fact (0 < r')] :
   inv_fun := λ (f : (Λ →+ M) ^ N),
   { to_fun := λ x, x.sum $ λ i l, f i l,
     map_zero' := by rw [finsupp.sum_zero_index],
-    map_add' := λ x y, by simp only [finsupp.sum_add_index'] },
+    map_add' := λ x y, by simp only [finsupp.sum_add_index', map_zero, eq_self_iff_true,
+      implies_true_iff, map_add, forall_3_true_iff] },
   left_inv := λ f,
   begin
     ext i l, dsimp only,

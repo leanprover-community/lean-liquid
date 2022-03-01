@@ -32,7 +32,7 @@ def is_limit_prod_cone : is_limit (prod_cone X Y) :=
   end,
   uniq' := begin
     rintros S m h,
-    ext,
+    ext x,
     { specialize h walking_pair.left,
       apply_fun (λ e, e x) at h,
       exact h },

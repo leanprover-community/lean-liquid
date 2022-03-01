@@ -3,7 +3,7 @@ import category_theory.abelian.exact
 import category_theory.linear.yoneda
 import algebra.category.Module.abelian
 import algebra.category.Group.abelian
-import category_theory.currying
+import category_theory.functor.currying
 import for_mathlib.exact_seq
 import for_mathlib.preadditive_yoneda
 import for_mathlib.AddCommGroup.exact

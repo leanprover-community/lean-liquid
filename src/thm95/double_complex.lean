@@ -172,8 +172,8 @@ begin
   apply norm_sum_le_of_le,
   rintro i -,
   refine le_trans (norm_zsmul_le _ _) _,
-  rw [← int.norm_cast_real, int.cast_pow, normed_field.norm_pow, int.cast_neg, int.cast_one,
-    norm_neg, norm_one, one_pow, one_mul],
+  rw [← int.norm_cast_real, int.cast_pow, norm_pow, int.cast_neg, int.cast_one, norm_neg, norm_one,
+    one_pow, one_mul],
   apply normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.1,
   apply breen_deligne.data.complex.map_norm_noninc
 end
@@ -201,8 +201,8 @@ begin
   apply norm_sum_le_of_le,
   rintro i -,
   refine le_trans (norm_zsmul_le _ _) _,
-  rw [← int.norm_cast_real, int.cast_pow, normed_field.norm_pow, int.cast_neg, int.cast_one,
-    norm_neg, norm_one, one_pow, one_mul],
+  rw [← int.norm_cast_real, int.cast_pow, norm_pow, int.cast_neg, int.cast_one, norm_neg, norm_one,
+    one_pow, one_mul],
   apply normed_group_hom.norm_noninc.norm_noninc_iff_norm_le_one.1,
   apply breen_deligne.data.complex.map_norm_noninc
 end

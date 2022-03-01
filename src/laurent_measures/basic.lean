@@ -169,7 +169,7 @@ instance : add_comm_monoid (ℒ S) :=
   { to_fun := λ s k, n • (F s k),
     summable' := λ s, begin
       -- aahrg, why is `n` an implicit variable here???
-      have := @summable.const_smul _ _ _ _ _ _ _ _ _ _ n (F.nnreal_summable s),
+      have := @summable.const_smul _ _ _ _ _ _ _ _ _ n (F.nnreal_summable s),
       simpa only [nsmul_eq_mul, int.nat_cast_eq_coe_nat, int.nnnorm_mul,
         nat.nnnorm_coe_int, mul_assoc],
     end },
@@ -186,7 +186,7 @@ instance : add_comm_group (ℒ S) :=
   { to_fun := λ s m, n • (F s m),
     summable' := λ s, begin
       -- aahrg, why is `n.nat_abs` an implicit variable here???
-      have := @summable.const_smul _ _ _ _ _ _ _ _ _ _ n.nat_abs (F.nnreal_summable s),
+      have := @summable.const_smul _ _ _ _ _ _ _ _ _ n.nat_abs (F.nnreal_summable s),
       simpa only [nsmul_eq_mul, nnreal.coe_nat_abs, algebra.id.smul_eq_mul,
         int.nnnorm_mul, mul_assoc],
     end },

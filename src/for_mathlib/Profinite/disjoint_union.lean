@@ -168,7 +168,7 @@ def sigma_pullback_to_pullback_sigma {B} (f : Π a, X a ⟶ B) :
   sigma (λ a : α × α, pullback (f a.1) (f a.2)) ⟶ pullback (sigma.desc X f) (sigma.desc X f) :=
 sigma.desc _ $ λ a, pullback.lift _ _
   (pullback.fst _ _ ≫ sigma.ι _ _) (pullback.snd _ _ ≫ sigma.ι _ _) begin
-    cases a, dsimp at *, ext1, cases x, assumption,
+    cases a, dsimp at *, ext1 x, cases x, assumption,
   end
 
 instance {B} (f : Π a, X a ⟶ B) : is_iso (sigma_pullback_to_pullback_sigma X f) :=
