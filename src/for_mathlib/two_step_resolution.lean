@@ -369,6 +369,3 @@ begin
     exact this
   }
 end
-
-
-#lint
