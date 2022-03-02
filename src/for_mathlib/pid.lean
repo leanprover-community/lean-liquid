@@ -1,8 +1,8 @@
 import linear_algebra.dimension
 import ring_theory.principal_ideal_domain
-import ring_theory.finiteness
 import set_theory.ordinal
-import set_theory.cardinal
+import set_theory.ordinal_arithmetic
+import linear_algebra.free_module.basic
 
 open_locale big_operators
 
@@ -706,26 +706,6 @@ begin
     exact hI
   },
 
-  have hF : ∀ i j, i ≤ j → F i ≤ F j,
-  { intros i j hij,
-    apply submodule.span_mono,
-    apply set.image_subset,
-
-    have hij := eq_or_lt_of_le hij,
-    cases hij with hij hij,
-    { refine subset_of_eq _, exact congr_arg _ hij },
-    intros x hx,
-    have hx : ¬r (enum i) x := hx,
-    have hij := (ordinal.enum_lt i.2 j.2).2 hij,
-    have hx : r x (enum i) ∨ x = (enum i) := le_unbundled.2 hx,
-    have goal : r x (enum j) ∨ x = (enum j),
-    cases hx with hx hx,
-    exact or.intro_left _ (is_trans.trans _ _ _ hx hij),
-    rw hx,
-    exact or.intro_left _ hij,
-    exact le_unbundled.1 goal
-  },
-
   have hBBN : ∀ i, (BB i : M) ∈ N := λ i, by {apply hU i.1, exact (hu i.1).1},
 
   have hBB : ∀ i, (BB i : M) ∈ F i,
@@ -846,4 +826,16 @@ begin
   },
 
   exact ⟨good, ⟨basis.mk H₁ H₂⟩⟩
+end
+
+
+@[instance]
+theorem submodule.free_of_pid_of_free [is_domain R] [is_principal_ideal_ring R]
+  {N : submodule R M}
+  [module.free R M] :
+module.free R N :=
+begin
+  have h := (submodule.nonempty_basis_of_pid' (module.free.choose_basis R M) N).some_spec,
+  cases h,
+  exact module.free.of_basis h
 end
