@@ -457,6 +457,7 @@ begin
   exacts [eq_iff_iff.mpr (inducing_cast_ℳ p S c).continuous_iff, H],
   end
 
+-- This is the main continuity property needed in `ses2.lean`
 lemma continuous_θ_c (c : ℝ≥0) : continuous (θ_c c S) :=
 begin
   apply continuous_of_seval_ℳ_comp_continuous,
