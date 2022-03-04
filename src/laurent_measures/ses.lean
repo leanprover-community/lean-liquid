@@ -237,17 +237,17 @@ def seval_ℳ_c (c : ℝ≥0) (s : S) : filtration (ℳ S) c → (filtration (�
 end
 
 --not sure if these are needed
-def cast_ℳ_c (c : ℝ≥0) : filtration (ℳ S) c → (S → {x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c}) :=
-begin
-  intros x s,
-  refine ⟨x.1 s, _⟩,
-  have hx := x.2,
-  simp only [filtration, set.mem_set_of_eq, seval_ℒ, nnnorm, laurent_measures.coe_mk,
-    fintype.univ_punit, finset.sum_singleton] at hx,
-  have := finset.sum_le_sum_of_subset (finset.singleton_subset_iff.mpr $ finset.mem_univ_val _),
-  rw finset.sum_singleton at this,
-  apply le_trans this hx,
-end
+-- def cast_ℳ_c (c : ℝ≥0) : filtration (ℳ S) c → (S → {x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c}) :=
+-- begin
+--   intros x s,
+--   refine ⟨x.1 s, _⟩,
+--   have hx := x.2,
+--   simp only [filtration, set.mem_set_of_eq, seval_ℒ, nnnorm, laurent_measures.coe_mk,
+--     fintype.univ_punit, finset.sum_singleton] at hx,
+--   have := finset.sum_le_sum_of_subset (finset.singleton_subset_iff.mpr $ finset.mem_univ_val _),
+--   rw finset.sum_singleton at this,
+--   apply le_trans this hx,
+-- end
 
 
 -- **[FAE]** From here everything might be useless until `lemma inducing_cast_ℳ`: check
@@ -285,7 +285,7 @@ end
 
 lemma coe_α_coe : (coe : (box S c) → (ℳ S)) ∘ (α S c) = coe := by {funext _, refl}
 
-example : inducing (α S c) :=
+lemma inducing_α : inducing (α S c) :=
 begin
   have ind_ind := @induced_compose _ _ (ℳ S) _ (α p S c) coe,
   rw [coe_α_coe p S c] at ind_ind,
@@ -302,48 +302,30 @@ end
 --   simpa only,
 -- end
 
-lemma inducing_cast_ℳ (c : ℝ≥0) : inducing (cast_ℳ_c S c) :=
-begin
-  -- let f :
-  -- let := cast_ℳ_c p S c,
-  -- let M := ℳ S,
-  -- unfold [ℳ S],
-  -- have := @pi_induced_induced S (λ i, ℝ) (λ i, { x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c}) _ ,--(cast_ℳ_c p S c),
-  -- fconstructor,
-  -- dsimp [real_measures.topological_space],
-  sorry,
-  -- apply pi_induced_induced,
-  -- sorry,
-  -- simp,
-  -- sorry,
-end
+-- lemma inducing_cast_ℳ (c : ℝ≥0) : inducing (cast_ℳ_c S c) :=
+-- begin
+--   -- let f :
+--   -- let := cast_ℳ_c p S c,
+--   -- let M := ℳ S,
+--   -- unfold [ℳ S],
+--   -- have := @pi_induced_induced S (λ i, ℝ) (λ i, { x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c}) _ ,--(cast_ℳ_c p S c),
+--   -- fconstructor,
+--   -- dsimp [real_measures.topological_space],
+--   sorry,
+--   -- apply pi_induced_induced,
+--   -- sorry,
+--   -- simp,
+--   -- sorry,
+-- end
 
 -- lemma cont_cast_ℳ (c : ℝ≥0) : continuous (cast_ℳ_c S c) := sorry
-def equiv_ball_ℳ (c : ℝ≥0) : filtration (ℳ ϖ) c ≃ₜ {x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c} := sorry
+-- def equiv_ball_ℳ (c : ℝ≥0) : filtration (ℳ ϖ) c ≃ₜ {x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c} := sorry
 
-lemma seval_cast_ℳ_commute (c : ℝ≥0) (s : S) :
- (λ x, (cast_ℳ_c S c x s)) = (equiv_ball_ℳ c) ∘ seval_ℳ_c S c s := sorry
+-- lemma seval_cast_ℳ_commute (c : ℝ≥0) (s : S) :
+--  (λ x, (cast_ℳ_c S c x s)) = (equiv_ball_ℳ c) ∘ seval_ℳ_c S c s := sorry
 
-lemma seval_cast_ℳ_commute' {X : Type*} (c : ℝ≥0) {f : X → filtration (ℳ S) c} (s : S)  :
- (λ x, (cast_ℳ_c S c (f x) s)) = (equiv_ball_ℳ c) ∘ seval_ℳ_c S c s ∘ f :=
- begin
-  ext z,
-  have h_commute := @seval_cast_ℳ_commute p S _ _ c s,
-  have := congr_fun h_commute (f z),
-  simp only at this,
-  rw this,
- end
-
--- #check α S c
--- #check (λ x, λ s : S, (((α S c) x).1 s))
--- #check cast_ℳ_c
--- #check (λ s : S, seval_ℳ_c)
-
--- lemma seval_α_commute (c : ℝ≥0) (s : S) :
---  (λ x, (((α S c) x).1 s)) = (equiv_box_ϖ S c) ∘ seval_ℳ_c S c s := sorry
-
---  lemma seval_α_commute' {X : Type*} (c : ℝ≥0) {f : X → filtration (ℳ S) c} (s : S)  :
---  (λ x, ((α S c) (f x)).1 s) = (equiv_ball_ℳ c) ∘ seval_ℳ_c S c s ∘ f :=
+-- lemma seval_cast_ℳ_commute' {X : Type*} (c : ℝ≥0) {f : X → filtration (ℳ S) c} (s : S)  :
+--  (λ x, (cast_ℳ_c S c (f x) s)) = (equiv_ball_ℳ c) ∘ seval_ℳ_c S c s ∘ f :=
 --  begin
 --   ext z,
 --   have h_commute := @seval_cast_ℳ_commute p S _ _ c s,
@@ -351,6 +333,23 @@ lemma seval_cast_ℳ_commute' {X : Type*} (c : ℝ≥0) {f : X → filtration (�
 --   simp only at this,
 --   rw this,
 --  end
+
+
+lemma seval_ℳ_α_commute (c : ℝ≥0) (s : S) :
+ (λ F, ((equiv_box_ϖ S c) ∘ (α S c)) F s) = (λ F, seval_ℳ_c S c s F) :=
+begin
+  sorry,
+end
+
+ lemma seval_ℳ_α_commute' {X : Type*} (c : ℝ≥0) {f : X → filtration (ℳ S) c} (s : S)  :
+ (λ x, ((equiv_box_ϖ S c) ∘ (α S c)) (f x) s) = (λ x, seval_ℳ_c S c s (f x)) :=
+ begin
+  ext z,
+  have h_commute := @seval_ℳ_α_commute p S _ _ c s,
+  have := congr_fun h_commute (f z),
+  simp only at this,
+  rw this,
+ end
 
 
 -- lemma cont_iff_comp_cast_ℳ (c : ℝ≥0) {X : Type*} [topological_space X] (f : X → filtration (ℳ S) c) :
@@ -391,9 +390,6 @@ begin
   apply truncate_continuous,
 end
 
---**[FAE]** Useful?
--- lemma cont_seval_ℳ_c (c : ℝ≥0) (s : S) : continuous (seval_ℳ_c S c s) := sorry
-
 open metric
 
 --**[FAE]** Probably needed, but check before proving it!
@@ -406,24 +402,24 @@ lemma continuous_iff_for_all_closed (c : ℝ≥0) {X : Type*} [topological_space
  end
 
 
-def equiv_ball_ℓp (c : ℝ≥0) : {x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c} ≃ₜ
-  closed_ball (0 : ℝ) (c ^ (1 / p : ℝ)) :=
-begin
-  fconstructor,
-  {fconstructor,
-    { intro x,
-      use x,
-      rw mem_closed_ball_zero_iff,
-      sorry,
+-- def equiv_ball_ℓp (c : ℝ≥0) : {x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c} ≃ₜ
+--   closed_ball (0 : ℝ) (c ^ (1 / p : ℝ)) :=
+-- begin
+--   fconstructor,
+--   {fconstructor,
+--     { intro x,
+--       use x,
+--       rw mem_closed_ball_zero_iff,
+--       sorry,
 
-    },
-  {sorry, },
-  {sorry, },
-  { sorry, },
-  },
-  sorry,
-  sorry,
-end
+--     },
+--   {sorry, },
+--   {sorry, },
+--   { sorry, },
+--   },
+--   sorry,
+--   sorry,
+-- end
 
 
 def θ_c (c : ℝ≥0) (T : Fintype) : (filtration (laurent_measures r T) c) →
@@ -443,18 +439,35 @@ begin
   refl,
 end
 
+
+-- **[FAE]** This is the right lemma, in the proof we should introduce α and use it is inducing
+-- lemma continuous_of_seval_ℳ_comp_continuous (c : ℝ≥0) {X : Type*} [topological_space X]
+--   {f : X → (filtration (ℳ S) c)} : (∀ s, continuous ((seval_ℳ_c S c s) ∘ f)) → continuous f :=
+-- begin
+--   intro H,
+--   replace H : ∀ (s : S), continuous (λ x : X, (cast_ℳ_c p S c) (f x) s),
+--   { intro s,
+--     rw @seval_cast_ℳ_commute' p S _ _ X c f s,
+--     apply ((equiv_ball_ℳ p c).comp_continuous_iff).mpr,
+--     exact H s },
+--   rw ← continuous_pi_iff at H,
+--   convert_to (continuous (λ x, cast_ℳ_c p S c (f x))) using 0,
+--   exacts [eq_iff_iff.mpr (inducing_cast_ℳ p S c).continuous_iff, H],
+--   end
+
 lemma continuous_of_seval_ℳ_comp_continuous (c : ℝ≥0) {X : Type*} [topological_space X]
   {f : X → (filtration (ℳ S) c)} : (∀ s, continuous ((seval_ℳ_c S c s) ∘ f)) → continuous f :=
 begin
   intro H,
-  replace H : ∀ (s : S), continuous (λ x : X, (cast_ℳ_c p S c) (f x) s),
-  { intro s,
-    rw @seval_cast_ℳ_commute' p S _ _ X c f s,
-    apply ((equiv_ball_ℳ p c).comp_continuous_iff).mpr,
+  replace H : ∀ (s : S), continuous (λ x : X, ((equiv_box_ϖ p S c) ∘ (α p S c)) (f x) s),
+  { intro,
+    rw [seval_ℳ_α_commute' p S c s],
     exact H s },
   rw ← continuous_pi_iff at H,
-  convert_to (continuous (λ x, cast_ℳ_c p S c (f x))) using 0,
-  exacts [eq_iff_iff.mpr (inducing_cast_ℳ p S c).continuous_iff, H],
+  convert_to (continuous (λ x, (equiv_box_ϖ p S c) (α p S c (f x)))) using 0,
+  { apply eq_iff_iff.mpr,
+    rw [homeomorph.comp_continuous_iff, (inducing_α p S c).continuous_iff] },
+  exact H,
   end
 
 -- This is the main continuity property needed in `ses2.lean`
