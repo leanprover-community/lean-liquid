@@ -260,14 +260,27 @@ variable (c : ℝ≥0)
 
 def box := {F : (ℳ S) // ∀ s, ∥ F s ∥₊ ^ (p:ℝ) ≤ c }
 
-example : has_coe (filtration (ℳ S) c) (ℳ S) := infer_instance --already declared
+-- example : has_coe (filtration (ℳ S) c) (ℳ S) := infer_instance --already declared
 instance : has_coe (box S c) (ℳ S) := by {dsimp only [box], apply_instance}
 instance : topological_space (ℳ S) := by {dsimp only [real_measures], apply_instance}
 instance : topological_space (box S c) := by {dsimp only [box], apply_instance}
 
-lemma equiv_box_ϖ : (box S c) ≃ₜ Π (s : S), (filtration (ℳ ϖ) c) :=
+def equiv_box_ϖ : (box S c) ≃ₜ Π (s : S), (filtration (ℳ ϖ) c) :=
 begin
-  sorry,
+  sorry; {
+  fconstructor,
+  { fconstructor,
+    { intros F s,
+      cases F,
+      -- need a lemma constructing an element in (ℳ S)_c from S-many elements in (ℳ ϖ)_c,
+        --used many times
+      -- let := (seval_ℳ_c p S c s) F_val,
+
+    },
+
+
+  },
+  }
 end
 
 def α : filtration (ℳ S) c → box S c :=
@@ -338,7 +351,11 @@ end
 lemma seval_ℳ_α_commute (c : ℝ≥0) (s : S) :
  (λ F, ((equiv_box_ϖ S c) ∘ (α S c)) F s) = (λ F, seval_ℳ_c S c s F) :=
 begin
-  sorry,
+  sorry; {
+  funext,
+  simp,
+
+}
 end
 
  lemma seval_ℳ_α_commute' {X : Type*} (c : ℝ≥0) {f : X → filtration (ℳ S) c} (s : S)  :
