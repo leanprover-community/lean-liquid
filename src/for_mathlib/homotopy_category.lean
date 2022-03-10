@@ -84,9 +84,6 @@ instance : has_add (A ⟶ B) :=
   (λ (f₁ f₂ g : A.as ⟶ B.as) (h : quotient.comp_closure (homotopic V c) f₁ f₂),
     eq_of_homotopy _ _ (h.rel.some.add_right g))⟩
 
-lemma quotient_map_add {A B : homological_complex V c} (f g : A ⟶ B) :
-  (quotient V c).map (f + g) = (quotient V c).map f + (quotient V c).map g := rfl
-
 instance : has_sub (A ⟶ B) :=
 ⟨quot.lift₂ (λ f g, (quotient V c).map (f - g))
   (λ (f g₁ g₂ : A.as ⟶ B.as) (h : quotient.comp_closure (homotopic V c) g₁ g₂),
@@ -94,9 +91,39 @@ instance : has_sub (A ⟶ B) :=
   (λ (f₁ f₂ g : A.as ⟶ B.as) (h : quotient.comp_closure (homotopic V c) f₁ f₂),
     eq_of_homotopy _ _ (h.rel.some.sub_right g))⟩
 
+instance has_nsmul : has_scalar ℕ (A ⟶ B) := ⟨λ n, nsmul_rec n⟩
+
+instance has_zsmul : has_scalar ℤ (A ⟶ B) := ⟨λ n, zsmul_rec n⟩
+
+lemma quotient_map_neg {A B : homological_complex V c} (f : A ⟶ B) :
+(quotient V c).map (-f) = -(quotient V c).map f := rfl
+
+lemma quotient_map_add {A B : homological_complex V c} (f g : A ⟶ B) :
+  (quotient V c).map (f + g) = (quotient V c).map f + (quotient V c).map g := rfl
+
+lemma quotient_map_sub {A B : homological_complex V c} (f g : A ⟶ B) :
+  (quotient V c).map (f - g) = (quotient V c).map f - (quotient V c).map g := rfl
+
+lemma quotient_map_nsmul {A B : homological_complex V c} (n : ℕ) (f : A ⟶ B) :
+(quotient V c).map (n • f) = n • (quotient V c).map f :=
+begin
+  induction n with n ih,
+  { rw zero_smul, refl },
+  { rw [succ_nsmul, quotient_map_add, ih], refl, }
+end
+
+lemma quotient_map_zsmul {A B : homological_complex V c} (n : ℤ) (f : A ⟶ B) :
+(quotient V c).map (n • f) = n • (quotient V c).map f :=
+begin
+  cases n,
+  { rw [of_nat_zsmul, quotient_map_nsmul], refl },
+  { rw [zsmul_neg_succ_of_nat, quotient_map_neg, quotient_map_nsmul], refl, }
+end
+
 instance : add_comm_group (A ⟶ B) :=
 function.surjective.add_comm_group (λ f, (quotient V c).map f) (surjective_quot_mk _)
   rfl (λ _ _, rfl) (λ _, rfl) (λ _ _, rfl)
+  (λ f n, quotient_map_nsmul n f) (λ f n, quotient_map_zsmul n f)
 
 instance : preadditive (homotopy_category V c) :=
 { add_comp' := λ X Y Z f₁ f₂ g,

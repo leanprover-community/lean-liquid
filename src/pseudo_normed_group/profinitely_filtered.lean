@@ -630,6 +630,14 @@ variables [comphaus_filtered_pseudo_normed_group M]
 variables [comphaus_filtered_pseudo_normed_group M₁]
 variables [comphaus_filtered_pseudo_normed_group M₂]
 
+@[simps]
+def copy (f : comphaus_filtered_pseudo_normed_group_hom M₁ M₂) (g : M₁ → M₂) (h : g = f) :
+  comphaus_filtered_pseudo_normed_group_hom M₁ M₂ :=
+{ to_fun := g,
+  bound' := by { cases h, exact f.bound },
+  continuous' := by { cases h, exact f.continuous' },
+  .. f.to_add_monoid_hom.copy g h }
+
 def add (f g : comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :
   comphaus_filtered_pseudo_normed_group_hom M₁ M₂ :=
 { to_fun := f + g,
@@ -650,26 +658,6 @@ def add (f g : comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :
   end,
   .. f.to_add_monoid_hom + g.to_add_monoid_hom }
 
-def sub (f g : comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :
-  comphaus_filtered_pseudo_normed_group_hom M₁ M₂ :=
-{ to_fun := f - g,
-  bound' :=
-  begin
-    obtain ⟨Cf, hCf⟩ := f.bound,
-    obtain ⟨Cg, hCg⟩ := g.bound,
-    refine ⟨Cf + Cg, λ c x hx, _⟩,
-    rw add_mul,
-    apply sub_mem_filtration (hCf hx) (hCg hx),
-  end,
-  continuous' :=
-  begin
-    apply pfpng_ctu.sub f.continuous g.continuous,
-    obtain ⟨Cf, hCf⟩ := f.bound,
-    intro c₁,
-    refine ⟨Cf * c₁, λ x, hCf x.2⟩,
-  end,
-  .. f.to_add_monoid_hom - g.to_add_monoid_hom }
-
 def neg (f : comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :
   comphaus_filtered_pseudo_normed_group_hom M₁ M₂ :=
 { to_fun := -f,
@@ -682,17 +670,49 @@ def neg (f : comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :
   continuous' := pfpng_ctu.neg f.continuous,
   .. -f.to_add_monoid_hom }
 
+def sub (f g : comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :
+  comphaus_filtered_pseudo_normed_group_hom M₁ M₂ :=
+(f.add g.neg).copy (f - g) (sub_eq_add_neg _ _)
+
+def nsmul' : Π (n : ℕ) (f : comphaus_filtered_pseudo_normed_group_hom M₁ M₂),
+  comphaus_filtered_pseudo_normed_group_hom M₁ M₂
+| 0     f := 0
+| (n+1) f := f.add (nsmul' n f)
+
+def nsmul (n : ℕ) (f : comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :
+  comphaus_filtered_pseudo_normed_group_hom M₁ M₂ :=
+(f.nsmul' n).copy (n • f)
+begin
+  induction n with n ih,
+  { rw zero_smul, refl },
+  { rw [succ_nsmul, ih], refl },
+end
+
+def zsmul' : Π (n : ℤ) (f : comphaus_filtered_pseudo_normed_group_hom M₁ M₂),
+  comphaus_filtered_pseudo_normed_group_hom M₁ M₂
+| (n:ℕ)  f := f.nsmul n
+| -[1+n] f := (f.nsmul (n.succ)).neg
+
+def zsmul (n : ℤ) (f : comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :
+  comphaus_filtered_pseudo_normed_group_hom M₁ M₂ :=
+(f.zsmul' n).copy (n • f)
+begin
+  cases n,
+  { rw of_nat_zsmul, refl },
+  { rw zsmul_neg_succ_of_nat, refl },
+end
+
 instance : has_add (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) := ⟨add⟩
-
-instance : has_sub (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) := ⟨sub⟩
-
 instance : has_neg (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) := ⟨neg⟩
+instance : has_sub (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) := ⟨sub⟩
+instance has_nsmul : has_scalar ℕ (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) := ⟨nsmul⟩
+instance has_zsmul : has_scalar ℤ (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) := ⟨zsmul⟩
 
 instance : add_comm_group (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :=
 function.injective.add_comm_group
   comphaus_filtered_pseudo_normed_group_hom.to_add_monoid_hom
   (λ f g h, by { ext, rw add_monoid_hom.ext_iff at h, exact h x })
-  rfl (λ _ _, rfl) (λ _, rfl) (λ _ _, rfl)
+  rfl (λ _ _, rfl) (λ _, rfl) (λ _ _, rfl) (λ _ _, rfl) (λ _ _, rfl)
 
 @[simps]
 def to_add_monoid_hom_hom : (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) →+ (M₁ →+ M₂) :=

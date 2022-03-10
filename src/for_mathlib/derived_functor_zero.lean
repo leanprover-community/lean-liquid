@@ -28,15 +28,15 @@ nat_iso.of_components (λ X,
   end)
 begin
   rintros (a|a) (b|b) (f|f),
-  work_on_goal 0 { dsimp at *, simp at *, dsimp at *, simp at * },
-  work_on_goal 0 { dsimp at *, unfold_aux, dsimp at *, simp at * },
-  work_on_goal 0 { dsimp at *, simp at * },
-  dsimp at *, simp at *, dsimp at *, simp at *,
+  { dsimp at *, simp at *, dsimp at *, simp at * },
+  { dsimp at *, unfold_aux, dsimp at *, simp at * },
+  { dsimp at *, simp at * },
+  { dsimp at *, simp at *, dsimp at *, simp at * },
 end
 
-/-- A morphism `cokernel f ⟶ A₃` provided that `f ≫ g = 0`. -/
-def cokernel_comparison (w : f ≫ g = 0) : cokernel f ⟶ A₃ :=
-cokernel.desc f g w
+-- /-- A morphism `cokernel f ⟶ A₃` provided that `f ≫ g = 0`. -/
+-- def cokernel_comparison (w : f ≫ g = 0) : cokernel f ⟶ A₃ :=
+-- cokernel.desc f g w
 
 end limits
 
@@ -83,14 +83,14 @@ local attribute [instance] abelian.pseudoelement.over_to_sort
   abelian.pseudoelement.has_zero
 
 instance comparison_is_iso_of_exact (ex : exact_seq C [f, g, (0 : A₃ ⟶ X)]) :
-  is_iso (cokernel_comparison (comp_eq_zero ex)) :=
+  is_iso (cokernel.desc _ _ (comp_eq_zero ex)) :=
 begin
   letI : epi g := ((abelian.tfae_epi X g).out 0 2).2 ((exact_iff_exact_seq _ _).2 $ ex.extract 1 2),
   refine (is_iso_iff_mono_and_epi _).2 ⟨_, limits.cokernel.desc_epi _ _ _⟩,
   refine abelian.pseudoelement.mono_of_zero_of_map_zero _ (λ a ha, _),
   obtain ⟨b, hb⟩ := abelian.pseudoelement.pseudo_surjective_of_epi (cokernel.π f) a,
   have hbz : g b = 0,
-  { have : g = (cokernel.π f) ≫ (cokernel_comparison (comp_eq_zero ex)) :=
+  { have : g = (cokernel.π f) ≫ (cokernel.desc _ _ (comp_eq_zero ex)) :=
       (cokernel.π_desc _ _ _).symm,
     rw [this, abelian.pseudoelement.comp_apply, hb, ha] },
   obtain ⟨c, hc : f c = b⟩ := abelian.pseudoelement.pseudo_exact_of_exact.2 _ hbz,
@@ -101,18 +101,17 @@ begin
 end
 
 @[simp, reassoc]
-lemma cokernel_comparison_inv (ex : exact_seq C [f, g, (0 : A₃ ⟶ X)]) :
-  g ≫ inv (cokernel_comparison (comp_eq_zero ex)) = cokernel.π _ :=
+lemma cokernel_desc_inv (ex : exact_seq C [f, g, (0 : A₃ ⟶ X)]) :
+  g ≫ inv (cokernel.desc _ _ (comp_eq_zero ex)) = cokernel.π _ :=
 begin
   rw is_iso.comp_inv_eq,
-  dsimp [cokernel_comparison],
   simp,
 end
 
 lemma aux [limits.preserves_finite_colimits F] (ex : exact_seq C [f, g, (0 : A₃ ⟶ X)]) :
-  F.map g ≫ (F.map $ inv (cokernel_comparison (comp_eq_zero ex))) ≫ (preserves_cokernel _ _).hom =
+  F.map g ≫ (F.map $ inv (cokernel.desc _ _ (comp_eq_zero ex))) ≫ (preserves_cokernel _ _).hom =
   cokernel.π (F.map f) :=
-by simp only [← category.assoc, ← F.map_comp, cokernel_comparison_inv, map_preserves_cokernel_hom]
+by simp only [← category.assoc, ← F.map_comp, cokernel_desc_inv, map_preserves_cokernel_hom]
 
 variable (F)
 
@@ -126,7 +125,7 @@ begin
     rwa [← exact_iff_exact_seq, ← (abelian.tfae_epi X g).out 0 2] at ex },
   refine exact_seq.cons _ _ _ _ _,
   { let I : F.obj A₃ ≅ cokernel (F.map f) :=
-      (F.map_iso $ (as_iso $ cokernel_comparison (comp_eq_zero ex)).symm) ≪≫ preserves_cokernel _ _,
+      (F.map_iso $ (as_iso $ cokernel.desc _ _ (comp_eq_zero ex)).symm) ≪≫ preserves_cokernel _ _,
     suffices : category_theory.exact (F.map f) (F.map g ≫ I.hom), by rwa exact_comp_iso at this,
     erw aux,
     exact abelian.exact_cokernel (F.map f) },
@@ -195,7 +194,7 @@ begin
   refine (iso.comp_inv_eq _).2 _,
   rw [category.comp_id, iso.inv_hom_id, iso.comp_inv_eq, category.id_comp],
   ext,
-  simp only [category.assoc, homology.desc'_π'_assoc, cokernel_comparison_inv_assoc,
+  simp only [category.assoc, homology.desc'_π'_assoc, cokernel_desc_inv_assoc,
     cokernel.π_desc, homology.π', iso.inv_hom_id, category.comp_id],
   nth_rewrite 1 [← category.comp_id (cokernel.π _)],
   refine congr_arg (category_struct.comp _) _,
@@ -203,7 +202,7 @@ begin
   rw [← category.assoc, ← category.assoc, ← category.assoc, iso.inv_hom_id, category.id_comp],
   ext,
   simp only [coequalizer_as_cokernel, category.assoc, cokernel.π_desc_assoc,
-    cokernel_comparison_inv_assoc, cokernel.π_desc, category.comp_id],
+    cokernel_desc_inv_assoc, cokernel.π_desc, category.comp_id],
   rw [← category.assoc],
   nth_rewrite 1 [← category.id_comp (cokernel.π _)],
   refine congr_fun (congr_arg category_struct.comp _) _,
@@ -220,8 +219,7 @@ begin
     ← category.assoc (F.left_derived_obj_iso 0 P).inv, iso.inv_hom_id, category.id_comp,
     is_iso.inv_comp_eq, category.comp_id],
   ext,
-  simp only [cokernel.π_desc_assoc, category.assoc, cokernel.π_desc, homology.desc',
-    cokernel_comparison],
+  simp only [cokernel.π_desc_assoc, category.assoc, cokernel.π_desc, homology.desc'],
   rw [← category.assoc, ← category.assoc (homology_iso_cokernel_lift _ _ _).inv, iso.inv_hom_id,
     category.id_comp],
   simp only [category.assoc, cokernel.π_desc, kernel.lift_ι_assoc, category.id_comp],
