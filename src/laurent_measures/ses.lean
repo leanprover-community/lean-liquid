@@ -222,14 +222,14 @@ def θ_to_add : (ℒ S) →+ (ℳ S) :=
 
 variable (S)
 
-open theta metric
+open theta metric real_measures
 
 def seval_ℳ_c (c : ℝ≥0) (s : S) : filtration (ℳ S) c → (filtration (ℳ ϖ) c) :=
 λ x,
   begin
   refine ⟨(λ _, x.1 s), _⟩,
   have hx := x.2,
-  simp only [filtration, set.mem_set_of_eq, seval_ℒ, nnnorm, laurent_measures.coe_mk,
+  simp only [filtration, set.mem_set_of_eq, nnnorm, laurent_measures.coe_mk,
     fintype.univ_punit, finset.sum_singleton] at ⊢ hx,
   have := finset.sum_le_sum_of_subset (finset.singleton_subset_iff.mpr $ finset.mem_univ_val _),
   rw finset.sum_singleton at this,
@@ -258,30 +258,41 @@ end
 
 variable (c : ℝ≥0)
 
-def box := {F : (ℳ S) // ∀ s, ∥ F s ∥₊ ^ (p:ℝ) ≤ c }
+def box := {F : (ℳ S) // ∀ s, ∥ F s ∥₊ ^ (p : ℝ) ≤ c }
 
--- example : has_coe (filtration (ℳ S) c) (ℳ S) := infer_instance --already declared
 instance : has_coe (box S c) (ℳ S) := by {dsimp only [box], apply_instance}
 instance : topological_space (ℳ S) := by {dsimp only [real_measures], apply_instance}
 instance : topological_space (box S c) := by {dsimp only [box], apply_instance}
 
-def equiv_box_ϖ : (box S c) ≃ₜ Π (s : S), (filtration (ℳ ϖ) c) :=
+def equiv_box_ϖ : (box S c) ≃ Π (s : S), (filtration (ℳ ϖ) c) :=
 begin
-  sorry; {
   fconstructor,
-  { fconstructor,
-    { intros F s,
-      cases F,
-      -- need a lemma constructing an element in (ℳ S)_c from S-many elements in (ℳ ϖ)_c,
-        --used many times
-      -- use ⟨(seval_ℳ p S c s) F_val, _⟩,
-
-    },
-
-
-  },
-  }
+  { intros F s,
+    use seval_ℳ S s F.1,
+    simp only [real_measures.mem_filtration_iff, nnnorm, fintype.univ_punit,
+      finset.sum_singleton, seval_ℳ],
+    exact F.2 s },
+  { intro G,
+    use λ s, (G s).1 punit.star,
+    intro s,
+    simpa only [real_measures.mem_filtration_iff, nnnorm, fintype.univ_punit,
+      finset.sum_singleton, seval_ℳ] using (G s).2 },
+  { intro _,
+    ext s,
+    simpa only [seval_ℳ] },
+  { intro G,
+    ext s,
+    simp only [seval_ℳ, subtype.val_eq_coe, subtype.coe_mk],
+    induction x,
+    refl }
 end
+
+def homeo_box_ϖ : (box S c) ≃ₜ Π (s : S), (filtration (ℳ ϖ) c) :=
+{ to_equiv := equiv_box_ϖ S c,
+  continuous_to_fun := begin
+    sorry,
+  end,
+  continuous_inv_fun := sorry, }
 
 def α : filtration (ℳ S) c → box S c :=
 begin
@@ -289,7 +300,7 @@ begin
   use x,
   have hx := x.2,
   intro s,
-  simp only [filtration, set.mem_set_of_eq, seval_ℒ, nnnorm, laurent_measures.coe_mk,
+  simp only [filtration, set.mem_set_of_eq, nnnorm, laurent_measures.coe_mk,
     fintype.univ_punit, finset.sum_singleton] at hx,
   have := finset.sum_le_sum_of_subset (finset.singleton_subset_iff.mpr $ finset.mem_univ_val _),
   rw finset.sum_singleton at this,
@@ -349,7 +360,7 @@ end
 
 
 lemma seval_ℳ_α_commute (c : ℝ≥0) (s : S) :
- (λ F, ((equiv_box_ϖ S c) ∘ (α S c)) F s) = (λ F, seval_ℳ_c S c s F) :=
+ (λ F, ((homeo_box_ϖ S c) ∘ (α S c)) F s) = (λ F, seval_ℳ_c S c s F) :=
 begin
   sorry; {
   funext,
@@ -359,7 +370,7 @@ begin
 end
 
  lemma seval_ℳ_α_commute' {X : Type*} (c : ℝ≥0) {f : X → filtration (ℳ S) c} (s : S)  :
- (λ x, ((equiv_box_ϖ S c) ∘ (α S c)) (f x) s) = (λ x, seval_ℳ_c S c s (f x)) :=
+ (λ x, ((homeo_box_ϖ S c) ∘ (α S c)) (f x) s) = (λ x, seval_ℳ_c S c s (f x)) :=
  begin
   ext z,
   have h_commute := @seval_ℳ_α_commute p S _ _ c s,
@@ -476,12 +487,12 @@ lemma continuous_of_seval_ℳ_comp_continuous (c : ℝ≥0) {X : Type*} [topolog
   {f : X → (filtration (ℳ S) c)} : (∀ s, continuous ((seval_ℳ_c S c s) ∘ f)) → continuous f :=
 begin
   intro H,
-  replace H : ∀ (s : S), continuous (λ x : X, ((equiv_box_ϖ p S c) ∘ (α p S c)) (f x) s),
+  replace H : ∀ (s : S), continuous (λ x : X, ((homeo_box_ϖ p S c) ∘ (α p S c)) (f x) s),
   { intro,
     rw [seval_ℳ_α_commute' p S c s],
     exact H s },
   rw ← continuous_pi_iff at H,
-  convert_to (continuous (λ x, (equiv_box_ϖ p S c) (α p S c (f x)))) using 0,
+  convert_to (continuous (λ x, (homeo_box_ϖ p S c) (α p S c (f x)))) using 0,
   { apply eq_iff_iff.mpr,
     rw [homeomorph.comp_continuous_iff, (inducing_α p S c).continuous_iff] },
   exact H,
