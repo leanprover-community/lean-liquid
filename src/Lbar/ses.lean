@@ -42,7 +42,8 @@ begin
   refine ⟨⟨λ s n, G s n.to_nat, λ s, _⟩, _⟩,
   { refine (nnreal.summable_iff_on_nat_less 0 (λ n n0, _)).mpr _,
     { simp [int.to_nat_of_nonpos n0.le] },
-    { simpa only [← nnreal.coe_nat_abs] using G.summable' s } },
+    { simp only [int.to_nat_coe_nat, zpow_coe_nat],
+      simpa only [← nnreal.coe_nat_abs] using G.summable' s } },
   { ext s (_|n),
     { exact (G.coeff_zero s).symm },
     { show ite (n.succ = 0) 0 (G s (n + 1)) = G s n.succ, from if_neg n.succ_ne_zero } }

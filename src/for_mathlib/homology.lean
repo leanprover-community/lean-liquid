@@ -33,54 +33,6 @@ variables {A : Type u} [category.{v} A] [abelian A]
 
 variables {X Y Z : A} (f : X ⟶ Y) (g : Y ⟶ Z) (w : f ≫ g = 0)
 
-namespace category_theory.limits
-
-@[simp, reassoc]
-lemma kernel_iso_of_eq_hom_comp_ι {f g : X ⟶ Y} [has_kernel f] [has_kernel g] (h : f = g) :
-  (kernel_iso_of_eq h).hom ≫ kernel.ι _ = kernel.ι _ :=
-by { unfreezingI { induction h, simp } }
-
-@[simp, reassoc]
-lemma kernel_iso_of_eq_inv_comp_ι {f g : X ⟶ Y} [has_kernel f] [has_kernel g] (h : f = g) :
-  (kernel_iso_of_eq h).inv ≫ kernel.ι _ = kernel.ι _ :=
-by { unfreezingI { induction h, simp } }
-
-@[simp, reassoc]
-lemma lift_comp_kernel_iso_of_eq_hom {Z} {f g : X ⟶ Y} [has_kernel f] [has_kernel g]
-  (h : f = g) (e : Z ⟶ X) (he) :
-  kernel.lift _ e he ≫ (kernel_iso_of_eq h).hom = kernel.lift _ e (by simp [← h, he]) :=
-by { unfreezingI { induction h, simp } }
-
-@[simp, reassoc]
-lemma lift_comp_kernel_iso_of_eq_inv {Z} {f g : X ⟶ Y} [has_kernel f] [has_kernel g]
-  (h : f = g) (e : Z ⟶ X) (he) :
-  kernel.lift _ e he ≫ (kernel_iso_of_eq h).inv = kernel.lift _ e (by simp [h, he]) :=
-by { unfreezingI { induction h, simp } }
-
-@[simp, reassoc]
-lemma π_comp_cokernel_iso_of_eq_hom {f g : X ⟶ Y} [has_cokernel f] [has_cokernel g] (h : f = g) :
-  cokernel.π _ ≫ (cokernel_iso_of_eq h).hom = cokernel.π _ :=
-by { unfreezingI { induction h, simp } }
-
-@[simp, reassoc]
-lemma π_comp_cokernel_iso_of_eq_inv {f g : X ⟶ Y} [has_cokernel f] [has_cokernel g] (h : f = g) :
-  cokernel.π _ ≫ (cokernel_iso_of_eq h).inv = cokernel.π _ :=
-by { unfreezingI { induction h, simp } }
-
-@[simp, reassoc]
-lemma cokernel_iso_of_eq_hom_comp_desc {Z} {f g : X ⟶ Y} [has_cokernel f] [has_cokernel g]
-  (h : f = g) (e : Y ⟶ Z) (he) :
-  (cokernel_iso_of_eq h).hom ≫ cokernel.desc _ e he = cokernel.desc _ e (by simp [h, he]) :=
-by { unfreezingI { induction h, simp } }
-
-@[simp, reassoc]
-lemma cokernel_iso_of_eq_inv_comp_desc {Z} {f g : X ⟶ Y} [has_cokernel f] [has_cokernel g]
-  (h : f = g) (e : Y ⟶ Z) (he) :
-  (cokernel_iso_of_eq h).inv ≫ cokernel.desc _ e he = cokernel.desc _ e (by simp [← h, he]) :=
-by { unfreezingI { induction h, simp } }
-
-end category_theory.limits
-
 namespace category_theory.abelian
 
 /-- The cokernel of `kernel.lift g f w`. This is isomorphic to `homology f g w`.

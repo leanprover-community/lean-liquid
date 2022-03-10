@@ -551,7 +551,7 @@ begin
     { refine (homotopy.of_eq _).trans h₁.symm.equiv_sub_zero, simp } },
   apply homotopy.equiv_sub_zero.symm _,
   refine (homotopy.of_eq _).trans this,
-  simp, abel
+  simp [two_smul], abel,
 end
 
 local attribute [simp] preadditive.comp_nsmul preadditive.nsmul_comp

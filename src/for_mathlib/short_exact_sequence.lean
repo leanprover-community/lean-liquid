@@ -407,11 +407,27 @@ instance : has_sub (A ⟶ B) :=
     sq1' := by { rw [sub_comp, comp_sub, f.sq1, g.sq1], },
     sq2' := by { rw [sub_comp, comp_sub, f.sq2, g.sq2], } } }
 
+instance has_nsmul : has_scalar ℕ (A ⟶ B) :=
+{ smul := λ n f,
+  { fst := n • f.1,
+    snd := n • f.2,
+    trd := n • f.3,
+    sq1' := by rw [nsmul_comp, comp_nsmul, f.sq1],
+    sq2' := by rw [nsmul_comp, comp_nsmul, f.sq2] } }
+
+instance has_zsmul : has_scalar ℤ (A ⟶ B) :=
+{ smul := λ n f,
+  { fst := n • f.1,
+    snd := n • f.2,
+    trd := n • f.3,
+    sq1' := by rw [zsmul_comp, comp_zsmul, f.sq1],
+    sq2' := by rw [zsmul_comp, comp_zsmul, f.sq2] } }
+
 variables (𝒞)
 
 instance : preadditive (short_exact_sequence 𝒞) :=
 { hom_group := λ A B, (short_exact_sequence.hom_inj_injective A B).add_comm_group _
-  rfl (λ _ _, rfl) (λ _, rfl) (λ _ _, rfl),
+  rfl (λ _ _, rfl) (λ _, rfl) (λ _ _, rfl) (λ _ _, rfl) (λ _ _, rfl),
   add_comp' := by { intros, ext; apply add_comp },
   comp_add' := by { intros, ext; apply comp_add }, }
 .
