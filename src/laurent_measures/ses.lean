@@ -274,7 +274,7 @@ begin
       cases F,
       -- need a lemma constructing an element in (ℳ S)_c from S-many elements in (ℳ ϖ)_c,
         --used many times
-      -- let := (seval_ℳ_c p S c s) F_val,
+      -- use ⟨(seval_ℳ p S c s) F_val, _⟩,
 
     },
 

@@ -157,6 +157,9 @@ begin
       rw [← hi.1, ← hi.2] } },
 end
 
+def seval_ℳ {r : ℝ≥0} (S : Fintype) (s : S): (real_measures r S) →
+  (real_measures r (Fintype.of punit)) := λ F, (λ _, F s)
+
 variables [fact (0 < p)] [fact (p ≤ 1)]
 
 open pseudo_normed_group (filtration)
