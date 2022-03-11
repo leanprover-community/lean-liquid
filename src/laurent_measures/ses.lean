@@ -287,10 +287,50 @@ begin
     refl }
 end
 
+example : (inducing (coe : (box S c) → (ℳ S))) :=
+begin
+  exact inducing_coe,
+end
+
+def cast_mah : filtration (ℳ ϖ) c → (ℳ ϖ) := λ x, x.1
+
+example : (inducing (cast_mah c)) :=
+begin
+  exact inducing_coe,
+end
+
+#check @set.pi S (λ s, (ℳ ϖ)) (set.univ) (λ s, filtration (ℳ ϖ) c)
+#check set.pi (@set.univ S) (λ s, filtration (ℳ ϖ) c)
+
+def cast_remah : (set.pi (@set.univ S) (λ s, filtration (ℳ ϖ) c)) → (Π s : S, (ℳ ϖ)) :=
+  λ x s, x.1 s
+
+-- example : inducing (cast_remah S c) :=
+-- begin
+--   have := @inducing_coe (Π s : S, (ℳ ϖ)) _ (set.pi (@set.univ S) (λ s, filtration (ℳ ϖ) c)),
+  -- exact
+  -- apply inducing_infi_to_pi,
+-- end
+
 def homeo_box_ϖ : (box S c) ≃ₜ Π (s : S), (filtration (ℳ ϖ) c) :=
 { to_equiv := equiv_box_ϖ S c,
   continuous_to_fun := begin
-    sorry,
+  sorry;{
+    have quattro := @inducing_coe (Π s : S, (ℳ ϖ)) _ (set.pi (@set.univ S) (λ s, filtration (ℳ ϖ) c)),
+    -- have tre : inducing (cast_remah p S c) := by {exact inducing_coe},
+    -- have uno := @inducing_coe (Π (s : S), (ℳ ϖ)) _ (Π (s : S), (filtration (ℳ ϖ) c)),
+    have due := @inducing.continuous_iff (box p S c)
+      (filtration (Π s : S, (ℳ ϖ)) c)
+      (Π s : S, (ℳ ϖ)) _ _ _
+      (equiv_box_ϖ p S c).to_fun,
+    --  _ _ _ _ _ _ (((equiv_box_ϖ p S c).to_fun))
+    --    _ quattro,
+    --  ((equiv_box_ϖ p S c).to_fun)
+    --   coe (inducing_coe),
+    --  (coe : (Π (s : S), filtration (ℳ ϖ) c) → (Π (s : S), (ℳ ϖ))),
+      -- (cast_remah p S c),
+      -- ((equiv_box_ϖ p S c).to_fun) _ uno,
+  },
   end,
   continuous_inv_fun := sorry, }
 
