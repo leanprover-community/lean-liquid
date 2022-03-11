@@ -299,8 +299,8 @@ begin
   exact inducing_coe,
 end
 
-#check @set.pi S (λ s, (ℳ ϖ)) (set.univ) (λ s, filtration (ℳ ϖ) c)
-#check set.pi (@set.univ S) (λ s, filtration (ℳ ϖ) c)
+-- #check @set.pi S (λ s, (ℳ ϖ)) (set.univ) (λ s, filtration (ℳ ϖ) c)
+-- #check set.pi (@set.univ S) (λ s, filtration (ℳ ϖ) c)
 
 def cast_remah : (set.pi (@set.univ S) (λ s, filtration (ℳ ϖ) c)) → (Π s : S, (ℳ ϖ)) :=
   λ x s, x.1 s
