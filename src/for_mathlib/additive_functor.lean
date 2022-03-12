@@ -1,4 +1,3 @@
-import category_theory.abelian.basic
 import category_theory.preadditive.additive_functor
 
 import for_mathlib.is_biprod

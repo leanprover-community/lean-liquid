@@ -1,4 +1,3 @@
-import category_theory.abelian.basic
 import category_theory.preadditive.additive_functor
 
 open category_theory category_theory.limits
