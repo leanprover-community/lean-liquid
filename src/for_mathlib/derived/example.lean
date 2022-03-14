@@ -223,6 +223,15 @@ begin
   simp only [add_subgroup.mem_comap, add_monoid_hom.mem_range, add_subgroup.coe_subtype,
     subtype.coe_mk, ← this.eq_iff, category_theory.limits.kernel.lift_ι_apply],
 end
+.
+
+def homotopy_category.quotient_map_hom (A B : homological_complex C c) :
+  (A ⟶ B) →+ ((homotopy_category.quotient C c).obj A ⟶ (homotopy_category.quotient C c).obj B) :=
+add_monoid_hom.mk' (λ f, (homotopy_category.quotient C c).map f) $ λ f g, rfl
+
+lemma quot.mk_surjective {X : Type*} (r : X → X → Prop) :
+  function.surjective (quot.mk r) :=
+λ x, quot.induction_on x $ λ x, ⟨x, rfl⟩
 
 open category_theory.limits
 
@@ -236,33 +245,44 @@ begin
   refine _ ≪≫ (homology_iso _ (-i+1) (-i) (-i-1) _ _).symm,
   rotate, { dsimp, refl }, { dsimp, exact sub_add_cancel _ _ },
   refine add_equiv_iso_AddCommGroup_iso.hom _ ≪≫ (AddCommGroup.homology_iso _ _ _).symm,
-  sorry
-  -- refine
-  -- { to_fun := begin
-  --     intro f,
-  --     refine quotient_add_group.mk' _ _,
-  --     refine ⟨_, _⟩,
-  --     { refine (bounded_homotopy_category.hom_val f).out.f (-i) ≫ _,
-  --       dsimp [bounded_homotopy_category.shift_functor_obj_val,
-  --         bounded_homotopy_category.single],
-  --       simp only [add_left_neg, eq_self_iff_true, if_true],
-  --       exact 𝟙 B, },
-  --     { simp only [add_left_neg, eq_self_iff_true, ite_eq_left_iff, not_true, forall_false_left,
-  --         congr_arg_mpr_hom_left, category.comp_id, id.def, functor.map_homological_complex_obj_d,
-  --         homological_complex.op_d, add_monoid_hom.mem_ker],
-  --       erw [preadditive_yoneda_obj_map_apply, quiver.hom.unop_op, ← category.assoc,
-  --         ← homological_complex.hom.comm],
-  --       dsimp [bounded_homotopy_category.single],
-  --       simp only [smul_zero, comp_zero, zero_comp], }
-  --   end,
-  --   inv_fun := begin
-  --     intro f,
-  --     refine (homotopy_category.quotient _ _).map
-  --     { f := _, comm' := _ },
-  --   end,
-  --   left_inv := _,
-  --   right_inv := _,
-  --   map_add' := _ },
+  refine add_equiv.surjective_congr _
+    (homotopy_category.quotient_map_hom _ _)
+    (quotient_add_group.mk' _) (quot.mk_surjective _) (quot.mk_surjective _) _,
+  refine
+  { to_fun := begin
+      intro f,
+      refine ⟨_, _⟩,
+      { refine f.f (-i) ≫ _,
+        dsimp [bounded_homotopy_category.shift_functor_obj_val, bounded_homotopy_category.single],
+        simp only [add_left_neg, eq_self_iff_true, if_true],
+        exact 𝟙 B, },
+      { simp only [add_left_neg, eq_self_iff_true, ite_eq_left_iff, not_true, forall_false_left,
+          congr_arg_mpr_hom_left, category.comp_id, id.def, functor.map_homological_complex_obj_d,
+          homological_complex.op_d, add_monoid_hom.mem_ker],
+        erw [preadditive_yoneda_obj_map_apply, quiver.hom.unop_op, ← category.assoc,
+          ← homological_complex.hom.comm],
+        dsimp [bounded_homotopy_category.single],
+        simp only [smul_zero, comp_zero, zero_comp], }
+    end,
+    inv_fun := begin
+      intro f, sorry,
+      -- refine { f := λ j, _, comm' := _ },
+      -- { dsimp [bounded_homotopy_category.shift_functor_obj_val, bounded_homotopy_category.single],
+      --   generalize hl : j + i = l,
+      --   rcases l with ((_|l)|l),
+      --   { cases f with f hf,
+      --     erw add_eq_zero_iff_eq_neg at hl, subst j,
+      --     exact f, },
+      --   { exact 0 },
+      --   { exact 0 } },
+      -- { intros j k hjk, dsimp at hjk, subst k,
+      --   generalize hl : j + i = l, dsimp,
+      --   split_ifs with h, swap, { dsimp, } }
+    end,
+    left_inv := _,
+    right_inv := _,
+    map_add' := _ },
+  all_goals { sorry },
 end
 
 noncomputable
