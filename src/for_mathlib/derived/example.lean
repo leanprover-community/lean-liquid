@@ -1,6 +1,8 @@
 import for_mathlib.derived.K_projective
 import for_mathlib.complex_extend
 import for_mathlib.projectives
+import for_mathlib.two_step_resolution
+import data.zmod.basic
 
 .
 
@@ -15,15 +17,25 @@ open_locale zero_object
 instance projective_zero : projective (0 : C) :=
 { factors := λ E X f e he, ⟨0, by ext⟩ }
 
-variables [enough_projectives C]
-
 lemma is_zero_homology_of_exact {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) (hfg : exact f g) :
   is_zero (homology f g hfg.w) :=
 begin
-  rw projective.preadditive.exact_iff_homology_is_zero at hfg,
-  obtain ⟨w, H⟩ := hfg,
-  exact H,
+  rw preadditive.exact_iff_homology_zero at hfg,
+  rcases hfg with ⟨w, ⟨e⟩⟩,
+  exact is_zero_of_iso_of_zero (is_zero_zero _) e.symm,
 end
+
+lemma category_theory.is_zero.exact {X Y Z : C} (hY : is_zero Y)
+  (f : X ⟶ Y) (g : Y ⟶ Z) : exact f g :=
+by simp only [abelian.exact_iff, hY.eq_zero_of_tgt f, hY.eq_zero_of_tgt (limits.kernel.ι g),
+    limits.zero_comp, eq_self_iff_true, and_true]
+
+lemma category_theory.is_zero.homology_is_zero {X Y Z : C} (hY : is_zero Y)
+  (f : X ⟶ Y) (g : Y ⟶ Z) (w : f ≫ g = 0) :
+  is_zero (homology f g w) :=
+is_zero_homology_of_exact f g $ hY.exact f g
+
+variables [enough_projectives C]
 
 lemma category_theory.is_zero.is_iso {X Y : C} (hX : is_zero X) (hY : is_zero Y) (f : X ⟶ Y) :
   is_iso f :=
@@ -198,7 +210,7 @@ A ⧸ C ≃* B ⧸ D :=
 
 attribute [elementwise] limits.kernel.lift_ι iso.hom_inv_id
 
-noncomputable
+protected noncomputable
 def AddCommGroup.homology_iso {A B C : AddCommGroup.{u}} (f : A ⟶ B) (g : B ⟶ C) (w : f ≫ g = 0) :
   homology f g w ≅ AddCommGroup.of (g.ker ⧸ (f.range.comap g.ker.subtype)) :=
 begin
@@ -329,17 +341,126 @@ lemma AddCommGroup.is_zero_of_eq (A : AddCommGroup) (h : ∀ x y : A, x = y) :
 { eq_zero_of_src := λ B f, by { ext, cases h x 0, exact f.map_zero },
   eq_zero_of_tgt := λ B f, by { ext, exact h _ _ } }
 
+lemma category_theory.ProjectiveResolution.is_projective_resolution
+  {A : C} (P : ProjectiveResolution A) :
+  P.complex.is_projective_resolution _ P.π :=
+{ projective := P.projective,
+  exact₀ := P.exact₀,
+  exact := P.exact,
+  epi := ProjectiveResolution.f.category_theory.epi P 0 }
+
 lemma Ext_is_zero_of_neg (A : Cᵒᵖ) (B : C) (i : ℤ) (hi : i < 0) :
   is_zero (((Ext' i).obj A).obj B) :=
 begin
-  dsimp [Ext'],
-  sorry
-  -- refine is_zero_of_iso_of_zero _ (bounded_homotopy_category.Ext_iso _ _ _ _ _).symm,
-
-  -- refine AddCommGroup.is_zero_of_eq _ _,
-  -- dsimp [Ext', bounded_homotopy_category.Ext],
-  -- intros f g,
-  -- apply bounded_homotopy_category.hom_ext,
-  -- apply homotopy_category.eq_of_homotopy,
-  -- sorry
+  let P := ProjectiveResolution.of A.unop,
+  refine is_zero_of_iso_of_zero _ (Ext'_iso _ _ i P.complex P.π P.is_projective_resolution).symm,
+  rcases i with (i|i),
+  { exfalso, revert hi, dec_trivial },
+  refine is_zero.homology_is_zero _ _ _ _,
+  refine AddCommGroup.is_zero_of_eq _ _,
+  intros f g,
+  ext,
 end
+
+namespace AddCommGroup
+
+instance : enough_projectives AddCommGroup.{u} :=
+{ presentation := begin
+    intro A, sorry -- fix this
+  end }
+
+lemma Ext_is_zero_of_one_lt
+  (A : AddCommGroup.{u}ᵒᵖ) (B : AddCommGroup.{u}) (i : ℤ) (hi : i > 1) :
+  is_zero (((Ext' i).obj A).obj B) :=
+begin
+  induction A,
+  rcases A with ⟨A, _Ainst⟩, resetI,
+  let := Ext'_iso (op $AddCommGroup.of A) B i,
+  dsimp at this,
+  refine is_zero_of_iso_of_zero _ (this _ _ (two_step_resolution_ab_projective A)).symm,
+  rcases i with ((_|_|i)|i),
+  { exfalso, revert hi, dec_trivial },
+  { exfalso, revert hi, dec_trivial },
+  swap,
+  { exfalso, revert hi, dec_trivial },
+  refine is_zero.homology_is_zero _ _ _ _,
+  refine AddCommGroup.is_zero_of_eq _ _,
+  intros f g,
+  apply category_theory.limits.has_zero_object.from_zero_ext,
+end
+
+noncomputable theory
+variable (n : ℕ)
+
+def zmod_resolution : chain_complex AddCommGroup ℕ :=
+chain_complex.mk' (of ℤ) (of ℤ) (n • 𝟙 _) (λ _, ⟨0, 0, zero_comp⟩)
+
+example : (zmod_resolution n).X 0 = of ℤ := rfl
+
+def zmod_resolution_pi_f :
+  Π (i : ℕ), (zmod_resolution 2).X i ⟶ ((chain_complex.single₀ AddCommGroup).obj (of $ zmod 2)).X i
+| 0     := show of ℤ ⟶ of (zmod 2), from @int.cast_add_hom _ _ ⟨(1 : zmod 2)⟩
+| (i+1) := 0
+
+def zmod_resolution_pi :
+  zmod_resolution 2 ⟶ (chain_complex.single₀ AddCommGroup).obj (of $ zmod 2) :=
+{ f := zmod_resolution_pi_f,
+  comm' := begin
+    rintros i ⟨_|j⟩ (rfl : _ = _),
+    { ext k, dsimp [zmod_resolution_pi_f, zmod_resolution],
+      simp only [zero_apply, fin.coe_zero, comp_apply, int.coe_cast_add_hom],
+      simp only [chain_complex.mk'_d_1_0, add_monoid_hom.coe_smul, pi.smul_apply, id_apply,
+        nsmul_one, int.nat_cast_eq_coe_nat, int.coe_nat_bit0, int.coe_nat_succ, int.coe_nat_zero,
+        zero_add, int.cast_bit0, int.cast_one],
+      refl, },
+    { exact comp_zero.trans comp_zero.symm }
+  end }
+
+lemma zmod_resolution_is_resolution :
+  (zmod_resolution 2).is_projective_resolution (of (zmod 2)) zmod_resolution_pi :=
+sorry
+
+lemma foobar : ∀ (k : zmod 2), 2 • k = 0 := dec_trivial
+
+@[simps] def add_subgroup.equiv_top (A : Type*) [add_comm_group A] :
+  A ≃+ (⊤ : add_subgroup A) :=
+{ to_fun := λ x, ⟨x, add_subgroup.mem_top _⟩,
+  inv_fun := λ x, x,
+  left_inv := λ x, rfl,
+  right_inv := by { rintro ⟨x, hx⟩, refl },
+  map_add' := λ x y, rfl }
+
+def Ext_zmod_two :
+  ((Ext' 1).obj (op $ of $ zmod 2)).obj (of $ zmod 2) ≅ of (zmod 2) :=
+begin
+  refine Ext'_iso (op $ of $ zmod 2) (of $ zmod 2) 1 (zmod_resolution 2) zmod_resolution_pi
+    zmod_resolution_is_resolution ≪≫ (homology_iso _ 0 (-1) (-2) rfl rfl) ≪≫ _,
+  refine (AddCommGroup.homology_iso _ _ _) ≪≫ _,
+  refine add_equiv_iso_AddCommGroup_iso.hom _,
+  refine add_equiv.surjective_congr _ (quotient_add_group.mk' _) (add_monoid_hom.id _)
+    (quot.mk_surjective _) function.surjective_id _,
+  refine (add_equiv.add_subgroup_congr _).trans _,
+  { exact ⊤ },
+  { convert add_monoid_hom.ker_zero using 2,
+    refine is_zero.eq_of_tgt _ _ _,
+    refine AddCommGroup.is_zero_of_eq _ _,
+    intros f g,
+    apply category_theory.limits.has_zero_object.from_zero_ext, },
+  { refine (add_subgroup.equiv_top _).symm.trans (zmultiples_add_hom _).symm, },
+  { simp only [add_monoid_hom.ker_zero, quotient_add_group.ker_mk,
+     functor.map_homological_complex_obj_d, homological_complex.op_d],
+    ext ⟨f, hf⟩,
+    simp only [add_subgroup.mem_comap, add_equiv.coe_to_add_monoid_hom, add_equiv.coe_trans,
+      function.comp_app, zmultiples_add_hom_symm_apply, add_subgroup.coe_subtype,
+      add_subgroup.coe_mk, add_monoid_hom.mem_range],
+    simp only [add_subgroup.equiv_top_symm_apply, add_monoid_hom.mem_ker],
+    dsimp [add_equiv.add_subgroup_congr, zmod_resolution],
+    split,
+    { intro hf1, refine ⟨0, comp_zero.trans _⟩, ext1, exact hf1.symm },
+    { intro H, cases H with g hg, rw [← hg, coe_comp],
+      convert g.map_nsmul _ _ using 1,
+      simp only [eq_to_hom_refl, id_apply, foobar], } }
+end
+
+
+end AddCommGroup
