@@ -37,6 +37,11 @@ instance (X : bounded_homotopy_category A) : homotopy_category.is_bounded_above 
 def of (X : homotopy_category A (complex_shape.up ℤ)) [homotopy_category.is_bounded_above X] :
   bounded_homotopy_category A := ⟨X⟩
 
+abbreviation hom_val {X Y : bounded_homotopy_category A} (f : X ⟶ Y) : X.val ⟶ Y.val := f
+
+lemma hom_ext {X Y : bounded_homotopy_category A} (f g : X ⟶ Y) (h : hom_val f = hom_val g) :
+  f = g := h
+
 instance : has_zero_object (bounded_homotopy_category A) :=
 { zero :=
   { val := 0,
@@ -107,6 +112,9 @@ has_shift_mk _ _
   associativity := λ m₁ m₂ m₃ X, homotopy_category.has_shift_associativity_aux _ m₁ m₂ m₃ X.val,
   left_unitality := λ n X, homotopy_category.has_shift_left_unitality_aux _ n X.val,
   right_unitality := λ n X, homotopy_category.has_shift_right_unitality_aux _ n X.val } .
+
+@[simp] lemma shift_functor_obj_val (X : bounded_homotopy_category A) (i : ℤ) :
+  ((category_theory.shift_functor _ i).obj X).val = X.val⟦i⟧ := rfl
 
 instance : preadditive (bounded_homotopy_category A) :=
 { hom_group := λ A B, show add_comm_group (A.val ⟶ B.val), by apply_instance,

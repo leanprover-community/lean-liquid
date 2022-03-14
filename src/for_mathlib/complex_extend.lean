@@ -146,3 +146,31 @@ def embed : homological_complex C c₁ ⥤ homological_complex C c₂ :=
   map_comp' := by { intros, ext i, exact embed.f_comp f g _ } }
 
 end homological_complex
+
+namespace chain_complex
+
+def single₀_comp_embed_iso_single_component (X : C) : Π (i : ℤ),
+  ((single₀ C ⋙ homological_complex.embed complex_shape.embedding.nat_down_int_up).obj X).X i ≅
+    ((homological_complex.single C (complex_shape.up ℤ) 0).obj X).X i
+| 0       := iso.refl _
+| (n+1:ℕ) := iso.refl _
+| -[1+n]  := iso.refl _
+
+def single₀_comp_embed_iso_single :
+  single₀ C ⋙ homological_complex.embed complex_shape.embedding.nat_down_int_up ≅
+    homological_complex.single C (complex_shape.up ℤ) 0 :=
+nat_iso.of_components
+  (λ X, homological_complex.hom.iso_of_components
+    (single₀_comp_embed_iso_single_component X)
+    (by rintro ((_|i)|i) ((_|j)|j) hij; exact comp_zero.trans zero_comp.symm))
+  begin
+    intros X Y f,
+    ext ((_|i)|i);
+    refine (category.comp_id _).trans (eq.trans _ (category.id_comp _).symm);
+    dsimp [homological_complex.single],
+    { simp only [eq_self_iff_true, category.comp_id, category.id_comp, if_true], refl },
+    { rw dif_neg, swap, dec_trivial, refl, },
+    { rw dif_neg, swap, dec_trivial, refl, }
+  end
+
+end chain_complex
