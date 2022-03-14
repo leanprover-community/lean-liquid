@@ -178,6 +178,11 @@ begin
   apply is_quasi_iso.cond,
 end
 
+instance is_quasi_iso_comp_iso {X Y Z : 𝒦} (f : X ⟶ Y) (g : Y ⟶ Z)
+  [hf : is_quasi_iso f] [hg : is_iso g] :
+  is_quasi_iso (f ≫ g) :=
+{ cond := λ i, by { rw (homology_functor A (complex_shape.up ℤ) i).map_comp, apply_instance, } }
+
 /--
 If `A → B → C → A[1]` is a distinguished triangle, and `A → B` is a quasi-isomorphism,
 then `C` is acyclic.
