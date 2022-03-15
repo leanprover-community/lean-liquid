@@ -287,17 +287,85 @@ begin
     refl }
 end
 
+
 example : (inducing (coe : (box S c) → (ℳ S))) :=
 begin
   exact inducing_coe,
 end
 
-def cast_mah : filtration (ℳ ϖ) c → (ℳ ϖ) := λ x, x.1
-
-example : (inducing (cast_mah c)) :=
+def equiv_S_ϖ : (Π s : S, ℳ ϖ) ≃  ℳ S :=
 begin
-  exact inducing_coe,
+  fconstructor,
+  { use λ g s, g s punit.star },
+  { use λ F s, λ _, F s},
+  { intro _,
+    funext,
+    apply congr_arg,
+    simp only [eq_iff_true_of_subsingleton] },
+  { intro _,
+    refl }
 end
+
+def homeo_S_ϖ : (Π s : S, ℳ ϖ) ≃ₜ ℳ S :=
+{ to_equiv := equiv_S_ϖ S,
+  continuous_to_fun := continuous_pi (λ _, continuous_apply_apply _ punit.star),
+  continuous_inv_fun := continuous_pi (λs,  continuous_pi (λ _, continuous_apply s)) }
+
+example (α β : Type*) (h : α ≃ β) : (Π (s : S), α) ≃ (Π (s : S), β) :=
+begin
+  refine equiv.Pi_congr_right _,
+  use λ s, h,
+end
+
+lemma filtration_pi_equiv' : filtration (Π (s : S), (ℳ ϖ)) c ≃ Π (s : S), (filtration (ℳ ϖ) c) :=
+begin
+  equiv_rw @filtration_pi_equiv S (λ s, ℳ ϖ) _ c,
+  refine equiv.Pi_congr of_lex _,
+  intro t,
+  fconstructor,
+  { intro x,
+    refine ⟨λ _, x.1 punit.star, x.2⟩ },
+  { sorry,
+    --use (λ x, ⟨λ i, x i, λ i, (x i).2⟩),
+    --intro x,
+    -- refine ⟨λ i, x.1 i, λ i, (x i).2⟩,
+    -- dsimp only,
+    -- refine ⟨x.1 ,x.2⟩,
+    -- let := λ s : S, (ℳ ϖ),
+    -- let pp := this t,
+    -- -- have := (real_measures.mem_filtration_iff x.1 c).mp x.2,
+    -- let := λ s : S, x.1,
+    -- refine ⟨x.1, _⟩,
+    -- -- refine ⟨_, this⟩,
+    -- -- let : (λ s : S, (ℳ ϖ)) t := x.1,
+    -- -- refine this,
+    -- -- use x,
+  },
+  sorry,
+  sorry,
+end
+
+-- def homeo_S_ϖ : (Π s : S, (ℳ ϖ)) ≃ₜ (ℳ S) :=
+-- { to_equiv := pi_equi
+-- }
+
+def cast_mah : filtration (Π s : S, ℳ ϖ) c → (Π s : S, ℳ ϖ) := λ x, x.1
+
+-- example : (inducing (cast_mah S c)) :=
+-- begin
+--   -- contin homeo_S_ϖ,
+--   refine (inducing.inducing_iff _).mp _,
+
+--   -- rw subtype.val_eq_coe,
+--   -- convert inducing_coe using 0,
+--   -- apply_instance,
+--   -- sorry,
+--   -- exact inducing_id,
+--   -- refine (inducing.inducing_iff _).mp _,
+--   -- refine {induced := _},
+--   -- apply_instance,
+--   -- exact inducing_coe,
+-- end
 
 -- #check @set.pi S (λ s, (ℳ ϖ)) (set.univ) (λ s, filtration (ℳ ϖ) c)
 -- #check set.pi (@set.univ S) (λ s, filtration (ℳ ϖ) c)
@@ -312,6 +380,14 @@ def cast_remah : (set.pi (@set.univ S) (λ s, filtration (ℳ ϖ) c)) → (Π s 
   -- apply inducing_infi_to_pi,
 -- end
 
+
+-- example : (filtration (ℳ S) c) ≃ (Π (s : S), filtration (ℳ ϖ) c) :=
+-- begin
+--   have := (@filtration_pi_equiv S (λ s, (ℳ ϖ)) _ c).symm,
+--   equiv_rw this,
+--   simp,
+-- end
+
 def homeo_box_ϖ' : (box S c) ≃ₜ filtration (Π (s : S), (ℳ ϖ)) c :=
 { to_equiv := (equiv_box_ϖ S c).trans (filtration_pi_equiv(λ s : S, (ℳ ϖ)) c).symm,
   continuous_to_fun := sorry,
@@ -321,6 +397,9 @@ def homeo_box_ϖ' : (box S c) ≃ₜ filtration (Π (s : S), (ℳ ϖ)) c :=
 def homeo_box_ϖ : (box S c) ≃ₜ Π (s : S), (filtration (ℳ ϖ) c) :=
 { to_equiv := equiv_box_ϖ S c,
   continuous_to_fun := begin
+  let ι : (Π s : S, filtration (ℳ ϖ) c) → (Π s : S, ℳ ϖ) := λ F s, (F s).1,
+  have : inducing ι,
+
     sorry;{
     -- have : has_coe (filtration (Π s : S, (ℳ ϖ)) c) (Π s : S, (ℳ ϖ)),
     -- exact has_coe
@@ -328,6 +407,7 @@ def homeo_box_ϖ : (box S c) ≃ₜ Π (s : S), (filtration (ℳ ϖ) c) :=
     -- have sette : inducing (λ F : filtration (Π s : S, (ℳ ϖ)) c, F.1),
     -- simp_rw subtype.val_eq_coe,
     -- refine inducing_coe,
+    -- have := inducing (Π (s : S), filtration (ℳ ϖ) c) → (Π s : S, ℳ ϖ)),
     -- have quattro := @inducing_coe (Π s : S, (ℳ ϖ)) _ (filtration (Π s : S, (ℳ ϖ)) c),
     -- let e_pi := (filtration_pi_equiv(λ s : S, (ℳ ϖ)) c).symm ∘ (equiv_box_ϖ p S c).to_fun,
 
@@ -337,8 +417,8 @@ def homeo_box_ϖ : (box S c) ≃ₜ Π (s : S), (filtration (ℳ ϖ) c) :=
     -- have := @coe_to_lift (filtration (Π s : S, (ℳ ϖ)) c) (Π s : S, ℳ ϖ),
     -- have := @inducing.continuous_iff (box p S c)
     --   (filtration (Π s : S, (ℳ ϖ)) c)
-    --   (Π s : S, (ℳ ϖ)) _ _ _
-    --   e_pi (λ F, F.1),
+    --   (Π s : S, (ℳ ϖ)) _ _ _,
+      -- e_pi (λ F, F.1),
     -- simp at this,
     -- simp_rw [subtype.val_eq_coe] at this,
     -- refine this quattro,
@@ -351,6 +431,7 @@ def homeo_box_ϖ : (box S c) ≃ₜ Π (s : S), (filtration (ℳ ϖ) c) :=
       -- (cast_remah p S c),
       -- ((equiv_box_ϖ p S c).to_fun) _ uno,
   },
+  sorry,
   end,
   continuous_inv_fun := sorry, }
 
@@ -366,6 +447,7 @@ begin
   rw finset.sum_singleton at this,
   apply le_trans this hx,
 end
+
 
 lemma coe_α_coe : (coe : (box S c) → (ℳ S)) ∘ (α S c) = coe := by {funext _, refl}
 
