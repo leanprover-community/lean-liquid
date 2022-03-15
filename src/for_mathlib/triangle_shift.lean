@@ -97,7 +97,22 @@ nat_iso.of_components (λ T,
       rw [← nat_trans.comp_app, ← nat_trans.comp_app],
       erw [monoidal_functor.μ_inv_hom_id_assoc, id_comp], refl,
     end)
-  sorry
+  begin
+    intros T₁ T₂ f, ext,
+    { dsimp only [functor.id_map, triangle_category_comp, triangle_morphism.comp_hom₁,
+        iso.of_components_hom_hom₁, iso.symm_hom, iso.app_inv, iso.symm_inv,
+        monoidal_functor.ε_iso_hom, triangle_shift_functor_map, triangle_shift_map_hom₁],
+      rw ← nat_trans.naturality _ _, refl },
+    { dsimp only [functor.id_map, triangle_category_comp, triangle_morphism.comp_hom₂,
+        iso.of_components_hom_hom₂, iso.symm_hom, iso.app_inv, iso.symm_inv,
+        monoidal_functor.ε_iso_hom, triangle_shift_functor_map, triangle_shift_map_hom₂],
+      rw ← nat_trans.naturality _ _, refl },
+    { dsimp only [functor.id_map, triangle_category_comp, triangle_morphism.comp_hom₃,
+        iso.of_components_hom_hom₃, iso.symm_hom, iso.app_inv, iso.symm_inv,
+        monoidal_functor.ε_iso_hom, triangle_shift_functor_map, triangle_shift_map_hom₃],
+      rw ← nat_trans.naturality _ _, refl },
+  end
+.
 
 @[simps]
 def triangle_shift_functor_μ (i j : ℤ) : triangle_shift_functor C i ⋙ triangle_shift_functor C j ≅
