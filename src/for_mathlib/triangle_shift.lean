@@ -80,6 +80,8 @@ def iso.of_components {T₁ T₂ : triangle C}
       functor.map_iso_hom, h₃], },
   hom_inv_id' := by ext; dsimp; simp,
   inv_hom_id' := by ext; dsimp; simp }
+.
+
 variable (C)
 
 @[simps]
@@ -97,7 +99,22 @@ nat_iso.of_components (λ T,
       rw [← nat_trans.comp_app, ← nat_trans.comp_app],
       erw [monoidal_functor.μ_inv_hom_id_assoc, id_comp], refl,
     end)
-  sorry
+  begin
+    intros T₁ T₂ f, ext,
+    { dsimp only [functor.id_map, triangle_category_comp, triangle_morphism.comp_hom₁,
+        iso.of_components_hom_hom₁, iso.symm_hom, iso.app_inv, iso.symm_inv,
+        monoidal_functor.ε_iso_hom, triangle_shift_functor_map, triangle_shift_map_hom₁],
+      rw ← nat_trans.naturality _ _, refl },
+    { dsimp only [functor.id_map, triangle_category_comp, triangle_morphism.comp_hom₂,
+        iso.of_components_hom_hom₂, iso.symm_hom, iso.app_inv, iso.symm_inv,
+        monoidal_functor.ε_iso_hom, triangle_shift_functor_map, triangle_shift_map_hom₂],
+      rw ← nat_trans.naturality _ _, refl },
+    { dsimp only [functor.id_map, triangle_category_comp, triangle_morphism.comp_hom₃,
+        iso.of_components_hom_hom₃, iso.symm_hom, iso.app_inv, iso.symm_inv,
+        monoidal_functor.ε_iso_hom, triangle_shift_functor_map, triangle_shift_map_hom₃],
+      rw ← nat_trans.naturality _ _, refl },
+  end
+.
 
 @[simps]
 def triangle_shift_functor_μ (i j : ℤ) : triangle_shift_functor C i ⋙ triangle_shift_functor C j ≅
@@ -109,7 +126,13 @@ nat_iso.of_components (λ T,
     (shift_add _ _ _).symm
     ((shift_functor_add _ _ _).inv.naturality _ )
     ((shift_functor_add _ _ _).inv.naturality _ )
-    sorry)
+    begin
+      dsimp, rw ← nat_trans.naturality_assoc,
+      simp only [functor.map_comp, assoc, obj_μ_app, functor.comp_map],
+      congr' 1,
+      rw [← nat_trans.comp_app, ← nat_trans.comp_app],
+      sorry
+    end)
   sorry
 
 def triangle_shift_core : shift_mk_core (triangle C) ℤ :=
