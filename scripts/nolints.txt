@@ -79,6 +79,15 @@ apply_nolint bounded_homotopy_category.lift unused_arguments
 apply_nolint bounded_homotopy_category.lift_ext unused_arguments
 apply_nolint homotopy_category.single unused_arguments
 
+-- for_mathlib/derived/example.lean
+apply_nolint AddCommGroup.Ext_is_zero_of_one_lt ge_or_gt
+apply_nolint category_theory.ProjectiveResolution.is_projective_resolution unused_arguments
+apply_nolint category_theory.is_zero.is_iso unused_arguments
+apply_nolint chain_complex.to_bounded_homotopy_category unused_arguments
+apply_nolint homological_complex.op unused_arguments
+apply_nolint homological_complex.unop unused_arguments
+apply_nolint homotopy_category.quotient_map_hom unused_arguments
+
 -- for_mathlib/derived/homological.lean
 apply_nolint category_theory.triangulated.homological_of_exists_aux unused_arguments
 apply_nolint category_theory.triangulated.is_iso_hom₁ unused_arguments
