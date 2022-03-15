@@ -80,6 +80,8 @@ def iso.of_components {T₁ T₂ : triangle C}
       functor.map_iso_hom, h₃], },
   hom_inv_id' := by ext; dsimp; simp,
   inv_hom_id' := by ext; dsimp; simp }
+.
+
 variable (C)
 
 @[simps]
@@ -124,7 +126,13 @@ nat_iso.of_components (λ T,
     (shift_add _ _ _).symm
     ((shift_functor_add _ _ _).inv.naturality _ )
     ((shift_functor_add _ _ _).inv.naturality _ )
-    sorry)
+    begin
+      dsimp, rw ← nat_trans.naturality_assoc,
+      simp only [functor.map_comp, assoc, obj_μ_app, functor.comp_map],
+      congr' 1,
+      rw [← nat_trans.comp_app, ← nat_trans.comp_app],
+      sorry
+    end)
   sorry
 
 def triangle_shift_core : shift_mk_core (triangle C) ℤ :=
