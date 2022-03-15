@@ -89,9 +89,14 @@ nat_iso.of_components (λ T,
     (shift_zero _ _).symm
     (shift_zero _ _).symm
     (shift_zero _ _).symm
-    ((shift_functor_zero _ _).inv.naturality _ )
-    ((shift_functor_zero _ _).inv.naturality _ )
-    sorry)
+    ((shift_functor_zero _ _).inv.naturality _)
+    ((shift_functor_zero _ _).inv.naturality _)
+    begin
+      dsimp, rw ← nat_trans.naturality_assoc, dsimp [shift_comm],
+      simp only [obj_ε_app, discrete.functor_map_id, nat_trans.id_app, ε_app_obj, assoc, id_comp],
+      rw [← nat_trans.comp_app, ← nat_trans.comp_app],
+      erw [monoidal_functor.μ_inv_hom_id_assoc, id_comp], refl,
+    end)
   sorry
 
 @[simps]
