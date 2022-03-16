@@ -100,18 +100,12 @@ nat_iso.of_components (λ T,
       erw [monoidal_functor.μ_inv_hom_id_assoc, id_comp], refl,
     end)
   begin
-    intros T₁ T₂ f, ext,
-    { dsimp only [functor.id_map, triangle_category_comp, triangle_morphism.comp_hom₁,
-        iso.of_components_hom_hom₁, iso.symm_hom, iso.app_inv, iso.symm_inv,
-        monoidal_functor.ε_iso_hom, triangle_shift_functor_map, triangle_shift_map_hom₁],
-      rw ← nat_trans.naturality _ _, refl },
-    { dsimp only [functor.id_map, triangle_category_comp, triangle_morphism.comp_hom₂,
-        iso.of_components_hom_hom₂, iso.symm_hom, iso.app_inv, iso.symm_inv,
-        monoidal_functor.ε_iso_hom, triangle_shift_functor_map, triangle_shift_map_hom₂],
-      rw ← nat_trans.naturality _ _, refl },
-    { dsimp only [functor.id_map, triangle_category_comp, triangle_morphism.comp_hom₃,
-        iso.of_components_hom_hom₃, iso.symm_hom, iso.app_inv, iso.symm_inv,
-        monoidal_functor.ε_iso_hom, triangle_shift_functor_map, triangle_shift_map_hom₃],
+    intros T₁ T₂ f, ext;
+    { dsimp only [triangle_morphism.comp_hom₁, iso.of_components_hom_hom₁, triangle_shift_map_hom₁,
+        triangle_morphism.comp_hom₂, iso.of_components_hom_hom₂, triangle_shift_map_hom₂,
+        triangle_morphism.comp_hom₃, iso.of_components_hom_hom₃, triangle_shift_map_hom₃,
+        functor.id_map, triangle_category_comp, iso.symm_hom, iso.app_inv, iso.symm_inv,
+        monoidal_functor.ε_iso_hom, triangle_shift_functor_map],
       rw ← nat_trans.naturality _ _, refl },
   end
 .
@@ -133,7 +127,15 @@ nat_iso.of_components (λ T,
       rw [← nat_trans.comp_app, ← nat_trans.comp_app],
       sorry
     end)
-  sorry
+  begin
+    intros T₁ T₂ f, ext;
+    { dsimp only [triangle_morphism.comp_hom₁, iso.of_components_hom_hom₁, triangle_shift_map_hom₁,
+        triangle_morphism.comp_hom₂, iso.of_components_hom_hom₂, triangle_shift_map_hom₂,
+        triangle_morphism.comp_hom₃, iso.of_components_hom_hom₃, triangle_shift_map_hom₃,
+        functor.id_map, triangle_category_comp, iso.symm_hom, iso.app_inv, iso.symm_inv,
+        monoidal_functor.ε_iso_hom, triangle_shift_functor_map],
+      rw ← nat_trans.naturality _ _, refl },
+  end
 
 def triangle_shift_core : shift_mk_core (triangle C) ℤ :=
 { F := triangle_shift_functor _,
