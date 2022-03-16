@@ -177,11 +177,42 @@ lemma shift_hom₃ {T₁ T₂ : triangle C} (f : T₁ ⟶ T₂) (i : ℤ) : f⟦
 
 end triangle
 
+instance {C : Type*} [category C] [preadditive C] (X Y : C) : has_neg (X ≅ Y) :=
+⟨λ f,
+{ hom := -f.hom,
+  inv := -f.inv,
+  hom_inv_id' := by simp only [comp_neg, neg_comp, iso.hom_inv_id, neg_neg],
+  inv_hom_id' := by simp only [comp_neg, neg_comp, iso.inv_hom_id, neg_neg] }⟩
+
+@[simp] lemma _root_.category_theory.neg_hom
+   {C : Type*} [category C] [preadditive C] {X Y : C} (f : X ≅ Y) :
+   (-f).hom = -(f.hom) := rfl
+
+@[simp] lemma _root_.category_theory.neg_inv
+   {C : Type*} [category C] [preadditive C] {X Y : C} (f : X ≅ Y) :
+   (-f).inv = -(f.inv) := rfl
+
 namespace pretriangulated
 variables [has_zero_object C] [∀ (i : ℤ), (shift_functor C i).additive] [pretriangulated C]
 
 lemma shift_of_dist_triangle (T : triangle C) (hT : T ∈ dist_triang C) (i : ℤ) :
-  T⟦i⟧ ∈ dist_triang C := sorry
+  T⟦i⟧ ∈ dist_triang C :=
+begin
+  induction i using int.induction_on with i IH i IH,
+  { exact isomorphic_distinguished T hT _ (shift_zero _ _), },
+  { suffices : T⟦(i+1 : ℤ)⟧ ≅ T⟦(i:ℤ)⟧.rotate.rotate.rotate,
+    { refine isomorphic_distinguished _ _ _ this,
+      repeat { refine rot_of_dist_triangle _ _ _ },
+      exact IH },
+    refine shift_add _ _ _ ≪≫ _,
+    refine triangle.iso.of_components (iso.refl _) (-iso.refl _) (iso.refl _) _ _ _,
+    { dsimp, simp only [category.id_comp, category.comp_id, comp_neg, neg_neg], },
+    { dsimp, simp only [category.id_comp, category.comp_id, neg_comp, neg_neg], },
+    { dsimp, simp only [category.id_comp, category.comp_id, neg_comp, neg_neg],
+      simp only [functor.map_comp, assoc, category_theory.functor.map_id, comp_id],
+      sorry }, },
+  sorry
+end
 
 end pretriangulated
 
