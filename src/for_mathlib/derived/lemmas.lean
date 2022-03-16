@@ -184,9 +184,24 @@ instance is_quasi_iso_comp_iso {X Y Z : 𝒦} (f : X ⟶ Y) (g : Y ⟶ Z)
 { cond := λ i, by { rw (homology_functor A (complex_shape.up ℤ) i).map_comp, apply_instance, } }
 
 -- Move This
-lemma is_iso_iff_neg_one_pow (A : Type*) [category A]
+@[simp] lemma is_iso_neg_iff (A : Type*) [category A]
+  [preadditive A] (X Y : A) (f : X ⟶ Y) :
+  is_iso (-f) ↔ is_iso f :=
+begin
+  split; rintro ⟨g, hg⟩; refine ⟨⟨-g, _⟩⟩;
+  simpa only [preadditive.comp_neg, preadditive.neg_comp, neg_neg] using hg,
+end
+
+-- Move This
+@[simp] lemma is_iso_neg_one_pow_iff (A : Type*) [category A]
   [preadditive A] (X Y : A) (f : X ⟶ Y) (i : ℤ) :
-  is_iso f ↔ is_iso (i.neg_one_pow • f) := sorry
+  is_iso (i.neg_one_pow • f) ↔ is_iso f :=
+begin
+  induction i using int.induction_on_iff with i,
+  { simp only [int.neg_one_pow_neg_zero, one_zsmul] },
+  dsimp,
+  simp only [int.neg_one_pow_add, int.neg_one_pow_one, mul_neg, mul_one, neg_smul, is_iso_neg_iff],
+end
 
 /--
 If `A → B → C → A[1]` is a distinguished triangle, and `A → B` is a quasi-isomorphism,
@@ -217,7 +232,7 @@ begin
   { have hh := h,
     rw ← is_quasi_iso_iff at h,
     erw H.map_zsmul,
-    rw ← is_iso_iff_neg_one_pow,
+    rw is_iso_neg_one_pow_iff,
     apply h },
   haveI : is_iso (H.map (S.rotate.mor₃)),
   { dsimp [triangle.rotate],
@@ -235,7 +250,7 @@ begin
       dsimp only [functor.comp_map] at hhh,
       dsimp [f],
       simp only [functor.map_zsmul],
-      rw ← is_iso_iff_neg_one_pow,
+      rw is_iso_neg_one_pow_iff,
       rw hhh,
       apply_with is_iso.comp_is_iso { instances := ff },
       apply_with is_iso.comp_is_iso { instances := ff },
