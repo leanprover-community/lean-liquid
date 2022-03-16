@@ -97,10 +97,12 @@ nat_iso.of_components (λ T,
     (shift_zero _ _).symm
     (shift_zero _ _).symm
     (shift_zero _ _).symm
-    ((shift_functor_zero _ _).inv.naturality _)
-    ((shift_functor_zero _ _).inv.naturality _)
+    sorry -- use ((shift_functor_zero _ _).inv.naturality _)
+    sorry -- use ((shift_functor_zero _ _).inv.naturality _)
     begin
-      dsimp, rw ← nat_trans.naturality_assoc, dsimp [shift_comm],
+      dsimp,
+      rw one_smul,
+      rw ← nat_trans.naturality_assoc, dsimp [shift_comm],
       simp only [obj_ε_app, discrete.functor_map_id, nat_trans.id_app, ε_app_obj, assoc, id_comp],
       rw [← nat_trans.comp_app, ← nat_trans.comp_app],
       erw [monoidal_functor.μ_inv_hom_id_assoc, id_comp], refl,
@@ -124,13 +126,16 @@ nat_iso.of_components (λ T,
     (shift_add _ _ _).symm
     (shift_add _ _ _).symm
     (shift_add _ _ _).symm
-    ((shift_functor_add _ _ _).inv.naturality _ )
-    ((shift_functor_add _ _ _).inv.naturality _ )
+    sorry -- use ((shift_functor_add _ _ _).inv.naturality _ )
+    sorry -- use ((shift_functor_add _ _ _).inv.naturality _ )
     begin
-      dsimp, rw ← nat_trans.naturality_assoc,
+      /-
+      dsimp,
+      rw ← nat_trans.naturality_assoc,
       simp only [functor.map_comp, assoc, obj_μ_app, functor.comp_map],
       congr' 1,
       rw [← nat_trans.comp_app, ← nat_trans.comp_app],
+      -/
       sorry
     end)
   begin
@@ -164,13 +169,14 @@ lemma shift_obj₂ (T : triangle C) (i : ℤ) : T⟦i⟧.obj₂ = T.obj₂⟦i�
 lemma shift_obj₃ (T : triangle C) (i : ℤ) : T⟦i⟧.obj₃ = T.obj₃⟦i⟧ := rfl
 
 @[simp]
-lemma shift_mor₁ (T : triangle C) (i : ℤ) : T⟦i⟧.mor₁ = T.mor₁⟦i⟧' := rfl
+lemma shift_mor₁ (T : triangle C) (i : ℤ) : T⟦i⟧.mor₁ = i.neg_one_pow • T.mor₁⟦i⟧' := rfl
 
 @[simp]
-lemma shift_mor₂ (T : triangle C) (i : ℤ) : T⟦i⟧.mor₂ = T.mor₂⟦i⟧' := rfl
+lemma shift_mor₂ (T : triangle C) (i : ℤ) : T⟦i⟧.mor₂ = i.neg_one_pow • T.mor₂⟦i⟧' := rfl
 
 @[simp]
-lemma shift_mor₃ (T : triangle C) (i : ℤ) : T⟦i⟧.mor₃ = T.mor₃⟦i⟧' ≫ (shift_comm _ _ _).hom := rfl
+lemma shift_mor₃ (T : triangle C) (i : ℤ) :
+  T⟦i⟧.mor₃ = i.neg_one_pow • (T.mor₃⟦i⟧' ≫ (shift_comm _ _ _).hom) := rfl
 
 @[simp]
 lemma shift_hom₁ {T₁ T₂ : triangle C} (f : T₁ ⟶ T₂) (i : ℤ) : f⟦i⟧'.hom₁ = f.hom₁⟦i⟧' := rfl
@@ -213,11 +219,13 @@ begin
       repeat { refine rot_of_dist_triangle _ _ _ },
       exact IH },
     refine shift_add _ _ _ ≪≫ _,
-    refine triangle.iso.of_components (iso.refl _) (-iso.refl _) (iso.refl _) _ _ _,
-    { dsimp, simp only [category.id_comp, category.comp_id, comp_neg, neg_neg], },
-    { dsimp, simp only [category.id_comp, category.comp_id, neg_comp, neg_neg], },
-    { dsimp, simp only [category.id_comp, category.comp_id, neg_comp, neg_neg],
-      simp only [functor.map_comp, assoc, category_theory.functor.map_id, comp_id],
+    refine triangle.iso.of_components (iso.refl _) (iso.refl _) (iso.refl _) _ _ _,
+    { dsimp, simp only [category.id_comp, category.comp_id, comp_neg, neg_one_smul], },
+    { dsimp, simp only [category.id_comp, category.comp_id, neg_comp, neg_one_smul], },
+    { dsimp, simp only [category.id_comp, category.comp_id, neg_comp, neg_one_smul],
+      simp only [functor.map_comp, assoc, category_theory.functor.map_id, comp_id,
+        functor.map_zsmul, preadditive.zsmul_comp, preadditive.comp_zsmul],
+      congr' 2,
       sorry }, },
   sorry
 end
