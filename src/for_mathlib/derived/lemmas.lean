@@ -183,6 +183,11 @@ instance is_quasi_iso_comp_iso {X Y Z : 𝒦} (f : X ⟶ Y) (g : Y ⟶ Z)
   is_quasi_iso (f ≫ g) :=
 { cond := λ i, by { rw (homology_functor A (complex_shape.up ℤ) i).map_comp, apply_instance, } }
 
+-- Move This
+lemma is_iso_iff_neg_one_pow (A : Type*) [category A]
+  [preadditive A] (X Y : A) (f : X ⟶ Y) (i : ℤ) :
+  is_iso f ↔ is_iso (i.neg_one_pow • f) := sorry
+
 /--
 If `A → B → C → A[1]` is a distinguished triangle, and `A → B` is a quasi-isomorphism,
 then `C` is acyclic.
@@ -211,6 +216,8 @@ begin
   haveI : is_iso (H.map S.mor₁),
   { have hh := h,
     rw ← is_quasi_iso_iff at h,
+    erw H.map_zsmul,
+    rw ← is_iso_iff_neg_one_pow,
     apply h },
   haveI : is_iso (H.map (S.rotate.mor₃)),
   { dsimp [triangle.rotate],
@@ -227,6 +234,8 @@ begin
       rw ← is_iso.eq_comp_inv at hhh,
       dsimp only [functor.comp_map] at hhh,
       dsimp [f],
+      simp only [functor.map_zsmul],
+      rw ← is_iso_iff_neg_one_pow,
       rw hhh,
       apply_with is_iso.comp_is_iso { instances := ff },
       apply_with is_iso.comp_is_iso { instances := ff },
@@ -439,7 +448,8 @@ begin
   { simp only [← functor.map_comp],
     congr' 1,
     dsimp,
-    simp only [preadditive.comp_neg, preadditive.neg_comp, neg_inj, ← functor.map_comp, f.comm₁] },
+    simp only [preadditive.comp_neg, preadditive.neg_comp, neg_inj, ← functor.map_comp, f.comm₁,
+      preadditive.zsmul_comp, preadditive.comp_zsmul] },
 end
 
 lemma is_K_projective_of_triangle (T : triangle 𝒦) (hT : T ∈ dist_triang 𝒦)
