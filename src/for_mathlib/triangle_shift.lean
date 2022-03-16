@@ -95,8 +95,16 @@ nat_iso.of_components (λ T,
     (shift_zero _ _).symm
     (shift_zero _ _).symm
     (shift_zero _ _).symm
-    sorry -- use ((shift_functor_zero _ _).inv.naturality _)
-    sorry -- use ((shift_functor_zero _ _).inv.naturality _)
+    begin
+      convert ((shift_functor_zero _ _).inv.naturality _),
+      dsimp only [triangle_shift_functor, triangle_shift_obj],
+      simpa,
+    end
+    begin
+      convert ((shift_functor_zero _ _).inv.naturality _),
+      dsimp only [triangle_shift_functor, triangle_shift_obj],
+      simpa,
+    end
     begin
       dsimp,
       rw one_smul,
