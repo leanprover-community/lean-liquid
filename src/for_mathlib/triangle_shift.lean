@@ -1,4 +1,5 @@
 import category_theory.triangulated.pretriangulated
+import for_mathlib.homological_complex_shift
 
 noncomputable theory
 
@@ -23,9 +24,9 @@ namespace triangle
 @[simps]
 def triangle_shift_obj (T : triangle C) (i : ℤ) : triangle C :=
 triangle.mk C
-  ((shift_functor _ i).map T.mor₁)
-  (((shift_functor _ i).map T.mor₂))
-  ((shift_functor C i).map T.mor₃ ≫ (shift_comm _ _ _).hom)
+  (i.neg_one_pow • ((shift_functor _ i).map T.mor₁))
+  (i.neg_one_pow • (((shift_functor _ i).map T.mor₂)))
+  (i.neg_one_pow • ((shift_functor C i).map T.mor₃ ≫ (shift_comm _ _ _).hom))
 
 @[simps]
 def triangle_shift_map {T₁ T₂ : triangle C} (f : T₁ ⟶ T₂) (i : ℤ) :
@@ -33,11 +34,16 @@ def triangle_shift_map {T₁ T₂ : triangle C} (f : T₁ ⟶ T₂) (i : ℤ) :
 { hom₁ := (shift_functor _ i).map f.hom₁,
   hom₂ := (shift_functor _ i).map f.hom₂,
   hom₃ := (shift_functor _ i).map f.hom₃,
-  comm₁' := by { dsimp, simp only [← functor.map_comp, f.comm₁] },
-  comm₂' := by { dsimp, simp only [← functor.map_comp, f.comm₂] },
+  comm₁' := by { dsimp, simp only [functor.map_zsmul,
+    preadditive.zsmul_comp, preadditive.comp_zsmul, ← functor.map_comp, f.comm₁] },
+  comm₂' := by { dsimp, simp only [functor.map_zsmul,
+    preadditive.zsmul_comp, preadditive.comp_zsmul, ← functor.map_comp, f.comm₂] },
   comm₃' := begin
     dsimp,
-    simp only [shift_comm_hom_comp, assoc, iso.cancel_iso_hom_right_assoc,
+    simp only [functor.map_zsmul,
+      preadditive.zsmul_comp, preadditive.comp_zsmul],
+    congr' 1,
+    simp only [ shift_comm_hom_comp, assoc, iso.cancel_iso_hom_right_assoc,
       ← functor.map_comp, f.comm₃],
   end }
 
@@ -177,6 +183,7 @@ lemma shift_hom₃ {T₁ T₂ : triangle C} (f : T₁ ⟶ T₂) (i : ℤ) : f⟦
 
 end triangle
 
+/-
 instance {C : Type*} [category C] [preadditive C] (X Y : C) : has_neg (X ≅ Y) :=
 ⟨λ f,
 { hom := -f.hom,
@@ -191,6 +198,7 @@ instance {C : Type*} [category C] [preadditive C] (X Y : C) : has_neg (X ≅ Y) 
 @[simp] lemma _root_.category_theory.neg_inv
    {C : Type*} [category C] [preadditive C] {X Y : C} (f : X ≅ Y) :
    (-f).inv = -(f.inv) := rfl
+-/
 
 namespace pretriangulated
 variables [has_zero_object C] [∀ (i : ℤ), (shift_functor C i).additive] [pretriangulated C]
