@@ -198,19 +198,31 @@ instance homological_complex.functor_eval_flip_preserves_colimits_of_shape
 { preserves_colimit := λ K,
   { preserves := λ c hc,
     let t : Π (s : cocone (K ⋙ homological_complex.functor_eval.flip.obj F))
-      (i : ℕ), cocone (K ⋙ F.X i) := λ s i,
+        (i : ℕ), cocone (K ⋙ F.X i) := λ s i,
     { X := s.X.X i,
       ι := { app := λ j, show (K ⋙ F.X i).obj j ⟶ s.X.X i, from (s.ι.app j).f i,
             naturality' := begin
               intros a b φ, have := s.ι.naturality φ, dsimp at this ⊢,
-                simp only [category.comp_id] at this ⊢,
-                rw ← this, refl
+              simp only [category.comp_id] at this ⊢,
+              rw ← this, refl
+            end } },
+      u : Π (s : cocone (K ⋙ homological_complex.functor_eval.flip.obj F))
+        (i j : ℕ), cocone (K ⋙ F.X i) := λ s i j,
+    { X := s.X.X j,
+      ι := { app := λ k, show (K ⋙ F.X i).obj k ⟶ s.X.X j,
+                         from (whisker_left K (F.d i j)).app k ≫ (s.ι.app k).f j,
+            naturality' := begin
+              intros a b φ, have := s.ι.naturality φ, dsimp at this ⊢,
+              simp only [category.comp_id] at this ⊢,
+              rw [← this, (F.d i j).naturality_assoc], refl,
             end } } in
     { desc := λ s,
       { f := λ i, (is_colimit_of_preserves (F.X i) hc).desc (t s i),
         comm' := begin
           intros i j h, dsimp,
-          have := (is_colimit_of_preserves (F.X j) hc).uniq (t s j),
+          have := (is_colimit_of_preserves (F.X i) hc).uniq (u s i j),
+          refine (this _ _).trans (this _ _).symm,
+          { intros, dsimp, sorry },
           sorry
         end },
       fac' := sorry,
