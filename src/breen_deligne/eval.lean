@@ -190,8 +190,10 @@ def eval_functor : data ⥤ 𝒜 ⥤ chain_complex 𝒜 ℕ :=
 eval_functor' F ⋙ homological_complex.functor_eval.flip
 .
 
-instance (BD : data) (J : Type*) [category J] [preserves_colimits_of_shape J F] :
-  preserves_colimits_of_shape J ((eval_functor F).obj BD) :=
+instance homological_complex.functor_eval_flip_preserves_colimits_of_shape
+  (J : Type*) [category J] (F : chain_complex (𝒜 ⥤ 𝒜) ℕ)
+  [∀ i, preserves_colimits_of_shape J (F.X i)] :
+  preserves_colimits_of_shape J (homological_complex.functor_eval.flip.obj F) :=
 { preserves_colimit := λ K,
   { preserves := λ c hc,
     { desc := λ s,
@@ -200,7 +202,18 @@ instance (BD : data) (J : Type*) [category J] [preserves_colimits_of_shape J F] 
       fac' := sorry,
       uniq' := sorry } } }
 
-instance (BD : data) (J : Type*) [category J] [preserves_filtered_colimits F] :
+instance eval_functor_preserves_colimits_of_shape
+  (BD : data) (J : Type*) [category J] [preserves_colimits_of_shape J F] :
+  preserves_colimits_of_shape J ((eval_functor F).obj BD) :=
+begin
+  refine @homological_complex.functor_eval_flip_preserves_colimits_of_shape _ _ _ _ J _
+    ((eval_functor' F).obj BD) (id _),
+  intro i,
+  show preserves_colimits_of_shape J (Pow (BD.X i) ⋙ F),
+  apply_instance
+end
+
+instance eval_functor_preserves_filtered_colimits (BD : data) [preserves_filtered_colimits F] :
   preserves_filtered_colimits ((eval_functor F).obj BD) :=
 { preserves_filtered_colimits := by introsI; apply_instance }
 
