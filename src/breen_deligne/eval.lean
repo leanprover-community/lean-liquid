@@ -1,6 +1,7 @@
 import category_theory.preadditive.functor_category
 import category_theory.limits.shapes.finite_products
 import category_theory.limits.shapes.biproducts
+import category_theory.limits.preserves.filtered
 
 import for_mathlib.homological_complex2
 
@@ -27,6 +28,39 @@ def Pow (n : ℕ) : 𝒜 ⥤ 𝒜 :=
 
 -- move this
 attribute [simps] comp_hom
+.
+
+instance (n : ℕ) {J : Type*} [category J] : preserves_colimits_of_shape J (Pow n : 𝒜 ⥤ 𝒜) :=
+{ preserves_colimit := λ K,
+  { preserves := λ c hc,
+    { desc := λ s, biproduct.desc $ λ i,
+        let t : cocone K :=
+        { X := s.X,
+          ι := { app := λ j, show K.obj j ⟶ (K ⋙ Pow n).obj j, from biproduct.ι _ i,
+                naturality' := by intros X Y f;
+                  simp only [functor.comp_map, Pow_map, biproduct.ι_map], } ≫ s.ι } in
+        hc.desc t,
+      fac' := begin
+        intros, ext,
+        simp only [Pow_map, functor.map_cocone_ι_app, biproduct.map_desc,
+          is_colimit.fac, nat_trans.comp_app, biproduct.ι_desc],
+      end,
+      uniq' := begin
+        intros, ext i,
+        simp only [biproduct.ι_desc],
+        let t : cocone K :=
+        { X := s.X,
+          ι := { app := λ j, show K.obj j ⟶ (K ⋙ Pow n).obj j, from biproduct.ι _ i,
+                naturality' := by intros X Y f;
+                  simp only [functor.comp_map, Pow_map, biproduct.ι_map], } ≫ s.ι },
+        refine hc.uniq t (_ ≫ m) _,
+        intro j,
+        simp only [nat_trans.comp_app, ← w,
+          functor.map_cocone_ι_app, Pow_map, biproduct.ι_map_assoc],
+      end } } }
+
+instance (n : ℕ) : preserves_colimits (Pow n : 𝒜 ⥤ 𝒜) :=
+{ preserves_colimits_of_shape := λ J hJ, by apply_instance }
 
 end preadditive
 end category_theory
@@ -148,12 +182,84 @@ namespace data
 open universal_map
 
 @[simps {fully_applied := ff}]
-def eval_functor : data ⥤ chain_complex (𝒜 ⥤ 𝒜) ℕ :=
+def eval_functor' : data ⥤ chain_complex (𝒜 ⥤ 𝒜) ℕ :=
 (eval_Pow_functor F).map_homological_complex _
 
 @[simps {fully_applied := ff}]
-def eval_functor' : data ⥤ 𝒜 ⥤ chain_complex 𝒜 ℕ :=
-eval_functor F ⋙ homological_complex.functor_eval.flip
+def eval_functor : data ⥤ 𝒜 ⥤ chain_complex 𝒜 ℕ :=
+eval_functor' F ⋙ homological_complex.functor_eval.flip
+.
+
+-- generalize to arbitrary homological complexes
+instance homological_complex.functor_eval_flip_preserves_colimits_of_shape
+  (J : Type*) [category J] (F : chain_complex (𝒜 ⥤ 𝒜) ℕ)
+  [∀ i, preserves_colimits_of_shape J (F.X i)] :
+  preserves_colimits_of_shape J (homological_complex.functor_eval.flip.obj F) :=
+{ preserves_colimit := λ K,
+  { preserves := λ c hc,
+    let t : Π (s : cocone (K ⋙ homological_complex.functor_eval.flip.obj F))
+      (i : ℕ), cocone (K ⋙ F.X i) := λ s i,
+    { X := s.X.X i,
+      ι := { app := λ j, show (K ⋙ F.X i).obj j ⟶ s.X.X i, from (s.ι.app j).f i,
+            naturality' := begin
+              intros a b φ, have := s.ι.naturality φ, dsimp at this ⊢,
+                simp only [category.comp_id] at this ⊢,
+                rw ← this, refl
+            end } } in
+    { desc := λ s,
+      { f := λ i, (is_colimit_of_preserves (F.X i) hc).desc (t s i),
+        comm' := begin
+          intros i j h, dsimp,
+          have := (is_colimit_of_preserves (F.X j) hc).uniq (t s j),
+          sorry
+        end },
+      fac' := sorry,
+      uniq' := sorry } } }
+
+/-
+{ preserves_colimit := λ K,
+  { preserves := λ c hc,
+    { desc := λ s, biproduct.desc $ λ i,
+        let t : cocone K :=
+        { X := s.X,
+          ι := { app := λ j, show K.obj j ⟶ (K ⋙ Pow n).obj j, from biproduct.ι _ i,
+                naturality' := by intros X Y f;
+                  simp only [functor.comp_map, Pow_map, biproduct.ι_map], } ≫ s.ι } in
+        hc.desc t,
+      fac' := begin
+        intros, ext,
+        simp only [Pow_map, functor.map_cocone_ι_app, biproduct.map_desc,
+          is_colimit.fac, nat_trans.comp_app, biproduct.ι_desc],
+      end,
+      uniq' := begin
+        intros, ext i,
+        simp only [biproduct.ι_desc],
+        let t : cocone K :=
+        { X := s.X,
+          ι := { app := λ j, show K.obj j ⟶ (K ⋙ Pow n).obj j, from biproduct.ι _ i,
+                naturality' := by intros X Y f;
+                  simp only [functor.comp_map, Pow_map, biproduct.ι_map], } ≫ s.ι },
+        refine hc.uniq t (_ ≫ m) _,
+        intro j,
+        simp only [nat_trans.comp_app, ← w,
+          functor.map_cocone_ι_app, Pow_map, biproduct.ι_map_assoc],
+      end } } }
+-/
+
+instance eval_functor_preserves_colimits_of_shape
+  (BD : data) (J : Type*) [category J] [preserves_colimits_of_shape J F] :
+  preserves_colimits_of_shape J ((eval_functor F).obj BD) :=
+begin
+  refine @homological_complex.functor_eval_flip_preserves_colimits_of_shape _ _ _ _ J _
+    ((eval_functor' F).obj BD) (id _),
+  intro i,
+  show preserves_colimits_of_shape J (Pow (BD.X i) ⋙ F),
+  apply_instance
+end
+
+instance eval_functor_preserves_filtered_colimits (BD : data) [preserves_filtered_colimits F] :
+  preserves_filtered_colimits ((eval_functor F).obj BD) :=
+{ preserves_filtered_colimits := by introsI; apply_instance }
 
 -- @[simps]
 -- def eval_functor.obj (M : 𝒜) : chain_complex 𝒜 ℕ :=
@@ -405,8 +511,8 @@ end
 
 @[simps {fully_applied := ff}]
 def aux :
-  (data.eval_functor' F).obj ((data.mul 2).obj BD'.data) ≅
-  Biprod ⋙ (data.eval_functor' F).obj BD'.data :=
+  (data.eval_functor F).obj ((data.mul 2).obj BD'.data) ≅
+  Biprod ⋙ (data.eval_functor F).obj BD'.data :=
 nat_iso.of_components (λ A,
   homological_complex.hom.iso_of_components (λ i, begin
       refine F.map_iso _,
@@ -414,7 +520,7 @@ nat_iso.of_components (λ A,
       refine (Pow _).map_iso (Biprod_iso_Pow_two.symm.app A)
     end) $ λ i j hij, aux' F A (BD'.data.X i) (BD'.data.X j) (BD'.data.d i j)) $ λ A B f, begin
       ext i,
-      dsimp only [data.eval_functor', data.eval_functor, eval_Pow, eval_Pow_functor_obj,
+      dsimp only [data.eval_functor, data.eval_functor', eval_Pow, eval_Pow_functor_obj,
         functor.map_iso_hom, functor.comp_obj, functor.comp_map, functor.flip_obj_map,
         iso.trans_hom, iso.symm_hom, nat_iso.app_hom,
         functor.map_homological_complex_obj_X,
@@ -464,16 +570,16 @@ begin
 end
 .
 
-def eval_functor'_homotopy (A : 𝒜) : _root_.homotopy
-  (((data.eval_functor' F).obj BD'.data).map (biprod.fst + biprod.snd : A ⊞ A ⟶ A))
-  (((data.eval_functor' F).obj BD'.data).map (biprod.fst : A ⊞ A ⟶ A) +
-    ((data.eval_functor' F).obj BD'.data).map (biprod.snd : A ⊞ A ⟶ A)) :=
+def eval_functor_homotopy (A : 𝒜) : _root_.homotopy
+  (((data.eval_functor F).obj BD'.data).map (biprod.fst + biprod.snd : A ⊞ A ⟶ A))
+  (((data.eval_functor F).obj BD'.data).map (biprod.fst : A ⊞ A ⟶ A) +
+    ((data.eval_functor F).obj BD'.data).map (biprod.snd : A ⊞ A ⟶ A)) :=
 begin
   refine ((eval_homotopy' F BD' A).symm.comp_left ((aux F BD').inv.app A)).congr _ _ _ _,
   { ext i,
     rw [homological_complex.comp_f, aux_inv_app_f,
       functor.map_homological_complex_map_f, functor.comp_map, eval_Pow_functor_map,
-      evaluation_obj_map, data.eval_functor'_obj_map_f],
+      evaluation_obj_map, data.eval_functor_obj_map_f],
     dsimp only [data.sum, universal_map.sum],
     rw [eval_Pow_of, whisker_right_app, ← F.map_comp, fin.sum_univ_two,
       eval_Pow_add, quux, quux],
@@ -500,7 +606,7 @@ begin
       functor.map_homological_complex_map_f, functor.comp_map, eval_Pow_functor_map,
       evaluation_obj_map,
       homological_complex.add_f_apply,
-      data.eval_functor'_obj_map_f, data.eval_functor'_obj_map_f],
+      data.eval_functor_obj_map_f, data.eval_functor_obj_map_f],
     dsimp only [data.proj, proj],
     rw [add_monoid_hom.map_sum, fin.sum_univ_two, eval_Pow_of, eval_Pow_of,
       nat_trans.app_add, whisker_right_app, whisker_right_app, comp_add,

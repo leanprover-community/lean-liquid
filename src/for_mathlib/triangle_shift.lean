@@ -124,27 +124,49 @@ nat_iso.of_components (λ T,
   end
 .
 
+variables [∀ (i : ℤ), (shift_functor C i).additive]
+
 @[simps]
-def triangle_shift_functor_μ (i j : ℤ) : triangle_shift_functor C i ⋙ triangle_shift_functor C j ≅
+def triangle_shift_functor_μ (i j : ℤ) :
+  triangle_shift_functor C i ⋙ triangle_shift_functor C j ≅
     triangle_shift_functor C (i + j) :=
 nat_iso.of_components (λ T,
   iso.of_components
     (shift_add _ _ _).symm
     (shift_add _ _ _).symm
     (shift_add _ _ _).symm
-    sorry -- use ((shift_functor_add _ _ _).inv.naturality _ )
-    sorry -- use ((shift_functor_add _ _ _).inv.naturality _ )
+    (by sorry; begin
+      dsimp [triangle_shift_functor, triangle_shift_obj],
+      simp only [zsmul_comp, comp_zsmul, iso.symm_hom, iso.app_inv, iso.symm_inv,
+        monoidal_functor.μ_iso_hom, functor.map_zsmul, smul_smul, int.neg_one_pow_add],
+      have := ((shift_functor_add _ i j).inv.naturality T.mor₁),
+      rw [functor.comp_map] at this,
+      erw [this, mul_comm], refl,
+    end)
+    (by sorry; begin
+      dsimp [triangle_shift_functor, triangle_shift_obj],
+      simp only [zsmul_comp, comp_zsmul, iso.symm_hom, iso.app_inv, iso.symm_inv,
+        monoidal_functor.μ_iso_hom, functor.map_zsmul, smul_smul, int.neg_one_pow_add],
+      have := ((shift_functor_add _ i j).inv.naturality T.mor₂),
+      rw [functor.comp_map] at this,
+      erw [this, mul_comm], refl,
+    end)
     begin
-      /-
-      dsimp,
-      rw ← nat_trans.naturality_assoc,
-      simp only [functor.map_comp, assoc, obj_μ_app, functor.comp_map],
-      congr' 1,
-      rw [← nat_trans.comp_app, ← nat_trans.comp_app],
-      -/
+      dsimp [triangle_shift_functor, triangle_shift_obj],
+      simp only [zsmul_comp, comp_zsmul, iso.symm_hom, iso.app_inv, iso.symm_inv,
+        monoidal_functor.μ_iso_hom, functor.map_zsmul, smul_smul, int.neg_one_pow_add,
+        mul_comm j.neg_one_pow],
+      have := ((shift_functor_add _ i j).inv.naturality T.mor₃),
+      dsimp [functor.comp_map] at this,
+      erw [← reassoc_of this], clear this,
+      simp only [functor.map_comp, assoc, obj_μ_app],
+      congr' 2,
+      dsimp [shift_comm],
+      repeat { rw [← nat_trans.comp_app], },
+      -- have := (shift_monoidal_functor C ℤ).to_lax_monoidal_functor.associativity i j 1,
       sorry
     end)
-  begin
+  (by sorry; begin
     intros T₁ T₂ f, ext;
     { dsimp only [triangle_morphism.comp_hom₁, iso.of_components_hom_hom₁, triangle_shift_map_hom₁,
         triangle_morphism.comp_hom₂, iso.of_components_hom_hom₂, triangle_shift_map_hom₂,
@@ -152,13 +174,28 @@ nat_iso.of_components (λ T,
         functor.id_map, triangle_category_comp, iso.symm_hom, iso.app_inv, iso.symm_inv,
         monoidal_functor.ε_iso_hom, triangle_shift_functor_map],
       rw ← nat_trans.naturality _ _, refl },
-  end
+  end)
+.
 
 def triangle_shift_core : shift_mk_core (triangle C) ℤ :=
 { F := triangle_shift_functor _,
   ε := triangle_shift_functor_ε _,
   μ := λ i j, triangle_shift_functor_μ _ _ _,
-  associativity := sorry,
+  associativity := begin
+    intros i j k T, ext,
+    { have := (shift_monoidal_functor C ℤ).to_lax_monoidal_functor.associativity i j k,
+      apply_fun (λ α, α.app T.obj₁) at this,
+      simp only [nat_trans.comp_app, obj_μ_app, assoc, μ_inv_hom_app_assoc, map_inv_hom_app,
+        comp_id, functor.associator_hom_app, nat_trans.hcomp_app, nat_trans.id_app,
+        category_theory.functor.map_id, id_comp] at this,
+      erw [id_comp] at this,
+      refine eq.trans _ this, clear this,
+      dsimp, simp only [obj_μ_app, assoc],
+      -- I don't like that `(eq_to_hom _).hom₁`.
+      sorry },
+    sorry,
+    sorry
+  end,
   left_unitality := sorry,
   right_unitality := sorry }
 
