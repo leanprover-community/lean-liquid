@@ -169,8 +169,8 @@ apply_nolint category_theory.snake.row_exact₂_aux unused_arguments
 apply_nolint category_theory.split.map def_lemma
 
 -- for_mathlib/triangle_shift.lean
+apply_nolint category_theory.triangulated.pretriangulated.shift_comm_self unused_arguments
 apply_nolint category_theory.triangulated.triangle.iso.of_components unused_arguments
-apply_nolint category_theory.triangulated.triangle.triangle_shift_obj unused_arguments
 
 -- laurent_measures/basic.lean
 apply_nolint laurent_measures.laurent_measures.norm_nonneg dup_namespace
