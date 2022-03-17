@@ -51,7 +51,7 @@ lemma _root_.category_theory.cochain_complex.exact_to_cone_in
   exact ((_root_.homology_functor _ _ 0).map f)
     ((_root_.homology_functor _ _ 0).map (cone.in f)) :=
 begin
-  sorry
+  admit
 end
 -/
 
