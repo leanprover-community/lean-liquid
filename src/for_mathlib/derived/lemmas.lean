@@ -203,6 +203,10 @@ begin
   simp only [int.neg_one_pow_add, int.neg_one_pow_one, mul_neg, mul_one, neg_smul, is_iso_neg_iff],
 end
 
+-- TODO(!): Why is this needed!?!?
+instance : has_shift (triangle 𝒦) ℤ :=
+triangle.has_shift (homotopy_category A (complex_shape.up ℤ))
+
 /--
 If `A → B → C → A[1]` is a distinguished triangle, and `A → B` is a quasi-isomorphism,
 then `C` is acyclic.

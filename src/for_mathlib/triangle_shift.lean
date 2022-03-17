@@ -199,7 +199,7 @@ def triangle_shift_core : shift_mk_core (triangle C) ℤ :=
   left_unitality := sorry,
   right_unitality := sorry }
 
-instance : has_shift (triangle C) ℤ :=
+instance has_shift : has_shift (triangle C) ℤ :=
 has_shift_mk _ _ $ triangle_shift_core _
 
 @[simp]
