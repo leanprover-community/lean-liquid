@@ -192,7 +192,17 @@ eval_functor' F ⋙ homological_complex.functor_eval.flip
 
 instance (BD : data) (J : Type*) [category J] [preserves_colimits_of_shape J F] :
   preserves_colimits_of_shape J ((eval_functor F).obj BD) :=
-{ preserves_colimit := sorry }
+{ preserves_colimit := λ K,
+  { preserves := λ c hc,
+    { desc := λ s,
+      { f := λ i, by { dsimp, sorry },
+        comm' := sorry },
+      fac' := sorry,
+      uniq' := sorry } } }
+
+instance (BD : data) (J : Type*) [category J] [preserves_filtered_colimits F] :
+  preserves_filtered_colimits ((eval_functor F).obj BD) :=
+{ preserves_filtered_colimits := by introsI; apply_instance }
 
 -- @[simps]
 -- def eval_functor.obj (M : 𝒜) : chain_complex 𝒜 ℕ :=
