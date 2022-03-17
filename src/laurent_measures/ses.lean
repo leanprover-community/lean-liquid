@@ -38,9 +38,11 @@ variable {S : Fintype}
 local notation `ℒ` := laurent_measures r
 local notation `ϖ` := Fintype.of punit
 
-variables {M₁ M₂ : Type u} [comphaus_filtered_pseudo_normed_group M₁] [comphaus_filtered_pseudo_normed_group M₂]
+variables {M₁ M₂ : Type u} [comphaus_filtered_pseudo_normed_group M₁]
+  [comphaus_filtered_pseudo_normed_group M₂]
 
-def cfpng_hom_add (f g : comphaus_filtered_pseudo_normed_group_hom M₁ M₂) : (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :=
+def cfpng_hom_add (f g : comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :
+  (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :=
 begin
   apply mk_of_bound (f.to_add_monoid_hom + g.to_add_monoid_hom) (f.bound.some + g.bound.some),
   intro c,
@@ -55,15 +57,20 @@ begin
   let g₀ : filtration M₁ c → filtration M₂ (g.bound.some * c) := λ x, ⟨g x, g.bound.some_spec x.2⟩,
   have hg₀ : continuous g₀ := g.continuous _ (λ x, rfl),
   simp only [add_monoid_hom.add_apply, coe_to_add_monoid_hom],
-  haveI : fact ((f.bound.some * c + g.bound.some * c) ≤ ((f.bound.some + g.bound.some) * c) ) := fact.mk (le_of_eq (add_mul _ _ _).symm),
-  let ι : filtration M₂ (f.bound.some * c + g.bound.some * c) → filtration M₂ ((f.bound.some + g.bound.some) * c) := cast_le,
+  haveI : fact ((f.bound.some * c + g.bound.some * c) ≤ ((f.bound.some + g.bound.some) * c) ) :=
+    fact.mk (le_of_eq (add_mul _ _ _).symm),
+  let ι : filtration M₂ (f.bound.some * c + g.bound.some * c) → filtration M₂
+    ((f.bound.some + g.bound.some) * c) := cast_le,
   have hι : continuous ι := continuous_cast_le _ _,
-  let S₀ : filtration M₂ (f.bound.some * c) × filtration M₂ (g.bound.some * c) → filtration M₂ (f.bound.some * c + g.bound.some * c) := λ x, ⟨x.fst + x.snd, add_mem_filtration x.fst.2 x.snd.2⟩,
+  let S₀ : filtration M₂ (f.bound.some * c) × filtration M₂ (g.bound.some * c) →
+    filtration M₂ (f.bound.some * c + g.bound.some * c) :=
+      λ x, ⟨x.fst + x.snd, add_mem_filtration x.fst.2 x.snd.2⟩,
   have hS₀ := continuous_add' (f.bound.some * c) (g.bound.some * c),
   exact hι.comp (hS₀.comp (continuous.prod_mk hf₀ hg₀)),
 end
 
-def cfpng_hom_neg (f : comphaus_filtered_pseudo_normed_group_hom M₁ M₂) : (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :=
+def cfpng_hom_neg (f : comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :
+  (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :=
 begin
   apply mk_of_bound (- f.to_add_monoid_hom) (f.bound.some),
   intro c,
@@ -104,10 +111,9 @@ local notation `r` := @r p
 local notation `ℳ` := real_measures p
 local notation `ℒ` := laurent_measures r
 
+variable {S : Fintype.{u}}
 
-variable {S : Fintype}
-
-local notation `ϖ` := Fintype.of punit
+local notation `ϖ` := Fintype.of (punit : Type u)
 
 def seval_ℒ_c (c : ℝ≥0) (s : S) : filtration (ℒ S) c → (filtration (ℒ ϖ) c) :=
 λ F,
@@ -254,8 +260,6 @@ end
 -- also the `variable (c : ℝ≥0)` issue; the idea is to replace cast_ℳ_c with α, for which
 -- everything seems to work
 
-
-
 variable (c : ℝ≥0)
 
 def box := {F : (ℳ S) // ∀ s, ∥ F s ∥₊ ^ (p : ℝ) ≤ c }
@@ -264,35 +268,7 @@ instance : has_coe (box S c) (ℳ S) := by {dsimp only [box], apply_instance}
 instance : topological_space (ℳ S) := by {dsimp only [real_measures], apply_instance}
 instance : topological_space (box S c) := by {dsimp only [box], apply_instance}
 
-def equiv_box_ϖ : (box S c) ≃ Π (s : S), (filtration (ℳ ϖ) c) :=
-begin
-  fconstructor,
-  { intros F s,
-    use seval_ℳ S s F.1,
-    simp only [real_measures.mem_filtration_iff, nnnorm, fintype.univ_punit,
-      finset.sum_singleton, seval_ℳ],
-    exact F.2 s },
-  { intro G,
-    use λ s, (G s).1 punit.star,
-    intro s,
-    simpa only [real_measures.mem_filtration_iff, nnnorm, fintype.univ_punit,
-      finset.sum_singleton, seval_ℳ] using (G s).2 },
-  { intro _,
-    ext s,
-    simpa only [seval_ℳ] },
-  { intro G,
-    ext s,
-    simp only [seval_ℳ, subtype.val_eq_coe, subtype.coe_mk],
-    induction x,
-    refl }
-end
-
-
-example : (inducing (coe : (box S c) → (ℳ S))) :=
-begin
-  exact inducing_coe,
-end
-
+-- **[FAE]** The problem is that the `equiv` below is only a type equivalence, not an iso of png's.
 def equiv_S_ϖ : (Π s : S, ℳ ϖ) ≃  ℳ S :=
 begin
   fconstructor,
@@ -311,117 +287,115 @@ def homeo_S_ϖ : (Π s : S, ℳ ϖ) ≃ₜ ℳ S :=
   continuous_to_fun := continuous_pi (λ _, continuous_apply_apply _ punit.star),
   continuous_inv_fun := continuous_pi (λs,  continuous_pi (λ _, continuous_apply s)) }
 
-example (α β : Type*) (h : α ≃ β) : (Π (s : S), α) ≃ (Π (s : S), β) :=
+-- lemma equiv_S_ϖ_c : filtration (Π s : S, ℳ ϖ) c ≃ filtration (ℳ S) c :=
+-- begin
+--   fconstructor,
+--   { intro F,
+--     refine equiv_S_ϖ F.1,
+--   },
+-- end
+
+def equiv_box_ϖ : (box S c) ≃ Π (s : S), (filtration (ℳ ϖ) c) := sorry
+-- { to_fun :=
+--   begin
+--     let := λ F : (box p S c), (equiv_S_ϖ p S).symm.to_fun F.1,
+--     have mah : ∀ F, (this F) ∈ filtration (real_measures p (Fintype.of punit)) c, sorry,
+--     use ⟨this, mah⟩,
+--   end,
+--   inv_fun := _,
+--   left_inv := _,
+--   right_inv := _ }
+-- begin
+--   fconstructor,
+--   { intros F s,
+--     use seval_ℳ S s F.1,
+--     simp only [real_measures.mem_filtration_iff, nnnorm, fintype.univ_punit,
+--       finset.sum_singleton, seval_ℳ],
+--     exact F.2 s },
+--   { intro G,
+--     use λ s, (G s).1 punit.star,
+--     intro s,
+--     simpa only [real_measures.mem_filtration_iff, nnnorm, fintype.univ_punit,
+--       finset.sum_singleton, seval_ℳ] using (G s).2 },
+--   { intro _,
+--     ext s,
+--     simpa only [seval_ℳ] },
+--   { intro G,
+--     ext s,
+--     simp only [seval_ℳ, subtype.val_eq_coe, subtype.coe_mk],
+--     induction x,
+--     refl }
+-- end
+
+-- def equiv_box_ϖ' : (box S c) ≃ { F : (Π (s : S), ℳ ϖ) // ∀ s, F s ∈ filtration (ℳ ϖ) c } :=
+-- def homeo_box_ϖ' : (box S c) ≃ₜ { F : (Π (s : S), ℳ ϖ) // ∀ s, F s ∈ filtration (ℳ ϖ) c } :=
+
+example : (inducing (coe : (box S c) → (ℳ S))) :=
 begin
-  refine equiv.Pi_congr_right _,
-  use λ s, h,
+  apply inducing_coe,
 end
 
-lemma filtration_pi_equiv' : filtration (Π (s : S), (ℳ ϖ)) c ≃ Π (s : S), (filtration (ℳ ϖ) c) :=
-begin
-  equiv_rw @filtration_pi_equiv S (λ s, ℳ ϖ) _ c,
-  refine equiv.Pi_congr of_lex _,
-  intro t,
-  fconstructor,
-  { intro x,
-    refine ⟨λ _, x.1 punit.star, x.2⟩ },
-  { sorry,
-    --use (λ x, ⟨λ i, x i, λ i, (x i).2⟩),
-    --intro x,
-    -- refine ⟨λ i, x.1 i, λ i, (x i).2⟩,
-    -- dsimp only,
-    -- refine ⟨x.1 ,x.2⟩,
-    -- let := λ s : S, (ℳ ϖ),
-    -- let pp := this t,
-    -- -- have := (real_measures.mem_filtration_iff x.1 c).mp x.2,
-    -- let := λ s : S, x.1,
-    -- refine ⟨x.1, _⟩,
-    -- -- refine ⟨_, this⟩,
-    -- -- let : (λ s : S, (ℳ ϖ)) t := x.1,
-    -- -- refine this,
-    -- -- use x,
-  },
-  sorry,
-  sorry,
-end
+-- example : inducing (coe : (filtration (Π (s : S), ℳ ϖ) c) → Π (s : S), ℳ ϖ) :=
+-- begin
+--   refine {induced := _},
+--   -- apply_instance,
+-- end
 
--- def homeo_S_ϖ : (Π s : S, (ℳ ϖ)) ≃ₜ (ℳ S) :=
--- { to_equiv := pi_equi
+
+-- lemma filtration_pi_equiv' : filtration (Π (s : S), (ℳ ϖ)) c ≃ Π (s : S), (filtration (ℳ ϖ) c) :=
+-- begin
+--   equiv_rw @filtration_pi_equiv S (λ s, ℳ ϖ) _ c,
+--   refine equiv.Pi_congr of_lex _,
+--   intro t,
+--   fconstructor,
+--   { intro x,
+--     refine ⟨λ _, x.1 punit.star, x.2⟩ },
+--   { intro x,
+--     refine ⟨x.1 ,x.2⟩ },
+--   sorry,
+--   sorry,
+-- end
+
+
+-- def homeo_box_ϖ' : (box S c) ≃ₜ filtration (Π (s : S), (ℳ ϖ)) c :=
+-- { to_equiv := (equiv_box_ϖ S c).trans (filtration_pi_equiv(λ s : S, (ℳ ϖ)) c).symm,
+--   continuous_to_fun := sorry,
+--   continuous_inv_fun := sorry,
 -- }
-
-def cast_mah : filtration (Π s : S, ℳ ϖ) c → (Π s : S, ℳ ϖ) := λ x, x.1
-
--- example : (inducing (cast_mah S c)) :=
--- begin
---   -- contin homeo_S_ϖ,
---   refine (inducing.inducing_iff _).mp _,
-
---   -- rw subtype.val_eq_coe,
---   -- convert inducing_coe using 0,
---   -- apply_instance,
---   -- sorry,
---   -- exact inducing_id,
---   -- refine (inducing.inducing_iff _).mp _,
---   -- refine {induced := _},
---   -- apply_instance,
---   -- exact inducing_coe,
--- end
-
--- #check @set.pi S (λ s, (ℳ ϖ)) (set.univ) (λ s, filtration (ℳ ϖ) c)
--- #check set.pi (@set.univ S) (λ s, filtration (ℳ ϖ) c)
-
-def cast_remah : (set.pi (@set.univ S) (λ s, filtration (ℳ ϖ) c)) → (Π s : S, (ℳ ϖ)) :=
-  λ x s, x.1 s
-
--- example : inducing (cast_remah S c) :=
--- begin
---   have := @inducing_coe (Π s : S, (ℳ ϖ)) _ (set.pi (@set.univ S) (λ s, filtration (ℳ ϖ) c)),
-  -- exact
-  -- apply inducing_infi_to_pi,
--- end
-
-
--- example : (filtration (ℳ S) c) ≃ (Π (s : S), filtration (ℳ ϖ) c) :=
--- begin
---   have := (@filtration_pi_equiv S (λ s, (ℳ ϖ)) _ c).symm,
---   equiv_rw this,
---   simp,
--- end
-
-def homeo_box_ϖ' : (box S c) ≃ₜ filtration (Π (s : S), (ℳ ϖ)) c :=
-{ to_equiv := (equiv_box_ϖ S c).trans (filtration_pi_equiv(λ s : S, (ℳ ϖ)) c).symm,
-  continuous_to_fun := sorry,
-  continuous_inv_fun := sorry,
-}
 
 def homeo_box_ϖ : (box S c) ≃ₜ Π (s : S), (filtration (ℳ ϖ) c) :=
 { to_equiv := equiv_box_ϖ S c,
   continuous_to_fun := begin
-  let ι : (Π s : S, filtration (ℳ ϖ) c) → (Π s : S, ℳ ϖ) := λ F s, (F s).1,
-  have : inducing ι,
 
-    sorry;{
+
+
+  -- let ι : (Π s : S, filtration (ℳ ϖ) c) → (Π s : S, ℳ ϖ) := λ F s, (F s).1,
+  -- have : inducing ι,
+
+    -- sorry;{
     -- have : has_coe (filtration (Π s : S, (ℳ ϖ)) c) (Π s : S, (ℳ ϖ)),
-    -- exact has_coe
+    -- exact has_coe,
     -- simp,
     -- have sette : inducing (λ F : filtration (Π s : S, (ℳ ϖ)) c, F.1),
     -- simp_rw subtype.val_eq_coe,
     -- refine inducing_coe,
     -- have := inducing (Π (s : S), filtration (ℳ ϖ) c) → (Π s : S, ℳ ϖ)),
-    -- have quattro := @inducing_coe (Π s : S, (ℳ ϖ)) _ (filtration (Π s : S, (ℳ ϖ)) c),
-    -- let e_pi := (filtration_pi_equiv(λ s : S, (ℳ ϖ)) c).symm ∘ (equiv_box_ϖ p S c).to_fun,
+    have quattro := @inducing_coe (Π s : S, (ℳ ϖ)) _ (filtration (Π s : S, (ℳ ϖ)) c),
+    let e_pi := (filtration_pi_equiv(λ s : S, (ℳ ϖ)) c).symm ∘
+      (equiv_box_ϖ p S c).to_fun,
 
     -- equiv_rw this at quattro,
     -- have tre : inducing (cast_remah p S c) := by {exact inducing_coe},
     -- have uno := @inducing_coe (Π (s : S), (ℳ ϖ)) _ (Π (s : S), (filtration (ℳ ϖ) c)),
     -- have := @coe_to_lift (filtration (Π s : S, (ℳ ϖ)) c) (Π s : S, ℳ ϖ),
-    -- have := @inducing.continuous_iff (box p S c)
-    --   (filtration (Π s : S, (ℳ ϖ)) c)
-    --   (Π s : S, (ℳ ϖ)) _ _ _,
-      -- e_pi (λ F, F.1),
-    -- simp at this,
+    have := @inducing.continuous_iff (box p S c)
+      (filtration (Π s : S, (ℳ ϖ)) c)
+      (Π s : S, (ℳ ϖ)) _ _ _--e_pi (λ F, F.1) _ _,
+      e_pi (λ F, F.1),
+    -- simp at e_pi this,
+    -- simp at quattro,
     -- simp_rw [subtype.val_eq_coe] at this,
-    -- refine this quattro,
+    -- apply this quattro,
     -- simp at this,-- coe quattro,
     --  _ _ _ _ _ _ (((equiv_box_ϖ p S c).to_fun))
     --    _ quattro,
@@ -430,7 +404,7 @@ def homeo_box_ϖ : (box S c) ≃ₜ Π (s : S), (filtration (ℳ ϖ) c) :=
     --  (coe : (Π (s : S), filtration (ℳ ϖ) c) → (Π (s : S), (ℳ ϖ))),
       -- (cast_remah p S c),
       -- ((equiv_box_ϖ p S c).to_fun) _ uno,
-  },
+  -- },
   sorry,
   end,
   continuous_inv_fun := sorry, }
