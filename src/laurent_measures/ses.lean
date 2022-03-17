@@ -435,6 +435,8 @@ def homeo_box_ϖ : (box S c) ≃ₜ Π (s : S), (filtration (ℳ ϖ) c) :=
   end,
   continuous_inv_fun := sorry, }
 
+--- **[FAE]**: FROM HERE ON, EVERYTHING HAS BEEN CLEANED UP
+
 def α : filtration (ℳ S) c → box S c :=
 begin
   intro x,
@@ -521,17 +523,8 @@ end
   rw this,
  end
 
-
--- lemma cont_iff_comp_cast_ℳ (c : ℝ≥0) {X : Type*} [topological_space X] (f : X → filtration (ℳ S) c) :
---   continuous (cast_ℳ_c S c ∘ f) → continuous f :=
--- begin
---   rw (aux0 S c).continuous_iff,
---   simp,
--- end
----
-
 @[nolint unused_arguments]
-def seval_ℒ_bdd (c : ℝ≥0) (S : Fintype) (A : finset ℤ) (s : S) :
+def seval_ℒ_bdd_c (c : ℝ≥0) (S : Fintype) (A : finset ℤ) (s : S) :
 laurent_measures_bdd r S A c → laurent_measures_bdd r ϖ A c :=
 begin
   intro F,
@@ -548,11 +541,11 @@ lemma continuous_seval_ℒ_c (c : ℝ≥0) (s : S) : continuous (seval_ℒ_c c s
 begin
   rw laurent_measures.continuous_iff,
   intro A,
-  let := seval_ℒ_bdd p c S A s,
+  let := seval_ℒ_bdd_c p c S A s,
   have h_trunc : (@truncate r ϖ c A) ∘ (seval_ℒ_c p c s) =
-    (seval_ℒ_bdd p c S A s) ∘ (@truncate r S c A),
+    (seval_ℒ_bdd_c p c S A s) ∘ (@truncate r S c A),
   { ext ⟨F, hF⟩ π k,
-    dsimp only [seval_ℒ_bdd, seval_ℒ_c],
+    dsimp only [seval_ℒ_bdd_c, seval_ℒ_c],
     refl },
   rw h_trunc,
   apply continuous.comp,
@@ -572,26 +565,6 @@ lemma continuous_iff_for_all_closed (c : ℝ≥0) {X : Type*} [topological_space
  end
 
 
--- def equiv_ball_ℓp (c : ℝ≥0) : {x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c} ≃ₜ
---   closed_ball (0 : ℝ) (c ^ (1 / p : ℝ)) :=
--- begin
---   fconstructor,
---   {fconstructor,
---     { intro x,
---       use x,
---       rw mem_closed_ball_zero_iff,
---       sorry,
-
---     },
---   {sorry, },
---   {sorry, },
---   { sorry, },
---   },
---   sorry,
---   sorry,
--- end
-
-
 def θ_c (c : ℝ≥0) (T : Fintype) : (filtration (laurent_measures r T) c) →
   (filtration (real_measures p T) c) :=
 begin
@@ -600,7 +573,7 @@ begin
   use ⟨θ f, θ_bound p c f f.2⟩,
 end
 
-lemma seval_ℒ_ℳ_commute (c : ℝ≥0) (s : S) :
+lemma commute_seval_ℒ_ℳ (c : ℝ≥0) (s : S) :
   (θ_c c (Fintype.of punit)) ∘ (seval_ℒ_c c s) = (seval_ℳ_c S c s) ∘ (θ_c c S) :=
 begin
   ext F x,
@@ -611,7 +584,7 @@ end
 
 
 -- **[FAE]** This is the right lemma, in the proof we should introduce α and use it is inducing
--- lemma continuous_of_seval_ℳ_comp_continuous (c : ℝ≥0) {X : Type*} [topological_space X]
+-- OLD lemma continuous_of_seval_ℳ_comp_continuous (c : ℝ≥0) {X : Type*} [topological_space X]
 --   {f : X → (filtration (ℳ S) c)} : (∀ s, continuous ((seval_ℳ_c S c s) ∘ f)) → continuous f :=
 -- begin
 --   intro H,
@@ -645,7 +618,7 @@ lemma continuous_θ_c (c : ℝ≥0) : continuous (θ_c c S) :=
 begin
   apply continuous_of_seval_ℳ_comp_continuous,
   intro s,
-  rw ← seval_ℒ_ℳ_commute,
+  rw ← commute_seval_ℒ_ℳ,
   refine continuous.comp _ (continuous_seval_ℒ_c p S c s),
   sorry,
 
