@@ -128,14 +128,40 @@ def map {S₁ S₂ : Fintype.{u}} (g : S₁ ⟶ S₂) :
 @[simp]
 lemma map_id : map (𝟙 S) =
   strict_comphaus_filtered_pseudo_normed_group_hom.id :=
-sorry
+begin
+  ext s,
+  dsimp [map],
+  simp [finset.filter_congr_decidable, finset.sum_filter],
+end
 
 @[simp]
 lemma map_comp {S₁ S₂ S₃ : Fintype.{u}}
   (g₁ : S₁ ⟶ S₂) (g₂ : S₂ ⟶ S₃) :
   map (g₁ ≫ g₂) =
   (map g₂).comp (map g₁) :=
-sorry
+begin
+  ext s₃,
+  dsimp [map],
+  erw ← finset.sum_bUnion,
+  apply finset.sum_congr,
+  { ext s,
+    split,
+    { intro h, simp only [finset.mem_filter, finset.mem_univ, true_and] at h,
+      rw finset.mem_bUnion,
+      use [g₁ s, by simpa] },
+    { intro h, simp only [finset.mem_bUnion, finset.mem_filter,
+      finset.mem_univ, true_and, exists_prop, exists_eq_right'] at h,
+      simpa, } },
+  { intros s₁ h,
+    rw finset.mem_bUnion at h },
+  { intros x hx y hy,
+    simp only [finset.coe_filter, finset.coe_univ, set.sep_univ,
+      set.mem_set_of_eq] at hx hy,
+    intros h a ha,
+    simp only [finset.inf_eq_inter, finset.mem_inter, finset.mem_filter,
+      finset.mem_univ, true_and] at ha,
+    apply h, rw [← ha.1, ← ha.2] }
+end
 
 end free_pfpng
 
