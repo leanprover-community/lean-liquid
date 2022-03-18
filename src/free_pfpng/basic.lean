@@ -38,14 +38,38 @@ end
 instance (c) : topological_space { f : free_pfpng S | ∥f∥₊ ≤ c } := ⊥
 instance (c) : discrete_topology { f : free_pfpng S | ∥f∥₊ ≤ c } := ⟨rfl⟩
 
+lemma norm_eval_le {c : nnreal} {s : S}
+  (f : free_pfpng S) (hf : ∥f∥₊ ≤ c) : ∥f s∥₊ ≤ c :=
+le_trans (begin
+  apply @finset.single_le_sum S nnreal _ (λ t, ∥f t∥₊) finset.univ,
+  { intros _ _, apply zero_le },
+  { exact finset.mem_univ s }
+end) hf
+
 instance (c) : fintype { f : free_pfpng S | ∥f∥₊ ≤ c } :=
 begin
   let A := { f : free_pfpng S | ∥f∥₊ ≤ c },
-  have h : ∃ (N : ℕ), c ≤ N := sorry, -- ceiling.
+  have h : ∃ (N : ℕ), c ≤ N := ⟨nat.ceil c, nat.le_ceil c⟩,
   let N := h.some, let hN : c ≤ N := h.some_spec,
   let ι : A → S → set.Icc (-(N : ℤ)) N :=
-    λ a s, ⟨a.1 s, _⟩,
-  swap, { sorry },
+    λ a s, ⟨a.1 s, _, _⟩,
+  rotate,
+  { -- I'm sure there is a more efficient way to do this...
+    have : - ∥a.val s∥ ≤ a.val s := neg_abs_le_self ↑(a.val s),
+    replace this : - (c : ℝ) ≤ a.val s := le_trans _ this,
+    swap,
+    { simp only [subtype.val_eq_coe, neg_le_neg_iff],
+      exact_mod_cast (norm_eval_le S a.val a.2) },
+    replace this : -(N : ℝ) ≤ _ := le_trans _ this,
+    swap,
+    { rw [neg_le_neg_iff], exact_mod_cast hN },
+    exact_mod_cast this },
+  { have : ↑(a.val s) ≤ ∥a.val s∥ := le_max_left _ _,
+    replace this : ↑(a.val s) ≤ (c : ℝ) := le_trans this _,
+    swap, { exact_mod_cast (norm_eval_le S a.val a.2) },
+    replace this := le_trans this hN,
+    push_cast at this,
+    exact_mod_cast this },
   have : function.injective ι,
   { rintros ⟨f,hf⟩ ⟨g,hg⟩ h,
     ext s,
@@ -71,22 +95,73 @@ def map {S₁ S₂ : Fintype.{u}} (g : S₁ ⟶ S₂) :
   strict_comphaus_filtered_pseudo_normed_group_hom
   (free_pfpng S₁) (free_pfpng S₂) :=
 { to_fun := λ f s, ∑ t in finset.univ.filter (λ w, g w = s), f t,
-  map_zero' := sorry,
-  map_add' := sorry,
-  strict' := sorry,
+  map_zero' := by simpa,
+  map_add' := λ f g, by simpa [finset.sum_add_distrib],
+  strict' := begin
+    intros c f hf,
+    refine le_trans _ hf,
+    change ∑ s₂, ∥(∑ t in finset.univ.filter (λ w, g w = s₂), f t)∥₊ ≤
+      ∑ s₁, _,
+    have : ∑ s₂, ∥(∑ t in finset.univ.filter (λ w, g w = s₂), f t)∥₊ ≤
+      ∑ s₂ : S₂, ∑ t in finset.univ.filter (λ w, g w = s₂), ∥f t∥₊,
+    { apply finset.sum_le_sum,
+      intros i _,
+      apply nnnorm_sum_le },
+    refine le_trans this _,
+    rw ← finset.sum_bUnion,
+    apply le_of_eq,
+    apply finset.sum_congr,
+    { rw finset.eq_univ_iff_forall,
+      intros x,
+      rw finset.mem_bUnion,
+      use [g x, by simp] },
+    { intros s₁ _, refl },
+    { intros x _ y _ h,
+      rintros a hh,
+      apply h,
+      simp only [finset.inf_eq_inter, finset.mem_inter, finset.mem_filter,
+        finset.mem_univ, true_and] at hh,
+      rw [← hh.1, ← hh.2] }
+  end,
   continuous' := λ c, continuous_of_discrete_topology }
 
 @[simp]
 lemma map_id : map (𝟙 S) =
   strict_comphaus_filtered_pseudo_normed_group_hom.id :=
-sorry
+begin
+  ext s,
+  dsimp [map],
+  simp [finset.filter_congr_decidable, finset.sum_filter],
+end
 
 @[simp]
 lemma map_comp {S₁ S₂ S₃ : Fintype.{u}}
   (g₁ : S₁ ⟶ S₂) (g₂ : S₂ ⟶ S₃) :
   map (g₁ ≫ g₂) =
   (map g₂).comp (map g₁) :=
-sorry
+begin
+  ext s₃,
+  dsimp [map],
+  erw ← finset.sum_bUnion,
+  apply finset.sum_congr,
+  { ext s,
+    split,
+    { intro h, simp only [finset.mem_filter, finset.mem_univ, true_and] at h,
+      rw finset.mem_bUnion,
+      use [g₁ s, by simpa] },
+    { intro h, simp only [finset.mem_bUnion, finset.mem_filter,
+      finset.mem_univ, true_and, exists_prop, exists_eq_right'] at h,
+      simpa, } },
+  { intros s₁ h,
+    rw finset.mem_bUnion at h },
+  { intros x hx y hy,
+    simp only [finset.coe_filter, finset.coe_univ, set.sep_univ,
+      set.mem_set_of_eq] at hx hy,
+    intros h a ha,
+    simp only [finset.inf_eq_inter, finset.mem_inter, finset.mem_filter,
+      finset.mem_univ, true_and] at ha,
+    apply h, rw [← ha.1, ← ha.2] }
+end
 
 end free_pfpng
 
