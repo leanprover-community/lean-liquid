@@ -38,14 +38,38 @@ end
 instance (c) : topological_space { f : free_pfpng S | ∥f∥₊ ≤ c } := ⊥
 instance (c) : discrete_topology { f : free_pfpng S | ∥f∥₊ ≤ c } := ⟨rfl⟩
 
+lemma norm_eval_le {c : nnreal} {s : S}
+  (f : free_pfpng S) (hf : ∥f∥₊ ≤ c) : ∥f s∥₊ ≤ c :=
+le_trans (begin
+  apply @finset.single_le_sum S nnreal _ (λ t, ∥f t∥₊) finset.univ,
+  { intros _ _, apply zero_le },
+  { exact finset.mem_univ s }
+end) hf
+
 instance (c) : fintype { f : free_pfpng S | ∥f∥₊ ≤ c } :=
 begin
   let A := { f : free_pfpng S | ∥f∥₊ ≤ c },
-  have h : ∃ (N : ℕ), c ≤ N := sorry, -- ceiling.
+  have h : ∃ (N : ℕ), c ≤ N := ⟨nat.ceil c, nat.le_ceil c⟩,
   let N := h.some, let hN : c ≤ N := h.some_spec,
   let ι : A → S → set.Icc (-(N : ℤ)) N :=
-    λ a s, ⟨a.1 s, _⟩,
-  swap, { sorry },
+    λ a s, ⟨a.1 s, _, _⟩,
+  rotate,
+  { -- I'm sure there is a more efficient way to do this...
+    have : - ∥a.val s∥ ≤ a.val s := neg_abs_le_self ↑(a.val s),
+    replace this : - (c : ℝ) ≤ a.val s := le_trans _ this,
+    swap,
+    { simp only [subtype.val_eq_coe, neg_le_neg_iff],
+      exact_mod_cast (norm_eval_le S a.val a.2) },
+    replace this : -(N : ℝ) ≤ _ := le_trans _ this,
+    swap,
+    { rw [neg_le_neg_iff], exact_mod_cast hN },
+    exact_mod_cast this },
+  { have : ↑(a.val s) ≤ ∥a.val s∥ := le_max_left _ _,
+    replace this : ↑(a.val s) ≤ (c : ℝ) := le_trans this _,
+    swap, { exact_mod_cast (norm_eval_le S a.val a.2) },
+    replace this := le_trans this hN,
+    push_cast at this,
+    exact_mod_cast this },
   have : function.injective ι,
   { rintros ⟨f,hf⟩ ⟨g,hg⟩ h,
     ext s,
