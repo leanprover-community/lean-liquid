@@ -95,9 +95,34 @@ def map {S₁ S₂ : Fintype.{u}} (g : S₁ ⟶ S₂) :
   strict_comphaus_filtered_pseudo_normed_group_hom
   (free_pfpng S₁) (free_pfpng S₂) :=
 { to_fun := λ f s, ∑ t in finset.univ.filter (λ w, g w = s), f t,
-  map_zero' := sorry,
-  map_add' := sorry,
-  strict' := sorry,
+  map_zero' := by simpa,
+  map_add' := λ f g, by simpa [finset.sum_add_distrib],
+  strict' := begin
+    intros c f hf,
+    refine le_trans _ hf,
+    change ∑ s₂, ∥(∑ t in finset.univ.filter (λ w, g w = s₂), f t)∥₊ ≤
+      ∑ s₁, _,
+    have : ∑ s₂, ∥(∑ t in finset.univ.filter (λ w, g w = s₂), f t)∥₊ ≤
+      ∑ s₂ : S₂, ∑ t in finset.univ.filter (λ w, g w = s₂), ∥f t∥₊,
+    { apply finset.sum_le_sum,
+      intros i _,
+      apply nnnorm_sum_le },
+    refine le_trans this _,
+    rw ← finset.sum_bUnion,
+    apply le_of_eq,
+    apply finset.sum_congr,
+    { rw finset.eq_univ_iff_forall,
+      intros x,
+      rw finset.mem_bUnion,
+      use [g x, by simp] },
+    { intros s₁ _, refl },
+    { intros x _ y _ h,
+      rintros a hh,
+      apply h,
+      simp only [finset.inf_eq_inter, finset.mem_inter, finset.mem_filter,
+        finset.mem_univ, true_and] at hh,
+      rw [← hh.1, ← hh.2] }
+  end,
   continuous' := λ c, continuous_of_discrete_topology }
 
 @[simp]
