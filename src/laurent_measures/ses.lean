@@ -267,6 +267,8 @@ def box := {F : (ℳ S) // ∀ s, ∥ F s ∥₊ ^ (p : ℝ) ≤ c }
 instance : has_coe (box S c) (ℳ S) := by {dsimp only [box], apply_instance}
 instance : topological_space (ℳ S) := by {dsimp only [real_measures], apply_instance}
 instance : topological_space (box S c) := by {dsimp only [box], apply_instance}
+instance : module ℝ (ℳ S) := by {dsimp only [real_measures], apply_instance}
+
 
 -- **[FAE]** The problem is that the `equiv` below is only a type equivalence, not an iso of png's.
 def equiv_S_ϖ : (Π s : S, ℳ ϖ) ≃  ℳ S :=
@@ -287,13 +289,29 @@ def homeo_S_ϖ : (Π s : S, ℳ ϖ) ≃ₜ ℳ S :=
   continuous_to_fun := continuous_pi (λ _, continuous_apply_apply _ punit.star),
   continuous_inv_fun := continuous_pi (λs,  continuous_pi (λ _, continuous_apply s)) }
 
--- lemma equiv_S_ϖ_c : filtration (Π s : S, ℳ ϖ) c ≃ filtration (ℳ S) c :=
+-- example (T : fintype ℕ) : fintype.card = 2 :=
 -- begin
---   fconstructor,
---   { intro F,
---     refine equiv_S_ϖ F.1,
---   },
+
 -- end
+
+lemma equiv_S_ϖ_c : filtration (Π s : S, ℳ ϖ) c ≃ filtration (ℳ S) c :=
+begin
+  fconstructor,
+  { intro F,
+    refine ⟨(equiv_S_ϖ p S).to_fun F.1,_⟩,
+    -- refine ⟨(1 /  S.card) • ((equiv_S_ϖ p S).to_fun F.1),_⟩,
+    have hF := F.2,
+    rw mem_filtration_pi at hF,
+    simp_rw [real_measures.mem_filtration_iff, nnnorm] at hF ⊢,
+    dsimp only [equiv_S_ϖ],
+    simp only [filtration, set.mem_set_of_eq, nnnorm, laurent_measures.coe_mk,
+    fintype.univ_punit, finset.sum_singleton] at hF,
+    sorry,--finally something false but reasonable!
+  },
+  sorry,
+  sorry,
+  sorry,
+end
 
 def equiv_box_ϖ : (box S c) ≃ Π (s : S), (filtration (ℳ ϖ) c) := sorry
 -- { to_fun :=
