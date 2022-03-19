@@ -178,6 +178,8 @@ apply_nolint laurent_measures.laurent_measures.norm_nonneg dup_namespace
 -- laurent_measures/ses.lean
 apply_nolint laurent_measures_ses.box unused_arguments
 apply_nolint laurent_measures_ses.equiv_S_ϖ unused_arguments
+apply_nolint laurent_measures_ses.equiv_S_ϖ_c def_lemma
+apply_nolint laurent_measures_ses.real_measures.module unused_arguments
 apply_nolint laurent_measures_ses.real_measures.topological_space unused_arguments
 
 -- laurent_measures/theta.lean
