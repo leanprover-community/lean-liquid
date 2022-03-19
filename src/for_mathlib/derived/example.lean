@@ -99,6 +99,49 @@ begin
 end
 .
 
+noncomputable
+def homological_complex.homology_functor_single [decidable_eq ι] (i : ι) :
+  homological_complex.single C c i ⋙ homology_functor C c i ≅ 𝟭 C :=
+begin
+  refine nat_iso.of_components _ _,
+  { intro X,
+    refine homology.congr _ _ _ _ ≪≫ homology_zero_zero ≪≫ _,
+    { delta homological_complex.d_to,
+      rcases c.prev i with (_|⟨_, _⟩),
+      { dsimp, rw if_pos rfl },
+      { dsimp, rw limits.comp_zero } },
+    { delta homological_complex.d_from,
+      rcases c.next i with (_|⟨_, _⟩),
+      { dsimp, rw if_pos rfl },
+      { dsimp, rw limits.zero_comp } },
+    { exact eq_to_iso (if_pos rfl) } },
+  { intros X Y f,
+    apply homology.ext,
+    dsimp,
+    simpa only [category.comp_id, homological_complex.hom.sq_from_left, eq_to_hom_refl,
+      homological_complex.single_obj_X_self_hom, homology.map_desc_assoc, eq_to_hom_trans,
+      homological_complex.single_obj_X_self_inv, homological_complex.single_map_f_self,
+      category.assoc, limits.kernel_subobject_map_arrow, homology.π_desc_assoc] }
+end
+
+instance {X Y Z : C} (f: X ⟶ Y) : is_iso (homology.ι f (0 : Y ⟶ Z) limits.comp_zero) :=
+begin
+  suffices : limits.cokernel.desc f 0 limits.comp_zero = 0,
+  { exact @@is_iso.comp_is_iso _ _ (show _, by convert limits.kernel.ι_zero_is_iso) },
+  ext,
+  simp,
+end
+
+lemma homology.desc_zero_is_iso_of_exact_of_epi {X Y Z W : C} (f : X ⟶ Y) (g : Y ⟶ Z)
+  [h : exact f g] [epi g] : is_iso (homology.desc' f (0 : Y ⟶ W) limits.comp_zero
+    (limits.kernel_zero_iso_source.hom ≫ g) (by simp)) :=
+begin
+  convert_to is_iso (homology.ι _ _ _ ≫
+    (limits.colimit.iso_colimit_cocone ⟨_, abelian.is_colimit_of_exact_of_epi f g h⟩).hom),
+  { ext, simp },
+  { apply_instance }
+end
+
 lemma chain_complex.is_projective_resolution.is_quasi_iso_embed {P : chain_complex C ℕ}
   {A : C} {π : P ⟶ (chain_complex.single₀ C).obj A}
   (hP : P.is_projective_resolution A π) :
@@ -110,8 +153,36 @@ begin
   rw [← functor.comp_map, category_theory.nat_iso.is_iso_iff
     (functor.associator _ _ _ ≪≫ iso_whisker_left _ (homology_factors _ _ _))],
   rcases i with ((_|i)|i),
-  { -- use chain_complex.homology_functor_0_single₀,
-    sorry },
+  { apply_with is_iso.of_is_iso_comp_right { instances := ff },
+    show is_iso (functor.map_iso _ (chain_complex.single₀_comp_embed_iso_single.app A) ≪≫
+        ((homological_complex.homology_functor_single (0 : ℤ)).app A : _)).hom, by apply_instance,
+    apply_with is_iso.of_is_iso_comp_left { instances := ff },
+    swap 2, convert @@homology.desc_zero_is_iso_of_exact_of_epi _ _ _ _ _ hP.exact₀ hP.epi using 1,
+    swap 4,
+    { refine (homology.map_iso _ _ (arrow.iso_mk _ _ _)
+        (arrow.iso_mk _ (by exact iso.refl _) _) rfl).hom,
+      { exact ((homological_complex.embed.obj complex_shape.embedding.nat_down_int_up P).X_prev_iso
+          (show (complex_shape.up ℤ).rel (-[1+0]) 0, from neg_add_self 1)).symm },
+      { exact iso.refl _ },
+      { dsimp,
+        rw [eq_comm, iso.eq_inv_comp, category.comp_id, eq_comm],
+        apply homological_complex.d_to_eq },
+      { dsimp,
+        rw [category.comp_id, category.id_comp],
+        rw homological_complex.d_from_eq _ (show (complex_shape.up ℤ).rel 0 1, from rfl),
+        exact limits.zero_comp } },
+    { ext,
+      dsimp [homology.map_iso, homological_complex.homology_functor_single],
+      rw [← cancel_epi (limits.kernel_subobject_iso _).hom, homology.π'_eq_π_assoc],
+      simp only [homology.desc'_π', category.comp_id, homological_complex.hom.sq_from_left,
+        limits.kernel_subobject_arrow_assoc, homology.π_desc, homology.map_desc,
+        limits.kernel_subobject_map_arrow_assoc, arrow.iso_mk_hom_left,
+        limits.kernel_subobject_map_arrow],
+      dsimp [chain_complex.single₀_comp_embed_iso_single,
+        chain_complex.single₀_comp_embed_iso_single_component],
+      simpa,
+      apply_instance },
+    { apply_instance } },
   { refine is_zero.is_iso _ _ _; refine is_zero_homology_of_exact _ _ _, },
   { refine is_zero.is_iso _ _ _,
     { refine is_zero_of_iso_of_zero _ (homology_iso _ (-[1+i.succ] : ℤ) _ (-i : ℤ) _ _).symm,
