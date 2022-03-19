@@ -564,7 +564,7 @@ begin
     exact ⟨(x : ℤ), by norm_num⟩ }
 end
 
-lemma foobar : ∀ (k : zmod 2), 2 • k = 0 := dec_trivial
+lemma zmod.nsmul_eq_zero (k : zmod n) : n • k = 0 := by norm_num
 
 @[simps] def add_subgroup.equiv_top (A : Type*) [add_comm_group A] :
   A ≃+ (⊤ : add_subgroup A) :=
@@ -604,7 +604,7 @@ begin
     { intro hf1, refine ⟨0, comp_zero.trans _⟩, ext1, exact hf1.symm },
     { intro H, cases H with g hg, rw [← hg, coe_comp],
       convert g.map_nsmul _ _ using 1,
-      simp only [eq_to_hom_refl, id_apply, foobar], } }
+      simp only [eq_to_hom_refl, id_apply, zmod.nsmul_eq_zero] } }
 end
 
 
