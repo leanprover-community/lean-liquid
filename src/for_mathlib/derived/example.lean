@@ -435,10 +435,41 @@ end
 
 namespace AddCommGroup
 
+-- We only need `G` to preserve epimorphisms, but we don't have such a class.
+lemma preserves_projectives {C D : Type*} [category C] [category.{v} D] {F : C ⥤ D} {G : D ⥤ C}
+  (adj : F ⊣ G) [preserves_colimits_of_shape walking_span.{v} G] (P : C) [projective P] :
+    projective (F.obj P) :=
+begin
+  constructor,
+  intros,
+  resetI,
+  use (adj.hom_equiv _ _).symm (projective.factor_thru (adj.hom_equiv _ _ f) (G.map e)),
+  rw [← adj.hom_equiv_naturality_right_symm, projective.factor_thru_comp, equiv.symm_apply_apply],
+end
+
+instance {C D : Type*} [category C] [category D] {F : C ⥤ D}
+  {G : D ⥤ C} (adj : F ⊣ G) [faithful G] (X : D) : epi (adj.counit.app X) :=
+begin
+  haveI : split_epi (G.map (adj.counit.app X)) := ⟨_, adj.right_triangle_components⟩,
+  exact faithful_reflects_epi G infer_instance
+end
+
+lemma enough_projectives_of_adjoint {C D : Type*} [category C] [category.{v} D] {F : C ⥤ D}
+  {G : D ⥤ C} (adj : F ⊣ G) [preserves_colimits_of_shape walking_span.{v} G] [faithful G]
+  [enough_projectives C] : enough_projectives D :=
+begin
+  haveI : is_left_adjoint F := ⟨_, adj⟩,
+  constructor,
+  intro X,
+  refine ⟨⟨_, preserves_projectives adj _, (adj.hom_equiv _ _).symm (projective.π (G.obj X)), _⟩⟩,
+  dsimp,
+  rw adjunction.hom_equiv_counit,
+  exact epi_comp _ _,
+end
+
 instance : enough_projectives AddCommGroup.{u} :=
-{ presentation := begin
-    intro A, sorry -- fix this
-  end }
+enough_projectives_of_adjoint
+  (functor.as_equivalence (forget₂ (Module ℤ) AddCommGroup)).to_adjunction
 
 lemma Ext_is_zero_of_one_lt
   (A : AddCommGroup.{u}ᵒᵖ) (B : AddCommGroup.{u}) (i : ℤ) (hi : i > 1) :
@@ -469,13 +500,13 @@ chain_complex.mk' (of ℤ) (of ℤ) (n • 𝟙 _) (λ _, ⟨0, 0, zero_comp⟩)
 example : (zmod_resolution n).X 0 = of ℤ := rfl
 
 def zmod_resolution_pi_f :
-  Π (i : ℕ), (zmod_resolution 2).X i ⟶ ((chain_complex.single₀ AddCommGroup).obj (of $ zmod 2)).X i
-| 0     := show of ℤ ⟶ of (zmod 2), from @int.cast_add_hom _ _ ⟨(1 : zmod 2)⟩
+  Π (i : ℕ), (zmod_resolution n).X i ⟶ ((chain_complex.single₀ AddCommGroup).obj (of $ zmod n)).X i
+| 0     := show of ℤ ⟶ of (zmod n), from @int.cast_add_hom _ _ ⟨(1 : zmod n)⟩
 | (i+1) := 0
 
 def zmod_resolution_pi :
-  zmod_resolution 2 ⟶ (chain_complex.single₀ AddCommGroup).obj (of $ zmod 2) :=
-{ f := zmod_resolution_pi_f,
+  zmod_resolution n ⟶ (chain_complex.single₀ AddCommGroup).obj (of $ zmod n) :=
+{ f := zmod_resolution_pi_f n,
   comm' := begin
     rintros i ⟨_|j⟩ (rfl : _ = _),
     { ext k, dsimp [zmod_resolution_pi_f, zmod_resolution],
@@ -483,13 +514,55 @@ def zmod_resolution_pi :
       simp only [chain_complex.mk'_d_1_0, add_monoid_hom.coe_smul, pi.smul_apply, id_apply,
         nsmul_one, int.nat_cast_eq_coe_nat, int.coe_nat_bit0, int.coe_nat_succ, int.coe_nat_zero,
         zero_add, int.cast_bit0, int.cast_one],
-      refl, },
+      exact (zmod.nat_cast_self n).symm },
     { exact comp_zero.trans comp_zero.symm }
   end }
 
-lemma zmod_resolution_is_resolution :
-  (zmod_resolution 2).is_projective_resolution (of (zmod 2)) zmod_resolution_pi :=
-sorry
+instance : projective (AddCommGroup.of ℤ) :=
+preserves_projectives (functor.as_equivalence (forget₂ (Module ℤ) AddCommGroup)).to_adjunction
+  (Module.of ℤ ℤ)
+
+instance exact_zmod_nsmul_cast :
+  exact (n • 𝟙 (of ℤ)) (AddCommGroup.of_hom $ int.cast_add_hom (zmod n)) :=
+begin
+  rw AddCommGroup.exact_iff,
+  erw zmod.ker_int_cast_add_hom,
+  ext,
+  apply exists_congr,
+  rintro (a : ℤ),
+  change n • a = x ↔ a * (n : ℤ) = x,
+  rw mul_comm,
+  norm_num,
+end
+
+lemma zmod_resolution_is_resolution (hn : n ≠ 0) :
+  (zmod_resolution n).is_projective_resolution (of (zmod n)) (zmod_resolution_pi n) :=
+begin
+  constructor,
+  { rintro (_|_|_|_),
+    { show projective (AddCommGroup.of ℤ), by apply_instance },
+    { show projective (AddCommGroup.of ℤ), by apply_instance },
+    { show projective (0 : AddCommGroup), by apply_instance },
+    { show projective (0 : AddCommGroup), by apply_instance } },
+  { dsimp [zmod_resolution_pi, zmod_resolution_pi_f, zmod_resolution],
+    rw chain_complex.mk'_d_1_0,
+    exact AddCommGroup.exact_zmod_nsmul_cast n },
+  { intro i,
+    dsimp [zmod_resolution, chain_complex.mk', chain_complex.mk, chain_complex.of],
+    rw [if_pos rfl, if_pos rfl, category.id_comp, category.id_comp],
+    rcases i with (_|_|_),
+    { show exact 0 (n • 𝟙 (of ℤ)),
+      rw [(abelian.tfae_mono 0 (n • 𝟙 (of ℤ))).out 2 0, AddCommGroup.mono_iff_injective],
+      rintros (x : ℤ) (y : ℤ) (e : n • x = n • y),
+      norm_num at e,
+      exact e.resolve_right hn },
+    { show exact 0 0, apply_instance },
+    { show exact 0 0, apply_instance } },
+  { dsimp [zmod_resolution_pi, zmod_resolution_pi_f],
+    rw AddCommGroup.epi_iff_surjective,
+    rintro (x : zmod n),
+    exact ⟨(x : ℤ), by norm_num⟩ }
+end
 
 lemma foobar : ∀ (k : zmod 2), 2 • k = 0 := dec_trivial
 
@@ -501,11 +574,12 @@ lemma foobar : ∀ (k : zmod 2), 2 • k = 0 := dec_trivial
   right_inv := by { rintro ⟨x, hx⟩, refl },
   map_add' := λ x y, rfl }
 
-def Ext_zmod_two :
-  ((Ext' 1).obj (op $ of $ zmod 2)).obj (of $ zmod 2) ≅ of (zmod 2) :=
+def Ext_zmod (hn : n ≠ 0) :
+  ((Ext' 1).obj (op $ of $ zmod n)).obj (of $ zmod n) ≅ of (zmod n) :=
 begin
-  refine Ext'_iso (op $ of $ zmod 2) (of $ zmod 2) 1 (zmod_resolution 2) zmod_resolution_pi
-    zmod_resolution_is_resolution ≪≫ (homology_iso _ 0 (-1) (-2) rfl rfl) ≪≫ _,
+  refine Ext'_iso (op $ of $ zmod n) (of $ zmod n) 1 (zmod_resolution n) (zmod_resolution_pi n)
+    (zmod_resolution_is_resolution n hn) ≪≫
+      (homology_iso _ 0 (-1) (-2) rfl rfl) ≪≫ _,
   refine (AddCommGroup.homology_iso _ _ _) ≪≫ _,
   refine add_equiv_iso_AddCommGroup_iso.hom _,
   refine add_equiv.surjective_congr _ (quotient_add_group.mk' _) (add_monoid_hom.id _)
