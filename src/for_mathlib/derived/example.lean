@@ -35,8 +35,6 @@ lemma category_theory.is_zero.homology_is_zero {X Y Z : C} (hY : is_zero Y)
   is_zero (homology f g w) :=
 is_zero_homology_of_exact f g $ hY.exact f g
 
-variables [enough_projectives C]
-
 lemma category_theory.is_zero.is_iso {X Y : C} (hX : is_zero X) (hY : is_zero Y) (f : X ⟶ Y) :
   is_iso f :=
 { out := ⟨0, hX.eq_of_src _ _, hY.eq_of_tgt _ _⟩ }
@@ -78,8 +76,8 @@ noncomputable def chain_complex.to_bounded_homotopy_category :
   map_comp' := λ P Q R f g, (homological_complex.embed (complex_shape.embedding.nat_down_int_up) ⋙
       homotopy_category.quotient C _).map_comp f g }
 
-lemma chain_complex.to_bounded_homotopy_category.is_K_projective (P : chain_complex C ℕ)
-  (A : C) (π : P ⟶ (chain_complex.single₀ C).obj A)
+lemma chain_complex.to_bounded_homotopy_category.is_K_projective [enough_projectives C]
+  (P : chain_complex C ℕ) (A : C) (π : P ⟶ (chain_complex.single₀ C).obj A)
   (hP : P.is_projective_resolution A π) :
   is_K_projective (chain_complex.to_bounded_homotopy_category.obj P).val :=
 begin
@@ -157,7 +155,7 @@ begin
     show is_iso (functor.map_iso _ (chain_complex.single₀_comp_embed_iso_single.app A) ≪≫
         ((homological_complex.homology_functor_single (0 : ℤ)).app A : _)).hom, by apply_instance,
     apply_with is_iso.of_is_iso_comp_left { instances := ff },
-    swap 2, convert @@homology.desc_zero_is_iso_of_exact_of_epi _ _ _ _ _ hP.exact₀ hP.epi using 1,
+    swap 2, convert @@homology.desc_zero_is_iso_of_exact_of_epi _ _ _ _ hP.exact₀ hP.epi using 1,
     swap 4,
     { refine (homology.map_iso _ _ (arrow.iso_mk _ _ _)
         (arrow.iso_mk _ (by exact iso.refl _) _) rfl).hom,
@@ -318,74 +316,157 @@ lemma quot.mk_surjective {X : Type*} (r : X → X → Prop) :
 
 open category_theory.limits
 
-noncomputable
-def bounded_homotopy_category.hom_shift_single_iso
-  (P : bounded_homotopy_category C) (B : C) (i : ℤ) :
-  AddCommGroup.of (P ⟶ (shift_functor (bounded_homotopy_category C) i).obj
-    ((bounded_homotopy_category.single 0).obj B)) ≅
-  (((preadditive_yoneda.obj B).map_homological_complex _).obj P.val.as.op).homology (-i) :=
+@[simp]
+lemma _root_.category_theory.equivalence.symm_to_adjunction_counit {C D : Type*} [category C]
+  [category D] (e : C ≌ D) : e.symm.to_adjunction.counit = e.unit_inv := rfl
+
+@[simp]
+lemma _root_.homological_complex.shift_equiv_unit_app (i j : ℤ) (X : cochain_complex C ℤ) :
+  homological_complex.hom.f ((shift_equiv _ i).unit.app X) j = (X.X_eq_to_iso $ by simp).hom :=
 begin
-  refine _ ≪≫ (homology_iso _ (-i+1) (-i) (-i-1) _ _).symm,
+  dsimp [shift_equiv, unit_of_tensor_iso_unit],
+  simp [homological_complex.X_eq_to_iso],
+end
+
+@[simp]
+lemma _root_.homological_complex.shift_equiv_unit_inv_app (i j : ℤ) (X : cochain_complex C ℤ) :
+  homological_complex.hom.f ((shift_equiv _ i).unit_inv.app X) j = (X.X_eq_to_iso $ by simp).hom :=
+begin
+  dsimp [shift_equiv, unit_of_tensor_iso_unit],
+  simp [homological_complex.X_eq_to_iso],
+end
+@[simp]
+lemma _root_.category_theory.equivalence.symm_to_adjunction_unit {C D : Type*} [category C]
+  [category D] (e : C ≌ D) : e.symm.to_adjunction.unit = e.counit_inv := rfl
+
+@[simp]
+lemma _root_.homological_complex.shift_equiv_counit_app (i j : ℤ) (X : cochain_complex C ℤ) :
+  homological_complex.hom.f ((shift_equiv _ i).counit.app X) j = (X.X_eq_to_iso $ by simp).hom :=
+begin
+  dsimp [shift_equiv, unit_of_tensor_iso_unit],
+  simpa [homological_complex.X_eq_to_iso],
+end
+
+@[simp]
+lemma _root_.homological_complex.shift_equiv_counit_inv_app (i j : ℤ) (X : cochain_complex C ℤ) :
+  homological_complex.hom.f ((shift_equiv _ i).counit_inv.app X) j = (X.X_eq_to_iso $ by simp).hom :=
+begin
+  dsimp [shift_equiv, unit_of_tensor_iso_unit],
+  simpa [homological_complex.X_eq_to_iso],
+end
+
+noncomputable
+def homotopy.to_single [decidable_eq ι] [decidable_rel c.rel] {X : homological_complex C c} {B : C}
+  {i j : ι} (r : c.rel i j)
+  (f g : X ⟶ (homological_complex.single C c i).obj B) (h : X.X j ⟶ B)
+  (H : f.f i = X.d i j ≫ h ≫ eq_to_hom (if_pos rfl).symm + g.f i) :
+  homotopy f g :=
+{ hom := λ i₁ i₂, if r' : c.rel i₂ i₁ then if e : i₂ = i then
+    (X.X_eq_to_iso (c.next_eq (e ▸ r' : c.rel i i₁) r)).hom ≫ h ≫ eq_to_hom (if_pos e).symm
+    else 0 else 0,
+  zero' := λ _ _ e, dif_neg e,
+  comm := λ k, begin
+    dsimp,
+    by_cases k = i,
+    swap, { apply is_zero.eq_of_tgt, dsimp, rw if_neg h, exact is_zero_zero _ },
+    subst h,
+    rw [d_next_eq _ r, dif_pos r, dif_pos rfl, H, X.X_eq_to_iso_refl, category.id_comp],
+    nth_rewrite_lhs 0 ← add_monoid.add_zero (X.d k j ≫ h ≫ eq_to_hom _),
+    congr,
+    delta prev_d,
+    rcases c.prev k with (_|⟨i, _⟩); dsimp,
+    { refl },
+    { rw comp_zero, refl }
+  end }
+
+lemma homotopic_to_single_iff [decidable_eq ι] {X : homological_complex C c}
+  {B : C} {i j : ι} (r : c.rel i j)
+  (f g : X ⟶ (homological_complex.single C c i).obj B) :
+  homotopic _ _ f g ↔
+    ∃ (h : X.X j ⟶ B), f.f i = X.d i j ≫ h ≫ eq_to_hom (if_pos rfl).symm + g.f i :=
+begin
+  haveI : decidable_rel c.rel := λ _ _, classical.dec _,
+  refine ⟨_, λ ⟨h, H⟩, ⟨homotopy.to_single r f g h H⟩⟩,
+  rintro ⟨h⟩,
+  use h.hom j i ≫ eq_to_hom (if_pos rfl),
+  rw [category.assoc, eq_to_hom_trans, eq_to_hom_refl, category.comp_id, ← add_zero (_ ≫ _)],
+  have := h.comm i,
+  rw [d_next_eq _ r] at this,
+  convert this,
+  delta prev_d,
+  rcases c.prev i with (_|⟨j, _⟩); dsimp; simp
+end
+
+instance : decidable_rel (complex_shape.up ℤ).rel :=
+λ i j, show decidable (i + 1 = j), by apply_instance
+
+@[simps] noncomputable
+def homological_complex.hom_single_iso
+  (P : cochain_complex C ℤ) (B : C) (i : ℤ) :
+  (P ⟶ (homological_complex.single C (complex_shape.up ℤ) i).obj B) ≃+
+    (add_monoid_hom.ker ((((preadditive_yoneda.obj B).map_homological_complex
+      (complex_shape.up ℤ).symm).obj P.op).d i (i - 1))) :=
+{ to_fun := λ f, begin
+    refine ⟨f.f i ≫ eq_to_hom (if_pos rfl), _⟩,
+    change P.d (i - 1) i ≫ f.f i ≫ eq_to_hom _ = 0,
+    rw ← f.comm_assoc,
+    dsimp,
+    rw [zero_comp, comp_zero],
+  end,
+  inv_fun := λ f, begin
+    refine ⟨λ j, if e : j = i then
+      (P.X_eq_to_iso $ e).hom ≫ f.1 ≫ eq_to_hom (if_pos e).symm else 0, _⟩,
+    rintros j k (rfl : j + 1 = k),
+    dsimp,
+    rw comp_zero,
+    split_ifs,
+    { have := eq_sub_iff_add_eq.mpr h, subst this,
+      rw [P.X_d_eq_to_iso_assoc, ← category.assoc, ← subtype.val_eq_coe,
+        show P.d (i - 1) i ≫ f.1 = 0, from f.2, zero_comp] },
+    { exact comp_zero.symm }
+  end,
+  left_inv := begin
+    intro f,
+    ext j,
+    dsimp,
+    split_ifs,
+    { subst h, simp },
+    { apply is_zero.eq_of_tgt, rw if_neg h, exact is_zero_zero _ }
+  end,
+  right_inv := λ f, by { ext, dsimp, simp },
+  map_add' := λ f g, subtype.ext (preadditive.add_comp _ _ _ _ _ _) }
+.
+noncomputable
+def bounded_homotopy_category.hom_single_iso
+  (P : bounded_homotopy_category C) (B : C) (i : ℤ) :
+  AddCommGroup.of (P ⟶ (bounded_homotopy_category.single C i).obj B) ≅
+  (((preadditive_yoneda.obj B).map_homological_complex _).obj P.val.as.op).homology i :=
+begin
+  refine _ ≪≫ (homology_iso _ (i+1) i (i-1) _ _).symm,
   rotate, { dsimp, refl }, { dsimp, exact sub_add_cancel _ _ },
   refine add_equiv_iso_AddCommGroup_iso.hom _ ≪≫ (AddCommGroup.homology_iso _ _ _).symm,
-  refine add_equiv.surjective_congr _
+  refine add_equiv.surjective_congr (homological_complex.hom_single_iso P.val.as B i)
     (homotopy_category.quotient_map_hom _ _)
     (quotient_add_group.mk' _) (quot.mk_surjective _) (quot.mk_surjective _) _,
-  refine
-  { to_fun := by sorry; begin
-      intro f,
-      refine ⟨_, _⟩,
-      { refine f.f (-i) ≫ _,
-        dsimp [bounded_homotopy_category.shift_functor_obj_val, bounded_homotopy_category.single],
-        simp only [add_left_neg, eq_self_iff_true, if_true],
-        exact 𝟙 B, },
-      { simp only [add_left_neg, eq_self_iff_true, ite_eq_left_iff, not_true, forall_false_left,
-          congr_arg_mpr_hom_left, category.comp_id, id.def, functor.map_homological_complex_obj_d,
-          homological_complex.op_d, add_monoid_hom.mem_ker],
-        erw [preadditive_yoneda_obj_map_apply, quiver.hom.unop_op, ← category.assoc,
-          ← homological_complex.hom.comm],
-        dsimp [bounded_homotopy_category.single],
-        simp only [smul_zero, comp_zero, zero_comp], }
-    end,
-    inv_fun := begin
-      intro f,
-      refine ((shift_equiv _ i).symm.to_adjunction.hom_equiv P.val.as _) _,
-      refine { f := λ j, _, comm' := _ },
-      { dsimp [bounded_homotopy_category.shift_functor_obj_val, bounded_homotopy_category.single],
-        rcases j with ((_|j)|j),
-        { dsimp, refine eq_to_hom _ ≫ f.1, rw zero_add, refl },
-        { exact 0 },
-        { exact 0 } },
-      { intros j k hjk, dsimp at hjk, subst k,
-        rcases j with ((_|j)|(_|j)),
-        { dsimp, refine comp_zero.trans comp_zero.symm, },
-        { dsimp, refine comp_zero.trans comp_zero.symm, },
-        { refine comp_zero.trans _,
-          cases f with f hf,
-          change P.val.as.d (-i - 1) (-i) ≫ f = 0 at hf,
-          dsimp, simp only [int.neg_one_pow_neg, linear.smul_comp],
-          convert (smul_zero _).symm using 2,
-          have H1 : (complex_shape.up ℤ).rel (-[1+ 0] + -i) (-[1+ 0] + 1 + -i),
-          { dsimp, rw add_right_comm, },
-          have H2 : (complex_shape.up ℤ).rel (-i - 1) (-[1+ 0] + 1 + -i),
-          { dsimp, simp only [sub_add_cancel, self_eq_add_left], refl },
-          have H3 : (complex_shape.up ℤ).rel (-i - 1) (-i),
-          { dsimp, rw sub_add_cancel, },
-          rw [← homological_complex.eq_to_hom_comp_d _ H1 H2,
-              ← homological_complex.d_comp_eq_to_hom _ H2 H3],
-          simp only [category.assoc],
-          convert comp_zero using 2,
-          convert hf using 2,
-          rw ← is_iso.eq_inv_comp,
-          simp only [inv_eq_to_hom],
-          refl, },
-        { dsimp, refine comp_zero.trans comp_zero.symm, }, }
-    end,
-    left_inv := _,
-    right_inv := _,
-    map_add' := _ },
-  all_goals { sorry },
+  ext f,
+  dsimp,
+  simp only [homotopy_category.quotient_map_hom, quotient_add_group.ker_mk,
+    add_equiv.coe_to_add_monoid_hom, add_monoid_hom.mem_ker, add_subgroup.mem_comap,
+    add_subgroup.coe_subtype, add_monoid_hom.mk'_apply, add_subgroup.coe_mk,
+    add_equiv.coe_mk, add_monoid_hom.mem_range],
+  rw ← (homotopy_category.quotient _ _).map_zero,
+  any_goals { apply_instance },
+  erw quotient.functor_map_eq_iff,
+  rw homotopic_to_single_iff (show (complex_shape.up ℤ).rel i (i+1), from rfl),
+  apply exists_congr,
+  intro g,
+  simp only [add_zero, quiver.hom.unop_op, linear_map.to_add_monoid_hom_coe,
+    preadditive_yoneda_obj_map_apply, homological_complex.zero_f_apply,
+    homological_complex.hom_single_iso_apply_coe],
+  rw [← is_iso.comp_inv_eq, inv_eq_to_hom, eq_comm, category.assoc],
 end
+
+variable [enough_projectives C]
 
 noncomputable
 def Ext'_iso (A : Cᵒᵖ) (B : C) (i : ℤ) (P : chain_complex C ℕ)
@@ -401,10 +482,12 @@ begin
   refine (bounded_homotopy_category.Ext_iso i
     (chain_complex.to_bounded_homotopy_category.obj P)
     _ _ (chain_complex.to_bounded_homotopy_category.map π ≫ _)) ≪≫
-    bounded_homotopy_category.hom_shift_single_iso _ B i,
+    (preadditive_yoneda.map_iso _).app (op (chain_complex.to_bounded_homotopy_category.obj P)) ≪≫
+      bounded_homotopy_category.hom_single_iso _ B (-i),
   { exact ((homotopy_category.quotient _ _).map_iso $
       (chain_complex.single₀_comp_embed_iso_single).app A.unop).hom, },
   { apply_instance },
+  { exact (bounded_homotopy_category.shift_single_iso 0 i).app B ≪≫ eq_to_iso (by rw zero_sub) }
 end
 
 lemma AddCommGroup.is_zero_of_eq (A : AddCommGroup) (h : ∀ x y : A, x = y) :
