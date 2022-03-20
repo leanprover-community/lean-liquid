@@ -192,5 +192,82 @@ instance : triangulated.pretriangulated (bounded_homotopy_category A) :=
     intros T₁ T₂ hT₁ hT₂ f g h,
     apply pretriangulated.complete_distinguished_triangle_morphism _ _ hT₁ hT₂ f g h,
   end }
+.
+
+variable (A)
+
+-- Move this
+@[simps]
+def _root_.homotopy_category.single (i : ℤ) : A ⥤ homotopy_category A (complex_shape.up ℤ) :=
+homological_complex.single _ _ i ⋙ homotopy_category.quotient _ _
+
+def single (i : ℤ) : A ⥤ bounded_homotopy_category A :=
+{ obj := λ X,
+  { val := (homotopy_category.single A i).obj X,
+    bdd := begin
+      use i+1,
+      intros j hj,
+      dsimp,
+      erw if_neg,
+      { apply is_zero_zero },
+      { exact ((i.lt_iff_add_one_le j).mpr hj).ne' }
+    end },
+  map := λ X Y f, (homotopy_category.single A i).map f,
+  map_id' := λ X, (homotopy_category.single A i).map_id _,
+  map_comp' := λ X Y Z f g, (homotopy_category.single A i).map_comp f g }
+
+
+def forget :
+  bounded_homotopy_category A ⥤ homotopy_category A (complex_shape.up ℤ) :=
+{ obj := bounded_homotopy_category.val, map := λ _ _, id }
+
+instance : full (forget A) := { preimage := λ _ _, id }
+instance : faithful (forget A) := {}
+
+def forget_shift (i : ℤ) :
+  forget A ⋙ shift_functor (homotopy_category A (complex_shape.up ℤ)) i ≅
+  shift_functor _ i ⋙ forget A :=
+iso.refl _
+
+noncomputable
+def bounded_homotopy_category.single_forget (i : ℤ) :
+  single A i ⋙ forget A ≅ homotopy_category.single A i :=
+iso.refl _
+
+variable {A}
+
+section
+
+@[simps]
+def homological_complex.shift_single_obj (i j : ℤ) (X : A) :
+  ((homological_complex.single A (complex_shape.up ℤ) i).obj X)⟦j⟧ ≅
+  (homological_complex.single A (complex_shape.up ℤ) (i - j)).obj X :=
+{ hom := { f := λ k, eq_to_hom (by { dsimp, congr' 1, simpa using eq_sub_iff_add_eq.symm }) },
+  inv := { f := λ k, eq_to_hom (by { dsimp, congr' 1, simpa using eq_sub_iff_add_eq }) } }
+
+@[simps]
+def homological_complex.single_shift (i j : ℤ) :
+  homological_complex.single A (complex_shape.up ℤ) i ⋙ category_theory.shift_functor _ j ≅
+  homological_complex.single A (complex_shape.up ℤ) (i - j) :=
+nat_iso.of_components (λ X, homological_complex.shift_single_obj i j X)
+begin
+  intros,
+  ext k,
+  dsimp,
+  split_ifs,
+  { rw dif_pos (eq_sub_iff_add_eq.mpr h), simp },
+  { rw dif_neg (eq_sub_iff_add_eq.not.mpr h), simp },
+end
+.
+noncomputable
+def shift_single_iso (i j : ℤ) :
+  single A i ⋙ shift_functor _ j ≅ single A (i - j) :=
+fully_faithful_cancel_right (bounded_homotopy_category.forget A)
+(iso_whisker_right (homological_complex.single_shift i j)
+  (homotopy_category.quotient A (complex_shape.up ℤ)) : _)
+
+end
+
+
 
 end bounded_homotopy_category

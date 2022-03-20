@@ -264,30 +264,10 @@ begin
   exact this,
 end
 
--- Move this
-@[simps]
-def _root_.homotopy_category.single (i : ℤ) : A ⥤ homotopy_category A (complex_shape.up ℤ) :=
-homological_complex.single _ _ i ⋙ homotopy_category.quotient _ _
-
-def single (i : ℤ) : A ⥤ bounded_homotopy_category A :=
-{ obj := λ X,
-  { val := (homotopy_category.single i).obj X,
-    bdd := begin
-      use i+1,
-      intros j hj,
-      dsimp,
-      erw if_neg,
-      { apply is_zero_zero },
-      { exact ((i.lt_iff_add_one_le j).mpr hj).ne' }
-    end },
-  map := λ X Y f, (homotopy_category.single i).map f,
-  map_id' := λ X, (homotopy_category.single i).map_id _,
-  map_comp' := λ X Y Z f g, (homotopy_category.single i).map_comp f g }
-
 end bounded_homotopy_category
 
 variable [enough_projectives A]
 
 def Ext' (i : ℤ) : Aᵒᵖ ⥤ A ⥤ Ab :=
-(bounded_homotopy_category.single 0).op ⋙
-  (bounded_homotopy_category.single 0 ⋙ (bounded_homotopy_category.Ext i).flip).flip
+(bounded_homotopy_category.single A 0).op ⋙
+  (bounded_homotopy_category.single A 0 ⋙ (bounded_homotopy_category.Ext i).flip).flip

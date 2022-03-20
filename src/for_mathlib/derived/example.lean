@@ -318,11 +318,74 @@ lemma quot.mk_surjective {X : Type*} (r : X → X → Prop) :
 
 open category_theory.limits
 
+@[simp]
+lemma _root_.category_theory.equivalence.symm_to_adjunction_counit {C D : Type*} [category C]
+  [category D] (e : C ≌ D) : e.symm.to_adjunction.counit = e.unit_inv := rfl
+
+@[simp]
+lemma _root_.homological_complex.shift_equiv_unit_app (i j : ℤ) (X : cochain_complex C ℤ) :
+  homological_complex.hom.f ((shift_equiv _ i).unit.app X) j = (X.X_eq_to_iso $ by simp).hom :=
+begin
+  dsimp [shift_equiv, unit_of_tensor_iso_unit],
+  simp [homological_complex.X_eq_to_iso],
+end
+
+@[simp]
+lemma _root_.homological_complex.shift_equiv_unit_inv_app (i j : ℤ) (X : cochain_complex C ℤ) :
+  homological_complex.hom.f ((shift_equiv _ i).unit_inv.app X) j = (X.X_eq_to_iso $ by simp).hom :=
+begin
+  dsimp [shift_equiv, unit_of_tensor_iso_unit],
+  simp [homological_complex.X_eq_to_iso],
+end
+@[simp]
+lemma _root_.category_theory.equivalence.symm_to_adjunction_unit {C D : Type*} [category C]
+  [category D] (e : C ≌ D) : e.symm.to_adjunction.unit = e.counit_inv := rfl
+
+@[simp]
+lemma _root_.homological_complex.shift_equiv_counit_app (i j : ℤ) (X : cochain_complex C ℤ) :
+  homological_complex.hom.f ((shift_equiv _ i).counit.app X) j = (X.X_eq_to_iso $ by simp).hom :=
+begin
+  dsimp [shift_equiv, unit_of_tensor_iso_unit],
+  simpa [homological_complex.X_eq_to_iso],
+end
+
+@[simp]
+lemma _root_.homological_complex.shift_equiv_counit_inv_app (i j : ℤ) (X : cochain_complex C ℤ) :
+  homological_complex.hom.f ((shift_equiv _ i).counit_inv.app X) j = (X.X_eq_to_iso $ by simp).hom :=
+begin
+  dsimp [shift_equiv, unit_of_tensor_iso_unit],
+  simpa [homological_complex.X_eq_to_iso],
+end
+
+noncomputable
+def homotopy.to_shift_single [decidable_eq ι] [decidable_rel c.rel] (X : homological_complex C c) (B : C)
+  {i j : ι} (r : c.rel i j)
+  (f g : X ⟶ (homological_complex.single C c i).obj B) (h : X.X j ⟶ B)
+  (H : f.f i = X.d i j ≫ h ≫ eq_to_hom (if_pos rfl).symm + g.f i) :
+  homotopy f g :=
+{ hom := λ i₁ i₂, if r' : c.rel i₂ i₁ then if e : i₂ = i then
+    (X.X_eq_to_iso (c.next_eq (e ▸ r' : c.rel i i₁) r)).hom ≫ h ≫ eq_to_hom (if_pos e).symm
+    else 0 else 0,
+  zero' := λ _ _ e, dif_neg e,
+  comm := λ k, begin
+    dsimp,
+    by_cases k = i,
+    swap, { apply is_zero.eq_of_tgt, dsimp, rw if_neg h, exact is_zero_zero _ },
+    subst h,
+    rw [d_next_eq _ r, dif_pos r, dif_pos rfl, H, X.X_eq_to_iso_refl, category.id_comp],
+    nth_rewrite_lhs 0 ← add_monoid.add_zero (X.d k j ≫ h ≫ eq_to_hom _),
+    congr,
+    delta prev_d,
+    rcases c.prev k with (_|⟨i, _⟩) ; dsimp,
+    { refl },
+    { rw comp_zero, refl }
+  end }
+
 noncomputable
 def bounded_homotopy_category.hom_shift_single_iso
   (P : bounded_homotopy_category C) (B : C) (i : ℤ) :
   AddCommGroup.of (P ⟶ (shift_functor (bounded_homotopy_category C) i).obj
-    ((bounded_homotopy_category.single 0).obj B)) ≅
+    ((bounded_homotopy_category.single C 0).obj B)) ≅
   (((preadditive_yoneda.obj B).map_homological_complex _).obj P.val.as.op).homology (-i) :=
 begin
   refine _ ≪≫ (homology_iso _ (-i+1) (-i) (-i-1) _ _).symm,
@@ -332,14 +395,13 @@ begin
     (homotopy_category.quotient_map_hom _ _)
     (quotient_add_group.mk' _) (quot.mk_surjective _) (quot.mk_surjective _) _,
   refine
-  { to_fun := by sorry; begin
+  { to_fun := by begin
       intro f,
       refine ⟨_, _⟩,
-      { refine f.f (-i) ≫ _,
+      { refine f.f (-i) ≫ eq_to_hom _,
         dsimp [bounded_homotopy_category.shift_functor_obj_val, bounded_homotopy_category.single],
-        simp only [add_left_neg, eq_self_iff_true, if_true],
-        exact 𝟙 B, },
-      { simp only [add_left_neg, eq_self_iff_true, ite_eq_left_iff, not_true, forall_false_left,
+        simp only [add_left_neg, eq_self_iff_true, if_true] },
+      sorry; { simp only [add_left_neg, eq_self_iff_true, ite_eq_left_iff, not_true, forall_false_left,
           congr_arg_mpr_hom_left, category.comp_id, id.def, functor.map_homological_complex_obj_d,
           homological_complex.op_d, add_monoid_hom.mem_ker],
         erw [preadditive_yoneda_obj_map_apply, quiver.hom.unop_op, ← category.assoc,
@@ -352,11 +414,10 @@ begin
       refine ((shift_equiv _ i).symm.to_adjunction.hom_equiv P.val.as _) _,
       refine { f := λ j, _, comm' := _ },
       { dsimp [bounded_homotopy_category.shift_functor_obj_val, bounded_homotopy_category.single],
-        rcases j with ((_|j)|j),
-        { dsimp, refine eq_to_hom _ ≫ f.1, rw zero_add, refl },
-        { exact 0 },
-        { exact 0 } },
-      { intros j k hjk, dsimp at hjk, subst k,
+        refine if e : j = 0 then
+          (P.val.as.X_eq_to_iso $ _).hom ≫ f.1 ≫ eq_to_hom (if_pos e).symm else 0,
+        { subst e, exact zero_add _ } },
+      sorry; { intros j k hjk, dsimp at hjk, subst k,
         rcases j with ((_|j)|(_|j)),
         { dsimp, refine comp_zero.trans comp_zero.symm, },
         { dsimp, refine comp_zero.trans comp_zero.symm, },
@@ -384,6 +445,40 @@ begin
     left_inv := _,
     right_inv := _,
     map_add' := _ },
+  sorry; { intro f,
+    dsimp,
+    rw equiv.apply_eq_iff_eq_symm_apply,
+    ext ((j|_)|j); dsimp,
+    { simp only [homological_complex.comp_f, homological_complex.X_eq_to_iso_shift,
+        homological_complex.X_eq_to_iso_f_assoc, homological_complex.shift_f,
+        adjunction.hom_equiv_counit],
+      congr' 1,
+      exact (eq_to_hom_trans _ _).trans (homological_complex.shift_equiv_unit_inv_app i 0
+        ((bounded_homotopy_category.single 0).obj B).val.as).symm },
+    { apply is_zero.eq_of_tgt,
+      rw if_neg,
+      exact is_zero_zero _,
+      linarith },
+    {  apply is_zero.eq_of_tgt,
+      rw if_neg,
+      exact is_zero_zero _,
+      intro e,
+      injection e } },
+  sorry; { intro x,
+    ext,
+    dsimp,
+    simp [-equivalence.equivalence_mk'_counit_inv] },
+  sorry; { intros f g,
+    ext,
+    exact preadditive.add_comp _ _ _ _ _ _ },
+  { ext f,
+    dsimp,
+    simp only [homotopy_category.quotient_map_hom, quotient_add_group.ker_mk,
+      add_equiv.coe_to_add_monoid_hom, add_monoid_hom.mem_ker, add_subgroup.mem_comap,
+      add_subgroup.coe_subtype, add_monoid_hom.mk'_apply, add_subgroup.coe_mk,
+      add_equiv.coe_mk, add_monoid_hom.mem_range],
+    rw ← (homotopy_category.quotient _ _).map_zero,
+    erw quotient.functor_map_eq_iff, },
   all_goals { sorry },
 end
 
