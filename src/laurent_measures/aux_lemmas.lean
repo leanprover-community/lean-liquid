@@ -1,6 +1,6 @@
 import data.finset.nat_antidiagonal
 import analysis.normed_space.basic
-import analysis.specific_limits
+import analysis.specific_limits.basic
 import laurent_measures.int_nat_shifts
 
 noncomputable theory

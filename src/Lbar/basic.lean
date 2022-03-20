@@ -4,7 +4,7 @@ import topology.algebra.infinite_sum
 import data.finset.basic
 import data.equiv.basic
 import analysis.normed_space.basic
-import analysis.specific_limits
+import analysis.specific_limits.normed
 import data.equiv.basic
 
 import Lbar.bounded
@@ -392,7 +392,7 @@ def geom [hr' : fact (r' < 1)] : Lbar r' S :=
   coeff_zero' := λ s, if_pos rfl,
   summable' := λ s,
   begin
-    have := (normed_ring.summable_geometric_of_norm_lt_1 (r' : ℝ) _), swap,
+    have := (@summable_geometric_of_norm_lt_1 _ _ (r' : ℝ) _), swap,
     { rw nnreal.norm_eq, exact hr'.out },
     simp only [← nnreal.coe_pow, nnreal.summable_coe] at this,
     apply nnreal.summable_of_le _ this,

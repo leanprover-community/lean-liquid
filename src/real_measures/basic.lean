@@ -1,5 +1,5 @@
 import analysis.special_functions.pow
-import analysis.specific_limits
+import analysis.specific_limits.basic
 import analysis.normed_space.basic
 import analysis.mean_inequalities_pow
 import category_theory.Fintype

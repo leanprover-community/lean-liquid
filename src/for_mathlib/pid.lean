@@ -514,13 +514,14 @@ end aux_lemmas
 -- Auxiliary lemma for comparing a span in a submodule with the span considered in the larger module.
 lemma span_restrict
   (N : submodule R M) (s : set M) (hs : s ⊆ N.carrier) :
-∀ x : N, x ∈ @submodule.span R N _ _ _ (restrict s N.carrier : set N) ↔ (x : M) ∈ submodule.span R s :=
+  ∀ x : N, x ∈ @submodule.span R N _ _ _ (N.carrier.restrict s) ↔
+  (x : M) ∈ submodule.span R s :=
 begin
   intro x,
   split,
   { simp only [submodule.mem_span],
     intros hx p hp,
-    let s' : set N := restrict s N.carrier,
+    let s' : set N := N.carrier.restrict s,
     have hp' : s' ⊆ comap N.subtype p,
     intros y hy,
     exact_mod_cast mem_of_subset_of_mem hp (hy : s y),
@@ -535,7 +536,7 @@ begin
     simp only [map_coe, submodule.coe_subtype, mem_image, set_like.mem_coe],
     have hy' := mem_of_subset_of_mem hs hy,
     refine ⟨⟨y, hy'⟩, ⟨_, rfl⟩⟩,
-    have hy'' : restrict s N.carrier ⟨y, hy'⟩,
+    have hy'' : N.carrier.restrict s ⟨y, hy'⟩,
     simp only [restrict_apply, coe_mk],
     exact hy,
     exact_mod_cast mem_of_subset_of_mem hp hy'',
@@ -551,7 +552,7 @@ lemma span_range_cod_restrict
   (N : submodule R M) {α : Type*} (f : α → M) (h : ∀ (x : α), f x ∈ N) :
 ∀ x : N, x ∈ @submodule.span R N _ _ _ (range (cod_restrict f N h)) ↔ (x : M) ∈ submodule.span R (range f) :=
 begin
-  have hr : range (cod_restrict f N _) = restrict (range f) N.carrier,
+  have hr : range (cod_restrict f N _) = N.carrier.restrict (range f),
   ext x,
   simp,
   split,

@@ -56,7 +56,7 @@ namespace biprod
 
 variables (A B)
 
-@[simps] noncomputable
+@[simps]
 def is_biprod [has_binary_biproduct A B] :
   is_biprod (A ⊞ B) biprod.inl biprod.inr biprod.fst biprod.snd :=
 { inl_fst := biprod.inl_fst,

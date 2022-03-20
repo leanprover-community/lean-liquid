@@ -1,7 +1,7 @@
 import topology.algebra.infinite_sum
 import analysis.normed_space.basic
 import topology.instances.ennreal
-import analysis.specific_limits
+import analysis.specific_limits.normed
 
 /- These are lemmas that are used in the proof of either auxilliary facts for Theorem 6.9 or
 for Theorem 6.9 directly. -/

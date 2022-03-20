@@ -31,12 +31,14 @@ by rw [is_zero_iff_id_eq_zero, ← cancel_mono f, zero_comp, h.2 (𝟙 _ ≫ f)]
 lemma is_zero_of_epi {X Y : V} (f : X ⟶ Y) [epi f] (h : is_zero X) : is_zero Y :=
 by rw [is_zero_iff_id_eq_zero, ← cancel_epi f, comp_zero, h.1 (f ≫ 𝟙 Y)]
 
+noncomputable
 lemma split_epi_of_is_zero {X Y : V} (f : X ⟶ Y) (h : is_zero Y) : split_epi f :=
 ⟨0, by simp [is_zero_iff_id_eq_zero.mp h]⟩
 
 lemma epi_of_is_zero {X Y : V} (f : X ⟶ Y) (h : is_zero Y) : epi f :=
 @@split_epi.epi _ _ (split_epi_of_is_zero f h)
 
+noncomputable
 lemma split_mono_of_is_zero {X Y : V} (f : X ⟶ Y) (h : is_zero X) : split_mono f :=
 ⟨0, by simp [is_zero_iff_id_eq_zero.mp h]⟩
 

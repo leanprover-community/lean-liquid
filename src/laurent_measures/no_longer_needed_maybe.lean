@@ -1,6 +1,6 @@
 import data.finset.nat_antidiagonal
 import analysis.normed_space.basic
-import analysis.specific_limits
+import analysis.specific_limits.basic
 import laurent_measures.aux_lemmas
 
 /-  These lemmas seem to no longer be needed for Theorem 6.9 or anywhere else in LTE. I ([FAE])

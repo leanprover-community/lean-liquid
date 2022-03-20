@@ -1,4 +1,4 @@
-import analysis.specific_limits
+import analysis.specific_limits.basic
 import category_theory.Fintype
 import analysis.normed_space.basic
 

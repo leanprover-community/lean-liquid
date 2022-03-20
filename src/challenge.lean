@@ -25,6 +25,7 @@ variables [fact (p' < p)] [fact (p' ≤ 1)] [fact (p ≤ 1)]
 
 set_option pp.universes true
 
+noncomputable
 theorem liquid_tensor_experiment (S : Profinite.{1}) (V : pBanach.{1} p) (i : ℕ) (hi : 0 < i) :
   Ext i (ℳ_{p'} S) V ≅ 0 :=
 sorry
