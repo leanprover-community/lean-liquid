@@ -295,7 +295,7 @@ end
 instance (i : ℤ) (X : 𝒦) : homological_functor ((Ext i).obj (opposite.op X)) :=
 begin
   show homological_functor (category_theory.shift_functor 𝒦 i ⋙ preadditive_yoneda.flip.obj _),
-  let E := hom_shift_right_iso X.replace i (-i) (by simp),
+  let E := hom_shift_right_iso X.replace i,
   exact homological_of_nat_iso _ _ E.symm,
 end
 
