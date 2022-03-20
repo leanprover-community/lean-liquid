@@ -235,13 +235,61 @@ begin
   simp only [preadditive.add_comp, lift_lifts, preadditive.comp_add],
 end .
 
-def hom_shift_right_iso (X : 𝒦) (i j : ℤ) (h : i + j = 0) :
-  category_theory.shift_functor 𝒦 i ⋙ preadditive_yoneda.flip.obj (opposite.op X) ≅
-  preadditive_yoneda.flip.obj (opposite.op (X⟦-i⟧)) := sorry
+def _root_.category_theory.adjunction.yoneda_whiskering_left
+  {C D : Type*} [category C] [category D] [preadditive C] [preadditive D] {F : C ⥤ D}
+  {G : D ⥤ C} (adj : F ⊣ G) :
+  yoneda ⋙ ((whiskering_left _ _ _).obj F.op) ≅ G ⋙ yoneda :=
+begin
+  fapply nat_iso.of_components,
+  { intro Y,
+    fapply nat_iso.of_components,
+    { intro X, exact (adj.hom_equiv (opposite.unop X) Y).to_iso },
+    { intros X₁ X₂ f, ext g, exact adj.hom_equiv_naturality_left f.unop g } },
+  { intros Y₁ Y₂ f, ext X g, exact adj.hom_equiv_naturality_right g f }
+end
 
-def hom_shift_left_iso (X : 𝒦) (i j : ℤ) (h : i + j = 0) :
+def _root_.category_theory.adjunction.preadditive_yoneda_whiskering_left
+  {C D : Type*} [category C] [category D] [preadditive C] [preadditive D] {F : C ⥤ D}
+  {G : D ⥤ C} (adj : F ⊣ G) [functor.additive G] :
+  preadditive_yoneda ⋙ ((whiskering_left _ _ _).obj F.op) ≅ G ⋙ preadditive_yoneda :=
+begin
+  fapply nat_iso.of_components,
+  { intro Y,
+    fapply nat_iso.of_components,
+    { intro X,
+      refine add_equiv_iso_AddCommGroup_iso.hom
+        { map_add' := _, ..(adj.hom_equiv (opposite.unop X) Y) },
+      intros f g, simp },
+    { intros X₁ X₂ f, ext g, exact adj.hom_equiv_naturality_left f.unop g } },
+  { intros Y₁ Y₂ f, ext X g, exact adj.hom_equiv_naturality_right g f }
+end
+.
+instance shift_equiv_symm_inverse_additive (i : ℤ) :
+  (shift_equiv (bounded_homotopy_category A) i).symm.inverse.additive :=
+show (category_theory.shift_functor (bounded_homotopy_category A) (i)).additive, by apply_instance
+
+instance shift_equiv_inverse_additive (i : ℤ) :
+  (shift_equiv (bounded_homotopy_category A) i).inverse.additive :=
+show (category_theory.shift_functor (bounded_homotopy_category A) (-i)).additive, by apply_instance
+
+def hom_shift_right_iso (X : 𝒦) (i : ℤ) :
+  category_theory.shift_functor 𝒦 i ⋙ preadditive_yoneda.flip.obj (opposite.op X) ≅
+  preadditive_yoneda.flip.obj (opposite.op (X⟦-i⟧)) :=
+begin
+  have := (iso_whisker_right ((shift_equiv (bounded_homotopy_category A) i).symm
+  .to_adjunction).preadditive_yoneda_whiskering_left.symm
+    ((evaluation _ _).obj $ opposite.op X) : _),
+  exact this,
+end
+
+def hom_shift_left_iso (X : 𝒦) (i : ℤ) :
   (category_theory.shift_functor 𝒦 i).op ⋙ preadditive_yoneda.obj X ≅
-  preadditive_yoneda.obj (X⟦j⟧) := sorry
+  preadditive_yoneda.obj (X⟦-i⟧) :=
+begin
+  have := (shift_equiv (bounded_homotopy_category A) i)
+  .to_adjunction.preadditive_yoneda_whiskering_left.app X,
+  exact this,
+end
 
 -- The LES for Ext in the second variable.
 instance (i : ℤ) (X : 𝒦) : homological_functor ((Ext i).obj (opposite.op X)) :=
