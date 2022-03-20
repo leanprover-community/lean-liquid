@@ -436,7 +436,7 @@ def homological_complex.hom_single_iso
   map_add' := λ f g, subtype.ext (preadditive.add_comp _ _ _ _ _ _) }
 .
 noncomputable
-def bounded_homotopy_category.hom_shift_single_iso
+def bounded_homotopy_category.hom_single_iso
   (P : bounded_homotopy_category C) (B : C) (i : ℤ) :
   AddCommGroup.of (P ⟶ (bounded_homotopy_category.single C i).obj B) ≅
   (((preadditive_yoneda.obj B).map_homological_complex _).obj P.val.as.op).homology i :=
@@ -481,10 +481,12 @@ begin
   refine (bounded_homotopy_category.Ext_iso i
     (chain_complex.to_bounded_homotopy_category.obj P)
     _ _ (chain_complex.to_bounded_homotopy_category.map π ≫ _)) ≪≫
-    bounded_homotopy_category.hom_shift_single_iso _ B i,
+    (preadditive_yoneda.map_iso _).app (op (chain_complex.to_bounded_homotopy_category.obj P)) ≪≫
+      bounded_homotopy_category.hom_single_iso _ B (-i),
   { exact ((homotopy_category.quotient _ _).map_iso $
       (chain_complex.single₀_comp_embed_iso_single).app A.unop).hom, },
   { apply_instance },
+  { exact (bounded_homotopy_category.shift_single_iso 0 i).app B ≪≫ eq_to_iso (by rw zero_sub) }
 end
 
 lemma AddCommGroup.is_zero_of_eq (A : AddCommGroup) (h : ∀ x y : A, x = y) :
