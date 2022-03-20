@@ -230,7 +230,7 @@ def forget_shift (i : ℤ) :
 iso.refl _
 
 noncomputable
-def bounded_homotopy_category.single_forget (i : ℤ) :
+def single_forget (i : ℤ) :
   single A i ⋙ forget A ≅ homotopy_category.single A i :=
 iso.refl _
 
@@ -239,14 +239,14 @@ variable {A}
 section
 
 @[simps]
-def homological_complex.shift_single_obj (i j : ℤ) (X : A) :
+def _root_.homological_complex.shift_single_obj (i j : ℤ) (X : A) :
   ((homological_complex.single A (complex_shape.up ℤ) i).obj X)⟦j⟧ ≅
   (homological_complex.single A (complex_shape.up ℤ) (i - j)).obj X :=
 { hom := { f := λ k, eq_to_hom (by { dsimp, congr' 1, simpa using eq_sub_iff_add_eq.symm }) },
   inv := { f := λ k, eq_to_hom (by { dsimp, congr' 1, simpa using eq_sub_iff_add_eq }) } }
 
 @[simps]
-def homological_complex.single_shift (i j : ℤ) :
+def _root_.homological_complex.single_shift (i j : ℤ) :
   homological_complex.single A (complex_shape.up ℤ) i ⋙ category_theory.shift_functor _ j ≅
   homological_complex.single A (complex_shape.up ℤ) (i - j) :=
 nat_iso.of_components (λ X, homological_complex.shift_single_obj i j X)
@@ -267,7 +267,5 @@ fully_faithful_cancel_right (bounded_homotopy_category.forget A)
   (homotopy_category.quotient A (complex_shape.up ℤ)) : _)
 
 end
-
-
 
 end bounded_homotopy_category

@@ -379,12 +379,13 @@ def homotopy.to_single [decidable_eq ι] [decidable_rel c.rel] {X : homological_
     { rw comp_zero, refl }
   end }
 
-lemma homotopic_to_single_iff [decidable_eq ι] [decidable_rel c.rel] {X : homological_complex C c}
+lemma homotopic_to_single_iff [decidable_eq ι] {X : homological_complex C c}
   {B : C} {i j : ι} (r : c.rel i j)
   (f g : X ⟶ (homological_complex.single C c i).obj B) :
   homotopic _ _ f g ↔
     ∃ (h : X.X j ⟶ B), f.f i = X.d i j ≫ h ≫ eq_to_hom (if_pos rfl).symm + g.f i :=
 begin
+  haveI : decidable_rel c.rel := λ _ _, classical.dec _,
   refine ⟨_, λ ⟨h, H⟩, ⟨homotopy.to_single r f g h H⟩⟩,
   rintro ⟨h⟩,
   use h.hom j i ≫ eq_to_hom (if_pos rfl),
