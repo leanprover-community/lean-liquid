@@ -84,8 +84,10 @@ apply_nolint AddCommGroup.Ext_is_zero_of_one_lt ge_or_gt
 apply_nolint category_theory.ProjectiveResolution.is_projective_resolution unused_arguments
 apply_nolint category_theory.is_zero.is_iso unused_arguments
 apply_nolint chain_complex.to_bounded_homotopy_category unused_arguments
+apply_nolint homological_complex.homology_functor_single unused_arguments
 apply_nolint homological_complex.op unused_arguments
 apply_nolint homological_complex.unop unused_arguments
+apply_nolint homology.ι.category_theory.is_iso unused_arguments
 apply_nolint homotopy_category.quotient_map_hom unused_arguments
 
 -- for_mathlib/derived/homological.lean
