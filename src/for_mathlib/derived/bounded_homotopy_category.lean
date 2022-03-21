@@ -4,7 +4,6 @@ import for_mathlib.abelian_category
 import for_mathlib.derived.homological
 import for_mathlib.derived.lemmas
 import category_theory.abelian.projective
-import for_mathlib.homology
 import for_mathlib.snake_lemma3
 import for_mathlib.les_homology
 import for_mathlib.exact_seq3
