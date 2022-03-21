@@ -23,6 +23,14 @@ namespace bounded_homotopy_category
 
 local notation `𝒦` := bounded_homotopy_category A
 
+instance shift_equiv_symm_inverse_additive (i : ℤ) :
+  (shift_equiv (bounded_homotopy_category A) i).symm.inverse.additive :=
+show (category_theory.shift_functor (bounded_homotopy_category A) (i)).additive, by apply_instance
+
+instance shift_equiv_inverse_additive (i : ℤ) :
+  (shift_equiv (bounded_homotopy_category A) i).inverse.additive :=
+show (category_theory.shift_functor (bounded_homotopy_category A) (-i)).additive, by apply_instance
+
 variable [enough_projectives A]
 
 -- Main theorem about existence of K-projective replacements.
@@ -235,7 +243,7 @@ begin
 end .
 
 def _root_.category_theory.adjunction.yoneda_whiskering_left
-  {C D : Type*} [category C] [category D] [preadditive C] [preadditive D] {F : C ⥤ D}
+  {C D : Type*} [category C] [category D] {F : C ⥤ D}
   {G : D ⥤ C} (adj : F ⊣ G) :
   yoneda ⋙ ((whiskering_left _ _ _).obj F.op) ≅ G ⋙ yoneda :=
 begin
@@ -263,13 +271,6 @@ begin
   { intros Y₁ Y₂ f, ext X g, exact adj.hom_equiv_naturality_right g f }
 end
 .
-instance shift_equiv_symm_inverse_additive (i : ℤ) :
-  (shift_equiv (bounded_homotopy_category A) i).symm.inverse.additive :=
-show (category_theory.shift_functor (bounded_homotopy_category A) (i)).additive, by apply_instance
-
-instance shift_equiv_inverse_additive (i : ℤ) :
-  (shift_equiv (bounded_homotopy_category A) i).inverse.additive :=
-show (category_theory.shift_functor (bounded_homotopy_category A) (-i)).additive, by apply_instance
 
 def hom_shift_right_iso (X : 𝒦) (i : ℤ) :
   category_theory.shift_functor 𝒦 i ⋙ preadditive_yoneda.flip.obj (opposite.op X) ≅
