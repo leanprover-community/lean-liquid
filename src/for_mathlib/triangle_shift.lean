@@ -177,6 +177,7 @@ nat_iso.of_components (λ T,
   end)
 .
 
+/-
 def triangle_shift_core : shift_mk_core (triangle C) ℤ :=
 { F := triangle_shift_functor _,
   ε := triangle_shift_functor_ε _,
@@ -198,9 +199,105 @@ def triangle_shift_core : shift_mk_core (triangle C) ℤ :=
   end,
   left_unitality := sorry,
   right_unitality := sorry }
+-/
 
-instance has_shift : has_shift (triangle C) ℤ :=
-has_shift_mk _ _ $ triangle_shift_core _
+@[simps]
+def map_triangle_shift_functor (m n : discrete ℤ) (f : m ⟶ n) :
+  triangle_shift_functor C m ⟶ triangle_shift_functor C n :=
+{ app := λ T,
+  { hom₁ := eq_to_hom $ by rw discrete.eq_of_hom f,
+    hom₂ := eq_to_hom $ by rw discrete.eq_of_hom f,
+    hom₃ := eq_to_hom $ by rw discrete.eq_of_hom f,
+    comm₁' := by { rcases f with ⟨⟨⟨⟩⟩⟩, simp only [eq_to_hom_refl, id_comp, comp_id], },
+    comm₂' := by { rcases f with ⟨⟨⟨⟩⟩⟩, simp only [eq_to_hom_refl, id_comp, comp_id], },
+    comm₃' := by { rcases f with ⟨⟨⟨⟩⟩⟩,
+      dsimp, rw (shift_functor C (1 : ℤ)).map_id, simp only [comp_id, id_comp]} },
+  naturality' := begin
+    rcases f with ⟨⟨⟨⟩⟩⟩,
+    rintros X Y g, ext;
+    { dsimp, simp only [eq_to_hom_refl, id_comp, comp_id] },
+  end } .
+
+-- Move + generalize!
+@[simp]
+lemma discrete.associator_def (a b c : discrete ℤ) :
+  α_ a b c = eq_to_iso (add_assoc a b c) := rfl
+
+-- Move + generalize!
+@[simp]
+lemma discrete.left_unitor_def (a : discrete ℤ) :
+  λ_ a = eq_to_iso (zero_add _) := rfl
+
+-- Move + generalize!
+@[simp]
+lemma discrete.right_unitor_def (a : discrete ℤ) :
+  ρ_ a = eq_to_iso (add_zero _) := rfl
+
+lemma associativity_aux (X : C) (a b c : discrete ℤ) :
+(𝟙 ((shift_functor C c).obj ((shift_functor C b).obj ((shift_functor C a).obj X))) ≫
+  (shift_functor C c).map (((shift_monoidal_functor C ℤ).to_lax_monoidal_functor.μ a b).app X)) ≫
+  ((shift_monoidal_functor C ℤ).to_lax_monoidal_functor.μ (a ⊗ b) c).app X ≫
+  eq_to_hom (by { congr' 2, apply add_assoc }) =
+  𝟙 ((shift_functor C c).obj
+  ((shift_functor C b).obj ((shift_functor C a).obj X))) ≫ (((shift_monoidal_functor C ℤ).to_lax_monoidal_functor.μ b c).app
+  ((shift_functor C a).obj X) ≫ (shift_functor C (b + c)).map
+  (𝟙 ((shift_functor C a).obj X))) ≫ ((shift_monoidal_functor C ℤ).to_lax_monoidal_functor.μ a
+  (b ⊗ c)).app X :=
+begin
+  have := (shift_monoidal_functor C ℤ).associativity' a b c,
+  apply_fun (λ e, e.app X) at this,
+  dsimp at this ⊢,
+  simp only [id_comp, comp_id, category_theory.functor.map_id,
+    eq_to_hom_map, eq_to_hom_app] at this ⊢,
+  erw comp_id,
+  exact this
+end
+
+lemma left_unitality_aux (X : C) (a : discrete ℤ) : 𝟙 ((shift_functor C a).obj X) =
+  (𝟙 ((shift_functor C a).obj X) ≫ (shift_functor C a).map
+    ((shift_monoidal_functor C ℤ).to_lax_monoidal_functor.ε.app X)) ≫
+    ((shift_monoidal_functor C ℤ).to_lax_monoidal_functor.μ
+    (𝟙_ (discrete ℤ)) a).app X ≫ eq_to_hom (by { congr, exact zero_add a }) :=
+begin
+  have := (shift_monoidal_functor C ℤ).left_unitality' a,
+  apply_fun (λ e, e.app X) at this,
+  dsimp at this ⊢,
+  simp only [id_comp, comp_id, category_theory.functor.map_id,
+    eq_to_hom_map, eq_to_hom_app] at this ⊢,
+  exact this
+end
+
+lemma right_unitality_aux (X : C) (a : discrete ℤ) : 𝟙 ((shift_functor C a).obj X) =
+  ((shift_monoidal_functor C ℤ).to_lax_monoidal_functor.ε.app ((shift_functor C a).obj X) ≫
+       (shift_functor C (𝟙_ (discrete ℤ))).map (𝟙 ((shift_functor C a).obj X))) ≫
+    ((shift_monoidal_functor C ℤ).to_lax_monoidal_functor.μ a (𝟙_ (discrete ℤ))).app X ≫
+    eq_to_hom (by { congr, apply add_zero }) :=
+begin
+  have := (shift_monoidal_functor C ℤ).right_unitality' a,
+  apply_fun (λ e, e.app X) at this,
+  dsimp at this ⊢,
+  simp only [id_comp, comp_id, category_theory.functor.map_id,
+    eq_to_hom_map, eq_to_hom_app] at this ⊢,
+  erw comp_id,
+  exact this
+end
+
+instance has_shift : has_shift (triangle C) ℤ := has_shift.mk $
+{ obj := triangle_shift_functor _,
+  map := λ m n f, map_triangle_shift_functor _ _ _ f,
+  map_id' := λ X, by { ext; refl },
+  map_comp' := λ X Y Z f g, by { ext; simp },
+  ε := (triangle_shift_functor_ε _).hom,
+  μ := λ m n, (triangle_shift_functor_μ _ m n).hom,
+  μ_natural' := begin
+    rintros m m' n n' ⟨⟨⟨⟩⟩⟩ ⟨⟨⟨⟩⟩⟩, ext;
+    { dsimp, simp only [id_comp, comp_id, category_theory.functor.map_id] },
+  end,
+  associativity' := λ a b c, by ext; apply associativity_aux,
+  left_unitality' := λ a, by ext; apply left_unitality_aux,
+  right_unitality' := λ a, by ext; apply right_unitality_aux,
+  ε_is_iso := infer_instance,
+  μ_is_iso := infer_instance } .
 
 @[simp]
 lemma shift_obj₁ (T : triangle C) (i : ℤ) : T⟦i⟧.obj₁ = T.obj₁⟦i⟧ := rfl
