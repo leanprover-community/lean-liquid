@@ -1,5 +1,6 @@
 import category_theory.triangulated.pretriangulated
 import for_mathlib.homological_complex_shift
+import for_mathlib.monoidal_category
 
 noncomputable theory
 
@@ -8,6 +9,21 @@ open category_theory.preadditive
 open category_theory.limits
 
 universes v u
+
+-- Move + generalize!
+@[simp]
+lemma category_theory.discrete.associator_def (a b c : discrete ℤ) :
+  α_ a b c = eq_to_iso (add_assoc a b c) := rfl
+
+-- Move + generalize!
+@[simp]
+lemma category_theory.discrete.left_unitor_def (a : discrete ℤ) :
+  λ_ a = eq_to_iso (zero_add _) := rfl
+
+-- Move + generalize!
+@[simp]
+lemma category_theory.discrete.right_unitor_def (a : discrete ℤ) :
+  ρ_ a = eq_to_iso (add_zero _) := rfl
 
 namespace category_theory.triangulated
 open category_theory.category
@@ -127,6 +143,35 @@ nat_iso.of_components (λ T,
 variables [∀ (i : ℤ), (shift_functor C i).additive]
 
 @[simps]
+def shift_comm_functor (i j : ℤ) :
+  shift_functor C i ⋙ shift_functor C j ≅ shift_functor C j ⋙ shift_functor C i :=
+nat_iso.of_components
+(λ X, shift_comm _ _ _)
+sorry
+
+lemma triangle_shift_functor_μ_aux (X : C) (i j : ℤ) :
+  (shift_functor C j).map (shift_comm X 1 i).hom ≫
+    (shift_comm ((shift_functor C i).obj X) 1 j).hom ≫
+      (shift_functor C 1).map
+        (shift_add X i j).inv =
+  (shift_add ((shift_functor C 1).obj X) i j).inv ≫
+    (shift_comm X 1 (i + j)).hom :=
+begin
+  simp only [iso.eq_inv_comp, ← category.assoc, ← functor.map_iso_inv,
+    iso.comp_inv_eq],
+  dsimp,
+  simp only [category.assoc],
+  dsimp [shift_comm],
+  --simp only [← nat_trans.comp_app],
+  change (shift_functor C j).map ((shift_comm_functor _ _ _).hom.app X) ≫
+    (shift_comm_functor _ _ _).hom.app _ = _ ≫ (shift_comm_functor _ _ _).hom.app X ≫ _,
+  have := (shift_comm_functor C 1 (i + j)).hom.naturality,
+  dsimp only [functor.comp_map] at this,
+  --- UUUUUGGGHHHHH
+  sorry
+end
+
+@[simps]
 def triangle_shift_functor_μ (i j : ℤ) :
   triangle_shift_functor C i ⋙ triangle_shift_functor C j ≅
     triangle_shift_functor C (i + j) :=
@@ -161,10 +206,33 @@ nat_iso.of_components (λ T,
       erw [← reassoc_of this], clear this,
       simp only [functor.map_comp, assoc, obj_μ_app],
       congr' 2,
-      dsimp [shift_comm],
-      repeat { rw [← nat_trans.comp_app], },
+      --have := (shift_monoidal_functor C ℤ).to_lax_monoidal_functor.associativity i j 1,
+      rw (shift_monoidal_functor C ℤ).map_associator_inv,
+      dsimp,
+      simp only [assoc, is_iso.inv_id, nat_trans.hcomp_app, comp_id, id_comp],
+      slice_lhs 4 5
+      { rw [← nat_trans.comp_app, is_iso.hom_inv_id,
+          nat_trans.id_app] },
+      erw id_comp,
+      rw category_theory.nat_iso.is_iso_inv_app,
+      --rw nat_trans.id_hcomp_app,
+      dsimp,
+      simp only [category_theory.functor.map_id, comp_id, assoc, is_iso.hom_inv_id_assoc],
+      slice_lhs 4 5
+      { rw [← nat_trans.comp_app, (shift_monoidal_functor C ℤ).μ_hom_inv_id,
+          nat_trans.id_app] },
+      erw comp_id, apply triangle_shift_functor_μ_aux,
+
+
+      --     erw [category_theory.functor.map_id, comp_id],
+      --dsimp [shift_comm],
+      --simp only [← nat_trans.comp_app, is_iso.hom_inv_id_assoc],
+      --erw is_iso.hom_inv_id_assoc,
+      --erw comp_id,
+      --rw category_theory.discrete.associator_def,
+      --dsimp [shift_comm],
+      --repeat { rw [← nat_trans.comp_app], },
       -- have := (shift_monoidal_functor C ℤ).to_lax_monoidal_functor.associativity i j 1,
-      sorry
     end)
   (by sorry; begin
     intros T₁ T₂ f, ext;
@@ -218,20 +286,7 @@ def map_triangle_shift_functor (m n : discrete ℤ) (f : m ⟶ n) :
     { dsimp, simp only [eq_to_hom_refl, id_comp, comp_id] },
   end } .
 
--- Move + generalize!
-@[simp]
-lemma discrete.associator_def (a b c : discrete ℤ) :
-  α_ a b c = eq_to_iso (add_assoc a b c) := rfl
 
--- Move + generalize!
-@[simp]
-lemma discrete.left_unitor_def (a : discrete ℤ) :
-  λ_ a = eq_to_iso (zero_add _) := rfl
-
--- Move + generalize!
-@[simp]
-lemma discrete.right_unitor_def (a : discrete ℤ) :
-  ρ_ a = eq_to_iso (add_zero _) := rfl
 
 lemma associativity_aux (X : C) (a b c : discrete ℤ) :
 (𝟙 ((shift_functor C c).obj ((shift_functor C b).obj ((shift_functor C a).obj X))) ≫
