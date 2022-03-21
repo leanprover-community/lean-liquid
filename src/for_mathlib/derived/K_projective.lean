@@ -23,13 +23,7 @@ namespace bounded_homotopy_category
 
 local notation `𝒦` := bounded_homotopy_category A
 
-instance shift_equiv_symm_inverse_additive (i : ℤ) :
-  (shift_equiv (bounded_homotopy_category A) i).symm.inverse.additive :=
-show (category_theory.shift_functor (bounded_homotopy_category A) (i)).additive, by apply_instance
-
-instance shift_equiv_inverse_additive (i : ℤ) :
-  (shift_equiv (bounded_homotopy_category A) i).inverse.additive :=
-show (category_theory.shift_functor (bounded_homotopy_category A) (-i)).additive, by apply_instance
+section enough_projectives
 
 variable [enough_projectives A]
 
@@ -272,6 +266,16 @@ begin
 end
 .
 
+end enough_projectives
+
+instance shift_equiv_symm_inverse_additive (i : ℤ) :
+  (shift_equiv (bounded_homotopy_category A) i).symm.inverse.additive :=
+show (category_theory.shift_functor (bounded_homotopy_category A) (i)).additive, by apply_instance
+
+instance shift_equiv_inverse_additive (i : ℤ) :
+  (shift_equiv (bounded_homotopy_category A) i).inverse.additive :=
+show (category_theory.shift_functor (bounded_homotopy_category A) (-i)).additive, by apply_instance
+
 def hom_shift_right_iso (X : 𝒦) (i : ℤ) :
   category_theory.shift_functor 𝒦 i ⋙ preadditive_yoneda.flip.obj (opposite.op X) ≅
   preadditive_yoneda.flip.obj (opposite.op (X⟦-i⟧)) :=
@@ -292,7 +296,7 @@ begin
 end
 
 -- The LES for Ext in the second variable.
-instance (i : ℤ) (X : 𝒦) : homological_functor ((Ext i).obj (opposite.op X)) :=
+instance (i : ℤ) (X : 𝒦) [enough_projectives A] : homological_functor ((Ext i).obj (opposite.op X)) :=
 begin
   show homological_functor (category_theory.shift_functor 𝒦 i ⋙ preadditive_yoneda.flip.obj _),
   let E := hom_shift_right_iso X.replace i,
@@ -301,7 +305,7 @@ end
 
 -- The LES for Ext in the first variable.
 -- We need K-projective replacements of triangles for this.
-instance (i : ℤ) (X : 𝒦) : homological_functor ((Ext i).flip.obj X).right_op :=
+instance (i : ℤ) (X : 𝒦) [enough_projectives A] : homological_functor ((Ext i).flip.obj X).right_op :=
 begin
   constructor,
   intros T hT,
