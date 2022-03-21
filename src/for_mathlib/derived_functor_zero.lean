@@ -17,8 +17,7 @@ variables [abelian C] [abelian D] [additive F] [preserves_finite_colimits F]
 section les
 
 def δ₀ (A : short_exact_sequence C) := δ F 0 A ≫ (left_derived_zero_iso_self F).hom.app A.1
-
-lemma seven_term_exact_seq [preserves_finite_colimits F] (A : short_exact_sequence C) :
+[preserves_finite_colimits F] (A : short_exact_sequence C) :
   exact_seq D [
     (F.left_derived 1).map A.f, (F.left_derived 1).map A.g,
     δ₀ F A,
