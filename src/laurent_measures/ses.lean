@@ -289,7 +289,7 @@ def homeo_S_pi_ϖ : (Π s : S, ℳ ϖ) ≃ₜ ℳ S :=
   continuous_to_fun := continuous_pi (λ _, continuous_apply_apply _ punit.star),
   continuous_inv_fun := continuous_pi (λs,  continuous_pi (λ _, continuous_apply s)) }
 
-example : filtration (Π (s : S), ℳ ϖ) c ≃ Π (s : S), filtration (ℳ ϖ) c :=
+lemma C_D : filtration (Π (s : S), ℳ ϖ) c ≃ Π (s : S), filtration (ℳ ϖ) c :=
 begin
   fconstructor,
   { intros F s,
@@ -302,6 +302,13 @@ begin
   all_goals { intro, simp only [subtype.val_eq_coe, subtype.coe_eta] },
 end
 
+-- lemma C_D_top : filtration (Π (s : S), ℳ ϖ) c ≃ₜ Π (s : S), filtration (ℳ ϖ) c :=
+-- { to_equiv := (C_D S c),
+--   continuous_to_fun :=
+
+--     -- dsimp only [C_D],
+--   end,
+--   continuous_inv_fun := sorry,}
 
 
 lemma equiv_S_ϖ_c : filtration (Π s : S, ℳ ϖ) c ≃ filtration (ℳ S) c :=
