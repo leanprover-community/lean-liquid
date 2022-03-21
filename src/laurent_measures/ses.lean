@@ -271,7 +271,7 @@ instance : module ℝ (ℳ S) := by {dsimp only [real_measures], apply_instance}
 
 
 -- **[FAE]** The problem is that the `equiv` below is only a type equivalence, not an iso of png's.
-def equiv_S_ϖ : (Π s : S, ℳ ϖ) ≃  ℳ S :=
+def equiv_S_pi_ϖ : (Π s : S, ℳ ϖ) ≃  ℳ S :=
 begin
   fconstructor,
   { use λ g s, g s punit.star },
@@ -284,26 +284,36 @@ begin
     refl }
 end
 
-def homeo_S_ϖ : (Π s : S, ℳ ϖ) ≃ₜ ℳ S :=
-{ to_equiv := equiv_S_ϖ S,
+def homeo_S_pi_ϖ : (Π s : S, ℳ ϖ) ≃ₜ ℳ S :=
+{ to_equiv := equiv_S_pi_ϖ S,
   continuous_to_fun := continuous_pi (λ _, continuous_apply_apply _ punit.star),
   continuous_inv_fun := continuous_pi (λs,  continuous_pi (λ _, continuous_apply s)) }
 
--- example (T : fintype ℕ) : fintype.card = 2 :=
--- begin
+example : filtration (Π (s : S), ℳ ϖ) c ≃ Π (s : S), filtration (ℳ ϖ) c :=
+begin
+  fconstructor,
+  { intros F s,
+    exact ⟨F.1 s, F.2 s⟩ },
+  { intros F,
+    use λ s, (F s).1,
+    rw mem_filtration_pi,
+    intro s,
+    exact (F s).2 },
+  all_goals { intro, simp only [subtype.val_eq_coe, subtype.coe_eta] },
+end
 
--- end
+
 
 lemma equiv_S_ϖ_c : filtration (Π s : S, ℳ ϖ) c ≃ filtration (ℳ S) c :=
 begin
   fconstructor,
   { intro F,
-    refine ⟨(equiv_S_ϖ p S).to_fun F.1,_⟩,
+    refine ⟨(equiv_S_pi_ϖ p S).to_fun F.1,_⟩,
     -- refine ⟨(1 /  S.card) • ((equiv_S_ϖ p S).to_fun F.1),_⟩,
     have hF := F.2,
     rw mem_filtration_pi at hF,
     simp_rw [real_measures.mem_filtration_iff, nnnorm] at hF ⊢,
-    dsimp only [equiv_S_ϖ],
+    dsimp only [equiv_S_pi_ϖ],
     simp only [filtration, set.mem_set_of_eq, nnnorm, laurent_measures.coe_mk,
     fintype.univ_punit, finset.sum_singleton] at hF,
     sorry,--finally something false but reasonable!
