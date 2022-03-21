@@ -172,7 +172,7 @@ begin
     { ext,
       dsimp [homology.map_iso, homological_complex.homology_functor_single],
       rw [← cancel_epi (limits.kernel_subobject_iso _).hom, homology.π'_eq_π_assoc],
-      simp only [homology.desc'_π', category.comp_id, homological_complex.hom.sq_from_left,
+      simp only [homology.π'_desc', category.comp_id, homological_complex.hom.sq_from_left,
         limits.kernel_subobject_arrow_assoc, homology.π_desc, homology.map_desc,
         limits.kernel_subobject_map_arrow_assoc, arrow.iso_mk_hom_left,
         limits.kernel_subobject_map_arrow],

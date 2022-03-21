@@ -1,5 +1,5 @@
 import for_mathlib.snake_lemma2
-import for_mathlib.homology
+import category_theory.abelian.homology
 import for_mathlib.exact_seq2
 
 noncomputable theory

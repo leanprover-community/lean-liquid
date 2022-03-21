@@ -1,6 +1,5 @@
-import for_mathlib.homology
 import algebra.homology.homology
-
+import category_theory.abelian.homology
 
 namespace category_theory
 
@@ -83,23 +82,7 @@ def homology_iso :
     rw ← this,
     simp,
   end,
-  hom_inv_id' := begin
-    ext,
-    simp,
-    let f := _, show _ = f,
-    simp only [← category.assoc _ _ f],
-    convert category.id_comp _,
-    ext,
-    simp,
-  end,
-  inv_hom_id' := begin
-    ext,
-    simp,
-    let f := _, show _ = f,
-    simp only [← category.assoc _ _ f],
-    convert category.id_comp _,
-    ext,
-    simp,
-  end }
+  hom_inv_id' := by { ext, simp },
+  inv_hom_id' := by { ext, simp } }
 
 end category_theory
