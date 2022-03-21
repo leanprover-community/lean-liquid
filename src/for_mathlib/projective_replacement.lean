@@ -4,7 +4,6 @@ import tactic.linarith
 import algebra.homology.quasi_iso
 import algebra.homology.homotopy
 import for_mathlib.abelian_category
-import for_mathlib.homology
 
 .
 
