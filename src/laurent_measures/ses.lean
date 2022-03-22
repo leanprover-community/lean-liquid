@@ -404,13 +404,8 @@ begin
 end
 
 lemma commute_seval_ℒ_ℳ (c : ℝ≥0) (s : S) :
-  (θ_c c (Fintype.of punit)) ∘ (seval_ℒ_c c s) = (seval_ℳ_c S c s) ∘ (θ_c c S) :=
-begin
-  ext F x,
-  simp only [seval_ℳ_c, seval_ℒ_c, seval_ℒ, θ_c, one_mul, subtype.coe_mk, eq_mpr_eq_cast,
-    set_coe_cast],
-  refl,
-end
+  (θ_c c (Fintype.of punit)) ∘ (seval_ℒ_c c s) = (seval_ℳ_c S c s) ∘ (θ_c c S) := by simpa only
+  [seval_ℳ_c, seval_ℒ_c, seval_ℒ, θ_c, one_mul, subtype.coe_mk, eq_mpr_eq_cast, set_coe_cast]
 
 
 lemma continuous_of_seval_ℳ_comp_continuous (c : ℝ≥0) {X : Type*} [topological_space X]
@@ -426,7 +421,9 @@ begin
   { apply eq_iff_iff.mpr,
     rw [homeomorph.comp_continuous_iff, (inducing_α p S c).continuous_iff] },
   exact H,
-  end
+end
+
+-- def closed_of_ℳ_ϖ (c : ℝ≥0) : filtration (ℳ ϖ) c ≃ₜ closed_ball (0 : ℝ) c := sorry
 
 -- This is the main continuity property needed in `ses2.lean`
 lemma continuous_θ_c (c : ℝ≥0) : continuous (θ_c c S) :=
@@ -435,12 +432,12 @@ begin
   intro s,
   rw ← commute_seval_ℒ_ℳ,
   refine continuous.comp _ (continuous_seval_ℒ_c p S c s),
+  dsimp only [θ_c],
+  rw continuous_iff_is_closed,
+  intros C hC,
   sorry,
-
-
-
-
-  -- dsimp only [θ_c],
+  -- have := @closed_of_ℳ_ϖ p _ _ c,
+  -- refine (@closed_of_ℳ_ϖ p _ _ c).symm.comp_continuous_iff.mp,
   -- apply cont_at_cast_ℳ c (θ_c S c),
   -- rw aux_commutative_θ,
   -- apply continuous.comp _ (cont_cast_ℒ c),
