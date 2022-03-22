@@ -142,12 +142,38 @@ nat_iso.of_components (λ T,
 
 variables [∀ (i : ℤ), (shift_functor C i).additive]
 
-@[simps]
-def shift_comm_functor (i j : ℤ) :
-  shift_functor C i ⋙ shift_functor C j ≅ shift_functor C j ⋙ shift_functor C i :=
-nat_iso.of_components
-(λ X, shift_comm _ _ _)
-sorry
+@[reassoc]
+lemma shift_comm_eq_eq_to_hom (X : C) (i j : ℤ) :
+  (shift_add X i j).hom ≫ (shift_comm X i j).hom ≫ (shift_add X j i).inv =
+  eq_to_hom (by { congr' 2, exact add_comm i j}) :=
+begin
+  dsimp [shift_add, shift_comm, opaque_eq_to_iso],
+  simp, erw comp_id,
+end
+
+@[reassoc]
+lemma shift_add_comp_eq_to_hom (X : C) (i j k : ℤ) (h : i + j = j + i) :
+  (shift_add X (i+j) k).hom ≫
+  eq_to_hom (by { congr' 3}) ≫
+  (shift_add X (j+i) k).inv =
+  eq_to_hom (by { congr' 3}) :=
+begin
+  dsimp [shift_add, opaque_eq_to_iso],
+  induction h, dsimp, simpa,
+end
+
+
+@[reassoc]
+lemma shift_add_comp_eq_to_hom' (X : C) (i j k : ℤ) (h : j + k = k + j) :
+  (shift_add X i (j+k)).hom ≫
+  eq_to_hom (by { congr' 3}) ≫
+  (shift_add X i (k+j)).inv =
+  eq_to_hom (by { congr' 3}) :=
+begin
+  dsimp [shift_add, opaque_eq_to_iso],
+  induction h, dsimp, simpa,
+end
+
 
 lemma triangle_shift_functor_μ_aux (X : C) (i j : ℤ) :
   (shift_functor C j).map (shift_comm X 1 i).hom ≫
@@ -157,18 +183,15 @@ lemma triangle_shift_functor_μ_aux (X : C) (i j : ℤ) :
   (shift_add ((shift_functor C 1).obj X) i j).inv ≫
     (shift_comm X 1 (i + j)).hom :=
 begin
-  simp only [iso.eq_inv_comp, ← category.assoc, ← functor.map_iso_inv,
-    iso.comp_inv_eq],
-  dsimp,
-  simp only [category.assoc],
-  dsimp [shift_comm],
-  --simp only [← nat_trans.comp_app],
-  change (shift_functor C j).map ((shift_comm_functor _ _ _).hom.app X) ≫
-    (shift_comm_functor _ _ _).hom.app _ = _ ≫ (shift_comm_functor _ _ _).hom.app X ≫ _,
-  have := (shift_comm_functor C 1 (i + j)).hom.naturality,
-  dsimp only [functor.comp_map] at this,
-  --- UUUUUGGGHHHHH
-  sorry
+  dsimp [shift_add, shift_comm, opaque_eq_to_iso],
+  simp only [eq_to_hom_map, eq_to_hom_app, functor.map_comp, obj_μ_app,
+    category_theory.discrete.associator_def, eq_to_iso.inv,
+    obj_μ_inv_app, eq_to_iso.hom, assoc, μ_inv_hom_app_assoc],
+  congr' 2,
+  simp only [← assoc], congr' 1, simp only [assoc],
+  erw shift_add_comp_eq_to_hom_assoc,
+  erw shift_add_comp_eq_to_hom'_assoc,
+  simpa, exact add_comm _ _, exact add_comm _ _,
 end
 
 @[simps]
@@ -180,7 +203,7 @@ nat_iso.of_components (λ T,
     (shift_add _ _ _).symm
     (shift_add _ _ _).symm
     (shift_add _ _ _).symm
-    (by sorry; begin
+    (begin
       dsimp [triangle_shift_functor, triangle_shift_obj],
       simp only [zsmul_comp, comp_zsmul, iso.symm_hom, iso.app_inv, iso.symm_inv,
         monoidal_functor.μ_iso_hom, functor.map_zsmul, smul_smul, int.neg_one_pow_add],
@@ -188,7 +211,7 @@ nat_iso.of_components (λ T,
       rw [functor.comp_map] at this,
       erw [this, mul_comm], refl,
     end)
-    (by sorry; begin
+    (begin
       dsimp [triangle_shift_functor, triangle_shift_obj],
       simp only [zsmul_comp, comp_zsmul, iso.symm_hom, iso.app_inv, iso.symm_inv,
         monoidal_functor.μ_iso_hom, functor.map_zsmul, smul_smul, int.neg_one_pow_add],
@@ -222,19 +245,8 @@ nat_iso.of_components (λ T,
       { rw [← nat_trans.comp_app, (shift_monoidal_functor C ℤ).μ_hom_inv_id,
           nat_trans.id_app] },
       erw comp_id, apply triangle_shift_functor_μ_aux,
-
-
-      --     erw [category_theory.functor.map_id, comp_id],
-      --dsimp [shift_comm],
-      --simp only [← nat_trans.comp_app, is_iso.hom_inv_id_assoc],
-      --erw is_iso.hom_inv_id_assoc,
-      --erw comp_id,
-      --rw category_theory.discrete.associator_def,
-      --dsimp [shift_comm],
-      --repeat { rw [← nat_trans.comp_app], },
-      -- have := (shift_monoidal_functor C ℤ).to_lax_monoidal_functor.associativity i j 1,
     end)
-  (by sorry; begin
+  (begin
     intros T₁ T₂ f, ext;
     { dsimp only [triangle_morphism.comp_hom₁, iso.of_components_hom_hom₁, triangle_shift_map_hom₁,
         triangle_morphism.comp_hom₂, iso.of_components_hom_hom₂, triangle_shift_map_hom₂,
