@@ -253,6 +253,9 @@ by simp only [strict, bound_by, one_mul]
 
 variables {f}
 
+lemma bound_by.mono {C₁} (hf : f.bound_by C₁) (C₂ : ℝ≥0) (H : C₁ ≤ C₂) : f.bound_by C₂ :=
+λ c x hx, filtration_mono (mul_le_mul' H le_rfl) (hf hx)
+
 lemma strict.bound_by_one (hf : f.strict) : f.bound_by 1 :=
 f.strict_iff_bound_by_one.1 hf
 
@@ -727,6 +730,23 @@ lemma bound_by.add {f g : comphaus_filtered_pseudo_normed_group_hom M₁ M₂} {
   (hf : f.bound_by Cf) (hg : g.bound_by Cg) :
   (f + g).bound_by (Cf + Cg) :=
 λ c x hx, by { rw add_mul, exact add_mem_filtration (hf hx) (hg hx) }
+
+lemma bound_by.sub {f g : comphaus_filtered_pseudo_normed_group_hom M₁ M₂} {Cf Cg : ℝ≥0}
+  (hf : f.bound_by Cf) (hg : g.bound_by Cg) :
+  (f - g).bound_by (Cf + Cg) :=
+λ c x hx, by { rw add_mul, exact sub_mem_filtration (hf hx) (hg hx) }
+
+lemma bound_by.neg {f : comphaus_filtered_pseudo_normed_group_hom M₁ M₂} {Cf : ℝ≥0}
+  (hf : f.bound_by Cf) : (-f).bound_by Cf :=
+λ c x hx, neg_mem_filtration (hf hx)
+
+lemma bound_by.nsmul {f : comphaus_filtered_pseudo_normed_group_hom M₁ M₂} {Cf : ℝ≥0}
+  (hf : f.bound_by Cf) (n : ℕ) : (n • f).bound_by (n * Cf) :=
+λ c x hx, filtration_mono (mul_assoc _ _ _).ge (nat_smul_mem_filtration n _ _ (hf hx))
+
+lemma bound_by.zsmul {f : comphaus_filtered_pseudo_normed_group_hom M₁ M₂} {Cf : ℝ≥0}
+  (hf : f.bound_by Cf) (n : ℤ) : (n • f).bound_by (n.nat_abs * Cf) :=
+λ c x hx, filtration_mono (mul_assoc _ _ _).ge (int_smul_mem_filtration n _ _ (hf hx))
 
 @[simp] lemma add_apply (f g : comphaus_filtered_pseudo_normed_group_hom M₁ M₂) (x : M₁) :
   (f + g) x = f x + g x := rfl

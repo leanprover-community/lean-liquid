@@ -100,6 +100,18 @@ def Φ : comphaus_filtered_pseudo_normed_group_hom (ℒ S) (ℒ S) := 2 • shif
 
 lemma Φ_eq_ϕ (F : ℒ S) : Φ S F = ϕ F := rfl
 
+lemma Φ_bound_by_3 [fact (r ≤ 1)] :
+  (Φ S : comphaus_filtered_pseudo_normed_group_hom (ℒ S) (ℒ S)).bound_by 3 :=
+begin
+  let sh : comphaus_filtered_pseudo_normed_group_hom (ℒ S) (ℒ S) := shift (-1),
+  have Hsh : sh.bound_by 1,
+  { refine (mk_of_bound_bound_by _ _ _).mono 1 _,
+    rw [neg_neg], exact (pow_one r).le.trans (fact.out _) },
+  suffices : (sh + sh + (-id)).bound_by (1 + 1 + 1),
+  { convert this using 1, ext1, dsimp only [Φ_eq_ϕ, ϕ], erw two_nsmul, refl, },
+  refine (Hsh.add Hsh).add (mk_of_bound_bound_by _ _ _).neg,
+end
+
 end phi_to_hom
 
 section theta

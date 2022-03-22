@@ -16,4 +16,7 @@ def condensed (r' : ℝ≥0) [fact (0 < r')] : Profinite.{u} ⥤ Condensed.{u} A
   ProFiltPseuNormGrpWithTinv₁.to_CompHausFiltPseuNormGrp₁.{u} r') ⋙
   CompHausFiltPseuNormGrp₁.to_Condensed
 
+def condensedCH (r' : ℝ≥0) [fact (0 < r')] : Profinite.{u} ⥤ Condensed.{u} Ab.{u+1} :=
+laurent_measures.profiniteCH.{u} r' ⋙ CompHausFiltPseuNormGrp₁.to_Condensed
+
 end laurent_measures
