@@ -165,5 +165,29 @@ begin
     ext s,
     exact hfx₀ s, }
 end
+.
+
+@[simp] lemma to_Condensed_map_zero (A B : CompHausFiltPseuNormGrp₁.{u}) :
+  to_Condensed.map (0 : A ⟶ B) = 0 :=
+by { ext S s x, refl, }
+
+instance mono_to_Condensed_map {A B : CompHausFiltPseuNormGrp₁.{u}}
+  (f : A ⟶ B) [hg : mono ((to_PNG₁ ⋙ PseuNormGrp₁.to_Ab).map f)] :
+  mono (to_Condensed.map f) :=
+begin
+  refine ((abelian.tfae_mono (to_Condensed.obj A) (to_Condensed.map f)).out 2 0).mp _,
+  have := exact_of_exact_with_constant (0 : A ⟶ A) f 1 le_rfl (exact_with_constant_of_mono A f),
+  simpa only [to_Condensed_map_zero]
+end
+
+lemma epi_to_Condensed_map {A B : CompHausFiltPseuNormGrp₁.{u}}
+  (f : A ⟶ B) [H : epi ((to_PNG₁ ⋙ PseuNormGrp₁.to_Ab).map f)]
+  (Cf : ℝ≥0) (hCf : 1 ≤ Cf) (hf : ∀ c, filtration B c ⊆ f '' (filtration A (Cf * c))) :
+  epi (to_Condensed.map f) :=
+begin
+  refine ((abelian.tfae_epi (to_Condensed.obj B) (to_Condensed.map f)).out 2 0).mp _,
+  have := exact_of_exact_with_constant f (0 : B ⟶ B) Cf hCf (exact_with_constant_of_epi B f Cf hf),
+  simpa only [to_Condensed_map_zero]
+end
 
 end condensed

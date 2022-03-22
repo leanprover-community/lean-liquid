@@ -70,6 +70,21 @@ def map_comphaus_filtered_pseudo_normed_group_hom {M₁ M₂ : Type*}
   end,
   continuous' := λ c₁ c₂ f₀ hf₀, f.continuous f₀ hf₀, }
 
+@[simps]
+def map_strict_comphaus_filtered_pseudo_normed_group_hom {M₁ M₂ : Type*}
+  [comphaus_filtered_pseudo_normed_group M₁] [comphaus_filtered_pseudo_normed_group M₂]
+  (N : ℝ≥0) (f : strict_comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :
+  strict_comphaus_filtered_pseudo_normed_group_hom (rescale N M₁) (rescale N M₂) :=
+{ to_fun := rescale.of ∘ f ∘ rescale.of.symm,
+  map_zero' := f.map_zero,
+  map_add' := λ x y, f.map_add x y,
+  strict' := λ c x hx, begin
+    rw rescale.mem_filtration at hx ⊢,
+    simp only [function.comp_app, equiv.symm_apply_apply, mul_assoc],
+    exact f.strict hx,
+  end,
+  continuous' := λ c, f.continuous' _, }
+
 end profinitely_filtered_pseudo_normed_group
 
 section profinitely_filtered_pseudo_normed_group_with_Tinv
