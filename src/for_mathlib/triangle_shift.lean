@@ -273,12 +273,12 @@ def triangle_shift_core : shift_mk_core (triangle C) ℤ :=
       refine eq.trans _ this, clear this,
       dsimp, simp only [obj_μ_app, assoc],
       -- I don't like that `(eq_to_hom _).hom₁`.
-      sorry },
-    sorry,
-    sorry
+      admit },
+    admit,
+    admit
   end,
-  left_unitality := sorry,
-  right_unitality := sorry }
+  left_unitality := admit,
+  right_unitality := admit }
 -/
 
 @[simps]
