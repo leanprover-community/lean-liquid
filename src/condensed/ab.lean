@@ -123,6 +123,20 @@ def of_top_ab : Condensed.{u} Ab.{u+1} :=
     exact B.to_Condensed.cond,
   end }
 
+
+variables {A} {B : Type u} [add_comm_group B] [topological_space B] [topological_add_group B]
+
+def of_top_ab_map (f : A →+ B) (hf : continuous f) : of_top_ab A ⟶ of_top_ab B :=
+{ val := whisker_right
+  { app := λ S, begin
+      refine add_monoid_hom.mk' (λ g, ⟨f ∘ (show C(↥(opposite.unop S), A), from g), hf.comp _⟩) _,
+      { exact g.continuous },
+      { intros, ext, exact f.map_add _ _, }
+    end,
+    naturality' := λ S T g, rfl, }
+  Ab.ulift.{u+1} }
+
+
 end
 
 end Condensed

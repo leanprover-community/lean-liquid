@@ -55,7 +55,7 @@ instance [profinitely_filtered_pseudo_normed_group M] :
 
 @[simps]
 def map_comphaus_filtered_pseudo_normed_group_hom {M₁ M₂ : Type*}
-  [profinitely_filtered_pseudo_normed_group M₁] [profinitely_filtered_pseudo_normed_group M₂]
+  [comphaus_filtered_pseudo_normed_group M₁] [comphaus_filtered_pseudo_normed_group M₂]
   (N : ℝ≥0) (f : comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :
   comphaus_filtered_pseudo_normed_group_hom (rescale N M₁) (rescale N M₂) :=
 { to_fun := rescale.of ∘ f ∘ rescale.of.symm,
