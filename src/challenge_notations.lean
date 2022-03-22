@@ -1,9 +1,9 @@
 import banach
 import real_measures.condensed
 import condensed.projective_resolution
-import category_theory.abelian.ext
 import for_mathlib.Profinite.extend
 import for_mathlib.abelian_category
+import for_mathlib.derived.K_projective
 
 open_locale nnreal
 open opposite category_theory
@@ -18,7 +18,7 @@ localized "notation `ℳ_{` p' `}` S := (real_measures.condensed p').obj S"
   in liquid_tensor_experiment
 
 abbreviation liquid_tensor_experiment.Ext (i : ℕ) (A B : Condensed.{u} Ab.{u+1}) :=
-((Ext ℤ (Condensed Ab) i).obj (op A)).obj B
+((Ext' i).obj (op A)).obj B
 
 instance [fact (0 < (p:ℝ))] : has_coe (pBanach p) (Condensed Ab) :=
 { coe := λ V, Condensed.of_top_ab V }
