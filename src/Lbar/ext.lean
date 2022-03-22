@@ -43,7 +43,7 @@ def Tinv_sub (S : Profinite.{u}) (V : SemiNormedGroup.{u}) [normed_with_aut r V]
   -- this should be normed_with_aut.T.inv mapped through a functor
 
 /-- Thm 9.4bis of [Analytic]. More precisely: the first observation in the proof 9.4 => 9.1. -/
-theorem Ext_iso_zero (S : Profinite.{u}) (V : SemiNormedGroup.{u}) [normed_with_aut r V] (i : ℤ) :
+theorem is_iso_Tinv_sub (S : Profinite.{u}) (V : SemiNormedGroup.{u}) [normed_with_aut r V] (i : ℤ) :
   is_iso (Tinv_sub r r' S V i) :=
 sorry
 
