@@ -343,11 +343,7 @@ end
 lemma seval_ℳ_α_commute (c : ℝ≥0) (s : S) :
  (λ F, ((homeo_box_ϖ S c) ∘ (α S c)) F s) = (λ F, seval_ℳ_c S c s F) :=
 begin
-  sorry; {
-  funext,
-  simp,
-
-}
+  sorry,
 end
 
  lemma seval_ℳ_α_commute' {X : Type*} (c : ℝ≥0) {f : X → filtration (ℳ S) c} (s : S)  :
