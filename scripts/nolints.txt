@@ -77,18 +77,10 @@ apply_nolint category_theory.additive_category_of_abelian instance_priority
 -- for_mathlib/derived/K_projective.lean
 apply_nolint bounded_homotopy_category.lift unused_arguments
 apply_nolint bounded_homotopy_category.lift_ext unused_arguments
-apply_nolint homotopy_category.single unused_arguments
 
 -- for_mathlib/derived/example.lean
 apply_nolint AddCommGroup.Ext_is_zero_of_one_lt ge_or_gt
 apply_nolint category_theory.ProjectiveResolution.is_projective_resolution unused_arguments
-apply_nolint category_theory.is_zero.is_iso unused_arguments
-apply_nolint chain_complex.to_bounded_homotopy_category unused_arguments
-apply_nolint homological_complex.homology_functor_single unused_arguments
-apply_nolint homological_complex.op unused_arguments
-apply_nolint homological_complex.unop unused_arguments
-apply_nolint homology.ι.category_theory.is_iso unused_arguments
-apply_nolint homotopy_category.quotient_map_hom unused_arguments
 
 -- for_mathlib/derived/homological.lean
 apply_nolint category_theory.triangulated.homological_of_exists_aux unused_arguments
@@ -172,14 +164,19 @@ apply_nolint category_theory.split.map def_lemma
 
 -- for_mathlib/triangle_shift.lean
 apply_nolint category_theory.triangulated.pretriangulated.shift_comm_self unused_arguments
+apply_nolint category_theory.triangulated.triangle.associativity_aux unused_arguments
 apply_nolint category_theory.triangulated.triangle.iso.of_components unused_arguments
+apply_nolint category_theory.triangulated.triangle.left_unitality_aux unused_arguments
+apply_nolint category_theory.triangulated.triangle.map_triangle_shift_functor unused_arguments
+apply_nolint category_theory.triangulated.triangle.right_unitality_aux unused_arguments
 
 -- laurent_measures/basic.lean
 apply_nolint laurent_measures.laurent_measures.norm_nonneg dup_namespace
 
 -- laurent_measures/ses.lean
+apply_nolint laurent_measures_ses.C_D def_lemma
 apply_nolint laurent_measures_ses.box unused_arguments
-apply_nolint laurent_measures_ses.equiv_S_ϖ unused_arguments
+apply_nolint laurent_measures_ses.equiv_S_pi_ϖ unused_arguments
 apply_nolint laurent_measures_ses.equiv_S_ϖ_c def_lemma
 apply_nolint laurent_measures_ses.real_measures.module unused_arguments
 apply_nolint laurent_measures_ses.real_measures.topological_space unused_arguments
