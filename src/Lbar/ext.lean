@@ -2,6 +2,7 @@ import for_mathlib.derived.K_projective
 import liquid
 import Lbar.functor
 import condensed.projective_resolution
+import breen_deligne.main
 
 noncomputable theory
 
@@ -43,8 +44,11 @@ def Tinv_sub (S : Profinite.{u}) (V : SemiNormedGroup.{u}) [normed_with_aut r V]
   -- this should be normed_with_aut.T.inv mapped through a functor
 
 /-- Thm 9.4bis of [Analytic]. More precisely: the first observation in the proof 9.4 => 9.1. -/
-theorem is_iso_Tinv_sub (S : Profinite.{u}) (V : SemiNormedGroup.{u}) [normed_with_aut r V] (i : ℤ) :
-  is_iso (Tinv_sub r r' S V i) :=
-sorry
+theorem is_iso_Tinv_sub (S : Profinite.{u}) (V : SemiNormedGroup.{u}) [normed_with_aut r V] :
+  ∀ i, is_iso (Tinv_sub r r' S V i) :=
+begin
+  refine (breen_deligne.package.main_lemma _ _ _ _ _ _).mpr _,
+  all_goals { sorry }
+end
 
 end Lbar
