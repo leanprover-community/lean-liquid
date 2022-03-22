@@ -144,6 +144,76 @@ def embed : homological_complex C c₁ ⥤ homological_complex C c₂ :=
   map := λ X Y f, embed.map e f,
   map_id' := λ X, by { ext i, exact embed.f_id _ },
   map_comp' := by { intros, ext i, exact embed.f_comp f g _ } }
+.
+
+section homotopy
+
+variables (f' : X ⟶ Y) (h : homotopy f f')
+
+def embed_homotopy_hom : Π (i j : option ι₁), embed.X X i ⟶ embed.X Y j
+| (some i) (some j) := h.hom i j
+| (some i) none     := 0
+| none     j        := 0
+
+lemma embed_homotopy_zero : Π (i j : option ι₁)
+  (H : ∀ (i' j' : ι₁), i = some i' → j = some j' → ¬ c₁.rel j' i'),
+  embed_homotopy_hom f f' h i j = 0
+| (some i) (some j) H := h.zero i j $ H _ _ rfl rfl
+| (some i) none     H := rfl
+| none     j        H := rfl
+
+-- lemma embed_homotopy_comm : ∀ (i j k : option ι₁)
+--   (Hij : ∀ (i' j' : ι₁), i = some i' → j = some j' → c₁.rel i' j')
+--   (Hjk : ∀ (j' k' : ι₁), j = some j' → k = some k' → c₁.rel j' k'),
+--   embed.f f j =
+--     embed.d X j k ≫ embed_homotopy_hom f f' h k j +
+--     embed_homotopy_hom f f' h j i ≫ embed.d Y i j +
+--     embed.f f' j
+-- | (some i) (some j) (some k) Hij Hjk := begin
+--   have hij : c₁.rel i j := Hij _ _ rfl rfl,
+--   have hjk : c₁.rel j k := Hjk _ _ rfl rfl,
+--   have := h.comm j,
+--   rw [prev_d_eq _ hij, d_next_eq _ hjk] at this,
+--   exact this
+-- end
+-- | (some i) (some j) none Hij _ := begin
+--   have hij : c₁.rel i j := Hij _ _ rfl rfl,
+--   have := h.comm j,
+--   rw [prev_d_eq _ hij] at this,
+--   sorry
+-- end
+-- | none (some _) (some _) _ _ := sorry
+-- | none (some _) none _ _ := sorry
+-- | none none none _ _ := by { erw [zero_comp, zero_add, zero_add], refl }
+-- | none none (some _) _ _ := by { erw [zero_comp, comp_zero, zero_add, zero_add], refl }
+-- | (some _) none none _ _ := by { erw [zero_comp, comp_zero, zero_add, zero_add], refl }
+-- | (some _) none (some _) _ _ := by { erw [zero_comp, comp_zero, zero_add, zero_add], refl }
+
+lemma embed_homotopy_comm : ∀ (i : option ι₁) (F : Π i, embed.X X i ⟶ embed.X Y i)
+  (hF : ∀ i, F (e.r i) = let F' := (λ (i j : ι₂),
+    show ((embed e).obj X).X i ⟶ ((embed e).obj Y).X j, from
+    embed_homotopy_hom f f' h (e.r i) (e.r j)) in (d_next i) F' + (prev_d i) F'),
+  embed.f f i = F i + embed.f f' i
+| (some i) F hF := begin
+  convert h.comm i using 2,
+  dsimp at hF, specialize hF (e.f i),
+  sorry
+end
+| none     i' H := by ext
+
+def embed_homotopy :
+  homotopy ((embed e).map f) ((embed e).map f') :=
+{ hom := λ i j, embed_homotopy_hom f f' h (e.r i) (e.r j),
+  zero' := λ i j hij, embed_homotopy_zero f f' h _ _ begin
+    simp only [e.eq_some],
+    rintro i' j' rfl rfl h',
+    exact hij (e.c h')
+  end,
+  comm := λ i,  begin
+    sorry
+  end }
+
+end homotopy
 
 end homological_complex
 
