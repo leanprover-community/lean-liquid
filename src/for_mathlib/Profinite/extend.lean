@@ -193,4 +193,37 @@ begin
   simp,
 end
 
+lemma extend_π (F G : Fintype ⥤ C)
+  [∀ X : Profinite, has_limit (X.fintype_diagram ⋙ F)]
+  [∀ X : Profinite, has_limit (X.fintype_diagram ⋙ G)]
+  (α : extend F ⟶ extend G) (X : Profinite) (T : discrete_quotient X) :
+  α.app X ≫ limit.π _ T =
+  (extend F).map (X.as_limit_cone.π.app T) ≫
+  α.app (Profinite.of T) ≫ (extend_extends G).hom.app _ :=
+begin
+  have : (extend_extends G).hom.app (X.fintype_diagram.obj T) =
+    limit.π _ ⊥ ≫ _ := rfl,
+  erw [this, α.naturality_assoc], congr' 1,
+  dsimp [extend],
+  simp only [limit.lift_π_assoc, change_cone_π_app, limit.cone_π, category.assoc,
+    ← G.map_comp],
+  sorry
+end
+
+
+lemma extend_nat_trans_ext {F G : Fintype ⥤ C}
+  [∀ X : Profinite, has_limit (X.fintype_diagram ⋙ F)]
+  [∀ X : Profinite, has_limit (X.fintype_diagram ⋙ G)]
+  (α β : extend F ⟶ extend G)
+  (h : whisker_left Fintype.to_Profinite α = whisker_left Fintype.to_Profinite β) :
+  α = β :=
+begin
+  ext S T,
+  dsimp,
+  let p : S ⟶ of T := S.as_limit_cone.π.app T,
+  let E : Fintype.to_Profinite ⋙ extend G ≅ G := extend_extends G,
+  apply_fun (λ e, (extend F).map p ≫ e.app ⟨T⟩ ≫ E.hom.app _) at h,
+  simpa [extend_π] using h,
+end
+
 end Profinite
