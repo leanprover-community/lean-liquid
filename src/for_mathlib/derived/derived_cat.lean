@@ -151,7 +151,32 @@ instance additive (n : ℤ) : (shift_functor (bounded_derived_category A) n).add
 
 open category_theory.triangulated
 
+variable {A}
+noncomputable
+def replace_triangle (S : triangle (bounded_homotopy_category A)) :
+  triangle (bounded_derived_category A) :=
+{ obj₁ := of $ S.obj₁.replace,
+  obj₂ := of $ S.obj₂.replace,
+  obj₃ := of $ S.obj₃.replace,
+  mor₁ := ⟨bounded_homotopy_category.lift (S.obj₁.π ≫ S.mor₁) S.obj₂.π⟩,
+  mor₂ := ⟨bounded_homotopy_category.lift (S.obj₂.π ≫ S.mor₂) S.obj₃.π⟩,
+  mor₃ := begin
+    haveI : is_quasi_iso
+      ((shift_functor (bounded_homotopy_category A) (1 : ℤ)).map S.obj₁.π) :=
+    by { change is_quasi_iso ((S.obj₁.π)⟦(1 : ℤ)⟧'), by apply_instance }, -- WAT?
+    exact ⟨bounded_homotopy_category.lift (S.obj₃.π ≫ S.mor₃) (S.obj₁.π⟦(1 : ℤ)⟧')⟩,
+  end }
+
+variable (A)
 instance pretriangulated : triangulated.pretriangulated (bounded_derived_category A) :=
-sorry
+{ distinguished_triangles := { T |
+    ∃ (S : triangle (bounded_homotopy_category A))
+      (hS : S ∈ dist_triang (bounded_homotopy_category A))
+      (f : T ⟶ replace_triangle S), is_iso f },
+  isomorphic_distinguished := sorry,
+  contractible_distinguished := sorry,
+  distinguished_cocone_triangle := sorry,
+  rotate_distinguished_triangle := sorry,
+  complete_distinguished_triangle_morphism := sorry }
 
 end bounded_derived_category
