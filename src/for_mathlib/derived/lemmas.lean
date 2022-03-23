@@ -177,10 +177,29 @@ begin
   apply is_quasi_iso.cond,
 end
 
+instance is_quasi_iso_comp {X Y Z : 𝒦} (f : X ⟶ Y) (g : Y ⟶ Z)
+  [is_quasi_iso f] [is_quasi_iso g] : is_quasi_iso (f ≫ g) :=
+begin
+  constructor, intros i,
+  simp only [functor.map_comp],
+  apply_instance,
+end
+
+instance is_quasi_iso_of_is_iso {X Y : 𝒦} (f : X ⟶ Y) [is_iso f] : is_quasi_iso f :=
+begin
+  constructor,
+  intros i, apply_instance
+end
+
+example {X Y Z : 𝒦} (f : X ⟶ Y) (g : Y ⟶ Z)
+  [hf : is_quasi_iso f] [hg : is_iso g] :
+  is_quasi_iso (f ≫ g) := infer_instance
+/-
 instance is_quasi_iso_comp_iso {X Y Z : 𝒦} (f : X ⟶ Y) (g : Y ⟶ Z)
   [hf : is_quasi_iso f] [hg : is_iso g] :
-  is_quasi_iso (f ≫ g) :=
+  is_quasi_iso (f ≫ g) := infer_instance
 { cond := λ i, by { rw (homology_functor A (complex_shape.up ℤ) i).map_comp, apply_instance, } }
+-/
 
 -- Move This
 @[simp] lemma is_iso_neg_iff (A : Type*) [category A]
