@@ -21,7 +21,7 @@ open laurent_measures_ses ProFiltPseuNormGrpWithTinv₁
 
 section phi
 
-variables (r : ℝ≥0) [fact (0 < r)] [fact (r ≤ 1)]
+variables (r : ℝ≥0) [fact (0 < r)] [fact (r < 1)]
 
 abbreviation finCHFPNG₁ :=
 fintype_functor r ⋙ to_CompHausFiltPseuNormGrp₁.{u} r
@@ -53,22 +53,15 @@ def Φ_profinite_rescaled := Profinite.extend_nat_trans (Φ_finite_rescaled r)
 def Φ_condensed_rescaled :=
 whisker_right (Φ_profinite_rescaled r) (CompHausFiltPseuNormGrp₁.to_Condensed)
 
----- NOTE: this is the wrong approach, we need to reduce to finite `S`
--- instance mono_aux (S : Profinite.{u}) :
---   mono ((CompHausFiltPseuNormGrp₁.to_PNG₁.{u} ⋙ PseuNormGrp₁.to_Ab.{u}).map
---     ((Φ_profinite_rescaled.{u} r).app S)) :=
--- begin
---   rw [AddCommGroup.mono_iff_ker_eq_bot, eq_bot_iff],
---   intros x hx,
---   rw add_subgroup.mem_bot,
---   dsimp at hx, sorry,
--- end
-
 lemma mono (S : Profinite.{u}) : mono ((Φ_condensed_rescaled r).app S) :=
 begin
----- NOTE: this is the wrong approach, we need to reduce to finite `S`
-  -- refine condensed.mono_to_Condensed_map _
-  sorry
+  refine condensed.mono_to_Condensed_map _ _,
+  revert S,
+  refine CompHausFiltPseuNormGrp₁.exact_with_constant_extend_zero_left _ _ _ _ _ _,
+  intro S,
+  apply_with CompHausFiltPseuNormGrp₁.exact_with_constant_of_mono { instances := ff },
+  rw [AddCommGroup.mono_iff_ker_eq_bot, eq_bot_iff],
+  exact injective_ϕ,
 end
 
 end phi
@@ -104,16 +97,20 @@ def Θ_condensed :
   condensedCH r ⟶ real_measures.condensed p :=
 whisker_right (Θ_profinite p) (CompHausFiltPseuNormGrp₁.to_Condensed)
 
----- NOTE: this is the wrong approach, we need to reduce to finite `S`
--- instance epi_aux  (S : Profinite.{u}) :
---   epi ((CompHausFiltPseuNormGrp₁.to_PNG₁ ⋙ PseuNormGrp₁.to_Ab).map ((Θ_profinite r).app S)) :=
--- sorry
-
 lemma epi (S : Profinite.{u}) : epi ((Θ_condensed r).app S) :=
 begin
----- NOTE: this is the wrong approach, we need to reduce to finite `S`
---   refine condensed.epi_to_Condensed_map _ _ _ _,
-  all_goals { sorry },
+  refine condensed.epi_to_Condensed_map _ sorry sorry _,
+  revert S,
+  refine CompHausFiltPseuNormGrp₁.exact_with_constant_extend_zero_right _ _ _ _ _ _,
+  intro S,
+  apply_with CompHausFiltPseuNormGrp₁.exact_with_constant_of_epi { instances := ff },
+  { rw [AddCommGroup.epi_iff_surjective],
+    intros x,
+    haveI : fact ((0:ℝ) < 1/2) := ⟨by { norm_num, }⟩,
+    haveI : fact ((1/2:ℝ) < 1) := ⟨by { norm_num, }⟩,
+    exact theta.ϑ_surjective (1/2) _ p _ x, },
+  { show ∀ (c : ℝ≥0), _ ⊆ (Θ r S) '' (pseudo_normed_group.filtration (laurent_measures _ _) _),
+    sorry }
 end
 
 end theta
