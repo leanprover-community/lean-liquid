@@ -11,6 +11,8 @@ import for_mathlib.homology_iso
 import for_mathlib.projective_replacement
 -- import for_mathlib.arrow_preadditive
 
+import hacks_and_tricks.asyncI
+
 noncomputable theory
 
 open category_theory category_theory.limits category_theory.triangulated
@@ -104,6 +106,7 @@ begin
   let r' : W' ⟶ T' := ⟨T.obj₁.π, T.obj₂.π, q, hWT, sq2, sq3⟩,
   haveI : is_quasi_iso r.hom₃, { exact is_quasi_iso_of_triangle W' T' hW hT r' },
   haveI : is_K_projective W.obj₃.val,
+  by asyncI
   { haveI : is_K_projective W'.obj₁ := show is_K_projective T.obj₁.replace.val, by apply_instance,
     haveI : is_K_projective W'.obj₂ := show is_K_projective T.obj₂.replace.val, by apply_instance,
     exact homotopy_category.is_K_projective_of_triangle W' hW },
@@ -112,11 +115,14 @@ begin
   haveI : is_K_projective S.obj₃.val := show is_K_projective T.obj₃.replace.val, by apply_instance,
   apply mem_distinguished_of_iso _ hW,
   refine ⟨⟨𝟙 _,𝟙 _, lift q T.obj₃.π, _, _, _⟩,⟨𝟙 _,𝟙 _, lift T.obj₃.π q, _,_,_⟩,_,_⟩,
+  asyncI
   { dsimp, rw [category.comp_id, category.id_comp], },
+  asyncI
   { dsimp [S, replace_triangle],
     rw category.id_comp,
     apply lift_unique,
     erw [category.assoc, lift_lifts], exact sq2, },
+  asyncI
   { dsimp [S, replace_triangle],
     rw [category_theory.functor.map_id, category.comp_id],
     haveI : is_quasi_iso
@@ -126,12 +132,15 @@ begin
     erw [category.assoc, lift_lifts, lift_lifts_assoc],
     exact sq3,
     assumption },
+  asyncI
   { dsimp, rw [category.id_comp, category.comp_id] },
+  asyncI
   { dsimp [S, replace_triangle],
     rw category.id_comp,
     apply lift_ext q,
     erw [category.assoc, lift_lifts, lift_lifts, sq2],
     assumption },
+  asyncI
   { dsimp [S, replace_triangle],
     rw [category_theory.functor.map_id, category.comp_id],
     haveI : is_quasi_iso
@@ -140,12 +149,15 @@ begin
     apply lift_ext (T.obj₁.π⟦(1 : ℤ)⟧'),
     erw [category.assoc, lift_lifts, sq3, lift_lifts_assoc],
     assumption },
+  asyncI
   { ext; dsimp, rw category.id_comp, rw category.id_comp,
     apply lift_ext q, erw [category.assoc, lift_lifts, lift_lifts, category.id_comp],
     assumption },
+  asyncI
   { ext; dsimp, rw category.id_comp, rw category.id_comp,
     apply lift_ext T.obj₃.π, erw [category.assoc, lift_lifts, lift_lifts, category.id_comp],
     assumption },
+  asyncI
   { dsimp [W, S, replace_triangle],
     rw lift_lifts },
 end
@@ -154,7 +166,7 @@ end
 def Ext0 : 𝒦ᵒᵖ ⥤ 𝒦 ⥤ Ab :=
 { obj := λ X, preadditive_yoneda.flip.obj (opposite.op $ X.unop.replace),
   map := λ X₁ X₂ f, preadditive_yoneda.flip.map (lift (X₂.unop.π ≫ f.unop) X₁.unop.π).op,
-  map_id' := begin
+  map_id' := by asyncI {
     intros X,
     ext Y e,
     dsimp [preadditive_yoneda, preadditive_yoneda_obj],
@@ -163,9 +175,8 @@ def Ext0 : 𝒦ᵒᵖ ⥤ 𝒦 ⥤ Ab :=
     convert category.id_comp _,
     symmetry,
     apply lift_unique,
-    simp,
-  end,
-  map_comp' := begin
+    simp, },
+  map_comp' := by asyncI {
     intros X₁ X₂ X₃ f g,
     ext Y e,
     dsimp,
@@ -176,8 +187,8 @@ def Ext0 : 𝒦ᵒᵖ ⥤ 𝒦 ⥤ Ab :=
     congr' 1,
     symmetry,
     apply lift_unique,
-    simp,
-  end } .
+    simp } }
+.
 
 def Ext (i : ℤ) : 𝒦ᵒᵖ ⥤ 𝒦 ⥤ Ab :=
 Ext0 ⋙ (whiskering_left _ _ _).obj (shift_functor _ i)
@@ -189,20 +200,19 @@ def replacement_iso (P₁ P₂ X : 𝒦) [is_K_projective P₁.val] [is_K_projec
   (f₁ : P₁ ⟶ X) (f₂ : P₂ ⟶ X) [is_quasi_iso f₁] [is_quasi_iso f₂] : P₁ ≅ P₂ :=
 { hom         := lift f₁ f₂,
   inv         := lift f₂ f₁,
-  hom_inv_id' := begin
+  hom_inv_id' := by asyncI {
     have : 𝟙 P₁ = lift f₁ f₁,
     { apply lift_unique, simp only [category.id_comp] },
     rw this,
     apply lift_unique,
-    simp only [category.assoc, lift_lifts],
-  end,
-  inv_hom_id' := begin
+    simp only [category.assoc, lift_lifts], },
+  inv_hom_id' := by asyncI {
     have : 𝟙 P₂ = lift f₂ f₂,
     { apply lift_unique, simp only [category.id_comp] },
       rw this,
     apply lift_unique,
-    simp only [category.assoc, lift_lifts],
-  end } .
+    simp only [category.assoc, lift_lifts], } }
+.
 
 @[simps]
 def Ext_iso
