@@ -22,6 +22,7 @@ variables (F : 𝒜 ⥤ 𝒜) [preserves_filtered_colimits F]
 -- These extra hypotheses are certainly satisfies by
 -- `BD = breen_deligne.package.eg` and
 -- `F` = "free condensed abelian group"
+-- Also missing: the condition that `A` is torsion free.
 lemma main_lemma_bdd (A : 𝒜ᵒᵖ) (B : 𝒜) (f : A ⟶ A) (g : B ⟶ B) (j : ℤ) :
   (∀ i ≤ j, is_iso $ ((Ext' i).map f).app B - ((Ext' i).obj A).map g) ↔
   (∀ i ≤ j, is_iso $
