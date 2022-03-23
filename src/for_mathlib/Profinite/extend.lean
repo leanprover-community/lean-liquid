@@ -207,9 +207,19 @@ begin
   dsimp [extend],
   simp only [limit.lift_π_assoc, change_cone_π_app, limit.cone_π, category.assoc,
     ← G.map_comp],
-  sorry
+  convert (limit.w _ _).symm,
+  swap,
+  { apply hom_of_le, intros x y h, dsimp [discrete_quotient.comap] at h,
+    change _ = _ at h, dsimp [Profinite.as_limit_cone] at h,
+    exact quotient.exact' h },
+  ext t, rcases t with ⟨t⟩,
+  dsimp,
+  let E : ↥(X.fintype_diagram.obj T) ≃ (⊥ : discrete_quotient T) :=
+    equiv.of_bijective _ discrete_quotient.proj_bot_bijective,
+  change E.symm _ = _,
+  apply_fun E,
+  rw equiv.apply_symm_apply, refl,
 end
-
 
 lemma extend_nat_trans_ext {F G : Fintype ⥤ C}
   [∀ X : Profinite, has_limit (X.fintype_diagram ⋙ F)]
