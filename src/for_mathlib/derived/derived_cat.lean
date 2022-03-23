@@ -179,4 +179,49 @@ instance pretriangulated : triangulated.pretriangulated (bounded_derived_categor
   rotate_distinguished_triangle := sorry,
   complete_distinguished_triangle_morphism := sorry }
 
+variable {A}
+@[simps]
+def lift {C : Type*} [category C] (F : bounded_homotopy_category A ⥤ C) :
+  bounded_derived_category A ⥤ C :=
+{ obj := λ X, F.obj X.val,
+  map := λ X Y f, F.map f.val,
+  map_id' := λ X, F.map_id _,
+  map_comp' := λ X Y Z f g, F.map_comp _ _ }
+
+noncomputable
+def localize_lift {C : Type*} [category C]
+  (F : bounded_homotopy_category A ⥤ C)
+  [∀ (X Y : bounded_homotopy_category A) (f : X ⟶ Y)
+    [h : is_quasi_iso f], is_iso (F.map f)] :
+  localization_functor A ⋙ lift F ≅ F :=
+nat_iso.of_components
+(λ X, as_iso $ F.map X.π)
+begin
+  intros X Y f,
+  dsimp,
+  simp only [← F.map_comp],
+  congr' 1,
+  rw bounded_homotopy_category.lift_lifts,
+end
+
+@[simps]
+noncomputable
+def localization_iso (X : bounded_derived_category A) :
+  (localization_functor A).obj X.val ≅ X :=
+{ hom := ⟨X.val.π⟩,
+  inv := ⟨bounded_homotopy_category.lift (𝟙 _) X.val.π⟩,
+  hom_inv_id' := sorry,
+  inv_hom_id' := sorry }
+
+noncomputable
+def lift_unique {C : Type*} [category C]
+  (F : bounded_homotopy_category A ⥤ C)
+  [∀ (X Y : bounded_homotopy_category A) (f : X ⟶ Y)
+    [h : is_quasi_iso f], is_iso (F.map f)]
+  (G : bounded_derived_category A ⥤ C)
+  (e : F ≅ localization_functor A ⋙ G) :
+  lift F ≅ G :=
+nat_iso.of_components
+(λ X, e.app X.val ≪≫ G.map_iso (localization_iso _)) sorry
+
 end bounded_derived_category
