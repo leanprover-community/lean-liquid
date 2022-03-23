@@ -153,9 +153,19 @@ instance has_zero_nat_trans_CHFPNG₁ {𝒞 : Type*} [category 𝒞]
   has_zero (A ⟶ B) :=
 ⟨⟨0, λ S T f, by { ext t, exact (B.map f).map_zero.symm }⟩⟩
 
+@[simp] lemma zero_app {𝒞 : Type*} [category 𝒞] (A B : 𝒞 ⥤ CompHausFiltPseuNormGrp₁.{u}) (S) :
+  (0 : A ⟶ B).app S = 0 := rfl
+
 @[simp] lemma Profinite.extend_nat_trans_zero (A B : Fintype ⥤ CompHausFiltPseuNormGrp₁.{u}) :
   Profinite.extend_nat_trans (0 : A ⟶ B) = 0 :=
-sorry
+begin
+  ext S : 2,
+  refine is_limit.hom_ext (limit.is_limit _) _,
+  intro j,
+  simp only [Profinite.extend_nat_trans_app, limit.cone_π, lim_map_π, whisker_left_app, zero_app],
+  ext,
+  exact (limit.π (S.fintype_diagram ⋙ B) j).map_zero.symm,
+end
 
 lemma exact_with_constant_extend_zero_left (A B C : Fintype ⥤ CompHausFiltPseuNormGrp₁.{u})
   (g : B ⟶ C) (r : ℝ≥0)

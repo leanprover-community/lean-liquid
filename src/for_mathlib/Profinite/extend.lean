@@ -193,4 +193,15 @@ begin
   simp,
 end
 
+lemma extend_nat_trans_ext {F G : Fintype ⥤ C}
+  [∀ X : Profinite, has_limit (X.fintype_diagram ⋙ F)]
+  [∀ X : Profinite, has_limit (X.fintype_diagram ⋙ G)]
+  (α β : extend F ⟶ extend G)
+  (h : whisker_left Fintype.to_Profinite α = whisker_left Fintype.to_Profinite β) :
+  α = β :=
+begin
+  -- jmc : is this even true?
+  sorry
+end
+
 end Profinite
