@@ -67,4 +67,91 @@ begin
     apply_instance }
 end
 
+local attribute [instance] limits.has_zero_object.has_zero
+
+-- MOVE THIS
+instance zero_is_K_projective : is_K_projective (0 : bounded_homotopy_category A).val :=
+begin
+  constructor,
+  introsI Y _ f, ext,
+end
+
+noncomputable
+instance has_zero_object : limits.has_zero_object (bounded_derived_category A) :=
+{ zero := of 0,
+  unique_to := λ X,
+  { default := ⟨0⟩,
+    uniq := λ a, by { ext1, cases a, dsimp at *, apply limits.has_zero_object.from_zero_ext } },
+  unique_from := λ X,
+  { default := ⟨0⟩,
+    uniq := λ a, by { ext1, cases a, dsimp at *, apply limits.has_zero_object.to_zero_ext } } }
+
+noncomputable
+instance has_shift : has_shift (bounded_derived_category A) ℤ := has_shift_mk _ _ $
+{ F := λ i,
+  { obj := λ X,
+    { val := X.val⟦i⟧,
+      proj := by { dsimp, apply_instance } },
+    map := λ X Y f, ⟨f.val⟦i⟧'⟩,
+    map_id' := λ X, by { ext1, dsimp, apply category_theory.functor.map_id },
+    map_comp' := λ X Y Z f g, by { ext1, dsimp, apply category_theory.functor.map_comp } },
+  ε :=
+  { hom :=
+    { app := λ X, ⟨(shift_zero _ _).inv⟩,
+      naturality' := sorry },
+    inv :=
+    { app := λ X, ⟨(shift_zero _ _).hom⟩,
+      naturality' := sorry },
+    hom_inv_id' := sorry,
+    inv_hom_id' := sorry },
+  μ := λ m n,
+  { hom :=
+    { app := λ X, ⟨(shift_add _ _ _).inv⟩,
+      naturality' := sorry },
+    inv :=
+    { app := λ X, ⟨(shift_add _ _ _).hom⟩,
+      naturality' := sorry },
+    hom_inv_id' := sorry,
+    inv_hom_id' := sorry },
+  associativity := sorry,
+  left_unitality := sorry,
+  right_unitality := sorry }
+
+@[simps]
+instance preadditive : preadditive (bounded_derived_category A) :=
+{ hom_group := λ P Q,
+  { add := λ f g, ⟨f.val + g.val⟩,
+    add_assoc := sorry,
+    zero := ⟨0⟩,
+    zero_add := sorry,
+    add_zero := sorry,
+    nsmul := λ n f, ⟨n • f.val⟩,
+    nsmul_zero' := sorry,
+    nsmul_succ' := sorry,
+    neg := λ f, ⟨-f.val⟩,
+    sub := λ f g, ⟨f.val - g.val⟩,
+    sub_eq_add_neg := sorry,
+    zsmul := λ n f, ⟨n • f.val⟩,
+    zsmul_zero' := sorry,
+    zsmul_succ' := sorry,
+    zsmul_neg' := sorry,
+    add_left_neg := sorry,
+    add_comm := sorry },
+  add_comp' := sorry,
+  comp_add' := sorry }
+
+instance additive (n : ℤ) : (shift_functor (bounded_derived_category A) n).additive :=
+{ map_add' := begin
+    intros P Q f g,
+    ext1,
+    dsimp,
+    erw ← (shift_functor (bounded_homotopy_category A) n).map_add,
+    refl,
+  end }
+
+open category_theory.triangulated
+
+instance pretriangulated : triangulated.pretriangulated (bounded_derived_category A) :=
+sorry
+
 end bounded_derived_category
