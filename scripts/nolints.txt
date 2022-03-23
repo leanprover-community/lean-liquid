@@ -2,7 +2,7 @@ import .all
 run_cmd tactic.skip
 
 -- Lbar/ext.lean
-apply_nolint Lbar.Ext_iso_zero def_lemma
+apply_nolint Lbar.Tinv_sub unused_arguments
 apply_nolint Lbar.condensed unused_arguments
 
 -- Lbar/functor.lean
@@ -169,17 +169,21 @@ apply_nolint category_theory.triangulated.triangle.iso.of_components unused_argu
 apply_nolint category_theory.triangulated.triangle.left_unitality_aux unused_arguments
 apply_nolint category_theory.triangulated.triangle.map_triangle_shift_functor unused_arguments
 apply_nolint category_theory.triangulated.triangle.right_unitality_aux unused_arguments
+apply_nolint category_theory.triangulated.triangle.shift_add_comp_eq_to_hom unused_arguments
+apply_nolint category_theory.triangulated.triangle.shift_add_comp_eq_to_hom' unused_arguments
+apply_nolint category_theory.triangulated.triangle.shift_comm_eq_eq_to_hom unused_arguments
 
 -- laurent_measures/basic.lean
 apply_nolint laurent_measures.laurent_measures.norm_nonneg dup_namespace
 
 -- laurent_measures/ses.lean
-apply_nolint laurent_measures_ses.C_D def_lemma
 apply_nolint laurent_measures_ses.box unused_arguments
-apply_nolint laurent_measures_ses.equiv_S_pi_ϖ unused_arguments
-apply_nolint laurent_measures_ses.equiv_S_ϖ_c def_lemma
-apply_nolint laurent_measures_ses.real_measures.module unused_arguments
 apply_nolint laurent_measures_ses.real_measures.topological_space unused_arguments
+
+-- laurent_measures/ses2.lean
+apply_nolint laurent_measures.CHFPNG₁ unused_arguments
+apply_nolint laurent_measures.finCHFPNG₁ unused_arguments
+apply_nolint laurent_measures.rescale_preserves_limits_of_shape_discrete_quotient unused_arguments
 
 -- laurent_measures/theta.lean
 apply_nolint theta.aux_y unused_arguments
