@@ -23,11 +23,129 @@ structure exact_with_constant (f : A ⟶ B) (g : B ⟶ C) (r : ℝ≥0) : Prop :
 (exact : exact ((to_PNG₁ ⋙ PseuNormGrp₁.to_Ab).map f) ((to_PNG₁ ⋙ PseuNormGrp₁.to_Ab).map g))
 (cond : ∀ c : ℝ≥0, g ⁻¹' {0} ∩ (filtration B c) ⊆ f '' (filtration A (r * c)))
 
+-- move this
+@[simps obj_obj obj_map_to_fun map_app {fully_applied := ff}]
+def Filtration : ℝ≥0 ⥤ CompHausFiltPseuNormGrp₁.{u} ⥤ CompHaus.{u} :=
+{ obj := λ c,
+  { obj := λ M, CompHaus.of (pseudo_normed_group.filtration M c),
+    map := λ M N f, ⟨f.level, f.level_continuous c⟩,
+    map_id' := by { intros, ext, refl },
+    map_comp' := by { intros, ext, refl } },
+  map := λ c₁ c₂ h,
+  { app := λ M, ⟨@pseudo_normed_group.cast_le _ _ c₁ c₂ ⟨h.le⟩,
+      @comphaus_filtered_pseudo_normed_group.continuous_cast_le _ _ c₁ c₂ ⟨h.le⟩⟩ },
+  map_id' := by { intros, ext, refl },
+  map_comp' := by { intros, ext, refl } }
+.
+
+instance mono_Filtration_map_app (c₁ c₂ : ℝ≥0) (h : c₁ ⟶ c₂) (M) :
+  mono ((Filtration.map h).app M) :=
+by { rw CompHaus.mono_iff_injective, convert injective_cast_le _ _ }
+
+namespace exact_with_constant
+noncomputable theory
+
+variables (f : A ⟶ B) (g : B ⟶ C) (r c : ℝ≥0) [fact (1 ≤ r)]
+
+def c_le_rc : c ⟶ r * c := hom_of_le $ fact.out _
+
+def P1 : CompHaus :=
+pullback ((Filtration.map (c_le_rc r c)).app B) ((Filtration.obj (r * c)).map f)
+
+def pt {X : CompHaus} (x : X) : (⊤_ CompHaus) ⟶ X :=
+⟨λ _, x, continuous_const⟩
+
+def P2 : CompHaus :=
+pullback ((Filtration.obj c).map g) (pt (0 : pseudo_normed_group.filtration C c))
+
+def P1_to_P2 (hfg : f ≫ g = 0) : P1 f r c ⟶ P2 g c :=
+pullback.lift pullback.fst (terminal.from _)
+begin
+  rw [← cancel_mono ((Filtration.map (c_le_rc r c)).app C), category.assoc,
+    nat_trans.naturality, pullback.condition_assoc, ← functor.map_comp, hfg],
+  refl,
+end
+
+lemma P1_to_P2_comp_fst (hfg : f ≫ g = 0) :
+  P1_to_P2 f g r c hfg ≫ pullback.fst = pullback.fst :=
+pullback.lift_fst _ _ _
+
+lemma surjective (h : exact_with_constant f g r) :
+  ∃ (h : f ≫ g = 0), ∀ c, function.surjective (P1_to_P2 f g r c h) :=
+begin
+  have hfg : f ≫ g = 0,
+  { ext x, exact fun_like.congr_fun h.exact.w x },
+  refine ⟨hfg, _⟩,
+  intros c y,
+  let π₁ : P2 g c ⟶ (Filtration.obj c).obj B := pullback.fst,
+  have hy : (π₁ y).val ∈ g ⁻¹' {0} ∩ filtration B c,
+  asyncI
+  { refine ⟨_, (π₁ y).2⟩,
+    simp only [subtype.val_eq_coe, set.mem_preimage, set.mem_singleton_iff],
+    have w := @pullback.condition _ _ _ _ _
+      ((Filtration.obj c).map g) (pt (0 : pseudo_normed_group.filtration C c)) _,
+    have := (fun_like.congr_fun w y),
+    exact congr_arg subtype.val this, },
+  obtain ⟨x, hx, hfx⟩ := h.cond c hy,
+  let s : CompHaus.of punit ⟶ P1 f r c :=
+  terminal.from _ ≫ pullback.lift (pt (π₁ y)) (pt ⟨x, hx⟩) _,
+  swap, { ext t, exact hfx.symm },
+  refine ⟨s punit.star, _⟩,
+  suffices : s ≫ P1_to_P2 f g r c hfg = terminal.from _ ≫ pt y,
+  { exact fun_like.congr_fun this punit.star },
+  delta P1_to_P2,
+  apply category_theory.limits.pullback.hom_ext,
+  { simp only [category.assoc, pullback.lift_fst], refl },
+  { exact subsingleton.elim _ _ }
+end
+
+lemma of_surjective (hfg : f ≫ g = 0) (h : ∀ c, function.surjective (P1_to_P2 f g r c hfg)) :
+  exact_with_constant f g r :=
+begin
+  have H : ∀ (c : ℝ≥0), g ⁻¹' {0} ∩ filtration B c ⊆ f '' filtration A (r * c),
+  { rintro c y ⟨hy, hyc⟩,
+    let t : CompHaus.of punit ⟶ P2 g c :=
+    pullback.lift (terminal.from _ ≫ pt ⟨y, hyc⟩) (terminal.from _) _,
+    swap, { ext, exact hy },
+    obtain ⟨s, hs⟩ := h c (t punit.star),
+    let π₂ : P1 f r c ⟶ (Filtration.obj (r * c)).obj A := pullback.snd,
+    refine ⟨(π₂ s).val, _⟩,
+    let P := CompHaus.of punit,
+    suffices : terminal.from P ≫ pt s ≫ π₂ ≫ ((Filtration.obj (r*c)).map f) =
+      terminal.from _ ≫ pt ⟨y, filtration_mono (fact.out _) hyc⟩,
+    { have hs := fun_like.congr_fun this punit.star, exact ⟨(π₂ s).2, congr_arg subtype.val hs⟩ },
+    have H : terminal.from P ≫ pt s ≫ P1_to_P2 f g r c hfg = t,
+    { apply continuous_map.ext, rintro ⟨⟩, exact hs },
+    rw [← pullback.condition, ← P1_to_P2_comp_fst f g r c hfg, category.assoc,
+      reassoc_of H, pullback.lift_fst_assoc],
+    refl },
+  refine ⟨_, H⟩,
+  { rw AddCommGroup.exact_iff', split,
+    { ext x,
+      have := congr_arg (coe_fn : (A ⟶ C) → (A → C)) hfg,
+      exact congr_fun this x, },
+    { intros y hy,
+      obtain ⟨c, hyc⟩ := B.exhaustive y,
+      obtain ⟨x, hx, rfl⟩ := H c ⟨hy, hyc⟩,
+      exact ⟨x, rfl⟩ } },
+end
+
+lemma iff_surjective :
+  exact_with_constant f g r ↔
+  ∃ (h : f ≫ g = 0), ∀ c, function.surjective (P1_to_P2 f g r c h) :=
+begin
+  split,
+  { exact surjective _ _ _ },
+  { rintro ⟨hfg, h⟩, exact of_surjective f g r hfg h }
+end
+
+end exact_with_constant
+
 lemma exact_with_constant_extend {A B C : Fintype ⥤ CompHausFiltPseuNormGrp₁.{u}}
   (f : A ⟶ B) (g : B ⟶ C) (r : ℝ≥0)
   (hfg : ∀ S, exact_with_constant (f.app S) (g.app S) r) (S : Profinite) :
   exact_with_constant
-   ((Profinite.extend_nat_trans f).app S) ((Profinite.extend_nat_trans g).app S) r :=
+    ((Profinite.extend_nat_trans f).app S) ((Profinite.extend_nat_trans g).app S) r :=
 sorry
 
 instance has_zero_nat_trans_CHFPNG₁ {𝒞 : Type*} [category 𝒞]
@@ -124,6 +242,7 @@ begin
 end
 
 open comphaus_filtered_pseudo_normed_group
+open CompHausFiltPseuNormGrp₁.exact_with_constant (P1 P2 P1_to_P2 P1_to_P2_comp_fst c_le_rc)
 
 lemma exact_of_exact_with_constant {A B C : CompHausFiltPseuNormGrp₁.{u}}
   (f : A ⟶ B) (g : B ⟶ C) (r : ℝ≥0) (hr : 1 ≤ r)
@@ -132,67 +251,40 @@ lemma exact_of_exact_with_constant {A B C : CompHausFiltPseuNormGrp₁.{u}}
 begin
   rw exact_iff_ExtrDisc,
   intro S,
+  haveI h1r : fact (1 ≤ r) := ⟨hr⟩,
+  rw exact_with_constant.iff_surjective at hfg,
+  rcases hfg with ⟨hfg, H⟩,
   simp only [subtype.val_eq_coe, to_Condensed_map, CompHausFiltPseuNormGrp.Presheaf.map_app,
     whisker_right_app, Ab.exact_ulift_map],
   rw AddCommGroup.exact_iff',
   split,
-  { ext x s,
-    simp only [subtype.val_eq_coe, CompHausFiltPseuNormGrp.presheaf.map_apply, function.comp_app,
-      category_theory.comp_apply, AddCommGroup.zero_apply,
-      strict_comphaus_filtered_pseudo_normed_group_hom.to_chfpsng_hom_to_fun],
-    exact fun_like.congr_fun hfg.exact.w (x.1 s), },
+  { show @CompHausFiltPseuNormGrp.presheaf.map.{u}
+      (enlarging_functor.obj A) (enlarging_functor.obj C)
+      (@strict_comphaus_filtered_pseudo_normed_group_hom.to_chfpsng_hom.{u u} A C _ _ (f ≫ g))
+      (unop.{u+2} (ExtrDisc_to_Profinite.{u}.op.obj (op S))) = 0,
+    rw hfg, ext x s, refl, },
   { rintro ⟨_, c, y₀ : S.val → filtration B c, hy₀, rfl⟩ hy,
     dsimp at hy ⊢,
-    simp only [add_monoid_hom.mem_ker, add_monoid_hom.mem_range, function.comp,
-      strict_comphaus_filtered_pseudo_normed_group_hom.to_chfpsng_hom_to_fun,
-      CompHausFiltPseuNormGrp.presheaf.map_apply] at hy ⊢,
-    let f₀ : (CompHaus.of $ filtration A (r * c)) ⟶ (CompHaus.of $ filtration B (r * c)) :=
-      (CompHausFiltPseuNormGrp₁.level.obj (r * c)).map f,
-    let g₀ : (CompHaus.of $ filtration B c) ⟶ (CompHaus.of $ filtration C c) :=
-      (CompHausFiltPseuNormGrp₁.level.obj c).map g,
-    let K : set (filtration B c) := g₀ ⁻¹' {(0 : filtration C c)},
-    have K_cmpt : is_compact K := (is_closed_singleton.preimage g₀.continuous).is_compact,
-    rw is_compact_iff_compact_space at K_cmpt,
-    have aux : fact (c ≤ r * c),
-    { refine ⟨_⟩, transitivity 1 * c, rw one_mul, exact mul_le_mul' hr le_rfl },
-    resetI,
-    let α : (CompHaus.of $ K) ⟶ (CompHaus.of $ filtration B (r * c)) :=
-      ⟨cast_le ∘ (coe : K → filtration B c), (continuous_cast_le _ _).comp continuous_subtype_val⟩,
-    let Z := pullback α f₀,
-    have hZ : function.surjective (pullback.fst : Z ⟶ _),
-    { rintro (b : K),
-      have hb : (b : B) ∈ g ⁻¹' {0} ∩ filtration B c,
-      { refine ⟨_, b.1.2⟩, have := b.2, dsimp [K] at this,
-        simp only [set.mem_preimage, set.mem_singleton_iff] at this ⊢,
-        exact congr_arg coe this, },
-      obtain ⟨a, ha⟩ := hfg.cond c hb,
-      let t : CompHaus.of punit ⟶ Z := pullback.lift
-        ⟨λ _, b, continuous_const⟩ ⟨λ _, ⟨a, ha.1⟩, continuous_const⟩ _,
-      swap,
-      { ext ⟨⟩,
-        simp only [CompHaus.coe_comp, continuous_map.coe_mk, function.comp_app, coe_cast_le],
-        exact ha.2.symm, },
-      refine ⟨t punit.star, _⟩,
-      rw [← category_theory.comp_apply, pullback.lift_fst],
-      refl, },
-    let y₀' : S.val → K := λ s, ⟨y₀ s, _⟩,
-    swap, { ext, rw subtype.ext_iff at hy, exact congr_fun hy s, },
-    have hy₀' : continuous y₀' := continuous_subtype_mk _ hy₀,
-    let x : S.val.to_CompHaus ⟶ Z := ExtrDisc.lift' _ hZ ⟨y₀', hy₀'⟩,
-    have hx' : x ≫ (pullback.fst : Z ⟶ _) = ⟨y₀', hy₀'⟩ := ExtrDisc.lift_lifts' _ _ _,
-    let x₀ : S.val → filtration A (r * c) := (pullback.snd : Z ⟶ _) ∘ x,
-    have hx₀ : continuous x₀ := (continuous_map.continuous _).comp x.continuous,
-    have hfx₀ : ∀ s : S.val, f (x₀ s) = y₀ s,
-    { intro s,
-      have := (@pullback.condition _ _ _ _ _ α f₀ _),
-      rw fun_like.ext_iff at this,
-      convert (congr_arg (coe : filtration B _ → B) (this (x s))).symm using 1,
-      rw [fun_like.ext_iff] at hx',
-      simp only [coe_comp, function.comp_apply] at hx' ⊢,
-      rw hx', refl },
+    let y : CompHaus.of S.val ⟶ (Filtration.obj c).obj B := ⟨y₀, hy₀⟩,
+    let t : CompHaus.of S.val ⟶ P2 g c := pullback.lift y (terminal.from _) _,
+    swap,
+    { apply continuous_map.ext, intros a, apply subtype.ext,
+      simp only [add_monoid_hom.mem_ker, CompHausFiltPseuNormGrp.presheaf.map_apply] at hy,
+      have := congr_arg subtype.val hy,
+      exact congr_fun this a },
+    let s := ExtrDisc.lift' _ (H c) t,
+    have hs : s ≫ P1_to_P2 f g r c hfg = t := ExtrDisc.lift_lifts' _ _ _,
+    let π₂ : P1 f r c ⟶ (Filtration.obj (r * c)).obj A := pullback.snd,
+    let x₀ := (s ≫ π₂).1,
+    have hx₀ := (s ≫ π₂).2,
     refine ⟨⟨_, _, x₀, hx₀, rfl⟩, _⟩,
-    ext s,
-    exact hfx₀ s, }
+    apply_fun (λ φ, φ ≫ pullback.fst) at hs,
+    erw [pullback.lift_fst y (terminal.from _)] at hs,
+    rw [category.assoc, P1_to_P2_comp_fst, ← cancel_mono ((Filtration.map (c_le_rc r c)).app B),
+      category.assoc, pullback.condition] at hs,
+    ext z,
+    have := fun_like.congr_fun hs z,
+    exact congr_arg subtype.val this, }
 end
 .
 

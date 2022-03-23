@@ -1,6 +1,8 @@
 import topology.category.Profinite.as_limit
 import for_mathlib.Fintype
 
+import hacks_and_tricks.asyncI
+
 noncomputable theory
 
 namespace Profinite
@@ -20,15 +22,15 @@ def change_cone {X Y : Profinite} (f : X ⟶ Y) (D : cone (X.fintype_diagram ⋙
 { X := D.X,
   π :=
   { app := λ S, D.π.app (S.comap f.continuous) ≫ F.map (discrete_quotient.map $ le_refl _),
-    naturality' := begin
+    naturality' := by asyncI {
       rintros I J h,
       dsimp,
       simp only [category.id_comp, category.assoc],
       rw ← D.w (hom_of_le $ discrete_quotient.comap_mono _ $ le_of_hom h),
       simp only [category.assoc, ← F.map_comp, functor.comp_map],
       congr' 2,
-      ext ⟨t⟩, refl,
-    end } } .
+      ext ⟨t⟩, refl, } } }
+.
 
 -- Assume that C has enough limits.
 variable [∀ X : Profinite, has_limit (X.fintype_diagram ⋙ F)]
@@ -39,7 +41,7 @@ variable [∀ X : Profinite, has_limit (X.fintype_diagram ⋙ F)]
 def extend : Profinite ⥤ C :=
 { obj := λ X, limit (X.fintype_diagram ⋙ F),
   map := λ X Y f, limit.lift _ (change_cone _ f _),
-  map_id' := begin
+  map_id' := by asyncI {
     intros X,
     ext S,
     dsimp,
@@ -48,17 +50,16 @@ def extend : Profinite ⥤ C :=
     change _ ≫ F.map (𝟙 _) = _,
     rw [F.map_id, category.comp_id],
     congr,
-    exact S.comap_id,
-  end,
-  map_comp' := begin
+    exact S.comap_id, },
+  map_comp' := by asyncI {
     intros X Y Z f g,
     ext S,
     dsimp,
     simp only [limit.lift_π, change_cone_π_app,
       limit.cone_π, limit.lift_π_assoc, coe_comp, category.assoc, ← F.map_comp],
     congr,
-    exact discrete_quotient.map_comp _ _,
-  end } .
+    exact discrete_quotient.map_comp _ _, } }
+.
 
 /-- discrete quotients of a finite type has an initial object given by `⊥`. -/
 @[simps]
@@ -79,7 +80,8 @@ nat_iso.of_components (λ X, begin
     Fintype.iso_of_equiv (equiv.of_bijective _ (discrete_quotient.proj_bot_bijective)).symm,
   let g := D.cone_point_unique_up_to_iso E,
   exact g ≪≫ F.map_iso e,
-end) begin
+end) $
+by asyncI {
   intros X Y f,
   letI : topological_space X := ⊥,
   letI : topological_space Y := ⊥,
@@ -96,8 +98,8 @@ end) begin
   simp_rw [← iso.inv_comp_eq, ← category.assoc],
   symmetry,
   rw ← iso.comp_inv_eq,
-  refl,
-end .
+  refl, }
+.
 
 /-
 instance extend_preserves_limit (X : Profinite) : preserves_limit X.diagram (extend F) :=
@@ -129,8 +131,8 @@ nat_iso.of_components (λ X,
       f : X.diagram ⋙ G ≅ X.fintype_diagram ⋙ F := iso_whisker_left _ w,
       E' : cone (X.fintype_diagram ⋙ F) := (cones.postcompose f.hom).obj E,
       hE' : is_limit E' := (is_limit.postcompose_hom_equiv f _).symm hE in
-      hE'.cone_point_unique_up_to_iso (limit.is_limit _) )
-begin
+      hE'.cone_point_unique_up_to_iso (limit.is_limit _) ) $
+by asyncI {
   intros A B f,
   dsimp [is_limit.postcompose_hom_equiv, is_limit.of_cone_equiv,
     is_limit.cone_point_unique_up_to_iso],
@@ -139,8 +141,8 @@ begin
     functor.comp_map, functor.map_cone_π_app, change_cone_π_app, limit.cone_π,
     limit.lift_π_assoc, whisker_left_app, nat_trans.comp_app, category.assoc],
   simp only [← category.assoc, ← G.map_comp],
-  refl,
-end .
+  refl, }
+.
 
 def extend_commutes
   (G : C ⥤ D)
@@ -148,8 +150,8 @@ def extend_commutes
   [∀ X : Profinite.{v}, has_limit (X.fintype_diagram ⋙ F ⋙ G)] :
   extend F ⋙ G ≅ extend (F ⋙ G) :=
 nat_iso.of_components
-(λ X, (is_limit_of_preserves G (limit.is_limit _)).cone_point_unique_up_to_iso (limit.is_limit _))
-begin
+(λ X, (is_limit_of_preserves G (limit.is_limit _)).cone_point_unique_up_to_iso (limit.is_limit _)) $
+by asyncI {
   intros X Y f,
   ext,
   dsimp,
@@ -158,8 +160,7 @@ begin
   erw [limit.lift_π, limit.lift_π_assoc],
   dsimp,
   rw [← G.map_comp, limit.lift_π, ← G.map_comp],
-  refl,
-end
+  refl, }
 
 /-- A natural transformation induces a natural transformation on extensions. -/
 @[simps]
