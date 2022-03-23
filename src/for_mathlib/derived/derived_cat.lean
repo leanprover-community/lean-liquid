@@ -53,19 +53,14 @@ lemma is_iso_localization_functor_map_of_is_quasi_iso
   (X Y : bounded_homotopy_category A) (f : X ⟶ Y)
   [is_quasi_iso f] : is_iso ((localization_functor _).map f) :=
 begin
-  haveI : is_quasi_iso (X.π ≫ f),
-  { have := homotopy_category.is_quasi_iso_comp_iso,
-
-   },
-  let e : Y.replace ⟶ X.replace := bounded_homotopy_category.lift Y.π (X.π ≫ f),
-  use e,
+  use bounded_homotopy_category.lift Y.π (X.π ≫ f),
   split,
-  { ext1, dsimp [e],
+  { ext1, dsimp,
     apply bounded_homotopy_category.lift_ext (X.π ≫ f),
     simp only [category.assoc, bounded_homotopy_category.lift_lifts, category.comp_id,
       category.id_comp],
     apply_instance },
-  { ext1, dsimp [e],
+  { ext1, dsimp,
     apply bounded_homotopy_category.lift_ext Y.π,
     simp only [category.assoc, bounded_homotopy_category.lift_lifts, category.comp_id,
       category.id_comp],
