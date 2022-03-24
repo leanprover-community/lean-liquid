@@ -233,7 +233,26 @@ begin
   let p : S ⟶ of T := S.as_limit_cone.π.app T,
   let E : Fintype.to_Profinite ⋙ extend G ≅ G := extend_extends G,
   apply_fun (λ e, (extend F).map p ≫ e.app ⟨T⟩ ≫ E.hom.app _) at h,
-  simpa [extend_π] using h,
+  simpa only [extend_π] using h,
+end
+
+lemma extend_nat_trans_whisker_left {F G : Fintype ⥤ C}
+  [∀ X : Profinite, has_limit (X.fintype_diagram ⋙ F)]
+  [∀ X : Profinite, has_limit (X.fintype_diagram ⋙ G)]
+  (α : F ⟶ G) :
+  whisker_left Fintype.to_Profinite (extend_nat_trans α) =
+  (extend_extends F).hom ≫ α ≫ (extend_extends G).inv :=
+begin
+  ext S,
+  simp only [lim_map, is_limit.map, whisker_left_app, extend_nat_trans_app, limit.is_limit_lift,
+    limit.lift_π, cones.postcompose_obj_π, nat_trans.comp_app, limit.cone_π, extend_extends_hom_app,
+    extend_extends_inv_app, category.assoc, nat_trans.naturality_assoc,
+    ← G.map_iso_hom, ← G.map_iso_inv, iso.hom_inv_id_assoc],
+  rw [← iso.inv_comp_eq],
+  erw [limit.cone_point_unique_up_to_iso_inv_comp,
+    limit.cone_point_unique_up_to_iso_inv_comp_assoc],
+  simp only [cone_of_diagram_initial_π_app, functor.comp_map],
+  erw [nat_trans.naturality],
 end
 
 end Profinite

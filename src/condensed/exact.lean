@@ -148,6 +148,12 @@ lemma exact_with_constant_extend {A B C : Fintype ⥤ CompHausFiltPseuNormGrp₁
     ((Profinite.extend_nat_trans f).app S) ((Profinite.extend_nat_trans g).app S) r :=
 sorry
 
+-- move this
+instance : has_zero_morphisms (CompHausFiltPseuNormGrp₁.{u}) :=
+{ has_zero := λ M₁ M₂, ⟨0⟩,
+  comp_zero' := λ _ _ f _, rfl,
+  zero_comp' := λ _ _ _ f, by { ext, exact f.map_zero } }
+
 instance has_zero_nat_trans_CHFPNG₁ {𝒞 : Type*} [category 𝒞]
   (A B : 𝒞 ⥤ CompHausFiltPseuNormGrp₁.{u}) :
   has_zero (A ⟶ B) :=
@@ -159,12 +165,10 @@ instance has_zero_nat_trans_CHFPNG₁ {𝒞 : Type*} [category 𝒞]
 @[simp] lemma Profinite.extend_nat_trans_zero (A B : Fintype ⥤ CompHausFiltPseuNormGrp₁.{u}) :
   Profinite.extend_nat_trans (0 : A ⟶ B) = 0 :=
 begin
+  apply Profinite.extend_nat_trans_ext,
+  rw [Profinite.extend_nat_trans_whisker_left],
   ext S : 2,
-  refine is_limit.hom_ext (limit.is_limit _) _,
-  intro j,
-  simp only [Profinite.extend_nat_trans_app, limit.cone_π, lim_map_π, whisker_left_app, zero_app],
-  ext,
-  exact (limit.π (S.fintype_diagram ⋙ B) j).map_zero.symm,
+  simp only [nat_trans.comp_app, whisker_left_app, zero_app, zero_comp, comp_zero],
 end
 
 lemma exact_with_constant_extend_zero_left (A B C : Fintype ⥤ CompHausFiltPseuNormGrp₁.{u})
