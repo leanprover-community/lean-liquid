@@ -144,8 +144,8 @@ by asyncI {
   refl, }
 .
 
-def extend_commutes
-  (G : C ⥤ D)
+@[simps]
+def extend_commutes (G : C ⥤ D)
   [∀ X : Profinite.{v}, preserves_limits_of_shape (discrete_quotient X) G]
   [∀ X : Profinite.{v}, has_limit (X.fintype_diagram ⋙ F ⋙ G)] :
   extend F ⋙ G ≅ extend (F ⋙ G) :=
@@ -155,12 +155,35 @@ by asyncI {
   intros X Y f,
   ext,
   dsimp,
-  simp only [category.assoc, limit.lift_π, change_cone_π_app,
-    limit.cone_π, functor.comp_map],
+  simp only [category.assoc, limit.lift_π, change_cone_π_app, limit.cone_π, functor.comp_map],
   erw [limit.lift_π, limit.lift_π_assoc],
   dsimp,
   rw [← G.map_comp, limit.lift_π, ← G.map_comp],
   refl, }
+
+lemma extend_commutes_comp_extend_extends (G : C ⥤ D)
+  [∀ X : Profinite.{v}, preserves_limits_of_shape (discrete_quotient X) G]
+  [∀ X : Profinite.{v}, has_limit (X.fintype_diagram ⋙ F ⋙ G)] :
+  whisker_left Fintype.to_Profinite (extend_commutes F G).hom ≫ (extend_extends _).hom =
+  (functor.associator _ _ _).inv ≫ (whisker_right (extend_extends _).hom G) :=
+begin
+  ext,
+  simp only [nat_trans.comp_app, whisker_left_app, extend_extends_hom_app, functor.comp_map,
+    functor.associator_inv_app, whisker_right_app, functor.map_comp, category.id_comp,
+    extend_commutes_hom_app],
+  rw [← category.assoc], congr' 1,
+  rw [← iso.eq_comp_inv],
+  ext,
+  simp only [is_limit.cone_point_unique_up_to_iso, category.assoc,
+    functor.map_iso_hom, is_limit.unique_up_to_iso_hom, cones.forget_map,
+    is_limit.lift_cone_morphism_hom, limit.is_limit_lift],
+  erw [limit.lift_π, limit.lift_π],
+  simp only [functor.map_cone_π_app, limit.cone_π, functor.map_iso_inv, cones.forget_map,
+    is_limit.unique_up_to_iso_inv, is_limit.lift_cone_morphism_hom, limit.is_limit_lift,
+    cone_of_diagram_initial_π_app, functor.comp_map, limit_of_diagram_initial],
+  rw [← functor.map_comp], congr' 1, symmetry,
+  exact limit.w _ ((bot_initial x).to j),
+end
 
 /-- A natural transformation induces a natural transformation on extensions. -/
 @[simps]
