@@ -223,6 +223,15 @@ begin
 end
 .
 
+lemma nonstrict_extend_bound_by {F G : Fintype ⥤ CompHausFiltPseuNormGrp₁.{u}}
+  (α : F ⋙ enlarging_functor ⟶ G ⋙ enlarging_functor) (c : ℝ≥0) [fact (0 < c)]
+  (h : ∀ X, (α.app X).bound_by c) (X : Profinite.{u}) :
+  ((nonstrict_extend α c h).app X).bound_by c :=
+begin
+  -- needs a `bound_by.comp` lemma
+  sorry,
+end
+
 lemma nonstrict_extend_ext {F G : Fintype ⥤ CompHausFiltPseuNormGrp₁.{u}}
   (α β : Profinite.extend.{u} F ⋙ enlarging_functor ⟶ Profinite.extend.{u} G ⋙ enlarging_functor)
   (c : ℝ≥0) [fact (0 < c)] (hα : ∀ X, (α.app X).bound_by c) (hβ : ∀ X, (β.app X).bound_by c)
@@ -237,6 +246,6 @@ begin
   -- move this
   haveI : faithful enlarging_functor.{u} := sorry,
   refine ((whiskering_right _ _ _).obj enlarging_functor.{u}).map_injective _,
-  simp only [whiskering_right_obj_map],
-  sorry
+  simp only [whiskering_right_obj_map, whisker_right_left,
+    strictify_nat_trans_enlarging, whisker_left_comp, h],
 end

@@ -33,6 +33,10 @@ def enlarging_functor : CompHausFiltPseuNormGrp₁ ⥤ CompHausFiltPseuNormGrp :
 { obj := λ M, CompHausFiltPseuNormGrp.of M,
   map := λ M₁ M₂ f, f.to_chfpsng_hom }
 
+instance : faithful (enlarging_functor.{u}) :=
+{ map_injective' := λ M₁ M₂ f g h,
+  by { ext x, apply_fun (λ φ, φ.to_fun) at h, exact congr_fun h x } }
+
 instance : concrete_category CompHausFiltPseuNormGrp₁.{u} :=
 { forget :=
   { obj := λ M, M.M,
