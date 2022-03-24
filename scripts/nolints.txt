@@ -78,6 +78,9 @@ apply_nolint category_theory.additive_category_of_abelian instance_priority
 apply_nolint bounded_homotopy_category.lift unused_arguments
 apply_nolint bounded_homotopy_category.lift_ext unused_arguments
 
+-- for_mathlib/derived/derived_cat.lean
+apply_nolint bounded_derived_category.zero_is_K_projective unused_arguments
+
 -- for_mathlib/derived/example.lean
 apply_nolint AddCommGroup.Ext_is_zero_of_one_lt ge_or_gt
 apply_nolint category_theory.ProjectiveResolution.is_projective_resolution unused_arguments
@@ -90,6 +93,9 @@ apply_nolint category_theory.triangulated.is_iso_hom₃ unused_arguments
 apply_nolint category_theory.triangulated.is_iso_of_is_iso_inv_rotate unused_arguments
 apply_nolint category_theory.triangulated.is_iso_of_is_iso_rotate unused_arguments
 apply_nolint category_theory.triangulated.is_iso_triangle_hom_of_is_iso unused_arguments
+
+-- for_mathlib/derived/lemmas.lean
+apply_nolint homotopy_category.is_quasi_iso_of_is_iso instance_priority
 
 -- for_mathlib/derived_functor.lean
 apply_nolint category_theory.functor.left_derived.α unused_arguments
