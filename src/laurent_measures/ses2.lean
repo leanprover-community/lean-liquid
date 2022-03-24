@@ -33,7 +33,7 @@ def Φ_finite_rescaled :
   finCHFPNG₁.{u} r ⋙ CompHausFiltPseuNormGrp₁.rescale.{u u} 3 ⟶ finCHFPNG₁.{u} r :=
 { app := λ S, comphaus_filtered_pseudo_normed_group_hom.strictify
     ((finCHFPNG₁ r).obj S) _ (Φ S) _ (Φ_bound_by_3 S),
-  naturality' := λ S T f, sorry }
+  naturality' := λ S T f, by { ext x t n, apply Φ_natural } }
 
 -- move this
 instance rescale_preserves_limits' (r : ℝ≥0) [fact (0 < r)] :
@@ -127,6 +127,7 @@ lemma exact_with_constant_profinite (S : Profinite) :
 begin
   refine ⟨sorry, sorry, _⟩,
   refine exact_with_constant_extend _ _ _ _ _,
+  clear S, intro S,
   sorry,
 end
 

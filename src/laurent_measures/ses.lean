@@ -21,7 +21,7 @@ universe u
 namespace laurent_measures_ses
 
 open laurent_measures pseudo_normed_group comphaus_filtered_pseudo_normed_group
-  comphaus_filtered_pseudo_normed_group_hom
+open comphaus_filtered_pseudo_normed_group_hom
 open_locale big_operators nnreal
 
 section phi_to_hom
@@ -110,6 +110,14 @@ begin
   suffices : (sh + sh + (-id)).bound_by (1 + 1 + 1),
   { convert this using 1, ext1, dsimp only [Φ_eq_ϕ, ϕ], erw two_nsmul, refl, },
   refine (Hsh.add Hsh).add (mk_of_bound_bound_by _ _ _).neg,
+end
+
+lemma Φ_natural (S T : Fintype) (f : S ⟶ T) (F : ℒ S) (t : T) (n : ℤ) :
+  Φ T (map f F) t n = laurent_measures.map f (Φ S F) t n :=
+begin
+  simp only [Φ_eq_ϕ],
+  dsimp only [ϕ],
+  sorry,
 end
 
 end phi_to_hom
