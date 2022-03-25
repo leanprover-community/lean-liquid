@@ -20,8 +20,21 @@ namespace CompHausFiltPseuNormGrp₁
 variables {A B C : CompHausFiltPseuNormGrp₁.{u}}
 
 structure exact_with_constant (f : A ⟶ B) (g : B ⟶ C) (r : ℝ≥0) : Prop :=
-(exact : exact ((to_PNG₁ ⋙ PseuNormGrp₁.to_Ab).map f) ((to_PNG₁ ⋙ PseuNormGrp₁.to_Ab).map g))
+(comp_eq_zero : f ≫ g = 0)
 (cond : ∀ c : ℝ≥0, g ⁻¹' {0} ∩ (filtration B c) ⊆ f '' (filtration A (r * c)))
+
+lemma exact_with_constant.exact {f : A ⟶ B} {g : B ⟶ C} {r : ℝ≥0} (h : exact_with_constant f g r) :
+  exact ((to_PNG₁ ⋙ PseuNormGrp₁.to_Ab).map f) ((to_PNG₁ ⋙ PseuNormGrp₁.to_Ab).map g) :=
+begin
+  rw AddCommGroup.exact_iff',
+  split,
+  { ext x, have := h.comp_eq_zero, apply_fun (λ φ, φ.to_fun) at this, exact congr_fun this x },
+  { intros y hy,
+    obtain ⟨c, hc⟩ := B.exhaustive y,
+    obtain ⟨a, ha, rfl⟩ := h.cond c ⟨_, hc⟩,
+    { exact ⟨a, rfl⟩ },
+    { simp only [set.mem_preimage, set.mem_singleton_iff], exact hy } },
+end
 
 -- move this
 @[simps obj_obj obj_map_to_fun map_app {fully_applied := ff}]
@@ -120,14 +133,9 @@ begin
       reassoc_of H, pullback.lift_fst_assoc],
     refl },
   refine ⟨_, H⟩,
-  { rw AddCommGroup.exact_iff', split,
-    { ext x,
-      have := congr_arg (coe_fn : (A ⟶ C) → (A → C)) hfg,
-      exact congr_fun this x, },
-    { intros y hy,
-      obtain ⟨c, hyc⟩ := B.exhaustive y,
-      obtain ⟨x, hx, rfl⟩ := H c ⟨hy, hyc⟩,
-      exact ⟨x, rfl⟩ } },
+  ext x,
+  have := congr_arg (coe_fn : (A ⟶ C) → (A → C)) hfg,
+  exact congr_fun this x,
 end
 
 lemma iff_surjective :
@@ -198,9 +206,7 @@ lemma exact_with_constant_of_epi (f : A ⟶ B) [H : epi ((to_PNG₁ ⋙ PseuNorm
   exact_with_constant f (0 : B ⟶ C) r :=
 begin
   fsplit,
-  { exact ((abelian.tfae_epi
-      ((to_PNG₁ ⋙ PseuNormGrp₁.to_Ab).obj C)
-      ((to_PNG₁ ⋙ PseuNormGrp₁.to_Ab).map f)).out 0 2).mp H, },
+  { rw comp_zero },
   { intro c, exact set.subset.trans (set.inter_subset_right _ _) (hf c), }
 end
 
@@ -210,9 +216,7 @@ lemma exact_with_constant_of_mono (g : B ⟶ C) [hg : mono ((to_PNG₁ ⋙ PseuN
   exact_with_constant (0 : A ⟶ B) g 1 :=
 begin
   fsplit,
-  { exact ((abelian.tfae_mono
-      ((to_PNG₁ ⋙ PseuNormGrp₁.to_Ab).obj A)
-      ((to_PNG₁ ⋙ PseuNormGrp₁.to_Ab).map g)).out 0 2).mp hg, },
+  { rw zero_comp },
   { rintro c x ⟨hx, -⟩,
     suffices : x = 0, { subst x, refine ⟨0, zero_mem_filtration _, rfl⟩, },
     simp only [set.mem_preimage, set.mem_singleton_iff] at hx,
