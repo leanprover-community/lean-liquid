@@ -161,6 +161,7 @@ by asyncI {
   rw [← G.map_comp, limit.lift_π, ← G.map_comp],
   refl, }
 
+@[reassoc]
 lemma extend_commutes_comp_extend_extends (G : C ⥤ D)
   [∀ X : Profinite.{v}, preserves_limits_of_shape (discrete_quotient X) G]
   [∀ X : Profinite.{v}, has_limit (X.fintype_diagram ⋙ F ⋙ G)] :
@@ -276,6 +277,31 @@ begin
     limit.cone_point_unique_up_to_iso_inv_comp_assoc],
   simp only [cone_of_diagram_initial_π_app, functor.comp_map],
   erw [nat_trans.naturality],
+end
+
+lemma extend_nat_trans_whisker_right {F G : Fintype ⥤ C}
+  [∀ X : Profinite, has_limit (X.fintype_diagram ⋙ F)]
+  [∀ X : Profinite, has_limit (X.fintype_diagram ⋙ G)]
+  (α : F ⟶ G) (E : C ⥤ D)
+  [∀ X : Profinite.{v}, preserves_limits_of_shape (discrete_quotient X) E]
+  [∀ X : Profinite.{v}, has_limit (X.fintype_diagram ⋙ F ⋙ E)]
+  [∀ X : Profinite.{v}, has_limit (X.fintype_diagram ⋙ G ⋙ E)] :
+  extend_nat_trans (whisker_right α E) =
+  (extend_commutes _ _).inv ≫ whisker_right (extend_nat_trans α) E ≫ (extend_commutes _ _).hom :=
+begin
+  apply extend_nat_trans_ext,
+  simp only [extend_nat_trans_whisker_left, ← whisker_right_left, category.assoc,
+    whisker_left_comp, whisker_right_comp],
+  rw [← iso_whisker_left_inv, iso.eq_inv_comp, iso_whisker_left_hom,
+    extend_commutes_comp_extend_extends_assoc],
+  simp only [← category.assoc, iso.comp_inv_eq],
+  simp only [category.assoc, extend_commutes_comp_extend_extends],
+  ext,
+  simp only [nat_trans.comp_app, functor.associator_hom_app, functor.associator_inv_app],
+  erw [category.id_comp, category.id_comp],
+  simp only [← nat_trans.comp_app, ← iso_whisker_right_hom, ← iso_whisker_right_inv,
+    iso.inv_hom_id],
+  erw [category.comp_id],
 end
 
 end Profinite
