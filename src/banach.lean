@@ -97,6 +97,16 @@ def choose_normed_with_aut (x : ℝ≥0) [fact (0 < x)] :
   norm_T := λ v, by { dsimp, rw [has_p_norm.norm_smul, smul_eq_mul], congr' 2,
     rw abs_eq_self, exact x.coe_nonneg } }
 
+@[simp]
+lemma choose_normed_with_aut_T_hom (x : ℝ≥0) [fact (0 < x)] (v : V) :
+  (@normed_with_aut.T (x ^ p) ⟨V, choose_semi_normed_group V⟩ (V.choose_normed_with_aut x)).hom v =
+  x • v := rfl
+
+@[simp]
+lemma choose_normed_with_aut_T_inv (x : ℝ≥0) [fact (0 < x)] (v : V) :
+  (@normed_with_aut.T (x ^ p) ⟨V, choose_semi_normed_group V⟩ (V.choose_normed_with_aut x)).inv v =
+  x⁻¹ • v := rfl
+
 end pBanach
 
 -- noncomputable
