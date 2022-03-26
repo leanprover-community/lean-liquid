@@ -149,22 +149,22 @@ instance [add_group α] [nnnorm_add_class α] : nnnorm_add_class (S → α) :=
   ..(infer_instance : add_comm_group _) }
 
 /--  Let `r : ℝ≥0` be a non-negative real number and `S : Fintype` a finite type.
-`invpoly r S` is the type of `S`-indexed terms of type `r.normed`, that is, finsupps
+`invpoly' r S` is the type of `S`-indexed terms of type `r.normed`, that is, finsupps
 `ℕ →₀ ℤ` with norm defined using `r⁻¹`. -/
 @[derive add_comm_group]
-def invpoly (r : ℝ≥0) (S : Fintype) := S → r.normed
+def invpoly' (r : ℝ≥0) (S : Fintype) := S → r.normed
 
-namespace invpoly
+namespace invpoly'
 
-instance : inhabited (invpoly r S) := ⟨0⟩
+instance : inhabited (invpoly' r S) := ⟨0⟩
 
-instance : has_nnnorm (invpoly r S) :=
+instance : has_nnnorm (invpoly' r S) :=
 @fintype.sum_nnnorm r.normed ⟨nnnorm⟩ S
 
-instance : nnnorm_add_class (invpoly r S) :=
+instance : nnnorm_add_class (invpoly' r S) :=
 pi.nnnorm_add_class
 
-instance : pseudo_normed_group (invpoly r S) :=
+instance : pseudo_normed_group (invpoly' r S) :=
 std_flt.to_pseudo_normed_group
 
-end invpoly
+end invpoly'
