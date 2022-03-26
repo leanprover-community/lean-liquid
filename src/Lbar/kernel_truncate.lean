@@ -15,7 +15,7 @@ variables {r' : ℝ≥0} [fact (0 < r')] [fact (r' < 1)] {S : Fintype}
 /--  Given `F : laurent_measures r' S`, for each `s : S`, `tail F s` is the restriction of `F s` to
 the non-positive indices, with opposite sign, i.e. a finsupp `ℕ →₀ ℤ`.
 Taken together `tail F` is a term of type `invpoly r' ⟨S⟩`. -/
-def tail : invpoly r' ⟨S⟩ :=
+def tail : invpoly' r' ⟨S⟩ :=
 λ s, ⟨begin
     refine set.finite.to_finset (_ : {n : ℕ | ∃ m : ℤ, m = -n ∧ F s (m) ≠ 0}.finite),
     obtain ⟨d, h⟩ := exists_bdd_filtration (fact.out _ : 0 < r') (fact.out _ : r' < 1) F,
