@@ -8,6 +8,8 @@ import invpoly.bounded
 import pseudo_normed_group.basic
 import pseudo_normed_group.category
 
+import laurent_measures.basic
+
 import for_mathlib.tsum
 
 universe u
@@ -131,30 +133,6 @@ instance : has_sub (ℤ[T⁻¹] S) := ⟨sub⟩
 
 example (a m : ℤ) : (-a)*m=a*(-m) := neg_mul_comm a m
 
--- move me
-instance : has_continuous_smul ℕ ℝ≥0 :=
-{ continuous_smul := begin
-    let f : ℕ × ℝ≥0 → ℝ≥0 × ℝ≥0 := prod.map coe id,
-    have hf : continuous f := continuous.prod_map continuous_bot continuous_id,
-    simpa only [nsmul_eq_mul] using continuous_mul.comp hf,
-end }
-
--- move me
-@[simp] lemma _root_.int.norm_mul (m n : ℤ) : ∥m * n∥ = ∥m∥ * ∥n∥ :=
-by simp only [int.norm_eq_abs, int.cast_mul, abs_mul]
-
--- move me
-@[simp] lemma _root_.int.nnnorm_mul (m n : ℤ) : ∥m * n∥₊ = ∥m∥₊ * ∥n∥₊ :=
-by ext; simp only [coe_nnnorm, int.norm_mul, nonneg.coe_mul]
-
--- move me
-@[simp] lemma _root_.nat.norm_coe_int (n : ℕ) : ∥(n : ℤ)∥ = n :=
-by simp only [int.norm_eq_abs, int.cast_coe_nat, nat.abs_cast]
-
--- move me
-@[simp] lemma _root_.nat.nnnorm_coe_int (n : ℕ) : ∥(n : ℤ)∥₊ = n :=
-by ext; simp only [coe_nnnorm, nat.norm_coe_int, nnreal.coe_nat_cast]
-
 instance : add_comm_monoid (ℤ[T⁻¹] S) :=
 { add_assoc := λ a b c, by { ext, simp only [add_assoc, add_apply] },
   add_comm := λ F G, by { ext, simp only [add_comm, add_apply] },
@@ -269,22 +247,6 @@ end
 
 lemma map_bound' (f : S ⟶ S') (F : ℤ[T⁻¹] S) : ∥map f F∥ ≤ ∥F∥ :=
 by simpa only [← coe_nnnorm, ← nnreal.coe_add, nnreal.coe_le_coe] using map_bound f F
-
-
-/-
-lemma exists_c (F : ℤ[T⁻¹] S) : ∃ (c : ℝ≥0),
-  ∀ s : S, ∑' n, ∥ F s n ∥ * r ^ (-n : ℤ) ≤ c :=
-begin
-  use ∑ s, ∑' n, ∥ F s n ∥ * r ^ (-n : ℤ),
-  { apply finset.sum_nonneg,
-    rintros s -,
-    apply tsum_nonneg,
-    intros n,
-    refine mul_nonneg (norm_nonneg _) (zpow_nonneg _ _),
-    exact nnreal.coe_nonneg r, },
-  { admit },
-end
--/
 
 /-- This lemma puts bounds on where `F s n` can be nonzero. -/
 lemma eq_zero_of_filtration (F : ℤ[T⁻¹] S) (c : ℝ≥0) :
@@ -586,16 +548,6 @@ end
 
 end profinite_structure
 
-/-
---should this be a coercion?
-def c_measures_to_oc (r : ℝ≥0) (c : ℝ≥0) (S : Type*) (hS : fintype S) :
-  c_measures r c S hS → ℤ[T⁻¹] S hS := λ f, ⟨f.to_fun, f.summable⟩
-
-lemma invpoly_are_c (r : ℝ≥0) (S : Type*) (hS : fintype S) (F : ℤ[T⁻¹] S hS) :
-  ∃ (c : ℝ≥0) (f : c_measures r c S hS),
-  c_measures_to_oc r c S hS f = F := by admit
--/
-
 --needed?
 instance : pseudo_normed_group (ℤ[T⁻¹] S) :=
 { filtration := λ c, { F | ∥F∥₊ ≤ c },
@@ -707,15 +659,6 @@ add_monoid_hom.mk' (λ F,
   { to_fun := λ s, Tinv_aux (F s),
     summable' := λ s, Tinv_aux_summable F s })
   (by { intros F G, ext s (_|n); refl })
-
--- move me
-@[simp, to_additive] lemma _root_.finset.prod_attach' {α M : Type*} [comm_monoid M]
-  (s : finset α) (f : s → M) :
-  ∏ a in s.attach, f a = ∏ a in s, if h : a ∈ s then f ⟨a, h⟩ else 1 :=
-begin
-  rw [eq_comm, ← finset.prod_attach, finset.prod_congr rfl],
-  intros, simp only [finset.coe_mem, finset.mk_coe, dite_eq_ite, if_true],
-end
 
 @[simps]
 def Tinv [hr : fact (0 < r)] :

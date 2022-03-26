@@ -1,6 +1,8 @@
 import Lbar.functor
 import laurent_measures.functor
 import laurent_measures.aux_lemmas
+import invpoly.functor
+import condensed.condensify
 
 .
 
@@ -21,6 +23,55 @@ variables (r' : ℝ≥0) [fact (0 < r')] (S : Fintype)
 -- move me
 lemma int.coe_nat_injective : function.injective (coe : ℕ → ℤ) :=
 λ m n h, int.coe_nat_inj h
+
+namespace invpoly
+
+def to_laurent_measures_fun (F : invpoly r' S) : S → ℤ → ℤ
+| s 0       := F s 0
+| s (n+1:ℕ) := 0
+| s -[1+n]  := F s (n+1)
+
+@[simps] def to_laurent_measures (F : invpoly r' S) : laurent_measures r' S :=
+{ to_fun := to_laurent_measures_fun r' S F,
+  summable' := λ s, begin
+    rw ← nnreal.summable_coe,
+    rw ← @summable_subtype_and_compl ℝ ℤ _ _ _ _ _ {n : ℤ | n ≤ 0},
+    split,
+    { sorry /- setup equiv with `ℕ` using `k → -k` and use `F.nnreal_summable s` -/ },
+    { convert summable_zero, ext ⟨((_|n)|n), hn⟩,
+      { simp only [int.of_nat_eq_coe, int.coe_nat_zero, set.mem_compl_eq, set.mem_set_of_eq,
+         le_refl, not_true] at hn,
+        exact hn.elim },
+      { erw [nnnorm_zero, zero_mul, nnreal.coe_zero], },
+      { simp only [set.mem_compl_eq, set.mem_set_of_eq, not_le, int.neg_succ_not_pos] at hn,
+        exact hn.elim }, },
+  end }
+
+lemma to_laurent_measures_injective : function.injective (to_laurent_measures r' S) :=
+begin
+  intros F G h,
+  ext s (_|n),
+  { apply_fun (λ F, F s 0) at h, exact h },
+  { apply_fun (λ F, F s (-n.succ)) at h, exact h }
+end
+
+def to_laurent_measures_addhom : invpoly r' S →+ laurent_measures r' S :=
+add_monoid_hom.mk' (to_laurent_measures r' S) $
+by { intros, ext s ((_|n)|n); refl }
+
+def to_laurent_measures_hom : comphaus_filtered_pseudo_normed_group_with_Tinv_hom r'
+  (invpoly r' S) (laurent_measures r' S) :=
+{ strict' := sorry,
+  continuous' :=  sorry,
+  map_Tinv' := sorry,
+  .. to_laurent_measures_addhom r' S }
+
+def to_laurent_measures_nat_trans :
+  invpoly.fintype_functor r' ⟶ laurent_measures.fintype_functor r' :=
+{ app := λ S, to_laurent_measures_hom r' S,
+  naturality' := sorry }
+
+end invpoly
 
 namespace laurent_measures
 
@@ -105,7 +156,7 @@ end
   end }
 
 @[simps]
-def to_Lbar_fintype_nat_trans : laurent_measures.fintype_functor r' ⟶ Lbar.fintype_functor r' :=
+def to_Lbar_nat_trans : laurent_measures.fintype_functor r' ⟶ Lbar.fintype_functor r' :=
 { app := λ S, to_Lbar_hom r' S,
   naturality' := λ S₁ S₂ f, begin
     ext,
@@ -114,9 +165,21 @@ def to_Lbar_fintype_nat_trans : laurent_measures.fintype_functor r' ⟶ Lbar.fin
       comphaus_filtered_pseudo_normed_group_with_Tinv_hom.coe_mk],
     split_ifs, { simp only [finset.sum_const_zero], }, { refl }
   end }
+.
 
-@[simps]
-def to_Lbar_nat_trans : laurent_measures.profinite r' ⟶ Lbar.functor r' :=
-Profinite.extend_nat_trans $ to_Lbar_fintype_nat_trans r'
+open category_theory ProFiltPseuNormGrpWithTinv₁
+
+theorem short_exact (S : Profinite) :
+  short_exact
+    ((condensify_map
+      (whisker_right (invpoly.to_laurent_measures_nat_trans r') (to_CHFPNG₁ r'))).app S)
+    ((condensify_map
+      (whisker_right (to_Lbar_nat_trans r') (to_CHFPNG₁ r'))).app S) :=
+begin
+  refine condensify_exact _ _ sorry _ sorry _ _ _ _ _ _ S,
+  swap 3, { apply invpoly.to_laurent_measures_injective },
+  swap 5, { apply to_Lbar_surjective },
+  all_goals { sorry }
+end
 
 end laurent_measures
