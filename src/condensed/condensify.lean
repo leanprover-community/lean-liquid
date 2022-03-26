@@ -122,6 +122,10 @@ def condensify_Tinv (F : Fintype.{u} ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r') :
   condensify.{u} (F ⋙ to_CHFPNG₁ r') ⟶ condensify.{u} (F ⋙ to_CHFPNG₁ r') :=
 condensify_nonstrict (Tinv_nat_trans _) r'⁻¹ (Tinv_bound_by _)
 
+def condensify_Tinv2 (F : Fintype.{u} ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r') :
+  condensify.{u} (F ⋙ to_CHFPNG₁ r') ⟶ condensify.{u} (F ⋙ to_CHFPNG₁ r') :=
+condensify_nonstrict (Tinv2_nat_trans _) (r'⁻¹ + 2) (Tinv2_bound_by _)
+
 lemma condensify_map_comp_Tinv {F G : Fintype.{u} ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r'}
   (α : F ⟶ G) :
   condensify_map (whisker_right α (to_CHFPNG₁ r')) ≫ condensify_Tinv G =
@@ -276,24 +280,6 @@ begin
   { intros S c' x H, obtain ⟨x, hx, rfl⟩ := H2b S c' H,
     refine ⟨x, pseudo_normed_group.filtration_mono _ hx, rfl⟩,
     simp only [inv_one, mul_one], },
-  -- apply_with short_exact.mk { instances := ff },
-  -- { apply condensed.mono_to_Condensed_map,
-  --   apply exact_with_constant_extend_zero_left,
-  --   intro S,
-  --   apply_with exact_with_constant_of_mono { instances := ff },
-  --   rw AddCommGroup.mono_iff_injective,
-  --   exact H1 S, },
-  -- { apply condensed.epi_to_Condensed_map _ cβ hcβ,
-  --   apply exact_with_constant_extend_zero_right,
-  --   intro S,
-  --   apply_with exact_with_constant_of_epi { instances := ff },
-  --   swap, { exact H3b S },
-  --   rw AddCommGroup.epi_iff_surjective,
-  --   exact H3a S },
-  -- { apply condensed.exact_of_exact_with_constant _ _ cα hcα,
-  --   apply exact_with_constant_extend,
-  --   intro S,
-  --   refine ⟨H2a S, H2b S⟩, }
 end
 
 -- move me

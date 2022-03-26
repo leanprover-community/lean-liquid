@@ -1,8 +1,7 @@
 import laurent_measures.ses
 import laurent_measures.condensed
 import real_measures.condensed
-import condensed.exact
-import condensed.rescale
+import condensed.condensify
 
 universe u
 
@@ -12,59 +11,9 @@ open category_theory
 
 open_locale nnreal
 
-lemma fact0lt3 : fact ((0 : ℝ≥0) < 3) := ⟨by norm_num⟩
-local attribute [instance] fact0lt3
-
 namespace laurent_measures
 
 open laurent_measures_ses ProFiltPseuNormGrpWithTinv₁
-
-section phi
-
-variables (r : ℝ≥0) [fact (0 < r)] [fact (r < 1)]
-
-abbreviation finCHFPNG₁ :=
-fintype_functor r ⋙ to_CompHausFiltPseuNormGrp₁.{u} r
-
-abbreviation CHFPNG₁ :=
-profinite r ⋙ to_CompHausFiltPseuNormGrp₁.{u} r
-
-def Φ_finite_rescaled :
-  finCHFPNG₁.{u} r ⋙ CompHausFiltPseuNormGrp₁.rescale.{u u} 3 ⟶ finCHFPNG₁.{u} r :=
-{ app := λ S, comphaus_filtered_pseudo_normed_group_hom.strictify
-    ((finCHFPNG₁ r).obj S) _ (Φ S) _ (Φ_bound_by_3 S),
-  naturality' := λ S T f, by { ext x t n, apply Φ_natural } }
-
--- move this
-instance rescale_preserves_limits' (r : ℝ≥0) [fact (0 < r)] :
-  limits.preserves_limits.{u u u+1 u+1}
-  (CompHausFiltPseuNormGrp₁.rescale.{u u} r) :=
-sorry
-
--- move this
-instance rescale_preserves_limits_of_shape_discrete_quotient (X : Profinite.{u}) :
-  limits.preserves_limits_of_shape.{u u u u u+1 u+1} (discrete_quotient X)
-    (to_CompHausFiltPseuNormGrp₁ r ⋙ CompHausFiltPseuNormGrp₁.rescale.{u u} 3) :=
-limits.comp_preserves_limits_of_shape _ _
-
-/-- This doesn't work! We need to rescale the domain! -/
-def Φ_profinite_rescaled := Profinite.extend_nat_trans (Φ_finite_rescaled r)
-
-def Φ_condensed_rescaled :=
-whisker_right (Φ_profinite_rescaled r) (CompHausFiltPseuNormGrp₁.to_Condensed)
-
-lemma mono (S : Profinite.{u}) : mono ((Φ_condensed_rescaled r).app S) :=
-begin
-  refine condensed.mono_to_Condensed_map _ _,
-  revert S,
-  refine CompHausFiltPseuNormGrp₁.exact_with_constant_extend_zero_left _ _ _ _ _ _,
-  intro S,
-  apply_with CompHausFiltPseuNormGrp₁.exact_with_constant_of_mono { instances := ff },
-  rw [AddCommGroup.mono_iff_ker_eq_bot, eq_bot_iff],
-  exact injective_ϕ,
-end
-
-end phi
 
 section theta
 
@@ -89,30 +38,6 @@ def Θ_fintype_nat_trans :
   naturality' := λ S T f, by { ext x t, apply θ_natural, } }
 .
 
-def Θ_profinite : profiniteCH r ⟶ real_measures.profinite.{u} p :=
-Profinite.extend_nat_trans (Θ_fintype_nat_trans.{u} p)
-.
-
-def Θ_condensed :
-  condensedCH r ⟶ real_measures.condensed p :=
-whisker_right (Θ_profinite p) (CompHausFiltPseuNormGrp₁.to_Condensed)
-
-lemma epi (S : Profinite.{u}) : epi ((Θ_condensed r).app S) :=
-begin
-  refine condensed.epi_to_Condensed_map _ sorry sorry _,
-  revert S,
-  refine CompHausFiltPseuNormGrp₁.exact_with_constant_extend_zero_right _ _ _ _ _ _,
-  intro S,
-  apply_with CompHausFiltPseuNormGrp₁.exact_with_constant_of_epi { instances := ff },
-  { rw [AddCommGroup.epi_iff_surjective],
-    intros x,
-    haveI : fact ((0:ℝ) < 1/2) := ⟨by { norm_num, }⟩,
-    haveI : fact ((1/2:ℝ) < 1) := ⟨by { norm_num, }⟩,
-    exact theta.ϑ_surjective (1/2) _ p _ x, },
-  { show ∀ (c : ℝ≥0), _ ⊆ (Θ r S) '' (pseudo_normed_group.filtration (laurent_measures _ _) _),
-    sorry }
-end
-
 end theta
 
 section ses
@@ -122,19 +47,11 @@ local notation `r` := @r p
 
 open CompHausFiltPseuNormGrp₁
 
-lemma exact_with_constant_profinite (S : Profinite) :
-  ∃ C ≥ 1, exact_with_constant ((Φ_profinite_rescaled r).app S) ((Θ_profinite p).app S) C :=
+theorem short_exact (S : Profinite) :
+  short_exact ((condensify_Tinv2 _).app S) ((condensify_map $ Θ_fintype_nat_trans p).app S) :=
 begin
-  refine ⟨sorry, sorry, _⟩,
-  refine exact_with_constant_extend _ _ _ _ _,
-  clear S, intro S,
-  sorry,
-end
-
-lemma exact (S : Profinite) : exact ((Φ_condensed_rescaled r).app S) ((Θ_condensed p).app S) :=
-begin
-  obtain ⟨C, hC, H⟩ := exact_with_constant_profinite p S,
-  exact condensed.exact_of_exact_with_constant _ _ C hC H,
+  refine condensify_nonstrict_exact _ _ (r⁻¹ + 2) (Tinv2_bound_by _) sorry _ sorry _ _ _ _ _ _ _,
+  all_goals { sorry },
 end
 
 end ses
