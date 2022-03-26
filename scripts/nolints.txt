@@ -35,6 +35,9 @@ apply_nolint ProFiltPseuNormGrpWithTinv₁.to_PNG₁ unused_arguments
 -- condensed/condensify.lean
 apply_nolint ProFiltPseuNormGrpWithTinv₁.to_CHFPNG₁ unused_arguments
 
+-- condensed/exact.lean
+apply_nolint CompHausFiltPseuNormGrp₁.exact_with_constant_of_epi unused_arguments
+
 -- condensed/extr/basic.lean
 apply_nolint product_condition_setup.G unused_arguments
 
