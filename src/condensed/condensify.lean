@@ -114,7 +114,7 @@ lemma Tinv_nat_trans_comp {F G : C ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r'} (α
 by { ext X x, exact (α.app X).map_Tinv x }
 
 -- move me
-instance fact_inv_pos : fact (0 < r'⁻¹) := sorry
+instance fact_inv_pos : fact (0 < r'⁻¹) := ⟨nnreal.inv_pos.2 $ fact.out _⟩
 
 set_option pp.universes true
 
