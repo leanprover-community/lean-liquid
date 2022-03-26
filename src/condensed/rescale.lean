@@ -204,7 +204,7 @@ instance preadditive_CompHausFiltPseuNormGrp : preadditive CompHausFiltPseuNormG
 
 section
 
-variables {F G : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}}
+variables {F G H : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}}
 variables (α β : F ⋙ enlarging_functor ⟶ G ⋙ enlarging_functor)
 variables (c cα cβ cαβ : ℝ≥0) [fact (0 < c)] [fact (0 < cα)] [fact (0 < cβ)] [fact (0 < cαβ)]
 
@@ -350,6 +350,43 @@ begin
       nonstrict_extend_whisker_left, preadditive.nsmul_comp, preadditive.comp_nsmul,
       nat_trans.app_nsmul, nat_trans.comp_app, category.id_comp, category.comp_id,
       functor.associator_hom_app, functor.associator_inv_app], }
+end
+
+lemma nonstrict_extend_comp
+  (α : F ⋙ enlarging_functor ⟶ G ⋙ enlarging_functor)
+  (β : G ⋙ enlarging_functor ⟶ H ⋙ enlarging_functor)
+  (hα : ∀ X, (α.app X).bound_by cα) (hβ : ∀ X, (β.app X).bound_by cβ)
+  (hαβ : ∀ X, ((α ≫ β).app X).bound_by cαβ) :
+  nonstrict_extend (α ≫ β) cαβ hαβ = nonstrict_extend α cα hα ≫ nonstrict_extend β cβ hβ :=
+begin
+  refine nonstrict_extend_ext _ _ cαβ (cα * cβ) (nonstrict_extend_bound_by _ _ _) _ _,
+  { sorry /- needs `bound_by.comp` -/ },
+  { simp only [nonstrict_extend_whisker_left, whisker_left_comp, category.assoc,
+      ← iso_whisker_right_hom, ← iso_whisker_right_inv,
+      iso.hom_inv_id_assoc, iso.inv_hom_id_assoc], }
+end
+
+lemma nonstrict_extend_id
+  (hα : ∀ X, (nat_trans.app (𝟙 (F ⋙ enlarging_functor.{u})) X).bound_by cα) :
+  nonstrict_extend (𝟙 _) cα hα = 𝟙 _ :=
+begin
+  refine nonstrict_extend_ext _ _ cα 1 (nonstrict_extend_bound_by _ _ _) _ _,
+  { intro X, exact comphaus_filtered_pseudo_normed_group_hom.mk_of_bound_bound_by _ _ _ },
+  { simp only [nonstrict_extend_whisker_left, whisker_left_comp, category.assoc,
+      ← iso_whisker_right_hom, ← iso_whisker_right_inv, category.id_comp,
+      iso.hom_inv_id_assoc, iso.inv_hom_id_assoc, whisker_left_id'],
+    refl, }
+end
+
+lemma nonstrict_extend_whisker_right_enlarging (α : F ⟶ G) :
+  nonstrict_extend (whisker_right α enlarging_functor) 1
+    (λ X, (comphaus_filtered_pseudo_normed_group_hom.mk_of_strict_strict _ _).bound_by_one) =
+  whisker_right (Profinite.extend_nat_trans α) _ :=
+begin
+  refine nonstrict_extend_ext _ _ 1 1 (nonstrict_extend_bound_by _ _ _)
+    (λ X, (comphaus_filtered_pseudo_normed_group_hom.mk_of_strict_strict _ _).bound_by_one) _,
+  rw [nonstrict_extend_whisker_left, ← whisker_right_left, Profinite.extend_nat_trans_whisker_left],
+  refl
 end
 
 end
