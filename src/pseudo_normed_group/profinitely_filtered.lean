@@ -246,6 +246,9 @@ mk_of_bound f h.some h.some_spec
 
 def strict : Prop := ∀ ⦃c x⦄, x ∈ filtration M₁ c → f x ∈ filtration M₂ c
 
+/-- If `f : comphaus_filtered_pseudo_normed_group_hom M₁ M₂` and `r : ℝ≥0` then
+  `f.bound_by r` is the statement that `f` maps the `c`th filtrand of `M₁` into the `r*c`th
+  filtrand of `M₂`. -/
 def bound_by (C : ℝ≥0) : Prop := ∀ ⦃c x⦄, x ∈ filtration M₁ c → f x ∈ filtration M₂ (C * c)
 
 lemma strict_iff_bound_by_one : f.strict ↔ f.bound_by 1 :=
