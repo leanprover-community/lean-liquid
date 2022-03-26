@@ -37,6 +37,10 @@ variables {F G H : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}}
 def condensify_map (α : F ⟶ G) : condensify F ⟶ condensify G :=
 whisker_right (Profinite.extend_nat_trans α) _
 
+lemma condensify_map_id (F : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}) :
+  condensify_map (𝟙 F) = 𝟙 (condensify F) :=
+by simpa only [condensify_map, Profinite.extend_nat_trans_id] using whisker_right_id _
+
 lemma condensify_map_comp (α : F ⟶ G) (β : G ⟶ H) :
   condensify_map (α ≫ β) = condensify_map α ≫ condensify_map β :=
 by simp only [condensify_map, Profinite.extend_nat_trans_comp, whisker_right_comp]
@@ -51,10 +55,27 @@ def Tinv_nat_trans (F : C ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r') :
 { app := λ X, profinitely_filtered_pseudo_normed_group_with_Tinv.Tinv,
   naturality' := λ X Y f, by { ext x, exact ((F.map f).map_Tinv x).symm } }
 
--- def Tinv2_nat_trans (F : C ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r') :
---   (F ⋙ to_CHFPNG₁.{u} r') ⋙ enlarging_functor ⟶
---   (F ⋙ to_CHFPNG₁.{u} r') ⋙ enlarging_functor :=
--- Tinv_nat_trans F - _
+def Tinv2_nat_trans (F : C ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r') :
+  (F ⋙ to_CHFPNG₁.{u} r') ⋙ enlarging_functor ⟶
+  (F ⋙ to_CHFPNG₁.{u} r') ⋙ enlarging_functor :=
+Tinv_nat_trans F - 2 • 𝟙 _
+
+lemma Tinv_bound_by (F : C ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r') (X : C) :
+  ((Tinv_nat_trans F).app X).bound_by r'⁻¹ :=
+profinitely_filtered_pseudo_normed_group_with_Tinv.Tinv_bound_by
+
+lemma twoid_bound_by (F : C ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r') (X : C) :
+  comphaus_filtered_pseudo_normed_group_hom.bound_by
+    ((2 • 𝟙 ((F ⋙ to_CHFPNG₁ r') ⋙ enlarging_functor)).app X) 2 :=
+begin
+  simp only [nat_trans.app_nsmul, nat_trans.id_app],
+  refine ((comphaus_filtered_pseudo_normed_group_hom.mk_of_bound_bound_by _ 1 _).nsmul 2).mono _ _,
+  norm_num,
+end
+
+lemma Tinv2_bound_by (F : C ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r') (X : C) :
+  ((Tinv2_nat_trans F).app X).bound_by (r'⁻¹ + 2) :=
+(Tinv_bound_by F X).sub (twoid_bound_by F X)
 
 @[reassoc]
 lemma Tinv_nat_trans_comp {F G : C ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r'} (α : F ⟶ G) :
@@ -95,6 +116,65 @@ def condensify_nonstrict
 (functor.associator _ _ _).inv ≫
   whisker_right (nonstrict_extend.{u} α c h) to_Condensed ≫
   (functor.associator _ _ _).hom
+
+section
+
+variables (α β : F ⋙ enlarging_functor.{u} ⟶ G ⋙ enlarging_functor.{u})
+variables (c cα cβ cαβ : ℝ≥0) [fact (0 < c)]  [fact (0 < cα)] [fact (0 < cβ)] [fact (0 < cαβ)]
+
+lemma condensify_nonstrict_map_add
+  (hα : ∀ X, (α.app X).bound_by cα) (hβ : ∀ X, (β.app X).bound_by cβ)
+  (hαβ : ∀ X, ((α + β).app X).bound_by cαβ) :
+  condensify_nonstrict (α + β) cαβ hαβ =
+  condensify_nonstrict α cα hα + condensify_nonstrict β cβ hβ :=
+begin
+  delta condensify_nonstrict,
+  rw [nonstrict_extend_map_add _ _ cα cβ cαβ hα hβ],
+  refl,
+end
+
+lemma condensify_nonstrict_map_neg
+  (hα : ∀ X, (α.app X).bound_by cα) (hβ : ∀ X, ((-α).app X).bound_by cβ) :
+  condensify_nonstrict (-α) cβ hβ = -condensify_nonstrict α cα hα :=
+begin
+  delta condensify_nonstrict,
+  rw [nonstrict_extend_map_neg _ _ cβ hα],
+  refl,
+end
+
+lemma condensify_nonstrict_map_sub
+  (hα : ∀ X, (α.app X).bound_by cα) (hβ : ∀ X, (β.app X).bound_by cβ)
+  (hαβ : ∀ X, ((α - β).app X).bound_by cαβ) :
+  condensify_nonstrict (α - β) cαβ hαβ =
+  condensify_nonstrict α cα hα - condensify_nonstrict β cβ hβ :=
+begin
+  delta condensify_nonstrict,
+  rw [nonstrict_extend_map_sub _ _ cα cβ cαβ hα hβ],
+  refl,
+end
+
+lemma condensify_nonstrict_map_nsmul (n : ℕ)
+  (hα : ∀ X, (α.app X).bound_by cα) (hβ : ∀ X, ((n • α).app X).bound_by cβ) :
+  condensify_nonstrict (n • α) cβ hβ = n • condensify_nonstrict α cα hα :=
+begin
+  delta condensify_nonstrict,
+  rw [nonstrict_extend_map_nsmul _ _ cβ n hα],
+  clear hβ,
+  induction n with n ih,
+  { rw [zero_smul, zero_smul], refl },
+  { rw [succ_nsmul, succ_nsmul, ← ih], refl, }
+end
+
+-- move me
+instance fact_inv_pos : fact (0 < r'⁻¹) := sorry
+
+lemma condensify_nonstrict_Tinv (F : Fintype.{u} ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r') :
+  condensify_nonstrict (Tinv_nat_trans F) r'⁻¹ (Tinv_bound_by _) = condensify_Tinv F :=
+begin
+  sorry
+end
+
+end
 
 open pseudo_normed_group (filtration)
 
@@ -178,3 +258,19 @@ begin
       refine ⟨@rescale.of c _ x, hx, rfl⟩, } }
 end
 .
+
+-- move me
+attribute [simps] Ab.ulift
+
+lemma condensify_nonstrict_Tinv2 (F : Fintype.{u} ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r') :
+  condensify_nonstrict (Tinv2_nat_trans F) (r'⁻¹ + 2) (Tinv2_bound_by F) =
+  condensify_Tinv F - 2 • 𝟙 _ :=
+begin
+  delta Tinv2_nat_trans,
+  rw [condensify_nonstrict_map_sub _ _ r'⁻¹ 2 (r'⁻¹ + 2) (Tinv_bound_by _) (twoid_bound_by _),
+    condensify_nonstrict_map_nsmul _ 1 2, condensify_nonstrict_Tinv],
+  swap,
+  { intro, exact comphaus_filtered_pseudo_normed_group_hom.mk_of_bound_bound_by _ 1 _ },
+  rw [← condensify_map_id],
+  sorry
+end
