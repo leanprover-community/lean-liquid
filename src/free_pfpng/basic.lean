@@ -173,6 +173,3 @@ def free_pfpng_functor : Fintype ⥤ ProFiltPseuNormGrp₁ :=
   map := λ S₁ S₂ f, free_pfpng.map f,
   map_id' := free_pfpng.map_id,
   map_comp' := λ _ _ _ g₁ g₂, free_pfpng.map_comp g₁ g₂ }
-
-def free_pfpng_profinite : Profinite.{u} ⥤ ProFiltPseuNormGrp₁ :=
-Profinite.extend $ free_pfpng_functor
