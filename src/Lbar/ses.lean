@@ -20,10 +20,6 @@ open_locale nnreal
 
 variables (r' : ℝ≥0) [fact (0 < r')] (S : Fintype)
 
--- move me
-lemma int.coe_nat_injective : function.injective (coe : ℕ → ℤ) :=
-λ m n h, int.coe_nat_inj h
-
 namespace invpoly
 
 def to_laurent_measures_fun (F : invpoly r' S) : S → ℤ → ℤ
@@ -169,17 +165,22 @@ def to_Lbar_nat_trans : laurent_measures.fintype_functor r' ⟶ Lbar.fintype_fun
 
 open category_theory ProFiltPseuNormGrpWithTinv₁
 
+end laurent_measures
+
+namespace Lbar
+
 theorem short_exact (S : Profinite) :
   short_exact
     ((condensify_map
       (whisker_right (invpoly.to_laurent_measures_nat_trans r') (to_CHFPNG₁ r'))).app S)
     ((condensify_map
-      (whisker_right (to_Lbar_nat_trans r') (to_CHFPNG₁ r'))).app S) :=
+      (whisker_right (laurent_measures.to_Lbar_nat_trans r') (to_CHFPNG₁ r'))).app S) :=
 begin
   refine condensify_exact _ _ sorry _ sorry _ _ _ _ _ _ S,
   swap 3, { apply invpoly.to_laurent_measures_injective },
-  swap 5, { apply to_Lbar_surjective },
+  swap 5, { apply laurent_measures.to_Lbar_surjective },
   all_goals { sorry }
 end
 
-end laurent_measures
+end Lbar
+
