@@ -13,6 +13,10 @@ The short exact sequence
 ```
 -/
 
+-- move me
+lemma int.coe_nat_injective : function.injective (coe : ℕ → ℤ) :=
+λ m n h, int.coe_nat_inj h
+
 noncomputable theory
 
 open aux_thm69
@@ -163,11 +167,11 @@ def to_Lbar_nat_trans : laurent_measures.fintype_functor r' ⟶ Lbar.fintype_fun
   end }
 .
 
-open category_theory ProFiltPseuNormGrpWithTinv₁
-
 end laurent_measures
 
 namespace Lbar
+
+open category_theory ProFiltPseuNormGrpWithTinv₁
 
 theorem short_exact (S : Profinite) :
   short_exact
