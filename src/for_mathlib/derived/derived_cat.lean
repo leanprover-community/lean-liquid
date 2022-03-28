@@ -175,8 +175,15 @@ instance pretriangulated : triangulated.pretriangulated (bounded_derived_categor
     ∃ (S : triangle (bounded_homotopy_category A))
       (hS : S ∈ dist_triang (bounded_homotopy_category A))
       (f : T ⟶ replace_triangle S), is_iso f },
-  isomorphic_distinguished := sorry,
-  contractible_distinguished := sorry,
+  isomorphic_distinguished := begin
+    rintro T₁ ⟨S₁, hS₁, f₁, hf₁⟩ T₂ i, resetI,
+    refine ⟨S₁, hS₁, i.hom ≫ f₁, infer_instance⟩,
+  end,
+  contractible_distinguished := begin
+    intro X,
+    refine ⟨contractible_triangle _ X.val, pretriangulated.contractible_distinguished _, _⟩,
+    sorry,
+  end,
   distinguished_cocone_triangle := sorry,
   rotate_distinguished_triangle := sorry,
   complete_distinguished_triangle_morphism := sorry }
@@ -212,8 +219,11 @@ def localization_iso (X : bounded_derived_category A) :
   (localization_functor A).obj X.val ≅ X :=
 { hom := ⟨X.val.π⟩,
   inv := ⟨bounded_homotopy_category.lift (𝟙 _) X.val.π⟩,
-  hom_inv_id' := sorry,
-  inv_hom_id' := sorry }
+  hom_inv_id' := begin
+    ext, dsimp, refine bounded_homotopy_category.lift_ext X.val.π _ _ _,
+    rw [category.assoc, bounded_homotopy_category.lift_lifts, category.id_comp, category.comp_id],
+  end,
+  inv_hom_id' := by { ext, dsimp, rw bounded_homotopy_category.lift_lifts } }
 
 noncomputable
 def lift_unique {C : Type*} [category C]
@@ -224,6 +234,16 @@ def lift_unique {C : Type*} [category C]
   (e : F ≅ localization_functor A ⋙ G) :
   lift F ≅ G :=
 nat_iso.of_components
-(λ X, e.app X.val ≪≫ G.map_iso (localization_iso _)) sorry
+(λ X, e.app X.val ≪≫ G.map_iso (localization_iso _))
+begin
+  intros X Y f,
+  simp only [lift_map, iso.trans_hom, iso.app_hom, functor.map_iso_hom, nat_trans.naturality_assoc,
+    functor.comp_map, category.assoc, nat_iso.cancel_nat_iso_hom_left],
+  rw [← functor.map_comp, ← functor.map_comp],
+  congr' 1,
+  ext,
+  simp only [category_theory.category_comp_val, localization_functor_map_val,
+    localization_iso_hom_val, bounded_homotopy_category.lift_lifts],
+end
 
 end bounded_derived_category
