@@ -2,6 +2,7 @@ import for_mathlib.derived.K_projective
 import liquid
 import Lbar.functor
 import condensed.projective_resolution
+import condensed.condensify
 import breen_deligne.main
 
 noncomputable theory
@@ -19,29 +20,14 @@ namespace Lbar
 open ProFiltPseuNormGrpWithTinv₁ ProFiltPseuNormGrp₁ CompHausFiltPseuNormGrp₁
 
 def condensed : Profinite.{u} ⥤ Condensed.{u} Ab.{u+1} :=
-Lbar.functor.{u u} r' ⋙ to_PFPNG₁.{u} _ ⋙ to_CHFPNG₁.{u} ⋙ to_Condensed.{u}
-
-def Tinv_nat_trans : Lbar.condensed.{u} r' ⟶ Lbar.condensed.{u} r' :=
-begin
-  refine @whisker_right _ _ _ _ _ _
-    (Lbar.functor.{u u} r' ⋙ to_PFPNG₁.{u} _ ⋙ to_CHFPNG₁.{u} ⋙ enlarging_functor)
-    (Lbar.functor.{u u} r' ⋙ to_PFPNG₁.{u} _ ⋙ to_CHFPNG₁.{u} ⋙ enlarging_functor)
-    _
-    CompHausFiltPseuNormGrp.to_Condensed,
-  refine whisker_left (Lbar.functor.{u u} r')
-  { app := _,
-    naturality' := _ },
-  { intro M, exact profinitely_filtered_pseudo_normed_group_with_Tinv.Tinv },
-  { intros M₁ M₂ f, ext x, exact (f.map_Tinv x).symm }
-end
+condensify (fintype_functor.{u u} r' ⋙ to_CHFPNG₁ r')
 
 def Tinv_sub (S : Profinite.{u}) (V : SemiNormedGroup.{u}) [normed_with_aut r V] (i : ℤ) :
   ((Ext' i).obj (op $ (Lbar.condensed.{u} r').obj S)).obj (Condensed.of_top_ab V) ⟶
   ((Ext' i).obj (op $ (Lbar.condensed.{u} r').obj S)).obj (Condensed.of_top_ab V) :=
-((Ext' i).map ((Tinv_nat_trans r').app S).op).app _ -
+((Ext' i).map ((condensify_Tinv _).app S).op).app _ -
 ((Ext' i).obj _).map (Condensed.of_top_ab_map (normed_with_aut.T.inv).to_add_monoid_hom
   (normed_group_hom.continuous _))
-  -- this should be normed_with_aut.T.inv mapped through a functor
 
 /-- Thm 9.4bis of [Analytic]. More precisely: the first observation in the proof 9.4 => 9.1. -/
 theorem is_iso_Tinv_sub (S : Profinite.{u}) (V : SemiNormedGroup.{u}) [normed_with_aut r V] :
@@ -49,6 +35,17 @@ theorem is_iso_Tinv_sub (S : Profinite.{u}) (V : SemiNormedGroup.{u}) [normed_wi
 begin
   refine (breen_deligne.package.main_lemma _ _ _ _ _ _).mpr _,
   all_goals { sorry }
+end
+
+/-- Thm 9.4bis of [Analytic]. More precisely: the first observation in the proof 9.4 => 9.1. -/
+theorem is_iso_Tinv2 (S : Profinite.{u}) (V : SemiNormedGroup.{u}) [normed_with_aut r V] :
+  ∀ i, is_iso (((Ext' i).map ((condensify_Tinv2 (Lbar.fintype_functor.{u u} r')).app S).op).app
+    (Condensed.of_top_ab ↥V)) :=
+begin
+  rw [condensify_Tinv2, condensify_nonstrict_Tinv2],
+  -- use that `Ext'.map` is additive (is that formalized already?)
+  -- then repackage and use `is_iso_Tinv_sub` above
+  sorry
 end
 
 end Lbar
