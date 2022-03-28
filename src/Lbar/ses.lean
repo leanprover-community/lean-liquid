@@ -27,9 +27,9 @@ variables (r' : ℝ≥0) [fact (0 < r')] (S : Fintype)
 namespace invpoly
 
 def to_laurent_measures_fun (F : invpoly r' S) : S → ℤ → ℤ
-| s 0       := F s 0
+| s 0       := (F s).coeff 0
 | s (n+1:ℕ) := 0
-| s -[1+n]  := F s (n+1)
+| s -[1+n]  := (F s).coeff (n+1)
 
 @[simps] def to_laurent_measures (F : invpoly r' S) : laurent_measures r' S :=
 { to_fun := to_laurent_measures_fun r' S F,
@@ -57,7 +57,14 @@ end
 
 def to_laurent_measures_addhom : invpoly r' S →+ laurent_measures r' S :=
 add_monoid_hom.mk' (to_laurent_measures r' S) $
-by { intros, ext s ((_|n)|n); refl }
+begin
+  intros F G, ext s ((_|n)|n),
+  { simp only [to_laurent_measures_fun, add_apply, int.of_nat_zero,
+      to_laurent_measures_to_fun, laurent_measures.add_apply, polynomial.coeff_add], },
+  { refl, },
+  { simp only [to_laurent_measures_fun, add_apply, to_laurent_measures_to_fun,
+      laurent_measures.add_apply, polynomial.coeff_add], }
+end
 
 def to_laurent_measures_hom : comphaus_filtered_pseudo_normed_group_with_Tinv_hom r'
   (invpoly r' S) (laurent_measures r' S) :=
@@ -187,4 +194,3 @@ begin
 end
 
 end Lbar
-
