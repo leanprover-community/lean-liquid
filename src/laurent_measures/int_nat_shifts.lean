@@ -138,8 +138,11 @@ lemma compl_le_symm_eval {x : {z : ℤ // z < 0}} :
   (compl_le.symm x : ℤ) = x :=
 by { cases x with x hx, refl }
 
-section group_one_one
-variables (α : Type*) [group α] [has_lt α] [covariant_class α α (*) (<)]
+section group
+variables (α : Type*)
+
+section one_lt
+variables [group α] [has_lt α] [covariant_class α α (*) (<)]
 
 /--  Taking inverses establishes an isomorphism between the elements of a group that are
 strictly smaller than `1` with the elements that are strictly larger than `1`. -/
@@ -152,7 +155,6 @@ def equiv.lt_one_gt_one : {z : α | z < 1} ≃ {z : α | 1 < z} :=
   right_inv := by { rintro ⟨z, hz⟩, simp } }
 
 variable {α}
-
 @[simp, to_additive]
 lemma equiv.lt_one_gt_one_eval {x : {z : α | z < 1}} :
   ((equiv.lt_one_gt_one α) x : α) = x⁻¹ :=
@@ -163,7 +165,37 @@ lemma equiv.lt_one_gt_one_symm_eval {x : {z : α | 1 < z}} :
   ((equiv.lt_one_gt_one α).symm x : α) = x⁻¹ :=
 by { cases x with x hx, refl }
 
-end group_one_one
+end one_lt
+
+section one_le
+variables [group α] [has_le α] [covariant_class α α (*) (≤)]
+
+/--  Taking inverses establishes an isomorphism between the elements of a group that are
+at most `1` with the elements that are at least `1`. -/
+@[to_additive "Taking opposites establishes an isomorphism between the elements of an additive
+group that are strictly at most `0` with the elements that are at least `0`."]
+def equiv.le_one_ge_one : {z : α | z ≤ 1} ≃ {z : α | 1 ≤ z} :=
+{ to_fun    := by { rintro ⟨z, hz⟩, exact ⟨z⁻¹, by simpa⟩ },
+  inv_fun   := by { rintro ⟨z, hz⟩, exact ⟨z⁻¹, by simpa⟩ },
+  left_inv  := by { rintro ⟨z, hz⟩, simp },
+  right_inv := by { rintro ⟨z, hz⟩, simp } }
+
+
+variable {α}
+
+@[simp, to_additive]
+lemma equiv.le_one_ge_one_eval {x : {z : α | z ≤ 1}} :
+  ((equiv.le_one_ge_one α) x : α) = x⁻¹ :=
+by { cases x with x hx, refl }
+
+@[simp, to_additive]
+lemma equiv.le_one_ge_one_symm_eval {x : {z : α | 1 ≤ z}} :
+  ((equiv.le_one_ge_one α).symm x : α) = x⁻¹ :=
+by { cases x with x hx, refl }
+
+end one_le
+
+end group
 
 /--  An equivalence between the complement of the non-negative integers and the natural numbers. -/
 def oppo : ({z : ℤ | 0 ≤ z}ᶜ : set ℤ) ≃ ℕ :=
