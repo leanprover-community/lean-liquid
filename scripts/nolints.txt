@@ -11,6 +11,7 @@ apply_nolint Lbar.map_strict unused_arguments
 apply_nolint Lbar.map_zero unused_arguments
 
 -- Lbar/ses.lean
+apply_nolint invpoly.to_laurent_measures_fun unused_arguments
 apply_nolint laurent_measures.to_Lbar unused_arguments
 
 -- breen_deligne/category.lean
@@ -56,6 +57,9 @@ apply_nolint finite_product_condition_holds_for_colimit unused_arguments
 
 -- condensed/is_proetale_sheaf.lean
 apply_nolint category_theory.functor.finite_product_condition_of_sum unused_arguments
+
+-- condensed/rescale.lean
+apply_nolint fact_max_pos unused_arguments
 
 -- for_mathlib/Gordan.lean
 apply_nolint missing unused_arguments
@@ -185,17 +189,15 @@ apply_nolint category_theory.triangulated.triangle.shift_add_comp_eq_to_hom unus
 apply_nolint category_theory.triangulated.triangle.shift_add_comp_eq_to_hom' unused_arguments
 apply_nolint category_theory.triangulated.triangle.shift_comm_eq_eq_to_hom unused_arguments
 
+-- invpoly/basic.lean
+apply_nolint invpoly.invpoly.norm_nonneg dup_namespace
+
 -- laurent_measures/basic.lean
 apply_nolint laurent_measures.laurent_measures.norm_nonneg dup_namespace
 
 -- laurent_measures/ses.lean
 apply_nolint laurent_measures_ses.box unused_arguments
 apply_nolint laurent_measures_ses.real_measures.topological_space unused_arguments
-
--- laurent_measures/ses2.lean
-apply_nolint laurent_measures.CHFPNG₁ unused_arguments
-apply_nolint laurent_measures.finCHFPNG₁ unused_arguments
-apply_nolint laurent_measures.rescale_preserves_limits_of_shape_discrete_quotient unused_arguments
 
 -- laurent_measures/theta.lean
 apply_nolint theta.aux_y unused_arguments
