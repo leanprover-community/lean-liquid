@@ -20,24 +20,76 @@ open category_theory category_theory.limits opposite pseudo_normed_group
 -- move me
 namespace CompHaus
 
-variables {J : Type u} [category J] [is_filtered J] (F G : J ⥤ CompHaus.{v}) (α : F ⟶ G)
+variables {J : Type u} [small_category J]
+  (F G : J ⥤ CompHaus.{u}) (α : F ⟶ G)
 variables (cF : cone F) (cG : cone G) (hcF : is_limit cF) (hcG : is_limit cG)
 
-def pt {X : CompHaus} (x : X) : (⊤_ CompHaus) ⟶ X :=
+def pt {X : CompHaus.{u}} (x : X) : (⊤_ CompHaus) ⟶ X :=
 ⟨λ _, x, continuous_const⟩
 
-def diagram_of_pt (y : cG.X) : J ⥤ CompHaus.{v} :=
+def diagram_of_pt (y : cG.X) : J ⥤ CompHaus.{u} :=
 { obj := λ j, pullback (α.app j) (pt y ≫ cG.π.app j),
   map := λ i j f, pullback.lift (pullback.fst ≫ F.map f) pullback.snd
     (by rw [category.assoc, α.naturality, pullback.condition_assoc, category.assoc, cG.w]),
   map_id' := sorry,
   map_comp' := sorry }
 
-lemma is_limit.surjective_of_surjective
+def cone_of_pt (y : cG.X) : cone (diagram_of_pt F G α cG y) :=
+{ X := pullback (hcG.map cF α) (pt y),
+  π :=
+  { app := λ j, pullback.lift
+      (pullback.fst ≫ cF.π.app _)
+      pullback.snd
+      (by rw [category.assoc, ← pullback.condition_assoc, is_limit.map_π]),
+    naturality' := sorry } }
+
+def is_limit_cone_of_pt (y : cG.X) : is_limit (cone_of_pt F G α cF cG hcG y) :=
+{ lift := λ S, pullback.lift
+    (hcF.lift ⟨S.X,
+    { app := λ j, S.π.app j ≫ pullback.fst,
+      naturality' := sorry }⟩)
+    (terminal.from _)
+    sorry,
+  fac' := sorry,
+  uniq' := sorry }
+
+lemma is_limit.surjective_of_surjective [is_cofiltered J]
   (hα : ∀ j, function.surjective (α.app j)) :
-  function.surjective (hcG.map cF α) :=
+  function.surjective (hcG.map cF α) := λ y,
+let E := cone_of_pt F G α cF cG hcG y,
+  hE : is_limit E := is_limit_cone_of_pt F G α cF cG hcF hcG y in
 begin
-  intro y,
+  suffices : ∃ (e : (⊤_ CompHaus.{u}) ⟶ E.X),
+    e ≫ (pullback.fst : E.X ⟶ cF.X) ≫ hcG.map cF α = pt y,
+  { obtain ⟨e,he⟩ := this,
+    use (terminal.from (CompHaus.of punit) ≫ e ≫ pullback.fst) punit.star,
+    rw ← comp_apply,
+    have : y = (terminal.from (CompHaus.of punit) ≫ pt y) punit.star := rfl,
+    conv_rhs { rw this }, clear this, congr' 1,
+    apply hcG.hom_ext,
+    intros j,
+    simp only [←he, category.assoc] },
+  let E' := CompHaus_to_Top.map_cone E,
+  let hE' : is_limit E' := is_limit_of_preserves CompHaus_to_Top hE,
+  let ee : E' ≅ Top.limit_cone _ :=
+    hE'.unique_up_to_iso (Top.limit_cone_is_limit _),
+  let e : E'.X ≅ (Top.limit_cone _).X :=
+    hE'.cone_point_unique_up_to_iso (Top.limit_cone_is_limit _),
+  haveI : ∀ j : J, t2_space (((diagram_of_pt F G α cG y ⋙ CompHaus_to_Top).obj j)),
+  { intros j,
+    change t2_space ((diagram_of_pt F G α cG y).obj j), apply_instance },
+  haveI : ∀ j : J, compact_space (((diagram_of_pt F G α cG y ⋙ CompHaus_to_Top).obj j)),
+  { intros j,
+    change compact_space ((diagram_of_pt F G α cG y).obj j), apply_instance },
+  haveI : ∀ j : J, nonempty (((diagram_of_pt F G α cG y ⋙ CompHaus_to_Top).obj j)),
+  { -- use hα,
+    sorry },
+  have := Top.nonempty_limit_cone_of_compact_t2_cofiltered_system
+    (diagram_of_pt F G α cG y ⋙ CompHaus_to_Top),
+  obtain ⟨a⟩ := this,
+  let b := e.inv a,
+  use pt b,
+  sorry
 end
 
 end CompHaus
