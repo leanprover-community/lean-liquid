@@ -1,6 +1,10 @@
 
 import for_mathlib.derived.les_facts
 import laurent_measures.ses2
+import invpoly.ses
+import Lbar.ses
+import Lbar.ext
+import free_pfpng.acyclic
 import challenge_notations
 
 .
@@ -28,7 +32,13 @@ lemma epi_and_is_iso (V : SemiNormedGroup.{u}) [normed_with_aut r V] [complete_s
   ∀ i > 0, is_iso (((Ext' i).map ((condensify_Tinv2 (fintype_functor r')).app S).op).app
     (Condensed.of_top_ab V)) :=
 begin
-  sorry
+  have SES := Lbar.short_exact.{u u} r' S,
+  haveI : fact (r < 1) := ⟨(fact.out _ : r < r').trans (fact.out _)⟩,
+  rw ← epi_and_is_iso_iff_of_is_iso _ _ _ _
+    ((condensify_Tinv2 _).app S) ((condensify_Tinv2 _).app S) ((condensify_Tinv2 _).app S)
+    (Condensed.of_top_ab V) SES SES (Lbar.is_iso_Tinv2 r r' S V),
+  rw ← is_zero_iff_epi_and_is_iso _ _ _ (invpoly.short_exact r' S),
+  apply free_pfpng_acyclic,
 end
 
 

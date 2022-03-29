@@ -27,9 +27,9 @@ variables (r' : ℝ≥0) [fact (0 < r')] (S : Fintype)
 namespace invpoly
 
 def to_laurent_measures_fun (F : invpoly r' S) : S → ℤ → ℤ
-| s 0       := F s 0
+| s 0       := (F s).coeff 0
 | s (n+1:ℕ) := 0
-| s -[1+n]  := F s (n+1)
+| s -[1+n]  := (F s).coeff (n+1)
 
 @[simps] def to_laurent_measures (F : invpoly r' S) : laurent_measures r' S :=
 { to_fun := to_laurent_measures_fun r' S F,
@@ -37,7 +37,26 @@ def to_laurent_measures_fun (F : invpoly r' S) : S → ℤ → ℤ
     rw ← nnreal.summable_coe,
     rw ← @summable_subtype_and_compl ℝ ℤ _ _ _ _ _ {n : ℤ | n ≤ 0},
     split,
-    { sorry /- setup equiv with `ℕ` using `k → -k` and use `F.nnreal_summable s` -/ },
+    { have := F.nnreal_summable s,
+      rw ← nnreal.summable_coe at this,
+      convert (equiv.summable_iff (equiv.nonpos_ge_zero ℤ)).mpr _,
+      rotate,
+      { exact λ a, ((∥(F s).coeff (int.to_nat a)∥₊ * r' ^ (-(a.1))) : ℝ) },
+      rotate,
+      { apply funext,
+        rintros ⟨x, hx⟩,
+        rcases x with ⟨_ | x⟩ | x,
+        { refl },
+        { rw [int.of_nat_eq_coe, int.coe_nat_succ, set.mem_set_of_eq] at hx,
+          refine (not_lt.mpr hx _).elim,
+          exact int.add_pos_of_nonneg_of_pos (int.coe_zero_le x) zero_lt_one },
+        { simp only [subtype.coe_mk, zpow_neg_succ_of_nat, nonneg.coe_mul, coe_nnnorm,
+            nnreal.coe_pow, subtype.val_eq_coe, zpow_neg₀, function.comp_app, nnreal.coe_eq_zero,
+            equiv.nonpos_ge_zero_eval, inv_inv, inv_eq_zero, pow_eq_zero_iff, nat.succ_pos'],
+        congr } },
+      { refine (equiv.summable_iff (int_subtype_nonneg_equiv.symm : ℕ ≃ {z : ℤ // 0 ≤ z})).mp _,
+        simpa },
+      /- setup equiv with `ℕ` using `k → -k` and use `F.nnreal_summable s` -/ },
     { convert summable_zero, ext ⟨((_|n)|n), hn⟩,
       { simp only [int.of_nat_eq_coe, int.coe_nat_zero, set.mem_compl_eq, set.mem_set_of_eq,
          le_refl, not_true] at hn,
@@ -57,7 +76,14 @@ end
 
 def to_laurent_measures_addhom : invpoly r' S →+ laurent_measures r' S :=
 add_monoid_hom.mk' (to_laurent_measures r' S) $
-by { intros, ext s ((_|n)|n); refl }
+begin
+  intros F G, ext s ((_|n)|n),
+  { simp only [to_laurent_measures_fun, add_apply, int.of_nat_zero,
+      to_laurent_measures_to_fun, laurent_measures.add_apply, polynomial.coeff_add], },
+  { refl, },
+  { simp only [to_laurent_measures_fun, add_apply, to_laurent_measures_to_fun,
+      laurent_measures.add_apply, polynomial.coeff_add], }
+end
 
 def to_laurent_measures_hom : comphaus_filtered_pseudo_normed_group_with_Tinv_hom r'
   (invpoly r' S) (laurent_measures r' S) :=
@@ -187,4 +213,3 @@ begin
 end
 
 end Lbar
-

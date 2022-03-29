@@ -17,9 +17,8 @@ universe u
 noncomputable theory
 open_locale big_operators nnreal classical
 
-structure invpoly (r : ℝ≥0) (S : Fintype) :=
-(to_fun    : S → ℕ → ℤ)
-(summable' : ∀ s, summable (λ n, ∥to_fun s n∥₊ * r ^ (-n:ℤ)))
+@[derive add_comm_group]
+def invpoly (r : ℝ≥0) (S : Fintype) := S → polynomial ℤ
 
 variables {r : ℝ≥0} {S S' : Fintype.{u}}
 
@@ -27,20 +26,28 @@ local notation `ℤ[T⁻¹]` := invpoly r
 
 namespace invpoly
 
-instance : has_coe_to_fun (ℤ[T⁻¹] S) (λ F, S → ℕ → ℤ) :=
-⟨λ F, F.to_fun⟩
+@[simp] lemma add_apply (F G : ℤ[T⁻¹] S) (s : S) : (F + G) s = F s + G s := rfl
+@[simp] lemma sub_apply (F G : ℤ[T⁻¹] S) (s : S) : (F - G) s = F s - G s := rfl
+@[simp] lemma neg_apply (F : ℤ[T⁻¹] S) (s : S) : (-F) s = -(F s) := rfl
+@[simp] lemma zero_apply (s : S) : (0 : ℤ[T⁻¹] S) s = 0 := rfl
+@[simp] lemma nsmul_apply (k : ℕ) (F : ℤ[T⁻¹] S) (s : S) : (k • F) s = k • (F s) := rfl
+@[simp] lemma zsmul_apply (k : ℤ) (F : ℤ[T⁻¹] S) (s : S) : (k • F) s = k • (F s) := rfl
 
-@[simp] lemma coe_mk (f : S → ℕ → ℤ) (hf) (s : S) (n : ℕ) :
-  (@invpoly.mk r S f hf) s n = f s n := rfl
+-- @[ext]
+-- lemma ext (F G : ℤ[T⁻¹] S) : (F : S → ) = G → F = G :=
+-- by { intros h, funext s, ext, exact congr_fun (congr_fun h s) n }
 
-@[ext]
-lemma ext (F G : ℤ[T⁻¹] S) : (F : S → ℕ → ℤ) = G → F = G :=
-by { intros h, cases F, cases G, simpa }
+protected lemma nnreal_summable (F : ℤ[T⁻¹] S) (s : S) :
+  summable (λ n, ∥(F s).coeff n∥₊ * r ^ (-n:ℤ)) :=
+begin
+  apply @summable_of_ne_finset_zero _ _ _ _ _ (F s).support,
+  intros n hn,
+  simp only [polynomial.mem_support_iff, not_not] at hn,
+  simp only [hn, nnnorm_zero, zero_mul],
+end
 
-protected lemma nnreal_summable (F : ℤ[T⁻¹] S) (s : S) : summable (λ n, ∥F s n∥₊ * r ^ (-n:ℤ)) :=
-F.2 _
-
-protected lemma summable (F : ℤ[T⁻¹] S) (s : S) : summable (λ n, ∥F s n∥ * r ^ (-n : ℤ)) :=
+protected lemma summable (F : ℤ[T⁻¹] S) (s : S) :
+  summable (λ n, ∥(F s).coeff n∥ * r ^ (-n : ℤ)) :=
 begin
   simpa only [← nnreal.summable_coe, nnreal.coe_mul, coe_nnnorm, nnreal.coe_zpow]
     using F.nnreal_summable s
@@ -51,20 +58,11 @@ lemma nonneg_of_norm_mul_zpow (k n : ℤ) (r : ℝ≥0) : 0 ≤ ∥ k ∥ * (r :
 mul_nonneg (norm_nonneg _) (zpow_nonneg (nnreal.coe_nonneg _) _)
 
 def map (f : S ⟶ S') : ℤ[T⁻¹] S → ℤ[T⁻¹] S' := λ F,
-{ to_fun := λ s' k, ∑ s in finset.univ.filter (λ t, f t = s'), F s k,
-  summable' := begin
-    intros s',
-    have : ∀ n : ℕ, ∥∑ s in finset.univ.filter (λ t, f t = s'), F s n∥₊ * r^(-n:ℤ) ≤
-      ∑ s in finset.univ.filter (λ t, f t = s'), ∥F s n∥₊ * r^(-n:ℤ) := λ n,
-    calc ∥∑ s in finset.univ.filter (λ t, f t = s'), F s n∥₊ * r^(-n:ℤ) ≤
-      (∑ s in finset.univ.filter (λ t, f t = s'), ∥F s n∥₊) * r^(-n:ℤ) :
-        mul_le_mul' (nnnorm_sum_le _ _) le_rfl
-      ... = _ : by rw finset.sum_mul,
-    exact nnreal.summable_of_le this (summable_sum $ λ (s : S) _, F.nnreal_summable s),
-  end }
+λ s', ∑ s in finset.univ.filter (λ t, f t = s'), F s
 
 @[simp] lemma map_apply (f : S ⟶ S') (F : ℤ[T⁻¹] S) (s' : S') (k : ℕ) :
-  map f F s' k = ∑ s in finset.univ.filter (λ t, f t = s'), F s k := rfl
+  (map f F s').coeff k = ∑ s in finset.univ.filter (λ t, f t = s'), (F s).coeff k :=
+by simp only [map, ← polynomial.finset_sum_coeff]
 
 @[simp] lemma map_id : (map (𝟙 S) : ℤ[T⁻¹] S → ℤ[T⁻¹] S) = id :=
 begin
@@ -93,96 +91,15 @@ begin
     rw [← hk.1, ← hk.2] }
 end
 
-def add : ℤ[T⁻¹] S → ℤ[T⁻¹] S → ℤ[T⁻¹] S := λ F G,
-{ to_fun := F + G,
-  summable' := λ s, begin
-    refine nnreal.summable_of_le _ ((F.nnreal_summable s).add (G.nnreal_summable s)),
-    intros n,
-    rw ← add_mul,
-    exact mul_le_mul' (nnnorm_add_le _ _) le_rfl,
-  end }
-
-instance : has_add (ℤ[T⁻¹] S) := ⟨add⟩
-
-@[simp]
-lemma add_apply (F G : ℤ[T⁻¹] S) (s : S) (n : ℕ) : (F + G) s n = F s n + G s n := rfl
-
-def zero : ℤ[T⁻¹] S :=
-{ to_fun := 0,
-  summable' := λ s, by simp [summable_zero] }
-
-instance : has_zero (ℤ[T⁻¹] S) := ⟨zero⟩
-
-@[simp] lemma zero_apply (s : S) (n : ℕ) : (0 : ℤ[T⁻¹] S) s n = 0 := rfl
-
-def neg : ℤ[T⁻¹] S → ℤ[T⁻¹] S := λ F,
-{ to_fun := - F,
-  summable' := λ s, by simpa only [pi.neg_apply, nnnorm_neg] using F.nnreal_summable s }
-
-instance : has_neg (ℤ[T⁻¹] S) := ⟨neg⟩
-
-@[simp] lemma neg_apply (F : ℤ[T⁻¹] S) (s : S) (n : ℕ) : (-F) s n = - (F s n) := rfl
-
-def sub : ℤ[T⁻¹] S → ℤ[T⁻¹] S → ℤ[T⁻¹] S := λ F G,
-{ to_fun := F - G,
-  summable' := (add F (neg G)).nnreal_summable }
-
-instance : has_sub (ℤ[T⁻¹] S) := ⟨sub⟩
-
-@[simp] lemma sub_apply (F G : ℤ[T⁻¹] S) (s : S) (n : ℕ) : (F - G) s n = F s n - G s n := rfl
-
-example (a m : ℤ) : (-a)*m=a*(-m) := neg_mul_comm a m
-
-instance : add_comm_monoid (ℤ[T⁻¹] S) :=
-{ add_assoc := λ a b c, by { ext, simp only [add_assoc, add_apply] },
-  add_comm := λ F G, by { ext, simp only [add_comm, add_apply] },
-  zero_add := λ a, by { ext, simp only [zero_add, add_apply, zero_apply] },
-  add_zero := λ a, by { ext, simp only [add_zero, add_apply, zero_apply] },
-  nsmul := λ n F,
-  { to_fun := λ s k, n • (F s k),
-    summable' := λ s, begin
-      -- aahrg, why is `n` an implicit variable here???
-      have := @summable.const_smul _ _ _ _ _ _ _ _ _ n (F.nnreal_summable s),
-      simpa only [nsmul_eq_mul, int.nat_cast_eq_coe_nat, int.nnnorm_mul,
-        nat.nnnorm_coe_int, mul_assoc],
-    end },
-  nsmul_zero' := λ F, by { ext, refl },
-  nsmul_succ' := λ n F, by { ext, refl },
-  ..(infer_instance : has_add _),
-  ..(infer_instance : has_zero _) }
-
-instance : add_comm_group (ℤ[T⁻¹] S) :=
-{ neg := neg,
-  sub := sub,
-  sub_eq_add_neg := λ F G, by { ext, refl },
-  zsmul := λ n F,
-  { to_fun := λ s m, n • (F s m),
-    summable' := λ s, begin
-      -- aahrg, why is `n.nat_abs` an implicit variable here???
-      have := @summable.const_smul _ _ _ _ _ _ _ _ _ n.nat_abs (F.nnreal_summable s),
-      simpa only [nsmul_eq_mul, nnreal.coe_nat_abs, algebra.id.smul_eq_mul,
-        int.nnnorm_mul, mul_assoc],
-    end },
-  zsmul_zero' := λ F, by { ext, simp only [algebra.id.smul_eq_mul, zero_mul, coe_mk, zero_apply], },
-  zsmul_succ' := λ n F, by { ext, simp only [add_apply, int.coe_nat_succ, int.of_nat_eq_coe,
-    zsmul_eq_smul, smul_eq_mul, add_mul, add_comm, one_mul, coe_mk], },
-  zsmul_neg' := λ n F, by { ext, simp only [int.coe_nat_succ, int.of_nat_eq_coe,
-    int.neg_succ_of_nat_coe, add_comm, zsmul_eq_smul, smul_eq_mul], ring_nf},
-  add_left_neg := λ F, by { ext, simp only [zero_apply, add_apply, neg_apply, add_left_neg], },
-  add_comm := λ a b, by { ext, dsimp, rw add_comm },
-  ..(infer_instance : add_comm_monoid _),
-  ..(infer_instance : has_neg _),
-  ..(infer_instance : has_sub _) }.
-
 instance : has_norm (ℤ[T⁻¹] S) :=
-⟨λ F, ∑ s, ∑' n, ∥F s n∥ * (r : ℝ) ^ (-n:ℤ)⟩
+⟨λ F, ∑ s, ∑' n, ∥(F s).coeff n∥ * (r : ℝ) ^ (-n:ℤ)⟩
 
-lemma norm_def (F : ℤ[T⁻¹] S) : ∥F∥ = ∑ s, ∑' n, ∥F s n∥ * (r : ℝ)^(-n:ℤ) := rfl
+lemma norm_def (F : ℤ[T⁻¹] S) : ∥F∥ = ∑ s, ∑' n, ∥(F s).coeff n∥ * (r : ℝ)^(-n:ℤ) := rfl
 
 instance : has_nnnorm (ℤ[T⁻¹] S) :=
-⟨λ F, ∑ s, ∑' n, ∥F s n∥₊ * r ^ (-n : ℤ)⟩
+⟨λ F, ∑ s, ∑' n, ∥(F s).coeff n∥₊ * r ^ (-n : ℤ)⟩
 
-lemma nnnorm_def (F : ℤ[T⁻¹] S) : ∥F∥₊ = ∑ s, ∑' n, ∥F s n∥₊ * r^(-n:ℤ) := rfl
+lemma nnnorm_def (F : ℤ[T⁻¹] S) : ∥F∥₊ = ∑ s, ∑' n, ∥(F s).coeff n∥₊ * r^(-n:ℤ) := rfl
 
 @[simp] lemma coe_nnnorm (F : ℤ[T⁻¹] S) : (∥F∥₊ : ℝ) = ∥F∥ :=
 by simp only [nnnorm_def, norm_def, nnreal.coe_sum, nnreal.coe_tsum,
@@ -192,7 +109,7 @@ by simp only [nnnorm_def, norm_def, nnreal.coe_sum, nnreal.coe_tsum,
 by rw [← coe_nnnorm]; exact ∥F∥₊.coe_nonneg
 
 @[simp] lemma nnnorm_neg (F : ℤ[T⁻¹] S) : ∥-F∥₊ = ∥F∥₊ :=
-by simp only [nnnorm_def, neg_apply, nnnorm_neg]
+by simp only [nnnorm_def, nnnorm_neg, neg_apply, polynomial.coeff_neg]
 
 lemma nnnorm_add (F G : ℤ[T⁻¹] S) : ∥F + G∥₊ ≤ ∥F∥₊ + ∥G∥₊ :=
 begin
@@ -210,27 +127,24 @@ end
 lemma norm_add (F G : ℤ[T⁻¹] S) : ∥F + G∥ ≤ ∥F∥ + ∥G∥ :=
 by simpa only [← coe_nnnorm, ← nnreal.coe_add, nnreal.coe_le_coe] using nnnorm_add F G
 
-@[simp] lemma nsmul_apply (k : ℕ) (F : ℤ[T⁻¹] S) (s : S) (n : ℕ) : (k • F) s n = k • (F s n) := rfl
-
-@[simp] lemma zsmul_apply (k : ℤ) (F : ℤ[T⁻¹] S) (s : S) (n : ℕ) : (k • F) s n = k • (F s n) := rfl
-
 section
 open finset
 
 lemma map_bound (f : S ⟶ S') (F : ℤ[T⁻¹] S) : ∥map f F∥₊ ≤ ∥F∥₊ := calc
-∥map f F∥₊ = ∑ s', ∑' n, ∥∑ s in univ.filter (λ t, f t = s'), F s n∥₊ * _ : rfl
-... ≤ ∑ s', ∑' n, ∑ s in univ.filter (λ t, f t = s'), ∥F s n∥₊ * r^(-n:ℤ) : begin
+∥map f F∥₊ = ∑ s', ∑' n, ∥∑ s in univ.filter (λ t, f t = s'), (F s).coeff n∥₊ * (r^(-n:ℤ)) :
+  (by simp only [map, ← polynomial.finset_sum_coeff]; refl)
+... ≤ ∑ s', ∑' n, ∑ s in univ.filter (λ t, f t = s'), ∥(F s).coeff n∥₊ * r^(-n:ℤ) : begin
   apply sum_le_sum,
   rintros s' -,
-  have h1 : summable (λ n : ℕ, ∑ (s : S.α) in univ.filter (λ t, f t = s'), ∥F s n∥₊ * r^(-n:ℤ)) :=
+  have h1 : summable (λ n : ℕ, ∑ (s : S.α) in univ.filter (λ t, f t = s'), ∥(F s).coeff n∥₊ * r^(-n:ℤ)) :=
     summable_sum (λ s _, F.nnreal_summable s),
   have h2 : ∀ b : ℕ,
-    ∥∑ (s : S.α) in univ.filter (λ t, f t = s'), F s b∥₊ * r ^ (-b:ℤ) ≤
-      ∑ (s : S.α) in univ.filter (λ t, f t = s'), ∥F s b∥₊ * r ^ (-b:ℤ),
+    ∥∑ (s : S.α) in univ.filter (λ t, f t = s'), (F s).coeff b∥₊ * r ^ (-b:ℤ) ≤
+      ∑ (s : S.α) in univ.filter (λ t, f t = s'), ∥(F s).coeff b∥₊ * r ^ (-b:ℤ),
   { intros b, rw ← sum_mul, exact mul_le_mul' (nnnorm_sum_le _ _) le_rfl },
   apply tsum_le_tsum h2 (nnreal.summable_of_le h2 h1) h1,
 end
-... = ∑ s', ∑ s in univ.filter (λ t, f t = s'), ∑' n, ∥F s n∥₊ * r^(-n:ℤ) :
+... = ∑ s', ∑ s in univ.filter (λ t, f t = s'), ∑' n, ∥(F s).coeff n∥₊ * r^(-n:ℤ) :
   sum_congr rfl (λ s' _, tsum_sum $ λ s _, F.nnreal_summable _)
 ... = _ : begin
   rw [← sum_bUnion],
@@ -248,16 +162,16 @@ end
 lemma map_bound' (f : S ⟶ S') (F : ℤ[T⁻¹] S) : ∥map f F∥ ≤ ∥F∥ :=
 by simpa only [← coe_nnnorm, ← nnreal.coe_add, nnreal.coe_le_coe] using map_bound f F
 
-/-- This lemma puts bounds on where `F s n` can be nonzero. -/
+/-- This lemma puts bounds on where `(F s).coeff n` can be nonzero. -/
 lemma eq_zero_of_filtration (F : ℤ[T⁻¹] S) (c : ℝ≥0) :
-  ∥F∥₊ ≤ c → ∀ (s : S) (n : ℕ), c < r^(-n:ℤ) → F s n = 0 :=
+  ∥F∥₊ ≤ c → ∀ (s : S) (n : ℕ), c < r^(-n:ℤ) → (F s).coeff n = 0 :=
 begin
   intros hF s n h,
-  suffices : ∥F s n∥₊ < 1,
-  { change abs (F s n : ℝ) < 1 at this,
+  suffices : ∥(F s).coeff n∥₊ < 1,
+  { change abs ((F s).coeff n : ℝ) < 1 at this,
     norm_cast at this,
     rwa ← int.eq_zero_iff_abs_lt_one },
-  have : ∥F s n∥₊ * r ^ (-n : ℤ) ≤ ∑' k, ∥F s k∥₊ * r ^ (-k:ℤ),
+  have : ∥(F s).coeff n∥₊ * r ^ (-n : ℤ) ≤ ∑' k, ∥(F s).coeff k∥₊ * r ^ (-k:ℤ),
   { exact le_tsum (F.nnreal_summable s) _ (λ k _, zero_le'), },
   replace this := lt_of_le_of_lt (this.trans _) h,
   { have hr₁ : 0 < r^(-n:ℤ) := lt_of_le_of_lt zero_le' h,
@@ -267,7 +181,7 @@ begin
     { exact (mul_inv_cancel hr₂).symm },
     { rwa nnreal.inv_pos }, },
   { refine le_trans _ hF,
-    apply @finset.single_le_sum S ℝ≥0 _ (λ s, ∑' n, ∥F s n∥₊ * r^(-n:ℤ)),
+    apply @finset.single_le_sum S ℝ≥0 _ (λ s, ∑' n, ∥(F s).coeff n∥₊ * r^(-n:ℤ)),
     { rintros s -, exact zero_le', },
     { exact finset.mem_univ _ } }
 end
@@ -287,7 +201,7 @@ open real
 
 -- --For every F, d F is a bound whose existence is established in `eq_zero_of_filtration`
 -- lemma exists_bdd_filtration {S : Fintype} (hr₀ : 0 < (r : ℝ)) (hr₁ : (r : ℝ) < 1) (F : ℤ[T⁻¹] S) :
---   ∃ d : ℕ, ∀ s : S, ∀ (n : ℕ), n < d → F s n = 0 :=
+--   ∃ d : ℕ, ∀ s : S, ∀ (n : ℕ), n < d → (F s).coeff n = 0 :=
 -- begin
 --   have h_logr : (log r) < 0 := log_neg hr₀ hr₁,
 --   let d := if log ∥ F ∥ ≥ 0 then ⌊ (log ∥ F ∥ / log (r : ℝ)) ⌋ - 1 else -1,
@@ -329,10 +243,10 @@ section profinite_structure
 
 @[simps] def truncate {c : ℝ≥0} (A : finset ℕ) :
   { F : ℤ[T⁻¹] S | ∥F∥₊ ≤ c } → invpoly_bdd r S A c := λ F,
-{ to_fun := λ s i, F s i,
+{ to_fun := λ s i, (F.1 s).coeff i,
   bound' := begin
     refine (finset.sum_le_sum $ λ s _, _).trans F.2,
-    convert sum_le_tsum A _ ((F : ℤ[T⁻¹] S).nnreal_summable s) using 1,
+    convert sum_le_tsum A _ (F.1.nnreal_summable s) using 1,
     { conv_rhs { rw ← finset.sum_attach }, refl },
     { intros b hb, exact zero_le', },
   end }
@@ -446,18 +360,11 @@ lemma exists_of_compat {c} (F : Π (A : finset ℕ), invpoly_bdd r S A c)
     transition h (F _) = F _) :
   ∃ (G : {H : ℤ[T⁻¹] S | ∥H∥₊ ≤ c }), ∀ (k : finset ℕ), truncate k G = F k :=
 begin
-  let G : ℤ[T⁻¹] S := ⟨mk_seq F, mk_seq_compat_nnreal_summable _ compat⟩,
+  let supp : finset ℕ := sorry, -- should be the support of `mk_seq`.
+  let G : ℤ[T⁻¹] S := λ s, ∑ n in supp, mk_seq F s n * polynomial.X ^ n,
   use G,
-  { apply mk_seq_compat_sum_le _ compat },
-  { intros k,
-    ext s i,
-    change F _ _ _ = _,
-    have := compat k {i} (by simp),
-    apply_fun (λ e, e s ⟨i, by simp⟩) at this,
-    erw ← this,
-    change F k _ _ = F k _ _,
-    congr,
-    ext, refl }
+  sorry,
+  sorry,
 end
 
 variables (r S)
@@ -579,7 +486,10 @@ instance [fact (0 < r)] : profinitely_filtered_pseudo_normed_group (ℤ[T⁻¹] 
     have :
       (truncate A : _ → invpoly_bdd r S A (c₁ + c₂)) ∘ pseudo_normed_group.add' =
       E ∘ (prod.map (truncate A) (truncate A)),
-    { ext, refl },
+    { ext,
+      simp only [function.comp_app, truncate_to_fun, subtype.val_eq_coe,
+        pseudo_normed_group.add'_eq, add_apply, polynomial.coeff_add, prod_map],
+      refl },
     rw this,
     apply continuous.comp,
     { exact continuous_of_discrete_topology },
@@ -602,7 +512,10 @@ instance [fact (0 < r)] : profinitely_filtered_pseudo_normed_group (ℤ[T⁻¹] 
       simpa },
     have : (truncate A : _ → invpoly_bdd r S A c) ∘ pseudo_normed_group.neg' =
       E ∘ truncate A,
-    { ext, refl },
+    { ext,
+      simp only [function.comp_app, truncate_to_fun, subtype.val_eq_coe,
+        pseudo_normed_group.neg'_eq, neg_apply, polynomial.coeff_neg],
+      refl },
     rw this,
     apply continuous.comp,
     { exact continuous_of_discrete_topology },
@@ -625,22 +538,32 @@ instance [fact (0 < r)] : profinitely_filtered_pseudo_normed_group (ℤ[T⁻¹] 
   ..(infer_instance : (pseudo_normed_group (ℤ[T⁻¹] S))) }
 .
 
-def Tinv_aux {R : Type*} [has_zero R] : (ℕ → R) → ℕ → R
-| F 0     := 0
-| F (n+1) := F n
+-- @[simp] lemma Tinv_aux_ne_zero {R : Type*} [has_zero R] (f : ℕ → R) (i : ℕ) (hi : i ≠ 0) :
+--   Tinv_aux f i = f (i - 1) :=
+-- by { cases i, contradiction, refl, }
 
-@[simp] lemma Tinv_aux_zero {R : Type*} [has_zero R] (f : ℕ → R) : Tinv_aux f 0 = 0 := rfl
+/--
+The `T⁻¹` action on `ℤ[T⁻¹] S`.
+This is defined, essentially, as a shift in `ℕ` (accounting for the restriction at 0).
+This is an additive group homomorphism.
+-/
+def Tinv_aux {S : Fintype.{u}} :
+  ℤ[T⁻¹] S →+ ℤ[T⁻¹] S :=
+add_monoid_hom.mk' (λ F s, add_monoid_hom.mul_left polynomial.X (F s))
+  (by { intros F G, funext s, exact map_add _ _ _ })
 
-@[simp] lemma Tinv_aux_ne_zero {R : Type*} [has_zero R] (f : ℕ → R) (i : ℕ) (hi : i ≠ 0) :
-  Tinv_aux f i = f (i - 1) :=
-by { cases i, contradiction, refl, }
+lemma Tinv_aux_coeff (F : ℤ[T⁻¹] S) (s : S) (n : ℕ) :
+  (Tinv_aux F s).coeff n = (polynomial.X * F s).coeff n := rfl
 
-@[simp] lemma Tinv_aux_succ {R : Type*} [has_zero R] (f : ℕ → R) (i : ℕ) :
-  Tinv_aux f (i + 1) = f i :=
-rfl
+@[simp] lemma Tinv_aux_zero (F : ℤ[T⁻¹] S) (s : S) : (Tinv_aux F s).coeff 0 = 0 :=
+by simp only [Tinv_aux_coeff, polynomial.mul_coeff_zero, polynomial.coeff_X_zero, zero_mul]
+
+@[simp] lemma Tinv_aux_succ (F : ℤ[T⁻¹] S) (s : S) (i : ℕ) :
+  (Tinv_aux F s).coeff (i + 1) = (F s).coeff i :=
+by simp only [Tinv_aux_coeff, polynomial.coeff_X_mul]
 
 lemma Tinv_aux_summable [hr : fact (0 < r)] (F : ℤ[T⁻¹] S) (s : S) :
-  summable (λ n, (∥(Tinv_aux (F s) n)∥₊ * r ^ (-n:ℤ))) :=
+  summable (λ n, (∥(Tinv_aux F s).coeff n∥₊ * r ^ (-n:ℤ))) :=
 begin
   rw ← nnreal.summable_nat_add_iff 1,
   simp only [Tinv_aux_succ, int.coe_nat_succ, neg_add, zpow_add₀ hr.out.ne', ← mul_assoc],
@@ -648,24 +571,12 @@ begin
   exact F.nnreal_summable s,
 end
 
-/--
-The `T⁻¹` action on `ℤ[T⁻¹] S`.
-This is defined, essentially, as a shift in `ℕ` (accounting for the restriction at 0).
-This is an additive group homomorphism.
--/
-def Tinv_add_monoid_hom {S : Fintype.{u}} [hr : fact (0 < r)] :
-  ℤ[T⁻¹] S →+ ℤ[T⁻¹] S :=
-add_monoid_hom.mk' (λ F,
-  { to_fun := λ s, Tinv_aux (F s),
-    summable' := λ s, Tinv_aux_summable F s })
-  (by { intros F G, ext s (_|n); refl })
-
 @[simps]
-def Tinv [hr : fact (0 < r)] :
+def Tinv_hom [hr : fact (0 < r)] :
   comphaus_filtered_pseudo_normed_group_hom (ℤ[T⁻¹] S) (ℤ[T⁻¹] S) :=
-comphaus_filtered_pseudo_normed_group_hom.mk_of_bound Tinv_add_monoid_hom r⁻¹
+comphaus_filtered_pseudo_normed_group_hom.mk_of_bound Tinv_aux r⁻¹
 begin
-  abstract Tinvt_spec {
+  abstract Tinv_spec {
   intro c,
   have H : _ := _,
   refine ⟨H, _⟩,
@@ -690,7 +601,9 @@ begin
     swap 2, { cases a with a ha, cases a, exact 0, exact F s ⟨a, hB ⟨_, ha⟩⟩ },
     { suffices : truncate A ∘ _ = g ∘ truncate B,
       { rw this, exact continuous_of_discrete_topology.comp (truncate_continuous r S _ B) },
-      ext F s ⟨(_|a), ha⟩; refl },
+      ext F s ⟨(_|a), ha⟩,
+      { dsimp, rw Tinv_aux_zero, refl },
+      { dsimp, rw Tinv_aux_succ, refl } },
     { refine le_trans _ (mul_le_mul' le_rfl F.bound),
       rw [invpoly_bdd.nnnorm_def, mul_comm, finset.sum_mul],
       refine finset.sum_le_sum (λ s hs, _),
@@ -716,13 +629,12 @@ begin
     refine le_trans _ (mul_le_mul' hF le_rfl),
     simp only [nnnorm_def, finset.sum_mul],
     refine finset.sum_le_sum (λ s _, _),
-    transitivity ∑' n, ∥F s n∥₊ * r^(-n:ℤ) * r⁻¹,
+    transitivity ∑' n, ∥(F s).coeff n∥₊ * r^(-n:ℤ) * r⁻¹,
     { rw ← sum_add_tsum_nat_add' 1,
       swap, { apply Tinv_aux_summable },
       simp only [finset.range_one, zpow_neg₀, zpow_coe_nat, finset.sum_singleton,
         pow_zero, inv_one, mul_one, int.coe_nat_succ, neg_add, zpow_add₀ hr.out.ne',
-        zpow_one, mul_assoc, Tinv_add_monoid_hom, add_monoid_hom.mk'_apply,
-        coe_mk, Tinv_aux_zero, nnnorm_zero, Tinv_aux_succ, zero_add], },
+        zpow_one, mul_assoc, Tinv_aux_zero, nnnorm_zero, Tinv_aux_succ, zero_add], },
     refine le_of_eq _, ext,
     simp only [nonneg.coe_mul, nnreal.coe_tsum, coe_nnnorm, nnreal.coe_zpow, tsum_mul_right], } }
 end
@@ -730,10 +642,22 @@ end
 
 instance [fact (0 < r)] :
   profinitely_filtered_pseudo_normed_group_with_Tinv r (ℤ[T⁻¹] S) :=
-{ Tinv := Tinv,
+{ Tinv := Tinv_hom,
   Tinv_mem_filtration := λ c F hF,
     comphaus_filtered_pseudo_normed_group_hom.mk_of_bound_bound_by _ _ _ hF,
   .. (_: profinitely_filtered_pseudo_normed_group (ℤ[T⁻¹] S))}
+
+open comphaus_filtered_pseudo_normed_group_with_Tinv
+
+lemma Tinv_coeff [fact (0 < r)] (F : ℤ[T⁻¹] S) (s : S) (n : ℕ) :
+  (Tinv F s).coeff n = (polynomial.X * F s).coeff n := rfl
+
+@[simp] lemma Tinv_zero [fact (0 < r)] (F : ℤ[T⁻¹] S) (s : S) : (Tinv F s).coeff 0 = 0 :=
+Tinv_aux_zero F s
+
+@[simp] lemma Tinv_succ [fact (0 < r)] (F : ℤ[T⁻¹] S) (s : S) (i : ℕ) :
+  (Tinv F s).coeff (i + 1) = (F s).coeff i :=
+Tinv_aux_succ F s i
 
 variable {α : Type*}
 
@@ -744,16 +668,21 @@ open pseudo_normed_group profinitely_filtered_pseudo_normed_group
 def map_hom [fact (0 < r)] (f : S ⟶ S') :
   comphaus_filtered_pseudo_normed_group_with_Tinv_hom r (ℤ[T⁻¹] S) (ℤ[T⁻¹] S') :=
 { to_fun := map f,
-  map_zero' := by { ext, simp only [map_apply, zero_apply, finset.sum_const_zero], },
-  map_add' := λ F G, by { ext s i, simp only [←finset.sum_add_distrib, map_apply, add_apply], },
-  map_Tinv' := λ F, by { ext s (_|i); simp only [map_apply]; sorry },
+  map_zero' := by { ext s n,
+    simp only [map_apply, zero_apply, polynomial.coeff_zero, finset.sum_const_zero], },
+  map_add' := λ F G, by { ext s n,
+    simp only [map_apply, add_apply, polynomial.coeff_add, finset.sum_add_distrib], },
+  map_Tinv' := λ F, by { ext s (_|n),
+    { simp only [map_apply, Tinv_zero, finset.sum_const_zero], },
+    { simp only [map_apply, Tinv_succ], } },
   strict' := λ c F (hF : ∥F∥₊ ≤ c), (map_bound _ _).trans hF,
   continuous' := λ c, begin
     rw continuous_iff,
     intros T,
     let f₀ : (filtration (invpoly r S) c) → (filtration (invpoly r S') c) :=
       level (map f) (λ c F (hF : ∥F∥₊ ≤ c), (map_bound f F).trans hF) c,
-    have : truncate T ∘ f₀ = invpoly_bdd.map f ∘ truncate T, { ext F s' t, refl },
+    have : truncate T ∘ f₀ = invpoly_bdd.map f ∘ truncate T, { ext s n,
+      simp only [truncate_to_fun, subtype.val_eq_coe, level_coe, map_apply, invpoly_bdd.map_apply]},
     rw this,
     exact continuous_of_discrete_topology.comp (truncate_continuous r S _ T),
   end }
