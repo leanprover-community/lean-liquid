@@ -89,6 +89,7 @@ apply_nolint bounded_homotopy_category.lift unused_arguments
 apply_nolint bounded_homotopy_category.lift_ext unused_arguments
 
 -- for_mathlib/derived/derived_cat.lean
+apply_nolint bounded_derived_category.lift_unique unused_arguments
 apply_nolint bounded_derived_category.zero_is_K_projective unused_arguments
 
 -- for_mathlib/derived/example.lean
@@ -190,10 +191,14 @@ apply_nolint category_theory.triangulated.triangle.shift_add_comp_eq_to_hom' unu
 apply_nolint category_theory.triangulated.triangle.shift_comm_eq_eq_to_hom unused_arguments
 
 -- invpoly/basic.lean
+apply_nolint invpoly unused_arguments
 apply_nolint invpoly.invpoly.norm_nonneg dup_namespace
 
 -- laurent_measures/basic.lean
 apply_nolint laurent_measures.laurent_measures.norm_nonneg dup_namespace
+
+-- laurent_measures/ext.lean
+apply_nolint laurent_measures.epi_and_is_iso unused_arguments
 
 -- laurent_measures/ses.lean
 apply_nolint laurent_measures_ses.box unused_arguments
