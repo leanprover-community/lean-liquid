@@ -9,11 +9,38 @@ import condensed.kernel_comparison
 
 .
 
-universe u
+universes u v
+
+noncomputable theory
 
 open_locale nnreal
 
 open category_theory category_theory.limits opposite pseudo_normed_group
+
+-- move me
+namespace CompHaus
+
+variables {J : Type u} [category J] [is_filtered J] (F G : J ⥤ CompHaus.{v}) (α : F ⟶ G)
+variables (cF : cone F) (cG : cone G) (hcF : is_limit cF) (hcG : is_limit cG)
+
+def pt {X : CompHaus} (x : X) : (⊤_ CompHaus) ⟶ X :=
+⟨λ _, x, continuous_const⟩
+
+def diagram_of_pt (y : cG.X) : J ⥤ CompHaus.{v} :=
+{ obj := λ j, pullback (α.app j) (pt y ≫ cG.π.app j),
+  map := λ i j f, pullback.lift (pullback.fst ≫ F.map f) pullback.snd
+    (by rw [category.assoc, α.naturality, pullback.condition_assoc, category.assoc, cG.w]),
+  map_id' := sorry,
+  map_comp' := sorry }
+
+lemma is_limit.surjective_of_surjective
+  (hα : ∀ j, function.surjective (α.app j)) :
+  function.surjective (hcG.map cF α) :=
+begin
+  intro y,
+end
+
+end CompHaus
 
 namespace CompHausFiltPseuNormGrp₁
 
@@ -62,12 +89,14 @@ variables (f : A ⟶ B) (g : B ⟶ C) (r c : ℝ≥0) [fact (1 ≤ r)]
 
 def c_le_rc : c ⟶ r * c := hom_of_le $ fact.out _
 
+/-- Given `f : A ⟶ B`, `P1` is the pullback `B_c ×_{B_{rc}} A_{rc}`. -/
 def P1 : CompHaus :=
 pullback ((Filtration.map (c_le_rc r c)).app B) ((Filtration.obj (r * c)).map f)
 
 def pt {X : CompHaus} (x : X) : (⊤_ CompHaus) ⟶ X :=
 ⟨λ _, x, continuous_const⟩
 
+/-- Given `g : B ⟶ C`, `P2` is the pullback `B_c ×_{C_c} {pt}`. -/
 def P2 : CompHaus :=
 pullback ((Filtration.obj c).map g) (pt (0 : pseudo_normed_group.filtration C c))
 
@@ -149,18 +178,30 @@ end
 
 end exact_with_constant
 
-lemma exact_with_constant_extend {A B C : Fintype ⥤ CompHausFiltPseuNormGrp₁.{u}}
-  (f : A ⟶ B) (g : B ⟶ C) (r : ℝ≥0)
-  (hfg : ∀ S, exact_with_constant (f.app S) (g.app S) r) (S : Profinite) :
-  exact_with_constant
-    ((Profinite.extend_nat_trans f).app S) ((Profinite.extend_nat_trans g).app S) r :=
-sorry
-
 -- move this
 instance : has_zero_morphisms (CompHausFiltPseuNormGrp₁.{u}) :=
 { has_zero := λ M₁ M₂, ⟨0⟩,
   comp_zero' := λ _ _ f _, rfl,
   zero_comp' := λ _ _ _ f, by { ext, exact f.map_zero } }
+
+lemma exact_with_constant_extend {A B C : Fintype ⥤ CompHausFiltPseuNormGrp₁.{u}}
+  (f : A ⟶ B) (g : B ⟶ C) (r : ℝ≥0) [fact (1 ≤ r)]
+  (hfg : ∀ S, exact_with_constant (f.app S) (g.app S) r) (S : Profinite) :
+  exact_with_constant
+    ((Profinite.extend_nat_trans f).app S) ((Profinite.extend_nat_trans g).app S) r :=
+begin
+  rw exact_with_constant.iff_surjective,
+  fsplit,
+  { rw [← nat_trans.comp_app, ← Profinite.extend_nat_trans_comp],
+    apply limit.hom_ext,
+    intro X,
+    specialize hfg (S.fintype_diagram.obj X),
+    erw [zero_comp, limit.lift_π],
+    simp only [cones.postcompose_obj_π, whisker_left_comp, nat_trans.comp_app,
+      limit.cone_π, whisker_left_app, hfg.comp_eq_zero, comp_zero], },
+  intros c,
+  sorry
+end
 
 instance has_zero_nat_trans_CHFPNG₁ {𝒞 : Type*} [category 𝒞]
   (A B : 𝒞 ⥤ CompHausFiltPseuNormGrp₁.{u}) :
@@ -180,7 +221,7 @@ begin
 end
 
 lemma exact_with_constant_extend_zero_left (A B C : Fintype ⥤ CompHausFiltPseuNormGrp₁.{u})
-  (g : B ⟶ C) (r : ℝ≥0)
+  (g : B ⟶ C) (r : ℝ≥0) [fact (1 ≤ r)]
   (hfg : ∀ S, exact_with_constant (0 : A.obj S ⟶ B.obj S) (g.app S) r) (S : Profinite) :
   exact_with_constant (0 : (Profinite.extend A).obj S ⟶ (Profinite.extend B).obj S)
     ((Profinite.extend_nat_trans g).app S) r :=
@@ -190,7 +231,7 @@ begin
 end
 
 lemma exact_with_constant_extend_zero_right (A B C : Fintype ⥤ CompHausFiltPseuNormGrp₁.{u})
-  (f : A ⟶ B) (r : ℝ≥0)
+  (f : A ⟶ B) (r : ℝ≥0) [fact (1 ≤ r)]
   (hfg : ∀ S, exact_with_constant (f.app S) (0 : B.obj S ⟶ C.obj S) r) (S : Profinite) :
   exact_with_constant ((Profinite.extend_nat_trans f).app S)
     (0 : (Profinite.extend B).obj S ⟶ (Profinite.extend C).obj S) r :=
