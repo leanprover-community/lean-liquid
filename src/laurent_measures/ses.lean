@@ -403,10 +403,13 @@ begin
   apply truncate_continuous,
 end
 
-open metric
+section topological_generalities
 
+open metric set
+
+variables {X : Type*} [topological_space X]
 --**[FAE]** Probably needed, but check before proving it!
-lemma continuous_iff_for_all_closed (c : ℝ≥0) {X : Type*} [topological_space X]
+lemma continuous_if_for_all_closed (c : ℝ≥0)
   (f : X → closed_ball (0 : ℝ) c) (H : ∀ a : ℝ≥0, ∀ (H : a ≤ c), is_closed
     (f⁻¹' ((closed_ball ⟨(0 : ℝ), (mem_closed_ball_self c.2)⟩ a) : set ((closed_ball (0 : ℝ) c)))))
     : continuous f :=
@@ -414,6 +417,42 @@ lemma continuous_iff_for_all_closed (c : ℝ≥0) {X : Type*} [topological_space
    sorry,
  end
 
+lemma reduction_balls {c : ℝ} (f : X → (Icc (-c) c)) (H : ∀ y : (Icc (-c) c), ∀ ε : ℝ,
+  is_open (f⁻¹' (ball y ε))) : continuous f :=
+begin
+  rw continuous_def,
+  intros _ hU,
+  rw is_open_iff_forall_mem_open,
+  intros x hx,
+  obtain ⟨ε, h₀, hε⟩ := (is_open_iff.mp hU) (f x) (mem_preimage.mp hx),
+  use f⁻¹' (ball (f x) ε),
+  exact ⟨preimage_mono hε, H (f x) ε, mem_ball_self h₀⟩,
+end
+
+lemma complement_of_balls {c : ℝ} (y : Icc (-c) c) (ε : ℝ) : ∃ (x₁ x₂ : Icc (-c) c), ∃ (δ₁ δ₂ : ℝ),
+   ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ :=
+begin
+  sorry
+end
+
+-- lemma aux_c {c : ℝ} (hc : 0 < c) : (0 : ℝ) ∈ (Icc (-c) c) :=
+-- --by {apply
+-- mem_Icc.mpr ⟨right.neg_nonpos_iff.mpr (le_of_lt hc), (le_of_lt hc)⟩-- }
+-- lemma continuous_iff_preimage_closed {c : ℝ} (hc : 0 < c) (f : X → (Icc (-c) c)) (H : ∀ y : Icc (-c) c, ∀ ε : ℝ, is_closed (f⁻¹' (closed_ball ⟨y, aux_c hc⟩ ε))) : continuous f :=
+
+lemma continuous_if_preimage_closed {c : ℝ} (hc : 0 < c) (f : X → (Icc (-c) c))
+  (H : ∀ y : Icc (-c) c, ∀ ε : ℝ, is_closed (f⁻¹' (closed_ball y ε))) : continuous f :=
+begin
+  apply reduction_balls,
+  intros y ε,
+  obtain ⟨x₁,x₂,δ₁,δ₂,h⟩ := complement_of_balls y ε,
+  rw h,
+  simp only [compl_union, preimage_inter, preimage_compl],
+  apply is_open.inter,
+  all_goals {simp only [is_open_compl_iff], apply H},
+end
+
+end topological_generalities
 
 def θ_c (c : ℝ≥0) (T : Fintype) : (filtration (laurent_measures r T) c) →
   (filtration (real_measures p T) c) :=
@@ -453,9 +492,16 @@ begin
   rw ← commute_seval_ℒ_ℳ,
   refine continuous.comp _ (continuous_seval_ℒ_c p S c s),
   dsimp only [θ_c],
-  rw continuous_iff_is_closed,
-  intros C hC,
+  -- have e : filtration (real_measures p (Fintype.of punit)) c ≃ₜ set.Icc (-c.1) c.1,
+  -- sorry,
+  apply (homeo_filtration_ϖ_Icc c).comp_continuous_iff.mp,
+  -- rw continuous_iff_preimage_closed,
+  -- rw continuous_iff_is_closed,
+  -- intros C hC,
+  apply continuous_if_preimage_closed,
   sorry,
+  sorry,
+  -- ,/
   -- have := @closed_of_ℳ_ϖ p _ _ c,
   -- refine (@closed_of_ℳ_ϖ p _ _ c).symm.comp_continuous_iff.mp,
   -- apply cont_at_cast_ℳ c (θ_c S c),
