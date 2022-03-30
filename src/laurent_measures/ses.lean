@@ -403,6 +403,8 @@ begin
   apply truncate_continuous,
 end
 
+-- **[FAE]** this section is possibly useless (in that case, equiv_filtration_ϖ and
+--homeo_filtration_ϖ are in `real_measures` are also useless)
 section topological_generalities
 
 open metric set
@@ -495,11 +497,16 @@ begin
   -- have e : filtration (real_measures p (Fintype.of punit)) c ≃ₜ set.Icc (-c.1) c.1,
   -- sorry,
   apply (homeo_filtration_ϖ_Icc c).comp_continuous_iff.mp,
+  apply reduction_balls,
+  intros y ε,
+  dsimp [homeo_filtration_ϖ_Icc],-- θ, ϑ],
+  -- **[fae]** ADD AN ONLY ABOVE OR REMOVE ALTOGETHER
+
   -- rw continuous_iff_preimage_closed,
   -- rw continuous_iff_is_closed,
   -- intros C hC,
-  apply continuous_if_preimage_closed,
-  sorry,
+  -- apply continuous_if_preimage_closed,
+  -- sorry,
   sorry,
   -- ,/
   -- have := @closed_of_ℳ_ϖ p _ _ c,
