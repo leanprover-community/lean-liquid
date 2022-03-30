@@ -1,3 +1,5 @@
+import category_theory.limits.fubini
+
 import for_mathlib.Profinite.extend
 import for_mathlib.AddCommGroup.exact
 
@@ -27,7 +29,7 @@ variables (cF : cone F) (cG : cone G) (hcF : is_limit cF) (hcG : is_limit cG)
 def pt {X : CompHaus.{u}} (x : X) : (⊤_ CompHaus) ⟶ X :=
 ⟨λ _, x, continuous_const⟩
 
-def diagram_of_pt (y : cG.X) : J ⥤ CompHaus.{u} :=
+@[simps] def diagram_of_pt (y : cG.X) : J ⥤ CompHaus.{u} :=
 { obj := λ j, pullback (α.app j) (pt y ≫ cG.π.app j),
   map := λ i j f, pullback.lift (pullback.fst ≫ F.map f) pullback.snd
     (by rw [category.assoc, α.naturality, pullback.condition_assoc, category.assoc, cG.w]),
@@ -76,26 +78,34 @@ begin
   let e : E'.X ≅ (Top.limit_cone _).X :=
     hE'.cone_point_unique_up_to_iso (Top.limit_cone_is_limit _),
   haveI : ∀ j : J, t2_space (((diagram_of_pt F G α cG y ⋙ CompHaus_to_Top).obj j)),
-  { intros j,
-    change t2_space ((diagram_of_pt F G α cG y).obj j), apply_instance },
+  { intros j, change t2_space ((diagram_of_pt F G α cG y).obj j), apply_instance },
   haveI : ∀ j : J, compact_space (((diagram_of_pt F G α cG y ⋙ CompHaus_to_Top).obj j)),
-  { intros j,
-    change compact_space ((diagram_of_pt F G α cG y).obj j), apply_instance },
+  { intros j, change compact_space ((diagram_of_pt F G α cG y).obj j), apply_instance },
   haveI : ∀ j : J, nonempty (((diagram_of_pt F G α cG y ⋙ CompHaus_to_Top).obj j)),
-  { -- use hα,
-    sorry },
+  { intro j, change nonempty ((diagram_of_pt F G α cG y).obj j),
+    dsimp only [diagram_of_pt_obj],
+    let y' := (terminal.from (CompHaus.of punit) ≫ pt y ≫ cG.π.app j) punit.star,
+    obtain ⟨x', hx'⟩ := hα j y',
+    refine ⟨(terminal.from (CompHaus.of punit) ≫ pullback.lift (pt x') (𝟙 _) _) punit.star⟩,
+    ext z, exact hx', },
   have := Top.nonempty_limit_cone_of_compact_t2_cofiltered_system
     (diagram_of_pt F G α cG y ⋙ CompHaus_to_Top),
   obtain ⟨a⟩ := this,
   let b := e.inv a,
   use pt b,
-  sorry
+  rw pullback.condition,
+  refl,
 end
 
 end CompHaus
 
 namespace CompHausFiltPseuNormGrp₁
 
+-- move this
+instance : has_zero_morphisms (CompHausFiltPseuNormGrp₁.{u}) :=
+{ has_zero := λ M₁ M₂, ⟨0⟩,
+  comp_zero' := λ _ _ f _, rfl,
+  zero_comp' := λ _ _ _ f, by { ext, exact f.map_zero } }
 variables {A B C : CompHausFiltPseuNormGrp₁.{u}}
 
 structure exact_with_constant (f : A ⟶ B) (g : B ⟶ C) (r : ℝ≥0) : Prop :=
@@ -230,13 +240,45 @@ end
 
 end exact_with_constant
 
--- move this
-instance : has_zero_morphisms (CompHausFiltPseuNormGrp₁.{u}) :=
-{ has_zero := λ M₁ M₂, ⟨0⟩,
-  comp_zero' := λ _ _ f _, rfl,
-  zero_comp' := λ _ _ _ f, by { ext, exact f.map_zero } }
+namespace exact_with_constant
 
-lemma exact_with_constant_extend {A B C : Fintype ⥤ CompHausFiltPseuNormGrp₁.{u}}
+variables {J : Type u} [small_category J]
+variables {A' B' C' : J ⥤ CompHausFiltPseuNormGrp₁.{u}}
+variables (f : A' ⟶ B') (g : B' ⟶ C') (r c : ℝ≥0) [fact (1 ≤ r)]
+
+@[simps obj obj_obj obj_map map map_app { fully_applied := ff }]
+def P1_functor : J ⥤ walking_cospan ⥤ CompHaus.{u} :=
+functor.flip $ cospan
+  (whisker_left B' (Filtration.map (c_le_rc r c)))
+  (whisker_right f (Filtration.obj (r * c)))
+
+@[simps obj obj_obj obj_map map map_app { fully_applied := ff }]
+def P2_functor : J ⥤ walking_cospan ⥤ CompHaus.{u} :=
+functor.flip $ @cospan _ _ _ ((category_theory.functor.const _).obj (⊤_ _)) _
+  (whisker_right g (Filtration.obj c))
+  { app := λ j, pt (0 : pseudo_normed_group.filtration (C'.obj j) c),
+    naturality' := by { intros, ext, exact (C'.map f).map_zero.symm } }
+
+@[simps]
+def P1_to_P2_nat_trans (hfg : f ≫ g = 0) :
+  (P1_functor f r c ⋙ lim) ⟶ (P2_functor g c ⋙ lim) :=
+{ app := λ j, begin
+    refine _ ≫ P1_to_P2 (f.app j) (g.app j) r c (by { rw [← nat_trans.comp_app, hfg], refl }) ≫ _,
+    { refine lim_map (diagram_iso_cospan _).hom, },
+    { refine lim_map (_ ≫ (diagram_iso_cospan _).inv), exact 𝟙 _, }
+  end,
+  naturality' := sorry }
+
+set_option pp.universes true
+
+-- move me, generalize
+lemma extend_aux {A₁ B₁ A₂ B₂ : CompHaus}
+  (e₁ : A₁ ≅ B₁) (e₂ : A₂ ≅ B₂) (f : A₁ ⟶ A₂) (g : B₁ ⟶ B₂) (hf : epi f)
+  (H : f = e₁.hom ≫ g ≫ e₂.inv) :
+  epi g :=
+by { rw [← iso.inv_comp_eq, iso.eq_comp_inv] at H, subst H, apply epi_comp _, apply epi_comp }
+
+lemma extend {A B C : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}}
   (f : A ⟶ B) (g : B ⟶ C) (r : ℝ≥0) [fact (1 ≤ r)]
   (hfg : ∀ S, exact_with_constant (f.app S) (g.app S) r) (S : Profinite) :
   exact_with_constant
@@ -252,8 +294,48 @@ begin
     simp only [cones.postcompose_obj_π, whisker_left_comp, nat_trans.comp_app,
       limit.cone_π, whisker_left_app, hfg.comp_eq_zero, comp_zero], },
   intros c,
-  sorry
+  have hfg' : whisker_left.{u u u+1 u u+1 u} S.fintype_diagram f ≫
+    whisker_left.{u u u+1 u u+1 u} S.fintype_diagram g = 0,
+  { ext X : 2,
+    simp only [nat_trans.comp_app, whisker_left_app, (hfg (S.fintype_diagram.obj X)).comp_eq_zero],
+    refl },
+  have key := CompHaus.is_limit.surjective_of_surjective
+    (P1_functor.{u} (whisker_left S.fintype_diagram f) r c ⋙ lim)
+    (P2_functor.{u} (whisker_left S.fintype_diagram g) c ⋙ lim)
+    (P1_to_P2_nat_trans _ _ _ _ hfg')
+    (limit.cone _) (limit.cone _) (limit.is_limit _) (limit.is_limit _) _,
+  swap,
+  { intro X, specialize hfg (S.fintype_diagram.obj X), rw [iff_surjective] at hfg,
+    rcases hfg with ⟨aux', hfg⟩, specialize hfg c,
+    rw ← CompHaus.epi_iff_surjective at hfg ⊢,
+    apply_with epi_comp {instances := ff},
+    { show epi ((@limits.lim _ _ _ _ _).map _), apply_instance, },
+    apply_with epi_comp {instances := ff},
+    { exact hfg },
+    { show epi ((@limits.lim _ _ _ _ _).map _), apply_instance, }, },
+  rw ← CompHaus.epi_iff_surjective at key ⊢,
+  refine extend_aux _ _ _ _ key _,
+  all_goals { sorry }
+  -- { let foo := limit_curry_swap_comp_lim_iso_limit_curry_comp_lim
+  --     (uncurry.{u u u}.obj $ P1_functor.{u} (whisker_left S.fintype_diagram f) r c),
+  --   refine _ ≪≫ foo.symm ≪≫ _,
+  --   { refine (@limits.lim _ _ _ _ _).map_iso _,
+  --     refine iso_whisker_right _ _,
+  --     refine nat_iso.of_components (λ X, nat_iso.of_components (λ _, iso.refl _) _) _,
+  --     { intros i j h, dsimp,
+  --       simp only [category_theory.functor.map_id, category.id_comp, category.comp_id], },
+  --     { intros X Y φ, ext i : 2, dsimp,
+  --       simp only [category_theory.functor.map_id, category.id_comp, category.comp_id,
+  --         nat_trans.id_app], } },
+  --   { refine (@limits.lim _ _ _ _ _).map_iso _,
+  --     refine diagram_iso_cospan _ ≪≫ _,
+  --     dsimp [curry, curry_obj, uncurry, prod.swap],
+  --     refine nat_iso.of_components (λ j, _) _,
+  --      }
+  --  }
 end
+
+end exact_with_constant
 
 instance has_zero_nat_trans_CHFPNG₁ {𝒞 : Type*} [category 𝒞]
   (A B : 𝒞 ⥤ CompHausFiltPseuNormGrp₁.{u}) :
@@ -278,7 +360,7 @@ lemma exact_with_constant_extend_zero_left (A B C : Fintype ⥤ CompHausFiltPseu
   exact_with_constant (0 : (Profinite.extend A).obj S ⟶ (Profinite.extend B).obj S)
     ((Profinite.extend_nat_trans g).app S) r :=
 begin
-  have := exact_with_constant_extend (0 : A ⟶ B) g r hfg S,
+  have := exact_with_constant.extend (0 : A ⟶ B) g r hfg S,
   simpa,
 end
 
@@ -288,7 +370,7 @@ lemma exact_with_constant_extend_zero_right (A B C : Fintype ⥤ CompHausFiltPse
   exact_with_constant ((Profinite.extend_nat_trans f).app S)
     (0 : (Profinite.extend B).obj S ⟶ (Profinite.extend C).obj S) r :=
 begin
-  have := exact_with_constant_extend f (0 : B ⟶ C) r hfg S,
+  have := exact_with_constant.extend f (0 : B ⟶ C) r hfg S,
   simpa,
 end
 
