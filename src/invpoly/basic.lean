@@ -4,7 +4,6 @@ import analysis.specific_limits.basic
 import category_theory.Fintype
 import analysis.normed_space.basic
 
-import invpoly.bounded
 import pseudo_normed_group.basic
 import pseudo_normed_group.category
 
