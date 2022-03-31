@@ -160,6 +160,7 @@ begin
     exact pseudo_normed_group.nat_smul_mem_filtration k m c h }
 end
 
+/-- The map from `filtration M₁ c` to `filtration M₂ c` induced by a strict morphism `M₁ → M₂`. -/
 @[simps] def level {M₁ M₂ : Type*} [pseudo_normed_group M₁] [pseudo_normed_group M₂]
  (f : M₁ → M₂) (strict :  ∀ ⦃c x⦄, x ∈ filtration M₁ c → f x ∈ filtration M₂ c)
  (c : ℝ≥0) : filtration M₁ c → filtration M₂ c :=
