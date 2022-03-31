@@ -233,6 +233,8 @@ lemma condensify_nonstrict_exact
   (X : Profinite.{u}) :
   short_exact ((condensify_nonstrict α c h).app X) ((condensify_map β).app X) :=
 begin
+  haveI hcα' : fact (1 ≤ cα) := ⟨hcα⟩,
+  haveI hcβ' : fact (1 ≤ cβ) := ⟨hcβ⟩,
   apply_with short_exact.mk { instances := ff },
   { simp only [condensify_nonstrict, nonstrict_extend, whisker_right_comp],
     repeat { apply_with mono_comp { instances := ff }; try { apply_instance } },
@@ -255,7 +257,7 @@ begin
     simp only [nonstrict_extend, whisker_right_comp, nat_trans.comp_app, category.assoc],
     repeat { apply exact_of_iso_comp_exact; [apply_instance, skip] },
     apply condensed.exact_of_exact_with_constant _ _ cα hcα,
-    apply exact_with_constant_extend,
+    apply exact_with_constant.extend,
     intro S,
     refine ⟨_, _⟩,
     { ext x, specialize H2a S, apply_fun (λ φ, φ.to_fun) at H2a, exact congr_fun H2a x },
