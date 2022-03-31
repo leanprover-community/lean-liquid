@@ -332,6 +332,20 @@ begin
   exact hg₀.comp hf₀
 end
 
+lemma bound_by.id : (id : comphaus_filtered_pseudo_normed_group_hom M M).bound_by 1 :=
+begin
+  intros c x hx,
+  rwa one_mul,
+end
+
+lemma bound_by.comp {f' : comphaus_filtered_pseudo_normed_group_hom M₂ M₃} {C₁ C₂ : ℝ≥0}
+  (hf : f.bound_by C₁) (hf' : f'.bound_by C₂) : (f'.comp f).bound_by (C₂ * C₁) :=
+begin
+  intros c x hx,
+  rw mul_assoc,
+  exact hf' (hf hx),
+end
+
 end comphaus_filtered_pseudo_normed_group_hom
 
 namespace strict_comphaus_filtered_pseudo_normed_group_hom
