@@ -79,7 +79,7 @@ lemma equiv.mul_inv_rev (d e : G) :
 
 end group_add_neg
 
-/--  The subtype of nonnegative integers is equivalent to the natural number. -/
+/--  The subtype of nonnegative integers is equivalent to the natural numbers. -/
 def int_subtype_nonneg_equiv : {x : ℤ // 0 ≤ x} ≃ ℕ :=
 { to_fun := begin
     rintro ⟨x | y, hx⟩,
