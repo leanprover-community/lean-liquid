@@ -127,6 +127,17 @@ end
 lemma norm_add (F G : ℤ[T⁻¹] S) : ∥F + G∥ ≤ ∥F∥ + ∥G∥ :=
 by simpa only [← coe_nnnorm, ← nnreal.coe_add, nnreal.coe_le_coe] using nnnorm_add F G
 
+
+instance : pseudo_normed_group (ℤ[T⁻¹] S) :=
+{ filtration := λ c, { F | ∥F∥₊ ≤ c },
+  filtration_mono := λ c₁ c₂ h F hF, by {dsimp at *, exact le_trans hF h},
+  zero_mem_filtration := λ c, by simp [nnnorm_def],
+  neg_mem_filtration := λ c F h, (nnnorm_neg F).le.trans h,
+  add_mem_filtration := λ c₁ c₂ F₁ F₂ h₁ h₂, (nnnorm_add _ _).trans (add_le_add h₁ h₂) }
+
+@[simp] lemma mem_filtration_iff (F : ℤ[T⁻¹] S) (c : ℝ≥0) :
+  F ∈ pseudo_normed_group.filtration (ℤ[T⁻¹] S) c ↔ ∥F∥₊ ≤ c := iff.rfl
+
 section
 open finset
 
@@ -197,350 +208,22 @@ begin
   exact zpow_strict_mono (one_lt_inv hx₀ hx₁) H,
 end
 
-open real
-
--- --For every F, d F is a bound whose existence is established in `eq_zero_of_filtration`
--- lemma exists_bdd_filtration {S : Fintype} (hr₀ : 0 < (r : ℝ)) (hr₁ : (r : ℝ) < 1) (F : ℤ[T⁻¹] S) :
---   ∃ d : ℕ, ∀ s : S, ∀ (n : ℕ), n < d → (F s).coeff n = 0 :=
--- begin
---   have h_logr : (log r) < 0 := log_neg hr₀ hr₁,
---   let d := if log ∥ F ∥ ≥ 0 then ⌊ (log ∥ F ∥ / log (r : ℝ)) ⌋ - 1 else -1,
---   use d,
---   intros s n hn,
---   have H1 := zpow_strict_anti hr₀ hr₁ hn,
---   suffices H2 : ∥F∥₊ < r ^ d,
---   { refine eq_zero_of_filtration F (∥F∥₊) le_rfl s n (H2.trans _),
---     rw [← nnreal.coe_lt_coe, nnreal.coe_zpow, nnreal.coe_zpow],
---     exact zpow_strict_anti hr₀ hr₁ hn, },
---   have hd1 : 0 < -(d : ℝ),
---   { rw [lt_neg, neg_zero, ← int.cast_zero, int.cast_lt],
---     apply int.lt_of_le_sub_one,
---     dsimp only [d],
---     split_ifs,
---     { rw [tsub_le_iff_right, sub_add, sub_self, sub_zero],
---       exact int.floor_nonpos (div_nonpos_of_nonneg_of_nonpos h(le_of_lt h_logr)) },
---     { simp only [zero_sub] } },
---   have hFd1 : (log ∥ F ∥) < d * (log (r : ℝ)),
---   { rw ← zsmul_eq_mul,
---     rw ite_smul,
---     split_ifs,
---     { rw zsmul_eq_mul,
---       calc (log ∥F∥)
---           = (log ∥F∥/log r) * log r : (div_mul_cancel (log ∥F∥) (ne_of_lt h_logr)).symm
---       ... ≤ ⌊ (log ∥F∥)/log r⌋ * log r : (mul_le_mul_right_of_neg h_logr).mpr (int.floor_le _)
---       ... < (⌊ (log ∥F∥)/log r⌋ - 1) * log r : (mul_lt_mul_right_of_neg h_logr).mpr (sub_one_lt _)
---       ... = ↑(⌊ (log ∥F∥)/log r⌋ - 1) * log r : by simp only [int.cast_one, int.cast_sub] },
---     { rw [neg_smul, one_smul],
---       rw [ge_iff_le, not_le] at h,
---       apply h.trans,
---       rwa [lt_neg, neg_zero] } },
---   rw [← nnreal.coe_lt_coe, nnreal.coe_zpow, coe_nnnorm],
---   have := (real.lt_rpow_of_log_lt (invpoly.norm_nonneg F) hr₀ hFd1),
---   rwa [real.rpow_int_cast _ d] at this,
--- end
-
 section profinite_structure
 
-@[simps] def truncate {c : ℝ≥0} (A : finset ℕ) :
-  { F : ℤ[T⁻¹] S | ∥F∥₊ ≤ c } → invpoly_bdd r S A c := λ F,
-{ to_fun := λ s i, (F.1 s).coeff i,
-  bound' := begin
-    refine (finset.sum_le_sum $ λ s _, _).trans F.2,
-    convert sum_le_tsum A _ (F.1.nnreal_summable s) using 1,
-    { conv_rhs { rw ← finset.sum_attach }, refl },
-    { intros b hb, exact zero_le', },
-  end }
+variables [fact (0 < r)] (c : ℝ≥0)
 
-lemma eq_iff_truncate_eq (c : ℝ≥0) (F G : {F : ℤ[T⁻¹] S | ∥F∥₊ ≤ c}) :
-  (∀ k, truncate k F = truncate k G) → F = G :=
-begin
-  intros h,
-  ext s i,
-  specialize h {i},
-  apply_fun (λ e, e s ⟨i, by simp⟩) at h,
-  exact h,
-end
+instance : fintype { F : ℤ[T⁻¹] S | ∥F∥₊ ≤ c} := sorry
 
-
-def finset_map {A B : finset ℕ} (h : B ≤ A) : B → A :=
-λ i, ⟨i, h i.2⟩
-
-def transition {c : ℝ≥0} {A B : finset ℕ} (h : B ≤ A) :
-  invpoly_bdd r S A c → invpoly_bdd r S B c := λ F,
-⟨λ s i, F s (finset_map h i), begin
-  refine (finset.sum_le_sum $ λ s _, _).trans F.2,
-  have : ∑ i : B, ∥F s (finset_map h i)∥₊ * r^(-i : ℤ) =
-    ∑ i in finset.univ.image (finset_map h), ∥F s i∥₊ * r^(-i : ℤ),
-  { rw finset.sum_image,
-    { refl },
-    { rintros i - j - hh,
-      apply subtype.ext,
-      apply_fun (λ e, e.val) at hh,
-      exact hh } },
-  rw this,
-  refine finset.sum_le_sum_of_subset_of_nonneg (finset.subset_univ _) (λ _ _ _, zero_le'),
-end⟩
-
-def mk_seq {c} (F : Π (A : finset ℕ), invpoly_bdd r S A c) :
-  S → ℕ → ℤ := λ s i, F {i} s ⟨i, by simp⟩
-
-lemma mk_seq_compat {c} (F : Π (A : finset ℕ), invpoly_bdd r S A c)
-  (compat : ∀ (A B : finset ℕ) (h : B ≤ A), transition h (F _) = F _) (s : S)
-  (A : finset ℕ) (i : A) : mk_seq F s i = F A s i :=
-begin
-  have : ({i} : finset ℕ) ≤ A, { simp },
-  specialize compat _ _ this,
-  dsimp [mk_seq],
-  rw ← compat,
-  change (F A) s _ = _,
-  congr,
-  ext,
-  refl,
-end
-
-lemma mk_seq_compat_summable {c} (F : Π (A : finset ℕ), invpoly_bdd r S A c)
-  (compat : ∀ (A B : finset ℕ) (h : B ≤ A), transition h (F _) = F _) (s : S) :
-  summable (λ k : ℕ, ∥mk_seq F s k∥ * (r:ℝ)^(-k:ℤ)) :=
-begin
-  apply summable_of_sum_le,
-  { intro k,
-    dsimp,
-    refine mul_nonneg (norm_nonneg _) (zpow_nonneg (nnreal.coe_nonneg _) _) },
-  { intros A,
-    rw ← finset.sum_attach,
-    refine le_trans _ (F A).bound,
-    simp_rw mk_seq_compat _ compat,
-    simp only [invpoly_bdd.nnnorm_def, finset.univ_eq_attach, nnreal.coe_sum,
-      nnreal.coe_mul, nnreal.coe_zpow],
-    apply @finset.single_le_sum S ℝ _ (λ s, ∑ (i : A), ∥ F A s i ∥ * (r : ℝ)^(-i : ℤ)),
-    swap, { simp },
-    rintro s -,
-    apply finset.sum_nonneg,
-    rintros a -,
-    refine mul_nonneg (norm_nonneg _) (zpow_nonneg (nnreal.coe_nonneg _) _) },
-end
-
-lemma mk_seq_compat_nnreal_summable {c} (F : Π (A : finset ℕ), invpoly_bdd r S A c)
-  (compat : ∀ (A B : finset ℕ) (h : B ≤ A), transition h (F _) = F _) (s : S) :
-  summable (λ k : ℕ, ∥mk_seq F s k∥₊ * r^(-k:ℤ)) :=
-begin
-  rw ← nnreal.summable_coe,
-  simpa only [nonneg.coe_mul, coe_nnnorm, nnreal.coe_zpow] using mk_seq_compat_summable F compat s
-end
-
-lemma mk_seq_compat_sum_le {c} (F : Π (A : finset ℕ), invpoly_bdd r S A c)
-  (compat : ∀ (A B : finset ℕ) (h : B ≤ A), transition h (F _) = F _)  :
-  ∑ (s : S), ∑' (k : ℕ), ∥mk_seq F s k∥₊ * r^(-k:ℤ) ≤ c :=
-begin
-  rw ← tsum_sum,
-  swap, { intros s hs, apply mk_seq_compat_nnreal_summable _ compat },
-  have : ∀ A : finset ℕ,
-    ∑ (b : A), ∑ (s : S), ∥F A s b∥₊ * r^(-b : ℤ) ≤ c,
-  { intros A,
-    rw finset.sum_comm,
-    exact (F A).bound },
-  apply tsum_le_of_sum_le,
-  { apply summable_sum,
-    intros s hs,
-    apply mk_seq_compat_nnreal_summable _ compat },
-  intros I,
-  rw finset.sum_comm,
-  convert (F I).bound using 1,
-  dsimp,
-  apply finset.sum_congr rfl,
-  rintros s -,
-  rw ← finset.sum_attach,
-  apply finset.sum_congr rfl,
-  rintros i -,
-  simp_rw [mk_seq_compat _ compat],
-end
-
-lemma exists_of_compat {c} (F : Π (A : finset ℕ), invpoly_bdd r S A c)
-  (compat : ∀ (A B : finset ℕ) (h : B ≤ A),
-    transition h (F _) = F _) :
-  ∃ (G : {H : ℤ[T⁻¹] S | ∥H∥₊ ≤ c }), ∀ (k : finset ℕ), truncate k G = F k :=
-begin
-  let supp : finset ℕ := sorry, -- should be the support of `mk_seq`.
-  let G : ℤ[T⁻¹] S := λ s, ∑ n in supp, mk_seq F s n * polynomial.X ^ n,
-  use G,
-  sorry,
-  sorry,
-end
-
-variables (r S)
-open category_theory
-def invpoly_bdd_functor (c : ℝ≥0) [fact (0 < r)] :
-  (as_small (finset ℕ))ᵒᵖ ⥤ Fintype :=
-{ obj := λ A, Fintype.of $ invpoly_bdd r S (ulift.down A.unop) c,
-  map := λ A B f, transition (le_of_hom $ ulift.down f.unop) }.
-
-def invpoly_bdd_equiv (c : ℝ≥0) [fact (0 < r)] : { F : ℤ[T⁻¹] S | ∥F∥₊ ≤ c } ≃
-  (Profinite.limit_cone (invpoly_bdd_functor r S c ⋙ Fintype.to_Profinite)).X :=
-equiv.of_bijective (λ F, ⟨λ A, truncate (ulift.down A.unop) F, λ A B f, by { ext, refl }⟩)
-begin
-  split,
-  { intros F G h,
-    apply eq_iff_truncate_eq,
-    intros k,
-    dsimp at h,
-    apply_fun (λ e, e.1 (opposite.op ⟨k⟩)) at h,
-    exact h },
-  { rintros ⟨F, hF⟩,
-    dsimp at F hF,
-    obtain ⟨G,hG⟩ := exists_of_compat (λ A, F (opposite.op ⟨A⟩)) _,
-    { use G,
-      ext : 2,
-      dsimp,
-      have := hG (ulift.down x.unop),
-      convert this,
-      rw ← x.op_unop,
-      congr' 1,
-      ext,
-      refl },
-    { intros A B h,
-      let e : (opposite.op $ as_small.up.obj A) ⟶ (opposite.op $ as_small.up.obj B) :=
-        quiver.hom.op (as_small.up.map (hom_of_le h)),
-      exact hF e } }
-end
-
-instance (c : ℝ≥0) [fact (0 < r)] : topological_space {F : ℤ[T⁻¹] S | ∥F∥₊ ≤ c} :=
-topological_space.induced (invpoly_bdd_equiv r S c) infer_instance
-
-def invpoly_bdd_homeo (c : ℝ≥0) [fact (0 < r)] : { F : ℤ[T⁻¹] S | ∥F∥₊ ≤ c } ≃ₜ
-  (Profinite.limit_cone (invpoly_bdd_functor r S c ⋙ Fintype.to_Profinite)).X :=
-{ continuous_to_fun := continuous_induced_dom,
-  continuous_inv_fun := begin
-    have : inducing (invpoly_bdd_equiv r S c) := ⟨rfl⟩,
-    rw this.continuous_iff,
-    dsimp,
-    simp only [equiv.self_comp_symm],
-    exact continuous_id,
-  end,
-  ..(invpoly_bdd_equiv _ _ _) }
-
-instance (c : ℝ≥0) [fact (0 < r)] : t2_space { F : ℤ[T⁻¹] S | ∥F∥₊ ≤ c } :=
-(invpoly_bdd_homeo r S c).symm.t2_space
-
-instance (c : ℝ≥0) [fact (0 < r)] : totally_disconnected_space { F : ℤ[T⁻¹] S | ∥F∥₊ ≤ c } :=
-(invpoly_bdd_homeo r S c).symm.totally_disconnected_space
-
-instance (c : ℝ≥0) [fact (0 < r)] : compact_space {F : ℤ[T⁻¹] S | ∥F∥₊ ≤ c} :=
-(invpoly_bdd_homeo r S c).symm.compact_space
-
-@[continuity]
-lemma truncate_continuous (c : ℝ≥0) [fact (0 < r)] (A : finset ℕ) :
-  continuous (truncate A : _ → invpoly_bdd r S _ c) :=
-begin
-  let g₁ :=
-    (Profinite.limit_cone (invpoly_bdd_functor.{u} r S c ⋙ Fintype.to_Profinite)).π.app
-    (opposite.op $ ulift.up A),
-  let g₂ := (invpoly_bdd_homeo r S c),
-  change continuous (g₁ ∘ g₂),
-  continuity,
-end
-
-lemma continuous_iff (c : ℝ≥0) [fact (0 < r)] {α : Type*} [topological_space α]
-  (f : α → { F : ℤ[T⁻¹] S | ∥F∥₊ ≤ c }) :
-  continuous f ↔ ∀ (A : finset ℕ), continuous ((truncate A) ∘ f) :=
-begin
-  split,
-  { intros hf A, continuity },
-  { intros h,
-    rw ← (invpoly_bdd_homeo r S c).comp_continuous_iff,
-    apply continuous_subtype_mk,
-    apply continuous_pi,
-    intros A,
-    apply h }
-end
-
-end profinite_structure
-
---needed?
-instance : pseudo_normed_group (ℤ[T⁻¹] S) :=
-{ filtration := λ c, { F | ∥F∥₊ ≤ c },
-  filtration_mono := λ c₁ c₂ h F hF, by {dsimp at *, exact le_trans hF h},
-  zero_mem_filtration := λ c, by simp [nnnorm_def],
-  neg_mem_filtration := λ c F h, (nnnorm_neg F).le.trans h,
-  add_mem_filtration := λ c₁ c₂ F₁ F₂ h₁ h₂, (nnnorm_add _ _).trans (add_le_add h₁ h₂) }
-
-@[simp] lemma mem_filtration_iff (F : ℤ[T⁻¹] S) (c : ℝ≥0) :
-  F ∈ pseudo_normed_group.filtration (ℤ[T⁻¹] S) c ↔ ∥F∥₊ ≤ c := iff.rfl
+instance : topological_space { F : ℤ[T⁻¹] S | ∥F∥₊ ≤ c} := ⊥
 
 instance [fact (0 < r)] : profinitely_filtered_pseudo_normed_group (ℤ[T⁻¹] S) :=
-{ continuous_add' := begin
-    intros c₁ c₂,
-    rw continuous_iff,
-    intros A,
-    let E : invpoly_bdd r S A c₁ × invpoly_bdd r S A c₂ →
-      invpoly_bdd r S A (c₁ + c₂) := λ G, ⟨G.1 + G.2, _⟩,
-    swap, {
-      refine le_trans _ (add_le_add G.fst.2 G.snd.2),
-      rw ← finset.sum_add_distrib,
-      apply finset.sum_le_sum,
-      intros i hi,
-      rw ← finset.sum_add_distrib,
-      apply finset.sum_le_sum,
-      intros j hj,
-      rw ← add_mul,
-      refine mul_le_mul' (norm_add_le _ _) le_rfl, },
-    have :
-      (truncate A : _ → invpoly_bdd r S A (c₁ + c₂)) ∘ pseudo_normed_group.add' =
-      E ∘ (prod.map (truncate A) (truncate A)),
-    { ext,
-      simp only [function.comp_app, truncate_to_fun, subtype.val_eq_coe,
-        pseudo_normed_group.add'_eq, add_apply, polynomial.coeff_add, prod_map],
-      refl },
-    rw this,
-    apply continuous.comp,
-    { exact continuous_of_discrete_topology },
-    { apply continuous.prod_map,
-      all_goals {apply truncate_continuous} }
-  end,
-  continuous_neg' := begin
-    intros c,
-    rw continuous_iff,
-    intros A,
-    let E : invpoly_bdd r S A c → invpoly_bdd r S A c :=
-      λ G, ⟨- G, _⟩,
-    swap, {
-      convert G.2 using 1,
-      apply finset.sum_congr rfl,
-      intros s hs,
-      apply finset.sum_congr rfl,
-      intros x hx,
-      congr' 1,
-      simpa },
-    have : (truncate A : _ → invpoly_bdd r S A c) ∘ pseudo_normed_group.neg' =
-      E ∘ truncate A,
-    { ext,
-      simp only [function.comp_app, truncate_to_fun, subtype.val_eq_coe,
-        pseudo_normed_group.neg'_eq, neg_apply, polynomial.coeff_neg],
-      refl },
-    rw this,
-    apply continuous.comp,
-    { exact continuous_of_discrete_topology },
-    { apply truncate_continuous }
-  end,
-  continuous_cast_le := begin
-    introsI c₁ c₂ h,
-    rw continuous_iff,
-    intros A,
-    let g : invpoly_bdd r S A c₁ → invpoly_bdd r S A c₂ :=
-      λ g, ⟨g, le_trans g.2 h.out⟩,
-    have : (truncate A : _ → invpoly_bdd r S A c₂) ∘ pseudo_normed_group.cast_le =
-      g ∘ truncate A,
-    { ext, refl },
-    rw this,
-    apply continuous.comp,
-    { exact continuous_of_discrete_topology },
-    { apply truncate_continuous }
-  end,
+{ continuous_add' := λ _ _, continuous_of_discrete_topology,
+  continuous_neg' := λ _, continuous_of_discrete_topology,
+  continuous_cast_le := λ _ _ _, continuous_of_discrete_topology,
   ..(infer_instance : (pseudo_normed_group (ℤ[T⁻¹] S))) }
 .
 
--- @[simp] lemma Tinv_aux_ne_zero {R : Type*} [has_zero R] (f : ℕ → R) (i : ℕ) (hi : i ≠ 0) :
---   Tinv_aux f i = f (i - 1) :=
--- by { cases i, contradiction, refl, }
+end profinite_structure
 
 /--
 The `T⁻¹` action on `ℤ[T⁻¹] S`.
@@ -578,65 +261,20 @@ comphaus_filtered_pseudo_normed_group_hom.mk_of_bound Tinv_aux r⁻¹
 begin
   abstract Tinv_spec {
   intro c,
-  have H : _ := _,
-  refine ⟨H, _⟩,
-  { rw continuous_iff,
-    intro A,
-    let B : finset ℕ := A.image (λ k, k - 1),
-    have hB : ∀ a : A, (a:ℕ) - 1 ∈ B,
-    { intro, simp only [finset.mem_image], refine ⟨a, a.2, rfl⟩ },
-    let C : finset ℕ := B.map ⟨_, add_left_injective 1⟩,
-    have hAC : A ⊆ insert 0 C,
-    { rintro (_|a) ha,
-      { exact finset.mem_insert_self _ _, },
-      { refine finset.mem_insert_of_mem _,
-        simp only [finset.mem_map, finset.mem_image, exists_prop, function.embedding.coe_fn_mk,
-          exists_exists_and_eq_and],
-        refine ⟨a.succ, ha, rfl⟩ } },
-    -- let ψ : Π (A : finset ℕ), S → A → ℤ,
-    -- { rintros A s ⟨(_|a), ha⟩, exact 0, exact F s ⟨a, hB ⟨_, ha⟩⟩ },
-    let g : invpoly_bdd r S B c → invpoly_bdd r S A (r⁻¹ * c) := λ F,
-    { to_fun := λ s a, _,
-      bound' := _, },
-    swap 2, { cases a with a ha, cases a, exact 0, exact F s ⟨a, hB ⟨_, ha⟩⟩ },
-    { suffices : truncate A ∘ _ = g ∘ truncate B,
-      { rw this, exact continuous_of_discrete_topology.comp (truncate_continuous r S _ B) },
-      ext F s ⟨(_|a), ha⟩,
-      { dsimp, rw Tinv_aux_zero, refl },
-      { dsimp, rw Tinv_aux_succ, refl } },
-    { refine le_trans _ (mul_le_mul' le_rfl F.bound),
-      rw [invpoly_bdd.nnnorm_def, mul_comm, finset.sum_mul],
-      refine finset.sum_le_sum (λ s hs, _),
-      simp only [B, finset.univ_eq_attach],
-      erw [finset.sum_mul, finset.sum_attach', finset.sum_attach'],
-      refine (finset.sum_le_sum_of_subset hAC).trans _,
-      have h0C : 0 ∉ C,
-      { simp only [finset.mem_map, function.embedding.coe_fn_mk, nat.succ_ne_zero,
-          exists_false, not_false_iff], },
-      rw [finset.sum_insert h0C],
-      simp only [function.embedding.coe_fn_mk, finset.mem_image, exists_prop, nat.rec_zero,
-        nnnorm_zero, coe_coe, subtype.coe_mk, zero_mul, dite_eq_ite, if_t_t, zpow_neg₀,
-        zpow_coe_nat, finset.sum_map, nat.rec_add_one, zero_add],
-      refine finset.sum_le_sum (λ n hn, _),
-      split_ifs with h₁ h₂, rotate,
-      { exact (h₂ ⟨n+1, h₁, rfl⟩).elim },
-      { exact zero_le' },
-      { exact zero_le' },
-      simp only [pow_add, mul_inv₀, pow_one, mul_assoc],
-      exact le_rfl } },
-  { intros F hF,
-    rw mul_comm,
-    refine le_trans _ (mul_le_mul' hF le_rfl),
-    simp only [nnnorm_def, finset.sum_mul],
-    refine finset.sum_le_sum (λ s _, _),
-    transitivity ∑' n, ∥(F s).coeff n∥₊ * r^(-n:ℤ) * r⁻¹,
-    { rw ← sum_add_tsum_nat_add' 1,
-      swap, { apply Tinv_aux_summable },
-      simp only [finset.range_one, zpow_neg₀, zpow_coe_nat, finset.sum_singleton,
-        pow_zero, inv_one, mul_one, int.coe_nat_succ, neg_add, zpow_add₀ hr.out.ne',
-        zpow_one, mul_assoc, Tinv_aux_zero, nnnorm_zero, Tinv_aux_succ, zero_add], },
-    refine le_of_eq _, ext,
-    simp only [nonneg.coe_mul, nnreal.coe_tsum, coe_nnnorm, nnreal.coe_zpow, tsum_mul_right], } }
+  refine ⟨_, continuous_of_discrete_topology⟩,
+  intros F hF,
+  rw mul_comm,
+  refine le_trans _ (mul_le_mul' hF le_rfl),
+  simp only [nnnorm_def, finset.sum_mul],
+  refine finset.sum_le_sum (λ s _, _),
+  transitivity ∑' n, ∥(F s).coeff n∥₊ * r^(-n:ℤ) * r⁻¹,
+  { rw ← sum_add_tsum_nat_add' 1,
+    swap, { apply Tinv_aux_summable },
+    simp only [finset.range_one, zpow_neg₀, zpow_coe_nat, finset.sum_singleton,
+      pow_zero, inv_one, mul_one, int.coe_nat_succ, neg_add, zpow_add₀ hr.out.ne',
+      zpow_one, mul_assoc, Tinv_aux_zero, nnnorm_zero, Tinv_aux_succ, zero_add], },
+  refine le_of_eq _, ext,
+  simp only [nonneg.coe_mul, nnreal.coe_tsum, coe_nnnorm, nnreal.coe_zpow, tsum_mul_right], }
 end
 .
 
@@ -676,15 +314,6 @@ def map_hom [fact (0 < r)] (f : S ⟶ S') :
     { simp only [map_apply, Tinv_zero, finset.sum_const_zero], },
     { simp only [map_apply, Tinv_succ], } },
   strict' := λ c F (hF : ∥F∥₊ ≤ c), (map_bound _ _).trans hF,
-  continuous' := λ c, begin
-    rw continuous_iff,
-    intros T,
-    let f₀ : (filtration (invpoly r S) c) → (filtration (invpoly r S') c) :=
-      level (map f) (λ c F (hF : ∥F∥₊ ≤ c), (map_bound f F).trans hF) c,
-    have : truncate T ∘ f₀ = invpoly_bdd.map f ∘ truncate T, { ext s n,
-      simp only [truncate_to_fun, subtype.val_eq_coe, level_coe, map_apply, invpoly_bdd.map_apply]},
-    rw this,
-    exact continuous_of_discrete_topology.comp (truncate_continuous r S _ T),
-  end }
+  continuous' := λ c, continuous_of_discrete_topology }
 
 end invpoly
