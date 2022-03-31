@@ -39,8 +39,16 @@ lemma to_laurent_measures_fun_pos (F : invpoly r' S) (s : S) (n : ℕ) :
 to_laurent_measures_fun r' S F s (n+1 : ℕ) = 0 :=
 rfl
 
+lemma to_laurent_measures_fun_pos' (F : invpoly r' S) (s : S) (n : ℕ) :
+to_laurent_measures_fun r' S F s (n + 1) = 0 :=
+rfl
+
 lemma to_laurent_measures_fun_neg (F : invpoly r' S) (s : S) (n : ℕ) :
 to_laurent_measures_fun r' S F s -[1+n] = (F s).coeff (n+1) :=
+rfl
+
+lemma to_laurent_measures_fun_neg' (F : invpoly r' S) (s : S) (n : ℕ) :
+to_laurent_measures_fun r' S F s (-(n.succ)) = (F s).coeff (n+1) :=
 rfl
 
 @[simps] def to_laurent_measures (F : invpoly r' S) : laurent_measures r' S :=
@@ -99,7 +107,33 @@ end
 
 def to_laurent_measures_hom : comphaus_filtered_pseudo_normed_group_with_Tinv_hom r'
   (invpoly r' S) (laurent_measures r' S) :=
-{ strict' := begin intros c p hp, simp, sorry end,
+{ strict' := begin
+    rintros c p hp,
+    simp only [add_monoid_hom.to_fun_eq_coe, laurent_measures.mem_filtration_iff],
+    simp only [mem_filtration_iff] at hp,
+    convert hp using 1,
+    unfold nnnorm,
+    congr',
+    ext s,
+    norm_cast,
+    refine tsum_eq_tsum_of_ne_zero_bij (λ n, -((n.1 : ℕ) : ℤ)) _ _ _,
+  { rintros ⟨x, _⟩ ⟨y, _⟩ h, simpa using h },
+  { intros n hn,
+    rw function.mem_support at hn,
+    rw set.mem_range,
+    rcases n with ((_|n)|n),
+    { exact ⟨⟨0, hn⟩, rfl⟩ },
+    { exfalso,
+      simpa [to_laurent_measures_addhom, to_laurent_measures_fun_pos'] using hn },
+    { exact ⟨⟨n+1, hn⟩, rfl⟩ } },
+  { rintro ⟨n, hn⟩,
+    simp only [to_laurent_measures_addhom, add_monoid_hom.mk'_apply, to_laurent_measures_to_fun, subtype.coe_mk, zpow_neg₀,
+      zpow_coe_nat, mul_eq_mul_right_iff, subtype.mk_eq_mk, inv_eq_zero],
+    left,
+    cases n with n,
+    { simp [to_laurent_measures_fun_zero], },
+    { simp only [to_laurent_measures_fun_neg'], } },
+  end,
   continuous' := begin sorry end,
   map_Tinv' := begin sorry end,
   .. to_laurent_measures_addhom r' S }
