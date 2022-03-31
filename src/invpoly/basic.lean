@@ -16,6 +16,7 @@ universe u
 noncomputable theory
 open_locale big_operators nnreal classical
 
+/-- `invpoly r S`, with notation `ℤ[T⁻¹] S`, is the functions `S → ℤ[T⁻¹]`. -/
 @[derive add_comm_group]
 def invpoly (r : ℝ≥0) (S : Fintype) := S → polynomial ℤ
 
