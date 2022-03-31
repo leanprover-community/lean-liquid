@@ -31,6 +31,18 @@ def to_laurent_measures_fun (F : invpoly r' S) : S → ℤ → ℤ
 | s (n+1:ℕ) := 0
 | s -[1+n]  := (F s).coeff (n+1)
 
+lemma to_laurent_measures_fun_zero (F : invpoly r' S) (s : S) :
+to_laurent_measures_fun r' S F s 0 = (F s).coeff 0 :=
+rfl
+
+lemma to_laurent_measures_fun_pos (F : invpoly r' S) (s : S) (n : ℕ) :
+to_laurent_measures_fun r' S F s (n+1 : ℕ) = 0 :=
+rfl
+
+lemma to_laurent_measures_fun_neg (F : invpoly r' S) (s : S) (n : ℕ) :
+to_laurent_measures_fun r' S F s -[1+n] = (F s).coeff (n+1) :=
+rfl
+
 @[simps] def to_laurent_measures (F : invpoly r' S) : laurent_measures r' S :=
 { to_fun := to_laurent_measures_fun r' S F,
   summable' := λ s, begin
@@ -87,15 +99,26 @@ end
 
 def to_laurent_measures_hom : comphaus_filtered_pseudo_normed_group_with_Tinv_hom r'
   (invpoly r' S) (laurent_measures r' S) :=
-{ strict' := sorry,
-  continuous' :=  sorry,
-  map_Tinv' := sorry,
+{ strict' := begin intros c p hp, simp, sorry end,
+  continuous' := begin sorry end,
+  map_Tinv' := begin sorry end,
   .. to_laurent_measures_addhom r' S }
 
 def to_laurent_measures_nat_trans :
   invpoly.fintype_functor r' ⟶ laurent_measures.fintype_functor r' :=
 { app := λ S, to_laurent_measures_hom r' S,
-  naturality' := sorry }
+  naturality' := λ S T f, begin
+    ext p t n,
+    classical,
+    suffices : to_laurent_measures_fun r' T (map f p) t n =
+      (finset.filter (λ (t_1 : S.α), f t_1 = t) finset.univ).sum (λ (x : S.α),
+        to_laurent_measures_fun r' S p x n),
+    simpa [to_laurent_measures_hom, to_laurent_measures_addhom],
+    rcases n with ((_ | n) | n),
+    { convert map_apply f p t 0, },
+    { simp only [int.of_nat_eq_coe, to_laurent_measures_fun_pos, finset.sum_const_zero] },
+    { convert map_apply f p t (n+1), }
+  end }
 
 end invpoly
 
