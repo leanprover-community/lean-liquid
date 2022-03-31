@@ -236,7 +236,7 @@ end
 lemma nonstrict_extend_bound_by (h : ∀ X, (α.app X).bound_by c) (X : Profinite.{u}) :
   ((nonstrict_extend α c h).app X).bound_by c :=
 begin
-  -- needs a `bound_by.comp` lemma
+  -- needs a `bound_by.comp` lemma (now available in pseudo_normed_group.profinitely_filtered)
   sorry,
 end
 
