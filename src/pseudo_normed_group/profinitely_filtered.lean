@@ -140,6 +140,10 @@ end profinitely_filtered_pseudo_normed_group
 section
 set_option old_structure_cmd true
 
+/-- A `comphaus_filtered_pseudo_normed_group_hom` is a morphism between compact hausdorff
+  filtered pseudo-normed groups. It is an additive group homomorphism which is bounded
+  in the sense that there exist some constant `B` such that the filtrand at level `c`
+  for the source is mapped into the filtrand at level `B*c` in the target. -/
 structure comphaus_filtered_pseudo_normed_group_hom (M₁ M₂ : Type*)
   [comphaus_filtered_pseudo_normed_group M₁]
   [comphaus_filtered_pseudo_normed_group M₂]
@@ -148,6 +152,10 @@ structure comphaus_filtered_pseudo_normed_group_hom (M₁ M₂ : Type*)
 (continuous' : ∀ ⦃c₁ c₂⦄ (f₀ : filtration M₁ c₁ → filtration M₂ c₂)
   (h : ∀ x, to_fun ↑x = f₀ x), continuous f₀)
 
+/-- A `strict_comphaus_filtered_pseudo_normed_group_hom` is a strict morphism between compact
+  hausdorff filtered pseudo-normed groups. It is an additive group homomorphism which is bounded
+  in the strict sense that the filtrand at level `c` for the source is mapped into the filtrand
+  at level `c` in the target. -/
 structure strict_comphaus_filtered_pseudo_normed_group_hom (M₁ M₂ : Type*)
   [comphaus_filtered_pseudo_normed_group M₁]
   [comphaus_filtered_pseudo_normed_group M₂]
@@ -475,6 +483,8 @@ by cases f; cases g; cases h; refl
   continuous' := λ c, (g.level_continuous c).comp (f.level_continuous c),
   ..(g.to_add_monoid_hom.comp f.to_add_monoid_hom) }
 
+/-- If `f` is a strict morphism between compact hausdorff filtered pseudo-normed groups
+  then `f.to_chfpsng_hom` is the corresponding morphism where we forget strictness.  -/
 @[simps]
 def to_chfpsng_hom (f : strict_comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :
   comphaus_filtered_pseudo_normed_group_hom M₁ M₂ :=
