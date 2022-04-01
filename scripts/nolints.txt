@@ -193,6 +193,8 @@ apply_nolint category_theory.triangulated.triangle.shift_comm_eq_eq_to_hom unuse
 -- invpoly/basic.lean
 apply_nolint invpoly unused_arguments
 apply_nolint invpoly.invpoly.norm_nonneg dup_namespace
+apply_nolint invpoly.profinitely_filtered_pseudo_normed_group unused_arguments
+apply_nolint invpoly.set_of.topological_space unused_arguments
 
 -- laurent_measures/basic.lean
 apply_nolint laurent_measures.laurent_measures.norm_nonneg dup_namespace
@@ -202,6 +204,7 @@ apply_nolint laurent_measures.epi_and_is_iso unused_arguments
 
 -- laurent_measures/ses.lean
 apply_nolint laurent_measures_ses.box unused_arguments
+apply_nolint laurent_measures_ses.continuous_if_preimage_closed unused_arguments
 apply_nolint laurent_measures_ses.real_measures.topological_space unused_arguments
 
 -- laurent_measures/theta.lean
