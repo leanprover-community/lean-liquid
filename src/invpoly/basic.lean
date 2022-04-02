@@ -212,11 +212,11 @@ section profinite_structure
 
 variables [fact (0 < r)] (c : ℝ≥0)
 
-instance : fintype { F : ℤ[T⁻¹] S | ∥F∥₊ ≤ c} := sorry
+instance [fact (r < 1)] : fintype { F : ℤ[T⁻¹] S | ∥F∥₊ ≤ c} := sorry
 
 instance : topological_space { F : ℤ[T⁻¹] S | ∥F∥₊ ≤ c} := ⊥
 
-instance [fact (0 < r)] : profinitely_filtered_pseudo_normed_group (ℤ[T⁻¹] S) :=
+instance [fact (0 < r)] [fact (r < 1)] : profinitely_filtered_pseudo_normed_group (ℤ[T⁻¹] S) :=
 { continuous_add' := λ _ _, continuous_of_discrete_topology,
   continuous_neg' := λ _, continuous_of_discrete_topology,
   continuous_cast_le := λ _ _ _, continuous_of_discrete_topology,
@@ -255,7 +255,7 @@ begin
 end
 
 @[simps]
-def Tinv_hom [hr : fact (0 < r)] :
+def Tinv_hom [hr : fact (0 < r)] [fact (r < 1)] :
   comphaus_filtered_pseudo_normed_group_hom (ℤ[T⁻¹] S) (ℤ[T⁻¹] S) :=
 comphaus_filtered_pseudo_normed_group_hom.mk_of_bound Tinv_aux r⁻¹
 begin
@@ -278,7 +278,7 @@ begin
 end
 .
 
-instance [fact (0 < r)] :
+instance [fact (0 < r)] [fact (r < 1)] :
   profinitely_filtered_pseudo_normed_group_with_Tinv r (ℤ[T⁻¹] S) :=
 { Tinv := Tinv_hom,
   Tinv_mem_filtration := λ c F hF,
@@ -287,13 +287,13 @@ instance [fact (0 < r)] :
 
 open comphaus_filtered_pseudo_normed_group_with_Tinv
 
-lemma Tinv_coeff [fact (0 < r)] (F : ℤ[T⁻¹] S) (s : S) (n : ℕ) :
+lemma Tinv_coeff [fact (0 < r)] [fact (r < 1)] (F : ℤ[T⁻¹] S) (s : S) (n : ℕ) :
   (Tinv F s).coeff n = (polynomial.X * F s).coeff n := rfl
 
-@[simp] lemma Tinv_zero [fact (0 < r)] (F : ℤ[T⁻¹] S) (s : S) : (Tinv F s).coeff 0 = 0 :=
+@[simp] lemma Tinv_zero [fact (0 < r)] [fact (r < 1)] (F : ℤ[T⁻¹] S) (s : S) : (Tinv F s).coeff 0 = 0 :=
 Tinv_aux_zero F s
 
-@[simp] lemma Tinv_succ [fact (0 < r)] (F : ℤ[T⁻¹] S) (s : S) (i : ℕ) :
+@[simp] lemma Tinv_succ [fact (0 < r)] [fact (r < 1)] (F : ℤ[T⁻¹] S) (s : S) (i : ℕ) :
   (Tinv F s).coeff (i + 1) = (F s).coeff i :=
 Tinv_aux_succ F s i
 
@@ -303,7 +303,7 @@ open pseudo_normed_group profinitely_filtered_pseudo_normed_group
   comphaus_filtered_pseudo_normed_group
 
 @[simps]
-def map_hom [fact (0 < r)] (f : S ⟶ S') :
+def map_hom [fact (0 < r)] [fact (r < 1)] (f : S ⟶ S') :
   comphaus_filtered_pseudo_normed_group_with_Tinv_hom r (ℤ[T⁻¹] S) (ℤ[T⁻¹] S') :=
 { to_fun := map f,
   map_zero' := by { ext s n,
