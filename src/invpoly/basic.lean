@@ -16,6 +16,15 @@ universe u
 noncomputable theory
 open_locale big_operators nnreal classical
 
+-- PR #13130
+lemma int.abs_le_floor_nnreal_iff (z : ℤ) (c : ℝ≥0) : |z| ≤ ⌊c⌋₊ ↔ ∥z∥₊ ≤ c :=
+begin
+  rw [int.abs_eq_nat_abs, int.coe_nat_le, nat.le_floor_iff (zero_le c)],
+  congr',
+  exact nnreal.coe_nat_abs z,
+end
+
+
 /-- `invpoly r S`, with notation `ℤ[T⁻¹] S`, is the functions `S → ℤ[T⁻¹]`. -/
 @[derive add_comm_group]
 def invpoly (r : ℝ≥0) (S : Fintype) := S → polynomial ℤ
@@ -173,6 +182,35 @@ end
 lemma map_bound' (f : S ⟶ S') (F : ℤ[T⁻¹] S) : ∥map f F∥ ≤ ∥F∥ :=
 by simpa only [← coe_nnnorm, ← nnreal.coe_add, nnreal.coe_le_coe] using map_bound f F
 
+lemma bounded_of_filtration (F : ℤ[T⁻¹] S) (c : ℝ≥0) [hr : fact (0 < r)] :
+  ∥F∥₊ ≤ c → ∀ (s : S) (n : ℕ), ∥(F s).coeff n∥₊ ≤ c * r^n :=
+begin
+  intros hF s n,
+  have : ∥(F s).coeff n∥₊ * r ^ (-n : ℤ) ≤ ∑' k, ∥(F s).coeff k∥₊ * r ^ (-k:ℤ),
+  { exact le_tsum (F.nnreal_summable s) _ (λ k _, zero_le'), },
+  rw [mul_comm, nnreal.mul_le_iff_le_inv (zpow_ne_zero_of_ne_zero (hr.elim.ne).symm _)] at this,
+  simp only [zpow_neg₀, zpow_coe_nat, inv_inv, mul_comm (r^n)] at this,
+  refine le_trans this _,
+  rw mul_le_mul_right (pow_pos hr.elim n),
+  refine le_trans _ hF,
+  unfold nnnorm,
+  simp only [zpow_neg₀, zpow_coe_nat],
+  apply @finset.single_le_sum S ℝ≥0 _ (λ s, ∑' n, ∥(F s).coeff n∥₊ * (r^n)⁻¹),
+    { rintros s -, exact zero_le', },
+    { exact finset.mem_univ _ }
+end
+
+lemma bounded_of_filtration' (F : ℤ[T⁻¹] S) (c : ℝ≥0) [fact (0 < r)] [hr : fact (r < 1)] :
+  ∥F∥₊ ≤ c → ∀ (s : S) (n : ℕ), |(F s).coeff n| ≤ ⌊c⌋₊ :=
+begin
+  intros hF s n,
+  rw int.abs_le_floor_nnreal_iff,
+  refine le_trans (bounded_of_filtration F c hF s n) _,
+  exact mul_le_of_le_of_le_one (le_refl c) (pow_le_one' hr.elim.le n),
+end
+
+-- rather annoyingly, can't use `bounded_of_filtration` to prove this
+-- more easily because it's true even if r=0 :-)
 /-- This lemma puts bounds on where `(F s).coeff n` can be nonzero. -/
 lemma eq_zero_of_filtration (F : ℤ[T⁻¹] S) (c : ℝ≥0) :
   ∥F∥₊ ≤ c → ∀ (s : S) (n : ℕ), c < r^(-n:ℤ) → (F s).coeff n = 0 :=
@@ -195,6 +233,12 @@ begin
     apply @finset.single_le_sum S ℝ≥0 _ (λ s, ∑' n, ∥(F s).coeff n∥₊ * r^(-n:ℤ)),
     { rintros s -, exact zero_le', },
     { exact finset.mem_univ _ } }
+end
+
+lemma eq_zero_of_filtration' (F : ℤ[T⁻¹] S) (c : ℝ≥0) [fact (0 < r)] [hr : fact (r < 1)] :
+  ∥F∥₊ ≤ c → ∀ (s : S) (n : ℕ), -real.log(c)/real.log(r) < n → (F s).coeff n = 0 :=
+begin
+  sorry
 end
 
 -- move me
