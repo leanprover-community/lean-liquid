@@ -10,11 +10,20 @@ import pseudo_normed_group.category
 import laurent_measures.basic
 
 import for_mathlib.tsum
+import for_mathlib.nnreal
 
 universe u
 
 noncomputable theory
 open_locale big_operators nnreal classical
+
+-- PR #13130
+lemma int.abs_le_floor_nnreal_iff (z : ℤ) (c : ℝ≥0) : |z| ≤ ⌊c⌋₊ ↔ ∥z∥₊ ≤ c :=
+begin
+  rw [int.abs_eq_nat_abs, int.coe_nat_le, nat.le_floor_iff (zero_le c)],
+  congr',
+  exact nnreal.coe_nat_abs z,
+end
 
 /-- `invpoly r S`, with notation `ℤ[T⁻¹] S`, is the functions `S → ℤ[T⁻¹]`. -/
 @[derive add_comm_group]
@@ -173,6 +182,35 @@ end
 lemma map_bound' (f : S ⟶ S') (F : ℤ[T⁻¹] S) : ∥map f F∥ ≤ ∥F∥ :=
 by simpa only [← coe_nnnorm, ← nnreal.coe_add, nnreal.coe_le_coe] using map_bound f F
 
+lemma bounded_of_filtration (F : ℤ[T⁻¹] S) (c : ℝ≥0) [hr : fact (0 < r)] :
+  ∥F∥₊ ≤ c → ∀ (s : S) (n : ℕ), ∥(F s).coeff n∥₊ ≤ c * r^n :=
+begin
+  intros hF s n,
+  have : ∥(F s).coeff n∥₊ * r ^ (-n : ℤ) ≤ ∑' k, ∥(F s).coeff k∥₊ * r ^ (-k:ℤ),
+  { exact le_tsum (F.nnreal_summable s) _ (λ k _, zero_le'), },
+  rw [mul_comm, nnreal.mul_le_iff_le_inv (zpow_ne_zero_of_ne_zero (hr.elim.ne).symm _)] at this,
+  simp only [zpow_neg₀, zpow_coe_nat, inv_inv, mul_comm (r^n)] at this,
+  refine le_trans this _,
+  rw mul_le_mul_right (pow_pos hr.elim n),
+  refine le_trans _ hF,
+  unfold nnnorm,
+  simp only [zpow_neg₀, zpow_coe_nat],
+  apply @finset.single_le_sum S ℝ≥0 _ (λ s, ∑' n, ∥(F s).coeff n∥₊ * (r^n)⁻¹),
+    { rintros s -, exact zero_le', },
+    { exact finset.mem_univ _ }
+end
+
+lemma bounded_of_filtration' (F : ℤ[T⁻¹] S) (c : ℝ≥0) [fact (0 < r)] [hr : fact (r < 1)] :
+  ∥F∥₊ ≤ c → ∀ (s : S) (n : ℕ), |(F s).coeff n| ≤ ⌊c⌋₊ :=
+begin
+  intros hF s n,
+  rw int.abs_le_floor_nnreal_iff,
+  refine le_trans (bounded_of_filtration F c hF s n) _,
+  exact mul_le_of_le_of_le_one (le_refl c) (pow_le_one' hr.elim.le n),
+end
+
+-- rather annoyingly, can't use `bounded_of_filtration` to prove this
+-- more easily because it's true even if r=0 :-)
 /-- This lemma puts bounds on where `(F s).coeff n` can be nonzero. -/
 lemma eq_zero_of_filtration (F : ℤ[T⁻¹] S) (c : ℝ≥0) :
   ∥F∥₊ ≤ c → ∀ (s : S) (n : ℕ), c < r^(-n:ℤ) → (F s).coeff n = 0 :=
@@ -195,6 +233,28 @@ begin
     apply @finset.single_le_sum S ℝ≥0 _ (λ s, ∑' n, ∥(F s).coeff n∥₊ * r^(-n:ℤ)),
     { rintros s -, exact zero_le', },
     { exact finset.mem_univ _ } }
+end
+
+lemma log_div_log_lt {r : ℝ≥0} (c : ℝ≥0) (n : ℕ)
+  (hr0 : 0 < r)
+  (hr1 : r < 1)
+  (h : -real.log ↑c / real.log ↑r < ↑n) :
+  c < r ^ -(n : ℤ) :=
+begin
+  rcases c.eq_zero_or_pos with (rfl | hc),
+  { apply nnreal.zpow_pos hr0.ne.symm, },
+  { rw [div_lt_iff_of_neg (real.log_neg hr0 hr1), lt_neg, ← neg_mul] at h,
+    rw [(by norm_cast :  -(n : ℝ) = (-(n : ℤ) : ℤ)), ← real.log_zpow] at h,
+    rw real.log_lt_log_iff hc at h,
+    { exact_mod_cast h },
+    { norm_cast, apply nnreal.zpow_pos hr0.ne.symm } },
+end
+
+lemma eq_zero_of_filtration' (F : ℤ[T⁻¹] S) (c : ℝ≥0) [hr0 : fact (0 < r)] [hr1 : fact (r < 1)] :
+  ∥F∥₊ ≤ c → ∀ (s : S) (n : ℕ), -real.log(c)/real.log(r) < n → (F s).coeff n = 0 :=
+begin
+  intros hF s n h,
+  refine eq_zero_of_filtration F c hF s n (log_div_log_lt c n hr0.elim hr1.elim h),
 end
 
 -- move me
