@@ -250,7 +250,7 @@ begin
     { norm_cast, apply nnreal.zpow_pos hr0.ne.symm } },
 end
 
-lemma eq_zero_of_filtration' (F : ℤ[T⁻¹] S) (c : ℝ≥0) [hr0 : fact (0 < r)] [hr1 : fact (r < 1)] :
+lemma eq_zero_of_filtration' {F : ℤ[T⁻¹] S} {c : ℝ≥0} [hr0 : fact (0 < r)] [hr1 : fact (r < 1)] :
   ∥F∥₊ ≤ c → ∀ (s : S) (n : ℕ), -real.log(c)/real.log(r) < n → (F s).coeff n = 0 :=
 begin
   intros hF s n h,
@@ -272,7 +272,23 @@ section profinite_structure
 
 variables [fact (0 < r)] (c : ℝ≥0)
 
-instance [fact (r < 1)] : fintype { F : ℤ[T⁻¹] S | ∥F∥₊ ≤ c} := sorry
+instance [fact (r < 1)] : fintype { F : ℤ[T⁻¹] S | ∥F∥₊ ≤ c} :=
+let i : { F : ℤ[T⁻¹] S | ∥F∥₊ ≤ c} →
+  (S → fin (⌊-real.log ↑c / real.log ↑r⌋₊ + 1) → set.Icc (-⌊c⌋₊ : ℤ) ⌊c⌋₊ ) :=
+λ F s j, ⟨(F.1 s).coeff j, abs_le.1 (bounded_of_filtration' _ _ F.2 _ _)⟩ in
+fintype.of_injective i begin
+  intros F₁ F₂ h,
+  ext s n,
+  cases le_or_lt (n : ℝ) (-real.log(c)/real.log(r)) with hn hn,
+  { replace hn := nat.le_floor hn,
+    rw ← nat.lt_add_one_iff at hn,
+    replace h := congr_fun (congr_fun h s) ⟨n, hn⟩,
+    exact congr_arg subtype.val h },
+  { convert (rfl : (0 : ℤ) = 0),
+    { apply eq_zero_of_filtration' F₁.2 _ _ hn, },
+    { apply eq_zero_of_filtration' F₂.2 _ _ hn, }
+  },
+end
 
 instance : topological_space { F : ℤ[T⁻¹] S | ∥F∥₊ ≤ c} := ⊥
 
