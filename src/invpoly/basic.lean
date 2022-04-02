@@ -24,6 +24,12 @@ begin
   exact nnreal.coe_nat_abs z,
 end
 
+-- PR #13131
+lemma nnreal.eq_zero_or_pos (c : ℝ≥0) : c = 0 ∨ 0 < c :=
+begin
+  rw eq_comm,
+  exact eq_or_lt_of_le c.2,
+end
 
 /-- `invpoly r S`, with notation `ℤ[T⁻¹] S`, is the functions `S → ℤ[T⁻¹]`. -/
 @[derive add_comm_group]
@@ -235,10 +241,26 @@ begin
     { exact finset.mem_univ _ } }
 end
 
-lemma eq_zero_of_filtration' (F : ℤ[T⁻¹] S) (c : ℝ≥0) [fact (0 < r)] [hr : fact (r < 1)] :
+lemma log_div_log_lt {r : ℝ≥0} (c : ℝ≥0) (n : ℕ)
+  (hr0 : 0 < r)
+  (hr1 : r < 1)
+  (h : -real.log ↑c / real.log ↑r < ↑n) :
+  c < r ^ -(n : ℤ) :=
+begin
+  rcases c.eq_zero_or_pos with (rfl | hc),
+  { apply nnreal.zpow_pos hr0.ne.symm, },
+  { rw [div_lt_iff_of_neg (real.log_neg hr0 hr1), lt_neg, ← neg_mul] at h,
+    rw [(by norm_cast :  -(n : ℝ) = (-(n : ℤ) : ℤ)), ← real.log_zpow] at h,
+    rw real.log_lt_log_iff hc at h,
+    { exact_mod_cast h },
+    { norm_cast, apply nnreal.zpow_pos hr0.ne.symm } },
+end
+
+lemma eq_zero_of_filtration' (F : ℤ[T⁻¹] S) (c : ℝ≥0) [hr0 : fact (0 < r)] [hr1 : fact (r < 1)] :
   ∥F∥₊ ≤ c → ∀ (s : S) (n : ℕ), -real.log(c)/real.log(r) < n → (F s).coeff n = 0 :=
 begin
-  sorry
+  intros hF s n h,
+  refine eq_zero_of_filtration F c hF s n (log_div_log_lt c n hr0.elim hr1.elim h),
 end
 
 -- move me
