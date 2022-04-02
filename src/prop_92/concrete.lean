@@ -8,6 +8,9 @@ import locally_constant.analysis
 
 import tactic.ring_exp
 
+import for_mathlib.nnreal
+
+
 /-!
 This file builds a concrete version of Proposition 9.2, with almost no category.
 The exception is that `SemiNormedGroup` is used because this is expected in
@@ -119,10 +122,6 @@ begin
   ext x,
   simp,
 end
-
-
-lemma nnreal.eq_zero_or_pos (r : nnreal) : r = 0 ∨ 0 < r :=
-(lt_or_eq_of_le $ zero_le r).elim (λ h, or.inr h) (λ h, or.inl h.symm)
 
 instance semi_normed_group.inhabited (G : Type*) [semi_normed_group G] : inhabited G := ⟨0⟩
 

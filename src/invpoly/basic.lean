@@ -10,6 +10,7 @@ import pseudo_normed_group.category
 import laurent_measures.basic
 
 import for_mathlib.tsum
+import for_mathlib.nnreal
 
 universe u
 
@@ -22,13 +23,6 @@ begin
   rw [int.abs_eq_nat_abs, int.coe_nat_le, nat.le_floor_iff (zero_le c)],
   congr',
   exact nnreal.coe_nat_abs z,
-end
-
--- PR #13131
-lemma nnreal.eq_zero_or_pos (c : ℝ≥0) : c = 0 ∨ 0 < c :=
-begin
-  rw eq_comm,
-  exact eq_or_lt_of_le c.2,
 end
 
 /-- `invpoly r S`, with notation `ℤ[T⁻¹] S`, is the functions `S → ℤ[T⁻¹]`. -/

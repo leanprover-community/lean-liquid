@@ -20,3 +20,10 @@ begin
 end
 
 attribute [norm_cast] nnreal.coe_zpow
+
+-- PR #13131
+lemma nnreal.eq_zero_or_pos (c : ℝ≥0) : c = 0 ∨ 0 < c :=
+begin
+  rw eq_comm,
+  exact eq_or_lt_of_le c.2,
+end
