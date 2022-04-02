@@ -13,7 +13,7 @@ open category_theory
 
 namespace invpoly
 
-variables (r' : ℝ≥0) [fact (0 < r')]
+variables (r' : ℝ≥0) [fact (0 < r')] [fact (r' < 1)]
 
 open ProFiltPseuNormGrpWithTinv₁
 
