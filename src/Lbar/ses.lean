@@ -17,6 +17,15 @@ The short exact sequence
 lemma int.coe_nat_injective : function.injective (coe : ℕ → ℤ) :=
 λ m n h, int.coe_nat_inj h
 
+lemma int.nat_abs_of_nonpos {a : ℤ} : a ≤ 0 → ↑(a.nat_abs) = -a :=
+begin
+  intro h,
+  rw ← int.nat_abs_neg,
+  apply int.nat_abs_of_nonneg,
+  exact neg_nonneg.mpr h,
+end
+
+
 noncomputable theory
 
 open aux_thm69
@@ -50,6 +59,14 @@ rfl
 lemma to_laurent_measures_fun_neg' (F : invpoly r' S) (s : S) (n : ℕ) :
 to_laurent_measures_fun r' S F s (-(n.succ)) = (F s).coeff (n+1) :=
 rfl
+
+lemma to_laurent_measures_fun_nonpos (F : invpoly r' S) (s : S) (n : ℕ) :
+to_laurent_measures_fun r' S F s (-n) = (F s).coeff n :=
+begin
+  cases n,
+  { exact to_laurent_measures_fun_zero r' S F s, },
+  { exact to_laurent_measures_fun_neg r' S F s n, }
+end
 
 @[simps] def to_laurent_measures (F : invpoly r' S) : laurent_measures r' S :=
 { to_fun := to_laurent_measures_fun r' S F,
@@ -134,9 +151,30 @@ def to_laurent_measures_hom [fact (r' < 1)]: comphaus_filtered_pseudo_normed_gro
     { simp [to_laurent_measures_fun_zero], },
     { simp only [to_laurent_measures_fun_neg'], } },
   end,
-  continuous' := begin sorry end,
-  map_Tinv' := begin sorry end,
-  .. to_laurent_measures_addhom r' S }
+  continuous' := λ c, continuous_bot,
+  map_Tinv' := begin
+    intro F,
+    ext s z,
+    change to_laurent_measures_fun r' S (λ (s : ↥S), polynomial.X * F s) s z =
+      to_laurent_measures_fun r' S F s (z + 1),
+    rcases lt_trichotomy 0 z with (hz | rfl | hz),
+    { let n := (z - 1).nat_abs,
+      have hn : z - 1 = n := int.eq_nat_abs_of_zero_le (int.le_sub_one_of_lt hz),
+      rw sub_eq_iff_eq_add at hn,
+      rw [hn, to_laurent_measures_fun_pos', (by norm_cast : (n : ℤ) + 1 = (n + 1 : ℕ)),
+        to_laurent_measures_fun_pos'] },
+    { rw [to_laurent_measures_fun_zero, (by norm_cast : (0 : ℤ) + 1 = (0 + 1 : ℕ)),
+        to_laurent_measures_fun_pos],
+      simp only [polynomial.mul_coeff_zero, polynomial.coeff_X_zero, zero_mul] },
+    { let n := (z + 1).nat_abs,
+      have hn : (n : ℤ) = -(z + 1) := int.nat_abs_of_nonpos (int.add_one_le_of_lt hz),
+      rw eq_neg_iff_eq_neg at hn,
+      rw hn,
+      rw ← eq_sub_iff_add_eq at hn,
+      rw [hn, to_laurent_measures_fun_nonpos, (by {simp, ring} : -(n : ℤ) - 1 = -(n + 1 : ℕ)),
+        to_laurent_measures_fun_nonpos, polynomial.coeff_X_mul] },
+  end,
+  .. to_laurent_measures_addhom r' S }.
 
 def to_laurent_measures_nat_trans [fact (r' < 1)]:
   invpoly.fintype_functor r' ⟶ laurent_measures.fintype_functor r' :=
