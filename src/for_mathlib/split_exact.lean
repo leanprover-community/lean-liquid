@@ -17,6 +17,8 @@ namespace category_theory
 variables [abelian 𝒜]
 variables {A B C A' B' C' : 𝒜} (f : A ⟶ B) (g : B ⟶ C) (f' : A' ⟶ B') (g' : B' ⟶ C')
 
+/-- If `f : A ⟶ B` and `g : B ⟶ C` then `short_exact f g` is the proposition saying
+  the resulting diagram `0 ⟶ A ⟶ B ⟶ C ⟶ 0` is an exact sequence. -/
 structure short_exact : Prop :=
 [mono  : mono f]
 [epi   : epi g]
