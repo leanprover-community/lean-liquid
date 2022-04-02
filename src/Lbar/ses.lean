@@ -105,7 +105,7 @@ begin
       laurent_measures.add_apply, polynomial.coeff_add], }
 end
 
-def to_laurent_measures_hom : comphaus_filtered_pseudo_normed_group_with_Tinv_hom r'
+def to_laurent_measures_hom [fact (r' < 1)]: comphaus_filtered_pseudo_normed_group_with_Tinv_hom r'
   (invpoly r' S) (laurent_measures r' S) :=
 { strict' := begin
     rintros c p hp,
@@ -138,7 +138,7 @@ def to_laurent_measures_hom : comphaus_filtered_pseudo_normed_group_with_Tinv_ho
   map_Tinv' := begin sorry end,
   .. to_laurent_measures_addhom r' S }
 
-def to_laurent_measures_nat_trans :
+def to_laurent_measures_nat_trans [fact (r' < 1)]:
   invpoly.fintype_functor r' ⟶ laurent_measures.fintype_functor r' :=
 { app := λ S, to_laurent_measures_hom r' S,
   naturality' := λ S T f, begin
@@ -256,7 +256,7 @@ namespace Lbar
 
 open category_theory ProFiltPseuNormGrpWithTinv₁
 
-theorem short_exact (S : Profinite) :
+theorem short_exact (S : Profinite) [fact (r' < 1)]:
   short_exact
     ((condensify_map
       (whisker_right (invpoly.to_laurent_measures_nat_trans r') (to_CHFPNG₁ r'))).app S)
