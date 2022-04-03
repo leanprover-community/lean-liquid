@@ -33,27 +33,52 @@ def pt {X : CompHaus.{u}} (x : X) : (⊤_ CompHaus) ⟶ X :=
 { obj := λ j, pullback (α.app j) (pt y ≫ cG.π.app j),
   map := λ i j f, pullback.lift (pullback.fst ≫ F.map f) pullback.snd
     (by rw [category.assoc, α.naturality, pullback.condition_assoc, category.assoc, cG.w]),
-  map_id' := sorry,
-  map_comp' := sorry }
+  map_id' := λ j, by apply pullback.hom_ext; dsimp; simp,
+  map_comp' := λ i j k f g, by { apply pullback.hom_ext; dsimp; simp } }
 
-def cone_of_pt (y : cG.X) : cone (diagram_of_pt F G α cG y) :=
+.
+
+@[simps] def cone_of_pt (y : cG.X) : cone (diagram_of_pt F G α cG y) :=
 { X := pullback (hcG.map cF α) (pt y),
   π :=
   { app := λ j, pullback.lift
       (pullback.fst ≫ cF.π.app _)
       pullback.snd
       (by rw [category.assoc, ← pullback.condition_assoc, is_limit.map_π]),
-    naturality' := sorry } }
+    naturality' := λ i j f, by apply pullback.hom_ext; dsimp; simp } }
+
+.
 
 def is_limit_cone_of_pt (y : cG.X) : is_limit (cone_of_pt F G α cF cG hcG y) :=
 { lift := λ S, pullback.lift
     (hcF.lift ⟨S.X,
     { app := λ j, S.π.app j ≫ pullback.fst,
-      naturality' := sorry }⟩)
+      naturality' := begin
+        intros i j f,
+        dsimp,
+        rw ← S.w f, dsimp [diagram_of_pt],
+        simp only [category.id_comp, category.assoc, pullback.lift_fst],
+      end }⟩)
     (terminal.from _)
-    sorry,
-  fac' := sorry,
-  uniq' := sorry }
+    begin
+      apply hcG.hom_ext, intros j, dsimp,
+      simp only [category.assoc, is_limit.map_π, is_limit.fac_assoc, pullback.condition],
+      ext, refl,
+    end,
+  fac' := begin
+    intros s j, dsimp, apply pullback.hom_ext,
+    { simp only [category.assoc, pullback.lift_fst, pullback.lift_fst_assoc, is_limit.fac] },
+    { simp only [eq_iff_true_of_subsingleton] },
+  end,
+  uniq' := begin
+    intros s m hm,
+    dsimp at m hm,
+    apply pullback.hom_ext,
+    { rw pullback.lift_fst,
+      apply hcF.hom_ext, intros j,
+      simp only [category.assoc, is_limit.fac, ← hm j, pullback.lift_fst] },
+    { simp only [eq_iff_true_of_subsingleton] }
+  end }
 
 lemma is_limit.surjective_of_surjective [is_cofiltered J]
   (hα : ∀ j, function.surjective (α.app j)) :
