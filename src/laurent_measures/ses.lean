@@ -403,23 +403,22 @@ begin
   apply truncate_continuous,
 end
 
--- **[FAE]** this section is possibly useless (in that case, equiv_filtration_ϖ and
---homeo_filtration_ϖ are in `real_measures` are also useless)
 section topological_generalities
 
 open metric set
 
+-- **[FAE]** In this section, many results exist in two versions, with and without `'`. The first is stated in terms of `Icc` and `Ioo`, the second in terms of `closed_ball` and `open_ball`; they are equivalent, and I will need to get rid of the useless ones at the end
 variables {X : Type*} [topological_space X]
 --**[FAE]** Probably needed, but check before proving it!
-lemma continuous_if_for_all_closed (c : ℝ≥0)
-  (f : X → closed_ball (0 : ℝ) c) (H : ∀ a : ℝ≥0, ∀ (H : a ≤ c), is_closed
-    (f⁻¹' ((closed_ball ⟨(0 : ℝ), (mem_closed_ball_self c.2)⟩ a) : set ((closed_ball (0 : ℝ) c)))))
-    : continuous f :=
- begin
-   sorry,
- end
+-- lemma continuous_if_for_all_closed (c : ℝ≥0)
+--   (f : X → closed_ball (0 : ℝ) c) (H : ∀ a : ℝ≥0, ∀ (H : a ≤ c), is_closed
+--     (f⁻¹' ((closed_ball ⟨(0 : ℝ), (mem_closed_ball_self c.2)⟩ a) : set ((closed_ball (0 : ℝ) c)))))
+--     : continuous f :=
+--  begin
+--    sorry,
+--  end
 
-lemma reduction_balls {c : ℝ} (f : X → (Icc (-c) c)) (H : ∀ y : (Icc (-c) c), ∀ ε : ℝ,
+lemma reduction_balls {c : ℝ≥0} (f : X → (Icc (-c : ℝ) c)) (H : ∀ y : (Icc (-c : ℝ) c), ∀ ε : ℝ,
   is_open (f⁻¹' (ball y ε))) : continuous f :=
 begin
   rw continuous_def,
@@ -431,19 +430,33 @@ begin
   exact ⟨preimage_mono hε, H (f x) ε, mem_ball_self h₀⟩,
 end
 
-lemma complement_of_balls {c : ℝ} (y : Icc (-c) c) (ε : ℝ) : ∃ (x₁ x₂ : Icc (-c) c), ∃ (δ₁ δ₂ : ℝ),
-   ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ :=
+
+lemma reduction_balls' {c : ℝ≥0} (f : X → (closed_ball (0 : ℝ) c)) (H : ∀ y : (closed_ball 0 c), ∀ ε : ℝ,
+  is_open (f⁻¹' (ball y ε))) : continuous f :=
+begin
+  rw continuous_def,
+  intros _ hU,
+  rw is_open_iff_forall_mem_open,
+  intros x hx,
+  obtain ⟨ε, h₀, hε⟩ := (is_open_iff.mp hU) (f x) (mem_preimage.mp hx),
+  use f⁻¹' (ball (f x) ε),
+  exact ⟨preimage_mono hε, H (f x) ε, mem_ball_self h₀⟩,
+end
+
+lemma complement_of_balls {c : ℝ≥0} (y : Icc (-c : ℝ) c) (ε : ℝ) : ∃ (x₁ x₂ : Icc (-c : ℝ) c),
+  ∃ (δ₁ δ₂ : ℝ), ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ :=
 begin
   sorry
 end
 
--- lemma aux_c {c : ℝ} (hc : 0 < c) : (0 : ℝ) ∈ (Icc (-c) c) :=
--- --by {apply
--- mem_Icc.mpr ⟨right.neg_nonpos_iff.mpr (le_of_lt hc), (le_of_lt hc)⟩-- }
--- lemma continuous_iff_preimage_closed {c : ℝ} (hc : 0 < c) (f : X → (Icc (-c) c)) (H : ∀ y : Icc (-c) c, ∀ ε : ℝ, is_closed (f⁻¹' (closed_ball ⟨y, aux_c hc⟩ ε))) : continuous f :=
+lemma complement_of_balls' {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) (ε : ℝ) : ∃ (x₁ x₂ : (closed_ball 0 c)),
+  ∃ (δ₁ δ₂ : ℝ), ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ :=
+begin
+  sorry
+end
 
-lemma continuous_if_preimage_closed {c : ℝ} (hc : 0 < c) (f : X → (Icc (-c) c))
-  (H : ∀ y : Icc (-c) c, ∀ ε : ℝ, is_closed (f⁻¹' (closed_ball y ε))) : continuous f :=
+lemma continuous_if_preimage_closed {c : ℝ≥0} (f : X → (Icc (-c : ℝ) c))
+  (H : ∀ y : Icc (-c : ℝ) c, ∀ ε : ℝ, is_closed (f⁻¹' (closed_ball y ε))) : continuous f :=
 begin
   apply reduction_balls,
   intros y ε,
@@ -453,6 +466,37 @@ begin
   apply is_open.inter,
   all_goals {simp only [is_open_compl_iff], apply H},
 end
+
+lemma continuous_if_preimage_closed' {c : ℝ≥0} (f : X → (closed_ball (0 : ℝ) c))
+  (H : ∀ y : (closed_ball (0 : ℝ) c), ∀ ε : ℝ, is_closed (f⁻¹' (closed_ball y ε))) : continuous f :=
+begin
+  apply reduction_balls',
+  intros y ε,
+  obtain ⟨x₁,x₂,δ₁,δ₂,h⟩ := complement_of_balls' y ε,
+  rw h,
+  simp only [compl_union, preimage_inter, preimage_compl],
+  apply is_open.inter,
+  all_goals {simp only [is_open_compl_iff], apply H},
+end
+
+instance (c : ℝ≥0) : has_zero (Icc (-c : ℝ) c):=
+{ zero := ⟨(0 : ℝ), by {simp only [mem_Icc, right.neg_nonpos_iff, nnreal.zero_le_coe, and_self]}⟩}
+
+lemma continuous_if_preimage_closed₀ (c : ℝ≥0) (f : X → (Icc (-c : ℝ) c))
+  (H : ∀ ε : ℝ, is_closed (f⁻¹' (closed_ball 0 ε))) : continuous f :=
+begin
+  sorry,
+end
+
+instance (c : ℝ≥0) : has_zero (closed_ball (0 : ℝ) c):=
+{ zero := ⟨0, by {simp only [mem_closed_ball_zero_iff, norm_zero, nnreal.zero_le_coe]}⟩}
+
+lemma continuous_if_preimage_closed₀' (c : ℝ≥0) (f : X → (closed_ball (0 : ℝ) c))
+  (H : ∀ ε : ℝ, is_closed (f⁻¹' (closed_ball 0  ε))) : continuous f :=
+begin
+  sorry,
+end
+
 
 end topological_generalities
 
@@ -484,7 +528,7 @@ begin
   exact H,
 end
 
--- def closed_of_ℳ_ϖ (c : ℝ≥0) : filtration (ℳ ϖ) c ≃ₜ closed_ball (0 : ℝ) c := sorry
+
 
 -- This is the main continuity property needed in `ses2.lean`
 lemma continuous_θ_c (c : ℝ≥0) : continuous (θ_c c S) :=
@@ -494,12 +538,29 @@ begin
   rw ← commute_seval_ℒ_ℳ,
   refine continuous.comp _ (continuous_seval_ℒ_c p S c s),
   dsimp only [θ_c],
-  -- have e : filtration (real_measures p (Fintype.of punit)) c ≃ₜ set.Icc (-c.1) c.1,
-  -- sorry,
   apply (homeo_filtration_ϖ_Icc c).comp_continuous_iff.mp,
-  apply reduction_balls,
-  intros y ε,
-  dsimp [homeo_filtration_ϖ_Icc],-- θ, ϑ],
+  -- simp only [one_mul, eq_self_iff_true, eq_mpr_eq_cast, set_coe_cast],
+  apply continuous_if_preimage_closed₀ (c ^ (p⁻¹ : ℝ)),
+  intro ε,
+  simp only [one_mul, eq_self_iff_true, eq_mpr_eq_cast, set_coe_cast],
+  -- dsimp only [one_mul, eq_self_iff_true],
+  rw set.preimage_comp,
+  -- equiv_rw [(equiv_filtration_ϖ_Icc c).symm],
+  -- refl
+
+
+
+
+
+
+
+
+
+
+  -- refine continuous_if_preimage_closed₀ _,
+  -- apply reduction_balls,
+  -- intros y ε,
+  -- dsimp [homeo_filtration_ϖ_Icc],-- θ, ϑ],
   -- **[fae]** ADD AN ONLY ABOVE OR REMOVE ALTOGETHER
 
   -- rw continuous_iff_preimage_closed,

@@ -239,7 +239,7 @@ begin
 end
 
 def equiv_filtration_ϖ_Icc (c : ℝ≥0) : filtration (ℳ p ϖ) c ≃ set.Icc ((- c ^ (p⁻¹ : ℝ)) : ℝ)
-  (c ^ (p⁻¹ : ℝ) : ℝ):=
+  (c ^ (p⁻¹ : ℝ)):=
 begin
   fconstructor,
   { intro f,
@@ -270,11 +270,19 @@ begin
 end
 
 def homeo_filtration_ϖ_Icc (c : ℝ≥0) : filtration (ℳ p ϖ) c ≃ₜ set.Icc ((- c ^ (p⁻¹ : ℝ)) : ℝ)
-  ((c ^ (p⁻¹ : ℝ)) : ℝ) :=-- sorry
+  (c ^ (p⁻¹ : ℝ)) :=
 { to_equiv := equiv_filtration_ϖ_Icc c,
   continuous_to_fun := sorry,
   continuous_inv_fun := sorry
 }
+
+
+lemma homeo_filtration_ϖ_Icc_apply (c c': ℝ≥0) (h : c ≤ c') :
+(homeo_filtration_ϖ_Icc c').to_fun '' (set.range (set.inclusion (@pseudo_normed_group.filtration_mono (ℳ p ϖ) _ _ _ h)))
+  = ⊥ := --set.Icc ((- c ^ (p⁻¹ : ℝ)) : ℝ) ((c ^ (p⁻¹ : ℝ) : ℝ)) :=
+begin
+  sorry,
+end
 
 instance chpng_real_measures : comphaus_filtered_pseudo_normed_group (ℳ p S) :=
 { continuous_add' := begin
