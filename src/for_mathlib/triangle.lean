@@ -135,6 +135,29 @@ lemma triangle.nonneg_rotate_neg₃ :
 def triangle.nonneg_rotate_iso : T.nonneg_rotate ≅ (neg₃_functor C).obj T.rotate :=
 (neg₃_equiv C).iso_equiv _ _ (iso.refl _)
 
+--
+
+@[simps]
+def triangle.obj₁_functor : triangle C ⥤ C :=
+{ obj := λ T, T.obj₁,
+  map := λ S T f, f.hom₁,
+  map_id' := λ _, rfl,
+  map_comp' := λ A B C f g, rfl }
+
+@[simps]
+def triangle.obj₂_functor : triangle C ⥤ C :=
+{ obj := λ T, T.obj₂,
+  map := λ S T f, f.hom₂,
+  map_id' := λ _, rfl,
+  map_comp' := λ A B C f g, rfl }
+
+@[simps]
+def triangle.obj₃_functor : triangle C ⥤ C :=
+{ obj := λ T, T.obj₃,
+  map := λ S T f, f.hom₃,
+  map_id' := λ _, rfl,
+  map_comp' := λ A B C f g, rfl }
+
 end triangulated
 
 end category_theory

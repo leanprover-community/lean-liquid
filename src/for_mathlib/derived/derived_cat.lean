@@ -174,10 +174,10 @@ instance pretriangulated : triangulated.pretriangulated (bounded_derived_categor
 { distinguished_triangles := { T |
     ∃ (S : triangle (bounded_homotopy_category A))
       (hS : S ∈ dist_triang (bounded_homotopy_category A))
-      (f : T ⟶ replace_triangle S), is_iso f },
+      (f : T ≅ replace_triangle S), true },
   isomorphic_distinguished := begin
     rintro T₁ ⟨S₁, hS₁, f₁, hf₁⟩ T₂ i, resetI,
-    refine ⟨S₁, hS₁, i.hom ≫ f₁, infer_instance⟩,
+    refine ⟨S₁, hS₁, i ≪≫ f₁, trivial⟩,
   end,
   contractible_distinguished := begin
     intro X,
@@ -246,4 +246,32 @@ begin
     localization_iso_hom_val, bounded_homotopy_category.lift_lifts],
 end
 
+variable (A)
+noncomputable
+def Ext (n : ℤ) : (bounded_derived_category A)ᵒᵖ ⥤ bounded_derived_category A ⥤ Ab :=
+functor.flip $ shift_functor _ n ⋙ preadditive_yoneda
+
+@[simp]
+lemma Ext_obj_obj (n : ℤ) (X : (bounded_derived_category A)ᵒᵖ) (Y : bounded_derived_category A) :
+  ((Ext A n).obj X).obj Y = AddCommGroup.of (X.unop ⟶ Y⟦n⟧) := rfl
+
+@[simp]
+lemma Ext_map_app_apply (n : ℤ) {X Y : (bounded_derived_category A)ᵒᵖ}
+  (f : X ⟶ Y) (Z : bounded_derived_category A) (e : ((Ext A n).obj X).obj Z) :
+  ((Ext A n).map f).app Z e = f.unop ≫ e := rfl
+
+@[simp]
+lemma Ext_obj_map (n : ℤ) (X : (bounded_derived_category A)ᵒᵖ) {Y Z : bounded_derived_category A}
+  (f : Y ⟶ Z) (e : ((Ext A n).obj X).obj Y) : ((Ext A n).obj X).map f e =
+  e ≫ f⟦n⟧' := rfl
+
 end bounded_derived_category
+
+/-
+0 → A → B → C → 0
+
+A -f→ B → Cone(f) → A[1]
+
+Canonical Cone(f) → C quasi iso
+
+-/
