@@ -296,12 +296,69 @@ def P1_to_P2_nat_trans (hfg : f ≫ g = 0) :
 
 set_option pp.universes true
 
+/-
+TODO:
+
+jmc: below is a framework for setting up some canonical isomorphisms between limits.
+It really boils down to saying that limits commute.
+This shouldn't be so hard...
+I'm not convinced that this is the best way to do it,
+there should be a more ergonomic approach.
+-/
+
+
+def P1_hom {A B : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}}
+  (f : A ⟶ B) (r c : ℝ≥0) [fact (1 ≤ r)] (S : Profinite) :
+  P1.{u} ((Profinite.extend_nat_trans.{u u+1} f).app S) r c ⟶
+    limit (P1_functor.{u} (whisker_left S.fintype_diagram f) r c ⋙ lim) :=
+limit.lift _
+{ X := P1.{u} ((Profinite.extend_nat_trans.{u u+1} f).app S) r c,
+  π :=
+  { app := sorry,
+    naturality' := sorry }, }
+
+def P1_inv {A B : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}}
+  (f : A ⟶ B) (r c : ℝ≥0) [fact (1 ≤ r)] (S : Profinite) :
+  limit (P1_functor.{u} (whisker_left S.fintype_diagram f) r c ⋙ lim) ⟶
+    P1.{u} ((Profinite.extend_nat_trans.{u u+1} f).app S) r c :=
+sorry
+
+def P1_iso {A B : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}}
+  (f : A ⟶ B) (r c : ℝ≥0) [fact (1 ≤ r)] (S : Profinite) :
+  P1.{u} ((Profinite.extend_nat_trans.{u u+1} f).app S) r c ≅
+    limit (P1_functor.{u} (whisker_left S.fintype_diagram f) r c ⋙ lim) :=
+{ hom := P1_hom f r c S,
+  inv := P1_inv f r c S,
+  hom_inv_id' := sorry,
+  inv_hom_id' := sorry }
+
+def P2_hom {B C : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}}
+  (g : B ⟶ C) (c : ℝ≥0) (S : Profinite) :
+  P2.{u} ((Profinite.extend_nat_trans.{u u+1} g).app S) c ⟶
+    limit (P2_functor.{u} (whisker_left S.fintype_diagram g) c ⋙ lim) :=
+sorry
+
+def P2_inv {B C : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}}
+  (g : B ⟶ C) (c : ℝ≥0) (S : Profinite) :
+  limit (P2_functor.{u} (whisker_left S.fintype_diagram g) c ⋙ lim) ⟶
+    P2.{u} ((Profinite.extend_nat_trans.{u u+1} g).app S) c :=
+sorry
+
+def P2_iso {B C : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}}
+  (g : B ⟶ C) (c : ℝ≥0) (S : Profinite) :
+  P2.{u} ((Profinite.extend_nat_trans.{u u+1} g).app S) c ≅
+    limit (P2_functor.{u} (whisker_left S.fintype_diagram g) c ⋙ lim) :=
+{ hom := P2_hom g c S,
+  inv := P2_inv g c S,
+  hom_inv_id' := sorry,
+  inv_hom_id' := sorry }
+
 -- move me, generalize
 lemma extend_aux {A₁ B₁ A₂ B₂ : CompHaus}
   (e₁ : A₁ ≅ B₁) (e₂ : A₂ ≅ B₂) (f : A₁ ⟶ A₂) (g : B₁ ⟶ B₂) (hf : epi f)
-  (H : f = e₁.hom ≫ g ≫ e₂.inv) :
+  (H : e₁.inv ≫ f ≫ e₂.hom = g) :
   epi g :=
-by { rw [← iso.inv_comp_eq, iso.eq_comp_inv] at H, subst H, apply epi_comp _, apply epi_comp }
+by { subst H, apply epi_comp _ _, apply_instance, apply epi_comp }
 
 lemma extend {A B C : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}}
   (f : A ⟶ B) (g : B ⟶ C) (r : ℝ≥0) [fact (1 ≤ r)]
@@ -339,8 +396,14 @@ begin
     { exact hfg },
     { show epi ((@limits.lim _ _ _ _ _).map _), apply_instance, }, },
   rw ← CompHaus.epi_iff_surjective at key ⊢,
-  refine extend_aux _ _ _ _ key _,
-  all_goals { sorry }
+  refine extend_aux (P1_iso f r c S).symm (P2_iso g c S).symm _ _ key _,
+  apply pullback.hom_ext,
+  { rw P1_to_P2_comp_fst,
+    sorry },
+  sorry,
+  -- apply Profinite.extend_nat_trans_ext,
+
+
   -- { let foo := limit_curry_swap_comp_lim_iso_limit_curry_comp_lim
   --     (uncurry.{u u u}.obj $ P1_functor.{u} (whisker_left S.fintype_diagram f) r c),
   --   refine _ ≪≫ foo.symm ≪≫ _,
