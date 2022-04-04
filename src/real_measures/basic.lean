@@ -238,6 +238,58 @@ begin
   exact (nnreal.continuous_rpow_const h0p).comp (continuous_nnnorm.comp (continuous_apply s)),
 end
 
+open metric
+
+def equiv_filtration_ϖ_ball (c : ℝ≥0) : filtration (ℳ p ϖ) c ≃ closed_ball (0 : ℝ)
+  (c ^ (p⁻¹ : ℝ)):=
+begin
+  fconstructor,
+  { intro f,
+    use f.1 punit.star,
+    simp only [mem_closed_ball_zero_iff],
+    have hf := (mem_filtration_iff f.1 c).mp f.2,
+    simp only [← nnreal.coe_le_coe, real_measures.coe_nnnorm, nnnorm_def, fintype.univ_punit, finset.sum_singleton, norm_def]
+      at hf,
+    have := @nnreal.rpow_le_rpow_iff (∥f.1 punit.star∥₊) (c ^ (p⁻¹ : ℝ)) p _,
+    rw [← nnreal.rpow_mul, inv_mul_cancel, nnreal.rpow_one] at this,
+    exact this.mp hf,
+    exact (nnreal.coe_ne_zero.mpr (ne_of_gt (fact.out _))),
+    rw ← nnreal.coe_zero,
+    exact nnreal.coe_lt_coe.mpr (fact.out _),
+  },
+  { intro x,
+    use (λ _, x),
+    have := @real.rpow_le_rpow_iff (|↑x| : ℝ) (c ^ (p⁻¹ : ℝ)) p _ _ _,
+    rw [← real.rpow_mul, inv_mul_cancel, real.rpow_one] at this,
+    have hx := x.2,
+    simp only [mem_filtration_iff, subtype.val_eq_coe, nnnorm, fintype.univ_punit,
+      finset.sum_singleton, ← nnreal.coe_le_coe, nnreal.coe_rpow, subtype.coe_mk, real.norm_eq_abs,
+      this, abs_le, mem_closed_ball_zero_iff] at hx ⊢,
+    exact hx,
+    { rw nnreal.coe_ne_zero,
+      exact ne_of_gt (fact.out _) },
+    { exact c.2 },
+    { exact abs_nonneg x },
+    { rw ← nnreal.coe_rpow,
+     exact (c ^ (p⁻¹ : ℝ)).2 },
+    { rw [← nnreal.coe_zero, nnreal.coe_lt_coe],
+      exact fact.out _ } },
+    { intro,
+      ext,
+      simp only [subtype.val_eq_coe, subtype.coe_mk],
+      apply congr_arg,
+      simp only [eq_iff_true_of_subsingleton] },
+    { intro,
+      simp only [subtype.coe_eta] },
+end
+
+def homeo_filtration_ϖ_ball (c : ℝ≥0) : filtration (ℳ p ϖ) c ≃ₜ closed_ball (0 : ℝ)
+  (c ^ (p⁻¹ : ℝ)) :=
+{ to_equiv := equiv_filtration_ϖ_ball c,
+  continuous_to_fun := sorry,
+  continuous_inv_fun := sorry
+}
+
 def equiv_filtration_ϖ_Icc (c : ℝ≥0) : filtration (ℳ p ϖ) c ≃ set.Icc ((- c ^ (p⁻¹ : ℝ)) : ℝ)
   (c ^ (p⁻¹ : ℝ)):=
 begin
