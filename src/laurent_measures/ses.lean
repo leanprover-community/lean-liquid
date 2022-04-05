@@ -36,7 +36,7 @@ variables [fact (0 < r)]
 variable {S : Fintype}
 
 local notation `ℒ` := laurent_measures r
-local notation `ϖ` := Fintype.of (punit : Type u)
+local notation `ϖ` := Fintype.of punit
 
 variables {M₁ M₂ : Type u} [comphaus_filtered_pseudo_normed_group M₁]
   [comphaus_filtered_pseudo_normed_group M₂]
@@ -537,81 +537,12 @@ begin
   refine continuous.comp _ (continuous_seval_ℒ_c p S c s),
   dsimp only [θ_c],
   apply (homeo_filtration_ϖ_ball c).comp_continuous_iff.mp,
-  -- simp only [one_mul, eq_self_iff_true, eq_mpr_eq_cast, set_coe_cast],
   apply continuous_if_preimage_closed₀' (c ^ (p⁻¹ : ℝ)),
   intros ε hε,
   replace hε : ε ^ (p : ℝ) ≤ c, sorry,
   simp only [one_mul, eq_self_iff_true, eq_mpr_eq_cast, set_coe_cast],
-  -- dsimp only [one_mul, eq_self_iff_true],
-  rw set.preimage_comp,
-  -- have blah : (ε : ℝ) = (ε ^ (p : ℝ)) ^ (p⁻¹ : ℝ),
-  -- sorry,
-  -- rw blah,
-  rw @homeo_filtration_ϖ_ball_preimage p _ _ ϖ c ε hε,
-  -- have rww := @nnreal.coe_rpow c (p⁻¹ : ℝ),
-  -- have rwb := closed_ball 0 ε : set
-  -- equiv_rw [(equiv_filtration_ϖ_Icc c).symm],
-  -- refl
-
-
-
-
-
-
-
-
-
-
-  -- refine continuous_if_preimage_closed₀ _,
-  -- apply reduction_balls,
-  -- intros y ε,
-  -- dsimp [homeo_filtration_ϖ_Icc],-- θ, ϑ],
-  -- **[fae]** ADD AN ONLY ABOVE OR REMOVE ALTOGETHER
-
-  -- rw continuous_iff_preimage_closed,
-  -- rw continuous_iff_is_closed,
-  -- intros C hC,
-  -- apply continuous_if_preimage_closed,
-  -- sorry,
+  rw [set.preimage_comp, homeo_filtration_ϖ_ball_preimage hε],
   sorry,
-  -- ,/
-  -- have := @closed_of_ℳ_ϖ p _ _ c,
-  -- refine (@closed_of_ℳ_ϖ p _ _ c).symm.comp_continuous_iff.mp,
-  -- apply cont_at_cast_ℳ c (θ_c S c),
-  -- rw aux_commutative_θ,
-  -- apply continuous.comp _ (cont_cast_ℒ c),
-  -- apply continuous_pi,
-  -- intro s,
-
-
-
-
-
-
-
-  --**[FAE]** Old version
-  -- {
-  -- dsimp only [θ_c],
-  -- apply cont_at_cast_ℳ c (θ_c S c),
-  -- apply continuous_pi,
-  -- intro s,
-  -- apply ((equiv_ball_ℓp c).comp_continuous_iff).mp,
-  -- let f := (equiv_ball_ℓp c) ∘ (λ a,
-  --   (cast_ℳ_c c ∘ θ_c S c) a s),
-  -- apply cont_at_closed (c ^ (1 / p : ℝ)) f,
-  -- intros a ha,
-  -- dsimp [f],
-  -- --from here, it is clearly broken
-  -- convert is_closed_empty,
-  -- apply aux_6 S a c s ha,
-  -- }
-  -- unfold,
-  -- dsimp [f, cast_ℳ_c, θ_c],
-
-
-
-
-  --all_goals {apply_instance},
 end
 
 

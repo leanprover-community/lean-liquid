@@ -21,7 +21,7 @@ def real_measures (p : ℝ≥0) (S : Fintype) := S → ℝ
 variables {p : ℝ≥0} {S S' : Fintype.{u}}
 
 local notation `ℳ` := real_measures
-local notation `ϖ` := Fintype.of (punit : Type u)
+local notation `ϖ` := Fintype.of punit
 
 namespace real_measures
 
@@ -289,19 +289,12 @@ def homeo_filtration_ϖ_ball (c : ℝ≥0) : filtration (ℳ p ϖ) c ≃ₜ clos
   continuous_to_fun := sorry,
   continuous_inv_fun := sorry
 }
-
--- lemma le_c_le_cp {c c': ℝ≥0} (h : c ≤ c') :  c ^ (p⁻¹ : ℝ) ≤ c' ^ (p⁻¹ : ℝ) : ℝ≥0) : \R) := sorry
-
 instance {c : ℝ≥0} : has_zero (closed_ball (0 : ℝ) c):=
-{ zero := ⟨0, by {simp only [mem_closed_ball_zero_iff, norm_zero, nnreal.zero_le_coe]}⟩}
+  { zero := ⟨0, by {simp only [mem_closed_ball_zero_iff, norm_zero, nnreal.zero_le_coe]}⟩}
 
--- #check ϖ
-
-lemma homeo_filtration_ϖ_ball_preimage {punit : Type u} (c ε: ℝ≥0) (h : ε ^ (p : ℝ) ≤ c) :
-(homeo_filtration_ϖ_ball c)⁻¹' --(set.range (set.inclusion
-  (closed_ball 0 ε) = --)) =
-  (set.range (set.inclusion
-  (@pseudo_normed_group.filtration_mono (ℳ p ϖ) _ _ _ h))) := --set.Icc ((- c ^ (p⁻¹ : ℝ)) : ℝ) ((c ^ (p⁻¹ : ℝ) : ℝ)) :=
+lemma homeo_filtration_ϖ_ball_preimage {c ε: ℝ≥0} (h : ε ^ (p : ℝ) ≤ c) :
+  (homeo_filtration_ϖ_ball c)⁻¹' (closed_ball 0 ε) =
+  (set.range (set.inclusion (@pseudo_normed_group.filtration_mono (ℳ p ϖ) _ _ _ h))) :=
 begin
   sorry,
 end
