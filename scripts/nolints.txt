@@ -179,6 +179,11 @@ apply_nolint category_theory.snake.row_exact₂_aux unused_arguments
 -- for_mathlib/split_exact.lean
 apply_nolint category_theory.split.map def_lemma
 
+-- for_mathlib/triangle.lean
+apply_nolint category_theory.triangulated.triangle.obj₁_functor unused_arguments
+apply_nolint category_theory.triangulated.triangle.obj₂_functor unused_arguments
+apply_nolint category_theory.triangulated.triangle.obj₃_functor unused_arguments
+
 -- for_mathlib/triangle_shift.lean
 apply_nolint category_theory.triangulated.pretriangulated.shift_comm_self unused_arguments
 apply_nolint category_theory.triangulated.triangle.associativity_aux unused_arguments
@@ -204,7 +209,6 @@ apply_nolint laurent_measures.epi_and_is_iso unused_arguments
 
 -- laurent_measures/ses.lean
 apply_nolint laurent_measures_ses.box unused_arguments
-apply_nolint laurent_measures_ses.continuous_if_preimage_closed unused_arguments
 apply_nolint laurent_measures_ses.real_measures.topological_space unused_arguments
 
 -- laurent_measures/theta.lean
