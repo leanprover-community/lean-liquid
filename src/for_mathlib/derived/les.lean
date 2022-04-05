@@ -43,6 +43,7 @@ def cone.π (w : ∀ i, f.f i ≫ g.f i = 0) :
     { simp only [category.assoc, biprod.inr_snd_assoc, biprod.inr_desc_assoc, g.comm], }
   end }
 
+-- TODO: this should of course assume termwise short-exactness, but I had to run away
 def cone.π_quasi_iso (w : ∀ i, f.f i ≫ g.f i = 0) :
   quasi_iso (cone.π f g w) :=
 { is_iso := λ i, begin
