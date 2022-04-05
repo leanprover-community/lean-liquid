@@ -36,7 +36,7 @@ variables [fact (0 < r)]
 variable {S : Fintype}
 
 local notation `ℒ` := laurent_measures r
-local notation `ϖ` := Fintype.of punit
+local notation `ϖ` := Fintype.of (punit : Type u)
 
 variables {M₁ M₂ : Type u} [comphaus_filtered_pseudo_normed_group M₁]
   [comphaus_filtered_pseudo_normed_group M₂]
@@ -124,7 +124,7 @@ end phi_to_hom
 
 section theta
 
-open theta
+open theta real_measures
 
 parameter (p : ℝ≥0)
 local notation `r` := @r p
@@ -153,7 +153,7 @@ lemma θ_zero : θ (0 : ℒ S) = 0 :=
 begin
   dsimp only [θ, theta.ϑ],
   funext,
-  simp only [zero_apply, int.cast_zero, zero_mul, tsum_zero, real_measures.zero_apply],
+  simp only [laurent_measures.zero_apply, int.cast_zero, zero_mul, tsum_zero, real_measures.zero_apply],
 end
 
 variable [fact (p < 1)]
@@ -216,7 +216,7 @@ lemma θ_bound : ∀ c : ℝ≥0, ∀ F : (ℒ S), F ∈ filtration (ℒ S) c �
   (1 * c) :=
 begin
   intros c F hF,
-  rw mem_filtration_iff at hF,
+  rw laurent_measures.mem_filtration_iff at hF,
   dsimp only [laurent_measures.has_nnnorm] at hF,
   rw [one_mul, real_measures.mem_filtration_iff],
   dsimp only [real_measures.has_nnnorm, θ, theta.ϑ],
@@ -488,11 +488,9 @@ begin
   sorry,
 end
 
-instance (c : ℝ≥0) : has_zero (closed_ball (0 : ℝ) c):=
-{ zero := ⟨0, by {simp only [mem_closed_ball_zero_iff, norm_zero, nnreal.zero_le_coe]}⟩}
 
 lemma continuous_if_preimage_closed₀' (c : ℝ≥0) (f : X → (closed_ball (0 : ℝ) c))
-  (H : ∀ ε : ℝ, is_closed (f⁻¹' (closed_ball 0  ε))) : continuous f :=
+  (H : ∀ ε : ℝ≥0, ε ≤ c → is_closed (f⁻¹' (closed_ball 0  ε))) : continuous f :=
 begin
   sorry,
 end
@@ -538,13 +536,20 @@ begin
   rw ← commute_seval_ℒ_ℳ,
   refine continuous.comp _ (continuous_seval_ℒ_c p S c s),
   dsimp only [θ_c],
-  apply (homeo_filtration_ϖ_Icc c).comp_continuous_iff.mp,
+  apply (homeo_filtration_ϖ_ball c).comp_continuous_iff.mp,
   -- simp only [one_mul, eq_self_iff_true, eq_mpr_eq_cast, set_coe_cast],
-  apply continuous_if_preimage_closed₀ (c ^ (p⁻¹ : ℝ)),
-  intro ε,
+  apply continuous_if_preimage_closed₀' (c ^ (p⁻¹ : ℝ)),
+  intros ε hε,
+  replace hε : ε ^ (p : ℝ) ≤ c, sorry,
   simp only [one_mul, eq_self_iff_true, eq_mpr_eq_cast, set_coe_cast],
   -- dsimp only [one_mul, eq_self_iff_true],
   rw set.preimage_comp,
+  -- have blah : (ε : ℝ) = (ε ^ (p : ℝ)) ^ (p⁻¹ : ℝ),
+  -- sorry,
+  -- rw blah,
+  rw @homeo_filtration_ϖ_ball_preimage p _ _ ϖ c ε hε,
+  -- have rww := @nnreal.coe_rpow c (p⁻¹ : ℝ),
+  -- have rwb := closed_ball 0 ε : set
   -- equiv_rw [(equiv_filtration_ϖ_Icc c).symm],
   -- refl
 
