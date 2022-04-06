@@ -11,6 +11,10 @@ variables {ι₁ ι₂ : Type*}
 
 namespace complex_shape
 
+/-- An embedding `embedding c₁ c₂` between two complex shapes `ι₁` and `ι₂` is
+an injection `ι₁ → ι₂` sending related vertices to related vertices. Recall that two
+vertices are related in a complex shape iff the differential between them is allowed to
+be nonzero. -/
 structure embedding (c₁ : complex_shape ι₁) (c₂ : complex_shape ι₂) :=
 (f : ι₁ → ι₂)
 (r : ι₂ → option ι₁)
