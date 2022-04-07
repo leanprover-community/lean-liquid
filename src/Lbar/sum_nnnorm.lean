@@ -28,6 +28,6 @@ end
 lemma dists [decidable_eq α] [add_group β] {l : α} {x y z : α →₀ β} (hl : l ∈ (x - z).support) :
   l ∈ (x - y).support ∪ (y - z).support :=
 have xz : l ∈ (- (x - z)).support, by rwa support_neg,
-add_zero_dists (by simp only [neg_sub, coe_sub, pi.sub_apply, sub_add_sub_cancel, sub_self]) xz
+add_zero_dists (by simp only [neg_sub, finsupp.coe_sub, pi.sub_apply, sub_add_sub_cancel, sub_self]) xz
 
 end families_of_add_comm_groups

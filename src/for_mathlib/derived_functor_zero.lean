@@ -1,5 +1,5 @@
 import for_mathlib.derived_functor
-import category_theory.abelian.derived
+import category_theory.abelian.left_derived
 
 universes w v u
 

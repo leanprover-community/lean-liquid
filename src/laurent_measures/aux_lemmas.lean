@@ -228,7 +228,7 @@ lemma summable_shift (f : ℤ → ℝ) (N : ℤ) :
 lemma int_tsum_shift (f : ℤ → ℝ) (N : ℤ) :
   ∑' (x : ℕ), f (x + N) = ∑' (x : {x // N ≤ x}), f x :=
 begin
-  apply (equiv.refl ℝ).tsum_eq_tsum_of_has_sum_iff_has_sum rfl,
+  apply tsum_eq_tsum_of_has_sum_iff_has_sum,
   intro _,
   apply (@equiv.has_sum_iff ℝ _ ℕ _ _ (f ∘ coe) _ ((equiv_bdd_integer_nat N))),
 end

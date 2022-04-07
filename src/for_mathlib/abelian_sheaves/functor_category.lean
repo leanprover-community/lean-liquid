@@ -211,10 +211,8 @@ instance abelian.is_iso_coim_to_im {X Y : D} (f : X ⟶ Y) : is_iso (coim_to_im 
 begin
   have : coim_to_im f = (abelian.coimage_iso_image f).hom,
   { ext,
-    -- ugh... why is the definition of `abelian.coimage_iso_image` so complicated?!
-    dsimp [coim_to_im, abelian.coimages.coimage_strong_epi_mono_factorisation,
-      limits.strong_epi_mono_factorisation.to_mono_is_image],
-    simp },
+    simp only [coim_to_im, category.assoc, abelian.image.fac, cokernel.π_desc, as_iso_hom,
+      abelian.coimage_image_factorisation] },
   rw this, apply_instance,
 end
 
