@@ -129,8 +129,10 @@ def cone.π_quasi_iso (w : ∀ i, short_exact (f.f i) (g.f i)) :
   quasi_iso (cone.π f g (λ i, (w i).exact.w)) :=
 { is_iso := λ i, begin
     let π := cone.π f g (λ i, (w i).exact.w),
-    have aux : ∀ n, short_exact ((kernel.ι π).f n) (π.f n),
-    { sorry },
+    have aux : ∀ n, short_exact ((kernel.ι π).f n) (π.f n) := λ n,
+      { mono := equalizer.ι_mono,
+        epi := by { haveI := (w n).epi, exact category_theory.epi_comp _ _},
+        exact := exact_kernel_ι },
     suffices : ∀ n, is_zero (homology (kernel π) n),
     { exact (six_term_exact_seq (kernel.ι π) π aux i (i+1) rfl).is_iso_of_zero_of_zero
         ((this _).eq_of_src _ _) ((this _).eq_of_tgt _ _), },
