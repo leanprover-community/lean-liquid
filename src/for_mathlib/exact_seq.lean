@@ -100,14 +100,20 @@ begin
   simp,
 end
 
-instance [exact f g] : exact g.op f.op :=
+variables {f g}
+
+lemma op (h : exact f g) : exact g.op f.op :=
 begin
   rw abelian.exact_iff,
-  refine ⟨by simp [← op_comp], _⟩,
+  refine ⟨_, _⟩,
+  { simp only [← op_comp, h.w, op_zero], },
   apply_fun quiver.hom.unop,
   swap, { exact quiver.hom.unop_inj },
-  simp,
+  simp only [h, unop_comp, cokernel.π_op, eq_to_hom_refl, kernel.ι_op, category.id_comp,
+    category.assoc, kernel_comp_cokernel_assoc, zero_comp, comp_zero, unop_zero],
 end
+
+variables (f g)
 
 def kernel_unop_iso {C B : 𝒜ᵒᵖ} (f : C ⟶ B) : opposite.op (kernel f.unop) ≅ cokernel f :=
 { hom := (kernel.lift _ (cokernel.π f).unop (by simp [← unop_comp])).op ≫
@@ -171,13 +177,13 @@ begin
   simp,
 end
 
-instance {C B A : 𝒜ᵒᵖ} (g : C ⟶ B) (f : B ⟶ A) [exact g f] : exact f.unop g.unop :=
+lemma unop {C B A : 𝒜ᵒᵖ} {g : C ⟶ B} {f : B ⟶ A} (h : exact g f) : exact f.unop g.unop :=
 begin
   rw abelian.exact_iff,
-  refine ⟨by simp [← unop_comp], _⟩,
+  refine ⟨by simp only [← unop_comp, h.w, unop_zero], _⟩,
   apply_fun quiver.hom.op,
   swap, { exact quiver.hom.op_inj },
-  simp,
+  simp [h],
 end
 
 end exact
@@ -279,11 +285,10 @@ lemma op : ∀ {L : list (arrow 𝒜)}, exact_seq 𝒜 L → exact_seq 𝒜ᵒ�
 | _ (single f)          := single f.op
 | _ (cons f g hfg L hL) :=
 begin
-  have hgf : exact g.op f.op, { resetI, apply_instance },
   have := op hL,
   simp only [list.reverse_cons, list.map_append] at this ⊢,
   refine this.append _ (list.cons_ne_nil _ _),
-  exact cons _ _ hgf _ (single _),
+  exact cons _ _ hfg.op _ (single _),
 end
 
 lemma unop : ∀ {L : list (arrow 𝒜ᵒᵖ)}, exact_seq 𝒜ᵒᵖ L → exact_seq 𝒜 (L.reverse.map arrow.unop)
@@ -291,11 +296,10 @@ lemma unop : ∀ {L : list (arrow 𝒜ᵒᵖ)}, exact_seq 𝒜ᵒᵖ L → exact
 | _ (single f)          := single f.unop
 | _ (cons f g hfg L hL) :=
 begin
-  have hgf : exact g.unop f.unop, { resetI, apply_instance },
   have := unop hL,
   simp only [list.reverse_cons, list.map_append] at this ⊢,
   refine this.append _ (list.cons_ne_nil _ _),
-  exact cons _ _ hgf _ (single _),
+  exact cons _ _ hfg.unop _ (single _),
 end
 
 lemma of_op {L : list (arrow 𝒜)} (h : exact_seq 𝒜ᵒᵖ (L.reverse.map arrow.op)) : exact_seq 𝒜 L :=

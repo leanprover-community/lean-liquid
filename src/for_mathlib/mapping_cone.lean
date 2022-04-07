@@ -514,7 +514,7 @@ def comp_null_homotopic_of_row_split_exact : homotopy (b' ≫ b) 0 :=
 begin
   haveI := λ i, (H₂ i).split_epi,
   haveI := λ i, (H₂ i).split_mono,
-  haveI := λ i, (H₂ i).short_exact.3,
+  have aux := λ i, (H₂ i).short_exact.3,
   let h₁' := (h₂.trans (homotopy.of_eq (comp_zero : 𝟙 _ ≫ 0 = 0).symm)).symm,
   let h₂' := (h₃.trans $ homotopy.of_eq (zero_comp : 0 ≫ 𝟙 _ = 0).symm),
   refine ((of_termwise_split_epi_homotopy h₁').symm.comp
@@ -522,7 +522,7 @@ begin
   apply hom.ext,
   apply funext,
   intro i,
-  exact comp_eq_zero_of_exact (f.f i) (g.f i)
+  exact comp_eq_zero_of_exact (f.f i) (g.f i) (aux i)
     (congr_f ((of_termwise_split_epi_commutes h₁').trans comp_zero) i)
     (congr_f ((of_termwise_split_mono_commutes h₂').trans zero_comp) i)
 end
@@ -716,7 +716,8 @@ def iso_cone_of_termwise_split_inv_hom_homotopy (h : ∀ i, splitting (f.f i) (g
         splitting.ι_retraction_assoc, eq_self_iff_true, X_eq_to_iso_d, X_eq_to_iso_f_assoc,
         X_eq_to_iso_refl, X_eq_to_iso_trans, neg_neg, neg_zero, zero_add, neg_sub, hom.comm_assoc,
         splitting.π_section_eq_id_sub_assoc, splitting.π_section_eq_id_sub, category.id_comp,
-        preadditive.sub_comp_assoc, hom.comm, preadditive.sub_comp, splitting.ι_retraction];
+        preadditive.sub_comp_assoc, hom.comm, preadditive.sub_comp, splitting.ι_retraction,
+        exact_inl_snd];
       abel
   end }
 
@@ -747,9 +748,9 @@ def termwise_split_of_termwise_split_mono [H : ∀ i, split_mono (f.f i)] (i : �
 begin
   apply left_split.splitting,
   dsimp only [normal_mono, cokernel_complex_π],
-  haveI : exact (f.f i) (cokernel.π (f.f i)) := abelian.exact_cokernel _,
   constructor,
-  exact ⟨(H i).1, (H i).2⟩
+  exact ⟨(H i).1, (H i).2⟩,
+  exact abelian.exact_cokernel _,
 end
 
 /-- Every neg₃ of a cone triangle is isomorphic to some triangle associated to some
@@ -803,7 +804,7 @@ begin
     biprod.lift_snd, comp_zero, zero_comp, preadditive.comp_add, X_d_eq_to_iso, X_eq_to_iso_d,
     splitting.comp_iso_eq_inl_assoc, splitting.inl_comp_iso_eq_assoc,
     splitting.iso_comp_snd_eq_assoc, eq_self_iff_true, hom.comm_assoc, zero_add,
-    splitting.iso_hom_fst_assoc, splitting.inr_iso_inv_assoc],
+    splitting.iso_hom_fst_assoc, splitting.inr_iso_inv_assoc, exact_inl_snd],
   { rw ← cancel_epi (g.f _),
     simp only [category.id_comp, preadditive.sub_comp_assoc, (h _).comp_eq_zero_assoc,
       sub_zero, category.assoc, comp_zero, hom.comm, preadditive.sub_comp, limits.zero_comp,

@@ -41,7 +41,7 @@ def Cech_augmentation_map : ((Cech_nerve r' Λ M N).right.obj (mk 0)).unop ⟶ (
 (Hom M).map (cosimplicial_augmentation_map Λ N).op
 
 lemma Cech_nerve_hom_zero :
-  (Cech_nerve.{u} r' Λ M N).hom.app (mk.{u} 0) = (Cech_augmentation_map.{u} r' Λ M N).op :=
+  (Cech_nerve.{u} r' Λ M N).hom.app (mk 0) = (Cech_augmentation_map.{u} r' Λ M N).op :=
 begin
   dsimp only [Cech_nerve, Cech_augmentation_map, cosimplicial_object.augmented.whiskering_obj],
   simp only [whisker_right_app, category.id_comp, functor.right_op_map, nat_trans.comp_app,
