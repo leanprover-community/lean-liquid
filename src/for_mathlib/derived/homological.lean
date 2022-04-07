@@ -58,6 +58,15 @@ begin
   apply inv_rot_of_dist_triangle _ _ hT,
 end
 
+lemma five_term_exact_seq' {A : Type*} [category A] [abelian A] (F : C ⥤ A) [F.additive]
+  [homological_functor F] (T : triangle C) (hT : T ∈ dist_triang C) :
+  exact_seq A [F.map T.mor₁, F.map T.mor₂, F.map T.mor₃, F.map (T.rotate.mor₃)] :=
+begin
+  apply exact_seq.cons,
+  apply homological_functor.cond F T hT,
+  exact four_term_exact_seq F T.rotate (rot_of_dist_triangle _ _ hT),
+end
+
 lemma complete_distinguished_triangle_morphism'
   (T₁ T₂ : triangle C)
   (h₁ : T₁ ∈ dist_triang C)
