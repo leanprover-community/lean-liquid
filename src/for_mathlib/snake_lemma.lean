@@ -968,11 +968,7 @@ begin
 end
 
 instance : epi hD.to_kernel :=
-begin
-  dsimp [to_kernel],
-  have : exact ((0,2) ⟶[D] (1,2)) ((1,2) ⟶[D] (2,2)) := hD.col_exact₁ _,
-  apply_instance,
-end
+kernel.lift.epi (hD.col_exact₁ _)
 
 instance : is_iso hD.to_kernel :=
 is_iso_of_mono_of_epi _
@@ -981,16 +977,12 @@ def cokernel_to : cokernel ((1,0) ⟶[D] (2,0)) ⟶ D.obj (3,0) :=
 cokernel.desc _ (_ ⟶[D] _) (hD.col_exact₂ _).1
 
 instance : mono hD.cokernel_to :=
-begin
-  dsimp [cokernel_to],
-  have : exact ((1,0) ⟶[D] (2,0)) ((2,0) ⟶[D] (3,0)) := hD.col_exact₂ _,
-  apply_instance,
-end
+abelian.category_theory.limits.cokernel.desc.category_theory.mono _ _ (hD.col_exact₂ _)
 
 instance : epi hD.cokernel_to :=
 begin
   dsimp [cokernel_to],
-  have : epi ((2,0) ⟶[D] (3,0)) := hD.col_epi _,
+  haveI : epi ((2,0) ⟶[D] (3,0)) := hD.col_epi _,
   apply_instance,
 end
 
