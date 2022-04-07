@@ -300,7 +300,7 @@ with one that uses the general theory for commuting limits.
 -/
 
 
--- TODO move to mathlib
+-- TODO These are in #13216
 def cospan_comp_iso {C D : Type*} [category C] [category D] (F : C ⥤ D)
   {X Y Z : C} (f : X ⟶ Z) (g : Y ⟶ Z) :
   cospan f g ⋙ F ≅ cospan (F.map f) (F.map g) :=
@@ -322,7 +322,7 @@ rfl
   (cospan_comp_iso F f g).app walking_cospan.one = iso.refl _ :=
 rfl
 
--- TODO move to mathlib
+-- TODO These are in #13216
 def cospan_ext {C : Type*} [category C]
   {X Y Z X' Y' Z' : C} {f : X ⟶ Z} {g : Y ⟶ Z} {f' : X' ⟶ Z'} {g' : Y' ⟶ Z'}
   (iX : X ≅ X') (iY : Y ≅ Y') (iZ : Z ≅ Z')
