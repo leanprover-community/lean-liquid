@@ -431,8 +431,8 @@ begin
 end
 
 
-lemma reduction_balls' {c : ℝ≥0} (f : X → (closed_ball (0 : ℝ) c)) (H : ∀ y : (closed_ball 0 c), ∀ ε : ℝ,
-  is_open (f⁻¹' (ball y ε))) : continuous f :=
+lemma reduction_balls' {c : ℝ≥0} (f : X → (closed_ball (0 : ℝ) c)) (H : ∀ y : (closed_ball 0 c),
+  ∀ ε : ℝ, is_open (f⁻¹' (ball y ε))) : continuous f :=
 begin
   rw continuous_def,
   intros _ hU,
@@ -449,10 +449,59 @@ begin
   sorry
 end
 
-lemma complement_of_balls' {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) (ε : ℝ) : ∃ (x₁ x₂ : (closed_ball 0 c)),
-  ∃ (δ₁ δ₂ : ℝ), ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ :=
+example (a b c : ℝ) : a * b + b = (a + 1) * b :=
 begin
+  show_term{ring},
+end
+
+lemma complement_of_balls' {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) (ε : ℝ) :
+ ∃ (x₁ x₂ : (closed_ball 0 c)), ∃ (δ₁ δ₂ : ℝ),
+  ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ :=
+begin
+  sorry;{
+  by_cases hε : ε ≤ c,
+  { have hy : (y : ℝ) ≤ c, sorry,
+    set δ₁ := (-ε + y + c)/2 with hδ₁,
+    set x₁ := (- ε + y - c)/2 with hx₁,
+    set δ₂ := (-ε - y + c)/2 with hδ₂,
+    set x₂ := (ε + y + c)/2 with hx₂,
+    use x₁,
+    simp only [mem_closed_ball_zero_iff, norm_div, real.norm_two, real.norm_eq_abs, abs_le],
+    split,
+    sorry;{
+    suffices : (-2 * c : ℝ) ≤ 2 * x₁,
+    sorry,
+    have : -ε + y -c ≥ -2 * c,
+    rw ge,
+    rw le_sub_iff_add_le,
+    -- rw add_comm,
+    ring_nf SOP,
+    simp,
+    -- simp [hε],
+    -- linarith,
+    -- linarith,
+    have hc := (one_mul (c : ℝ)).symm,
+    -- rw hc,
+
+    -- rw [← one_mul c],
+    -- rw ← add_mul,
+    -- rw neg_mul,
+    rw neg_add_le_iff_le_add,
+    -- simp only [neg_mul, neg_add_le_iff_le_add],
+    -- simp only [*, neg_mul, ge_iff_le, neg_le_sub_iff_le_add, eq_self_iff_true] at *,
+
+
+    calc 2 * x₁ = -ε + y - c : by {rw hx₁, ring}
+            ... ≥ -2 * c : by sorry,
+
+
+
+    sorry,
+
+    },
   sorry
+  },
+  }
 end
 
 lemma continuous_if_preimage_closed {c : ℝ≥0} (f : X → (Icc (-c : ℝ) c))
