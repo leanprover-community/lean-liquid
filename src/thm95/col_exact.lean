@@ -104,7 +104,7 @@ def Cech_nerve' :
   (Cech_nerve r' Λ M N)
 
 lemma Cech_nerve'_hom_zero :
-  (Cech_nerve'.{u} r' V Λ M N n).hom.app (mk.{u} 0) =
+  (Cech_nerve'.{u} r' V Λ M N n).hom.app (mk 0) =
     (CLCFP' r' V n).map (Cech_augmentation_map.{u} r' Λ M N).op :=
 begin
   dsimp only [Cech_nerve', cosimplicial_object.augmented.whiskering_obj],
@@ -344,7 +344,7 @@ namespace Cech_nerve_level_hom
 /-! The goal is to build a section to `Cech_nerve_level_hom` -/
 
 variables {r' Λ M N n}
-variables {c : ℝ≥0} {i : simplex_category.{u}ᵒᵖ}
+variables {c : ℝ≥0} {i : simplex_categoryᵒᵖ}
 variables (y : (FLC_complex_arrow _ (aug_map_strict r' Λ M N n) c).augmented_cech_nerve.left.obj i)
 
 def z₀' := limits.wide_pullback.base

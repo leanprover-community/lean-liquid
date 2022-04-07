@@ -370,8 +370,6 @@ end
 @[simp] lemma _root_.ulift.up_inj {α : Type*} (a b : α) : ulift.up a = ulift.up b ↔ a = b :=
 ⟨congr_arg ulift.down, congr_arg ulift.up⟩
 
-@[simp] lemma _root_.ulift.down_inj {α : Type*} (a b : ulift α) : a.down = b.down ↔ a = b :=
-⟨by { cases a, cases b, exact congr_arg ulift.up }, congr_arg ulift.down⟩
 
 @[simps]
 def Pow_comp_Pow_components (m n : ℕ) (A : 𝒜) :

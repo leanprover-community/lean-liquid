@@ -154,45 +154,43 @@ lemma prev_eq_zero {A₁ A₂ : homological_complex C c} (f : A₁ ⟶ A₂) (i 
 (X_prev_is_zero _ _ hi).eq_zero_of_src _
 
 lemma exact_next {A₁ A₂ A₃ : homological_complex C c} (f : A₁ ⟶ A₂) (g : A₂ ⟶ A₃)
-  (i j : ι) (hij : c.rel i j) [exact (f.f j) (g.f j)] :
+  (i j : ι) (hij : c.rel i j) (h : exact (f.f j) (g.f j)) :
   exact (f.next i) (g.next i) :=
 begin
   refine preadditive.exact_of_iso_of_exact' (f.f j) (g.f j) _ _
-    (X_next_iso A₁ hij).symm (X_next_iso A₂ hij).symm (X_next_iso A₃ hij).symm
-    _ _ infer_instance;
+    (X_next_iso A₁ hij).symm (X_next_iso A₂ hij).symm (X_next_iso A₃ hij).symm _ _ h;
   simp only [hom.next_eq _ hij, iso.symm_hom, iso.inv_hom_id_assoc],
 end
 
-instance exact_next' {A₁ A₂ A₃ : homological_complex C c} (f : A₁ ⟶ A₂) (g : A₂ ⟶ A₃) (i : ι)
-  [∀ n, exact (f.f n) (g.f n)] : exact (f.next i) (g.next i) :=
+lemma exact_next' {A₁ A₂ A₃ : homological_complex C c} (f : A₁ ⟶ A₂) (g : A₂ ⟶ A₃) (i : ι)
+  (h : ∀ n, exact (f.f n) (g.f n)) : exact (f.next i) (g.next i) :=
 begin
   rcases (c.next i).eq_none_or_eq_some with (hi | ⟨⟨j, hij⟩, hi⟩),
   { rw [next_eq_zero _ _ hi],
     apply_with exact_zero_left_of_mono { instances := ff },
     { apply_instance },
     { refine ⟨λ Z a b H, _⟩, apply (X_next_is_zero _ _ hi).eq_of_tgt } },
-  exact exact_next f g i j hij
+  exact exact_next f g i j hij (h j)
 end
 
 lemma exact_prev {A₁ A₂ A₃ : homological_complex C c} (f : A₁ ⟶ A₂) (g : A₂ ⟶ A₃)
-  (i j : ι) (hij : c.rel i j) [exact (f.f i) (g.f i)] :
+  (i j : ι) (hij : c.rel i j) (h : exact (f.f i) (g.f i)) :
   exact (f.prev j) (g.prev j) :=
 begin
   refine preadditive.exact_of_iso_of_exact' (f.f i) (g.f i) _ _
-    (X_prev_iso A₁ hij).symm (X_prev_iso A₂ hij).symm (X_prev_iso A₃ hij).symm
-    _ _ infer_instance;
+    (X_prev_iso A₁ hij).symm (X_prev_iso A₂ hij).symm (X_prev_iso A₃ hij).symm _ _ h;
   simp only [hom.prev_eq _ hij, iso.symm_hom, iso.inv_hom_id_assoc],
 end
 
-instance exact_prev' {A₁ A₂ A₃ : homological_complex C c} (f : A₁ ⟶ A₂) (g : A₂ ⟶ A₃) (j : ι)
-  [∀ n, exact (f.f n) (g.f n)] : exact (f.prev j) (g.prev j) :=
+lemma exact_prev' {A₁ A₂ A₃ : homological_complex C c} (f : A₁ ⟶ A₂) (g : A₂ ⟶ A₃) (j : ι)
+  (h : ∀ n, exact (f.f n) (g.f n)) : exact (f.prev j) (g.prev j) :=
 begin
   rcases (c.prev j).eq_none_or_eq_some with (hj | ⟨⟨i, hij⟩, hj⟩),
   { rw [prev_eq_zero _ _ hj],
     apply_with exact_zero_left_of_mono { instances := ff },
     { apply_instance },
     { refine ⟨λ Z a b H, _⟩, apply (X_prev_is_zero _ _ hj).eq_of_tgt } },
-  exact exact_prev f g i j hij
+  exact exact_prev f g i j hij (h i)
 end
 
 lemma mono_next {A₁ A₂ : homological_complex C c} (f : A₁ ⟶ A₂)
@@ -248,11 +246,12 @@ begin
     image_subobject_arrow_comp_assoc, hom.sq_to_left, image_subobject_arrow_comp, hom.comm_to],
 end
 
-instance uuugher (A B : C) (f : A ⟶ B) : exact (kernel_subobject f).arrow f :=
-by { rw [← kernel_subobject_arrow, exact_iso_comp], apply_instance }
+lemma exact_kernel_subobject_arrow (A B : C) (f : A ⟶ B) : exact (kernel_subobject f).arrow f :=
+by { rw [← kernel_subobject_arrow, exact_iso_comp], exact exact_kernel_ι }
 
-instance uuugh (A : homological_complex C c) (i : ι) : exact (cycles A i).arrow (d_from A i) :=
-by delta cycles; apply_instance
+lemma exact_cycles_arrow (A : homological_complex C c) (i : ι) :
+  exact (cycles A i).arrow (d_from A i) :=
+exact_kernel_subobject_arrow _ _ _
 
 lemma exact_cycles_map {A₁ A₂ A₃ : homological_complex C c} (f : A₁ ⟶ A₂) (g : A₂ ⟶ A₃)
   (hfg : ∀ n, short_exact (f.f n) (g.f n)) (j : ι) :
@@ -273,14 +272,15 @@ begin
     (cokernel.π $ A₁.d_from j) (cokernel.π $ A₂.d_from j) (cokernel.π $ A₃.d_from j)
     (cokernel.map _ _ _ _ sq₁) (cokernel.map _ _ _ _ sq₂),
   { exact S.six_term_exact_seq.pair },
-  have hfg_exact := λ j, (hfg j).exact,
   have hfg_epi := λ j, (hfg j).epi,
   have hfg_mono := λ j, (hfg j).mono,
   resetI,
   fsplit,
-  { refine exact_seq.cons _ _ infer_instance _ ((exact_iff_exact_seq _ _).mp infer_instance) },
-  { refine exact_seq.cons _ _ infer_instance _ ((exact_iff_exact_seq _ _).mp infer_instance) },
-  { refine exact_seq.cons _ _ infer_instance _ ((exact_iff_exact_seq _ _).mp infer_instance) },
+  { exact (hfg j).exact },
+  { exact exact_next' _ _ _ (λ i, (hfg i).exact), },
+  { refine (exact_cycles_arrow _ _).cons (abelian.exact_cokernel _).exact_seq, },
+  { refine (exact_cycles_arrow _ _).cons (abelian.exact_cokernel _).exact_seq, },
+  { refine (exact_cycles_arrow _ _).cons (abelian.exact_cokernel _).exact_seq, },
   { rw cycles_map_arrow, },
   { rw cycles_map_arrow, },
   { exact sq₁ },
@@ -330,7 +330,7 @@ by rwa [abelian.exact_iff_image_eq_kernel, ← him, ← hker, ← abelian.exact_
 lemma exact_column :
 exact_seq C [(kernel.ι (A.d_to j)), (A.d_to j), (cokernel.π (A.boundaries j).arrow)] :=
 exact_kernel_ι.cons $
-(exact.congr (boundaries A j).arrow _ _ _ infer_instance (image_subobject_arrow _) rfl).exact_seq
+(exact.congr (boundaries A j).arrow _ _ _ (abelian.exact_cokernel _) (image_subobject_arrow _) rfl).exact_seq
 
 lemma exact_mod_boundaries_map (hfg : ∀ n, short_exact (f.f n) (g.f n)) (j : ι) :
   exact (mod_boundaries_map f j) (mod_boundaries_map g j) :=
@@ -352,11 +352,12 @@ begin
     (cokernel.π _) (cokernel.π _) (cokernel.π _)
     (mod_boundaries_map f j) (mod_boundaries_map g j),
   { exact (S.six_term_exact_seq.drop 3).pair },
-  have hfg_exact := λ n, (hfg n).exact,
   have hfg_epi := λ n, (hfg n).epi,
   have hfg_mono := λ n, (hfg n).mono,
   resetI,
   fsplit,
+  { exact exact_prev' _ _ _ (λ n, (hfg n).exact) },
+  { exact (hfg j).exact },
   { apply exact_column },
   { apply exact_column },
   { apply exact_column },
@@ -442,19 +443,15 @@ begin
     exact_cycles_arrow_delta_to_cycles _ i j hij,
   letI : epi (homology.π (d_to A i) (d_from A i) (A.d_to_comp_d_from i)) := coequalizer.π_epi,
   fsplit,
-  { refine exact_seq.cons _ _ (category_theory.exact_zero_mono _) _ _,
-    rw [← exact_iff_exact_seq],
-    exact abelian.exact_cokernel _ },
-  { refine exact_seq.cons _ _ (category_theory.exact_zero_mono _) _ _,
-    rw [← exact_iff_exact_seq],
-    apply_instance },
-  { refine exact_seq.cons _ _ (category_theory.exact_zero_mono _) _ _,
-    rw [← exact_iff_exact_seq],
-    apply_instance },
+  { rw ← epi_iff_exact_zero_right, apply_instance },
+  { apply exact_cycles_arrow_delta_to_cycles },
+  { exact (category_theory.exact_zero_mono _).cons (abelian.exact_cokernel _).exact_seq, },
+  { exact (category_theory.exact_zero_mono _).cons (abelian.exact_cokernel _).exact_seq, },
+  { exact (category_theory.exact_zero_mono _).cons (exact_zero_left_of_mono _).exact_seq, },
   { simp only [zero_comp] },
   { simp only [zero_comp] },
   { simp only [boundaries_to_cycles_arrow, category.id_comp] },
-  { simp only [boundaries_arrow_comp_delta_to_cycles, exact.w] },
+  { simp only [boundaries_arrow_comp_delta_to_cycles, zero_comp], },
   { dsimp [homology.π, cycles], simp only [cokernel.π_desc] },
   { simp only [mod_boundaries_to_cycles_app, cokernel.π_desc, category.comp_id] },
 end
@@ -463,9 +460,7 @@ lemma exact_mod_boundaries_to_cycles_to_homology :
   exact ((mod_boundaries_to_cycles i j hij).app A) ((cycles_to_homology j).app A)  :=
 begin
   refine exact.congr (boundaries_to_cycles _ _) _ _ _ _ _ rfl,
-  { simp only [cycles_to_homology_app],
-    delta boundaries_to_cycles,
-    apply_instance },
+  { exact abelian.exact_cokernel _, },
   { simp only [mod_boundaries_to_cycles_app],
     delta delta_to_cycles,
     rw [← image_subobject_comp_eq_of_epi (cokernel.π _)],

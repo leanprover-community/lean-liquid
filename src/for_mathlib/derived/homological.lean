@@ -154,7 +154,7 @@ begin
   dsimp,
   let f := _, let g := _, show exact f g,
   suffices : exact g.unop f.unop,
-  { resetI, rw ← f.op_unop, rw ← g.op_unop, apply_instance },
+  { rw ← f.op_unop, rw ← g.op_unop, apply this.op, },
   rw AddCommGroup.exact_iff,
   apply le_antisymm,
   { rintros _ ⟨q : _ ⟶ X, rfl⟩,
@@ -323,7 +323,7 @@ instance is_iso_hom₃ (T₁ T₂ : triangle C) (e : T₁ ⟶ T₂) [is_iso e] :
   show (inv e ≫ e).hom₃ = _, by simpa only [is_iso.inv_hom_id]⟩⟩
 
 lemma homological_of_exists_aux {A : Type*} [category A] [abelian A] (F : C ⥤ A) [F.additive]
-  (T₁ T₂ : triangle C) (e : T₁ ⟶ T₂) [is_iso e] [exact (F.map T₁.mor₁) (F.map T₁.mor₂)] :
+  (T₁ T₂ : triangle C) (e : T₁ ⟶ T₂) [is_iso e] (H : exact (F.map T₁.mor₁) (F.map T₁.mor₂)) :
   exact (F.map T₂.mor₁) (F.map T₂.mor₂) :=
 begin
   have : T₂.mor₁ = inv e.hom₁ ≫ T₁.mor₁ ≫ e.hom₂,
@@ -339,7 +339,7 @@ begin
   simp only [← category.assoc],
   simp only [exact_comp_iso],
   change exact (_ ≫ (as_iso (F.map e.hom₂)).hom) ((as_iso (F.map e.hom₂)).inv ≫ _),
-  apply_instance,
+  rwa exact_comp_hom_inv_comp_iff,
 end
 
 lemma homological_of_exists {A : Type*} [category A] [abelian A] (F : C ⥤ A) [F.additive]
@@ -356,8 +356,7 @@ begin
   let E : T' ⟶ T := ⟨𝟙 _, 𝟙 _, e, by simp, h1⟩,
   haveI : is_iso E,
   { apply is_iso_of_is_iso_of_is_iso' _ _ hT' hT },
-  haveI : exact (F.map T'.mor₁) (F.map T'.mor₂) := hE,
-  apply (homological_of_exists_aux F T' T E)
+  exact homological_of_exists_aux F T' T E hE,
 end
 
 lemma homological_of_rotate {A : Type*} [category A] [abelian A] (F : C ⥤ A) [F.additive]
@@ -369,8 +368,7 @@ begin
   specialize h T.inv_rotate (inv_rot_of_dist_triangle C T hT),
   let E : T.inv_rotate.rotate ≅ T := inv_rot_comp_rot.app _,
   apply homological_of_exists_aux _ _ _ E.hom,
-  apply_instance,
-  assumption
+  assumption'
 end
 
 lemma homological_of_inv_rotate {A : Type*} [category A] [abelian A] (F : C ⥤ A) [F.additive]
@@ -382,8 +380,7 @@ begin
   specialize h T.rotate (rot_of_dist_triangle C T hT),
   let E : T.rotate.inv_rotate ≅ T := (rot_comp_inv_rot.app _).symm,
   apply homological_of_exists_aux _ _ _ E.hom,
-  apply_instance,
-  assumption
+  assumption'
 end
 
 lemma homological_of_nat_iso {A : Type*} [category A] [abelian A] (F G : C ⥤ A)
@@ -397,8 +394,8 @@ begin
   rw [← h₁, ← h₂, exact_iso_comp, ← category.assoc, exact_comp_iso],
   let E := as_iso (e.hom.app T.obj₂),
   change exact (F.map T.mor₁ ≫ E.hom) (E.inv ≫ _),
-  haveI : exact (F.map T.mor₁) (F.map T.mor₂) := by apply homological_functor.cond F _ hT,
-  apply_instance,
+  have : exact (F.map T.mor₁) (F.map T.mor₂) := by apply homological_functor.cond F _ hT,
+  rwa exact_comp_hom_inv_comp_iff,
 end
 
 end category_theory.triangulated

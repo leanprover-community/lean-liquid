@@ -17,14 +17,6 @@ universe u
 noncomputable theory
 open_locale big_operators nnreal classical
 
--- PR #13130
-lemma int.abs_le_floor_nnreal_iff (z : ℤ) (c : ℝ≥0) : |z| ≤ ⌊c⌋₊ ↔ ∥z∥₊ ≤ c :=
-begin
-  rw [int.abs_eq_nat_abs, int.coe_nat_le, nat.le_floor_iff (zero_le c)],
-  congr',
-  exact nnreal.coe_nat_abs z,
-end
-
 /-- `invpoly r S`, with notation `ℤ[T⁻¹] S`, is the functions `S → ℤ[T⁻¹]`. -/
 @[derive add_comm_group]
 def invpoly (r : ℝ≥0) (S : Fintype) := S → polynomial ℤ

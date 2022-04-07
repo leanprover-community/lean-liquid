@@ -22,7 +22,7 @@ variables {A B C A' B' C' : 𝒜} (f : A ⟶ B) (g : B ⟶ C) (f' : A' ⟶ B') (
 structure short_exact : Prop :=
 [mono  : mono f]
 [epi   : epi g]
-[exact : exact f g]
+(exact : exact f g)
 
 open_locale zero_object
 
@@ -40,7 +40,11 @@ begin
   obtain ⟨_, _, _⟩ := h',
   resetI,
   refine @abelian.is_iso_of_is_iso_of_is_iso_of_is_iso_of_is_iso 𝒜 _ _ 0 _ _ _ 0 _ _ _
-    0 f g 0 f' g' 0 i₁ i₂ i₃ _ comm₁ comm₂ 0 0 0 0 0 _ _ _ _ _ _ _ _ _ _ _; simp,
+    0 f g 0 f' g' 0 i₁ i₂ i₃ _ comm₁ comm₂ 0 0 0 0 0 _ _ _ _ _ _ _ _ _ _ _;
+  try { simp };
+  try { apply exact_zero_left_of_mono };
+  try { assumption };
+  rwa ← epi_iff_exact_zero_right,
 end
 
 
@@ -52,7 +56,7 @@ Such a sequence is automatically short exact (i.e., `f` is mono). -/
 structure left_split : Prop :=
 (left_split : ∃ φ : B ⟶ A, f ≫ φ = 𝟙 A)
 [epi   : epi g]
-[exact : exact f g]
+(exact : exact f g)
 
 lemma left_split.short_exact {f : A ⟶ B} {g : B ⟶ C} (h : left_split f g) : short_exact f g :=
 { mono :=
@@ -71,7 +75,7 @@ Such a sequence is automatically short exact (i.e., `g` is epi). -/
 structure right_split : Prop :=
 (right_split : ∃ χ : C ⟶ B, χ ≫ g = 𝟙 C)
 [mono  : mono f]
-[exact : exact f g]
+(exact : exact f g)
 
 lemma right_split.short_exact {f : A ⟶ B} {g : B ⟶ C} (h : right_split f g) : short_exact f g :=
 { epi :=
@@ -154,7 +158,7 @@ begin
 end
 
 -- move this?
-instance exact_inl_snd (A B : 𝒜) : exact (biprod.inl : A ⟶ A ⊞ B) biprod.snd :=
+lemma exact_inl_snd (A B : 𝒜) : exact (biprod.inl : A ⟶ A ⊞ B) biprod.snd :=
 exact_of_split _ _ biprod.inr biprod.fst biprod.inl_snd biprod.total
 
 /-- A *splitting* of a sequence `A -f⟶ B -g⟶ C` is an isomorphism
@@ -258,7 +262,7 @@ h.split.1.some_spec.some_spec.2.2.1
 protected lemma exact : exact f g :=
 begin
   rw exact_iff_exact_of_iso f g (biprod.inl : A ⟶ A ⊞ C) (biprod.snd : A ⊞ C ⟶ C) _ _ _,
-  { apply_instance },
+  { exact exact_inl_snd _ _ },
   { refine arrow.iso_mk (iso.refl _) h.iso _,
     simp only [iso.refl_hom, arrow.mk_hom, category.id_comp, comp_iso_eq_inl], },
   { refine arrow.iso_mk h.iso (iso.refl _) _,
@@ -289,6 +293,7 @@ def mk' (h : short_exact f g) (i : B ⟶ A ⊞ C) (h1 : f ≫ i = biprod.inl) (h
     refine is_iso_of_short_exact_of_is_iso_of_is_iso f g _ _ h _ _ _ _
       (h1.trans (category.id_comp _).symm).symm (h2.trans (category.comp_id _).symm),
     split,
+    apply exact_inl_snd
   end,
   comp_iso_eq_inl := by { rwa as_iso_hom, },
   iso_comp_snd_eq := h2 }

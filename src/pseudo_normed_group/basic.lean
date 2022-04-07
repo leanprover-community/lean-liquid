@@ -1,5 +1,5 @@
 import data.real.nnreal
-import algebra.group.hom
+import algebra.hom.group
 import algebra.big_operators
 import algebra.module.pi
 import topology.basic

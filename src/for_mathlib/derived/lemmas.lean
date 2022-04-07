@@ -55,7 +55,7 @@ end
 -/
 
 lemma _root_.category_theory.abelian.exact_neg_right (X Y Z : A) (f : X ⟶ Y) (g : Y ⟶ Z)
-  [h : exact f g] : exact f (-g) :=
+  (h : exact f g) : exact f (-g) :=
 begin
   refine preadditive.exact_of_iso_of_exact' f g f (-g) (iso.refl _) (iso.refl _) _ _ _ h,
   { have : (-𝟙 Z) ≫ (-𝟙 Z) = 𝟙 Z,
@@ -87,12 +87,11 @@ begin
     { simp only [← functor.map_comp],
       change (category_theory.shift_functor 𝒦 (1 : ℤ)).map ((E.inv ≫ E.hom).hom₁) = _,
       rw iso.inv_hom_id, refl } },
-  apply homological_of_exists_aux _ _ _ E'.inv,
-  apply_instance,
+  refine homological_of_exists_aux _ _ _ E'.inv _,
   dsimp,
   simp only [functor.map_neg],
-  apply_with category_theory.abelian.exact_neg_right { instances := ff },
-  apply _root_.category_theory.cochain_complex.exact_cone_in_cone_out,
+  apply category_theory.abelian.exact_neg_right,
+  apply category_theory.cochain_complex.exact_cone_in_cone_out,
 end .
 
 variable (A)
@@ -415,31 +414,31 @@ begin
   let S₁ := T₁⟦i⟧,
   let S₂ := T₂⟦i⟧,
   let g : S₁ ⟶ S₂ := f⟦i⟧',
-  haveI : exact (H.map S₁.mor₁) (H.map S₁.mor₂),
+  have aux1 : exact (H.map S₁.mor₁) (H.map S₁.mor₂),
   { apply homological_functor.cond,
     apply pretriangulated.shift_of_dist_triangle,
     assumption },
-  haveI : exact (H.map S₁.mor₂) (H.map S₁.mor₃),
+  have aux2 : exact (H.map S₁.mor₂) (H.map S₁.mor₃),
   { apply homological_functor.cond H S₁.rotate,
     apply pretriangulated.rot_of_dist_triangle,
     apply pretriangulated.shift_of_dist_triangle,
     assumption },
-  haveI : exact (H.map S₁.mor₃) (H.map S₁.rotate.mor₃),
+  have aux3 : exact (H.map S₁.mor₃) (H.map S₁.rotate.mor₃),
   { apply homological_functor.cond H S₁.rotate.rotate,
     apply pretriangulated.rot_of_dist_triangle,
     apply pretriangulated.rot_of_dist_triangle,
     apply pretriangulated.shift_of_dist_triangle,
     assumption },
-  haveI : exact (H.map S₂.mor₁) (H.map S₂.mor₂),
+  have aux4 : exact (H.map S₂.mor₁) (H.map S₂.mor₂),
   { apply homological_functor.cond,
     apply pretriangulated.shift_of_dist_triangle,
     assumption },
-  haveI : exact (H.map S₂.mor₂) (H.map S₂.mor₃),
+  have aux5 : exact (H.map S₂.mor₂) (H.map S₂.mor₃),
   { apply homological_functor.cond H S₂.rotate,
     apply pretriangulated.rot_of_dist_triangle,
     apply pretriangulated.shift_of_dist_triangle,
     assumption },
-  haveI : exact (H.map S₂.mor₃) (H.map S₂.rotate.mor₃),
+  have aux6 : exact (H.map S₂.mor₃) (H.map S₂.rotate.mor₃),
   { apply homological_functor.cond H S₂.rotate.rotate,
     apply pretriangulated.rot_of_dist_triangle,
     apply pretriangulated.rot_of_dist_triangle,
@@ -478,7 +477,7 @@ begin
     (H.obj (S₂.obj₂⟦(1 : ℤ)⟧))
     (H.map (S₁.rotate.mor₃))
     (H.map (S₂.rotate.mor₃))
-    (H.map (g.hom₂⟦(1 : ℤ)⟧')) _ _ _ _ _ _ _ _ _ _ _,
+    (H.map (g.hom₂⟦(1 : ℤ)⟧')) _ aux1 aux2 aux3 aux4 aux5 aux6 _ _ _ _,
   { simp only [← H.map_comp, g.comm₁] },
   { simp only [← H.map_comp, g.comm₂] },
   { simp only [← H.map_comp, g.comm₃] },
@@ -499,8 +498,7 @@ begin
   have e := homological_functor.cond H T.rotate
     (rotate_mem_distinguished_triangles _ hT),
   dsimp [H] at e,
-  let a := _, let b := _, change exact a b at e, have e' : exact b.unop a.unop,
-  { resetI, apply_instance },
+  let a := _, let b := _, change exact a b at e, have e' : exact b.unop a.unop := e.unop,
   dsimp at e',
   rw AddCommGroup.exact_iff at e',
   let a' := _, let b' := _, change add_monoid_hom.range a' = add_monoid_hom.ker b' at e',
