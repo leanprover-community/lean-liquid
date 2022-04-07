@@ -449,10 +449,6 @@ begin
   sorry
 end
 
-example (a b c : ℝ) : a * b + b = (a + 1) * b :=
-begin
-  show_term{ring},
-end
 
 lemma complement_of_balls' {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) (ε : ℝ) :
  ∃ (x₁ x₂ : (closed_ball 0 c)), ∃ (δ₁ δ₂ : ℝ),
