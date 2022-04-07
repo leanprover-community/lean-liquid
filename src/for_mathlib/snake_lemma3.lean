@@ -44,38 +44,22 @@ begin
 end
 
 lemma row_exact₁_aux (X Y Z : cochain_complex 𝒜 ℤ)
-  (f : X ⟶ Y)
-  (g : Y ⟶ Z)
-  [exact (f.f (-1)) (g.f (-1))]
-  [exact (f.f 0) (g.f 0)]
-  [exact (f.f 1) (g.f 1)]
-  [epi (g.f (-1))]
-  [epi (g.f 0)]
-  [epi (g.f 1)]
-  [mono (f.f (-1))]
-  [mono (f.f 0)]
-  [mono (f.f 1)] :
+  (f : X ⟶ Y) (g : Y ⟶ Z) (h : exact (f.f (-1)) (g.f (-1)))
+  [epi (g.f (-1))] [epi (g.f 0)] [epi (g.f 1)]
+  [mono (f.f (-1))] [mono (f.f 0)] [mono (f.f 1)] :
   exact (homological_complex.hom.prev f 0) (homological_complex.hom.prev g 0) :=
 begin
   rw [f.prev_eq, g.prev_eq],
   rotate 2, exact (-1), swap, exact (-1), simp, swap, simp,
   simp,
   rw [← category.assoc, exact_comp_iso],
-  apply category_theory.exact_comp_inv_hom_comp,
+  apply category_theory.exact_comp_inv_hom_comp _ h,
 end
 
 lemma row_exact₂_aux (X Y Z : cochain_complex 𝒜 ℤ)
-  (f : X ⟶ Y)
-  (g : Y ⟶ Z)
-  [exact (f.f (-1)) (g.f (-1))]
-  [exact (f.f 0) (g.f 0)]
-  [exact (f.f 1) (g.f 1)]
-  [epi (g.f (-1))]
-  [epi (g.f 0)]
-  [epi (g.f 1)]
-  [mono (f.f (-1))]
-  [mono (f.f 0)]
-  [mono (f.f 1)] :
+  (f : X ⟶ Y) (g : Y ⟶ Z) (h0 : exact (f.f 0) (g.f 0)) (h1 : exact (f.f 1) (g.f 1))
+  [epi (g.f (-1))] [epi (g.f 0)] [epi (g.f 1)]
+  [mono (f.f (-1))] [mono (f.f 0)] [mono (f.f 1)] :
   exact
     (kernel.lift (homological_complex.d_from Y 0)
        (kernel.ι (homological_complex.d_from X 0) ≫ f.f 0)
@@ -91,13 +75,13 @@ begin
     swap,
     apply_with mono_comp { instances := ff },
     all_goals { apply_instance } },
-  haveI : exact (homological_complex.hom.next f 0) (homological_complex.hom.next g 0),
+  have : exact (homological_complex.hom.next f 0) (homological_complex.hom.next g 0),
   { rw [f.next_eq, g.next_eq],
     rotate 2, exact 1, swap, exact 1, simp, swap, simp,
     simp,
     rw [← category.assoc, exact_comp_iso],
-    apply category_theory.exact_comp_inv_hom_comp },
-  let S := mk_of_sequence_hom
+    apply category_theory.exact_comp_inv_hom_comp _ h1 },
+  have S := mk_of_sequence_hom
     (X.X 0)
     (Y.X 0)
     (Z.X 0)
@@ -105,22 +89,15 @@ begin
     (Y.X_next 0)
     (Z.X_next 0)
     (f.f 0) (g.f 0) (X.d_from 0) (Y.d_from 0) (Z.d_from 0)
-    (f.next 0) (g.next 0) (by simp) (by simp),
-  rw exact_iff_exact_seq,
-  exact S.six_term_exact_seq.extract 0 2,
+    (f.next 0) (g.next 0) (by simp) (by simp) h0 this,
+  exact S.six_term_exact_seq.pair,
 end
 
 lemma mk_of_homology (X Y Z : cochain_complex 𝒜 ℤ)
   (f : X ⟶ Y) (g : Y ⟶ Z)
-  [exact (f.f (-1)) (g.f (-1))]
-  [exact (f.f 0) (g.f 0)]
-  [exact (f.f 1) (g.f 1)]
-  [epi (g.f (-1))]
-  [epi (g.f 0)]
-  [epi (g.f 1)]
-  [mono (f.f (-1))]
-  [mono (f.f 0)]
-  [mono (f.f 1)] :
+  (hn1 : exact (f.f (-1)) (g.f (-1))) (h0 : exact (f.f 0) (g.f 0)) (h1 : exact (f.f 1) (g.f 1))
+  [epi (g.f (-1))] [epi (g.f 0)] [epi (g.f 1)]
+  [mono (f.f (-1))] [mono (f.f 0)] [mono (f.f 1)] :
   snake
   -- the objects
          (kernel (X.d_to 0))             (kernel (Y.d_to 0))              (kernel (Z.d_to 0))
@@ -135,8 +112,8 @@ lemma mk_of_homology (X Y Z : cochain_complex 𝒜 ℤ)
   (kernel.map _ _ (f.f _) (f.next _) (by simp)) (kernel.map _ _ (g.f _) (g.next _) (by simp))
   (homology.π' _ _ _) (homology.π' _ _ _) (homology.π' _ _ _)
   ((homology_functor _ _ _).map f) ((homology_functor _ _ _).map g) :=
-{ row_exact₁ := row_exact₁_aux _ _ _ _ _,
-  row_exact₂ := row_exact₂_aux _ _ _ _ _,
+{ row_exact₁ := row_exact₁_aux _ _ _ _ _ hn1,
+  row_exact₂ := row_exact₂_aux _ _ _ _ _ h0 h1,
   row_epi := begin
     rw g.prev_eq,
     rotate 2, exact (-1),
