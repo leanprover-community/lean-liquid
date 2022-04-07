@@ -449,55 +449,41 @@ begin
   sorry
 end
 
+example (a b c : ℝ) : - a ≤ - b + c ↔ b ≤ a + c :=
+begin
+  simp only [le_neg_add_iff_add_le, add_neg_le_iff_le_add'],
+end
 
 lemma complement_of_balls' {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) (ε : ℝ) :
  ∃ (x₁ x₂ : (closed_ball 0 c)), ∃ (δ₁ δ₂ : ℝ),
   ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ :=
 begin
-  sorry;{
-  by_cases hε : ε ≤ c,
-  { have hy : (y : ℝ) ≤ c, sorry,
-    set δ₁ := (-ε + y + c)/2 with hδ₁,
+  -- sorry;{
+  by_cases h_right : (c : ℝ) ≤ y + ε,
+  sorry,--only an open on the left is needed
+  by_cases h_left : - ε + y ≤ - c,
+  sorry, -- only an open on the  right is needed
+  { set δ₁ := (-ε + y + c)/2 with hδ₁,
     set x₁ := (- ε + y - c)/2 with hx₁,
     set δ₂ := (-ε - y + c)/2 with hδ₂,
     set x₂ := (ε + y + c)/2 with hx₂,
     use x₁,
     simp only [mem_closed_ball_zero_iff, norm_div, real.norm_two, real.norm_eq_abs, abs_le],
     split,
-    sorry;{
-    suffices : (-2 * c : ℝ) ≤ 2 * x₁,
-    sorry,
-    have : -ε + y -c ≥ -2 * c,
-    rw ge,
-    rw le_sub_iff_add_le,
-    -- rw add_comm,
-    ring_nf SOP,
-    simp,
-    -- simp [hε],
-    -- linarith,
-    -- linarith,
-    have hc := (one_mul (c : ℝ)).symm,
-    -- rw hc,
+    { suffices : (-2 * c : ℝ) ≤ 2 * x₁,
+      linarith,
+      calc 2 * x₁ = - ε + y - c : by {rw hx₁, ring}
+              ... ≥ -2 * c : by linarith },
+    sorry;{ suffices : 2 * x₁ ≤ 2 * c,
+      linarith,
+      have temp : - ε + y - c ≤ 2 * c,
+      simp at h_right,
 
-    -- rw [← one_mul c],
-    -- rw ← add_mul,
-    -- rw neg_mul,
-    rw neg_add_le_iff_le_add,
-    -- simp only [neg_mul, neg_add_le_iff_le_add],
-    -- simp only [*, neg_mul, ge_iff_le, neg_le_sub_iff_le_add, eq_self_iff_true] at *,
-
-
-    calc 2 * x₁ = -ε + y - c : by {rw hx₁, ring}
-            ... ≥ -2 * c : by sorry,
-
-
-
-    sorry,
-
-    },
-  sorry
+      calc 2 * x₁ = - ε + y - c : by {rw hx₁, ring}
+              ... ≤ 2 * c : by sorry, },
+    {sorry},
   },
-  }
+  -- sorry,
 end
 
 lemma continuous_if_preimage_closed {c : ℝ≥0} (f : X → (Icc (-c : ℝ) c))
