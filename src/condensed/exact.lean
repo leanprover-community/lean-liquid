@@ -150,20 +150,10 @@ begin
     { simp only [set.mem_preimage, set.mem_singleton_iff], exact hy } },
 end
 
--- move this
+-- TODO remove this; it's a redundant alias
 @[simps obj_obj obj_map_to_fun map_app {fully_applied := ff}]
 def Filtration : ℝ≥0 ⥤ CompHausFiltPseuNormGrp₁.{u} ⥤ CompHaus.{u} :=
-{ obj := λ c,
-  { obj := λ M, CompHaus.of (pseudo_normed_group.filtration M c),
-    map := λ M N f, ⟨f.level, f.level_continuous c⟩,
-    map_id' := by { intros, ext, refl },
-    map_comp' := by { intros, ext, refl } },
-  map := λ c₁ c₂ h,
-  { app := λ M, ⟨@pseudo_normed_group.cast_le _ _ c₁ c₂ ⟨h.le⟩,
-      @comphaus_filtered_pseudo_normed_group.continuous_cast_le _ _ c₁ c₂ ⟨h.le⟩⟩ },
-  map_id' := by { intros, ext, refl },
-  map_comp' := by { intros, ext, refl } }
-.
+CompHausFiltPseuNormGrp₁.level
 
 instance mono_Filtration_map_app (c₁ c₂ : ℝ≥0) (h : c₁ ⟶ c₂) (M) :
   mono ((Filtration.map h).app M) :=
@@ -304,33 +294,83 @@ It really boils down to saying that limits commute.
 This shouldn't be so hard...
 I'm not convinced that this is the best way to do it,
 there should be a more ergonomic approach.
+
+scott: I've replaced the definition of `P1_iso`
+with one that uses the general theory for commuting limits.
 -/
 
 
-def P1_hom {A B : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}}
-  (f : A ⟶ B) (r c : ℝ≥0) [fact (1 ≤ r)] (S : Profinite) :
-  P1.{u} ((Profinite.extend_nat_trans.{u u+1} f).app S) r c ⟶
-    limit (P1_functor.{u} (whisker_left S.fintype_diagram f) r c ⋙ lim) :=
-limit.lift _
-{ X := P1.{u} ((Profinite.extend_nat_trans.{u u+1} f).app S) r c,
-  π :=
-  { app := sorry,
-    naturality' := sorry }, }
+-- TODO move to mathlib
+def cospan_comp_iso {C D : Type*} [category C] [category D] (F : C ⥤ D)
+  {X Y Z : C} (f : X ⟶ Z) (g : Y ⟶ Z) :
+  cospan f g ⋙ F ≅ cospan (F.map f) (F.map g) :=
+nat_iso.of_components (by rintros (⟨⟩|⟨⟨⟩⟩); exact iso.refl _)
+  (by rintros (⟨⟩|⟨⟨⟩⟩) (⟨⟩|⟨⟨⟩⟩) ⟨⟩; repeat { dsimp, simp, })
 
-def P1_inv {A B : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}}
-  (f : A ⟶ B) (r c : ℝ≥0) [fact (1 ≤ r)] (S : Profinite) :
-  limit (P1_functor.{u} (whisker_left S.fintype_diagram f) r c ⋙ lim) ⟶
-    P1.{u} ((Profinite.extend_nat_trans.{u u+1} f).app S) r c :=
-sorry
+@[simp] lemma cospan_comp_iso_app_left {C D : Type*} [category C] [category D] (F : C ⥤ D)
+  {X Y Z : C} (f : X ⟶ Z) (g : Y ⟶ Z) :
+  (cospan_comp_iso F f g).app walking_cospan.left = iso.refl _ :=
+rfl
+
+@[simp] lemma cospan_comp_iso_app_right {C D : Type*} [category C] [category D] (F : C ⥤ D)
+  {X Y Z : C} (f : X ⟶ Z) (g : Y ⟶ Z) :
+  (cospan_comp_iso F f g).app walking_cospan.right = iso.refl _ :=
+rfl
+
+@[simp] lemma cospan_comp_iso_app_one {C D : Type*} [category C] [category D] (F : C ⥤ D)
+  {X Y Z : C} (f : X ⟶ Z) (g : Y ⟶ Z) :
+  (cospan_comp_iso F f g).app walking_cospan.one = iso.refl _ :=
+rfl
+
+-- TODO move to mathlib
+def cospan_ext {C : Type*} [category C]
+  {X Y Z X' Y' Z' : C} {f : X ⟶ Z} {g : Y ⟶ Z} {f' : X' ⟶ Z'} {g' : Y' ⟶ Z'}
+  (iX : X ≅ X') (iY : Y ≅ Y') (iZ : Z ≅ Z')
+  (wf : iX.hom ≫ f' = f ≫ iZ.hom) (wg : iY.hom ≫ g' = g ≫ iZ.hom) :
+  cospan f g ≅ cospan f' g' :=
+nat_iso.of_components (by { rintros (⟨⟩|⟨⟨⟩⟩), exacts [iZ, iX, iY], })
+  (by rintros (⟨⟩|⟨⟨⟩⟩) (⟨⟩|⟨⟨⟩⟩) ⟨⟩; repeat { dsimp, simp [wf, wg], })
+
+@[simp] lemma cospan_ext_app_left {C : Type*} [category C]
+  {X Y Z X' Y' Z' : C} {f : X ⟶ Z} {g : Y ⟶ Z} {f' : X' ⟶ Z'} {g' : Y' ⟶ Z'}
+  (iX : X ≅ X') (iY : Y ≅ Y') (iZ : Z ≅ Z')
+  (wf : iX.hom ≫ f' = f ≫ iZ.hom) (wg : iY.hom ≫ g' = g ≫ iZ.hom) :
+  (cospan_ext iX iY iZ wf wg).app walking_cospan.left = iX :=
+by { dsimp [cospan_ext], simp, }
+
+@[simp] lemma cospan_ext_app_right {C : Type*} [category C]
+  {X Y Z X' Y' Z' : C} {f : X ⟶ Z} {g : Y ⟶ Z} {f' : X' ⟶ Z'} {g' : Y' ⟶ Z'}
+  (iX : X ≅ X') (iY : Y ≅ Y') (iZ : Z ≅ Z')
+  (wf : iX.hom ≫ f' = f ≫ iZ.hom) (wg : iY.hom ≫ g' = g ≫ iZ.hom) :
+  (cospan_ext iX iY iZ wf wg).app walking_cospan.right = iY :=
+by { dsimp [cospan_ext], simp, }
+
+@[simp] lemma cospan_ext_app_one {C : Type*} [category C]
+  {X Y Z X' Y' Z' : C} {f : X ⟶ Z} {g : Y ⟶ Z} {f' : X' ⟶ Z'} {g' : Y' ⟶ Z'}
+  (iX : X ≅ X') (iY : Y ≅ Y') (iZ : Z ≅ Z')
+  (wf : iX.hom ≫ f' = f ≫ iZ.hom) (wg : iY.hom ≫ g' = g ≫ iZ.hom) :
+  (cospan_ext iX iY iZ wf wg).app walking_cospan.one = iZ :=
+by { dsimp [cospan_ext], simp, }
+
+
+instance (c : ℝ≥0) : preserves_limits (Filtration.obj c) :=
+by { dsimp [Filtration], apply_instance, }
 
 def P1_iso {A B : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}}
   (f : A ⟶ B) (r c : ℝ≥0) [fact (1 ≤ r)] (S : Profinite) :
   P1.{u} ((Profinite.extend_nat_trans.{u u+1} f).app S) r c ≅
     limit (P1_functor.{u} (whisker_left S.fintype_diagram f) r c ⋙ lim) :=
-{ hom := P1_hom f r c S,
-  inv := P1_inv f r c S,
-  hom_inv_id' := sorry,
-  inv_hom_id' := sorry }
+begin
+  refine has_limit.iso_of_nat_iso (_ ≪≫ (cospan_comp_iso _ _ _).symm) ≪≫
+    (limit_flip_comp_lim_iso_limit_comp_lim _).symm,
+  exact cospan_ext (preserves_limit_iso _ _) (preserves_limit_iso _ _) (preserves_limit_iso _ _)
+    (by { apply limit.hom_ext, intros, ext, simp, })
+    (begin
+      apply limit.hom_ext,
+      intros,
+      simp [-category_theory.functor.map_comp, ←(Filtration.obj (r * c)).map_comp],
+    end)
+end
 
 def P2_hom {B C : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}}
   (g : B ⟶ C) (c : ℝ≥0) (S : Profinite) :
