@@ -104,7 +104,7 @@ by simp only [has_nnnorm.nnnorm, support_zero, sum_empty]
 
 @[simp]
 lemma nnnorm_neg : ∥-F∥₊ = ∥F∥₊ :=
-by simp only [has_nnnorm.nnnorm, pi.neg_apply, coe_neg, support_neg, norm_neg]
+by simp only [has_nnnorm.nnnorm, pi.neg_apply, finsupp.coe_neg, support_neg, norm_neg]
 
 lemma nnnorm_add_le : ∥F + G∥₊ ≤ ∥F∥₊ + ∥G∥₊ :=
 begin

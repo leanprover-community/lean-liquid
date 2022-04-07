@@ -147,10 +147,6 @@ lemma X_eq_to_iso_f {X Y : homological_complex V c} (f : X ⟶ Y) {i j : ι} (h 
   (X.X_eq_to_iso h).hom ≫ f.f j = f.f i ≫ (Y.X_eq_to_iso h).hom :=
 by { subst h, simp [X_eq_to_iso] }
 
-@[simp]
-lemma eq_to_hom_f {X Y : homological_complex V c} (h : X = Y) (i) :
-  hom.f (eq_to_hom h) i = eq_to_hom (by rw h) := by { subst h, simp }
-
 variables (V)
 
 instance : has_shift (cochain_complex V ℤ) ℤ :=

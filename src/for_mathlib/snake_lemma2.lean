@@ -24,8 +24,8 @@ local notation `kernel_map`   := kernel.map _ _ _ _
 local notation `cokernel_map` := cokernel.map _ _ _ _
 
 structure snake : Prop :=
-[row_exact₁ : exact f₁ g₁]
-[row_exact₂ : exact f₂ g₂]
+(row_exact₁ : exact f₁ g₁)
+(row_exact₂ : exact f₂ g₂)
 [row_epi : epi g₁]
 [row_mono : mono f₂]
 (col_exact_a : exact_seq 𝒜 [a₀, a₁, a₂])
@@ -47,7 +47,7 @@ structure snake : Prop :=
 namespace snake
 
 lemma mk_of_sequence_hom (sq₁ : a₁ ≫ f₂ = f₁ ≫ b₁) (sq₂ : b₁ ≫ g₂ = g₁ ≫ c₁)
-  [exact f₁ g₁] [exact f₂ g₂] [epi g₁] [mono f₂] : snake
+  (h₁ : exact f₁ g₁) (h₂ : exact f₂ g₂) [epi g₁] [mono f₂] : snake
   (kernel a₁) (kernel b₁) (kernel c₁)
   A₁ B₁ C₁
   A₂ B₂ C₂
@@ -59,9 +59,11 @@ lemma mk_of_sequence_hom (sq₁ : a₁ ≫ f₂ = f₁ ≫ b₁) (sq₂ : b₁ �
   f₂ g₂
   (cokernel.π _) (cokernel.π _) (cokernel.π _)
   (cokernel_map sq₁) (cokernel_map sq₂) :=
-{ col_exact_a := exact_seq.cons _ _ infer_instance _ $ (exact_iff_exact_seq _ _).mp infer_instance,
-  col_exact_b := exact_seq.cons _ _ infer_instance _ $ (exact_iff_exact_seq _ _).mp infer_instance,
-  col_exact_c := exact_seq.cons _ _ infer_instance _ $ (exact_iff_exact_seq _ _).mp infer_instance,
+{ row_exact₁ := h₁,
+  row_exact₂ := h₂,
+  col_exact_a := exact_seq.cons _ _ exact_kernel_ι _ $ (exact_iff_exact_seq _ _).mp (abelian.exact_cokernel _),
+  col_exact_b := exact_seq.cons _ _ exact_kernel_ι _ $ (exact_iff_exact_seq _ _).mp (abelian.exact_cokernel _),
+  col_exact_c := exact_seq.cons _ _ exact_kernel_ι _ $ (exact_iff_exact_seq _ _).mp (abelian.exact_cokernel _),
   sq_a₀ := (limits.kernel.lift_ι _ _ _).symm,
   sq_b₀ := (limits.kernel.lift_ι _ _ _).symm,
   sq_a₁ := sq₁,
@@ -146,7 +148,8 @@ lemma cokernel.map_mono_of_epi_of_mono (sq : f₁ ≫ b₁ = a₁ ≫ f₂)
   mono (cokernel.map f₁ f₂ a₁ b₁ sq) :=
 begin
   have S := snake.mk_of_sequence_hom A₁ B₁ (cokernel f₁) A₂ B₂ (cokernel f₂)
-    f₁ (cokernel.π _) a₁ b₁ (cokernel.map f₁ f₂ a₁ b₁ sq) f₂ (cokernel.π _) sq.symm (by simp),
+    f₁ (cokernel.π _) a₁ b₁ (cokernel.map f₁ f₂ a₁ b₁ sq) f₂ (cokernel.π _) sq.symm (by simp)
+    (abelian.exact_cokernel _) (abelian.exact_cokernel _),
   apply (S.col_exact_c).pair.mono_of_is_zero,
   exact (S.six_term_exact_seq.drop 1).pair.is_zero_of_is_zero_is_zero
     (is_zero_kernel_of_mono _) (is_zero_cokernel_of_epi _),

@@ -40,7 +40,7 @@ instance Fst_Snd_mono (n : ℕ) : mono (((Fst_Snd C).app A).f n) := (A.X n).mono
 
 instance Snd_Trd_epi (n : ℕ) : epi (((Snd_Trd C).app A).f n) := (A.X n).epi'
 
-instance Fst_Snd_Trd_exact (n : ℕ) : exact (((Fst_Snd C).app A).f n) (((Snd_Trd C).app A).f n) :=
+lemma Fst_Snd_Trd_exact (n : ℕ) : exact (((Fst_Snd C).app A).f n) (((Snd_Trd C).app A).f n) :=
 (A.X n).exact'
 
 end homological_complex

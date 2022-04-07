@@ -1,5 +1,5 @@
 
-import category_theory.functor.derived
+import category_theory.functor.left_derived
 
 noncomputable theory
 
