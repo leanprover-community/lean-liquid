@@ -21,11 +21,8 @@ lemma exact_of_epi_comp_kernel.ι_comp_mono {C : Type u} [category.{v} C] [abeli
   (hi : i = kernel.ι g) : exact (f ≫ i) (g ≫ h) :=
 begin
   suffices : exact i g,
-  { letI := hf,
-    letI := hh,
-    letI := this,
-    letI : exact (f ≫ i) g := exact_epi_comp,
-    exact exact_comp_mono },
+  { letI := hf, letI := hh,
+    exact exact_comp_mono (exact_epi_comp this) },
   rw [hi],
   exact exact_kernel_ι
 end
@@ -53,7 +50,7 @@ def horseshoe_base_π : horseshoe_base A ⟶ A :=
   begin
     dsimp [horseshoe_base], apply category_theory.limits.biprod.hom_ext',
     { simp only [zero_comp, exact.w_assoc, biprod.inl_desc_assoc, category.assoc,
-        short_exact_sequence.f_comp_g, comp_zero], },
+        short_exact_sequence.f_comp_g, comp_zero, exact_inl_snd], },
     { simp only [projective.factor_thru_comp, biprod.inr_snd_assoc, biprod.inr_desc_assoc], }
   end }
 
@@ -69,8 +66,9 @@ instance epi_horseshoe_base_π_2 : epi (horseshoe_base_π A).2 :=
 begin
   let φ := horseshoe_base_π A,
   have h : φ.3 ≫ (0 : A.3 ⟶ 0) = (0 : _ ⟶ 0) ≫ (0 : 0 ⟶ 0) := by simp,
-  refine category_theory.abelian.epi_of_epi_of_epi_of_mono φ.sq1' φ.sq2' h _ _ _,
-  all_goals { apply_instance },
+  refine category_theory.abelian.epi_of_epi_of_epi_of_mono φ.sq1' φ.sq2' h _ _ _ _ _ _;
+  try { rw ← epi_iff_exact_zero_right }; try { apply_instance },
+  exact A.exact',
 end
 
 variables {A B}
@@ -122,7 +120,7 @@ lemma horseshoe_ker_ι_comp_base_π :
   (horseshoe_ker_ι (horseshoe_base_π A)) ≫ horseshoe_base_π A = 0 :=
 begin
   dsimp [horseshoe_ker_ι, horseshoe_base_π],
-  ext1; show kernel.ι _ ≫ _ = 0; apply exact.w,
+  ext1; show kernel.ι _ ≫ _ = 0; exact exact.w exact_kernel_ι,
 end
 
 noncomputable

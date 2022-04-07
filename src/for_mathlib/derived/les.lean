@@ -58,7 +58,7 @@ noncomputable def cone.π (w : ∀ i, f.f i ≫ g.f i = 0) :
     dsimp at hij, subst j, dsimp [cone.d], rw [if_pos rfl, biprod.lift_snd_assoc],
     ext,
     { simp only [exact.w_assoc, zero_comp, category.assoc, biprod.inl_desc_assoc,
-        category.id_comp, w], },
+        category.id_comp, w, exact_inl_snd], },
     { simp only [category.assoc, biprod.inr_snd_assoc, biprod.inr_desc_assoc, g.comm], }
   end }
 
@@ -147,7 +147,8 @@ def cone.π_quasi_iso (w : ∀ i, short_exact (f.f i) (g.f i)) :
     set x := (kernel.ι π).f (n+1) b with xdef,
     have hx : π.f _ x = 0,
     { dsimp only [x, kernel.ι_f],
-      rw [← pseudoelement.comp_apply, exact.w, pseudoelement.zero_apply], },
+      rw [← pseudoelement.comp_apply, exact_kernel_ι.w, pseudoelement.zero_apply],
+      apply_instance },
     let y := (biprod.snd : (X.X _) ⊞ (Y.X (n+1)) ⟶ Y.X (n+1)) x,
     have hy : g.f _ y = 0,
     { dsimp only [y], rw [← pseudoelement.comp_apply], exact hx },
@@ -156,7 +157,8 @@ def cone.π_quasi_iso (w : ∀ i, short_exact (f.f i) (g.f i)) :
     let a' : ↥((X.X (n+1)) ⊞ (Y.X n)) := (biprod.inl : _ ⟶ (X.X (n+1)) ⊞ (Y.X n)) a,
     have ha' : π.f n a' = 0,
     { dsimp only [a', π, cone.π_f],
-      rw [← pseudoelement.comp_apply, exact.w_assoc, zero_comp, pseudoelement.zero_apply], },
+      rw [← pseudoelement.comp_apply, (exact_inl_snd _ _).w_assoc,
+        zero_comp, pseudoelement.zero_apply], },
     have aux' := @pseudoelement.pseudo_exact_of_exact _ _ _ _ _ _ _ _ (aux n).exact,
     obtain ⟨a'', ha''⟩ := aux'.2 a' ha',
     refine ⟨a'', _⟩,
