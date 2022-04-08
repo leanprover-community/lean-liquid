@@ -36,6 +36,59 @@ def limit_const_terminal {J : Type*} [category J] {C : Type*} [category C] [has_
     terminal.from _ :=
 by ext ⟨⟩
 
+variables {C D : Type*} [category.{v} C] [category.{v} D]
+
+@[simp] lemma cospan_comp_iso_hom_app_left (F : C ⥤ D) {X Y Z : C} (f : X ⟶ Z) (g : Y ⟶ Z) :
+  (cospan_comp_iso F f g).hom.app walking_cospan.left = 𝟙 _ :=
+rfl
+
+@[simp] lemma cospan_comp_iso_hom_app_right (F : C ⥤ D) {X Y Z : C} (f : X ⟶ Z) (g : Y ⟶ Z) :
+  (cospan_comp_iso F f g).hom.app walking_cospan.right = 𝟙 _ :=
+rfl
+
+@[simp] lemma cospan_comp_iso_hom_app_one (F : C ⥤ D) {X Y Z : C} (f : X ⟶ Z) (g : Y ⟶ Z) :
+  (cospan_comp_iso F f g).hom.app walking_cospan.one = 𝟙 _ :=
+rfl
+
+@[simp] lemma cospan_comp_iso_inv_app_left (F : C ⥤ D) {X Y Z : C} (f : X ⟶ Z) (g : Y ⟶ Z) :
+  (cospan_comp_iso F f g).inv.app walking_cospan.left = 𝟙 _ :=
+rfl
+
+@[simp] lemma cospan_comp_iso_inv_app_right (F : C ⥤ D) {X Y Z : C} (f : X ⟶ Z) (g : Y ⟶ Z) :
+  (cospan_comp_iso F f g).inv.app walking_cospan.right = 𝟙 _ :=
+rfl
+
+@[simp] lemma cospan_comp_iso_inv_app_one (F : C ⥤ D) {X Y Z : C} (f : X ⟶ Z) (g : Y ⟶ Z) :
+  (cospan_comp_iso F f g).inv.app walking_cospan.one = 𝟙 _ :=
+rfl
+
+variables {X Y Z X' Y' Z' : C} (iX : X ≅ X') (iY : Y ≅ Y') (iZ : Z ≅ Z')
+variables {f : X ⟶ Z} {g : Y ⟶ Z} {f' : X' ⟶ Z'} {g' : Y' ⟶ Z'}
+
+@[simp] lemma cospan_ext_hom_app_left (wf : iX.hom ≫ f' = f ≫ iZ.hom) (wg : iY.hom ≫ g' = g ≫ iZ.hom) :
+  (cospan_ext iX iY iZ wf wg).hom.app walking_cospan.left = iX.hom :=
+by { dsimp [cospan_ext], simp, }
+
+@[simp] lemma cospan_ext_hom_app_right (wf : iX.hom ≫ f' = f ≫ iZ.hom) (wg : iY.hom ≫ g' = g ≫ iZ.hom) :
+  (cospan_ext iX iY iZ wf wg).hom.app walking_cospan.right = iY.hom :=
+by { dsimp [cospan_ext], simp, }
+
+@[simp] lemma cospan_ext_hom_app_one (wf : iX.hom ≫ f' = f ≫ iZ.hom) (wg : iY.hom ≫ g' = g ≫ iZ.hom) :
+  (cospan_ext iX iY iZ wf wg).hom.app walking_cospan.one = iZ.hom :=
+by { dsimp [cospan_ext], simp, }
+
+@[simp] lemma cospan_ext_inv_app_left (wf : iX.hom ≫ f' = f ≫ iZ.hom) (wg : iY.hom ≫ g' = g ≫ iZ.hom) :
+  (cospan_ext iX iY iZ wf wg).inv.app walking_cospan.left = iX.inv :=
+by { dsimp [cospan_ext], simp, }
+
+@[simp] lemma cospan_ext_inv_app_right (wf : iX.hom ≫ f' = f ≫ iZ.hom) (wg : iY.hom ≫ g' = g ≫ iZ.hom) :
+  (cospan_ext iX iY iZ wf wg).inv.app walking_cospan.right = iY.inv :=
+by { dsimp [cospan_ext], simp, }
+
+@[simp] lemma cospan_ext_inv_app_one (wf : iX.hom ≫ f' = f ≫ iZ.hom) (wg : iY.hom ≫ g' = g ≫ iZ.hom) :
+  (cospan_ext iX iY iZ wf wg).inv.app walking_cospan.one = iZ.inv :=
+by { dsimp [cospan_ext], simp, }
+
 end category_theory.limits
 
 -- move me
@@ -450,6 +503,56 @@ lemma extend_aux' {A₁ B₁ A₂ B₂ : CompHaus}
   (H : f = e₁.hom ≫ g ≫ e₂.inv) :
   epi g :=
 by { rw [← iso.inv_comp_eq, iso.eq_comp_inv, category.assoc] at H, apply extend_aux e₁ e₂ f g hf H }
+
+lemma extend_aux_1 {A B C : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}} (r : ℝ≥0)
+  (S : Profinite.{u}) (c : ℝ≥0) (f : A ⟶ B) (g : B ⟶ C) [fact (1 ≤ r)] (w w') :
+  ((P1_iso.{u} f r c S).symm.inv ≫
+         is_limit.map.{u u u u+1}
+             (limit.cone.{u u u u+1}
+                (P1_functor.{u}
+                     (whisker_left.{u u u+1 u u+1 u} S.fintype_diagram f) r c ⋙
+                   lim.{u u u u+1}))
+             (limit.is_limit.{u u u u+1}
+                (P2_functor.{u}
+                     (whisker_left.{u u u+1 u u+1 u} S.fintype_diagram g)
+                     c ⋙
+                   lim.{u u u u+1}))
+             (P1_to_P2_nat_trans.{u}
+                (whisker_left.{u u u+1 u u+1 u} S.fintype_diagram f)
+                (whisker_left.{u u u+1 u u+1 u} S.fintype_diagram g) r c w) ≫
+           (P2_iso.{u} g c S).symm.hom) ≫
+      pullback.fst.{u u+1} =
+    P1_to_P2.{u} ((Profinite.extend_nat_trans.{u u+1} f).app S)
+        ((Profinite.extend_nat_trans.{u u+1} g).app S) r c w' ≫
+      pullback.fst.{u u+1} :=
+begin
+  rw P1_to_P2_comp_fst, dsimp [P1_iso, P2_iso],
+  apply (cancel_mono ((preserves_limit_iso (Filtration.obj _) _).hom)).1,
+  apply limit.hom_ext,
+  intro j,
+  simp only [category_theory.limits.has_limit.iso_of_nat_iso_inv_π,
+    category_theory.iso.symm_inv,
+    category_theory.preserves_limits_iso_hom_π,
+    category_theory.limits.cospan_ext_inv_app_left,
+    category_theory.iso.trans_inv,
+    category_theory.nat_trans.comp_app,
+    category_theory.category.id_comp,
+    category_theory.preserves_limits_iso_inv_π,
+    category_theory.limits.cospan_comp_iso_hom_app_left,
+    category_theory.category.assoc],
+  dsimp,
+  erw limit_flip_comp_lim_iso_limit_comp_lim_hom_π_π,
+  erw is_limit.map_π_assoc,
+  dsimp [P1_to_P2],
+  simp only [category_theory.category.id_comp,
+  category_theory.category.assoc,
+  category_theory.limits.limit.lift_map],
+  erw [limit.lift_π],
+  -- This has gone off the rails: we have `is_limit` and `limit` stuff mixed up,
+  -- so things don't simplify.
+  -- erw [lim_map_π],
+  sorry
+end
 
 lemma extend {A B C : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}}
   (f : A ⟶ B) (g : B ⟶ C) (r : ℝ≥0) [fact (1 ≤ r)]
