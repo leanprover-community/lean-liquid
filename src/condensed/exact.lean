@@ -551,7 +551,7 @@ begin
   -- This has gone off the rails: we have `is_limit` and `limit` stuff mixed up,
   -- so things don't simplify.
   -- erw [lim_map_π],
-  sorry
+  all_goals { sorry },
 end
 
 lemma extend {A B C : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}}
