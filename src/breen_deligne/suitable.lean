@@ -78,18 +78,6 @@ instance suitable_mul_right (f : basic_universal_map m n) [h : f.suitable c₁ c
   f.suitable (c₁ * c) (c₂ * c) :=
 by { rw [mul_comm _ c, mul_comm _ c], exact basic_universal_map.suitable_mul_left _ _ _ _ }
 
--- PR #8132
-lemma nat_abs_sum_le {ι : Type*} (s : finset ι) (f : ι → ℤ) :
-  (∑ i in s, f i).nat_abs ≤ ∑ i in s, (f i).nat_abs :=
-begin
-  classical,
-  apply finset.induction_on s,
-  { simp only [finset.sum_empty, int.nat_abs_zero] },
-  { intros i s his IH,
-    simp only [his, finset.sum_insert, not_false_iff],
-    exact (int.nat_abs_add_le _ _).trans (add_le_add le_rfl IH) }
-end
-
 instance suitable_id : (id n).suitable c c :=
 begin
   intro i,
