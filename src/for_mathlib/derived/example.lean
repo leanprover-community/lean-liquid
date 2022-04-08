@@ -131,8 +131,8 @@ begin
 end
 
 lemma homology.desc_zero_is_iso_of_exact_of_epi {X Y Z W : C} (f : X ⟶ Y) (g : Y ⟶ Z)
-  [h : exact f g] [epi g] : is_iso (homology.desc' f (0 : Y ⟶ W) limits.comp_zero
-    (limits.kernel_zero_iso_source.hom ≫ g) (by simp)) :=
+  (h : exact f g) [epi g] : is_iso (homology.desc' f (0 : Y ⟶ W) limits.comp_zero
+    (limits.kernel_zero_iso_source.hom ≫ g) (by simp [h.w])) :=
 begin
   convert_to is_iso (homology.ι _ _ _ ≫
     (limits.colimit.iso_colimit_cocone ⟨_, abelian.is_colimit_of_exact_of_epi f g h⟩).hom),
@@ -181,7 +181,7 @@ begin
       simpa,
       apply_instance },
     { apply_instance } },
-  { refine is_zero.is_iso _ _ _; refine is_zero_homology_of_exact _ _ _, },
+  { refine is_zero.is_iso _ _ _; refine is_zero_homology_of_exact _ _ (exact_of_zero _ _), },
   { refine is_zero.is_iso _ _ _,
     { refine is_zero_of_iso_of_zero _ (homology_iso _ (-[1+i.succ] : ℤ) _ (-i : ℤ) _ _).symm,
       rotate,
@@ -193,7 +193,7 @@ begin
       rotate,
       { dsimp, refl, },
       { dsimp, simp only [int.neg_succ_of_nat_eq', sub_add_cancel], },
-      refine is_zero_homology_of_exact _ _ _, } }
+      refine is_zero_homology_of_exact _ _ (exact_of_zero _ _), } }
 end
 .
 
@@ -277,7 +277,7 @@ A ⧸ C ≃* B ⧸ D :=
   map_mul' := λ x y, monoid_hom.map_mul _ _ _ }
 .
 
-attribute [elementwise] limits.kernel.lift_ι iso.hom_inv_id
+attribute [elementwise] iso.hom_inv_id
 
 protected noncomputable
 def AddCommGroup.homology_iso {A B C : AddCommGroup.{u}} (f : A ⟶ B) (g : B ⟶ C) (w : f ≫ g = 0) :
@@ -605,7 +605,7 @@ instance : projective (AddCommGroup.of ℤ) :=
 preserves_projectives (functor.as_equivalence (forget₂ (Module ℤ) AddCommGroup)).to_adjunction
   (Module.of ℤ ℤ)
 
-instance exact_zmod_nsmul_cast :
+lemma exact_zmod_nsmul_cast :
   exact (n • 𝟙 (of ℤ)) (AddCommGroup.of_hom $ int.cast_add_hom (zmod n)) :=
 begin
   rw AddCommGroup.exact_iff,
@@ -639,8 +639,8 @@ begin
       rintros (x : ℤ) (y : ℤ) (e : n • x = n • y),
       norm_num at e,
       exact e.resolve_right hn },
-    { show exact 0 0, apply_instance },
-    { show exact 0 0, apply_instance } },
+    { show exact 0 0, apply exact_of_zero },
+    { show exact 0 0, apply exact_of_zero } },
   { dsimp [zmod_resolution_pi, zmod_resolution_pi_f],
     rw AddCommGroup.epi_iff_surjective,
     rintro (x : zmod n),

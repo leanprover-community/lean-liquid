@@ -1,4 +1,4 @@
-import category_theory.functor.derived
+import category_theory.functor.left_derived
 import data.matrix.notation
 
 import for_mathlib.homological_complex

@@ -2,10 +2,9 @@ import data.real.basic
 import algebra.big_operators.basic
 import topology.algebra.infinite_sum
 import data.finset.basic
-import data.equiv.basic
+import logic.equiv.basic
 import analysis.normed_space.basic
 import analysis.specific_limits.normed
-import data.equiv.basic
 
 import Lbar.bounded
 import pseudo_normed_group.basic

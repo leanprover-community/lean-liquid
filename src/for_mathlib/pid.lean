@@ -182,7 +182,7 @@ begin
     intros x hx,
     have hx : x ∈ l.support := hx,
     have : x.1.1 ≤ m.1.1 := finset.le_max' l.support x hx,
-    exact succ_order.lt_succ_iff.2 this,
+    exact order.lt_succ_iff.2 this,
     exact H m.1.1.succ hm hmo l hsub hl
   },
   { rw finset.not_nonempty_iff_eq_empty at hemp,
@@ -219,7 +219,7 @@ begin
     intros x hx,
     have hx : x ∈ l.support := hx,
     have : x.1 ≤ m.1 := finset.le_max' l.support x hx,
-    exact succ_order.lt_succ_iff.2 this,
+    exact order.lt_succ_iff.2 this,
     exact H m.1.succ hm hmo l hsub hl
   },
   { rw finset.not_nonempty_iff_eq_empty at hemp,
@@ -443,7 +443,7 @@ begin
         have hx := mem_of_subset_of_mem hsupp₀ hx,
         have hx : x.1 < i := hx,
         rw ←hj at hx,
-        have := mt (not_covby_iff (ordinal.lt_succ_self j)).2 (not_not.2 (covby_iff_succ_eq.mpr rfl)),
+        have := mt (not_covby_iff (ordinal.lt_succ_self j)).2 (not_not.2 (order.succ_eq_iff_covby.mp rfl)),
         push_neg at this,
         have := not_lt_of_ge (this x h_1),
         contradiction

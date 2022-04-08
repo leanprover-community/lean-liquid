@@ -344,11 +344,11 @@ section
 variables {𝒜 : Type*} [category 𝒜] [abelian 𝒜]
 
 -- move (ang generalize) this
-instance exact_kernel_ι_self {A B : 𝒜} (f : A ⟶ B) : exact (kernel.ι f) f :=
+lemma exact_kernel_ι_self {A B : 𝒜} (f : A ⟶ B) : exact (kernel.ι f) f :=
 by { rw abelian.exact_iff, tidy } -- why do we not have abelian.exact_kernel?
 
 -- move this
-instance exact_self_cokernel_π {A B : 𝒜} (f : A ⟶ B) : exact f (cokernel.π f) :=
+lemma exact_self_cokernel_π {A B : 𝒜} (f : A ⟶ B) : exact f (cokernel.π f) :=
 abelian.exact_cokernel _
 
 local notation `kernel_map`   := kernel.map _ _ _ _
@@ -448,8 +448,8 @@ lemma mk_of_short_exact_sequence_hom {𝒜 : Type*} [category 𝒜] [abelian �
   is_snake_input (snake_diagram.mk_of_short_exact_sequence_hom A B f) :=
 { row_exact₁ := by { aux_simp, exact A.exact' },
   row_exact₂ := by { aux_simp, exact B.exact' },
-  col_exact₁ := λ j, by { fin_cases j; aux_simp, all_goals { apply_instance } },
-  col_exact₂ := λ j, by { fin_cases j; aux_simp, all_goals { apply_instance } },
+  col_exact₁ := λ j, by { fin_cases j; aux_simp, all_goals { apply exact_kernel_ι_self, } },
+  col_exact₂ := λ j, by { fin_cases j; aux_simp, all_goals { apply exact_self_cokernel_π } },
   col_mono := λ j, by { fin_cases j; aux_simp, all_goals { apply_instance } },
   col_epi := λ j, by { fin_cases j; aux_simp, all_goals { apply_instance } },
   row_mono := by { aux_simp, exact B.mono' },
@@ -486,16 +486,10 @@ lemma surjective_iff_epi {P Q : 𝒜} (f : P ⟶ Q) : function.surjective f ↔ 
 
 lemma exists_of_exact {P Q R : 𝒜} {f : P ⟶ Q} {g : Q ⟶ R} (e : exact f g) (q) (hq : g q = 0) :
   ∃ p, f p = q :=
-begin
-  apply pseudo_exact_of_exact.2 _ hq,
-  apply_instance
-end
+(pseudo_exact_of_exact e).2 _ hq
 
 lemma eq_zero_of_exact {P Q R : 𝒜} {f : P ⟶ Q} {g : Q ⟶ R} (e : exact f g) (p) : g (f p) = 0 :=
-begin
-  apply pseudo_exact_of_exact.1,
-  apply_instance
-end
+(pseudo_exact_of_exact e).1 _
 
 @[simp]
 lemma kernel_ι_apply {P Q : 𝒜} (f : P ⟶ Q) (a) : f (kernel.ι f a) = 0 :=
@@ -529,7 +523,7 @@ lemma exists_of_cokernel_π_eq_zero {P Q : 𝒜} (f : P ⟶ Q) (a) :
 begin
   intro h,
   apply exists_of_exact _ _ h,
-  apply_instance
+  apply snake_diagram.exact_self_cokernel_π,
 end
 
 lemma cokernel_π_surjective {P Q : 𝒜} (f : P ⟶ Q) : function.surjective (cokernel.π f) :=
@@ -657,7 +651,7 @@ end
 def ker_row₁_to_top_left (hD : is_snake_input D) : kernel ((1,0) ⟶[D] (1,1)) ⟶ D.obj (0, 0) :=
 by { letI := hD.col_mono 0, exact (limits.kernel.lift _ _ (ker_row₁_to_row₂ hD)) ≫
     (limits.kernel.lift _ _ (((abelian.exact_iff _ _).1 (hD.col_exact₁ 0)).2)) ≫
-    inv (abelian.images.factor_thru_image ((0,0) ⟶[D] (1,0))) }
+    inv (abelian.factor_thru_image ((0,0) ⟶[D] (1,0))) }
 
 lemma ker_row₁_to_top_left_mono (hD : is_snake_input D) : mono (ker_row₁_to_top_left hD) :=
 begin
@@ -671,8 +665,8 @@ lemma ker_row₁_to_top_left_comp_eq_ι (hD : is_snake_input D) : ker_row₁_to_
   ((0,0) ⟶[D] (1,0)) = kernel.ι ((1,0) ⟶[D] (1,1)) :=
 begin
   letI := hD.col_mono 0,
-  have : inv (abelian.images.factor_thru_image ((0,0) ⟶[D] (1,0))) ≫ ((0,0) ⟶[D] (1,0)) =
-    category_theory.abelian.images.image.ι _ := by simp,
+  have : inv (abelian.factor_thru_image ((0,0) ⟶[D] (1,0))) ≫ ((0,0) ⟶[D] (1,0)) =
+    category_theory.abelian.image.ι _ := by simp,
   rw [ker_row₁_to_top_left, category.assoc, category.assoc, this],
   simp
 end
@@ -726,7 +720,7 @@ end
 def bottom_right_to_coker_row₂ (hD : is_snake_input D) :
   D.obj (3, 2) ⟶ cokernel ((2,1) ⟶[D] (2,2)) :=
 by { letI := hD.col_epi 2, exact
-  (inv (abelian.coimages.factor_thru_coimage ((2,2) ⟶[D] (3,2)))) ≫
+  (inv (abelian.factor_thru_coimage ((2,2) ⟶[D] (3,2)))) ≫
   (limits.cokernel.desc _ _ (ker_col₂_to_coker_row₂_eq_zero hD)) ≫
   (limits.cokernel.desc _ _ (row₁_to_coker_row₂_eq_zero hD)) }
 
@@ -742,8 +736,8 @@ lemma bottom_right_to_coker_row₂_comp_eq_π (hD : is_snake_input D) : ((2,2) �
   bottom_right_to_coker_row₂ hD = cokernel.π ((2,1) ⟶[D] (2,2)) :=
 begin
   letI := hD.col_epi 2,
-  have : ((2,2) ⟶[D] (3,2)) ≫ inv (abelian.coimages.factor_thru_coimage ((2,2) ⟶[D] (3,2))) =
-    category_theory.abelian.coimages.coimage.π _ := by simp,
+  have : ((2,2) ⟶[D] (3,2)) ≫ inv (abelian.factor_thru_coimage ((2,2) ⟶[D] (3,2))) =
+    category_theory.abelian.coimage.π _ := by simp,
   rw [bottom_right_to_coker_row₂, ← category.assoc, ← category.assoc, this],
   simp
 end
@@ -757,7 +751,8 @@ begin
     rw [← hb, ← abelian.pseudoelement.comp_apply, ← abelian.pseudoelement.comp_apply,
       ← category.assoc, ← D.map_comp, map_eq hD ((hom (2, 1) (3, 1)) ≫ (hom _ (3, 2)))
       ((hom _ (2, 2)) ≫ (hom _ _)), D.map_comp, category.assoc,
-      bottom_right_to_coker_row₂_comp_eq_π hD, exact.w, zero_apply] },
+      bottom_right_to_coker_row₂_comp_eq_π hD, (snake_diagram.exact_self_cokernel_π _).w,
+      zero_apply], },
   { letI := hD.col_epi 2,
     obtain ⟨b, hb⟩ := abelian.pseudoelement.pseudo_surjective_of_epi ((2,2) ⟶[D] (3,2)) a,
     rw [← hb, ← abelian.pseudoelement.comp_apply, bottom_right_to_coker_row₂_comp_eq_π hD] at ha,
@@ -827,7 +822,7 @@ begin
     simp [abelian.pseudoelement.comp_apply] at ha,
     have : ∃ c, ((1,0) ⟶[D] (1,1)) c = kernel.ι ((1,1) ⟶[D] (2,2)) a,
     { apply exists_of_exact _ _ ha,
-      apply_instance },
+      apply snake_diagram.exact_self_cokernel_π, },
     obtain ⟨c,hc⟩ := this,
     have : hD.to_top_right_kernel c = a,
     { apply_fun kernel.ι ((1,1) ⟶[D] (2,2)),
@@ -852,7 +847,7 @@ begin
     rw surjective_iff_epi,
     apply hD.row_epi },
   obtain ⟨c,hc⟩ : ∃ c, kernel.ι ((1,1) ⟶[D] (2,2)) c = b,
-  { have : exact (kernel.ι ((1,1) ⟶[D] (2,2))) ((1,1) ⟶[D] (2,2)), by apply_instance,
+  { have : exact (kernel.ι ((1,1) ⟶[D] (2,2))) ((1,1) ⟶[D] (2,2)) := exact_kernel_ι,
     apply exists_of_exact this,
     rw [(show hom (1,1) (2,2) = hom (1,1) (1,2) ≫ hom (1,2) (2,2), by refl),
       D.map_comp, abelian.pseudoelement.comp_apply, hb],
@@ -908,7 +903,7 @@ begin
   simp [abelian.pseudoelement.comp_apply] at ha,
   obtain ⟨c,hc⟩ : ∃ c, ((1,0) ⟶[D] (2,1)) c = ((2,0) ⟶[D] (2,1)) a,
   { apply exists_of_exact _ _ ha,
-    apply_instance },
+    apply abelian.exact_cokernel, },
   have : ((1,0) ⟶[D] (2,0)) c = a,
   { apply_fun ((2,0) ⟶[D] (2,1)),
     swap, { rw injective_iff_mono, apply hD.row_mono },
@@ -973,11 +968,7 @@ begin
 end
 
 instance : epi hD.to_kernel :=
-begin
-  dsimp [to_kernel],
-  haveI : exact ((0,2) ⟶[D] (1,2)) ((1,2) ⟶[D] (2,2)) := hD.col_exact₁ _,
-  apply_instance,
-end
+kernel.lift.epi (hD.col_exact₁ _)
 
 instance : is_iso hD.to_kernel :=
 is_iso_of_mono_of_epi _
@@ -986,11 +977,7 @@ def cokernel_to : cokernel ((1,0) ⟶[D] (2,0)) ⟶ D.obj (3,0) :=
 cokernel.desc _ (_ ⟶[D] _) (hD.col_exact₂ _).1
 
 instance : mono hD.cokernel_to :=
-begin
-  dsimp [cokernel_to],
-  haveI : exact ((1,0) ⟶[D] (2,0)) ((2,0) ⟶[D] (3,0)) := hD.col_exact₂ _,
-  apply_instance,
-end
+abelian.category_theory.limits.cokernel.desc.category_theory.mono _ _ (hD.col_exact₂ _)
 
 instance : epi hD.cokernel_to :=
 begin
@@ -1083,7 +1070,7 @@ begin
     obtain ⟨d,hd⟩ : ∃ d, ((1,1) ⟶[D] (2,1)) d = c := exists_of_exact (hD.col_exact₂ _) _ hb,
     obtain ⟨e,he⟩ : ∃ e, kernel.ι ((1,1) ⟶[D] (2,2)) e = d,
     { apply exists_of_exact _ _ (_ : ((1,1) ⟶[D] (2,2)) d = 0),
-      { apply_instance },
+      { apply exact_kernel_ι },
       dsimp [b'] at hc,
       apply_fun hD.bottom_left_cokernel_to at hc,
       simp only [bottom_left_cokernel_to, ←abelian.pseudoelement.comp_apply, cokernel.π_desc] at hc,

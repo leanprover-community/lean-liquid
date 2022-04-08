@@ -1,6 +1,6 @@
 import category_theory.concrete_category.bundled_hom
 import topology.category.Profinite
-import data.equiv.fin
+import logic.equiv.fin
 --import for_mathlib.concrete
 import for_mathlib.CompHaus
 import for_mathlib.topology

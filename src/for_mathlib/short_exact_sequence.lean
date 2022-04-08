@@ -26,11 +26,11 @@ structure short_exact_sequence [has_images 𝒞] [has_zero_morphisms 𝒞] [has_
 (g : snd ⟶ trd)
 [mono'  : mono f]
 [epi'   : epi g]
-[exact' : exact f g]
+(exact' : exact f g)
 
 namespace short_exact_sequence
 
-attribute [instance] mono' epi' exact'
+attribute [instance] mono' epi'
 
 variables {𝒞} [has_images 𝒞] [has_zero_morphisms 𝒞] [has_kernels 𝒞]
 
@@ -193,7 +193,13 @@ lemma snd_is_iso (h1 : is_iso f.1) (h3 : is_iso f.3) : is_iso f.2 :=
   0 B.f B.g
   0 f.1 f.2 f.3 (by rw [zero_comp, zero_comp]) f.sq1 f.sq2
   0 0
-  0 0 0 (by rw [comp_zero, comp_zero]) _ _ _ _ _ _ _ _ _ _
+  0 0 0 (by rw [comp_zero, comp_zero])
+  (exact_zero_left_of_mono _)
+  A.exact'
+  ((epi_iff_exact_zero_right _).mp infer_instance)
+  (exact_zero_left_of_mono _)
+  B.exact'
+  ((epi_iff_exact_zero_right _).mp infer_instance) _ _ _ _
 
 /-- One form of the five lemma: if a morphism `f` of short exact sequences has isomorphisms
 as first and third component, then `f` itself is an isomorphism. -/
@@ -271,7 +277,7 @@ lemma exact_of_split {A B C : 𝒜} (f : A ⟶ B) (g : B ⟶ C) (χ : C ⟶ B) (
   end }
 
 -- move this
-instance exact_inl_snd (A B : 𝒜) : exact (biprod.inl : A ⟶ A ⊞ B) biprod.snd :=
+lemma exact_inl_snd (A B : 𝒜) : exact (biprod.inl : A ⟶ A ⊞ B) biprod.snd :=
 exact_of_split _ _ biprod.inr biprod.fst biprod.inl_snd biprod.total
 
 def mk_of_split {A B C : 𝒜} (f : A ⟶ B) (g : B ⟶ C) (φ : B ⟶ A) (χ : C ⟶ B)
@@ -297,7 +303,8 @@ mk_of_split f g H.some H.some_spec.some H.some_spec.some_spec.1 H.some_spec.some
   snd := A ⊞ B,
   trd := B,
   f := biprod.inl,
-  g := biprod.snd }
+  g := biprod.snd,
+  exact' := exact_inl_snd _ _ }
 
 /-- A *splitting* of a short exact sequence `0 ⟶ A₁ -f⟶ A₂ -g⟶ A₃ ⟶ 0` is
 an isomorphism to the short exact sequence `0 ⟶ A₁ ⟶ A₁ ⊕ A₃ ⟶ A₃ ⟶ 0`,
@@ -338,7 +345,7 @@ def left_split.splitting {A : short_exact_sequence 𝒜} (h : A.left_split) : A.
 { to_iso := iso_of_components' (iso.refl _) (biprod.lift h.some A.g) (iso.refl _)
     (by { dsimp, simp only [category.id_comp], ext,
       { simpa only [biprod.inl_fst, biprod.lift_fst, category.assoc] using h.some_spec.symm, },
-      { simp only [exact.w, f_comp_g, biprod.lift_snd, category.assoc] } })
+      { simp only [exact.w, f_comp_g, biprod.lift_snd, category.assoc, exact_inl_snd] } })
     (by { dsimp, simp only [category.comp_id, biprod.lift_snd], }),
   fst_eq_id := rfl,
   trd_eq_id := rfl }
@@ -347,7 +354,7 @@ def right_split.splitting {A : short_exact_sequence 𝒜} (h : A.right_split) : 
 { to_iso := iso.symm $ iso_of_components' (iso.refl _) (biprod.desc A.f h.some) (iso.refl _)
     (by { dsimp, simp only [biprod.inl_desc, category.id_comp], })
     (by { dsimp, simp only [category.comp_id], ext,
-      { simp only [exact.w, f_comp_g, biprod.inl_desc_assoc] },
+      { simp only [exact.w, f_comp_g, biprod.inl_desc_assoc, exact_inl_snd] },
       { simpa only [biprod.inr_snd, biprod.inr_desc_assoc] using h.some_spec, } }),
   fst_eq_id := rfl,
   trd_eq_id := rfl }
