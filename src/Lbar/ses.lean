@@ -305,9 +305,19 @@ begin
   refine condensify_exact _ _ 1 le_rfl 1 le_rfl _ _ _ _ _ S,
   { apply invpoly.to_laurent_measures_injective },
   { intro S, ext F s (_|n); refl, },
-  { sorry },
+  { rintro S c F ⟨hF1, hF2⟩,
+    simp only [whisker_right_app, laurent_measures.to_Lbar_nat_trans_app, functor.comp_map,
+      set.mem_inter_eq, set.mem_preimage, set.mem_singleton_iff] at hF1 hF2,
+    change laurent_measures.to_Lbar r' S F = 0 at hF1,
+    change F ∈ pseudo_normed_group.filtration (laurent_measures r' S) c at hF2,
+    show F ∈ invpoly.to_laurent_measures r' S '' (pseudo_normed_group.filtration (invpoly r' S) (1 * c)),
+    -- Probably good to define `laurent_measures.truncate` that truncates `F` to only the negative powers of `T⁻¹`.
+    -- Use that to get the desired `invpoly`.
+    sorry },
   { apply laurent_measures.to_Lbar_surjective },
-  { sorry }
+  { rintro S c F hF,
+    -- Do something similar to the above
+    sorry }
 end
 
 end Lbar
