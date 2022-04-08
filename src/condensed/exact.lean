@@ -21,20 +21,82 @@ open category_theory category_theory.limits opposite pseudo_normed_group
 
 namespace category_theory.limits
 
+-- These are in PR #13238
+instance {J : Type*} [category J] {C : Type*} [category C] [has_terminal C] :
+  has_limit ((category_theory.functor.const J).obj (⊤_ C)) :=
+has_limit.mk
+{ cone :=
+  { X := ⊤_ C,
+    π := { app := λ _, terminal.from _, }, },
+  is_limit :=
+  { lift := λ s, terminal.from _, }, }
+
 @[simps hom]
-def limit_const_terminal {J : Type*} [category J] {C : Type*} [category C] [has_terminal C]
-  [has_limit ((category_theory.functor.const J).obj (⊤_ C))] :
+def limit_const_terminal {J : Type*} [category J] {C : Type*} [category C] [has_terminal C] :
   limit ((category_theory.functor.const J).obj (⊤_ C)) ≅ ⊤_ C :=
 { hom := terminal.from _,
   inv := limit.lift ((category_theory.functor.const J).obj (⊤_ C))
     { X := ⊤_ C, π := { app := λ j, terminal.from _, }}, }
 
 @[simp, reassoc] lemma limit_const_terminal_inv_π
-  {J : Type*} [category J] {C : Type*} [category C] [has_terminal C]
-  [has_limit ((category_theory.functor.const J).obj (⊤_ C))] {j : J} :
+  {J : Type*} [category J] {C : Type*} [category C] [has_terminal C] {j : J} :
   limit_const_terminal.inv ≫ limit.π ((category_theory.functor.const J).obj (⊤_ C)) j =
     terminal.from _ :=
 by ext ⟨⟩
+
+-- These are in PR #13237.
+variables {C D : Type*} [category.{v} C] [category.{v} D]
+
+@[simp] lemma cospan_comp_iso_hom_app_left (F : C ⥤ D) {X Y Z : C} (f : X ⟶ Z) (g : Y ⟶ Z) :
+  (cospan_comp_iso F f g).hom.app walking_cospan.left = 𝟙 _ :=
+rfl
+
+@[simp] lemma cospan_comp_iso_hom_app_right (F : C ⥤ D) {X Y Z : C} (f : X ⟶ Z) (g : Y ⟶ Z) :
+  (cospan_comp_iso F f g).hom.app walking_cospan.right = 𝟙 _ :=
+rfl
+
+@[simp] lemma cospan_comp_iso_hom_app_one (F : C ⥤ D) {X Y Z : C} (f : X ⟶ Z) (g : Y ⟶ Z) :
+  (cospan_comp_iso F f g).hom.app walking_cospan.one = 𝟙 _ :=
+rfl
+
+@[simp] lemma cospan_comp_iso_inv_app_left (F : C ⥤ D) {X Y Z : C} (f : X ⟶ Z) (g : Y ⟶ Z) :
+  (cospan_comp_iso F f g).inv.app walking_cospan.left = 𝟙 _ :=
+rfl
+
+@[simp] lemma cospan_comp_iso_inv_app_right (F : C ⥤ D) {X Y Z : C} (f : X ⟶ Z) (g : Y ⟶ Z) :
+  (cospan_comp_iso F f g).inv.app walking_cospan.right = 𝟙 _ :=
+rfl
+
+@[simp] lemma cospan_comp_iso_inv_app_one (F : C ⥤ D) {X Y Z : C} (f : X ⟶ Z) (g : Y ⟶ Z) :
+  (cospan_comp_iso F f g).inv.app walking_cospan.one = 𝟙 _ :=
+rfl
+
+variables {X Y Z X' Y' Z' : C} (iX : X ≅ X') (iY : Y ≅ Y') (iZ : Z ≅ Z')
+variables {f : X ⟶ Z} {g : Y ⟶ Z} {f' : X' ⟶ Z'} {g' : Y' ⟶ Z'}
+
+@[simp] lemma cospan_ext_hom_app_left (wf : iX.hom ≫ f' = f ≫ iZ.hom) (wg : iY.hom ≫ g' = g ≫ iZ.hom) :
+  (cospan_ext iX iY iZ wf wg).hom.app walking_cospan.left = iX.hom :=
+by { dsimp [cospan_ext], simp, }
+
+@[simp] lemma cospan_ext_hom_app_right (wf : iX.hom ≫ f' = f ≫ iZ.hom) (wg : iY.hom ≫ g' = g ≫ iZ.hom) :
+  (cospan_ext iX iY iZ wf wg).hom.app walking_cospan.right = iY.hom :=
+by { dsimp [cospan_ext], simp, }
+
+@[simp] lemma cospan_ext_hom_app_one (wf : iX.hom ≫ f' = f ≫ iZ.hom) (wg : iY.hom ≫ g' = g ≫ iZ.hom) :
+  (cospan_ext iX iY iZ wf wg).hom.app walking_cospan.one = iZ.hom :=
+by { dsimp [cospan_ext], simp, }
+
+@[simp] lemma cospan_ext_inv_app_left (wf : iX.hom ≫ f' = f ≫ iZ.hom) (wg : iY.hom ≫ g' = g ≫ iZ.hom) :
+  (cospan_ext iX iY iZ wf wg).inv.app walking_cospan.left = iX.inv :=
+by { dsimp [cospan_ext], simp, }
+
+@[simp] lemma cospan_ext_inv_app_right (wf : iX.hom ≫ f' = f ≫ iZ.hom) (wg : iY.hom ≫ g' = g ≫ iZ.hom) :
+  (cospan_ext iX iY iZ wf wg).inv.app walking_cospan.right = iY.inv :=
+by { dsimp [cospan_ext], simp, }
+
+@[simp] lemma cospan_ext_inv_app_one (wf : iX.hom ≫ f' = f ≫ iZ.hom) (wg : iY.hom ≫ g' = g ≫ iZ.hom) :
+  (cospan_ext iX iY iZ wf wg).inv.app walking_cospan.one = iZ.inv :=
+by { dsimp [cospan_ext], simp, }
 
 end category_theory.limits
 
@@ -140,6 +202,12 @@ begin
   rw pullback.condition,
   refl,
 end
+
+-- Scott: perhaps life is easier if we use this version? I'm not too sure.
+lemma is_limit.surjective_of_surjective' [is_cofiltered J]
+  (hα : ∀ j, function.surjective (α.app j)) :
+   function.surjective (lim_map α) :=
+is_limit.surjective_of_surjective _ _ _ _ _ (limit.is_limit _) _ hα
 
 end CompHaus
 
@@ -294,7 +362,80 @@ functor.flip $ @cospan _ _ _ ((category_theory.functor.const _).obj (⊤_ _)) _
   { app := λ j, pt (0 : pseudo_normed_group.filtration (C'.obj j) c),
     naturality' := by { intros, ext, exact (C'.map f).map_zero.symm } }
 
-@[simps]
+lemma P1_to_P2_nat_trans_aux_1 (hfg : f ≫ g = 0) (X Y : J) (h : X ⟶ Y) (w w') :
+  ((P1_functor f r c ⋙ lim).map h ≫
+         lim_map (diagram_iso_cospan ((P1_functor f r c).obj Y)).hom ≫
+           P1_to_P2 (f.app Y) (g.app Y) r c w ≫
+             lim_map
+               (𝟙 (cospan ((Filtration.obj c).map (g.app Y)) (pt 0)) ≫
+                  (diagram_iso_cospan ((P2_functor g c).obj Y)).inv)) ≫
+      limit.π ((P2_functor g c).obj Y) none =
+    ((lim_map (diagram_iso_cospan ((P1_functor f r c).obj X)).hom ≫
+            P1_to_P2 (f.app X) (g.app X) r c w' ≫
+              lim_map
+                (𝟙 (cospan ((Filtration.obj c).map (g.app X)) (pt 0)) ≫
+                   (diagram_iso_cospan ((P2_functor g c).obj X)).inv)) ≫
+         (P2_functor g c ⋙ lim).map h) ≫
+      limit.π ((P2_functor g c).obj Y) none :=
+begin
+  dsimp [P1_to_P2],
+  simp only [iso.refl_hom, iso.refl_inv, nat_trans.comp_app, eq_to_iso_refl,
+    category.id_comp, category.assoc,
+    cones.postcompose_obj_π, lim_map_π_assoc, limit.lift_π,
+    diagram_iso_cospan_hom_app, diagram_iso_cospan_inv_app,
+    pullback_cone.mk_π_app_one, limit.lift_map],
+  dsimp,
+  simp only [←(Filtration.obj c).map_comp, category.comp_id, category.id_comp,
+    nat_trans.naturality],
+end
+
+lemma P1_to_P2_nat_trans_aux_2 (hfg : f ≫ g = 0) (X Y : J) (h : X ⟶ Y) (w w') :
+  ((P1_functor f r c ⋙ lim).map h ≫
+         lim_map (diagram_iso_cospan ((P1_functor f r c).obj Y)).hom ≫
+           P1_to_P2 (f.app Y) (g.app Y) r c w ≫
+             lim_map
+               (𝟙 (cospan ((Filtration.obj c).map (g.app Y)) (pt 0)) ≫
+                  (diagram_iso_cospan ((P2_functor g c).obj Y)).inv)) ≫
+      limit.π ((P2_functor g c).obj Y) (some walking_pair.left) =
+    ((lim_map (diagram_iso_cospan ((P1_functor f r c).obj X)).hom ≫
+            P1_to_P2 (f.app X) (g.app X) r c w' ≫
+              lim_map
+                (𝟙 (cospan ((Filtration.obj c).map (g.app X)) (pt 0)) ≫
+                   (diagram_iso_cospan ((P2_functor g c).obj X)).inv)) ≫
+         (P2_functor g c ⋙ lim).map h) ≫
+      limit.π ((P2_functor g c).obj Y) (some walking_pair.left) :=
+begin
+  dsimp [P1_to_P2],
+  simp only [iso.refl_hom ,iso.refl_inv, eq_to_iso_refl, nat_trans.comp_app,
+    category.id_comp, category.assoc, pullback_cone.mk_π_app_left,
+    cones.postcompose_obj_π, lim_map_π_assoc, limit.lift_π, limit.lift_map,
+    diagram_iso_cospan_hom_app, diagram_iso_cospan_inv_app],
+  dsimp,
+  simp only [category.comp_id, category.id_comp],
+end
+
+lemma P1_to_P2_nat_trans_aux_3 (hfg : f ≫ g = 0) (X Y : J) (h : X ⟶ Y) (w w') :
+  ((P1_functor f r c ⋙ lim).map h ≫
+         lim_map (diagram_iso_cospan ((P1_functor f r c).obj Y)).hom ≫
+           P1_to_P2 (f.app Y) (g.app Y) r c w ≫
+             lim_map
+               (𝟙 (cospan ((Filtration.obj c).map (g.app Y)) (pt 0)) ≫
+                  (diagram_iso_cospan ((P2_functor g c).obj Y)).inv)) ≫
+      limit.π ((P2_functor g c).obj Y) (some walking_pair.right) =
+    ((lim_map (diagram_iso_cospan ((P1_functor f r c).obj X)).hom ≫
+            P1_to_P2 (f.app X) (g.app X) r c w' ≫
+              lim_map
+                (𝟙 (cospan ((Filtration.obj c).map (g.app X)) (pt 0)) ≫
+                   (diagram_iso_cospan ((P2_functor g c).obj X)).inv)) ≫
+         (P2_functor g c ⋙ lim).map h) ≫
+      limit.π ((P2_functor g c).obj Y) (some walking_pair.right) :=
+begin
+  dsimp [P1_to_P2],
+  simp only [category.id_comp, category.assoc, eq_to_iso_refl, iso.refl_inv, nat_trans.comp_app,
+    pullback_cone.mk_π_app_right, cones.postcompose_obj_π, limit.lift_π, limit.lift_map,
+    diagram_iso_cospan_inv_app, eq_iff_true_of_subsingleton],
+end
+
 def P1_to_P2_nat_trans (hfg : f ≫ g = 0) :
   (P1_functor f r c ⋙ lim) ⟶ (P2_functor g c ⋙ lim) :=
 { app := λ j, begin
@@ -306,10 +447,12 @@ def P1_to_P2_nat_trans (hfg : f ≫ g = 0) :
     -- It would be nicer to use `pullback.hom_ext` here, but it doesn't unify.
     -- Nevertheless, we can bash out the remaining goals with `simp`.
     apply limit.hom_ext, rintros (⟨⟩|⟨⟨⟩⟩),
-    { dsimp [P1_to_P2], simp, dsimp, simp [-category_theory.functor.map_comp, ←(Filtration.obj c).map_comp], },
-    { dsimp [P1_to_P2], simp, dsimp, simp, },
-    { dsimp [P1_to_P2], simp, },
+    { apply P1_to_P2_nat_trans_aux_1 _ _ _ _ hfg, },
+    { apply P1_to_P2_nat_trans_aux_2 _ _ _ _ hfg, },
+    { apply P1_to_P2_nat_trans_aux_3 _ _ _ _ hfg, },
   end }
+
+attribute [simps] P1_to_P2_nat_trans
 
 set_option pp.universes true
 
@@ -376,6 +519,62 @@ lemma extend_aux' {A₁ B₁ A₂ B₂ : CompHaus}
   epi g :=
 by { rw [← iso.inv_comp_eq, iso.eq_comp_inv, category.assoc] at H, apply extend_aux e₁ e₂ f g hf H }
 
+lemma extend_aux_1 {A B C : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}} (r c : ℝ≥0)
+  (S : Profinite.{u}) (f : A ⟶ B) (g : B ⟶ C) [fact (1 ≤ r)] (w w') :
+  ((P1_iso.{u} f r c S).symm.inv ≫
+         lim_map.{u u u u+1}
+             (P1_to_P2_nat_trans.{u}
+                (whisker_left.{u u u+1 u u+1 u} S.fintype_diagram f)
+                (whisker_left.{u u u+1 u u+1 u} S.fintype_diagram g) r c w) ≫
+           (P2_iso.{u} g c S).symm.hom) ≫
+      pullback.fst.{u u+1} =
+    P1_to_P2.{u} ((Profinite.extend_nat_trans.{u u+1} f).app S)
+        ((Profinite.extend_nat_trans.{u u+1} g).app S) r c w' ≫
+      pullback.fst.{u u+1} :=
+begin
+  apply (cancel_mono ((preserves_limit_iso (Filtration.obj _) _).hom)).1,
+  apply limit.hom_ext,
+  { -- TODO this is not the prettiest proof.
+    -- We need some good simp lemmas for `P1_iso`, `P2_iso`, and `P1_to_P2`.
+    intro j,
+    simp only [P1_to_P2_comp_fst, category_theory.preserves_limits_iso_hom_π, category_theory.category.assoc],
+    dsimp [P2_iso],
+    simp only [category_theory.iso.symm_inv,
+      category_theory.limits.cospan_ext_inv_app_left,
+      category_theory.iso.trans_inv,
+      category_theory.nat_trans.comp_app,
+      category_theory.category.id_comp,
+      category_theory.preserves_limits_iso_inv_π,
+      category_theory.limits.cospan_comp_iso_hom_app_left,
+      category_theory.category.assoc,
+      category_theory.limits.has_limit.iso_of_nat_iso_inv_π_assoc],
+    erw [limit_flip_comp_lim_iso_limit_comp_lim_hom_π_π, lim_map_π_assoc],
+    simp only [category_theory.category.id_comp,
+      CompHausFiltPseuNormGrp₁.exact_with_constant.P1_to_P2_nat_trans_app,
+      category_theory.category.assoc],
+    erw [lim_map_π],
+    dsimp [P1_to_P2],
+    simp only [category_theory.category.comp_id,
+      category_theory.iso.refl_hom,
+      category_theory.eq_to_iso_refl,
+      category_theory.limits.lim_map_π,
+      category_theory.limits.diagram_iso_cospan_hom_app,
+      category_theory.limits.pullback.lift_fst],
+    dsimp [P1_iso],
+    simp only [category_theory.category.assoc],
+    erw [limit_flip_comp_lim_iso_limit_comp_lim_inv_π_π],
+    simp only [category_theory.limits.has_limit.iso_of_nat_iso_hom_π_assoc,
+      category_theory.nat_trans.comp_app,
+      category_theory.iso.symm_hom,
+      category_theory.limits.cospan_comp_iso_inv_app_left,
+      category_theory.category.assoc,
+      category_theory.iso.trans_hom,
+      category_theory.limits.cospan_ext_hom_app_left],
+    dsimp,
+    simp only [category_theory.preserves_limits_iso_hom_π, category_theory.category.id_comp], },
+  all_goals { apply_instance, },
+end
+
 lemma extend {A B C : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}}
   (f : A ⟶ B) (g : B ⟶ C) (r : ℝ≥0) [fact (1 ≤ r)]
   (hfg : ∀ S, exact_with_constant (f.app S) (g.app S) r) (S : Profinite) :
@@ -397,11 +596,10 @@ begin
   { ext X : 2,
     simp only [nat_trans.comp_app, whisker_left_app, (hfg (S.fintype_diagram.obj X)).comp_eq_zero],
     refl },
-  have key := CompHaus.is_limit.surjective_of_surjective
+  have key := CompHaus.is_limit.surjective_of_surjective'
     (P1_functor.{u} (whisker_left S.fintype_diagram f) r c ⋙ lim)
     (P2_functor.{u} (whisker_left S.fintype_diagram g) c ⋙ lim)
-    (P1_to_P2_nat_trans _ _ _ _ hfg')
-    (limit.cone _) (limit.cone _) (limit.is_limit _) (limit.is_limit _) _,
+    (P1_to_P2_nat_trans _ _ _ _ hfg') _,
   swap,
   { intro X, specialize hfg (S.fintype_diagram.obj X), rw [iff_surjective] at hfg,
     rcases hfg with ⟨aux', hfg⟩, specialize hfg c,
@@ -414,29 +612,8 @@ begin
   rw ← CompHaus.epi_iff_surjective at key ⊢,
   refine extend_aux (P1_iso f r c S).symm (P2_iso g c S).symm _ _ key _,
   apply pullback.hom_ext,
-  { rw P1_to_P2_comp_fst,
-    sorry },
-  sorry,
-  -- apply Profinite.extend_nat_trans_ext,
-
-
-  -- { let foo := limit_curry_swap_comp_lim_iso_limit_curry_comp_lim
-  --     (uncurry.{u u u}.obj $ P1_functor.{u} (whisker_left S.fintype_diagram f) r c),
-  --   refine _ ≪≫ foo.symm ≪≫ _,
-  --   { refine (@limits.lim _ _ _ _ _).map_iso _,
-  --     refine iso_whisker_right _ _,
-  --     refine nat_iso.of_components (λ X, nat_iso.of_components (λ _, iso.refl _) _) _,
-  --     { intros i j h, dsimp,
-  --       simp only [category_theory.functor.map_id, category.id_comp, category.comp_id], },
-  --     { intros X Y φ, ext i : 2, dsimp,
-  --       simp only [category_theory.functor.map_id, category.id_comp, category.comp_id,
-  --         nat_trans.id_app], } },
-  --   { refine (@limits.lim _ _ _ _ _).map_iso _,
-  --     refine diagram_iso_cospan _ ≪≫ _,
-  --     dsimp [curry, curry_obj, uncurry, prod.swap],
-  --     refine nat_iso.of_components (λ j, _) _,
-  --      }
-  --  }
+  apply extend_aux_1,
+  apply subsingleton.elim,
 end
 
 end exact_with_constant

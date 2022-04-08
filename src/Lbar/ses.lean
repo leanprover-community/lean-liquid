@@ -176,6 +176,7 @@ def to_laurent_measures_hom [fact (r' < 1)]: comphaus_filtered_pseudo_normed_gro
   end,
   .. to_laurent_measures_addhom r' S }.
 
+@[simps]
 def to_laurent_measures_nat_trans [fact (r' < 1)]:
   invpoly.fintype_functor r' ⟶ laurent_measures.fintype_functor r' :=
 { app := λ S, to_laurent_measures_hom r' S,
@@ -208,18 +209,31 @@ namespace laurent_measures
     { simp only [function.comp_app, nnreal.coe_nat_abs, zpow_coe_nat] }
   end }
 
-lemma to_Lbar_surjective : function.surjective (to_Lbar r' S) :=
+def to_Lbar_section (G : Lbar r' S) : laurent_measures r' S :=
+⟨λ s n, G s n.to_nat,
 begin
-  intro G,
-  refine ⟨⟨λ s n, G s n.to_nat, λ s, _⟩, _⟩,
-  { refine (nnreal.summable_iff_on_nat_less 0 (λ n n0, _)).mpr _,
-    { simp [int.to_nat_of_nonpos n0.le] },
-    { simp only [int.to_nat_coe_nat, zpow_coe_nat],
-      simpa only [← nnreal.coe_nat_abs] using G.summable' s } },
-  { ext s (_|n),
-    { exact (G.coeff_zero s).symm },
-    { show ite (n.succ = 0) 0 (G s (n + 1)) = G s n.succ, from if_neg n.succ_ne_zero } }
+  intro s,
+  refine (nnreal.summable_iff_on_nat_less 0 (λ n n0, _)).mpr _,
+  { simp [int.to_nat_of_nonpos n0.le] },
+  { simp only [int.to_nat_coe_nat, zpow_coe_nat],
+    simpa only [← nnreal.coe_nat_abs] using G.summable' s }
+end⟩
+
+lemma to_Lbar_section_to_Lbar (G : Lbar r' S) :
+  to_Lbar r' S (to_Lbar_section r' S G) = G :=
+begin
+  ext s (_|n),
+  { exact (G.coeff_zero s).symm },
+  { show ite (n.succ = 0) 0 (G s (n + 1)) = G s n.succ, from if_neg n.succ_ne_zero }
 end
+
+lemma to_Lbar_section_mem_filtration (G : Lbar r' S) (c : ℝ≥0)
+  (hG : G ∈ pseudo_normed_group.filtration (Lbar r' S) c) :
+  to_Lbar_section r' S G ∈ pseudo_normed_group.filtration (laurent_measures r' S) c :=
+sorry
+
+lemma to_Lbar_surjective : function.surjective (to_Lbar r' S) :=
+λ G, ⟨to_Lbar_section r' S G, to_Lbar_section_to_Lbar r' S G⟩
 
 lemma nnnorm_to_Lbar (F : laurent_measures r' S) : ∥to_Lbar r' S F∥₊ ≤ ∥F∥₊ :=
 begin
@@ -294,17 +308,32 @@ namespace Lbar
 
 open category_theory ProFiltPseuNormGrpWithTinv₁
 
-theorem short_exact (S : Profinite) [fact (r' < 1)]:
+theorem short_exact (S : Profinite) [fact (r' < 1)] :
   short_exact
     ((condensify_map
       (whisker_right (invpoly.to_laurent_measures_nat_trans r') (to_CHFPNG₁ r'))).app S)
     ((condensify_map
       (whisker_right (laurent_measures.to_Lbar_nat_trans r') (to_CHFPNG₁ r'))).app S) :=
 begin
-  refine condensify_exact _ _ sorry _ sorry _ _ _ _ _ _ S,
-  swap 3, { apply invpoly.to_laurent_measures_injective },
-  swap 5, { apply laurent_measures.to_Lbar_surjective },
-  all_goals { sorry }
+  refine condensify_exact _ _ 1 le_rfl 1 le_rfl _ _ _ _ _ S,
+  { apply invpoly.to_laurent_measures_injective },
+  { intro S, ext F s (_|n); refl, },
+  { rintro S c F ⟨hF1, hF2⟩,
+    simp only [whisker_right_app, laurent_measures.to_Lbar_nat_trans_app, functor.comp_map,
+      set.mem_inter_eq, set.mem_preimage, set.mem_singleton_iff] at hF1 hF2,
+    change laurent_measures.to_Lbar r' S F = 0 at hF1,
+    change F ∈ pseudo_normed_group.filtration (laurent_measures r' S) c at hF2,
+    show F ∈ invpoly.to_laurent_measures r' S '' (pseudo_normed_group.filtration (invpoly r' S) (1 * c)),
+    -- Probably good to define `laurent_measures.truncate` that truncates `F` to only the negative powers of `T⁻¹`.
+    -- Use that to get the desired `invpoly`.
+    sorry },
+  { apply laurent_measures.to_Lbar_surjective },
+  { rintro S c F hF,
+    refine ⟨laurent_measures.to_Lbar_section r' S F, _, _⟩,
+    { apply laurent_measures.to_Lbar_section_mem_filtration,
+      apply pseudo_normed_group.filtration_mono _ hF,
+      rw one_mul },
+    { apply laurent_measures.to_Lbar_section_to_Lbar } }
 end
 
 end Lbar

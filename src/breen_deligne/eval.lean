@@ -224,41 +224,19 @@ instance homological_complex.functor_eval_flip_preserves_colimits_of_shape
           intros i j h, dsimp,
           have := (is_colimit_of_preserves (F.X i) hc).uniq (u s i j),
           refine (this _ _).trans (this _ _).symm,
-          { intros, dsimp, sorry },
-          sorry
+          { intros j', dsimp,
+            erw [(is_colimit_of_preserves (F.X i) hc).fac_assoc],
+            apply (s.ι.app j').comm, },
+          { intros j', dsimp,
+            rw nat_trans.naturality_assoc,
+            erw [(is_colimit_of_preserves (F.X j) hc).fac], }
         end },
-      fac' := sorry,
-      uniq' := sorry } } }
-
-/-
-{ preserves_colimit := λ K,
-  { preserves := λ c hc,
-    { desc := λ s, biproduct.desc $ λ i,
-        let t : cocone K :=
-        { X := s.X,
-          ι := { app := λ j, show K.obj j ⟶ (K ⋙ Pow n).obj j, from biproduct.ι _ i,
-                naturality' := by intros X Y f;
-                  simp only [functor.comp_map, Pow_map, biproduct.ι_map], } ≫ s.ι } in
-        hc.desc t,
-      fac' := begin
-        intros, ext,
-        simp only [Pow_map, functor.map_cocone_ι_app, biproduct.map_desc,
-          is_colimit.fac, nat_trans.comp_app, biproduct.ι_desc],
-      end,
+      fac' := by { intros, ext i, dsimp, erw [(is_colimit_of_preserves (F.X i) hc).fac], },
       uniq' := begin
         intros, ext i,
-        simp only [biproduct.ι_desc],
-        let t : cocone K :=
-        { X := s.X,
-          ι := { app := λ j, show K.obj j ⟶ (K ⋙ Pow n).obj j, from biproduct.ι _ i,
-                naturality' := by intros X Y f;
-                  simp only [functor.comp_map, Pow_map, biproduct.ι_map], } ≫ s.ι },
-        refine hc.uniq t (_ ≫ m) _,
-        intro j,
-        simp only [nat_trans.comp_app, ← w,
-          functor.map_cocone_ι_app, Pow_map, biproduct.ι_map_assoc],
-      end } } }
--/
+        exact (is_colimit_of_preserves (F.X i) hc).uniq (t s i) (m.f i)
+          (λ j, homological_complex.congr_hom (w j) i),
+      end, } } }
 
 instance eval_functor_preserves_colimits_of_shape
   (BD : data) (J : Type*) [category J] [preserves_colimits_of_shape J F] :
