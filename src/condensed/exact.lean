@@ -294,7 +294,80 @@ functor.flip $ @cospan _ _ _ ((category_theory.functor.const _).obj (⊤_ _)) _
   { app := λ j, pt (0 : pseudo_normed_group.filtration (C'.obj j) c),
     naturality' := by { intros, ext, exact (C'.map f).map_zero.symm } }
 
-@[simps]
+lemma P1_to_P2_nat_trans_aux_1 (hfg : f ≫ g = 0) (X Y : J) (h : X ⟶ Y) (w w') :
+  ((P1_functor f r c ⋙ lim).map h ≫
+         lim_map (diagram_iso_cospan ((P1_functor f r c).obj Y)).hom ≫
+           P1_to_P2 (f.app Y) (g.app Y) r c w ≫
+             lim_map
+               (𝟙 (cospan ((Filtration.obj c).map (g.app Y)) (pt 0)) ≫
+                  (diagram_iso_cospan ((P2_functor g c).obj Y)).inv)) ≫
+      limit.π ((P2_functor g c).obj Y) none =
+    ((lim_map (diagram_iso_cospan ((P1_functor f r c).obj X)).hom ≫
+            P1_to_P2 (f.app X) (g.app X) r c w' ≫
+              lim_map
+                (𝟙 (cospan ((Filtration.obj c).map (g.app X)) (pt 0)) ≫
+                   (diagram_iso_cospan ((P2_functor g c).obj X)).inv)) ≫
+         (P2_functor g c ⋙ lim).map h) ≫
+      limit.π ((P2_functor g c).obj Y) none :=
+begin
+  dsimp [P1_to_P2],
+  simp only [iso.refl_hom, iso.refl_inv, nat_trans.comp_app, eq_to_iso_refl,
+    category.id_comp, category.assoc,
+    cones.postcompose_obj_π, lim_map_π_assoc, limit.lift_π,
+    diagram_iso_cospan_hom_app, diagram_iso_cospan_inv_app,
+    pullback_cone.mk_π_app_one, limit.lift_map],
+  dsimp,
+  simp only [←(Filtration.obj c).map_comp, category.comp_id, category.id_comp,
+    nat_trans.naturality],
+end
+
+lemma P1_to_P2_nat_trans_aux_2 (hfg : f ≫ g = 0) (X Y : J) (h : X ⟶ Y) (w w') :
+  ((P1_functor f r c ⋙ lim).map h ≫
+         lim_map (diagram_iso_cospan ((P1_functor f r c).obj Y)).hom ≫
+           P1_to_P2 (f.app Y) (g.app Y) r c w ≫
+             lim_map
+               (𝟙 (cospan ((Filtration.obj c).map (g.app Y)) (pt 0)) ≫
+                  (diagram_iso_cospan ((P2_functor g c).obj Y)).inv)) ≫
+      limit.π ((P2_functor g c).obj Y) (some walking_pair.left) =
+    ((lim_map (diagram_iso_cospan ((P1_functor f r c).obj X)).hom ≫
+            P1_to_P2 (f.app X) (g.app X) r c w' ≫
+              lim_map
+                (𝟙 (cospan ((Filtration.obj c).map (g.app X)) (pt 0)) ≫
+                   (diagram_iso_cospan ((P2_functor g c).obj X)).inv)) ≫
+         (P2_functor g c ⋙ lim).map h) ≫
+      limit.π ((P2_functor g c).obj Y) (some walking_pair.left) :=
+begin
+  dsimp [P1_to_P2],
+  simp only [iso.refl_hom ,iso.refl_inv, eq_to_iso_refl, nat_trans.comp_app,
+    category.id_comp, category.assoc, pullback_cone.mk_π_app_left,
+    cones.postcompose_obj_π, lim_map_π_assoc, limit.lift_π, limit.lift_map,
+    diagram_iso_cospan_hom_app, diagram_iso_cospan_inv_app],
+  dsimp,
+  simp only [category.comp_id, category.id_comp],
+end
+
+lemma P1_to_P2_nat_trans_aux_3 (hfg : f ≫ g = 0) (X Y : J) (h : X ⟶ Y) (w w') :
+  ((P1_functor f r c ⋙ lim).map h ≫
+         lim_map (diagram_iso_cospan ((P1_functor f r c).obj Y)).hom ≫
+           P1_to_P2 (f.app Y) (g.app Y) r c w ≫
+             lim_map
+               (𝟙 (cospan ((Filtration.obj c).map (g.app Y)) (pt 0)) ≫
+                  (diagram_iso_cospan ((P2_functor g c).obj Y)).inv)) ≫
+      limit.π ((P2_functor g c).obj Y) (some walking_pair.right) =
+    ((lim_map (diagram_iso_cospan ((P1_functor f r c).obj X)).hom ≫
+            P1_to_P2 (f.app X) (g.app X) r c w' ≫
+              lim_map
+                (𝟙 (cospan ((Filtration.obj c).map (g.app X)) (pt 0)) ≫
+                   (diagram_iso_cospan ((P2_functor g c).obj X)).inv)) ≫
+         (P2_functor g c ⋙ lim).map h) ≫
+      limit.π ((P2_functor g c).obj Y) (some walking_pair.right) :=
+begin
+  dsimp [P1_to_P2],
+  simp only [category.id_comp, category.assoc, eq_to_iso_refl, iso.refl_inv, nat_trans.comp_app,
+    pullback_cone.mk_π_app_right, cones.postcompose_obj_π, limit.lift_π, limit.lift_map,
+    diagram_iso_cospan_inv_app, eq_iff_true_of_subsingleton],
+end
+
 def P1_to_P2_nat_trans (hfg : f ≫ g = 0) :
   (P1_functor f r c ⋙ lim) ⟶ (P2_functor g c ⋙ lim) :=
 { app := λ j, begin
@@ -306,10 +379,12 @@ def P1_to_P2_nat_trans (hfg : f ≫ g = 0) :
     -- It would be nicer to use `pullback.hom_ext` here, but it doesn't unify.
     -- Nevertheless, we can bash out the remaining goals with `simp`.
     apply limit.hom_ext, rintros (⟨⟩|⟨⟨⟩⟩),
-    { dsimp [P1_to_P2], simp, dsimp, simp [-category_theory.functor.map_comp, ←(Filtration.obj c).map_comp], },
-    { dsimp [P1_to_P2], simp, dsimp, simp, },
-    { dsimp [P1_to_P2], simp, },
+    { apply P1_to_P2_nat_trans_aux_1 _ _ _ _ hfg, },
+    { apply P1_to_P2_nat_trans_aux_2 _ _ _ _ hfg, },
+    { apply P1_to_P2_nat_trans_aux_3 _ _ _ _ hfg, },
   end }
+
+attribute [simps] P1_to_P2_nat_trans
 
 set_option pp.universes true
 
