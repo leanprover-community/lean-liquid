@@ -22,10 +22,10 @@ variables {A : Type u} [category.{v} A] [abelian A]
 namespace homotopy_category
 
 local notation `𝒦` := homotopy_category A (complex_shape.up ℤ)
-local notation `HH` := homotopy_category.homology_functor A (complex_shape.up ℤ) 0
+local notation `HH` i := homotopy_category.homology_functor A (complex_shape.up ℤ) i
 
 -- Move this
-instance homology_functor_additive : functor.additive HH := functor.additive.mk $
+instance homology_functor_additive (i : ℤ) : functor.additive (HH i) := functor.additive.mk $
 begin
   rintros X Y ⟨f⟩ ⟨g⟩,
   dsimp [homotopy_category.homology_functor],
@@ -35,11 +35,11 @@ begin
 end
 
 lemma _root_.category_theory.cochain_complex.exact_cone_in_cone_out
-  (X Y : cochain_complex A ℤ) (f : X ⟶ Y) :
-  exact ((_root_.homology_functor _ _ 0).map (cone.in f))
-    ((_root_.homology_functor _ _ 0).map (cone.out f)) :=
+  (i : ℤ) (X Y : cochain_complex A ℤ) (f : X ⟶ Y) :
+  exact ((_root_.homology_functor _ _ i).map (cone.in f))
+    ((_root_.homology_functor _ _ i).map (cone.out f)) :=
 begin
-  refine (homological_complex.six_term_exact_seq (cone.in f) (cone.out f) _ 0 1 rfl).pair,
+  refine (homological_complex.six_term_exact_seq (cone.in f) (cone.out f) _ i (i+1) rfl).pair,
   intro n,
   apply (cone.termwise_split _ _).short_exact,
 end
@@ -65,7 +65,7 @@ begin
   { simp only [preadditive.comp_neg, category.comp_id, iso.refl_hom, category.id_comp], }
 end
 
-instance homology_functor_homological : homological_functor HH :=
+instance homology_functor_homological (i : ℤ) : homological_functor (HH i) :=
 begin
   apply homological_of_rotate,
   intros T hT,
