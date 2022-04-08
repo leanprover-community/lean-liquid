@@ -86,36 +86,54 @@ instance has_zero_object : limits.has_zero_object (bounded_derived_category A) :
   { default := ⟨0⟩,
     uniq := λ a, by { ext1, cases a, dsimp at *, apply limits.has_zero_object.to_zero_ext } } }
 
+@[simps]
+def has_shift_functor (i : ℤ) : bounded_derived_category A ⥤ bounded_derived_category A:=
+{ obj := λ X,
+  { val := X.val⟦i⟧,
+    proj := by { dsimp, apply_instance } },
+  map := λ X Y f, ⟨f.val⟦i⟧'⟩,
+  map_id' := λ X, by { ext1, dsimp, apply category_theory.functor.map_id },
+  map_comp' := λ X Y Z f g, by { ext1, dsimp, apply category_theory.functor.map_comp } }
+
+section
+open homological_complex
+
+noncomputable
+def has_shift_ε : 𝟭 (bounded_derived_category A) ≅ has_shift_functor A 0 :=
+{ hom :=
+  { app := λ X, ⟨(shift_zero _ _).inv⟩,
+    naturality' := λ X Y f,
+      by { ext1, apply (homotopy_category.shift_ε _).hom.naturality _, }, },
+  inv :=
+  { app := λ X, ⟨(shift_zero _ _).hom⟩,
+    naturality' := λ X Y f,
+      by { ext1, sorry, }, }, }
+
+@[simps]
+noncomputable
+def has_shift_μ (m n : ℤ) : has_shift_functor A m ⋙ has_shift_functor A n ≅ has_shift_functor A (m + n) :=
+{ hom :=
+  { app := λ X, ⟨(shift_add _ _ _).inv⟩,
+    naturality' := λ X Y f,
+      by { ext1, exact (homotopy_category.shift_functor_add A m n).hom.naturality f.val, } },
+  inv :=
+  { app := λ X, ⟨(shift_add _ _ _).hom⟩,
+    naturality' := begin intros, ext1, dsimp, have := (homotopy_category.shift_functor_add A m n).inv.naturality f.val,
+      -- why doesn't this work?
+      -- exact this,
+      sorry
+       end }, }
+
 noncomputable
 instance has_shift : has_shift (bounded_derived_category A) ℤ := has_shift_mk _ _ $
-{ F := λ i,
-  { obj := λ X,
-    { val := X.val⟦i⟧,
-      proj := by { dsimp, apply_instance } },
-    map := λ X Y f, ⟨f.val⟦i⟧'⟩,
-    map_id' := λ X, by { ext1, dsimp, apply category_theory.functor.map_id },
-    map_comp' := λ X Y Z f g, by { ext1, dsimp, apply category_theory.functor.map_comp } },
-  ε :=
-  { hom :=
-    { app := λ X, ⟨(shift_zero _ _).inv⟩,
-      naturality' := sorry },
-    inv :=
-    { app := λ X, ⟨(shift_zero _ _).hom⟩,
-      naturality' := sorry },
-    hom_inv_id' := sorry,
-    inv_hom_id' := sorry },
-  μ := λ m n,
-  { hom :=
-    { app := λ X, ⟨(shift_add _ _ _).inv⟩,
-      naturality' := sorry },
-    inv :=
-    { app := λ X, ⟨(shift_add _ _ _).hom⟩,
-      naturality' := sorry },
-    hom_inv_id' := sorry,
-    inv_hom_id' := sorry },
-  associativity := sorry,
+{ F := λ i, has_shift_functor A i,
+  ε := has_shift_ε A,
+  μ := has_shift_μ A,
+  associativity := begin intros, ext, dsimp, sorry, end,
   left_unitality := sorry,
   right_unitality := sorry }
+
+end
 
 @[simps]
 instance preadditive : preadditive (bounded_derived_category A) :=
