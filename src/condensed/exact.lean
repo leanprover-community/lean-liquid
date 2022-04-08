@@ -362,6 +362,13 @@ lemma extend_aux {A₁ B₁ A₂ B₂ : CompHaus}
   epi g :=
 by { subst H, apply epi_comp _ _, apply_instance, apply epi_comp }
 
+-- move me, generalize
+lemma extend_aux' {A₁ B₁ A₂ B₂ : CompHaus}
+  (e₁ : A₁ ≅ B₁) (e₂ : A₂ ≅ B₂) (f : A₁ ⟶ A₂) (g : B₁ ⟶ B₂) (hf : epi f)
+  (H : f = e₁.hom ≫ g ≫ e₂.inv) :
+  epi g :=
+by { rw [← iso.inv_comp_eq, iso.eq_comp_inv, category.assoc] at H, apply extend_aux e₁ e₂ f g hf H }
+
 lemma extend {A B C : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}}
   (f : A ⟶ B) (g : B ⟶ C) (r : ℝ≥0) [fact (1 ≤ r)]
   (hfg : ∀ S, exact_with_constant (f.app S) (g.app S) r) (S : Profinite) :

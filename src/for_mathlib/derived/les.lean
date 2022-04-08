@@ -24,13 +24,6 @@ variables (A : Type*) [category A] [abelian A] [enough_projectives A]
 
 namespace bounded_derived_category
 
-@[simps]
-def forget : bounded_derived_category A ⥤ bounded_homotopy_category A :=
-{ obj := λ X, X.val,
-  map := λ _ _ f, f.val,
-  map_id' := λ _ , rfl,
-  map_comp' := λ _ _ _ _ _, rfl }
-
 instance Ext_additive_fst (i : ℤ) (X : bounded_derived_category A) :
   (((Ext A i).flip.obj X).right_op).additive :=
 { map_add' := begin
