@@ -65,7 +65,7 @@ begin
     ((homotopy_category.homology_functor _ _ 0).map T.mor₃)
     ((homology_functor _ _ 0).map f)
     ((homology_functor _ _ 0).map g)
-    (δ f g _ 0 1 rfl)
+    (δ f g ses 0 1 rfl)
     (𝟙 _) (𝟙 _)
     ((homology_functor _ _ 0).map (cone.π f g _))
     (EE.app _).hom _ _ _
@@ -73,11 +73,26 @@ begin
     ((homology_functor _ _ 1).obj Y)
     ((homotopy_category.homology_functor A (complex_shape.up ℤ) 0).map T.rotate.mor₃)
     ((homology_functor A (complex_shape.up ℤ) 1).map f)
-    (EE.app _).hom,
+    (-(EE.app _)).hom,
     apply key, any_goals { apply_instance },
     -- now we need to check that many things commute, and that many things are exact.
     -- It's possible the morphisms above would need to be adjusted with a negation.
-    all_goals { sorry },
+  { dsimp [triangle.rotate],
+    simp only [functor.map_neg, preadditive.comp_neg, preadditive.neg_comp, neg_neg],
+    symmetry,
+    apply EE.hom.naturality },
+  { exact E1.pair },
+  { exact (E1.drop 1).pair },
+  { exact (E1.drop 2).pair },
+  { exact E2.pair },
+  { exact (E2.drop 1).pair },
+  { exact (E2.drop 2).pair },
+  { simp only [category.id_comp, category.comp_id], refl },
+  { rw category.id_comp,
+    change _ = (homology_functor _ _ _).map _ ≫ _,
+    rw ← functor.map_comp,
+    congr' 1, ext i, symmetry, apply biprod.inr_snd_assoc },
+  { sorry },
 end
 
 end homological_complex
