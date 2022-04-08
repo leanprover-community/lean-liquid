@@ -233,10 +233,9 @@ instance homological_complex.functor_eval_flip_preserves_colimits_of_shape
         end },
       fac' := by { intros, ext i, dsimp, erw [(is_colimit_of_preserves (F.X i) hc).fac], },
       uniq' := begin
-        intros, ext i, dsimp,
-        replace w := λ j, homological_complex.congr_hom (w j) i,
-        dsimp at w,
-        sorry,
+        intros, ext i,
+        exact (is_colimit_of_preserves (F.X i) hc).uniq (t s i) (m.f i)
+          (λ j, homological_complex.congr_hom (w j) i),
       end, } } }
 
 .
