@@ -176,6 +176,7 @@ def to_laurent_measures_hom [fact (r' < 1)]: comphaus_filtered_pseudo_normed_gro
   end,
   .. to_laurent_measures_addhom r' S }.
 
+@[simps]
 def to_laurent_measures_nat_trans [fact (r' < 1)]:
   invpoly.fintype_functor r' ⟶ laurent_measures.fintype_functor r' :=
 { app := λ S, to_laurent_measures_hom r' S,
@@ -294,17 +295,19 @@ namespace Lbar
 
 open category_theory ProFiltPseuNormGrpWithTinv₁
 
-theorem short_exact (S : Profinite) [fact (r' < 1)]:
+theorem short_exact (S : Profinite) [fact (r' < 1)] :
   short_exact
     ((condensify_map
       (whisker_right (invpoly.to_laurent_measures_nat_trans r') (to_CHFPNG₁ r'))).app S)
     ((condensify_map
       (whisker_right (laurent_measures.to_Lbar_nat_trans r') (to_CHFPNG₁ r'))).app S) :=
 begin
-  refine condensify_exact _ _ sorry _ sorry _ _ _ _ _ _ S,
-  swap 3, { apply invpoly.to_laurent_measures_injective },
-  swap 5, { apply laurent_measures.to_Lbar_surjective },
-  all_goals { sorry }
+  refine condensify_exact _ _ 1 le_rfl 1 le_rfl _ _ _ _ _ S,
+  { apply invpoly.to_laurent_measures_injective },
+  { intro S, ext F s (_|n); refl, },
+  { sorry },
+  { apply laurent_measures.to_Lbar_surjective },
+  { sorry }
 end
 
 end Lbar

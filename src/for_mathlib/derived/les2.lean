@@ -1,4 +1,5 @@
 import for_mathlib.derived.lemmas
+import for_mathlib.derived.les
 
 open category_theory
 open category_theory.limits
@@ -12,11 +13,6 @@ variables {X Y Z : cochain_complex A ℤ} (f : X ⟶ Y) (g : Y ⟶ Z)
 noncomputable theory
 
 local notation `𝒦` := homotopy_category A (complex_shape.up ℤ)
-
--- Copy this over from `for_mathlib/derived/les.lean`.
-def cone.π (w : ∀ i : ℤ, f.f i ≫ g.f i = 0): cone f ⟶ Z :=
-{ f := λ i, biprod.snd ≫ g.f _,
-  comm' := sorry }
 
 -- The 5-lemma with no instances... I think this is more convenient to apply in practice.
 lemma _root_.category_theory.abelian.is_iso_of_is_iso_of_is_iso_of_is_iso_of_is_iso' :
