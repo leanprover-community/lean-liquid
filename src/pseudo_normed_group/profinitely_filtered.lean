@@ -510,11 +510,6 @@ end comphaus_filtered_pseudo_normed_group_hom
 
 namespace punit
 
--- PR #8138
-instance (X : Type*) [subsingleton X] (p : X → Prop) :
-  subsingleton (subtype p) :=
-⟨λ x y, subtype.ext $ subsingleton.elim _ _⟩
-
 instance : profinitely_filtered_pseudo_normed_group punit :=
 { filtration := λ _, set.univ,
   filtration_mono := λ _ _ _, set.subset_univ _,
