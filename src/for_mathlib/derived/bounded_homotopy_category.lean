@@ -126,6 +126,7 @@ by constructor
 
 instance : triangulated.pretriangulated (bounded_homotopy_category A) :=
 { distinguished_triangles :=
+  -- This could be expresed using `.map_triangle`?
   { T | triangle.mk (homotopy_category _ _) T.mor₁ T.mor₂ T.mor₃ ∈
     dist_triang (homotopy_category A (complex_shape.up ℤ)) },
   isomorphic_distinguished := begin

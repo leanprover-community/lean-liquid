@@ -25,6 +25,16 @@ instance : category (bounded_derived_category A) :=
   comp_id' := λ X Y f, by { ext1, apply category.comp_id _ },
   assoc' := λ X Y Z W f g h, by { ext1, apply category.assoc _ _ _ } }
 
+variable (A)
+def forget : bounded_derived_category A ⥤ bounded_homotopy_category A :=
+{ obj := λ X, X.val,
+  map := λ X Y f, f.val, }
+
+instance : faithful (forget A) := {}
+
+instance : full (forget A) :=
+{ preimage := λ X Y f, ⟨f⟩, }
+
 variable {A}
 @[simps]
 def of (X : bounded_homotopy_category A) [homotopy_category.is_K_projective X.val] :
@@ -135,6 +145,11 @@ instance has_shift : has_shift (bounded_derived_category A) ℤ := has_shift_mk 
 
 end
 
+def shift_functor_localization_functor (m : ℤ) :
+  shift_functor (bounded_homotopy_category A) m ⋙ localization_functor A ≅
+    localization_functor A ⋙ shift_functor (bounded_derived_category A) m :=
+sorry
+
 @[simps]
 instance preadditive : preadditive (bounded_derived_category A) :=
 { hom_group := λ P Q,
@@ -169,6 +184,11 @@ instance additive (n : ℤ) : (shift_functor (bounded_derived_category A) n).add
     refl,
   end }
 
+variable (A)
+def forget_triangulated_functor_struct : triangulated.pretriangulated.triangulated_functor_struct (bounded_derived_category A) (bounded_homotopy_category A) :=
+{ to_functor := forget A,
+  comm_shift := sorry, }
+
 variable {A}
 @[simps]
 def lift {C : Type*} [category C] (F : bounded_homotopy_category A ⥤ C) :
@@ -194,17 +214,19 @@ begin
   rw bounded_homotopy_category.lift_lifts,
 end
 
+@[simp, reassoc] lemma π_lift_id_π (X : bounded_derived_category A) :
+  X.val.π ≫ bounded_homotopy_category.lift (𝟙 X.val) X.val.π = 𝟙 X.val.replace :=
+begin
+  refine bounded_homotopy_category.lift_ext X.val.π _ _ _,
+  rw [category.assoc, bounded_homotopy_category.lift_lifts, category.id_comp, category.comp_id],
+end
+
 @[simps]
 noncomputable
 def localization_iso (X : bounded_derived_category A) :
   (localization_functor A).obj X.val ≅ X :=
 { hom := ⟨X.val.π⟩,
-  inv := ⟨bounded_homotopy_category.lift (𝟙 _) X.val.π⟩,
-  hom_inv_id' := begin
-    ext, dsimp, refine bounded_homotopy_category.lift_ext X.val.π _ _ _,
-    rw [category.assoc, bounded_homotopy_category.lift_lifts, category.id_comp, category.comp_id],
-  end,
-  inv_hom_id' := by { ext, dsimp, rw bounded_homotopy_category.lift_lifts } }
+  inv := ⟨bounded_homotopy_category.lift (𝟙 _) X.val.π⟩, }
 
 noncomputable
 def lift_unique {C : Type*} [category C]
@@ -247,46 +269,113 @@ def replace_triangle (S : triangle (bounded_homotopy_category A)) :
     exact ⟨bounded_homotopy_category.lift (S.obj₃.π ≫ S.mor₃) (S.obj₁.π⟦(1 : ℤ)⟧')⟩,
   end }
 
+noncomputable
+def replace_triangle_rotate (S : triangle (bounded_homotopy_category A)) :
+  (replace_triangle S).rotate ≅ replace_triangle S.rotate :=
+begin
+  fapply triangle.iso.of_components,
+  exact iso.refl _,
+  exact iso.refl _,
+  exact ((shift_functor_localization_functor A 1).app S.obj₁).symm,
+  { ext, dsimp, simp, },
+  sorry,
+  sorry,
+end
+
 variable (A)
-instance pretriangulated : triangulated.pretriangulated (bounded_derived_category A) :=
-{ distinguished_triangles := { T |
+
+def pretriangulated_distinguished_triangles :=
+ { T |
     ∃ (S : triangle (bounded_homotopy_category A))
       (hS : S ∈ dist_triang (bounded_homotopy_category A))
-      (f : T ≅ replace_triangle S), true },
+      (f : T ≅ replace_triangle S), true }
+
+variable {A}
+
+-- Is this even true? I hope so.
+lemma forget_distinguished_of_distinguished
+  {T : triangle (bounded_derived_category A)} (m : T ∈ pretriangulated_distinguished_triangles A) :
+  (forget_triangulated_functor_struct A).map_triangle T ∈ dist_triang (bounded_homotopy_category A) :=
+sorry
+
+lemma pretriangulated_contractible_distinguished (X : bounded_derived_category A) :
+  contractible_triangle (bounded_derived_category A) X ∈
+    pretriangulated_distinguished_triangles A :=
+begin
+  refine ⟨contractible_triangle _ X.val, pretriangulated.contractible_distinguished _, ⟨_, trivial⟩⟩,
+  symmetry,
+  fapply triangle.iso.of_components,
+  exact localization_iso X,
+  exact localization_iso X,
+  exact localization_iso 0,
+  { ext, dsimp, simp, },
+  { ext, },
+  { apply (cancel_epi (localization_iso 0).inv).1, ext, apply_instance, },
+end
+
+@[simp]
+lemma shift_functor_map_val (m : ℤ) {X Y : bounded_derived_category A} (f : X ⟶ Y) :
+  ((shift_functor (bounded_derived_category A) m).map f).val =
+    (shift_functor (bounded_homotopy_category A) m).map f.val :=
+rfl
+
+lemma pretriangulated_distinguished_cocone_triangle
+  {X Y : bounded_derived_category A}
+  (f : X ⟶ Y) :
+  ∃ (Z : bounded_derived_category A) (g : Y ⟶ Z)
+    (h : Z ⟶ (shift_functor (bounded_derived_category A) 1).obj X),
+    triangle.mk (bounded_derived_category A) f g h ∈
+      pretriangulated_distinguished_triangles A :=
+begin
+  obtain ⟨Z, g, h, m⟩ := pretriangulated.distinguished_cocone_triangle _ _ f.val,
+  use (localization_functor A).obj Z,
+  use (localization_iso Y).inv ≫ (localization_functor A).map g,
+  refine ⟨(localization_functor A).map (h ≫ eq_to_hom (by refl)) ≫ (localization_iso _).hom, _⟩,
+  refine ⟨_, m, ⟨_, trivial⟩⟩,
+  symmetry,
+  fapply triangle.iso.of_components,
+  exact localization_iso _,
+  exact localization_iso _,
+  exact iso.refl _,
+  all_goals { ext, dsimp, simp, },
+end
+
+variable (A)
+
+instance pretriangulated : triangulated.pretriangulated (bounded_derived_category A) :=
+{ distinguished_triangles := pretriangulated_distinguished_triangles A,
   isomorphic_distinguished := begin
     rintro T₁ ⟨S₁, hS₁, f₁, hf₁⟩ T₂ i, resetI,
     refine ⟨S₁, hS₁, i ≪≫ f₁, trivial⟩,
   end,
-  contractible_distinguished := begin
-    intro X,
-    refine ⟨contractible_triangle _ X.val, pretriangulated.contractible_distinguished _, ⟨_, trivial⟩⟩,
-    symmetry,
-    fapply triangle.iso.of_components,
-    exact localization_iso X,
-    exact localization_iso X,
-    exact localization_iso 0,
-    { ext, dsimp, simp, },
-    { ext, },
-    { apply (cancel_epi (localization_iso 0).inv).1, ext, apply_instance, },
+  contractible_distinguished := pretriangulated_contractible_distinguished,
+  distinguished_cocone_triangle := λ X Y f, pretriangulated_distinguished_cocone_triangle f,
+  rotate_distinguished_triangle := λ T, begin
+    split,
+    { rintro ⟨S, hS, f, -⟩,
+      use S.rotate,
+      refine ⟨pretriangulated.rot_of_dist_triangle _ _ hS, _, trivial⟩,
+      exact rotate.map_iso f ≪≫ replace_triangle_rotate _, },
+    { rintro ⟨S, hS, f, -⟩,
+      use S.inv_rotate,
+      refine ⟨pretriangulated.inv_rot_of_dist_triangle _ _ hS, _, trivial⟩,
+      sorry, -- still somewhat tedious!
+       },
   end,
-  distinguished_cocone_triangle := λ X Y f, begin
-    obtain ⟨Z, g, h, m⟩ := pretriangulated.distinguished_cocone_triangle _ _ f.val,
-    use (localization_functor A).obj Z,
-    use (localization_iso Y).inv ≫ (localization_functor A).map g,
-    refine ⟨(localization_functor A).map h ≫ _ ≫ (localization_iso _).hom, _⟩,
+  complete_distinguished_triangle_morphism := begin
+    -- I'm not sure of the best approach here.
+    -- I'm hoping we can work rather formally,
+    -- and not have to think about *why* this is true in the (bounded) homotopy category,
+    -- only remembering that it is true there.
+    intros,
+    have := pretriangulated.complete_distinguished_triangle_morphism
+      ((forget_triangulated_functor_struct A).map_triangle T₁)
+      ((forget_triangulated_functor_struct A).map_triangle T₂)
+      (forget_distinguished_of_distinguished h₁)
+      (forget_distinguished_of_distinguished h₂) ((forget A).map a) ((forget A).map b)
+      (congr_arg bounded_derived_category_hom.val comm₁),
     sorry,
-    refine ⟨_, m, ⟨_, trivial⟩⟩,
-    symmetry,
-    fapply triangle.iso.of_components,
-    exact localization_iso _,
-    exact localization_iso _,
-    exact iso.refl _,
-    { ext, dsimp, simp, },
-    { ext, dsimp, simp, sorry, },
-    { ext, dsimp, simp, sorry, },
-  end,
-  rotate_distinguished_triangle := sorry,
-  complete_distinguished_triangle_morphism := sorry }
+  end }
 
 variable (A)
 noncomputable
