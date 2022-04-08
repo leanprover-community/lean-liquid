@@ -393,8 +393,9 @@ def embed_homotopy (e : cι.embedding cι') :
           functor.conj_eq_to_hom_iff_heq],
         rw e.r_f i,
         refl, },
-      { simp [embed_iso],
-        congr',
+      { simp only [embed_iso, eq_to_iso.hom, iso.symm_hom, eq_to_iso.inv,
+  preadditive.add_comp, category.assoc, preadditive.comp_add],
+        congr' 2,
         { -- next 30 lines is hacky d_next argument
           rw functor.conj_eq_to_hom_iff_heq,
           delta d_next embed.obj id_rhs embed_homotopy_hom,
