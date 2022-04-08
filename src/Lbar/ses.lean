@@ -241,8 +241,20 @@ let e : ↥(function.support (λ (x : ℕ), f ↑x)) ≃
     convert h,
     exact int.eq_nat_abs_of_zero_le (le_of_not_lt h_1),
   end⟩,
-  left_inv := by intros; sorry,
-  right_inv := by intros; sorry } in
+  left_inv := begin
+    rintro ⟨x, hx⟩,
+    refl,
+  end,
+  right_inv := begin
+    rintro ⟨y, hy⟩,
+    simp only [coe_coe, subtype.coe_mk, subtype.mk_eq_mk],
+    refine (int.eq_nat_abs_of_zero_le _).symm,
+    by_contra h,
+    push_neg at h,
+    apply hy,
+    dsimp only,
+    rw if_pos h,
+  end } in
 begin
   apply equiv.tsum_eq_tsum_of_support e,
   rintros ⟨x, hx⟩,
