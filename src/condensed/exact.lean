@@ -21,21 +21,30 @@ open category_theory category_theory.limits opposite pseudo_normed_group
 
 namespace category_theory.limits
 
+-- These are in PR #13238
+instance {J : Type*} [category J] {C : Type*} [category C] [has_terminal C] :
+  has_limit ((category_theory.functor.const J).obj (⊤_ C)) :=
+has_limit.mk
+{ cone :=
+  { X := ⊤_ C,
+    π := { app := λ _, terminal.from _, }, },
+  is_limit :=
+  { lift := λ s, terminal.from _, }, }
+
 @[simps hom]
-def limit_const_terminal {J : Type*} [category J] {C : Type*} [category C] [has_terminal C]
-  [has_limit ((category_theory.functor.const J).obj (⊤_ C))] :
+def limit_const_terminal {J : Type*} [category J] {C : Type*} [category C] [has_terminal C] :
   limit ((category_theory.functor.const J).obj (⊤_ C)) ≅ ⊤_ C :=
 { hom := terminal.from _,
   inv := limit.lift ((category_theory.functor.const J).obj (⊤_ C))
     { X := ⊤_ C, π := { app := λ j, terminal.from _, }}, }
 
 @[simp, reassoc] lemma limit_const_terminal_inv_π
-  {J : Type*} [category J] {C : Type*} [category C] [has_terminal C]
-  [has_limit ((category_theory.functor.const J).obj (⊤_ C))] {j : J} :
+  {J : Type*} [category J] {C : Type*} [category C] [has_terminal C] {j : J} :
   limit_const_terminal.inv ≫ limit.π ((category_theory.functor.const J).obj (⊤_ C)) j =
     terminal.from _ :=
 by ext ⟨⟩
 
+-- These are in PR #13237.
 variables {C D : Type*} [category.{v} C] [category.{v} D]
 
 @[simp] lemma cospan_comp_iso_hom_app_left (F : C ⥤ D) {X Y Z : C} (f : X ⟶ Z) (g : Y ⟶ Z) :
