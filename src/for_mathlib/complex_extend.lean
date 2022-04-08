@@ -202,6 +202,10 @@ def embed.f : Π i, embed.X X i ⟶ embed.X Y i
 @[simp] lemma embed.f_none : embed.f f none = 0 := rfl
 @[simp] lemma embed.f_some (i : ι) : embed.f f (some i) = f.f i := rfl
 
+lemma embed.f_add {f g : X ⟶ Y} : ∀ i, embed.f (f + g) i = embed.f f i + embed.f g i
+| (some i) := by simp
+| none     := by simp
+
 lemma embed.comm :  ∀ i j, embed.f f i ≫ embed.d Y i j = embed.d X i j ≫ embed.f f j
 | (some i) (some j) := f.comm _ _
 | (some i) none     := show _ ≫ 0 = 0 ≫ 0, by simp only [comp_zero]
@@ -233,16 +237,7 @@ def embed : homological_complex 𝒞 cι ⥤ homological_complex 𝒞 cι' :=
 
 instance embed_additive :
   (embed e : homological_complex 𝒞 cι ⥤ homological_complex 𝒞 cι').additive :=
- { map_add' := begin
-    intros X Y f g,
-    ext n,
-    --simp only [homological_complex.add_f_apply],
-    delta homological_complex.embed,
-    dsimp,
-    delta homological_complex.embed.map,
-    dsimp,
-    sorry,
-  end }
+ { map_add' := λ X Y f g, by { ext, exact embed.f_add _, }, }
 
 def embed_iso (i : ι) : ((embed e).obj X).X (e.f i) ≅ X.X i :=
 eq_to_iso
