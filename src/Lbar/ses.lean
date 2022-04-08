@@ -209,18 +209,31 @@ namespace laurent_measures
     { simp only [function.comp_app, nnreal.coe_nat_abs, zpow_coe_nat] }
   end }
 
-lemma to_Lbar_surjective : function.surjective (to_Lbar r' S) :=
+def to_Lbar_section (G : Lbar r' S) : laurent_measures r' S :=
+⟨λ s n, G s n.to_nat,
 begin
-  intro G,
-  refine ⟨⟨λ s n, G s n.to_nat, λ s, _⟩, _⟩,
-  { refine (nnreal.summable_iff_on_nat_less 0 (λ n n0, _)).mpr _,
-    { simp [int.to_nat_of_nonpos n0.le] },
-    { simp only [int.to_nat_coe_nat, zpow_coe_nat],
-      simpa only [← nnreal.coe_nat_abs] using G.summable' s } },
-  { ext s (_|n),
-    { exact (G.coeff_zero s).symm },
-    { show ite (n.succ = 0) 0 (G s (n + 1)) = G s n.succ, from if_neg n.succ_ne_zero } }
+  intro s,
+  refine (nnreal.summable_iff_on_nat_less 0 (λ n n0, _)).mpr _,
+  { simp [int.to_nat_of_nonpos n0.le] },
+  { simp only [int.to_nat_coe_nat, zpow_coe_nat],
+    simpa only [← nnreal.coe_nat_abs] using G.summable' s }
+end⟩
+
+lemma to_Lbar_section_to_Lbar (G : Lbar r' S) :
+  to_Lbar r' S (to_Lbar_section r' S G) = G :=
+begin
+  ext s (_|n),
+  { exact (G.coeff_zero s).symm },
+  { show ite (n.succ = 0) 0 (G s (n + 1)) = G s n.succ, from if_neg n.succ_ne_zero }
 end
+
+lemma to_Lbar_section_mem_filtration (G : Lbar r' S) (c : ℝ≥0)
+  (hG : G ∈ pseudo_normed_group.filtration (Lbar r' S) c) :
+  to_Lbar_section r' S G ∈ pseudo_normed_group.filtration (laurent_measures r' S) c :=
+sorry
+
+lemma to_Lbar_surjective : function.surjective (to_Lbar r' S) :=
+λ G, ⟨to_Lbar_section r' S G, to_Lbar_section_to_Lbar r' S G⟩
 
 lemma nnnorm_to_Lbar (F : laurent_measures r' S) : ∥to_Lbar r' S F∥₊ ≤ ∥F∥₊ :=
 begin
@@ -316,8 +329,11 @@ begin
     sorry },
   { apply laurent_measures.to_Lbar_surjective },
   { rintro S c F hF,
-    -- Do something similar to the above
-    sorry }
+    refine ⟨laurent_measures.to_Lbar_section r' S F, _, _⟩,
+    { apply laurent_measures.to_Lbar_section_mem_filtration,
+      apply pseudo_normed_group.filtration_mono _ hF,
+      rw one_mul },
+    { apply laurent_measures.to_Lbar_section_to_Lbar } }
 end
 
 end Lbar
