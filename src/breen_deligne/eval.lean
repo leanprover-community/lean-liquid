@@ -667,9 +667,23 @@ begin
   refine homotopy_category.eq_of_homotopy _ _ _,
   -- Prove this in the correct file
   haveI : (homological_complex.embed complex_shape.embedding.nat_down_int_up :
-    chain_complex 𝒜 ℕ ⥤ cochain_complex 𝒜 ℤ).additive := sorry,
+    chain_complex 𝒜 ℕ ⥤ cochain_complex 𝒜 ℤ).additive :=
+    { map_add' := begin
+      intros X Y f g,
+      ext n,
+      --simp only [homological_complex.add_f_apply],
+      delta complex_shape.embedding.nat_down_int_up,
+      delta homological_complex.embed,
+      dsimp,
+      delta homological_complex.embed.map,
+      dsimp,
+      rcases n with (_|n) | n,
+      { sorry },
+      { sorry },
+      { sorry },
+    end },
   rw [← functor.map_add],
-  exact homological_complex.embed_homotopy _ _ _ (eval_functor_homotopy F BD A),
+  exact homological_complex.embed_homotopy _ _ (eval_functor_homotopy F BD A) _,
 end
 
 end package
