@@ -308,7 +308,7 @@ begin
     erw [hy, ← norm_T, locally_constant.norm_eq_iff],
     intro y',
     erw [norm_T, norm_T],
-    cases r.eq_zero_or_pos with hr hr,
+    cases (eq_zero_or_pos : r = 0 ∨ 0 < r) with hr hr,
     { simp only [hr, nnreal.coe_zero, zero_mul] },
     { simp only [hr, ←hy, g.norm_apply_le, mul_le_mul_left, nnreal.coe_pos] } },
 end

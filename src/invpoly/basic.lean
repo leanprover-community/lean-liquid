@@ -233,7 +233,7 @@ lemma log_div_log_lt {r : ℝ≥0} (c : ℝ≥0) (n : ℕ)
   (h : -real.log ↑c / real.log ↑r < ↑n) :
   c < r ^ -(n : ℤ) :=
 begin
-  rcases c.eq_zero_or_pos with (rfl | hc),
+  rcases (eq_zero_or_pos : c = 0 ∨ 0 < c) with (rfl | hc),
   { apply nnreal.zpow_pos hr0.ne.symm, },
   { rw [div_lt_iff_of_neg (real.log_neg hr0 hr1), lt_neg, ← neg_mul] at h,
     rw [(by norm_cast :  -(n : ℝ) = (-(n : ℤ) : ℤ)), ← real.log_zpow] at h,
