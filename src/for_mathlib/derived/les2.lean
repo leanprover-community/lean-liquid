@@ -33,8 +33,8 @@ lemma _root_.category_theory.abelian.is_iso_of_is_iso_of_is_iso_of_is_iso_of_is_
       is_iso δ → is_iso ε → is_iso γ :=
 begin
   intros U B C D A' B' C' D' f g h f' g' h' α β γ δ w1 w2 w3 E E' i i' ε w4,
-  intros, resetI,
-  apply abelian.is_iso_of_is_iso_of_is_iso_of_is_iso_of_is_iso w1 w2 w3 w4,
+  intros hfg hgh hhi hf'g' hg'h' hh'i' hα hβ hδ hε, resetI,
+  apply abelian.is_iso_of_is_iso_of_is_iso_of_is_iso_of_is_iso w1 w2 w3 w4 hfg hgh hhi hf'g' hg'h' hh'i',
 end
 
 theorem is_iso_homology_functor_map (ses : ∀ (i : ℤ), short_exact (f.f i) (g.f i)) :
