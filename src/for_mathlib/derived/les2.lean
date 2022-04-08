@@ -191,7 +191,8 @@ def cone_triangle
 lemma dist_cone_triangle
   [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj X)]
   [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj Y)] :
-  cone_triangle f ∈ dist_triang (bounded_homotopy_category A) := sorry
+  cone_triangle f ∈ dist_triang (bounded_homotopy_category A) :=
+homotopy_category.cone_triangleₕ_mem_distinguished_triangles _ _ f
 
 instance is_iso_Ext_map_cone_π
   (n : ℤ)
