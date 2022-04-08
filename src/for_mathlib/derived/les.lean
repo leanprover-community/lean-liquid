@@ -20,9 +20,9 @@ end
 
 end category_theory
 
-variables (A : Type*) [category A] [abelian A] [enough_projectives A]
-
 namespace bounded_derived_category
+
+variables (A : Type*) [category A] [abelian A] [enough_projectives A]
 
 instance Ext_additive_fst (i : ℤ) (X : bounded_derived_category A) :
   (((Ext A i).flip.obj X).right_op).additive :=
@@ -40,7 +40,9 @@ end bounded_derived_category
 
 namespace homological_complex
 
-variables {A}
+section
+
+variables {A : Type*} [category A] [abelian A]
 variables {X Y Z : cochain_complex A ℤ} (f : X ⟶ Y) (g : Y ⟶ Z)
 
 @[simps]
@@ -70,6 +72,11 @@ noncomputable def kernel : cochain_complex A ℤ :=
 noncomputable def kernel.ι : kernel f ⟶ X :=
 { f := λ i, kernel.ι _,
   comm' := λ i j hij, by simp only [kernel_d, kernel.lift_ι] }
+
+end
+
+variables {A : Type*} [category A] [abelian A] [enough_projectives A]
+variables {X Y Z : cochain_complex A ℤ} (f : X ⟶ Y) (g : Y ⟶ Z)
 
 open_locale pseudoelement
 open category_theory.abelian
