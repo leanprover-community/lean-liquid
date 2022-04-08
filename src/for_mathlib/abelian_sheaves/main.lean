@@ -205,8 +205,9 @@ variables [∀ (X : C), limits.preserves_colimits_of_shape (J.cover X)ᵒᵖ (fo
 variables [reflects_isomorphisms (forget A)]
 
 def coim_to_im'_aux {F G : Sheaf J A} (η : F ⟶ G) :
-coim ((Sheaf_to_presheaf J A).map η) ⟶ (Sheaf_to_presheaf J A).obj (kernel_sheaf (cokernel_π η)) :=
-(coim_to_im _ ≫ limits.kernel.lift _ (limits.kernel.ι _) begin
+  abelian.coimage ((Sheaf_to_presheaf J A).map η) ⟶
+    (Sheaf_to_presheaf J A).obj (kernel_sheaf (cokernel_π η)) :=
+(abelian.coimage_image_comparison _ ≫ limits.kernel.lift _ (limits.kernel.ι _) begin
   dsimp [cokernel_π],
   rw [← category.assoc, limits.kernel.condition],
   simp only [limits.zero_comp],
@@ -288,12 +289,12 @@ def cokernel_sheaf_kernel_ι_iso {F G : Sheaf J A} (η : F ⟶ G) :
 lemma eq_coim_to_im' {F G : Sheaf J A} (η : F ⟶ G) :
   (cokernel_sheaf_kernel_ι_iso η).inv ≫
   (cokernel_iso_cokernel_sheaf _).inv ≫
-  coim_to_im η  ≫
+  abelian.coimage_image_comparison η  ≫
   (kernel_iso_kernel_sheaf _).hom ≫
   (kernel_sheaf_cokernel_π_iso η).hom
   = coim_to_im' η :=
 begin
-  dsimp [coim_to_im, cokernel_sheaf_kernel_ι_iso,
+  dsimp [abelian.coimage_image_comparison, cokernel_sheaf_kernel_ι_iso,
     coim_to_im', coim_to_im'_aux, kernel_sheaf_cokernel_π_iso,
     limits.is_colimit.cocone_point_unique_up_to_iso,
     limits.is_limit.cone_point_unique_up_to_iso],
@@ -319,7 +320,7 @@ begin
 end
 
 lemma coim_to_im_eq {F G : Sheaf J A} (η : F ⟶ G) :
-  coim_to_im η =
+  abelian.coimage_image_comparison η =
   (cokernel_iso_cokernel_sheaf _).hom ≫
   (cokernel_sheaf_kernel_ι_iso η).hom ≫
   coim_to_im' η ≫
@@ -473,7 +474,7 @@ end
 
 lemma coim_to_im'_eq {F G : Sheaf J A} (η : F ⟶ G) :
   (Sheaf_to_presheaf J A).map (coim_to_im' η) =
-  (sheafification J A).map (coim_to_im _) ≫ (kernel_cokernel_π_iso η).hom :=
+  (sheafification J A).map (abelian.coimage_image_comparison _) ≫ (kernel_cokernel_π_iso η).hom :=
 begin
   dsimp only [kernel_cokernel_π_iso, limits.is_limit.cone_point_unique_up_to_iso,
     functor.map_iso, iso.trans_hom],
@@ -492,7 +493,7 @@ begin
   erw limits.limit.lift_π,
   dsimp [limits.cones.functoriality, sheafify_map],
   simp_rw [← plus_functor_map, ← functor.comp_map, ← functor.map_comp],
-  dsimp [coim_to_im', coim_to_im, coim_to_im'_aux],
+  dsimp [coim_to_im', abelian.coimage_image_comparison, coim_to_im'_aux],
   apply J.sheafify_hom_ext,
   { exact plus.is_sheaf_plus_plus J G.val, },
   simp_rw ← category.assoc,
@@ -504,7 +505,8 @@ begin
   erw category.assoc,
 end
 
-instance is_iso_coim_to_im {F G : Sheaf J A} (η : F ⟶ G) : is_iso (coim_to_im η) :=
+instance is_iso_coim_to_im {F G : Sheaf J A} (η : F ⟶ G) :
+  is_iso (abelian.coimage_image_comparison η) :=
 begin
   rw coim_to_im_eq,
   suffices : is_iso (coim_to_im' η),
@@ -516,7 +518,7 @@ begin
 end
 
 instance abelian : abelian (Sheaf J A) :=
-abelian_of_coim_to_im (λ F G η, infer_instance)
+abelian.of_coimage_image_comparison_is_iso
 
 end abelian
 
