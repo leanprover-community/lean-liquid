@@ -4,8 +4,6 @@ import category_theory.preadditive.functor_category
 import category_theory.additive.basic
 import category_theory.abelian.basic
 
-import for_mathlib.abelian_of_isom_thm
-
 namespace category_theory
 
 universes w v u
@@ -169,13 +167,13 @@ section cokernels_and_kernels
 
 variables [has_zero_morphisms D] [has_cokernels D] [has_kernels D]
 
-lemma nat_trans.coim_to_im_app {F G : C ⥤ D} (η : F ⟶ G) (X : C) :
+lemma nat_trans.coimage_image_comparison_app {F G : C ⥤ D} (η : F ⟶ G) (X : C) :
  (nat_trans.cokernel_kernel_ι_iso _ _).inv ≫
- (nat_trans.cokernel_obj_iso _ _).inv ≫ (coim_to_im η).app X ≫
+ (nat_trans.cokernel_obj_iso _ _).inv ≫ (abelian.coimage_image_comparison η).app X ≫
  (nat_trans.kernel_obj_iso _ _).hom ≫
- (nat_trans.kernel_cokernel_π_iso _ _).hom = coim_to_im (η.app X) :=
+ (nat_trans.kernel_cokernel_π_iso _ _).hom = abelian.coimage_image_comparison (η.app X) :=
 begin
-  dsimp [coim_to_im],
+  dsimp [abelian.coimage_image_comparison],
   ext,
   dsimp [nat_trans.cokernel_obj_iso, is_colimit.cocone_point_unique_up_to_iso],
   dsimp [nat_trans.kernel_obj_iso, is_limit.cone_point_unique_up_to_iso],
@@ -207,25 +205,16 @@ variable [abelian D]
 instance additive_category_of_abelian : additive_category D :=
 { ..(infer_instance : preadditive D) } -- without the infer instance, this becomes REALLY slow...
 
-instance abelian.is_iso_coim_to_im {X Y : D} (f : X ⟶ Y) : is_iso (coim_to_im f) :=
-begin
-  have : coim_to_im f = (abelian.coimage_iso_image f).hom,
-  { ext,
-    simp only [coim_to_im, category.assoc, abelian.image.fac, cokernel.π_desc, as_iso_hom,
-      abelian.coimage_image_factorisation] },
-  rw this, apply_instance,
-end
-
 instance functor_category_is_iso_coim_to_im_app {F G : C ⥤ D} (η : F ⟶ G) (X : C) :
-  is_iso ((coim_to_im η).app X) :=
+  is_iso ((abelian.coimage_image_comparison η).app X) :=
 begin
-  have : (coim_to_im η).app X =
+  have : (abelian.coimage_image_comparison η).app X =
     (nat_trans.cokernel_obj_iso _ _).hom ≫
     (nat_trans.cokernel_kernel_ι_iso _ _).hom ≫
-    coim_to_im _ ≫
+    abelian.coimage_image_comparison _ ≫
     (nat_trans.kernel_cokernel_π_iso _ _).inv ≫
     (nat_trans.kernel_obj_iso _ _).inv,
-  { rw ← nat_trans.coim_to_im_app,
+  { rw ← nat_trans.coimage_image_comparison_app,
     simp only [category.assoc, iso.inv_hom_id, iso.inv_hom_id_assoc,
       iso.hom_inv_id, iso.hom_inv_id_assoc, category.comp_id] },
   rw this,
@@ -233,10 +222,10 @@ begin
 end
 
 instance functor_category_is_iso_coim_to_im {F G : C ⥤ D} (η : F ⟶ G) :
-  is_iso (coim_to_im η) := nat_iso.is_iso_of_is_iso_app _
+  is_iso (abelian.coimage_image_comparison η) := nat_iso.is_iso_of_is_iso_app _
 
 instance : abelian (C ⥤ D) :=
-abelian_of_coim_to_im (λ F G η, infer_instance)
+abelian.of_coimage_image_comparison_is_iso
 
 end abelian
 
