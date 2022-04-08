@@ -171,6 +171,101 @@ instance is_quasi_iso_cone_π
   homotopy_category.is_quasi_iso (cone.π f g _) :=
 homological_complex.is_quasi_iso_map_cone_π _ _ w
 
+def of_hom (f : X ⟶ Y)
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj X)]
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj Y)] :
+  of' X ⟶ of' Y :=
+(homotopy_category.quotient _ _).map f
+
+def cone_triangle
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj X)]
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj Y)] :
+  triangle (bounded_homotopy_category A) :=
+{ obj₁ := of' X,
+  obj₂ := of' Y,
+  obj₃ := cone f,
+  mor₁ := of_hom f,
+  mor₂ := (cone.triangleₕ f).mor₂,
+  mor₃ := -(cone.triangleₕ f).mor₃, }
+
+lemma dist_cone_triangle
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj X)]
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj Y)] :
+  cone_triangle f ∈ dist_triang (bounded_homotopy_category A) := sorry
+
+instance is_iso_Ext_map_cone_π
+  (n : ℤ)
+  [enough_projectives A]
+  (W : bounded_homotopy_category A)
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj X)]
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj Y)]
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj Z)]
+  (w : ∀ i, short_exact (f.f i) (g.f i)) :
+  is_iso (((Ext n).flip.obj W).right_op.map (cone.π f g (λ i, (w i).exact.w))) :=
+begin
+  dsimp [functor.right_op],
+  apply_with category_theory.is_iso_op { instances := ff },
+  apply bounded_homotopy_category.is_iso_Ext_flip_obj_map_of_is_quasi_iso,
+end
+
+def connecting_hom'
+  (n : ℤ)
+  [enough_projectives A]
+  (W : bounded_homotopy_category A)
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj X)]
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj Y)]
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj Z)]
+  (w : ∀ i, short_exact (f.f i) (g.f i)) :
+  ((Ext n).flip.obj W).right_op.obj (of' Z) ⟶
+  ((Ext n).flip.obj W).right_op.obj ((of' X)⟦(1 : ℤ)⟧) :=
+inv (((Ext n).flip.obj W).right_op.map ((cone.π f g (λ i, (w i).exact.w)))) ≫
+((Ext n).flip.obj W).right_op.map (cone_triangle f).mor₃
+
+def Ext_five_term_exact_seq
+  (n : ℤ)
+  [enough_projectives A]
+  (W : bounded_homotopy_category A)
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj X)]
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj Y)]
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj Z)]
+  (w : ∀ i, short_exact (f.f i) (g.f i)) :
+  let E := ((Ext n).flip.obj W).right_op in
+  exact_seq Abᵒᵖ $
+    [ arrow.mk (E.map (of_hom f))
+    , E.map (of_hom g)
+    , connecting_hom' f g n W w
+    , E.map (-(of_hom f)⟦(1 : ℤ)⟧')] :=
+begin
+  intros E,
+  have hg : of_hom g = (cone_triangle f).mor₂ ≫ (cone.π f g (λ i, (w i).exact.w)),
+  { dsimp [of_hom, cone_triangle, cone.π, homotopy_category.cone.π],
+    erw [← functor.map_comp], congr' 1,
+    ext ii,
+    dsimp [cone.in], rw biprod.inr_snd_assoc },
+  let e := (E.map ((cone.π f g (λ i, (w i).exact.w)))),
+  let ee := as_iso e,
+  have firsttwo := homological_functor.cond E (cone_triangle f) (dist_cone_triangle _),
+  apply exact_seq.cons,
+  { rw [hg, functor.map_comp],
+    rw exact_comp_iso,
+    apply firsttwo },
+  apply exact_seq.cons,
+  { have next_two :=
+      homological_functor.cond E (cone_triangle f).rotate _,
+    dsimp only [connecting_hom'], rw [hg, functor.map_comp],
+    change exact (_ ≫ ee.hom) (ee.inv ≫ _),
+    rw category_theory.exact_comp_hom_inv_comp_iff,
+    exact next_two,
+    apply pretriangulated.rot_of_dist_triangle, apply dist_cone_triangle },
+  rw ← exact_iff_exact_seq,
+  { dsimp only [connecting_hom'],
+    rw exact_iso_comp,
+    apply homological_functor.cond E (cone_triangle f).rotate.rotate,
+    apply pretriangulated.rot_of_dist_triangle,
+    apply pretriangulated.rot_of_dist_triangle,
+    apply dist_cone_triangle },
+end
+
 end bounded_homotopy_category
 
 namespace bounded_derived_category
