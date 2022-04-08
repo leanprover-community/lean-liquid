@@ -109,7 +109,7 @@ end complex_shape
 variables {c₁ : complex_shape ι₁} {c₂ : complex_shape ι₂}
 variables {cι : complex_shape ι} {cι' : complex_shape ι'}
 
-variables {𝒞 : Type*} [category 𝒞] [abelian 𝒞] -- reclaim category notation!
+variables {𝒞 : Type*} [category 𝒞] [preadditive 𝒞] [has_zero_object 𝒞] -- reclaim category notation!
 
 namespace homological_complex
 
@@ -230,6 +230,19 @@ def embed : homological_complex 𝒞 cι ⥤ homological_complex 𝒞 cι' :=
   map_id' := λ X, by { ext i, exact embed.f_id _ },
   map_comp' := by { intros, ext i, exact embed.f_comp f g _ } }
 .
+
+instance embed_additive :
+  (embed e : homological_complex 𝒞 cι ⥤ homological_complex 𝒞 cι').additive :=
+ { map_add' := begin
+    intros X Y f g,
+    ext n,
+    --simp only [homological_complex.add_f_apply],
+    delta homological_complex.embed,
+    dsimp,
+    delta homological_complex.embed.map,
+    dsimp,
+    sorry,
+  end }
 
 def embed_iso (i : ι) : ((embed e).obj X).X (e.f i) ≅ X.X i :=
 eq_to_iso
