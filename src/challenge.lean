@@ -30,6 +30,14 @@ variables [fact (p' < p)] [fact (p' ≤ 1)] [fact (p ≤ 1)]
 
 set_option pp.universes true
 
+-- move me
+instance : fact (@r p < 1) :=
+begin
+  constructor, delta r,
+  apply real.rpow_lt_one,
+  all_goals { sorry }
+end
+
 theorem liquid_tensor_experiment (S : Profinite.{1}) (V : pBanach.{1} p) :
   ∀ i > 0, Ext i (ℳ_{p'} S) V ≅ 0 :=
 begin
@@ -44,6 +52,7 @@ begin
   convert laurent_measures.epi_and_is_iso _ r S ⟨V⟩ _ using 1,
   { refine ⟨nnreal.rpow_lt_rpow_of_exponent_gt (fact.out _) _ (fact.out _)⟩,
     exact nnreal.half_lt_self one_ne_zero, },
+  { apply_instance },
   { intro v,
     rw [pBanach.choose_normed_with_aut_T_inv, ← inv_eq_one_div, inv_inv, two_smul, two_nsmul], }
 end
