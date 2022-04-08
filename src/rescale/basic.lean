@@ -9,6 +9,9 @@ This file is little more than the definition of the type alias.
 noncomputable theory
 open_locale big_operators classical nnreal
 
+/-- `rescale r M` is the pseudo-normed group `M` but with a new filtration,
+where `(rescale r M)_c := M_{c*r⁻¹}`.
+-/
 @[nolint unused_arguments]
 def rescale (N : ℝ≥0) (V : Type*) := V
 
