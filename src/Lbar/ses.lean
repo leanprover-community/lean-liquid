@@ -232,10 +232,17 @@ lemma tsum_nat_eq_tsum_int {α : Type*} [add_comm_monoid α] [topological_space 
   (f : ℤ → α) : ∑' (n : ℕ), f n = ∑' (z : ℤ), if z < 0 then 0 else f z :=
 let e : ↥(function.support (λ (x : ℕ), f ↑x)) ≃
   ↥(function.support (λ (y : ℤ), ite (y < 0) 0 (f y))) :=
-{ to_fun := λ x, ⟨x, sorry⟩,
-  inv_fun := λ y, ⟨y.1.nat_abs, sorry⟩,
-  left_inv := sorry,
-  right_inv := sorry } in
+{ to_fun := λ x, ⟨x, x.2⟩,
+  inv_fun := λ y, ⟨y.1.nat_abs, λ h, begin
+    cases y with y hy,
+    apply hy,
+    dsimp only,
+    split_ifs, refl,
+    convert h,
+    exact int.eq_nat_abs_of_zero_le (le_of_not_lt h_1),
+  end⟩,
+  left_inv := by intros; sorry,
+  right_inv := by intros; sorry } in
 begin
   apply equiv.tsum_eq_tsum_of_support e,
   rintros ⟨x, hx⟩,
