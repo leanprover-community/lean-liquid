@@ -279,50 +279,6 @@ lemma embed_homotopy_zero : Π (oi oj : option ι)
 | (some i) none     H := rfl
 | none     j        H := rfl
 
--- lemma embed_homotopy_comm : ∀ (oi oj ok : option ι)
---   (Hij : ∀ (i j : ι), oi = some i → oj = some j → cι.rel i j)
---   (Hjk : ∀ (j k : ι), oj = some j → ok = some k → cι.rel j k),
---   embed.f f oj =
---     embed.d X oj ok ≫ embed_homotopy_hom f f' h ok oj +
---     embed_homotopy_hom f f' h oj oi ≫ embed.d Y oi oj +
---     embed.f f' oj
--- | (some i) (some j) (some k) Hij Hjk := begin
---   have hij : cι.rel i j := Hij _ _ rfl rfl,
---   have hjk : cι.rel j k := Hjk _ _ rfl rfl,
---   have := h.comm j,
---   rw [prev_d_eq _ hij, d_next_eq _ hjk] at this,
---   exact this
--- end
--- | (some i) (some j) none Hij _ := begin
---   have hij : cι.rel i j := Hij _ _ rfl rfl,
---   simp,
---   have h1 := h.comm j,
---   rw [prev_d_eq _ hij] at h1,
---   have h2 := h.comm j,
---   simp at h1,
---   simp at h2,
---   sorry
--- end
--- | none (some _) (some _) _ _ := sorry
--- | none (some _) none _ _ := sorry
--- | none none none _ _ := by { erw [zero_comp, zero_add, zero_add], refl }
--- | none none (some _) _ _ := by { erw [zero_comp, comp_zero, zero_add, zero_add], refl }
--- | (some _) none none _ _ := by { erw [zero_comp, comp_zero, zero_add, zero_add], refl }
--- | (some _) none (some _) _ _ := by { erw [zero_comp, comp_zero, zero_add, zero_add], refl }
-
--- lemma embed_homotopy_comm' (e : cι.embedding cι') :
---   ∀ (i : option ι) (F : Π i, embed.X X i ⟶ embed.X Y i)
---   (hF : ∀ i, F (e.r i) = let F' := (λ (i j : ι'),
---     show ((embed e).obj X).X i ⟶ ((embed e).obj Y).X j, from
---     embed_homotopy_hom f f' h (e.r i) (e.r j)) in (d_next i) F' + (prev_d i) F'),
---   embed.f f i = F i + embed.f f' i
--- | (some i) F hF := begin
---   convert h.comm i using 2,
---   dsimp at hF, specialize hF (e.f i),
---   sorry
--- end
--- | none     i' H := by ext
-
 def embed_homotopy (e : cι.embedding cι') :
   homotopy ((embed e).map f) ((embed e).map f') :=
 { hom := λ i j, embed_homotopy_hom f f' h (e.r i) (e.r j),
@@ -346,7 +302,7 @@ def embed_homotopy (e : cι.embedding cι') :
         rw e.r_f i,
         refl, },
       { simp only [embed_iso, eq_to_iso.hom, iso.symm_hom, eq_to_iso.inv,
-  preadditive.add_comp, category.assoc, preadditive.comp_add],
+          preadditive.add_comp, category.assoc, preadditive.comp_add],
         congr' 2,
         { -- next 30 lines is hacky d_next argument
           rw functor.conj_eq_to_hom_iff_heq,
