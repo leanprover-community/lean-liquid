@@ -302,7 +302,14 @@ def P1_to_P2_nat_trans (hfg : f ≫ g = 0) :
     { refine lim_map (diagram_iso_cospan _).hom, },
     { refine lim_map (_ ≫ (diagram_iso_cospan _).inv), exact 𝟙 _, }
   end,
-  naturality' := sorry }
+  naturality' := λ X Y h, begin
+    -- It would be nicer to use `pullback.hom_ext` here, but it doesn't unify.
+    -- Nevertheless, we can bash out the remaining goals with `simp`.
+    apply limit.hom_ext, rintros (⟨⟩|⟨⟨⟩⟩),
+    { dsimp [P1_to_P2], simp, dsimp, simp [-category_theory.functor.map_comp, ←(Filtration.obj c).map_comp], },
+    { dsimp [P1_to_P2], simp, dsimp, simp, },
+    { dsimp [P1_to_P2], simp, },
+  end }
 
 set_option pp.universes true
 
