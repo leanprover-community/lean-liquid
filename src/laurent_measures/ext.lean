@@ -22,10 +22,8 @@ variables
 -- move me
 instance fact_half_pos : fact ((0:ℝ≥0) < 1/2) := ⟨by simp⟩
 
--- move me
-instance fact_pos_of_half_lt : fact (0 < r') := sorry -- this is false!
-
-lemma epi_and_is_iso (V : SemiNormedGroup.{u}) [normed_with_aut r V] [complete_space V]
+lemma epi_and_is_iso [fact (0 < r')]
+  (V : SemiNormedGroup.{u}) [normed_with_aut r V] [complete_space V]
   (hV : ∀ (v : V), (normed_with_aut.T.inv v) = 2 • v) :
   epi (((Ext' 0).map ((condensify_Tinv2 (fintype_functor r')).app S).op).app
     (Condensed.of_top_ab V)) ∧
