@@ -726,6 +726,10 @@ preserves_limit_of_preserves_limit_cone (limit_cone_is_limit _)
     simpa,
   end } .
 
+instance (c : ℝ≥0) : preserves_limits (level.obj c) :=
+{ preserves_limits_of_shape := λ J _, by exactI
+  { preserves_limit := λ G, by apply_instance, } }
+
 lemma mem_filtration_iff_of_is_limit (C : cone G) (hC : is_limit C) (c : ℝ≥0) (x : C.X) :
   x ∈ pseudo_normed_group.filtration C.X c ↔
   (∀ j : J, C.π.app j x ∈ pseudo_normed_group.filtration (G.obj j) c) :=
