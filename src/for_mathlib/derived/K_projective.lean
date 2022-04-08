@@ -356,7 +356,8 @@ begin
   apply lift_unique, rw is_iso.inv_comp_eq, simp,
 end
 
-instance is_iso_Ext_flip_obj_map_of_is_quasi_iso [enough_projectives A] (i : ℤ) (X X' Y : 𝒦)
+instance is_iso_Ext_flip_obj_map_of_is_quasi_iso [enough_projectives A] (i : ℤ)
+  (X X' Y : 𝒦)
   (f : X ⟶ X') [homotopy_category.is_quasi_iso f] :
   is_iso (((Ext i).flip.obj Y).map f.op) :=
 begin

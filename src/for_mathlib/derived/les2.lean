@@ -120,6 +120,59 @@ homological_complex.is_quasi_iso_map_cone_π _ _ w
 
 end homotopy_category
 
+namespace homological_complex
+
+end homological_complex
+
+namespace bounded_homotopy_category
+
+variables {X Y Z : cochain_complex A ℤ} (f : X ⟶ Y) (g : Y ⟶ Z)
+open homological_complex
+
+def cone
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj X)]
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj Y)]
+  (f : X ⟶ Y) :
+  bounded_homotopy_category A :=
+{ val := homotopy_category.cone f,
+  bdd := begin
+    obtain ⟨a,ha⟩ :=
+      homotopy_category.is_bounded_above.cond ((homotopy_category.quotient _ _).obj X),
+    obtain ⟨b,hb⟩ :=
+      homotopy_category.is_bounded_above.cond ((homotopy_category.quotient _ _).obj Y),
+    constructor, use (max a b + 1),
+    intros t ht,
+    apply is_zero_biprod,
+    { apply ha, refine le_trans (le_trans _ ht) _,
+      refine le_trans (le_max_left a b) _,
+      all_goals { linarith } },
+    { apply hb,
+      refine le_trans _ ht, refine le_trans (le_max_right a b) _,
+      linarith }
+  end }
+
+def of' (X : cochain_complex A ℤ)
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj X)] :
+  bounded_homotopy_category A :=
+of $ (homotopy_category.quotient _ _).obj X
+
+def cone.π
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj X)]
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj Y)]
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj Z)]
+  (w) : cone f ⟶ of' Z :=
+homotopy_category.cone.π f g w
+
+instance is_quasi_iso_cone_π
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj X)]
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj Y)]
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj Z)]
+  (w : ∀ i, short_exact (f.f i) (g.f i)) :
+  homotopy_category.is_quasi_iso (cone.π f g _) :=
+homological_complex.is_quasi_iso_map_cone_π _ _ w
+
+end bounded_homotopy_category
+
 namespace bounded_derived_category
 
 variables [enough_projectives A]
