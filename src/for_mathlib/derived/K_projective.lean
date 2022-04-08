@@ -360,8 +360,8 @@ instance is_iso_Ext_flip_obj_map_of_is_quasi_iso [enough_projectives A] (i : ℤ
   (f : X ⟶ X') [homotopy_category.is_quasi_iso f] :
   is_iso (((Ext i).flip.obj Y).map f.op) :=
 begin
-  let E := (preadditive_yoneda.obj (Y⟦i⟧)),
-  let e := (preadditive_yoneda.obj (Y⟦i⟧)).map (lift (X.π ≫ f) X'.π).op, change is_iso e,
+  let e := (preadditive_yoneda.obj (Y⟦i⟧)).map (lift (X.π ≫ f) X'.π).op,
+  change is_iso e,
   apply functor.map_is_iso,
 end
 
