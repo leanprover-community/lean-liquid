@@ -326,6 +326,45 @@ begin
   exact this,
 end
 
+instance lift_is_iso
+  [enough_projectives A] (X Y X' Y' : 𝒦)
+  (f : X ⟶ Y) (πX : X' ⟶ X) (πY : Y' ⟶ Y)
+  [homotopy_category.is_quasi_iso f]
+  [homotopy_category.is_quasi_iso πX]
+  [homotopy_category.is_quasi_iso πY]
+  [homotopy_category.is_K_projective X'.val]
+  [homotopy_category.is_K_projective Y'.val] :
+  is_iso (lift (πX ≫ f) πY) :=
+begin
+  use lift πY (πX ≫ f),
+  split,
+  { apply lift_ext (πX ≫ f), simp, apply_instance },
+  { apply lift_ext πY, simp, apply_instance }
+end
+
+@[simp]
+lemma inv_lift
+  [enough_projectives A] (X Y X' Y' : 𝒦)
+  (f : X ⟶ Y) (πX : X' ⟶ X) (πY : Y' ⟶ Y)
+  [homotopy_category.is_quasi_iso f]
+  [homotopy_category.is_quasi_iso πX]
+  [homotopy_category.is_quasi_iso πY]
+  [homotopy_category.is_K_projective X'.val]
+  [homotopy_category.is_K_projective Y'.val] :
+  inv (lift (πX ≫ f) πY) = lift πY (πX ≫ f) :=
+begin
+  apply lift_unique, rw is_iso.inv_comp_eq, simp,
+end
+
+instance is_iso_Ext_flip_obj_map_of_is_quasi_iso [enough_projectives A] (i : ℤ) (X X' Y : 𝒦)
+  (f : X ⟶ X') [homotopy_category.is_quasi_iso f] :
+  is_iso (((Ext i).flip.obj Y).map f.op) :=
+begin
+  let E := (preadditive_yoneda.obj (Y⟦i⟧)),
+  let e := (preadditive_yoneda.obj (Y⟦i⟧)).map (lift (X.π ≫ f) X'.π).op, change is_iso e,
+  apply functor.map_is_iso,
+end
+
 end bounded_homotopy_category
 
 variable [enough_projectives A]

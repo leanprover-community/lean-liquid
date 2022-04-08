@@ -126,5 +126,22 @@ variables [enough_projectives A]
 variables {X Y Z : bounded_derived_category A} (f : X ⟶ Y) (g : Y ⟶ Z)
 open homological_complex
 
+def cone (f : X ⟶ Y) : bounded_derived_category A :=
+(localization_functor _).obj $
+{ val := homotopy_category.cone f.val.out,
+  bdd := begin
+    obtain ⟨a,ha⟩ := homotopy_category.is_bounded_above.cond X.val.val,
+    obtain ⟨b,hb⟩ := homotopy_category.is_bounded_above.cond Y.val.val,
+    constructor, use (max a b + 1),
+    intros t ht,
+    apply is_zero_biprod,
+    { apply ha, refine le_trans (le_trans _ ht) _,
+      refine le_trans (le_max_left a b) _,
+      all_goals { linarith } },
+    { apply hb,
+      refine le_trans _ ht, refine le_trans (le_max_right a b) _,
+      linarith }
+  end }
+
 -- UGH
 end bounded_derived_category
