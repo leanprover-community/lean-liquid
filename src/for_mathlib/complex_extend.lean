@@ -179,7 +179,6 @@ section embedding_change_of_complex
 
 variable (e : cι.embedding cι')
 
---variables (X Y Z : homological_complex C c₁) (f : X ⟶ Y) (g : Y ⟶ Z)
 /-- Object-valued pushforward of `𝒞`-valued homological complexes along an embedding
   `ι₁ ↪ ι₂` of complex-shapes (with all indexes not in the image going to `0`). -/
 def embed.obj (X : homological_complex 𝒞 cι) : homological_complex 𝒞 cι' :=
@@ -199,8 +198,6 @@ variables {X Y Z : homological_complex 𝒞 cι} (f : X ⟶ Y) (g : Y ⟶ Z)
 def embed.f : Π i, embed.X X i ⟶ embed.X Y i
 | (some i) := f.f i
 | none     := 0
-
--- embed.f f (some j)
 
 @[simp] lemma embed.f_none : embed.f f none = 0 := rfl
 @[simp] lemma embed.f_some (i : ι) : embed.f f (some i) = f.f i := rfl
@@ -242,21 +239,6 @@ begin
   rw e.r_f,
   refl,
 end
-
-set_option pp.proofs true
-lemma foo (i : ι) : (embed_iso e i).hom ≫ f.f i =
-  embed.f f (e.r (e.f i)) ≫ (embed_iso e i).hom :=
-begin
-  rw ← iso.cancel_iso_hom_right _ _ (embed_iso e i).symm,
-  simp [embed_iso],
-  symmetry,
-  rw functor.conj_eq_to_hom_iff_heq,
-  have h1 := embed.f_some f i,
-  have h2 := e.r_f i,
-  rw h2,
-  simp,
-end
-
 
 end embedding_change_of_complex
 
@@ -333,44 +315,6 @@ lemma embed_homotopy_zero : Π (oi oj : option ι)
 -- end
 -- | none     i' H := by ext
 
--- def loop : complex_shape unit :=
--- { rel := λ _ _, true,
---   next_eq := λ _ _ _ _ _, unit.ext,
---   prev_eq := λ _ _ _ _ _, unit.ext }
-
--- namespace loop
-
--- /-- Constructor for the data you need to make a homological complex for the `loop` complex-shape :
-
--- -/
--- def of_object {A : 𝒞} {d : A ⟶ A} (h : d ≫ d = 0): homological_complex 𝒞 loop :=
--- { X := λ _, A,
---   d := λ _ _, d,
---   shape' := λ _ _ h, (h trivial).elim,
---   d_comp_d' := λ _ _ _ _ _, h }
-
--- def of_morphism {A B : 𝒞} {dA : A ⟶ A} {dB : B ⟶ B} (hA : dA ≫ dA = 0) (hB : dB ≫ dB = 0)
---   -- morphism from A to B
---   (f : A ⟶ B) (h : f ≫ dB = dA ≫ f)
---   :
--- (of_object hA) ⟶ (of_object hB) :=
--- { f := λ _, f,--begin unfold of, dsimp, end,
---   comm' := λ _ _ _, h }
-
--- example {A B : 𝒞} {dA : A ⟶ A} {dB : B ⟶ B} (hA : dA ≫ dA = 0) (hB : dB ≫ dB = 0)
--- (f g : A ⟶ B) (hf : f ≫ dB = dA ≫ f) (hg : g ≫ dB = dA ≫ g) -- initial data :
---   -- now what the homotopy means
---   (h : A ⟶ B) :
---   homotopy (of_morphism hA hB f hf) (of_morphism _ _ g hg) :=
--- { hom := λ _ _, h,
---   zero' := λ _ _ h, false.elim $ h trivial,
---   comm := λ ⟨⟩, begin
---     unfold d_next,
---      sorry end }
-
-
--- end loop
-
 def embed_homotopy (e : cι.embedding cι') :
   homotopy ((embed e).map f) ((embed e).map f') :=
 { hom := λ i j, embed_homotopy_hom f f' h (e.r i) (e.r j),
@@ -428,8 +372,7 @@ def embed_homotopy (e : cι.embedding cι') :
             simp only [add_monoid_hom.mk'_apply],
             rw [e.r_f j, h4],
             simp } },
-        {
-                    rw functor.conj_eq_to_hom_iff_heq,
+        { rw functor.conj_eq_to_hom_iff_heq,
           delta prev_d embed.obj id_rhs embed_homotopy_hom,
           dsimp only,
           induction hi : cι.prev i,
