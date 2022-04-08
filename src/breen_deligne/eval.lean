@@ -224,11 +224,22 @@ instance homological_complex.functor_eval_flip_preserves_colimits_of_shape
           intros i j h, dsimp,
           have := (is_colimit_of_preserves (F.X i) hc).uniq (u s i j),
           refine (this _ _).trans (this _ _).symm,
-          { intros, dsimp, sorry },
-          sorry
+          { intros j', dsimp,
+            erw [(is_colimit_of_preserves (F.X i) hc).fac_assoc],
+            apply (s.ι.app j').comm, },
+          { intros j', dsimp,
+            rw nat_trans.naturality_assoc,
+            erw [(is_colimit_of_preserves (F.X j) hc).fac], }
         end },
-      fac' := sorry,
-      uniq' := sorry } } }
+      fac' := by { intros, ext i, dsimp, erw [(is_colimit_of_preserves (F.X i) hc).fac], },
+      uniq' := begin
+        intros, ext i, dsimp,
+        replace w := λ j, homological_complex.congr_hom (w j) i,
+        dsimp at w,
+        sorry,
+      end, } } }
+
+.
 
 /-
 { preserves_colimit := λ K,
