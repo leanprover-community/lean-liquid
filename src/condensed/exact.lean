@@ -194,6 +194,12 @@ begin
   refl,
 end
 
+-- Scott: perhaps life is easier if we use this version? I'm not too sure.
+lemma is_limit.surjective_of_surjective' [is_cofiltered J]
+  (hα : ∀ j, function.surjective (α.app j)) :
+   function.surjective (lim_map α) :=
+is_limit.surjective_of_surjective _ _ _ _ _ (limit.is_limit _) _ hα
+
 end CompHaus
 
 namespace CompHausFiltPseuNormGrp₁
@@ -504,19 +510,60 @@ lemma extend_aux' {A₁ B₁ A₂ B₂ : CompHaus}
   epi g :=
 by { rw [← iso.inv_comp_eq, iso.eq_comp_inv, category.assoc] at H, apply extend_aux e₁ e₂ f g hf H }
 
-lemma extend_aux_1 {A B C : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}} (r : ℝ≥0)
-  (S : Profinite.{u}) (c : ℝ≥0) (f : A ⟶ B) (g : B ⟶ C) [fact (1 ≤ r)] (w w') :
+-- lemma extend_aux_1 {A B C : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}} (r : ℝ≥0)
+--   (S : Profinite.{u}) (c : ℝ≥0) (f : A ⟶ B) (g : B ⟶ C) [fact (1 ≤ r)] (w w') :
+--   ((P1_iso.{u} f r c S).symm.inv ≫
+--          is_limit.map.{u u u u+1}
+--              (limit.cone.{u u u u+1}
+--                 (P1_functor.{u}
+--                      (whisker_left.{u u u+1 u u+1 u} S.fintype_diagram f) r c ⋙
+--                    lim.{u u u u+1}))
+--              (limit.is_limit.{u u u u+1}
+--                 (P2_functor.{u}
+--                      (whisker_left.{u u u+1 u u+1 u} S.fintype_diagram g)
+--                      c ⋙
+--                    lim.{u u u u+1}))
+--              (P1_to_P2_nat_trans.{u}
+--                 (whisker_left.{u u u+1 u u+1 u} S.fintype_diagram f)
+--                 (whisker_left.{u u u+1 u u+1 u} S.fintype_diagram g) r c w) ≫
+--            (P2_iso.{u} g c S).symm.hom) ≫
+--       pullback.fst.{u u+1} =
+--     P1_to_P2.{u} ((Profinite.extend_nat_trans.{u u+1} f).app S)
+--         ((Profinite.extend_nat_trans.{u u+1} g).app S) r c w' ≫
+--       pullback.fst.{u u+1} :=
+-- begin
+--   rw P1_to_P2_comp_fst, dsimp [P1_iso, P2_iso],
+--   apply (cancel_mono ((preserves_limit_iso (Filtration.obj _) _).hom)).1,
+--   apply limit.hom_ext,
+--   intro j,
+--   simp only [category_theory.limits.has_limit.iso_of_nat_iso_inv_π,
+--     category_theory.iso.symm_inv,
+--     category_theory.preserves_limits_iso_hom_π,
+--     category_theory.limits.cospan_ext_inv_app_left,
+--     category_theory.iso.trans_inv,
+--     category_theory.nat_trans.comp_app,
+--     category_theory.category.id_comp,
+--     category_theory.preserves_limits_iso_inv_π,
+--     category_theory.limits.cospan_comp_iso_hom_app_left,
+--     category_theory.category.assoc],
+--   dsimp,
+--   erw limit_flip_comp_lim_iso_limit_comp_lim_hom_π_π,
+--   erw is_limit.map_π_assoc,
+--   dsimp [P1_to_P2],
+--   simp only [category_theory.category.id_comp,
+--   category_theory.category.assoc,
+--   category_theory.limits.limit.lift_map],
+--   erw [limit.lift_π],
+--   -- This has gone off the rails: we have `is_limit` and `limit` stuff mixed up,
+--   -- so things don't simplify.
+--   -- erw [lim_map_π],
+--   all_goals { sorry },
+-- end
+
+lemma extend_aux_1 {A B C : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}} (r c : ℝ≥0)
+  (S : Profinite.{u}) (f : A ⟶ B) (g : B ⟶ C) [fact (1 ≤ r)] (w w') :
   ((P1_iso.{u} f r c S).symm.inv ≫
-         is_limit.map.{u u u u+1}
-             (limit.cone.{u u u u+1}
-                (P1_functor.{u}
-                     (whisker_left.{u u u+1 u u+1 u} S.fintype_diagram f) r c ⋙
-                   lim.{u u u u+1}))
-             (limit.is_limit.{u u u u+1}
-                (P2_functor.{u}
-                     (whisker_left.{u u u+1 u u+1 u} S.fintype_diagram g)
-                     c ⋙
-                   lim.{u u u u+1}))
+         lim_map.{u u u u+1}
              (P1_to_P2_nat_trans.{u}
                 (whisker_left.{u u u+1 u u+1 u} S.fintype_diagram f)
                 (whisker_left.{u u u+1 u u+1 u} S.fintype_diagram g) r c w) ≫
@@ -526,32 +573,29 @@ lemma extend_aux_1 {A B C : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}} (r :
         ((Profinite.extend_nat_trans.{u u+1} g).app S) r c w' ≫
       pullback.fst.{u u+1} :=
 begin
-  rw P1_to_P2_comp_fst, dsimp [P1_iso, P2_iso],
   apply (cancel_mono ((preserves_limit_iso (Filtration.obj _) _).hom)).1,
   apply limit.hom_ext,
+  all_goals { try { apply_instance, }, },
   intro j,
-  simp only [category_theory.limits.has_limit.iso_of_nat_iso_inv_π,
-    category_theory.iso.symm_inv,
-    category_theory.preserves_limits_iso_hom_π,
-    category_theory.limits.cospan_ext_inv_app_left,
-    category_theory.iso.trans_inv,
-    category_theory.nat_trans.comp_app,
-    category_theory.category.id_comp,
-    category_theory.preserves_limits_iso_inv_π,
-    category_theory.limits.cospan_comp_iso_hom_app_left,
-    category_theory.category.assoc],
   dsimp,
-  erw limit_flip_comp_lim_iso_limit_comp_lim_hom_π_π,
-  erw is_limit.map_π_assoc,
-  dsimp [P1_to_P2],
-  simp only [category_theory.category.id_comp,
-  category_theory.category.assoc,
-  category_theory.limits.limit.lift_map],
-  erw [limit.lift_π],
-  -- This has gone off the rails: we have `is_limit` and `limit` stuff mixed up,
-  -- so things don't simplify.
-  -- erw [lim_map_π],
-  all_goals { sorry },
+  simp only [P1_to_P2_comp_fst, category_theory.preserves_limits_iso_hom_π, category_theory.category.assoc],
+  sorry,
+end
+
+lemma extend_aux_2 {A B C : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}} (r : ℝ≥0)
+  (S : Profinite.{u}) (c : ℝ≥0) (f : A ⟶ B) (g : B ⟶ C) [fact (1 ≤ r)] (w w') :
+  ((P1_iso.{u} f r c S).symm.inv ≫
+         lim_map.{u u u u+1}
+             (P1_to_P2_nat_trans.{u}
+                (whisker_left.{u u u+1 u u+1 u} S.fintype_diagram f)
+                (whisker_left.{u u u+1 u u+1 u} S.fintype_diagram g) r c w) ≫
+           (P2_iso.{u} g c S).symm.hom) ≫
+      pullback.snd.{u u+1} =
+    P1_to_P2.{u} ((Profinite.extend_nat_trans.{u u+1} f).app S)
+        ((Profinite.extend_nat_trans.{u u+1} g).app S) r c w' ≫
+      pullback.snd.{u u+1} :=
+begin
+  admit,
 end
 
 lemma extend {A B C : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}}
@@ -575,11 +619,10 @@ begin
   { ext X : 2,
     simp only [nat_trans.comp_app, whisker_left_app, (hfg (S.fintype_diagram.obj X)).comp_eq_zero],
     refl },
-  have key := CompHaus.is_limit.surjective_of_surjective
+  have key := CompHaus.is_limit.surjective_of_surjective'
     (P1_functor.{u} (whisker_left S.fintype_diagram f) r c ⋙ lim)
     (P2_functor.{u} (whisker_left S.fintype_diagram g) c ⋙ lim)
-    (P1_to_P2_nat_trans _ _ _ _ hfg')
-    (limit.cone _) (limit.cone _) (limit.is_limit _) (limit.is_limit _) _,
+    (P1_to_P2_nat_trans _ _ _ _ hfg') _,
   swap,
   { intro X, specialize hfg (S.fintype_diagram.obj X), rw [iff_surjective] at hfg,
     rcases hfg with ⟨aux', hfg⟩, specialize hfg c,
@@ -592,9 +635,8 @@ begin
   rw ← CompHaus.epi_iff_surjective at key ⊢,
   refine extend_aux (P1_iso f r c S).symm (P2_iso g c S).symm _ _ key _,
   apply pullback.hom_ext,
-  { rw P1_to_P2_comp_fst,
-    sorry },
-  sorry,
+  apply extend_aux_1,
+  apply extend_aux_2,
   -- apply Profinite.extend_nat_trans_ext,
 
 
