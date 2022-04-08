@@ -1,5 +1,6 @@
 import for_mathlib.derived.lemmas
 import for_mathlib.derived.les
+import for_mathlib.derived.derived_cat
 
 open category_theory
 open category_theory.limits
@@ -7,12 +8,12 @@ open category_theory.triangulated
 
 variables {A : Type*} [category A] [abelian A]
 
+local notation `𝒦` := homotopy_category A (complex_shape.up ℤ)
+
 namespace homological_complex
 variables {X Y Z : cochain_complex A ℤ} (f : X ⟶ Y) (g : Y ⟶ Z)
 
 noncomputable theory
-
-local notation `𝒦` := homotopy_category A (complex_shape.up ℤ)
 
 -- The 5-lemma with no instances... I think this is more convenient to apply in practice.
 lemma _root_.category_theory.abelian.is_iso_of_is_iso_of_is_iso_of_is_iso_of_is_iso' :
@@ -102,3 +103,28 @@ begin
 end
 
 end homological_complex
+
+namespace homotopy_category
+
+variables {X Y Z : cochain_complex A ℤ} (f : X ⟶ Y) (g : Y ⟶ Z)
+open homological_complex
+
+def cone := (homotopy_category.quotient _ _).obj (cone f)
+
+def cone.π (w) : cone f ⟶ (homotopy_category.quotient _ _).obj Z :=
+(homotopy_category.quotient _ _).map (cone.π f g w)
+
+instance is_quasi_iso_cone_π
+  (w : ∀ i, short_exact (f.f i) (g.f i)) : is_quasi_iso (cone.π f g _) :=
+homological_complex.is_quasi_iso_map_cone_π _ _ w
+
+end homotopy_category
+
+namespace bounded_derived_category
+
+variables [enough_projectives A]
+variables {X Y Z : bounded_derived_category A} (f : X ⟶ Y) (g : Y ⟶ Z)
+open homological_complex
+
+-- UGH
+end bounded_derived_category
