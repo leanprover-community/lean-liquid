@@ -19,6 +19,25 @@ open_locale nnreal
 
 open category_theory category_theory.limits opposite pseudo_normed_group
 
+namespace category_theory.limits
+
+@[simps hom]
+def limit_const_terminal {J : Type*} [category J] {C : Type*} [category C] [has_terminal C]
+  [has_limit ((category_theory.functor.const J).obj (⊤_ C))] :
+  limit ((category_theory.functor.const J).obj (⊤_ C)) ≅ ⊤_ C :=
+{ hom := terminal.from _,
+  inv := limit.lift ((category_theory.functor.const J).obj (⊤_ C))
+    { X := ⊤_ C, π := { app := λ j, terminal.from _, }}, }
+
+@[simp, reassoc] lemma limit_const_terminal_inv_π
+  {J : Type*} [category J] {C : Type*} [category C] [has_terminal C]
+  [has_limit ((category_theory.functor.const J).obj (⊤_ C))] {j : J} :
+  limit_const_terminal.inv ≫ limit.π ((category_theory.functor.const J).obj (⊤_ C)) j =
+    terminal.from _ :=
+by ext ⟨⟩
+
+end category_theory.limits
+
 -- move me
 namespace CompHaus
 
@@ -170,6 +189,7 @@ def c_le_rc : c ⟶ r * c := hom_of_le $ fact.out _
 def P1 : CompHaus :=
 pullback ((Filtration.map (c_le_rc r c)).app B) ((Filtration.obj (r * c)).map f)
 
+@[simps]
 def pt {X : CompHaus} (x : X) : (⊤_ CompHaus) ⟶ X :=
 ⟨λ _, x, continuous_const⟩
 
@@ -318,26 +338,22 @@ begin
     end)
 end
 
-def P2_hom {B C : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}}
-  (g : B ⟶ C) (c : ℝ≥0) (S : Profinite) :
-  P2.{u} ((Profinite.extend_nat_trans.{u u+1} g).app S) c ⟶
-    limit (P2_functor.{u} (whisker_left S.fintype_diagram g) c ⋙ lim) :=
-sorry
-
-def P2_inv {B C : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}}
-  (g : B ⟶ C) (c : ℝ≥0) (S : Profinite) :
-  limit (P2_functor.{u} (whisker_left S.fintype_diagram g) c ⋙ lim) ⟶
-    P2.{u} ((Profinite.extend_nat_trans.{u u+1} g).app S) c :=
-sorry
+open category_theory.limits
 
 def P2_iso {B C : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}}
   (g : B ⟶ C) (c : ℝ≥0) (S : Profinite) :
   P2.{u} ((Profinite.extend_nat_trans.{u u+1} g).app S) c ≅
     limit (P2_functor.{u} (whisker_left S.fintype_diagram g) c ⋙ lim) :=
-{ hom := P2_hom g c S,
-  inv := P2_inv g c S,
-  hom_inv_id' := sorry,
-  inv_hom_id' := sorry }
+begin
+  refine has_limit.iso_of_nat_iso (_ ≪≫ (cospan_comp_iso _ _ _).symm) ≪≫
+    (limit_flip_comp_lim_iso_limit_comp_lim _).symm,
+  fapply cospan_ext,
+  exact (preserves_limit_iso _ _),
+  exact category_theory.limits.limit_const_terminal.symm,
+  exact (preserves_limit_iso _ _),
+  { apply limit.hom_ext, intros, simp [-category_theory.functor.map_comp, ←(Filtration.obj c).map_comp], },
+  { apply limit.hom_ext, intros, ext, simp, },
+end
 
 -- move me, generalize
 lemma extend_aux {A₁ B₁ A₂ B₂ : CompHaus}
