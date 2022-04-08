@@ -227,10 +227,44 @@ begin
   { show ite (n.succ = 0) 0 (G s (n + 1)) = G s n.succ, from if_neg n.succ_ne_zero }
 end
 
+lemma tsum_nat_eq_tsum_int {α : Type*} [add_comm_monoid α] [topological_space α]
+  [t2_space α]
+  (f : ℤ → α) : ∑' (n : ℕ), f n = ∑' (z : ℤ), if z < 0 then 0 else f z :=
+let e : ↥(function.support (λ (x : ℕ), f ↑x)) ≃
+  ↥(function.support (λ (y : ℤ), ite (y < 0) 0 (f y))) :=
+{ to_fun := λ x, ⟨x, sorry⟩,
+  inv_fun := λ y, ⟨y.1.nat_abs, sorry⟩,
+  left_inv := sorry,
+  right_inv := sorry } in
+begin
+  apply equiv.tsum_eq_tsum_of_support e,
+  rintros ⟨x, hx⟩,
+  have hx2 : ¬ ((x : ℤ) < 0) := λ h, nat.not_lt_zero x (int.coe_nat_lt.1 h),
+  simp [hx2],
+end
+
 lemma to_Lbar_section_mem_filtration (G : Lbar r' S) (c : ℝ≥0)
   (hG : G ∈ pseudo_normed_group.filtration (Lbar r' S) c) :
   to_Lbar_section r' S G ∈ pseudo_normed_group.filtration (laurent_measures r' S) c :=
-sorry
+begin
+  change _ ≤ _,
+  convert (hG : _ ≤ _) using 1,
+  change finset.univ.sum _ = finset.univ.sum _,
+  congr' 1, ext s, norm_cast,
+  symmetry,
+  convert tsum_nat_eq_tsum_int (λ n, ∥G s n.to_nat∥₊ * r' ^ n),
+  { ext n,
+    simp only [int.nat_abs, nonneg.coe_mul, nnreal.coe_nat_cast, nnreal.coe_pow,
+      int.to_nat_coe_nat, zpow_coe_nat, coe_nnnorm, mul_eq_mul_right_iff,
+      int.nat_abs, _root_.coe_nnnorm, int.norm_eq_abs, int.cast_nat_abs],
+    left, refl,
+  },
+  { ext z,
+    simp only [to_Lbar_section, coe_mk, nonneg.coe_mul, coe_nnnorm, nnreal.coe_zpow],
+    split_ifs,
+    { simp [int.to_nat_of_nonpos h.le, G.coeff_zero] },
+    { simp } },
+end
 
 lemma to_Lbar_surjective : function.surjective (to_Lbar r' S) :=
 λ G, ⟨to_Lbar_section r' S G, to_Lbar_section_to_Lbar r' S G⟩
