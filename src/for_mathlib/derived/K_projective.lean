@@ -9,6 +9,7 @@ import for_mathlib.exact_seq3
 import for_mathlib.triangle_shift
 import for_mathlib.homology_iso
 import for_mathlib.projective_replacement
+import for_mathlib.derived.lemmas
 -- import for_mathlib.arrow_preadditive
 
 import hacks_and_tricks.asyncI
@@ -108,8 +109,11 @@ instance is_K_projective_shift (X : 𝒦) [is_K_projective X.val] (m : ℤ) :
   is_K_projective ((category_theory.shift_functor 𝒦 m).obj X).val :=
   sorry
 
+-- TODO this shouldn't be necessary: do we just need to simplify
+-- `(category_theory.shift_functor 𝒦 m).map g` to `g⟦m⟧'`?
 instance {X Y : 𝒦} (g : X ⟶ Y) [is_quasi_iso g] (m : ℤ) :
-  is_quasi_iso ((category_theory.shift_functor 𝒦 m).map g) := sorry
+  is_quasi_iso ((category_theory.shift_functor 𝒦 m).map g) :=
+homotopy_category.is_quasi_iso_shift _ _ _ _
 
 lemma shift_functor_map_lift
   {P X Y : 𝒦} [is_K_projective P.val] (f : P ⟶ Y) (g : X ⟶ Y) [is_quasi_iso g] (m : ℤ) :
