@@ -74,10 +74,49 @@ begin
   assumption
 end
 
+@[simp]
+lemma lift_self {P X : 𝒦} [is_K_projective P.val] (g : P ⟶ X) [is_quasi_iso g] :
+  lift g g = 𝟙 _ :=
+(lift_unique _ _ _ (by simp)).symm
+
+@[simp]
+lemma lift_comp {P X Y : 𝒦} [is_K_projective P.val] (f : P ⟶ X) (g : X ⟶ Y) [is_quasi_iso g] :
+  lift (f ≫ g) g = f :=
+(lift_unique _ _ _ (by simp)).symm
+
+@[simp, reassoc]
+lemma lift_comp_lift_self {P X Y Z : 𝒦} [is_K_projective P.val] [is_K_projective X.val]
+  (f : P ⟶ Y) (g : X ⟶ Y) [is_quasi_iso g] (k : Z ⟶ Y) [is_quasi_iso k] :
+  lift f g ≫ lift g k = lift f k :=
+lift_unique _ _ _ (by simp)
+
+@[simp, reassoc]
+lemma lift_comp_lift_comp {P W X Y Z : 𝒦} [is_K_projective P.val] [is_K_projective X.val]
+  (f : P ⟶ Y) (g : X ⟶ Y) [is_quasi_iso g] (h : Y ⟶ Z) (k : W ⟶ Z) [is_quasi_iso k] :
+  lift f g ≫ lift (g ≫ h) k = lift (f ≫ h) k :=
+lift_unique _ _ _ (by simp)
+
+instance is_K_projective_shift (X : 𝒦) [is_K_projective X.val] (m : ℤ) :
+  is_K_projective ((category_theory.shift_functor 𝒦 m).obj X).val :=
+  sorry
+
+instance {X Y : 𝒦} (g : X ⟶ Y) [is_quasi_iso g] (m : ℤ) :
+  is_quasi_iso ((category_theory.shift_functor 𝒦 m).map g) := sorry
+
+lemma shift_functor_map_lift
+  {P X Y : 𝒦} [is_K_projective P.val] (f : P ⟶ Y) (g : X ⟶ Y) [is_quasi_iso g] (m : ℤ) :
+  (category_theory.shift_functor 𝒦 m).map (lift f g) =
+    lift ((category_theory.shift_functor 𝒦 m).map f) ((category_theory.shift_functor 𝒦 m).map g) :=
+begin
+  apply lift_unique,
+  simp only [←category_theory.functor.map_comp, lift_lifts],
+end
+
 lemma lift_ext {P X Y : 𝒦} [is_K_projective P.val] (g : X ⟶ Y) [is_quasi_iso g]
   (a b : P ⟶ X) (h : a ≫ g = b ≫ g) : a = b :=
 (hom_K_projective_bijective P.val g).1 h
 
+@[simps]
 def replace_triangle (T : triangle 𝒦) : triangle 𝒦 :=
 { obj₁ := T.obj₁.replace,
   obj₂ := T.obj₂.replace,
