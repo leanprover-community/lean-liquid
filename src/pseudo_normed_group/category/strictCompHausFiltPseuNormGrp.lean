@@ -9,7 +9,8 @@ local attribute [instance] type_pow
 
 noncomputable theory
 
-/-- The category of CompHaus-ly filtered pseudo-normed groups with strict morphisms. -/
+/-- The category of CompHaus-ly filtered pseudo-normed groups with exhaustive filtrations
+and with strict morphisms. -/
 structure CompHausFiltPseuNormGrp₁ : Type (u+1) :=
 (M : Type u)
 [str : comphaus_filtered_pseudo_normed_group M]

@@ -108,10 +108,27 @@ def rescale (r : ℝ≥0) [fact (0 < r)] : CompHausFiltPseuNormGrp₁ ⥤ CompHa
   map_comp' := by { intros, ext, refl } }
 .
 
+-- def rescale.comp (r s : ℝ≥0) [fact (0 < r)] [fact (0 < s)] :
+-- rescale r ⋙ rescale s ⟶ rescale (r * s) :=
+-- { app := λ M,
+--   { continuous' := sorry,
+--     ..rescale.of_rescale_rescale_strict_pseudo_normed_group_hom r s M
+--   },
+--   naturality' := _ }
+
+instance rescale.equivalence (r : ℝ≥0) [fact (0 < r)] :
+  is_equivalence (rescale r) :=
+is_equivalence.mk (@rescale r⁻¹ ⟨nnreal.inv_pos.2 (fact.elim infer_instance)⟩)
+sorry sorry
+
 instance rescale_preserves_limits_of_shape_discrete_quotient
   (X : Profinite.{u}) (c : ℝ≥0) [fact (0 < c)] :
   limits.preserves_limits_of_shape.{u u u u u+1 u+1} (discrete_quotient.{u} ↥X) (rescale.{u u} c) :=
-sorry
+begin
+  let foo := (category_theory.adjunction.is_equivalence_preserves_limits
+    (rescale c)).preserves_limits_of_shape,
+  exact foo, -- not 100% sure why this is happening
+end
 
 @[simps]
 def rescale_enlarging_iso (r : ℝ≥0) [fact (0 < r)] :
