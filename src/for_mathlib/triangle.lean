@@ -123,7 +123,7 @@ def triangle.nonneg_inv_rotate_iso [(shift_functor C (1 : ℤ)).additive] :
 (neg₃_equiv C).iso_equiv _ _ T.nonneg_inv_rotate_neg₃
 
 @[simps]
-def neg₃_rotate : neg₃_functor C ⋙ rotate ≅ rotate ⋙ neg₃_functor C :=
+def neg₃_rotate : neg₃_functor C ⋙ rotate C ≅ rotate C ⋙ neg₃_functor C :=
 nat_iso.of_components
   (λ X, mk_triangle_iso (iso.refl _) (iso.refl _) (-iso.refl _)
     (by { dsimp, simp }) (by { dsimp, simp }) (by { dsimp, simp }))

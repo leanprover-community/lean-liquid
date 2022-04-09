@@ -52,14 +52,14 @@ lemma rotate_mem_distinguished_triangles (T : triangle 𝒦) (h : T ∈ distingu
   T.rotate ∈ distinguished_triangles V :=
 begin
   obtain ⟨X, Y, f, ⟨e⟩⟩ := (mem_distinguished_iff_exists_iso_cone _).mp h,
-  exact ⟨_, _, _, _, _, _, ⟨rotate.map_iso e ≪≫ neg₃_rotate.app _ ≪≫
+  exact ⟨_, _, _, _, _, _, ⟨(rotate _).map_iso e ≪≫ neg₃_rotate.app _ ≪≫
     (triangle.nonneg_rotate_iso _).symm ≪≫
       (homotopy_category.lift_triangle _).map_iso (triangle_of_termwise_split_cone_iso f).symm⟩⟩,
 end
 
 def inv_rotate_lift_triangle (V : Type u) [category.{v} V] [abelian V] :
-  inv_rotate ⋙ homotopy_category.lift_triangle V ≅
-    homotopy_category.lift_triangle _ ⋙ inv_rotate :=
+  (inv_rotate _) ⋙ homotopy_category.lift_triangle V ≅
+    homotopy_category.lift_triangle _ ⋙ (inv_rotate _) :=
 nat_iso.of_components (λ X, mk_triangle_iso (iso.refl _) (iso.refl _) (iso.refl _)
   (by { dsimp, simp only [category.comp_id, functor.map_neg, discrete.functor_map_id,
     category.id_comp, preadditive.comp_neg, shift_ε_inv_app, category.assoc, neg_inj,
@@ -76,7 +76,7 @@ lemma inv_rotate_mem_distinguished_triangles (T : triangle 𝒦) (h : T ∈ dist
 begin
   obtain ⟨X, Y, Z, f, g, h, ⟨e⟩⟩ := h,
   exact (mem_distinguished_iff_exists_iso_cone _).mpr ⟨_, _, _,
-    ⟨inv_rotate.map_iso e ≪≫ ((inv_rotate_lift_triangle _).app _).symm ≪≫
+    ⟨(inv_rotate _).map_iso e ≪≫ ((inv_rotate_lift_triangle _).app _).symm ≪≫
     (homotopy_category.lift_triangle _).map_iso ((neg₃_equiv _).iso_equiv _ _
     ((triangle.nonneg_inv_rotate_iso _).symm ≪≫ inv_rotate_iso_cone_triangle f g h))⟩⟩
 end
@@ -99,7 +99,7 @@ instance : pretriangulated 𝒦 :=
     split,
     { apply rotate_mem_distinguished_triangles },
     { intro h,
-      exact mem_distinguished_of_iso (triangle_rotation.unit_iso.app T).symm
+      exact mem_distinguished_of_iso ((triangle_rotation _).unit_iso.app T).symm
         (inv_rotate_mem_distinguished_triangles _ h) }
   end,
   complete_distinguished_triangle_morphism := begin

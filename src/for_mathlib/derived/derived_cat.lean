@@ -2,17 +2,6 @@ import for_mathlib.derived.K_projective
 
 open category_theory
 
--- namespace category_theory
--- universes v₁ v₂ u₁ u₂
-
--- noncomputable
--- def monoidal_functor.ε_iso {C : Type*} {_ : category.{v₁} C} {_ : monoidal_category C}
---   {D : Type*} {_ : category.{v₁} D} {_ : monoidal_category D} (F : monoidal_functor.{v₁ v₂} C D) :
---   tensor_unit D ≅ F.obj (tensor_unit C) :=
--- as_iso F.ε
-
--- end category_theory
-
 -- PR's as #13263
 section
 
@@ -440,7 +429,7 @@ end
 
 @[simps]
 noncomputable def forget_replace_triangle (S : triangle (bounded_homotopy_category A)) :
-  (forget_triangulated_functor_struct A).map_triangle (replace_triangle S) ≅
+  (forget_triangulated_functor_struct A).map_triangle.obj (replace_triangle S) ≅
     bounded_homotopy_category.replace_triangle S :=
 begin
   fapply triangle.iso.of_components,
@@ -469,21 +458,20 @@ begin
   exact ⟨S₁, hS₁, i ≪≫ f₁, trivial⟩,
 end
 
-lemma forget_replace_triangle_distinguished  (S : triangle (bounded_homotopy_category A))
+lemma forget_replace_triangle_distinguished (S : triangle (bounded_homotopy_category A))
   (m : S ∈ dist_triang (bounded_homotopy_category A)) :
-  (forget_triangulated_functor_struct A).map_triangle (replace_triangle S) ∈ dist_triang (bounded_homotopy_category A) :=
+  (forget_triangulated_functor_struct A).map_triangle.obj (replace_triangle S) ∈ dist_triang (bounded_homotopy_category A) :=
 pretriangulated.isomorphic_distinguished
   _ (bounded_homotopy_category.distinguished_replace_triangle S m)
   _ (forget_replace_triangle S)
 
 lemma forget_distinguished_of_distinguished
   {T : triangle (bounded_derived_category A)} (m : T ∈ pretriangulated_distinguished_triangles A) :
-  (forget_triangulated_functor_struct A).map_triangle T ∈ dist_triang (bounded_homotopy_category A) :=
+  (forget_triangulated_functor_struct A).map_triangle.obj T ∈ dist_triang (bounded_homotopy_category A) :=
 begin
   obtain ⟨S, hS, f, -⟩ := m,
-  -- This is a formal consequence of `forget_replace_triangle_distinguished`,
-  -- but will be easier to state once #13262 lands.
-  sorry
+  exact pretriangulated.isomorphic_distinguished _ (forget_replace_triangle_distinguished _ hS)
+    _ ((forget_triangulated_functor_struct A).map_triangle.map_iso f),
 end
 
 lemma pretriangulated_contractible_distinguished (X : bounded_derived_category A) :
@@ -540,18 +528,15 @@ begin
   { rintro ⟨S, hS, f, -⟩,
     use S.rotate,
     refine ⟨pretriangulated.rot_of_dist_triangle _ _ hS, _, trivial⟩,
-    exact rotate.map_iso f ≪≫ replace_triangle_rotate _, },
+    exact (rotate _).map_iso f ≪≫ replace_triangle_rotate _, },
   { rintro ⟨S, hS, f, -⟩,
     use S.inv_rotate,
     refine ⟨pretriangulated.inv_rot_of_dist_triangle _ _ hS, _, trivial⟩,
 
-    let R := (rotate : triangle (bounded_derived_category A) ⥤ triangle (bounded_derived_category A)),
-    haveI : faithful R := sorry, -- available after #13262
-    haveI : full R := sorry, -- available after #13262
-    apply (iso_equiv_of_fully_faithful R).inv_fun,
+    apply (iso_equiv_of_fully_faithful (rotate (bounded_derived_category A))).inv_fun,
     refine f ≪≫ _ ≪≫ (replace_triangle_rotate _).symm,
     apply replace_triangle'.map_iso,
-    exact (triangle_rotation).counit_iso.symm.app S, },
+    exact (triangle_rotation _).counit_iso.symm.app S, },
 end
 
 lemma complete_distinguished_triangle_morphism (T₁ T₂ : triangle (bounded_derived_category A))
@@ -565,8 +550,8 @@ begin
   -- We work formally, just using the fact this is true in the bounded homotopy category,
   -- without needing to care why.
   obtain ⟨c', h1, h2⟩ := pretriangulated.complete_distinguished_triangle_morphism
-    ((forget_triangulated_functor_struct A).map_triangle T₁)
-    ((forget_triangulated_functor_struct A).map_triangle T₂)
+    ((forget_triangulated_functor_struct A).map_triangle.obj T₁)
+    ((forget_triangulated_functor_struct A).map_triangle.obj T₂)
     (forget_distinguished_of_distinguished m₁)
     (forget_distinguished_of_distinguished m₂) ((forget A).map a) ((forget A).map b)
     (congr_arg bounded_derived_category_hom.val comm),
