@@ -202,6 +202,7 @@ begin
     refl, },
 end
 
+@[simps]
 noncomputable
 def shift_functor_localization_functor (m : ℤ) :
   shift_functor (bounded_homotopy_category A) m ⋙ localization_functor A ≅
@@ -392,8 +393,13 @@ begin
   exact iso.refl _,
   exact ((shift_functor_localization_functor A 1).app S.obj₁).symm,
   { ext, dsimp, simp, },
-  { ext, dsimp, simp, sorry, },
-  { ext, dsimp, simp, sorry, },
+  { ext, dsimp, erw [category.id_comp, category.id_comp], simp, },
+  { ext, dsimp,
+    simp only [bounded_homotopy_category.lift_neg, bounded_homotopy_category.lift_comp_lift_comp,
+      preadditive.comp_neg, preadditive.neg_comp, neg_inj, category.assoc,
+      category_theory.functor.map_id],
+   erw [category.id_comp, category.comp_id],
+   simp [bounded_homotopy_category.shift_functor_map_lift], },
 end
 
 @[simps]
