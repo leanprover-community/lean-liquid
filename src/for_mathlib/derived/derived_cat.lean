@@ -2,6 +2,17 @@ import for_mathlib.derived.K_projective
 
 open category_theory
 
+-- namespace category_theory
+-- universes v₁ v₂ u₁ u₂
+
+-- noncomputable
+-- def monoidal_functor.ε_iso {C : Type*} {_ : category.{v₁} C} {_ : monoidal_category C}
+--   {D : Type*} {_ : category.{v₁} D} {_ : monoidal_category D} (F : monoidal_functor.{v₁ v₂} C D) :
+--   tensor_unit D ≅ F.obj (tensor_unit C) :=
+-- as_iso F.ε
+
+-- end category_theory
+
 -- PR's as #13263
 section
 
@@ -146,38 +157,63 @@ def has_shift_functor (i : ℤ) : bounded_derived_category A ⥤ bounded_derived
 section
 open homological_complex
 
+/-!
+There's a somewhat awkward problem here, that perhaps needs a more robust fix.
+Lean is having trouble here seeing that two different inverses are equal,
+because one of them is hiding behind the existential `is_iso`.
+
+This means we need to be more careful about definitional equalities, and
+need to use `(shift_monoidal_functor _ ℤ).ε_iso.inv.naturality`
+rather then `(homotopy_category.shift_ε _).hom.naturality`.
+
+Unfortunately we then need
+`local attribute [instance] endofunctor_monoidal_category`
+as otherwise `ε_iso` gets confused.
+-/
+local attribute [instance] endofunctor_monoidal_category
+
 noncomputable
 def has_shift_ε : 𝟭 (bounded_derived_category A) ≅ has_shift_functor A 0 :=
 { hom :=
   { app := λ X, ⟨(shift_zero _ _).inv⟩,
-    naturality' := λ X Y f,
-      by { ext1, apply (homotopy_category.shift_ε _).hom.naturality _, }, },
+    naturality' := λ X Y f, by { ext1,
+      exact (homotopy_category.shift_ε _).hom.naturality f.val, }, },
   inv :=
   { app := λ X, ⟨(shift_zero _ _).hom⟩,
-    naturality' := λ X Y f,
-      by { ext1, sorry, }, }, }
+    naturality' := λ X Y f, by { ext1,
+      exact (shift_monoidal_functor _ ℤ).ε_iso.inv.naturality f.val, }, }, }
 
 @[simps]
 noncomputable
 def has_shift_μ (m n : ℤ) : has_shift_functor A m ⋙ has_shift_functor A n ≅ has_shift_functor A (m + n) :=
 { hom :=
   { app := λ X, ⟨(shift_add _ _ _).inv⟩,
-    naturality' := λ X Y f,
-      by { ext1, exact (homotopy_category.shift_functor_add A m n).hom.naturality f.val, } },
+    naturality' := λ X Y f, by { ext1,
+      exact (homotopy_category.shift_functor_add A m n).hom.naturality f.val, } },
   inv :=
   { app := λ X, ⟨(shift_add _ _ _).hom⟩,
-    naturality' := begin intros, ext1, dsimp, have := (homotopy_category.shift_functor_add A m n).inv.naturality f.val,
-      -- why doesn't this work?
-      -- exact this,
-      sorry
-       end }, }
+    naturality' := λ X Y f, by { ext1,
+      exact ((shift_monoidal_functor _ ℤ).μ_iso m n).inv.naturality f.val, }, }, }
+
+.
+
+-- This is really ugly, and not appropriate for mathlib...
+local attribute [reducible] endofunctor_monoidal_category
 
 noncomputable
 instance has_shift : has_shift (bounded_derived_category A) ℤ := has_shift_mk _ _ $
 { F := λ i, has_shift_functor A i,
   ε := has_shift_ε A,
   μ := has_shift_μ A,
-  associativity := begin intros, ext, dsimp, sorry, end,
+  associativity := begin intros, ext, dsimp,
+    have := (shift_monoidal_functor (bounded_homotopy_category A) ℤ).to_lax_monoidal_functor.associativity m₁ m₂ m₃,
+    dsimp at this,
+    have t := nat_trans.congr_app this X.val,
+    dsimp at t, simp only [category.id_comp, category_theory.functor.map_id, category.assoc] at t,
+    convert t,
+    -- almost there! but so gross.
+    sorry,
+  end,
   left_unitality := sorry,
   right_unitality := sorry }
 
