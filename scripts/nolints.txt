@@ -13,10 +13,14 @@ apply_nolint Lbar.map_zero unused_arguments
 -- Lbar/ses.lean
 apply_nolint invpoly.to_laurent_measures_fun unused_arguments
 apply_nolint laurent_measures.to_Lbar unused_arguments
+apply_nolint laurent_measures.to_Lbar_section unused_arguments
 
 -- breen_deligne/category.lean
 apply_nolint breen_deligne.FreeMat.kronecker_map_reindex_left unused_arguments
 apply_nolint breen_deligne.FreeMat.kronecker_map_reindex_right unused_arguments
+
+-- breen_deligne/eval.lean
+apply_nolint breen_deligne.data.homological_complex.functor_eval_flip_preserves_colimits_of_shape unused_arguments
 
 -- breen_deligne/suitable.lean
 apply_nolint breen_deligne.basic_universal_map.suitable class_structure
@@ -37,6 +41,9 @@ apply_nolint ProFiltPseuNormGrpWithTinv₁.to_PNG₁ unused_arguments
 apply_nolint ProFiltPseuNormGrpWithTinv₁.to_CHFPNG₁ unused_arguments
 
 -- condensed/exact.lean
+apply_nolint CompHausFiltPseuNormGrp₁.exact_with_constant.P1_to_P2_nat_trans_aux_1 unused_arguments
+apply_nolint CompHausFiltPseuNormGrp₁.exact_with_constant.P1_to_P2_nat_trans_aux_2 unused_arguments
+apply_nolint CompHausFiltPseuNormGrp₁.exact_with_constant.P1_to_P2_nat_trans_aux_3 unused_arguments
 apply_nolint CompHausFiltPseuNormGrp₁.exact_with_constant_of_epi unused_arguments
 
 -- condensed/extr/basic.lean
@@ -75,12 +82,6 @@ apply_nolint Profinite.sigma_iso_of_equiv_aux unused_arguments
 apply_nolint category_theory.preserves_zero_of_preserves_initial instance_priority
 apply_nolint category_theory.preserves_zero_of_preserves_terminal instance_priority
 
--- for_mathlib/abelian_of_isom_thm.lean
-apply_nolint category_theory.iso_im_of_epi unused_arguments
-apply_nolint category_theory.iso_im_of_mono unused_arguments
-apply_nolint category_theory.limits.mono_factorisation.kernel_ι_comp unused_arguments
-apply_nolint category_theory.nonempty instance_priority
-
 -- for_mathlib/abelian_sheaves/functor_category.lean
 apply_nolint category_theory.additive_category_of_abelian instance_priority
 
@@ -111,9 +112,10 @@ apply_nolint homotopy_category.is_quasi_iso_of_is_iso instance_priority
 -- for_mathlib/derived/les.lean
 apply_nolint homological_complex.biprod.comp_lift unused_arguments
 apply_nolint homological_complex.biprod.lift_desc_comm unused_arguments
-apply_nolint homological_complex.cone.π unused_arguments
 apply_nolint homological_complex.cone.π_quasi_iso def_lemma
-apply_nolint homological_complex.kernel unused_arguments
+
+-- for_mathlib/derived/les2.lean
+apply_nolint bounded_homotopy_category.Ext_five_term_exact_seq def_lemma
 
 -- for_mathlib/derived_functor.lean
 apply_nolint category_theory.functor.left_derived.α unused_arguments
