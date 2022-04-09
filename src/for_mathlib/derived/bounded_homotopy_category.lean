@@ -41,6 +41,14 @@ abbreviation hom_val {X Y : bounded_homotopy_category A} (f : X ⟶ Y) : X.val �
 lemma hom_ext {X Y : bounded_homotopy_category A} (f g : X ⟶ Y) (h : hom_val f = hom_val g) :
   f = g := h
 
+@[simps]
+def mk_iso {X Y : bounded_homotopy_category A} (i : X.val ≅ Y.val) :
+  X ≅ Y :=
+{ hom := i.hom,
+  inv := i.inv,
+  hom_inv_id' := i.hom_inv_id,
+  inv_hom_id' := i.inv_hom_id, }
+
 instance : has_zero_object (bounded_homotopy_category A) :=
 { zero :=
   { val := 0,

@@ -68,6 +68,16 @@ variable {A}
 def of (X : bounded_homotopy_category A) [homotopy_category.is_K_projective X.val] :
   bounded_derived_category A := { val := X }
 
+@[simp] lemma forget_obj_of {X : bounded_homotopy_category A} [homotopy_category.is_K_projective X.val] :
+  (forget A).obj (of X) = X :=
+rfl
+
+@[simps]
+def mk_iso {X Y : bounded_derived_category A} (i : (forget A).obj X ≅ (forget A).obj Y) :
+  X ≅ Y :=
+{ hom := ⟨i.hom⟩,
+  inv := ⟨i.inv⟩, }
+
 variable (A)
 @[simps]
 noncomputable def localization_functor :
@@ -179,11 +189,41 @@ lemma shift_functor_val (m : ℤ) {X Y : bounded_derived_category A} (f : X ⟶ 
     (shift_functor (bounded_homotopy_category A) m).map f.val :=
 rfl
 
+@[simps]
+noncomputable
+def shift_functor_forget (m : ℤ) :
+  shift_functor (bounded_derived_category A) m ⋙ forget A ≅
+    forget A ⋙ shift_functor (bounded_homotopy_category A) m :=
+begin
+  fapply nat_iso.of_components,
+  { exact λ X, bounded_homotopy_category.mk_iso (by refl), },
+  { intros,
+    erw [category.id_comp, category.comp_id],
+    refl, },
+end
+
+noncomputable
 def shift_functor_localization_functor (m : ℤ) :
   shift_functor (bounded_homotopy_category A) m ⋙ localization_functor A ≅
     localization_functor A ⋙ shift_functor (bounded_derived_category A) m :=
-sorry
+begin
+  fapply nat_iso.of_components,
+  { intros,
+    apply mk_iso,
+    refine _ ≪≫ ((shift_functor_forget A m).app _).symm,
+    dsimp,
+    exact
+    { hom := bounded_homotopy_category.lift ((shift_functor (bounded_homotopy_category A) m).obj X).π
+        ((shift_functor (bounded_homotopy_category A) m).map X.π),
+      inv := bounded_homotopy_category.lift ((shift_functor (bounded_homotopy_category A) m).map X.π)
+        ((shift_functor (bounded_homotopy_category A) m).obj X).π, }, },
+  { intros, ext, dsimp,
+    simp only [bounded_homotopy_category.lift_comp_lift_self_assoc, category_theory.category.assoc],
+    erw [category.comp_id, category.id_comp],
+    simp [bounded_homotopy_category.shift_functor_map_lift], },
+end
 
+-- TODO replace this by pulling back a preadditive instance along `forget`?
 @[simps]
 instance preadditive : preadditive (bounded_derived_category A) :=
 { hom_group := λ P Q,
@@ -352,8 +392,8 @@ begin
   exact iso.refl _,
   exact ((shift_functor_localization_functor A 1).app S.obj₁).symm,
   { ext, dsimp, simp, },
-  sorry,
-  sorry,
+  { ext, dsimp, simp, sorry, },
+  { ext, dsimp, simp, sorry, },
 end
 
 @[simps]
@@ -468,8 +508,8 @@ begin
     haveI : full R := sorry, -- available after #13262
     apply (iso_equiv_of_fully_faithful R).inv_fun,
     refine f ≪≫ _ ≪≫ (replace_triangle_rotate _).symm,
-    sorry, -- still somewhat tedious!
-      },
+    apply replace_triangle'.map_iso,
+    exact (triangle_rotation).counit_iso.symm.app S, },
 end
 
 lemma complete_distinguished_triangle_morphism (T₁ T₂ : triangle (bounded_derived_category A))
