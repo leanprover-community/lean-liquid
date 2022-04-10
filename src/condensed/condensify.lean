@@ -116,7 +116,7 @@ by { ext X x, exact (α.app X).map_Tinv x }
 -- move me
 instance fact_inv_pos : fact (0 < r'⁻¹) := ⟨nnreal.inv_pos.2 $ fact.out _⟩
 
-set_option pp.universes true
+--set_option pp.universes true
 
 def condensify_Tinv (F : Fintype.{u} ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r') :
   condensify.{u} (F ⋙ to_CHFPNG₁ r') ⟶ condensify.{u} (F ⋙ to_CHFPNG₁ r') :=
@@ -133,9 +133,22 @@ lemma condensify_map_comp_Tinv {F G : Fintype.{u} ⥤ ProFiltPseuNormGrpWithTinv
 begin
   delta condensify_map condensify_Tinv,
   rw [← condensify_nonstrict_comp 1 r'⁻¹ r'⁻¹, ← condensify_nonstrict_comp r'⁻¹ 1 r'⁻¹],
-  swap, { sorry },
-  swap, { sorry },
-  { rw [whisker_right_twice, Tinv_nat_trans_comp], },
+  swap, {
+    intro X,
+    rw nat_trans.comp_app,
+    rw ← one_mul r'⁻¹,
+    apply comphaus_filtered_pseudo_normed_group_hom.bound_by.comp (Tinv_bound_by F X),
+    simp only [whisker_right_twice, whisker_right_app, functor.comp_map, enlarging_functor_map],
+    apply strict_comphaus_filtered_pseudo_normed_group_hom.to_chfpsng_hom.bound_by_one
+    },
+  swap, {
+    intro X,
+    rw nat_trans.comp_app,
+    rw ← mul_one r'⁻¹,
+    refine comphaus_filtered_pseudo_normed_group_hom.bound_by.comp _ (Tinv_bound_by G X),
+    simp only [whisker_right_twice, whisker_right_app, functor.comp_map, enlarging_functor_map],
+    apply strict_comphaus_filtered_pseudo_normed_group_hom.to_chfpsng_hom.bound_by_one, },
+  { simp only [whisker_right_twice, Tinv_nat_trans_comp], },
 end
 .
 
