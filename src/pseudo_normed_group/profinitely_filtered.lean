@@ -491,6 +491,13 @@ def to_chfpsng_hom (f : strict_comphaus_filtered_pseudo_normed_group_hom M₁ M�
 comphaus_filtered_pseudo_normed_group_hom.mk_of_strict f.to_add_monoid_hom $
 λ c, ⟨λ x h, f.strict h, f.level_continuous _⟩
 
+lemma to_chfpsng_hom.bound_by_one (f : strict_comphaus_filtered_pseudo_normed_group_hom M₁ M₂) :
+  (to_chfpsng_hom f).bound_by 1 := λ c m hmc,
+begin
+  rw [one_mul],
+  exact f.strict hmc,
+end
+
 end strict_comphaus_filtered_pseudo_normed_group_hom
 
 namespace comphaus_filtered_pseudo_normed_group_hom
