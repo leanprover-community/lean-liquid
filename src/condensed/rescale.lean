@@ -171,7 +171,9 @@ def rescale (r : ℝ≥0) [fact (0 < r)] : CompHausFiltPseuNormGrp₁ ⥤ CompHa
 
 -- practice
 example : 𝟭 CompHausFiltPseuNormGrp₁ ⟶ rescale 1 :=
-{ app := λ M, comphaus_filtered_pseudo_normed_group.to_rescale_one_strict M,
+{ app := λ M, begin
+  change strict_comphaus_filtered_pseudo_normed_group_hom M (_root_.rescale 1 M),
+  exact comphaus_filtered_pseudo_normed_group.to_rescale_one_strict M, end,
   naturality' := λ M N f, rfl,
 }
 
@@ -179,14 +181,49 @@ example : 𝟭 CompHausFiltPseuNormGrp₁ ⟶ rescale 1 :=
 -- a bunch of `of_rescale_rescale_strict` etc above
 instance rescale.equivalence (r : ℝ≥0) [fact (0 < r)] :
   is_equivalence (rescale r) :=
+by haveI : fact (0 < r⁻¹) := ⟨nnreal.inv_pos.2 (fact.elim infer_instance)⟩;
+   haveI : fact (0 < r * r⁻¹) := ⟨begin
+     refine mul_pos (fact.elim infer_instance) (fact.elim infer_instance),
+    end⟩;
+exactI
 is_equivalence.mk (@rescale r⁻¹ ⟨nnreal.inv_pos.2 (fact.elim infer_instance)⟩)
 { hom :=
-  { app := λ M, sorry, -- have enough to make this now
-    naturality' := sorry -- will be rfl },
+  { app := λ M,
+    -- M ⟶ rescale 1 M ⟶ rescale (r * r⁻¹) M ⟶ rescale r⁻¹ (rescale r M)
+    ((comphaus_filtered_pseudo_normed_group.to_rescale_rescale_strict r⁻¹ r M).comp
+    ((comphaus_filtered_pseudo_normed_group.of_rescale_eq_strict M 1 (r * r⁻¹)
+      (eq.symm (mul_inv_cancel (ne_of_gt (fact.elim infer_instance))))))).comp
+    (comphaus_filtered_pseudo_normed_group.to_rescale_one_strict M),
+    naturality' := λ M N f, rfl,
   },
-  inv := sorry,
-  hom_inv_id' := sorry,
-  inv_hom_id' := sorry } sorry
+  inv :=
+  { app := λ M,
+    -- rescale r⁻¹ (rescale r M) ⟶ rescale (r * r⁻¹) M ⟶ rescale 1 M ⟶ M
+    (comphaus_filtered_pseudo_normed_group.of_rescale_one_strict M).comp
+    (((comphaus_filtered_pseudo_normed_group.of_rescale_eq_strict M (r * r⁻¹) 1
+      ((mul_inv_cancel (ne_of_gt (fact.elim infer_instance)))))).comp
+      (comphaus_filtered_pseudo_normed_group.of_rescale_rescale_strict r⁻¹ r M)),
+    naturality' := λ M N f, rfl },
+  hom_inv_id' := rfl,
+  inv_hom_id' := rfl }
+  { hom :=
+    { app := λ M,
+    -- rescale r (rescale r⁻¹ M) ⟶ rescale (r⁻¹ * r) M ⟶ rescale 1 M ⟶ M
+    (comphaus_filtered_pseudo_normed_group.of_rescale_one_strict M).comp
+    (((comphaus_filtered_pseudo_normed_group.of_rescale_eq_strict M (r⁻¹ * r) 1
+      ((inv_mul_cancel (ne_of_gt (fact.elim infer_instance)))))).comp
+      (comphaus_filtered_pseudo_normed_group.of_rescale_rescale_strict r r⁻¹ M)),
+      naturality' := λ M N f, rfl },
+    inv :=
+    { app := λ M,
+    -- M ⟶ rescale 1 M ⟶ rescale (r⁻¹ * r) M ⟶ rescale r (rescale r⁻¹ M)
+    ((comphaus_filtered_pseudo_normed_group.to_rescale_rescale_strict r r⁻¹ M).comp
+    ((comphaus_filtered_pseudo_normed_group.of_rescale_eq_strict M 1 (r⁻¹ * r)
+      (eq.symm (inv_mul_cancel (ne_of_gt (fact.elim infer_instance))))))).comp
+    (comphaus_filtered_pseudo_normed_group.to_rescale_one_strict M),
+      naturality' := λ M N f, rfl },
+    hom_inv_id' := rfl,
+    inv_hom_id' := rfl }
 
 instance rescale_preserves_limits_of_shape_discrete_quotient
   (X : Profinite.{u}) (c : ℝ≥0) [fact (0 < c)] :
@@ -194,7 +231,7 @@ instance rescale_preserves_limits_of_shape_discrete_quotient
 begin
   let foo := (category_theory.adjunction.is_equivalence_preserves_limits
     (rescale c)).preserves_limits_of_shape,
-  exact foo, -- not 100% sure why this is happening
+  exact foo, -- not 100% sure I need to define foo first
 end
 
 @[simps]
