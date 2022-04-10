@@ -45,48 +45,56 @@ strict_pseudo_normed_group_hom (rescale 1 M) M :=
   strict' := λ c x hx, by rwa [mem_filtration, inv_one, mul_one] at hx
 }
 
-def of_to_rescale_one_comp_eq_id [fact (0 < r)] [fact (0 < r')] :
-  (of_rescale_one_strict_pseudo_normed_group_hom M).comp
-  (to_rescale_one_strict_pseudo_normed_group_hom M) =
-  strict_pseudo_normed_group_hom.id (rescale 1 M) :=
-rfl
+-- def of_to_rescale_one_comp_eq_id [fact (0 < r)] [fact (0 < r')] :
+--   (of_rescale_one_strict_pseudo_normed_group_hom M).comp
+--   (to_rescale_one_strict_pseudo_normed_group_hom M) =
+--   strict_pseudo_normed_group_hom.id (rescale 1 M) :=
+-- rfl
 
-def to_of_rescale_one_comp_eq_id [fact (0 < r)] [fact (0 < r')] :
-  (to_rescale_one_strict_pseudo_normed_group_hom M).comp
-  (of_rescale_one_strict_pseudo_normed_group_hom M) =
-  strict_pseudo_normed_group_hom.id M :=
-rfl
+-- def to_of_rescale_one_comp_eq_id [fact (0 < r)] [fact (0 < r')] :
+--   (to_rescale_one_strict_pseudo_normed_group_hom M).comp
+--   (of_rescale_one_strict_pseudo_normed_group_hom M) =
+--   strict_pseudo_normed_group_hom.id M :=
+-- rfl
 
-def of_rescale_rescale_strict_pseudo_normed_group_hom [fact (0 < r)] [fact (0 < r')]:
+def of_rescale_eq_strict_pseudo_normed_group_hom [fact (0 < r)] [fact (0 < r')] (h : r = r') :
+strict_pseudo_normed_group_hom (rescale r M) (rescale r' M) :=
+{ to_fun := λ m, rescale.of (rescale.of.symm m),
+  map_zero' := rfl,
+  map_add' := λ _ _, rfl,
+  strict' := λ c x hx, by rwa [mem_filtration', ← h, ← mem_filtration r M],
+}
+
+def of_rescale_rescale_strict_pseudo_normed_group_hom [fact (0 < r)] [fact (0 < r')] :
 strict_pseudo_normed_group_hom (rescale r (rescale r' M)) (rescale (r' * r) M) :=
 { to_fun := λ m, (rescale.of (rescale.of.symm (rescale.of.symm m))),
   map_zero' := rfl,
   map_add' := λ _ _, rfl,
-  strict' := λ c x hx, begin
+  strict' := λ c x hx, by
     rwa [mem_filtration', nnreal.mul_inv, ← mul_assoc, ← mem_filtration r' M, ← mem_filtration r],
-  end }
+}
 
 def to_rescale_rescale_strict_pseudo_normed_group_hom [fact (0 < r)] [fact (0 < r')]:
 strict_pseudo_normed_group_hom (rescale (r' * r) M) (rescale r (rescale r' M)) :=
 { to_fun := λ m, (rescale.of (rescale.of (rescale.of.symm m))),
   map_zero' := rfl,
   map_add' := λ _ _, rfl,
-  strict' := λ c x hx, begin
+  strict' := λ c x hx, by
     rwa [mem_filtration' r (rescale r' M), mem_filtration' r' M, mul_assoc, ← nnreal.mul_inv,
       ← mem_filtration (r' * r) M],
-  end }
+}
 
-def of_to_rescale_rescale_comp_eq_id [fact (0 < r)] [fact (0 < r')] :
-  (of_rescale_rescale_strict_pseudo_normed_group_hom r r' M).comp
-  (to_rescale_rescale_strict_pseudo_normed_group_hom r r' M) =
-  strict_pseudo_normed_group_hom.id (rescale r (rescale r' M)) :=
-rfl
+-- def of_to_rescale_rescale_comp_eq_id [fact (0 < r)] [fact (0 < r')] :
+--   (of_rescale_rescale_strict_pseudo_normed_group_hom r r' M).comp
+--   (to_rescale_rescale_strict_pseudo_normed_group_hom r r' M) =
+--   strict_pseudo_normed_group_hom.id (rescale r (rescale r' M)) :=
+-- rfl
 
-def to_of_rescale_rescale_comp_eq_id' [fact (0 < r)] [fact (0 < r')] :
-  (to_rescale_rescale_strict_pseudo_normed_group_hom r r' M).comp
-  (of_rescale_rescale_strict_pseudo_normed_group_hom r r' M) =
-  strict_pseudo_normed_group_hom.id (rescale (r' * r) M) :=
-rfl
+-- def to_of_rescale_rescale_comp_eq_id' [fact (0 < r)] [fact (0 < r')] :
+--   (to_rescale_rescale_strict_pseudo_normed_group_hom r r' M).comp
+--   (of_rescale_rescale_strict_pseudo_normed_group_hom r r' M) =
+--   strict_pseudo_normed_group_hom.id (rescale (r' * r) M) :=
+-- rfl
 
 end pseudo_normed_group
 
