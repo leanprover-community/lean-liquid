@@ -418,7 +418,8 @@ begin
         let BBj₀ : finsupp.supported R R (λ x : ords, x.1 < i) := ⟨B.repr (BB j_good), hBBj'⟩,
         let l'₀ : finsupp.supported R R (λ x : ords, x.1 < i) := l₀ - r • BBj₀,
         have hl' : l' = l'₀ :=
-          by simp only [l', linear_equiv.map_smulₛₗ, ring_hom.id_apply, coe_sub, subtype.coe_mk, coe_smul_of_tower],
+          by { simp only [l', linear_equiv.map_smulₛₗ, ring_hom.id_apply, subtype.coe_mk, coe_smul_of_tower,
+            add_subgroup_class.coe_sub, submodule.coe_mk, sub_left_inj], },
         have hl'' := (finsupp.mem_supported R l'₀.1).1 l'₀.2,
         simp only [subtype.val_eq_coe, ←hl'] at hl'',
         exact mem_of_subset_of_mem hl'' hx
