@@ -15,18 +15,6 @@ open category_theory
 
 namespace comphaus_filtered_pseudo_normed_group
 
--- def strict_unscale (M : Type*) [comphaus_filtered_pseudo_normed_group M]
---   (r : ℝ≥0) [fact (1 ≤ r)] :
---   strict_comphaus_filtered_pseudo_normed_group_hom (rescale r M) M :=
--- { to_fun := rescale.of.symm,
---   map_zero' := rfl,
---   map_add' := λ _ _, rfl,
---   strict' := λ c x hx, begin
---     rw [rescale.mem_filtration] at hx,
---     exact pseudo_normed_group.filtration_mono (fact.out _) hx,
---   end,
---   continuous' := λ c, @comphaus_filtered_pseudo_normed_group.continuous_cast_le M _ (c * r⁻¹) c _ }
-
 def of_rescale_one_strict (M : Type*) [comphaus_filtered_pseudo_normed_group M] :
   strict_comphaus_filtered_pseudo_normed_group_hom (rescale 1 M) M :=
 { continuous' := λ c, comphaus_filtered_pseudo_normed_group.continuous_cast_le (c * 1⁻¹) c,
@@ -161,30 +149,10 @@ def rescale (r : ℝ≥0) [fact (0 < r)] : CompHausFiltPseuNormGrp₁ ⥤ CompHa
   map_comp' := by { intros, ext, refl } }
 .
 
--- def rescale.comp (r s : ℝ≥0) [fact (0 < r)] [fact (0 < s)] :
--- rescale r ⋙ rescale s ⟶ rescale (r * s) :=
--- { app := λ M,
---   { continuous' := sorry,
---     ..rescale.of_rescale_rescale_strict_pseudo_normed_group_hom r s M
---   },
---   naturality' := _ }
-
--- practice
-example : 𝟭 CompHausFiltPseuNormGrp₁ ⟶ rescale 1 :=
-{ app := λ M, begin
-  change strict_comphaus_filtered_pseudo_normed_group_hom M (_root_.rescale 1 M),
-  exact comphaus_filtered_pseudo_normed_group.to_rescale_one_strict M, end,
-  naturality' := λ M N f, rfl,
-}
-
--- kmb in the middle of this. Should now be just a case of putting together
--- a bunch of `of_rescale_rescale_strict` etc above
 instance rescale.equivalence (r : ℝ≥0) [fact (0 < r)] :
   is_equivalence (rescale r) :=
 by haveI : fact (0 < r⁻¹) := ⟨nnreal.inv_pos.2 (fact.elim infer_instance)⟩;
-   haveI : fact (0 < r * r⁻¹) := ⟨begin
-     refine mul_pos (fact.elim infer_instance) (fact.elim infer_instance),
-    end⟩;
+   haveI : fact (0 < r * r⁻¹) := ⟨mul_pos (fact.elim infer_instance) (fact.elim infer_instance)⟩;
 exactI
 is_equivalence.mk (@rescale r⁻¹ ⟨nnreal.inv_pos.2 (fact.elim infer_instance)⟩)
 { hom :=
@@ -231,7 +199,7 @@ instance rescale_preserves_limits_of_shape_discrete_quotient
 begin
   let foo := (category_theory.adjunction.is_equivalence_preserves_limits
     (rescale c)).preserves_limits_of_shape,
-  exact foo, -- not 100% sure I need to define foo first
+  exact foo, -- not 100% sure why I need to define foo first
 end
 
 @[simps]
