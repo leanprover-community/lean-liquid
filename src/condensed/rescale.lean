@@ -15,17 +15,70 @@ open category_theory
 
 namespace comphaus_filtered_pseudo_normed_group
 
-def strict_unscale (M : Type*) [comphaus_filtered_pseudo_normed_group M]
-  (r : ℝ≥0) [fact (1 ≤ r)] :
-  strict_comphaus_filtered_pseudo_normed_group_hom (rescale r M) M :=
-{ to_fun := rescale.of.symm,
-  map_zero' := rfl,
-  map_add' := λ _ _, rfl,
-  strict' := λ c x hx, begin
-    rw [rescale.mem_filtration] at hx,
-    exact pseudo_normed_group.filtration_mono (fact.out _) hx,
+-- def strict_unscale (M : Type*) [comphaus_filtered_pseudo_normed_group M]
+--   (r : ℝ≥0) [fact (1 ≤ r)] :
+--   strict_comphaus_filtered_pseudo_normed_group_hom (rescale r M) M :=
+-- { to_fun := rescale.of.symm,
+--   map_zero' := rfl,
+--   map_add' := λ _ _, rfl,
+--   strict' := λ c x hx, begin
+--     rw [rescale.mem_filtration] at hx,
+--     exact pseudo_normed_group.filtration_mono (fact.out _) hx,
+--   end,
+--   continuous' := λ c, @comphaus_filtered_pseudo_normed_group.continuous_cast_le M _ (c * r⁻¹) c _ }
+
+def of_rescale_one_strict (M : Type*) [comphaus_filtered_pseudo_normed_group M] :
+  strict_comphaus_filtered_pseudo_normed_group_hom (rescale 1 M) M :=
+{ continuous' := λ c, comphaus_filtered_pseudo_normed_group.continuous_cast_le (c * 1⁻¹) c,
+  .. rescale.of_rescale_one_strict_pseudo_normed_group_hom M
+}
+
+def to_rescale_one_strict (M : Type*) [comphaus_filtered_pseudo_normed_group M] :
+  strict_comphaus_filtered_pseudo_normed_group_hom M (rescale 1 M) :=
+{ continuous' := λ c, begin
+    haveI : fact (c ≤ c * 1⁻¹) := ⟨le_of_eq (by rw [inv_one, mul_one])⟩,
+    exact comphaus_filtered_pseudo_normed_group.continuous_cast_le c (c * 1⁻¹),
   end,
-  continuous' := λ c, @comphaus_filtered_pseudo_normed_group.continuous_cast_le M _ (c * r⁻¹) c _ }
+  .. rescale.to_rescale_one_strict_pseudo_normed_group_hom M
+}
+
+def of_rescale_eq_strict (M : Type*) [comphaus_filtered_pseudo_normed_group M]
+  (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] (hrr' : r = r') :
+strict_comphaus_filtered_pseudo_normed_group_hom (rescale r M) (rescale r' M) :=
+{ continuous' := λ c, begin
+  haveI : fact (c * r⁻¹ ≤ c * r'⁻¹) := ⟨le_of_eq (by rw hrr')⟩,
+    exact comphaus_filtered_pseudo_normed_group.continuous_cast_le (c * r⁻¹) (c * r'⁻¹),
+  end,
+  .. rescale.of_rescale_eq_strict_pseudo_normed_group_hom  r r' M hrr',
+}
+
+def of_rescale_rescale_strict (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')]
+  (M : Type*) [comphaus_filtered_pseudo_normed_group M] :
+  strict_comphaus_filtered_pseudo_normed_group_hom
+    (rescale r (rescale r' M)) (rescale (r' * r) M) :=
+{
+  continuous' := λ c,
+  begin
+    haveI : fact (c * r⁻¹ * r'⁻¹ ≤ c * (r' * r)⁻¹) :=
+      ⟨le_of_eq (by rw [nnreal.mul_inv, mul_assoc])⟩,
+    exact comphaus_filtered_pseudo_normed_group.continuous_cast_le (c * r⁻¹ * r'⁻¹) _,
+  end,
+  ..rescale.of_rescale_rescale_strict_pseudo_normed_group_hom r r' M
+}
+
+def to_rescale_rescale_strict (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')]
+  (M : Type*) [comphaus_filtered_pseudo_normed_group M] :
+  strict_comphaus_filtered_pseudo_normed_group_hom
+    (rescale (r' * r) M) (rescale r (rescale r' M)) :=
+{
+  continuous' := λ c,
+  begin
+    haveI : fact (c * (r' * r)⁻¹ ≤ c * r⁻¹ * r'⁻¹) :=
+      ⟨le_of_eq (by rw [nnreal.mul_inv, mul_assoc])⟩,
+    exact comphaus_filtered_pseudo_normed_group.continuous_cast_le (c * (r' * r)⁻¹) _,
+  end,
+  ..rescale.to_rescale_rescale_strict_pseudo_normed_group_hom r r' M
+}
 
 end comphaus_filtered_pseudo_normed_group
 
@@ -116,10 +169,24 @@ def rescale (r : ℝ≥0) [fact (0 < r)] : CompHausFiltPseuNormGrp₁ ⥤ CompHa
 --   },
 --   naturality' := _ }
 
+-- practice
+example : 𝟭 CompHausFiltPseuNormGrp₁ ⟶ rescale 1 :=
+{ app := λ M, comphaus_filtered_pseudo_normed_group.to_rescale_one_strict M,
+  naturality' := λ M N f, rfl,
+}
+
+-- kmb in the middle of this. Should now be just a case of putting together
+-- a bunch of `of_rescale_rescale_strict` etc above
 instance rescale.equivalence (r : ℝ≥0) [fact (0 < r)] :
   is_equivalence (rescale r) :=
 is_equivalence.mk (@rescale r⁻¹ ⟨nnreal.inv_pos.2 (fact.elim infer_instance)⟩)
-sorry sorry
+{ hom :=
+  { app := λ M, sorry, -- have enough to make this now
+    naturality' := sorry -- will be rfl },
+  },
+  inv := sorry,
+  hom_inv_id' := sorry,
+  inv_hom_id' := sorry } sorry
 
 instance rescale_preserves_limits_of_shape_discrete_quotient
   (X : Profinite.{u}) (c : ℝ≥0) [fact (0 < c)] :
