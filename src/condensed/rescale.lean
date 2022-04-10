@@ -325,27 +325,17 @@ end
 lemma nonstrict_extend_bound_by (h : ∀ X, (α.app X).bound_by c) (X : Profinite.{u}) :
   ((nonstrict_extend α c h).app X).bound_by c :=
 begin
-  -- needs a `bound_by.comp` lemma (now available in pseudo_normed_group.profinitely_filtered)
---  apply comphaus_filtered_pseudo_normed_group_hom.bound_by.comp,
-  conv begin
-    congr, skip,
-    rw ← one_mul c,
-  end,
-  apply comphaus_filtered_pseudo_normed_group_hom.bound_by.comp,
-  { intros r m hm,
---    squeeze_simp at hm,
-    simp only [whisker_left_app, rescale_enlarging_iso_inv_app_to_fun],
-    change m ∈ _,
-    rw mul_comm,
-    rw (show r = r * c * c⁻¹, by sorry),
-    convert hm,
-    sorry },
-  rw ← one_mul (1 : ℝ≥0),
-  simp only [whisker_left_app, whisker_right_comp, nat_trans.comp_app, whisker_right_app,
-    Profinite.extend_commutes_hom_app, enlarging_functor_map, Profinite.extend_nat_trans_app],
-  apply comphaus_filtered_pseudo_normed_group_hom.bound_by.comp,
-  apply strict_comphaus_filtered_pseudo_normed_group_hom.to_chfpsng_hom.bound_by_one,
-  apply strict_comphaus_filtered_pseudo_normed_group_hom.to_chfpsng_hom.bound_by_one,
+  conv begin congr, skip, rw ← one_mul c, end, -- can't get nth_rewrite to work
+  refine comphaus_filtered_pseudo_normed_group_hom.bound_by.comp (λ r m hm, _) _,
+  { rw mul_comm,
+    rwa (show r = r * c * c⁻¹, begin
+      rw [mul_assoc, mul_inv_cancel (ne_of_gt (fact.elim infer_instance)), mul_one];
+      apply_instance,
+    end) at hm },
+  { rw [← one_mul (1 : ℝ≥0), whisker_right_comp],
+    apply comphaus_filtered_pseudo_normed_group_hom.bound_by.comp,
+    { apply strict_comphaus_filtered_pseudo_normed_group_hom.to_chfpsng_hom.bound_by_one },
+    { apply strict_comphaus_filtered_pseudo_normed_group_hom.to_chfpsng_hom.bound_by_one } },
 end
 
 lemma nonstrict_extend_ext'
