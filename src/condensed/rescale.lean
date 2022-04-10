@@ -458,7 +458,11 @@ lemma nonstrict_extend_comp
   nonstrict_extend (α ≫ β) cαβ hαβ = nonstrict_extend α cα hα ≫ nonstrict_extend β cβ hβ :=
 begin
   refine nonstrict_extend_ext _ _ cαβ (cα * cβ) (nonstrict_extend_bound_by _ _ _) _ _,
-  { sorry /- needs `bound_by.comp` -/ },
+  { intro X,
+    rw mul_comm,
+    apply comphaus_filtered_pseudo_normed_group_hom.bound_by.comp,
+    { exact nonstrict_extend_bound_by α cα hα X },
+    { exact nonstrict_extend_bound_by β cβ hβ X } },
   { simp only [nonstrict_extend_whisker_left, whisker_left_comp, category.assoc,
       ← iso_whisker_right_hom, ← iso_whisker_right_inv,
       iso.hom_inv_id_assoc, iso.inv_hom_id_assoc], }
