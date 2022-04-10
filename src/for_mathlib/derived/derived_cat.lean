@@ -2,27 +2,6 @@ import for_mathlib.derived.K_projective
 
 open category_theory
 
--- PR's as #13263
-section
-
-variables {C D : Type*} [category C] [category D]
-
-lemma category_theory.functor.map_iso_injective (F : C ⥤ D) [faithful F] {X Y : C} :
-  function.injective $ @functor.map_iso _ _ _ _ F X Y :=
-λ i j h, iso.ext (functor.map_injective F (congr_arg iso.hom h : _))
-
-def foo (F : C ⥤ D) [full F] [faithful F] {X Y : C} : (X ⟶ Y) ≃ (F.obj X ⟶ F.obj Y) :=
-equiv_of_fully_faithful F
-
-/-- If `F` is fully faithful, we have an equivalence of hom-sets `X ≅ Y` and `F X ≅ F Y`. -/
-@[simps]
-def iso_equiv_of_fully_faithful (F : C ⥤ D) [full F] [faithful F] {X Y : C} : (X ≅ Y) ≃ (F.obj X ≅ F.obj Y) :=
-{ to_fun := λ f, F.map_iso f,
-  inv_fun := λ f, preimage_iso f,
-  left_inv := λ f, by simp,
-  right_inv := λ f, by { ext, simp, } }
-end
-
 variables (A : Type*) [category A] [abelian A] [enough_projectives A]
 
 structure bounded_derived_category :=
@@ -143,70 +122,18 @@ def has_shift_functor (i : ℤ) : bounded_derived_category A ⥤ bounded_derived
   map_id' := λ X, by { ext1, dsimp, apply category_theory.functor.map_id },
   map_comp' := λ X Y Z f g, by { ext1, dsimp, apply category_theory.functor.map_comp } }
 
-section
-open homological_complex
-
-/-!
-There's a somewhat awkward problem here, that perhaps needs a more robust fix.
-Lean is having trouble here seeing that two different inverses are equal,
-because one of them is hiding behind the existential `is_iso`.
-
-This means we need to be more careful about definitional equalities, and
-need to use `(shift_monoidal_functor _ ℤ).ε_iso.inv.naturality`
-rather then `(homotopy_category.shift_ε _).hom.naturality`.
-
-Unfortunately we then need
-`local attribute [instance] endofunctor_monoidal_category`
-as otherwise `ε_iso` gets confused.
--/
-local attribute [instance] endofunctor_monoidal_category
-
-noncomputable
-def has_shift_ε : 𝟭 (bounded_derived_category A) ≅ has_shift_functor A 0 :=
-{ hom :=
-  { app := λ X, ⟨(shift_zero _ _).inv⟩,
-    naturality' := λ X Y f, by { ext1,
-      exact (homotopy_category.shift_ε _).hom.naturality f.val, }, },
-  inv :=
-  { app := λ X, ⟨(shift_zero _ _).hom⟩,
-    naturality' := λ X Y f, by { ext1,
-      exact (shift_monoidal_functor _ ℤ).ε_iso.inv.naturality f.val, }, }, }
-
-@[simps]
-noncomputable
-def has_shift_μ (m n : ℤ) : has_shift_functor A m ⋙ has_shift_functor A n ≅ has_shift_functor A (m + n) :=
-{ hom :=
-  { app := λ X, ⟨(shift_add _ _ _).inv⟩,
-    naturality' := λ X Y f, by { ext1,
-      exact (homotopy_category.shift_functor_add A m n).hom.naturality f.val, } },
-  inv :=
-  { app := λ X, ⟨(shift_add _ _ _).hom⟩,
-    naturality' := λ X Y f, by { ext1,
-      exact ((shift_monoidal_functor _ ℤ).μ_iso m n).inv.naturality f.val, }, }, }
-
-.
-
--- This is really ugly, and not appropriate for mathlib...
-local attribute [reducible] endofunctor_monoidal_category
-
-noncomputable
-instance has_shift : has_shift (bounded_derived_category A) ℤ := has_shift_mk _ _ $
-{ F := λ i, has_shift_functor A i,
-  ε := has_shift_ε A,
-  μ := has_shift_μ A,
-  associativity := begin intros, ext, dsimp,
-    have := (shift_monoidal_functor (bounded_homotopy_category A) ℤ).to_lax_monoidal_functor.associativity m₁ m₂ m₃,
-    dsimp at this,
-    have t := nat_trans.congr_app this X.val,
-    dsimp at t, simp only [category.id_comp, category_theory.functor.map_id, category.assoc] at t,
-    convert t,
-    -- almost there! but so gross.
-    sorry,
-  end,
-  left_unitality := sorry,
-  right_unitality := sorry }
-
+@[simps] def has_shift_functor_forget (m : ℤ) :
+  has_shift_functor A m ⋙ forget A ≅ forget A ⋙ shift_functor (bounded_homotopy_category A) m :=
+begin
+  fapply nat_iso.of_components,
+  { exact λ X, bounded_homotopy_category.mk_iso (by refl), },
+  { intros,
+    erw [category.id_comp, category.comp_id],
+    refl, },
 end
+
+noncomputable instance : has_shift (bounded_derived_category A) ℤ :=
+has_shift_of_fully_faithful (forget A) (has_shift_functor A) (has_shift_functor_forget A)
 
 @[simp]
 lemma shift_functor_val (m : ℤ) {X Y : bounded_derived_category A} (f : X ⟶ Y) :
@@ -219,13 +146,8 @@ noncomputable
 def shift_functor_forget (m : ℤ) :
   shift_functor (bounded_derived_category A) m ⋙ forget A ≅
     forget A ⋙ shift_functor (bounded_homotopy_category A) m :=
-begin
-  fapply nat_iso.of_components,
-  { exact λ X, bounded_homotopy_category.mk_iso (by refl), },
-  { intros,
-    erw [category.id_comp, category.comp_id],
-    refl, },
-end
+has_shift_of_fully_faithful_comm
+  (forget A) (shift_functor (bounded_derived_category A)) (has_shift_functor_forget A) m
 
 @[simps]
 noncomputable
