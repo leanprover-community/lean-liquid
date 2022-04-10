@@ -386,7 +386,7 @@ begin
   simpa using h,
 end
 
-instance (P : 𝒦) [is_K_projective P] (i : ℤ) : is_K_projective (P⟦i⟧) :=
+instance is_K_projective_shift (P : 𝒦) [is_K_projective P] (i : ℤ) : is_K_projective (P⟦i⟧) :=
 begin
   constructor,
   introsI Y _ f,

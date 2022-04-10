@@ -284,9 +284,9 @@ has_shift_mk _ _
 { F := homotopy_category.shift_functor V,
   ε := homotopy_category.shift_ε V,
   μ := homotopy_category.shift_functor_add V,
-  associativity := homotopy_category.has_shift_associativity_aux _,
-  left_unitality := homotopy_category.has_shift_left_unitality_aux _,
-  right_unitality := homotopy_category.has_shift_right_unitality_aux _ }
+  associativity := by simpa using homotopy_category.has_shift_associativity_aux _,
+  left_unitality := by simpa using homotopy_category.has_shift_left_unitality_aux _,
+  right_unitality := by simpa using homotopy_category.has_shift_right_unitality_aux _ }
 
 @[simp] lemma homotopy_category.quotient_obj_shift (X : cochain_complex V ℤ) (n : ℤ) :
   ((homotopy_category.quotient V _).obj X)⟦n⟧ = ⟨X⟦n⟧⟩ := rfl
