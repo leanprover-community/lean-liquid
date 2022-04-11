@@ -371,6 +371,12 @@ begin
   rwa [real.rpow_int_cast _ d] at this,
 end
 
+def bdd_filtration {S : Fintype} (hr₀ : 0 < (r : ℝ)) (hr₁ : (r : ℝ) < 1) (F : ℒ S) : ℤ :=
+(exists_bdd_filtration hr₀ hr₁ F).some
+
+def bdd_filtration_spec {S : Fintype} (hr₀ : 0 < (r : ℝ)) (hr₁ : (r : ℝ) < 1) (F : ℒ S) :
+∀ s n, n < bdd_filtration hr₀ hr₁ F → F s n = 0 := (exists_bdd_filtration hr₀ hr₁ F).some_spec
+
 section profinite_structure
 
 @[simps] def truncate {c : ℝ≥0} (A : finset ℤ) :
