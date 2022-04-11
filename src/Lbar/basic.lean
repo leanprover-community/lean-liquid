@@ -33,8 +33,10 @@ section defs
 
 set_option old_structure_cmd true
 
-/-- `Lbar r' S` is the set of power series
-`F_s = ∑ a_{s,n}T^n ∈ Tℤ[[T]]` such that `∑_{s,n} |a_{s,n}|r'^n` converges -/
+/-- `Lbar r S` is the set of power series
+`F_s = ∑ a_{s,n}T^n ∈ Tℤ[[T]]` such that `∑_{s,n} |a_{s,n}|r^n` converges
+(or equivalently, because `S` is a finite type, such that for each `s : S`,
+`∑_n |a_{s,n}|r^n` converges. ) -/
 structure Lbar (r' : ℝ≥0) (S : Type u) [fintype S] :=
 (to_fun      : S → ℕ → ℤ)
 (coeff_zero' : ∀ s, to_fun s 0 = 0)
