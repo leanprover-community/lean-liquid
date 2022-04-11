@@ -205,11 +205,11 @@ end
 --         (Tinv_nat_trans (Profinite.extend F)) :=
 -- begin
 --   refine nonstrict_extend_ext' _ _ r'⁻¹ (nonstrict_extend_bound_by _ _ _) _ _,
---   { sorry },
+--   { admit },
 --   { rw [nonstrict_extend_whisker_left],
 --     simp only [whisker_left_comp, ← iso_whisker_left_hom, ← iso_whisker_left_inv,
 --       ← iso.inv_comp_eq, iso.eq_comp_inv, category.assoc],
---     sorry }
+--     admit }
 -- end
 
 lemma condensify_nonstrict_Tinv (F : Fintype.{u} ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r') :
