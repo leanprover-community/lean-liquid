@@ -88,6 +88,7 @@ apply_nolint category_theory.additive_category_of_abelian instance_priority
 -- for_mathlib/derived/K_projective.lean
 apply_nolint bounded_homotopy_category.lift unused_arguments
 apply_nolint bounded_homotopy_category.lift_ext unused_arguments
+apply_nolint bounded_homotopy_category.map.homotopy_category.is_quasi_iso unused_arguments
 
 -- for_mathlib/derived/derived_cat.lean
 apply_nolint bounded_derived_category.lift_unique unused_arguments
@@ -300,6 +301,8 @@ apply_nolint generates_norm.rescale_generators unused_arguments
 
 -- rescale/pseudo_normed_group.lean
 apply_nolint rescale.comphaus_filtered_pseudo_normed_group fails_quickly
+apply_nolint rescale.mem_filtration' unused_arguments
+apply_nolint rescale.of_rescale_eq_strict_pseudo_normed_group_hom unused_arguments
 apply_nolint rescale.profinitely_filtered_pseudo_normed_group fails_quickly
 apply_nolint rescale.profinitely_filtered_pseudo_normed_group_with_Tinv fails_quickly
 apply_nolint rescale.pseudo_normed_group fails_quickly
