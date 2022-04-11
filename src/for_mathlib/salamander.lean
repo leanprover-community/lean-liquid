@@ -1,3 +1,5 @@
+import category_theory.abelian.homology
+
 import for_mathlib.exact_seq3
 import for_mathlib.homology_exact
 .
@@ -75,6 +77,21 @@ protected def unop {A B X : 𝓐ᵒᵖ} (sum : sum_str A B X) : sum_str (unop A)
   inr_fst := by { rw [← unop_comp, sum.inl_snd, unop_zero] },
   total := by { rw [← unop_comp, ← unop_comp, ← unop_add, sum.total, unop_id] } }
 
+lemma symm_symm (sum : sum_str A B X) : sum.symm.symm = sum :=
+by { cases sum, refl }
+
+lemma op_symm (sum : sum_str A B X) : sum.symm.op = sum.op.symm :=
+by { cases sum, refl }
+
+lemma unop_symm {A B X : 𝓐ᵒᵖ} (sum : sum_str A B X) : sum.symm.unop = sum.unop.symm :=
+by { cases sum, refl }
+
+lemma unop_op (sum : sum_str A B X) : sum.op.unop = sum :=
+by { cases sum, refl }
+
+lemma op_unop {A B X : 𝓐ᵒᵖ} (sum : sum_str A B X) : sum.unop.op = sum :=
+by { cases sum, refl }
+
 end sum_str
 
 variables {A₁₁ A₁₂ A₁₃ A₁₄ A₁₅ : 𝓐}
@@ -113,7 +130,7 @@ A₂₁ --- f₂₁ --> A₂₂ --- f₂₂ --> A₂₃
 
 ```
 whose rows and columns are complexes. -/
-structure LBC :=
+@[ext] structure LBC :=
 (hw : f₂₁ ≫ f₂₂ = 0)
 (vw : g₁₂ ≫ g₂₂ = 0)
 (diag_in : A₁₁ ⟶ A₂₂)
@@ -218,6 +235,59 @@ protected def op (lbc : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂
   inr_π := by { dsimp, rw [← op_comp, lbc.ι_fst], },
   ι_fst := by { dsimp, rw [← op_comp, lbc.inr_π], },
   ι_snd := by { dsimp, rw [← op_comp, lbc.inl_π], } }
+
+variables {A'₁₁ A'₁₂ A'₁₃ A'₁₄ A'₁₅ : 𝓐ᵒᵖ}
+variables {A'₂₁ A'₂₂ A'₂₃ A'₂₄ A'₂₅ : 𝓐ᵒᵖ}
+variables {A'₃₁ A'₃₂ A'₃₃ A'₃₄ A'₃₅ : 𝓐ᵒᵖ}
+variables {A'₄₁ A'₄₂ A'₄₃ A'₄₄ A'₄₅ : 𝓐ᵒᵖ}
+variables {A'₅₁ A'₅₂ A'₅₃ A'₅₄ A'₅₅ : 𝓐ᵒᵖ}
+
+variables {f'₁₁ : A'₁₁ ⟶ A'₁₂} {f'₁₂ : A'₁₂ ⟶ A'₁₃} {f'₁₃ : A'₁₃ ⟶ A'₁₄} {f'₁₄ : A'₁₄ ⟶ A'₁₅}
+variables {g'₁₁ : A'₁₁ ⟶ A'₂₁} {g'₁₂ : A'₁₂ ⟶ A'₂₂} {g'₁₃ : A'₁₃ ⟶ A'₂₃} {g'₁₄ : A'₁₄ ⟶ A'₂₄} {g'₁₅ : A'₁₅ ⟶ A'₂₅}
+variables {f'₂₁ : A'₂₁ ⟶ A'₂₂} {f'₂₂ : A'₂₂ ⟶ A'₂₃} {f'₂₃ : A'₂₃ ⟶ A'₂₄} {f'₂₄ : A'₂₄ ⟶ A'₂₅}
+variables {g'₂₁ : A'₂₁ ⟶ A'₃₁} {g'₂₂ : A'₂₂ ⟶ A'₃₂} {g'₂₃ : A'₂₃ ⟶ A'₃₃} {g'₂₄ : A'₂₄ ⟶ A'₃₄} {g'₂₅ : A'₂₅ ⟶ A'₃₅}
+variables {f'₃₁ : A'₃₁ ⟶ A'₃₂} {f'₃₂ : A'₃₂ ⟶ A'₃₃} {f'₃₃ : A'₃₃ ⟶ A'₃₄} {f'₃₄ : A'₃₄ ⟶ A'₃₅}
+variables {g'₃₁ : A'₃₁ ⟶ A'₄₁} {g'₃₂ : A'₃₂ ⟶ A'₄₂} {g'₃₃ : A'₃₃ ⟶ A'₄₃} {g'₃₄ : A'₃₄ ⟶ A'₄₄} {g'₃₅ : A'₃₅ ⟶ A'₄₅}
+variables {f'₄₁ : A'₄₁ ⟶ A'₄₂} {f'₄₂ : A'₄₂ ⟶ A'₄₃} {f'₄₃ : A'₄₃ ⟶ A'₄₄} {f'₄₄ : A'₄₄ ⟶ A'₄₅}
+variables {g'₄₁ : A'₄₁ ⟶ A'₅₁} {g'₄₂ : A'₄₂ ⟶ A'₅₂} {g'₄₃ : A'₄₃ ⟶ A'₅₃} {g'₄₄ : A'₄₄ ⟶ A'₅₄} {g'₄₅ : A'₄₅ ⟶ A'₅₅}
+variables {f'₅₁ : A'₅₁ ⟶ A'₅₂} {f'₅₂ : A'₅₂ ⟶ A'₅₃} {f'₅₃ : A'₅₃ ⟶ A'₅₄} {f'₅₄ : A'₅₄ ⟶ A'₅₅}
+
+@[simps]
+protected def unop (lbc : LBC f'₁₁ g'₁₁ g'₁₂ f'₂₁ f'₂₂ g'₂₂ g'₂₃ f'₃₂) :
+  LBC f'₃₂.unop g'₂₃.unop g'₂₂.unop f'₂₂.unop f'₂₁.unop g'₁₂.unop g'₁₁.unop f'₁₁.unop :=
+{ hw := by { rw [← unop_comp, lbc.hw, unop_zero] },
+  vw := by { rw [← unop_comp, lbc.vw, unop_zero] },
+  diag_in := lbc.diag_out.unop,
+  diag_out := lbc.diag_in.unop,
+  diag_in_tr₁ := by { rw [← unop_comp, lbc.diag_out_tr₂] },
+  diag_in_tr₂ := by { rw [← unop_comp, lbc.diag_out_tr₁] },
+  diag_out_tr₁ := by { rw [← unop_comp, lbc.diag_in_tr₂] },
+  diag_out_tr₂ := by { rw [← unop_comp, lbc.diag_in_tr₁] },
+  X := unop lbc.Y,
+  Y := unop lbc.X,
+  sum₁ := lbc.symm.sum₂.unop,
+  sum₂ := lbc.symm.sum₁.unop,
+  π := lbc.ι.unop,
+  ι := lbc.π.unop,
+  inl_π := by { dsimp, rw [← unop_comp, lbc.ι_snd], },
+  inr_π := by { dsimp, rw [← unop_comp, lbc.ι_fst], },
+  ι_fst := by { dsimp, rw [← unop_comp, lbc.inr_π], },
+  ι_snd := by { dsimp, rw [← unop_comp, lbc.inl_π], } }
+.
+
+lemma unop_op (lbc : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂) : lbc.op.unop = lbc :=
+begin
+  cases lbc, ext; try { refl },
+  { dsimp, rw [← sum_str.op_symm, sum_str.unop_op, sum_str.symm_symm], },
+  { dsimp, rw [← sum_str.op_symm, sum_str.unop_op, sum_str.symm_symm], },
+end
+
+lemma op_unop (lbc : LBC f'₁₁ g'₁₁ g'₁₂ f'₂₁ f'₂₂ g'₂₂ g'₂₃ f'₃₂) : lbc.unop.op = lbc :=
+begin
+  cases lbc, ext; try { refl },
+  { dsimp, rw [← sum_str.unop_symm, sum_str.op_unop, sum_str.symm_symm], },
+  { dsimp, rw [← sum_str.unop_symm, sum_str.op_unop, sum_str.symm_symm], },
+end
 
 end
 
@@ -418,6 +488,100 @@ end
 open_locale pseudoelement
 open category_theory.abelian
 
+section
+
+variables {A'₁₁ A'₁₂ A'₁₃ A'₁₄ A'₁₅ : 𝓐ᵒᵖ}
+variables {A'₂₁ A'₂₂ A'₂₃ A'₂₄ A'₂₅ : 𝓐ᵒᵖ}
+variables {A'₃₁ A'₃₂ A'₃₃ A'₃₄ A'₃₅ : 𝓐ᵒᵖ}
+variables {A'₄₁ A'₄₂ A'₄₃ A'₄₄ A'₄₅ : 𝓐ᵒᵖ}
+variables {A'₅₁ A'₅₂ A'₅₃ A'₅₄ A'₅₅ : 𝓐ᵒᵖ}
+
+variables {f'₁₁ : A'₁₁ ⟶ A'₁₂} {f'₁₂ : A'₁₂ ⟶ A'₁₃} {f'₁₃ : A'₁₃ ⟶ A'₁₄} {f'₁₄ : A'₁₄ ⟶ A'₁₅}
+variables {g'₁₁ : A'₁₁ ⟶ A'₂₁} {g'₁₂ : A'₁₂ ⟶ A'₂₂} {g'₁₃ : A'₁₃ ⟶ A'₂₃} {g'₁₄ : A'₁₄ ⟶ A'₂₄} {g'₁₅ : A'₁₅ ⟶ A'₂₅}
+variables {f'₂₁ : A'₂₁ ⟶ A'₂₂} {f'₂₂ : A'₂₂ ⟶ A'₂₃} {f'₂₃ : A'₂₃ ⟶ A'₂₄} {f'₂₄ : A'₂₄ ⟶ A'₂₅}
+variables {g'₂₁ : A'₂₁ ⟶ A'₃₁} {g'₂₂ : A'₂₂ ⟶ A'₃₂} {g'₂₃ : A'₂₃ ⟶ A'₃₃} {g'₂₄ : A'₂₄ ⟶ A'₃₄} {g'₂₅ : A'₂₅ ⟶ A'₃₅}
+variables {f'₃₁ : A'₃₁ ⟶ A'₃₂} {f'₃₂ : A'₃₂ ⟶ A'₃₃} {f'₃₃ : A'₃₃ ⟶ A'₃₄} {f'₃₄ : A'₃₄ ⟶ A'₃₅}
+variables {g'₃₁ : A'₃₁ ⟶ A'₄₁} {g'₃₂ : A'₃₂ ⟶ A'₄₂} {g'₃₃ : A'₃₃ ⟶ A'₄₃} {g'₃₄ : A'₃₄ ⟶ A'₄₄} {g'₃₅ : A'₃₅ ⟶ A'₄₅}
+variables {f'₄₁ : A'₄₁ ⟶ A'₄₂} {f'₄₂ : A'₄₂ ⟶ A'₄₃} {f'₄₃ : A'₄₃ ⟶ A'₄₄} {f'₄₄ : A'₄₄ ⟶ A'₄₅}
+variables {g'₄₁ : A'₄₁ ⟶ A'₅₁} {g'₄₂ : A'₄₂ ⟶ A'₅₂} {g'₄₃ : A'₄₃ ⟶ A'₅₃} {g'₄₄ : A'₄₄ ⟶ A'₅₄} {g'₄₅ : A'₄₅ ⟶ A'₅₅}
+variables {f'₅₁ : A'₅₁ ⟶ A'₅₂} {f'₅₂ : A'₅₂ ⟶ A'₅₃} {f'₅₃ : A'₅₃ ⟶ A'₅₄} {f'₅₄ : A'₅₄ ⟶ A'₅₅}
+
+
+open opposite
+
+-- #check kernel_op_op
+-- -- kernel f.op ≅ opposite.op (cokernel f)
+
+-- #check kernel_op_unop
+-- -- opposite.unop (kernel f.op) ≅ cokernel f
+
+-- #check kernel_unop_op
+-- -- opposite.op (kernel g.unop) ≅ cokernel g
+
+-- #check kernel_unop_unop
+-- -- kernel g.unop ≅ opposite.unop (cokernel g)
+
+-- #check cokernel_op_op
+-- -- cokernel f.op ≅ opposite.op (kernel f)
+
+-- #check cokernel_op_unop
+-- -- opposite.unop (cokernel f.op) ≅ kernel f
+
+-- #check cokernel_unop_op
+-- -- opposite.op (cokernel g.unop) ≅ kernel g
+
+-- #check cokernel_unop_unop
+-- -- cokernel g.unop ≅ opposite.unop (kernel g)
+
+def homology_unop_iso {A B C : 𝓐ᵒᵖ} (f : A ⟶ B) (g : B ⟶ C) (w : f ≫ g = 0) :
+  homology f g w ≅ op (homology g.unop f.unop (by { rw [← unop_comp, w, unop_zero] })) :=
+homology_iso_cokernel_lift _ _ _ ≪≫
+  sorry ≪≫ -- goal is: cokernel (kernel.lift g f w) ≅ cokernel (cokernel.desc g.unop f.unop _).op
+  cokernel_op_op _ ≪≫
+  (homology_iso_kernel_desc _ _ _).op
+
+def homology_op_iso {A B C : 𝓐} (f : A ⟶ B) (g : B ⟶ C) (w : f ≫ g = 0) :
+  homology g.op f.op (by rw [← op_comp, w, op_zero]) ≅ op (homology f g w) :=
+homology_unop_iso _ _ _
+
+lemma op_H_to_don (lbc : LBC f'₁₁ g'₁₁ g'₁₂ f'₂₁ f'₂₂ g'₂₂ g'₂₃ f'₃₂) :
+  lbc.H_to_don = (homology_unop_iso _ _ _).hom ≫ lbc.unop.rcp_to_H.op ≫
+    (homology_unop_iso _ _ lbc.π_diag_out).inv :=
+sorry
+
+lemma op_rcp_to_H (lbc : LBC f'₁₁ g'₁₁ g'₁₂ f'₂₁ f'₂₂ g'₂₂ g'₂₃ f'₃₂) :
+  lbc.rcp_to_H = (homology_unop_iso _ _ lbc.diag_in_ι).hom ≫
+    lbc.unop.H_to_don.op ≫ (homology_unop_iso _ _ _).inv :=
+begin
+  sorry
+end
+
+lemma op_V_to_don (lbc : LBC f'₁₁ g'₁₁ g'₁₂ f'₂₁ f'₂₂ g'₂₂ g'₂₃ f'₃₂) :
+  lbc.V_to_don = (homology_unop_iso _ _ _).hom ≫ lbc.unop.rcp_to_V.op ≫
+    (homology_unop_iso _ _ lbc.π_diag_out).inv :=
+lbc.symm.op_H_to_don
+
+lemma op_rcp_to_V (lbc : LBC f'₁₁ g'₁₁ g'₁₂ f'₂₁ f'₂₂ g'₂₂ g'₂₃ f'₃₂) :
+  lbc.rcp_to_V = (homology_unop_iso _ _ lbc.diag_in_ι).hom ≫
+    lbc.unop.V_to_don.op ≫ (homology_unop_iso _ _ _).inv :=
+lbc.symm.op_rcp_to_H
+
+lemma op_ex_h
+  (lbc₁ : LBC f'₁₁ g'₁₁ g'₁₂ f'₂₁ f'₂₂ g'₂₂ g'₂₃ f'₃₂)
+  (lbc₂ : LBC f'₁₂ g'₁₂ g'₁₃ f'₂₂ f'₂₃ g'₂₃ g'₂₄ f'₃₃) :
+  lbc₁.ex_h lbc₂ = (homology_unop_iso _ _ lbc₁.π_diag_out).hom ≫
+    (lbc₂.unop.ex_h lbc₁.unop).op ≫ (homology_unop_iso _ _ lbc₂.diag_in_ι).inv :=
+sorry
+
+lemma op_ex_v
+  (lbc₁ : LBC f'₁₁ g'₁₁ g'₁₂ f'₂₁ f'₂₂ g'₂₂ g'₂₃ f'₃₂)
+  (lbc₂ : LBC f'₂₁ g'₂₁ g'₂₂ f'₃₁ f'₃₂ g'₃₂ g'₃₃ f'₄₂) :
+  lbc₁.ex_v lbc₂ = (homology_unop_iso _ _ lbc₁.π_diag_out).hom ≫
+    (lbc₂.unop.ex_v lbc₁.unop).op ≫ (homology_unop_iso _ _ lbc₂.diag_in_ι).inv  :=
+by convert lbc₁.symm.op_ex_h lbc₂.symm using 1
+
+end
+
 lemma exact_aux_1
   (lbc₁ : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
   (lbc₂ : LBC f₂₁ g₂₁ g₂₂ f₃₁ f₃₂ g₃₂ g₃₃ f₄₂) :
@@ -475,8 +639,16 @@ lemma salamander_v
 begin
   refine (exact_aux_1 lbc₁ lbc₂).cons _,
   refine (exact_aux_2 lbc₂ lbc₃).cons _,
-  have := (exact_aux_2 lbc₃.op lbc₂.op).unop,
-  sorry
+  have aux1 := (exact_aux_2 lbc₃.op lbc₂.op).unop,
+  simp only [op_H_to_don, op_ex_h, unop_comp, ← iso.unop_hom, ← iso.unop_inv,
+    exact_comp_iso, exact_iso_comp, exact_comp_hom_inv_comp_iff, quiver.hom.unop_op] at aux1,
+  refine aux1.cons _,
+  have aux2 := (exact_aux_1 lbc₄.op lbc₃.op).unop,
+  simp only [op_H_to_don, op_ex_v, op_rcp_to_H, category.assoc, iso.inv_hom_id_assoc,
+    unop_comp, ← iso.unop_hom, ← iso.unop_inv, quiver.hom.unop_op,
+    exact_iso_comp, exact_comp_hom_inv_comp_iff] at aux2,
+  simp only [← category.assoc, exact_comp_iso] at aux2,
+  exact aux2.exact_seq,
 end
 
 lemma salamander_h
@@ -528,7 +700,7 @@ section
 ## Intramural isomorphisms
 -/
 
-lemma rcp_iso_H
+lemma iso_rcp_to_H
   (lbc : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
   (H₂₁ : is_zero A₂₁) (H₃₁ : is_zero A₃₁) (h : exact f₃₁ f₃₂) :
   is_iso lbc.rcp_to_H :=
@@ -545,6 +717,30 @@ begin
   rotate,
   { exact LBC.of_core ⟨zero_comp, zero_comp, zero_comp.trans zero_comp.symm, lbc.sq₁⟩, },
   { exact LBC.of_core ⟨zero_comp, comp_zero, zero_comp.trans zero_comp.symm, H₂₁.eq_of_src _ _⟩, },
+  refine this.is_iso_of_zero_of_zero _ _,
+  { refine is_zero.eq_of_src _ _ _, apply H₂₁.homology_is_zero },
+  { refine is_zero.eq_of_tgt _ _ _,
+    apply is_zero_of_iso_of_zero _ (as_iso (lbc₃.ex_h lbc₄)),
+    apply H₃₁.homology_is_zero, },
+end
+
+lemma iso_V_to_don
+  (lbc : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
+  (H₂₁ : is_zero A₂₁) (H₃₁ : is_zero A₃₁) (h : exact f₃₁ f₃₂) :
+  is_iso lbc.V_to_don :=
+begin
+  have lbc₄ : LBC f₂₁ 0 g₂₂ f₃₁ f₃₂ 0 (0 : _ ⟶ 0) (0 : 0 ⟶ 0) :=
+  LBC.of_core ⟨H₃₁.eq_of_src _ _, comp_zero, H₂₁.eq_of_src _ _, comp_zero.trans comp_zero.symm⟩,
+  have lbc₃ : LBC 0 0 0 0 f₃₁ 0 0 0 :=
+  LBC.of_core ⟨zero_comp, comp_zero, zero_comp.trans zero_comp.symm, comp_zero.trans comp_zero.symm⟩,
+  haveI aux := ex_h_is_iso lbc₃ lbc₄ zero_comp zero_comp _ _, any_goals { exact 0 },
+  rotate,
+  { apply H₃₁.homology_is_zero, },
+  { exact exact.homology_is_zero _ _ h, },
+  have := salamander_h _ lbc lbc₄ _, any_goals { exact 0 },
+  rotate,
+  { exact LBC.of_core ⟨zero_comp, comp_zero, zero_comp.trans zero_comp.symm, H₂₁.eq_of_src _ _⟩, },
+  { exact LBC.of_core ⟨comp_zero, comp_zero, lbc.sq₂, comp_zero.trans comp_zero.symm⟩, },
   refine this.is_iso_of_zero_of_zero _ _,
   { refine is_zero.eq_of_src _ _ _, apply H₂₁.homology_is_zero },
   { refine is_zero.eq_of_tgt _ _ _,
