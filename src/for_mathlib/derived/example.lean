@@ -1,8 +1,10 @@
+import data.zmod.basic
+
 import for_mathlib.derived.K_projective
 import for_mathlib.complex_extend
 import for_mathlib.projectives
 import for_mathlib.two_step_resolution
-import data.zmod.basic
+import for_mathlib.homology_exact
 
 .
 
@@ -16,28 +18,6 @@ open_locale zero_object
 
 instance projective_zero : projective (0 : C) :=
 { factors := λ E X f e he, ⟨0, by ext⟩ }
-
-lemma is_zero_homology_of_exact {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) (hfg : exact f g) :
-  is_zero (homology f g hfg.w) :=
-begin
-  rw preadditive.exact_iff_homology_zero at hfg,
-  rcases hfg with ⟨w, ⟨e⟩⟩,
-  exact is_zero_of_iso_of_zero (is_zero_zero _) e.symm,
-end
-
-lemma category_theory.is_zero.exact {X Y Z : C} (hY : is_zero Y)
-  (f : X ⟶ Y) (g : Y ⟶ Z) : exact f g :=
-by simp only [abelian.exact_iff, hY.eq_zero_of_tgt f, hY.eq_zero_of_tgt (limits.kernel.ι g),
-    limits.zero_comp, eq_self_iff_true, and_true]
-
-lemma category_theory.is_zero.homology_is_zero {X Y Z : C} (hY : is_zero Y)
-  (f : X ⟶ Y) (g : Y ⟶ Z) (w : f ≫ g = 0) :
-  is_zero (homology f g w) :=
-is_zero_homology_of_exact f g $ hY.exact f g
-
-lemma category_theory.is_zero.is_iso {X Y : C} (hX : is_zero X) (hY : is_zero Y) (f : X ⟶ Y) :
-  is_iso f :=
-{ out := ⟨0, hX.eq_of_src _ _, hY.eq_of_tgt _ _⟩ }
 
 lemma category_theory.is_iso_of_nat_iso {C D : Type*} [category C] [category D]
   {F G : C ⥤ D} (α : F ≅ G)
@@ -181,19 +161,19 @@ begin
       simpa,
       apply_instance },
     { apply_instance } },
-  { refine is_zero.is_iso _ _ _; refine is_zero_homology_of_exact _ _ (exact_of_zero _ _), },
+  { refine is_zero.is_iso _ _ _; refine exact.homology_is_zero _ _ (exact_of_zero _ _), },
   { refine is_zero.is_iso _ _ _,
     { refine is_zero_of_iso_of_zero _ (homology_iso _ (-[1+i.succ] : ℤ) _ (-i : ℤ) _ _).symm,
       rotate,
       { dsimp, refl, },
       { dsimp, simp only [int.neg_succ_of_nat_eq', sub_add_cancel], },
-      refine is_zero_homology_of_exact _ _ _,
+      refine exact.homology_is_zero _ _ _,
       cases i; exact (hP.exact _), },
     { refine is_zero_of_iso_of_zero _ (homology_iso _ (-[1+i.succ] : ℤ) _ (-i : ℤ) _ _).symm,
       rotate,
       { dsimp, refl, },
       { dsimp, simp only [int.neg_succ_of_nat_eq', sub_add_cancel], },
-      refine is_zero_homology_of_exact _ _ (exact_of_zero _ _), } }
+      refine exact.homology_is_zero _ _ (exact_of_zero _ _), } }
 end
 .
 
