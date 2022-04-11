@@ -68,6 +68,8 @@ begin
   { exact to_laurent_measures_fun_neg r' S F s n, }
 end
 
+/-- The natural inclusion from an S-indexed set of polynomials `Fₛ : ℤ[T⁻¹]` to
+the corresponding power series `Fₛ : ℤ[[T]][T⁻¹]`. -/
 @[simps] def to_laurent_measures (F : invpoly r' S) : laurent_measures r' S :=
 { to_fun := to_laurent_measures_fun r' S F,
   summable' := λ s, begin
@@ -102,6 +104,86 @@ end
       { simp only [set.mem_compl_eq, set.mem_set_of_eq, not_le, int.neg_succ_not_pos] at hn,
         exact hn.elim }, },
   end }
+
+open_locale big_operators
+
+/-- The projection from a Laurent measure `Fₛ : ℤ[[T]][T⁻¹]` to `Fₛ : ℤ[T⁻¹]` obtained
+by throwing away all the positive terms. -/
+def of_laurent_measures [fact (r' < 1)] (F : laurent_measures r' S) : invpoly r' S :=
+λ s, ∑ n in finset.range ((1 : ℤ) -(laurent_measures.exists_bdd_filtration
+  (show (0 : ℝ) < r', by norm_cast; exact fact.elim infer_instance)
+  (by norm_cast; exact fact.elim infer_instance) F).some).to_nat,
+  F s (-n) * polynomial.X^n
+
+-- move me
+open polynomial finset
+
+lemma polynomial.sum_range_const_mul_X_pow_coeff {R : Type*} [semiring R]
+  (f : ℕ → R) (d n : ℕ) :
+(∑ i in range d, C (f i) * X^i).coeff n = if n < d then f n else 0 :=
+begin
+  rw finset_sum_coeff,
+  split_ifs,
+  { suffices : ∀ b, (C (f b) * X ^ b).coeff n = if n = b then f b else 0,
+    { simp_rw this,
+      simp [h], },
+    intro i,
+    simp [coeff_X_pow] },
+  { refine sum_eq_zero (λ i hi, coeff_eq_zero_of_degree_lt _),
+    apply lt_of_le_of_lt (degree_mul_le _ _),
+    apply lt_of_le_of_lt (add_le_add (degree_C_le) (degree_X_pow_le i)),
+    norm_cast,
+    rw finset.mem_range at hi,
+    rw [zero_add],
+    exact lt_of_lt_of_le hi (le_of_not_lt h), },
+end
+
+example (r' : ℝ≥0) (S : Fintype) (n : ℕ)
+  [fact (0 < r')]
+  [fact (r' < 1)]
+  (F : invpoly r' S)
+  (s : ↥S)
+  (d : ℤ)
+  (hd : ∀ (s : ↥S) (n : ℤ),
+        n < d → (to_laurent_measures r' S F) s n = 0) :
+     ite (n < (1 - d).to_nat) ((to_laurent_measures r' S F) s (-↑n)) 0 =
+       (F s).coeff n  :=
+begin
+  rw ← to_laurent_measures_fun_nonpos,
+  split_ifs, refl,
+  symmetry,
+  apply hd,
+  push_neg at h,
+  rw int.to_nat_le at h,
+  linarith,
+end
+
+lemma to_laurent_measures_of_laurent_measures [fact (r' < 1)] (F : invpoly r' S) :
+  of_laurent_measures r' S (to_laurent_measures r' S F) = F :=
+begin
+  let d := (laurent_measures.exists_bdd_filtration
+    (show (0 : ℝ) < r', by norm_cast; exact fact.elim infer_instance)
+    (by norm_cast; exact fact.elim infer_instance) (to_laurent_measures r' S F)).some,
+  have hd : ∀ (s : S) (n : ℤ), n < d → (to_laurent_measures r' S F) s n = 0 :=
+    (laurent_measures.exists_bdd_filtration
+    (show (0 : ℝ) < r', by norm_cast; exact fact.elim infer_instance)
+    (by norm_cast; exact fact.elim infer_instance) (to_laurent_measures r' S F)).some_spec,
+  ext s n,
+  delta of_laurent_measures,
+  suffices : (∑ (n : ℕ) in range (1 - d).to_nat,
+    C (to_laurent_measures r' S F s (-↑n)) * X ^ n).coeff n =
+  (F s).coeff n,
+    simpa,
+  rw polynomial.sum_range_const_mul_X_pow_coeff,
+  rw ← to_laurent_measures_fun_nonpos,
+  split_ifs, refl,
+  symmetry,
+  apply hd,
+  push_neg at h,
+  rw int.to_nat_le at h,
+  linarith,
+end
+
 
 lemma to_laurent_measures_injective : function.injective (to_laurent_measures r' S) :=
 begin
@@ -197,6 +279,8 @@ end invpoly
 
 namespace laurent_measures
 
+/-- `to_Lbar r S` is the function sending a Laurent measure `Fₛ : ℤ → ℤ` to its
+truncation `Fₛ : {n ≥ 1} → ℤ` (often thought of as a power series `Fₛ ∈ Tℤ[[T]]`.) -/
 @[simps] def to_Lbar (F : laurent_measures r' S) : Lbar r' S :=
 { to_fun := λ s n, if n = 0 then 0 else F s n,
   coeff_zero' := λ s, if_pos rfl,
@@ -209,6 +293,9 @@ namespace laurent_measures
     { simp only [function.comp_app, nnreal.coe_nat_abs, zpow_coe_nat] }
   end }
 
+/-- `to_Lbar_section r S` is the natural inclusion from `Lbar r S` to `laurent_measures r S`
+sending a power series `Fₛ : {n≥1} → ℤ` to the associated function `Fₛ : ℤ → ℤ` which
+vanishes on non-positive integers. -/
 def to_Lbar_section (G : Lbar r' S) : laurent_measures r' S :=
 ⟨λ s n, G s n.to_nat,
 begin
@@ -300,6 +387,9 @@ begin
   split_ifs, { rw [nnnorm_zero, zero_mul], exact zero_le' }, { refl }
 end
 
+/-- `to_Lbar_hom` is the `comphaus_filtered_pseudo_normed_group_with_Tinv_hom` version
+of `to_Lbar r S`, the function which truncates a Laurent power series in `ℤ[[T]][1/T]`
+to its positive terms in `Tℤ[[T]]`. -/
 @[simps] def to_Lbar_hom : comphaus_filtered_pseudo_normed_group_with_Tinv_hom r'
   (laurent_measures r' S) (Lbar r' S) :=
 { to_fun := to_Lbar r' S,
@@ -376,9 +466,10 @@ begin
       set.mem_inter_eq, set.mem_preimage, set.mem_singleton_iff] at hF1 hF2,
     change laurent_measures.to_Lbar r' S F = 0 at hF1,
     change F ∈ pseudo_normed_group.filtration (laurent_measures r' S) c at hF2,
-    show F ∈ invpoly.to_laurent_measures r' S '' (pseudo_normed_group.filtration (invpoly r' S) (1 * c)),
-    -- Probably good to define `laurent_measures.truncate` that truncates `F` to only the negative powers of `T⁻¹`.
-    -- Use that to get the desired `invpoly`.
+    show F ∈ invpoly.to_laurent_measures r' S ''
+      (pseudo_normed_group.filtration (invpoly r' S) (1 * c)),
+    -- Probably good to define `laurent_measures.truncate` that truncates `F` to only the
+    -- negative powers of `T⁻¹`. Use that to get the desired `invpoly`.
     sorry },
   { apply laurent_measures.to_Lbar_surjective },
   { rintro S c F hF,
