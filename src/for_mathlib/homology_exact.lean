@@ -6,6 +6,7 @@ import for_mathlib.exact_seq2
 noncomputable theory
 
 open category_theory category_theory.limits
+open opposite
 
 -- move me
 namespace category_theory
@@ -43,5 +44,16 @@ exact.homology_is_zero f g $ hY.exact f g
 lemma is_zero.is_iso {X Y : 𝓐} (hX : is_zero X) (hY : is_zero Y) (f : X ⟶ Y) :
   is_iso f :=
 { out := ⟨0, hX.eq_of_src _ _, hY.eq_of_tgt _ _⟩ }
+
+lemma is_zero.op {X : 𝓐} (h : is_zero X) : is_zero (op X) :=
+{ eq_zero_of_src := λ Y f, congr_arg quiver.hom.op (h.eq_zero_of_tgt f.unop),
+  eq_zero_of_tgt := λ Y f, congr_arg quiver.hom.op (h.eq_zero_of_src f.unop), }
+
+lemma is_zero.unop {X : 𝓐ᵒᵖ} (h : is_zero X) : is_zero (unop X) :=
+{ eq_zero_of_src := λ Y f, congr_arg quiver.hom.unop (h.eq_zero_of_tgt f.op),
+  eq_zero_of_tgt := λ Y f, congr_arg quiver.hom.unop (h.eq_zero_of_src f.op), }
+
+@[simp] lemma is_zero_op {X : 𝓐} : is_zero (op X) ↔ is_zero X := ⟨is_zero.unop, is_zero.op⟩
+@[simp] lemma is_zero_unop {X : 𝓐ᵒᵖ} : is_zero (unop X) ↔ is_zero X := ⟨is_zero.op, is_zero.unop⟩
 
 end category_theory

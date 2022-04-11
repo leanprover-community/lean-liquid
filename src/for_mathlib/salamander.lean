@@ -695,12 +695,17 @@ by convert lbc₁.symm.ex_h_is_iso lbc₂.symm h₁ h₂ H₁ H₂ using 1
 
 end
 
-section
+section intramural_isos
+
 /-!
 ## Intramural isomorphisms
+
+The subscripts at the end of the names indicate where the `0`s in the diagram are located:
+`ₗ` = left, `ᵤ` = up, `ᵣ` = right, and `ₛ` down (south, thanks unicode).
+
 -/
 
-lemma iso_rcp_to_H
+lemma iso_rcp_to_Hₗ
   (lbc : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
   (H₂₁ : is_zero A₂₁) (H₃₁ : is_zero A₃₁) (h : exact f₃₁ f₃₂) :
   is_iso lbc.rcp_to_H :=
@@ -724,7 +729,7 @@ begin
     apply H₃₁.homology_is_zero, },
 end
 
-lemma iso_V_to_don
+lemma iso_V_to_donₗ
   (lbc : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
   (H₂₁ : is_zero A₂₁) (H₃₁ : is_zero A₃₁) (h : exact f₃₁ f₃₂) :
   is_iso lbc.V_to_don :=
@@ -748,6 +753,75 @@ begin
     apply H₃₁.homology_is_zero, },
 end
 
+lemma iso_rcp_to_Vᵤ
+  (lbc : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
+  (H₁₂ : is_zero A₁₂) (H₁₃ : is_zero A₁₃) (h : exact g₁₃ g₂₃) :
+  is_iso lbc.rcp_to_V :=
+lbc.symm.iso_rcp_to_Hₗ H₁₂ H₁₃ h
+
+lemma iso_H_to_donᵤ
+  (lbc : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
+  (H₁₂ : is_zero A₁₂) (H₁₃ : is_zero A₁₃) (h : exact g₁₃ g₂₃) :
+  is_iso lbc.H_to_don :=
+lbc.symm.iso_V_to_donₗ H₁₂ H₁₃ h
+
+lemma iso_H_to_donᵣ
+  (lbc : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
+  (H₁₂ : is_zero A₂₃) (H₁₃ : is_zero A₁₃) (h : exact f₁₁ f₁₂) :
+  is_iso lbc.H_to_don :=
+begin
+  have aux := iso_rcp_to_Hₗ lbc.op H₁₂.op H₁₃.op h.op,
+  simp only [op_rcp_to_H] at aux,
+  replace aux := @is_iso.of_is_iso_comp_left _ _ _ _ _ _ _ _ aux,
+  replace aux := @is_iso.of_is_iso_comp_right _ _ _ _ _ _ _ _ aux,
+  rwa is_iso_op_iff at aux,
 end
+
+lemma iso_rcp_to_Vᵣ
+  (lbc : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
+  (H₁₂ : is_zero A₂₃) (H₁₃ : is_zero A₁₃) (h : exact f₁₁ f₁₂) :
+  is_iso lbc.rcp_to_V :=
+begin
+  have aux := iso_V_to_donₗ lbc.op H₁₂.op H₁₃.op h.op,
+  simp only [op_V_to_don] at aux,
+  replace aux := @is_iso.of_is_iso_comp_left _ _ _ _ _ _ _ _ aux,
+  replace aux := @is_iso.of_is_iso_comp_right _ _ _ _ _ _ _ _ aux,
+  rwa is_iso_op_iff at aux,
+end
+
+lemma iso_rcp_to_Hₛ
+  (lbc : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
+  (H₃₁ : is_zero A₃₁) (H₃₂ : is_zero A₃₂) (h : exact g₁₁ g₂₁) :
+  is_iso lbc.rcp_to_H :=
+lbc.symm.iso_rcp_to_Vᵣ H₃₂ H₃₁ h
+
+
+lemma iso_V_to_donₛ
+  (lbc : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
+  (H₃₁ : is_zero A₃₁) (H₃₂ : is_zero A₃₂) (h : exact g₁₁ g₂₁) :
+  is_iso lbc.V_to_don :=
+lbc.symm.iso_H_to_donᵣ H₃₂ H₃₁ h
+
+end intramural_isos
+
+section three_x_three
+
+/-!
+## The 3×3 lemma
+-/
+
+lemma three_x_three_top_row
+  (Hr2 : exact f₂₁ f₂₂) (Hr3 : exact f₃₁ f₃₂)
+  (Hc1 : exact g₁₁ g₂₁) (Hc2 : exact g₁₂ g₂₂) (Hc3 : exact g₁₃ g₂₃)
+  [mono f₂₁] [mono f₃₁] [mono g₁₁] [mono g₁₂] [mono g₁₃] :
+  exact f₁₁ f₁₂ ∧ mono f₁₁ :=
+begin
+  have w : f₁₁ ≫ f₁₂ = 0, sorry,
+  -- see https://ncatlab.org/nlab/show/salamander+lemma#3x3Lemmas
+  -- all the ingredients are higher up in this file
+  sorry
+end
+
+end three_x_three
 
 end LBC
