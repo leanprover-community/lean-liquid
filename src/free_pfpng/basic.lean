@@ -173,3 +173,13 @@ def free_pfpng_functor : Fintype ⥤ ProFiltPseuNormGrp₁ :=
   map := λ S₁ S₂ f, free_pfpng.map f,
   map_id' := free_pfpng.map_id,
   map_comp' := λ _ _ _ g₁ g₂, free_pfpng.map_comp g₁ g₂ }
+
+def Fintype.free_pfpng (T : Fintype) : ProFiltPseuNormGrp₁ :=
+free_pfpng_functor.obj T
+
+def Profinite.free_pfpng (S : Profinite) : ProFiltPseuNormGrp₁ :=
+(Profinite.extend free_pfpng_functor).obj S
+
+def Profinite.free_pfpng_π (S : Profinite) (T : discrete_quotient S) :
+  S.free_pfpng ⟶ (Fintype.of T).free_pfpng :=
+category_theory.limits.limit.π _ _

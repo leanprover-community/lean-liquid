@@ -1,4 +1,5 @@
 import free_pfpng.basic
+import pseudo_normed_group.bounded_limits
 
 -- Move this
 namespace Profinite
@@ -40,5 +41,24 @@ end
 end Profinite
 
 namespace free_pfpng
+
+open category_theory
+
+theorem discrete_quotient_separates_points (S : Profinite) (t₁ t₂ : S.free_pfpng)
+  (h : ∀ T : discrete_quotient S, S.free_pfpng_π T t₁ = S.free_pfpng_π T t₂) : t₁ = t₂ :=
+begin
+  let E : limits.cone ((S.fintype_diagram ⋙ free_pfpng_functor) ⋙
+      ProFiltPseuNormGrp₁.to_PNG₁ ⋙ PseuNormGrp₁.to_Ab) :=
+    Ab.explicit_limit_cone _,
+  let hE : limits.is_limit E := Ab.explicit_limit_cone_is_limit _,
+  let B := ProFiltPseuNormGrp₁.bounded_cone ⟨E,hE⟩,
+  let hB : limits.is_limit B := ProFiltPseuNormGrp₁.bounded_cone_is_limit ⟨E,hE⟩,
+  let II : limits.limit.cone _ ≅ B := (limits.limit.is_limit _).unique_up_to_iso hB,
+  let I : S.free_pfpng ≅ B.X := (limits.cones.forget _).map_iso II,
+  apply_fun I.hom, ext T : 3, exact h T,
+  intros x y hh, apply_fun (λ e, I.inv e) at hh,
+  change (I.hom ≫ I.inv) x = (I.hom ≫ I.inv) y at hh,
+  simpa only [iso.hom_inv_id] using hh,
+end
 
 end free_pfpng
