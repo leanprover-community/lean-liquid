@@ -1,5 +1,8 @@
 import free_pfpng.basic
 import pseudo_normed_group.bounded_limits
+import condensed.adjunctions
+import algebra.category.Module.adjunctions
+import group_theory.free_abelian_group_finsupp
 
 -- Move this
 namespace Profinite
@@ -62,3 +65,36 @@ begin
 end
 
 end free_pfpng
+
+-- Move this
+namespace AddCommGroup
+
+noncomputable theory
+universe u
+
+@[simps]
+def free' : Type u ⥤ AddCommGroup.{u} :=
+{ obj := λ X, AddCommGroup.of $ X →₀ ℤ,
+  map := λ X Y f, finsupp.map_domain.add_monoid_hom f,
+  map_id' := sorry, -- easy
+  map_comp' := sorry -- easy
+}
+
+@[simps]
+def of_iso {A B : Type u} [add_comm_group A] [add_comm_group B]
+  (e : A ≃+ B) : of A ≅ of B :=
+{ hom := e.to_add_monoid_hom,
+  inv := e.symm.to_add_monoid_hom,
+  hom_inv_id' := sorry,
+  inv_hom_id' := sorry }
+
+@[simps]
+def free_iso_free' : free ≅ free' :=
+category_theory.nat_iso.of_components
+(λ X, of_iso (free_abelian_group.equiv_finsupp X))
+sorry
+
+def adj' : free' ⊣ category_theory.forget _ :=
+AddCommGroup.adj.of_nat_iso_left $ free_iso_free'
+
+end AddCommGroup
