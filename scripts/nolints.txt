@@ -212,6 +212,7 @@ apply_nolint invpoly.profinitely_filtered_pseudo_normed_group unused_arguments
 apply_nolint invpoly.set_of.topological_space unused_arguments
 
 -- laurent_measures/basic.lean
+apply_nolint laurent_measures.bdd_filtration_spec def_lemma
 apply_nolint laurent_measures.laurent_measures.norm_nonneg dup_namespace
 
 -- laurent_measures/ext.lean
