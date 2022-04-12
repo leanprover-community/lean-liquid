@@ -76,23 +76,32 @@ universe u
 def free' : Type u ⥤ AddCommGroup.{u} :=
 { obj := λ X, AddCommGroup.of $ X →₀ ℤ,
   map := λ X Y f, finsupp.map_domain.add_monoid_hom f,
-  map_id' := sorry, -- easy
-  map_comp' := sorry -- easy
-}
+  map_id' := begin
+    intros X, ext, dsimp, simp,
+  end,
+  map_comp' := begin
+    intros X Y Z f g, ext, dsimp, simp,
+  end } .
 
 @[simps]
 def of_iso {A B : Type u} [add_comm_group A] [add_comm_group B]
   (e : A ≃+ B) : of A ≅ of B :=
 { hom := e.to_add_monoid_hom,
   inv := e.symm.to_add_monoid_hom,
-  hom_inv_id' := sorry,
-  inv_hom_id' := sorry }
+  hom_inv_id' := begin
+    ext, dsimp, simp,
+  end,
+  inv_hom_id' := begin
+    ext, dsimp, simp,
+  end } .
 
 @[simps]
 def free_iso_free' : free ≅ free' :=
 category_theory.nat_iso.of_components
 (λ X, of_iso (free_abelian_group.equiv_finsupp X))
-sorry
+begin
+  intros X Y f, ext, dsimp, simp,
+end
 
 def adj' : free' ⊣ category_theory.forget _ :=
 AddCommGroup.adj.of_nat_iso_left $ free_iso_free'
