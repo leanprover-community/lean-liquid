@@ -22,7 +22,7 @@ begin
   ext, exact h,
 end
 
-lemma discrete_quotient_separates_points {α : Fintype} {S : Profinite}
+lemma discrete_quotient_separates_points {α : Type*} [fintype α] {S : Profinite}
   (f : α → S) (hf : function.injective f) :
   ∃ (T : discrete_quotient S), function.injective (T.proj ∘ f) :=
 begin
@@ -107,3 +107,45 @@ def adj' : free' ⊣ category_theory.forget _ :=
 AddCommGroup.adj.of_nat_iso_left $ free_iso_free'
 
 end AddCommGroup
+
+namespace free_pfpng
+
+open AddCommGroup
+
+universe u
+
+/--
+If `t₁ t₂ : ℤ[S]` have the same image in `ℤ[T]` for every discrete quotient `T` of `S`,
+then `t₁ = t₂`. Here `ℤ[-]` refers to the usual free abelian group of the *set* `S`.
+-/
+def discrete_quotient_separates_points' (S : Profinite.{u})
+  (t : free'.obj S) (h : ∀ T : discrete_quotient S, free'.map T.proj t = 0) : t = 0 :=
+begin
+  let A := t.support,
+  let e : A → ℤ := λ a, t.to_fun a,
+  let ι : A → S := λ a, a,
+  have hι : function.injective ι, sorry, -- easy
+  obtain ⟨T,hT⟩ := Profinite.discrete_quotient_separates_points ι hι,
+  specialize h T,
+  let t' : A →₀ ℤ := t.comap_domain ι _,
+  swap,
+  { -- use hι,
+    sorry },
+  let q : T →₀ ℤ := free'.map T.proj t,
+  let π : A → T := T.proj ∘ ι,
+  let q' : A →₀ ℤ := q.comap_domain π _,
+  swap,
+  { -- use hT,
+    sorry },
+  suffices : t' = q',
+  { -- use h,
+    sorry,
+  },
+  classical,
+  ext a, dsimp [t', q', ι, q, π, finsupp.map_domain],
+  simp only [finsupp.sum_apply],
+  sorry -- annoying
+  --dsimp [finsupp.sum, finsupp.single],
+end
+
+end free_pfpng
