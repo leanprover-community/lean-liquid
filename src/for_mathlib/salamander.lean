@@ -898,4 +898,97 @@ three_x_three_bot_row Hc1 Hc2 Hr1 Hr2 Hr3 sq₁₁.symm sq₂₁.symm sq₁₂.s
 
 end three_x_three
 
+section four
+
+/-!
+## The four lemma
+
+We prove a version of the four lemma that is slightly more general than the usual version.
+-/
+
+lemma four_lemma_top_epi
+  (Hr1 : exact_seq 𝓐 [f₂₁, f₂₂, f₂₃]) (Hr2 : exact_seq 𝓐 [f₃₁, f₃₂, f₃₃])
+  (Hc1 : exact g₁₂ g₂₂) (Hc2 : exact g₁₃ g₂₃)
+  (sq₁₂ : f₁₂ ≫ g₁₃ = g₁₂ ≫ f₂₂)
+  (sq₂₁ : f₂₁ ≫ g₂₂ = g₂₁ ≫ f₃₁) (sq₂₂ : f₂₂ ≫ g₂₃ = g₂₂ ≫ f₃₂)
+  (sq₂₃ : f₂₃ ≫ g₂₄ = g₂₃ ≫ f₃₃)
+  [mono g₁₃] [epi g₂₁] [mono g₂₄] :
+  epi f₁₂ :=
+begin
+  rw epi_iff_exact_zero_right,
+  let lbc₁₃ : LBC (0 : 0 ⟶ 0) 0 0 f₁₂ (0 : _ ⟶ 0) g₁₃ 0 f₂₃ :=
+    LBC.of_core ⟨comp_zero, zero_comp, (is_zero_zero _).eq_of_src _ _, _⟩,
+  swap, { simp only [← cancel_mono g₂₄, zero_comp, category.assoc, sq₂₃, reassoc_of Hc2.w], },
+  let lbc₂₂ : LBC (0 : 0 ⟶ _) 0 g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂ :=
+    LBC.of_core ⟨Hr1.pair.w, Hc1.w, (is_zero_zero _).eq_of_src _ _, sq₂₂⟩,
+  let lbc₂₃ : LBC f₁₂ g₁₂ g₁₃ f₂₂ f₂₃ g₂₃ g₂₄ f₃₃ :=
+    LBC.of_core ⟨(Hr1.drop 1).pair.w, Hc2.w, sq₁₂, sq₂₃⟩,
+  let lbc₃₁ : LBC 0 (0 : 0 ⟶ _) g₂₁ (kernel.ι f₃₁) f₃₁ 0 (cokernel.π g₂₂) (0 : 0 ⟶ _) :=
+    LBC.of_core ⟨kernel.condition _, comp_zero, (is_zero_zero _).eq_of_src _ _, _⟩,
+  swap, { simp only [← cancel_epi g₂₁, comp_zero, ← reassoc_of sq₂₁, cokernel.condition] },
+  let lbc₃₂ : LBC f₂₁ g₂₁ g₂₂ f₃₁ f₃₂ (cokernel.π g₂₂) 0 (0 : _ ⟶ 0) :=
+    LBC.of_core ⟨Hr2.pair.w, cokernel.condition _, sq₂₁, (is_zero_zero _).eq_of_tgt _ _⟩,
+  let lbc₄₁ : LBC (kernel.ι f₃₁) 0 0 (0 : 0 ⟶ 0) (0 : 0 ⟶ cokernel g₂₂) 0 0 (0 : 0 ⟶ 0) :=
+    LBC.of_core ⟨comp_zero, comp_zero,
+      (is_zero_zero _).eq_of_tgt _ _, (is_zero_zero _).eq_of_src _ _⟩,
+  have e1 := lbc₁₃.iso_H_to_donᵤ (is_zero_zero _) (is_zero_zero _) (exact_of_zero 0 0),
+  have e2 := lbc₁₃.iso_ex_v lbc₂₃ zero_comp zero_comp
+    (exact.homology_is_zero _ _ $ exact_zero_left_of_mono _) (Hc2.homology_is_zero _ _),
+  have e3 := lbc₂₂.iso_ex_h lbc₂₃ zero_comp (Hr2.drop 1).pair.w
+    (Hr1.pair.homology_is_zero _ _) ((Hr1.drop 1).pair.homology_is_zero _ _),
+  have e3 := lbc₂₂.iso_ex_v lbc₃₂ zero_comp comp_zero
+    (Hc1.homology_is_zero _ _) ((abelian.exact_cokernel _).homology_is_zero _ _),
+  have e4 := lbc₃₁.iso_ex_h lbc₃₂ zero_comp zero_comp
+    (exact_kernel_ι.homology_is_zero _ _) (Hr2.pair.homology_is_zero _ _),
+  have e5 := lbc₃₁.iso_ex_v lbc₄₁ comp_zero comp_zero
+    (exact.homology_is_zero _ _ _) ((is_zero_zero _).homology_is_zero _ _ _),
+  swap, { rwa ← epi_iff_exact_zero_right, },
+  have aux : is_zero lbc₄₁.rcp := (is_zero_zero _).homology_is_zero _ _ _,
+  suffices : is_zero lbc₁₃.H, { exact exact_of_homology_is_zero this },
+  refine is_zero_of_iso_of_zero aux _,
+  resetI,
+  exact as_iso (inv (lbc₃₁.ex_v lbc₄₁) ≫ lbc₃₁.ex_h lbc₃₂ ≫ inv (lbc₂₂.ex_v lbc₃₂) ≫
+    lbc₂₂.ex_h lbc₂₃ ≫ inv (lbc₁₃.ex_v lbc₂₃) ≫ inv lbc₁₃.H_to_don),
+end
+
+-- move me
+lemma sq_op (sq : f₁₁ ≫ g₁₂ = g₁₁ ≫ f₂₁) :
+  f₂₁.op ≫ g₁₁.op = g₁₂.op ≫ f₁₁.op :=
+by simp only [← op_comp, sq]
+
+lemma four_lemma_bot_mono
+  (Hr1 : exact_seq 𝓐 [f₂₁, f₂₂, f₂₃]) (Hr2 : exact_seq 𝓐 [f₃₁, f₃₂, f₃₃])
+  (Hc1 : exact g₂₂ g₃₂) (Hc2 : exact g₂₃ g₃₃)
+  (sq₂₁ : f₂₁ ≫ g₂₂ = g₂₁ ≫ f₃₁) (sq₂₂ : f₂₂ ≫ g₂₃ = g₂₂ ≫ f₃₂)
+  (sq₂₃ : f₂₃ ≫ g₂₄ = g₂₃ ≫ f₃₃) (sq₃₂ : f₃₂ ≫ g₃₃ = g₃₂ ≫ f₄₂)
+  [epi g₂₁] [mono g₂₄] [epi g₃₂] :
+  mono f₄₂ :=
+begin
+  haveI : epi f₄₂.op := four_lemma_top_epi Hr2.op Hr1.op Hc2.op Hc1.op
+    (sq_op sq₃₂) (sq_op sq₂₃) (sq_op sq₂₂) (sq_op sq₂₁),
+  exact category_theory.unop_mono_of_epi f₄₂.op
+end
+
+lemma four_lemma_left_epi
+  (Hc1 : exact_seq 𝓐 [g₁₂, g₂₂, g₃₂]) (Hc2 : exact_seq 𝓐 [g₁₃, g₂₃, g₃₃])
+  (Hr1 : exact f₂₁ f₂₂) (Hr2 : exact f₃₁ f₃₂)
+  (sq₁₂ : f₁₂ ≫ g₁₃ = g₁₂ ≫ f₂₂)
+  (sq₂₁ : f₂₁ ≫ g₂₂ = g₂₁ ≫ f₃₁) (sq₂₂ : f₂₂ ≫ g₂₃ = g₂₂ ≫ f₃₂)
+  (sq₃₂ : f₃₂ ≫ g₃₃ = g₃₂ ≫ f₄₂)
+  [epi f₁₂] [mono f₄₂] [mono f₃₁] :
+  epi g₂₁ :=
+four_lemma_top_epi Hc1 Hc2 Hr1 Hr2 sq₂₁.symm sq₁₂.symm sq₂₂.symm sq₃₂.symm
+
+lemma four_lemma_right_mono
+  (Hc1 : exact_seq 𝓐 [g₁₂, g₂₂, g₃₂]) (Hc2 : exact_seq 𝓐 [g₁₃, g₂₃, g₃₃])
+  (Hr1 : exact f₂₂ f₂₃) (Hr2 : exact f₃₂ f₃₃)
+  (sq₁₂ : f₁₂ ≫ g₁₃ = g₁₂ ≫ f₂₂)
+  (sq₂₂ : f₂₂ ≫ g₂₃ = g₂₂ ≫ f₃₂) (sq₂₃ : f₂₃ ≫ g₂₄ = g₂₃ ≫ f₃₃)
+  (sq₃₂ : f₃₂ ≫ g₃₃ = g₃₂ ≫ f₄₂)
+  [epi f₁₂] [mono f₄₂] [epi f₂₃] :
+  mono g₂₄ :=
+four_lemma_bot_mono Hc1 Hc2 Hr1 Hr2 sq₁₂.symm sq₂₂.symm sq₃₂.symm sq₂₃.symm
+
+end four
+
 end LBC
