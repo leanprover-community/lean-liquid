@@ -671,7 +671,7 @@ section
 ## Extramural isomorphisms
 -/
 
-lemma ex_h_is_iso
+lemma iso_ex_h
   (lbc₁ : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
   (lbc₂ : LBC f₁₂ g₁₂ g₁₃ f₂₂ f₂₃ g₂₃ g₂₄ f₃₃)
   (h₁ : f₁₁ ≫ f₁₂ = 0) (h₂ : f₃₂ ≫ f₃₃ = 0)
@@ -685,13 +685,13 @@ begin
   exact this.is_iso_of_zero_of_zero (H₁.eq_of_src _ _) (H₂.eq_of_tgt _ _),
 end
 
-lemma ex_v_is_iso
+lemma iso_ex_v
   (lbc₁ : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
   (lbc₂ : LBC f₂₁ g₂₁ g₂₂ f₃₁ f₃₂ g₃₂ g₃₃ f₄₂)
   (h₁ : g₁₁ ≫ g₂₁ = 0) (h₂ : g₂₃ ≫ g₃₃ = 0)
   (H₁ : is_zero lbc₁.V) (H₂ : is_zero lbc₂.V) :
   is_iso (lbc₁.ex_v lbc₂) :=
-by convert lbc₁.symm.ex_h_is_iso lbc₂.symm h₁ h₂ H₁ H₂ using 1
+by convert lbc₁.symm.iso_ex_h lbc₂.symm h₁ h₂ H₁ H₂ using 1
 
 end
 
@@ -714,7 +714,7 @@ begin
   LBC.of_core ⟨H₃₁.eq_of_src _ _, comp_zero, H₂₁.eq_of_src _ _, comp_zero.trans comp_zero.symm⟩,
   have lbc₃ : LBC 0 0 0 0 f₃₁ 0 0 0 :=
   LBC.of_core ⟨zero_comp, comp_zero, zero_comp.trans zero_comp.symm, comp_zero.trans comp_zero.symm⟩,
-  haveI aux := ex_h_is_iso lbc₃ lbc₄ zero_comp zero_comp _ _, any_goals { exact 0 },
+  haveI aux := iso_ex_h lbc₃ lbc₄ zero_comp zero_comp _ _, any_goals { exact 0 },
   rotate,
   { apply H₃₁.homology_is_zero, },
   { exact exact.homology_is_zero _ _ h, },
@@ -738,7 +738,7 @@ begin
   LBC.of_core ⟨H₃₁.eq_of_src _ _, comp_zero, H₂₁.eq_of_src _ _, comp_zero.trans comp_zero.symm⟩,
   have lbc₃ : LBC 0 0 0 0 f₃₁ 0 0 0 :=
   LBC.of_core ⟨zero_comp, comp_zero, zero_comp.trans zero_comp.symm, comp_zero.trans comp_zero.symm⟩,
-  haveI aux := ex_h_is_iso lbc₃ lbc₄ zero_comp zero_comp _ _, any_goals { exact 0 },
+  haveI aux := iso_ex_h lbc₃ lbc₄ zero_comp zero_comp _ _, any_goals { exact 0 },
   rotate,
   { apply H₃₁.homology_is_zero, },
   { exact exact.homology_is_zero _ _ h, },
@@ -810,17 +810,91 @@ section three_x_three
 ## The 3×3 lemma
 -/
 
+-- move me
+theorem _root_.list.tfae.mp {l} (h : tfae l) (n₁ n₂) {a b}
+  (h₁ : list.nth l n₁ = some a . tactic.interactive.refl)
+  (h₂ : list.nth l n₂ = some b . tactic.interactive.refl) :
+  a → b :=
+(h.out n₁ n₂ h₁ h₂).mp
+
 lemma three_x_three_top_row
   (Hr2 : exact f₂₁ f₂₂) (Hr3 : exact f₃₁ f₃₂)
   (Hc1 : exact g₁₁ g₂₁) (Hc2 : exact g₁₂ g₂₂) (Hc3 : exact g₁₃ g₂₃)
+  (sq₁₁ : f₁₁ ≫ g₁₂ = g₁₁ ≫ f₂₁) (sq₁₂ : f₁₂ ≫ g₁₃ = g₁₂ ≫ f₂₂)
+  (sq₂₁ : f₂₁ ≫ g₂₂ = g₂₁ ≫ f₃₁) (sq₂₂ : f₂₂ ≫ g₂₃ = g₂₂ ≫ f₃₂)
   [mono f₂₁] [mono f₃₁] [mono g₁₁] [mono g₁₂] [mono g₁₃] :
   exact f₁₁ f₁₂ ∧ mono f₁₁ :=
 begin
-  have w : f₁₁ ≫ f₁₂ = 0, sorry,
-  -- see https://ncatlab.org/nlab/show/salamander+lemma#3x3Lemmas
-  -- all the ingredients are higher up in this file
-  sorry
+  have w : f₁₁ ≫ f₁₂ = 0,
+  { rw [← cancel_mono g₁₃, zero_comp, category.assoc, sq₁₂, reassoc_of sq₁₁, Hr2.w, comp_zero], },
+  let lbc₁₁ : LBC (0 : 0 ⟶ 0) (0 : 0 ⟶ 0) 0 0 f₁₁ g₁₁ g₁₂ f₂₁ :=
+    LBC.of_core ⟨zero_comp, zero_comp, (is_zero_zero _).eq_of_src _ _, sq₁₁⟩,
+  let lbc₁₂ : LBC (0 : 0 ⟶ 0) 0 0 f₁₁ f₁₂ g₁₂ g₁₃ f₂₂ :=
+    LBC.of_core ⟨w, zero_comp, (is_zero_zero _).eq_of_src _ _, sq₁₂⟩,
+  let lbc₂₁ : LBC 0 (0 : 0 ⟶ 0) g₁₁ 0 f₂₁ g₂₁ g₂₂ f₃₁ :=
+    LBC.of_core ⟨zero_comp, Hc1.w, (is_zero_zero _).eq_of_src _ _, sq₂₁⟩,
+  let lbc₂₂ : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂ :=
+    LBC.of_core ⟨Hr2.w, Hc2.w, sq₁₁, sq₂₂⟩,
+  suffices : is_zero lbc₁₁.H ∧ is_zero lbc₁₂.H,
+  { refine ⟨exact_of_homology_is_zero this.2, _⟩,
+    apply (tfae_mono (0:𝓐) f₁₁).mp 2 0,
+    exact exact_of_homology_is_zero this.1, },
+  split,
+  { haveI e1 := lbc₁₁.iso_rcp_to_Hₗ (is_zero_zero _) (is_zero_zero _)
+      ((tfae_mono (0:𝓐) f₂₁).mp 0 2 rfl rfl infer_instance),
+    haveI e2 := lbc₁₁.iso_rcp_to_Vᵤ (is_zero_zero _) (is_zero_zero _)
+      ((tfae_mono (0:𝓐) g₁₂).mp 0 2 rfl rfl infer_instance),
+    refine is_zero_of_iso_of_zero _
+      (as_iso $ inv lbc₁₁.rcp_to_V ≫ lbc₁₁.rcp_to_H),
+    refine exact.homology_is_zero _ _ _,
+    apply exact_zero_left_of_mono },
+  { haveI e1 := lbc₁₂.iso_H_to_donᵤ (is_zero_zero _) (is_zero_zero _)
+      ((tfae_mono (0:𝓐) g₁₃).mp 0 2 rfl rfl infer_instance),
+    haveI e2 := lbc₁₂.iso_ex_v lbc₂₂ zero_comp Hc3.w
+      (exact.homology_is_zero _ _ _) (Hc2.homology_is_zero _ _),
+    swap, { apply exact_zero_left_of_mono },
+    haveI e3 := lbc₂₁.iso_ex_h lbc₂₂ zero_comp Hr3.w
+      (exact.homology_is_zero _ _ _) (Hr2.homology_is_zero _ _),
+    swap, { apply exact_zero_left_of_mono },
+    haveI e4 := lbc₂₁.iso_V_to_donₗ (is_zero_zero _) (is_zero_zero _)
+      ((tfae_mono (0:𝓐) f₃₁).mp 0 2 rfl rfl infer_instance),
+    have aux : is_zero lbc₂₁.V := Hc1.homology_is_zero _ _,
+    apply is_zero_of_iso_of_zero aux,
+    exact as_iso
+      (lbc₂₁.V_to_don ≫ lbc₂₁.ex_h lbc₂₂ ≫ inv (lbc₁₂.ex_v lbc₂₂) ≫ inv lbc₁₂.H_to_don) }
 end
+
+lemma three_x_three_left_col
+  (Hr1 : exact f₁₁ f₁₂) (Hr2 : exact f₂₁ f₂₂) (Hr3 : exact f₃₁ f₃₂)
+  (Hc2 : exact g₁₂ g₂₂) (Hc3 : exact g₁₃ g₂₃)
+  (sq₁₁ : f₁₁ ≫ g₁₂ = g₁₁ ≫ f₂₁) (sq₁₂ : f₁₂ ≫ g₁₃ = g₁₂ ≫ f₂₂)
+  (sq₂₁ : f₂₁ ≫ g₂₂ = g₂₁ ≫ f₃₁) (sq₂₂ : f₂₂ ≫ g₂₃ = g₂₂ ≫ f₃₂)
+  [mono f₁₁] [mono f₂₁] [mono f₃₁] [mono g₁₂] [mono g₁₃] :
+  exact g₁₁ g₂₁ ∧ mono g₁₁ :=
+three_x_three_top_row Hc2 Hc3 Hr1 Hr2 Hr3 sq₁₁.symm sq₂₁.symm sq₁₂.symm sq₂₂.symm
+
+lemma three_x_three_bot_row
+  (Hr1 : exact f₁₁ f₁₂) (Hr2 : exact f₂₁ f₂₂)
+  (Hc1 : exact g₁₁ g₂₁) (Hc2 : exact g₁₂ g₂₂) (Hc3 : exact g₁₃ g₂₃)
+  (sq₁₁ : f₁₁ ≫ g₁₂ = g₁₁ ≫ f₂₁) (sq₁₂ : f₁₂ ≫ g₁₃ = g₁₂ ≫ f₂₂)
+  (sq₂₁ : f₂₁ ≫ g₂₂ = g₂₁ ≫ f₃₁) (sq₂₂ : f₂₂ ≫ g₂₃ = g₂₂ ≫ f₃₂)
+  [epi f₁₂] [epi f₂₂] [epi g₂₁] [epi g₂₂] [epi g₂₃] :
+  exact f₃₁ f₃₂ ∧ epi f₃₂ :=
+begin
+  have : exact f₃₂.op f₃₁.op ∧ mono f₃₂.op :=
+    three_x_three_top_row Hr2.op Hr1.op Hc3.op Hc2.op Hc1.op _ _ _ _,
+  { refine ⟨this.1.unop, _⟩, haveI := this.2, exact category_theory.unop_epi_of_mono f₃₂.op },
+  all_goals { simp only [← op_comp, sq₁₁, sq₁₂, sq₂₁, sq₂₂] },
+end
+
+lemma three_x_three_right_col
+  (Hr1 : exact f₁₁ f₁₂) (Hr2 : exact f₂₁ f₂₂) (Hr3 : exact f₃₁ f₃₂)
+  (Hc1 : exact g₁₁ g₂₁) (Hc2 : exact g₁₂ g₂₂)
+  (sq₁₁ : f₁₁ ≫ g₁₂ = g₁₁ ≫ f₂₁) (sq₁₂ : f₁₂ ≫ g₁₃ = g₁₂ ≫ f₂₂)
+  (sq₂₁ : f₂₁ ≫ g₂₂ = g₂₁ ≫ f₃₁) (sq₂₂ : f₂₂ ≫ g₂₃ = g₂₂ ≫ f₃₂)
+  [epi f₁₂] [epi f₂₂] [epi f₃₂] [epi g₂₁] [epi g₂₂] :
+  exact g₁₃ g₂₃ ∧ epi g₂₃ :=
+three_x_three_bot_row Hc1 Hc2 Hr1 Hr2 Hr3 sq₁₁.symm sq₂₁.symm sq₁₂.symm sq₂₂.symm
 
 end three_x_three
 

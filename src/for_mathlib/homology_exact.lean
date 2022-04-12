@@ -31,6 +31,15 @@ begin
   exact is_zero_of_iso_of_zero (is_zero_zero _) e.symm,
 end
 
+lemma exact_of_homology_is_zero {X Y Z : 𝓐} {f : X ⟶ Y} {g : Y ⟶ Z} {w : f ≫ g = 0}
+  (H : is_zero (homology f g w)) :
+  exact f g :=
+begin
+  rw preadditive.exact_iff_homology_zero,
+  refine ⟨w, ⟨_⟩⟩,
+  exact H.iso_zero
+end
+
 lemma is_zero.exact {X Y Z : 𝓐} (hY : is_zero Y)
   (f : X ⟶ Y) (g : Y ⟶ Z) : exact f g :=
 by simp only [abelian.exact_iff, hY.eq_zero_of_tgt f, hY.eq_zero_of_tgt (limits.kernel.ι g),
