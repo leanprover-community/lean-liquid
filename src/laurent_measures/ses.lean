@@ -137,7 +137,7 @@ local notation `ϖ` := Fintype.of (punit : Type u)
 
 def seval_ℒ_c (c : ℝ≥0) (s : S) : filtration (ℒ S) c → (filtration (ℒ ϖ) c) :=
 λ F,
-  begin
+begin
   refine ⟨seval_ℒ S s F, _⟩,
   have hF := F.2,
   simp only [filtration, set.mem_set_of_eq, seval_ℒ, nnnorm, laurent_measures.coe_mk,
@@ -449,41 +449,57 @@ begin
   sorry
 end
 
-example (a b c : ℝ) : - a ≤ - b + c ↔ b ≤ a + c :=
-begin
-  simp only [le_neg_add_iff_add_le, add_neg_le_iff_le_add'],
-end
+-- example (a b : ℝ) : -a + b = b - a :=
+-- begin
+--   library_search,
+-- end
 
 lemma complement_of_balls' {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) (ε : ℝ) :
  ∃ (x₁ x₂ : (closed_ball 0 c)), ∃ (δ₁ δ₂ : ℝ),
   ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ :=
 begin
-  -- sorry;{
-  by_cases h_right : (c : ℝ) ≤ y + ε,
-  sorry,--only an open on the left is needed
-  by_cases h_left : - ε + y ≤ - c,
-  sorry, -- only an open on the  right is needed
-  { set δ₁ := (-ε + y + c)/2 with hδ₁,
-    set x₁ := (- ε + y - c)/2 with hx₁,
-    set δ₂ := (-ε - y + c)/2 with hδ₂,
-    set x₂ := (ε + y + c)/2 with hx₂,
-    use x₁,
-    simp only [mem_closed_ball_zero_iff, norm_div, real.norm_two, real.norm_eq_abs, abs_le],
-    split,
-    { suffices : (-2 * c : ℝ) ≤ 2 * x₁,
-      linarith,
-      calc 2 * x₁ = - ε + y - c : by {rw hx₁, ring}
-              ... ≥ -2 * c : by linarith },
-    sorry;{ suffices : 2 * x₁ ≤ 2 * c,
-      linarith,
-      have temp : - ε + y - c ≤ 2 * c,
-      simp at h_right,
-
-      calc 2 * x₁ = - ε + y - c : by {rw hx₁, ring}
-              ... ≤ 2 * c : by sorry, },
-    {sorry},
-  },
-  -- sorry,
+  by_cases hε : ε ≤ 0,
+  { have := (@ball_eq_empty _ _ y ε).mpr hε,
+    rw this,
+    use [0, 0, c, c],
+    -- simp,
+    simp only [union_self, bot_eq_empty],
+    apply (compl_eq_bot.mpr _).symm,
+    rw top_eq_univ,
+    ext x,
+    split;
+    intro _,
+    simp only [mem_univ],
+    exact x.2 },
+  { by_cases h_right : (c : ℝ) ≤ y + ε,
+    sorry,--only an open on the left is needed
+    by_cases h_left : - ε + y ≤ - c,
+    sorry, -- only an open on the  right is needed
+    { set δ₁ := (-ε + y + c)/2 with hδ₁,
+      set x₁ := (- ε + y - c)/2 with hx₁,
+      set δ₂ := (-ε - y + c)/2 with hδ₂,
+      set x₂ := (ε + y + c)/2 with hx₂,
+      use x₁,
+      simp only [mem_closed_ball_zero_iff, norm_div, real.norm_two, real.norm_eq_abs, abs_le],
+      split,
+      { suffices : (-2 * c : ℝ) ≤ 2 * x₁,
+        linarith,
+        calc 2 * x₁ = - ε + y - c : by {rw hx₁, ring}
+                ... ≥ -2 * c : by linarith },
+      { suffices : 2 * x₁ ≤ 2 * c,
+        linarith,
+        simp only [*, mul_le_mul_left, zero_lt_bit0, zero_lt_one, eq_self_iff_true, not_le],
+        simp only [not_le, add_comm] at h_right,
+        rw [div_le_iff, sub_le_iff_le_add],
+        calc - ε + y ≤ ε + y : by {apply add_le_add_right (neg_le_self_iff.mpr $ le_of_lt $
+          not_le.mp hε)}
+                 ... ≤ c : by {exact (le_of_lt h_right)}
+                 ... ≤ c * 2 + c : by {exact (le_add_iff_nonneg_left c).mpr (c * 2).2},
+        simp only [zero_lt_bit0, zero_lt_one],
+      {sorry},
+    },
+    -- sorry,
+  }
 end
 
 lemma continuous_if_preimage_closed {c : ℝ≥0} (f : X → (Icc (-c : ℝ) c))
