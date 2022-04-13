@@ -1,5 +1,5 @@
 import free_pfpng.main
-import for_mathlib.derived.example
+import condensed.acyclic
 .
 
 noncomputable theory
@@ -17,7 +17,10 @@ theorem free_acyclic (i : ℤ) (hi : 0 < i) :
   is_zero (((Ext' i).obj (op ((Profinite_to_Condensed ⋙ CondensedSet_to_Condensed_Ab).obj S))).obj
     (Condensed.of_top_ab V)) :=
 begin
-  sorry
+  apply condensed.acyclic_of_exact _ _ _ i hi,
+  sorry -- use `prop819` from `prop819.lean`,
+  -- but first we need to relate `Condensed.of_top_ab V`
+  -- to the completion of locally constant functions to `V`
 end
 
 theorem free_pfpng_acyclic (i : ℤ) (hi : 0 < i) :
