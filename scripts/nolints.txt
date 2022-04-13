@@ -176,6 +176,9 @@ apply_nolint split_mono_of_is_zero def_lemma
 -- for_mathlib/rational_cones.lean
 apply_nolint extended_le_span unused_arguments
 
+-- for_mathlib/salamander.lean
+apply_nolint LBC.sq_op unused_arguments
+
 -- for_mathlib/snake_lemma.lean
 apply_nolint category_theory.snake_diagram.mk_functor.square_commutes_col unused_arguments
 apply_nolint category_theory.snake_diagram.mk_functor.square_commutes_comp_col unused_arguments
@@ -204,6 +207,9 @@ apply_nolint category_theory.triangulated.triangle.right_unitality_aux unused_ar
 apply_nolint category_theory.triangulated.triangle.shift_add_comp_eq_to_hom unused_arguments
 apply_nolint category_theory.triangulated.triangle.shift_add_comp_eq_to_hom' unused_arguments
 apply_nolint category_theory.triangulated.triangle.shift_comm_eq_eq_to_hom unused_arguments
+
+-- free_pfpng/lemmas.lean
+apply_nolint free_pfpng.discrete_quotient_separates_points' def_lemma
 
 -- invpoly/basic.lean
 apply_nolint invpoly unused_arguments
