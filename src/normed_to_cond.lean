@@ -100,8 +100,9 @@ end
 
 def LCC_iso_Cond_of_top_ab_obj :
   completion (locally_constant S V) ≃+ C(S, V) :=
-{ map_add' := λ f g, begin
-    sorry
+{ to_fun := completion.extension $ locally_constant.to_continuous_map,
+  map_add' := λ f g, begin
+    ext s, sorry
   end,
   .. LCC_iso_Cond_of_top_ab_equiv S V }
 
