@@ -449,10 +449,12 @@ begin
   sorry
 end
 
--- example (a b : ℝ) : -a + b = b - a :=
--- begin
---   library_search,
--- end
+example (a b c : ℝ) : a + (b - c) = a + b - c := --sub_div' hc
+begin
+  exact add_sub a b c,
+end
+
+-- lemma aux_complement_left {a : (closed_ball (0 : ℝ) c)} (
 
 lemma complement_of_balls' {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) (ε : ℝ) :
  ∃ (x₁ x₂ : (closed_ball 0 c)), ∃ (δ₁ δ₂ : ℝ),
@@ -480,26 +482,50 @@ begin
       set δ₂ := (-ε - y + c)/2 with hδ₂,
       set x₂ := (ε + y + c)/2 with hx₂,
       use x₁,
-      simp only [mem_closed_ball_zero_iff, norm_div, real.norm_two, real.norm_eq_abs, abs_le],
-      split,
-      { suffices : (-2 * c : ℝ) ≤ 2 * x₁,
-        linarith,
-        calc 2 * x₁ = - ε + y - c : by {rw hx₁, ring}
-                ... ≥ -2 * c : by linarith },
-      { suffices : 2 * x₁ ≤ 2 * c,
-        linarith,
-        simp only [*, mul_le_mul_left, zero_lt_bit0, zero_lt_one, eq_self_iff_true, not_le],
-        simp only [not_le, add_comm] at h_right,
-        rw [div_le_iff, sub_le_iff_le_add],
-        calc - ε + y ≤ ε + y : by {apply add_le_add_right (neg_le_self_iff.mpr $ le_of_lt $
-          not_le.mp hε)}
-                 ... ≤ c : by {exact (le_of_lt h_right)}
-                 ... ≤ c * 2 + c : by {exact (le_add_iff_nonneg_left c).mpr (c * 2).2},
-        simp only [zero_lt_bit0, zero_lt_one],
-      {sorry},
-    },
-    -- sorry,
-  }
+      { simp only [mem_closed_ball_zero_iff, norm_div, real.norm_two, real.norm_eq_abs, abs_le],
+        split,
+        { suffices : (-2 * c : ℝ) ≤ 2 * x₁,
+          linarith,
+          calc 2 * x₁ = - ε + y - c : by {rw hx₁, ring}
+                  ... ≥ -2 * c : by linarith },
+        { suffices : 2 * x₁ ≤ 2 * c,
+          linarith,
+          simp only [*, mul_le_mul_left, zero_lt_bit0, zero_lt_one, eq_self_iff_true, not_le],
+          simp only [not_le, add_comm] at h_right,
+          rw [div_le_iff, sub_le_iff_le_add],
+          calc - ε + y ≤ ε + y : by {apply add_le_add_right (neg_le_self_iff.mpr $ le_of_lt $
+            not_le.mp hε)}
+                  ... ≤ c : by {exact (le_of_lt h_right)}
+                  ... ≤ c * 2 + c : by {exact (le_add_iff_nonneg_left c).mpr (c * 2).2},
+          simp only [zero_lt_bit0, zero_lt_one] }},
+      use x₂,
+      { sorry},
+      use [δ₁, δ₂],
+      simp only [compl_union],
+      ext a,
+      simp only [mem_inter_eq, mem_ball, mem_compl_iff, mem_closed_ball, not_le],
+      split,--needed?
+      { intro ha,
+        split,--needed?
+        have lem_su : dist (a : ℝ) x₁ = a - x₁, sorry,
+        rw [hδ₁, subtype.dist_eq, subtype.coe_mk, lem_su, hx₁, sub_div' _ _ _ (@two_ne_zero ℝ _ _)],
+        apply div_lt_div_of_lt _,
+        rw [sub_sub_assoc_swap, add_comm, add_comm _ (c : ℝ), add_sub_assoc],
+        apply add_lt_add_left,
+        rw [subtype.dist_eq, real.dist_eq, abs_sub_lt_iff] at ha,
+        rw [sub_add_eq_sub_sub, sub_neg_eq_add, add_comm _ ε, ← add_sub, neg_add_lt_iff_lt_add,
+          ← add_assoc, ← two_mul, add_sub, sub_eq_add_neg, lt_add_neg_iff_add_lt, ← two_mul,
+          mul_comm _ (2 : ℝ), ← mul_add, mul_lt_mul_left, ← sub_lt_iff_lt_add],
+        exact ha.2,
+        repeat {simp only [zero_lt_bit0, zero_lt_one]},
+
+        sorry,
+      },
+      sorry,
+      -- split,
+
+
+    } },
 end
 
 lemma continuous_if_preimage_closed {c : ℝ≥0} (f : X → (Icc (-c : ℝ) c))
