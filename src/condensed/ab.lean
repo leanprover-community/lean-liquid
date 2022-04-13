@@ -375,6 +375,47 @@ def to_Condensed : CompHausFiltPseuNormGrp.{u} ⥤ Condensed.{u} Ab.{u+1} :=
   map_id' := λ X, by { ext : 2, dsimp, simp },
   map_comp' := λ X Y Z f g, by { ext : 2, dsimp, simp } }
 
+section
+
+#check Top.to_Condensed
+
+variables (A : CompHausFiltPseuNormGrp.{u})
+
+@[simps]
+def level_CompHaus_diagram : ℝ≥0 ⥤ CompHaus.{u} :=
+{ obj := λ r, CompHaus.of $ filtration A r,
+  map := λ r s h,
+  { to_fun := cast_le' h.le,
+    continuous_to_fun := by letI : fact (r ≤ s) := ⟨h.le⟩; exact continuous_cast_le _ _ },
+  map_id' := λ r, by { ext, refl },
+  map_comp' := λ r s t h1 h2, by { ext, refl } }
+
+@[simps]
+def level_Condensed_diagram : ℝ≥0 ⥤ CondensedSet.{u} :=
+A.level_CompHaus_diagram ⋙ CompHaus_to_Top.{u} ⋙ Top_to_Condensed.{u}
+
+@[simps]
+def level_Condensed_diagram' : (as_small.{u+1} ℝ≥0) ⥤ CondensedSet.{u} :=
+as_small.down ⋙ A.level_Condensed_diagram
+
+def level_Condensed_diagram_cone :
+  cocone A.level_Condensed_diagram' :=
+{ X := Condensed_Ab_to_CondensedSet.obj (to_Condensed.obj A),
+  ι :=
+  { app := λ r, Sheaf.hom.mk $
+    { app := λ S f, ulift.up $ ⟨_, ulift.down r, f.down.1, f.down.2, rfl⟩,
+      naturality' := λ S T f, by { ext, refl } },
+    naturality' := λ r s h, by { ext, refl } } }
+
+def colimit_to_Condensed_obj :
+  colimit A.level_Condensed_diagram' ⟶ Condensed_Ab_to_CondensedSet.obj (to_Condensed.obj A) :=
+colimit.desc _ A.level_Condensed_diagram_cone
+
+instance is_iso_colimit_to_Condensed_obj : is_iso A.colimit_to_Condensed_obj := sorry
+
+end
+
+
 end CompHausFiltPseuNormGrp
 
 @[simps obj map {fully_applied := ff}]
