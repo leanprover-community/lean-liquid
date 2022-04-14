@@ -156,7 +156,7 @@ def second_iso : colimit (prod (G.flip.obj (op X)) (G.flip.obj (op Y))) ≅
   limit (colimit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))).flip) :=
 colimit_limit_iso _
 
-@[simps] noncomputable
+noncomputable
 def third_iso_aux_left :
   (colimit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))).flip).obj walking_pair.left ≅
   (colimit G).obj (op X) :=
@@ -168,7 +168,7 @@ let e₁ :=
     (colimit.is_colimit G) in
 e₁.cocone_point_unique_up_to_iso e₂
 
-@[simps] noncomputable
+noncomputable
 def third_iso_aux_right :
   (colimit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))).flip).obj walking_pair.right ≅
   (colimit G).obj (op Y) :=
@@ -204,7 +204,7 @@ def third_iso_aux' : cone (colimit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))
     naturality' := sorry } }
 -/
 
-@[simps] noncomputable
+noncomputable
 def third_iso_aux : cone (colimit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))).flip) :=
 { X := prod ((colimit G).obj (op X)) ((colimit G).obj (op Y)),
   π :=
@@ -229,13 +229,17 @@ def third_iso :
   inv := limit.lift _ (third_iso_aux _ _ _),
   hom_inv_id' := begin
     ext (_|_),
-    { simp, dsimp [third_iso_aux, third_iso_aux._match_1], simp, sorry },
-    { simp, dsimp [third_iso_aux, third_iso_aux._match_1], simp, sorry },
+    { simp only [category.assoc, limit.lift_π, category.id_comp],
+      dsimp [third_iso_aux, third_iso_aux._match_1], simp },
+    { simp only [category.assoc, limit.lift_π, category.id_comp],
+      dsimp [third_iso_aux, third_iso_aux._match_1], simp },
   end,
   inv_hom_id' := begin
     ext,
-    { simp, dsimp [third_iso_aux], simp, sorry },
-    { simp, dsimp [third_iso_aux], simp, sorry },
+    { simp only [prod.comp_lift, limit.lift_π_assoc, prod.lift_fst, category.id_comp],
+      dsimp [third_iso_aux], simp, },
+    { simp only [prod.comp_lift, limit.lift_π_assoc, prod.lift_snd, category.id_comp],
+      dsimp [third_iso_aux], simp, },
   end }
 
 /-
