@@ -44,9 +44,6 @@ lemma continuous_map.bdd_above_range_norm (f : C(S, V')) :
   bdd_above (set.range (λ (s : ↥S), ∥f s∥)) :=
 (is_compact_range $ continuous_norm.comp f.continuous).bdd_above
 
-instance : separated_space C(S, V) :=
-sorry -- use continuous_map.t2_space
-
 def Condensed.of_top_ab_map_normed_group_hom {S T : Profinite.{u}ᵒᵖ} (f : S ⟶ T) :
   normed_group_hom C(_, V') C(_, V') :=
 { to_fun := (Condensed.of_top_ab.presheaf.{u} V').map f,
