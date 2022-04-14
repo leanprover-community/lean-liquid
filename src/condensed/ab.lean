@@ -9,6 +9,7 @@ import for_mathlib.AddCommGroup.exact
 
 import condensed.adjunctions
 import condensed.top_comparison
+import condensed.filtered_colimits
 
 /-!
 # Properties of the category of condensed abelian groups
@@ -405,7 +406,13 @@ def level_Condensed_diagram_cone :
   { app := λ r, Sheaf.hom.mk $
     { app := λ S f, ulift.up $ ⟨_, ulift.down r, f.down.1, f.down.2, rfl⟩,
       naturality' := λ S T f, by { ext, refl } },
-    naturality' := λ r s h, by { ext, refl } } }
+    naturality' := λ r s h, by { ext, refl } } } .
+
+def colimit_iso_Condensed_obj :
+  colimit A.level_Condensed_diagram' ≅ Condensed_Ab_to_CondensedSet.obj (to_Condensed.obj A) :=
+calc
+  _ ≅ _ : (colimit.is_colimit _).cocone_point_unique_up_to_iso (filtered_cocone_is_colimit _)
+  ... ≅ _ : sorry
 
 def colimit_to_Condensed_obj :
   colimit A.level_Condensed_diagram' ⟶ Condensed_Ab_to_CondensedSet.obj (to_Condensed.obj A) :=
