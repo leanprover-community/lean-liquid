@@ -421,11 +421,9 @@ equiv.of_bijective (quot.lift
   sorry)
 sorry
 
-def colimit_iso_Condensed_obj :
-  colimit A.level_Condensed_diagram' ≅ Condensed_Ab_to_CondensedSet.obj (to_Condensed.obj A) :=
-calc
-  _ ≅ _ : (colimit.is_colimit _).cocone_point_unique_up_to_iso (filtered_cocone_is_colimit _)
-  ... ≅ _ : Sheaf.iso.mk _ (Condensed_Ab_to_CondensedSet.{u}.obj (to_Condensed.{u}.obj A)) $
+def colimit_iso_Condensed_obj_aux_nat_iso :
+  (filtered_cocone.{u} A.level_Condensed_diagram').X.val ≅
+  (Condensed_Ab_to_CondensedSet.{u}.obj (to_Condensed.{u}.obj A)).val :=
   nat_iso.of_components (λ X,
     (is_colimit_of_preserves ((evaluation _ _).obj X)
       (colimit.is_colimit (A.level_Condensed_diagram' ⋙
@@ -434,6 +432,12 @@ calc
     (types.colimit_cocone_is_colimit _) ≪≫
     equiv.to_iso ((A.colimit_iso_Condensed_obj_aux X.unop).trans equiv.ulift.symm)
   ) sorry
+
+def colimit_iso_Condensed_obj :
+  colimit A.level_Condensed_diagram' ≅ Condensed_Ab_to_CondensedSet.obj (to_Condensed.obj A) :=
+(colimit.is_colimit _).cocone_point_unique_up_to_iso (filtered_cocone_is_colimit _) ≪≫
+  Sheaf.iso.mk _ (Condensed_Ab_to_CondensedSet.{u}.obj (to_Condensed.{u}.obj A))
+    A.colimit_iso_Condensed_obj_aux_nat_iso
 
 def colimit_to_Condensed_obj :
   colimit A.level_Condensed_diagram' ⟶ Condensed_Ab_to_CondensedSet.obj (to_Condensed.obj A) :=
