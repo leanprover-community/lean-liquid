@@ -21,18 +21,36 @@ def Ext.map₁ : ((Ext i).obj (op A.obj₂)).obj B ⟶ ((Ext i).obj (op A.obj₁
 def Ext.map₂ : ((Ext i).obj (op A.obj₃)).obj B ⟶ ((Ext i).obj (op A.obj₂)).obj B :=
 ((Ext i).map A.mor₂.op).app B
 
-def Ext.δ_iso : ((Ext i).obj (op A.obj₁)).obj B ≅ ((Ext (i + 1)).obj (op (A.obj₁⟦(1:ℤ)⟧))).obj B :=
+def Ext.shift_neg_iso (A B : bounded_homotopy_category C) :
+  ((Ext i).obj (op (A⟦(-1:ℤ)⟧))).obj B ≅ ((Ext (i + 1)).obj (op A)).obj B :=
+sorry
+
+def Ext.shift_iso (A B : bounded_homotopy_category C) :
+  ((Ext i).obj (op A)).obj B ≅ ((Ext (i + 1)).obj (op (A⟦(1:ℤ)⟧))).obj B :=
 sorry
 
 def Ext.δ :
   ((Ext i).obj (op A.obj₁)).obj B ⟶ ((Ext (i+1)).obj (op A.obj₃)).obj B :=
-(Ext.δ_iso i A B).hom ≫ ((Ext (i+1)).map A.mor₃.op).app B
+(Ext.shift_iso i A.obj₁ B).hom ≫ ((Ext (i + 1)).map A.mor₃.op).app B
 
 set_option pp.universes true
 
-lemma Ext.five_term_exact_seq :
-  exact_seq Ab.{v} [Ext.map₁ i A B, Ext.map₂ i A B, Ext.δ i A B, Ext.map₁ (i+1) A B] :=
+-- this should be true up to a possible minus sign
+lemma Ext.δ_aux :
+  Ext.δ i A B =
+  ((Ext i).map A.inv_rotate.mor₁.op).app B ≫ (Ext.shift_neg_iso i A.obj₃ B).hom :=
 sorry
+
+lemma Ext.five_term_exact_seq (hA : A ∈ dist_triang (bounded_homotopy_category C)) :
+  exact_seq Ab.{v} [Ext.map₂ i A B, Ext.map₁ i A B, Ext.δ i A B, Ext.map₂ (i+1) A B] :=
+begin
+  refine exact.cons _ (exact.cons _ (exact.exact_seq _)),
+  { exact (four_term_exact_seq ((Ext i).flip.obj B).right_op A hA).pair.unop, },
+  { rw [Ext.δ_aux, exact_comp_iso],
+    exact (five_term_exact_seq ((Ext i).flip.obj B).right_op A hA).pair.unop, },
+  { rw [Ext.δ, exact_iso_comp],
+    exact (four_term_exact_seq ((Ext (i+1)).flip.obj B).right_op A hA).unop.pair, }
+end
 
 end bounded_homotopy_category
 
@@ -47,8 +65,18 @@ lemma epi_and_is_iso_iff_of_is_iso
   (f₁ : X₁ ⟶ X₂) (f₂ : X₂ ⟶ X₃)
   (g₁ : Y₁ ⟶ Y₂) (g₂ : Y₂ ⟶ Y₃)
   (α₁ : X₁ ⟶ Y₁) (α₂ : X₂ ⟶ Y₂) (α₃ : X₃ ⟶ Y₃)
+  (sq₁ : f₁ ≫ α₂ = α₁ ≫ g₁) (sq₂ : f₂ ≫ α₃ = α₂ ≫ g₂)
   (Z : C) (hf : short_exact f₁ f₂) (hg : short_exact g₁ g₂)
   (H : ∀ i, is_iso (((Ext' i).map α₃.op).app Z)) :
   (epi (((Ext' 0).map α₁.op).app Z) ∧ ∀ i > 0, is_iso (((Ext' i).map α₁.op).app Z)) ↔
   (epi (((Ext' 0).map α₂.op).app Z) ∧ ∀ i > 0, is_iso (((Ext' i).map α₂.op).app Z)) :=
+sorry
+
+
+-- move me
+instance Ext'.flip_additive (i : ℤ) (B : C) : ((Ext' i).flip.obj B).additive :=
+sorry
+
+-- move me
+instance Ext'.additive (i : ℤ) (A : Cᵒᵖ) : ((Ext' i).obj A).additive :=
 sorry
