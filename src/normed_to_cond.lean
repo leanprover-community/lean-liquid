@@ -98,9 +98,7 @@ lemma _root_.uniform_space.completion.extension_injective {S V : Type*}
   function.injective (completion.extension f) :=
 sorry
 
--- move me
-instance locally_constant.separated_space : separated_space.{u} (locally_constant S V') :=
-sorry
+local attribute [instance] locally_constant.normed_group
 
 def LCC_iso_Cond_of_top_ab_equiv :
   completion (locally_constant S V') ≃+ C(S, V') :=
