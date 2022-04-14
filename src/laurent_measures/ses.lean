@@ -493,6 +493,20 @@ begin
     simp only [zero_lt_bit0, zero_lt_one] },
 end
 
+lemma aux_dist_left {a y : closed_ball (0 : ℝ) c} {ε x: ℝ}  (ha : a ∈ ball y ε) (hε : ¬ ε ≤ 0)
+  (hx : x = (-ε + y - c) / 2) : dist (a : ℝ) x = a - x :=
+begin
+  rw [real.dist_eq, abs_eq_self, sub_nonneg],
+  rw [mem_ball, subtype.dist_eq, real.dist_eq, abs_lt, lt_sub_iff_add_lt] at ha,
+  apply le_of_lt,
+  have := a.2,
+  rw [mem_closed_ball, subtype.val_eq_coe, real.dist_eq, sub_zero, abs_le] at this,
+  calc x = (-ε + y - c) / 2 : by {exact hx}
+     ... < (a - c) / 2 : by linarith
+     ... ≤ a : by {rw [div_le_iff, sub_le, mul_two, ← sub_sub, sub_self, zero_sub, neg_le],
+                    exact this.1, simp only [zero_lt_bit0, zero_lt_one]},
+end
+
 lemma complement_of_balls' {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) (ε : ℝ) :
  ∃ (x₁ x₂ : (closed_ball 0 c)), ∃ (δ₁ δ₂ : ℝ),
   ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ :=
@@ -521,16 +535,15 @@ begin
         (not_le.mp h_left) h_right, δ₁, δ₂],
       simp only [compl_union],
       ext a,
-      simp only [mem_inter_eq, mem_ball, mem_compl_iff, mem_closed_ball, not_le],
-      split,--needed?
+      simp only [mem_inter_eq, mem_compl_iff, mem_closed_ball, not_le],
+      split,
       { intro ha,
-        split,--needed?
-        have lem_su : dist (a : ℝ) x₁ = a - x₁, sorry,
-        rw [hδ₁, subtype.dist_eq, subtype.coe_mk, lem_su, hx₁, sub_div' _ _ _ (@two_ne_zero ℝ _ _)],
+        split,
+        rw [hδ₁, subtype.dist_eq, subtype.coe_mk, aux_dist_left c ha hε hx₁, hx₁, sub_div' _ _ _ (@two_ne_zero ℝ _ _)],
         apply div_lt_div_of_lt _,
         rw [sub_sub_assoc_swap, add_comm, add_comm _ (c : ℝ), add_sub_assoc],
         apply add_lt_add_left,
-        rw [subtype.dist_eq, real.dist_eq, abs_sub_lt_iff] at ha,
+        rw [mem_ball, subtype.dist_eq, real.dist_eq, abs_sub_lt_iff] at ha,
         rw [sub_add_eq_sub_sub, sub_neg_eq_add, add_comm _ ε, ← add_sub, neg_add_lt_iff_lt_add,
           ← add_assoc, ← two_mul, add_sub, sub_eq_add_neg, lt_add_neg_iff_add_lt, ← two_mul,
           mul_comm _ (2 : ℝ), ← mul_add, mul_lt_mul_left, ← sub_lt_iff_lt_add],
