@@ -226,8 +226,16 @@ def third_iso :
     (limit.π _ walking_pair.left ≫ (third_iso_aux_left _ _ _).hom)
     (limit.π _ walking_pair.right ≫ (third_iso_aux_right _ _ _).hom),
   inv := limit.lift _ (third_iso_aux _ _ _),
-  hom_inv_id' := sorry,
-  inv_hom_id' := sorry }
+  hom_inv_id' := begin
+    ext (_|_),
+    { simp, dsimp [third_iso_aux, third_iso_aux._match_1], simp },
+    { simp, dsimp [third_iso_aux, third_iso_aux._match_1], simp },
+  end,
+  inv_hom_id' := begin
+    ext,
+    { simp, dsimp [third_iso_aux], simp },
+    { simp, dsimp [third_iso_aux], simp },
+  end }
 
 /-
 noncomputable
