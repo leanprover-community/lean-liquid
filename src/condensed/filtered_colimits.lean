@@ -74,6 +74,120 @@ end
 
 end empty
 
+namespace prod
+
+variables (X Y : Profinite.{u}) (G : J ⥤ Profinite.{u}ᵒᵖ ⥤ C)
+
+noncomputable
+def comparison_component (j : J) :
+  (G.obj j).obj (op $ Profinite.sum X Y) ⟶ prod ((G.obj j).obj (op X)) ((G.obj j).obj (op Y)) :=
+prod.lift ((G.obj j).map (Profinite.sum.inl _ _).op) ((G.obj j).map (Profinite.sum.inr _ _).op)
+
+variables [∀ j, is_iso (comparison_component X Y G j)]
+
+noncomputable
+def first_iso : (colimit G).obj (op $ Profinite.sum X Y) ≅
+  colimit (prod (G.flip.obj (op X)) (G.flip.obj (op Y))) :=
+let e₁ := is_colimit_of_preserves ((evaluation _ _).obj (op $ Profinite.sum X Y))
+  (colimit.is_colimit G),
+    e₂ := e₁.cocone_point_unique_up_to_iso (colimit.is_colimit _),
+    e₃ : G ⋙ (evaluation Profiniteᵒᵖ C).obj (op (X.sum Y)) ≅
+      G.flip.obj (op X) ⨯ G.flip.obj (op Y) :=
+      nat_iso.of_components (λ j,
+        let e₄ : pair ((G.obj j).obj (op X)) ((G.obj j).obj (op Y)) ≅
+          pair (G.flip.obj (op X)) (G.flip.obj (op Y)) ⋙ (evaluation J C).obj j :=
+          nat_iso.of_components
+          (λ p, match p with
+            | walking_pair.left := iso.refl _
+            | walking_pair.right := iso.refl _
+            end) sorry in
+        as_iso (comparison_component X Y G j)
+        ≪≫ has_limit.iso_of_nat_iso e₄ ≪≫
+        (limit.is_limit _).cone_point_unique_up_to_iso
+        (is_limit_of_preserves ((evaluation _ _).obj j) (limit.is_limit _)))
+      sorry in
+e₂ ≪≫ has_colimit.iso_of_nat_iso e₃
+
+noncomputable
+def second_iso : colimit (prod (G.flip.obj (op X)) (G.flip.obj (op Y))) ≅
+  limit (colimit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))).flip) :=
+colimit_limit_iso _
+
+def third_iso_aux_left :
+  (colimit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))).flip).obj walking_pair.left ≅
+  (colimit G).obj (op X) := sorry
+
+def third_iso_aux_right :
+  (colimit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))).flip).obj walking_pair.right ≅
+  (colimit G).obj (op Y) := sorry
+
+noncomputable
+def third_iso_aux : cone (pair (op X) (op Y) ⋙ colimit G) :=
+{ X := limit (colimit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))).flip),
+  π :=
+  { app := λ p,
+    match p with
+    | walking_pair.left := limit.π _ walking_pair.left ≫ (third_iso_aux_left X Y G).hom
+    | walking_pair.right := limit.π _ walking_pair.right ≫ (third_iso_aux_right X Y G).hom
+    end,
+    naturality' := sorry } }
+
+noncomputable
+def third_iso_aux' : cone (colimit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))).flip) :=
+{ X := limit (pair (op X) (op Y) ⋙ colimit G),
+  π :=
+  { app := λ p,
+    match p with
+    | walking_pair.left := limit.π _ walking_pair.left ≫ (third_iso_aux_left X Y G).inv
+    | walking_pair.right := limit.π _ walking_pair.right ≫ (third_iso_aux_right X Y G).inv
+    end,
+    naturality' := sorry } }
+
+noncomputable
+def third_iso :
+  limit (colimit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))).flip)
+    ≅ limit (pair (op X) (op Y) ⋙ colimit G) :=
+{ hom := limit.lift _ (third_iso_aux _ _ _),
+  inv := limit.lift _ (third_iso_aux' _ _ _),
+  hom_inv_id' := sorry,
+  inv_hom_id' := sorry }
+
+noncomputable
+def fourth_iso_aux : cone (pair (op X) (op Y) ⋙ colimit G) :=
+{ X := prod ((colimit G).obj (op X)) ((colimit G).obj (op Y)),
+  π :=
+  { app := λ p,
+    match p with
+    | walking_pair.left := limits.prod.fst
+    | walking_pair.right := limits.prod.snd
+    end,
+    naturality' := sorry } }
+
+noncomputable
+def fourth_iso : limit (pair (op X) (op Y) ⋙ colimit G) ≅
+  prod ((colimit G).obj (op X)) ((colimit G).obj (op Y)) :=
+{ hom := prod.lift (limit.π _ walking_pair.left) (limit.π _ walking_pair.right),
+  inv := limit.lift _ (fourth_iso_aux _ _ _),
+  hom_inv_id' := sorry,
+  inv_hom_id' := sorry }
+
+noncomputable
+def comparison : (colimit G).obj (op $ Profinite.sum X Y) ⟶
+  prod ((colimit G).obj (op X)) ((colimit G).obj (op Y)) :=
+prod.lift
+  ((colimit G).map (Profinite.sum.inl _ _).op)
+  ((colimit G).map (Profinite.sum.inr _ _).op)
+
+lemma is_iso_comparison : is_iso (comparison X Y G) :=
+begin
+  suffices : (comparison X Y G) =
+    (first_iso X Y G).hom ≫ (second_iso X Y G).hom ≫ (third_iso X Y G).hom ≫
+      (fourth_iso X Y G).hom, by { rw this, apply_instance },
+  sorry
+end
+
+end prod
+
 end is_sheaf_colimit_presheaf_aux
 open is_sheaf_colimit_presheaf_aux
 
@@ -187,6 +301,9 @@ begin
   { apply_with empty.is_iso_comparison { instances := ff },
     exact hGsempty,
     all_goals { apply_instance } },
-  { sorry },
+  { intros X Y,
+    apply_with prod.is_iso_comparison { instances := ff },
+    intros j, apply hGsprod,
+    all_goals { apply_instance } },
   { sorry }
 end
