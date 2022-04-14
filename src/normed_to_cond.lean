@@ -44,40 +44,6 @@ lemma continuous_map.bdd_above_range_norm (f : C(S, V')) :
   bdd_above (set.range (λ (s : ↥S), ∥f s∥)) :=
 (is_compact_range $ continuous_norm.comp f.continuous).bdd_above
 
--- instance : semi_normed_group C(S, V) :=
--- { dist := λ x y, ∥x - y∥,
---   dist_self := λ x, begin
---     dsimp,
---     simp only [sub_self, continuous_map.norm_def, continuous_map.coe_zero,
---       pi.zero_apply, norm_zero, real.csupr_const_zero],
---   end,
---   dist_comm := λ x y, begin
---     dsimp,
---     simp only [continuous_map.norm_def, continuous_map.coe_sub, pi.sub_apply],
---     simp only [← dist_eq_norm, dist_comm],
---   end,
---   dist_triangle := λ x y z, begin
---     dsimp,
---     simp only [continuous_map.norm_def],
---     casesI is_empty_or_nonempty S,
---     { simp only [real.csupr_empty, zero_add], },
---     apply csupr_le,
---     intro s,
---     generalize hf : x - y = f,
---     generalize hg : y - z = g,
---     have : f + g = x - z, { rw [← hf, ← hg, sub_add_sub_cancel], },
---     rw ← this, clear this,
---     calc ∥(f + g) s∥ ≤ ∥f s∥ + ∥g s∥ : norm_add_le _ _
---     ... ≤ ∥f∥ + ∥g∥ : add_le_add (le_csupr _ s) (le_csupr _ s),
---     { apply continuous_map.bdd_above_range_norm },
---     { apply continuous_map.bdd_above_range_norm },
---   end,
---   dist_eq := λ x y, rfl,
---   edist := λ x y, ennreal.of_real ∥x - y∥,
---   edist_dist := λ x y, rfl,
---   to_uniform_space := continuous_map.compact_convergence_uniform_space.{u u},
---   uniformity_dist := sorry, }
-
 instance : separated_space C(S, V) :=
 sorry -- use continuous_map.t2_space
 
@@ -165,10 +131,7 @@ begin
 end
 
 instance SemiNormedGroup.metric_space : metric_space V :=
-{ eq_of_dist_eq_zero := begin
-    sorry
-  end,
-  ..(by apply_instance : pseudo_metric_space V) }
+metric.of_t2_pseudo_metric_space ‹_›
 
 instance SemiNormedGroup.normed_group : normed_group V :=
 { dist_eq := semi_normed_group.dist_eq,
