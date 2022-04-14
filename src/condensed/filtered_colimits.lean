@@ -22,6 +22,62 @@ open opposite
 
 namespace is_sheaf_colimit_presheaf_aux
 
+namespace empty
+
+variables (G : J ⥤ Profinite.{u}ᵒᵖ ⥤ C)
+
+noncomputable
+def comparison_component (j : J) :
+  (G.obj j).obj (op Profinite.empty) ⟶ ⊤_ _ := terminal.from _
+
+variables [∀ j, is_iso (comparison_component G j)]
+
+noncomputable
+def first_iso : (colimit G).obj (op Profinite.empty) ≅
+  colimit (limit (functor.empty _ ⋙ G.flip)) :=
+let e₁ := is_colimit_of_preserves ((evaluation _ _).obj (op Profinite.empty))
+  (colimit.is_colimit G),
+    e₂ := e₁.cocone_point_unique_up_to_iso (colimit.is_colimit _),
+    e₃ : G ⋙ (evaluation Profiniteᵒᵖ C).obj (op Profinite.empty) ≅
+      limit (functor.empty Profiniteᵒᵖ ⋙ G.flip) :=
+      nat_iso.of_components
+      (λ j,
+        let e₄ := is_limit_of_preserves ((evaluation _ _).obj j)
+          (limit.is_limit (functor.empty _ ⋙ G.flip)),
+            e₅ := (limit.is_limit _).cone_point_unique_up_to_iso e₄,
+            e₆ : functor.empty C ≅
+              (functor.empty Profiniteᵒᵖ ⋙ G.flip) ⋙ (evaluation J C).obj j :=
+              nat_iso.of_components (λ i, i.elim) (λ i, i.elim) in
+        as_iso (comparison_component G j) ≪≫
+          has_limit.iso_of_nat_iso e₆ ≪≫ e₅)
+      sorry in
+e₂ ≪≫ has_colimit.iso_of_nat_iso e₃
+
+noncomputable
+def second_iso : colimit (limit (functor.empty _ ⋙ G.flip)) ≅
+  limit (colimit (functor.empty _ ⋙ G.flip).flip) :=
+  colimit_limit_iso _
+
+noncomputable
+def third_iso : limit (colimit (functor.empty _ ⋙ G.flip).flip) ≅ ⊤_ _ :=
+has_limit.iso_of_nat_iso $ nat_iso.of_components (λ i, i.elim) (λ i, i.elim)
+
+noncomputable
+def comparison : (colimit G).obj (op Profinite.empty) ⟶ ⊤_ _ := terminal.from _
+
+theorem is_iso_comparison : is_iso (comparison G) :=
+begin
+  suffices : comparison G = (first_iso G).hom ≫ (second_iso G).hom ≫ (third_iso G).hom,
+  { rw this, apply_instance },
+  simp,
+end
+
+end empty
+
+end is_sheaf_colimit_presheaf_aux
+open is_sheaf_colimit_presheaf_aux
+
+/-
 variables {K : Type (u+1)} [small_category K] [fin_category K]
   (E : K ⥤ Profinite.{u}ᵒᵖ) [has_limit E] (G : J ⥤ Profinite.{u}ᵒᵖ ⥤ C)
   [∀ j, preserves_limits_of_shape K (G.obj j)]
@@ -104,6 +160,7 @@ theorem product_condition_iff_preserves (G : Profiniteᵒᵖ ⥤ C) :
 theorem equalizer_condition_iff_preserves (G : Profiniteᵒᵖ ⥤ C) :
   G.equalizer_condition' ↔
   nonempty (preserves_limits_of_shape (walking_parallel_pair.{u+1}) G) := sorry
+-/
 
 lemma is_sheaf_colimit_presheaf :
   presheaf.is_sheaf proetale_topology (colimit (F ⋙ Sheaf_to_presheaf _ _)) :=
@@ -126,22 +183,10 @@ begin
     rw (Gs.obj j).is_proetale_sheaf_tfae.out 0 3 at hGs,
     exact hGs.2.2 },
   rw G.is_proetale_sheaf_tfae.out 0 3,
-  rw empty_condition_iff_preserves,
-  rw product_condition_iff_preserves,
-  rw equalizer_condition_iff_preserves,
-  have I1 : ∀ j, preserves_limits_of_shape (discrete pempty.{u+1}) (Gs.obj j),
-  { intros j, specialize hGsempty j,
-    rw empty_condition_iff_preserves at hGsempty,
-    exact hGsempty.some },
-  have I2 : ∀ j, preserves_limits_of_shape (discrete walking_pair.{u+1}) (Gs.obj j),
-  { intros j, specialize hGsprod j,
-    rw product_condition_iff_preserves at hGsprod,
-    exact hGsprod.some },
-  have I3 : ∀ j, preserves_limits_of_shape (walking_parallel_pair.{u+1}) (Gs.obj j),
-  { intros j, specialize hGseq j,
-    rw equalizer_condition_iff_preserves at hGseq,
-    exact hGseq.some },
-  refine ⟨⟨_⟩,⟨_⟩,⟨_⟩⟩,
-  dsimp only [Gs] at I1 I2 I3, resetI, dsimp [G],
-  all_goals { sorry } -- universe annoyances...
+  refine ⟨_,_,_⟩,
+  { apply_with empty.is_iso_comparison { instances := ff },
+    exact hGsempty,
+    all_goals { apply_instance } },
+  { sorry },
+  { sorry }
 end
