@@ -92,18 +92,24 @@ begin
     all_goals { apply locally_constant.to_continuous_map_uniform_continuous } }
 end
 
+lemma _root_.uniform_space.completion.extension_injective {S V : Type*}
+  [uniform_space S] [separated_space S] [uniform_space V] [complete_space V] [separated_space V]
+  (f : S → V) (hf : function.injective f) (hfuc : uniform_continuous f) :
+  function.injective (completion.extension f) :=
+sorry
+
+-- move me
+instance locally_constant.separated_space : separated_space.{u} (locally_constant S V') :=
+sorry
+
 def LCC_iso_Cond_of_top_ab_equiv :
   completion (locally_constant S V') ≃+ C(S, V') :=
 add_equiv.of_bijective (LCC_iso_Cond_of_top_ab_hom S V')
 begin
   split,
-  { rw add_monoid_hom.injective_iff,
-    intros f,
-    apply completion.induction_on f; clear f,
-    { sorry },
-    intros f hf,
-    have := @locally_constant.to_continuous_map_injective S V' _ _ f 0,
-    sorry },
+  { apply uniform_space.completion.extension_injective,
+    { apply locally_constant.to_continuous_map_injective },
+    { apply locally_constant.to_continuous_map_uniform_continuous } },
   { sorry }
 end
 
