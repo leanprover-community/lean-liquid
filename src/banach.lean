@@ -49,6 +49,7 @@ structure p_banach : Prop :=
 [topological_add_group : topological_add_group V]
 [continuous_smul : has_continuous_smul ℝ V]
 [complete : complete_space V]
+[separated : separated_space V]
 
 end
 
@@ -71,6 +72,7 @@ instance : _root_.uniform_space V := V.uniform_space'
 instance : _root_.topological_add_group V := V.p_banach'.topological_add_group
 instance : _root_.has_continuous_smul ℝ V := V.p_banach'.continuous_smul
 instance : _root_.complete_space V := V.p_banach'.complete
+instance : _root_.separated_space V := V.p_banach'.separated
 
 variables {p}
 

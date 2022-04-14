@@ -13,7 +13,7 @@ open function (surjective)
 open_locale nnreal
 
 variables (S : Profinite.{u})
-variables (V : SemiNormedGroup.{u}) [complete_space V]
+variables (V : SemiNormedGroup.{u}) [complete_space V] [separated_space V]
 
 set_option pp.universes true
 

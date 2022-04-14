@@ -300,11 +300,10 @@ end
 -- move me
 attribute [simps] Ab.ulift
 
-lemma condensify_nonstrict_Tinv2 (F : Fintype.{u} ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r') :
-  condensify_nonstrict (Tinv2_nat_trans F) (r'⁻¹ + 2) (Tinv2_bound_by F) =
-  condensify_Tinv F - 2 • 𝟙 _ :=
+lemma condensify_Tinv2_eq (F : Fintype.{u} ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r') :
+  condensify_Tinv2 F = condensify_Tinv F - 2 • 𝟙 _ :=
 begin
-  delta Tinv2_nat_trans,
+  delta condensify_Tinv2 Tinv2_nat_trans,
   rw [condensify_nonstrict_map_sub _ _ r'⁻¹ 2 (r'⁻¹ + 2) (Tinv_bound_by _) (twoid_bound_by _),
     condensify_nonstrict_map_nsmul _ 1 2, condensify_nonstrict_Tinv],
   swap,
@@ -312,3 +311,12 @@ begin
   rw [← condensify_map_id, ← condensify_nonstrict_whisker_right_enlarging],
   refl
 end
+
+open category_theory.preadditive
+
+lemma condensify_map_comp_Tinv2 {F G : Fintype.{u} ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r'}
+  (α : F ⟶ G) :
+  condensify_map (whisker_right α (to_CHFPNG₁ r')) ≫ condensify_Tinv2 G =
+  condensify_Tinv2 F ≫ condensify_map (whisker_right α (to_CHFPNG₁ r')) :=
+by simp only [condensify_Tinv2_eq, comp_sub, sub_comp, comp_nsmul, nsmul_comp,
+    condensify_map_comp_Tinv, category.id_comp, category.comp_id]
