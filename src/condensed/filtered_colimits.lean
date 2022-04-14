@@ -1,6 +1,7 @@
 import condensed.is_proetale_sheaf
 import condensed.adjunctions
 import category_theory.limits.filtered_colimit_commutes_finite_limit
+import for_mathlib.AddCommGroup.explicit_limits
 
 open category_theory
 open category_theory.limits
@@ -228,13 +229,13 @@ def third_iso :
   inv := limit.lift _ (third_iso_aux _ _ _),
   hom_inv_id' := begin
     ext (_|_),
-    { simp, dsimp [third_iso_aux, third_iso_aux._match_1], simp },
-    { simp, dsimp [third_iso_aux, third_iso_aux._match_1], simp },
+    { simp, dsimp [third_iso_aux, third_iso_aux._match_1], simp, sorry },
+    { simp, dsimp [third_iso_aux, third_iso_aux._match_1], simp, sorry },
   end,
   inv_hom_id' := begin
     ext,
-    { simp, dsimp [third_iso_aux], simp },
-    { simp, dsimp [third_iso_aux], simp },
+    { simp, dsimp [third_iso_aux], simp, sorry },
+    { simp, dsimp [third_iso_aux], simp, sorry },
   end }
 
 /-
@@ -546,4 +547,51 @@ def filtered_cocone_is_colimit : is_colimit (filtered_cocone F) :=
     apply colimit.hom_ext,
     intros j, specialize hm j, apply_fun (λ e, e.val) at hm,
     dsimp at hm, simpa using hm,
-  end }
+  end } .
+
+noncomputable
+def preserves_limits_aux_1 (G : J ⥤ Condensed.{u} Ab.{u+1}) :
+  colimit (G ⋙ Sheaf_to_presheaf proetale_topology Ab) ⋙ forget Ab ≅
+  colimit (G ⋙ Sheaf_to_presheaf _ _ ⋙ (whiskering_right _ _ _).obj (forget Ab)) :=
+nat_iso.of_components
+begin
+  intros X,
+  let E := (G ⋙ Sheaf_to_presheaf _ _ ⋙ (whiskering_right _ _ _).obj (forget Ab)),
+  let e₀ := colimit.is_colimit E,
+  let e₁ := is_colimit_of_preserves ((evaluation _ _).obj X) e₀,
+  refine _ ≪≫ (colimit.is_colimit _).cocone_point_unique_up_to_iso e₁,
+  change (forget Ab).obj _ ≅ colimit _,
+  let e₂ := colimit.is_colimit (G ⋙ Sheaf_to_presheaf proetale_topology Ab),
+  let e₃ := is_colimit_of_preserves ((evaluation _ _).obj X) e₂,
+  let e₄ := e₃.cocone_point_unique_up_to_iso (colimit.is_colimit _),
+  refine (forget Ab).map_iso e₄ ≪≫ _,
+  change (forget Ab).obj (colimit _) ≅ _,
+  let e₅ := is_colimit_of_preserves (forget Ab)
+    (colimit.is_colimit ((G ⋙ Sheaf_to_presheaf proetale_topology Ab)
+    ⋙ (evaluation Profiniteᵒᵖ Ab).obj X)),
+  exact e₅.cocone_point_unique_up_to_iso (colimit.is_colimit _),
+end
+sorry
+
+noncomputable
+def preserves_limits_of_shape_of_filtered_aux (G : J ⥤ Condensed.{u} Ab.{u+1}) :
+  Condensed_Ab_to_CondensedSet.{u}.map_cocone (filtered_cocone G) ≅
+  filtered_cocone (G ⋙ Condensed_Ab_to_CondensedSet.{u}) :=
+cocones.ext
+{ hom := Sheaf.hom.mk $ (preserves_limits_aux_1 G).hom,
+  inv := Sheaf.hom.mk $ (preserves_limits_aux_1 G).inv,
+  hom_inv_id' := by { ext1, simp },
+  inv_hom_id' := by { ext1, simp } }
+sorry
+
+noncomputable
+instance Condensed_Ab_to_CondensedSet_preserves_limits_of_shape_of_filtered :
+  preserves_colimits_of_shape J Condensed_Ab_to_CondensedSet.{u} :=
+begin
+  constructor,
+  intros G,
+  apply preserves_colimit_of_preserves_colimit_cocone (filtered_cocone_is_colimit G),
+  apply is_colimit.of_iso_colimit (filtered_cocone_is_colimit
+    (G ⋙ Condensed_Ab_to_CondensedSet)),
+  exact (preserves_limits_of_shape_of_filtered_aux G).symm,
+end
