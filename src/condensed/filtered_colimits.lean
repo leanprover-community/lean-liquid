@@ -188,6 +188,122 @@ end
 
 end prod
 
+namespace eq
+
+variables {X Y : Profinite.{u}} (f : X ⟶ Y) (G : J ⥤ Profinite.{u}ᵒᵖ ⥤ C)
+
+noncomputable
+def comparison_component (j : J) :
+  (G.obj j).obj (op $ Y) ⟶
+  equalizer
+    ((G.obj j).map (Profinite.pullback.fst f f).op)
+    ((G.obj j).map (Profinite.pullback.snd f f).op) :=
+equalizer.lift ((G.obj j).map f.op)
+begin
+  simp_rw [← (G.obj j).map_comp, ← op_comp, Profinite.pullback.condition],
+end
+
+variables [∀ j, is_iso (comparison_component f G j)]
+
+noncomputable
+def first_iso : (colimit G).obj (op $ Y) ≅
+  colimit (equalizer
+    (G.flip.map (Profinite.pullback.fst f f).op)
+    (G.flip.map (Profinite.pullback.snd f f).op)) :=
+let e₁ := is_colimit_of_preserves
+  ((evaluation _ _).obj (op $ Y)) (colimit.is_colimit G),
+    e₂ := e₁.cocone_point_unique_up_to_iso (colimit.is_colimit _),
+    e₃ : G ⋙ (evaluation Profiniteᵒᵖ C).obj (op Y) ≅
+      equalizer (G.flip.map (Profinite.pullback.fst f f).op)
+        (G.flip.map (Profinite.pullback.snd f f).op) :=
+      nat_iso.of_components (λ j,
+        let e₄ : parallel_pair ((G.obj j).map (Profinite.pullback.fst f f).op)
+                  ((G.obj j).map (Profinite.pullback.snd f f).op) ≅
+                 parallel_pair (G.flip.map (Profinite.pullback.fst f f).op)
+                  (G.flip.map (Profinite.pullback.snd f f).op) ⋙
+                  (evaluation J C).obj j :=
+            nat_iso.of_components (λ p,
+              match p with
+              | walking_parallel_pair.zero := iso.refl _
+              | walking_parallel_pair.one := iso.refl _
+              end)
+            sorry in
+        as_iso (comparison_component f G j)
+          ≪≫
+          has_limit.iso_of_nat_iso e₄
+          ≪≫ (limit.is_limit _).cone_point_unique_up_to_iso
+          (is_limit_of_preserves ((evaluation _ _).obj j) (limit.is_limit _)))
+      sorry in
+e₂ ≪≫ has_colimit.iso_of_nat_iso e₃
+
+noncomputable
+def second_iso : colimit (equalizer
+    (G.flip.map (Profinite.pullback.fst f f).op)
+    (G.flip.map (Profinite.pullback.snd f f).op)) ≅
+    limit (colimit (parallel_pair
+      (G.flip.map (Profinite.pullback.fst f f).op)
+      (G.flip.map (Profinite.pullback.snd f f).op)).flip) :=
+colimit_limit_iso _
+
+noncomputable
+def third_iso_aux :
+  (colimit (parallel_pair (G.flip.map (Profinite.pullback.fst f f).op)
+    (G.flip.map (Profinite.pullback.snd f f).op)).flip).obj
+    walking_parallel_pair.zero ≅ (colimit G).obj (op X) :=
+let e₁ :=
+  is_colimit_of_preserves ((evaluation _ _).obj walking_parallel_pair.zero)
+    (colimit.is_colimit (parallel_pair (G.flip.map (Profinite.pullback.fst f f).op)
+    (G.flip.map (Profinite.pullback.snd f f).op)).flip),
+    e₂ := is_colimit_of_preserves ((evaluation _ _).obj (op X)) (colimit.is_colimit G) in
+e₁.cocone_point_unique_up_to_iso e₂
+
+noncomputable
+def third_iso_aux' : cone (colimit (parallel_pair
+      (G.flip.map (Profinite.pullback.fst f f).op)
+      (G.flip.map (Profinite.pullback.snd f f).op)).flip) :=
+{ X := equalizer
+      ((colimit G).map (Profinite.pullback.fst f f).op)
+      ((colimit G).map (Profinite.pullback.snd f f).op),
+  π :=
+  { app := λ p,
+    match p with
+    | walking_parallel_pair.zero := equalizer.ι _ _ ≫ (third_iso_aux _ _).inv
+    | walking_parallel_pair.one := equalizer.ι _ _ ≫ (third_iso_aux f G).inv ≫
+        category_theory.functor.map _ walking_parallel_pair_hom.left
+    end,
+  naturality' := sorry } }
+
+noncomputable
+def third_iso : limit (colimit (parallel_pair
+      (G.flip.map (Profinite.pullback.fst f f).op)
+      (G.flip.map (Profinite.pullback.snd f f).op)).flip) ≅
+    equalizer
+      ((colimit G).map (Profinite.pullback.fst f f).op)
+      ((colimit G).map (Profinite.pullback.snd f f).op) :=
+{ hom := equalizer.lift
+    (limit.π _ walking_parallel_pair.zero ≫ (third_iso_aux f G).hom) sorry,
+  inv := limit.lift _ (third_iso_aux' _ _),
+  hom_inv_id' := sorry,
+  inv_hom_id' := sorry }
+
+noncomputable
+def comparison :
+  (colimit G).obj (op $ Y) ⟶
+  equalizer
+    ((colimit G).map (Profinite.pullback.fst f f).op)
+    ((colimit G).map (Profinite.pullback.snd f f).op) :=
+equalizer.lift ((colimit G).map f.op) sorry
+
+theorem is_iso_comparison : is_iso (comparison f G) :=
+begin
+  suffices : comparison f G =
+    (first_iso f G).hom ≫ (second_iso f G).hom ≫ (third_iso f G).hom,
+  { rw this, apply_instance },
+  sorry
+end
+
+end eq
+
 end is_sheaf_colimit_presheaf_aux
 open is_sheaf_colimit_presheaf_aux
 
@@ -305,5 +421,7 @@ begin
     apply_with prod.is_iso_comparison { instances := ff },
     intros j, apply hGsprod,
     all_goals { apply_instance } },
-  { sorry }
+  { intros X Y f hf,
+    apply_with eq.is_iso_comparison { instances := ff },
+    intros j, apply hGseq, assumption' }
 end
