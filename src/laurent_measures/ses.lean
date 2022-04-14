@@ -449,10 +449,6 @@ begin
   sorry
 end
 
-example (a b c : ℝ) : a + (b - c) = a + b - c := --sub_div' hc
-begin
-  exact add_sub a b c,
-end
 
 lemma aux_mem_left {y : (closed_ball (0 : ℝ) c)} {ε x : ℝ} (hx : x = (-ε + y - c) / 2)
   (hε : ¬ ε ≤ 0) (h_left : (- c : ℝ) < - ε + y) (h_right : ¬ (c : ℝ) ≤ ε + y) :
@@ -508,7 +504,19 @@ begin
 end
 
 lemma aux_dist_right {a y : closed_ball (0 : ℝ) c} {ε x: ℝ}  (ha : a ∈ ball y ε) (hε : ¬ ε ≤ 0)
-  (hx : x = (ε + y + c) / 2) : dist (a : ℝ) x = x - a := sorry
+  (hx : x = (ε + y + c) / 2) : dist (a : ℝ) x = x - a :=
+begin
+  have h_neg : - ((a : ℝ) - x) = (x - a) := by {ring},
+  rw [real.dist_eq, ← h_neg, abs_eq_neg_self, sub_nonpos],
+  rw [mem_ball, subtype.dist_eq, real.dist_eq, abs_lt, lt_sub_iff_add_lt] at ha,
+  apply le_of_lt,
+  have := a.2,
+  rw [mem_closed_ball, subtype.val_eq_coe, real.dist_eq, sub_zero, abs_le] at this,
+  calc x = (ε + y + c) / 2 : by {exact hx}
+      ... > (a + c) / 2 : by linarith
+      ... ≥ a : by {rw [ge_iff_le, le_div_iff, ← sub_le_iff_le_add', mul_two, ← add_sub, sub_self,
+        add_zero], exact this.2, simp only [zero_lt_bit0, zero_lt_one]},
+end
 
 
 lemma complement_of_balls' {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) (ε : ℝ) :
@@ -567,14 +575,10 @@ begin
             mul_lt_mul_left, ← sub_lt_iff_lt_add'],
           exact ha.1,
           repeat {simp only [zero_lt_bit0, zero_lt_one]}}},
-    sorry}
-  }
-          -- sorry},
-  -- },
-          -- },
-
-          -- },
-          -- sorry},
+      { rintros ⟨h₁, h₂⟩,
+        rw mem_ball,
+        sorry}
+  }}
 end
 
 lemma continuous_if_preimage_closed {c : ℝ≥0} (f : X → (Icc (-c : ℝ) c))
