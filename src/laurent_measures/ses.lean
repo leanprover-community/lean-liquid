@@ -510,10 +510,6 @@ end
 lemma aux_dist_right {a y : closed_ball (0 : ℝ) c} {ε x: ℝ}  (ha : a ∈ ball y ε) (hε : ¬ ε ≤ 0)
   (hx : x = (ε + y + c) / 2) : dist (a : ℝ) x = x - a := sorry
 
--- example (a b : ℝ) : a - b = -b + a :=
--- begin
---   show_term{ring},
--- end
 
 lemma complement_of_balls' {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) (ε : ℝ) :
  ∃ (x₁ x₂ : (closed_ball 0 c)), ∃ (δ₁ δ₂ : ℝ),
@@ -570,7 +566,15 @@ begin
             ← two_mul, neg_mul, ← sub_eq_add_neg, mul_neg, neg_lt_sub_iff_lt_add, ← mul_add,
             mul_lt_mul_left, ← sub_lt_iff_lt_add'],
           exact ha.1,
-          repeat {simp only [zero_lt_bit0, zero_lt_one]}} }}},
+          repeat {simp only [zero_lt_bit0, zero_lt_one]}}},
+    sorry}
+  }
+          -- sorry},
+  -- },
+          -- },
+
+          -- },
+          -- sorry},
 end
 
 lemma continuous_if_preimage_closed {c : ℝ≥0} (f : X → (Icc (-c : ℝ) c))
