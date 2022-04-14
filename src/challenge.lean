@@ -35,7 +35,9 @@ instance : fact (@r p < 1) :=
 begin
   constructor, delta r,
   apply real.rpow_lt_one,
-  all_goals { sorry }
+  { norm_num },
+  { norm_num },
+  { exact fact.out _ }
 end
 
 theorem liquid_tensor_experiment (S : Profinite.{1}) (V : pBanach.{1} p) :

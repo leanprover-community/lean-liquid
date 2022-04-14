@@ -464,7 +464,6 @@ begin
   { have := (@ball_eq_empty _ _ y ε).mpr hε,
     rw this,
     use [0, 0, c, c],
-    -- simp,
     simp only [union_self, bot_eq_empty],
     apply (compl_eq_bot.mpr _).symm,
     rw top_eq_univ,

@@ -6,7 +6,9 @@ open category_theory
 open category_theory.limits
 open category_theory.triangulated
 
-variables {A : Type*} [category A] [abelian A]
+universes v u
+
+variables {A : Type u} [category.{v} A] [abelian A]
 
 local notation `𝒦` := homotopy_category A (complex_shape.up ℤ)
 
@@ -231,8 +233,8 @@ def Ext_five_term_exact_seq
   [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj Z)]
   (w : ∀ i, short_exact (f.f i) (g.f i)) :
   let E := ((Ext n).flip.obj W).right_op in
-  exact_seq Abᵒᵖ $
-    [ arrow.mk (E.map (of_hom f))
+  exact_seq Ab.{v}ᵒᵖ $
+    [ E.map (of_hom f)
     , E.map (of_hom g)
     , connecting_hom' f g n W w
     , E.map (-(of_hom f)⟦(1 : ℤ)⟧')] :=

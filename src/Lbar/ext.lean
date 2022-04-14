@@ -1,4 +1,4 @@
-import for_mathlib.derived.K_projective
+import for_mathlib.derived.les_facts
 import liquid
 import Lbar.functor
 import condensed.projective_resolution
@@ -79,15 +79,38 @@ begin
   sorry -- use `iso_of_proiso`
 end
 
+-- move me
+@[simp] lemma _root_.category_theory.op_nsmul
+  {C : Type*} [category C] [preadditive C] {X Y : C} (n : ℕ) (f : X ⟶ Y) :
+  (n • f).op = n • f.op := rfl
+
+-- move me
+@[simp] lemma _root_.category_theory.op_sub
+  {C : Type*} [category C] [preadditive C] {X Y : C} (f g : X ⟶ Y) :
+  (f - g).op = f.op - g.op := rfl
+
+-- move me
+attribute [simps] Condensed.of_top_ab_map
+
 /-- Thm 9.4bis of [Analytic]. More precisely: the first observation in the proof 9.4 => 9.1. -/
-theorem is_iso_Tinv2 (S : Profinite.{u}) (V : SemiNormedGroup.{u}) [normed_with_aut r V] :
+theorem is_iso_Tinv2 (S : Profinite.{u}) (V : SemiNormedGroup.{u}) [normed_with_aut r V]
+  (hV : ∀ (v : V), (normed_with_aut.T.inv v) = 2 • v) :
   ∀ i, is_iso (((Ext' i).map ((condensify_Tinv2 (Lbar.fintype_functor.{u u} r')).app S).op).app
     (Condensed.of_top_ab ↥V)) :=
 begin
-  rw [condensify_Tinv2, condensify_nonstrict_Tinv2],
-  -- use that `Ext'.map` is additive (is that formalized already?)
-  -- then repackage and use `is_iso_Tinv_sub` above
-  sorry
+  intro i,
+  rw [condensify_Tinv2_eq, ← functor.flip_obj_map, nat_trans.app_sub, category_theory.op_sub,
+    nat_trans.app_nsmul,  category_theory.op_nsmul, two_nsmul, nat_trans.id_app, op_id,
+    functor.map_sub, functor.map_add, category_theory.functor.map_id],
+  convert is_iso_Tinv_sub r r' S V i using 2,
+  suffices : Condensed.of_top_ab_map (normed_group_hom.to_add_monoid_hom normed_with_aut.T.inv) _ =
+    2 • 𝟙 _,
+  { rw [this, two_nsmul, functor.map_add, category_theory.functor.map_id], refl, },
+  ext T f t,
+  dsimp only [Condensed.of_top_ab_map_val, whisker_right_app, Ab.ulift_map_apply_down,
+    add_monoid_hom.mk'_apply, continuous_map.coe_mk, function.comp_app],
+  erw [hV, two_nsmul, two_nsmul],
+  refl,
 end
 
 end Lbar
