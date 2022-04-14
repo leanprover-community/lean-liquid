@@ -408,6 +408,17 @@ def level_Condensed_diagram_cone :
       naturality' := λ S T f, by { ext, refl } },
     naturality' := λ r s h, by { ext, refl } } } .
 
+def colimit_iso_Condensed_obj_aux (X) :
+let E := A.level_Condensed_diagram' ⋙ Sheaf_to_presheaf _ _ ⋙ (evaluation _ _).obj (op X) in
+  (types.colimit_cocone E).X ≃ A.presheaf X :=
+equiv.of_bijective (quot.lift
+  begin
+    intros f,
+    exact ⟨_, ulift.down f.1, f.2.down.1, f.2.down.2, rfl⟩,
+  end
+  sorry)
+sorry
+
 def colimit_iso_Condensed_obj :
   colimit A.level_Condensed_diagram' ≅ Condensed_Ab_to_CondensedSet.obj (to_Condensed.obj A) :=
 calc
@@ -419,23 +430,7 @@ calc
         Sheaf_to_presheaf _ _))).cocone_point_unique_up_to_iso (colimit.is_colimit _) ≪≫
     (colimit.is_colimit _).cocone_point_unique_up_to_iso
     (types.colimit_cocone_is_colimit _) ≪≫
-    equiv.to_iso
-    { to_fun := quot.lift
-        begin
-          intros r,
-          exact ulift.up ⟨_, ulift.down r.1, _, r.2.down.2, rfl⟩,
-        end
-        sorry,
-      inv_fun := begin
-        intros f,
-        choose c f1 hf1 hh using f.down.2,
-        apply quot.mk, use ulift.up c,
-        dsimp [ulift_functor],
-        apply ulift.up,
-        exact ⟨f1, hf1⟩,
-      end,
-      left_inv := sorry,
-      right_inv := sorry }
+    equiv.to_iso ((A.colimit_iso_Condensed_obj_aux X.unop).trans equiv.ulift.symm)
   ) sorry
 
 def colimit_to_Condensed_obj :
