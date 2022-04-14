@@ -212,7 +212,11 @@ def third_iso_aux : cone (colimit (pair (G.flip.obj (op X)) (G.flip.obj (op Y)))
     | walking_pair.left := limits.prod.fst ≫ (third_iso_aux_left _ _ _).inv
     | walking_pair.right := limits.prod.snd ≫ (third_iso_aux_right _ _ _).inv
     end,
-    naturality' := sorry } }
+    naturality' := begin
+      rintros (_|_) (_|_) (_|_),
+      { dsimp [third_iso_aux._match_1], simp },
+      { dsimp [third_iso_aux._match_1], simp },
+    end } }
 
 noncomputable
 def third_iso :
