@@ -454,7 +454,31 @@ begin
   exact add_sub a b c,
 end
 
--- lemma aux_complement_left {a : (closed_ball (0 : ℝ) c)} (
+lemma aux_mem_left {y : (closed_ball (0 : ℝ) c)} {ε x : ℝ} (hx : x = (-ε + y - c) / 2)
+  (hε : ¬ ε ≤ 0)
+  (h_left : (- c : ℝ) < - ε + y)
+  (h_right : ¬ (c : ℝ) ≤ ε + y) :
+  x ∈ closed_ball (0 : ℝ) c :=
+begin
+ simp only [mem_closed_ball_zero_iff, norm_div, real.norm_two, real.norm_eq_abs, abs_le],
+  split,
+  { suffices : (-2 * c : ℝ) ≤ 2 * x,
+    linarith,
+    calc 2 * x = - ε + y - c : by {rw hx, ring}
+            ... ≥ -2 * c : by linarith, },
+  { suffices : 2 * x ≤ 2 * c,
+    linarith,
+    simp only [*, mul_le_mul_left, zero_lt_bit0, zero_lt_one, eq_self_iff_true, not_le],
+    rw [div_le_iff, sub_le_iff_le_add],
+    calc - ε + y ≤ ε + y : by {apply add_le_add_right (neg_le_self_iff.mpr $ le_of_lt $
+      not_le.mp hε)}
+            ... ≤ c : by {exact (le_of_lt (not_le.mp h_right))}
+            ... ≤ c * 2 + c : by {exact (le_add_iff_nonneg_left c).mpr (c * 2).2},
+    simp only [zero_lt_bit0, zero_lt_one] },
+end
+
+lemma aux_mem_right {y : (closed_ball (0 : ℝ) c)} {ε x : ℝ} (hx : x = (ε + y - c) / 2) :
+  x ∈ closed_ball (0 : ℝ) c := sorry
 
 lemma complement_of_balls' {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) (ε : ℝ) :
  ∃ (x₁ x₂ : (closed_ball 0 c)), ∃ (δ₁ δ₂ : ℝ),
@@ -472,7 +496,7 @@ begin
     intro _,
     simp only [mem_univ],
     exact x.2 },
-  { by_cases h_right : (c : ℝ) ≤ y + ε,
+  { by_cases h_right : (c : ℝ) ≤ ε + y,
     sorry,--only an open on the left is needed
     by_cases h_left : - ε + y ≤ - c,
     sorry, -- only an open on the  right is needed
@@ -480,23 +504,7 @@ begin
       set x₁ := (- ε + y - c)/2 with hx₁,
       set δ₂ := (-ε - y + c)/2 with hδ₂,
       set x₂ := (ε + y + c)/2 with hx₂,
-      use x₁,
-      { simp only [mem_closed_ball_zero_iff, norm_div, real.norm_two, real.norm_eq_abs, abs_le],
-        split,
-        { suffices : (-2 * c : ℝ) ≤ 2 * x₁,
-          linarith,
-          calc 2 * x₁ = - ε + y - c : by {rw hx₁, ring}
-                  ... ≥ -2 * c : by linarith },
-        { suffices : 2 * x₁ ≤ 2 * c,
-          linarith,
-          simp only [*, mul_le_mul_left, zero_lt_bit0, zero_lt_one, eq_self_iff_true, not_le],
-          simp only [not_le, add_comm] at h_right,
-          rw [div_le_iff, sub_le_iff_le_add],
-          calc - ε + y ≤ ε + y : by {apply add_le_add_right (neg_le_self_iff.mpr $ le_of_lt $
-            not_le.mp hε)}
-                  ... ≤ c : by {exact (le_of_lt h_right)}
-                  ... ≤ c * 2 + c : by {exact (le_add_iff_nonneg_left c).mpr (c * 2).2},
-          simp only [zero_lt_bit0, zero_lt_one] }},
+      use [x₁, aux_mem_left c hx₁ hε (not_le.mp h_left) h_right],
       use x₂,
       { sorry},
       use [δ₁, δ₂],
