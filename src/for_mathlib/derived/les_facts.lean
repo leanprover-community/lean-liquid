@@ -54,6 +54,78 @@ end
 
 end bounded_homotopy_category
 
+namespace bounded_homotopy_category
+
+section cone
+
+variables {A B : cochain_complex C ℤ} (f : A ⟶ B)
+variables [is_bounded_above ⟨A⟩] [is_bounded_above ⟨B⟩]
+
+def cone :
+  bounded_homotopy_category C :=
+{ val := { as := homological_complex.cone f },
+  bdd := begin
+    obtain ⟨a, ha⟩ := is_bounded_above.cond ⟨A⟩,
+    obtain ⟨b, hb⟩ := is_bounded_above.cond ⟨B⟩,
+    refine ⟨⟨max a b, _⟩⟩,
+    intros i hi,
+    specialize ha (i+1) ((le_max_left _ _).trans $ hi.trans $ by norm_num),
+    specialize hb i ((le_max_right _ _).trans $ hi),
+    dsimp,
+    constructor,
+    { intros Y g, ext,
+      { exact ha.eq_of_src _ _ },
+      { exact hb.eq_of_src _ _ }, },
+    { intros Y g, ext,
+      { exact ha.eq_of_tgt _ _ },
+      { exact hb.eq_of_tgt _ _ }, }
+  end }
+
+def cone.in : bounded_homotopy_category.mk ⟨B⟩ ⟶ cone f :=
+(homotopy_category.quotient _ _).map (homological_complex.cone.in f)
+
+-- move me
+instance is_bounded_above_shift (i : ℤ) : is_bounded_above {as := A⟦i⟧} :=
+begin
+  obtain ⟨a, ha⟩ := is_bounded_above.cond ⟨A⟩,
+  refine ⟨⟨a - i, _⟩⟩,
+  intros j hj,
+  rw sub_le_iff_le_add at hj,
+  exact ha (j + i) hj,
+end
+
+def cone.out : cone f ⟶ bounded_homotopy_category.mk ⟨A⟦(1:ℤ)⟧⟩ :=
+(homotopy_category.quotient _ _).map (homological_complex.cone.out f)
+
+def cone.triangle : triangle (bounded_homotopy_category C) :=
+{ obj₁ := bounded_homotopy_category.mk ⟨A⟩,
+  obj₂ := bounded_homotopy_category.mk ⟨B⟩,
+  obj₃ := cone f,
+  mor₁ := (homotopy_category.quotient _ _).map f,
+  mor₂ := cone.in f,
+  mor₃ := cone.out f }
+
+lemma cone.triangle_dist :
+  (neg₃_functor _).obj (cone.triangle f) ∈ dist_triang (bounded_homotopy_category C) :=
+(cone_triangleₕ_mem_distinguished_triangles _ _ f)
+
+end cone
+
+end bounded_homotopy_category
+
+section
+-- these should already be there for `Ext`, so it shouldn't be too hard
+
+-- move me
+instance Ext'.flip_additive (i : ℤ) (B : C) : ((Ext' i).flip.obj B).additive :=
+sorry
+
+-- move me
+instance Ext'.additive (i : ℤ) (A : Cᵒᵖ) : ((Ext' i).obj A).additive :=
+sorry
+
+end
+
 lemma is_zero_iff_epi_and_is_iso
   {A₁ A₂ A₃ : C} (f : A₁ ⟶ A₂) (g : A₂ ⟶ A₃) (B : C) (h : short_exact f g) :
   (∀ i > 0, is_zero (((Ext' i).obj (op A₃)).obj B)) ↔
@@ -70,13 +142,4 @@ lemma epi_and_is_iso_iff_of_is_iso
   (H : ∀ i, is_iso (((Ext' i).map α₃.op).app Z)) :
   (epi (((Ext' 0).map α₁.op).app Z) ∧ ∀ i > 0, is_iso (((Ext' i).map α₁.op).app Z)) ↔
   (epi (((Ext' 0).map α₂.op).app Z) ∧ ∀ i > 0, is_iso (((Ext' i).map α₂.op).app Z)) :=
-sorry
-
-
--- move me
-instance Ext'.flip_additive (i : ℤ) (B : C) : ((Ext' i).flip.obj B).additive :=
-sorry
-
--- move me
-instance Ext'.additive (i : ℤ) (A : Cᵒᵖ) : ((Ext' i).obj A).additive :=
 sorry
