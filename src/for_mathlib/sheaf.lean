@@ -55,6 +55,10 @@ variables {A : Type*} [category A]
 lemma hom.comp_val {X Y Z : Sheaf J A} (f : X ⟶ Y) (g : Y ⟶ Z) :
   (f ≫ g).val = f.val ≫ g.val := rfl
 
+@[simps]
+def iso.mk (X Y : Sheaf J A) (e : X.val ≅ Y.val) : X ≅ Y :=
+⟨⟨e.hom⟩, ⟨e.inv⟩, by { ext1, simp }, by { ext1, simp }⟩
+
 end Sheaf
 
 end category_theory

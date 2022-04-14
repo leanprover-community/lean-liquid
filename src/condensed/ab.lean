@@ -9,6 +9,7 @@ import for_mathlib.AddCommGroup.exact
 
 import condensed.adjunctions
 import condensed.top_comparison
+import condensed.filtered_colimits
 
 /-!
 # Properties of the category of condensed abelian groups
@@ -405,13 +406,49 @@ def level_Condensed_diagram_cone :
   { app := λ r, Sheaf.hom.mk $
     { app := λ S f, ulift.up $ ⟨_, ulift.down r, f.down.1, f.down.2, rfl⟩,
       naturality' := λ S T f, by { ext, refl } },
-    naturality' := λ r s h, by { ext, refl } } }
+    naturality' := λ r s h, by { ext, refl } } } .
+
+-- We would have to use `some` to define the inverse of this equiv, so we may as well just use
+-- `equiv.of_bijective`
+def colimit_iso_Condensed_obj_aux (X) :
+let E := A.level_Condensed_diagram' ⋙ Sheaf_to_presheaf _ _ ⋙ (evaluation _ _).obj (op X) in
+  (types.colimit_cocone E).X ≃ A.presheaf X :=
+equiv.of_bijective (quot.lift
+  begin
+    intros f,
+    exact ⟨_, ulift.down f.1, f.2.down.1, f.2.down.2, rfl⟩,
+  end
+  sorry)
+sorry
+
+def colimit_iso_Condensed_obj_aux_nat_iso :
+  (filtered_cocone.{u} A.level_Condensed_diagram').X.val ≅
+  (Condensed_Ab_to_CondensedSet.{u}.obj (to_Condensed.{u}.obj A)).val :=
+  nat_iso.of_components (λ X,
+    (is_colimit_of_preserves ((evaluation _ _).obj X)
+      (colimit.is_colimit (A.level_Condensed_diagram' ⋙
+        Sheaf_to_presheaf _ _))).cocone_point_unique_up_to_iso (colimit.is_colimit _) ≪≫
+    (colimit.is_colimit _).cocone_point_unique_up_to_iso
+    (types.colimit_cocone_is_colimit _) ≪≫
+    equiv.to_iso ((A.colimit_iso_Condensed_obj_aux X.unop).trans equiv.ulift.symm)
+  ) sorry
+
+def colimit_iso_Condensed_obj :
+  colimit A.level_Condensed_diagram' ≅ Condensed_Ab_to_CondensedSet.obj (to_Condensed.obj A) :=
+(colimit.is_colimit _).cocone_point_unique_up_to_iso (filtered_cocone_is_colimit _) ≪≫
+  Sheaf.iso.mk _ (Condensed_Ab_to_CondensedSet.{u}.obj (to_Condensed.{u}.obj A))
+    A.colimit_iso_Condensed_obj_aux_nat_iso
 
 def colimit_to_Condensed_obj :
   colimit A.level_Condensed_diagram' ⟶ Condensed_Ab_to_CondensedSet.obj (to_Condensed.obj A) :=
 colimit.desc _ A.level_Condensed_diagram_cone
 
-instance is_iso_colimit_to_Condensed_obj : is_iso A.colimit_to_Condensed_obj := sorry
+instance is_iso_colimit_to_Condensed_obj : is_iso A.colimit_to_Condensed_obj :=
+begin
+  suffices : A.colimit_to_Condensed_obj =
+    A.colimit_iso_Condensed_obj.hom, by { rw this, apply_instance },
+  sorry
+end
 
 end
 
