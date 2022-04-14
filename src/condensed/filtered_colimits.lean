@@ -325,7 +325,50 @@ nat_iso.of_components (λ j,
     has_limit.iso_of_nat_iso (first_iso_aux_aux _ _ _)
     ≪≫ (limit.is_limit _).cone_point_unique_up_to_iso
     (is_limit_of_preserves ((evaluation _ _).obj j) (limit.is_limit _)))
-sorry
+begin
+  intros i j g, dsimp [comparison_component, first_iso_aux_aux],
+  apply (is_limit_of_preserves ((evaluation J C).obj j)
+    (limit.is_limit
+    (parallel_pair (G.flip.map (Profinite.pullback.fst f f).op)
+    (G.flip.map (Profinite.pullback.snd f f).op)))).hom_ext,
+  rintros (_|_),
+  { dsimp [is_limit.cone_point_unique_up_to_iso],
+    have := (is_limit_of_preserves ((evaluation J C).obj j)
+      (limit.is_limit
+      (parallel_pair (G.flip.map (Profinite.pullback.fst f f).op)
+      (G.flip.map (Profinite.pullback.snd f f).op)))).fac (limit.cone _)
+      walking_parallel_pair.zero,
+    dsimp at this, simp only [category.assoc, this], clear this,
+    have := (is_limit_of_preserves ((evaluation J C).obj i)
+      (limit.is_limit
+      (parallel_pair (G.flip.map (Profinite.pullback.fst f f).op)
+      (G.flip.map (Profinite.pullback.snd f f).op)))).fac (limit.cone _)
+      walking_parallel_pair.zero,
+    dsimp at this, simp only [nat_trans.naturality, category.assoc, reassoc_of this], clear this,
+    simp only [has_limit.iso_of_nat_iso_hom_π, nat_iso.of_components.hom_app,
+      equalizer.lift_ι_assoc, functor.flip_obj_map, has_limit.iso_of_nat_iso_hom_π_assoc],
+    dsimp [first_iso_aux_aux._match_1],
+    simp only [category.comp_id, category.id_comp, nat_trans.naturality] },
+  { dsimp [is_limit.cone_point_unique_up_to_iso],
+    have := (is_limit_of_preserves ((evaluation J C).obj j)
+      (limit.is_limit
+      (parallel_pair (G.flip.map (Profinite.pullback.fst f f).op)
+      (G.flip.map (Profinite.pullback.snd f f).op)))).fac (limit.cone _)
+      walking_parallel_pair.one,
+    dsimp at this, simp only [category.assoc, this], clear this,
+    have := (is_limit_of_preserves ((evaluation J C).obj i)
+      (limit.is_limit
+      (parallel_pair (G.flip.map (Profinite.pullback.fst f f).op)
+      (G.flip.map (Profinite.pullback.snd f f).op)))).fac (limit.cone _)
+      walking_parallel_pair.one,
+    dsimp at this, simp only [nat_trans.naturality, category.assoc, reassoc_of this], clear this,
+    simp only [has_limit.iso_of_nat_iso_hom_π, nat_iso.of_components.hom_app,
+      limit.lift_π_assoc, fork.of_ι_π_app, category.assoc, functor.flip_obj_map,
+      has_limit.iso_of_nat_iso_hom_π_assoc],
+    dsimp [first_iso_aux_aux._match_1],
+    simp only [category.comp_id, category.id_comp,
+      nat_trans.naturality, nat_trans.naturality_assoc] }
+end
 
 noncomputable
 def first_iso : (colimit G).obj (op $ Y) ≅
