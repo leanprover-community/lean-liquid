@@ -83,8 +83,8 @@ begin
   apply completion.induction_on₂ f g,
   { apply is_closed_eq,
     { exact completion.continuous_extension.comp continuous_add },
-    { -- exact completion.continuous_extension.add completion.continuous_extension,
-      sorry } },
+    { exact (completion.continuous_extension.comp continuous_fst).add
+            (completion.continuous_extension.comp continuous_snd), } },
   { sorry }
 end
 
