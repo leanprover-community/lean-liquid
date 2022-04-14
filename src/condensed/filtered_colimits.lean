@@ -458,3 +458,32 @@ begin
     apply_with eq.is_iso_comparison { instances := ff },
     intros j, apply hGseq, assumption' }
 end
+
+@[simps]
+noncomputable
+def filtered_cocone : cocone F :=
+{ X := ⟨colimit (F ⋙ Sheaf_to_presheaf _ _), is_sheaf_colimit_presheaf _⟩,
+  ι :=
+  { app := λ j, Sheaf.hom.mk $ colimit.ι (F ⋙ Sheaf_to_presheaf _ _) j,
+    naturality' := begin
+      intros i j f,
+      ext1, dsimp,
+      simpa using colimit.w (F ⋙ Sheaf_to_presheaf _ _) f,
+    end } }
+
+noncomputable
+def filtered_cocone_is_colimit : is_colimit (filtered_cocone F) :=
+{ desc := λ S, Sheaf.hom.mk $ colimit.desc (F ⋙ Sheaf_to_presheaf _ _)
+    ((Sheaf_to_presheaf _ _).map_cocone S),
+  fac' := begin
+    intros S j,
+    ext1, dsimp,
+    simp,
+  end,
+  uniq' := begin
+    intros S m hm,
+    ext1, dsimp,
+    apply colimit.hom_ext,
+    intros j, specialize hm j, apply_fun (λ e, e.val) at hm,
+    dsimp at hm, simpa using hm,
+  end }
