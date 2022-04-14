@@ -50,7 +50,12 @@ let e₁ := is_colimit_of_preserves ((evaluation _ _).obj (op Profinite.empty))
               nat_iso.of_components (λ i, i.elim) (λ i, i.elim) in
         as_iso (comparison_component G j) ≪≫
           has_limit.iso_of_nat_iso e₆ ≪≫ e₅)
-      sorry in
+      begin
+        intros X Y f, dsimp [comparison_component],
+        apply (is_limit_of_preserves ((evaluation J C).obj Y)
+          (limit.is_limit (functor.empty Profiniteᵒᵖ ⋙ G.flip))).hom_ext,
+        intros j, cases j,
+      end in
 e₂ ≪≫ has_colimit.iso_of_nat_iso e₃
 
 noncomputable
