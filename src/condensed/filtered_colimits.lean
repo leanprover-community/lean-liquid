@@ -155,7 +155,7 @@ def second_iso : colimit (prod (G.flip.obj (op X)) (G.flip.obj (op Y))) ≅
   limit (colimit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))).flip) :=
 colimit_limit_iso _
 
-noncomputable
+@[simps] noncomputable
 def third_iso_aux_left :
   (colimit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))).flip).obj walking_pair.left ≅
   (colimit G).obj (op X) :=
@@ -167,7 +167,7 @@ let e₁ :=
     (colimit.is_colimit G) in
 e₁.cocone_point_unique_up_to_iso e₂
 
-noncomputable
+@[simps] noncomputable
 def third_iso_aux_right :
   (colimit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))).flip).obj walking_pair.right ≅
   (colimit G).obj (op Y) :=
@@ -203,7 +203,7 @@ def third_iso_aux' : cone (colimit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))
     naturality' := sorry } }
 -/
 
-noncomputable
+@[simps] noncomputable
 def third_iso_aux : cone (colimit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))).flip) :=
 { X := prod ((colimit G).obj (op X)) ((colimit G).obj (op Y)),
   π :=
@@ -358,7 +358,13 @@ def third_iso_aux' : cone (colimit (parallel_pair
     | walking_parallel_pair.one := equalizer.ι _ _ ≫ (third_iso_aux f G).inv ≫
         category_theory.functor.map _ walking_parallel_pair_hom.left
     end,
-  naturality' := sorry } }
+  naturality' := begin
+    rintro (_|_) (_|_) ⟨⟩,
+    { dsimp, simp only [category.id_comp, category_theory.functor.map_id, category.comp_id], },
+    { dsimp [third_iso_aux'._match_1], simp only [category.id_comp, category.assoc], },
+    { dsimp [third_iso_aux'._match_1], simp only [category.id_comp, category.assoc], sorry, },
+    { dsimp, simp only [category.id_comp, category_theory.functor.map_id, category.comp_id], },
+  end } }
 
 noncomputable
 def third_iso : limit (colimit (parallel_pair
