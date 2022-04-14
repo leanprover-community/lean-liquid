@@ -44,9 +44,6 @@ lemma continuous_map.bdd_above_range_norm (f : C(S, V')) :
   bdd_above (set.range (λ (s : ↥S), ∥f s∥)) :=
 (is_compact_range $ continuous_norm.comp f.continuous).bdd_above
 
-instance : separated_space C(S, V) :=
-sorry -- use continuous_map.t2_space
-
 def Condensed.of_top_ab_map_normed_group_hom {S T : Profinite.{u}ᵒᵖ} (f : S ⟶ T) :
   normed_group_hom C(_, V') C(_, V') :=
 { to_fun := (Condensed.of_top_ab.presheaf.{u} V').map f,
@@ -86,23 +83,31 @@ begin
   apply completion.induction_on₂ f g,
   { apply is_closed_eq,
     { exact completion.continuous_extension.comp continuous_add },
-    { -- exact completion.continuous_extension.add completion.continuous_extension,
-      sorry } },
-  { sorry }
+    { exact (completion.continuous_extension.comp continuous_fst).add
+            (completion.continuous_extension.comp continuous_snd), } },
+  { clear f g, intros f g,
+    rw [← completion.coe_add,
+      completion.extension_coe, completion.extension_coe, completion.extension_coe],
+    { refl },
+    all_goals { apply locally_constant.to_continuous_map_uniform_continuous } }
 end
+
+lemma _root_.uniform_space.completion.extension_injective {S V : Type*}
+  [uniform_space S] [separated_space S] [uniform_space V] [complete_space V] [separated_space V]
+  (f : S → V) (hf : function.injective f) (hfuc : uniform_continuous f) :
+  function.injective (completion.extension f) :=
+sorry
+
+local attribute [instance] locally_constant.normed_group
 
 def LCC_iso_Cond_of_top_ab_equiv :
   completion (locally_constant S V') ≃+ C(S, V') :=
 add_equiv.of_bijective (LCC_iso_Cond_of_top_ab_hom S V')
 begin
   split,
-  { rw add_monoid_hom.injective_iff,
-    intros f,
-    apply completion.induction_on f; clear f,
-    { sorry },
-    intros f hf,
-    have := @locally_constant.to_continuous_map_injective S V' _ _ f 0,
-    sorry },
+  { apply uniform_space.completion.extension_injective,
+    { apply locally_constant.to_continuous_map_injective },
+    { apply locally_constant.to_continuous_map_uniform_continuous } },
   { sorry }
 end
 
