@@ -1,4 +1,5 @@
 import for_mathlib.derived.example
+import for_mathlib.derived.les2
 
 .
 
@@ -11,81 +12,9 @@ open bounded_homotopy_category
 
 variables {C : Type u} [category.{v} C] [abelian C] [enough_projectives C]
 
-namespace bounded_homotopy_category
-
-variables (i : ℤ) (A : triangle (bounded_homotopy_category C)) (B : bounded_homotopy_category C)
-
-def Ext.map₁ : ((Ext i).obj (op A.obj₂)).obj B ⟶ ((Ext i).obj (op A.obj₁)).obj B :=
-((Ext i).map A.mor₁.op).app B
-
-def Ext.map₂ : ((Ext i).obj (op A.obj₃)).obj B ⟶ ((Ext i).obj (op A.obj₂)).obj B :=
-((Ext i).map A.mor₂.op).app B
-
-def Ext.shift_neg_iso (A B : bounded_homotopy_category C) :
-  ((Ext i).obj (op (A⟦(-1:ℤ)⟧))).obj B ≅ ((Ext (i + 1)).obj (op A)).obj B :=
-sorry
-
-def Ext.shift_iso (A B : bounded_homotopy_category C) :
-  ((Ext i).obj (op A)).obj B ≅ ((Ext (i + 1)).obj (op (A⟦(1:ℤ)⟧))).obj B :=
-sorry
-
-def Ext.δ :
-  ((Ext i).obj (op A.obj₁)).obj B ⟶ ((Ext (i+1)).obj (op A.obj₃)).obj B :=
-(Ext.shift_iso i A.obj₁ B).hom ≫ ((Ext (i + 1)).map A.mor₃.op).app B
-
-set_option pp.universes true
-
--- this should be true up to a possible minus sign
-lemma Ext.δ_aux :
-  Ext.δ i A B =
-  ((Ext i).map A.inv_rotate.mor₁.op).app B ≫ (Ext.shift_neg_iso i A.obj₃ B).hom :=
-sorry
-
-lemma Ext.five_term_exact_seq (hA : A ∈ dist_triang (bounded_homotopy_category C)) :
-  exact_seq Ab.{v} [Ext.map₂ i A B, Ext.map₁ i A B, Ext.δ i A B, Ext.map₂ (i+1) A B] :=
-begin
-  refine exact.cons _ (exact.cons _ (exact.exact_seq _)),
-  { exact (four_term_exact_seq ((Ext i).flip.obj B).right_op A hA).pair.unop, },
-  { rw [Ext.δ_aux, exact_comp_iso],
-    exact (five_term_exact_seq ((Ext i).flip.obj B).right_op A hA).pair.unop, },
-  { rw [Ext.δ, exact_iso_comp],
-    exact (four_term_exact_seq ((Ext (i+1)).flip.obj B).right_op A hA).unop.pair, }
-end
-
-end bounded_homotopy_category
-
-namespace bounded_homotopy_category
-
-section cone
-
-variables {A B : cochain_complex C ℤ} (f : A ⟶ B)
-variables [is_bounded_above ⟨A⟩] [is_bounded_above ⟨B⟩]
-
-def cone :
-  bounded_homotopy_category C :=
-{ val := { as := homological_complex.cone f },
-  bdd := begin
-    obtain ⟨a, ha⟩ := is_bounded_above.cond ⟨A⟩,
-    obtain ⟨b, hb⟩ := is_bounded_above.cond ⟨B⟩,
-    refine ⟨⟨max a b, _⟩⟩,
-    intros i hi,
-    specialize ha (i+1) ((le_max_left _ _).trans $ hi.trans $ by norm_num),
-    specialize hb i ((le_max_right _ _).trans $ hi),
-    dsimp,
-    constructor,
-    { intros Y g, ext,
-      { exact ha.eq_of_src _ _ },
-      { exact hb.eq_of_src _ _ }, },
-    { intros Y g, ext,
-      { exact ha.eq_of_tgt _ _ },
-      { exact hb.eq_of_tgt _ _ }, }
-  end }
-
-def cone.in : bounded_homotopy_category.mk ⟨B⟩ ⟶ cone f :=
-(homotopy_category.quotient _ _).map (homological_complex.cone.in f)
-
 -- move me
-instance is_bounded_above_shift (i : ℤ) : is_bounded_above {as := A⟦i⟧} :=
+instance is_bounded_above_shift {A : cochain_complex C ℤ} [is_bounded_above ⟨A⟩] (i : ℤ) :
+  is_bounded_above {as := A⟦i⟧} :=
 begin
   obtain ⟨a, ha⟩ := is_bounded_above.cond ⟨A⟩,
   refine ⟨⟨a - i, _⟩⟩,
@@ -94,43 +23,99 @@ begin
   exact ha (j + i) hj,
 end
 
-def cone.out : cone f ⟶ bounded_homotopy_category.mk ⟨A⟦(1:ℤ)⟧⟩ :=
-(homotopy_category.quotient _ _).map (homological_complex.cone.out f)
-
-def cone.triangle : triangle (bounded_homotopy_category C) :=
-{ obj₁ := bounded_homotopy_category.mk ⟨A⟩,
-  obj₂ := bounded_homotopy_category.mk ⟨B⟩,
-  obj₃ := cone f,
-  mor₁ := (homotopy_category.quotient _ _).map f,
-  mor₂ := cone.in f,
-  mor₃ := cone.out f }
-
-lemma cone.triangle_dist :
-  (neg₃_functor _).obj (cone.triangle f) ∈ dist_triang (bounded_homotopy_category C) :=
-(cone_triangleₕ_mem_distinguished_triangles _ _ f)
-
-end cone
-
-end bounded_homotopy_category
-
 section
--- these should already be there for `Ext`, so it shouldn't be too hard
+
+-- move me
+instance homological_complex.single_additive (i : ℤ) :
+  (homological_complex.single C (complex_shape.up ℤ) i).additive :=
+{ map_add' := λ X Y f g, begin
+    ext n, dsimp, by_cases hn : n = i,
+    { subst n, rw [dif_pos rfl, dif_pos rfl, dif_pos rfl],
+      simp only [preadditive.add_comp, preadditive.comp_add], },
+    { rw [dif_neg hn, dif_neg hn, dif_neg hn, add_zero], },
+  end }
+
+-- move me
+instance bounded_homotopy_category.single_additive (i : ℤ) :
+  (bounded_homotopy_category.single C i).additive :=
+{ map_add' := λ X Y f g, begin
+    delta bounded_homotopy_category.single,
+    dsimp,
+    rw functor.map_add,
+    refl
+  end }
+
+instance Ext.additive (i : ℤ) :
+  (Ext i : (bounded_homotopy_category C)ᵒᵖ ⥤ bounded_homotopy_category C ⥤ Ab).additive :=
+{ map_add' := λ X Y f g, begin
+    ext B e,
+    dsimp [Ext],
+    rw [preadditive.comp_add, lift_add, preadditive.add_comp],
+  end }
 
 -- move me
 instance Ext'.flip_additive (i : ℤ) (B : C) : ((Ext' i).flip.obj B).additive :=
-sorry
+{ map_add' := λ X Y f g,
+  begin
+    delta Ext',
+    dsimp,
+    rw [functor.map_add, op_add, functor.map_add],
+    refl,
+  end }
 
 -- move me
 instance Ext'.additive (i : ℤ) (A : Cᵒᵖ) : ((Ext' i).obj A).additive :=
-sorry
+{ map_add' := λ X Y f g,
+  begin
+    delta Ext',
+    dsimp,
+    rw [functor.map_add, functor.map_add],
+  end }
 
 end
+
+-- move me
+instance single_is_bounded_above (A : C) :
+  is_bounded_above {as := (homological_complex.single C (complex_shape.up ℤ) 0).obj A} :=
+begin
+  refine ⟨⟨1, _⟩⟩,
+  intros i hi,
+  dsimp,
+  rw if_neg,
+  { exact is_zero_zero _ },
+  { rintro rfl, exact zero_lt_one.not_le hi }
+end
+
+-- move me
+instance quotient_single_is_bounded_above (A : C) :
+  ((quotient C (complex_shape.up ℤ)).obj
+    ((homological_complex.single C (complex_shape.up ℤ) 0).obj A)).is_bounded_above :=
+single_is_bounded_above A
 
 lemma is_zero_iff_epi_and_is_iso
   {A₁ A₂ A₃ : C} (f : A₁ ⟶ A₂) (g : A₂ ⟶ A₃) (B : C) (h : short_exact f g) :
   (∀ i > 0, is_zero (((Ext' i).obj (op A₃)).obj B)) ↔
   (epi (((Ext' 0).map f.op).app B) ∧ ∀ i > 0, is_iso (((Ext' i).map f.op).app B)) :=
-sorry
+begin
+  let f' := (homological_complex.single _ (complex_shape.up ℤ) (0:ℤ)).map f,
+  let g' := (homological_complex.single _ (complex_shape.up ℤ) (0:ℤ)).map g,
+  let B' := (bounded_homotopy_category.single _ 0).obj B,
+  have Hfg : ∀ (i : ℤ), short_exact (f'.f i) (g'.f i),
+  { intro i, dsimp, by_cases hi : i = 0,
+    { subst i, dsimp, simp only [eq_self_iff_true, category.comp_id, category.id_comp, if_true, h] },
+    { rw [dif_neg hi, dif_neg hi, if_neg hi, if_neg hi, if_neg hi],
+      refine ⟨exact_of_zero _ _⟩, } },
+  split,
+  { intro H,
+    split,
+    { have := ((Ext_five_term_exact_seq f' g' 0 B' Hfg).unop).pair,
+      -- refine this.epi_iff_eq_zero.mpr _,
+      -- refine is_zero.eq_of_tgt _ _ _,
+      sorry },
+    { sorry } },
+  { intros H i hi,
+    sorry }
+end
 
 lemma epi_and_is_iso_iff_of_is_iso
   {X₁ X₂ X₃ Y₁ Y₂ Y₃ : C}
