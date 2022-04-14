@@ -377,7 +377,7 @@ def to_Condensed : CompHausFiltPseuNormGrp.{u} ⥤ Condensed.{u} Ab.{u+1} :=
 
 section
 
-#check Top.to_Condensed
+-- #check Top.to_Condensed
 
 variables (A : CompHausFiltPseuNormGrp.{u})
 
