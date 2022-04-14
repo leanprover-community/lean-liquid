@@ -85,7 +85,11 @@ begin
     { exact completion.continuous_extension.comp continuous_add },
     { exact (completion.continuous_extension.comp continuous_fst).add
             (completion.continuous_extension.comp continuous_snd), } },
-  { sorry }
+  { clear f g, intros f g,
+    rw [← completion.coe_add,
+      completion.extension_coe, completion.extension_coe, completion.extension_coe],
+    { refl },
+    all_goals { apply locally_constant.to_continuous_map_uniform_continuous } }
 end
 
 def LCC_iso_Cond_of_top_ab_equiv :
