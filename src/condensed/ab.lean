@@ -408,6 +408,8 @@ def level_Condensed_diagram_cone :
       naturality' := λ S T f, by { ext, refl } },
     naturality' := λ r s h, by { ext, refl } } } .
 
+-- We would have to use `some` to define the inverse of this equiv, so we may as well just use
+-- `equiv.of_bijective`
 def colimit_iso_Condensed_obj_aux (X) :
 let E := A.level_Condensed_diagram' ⋙ Sheaf_to_presheaf _ _ ⋙ (evaluation _ _).obj (op X) in
   (types.colimit_cocone E).X ≃ A.presheaf X :=
