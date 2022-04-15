@@ -799,6 +799,10 @@ def filtered_cocone_is_colimit : is_colimit (filtered_cocone F) :=
     dsimp at hm, simpa using hm,
   end } .
 
+section
+
+local attribute [-simp] forget_map_eq_coe
+
 noncomputable
 def preserves_limits_aux_1 (G : J ⥤ Condensed.{u} Ab.{u+1}) :
   colimit (G ⋙ Sheaf_to_presheaf proetale_topology Ab) ⋙ forget Ab ≅
@@ -821,7 +825,44 @@ begin
     ⋙ (evaluation Profiniteᵒᵖ Ab).obj X)),
   exact e₅.cocone_point_unique_up_to_iso (colimit.is_colimit _),
 end
-sorry
+begin
+  intros X Y f, dsimp, simp only [category.assoc],
+  dsimp [is_colimit.cocone_point_unique_up_to_iso],
+  let E₀ := is_colimit_of_preserves ((evaluation Profiniteᵒᵖ Ab).obj X)
+    (colimit.is_colimit (G ⋙ Sheaf_to_presheaf proetale_topology Ab)),
+  let E := is_colimit_of_preserves (forget Ab) E₀,
+  apply E.hom_ext, intros j, dsimp,
+
+  -- Let's work on the LHS
+
+  slice_lhs 1 3
+  { simp only [← (forget Ab).map_comp],
+    rw ← ((colimit.ι (G ⋙ Sheaf_to_presheaf proetale_topology Ab) j)).naturality_assoc, },
+  have := (is_colimit_of_preserves ((evaluation Profiniteᵒᵖ Ab).obj Y)
+    (colimit.is_colimit (G ⋙ Sheaf_to_presheaf proetale_topology Ab))).fac _ j,
+  dsimp at this, rw this, clear this,
+  dsimp,
+  have := (is_colimit_of_preserves (forget Ab)
+    (colimit.is_colimit ((G ⋙ Sheaf_to_presheaf proetale_topology Ab) ⋙
+    (evaluation Profiniteᵒᵖ Ab).obj Y))).fac _ j,
+  simp only [(forget Ab).map_comp, category.assoc],
+  dsimp at this, slice_lhs 2 3 { rw this }, clear this,
+  erw colimit.ι_desc,
+
+  -- Now for the RHS
+
+  slice_rhs 1 2 { rw ← (forget Ab).map_comp },
+  have := (is_colimit_of_preserves ((evaluation Profiniteᵒᵖ Ab).obj X)
+    (colimit.is_colimit (G ⋙ Sheaf_to_presheaf proetale_topology Ab))).fac _ j,
+  dsimp at this, rw this, clear this,
+  have := (is_colimit_of_preserves (forget Ab)
+    (colimit.is_colimit ((G ⋙ Sheaf_to_presheaf proetale_topology Ab) ⋙
+    (evaluation Profiniteᵒᵖ Ab).obj X))).fac _ j,
+  dsimp at this, slice_rhs 1 2 { erw this }, clear this, erw colimit.ι_desc,
+  dsimp, erw ← nat_trans.naturality, refl,
+end
+
+end
 
 noncomputable
 def preserves_limits_of_shape_of_filtered_aux (G : J ⥤ Condensed.{u} Ab.{u+1}) :
