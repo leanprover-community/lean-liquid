@@ -402,6 +402,19 @@ let e₁ :=
 e₁.cocone_point_unique_up_to_iso e₂
 
 noncomputable
+def third_iso_aux'' :
+  (colimit (parallel_pair (G.flip.map (Profinite.pullback.fst f f).op)
+    (G.flip.map (Profinite.pullback.snd f f).op)).flip).obj
+    walking_parallel_pair.one ≅ (colimit G).obj (op $ Profinite.pullback f f) :=
+let e₁ :=
+  is_colimit_of_preserves ((evaluation _ _).obj walking_parallel_pair.one)
+    (colimit.is_colimit (parallel_pair (G.flip.map (Profinite.pullback.fst f f).op)
+    (G.flip.map (Profinite.pullback.snd f f).op)).flip),
+    e₂ := is_colimit_of_preserves ((evaluation _ _).obj (op $ Profinite.pullback f f))
+    (colimit.is_colimit G) in
+e₁.cocone_point_unique_up_to_iso e₂
+
+noncomputable
 def third_iso_aux' : cone (colimit (parallel_pair
       (G.flip.map (Profinite.pullback.fst f f).op)
       (G.flip.map (Profinite.pullback.snd f f).op)).flip) :=
@@ -419,7 +432,41 @@ def third_iso_aux' : cone (colimit (parallel_pair
     rintro (_|_) (_|_) ⟨⟩,
     { dsimp, simp only [category.id_comp, category_theory.functor.map_id, category.comp_id], },
     { dsimp [third_iso_aux'._match_1], simp only [category.id_comp, category.assoc], },
-    { dsimp [third_iso_aux'._match_1], simp only [category.id_comp, category.assoc], sorry, },
+    { dsimp [third_iso_aux'._match_1], simp only [category.id_comp, category.assoc],
+      let e₁ := _, let e₂ := _, change _ ≫ e₁ = _ ≫ e₂,
+      have : e₁ = (colimit G).map (Profinite.pullback.fst f f).op ≫
+        (third_iso_aux'' f G).inv,
+      { dsimp [e₁, third_iso_aux, third_iso_aux''],
+        apply (is_colimit_of_preserves ((evaluation Profiniteᵒᵖ C).obj
+          (op X)) (colimit.is_colimit G)).hom_ext, intros j,
+        dsimp [is_colimit.cocone_point_unique_up_to_iso],
+        have h1 := (is_colimit_of_preserves ((evaluation Profiniteᵒᵖ C).obj (op X))
+          (colimit.is_colimit G)).fac _ j,
+        have h2 := (is_colimit_of_preserves ((evaluation Profiniteᵒᵖ C).obj
+          (op $ Profinite.pullback f f)) (colimit.is_colimit G)).fac _ j,
+        dsimp at h1 h2,
+        slice_lhs 1 2 { rw h1 }, clear h1,
+        rw ← nat_trans.naturality_assoc,
+        slice_rhs 2 3 { rw h2 }, clear h2,
+        dsimp, rw ← nat_trans.naturality, refl },
+      rw this, clear this,
+      have : e₂ = (colimit G).map (Profinite.pullback.snd f f).op ≫
+        (third_iso_aux'' f G).inv,
+      { dsimp [e₂, third_iso_aux, third_iso_aux''],
+        apply (is_colimit_of_preserves ((evaluation Profiniteᵒᵖ C).obj
+          (op X)) (colimit.is_colimit G)).hom_ext, intros j,
+        dsimp [is_colimit.cocone_point_unique_up_to_iso],
+        have h1 := (is_colimit_of_preserves ((evaluation Profiniteᵒᵖ C).obj (op X))
+          (colimit.is_colimit G)).fac _ j,
+        have h2 := (is_colimit_of_preserves ((evaluation Profiniteᵒᵖ C).obj
+          (op $ Profinite.pullback f f)) (colimit.is_colimit G)).fac _ j,
+        dsimp at h1 h2,
+        slice_lhs 1 2 { rw h1 }, clear h1,
+        rw ← nat_trans.naturality_assoc,
+        slice_rhs 2 3 { rw h2 }, clear h2,
+        dsimp, rw ← nat_trans.naturality, refl },
+      rw this, clear this,
+      simp only [category.assoc, equalizer.condition_assoc] },
     { dsimp, simp only [category.id_comp, category_theory.functor.map_id, category.comp_id], },
   end } }
 
