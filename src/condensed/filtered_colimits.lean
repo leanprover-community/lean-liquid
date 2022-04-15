@@ -522,7 +522,10 @@ def comparison :
   equalizer
     ((colimit G).map (Profinite.pullback.fst f f).op)
     ((colimit G).map (Profinite.pullback.snd f f).op) :=
-equalizer.lift ((colimit G).map f.op) sorry
+equalizer.lift ((colimit G).map f.op)
+begin
+  simp only [← functor.map_comp, ← op_comp, Profinite.pullback.condition],
+end
 
 theorem is_iso_comparison : is_iso (comparison f G) :=
 begin
