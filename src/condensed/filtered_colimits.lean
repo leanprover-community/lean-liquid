@@ -862,7 +862,7 @@ begin
   dsimp, erw ← nat_trans.naturality, refl,
 end
 
-end
+local attribute [-simp] types_comp_apply functor_to_types.comp
 
 noncomputable
 def preserves_limits_of_shape_of_filtered_aux (G : J ⥤ Condensed.{u} Ab.{u+1}) :
@@ -873,7 +873,22 @@ cocones.ext
   inv := Sheaf.hom.mk $ (preserves_limits_aux_1 G).inv,
   hom_inv_id' := by { ext1, simp },
   inv_hom_id' := by { ext1, simp } }
-sorry
+begin
+  intros j, ext, dsimp [preserves_limits_aux_1, is_colimit.cocone_point_unique_up_to_iso],
+
+  simp only [← category.assoc, ← (forget Ab).map_comp],
+  have := (is_colimit_of_preserves ((evaluation Profiniteᵒᵖ Ab).obj x)
+    (colimit.is_colimit (G ⋙ Sheaf_to_presheaf proetale_topology Ab))).fac _ j,
+  dsimp at this, rw this, clear this, dsimp, simp only [category.assoc],
+  have := (is_colimit_of_preserves (forget Ab)
+    (colimit.is_colimit ((G ⋙ Sheaf_to_presheaf proetale_topology Ab) ⋙
+    (evaluation Profiniteᵒᵖ Ab).obj x))).fac _ j,
+  dsimp at this, simp only [← category.assoc], rw this, clear this, erw colimit.ι_desc,
+  refl,
+
+end
+
+end
 
 noncomputable
 instance Condensed_Ab_to_CondensedSet_preserves_limits_of_shape_of_filtered :
