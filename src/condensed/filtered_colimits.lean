@@ -613,7 +613,37 @@ begin
   suffices : comparison f G =
     (first_iso f G).hom ≫ (second_iso f G).hom ≫ (third_iso f G).hom,
   { rw this, apply_instance },
-  sorry
+  ext,
+  dsimp [comparison, first_iso, second_iso, third_iso, colimit_limit_iso],
+  simp only [category.assoc, equalizer.lift_ι, has_limit.iso_of_nat_iso_hom_π_assoc,
+    iso.symm_hom, colimit_flip_iso_comp_colim_inv_app,
+    limit.cone_point_unique_up_to_iso_hom_comp_assoc, functor.map_cone_π_app,
+    equalizer.fork_π_app_zero],
+  dsimp [has_colimit.iso_of_nat_iso, is_colimit.cocone_point_unique_up_to_iso,
+    colim, colim_map, is_colimit.map, colimit_obj_iso_colimit_comp_evaluation,
+    preserves_colimit_iso, third_iso_aux],
+  have := (is_colimit_of_preserves ((evaluation Profiniteᵒᵖ C).obj (op Y))
+    (colimit.is_colimit G)).fac _ j, dsimp at this,
+  slice_rhs 1 2 { rw this }, clear this,
+  simp only [colimit.cocone_ι, colimit.ι_desc, cocones.precompose_obj_ι, nat_trans.comp_app,
+    category.assoc, flip_comp_evaluation_inv_app, functor.map_cocone_ι_app, evaluation_obj_map],
+  dsimp [first_iso_aux, comparison_component],
+  simp only [has_limit.lift_iso_of_nat_iso_hom_assoc, category.id_comp, category.assoc],
+  dsimp [is_limit.cone_point_unique_up_to_iso],
+  have := (is_colimit_of_preserves ((evaluation walking_parallel_pair C).obj
+    walking_parallel_pair.zero) (colimit.is_colimit
+    (parallel_pair (G.flip.map (Profinite.pullback.fst f f).op)
+    (G.flip.map (Profinite.pullback.snd f f).op)).flip)).fac _ j,
+  dsimp at this, slice_rhs 4 5 { rw this }, clear this,
+  have := (is_limit_of_preserves ((evaluation J C).obj j)
+    (limit.is_limit (parallel_pair (G.flip.map (Profinite.pullback.fst f f).op)
+    (G.flip.map (Profinite.pullback.snd f f).op)))).fac _ walking_parallel_pair.zero,
+  dsimp at this ⊢, slice_rhs 2 3 { erw this }, clear this,
+  dsimp,
+  simp only [limit.lift_π_assoc, cones.postcompose_obj_π, nat_trans.comp_app,
+    fork.of_ι_π_app, category.assoc],
+  dsimp [first_iso_aux_aux],
+  simp only [category.id_comp, nat_trans.naturality],
 end
 
 end eq
