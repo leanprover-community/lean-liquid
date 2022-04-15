@@ -499,8 +499,22 @@ def third_iso : limit (colimit (parallel_pair
       simp [limit.w F walking_parallel_pair_hom.left],
     end,
   inv := limit.lift _ (third_iso_aux' _ _),
-  hom_inv_id' := sorry,
-  inv_hom_id' := sorry }
+  hom_inv_id' := begin
+    ext (_|_),
+    { simp only [category.assoc, limit.lift_π, category.id_comp],
+      dsimp [third_iso_aux', third_iso_aux'._match_1],
+      simp only [equalizer.lift_ι_assoc, category.assoc, iso.hom_inv_id, category.comp_id] },
+    { simp only [category.assoc, limit.lift_π, category.id_comp],
+      dsimp [third_iso_aux', third_iso_aux'._match_1],
+      simp only [equalizer.lift_ι_assoc, category.assoc, iso.hom_inv_id_assoc,
+        category.comp_id, category.id_comp, limit.w] }
+  end,
+  inv_hom_id' := begin
+    ext,
+    simp only [category.assoc, equalizer.lift_ι, limit.lift_π_assoc, category.id_comp],
+    dsimp [third_iso_aux, third_iso_aux'],
+    simp only [category.assoc, iso.inv_hom_id, category.comp_id],
+  end }
 
 noncomputable
 def comparison :
