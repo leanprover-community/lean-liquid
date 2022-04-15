@@ -443,50 +443,37 @@ begin
   exact ⟨preimage_mono hε, H (f x) ε, mem_ball_self h₀⟩,
 end
 
-lemma complement_of_balls {c : ℝ≥0} (y : Icc (-c : ℝ) c) (ε : ℝ) : ∃ (x₁ x₂ : Icc (-c : ℝ) c),
-  ∃ (δ₁ δ₂ : ℝ), ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ :=
-begin
-  sorry
-end
+-- lemma complement_of_balls {c : ℝ≥0} (y : Icc (-c : ℝ) c) (ε : ℝ) : ∃ (x₁ x₂ : Icc (-c : ℝ) c),
+--   ∃ (δ₁ δ₂ : ℝ), ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ :=
+-- begin
+--   sorry
+-- end
 
 
 lemma aux_mem_left {y : (closed_ball (0 : ℝ) c)} {ε x : ℝ} (hx : x = (-ε + y - c) / 2)
-  (hε : ¬ ε ≤ 0) (h_left : (- c : ℝ) < - ε + y) (h_right : ¬ (c : ℝ) ≤ ε + y) :
-  x ∈ closed_ball (0 : ℝ) c :=
+  (hε : ¬ ε ≤ 0) (h_left : (- c : ℝ) ≤ - ε + y) : x ∈ closed_ball (0 : ℝ) c :=
 begin
- simp only [mem_closed_ball_zero_iff, norm_div, real.norm_two, real.norm_eq_abs, abs_le],
+  simp only [mem_closed_ball_zero_iff, norm_div, real.norm_two, real.norm_eq_abs, abs_le],
   split,
-  { suffices : (-2 * c : ℝ) ≤ 2 * x,
-    linarith,
-    calc 2 * x = - ε + y - c : by {rw hx, ring}
-            ... ≥ -2 * c : by linarith, },
-  { suffices : 2 * x ≤ 2 * c,
-    linarith,
-    simp only [*, mul_le_mul_left, zero_lt_bit0, zero_lt_one, eq_self_iff_true, not_le],
-    rw [div_le_iff, sub_le_iff_le_add],
-    calc - ε + y ≤ ε + y : by {apply add_le_add_right (neg_le_self_iff.mpr $ le_of_lt $
-      not_le.mp hε)}
-            ... ≤ c : by {exact (le_of_lt (not_le.mp h_right))}
-            ... ≤ c * 2 + c : by {exact (le_add_iff_nonneg_left c).mpr (c * 2).2},
-    simp only [zero_lt_bit0, zero_lt_one] },
+  { linarith },
+  { have h_yc : (y : ℝ) ≤ c,
+    have hy := y.2,
+    rw [mem_closed_ball_zero_iff, subtype.val_eq_coe, real.norm_eq_abs] at hy,
+    exact (le_abs_self (y : ℝ)).trans hy,
+    linarith },
 end
 
 lemma aux_mem_right {y : (closed_ball (0 : ℝ) c)} {ε x : ℝ} (hx : x = (ε + y + c) / 2)
-  (hε : ¬ ε ≤ 0) (h_left : (- c : ℝ) < - ε + y) (h_right : ¬ (c : ℝ) ≤ ε + y) :
-  x ∈ closed_ball (0 : ℝ) c :=
+  (hε : ¬ ε ≤ 0) (h_right : ε + y ≤ c) : x ∈ closed_ball (0 : ℝ) c :=
 begin
-   simp only [mem_closed_ball_zero_iff, norm_div, real.norm_two, real.norm_eq_abs, abs_le],
+  simp only [mem_closed_ball_zero_iff, norm_div, real.norm_two, real.norm_eq_abs, abs_le],
   split,
-  { suffices : (-2 * c : ℝ) ≤ 2 * x,
-    linarith,
-    calc 2 * x = ε + y + c : by {rw hx, ring}
-            ... ≥ -2 * c : by linarith, },
-  { suffices : 2 * x ≤ 2 * c,
-    linarith,
-    simp only [*, mul_le_mul_left, zero_lt_bit0, zero_lt_one, eq_self_iff_true, not_le],
-    rw [div_le_iff, ← le_sub_iff_add_le, mul_two, add_tsub_cancel_left],
-    exact le_of_lt (not_le.mp h_right),
-    simp only [zero_lt_bit0, zero_lt_one] },
+  { have h_yc : - (c : ℝ) ≤ (y : ℝ),
+    have hy := y.2,
+    rw [mem_closed_ball_zero_iff, subtype.val_eq_coe, real.norm_eq_abs] at hy,
+    exact (abs_le.mp hy).1,
+    linarith },
+  { linarith },
 end
 
 lemma aux_dist_left {a y : closed_ball (0 : ℝ) c} {ε x: ℝ}  (ha : a ∈ ball y ε) (hε : ¬ ε ≤ 0)
@@ -535,16 +522,16 @@ begin
     intro _,
     simp only [mem_univ],
     exact x.2 },
-  { by_cases h_right : (c : ℝ) ≤ ε + y,
+  { set δ₁ := (-ε + y + c) / 2 with hδ₁,
+    set x₁ := (- ε + y - c) / 2 with hx₁,
+    set δ₂ := (-ε - y + c) / 2 with hδ₂,
+    set x₂ := (ε + y + c) / 2 with hx₂,
+    by_cases h_right : (c : ℝ) < ε + y,
     {sorry},--only an open on the left is needed
-    by_cases h_left : - ε + y ≤ - c,
+    by_cases h_left : - ε + y < - c,
     {sorry}, -- only an open on the  right is needed
-    { set δ₁ := (-ε + y + c) / 2 with hδ₁,
-      set x₁ := (- ε + y - c) / 2 with hx₁,
-      set δ₂ := (-ε - y + c) / 2 with hδ₂,
-      set x₂ := (ε + y + c) / 2 with hx₂,
-      use [x₁, aux_mem_left c hx₁ hε (not_le.mp h_left) h_right, x₂, aux_mem_right c hx₂ hε
-        (not_le.mp h_left) h_right, δ₁, δ₂],
+    { use [x₁, aux_mem_left c hx₁ hε (not_lt.mp h_left), x₂, aux_mem_right c hx₂ hε
+        (not_lt.mp h_right), δ₁, δ₂],
       simp only [compl_union],
       ext a,
       simp only [mem_inter_eq, mem_compl_iff, mem_closed_ball, not_le],
@@ -581,17 +568,17 @@ begin
   }}
 end
 
-lemma continuous_if_preimage_closed {c : ℝ≥0} (f : X → (Icc (-c : ℝ) c))
-  (H : ∀ y : Icc (-c : ℝ) c, ∀ ε : ℝ, is_closed (f⁻¹' (closed_ball y ε))) : continuous f :=
-begin
-  apply reduction_balls,
-  intros y ε,
-  obtain ⟨x₁,x₂,δ₁,δ₂,h⟩ := complement_of_balls y ε,
-  rw h,
-  simp only [compl_union, preimage_inter, preimage_compl],
-  apply is_open.inter,
-  all_goals {simp only [is_open_compl_iff], apply H},
-end
+-- lemma continuous_if_preimage_closed {c : ℝ≥0} (f : X → (Icc (-c : ℝ) c))
+--   (H : ∀ y : Icc (-c : ℝ) c, ∀ ε : ℝ, is_closed (f⁻¹' (closed_ball y ε))) : continuous f :=
+-- begin
+--   apply reduction_balls,
+--   intros y ε,
+--   obtain ⟨x₁,x₂,δ₁,δ₂,h⟩ := complement_of_balls y ε,
+--   rw h,
+--   simp only [compl_union, preimage_inter, preimage_compl],
+--   apply is_open.inter,
+--   all_goals {simp only [is_open_compl_iff], apply H},
+-- end
 
 lemma continuous_if_preimage_closed' {c : ℝ≥0} (f : X → (closed_ball (0 : ℝ) c))
   (H : ∀ y : (closed_ball (0 : ℝ) c), ∀ ε : ℝ, is_closed (f⁻¹' (closed_ball y ε))) : continuous f :=

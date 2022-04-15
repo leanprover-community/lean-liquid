@@ -28,6 +28,7 @@ apply_nolint breen_deligne.universal_map.suitable class_structure
 apply_nolint breen_deligne.universal_map.very_suitable class_structure
 
 -- challenge.lean
+apply_nolint has_lt.lt.fact unused_arguments
 apply_nolint liquid_tensor_experiment def_lemma
 
 -- combinatorial_lemma/profinite.lean
@@ -61,6 +62,21 @@ apply_nolint finite_product_colimit_setup.Q₀ unused_arguments
 apply_nolint finite_product_colimit_setup.T unused_arguments
 apply_nolint finite_product_colimit_setup.ct_iso unused_arguments
 apply_nolint finite_product_condition_holds_for_colimit unused_arguments
+
+-- condensed/filtered_colimits.lean
+apply_nolint is_sheaf_colimit_presheaf_aux.empty.comparison unused_arguments
+apply_nolint is_sheaf_colimit_presheaf_aux.empty.comparison_component unused_arguments
+apply_nolint is_sheaf_colimit_presheaf_aux.empty.second_iso unused_arguments
+apply_nolint is_sheaf_colimit_presheaf_aux.empty.third_iso unused_arguments
+apply_nolint is_sheaf_colimit_presheaf_aux.eq.comparison_component unused_arguments
+apply_nolint is_sheaf_colimit_presheaf_aux.eq.first_iso_aux_aux unused_arguments
+apply_nolint is_sheaf_colimit_presheaf_aux.eq.second_iso unused_arguments
+apply_nolint is_sheaf_colimit_presheaf_aux.eq.third_iso_aux unused_arguments
+apply_nolint is_sheaf_colimit_presheaf_aux.prod.comparison unused_arguments
+apply_nolint is_sheaf_colimit_presheaf_aux.prod.comparison_component unused_arguments
+apply_nolint is_sheaf_colimit_presheaf_aux.prod.second_iso unused_arguments
+apply_nolint is_sheaf_colimit_presheaf_aux.prod.third_iso_aux_left unused_arguments
+apply_nolint is_sheaf_colimit_presheaf_aux.prod.third_iso_aux_right unused_arguments
 
 -- condensed/is_proetale_sheaf.lean
 apply_nolint category_theory.functor.finite_product_condition_of_sum unused_arguments
@@ -117,6 +133,11 @@ apply_nolint homological_complex.cone.π_quasi_iso def_lemma
 
 -- for_mathlib/derived/les2.lean
 apply_nolint bounded_homotopy_category.Ext_five_term_exact_seq def_lemma
+
+-- for_mathlib/derived/les_facts.lean
+apply_nolint homological_complex.single_additive unused_arguments
+apply_nolint is_bounded_above_shift unused_arguments
+apply_nolint single_is_bounded_above unused_arguments
 
 -- for_mathlib/derived_functor.lean
 apply_nolint category_theory.functor.left_derived.α unused_arguments
@@ -221,10 +242,9 @@ apply_nolint invpoly.set_of.topological_space unused_arguments
 apply_nolint laurent_measures.bdd_filtration_spec def_lemma
 apply_nolint laurent_measures.laurent_measures.norm_nonneg dup_namespace
 
--- laurent_measures/ext.lean
-apply_nolint laurent_measures.epi_and_is_iso unused_arguments
-
 -- laurent_measures/ses.lean
+apply_nolint laurent_measures_ses.aux_dist_left unused_arguments
+apply_nolint laurent_measures_ses.aux_dist_right unused_arguments
 apply_nolint laurent_measures_ses.box unused_arguments
 apply_nolint laurent_measures_ses.real_measures.topological_space unused_arguments
 
@@ -246,6 +266,13 @@ apply_nolint SemiNormedGroup.normed_with_aut_LocallyConstant fails_quickly
 
 -- normed_group/pseudo_normed_group.lean
 apply_nolint semi_normed_group.pseudo_normed_group instance_priority
+
+-- normed_to_cond.lean
+apply_nolint LCC unused_arguments
+apply_nolint SemiNormedGroup.metric_space unused_arguments fails_quickly
+apply_nolint SemiNormedGroup.normed_group fails_quickly
+apply_nolint continuous_map.bdd_above_range_norm unused_arguments
+apply_nolint locally_constant.to_continuous_map_hom unused_arguments
 
 -- polyhedral_lattice/topology.lean
 apply_nolint polyhedral_lattice.discrete_topology instance_priority
