@@ -270,12 +270,93 @@ prod.lift
   ((colimit G).map (Profinite.sum.inl _ _).op)
   ((colimit G).map (Profinite.sum.inr _ _).op)
 
+lemma is_iso_comparison_aux_fst (j) :
+  (colimit.ι G j).app (op (X.sum Y)) ≫ comparison X Y G ≫ limits.prod.fst =
+    (colimit.ι G j).app (op (X.sum Y)) ≫
+      (first_iso X Y G).hom ≫ (second_iso X Y G).hom ≫ (third_iso X Y G).hom ≫
+      limits.prod.fst :=
+begin
+  dsimp [comparison, first_iso, second_iso, third_iso, colimit_limit_iso],
+  simp only [prod.comp_lift, prod.lift_fst, category.assoc,
+    has_limit.iso_of_nat_iso_hom_π_assoc, iso.symm_hom,
+    colimit_flip_iso_comp_colim_inv_app,
+    limit.cone_point_unique_up_to_iso_hom_comp_assoc, functor.map_cone_π_app,
+    binary_fan.π_app_left],
+  dsimp [has_colimit.iso_of_nat_iso, colim, colim_map, is_colimit.map,
+    is_colimit.cocone_point_unique_up_to_iso,
+    colimit_obj_iso_colimit_comp_evaluation,
+    third_iso_aux, third_iso_aux_left, preserves_colimit_iso],
+  have := (is_colimit_of_preserves
+    ((evaluation Profiniteᵒᵖ C).obj (op (X.sum Y)))
+    (colimit.is_colimit G)).fac _ j,
+  dsimp at this, slice_rhs 1 2 { rw this }, clear this,
+  simp only [colimit.cocone_ι, colimit.ι_desc, cocones.precompose_obj_ι,
+    nat_trans.comp_app, category.assoc, flip_comp_evaluation_inv_app,
+    functor.map_cocone_ι_app, evaluation_obj_map],
+  dsimp [first_iso_aux, first_iso_aux_aux, comparison_component,
+    is_limit.cone_point_unique_up_to_iso],
+  simp only [has_limit.lift_iso_of_nat_iso_hom_assoc,
+    category.id_comp, category.assoc],
+  have := (is_limit_of_preserves ((evaluation J C).obj j)
+    (limit.is_limit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))))).fac _
+      walking_pair.left, dsimp at this,
+  slice_rhs 2 3 { rw this }, clear this,
+  simp only [limit.cone_π, category.assoc, limit.lift_π_assoc,
+    cones.postcompose_obj_π, nat_trans.comp_app,
+    binary_fan.mk_π_app_left, nat_iso.of_components.hom_app],
+  have := (is_colimit_of_preserves ((evaluation _ C).obj walking_pair.left)
+    (colimit.is_colimit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))).flip)).fac _ j,
+  dsimp at this, slice_rhs 3 4 { rw this }, clear this,
+  dsimp [first_iso_aux_aux._match_1], simp only [category.id_comp, nat_trans.naturality],
+end
+
+lemma is_iso_comparison_aux_snd (j) : (colimit.ι G j).app (op (X.sum Y)) ≫ comparison X Y G ≫
+  limits.prod.snd = (colimit.ι G j).app (op (X.sum Y)) ≫
+    (first_iso X Y G).hom ≫ (second_iso X Y G).hom ≫ (third_iso X Y G).hom ≫
+    limits.prod.snd :=
+begin
+  dsimp [comparison, first_iso, second_iso, third_iso, colimit_limit_iso],
+  simp only [prod.comp_lift, prod.lift_snd, category.assoc,
+    has_limit.iso_of_nat_iso_hom_π_assoc, iso.symm_hom,
+    colimit_flip_iso_comp_colim_inv_app,
+    limit.cone_point_unique_up_to_iso_hom_comp_assoc, functor.map_cone_π_app,
+    binary_fan.π_app_right],
+  dsimp [has_colimit.iso_of_nat_iso, colim, colim_map, is_colimit.map,
+    is_colimit.cocone_point_unique_up_to_iso,
+    colimit_obj_iso_colimit_comp_evaluation,
+    third_iso_aux, third_iso_aux_right, preserves_colimit_iso],
+  have := (is_colimit_of_preserves
+    ((evaluation Profiniteᵒᵖ C).obj (op (X.sum Y)))
+    (colimit.is_colimit G)).fac _ j,
+  dsimp at this, slice_rhs 1 2 { rw this }, clear this,
+  simp only [colimit.cocone_ι, colimit.ι_desc, cocones.precompose_obj_ι,
+    nat_trans.comp_app, category.assoc, flip_comp_evaluation_inv_app,
+    functor.map_cocone_ι_app, evaluation_obj_map],
+  dsimp [first_iso_aux, first_iso_aux_aux, comparison_component,
+    is_limit.cone_point_unique_up_to_iso],
+  simp only [has_limit.lift_iso_of_nat_iso_hom_assoc,
+    category.id_comp, category.assoc],
+  have := (is_limit_of_preserves ((evaluation J C).obj j)
+    (limit.is_limit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))))).fac _
+      walking_pair.right, dsimp at this,
+  slice_rhs 2 3 { rw this }, clear this,
+  simp only [limit.cone_π, category.assoc, limit.lift_π_assoc,
+    cones.postcompose_obj_π, nat_trans.comp_app,
+    binary_fan.mk_π_app_left, nat_iso.of_components.hom_app],
+  have := (is_colimit_of_preserves ((evaluation _ C).obj walking_pair.right)
+    (colimit.is_colimit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))).flip)).fac _ j,
+  dsimp at this, slice_rhs 3 4 { rw this }, clear this,
+  dsimp [first_iso_aux_aux._match_1], simp only [category.id_comp, nat_trans.naturality],
+end
+
 lemma is_iso_comparison : is_iso (comparison X Y G) :=
 begin
   suffices : (comparison X Y G) =
     (first_iso X Y G).hom ≫ (second_iso X Y G).hom ≫ (third_iso X Y G).hom,
   { rw this, apply_instance },
-  sorry
+  ext,
+  { simp only [category.assoc, is_iso_comparison_aux_fst] },
+  { simp only [category.assoc, is_iso_comparison_aux_snd] }
 end
 
 end prod
