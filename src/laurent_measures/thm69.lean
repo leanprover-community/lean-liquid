@@ -50,11 +50,10 @@ by simp only [ϕ, sub_apply, nsmul_apply, shift_to_fun_to_fun, nsmul_eq_mul]; re
 lemma ϕ_natural (S T : Fintype) (f : S ⟶ T) : --[fact (0 < p)] [fact ( p ≤ 1)] :
   ϕ ∘ laurent_measures.map_hom f = laurent_measures.map_hom f ∘ ϕ :=
 begin
-  ext F t,
-  -- dsimp only [θ],
-  -- rw ϑ_eq_ϑ',
-  -- dsimp only [ϑ', seval],
-  sorry,
+  ext F t n,
+  simp only [ϕ, sum_sub_distrib, mul_sum, function.comp_app, map_hom_to_fun, sub_apply,
+    nsmul_apply, shift_to_fun_to_fun,
+    map_apply, nsmul_eq_mul, mul_ite, mul_zero], -- squeezed for time
 end
 
 -- #check @ϕ
