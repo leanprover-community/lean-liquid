@@ -268,6 +268,22 @@ begin
     apply pretriangulated.rot_of_dist_triangle,
     apply dist_cone_triangle },
 end
+.
+
+def shift_iso [enough_projectives A]
+  (n : ℤ) (X : cochain_complex A ℤ) (Y : bounded_homotopy_category A)
+  [((homotopy_category.quotient A (complex_shape.up ℤ)).obj X).is_bounded_above] :
+  (((Ext (n+1)).flip.obj Y).right_op).obj ((of' X)⟦(1:ℤ)⟧) ≅
+  (((Ext n).flip.obj Y).right_op).obj ((of' X)) :=
+begin
+  let P := (of' X).replace,
+  let e := Ext_iso n (of' X).replace (of' X) Y (of' X).π,
+  let e' := Ext_iso (n+1) ((of' X).replace⟦1⟧) ((of' X)⟦1⟧) Y ((of' X).π⟦(1:ℤ)⟧'),
+  dsimp only [functor.right_op_obj],
+  refine (e ≪≫ _ ≪≫ e'.symm).op,
+  clear e e',
+  sorry
+end
 
 end bounded_homotopy_category
 
