@@ -108,13 +108,35 @@ begin
   split,
   { intro H,
     split,
-    { have := ((Ext_five_term_exact_seq f' g' 0 B' Hfg).unop).pair,
-      -- refine this.epi_iff_eq_zero.mpr _,
-      -- refine is_zero.eq_of_tgt _ _ _,
-      sorry },
-    { sorry } },
+    { have := ((Ext_five_term_exact_seq' f' g' 0 B' Hfg).drop 1).pair,
+      refine this.epi_iff_eq_zero.mpr _,
+      refine is_zero.eq_of_tgt _ _ _,
+      exact H 1 zero_lt_one, },
+    { rintro i (hi : 0 < i),
+      apply (Ext_five_term_exact_seq' f' g' i B' Hfg).is_iso_of_zero_of_zero,
+      { refine is_zero.eq_of_src _ _ _,
+        exact H i hi, },
+      { refine is_zero.eq_of_tgt _ _ _,
+        exact H (i+1) (hi.trans $ lt_add_one _), }, } },
   { intros H i hi,
-    sorry }
+    obtain ⟨i, rfl⟩ : ∃ j, j + 1 = i := ⟨i-1, sub_add_cancel _ _⟩,
+    have := λ i, Ext_five_term_exact_seq' f' g' i B' Hfg,
+    refine is_zero_of_exact_zero_zero' _ _ ((this i).drop 2).pair _ _,
+    sorry { refine ((this i).drop 1).pair.epi_iff_eq_zero.mp _,
+      rw [gt_iff_lt, int.lt_add_one_iff] at hi,
+      obtain (rfl|hi) := hi.eq_or_lt,
+      { exact H.1 },
+      { show epi (((Ext i).map (of_hom f').op).app B'),
+        -- this is sloooow...
+        haveI : is_iso (((Ext i).map (of_hom f').op).app B') := H.2 i hi,
+        exact regular_epi.epi (((Ext i).map (of_hom f').op).app B'), } },
+    { refine (this (i+1)).pair.mono_iff_eq_zero.mp _,
+      sorry
+      -- timing out, for some reason
+      -- show mono (((Ext (i+1)).map (of_hom f').op).app B'),
+      -- haveI : is_iso (((Ext (i+1)).map (of_hom f').op).app B') := H.2 (i+1) hi,
+      -- exact regular_mono.mono (((Ext i).map (of_hom f').op).app B'),
+       } }
 end
 
 lemma epi_and_is_iso_iff_of_is_iso

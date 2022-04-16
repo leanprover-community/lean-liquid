@@ -270,17 +270,33 @@ begin
 end
 .
 
+
 def shift_iso [enough_projectives A]
   (n : ℤ) (X : cochain_complex A ℤ) (Y : bounded_homotopy_category A)
   [((homotopy_category.quotient A (complex_shape.up ℤ)).obj X).is_bounded_above] :
   (((Ext (n+1)).flip.obj Y)).obj (opposite.op $ (of' X)⟦(1:ℤ)⟧) ≅
   (((Ext n).flip.obj Y)).obj (opposite.op $ (of' X)) :=
 begin
-  let P := (of' X).replace,
   let e := Ext_iso n (of' X).replace (of' X) Y (of' X).π,
   let e' := Ext_iso (n+1) ((of' X).replace⟦1⟧) ((of' X)⟦1⟧) Y ((of' X).π⟦(1:ℤ)⟧'),
   refine (e' ≪≫ _ ≪≫ e.symm),
   clear e e',
+  refine add_equiv.to_AddCommGroup_iso _,
+  let se := shift_equiv (bounded_homotopy_category A) (1:ℤ),
+  sorry
+end
+
+lemma shift_iso_conj
+  (n : ℤ)
+  [enough_projectives A]
+  (W : bounded_homotopy_category A)
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj X)]
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj Y)] :
+  (shift_iso _ _ _).inv ≫ (((Ext (n+1)).flip.obj W).right_op.map (-(of_hom f)⟦(1 : ℤ)⟧')).unop
+    ≫ (shift_iso _ _ _).hom =
+  ((Ext n).flip.obj W).map (of_hom f).op :=
+begin
+  -- this should be true up to a minus sign
   sorry
 end
 
@@ -313,7 +329,9 @@ def Ext_five_term_exact_seq'
 begin
   refine (Ext_five_term_exact_seq f g n W w).pair.unop.cons _,
   refine exact.cons _ (exact.exact_seq _),
-  { sorry },
+  { rw [Ext_δ, functor.right_op_map, quiver.hom.unop_op, ← shift_iso_conj f n W,
+      exact_iso_comp, exact_comp_hom_inv_comp_iff],
+    exact (Ext_five_term_exact_seq f g (n+1) W w).unop.pair, },
   { rw [Ext_δ, exact_iso_comp],
     exact ((Ext_five_term_exact_seq f g (n+1) W w).drop 1).pair.unop, }
 end
