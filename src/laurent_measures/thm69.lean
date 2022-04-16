@@ -130,15 +130,40 @@ variable {S : Fintype}
 local notation `ℒ` := laurent_measures r
 local notation `ℳ` := real_measures p
 
+theorem nnreal.rpow_int_cast (x : nnreal) (n : ℤ) : x ^ (n : ℝ) = x ^ n :=
+begin
+  apply subtype.ext,
+  simp,
+end
+
+
 
 def θ : ℒ S → ℳ S := ϑ (1 / 2 : ℝ) r p S
 
 lemma θ_natural [fact (0 < p)] [fact (p ≤ 1)] (S T : Fintype) (f : S ⟶ T) (F : ℒ S) (t : T) :
   θ (map f F) t = real_measures.map f (θ F) t :=
 begin
-  dsimp only [θ],
-  rw ϑ_eq_ϑ',
-  dsimp only [ϑ', seval_ℒ],
+  simp only [θ, ϑ, one_div, map_apply, int.cast_sum, inv_zpow', zpow_neg₀, real_measures.map_apply],
+  rw ← tsum_sum,
+  { congr', ext n, exact sum_mul, },
+  intros,
+  rw mem_filter at H,
+  rcases H with ⟨-, rfl⟩,
+  have := F.summable i,
+  -- now split into >=0 and <0 pieces??
+  -- [failed attempt when I didn't do this:]
+  -- refine summable_of_norm_bounded _ (F.summable i) _,
+  -- intros n,
+  -- simp only [norm_mul, norm_inv, norm_zpow, real.norm_two],
+  -- apply mul_le_mul_of_nonneg_left _ (norm_nonneg _),
+  -- delta r,
+  -- delta r, --*shrug**
+  -- -- there is API missing here or maybe I'm just lost
+  -- rw (by push_cast : ((2 : ℝ) ^ n)⁻¹ = ((2 ^ n)⁻¹ : nnreal)),
+  -- norm_cast,
+  -- rw [← nnreal.rpow_int_cast, ← inv_rpow],
+  -- rw nnreal.rpow_int_cast,
+  -- -- aargh not true
   sorry,
 end
 
@@ -149,6 +174,8 @@ calc (1/2:ℝ≥0)
     = (1/2) ^ (1:ℝ) : (rpow_one (1/2:ℝ≥0)).symm
 ... < r : rpow_lt_rpow_of_exponent_gt (half_pos zero_lt_one) (half_lt_self one_ne_zero) $
 (nnreal.coe_lt_coe.mpr (fact.out _)).trans_le (nnreal.coe_one).le
+
+#check r
 
 lemma laurent_measures.summable_half (F : ℒ S) (s : S) :
   summable (λ n, ((F s n) : ℝ) * (1 / 2) ^ n) :=
