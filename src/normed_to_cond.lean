@@ -64,61 +64,70 @@ lemma Condensed.of_top_ab_map_continuous {S T : Profinite.{u}ᵒᵖ} (f : S ⟶ 
     ((Condensed.of_top_ab.presheaf.{u} V').map f) :=
 (Condensed.of_top_ab_map_normed_group_hom V' f).continuous
 
-@[simps]
-def locally_constant.to_continuous_map_hom :
-  normed_group_hom (locally_constant S V') C(S, V') :=
-{ to_fun := locally_constant.to_continuous_map,
-  map_add' := λ f g, rfl,
-  bound' := by { refine ⟨1, λ f, _⟩, rw one_mul, rw [continuous_map.norm_eq_supr_norm], refl, } }
+lemma locally_constant.to_continuous_map_isometry :
+  isometry (locally_constant.to_continuous_map : locally_constant S V' → C(S, V')) :=
+begin
+  intros f g,
+  simp only [edist_dist, dist_eq_norm, continuous_map.norm_eq_supr_norm,
+    locally_constant.norm_def, locally_constant.to_continuous_map_eq_coe,
+    continuous_map.coe_sub, locally_constant.coe_continuous_map, pi.sub_apply],
+  refl,
+end
+
+lemma locally_constant.to_continuous_map_uniform_inducing :
+  uniform_inducing (locally_constant.to_continuous_map : locally_constant S V' → C(S, V')) :=
+(locally_constant.to_continuous_map_isometry S V').uniform_inducing
 
 lemma locally_constant.to_continuous_map_uniform_continuous :
   uniform_continuous (locally_constant.to_continuous_map : locally_constant S V' → C(S, V')) :=
-(locally_constant.to_continuous_map_hom S V').uniform_continuous
+(locally_constant.to_continuous_map_uniform_inducing S V').uniform_continuous
 
-def LCC_iso_Cond_of_top_ab_hom :
-  completion (locally_constant S V') →+ C(S, V') :=
-add_monoid_hom.mk' (completion.extension $ locally_constant.to_continuous_map) $
+lemma locally_constant.to_continuous_map_dense_range :
+  dense_range (locally_constant.to_continuous_map : locally_constant S V' → C(S, V')) :=
 begin
-  intros f g,
-  apply completion.induction_on₂ f g,
-  { apply is_closed_eq,
-    { exact completion.continuous_extension.comp continuous_add },
-    { exact (completion.continuous_extension.comp continuous_fst).add
-            (completion.continuous_extension.comp continuous_snd), } },
-  { clear f g, intros f g,
-    rw [← completion.coe_add,
-      completion.extension_coe, completion.extension_coe, completion.extension_coe],
-    { refl },
-    all_goals { apply locally_constant.to_continuous_map_uniform_continuous } }
+  rw metric.dense_range_iff,
+  intros f ε hε,
+  sorry
 end
 
-lemma _root_.uniform_space.completion.extension_injective {S V : Type*}
-  [uniform_space S] [separated_space S] [uniform_space V] [complete_space V] [separated_space V]
-  (f : S → V) (hf : function.injective f) (hfuc : uniform_continuous f) :
-  function.injective (completion.extension f) :=
-sorry
-
-local attribute [instance] locally_constant.normed_group
+def locally_constant.pkg : abstract_completion (locally_constant S V') :=
+{ space := C(S, V'),
+  coe := locally_constant.to_continuous_map,
+  uniform_struct := by apply_instance,
+  complete := by apply_instance,
+  separation := by apply_instance,
+  uniform_inducing := locally_constant.to_continuous_map_uniform_inducing S V',
+  dense := locally_constant.to_continuous_map_dense_range S V', }
 
 def LCC_iso_Cond_of_top_ab_equiv :
+  completion (locally_constant S V') ≃ C(S, V') :=
+(@completion.cpkg (locally_constant S V') _).compare_equiv (locally_constant.pkg S V')
+
+def LCC_iso_Cond_of_top_ab_add_equiv :
   completion (locally_constant S V') ≃+ C(S, V') :=
-add_equiv.of_bijective (LCC_iso_Cond_of_top_ab_hom S V')
-begin
-  split,
-  { apply uniform_space.completion.extension_injective,
-    { apply locally_constant.to_continuous_map_injective },
-    { apply locally_constant.to_continuous_map_uniform_continuous } },
-  { sorry }
-end
+{ to_fun := completion.extension locally_constant.to_continuous_map,
+  map_add' := begin
+    intros f g,
+    apply completion.induction_on₂ f g,
+    { apply is_closed_eq,
+      { exact completion.continuous_extension.comp continuous_add },
+      { exact (completion.continuous_extension.comp continuous_fst).add
+              (completion.continuous_extension.comp continuous_snd), } },
+    { clear f g, intros f g,
+      rw [← completion.coe_add,
+        completion.extension_coe, completion.extension_coe, completion.extension_coe],
+      { refl },
+      all_goals { apply locally_constant.to_continuous_map_uniform_continuous } }
+  end,
+  .. LCC_iso_Cond_of_top_ab_equiv S V' }
 
 lemma LCC_iso_Cond_of_top_ab_natural {S T : Profinite.{u}} (f : S ⟶ T) :
-  LCC_iso_Cond_of_top_ab_equiv S V' ∘
+  LCC_iso_Cond_of_top_ab_add_equiv S V' ∘
   completion.map (locally_constant.comap f) =
   (Condensed.of_top_ab.presheaf.{u} V').map f.op ∘
-  LCC_iso_Cond_of_top_ab_equiv T V' :=
+  LCC_iso_Cond_of_top_ab_add_equiv T V' :=
 begin
-  dsimp [LCC_iso_Cond_of_top_ab_equiv, LCC_iso_Cond_of_top_ab_hom, add_equiv.of_bijective,
-    equiv.of_bijective],
+  dsimp [LCC_iso_Cond_of_top_ab_add_equiv],
   apply completion.ext,
   { refine completion.continuous_extension.comp completion.continuous_map, },
   { refine (Condensed.of_top_ab_map_continuous _ _).comp completion.continuous_extension, },
@@ -145,7 +154,7 @@ instance SemiNormedGroup.normed_group : normed_group V :=
 def LCC_iso_Cond_of_top_ab :
   LCC.{u} V ≅ Condensed.of_top_ab.presheaf.{u} V :=
 nat_iso.of_components
-  (λ S, add_equiv.to_AddCommGroup_iso $ LCC_iso_Cond_of_top_ab_equiv (unop S) V)
+  (λ S, add_equiv.to_AddCommGroup_iso $ LCC_iso_Cond_of_top_ab_add_equiv (unop S) V)
   begin
     intros S T f,
     ext1 φ,
