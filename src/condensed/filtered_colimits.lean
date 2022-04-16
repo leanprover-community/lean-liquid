@@ -190,7 +190,7 @@ def third_iso_aux : cone (pair (op X) (op Y) ⋙ colimit G) :=
     | walking_pair.left := limit.π _ walking_pair.left ≫ (third_iso_aux_left X Y G).hom
     | walking_pair.right := limit.π _ walking_pair.right ≫ (third_iso_aux_right X Y G).hom
     end,
-    naturality' := sorry } }
+    naturality' := admit } }
 
 noncomputable
 def third_iso_aux' : cone (colimit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))).flip) :=
@@ -201,7 +201,7 @@ def third_iso_aux' : cone (colimit (pair (G.flip.obj (op X)) (G.flip.obj (op Y))
     | walking_pair.left := limit.π _ walking_pair.left ≫ (third_iso_aux_left X Y G).inv
     | walking_pair.right := limit.π _ walking_pair.right ≫ (third_iso_aux_right X Y G).inv
     end,
-    naturality' := sorry } }
+    naturality' := admit } }
 -/
 
 noncomputable
@@ -252,15 +252,15 @@ def fourth_iso_aux : cone (pair (op X) (op Y) ⋙ colimit G) :=
     | walking_pair.left := limits.prod.fst
     | walking_pair.right := limits.prod.snd
     end,
-    naturality' := sorry } }
+    naturality' := admit } }
 
 noncomputable
 def fourth_iso : limit (pair (op X) (op Y) ⋙ colimit G) ≅
   prod ((colimit G).obj (op X)) ((colimit G).obj (op Y)) :=
 { hom := prod.lift (limit.π _ walking_pair.left) (limit.π _ walking_pair.right),
   inv := limit.lift _ (fourth_iso_aux _ _ _),
-  hom_inv_id' := sorry,
-  inv_hom_id' := sorry }
+  hom_inv_id' := admit,
+  inv_hom_id' := admit }
 -/
 
 noncomputable
@@ -681,7 +681,7 @@ let e := is_colimit_of_preserves ((evaluation _ _).obj (limit E))
       refine nat_iso.of_components _ _,
       intros k, exact iso.refl _,
       intros k₁ k₂ f, dsimp, simp,
-    end) sorry in
+    end) admit in
 ee ≪≫ has_colimit.iso_of_nat_iso tt
 
 noncomputable
@@ -706,34 +706,34 @@ nat_iso.of_components (λ k,
     refine nat_iso.of_components _ _,
     intros j, exact iso.refl _,
     intros i j f, dsimp, simp,
-  end) sorry
+  end) admit
 
 lemma is_iso : is_iso (comparison_map E G) :=
 begin
   suffices : comparison_map E G =
     (first_iso E G).hom ≫ (second_iso E G).hom ≫ (third_iso E G).hom,
   { rw this, apply_instance },
-  sorry,
+  admit,
 end
 
 -- Use the comparison map above
 variable (K)
-def key : preserves_limits_of_shape K (colimit G) := sorry
+def key : preserves_limits_of_shape K (colimit G) := admit
 
 end is_sheaf_colimit_presheaf_aux
 open is_sheaf_colimit_presheaf_aux
 
 theorem empty_condition_iff_preserves (G : Profiniteᵒᵖ ⥤ C) :
   G.empty_condition' ↔
-  nonempty (preserves_limits_of_shape (discrete pempty.{u+1}) G) := sorry
+  nonempty (preserves_limits_of_shape (discrete pempty.{u+1}) G) := admit
 
 theorem product_condition_iff_preserves (G : Profiniteᵒᵖ ⥤ C) :
   G.product_condition' ↔
-  nonempty (preserves_limits_of_shape (discrete walking_pair.{u+1}) G) := sorry
+  nonempty (preserves_limits_of_shape (discrete walking_pair.{u+1}) G) := admit
 
 theorem equalizer_condition_iff_preserves (G : Profiniteᵒᵖ ⥤ C) :
   G.equalizer_condition' ↔
-  nonempty (preserves_limits_of_shape (walking_parallel_pair.{u+1}) G) := sorry
+  nonempty (preserves_limits_of_shape (walking_parallel_pair.{u+1}) G) := admit
 -/
 
 lemma is_sheaf_colimit_presheaf :
