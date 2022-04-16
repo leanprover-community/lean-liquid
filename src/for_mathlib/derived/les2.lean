@@ -273,16 +273,49 @@ end
 def shift_iso [enough_projectives A]
   (n : ℤ) (X : cochain_complex A ℤ) (Y : bounded_homotopy_category A)
   [((homotopy_category.quotient A (complex_shape.up ℤ)).obj X).is_bounded_above] :
-  (((Ext (n+1)).flip.obj Y).right_op).obj ((of' X)⟦(1:ℤ)⟧) ≅
-  (((Ext n).flip.obj Y).right_op).obj ((of' X)) :=
+  (((Ext (n+1)).flip.obj Y)).obj (opposite.op $ (of' X)⟦(1:ℤ)⟧) ≅
+  (((Ext n).flip.obj Y)).obj (opposite.op $ (of' X)) :=
 begin
   let P := (of' X).replace,
   let e := Ext_iso n (of' X).replace (of' X) Y (of' X).π,
   let e' := Ext_iso (n+1) ((of' X).replace⟦1⟧) ((of' X)⟦1⟧) Y ((of' X).π⟦(1:ℤ)⟧'),
-  dsimp only [functor.right_op_obj],
-  refine (e ≪≫ _ ≪≫ e'.symm).op,
+  refine (e' ≪≫ _ ≪≫ e.symm),
   clear e e',
   sorry
+end
+
+def Ext_δ
+  (n : ℤ)
+  [enough_projectives A]
+  (W : bounded_homotopy_category A)
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj X)]
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj Y)]
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj Z)]
+  (w : ∀ i, short_exact (f.f i) (g.f i)) :
+  ((Ext n).flip.obj W).obj (opposite.op $ of' X) ⟶
+  ((Ext (n+1)).flip.obj W).obj (opposite.op $ of' Z) :=
+(shift_iso n X W).inv ≫ (connecting_hom' f g (n+1) W w).unop
+
+def Ext_five_term_exact_seq'
+  (n : ℤ)
+  [enough_projectives A]
+  (W : bounded_homotopy_category A)
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj X)]
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj Y)]
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj Z)]
+  (w : ∀ i, short_exact (f.f i) (g.f i)) :
+  let E := λ n, ((Ext n).flip.obj W) in
+  exact_seq Ab.{v} $
+    [ (E n).map (of_hom g).op
+    , (E n).map (of_hom f).op
+    , Ext_δ f g n W w
+    , (E (n+1)).map (of_hom g).op ] :=
+begin
+  refine (Ext_five_term_exact_seq f g n W w).pair.unop.cons _,
+  refine exact.cons _ (exact.exact_seq _),
+  { sorry },
+  { rw [Ext_δ, exact_iso_comp],
+    exact ((Ext_five_term_exact_seq f g (n+1) W w).drop 1).pair.unop, }
 end
 
 end bounded_homotopy_category
