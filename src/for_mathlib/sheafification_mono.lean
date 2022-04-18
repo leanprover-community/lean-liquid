@@ -14,29 +14,51 @@ universe u
 variables {C : Type (u+1)} [category.{u} C] (J : grothendieck_topology C)
 variables {F : Cᵒᵖ ⥤ Ab.{u+1}} {G : Sheaf J Ab.{u+1}}
 
+@[simps]
 def kernel_fork_point (η : F ⟶ G.val) : Cᵒᵖ ⥤ Ab.{u+1} :=
 { obj := λ X, AddCommGroup.of (η.app X).ker,
   map := λ X Y f,
-  { to_fun := λ t, ⟨F.map f t.1, sorry⟩,
-    map_zero' := sorry,
-    map_add' := sorry },
-  map_id' := sorry,
-  map_comp' := sorry }
+  { to_fun := λ t, ⟨F.map f t.1, begin
+      change (_ ≫ η.app Y) _ = 0, rw nat_trans.naturality,
+      rcases t with ⟨t, (ht : η.app X t = 0)⟩, dsimp,
+      simp [comp_apply, ht],
+    end⟩,
+    map_zero' := by { ext, apply add_monoid_hom.map_zero, },
+    map_add' := by { intros, ext, apply add_monoid_hom.map_add } },
+  map_id' := λ X, by { ext, simp, },
+  map_comp' := λ X Y Z f g, by { ext, simp } }
 
+@[simps]
 def kernel_fork_ι (η : F ⟶ G.val) : kernel_fork_point J η ⟶ F :=
 { app := λ T, (η.app _).ker.subtype,
-  naturality' := sorry }
+  naturality' := begin
+    intros X Y f, ext,
+    simp only [comp_apply, add_subgroup.coe_subtype,
+      kernel_fork_point_map_apply_coe, subtype.val_eq_coe],
+  end }
 
+@[simps]
 def kernel_fork (η : F ⟶ G.val) : kernel_fork η :=
-kernel_fork.of_ι (kernel_fork_ι _ η) sorry
+kernel_fork.of_ι (kernel_fork_ι _ η)
+begin
+  ext X ⟨x,hx⟩, simpa using hx,
+end
 
 def is_limit_kernel_fork (η : F ⟶ G.val) : is_limit (kernel_fork J η) :=
 fork.is_limit.mk _ (λ S,
 { app := λ X,
-  { to_fun := λ t, ⟨(S.π.app walking_parallel_pair.zero).app _ t, sorry⟩,
-    map_zero' := sorry,
-    map_add' := sorry },
-  naturality' := sorry }) sorry sorry
+  { to_fun := λ t, ⟨(S.π.app walking_parallel_pair.zero).app _ t, begin
+      change (_ ≫ η.app _) _ = _, rw ← nat_trans.comp_app,
+      rw S.condition, simp,
+    end⟩,
+    map_zero' := by { ext, apply add_monoid_hom.map_zero },
+    map_add' := by { intros, ext, apply add_monoid_hom.map_add } },
+  naturality' := begin
+    intros X Y f, ext,
+    simp only [comp_apply, add_monoid_hom.coe_mk,
+      add_subgroup.coe_mk, kernel_fork_X_map_apply_coe],
+    simpa only [← comp_apply, nat_trans.naturality],
+  end }) sorry sorry
 
 noncomputable instance : abelian (Cᵒᵖ ⥤ Ab.{u+1}) :=
 functor.abelian.{(u+2) u (u+1)}
