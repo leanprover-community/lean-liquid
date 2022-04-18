@@ -507,13 +507,7 @@ begin
         add_zero], exact this.2, simp only [zero_lt_bit0, zero_lt_one]},
 end
 
-example (a b : ℝ) : a ≤ b ∧ b < a → false :=
-begin
-  intros h1,
-  linarith,
-end
-
-lemma complement_of_balls_nonpos {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) (ε : ℝ) (hε : ε ≤ 0):
+lemma complement_of_balls_nonpos {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) {ε : ℝ} (hε : ε ≤ 0):
  ∃ (x₁ x₂ : (closed_ball 0 c)), ∃ (δ₁ δ₂ : ℝ),
   ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ :=
 begin
@@ -530,16 +524,29 @@ begin
   exact x.2,
 end
 
-lemma complement_of_balls_pos_left {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) (ε : ℝ) (hε : 0 < ε):
+
+-- (h_right : ε + y ≤ c) (Nh_left : ¬ - (c : ℝ) ≤ -ε + y)
+
+lemma complement_of_balls_pos_Nleft {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) {ε : ℝ} (hε : 0 < ε)
+ (Nh_left : ¬ - (c : ℝ) ≤ -ε + y) (h_right : ε + y ≤ c) :
+ ∃ (x₁ x₂ : (closed_ball 0 c)), ∃ (δ₁ δ₂ : ℝ),
+  ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ :=
+begin
+  sorry
+end
+
+lemma complement_of_balls_pos_Nright {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) {ε : ℝ} (hε : 0 < ε)
+  (h_left : - (c : ℝ) ≤ -ε + y) (Nh_right : ¬ ε + y ≤ c) :
  ∃ (x₁ x₂ : (closed_ball 0 c)), ∃ (δ₁ δ₂ : ℝ),
   ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ := sorry
 
-lemma complement_of_balls_pos_right {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) (ε : ℝ) (hε : 0 < ε):
+lemma complement_of_balls_pos_NN {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) {ε : ℝ} (hε : 0 < ε)
+  (Nh_left : ¬ - (c : ℝ) ≤ -ε + y) (Nh_right : ¬ ε + y ≤ c) :
  ∃ (x₁ x₂ : (closed_ball 0 c)), ∃ (δ₁ δ₂ : ℝ),
   ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ := sorry
 
-lemma complement_of_balls_pos_centre {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) (ε : ℝ) (hε : 0 < ε)
-  (h_right : ¬ (c : ℝ) < ε + y) (h_left : ¬ -ε + y < -c) :
+lemma complement_of_balls_pos_centre {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) {ε : ℝ} (hε : 0 < ε)
+  (h_right : ε + y ≤ c) (h_left : - (c : ℝ) ≤ -ε + y) :
   ∃ (x₁ x₂ : (closed_ball 0 c)), ∃ (δ₁ δ₂ : ℝ),
   ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ :=
 begin
@@ -547,14 +554,8 @@ begin
   set x₁ := (- ε + y - c) / 2 with hx₁,
   set δ₂ := (-ε - y + c) / 2 with hδ₂,
   set x₂ := (ε + y + c) / 2 with hx₂,
-  -- by_cases h_right : (c : ℝ) < ε + y,
-  -- {sorry},--only an open on the left is needed
-  -- by_cases h_left : - ε + y < - c,
-  -- {sorry}, -- only an open on the  right is needed
-  -- use x₁,
-  -- exact aux_mem_left c hx₁ hε (not_lt.mp h_left),
-  use [x₁, aux_mem_left c hx₁ hε (not_lt.mp h_left), x₂, aux_mem_right c hx₂ hε
-      (not_lt.mp h_right), δ₁, δ₂],
+  use [x₁, aux_mem_left c hx₁ hε h_left, x₂, aux_mem_right c hx₂ hε
+      h_right, δ₁, δ₂],
     simp only [compl_union],
     ext a,
     simp only [mem_inter_eq, mem_compl_iff, mem_closed_ball, not_le],
@@ -585,24 +586,19 @@ begin
           mul_lt_mul_left, ← sub_lt_iff_lt_add'],
         exact ha.1,
         repeat {simp only [zero_lt_bit0, zero_lt_one]}}},
-    -- sorry,
-
     { rintros ⟨h₁, h₂⟩,
-
-      -- -- have hy := y.2,
       have ha := a.2,
       rw [mem_closed_ball, subtype.val_eq_coe, real.dist_0_eq_abs, abs_le] at ha,
-      -- -- rw [mem_closed_ball, subtype.val_eq_coe, real.dist_0_eq_abs, abs_le] at hy,
       rw [subtype.dist_eq, real.dist_eq, subtype.coe_mk, lt_abs] at h₁ h₂,
       have H₁ : x₁ + δ₁ = -ε + y ∧ x₁ - δ₁ = - c,
       { rw [hx₁, hδ₁, ← add_div, ← sub_div],
         split,
         repeat {ring}},
-      replace h₁ : δ₁ < a - x₁,
-      { rw neg_sub at h₁,
-        nth_rewrite 1 lt_sub at h₁,
-        rw H₁.2 at h₁,
-        exact (or_iff_left (not_lt.mpr ha.1)).mp h₁ },
+      replace h₁ :x₁ + δ₁ < a,
+      { cases h₁ with hh₁,-- [FAE] Need to split cases to avoid `result contains metavariable`
+        rwa lt_sub_iff_add_lt' at hh₁,
+        rw [neg_sub, lt_sub, H₁.2] at h₁,
+        linarith},
       have H₂ : x₂ - δ₂ = ε + y ∧ δ₂ + x₂ = c,
       { rw [hx₂, hδ₂, ← add_div, ← sub_div],
         split,
@@ -610,18 +606,25 @@ begin
       replace h₂ : δ₂ < x₂ - a,
       { rw [neg_sub, lt_sub_iff_add_lt, H₂.2] at h₂,
         exact (or_iff_right (not_lt.mpr ha.2)).mp h₂ },
-      rw [mem_ball, subtype.dist_eq, real.dist_eq, abs_lt, lt_sub_iff_add_lt, ← H₁.1],
-      sorry,
-      -- split,
-      -- linarith,
-      -- linarith,
-      },
-      -- recover,
+        rw [mem_ball, subtype.dist_eq, real.dist_eq, abs_lt, lt_sub_iff_add_lt, ← H₁.1],
+        split,
+        all_goals {linarith} },
 end
 
 lemma complement_of_balls' {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) (ε : ℝ) :
  ∃ (x₁ x₂ : (closed_ball 0 c)), ∃ (δ₁ δ₂ : ℝ),
-  ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ := sorry
+  ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ :=
+begin
+  by_cases hε : 0 < ε,
+  { by_cases h_right : ε + y ≤ c,
+    by_cases h_left : - (c : ℝ) ≤ - ε + y,
+    { exact complement_of_balls_pos_centre y hε h_right h_left },
+    { exact complement_of_balls_pos_Nleft y hε h_left h_right },
+    { by_cases h_left : - (c : ℝ) ≤ - ε + y,
+    { exact complement_of_balls_pos_Nright y hε h_left h_right, },
+    { exact complement_of_balls_pos_NN y hε h_left h_right }}},
+  { exact complement_of_balls_nonpos y (not_lt.mp hε) },
+end
 
 
 -- lemma continuous_if_preimage_closed {c : ℝ≥0} (f : X → (Icc (-c : ℝ) c))
