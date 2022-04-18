@@ -79,7 +79,27 @@ begin
   { apply is_iso_to_sheafify, exact G.2 },
   symmetry,
   exact as_iso (J.to_sheafify G.val),
-  sorry,
+  rintro (_|_) (_|_) (_|_),
+  { dsimp, simp, erw J.sheafify_map_id, refl },
+  { dsimp, rw is_iso.comp_inv_eq, simp,
+    apply J.sheafify_hom_ext,
+    apply_with J.sheafify_is_sheaf { instances := ff },
+    any_goals { apply_instance },
+    intros X, apply_instance,
+    simp only [to_sheafify_naturality_assoc],
+    rw [← J.sheafify_map_comp, J.to_sheafify_sheafify_lift] },
+  { dsimp,
+    simp only [comp_zero, preadditive.is_iso.comp_right_eq_zero],
+    apply J.sheafify_hom_ext,
+    apply_with J.sheafify_is_sheaf { instances := ff },
+    any_goals { apply_instance },
+    intros x, apply_instance,
+    simp only [comp_zero],
+    rw [← J.to_sheafify_naturality, zero_comp] },
+  { dsimp, simp only [is_iso.comp_inv_eq],
+    simp only [category.assoc, is_iso.eq_inv_comp],
+    erw [(parallel_pair _ _).map_id, J.sheafify_map_id],
+    dsimp, simp only [category.id_comp, category.comp_id], }
 end
 
 lemma is_zero_iff (F : Cᵒᵖ ⥤ Ab.{u+1}) : is_zero F ↔ ∀ X, is_zero (F.obj X) := sorry
