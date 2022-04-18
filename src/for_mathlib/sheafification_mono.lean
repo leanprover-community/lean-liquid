@@ -82,10 +82,69 @@ begin
   sorry,
 end
 
+lemma is_zero_iff (F : Cᵒᵖ ⥤ Ab.{u+1}) : is_zero F ↔ ∀ X, is_zero (F.obj X) := sorry
+
+lemma is_zero_Ab (X : Ab) (hX : ∀ t : X, t = 0) : is_zero X := sorry
+
+lemma is_zero_colimit_of_is_zero {J : Type u} [small_category J] (F : J ⥤ Ab.{u})
+  (hF : ∀ X, is_zero (F.obj X)) : is_zero (colimit F) := sorry
+
+lemma is_zero_limit_of_is_zero {J : Type u} [small_category J] (F : J ⥤ Ab.{u})
+  (hF : ∀ X, is_zero (F.obj X)) : is_zero (limit F) := sorry
+
+lemma is_zero_plus_of_is_zero (F : Cᵒᵖ ⥤ Ab.{u+1})
+  (hF : is_zero F) : is_zero (J.plus_obj F) :=
+begin
+  rw is_zero_iff, intros X,
+  apply is_zero_colimit_of_is_zero, intros W,
+  rw is_zero_iff at hF,
+  apply is_zero_limit_of_is_zero, intros P,
+  cases P; apply hF,
+end
+
+lemma eq_zero_of_exists {J : Type u} [small_category J] [is_filtered J]
+  (F : J ⥤ Ab.{u}) (j) (t : F.obj j)
+  (ht : ∃ (e : J) (q : j ⟶ e), F.map q t = 0) : colimit.ι F j t = 0 := sorry
+
+lemma eq_zero_of_forall {J : Type u} [small_category J]
+  (F : J ⥤ Ab.{u}) (t : limit F) (ht : ∀ j, limit.π F j t = 0) : t = 0 := sorry
+
 lemma is_zero_of_exists_cover (F : Cᵒᵖ ⥤ Ab.{u+1})
   (h : ∀ (B : C) (t : F.obj (op B)), ∃ W : J.cover B,
     ∀ f : W.arrow, F.map f.f.op t = 0) : is_zero (J.sheafify F) :=
-sorry
+begin
+  -- This proof is a mess...
+  apply is_zero_plus_of_is_zero,
+  rw is_zero_iff,
+  intros B, tactic.op_induction',
+  apply is_zero_Ab,
+  intros t,
+  obtain ⟨W,y,rfl⟩ := concrete.is_colimit_exists_rep _ (colimit.is_colimit _) t,
+  apply eq_zero_of_exists,
+  let z := concrete.multiequalizer_equiv _ y,
+  choose Ws hWs using λ i, (h _ (z.1 i)),
+  let T : J.cover B := W.unop.bind Ws, use (op T),
+  use (W.unop.bind_to_base _).op,
+  apply_fun concrete.multiequalizer_equiv _, swap, apply_instance,
+  ext,
+  dsimp, rw add_monoid_hom.map_zero,
+  dsimp [diagram],
+  simp only [← comp_apply, multiequalizer.lift_ι],
+  dsimp [cover.index] at x,
+  dsimp only [cover.index] at hWs,
+  dsimp [cover.arrow.map],
+  cases x with Z x hx, rcases hx with ⟨A,g,f,hf,hA,rfl⟩,
+  dsimp at hA ⊢,
+  specialize hWs ⟨_,f,hf⟩ ⟨_,g,hA⟩,
+  convert hWs,
+  dsimp [z],
+  simp only [← comp_apply], congr' 2,
+  rw ← category.comp_id (multiequalizer.ι ((unop W).index F) {Y := Z, f := g ≫ f, hf := _}),
+  let R : W.unop.relation := ⟨_,_,_, g, 𝟙 _, f, g ≫ f, _, _, _⟩,
+  symmetry,
+  convert multiequalizer.condition (W.unop.index F) R,
+  dsimp [cover.index], rw F.map_id, rw category.id_comp,
+end
 
 lemma sheafify_lift_mono_of_exists_cover (η : F ⟶ G.val)
   (h : ∀ (B : C) (t : F.obj (op B)) (ht : η.app _ t = 0),
