@@ -507,12 +507,6 @@ begin
         add_zero], exact this.2, simp only [zero_lt_bit0, zero_lt_one]},
 end
 
-example (a b : ℝ) : a ≤ b ∧ b < a → false :=
-begin
-  intros h1,
-  linarith,
-end
-
 lemma complement_of_balls_nonpos {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) {ε : ℝ} (hε : ε ≤ 0):
  ∃ (x₁ x₂ : (closed_ball 0 c)), ∃ (δ₁ δ₂ : ℝ),
   ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ :=
@@ -530,11 +524,24 @@ begin
   exact x.2,
 end
 
-lemma complement_of_balls_pos_left {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) {ε : ℝ} (hε : 0 < ε):
+
+-- (h_right : ε + y ≤ c) (Nh_left : ¬ - (c : ℝ) ≤ -ε + y)
+
+lemma complement_of_balls_pos_Nleft {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) {ε : ℝ} (hε : 0 < ε)
+ (Nh_left : ¬ - (c : ℝ) ≤ -ε + y) (h_right : ε + y ≤ c) :
+ ∃ (x₁ x₂ : (closed_ball 0 c)), ∃ (δ₁ δ₂ : ℝ),
+  ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ :=
+begin
+  sorry
+end
+
+lemma complement_of_balls_pos_Nright {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) {ε : ℝ} (hε : 0 < ε)
+  (h_left : - (c : ℝ) ≤ -ε + y) (Nh_right : ¬ ε + y ≤ c) :
  ∃ (x₁ x₂ : (closed_ball 0 c)), ∃ (δ₁ δ₂ : ℝ),
   ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ := sorry
 
-lemma complement_of_balls_pos_right {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) {ε : ℝ} (hε : 0 < ε):
+lemma complement_of_balls_pos_NN {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) {ε : ℝ} (hε : 0 < ε)
+  (Nh_left : ¬ - (c : ℝ) ≤ -ε + y) (Nh_right : ¬ ε + y ≤ c) :
  ∃ (x₁ x₂ : (closed_ball 0 c)), ∃ (δ₁ δ₂ : ℝ),
   ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ := sorry
 
@@ -612,9 +619,10 @@ begin
   { by_cases h_right : ε + y ≤ c,
     by_cases h_left : - (c : ℝ) ≤ - ε + y,
     { exact complement_of_balls_pos_centre y hε h_right h_left },
-    { sorry}, --exact complement_of_balls_pos_left
-    { sorry}, --exact complement_of_balls_pos_right  },
-  },
+    { exact complement_of_balls_pos_Nleft y hε h_left h_right },
+    { by_cases h_left : - (c : ℝ) ≤ - ε + y,
+    { exact complement_of_balls_pos_Nright y hε h_left h_right, },
+    { exact complement_of_balls_pos_NN y hε h_left h_right }}},
   { exact complement_of_balls_nonpos y (not_lt.mp hε) },
 end
 
