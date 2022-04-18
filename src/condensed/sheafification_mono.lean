@@ -47,5 +47,24 @@ theorem Condensed_Ab_sheafify_lift_mono_iff :
       ∀ a : α, F.map (π a).op t = 0) :=
 begin
   rw sheafify_lift_mono_iff proetale_topology.{u},
-  sorry,
+  split,
+  { intros h B t ht,
+    specialize h B t ht,
+    obtain ⟨W,hw⟩ := h,
+    rcases W with ⟨W,hW⟩,
+    have HW : W ∈ proetale_topology B := hW,
+    rcases hW with ⟨W, ⟨α, hα, X, π, surj, rfl⟩, h⟩,
+    use [α, hα, X, π, surj], intros a,
+    let W' : proetale_topology.cover B := ⟨W,HW⟩,
+    let ff : W'.arrow := _,
+    swap, { constructor, apply h, use a },
+    specialize hw ff, exact hw },
+  { rintros h B t ht, specialize h B t ht,
+    obtain ⟨α, hα, X, π, surj, hh⟩ := h,
+    refine ⟨⟨sieve.generate (presieve.of_arrows X π),_⟩,_⟩,
+    constructor, use [α, hα, X, π, surj], exact sieve.le_generate (presieve.of_arrows X π),
+    rintros ⟨X,f,⟨W,e1,e2,hhh,rfl⟩⟩,
+    dsimp, simp only [F.map_comp, comp_apply],
+    obtain ⟨a⟩ := hhh, rw hh,
+    rw add_monoid_hom.map_zero }
 end
