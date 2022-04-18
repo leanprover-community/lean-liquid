@@ -242,10 +242,7 @@ open metric
 
 def equiv_filtration_ϖ_ball (c : ℝ≥0) : filtration (ℳ p ϖ) c ≃ closed_ball (0 : ℝ)
   (c ^ (p⁻¹ : ℝ) : ℝ≥0):=
-begin
-  fconstructor,
-  { intro f,
-    use f.1 punit.star,
+{ to_fun := λ f, ⟨f.1 punit.star, begin
     simp only [mem_closed_ball_zero_iff],
     have hf := (mem_filtration_iff f.1 c).mp f.2,
     simp only [← nnreal.coe_le_coe, real_measures.coe_nnnorm, nnnorm_def, fintype.univ_punit, finset.sum_singleton, norm_def]
@@ -256,9 +253,8 @@ begin
     exact (nnreal.coe_ne_zero.mpr (ne_of_gt (fact.out _))),
     rw ← nnreal.coe_zero,
     exact nnreal.coe_lt_coe.mpr (fact.out _),
-  },
-  { intro x,
-    use (λ _, x),
+  end⟩,
+  inv_fun := λ x, ⟨λ _, x, begin
     have := @real.rpow_le_rpow_iff (|↑x| : ℝ) (c ^ (p⁻¹ : ℝ)) p _ _ _,
     rw [← real.rpow_mul, inv_mul_cancel, real.rpow_one] at this,
     have hx := x.2,
@@ -273,15 +269,19 @@ begin
     { rw ← nnreal.coe_rpow,
      exact (c ^ (p⁻¹ : ℝ)).2 },
     { rw [← nnreal.coe_zero, nnreal.coe_lt_coe],
-      exact fact.out _ } },
-    { intro,
+      exact fact.out _ }
+  end⟩,
+  left_inv := begin
+    intro,
       ext,
       simp only [subtype.val_eq_coe, subtype.coe_mk],
       apply congr_arg,
-      simp only [eq_iff_true_of_subsingleton] },
-    { intro,
-      simp only [subtype.coe_eta] },
-end
+      simp only [eq_iff_true_of_subsingleton]
+  end,
+  right_inv := begin
+    intro,
+    simp only [subtype.coe_eta]
+  end }
 
 def homeo_filtration_ϖ_ball (c : ℝ≥0) : filtration (ℳ p ϖ) c ≃ₜ closed_ball (0 : ℝ)
   (c ^ (p⁻¹ : ℝ) : ℝ≥0) :=
