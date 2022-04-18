@@ -25,6 +25,5 @@ begin
   rw add_monoid_hom.injective_iff, intros t ht,
   obtain ⟨W,E,rfl⟩ := limits.concrete.colimit_exists_rep _ t,
   let E' := limits.concrete.multiequalizer_equiv _ E,
-  obtain ⟨x,hx⟩ := E',
-  sorry
+  sorry,
 end
