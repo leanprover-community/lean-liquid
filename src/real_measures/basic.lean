@@ -286,8 +286,14 @@ def equiv_filtration_ϖ_ball (c : ℝ≥0) : filtration (ℳ p ϖ) c ≃ closed_
 def homeo_filtration_ϖ_ball (c : ℝ≥0) : filtration (ℳ p ϖ) c ≃ₜ closed_ball (0 : ℝ)
   (c ^ (p⁻¹ : ℝ) : ℝ≥0) :=
 { to_equiv := equiv_filtration_ϖ_ball c,
-  continuous_to_fun := sorry,
-  continuous_inv_fun := sorry
+  continuous_to_fun := begin
+    refine continuous_subtype_mk (λ (x : {F // ∥F∥₊ ≤ c}), equiv_filtration_ϖ_ball._proof_1 c x) _,
+    exact continuous.comp (continuous_apply punit.star) continuous_subtype_coe,
+  end,
+  continuous_inv_fun := begin
+    simp only [equiv_filtration_ϖ_ball],
+    continuity,
+  end
 }
 instance {c : ℝ≥0} : has_zero (closed_ball (0 : ℝ) c):=
   { zero := ⟨0, by {simp only [mem_closed_ball_zero_iff, norm_zero, nnreal.zero_le_coe]}⟩}
@@ -296,9 +302,17 @@ lemma homeo_filtration_ϖ_ball_preimage {c ε: ℝ≥0} (h : ε ^ (p : ℝ) ≤ 
   (homeo_filtration_ϖ_ball c)⁻¹' (closed_ball 0 ε) =
   (set.range (set.inclusion (@pseudo_normed_group.filtration_mono (ℳ p ϖ) _ _ _ h))) :=
 begin
-  sorry,
+  ext ⟨x, hx⟩,
+  simp only [homeo_filtration_ϖ_ball, equiv_filtration_ϖ_ball, subtype.val_eq_coe, subtype.coe_mk,
+    homeomorph.homeomorph_mk_coe, equiv.coe_fn_mk, set.mem_preimage, mem_closed_ball, dist_le_coe,
+    set.range_inclusion, set.mem_set_of_eq],
+  change _ ↔ ∑ s : punit, ∥x s∥₊ ^ (p:ℝ) ≤ _,
+  simp only [fintype.univ_punit, finset.sum_singleton],
+  rw nnreal.rpow_le_rpow_iff,
+  { convert iff.rfl,
+    convert (sub_zero _).symm },
+  { norm_cast, exact fact.elim infer_instance },
 end
-
 
 -- **[FAE]** The following ones with `_Icc_` might be useless
 
