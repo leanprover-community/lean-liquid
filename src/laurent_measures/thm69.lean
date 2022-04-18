@@ -130,16 +130,67 @@ variable {S : Fintype}
 local notation `ℒ` := laurent_measures r
 local notation `ℳ` := real_measures p
 
+theorem nnreal.rpow_int_cast (x : nnreal) (n : ℤ) : x ^ (n : ℝ) = x ^ n :=
+begin
+  apply subtype.ext,
+  simp,
+end
 
 def θ : ℒ S → ℳ S := ϑ (1 / 2 : ℝ) r p S
 
 lemma θ_natural [fact (0 < p)] [fact (p ≤ 1)] (S T : Fintype) (f : S ⟶ T) (F : ℒ S) (t : T) :
   θ (map f F) t = real_measures.map f (θ F) t :=
 begin
-  dsimp only [θ],
-  rw ϑ_eq_ϑ',
-  dsimp only [ϑ', seval_ℒ],
-  sorry,
+  simp only [θ, ϑ, one_div, map_apply, int.cast_sum, inv_zpow', zpow_neg₀, real_measures.map_apply],
+  rw ← tsum_sum,
+  { congr', ext n, exact sum_mul, },
+  intros,
+  rw mem_filter at H,
+  rcases H with ⟨-, rfl⟩,
+  have := F.summable i,
+
+  refine summable.add_compl (_ : summable (_ ∘ (coe : {n : ℤ | 0 ≤ n} → ℤ))) _,
+  {
+    have moo := summable.comp_injective this
+      (subtype.coe_injective : function.injective (coe : {n : ℤ | 0 ≤ n} → ℤ)),
+    refine summable_of_norm_bounded _ (moo) _, clear moo this,
+--    have foo := summable.summable_of_eq_zero_or_self this,
+    rintro ⟨n, (hn : 0 ≤ n)⟩,
+    simp only [function.comp_app, subtype.coe_mk, norm_mul, norm_inv, norm_zpow, real.norm_two],
+    rw (F i n).norm_cast_real,
+    apply mul_le_mul_of_nonneg_left _ (norm_nonneg _),
+    delta r,
+    delta r,
+    rw (by push_cast : ((2 : ℝ) ^ n)⁻¹ = ((2 ^ n)⁻¹ : nnreal)),
+    norm_cast,
+    rw [← nnreal.rpow_int_cast, ← inv_rpow],
+    rw nnreal.rpow_int_cast,
+    set m := n.nat_abs with hm,
+    have hmn : n = m := by { rw hm, exact int.eq_nat_abs_of_zero_le hn },
+    rw hmn,
+    norm_cast,
+    apply pow_le_pow_of_le, clear hn hmn hm m n,
+    rw (show (2 : nnreal)⁻¹ = (1 / 2) ^ (1 : ℝ), by simp;norm_num),
+    refine rpow_le_rpow_of_exponent_ge _ _ _,
+    { simp },
+    { simp, norm_num },
+    { exact_mod_cast (fact.elim infer_instance),
+      apply_instance, } },
+  {
+    obtain ⟨d, hd⟩ := exists_bdd_filtration (r_pos) (r_lt_one) F,
+    apply summable_of_ne_finset_zero, -- missing finset
+    swap, exact (finset.subtype _ (finset.Ico d 0)),
+    rintros ⟨z, (hz : ¬ (0 ≤ z))⟩ hz2,
+    simp only [subtype.coe_mk, mul_eq_zero, int.cast_eq_zero, inv_eq_zero],
+    left,
+    apply hd,
+    simp only [mem_subtype, subtype.coe_mk, mem_Ico, not_and, not_le] at hz2,
+    by_contra h,
+    push_neg at h,
+    apply hz,
+    specialize hz2 h,
+    push_neg at hz2,
+    exact hz2 },
 end
 
 variables [fact (p < 1)]

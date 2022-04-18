@@ -242,10 +242,7 @@ open metric
 
 def equiv_filtration_ϖ_ball (c : ℝ≥0) : filtration (ℳ p ϖ) c ≃ closed_ball (0 : ℝ)
   (c ^ (p⁻¹ : ℝ) : ℝ≥0):=
-begin
-  fconstructor,
-  { intro f,
-    use f.1 punit.star,
+{ to_fun := λ f, ⟨f.1 punit.star, begin
     simp only [mem_closed_ball_zero_iff],
     have hf := (mem_filtration_iff f.1 c).mp f.2,
     simp only [← nnreal.coe_le_coe, real_measures.coe_nnnorm, nnnorm_def, fintype.univ_punit, finset.sum_singleton, norm_def]
@@ -256,9 +253,8 @@ begin
     exact (nnreal.coe_ne_zero.mpr (ne_of_gt (fact.out _))),
     rw ← nnreal.coe_zero,
     exact nnreal.coe_lt_coe.mpr (fact.out _),
-  },
-  { intro x,
-    use (λ _, x),
+  end⟩,
+  inv_fun := λ x, ⟨λ _, x, begin
     have := @real.rpow_le_rpow_iff (|↑x| : ℝ) (c ^ (p⁻¹ : ℝ)) p _ _ _,
     rw [← real.rpow_mul, inv_mul_cancel, real.rpow_one] at this,
     have hx := x.2,
@@ -273,21 +269,31 @@ begin
     { rw ← nnreal.coe_rpow,
      exact (c ^ (p⁻¹ : ℝ)).2 },
     { rw [← nnreal.coe_zero, nnreal.coe_lt_coe],
-      exact fact.out _ } },
-    { intro,
+      exact fact.out _ }
+  end⟩,
+  left_inv := begin
+    intro,
       ext,
       simp only [subtype.val_eq_coe, subtype.coe_mk],
       apply congr_arg,
-      simp only [eq_iff_true_of_subsingleton] },
-    { intro,
-      simp only [subtype.coe_eta] },
-end
+      simp only [eq_iff_true_of_subsingleton]
+  end,
+  right_inv := begin
+    intro,
+    simp only [subtype.coe_eta]
+  end }
 
 def homeo_filtration_ϖ_ball (c : ℝ≥0) : filtration (ℳ p ϖ) c ≃ₜ closed_ball (0 : ℝ)
   (c ^ (p⁻¹ : ℝ) : ℝ≥0) :=
 { to_equiv := equiv_filtration_ϖ_ball c,
-  continuous_to_fun := sorry,
-  continuous_inv_fun := sorry
+  continuous_to_fun := begin
+    refine continuous_subtype_mk (λ (x : {F // ∥F∥₊ ≤ c}), equiv_filtration_ϖ_ball._proof_1 c x) _,
+    exact continuous.comp (continuous_apply punit.star) continuous_subtype_coe,
+  end,
+  continuous_inv_fun := begin
+    simp only [equiv_filtration_ϖ_ball],
+    continuity,
+  end
 }
 instance {c : ℝ≥0} : has_zero (closed_ball (0 : ℝ) c):=
   { zero := ⟨0, by {simp only [mem_closed_ball_zero_iff, norm_zero, nnreal.zero_le_coe]}⟩}
@@ -296,57 +302,65 @@ lemma homeo_filtration_ϖ_ball_preimage {c ε: ℝ≥0} (h : ε ^ (p : ℝ) ≤ 
   (homeo_filtration_ϖ_ball c)⁻¹' (closed_ball 0 ε) =
   (set.range (set.inclusion (@pseudo_normed_group.filtration_mono (ℳ p ϖ) _ _ _ h))) :=
 begin
-  sorry,
+  ext ⟨x, hx⟩,
+  simp only [homeo_filtration_ϖ_ball, equiv_filtration_ϖ_ball, subtype.val_eq_coe, subtype.coe_mk,
+    homeomorph.homeomorph_mk_coe, equiv.coe_fn_mk, set.mem_preimage, mem_closed_ball, dist_le_coe,
+    set.range_inclusion, set.mem_set_of_eq],
+  change _ ↔ ∑ s : punit, ∥x s∥₊ ^ (p:ℝ) ≤ _,
+  simp only [fintype.univ_punit, finset.sum_singleton],
+  rw nnreal.rpow_le_rpow_iff,
+  { convert iff.rfl,
+    convert (sub_zero _).symm },
+  { norm_cast, exact fact.elim infer_instance },
 end
-
 
 -- **[FAE]** The following ones with `_Icc_` might be useless
 
-def equiv_filtration_ϖ_Icc (c : ℝ≥0) : filtration (ℳ p ϖ) c ≃ set.Icc ((- c ^ (p⁻¹ : ℝ)) : ℝ)
-  (c ^ (p⁻¹ : ℝ)):=
-begin
-  fconstructor,
-  { intro f,
-    exact ⟨f.1 punit.star, apply_mem_Icc_of_nnnorm_le _ _ _ f.2⟩ },
-  { intro x,
-    use (λ _, x),
-    have := @real.rpow_le_rpow_iff (|↑x| : ℝ) (c ^ (p⁻¹ : ℝ)) p _ _ _,
-    rw [← real.rpow_mul, inv_mul_cancel, real.rpow_one] at this,
-    have hx := x.2,
-    simpa only [mem_filtration_iff, subtype.val_eq_coe, set.mem_Icc, nnnorm, fintype.univ_punit,
-      finset.sum_singleton, ← nnreal.coe_le_coe, nnreal.coe_rpow, subtype.coe_mk, real.norm_eq_abs,
-      this, abs_le],
-    { rw nnreal.coe_ne_zero,
-      exact ne_of_gt (fact.out _) },
-    { exact c.2 },
-    { exact abs_nonneg x },
-    { rw ← nnreal.coe_rpow,
-     exact (c ^ (p⁻¹ : ℝ)).2 },
-    { rw [← nnreal.coe_zero, nnreal.coe_lt_coe],
-      exact fact.out _ } },
-    { intro f,
-      ext s,
-      simp only [subtype.val_eq_coe, subtype.coe_mk],
-      apply congr_arg,
-      simp only [eq_iff_true_of_subsingleton] },
-    { intro x,
-      simp only [subtype.coe_eta] },
-end
+-- def equiv_filtration_ϖ_Icc (c : ℝ≥0) : filtration (ℳ p ϖ) c ≃ set.Icc ((- c ^ (p⁻¹ : ℝ)) : ℝ)
+--   (c ^ (p⁻¹ : ℝ)):=
+-- begin
+--   fconstructor,
+--   { intro f,
+--     exact ⟨f.1 punit.star, apply_mem_Icc_of_nnnorm_le _ _ _ f.2⟩ },
+--   { intro x,
+--     use (λ _, x),
+--     have := @real.rpow_le_rpow_iff (|↑x| : ℝ) (c ^ (p⁻¹ : ℝ)) p _ _ _,
+--     rw [← real.rpow_mul, inv_mul_cancel, real.rpow_one] at this,
+--     have hx := x.2,
+--     simpa only [mem_filtration_iff, subtype.val_eq_coe, set.mem_Icc, nnnorm, fintype.univ_punit,
+--       finset.sum_singleton, ← nnreal.coe_le_coe, nnreal.coe_rpow, subtype.coe_mk, real.norm_eq_abs,
+--       this, abs_le],
+--     { rw nnreal.coe_ne_zero,
+--       exact ne_of_gt (fact.out _) },
+--     { exact c.2 },
+--     { exact abs_nonneg x },
+--     { rw ← nnreal.coe_rpow,
+--      exact (c ^ (p⁻¹ : ℝ)).2 },
+--     { rw [← nnreal.coe_zero, nnreal.coe_lt_coe],
+--       exact fact.out _ } },
+--     { intro f,
+--       ext s,
+--       simp only [subtype.val_eq_coe, subtype.coe_mk],
+--       apply congr_arg,
+--       simp only [eq_iff_true_of_subsingleton] },
+--     { intro x,
+--       simp only [subtype.coe_eta] },
+-- end
 
-def homeo_filtration_ϖ_Icc (c : ℝ≥0) : filtration (ℳ p ϖ) c ≃ₜ set.Icc ((- c ^ (p⁻¹ : ℝ)) : ℝ)
-  (c ^ (p⁻¹ : ℝ)) :=
-{ to_equiv := equiv_filtration_ϖ_Icc c,
-  continuous_to_fun := sorry,
-  continuous_inv_fun := sorry
-}
+-- def homeo_filtration_ϖ_Icc (c : ℝ≥0) : filtration (ℳ p ϖ) c ≃ₜ set.Icc ((- c ^ (p⁻¹ : ℝ)) : ℝ)
+--   (c ^ (p⁻¹ : ℝ)) :=
+-- { to_equiv := equiv_filtration_ϖ_Icc c,
+--   continuous_to_fun := sorry,
+--   continuous_inv_fun := sorry
+-- }
 
 
-lemma homeo_filtration_ϖ_Icc_apply (c c': ℝ≥0) (h : c ≤ c') :
-(homeo_filtration_ϖ_Icc c').to_fun '' (set.range (set.inclusion (@pseudo_normed_group.filtration_mono (ℳ p ϖ) _ _ _ h)))
-  = ⊥ := --set.Icc ((- c ^ (p⁻¹ : ℝ)) : ℝ) ((c ^ (p⁻¹ : ℝ) : ℝ)) :=
-begin
-  sorry,
-end
+-- lemma homeo_filtration_ϖ_Icc_apply (c c': ℝ≥0) (h : c ≤ c') :
+-- (homeo_filtration_ϖ_Icc c').to_fun '' (set.range (set.inclusion (@pseudo_normed_group.filtration_mono (ℳ p ϖ) _ _ _ h)))
+--   = ⊥ := --set.Icc ((- c ^ (p⁻¹ : ℝ)) : ℝ) ((c ^ (p⁻¹ : ℝ) : ℝ)) :=
+-- begin
+--   sorry,
+-- end
 
 instance chpng_real_measures : comphaus_filtered_pseudo_normed_group (ℳ p S) :=
 { continuous_add' := begin
