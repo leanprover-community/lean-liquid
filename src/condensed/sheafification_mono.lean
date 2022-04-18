@@ -24,6 +24,8 @@ begin
   suffices : function.injective ((proetale_topology.sheafify_lift η G.cond).app (op B)), sorry,
   rw add_monoid_hom.injective_iff, intros t ht,
   obtain ⟨W,E,rfl⟩ := limits.concrete.colimit_exists_rep _ t,
-  let E' := limits.concrete.multiequalizer_equiv _ E,
+  let F := (limits.concrete.multiequalizer_equiv _ E).1,
+  choose Ws Es hEs using λ i, limits.concrete.colimit_exists_rep _ (F i),
+  let WW := W.unop.bind (λ i, (Ws i).unop),
   sorry,
 end
