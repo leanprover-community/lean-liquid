@@ -744,8 +744,8 @@ begin
   all_goals {simp only [is_open_compl_iff], apply H},
 end
 
-instance (c : ℝ≥0) : has_zero (Icc (-c : ℝ) c):=
-{ zero := ⟨(0 : ℝ), by {simp only [mem_Icc, right.neg_nonpos_iff, nnreal.zero_le_coe, and_self]}⟩}
+-- instance (c : ℝ≥0) : has_zero (Icc (-c : ℝ) c):=
+-- { zero := ⟨(0 : ℝ), by {simp only [mem_Icc, right.neg_nonpos_iff, nnreal.zero_le_coe, and_self]}⟩}
 
 -- lemma continuous_if_preimage_closed₀ (c : ℝ≥0) (f : X → (Icc (-c : ℝ) c))
 --   (H : ∀ ε : ℝ, is_closed (f⁻¹' (closed_ball 0 ε))) : continuous f :=
