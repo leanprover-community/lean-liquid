@@ -1,5 +1,6 @@
 import condensed.adjunctions
 import category_theory.adjunction.evaluation
+import for_mathlib.sheafification_mono
 
 open category_theory
 open category_theory.grothendieck_topology
@@ -16,5 +17,16 @@ theorem Condensed_Ab_sheafify_lift_mono_of_exists :
       (surj : ∀ b : B, ∃ (a : α) (x : X a), π a x = b),
       ∀ a : α, F.map (π a).op t = 0)) → mono (proetale_topology.sheafify_lift η G.cond) :=
 begin
-  sorry,
+  intros h,
+  apply sheafify_lift_mono_of_exists_cover,
+  intros B t ht,
+  specialize h B t ht,
+  obtain ⟨α, hα, X, π, surj, h⟩ := h,
+  resetI,
+  let W : proetale_topology.cover B := ⟨sieve.generate (presieve.of_arrows X π), _⟩,
+  use W,
+  rintros ⟨Z,f,⟨A,g,hg,⟨a⟩,rfl⟩⟩,
+  dsimp, simp [h a],
+  use [presieve.of_arrows X π, α, hα, X, π, surj],
+  apply sieve.le_generate,
 end
