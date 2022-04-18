@@ -524,9 +524,6 @@ begin
   exact x.2,
 end
 
-
--- (h_right : ε + y ≤ c) (Nh_left : ¬ - (c : ℝ) ≤ -ε + y)
-
 lemma complement_of_balls_pos_Nleft {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) {ε : ℝ} (hε : 0 < ε)
  (Nh_left : ¬ - (c : ℝ) ≤ -ε + y) (h_right : ε + y ≤ c) :
  ∃ (x₁ x₂ : (closed_ball 0 c)), ∃ (δ₁ δ₂ : ℝ),
@@ -614,10 +611,32 @@ begin
     all_goals {linarith}}
 end
 
+
+-- ext x,
+--   split;
+--   intro _,
+--   simp only [mem_univ],
+--   exact x.2,
+
 lemma complement_of_balls_pos_NN {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) {ε : ℝ} (hε : 0 < ε)
   (Nh_left : ¬ - (c : ℝ) ≤ -ε + y) (Nh_right : ¬ ε + y ≤ c) :
  ∃ (x₁ x₂ : (closed_ball 0 c)), ∃ (δ₁ δ₂ : ℝ),
-  ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ := sorry
+  ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ :=
+begin
+  use [0, 0, -1, -1],
+  rw [((@closed_ball_eq_empty _ _ (0 : closed_ball (0 : ℝ) c) (-1 : ℝ)).mpr neg_one_lt_zero),
+    union_self, compl_empty],
+  ext a,
+  split,
+  {intro _,
+    simp only [mem_univ]},
+  { rintro -,
+    have := a.2,
+    simp only [mem_closed_ball, subtype.val_eq_coe, top_eq_univ, mem_univ, mem_ball,
+      forall_true_left, subtype.dist_eq, real.dist_eq, abs_le, abs_lt] at this ⊢,
+    split;
+    linarith}
+end
 
 lemma complement_of_balls_pos_centre {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) {ε : ℝ} (hε : 0 < ε)
   (h_right : ε + y ≤ c) (h_left : - (c : ℝ) ≤ -ε + y) :
@@ -728,11 +747,11 @@ end
 instance (c : ℝ≥0) : has_zero (Icc (-c : ℝ) c):=
 { zero := ⟨(0 : ℝ), by {simp only [mem_Icc, right.neg_nonpos_iff, nnreal.zero_le_coe, and_self]}⟩}
 
-lemma continuous_if_preimage_closed₀ (c : ℝ≥0) (f : X → (Icc (-c : ℝ) c))
-  (H : ∀ ε : ℝ, is_closed (f⁻¹' (closed_ball 0 ε))) : continuous f :=
-begin
-  sorry,
-end
+-- lemma continuous_if_preimage_closed₀ (c : ℝ≥0) (f : X → (Icc (-c : ℝ) c))
+--   (H : ∀ ε : ℝ, is_closed (f⁻¹' (closed_ball 0 ε))) : continuous f :=
+-- begin
+--   sorry,
+-- end
 
 
 lemma continuous_if_preimage_closed₀' (c : ℝ≥0) (f : X → (closed_ball (0 : ℝ) c))
