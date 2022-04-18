@@ -124,23 +124,47 @@ begin
     dsimp, simp only [category.id_comp, category.comp_id], }
 end
 
-lemma is_zero_iff (F : Cᵒᵖ ⥤ Ab.{u+1}) : is_zero F ↔ ∀ X, is_zero (F.obj X) := sorry
+lemma is_zero_iff {C : Type*} [category C] (F : C ⥤ Ab.{u}) :
+  is_zero F ↔ ∀ X, is_zero (F.obj X) :=
+begin
+  split,
+  { intros H X, classical,
+    -- let 𝓨 : Ab.{u} → (C ⥤ Ab.{u}) := λ Y,
+    -- { obj := λ Z, if nonempty (Z ≅ X) then Y else 0,
+    --   map := _,
+    --   map_id' := _,
+    --   map_comp' := _ },
+    split; intros Y f,
+    { sorry },
+    { sorry } },
+  { intro H,
+    split; intros G f; ext Z : 2,
+    { apply (H Z).eq_of_src, },
+    { apply (H Z).eq_of_tgt, } }
+end
 
-lemma is_zero_Ab (X : Ab) (hX : ∀ t : X, t = 0) : is_zero X := sorry
+lemma is_zero_Ab (X : Ab) (hX : ∀ t : X, t = 0) : is_zero X :=
+begin
+  split; intros Y f,
+  { ext x, rw hX x, exact f.map_zero },
+  { ext y, apply hX }
+end
 
 lemma is_zero_colimit_of_is_zero {J : Type u} [small_category J] (F : J ⥤ Ab.{u})
-  (hF : ∀ X, is_zero (F.obj X)) : is_zero (colimit F) := sorry
+  (hF : is_zero F) : is_zero (colimit F) := sorry
 
 lemma is_zero_limit_of_is_zero {J : Type u} [small_category J] (F : J ⥤ Ab.{u})
-  (hF : ∀ X, is_zero (F.obj X)) : is_zero (limit F) := sorry
+  (hF : is_zero F) : is_zero (limit F) := sorry
 
 lemma is_zero_plus_of_is_zero (F : Cᵒᵖ ⥤ Ab.{u+1})
   (hF : is_zero F) : is_zero (J.plus_obj F) :=
 begin
   rw is_zero_iff, intros X,
-  apply is_zero_colimit_of_is_zero, intros W,
-  rw is_zero_iff at hF,
-  apply is_zero_limit_of_is_zero, intros P,
+  apply is_zero_colimit_of_is_zero,
+  rw is_zero_iff at hF ⊢,
+  intros W,
+  apply is_zero_limit_of_is_zero,
+  rw is_zero_iff, intros P,
   cases P; apply hF,
 end
 
