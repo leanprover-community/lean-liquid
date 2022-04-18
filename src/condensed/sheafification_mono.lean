@@ -30,3 +30,17 @@ begin
   use [presieve.of_arrows X π, α, hα, X, π, surj],
   apply sieve.le_generate,
 end
+
+theorem presheaf_to_Condensed_Ab_map_mono_of_exists
+  (h : ∀ (B : Profinite.{u}) (t : F.obj (op B)), η.app (op B) t = 0 →
+    (∃ (α : Type u) [fintype α] (X : α → Profinite.{u}) (π : Π a : α, X a ⟶ B)
+      (surj : ∀ b : B, ∃ (a : α) (x : X a), π a x = b),
+      ∀ a : α, F.map (π a).op t = 0)):
+  mono (((sheafification_adjunction
+    proetale_topology Ab.{u+1}).hom_equiv _ G).symm η) :=
+begin
+  apply faithful_reflects_mono (Sheaf_to_presheaf proetale_topology Ab.{u+1}),
+  dsimp [sheafification_adjunction],
+  apply Condensed_Ab_sheafify_lift_mono_of_exists,
+  exact h
+end
