@@ -6,6 +6,7 @@ import algebra.category.Group.filtered_colimits
 import for_mathlib.SheafOfTypes_sheafification
 import for_mathlib.whisker_adjunction
 import for_mathlib.abelian_sheaves.main
+import for_mathlib.AddCommGroup
 
 import condensed.basic
 
@@ -68,10 +69,19 @@ Sheaf_compose _ (forget _)
 def CondensedSet_to_Condensed_Ab : CondensedSet ⥤ Condensed Ab :=
 Sheaf.compose_and_sheafify _ AddCommGroup.free
 
+@[simps obj_val map]
+def CondensedSet_to_Condensed_Ab' : CondensedSet ⥤ Condensed Ab :=
+Sheaf.compose_and_sheafify _ AddCommGroup.free'
+
 @[simps unit_app counit_app]
 def Condensed_Ab_CondensedSet_adjunction :
   CondensedSet_to_Condensed_Ab ⊣ Condensed_Ab_to_CondensedSet :=
 Sheaf.adjunction _ AddCommGroup.adj
+
+@[simps unit_app counit_app]
+def Condensed_Ab_CondensedSet_adjunction' :
+  CondensedSet_to_Condensed_Ab' ⊣ Condensed_Ab_to_CondensedSet :=
+Sheaf.adjunction _ AddCommGroup.adj'
 
 @[simp]
 lemma Condensed_Ab_CondensedSet_adjunction_hom_equiv_apply (X : CondensedSet)
