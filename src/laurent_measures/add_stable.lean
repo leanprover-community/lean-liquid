@@ -27,7 +27,11 @@ local notation `ϖ` := Fintype.of (punit : Type u)
 def θ_section (g : ℳ S) : (ℒ S) := ⟨ϑ_section (1 / 2 : ℝ) r p S g,
   summable_ϑ_section (1 / 2 : ℝ) r p S g⟩
 
--- instance : has_coe ℝ (ℳ S) := { coe := λ a s, a }
+instance : has_coe ℝ (ℳ S) := { coe := λ a s, a }
+
+-- variable (a : ℝ)
+-- #check ((λ s : S, a) : (ℳ S))
+-- #check (a : (ℳ S))
 
 def real_add (a : ℝ) (F : ℒ S) : ℒ S := (θ_section (λ s, a)) + F
 
@@ -42,17 +46,7 @@ begin
   rw [add_comm _ (F s n)],
 end
 
-
-
--- lemma summable_constant (a : ℝ) : summable (λ s,
-
--- instance : has_coe ℝ (ℒ S) :=
--- { coe := λ a (s : S) (n : ℤ), ⟨if n = 0 then a else 0,
--- begin
-
--- end⟩}
-
 -- class is_add_stable (a : ℝ) (c : ℝ≥0) (X : set (filtration (ℒ S) c)) : Prop :=
--- (is_add_stable : ∀ F : filtration (ℒ S) c, F ∈ X → ∥ F.1 + a ∥ ≤ c)
+-- (is_add_stable : ∀ F : filtration (ℒ S) c, F ∈ X → ∥ real_add a F.1 ∥ ≤ c)
 
 end add_stable
