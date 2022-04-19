@@ -95,3 +95,16 @@ lemma Condensed_Ab_CondensedSet_adjunction_hom_equiv_symm_apply (X : CondensedSe
   ((Condensed_Ab_CondensedSet_adjunction.hom_equiv _ _).symm e).val =
   proetale_topology.sheafify_lift
     (((AddCommGroup.adj.whisker_right _).hom_equiv _ _).symm e.val) Y.2 := rfl
+
+@[simp]
+lemma Condensed_Ab_CondensedSet_adjunction'_hom_equiv_apply (X : CondensedSet)
+  (Y : Condensed Ab) (e : CondensedSet_to_Condensed_Ab'.obj X ⟶ Y) :
+  (Condensed_Ab_CondensedSet_adjunction'.hom_equiv _ _ e).val =
+  (AddCommGroup.adj'.whisker_right _).hom_equiv _ _ (proetale_topology.to_sheafify _ ≫ e.val) := rfl
+
+@[simp]
+lemma Condensed_Ab_CondensedSet_adjunction'_hom_equiv_symm_apply (X : CondensedSet)
+  (Y : Condensed Ab) (e : X ⟶ Condensed_Ab_to_CondensedSet.obj Y) :
+  ((Condensed_Ab_CondensedSet_adjunction'.hom_equiv _ _).symm e).val =
+  proetale_topology.sheafify_lift
+    (((AddCommGroup.adj'.whisker_right _).hom_equiv _ _).symm e.val) Y.2 := rfl
