@@ -246,7 +246,8 @@ begin
         rw real.norm_of_nonneg,
         { -- can't use pow_mul yet because one is int one is real
           sorry },
-        { sorry } },
+        { -- easy
+          sorry } },
       { refine (real.rpow_pos_of_pos _ _).le,
         rw norm_pos_iff,
         apply zpow_ne_zero,
