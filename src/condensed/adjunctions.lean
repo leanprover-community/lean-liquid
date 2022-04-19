@@ -73,6 +73,11 @@ Sheaf.compose_and_sheafify _ AddCommGroup.free
 def CondensedSet_to_Condensed_Ab' : CondensedSet ⥤ Condensed Ab :=
 Sheaf.compose_and_sheafify _ AddCommGroup.free'
 
+@[simps hom_app_val inv_app_val]
+def CondensedSet_to_Condensed_Ab_iso :
+  CondensedSet_to_Condensed_Ab ≅ CondensedSet_to_Condensed_Ab' :=
+iso_whisker_left _ $ iso_whisker_right (functor.map_iso _ $ AddCommGroup.free_iso_free') _
+
 @[simps unit_app counit_app]
 def Condensed_Ab_CondensedSet_adjunction :
   CondensedSet_to_Condensed_Ab ⊣ Condensed_Ab_to_CondensedSet :=
