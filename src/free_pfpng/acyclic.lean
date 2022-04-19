@@ -1,7 +1,7 @@
 import free_pfpng.main
 import condensed.acyclic
 import prop819
-import normed_to_cond
+import locally_constant.completion
 .
 
 noncomputable theory
