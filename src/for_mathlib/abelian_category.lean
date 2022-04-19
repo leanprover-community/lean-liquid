@@ -9,6 +9,10 @@ open category_theory.limits
 
 variables {C : Type*} [category C] [has_zero_morphisms C]
 
+/-
+The first 70 lines form the content of mathlib PR: #13511
+-/
+
 structure is_zero (X : C) : Prop :=
 (eq_zero_of_src : ∀ {Y : C} (f : X ⟶ Y), f = 0)
 (eq_zero_of_tgt : Π {Y : C} (f : Y ⟶ X), f = 0)
@@ -52,6 +56,7 @@ lemma is_zero_of_top_le_bot [has_zero_object C] (X : C)
     exact subobject.factors_of_le f h (subobject.top_factors f),
   end }
 
+-- PR #13511 renames this to `of_iso` ans swaps the order of `X` and `Y`.
 lemma is_zero_of_iso_of_zero {C : Type*} [category C] [has_zero_morphisms C]
   {X : C} (hX : is_zero X) {Y : C} (h : X ≅ Y) : is_zero Y :=
 begin
