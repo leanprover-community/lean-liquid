@@ -3,6 +3,7 @@ import for_mathlib.AddCommGroup.kernels
 import for_mathlib.abelian_category
 import for_mathlib.abelian_sheaves.main
 import algebra.category.Group.filtered_colimits
+import algebra.group.ulift
 
 namespace category_theory.grothendieck_topology
 
@@ -153,11 +154,25 @@ begin
   { ext y, apply hX }
 end
 
-lemma is_zero_colimit_of_is_zero {J : Type u} [small_category J] (F : J ⥤ Ab.{u})
-  (hF : is_zero F) : is_zero (colimit F) := sorry
+lemma is_zero_colimit_of_is_zero {C A : Type*} [category C] [category A] [abelian A] (F : C ⥤ A)
+  [has_colimits_of_shape C A] (hF : is_zero F) : is_zero (colimit F) :=
+begin
+  let G : C ⥤ A := (category_theory.functor.const C).obj (⊥_ _),
+  have hG : is_zero G := is_zero_functor _ (λ X, is_zero_initial),
+  let e : G ≅ F := hG.iso hF,
+  refine is_zero_of_iso_of_zero _ (colim.map_iso e),
+  refine is_zero_of_iso_of_zero is_zero_initial colimit_const_initial.symm,
+end
 
-lemma is_zero_limit_of_is_zero {J : Type u} [small_category J] (F : J ⥤ Ab.{u})
-  (hF : is_zero F) : is_zero (limit F) := sorry
+lemma is_zero_limit_of_is_zero {C A : Type*} [category C] [category A] [abelian A] (F : C ⥤ A)
+  [has_limits_of_shape C A] (hF : is_zero F) : is_zero (limit F) :=
+begin
+  let G : C ⥤ A := (category_theory.functor.const C).obj (⊤_ _),
+  have hG : is_zero G := is_zero_functor _ (λ X, is_zero_terminal),
+  let e : G ≅ F := hG.iso hF,
+  refine is_zero_of_iso_of_zero _ (lim.map_iso e),
+  refine is_zero_of_iso_of_zero is_zero_terminal limit_const_terminal.symm,
+end
 
 lemma is_zero_plus_of_is_zero (F : Cᵒᵖ ⥤ Ab.{u+1})
   (hF : is_zero F) : is_zero (J.plus_obj F) :=
@@ -173,10 +188,26 @@ end
 
 lemma eq_zero_of_exists {J : Type u} [small_category J] [is_filtered J]
   (F : J ⥤ Ab.{u}) (j) (t : F.obj j)
-  (ht : ∃ (e : J) (q : j ⟶ e), F.map q t = 0) : colimit.ι F j t = 0 := sorry
+  (ht : ∃ (e : J) (q : j ⟶ e), F.map q t = 0) : colimit.ι F j t = 0 :=
+begin
+  rcases ht with ⟨e, q, hq⟩,
+  rw [← colimit.w F q, comp_apply, hq, map_zero],
+end
 
 lemma eq_zero_of_forall {J : Type u} [small_category J]
-  (F : J ⥤ Ab.{u}) (t : limit F) (ht : ∀ j, limit.π F j t = 0) : t = 0 := sorry
+  (F : J ⥤ Ab.{u}) (t : limit F) (ht : ∀ j, limit.π F j t = 0) : t = 0 :=
+begin
+  let t' : AddCommGroup.of (free_abelian_group punit) ⟶ limit F :=
+    AddCommGroup.of_hom (free_abelian_group.lift $ λ _, t),
+  suffices : t' = 0,
+  { simpa only [t', AddCommGroup.of_hom, free_abelian_group.lift.of] using
+      fun_like.congr_fun this (free_abelian_group.of punit.star), },
+  apply limit.hom_ext,
+  intro j,
+  ext x, cases x,
+  simpa only [t', AddCommGroup.of_hom, free_abelian_group.lift.of, comp_apply, map_zero,
+    add_monoid_hom.zero_apply] using ht j,
+end
 
 lemma is_zero_of_exists_cover (F : Cᵒᵖ ⥤ Ab.{u+1})
   (h : ∀ (B : C) (t : F.obj (op B)), ∃ W : J.cover B,
