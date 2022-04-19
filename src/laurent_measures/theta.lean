@@ -339,42 +339,55 @@ def ϑ' (r p: ℝ≥0) (S : Fintype) : (laurent_measures r S) → (S → ℝ) :=
 
 lemma ϑ_eq_ϑ' : ϑ = ϑ' := rfl
 
-theorem ϑ_surjective (r p : ℝ≥0) (S : Fintype) (g : real_measures p S) [fact (r < 1)] [fact (0 < ξ)]
-   [fact (ξ < 1)] : ∃ (F : laurent_measures r S), (ϑ ξ r p S F) = g :=
+def ϑ_section (r p : ℝ≥0) (S : Fintype) (g : real_measures p S) [fact (r < 1)] [fact (0 < ξ)]
+   [fact (ξ < 1)] : (S → ℤ → ℤ) := λ s m, int.rec_on m (λ i, ⌊((y ξ (g s) i) / ξ ^ i)⌋) (0)
+
+lemma summable_ϑ_section (r p : ℝ≥0) (S : Fintype) (g : real_measures p S) [fact (r < 1)]
+  [fact (0 < ξ)] [fact (ξ < 1)] : ∀ s, summable (λ n, ∥(ϑ_section ξ r p S g ) s n∥₊ * r ^ n) :=
 begin
-  let F₀ : S → ℤ → ℤ := λ s m, int.rec_on m (λ i, ⌊((y ξ (g s) i) / ξ ^ i)⌋) (0),
+  let F₀ := ϑ_section ξ r p S g,
   have hinj : function.injective (coe : ℕ → ℤ) := by {apply int.coe_nat_inj},
   have h_aux : ∀ s : S, ∀ n : ℤ, n ∉ set.range (coe : ℕ → ℤ) → F₀ s n = 0,
   { rintros s ( _ | _ ),
     simp only [forall_false_left, set.mem_range_self, not_true, int.of_nat_eq_coe],
     intro,
     refl },
-  have h_range : ∀ s : S, ∀ n : ℤ,
-    n ∉ set.range (coe : ℕ → ℤ) → (F₀ s n : ℝ) * ξ ^ n = 0,
-  swap,
-  have h_range_norm : ∀ s : S, ∀ n : ℤ,
-    n ∉ set.range (coe : ℕ → ℤ) → ∥F₀ s n ∥₊ * r ^ n = 0,
-  swap,
-  { have HF₀ : ∀ s : S, summable (λ (n : ℤ), ∥F₀ s n∥₊ * r ^ n),
-    { intro s,
-      apply (@function.injective.summable_iff _ _ _ _ _ _ _ hinj (h_range_norm s)).mp,
-      convert summable_nnnorm ξ (g s) r (fact.out _),
-      ext n,
-      simp only [zpow_coe_nat, nonneg.coe_mul, coe_nnnorm, nnreal.coe_pow],
-      congr', },
-    let F : laurent_measures r S := ⟨F₀, HF₀⟩,
+  have h_range_norm : ∀ s : S, ∀ n : ℤ, n ∉ set.range (coe : ℕ → ℤ) → ∥F₀ s n ∥₊ * r ^ n = 0,
+  { intros s n,
+    specialize h_aux s n,
+    simp only [h_aux, int.cast_eq_zero, mul_eq_zero, nnnorm_eq_zero],
+    tauto},
+  intro s,
+  apply (@function.injective.summable_iff _ _ _ _ _ _ _ hinj (h_range_norm s)).mp,
+  convert summable_nnnorm ξ (g s) r (fact.out _),
+  ext n,
+  simp only [zpow_coe_nat, nonneg.coe_mul, coe_nnnorm, nnreal.coe_pow],
+  congr',
+end
+
+theorem ϑ_surjective (r p : ℝ≥0) (S : Fintype) (g : real_measures p S) [fact (r < 1)] [fact (0 < ξ)]
+   [fact (ξ < 1)] : ∃ (F : laurent_measures r S), (ϑ ξ r p S F) = g :=
+begin
+  have hinj : function.injective (coe : ℕ → ℤ) := by {apply int.coe_nat_inj},
+    let F : laurent_measures r S := ⟨ϑ_section ξ r p S g, summable_ϑ_section ξ r p S g⟩,
+    have h_aux : ∀ s : S, ∀ n : ℤ, n ∉ set.range (coe : ℕ → ℤ) → F s n = 0,
+    { rintros s ( _ | _ ),
+      simp only [forall_false_left, set.mem_range_self, not_true, int.of_nat_eq_coe],
+      intro,
+      refl },
+    have h_range : ∀ s : S, ∀ n : ℤ, n ∉ set.range (coe : ℕ → ℤ) → (F s n : ℝ) * ξ ^ n = 0,
+    { intros n hn,
+    specialize h_aux n hn,
+    simp only [h_aux, int.cast_eq_zero, mul_eq_zero, nnnorm_eq_zero],
+    tauto },
     use F,
-    have : ∀ s : S, has_sum (λ n, ((F₀ s n) : ℝ) * ξ ^ n) (g s),
+    have : ∀ s : S, has_sum (λ n, ((F s n) : ℝ) * ξ ^ n) (g s),
     { intro s,
       apply (@function.injective.has_sum_iff _ _ _ _ _ _ (g s) _ hinj (h_range s)).mp,
       exact has_sum_x ξ (g s) },
     funext,
     apply has_sum.tsum_eq,
-    exact this s},
-  all_goals { intros n hn,
-    specialize h_aux n hn,
-    simp only [h_aux, int.cast_eq_zero, mul_eq_zero, nnnorm_eq_zero],
-    tauto },
+    exact this s,
 end
 
 end theta_surj
