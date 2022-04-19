@@ -87,6 +87,8 @@ lemma locally_constant.to_continuous_map_dense_range :
 begin
   rw metric.dense_range_iff,
   intros f ε hε,
+  -- see https://github.com/leanprover-community/mathlib/blob/f2fd1fb4507431cf2f2a873db4b97d360633fb69/src/number_theory/L_functions.lean#L453
+  -- where Ashvni proves this for normed rings
   sorry
 end
 
