@@ -1,5 +1,6 @@
 import topology.continuous_function.compact
 
+import locally_constant.completion_aux
 import free_pfpng.main
 import condensed.acyclic
 import prop819
@@ -84,13 +85,7 @@ lemma locally_constant.to_continuous_map_uniform_continuous :
 
 lemma locally_constant.to_continuous_map_dense_range :
   dense_range (locally_constant.to_continuous_map : locally_constant S V' → C(S, V')) :=
-begin
-  rw metric.dense_range_iff,
-  intros f ε hε,
-  -- see https://github.com/leanprover-community/mathlib/blob/f2fd1fb4507431cf2f2a873db4b97d360633fb69/src/number_theory/L_functions.lean#L453
-  -- where Ashvni proves this for normed rings
-  sorry
-end
+locally_constant.density.loc_const_dense _
 
 def locally_constant.pkg : abstract_completion (locally_constant S V') :=
 { space := C(S, V'),

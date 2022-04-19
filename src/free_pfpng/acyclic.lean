@@ -1,7 +1,7 @@
 import free_pfpng.main
 import condensed.acyclic
 import prop819
-import normed_to_cond
+import locally_constant.completion
 .
 
 noncomputable theory
@@ -16,30 +16,6 @@ variables (S : Profinite.{u})
 variables (V : SemiNormedGroup.{u}) [complete_space V] [separated_space V]
 
 set_option pp.universes true
-
-namespace category_theory
-
-namespace functor
-
-variables {C D : Type*} [category C] [category D] [abelian C] [abelian D]
-
-class exact (F : C ⥤ D) :=
-(map_exact : ∀ {X Y Z : C} {f : X ⟶ Y} {g : Y ⟶ Z}, exact f g → exact (F.map f) (F.map g))
-
-variables {ι : Type*} {c : complex_shape ι}
-
--- def homology_map_homological_complex (F : C ⥤ D) [F.additive] [F.exact]
---   (X : homological_complex C c) (i : ι) :
---   ((F.map_homological_complex c).obj X).homology i ≅
---   F.obj (X.homology i) :=
--- sorry
-
--- lemma map_homological_complex_d_from (F : C ⥤ D) [F.additive]
---   (X : homological_complex C c) (i : ι) :
-
-end functor
-
-end category_theory
 
 namespace cosimplicial_object
 
@@ -108,55 +84,6 @@ nat_iso.of_components
 end augmented
 end cosimplicial_object
 
-lemma free_acyclic_aux' (F : arrow Profinite) (hF : surjective (F.hom)) (i : ℕ) :
-  is_zero ((((cosimplicial_object.augmented.whiskering Profiniteᵒᵖ Ab).obj
-    (LCC V)).obj F.augmented_cech_nerve.right_op).to_cocomplex.homology i) :=
-begin
-  rw [← homology_functor_obj, ← category_theory.cosimplicial_object.augmented.cocomplex_obj],
-  let e1 := (homology_functor.{u u+1 0} Ab.{u} (complex_shape.up.{0} ℕ) i).map_iso
-    (cosimplicial_object.augmented.cocomplex.{u+1 u}.map_iso
-    ((cosimplicial_object.augmented.whiskering_comp
-    (SemiNormedGroup.LCC.{u u}.obj V) (forget₂ SemiNormedGroup.{u} Ab.{u})).app
-    F.augmented_cech_nerve.right_op)),
-  refine is_zero_of_iso_of_zero _ e1.symm,
-  let e2 := (homology_functor.{u u+1 0} Ab.{u} (complex_shape.up.{0} ℕ) i).map_iso
-    ((cosimplicial_object.augmented.cocomplex_whiskering_additive
-      (forget₂ SemiNormedGroup.{u} Ab.{u})).app _),
-  refine is_zero_of_iso_of_zero _ e2.symm,
-  clear e1 e2,
-  let C :=
-    ((forget₂ SemiNormedGroup.{u} Ab.{u}).map_homological_complex (complex_shape.up.{0} ℕ)).obj
-    (((cosimplicial_object.augmented.whiskering Profinite.{u}ᵒᵖ SemiNormedGroup.{u}).obj
-      (SemiNormedGroup.LCC.{u u}.obj V)).obj
-      F.augmented_cech_nerve.right_op).to_cocomplex,
-  show is_zero (C.homology i),
-  cases i,
-  { apply exact.homology_is_zero,
-    rw [AddCommGroup.exact_iff', homological_complex.d_to_comp_d_from, eq_self_iff_true, true_and,
-      homological_complex.d_to_eq_zero],
-    swap, { rw [option.eq_none_iff_forall_not_mem], rintro ⟨i, hi⟩, dsimp at hi,
-      exfalso, exact nat.no_confusion hi, },
-    intros f hf, refine ⟨0, (prop819_degree_zero F hF V f _).symm⟩,
-    rw [add_monoid_hom.mem_ker] at hf,
-    have h01 : (complex_shape.up.{0} ℕ).rel 0 1 := rfl,
-    have := homological_complex.d_from_comp_X_next_iso C h01,
-    rw [← iso.eq_comp_inv] at this,
-    apply_fun (C.X_next_iso h01).hom at hf,
-    rw [this, ← Ab.comp_apply, category.assoc, iso.inv_hom_id, category.comp_id, map_zero] at hf,
-    exact hf, },
-  let e := (homology_iso C i (i+1) (i+2) rfl rfl),
-  convert is_zero_of_iso_of_zero _ e.symm using 1,
-  -- the next `sorry` is currently false
-  -- make `has_zero_object` a `Prop`, and this will go away (the `convert` will be defeq)
-  sorry,
-  apply exact.homology_is_zero,
-  rw [AddCommGroup.exact_iff', homological_complex.d_comp_d, eq_self_iff_true, true_and],
-  intros f hf,
-  -- use `prop819` from `prop819.lean`
-  obtain ⟨g, rfl, -⟩ := prop819 F hF V 1 zero_lt_one f hf,
-  exact ⟨g, rfl⟩,
-end
-
 section
 universe v
 -- move me
@@ -167,18 +94,51 @@ lemma free_acyclic_aux (F : arrow Profinite) (hF : surjective (F.hom)) (i : ℕ)
     is_zero ((((cosimplicial_object.augmented.whiskering Profiniteᵒᵖ Ab).obj
       (LCC V ⋙ Ab.ulift.{u+1})).obj F.augmented_cech_nerve.right_op).to_cocomplex.homology i) :=
 begin
+  let U := (forget₂.{u+1 u+1 u u u} SemiNormedGroup.{u} Ab.{u} ⋙ Ab.ulift.{u+1 u}),
+  show is_zero.{u+2 u+1} (homological_complex.homology.{u+1 u+2 0}
+    (((cosimplicial_object.augmented.whiskering.{u u+1 u+1 u+2} Profinite.{u}ᵒᵖ Ab.{u+1}).obj
+      (SemiNormedGroup.LCC.{u u}.obj V ⋙ U)).obj F.augmented_cech_nerve.right_op).to_cocomplex i),
   rw [← homology_functor_obj, ← category_theory.cosimplicial_object.augmented.cocomplex_obj],
-  let e1 := (homology_functor Ab (complex_shape.up.{0} ℕ) i).map_iso
+  let e1 := (homology_functor _ (complex_shape.up.{0} ℕ) i).map_iso
     (cosimplicial_object.augmented.cocomplex.map_iso
-    ((cosimplicial_object.augmented.whiskering_comp (LCC V) Ab.ulift.{u+1}).app
+    ((cosimplicial_object.augmented.whiskering_comp _ U).app
     F.augmented_cech_nerve.right_op)),
   refine is_zero_of_iso_of_zero _ e1.symm,
   let e2 := (homology_functor Ab (complex_shape.up.{0} ℕ) i).map_iso
-    ((cosimplicial_object.augmented.cocomplex_whiskering_additive
-      Ab.ulift.{u+1}).app _),
+    ((cosimplicial_object.augmented.cocomplex_whiskering_additive U).app _),
   refine is_zero_of_iso_of_zero _ e2.symm,
   clear e1 e2,
-  sorry
+  let C :=
+    (U.map_homological_complex (complex_shape.up.{0} ℕ)).obj
+    (((cosimplicial_object.augmented.whiskering Profinite.{u}ᵒᵖ _).obj
+      (SemiNormedGroup.LCC.{u u}.obj V)).obj
+      F.augmented_cech_nerve.right_op).to_cocomplex,
+  show is_zero (C.homology i),
+  cases i,
+  { apply exact.homology_is_zero,
+    rw [AddCommGroup.exact_iff', homological_complex.d_to_comp_d_from, eq_self_iff_true, true_and,
+      homological_complex.d_to_eq_zero],
+    swap, { rw [option.eq_none_iff_forall_not_mem], rintro ⟨i, hi⟩, dsimp at hi,
+      exfalso, exact nat.no_confusion hi, },
+    intros f hf, refine ⟨0, ulift.down_injective (prop819_degree_zero F hF V f.down _).symm⟩,
+    rw [add_monoid_hom.mem_ker] at hf,
+    have h01 : (complex_shape.up.{0} ℕ).rel 0 1 := rfl,
+    have := homological_complex.d_from_comp_X_next_iso C h01,
+    rw [← iso.eq_comp_inv] at this,
+    apply_fun (C.X_next_iso h01).hom at hf,
+    rw [this, ← Ab.comp_apply, category.assoc, iso.inv_hom_id, category.comp_id, map_zero] at hf,
+    exact congr_arg ulift.down hf, },
+  { let e := (homology_iso C i (i+1) (i+2) rfl rfl),
+    convert is_zero_of_iso_of_zero _ e.symm using 1,
+    -- the next `sorry` is currently false
+    -- make `has_zero_object` a `Prop`, and this will go away (the `convert` will be defeq)
+    sorry,
+    apply exact.homology_is_zero,
+    rw [AddCommGroup.exact_iff', homological_complex.d_comp_d, eq_self_iff_true, true_and],
+    intros f hf,
+    -- use `prop819` from `prop819.lean`
+    obtain ⟨g, hg, -⟩ := prop819 F hF V 1 zero_lt_one f.down (congr_arg ulift.down hf),
+    refine ⟨ulift.up g, ulift.down_injective hg⟩, },
 end
 
 theorem free_acyclic (i : ℤ) (hi : 0 < i) :
