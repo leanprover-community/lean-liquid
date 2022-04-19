@@ -132,6 +132,7 @@ begin
     convert is_zero_of_iso_of_zero _ e.symm using 1,
     -- the next `sorry` is currently false
     -- make `has_zero_object` a `Prop`, and this will go away (the `convert` will be defeq)
+    -- relevant mathlib PR: #13517
     sorry,
     apply exact.homology_is_zero,
     rw [AddCommGroup.exact_iff', homological_complex.d_comp_d, eq_self_iff_true, true_and],
