@@ -48,18 +48,35 @@ end
 def is_limit_kernel_fork (η : F ⟶ G.val) : is_limit (kernel_fork J η) :=
 fork.is_limit.mk _ (λ S,
 { app := λ X,
-  { to_fun := λ t, ⟨(S.π.app walking_parallel_pair.zero).app _ t, begin
+  { to_fun := λ t, ⟨S.ι.app _ t, begin
       change (_ ≫ η.app _) _ = _, rw ← nat_trans.comp_app,
-      rw S.condition, simp,
+      rw S.condition,
+      simp only [comp_zero, nat_trans.app_zero, AddCommGroup.zero_apply],
     end⟩,
     map_zero' := by { ext, apply add_monoid_hom.map_zero },
     map_add' := by { intros, ext, apply add_monoid_hom.map_add } },
   naturality' := begin
     intros X Y f, ext,
-    simp only [comp_apply, add_monoid_hom.coe_mk,
-      add_subgroup.coe_mk, kernel_fork_X_map_apply_coe],
+    simp only [comp_apply, add_monoid_hom.coe_mk, add_subgroup.coe_mk, kernel_fork_X_map_apply_coe],
     simpa only [← comp_apply, nat_trans.naturality],
-  end }) sorry sorry
+  end })
+  begin
+    intro s,
+    ext X t,
+    delta kernel_fork,
+    rw [kernel_fork.ι_of_ι, nat_trans.comp_app, kernel_fork_ι_app],
+    refl,
+  end
+  begin
+    delta kernel_fork kernel_fork.of_ι,
+    dsimp only [fork.of_ι_X, fork.of_ι_π_app],
+    intros s m H,
+    ext X : 2,
+    dsimp only,
+    simp only [s.ι_eq_app_zero, ← H walking_parallel_pair.zero],
+    ext t,
+    refl,
+  end
 
 noncomputable instance : abelian (Cᵒᵖ ⥤ Ab.{u+1}) :=
 functor.abelian.{(u+2) u (u+1)}
