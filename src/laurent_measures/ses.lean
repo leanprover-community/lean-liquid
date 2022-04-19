@@ -183,8 +183,9 @@ lemma nnreal.rpow_le_rpow_of_exponent_le {x : ℝ≥0} (x1 : 1 ≤ x) {y z : ℝ
 by { cases x with x hx, exact real.rpow_le_rpow_of_exponent_le x1 hyz }
 
 
-lemma nnreal.tsum_geom_arit_inequality (f: ℤ → ℝ) (r' : ℝ) : ∥ tsum (λ n, (f n : ℝ)) ∥₊ ^ r' ≤
-  tsum (λ n, ∥ (f n)∥₊ ^ r' ) :=
+lemma nnreal.tsum_geom_arit_inequality (f: ℤ → ℝ) {r' : ℝ} (hr'1 : 0 < r') (hr'2 : r' < 1)
+  (hs1 : summable (λ n, f n)) (hs2 : summable (λ n, ∥(f n)∥₊ ^ r')) :
+  ∥ tsum (λ n, (f n : ℝ)) ∥₊ ^ r' ≤ tsum (λ n, ∥ (f n)∥₊ ^ r' ) :=
 begin
   sorry--asked Heather, use nnreal.rpow_sum_le_sum_rpow in `real_measures.lean`
 end
@@ -224,7 +225,33 @@ begin
   have ineq : ∀ (s ∈ T), ∥∑' (n : ℤ), ((F s n) : ℝ) * (1 / 2) ^ n∥₊ ^ (p : ℝ) ≤ ∑' (n : ℤ),
     ∥ ((F s n) : ℝ) * (1 / 2) ^ n∥₊ ^ (p : ℝ),
   { intros s hs,
-    apply nnreal.tsum_geom_arit_inequality (λ n, ((F s n) * (1 / 2) ^ n)) (p : ℝ), },
+    apply nnreal.tsum_geom_arit_inequality (λ n, ((F s n) * (1 / 2) ^ n)),
+    { norm_num, exact fact.out _},
+    { suffices : p < 1, assumption_mod_cast, exact fact.out _},
+    { dsimp only,
+      obtain ⟨d, hd⟩ := exists_bdd_filtration (r_pos) (r_lt_one) F,
+      apply aux_thm69.summable_smaller_radius d (F.summable s) (hd s) r_half },
+    { dsimp only,
+      simp_rw [nnnorm_mul, nnreal.mul_rpow],
+      have := F.summable s,
+      rw ← nnreal.summable_coe,
+      apply summable_of_nonneg_of_le (λ i, _) _ this, apply nnreal.zero_le_coe,
+      intro n,
+      push_cast,
+      apply mul_le_mul,
+      { -- true because ∥integer∥ is either 0 or >= 1
+        sorry },
+      { apply le_of_eq,
+        rw [← r_coe],
+        rw real.norm_of_nonneg,
+        { -- can't use pow_mul yet because one is int one is real
+          sorry },
+        { sorry } },
+      { refine (real.rpow_pos_of_pos _ _).le,
+        rw norm_pos_iff,
+        apply zpow_ne_zero,
+        norm_num, },
+      { apply norm_nonneg, } } },
   apply (finset.sum_le_sum ineq).trans,
   simp_rw [nnnorm_mul, ← inv_eq_one_div, nnnorm_zpow, nnnorm_inv, nnreal.mul_rpow, real.nnnorm_two,
     nnreal.rpow_int_cast, ← nnreal.rpow_mul (2 : ℝ≥0)⁻¹, mul_comm, nnreal.rpow_mul (2 : ℝ≥0)⁻¹],
