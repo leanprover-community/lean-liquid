@@ -124,23 +124,26 @@ begin
     dsimp, simp only [category.id_comp, category.comp_id], }
 end
 
-lemma is_zero_iff {C : Type*} [category C] (F : C ⥤ Ab.{u}) :
+lemma is_zero_functor {C A : Type*} [category C] [category A] [abelian A]
+  (F : C ⥤ A) (hF : ∀ X, is_zero (F.obj X)) :
+  is_zero F :=
+begin
+  split; intros G f; ext Z : 2,
+  { apply (hF Z).eq_of_src, },
+  { apply (hF Z).eq_of_tgt, }
+end
+
+open_locale zero_object
+
+lemma is_zero_iff {C A : Type*} [category C] [category A] [abelian A] (F : C ⥤ A) :
   is_zero F ↔ ∀ X, is_zero (F.obj X) :=
 begin
-  split,
-  { intros H X, classical,
-    -- let 𝓨 : Ab.{u} → (C ⥤ Ab.{u}) := λ Y,
-    -- { obj := λ Z, if nonempty (Z ≅ X) then Y else 0,
-    --   map := _,
-    --   map_id' := _,
-    --   map_comp' := _ },
-    split; intros Y f,
-    { sorry },
-    { sorry } },
-  { intro H,
-    split; intros G f; ext Z : 2,
-    { apply (H Z).eq_of_src, },
-    { apply (H Z).eq_of_tgt, } }
+  refine ⟨_, is_zero_functor _⟩,
+  intros hF X,
+  let G : C ⥤ A := (category_theory.functor.const C).obj 0,
+  have hG : is_zero G := is_zero_functor _ (λ X, is_zero_zero _),
+  let e : G ≅ F := hG.iso hF,
+  refine is_zero_of_iso_of_zero (is_zero_zero _) (e.app X),
 end
 
 lemma is_zero_Ab (X : Ab) (hX : ∀ t : X, t = 0) : is_zero X :=
