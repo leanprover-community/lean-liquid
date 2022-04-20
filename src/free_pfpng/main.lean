@@ -46,7 +46,11 @@ def Profinite.free'_to_pfpng (S : Profinite.{u}) :
   (ProFiltPseuNormGrp₁.to_CHFPNG₁.obj S.free_pfpng)) :=
 (Condensed_Ab_CondensedSet_adjunction'.hom_equiv _ _).symm S.to_free_pfpng'
 
-instance Profinite.is_iso_free'_to_pfpng (S : Profinite.{u}) : is_iso S.free'_to_pfpng := sorry
+instance Profinite.mono_free'_to_pfpng (S : Profinite.{u}) : mono S.free'_to_pfpng := sorry
+instance Profinite.epi_free'_to_pfpng (S : Profinite.{u}) : epi S.free'_to_pfpng := sorry
+
+instance Profinite.is_iso_free'_to_pfpng (S : Profinite.{u}) : is_iso S.free'_to_pfpng :=
+is_iso_of_mono_of_epi _
 
 def Profinite.free_to_pfpng (S : Profinite.{u}) :
   CondensedSet_to_Condensed_Ab.obj S.to_Condensed ⟶
