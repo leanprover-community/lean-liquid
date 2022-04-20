@@ -350,8 +350,8 @@ end
 -- def homeo_filtration_ϖ_Icc (c : ℝ≥0) : filtration (ℳ p ϖ) c ≃ₜ set.Icc ((- c ^ (p⁻¹ : ℝ)) : ℝ)
 --   (c ^ (p⁻¹ : ℝ)) :=
 -- { to_equiv := equiv_filtration_ϖ_Icc c,
---   continuous_to_fun := sorry,
---   continuous_inv_fun := sorry
+--   continuous_to_fun := admit,
+--   continuous_inv_fun := admit
 -- }
 
 
@@ -359,7 +359,7 @@ end
 -- (homeo_filtration_ϖ_Icc c').to_fun '' (set.range (set.inclusion (@pseudo_normed_group.filtration_mono (ℳ p ϖ) _ _ _ h)))
 --   = ⊥ := --set.Icc ((- c ^ (p⁻¹ : ℝ)) : ℝ) ((c ^ (p⁻¹ : ℝ) : ℝ)) :=
 -- begin
---   sorry,
+--   admit,
 -- end
 
 instance chpng_real_measures : comphaus_filtered_pseudo_normed_group (ℳ p S) :=
