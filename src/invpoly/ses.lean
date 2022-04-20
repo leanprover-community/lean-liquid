@@ -23,6 +23,7 @@ variables (r : ℝ≥0) [fact (0 < r)] [fact (r < 1)]
   strict' := λ c F hF, begin
     refine (finset.sum_le_sum _).trans hF,
     rintro s -,
+    /- TODO(jmc): This is false. We need to take another route. -/
     sorry
   end,
   continuous' := λ c, continuous_of_discrete_topology }
