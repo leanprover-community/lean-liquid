@@ -383,7 +383,7 @@ section
 variables (A : CompHausFiltPseuNormGrp.{u})
 
 @[simps]
-def level_CompHaus_diagram : ℝ≥0 ⥤ CompHaus.{u} :=
+def level : ℝ≥0 ⥤ CompHaus.{u} :=
 { obj := λ r, CompHaus.of $ filtration A r,
   map := λ r s h,
   { to_fun := cast_le' h.le,
@@ -393,7 +393,7 @@ def level_CompHaus_diagram : ℝ≥0 ⥤ CompHaus.{u} :=
 
 @[simps]
 def level_Condensed_diagram : ℝ≥0 ⥤ CondensedSet.{u} :=
-A.level_CompHaus_diagram ⋙ CompHaus_to_Top.{u} ⋙ Top_to_Condensed.{u}
+A.level ⋙ CompHaus_to_Top.{u} ⋙ Top_to_Condensed.{u}
 
 @[simps]
 def level_Condensed_diagram' : (as_small.{u+1} ℝ≥0) ⥤ CondensedSet.{u} :=
@@ -451,7 +451,6 @@ begin
 end
 
 end
-
 
 end CompHausFiltPseuNormGrp
 

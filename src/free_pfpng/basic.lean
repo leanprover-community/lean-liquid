@@ -1,6 +1,7 @@
 import pseudo_normed_group.category
 import data.set.intervals
 import for_mathlib.Profinite.extend
+import condensed.ab
 
 .
 
@@ -177,8 +178,24 @@ def free_pfpng_functor : Fintype ⥤ ProFiltPseuNormGrp₁ :=
 def Fintype.free_pfpng (T : Fintype) : ProFiltPseuNormGrp₁ :=
 free_pfpng_functor.obj T
 
+def Fintype.free_pfpng_unit :
+  Fintype.to_Profinite ⟶ free_pfpng_functor ⋙ ProFiltPseuNormGrp₁.level.obj 1 :=
+{ app := λ S,
+  { to_fun := λ s,
+    { val := λ t, if t = s then 1 else 0,
+      property := sorry },
+    continuous_to_fun := continuous_bot },
+  naturality' := sorry }
+
 def Profinite.free_pfpng (S : Profinite) : ProFiltPseuNormGrp₁ :=
 (Profinite.extend free_pfpng_functor).obj S
+
+open category_theory
+
+def Profinite.to_free_pfpng (S : Profinite.{u}) :
+  S ⟶ (ProFiltPseuNormGrp₁.level.obj 1).obj S.free_pfpng :=
+(limits.is_limit_of_preserves (ProFiltPseuNormGrp₁.level.obj 1) (limits.limit.is_limit _)).map
+  S.as_limit_cone $ whisker_left _ (Fintype.free_pfpng_unit) ≫ (functor.associator _ _ _).inv
 
 def Profinite.free_pfpng_π (S : Profinite) (T : discrete_quotient S) :
   S.free_pfpng ⟶ (Fintype.of T).free_pfpng :=
