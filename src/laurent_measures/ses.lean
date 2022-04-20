@@ -848,19 +848,15 @@ begin
   exact H,
 end
 
---- some trials
-lemma θ_bound_optimal (F : (ℒ S)) (ε : ℝ≥0) (hF : ε < ∥ F ∥₊) :  θ F ∉ filtration (ℳ S) ε := sorry
+--- some trials **[FAE]** Both certainly false: the preimage of a closed ball in (ℳ S) contains the whole kernel, which itself contains unbounded measures.
+-- lemma θ_bound_optimal (F : (ℒ S)) (ε : ℝ≥0) (hF : ε < ∥ F ∥₊) :  θ F ∉ filtration (ℳ S) ε := sorry
 
-
-open set
-
-lemma preimage_θ (c ε : ℝ≥0) (H : ε ≤ c) : (θ_c c S)⁻¹'
-  (range (inclusion (@filtration_mono (ℳ S) _ _ _ H))) =
-    (range (inclusion (@filtration_mono (ℒ S) _ _ _ H))) :=
-begin
-  simp only [range_inclusion, preimage_set_of_eq, laurent_measures.mem_filtration_iff],
-  sorry,
-end
+-- lemma preimage_θ (c ε : ℝ≥0) (H : ε ≤ c) : (θ_c c S)⁻¹'
+--   (range (inclusion (@filtration_mono (ℳ S) _ _ _ H))) =
+--     (range (inclusion (@filtration_mono (ℒ S) _ _ _ H))) :=
+-- begin
+--   simp only [range_inclusion, preimage_set_of_eq, laurent_measures.mem_filtration_iff],
+-- end
 
 
 
