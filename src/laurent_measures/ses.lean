@@ -820,6 +820,10 @@ end
 
 end topological_generalities
 
+def (c ε : ℝ≥0) geom_B : ℤ := 3
+
+-- lemma
+
 def θ_c (c : ℝ≥0) (T : Fintype) : (filtration (laurent_measures r T) c) →
   (filtration (real_measures p T) c) :=
 begin
