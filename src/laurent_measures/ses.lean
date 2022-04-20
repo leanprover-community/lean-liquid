@@ -869,7 +869,7 @@ begin
   refine continuous.comp _ (continuous_seval_ℒ_c p S c s),
   dsimp only [θ_c],
   apply (homeo_filtration_ϖ_ball c).comp_continuous_iff.mp,
-  sorry;{-- [FAE] from here on, the proof might be  broken since it relies on `continuous_if_preimage_closed₀'` which is not true as it is stated
+  sorry;{-- **[FAE]** from here on, the proof might be  broken since it relies on `continuous_if_preimage_closed₀'` which is not true as it is stated
   -- apply continuous_if_preimage_closed₀' (c ^ (p⁻¹ : ℝ)),
   -- intros ε hε,
   -- replace hε : ε ^ (p : ℝ) ≤ c,
