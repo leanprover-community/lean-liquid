@@ -3,6 +3,7 @@ import condensed.projective_resolution
 import condensed.condensify
 import condensed.adjunctions
 import condensed.sheafification_mono
+import free_pfpng.lemmas
 
 .
 
@@ -76,6 +77,27 @@ def Profinite.free'_to_condensed_free_pfpng (S : Profinite.{u}) :
   S.free' ⟶ S.condensed_free_pfpng :=
 S.free'_lift S.to_condensed_free_pfpng
 
+instance : limits.has_limits_of_size.{u} Ab.{u+1} := sorry
+
+/-- the limit `lim_i ℤ[S_i]`. -/
+def Profinite.limit_free (S : Profinite.{u}) : Ab.{u+1} :=
+limits.limit $ (S.fintype_diagram ⋙ forget Fintype ⋙
+  AddCommGroup.free') ⋙ Ab.ulift.{u+1}
+
+def Profinite.condensed_free_pfpng_specialize_cone (S B : Profinite.{u}) (b : B) :
+  limits.cone ((S.fintype_diagram ⋙ forget Fintype ⋙ AddCommGroup.free') ⋙ Ab.ulift.{u+1}) :=
+{ X := S.condensed_free_pfpng.val.obj (op B),
+  π :=
+  { app := λ T,
+    { to_fun := λ t, ⟨finsupp.equiv_fun_on_fintype.symm (S.free_pfpng_π T (t.down.1 b))⟩,
+      map_zero' := sorry,
+      map_add' := sorry },
+    naturality' := sorry } }
+
+def Profinite.condensed_free_pfpng_specialize (S B : Profinite.{u}) (b : B) :
+  S.condensed_free_pfpng.val.obj (op B) ⟶ S.limit_free :=
+limits.limit.lift _ (S.condensed_free_pfpng_specialize_cone B b)
+
 instance Profinite.mono_free'_to_condensed_free_pfpng
   (S : Profinite.{u}) : mono S.free'_to_condensed_free_pfpng :=
 begin
@@ -94,6 +116,16 @@ begin
   have aux : ∀ b : B, t.map_domain (ι b) = 0,
   { -- use discrete_quotient_separates_points'
     -- along with general stuff about bounded limits.
+    intros b,
+    apply free_pfpng.discrete_quotient_separates_points' S (t.map_domain (ι b)),
+    intros T,
+    apply_fun (λ e, S.condensed_free_pfpng_specialize B b e) at ht,
+    rw add_monoid_hom.map_zero at ht,
+    apply_fun (λ e, limits.limit.π (S.fintype_diagram ⋙ forget Fintype ⋙
+      AddCommGroup.free' ⋙ Ab.ulift) T e) at ht,
+    rw add_monoid_hom.map_zero at ht,
+    apply_fun ulift.down at ht,
+    convert ht,
     sorry },
   -- At this point we need to carry out the inductive part of this proof...
   sorry
