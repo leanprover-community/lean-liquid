@@ -810,12 +810,12 @@ end
 --   sorry,
 -- end
 
-
-lemma continuous_if_preimage_closed₀' (c : ℝ≥0) (f : X → (closed_ball (0 : ℝ) c))
-  (H : ∀ ε : ℝ≥0, ε ≤ c → is_closed (f⁻¹' (closed_ball 0  ε))) : continuous f :=
-begin
-  sorry,
-end
+-- **[FAE]** The next `lemma` might be false...
+-- lemma continuous_if_preimage_closed₀' (c : ℝ≥0) (f : X → (closed_ball (0 : ℝ) c))
+--   (H : ∀ ε : ℝ≥0, ε ≤ c → is_closed (f⁻¹' (closed_ball 0  ε))) : continuous f :=
+-- begin
+--   sorry,
+-- end
 
 
 end topological_generalities
@@ -869,15 +869,16 @@ begin
   refine continuous.comp _ (continuous_seval_ℒ_c p S c s),
   dsimp only [θ_c],
   apply (homeo_filtration_ϖ_ball c).comp_continuous_iff.mp,
-  apply continuous_if_preimage_closed₀' (c ^ (p⁻¹ : ℝ)),
-  intros ε hε,
-  replace hε : ε ^ (p : ℝ) ≤ c,
-  { have := @nnreal.rpow_le_rpow ε (c ^ (p⁻¹ : ℝ)) p hε _,
-    rw [← nnreal.rpow_mul, inv_mul_cancel, nnreal.rpow_one] at this,
-    exacts [this, (nnreal.coe_ne_zero.mpr $ ne_of_gt $ fact.out _), by {rw [← nnreal.coe_zero, nnreal.coe_le_coe], exact (le_of_lt $fact.out _)}] },
-  simp only [one_mul, eq_self_iff_true, eq_mpr_eq_cast, set_coe_cast],
-  rw [set.preimage_comp, homeo_filtration_ϖ_ball_preimage hε],
-  sorry,
+  sorry;{-- [FAE] from here on, the proof might be  broken since it relies on `continuous_if_preimage_closed₀'` which is not true as it is stated
+  -- apply continuous_if_preimage_closed₀' (c ^ (p⁻¹ : ℝ)),
+  -- intros ε hε,
+  -- replace hε : ε ^ (p : ℝ) ≤ c,
+  -- { have := @nnreal.rpow_le_rpow ε (c ^ (p⁻¹ : ℝ)) p hε _,
+  --   rw [← nnreal.rpow_mul, inv_mul_cancel, nnreal.rpow_one] at this,
+  --   exacts [this, (nnreal.coe_ne_zero.mpr $ ne_of_gt $ fact.out _), by {rw [← nnreal.coe_zero, nnreal.coe_le_coe], exact (le_of_lt $fact.out _)}] },
+  -- simp only [one_mul, eq_self_iff_true, eq_mpr_eq_cast, set_coe_cast],
+  -- rw [set.preimage_comp, homeo_filtration_ϖ_ball_preimage hε],
+  }
 end
 
 
