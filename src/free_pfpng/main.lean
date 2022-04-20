@@ -76,11 +76,12 @@ def free_pfpng_profinite_natural_map :
 
 instance : is_iso free_pfpng_profinite_natural_map := sorry
 
+-- NOTE (AT): Maybe `condensdify` should be redefined?
 /-- Prop 2.1 of Analytic.pdf -/
 def free_pfpng_profinite_iso :
   condensify (free_pfpng_functor ⋙ ProFiltPseuNormGrp₁.to_CHFPNG₁) ≅
   Profinite_to_Condensed ⋙ CondensedSet_to_Condensed_Ab :=
-(as_iso free_pfpng_profinite_natural_map).symm
+sorry ≪≫ (as_iso free_pfpng_profinite_natural_map).symm
 
 .
 
