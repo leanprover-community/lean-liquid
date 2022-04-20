@@ -191,11 +191,21 @@ def Profinite.free_pfpng (S : Profinite) : ProFiltPseuNormGrp₁ :=
 (Profinite.extend free_pfpng_functor).obj S
 
 open category_theory
+open category_theory.limits
+
+def Profinite.free_pfpng_level_iso (S : Profinite.{u}) (r) :
+  (ProFiltPseuNormGrp₁.level.obj r).obj S.free_pfpng ≅
+  limits.limit (S.fintype_diagram ⋙ free_pfpng_functor ⋙ ProFiltPseuNormGrp₁.level.obj r) :=
+(is_limit_of_preserves (ProFiltPseuNormGrp₁.level.obj r)
+  (limit.is_limit _)).cone_point_unique_up_to_iso $ limit.is_limit _
 
 def Profinite.to_free_pfpng (S : Profinite.{u}) :
   S ⟶ (ProFiltPseuNormGrp₁.level.obj 1).obj S.free_pfpng :=
-(limits.is_limit_of_preserves (ProFiltPseuNormGrp₁.level.obj 1) (limits.limit.is_limit _)).map
-  S.as_limit_cone $ whisker_left _ (Fintype.free_pfpng_unit) ≫ (functor.associator _ _ _).inv
+(limit.is_limit _).map S.as_limit_cone (whisker_left _ $ Fintype.free_pfpng_unit) ≫
+(S.free_pfpng_level_iso 1).inv
+
+--(limits.is_limit_of_preserves (ProFiltPseuNormGrp₁.level.obj 1) (limits.limit.is_limit _)).map
+--  S.as_limit_cone $ whisker_left _ (Fintype.free_pfpng_unit) ≫ (functor.associator _ _ _).inv
 
 def Profinite.free_pfpng_π (S : Profinite) (T : discrete_quotient S) :
   S.free_pfpng ⟶ (Fintype.of T).free_pfpng :=
