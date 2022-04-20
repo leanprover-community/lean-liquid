@@ -42,9 +42,9 @@ variables [fact (0 < r)]
 variable {S : Fintype}
 
 def ϕ : ℒ S → ℒ S :=
-λ F, 2 • shift (-1) F - F
+λ F, shift (1) F - 2 • F
 
-lemma ϕ_apply (F : ℒ S) (s : S) (n : ℤ) : ϕ F s n = 2 * F s (n-1) - F s n :=
+lemma ϕ_apply (F : ℒ S) (s : S) (n : ℤ) : ϕ F s n = F s (n+1) - 2 * F s n :=
 by simp only [ϕ, sub_apply, nsmul_apply, shift_to_fun_to_fun, nsmul_eq_mul]; refl
 
 lemma ϕ_natural (S T : Fintype) (f : S ⟶ T) : --[fact (0 < p)] [fact ( p ≤ 1)] :
@@ -77,11 +77,10 @@ begin
   dsimp only [ϕ] at H, rw [sub_eq_zero] at H,
   replace H : ∀ n : ℤ, ∀ s : S, 2 * F s (n - 1) = F s n,
   { intros n s,
-    conv_rhs { rw ← H },
-    simp only [nsmul_apply, shift_to_fun_to_fun, int.add_neg_one, nsmul_eq_mul,
-      int.nat_cast_eq_coe_nat, int.coe_nat_bit0, int.coe_nat_succ, int.coe_nat_zero, zero_add,
-      mul_eq_mul_left_iff, eq_self_iff_true, bit0_eq_zero, one_ne_zero, or_false],
-    refl },
+    rw laurent_measures.ext_iff at H,
+    convert (H s (n-1)).symm using 1,
+    { rw [two_smul, two_mul], refl, },
+    { simp [shift] } },
   ext s n,
   apply int.induction_on' n (F.d - 1),
   { refine lt_d_eq_zero _ _ (F.d - 1) _,
@@ -209,10 +208,30 @@ lemma θ_ϕ_complex (F : ℒ S) : (θ ∘ ϕ) F = 0 :=
 begin
   have t0 : (2 : ℝ)⁻¹ ≠ 0 := inv_ne_zero two_ne_zero,
   funext s,
-  convert_to ∑' (n : ℤ), ((2 * F s (n - 1) - F s n) : ℝ) * (1 / 2) ^ n = 0,
+  convert_to ∑' (n : ℤ), ((F s (n + 1) - 2 * F s n) : ℝ) * (1 / 2) ^ n = 0,
   { apply tsum_congr,
     intro b,
     field_simp [ϕ] },
+  simp_rw [sub_mul],
+  rw [tsum_sub, sub_eq_zero],
+--  have := F.summable_half s,
+  { refine tsum_eq_tsum_of_ne_zero_bij (λ i, (i.val : ℤ) - 1) _ _ _,
+    { rintros ⟨x, _⟩ ⟨y, _⟩ h, dsimp at *, linarith },
+    { rintros x hx,
+      refine ⟨⟨x + 1, _⟩, _⟩,
+      { rw function.mem_support at ⊢ hx,
+        convert hx using 1,
+        simp [zpow_add₀],
+        ring },
+      { simp } },
+    { rintro ⟨i, hi⟩,
+      simp [zpow_sub₀],
+      ring } },
+  {
+    sorry },
+  { simp_rw [mul_assoc],
+    sorry }
+end #exit
   have h_pos : has_sum (λ n, ((2 * F s (n - 1)) : ℝ) * (1 / 2) ^ n) (F.summable_half s).some,
   { convert ((equiv.add_group_add (- 1)).has_sum_iff ).mpr (F.summable_half s).some_spec using 1,
     ext n,

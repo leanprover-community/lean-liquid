@@ -95,7 +95,8 @@ instance : add_comm_group (comphaus_filtered_pseudo_normed_group_hom M₁ M₂) 
 
 variable (S)
 
-def Φ : comphaus_filtered_pseudo_normed_group_hom (ℒ S) (ℒ S) := 2 • shift (-1) - id
+/-- The map on Laurent measures induced by multiplication by `T⁻¹ - 2` on `ℤ((T))ᵣ`. -/
+def Φ : comphaus_filtered_pseudo_normed_group_hom (ℒ S) (ℒ S) := shift (1) - 2 • id
 -- variable {S}
 
 
