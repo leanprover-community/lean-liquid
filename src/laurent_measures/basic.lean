@@ -514,11 +514,16 @@ end
 
 variables (r S)
 open category_theory
+/-- `laurent_measures_bdd_functor r S c` is the contravariant functor sending `T : finset ℤ` to
+  the finite type `laurent_measures_bdd r S T c`. Morphisms are given by throwing away
+  coefficients. -/
 def laurent_measures_bdd_functor (c : ℝ≥0) [fact (0 < r)] :
   (as_small (finset ℤ))ᵒᵖ ⥤ Fintype :=
 { obj := λ A, Fintype.of $ laurent_measures_bdd r S (ulift.down A.unop) c,
   map := λ A B f, transition (le_of_hom $ ulift.down f.unop) }.
 
+/-- The `equiv` between Laurent measures with norm at most `c` and the projective limit
+over `T : finset ℤ` of the finite types `laurent_measures_bdd r S T c`. -/
 def laurent_measures_bdd_equiv (c : ℝ≥0) [fact (0 < r)] : { F : ℒ S | ∥F∥₊ ≤ c } ≃
   (Profinite.limit_cone (laurent_measures_bdd_functor r S c ⋙ Fintype.to_Profinite)).X :=
 equiv.of_bijective (λ F, ⟨λ A, truncate (ulift.down A.unop) F, λ A B f, by { ext, refl }⟩)
@@ -548,6 +553,7 @@ begin
       exact hF e } }
 end
 
+/-- The profinite topology on the Laurent measures with norm at most `c`. -/
 instance (c : ℝ≥0) [fact (0 < r)] : topological_space {F : ℒ S | ∥F∥₊ ≤ c} :=
 topological_space.induced (laurent_measures_bdd_equiv r S c) infer_instance
 
