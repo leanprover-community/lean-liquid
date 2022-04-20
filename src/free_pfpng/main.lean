@@ -18,8 +18,6 @@ CompHausFiltPseuNormGrp.to_Condensed.obj $
   CompHausFiltPseuNormGrp₁.enlarging_functor.obj
   (ProFiltPseuNormGrp₁.to_CHFPNG₁.obj S.free_pfpng)
 
-#check limits.is_limit.map
-
 def Profinite.to_free_pfpng'_level (S : Profinite.{u}) :
   S.to_Condensed ⟶ ((ProFiltPseuNormGrp₁.level.obj 1).obj S.free_pfpng).to_Condensed :=
 Profinite_to_Condensed.map $ S.to_free_pfpng
@@ -76,7 +74,6 @@ def free_pfpng_profinite_natural_map :
 
 instance : is_iso free_pfpng_profinite_natural_map := sorry
 
--- NOTE (AT): Maybe `condensdify` should be redefined?
 /-- Prop 2.1 of Analytic.pdf -/
 def free_pfpng_profinite_iso :
   condensify (free_pfpng_functor ⋙ ProFiltPseuNormGrp₁.to_CHFPNG₁) ≅
