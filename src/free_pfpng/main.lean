@@ -85,10 +85,17 @@ begin
     λ f, (S.to_condensed_free_pfpng.val.app (op B) f),
   dsimp at t ht,
   replace ht : free'_lift e t = 0,
-  { convert ht, ext u v, dsimp [free'_lift],
+  sorry { convert ht, ext u v, dsimp [free'_lift],
     simp only [adjunction.hom_equiv_counit, whiskering_right_obj_map,
       nat_trans.comp_app, whisker_right_app,
       adjunction.whisker_right_counit_app_app] },
+  let ι : Π b : B, S.to_Condensed.val.obj (op B) → S :=
+    λ b f, (ulift.down f).1 b,
+  have aux : ∀ b : B, t.map_domain (ι b) = 0,
+  { -- use discrete_quotient_separates_points'
+    -- along with general stuff about bounded limits.
+    sorry },
+  -- At this point we need to carry out the inductive part of this proof...
   sorry
 end
 
