@@ -182,12 +182,24 @@ lemma nnreal.rpow_le_rpow_of_exponent_le {x : ℝ≥0} (x1 : 1 ≤ x) {y z : ℝ
   x ^ y ≤ x ^ z :=
 by { cases x with x hx, exact real.rpow_le_rpow_of_exponent_le x1 hyz }
 
-
-lemma nnreal.tsum_geom_arit_inequality (f: ℤ → ℝ) {r' : ℝ} (hr'1 : 0 < r') (hr'2 : r' < 1)
+lemma nnreal.tsum_geom_arit_inequality (f: ℤ → ℝ) {r' : ℝ} (hr'1 : 0 < r') (hr'2 : r' ≤ 1)
   (hs1 : summable (λ n, f n)) (hs2 : summable (λ n, ∥(f n)∥₊ ^ r')) :
-  ∥ tsum (λ n, (f n : ℝ)) ∥₊ ^ r' ≤ tsum (λ n, ∥ (f n)∥₊ ^ r' ) :=
+  ∥ tsum (λ n, f n) ∥₊ ^ r' ≤ tsum (λ n, ∥(f n)∥₊ ^ r' ) :=
 begin
-  sorry--asked Heather, use nnreal.rpow_sum_le_sum_rpow in `real_measures.lean`
+  rw ← summable_norm_iff at hs1,
+  simp_rw ← _root_.coe_nnnorm at hs1,
+  rw nnreal.summable_coe at hs1,
+  refine le_trans (nnreal.rpow_le_rpow (nnnorm_tsum_le hs1) hr'1.le) _,
+  have := λ s : finset ℤ, nnreal.rpow_sum_le_sum_rpow s (λ i, ∥f i∥₊) hr'1 hr'2,
+  dsimp only at this,
+  have s1' := filter.tendsto.comp (continuous.tendsto
+    (nnreal.continuous_rpow_const hr'1.le) _) hs1.has_sum,
+  dsimp [function.comp] at s1',
+  apply tendsto_le_of_eventually_le s1' hs2.has_sum,
+  delta filter.eventually_le,
+  convert filter.univ_sets _,
+  ext x,
+  simp [this],
 end
 
 
@@ -227,7 +239,7 @@ begin
   { intros s hs,
     apply nnreal.tsum_geom_arit_inequality (λ n, ((F s n) * (1 / 2) ^ n)),
     { norm_num, exact fact.out _},
-    { suffices : p < 1, assumption_mod_cast, exact fact.out _},
+    { suffices : p ≤ 1, assumption_mod_cast, exact fact.out _},
     { dsimp only,
       obtain ⟨d, hd⟩ := exists_bdd_filtration (r_pos) (r_lt_one) F,
       apply aux_thm69.summable_smaller_radius d (F.summable s) (hd s) r_half },
@@ -246,8 +258,8 @@ begin
         rw real.norm_of_nonneg,
         { -- can't use pow_mul yet because one is int one is real
           sorry },
-        { -- easy
-          sorry } },
+        { apply zpow_nonneg,
+          norm_num } },
       { refine (real.rpow_pos_of_pos _ _).le,
         rw norm_pos_iff,
         apply zpow_ne_zero,
