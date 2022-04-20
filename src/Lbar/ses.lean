@@ -473,7 +473,7 @@ theorem short_exact (S : Profinite) [fact (r' < 1)] :
     ((condensify_map
       (whisker_right (laurent_measures.to_Lbar_nat_trans r') (to_CHFPNG₁ r'))).app S) :=
 begin
-  refine condensify_exact _ _ 1 le_rfl 1 le_rfl _ _ _ _ _ S,
+  refine condensify_exact _ _ id id le_rfl le_rfl _ _ _ _ _ S,
   { apply invpoly.to_laurent_measures_injective },
   { intro S, ext F s (_|n); refl, },
   { rintro S c F ⟨hF1, hF2⟩,
@@ -482,8 +482,7 @@ begin
     change laurent_measures.to_Lbar r' S F = 0 at hF1,
     change F ∈ pseudo_normed_group.filtration (laurent_measures r' S) c at hF2,
     show F ∈ invpoly.to_laurent_measures r' S ''
-      (pseudo_normed_group.filtration (invpoly r' S) (1 * c)),
-    rw one_mul,
+      (pseudo_normed_group.filtration (invpoly r' S) c),
     have hd := laurent_measures.bdd_filtration_spec
       (show (0 : ℝ) < r', by norm_cast; exact fact.elim infer_instance)
       (by norm_cast; exact fact.elim infer_instance)
@@ -527,8 +526,7 @@ begin
   { rintro S c F hF,
     refine ⟨laurent_measures.to_Lbar_section r' S F, _, _⟩,
     { apply laurent_measures.to_Lbar_section_mem_filtration,
-      apply pseudo_normed_group.filtration_mono _ hF,
-      rw one_mul },
+      exact pseudo_normed_group.filtration_mono le_rfl hF, },
     { apply laurent_measures.to_Lbar_section_to_Lbar } }
 end
 
