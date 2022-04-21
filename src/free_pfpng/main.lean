@@ -67,7 +67,22 @@ def free'_lift {X : Type (u+1)} {A : Ab.{u+1}} (f : X → A) :
 
 -- TODO: Consider redefining `AddCommGroup.free'` so that this is true by rfl.
 lemma free'_lift_eq_finsupp_lift {X : Type (u+1)} {A : Ab.{u+1}} (f : X → A) :
-  free'_lift f = (finsupp.lift _ _ _ f).to_add_monoid_hom := sorry
+  free'_lift f = (finsupp.lift _ _ _ f).to_add_monoid_hom :=
+begin
+  dsimp [free'_lift],
+  apply_fun AddCommGroup.adj'.hom_equiv X A,
+  rw equiv.apply_symm_apply,
+  dsimp [AddCommGroup.adj', adjunction.of_nat_iso_left,
+    AddCommGroup.free_iso_free'],
+  simp only [adjunction.hom_equiv_unit, forget_map_eq_coe],
+  dsimp [AddCommGroup.adj, AddCommGroup.free],
+  ext i,
+  simp only [types_comp_apply, comp_apply, add_equiv.coe_to_add_monoid_hom,
+    free_abelian_group.equiv_finsupp_apply,
+    linear_map.to_add_monoid_hom_coe, finsupp.lift_apply],
+  change _ = (free_abelian_group.to_finsupp (free_abelian_group.of i)).sum _,
+  simp only [free_abelian_group.to_finsupp_of, finsupp.sum_single_index, zero_smul, one_zsmul],
+end
 
 open category_theory.grothendieck_topology
 
