@@ -98,7 +98,8 @@ def Profinite.free'_to_condensed_free_pfpng (S : Profinite.{u}) :
   S.free' ⟶ S.condensed_free_pfpng :=
 S.free'_lift S.to_condensed_free_pfpng
 
-instance : limits.has_limits_of_size.{u} Ab.{u+1} := sorry
+instance : limits.has_limits_of_size.{u u} Ab.{u+1} :=
+category_theory.limits.has_limits_of_size_shrink.{u u (u+1) (u+1)} Ab.{u+1}
 
 /-- the limit `lim_i ℤ[S_i]`. -/
 def Profinite.limit_free (S : Profinite.{u}) : Ab.{u+1} :=
@@ -251,7 +252,10 @@ begin
     let X₀ : E₀ → Profinite.{u} := λ i, Profinite.equalizer (e (ee i.1.1)) (e (ee i.1.2)),
     let π₀ : Π (i : E₀), X₀ i ⟶ B := λ i, Profinite.equalizer.ι _ _,
 
-    have surj₀ : ∀ (b : B), ∃ (e₀ : E₀) (x : X₀ e₀), π₀ _ x = b, sorry, -- Use `H`.
+    have surj₀ : ∀ (b : B), ∃ (e₀ : E₀) (x : X₀ e₀), π₀ _ x = b,
+    { intro b, specialize H b,
+      -- extract out of `H` two functions `g₁ g₂ : B ⟶ S` with `g₁ ≠ g₂` and `g₁ b = g₂ b`
+      sorry },
 
     let f₀ : Π (i : E₀), S.to_Condensed.val.obj (op B) → S.to_Condensed.val.obj (op (X₀ i)) :=
       λ i, S.to_Condensed.val.map (π₀ i).op,
