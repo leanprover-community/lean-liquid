@@ -112,6 +112,14 @@ lemma finsupp.fun_ext {α γ : Type*}
   (h : ∀ x : α, f (finsupp.single x 1) = g (finsupp.single x 1)) :
   f = g := sorry
 
+def ProFiltPseuNormGroup₁.limit_π_coe_eq
+  {r : nnreal} {J : Type u} [small_category J]
+  (F : J ⥤ ProFiltPseuNormGrp₁.{u})
+  (k : (ProFiltPseuNormGrp₁.level.obj r).obj (limits.limit F))
+  (j) :
+  limits.limit.π F j (k.1 : limits.limit F) =
+  (((ProFiltPseuNormGrp₁.level.obj r).map (limits.limit.π F j)) k).1 := rfl
+
 lemma Profinite.mono_free'_to_condensed_free_pfpng_aux
   (S B : Profinite.{u}) (b : B) (T : discrete_quotient S)
   (t : S.to_Condensed.val.obj (op B) →₀ ℤ) :
@@ -131,12 +139,12 @@ begin
   dsimp,
   change ulift.down ∘ _ = _,
   apply finsupp.fun_ext,
-  sorry { intros, simp only [function.comp_app, map_add, ulift.add_down,
+  { intros, simp only [function.comp_app, map_add, ulift.add_down,
       eq_self_iff_true, forall_const] },
-  sorry { simp only [function.comp_app, map_zero, ulift.zero_down] },
-  sorry { intros, simp only [function.comp_app, map_add, ulift.add_down,
+  { simp only [function.comp_app, map_zero, ulift.zero_down] },
+  { intros, simp only [function.comp_app, map_add, ulift.add_down,
       eq_self_iff_true, forall_const, finsupp.map_domain_add], },
-  sorry { simp only [function.comp_app, map_zero, ulift.zero_down,
+  { simp only [function.comp_app, map_zero, ulift.zero_down,
       finsupp.map_domain_zero] },
   { intros s, rw free'_lift_eq_finsupp_lift,
     dsimp, simp only [finsupp.sum_single_index, zero_smul,
@@ -149,8 +157,13 @@ begin
     dsimp [Profinite.free_pfpng_π, Profinite.to_free_pfpng,
       Profinite.free_pfpng_level_iso,
       limits.is_limit.cone_point_unique_up_to_iso],
-    sorry
-  },
+    erw ProFiltPseuNormGroup₁.limit_π_coe_eq
+      (S.fintype_diagram ⋙ free_pfpng_functor),
+    simp only [← comp_apply, category.assoc],
+    erw (limits.is_limit_of_preserves (ProFiltPseuNormGrp₁.level.obj 1)
+      (limits.limit.is_limit (S.fintype_diagram ⋙ free_pfpng_functor))).fac,
+    erw limits.limit.lift_π,
+    ext i, refl },
 end
 
 instance Profinite.mono_free'_to_condensed_free_pfpng
