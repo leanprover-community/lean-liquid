@@ -220,6 +220,25 @@ begin
     adjunction.whisker_right_counit_app_app],
 end
 
+lemma Profinite.mono_free'_to_condensed_free_pfpng_induction_aux (S B : Profinite.{u}) (n : ℕ) :
+  ∀ (t : S.to_Condensed.val.obj (op B) →₀ ℤ),
+    t.support.card = n →
+    (free'_lift (S.to_condensed_free_pfpng.val.app (op B))) t = 0 →
+  (∀ (b : ↥B), finsupp.map_domain (λ f : S.to_Condensed.val.obj (op B),
+    (ulift.down f).1 b) t = 0) →
+  (∃ (α : Type u) [_inst_1 : fintype α] (X : α → Profinite) (π : Π (a : α), X a ⟶ B)
+    (surj : ∀ (b : ↥B), ∃ (a : α) (x : ↥(X a)), (π a) x = b),
+    ∀ (a : α), finsupp.map_domain (S.to_Condensed.val.map (π a).op) t = 0) :=
+begin
+  induction n,
+  case nat.zero
+  { intros t ht, simp at ht, rw ht, intros h1 h2,
+    use [punit, infer_instance, λ _, B, λ _, 𝟙 _],
+    split, { intros b, use [punit.star, b], refl },
+    { intros _, rw finsupp.map_domain_zero, } },
+  case nat.succ : n hn { sorry },
+end
+
 instance Profinite.mono_free'_to_condensed_free_pfpng
   (S : Profinite.{u}) : mono S.free'_to_condensed_free_pfpng :=
 begin
@@ -233,9 +252,10 @@ begin
     λ b f, (ulift.down f).1 b,
   have aux : ∀ b : B, t.map_domain (ι b) = 0 :=
     λ b, S.specialization_eq_zero_of_eq_zero B b t ht,
-
-  -- At this point we need to carry out the inductive part of this proof...
-  sorry
+  dsimp,
+  apply Profinite.mono_free'_to_condensed_free_pfpng_induction_aux,
+  refl,
+  assumption',
 end
 
 instance Profinite.epi_free'_to_condensed_free_pfpng
