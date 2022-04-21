@@ -220,9 +220,9 @@ begin
     adjunction.whisker_right_counit_app_app],
 end
 
-lemma Profinite.mono_free'_to_condensed_free_pfpng_induction_aux (S B : Profinite.{u}) (n : ℕ) :
-  ∀ (t : S.to_Condensed.val.obj (op B) →₀ ℤ),
-    t.support.card = n →
+lemma Profinite.mono_free'_to_condensed_free_pfpng_induction_aux (n : ℕ) :
+  ∀ (S B : Profinite.{u}) (t : S.to_Condensed.val.obj (op B) →₀ ℤ),
+    t.support.card ≤ n →
     (free'_lift (S.to_condensed_free_pfpng.val.app (op B))) t = 0 →
   (∀ (b : ↥B), finsupp.map_domain (λ f : S.to_Condensed.val.obj (op B),
     (ulift.down f).1 b) t = 0) →
@@ -232,11 +232,24 @@ lemma Profinite.mono_free'_to_condensed_free_pfpng_induction_aux (S B : Profinit
 begin
   induction n,
   case nat.zero
-  { intros t ht, simp at ht, rw ht, intros h1 h2,
+  { intros S B t ht, simp at ht, rw ht, intros h1 h2,
     use [punit, infer_instance, λ _, B, λ _, 𝟙 _],
     split, { intros b, use [punit.star, b], refl },
     { intros _, rw finsupp.map_domain_zero, } },
-  case nat.succ : n hn { sorry },
+  case nat.succ : n hn
+  { intros S B t ht1 ht2 H,
+    let F := t.support,
+    let e : F → (B ⟶ S) := λ f, f.1.1,
+    obtain ⟨Q,h1,h2,ee,-⟩ : ∃ (α : Type u) (hα1 : fintype α)
+      (hα2 : linear_order α) (ee : α ≃ F), true := sorry,
+    resetI,
+    let E := { a : Q × Q | a.1 < a.2 },
+    let X : E → Profinite.{u} := λ i, Profinite.equalizer (e (ee i.1.1)) (e (ee i.1.2)),
+    let π : Π (i : E), X i ⟶ B := λ i, Profinite.equalizer.ι _ _,
+    refine ⟨E,infer_instance,X,π,_,_⟩,
+    { sorry },
+    { sorry }
+  },
 end
 
 instance Profinite.mono_free'_to_condensed_free_pfpng
