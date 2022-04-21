@@ -110,7 +110,7 @@ begin
   { refine (mk_of_bound_bound_by _ _ _).mono 1 _,
     rw [neg_neg], exact (pow_one r).le.trans (fact.out _) },
   suffices : (sh + sh + (-id)).bound_by (1 + 1 + 1),
-  { convert this using 1, ext1, dsimp only [Φ_eq_ϕ, ϕ], erw two_nsmul, refl, },
+  { convert this using 1, ext1, dsimp only [Φ_eq_ϕ, ϕ], erw two_nsmul, sorry, }, -- was refl
   refine (Hsh.add Hsh).add (mk_of_bound_bound_by _ _ _).neg,
 end
 
