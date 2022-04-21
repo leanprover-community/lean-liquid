@@ -63,6 +63,10 @@ def free'_lift {X : Type (u+1)} {A : Ab.{u+1}} (f : X → A) :
   AddCommGroup.free'.obj X ⟶ A :=
 (AddCommGroup.adj'.hom_equiv _ _).symm f
 
+-- TODO: Consider redefining `AddCommGroup.free'` so that this is true by rfl.
+lemma free'_lift_eq_finsupp_lift {X : Type (u+1)} {A : Ab.{u+1}} (f : X → A) :
+  free'_lift f = (finsupp.lift _ _ _ f).to_add_monoid_hom := sorry
+
 open category_theory.grothendieck_topology
 
 lemma Profinite.free'_lift_val_eq_sheafification_lift (S : Profinite.{u})
@@ -98,6 +102,57 @@ def Profinite.condensed_free_pfpng_specialize (S B : Profinite.{u}) (b : B) :
   S.condensed_free_pfpng.val.obj (op B) ⟶ S.limit_free :=
 limits.limit.lift _ (S.condensed_free_pfpng_specialize_cone B b)
 
+lemma finsupp.fun_ext {α γ : Type*}
+  [add_comm_group γ]
+  (f g : (α →₀ ℤ) → γ)
+  (haddf : ∀ x y, f (x + y) = f x + f y)
+  (hzerof : f 0 = 0)
+  (haddg : ∀ x y, g (x + y) = g x + g y)
+  (hzerog : g 0 = 0)
+  (h : ∀ x : α, f (finsupp.single x 1) = g (finsupp.single x 1)) :
+  f = g := sorry
+
+lemma Profinite.mono_free'_to_condensed_free_pfpng_aux
+  (S B : Profinite.{u}) (b : B) (T : discrete_quotient S)
+  (t : S.to_Condensed.val.obj (op B) →₀ ℤ) :
+let e : S.to_Condensed.val.obj (op B) →
+    S.condensed_free_pfpng.val.obj (op B) :=
+    λ f, (S.to_condensed_free_pfpng.val.app (op B) f),
+    ι : S.to_Condensed.val.obj (op B) → S :=
+      λ f, (ulift.down f).1 b in
+    ((limits.limit.π (S.fintype_diagram ⋙ forget Fintype ⋙
+      AddCommGroup.free' ⋙ Ab.ulift) T)
+      (S.condensed_free_pfpng_specialize B b (free'_lift e t))).down
+  = t.map_domain (T.proj ∘ ι) :=
+begin
+  dsimp,
+  revert t,
+  rw ← function.funext_iff,
+  dsimp,
+  change ulift.down ∘ _ = _,
+  apply finsupp.fun_ext,
+  sorry { intros, simp only [function.comp_app, map_add, ulift.add_down,
+      eq_self_iff_true, forall_const] },
+  sorry { simp only [function.comp_app, map_zero, ulift.zero_down] },
+  sorry { intros, simp only [function.comp_app, map_add, ulift.add_down,
+      eq_self_iff_true, forall_const, finsupp.map_domain_add], },
+  sorry { simp only [function.comp_app, map_zero, ulift.zero_down,
+      finsupp.map_domain_zero] },
+  { intros s, rw free'_lift_eq_finsupp_lift,
+    dsimp, simp only [finsupp.sum_single_index, zero_smul,
+      one_zsmul, finsupp.map_domain_single, function.comp_app],
+    dsimp [Profinite.condensed_free_pfpng_specialize],
+    rw ← comp_apply, erw limits.limit.lift_π,
+    dsimp [Profinite.condensed_free_pfpng_specialize_cone],
+    apply_fun finsupp.equiv_fun_on_fintype, swap, apply_instance,
+    rw equiv.apply_symm_apply,
+    dsimp [Profinite.free_pfpng_π, Profinite.to_free_pfpng,
+      Profinite.free_pfpng_level_iso,
+      limits.is_limit.cone_point_unique_up_to_iso],
+    sorry
+  },
+end
+
 instance Profinite.mono_free'_to_condensed_free_pfpng
   (S : Profinite.{u}) : mono S.free'_to_condensed_free_pfpng :=
 begin
@@ -114,8 +169,7 @@ begin
   let ι : Π b : B, S.to_Condensed.val.obj (op B) → S :=
     λ b f, (ulift.down f).1 b,
   have aux : ∀ b : B, t.map_domain (ι b) = 0,
-  { -- use discrete_quotient_separates_points'
-    -- along with general stuff about bounded limits.
+  sorry { -- use discrete_quotient_separates_points'
     intros b,
     apply free_pfpng.discrete_quotient_separates_points' S (t.map_domain (ι b)),
     intros T,
@@ -125,8 +179,10 @@ begin
       AddCommGroup.free' ⋙ Ab.ulift) T e) at ht,
     rw add_monoid_hom.map_zero at ht,
     apply_fun ulift.down at ht,
-    convert ht,
-    sorry },
+    dsimp [AddCommGroup.free'],
+    rw ← finsupp.map_domain_comp,
+    have := S.mono_free'_to_condensed_free_pfpng_aux B b T t,
+    dsimp at this, erw ← this, exact ht },
   -- At this point we need to carry out the inductive part of this proof...
   sorry
 end
