@@ -238,17 +238,43 @@ begin
     { intros _, rw finsupp.map_domain_zero, } },
   case nat.succ : n hn
   { intros S B t ht1 ht2 H,
+    by_cases ht2' : t.support.card = n+1, swap, { sorry }, clear ht2,
     let F := t.support,
     let e : F → (B ⟶ S) := λ f, f.1.1,
     obtain ⟨Q,h1,h2,ee,-⟩ : ∃ (α : Type u) (hα1 : fintype α)
       (hα2 : linear_order α) (ee : α ≃ F), true := sorry,
     resetI,
-    let E := { a : Q × Q | a.1 < a.2 },
-    let X : E → Profinite.{u} := λ i, Profinite.equalizer (e (ee i.1.1)) (e (ee i.1.2)),
-    let π : Π (i : E), X i ⟶ B := λ i, Profinite.equalizer.ι _ _,
-    refine ⟨E,infer_instance,X,π,_,_⟩,
+    let E₀ := { a : Q × Q | a.1 < a.2 },
+    let X₀ : E₀ → Profinite.{u} := λ i, Profinite.equalizer (e (ee i.1.1)) (e (ee i.1.2)),
+    let π₀ : Π (i : E₀), X₀ i ⟶ B := λ i, Profinite.equalizer.ι _ _,
+
+    have surj₀ : ∀ (b : B), ∃ (e₀ : E₀) (x : X₀ e₀), π₀ _ x = b, sorry, -- Use `H`.
+
+    let f₀ : Π (i : E₀), S.to_Condensed.val.obj (op B) → S.to_Condensed.val.obj (op (X₀ i)) :=
+      λ i, S.to_Condensed.val.map (π₀ i).op,
+
+    let t₀ : Π (i : E₀), S.to_Condensed.val.obj (op (X₀ i)) →₀ ℤ :=
+      λ i, t.map_domain (f₀ i),
+
+    have card₀ : ∀ (i : E₀), (t₀ i).support.card ≤ n := sorry,
+    have lift₀ : ∀ (i : E₀), free'_lift (S.to_condensed_free_pfpng.val.app (op (X₀ i))) (t₀ i) = 0,
+      sorry,
+
+    have map₀ : ∀ (i : E₀) (b : ↥(X₀ i)),
+        finsupp.map_domain
+          (λ (f : S.to_Condensed.val.obj (op (X₀ i))), f.down.to_fun b) (t₀ i) = 0, sorry,
+    have key := λ i, hn S (X₀ i) (t₀ i) (card₀ i) (lift₀ i) (map₀ i),
+
+    choose A hA X₁ π₁ surj₁ key using key, resetI,
+
+    let E := Σ (e : E₀), A e,
+    let X : E → Profinite.{u} := λ i, X₁ i.1 i.2,
+    let π : Π (e : E), X e ⟶ B := λ e, π₁ e.1 e.2 ≫ π₀ e.1,
+
+    use [E, infer_instance, X, π], split,
+
     { sorry },
-    { sorry }
+    { sorry },
   },
 end
 
