@@ -189,6 +189,37 @@ begin
     refl },
 end
 
+lemma Profinite.specialization_eq_zero_of_eq_zero (S B : Profinite.{u}) (b : B)
+  (t : S.to_Condensed.val.obj (op B) →₀ ℤ)
+  (ht : free'_lift (S.to_condensed_free_pfpng.val.app (op B)) t = 0) :
+  t.map_domain (λ f, (ulift.down f).1 b) = 0 :=
+begin
+  apply free_pfpng.discrete_quotient_separates_points' S,
+  intros T,
+  apply_fun (λ e, S.condensed_free_pfpng_specialize B b e) at ht,
+  rw add_monoid_hom.map_zero at ht,
+  apply_fun (λ e, limits.limit.π (S.fintype_diagram ⋙ forget Fintype ⋙
+    AddCommGroup.free' ⋙ Ab.ulift) T e) at ht,
+  rw add_monoid_hom.map_zero at ht,
+  apply_fun ulift.down at ht,
+  dsimp [AddCommGroup.free'],
+  rw ← finsupp.map_domain_comp,
+  have := S.mono_free'_to_condensed_free_pfpng_aux B b T t,
+  dsimp at this, erw ← this, exact ht
+end
+
+lemma Profinite.adj'_hom_equiv_symm_eq_free'_lift (S B : Profinite.{u}) :
+    (((AddCommGroup.adj'.whisker_right Profinite.{u}ᵒᵖ).hom_equiv
+      S.to_Condensed.val S.condensed_free_pfpng.val).symm
+      S.to_condensed_free_pfpng.val).app (op B) =
+    free'_lift (S.to_condensed_free_pfpng.val.app (op B)) :=
+begin
+  ext u v, dsimp [free'_lift],
+  simp only [adjunction.hom_equiv_counit, whiskering_right_obj_map,
+    nat_trans.comp_app, whisker_right_app,
+    adjunction.whisker_right_counit_app_app],
+end
+
 instance Profinite.mono_free'_to_condensed_free_pfpng
   (S : Profinite.{u}) : mono S.free'_to_condensed_free_pfpng :=
 begin
@@ -197,28 +228,12 @@ begin
     S.condensed_free_pfpng.val.obj (op B) :=
     λ f, (S.to_condensed_free_pfpng.val.app (op B) f),
   dsimp at t ht,
-  replace ht : free'_lift e t = 0,
-  sorry { convert ht, ext u v, dsimp [free'_lift],
-    simp only [adjunction.hom_equiv_counit, whiskering_right_obj_map,
-      nat_trans.comp_app, whisker_right_app,
-      adjunction.whisker_right_counit_app_app] },
+  replace ht : free'_lift e t = 0, by rwa ← S.adj'_hom_equiv_symm_eq_free'_lift,
   let ι : Π b : B, S.to_Condensed.val.obj (op B) → S :=
     λ b f, (ulift.down f).1 b,
-  have aux : ∀ b : B, t.map_domain (ι b) = 0,
-  sorry { -- use discrete_quotient_separates_points'
-    intros b,
-    apply free_pfpng.discrete_quotient_separates_points' S (t.map_domain (ι b)),
-    intros T,
-    apply_fun (λ e, S.condensed_free_pfpng_specialize B b e) at ht,
-    rw add_monoid_hom.map_zero at ht,
-    apply_fun (λ e, limits.limit.π (S.fintype_diagram ⋙ forget Fintype ⋙
-      AddCommGroup.free' ⋙ Ab.ulift) T e) at ht,
-    rw add_monoid_hom.map_zero at ht,
-    apply_fun ulift.down at ht,
-    dsimp [AddCommGroup.free'],
-    rw ← finsupp.map_domain_comp,
-    have := S.mono_free'_to_condensed_free_pfpng_aux B b T t,
-    dsimp at this, erw ← this, exact ht },
+  have aux : ∀ b : B, t.map_domain (ι b) = 0 :=
+    λ b, S.specialization_eq_zero_of_eq_zero B b t ht,
+
   -- At this point we need to carry out the inductive part of this proof...
   sorry
 end
