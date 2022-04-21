@@ -242,7 +242,10 @@ begin
     let F := t.support,
     let e : F → (B ⟶ S) := λ f, f.1.1,
     obtain ⟨Q,h1,h2,ee,-⟩ : ∃ (α : Type u) (hα1 : fintype α)
-      (hα2 : linear_order α) (ee : α ≃ F), true := sorry,
+      (hα2 : linear_order α) (ee : α ≃ F), true,
+    { refine ⟨ulift (fin (fintype.card F)), infer_instance,
+        is_well_order.linear_order well_ordering_rel,
+        equiv.ulift.trans (fintype.equiv_fin _).symm, trivial⟩, },
     resetI,
     let E₀ := { a : Q × Q | a.1 < a.2 },
     let X₀ : E₀ → Profinite.{u} := λ i, Profinite.equalizer (e (ee i.1.1)) (e (ee i.1.2)),
