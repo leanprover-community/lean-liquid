@@ -818,11 +818,20 @@ end
 -- end
 
 
+def geom_B (ε : ℝ≥0)  : ℤ := 3
+
+-- #check geom_B
+
+def U (F : filtration (ℒ S) c) (ε : ℝ≥0) : set (filtration (ℒ S) c) := λ G,
+  ∀ s n, n ≤ (geom_B ε) → F s n = G s n
+
+-- #check geom_U S
+
+lemma is_open_U (F : filtration (ℒ S) c) (ε : ℝ≥0) : is_open (U S c F ε) := sorry
+
+
 end topological_generalities
 
-def (c ε : ℝ≥0) geom_B : ℤ := 3
-
--- lemma
 
 def θ_c (c : ℝ≥0) (T : Fintype) : (filtration (laurent_measures r T) c) →
   (filtration (real_measures p T) c) :=
@@ -855,12 +864,8 @@ end
 --- some trials **[FAE]** Both certainly false: the preimage of a closed ball in (ℳ S) contains the whole kernel, which itself contains unbounded measures.
 -- lemma θ_bound_optimal (F : (ℒ S)) (ε : ℝ≥0) (hF : ε < ∥ F ∥₊) :  θ F ∉ filtration (ℳ S) ε := sorry
 
--- lemma preimage_θ (c ε : ℝ≥0) (H : ε ≤ c) : (θ_c c S)⁻¹'
---   (range (inclusion (@filtration_mono (ℳ S) _ _ _ H))) =
---     (range (inclusion (@filtration_mono (ℒ S) _ _ _ H))) :=
--- begin
---   simp only [range_inclusion, preimage_set_of_eq, laurent_measures.mem_filtration_iff],
--- end
+lemma image_U (ε : ℝ≥0) (H : ε ≤ c) (F G : filtration (ℒ S) c) :
+  G ∈ (U S c F ε) → ∥ (θ_c c S G).1 - (θ_c c S) F ∥ < ε := sorry
 
 
 
@@ -885,8 +890,6 @@ begin
   }
 end
 
-
-variable {S}
 
 end theta
 
