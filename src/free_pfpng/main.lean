@@ -40,7 +40,7 @@ S.to_free_pfpng_level ≫
 lemma Profinite.to_condensed_free_pfpng_app (S T : Profinite.{u}) (f) :
   S.to_condensed_free_pfpng.val.app (op T) f = ulift.up
   ⟨_, 1, S.to_free_pfpng ∘ (ulift.down f).1,
-    S.to_free_pfpng.2.comp (ulift.down f).2 ,rfl⟩ :=
+    S.to_free_pfpng.2.comp (ulift.down f).2, rfl⟩ :=
 rfl
 
 def profinite_to_condensed_unit :
@@ -51,7 +51,11 @@ def profinite_to_condensed_unit :
   CompHausFiltPseuNormGrp.to_Condensed ⋙
   Condensed_Ab_to_CondensedSet :=
 { app := λ S, S.to_condensed_free_pfpng,
-  naturality' := sorry }
+  naturality' := λ S T f, begin
+    ext X s x, induction X using opposite.rec,
+    dsimp at x,
+    sorry
+  end }
 
 def Profinite.free' (S : Profinite.{u}) : Condensed.{u} Ab.{u+1} :=
 CondensedSet_to_Condensed_Ab'.obj S.to_Condensed
@@ -110,10 +114,9 @@ def Profinite.condensed_free_pfpng_specialize_cone (S B : Profinite.{u}) (b : B)
   limits.cone ((S.fintype_diagram ⋙ forget Fintype ⋙ AddCommGroup.free') ⋙ Ab.ulift.{u+1}) :=
 { X := S.condensed_free_pfpng.val.obj (op B),
   π :=
-  { app := λ T,
-    { to_fun := λ t, ⟨finsupp.equiv_fun_on_fintype.symm (S.free_pfpng_π T (t.down.1 b))⟩,
-      map_zero' := sorry,
-      map_add' := sorry },
+  { app := λ T, add_monoid_hom.mk'
+      (λ t, ⟨finsupp.equiv_fun_on_fintype.symm (S.free_pfpng_π T (t.down.1 b))⟩)
+      sorry,
     naturality' := sorry } }
 
 def Profinite.condensed_free_pfpng_specialize (S B : Profinite.{u}) (b : B) :
