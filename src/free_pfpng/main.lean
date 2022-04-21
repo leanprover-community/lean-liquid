@@ -5,6 +5,8 @@ import condensed.adjunctions
 import condensed.sheafification_mono
 import free_pfpng.lemmas
 
+import for_mathlib.int
+
 .
 
 
@@ -106,11 +108,19 @@ lemma finsupp.fun_ext {α γ : Type*}
   [add_comm_group γ]
   (f g : (α →₀ ℤ) → γ)
   (haddf : ∀ x y, f (x + y) = f x + f y)
-  (hzerof : f 0 = 0)
   (haddg : ∀ x y, g (x + y) = g x + g y)
-  (hzerog : g 0 = 0)
   (h : ∀ x : α, f (finsupp.single x 1) = g (finsupp.single x 1)) :
-  f = g := sorry
+  f = g :=
+congr_arg add_monoid_hom.to_fun $
+@finsupp.add_hom_ext α ℤ γ _ _ (add_monoid_hom.mk' f haddf) (add_monoid_hom.mk' g haddg)
+begin
+  intros x n,
+  apply int.induction_on_iff n; clear n,
+  { simp only [finsupp.single_zero, map_zero], },
+  { intro n,
+    { simp only [finsupp.single_add, map_add],
+      simp only [h, add_monoid_hom.mk'_apply, add_left_inj], }, },
+end
 
 lemma Profinite.mono_free'_to_condensed_free_pfpng_aux
   (S B : Profinite.{u}) (b : B) (T : discrete_quotient S)
@@ -133,11 +143,8 @@ begin
   apply finsupp.fun_ext,
   sorry { intros, simp only [function.comp_app, map_add, ulift.add_down,
       eq_self_iff_true, forall_const] },
-  sorry { simp only [function.comp_app, map_zero, ulift.zero_down] },
   sorry { intros, simp only [function.comp_app, map_add, ulift.add_down,
       eq_self_iff_true, forall_const, finsupp.map_domain_add], },
-  sorry { simp only [function.comp_app, map_zero, ulift.zero_down,
-      finsupp.map_domain_zero] },
   { intros s, rw free'_lift_eq_finsupp_lift,
     dsimp, simp only [finsupp.sum_single_index, zero_smul,
       one_zsmul, finsupp.map_domain_single, function.comp_app],
