@@ -830,16 +830,20 @@ end
 -- end
 
 
-def geom_B (ε : ℝ)  : ℤ := 3
+def geom_B (ε : ℝ)  : ℤ := ⌊ real.logb (2 * r) (2 * r - 1) * ε ⌋ + 1
 
--- #check geom_B
+lemma tail_B (ε : ℝ) : (tsum (λ x : {n : ℤ // n ≥ (geom_B ε)}, (2 * r) ^ ( - x.1 )) : ℝ) ≤ ε :=
+  sorry
 
 def U (F : filtration (ℒ S) c) (ε : ℝ) : set (filtration (ℒ S) c) := λ G,
   ∀ s n, n ≤ (geom_B ε) → F s n = G s n
 
-lemma mem_U (F : filtration (ℒ S) c) (ε : ℝ) : F ∈ (U S c F ε) := sorry
+lemma mem_U (F : filtration (ℒ S) c) (ε : ℝ) : F ∈ (U S c F ε) := λ _ _ _, rfl
 
-lemma is_open_U (F : filtration (ℒ S) c) (ε : ℝ) : is_open (U S c F ε) := sorry
+lemma is_open_U (F : filtration (ℒ S) c) (ε : ℝ) : is_open (U S c F ε) :=
+begin
+  sorry,
+end
 
 
 end topological_generalities
@@ -885,7 +889,6 @@ begin
   intro s,
   rw ← commute_seval_ℒ_ℳ,
   refine continuous.comp _ (continuous_seval_ℒ_c p S c s),
-  -- dsimp only [θ_c],
   apply (homeo_filtration_ϖ_ball c).comp_continuous_iff.mp,
   apply reduction_balls,
   intros y ε,
