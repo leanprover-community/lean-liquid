@@ -1,7 +1,9 @@
 import for_mathlib.derived.les2
 .
 
-open category_theory opposite
+noncomputable theory
+
+open category_theory category_theory.limits opposite
 open homotopy_category (hiding single)
 open bounded_homotopy_category
 

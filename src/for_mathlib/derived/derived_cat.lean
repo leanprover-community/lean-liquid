@@ -55,7 +55,9 @@ rfl
 def mk_iso {X Y : bounded_derived_category A} (i : (forget A).obj X ≅ (forget A).obj Y) :
   X ≅ Y :=
 { hom := ⟨i.hom⟩,
-  inv := ⟨i.inv⟩, }
+  inv := ⟨i.inv⟩,
+  hom_inv_id' := sorry,
+  inv_hom_id' := sorry }
 
 variable (A)
 @[simps]
@@ -94,24 +96,27 @@ begin
     apply_instance }
 end
 
-local attribute [instance] limits.has_zero_object.has_zero
+open_locale zero_object
+open category_theory.limits
 
 -- MOVE THIS
-instance zero_is_K_projective : is_K_projective (0 : bounded_homotopy_category A).val :=
+lemma zero_is_K_projective {X : bounded_homotopy_category A} (hX : is_zero X) :
+  is_K_projective X.val :=
 begin
   constructor,
-  introsI Y _ f, ext,
+  introsI Y _ f, apply (bounded_homotopy_category.zero_val hX).eq_of_src f
 end
 
-noncomputable
+protected noncomputable
+def zero : bounded_derived_category A :=
+{ val := bounded_homotopy_category.zero,
+  proj := zero_is_K_projective _ $ bounded_homotopy_category.is_zero_zero }
+
+protected lemma is_zero_zero : limits.is_zero (bounded_derived_category.zero A) :=
+sorry
+
 instance has_zero_object : limits.has_zero_object (bounded_derived_category A) :=
-{ zero := of 0,
-  unique_to := λ X,
-  { default := ⟨0⟩,
-    uniq := λ a, by { ext1, cases a, dsimp at *, apply limits.has_zero_object.from_zero_ext } },
-  unique_from := λ X,
-  { default := ⟨0⟩,
-    uniq := λ a, by { ext1, cases a, dsimp at *, apply limits.has_zero_object.to_zero_ext } } }
+⟨⟨bounded_derived_category.zero A, bounded_derived_category.is_zero_zero A⟩⟩
 
 @[simps]
 def has_shift_functor (i : ℤ) : bounded_derived_category A ⥤ bounded_derived_category A:=
@@ -405,10 +410,15 @@ begin
   fapply triangle.iso.of_components,
   exact localization_iso X,
   exact localization_iso X,
-  exact localization_iso 0,
-  { ext, dsimp, simp, },
-  { ext, },
-  { apply (cancel_epi (localization_iso 0).inv).1, ext, apply_instance, },
+  refine _ ≪≫ localization_iso 0,
+  { dsimp, sorry,
+    -- refine bounded_homotopy_category.is_zero_zero.iso_zero,
+    -- refine functor.map_iso _ _,
+    },
+  all_goals { sorry }
+  -- { ext, dsimp, simp, },
+  -- { ext, },
+  -- { apply (cancel_epi (localization_iso 0).inv).1, ext, apply_instance, },
 end
 
 @[simp]

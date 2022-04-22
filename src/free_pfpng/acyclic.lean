@@ -8,7 +8,7 @@ noncomputable theory
 
 universes u
 
-open category_theory opposite ProFiltPseuNormGrp₁
+open category_theory category_theory.limits opposite ProFiltPseuNormGrp₁
 open function (surjective)
 open_locale nnreal
 
@@ -95,7 +95,7 @@ lemma free_acyclic_aux (F : arrow Profinite) (hF : surjective (F.hom)) (i : ℕ)
       (LCC V ⋙ Ab.ulift.{u+1})).obj F.augmented_cech_nerve.right_op).to_cocomplex.homology i) :=
 begin
   let U := (forget₂.{u+1 u+1 u u u} SemiNormedGroup.{u} Ab.{u} ⋙ Ab.ulift.{u+1 u}),
-  show is_zero.{u+2 u+1} (homological_complex.homology.{u+1 u+2 0}
+  show is_zero (homological_complex.homology.{u+1 u+2 0}
     (((cosimplicial_object.augmented.whiskering.{u u+1 u+1 u+2} Profinite.{u}ᵒᵖ Ab.{u+1}).obj
       (SemiNormedGroup.LCC.{u u}.obj V ⋙ U)).obj F.augmented_cech_nerve.right_op).to_cocomplex i),
   rw [← homology_functor_obj, ← category_theory.cosimplicial_object.augmented.cocomplex_obj],
@@ -129,11 +129,7 @@ begin
     rw [this, ← Ab.comp_apply, category.assoc, iso.inv_hom_id, category.comp_id, map_zero] at hf,
     exact congr_arg ulift.down hf, },
   { let e := (homology_iso C i (i+1) (i+2) rfl rfl),
-    convert is_zero_of_iso_of_zero _ e.symm using 1,
-    -- the next `sorry` is currently false
-    -- make `has_zero_object` a `Prop`, and this will go away (the `convert` will be defeq)
-    -- relevant mathlib PR: #13517
-    sorry,
+    refine is_zero_of_iso_of_zero _ e.symm,
     apply exact.homology_is_zero,
     rw [AddCommGroup.exact_iff', homological_complex.d_comp_d, eq_self_iff_true, true_and],
     intros f hf,
