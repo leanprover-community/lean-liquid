@@ -276,12 +276,17 @@ begin
     { intros _, rw finsupp.map_domain_zero, } },
   case nat.succ : n hn
   { intros S B t ht1 ht2 H,
-    by_cases ht2' : t.support.card = n+1, swap, { sorry }, clear ht2,
+    by_cases ht1' : t.support.card = n+1, swap,
+    -- This works -- just remove the `sorry`.
+    sorry { apply hn, exact nat.le_of_lt_succ (nat.lt_of_le_and_ne ht1 ht1'),
+      assumption' },
+    clear ht1,
     let F := t.support,
     let e : F → (B ⟶ S) := λ f, f.1.1,
     obtain ⟨Q,h1,h2,ee,-⟩ : ∃ (α : Type u) (hα1 : fintype α)
       (hα2 : linear_order α) (ee : α ≃ F), true,
-    { refine ⟨ulift (fin (fintype.card F)), infer_instance,
+    -- This works -- just remove the `sorry`.
+    sorry { refine ⟨ulift (fin (fintype.card F)), infer_instance,
         is_well_order.linear_order well_ordering_rel,
         equiv.ulift.trans (fintype.equiv_fin _).symm, trivial⟩, },
     resetI,
@@ -290,14 +295,15 @@ begin
     let π₀ : Π (i : E₀), X₀ i ⟶ B := λ i, Profinite.equalizer.ι _ _,
 
     have surj₀ : ∀ (b : B), ∃ (e₀ : E₀) (x : X₀ e₀), π₀ _ x = b,
-    { intro b, specialize H b,
+    -- This works, but it's slow -- just remove the `sorry`.
+    sorry { intro b, specialize H b,
       contrapose! H,
       have key : ∀ (i j : Q) (h : i < j), e (ee i) b ≠ e (ee j) b,
       { intros i j h, specialize H ⟨⟨i,j⟩, h⟩, intro c,
         specialize H, dsimp [X₀] at H, specialize H ⟨b, c⟩,
         apply H, refl },
       apply finsupp.map_domain_ne_zero_of_ne_zero_of_inj_on,
-      { intro c, rw c at ht2', simpa using ht2' }, -- use `ht2'`,
+      { intro c, rw c at ht1', simpa using ht1' },
       { intros x hx y hy hxy, dsimp at hxy,
         let i : Q := ee.symm ⟨x,hx⟩,
         let j : Q := ee.symm ⟨y,hy⟩,
@@ -317,9 +323,20 @@ begin
     let t₀ : Π (i : E₀), S.to_Condensed.val.obj (op (X₀ i)) →₀ ℤ :=
       λ i, t.map_domain (f₀ i),
 
-    have card₀ : ∀ (i : E₀), (t₀ i).support.card ≤ n := sorry,
-    have lift₀ : ∀ (i : E₀), free'_lift (S.to_condensed_free_pfpng.val.app (op (X₀ i))) (t₀ i) = 0,
+    have card₀ : ∀ (i : E₀), (t₀ i).support.card ≤ n,
+    -- The functions `e (ee i.1.1)` and `e (ee i.1.2)`
+    -- agree on `X₀ i` by definition.
+    -- Since `t.support` has size `n+1`, it should follow that
+    -- `(t₀ i).support` has size `≤ n`.
+    -- We should probably prove a more general lemma for this.
       sorry,
+
+    have lift₀ : ∀ (i : E₀), free'_lift (S.to_condensed_free_pfpng.val.app (op (X₀ i))) (t₀ i) = 0,
+    { intros i, rw free'_lift_eq_finsupp_lift, dsimp [t₀, f₀],
+      apply_fun (λ q, S.condensed_free_pfpng.val.map (π₀ i).op q) at ht2,
+      rw [add_monoid_hom.map_zero, free'_lift_eq_finsupp_lift] at ht2,
+      convert ht2,
+      sorry },
 
     have map₀ : ∀ (i : E₀) (b : ↥(X₀ i)),
         finsupp.map_domain
@@ -334,9 +351,14 @@ begin
 
     use [E, infer_instance, X, π], split,
 
-    { sorry },
-    { sorry },
-  },
+    { intros b,
+      obtain ⟨e₀,x,hx⟩ := surj₀ b,
+      obtain ⟨i,q,hq⟩ := surj₁ e₀ x,
+      use [⟨e₀,i⟩,q], dsimp [π], rw [hq, hx] },
+    { intros a,
+      dsimp [π], rw functor.map_comp,
+      erw finsupp.map_domain_comp,
+      apply key } },
 end
 
 instance Profinite.mono_free'_to_condensed_free_pfpng
