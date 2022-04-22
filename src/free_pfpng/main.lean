@@ -297,9 +297,19 @@ begin
         specialize H, dsimp [X₀] at H, specialize H ⟨b, c⟩,
         apply H, refl },
       apply finsupp.map_domain_ne_zero_of_ne_zero_of_inj_on,
-      { sorry }, -- use `ht2'`,
-      { sorry }, -- use `key`.
-    },
+      { intro c, rw c at ht2', simpa using ht2' }, -- use `ht2'`,
+      { intros x hx y hy hxy, dsimp at hxy,
+        let i : Q := ee.symm ⟨x,hx⟩,
+        let j : Q := ee.symm ⟨y,hy⟩,
+        rcases lt_trichotomy i j with (hhh|hhh|hhh),
+        { specialize key i j hhh, contrapose hxy, convert key,
+          { dsimp [i], rw ee.apply_symm_apply, refl },
+          { dsimp [j], rw ee.apply_symm_apply, refl } },
+        { apply_fun (λ q, (ee q).1) at hhh, dsimp [i,j] at hhh,
+          simp_rw ee.apply_symm_apply at hhh, exact hhh },
+        { specialize key j i hhh, contrapose hxy, convert key.symm,
+          { dsimp [j], rw ee.apply_symm_apply, refl },
+          { dsimp [i], rw ee.apply_symm_apply, refl } } } },
 
     let f₀ : Π (i : E₀), S.to_Condensed.val.obj (op B) → S.to_Condensed.val.obj (op (X₀ i)) :=
       λ i, S.to_Condensed.val.map (π₀ i).op,
