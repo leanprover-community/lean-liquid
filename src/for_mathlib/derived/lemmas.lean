@@ -130,8 +130,7 @@ begin
     apply is_zero_of_iso_of_zero (h i),
     apply (homology_zero_shift_iso A i).app _ },
   { introsI h i,
-    apply is_zero_of_iso_of_zero (is_acyclic.cond _ i),
-    apply ((homology_zero_shift_iso A _).app _).symm,
+    apply (is_acyclic.cond _ i).of_iso ((homology_zero_shift_iso A _).app _),
     assumption },
 end
 

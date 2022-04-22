@@ -33,8 +33,8 @@ example (A : short_exact_sequence C)
 begin
   obtain ⟨i, rfl⟩ : ∃ k, i = k + 2, { simpa only [add_comm] using nat.exists_eq_add_of_le hi },
   refine is_zero_of_exact_zero_zero' _ _ (delta_functor.δ_exact (i+1) A) _ _,
-  { exact (hA₃ (i+1) i.succ_pos).eq_zero_of_src _ },
-  { refine (hA₂ (i+2) _).eq_zero_of_tgt _, exact pos_of_gt hi }
+  { exact (hA₃ (i+1) i.succ_pos).eq_of_src _ _ },
+  { refine (hA₂ (i+2) _).eq_of_tgt _ _, exact pos_of_gt hi }
 end
 
 end delta_functor

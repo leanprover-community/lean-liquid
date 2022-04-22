@@ -248,6 +248,8 @@ begin
       apply locally_constant.norm_apply_le } },
 end
 
+open_locale zero_object
+
 theorem prop819_degree_zero (f : (FLC F M).X 0) (hf : (FLC F M).d 0 1 f = 0) :
   f = 0 :=
 begin

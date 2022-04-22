@@ -113,7 +113,7 @@ def punit_equiv : ℤ[punit] ≃+ ℤ :=
     (λ x, punit.cases_on x (by simp))
     (λ x, punit.cases_on x (by simp))
     (λ x y hx hy, by { simp only [add_monoid_hom.map_add, add_smul] at *, rw [hx, hy]}),
-  right_inv := λ n, by { rw [add_monoid_hom.map_int_module_smul, lift.of], exact zsmul_int_one n},
+  right_inv := λ n, by { rw [add_monoid_hom.map_zsmul, lift.of], exact zsmul_int_one n},
   map_add' := add_monoid_hom.map_add _ }
 
 -- this is now on `free-abelian-group-equivs` branch
@@ -198,7 +198,7 @@ def to_functorial_map {m n : ℕ} (U : universal_map m n) :
       ext i,
       -- and this just boils down to trivialities
       simp only [basic_universal_map.pre_eval_apply, pow_eval, add_monoid_hom.map_sum,
-        map_int_module_smul], },
+        map_zsmul], },
       -- the rest is just checking that the question about universal maps was linear
       -- so the reduction to the basic case was OK.
     { intros F hF,

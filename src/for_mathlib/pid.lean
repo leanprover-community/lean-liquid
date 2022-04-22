@@ -1,7 +1,6 @@
 import linear_algebra.dimension
 import ring_theory.principal_ideal_domain
-import set_theory.ordinal
-import set_theory.ordinal_arithmetic
+import set_theory.ordinal.arithmetic
 import linear_algebra.free_module.basic
 
 open_locale big_operators

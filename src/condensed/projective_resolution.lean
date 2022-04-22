@@ -103,10 +103,8 @@ begin
   simp only [comp_apply, AddCommGroup.free_map_coe, category.id_comp, category.comp_id],
   dsimp [functor.right_unitor, AddCommGroup.adj, applicative.to_functor],
   erw equiv.apply_symm_apply,
-  simp,
-  change _ + _ = _,
-  rw zero_add,
-  refl,
+  simp only [op_id, category_theory.functor.map_id, id_apply, one_mul, monoid_hom.to_fun_eq_coe,
+    free_group.lift.of, types_id_apply],
 end
 
 local attribute [instance] limits.has_zero_object.has_zero

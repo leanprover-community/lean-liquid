@@ -53,7 +53,7 @@ theorem eval_LCFP_rescale [ϕ.suitable c₂ c₁]
   (by clean @_root_.id _ ((eval_LCFP V r' (c₁ * N⁻¹) (c₂ * N⁻¹) ϕ).app (op (of r' M)))) :=
 begin
   simp only [eval_LCFP, ← nat_trans.app_hom_apply,
-    add_monoid_hom.map_sum, add_monoid_hom.map_int_module_smul],
+    add_monoid_hom.map_sum, add_monoid_hom.map_zsmul],
   simp only [nat_trans.app_hom_apply, basic_universal_map.eval_LCFP_rescale],
 end
 

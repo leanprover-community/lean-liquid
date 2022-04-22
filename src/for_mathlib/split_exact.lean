@@ -312,12 +312,20 @@ open_locale zero_object
 
 -- move this, add `iso_zero_biprod`
 @[simps]
-def iso_biprod_zero {C : Type*} [category C] [has_zero_morphisms C] [has_zero_object C]
-  [has_binary_biproducts C] {X : C} : X ≅ X ⊞ 0 :=
-{ hom := biprod.inl, inv := biprod.fst }
+def iso_biprod_zero {C : Type*} [category C] [has_zero_morphisms C]
+  [has_binary_biproducts C] {X Y : C} (hY : is_zero Y) : X ≅ X ⊞ Y :=
+{ hom := biprod.inl,
+  inv := biprod.fst,
+  inv_hom_id' := begin
+    apply category_theory.limits.biprod.hom_ext;
+    simp only [category.assoc, biprod.inl_fst, category.comp_id, category.id_comp,
+      biprod.inl_snd, comp_zero],
+    apply hY.eq_of_tgt
+  end }
 .
 
-def splitting_of_is_iso_zero {X Y : 𝒜} (f : X ⟶ Y) [is_iso f] : splitting f (0 : Y ⟶ 0) :=
-⟨(as_iso f).symm ≪≫ iso_biprod_zero, by simp, by simp⟩
+def splitting_of_is_iso_zero {X Y Z : 𝒜} (f : X ⟶ Y) [is_iso f] (hZ : is_zero Z) :
+  splitting f (0 : Y ⟶ Z) :=
+⟨(as_iso f).symm ≪≫ iso_biprod_zero hZ, by simp [hZ.eq_of_tgt _ 0], by simp⟩
 
 end category_theory

@@ -71,11 +71,8 @@ fork.is_limit.mk _ (λ S,
     delta kernel_fork kernel_fork.of_ι,
     dsimp only [fork.of_ι_X, fork.of_ι_π_app],
     intros s m H,
-    ext X : 2,
-    dsimp only,
-    simp only [s.ι_eq_app_zero, ← H walking_parallel_pair.zero],
-    ext t,
-    refl,
+    simp only [← H],
+    ext, refl,
   end
 
 noncomputable instance : abelian (Cᵒᵖ ⥤ Ab.{u+1}) :=
@@ -142,40 +139,16 @@ begin
     dsimp, simp only [category.id_comp, category.comp_id], }
 end
 
-lemma is_zero_functor {C A : Type*} [category C] [category A] [abelian A]
-  (F : C ⥤ A) (hF : ∀ X, is_zero (F.obj X)) :
-  is_zero F :=
-begin
-  split; intros G f; ext Z : 2,
-  { apply (hF Z).eq_of_src, },
-  { apply (hF Z).eq_of_tgt, }
-end
-
 open_locale zero_object
 
-lemma is_zero_iff {C A : Type*} [category C] [category A] [abelian A] (F : C ⥤ A) :
-  is_zero F ↔ ∀ X, is_zero (F.obj X) :=
-begin
-  refine ⟨_, is_zero_functor _⟩,
-  intros hF X,
-  let G : C ⥤ A := (category_theory.functor.const C).obj 0,
-  have hG : is_zero G := is_zero_functor _ (λ X, is_zero_zero _),
-  let e : G ≅ F := hG.iso hF,
-  refine is_zero_of_iso_of_zero (is_zero_zero _) (e.app X),
-end
-
 lemma is_zero_Ab (X : Ab) (hX : ∀ t : X, t = 0) : is_zero X :=
-begin
-  split; intros Y f,
-  { ext x, rw hX x, exact f.map_zero },
-  { ext y, apply hX }
-end
+by { rw is_zero_iff_id_eq_zero, ext, apply hX, }
 
 lemma is_zero_colimit_of_is_zero {C A : Type*} [category C] [category A] [abelian A] (F : C ⥤ A)
   [has_colimits_of_shape C A] (hF : is_zero F) : is_zero (colimit F) :=
 begin
   let G : C ⥤ A := (category_theory.functor.const C).obj (⊥_ _),
-  have hG : is_zero G := is_zero_functor _ (λ X, is_zero_initial),
+  have hG : is_zero G := functor.is_zero _ (λ X, is_zero_initial),
   let e : G ≅ F := hG.iso hF,
   refine is_zero_of_iso_of_zero _ (colim.map_iso e),
   refine is_zero_of_iso_of_zero is_zero_initial colimit_const_initial.symm,
@@ -185,7 +158,7 @@ lemma is_zero_limit_of_is_zero {C A : Type*} [category C] [category A] [abelian 
   [has_limits_of_shape C A] (hF : is_zero F) : is_zero (limit F) :=
 begin
   let G : C ⥤ A := (category_theory.functor.const C).obj (⊤_ _),
-  have hG : is_zero G := is_zero_functor _ (λ X, is_zero_terminal),
+  have hG : is_zero G := functor.is_zero _ (λ X, is_zero_terminal),
   let e : G ≅ F := hG.iso hF,
   refine is_zero_of_iso_of_zero _ (lim.map_iso e),
   refine is_zero_of_iso_of_zero is_zero_terminal limit_const_terminal.symm,
@@ -194,12 +167,12 @@ end
 lemma is_zero_plus_of_is_zero (F : Cᵒᵖ ⥤ Ab.{u+1})
   (hF : is_zero F) : is_zero (J.plus_obj F) :=
 begin
-  rw is_zero_iff, intros X,
+  rw functor.is_zero_iff, intros X,
   apply is_zero_colimit_of_is_zero,
-  rw is_zero_iff at hF ⊢,
+  rw functor.is_zero_iff at hF ⊢,
   intros W,
   apply is_zero_limit_of_is_zero,
-  rw is_zero_iff, intros P,
+  rw functor.is_zero_iff, intros P,
   cases P; apply hF,
 end
 
@@ -232,7 +205,7 @@ lemma is_zero_of_exists_cover (F : Cᵒᵖ ⥤ Ab.{u+1})
 begin
   -- This proof is a mess...
   apply is_zero_plus_of_is_zero,
-  rw is_zero_iff,
+  rw functor.is_zero_iff,
   intros B, tactic.op_induction',
   apply is_zero_Ab,
   intros t,

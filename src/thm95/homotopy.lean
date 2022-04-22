@@ -79,7 +79,7 @@ begin
      = (k' κ' m * (2 ^ N)⁻¹) * (c * κ i) : by ring1
   ... ≤ 1 * (c * κ i) : mul_le_mul' _ le_rfl
   ... = c * κ i : one_mul _,
-  apply mul_inv_le_of_le_mul (pow_ne_zero _ $ @two_ne_zero ℝ≥0 _ _),
+  apply mul_inv_le_of_le_mul,
   rw one_mul,
   exact hN.1
 end

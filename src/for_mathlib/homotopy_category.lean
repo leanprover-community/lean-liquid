@@ -1,5 +1,6 @@
 import algebra.homology.homotopy_category
 import for_mathlib.homological_complex_shift
+import for_mathlib.abelian_category
 
 universes v u
 
@@ -157,12 +158,21 @@ attribute[derive [full]] quotient
 
 open_locale zero_object
 
+protected def zero [has_zero_object V] : homotopy_category V c :=
+{ as := homological_complex.zero }
+
+protected lemma is_zero_zero [has_zero_object V] :
+  is_zero (homotopy_category.zero : homotopy_category V c) :=
+begin
+  rw [is_zero_iff_id_eq_zero],
+  apply eq_of_homotopy,
+  apply homotopy.of_eq,
+  rw ← is_zero_iff_id_eq_zero,
+  exact homological_complex.is_zero_zero,
+end
+
 instance [has_zero_object V] : has_zero_object (homotopy_category V c) :=
-{ zero := ⟨0⟩,
-  unique_to := λ X, ⟨⟨0⟩, λ f, by { induction f using quot.induction_on, dsimp, erw quot_mk,
-    rw [← (quotient V c).map_zero], congr, ext }⟩,
-  unique_from := λ X, ⟨⟨0⟩, λ f, by { induction f using quot.induction_on, dsimp, erw quot_mk,
-    rw [← (quotient V c).map_zero], congr, ext }⟩ }
+⟨⟨homotopy_category.zero, homotopy_category.is_zero_zero⟩⟩
 
 instance shift_functor_additive (n : ℤ) :
   (category_theory.shift_functor (homotopy_category V (complex_shape.up ℤ)) n).additive :=

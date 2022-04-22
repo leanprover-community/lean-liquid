@@ -37,8 +37,8 @@ begin
   intros f g,
   cases f with _ _ _ r,
   { exact g },
-  { cases g, exacts [walking_complex_hom.d r, zero _ _, zero _ _] },
-  { exact zero _ _ },
+  { cases g, exacts [walking_complex_hom.d r, walking_complex_hom.zero _ _, walking_complex_hom.zero _ _] },
+  { exact walking_complex_hom.zero _ _ },
 end
 
 instance : category_struct (walking_complex c) :=
@@ -49,8 +49,8 @@ instance : category_struct (walking_complex c) :=
     intros i j k f g,
     cases f with _ _ _ r,
     { exact g },
-    { cases g, exacts [walking_complex_hom.d r, zero _ _, zero _ _] },
-    { exact zero _ _ },
+    { cases g, exacts [walking_complex_hom.d r, walking_complex_hom.zero _ _, walking_complex_hom.zero _ _] },
+    { exact walking_complex_hom.zero _ _ },
   end }
 end
 

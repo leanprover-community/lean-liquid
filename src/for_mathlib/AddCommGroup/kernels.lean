@@ -25,10 +25,10 @@ fork.is_limit.mk _
     λ c, (add_monoid_hom.mem_ker _).2 $
     by { rw [←@function.comp_apply _ _ _ f s.ι c, ←coe_comp, fork.condition,
       has_zero_morphisms.comp_zero (fork.ι s) N], refl })
-  (λ s, by { ext, simp only [fork.ι_eq_app_zero, comp_apply, add_monoid_hom.cod_restrict_apply], refl })
+  (λ s, by { ext, simp only [comp_apply, add_monoid_hom.cod_restrict_apply], refl })
   (λ s m h, add_monoid_hom.ext $ λ x, subtype.ext_iff_val.2 $
     have h₁ : (m ≫ (kernel_cone f).π.app zero).to_fun = (s.π.app zero).to_fun,
-      by { congr, exact h zero },
+      by { congr, exact h },
     by convert @congr_fun _ _ _ _ h₁ x )
 
 /-- The cokernel cocone induced by the projection onto the quotient. -/
@@ -43,7 +43,7 @@ cofork.is_colimit.mk _
   (λ s : cofork f 0, quotient_add_group.lift _ s.π $
   by { rintro _ ⟨x, rfl⟩, have := add_monoid_hom.congr_fun s.condition x,
     simpa only [comp_apply, zero_apply, map_zero] using this, })
-  (λ s, by { ext, simp only [comp_apply, cofork.π_eq_app_one], refl })
+  (λ s, by { ext, simp only [comp_apply], refl })
   (λ s m h,
   begin
     let g : N ⟶ (of $ N ⧸ f.range) := (quotient_add_group.mk' f.range),
@@ -51,7 +51,7 @@ cofork.is_colimit.mk _
     swap, { ext ⟨x⟩, simp only [add_monoid_hom.mem_range, quotient_add_group.mk'_apply,
       add_subgroup.mem_top, iff_true], exact ⟨x, rfl⟩ },
     apply (cancel_epi g).1,
-    convert h walking_parallel_pair.one,
+    convert h,
     ext, refl,
   end)
 

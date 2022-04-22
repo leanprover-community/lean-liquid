@@ -406,7 +406,7 @@ begin
   rw [eval_LCFP_eq_eval_LCFP', eval_LCFP'],
   have : (∑ (g : basic_universal_map m n) in support ϕ, (coeff g ϕ).nat_abs : ℝ) ≤ N,
   { exact_mod_cast h },
-  simp only [← nat_trans.app_hom_apply, add_monoid_hom.map_sum, add_monoid_hom.map_int_module_smul],
+  simp only [← nat_trans.app_hom_apply, add_monoid_hom.map_sum, add_monoid_hom.map_zsmul],
   refine le_trans (norm_sum_le_of_le ϕ.support _) this,
   intros g hg,
   have aux := ϕ.suitable_of_mem_support c₂ c₁ g hg,

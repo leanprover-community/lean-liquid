@@ -220,7 +220,7 @@ begin
   { convert nnreal.rpow_le_rpow_of_exponent_le _ p_le_one,
     { rw nnreal.rpow_one,
       refl },
-    { refine not_lt.mp (λ hf, hF_nz (int.eq_zero_iff_abs_lt_one.mp _)),
+    { refine not_lt.mp (λ hf, hF_nz (int.abs_lt_one_iff.mp _)),
       suffices : (|F s b| : ℝ) < 1, exact_mod_cast this,
       rw ← int.norm_eq_abs,
       rwa [← nnreal.coe_lt_coe, ← nnnorm_norm, real.nnnorm_of_nonneg (norm_nonneg _)] at hf } }
