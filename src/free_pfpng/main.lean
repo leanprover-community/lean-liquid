@@ -224,6 +224,40 @@ begin
     adjunction.whisker_right_counit_app_app],
 end
 
+open_locale big_operators
+lemma finsupp.map_domain_ne_zero_of_ne_zero_of_inj_on {α β γ : Type*} [add_comm_group β]
+  (t : α →₀ β) (ht : t ≠ 0) (f : α → γ)
+  (hinj : set.inj_on f t.support) :
+  t.map_domain f ≠ 0 :=
+begin
+  contrapose! ht,
+  have : ∀ (e : γ) (he : e ∈ (t.map_domain f).support), ∃ (q : α) (hq : q ∈ t.support), f q = e,
+  { intros e he, by_contra c, push_neg at c,
+    simp only [finsupp.mem_support_iff, ne.def] at he,
+    apply he,
+    erw finset.sum_apply',
+    apply finset.sum_eq_zero,
+    intros a ha,
+    dsimp [finsupp.single], rw if_neg, apply c, exact ha },
+  choose q hq hh using this,
+  let ι : (t.map_domain f).support → t.support :=
+    λ e, ⟨q e.1 e.2, hq e.1 e.2⟩,
+  have hι : function.surjective ι,
+  { rintros ⟨e,he⟩, use f e,
+    simp only [finsupp.mem_support_iff, ne.def],
+    -- This is similar to `finsupp.map_domain_apply`, except using `inj_on` instead of `injective`.
+    have : (finsupp.map_domain f t) (f e) = t e, sorry,
+    rw this, clear this, simpa using he,
+    ext, dsimp,
+    apply hinj, apply hq, apply he, apply hh },
+  have : (t.map_domain f).support = ∅, by simpa using ht,
+  suffices : t.support = ∅, by simpa using this,
+  by_contra c, change _ ≠ _ at c,
+  erw ← finset.nonempty_iff_ne_empty at c,
+  obtain ⟨c,hc⟩ := c, obtain ⟨⟨c,hc⟩,ee⟩ := hι ⟨c,hc⟩,
+  rw this at hc, simpa using hc,
+end
+
 lemma Profinite.mono_free'_to_condensed_free_pfpng_induction_aux (n : ℕ) :
   ∀ (S B : Profinite.{u}) (t : S.to_Condensed.val.obj (op B) →₀ ℤ),
     t.support.card ≤ n →
@@ -257,8 +291,15 @@ begin
 
     have surj₀ : ∀ (b : B), ∃ (e₀ : E₀) (x : X₀ e₀), π₀ _ x = b,
     { intro b, specialize H b,
-      -- extract out of `H` two functions `g₁ g₂ : B ⟶ S` with `g₁ ≠ g₂` and `g₁ b = g₂ b`
-      sorry },
+      contrapose! H,
+      have key : ∀ (i j : Q) (h : i < j), e (ee i) b ≠ e (ee j) b,
+      { intros i j h, specialize H ⟨⟨i,j⟩, h⟩, intro c,
+        specialize H, dsimp [X₀] at H, specialize H ⟨b, c⟩,
+        apply H, refl },
+      apply finsupp.map_domain_ne_zero_of_ne_zero_of_inj_on,
+      { sorry }, -- use `ht2'`,
+      { sorry }, -- use `key`.
+    },
 
     let f₀ : Π (i : E₀), S.to_Condensed.val.obj (op B) → S.to_Condensed.val.obj (op (X₀ i)) :=
       λ i, S.to_Condensed.val.map (π₀ i).op,
