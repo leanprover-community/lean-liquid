@@ -477,20 +477,20 @@ variables {X : Type*} [topological_space X]
 --    sorry,
 --  end
 
-lemma reduction_balls {c : ℝ≥0} (f : X → (Icc (-c : ℝ) c)) (H : ∀ y : (Icc (-c : ℝ) c), ∀ ε : ℝ,
-  is_open (f⁻¹' (ball y ε))) : continuous f :=
-begin
-  rw continuous_def,
-  intros _ hU,
-  rw is_open_iff_forall_mem_open,
-  intros x hx,
-  obtain ⟨ε, h₀, hε⟩ := (is_open_iff.mp hU) (f x) (mem_preimage.mp hx),
-  use f⁻¹' (ball (f x) ε),
-  exact ⟨preimage_mono hε, H (f x) ε, mem_ball_self h₀⟩,
-end
+-- lemma reduction_balls {c : ℝ≥0} (f : X → (Icc (-c : ℝ) c)) (H : ∀ y : (Icc (-c : ℝ) c), ∀ ε : ℝ,
+--   is_open (f⁻¹' (ball y ε))) : continuous f :=
+-- begin
+--   rw continuous_def,
+--   intros _ hU,
+--   rw is_open_iff_forall_mem_open,
+--   intros x hx,
+--   obtain ⟨ε, h₀, hε⟩ := (is_open_iff.mp hU) (f x) (mem_preimage.mp hx),
+--   use f⁻¹' (ball (f x) ε),
+--   exact ⟨preimage_mono hε, H (f x) ε, mem_ball_self h₀⟩,
+-- end
 
 
-lemma reduction_balls' {c : ℝ≥0} (f : X → (closed_ball (0 : ℝ) c)) (H : ∀ y : (closed_ball 0 c),
+lemma reduction_balls {c : ℝ≥0} (f : X → (closed_ball (0 : ℝ) c)) (H : ∀ y : (closed_ball 0 c),
   ∀ ε : ℝ, is_open (f⁻¹' (ball y ε))) : continuous f :=
 begin
   rw continuous_def,
@@ -501,6 +501,18 @@ begin
   use f⁻¹' (ball (f x) ε),
   exact ⟨preimage_mono hε, H (f x) ε, mem_ball_self h₀⟩,
 end
+
+-- lemma reduction_balls' {c : ℝ≥0} (f : X → filtration (ℳ S) c) (H : ∀ G : filtration (ℳ S) c,
+--   ∀ ε : ℝ, is_open (f⁻¹' (ball G ε))) : continuous f :=
+-- begin
+--   rw continuous_def,
+--   intros _ hU,
+--   rw is_open_iff_forall_mem_open,
+--   intros x hx,
+--   obtain ⟨ε, h₀, hε⟩ := (is_open_iff.mp hU) (f x) (mem_preimage.mp hx),
+--   use f⁻¹' (ball (f x) ε),
+--   exact ⟨preimage_mono hε, H (f x) ε, mem_ball_self h₀⟩,
+-- end
 
 -- lemma complement_of_balls {c : ℝ≥0} (y : Icc (-c : ℝ) c) (ε : ℝ) : ∃ (x₁ x₂ : Icc (-c : ℝ) c),
 --   ∃ (δ₁ δ₂ : ℝ), ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ :=
@@ -792,7 +804,7 @@ end
 lemma continuous_if_preimage_closed' {c : ℝ≥0} (f : X → (closed_ball (0 : ℝ) c))
   (H : ∀ y : (closed_ball (0 : ℝ) c), ∀ ε : ℝ, is_closed (f⁻¹' (closed_ball y ε))) : continuous f :=
 begin
-  apply reduction_balls',
+  apply reduction_balls,
   intros y ε,
   obtain ⟨x₁,x₂,δ₁,δ₂,h⟩ := complement_of_balls' y ε,
   rw h,
@@ -818,11 +830,11 @@ end
 -- end
 
 
-def geom_B (ε : ℝ≥0)  : ℤ := 3
+def geom_B (ε : ℝ)  : ℤ := 3
 
 -- #check geom_B
 
-def U (F : filtration (ℒ S) c) (ε : ℝ≥0) : set (filtration (ℒ S) c) := λ G,
+def U (F : filtration (ℒ S) c) (ε : ℝ) : set (filtration (ℒ S) c) := λ G,
   ∀ s n, n ≤ (geom_B ε) → F s n = G s n
 
 -- #check geom_U S
@@ -861,12 +873,9 @@ begin
   exact H,
 end
 
---- some trials **[FAE]** Both certainly false: the preimage of a closed ball in (ℳ S) contains the whole kernel, which itself contains unbounded measures.
--- lemma θ_bound_optimal (F : (ℒ S)) (ε : ℝ≥0) (hF : ε < ∥ F ∥₊) :  θ F ∉ filtration (ℳ S) ε := sorry
 
-lemma image_U (ε : ℝ≥0) (H : ε ≤ c) (F G : filtration (ℒ S) c) :
+lemma dist_lt_of_mem_U (ε : ℝ) (F G : filtration (ℒ S) c) :
   G ∈ (U S c F ε) → ∥ (θ_c c S G).1 - (θ_c c S) F ∥ < ε := sorry
-
 
 
 -- This is the main continuity property needed in `ses2.lean`
@@ -876,8 +885,34 @@ begin
   intro s,
   rw ← commute_seval_ℒ_ℳ,
   refine continuous.comp _ (continuous_seval_ℒ_c p S c s),
-  dsimp only [θ_c],
+  -- dsimp only [θ_c],
   apply (homeo_filtration_ϖ_ball c).comp_continuous_iff.mp,
+  apply reduction_balls,
+  intros y ε,
+  rw is_open_iff_forall_mem_open,
+  intros F hF,
+  simp only [set.mem_preimage, one_mul, eq_self_iff_true, eq_mpr_eq_cast, set_coe_cast,
+    function.comp_app, mem_ball, subtype.dist_eq, real.dist_eq] at hF,
+  set V := U p ϖ c F (ε - |(homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) - y|) with hV,
+  use V,
+  split,
+  { intros G hG,
+    simp only [set.mem_preimage, one_mul, eq_self_iff_true, eq_mpr_eq_cast, set_coe_cast,
+    function.comp_app, mem_ball, subtype.dist_eq, real.dist_eq],
+    calc | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ G)) : ℝ) - y | ≤
+            | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ G)) : ℝ) -
+                  ((homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) : ℝ) | +
+                | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) : ℝ) - y | : abs_sub_le _ _ y
+        ... < ε - |((homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) : ℝ) - y | +
+              | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) : ℝ) - y | : by {apply add_lt_add_right,
+                               rw [← real_measures.dist_eq], refine dist_lt_of_mem_U p ϖ c _ F G hG}
+        ... = ε : by {rw sub_add_cancel} },
+  -- rw set.mem_preimage at hF,
+  -- simp only [one_mul, eq_self_iff_true, eq_mpr_eq_cast, set_coe_cast,
+  --   function.comp_app, mem_ball] at hF,
+
+
+
   sorry;{-- **[FAE]** from here on, the proof might be  broken since it relies on `continuous_if_preimage_closed₀'` which is not true as it is stated
   -- apply continuous_if_preimage_closed₀' (c ^ (p⁻¹ : ℝ)),
   -- intros ε hε,
