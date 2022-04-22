@@ -182,7 +182,7 @@ def Fintype.free_pfpng_unit :
   Fintype.to_Profinite ⟶ free_pfpng_functor ⋙ ProFiltPseuNormGrp₁.level.obj 1 :=
 { app := λ S,
   { to_fun := λ s,
-    { val := λ t, if t = s then 1 else 0,
+    { val := λ t, if s = t then 1 else 0,
       property := sorry },
     continuous_to_fun := continuous_bot },
   naturality' := sorry }
