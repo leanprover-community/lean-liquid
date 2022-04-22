@@ -837,9 +837,9 @@ def geom_B (ε : ℝ)  : ℤ := 3
 def U (F : filtration (ℒ S) c) (ε : ℝ) : set (filtration (ℒ S) c) := λ G,
   ∀ s n, n ≤ (geom_B ε) → F s n = G s n
 
--- #check geom_U S
+lemma mem_U (F : filtration (ℒ S) c) (ε : ℝ) : F ∈ (U S c F ε) := sorry
 
-lemma is_open_U (F : filtration (ℒ S) c) (ε : ℝ≥0) : is_open (U S c F ε) := sorry
+lemma is_open_U (F : filtration (ℒ S) c) (ε : ℝ) : is_open (U S c F ε) := sorry
 
 
 end topological_generalities
@@ -907,22 +907,7 @@ begin
               | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) : ℝ) - y | : by {apply add_lt_add_right,
                                rw [← real_measures.dist_eq], refine dist_lt_of_mem_U p ϖ c _ F G hG}
         ... = ε : by {rw sub_add_cancel} },
-  -- rw set.mem_preimage at hF,
-  -- simp only [one_mul, eq_self_iff_true, eq_mpr_eq_cast, set_coe_cast,
-  --   function.comp_app, mem_ball] at hF,
-
-
-
-  sorry;{-- **[FAE]** from here on, the proof might be  broken since it relies on `continuous_if_preimage_closed₀'` which is not true as it is stated
-  -- apply continuous_if_preimage_closed₀' (c ^ (p⁻¹ : ℝ)),
-  -- intros ε hε,
-  -- replace hε : ε ^ (p : ℝ) ≤ c,
-  -- { have := @nnreal.rpow_le_rpow ε (c ^ (p⁻¹ : ℝ)) p hε _,
-  --   rw [← nnreal.rpow_mul, inv_mul_cancel, nnreal.rpow_one] at this,
-  --   exacts [this, (nnreal.coe_ne_zero.mpr $ ne_of_gt $ fact.out _), by {rw [← nnreal.coe_zero, nnreal.coe_le_coe], exact (le_of_lt $fact.out _)}] },
-  -- simp only [one_mul, eq_self_iff_true, eq_mpr_eq_cast, set_coe_cast],
-  -- rw [set.preimage_comp, homeo_filtration_ϖ_ball_preimage hε],
-  }
+  refine and.intro (is_open_U p ϖ c F _) (mem_U p ϖ c F _),
 end
 
 
