@@ -127,6 +127,7 @@ def Profinite.condensed_free_pfpng_specialize_cone (S B : Profinite.{u}) (b : B)
         functor.const.obj_map, comp_apply, id_apply, add_monoid_hom.mk'_apply, functor.comp_map,
         forget_map_eq_coe, concrete_category.has_coe_to_fun_Type, AddCommGroup.free'_map,
         Ab.ulift_map_apply_down, finsupp.map_domain.add_monoid_hom_apply],
+      rw [← Profinite.free_pfpng_π_w _ f],
       sorry
     end } }
 

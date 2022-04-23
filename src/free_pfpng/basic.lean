@@ -223,3 +223,8 @@ def Profinite.to_free_pfpng (S : Profinite.{u}) :
 def Profinite.free_pfpng_π (S : Profinite) (T : discrete_quotient S) :
   S.free_pfpng ⟶ (Fintype.of T).free_pfpng :=
 category_theory.limits.limit.π _ _
+
+lemma Profinite.free_pfpng_π_w (S : Profinite) {T₁ T₂ : discrete_quotient S} (f : T₁ ⟶ T₂) :
+  Profinite.free_pfpng_π S T₁ ≫ (S.fintype_diagram ⋙ free_pfpng_functor).map f =
+  Profinite.free_pfpng_π S T₂ :=
+category_theory.limits.limit.w (S.fintype_diagram ⋙ free_pfpng_functor) _
