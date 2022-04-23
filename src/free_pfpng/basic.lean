@@ -183,7 +183,13 @@ def Fintype.free_pfpng_unit :
 { app := λ S,
   { to_fun := λ s,
     { val := λ t, if s = t then 1 else 0,
-      property := sorry },
+      property := begin
+        show finset.sum _ _ ≤ _,
+        rw finset.sum_eq_single_of_mem,
+        swap 4, { exact s }, swap 2, { apply finset.mem_univ },
+        { dsimp, rw [if_pos rfl, nnnorm_one], },
+        rintro t - ht, dsimp, rw [if_neg ht.symm, nnnorm_zero],
+      end },
     continuous_to_fun := continuous_bot },
   naturality' := sorry }
 

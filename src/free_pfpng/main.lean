@@ -121,7 +121,14 @@ def Profinite.condensed_free_pfpng_specialize_cone (S B : Profinite.{u}) (b : B)
         erw strict_comphaus_filtered_pseudo_normed_group_hom.map_add,
         refl,
       end,
-    naturality' := sorry } }
+    naturality' := λ T₁ T₂ f, begin
+      ext g x,
+      simp only [subtype.val_eq_coe, finsupp.equiv_fun_on_fintype_symm_apply_to_fun,
+        functor.const.obj_map, comp_apply, id_apply, add_monoid_hom.mk'_apply, functor.comp_map,
+        forget_map_eq_coe, concrete_category.has_coe_to_fun_Type, AddCommGroup.free'_map,
+        Ab.ulift_map_apply_down, finsupp.map_domain.add_monoid_hom_apply],
+      sorry
+    end } }
 
 def Profinite.condensed_free_pfpng_specialize (S B : Profinite.{u}) (b : B) :
   S.condensed_free_pfpng.val.obj (op B) ⟶ S.limit_free :=
