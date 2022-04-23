@@ -236,94 +236,93 @@ begin
   { simp_rw [mul_assoc],
     convert (F.summable_half s).mul_left 2 },
 end
+.
 
--- section p_lt_one
--- variables [fact (p < 1)]
-
-
-
--- end p_lt_one
+lemma psi_def_aux (p : ℝ≥0) {S : Fintype}
+  [fact (0 < p)]
+  [fact (p < 1)]
+  (F : ℒ S)
+  (s : ↥S)
+  (this : summable (λ (n : ℤ), ∥F s n∥ * ↑r ^ n)) :
+  summable
+    (λ (n : ℤ),
+       ∥ite (F.d ≤ n)
+             (-(2 : ℝ) ^ (n - 1) *
+                ∑' (k : ℕ), ↑(F s (n + ↑k)) * (1 / 2) ^ (n + ↑k))
+             0∥ *
+         ↑r ^ n) :=
+begin
+  sorry,
+end
 
 def ψ (F : ℒ S) (hF : θ F = 0) : ℒ S :=
 { to_fun := λ s n, if F.d ≤ n then
     ∑ l in range (n - F.d).nat_abs.succ, F s (n - 1 - l) * (2 ^ l)
     else 0,
   summable' := λ s, begin
+    -- make everything real
+    change summable (λ (n : ℤ),
+     ∥((ite (F.d ≤ n)
+       (∑ (l : ℕ) in range (n - F.d).nat_abs.succ, F s (n - 1 - ↑l) * 2 ^ l) 0 : ℤ) : ℝ)∥₊
+     * r ^ n),
+    push_cast,
+    -- hypothesis that infinite sum converges at r>1/2
     have := F.summable s,
-    simp [θ, ϑ, one_div, inv_zpow', zpow_neg₀] at hF,
+    -- get hypothesis that infinite sum is 0 at 1/2
+    simp only [θ, ϑ] at hF,
     replace hF := congr_fun hF s, dsimp at hF,
+    -- change sum from ℤ to ℕ
+    --rw nnreal.summable_iff_on_nat_less F.d, swap,
+    --{ intros n hn, simp [if_neg hn.not_le] },
+    have h1 : ∀ (n : ℤ),
+      ite (F.d ≤ n) (∑ (l : ℕ) in range (n - F.d).nat_abs.succ, (F s (n - 1 - ↑l) : ℝ) * 2 ^ l) 0 =
+      ite (F.d ≤ n) (-(2 : ℝ)^(n-1)*∑' (k : ℕ), F s (n + k) * (1/2) ^ (n + k)) 0,
+    { intro n,
+      split_ifs with hn, swap, refl,
+      rw [← inv_mul_eq_iff_eq_mul₀, ← neg_inv, neg_mul, mul_sum, neg_eq_iff_add_eq_zero, ← hF],
+        swap, exact neg_ne_zero.2 (zpow_ne_zero _ two_ne_zero),
+      convert @tsum_add_tsum_compl ℝ ℤ _ _ _ _ _ {x : ℤ | x < n}
+        (summable.subtype (F.summable_half s) _) (summable.subtype (F.summable_half s) _) using 2,
+      { simp_rw [← inv_zpow₀, inv_eq_one_div, mul_comm (((1 : ℝ)/2)^(n-1)), mul_assoc],
+        simp_rw (show ∀ (x : ℕ), (2 : ℝ)^x = (1/2)^(-(x : ℤ)), by {intros, simp}),
+        simp_rw [← zpow_add₀ (by norm_num : (1 : ℝ) / 2 ≠ 0), add_comm, ← sub_eq_add_neg],
+        rw ← tsum_eq_sum,
+        convert @equiv.tsum_eq ℝ _ _ _ _ _
+          (⟨λ m, ⟨n - 1 - m, lt_of_le_of_lt (sub_le_self _ (int.coe_zero_le m)) (sub_one_lt n)⟩,
+           (λ z, (n - 1 - z.1).nat_abs), λ m, by simp, λ ⟨z, hz⟩, subtype.ext begin
+--             squeeze_simp,
+             change n - 1 - (n - 1 - z).nat_abs = z,
+             rw ← int.eq_nat_abs_of_zero_le (sub_nonneg_of_le (int.le_sub_one_of_lt hz)),
+             ring, end⟩ : ℕ ≃ {z : ℤ // z < n}) _,
+        { ext, refl },
+        { intros b hb,
+          rw mul_eq_zero, left,
+          norm_cast,
+          apply lt_d_eq_zero,
+          by_contra h, push_neg at h, apply hb,
+          rw [mem_range, nat.succ_eq_add_one, ← int.coe_nat_lt, int.coe_nat_add,
+            ← int.eq_nat_abs_of_zero_le]; linarith } },
+      { convert @equiv.tsum_eq ℝ _ _ _ _ _
+          (⟨λ x, ⟨n + x, (int.le.intro rfl).not_lt⟩, (λ z, (z.1 - n).nat_abs),
+            λ x, by simp, λ ⟨x, hx⟩, subtype.ext begin
+              change n + _ = x,
+              rw ← int.eq_nat_abs_of_zero_le (sub_nonneg.2 (le_of_not_lt hx)),
+              exact add_eq_of_eq_sub' rfl,
+            end⟩ : ℕ ≃ {z : ℤ // ¬ z < n}) _,
+        ext, refl },
+    },
+    suffices : summable (λ (n : ℤ),
+     ∥ite (F.d ≤ n) (-(2 : ℝ)^(n-1)*∑' (k : ℕ), ↑(F s (n + k)) * (1/2) ^ (n + k)) 0∥₊ *
+       r ^ n),
+    { refine (summable_congr _).2 this,
+      intro n,
+      congr' 2,
+      apply h1 n,
+    }, clear h1,
+    -- next line goes from ℝ≥0 to ℝ
     simp only [←nnreal.summable_coe, nonneg.coe_mul, _root_.coe_nnnorm, nnreal.coe_zpow, summable_congr],
---   exact aux_thm69.summable_convolution r_half (F s) F.d (F.summable s) (λ n, lt_d_eq_zero F s _) this
-    sorry,
+    exact psi_def_aux p F s this,
   end }
-#exit
-begin
-  let b : S → ℤ → ℤ := λ s n,
-    if hn : F.d ≤ n then
-    ∑ l in range (n - F.d).nat_abs.succ,
-      F s (n - 1 - l) * (2 ^ l)
-    else 0,
-  use b,
-  sorry, end
---   intro s,
---   have h_θ : ∀ n : ℤ, ∥ b s n ∥ * r ^ (n : ℤ)  =
---     (1 / 2) * ∥ tsum (λ i : ℕ, ((F s (n + 1 + i)) : ℝ) * (1 / 2) ^ i) ∥ * r ^ (n : ℤ),
---   { intro n,
---     simp only [b, one_div, sub_nonneg, ge_iff_le, inv_pow₀, mul_eq_mul_right_iff],
---     apply or.intro_left,
---     by_cases h_event : n < F.d,
---     { rw [dif_neg (not_le_of_gt h_event), tsum_reindex],
---       suffices : ∑' (m : {m // n + 1 ≤ m}), (F s ↑m : ℝ) * (2 ^ (m : ℤ))⁻¹ =
---         ∑' (m : ℤ), (F s m) * (2 ^ (m : ℤ))⁻¹,
---       { simp only [θ, ϑ, one_div, inv_zpow', zpow_neg₀] at hF,
---         replace hF := congr_fun hF s,
---         simp only [this, norm_zero, subtype.val_eq_coe, zero_eq_mul, inv_eq_zero, bit0_eq_zero,
---           one_ne_zero, mul_eq_zero, norm_eq_zero, false_or],
---         exact or.inr hF },
---       { rw tsum_eq_tsum_of_has_sum_iff_has_sum,
---         intro z,
---         apply @has_sum_subtype_iff_of_support_subset _ _ _ _ (λ m, (F s m : ℝ) * (2 ^ (m : ℤ))⁻¹) z
---           {m : ℤ | n + 1 ≤ m},
---         rw function.support_subset_iff',
---         intros a ha,
---         simp only [not_le, set.mem_set_of_eq, int.lt_add_one_iff] at ha,
---         simp only [int.cast_eq_zero, inv_eq_zero, mul_eq_zero],
---         refine or.inl (lt_d_eq_zero F s a _),
---         exact ha.trans_lt h_event } },
---     { rw [not_lt] at h_event,
---       let m := (int.eq_coe_of_zero_le (sub_nonneg.mpr h_event)).some,
---       rw dif_pos h_event,
---       simp_rw [← int.norm_cast_real, int.cast_neg, int.cast_sum, int.cast_mul, int.cast_pow,
---         int.cast_two],
---       rw ← sub_nonneg at h_event,
---       rw [sum_range_sum_Icc (coe ∘ (F s)) n F.d h_event,
---         sum_Icc_sum_tail (F s) n F.d _ (λ n, lt_d_eq_zero F s _) h_event],
---       { rw [← (abs_eq_self.mpr (inv_nonneg.mpr (@zero_le_two ℝ _))), ← real.norm_eq_abs,
---           ← norm_mul, real.norm_eq_abs, real.norm_eq_abs, abs_eq_abs,
---           ← (sub_add_cancel n 1), (sub_eq_add_neg n 1), (add_assoc n _), (add_comm n _),
---           (add_assoc (-1 : ℤ) _ _), (add_comm 1 n), zpow_add₀ (@two_ne_zero ℝ _ _),
---           ← (add_assoc (-1 : ℤ) _ _), neg_add_cancel_comm, ← int.succ, mul_assoc, zpow_neg₀,
---           zpow_one],
---         apply or.intro_left,
---         rw ← tsum_reindex F n.succ s },
---       { simp only [θ, ϑ, one_div] at hF,
---         replace hF := congr_fun hF s,
---         simp only [real_measures.zero_apply, inv_eq_one_div] at hF,
---         simp_rw [← inv_zpow₀, inv_eq_one_div],
---         exact (summable.has_sum_iff
---           (F.summable_half s)).mpr hF }}},
---   have : ∀ (n : ℤ), n < F.d → ∥∑' (i : ℕ), (F s (n + 1 + i) : ℝ) * (1 / 2) ^ i∥ = 0,
---   { intros n hn,
---     specialize h_θ n,
---     simp only [mul_eq_mul_right_iff, zpow_ne_zero n (nnreal.coe_ne_zero.mpr (ne_of_lt r_pos).symm),
---       or_false] at h_θ,
---     convert_to 1 / 2 * ∥∑' (i : ℕ), (F s (n + 1 + i) : ℝ) * (1 / 2) ^ i∥ = 0 using 0,
---     simp only [one_div, mul_eq_zero, inv_eq_zero, bit0_eq_zero, one_ne_zero, false_or],
---     rw [← h_θ, norm_eq_zero],
---     exact dif_neg (not_le_of_gt hn) },
---   simp only [←nnreal.summable_coe, nonneg.coe_mul, _root_.coe_nnnorm, nnreal.coe_zpow, summable_congr h_θ],
---   exact aux_thm69.summable_convolution r_half (F s) F.d (F.summable s) (λ n, lt_d_eq_zero F s _) this
--- end
 
 theorem θ_ϕ_exact (F : ℒ S) (hF : θ F = 0) : ∃ G, ϕ G = F :=
 begin
