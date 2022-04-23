@@ -280,6 +280,11 @@ begin
   rw ← finsupp.lift_map_domain, refl,
 end
 
+lemma finsupp.card_supp_map_domain_lt {α β γ : Type*} [add_comm_group γ]
+  (f : α → β) (t : α →₀ γ) (u v : α)
+  (huv : u ≠ v) (hu : u ∈ t.support) (hv : v ∈ t.support)
+  (hf : f u = f v) : (t.map_domain f).support.card < t.support.card := sorry
+
 lemma Profinite.mono_free'_to_condensed_free_pfpng_induction_aux (n : ℕ) :
   ∀ (S B : Profinite.{u}) (t : S.to_Condensed.val.obj (op B) →₀ ℤ),
     t.support.card ≤ n →
@@ -290,6 +295,11 @@ lemma Profinite.mono_free'_to_condensed_free_pfpng_induction_aux (n : ℕ) :
     (surj : ∀ (b : ↥B), ∃ (a : α) (x : ↥(X a)), (π a) x = b),
     ∀ (a : α), finsupp.map_domain (S.to_Condensed.val.map (π a).op) t = 0) :=
 begin
+  /-
+  TODO: This proof is very slow. It would be better to pull out a few
+  of the `have` statements into separate lemmas to (hopefully)
+  speed this up.
+  -/
   induction n,
   case nat.zero
   { intros S B t ht, simp at ht, rw ht, intros h1 h2,
@@ -299,16 +309,14 @@ begin
   case nat.succ : n hn
   { intros S B t ht1 ht2 H,
     by_cases ht1' : t.support.card = n+1, swap,
-    -- This works -- just remove the `sorry`.
-    sorry { apply hn, exact nat.le_of_lt_succ (nat.lt_of_le_and_ne ht1 ht1'),
+    { apply hn, exact nat.le_of_lt_succ (nat.lt_of_le_and_ne ht1 ht1'),
       assumption' },
     clear ht1,
     let F := t.support,
     let e : F → (B ⟶ S) := λ f, f.1.1,
     obtain ⟨Q,h1,h2,ee,-⟩ : ∃ (α : Type u) (hα1 : fintype α)
       (hα2 : linear_order α) (ee : α ≃ F), true,
-    -- This works -- just remove the `sorry`.
-    sorry { refine ⟨ulift (fin (fintype.card F)), infer_instance,
+    { refine ⟨ulift (fin (fintype.card F)), infer_instance,
         is_well_order.linear_order well_ordering_rel,
         equiv.ulift.trans (fintype.equiv_fin _).symm, trivial⟩, },
     resetI,
@@ -317,8 +325,7 @@ begin
     let π₀ : Π (i : E₀), X₀ i ⟶ B := λ i, Profinite.equalizer.ι _ _,
 
     have surj₀ : ∀ (b : B), ∃ (e₀ : E₀) (x : X₀ e₀), π₀ _ x = b,
-    -- This works, but it's slow -- just remove the `sorry`.
-    sorry { intro b, specialize H b,
+    { intro b, specialize H b,
       contrapose! H,
       have key : ∀ (i j : Q) (h : i < j), e (ee i) b ≠ e (ee j) b,
       { intros i j h, specialize H ⟨⟨i,j⟩, h⟩, intro c,
@@ -346,16 +353,25 @@ begin
       λ i, t.map_domain (f₀ i),
 
     have card₀ : ∀ (i : E₀), (t₀ i).support.card ≤ n,
-    -- The functions `e (ee i.1.1)` and `e (ee i.1.2)`
-    -- agree on `X₀ i` by definition.
-    -- Since `t.support` has size `n+1`, it should follow that
-    -- `(t₀ i).support` has size `≤ n`.
-    -- We should probably prove a more general lemma for this.
-      sorry,
+    { intros i, suffices : (t₀ i).support.card < n + 1,
+        by exact nat.lt_succ_iff.mp this,
+      rw ← ht1',
+      fapply finsupp.card_supp_map_domain_lt,
+      refine (ee i.1.1).1,
+      refine (ee i.1.2).1,
+      { change ¬ _,
+        erw ← subtype.ext_iff,
+        apply ee.injective.ne,
+        apply ne_of_lt,
+        exact i.2 },
+      refine (ee i.1.1).2,
+      refine (ee i.1.2).2,
+      { dsimp [f₀, π₀, Profinite.to_Condensed], ext1, dsimp,
+        -- missing Profinite.equalizer.condition
+        ext t, exact t.2 } },
 
     have lift₀ : ∀ (i : E₀), free'_lift (S.to_condensed_free_pfpng.val.app (op (X₀ i))) (t₀ i) = 0,
-    -- This works -- just remove the `sorry`.
-    sorry { intros i, rw free'_lift_eq_finsupp_lift, dsimp only [t₀, f₀],
+    { intros i, rw free'_lift_eq_finsupp_lift, dsimp only [t₀, f₀],
       apply_fun (λ q, S.condensed_free_pfpng.val.map (π₀ i).op q) at ht2,
       rw [add_monoid_hom.map_zero, free'_lift_eq_finsupp_lift] at ht2,
       convert ht2,
@@ -367,8 +383,7 @@ begin
     have map₀ : ∀ (i : E₀) (b : ↥(X₀ i)),
         finsupp.map_domain
           (λ (f : S.to_Condensed.val.obj (op (X₀ i))), f.down.to_fun b) (t₀ i) = 0,
-    -- This works -- just remove the `sorry`.
-    sorry { intros i b, dsimp [t₀], rw ← finsupp.map_domain_comp,
+    { intros i b, dsimp [t₀], rw ← finsupp.map_domain_comp,
       exact H (π₀ i b) },
 
     have key := λ i, hn S (X₀ i) (t₀ i) (card₀ i) (lift₀ i) (map₀ i),
