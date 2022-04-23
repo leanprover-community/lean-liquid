@@ -572,13 +572,40 @@ def Profinite.free_to_pfpng (S : Profinite.{u}) :
   S.condensed_free_pfpng :=
 (Condensed_Ab_CondensedSet_adjunction.hom_equiv _ _).symm S.to_condensed_free_pfpng
 
+attribute [simps hom_app] AddCommGroup.free_iso_free'
+
 instance Profinite.is_iso_free_to_pfpng (S : Profinite.{u}) : is_iso S.free_to_pfpng :=
 begin
   suffices : S.free_to_pfpng =
     (CondensedSet_to_Condensed_Ab_iso.app S.to_Condensed).hom ≫
     S.free'_to_condensed_free_pfpng,
   { rw this, apply_instance },
-  sorry
+  rw [iso.app_hom],
+  delta Profinite.free'_to_condensed_free_pfpng Profinite.free'_lift Profinite.free_to_pfpng
+    CondensedSet_to_Condensed_Ab_iso Sheaf.adjunction
+    Condensed_Ab_CondensedSet_adjunction Condensed_Ab_CondensedSet_adjunction',
+  ext T : 4,
+  dsimp only [adjunction.mk_of_hom_equiv_hom_equiv, functor.map_iso_hom, quiver.hom.forget_Ab,
+    Sheaf.hom.comp_val, Condensed_Ab_to_CondensedSet_map, Sheaf.compose_equiv_symm_apply_val,
+    presheaf_to_Sheaf_map_val, nat_trans.comp_app,
+    iso_whisker_left_hom, iso_whisker_right_hom, whisker_left_app, whisker_right_app],
+  rw [← nat_trans.comp_app, sheafify_map_sheafify_lift],
+  congr' 4, clear T,
+  ext T : 2,
+  dsimp only [whiskering_right_map_app_app, whiskering_right_obj_map, nat_trans.comp_app,
+    adjunction.whisker_right, adjunction.mk_of_unit_counit_hom_equiv_symm_apply,
+    whisker_left_app, whisker_right_app,
+    functor.associator_hom_app, functor.right_unitor_hom_app],
+  erw [category.id_comp, category.id_comp, category.comp_id, category.comp_id],
+  rw [← nat_trans.naturality_assoc],
+  congr' 1,
+  dsimp only [AddCommGroup.adj, AddCommGroup.adj', adjunction.mk_of_hom_equiv_hom_equiv,
+    adjunction.of_nat_iso_left, adjunction.mk_of_hom_equiv_counit_app,
+    equiv.inv_fun_as_coe, equiv.symm_trans_apply, iso.symm_hom,
+    adjunction.equiv_homset_left_of_nat_iso_symm_apply],
+  simp only [equiv.symm_symm],
+  erw [← category.assoc, ← nat_trans.comp_app, iso.hom_inv_id, nat_trans.id_app,
+    category.id_comp],
 end
 
 def free_pfpng_profinite_natural_map :
