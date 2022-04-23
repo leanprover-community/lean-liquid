@@ -107,6 +107,30 @@ def Profinite.limit_free (S : Profinite.{u}) : Ab.{u+1} :=
 limits.limit $ (S.fintype_diagram ⋙ forget Fintype ⋙
   AddCommGroup.free') ⋙ Ab.ulift.{u+1}
 
+-- move me
+lemma _root_.finsupp.map_domain_equiv_fun_on_fintype_symm
+  {α β R : Type*} [fintype α] [semiring R] (f : α → β) (g : α → R) :
+  finsupp.map_domain f (finsupp.equiv_fun_on_fintype.symm g) =
+    finset.univ.sum (λ (x : α), finsupp.single (f x) (g x)) :=
+begin
+  dsimp [finsupp.map_domain],
+  rw [finsupp.sum_fintype], swap, { intro, apply finsupp.single_zero },
+  simp only [finsupp.equiv_fun_on_fintype_symm_apply_to_fun],
+end
+
+-- move me
+lemma _root_.finsupp.map_domain_equiv_fun_on_fintype_symm_apply
+  {α β R : Type*} [fintype α] [semiring R] (f : α → β) (g : α → R) (b : β)
+  [decidable_pred (λ (a : α), f a = b)] :
+  finsupp.map_domain f (finsupp.equiv_fun_on_fintype.symm g) b =
+    (finset.filter (λ (a : α), f a = b) finset.univ).sum g :=
+begin
+  rw [finsupp.map_domain_equiv_fun_on_fintype_symm, finset.sum_apply'],
+  classical,
+  simp only [finsupp.single_apply, ← finset.sum_filter],
+  congr'
+end
+
 def Profinite.condensed_free_pfpng_specialize_cone (S B : Profinite.{u}) (b : B) :
   limits.cone ((S.fintype_diagram ⋙ forget Fintype ⋙ AddCommGroup.free') ⋙ Ab.ulift.{u+1}) :=
 { X := S.condensed_free_pfpng.val.obj (op B),
@@ -127,8 +151,10 @@ def Profinite.condensed_free_pfpng_specialize_cone (S B : Profinite.{u}) (b : B)
       simp only [subtype.val_eq_coe, finsupp.equiv_fun_on_fintype_symm_apply_to_fun,
         functor.const.obj_map, comp_apply, id_apply, add_monoid_hom.mk'_apply, functor.comp_map,
         forget_map_eq_coe, concrete_category.has_coe_to_fun_Type, AddCommGroup.free'_map,
-        Ab.ulift_map_apply_down, finsupp.map_domain.add_monoid_hom_apply],
-      sorry
+        Ab.ulift_map_apply_down, finsupp.map_domain.add_monoid_hom_apply, free_pfpng.map,
+        free_pfpng_functor_map, strict_comphaus_filtered_pseudo_normed_group_hom.coe_mk],
+      classical,
+      rw finsupp.map_domain_equiv_fun_on_fintype_symm_apply, congr',
     end } }
 
 def Profinite.condensed_free_pfpng_specialize (S B : Profinite.{u}) (b : B) :
