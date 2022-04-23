@@ -238,19 +238,10 @@ begin
 end
 .
 
-lemma psi_def_aux (p : ℝ≥0) {S : Fintype}
-  [fact (0 < p)]
-  [fact (p < 1)]
-  (F : ℒ S)
-  (s : ↥S)
-  (this : summable (λ (n : ℤ), ∥F s n∥ * ↑r ^ n)) :
-  summable
-    (λ (n : ℤ),
-       ∥ite (F.d ≤ n)
-             (-(2 : ℝ) ^ (n - 1) *
-                ∑' (k : ℕ), ↑(F s (n + ↑k)) * (1 / 2) ^ (n + ↑k))
-             0∥ *
-         ↑r ^ n) :=
+lemma psi_def_aux (p : ℝ≥0) {S : Fintype} [fact (0 < p)] [fact (p < 1)] (F : ℒ S) (s : ↥S)
+  (F_sum : summable (λ (n : ℤ), ∥F s n∥ * ↑r ^ n)) :
+  summable (λ (n : ℤ), ∥ite (F.d ≤ n) (-(2 : ℝ) ^ (n - 1) *
+    ∑' (k : ℕ), ↑(F s (n + ↑k)) * (1 / 2) ^ (n + ↑k)) 0∥ * ↑r ^ n) :=
 begin
   sorry,
 end
