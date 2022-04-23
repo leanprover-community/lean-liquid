@@ -462,6 +462,37 @@ begin
     category.assoc, hh],
 end
 
+lemma epi_Profinite_to_Condensed_map_of_epi {X Y : Profinite.{u}}
+  (f : X ⟶ Y) [hf : epi f] : epi (Profinite_to_Condensed.map f) :=
+begin
+  constructor, intros Z a b h, ext W q : 34, induction W using opposite.rec,
+  have hZ := Z.2,
+  rw is_sheaf_iff_is_sheaf_of_type at hZ,
+  rw Z.val.is_proetale_sheaf_of_types_tfae.out 0 1 at hZ,
+  let q' := q.down,
+  dsimp at q q',
+  dsimp [functor.is_proetale_sheaf_of_types] at hZ,
+  specialize hZ punit W (λ _, Profinite.pullback f q')
+    (λ _, Profinite.pullback.snd _ _) sorry _,
+  { intros i, dsimp, refine Z.val.map _ (b.val.app (op W) q),
+    refine quiver.hom.op _, exact Profinite.pullback.snd _ _ },
+  specialize hZ _,
+  { sorry },
+  obtain ⟨t,ht1,ht2⟩ := hZ,
+  have : b.val.app (op W) q = t,
+  { apply ht2,
+    intros i, refl },
+  rw this, apply ht2,
+  intros i, dsimp,
+  change (a.val.app (op W) ≫ Z.val.map _) q =
+    (b.val.app (op W) ≫ Z.val.map _) q,
+  simp only [← nat_trans.naturality],
+  dsimp,
+  sorry
+
+
+end
+
 instance Profinite.epi_free'_to_condensed_free_pfpng
   (S : Profinite.{u}) : epi S.free'_to_condensed_free_pfpng :=
 begin
