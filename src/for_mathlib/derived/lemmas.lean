@@ -9,6 +9,7 @@ import for_mathlib.exact_seq3
 import for_mathlib.triangle_shift
 import for_mathlib.homology_iso
 import for_mathlib.projective_replacement
+import for_mathlib.homology_exact
 -- import for_mathlib.arrow_preadditive
 
 noncomputable theory
@@ -129,8 +130,7 @@ begin
     apply is_zero_of_iso_of_zero (h i),
     apply (homology_zero_shift_iso A i).app _ },
   { introsI h i,
-    apply is_zero_of_iso_of_zero (is_acyclic.cond _ i),
-    apply ((homology_zero_shift_iso A _).app _).symm,
+    apply (is_acyclic.cond _ i).of_iso ((homology_zero_shift_iso A _).app _),
     assumption },
 end
 
@@ -224,43 +224,33 @@ end
 instance : has_shift (triangle 𝒦) ℤ :=
 triangle.has_shift (homotopy_category A (complex_shape.up ℤ))
 
-/--
-If `A → B → C → A[1]` is a distinguished triangle, and `A → B` is a quasi-isomorphism,
-then `C` is acyclic.
--/
-lemma is_acyclic_of_dist_triang_of_is_quasi_iso (T : triangle 𝒦) (hT : T ∈ dist_triang 𝒦)
-  [h : is_quasi_iso T.mor₁] : is_acyclic T.obj₃ :=
+open category_theory.preadditive
+
+-- move me
+instance is_iso_neg {C : Type*} [category C] [preadditive C] {X Y : C} (f : X ⟶ Y) [is_iso f] :
+  is_iso (-f) :=
+by { use (-(inv f)), simp only [comp_neg, neg_comp, is_iso.hom_inv_id, neg_neg,
+  eq_self_iff_true, is_iso.inv_hom_id, and_self] }
+
+/-- If `A → B → C → A[1]` is a distinguished triangle,
+then `A → B` is a quasi-isomorphism if and only if `C` is acyclic. -/
+lemma is_quasi_iso_iff_is_acyclic (T : triangle 𝒦) (hT : T ∈ dist_triang 𝒦) :
+  is_quasi_iso T.mor₁ ↔ is_acyclic T.obj₃ :=
 begin
   let H := homology_functor A (complex_shape.up ℤ) 0,
-  rw ← is_acyclic_iff,
-  intros i,
-  let S : triangle 𝒦 := T⟦i⟧,
-  have hS : S ∈ dist_triang 𝒦,
+  rw [← is_acyclic_iff],
+  let S : ℤ → triangle 𝒦 := λ i, T⟦i⟧,
+  have hS : ∀ i : ℤ, S i ∈ dist_triang 𝒦,
   { apply pretriangulated.shift_of_dist_triangle, assumption },
-  change is_zero (H.obj (S.obj₃)),
-  let E : exact_seq A [H.map S.mor₁, H.map S.mor₂, H.map S.mor₃, H.map (S.rotate.mor₃)],
-  { apply exact_seq.cons,
-    apply homological_functor.cond H _ hS,
-    apply exact_seq.cons,
-    apply homological_functor.cond H S.rotate,
-    apply rotate_mem_distinguished_triangles _ hS,
-    rw ← exact_iff_exact_seq,
-    apply homological_functor.cond H S.rotate.rotate,
-    apply rotate_mem_distinguished_triangles,
-    apply rotate_mem_distinguished_triangles,
-    exact hS },
-  haveI : is_iso (H.map S.mor₁),
-  { have hh := h,
-    rw ← is_quasi_iso_iff at h,
-    erw H.map_zsmul,
-    rw is_iso_neg_one_pow_iff,
-    apply h },
-  haveI : is_iso (H.map (S.rotate.mor₃)),
-  { dsimp [triangle.rotate],
-    rw functor.map_neg,
-    let f := _, show is_iso (- f),
-    suffices : is_iso f,
-    { resetI, use (-(inv f)), split, simp, simp },
+  have hSmor₁ : ∀ i, (S i).mor₁ = i.neg_one_pow • T.mor₁⟦i⟧', { intro i, refl },
+  have aux : ∀ i, is_iso (H.map (S i).mor₁) ↔ is_iso (H.map (T.mor₁⟦i⟧')),
+  { intro i, rw [hSmor₁, H.map_zsmul, is_iso_neg_one_pow_iff], },
+  show _ ↔ (∀ i : ℤ, is_zero (H.obj (S i).obj₃)),
+  split; introsI hh,
+  { intro i,
+    haveI : is_iso (H.map ((S i).rotate.mor₃)),
+    { dsimp [triangle.rotate_mor₃],
+      rw [functor.map_neg, is_iso_neg_iff],
     let EE : (category_theory.shift_functor 𝒦 i ⋙ category_theory.shift_functor 𝒦 (1 : ℤ)) ⋙ H ≅
       homology_functor _ _ (i + 1),
     { refine iso_whisker_right _ _ ≪≫ homology_zero_shift_iso _ (i + 1),
@@ -269,7 +259,6 @@ begin
     { have hhh := EE.hom.naturality T.mor₁,
       rw ← is_iso.eq_comp_inv at hhh,
       dsimp only [functor.comp_map] at hhh,
-      dsimp [f],
       simp only [functor.map_zsmul],
       rw is_iso_neg_one_pow_iff,
       rw hhh,
@@ -277,8 +266,30 @@ begin
       apply_with is_iso.comp_is_iso { instances := ff },
       all_goals { apply_instance <|> assumption } },
     apply is_quasi_iso.cond },
-  apply is_zero_of_exact_seq_of_is_iso_of_is_iso _ _ _ _ E,
+    haveI : is_iso (H.map (S i).mor₁),
+    { simp only [← is_quasi_iso_iff, ← aux] at hh, exact hh i },
+    have E' := λ i : ℤ, five_term_exact_seq' H (S i) (hS i),
+    apply is_zero_of_exact_seq_of_is_iso_of_is_iso _ _ _ _ (E' i) },
+  { simp only [← is_quasi_iso_iff, ← aux],
+    intro i,
+    have E := five_term_exact_seq H (S i) (hS i),
+    apply E.is_iso_of_zero_of_zero,
+    { apply is_zero.eq_of_src,
+      let EE : (category_theory.shift_functor 𝒦 i ⋙ category_theory.shift_functor 𝒦 (-1 : ℤ)) ⋙ H ≅
+        (category_theory.shift_functor 𝒦 (i + -1)) ⋙ H,
+      { refine iso_whisker_right _ _, refine (shift_functor_add _ _ _).symm },
+      let e := EE.app T.obj₃,
+      -- let e := (homology_zero_shift_iso _ (-1 : ℤ)).app (S i).obj₃,
+      refine is_zero_of_iso_of_zero _ e.symm, clear e,
+      exact hh _, },
+    { apply (hh i).eq_of_tgt, }, }
 end
+
+/-- If `A → B → C → A[1]` is a distinguished triangle, and `A → B` is a quasi-isomorphism,
+then `C` is acyclic. -/
+lemma is_acyclic_of_dist_triang_of_is_quasi_iso (T : triangle 𝒦) (hT : T ∈ dist_triang 𝒦)
+  [h : is_quasi_iso T.mor₁] : is_acyclic T.obj₃ :=
+by rwa ← is_quasi_iso_iff_is_acyclic T hT
 
 instance is_acyclic_shift (T : 𝒦) [h : is_acyclic T] (i : ℤ) : is_acyclic (T⟦i⟧) :=
 begin

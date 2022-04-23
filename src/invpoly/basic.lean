@@ -211,7 +211,7 @@ begin
   suffices : ∥(F s).coeff n∥₊ < 1,
   { change abs ((F s).coeff n : ℝ) < 1 at this,
     norm_cast at this,
-    rwa ← int.eq_zero_iff_abs_lt_one },
+    rwa ← int.abs_lt_one_iff },
   have : ∥(F s).coeff n∥₊ * r ^ (-n : ℤ) ≤ ∑' k, ∥(F s).coeff k∥₊ * r ^ (-k:ℤ),
   { exact le_tsum (F.nnreal_summable s) _ (λ k _, zero_le'), },
   replace this := lt_of_le_of_lt (this.trans _) h,

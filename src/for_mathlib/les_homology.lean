@@ -133,25 +133,19 @@ lemma _root_.option.eq_none_or_eq_some {α : Type*} : ∀ (o : option α), o = n
 
 lemma X_next_is_zero (A : homological_complex C c) (i : ι) (hi : c.next i = none) :
   is_zero (A.X_next i) :=
-begin
-  apply is_zero_of_iso_of_zero (is_zero_zero _),
-  apply (X_next_iso_zero A hi).symm,
-end
+(limits.is_zero_zero _).of_iso (X_next_iso_zero A hi)
 
 lemma X_prev_is_zero (A : homological_complex C c) (i : ι) (hi : c.prev i = none) :
   is_zero (A.X_prev i) :=
-begin
-  apply is_zero_of_iso_of_zero (is_zero_zero _),
-  apply (X_prev_iso_zero A hi).symm,
-end
+(limits.is_zero_zero _).of_iso (X_prev_iso_zero A hi)
 
 lemma next_eq_zero {A₁ A₂ : homological_complex C c} (f : A₁ ⟶ A₂) (i : ι) (hi : c.next i = none) :
   f.next i = 0 :=
-(X_next_is_zero _ _ hi).eq_zero_of_src _
+(X_next_is_zero _ _ hi).eq_of_src _ _
 
 lemma prev_eq_zero {A₁ A₂ : homological_complex C c} (f : A₁ ⟶ A₂) (i : ι) (hi : c.prev i = none) :
   f.prev i = 0 :=
-(X_prev_is_zero _ _ hi).eq_zero_of_src _
+(X_prev_is_zero _ _ hi).eq_of_src _ _
 
 lemma exact_next {A₁ A₂ A₃ : homological_complex C c} (f : A₁ ⟶ A₂) (g : A₂ ⟶ A₃)
   (i j : ι) (hij : c.rel i j) (h : exact (f.f j) (g.f j)) :

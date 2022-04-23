@@ -48,14 +48,16 @@ is_limit_aux _ (λ S,
 begin
   intros S,
   ext,
+  delta fork.ι,
   dsimp,
-  simp,
+  simp only [kernel.lift_ι],
 end begin
   intros S m hm,
   ext X,
   apply_fun (λ e, e.app X) at hm,
+  delta fork.ι at hm,
   dsimp at ⊢ hm,
-  simp [hm]
+  simp only [hm, kernel.lift_ι],
 end
 
 instance functor_category_has_kernels :
@@ -121,14 +123,16 @@ is_colimit_aux _ (λ S,
 begin
   intros S,
   ext,
+  delta cofork.π,
   dsimp,
-  simp,
+  simp only [cokernel.π_desc],
 end begin
   intros S m hm,
   ext X,
   apply_fun (λ e, e.app X) at hm,
+  delta cofork.π at hm,
   dsimp at ⊢ hm,
-  simp [hm]
+  simp only [hm, cokernel.π_desc]
 end
 
 instance functor_category_has_cokernels :

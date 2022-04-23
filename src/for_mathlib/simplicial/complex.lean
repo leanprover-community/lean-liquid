@@ -1,6 +1,6 @@
 import data.fintype.card
 import algebra.module.hom
-import algebra.big_operators
+import algebra.big_operators.fin
 import algebraic_topology.simplicial_object
 
 import algebra.homology.homological_complex

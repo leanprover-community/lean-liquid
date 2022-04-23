@@ -605,7 +605,7 @@ begin
   { rintro c x ⟨hx, -⟩,
     suffices : x = 0, { subst x, refine ⟨0, zero_mem_filtration _, rfl⟩, },
     simp only [set.mem_preimage, set.mem_singleton_iff] at hx,
-    rw [AddCommGroup.mono_iff_injective, add_monoid_hom.injective_iff] at hg,
+    rw [AddCommGroup.mono_iff_injective, injective_iff_map_eq_zero] at hg,
     exact hg _ hx, }
 end
 

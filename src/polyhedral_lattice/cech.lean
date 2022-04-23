@@ -242,7 +242,7 @@ begin
   swap, { intro j, exact (g j).map_zero },
   simp only [← hl₀, hg, ← g₀.map_sum, ← f.map_sum] at h1 ⊢,
   rw [← polyhedral_lattice_hom.coe_to_add_monoid_hom] at h1 hf,
-  rw [add_monoid_hom.injective_iff] at hf,
+  rw [injective_iff_map_eq_zero] at hf,
   rw [hf _ h1, g₀.map_zero],
 end
 

@@ -55,7 +55,9 @@ rfl
 def mk_iso {X Y : bounded_derived_category A} (i : (forget A).obj X ≅ (forget A).obj Y) :
   X ≅ Y :=
 { hom := ⟨i.hom⟩,
-  inv := ⟨i.inv⟩, }
+  inv := ⟨i.inv⟩,
+  hom_inv_id' := by { ext1, simp },
+  inv_hom_id' := by { ext1, simp } }
 
 variable (A)
 @[simps]
@@ -94,24 +96,30 @@ begin
     apply_instance }
 end
 
-local attribute [instance] limits.has_zero_object.has_zero
+open_locale zero_object
+open category_theory.limits
 
 -- MOVE THIS
-instance zero_is_K_projective : is_K_projective (0 : bounded_homotopy_category A).val :=
+lemma zero_is_K_projective {X : bounded_homotopy_category A} (hX : is_zero X) :
+  is_K_projective X.val :=
 begin
   constructor,
-  introsI Y _ f, ext,
+  introsI Y _ f, apply (bounded_homotopy_category.zero_val hX).eq_of_src f
 end
 
-noncomputable
+protected noncomputable
+def zero : bounded_derived_category A :=
+{ val := bounded_homotopy_category.zero,
+  proj := zero_is_K_projective _ $ bounded_homotopy_category.is_zero_zero }
+
+protected lemma is_zero_zero : limits.is_zero (bounded_derived_category.zero A) :=
+{ unique_to := λ Y, nonempty.intro $ unique.mk ⟨⟨0⟩⟩ $ λ a,
+    by { ext1, cases a, apply bounded_homotopy_category.is_zero_zero.eq_of_src },
+  unique_from := λ Y, nonempty.intro $ unique.mk ⟨⟨0⟩⟩ $ λ a,
+    by { ext1, cases a, apply bounded_homotopy_category.is_zero_zero.eq_of_tgt } }
+
 instance has_zero_object : limits.has_zero_object (bounded_derived_category A) :=
-{ zero := of 0,
-  unique_to := λ X,
-  { default := ⟨0⟩,
-    uniq := λ a, by { ext1, cases a, dsimp at *, apply limits.has_zero_object.from_zero_ext } },
-  unique_from := λ X,
-  { default := ⟨0⟩,
-    uniq := λ a, by { ext1, cases a, dsimp at *, apply limits.has_zero_object.to_zero_ext } } }
+⟨⟨bounded_derived_category.zero A, bounded_derived_category.is_zero_zero A⟩⟩
 
 @[simps]
 def has_shift_functor (i : ℤ) : bounded_derived_category A ⥤ bounded_derived_category A:=
@@ -405,10 +413,23 @@ begin
   fapply triangle.iso.of_components,
   exact localization_iso X,
   exact localization_iso X,
-  exact localization_iso 0,
-  { ext, dsimp, simp, },
-  { ext, },
-  { apply (cancel_epi (localization_iso 0).inv).1, ext, apply_instance, },
+  refine _ ≪≫ localization_iso 0,
+  { dsimp,
+    refine (localization_functor _).map_iso _,
+    refine ⟨0,0,_,_⟩,
+    simp only [eq_iff_true_of_subsingleton],
+    simp only [zero_comp, auto_param_eq],
+    erw ← (forget A).map_id,
+    simp only [id_zero, functor.map_zero] },
+  { ext,
+    dsimp,
+    simp only [bounded_homotopy_category.lift_lifts] },
+  { ext,
+    dsimp,
+    simp only [bounded_homotopy_category.lift_lifts, category.assoc, comp_zero] },
+  { ext,
+    dsimp,
+    simp only [bounded_homotopy_category.lift_lifts, comp_zero] },
 end
 
 @[simp]

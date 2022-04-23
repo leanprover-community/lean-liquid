@@ -86,8 +86,14 @@ instance : pretriangulated 𝒦 :=
   isomorphic_distinguished := λ T₁ hT T₂ e, mem_distinguished_of_iso e.symm hT,
   contractible_distinguished := begin
     rintro ⟨X⟩,
-    use [X, X, 0, 𝟙 _, 0, λ i, (splitting_of_is_iso_zero (𝟙 (X.X i)) : _)],
-    refine ⟨mk_triangle_iso (iso.refl _) (iso.refl _) (iso.refl _) _ _ _⟩; dsimp; simp; refl
+    refine ⟨X, X, homological_complex.zero, 𝟙 _, 0, _, ⟨_⟩⟩,
+    { intro i, simp only [id_f, zero_f_apply],
+      refine splitting_of_is_iso_zero _ (homological_complex.zero_X _ _),
+      exact homological_complex.is_zero_zero },
+    refine mk_triangle_iso (iso.refl _) (iso.refl _) _ _ _ _,
+    { dsimp [triangleₕ_of_termwise_split],
+      refine homotopy_category.is_zero_zero.iso_zero.symm, },
+    all_goals { dsimp; simp; refl },
   end,
   distinguished_cocone_triangle := begin
     rintros ⟨X⟩ ⟨Y⟩ f,

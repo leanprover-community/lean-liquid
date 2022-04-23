@@ -46,7 +46,7 @@ noncomputable def chain_complex.to_bounded_homotopy_category :
       refine ⟨⟨1, _⟩⟩,
       rintro ((_|i)|i) h,
       { exfalso, revert h, dec_trivial },
-      { exact is_zero_zero _ },
+      { exact limits.is_zero_zero _ },
       { exfalso, revert h, dec_trivial }
     end },
   map := λ P Q f, (homological_complex.embed (complex_shape.embedding.nat_down_int_up) ⋙
@@ -72,7 +72,7 @@ begin
     { exact hP.projective _ }, },
   { rintro ((_|i)|i),
     { intro h, exfalso, revert h, dec_trivial },
-    { intro h, exact is_zero_zero _ },
+    { intro h, exact limits.is_zero_zero _ },
     { intro h, exfalso, revert h, dec_trivial } },
 end
 .
@@ -161,15 +161,15 @@ begin
       simpa,
       apply_instance },
     { apply_instance } },
-  { refine is_zero.is_iso _ _ _; refine exact.homology_is_zero _ _ (exact_of_zero _ _), },
-  { refine is_zero.is_iso _ _ _,
-    { refine is_zero_of_iso_of_zero _ (homology_iso _ (-[1+i.succ] : ℤ) _ (-i : ℤ) _ _).symm,
+  { refine limits.is_zero.is_iso _ _ _; refine exact.homology_is_zero _ _ (exact_of_zero _ _), },
+  { refine limits.is_zero.is_iso _ _ _,
+    { refine limits.is_zero_of_iso_of_zero _ (homology_iso _ (-[1+i.succ] : ℤ) _ (-i : ℤ) _ _).symm,
       rotate,
       { dsimp, refl, },
       { dsimp, simp only [int.neg_succ_of_nat_eq', sub_add_cancel], },
       refine exact.homology_is_zero _ _ _,
       cases i; exact (hP.exact _), },
-    { refine is_zero_of_iso_of_zero _ (homology_iso _ (-[1+i.succ] : ℤ) _ (-i : ℤ) _ _).symm,
+    { refine limits.is_zero_of_iso_of_zero _ (homology_iso _ (-[1+i.succ] : ℤ) _ (-i : ℤ) _ _).symm,
       rotate,
       { dsimp, refl, },
       { dsimp, simp only [int.neg_succ_of_nat_eq', sub_add_cancel], },
@@ -472,8 +472,11 @@ end
 
 lemma AddCommGroup.is_zero_of_eq (A : AddCommGroup) (h : ∀ x y : A, x = y) :
   is_zero A :=
-{ eq_zero_of_src := λ B f, by { ext, cases h x 0, exact f.map_zero },
-  eq_zero_of_tgt := λ B f, by { ext, exact h _ _ } }
+begin
+  rw is_zero_iff_id_eq_zero,
+  ext,
+  apply h,
+end
 
 lemma category_theory.ProjectiveResolution.is_projective_resolution
   {A : C} (P : ProjectiveResolution A) :

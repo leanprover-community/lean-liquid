@@ -117,7 +117,7 @@ variable [fact(0 < p)]
 
 lemma r_lt_one : r < 1 :=
 begin
-  refine rpow_lt_one zero_le' (half_lt_self one_ne_zero) _,
+  refine rpow_lt_one (half_lt_self one_ne_zero) _,
   rw nnreal.coe_pos,
   exact fact.out _
 end

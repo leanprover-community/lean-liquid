@@ -11,7 +11,7 @@ noncomputable theory
 
 universes u
 
-open category_theory homotopy_category opposite
+open category_theory category_theory.limits homotopy_category opposite
 open function (surjective)
 
 namespace condensed

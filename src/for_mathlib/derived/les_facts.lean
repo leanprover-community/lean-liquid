@@ -7,7 +7,7 @@ noncomputable theory
 
 universes v u
 
-open category_theory category_theory.triangulated homotopy_category opposite
+open category_theory category_theory.limits category_theory.triangulated homotopy_category opposite
 open bounded_homotopy_category
 
 variables {C : Type u} [category.{v} C] [abelian C] [enough_projectives C]

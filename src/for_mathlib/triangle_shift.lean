@@ -1,6 +1,7 @@
 import category_theory.triangulated.pretriangulated
 import for_mathlib.homological_complex_shift
 import for_mathlib.monoidal_category
+import for_mathlib.int
 
 noncomputable theory
 
@@ -421,15 +422,6 @@ begin
   dsimp [shift_comm, opaque_eq_to_iso],
   simp only [discrete.functor_map_id, nat_trans.id_app, id_comp, μ_hom_inv_app],
   refl,
-end
-
-@[elab_as_eliminator] protected lemma _root_.int.induction_on_iff {p : ℤ → Prop}
-  (i : ℤ) (hz : p 0) (h : ∀ i : ℤ, p i ↔ p (i + 1)) : p i :=
-begin
-  induction i using int.induction_on with i IH i IH,
-  { exact hz },
-  { rwa ← h },
-  { rw h, simpa only [sub_add_cancel], }
 end
 
 variables [has_zero_object C] [∀ (i : ℤ), (shift_functor C i).additive] [pretriangulated C]

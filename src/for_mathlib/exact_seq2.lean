@@ -51,10 +51,10 @@ lemma epi_iff_eq_zero (h : exact f g) : category_theory.epi f ↔ g = 0 :=
 ⟨h.eq_zero_of_epi, h.epi_of_eq_zero⟩
 
 lemma mono_of_is_zero (h : exact f g) (hA : is_zero A) : mono g :=
-by { rw h.mono_iff_eq_zero, exact hA.eq_zero_of_src f }
+by { rw h.mono_iff_eq_zero, exact hA.eq_of_src f _ }
 
 lemma epi_of_is_zero (h : exact f g) (hA : is_zero C) : category_theory.epi f :=
-by { rw h.epi_iff_eq_zero, exact hA.eq_zero_of_tgt g }
+by { rw h.epi_iff_eq_zero, exact hA.eq_of_tgt g _ }
 
 lemma is_zero_of_eq_zero_eq_zero (h : exact f g) (hf : f = 0) (hg : g = 0) : is_zero B :=
 is_zero_of_exact_zero_zero' _ _ h hf hg

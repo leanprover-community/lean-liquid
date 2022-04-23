@@ -226,17 +226,52 @@ def cone.triangle_functorial :
 
 open_locale zero_object
 
+lemma homological_complex.zero_X {ι : Type*} {c : complex_shape ι}
+  {C : homological_complex V c} (hC : is_zero C) (i : ι) :
+  is_zero (C.X i) :=
+begin
+  rw [is_zero_iff_id_eq_zero, ← homological_complex.eval_obj,
+    ← (homological_complex.eval V c i).map_id, hC.eq_of_src (𝟙 C) 0],
+  refl
+end
+
 def cone_from_zero (A : cochain_complex V ℤ) : cone (0 : 0 ⟶ A) ≅ A :=
 { hom :=
-  { f := λ i, biprod.snd, comm' := by { introv r, ext, dsimp [cone.d] at *, simp [if_pos r] } },
+  { f := λ i, biprod.snd, comm' := begin
+      introv r, ext; dsimp [cone.d] at *;
+      simp only [if_pos r, zero_comp, dite_eq_ite, biprod.lift_snd,
+        biprod.inl_desc, biprod.inr_desc, biprod.inl_snd_assoc, biprod.inr_snd_assoc],
+    end },
   inv := cone.in _,
-  inv_hom_id' := by { intros, ext, dsimp [cone.in], simp } }
+  inv_hom_id' := by { intros, ext, dsimp [cone.in], simp only [biprod.inr_snd] },
+  hom_inv_id' := begin
+    ext; dsimp [cone.in];
+    simp only [biprod.inl_snd_assoc, zero_comp, comp_f, id_f, category.assoc,
+      category.comp_id, biprod.inl_fst, biprod.inl_snd, biprod.inr_fst, biprod.inr_snd,
+      biprod.inr_snd_assoc],
+    apply is_zero.eq_of_src,
+    apply homological_complex.zero_X,
+    apply limits.is_zero_zero,
+  end }
 
 def cone_to_zero (A : cochain_complex V ℤ) : cone (0 : A ⟶ 0) ≅ A⟦(1 : ℤ)⟧ :=
 { hom := cone.out _,
   inv :=
-    { f := λ i, biprod.inl, comm' := by { introv r, ext, dsimp [cone.d] at *, simp [if_pos r] } },
-  hom_inv_id' := by { intros, ext, dsimp [cone.out], simp },
+    { f := λ i, biprod.inl, comm' := begin
+        introv r, ext; dsimp [cone.d] at *;
+        simp only [if_pos r, zero_comp, comp_zero, dite_eq_ite, category.assoc, category.comp_id,
+          biprod.lift_fst, biprod.lift_snd, biprod.inl_desc, neg_smul, one_zsmul,
+          biprod.inl_fst, biprod.inl_snd],
+    end },
+  hom_inv_id' := begin
+    ext; dsimp [cone.out];
+    simp only [biprod.inl_snd_assoc, zero_comp, comp_f, id_f, category.assoc,
+      category.comp_id, biprod.inl_fst, biprod.inl_snd, biprod.inr_fst, biprod.inr_snd,
+      biprod.inl_fst_assoc, biprod.inr_fst_assoc],
+    apply is_zero.eq_of_src,
+    apply homological_complex.zero_X,
+    apply limits.is_zero_zero,
+  end,
   inv_hom_id' := by { intros, ext, dsimp [cone.out], simp } }
 
 def cone.desc_of_null_homotopic (h : homotopy (f ≫ g) 0) : cone f ⟶ C :=
