@@ -15,9 +15,6 @@ noncomputable theory
 open category_theory
 open opposite
 
--- jmc: This is maybe not the best way to set things up.
--- The counit in `free_pfpng_profinite_natural_map` will probably be annoying
-
 universe u
 
 def Profinite.condensed_free_pfpng (S : Profinite.{u}) : Condensed Ab :=
@@ -116,8 +113,22 @@ def Profinite.condensed_free_pfpng_specialize_cone (S B : Profinite.{u}) (b : B)
   π :=
   { app := λ T, add_monoid_hom.mk'
       (λ t, ⟨finsupp.equiv_fun_on_fintype.symm (S.free_pfpng_π T (t.down.1 b))⟩)
-      sorry,
-    naturality' := sorry } }
+      begin
+        intros f g,
+        ext x,
+        simp only [ulift.add_down, subtype.val_eq_coe,
+          finsupp.equiv_fun_on_fintype_symm_apply_to_fun, finsupp.coe_add, pi.add_apply],
+        erw strict_comphaus_filtered_pseudo_normed_group_hom.map_add,
+        refl,
+      end,
+    naturality' := λ T₁ T₂ f, begin
+      ext g x,
+      simp only [subtype.val_eq_coe, finsupp.equiv_fun_on_fintype_symm_apply_to_fun,
+        functor.const.obj_map, comp_apply, id_apply, add_monoid_hom.mk'_apply, functor.comp_map,
+        forget_map_eq_coe, concrete_category.has_coe_to_fun_Type, AddCommGroup.free'_map,
+        Ab.ulift_map_apply_down, finsupp.map_domain.add_monoid_hom_apply],
+      sorry
+    end } }
 
 def Profinite.condensed_free_pfpng_specialize (S B : Profinite.{u}) (b : B) :
   S.condensed_free_pfpng.val.obj (op B) ⟶ S.limit_free :=
