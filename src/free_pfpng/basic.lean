@@ -214,7 +214,7 @@ def Profinite.free_pfpng_level_iso (S : Profinite.{u}) (r) :
 
 def Profinite.to_free_pfpng (S : Profinite.{u}) :
   S ⟶ (ProFiltPseuNormGrp₁.level.obj 1).obj S.free_pfpng :=
-(limit.is_limit _).map S.as_limit_cone (whisker_left _ $ Fintype.free_pfpng_unit) ≫
+(limit.is_limit _).map S.as_limit_cone (whisker_left _ $ Fintype.free_pfpng_unit.{u u}) ≫
 (S.free_pfpng_level_iso 1).inv
 
 --(limits.is_limit_of_preserves (ProFiltPseuNormGrp₁.level.obj 1) (limits.limit.is_limit _)).map
