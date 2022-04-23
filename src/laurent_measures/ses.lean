@@ -904,11 +904,12 @@ begin
     function.comp_app, mem_ball, subtype.dist_eq, real.dist_eq],
     calc | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ G)) : ℝ) - y | ≤
             | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ G)) : ℝ) -
-                  ((homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) : ℝ) | +
+                  (homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) | +
                 | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) : ℝ) - y | : abs_sub_le _ _ y
         ... < ε - |((homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) : ℝ) - y | +
-              | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) : ℝ) - y | : by {apply add_lt_add_right,
-                               rw [← real_measures.dist_eq], refine dist_lt_of_mem_U p ϖ c _ F G hG}
+              | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) : ℝ) - y | : by sorry
+              -- {apply add_lt_add_right,
+              --                  rw [← real_measures.dist_eq], refine dist_lt_of_mem_U p ϖ c _ F G hG}
         ... = ε : by {rw sub_add_cancel} },
   refine and.intro (is_open_U p ϖ c F _) (mem_U p ϖ c F _),
 end

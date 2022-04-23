@@ -297,10 +297,9 @@ def homeo_filtration_ϖ_ball (c : ℝ≥0) : filtration (ℳ p ϖ) c ≃ₜ clos
 }
 
 lemma real_measures.dist_eq {c : ℝ≥0} (F G : filtration (ℳ p ϖ) c) : ∥ F.1 - G.1 ∥ =
-  | ((homeo_filtration_ϖ_ball c F) - (homeo_filtration_ϖ_ball c G) : ℝ)| :=
-begin
-  sorry,
-end
+  | ((homeo_filtration_ϖ_ball c F) - (homeo_filtration_ϖ_ball c G) : ℝ)| ^ (p : ℝ) :=
+  by { simpa only [norm_def, fintype.univ_punit, subtype.val_eq_coe, sub_apply, finset.sum_singleton,
+    real.norm_eq_abs]}
 
 instance {c : ℝ≥0} : has_zero (closed_ball (0 : ℝ) c):=
   { zero := ⟨0, by {simp only [mem_closed_ball_zero_iff, norm_zero, nnreal.zero_le_coe]}⟩}
