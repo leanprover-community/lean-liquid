@@ -510,7 +510,11 @@ begin
   dsimp at q q',
   dsimp [functor.is_proetale_sheaf_of_types] at hZ,
   specialize hZ punit W (λ _, Profinite.pullback f q')
-    (λ _, Profinite.pullback.snd _ _) sorry _,
+    (λ _, Profinite.pullback.snd _ _) _ _,
+  { intros w, use punit.star,
+    have : function.surjective f := by rwa ← Profinite.epi_iff_surjective,
+    obtain ⟨a,ha⟩ := this (q' w),
+    use [⟨⟨a,w⟩,ha⟩, rfl] },
   { intros i, dsimp, refine Z.val.map _ (b.val.app (op W) q),
     refine quiver.hom.op _, exact Profinite.pullback.snd _ _ },
   specialize hZ _,
