@@ -488,9 +488,18 @@ begin
     (b.val.app (op W) ≫ Z.val.map _) q,
   simp only [← nat_trans.naturality],
   dsimp,
-  sorry
-
-
+  apply_fun (λ e, Profinite_to_Condensed.map (Profinite.pullback.fst f q') ≫ e) at h,
+  apply_fun (λ e, e.val.app (op (Profinite.pullback f q'))) at h,
+  dsimp at h,
+  let i : (Profinite.pullback f q').to_Condensed.val.obj (op (Profinite.pullback f q')) :=
+    ulift.up (𝟙 _),
+  apply_fun (λ e, e i) at h,
+  dsimp [ulift_functor] at h,
+  convert h,
+  all_goals
+  { ext1,
+    dsimp [Profinite.to_Condensed],
+    simp only [category.id_comp, Profinite.pullback.condition] },
 end
 
 instance Profinite.epi_free'_to_condensed_free_pfpng
