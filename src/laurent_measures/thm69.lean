@@ -214,6 +214,7 @@ begin
     field_simp [ϕ] },
   simp_rw [sub_mul],
   rw [tsum_sub, sub_eq_zero],
+  -- old proof was slicker :-(
   { refine tsum_eq_tsum_of_ne_zero_bij (λ i, (i.val : ℤ) - 1) _ _ _,
     { rintros ⟨x, _⟩ ⟨y, _⟩ h, dsimp at *, linarith },
     { rintros x hx,
@@ -244,6 +245,18 @@ end
 -- end p_lt_one
 
 def ψ (F : ℒ S) (hF : θ F = 0) : ℒ S :=
+{ to_fun := λ s n, if F.d ≤ n then
+    ∑ l in range (n - F.d).nat_abs.succ, F s (n - 1 - l) * (2 ^ l)
+    else 0,
+  summable' := λ s, begin
+    have := F.summable s,
+    simp [θ, ϑ, one_div, inv_zpow', zpow_neg₀] at hF,
+    replace hF := congr_fun hF s, dsimp at hF,
+    simp only [←nnreal.summable_coe, nonneg.coe_mul, _root_.coe_nnnorm, nnreal.coe_zpow, summable_congr],
+--   exact aux_thm69.summable_convolution r_half (F s) F.d (F.summable s) (λ n, lt_d_eq_zero F s _) this
+    sorry,
+  end }
+#exit
 begin
   let b : S → ℤ → ℤ := λ s n,
     if hn : F.d ≤ n then
