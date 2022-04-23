@@ -107,6 +107,30 @@ def Profinite.limit_free (S : Profinite.{u}) : Ab.{u+1} :=
 limits.limit $ (S.fintype_diagram ⋙ forget Fintype ⋙
   AddCommGroup.free') ⋙ Ab.ulift.{u+1}
 
+-- move me
+lemma _root_.finsupp.map_domain_equiv_fun_on_fintype_symm
+  {α β R : Type*} [fintype α] [semiring R] (f : α → β) (g : α → R) :
+  finsupp.map_domain f (finsupp.equiv_fun_on_fintype.symm g) =
+    finset.univ.sum (λ (x : α), finsupp.single (f x) (g x)) :=
+begin
+  dsimp [finsupp.map_domain],
+  rw [finsupp.sum_fintype], swap, { intro, apply finsupp.single_zero },
+  simp only [finsupp.equiv_fun_on_fintype_symm_apply_to_fun],
+end
+
+-- move me
+lemma _root_.finsupp.map_domain_equiv_fun_on_fintype_symm_apply
+  {α β R : Type*} [fintype α] [semiring R] (f : α → β) (g : α → R) (b : β)
+  [decidable_pred (λ (a : α), f a = b)] :
+  finsupp.map_domain f (finsupp.equiv_fun_on_fintype.symm g) b =
+    (finset.filter (λ (a : α), f a = b) finset.univ).sum g :=
+begin
+  rw [finsupp.map_domain_equiv_fun_on_fintype_symm, finset.sum_apply'],
+  classical,
+  simp only [finsupp.single_apply, ← finset.sum_filter],
+  congr'
+end
+
 def Profinite.condensed_free_pfpng_specialize_cone (S B : Profinite.{u}) (b : B) :
   limits.cone ((S.fintype_diagram ⋙ forget Fintype ⋙ AddCommGroup.free') ⋙ Ab.ulift.{u+1}) :=
 { X := S.condensed_free_pfpng.val.obj (op B),
@@ -127,8 +151,10 @@ def Profinite.condensed_free_pfpng_specialize_cone (S B : Profinite.{u}) (b : B)
       simp only [subtype.val_eq_coe, finsupp.equiv_fun_on_fintype_symm_apply_to_fun,
         functor.const.obj_map, comp_apply, id_apply, add_monoid_hom.mk'_apply, functor.comp_map,
         forget_map_eq_coe, concrete_category.has_coe_to_fun_Type, AddCommGroup.free'_map,
-        Ab.ulift_map_apply_down, finsupp.map_domain.add_monoid_hom_apply],
-      sorry
+        Ab.ulift_map_apply_down, finsupp.map_domain.add_monoid_hom_apply, free_pfpng.map,
+        free_pfpng_functor_map, strict_comphaus_filtered_pseudo_normed_group_hom.coe_mk],
+      classical,
+      rw finsupp.map_domain_equiv_fun_on_fintype_symm_apply, congr',
     end } }
 
 def Profinite.condensed_free_pfpng_specialize (S B : Profinite.{u}) (b : B) :
@@ -256,12 +282,11 @@ begin
     λ e, ⟨q e.1 e.2, hq e.1 e.2⟩,
   have hι : function.surjective ι,
   { rintros ⟨e,he⟩, use f e,
-    simp only [finsupp.mem_support_iff, ne.def],
-    -- This is similar to `finsupp.map_domain_apply`, except using `inj_on` instead of `injective`.
-    have : (finsupp.map_domain f t) (f e) = t e, sorry,
-    rw this, clear this, simpa using he,
-    ext, dsimp,
-    apply hinj, apply hq, apply he, apply hh },
+    { simp only [finsupp.mem_support_iff, ne.def],
+      rw finsupp.map_domain_apply' _ _ (set.subset.refl _) hinj he,
+      simpa using he },
+    { ext, dsimp,
+      apply hinj, apply hq, apply he, apply hh } },
   have : (t.map_domain f).support = ∅, by simpa using ht,
   suffices : t.support = ∅, by simpa using this,
   by_contra c, change _ ≠ _ at c,
@@ -485,11 +510,18 @@ begin
   dsimp at q q',
   dsimp [functor.is_proetale_sheaf_of_types] at hZ,
   specialize hZ punit W (λ _, Profinite.pullback f q')
-    (λ _, Profinite.pullback.snd _ _) sorry _,
+    (λ _, Profinite.pullback.snd _ _) _ _,
+  { intro w,
+    rw Profinite.epi_iff_surjective at hf,
+    obtain ⟨x, hx⟩ := hf (q' w),
+    refine ⟨punit.star, ⟨(x, w), hx⟩, rfl⟩, },
   { intros i, dsimp, refine Z.val.map _ (b.val.app (op W) q),
     refine quiver.hom.op _, exact Profinite.pullback.snd _ _ },
   specialize hZ _,
-  { sorry },
+  { clear hZ,
+    rintro ⟨⟩ ⟨⟩ S g₁ g₂ H, dsimp only at H,
+    apply_fun (λ φ, Z.val.map φ.op (b.val.app (op W) q)) at H,
+    simp only [op_comp, Z.val.map_comp] at H, exact H, },
   obtain ⟨t,ht1,ht2⟩ := hZ,
   have : b.val.app (op W) q = t,
   { apply ht2,
