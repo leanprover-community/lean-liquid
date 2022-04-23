@@ -438,8 +438,46 @@ begin
   assumption',
 end
 
+instance Condensed_Ab_to_CondensedSet_faithful :
+  faithful Condensed_Ab_to_CondensedSet :=
+{ map_injective' := begin
+    intros X Y f g h, ext W t : 4,
+    apply_fun (λ e, e.val.app W t) at h, dsimp at h,
+    exact h
+  end }
+
+lemma category_theory.epi_to_colimit_of_exists {J : Type u}
+  [small_category J] {C : Type*} [category.{u} C]
+  {F : J ⥤ C} (T : C)
+  (E : limits.cocone F) (hE : limits.is_colimit E)
+  (f : T ⟶ E.X)
+  (h : ∀ j : J,
+    ∃ (Z : C) (p : Z ⟶ T) (q : Z ⟶ F.obj j) (hq : epi q),
+      q ≫ E.ι.app j = p ≫ f) : epi f :=
+begin
+  constructor, intros W a b hh,
+  apply hE.hom_ext, intros j, specialize h j,
+  obtain ⟨Z,p,q,hq,w⟩ := h, resetI,
+  rw ← cancel_epi q, simp_rw [← category.assoc, w,
+    category.assoc, hh],
+end
+
 instance Profinite.epi_free'_to_condensed_free_pfpng
-  (S : Profinite.{u}) : epi S.free'_to_condensed_free_pfpng := sorry
+  (S : Profinite.{u}) : epi S.free'_to_condensed_free_pfpng :=
+begin
+  apply faithful_reflects_epi (Condensed_Ab_to_CondensedSet),
+  let E := CompHausFiltPseuNormGrp.level_Condensed_diagram_cocone
+    (CompHausFiltPseuNormGrp₁.enlarging_functor.obj
+    ((ProFiltPseuNormGrp₁.to_CHFPNG₁.obj S.free_pfpng))),
+  have hh : is_iso (limits.colimit.desc _ E),
+  { change is_iso (CompHausFiltPseuNormGrp.colimit_to_Condensed_obj _),
+    apply_instance },
+  let hE : limits.is_colimit E := @limits.is_colimit.of_point_iso
+    _ _ _ _ _ _ _ _ hh, -- <-- move this
+  apply category_theory.epi_to_colimit_of_exists  _ E hE,
+  intros j,
+  sorry
+end
 
 instance Profinite.is_iso_free'_to_condensed_free_pfpng
   (S : Profinite.{u}) : is_iso S.free'_to_condensed_free_pfpng :=
