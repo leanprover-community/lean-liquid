@@ -896,19 +896,26 @@ begin
   intros F hF,
   simp only [set.mem_preimage, one_mul, eq_self_iff_true, eq_mpr_eq_cast, set_coe_cast,
     function.comp_app, mem_ball, subtype.dist_eq, real.dist_eq] at hF,
-  set V := U p ϖ c F (ε - |(homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) - y|) with hV,
+  set V := U p ϖ c F ((ε - |(homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) - y|) ^ (p : ℝ)) with hV,
   use V,
   split,
   { intros G hG,
     simp only [set.mem_preimage, one_mul, eq_self_iff_true, eq_mpr_eq_cast, set_coe_cast,
     function.comp_app, mem_ball, subtype.dist_eq, real.dist_eq],
-    calc | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ G)) : ℝ) - y | ≤
+  have hp : 0 < (p : ℝ),
+  { rw [← nnreal.coe_zero, nnreal.coe_lt_coe],
+    from fact.out _ },
+  calc | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ G)) : ℝ) - y | ≤
             | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ G)) : ℝ) -
-                  ((homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) : ℝ) | +
+                  (homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) | +
                 | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) : ℝ) - y | : abs_sub_le _ _ y
         ... < ε - |((homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) : ℝ) - y | +
               | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) : ℝ) - y | : by {apply add_lt_add_right,
-                               rw [← real_measures.dist_eq], refine dist_lt_of_mem_U p ϖ c _ F G hG}
+                        rw [← real_measures.dist_eq, ← real.rpow_lt_rpow_iff
+                        (real.rpow_nonneg_of_nonneg (real_measures.norm_nonneg _) _)
+                        (sub_nonneg.mpr (le_of_lt hF)) hp, ← real.rpow_mul
+                        (real_measures.norm_nonneg _), inv_mul_cancel (ne_of_gt hp),
+                        real.rpow_one], refine dist_lt_of_mem_U p ϖ c _ F G hG}
         ... = ε : by {rw sub_add_cancel} },
   refine and.intro (is_open_U p ϖ c F _) (mem_U p ϖ c F _),
 end

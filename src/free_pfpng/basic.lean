@@ -183,9 +183,22 @@ def Fintype.free_pfpng_unit :
 { app := λ S,
   { to_fun := λ s,
     { val := λ t, if s = t then 1 else 0,
-      property := sorry },
+      property := begin
+        show finset.sum _ _ ≤ _,
+        rw finset.sum_eq_single_of_mem,
+        swap 4, { exact s }, swap 2, { apply finset.mem_univ },
+        { dsimp, rw [if_pos rfl, nnnorm_one], },
+        rintro t - ht, dsimp, rw [if_neg ht.symm, nnnorm_zero],
+      end },
     continuous_to_fun := continuous_bot },
-  naturality' := sorry }
+  naturality' := λ S T f, begin
+    ext s t,
+    delta ProFiltPseuNormGrp₁.level,
+    simp only [Fintype.to_Profinite_map_to_fun, Profinite.coe_comp, continuous_map.coe_mk,
+      function.comp_app, subtype.coe_mk, category_theory.functor.comp_map, free_pfpng_functor_map,
+      pseudo_normed_group.level_coe, subtype.coe_mk, free_pfpng.map, finset.mem_filter, true_and,
+      finset.mem_univ, strict_comphaus_filtered_pseudo_normed_group_hom.coe_mk, finset.sum_ite_eq],
+  end }
 
 def Profinite.free_pfpng (S : Profinite) : ProFiltPseuNormGrp₁ :=
 (Profinite.extend free_pfpng_functor).obj S
@@ -201,7 +214,7 @@ def Profinite.free_pfpng_level_iso (S : Profinite.{u}) (r) :
 
 def Profinite.to_free_pfpng (S : Profinite.{u}) :
   S ⟶ (ProFiltPseuNormGrp₁.level.obj 1).obj S.free_pfpng :=
-(limit.is_limit _).map S.as_limit_cone (whisker_left _ $ Fintype.free_pfpng_unit) ≫
+(limit.is_limit _).map S.as_limit_cone (whisker_left _ $ Fintype.free_pfpng_unit.{u u}) ≫
 (S.free_pfpng_level_iso 1).inv
 
 --(limits.is_limit_of_preserves (ProFiltPseuNormGrp₁.level.obj 1) (limits.limit.is_limit _)).map
@@ -210,3 +223,8 @@ def Profinite.to_free_pfpng (S : Profinite.{u}) :
 def Profinite.free_pfpng_π (S : Profinite) (T : discrete_quotient S) :
   S.free_pfpng ⟶ (Fintype.of T).free_pfpng :=
 category_theory.limits.limit.π _ _
+
+lemma Profinite.free_pfpng_π_w (S : Profinite) {T₁ T₂ : discrete_quotient S} (f : T₁ ⟶ T₂) :
+  Profinite.free_pfpng_π S T₁ ≫ (S.fintype_diagram ⋙ free_pfpng_functor).map f =
+  Profinite.free_pfpng_π S T₂ :=
+category_theory.limits.limit.w (S.fintype_diagram ⋙ free_pfpng_functor) _

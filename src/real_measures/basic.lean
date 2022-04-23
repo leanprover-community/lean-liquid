@@ -44,6 +44,8 @@ lemma nnnorm_def (F : ℳ p S) : ∥F∥₊ = ∑ s, ∥F s∥₊ ^ (p:ℝ) := r
 @[simp] protected lemma coe_nnnorm (F : ℳ p S) : (∥F∥₊ : ℝ) = ∥F∥ :=
 by simp only [norm_def, nnnorm_def, nnreal.coe_sum, nnreal.coe_rpow, coe_nnnorm]
 
+lemma real_measures.norm_nonneg (F : ℳ p S) : 0 ≤ ∥ F ∥ := by {rw [← F.coe_nnnorm], from ∥ F ∥₊.2}
+
 @[simp] protected lemma nnnorm_zero [hp : fact (0 < p)] : ∥(0 : ℳ p S)∥₊ = 0 :=
 begin
   rw [nnnorm_def, finset.sum_eq_zero],
@@ -296,10 +298,15 @@ def homeo_filtration_ϖ_ball (c : ℝ≥0) : filtration (ℳ p ϖ) c ≃ₜ clos
   end
 }
 
-lemma real_measures.dist_eq {c : ℝ≥0} (F G : filtration (ℳ p ϖ) c) : ∥ F.1 - G.1 ∥ =
+lemma real_measures.dist_eq {c : ℝ≥0} (F G : filtration (ℳ p ϖ) c) : ∥ F.1 - G.1 ∥ ^ (p⁻¹ : ℝ) =
   | ((homeo_filtration_ϖ_ball c F) - (homeo_filtration_ϖ_ball c G) : ℝ)| :=
 begin
-  sorry,
+  have hp : (p : ℝ) ≠ 0,
+  { rw ← nnreal.coe_zero,
+    exact (ne_of_gt (nnreal.coe_lt_coe.mpr (fact.out _))) },
+  simp only [norm_def, fintype.univ_punit, subtype.val_eq_coe, sub_apply, finset.sum_singleton,
+    ← real.rpow_mul (norm_nonneg _), mul_inv_cancel hp],
+  simpa only [real.rpow_one, real.norm_eq_abs],
 end
 
 instance {c : ℝ≥0} : has_zero (closed_ball (0 : ℝ) c):=
