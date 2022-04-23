@@ -615,7 +615,11 @@ def free_pfpng_profinite_natural_map :
   CompHausFiltPseuNormGrp₁.enlarging_functor ⋙
   CompHausFiltPseuNormGrp.to_Condensed :=
 { app := λ X, X.free_to_pfpng,
-  naturality' := sorry }
+  naturality' := λ S T f, begin
+    -- we should be able to precompose with the natural map `S.to_Condensed ⟶ S.free'`
+    -- how do we do that?
+    sorry
+  end }
 /-
 whisker_right profinite_to_condensed_unit _ ≫
 (functor.associator _ _ _).hom ≫
