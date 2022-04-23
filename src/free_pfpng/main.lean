@@ -258,6 +258,28 @@ begin
   rw this at hc, simpa using hc,
 end
 
+lemma finsupp.lift_map_domain {γ α β : Type*} [add_comm_group β]
+  (f : α → β) (ι : γ → α) :
+  (finsupp.lift _ ℤ _ f) ∘ finsupp.map_domain ι = finsupp.lift _ ℤ _ (f ∘ ι) :=
+begin
+  apply finsupp.fun_ext,
+  { intros x y,
+    dsimp only [function.comp_apply],
+    simp only [finsupp.map_domain_add],
+    erw ((finsupp.lift β ℤ α) f).to_add_monoid_hom.map_add, refl },
+  { intros x y,
+    erw ((finsupp.lift β ℤ γ) (f ∘ ι)).to_add_monoid_hom.map_add, refl },
+  { intros x, simp },
+end
+
+lemma finsupp.lift_map_domain_apply {γ α β : Type*} [add_comm_group β]
+  (f : α → β) (ι : γ → α) (e : γ →₀ ℤ) :
+  (finsupp.lift _ ℤ _ f).to_add_monoid_hom (e.map_domain ι) =
+  finsupp.lift _ ℤ _ (f ∘ ι) e :=
+begin
+  rw ← finsupp.lift_map_domain, refl,
+end
+
 lemma Profinite.mono_free'_to_condensed_free_pfpng_induction_aux (n : ℕ) :
   ∀ (S B : Profinite.{u}) (t : S.to_Condensed.val.obj (op B) →₀ ℤ),
     t.support.card ≤ n →
@@ -332,15 +354,23 @@ begin
       sorry,
 
     have lift₀ : ∀ (i : E₀), free'_lift (S.to_condensed_free_pfpng.val.app (op (X₀ i))) (t₀ i) = 0,
-    { intros i, rw free'_lift_eq_finsupp_lift, dsimp [t₀, f₀],
+    -- This works -- just remove the `sorry`.
+    sorry { intros i, rw free'_lift_eq_finsupp_lift, dsimp only [t₀, f₀],
       apply_fun (λ q, S.condensed_free_pfpng.val.map (π₀ i).op q) at ht2,
       rw [add_monoid_hom.map_zero, free'_lift_eq_finsupp_lift] at ht2,
       convert ht2,
-      sorry },
+      rw finsupp.lift_map_domain_apply,
+      dsimp [finsupp.lift],
+      rw (S.condensed_free_pfpng.val.map (π₀ i).op).map_finsupp_sum,
+      refl },
 
     have map₀ : ∀ (i : E₀) (b : ↥(X₀ i)),
         finsupp.map_domain
-          (λ (f : S.to_Condensed.val.obj (op (X₀ i))), f.down.to_fun b) (t₀ i) = 0, sorry,
+          (λ (f : S.to_Condensed.val.obj (op (X₀ i))), f.down.to_fun b) (t₀ i) = 0,
+    -- This works -- just remove the `sorry`.
+    sorry { intros i b, dsimp [t₀], rw ← finsupp.map_domain_comp,
+      exact H (π₀ i b) },
+
     have key := λ i, hn S (X₀ i) (t₀ i) (card₀ i) (lift₀ i) (map₀ i),
 
     choose A hA X₁ π₁ surj₁ key using key, resetI,
