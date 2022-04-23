@@ -283,7 +283,20 @@ end
 lemma finsupp.card_supp_map_domain_lt {α β γ : Type*} [add_comm_group γ]
   (f : α → β) (t : α →₀ γ) (u v : α)
   (huv : u ≠ v) (hu : u ∈ t.support) (hv : v ∈ t.support)
-  (hf : f u = f v) : (t.map_domain f).support.card < t.support.card := sorry
+  (hf : f u = f v) : (t.map_domain f).support.card < t.support.card :=
+begin
+  classical,
+  have key : (finsupp.map_domain f t).support ⊆ _ := finsupp.map_domain_support,
+  have : (finsupp.map_domain f t).support.card ≤ (t.support.image f).card :=
+    finset.card_le_of_subset key,
+  refine lt_of_le_of_lt this _,
+  have key' : (t.support.image f).card ≤ t.support.card := finset.card_image_le,
+  apply lt_of_le_of_ne key',
+  change ¬ _,
+  rw finset.card_image_eq_iff_inj_on,
+  dsimp [set.inj_on],
+  push_neg, use [u, hu, v, hv, hf],
+end
 
 lemma Profinite.mono_free'_to_condensed_free_pfpng_induction_aux (n : ℕ) :
   ∀ (S B : Profinite.{u}) (t : S.to_Condensed.val.obj (op B) →₀ ℤ),
