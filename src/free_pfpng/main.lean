@@ -115,9 +115,11 @@ def Profinite.condensed_free_pfpng_specialize_cone (S B : Profinite.{u}) (b : B)
       (λ t, ⟨finsupp.equiv_fun_on_fintype.symm (S.free_pfpng_π T (t.down.1 b))⟩)
       begin
         intros f g,
-        dsimp at f g,
         ext x,
-        sorry
+        simp only [ulift.add_down, subtype.val_eq_coe,
+          finsupp.equiv_fun_on_fintype_symm_apply_to_fun, finsupp.coe_add, pi.add_apply],
+        erw strict_comphaus_filtered_pseudo_normed_group_hom.map_add,
+        refl,
       end,
     naturality' := sorry } }
 
