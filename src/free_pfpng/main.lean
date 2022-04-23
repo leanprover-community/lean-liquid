@@ -15,9 +15,6 @@ noncomputable theory
 open category_theory
 open opposite
 
--- jmc: This is maybe not the best way to set things up.
--- The counit in `free_pfpng_profinite_natural_map` will probably be annoying
-
 universe u
 
 def Profinite.condensed_free_pfpng (S : Profinite.{u}) : Condensed Ab :=
@@ -116,7 +113,12 @@ def Profinite.condensed_free_pfpng_specialize_cone (S B : Profinite.{u}) (b : B)
   π :=
   { app := λ T, add_monoid_hom.mk'
       (λ t, ⟨finsupp.equiv_fun_on_fintype.symm (S.free_pfpng_π T (t.down.1 b))⟩)
-      sorry,
+      begin
+        intros f g,
+        dsimp at f g,
+        ext x,
+        sorry
+      end,
     naturality' := sorry } }
 
 def Profinite.condensed_free_pfpng_specialize (S B : Profinite.{u}) (b : B) :
