@@ -56,8 +56,8 @@ def mk_iso {X Y : bounded_derived_category A} (i : (forget A).obj X ≅ (forget 
   X ≅ Y :=
 { hom := ⟨i.hom⟩,
   inv := ⟨i.inv⟩,
-  hom_inv_id' := sorry,
-  inv_hom_id' := sorry }
+  hom_inv_id' := by { ext1, simp },
+  inv_hom_id' := by { ext1, simp } }
 
 variable (A)
 @[simps]
@@ -113,7 +113,10 @@ def zero : bounded_derived_category A :=
   proj := zero_is_K_projective _ $ bounded_homotopy_category.is_zero_zero }
 
 protected lemma is_zero_zero : limits.is_zero (bounded_derived_category.zero A) :=
-sorry
+{ unique_to := λ Y, nonempty.intro $ unique.mk ⟨⟨0⟩⟩ $ λ a,
+    by { ext1, cases a, apply bounded_homotopy_category.is_zero_zero.eq_of_src },
+  unique_from := λ Y, nonempty.intro $ unique.mk ⟨⟨0⟩⟩ $ λ a,
+    by { ext1, cases a, apply bounded_homotopy_category.is_zero_zero.eq_of_tgt } }
 
 instance has_zero_object : limits.has_zero_object (bounded_derived_category A) :=
 ⟨⟨bounded_derived_category.zero A, bounded_derived_category.is_zero_zero A⟩⟩
