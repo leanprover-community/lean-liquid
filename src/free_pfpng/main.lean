@@ -15,9 +15,6 @@ noncomputable theory
 open category_theory
 open opposite
 
--- jmc: This is maybe not the best way to set things up.
--- The counit in `free_pfpng_profinite_natural_map` will probably be annoying
-
 universe u
 
 def Profinite.condensed_free_pfpng (S : Profinite.{u}) : Condensed Ab :=
@@ -110,14 +107,55 @@ def Profinite.limit_free (S : Profinite.{u}) : Ab.{u+1} :=
 limits.limit $ (S.fintype_diagram ⋙ forget Fintype ⋙
   AddCommGroup.free') ⋙ Ab.ulift.{u+1}
 
+-- move me
+lemma _root_.finsupp.map_domain_equiv_fun_on_fintype_symm
+  {α β R : Type*} [fintype α] [semiring R] (f : α → β) (g : α → R) :
+  finsupp.map_domain f (finsupp.equiv_fun_on_fintype.symm g) =
+    finset.univ.sum (λ (x : α), finsupp.single (f x) (g x)) :=
+begin
+  dsimp [finsupp.map_domain],
+  rw [finsupp.sum_fintype], swap, { intro, apply finsupp.single_zero },
+  simp only [finsupp.equiv_fun_on_fintype_symm_apply_to_fun],
+end
+
+-- move me
+lemma _root_.finsupp.map_domain_equiv_fun_on_fintype_symm_apply
+  {α β R : Type*} [fintype α] [semiring R] (f : α → β) (g : α → R) (b : β)
+  [decidable_pred (λ (a : α), f a = b)] :
+  finsupp.map_domain f (finsupp.equiv_fun_on_fintype.symm g) b =
+    (finset.filter (λ (a : α), f a = b) finset.univ).sum g :=
+begin
+  rw [finsupp.map_domain_equiv_fun_on_fintype_symm, finset.sum_apply'],
+  classical,
+  simp only [finsupp.single_apply, ← finset.sum_filter],
+  congr'
+end
+
 def Profinite.condensed_free_pfpng_specialize_cone (S B : Profinite.{u}) (b : B) :
   limits.cone ((S.fintype_diagram ⋙ forget Fintype ⋙ AddCommGroup.free') ⋙ Ab.ulift.{u+1}) :=
 { X := S.condensed_free_pfpng.val.obj (op B),
   π :=
   { app := λ T, add_monoid_hom.mk'
       (λ t, ⟨finsupp.equiv_fun_on_fintype.symm (S.free_pfpng_π T (t.down.1 b))⟩)
-      sorry,
-    naturality' := sorry } }
+      begin
+        intros f g,
+        ext x,
+        simp only [ulift.add_down, subtype.val_eq_coe,
+          finsupp.equiv_fun_on_fintype_symm_apply_to_fun, finsupp.coe_add, pi.add_apply],
+        erw strict_comphaus_filtered_pseudo_normed_group_hom.map_add,
+        refl,
+      end,
+    naturality' := λ T₁ T₂ f, begin
+      ext g x,
+      rw [← Profinite.free_pfpng_π_w _ f],
+      simp only [subtype.val_eq_coe, finsupp.equiv_fun_on_fintype_symm_apply_to_fun,
+        functor.const.obj_map, comp_apply, id_apply, add_monoid_hom.mk'_apply, functor.comp_map,
+        forget_map_eq_coe, concrete_category.has_coe_to_fun_Type, AddCommGroup.free'_map,
+        Ab.ulift_map_apply_down, finsupp.map_domain.add_monoid_hom_apply, free_pfpng.map,
+        free_pfpng_functor_map, strict_comphaus_filtered_pseudo_normed_group_hom.coe_mk],
+      classical,
+      rw finsupp.map_domain_equiv_fun_on_fintype_symm_apply, congr',
+    end } }
 
 def Profinite.condensed_free_pfpng_specialize (S B : Profinite.{u}) (b : B) :
   S.condensed_free_pfpng.val.obj (op B) ⟶ S.limit_free :=
@@ -244,12 +282,11 @@ begin
     λ e, ⟨q e.1 e.2, hq e.1 e.2⟩,
   have hι : function.surjective ι,
   { rintros ⟨e,he⟩, use f e,
-    simp only [finsupp.mem_support_iff, ne.def],
-    -- This is similar to `finsupp.map_domain_apply`, except using `inj_on` instead of `injective`.
-    have : (finsupp.map_domain f t) (f e) = t e, sorry,
-    rw this, clear this, simpa using he,
-    ext, dsimp,
-    apply hinj, apply hq, apply he, apply hh },
+    { simp only [finsupp.mem_support_iff, ne.def],
+      rw finsupp.map_domain_apply' _ _ (set.subset.refl _) hinj he,
+      simpa using he },
+    { ext, dsimp,
+      apply hinj, apply hq, apply he, apply hh } },
   have : (t.map_domain f).support = ∅, by simpa using ht,
   suffices : t.support = ∅, by simpa using this,
   by_contra c, change _ ≠ _ at c,
@@ -280,6 +317,24 @@ begin
   rw ← finsupp.lift_map_domain, refl,
 end
 
+lemma finsupp.card_supp_map_domain_lt {α β γ : Type*} [add_comm_group γ]
+  (f : α → β) (t : α →₀ γ) (u v : α)
+  (huv : u ≠ v) (hu : u ∈ t.support) (hv : v ∈ t.support)
+  (hf : f u = f v) : (t.map_domain f).support.card < t.support.card :=
+begin
+  classical,
+  have key : (finsupp.map_domain f t).support ⊆ _ := finsupp.map_domain_support,
+  have : (finsupp.map_domain f t).support.card ≤ (t.support.image f).card :=
+    finset.card_le_of_subset key,
+  refine lt_of_le_of_lt this _,
+  have key' : (t.support.image f).card ≤ t.support.card := finset.card_image_le,
+  apply lt_of_le_of_ne key',
+  change ¬ _,
+  rw finset.card_image_eq_iff_inj_on,
+  dsimp [set.inj_on],
+  push_neg, use [u, hu, v, hv, hf],
+end
+
 lemma Profinite.mono_free'_to_condensed_free_pfpng_induction_aux (n : ℕ) :
   ∀ (S B : Profinite.{u}) (t : S.to_Condensed.val.obj (op B) →₀ ℤ),
     t.support.card ≤ n →
@@ -290,6 +345,11 @@ lemma Profinite.mono_free'_to_condensed_free_pfpng_induction_aux (n : ℕ) :
     (surj : ∀ (b : ↥B), ∃ (a : α) (x : ↥(X a)), (π a) x = b),
     ∀ (a : α), finsupp.map_domain (S.to_Condensed.val.map (π a).op) t = 0) :=
 begin
+  /-
+  TODO: This proof is very slow. It would be better to pull out a few
+  of the `have` statements into separate lemmas to (hopefully)
+  speed this up.
+  -/
   induction n,
   case nat.zero
   { intros S B t ht, simp at ht, rw ht, intros h1 h2,
@@ -299,16 +359,14 @@ begin
   case nat.succ : n hn
   { intros S B t ht1 ht2 H,
     by_cases ht1' : t.support.card = n+1, swap,
-    -- This works -- just remove the `sorry`.
-    sorry { apply hn, exact nat.le_of_lt_succ (nat.lt_of_le_and_ne ht1 ht1'),
+    { apply hn, exact nat.le_of_lt_succ (nat.lt_of_le_and_ne ht1 ht1'),
       assumption' },
     clear ht1,
     let F := t.support,
     let e : F → (B ⟶ S) := λ f, f.1.1,
     obtain ⟨Q,h1,h2,ee,-⟩ : ∃ (α : Type u) (hα1 : fintype α)
       (hα2 : linear_order α) (ee : α ≃ F), true,
-    -- This works -- just remove the `sorry`.
-    sorry { refine ⟨ulift (fin (fintype.card F)), infer_instance,
+    { refine ⟨ulift (fin (fintype.card F)), infer_instance,
         is_well_order.linear_order well_ordering_rel,
         equiv.ulift.trans (fintype.equiv_fin _).symm, trivial⟩, },
     resetI,
@@ -317,8 +375,7 @@ begin
     let π₀ : Π (i : E₀), X₀ i ⟶ B := λ i, Profinite.equalizer.ι _ _,
 
     have surj₀ : ∀ (b : B), ∃ (e₀ : E₀) (x : X₀ e₀), π₀ _ x = b,
-    -- This works, but it's slow -- just remove the `sorry`.
-    sorry { intro b, specialize H b,
+    { intro b, specialize H b,
       contrapose! H,
       have key : ∀ (i j : Q) (h : i < j), e (ee i) b ≠ e (ee j) b,
       { intros i j h, specialize H ⟨⟨i,j⟩, h⟩, intro c,
@@ -346,16 +403,25 @@ begin
       λ i, t.map_domain (f₀ i),
 
     have card₀ : ∀ (i : E₀), (t₀ i).support.card ≤ n,
-    -- The functions `e (ee i.1.1)` and `e (ee i.1.2)`
-    -- agree on `X₀ i` by definition.
-    -- Since `t.support` has size `n+1`, it should follow that
-    -- `(t₀ i).support` has size `≤ n`.
-    -- We should probably prove a more general lemma for this.
-      sorry,
+    { intros i, suffices : (t₀ i).support.card < n + 1,
+        by exact nat.lt_succ_iff.mp this,
+      rw ← ht1',
+      fapply finsupp.card_supp_map_domain_lt,
+      refine (ee i.1.1).1,
+      refine (ee i.1.2).1,
+      { change ¬ _,
+        erw ← subtype.ext_iff,
+        apply ee.injective.ne,
+        apply ne_of_lt,
+        exact i.2 },
+      refine (ee i.1.1).2,
+      refine (ee i.1.2).2,
+      { dsimp [f₀, π₀, Profinite.to_Condensed], ext1, dsimp,
+        -- missing Profinite.equalizer.condition
+        ext t, exact t.2 } },
 
     have lift₀ : ∀ (i : E₀), free'_lift (S.to_condensed_free_pfpng.val.app (op (X₀ i))) (t₀ i) = 0,
-    -- This works -- just remove the `sorry`.
-    sorry { intros i, rw free'_lift_eq_finsupp_lift, dsimp only [t₀, f₀],
+    { intros i, rw free'_lift_eq_finsupp_lift, dsimp only [t₀, f₀],
       apply_fun (λ q, S.condensed_free_pfpng.val.map (π₀ i).op q) at ht2,
       rw [add_monoid_hom.map_zero, free'_lift_eq_finsupp_lift] at ht2,
       convert ht2,
@@ -367,8 +433,7 @@ begin
     have map₀ : ∀ (i : E₀) (b : ↥(X₀ i)),
         finsupp.map_domain
           (λ (f : S.to_Condensed.val.obj (op (X₀ i))), f.down.to_fun b) (t₀ i) = 0,
-    -- This works -- just remove the `sorry`.
-    sorry { intros i b, dsimp [t₀], rw ← finsupp.map_domain_comp,
+    { intros i b, dsimp [t₀], rw ← finsupp.map_domain_comp,
       exact H (π₀ i b) },
 
     have key := λ i, hn S (X₀ i) (t₀ i) (card₀ i) (lift₀ i) (map₀ i),
@@ -410,8 +475,93 @@ begin
   assumption',
 end
 
+instance Condensed_Ab_to_CondensedSet_faithful :
+  faithful Condensed_Ab_to_CondensedSet :=
+{ map_injective' := begin
+    intros X Y f g h, ext W t : 4,
+    apply_fun (λ e, e.val.app W t) at h, dsimp at h,
+    exact h
+  end }
+
+lemma category_theory.epi_to_colimit_of_exists {J : Type u}
+  [small_category J] {C : Type*} [category.{u} C]
+  {F : J ⥤ C} (T : C)
+  (E : limits.cocone F) (hE : limits.is_colimit E)
+  (f : T ⟶ E.X)
+  (h : ∀ j : J,
+    ∃ (Z : C) (p : Z ⟶ T) (q : Z ⟶ F.obj j) (hq : epi q),
+      q ≫ E.ι.app j = p ≫ f) : epi f :=
+begin
+  constructor, intros W a b hh,
+  apply hE.hom_ext, intros j, specialize h j,
+  obtain ⟨Z,p,q,hq,w⟩ := h, resetI,
+  rw ← cancel_epi q, simp_rw [← category.assoc, w,
+    category.assoc, hh],
+end
+
+lemma epi_Profinite_to_Condensed_map_of_epi {X Y : Profinite.{u}}
+  (f : X ⟶ Y) [hf : epi f] : epi (Profinite_to_Condensed.map f) :=
+begin
+  constructor, intros Z a b h, ext W q : 34, induction W using opposite.rec,
+  have hZ := Z.2,
+  rw is_sheaf_iff_is_sheaf_of_type at hZ,
+  rw Z.val.is_proetale_sheaf_of_types_tfae.out 0 1 at hZ,
+  let q' := q.down,
+  dsimp at q q',
+  dsimp [functor.is_proetale_sheaf_of_types] at hZ,
+  specialize hZ punit W (λ _, Profinite.pullback f q')
+    (λ _, Profinite.pullback.snd _ _) _ _,
+  { intro w,
+    rw Profinite.epi_iff_surjective at hf,
+    obtain ⟨x, hx⟩ := hf (q' w),
+    refine ⟨punit.star, ⟨(x, w), hx⟩, rfl⟩, },
+  { intros i, dsimp, refine Z.val.map _ (b.val.app (op W) q),
+    refine quiver.hom.op _, exact Profinite.pullback.snd _ _ },
+  specialize hZ _,
+  { clear hZ,
+    rintro ⟨⟩ ⟨⟩ S g₁ g₂ H, dsimp only at H,
+    apply_fun (λ φ, Z.val.map φ.op (b.val.app (op W) q)) at H,
+    simp only [op_comp, Z.val.map_comp] at H, exact H, },
+  obtain ⟨t,ht1,ht2⟩ := hZ,
+  have : b.val.app (op W) q = t,
+  { apply ht2,
+    intros i, refl },
+  rw this, apply ht2,
+  intros i, dsimp,
+  change (a.val.app (op W) ≫ Z.val.map _) q =
+    (b.val.app (op W) ≫ Z.val.map _) q,
+  simp only [← nat_trans.naturality],
+  dsimp,
+  apply_fun (λ e, Profinite_to_Condensed.map (Profinite.pullback.fst f q') ≫ e) at h,
+  apply_fun (λ e, e.val.app (op (Profinite.pullback f q'))) at h,
+  dsimp at h,
+  let i : (Profinite.pullback f q').to_Condensed.val.obj (op (Profinite.pullback f q')) :=
+    ulift.up (𝟙 _),
+  apply_fun (λ e, e i) at h,
+  dsimp [ulift_functor] at h,
+  convert h,
+  all_goals
+  { ext1,
+    dsimp [Profinite.to_Condensed],
+    simp only [category.id_comp, Profinite.pullback.condition] },
+end
+
 instance Profinite.epi_free'_to_condensed_free_pfpng
-  (S : Profinite.{u}) : epi S.free'_to_condensed_free_pfpng := sorry
+  (S : Profinite.{u}) : epi S.free'_to_condensed_free_pfpng :=
+begin
+  apply faithful_reflects_epi (Condensed_Ab_to_CondensedSet),
+  let E := CompHausFiltPseuNormGrp.level_Condensed_diagram_cocone
+    (CompHausFiltPseuNormGrp₁.enlarging_functor.obj
+    ((ProFiltPseuNormGrp₁.to_CHFPNG₁.obj S.free_pfpng))),
+  have hh : is_iso (limits.colimit.desc _ E),
+  { change is_iso (CompHausFiltPseuNormGrp.colimit_to_Condensed_obj _),
+    apply_instance },
+  let hE : limits.is_colimit E := @limits.is_colimit.of_point_iso
+    _ _ _ _ _ _ _ _ hh, -- <-- move this
+  apply category_theory.epi_to_colimit_of_exists  _ E hE,
+  intros j,
+  sorry
+end
 
 instance Profinite.is_iso_free'_to_condensed_free_pfpng
   (S : Profinite.{u}) : is_iso S.free'_to_condensed_free_pfpng :=
