@@ -829,7 +829,9 @@ end
 --   sorry,
 -- end
 
+--clear p
 
+-- **[FAE]** This definition depends on `p` but it should not (although it causes no harm)
 def geom_B (ε : ℝ)  : ℤ := ⌊ real.logb (2 * r) (2 * r - 1) * ε ⌋ + 1
 
 lemma tail_B (ε : ℝ) : (tsum (λ x : {n : ℤ // n ≥ (geom_B ε)}, (2 * r) ^ ( - x.1 )) : ℝ) ≤ ε :=
@@ -878,9 +880,27 @@ begin
 end
 
 
-lemma dist_lt_of_mem_U (ε : ℝ) (F G : filtration (ℒ S) c) :
-  G ∈ (U S c F ε) → ∥ (θ_c c S G).1 - (θ_c c S) F ∥ < ε := sorry
-
+lemma dist_lt_of_mem_U (ε : ℝ) (F G : filtration (ℒ ϖ) c) :
+  G ∈ (U ϖ c F ε) → ∥ ((θ_c c ϖ G) : (ℳ ϖ)) - (θ_c c ϖ) F ∥ < ε :=
+begin
+  intro hG,
+  rw real_measures.norm_def,
+  simp only [fintype.univ_punit, real_measures.sub_apply, finset.sum_singleton],
+  rw real.norm_eq_abs,
+  -- dsi
+  -- dsimp [θ_c],
+  -- simp only [θ_c, one_mul, set_coe_cast, subtype.coe_mk],
+  simp only [θ_c, one_mul, eq_mpr_eq_cast, set_coe_cast, subtype.coe_mk],
+  dsimp only [θ, ϑ],
+  rw [← tsum_sub],
+  simp_rw [← sub_mul],
+  sorry,
+  sorry,
+  sorry,
+  -- {
+  -- have bound : ∀ b : ℤ, b ≤ (geom_B p ε) → (G punit.star b) - (F punit.star b) = 0,
+  -- }
+end
 
 -- This is the main continuity property needed in `ses2.lean`
 lemma continuous_θ_c (c : ℝ≥0) : continuous (θ_c c S) :=
@@ -915,7 +935,7 @@ begin
                         (real.rpow_nonneg_of_nonneg (real_measures.norm_nonneg _) _)
                         (sub_nonneg.mpr (le_of_lt hF)) hp, ← real.rpow_mul
                         (real_measures.norm_nonneg _), inv_mul_cancel (ne_of_gt hp),
-                        real.rpow_one], refine dist_lt_of_mem_U p ϖ c _ F G hG}
+                        real.rpow_one], refine dist_lt_of_mem_U p c _ F G hG}
         ... = ε : by {rw sub_add_cancel} },
   refine and.intro (is_open_U p ϖ c F _) (mem_U p ϖ c F _),
 end
