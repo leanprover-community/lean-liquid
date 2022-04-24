@@ -13,8 +13,8 @@ This file introduces the maps
 * `θ`, which is the specialization of evaluation-at-ξ map `ϑ` from `laurent_measures.theta`
   at `ξ=1/2`.
 * `ϕ` which corresponds to multiplying a Laurent series in `ℒ S = (laurent_measures r S)`
-  for `r = 2^(1/p)` by `2T-1`.
-* `ψ` corresponds to multiplying a Laurent series by `(2T-1)^-1`. It is defined only on series
+  for `r = 2^(1/p)` by `T⁻¹-2`.
+* `ψ` corresponds to dividing a Laurent series by `(T⁻¹-2)`. It is defined only on series
   vanishing at `1/2`, so that it again takes values in `ℒ S`
 * The maps `Θ`, `Φ` and `Ψ` are the "measurifications" of `θ`, `ϕ` and `ψ`,
   so they are morphisms in the right category (**[FAE]** Not here any more!)
@@ -238,11 +238,24 @@ begin
 end
 .
 
-lemma psi_def_aux (p : ℝ≥0) {S : Fintype} [fact (0 < p)] [fact (p < 1)] (F : ℒ S) (s : ↥S)
+lemma psi_def_aux {S : Fintype} [fact (0 < p)] [fact (p < 1)] (F : ℒ S) (s : ↥S)
   (F_sum : summable (λ (n : ℤ), ∥F s n∥ * ↑r ^ n)) :
   summable (λ (n : ℤ), ∥ite (F.d ≤ n) (-(2 : ℝ) ^ (n - 1) *
     ∑' (k : ℕ), ↑(F s (n + ↑k)) * (1 / 2) ^ (n + ↑k)) 0∥ * ↑r ^ n) :=
 begin
+  suffices : summable (λ (n : ℤ), (ite (F.d ≤ n) (-(2 : ℝ) ^ (n - 1) *
+    ∑' (k : ℕ), ↑(F s (n + ↑k)) * (1 / 2) ^ (n + ↑k)) 0) * ↑r ^ n),
+  { rw ← summable_norm_iff at this,
+    simp_rw norm_mul at this,
+    convert this,
+    ext,
+    congr',
+    rw real.norm_of_nonneg,
+    apply zpow_nonneg,
+    apply r_pos.le },
+  have half := F.summable_half s,
+  rw summable_sup
+  -- summable_mul_of_summable_norm
   sorry,
 end
 
@@ -312,7 +325,7 @@ def ψ (F : ℒ S) (hF : θ F = 0) : ℒ S :=
     }, clear h1,
     -- next line goes from ℝ≥0 to ℝ
     simp only [←nnreal.summable_coe, nonneg.coe_mul, _root_.coe_nnnorm, nnreal.coe_zpow, summable_congr],
-    exact psi_def_aux p F s this,
+    exact psi_def_aux F s this,
   end }
 
 theorem θ_ϕ_exact (F : ℒ S) (hF : θ F = 0) : ∃ G, ϕ G = F :=
