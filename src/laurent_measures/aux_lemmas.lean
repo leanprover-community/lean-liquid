@@ -309,7 +309,8 @@ begin
   have smaller_shift : ∀ (b : ℕ), summable (λ j : ℕ, ∥ (f (b + 1 + j) : ℝ)  * (1 / 2) ^ j ∥),
   { intro b,
     refine (summable_mul_right_iff (by norm_num : (1 / 2 : ℝ) ^ (b + 1) ≠ 0)).mpr _,
-    obtain hff := (equiv.add_group_add (b+1 : ℤ)).summable_iff.mpr (summable_smaller_radius_norm d r_half hf hd),
+    obtain hff := (equiv.add_group_add (b+1 : ℤ)).summable_iff.mpr (summable_smaller_radius_norm d
+      r_half hf hd),
     convert (summable_iff_on_nat_less (d - (b + 1)) _).mp hff,
     { ext,
       simp [mul_assoc, zpow_add₀ (two_ne_zero : (2 : ℝ) ≠ 0) (b+1), mul_inv₀, zpow_coe_nat,
