@@ -502,6 +502,19 @@ begin
   exact ⟨preimage_mono hε, H (f x) ε, mem_ball_self h₀⟩,
 end
 
+lemma reduction_balls' {c : ℝ≥0} (f : X → (closed_ball (0 : ℝ) c)) (H : ∀ y : (closed_ball 0 c),
+  ∀ ε : ℝ≥0, is_open (f⁻¹' (ball y ε))) : continuous f :=
+begin
+  rw continuous_def,
+  intros _ hU,
+  rw is_open_iff_forall_mem_open,
+  intros x hx,
+  obtain ⟨ε₀, h_pos, hε₀⟩ := (is_open_iff.mp hU) (f x) (mem_preimage.mp hx),
+  let ε : ℝ≥0 := ⟨ε₀, le_of_lt h_pos⟩,
+  use f⁻¹' (ball (f x) ε),
+  exact ⟨preimage_mono hε₀, H (f x) ε, mem_ball_self h_pos⟩,
+end
+
 -- lemma reduction_balls' {c : ℝ≥0} (f : X → filtration (ℳ S) c) (H : ∀ G : filtration (ℳ S) c,
 --   ∀ ε : ℝ, is_open (f⁻¹' (ball G ε))) : continuous f :=
 -- begin
@@ -801,17 +814,17 @@ end
 --   all_goals {simp only [is_open_compl_iff], apply H},
 -- end
 
-lemma continuous_if_preimage_closed' {c : ℝ≥0} (f : X → (closed_ball (0 : ℝ) c))
-  (H : ∀ y : (closed_ball (0 : ℝ) c), ∀ ε : ℝ, is_closed (f⁻¹' (closed_ball y ε))) : continuous f :=
-begin
-  apply reduction_balls,
-  intros y ε,
-  obtain ⟨x₁,x₂,δ₁,δ₂,h⟩ := complement_of_balls' y ε,
-  rw h,
-  simp only [compl_union, preimage_inter, preimage_compl],
-  apply is_open.inter,
-  all_goals {simp only [is_open_compl_iff], apply H},
-end
+-- lemma continuous_if_preimage_closed' {c : ℝ≥0} (f : X → (closed_ball (0 : ℝ) c))
+--   (H : ∀ y : (closed_ball (0 : ℝ) c), ∀ ε : ℝ, is_closed (f⁻¹' (closed_ball y ε))) : continuous f :=
+-- begin
+--   apply reduction_balls,
+--   intros y ε,
+--   obtain ⟨x₁,x₂,δ₁,δ₂,h⟩ := complement_of_balls' y ε,
+--   rw h,
+--   simp only [compl_union, preimage_inter, preimage_compl],
+--   apply is_open.inter,
+--   all_goals {simp only [is_open_compl_iff], apply H},
+-- end
 
 -- instance (c : ℝ≥0) : has_zero (Icc (-c : ℝ) c):=
 -- { zero := ⟨(0 : ℝ), by {simp only [mem_Icc, right.neg_nonpos_iff, nnreal.zero_le_coe, and_self]}⟩}
@@ -880,7 +893,7 @@ begin
 end
 
 
-lemma dist_lt_of_mem_U (ε : ℝ) (F G : filtration (ℒ ϖ) c) :
+lemma dist_lt_of_mem_U (ε : ℝ≥0) (F G : filtration (ℒ ϖ) c) :
   G ∈ (U ϖ c F ε) → ∥ ((θ_c c ϖ G) : (ℳ ϖ)) - (θ_c c ϖ) F ∥ < ε :=
 begin
   intro hG,
@@ -921,7 +934,9 @@ begin
   have h_sum := tsum_eq_tsum_of_ne_zero_bij i hi hf (λ _, refl _),
   -- dsimp only [f, g] at this,
   have hp_inv : 0 < (p⁻¹ : ℝ), sorry,
-  rw [h_sum, ← real.norm_eq_abs, ← real.rpow_lt_rpow_iff _ _ hp_inv, ← real.rpow_mul, mul_inv_cancel,
+  rw [h_sum, ← real.norm_eq_abs],
+  rw [← real.rpow_lt_rpow_iff _ _ hp_inv],
+  rw [← real.rpow_mul, mul_inv_cancel,
     real.rpow_one],
 
   rotate,
@@ -953,7 +968,7 @@ begin
   rw ← commute_seval_ℒ_ℳ,
   refine continuous.comp _ (continuous_seval_ℒ_c p S c s),
   apply (homeo_filtration_ϖ_ball c).comp_continuous_iff.mp,
-  apply reduction_balls,
+  apply reduction_balls',
   intros y ε,
   rw is_open_iff_forall_mem_open,
   intros F hF,
@@ -973,12 +988,15 @@ begin
                   (homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) | +
                 | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) : ℝ) - y | : abs_sub_le _ _ y
         ... < ε - |((homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) : ℝ) - y | +
-              | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) : ℝ) - y | : by {apply add_lt_add_right,
-                        rw [← real_measures.dist_eq, ← real.rpow_lt_rpow_iff
-                        (real.rpow_nonneg_of_nonneg (real_measures.norm_nonneg _) _)
-                        (sub_nonneg.mpr (le_of_lt hF)) hp, ← real.rpow_mul
-                        (real_measures.norm_nonneg _), inv_mul_cancel (ne_of_gt hp),
-                        real.rpow_one], refine dist_lt_of_mem_U p c _ F G hG}
+              | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) : ℝ) - y | : by sorry
+
+
+                        -- {apply add_lt_add_right,
+                        -- rw [← real_measures.dist_eq, ← real.rpow_lt_rpow_iff
+                        -- (real.rpow_nonneg_of_nonneg (real_measures.norm_nonneg _) _)
+                        -- (sub_nonneg.mpr (le_of_lt hF)) hp, ← real.rpow_mul
+                        -- (real_measures.norm_nonneg _), inv_mul_cancel (ne_of_gt hp),
+                        -- real.rpow_one], refine dist_lt_of_mem_U p c _ F G hG}
         ... = ε : by {rw sub_add_cancel} },
   refine and.intro (is_open_U p ϖ c F _) (mem_U p ϖ c F _),
 end
