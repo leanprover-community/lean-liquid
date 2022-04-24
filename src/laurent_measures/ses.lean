@@ -894,12 +894,21 @@ begin
 end
 
 lemma summable_subset (F : filtration (ℒ ϖ) c) (B : ℤ) :
-  summable (λ b : {x : ℤ // B < x}, ∥ ((F punit.star b) : ℝ) * (1 / 2) ^ b.1 ∥) := sorry
+  summable (λ b : {x : ℤ // B < x}, ∥ ((F punit.star b) : ℝ) * (1 / 2) ^ b.1 ∥) :=
+begin
+  sorry,
+
+  -- { simp_rw real.norm_eq_abs,
+  -- apply abs_eq
+  -- have h : function.injective (coe : {x : ℤ // B < x} → ℤ), sorry,
+  -- rw nnorm_eq_no
+  -- refine nnreal.summable_comp_injective _ h,
+end
 
 lemma coe_filtration_sub {c₁ c₂ : ℝ≥0} (F : filtration (ℒ S) c₁)
   (G : filtration (ℒ S) c₂) (s : S) (i : ℤ) :
   (⟨↑F - ↑G, sub_mem_filtration F.2 G.2⟩ : filtration (ℒ S) (c₁ + c₂)) s i
-  = (F : (ℒ S)) s i - (G : (ℒ S)) s i := sorry
+  = (F : (ℒ S)) s i - (G : (ℒ S)) s i := rfl
 
 lemma dist_lt_of_mem_U (ε : ℝ≥0) (F G : filtration (ℒ ϖ) c) :
   G ∈ (U ϖ c F ε) → ∥ ((θ_c c ϖ G) : (ℳ ϖ)) - (θ_c c ϖ) F ∥ < ε :=
