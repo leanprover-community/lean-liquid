@@ -890,14 +890,11 @@ begin
   simp only [θ_c, one_mul, eq_mpr_eq_cast, set_coe_cast, subtype.coe_mk],
   dsimp only [θ, ϑ],
   rw [← tsum_sub],
-
-  swap,
-  {
-  have := aux_thm69.summable_smaller_radius G.1.d (G.1.summable punit.star) _ _
-    (lt_d_eq_zero G.1 punit.star),
-  -- have due := lt_d_eq_zero G.1 punit.star,
-  },
-
+  rotate,
+  { exact aux_thm69.summable_smaller_radius G.1.d (G.1.summable punit.star)
+      (λ n, lt_d_eq_zero G.1 punit.star n) r_half },
+  { exact aux_thm69.summable_smaller_radius F.1.d (F.1.summable punit.star)
+      (λ n, lt_d_eq_zero F.1 punit.star n) r_half },
   simp_rw [← sub_mul],
   have h_B : ∀ b : ℤ, b ≤ (geom_B p ε) → ((G punit.star b) : ℝ) - (F punit.star b) = 0,
   { intros b hb,
@@ -906,9 +903,12 @@ begin
   let g : ({ b : ℤ | geom_B p ε < b}) → ℝ := f ∘ coe,
   let Sg := function.support g,
   let i := (coe : { b : ℤ | geom_B p ε < b} → ℤ) ∘ (coe : Sg → { b : ℤ | geom_B p ε < b}),
-  have hi : function.injective i, sorry,
+  have hi : ∀ ⦃x y : ↥(function.support g)⦄, i x = i y → ↑x = ↑y,
+  {intros _ _ h,
+    simp only [subtype.coe_inj] at h,
+    rwa [subtype.coe_inj] },
   have hf : function.support f ⊆ set.range i,
-   { intros a ha,
+  { intros a ha,
     simp only [f, function.mem_support, ne.def] at ha,
     have ha' : geom_B p ε < a,
     { by_contra',
@@ -916,14 +916,21 @@ begin
       simp only [one_div, inv_zpow', zpow_neg₀, mul_eq_zero, inv_eq_zero, not_or_distrib] at ha,
       replace ha := ha.1,
       simpa only },
-    simp only [set.mem_set_of_eq, function.mem_support, ne.def, set.mem_range, set_coe.exists],
-    use [a, ha', ha, refl _] },
-  have := tsum_eq_tsum_of_ne_zero_bij i _ hf _,
-  dsimp only [f, g] at this,
-  have hp : 0 < (p⁻¹ : ℝ), sorry,
-  rw [this, ← real.norm_eq_abs, ← real.rpow_lt_rpow_iff _ _ hp, ← real.rpow_mul, mul_inv_cancel,
+  simp only [set.mem_set_of_eq, function.mem_support, ne.def, set.mem_range, set_coe.exists],
+  use [a, ha', ha, refl _] },
+  have h_sum := tsum_eq_tsum_of_ne_zero_bij i hi hf (λ _, refl _),
+  -- dsimp only [f, g] at this,
+  have hp_inv : 0 < (p⁻¹ : ℝ), sorry,
+  rw [h_sum, ← real.norm_eq_abs, ← real.rpow_lt_rpow_iff _ _ hp_inv, ← real.rpow_mul, mul_inv_cancel,
     real.rpow_one],
-  refine (lt_of_le_of_lt (norm_tsum_le_tsum_norm _) _),
+
+  rotate,
+  { rw ← nnreal.coe_zero,
+    exact ne_of_gt (nnreal.coe_lt_coe.mpr (fact.out _)) },
+  { apply norm_nonneg },
+  { apply real.rpow_nonneg_of_nonneg (norm_nonneg _) },
+  sorry,
+  -- refine (lt_of_le_of_lt (norm_tsum_le_tsum_norm _) _),
   -- apply norm_tsum_le_tsum_norm,
   -- refl,
   -- simp,
@@ -932,7 +939,7 @@ begin
   -- simp,
 
   sorry,
-  sorry,
+  -- sorry,
   -- {
   -- have bound : ∀ b : ℤ, b ≤ (geom_B p ε) → (G punit.star b) - (F punit.star b) = 0,
   -- }
