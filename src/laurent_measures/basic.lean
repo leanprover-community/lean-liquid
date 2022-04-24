@@ -43,6 +43,9 @@ instance : has_coe_to_fun (ℒ S) (λ F, S → ℤ → ℤ) :=
 lemma ext (F G : ℒ S) : (F : S → ℤ → ℤ) = G → F = G :=
 by { intros h, cases F, cases G, simpa }
 
+lemma ext_iff (F G : ℒ S) : F = G ↔ ∀ s n, F s n = G s n :=
+⟨λ h, by intros; rw h, λ h, laurent_measures.ext F G $ by ext; apply h⟩
+
 protected lemma nnreal_summable (F : ℒ S) (s : S) : summable (λ n, ∥F s n∥₊ * r ^ n) :=
 F.2 _
 
@@ -693,6 +696,7 @@ instance [fact (0 < r)] : profinitely_filtered_pseudo_normed_group (ℒ S) :=
   ..(infer_instance : (pseudo_normed_group (ℒ S))) }
 .
 
+/-- The additive group homomorphism on Laurent measures induced by division by `T^k` on `ℤ((T))ᵣ` -/
 @[simps] def shift_add_monoid_hom [hr : fact (0 < r)] (k : ℤ) : ℒ S →+ ℒ S :=
 add_monoid_hom.mk' (λ F,
 { to_fun := λ s n, F s (n+k),
