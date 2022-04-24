@@ -3,6 +3,7 @@ import condensed.projective_resolution
 import condensed.condensify
 import condensed.adjunctions
 import condensed.sheafification_mono
+import condensed.coproducts
 import free_pfpng.lemmas
 
 import for_mathlib.int
@@ -546,6 +547,38 @@ begin
     simp only [category.id_comp, Profinite.pullback.condition] },
 end
 
+inductive pmz : set ℤ
+| neg_one : pmz (-1)
+| zero : pmz 0
+| one : pmz 1
+
+lemma pmz_finite : set.finite pmz := sorry
+
+instance fintype_pmz : fintype pmz := pmz_finite.fintype
+
+abbreviation Profinite.pow (S : Profinite.{u}) (n : ℕ) : Profinite.{u} :=
+Profinite.product (λ i : fin n, S)
+
+/-- `S.profinite n` is `(S × {-1,0,1})^n`. -/
+def Profinite.pmz (S : Profinite.{u}) (n : ℕ) : Profinite.{u} :=
+Profinite.sigma $ λ (x : ulift.{u} (fin n → pmz)), S.pow n
+
+/-- the canonical map of condensed sets `(S × {-1,0,1})^n ⟶ ℤ[S]` -/
+def Profinite.pmz_to_free' (S : Profinite.{u}) (n : ℕ) :
+  (S.pmz n).to_Condensed ⟶ Condensed_Ab_to_CondensedSet.obj S.free' :=
+(Profinite.to_Condensed_equiv (S.pmz n) (Condensed_Ab_to_CondensedSet.obj S.free')).symm $
+  (CondensedSet.val_obj_sigma_equiv (λ (f : ulift.{u} (fin n → pmz)), S.pow n)
+    (Condensed_Ab_to_CondensedSet.obj S.free')).symm $
+λ (f : ulift.{u} (fin n → pmz)),
+let e := proetale_topology.to_sheafify (S.to_Condensed.val ⋙ AddCommGroup.free') in
+e.app (op $ S.pow n) $ ∑ i : fin n, finsupp.single (ulift.up $ Profinite.product.π _ i) (f.down i)
+
+def Profinite.pmz_to_free_pfpng (S : Profinite.{u}) (j : nnreal) :
+  S.pmz ⌊j⌋₊ ⟶ (ProFiltPseuNormGrp₁.level.obj j).obj S.free_pfpng := sorry
+
+instance Profinite.pmz_to_free_pfpng_epi (S : Profinite.{u}) (j : nnreal) :
+  epi (S.pmz_to_free_pfpng j) := sorry
+
 instance Profinite.epi_free'_to_condensed_free_pfpng
   (S : Profinite.{u}) : epi S.free'_to_condensed_free_pfpng :=
 begin
@@ -560,7 +593,12 @@ begin
     _ _ _ _ _ _ _ _ hh, -- <-- move this
   apply category_theory.epi_to_colimit_of_exists  _ E hE,
   intros j,
-  sorry
+  let j' : nnreal := ulift.down j,
+  use [(S.pmz ⌊j'⌋₊).to_Condensed, S.pmz_to_free' ⌊j'⌋₊,
+    Profinite_to_Condensed.map (S.pmz_to_free_pfpng j')],
+  split,
+  { apply epi_Profinite_to_Condensed_map_of_epi },
+  { sorry }
 end
 
 instance Profinite.is_iso_free'_to_condensed_free_pfpng
