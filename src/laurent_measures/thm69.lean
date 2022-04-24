@@ -254,7 +254,7 @@ begin
     apply zpow_nonneg,
     apply r_pos.le },
   have half := F.summable_half s,
-  rw summable_sup
+  -- rw summable_sup
   -- summable_mul_of_summable_norm
   sorry,
 end
