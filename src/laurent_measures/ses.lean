@@ -846,10 +846,10 @@ end
 --clear p
 
 -- **[FAE]** This definition depends on `p` but it should not (although it causes no harm)
-def geom_B (ε : ℝ)  : ℤ := ⌊ real.logb (2 * r) (2 * r - 1) * ε ⌋ + 1
+def geom_B (ε : ℝ) : ℤ := ⌊ real.logb (2 * r) (2 * r - 1) * ε ⌋ + 1
 
-lemma tail_B (ε : ℝ) : (tsum (λ x : {n : ℤ // n ≥ (geom_B ε)}, (2 * r) ^ ( - x.1 )) : ℝ) ≤ ε :=
-  sorry
+lemma tail_B (F : filtration (ℒ ϖ) c) (ε : ℝ) : tsum (λ b : {n : ℤ // (geom_B ε) < n },
+  ∥ ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ∥ ) < ε ^ (p⁻¹ : ℝ) := sorry
 
 def U (F : filtration (ℒ S) c) (ε : ℝ) : set (filtration (ℒ S) c) := λ G,
   ∀ s n, n ≤ (geom_B ε) → F s n = G s n
@@ -893,6 +893,22 @@ begin
   exact H,
 end
 
+lemma summable_subset (F : filtration (ℒ ϖ) c) (B : ℤ) :
+  summable (λ b : {x : ℤ // B < x}, ∥ ((F punit.star b) : ℝ) * (1 / 2) ^ b.1 ∥) :=
+begin
+  sorry,
+
+  -- { simp_rw real.norm_eq_abs,
+  -- apply abs_eq
+  -- have h : function.injective (coe : {x : ℤ // B < x} → ℤ), sorry,
+  -- rw nnorm_eq_no
+  -- refine nnreal.summable_comp_injective _ h,
+end
+
+lemma coe_filtration_sub {c₁ c₂ : ℝ≥0} (F : filtration (ℒ S) c₁)
+  (G : filtration (ℒ S) c₂) (s : S) (i : ℤ) :
+  (⟨↑F - ↑G, sub_mem_filtration F.2 G.2⟩ : filtration (ℒ S) (c₁ + c₂)) s i
+  = (F : (ℒ S)) s i - (G : (ℒ S)) s i := rfl
 
 lemma dist_lt_of_mem_U (ε : ℝ≥0) (F G : filtration (ℒ ϖ) c) :
   G ∈ (U ϖ c F ε) → ∥ ((θ_c c ϖ G) : (ℳ ϖ)) - (θ_c c ϖ) F ∥ < ε :=
@@ -913,10 +929,11 @@ begin
   have h_B : ∀ b : ℤ, b ≤ (geom_B p ε) → ((G punit.star b) : ℝ) - (F punit.star b) = 0,
   { intros b hb,
     simp only [hG punit.star b hb, sub_self] },
-  let f := λ b : ℤ, ((((G : (ℒ ϖ)) punit.star b) : ℝ)- ((F : (ℒ ϖ)) punit.star b)) * ((1 / 2) : ℝ) ^ b,
+  let f := λ b : ℤ, ((((G : (ℒ ϖ)) punit.star b) - ((F : (ℒ ϖ)) punit.star b)) : ℝ)
+    * (1 / 2) ^ b,
   let g : ({ b : ℤ | geom_B p ε < b}) → ℝ := f ∘ coe,
-  let Sg := function.support g,
-  let i := (coe : { b : ℤ | geom_B p ε < b} → ℤ) ∘ (coe : Sg → { b : ℤ | geom_B p ε < b}),
+  let i := (coe : { b : ℤ | geom_B p ε < b} → ℤ) ∘
+    (coe : function.support g → { b : ℤ | geom_B p ε < b}),
   have hi : ∀ ⦃x y : ↥(function.support g)⦄, i x = i y → ↑x = ↑y,
   {intros _ _ h,
     simp only [subtype.coe_inj] at h,
@@ -933,32 +950,28 @@ begin
   simp only [set.mem_set_of_eq, function.mem_support, ne.def, set.mem_range, set_coe.exists],
   use [a, ha', ha, refl _] },
   have h_sum := tsum_eq_tsum_of_ne_zero_bij i hi hf (λ _, refl _),
-  -- dsimp only [f, g] at this,
-  have hp_inv : 0 < (p⁻¹ : ℝ), sorry,
-  rw [h_sum, ← real.norm_eq_abs],
-  rw [← real.rpow_lt_rpow_iff _ _ hp_inv],
-  rw [← real.rpow_mul, mul_inv_cancel,
-    real.rpow_one],
-
+  rw [h_sum, ← real.norm_eq_abs, ← real.rpow_lt_rpow_iff _ _ _, ← real.rpow_mul,
+    mul_inv_cancel, real.rpow_one],
   rotate,
   { rw ← nnreal.coe_zero,
     exact ne_of_gt (nnreal.coe_lt_coe.mpr (fact.out _)) },
   { apply norm_nonneg },
   { apply real.rpow_nonneg_of_nonneg (norm_nonneg _) },
-  sorry,
-  -- refine (lt_of_le_of_lt (norm_tsum_le_tsum_norm _) _),
-  -- apply norm_tsum_le_tsum_norm,
-  -- refl,
-  -- simp,
-  -- simp only [f, function.mem_support, ne.def],
-  -- simpa,
-  -- simp,
-
-  sorry,
-  -- sorry,
-  -- {
-  -- have bound : ∀ b : ℤ, b ≤ (geom_B p ε) → (G punit.star b) - (F punit.star b) = 0,
-  -- }
+  { rw ← nnreal.coe_zero,
+    exact ε.2 },
+  { rw [inv_pos, ← nnreal.coe_zero],
+    exact (nnreal.coe_lt_coe.mpr (fact.out _)) },
+  let FG_sub : filtration (ℒ ϖ) (c + c) := ⟨↑G - ↑F, sub_mem_filtration G.2 F.2⟩,
+  refine (lt_of_le_of_lt (norm_tsum_le_tsum_norm _) _),
+  dsimp [g, f],
+  convert summable_subset p (c + c) FG_sub (geom_B p ε),
+  { funext,
+    dsimp [FG_sub],
+    rw [coe_filtration_sub p ϖ G F punit.star (i : ℤ), int.cast_sub] },
+  convert tail_B p (c + c) FG_sub ε,
+  { funext,
+    dsimp [g, f],
+    rw int.cast_sub },
 end
 
 -- This is the main continuity property needed in `ses2.lean`
