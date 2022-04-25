@@ -694,11 +694,42 @@ Profinite.sigma.desc _ $ λ f,
       Profinite.sigma.ι _ f,
     naturality' := sorry }⟩
 
+def Profinite.pow_functor (n : ℕ) : Profinite.{u} ⥤ Profinite.{u} :=
+{ obj := λ S, S.pow n,
+  map := λ S T f, Profinite.map_pow f n,
+  map_id' := sorry,
+  map_comp' := sorry }
+
+def Profinite.pow_cone {J : Type u} [small_category J] {F : J ⥤ Profinite.{u}}
+  (E : limits.cone F) (n : ℕ) : limits.cone (F ⋙ Profinite.pow_functor n) :=
+(Profinite.pow_functor n).map_cone E
+
+def Profinite.pow_cone_is_limit
+  {J : Type u} [small_category J] {F : J ⥤ Profinite.{u}}
+  (E : limits.cone F) (hE : limits.is_limit E) (n : ℕ) :
+  limits.is_limit (Profinite.pow_cone E n) :=
+{ lift := λ Q, Profinite.product.lift _ $ λ a,
+    hE.lift ⟨Q.X,
+    { app := λ j, Q.π.app j ≫ Profinite.product.π _ a,
+      naturality' := sorry }⟩,
+  fac' := sorry,
+  uniq' := sorry }
 
 lemma Profinite.is_iso_pmz_to_limit (S : Profinite.{u}) (n : ℕ) :
   is_iso (S.pmz_to_limit n) :=
 begin
-  sorry -- use Profinite.is_iso_lift_sigma_cone, etc.
+  let E := Profinite.sigma_cone (ulift.{u} (fin n → pmz))
+    (Profinite.pow_cone S.as_limit_cone n),
+  let hE : limits.is_limit E := Profinite.sigma_cone_is_limit _ _
+    (Profinite.pow_cone_is_limit _ S.as_limit n),
+  let q : E.X ≅ (Profinite.limit_cone (S.pmz_diagram n)).X :=
+    hE.cone_point_unique_up_to_iso (Profinite.limit_cone_is_limit _),
+  have : is_iso q.hom := infer_instance,
+  convert this,
+  apply Profinite.sigma.hom_ext, intros e,
+  apply (Profinite.limit_cone_is_limit _).hom_ext,
+  intros T,
+  refl,
 end
 
 def Profinite.pmz_cone_is_limit (S : Profinite.{u}) (n : ℕ) :
@@ -785,14 +816,6 @@ end
 instance Profinite.pmz_to_free_pfpng_epi (S : Profinite.{u}) (j : nnreal) :
   epi (S.pmz_to_free_pfpng j) :=
 begin
-  /-
-    First, use the fact that `epi ↔ surjective` in `Profinite`.
-    This map is defined using `is_limit.map`, where the limit is over a cofiltered category.
-    We can thus reduce to the case where `S` is finite using Tychonoff
-    (and the relevant lemma should already exist in this repo).
-    We would have to show that `S.pmz_cone` is a limit cone for this,
-    but that shouldn't be too hard.
-  -/
   rw Profinite.epi_iff_surjective,
   dsimp only [Profinite.pmz_to_free_pfpng],
   have := Profinite.is_limit.surjective_of_surjective _ _ (S.pmz_to_level_nat_trans j)
@@ -801,8 +824,11 @@ begin
     (S.pmz_cone_is_limit _)
     (limits.is_limit_of_preserves _ (limits.limit.is_limit _)),
   apply this,
-  intros j,
-
+  intros T,
+  /-
+  We have now reduced to the finite case, where `pmz_to_free_pfpng` has an
+  explicit description.
+  -/
 
   sorry
 end
