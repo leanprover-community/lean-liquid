@@ -845,11 +845,17 @@ end
 
 --clear p
 
--- **[FAE]** This definition depends on `p` but it should not (although it causes no harm)
+-- **[FAE]** This definition depends on `p` but it should not (although it causes no harm, and in
+  --        all applications a `p` is needed)
 def geom_B (ε : ℝ) : ℤ := ⌊ real.logb (2 * r) (2 * r - 1) * ε ⌋ + 1
 
 lemma tail_B (F : filtration (ℒ ϖ) c) (ε : ℝ) : tsum (λ b : {n : ℤ // (geom_B ε) < n },
-  ∥ ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ∥ ) < ε ^ (p⁻¹ : ℝ) := sorry
+  ∥ ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ∥ ) < ε ^ (p⁻¹ : ℝ) :=
+begin
+  sorry,
+
+  -- **[FAE]** use tendsto_tsum_compl_at_top_zero
+end
 
 def U (F : filtration (ℒ S) c) (ε : ℝ) : set (filtration (ℒ S) c) := λ G,
   ∀ s n, n ≤ (geom_B ε) → F s n = G s n
@@ -900,7 +906,7 @@ begin
     (λ b, (∥ ((F punit.star b) : ℝ) * (1 / 2) ^ b ∥)) ∘ coe := by {simp only [subtype.val_eq_coe]},
   rw this,
   refine summable.comp_injective _ (subtype.coe_injective),
-  simp_rw [norm_mul, norm_zpow, ← inv_eq_one_div, norm_inv, real.norm_two, inv_eq_one_div],--, norm_zpow],
+  simp_rw [norm_mul, norm_zpow, ← inv_eq_one_div, norm_inv, real.norm_two, inv_eq_one_div],
   exact aux_thm69.summable_smaller_radius_norm F.1.d (r_half) (F.1.summable punit.star)
     (λ n, lt_d_eq_zero F.1 punit.star n),
 end
