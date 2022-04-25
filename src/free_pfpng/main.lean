@@ -558,8 +558,8 @@ lemma pmz_finite : set.finite pmz := sorry
 
 instance fintype_pmz : fintype pmz := pmz_finite.fintype
 
-abbreviation Profinite.pow (S : Profinite.{u}) (n : ℕ) : Profinite.{u} :=
-Profinite.product (λ i : fin n, S)
+--abbreviation Profinite.pow (S : Profinite.{u}) (n : ℕ) : Profinite.{u} :=
+--Profinite.product (λ i : fin n, S)
 
 /-- `S.profinite n` is `(S × {-1,0,1})^n`. -/
 def Profinite.pmz (S : Profinite.{u}) (n : ℕ) : Profinite.{u} :=
