@@ -13,6 +13,8 @@ import for_mathlib.int
 
 noncomputable theory
 
+open_locale classical
+
 open category_theory
 open opposite
 
@@ -180,7 +182,7 @@ begin
       simp only [h, add_monoid_hom.mk'_apply, add_left_inj], }, },
 end
 
-def ProFiltPseuNormGroup₁.limit_π_coe_eq
+def ProFiltPseuNormGrp₁.limit_π_coe_eq
   {r : nnreal} {J : Type u} [small_category J]
   (F : J ⥤ ProFiltPseuNormGrp₁.{u})
   (k : (ProFiltPseuNormGrp₁.level.obj r).obj (limits.limit F))
@@ -221,7 +223,7 @@ begin
     ext i,
     dsimp [Profinite.condensed_free_pfpng_specialize_cone,
       finsupp.single, Profinite.free_pfpng_π, Profinite.to_free_pfpng],
-    erw ProFiltPseuNormGroup₁.limit_π_coe_eq,
+    erw ProFiltPseuNormGrp₁.limit_π_coe_eq,
     simp only [← comp_apply, category.assoc],
     dsimp [Profinite.free_pfpng_level_iso,
       limits.is_limit.cone_point_unique_up_to_iso],
@@ -573,8 +575,52 @@ def Profinite.pmz_to_free' (S : Profinite.{u}) (n : ℕ) :
 let e := proetale_topology.to_sheafify (S.to_Condensed.val ⋙ AddCommGroup.free') in
 e.app (op $ S.pow n) $ ∑ i : fin n, finsupp.single (ulift.up $ Profinite.product.π _ i) (f.down i)
 
+def Profinite.pmz_functor (n : ℕ) : Profinite.{u} ⥤ Profinite.{u} :=
+{ obj := λ S, S.pmz n,
+  map := λ S T f,
+    Profinite.sigma.desc _ $ λ e,
+      (Profinite.product.lift (λ i : fin n, T)
+        (λ i, Profinite.product.π _ i ≫ f)) ≫ Profinite.sigma.ι _ e,
+  map_id' := sorry,
+  map_comp' := sorry }
+
+def Profinite.pmz_diagram (S : Profinite.{u}) (n : ℕ) :
+  discrete_quotient S ⥤ Profinite.{u} :=
+S.diagram ⋙ Profinite.pmz_functor n
+
+def Profinite.pmz_cone (S : Profinite.{u}) (n : ℕ) : limits.cone (S.pmz_diagram n) :=
+(Profinite.pmz_functor n).map_cone S.as_limit_cone
+
+instance Profinite.discrete_topology_discrete_quotient_pmz
+  (S : Profinite.{u}) (n : ℕ) (T : discrete_quotient S) :
+  discrete_topology ((Profinite.of T).pmz n) := sorry
+
+instance Profinite.discrete_topology_discrete_quotient_pow
+  (S : Profinite.{u}) (n : ℕ) (T : discrete_quotient S) :
+  discrete_topology ((Profinite.of T).pow n) := sorry
+
+def Profinite.pmz_to_level_component (S : Profinite.{u}) (j : nnreal) (T : discrete_quotient S)
+  (e : fin ⌊j⌋₊ → pmz) :
+  (Profinite.of ↥T).pow ⌊j⌋₊ ⟶
+  (ProFiltPseuNormGrp₁.level.obj j).obj (free_pfpng_functor.obj (Fintype.of ↥T)) :=
+{ to_fun := λ t,
+  { val := ∑ i : fin ⌊j⌋₊, (λ s, if t i = s then e i else 0),
+    property := sorry },
+  continuous_to_fun := continuous_of_discrete_topology }
+
+def Profinite.pmz_to_level (S : Profinite.{u}) (j : nnreal) (T : discrete_quotient S) :
+  (Profinite.of T).pmz ⌊j⌋₊ ⟶
+    (ProFiltPseuNormGrp₁.level.obj j).obj (free_pfpng_functor.obj $ Fintype.of T) :=
+{ to_fun := Profinite.sigma.desc _ $ λ e, S.pmz_to_level_component j T (ulift.down e),
+  continuous_to_fun := continuous_of_discrete_topology }
+
 def Profinite.pmz_to_free_pfpng (S : Profinite.{u}) (j : nnreal) :
-  S.pmz ⌊j⌋₊ ⟶ (ProFiltPseuNormGrp₁.level.obj j).obj S.free_pfpng := sorry
+  S.pmz ⌊j⌋₊ ⟶ (ProFiltPseuNormGrp₁.level.obj j).obj S.free_pfpng :=
+let E := limits.is_limit_of_preserves (ProFiltPseuNormGrp₁.level.obj j)
+  (limits.limit.is_limit (S.fintype_diagram ⋙ free_pfpng_functor)) in
+E.lift $ limits.cone.mk (S.pmz ⌊j⌋₊) $
+{ app := λ T, (S.pmz_cone ⌊j⌋₊).π.app T ≫ S.pmz_to_level j T,
+  naturality' := sorry }
 
 instance Profinite.pmz_to_free_pfpng_epi (S : Profinite.{u}) (j : nnreal) :
   epi (S.pmz_to_free_pfpng j) := sorry
