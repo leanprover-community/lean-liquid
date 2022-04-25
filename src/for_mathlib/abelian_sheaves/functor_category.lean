@@ -4,6 +4,8 @@ import category_theory.preadditive.functor_category
 import category_theory.additive.basic
 import category_theory.abelian.basic
 
+-- This can be removed after #13686 is merged
+
 namespace category_theory
 
 universes w v u
