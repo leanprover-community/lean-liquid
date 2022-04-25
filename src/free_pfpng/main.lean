@@ -629,7 +629,6 @@ lemma Profinite.exists_of_sigma_limit {J : Type u} [small_category J]
       ((Profinite.limit_cone F).π.app j t₀) =
       (Profinite.limit_cone (Profinite.sigma_functor F α)).π.app j t := sorry
 
--- This should be true without the assumption `j₀ : J` as well...
 lemma Profinite.bijective_sigma_to_limit {J : Type u} [small_category J]
   (F : J ⥤ Profinite.{u}) (α : Type u) [fintype α]
   (E : limits.cone F) (hE : limits.is_limit E) [is_cofiltered J] :
