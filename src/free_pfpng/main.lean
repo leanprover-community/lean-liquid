@@ -584,12 +584,23 @@ def Profinite.pmz_functor (n : ℕ) : Profinite.{u} ⥤ Profinite.{u} :=
   map_id' := sorry,
   map_comp' := sorry }
 
+instance Profinite.pmz_functor_preserves_limits (n : ℕ) :
+  limits.preserves_limits (Profinite.pmz_functor.{u} n) :=
+begin
+  constructor, dsimp, introsI J hJ,
+  sorry
+end
+
 def Profinite.pmz_diagram (S : Profinite.{u}) (n : ℕ) :
   discrete_quotient S ⥤ Profinite.{u} :=
 S.diagram ⋙ Profinite.pmz_functor n
 
 def Profinite.pmz_cone (S : Profinite.{u}) (n : ℕ) : limits.cone (S.pmz_diagram n) :=
 (Profinite.pmz_functor n).map_cone S.as_limit_cone
+
+def Profinite.pmz_cone_is_limit (S : Profinite.{u}) (n : ℕ) :
+  limits.is_limit (S.pmz_cone n) :=
+limits.is_limit_of_preserves (Profinite.pmz_functor n) S.as_limit
 
 instance Profinite.discrete_topology_discrete_quotient_pmz
   (S : Profinite.{u}) (n : ℕ) (T : discrete_quotient S) :
