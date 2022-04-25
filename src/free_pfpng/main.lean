@@ -618,8 +618,15 @@ def Profinite.sigma_functor {J : Type u} [small_category J]
 { obj := λ j, Profinite.sigma (λ a : α, F.obj j),
   map := λ i j e, Profinite.sigma.desc _ $ λ a,
     F.map e ≫ Profinite.sigma.ι _ a,
-  map_id' := sorry,
-  map_comp' := sorry }
+  map_id' := begin
+    intros j, apply Profinite.sigma.hom_ext, intros a,
+    simp,
+  end,
+  map_comp' := begin
+    intros i j k e f,
+    apply Profinite.sigma.hom_ext, intros a,
+    simp,
+  end }
 
 def Profinite.sigma_cone {J : Type u} [small_category J]
   {F : J ⥤ Profinite.{u}} (α : Type u) [fintype α]
@@ -629,7 +636,11 @@ def Profinite.sigma_cone {J : Type u} [small_category J]
   π :=
   { app := λ j, Profinite.sigma.desc _ $ λ a,
       E.π.app j ≫ Profinite.sigma.ι _ a,
-    naturality' := sorry } }
+    naturality' := begin
+      intros i j e, dsimp,
+      apply Profinite.sigma.hom_ext, intros a,
+      simp, dsimp [Profinite.sigma_functor], simp,
+    end } }
 
 def Profinite.sigma_to_limit {J : Type u} [small_category J]
   (F : J ⥤ Profinite.{u}) (α : Type u) [fintype α]
@@ -639,7 +650,10 @@ def Profinite.sigma_to_limit {J : Type u} [small_category J]
 Profinite.sigma.desc _ $ λ a, (Profinite.limit_cone_is_limit
   (Profinite.sigma_functor F α)).lift ⟨E.X,
   { app := λ j, E.π.app j ≫ Profinite.sigma.ι _ a,
-  naturality' := sorry }⟩
+  naturality' := begin
+    intros i j e, dsimp [Profinite.sigma_functor],
+    simp,
+  end }⟩
 
 lemma Profinite.exists_of_sigma_limit {J : Type u} [small_category J]
   (F : J ⥤ Profinite.{u}) (α : Type u) [fintype α] [is_cofiltered J]
