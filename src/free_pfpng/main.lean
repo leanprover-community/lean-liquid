@@ -627,7 +627,36 @@ lemma Profinite.exists_of_sigma_limit {J : Type u} [small_category J]
   ∃ (a₀ : α) (t₀ : (Profinite.limit_cone F).X),
     ∀ j : J, Profinite.sigma.ι _ a₀
       ((Profinite.limit_cone F).π.app j t₀) =
-      (Profinite.limit_cone (Profinite.sigma_functor F α)).π.app j t := sorry
+      (Profinite.limit_cone (Profinite.sigma_functor F α)).π.app j t :=
+begin
+  rcases t with ⟨t,ht⟩, dsimp at ht,
+  obtain ⟨j₀⟩ : nonempty J := is_cofiltered.nonempty,
+  let a₀ := (t j₀).1, use a₀,
+  have h1 : ∀ ⦃i j : J⦄ (f : i ⟶ j), (t i).1 = (t j).1,
+  { intros i j e, specialize ht e,
+    apply_fun (λ q, q.1) at ht,
+    cases t i, exact ht },
+  have h2 : ∀ j : J, (t j).1 = a₀,
+  { intros j,
+    let j₁ := is_cofiltered.min j j₀,
+    rw ← h1 (is_cofiltered.min_to_left j j₀), dsimp [a₀],
+    rw ← h1 (is_cofiltered.min_to_right j j₀) },
+  let t₀ : (Profinite.limit_cone F).X := ⟨_,_⟩,
+  rotate,
+  { intros j, exact (t j).2 },
+  { intros i j e,
+    specialize ht e,
+    cases (t i),
+    dsimp [Profinite.sigma_functor, Profinite.sigma.desc, Profinite.sigma.ι] at ht,
+    cases t j,
+    erw sigma.mk.inj_iff at ht,
+    exact eq_of_heq ht.2 },
+  use t₀,
+  intros j,
+  dsimp [Profinite.limit_cone, Profinite.sigma_functor, Profinite.sigma.ι,
+    Profinite.sigma.desc, CompHaus.limit_cone, Top.limit_cone], ext,
+  exact (h2 _).symm, refl,
+end
 
 lemma Profinite.bijective_sigma_to_limit {J : Type u} [small_category J]
   (F : J ⥤ Profinite.{u}) (α : Type u) [fintype α]
