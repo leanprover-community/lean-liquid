@@ -555,7 +555,18 @@ inductive pmz : set ℤ
 | zero : pmz 0
 | one : pmz 1
 
-lemma pmz_finite : set.finite pmz := sorry
+def pmz_eq : pmz = {0,1,-1} :=
+begin
+  ext, split,
+  { intros h, cases h, right, right, simpa, left, simp, right, left, simp },
+  { intros h, simp at h, rcases h with (rfl|rfl|rfl),
+    apply pmz.zero,
+    apply pmz.one,
+    apply pmz.neg_one }
+end
+
+lemma pmz_finite : set.finite pmz :=
+by simp [pmz_eq]
 
 instance fintype_pmz : fintype pmz := pmz_finite.fintype
 
