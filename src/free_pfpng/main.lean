@@ -593,8 +593,17 @@ def Profinite.pmz_functor (n : ℕ) : Profinite.{u} ⥤ Profinite.{u} :=
     Profinite.sigma.desc _ $ λ e,
       (Profinite.product.lift (λ i : fin n, T)
         (λ i, Profinite.product.π _ i ≫ f)) ≫ Profinite.sigma.ι _ e,
-  map_id' := sorry,
-  map_comp' := sorry }
+  map_id' := begin
+    intros X,
+    apply Profinite.sigma.hom_ext, intros e,
+    erw category.comp_id, refl,
+  end,
+  map_comp' := begin
+    intros X Y Z f g,
+    apply Profinite.sigma.hom_ext, intros e, dsimp, simp,
+    erw [Profinite.sigma.ι_desc],
+    refl,
+  end }
 
 def Profinite.pmz_diagram (S : Profinite.{u}) (n : ℕ) :
   discrete_quotient S ⥤ Profinite.{u} :=
