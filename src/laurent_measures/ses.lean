@@ -982,13 +982,17 @@ begin
   rw ← commute_seval_ℒ_ℳ,
   refine continuous.comp _ (continuous_seval_ℒ_c p S c s),
   apply (homeo_filtration_ϖ_ball c).comp_continuous_iff.mp,
-  apply reduction_balls',
+  apply reduction_balls,
   intros y ε,
   rw is_open_iff_forall_mem_open,
   intros F hF,
   simp only [set.mem_preimage, one_mul, eq_self_iff_true, eq_mpr_eq_cast, set_coe_cast,
     function.comp_app, mem_ball, subtype.dist_eq, real.dist_eq] at hF,
-  set V := U p ϖ c F ((ε - |(homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) - y|) ^ (p : ℝ)) with hV,
+  set η₀ := ε - |(homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) - y| with hη₀,
+  have η_pos : 0 ≤ η₀ := by {rw hη₀, from le_of_lt (sub_pos.mpr hF)},
+  set η : ℝ≥0 := ⟨η₀, η_pos⟩ with hη,
+  replace hη : η₀ = (η : ℝ) := subtype.coe_mk η₀ η_pos,
+  set V := U p ϖ c F ((η : ℝ) ^ (p : ℝ)) with hV,
   use V,
   split,
   { intros G hG,
@@ -997,20 +1001,19 @@ begin
   have hp : 0 < (p : ℝ),
   { rw [← nnreal.coe_zero, nnreal.coe_lt_coe],
     from fact.out _ },
+    rw hV at hG,
   calc | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ G)) : ℝ) - y | ≤
             | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ G)) : ℝ) -
                   (homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) | +
                 | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) : ℝ) - y | : abs_sub_le _ _ y
         ... < ε - |((homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) : ℝ) - y | +
-              | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) : ℝ) - y | : by sorry
-
-
-                        -- {apply add_lt_add_right,
-                        -- rw [← real_measures.dist_eq, ← real.rpow_lt_rpow_iff
-                        -- (real.rpow_nonneg_of_nonneg (real_measures.norm_nonneg _) _)
-                        -- (sub_nonneg.mpr (le_of_lt hF)) hp, ← real.rpow_mul
-                        -- (real_measures.norm_nonneg _), inv_mul_cancel (ne_of_gt hp),
-                        -- real.rpow_one], refine dist_lt_of_mem_U p c _ F G hG}
+              | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) : ℝ) - y | : by
+                        {apply add_lt_add_right, rw [← real_measures.dist_eq,
+                        ← real.rpow_lt_rpow_iff (real.rpow_nonneg_of_nonneg
+                        (real_measures.norm_nonneg _) _) (sub_nonneg.mpr (le_of_lt hF)) hp,
+                        ← real.rpow_mul (real_measures.norm_nonneg _), inv_mul_cancel (ne_of_gt hp),
+                        real.rpow_one, ← hη₀, hη, ← nnreal.coe_rpow],
+                        apply dist_lt_of_mem_U p c (η ^ (p : ℝ)) F G hG,}
         ... = ε : by {rw sub_add_cancel} },
   refine and.intro (is_open_U p ϖ c F _) (mem_U p ϖ c F _),
 end
