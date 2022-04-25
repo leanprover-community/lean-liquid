@@ -754,13 +754,22 @@ Profinite.sigma.desc _ $ λ f,
   (Profinite.limit_cone_is_limit (S.pmz_diagram n)).lift ⟨S.pow n,
   { app := λ T, Profinite.map_pow (S.as_limit_cone.π.app T) n ≫
       Profinite.sigma.ι _ f,
-    naturality' := sorry }⟩
+    naturality' := begin
+      intros A B e,
+      dsimp [Profinite.pmz_diagram, Profinite.pmz_functor],
+      simpa,
+    end }⟩
 
 def Profinite.pow_functor (n : ℕ) : Profinite.{u} ⥤ Profinite.{u} :=
 { obj := λ S, S.pow n,
   map := λ S T f, Profinite.map_pow f n,
-  map_id' := sorry,
-  map_comp' := sorry }
+  map_id' := begin
+    intros X, apply Profinite.product.hom_ext, intros i, dsimp [Profinite.map_pow], simp,
+  end,
+  map_comp' := begin
+    intros X Y Z f g,
+    apply Profinite.product.hom_ext, intros i, dsimp [Profinite.map_pow], simp,
+  end }
 
 def Profinite.pow_cone {J : Type u} [small_category J] {F : J ⥤ Profinite.{u}}
   (E : limits.cone F) (n : ℕ) : limits.cone (F ⋙ Profinite.pow_functor n) :=
@@ -773,9 +782,30 @@ def Profinite.pow_cone_is_limit
 { lift := λ Q, Profinite.product.lift _ $ λ a,
     hE.lift ⟨Q.X,
     { app := λ j, Q.π.app j ≫ Profinite.product.π _ a,
-      naturality' := sorry }⟩,
-  fac' := sorry,
-  uniq' := sorry }
+      naturality' := begin
+        intros i j e, dsimp,
+        simp only [category.id_comp, category.assoc],
+        rw ← Q.w e,
+        dsimp [Profinite.pow_functor, Profinite.map_pow],
+        simp,
+      end }⟩,
+  fac' := begin
+    intros Q j, apply Profinite.product.hom_ext, intros i,
+    dsimp [Profinite.pow_cone, Profinite.pow_functor, Profinite.map_pow],
+    simp only [category.assoc, Profinite.product.lift_π, Profinite.product.lift_π_assoc,
+      limits.is_limit.fac],
+  end,
+  uniq' := begin
+    intros Q m hm,
+    apply Profinite.product.hom_ext, intros a,
+    dsimp [Profinite.pow_cone, Profinite.pow_functor, Profinite.map_pow],
+    simp only [Profinite.product.lift_π],
+    apply hE.hom_ext,
+    intros j,
+    simp only [category.assoc, limits.is_limit.fac], rw ← hm,
+    dsimp [Profinite.pow_cone, Profinite.pow_functor, Profinite.map_pow],
+    simp only [category.assoc, Profinite.product.lift_π],
+  end }
 
 lemma Profinite.is_iso_pmz_to_limit (S : Profinite.{u}) (n : ℕ) :
   is_iso (S.pmz_to_limit n) :=
@@ -804,10 +834,12 @@ begin
   refl,
 end
 
+-- A finite union of finite products of finite discrete sets is discrete.
 instance Profinite.discrete_topology_discrete_quotient_pmz
   (S : Profinite.{u}) (n : ℕ) (T : discrete_quotient S) :
   discrete_topology ((Profinite.of T).pmz n) := sorry
 
+-- A finite product of finite discrete sets is discrete.
 instance Profinite.discrete_topology_discrete_quotient_pow
   (S : Profinite.{u}) (n : ℕ) (T : discrete_quotient S) :
   discrete_topology ((Profinite.of T).pow n) := sorry
