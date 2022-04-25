@@ -28,6 +28,7 @@ begin
   { resetI,
     let e := as_iso ((homotopy_category.homology_functor Abᵒᵖ _ i).map f),
     let e' := e.symm.unop,
+    refine _ ≪≫ e',
     -- currently there are some `op`s in the wrong places
     -- so this is provable, but requires identifying the `op` of homology with the homology of `op`s
     sorry },
@@ -36,5 +37,11 @@ begin
   dsimp [homological_complex.cone.triangleₕ] at this,
   simp only [quotient_map_out] at this,
   rw this, clear this,
+  constructor,
+  intro i,
+  refine is_zero.of_iso _ (homology_iso _ (i-1) i (i+1) _ _),
+  rotate, { exact add_sub_cancel _ _ }, { dsimp, refl },
+  apply exact.homology_is_zero _,
+  rw ← abelian.exact.unop_iff,
   sorry
 end
