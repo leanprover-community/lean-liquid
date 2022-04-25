@@ -455,4 +455,11 @@ by ext
 def from_punit {X : Profinite.{u}} (x : X) : punit ⟶ X :=
 ⟨λ _, x, by tidy⟩
 
+def pow (X : Profinite.{u}) (n : ℕ) : Profinite.{u} :=
+Profinite.product (λ i : fin n, X)
+
+def map_pow {X Y : Profinite.{u}} (f : X ⟶ Y) (n : ℕ) :
+  X.pow n ⟶ Y.pow n :=
+Profinite.product.lift _ $ λ n, Profinite.product.π _ n ≫ f
+
 end Profinite

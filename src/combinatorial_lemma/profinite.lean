@@ -84,6 +84,7 @@ end
 
 end comphaus_filtered_pseudo_normed_group
 
+/-
 namespace Profinite
 
 def pow (X : Profinite.{u}) (n : ℕ) : Profinite.{u} :=
@@ -94,6 +95,7 @@ def map_pow {X Y : Profinite.{u}} (f : X ⟶ Y) (n : ℕ) :
 Profinite.product.lift _ $ λ n, Profinite.product.π _ n ≫ f
 
 end Profinite
+-/
 
 namespace ProFiltPseuNormGrpWithTinv₁
 

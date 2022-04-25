@@ -558,8 +558,8 @@ lemma pmz_finite : set.finite pmz := sorry
 
 instance fintype_pmz : fintype pmz := pmz_finite.fintype
 
-abbreviation Profinite.pow (S : Profinite.{u}) (n : ℕ) : Profinite.{u} :=
-Profinite.product (λ i : fin n, S)
+--abbreviation Profinite.pow (S : Profinite.{u}) (n : ℕ) : Profinite.{u} :=
+--Profinite.product (λ i : fin n, S)
 
 /-- `S.profinite n` is `(S × {-1,0,1})^n`. -/
 def Profinite.pmz (S : Profinite.{u}) (n : ℕ) : Profinite.{u} :=
@@ -584,12 +584,23 @@ def Profinite.pmz_functor (n : ℕ) : Profinite.{u} ⥤ Profinite.{u} :=
   map_id' := sorry,
   map_comp' := sorry }
 
+instance Profinite.pmz_functor_preserves_limits (n : ℕ) :
+  limits.preserves_limits (Profinite.pmz_functor.{u} n) :=
+begin
+  constructor, dsimp, introsI J hJ,
+  sorry
+end
+
 def Profinite.pmz_diagram (S : Profinite.{u}) (n : ℕ) :
   discrete_quotient S ⥤ Profinite.{u} :=
 S.diagram ⋙ Profinite.pmz_functor n
 
 def Profinite.pmz_cone (S : Profinite.{u}) (n : ℕ) : limits.cone (S.pmz_diagram n) :=
 (Profinite.pmz_functor n).map_cone S.as_limit_cone
+
+def Profinite.pmz_cone_is_limit (S : Profinite.{u}) (n : ℕ) :
+  limits.is_limit (S.pmz_cone n) :=
+limits.is_limit_of_preserves (Profinite.pmz_functor n) S.as_limit
 
 instance Profinite.discrete_topology_discrete_quotient_pmz
   (S : Profinite.{u}) (n : ℕ) (T : discrete_quotient S) :
@@ -614,16 +625,32 @@ def Profinite.pmz_to_level (S : Profinite.{u}) (j : nnreal) (T : discrete_quotie
 { to_fun := Profinite.sigma.desc _ $ λ e, S.pmz_to_level_component j T (ulift.down e),
   continuous_to_fun := continuous_of_discrete_topology }
 
+def Profinite.pmz_to_level_nat_trans (S : Profinite.{u}) (j : nnreal) :
+  S.pmz_diagram ⌊j⌋₊ ⟶ S.fintype_diagram ⋙ free_pfpng_functor ⋙
+    (ProFiltPseuNormGrp₁.level.obj j) :=
+{ app := λ T, S.pmz_to_level j T,
+  naturality' := sorry }
+
 def Profinite.pmz_to_free_pfpng (S : Profinite.{u}) (j : nnreal) :
   S.pmz ⌊j⌋₊ ⟶ (ProFiltPseuNormGrp₁.level.obj j).obj S.free_pfpng :=
 let E := limits.is_limit_of_preserves (ProFiltPseuNormGrp₁.level.obj j)
   (limits.limit.is_limit (S.fintype_diagram ⋙ free_pfpng_functor)) in
-E.lift $ limits.cone.mk (S.pmz ⌊j⌋₊) $
-{ app := λ T, (S.pmz_cone ⌊j⌋₊).π.app T ≫ S.pmz_to_level j T,
-  naturality' := sorry }
+E.map (S.pmz_cone _) (S.pmz_to_level_nat_trans j)
 
 instance Profinite.pmz_to_free_pfpng_epi (S : Profinite.{u}) (j : nnreal) :
-  epi (S.pmz_to_free_pfpng j) := sorry
+  epi (S.pmz_to_free_pfpng j) :=
+begin
+  /-
+    First, use the fact that `epi ↔ surjective` in `Profinite`.
+    This map is defined using `is_limit.map`, where the limit is over a cofiltered category.
+    We can thus reduce to the case where `S` is finite using Tychonoff
+    (and the relevant lemma should already exist in this repo).
+    We would have to show that `S.pmz_cone` is a limit cone for this,
+    but that shouldn't be too hard.
+  -/
+  rw Profinite.epi_iff_surjective,
+  sorry
+end
 
 instance Profinite.epi_free'_to_condensed_free_pfpng
   (S : Profinite.{u}) : epi S.free'_to_condensed_free_pfpng :=
