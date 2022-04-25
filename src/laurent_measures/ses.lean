@@ -849,9 +849,15 @@ end
   --        all applications a `p` is needed)
 def geom_B (ε : ℝ) : ℤ := ⌊ real.logb (2 * r) (2 * r - 1) * ε ⌋ + 1
 
-lemma tail_B (F : filtration (ℒ ϖ) c) (ε : ℝ) : tsum (λ b : {n : ℤ // (geom_B ε) < n },
-  ∥ ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ∥ ) < ε ^ (p⁻¹ : ℝ) :=
+-- lemma tail_B_old (F : filtration (ℒ ϖ) c) (ε : ℝ) : tsum (λ b : {n : ℤ // (geom_B ε) < n },
+--   ∥ ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ∥ ) < ε ^ (p⁻¹ : ℝ) :=
+
+-- example (α : Type) (A : set α) : {x // x ∉ A} ≃ {x // x ∈ Aᶜ} := by library_search
+
+lemma tail_B (F : filtration (ℒ ϖ) c) (ε : ℝ) : ∥ tsum (λ b : {n : ℤ // (geom_B ε) < n },
+  ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ) ∥ < ε ^ (p⁻¹ : ℝ) :=
 begin
+  sorry;{
   set f := (λ b : ℕ, ∥ (F.1 punit.star b : ℝ) * (1 / 2 ) ^ b ∥),
   have := tendsto_tsum_compl_at_top_zero f,
   rw tendsto_at_top at this,
@@ -859,9 +865,19 @@ begin
   obtain ⟨A, hA⟩ := this (ε ^ (p⁻¹ : ℝ)) h_pos,
   specialize hA A (le_of_eq (refl A)),
   rw real.dist_0_eq_abs at hA,
-  sorry,
-
+  dsimp only [f] at hA,
+  rw [← real.norm_eq_abs] at hA,
+  have H : A.nonempty, sorry,
+  set B := (A.max' H).succ with hB,
+  have h_incl : A ⊆ finset.range B,
+  { --rw finset.le_eq_subset,
+    intros a ha,
+    apply finset.mem_range_succ_iff.mpr (A.le_max' _ ha) },
+  have := @mem_compl_iff ℕ A,
+  -- simp_rw mem_compl_iff at hA,
+  -- rw subset_compl
   -- **[FAE]** use tendsto_tsum_compl_at_top_zero
+  },
 end
 
 def U (F : filtration (ℒ S) c) (ε : ℝ) : set (filtration (ℒ S) c) := λ G,
@@ -906,17 +922,17 @@ begin
   exact H,
 end
 
-lemma summable_subset (F : filtration (ℒ ϖ) c) (B : ℤ) :
-  summable (λ b : {x : ℤ // B < x}, ∥ ((F punit.star b) : ℝ) * (1 / 2) ^ b.1 ∥) :=
-begin
-  have : (λ b : {x : ℤ // B < x}, ∥ ((F punit.star b) : ℝ) * (1 / 2) ^ b.1 ∥) =
-    (λ b, (∥ ((F punit.star b) : ℝ) * (1 / 2) ^ b ∥)) ∘ coe := by {simp only [subtype.val_eq_coe]},
-  rw this,
-  refine summable.comp_injective _ (subtype.coe_injective),
-  simp_rw [norm_mul, norm_zpow, ← inv_eq_one_div, norm_inv, real.norm_two, inv_eq_one_div],
-  exact aux_thm69.summable_smaller_radius_norm F.1.d (r_half) (F.1.summable punit.star)
-    (λ n, lt_d_eq_zero F.1 punit.star n),
-end
+-- lemma summable_subset (F : filtration (ℒ ϖ) c) (B : ℤ) :
+--   summable (λ b : {x : ℤ // B < x}, ∥ ((F punit.star b) : ℝ) * (1 / 2) ^ b.1 ∥) :=
+-- begin
+--   have : (λ b : {x : ℤ // B < x}, ∥ ((F punit.star b) : ℝ) * (1 / 2) ^ b.1 ∥) =
+--     (λ b, (∥ ((F punit.star b) : ℝ) * (1 / 2) ^ b ∥)) ∘ coe := by {simp only [subtype.val_eq_coe]},
+--   rw this,
+--   refine summable.comp_injective _ (subtype.coe_injective),
+--   simp_rw [norm_mul, norm_zpow, ← inv_eq_one_div, norm_inv, real.norm_two, inv_eq_one_div],
+--   exact aux_thm69.summable_smaller_radius_norm F.1.d (r_half) (F.1.summable punit.star)
+--     (λ n, lt_d_eq_zero F.1 punit.star n),
+-- end
 
 lemma coe_filtration_sub {c₁ c₂ : ℝ≥0} (F : filtration (ℒ S) c₁)
   (G : filtration (ℒ S) c₂) (s : S) (i : ℤ) :
@@ -975,16 +991,21 @@ begin
   { rw [inv_pos, ← nnreal.coe_zero],
     exact (nnreal.coe_lt_coe.mpr (fact.out _)) },
   let FG_sub : filtration (ℒ ϖ) (c + c) := ⟨↑G - ↑F, sub_mem_filtration G.2 F.2⟩,
-  refine (lt_of_le_of_lt (norm_tsum_le_tsum_norm _) _),
-  dsimp [g, f],
-  convert summable_subset p (c + c) FG_sub (geom_B p ε),
-  { funext,
-    dsimp [FG_sub],
-    rw [coe_filtration_sub p ϖ G F punit.star (i : ℤ), int.cast_sub] },
   convert tail_B p (c + c) FG_sub ε,
   { funext,
     dsimp [g, f],
     rw int.cast_sub },
+
+  -- refine (lt_of_le_of_lt (norm_tsum_le_tsum_norm _) _),
+  -- dsimp [g, f],
+  -- convert summable_subset p (c + c) FG_sub (geom_B p ε),
+  -- { funext,
+  --   dsimp [FG_sub],
+  --   rw [coe_filtration_sub p ϖ G F punit.star (i : ℤ), int.cast_sub] },
+  -- convert tail_B_old p (c + c) FG_sub ε,
+  -- { funext,
+  --   dsimp [g, f],
+  --   rw int.cast_sub },
 end
 
 -- This is the main continuity property needed in `ses2.lean`
