@@ -852,6 +852,13 @@ def geom_B (ε : ℝ) : ℤ := ⌊ real.logb (2 * r) (2 * r - 1) * ε ⌋ + 1
 lemma tail_B (F : filtration (ℒ ϖ) c) (ε : ℝ) : tsum (λ b : {n : ℤ // (geom_B ε) < n },
   ∥ ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ∥ ) < ε ^ (p⁻¹ : ℝ) :=
 begin
+  set f := (λ b : ℕ, ∥ (F.1 punit.star b : ℝ) * (1 / 2 ) ^ b ∥),
+  have := tendsto_tsum_compl_at_top_zero f,
+  rw tendsto_at_top at this,
+  have h_pos : 0 < ε ^ (p⁻¹ : ℝ), sorry,
+  obtain ⟨A, hA⟩ := this (ε ^ (p⁻¹ : ℝ)) h_pos,
+  specialize hA A (le_of_eq (refl A)),
+  rw real.dist_0_eq_abs at hA,
   sorry,
 
   -- **[FAE]** use tendsto_tsum_compl_at_top_zero
