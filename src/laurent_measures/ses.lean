@@ -896,13 +896,13 @@ end
 lemma summable_subset (F : filtration (ℒ ϖ) c) (B : ℤ) :
   summable (λ b : {x : ℤ // B < x}, ∥ ((F punit.star b) : ℝ) * (1 / 2) ^ b.1 ∥) :=
 begin
-  sorry,
-
-  -- { simp_rw real.norm_eq_abs,
-  -- apply abs_eq
-  -- have h : function.injective (coe : {x : ℤ // B < x} → ℤ), sorry,
-  -- rw nnorm_eq_no
-  -- refine nnreal.summable_comp_injective _ h,
+  have : (λ b : {x : ℤ // B < x}, ∥ ((F punit.star b) : ℝ) * (1 / 2) ^ b.1 ∥) =
+    (λ b, (∥ ((F punit.star b) : ℝ) * (1 / 2) ^ b ∥)) ∘ coe := by {simp only [subtype.val_eq_coe]},
+  rw this,
+  refine summable.comp_injective _ (subtype.coe_injective),
+  simp_rw [norm_mul, norm_zpow, ← inv_eq_one_div, norm_inv, real.norm_two, inv_eq_one_div],--, norm_zpow],
+  exact aux_thm69.summable_smaller_radius_norm F.1.d (r_half) (F.1.summable punit.star)
+    (λ n, lt_d_eq_zero F.1 punit.star n),
 end
 
 lemma coe_filtration_sub {c₁ c₂ : ℝ≥0} (F : filtration (ℒ S) c₁)
