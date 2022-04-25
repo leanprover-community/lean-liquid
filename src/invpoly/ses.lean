@@ -20,10 +20,13 @@ variables (r : ℝ≥0) [fact (0 < r)] [fact (r < 1)]
 { to_fun := λ F s, (F s).eval 2,
   map_zero' := by { ext, simp only [polynomial.eval_zero, pi.zero_apply], },
   map_add' := by { intros, ext, simp only [polynomial.eval_add, pi.add_apply], },
-  strict' := λ c F hF, sorry,
-  continuous' := λ c, begin
+  strict' := λ c F hF, begin
+    refine (finset.sum_le_sum _).trans hF,
+    rintro s -,
+    /- TODO(jmc): This is false. We need to take another route. -/
     sorry
-  end }
+  end,
+  continuous' := λ c, continuous_of_discrete_topology }
 
 lemma eval2_surjective (S : Fintype.{u}) :
   function.surjective (eval2 r S) :=

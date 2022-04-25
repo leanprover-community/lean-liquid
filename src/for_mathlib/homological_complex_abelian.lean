@@ -301,8 +301,9 @@ def kernel_complex_lift (s : kernel_fork f) : s.X ⟶ kernel_complex f :=
 def kernel_complex_is_kernel : is_limit (kernel_complex_fork f) :=
 begin
   apply is_limit_aux (kernel_complex_fork f) (kernel_complex_lift f),
-  { intro s, ext, dsimp, simp },
-  { intros s m h, ext, apply_fun (λ f, hom.f f x) at h, dsimp, simp [← h] }
+  { intro s, ext, delta fork.ι, dsimp, simp only [kernel.lift_ι] },
+  { intros s m h, ext, apply_fun (λ f, hom.f f x) at h,
+    delta fork.ι at h, dsimp at h ⊢, simp [h, kernel.lift_ι] }
 end
 .
 instance : has_kernel f := ⟨⟨⟨_, kernel_complex_is_kernel f⟩⟩⟩
@@ -337,8 +338,9 @@ def cokernel_complex_desc (s : cokernel_cofork f) : cokernel_complex f ⟶ s.X :
 def cokernel_complex_is_cokernel : is_colimit (cokernel_complex_cofork f) :=
 begin
   apply is_colimit_aux (cokernel_complex_cofork f) (cokernel_complex_desc f),
-  { intro s, ext, dsimp, simp },
-  { intros s m h, ext, apply_fun (λ f, hom.f f x) at h, dsimp, simp [← h] }
+  { intro s, ext, delta cofork.π, dsimp, simp only [cokernel.π_desc] },
+  { intros s m h, ext, apply_fun (λ f, hom.f f x) at h,
+    delta cofork.π at h, dsimp at h ⊢, simp only [h, cokernel.π_desc] }
 end
 .
 instance : has_cokernel f := ⟨⟨⟨_, cokernel_complex_is_cokernel f⟩⟩⟩

@@ -9,6 +9,9 @@ local attribute [instance] type_pow
 
 noncomputable theory
 
+/-- `ProFiltPseuNormGrpWithTinv₁ r` is the category of
+`profinitely_filtered_pseudo_normed_group_with_Tinv r M`s such that the filtration is
+exhaustive. -/
 structure ProFiltPseuNormGrpWithTinv₁ (r : ℝ≥0) : Type (u+1) :=
 (M : Type u)
 [str : profinitely_filtered_pseudo_normed_group_with_Tinv r M]

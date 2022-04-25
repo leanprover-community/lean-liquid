@@ -22,8 +22,8 @@ for `i ≥ 1`.
 
 noncomputable theory
 
-open_locale nnreal liquid_tensor_experiment
-open liquid_tensor_experiment category_theory
+open_locale liquid_tensor_experiment nnreal zero_object
+open liquid_tensor_experiment category_theory category_theory.limits
 
 variables (p' p : ℝ≥0) [fact (0 < p')] [fact (0 < (p : ℝ))]
 variables [fact (p' < p)] [fact (p' ≤ 1)] [fact (p ≤ 1)]
@@ -35,7 +35,9 @@ instance : fact (@r p < 1) :=
 begin
   constructor, delta r,
   apply real.rpow_lt_one,
-  all_goals { sorry }
+  { norm_num },
+  { norm_num },
+  { exact fact.out _ }
 end
 
 theorem liquid_tensor_experiment (S : Profinite.{1}) (V : pBanach.{1} p) :

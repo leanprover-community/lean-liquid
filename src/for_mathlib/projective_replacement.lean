@@ -15,21 +15,6 @@ section zero_object
 
 variables {V : Type*} [category V] [has_zero_morphisms V]
 
-lemma is_zero_iff_id_eq_zero {X : V} : is_zero X ↔ 𝟙 X = 0 :=
-begin
-  split,
-  { exact λ h, h.1 _, },
-  { intro e,
-    exact ⟨λ _ _, by { rw [← cancel_epi (𝟙 _), e, comp_zero, zero_comp], apply_instance },
-      λ _ _, by { rw [← cancel_mono (𝟙 _), e, comp_zero, zero_comp], apply_instance }⟩, }
-end
-
-lemma is_zero_of_mono {X Y : V} (f : X ⟶ Y) [mono f] (h : is_zero Y) : is_zero X :=
-by rw [is_zero_iff_id_eq_zero, ← cancel_mono f, zero_comp, h.2 (𝟙 _ ≫ f)]
-
-lemma is_zero_of_epi {X Y : V} (f : X ⟶ Y) [epi f] (h : is_zero X) : is_zero Y :=
-by rw [is_zero_iff_id_eq_zero, ← cancel_epi f, comp_zero, h.1 (f ≫ 𝟙 Y)]
-
 noncomputable
 lemma split_epi_of_is_zero {X Y : V} (f : X ⟶ Y) (h : is_zero Y) : split_epi f :=
 ⟨0, by simp [is_zero_iff_id_eq_zero.mp h]⟩
@@ -158,7 +143,7 @@ def replacement.hom : replacement X a H ⟶ X :=
     split_ifs with h',
     { rw [zero_comp, comp_zero] },
     { exfalso, linarith },
-    { rw comp_zero, apply (H _ (le_of_lt h)).2 },
+    { rw comp_zero, apply (H _ (le_of_lt h)).eq_of_tgt },
     { dsimp only [replacement],
       rw [dif_pos rfl, dif_neg h],
       simp only [← category.assoc, eq_to_hom_trans_assoc],
@@ -307,9 +292,8 @@ instance replacement_kernel_map_epi (i : ℕ) : epi (kernel.lift (X.d (a - i) (a
 begin
   cases i,
   { apply epi_of_is_zero,
-    apply is_zero_of_mono (kernel.ι _),
-    { apply H, simp },
-    apply_instance },
+    refine is_zero_of_mono (kernel.ι _) _,
+    { apply H, simp }, },
   { apply pseudoelement.epi_of_pseudo_surjective,
     intro x,
     obtain ⟨y, h₁, h₂⟩ := @pseudoelement.pseudo_pullback _ _ _ _ _ _ _ (X.d (a - i - 1) (a - i))
@@ -670,7 +654,7 @@ def null_homotopic_of_projective_to_acyclic_aux {X Y : cochain_complex V ℤ} (f
   homotopy ((cochain_complex.to_nat_chain_complex a).map f) 0 :=
 begin
   have h₄ : ∀ i, a ≤ i → f.f i = 0,
-  { intros i e, apply (h₂ i e).1 },
+  { intros i e, apply (h₂ i e).eq_of_src },
   fapply homotopy.mk_inductive _ 0,
   { dsimp, rw zero_comp, apply h₄, linarith },
   all_goals { dsimp },
@@ -764,12 +748,12 @@ def null_homotopic_of_projective_to_acyclic {X Y : cochain_complex V ℤ} (f : X
         (a - a).nat_abs (a - (a - 1)).nat_abs = 0,
       { rw this,
         simp only [add_zero, limits.comp_zero, homological_complex.zero_f_apply,
-          limits.zero_comp], apply (h₂ _ h_1).1 },
+          limits.zero_comp], apply (h₂ _ h_1).eq_of_src },
         rw [← sub_add, sub_self, zero_add, int.nat_abs_zero, int.nat_abs_one],
         dsimp [null_homotopic_of_projective_to_acyclic_aux, homotopy.mk_inductive],
         rw [dif_pos (zero_add _), zero_comp, zero_comp] },
-    { simp only [add_zero, limits.comp_zero, homological_complex.zero_f_apply,
-        limits.zero_comp], apply (h₂ _ _).1, linarith }
+    { simp only [add_zero, limits.comp_zero, homological_complex.zero_f_apply, limits.zero_comp],
+      apply (h₂ _ _).eq_of_src, linarith }
   end }
 
 end category_theory.projective

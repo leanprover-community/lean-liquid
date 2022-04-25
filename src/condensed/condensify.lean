@@ -116,7 +116,7 @@ by { ext X x, exact (α.app X).map_Tinv x }
 -- move me
 instance fact_inv_pos : fact (0 < r'⁻¹) := ⟨nnreal.inv_pos.2 $ fact.out _⟩
 
-set_option pp.universes true
+--set_option pp.universes true
 
 def condensify_Tinv (F : Fintype.{u} ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r') :
   condensify.{u} (F ⋙ to_CHFPNG₁ r') ⟶ condensify.{u} (F ⋙ to_CHFPNG₁ r') :=
@@ -133,9 +133,22 @@ lemma condensify_map_comp_Tinv {F G : Fintype.{u} ⥤ ProFiltPseuNormGrpWithTinv
 begin
   delta condensify_map condensify_Tinv,
   rw [← condensify_nonstrict_comp 1 r'⁻¹ r'⁻¹, ← condensify_nonstrict_comp r'⁻¹ 1 r'⁻¹],
-  swap, { sorry },
-  swap, { sorry },
-  { rw [whisker_right_twice, Tinv_nat_trans_comp], },
+  swap, {
+    intro X,
+    rw nat_trans.comp_app,
+    rw ← one_mul r'⁻¹,
+    apply comphaus_filtered_pseudo_normed_group_hom.bound_by.comp (Tinv_bound_by F X),
+    simp only [whisker_right_twice, whisker_right_app, functor.comp_map, enlarging_functor_map],
+    apply strict_comphaus_filtered_pseudo_normed_group_hom.to_chfpsng_hom.bound_by_one
+    },
+  swap, {
+    intro X,
+    rw nat_trans.comp_app,
+    rw ← mul_one r'⁻¹,
+    refine comphaus_filtered_pseudo_normed_group_hom.bound_by.comp _ (Tinv_bound_by G X),
+    simp only [whisker_right_twice, whisker_right_app, functor.comp_map, enlarging_functor_map],
+    apply strict_comphaus_filtered_pseudo_normed_group_hom.to_chfpsng_hom.bound_by_one, },
+  { simp only [whisker_right_twice, Tinv_nat_trans_comp], },
 end
 .
 
@@ -192,11 +205,11 @@ end
 --         (Tinv_nat_trans (Profinite.extend F)) :=
 -- begin
 --   refine nonstrict_extend_ext' _ _ r'⁻¹ (nonstrict_extend_bound_by _ _ _) _ _,
---   { sorry },
+--   { admit },
 --   { rw [nonstrict_extend_whisker_left],
 --     simp only [whisker_left_comp, ← iso_whisker_left_hom, ← iso_whisker_left_inv,
 --       ← iso.inv_comp_eq, iso.eq_comp_inv, category.assoc],
---     sorry }
+--     admit }
 -- end
 
 lemma condensify_nonstrict_Tinv (F : Fintype.{u} ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r') :
@@ -223,18 +236,16 @@ lemma condensify_nonstrict_exact
   (α : F ⋙ enlarging_functor.{u} ⟶ G ⋙ enlarging_functor.{u}) (β : G ⟶ H)
   (c : ℝ≥0) [fact (0 < c)]
   (h : ∀ X, (α.app X).bound_by c)
-  (cα : ℝ≥0) (hcα : 1 ≤ cα) (cβ : ℝ≥0) (hcβ : 1 ≤ cβ)
+  (cα cβ : ℝ≥0 → ℝ≥0) (hcα : id ≤ cα) (hcβ : id ≤ cβ)
   (H1 : ∀ S, function.injective (α.app S))
   (H2a : ∀ S, (α.app S) ≫ ((whisker_right β _).app S) = 0)
   (H2b : ∀ S c', (β.app S) ⁻¹' {0} ∩ filtration (G.obj S) c' ⊆
-    (α.app S) '' filtration (F.obj S) (cα * c' * c⁻¹))
+    (α.app S) '' filtration (F.obj S) (cα c' * c⁻¹))
   (H3a : ∀ S, function.surjective (β.app S))
-  (H3b : ∀ S c', filtration (H.obj S) c' ⊆ (β.app S) '' filtration (G.obj S) (cβ * c'))
+  (H3b : ∀ S c', filtration (H.obj S) c' ⊆ (β.app S) '' filtration (G.obj S) (cβ c'))
   (X : Profinite.{u}) :
   short_exact ((condensify_nonstrict α c h).app X) ((condensify_map β).app X) :=
 begin
-  haveI hcα' : fact (1 ≤ cα) := ⟨hcα⟩,
-  haveI hcβ' : fact (1 ≤ cβ) := ⟨hcβ⟩,
   apply_with short_exact.mk { instances := ff },
   { simp only [condensify_nonstrict, nonstrict_extend, whisker_right_comp],
     repeat { apply_with mono_comp { instances := ff }; try { apply_instance } },
@@ -246,20 +257,20 @@ begin
     exact H1 S, },
   { dsimp only [condensify_map, condensify_nonstrict],
     rw nonstrict_extend_whisker_right_enlarging,
-    apply condensed.epi_to_Condensed_map _ cβ hcβ,
+    apply condensed.epi_to_Condensed_map _ cβ,
     apply exact_with_constant_extend_zero_right,
     intro S,
-    apply_with exact_with_constant_of_epi { instances := ff },
-    { rw AddCommGroup.epi_iff_surjective, exact H3a S },
-    { exact H3b S, } },
+    apply_with (exact_with_constant_of_epi _ _ _ hcβ) { instances := ff },
+    { exact H3b S, },
+    { rw AddCommGroup.epi_iff_surjective, exact H3a S }, },
   { dsimp only [condensify_map, condensify_nonstrict],
     rw nonstrict_extend_whisker_right_enlarging,
     simp only [nonstrict_extend, whisker_right_comp, nat_trans.comp_app, category.assoc],
     repeat { apply exact_of_iso_comp_exact; [apply_instance, skip] },
-    apply condensed.exact_of_exact_with_constant _ _ cα hcα,
+    apply condensed.exact_of_exact_with_constant _ _ cα,
     apply exact_with_constant.extend,
     intro S,
-    refine ⟨_, _⟩,
+    refine ⟨_, _, hcα⟩,
     { ext x, specialize H2a S, apply_fun (λ φ, φ.to_fun) at H2a, exact congr_fun H2a x },
     { intros c' y hy,
       obtain ⟨x, hx, rfl⟩ := H2b S c' hy,
@@ -267,17 +278,18 @@ begin
 end
 .
 
-lemma condensify_exact (α : F ⟶ G) (β : G ⟶ H) (cα : ℝ≥0) (hcα : 1 ≤ cα) (cβ : ℝ≥0) (hcβ : 1 ≤ cβ)
+lemma condensify_exact (α : F ⟶ G) (β : G ⟶ H)
+  (cα cβ : ℝ≥0 → ℝ≥0) (hcα : id ≤ cα) (hcβ : id ≤ cβ)
   (H1 : ∀ S, function.injective (α.app S))
-  (H2a : ∀ S, (α.app S) ≫ (β.app S) = 0)
+  (H2a : ∀ S, α.app S ≫ β.app S = 0)
   (H2b : ∀ S c, (β.app S) ⁻¹' {0} ∩ filtration (G.obj S) c ⊆
-    (α.app S) '' filtration (F.obj S) (cα * c))
+    (α.app S) '' filtration (F.obj S) (cα c))
   (H3a : ∀ S, function.surjective (β.app S))
-  (H3b : ∀ S c, filtration (H.obj S) c ⊆ (β.app S) '' filtration (G.obj S) (cβ * c))
+  (H3b : ∀ S c, filtration (H.obj S) c ⊆ (β.app S) '' filtration (G.obj S) (cβ c))
   (X : Profinite.{u}) :
   short_exact ((condensify_map α).app X) ((condensify_map β).app X) :=
 begin
-  refine condensify_nonstrict_exact _ _ 1 _ cα hcα cβ hcβ H1 _ _ H3a H3b _,
+  refine condensify_nonstrict_exact _ _ 1 _ cα cβ hcα hcβ H1 _ _ H3a H3b _,
   { intro S, simp only [whisker_right_app, ← functor.map_comp, H2a], refl, },
   { intros S c' x H, obtain ⟨x, hx, rfl⟩ := H2b S c' H,
     refine ⟨x, pseudo_normed_group.filtration_mono _ hx, rfl⟩,
@@ -287,11 +299,10 @@ end
 -- move me
 attribute [simps] Ab.ulift
 
-lemma condensify_nonstrict_Tinv2 (F : Fintype.{u} ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r') :
-  condensify_nonstrict (Tinv2_nat_trans F) (r'⁻¹ + 2) (Tinv2_bound_by F) =
-  condensify_Tinv F - 2 • 𝟙 _ :=
+lemma condensify_Tinv2_eq (F : Fintype.{u} ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r') :
+  condensify_Tinv2 F = condensify_Tinv F - 2 • 𝟙 _ :=
 begin
-  delta Tinv2_nat_trans,
+  delta condensify_Tinv2 Tinv2_nat_trans,
   rw [condensify_nonstrict_map_sub _ _ r'⁻¹ 2 (r'⁻¹ + 2) (Tinv_bound_by _) (twoid_bound_by _),
     condensify_nonstrict_map_nsmul _ 1 2, condensify_nonstrict_Tinv],
   swap,
@@ -299,3 +310,12 @@ begin
   rw [← condensify_map_id, ← condensify_nonstrict_whisker_right_enlarging],
   refl
 end
+
+open category_theory.preadditive
+
+lemma condensify_map_comp_Tinv2 {F G : Fintype.{u} ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r'}
+  (α : F ⟶ G) :
+  condensify_map (whisker_right α (to_CHFPNG₁ r')) ≫ condensify_Tinv2 G =
+  condensify_Tinv2 F ≫ condensify_map (whisker_right α (to_CHFPNG₁ r')) :=
+by simp only [condensify_Tinv2_eq, comp_sub, sub_comp, comp_nsmul, nsmul_comp,
+    condensify_map_comp_Tinv, category.id_comp, category.comp_id]

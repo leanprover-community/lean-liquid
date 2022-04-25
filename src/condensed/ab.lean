@@ -9,6 +9,7 @@ import for_mathlib.AddCommGroup.exact
 
 import condensed.adjunctions
 import condensed.top_comparison
+import condensed.filtered_colimits
 
 /-!
 # Properties of the category of condensed abelian groups
@@ -374,6 +375,82 @@ def to_Condensed : CompHausFiltPseuNormGrp.{u} ⥤ Condensed.{u} Ab.{u+1} :=
   map := λ A B f, ⟨whisker_right (Presheaf.map f) _⟩,
   map_id' := λ X, by { ext : 2, dsimp, simp },
   map_comp' := λ X Y Z f g, by { ext : 2, dsimp, simp } }
+
+section
+
+-- #check Top.to_Condensed
+
+variables (A : CompHausFiltPseuNormGrp.{u})
+
+@[simps]
+def level : ℝ≥0 ⥤ CompHaus.{u} :=
+{ obj := λ r, CompHaus.of $ filtration A r,
+  map := λ r s h,
+  { to_fun := cast_le' h.le,
+    continuous_to_fun := by letI : fact (r ≤ s) := ⟨h.le⟩; exact continuous_cast_le _ _ },
+  map_id' := λ r, by { ext, refl },
+  map_comp' := λ r s t h1 h2, by { ext, refl } }
+
+@[simps]
+def level_Condensed_diagram : ℝ≥0 ⥤ CondensedSet.{u} :=
+A.level ⋙ CompHaus_to_Top.{u} ⋙ Top_to_Condensed.{u}
+
+@[simps]
+def level_Condensed_diagram' : (as_small.{u+1} ℝ≥0) ⥤ CondensedSet.{u} :=
+as_small.down ⋙ A.level_Condensed_diagram
+
+def level_Condensed_diagram_cocone :
+  cocone A.level_Condensed_diagram' :=
+{ X := Condensed_Ab_to_CondensedSet.obj (to_Condensed.obj A),
+  ι :=
+  { app := λ r, Sheaf.hom.mk $
+    { app := λ S f, ulift.up $ ⟨_, ulift.down r, f.down.1, f.down.2, rfl⟩,
+      naturality' := λ S T f, by { ext, refl } },
+    naturality' := λ r s h, by { ext, refl } } } .
+
+-- We would have to use `some` to define the inverse of this equiv, so we may as well just use
+-- `equiv.of_bijective`
+def colimit_iso_Condensed_obj_aux (X) :
+let E := A.level_Condensed_diagram' ⋙ Sheaf_to_presheaf _ _ ⋙ (evaluation _ _).obj (op X) in
+  (types.colimit_cocone E).X ≃ A.presheaf X :=
+equiv.of_bijective (quot.lift
+  begin
+    intros f,
+    exact ⟨_, ulift.down f.1, f.2.down.1, f.2.down.2, rfl⟩,
+  end
+  sorry)
+sorry
+
+def colimit_iso_Condensed_obj_aux_nat_iso :
+  (filtered_cocone.{u} A.level_Condensed_diagram').X.val ≅
+  (Condensed_Ab_to_CondensedSet.{u}.obj (to_Condensed.{u}.obj A)).val :=
+  nat_iso.of_components (λ X,
+    (is_colimit_of_preserves ((evaluation _ _).obj X)
+      (colimit.is_colimit (A.level_Condensed_diagram' ⋙
+        Sheaf_to_presheaf _ _))).cocone_point_unique_up_to_iso (colimit.is_colimit _) ≪≫
+    (colimit.is_colimit _).cocone_point_unique_up_to_iso
+    (types.colimit_cocone_is_colimit _) ≪≫
+    equiv.to_iso ((A.colimit_iso_Condensed_obj_aux X.unop).trans equiv.ulift.symm)
+  ) sorry
+
+def colimit_iso_Condensed_obj :
+  colimit A.level_Condensed_diagram' ≅ Condensed_Ab_to_CondensedSet.obj (to_Condensed.obj A) :=
+(colimit.is_colimit _).cocone_point_unique_up_to_iso (filtered_cocone_is_colimit _) ≪≫
+  Sheaf.iso.mk _ (Condensed_Ab_to_CondensedSet.{u}.obj (to_Condensed.{u}.obj A))
+    A.colimit_iso_Condensed_obj_aux_nat_iso
+
+def colimit_to_Condensed_obj :
+  colimit A.level_Condensed_diagram' ⟶ Condensed_Ab_to_CondensedSet.obj (to_Condensed.obj A) :=
+colimit.desc _ A.level_Condensed_diagram_cocone
+
+instance is_iso_colimit_to_Condensed_obj : is_iso A.colimit_to_Condensed_obj :=
+begin
+  suffices : A.colimit_to_Condensed_obj =
+    A.colimit_iso_Condensed_obj.hom, by { rw this, apply_instance },
+  sorry
+end
+
+end
 
 end CompHausFiltPseuNormGrp
 

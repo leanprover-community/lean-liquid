@@ -2,67 +2,52 @@ import category_theory.preadditive
 import category_theory.abelian.exact
 import algebra.homology.exact
 import category_theory.limits.preserves.shapes.terminal
+import category_theory.limits.shapes.zero_morphisms
 
 namespace category_theory
+namespace limits
 
 open category_theory.limits
 
 variables {C : Type*} [category C] [has_zero_morphisms C]
 
-structure is_zero (X : C) : Prop :=
-(eq_zero_of_src : ∀ {Y : C} (f : X ⟶ Y), f = 0)
-(eq_zero_of_tgt : Π {Y : C} (f : Y ⟶ X), f = 0)
-
-lemma is_zero.eq_of_src {C : Type*} [category C] [has_zero_morphisms C] {X Y : C}
-  (hX : is_zero X) (f g : X ⟶ Y) : f = g :=
-(hX.eq_zero_of_src f).trans (hX.eq_zero_of_src g).symm
-
-lemma is_zero.eq_of_tgt {C : Type*} [category C] [has_zero_morphisms C] {X Y : C}
-  (hX : is_zero X) (f g : Y ⟶ X) : f = g :=
-(hX.eq_zero_of_tgt f).trans (hX.eq_zero_of_tgt g).symm
-
-def is_zero.iso {C : Type*} [category C] [has_zero_morphisms C] {X Y : C}
-  (hX : is_zero X) (hY : is_zero Y) : X ≅ Y :=
-{ hom := 0,
-  inv := 0,
-  hom_inv_id' := hX.eq_of_src _ _,
-  inv_hom_id' := hY.eq_of_src _ _, }
-
 open_locale zero_object
 
-lemma is_zero_zero (C : Type*) [category C] [has_zero_morphisms C] [has_zero_object C] :
-  is_zero (0 : C) :=
-{ eq_zero_of_src := λ Y f, by ext,
-  eq_zero_of_tgt := λ Y f, by ext }
 
-def is_zero.iso_zero {C : Type*} [category C] [has_zero_morphisms C] [has_zero_object C]
-  {X : C} (hX : is_zero X) : X ≅ 0 :=
-hX.iso (is_zero_zero C)
+lemma is_zero_iff_id_eq_zero {X : C} : is_zero X ↔ 𝟙 X = 0 :=
+begin
+  split,
+  { exact λ h, h.eq_of_src _ _, },
+  { intro e, split; intro Y; use 0; intro f,
+    { rw [← cancel_epi (𝟙 _), e, comp_zero, zero_comp], apply_instance },
+    { rw [← cancel_mono (𝟙 _), e, comp_zero, zero_comp], apply_instance }, }
+end
+
+lemma is_zero_of_mono {X Y : C} (f : X ⟶ Y) [mono f] (h : is_zero Y) : is_zero X :=
+by rw [is_zero_iff_id_eq_zero, ← cancel_mono f, zero_comp, h.eq_of_tgt (𝟙 _ ≫ f)]
+
+lemma is_zero_of_epi {X Y : C} (f : X ⟶ Y) [epi f] (h : is_zero X) : is_zero Y :=
+by rw [is_zero_iff_id_eq_zero, ← cancel_epi f, comp_zero, h.eq_of_src (f ≫ 𝟙 Y)]
 
 lemma is_zero_of_top_le_bot [has_zero_object C] (X : C)
   (h : (⊤ : subobject X) ≤ ⊥) : is_zero X :=
-{ eq_zero_of_src := λ Y f,
+{ unique_to := λ Y,
   begin
+    use 0, intro f,
     rw [← cancel_epi ((⊤ : subobject X).arrow), ← subobject.of_le_arrow h],
     simp only [subobject.bot_arrow, comp_zero, zero_comp],
   end,
-  eq_zero_of_tgt := λ Y f,
+  unique_from := λ Y,
   begin
+    use 0, intro f,
     rw ← subobject.bot_factors_iff_zero,
     exact subobject.factors_of_le f h (subobject.top_factors f),
   end }
 
+-- inline this
 lemma is_zero_of_iso_of_zero {C : Type*} [category C] [has_zero_morphisms C]
   {X : C} (hX : is_zero X) {Y : C} (h : X ≅ Y) : is_zero Y :=
-begin
-  refine ⟨λ Z f, _, λ Z f, _⟩,
-  { have : h.inv ≫ (h.hom ≫ f) = 0,
-    { rw [hX.eq_zero_of_src (h.hom ≫ f), comp_zero] },
-    simpa using this },
-  { have : (f ≫ h.inv) ≫ h.hom = 0,
-    { rw [hX.eq_zero_of_tgt (f ≫ h.inv), zero_comp] },
-    simpa using this }
-end
+hX.of_iso h.symm
 
 lemma is_zero_of_exact_zero_zero {C : Type*} [category C] [abelian C]
   {X Y Z : C} (h : exact (0 : X ⟶ Y) (0 : Y ⟶ Z)) : is_zero Y :=
@@ -78,7 +63,7 @@ by { rw [hf, hg] at h, exact is_zero_of_exact_zero_zero h }
 
 lemma is_zero_of_exact_is_zero_is_zero {C : Type*} [category C] [abelian C] {X Y Z : C}
   (f : X ⟶ Y) (g : Y ⟶ Z) (h : exact f g) (hX : is_zero X) (hZ : is_zero Z) : is_zero Y :=
-is_zero_of_exact_zero_zero' f g h (hX.eq_zero_of_src f) (hZ.eq_zero_of_tgt g)
+is_zero_of_exact_zero_zero' f g h (hX.eq_of_src f _) (hZ.eq_of_tgt g _)
 
 lemma is_zero_cokernel_of_epi {C : Type*} [category C] [abelian C] {X Y : C}
   (f : X ⟶ Y) [epi f] : is_zero (cokernel f) :=
@@ -95,7 +80,7 @@ begin
   { introsI, apply is_zero_cokernel_of_epi },
   { intros h,
     rw abelian.epi_iff_cokernel_π_eq_zero,
-    apply h.eq_zero_of_tgt }
+    apply h.eq_of_tgt }
 end
 
 lemma is_zero_kernel_of_mono {C : Type*} [category C] [abelian C] {X Y : C}
@@ -113,7 +98,7 @@ begin
   { introsI, apply is_zero_kernel_of_mono },
   { intros h,
     rw abelian.mono_iff_kernel_ι_eq_zero,
-    apply h.eq_zero_of_src }
+    apply h.eq_of_src }
 end
 
 lemma is_zero_initial {C : Type*} [category C] [abelian C] : is_zero (⊥_ C) :=
@@ -179,8 +164,10 @@ lemma is_zero_biprod {C : Type u₁} [category.{v} C] [abelian C] (X Y : C)
   (hX : is_zero X) (hY : is_zero Y) : is_zero (biprod X Y) :=
 begin
   constructor,
-  { intros W f, ext, simp, apply hX.1, simp, apply hY.1 },
-  { intros W f, ext, simp, apply hX.2, simp, apply hY.2 }
+  { intro W, use 0, intro f, ext, simp, apply hX.eq_of_src, simp, apply hY.eq_of_src },
+  { intro W, use 0, intro f, ext, simp, apply hX.eq_of_tgt, simp, apply hY.eq_of_tgt }
 end
+
+end limits
 
 end category_theory

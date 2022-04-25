@@ -32,18 +32,10 @@ end
 
 --for `mathlib`?
 def equiv_bdd_integer_nat (N : ℤ) : ℕ ≃ {x // N ≤ x} :=
-begin
-  fconstructor,
-  { exact λ n, ⟨n + N, le_add_of_nonneg_left (int.coe_nat_nonneg n)⟩ },
-  { rintro ⟨x, hx⟩,
-    use (int.eq_coe_of_zero_le (sub_nonneg.mpr hx)).some },
-  { intro a,
-    simp_rw [add_tsub_cancel_right],
-    exact (int.coe_nat_inj $ Exists.some_spec $ int.eq_coe_of_zero_le $ int.of_nat_nonneg a).symm },
-  { rintro ⟨_, hx⟩,
-    simp only,
-    exact add_eq_of_eq_sub ((int.eq_coe_of_zero_le (sub_nonneg.mpr hx)).some_spec).symm }
-end
+{ to_fun := λ n, ⟨n + N, le_add_of_nonneg_left (int.coe_nat_nonneg n)⟩,
+  inv_fun := λ x, (x.1 - N).nat_abs,
+  left_inv := λ n, by simp,
+  right_inv := λ ⟨x, hx⟩, subtype.ext (by simp [int.nat_abs_of_nonneg (sub_nonneg.mpr hx)]) }
 
 def equiv_Icc_bdd_nonneg {d : ℤ} (hd : 0 ≤ d) : {x // d ≤ x} ≃
   {x // x ∉ range (int.eq_coe_of_zero_le hd).some}:=
@@ -309,7 +301,8 @@ begin
   have smaller_shift : ∀ (b : ℕ), summable (λ j : ℕ, ∥ (f (b + 1 + j) : ℝ)  * (1 / 2) ^ j ∥),
   { intro b,
     refine (summable_mul_right_iff (by norm_num : (1 / 2 : ℝ) ^ (b + 1) ≠ 0)).mpr _,
-    obtain hff := (equiv.add_group_add (b+1 : ℤ)).summable_iff.mpr (summable_smaller_radius_norm d r_half hf hd),
+    obtain hff := (equiv.add_group_add (b+1 : ℤ)).summable_iff.mpr (summable_smaller_radius_norm d
+      r_half hf hd),
     convert (summable_iff_on_nat_less (d - (b + 1)) _).mp hff,
     { ext,
       simp [mul_assoc, zpow_add₀ (two_ne_zero : (2 : ℝ) ≠ 0) (b+1), mul_inv₀, zpow_coe_nat,

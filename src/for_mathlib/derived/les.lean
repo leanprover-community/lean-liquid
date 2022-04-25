@@ -3,23 +3,6 @@ import for_mathlib.derived.example
 
 open category_theory category_theory.triangulated category_theory.limits
 
-namespace category_theory
-
-variables {𝓐 : Type*} [category 𝓐] [abelian 𝓐]
-
--- move me
-lemma exact_seq.is_iso_of_zero_of_zero {A B C D : 𝓐} {f : A ⟶ B} {g : B ⟶ C} {h : C ⟶ D}
-  {L : list (arrow 𝓐)} (H : exact_seq 𝓐 (f :: g :: h :: L)) (hf : f = 0) (hh : h = 0) :
-  is_iso g :=
-begin
-  subst f, subst h,
-  have : mono g, { rw [H.pair.mono_iff_eq_zero], },
-  haveI : epi g, { rw [(H.drop 1).pair.epi_iff_eq_zero] },
-  exact is_iso_of_mono_of_epi g,
-end
-
-end category_theory
-
 namespace bounded_derived_category
 
 variables (A : Type*) [category A] [abelian A] [enough_projectives A]
@@ -140,7 +123,7 @@ def cone.π_quasi_iso (w : ∀ i, short_exact (f.f i) (g.f i)) :
     obtain ⟨n, rfl⟩ : ∃ k, k+1 = n := ⟨n-1, sub_add_cancel _ _⟩,
     refine is_zero_of_iso_of_zero _
       (homology_iso (kernel π) n (n+1) (n+1+1) rfl rfl).symm,
-    apply is_zero_homology_of_exact,
+    apply exact.homology_is_zero,
     apply pseudoelement.exact_of_pseudo_exact,
     split, { intro a, rw [← pseudoelement.comp_apply, d_comp_d, pseudoelement.zero_apply], },
     intros b hb,

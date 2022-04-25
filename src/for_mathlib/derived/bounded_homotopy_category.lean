@@ -49,12 +49,29 @@ def mk_iso {X Y : bounded_homotopy_category A} (i : X.val ≅ Y.val) :
   hom_inv_id' := i.hom_inv_id,
   inv_hom_id' := i.inv_hom_id, }
 
+instance : preadditive (bounded_homotopy_category A) :=
+{ hom_group := λ A B, show add_comm_group (A.val ⟶ B.val), by apply_instance,
+  add_comp' := λ P Q R f g h, preadditive.add_comp _ _ _ _ _ _,
+  comp_add' := λ P Q R f g h, preadditive.comp_add _ _ _ _ _ _ }
+
+protected def zero : bounded_homotopy_category A :=
+{ val := homotopy_category.zero,
+  bdd := ⟨⟨0, λ i _, begin
+    apply limits.is_zero_zero
+  end⟩⟩ }
+
+protected lemma is_zero_zero :
+  is_zero (bounded_homotopy_category.zero : bounded_homotopy_category A) :=
+begin
+  rw is_zero_iff_id_eq_zero,
+  apply homotopy_category.is_zero_zero.eq_of_src,
+end
+
+lemma zero_val {X : bounded_homotopy_category A} (hX : is_zero X) : is_zero X.val :=
+by rwa is_zero_iff_id_eq_zero at hX ⊢
+
 instance : has_zero_object (bounded_homotopy_category A) :=
-{ zero :=
-  { val := 0,
-    bdd := ⟨⟨0, λ i _, by apply is_zero_zero ⟩⟩ },
-  unique_to := λ X, has_zero_object.unique_to _,
-  unique_from := λ X, has_zero_object.unique_from _ }
+⟨⟨bounded_homotopy_category.zero, bounded_homotopy_category.is_zero_zero⟩⟩
 
 /-
 lemma is_bounded_shift (X : bounded_homotopy_category A) (i : ℤ) :
@@ -123,11 +140,6 @@ has_shift_mk _ _
 @[simp] lemma shift_functor_obj_val (X : bounded_homotopy_category A) (i : ℤ) :
   ((category_theory.shift_functor _ i).obj X).val = X.val⟦i⟧ := rfl
 
-instance : preadditive (bounded_homotopy_category A) :=
-{ hom_group := λ A B, show add_comm_group (A.val ⟶ B.val), by apply_instance,
-  add_comp' := λ P Q R f g h, preadditive.add_comp _ _ _ _ _ _,
-  comp_add' := λ P Q R f g h, preadditive.comp_add _ _ _ _ _ _ }
-
 instance shift_functor_additive (i : ℤ) :
   (category_theory.shift_functor (bounded_homotopy_category A) i).additive :=
 by constructor
@@ -137,7 +149,7 @@ instance : triangulated.pretriangulated (bounded_homotopy_category A) :=
   -- This could be expresed using `.map_triangle`?
   { T | triangle.mk (homotopy_category _ _) T.mor₁ T.mor₂ T.mor₃ ∈
     dist_triang (homotopy_category A (complex_shape.up ℤ)) },
-  isomorphic_distinguished := begin
+  isomorphic_distinguished := by async begin
     intros T₁ hT₁ T₂ e,
     let S₁ : triangle (homotopy_category _ _) := triangle.mk _ T₁.mor₁ T₁.mor₂ T₁.mor₃,
     let S₂ : triangle (homotopy_category _ _) := triangle.mk _ T₂.mor₁ T₂.mor₂ T₂.mor₃,
@@ -163,7 +175,16 @@ instance : triangulated.pretriangulated (bounded_homotopy_category A) :=
     { exact e.hom.comm₂ },
     { exact e.hom.comm₃ }
   end,
-  contractible_distinguished := λ X, pretriangulated.contractible_distinguished _,
+  contractible_distinguished := begin
+    intros X,
+    apply pretriangulated.isomorphic_distinguished _
+      (pretriangulated.contractible_distinguished X.val),
+    delta contractible_triangle,
+    dsimp,
+    refine mk_triangle_iso (iso.refl _) (iso.refl _) _ _ _ _,
+    { dsimp, refine is_zero.iso_zero _, apply zero_val, exact limits.is_zero_zero _ },
+    all_goals { dsimp, simp only [category.comp_id, category.id_comp, zero_comp, comp_zero]; refl }
+  end,
   distinguished_cocone_triangle := begin
     intros X Y f,
     let T := (neg₃_functor (homotopy_category A (complex_shape.up ℤ))).obj (cone.triangleₕ f.out),
@@ -185,9 +206,11 @@ instance : triangulated.pretriangulated (bounded_homotopy_category A) :=
       constructor,
       refine triangle.iso.of_components
         (iso.refl _) (iso.refl _) (iso.refl _) _ _ _,
-      all_goals { dsimp [T], simp } } }
+      { dsimp, simp only [category.comp_id, homotopy_category.quotient_map_out, category.id_comp], },
+      { dsimp [T], simp only [category.comp_id, category.id_comp], },
+      { dsimp [T], simp only [category_theory.functor.map_id, category.comp_id, category.id_comp] } } }
   end,
-  rotate_distinguished_triangle := begin
+  rotate_distinguished_triangle := by async begin
     intros T,
     split,
     { intros hT,
@@ -196,7 +219,7 @@ instance : triangulated.pretriangulated (bounded_homotopy_category A) :=
       erw pretriangulated.rotate_distinguished_triangle,
       exact hT }
   end,
-  complete_distinguished_triangle_morphism := begin
+  complete_distinguished_triangle_morphism := by async begin
     intros T₁ T₂ hT₁ hT₂ f g h,
     apply pretriangulated.complete_distinguished_triangle_morphism _ _ hT₁ hT₂ f g h,
   end }
@@ -217,7 +240,7 @@ def single (i : ℤ) : A ⥤ bounded_homotopy_category A :=
       intros j hj,
       dsimp,
       erw if_neg,
-      { apply is_zero_zero },
+      { apply limits.is_zero_zero },
       { exact ((i.lt_iff_add_one_le j).mpr hj).ne' }
     end },
   map := λ X Y f, (homotopy_category.single A i).map f,

@@ -43,6 +43,9 @@ instance : has_coe_to_fun (ℒ S) (λ F, S → ℤ → ℤ) :=
 lemma ext (F G : ℒ S) : (F : S → ℤ → ℤ) = G → F = G :=
 by { intros h, cases F, cases G, simpa }
 
+lemma ext_iff (F G : ℒ S) : F = G ↔ ∀ s n, F s n = G s n :=
+⟨λ h, by intros; rw h, λ h, laurent_measures.ext F G $ by ext; apply h⟩
+
 protected lemma nnreal_summable (F : ℒ S) (s : S) : summable (λ n, ∥F s n∥₊ * r ^ n) :=
 F.2 _
 
@@ -302,7 +305,7 @@ begin
   suffices : ∥F s n∥₊ < 1,
   { change abs (F s n : ℝ) < 1 at this,
     norm_cast at this,
-    rwa ← int.eq_zero_iff_abs_lt_one },
+    rwa ← int.abs_lt_one_iff },
   have : ∥F s n∥₊ * r ^ n ≤ ∑' k, ∥F s k∥₊ * r ^ k,
   { exact le_tsum (F.nnreal_summable s) _ (λ k _, zero_le'), },
   replace this := lt_of_le_of_lt (this.trans _) h,
@@ -370,6 +373,12 @@ begin
   have := (real.lt_rpow_of_log_lt (laurent_measures.norm_nonneg F) hr₀ hFd1),
   rwa [real.rpow_int_cast _ d] at this,
 end
+
+def bdd_filtration {S : Fintype} (hr₀ : 0 < (r : ℝ)) (hr₁ : (r : ℝ) < 1) (F : ℒ S) : ℤ :=
+(exists_bdd_filtration hr₀ hr₁ F).some
+
+def bdd_filtration_spec {S : Fintype} (hr₀ : 0 < (r : ℝ)) (hr₁ : (r : ℝ) < 1) (F : ℒ S) :
+∀ s n, n < bdd_filtration hr₀ hr₁ F → F s n = 0 := (exists_bdd_filtration hr₀ hr₁ F).some_spec
 
 section profinite_structure
 
@@ -508,11 +517,16 @@ end
 
 variables (r S)
 open category_theory
+/-- `laurent_measures_bdd_functor r S c` is the contravariant functor sending `T : finset ℤ` to
+  the finite type `laurent_measures_bdd r S T c`. Morphisms are given by throwing away
+  coefficients. -/
 def laurent_measures_bdd_functor (c : ℝ≥0) [fact (0 < r)] :
   (as_small (finset ℤ))ᵒᵖ ⥤ Fintype :=
 { obj := λ A, Fintype.of $ laurent_measures_bdd r S (ulift.down A.unop) c,
   map := λ A B f, transition (le_of_hom $ ulift.down f.unop) }.
 
+/-- The `equiv` between Laurent measures with norm at most `c` and the projective limit
+over `T : finset ℤ` of the finite types `laurent_measures_bdd r S T c`. -/
 def laurent_measures_bdd_equiv (c : ℝ≥0) [fact (0 < r)] : { F : ℒ S | ∥F∥₊ ≤ c } ≃
   (Profinite.limit_cone (laurent_measures_bdd_functor r S c ⋙ Fintype.to_Profinite)).X :=
 equiv.of_bijective (λ F, ⟨λ A, truncate (ulift.down A.unop) F, λ A B f, by { ext, refl }⟩)
@@ -542,6 +556,7 @@ begin
       exact hF e } }
 end
 
+/-- The profinite topology on the Laurent measures with norm at most `c`. -/
 instance (c : ℝ≥0) [fact (0 < r)] : topological_space {F : ℒ S | ∥F∥₊ ≤ c} :=
 topological_space.induced (laurent_measures_bdd_equiv r S c) infer_instance
 
@@ -681,6 +696,7 @@ instance [fact (0 < r)] : profinitely_filtered_pseudo_normed_group (ℒ S) :=
   ..(infer_instance : (pseudo_normed_group (ℒ S))) }
 .
 
+/-- The additive group homomorphism on Laurent measures induced by division by `T^k` on `ℤ((T))ᵣ` -/
 @[simps] def shift_add_monoid_hom [hr : fact (0 < r)] (k : ℤ) : ℒ S →+ ℒ S :=
 add_monoid_hom.mk' (λ F,
 { to_fun := λ s n, F s (n+k),

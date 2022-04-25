@@ -71,4 +71,17 @@ lemma is_limit_ext {K : J ⥤ Ab.{u}} (C : limit_cone K) (x y : C.cone.X)
   (h : ∀ j : J, C.cone.π.app j x = C.cone.π.app j y) : x = y :=
 limits.concrete.is_limit_ext  _ C.2 _ _ h
 
+noncomputable
+instance (J : Type u) [small_category J] (K : J ⥤ Ab.{u}) :
+  creates_limit K (forget Ab) :=
+creates_limit_of_reflects_iso $ λ C hC,
+{ lifted_cone := explicit_limit_cone _,
+  valid_lift := (types.limit_cone_is_limit _).unique_up_to_iso hC,
+  makes_limit := explicit_limit_cone_is_limit _ }
+
+-- Do we have this somewhere else?
+noncomputable
+instance forget_creates_limits : creates_limits (forget Ab) :=
+by { constructor, introsI J hJ, constructor }
+
 end Ab

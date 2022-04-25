@@ -211,7 +211,6 @@ instance one_lt_k₁_sqrt : fact (1 < k₁_sqrt m) := ⟨begin
   change (1 : ℝ) < real.sqrt (k₁ κ' m),
   rw [real.lt_sqrt zero_le_one, pow_two, mul_one],
   exact (universal_constants.one_lt_k₁ κ' m).elim,
-  exact (k₁ κ' m).coe_nonneg,
 end⟩
 
 /-- `y m r` denotes `m + 2 + (r + 1) / (r - r^2) * (m + 2)^2`. -/

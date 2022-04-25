@@ -3,6 +3,7 @@ import for_mathlib.presieve
 import topology.category.Profinite.projective
 import for_mathlib.Profinite.disjoint_union
 import condensed.is_proetale_sheaf
+import category_theory.sites.limits
 
 /-!
 # Condensed sets
@@ -45,6 +46,38 @@ by rw [←X.map_comp, ←op_comp, pullback.condition, op_comp, X.map_comp]
 def natural_fork {S S' : Profinite.{u}} (f : S' ⟶ S) :
   fork (X.map pullback.fst.op) (X.map pullback.snd.op) :=
 fork.of_ι (X.map (quiver.hom.op f)) (maps_comm X f)
+
+section limits
+
+/-
+There are several files where the instances below are needed, but are not found automatically
+because the universe parameters involve things like `max v w` where `v = u+1` and `w = u`.
+So we just add them manually here.
+-/
+
+instance : has_limits CondensedSet.{u} :=
+Sheaf.category_theory.limits.has_limits.{(u+2) u (u+1)}
+
+instance : has_colimits CondensedSet.{u} :=
+Sheaf.category_theory.limits.has_colimits.{(u+2) u (u+1)}
+
+instance (C : Type (u+2)) [category.{u+1} C] [has_limits C] :
+  has_limits (Condensed.{u} C) :=
+Sheaf.category_theory.limits.has_limits.{(u+2) u (u+1)}
+
+instance (C : Type (u+2)) [category.{u+1} C]
+  [concrete_category.{u+1} C]
+  [reflects_isomorphisms (forget C)]
+  [preserves_limits (forget C)]
+  [has_colimits C]
+  [∀ (X : Profinite.{u}),
+    preserves_colimits_of_shape (proetale_topology.cover X)ᵒᵖ (forget C)]
+  [∀ (P : Profiniteᵒᵖ ⥤ C) (X : Profinite)
+    (S : proetale_topology.cover X), has_multiequalizer (S.index P)] :
+  has_colimits (Condensed.{u} C) :=
+Sheaf.category_theory.limits.has_colimits.{(u+2) u (u+1)}
+
+end limits
 
 /-
 -- TODO (BM): put this in mathlib (it's already in a mathlib branch with API)

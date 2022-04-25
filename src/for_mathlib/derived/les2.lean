@@ -6,7 +6,9 @@ open category_theory
 open category_theory.limits
 open category_theory.triangulated
 
-variables {A : Type*} [category A] [abelian A]
+universes v u
+
+variables {A : Type u} [category.{v} A] [abelian A]
 
 local notation `𝒦` := homotopy_category A (complex_shape.up ℤ)
 
@@ -231,8 +233,8 @@ def Ext_five_term_exact_seq
   [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj Z)]
   (w : ∀ i, short_exact (f.f i) (g.f i)) :
   let E := ((Ext n).flip.obj W).right_op in
-  exact_seq Abᵒᵖ $
-    [ arrow.mk (E.map (of_hom f))
+  exact_seq Ab.{v}ᵒᵖ $
+    [ E.map (of_hom f)
     , E.map (of_hom g)
     , connecting_hom' f g n W w
     , E.map (-(of_hom f)⟦(1 : ℤ)⟧')] :=
@@ -265,6 +267,73 @@ begin
     apply pretriangulated.rot_of_dist_triangle,
     apply pretriangulated.rot_of_dist_triangle,
     apply dist_cone_triangle },
+end
+.
+
+
+def shift_iso [enough_projectives A]
+  (n : ℤ) (X : cochain_complex A ℤ) (Y : bounded_homotopy_category A)
+  [((homotopy_category.quotient A (complex_shape.up ℤ)).obj X).is_bounded_above] :
+  (((Ext (n+1)).flip.obj Y)).obj (opposite.op $ (of' X)⟦(1:ℤ)⟧) ≅
+  (((Ext n).flip.obj Y)).obj (opposite.op $ (of' X)) :=
+begin
+  let e := Ext_iso n (of' X).replace (of' X) Y (of' X).π,
+  let e' := Ext_iso (n+1) ((of' X).replace⟦1⟧) ((of' X)⟦1⟧) Y ((of' X).π⟦(1:ℤ)⟧'),
+  refine (e' ≪≫ _ ≪≫ e.symm),
+  clear e e',
+  refine add_equiv.to_AddCommGroup_iso _,
+  let se := shift_equiv (bounded_homotopy_category A) (1:ℤ),
+  sorry
+end
+
+lemma shift_iso_conj
+  (n : ℤ)
+  [enough_projectives A]
+  (W : bounded_homotopy_category A)
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj X)]
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj Y)] :
+  (shift_iso _ _ _).inv ≫ (((Ext (n+1)).flip.obj W).right_op.map (-(of_hom f)⟦(1 : ℤ)⟧')).unop
+    ≫ (shift_iso _ _ _).hom =
+  ((Ext n).flip.obj W).map (of_hom f).op :=
+begin
+  -- this should be true up to a minus sign
+  sorry
+end
+
+def Ext_δ
+  (n : ℤ)
+  [enough_projectives A]
+  (W : bounded_homotopy_category A)
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj X)]
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj Y)]
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj Z)]
+  (w : ∀ i, short_exact (f.f i) (g.f i)) :
+  ((Ext n).flip.obj W).obj (opposite.op $ of' X) ⟶
+  ((Ext (n+1)).flip.obj W).obj (opposite.op $ of' Z) :=
+(shift_iso n X W).inv ≫ (connecting_hom' f g (n+1) W w).unop
+
+def Ext_five_term_exact_seq'
+  (n : ℤ)
+  [enough_projectives A]
+  (W : bounded_homotopy_category A)
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj X)]
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj Y)]
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj Z)]
+  (w : ∀ i, short_exact (f.f i) (g.f i)) :
+  let E := λ n, ((Ext n).flip.obj W) in
+  exact_seq Ab.{v} $
+    [ (E n).map (of_hom g).op
+    , (E n).map (of_hom f).op
+    , Ext_δ f g n W w
+    , (E (n+1)).map (of_hom g).op ] :=
+begin
+  refine (Ext_five_term_exact_seq f g n W w).pair.unop.cons _,
+  refine exact.cons _ (exact.exact_seq _),
+  { rw [Ext_δ, functor.right_op_map, quiver.hom.unop_op, ← shift_iso_conj f n W,
+      exact_iso_comp, exact_comp_hom_inv_comp_iff],
+    exact (Ext_five_term_exact_seq f g (n+1) W w).unop.pair, },
+  { rw [Ext_δ, exact_iso_comp],
+    exact ((Ext_five_term_exact_seq f g (n+1) W w).drop 1).pair.unop, }
 end
 
 end bounded_homotopy_category

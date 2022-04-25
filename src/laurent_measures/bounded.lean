@@ -11,6 +11,9 @@ noncomputable theory
 open_locale big_operators nnreal classical
 open set
 
+/-- `laurent_measures_bdd r S T c` is functions from `S` to the space of Laurent polynomials
+  whose coefficients are supported in the `finset` T, and whose `r`-norm is at most `c`.
+  Note that this is a finite type.  -/
 structure laurent_measures_bdd (r : ℝ≥0) (S : Fintype) (T : finset ℤ) (c : ℝ≥0) :=
 (to_fun : S → T → ℤ)
 (bound' : ∑ s i, ∥to_fun s i∥₊ * r ^ (i : ℤ) ≤ c)

@@ -107,9 +107,7 @@ lemma lift_add {P X Y : 𝒦} [is_K_projective P.val] (f₁ f₂ : P ⟶ Y) (g :
 
 instance is_K_projective_shift (X : 𝒦) [is_K_projective X.val] (m : ℤ) :
   is_K_projective ((category_theory.shift_functor 𝒦 m).obj X).val :=
-sorry
--- TODO: this should work; check the definitions of the shift functors?
--- homotopy_category.is_K_projective_shift X.val m
+by exact homotopy_category.is_K_projective_shift X.val m -- strange?
 
 instance {X Y : 𝒦} (g : X ⟶ Y) [is_quasi_iso g] (m : ℤ) :
   is_quasi_iso ((category_theory.shift_functor 𝒦 m).map g) :=

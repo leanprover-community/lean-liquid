@@ -15,18 +15,6 @@ open category_theory
 
 namespace comphaus_filtered_pseudo_normed_group
 
--- def strict_unscale (M : Type*) [comphaus_filtered_pseudo_normed_group M]
---   (r : ℝ≥0) [fact (1 ≤ r)] :
---   strict_comphaus_filtered_pseudo_normed_group_hom (rescale r M) M :=
--- { to_fun := rescale.of.symm,
---   map_zero' := rfl,
---   map_add' := λ _ _, rfl,
---   strict' := λ c x hx, begin
---     rw [rescale.mem_filtration] at hx,
---     exact pseudo_normed_group.filtration_mono (fact.out _) hx,
---   end,
---   continuous' := λ c, @comphaus_filtered_pseudo_normed_group.continuous_cast_le M _ (c * r⁻¹) c _ }
-
 def of_rescale_one_strict (M : Type*) [comphaus_filtered_pseudo_normed_group M] :
   strict_comphaus_filtered_pseudo_normed_group_hom (rescale 1 M) M :=
 { continuous' := λ c, comphaus_filtered_pseudo_normed_group.continuous_cast_le (c * 1⁻¹) c,
@@ -161,32 +149,49 @@ def rescale (r : ℝ≥0) [fact (0 < r)] : CompHausFiltPseuNormGrp₁ ⥤ CompHa
   map_comp' := by { intros, ext, refl } }
 .
 
--- def rescale.comp (r s : ℝ≥0) [fact (0 < r)] [fact (0 < s)] :
--- rescale r ⋙ rescale s ⟶ rescale (r * s) :=
--- { app := λ M,
---   { continuous' := sorry,
---     ..rescale.of_rescale_rescale_strict_pseudo_normed_group_hom r s M
---   },
---   naturality' := _ }
-
--- practice
-example : 𝟭 CompHausFiltPseuNormGrp₁ ⟶ rescale 1 :=
-{ app := λ M, comphaus_filtered_pseudo_normed_group.to_rescale_one_strict M,
-  naturality' := λ M N f, rfl,
-}
-
--- kmb in the middle of this. Should now be just a case of putting together
--- a bunch of `of_rescale_rescale_strict` etc above
 instance rescale.equivalence (r : ℝ≥0) [fact (0 < r)] :
   is_equivalence (rescale r) :=
+by haveI : fact (0 < r⁻¹) := ⟨nnreal.inv_pos.2 (fact.elim infer_instance)⟩;
+   haveI : fact (0 < r * r⁻¹) := ⟨mul_pos (fact.elim infer_instance) (fact.elim infer_instance)⟩;
+exactI
 is_equivalence.mk (@rescale r⁻¹ ⟨nnreal.inv_pos.2 (fact.elim infer_instance)⟩)
 { hom :=
-  { app := λ M, sorry, -- have enough to make this now
-    naturality' := sorry -- will be rfl },
+  { app := λ M,
+    -- M ⟶ rescale 1 M ⟶ rescale (r * r⁻¹) M ⟶ rescale r⁻¹ (rescale r M)
+    ((comphaus_filtered_pseudo_normed_group.to_rescale_rescale_strict r⁻¹ r M).comp
+    ((comphaus_filtered_pseudo_normed_group.of_rescale_eq_strict M 1 (r * r⁻¹)
+      (eq.symm (mul_inv_cancel (ne_of_gt (fact.elim infer_instance))))))).comp
+    (comphaus_filtered_pseudo_normed_group.to_rescale_one_strict M),
+    naturality' := λ M N f, rfl,
   },
-  inv := sorry,
-  hom_inv_id' := sorry,
-  inv_hom_id' := sorry } sorry
+  inv :=
+  { app := λ M,
+    -- rescale r⁻¹ (rescale r M) ⟶ rescale (r * r⁻¹) M ⟶ rescale 1 M ⟶ M
+    (comphaus_filtered_pseudo_normed_group.of_rescale_one_strict M).comp
+    (((comphaus_filtered_pseudo_normed_group.of_rescale_eq_strict M (r * r⁻¹) 1
+      ((mul_inv_cancel (ne_of_gt (fact.elim infer_instance)))))).comp
+      (comphaus_filtered_pseudo_normed_group.of_rescale_rescale_strict r⁻¹ r M)),
+    naturality' := λ M N f, rfl },
+  hom_inv_id' := rfl,
+  inv_hom_id' := rfl }
+  { hom :=
+    { app := λ M,
+    -- rescale r (rescale r⁻¹ M) ⟶ rescale (r⁻¹ * r) M ⟶ rescale 1 M ⟶ M
+    (comphaus_filtered_pseudo_normed_group.of_rescale_one_strict M).comp
+    (((comphaus_filtered_pseudo_normed_group.of_rescale_eq_strict M (r⁻¹ * r) 1
+      ((inv_mul_cancel (ne_of_gt (fact.elim infer_instance)))))).comp
+      (comphaus_filtered_pseudo_normed_group.of_rescale_rescale_strict r r⁻¹ M)),
+      naturality' := λ M N f, rfl },
+    inv :=
+    { app := λ M,
+    -- M ⟶ rescale 1 M ⟶ rescale (r⁻¹ * r) M ⟶ rescale r (rescale r⁻¹ M)
+    ((comphaus_filtered_pseudo_normed_group.to_rescale_rescale_strict r r⁻¹ M).comp
+    ((comphaus_filtered_pseudo_normed_group.of_rescale_eq_strict M 1 (r⁻¹ * r)
+      (eq.symm (inv_mul_cancel (ne_of_gt (fact.elim infer_instance))))))).comp
+    (comphaus_filtered_pseudo_normed_group.to_rescale_one_strict M),
+      naturality' := λ M N f, rfl },
+    hom_inv_id' := rfl,
+    inv_hom_id' := rfl }
 
 instance rescale_preserves_limits_of_shape_discrete_quotient
   (X : Profinite.{u}) (c : ℝ≥0) [fact (0 < c)] :
@@ -194,7 +199,7 @@ instance rescale_preserves_limits_of_shape_discrete_quotient
 begin
   let foo := (category_theory.adjunction.is_equivalence_preserves_limits
     (rescale c)).preserves_limits_of_shape,
-  exact foo, -- not 100% sure why this is happening
+  exact foo, -- not 100% sure why I need to define foo first
 end
 
 @[simps]
@@ -320,8 +325,17 @@ end
 lemma nonstrict_extend_bound_by (h : ∀ X, (α.app X).bound_by c) (X : Profinite.{u}) :
   ((nonstrict_extend α c h).app X).bound_by c :=
 begin
-  -- needs a `bound_by.comp` lemma (now available in pseudo_normed_group.profinitely_filtered)
-  sorry,
+  conv begin congr, skip, rw ← one_mul c, end, -- can't get nth_rewrite to work
+  refine comphaus_filtered_pseudo_normed_group_hom.bound_by.comp (λ r m hm, _) _,
+  { rw mul_comm,
+    rwa (show r = r * c * c⁻¹, begin
+      rw [mul_assoc, mul_inv_cancel (ne_of_gt (fact.elim infer_instance)), mul_one];
+      apply_instance,
+    end) at hm },
+  { rw [← one_mul (1 : ℝ≥0), whisker_right_comp],
+    apply comphaus_filtered_pseudo_normed_group_hom.bound_by.comp,
+    { apply strict_comphaus_filtered_pseudo_normed_group_hom.to_chfpsng_hom.bound_by_one },
+    { apply strict_comphaus_filtered_pseudo_normed_group_hom.to_chfpsng_hom.bound_by_one } },
 end
 
 lemma nonstrict_extend_ext'
@@ -444,7 +458,11 @@ lemma nonstrict_extend_comp
   nonstrict_extend (α ≫ β) cαβ hαβ = nonstrict_extend α cα hα ≫ nonstrict_extend β cβ hβ :=
 begin
   refine nonstrict_extend_ext _ _ cαβ (cα * cβ) (nonstrict_extend_bound_by _ _ _) _ _,
-  { sorry /- needs `bound_by.comp` -/ },
+  { intro X,
+    rw mul_comm,
+    apply comphaus_filtered_pseudo_normed_group_hom.bound_by.comp,
+    { exact nonstrict_extend_bound_by α cα hα X },
+    { exact nonstrict_extend_bound_by β cβ hβ X } },
   { simp only [nonstrict_extend_whisker_left, whisker_left_comp, category.assoc,
       ← iso_whisker_right_hom, ← iso_whisker_right_inv,
       iso.hom_inv_id_assoc, iso.inv_hom_id_assoc], }

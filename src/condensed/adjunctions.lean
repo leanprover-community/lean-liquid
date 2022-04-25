@@ -6,6 +6,7 @@ import algebra.category.Group.filtered_colimits
 import for_mathlib.SheafOfTypes_sheafification
 import for_mathlib.whisker_adjunction
 import for_mathlib.abelian_sheaves.main
+import for_mathlib.AddCommGroup
 
 import condensed.basic
 
@@ -68,10 +69,24 @@ Sheaf_compose _ (forget _)
 def CondensedSet_to_Condensed_Ab : CondensedSet ⥤ Condensed Ab :=
 Sheaf.compose_and_sheafify _ AddCommGroup.free
 
+@[simps obj_val map]
+def CondensedSet_to_Condensed_Ab' : CondensedSet ⥤ Condensed Ab :=
+Sheaf.compose_and_sheafify _ AddCommGroup.free'
+
+@[simps hom_app_val inv_app_val]
+def CondensedSet_to_Condensed_Ab_iso :
+  CondensedSet_to_Condensed_Ab ≅ CondensedSet_to_Condensed_Ab' :=
+iso_whisker_left _ $ iso_whisker_right (functor.map_iso _ $ AddCommGroup.free_iso_free') _
+
 @[simps unit_app counit_app]
 def Condensed_Ab_CondensedSet_adjunction :
   CondensedSet_to_Condensed_Ab ⊣ Condensed_Ab_to_CondensedSet :=
 Sheaf.adjunction _ AddCommGroup.adj
+
+@[simps unit_app counit_app]
+def Condensed_Ab_CondensedSet_adjunction' :
+  CondensedSet_to_Condensed_Ab' ⊣ Condensed_Ab_to_CondensedSet :=
+Sheaf.adjunction _ AddCommGroup.adj'
 
 @[simp]
 lemma Condensed_Ab_CondensedSet_adjunction_hom_equiv_apply (X : CondensedSet)
@@ -85,3 +100,16 @@ lemma Condensed_Ab_CondensedSet_adjunction_hom_equiv_symm_apply (X : CondensedSe
   ((Condensed_Ab_CondensedSet_adjunction.hom_equiv _ _).symm e).val =
   proetale_topology.sheafify_lift
     (((AddCommGroup.adj.whisker_right _).hom_equiv _ _).symm e.val) Y.2 := rfl
+
+@[simp]
+lemma Condensed_Ab_CondensedSet_adjunction'_hom_equiv_apply (X : CondensedSet)
+  (Y : Condensed Ab) (e : CondensedSet_to_Condensed_Ab'.obj X ⟶ Y) :
+  (Condensed_Ab_CondensedSet_adjunction'.hom_equiv _ _ e).val =
+  (AddCommGroup.adj'.whisker_right _).hom_equiv _ _ (proetale_topology.to_sheafify _ ≫ e.val) := rfl
+
+@[simp]
+lemma Condensed_Ab_CondensedSet_adjunction'_hom_equiv_symm_apply (X : CondensedSet)
+  (Y : Condensed Ab) (e : X ⟶ Condensed_Ab_to_CondensedSet.obj Y) :
+  ((Condensed_Ab_CondensedSet_adjunction'.hom_equiv _ _).symm e).val =
+  proetale_topology.sheafify_lift
+    (((AddCommGroup.adj'.whisker_right _).hom_equiv _ _).symm e.val) Y.2 := rfl
