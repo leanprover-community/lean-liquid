@@ -5,6 +5,7 @@ import condensed.adjunctions
 import condensed.sheafification_mono
 import condensed.coproducts
 import free_pfpng.lemmas
+import condensed.exact
 
 import for_mathlib.int
 
@@ -584,13 +585,6 @@ def Profinite.pmz_functor (n : ℕ) : Profinite.{u} ⥤ Profinite.{u} :=
   map_id' := sorry,
   map_comp' := sorry }
 
-instance Profinite.pmz_functor_preserves_limits (n : ℕ) :
-  limits.preserves_limits (Profinite.pmz_functor.{u} n) :=
-begin
-  constructor, dsimp, introsI J hJ,
-  sorry
-end
-
 def Profinite.pmz_diagram (S : Profinite.{u}) (n : ℕ) :
   discrete_quotient S ⥤ Profinite.{u} :=
 S.diagram ⋙ Profinite.pmz_functor n
@@ -598,9 +592,124 @@ S.diagram ⋙ Profinite.pmz_functor n
 def Profinite.pmz_cone (S : Profinite.{u}) (n : ℕ) : limits.cone (S.pmz_diagram n) :=
 (Profinite.pmz_functor n).map_cone S.as_limit_cone
 
+def Profinite.sigma_functor {J : Type u} [small_category J]
+  (F : J ⥤ Profinite.{u}) (α : Type u) [fintype α] :
+  J ⥤ Profinite.{u} :=
+{ obj := λ j, Profinite.sigma (λ a : α, F.obj j),
+  map := λ i j e, Profinite.sigma.desc _ $ λ a,
+    F.map e ≫ Profinite.sigma.ι _ a,
+  map_id' := sorry,
+  map_comp' := sorry }
+
+def Profinite.sigma_cone {J : Type u} [small_category J]
+  {F : J ⥤ Profinite.{u}} (α : Type u) [fintype α]
+  (E : limits.cone F) :
+  limits.cone (Profinite.sigma_functor F α) :=
+{ X := Profinite.sigma (λ a : α, E.X),
+  π :=
+  { app := λ j, Profinite.sigma.desc _ $ λ a,
+      E.π.app j ≫ Profinite.sigma.ι _ a,
+    naturality' := sorry } }
+
+def Profinite.sigma_to_limit {J : Type u} [small_category J]
+  (F : J ⥤ Profinite.{u}) (α : Type u) [fintype α]
+  (E : limits.cone F) :
+  (Profinite.sigma_cone α E).X ⟶
+    (Profinite.limit_cone (Profinite.sigma_functor F α)).X :=
+Profinite.sigma.desc _ $ λ a, (Profinite.limit_cone_is_limit
+  (Profinite.sigma_functor F α)).lift ⟨E.X,
+  { app := λ j, E.π.app j ≫ Profinite.sigma.ι _ a,
+  naturality' := sorry }⟩
+
+lemma Profinite.exists_of_sigma_limit {J : Type u} [small_category J]
+  (F : J ⥤ Profinite.{u}) (α : Type u) [fintype α] [is_cofiltered J]
+  (t : (Profinite.limit_cone (Profinite.sigma_functor F α)).X) :
+  ∃ (a₀ : α) (t₀ : (Profinite.limit_cone F).X),
+    ∀ j : J, Profinite.sigma.ι _ a₀
+      ((Profinite.limit_cone F).π.app j t₀) =
+      (Profinite.limit_cone (Profinite.sigma_functor F α)).π.app j t := sorry
+
+-- This should be true without the assumption `j₀ : J` as well...
+lemma Profinite.bijective_sigma_to_limit {J : Type u} [small_category J]
+  (F : J ⥤ Profinite.{u}) (α : Type u) [fintype α]
+  (E : limits.cone F) (hE : limits.is_limit E) [is_cofiltered J] :
+  function.bijective (Profinite.sigma_to_limit F α E) :=
+begin
+  split,
+  { rintros ⟨a,x⟩ ⟨b,y⟩ h,
+    dsimp [Profinite.sigma_to_limit, Profinite.sigma.desc,
+      Profinite.limit_cone_is_limit, CompHaus.limit_cone_is_limit,
+      Top.limit_cone_is_limit] at h,
+    apply_fun (λ e, e.1) at h,
+    have hh := h,
+    obtain ⟨j₀⟩ : nonempty J := is_cofiltered.nonempty,
+    apply_fun (λ e, (e j₀).1) at h, dsimp [Profinite.sigma.ι] at h,
+    subst h, ext, refl,
+    apply heq_of_eq,
+    apply limits.concrete.is_limit_ext _ hE,
+    intros jj, apply_fun (λ e, e jj) at hh,
+    erw sigma.mk.inj_iff at hh,
+    exact eq_of_heq hh.2 },
+  { rintros t,
+    obtain ⟨a,s,ht⟩ := Profinite.exists_of_sigma_limit F α t,
+    use a, let EE : E.X ≅ (Profinite.limit_cone F).X :=
+      hE.cone_point_unique_up_to_iso (Profinite.limit_cone_is_limit _),
+    use EE.inv s, dsimp, ext j : 2,
+    convert ht j, ext, refl,
+    apply heq_of_eq,
+    change ((hE.lift (Profinite.limit_cone F)) ≫ E.π.app j) s = _,
+    rw hE.fac, refl }
+end
+
+lemma Profinite.is_iso_lift_sigma_cone {J : Type u} [small_category J]
+  {F : J ⥤ Profinite.{u}} (α : Type u) [fintype α] [is_cofiltered J]
+  (E : limits.cone F) (hE : limits.is_limit E) :
+  is_iso ((Profinite.limit_cone_is_limit _).lift (Profinite.sigma_cone α E)) :=
+begin
+  apply Profinite.is_iso_of_bijective,
+  convert Profinite.bijective_sigma_to_limit F α E hE,
+  symmetry,
+  apply (Profinite.limit_cone_is_limit (Profinite.sigma_functor F α)).uniq,
+  intros j,
+  apply Profinite.sigma.hom_ext,
+  intros a, refl,
+end
+
+def Profinite.sigma_cone_is_limit {J : Type u} [small_category J]
+  {F : J ⥤ Profinite.{u}} (α : Type u) [fintype α] [is_cofiltered J]
+  (E : limits.cone F) (hE : limits.is_limit E) :
+  limits.is_limit (Profinite.sigma_cone α E) :=
+begin
+  haveI : is_iso ((Profinite.limit_cone_is_limit _).lift (Profinite.sigma_cone α E)) :=
+    Profinite.is_iso_lift_sigma_cone α E hE,
+  apply limits.is_limit.of_point_iso (Profinite.limit_cone_is_limit _),
+  assumption
+end
+
+def Profinite.pmz_to_limit (S : Profinite.{u}) (n : ℕ) :
+  S.pmz n ⟶ (Profinite.limit_cone (S.pmz_diagram n)).X :=
+Profinite.sigma.desc _ $ λ f,
+  (Profinite.limit_cone_is_limit (S.pmz_diagram n)).lift ⟨S.pow n,
+  { app := λ T, Profinite.map_pow (S.as_limit_cone.π.app T) n ≫
+      Profinite.sigma.ι _ f,
+    naturality' := sorry }⟩
+
+
+lemma Profinite.is_iso_pmz_to_limit (S : Profinite.{u}) (n : ℕ) :
+  is_iso (S.pmz_to_limit n) :=
+begin
+  sorry -- use Profinite.is_iso_lift_sigma_cone, etc.
+end
+
 def Profinite.pmz_cone_is_limit (S : Profinite.{u}) (n : ℕ) :
   limits.is_limit (S.pmz_cone n) :=
-limits.is_limit_of_preserves (Profinite.pmz_functor n) S.as_limit
+begin
+  apply limits.is_limit.of_point_iso (Profinite.limit_cone_is_limit _),
+  convert Profinite.is_iso_pmz_to_limit S n,
+  apply Profinite.sigma.hom_ext, intros a,
+  apply (Profinite.limit_cone_is_limit _).hom_ext, intros j,
+  refl,
+end
 
 instance Profinite.discrete_topology_discrete_quotient_pmz
   (S : Profinite.{u}) (n : ℕ) (T : discrete_quotient S) :
@@ -626,7 +735,7 @@ def Profinite.pmz_to_level (S : Profinite.{u}) (j : nnreal) (T : discrete_quotie
   continuous_to_fun := continuous_of_discrete_topology }
 
 def Profinite.pmz_to_level_nat_trans (S : Profinite.{u}) (j : nnreal) :
-  S.pmz_diagram ⌊j⌋₊ ⟶ S.fintype_diagram ⋙ free_pfpng_functor ⋙
+  S.pmz_diagram ⌊j⌋₊ ⟶ (S.fintype_diagram ⋙ free_pfpng_functor) ⋙
     (ProFiltPseuNormGrp₁.level.obj j) :=
 { app := λ T, S.pmz_to_level j T,
   naturality' := sorry }
@@ -636,6 +745,42 @@ def Profinite.pmz_to_free_pfpng (S : Profinite.{u}) (j : nnreal) :
 let E := limits.is_limit_of_preserves (ProFiltPseuNormGrp₁.level.obj j)
   (limits.limit.is_limit (S.fintype_diagram ⋙ free_pfpng_functor)) in
 E.map (S.pmz_cone _) (S.pmz_to_level_nat_trans j)
+
+lemma Profinite.is_limit.surjective_of_surjective
+  {J : Type u} [small_category J] (F G : J ⥤ Profinite.{u})
+  (α : F ⟶ G) (cF : limits.cone F)
+  (cG : limits.cone G) (hcF : limits.is_limit cF) (hcG : limits.is_limit cG)
+  [is_cofiltered J] (surj : ∀ (j : J), function.surjective ⇑(α.app j)) :
+  function.surjective ⇑(limits.is_limit.map cF hcG α) :=
+begin
+  have := CompHaus.is_limit.surjective_of_surjective
+    (F ⋙ Profinite_to_CompHaus)
+    (G ⋙ Profinite_to_CompHaus)
+    (whisker_right α _)
+    (Profinite_to_CompHaus.map_cone cF)
+    (Profinite_to_CompHaus.map_cone cG)
+    (limits.is_limit_of_preserves _ hcF)
+    (limits.is_limit_of_preserves _ hcG)
+    surj,
+  change function.surjective
+    (Profinite_to_CompHaus.map (limits.is_limit.map cF hcG α)),
+  convert this,
+  apply hcG.hom_ext, intros j,
+  simp only [limits.is_limit.map_π, iso.trans_hom, iso.symm_hom,
+    functor.map_iso_hom, limits.is_limit.unique_up_to_iso_hom,
+    limits.cone.category_comp_hom, limits.is_limit.lift_cone_morphism_hom,
+    limits.limit.is_limit_lift, limits.cones.functoriality_map_hom,
+    Profinite_to_CompHaus_map],
+  erw [category.assoc, category.assoc],
+  erw hcG.fac,
+  have := (lifted_limit_maps_to_original
+    (limits.limit.is_limit (G ⋙ Profinite_to_CompHaus))).inv.w j,
+  erw this,
+  dsimp, simp only [limits.limit.lift_π, limits.cones.postcompose_obj_π,
+    nat_trans.comp_app, functor.map_cone_π_app,
+    Profinite_to_CompHaus_map, whisker_right_app],
+  refl,
+end
 
 instance Profinite.pmz_to_free_pfpng_epi (S : Profinite.{u}) (j : nnreal) :
   epi (S.pmz_to_free_pfpng j) :=
@@ -649,6 +794,16 @@ begin
     but that shouldn't be too hard.
   -/
   rw Profinite.epi_iff_surjective,
+  dsimp only [Profinite.pmz_to_free_pfpng],
+  have := Profinite.is_limit.surjective_of_surjective _ _ (S.pmz_to_level_nat_trans j)
+    (S.pmz_cone _)
+    ((ProFiltPseuNormGrp₁.level.obj j).map_cone (limits.limit.cone _))
+    (S.pmz_cone_is_limit _)
+    (limits.is_limit_of_preserves _ (limits.limit.is_limit _)),
+  apply this,
+  intros j,
+
+
   sorry
 end
 
