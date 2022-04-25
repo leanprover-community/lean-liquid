@@ -614,16 +614,32 @@ def Profinite.pmz_to_level (S : Profinite.{u}) (j : nnreal) (T : discrete_quotie
 { to_fun := Profinite.sigma.desc _ $ λ e, S.pmz_to_level_component j T (ulift.down e),
   continuous_to_fun := continuous_of_discrete_topology }
 
+def Profinite.pmz_to_level_nat_trans (S : Profinite.{u}) (j : nnreal) :
+  S.pmz_diagram ⌊j⌋₊ ⟶ S.fintype_diagram ⋙ free_pfpng_functor ⋙
+    (ProFiltPseuNormGrp₁.level.obj j) :=
+{ app := λ T, S.pmz_to_level j T,
+  naturality' := sorry }
+
 def Profinite.pmz_to_free_pfpng (S : Profinite.{u}) (j : nnreal) :
   S.pmz ⌊j⌋₊ ⟶ (ProFiltPseuNormGrp₁.level.obj j).obj S.free_pfpng :=
 let E := limits.is_limit_of_preserves (ProFiltPseuNormGrp₁.level.obj j)
   (limits.limit.is_limit (S.fintype_diagram ⋙ free_pfpng_functor)) in
-E.lift $ limits.cone.mk (S.pmz ⌊j⌋₊) $
-{ app := λ T, (S.pmz_cone ⌊j⌋₊).π.app T ≫ S.pmz_to_level j T,
-  naturality' := sorry }
+E.map (S.pmz_cone _) (S.pmz_to_level_nat_trans j)
 
 instance Profinite.pmz_to_free_pfpng_epi (S : Profinite.{u}) (j : nnreal) :
-  epi (S.pmz_to_free_pfpng j) := sorry
+  epi (S.pmz_to_free_pfpng j) :=
+begin
+  /-
+    First, use the fact that `epi ↔ surjective` in `Profinite`.
+    This map is defined using `is_limit.map`, where the limit is over a cofiltered category.
+    We can thus reduce to the case where `S` is finite using Tychonoff
+    (and the relevant lemma should already exist in this repo).
+    We would have to show that `S.pmz_cone` is a limit cone for this,
+    but that shouldn't be too hard.
+  -/
+  rw Profinite.epi_iff_surjective,
+  sorry
+end
 
 instance Profinite.epi_free'_to_condensed_free_pfpng
   (S : Profinite.{u}) : epi S.free'_to_condensed_free_pfpng :=
