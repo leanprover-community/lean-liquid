@@ -472,6 +472,15 @@ begin
   split_ifs; refl,
 end
 
+.
+
+#check free'_lift
+lemma Profinite.free'_lift_eq (S : Profinite.{u}) (A : Condensed.{u} Ab.{u+1})
+  (η : S.to_Condensed ⟶ Condensed_Ab_to_CondensedSet.obj A)
+  (T : Profinite.{u}) :
+  (S.free'_lift η).val.app (op T) =
+  _ := sorry
+
 instance Profinite.epi_free'_to_condensed_free_pfpng
   (S : Profinite.{u}) : epi S.free'_to_condensed_free_pfpng :=
 begin
@@ -491,5 +500,14 @@ begin
     Profinite_to_Condensed.map (S.pmz_to_free_pfpng j')],
   split,
   { apply epi_Profinite_to_Condensed_map_of_epi },
-  { sorry }
+  apply_fun Profinite.to_Condensed_equiv _ _,
+  ext : 2,
+  dsimp [Profinite.to_Condensed_equiv, E,
+    CompHausFiltPseuNormGrp.level_Condensed_diagram_cocone,
+    Profinite.free'_to_condensed_free_pfpng,
+    Profinite.pmz_to_free'],
+  rw category_theory.functor.map_id,
+  rw id_apply, simp only [add_monoid_hom.map_sum],
+  sorry
+
 end

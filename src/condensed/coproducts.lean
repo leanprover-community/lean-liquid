@@ -1,5 +1,6 @@
 import condensed.is_proetale_sheaf
 import condensed.top_comparison
+import condensed.adjunctions
 
 /-!
 We show that passing from a profinite set to a condensed set
@@ -52,6 +53,16 @@ begin
   have key := this.1,
   exact key ⟨α⟩ X,
 end
+
+noncomputable
+lemma val_obj_sigma_add_equiv (Y : Condensed.{u} Ab.{u+1}) :
+  Y.val.obj (op $ Profinite.sigma X) ≃+
+  (Π (a : α), Y.val.obj (op $ X a)) :=
+add_equiv.of_bijective
+{ to_fun := λ f a, Y.val.map (Profinite.sigma.ι X a).op f,
+  map_zero' := by { ext1, simp },
+  map_add' := λ x y, by { ext1, simp } }
+((Condensed_Ab_to_CondensedSet.obj Y).val_obj_sigma_equiv X).bijective
 
 noncomputable
 def is_colimit_sigma_cone : is_colimit (sigma_cone X) :=
