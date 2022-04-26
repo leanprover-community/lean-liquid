@@ -474,12 +474,14 @@ end
 
 .
 
+/-
 #check free'_lift
 lemma Profinite.free'_lift_eq (S : Profinite.{u}) (A : Condensed.{u} Ab.{u+1})
   (η : S.to_Condensed ⟶ Condensed_Ab_to_CondensedSet.obj A)
   (T : Profinite.{u}) :
   (S.free'_lift η).val.app (op T) =
-  _ := sorry
+  sorry := sorry
+-/
 
 instance Profinite.epi_free'_to_condensed_free_pfpng
   (S : Profinite.{u}) : epi S.free'_to_condensed_free_pfpng :=
