@@ -1,4 +1,5 @@
 import free_pfpng.setup
+import data.sign
 
 noncomputable theory
 
@@ -80,6 +81,7 @@ begin
     simp only [category.id_comp, Profinite.pullback.condition] },
 end
 
+/-
 inductive pmz : set ℤ
 | neg_one : pmz (-1)
 | zero : pmz 0
@@ -99,23 +101,25 @@ lemma pmz_finite : set.finite pmz :=
 by simp [pmz_eq]
 
 instance fintype_pmz : fintype pmz := pmz_finite.fintype
+-/
 
 --abbreviation Profinite.pow (S : Profinite.{u}) (n : ℕ) : Profinite.{u} :=
 --Profinite.product (λ i : fin n, S)
 
 /-- `S.profinite n` is `(S × {-1,0,1})^n`. -/
 def Profinite.pmz (S : Profinite.{u}) (n : ℕ) : Profinite.{u} :=
-Profinite.sigma $ λ (x : ulift.{u} (fin n → pmz)), S.pow n
+Profinite.sigma $ λ (x : ulift.{u} (fin n → sign_type)), S.pow n
 
 /-- the canonical map of condensed sets `(S × {-1,0,1})^n ⟶ ℤ[S]` -/
 def Profinite.pmz_to_free' (S : Profinite.{u}) (n : ℕ) :
   (S.pmz n).to_Condensed ⟶ Condensed_Ab_to_CondensedSet.obj S.free' :=
 (Profinite.to_Condensed_equiv (S.pmz n) (Condensed_Ab_to_CondensedSet.obj S.free')).symm $
-  (CondensedSet.val_obj_sigma_equiv (λ (f : ulift.{u} (fin n → pmz)), S.pow n)
+  (CondensedSet.val_obj_sigma_equiv (λ (f : ulift.{u} (fin n → sign_type)), S.pow n)
     (Condensed_Ab_to_CondensedSet.obj S.free')).symm $
-λ (f : ulift.{u} (fin n → pmz)),
+λ (f : ulift.{u} (fin n → sign_type)),
 let e := proetale_topology.to_sheafify (S.to_Condensed.val ⋙ AddCommGroup.free') in
-e.app (op $ S.pow n) $ ∑ i : fin n, finsupp.single (ulift.up $ Profinite.product.π _ i) (f.down i)
+e.app (op $ S.pow n) $
+  ∑ i : fin n, finsupp.single (ulift.up $ Profinite.product.π _ i) (f.down i : ℤ)
 
 def Profinite.pmz_functor (n : ℕ) : Profinite.{u} ⥤ Profinite.{u} :=
 { obj := λ S, S.pmz n,
@@ -340,7 +344,7 @@ def Profinite.pow_cone_is_limit
 lemma Profinite.is_iso_pmz_to_limit (S : Profinite.{u}) (n : ℕ) :
   is_iso (S.pmz_to_limit n) :=
 begin
-  let E := Profinite.sigma_cone (ulift.{u} (fin n → pmz))
+  let E := Profinite.sigma_cone (ulift.{u} (fin n → sign_type))
     (Profinite.pow_cone S.as_limit_cone n),
   let hE : limits.is_limit E := Profinite.sigma_cone_is_limit _ _
     (Profinite.pow_cone_is_limit _ S.as_limit n),
@@ -375,11 +379,11 @@ instance Profinite.discrete_topology_discrete_quotient_pow
   discrete_topology ((Profinite.of T).pow n) := sorry
 
 def Profinite.pmz_to_level_component (S : Profinite.{u}) (j : nnreal) (T : discrete_quotient S)
-  (e : fin ⌊j⌋₊ → pmz) :
+  (e : fin ⌊j⌋₊ → sign_type) :
   (Profinite.of ↥T).pow ⌊j⌋₊ ⟶
   (ProFiltPseuNormGrp₁.level.obj j).obj (free_pfpng_functor.obj (Fintype.of ↥T)) :=
 { to_fun := λ t,
-  { val := ∑ i : fin ⌊j⌋₊, (λ s, if t i = s then e i else 0),
+  { val := ∑ i : fin ⌊j⌋₊, (λ s, if t i = s then (e i : ℤ) else 0),
     property := sorry },
   continuous_to_fun := continuous_of_discrete_topology }
 
@@ -441,7 +445,7 @@ lemma Profinite.pmz_to_free_pfpng_epi_aux {T : Type*} [fintype T]
   (r : nnreal)
   (f : T → ℤ)
   (hf : ∑ i : T, ∥ f i ∥₊ ≤ r) :
-  ∃ (e : fin ⌊r⌋₊ → pmz) (t : fin ⌊r⌋₊ → T),
+  ∃ (e : fin ⌊r⌋₊ → sign_type) (t : fin ⌊r⌋₊ → T),
   (∑ (i : fin ⌊r⌋₊), (λ (s : T), if (t i = s) then (e i : ℤ) else 0)) = f :=
 sorry
 
