@@ -614,11 +614,24 @@ lemma rhs_helper₁ :
     (S.to_Condensed.val ⋙ AddCommGroup.free')).app (op (S.pow ⌊j⌋₊)) $
     finsupp.single ⟨Profinite.product.π _ x⟩ (f.down x)) := by { ext, simp }
 
+def _root_.CompHausFiltPseuNormGrp.coe_add_monoid_hom
+  (A : CompHausFiltPseuNormGrp.{u}) (T : Profinite.{u}) :
+  (CompHausFiltPseuNormGrp.to_Condensed.obj A).val.obj (op T) →+ T → A :=
+{ to_fun := λ f, f.down.1,
+  map_zero' := rfl,
+  map_add' := λ _ _, rfl }
+
 lemma _root_.CompHausFiltPseuNormGrp.to_Condensed_app_sum_apply (n : ℕ)
   (A : CompHausFiltPseuNormGrp.{u}) (T : Profinite.{u})
     (g : fin n → (CompHausFiltPseuNormGrp.to_Condensed.obj A).val.obj (op T)) (t : T) :
   (ulift.down (∑ i : fin n, g i)).1 t = ∑ i : fin n,
-    (ulift.down (g i)).1 t := sorry
+    (ulift.down (g i)).1 t :=
+begin
+  let e := A.coe_add_monoid_hom T,
+  change _ = ∑ (i : fin n), (e (g i)) t,
+  rw [← finset.sum_apply t finset.univ (λ i : fin n, (e (g i))), ← e.map_sum],
+  refl,
+end
 
 lemma rhs_helper₃ (i : fin ⌊j⌋₊) :
   ((((S.free'_lift S.to_condensed_free_pfpng).val.app (op (S.pmz ⌊j⌋₊)))
