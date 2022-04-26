@@ -849,21 +849,10 @@ end
   --        all applications a `p` is needed)
 def geom_B (ε : ℝ) : ℤ := ⌊ real.logb (2 * r) (2 * r - 1) * ε ⌋ + 1
 
--- lemma tail_B_old (F : filtration (ℒ ϖ) c) (ε : ℝ) : tsum (λ b : {n : ℤ // (geom_B ε) < n },
---   ∥ ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ∥ ) < ε ^ (p⁻¹ : ℝ) :=
-
-example (B : ℕ) : {n : ℕ | B ≤ n} = {n : ℕ | n ∉ finset.range B} :=
-begin
-  simp,
-end
-
 lemma tail_B (F : filtration (ℒ ϖ) c) (ε : ℝ) : ∥ tsum (λ b : {n : ℤ // (geom_B ε) ≤ n },
   ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ) ∥ < ε ^ (p⁻¹ : ℝ) := sorry
 
--- lemma tail_B (F : filtration (ℒ ϖ) c) (ε : ℝ) : ∥ tsum (λ b : {n : ℤ // (geom_B ε) < n },
---   ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ) ∥ < ε ^ (p⁻¹ : ℝ) := sorry
-
-lemma tail_B_temp (F : filtration (ℒ ϖ) c) (ε : ℝ) : ∃ B : ℕ, ∥ tsum (λ b : {n : ℕ // B ≤ n },
+lemma tail_B_nat (F : filtration (ℒ ϖ) c) (ε : ℝ) : ∃ B : ℕ, ∥ tsum (λ b : {n : ℕ // B ≤ n },
   ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ) ∥ < ε ^ (p⁻¹ : ℝ) :=
 begin
   -- sorry;{
@@ -880,58 +869,45 @@ begin
     intros a ha,
     apply finset.mem_range_succ_iff.mpr (A.le_max' _ ha) },
   specialize hA (finset.range B) h_incl,
-  rw real.dist_0_eq_abs at hA,
-  rw [← real.norm_eq_abs] at hA,
+  rw [real.dist_0_eq_abs, ← real.norm_eq_abs] at hA,
   convert hA using 1,
-  -- dsimp only [f],
   apply congr_arg,
   simp_rw [subtype.val_eq_coe],
-  have set_eq : {n : ℕ | B ≤ n} = {n : ℕ | n ∉ finset.range B}, sorry,
+  have set_eq : {n : ℕ | B ≤ n} = {n : ℕ | n ∉ finset.range B} := by {simp only [finset.mem_range, not_lt]},
   exact tsum_congr_subtype f set_eq,
-  -- exact this,
-  -- dsimp only [f] at this ⊢,
-  -- have uff : ∑' (x : ↥{n : ℕ | n ∉ finset.range B}), (((F.val) punit.star ((x : ℕ) : ℤ)) : ℝ) * (1 / 2) ^ (x : ℕ) =
-  --   ∑' (x : {n : ℕ // n ∉ finset.range B}), (((F.val) punit.star ((x : ℕ) : ℤ)) : ℝ) * (1 / 2) ^ (x : ℕ), refl,
-  -- rw uff at this_1,
-  -- rw [← this_1],
-  -- refl,
-  -- rw ← this,
-  -- let e :=
-  -- apply equiv.tsum_eq,
-  -- simp,
-  -- convert tsum_congr_subtype using 1,
-  -- simp,
-  -- congr',
-  -- sorry,
-  -- simp,
-
-
-
-  -- have h_incl' : A ⊆ finset.range B,
-  -- { --rw finset.le_eq_subset,
-  --   intros a ha,
-  --   apply finset.mem_range_succ_iff.mpr (A.le_max' _ ha) },
-  -- have := @mem_compl_iff ℕ A,
-  -- simp_rw mem_compl_iff at hA,
-  -- rw subset_compl
-  -- **[FAE]** use tendsto_tsum_compl_at_top_zero
-  -- },
 end
 
--- def U (F : filtration (ℒ S) c) (ε : ℝ) : set (filtration (ℒ S) c) := λ G,
---   ∀ s n, n ≤ (geom_B ε) → F s n = G s n
+example (a b : ℕ) (h : a ≤ b) : (a : ℤ) ≤ (b : ℤ) := int.coe_nat_le.mpr h
+
+def eq_le_int_nat (B : ℕ) : {n : ℤ // (B : ℤ) ≤ n } ≃ {n : ℕ // B ≤ n} :=
+{ to_fun :=
+  begin
+    intro b,
+    use (int.eq_coe_of_zero_le ((int.coe_nat_nonneg B).trans b.2)).some,
+    rw ← int.coe_nat_le,
+    convert b.2,
+    exact (Exists.some_spec (int.eq_coe_of_zero_le ((int.coe_nat_nonneg B).trans b.2))).symm,
+  end,
+  inv_fun := λ n, ⟨n, by {simp only [coe_coe, int.coe_nat_le], from n.2}⟩,
+  left_inv := sorry,
+  right_inv := sorry }
+
+lemma tail_B_int (F : filtration (ℒ ϖ) c) (ε : ℝ) : ∃ B : ℤ, ∥ tsum (λ b : {n : ℤ // B ≤ n },
+  ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ) ∥ < ε ^ (p⁻¹ : ℝ) :=
+begin
+  obtain ⟨B, hB⟩ := tail_B_nat p c F ε,
+  use B,
+  convert hB using 1,
+  apply congr_arg,
+  exact ((eq_le_int_nat B).symm.tsum_eq (λ b : {n : ℤ // ↑B ≤ n },
+  ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 )).symm,
+end
 
 def U (F : filtration (ℒ S) c) (ε : ℝ) : set (filtration (ℒ S) c) := λ G,
   ∀ s n, n < (geom_B ε) → F s n = G s n
 
--- lemma mem_U (F : filtration (ℒ S) c) (ε : ℝ) : F ∈ (U S c F ε) := λ _ _ _, rfl
 
 lemma mem_U (F : filtration (ℒ S) c) (ε : ℝ) : F ∈ (U S c F ε) := λ _ _ _, rfl
-
--- lemma is_open_U (F : filtration (ℒ S) c) (ε : ℝ) : is_open (U S c F ε) :=
--- begin
---   sorry,
--- end
 
 lemma is_open_U (F : filtration (ℒ S) c) (ε : ℝ) : is_open (U S c F ε) :=
 begin
