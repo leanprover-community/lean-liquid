@@ -537,6 +537,146 @@ lemma Profinite.free'_lift_eq (S : Profinite.{u}) (A : Condensed.{u} Ab.{u+1})
   sorry := sorry
 -/
 
+namespace Profinite.epi_free'_to_condensed_setup
+
+variables (S : Profinite.{u}) (j : nnreal)
+
+#check S.free'_lift
+
+lemma free'_lift_app_eq (A : Condensed.{u} Ab.{u+1})
+  (η : S.to_Condensed ⟶ Condensed_Ab_to_CondensedSet.obj A)
+  (T : Profinite.{u}) :
+  (proetale_topology.to_sheafify _).app _ ≫ (S.free'_lift η).val.app (op T) =
+  free'_lift (η.val.app _) :=
+begin
+  dsimp [Profinite.free'_lift],
+  rw [← nat_trans.comp_app, proetale_topology.to_sheafify_sheafify_lift],
+  dsimp [adjunction.whisker_right, free'_lift], simp,
+end
+
+lemma free'_lift_app_eq' (A : Condensed.{u} Ab.{u+1})
+  (η : S.to_Condensed ⟶ Condensed_Ab_to_CondensedSet.obj A)
+  (T : Profinite.{u}) :
+  (proetale_topology.to_sheafify _).app _ ≫ (S.free'_lift η).val.app (op T) =
+  ((finsupp.lift ↥(A.val.obj (op T)) ℤ
+      (((Sheaf_to_presheaf proetale_topology (Type (u+1))).obj S.to_Condensed).obj (op T)))
+   (η.val.app (op T))).to_add_monoid_hom :=
+begin
+  rw free'_lift_app_eq, rw free'_lift_eq_finsupp_lift,
+end
+
+instance (A : Condensed.{u} Ab.{u+1}) (T) :
+  add_comm_group ((Condensed_Ab_to_CondensedSet.obj A).val.obj T) :=
+show add_comm_group (A.val.obj T), by apply_instance
+
+lemma free_pfpng_ext (u v : S.free_pfpng)
+  (huv : ∀ T : discrete_quotient S, S.free_pfpng_π T u = S.free_pfpng_π T v) : u = v :=
+begin
+  let E : limits.cone (S.fintype_diagram ⋙ free_pfpng_functor) :=
+    ProFiltPseuNormGrp₁.bounded_cone
+    ⟨Ab.explicit_limit_cone _, Ab.explicit_limit_cone_is_limit _⟩,
+  let hE : limits.is_limit E := ProFiltPseuNormGrp₁.bounded_cone_is_limit _,
+  let ee : S.free_pfpng ≅ E.X := (limits.limit.is_limit _).cone_point_unique_up_to_iso hE,
+  apply_fun ee.hom, swap,
+  { intros x y hh, apply_fun ee.inv at hh, simpa using hh },
+  ext T : 3, exact huv T,
+end
+
+variables (x : S.pmz ⌊j⌋₊) (T : discrete_quotient S)
+
+lemma lhs_helper : (S.free_pfpng_π T) ((S.pmz_to_free_pfpng j) x).1 =
+∑ i : fin ⌊j⌋₊, pi.single (T.proj (x.2 i)) (x.1.down i : ℤ) := sorry
+
+lemma rhs_helper₁ :
+  (λ (f : ulift (fin ⌊j⌋₊ → sign_type)),
+  ∑ (x : fin ⌊j⌋₊),
+    ((proetale_topology.to_sheafify (S.to_Condensed.val ⋙ AddCommGroup.free')).app
+      (op (S.pow ⌊j⌋₊)))
+      (finsupp.single {down := Profinite.product.π (λ (i : fin ⌊j⌋₊), S) x} ↑(f.down x))) =
+  ∑ (x : fin ⌊j⌋₊), (λ f, (proetale_topology.to_sheafify
+    (S.to_Condensed.val ⋙ AddCommGroup.free')).app (op (S.pow ⌊j⌋₊)) $
+    finsupp.single ⟨Profinite.product.π _ x⟩ (f.down x)) := by { ext, simp }
+
+lemma _root_.CompHausFiltPseuNormGrp.to_Condensed_app_sum_apply (n : ℕ)
+  (A : CompHausFiltPseuNormGrp.{u}) (T : Profinite.{u})
+    (g : fin n → (CompHausFiltPseuNormGrp.to_Condensed.obj A).val.obj (op T)) (t : T) :
+  (ulift.down (∑ i : fin n, g i)).1 t = ∑ i : fin n,
+    (ulift.down (g i)).1 t := sorry
+
+lemma rhs_helper₃ (i : fin ⌊j⌋₊) :
+  ((((S.free'_lift S.to_condensed_free_pfpng).val.app (op (S.pmz ⌊j⌋₊)))
+    (((Condensed.val_obj_sigma_add_equiv (λ (f : ulift (fin ⌊j⌋₊ → sign_type)), S.pow ⌊j⌋₊)
+      S.free').symm)
+    (λ (f : ulift (fin ⌊j⌋₊ → sign_type)),
+      ((proetale_topology.to_sheafify (S.to_Condensed.val ⋙ AddCommGroup.free')).app
+      (op (S.pow ⌊j⌋₊)))
+      (finsupp.single {down := Profinite.product.π (λ (i : fin ⌊j⌋₊), S) i}
+        ↑(f.down i))))).down).1 x =
+    (x.1.down i : ℤ) • (S.to_free_pfpng (x.2 i)).1 := sorry
+
+lemma rhs_helper₂ (i : fin ⌊j⌋₊) : (S.free_pfpng_π T)
+  (((((S.free'_lift S.to_condensed_free_pfpng).val.app (op (S.pmz ⌊j⌋₊)))
+    (((Condensed.val_obj_sigma_add_equiv (λ (f : ulift (fin ⌊j⌋₊ → sign_type)), S.pow ⌊j⌋₊)
+      S.free').symm)
+    (λ (f : ulift (fin ⌊j⌋₊ → sign_type)),
+      ((proetale_topology.to_sheafify (S.to_Condensed.val ⋙ AddCommGroup.free')).app
+      (op (S.pow ⌊j⌋₊)))
+      (finsupp.single {down := Profinite.product.π (λ (i : fin ⌊j⌋₊), S) i}
+        ↑(f.down i))))).down).1 x) =
+  pi.single (T.proj (x.snd i)) ↑(x.fst.down i) :=
+begin
+  rw rhs_helper₃,
+  erw (S.free_pfpng_π T).to_add_monoid_hom.map_zsmul,
+  change
+    _ • (((S.to_free_pfpng) ≫ (ProFiltPseuNormGrp₁.level.obj 1).map (S.free_pfpng_π T)) _).val = _,
+  dsimp [Profinite.to_free_pfpng, Profinite.free_pfpng_π,
+    Profinite.free_pfpng_level_iso],
+  dsimp [limits.is_limit.cone_point_unique_up_to_iso],
+  erw ← comp_apply,
+  erw ← comp_apply,
+  erw limits.is_limit.fac,
+  erw limits.is_limit.fac,
+  dsimp [Fintype.free_pfpng_unit, Profinite.as_limit_cone],
+  ext t, erw pi.single_apply, split_ifs; simp,
+  { intros hh, exact false.elim (hh h.symm) },
+  { intros hh, exact false.elim (h hh.symm) },
+end
+
+lemma rhs_helper :
+  (S.free_pfpng_π T)
+  ((((S.free'_lift S.to_condensed_free_pfpng).val.app (op (S.pmz ⌊j⌋₊)))
+  ((S.pmz_to_free' ⌊j⌋₊).val.app (op (S.pmz ⌊j⌋₊)) {down := 𝟙 (S.pmz ⌊j⌋₊)})).1.1 x) =
+  ∑ i : fin ⌊j⌋₊, pi.single (T.proj (x.2 i)) (x.1.down i : ℤ) :=
+begin
+  dsimp [Profinite.pmz_to_free'],
+  rw [category_theory.functor.map_id, id_apply],
+  simp only [add_monoid_hom.map_sum],
+  rw [rhs_helper₁],
+  rw [add_equiv.map_sum, add_monoid_hom.map_sum],
+  have := _root_.CompHausFiltPseuNormGrp.to_Condensed_app_sum_apply ⌊j⌋₊ _ _ _ x,
+  dsimp at this, erw this, clear this,
+  erw (S.free_pfpng_π T).to_add_monoid_hom.map_sum,
+  congr' 1, funext i, dsimp,
+  erw rhs_helper₂,
+end
+
+lemma key (j : (ulift.{u+1} nnreal)) :
+  Profinite_to_Condensed.map (S.pmz_to_free_pfpng j.down) ≫
+    (CompHausFiltPseuNormGrp₁.enlarging_functor.obj
+    (ProFiltPseuNormGrp₁.to_CHFPNG₁.obj S.free_pfpng)).level_Condensed_diagram_cocone.ι.app j =
+  S.pmz_to_free' ⌊j.down⌋₊ ≫
+  Condensed_Ab_to_CondensedSet.map S.free'_to_condensed_free_pfpng :=
+begin
+  apply_fun Profinite.to_Condensed_equiv _ _,
+  ext x : 3, dsimp at x,
+  dsimp [CompHausFiltPseuNormGrp.level_Condensed_diagram_cocone,
+    Profinite.free'_to_condensed_free_pfpng],
+  apply free_pfpng_ext, intros T,
+  erw lhs_helper, erw rhs_helper,
+end
+
+end Profinite.epi_free'_to_condensed_setup
+
 instance Profinite.epi_free'_to_condensed_free_pfpng
   (S : Profinite.{u}) : epi S.free'_to_condensed_free_pfpng :=
 begin
@@ -556,15 +696,5 @@ begin
     Profinite_to_Condensed.map (S.pmz_to_free_pfpng j')],
   split,
   { apply epi_Profinite_to_Condensed_map_of_epi },
-  apply_fun Profinite.to_Condensed_equiv _ _,
-  ext : 2,
-  dsimp [Profinite.to_Condensed_equiv, E,
-    CompHausFiltPseuNormGrp.level_Condensed_diagram_cocone,
-    Profinite.free'_to_condensed_free_pfpng,
-    Profinite.pmz_to_free'],
-  rw category_theory.functor.map_id,
-  rw id_apply,
-  simp only [add_monoid_hom.map_sum,
-    CondensedSet.coe_val_obj_sigma_equiv_symm],
-  sorry
+  { apply Profinite.epi_free'_to_condensed_setup.key },
 end
