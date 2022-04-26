@@ -907,6 +907,14 @@ begin
   refl,
 end
 
+lemma Profinite.pmz_to_free_pfpng_epi_aux {T : Type*} [fintype T]
+  (r : nnreal)
+  (f : T → ℤ)
+  (hf : ∑ i : T, ∥ f i ∥₊ ≤ r) :
+  ∃ (e : fin ⌊r⌋₊ → pmz) (t : fin ⌊r⌋₊ → T),
+  (∑ (i : fin ⌊r⌋₊), (λ (s : T), if (t i = s) then (e i : ℤ) else 0)) = f :=
+sorry
+
 instance Profinite.pmz_to_free_pfpng_epi (S : Profinite.{u}) (j : nnreal) :
   epi (S.pmz_to_free_pfpng j) :=
 begin
@@ -919,12 +927,15 @@ begin
     (limits.is_limit_of_preserves _ (limits.limit.is_limit _)),
   apply this,
   intros T,
-  /-
-  We have now reduced to the finite case, where `pmz_to_free_pfpng` has an
-  explicit description.
-  -/
-
-  sorry
+  rintros ⟨(f : T → ℤ), hf : ∑ i : T, _ ≤ _⟩,
+  obtain ⟨e,t,ht⟩ := Profinite.pmz_to_free_pfpng_epi_aux j f hf,
+  change ∃ a : Σ i, fin ⌊j⌋₊ → T, _,
+  use ulift.up e, use t, apply subtype.ext,
+  dsimp [Profinite.pmz_to_level_nat_trans, Profinite.pmz_to_level,
+    Profinite.sigma.desc, Profinite.pmz_to_level_component],
+  convert ht,
+  ext p,
+  split_ifs; refl,
 end
 
 instance Profinite.epi_free'_to_condensed_free_pfpng
