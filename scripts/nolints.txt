@@ -97,13 +97,15 @@ apply_nolint Profinite.image_stabilizes inhabited_nonempty
 apply_nolint Profinite.sigma_iso_of_equiv_aux unused_arguments
 
 -- for_mathlib/abelian_category.lean
-apply_nolint category_theory.preserves_zero_of_preserves_initial instance_priority
-apply_nolint category_theory.preserves_zero_of_preserves_terminal instance_priority
+apply_nolint category_theory.limits.is_zero_of_iso_of_zero unused_arguments
+apply_nolint category_theory.limits.preserves_zero_of_preserves_initial instance_priority
+apply_nolint category_theory.limits.preserves_zero_of_preserves_terminal instance_priority
 
 -- for_mathlib/abelian_sheaves/functor_category.lean
 apply_nolint category_theory.additive_category_of_abelian instance_priority
 
 -- for_mathlib/derived/K_projective.lean
+apply_nolint bounded_homotopy_category.is_K_projective_shift unused_arguments
 apply_nolint bounded_homotopy_category.lift unused_arguments
 apply_nolint bounded_homotopy_category.lift_ext unused_arguments
 apply_nolint bounded_homotopy_category.map.homotopy_category.is_quasi_iso unused_arguments
@@ -167,6 +169,7 @@ apply_nolint category_theory.monoidal.split_right unused_arguments
 apply_nolint category_theory.limits.is_initial.colimit_cocone unused_arguments
 
 -- for_mathlib/mapping_cone.lean
+apply_nolint homological_complex.homological_complex.zero_X dup_namespace
 apply_nolint homological_complex.termwise_split_epi_lift unused_arguments
 apply_nolint homological_complex.termwise_split_epi_retraction unused_arguments
 apply_nolint homological_complex.termwise_split_mono_desc unused_arguments
@@ -203,6 +206,9 @@ apply_nolint extended_le_span unused_arguments
 -- for_mathlib/salamander.lean
 apply_nolint LBC.sq_op unused_arguments
 
+-- for_mathlib/sheafification_mono.lean
+apply_nolint category_theory.grothendieck_topology.eq_zero_of_exists unused_arguments
+
 -- for_mathlib/snake_lemma.lean
 apply_nolint category_theory.snake_diagram.mk_functor.square_commutes_col unused_arguments
 apply_nolint category_theory.snake_diagram.mk_functor.square_commutes_comp_col unused_arguments
@@ -235,11 +241,19 @@ apply_nolint category_theory.triangulated.triangle.shift_comm_eq_eq_to_hom unuse
 -- free_pfpng/lemmas.lean
 apply_nolint free_pfpng.discrete_quotient_separates_points' def_lemma
 
+-- free_pfpng/main.lean
+apply_nolint ProFiltPseuNormGrp₁.limit_π_coe_eq def_lemma
+apply_nolint pmz_eq def_lemma
+
 -- invpoly/basic.lean
 apply_nolint invpoly unused_arguments
 apply_nolint invpoly.invpoly.norm_nonneg dup_namespace
 apply_nolint invpoly.profinitely_filtered_pseudo_normed_group unused_arguments
 apply_nolint invpoly.set_of.topological_space unused_arguments
+
+-- laurent_measures/add_stable.lean
+apply_nolint add_eq_add unused_arguments
+apply_nolint θ_section unused_arguments
 
 -- laurent_measures/basic.lean
 apply_nolint laurent_measures.bdd_filtration_spec def_lemma
@@ -249,7 +263,9 @@ apply_nolint laurent_measures.laurent_measures.norm_nonneg dup_namespace
 apply_nolint laurent_measures_ses.aux_dist_left unused_arguments
 apply_nolint laurent_measures_ses.aux_dist_right unused_arguments
 apply_nolint laurent_measures_ses.box unused_arguments
+apply_nolint laurent_measures_ses.coe_filtration_sub unused_arguments
 apply_nolint laurent_measures_ses.complement_of_balls_pos_NN unused_arguments
+apply_nolint laurent_measures_ses.geom_B unused_arguments
 apply_nolint laurent_measures_ses.real_measures.topological_space unused_arguments
 
 -- laurent_measures/theta.lean
@@ -258,6 +274,7 @@ apply_nolint theta.eventually_le ge_or_gt
 apply_nolint theta.eventually_le_one ge_or_gt
 apply_nolint theta.eventually_pos_floor ge_or_gt
 apply_nolint theta.eventually_pos_y ge_or_gt
+apply_nolint theta.ϑ_section unused_arguments
 
 -- laurent_measures/thm69.lean
 apply_nolint r_half unused_arguments
@@ -269,15 +286,20 @@ apply_nolint θ_natural unused_arguments
 apply_nolint SemiNormedGroup.normed_with_aut_LCC fails_quickly
 apply_nolint SemiNormedGroup.normed_with_aut_LocallyConstant fails_quickly
 
--- normed_group/pseudo_normed_group.lean
-apply_nolint semi_normed_group.pseudo_normed_group instance_priority
-
--- normed_to_cond.lean
+-- locally_constant/completion.lean
 apply_nolint LCC unused_arguments
-apply_nolint SemiNormedGroup.metric_space unused_arguments fails_quickly
+apply_nolint SemiNormedGroup.metric_space fails_quickly unused_arguments
 apply_nolint SemiNormedGroup.normed_group fails_quickly
 apply_nolint continuous_map.bdd_above_range_norm unused_arguments
+apply_nolint locally_constant.to_continuous_map_dense_range unused_arguments
 apply_nolint locally_constant.to_continuous_map_isometry unused_arguments
+
+-- locally_constant/completion_aux.lean
+apply_nolint locally_constant.density.B unused_arguments
+apply_nolint locally_constant.density.set_clopen unused_arguments
+
+-- normed_group/pseudo_normed_group.lean
+apply_nolint semi_normed_group.pseudo_normed_group instance_priority
 
 -- polyhedral_lattice/topology.lean
 apply_nolint polyhedral_lattice.discrete_topology instance_priority
@@ -327,6 +349,8 @@ apply_nolint profinitely_filtered_pseudo_normed_group_with_Tinv.to_comphaus_filt
 -- real_measures/basic.lean
 apply_nolint real_measures.map_hom unused_arguments
 apply_nolint real_measures.nnnorm_apply_le_of_nnnorm_le unused_arguments
+apply_nolint real_measures.real_measures.dist_eq dup_namespace
+apply_nolint real_measures.real_measures.norm_nonneg dup_namespace
 
 -- rescale/FiltrationPow.lean
 apply_nolint Filtration_cast_eq unused_arguments
