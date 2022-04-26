@@ -585,7 +585,24 @@ end
 variables (x : S.pmz ⌊j⌋₊) (T : discrete_quotient S)
 
 lemma lhs_helper : (S.free_pfpng_π T) ((S.pmz_to_free_pfpng j) x).1 =
-∑ i : fin ⌊j⌋₊, pi.single (T.proj (x.2 i)) (x.1.down i : ℤ) := sorry
+  ∑ i : fin ⌊j⌋₊, pi.single (T.proj (x.2 i)) (x.1.down i : ℤ) :=
+begin
+  change (((S.pmz_to_free_pfpng _) ≫ (ProFiltPseuNormGrp₁.level.obj j).map
+    (S.free_pfpng_π T)) _).val = _,
+  dsimp [Profinite.pmz_to_free_pfpng, Profinite.free_pfpng_π],
+  erw ← comp_apply,
+  erw limits.is_limit.fac,
+  dsimp [Profinite.pmz_to_level_nat_trans, Profinite.pmz_to_level],
+  rcases x with ⟨x1,x2⟩,
+  dsimp [Profinite.pmz_cone, Profinite.sigma.desc, Profinite.pmz_to_level_component,
+    Profinite.pmz_functor, Profinite.product.lift, Profinite.sigma.ι],
+  congr' 1, ext i t, erw pi.single_apply,
+  split_ifs with h1 h2 h3 h4,
+  { refl },
+  { exact false.elim (h2 h1.symm) },
+  { exact false.elim (h1 h3.symm) },
+  { refl }
+end
 
 lemma rhs_helper₁ :
   (λ (f : ulift (fin ⌊j⌋₊ → sign_type)),
