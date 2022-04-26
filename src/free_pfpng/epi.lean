@@ -633,6 +633,13 @@ begin
   refl,
 end
 
+lemma Profinite.free'_lift_val_obj_sigma_equiv_symm {α : Type u} [fintype α]
+  (A : Condensed.{u} Ab.{u+1}) (η : S.to_Condensed ⟶ Condensed_Ab_to_CondensedSet.obj A)
+  (X : α → Profinite.{u}) (t) :
+  (S.free'_lift η).val.app (op $ Profinite.sigma X)
+  ((Condensed.val_obj_sigma_add_equiv _ _ ).symm t) =
+  (Condensed.val_obj_sigma_add_equiv _ _ ).symm (λ a, (S.free'_lift η).val.app _ (t a)) := sorry
+
 lemma rhs_helper₃ (i : fin ⌊j⌋₊) :
   ((((S.free'_lift S.to_condensed_free_pfpng).val.app (op (S.pmz ⌊j⌋₊)))
     (((Condensed.val_obj_sigma_add_equiv (λ (f : ulift (fin ⌊j⌋₊ → sign_type)), S.pow ⌊j⌋₊)
@@ -642,7 +649,19 @@ lemma rhs_helper₃ (i : fin ⌊j⌋₊) :
       (op (S.pow ⌊j⌋₊)))
       (finsupp.single {down := Profinite.product.π (λ (i : fin ⌊j⌋₊), S) i}
         ↑(f.down i))))).down).1 x =
-    (x.1.down i : ℤ) • (S.to_free_pfpng (x.2 i)).1 := sorry
+    (x.1.down i : ℤ) • (S.to_free_pfpng (x.2 i)).1 :=
+begin
+  erw Profinite.free'_lift_val_obj_sigma_equiv_symm,
+  simp only [← comp_apply],
+  erw [free'_lift_app_eq'],
+  simp only [continuous_map.to_fun_eq_coe, linear_map.to_add_monoid_hom_coe, finsupp.lift_apply,
+  Profinite.to_condensed_free_pfpng_app, finsupp.sum_single_index, zero_smul, subtype.val_eq_coe],
+  -- This is now very close...
+  let Q := Condensed.val_obj_sigma_add_equiv (λ (a : ulift (fin ⌊j⌋₊ → sign_type)), S.pow ⌊j⌋₊)
+    S.condensed_free_pfpng,
+  change (Q.symm _).down.1 _ = _,
+  sorry
+end
 
 lemma rhs_helper₂ (i : fin ⌊j⌋₊) : (S.free_pfpng_π T)
   (((((S.free'_lift S.to_condensed_free_pfpng).val.app (op (S.pmz ⌊j⌋₊)))
