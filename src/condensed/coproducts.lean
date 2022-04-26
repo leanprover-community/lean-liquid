@@ -7,7 +7,7 @@ We show that passing from a profinite set to a condensed set
 preserves (finite) coproducts.
 -/
 
-
+open_locale big_operators classical
 open category_theory
 open category_theory.limits
 open opposite
@@ -55,7 +55,8 @@ begin
 end
 
 noncomputable
-lemma val_obj_sigma_add_equiv (Y : Condensed.{u} Ab.{u+1}) :
+def _root_.Condensed.val_obj_sigma_add_equiv
+  (Y : Condensed.{u} Ab.{u+1}) :
   Y.val.obj (op $ Profinite.sigma X) ≃+
   (Π (a : α), Y.val.obj (op $ X a)) :=
 add_equiv.of_bijective
@@ -63,6 +64,16 @@ add_equiv.of_bijective
   map_zero' := by { ext1, simp },
   map_add' := λ x y, by { ext1, simp } }
 ((Condensed_Ab_to_CondensedSet.obj Y).val_obj_sigma_equiv X).bijective
+
+@[simp]
+lemma coe_val_obj_sigma_equiv (Y : Condensed.{u} Ab.{u+1}) :
+  ⇑((Condensed_Ab_to_CondensedSet.obj Y).val_obj_sigma_equiv X) =
+  (Y.val_obj_sigma_add_equiv X) := rfl
+
+@[simp]
+lemma coe_val_obj_sigma_equiv_symm (Y : Condensed.{u} Ab.{u+1}) :
+  ⇑((Condensed_Ab_to_CondensedSet.obj Y).val_obj_sigma_equiv X).symm =
+  (Y.val_obj_sigma_add_equiv X).symm := rfl
 
 noncomputable
 def is_colimit_sigma_cone : is_colimit (sigma_cone X) :=

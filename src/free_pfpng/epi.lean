@@ -509,7 +509,8 @@ begin
     Profinite.free'_to_condensed_free_pfpng,
     Profinite.pmz_to_free'],
   rw category_theory.functor.map_id,
-  rw id_apply, simp only [add_monoid_hom.map_sum],
+  rw id_apply,
+  simp only [add_monoid_hom.map_sum,
+    CondensedSet.coe_val_obj_sigma_equiv_symm],
   sorry
-
 end
