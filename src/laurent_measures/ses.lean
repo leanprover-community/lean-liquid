@@ -889,8 +889,18 @@ def eq_le_int_nat (B : ℕ) : {n : ℤ // (B : ℤ) ≤ n } ≃ {n : ℕ // B �
     exact (Exists.some_spec (int.eq_coe_of_zero_le ((int.coe_nat_nonneg B).trans b.2))).symm,
   end,
   inv_fun := λ n, ⟨n, by {simp only [coe_coe, int.coe_nat_le], from n.2}⟩,
-  left_inv := sorry,
-  right_inv := sorry }
+  left_inv :=
+  begin
+    rintro ⟨_, h⟩,
+    simp only [coe_coe, subtype.coe_mk],
+    exact (Exists.some_spec (int.eq_coe_of_zero_le ((int.coe_nat_nonneg B).trans h))).symm,
+  end,
+  right_inv :=
+  begin
+    rintro ⟨_, h⟩,
+    simp only [coe_coe, subtype.coe_mk, int.coe_nat_inj'],
+    exact ((@exists_eq' _ _).some_spec).symm,
+  end, }
 
 lemma tail_B_int (F : filtration (ℒ ϖ) c) (ε : ℝ) : ∃ B : ℤ, ∥ tsum (λ b : {n : ℤ // B ≤ n },
   ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ) ∥ < ε ^ (p⁻¹ : ℝ) :=
