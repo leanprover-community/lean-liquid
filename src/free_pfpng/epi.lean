@@ -368,15 +368,23 @@ begin
   refl,
 end
 
--- A finite union of finite products of finite discrete sets is discrete.
-instance Profinite.discrete_topology_discrete_quotient_pmz
-  (S : Profinite.{u}) (n : ℕ) (T : discrete_quotient S) :
-  discrete_topology ((Profinite.of T).pmz n) := sorry
-
 -- A finite product of finite discrete sets is discrete.
-instance Profinite.discrete_topology_discrete_quotient_pow
-  (S : Profinite.{u}) (n : ℕ) (T : discrete_quotient S) :
-  discrete_topology ((Profinite.of T).pow n) := sorry
+instance Profinite.discrete_topology_pow
+  (S : Profinite.{u}) [discrete_topology S] (n : ℕ) :
+  discrete_topology (S.pow n) :=
+Pi.discrete_topology
+
+-- A finite union of finite products of finite discrete sets is discrete.
+instance Profinite.discrete_topology_pmz
+  (S : Profinite.{u}) [discrete_topology S] (n : ℕ) :
+  discrete_topology (S.pmz n) :=
+sigma.discrete_topology
+
+-- move this
+lemma _root_.sign_type.nnnorm_coe_int_le_one : ∀ i : sign_type, ∥(i : ℤ)∥₊ ≤ 1
+| sign_type.zero := by { erw [nnnorm_zero], exact zero_le', }
+| sign_type.neg := by { erw [nnnorm_neg], norm_num, }
+| sign_type.pos := by { erw [nnnorm_one], }
 
 def Profinite.pmz_to_level_component (S : Profinite.{u}) (j : nnreal) (T : discrete_quotient S)
   (e : fin ⌊j⌋₊ → sign_type) :
@@ -384,7 +392,26 @@ def Profinite.pmz_to_level_component (S : Profinite.{u}) (j : nnreal) (T : discr
   (ProFiltPseuNormGrp₁.level.obj j).obj (free_pfpng_functor.obj (Fintype.of ↥T)) :=
 { to_fun := λ t,
   { val := ∑ i : fin ⌊j⌋₊, (λ s, if t i = s then (e i : ℤ) else 0),
-    property := sorry },
+    property := begin
+      have : ∑ i : fin ⌊j⌋₊, (∑ s : T, if t i = s then (1 : nnreal) else 0) ≤ j,
+      { calc _
+            ≤ ∑ i : fin ⌊j⌋₊, (1 : nnreal) : _
+        ... ≤ j : _,
+        { apply finset.sum_le_sum, rintro i -, apply le_of_eq,
+          erw [finset.sum_eq_single_of_mem (t i : T) (@finset.mem_univ T _ _), if_pos rfl],
+          rintro s - hs, rw [if_neg hs.symm], },
+        { simp only [finset.sum_const, finset.card_fin, nat.smul_one_eq_coe],
+          exact nat.floor_le zero_le' } },
+      apply pseudo_normed_group.filtration_mono this,
+      apply pseudo_normed_group.sum_mem_filtration,
+      rintro i -,
+      apply finset.sum_le_sum,
+      rintro s -,
+      dsimp,
+      split_ifs,
+      { apply sign_type.nnnorm_coe_int_le_one },
+      { rw nnnorm_zero },
+    end },
   continuous_to_fun := continuous_of_discrete_topology }
 
 def Profinite.pmz_to_level (S : Profinite.{u}) (j : nnreal) (T : discrete_quotient S) :
