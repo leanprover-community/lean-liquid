@@ -852,44 +852,91 @@ def geom_B (ε : ℝ) : ℤ := ⌊ real.logb (2 * r) (2 * r - 1) * ε ⌋ + 1
 -- lemma tail_B_old (F : filtration (ℒ ϖ) c) (ε : ℝ) : tsum (λ b : {n : ℤ // (geom_B ε) < n },
 --   ∥ ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ∥ ) < ε ^ (p⁻¹ : ℝ) :=
 
--- example (α : Type) (A : set α) : {x // x ∉ A} ≃ {x // x ∈ Aᶜ} := by library_search
+example (B : ℕ) : {n : ℕ | B ≤ n} = {n : ℕ | n ∉ finset.range B} :=
+begin
+  simp,
+end
 
-lemma tail_B (F : filtration (ℒ ϖ) c) (ε : ℝ) : ∥ tsum (λ b : {n : ℤ // (geom_B ε) < n },
+lemma tail_B (F : filtration (ℒ ϖ) c) (ε : ℝ) : ∥ tsum (λ b : {n : ℤ // (geom_B ε) ≤ n },
+  ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ) ∥ < ε ^ (p⁻¹ : ℝ) := sorry
+
+-- lemma tail_B (F : filtration (ℒ ϖ) c) (ε : ℝ) : ∥ tsum (λ b : {n : ℤ // (geom_B ε) < n },
+--   ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ) ∥ < ε ^ (p⁻¹ : ℝ) := sorry
+
+lemma tail_B_temp (F : filtration (ℒ ϖ) c) (ε : ℝ) : ∃ B : ℕ, ∥ tsum (λ b : {n : ℕ // B ≤ n },
   ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ) ∥ < ε ^ (p⁻¹ : ℝ) :=
 begin
-  sorry;{
-  set f := (λ b : ℕ, ∥ (F.1 punit.star b : ℝ) * (1 / 2 ) ^ b ∥),
+  -- sorry;{
+  set f := (λ b : ℕ, (F.1 punit.star b : ℝ) * (1 / 2 ) ^ b ),
   have := tendsto_tsum_compl_at_top_zero f,
   rw tendsto_at_top at this,
   have h_pos : 0 < ε ^ (p⁻¹ : ℝ), sorry,
   obtain ⟨A, hA⟩ := this (ε ^ (p⁻¹ : ℝ)) h_pos,
-  specialize hA A (le_of_eq (refl A)),
-  rw real.dist_0_eq_abs at hA,
-  dsimp only [f] at hA,
-  rw [← real.norm_eq_abs] at hA,
   have H : A.nonempty, sorry,
   set B := (A.max' H).succ with hB,
-  have h_incl : A ⊆ finset.range B,
-  { --rw finset.le_eq_subset,
+  use B,
+  have h_incl : A ≤ finset.range B,
+  { rw finset.le_eq_subset,
     intros a ha,
     apply finset.mem_range_succ_iff.mpr (A.le_max' _ ha) },
-  have := @mem_compl_iff ℕ A,
+  specialize hA (finset.range B) h_incl,
+  rw real.dist_0_eq_abs at hA,
+  rw [← real.norm_eq_abs] at hA,
+  convert hA using 1,
+  -- dsimp only [f],
+  apply congr_arg,
+  simp_rw [subtype.val_eq_coe],
+  have set_eq : {n : ℕ | B ≤ n} = {n : ℕ | n ∉ finset.range B}, sorry,
+  exact tsum_congr_subtype f set_eq,
+  -- exact this,
+  -- dsimp only [f] at this ⊢,
+  -- have uff : ∑' (x : ↥{n : ℕ | n ∉ finset.range B}), (((F.val) punit.star ((x : ℕ) : ℤ)) : ℝ) * (1 / 2) ^ (x : ℕ) =
+  --   ∑' (x : {n : ℕ // n ∉ finset.range B}), (((F.val) punit.star ((x : ℕ) : ℤ)) : ℝ) * (1 / 2) ^ (x : ℕ), refl,
+  -- rw uff at this_1,
+  -- rw [← this_1],
+  -- refl,
+  -- rw ← this,
+  -- let e :=
+  -- apply equiv.tsum_eq,
+  -- simp,
+  -- convert tsum_congr_subtype using 1,
+  -- simp,
+  -- congr',
+  -- sorry,
+  -- simp,
+
+
+
+  -- have h_incl' : A ⊆ finset.range B,
+  -- { --rw finset.le_eq_subset,
+  --   intros a ha,
+  --   apply finset.mem_range_succ_iff.mpr (A.le_max' _ ha) },
+  -- have := @mem_compl_iff ℕ A,
   -- simp_rw mem_compl_iff at hA,
   -- rw subset_compl
   -- **[FAE]** use tendsto_tsum_compl_at_top_zero
-  },
+  -- },
 end
 
+-- def U (F : filtration (ℒ S) c) (ε : ℝ) : set (filtration (ℒ S) c) := λ G,
+--   ∀ s n, n ≤ (geom_B ε) → F s n = G s n
+
 def U (F : filtration (ℒ S) c) (ε : ℝ) : set (filtration (ℒ S) c) := λ G,
-  ∀ s n, n ≤ (geom_B ε) → F s n = G s n
+  ∀ s n, n < (geom_B ε) → F s n = G s n
+
+-- lemma mem_U (F : filtration (ℒ S) c) (ε : ℝ) : F ∈ (U S c F ε) := λ _ _ _, rfl
 
 lemma mem_U (F : filtration (ℒ S) c) (ε : ℝ) : F ∈ (U S c F ε) := λ _ _ _, rfl
+
+-- lemma is_open_U (F : filtration (ℒ S) c) (ε : ℝ) : is_open (U S c F ε) :=
+-- begin
+--   sorry,
+-- end
 
 lemma is_open_U (F : filtration (ℒ S) c) (ε : ℝ) : is_open (U S c F ε) :=
 begin
   sorry,
 end
-
 
 end topological_generalities
 
@@ -939,6 +986,78 @@ lemma coe_filtration_sub {c₁ c₂ : ℝ≥0} (F : filtration (ℒ S) c₁)
   (⟨↑F - ↑G, sub_mem_filtration F.2 G.2⟩ : filtration (ℒ S) (c₁ + c₂)) s i
   = (F : (ℒ S)) s i - (G : (ℒ S)) s i := rfl
 
+-- lemma dist_lt_of_mem_U (ε : ℝ≥0) (F G : filtration (ℒ ϖ) c) :
+--   G ∈ (U ϖ c F ε) → ∥ ((θ_c c ϖ G) : (ℳ ϖ)) - (θ_c c ϖ) F ∥ < ε :=
+-- begin
+--   intro hG,
+--   rw real_measures.norm_def,
+--   simp only [fintype.univ_punit, real_measures.sub_apply, finset.sum_singleton],
+--   rw real.norm_eq_abs,
+--   simp only [θ_c, one_mul, eq_mpr_eq_cast, set_coe_cast, subtype.coe_mk],
+--   dsimp only [θ, ϑ],
+--   rw [← tsum_sub],
+--   rotate,
+--   { exact aux_thm69.summable_smaller_radius G.1.d (G.1.summable punit.star)
+--       (λ n, lt_d_eq_zero G.1 punit.star n) r_half },
+--   { exact aux_thm69.summable_smaller_radius F.1.d (F.1.summable punit.star)
+--       (λ n, lt_d_eq_zero F.1 punit.star n) r_half },
+--   simp_rw [← sub_mul],
+--   have h_B : ∀ b : ℤ, b ≤ (geom_B p ε) → ((G punit.star b) : ℝ) - (F punit.star b) = 0,
+--   { intros b hb,
+--     simp only [hG punit.star b hb, sub_self] },
+--   let f := λ b : ℤ, ((((G : (ℒ ϖ)) punit.star b) - ((F : (ℒ ϖ)) punit.star b)) : ℝ)
+--     * (1 / 2) ^ b,
+--   let g : ({ b : ℤ | geom_B p ε < b}) → ℝ := f ∘ coe,
+--   let i := (coe : { b : ℤ | geom_B p ε < b} → ℤ) ∘
+--     (coe : function.support g → { b : ℤ | geom_B p ε < b}),
+--   -- let i := (coe : { b : ℤ | geom_B p ε < b} → ℤ) ∘
+--   --   (coe : function.support g → { b : ℤ | geom_B p ε < b}),
+--   have hi : ∀ ⦃x y : ↥(function.support g)⦄, i x = i y → ↑x = ↑y,
+--   {intros _ _ h,
+--     simp only [subtype.coe_inj] at h,
+--     rwa [subtype.coe_inj] },
+--   have hf : function.support f ⊆ set.range i,
+--   { intros a ha,
+--     simp only [f, function.mem_support, ne.def] at ha,
+--     have ha' : geom_B p ε < a,
+--     { by_contra',
+--       specialize h_B a this,
+--       simp only [one_div, inv_zpow', zpow_neg₀, mul_eq_zero, inv_eq_zero, not_or_distrib] at ha,
+--       replace ha := ha.1,
+--       simpa only },
+--   simp only [set.mem_set_of_eq, function.mem_support, ne.def, set.mem_range, set_coe.exists],
+--   use [a, ha', ha, refl _] },
+--   have h_sum := tsum_eq_tsum_of_ne_zero_bij i hi hf (λ _, refl _),
+--   rw [h_sum, ← real.norm_eq_abs, ← real.rpow_lt_rpow_iff _ _ _, ← real.rpow_mul,
+--     mul_inv_cancel, real.rpow_one],
+--   rotate,
+--   { rw ← nnreal.coe_zero,
+--     exact ne_of_gt (nnreal.coe_lt_coe.mpr (fact.out _)) },
+--   { apply norm_nonneg },
+--   { apply real.rpow_nonneg_of_nonneg (norm_nonneg _) },
+--   { rw ← nnreal.coe_zero,
+--     exact ε.2 },
+--   { rw [inv_pos, ← nnreal.coe_zero],
+--     exact (nnreal.coe_lt_coe.mpr (fact.out _)) },
+--   let FG_sub : filtration (ℒ ϖ) (c + c) := ⟨↑G - ↑F, sub_mem_filtration G.2 F.2⟩,
+--   convert tail_B p (c + c) FG_sub ε,
+--   { funext,
+--     dsimp [g, f],
+--     rw int.cast_sub },
+
+--   -- refine (lt_of_le_of_lt (norm_tsum_le_tsum_norm _) _),
+--   -- dsimp [g, f],
+--   -- convert summable_subset p (c + c) FG_sub (geom_B p ε),
+--   -- { funext,
+--   --   dsimp [FG_sub],
+--   --   rw [coe_filtration_sub p ϖ G F punit.star (i : ℤ), int.cast_sub] },
+--   -- convert tail_B_old p (c + c) FG_sub ε,
+--   -- { funext,
+--   --   dsimp [g, f],
+--   --   rw int.cast_sub },
+-- end
+
+--different name, same statement
 lemma dist_lt_of_mem_U (ε : ℝ≥0) (F G : filtration (ℒ ϖ) c) :
   G ∈ (U ϖ c F ε) → ∥ ((θ_c c ϖ G) : (ℳ ϖ)) - (θ_c c ϖ) F ∥ < ε :=
 begin
@@ -955,14 +1074,16 @@ begin
   { exact aux_thm69.summable_smaller_radius F.1.d (F.1.summable punit.star)
       (λ n, lt_d_eq_zero F.1 punit.star n) r_half },
   simp_rw [← sub_mul],
-  have h_B : ∀ b : ℤ, b ≤ (geom_B p ε) → ((G punit.star b) : ℝ) - (F punit.star b) = 0,
+  have h_B : ∀ b : ℤ, b < (geom_B p ε) → ((G punit.star b) : ℝ) - (F punit.star b) = 0,
   { intros b hb,
     simp only [hG punit.star b hb, sub_self] },
   let f := λ b : ℤ, ((((G : (ℒ ϖ)) punit.star b) - ((F : (ℒ ϖ)) punit.star b)) : ℝ)
     * (1 / 2) ^ b,
-  let g : ({ b : ℤ | geom_B p ε < b}) → ℝ := f ∘ coe,
-  let i := (coe : { b : ℤ | geom_B p ε < b} → ℤ) ∘
-    (coe : function.support g → { b : ℤ | geom_B p ε < b}),
+  let g : ({ b : ℤ | geom_B p ε ≤ b}) → ℝ := f ∘ coe,
+  let i := (coe : { b : ℤ | geom_B p ε ≤ b} → ℤ) ∘
+    (coe : function.support g → { b : ℤ | geom_B p ε ≤ b}),
+  -- let i := (coe : { b : ℤ | geom_B p ε < b} → ℤ) ∘
+  --   (coe : function.support g → { b : ℤ | geom_B p ε < b}),
   have hi : ∀ ⦃x y : ↥(function.support g)⦄, i x = i y → ↑x = ↑y,
   {intros _ _ h,
     simp only [subtype.coe_inj] at h,
@@ -970,7 +1091,7 @@ begin
   have hf : function.support f ⊆ set.range i,
   { intros a ha,
     simp only [f, function.mem_support, ne.def] at ha,
-    have ha' : geom_B p ε < a,
+    have ha' : geom_B p ε ≤ a,
     { by_contra',
       specialize h_B a this,
       simp only [one_div, inv_zpow', zpow_neg₀, mul_eq_zero, inv_eq_zero, not_or_distrib] at ha,
