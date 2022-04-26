@@ -417,14 +417,41 @@ def Profinite.pmz_to_level_component (S : Profinite.{u}) (j : nnreal) (T : discr
 def Profinite.pmz_to_level (S : Profinite.{u}) (j : nnreal) (T : discrete_quotient S) :
   (Profinite.of T).pmz ⌊j⌋₊ ⟶
     (ProFiltPseuNormGrp₁.level.obj j).obj (free_pfpng_functor.obj $ Fintype.of T) :=
-{ to_fun := Profinite.sigma.desc _ $ λ e, S.pmz_to_level_component j T (ulift.down e),
-  continuous_to_fun := continuous_of_discrete_topology }
+Profinite.sigma.desc _ $ λ e, S.pmz_to_level_component j T (ulift.down e)
+
+lemma Profinite.pmz_to_level_nat_trans_aux
+  (S : Profinite.{u}) (j : nnreal) (T₁ T₂ : discrete_quotient S) (f : T₁ ⟶ T₂)
+  (e : fin ⌊j⌋₊ → sign_type) (t : (Profinite.of T₁).pow ⌊j⌋₊) (s : T₂) :
+(∑ i : fin ⌊j⌋₊, λ s : T₂, ite (S.fintype_diagram.map f (t i) = s) (e i : ℤ) 0) s =
+  (@finset.filter (@bundled.α fintype (S.fintype_diagram.obj T₁))
+     (λ w : T₁, S.fintype_diagram.map f w = s)
+     (λ (a : @bundled.α fintype (S.fintype_diagram.obj T₁)),
+        classical.prop_decidable _)
+     (@finset.univ (@bundled.α fintype (S.fintype_diagram.obj T₁))
+        (@Fintype.fintype (S.fintype_diagram.obj T₁)))).sum
+    (∑ (i : fin ⌊j⌋₊), λ s : T₁, @ite ℤ (t i = s) _ ↑(e i) 0) :=
+begin
+  simp only [finset.sum_apply],
+  rw finset.sum_comm,
+  refine finset.sum_congr rfl _,
+  rintro i -,
+  rw finset.sum_ite_eq,
+  simp only [finset.mem_filter, finset.mem_univ, true_and],
+end
 
 def Profinite.pmz_to_level_nat_trans (S : Profinite.{u}) (j : nnreal) :
   S.pmz_diagram ⌊j⌋₊ ⟶ (S.fintype_diagram ⋙ free_pfpng_functor) ⋙
     (ProFiltPseuNormGrp₁.level.obj j) :=
 { app := λ T, S.pmz_to_level j T,
-  naturality' := sorry }
+  naturality' := begin
+    intros T₁ T₂ f,
+    dsimp [Profinite.pmz_diagram, Profinite.pmz_to_level, Profinite.pmz_functor],
+    apply Profinite.sigma.hom_ext,
+    rintro ⟨e⟩,
+    simp only [Profinite.sigma.ι_desc_assoc, category.assoc, Profinite.sigma.ι_desc],
+    ext t s,
+    exact Profinite.pmz_to_level_nat_trans_aux S j T₁ T₂ f e t s,
+  end }
 
 def Profinite.pmz_to_free_pfpng (S : Profinite.{u}) (j : nnreal) :
   S.pmz ⌊j⌋₊ ⟶ (ProFiltPseuNormGrp₁.level.obj j).obj S.free_pfpng :=
