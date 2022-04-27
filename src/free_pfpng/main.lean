@@ -16,7 +16,13 @@ lemma Profinite.is_zero_of_empty (S : Profinite.{u}) [is_empty S] :
 
 lemma category_theory.abelian.is_iso_of_mono_of_is_zero
   {A : Type*} [category A] [abelian A] {X Y : A} (f : X ⟶ Y) [mono f]
-  (hY : limits.is_zero Y) : is_iso f := sorry
+  (hY : limits.is_zero Y) : is_iso f :=
+begin
+  use 0, simp, split,
+  rw ← cancel_mono f,
+  apply hY.eq_of_tgt,
+  apply hY.eq_of_tgt,
+end
 
 instance Profinite.epi_free'_to_condensed_free_pfpng_of_empty
   (S : Profinite.{u}) [is_empty S] :
