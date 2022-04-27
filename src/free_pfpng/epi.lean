@@ -541,8 +541,6 @@ namespace Profinite.epi_free'_to_condensed_setup
 
 variables (S : Profinite.{u}) (j : nnreal)
 
-#check S.free'_lift
-
 lemma free'_lift_app_eq (A : Condensed.{u} Ab.{u+1})
   (η : S.to_Condensed ⟶ Condensed_Ab_to_CondensedSet.obj A)
   (T : Profinite.{u}) :
