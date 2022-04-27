@@ -11,6 +11,10 @@ open category_theory.grothendieck_topology
 
 universe u
 
+-- Do a case split on `[nonempty S]` here.
+instance Profinite.epi_free'_to_condensed_free_pfpng (S : Profinite.{u}) :
+  epi S.free'_to_condensed_free_pfpng := sorry
+
 instance Profinite.is_iso_free'_to_condensed_free_pfpng
   (S : Profinite.{u}) : is_iso S.free'_to_condensed_free_pfpng :=
 is_iso_of_mono_of_epi _
