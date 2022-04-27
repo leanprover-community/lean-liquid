@@ -171,8 +171,8 @@ begin
     rw add_mul },
   all_goals {apply summable_of_summable_norm, simp_rw [norm_mul, norm_inv, norm_zpow, real.norm_two,
     ← inv_zpow₀, inv_eq_one_div] },
-  exact aux_thm69.summable_smaller_radius_norm F.d r_half (F.summable s) (λ n, lt_d_eq_zero _ _ _),
-  exact aux_thm69.summable_smaller_radius_norm G.d r_half (G.summable s) (λ n, lt_d_eq_zero _ _ _),
+  exact aux_thm69.summable_smaller_radius_norm F.d half_lt_r (F.summable s) (λ n, lt_d_eq_zero _ _ _),
+  exact aux_thm69.summable_smaller_radius_norm G.d half_lt_r (G.summable s) (λ n, lt_d_eq_zero _ _ _),
 end
 
 --for mathlib
@@ -244,7 +244,7 @@ begin
     { suffices : p ≤ 1, assumption_mod_cast, exact fact.out _},
     { dsimp only,
       obtain ⟨d, hd⟩ := exists_bdd_filtration (r_pos) (r_lt_one) F,
-      apply aux_thm69.summable_smaller_radius d (F.summable s) (hd s) r_half },
+      apply aux_thm69.summable_smaller_radius d (F.summable s) (hd s) half_lt_r },
     { dsimp only,
       simp_rw [nnnorm_mul, nnreal.mul_rpow],
       have := F.summable s,
@@ -994,7 +994,7 @@ end
 --   rw this,
 --   refine summable.comp_injective _ (subtype.coe_injective),
 --   simp_rw [norm_mul, norm_zpow, ← inv_eq_one_div, norm_inv, real.norm_two, inv_eq_one_div],
---   exact aux_thm69.summable_smaller_radius_norm F.1.d (r_half) (F.1.summable punit.star)
+--   exact aux_thm69.summable_smaller_radius_norm F.1.d (half_lt_r) (F.1.summable punit.star)
 --     (λ n, lt_d_eq_zero F.1 punit.star n),
 -- end
 
@@ -1030,9 +1030,9 @@ begin
   rw [← tsum_sub],
   rotate,
   { exact aux_thm69.summable_smaller_radius G.1.d (G.1.summable punit.star)
-      (λ n, lt_d_eq_zero G.1 punit.star n) r_half },
+      (λ n, lt_d_eq_zero G.1 punit.star n) half_lt_r },
   { exact aux_thm69.summable_smaller_radius F.1.d (F.1.summable punit.star)
-      (λ n, lt_d_eq_zero F.1 punit.star n) r_half },
+      (λ n, lt_d_eq_zero F.1 punit.star n) half_lt_r },
   simp_rw [← sub_mul],
   set B := (geom_B p c (ε / 2 ^ p.1)) with def_B,
   let f := λ b : ℤ, ((((G : (ℒ ϖ)) punit.star b) - ((F : (ℒ ϖ)) punit.star b)) : ℝ)
@@ -1080,9 +1080,9 @@ end
 --   rw [← tsum_sub],
 --   rotate,
 --   { exact aux_thm69.summable_smaller_radius G.1.d (G.1.summable punit.star)
---       (λ n, lt_d_eq_zero G.1 punit.star n) r_half },
+--       (λ n, lt_d_eq_zero G.1 punit.star n) half_lt_r },
 --   { exact aux_thm69.summable_smaller_radius F.1.d (F.1.summable punit.star)
---       (λ n, lt_d_eq_zero F.1 punit.star n) r_half },
+--       (λ n, lt_d_eq_zero F.1 punit.star n) half_lt_r },
 --   simp_rw [← sub_mul],
 --   let FG_sub : filtration (ℒ ϖ) (c + c) := ⟨↑G - ↑F, sub_mem_filtration G.2 F.2⟩,
 --   have h_B : ∀ b : ℤ, b < (geom_B p c F ε) → ((G punit.star b) : ℝ) - (F punit.star b) = 0,
