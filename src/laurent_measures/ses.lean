@@ -906,24 +906,33 @@ begin
   let g := (λ n : ℕ, (c : ℝ) * (1 / (2 * r) ^ n)),
   have := tendsto_tsum_compl_at_top_zero g,
   rw tendsto_at_top at this,
-  have h_pos : 0 < ε ^ (p⁻¹ : ℝ), sorry,
+  have h_pos : 0 < ε ^ (p⁻¹ : ℝ) := real.rpow_pos_of_pos hε _,
   obtain ⟨A, hA⟩ := this (ε ^ (p⁻¹ : ℝ)) h_pos,
-  have H : A.nonempty, sorry,
-  set B := (A.max' H).succ with hB,
-  use B,
-  have h_incl : A ≤ finset.range B,
-  { rw finset.le_eq_subset,
-    intros a ha,
-    apply finset.mem_range_succ_iff.mpr (A.le_max' _ ha) },
-  specialize hA (finset.range B) h_incl,
-  rw [real.dist_0_eq_abs, ← real.norm_eq_abs] at hA,
-  intro F,
-  apply lt_of_le_of_lt (mem_filtration_sum_le_geom p c F B),
-  convert hA using 1,
-  apply congr_arg,
-  simp_rw [subtype.val_eq_coe, ← tsum_mul_left],
-  have set_eq : {n : ℕ | B ≤ n} = {n : ℕ | n ∉ finset.range B} := by {simp only [finset.mem_range, not_lt]},
-  exact tsum_congr_subtype g set_eq,
+  by_cases H : A.nonempty,
+  { set B := (A.max' H).succ with hB,
+    use B,
+    have h_incl : A ≤ finset.range B,
+    { rw finset.le_eq_subset,
+      intros a ha,
+      apply finset.mem_range_succ_iff.mpr (A.le_max' _ ha) },
+    specialize hA (finset.range B) h_incl,
+    rw [real.dist_0_eq_abs, ← real.norm_eq_abs] at hA,
+    intro F,
+    apply lt_of_le_of_lt (mem_filtration_sum_le_geom p c F B),
+    convert hA using 1,
+    apply congr_arg,
+    simp_rw [subtype.val_eq_coe, ← tsum_mul_left],
+    have set_eq : {n : ℕ | B ≤ n} = {n : ℕ | n ∉ finset.range B} := by {simp only [finset.mem_range, not_lt]},
+    exact tsum_congr_subtype g set_eq },
+  { simp only [finset.not_nonempty_iff_eq_empty] at H,
+    rw H at hA,
+    use 0,
+    intro F,
+    apply lt_of_le_of_lt (norm_tsum_le_tsum_norm _) _,
+    sorry,
+    -- apply tsum_le_of_sum_lt, -- exists the _le version, not the _lt one
+    sorry,
+  },
 end
 
 def eq_le_int_nat (B : ℕ) : {n : ℤ // (B : ℤ) ≤ n } ≃ {n : ℕ // B ≤ n} :=
@@ -1045,7 +1054,8 @@ end
 
 lemma tsum_subtype_sub (f g : ℤ → ℝ) (B : ℤ) : ∥ tsum ((λ (b : ℤ), (((g b) : ℝ) - f b) * (1 / 2) ^ b) ∘ (coe : {b | B ≤ b} → ℤ)) ∥ = ∥ ∑' (b : {x // B ≤ x}), (g b : ℝ) * (1 / 2) ^ b.1 - ∑' (b : {x // B ≤ x}), (f b : ℝ) * (1 / 2) ^ b.1 ∥ := sorry
 
-lemma pos_ε_pow (ε : ℝ) (hε : 0 < ε) : 0 < (ε / (2 : ℝ) ^ p.1) := sorry
+lemma pos_ε_pow (ε : ℝ) (hε : 0 < ε) : 0 < (ε / (2 : ℝ) ^ p.1) := by {apply div_pos hε
+  (real.rpow_pos_of_pos _ _), simp only [zero_lt_bit0, zero_lt_one]}
 
 lemma dist_lt_of_mem_U (ε : ℝ≥0) (hε : 0 < ε) (F G : filtration (ℒ ϖ) c) :
   G ∈ (U c F (geom_B c (ε / (2 : ℝ) ^ p.1) (pos_ε_pow ε hε))) → ∥ ((θ_c c ϖ G) : (ℳ ϖ)) - (θ_c c ϖ) F ∥ < ε :=
@@ -1175,8 +1185,6 @@ end
 -- This is the main continuity property needed in `ses2.lean`
 lemma continuous_θ_c (c : ℝ≥0) : continuous (θ_c c S) :=
 begin
-  sorry;--need to fix a timeout
-  {
   apply continuous_of_seval_ℳ_comp_continuous,
   intro s,
   rw ← commute_seval_ℒ_ℳ,
@@ -1192,35 +1200,44 @@ begin
   have η_pos : 0 < η₀ := by {rw hη₀, from (sub_pos.mpr hF)},
   set η : ℝ≥0 := ⟨η₀, le_of_lt η_pos⟩ with hη,
   replace hη : η₀ = (η : ℝ) := subtype.coe_mk η₀ η_pos,
-  have η_pos' : 0 < (η₀ / 2) ^ (p : ℝ) := sorry, --real.rpow_pos_of_pos (half_pos η_pos) _,
+  have η_pos' : 0 < (η₀ / 2) ^ (p : ℝ) := real.rpow_pos_of_pos (half_pos η_pos) _,
   set V := U p c F (geom_B p c ((η₀ / 2) ^ (p : ℝ)) η_pos') with hV,
-  simp_rw [real.div_rpow η.2 (le_of_lt (@two_pos ℝ _ _))] at hV,
+  simp_rw [real.div_rpow (le_of_lt η_pos) (le_of_lt (@two_pos ℝ _ _))] at hV,
   use V,
   split,
   { intros G hG,
     simp only [set.mem_preimage, one_mul, eq_self_iff_true, eq_mpr_eq_cast, set_coe_cast,
     function.comp_app, mem_ball, subtype.dist_eq, real.dist_eq],
-  have hp : 0 < (p : ℝ),
-  { rw [← nnreal.coe_zero, nnreal.coe_lt_coe],
-    from fact.out _ },
+    have hp : 0 < (p : ℝ),
+    { rw [← nnreal.coe_zero, nnreal.coe_lt_coe],
+      from fact.out _ },
     rw hV at hG,
-have h_calc := dist_lt_of_mem_U p c (η ^ (p : ℝ)) (real.rpow_pos_of_pos η_pos _) F G hG, --
-  -- calculations are faster if this assumption is singled out from the `calc` term below
-calc | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ G)) : ℝ) - y | ≤
-            | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ G)) : ℝ) -
-                  (homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) | +
-                | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) : ℝ) - y | : abs_sub_le _ _ y
-        ... < ε - |((homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) : ℝ) - y | +
-              | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) : ℝ) - y | : by
-                        {apply add_lt_add_right, rw [← real_measures.dist_eq,
-                        ← real.rpow_lt_rpow_iff (real.rpow_nonneg_of_nonneg
-                        (real_measures.norm_nonneg _) _) (sub_nonneg.mpr (le_of_lt hF)) hp,
-                        ← real.rpow_mul (real_measures.norm_nonneg _), inv_mul_cancel (ne_of_gt hp),
-                        real.rpow_one, ← hη₀, hη, ← nnreal.coe_rpow],
-                        apply h_calc,}
-        ... = ε : by {rw sub_add_cancel} },
+    sorry,
+  -- things are faster if these calculations are singled out from the sorried `calc` term below
+    -- have help_calc_1 : | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ G)) : ℝ) - (homeo_filtration_ϖ_ball c
+    --   (θ_c p c ϖ F)) | + | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) : ℝ) - y | < ε -
+    --     |((homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) : ℝ) - y | + | ((homeo_filtration_ϖ_ball c
+    --       (θ_c p c ϖ F)) : ℝ) - y |,
+    -- { apply add_lt_add_right,
+    --   rw [← real_measures.dist_eq,
+    --   ← real.rpow_lt_rpow_iff (real.rpow_nonneg_of_nonneg
+    --   (real_measures.norm_nonneg _) _) (sub_nonneg.mpr (le_of_lt hF)) hp,
+    --   ← real.rpow_mul (real_measures.norm_nonneg _), inv_mul_cancel (ne_of_gt hp),
+    --   real.rpow_one, ← hη₀, hη, ← nnreal.coe_rpow],
+    --   exact dist_lt_of_mem_U p c (η ^ (p : ℝ)) (real.rpow_pos_of_pos η_pos _) F G hG },
+    -- rw sub_add_cancel at help_calc_1,
+    -- have help_calc_2 :=  abs_sub_le ((homeo_filtration_ϖ_ball c (θ_c p c ϖ G)) : ℝ) ((homeo_filtration_ϖ_ball
+    --   c (θ_c p c ϖ F)) : ℝ) (y : ℝ),
+    -- apply lt_of_le_of_lt help_calc_2 help_calc_1
+    },
+    -- calc | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ G)) : ℝ) - y | ≤
+    --         | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ G)) : ℝ) -
+    --               (homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) | +
+    --             | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) : ℝ) - y | : abs_sub_le _ _ y
+    --     ... < ε - |((homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) : ℝ) - y | +
+    --           | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) : ℝ) - y | : help_calc
+    --     ... = ε : by {rw sub_add_cancel}
   refine and.intro (is_open_U p c F _) (mem_U p c F _),
-  },
 end
 
 
