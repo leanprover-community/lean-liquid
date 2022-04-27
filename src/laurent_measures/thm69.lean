@@ -6,7 +6,7 @@ import laurent_measures.basic
 import laurent_measures.theta
 import linear_algebra.basic
 import order.filter.at_top_bot tactic.linarith
-import for_mathlib.ennreal
+import for_mathlib.nnreal
 
 
 /-
@@ -249,41 +249,34 @@ down to the fact that you can interchange the order of summation in a ℝ≥0-va
 sum of sums"
 
 -/
-lemma nnreal.summable_of_comp_injective {α β : Type*} {f : α → ℝ≥0} {i : β → α}
-  (hi : function.injective i) (hi' : ∀ a, a ∉ set.range i → f a = 0) (hfi : summable (f ∘ i)) :
-  summable f :=
-begin
-  rw ← summable_coe at hfi ⊢,
-  let e : β ≃ ({x : α | x ∈ set.range i} : set α) :=
-  { to_fun := λ b, ⟨i b, b, rfl⟩,
-  inv_fun := λ x, x.2.some,
-  left_inv := begin intro b, simp, apply hi, exact Exists.some_spec (⟨b, rfl⟩ : ∃ y, i y = i b) end,
-  right_inv := begin rintro ⟨x, b, rfl⟩, simp, exact Exists.some_spec (⟨b, rfl⟩ : ∃ y, i y = i b) end },
-  have this2 : summable ((λ (x : {x : α // x ∈ set.range i}), (f x.1 : ℝ)) ∘ ⇑e : β → ℝ),
-  { convert (summable_congr _).1 hfi,
-    intro b, refl },
-  rw e.summable_iff at this2,
-  change summable ((λ a, (f a : ℝ)) ∘ (coe : {x // x ∈ set.range i} → α)) at this2,
-  rw ← this2.summable_compl_iff,
-  convert summable_zero,
-  ext1 ⟨x, hx⟩,
-  simp [hi' x hx],
-end
 
-lemma psi_def_aux_4 {S : Fintype} [fact (0 < p)] [fact (p < 1)] (F : ℒ S) (s : ↥S)
-  (F_sum : summable (λ (n : ℤ), ∥F s n∥₊ * r ^ n)) : summable
+
+lemma psi_def_aux_4 {S : Fintype} [fact (0 < p)] [fact (p < 1)] (F : ℒ S) (s : ↥S) : summable
   (λ (m : ℕ),
      ∥(2 : ℝ) ^ (F.d + ↑m)∥₊ *
        ((∑' (k : ℕ), ∥F s (F.d + ↑m + ↑k)∥₊ * (1 / 2) ^ (F.d + ↑m + ↑k)) * r ^ (F.d + ↑m))) :=
 begin
   -- tidy up
+  simp_rw [nnnorm_zpow, real.nnnorm_two],
+  have : ∀ m : ℕ, (2 : ℝ≥0) ^ (F.d + ↑m) *
+  ((∑' (k : ℕ), ∥F s (F.d + ↑m + ↑k)∥₊ * (1 / 2) ^ (F.d + ↑m + ↑k)) * r ^ (F.d + ↑m)) =
+  ∑' (k : ℕ), (2 : ℝ≥0) ^ (F.d + ↑m) * ∥F s (F.d + ↑m + ↑k)∥₊ * (1 / 2) ^ (F.d + ↑m + ↑k) * r ^ (F.d + ↑m),
+  { intro m,
+    rw [← nnreal.tsum_mul_right, ← nnreal.tsum_mul_left],
+    apply tsum_congr,
+    intro b,
+    ring },
+  rw summable_congr this, clear this,
   -- change order of summation
+  apply nnreal.summable_symm,
+  -- check various things are summable
+  have := F.summable_half s,
+  sorry, sorry,
   -- win
   sorry
 end
 
-lemma psi_def_aux_3 {S : Fintype} [fact (0 < p)] [fact (p < 1)] (F : ℒ S) (s : ↥S)
-  (F_sum : summable (λ (n : ℤ), ∥F s n∥₊ * r ^ n))  : summable
+lemma psi_def_aux_3 {S : Fintype} [fact (0 < p)] [fact (p < 1)] (F : ℒ S) (s : ↥S) : summable
   (λ (n : ℤ),
      ∥-(2 : ℝ) ^ (n - 1)∥₊ *
        ite (F.d ≤ n) ((∑' (k : ℕ), ∥F s (n + ↑k)∥₊ * (1 / 2) ^ (n + ↑k)) * r ^ n) 0) :=
@@ -307,11 +300,10 @@ begin
     simp, rw int.to_nat_of_nonneg, ring, linarith },
   { refine (summable_congr _).1 this,
     simp },
-  exact psi_def_aux_4 F s F_sum,
+  exact psi_def_aux_4 F s,
 end
 
-lemma psi_def_aux_2 {S : Fintype} [fact (0 < p)] [fact (p < 1)] (F : ℒ S) (s : ↥S)
-  (F_sum : summable (λ (n : ℤ), ∥F s n∥₊ * r ^ n)) : summable
+lemma psi_def_aux_2 {S : Fintype} [fact (0 < p)] [fact (p < 1)] (F : ℒ S) (s : ↥S) : summable
   (λ (n : ℤ),
      ite (F.d ≤ n) ∥-(2 : ℝ) ^ (n - 1) * ∑' (k : ℕ), ↑(F s (n + ↑k)) * (1 / 2) ^ (n + ↑k) * r ^ n∥₊ 0) :=
 begin
@@ -349,11 +341,10 @@ begin
             congr } } },
       { simp } },
     { simp } },
-  apply psi_def_aux_3 _ _ F_sum,
+  exact psi_def_aux_3 _ _,
 end
 
-lemma psi_def_aux {S : Fintype} [fact (0 < p)] [fact (p < 1)] (F : ℒ S) (s : ↥S)
-  (F_sum : summable (λ (n : ℤ), ∥F s n∥₊ * r ^ n)) :
+lemma psi_def_aux {S : Fintype} [fact (0 < p)] [fact (p < 1)] (F : ℒ S) (s : ↥S) :
   summable (λ (n : ℤ), ∥ite (F.d ≤ n) (-(2 : ℝ) ^ (n - 1) *
     ∑' (k : ℕ), ↑(F s (n + ↑k)) * (1 / 2) ^ (n + ↑k)) 0∥₊ * r ^ n) :=
 begin
@@ -367,7 +358,7 @@ begin
       rw [ ← mul_assoc, nnnorm_mul _ ((r : ℝ) ^ n)],
       simp },
     { simp } },
-  apply psi_def_aux_2 _ _ F_sum,
+  exact psi_def_aux_2 _ _,
 end
 
 def ψ (F : ℒ S) (hF : θ F = 0) : ℒ S :=
@@ -382,7 +373,6 @@ def ψ (F : ℒ S) (hF : θ F = 0) : ℒ S :=
      * r ^ n),
     push_cast,
     -- hypothesis that infinite sum converges at r>1/2
-    have := F.summable s,
     -- get hypothesis that infinite sum is 0 at 1/2
     simp only [θ, ϑ] at hF,
     replace hF := congr_fun hF s, dsimp at hF,
@@ -435,10 +425,7 @@ def ψ (F : ℒ S) (hF : θ F = 0) : ℒ S :=
       apply h1 n,
     }, clear h1,
     clear hF,
-    have foo : ∀ n : ℤ, (((∥F s n∥₊ * r^n) : ℝ≥0) : ℝ) = ∥F s n∥ * (r : ℝ) ^ n,
-      intro n, norm_cast,
-    rw [← summable_congr foo, nnreal.summable_coe] at this,
-    exact psi_def_aux F s this,
+    exact psi_def_aux F s,
   end }
 
 theorem θ_ϕ_exact (F : ℒ S) (hF : θ F = 0) : ∃ G, ϕ G = F :=
