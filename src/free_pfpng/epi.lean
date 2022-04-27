@@ -498,6 +498,8 @@ end
 section
 variables {α : Type*} [decidable_eq α] [nonempty α]
 
+open finset
+
 -- TODO: Inlining this yields an app-builder exception
 lemma exists_signed_sum_aux {n : ℕ} (sgn : ℕ → sign_type) (b : α) [decidable_eq α]
   {f : α → ℤ}
@@ -530,7 +532,8 @@ begin
   rw mem_cons at hb,
   obtain rfl | hb := hb,
   { rw [sum_eq_zero, zero_add, sum_const, if_pos rfl, card_sdiff (range_mono tsub_le_self),
-      card_range, card_range, tsub_tsub_cancel_of_le (le_of_add_le_left hn), nsmul_eq_mul, mul_comm,
+      card_range, card_range, tsub_tsub_cancel_of_le
+        (nat.le_of_add_le_left hn), nsmul_eq_mul, mul_comm,
       ←int.sign_eq_sign, int.nat_cast_eq_coe_nat, (f b).sign_mul_nat_abs],
     refine λ i hi, ite_eq_right_iff.2 _,
     rintro rfl,
@@ -538,20 +541,39 @@ begin
   { simp_rw [if_neg (ne_of_mem_of_not_mem hb ha).symm, hf _ hb, sum_const_zero, add_zero] }
 end
 
-lemma Profinite.pmz_to_free_pfpng_epi_aux (r : nnreal) (f : α → ℤ) (hf : ∑ i : T, ∥f i∥₊ ≤ r) :
+lemma Profinite.pmz_to_free_pfpng_epi_aux' [fintype α]
+  (r : nnreal) (f : α → ℤ) (hf : ∑ i : α, ∥f i∥₊ ≤ r) :
   ∃ (sgn : ℕ → sign_type) (g : ℕ → α),
     ∀ t, (∑ i in range ⌊r⌋₊, if g i = t then (sgn i : ℤ) else 0) = f t :=
 begin
   refine Exists₂.imp (λ _ _ h t, _) (exists_signed_sum univ ⌊r⌋₊ f _),
   { exact h.2 t (mem_univ _) },
-  refine le_floor _,
+  refine nat.le_floor _,
   simp_rw [nat.cast_sum, nnreal.coe_nat_abs],
   exact hf,
 end
 
+lemma Profinite.pmz_to_free_pfpng_epi_aux [fintype α]
+  (r : nnreal) (f : α → ℤ) (hf : ∑ i : α, ∥f i∥₊ ≤ r) :
+  ∃ (sgn : fin ⌊r⌋₊ → sign_type) (g : fin ⌊r⌋₊ → α),
+    (∑ i : fin ⌊r⌋₊, (λ t : α, if g i = t then (sgn i : ℤ) else 0)) = f :=
+begin
+  obtain ⟨e,g,h⟩ := Profinite.pmz_to_free_pfpng_epi_aux' r f hf,
+  let e' : fin ⌊r⌋₊ → sign_type := λ i, e i.1,
+  let g' : fin ⌊r⌋₊ → α := λ i, g i.1,
+  use [e',g'],
+  ext t, rw ← h,
+  simp only [finset.sum_apply],
+  rw finset.sum_range, refl,
 end
 
-instance Profinite.pmz_to_free_pfpng_epi (S : Profinite.{u}) (j : nnreal) :
+end
+
+-- Move this
+instance discrete_quotient.nonempty (X : Type*) [topological_space X] [h : nonempty X]
+  (T : discrete_quotient X) : nonempty T := ⟨T.proj (nonempty.some h)⟩
+
+instance Profinite.pmz_to_free_pfpng_epi (S : Profinite.{u}) [nonempty S] (j : nnreal) :
   epi (S.pmz_to_free_pfpng j) :=
 begin
   rw Profinite.epi_iff_surjective,
@@ -569,9 +591,7 @@ begin
   use ulift.up e, use t, apply subtype.ext,
   dsimp [Profinite.pmz_to_level_nat_trans, Profinite.pmz_to_level,
     Profinite.sigma.desc, Profinite.pmz_to_level_component],
-  convert ht,
-  ext p,
-  split_ifs; refl,
+  exact ht,
 end
 
 .
@@ -840,8 +860,8 @@ end
 
 end Profinite.epi_free'_to_condensed_setup
 
-instance Profinite.epi_free'_to_condensed_free_pfpng
-  (S : Profinite.{u}) : epi S.free'_to_condensed_free_pfpng :=
+instance Profinite.epi_free'_to_condensed_free_pfpng_of_nonempty
+  (S : Profinite.{u}) [nonempty S] : epi S.free'_to_condensed_free_pfpng :=
 begin
   apply faithful_reflects_epi (Condensed_Ab_to_CondensedSet),
   let E := CompHausFiltPseuNormGrp.level_Condensed_diagram_cocone
