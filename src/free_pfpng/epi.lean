@@ -670,8 +670,8 @@ def rhs_helper_equiv' :
   S ≃ S.to_Condensed.val.obj (op Profinite.punit) :=
 { to_fun := λ s, ulift.up $ Profinite.pt s,
   inv_fun := λ s, (ulift.down s).1 punit.star,
-  left_inv := sorry,
-  right_inv := sorry }
+  left_inv := λ t, rfl,
+  right_inv := λ t, by { ext ⟨⟩, refl } }
 
 lemma rhs_helper₄ {α : Type u} [fintype α]
   (A : ProFiltPseuNormGrp₁.{u})
