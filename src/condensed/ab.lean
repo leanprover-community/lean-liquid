@@ -518,7 +518,20 @@ instance is_iso_colimit_to_Condensed_obj : is_iso A.colimit_to_Condensed_obj :=
 begin
   suffices : A.colimit_to_Condensed_obj =
     A.colimit_iso_Condensed_obj.hom, by { rw this, apply_instance },
-  sorry
+  dsimp [colimit_iso_Condensed_obj, colimit_to_Condensed_obj],
+  apply colimit.hom_ext, intros i,
+  dsimp [is_colimit.cocone_point_unique_up_to_iso],
+  rw [colimit.ι_desc, colimit.ι_desc_assoc],
+  dsimp [Sheaf.iso.mk],
+  ext T : 3, dsimp,
+  rw ← nat_trans.comp_app,
+  dsimp [colimit_iso_Condensed_obj_aux_nat_iso, nat_iso.of_components],
+  slice_rhs 1 2
+  { erw (is_colimit_of_preserves ((evaluation Profiniteᵒᵖ (Type (u+1))).obj T)
+      (colimit.is_colimit (A.level_Condensed_diagram' ⋙
+      Sheaf_to_presheaf proetale_topology (Type (u+1))))).fac },
+  slice_rhs 1 2 { erw colimit.ι_desc },
+  ext, refl,
 end
 
 end
