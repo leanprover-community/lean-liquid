@@ -413,7 +413,7 @@ def level_Condensed_diagram_cocone :
 -- `equiv.of_bijective`
 def colimit_iso_Condensed_obj_aux (X) :
 let E := A.level_Condensed_diagram' ⋙ Sheaf_to_presheaf _ _ ⋙ (evaluation _ _).obj (op X) in
-  (types.colimit_cocone E).X ≃ A.presheaf X :=
+  (types.filtered_colimit_cocone E).X ≃ A.presheaf X :=
 equiv.of_bijective (quot.lift
   begin
     intros f,
@@ -430,7 +430,7 @@ def colimit_iso_Condensed_obj_aux_nat_iso :
       (colimit.is_colimit (A.level_Condensed_diagram' ⋙
         Sheaf_to_presheaf _ _))).cocone_point_unique_up_to_iso (colimit.is_colimit _) ≪≫
     (colimit.is_colimit _).cocone_point_unique_up_to_iso
-    (types.colimit_cocone_is_colimit _) ≪≫
+    (types.filtered_colimit_cocone_is_colimit _) ≪≫
     equiv.to_iso ((A.colimit_iso_Condensed_obj_aux X.unop).trans equiv.ulift.symm)
   ) sorry
 
