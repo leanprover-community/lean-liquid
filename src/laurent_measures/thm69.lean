@@ -267,6 +267,8 @@ begin
     intro b,
     ring },
   rw summable_congr this, clear this,
+  -- TODO : maybe now is the time to tidy up a bit (e.g. cancel the 2^x and (1/2)^x)
+
   -- change order of summation
   apply nnreal.summable_symm,
   -- check various things are summable
