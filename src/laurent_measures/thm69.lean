@@ -239,6 +239,77 @@ begin
 end
 .
 
+/-!
+
+### Definition of ψ
+
+This involves dividing by T⁻¹ - 2 and we have to check that this process converges.
+The proof below is pretty icky. It's "do some trivial rearrangements and it boils
+down to the fact that you can interchange the order of summation in a ℝ≥0-valued
+sum of sums"
+
+-/
+lemma nnreal.summable_of_comp_injective {α β : Type*} {f : α → ℝ≥0} {i : β → α}
+  (hi : function.injective i) (hi' : ∀ a, a ∉ set.range i → f a = 0) (hfi : summable (f ∘ i)) :
+  summable f :=
+begin
+  rw ← summable_coe at hfi ⊢,
+  let e : β ≃ ({x : α | x ∈ set.range i} : set α) :=
+  { to_fun := λ b, ⟨i b, b, rfl⟩,
+  inv_fun := λ x, x.2.some,
+  left_inv := begin intro b, simp, apply hi, exact Exists.some_spec (⟨b, rfl⟩ : ∃ y, i y = i b) end,
+  right_inv := begin rintro ⟨x, b, rfl⟩, simp, exact Exists.some_spec (⟨b, rfl⟩ : ∃ y, i y = i b) end },
+  have this2 : summable ((λ (x : {x : α // x ∈ set.range i}), (f x.1 : ℝ)) ∘ ⇑e : β → ℝ),
+  { convert (summable_congr _).1 hfi,
+    intro b, refl },
+  rw e.summable_iff at this2,
+  change summable ((λ a, (f a : ℝ)) ∘ (coe : {x // x ∈ set.range i} → α)) at this2,
+  rw ← this2.summable_compl_iff,
+  convert summable_zero,
+  ext1 ⟨x, hx⟩,
+  simp [hi' x hx],
+end
+
+lemma psi_def_aux_4 {S : Fintype} [fact (0 < p)] [fact (p < 1)] (F : ℒ S) (s : ↥S)
+  (F_sum : summable (λ (n : ℤ), ∥F s n∥₊ * r ^ n)) : summable
+  (λ (m : ℕ),
+     ∥(2 : ℝ) ^ (F.d + ↑m)∥₊ *
+       ((∑' (k : ℕ), ∥F s (F.d + ↑m + ↑k)∥₊ * (1 / 2) ^ (F.d + ↑m + ↑k)) * r ^ (F.d + ↑m))) :=
+begin
+  -- tidy up
+  -- change order of summation
+  -- win
+  sorry
+end
+
+lemma psi_def_aux_3 {S : Fintype} [fact (0 < p)] [fact (p < 1)] (F : ℒ S) (s : ↥S)
+  (F_sum : summable (λ (n : ℤ), ∥F s n∥₊ * r ^ n))  : summable
+  (λ (n : ℤ),
+     ∥-(2 : ℝ) ^ (n - 1)∥₊ *
+       ite (F.d ≤ n) ((∑' (k : ℕ), ∥F s (n + ↑k)∥₊ * (1 / 2) ^ (n + ↑k)) * r ^ n) 0) :=
+begin
+  -- get rid of factor of -1/2
+  simp_rw [_root_.nnnorm_neg, zpow_sub₀ (two_ne_zero : (2 : ℝ) ≠ 0), nnnorm_div, zpow_one,
+    div_eq_mul_inv _ ∥(2 : ℝ)∥₊, mul_comm _ ∥(2 : ℝ)∥₊⁻¹, mul_assoc],
+  apply summable.mul_left,
+  have hinj : function.injective (λ (m : ℕ), F.d + m),
+  { rintros a b (h2 : F.d + a = F.d + b),
+    simpa using h2 },
+  -- change outer sum to m : ℕ with n : ℤ = F.d + m
+  suffices : summable (λ (m : ℕ),
+     ∥(2 : ℝ) ^ (F.d + m)∥₊ *
+       ((∑' (k : ℕ), ∥F s (F.d + m + ↑k)∥₊ * (1 / 2) ^ (F.d + m + ↑k)) * r ^ (F.d + m))),
+  refine nnreal.summable_of_comp_injective hinj _ _,
+  { intros a ha,
+    rw [if_neg], simp,
+    intro hda, apply ha,
+    use (a - F.d).to_nat,
+    simp, rw int.to_nat_of_nonneg, ring, linarith },
+  { refine (summable_congr _).1 this,
+    simp },
+  exact psi_def_aux_4 F s F_sum,
+end
+
 lemma psi_def_aux_2 {S : Fintype} [fact (0 < p)] [fact (p < 1)] (F : ℒ S) (s : ↥S)
   (F_sum : summable (λ (n : ℤ), ∥F s n∥₊ * r ^ n)) : summable
   (λ (n : ℤ),
@@ -246,10 +317,39 @@ lemma psi_def_aux_2 {S : Fintype} [fact (0 < p)] [fact (p < 1)] (F : ℒ S) (s :
 begin
   simp_rw [nnnorm_mul],
   -- next : put norm inside inner tsum (a one way implication)
-  -- change outer sum to ℕ
-  -- change order of summation
--- win
-  sorry
+  suffices : summable
+  (λ (n : ℤ), ∥-(2 : ℝ) ^ (n - 1)∥₊ *
+     ite (F.d ≤ n)
+     ((∑' (k : ℕ), ∥F s (n + ↑k)∥₊ * (1 / 2) ^ (n + ↑k)) * r ^ n)
+       0),
+  refine summable_of_le _ this,
+  { intro n,
+    split_ifs,
+    { simp only [_root_.nnnorm_neg, nnnorm_zpow, real.nnnorm_two, one_div, inv_zpow', neg_add_rev],
+      refine mul_le_mul_of_nonneg_left _ _,
+      { refine le_trans (nnnorm_tsum_le _) _,
+        { clear this, have := F.summable_half s,
+          simp_rw nnnorm_mul,
+          apply summable.mul_right,
+          rw ← summable_norm_iff at this,
+          simp_rw ← _root_.coe_nnnorm at this,
+          rw nnreal.summable_coe at this,
+          have hinj : function.injective (λ (b : ℕ), n + b),
+          { rintros a b (h2 : n + a = n + b),
+            simpa using h2 },
+            convert summable_comp_injective this hinj,
+            ext1 k,
+            simp [← zpow_neg₀] },
+        { rw ← nnreal.tsum_mul_right,
+          apply le_of_eq,
+          apply tsum_congr,
+          { intro k,
+            simp only [nnnorm_mul, nnnorm_zpow, real.nnnorm_two, nnnorm_eq, mul_eq_mul_right_iff],
+            left, left,
+            congr } } },
+      { simp } },
+    { simp } },
+  apply psi_def_aux_3 _ _ F_sum,
 end
 
 lemma psi_def_aux {S : Fintype} [fact (0 < p)] [fact (p < 1)] (F : ℒ S) (s : ↥S)
