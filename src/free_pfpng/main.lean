@@ -11,9 +11,31 @@ open category_theory.grothendieck_topology
 
 universe u
 
+lemma Profinite.is_zero_of_empty (S : Profinite.{u}) [is_empty S] :
+  limits.is_zero S.condensed_free_pfpng := sorry
+
+lemma category_theory.abelian.is_iso_of_mono_of_is_zero
+  {A : Type*} [category A] [abelian A] {X Y : A} (f : X ⟶ Y) [mono f]
+  (hY : limits.is_zero Y) : is_iso f := sorry
+
+instance Profinite.epi_free'_to_condensed_free_pfpng_of_empty
+  (S : Profinite.{u}) [is_empty S] :
+  epi S.free'_to_condensed_free_pfpng :=
+begin
+  suffices : is_iso S.free'_to_condensed_free_pfpng,
+  { resetI, apply_instance },
+  apply category_theory.abelian.is_iso_of_mono_of_is_zero,
+  apply Profinite.is_zero_of_empty,
+end
+
 -- Do a case split on `[nonempty S]` here.
 instance Profinite.epi_free'_to_condensed_free_pfpng (S : Profinite.{u}) :
-  epi S.free'_to_condensed_free_pfpng := sorry
+  epi S.free'_to_condensed_free_pfpng :=
+begin
+  by_cases hS : nonempty S, { resetI, apply_instance },
+  simp only [not_nonempty_iff] at hS,
+  resetI, apply_instance
+end
 
 instance Profinite.is_iso_free'_to_condensed_free_pfpng
   (S : Profinite.{u}) : is_iso S.free'_to_condensed_free_pfpng :=
