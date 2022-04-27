@@ -6,6 +6,7 @@ import laurent_measures.basic
 import laurent_measures.theta
 import linear_algebra.basic
 import order.filter.at_top_bot tactic.linarith
+import for_mathlib.ennreal
 
 
 /-
@@ -194,7 +195,7 @@ end
 
 variables [fact (p < 1)]
 
-lemma r_half : 1 / 2 < r :=
+lemma half_lt_r : 1 / 2 < r :=
 calc (1/2:ℝ≥0)
     = (1/2) ^ (1:ℝ) : (rpow_one (1/2:ℝ≥0)).symm
 ... < r : rpow_lt_rpow_of_exponent_gt (half_pos zero_lt_one) (half_lt_self one_ne_zero) $
@@ -202,7 +203,7 @@ calc (1/2:ℝ≥0)
 
 lemma laurent_measures.summable_half (F : ℒ S) (s : S) :
   summable (λ n, ((F s n) : ℝ) * (1 / 2) ^ n) :=
-aux_thm69.summable_smaller_radius F.d (F.summable s) (λ n hn, lt_d_eq_zero _ _ _ hn) r_half
+aux_thm69.summable_smaller_radius F.d (F.summable s) (λ n hn, lt_d_eq_zero _ _ _ hn) half_lt_r
 
 lemma θ_ϕ_complex (F : ℒ S) : (θ ∘ ϕ) F = 0 :=
 begin
@@ -239,7 +240,7 @@ end
 .
 
 lemma psi_def_aux {S : Fintype} [fact (0 < p)] [fact (p < 1)] (F : ℒ S) (s : ↥S)
-  (F_sum : summable (λ (n : ℤ), ∥F s n∥ * ↑r ^ n)) :
+  (F_sum : summable (λ (n : ℤ), ∥F s n∥₊ * r ^ n)) :
   summable (λ (n : ℤ), ∥ite (F.d ≤ n) (-(2 : ℝ) ^ (n - 1) *
     ∑' (k : ℕ), ↑(F s (n + ↑k)) * (1 / 2) ^ (n + ↑k)) 0∥ * ↑r ^ n) :=
 begin
@@ -323,6 +324,10 @@ def ψ (F : ℒ S) (hF : θ F = 0) : ℒ S :=
       congr' 2,
       apply h1 n,
     }, clear h1,
+    clear hF,
+    have foo : ∀ n : ℤ, (((∥F s n∥₊ * r^n) : ℝ≥0) : ℝ) = ∥F s n∥ * (r : ℝ) ^ n,
+      intro n, norm_cast,
+    rw [← summable_congr foo, nnreal.summable_coe] at this,
     -- next line goes from ℝ≥0 to ℝ
     simp only [←nnreal.summable_coe, nonneg.coe_mul, _root_.coe_nnnorm, nnreal.coe_zpow, summable_congr],
     exact psi_def_aux F s this,
