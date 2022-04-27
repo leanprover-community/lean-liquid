@@ -649,13 +649,47 @@ begin
   simp only [add_equiv.apply_symm_apply],
 end
 
+-- move and rename
+def rhs_helper_equiv
+  (A : CompHausFiltPseuNormGrp.{u}) :
+  A ≃ (CompHausFiltPseuNormGrp.to_Condensed.obj A).val.obj (op Profinite.punit) :=
+{ to_fun := λ a, ulift.up $ ⟨λ _, a, sorry⟩,
+  inv_fun := λ f, f.down.val punit.star,
+  left_inv := sorry,
+  right_inv := sorry }
+
+-- move and rename
+def rhs_helper_equiv' :
+  S ≃ S.to_Condensed.val.obj (op Profinite.punit) :=
+{ to_fun := λ s, ulift.up $ Profinite.pt s,
+  inv_fun := λ s, (ulift.down s).1 punit.star,
+  left_inv := sorry,
+  right_inv := sorry }
+
 lemma rhs_helper₄ {α : Type u} [fintype α]
   (A : CompHausFiltPseuNormGrp.{u})
   (X : α → Profinite.{u})
   (e : Π (a : α), (CompHausFiltPseuNormGrp.to_Condensed.obj A).val.obj (op $ X a))
   (a₀ : α) (x₀ : X a₀) :
   ((Condensed.val_obj_sigma_add_equiv X _).symm e).down.val ⟨a₀,x₀⟩ =
-  (e a₀).down.val x₀ := sorry
+  (e a₀).down.val x₀ :=
+begin
+  let B := Condensed_Ab_to_CondensedSet.obj (CompHausFiltPseuNormGrp.to_Condensed.obj A),
+  let e₀ : (X a₀).to_Condensed ⟶ B :=
+    (Profinite.to_Condensed_equiv _ B).symm (e a₀),
+  let ee : (Profinite.sigma X).to_Condensed ⟶ B :=
+    (Profinite.to_Condensed_equiv _ B).symm ((Condensed.val_obj_sigma_add_equiv X _).symm e),
+  apply_fun rhs_helper_equiv A,
+  let s₀ : (X a₀).to_Condensed.val.obj (op Profinite.punit) :=
+    rhs_helper_equiv' _ x₀,
+  have : (rhs_helper_equiv A) ((e a₀).down.val x₀) =
+    e₀.val.app _ s₀, refl,
+  rw this,
+  have : e₀ = (Profinite_to_Condensed.map (Profinite.sigma.ι X a₀)) ≫ ee,
+  { dsimp only [e₀, ee], symmetry,
+    apply _root_.Condensed.val_obj_sigma_add_equiv_symm_apply },
+  rw this, refl,
+end
 
 lemma rhs_helper₃ (i : fin ⌊j⌋₊) :
   ((((S.free'_lift S.to_condensed_free_pfpng).val.app (op (S.pmz ⌊j⌋₊)))
