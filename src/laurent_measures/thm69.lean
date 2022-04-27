@@ -238,26 +238,126 @@ begin
 end
 .
 
-lemma psi_def_aux {S : Fintype} [fact (0 < p)] [fact (p < 1)] (F : ℒ S) (s : ↥S)
-  (F_sum : summable (λ (n : ℤ), ∥F s n∥ * ↑r ^ n)) :
-  summable (λ (n : ℤ), ∥ite (F.d ≤ n) (-(2 : ℝ) ^ (n - 1) *
-    ∑' (k : ℕ), ↑(F s (n + ↑k)) * (1 / 2) ^ (n + ↑k)) 0∥ * ↑r ^ n) :=
+lemma int.nat_bdd_of_summable (a : ℤ → ℝ) (ha : summable a) (m : ℤ) :
+  ∥∑' (n : ℕ), a (m + n)∥ ≤ ∑' (z : ℤ), ∥a z∥ :=
 begin
-  suffices : summable (λ (n : ℤ), (ite (F.d ≤ n) (-(2 : ℝ) ^ (n - 1) *
-    ∑' (k : ℕ), ↑(F s (n + ↑k)) * (1 / 2) ^ (n + ↑k)) 0) * ↑r ^ n),
-  { rw ← summable_norm_iff at this,
-    simp_rw norm_mul at this,
-    convert this,
-    ext,
-    congr',
-    rw real.norm_of_nonneg,
-    apply zpow_nonneg,
-    apply r_pos.le },
-  have half := F.summable_half s,
-  -- rw summable_sup
-  -- summable_mul_of_summable_norm
-  sorry,
+  have hinj : function.injective (λ (n : ℕ), m + n),
+  { rintros a b (h : m + a = m + b),
+    simpa using h },
+  rw ← summable_norm_iff at ha,
+  refine le_trans (norm_tsum_le_tsum_norm (ha.comp_injective hinj)) _,
+  exact tsum_le_tsum_of_inj _ hinj (λ _ _, norm_nonneg _) (λ _, le_refl _)
+    (ha.comp_injective hinj) ha,
 end
+
+lemma psi_def_aux2 (a : ℤ → ℝ) (ha : summable a) (s : ℝ) (hs1 : 0 ≤ s) (hs2 : s < 1) (d : ℤ) :
+  summable (λ (k : ℕ), (∑' (n : ℕ), ∥a (d + k + n)∥) * s^k) :=
+begin
+  rw ← summable_norm_iff,
+  simp_rw [norm_mul, norm_pow],
+  refine summable_of_nonneg_of_le _ _ (_ : summable (λ (k : ℕ), (∑' (z : ℤ), ∥a z∥) * ∥s∥^k)),
+  { intros,
+    exact mul_nonneg (norm_nonneg _) (pow_nonneg (norm_nonneg _) _) },
+  { intros,
+    apply mul_le_mul_of_nonneg_right,
+    { rw real.norm_of_nonneg,
+      { have hinj : function.injective (λ (n : ℕ), d + b + n),
+        { rintros x y (h : d + b + x = d + b + y),
+          simpa using h },
+        rw ← summable_norm_iff at ha,
+        refine tsum_le_tsum_of_inj _ hinj (λ _ _, norm_nonneg _) (λ _, le_refl _) _ ha,
+        exact ha.comp_injective hinj },
+      { refine tsum_nonneg (λ _, (norm_nonneg _)) } },
+    { exact (pow_nonneg (norm_nonneg _) _) } },
+  { apply summable.mul_left,
+    rw summable_geometric_iff_norm_lt_1,
+    rw [norm_norm, real.norm_eq_abs, abs_lt],
+    split; linarith },
+end
+
+-- probably true; Zulip says this is the wrong lemma
+-- lemma summable_snd_of_summable_fst {α : Type*} (F : α → α → ℝ) (h_nonneg : ∀ n k, 0 ≤ F n k)
+--   (h_rows : ∀ n, summable (λ k, F n k)) (h_cols : ∀ k, summable (λ n, F n k))
+--   (h_col_row : summable (λ k, ∑' n, F n k)) : summable (λ n, ∑' k, F n k) :=
+-- begin
+--   sorry
+-- end
+
+-- probably false -- `this` terms are not nonnegative so switching order of
+-- summation won't work. `this` needs to have absolute values
+-- lemma psi_def_aux3 {S : Fintype} [fact (0 < p)] [fact (p < 1)] (F : ℒ S) (s : ↥S)
+--   (this : summable (λ (k : ℕ),
+--     (∑' (n : ℕ), (F s (F.d + ↑k + ↑n) : ℝ) * ↑r ^ (F.d + ↑k + ↑n)) *
+--       (1 / (2 * ↑r)) ^ k)) :
+--   summable (λ (n : ℕ), (-(2 : ℝ) ^ (F.d + ↑n - 1) *
+--     ∑' (k : ℕ), ↑(F s (F.d + ↑n + ↑k)) * (1 / 2) ^ (F.d + ↑n + ↑k)) * ↑r ^ (F.d + ↑n)) :=
+-- begin
+--   -- get out power of 1/2
+--   conv begin
+--     congr,
+--     funext,
+--     rw [zpow_sub₀ (show (2 : ℝ) ≠ 0, from two_ne_zero),
+--       zpow_one, div_eq_mul_inv, mul_comm _ (2 : ℝ)⁻¹, ← neg_mul, mul_assoc,
+--       mul_assoc, ← _root_.tsum_mul_right, ← _root_.tsum_mul_left],
+--   end,
+--   apply summable.mul_left,
+--   rw ← summable_norm_iff,
+--   sorry,
+--   -- rw summable_sup
+--   -- summable_mul_of_summable_norm
+-- end
+
+-- probably should rewrite because of norm error earlier
+-- lemma psi_def_aux {S : Fintype} [fact (0 < p)] [fact (p < 1)] (F : ℒ S) (s : ↥S)
+--   (F_sum : summable (λ (n : ℤ), ∥F s n∥ * ↑r ^ n)) :
+--   summable (λ (n : ℤ), ∥ite (F.d ≤ n) (-(2 : ℝ) ^ (n - 1) *
+--     ∑' (k : ℕ), ↑(F s (n + ↑k)) * (1 / 2) ^ (n + ↑k)) 0∥ * ↑r ^ n) :=
+-- begin
+--   suffices : summable (λ (n : ℤ), (ite (F.d ≤ n) (-(2 : ℝ) ^ (n - 1) *
+--     ∑' (k : ℕ), ↑(F s (n + ↑k)) * (1 / 2) ^ (n + ↑k)) 0) * ↑r ^ n),
+--   { rw ← summable_norm_iff at this,
+--     simp_rw norm_mul at this,
+--     convert this,
+--     ext,
+--     congr',
+--     rw real.norm_of_nonneg,
+--     apply zpow_nonneg,
+--     apply r_pos.le },
+--   -- t = n - d, n = d + t
+--   suffices : summable (λ n : ℕ, (-(2 : ℝ) ^ (F.d + n - 1) *
+--     ∑' (k : ℕ), ↑(F s (F.d + n + ↑k)) * (1 / 2) ^ (F.d + n + ↑k)) * ↑r ^ (F.d + n)),
+--   { have hinj : function.injective (λ (n : ℕ), F.d + n),
+--     { rintros a b (h : F.d + a = F.d + b),
+--       simpa using h },
+--       rw ← function.injective.summable_iff hinj, swap,
+--       { intros x hx,
+--         rw if_neg, simp,
+--         intro hdx,
+--         apply hx,
+--         use (x - F.d).nat_abs,
+--         dsimp only,
+--         rw int.nat_abs_of_nonneg, ring,
+--         linarith },
+--       { convert this,
+--         ext n,
+--         simp } },
+-- --  have half := F.summable_half s,
+--   have hsum : summable (λ n, (F s n : ℝ) * r ^ n),
+--   { rw ← summable_norm_iff,
+--     simp_rw norm_mul,
+--     convert F_sum, ext n,
+--     norm_cast, simp },
+--   have := psi_def_aux2 (λ n, F s n * r^n) hsum (1/(2*r)) _ _ F.d,
+--   { dsimp at this,
+--     apply psi_def_aux3,
+--     sorry, }, -- exact this GAARGH
+--   { refine div_nonneg zero_le_one (mul_nonneg zero_le_two (zero_le_coe)) },
+--   { simp only [one_div, norm_inv, norm_mul, real.norm_two, norm_eq],
+--     rw _root_.inv_lt_one_iff, right,
+--     have := r_half,
+--     have : (1 : ℝ) / 2 < r, assumption_mod_cast,
+--     linarith },
+-- end
 
 def ψ (F : ℒ S) (hF : θ F = 0) : ℒ S :=
 { to_fun := λ s n, if F.d ≤ n then
