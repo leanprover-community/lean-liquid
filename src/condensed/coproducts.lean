@@ -92,6 +92,19 @@ lemma _root_.Condensed.val_obj_sigma_add_equiv_apply_apply
   (Y : Condensed.{u} Ab.{u+1}) (t) (a) :
   Y.val_obj_sigma_add_equiv X t a = Y.val.map (Profinite.sigma.ι X a).op t := rfl
 
+lemma val_obj_sigma_equiv_symm_apply'
+  (Y : CondensedSet.{u})
+  (e : Π (a : α), Y.val.obj (op $ X a)) (a₀ : α) :
+  (Y.val.map (Profinite.sigma.ι X a₀).op)
+  (((val_obj_sigma_equiv X Y).symm) e) = e a₀ :=
+begin
+  let e' := _, change (Y.val.map (Profinite.sigma.ι X a₀).op) e' = _,
+  have : e a₀ = (val_obj_sigma_equiv X Y) e' a₀,
+    { revert a₀, rw ← function.funext_iff, dsimp only [e'], simp },
+  rw this, refl,
+end
+
+-- TODO reuse the nonadditive variant for this.
 lemma _root_.Condensed.val_obj_sigma_add_equiv_symm_apply'
   (Y : Condensed.{u} Ab.{u+1})
   (e : Π (a : α), Y.val.obj (op $ X a)) (a₀ : α) :
@@ -104,6 +117,22 @@ begin
   rw this, refl,
 end
 
+lemma val_obj_sigma_equiv_symm_apply
+  (Y : CondensedSet.{u})
+  (e : Π (a : α), Y.val.obj (op $ X a)) (a₀ : α) :
+    (Profinite_to_Condensed.map (Profinite.sigma.ι X a₀)) ≫
+    (Profinite.to_Condensed_equiv (Profinite.sigma X) Y).symm
+    ((Y.val_obj_sigma_equiv X).symm e) =
+    (Profinite.to_Condensed_equiv (X a₀) Y).symm (e a₀) :=
+begin
+  apply_fun ((X a₀).to_Condensed_equiv Y),
+  simp only [equiv.apply_symm_apply],
+  dsimp [Profinite.to_Condensed_equiv],
+  simp only [category.comp_id],
+  apply val_obj_sigma_equiv_symm_apply'
+end
+
+-- TODO reuse the nonadditive variant for this.
 lemma _root_.Condensed.val_obj_sigma_add_equiv_symm_apply
   (Y : Condensed.{u} Ab.{u+1})
   (e : Π (a : α), Y.val.obj (op $ X a)) (a₀ : α) :
@@ -126,7 +155,31 @@ def is_colimit_sigma_cone : is_colimit (sigma_cone X) :=
 { desc := λ S, (Profinite.to_Condensed_equiv _ _).symm $
     (S.X.val_obj_sigma_equiv X).symm $ λ a,
     (Profinite.to_Condensed_equiv _ _) $ S.ι.app _,
-  fac' := sorry,
-  uniq' := sorry }
+  fac' := begin
+    intros Q T,
+    dsimp,
+    rw val_obj_sigma_equiv_symm_apply,
+    ext W ⟨(t : _ ⟶ _)⟩,
+    dsimp [Profinite.to_Condensed_equiv],
+    change ((Q.ι.app T).val.app (op (X T)) ≫ Q.X.val.map t.op) _ = _,
+    erw ← (Q.ι.app T).val.naturality,
+    change (Q.ι.app T).val.app (op (unop W)) _ = _,
+    congr' 1,
+    dsimp [Profinite.to_Condensed], ext, refl,
+  end,
+  uniq' := begin
+    intros S m hm,
+    apply_fun ((Profinite.sigma X).to_Condensed_equiv S.X),
+    apply_fun (val_obj_sigma_equiv X S.X),
+    simp only [equiv.apply_symm_apply],
+    ext a,
+    specialize hm a,
+    dsimp [val_obj_sigma_equiv],
+    change (m.val.app (op (Profinite.sigma X)) ≫
+      S.X.val.map _) _ = _,
+    rw ← m.val.naturality,
+    apply_fun (λ e, e.val.app (op (X a)) ⟨𝟙 _⟩) at hm,
+    exact hm,
+  end }
 
 end CondensedSet
