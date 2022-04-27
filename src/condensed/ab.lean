@@ -414,13 +414,25 @@ def level_Condensed_diagram_cocone :
 def colimit_iso_Condensed_obj_aux (X) :
 let E := A.level_Condensed_diagram' ⋙ Sheaf_to_presheaf _ _ ⋙ (evaluation _ _).obj (op X) in
   (types.filtered_colimit_cocone E).X ≃ A.presheaf X :=
-equiv.of_bijective (quot.lift
-  begin
-    intros f,
-    exact ⟨_, ulift.down f.1, f.2.down.1, f.2.down.2, rfl⟩,
-  end
-  sorry)
-sorry
+let E := A.level_Condensed_diagram' ⋙ Sheaf_to_presheaf _ _ ⋙ (evaluation _ _).obj (op X) in
+equiv.of_bijective
+(λ t, @quotient.lift_on' (Σ (j : as_small.{u+1} ℝ≥0), E.obj j) (A.presheaf X)
+  (types.filtered_colimit_setoid E) t
+  (λ f, ⟨_,ulift.down f.1, f.2.down.1, f.2.down.2, rfl⟩) begin
+    rintros ⟨i,x⟩ ⟨j,y⟩ ⟨e,u,v,h⟩,
+    ext q : 2,
+    dsimp [level_Condensed_diagram, level_Condensed_diagram'] at *,
+    apply_fun (λ e, (e.down q).1) at h, exact h
+  end)
+begin
+  split,
+  { rintros ⟨⟨⟨i⟩,f⟩⟩ ⟨⟨⟨j⟩,g⟩⟩ h, dsimp at h ⊢, apply quotient.sound',
+    simp only [subtype.mk_eq_mk] at h, use [⟨i ⊔ j⟩, ⟨le_sup_left⟩, ⟨le_sup_right⟩],
+    ext q,
+    dsimp [level_Condensed_diagram'], apply_fun (λ e, e q) at h, exact h },
+  { rintros ⟨f,c,g,hg,hf⟩,
+    use quotient.mk' ⟨⟨c⟩,⟨⟨g,hg⟩⟩⟩, ext tt, dsimp, rw hf }
+end
 
 def colimit_iso_Condensed_obj_aux_nat_iso :
   (filtered_cocone.{u} A.level_Condensed_diagram').X.val ≅
