@@ -651,12 +651,19 @@ end
 
 -- move and rename
 def rhs_helper_equiv
-  (A : CompHausFiltPseuNormGrp.{u}) :
-  A ≃ (CompHausFiltPseuNormGrp.to_Condensed.obj A).val.obj (op Profinite.punit) :=
-{ to_fun := λ a, ulift.up $ ⟨λ _, a, sorry⟩,
+  (A : ProFiltPseuNormGrp₁.{u}) :
+  A ≃ (CompHausFiltPseuNormGrp.to_Condensed.obj
+    (CompHausFiltPseuNormGrp₁.enlarging_functor.obj
+      (ProFiltPseuNormGrp₁.to_CHFPNG₁.obj A))).val.obj
+      (op Profinite.punit) :=
+{ to_fun := λ a, ulift.up $ ⟨λ _, a, begin
+    obtain ⟨c,hc⟩ := ProFiltPseuNormGrp₁.exhaustive _ a,
+    refine ⟨c, λ _, ⟨a,hc⟩, _, rfl⟩,
+    apply continuous_of_discrete_topology
+  end⟩,
   inv_fun := λ f, f.down.val punit.star,
-  left_inv := sorry,
-  right_inv := sorry }
+  left_inv := λ t, rfl,
+  right_inv := λ t, by { ext ⟨⟩, refl } }
 
 -- move and rename
 def rhs_helper_equiv' :
@@ -667,14 +674,20 @@ def rhs_helper_equiv' :
   right_inv := sorry }
 
 lemma rhs_helper₄ {α : Type u} [fintype α]
-  (A : CompHausFiltPseuNormGrp.{u})
+  (A : ProFiltPseuNormGrp₁.{u})
   (X : α → Profinite.{u})
-  (e : Π (a : α), (CompHausFiltPseuNormGrp.to_Condensed.obj A).val.obj (op $ X a))
+  (e : Π (a : α),
+    (CompHausFiltPseuNormGrp.to_Condensed.obj
+    (CompHausFiltPseuNormGrp₁.enlarging_functor.obj
+      (ProFiltPseuNormGrp₁.to_CHFPNG₁.obj A))).val.obj (op $ X a))
   (a₀ : α) (x₀ : X a₀) :
   ((Condensed.val_obj_sigma_add_equiv X _).symm e).down.val ⟨a₀,x₀⟩ =
   (e a₀).down.val x₀ :=
 begin
-  let B := Condensed_Ab_to_CondensedSet.obj (CompHausFiltPseuNormGrp.to_Condensed.obj A),
+  let B := Condensed_Ab_to_CondensedSet.obj
+    (CompHausFiltPseuNormGrp.to_Condensed.obj
+    (CompHausFiltPseuNormGrp₁.enlarging_functor.obj
+      (ProFiltPseuNormGrp₁.to_CHFPNG₁.obj A))) ,
   let e₀ : (X a₀).to_Condensed ⟶ B :=
     (Profinite.to_Condensed_equiv _ B).symm (e a₀),
   let ee : (Profinite.sigma X).to_Condensed ⟶ B :=
