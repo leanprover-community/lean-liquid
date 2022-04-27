@@ -279,7 +279,7 @@ lemma Presheaf.map_id (A : CompHausFiltPseuNormGrp) :
 lemma Presheaf.map_comp {A B C : CompHausFiltPseuNormGrp} (f : A ⟶ B) (g : B ⟶ C) :
   Presheaf.map (f ≫ g) = Presheaf.map f ≫ Presheaf.map g := by { ext, refl }
 
-set_option pp.universes true
+--set_option pp.universes true
 
 lemma Presheaf_comp_ulift_is_sheaf_aux_equalizer
   (A : CompHausFiltPseuNormGrp.{u}) :
@@ -409,9 +409,43 @@ def level_Condensed_diagram_cocone :
       naturality' := λ S T f, by { ext, refl } },
     naturality' := λ r s h, by { ext, refl } } } .
 
+def colimit_iso_Condensed_obj_aux_fun (X) :
+let E := A.level_Condensed_diagram' ⋙ Sheaf_to_presheaf _ _ ⋙ (evaluation _ _).obj (op X) in
+  (types.filtered_colimit_cocone E).X → A.presheaf X :=
+let E := A.level_Condensed_diagram' ⋙ Sheaf_to_presheaf _ _ ⋙ (evaluation _ _).obj (op X) in
+λ t, @quotient.lift_on' (Σ (j : as_small.{u+1} ℝ≥0), E.obj j) (A.presheaf X)
+  (types.filtered_colimit_setoid E) t
+  (λ f, ⟨_,ulift.down f.1, f.2.down.1, f.2.down.2, rfl⟩) begin
+    rintros ⟨i,x⟩ ⟨j,y⟩ ⟨e,u,v,h⟩,
+    ext q : 2,
+    dsimp [level_Condensed_diagram, level_Condensed_diagram'] at *,
+    apply_fun (λ e, (e.down q).1) at h, exact h
+  end
+
+lemma colimit_iso_Condensed_obj_aux_fun_bijective (X) :
+  function.bijective (colimit_iso_Condensed_obj_aux_fun A X) :=
+begin
+  split,
+  { rintros ⟨⟨⟨i⟩,f⟩⟩ ⟨⟨⟨j⟩,g⟩⟩ h, dsimp [colimit_iso_Condensed_obj_aux_fun] at h ⊢,
+    simp only [subtype.mk_eq_mk] at h,
+    apply quotient.sound',
+    use [⟨i ⊔ j⟩, ⟨le_sup_left⟩, ⟨le_sup_right⟩],
+    ext q,
+    dsimp [level_Condensed_diagram'], apply_fun (λ e, e q) at h, exact h },
+  { rintros ⟨f,c,g,hg,hf⟩,
+    use quotient.mk' ⟨⟨c⟩,⟨⟨g,hg⟩⟩⟩, ext tt, dsimp, rw hf, refl }
+end
+
 -- We would have to use `some` to define the inverse of this equiv, so we may as well just use
 -- `equiv.of_bijective`
+@[simps]
 def colimit_iso_Condensed_obj_aux (X) :
+let E := A.level_Condensed_diagram' ⋙ Sheaf_to_presheaf _ _ ⋙ (evaluation _ _).obj (op X) in
+  (types.filtered_colimit_cocone E).X ≃ A.presheaf X :=
+equiv.of_bijective (A.colimit_iso_Condensed_obj_aux_fun X)
+(A.colimit_iso_Condensed_obj_aux_fun_bijective X)
+
+/-
 let E := A.level_Condensed_diagram' ⋙ Sheaf_to_presheaf _ _ ⋙ (evaluation _ _).obj (op X) in
   (types.filtered_colimit_cocone E).X ≃ A.presheaf X :=
 let E := A.level_Condensed_diagram' ⋙ Sheaf_to_presheaf _ _ ⋙ (evaluation _ _).obj (op X) in
@@ -433,6 +467,7 @@ begin
   { rintros ⟨f,c,g,hg,hf⟩,
     use quotient.mk' ⟨⟨c⟩,⟨⟨g,hg⟩⟩⟩, ext tt, dsimp, rw hf }
 end
+-/
 
 def colimit_iso_Condensed_obj_aux_nat_iso :
   (filtered_cocone.{u} A.level_Condensed_diagram').X.val ≅
@@ -444,7 +479,30 @@ def colimit_iso_Condensed_obj_aux_nat_iso :
     (colimit.is_colimit _).cocone_point_unique_up_to_iso
     (types.filtered_colimit_cocone_is_colimit _) ≪≫
     equiv.to_iso ((A.colimit_iso_Condensed_obj_aux X.unop).trans equiv.ulift.symm)
-  ) sorry
+  )
+begin
+  intros X Y f, dsimp [is_colimit.cocone_point_unique_up_to_iso],
+  apply
+    (is_colimit_of_preserves ((evaluation Profiniteᵒᵖ (Type (u+1))).obj X)
+    (colimit.is_colimit (A.level_Condensed_diagram' ⋙
+    Sheaf_to_presheaf proetale_topology (Type (u+1))))).hom_ext,
+  intros j, simp only [category.assoc],
+  slice_lhs 0 1
+  { dsimp, rw ← nat_trans.naturality },
+  slice_lhs 2 3
+  { erw ((is_colimit_of_preserves ((evaluation Profiniteᵒᵖ (Type (u+1))).obj Y)
+      (colimit.is_colimit (A.level_Condensed_diagram' ⋙
+      Sheaf_to_presheaf proetale_topology (Type (u+1)))))).fac },
+  slice_lhs 2 3
+  { erw colimit.ι_desc },
+  slice_rhs 1 2
+  { erw (is_colimit_of_preserves ((evaluation Profiniteᵒᵖ (Type (u+1))).obj X)
+    (colimit.is_colimit (A.level_Condensed_diagram' ⋙
+    Sheaf_to_presheaf proetale_topology (Type (u+1))))).fac },
+  slice_rhs 1 2
+  { erw colimit.ι_desc },
+  ext, refl
+end
 
 def colimit_iso_Condensed_obj :
   colimit A.level_Condensed_diagram' ≅ Condensed_Ab_to_CondensedSet.obj (to_Condensed.obj A) :=
