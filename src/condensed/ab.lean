@@ -6,6 +6,7 @@ import algebra.group.ulift
 
 import for_mathlib.abelian_sheaves.main
 import for_mathlib.AddCommGroup.exact
+import for_mathlib.types
 
 import condensed.adjunctions
 import condensed.top_comparison
