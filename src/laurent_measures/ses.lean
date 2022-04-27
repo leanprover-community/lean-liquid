@@ -855,13 +855,55 @@ end
 -- lemma tail_B_nat (F : filtration (ℒ ϖ) c) (ε : ℝ) : ∃ B : ℕ, ∥ tsum (λ b : {n : ℕ // B ≤ n },
 --   ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ) ∥ < ε ^ (p⁻¹ : ℝ) := sorry
 
-lemma mem_filtration_sum_le_geom (F : filtration (ℒ ϖ) c) (B : ℕ): ∥ ∑' n : {x : ℕ // B ≤ x}, ((F.1 punit.star n) : ℝ) * (1 / 2) ^ n.1 ∥ ≤ ∥ (c : ℝ) * ∑' n : {x : ℕ // B ≤ x}, 1 / (2 * r) ^ n.1 ∥ := sorry
+lemma mem_filtration_le_monomial (F : filtration (ℒ ϖ) c) (n : ℕ) :
+ ∥ ((F.1 punit.star n) : ℝ) ∥ ≤ c * ( 1 / r ^ n) := sorry
+
+
+lemma mem_filtration_sum_le_geom (F : filtration (ℒ ϖ) c) (B : ℕ) : ∥ ∑' n : {x : ℕ // B ≤ x}, ((F.1 punit.star n) : ℝ) * (1 / 2) ^ n.1 ∥ ≤ ∥ (c : ℝ) * ∑' n : {x : ℕ // B ≤ x}, 1 / (2 * r) ^ n.1 ∥ :=
+begin
+  have two_r_nonneg : 0 ≤ 1 / (2 * r : ℝ) := by {apply one_div_nonneg.mpr (mul_nonneg _ r.2), simp only [zero_le_bit0, zero_le_one]},
+  have h_inj : function.injective (coe : {x : ℕ // B ≤ x} → ℕ) := subtype.coe_injective,
+  have geom_pos : (0 : ℝ) ≤ c * ∑' (n : {x // B ≤ x}), 1 / (2 * r) ^ n.1,
+  { apply mul_nonneg c.2 (tsum_nonneg _),
+    intro b,
+    rw ← one_div_pow,
+    apply pow_nonneg (two_r_nonneg) },
+  nth_rewrite 1 [real.norm_eq_abs],
+  rw [abs_eq_self.mpr geom_pos],
+    apply (norm_tsum_le_tsum_norm _).trans,
+  rw [← tsum_mul_left],
+  apply tsum_le_tsum,
+  { intro b,
+    rw [norm_mul, mul_pow, ← one_div_mul_one_div, mul_comm ((1 : ℝ) / 2 ^ b.1) _, ← mul_assoc],
+    rw [norm_pow, norm_div, norm_one, real.norm_two, div_pow, one_pow],
+    apply (mul_le_mul_right _).mpr,
+    apply mem_filtration_le_monomial p c F,
+    simp only [one_div, inv_pos, pow_pos, zero_lt_bit0, zero_lt_one] },
+  swap,
+  { by_cases hc : (c : ℝ) ≠ 0,
+    { rw [← summable_mul_left_iff hc],
+      simp_rw [← one_div_pow],
+      have two_r_lt : 1 / (2 * r : ℝ) < 1,
+      { have := (div_lt_one (nnreal.coe_lt_coe.mpr (r_pos))).mpr half_lt_r,
+        simp only [← inv_eq_one_div] at this ⊢,
+        rw [div_eq_mul_inv, nnreal.coe_inv, ← mul_inv₀] at this,
+        convert this,
+        assumption' },
+      exact (summable_geometric_of_lt_1 two_r_nonneg two_r_lt).comp_injective h_inj,
+      },
+    { rw not_ne_iff at hc,
+      simp_rw [hc, zero_mul],
+      exact summable_zero }, },
+  all_goals { simp_rw [norm_mul, norm_pow, norm_div, norm_one, real.norm_two, subtype.val_eq_coe],
+    refine ((aux_thm69.summable_iff_on_nat_less F.1.d _).mp (aux_thm69.summable_smaller_radius_norm F.1.d (half_lt_r) (F.1.summable punit.star) (λ n, lt_d_eq_zero F.1 punit.star n))).comp_injective h_inj,
+    intros n hn,
+    rw [lt_d_eq_zero F.1 punit.star n hn, norm_zero, zero_mul] },
+end
 
 lemma tail_B_nat (ε : ℝ) : ∃ B : ℕ, ∀ (F : filtration (ℒ ϖ) c), ∥ tsum (λ b : {n : ℕ // B ≤ n },
   ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ) ∥ < ε ^ (p⁻¹ : ℝ) :=
 begin
   let g := (λ n : ℕ, (c : ℝ) * (1 / (2 * r) ^ n)),
-  have h_g : summable g, sorry,
   have := tendsto_tsum_compl_at_top_zero g,
   rw tendsto_at_top at this,
   have h_pos : 0 < ε ^ (p⁻¹ : ℝ), sorry,
@@ -923,18 +965,16 @@ end
 
 def geom_B (ε : ℝ) : ℤ := (tail_B_int c ε).some
 
-
 lemma tail_B (ε : ℝ) :  ∀ (F : filtration (ℒ ϖ) c), ∥ tsum (λ b : {n : ℤ // geom_B c ε ≤ n },
   ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ) ∥ < ε ^ (p⁻¹ : ℝ) :=
 begin
   intro F,
+  dsimp only [geom_B],
   convert (tail_B_int p c ε).some_spec F using 1,
   apply congr_arg,
   sorry,
 end
 
--- def U_old (F : filtration (ℒ S) c) (ε : ℝ) : set (filtration (ℒ S) c) := λ G,
---   ∀ s n, n < (geom_B_old ε) → F s n = G s n
 
 def U (F : filtration (ℒ ϖ) c) (B : ℤ) : set (filtration (ℒ ϖ) c) := λ G, ∀ s n, n < B → F s n = G s n
 
