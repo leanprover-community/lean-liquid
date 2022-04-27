@@ -239,25 +239,35 @@ begin
 end
 .
 
+lemma psi_def_aux_2 {S : Fintype} [fact (0 < p)] [fact (p < 1)] (F : ℒ S) (s : ↥S)
+  (F_sum : summable (λ (n : ℤ), ∥F s n∥₊ * r ^ n)) : summable
+  (λ (n : ℤ),
+     ite (F.d ≤ n) ∥-(2 : ℝ) ^ (n - 1) * ∑' (k : ℕ), ↑(F s (n + ↑k)) * (1 / 2) ^ (n + ↑k) * r ^ n∥₊ 0) :=
+begin
+  simp_rw [nnnorm_mul],
+  -- next : put norm inside inner tsum (a one way implication)
+  -- change outer sum to ℕ
+  -- change order of summation
+-- win
+  sorry
+end
+
 lemma psi_def_aux {S : Fintype} [fact (0 < p)] [fact (p < 1)] (F : ℒ S) (s : ↥S)
   (F_sum : summable (λ (n : ℤ), ∥F s n∥₊ * r ^ n)) :
   summable (λ (n : ℤ), ∥ite (F.d ≤ n) (-(2 : ℝ) ^ (n - 1) *
-    ∑' (k : ℕ), ↑(F s (n + ↑k)) * (1 / 2) ^ (n + ↑k)) 0∥ * ↑r ^ n) :=
+    ∑' (k : ℕ), ↑(F s (n + ↑k)) * (1 / 2) ^ (n + ↑k)) 0∥₊ * r ^ n) :=
 begin
-  suffices : summable (λ (n : ℤ), (ite (F.d ≤ n) (-(2 : ℝ) ^ (n - 1) *
-    ∑' (k : ℕ), ↑(F s (n + ↑k)) * (1 / 2) ^ (n + ↑k)) 0) * ↑r ^ n),
-  { rw ← summable_norm_iff at this,
-    simp_rw norm_mul at this,
-    convert this,
-    ext,
-    congr',
-    rw real.norm_of_nonneg,
-    apply zpow_nonneg,
-    apply r_pos.le },
-  have half := F.summable_half s,
-  -- rw summable_sup
-  -- summable_mul_of_summable_norm
-  sorry,
+  suffices :  summable (λ (n : ℤ), ite (F.d ≤ n) ∥-(2 : ℝ) ^ (n - 1) *
+    ∑' (k : ℕ), ↑(F s (n + ↑k)) * (1 / 2) ^ (n + ↑k) * r ^ n∥₊ 0),
+  refine summable_of_le _ this,
+  { intro n,
+    split_ifs,
+    { apply le_of_eq,
+      simp_rw _root_.tsum_mul_right,
+      rw [ ← mul_assoc, nnnorm_mul _ ((r : ℝ) ^ n)],
+      simp },
+    { simp } },
+  apply psi_def_aux_2 _ _ F_sum,
 end
 
 def ψ (F : ℒ S) (hF : θ F = 0) : ℒ S :=
@@ -328,8 +338,6 @@ def ψ (F : ℒ S) (hF : θ F = 0) : ℒ S :=
     have foo : ∀ n : ℤ, (((∥F s n∥₊ * r^n) : ℝ≥0) : ℝ) = ∥F s n∥ * (r : ℝ) ^ n,
       intro n, norm_cast,
     rw [← summable_congr foo, nnreal.summable_coe] at this,
-    -- next line goes from ℝ≥0 to ℝ
-    simp only [←nnreal.summable_coe, nonneg.coe_mul, _root_.coe_nnnorm, nnreal.coe_zpow, summable_congr],
     exact psi_def_aux F s this,
   end }
 
