@@ -649,6 +649,14 @@ begin
   simp only [add_equiv.apply_symm_apply],
 end
 
+lemma rhs_helper₄ {α : Type u} [fintype α]
+  (A : CompHausFiltPseuNormGrp.{u})
+  (X : α → Profinite.{u})
+  (e : Π (a : α), (CompHausFiltPseuNormGrp.to_Condensed.obj A).val.obj (op $ X a))
+  (a₀ : α) (x₀ : X a₀) :
+  ((Condensed.val_obj_sigma_add_equiv X _).symm e).down.val ⟨a₀,x₀⟩ =
+  (e a₀).down.val x₀ := sorry
+
 lemma rhs_helper₃ (i : fin ⌊j⌋₊) :
   ((((S.free'_lift S.to_condensed_free_pfpng).val.app (op (S.pmz ⌊j⌋₊)))
     (((Condensed.val_obj_sigma_add_equiv (λ (f : ulift (fin ⌊j⌋₊ → sign_type)), S.pow ⌊j⌋₊)
@@ -669,7 +677,9 @@ begin
   let Q := Condensed.val_obj_sigma_add_equiv (λ (a : ulift (fin ⌊j⌋₊ → sign_type)), S.pow ⌊j⌋₊)
     S.condensed_free_pfpng,
   change (Q.symm _).down.1 _ = _,
-  sorry
+  cases x with x1 x2,
+  erw rhs_helper₄,
+  refl,
 end
 
 lemma rhs_helper₂ (i : fin ⌊j⌋₊) : (S.free_pfpng_π T)
