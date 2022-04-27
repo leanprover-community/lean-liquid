@@ -638,7 +638,18 @@ lemma Profinite.free'_lift_val_obj_sigma_equiv_symm {α : Type u} [fintype α]
   (X : α → Profinite.{u}) (t) :
   (S.free'_lift η).val.app (op $ Profinite.sigma X)
   ((Condensed.val_obj_sigma_add_equiv _ _ ).symm t) =
-  (Condensed.val_obj_sigma_add_equiv _ _ ).symm (λ a, (S.free'_lift η).val.app _ (t a)) := sorry
+  (Condensed.val_obj_sigma_add_equiv _ _ ).symm (λ a, (S.free'_lift η).val.app _ (t a)) :=
+begin
+  apply_fun Condensed.val_obj_sigma_add_equiv (λ (a : α), X a) A,
+  simp only [add_equiv.apply_symm_apply],
+  funext a,
+  dsimp,
+  simp only [← comp_apply, ← nat_trans.naturality],
+  simp only [comp_apply],
+  congr' 1,
+  rw ← Condensed.val_obj_sigma_add_equiv_apply_apply,
+  simp only [add_equiv.apply_symm_apply],
+end
 
 lemma rhs_helper₃ (i : fin ⌊j⌋₊) :
   ((((S.free'_lift S.to_condensed_free_pfpng).val.app (op (S.pmz ⌊j⌋₊)))

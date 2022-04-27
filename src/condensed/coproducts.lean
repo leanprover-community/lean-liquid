@@ -75,6 +75,11 @@ lemma coe_val_obj_sigma_equiv_symm (Y : Condensed.{u} Ab.{u+1}) :
   ⇑((Condensed_Ab_to_CondensedSet.obj Y).val_obj_sigma_equiv X).symm =
   (Y.val_obj_sigma_add_equiv X).symm := rfl
 
+@[simp]
+lemma _root_.Condensed.val_obj_sigma_add_equiv_apply_apply
+  (Y : Condensed.{u} Ab.{u+1}) (t) (a) :
+  Y.val_obj_sigma_add_equiv X t a = Y.val.map (Profinite.sigma.ι X a).op t := rfl
+
 noncomputable
 def is_colimit_sigma_cone : is_colimit (sigma_cone X) :=
 { desc := λ S, (Profinite.to_Condensed_equiv _ _).symm $
