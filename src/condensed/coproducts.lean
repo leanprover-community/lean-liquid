@@ -22,9 +22,21 @@ def to_Condensed_equiv (X : Profinite.{u}) (Y : CondensedSet.{u}) :
 { to_fun := λ f, f.val.app _ $ ulift.up $ 𝟙 _,
   inv_fun := λ f, Sheaf.hom.mk $
   { app := λ T g, Y.val.map (quiver.hom.op (ulift.down g)) f,
-    naturality' := sorry },
-  left_inv := sorry,
-  right_inv := sorry }
+    naturality' := begin
+      intros A B ff, ext t,
+      obtain ⟨t⟩ := t,
+      dsimp [Profinite.to_Condensed, ulift_functor, yoneda] at ⊢ t,
+      simp only [functor.map_comp], refl,
+    end },
+  left_inv := λ f, begin
+    ext T ⟨t⟩,
+    dsimp [yoneda] at ⊢ t,
+    change (f.val.app _ ≫ Y.val.map _) _ = _,
+    rw ← nat_trans.naturality,
+    change f.val.app _ _ = _,
+    congr' 1, ext, refl,
+  end,
+  right_inv := λ f, by { dsimp, simp } }
 
 end Profinite
 
