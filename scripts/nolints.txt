@@ -241,9 +241,8 @@ apply_nolint category_theory.triangulated.triangle.shift_comm_eq_eq_to_hom unuse
 -- free_pfpng/lemmas.lean
 apply_nolint free_pfpng.discrete_quotient_separates_points' def_lemma
 
--- free_pfpng/main.lean
+-- free_pfpng/setup.lean
 apply_nolint ProFiltPseuNormGrp₁.limit_π_coe_eq def_lemma
-apply_nolint pmz_eq def_lemma
 
 -- invpoly/basic.lean
 apply_nolint invpoly unused_arguments
@@ -265,7 +264,7 @@ apply_nolint laurent_measures_ses.aux_dist_right unused_arguments
 apply_nolint laurent_measures_ses.box unused_arguments
 apply_nolint laurent_measures_ses.coe_filtration_sub unused_arguments
 apply_nolint laurent_measures_ses.complement_of_balls_pos_NN unused_arguments
-apply_nolint laurent_measures_ses.geom_B unused_arguments
+apply_nolint laurent_measures_ses.geom_B_old unused_arguments
 apply_nolint laurent_measures_ses.real_measures.topological_space unused_arguments
 
 -- laurent_measures/theta.lean
