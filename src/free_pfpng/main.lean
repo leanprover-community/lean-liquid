@@ -11,8 +11,50 @@ open category_theory.grothendieck_topology
 
 universe u
 
+lemma Condensed.is_zero_of_is_zero_obj (A : Condensed.{u} Ab.{u+1})
+  (hA : ∀ S : Profinite.{u}, limits.is_zero (A.val.obj (opposite.op S))) :
+  limits.is_zero A :=
+{ unique_to := λ Y, nonempty.intro
+  { default := 0,
+    uniq := λ a, begin
+      ext t : 3,
+      apply (hA t.unop).eq_of_src,
+    end },
+  unique_from := λ Y, nonempty.intro
+  { default := 0,
+    uniq := λ a, begin
+      ext t : 3,
+      apply (hA t.unop).eq_of_tgt
+    end } }
+
+lemma Profinite.free_pfpng_eq_zero_of_empty (S : Profinite.{u}) [is_empty S]
+  (a : S.free_pfpng) : a = 0 :=
+begin
+  let E : limits.cone ((S.fintype_diagram ⋙ free_pfpng_functor)) :=
+    ProFiltPseuNormGrp₁.bounded_cone ⟨Ab.explicit_limit_cone _,
+      Ab.explicit_limit_cone_is_limit _⟩,
+  let hE : limits.is_limit E :=
+    ProFiltPseuNormGrp₁.bounded_cone_is_limit _,
+  let ee : S.free_pfpng ≅ E.X :=
+    (limits.limit.is_limit _).cone_point_unique_up_to_iso hE,
+  apply_fun ee.hom, swap,
+  { intros x y h, apply_fun ee.inv at h, simpa using h },
+  rw ee.hom.map_zero, ext T t,
+  obtain ⟨s⟩ := t,
+  apply is_empty.elim _ (s : S), assumption
+end
+
 lemma Profinite.is_zero_of_empty (S : Profinite.{u}) [is_empty S] :
-  limits.is_zero S.condensed_free_pfpng := sorry
+  limits.is_zero S.condensed_free_pfpng :=
+begin
+  apply Condensed.is_zero_of_is_zero_obj,
+  intros T,
+  dsimp [Profinite.condensed_free_pfpng],
+  dsimp [CompHausFiltPseuNormGrp.presheaf],
+  apply is_zero_Ab,
+  rintros ⟨⟨f,hf⟩⟩, ext t, change f t = 0,
+  apply Profinite.free_pfpng_eq_zero_of_empty,
+end
 
 lemma category_theory.abelian.is_iso_of_mono_of_is_zero
   {A : Type*} [category A] [abelian A] {X Y : A} (f : X ⟶ Y) [mono f]
