@@ -7,6 +7,7 @@ import laurent_measures.theta
 import linear_algebra.basic
 import order.filter.at_top_bot tactic.linarith
 import for_mathlib.nnreal
+import for_mathlib.group_with_zero
 
 
 /-
@@ -268,13 +269,30 @@ begin
     ring },
   rw summable_congr this, clear this,
   -- TODO : maybe now is the time to tidy up a bit (e.g. cancel the 2^x and (1/2)^x)
-
+  suffices : summable
+  (λ (m : ℕ), ∑' (k : ℕ),
+       ∥F s (F.d + ↑m + ↑k)∥₊ *
+       (1 / 2) ^ (k : ℤ) * r ^ (F.d + ↑m)),
+  { refine (summable_congr _).2 this,
+    intro m,
+    apply tsum_congr,
+    intro b,
+    rw one_div,
+    rw [inv_zpow₀,inv_zpow₀],
+    rw [← zpow_neg₀, ←zpow_neg₀],
+    have h2 : (2 : ℝ≥0) ≠ 0 := two_ne_zero,
+    simp only [pow_add₀, ne.def, bit0_eq_zero, one_ne_zero, not_false_iff, zpow_coe_nat, neg_add_rev, zpow_neg₀,
+  mul_eq_mul_right_iff],
+    field_simp [zpow_ne_zero _ h2], left,
+    ring,
+  },
+  simp_rw [mul_comm],
   -- change order of summation
   apply nnreal.summable_symm,
   -- check various things are summable
   have := F.summable_half s,
-  sorry, sorry,
-  -- win
+  { sorry }, { sorry },
+  -- sum is then bounded above by a GP.
   sorry
 end
 
