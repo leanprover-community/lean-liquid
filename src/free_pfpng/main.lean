@@ -239,17 +239,14 @@ end
 
 def free_pfpng_profinite_iso_aux :
   condensify (free_pfpng_functor ⋙ ProFiltPseuNormGrp₁.to_CHFPNG₁) ≅
-  Profinite.extend free_pfpng_functor ⋙
-  ProFiltPseuNormGrp₁.to_CHFPNG₁ ⋙
-    CompHausFiltPseuNormGrp₁.enlarging_functor ⋙
+  ((Profinite.extend free_pfpng_functor ⋙ ProFiltPseuNormGrp₁.to_CHFPNG₁) ⋙
+    CompHausFiltPseuNormGrp₁.enlarging_functor) ⋙
     CompHausFiltPseuNormGrp.to_Condensed :=
-nat_iso.of_components
-(λ X, Sheaf.iso.mk _ _ $ begin
-  dsimp [condensify],
-  -- (AT) Use the fact that `ProFiltPseuNormGrp₁.to_CHFPNG₁` preserves limits.
-  sorry
-end)
-sorry
+iso_whisker_right
+  (iso_whisker_right
+    (Profinite.extend_commutes free_pfpng_functor ProFiltPseuNormGrp₁.to_CHFPNG₁).symm
+    CompHausFiltPseuNormGrp₁.enlarging_functor)
+  CompHausFiltPseuNormGrp.to_Condensed
 
 /-- Prop 2.1 of Analytic.pdf -/
 def free_pfpng_profinite_iso :
@@ -257,6 +254,3 @@ def free_pfpng_profinite_iso :
   Profinite_to_Condensed ⋙ CondensedSet_to_Condensed_Ab :=
 free_pfpng_profinite_iso_aux ≪≫ (as_iso free_pfpng_profinite_natural_map).symm
 
-.
-
--- #check Condensed_Ab_CondensedSet_adjunction
