@@ -130,6 +130,59 @@ begin
     category.id_comp],
 end
 
+lemma free_pfpng_profinite_natural_map_aux (S T : Profinite.{u}) (f : S ⟶ T) :
+  f ≫ T.to_free_pfpng = S.to_free_pfpng ≫
+    (ProFiltPseuNormGrp₁.level.obj 1).map
+    ((Profinite.extend free_pfpng_functor).map f) :=
+begin
+  apply (limits.is_limit_of_preserves (ProFiltPseuNormGrp₁.level.obj 1)
+   (limits.limit.is_limit _)).hom_ext,
+  intros W, dsimp [Profinite.to_free_pfpng,
+    Profinite.free_pfpng_level_iso, limits.is_limit.cone_point_unique_up_to_iso,
+    limits.is_limit.map],
+  simp only [category.assoc],
+  erw (limits.is_limit_of_preserves (ProFiltPseuNormGrp₁.level.obj 1)
+    (limits.limit.is_limit (T.fintype_diagram ⋙ free_pfpng_functor))).fac,
+  erw limits.limit.lift_π,
+  swap, apply_instance,
+  simp only [← functor.map_comp, limits.limit.lift_π],
+  dsimp [Profinite.change_cone],
+  simp only [functor.map_comp],
+  erw (limits.is_limit_of_preserves (ProFiltPseuNormGrp₁.level.obj 1)
+    (limits.limit.is_limit (S.fintype_diagram ⋙ free_pfpng_functor))).fac_assoc,
+  erw limits.limit.lift_π_assoc,
+  ext, dsimp [Profinite.as_limit_cone, Fintype.free_pfpng_unit, free_pfpng.map,
+    ProFiltPseuNormGrp₁.level],
+  rcases x with ⟨x⟩,
+  simp only [finset.filter_congr_decidable,
+    int.nat_cast_eq_coe_nat],
+  erw [finset.sum_filter, finset.sum_ite, finset.sum_ite],
+  simp only [finset.filter_congr_decidable, finset.sum_const,
+    nat.smul_one_eq_coe, int.nat_cast_eq_coe_nat, finset.sum_const_zero,
+    add_zero],
+  rw finset.filter_filter,
+  split_ifs,
+  { symmetry, norm_cast, rw finset.card_eq_one,
+    use (W.comap f.2).proj a,
+    rw finset.eq_singleton_iff_nonempty_unique_mem,
+    split,
+    { rw finset.filter_nonempty_iff,
+      use (W.comap f.2).proj a,
+      refine ⟨finset.mem_univ _, h, rfl⟩ },
+    { rintros ⟨q⟩ hq,
+      simp only [finset.mem_filter, finset.mem_univ, true_and] at hq,
+      erw hq.2 } },
+  { symmetry, norm_cast,
+    simp only [finset.card_eq_zero],
+    rw finset.filter_eq_empty_iff,
+    rintros ⟨q⟩ -, push_neg, intros hh,
+    rw ← hh at h,
+    erw discrete_quotient.map_proj_apply at h,
+    contrapose! h,
+    let e : (W.comap f.2) → W := discrete_quotient.map (le_refl _),
+    apply_fun e at h, exact h },
+end
+
 def free_pfpng_profinite_natural_map :
   Profinite_to_Condensed ⋙ CondensedSet_to_Condensed_Ab ⟶
   Profinite.extend free_pfpng_functor ⋙
@@ -140,36 +193,41 @@ def free_pfpng_profinite_natural_map :
   naturality' := λ S T f, begin
     -- we should be able to precompose with the natural map `S.to_Condensed ⟶ S.free'`
     -- how do we do that?
-    sorry
+    -- Answer: use `adjunction.hom_equiv`.
+    dsimp only [functor.comp_map],
+    dsimp only [Profinite.free_to_pfpng],
+    apply_fun (Condensed_Ab_CondensedSet_adjunction.hom_equiv _ _),
+    simp only [adjunction.hom_equiv_unit, adjunction.hom_equiv_counit, functor.map_comp],
+    simp only [nat_trans.naturality, category.assoc, nat_trans.naturality_assoc],
+    dsimp only [Profinite.condensed_free_pfpng],
+    have := Condensed_Ab_CondensedSet_adjunction.unit.naturality
+      (Profinite_to_Condensed.map f),
+    dsimp only [functor.comp_map] at this,
+    slice_lhs 1 2 { rw ← this }, clear this,
+    dsimp only [functor.id_map], simp only [category.assoc],
+    have := Condensed_Ab_CondensedSet_adjunction.unit.naturality
+      S.to_condensed_free_pfpng,
+    dsimp only [functor.comp_map] at this,
+    slice_rhs 1 2 { erw ← this }, clear this,
+    dsimp only [functor.id_map], simp only [category.assoc],
+    have := Condensed_Ab_CondensedSet_adjunction.right_triangle_components,
+    slice_rhs 2 3 { erw this }, clear this,
+    erw category.id_comp,
+    slice_lhs 2 3 { erw ← nat_trans.naturality },
+    simp only [functor.id_map, category.assoc],
+    have := Condensed_Ab_CondensedSet_adjunction.right_triangle_components,
+    slice_lhs 3 4 { rw this }, clear this,
+    erw category.comp_id,
+    ext W ⟨t⟩ : 7, change W.unop ⟶ S at t,
+
+    dsimp [Profinite.to_condensed_free_pfpng,
+      CompHausFiltPseuNormGrp.level_Condensed_diagram_cocone,
+      Ab.ulift, Profinite.to_free_pfpng_level],
+    erw ← comp_apply,
+    erw ← comp_apply,
+    erw ← comp_apply,
+    rw free_pfpng_profinite_natural_map_aux _ _ f, refl,
   end }
-/-
-whisker_right profinite_to_condensed_unit _ ≫
-(functor.associator _ _ _).hom ≫
-whisker_left _ (
-  (functor.associator _ _ _).hom ≫
-  whisker_left _ (
-    (functor.associator _ _ _).hom ≫
-    whisker_left _ (
-      (functor.associator _ _ _).hom ≫ whisker_left _
-        Condensed_Ab_CondensedSet_adjunction.counit ≫ (functor.right_unitor _).hom )))
--/
-
-/-
-def profinite_to_condensed_unit :
-  Profinite_to_Condensed ⟶
-  condensify (free_pfpng_functor ⋙ ProFiltPseuNormGrp₁.to_CHFPNG₁) ⋙
-    Condensed_Ab_to_CondensedSet :=
-{ app := λ S, S.to_free_pfpng' ≫ _,
-  naturality' := sorry }
-
-def free_pfpng_profinite_natural_map :
-  Profinite_to_Condensed ⋙ CondensedSet_to_Condensed_Ab ⟶
-  condensify (free_pfpng_functor ⋙ ProFiltPseuNormGrp₁.to_CHFPNG₁) :=
-(((whiskering_right _ _ _).obj CondensedSet_to_Condensed_Ab).map profinite_to_condensed_unit) ≫
-  whisker_left
-    (condensify (free_pfpng_functor ⋙ ProFiltPseuNormGrp₁.to_CHFPNG₁))
-    Condensed_Ab_CondensedSet_adjunction.counit
--/
 
 instance free_pfpng_profinite_natural_map_is_iso :
   is_iso free_pfpng_profinite_natural_map :=
