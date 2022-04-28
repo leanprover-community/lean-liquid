@@ -24,5 +24,5 @@ by rw [ summable.has_sum_iff ennreal.summable, summable.has_sum_iff ennreal.summ
 -- begin
 
 --   -- wrong idea have := summable (λ ab : α × β, F ab.1 ab.2),
---   sorry,
+--   admit,
 -- end
