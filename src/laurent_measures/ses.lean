@@ -117,7 +117,7 @@ lemma Φ_eq_ϕ (F : ℒ S) : Φ S F = ϕ F := rfl
 
 --   }
 --   suffices : (sh + sh + (-id)).bound_by (1 + 1 + 1),
---   { convert this using 1, ext1, dsimp only [Φ_eq_ϕ, ϕ], erw two_nsmul, sorry, }, -- was refl
+--   { convert this using 1, ext1, dsimp only [Φ_eq_ϕ, ϕ], erw two_nsmul, }, -- was refl
 --   refine (Hsh.add Hsh).add (mk_of_bound_bound_by _ _ _).neg,
 -- end
 
@@ -470,281 +470,6 @@ begin
   exact ⟨preimage_mono hε, H (f x) ε, mem_ball_self h₀⟩,
 end
 
--- lemma reduction_balls' {c : ℝ≥0} (f : X → (closed_ball (0 : ℝ) c)) (H : ∀ y : (closed_ball 0 c),
---   ∀ ε : ℝ≥0, is_open (f⁻¹' (ball y ε))) : continuous f :=
--- begin
---   rw continuous_def,
---   intros _ hU,
---   rw is_open_iff_forall_mem_open,
---   intros x hx,
---   obtain ⟨ε₀, h_pos, hε₀⟩ := (is_open_iff.mp hU) (f x) (mem_preimage.mp hx),
---   let ε : ℝ≥0 := ⟨ε₀, le_of_lt h_pos⟩,
---   use f⁻¹' (ball (f x) ε),
---   exact ⟨preimage_mono hε₀, H (f x) ε, mem_ball_self h_pos⟩,
--- end
-
--- lemma aux_mem_left {y : (closed_ball (0 : ℝ) c)} {ε x : ℝ} (hx : x = (-ε + y - c) / 2)
---   (hε : 0 < ε) (h_left : (- c : ℝ) ≤ - ε + y) : x ∈ closed_ball (0 : ℝ) c :=
--- begin
---   simp only [mem_closed_ball_zero_iff, norm_div, real.norm_two, real.norm_eq_abs, abs_le],
---   split,
---   { linarith },
---   { have h_yc : (y : ℝ) ≤ c,
---     have hy := y.2,
---     rw [mem_closed_ball_zero_iff, subtype.val_eq_coe, real.norm_eq_abs] at hy,
---     exact (le_abs_self (y : ℝ)).trans hy,
---     linarith },
--- end
-
--- -- lemma aux_mem_right {y : (closed_ball (0 : ℝ) c)} {ε x : ℝ} (hx : x = (ε + y + c) / 2)
--- --   (hε : 0 < ε) (h_right : ε + y ≤ c) : x ∈ closed_ball (0 : ℝ) c :=
--- -- begin
--- --   simp only [mem_closed_ball_zero_iff, norm_div, real.norm_two, real.norm_eq_abs, abs_le],
--- --   split,
--- --   { have h_yc : - (c : ℝ) ≤ (y : ℝ),
--- --     have hy := y.2,
--- --     rw [mem_closed_ball_zero_iff, subtype.val_eq_coe, real.norm_eq_abs] at hy,
--- --     exact (abs_le.mp hy).1,
--- --     linarith },
--- --   { linarith },
--- -- end
-
--- -- lemma aux_dist_left {a y : closed_ball (0 : ℝ) c} {ε x: ℝ}  (ha : a ∈ ball y ε) (hε : 0 < ε)
--- --   (hx : x = (-ε + y - c) / 2) : dist (a : ℝ) x = a - x :=
--- -- begin
--- --   rw [real.dist_eq, abs_eq_self, sub_nonneg],
--- --   rw [mem_ball, subtype.dist_eq, real.dist_eq, abs_lt, lt_sub_iff_add_lt] at ha,
--- --   apply le_of_lt,
--- --   have := a.2,
--- --   rw [mem_closed_ball, subtype.val_eq_coe, real.dist_eq, sub_zero, abs_le] at this,
--- --   calc x = (-ε + y - c) / 2 : by {exact hx}
--- --      ... < (a - c) / 2 : by linarith
--- --      ... ≤ a : by {rw [div_le_iff, sub_le, mul_two, ← sub_sub, sub_self, zero_sub, neg_le],
--- --                     exact this.1, simp only [zero_lt_bit0, zero_lt_one]},
--- -- end
-
--- -- lemma aux_dist_right {a y : closed_ball (0 : ℝ) c} {ε x: ℝ}  (ha : a ∈ ball y ε) (hε : 0 < ε)
--- --   (hx : x = (ε + y + c) / 2) : dist (a : ℝ) x = x - a :=
--- -- begin
--- --   have h_neg : - ((a : ℝ) - x) = (x - a) := by {ring},
--- --   rw [real.dist_eq, ← h_neg, abs_eq_neg_self, sub_nonpos],
--- --   rw [mem_ball, subtype.dist_eq, real.dist_eq, abs_lt, lt_sub_iff_add_lt] at ha,
--- --   apply le_of_lt,
--- --   have := a.2,
--- --   rw [mem_closed_ball, subtype.val_eq_coe, real.dist_eq, sub_zero, abs_le] at this,
--- --   calc x = (ε + y + c) / 2 : by {exact hx}
--- --       ... > (a + c) / 2 : by linarith
--- --       ... ≥ a : by {rw [ge_iff_le, le_div_iff, ← sub_le_iff_le_add', mul_two, ← add_sub, sub_self,
--- --         add_zero], exact this.2, simp only [zero_lt_bit0, zero_lt_one]},
--- -- end
-
--- -- -- lemma complement_of_balls_nonpos {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) {ε : ℝ} (hε : ε ≤ 0):
--- -- --  ∃ (x₁ x₂ : (closed_ball 0 c)), ∃ (δ₁ δ₂ : ℝ),
--- -- --   ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ :=
--- -- -- begin
--- -- --   have := (@ball_eq_empty _ _ y ε).mpr hε,
--- -- --   rw this,
--- -- --   use [0, 0, c, c],
--- -- --   simp only [union_self, bot_eq_empty],
--- -- --   apply (compl_eq_bot.mpr _).symm,
--- -- --   rw top_eq_univ,
--- -- --   ext x,
--- -- --   split;
--- -- --   intro _,
--- -- --   simp only [mem_univ],
--- -- --   exact x.2,
--- -- -- end
-
--- -- -- lemma complement_of_balls_pos_Nleft {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) {ε : ℝ} (hε : 0 < ε)
--- -- --  (Nh_left : ¬ - (c : ℝ) ≤ -ε + y) (h_right : ε + y ≤ c) :
--- -- --  ∃ (x₁ x₂ : (closed_ball 0 c)), ∃ (δ₁ δ₂ : ℝ),
--- -- --   ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ :=
--- -- -- begin
--- -- --   set δ₂ := (-ε - y + c) / 2 with hδ₂,
--- -- --   set x₂ := (ε + y + c) / 2 with hx₂,
--- -- --   use [0, x₂, aux_mem_right c hx₂ hε h_right, -1, δ₂],
--- -- --   simp only [compl_union],
--- -- --   ext a,
--- -- --   simp only [mem_inter_eq, mem_compl_iff, mem_closed_ball, not_le],
--- -- --   split,
--- -- --   { intro ha,
--- -- --     apply and.intro (lt_of_lt_of_le neg_one_lt_zero dist_nonneg),
--- -- --     rw [hδ₂, subtype.dist_eq, subtype.coe_mk, aux_dist_right c ha hε hx₂, hx₂, div_sub' _ _ _
--- -- --           (@two_ne_zero ℝ _ _)],
--- -- --     have : (c : ℝ) - 2 * a = - 2 * a + c := by ring,
--- -- --     apply div_lt_div_of_lt _,
--- -- --     rw [← add_sub, this, ← add_assoc],
--- -- --     apply add_lt_add_right,
--- -- --     rw [mem_ball, subtype.dist_eq, real.dist_eq, abs_sub_lt_iff] at ha,
--- -- --     rw [sub_eq_add_neg, neg_add_lt_iff_lt_add, add_assoc, ← add_assoc ε ε _, ← two_mul,
--- -- --       ← add_assoc, add_comm _ (y : ℝ), add_assoc, ← sub_lt_iff_lt_add', sub_eq_add_neg,
--- -- --       ← two_mul, neg_mul, ← sub_eq_add_neg, mul_neg, neg_lt_sub_iff_lt_add, ← mul_add,
--- -- --       mul_lt_mul_left, ← sub_lt_iff_lt_add'],
--- -- --     exact ha.1,
--- -- --     repeat {simp only [zero_lt_bit0, zero_lt_one]}},
--- -- --   { rintros ⟨-, h₂⟩,
--- -- --     have ha := a.2,
--- -- --     rw [mem_closed_ball, subtype.val_eq_coe, real.dist_0_eq_abs, abs_le] at ha,
--- -- --     rw [subtype.dist_eq, real.dist_eq, subtype.coe_mk, lt_abs] at h₂,
--- -- --     have H₂ : x₂ - δ₂ = ε + y ∧ δ₂ + x₂ = c,
--- -- --     { rw [hx₂, hδ₂, ← add_div, ← sub_div],
--- -- --       split,
--- -- --       repeat {ring}},
--- -- --     replace h₂ : δ₂ < x₂ - a,
--- -- --     { rw [neg_sub, lt_sub_iff_add_lt, H₂.2] at h₂,
--- -- --       exact (or_iff_right (not_lt.mpr ha.2)).mp h₂ },
--- -- --     rw [mem_ball, subtype.dist_eq, real.dist_eq, abs_lt, lt_sub_iff_add_lt],
--- -- --     split;
--- -- --     linarith }
--- -- -- end
-
--- lemma complement_of_balls_pos_Nright {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) {ε : ℝ} (hε : 0 < ε)
---   (h_left : - (c : ℝ) ≤ -ε + y) (Nh_right : ¬ ε + y ≤ c) :
---  ∃ (x₁ x₂ : (closed_ball 0 c)), ∃ (δ₁ δ₂ : ℝ),
---   ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ :=
--- begin
---   set δ₁ := (-ε + y + c) / 2 with hδ₁,
---   set x₁ := (- ε + y - c) / 2 with hx₁,
---   have := aux_mem_left c hx₁ hε h_left,
---   use [x₁, aux_mem_left c hx₁ hε h_left, 0, δ₁, -1],
---   simp only [compl_union],
---   ext a,
---   simp only [mem_inter_eq, mem_compl_iff, mem_closed_ball, not_le],
---   split,
---   { intro ha,
---     apply and.intro _ (lt_of_lt_of_le neg_one_lt_zero dist_nonneg),
---       { rw [hδ₁, subtype.dist_eq, subtype.coe_mk, aux_dist_left c ha hε hx₁, hx₁, sub_div' _ _ _
---           (@two_ne_zero ℝ _ _)],
---         apply div_lt_div_of_lt _,
---         rw [sub_sub_assoc_swap, add_comm, add_comm _ (c : ℝ), add_sub_assoc],
---         apply add_lt_add_left,
---         rw [mem_ball, subtype.dist_eq, real.dist_eq, abs_sub_lt_iff] at ha,
---         rw [sub_add_eq_sub_sub, sub_neg_eq_add, add_comm _ ε, ← add_sub, neg_add_lt_iff_lt_add,
---           ← add_assoc, ← two_mul, add_sub, sub_eq_add_neg, lt_add_neg_iff_add_lt, ← two_mul,
---           mul_comm _ (2 : ℝ), ← mul_add, mul_lt_mul_left, ← sub_lt_iff_lt_add],
---         exact ha.2,
---         repeat {simp only [zero_lt_bit0, zero_lt_one]}}},
---   { rintros ⟨h₁, -⟩,
---     have ha := a.2,
---     rw [mem_closed_ball, subtype.val_eq_coe, real.dist_0_eq_abs, abs_le] at ha,
---     rw [subtype.dist_eq, real.dist_eq, subtype.coe_mk, lt_abs] at h₁,
---     have H₁ : x₁ + δ₁ = -ε + y ∧ x₁ - δ₁ = - c,
---     { rw [hx₁, hδ₁, ← add_div, ← sub_div],
---       split,
---       repeat {ring}},
---     replace h₁ :x₁ + δ₁ < a,
---     { cases h₁ with hh₁,
---       rwa lt_sub_iff_add_lt' at hh₁,
---       rw [neg_sub, lt_sub, H₁.2] at h₁,
---       linarith},
---     rw [mem_ball, subtype.dist_eq, real.dist_eq, abs_lt, lt_sub_iff_add_lt, ← H₁.1],
---     split,
---     all_goals {linarith}}
--- end
-
-
--- lemma complement_of_balls_pos_NN {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) {ε : ℝ} (hε : 0 < ε)
---   (Nh_left : ¬ - (c : ℝ) ≤ -ε + y) (Nh_right : ¬ ε + y ≤ c) :
---  ∃ (x₁ x₂ : (closed_ball 0 c)), ∃ (δ₁ δ₂ : ℝ),
---   ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ :=
--- begin
---   use [0, 0, -1, -1],
---   rw [((@closed_ball_eq_empty _ _ (0 : closed_ball (0 : ℝ) c) (-1 : ℝ)).mpr neg_one_lt_zero),
---     union_self, compl_empty],
---   ext a,
---   split,
---   {intro _,
---     simp only [mem_univ]},
---   { rintro -,
---     have := a.2,
---     simp only [mem_closed_ball, subtype.val_eq_coe, top_eq_univ, mem_univ, mem_ball,
---       forall_true_left, subtype.dist_eq, real.dist_eq, abs_le, abs_lt] at this ⊢,
---     split;
---     linarith}
--- end
-
--- lemma complement_of_balls_pos_centre {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) {ε : ℝ} (hε : 0 < ε)
---   (h_right : ε + y ≤ c) (h_left : - (c : ℝ) ≤ -ε + y) :
---   ∃ (x₁ x₂ : (closed_ball 0 c)), ∃ (δ₁ δ₂ : ℝ),
---   ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ :=
--- begin
---   set δ₁ := (-ε + y + c) / 2 with hδ₁,
---   set x₁ := (- ε + y - c) / 2 with hx₁,
---   set δ₂ := (-ε - y + c) / 2 with hδ₂,
---   set x₂ := (ε + y + c) / 2 with hx₂,
---   use [x₁, aux_mem_left c hx₁ hε h_left, x₂, aux_mem_right c hx₂ hε
---       h_right, δ₁, δ₂],
---     simp only [compl_union],
---     ext a,
---     simp only [mem_inter_eq, mem_compl_iff, mem_closed_ball, not_le],
---     split,
---     { intro ha,
---       split,
---       { rw [hδ₁, subtype.dist_eq, subtype.coe_mk, aux_dist_left c ha hε hx₁, hx₁, sub_div' _ _ _
---           (@two_ne_zero ℝ _ _)],
---         apply div_lt_div_of_lt _,
---         rw [sub_sub_assoc_swap, add_comm, add_comm _ (c : ℝ), add_sub_assoc],
---         apply add_lt_add_left,
---         rw [mem_ball, subtype.dist_eq, real.dist_eq, abs_sub_lt_iff] at ha,
---         rw [sub_add_eq_sub_sub, sub_neg_eq_add, add_comm _ ε, ← add_sub, neg_add_lt_iff_lt_add,
---           ← add_assoc, ← two_mul, add_sub, sub_eq_add_neg, lt_add_neg_iff_add_lt, ← two_mul,
---           mul_comm _ (2 : ℝ), ← mul_add, mul_lt_mul_left, ← sub_lt_iff_lt_add],
---         exact ha.2,
---         repeat {simp only [zero_lt_bit0, zero_lt_one]}},
---       { rw [hδ₂, subtype.dist_eq, subtype.coe_mk, aux_dist_right c ha hε hx₂, hx₂, div_sub' _ _ _
---           (@two_ne_zero ℝ _ _)],
---         have : (c : ℝ) - 2 * a = - 2 * a + c := by ring,
---         apply div_lt_div_of_lt _,
---         rw [← add_sub, this, ← add_assoc],
---         apply add_lt_add_right,
---         rw [mem_ball, subtype.dist_eq, real.dist_eq, abs_sub_lt_iff] at ha,
---         rw [sub_eq_add_neg, neg_add_lt_iff_lt_add, add_assoc, ← add_assoc ε ε _, ← two_mul,
---           ← add_assoc, add_comm _ (y : ℝ), add_assoc, ← sub_lt_iff_lt_add', sub_eq_add_neg,
---           ← two_mul, neg_mul, ← sub_eq_add_neg, mul_neg, neg_lt_sub_iff_lt_add, ← mul_add,
---           mul_lt_mul_left, ← sub_lt_iff_lt_add'],
---         exact ha.1,
---         repeat {simp only [zero_lt_bit0, zero_lt_one]}}},
---     { rintros ⟨h₁, h₂⟩,
---       have ha := a.2,
---       rw [mem_closed_ball, subtype.val_eq_coe, real.dist_0_eq_abs, abs_le] at ha,
---       rw [subtype.dist_eq, real.dist_eq, subtype.coe_mk, lt_abs] at h₁ h₂,
---       have H₁ : x₁ + δ₁ = -ε + y ∧ x₁ - δ₁ = - c,
---       { rw [hx₁, hδ₁, ← add_div, ← sub_div],
---         split,
---         repeat {ring}},
---       replace h₁ :x₁ + δ₁ < a,
---       { cases h₁ with hh₁,-- [FAE] Need to split cases to avoid `result contains metavariable`
---         rwa lt_sub_iff_add_lt' at hh₁,
---         rw [neg_sub, lt_sub, H₁.2] at h₁,
---         linarith},
---       have H₂ : x₂ - δ₂ = ε + y ∧ δ₂ + x₂ = c,
---       { rw [hx₂, hδ₂, ← add_div, ← sub_div],
---         split,
---         repeat {ring}},
---       replace h₂ : δ₂ < x₂ - a,
---       { rw [neg_sub, lt_sub_iff_add_lt, H₂.2] at h₂,
---         exact (or_iff_right (not_lt.mpr ha.2)).mp h₂ },
---         rw [mem_ball, subtype.dist_eq, real.dist_eq, abs_lt, lt_sub_iff_add_lt, ← H₁.1],
---         split,
---         all_goals {linarith} },
--- end
-
--- lemma complement_of_balls' {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) (ε : ℝ) :
---  ∃ (x₁ x₂ : (closed_ball 0 c)), ∃ (δ₁ δ₂ : ℝ),
---   ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ :=
--- begin
---   by_cases hε : 0 < ε,
---   { by_cases h_right : ε + y ≤ c,
---     by_cases h_left : - (c : ℝ) ≤ - ε + y,
---     { exact complement_of_balls_pos_centre y hε h_right h_left },
---     { exact complement_of_balls_pos_Nleft y hε h_left h_right },
---     { by_cases h_left : - (c : ℝ) ≤ - ε + y,
---     { exact complement_of_balls_pos_Nright y hε h_left h_right, },
---     { exact complement_of_balls_pos_NN y hε h_left h_right }}},
---   { exact complement_of_balls_nonpos y (not_lt.mp hε) },
--- end
-
-
 lemma mem_filtration_le_monomial (F : filtration (ℒ ϖ) c) (n : ℕ) :
  ∥ ((F.1 punit.star n) : ℝ) ∥ ≤ c * ( 1 / r ^ n) :=
 begin
@@ -902,7 +627,9 @@ end
 
 def U (F : filtration (ℒ ϖ) c) (B : ℤ) : set (filtration (ℒ ϖ) c) := λ G, ∀ s n, n < B → F s n = G s n
 
+
 lemma mem_U (F : filtration (ℒ ϖ) c) (B : ℤ) : F ∈ (U c F B) := λ _ _ _, rfl
+
 
 lemma is_open_U (F : filtration (ℒ ϖ) c) (B : ℤ) : is_open (U c F B) :=
 begin
@@ -954,9 +681,6 @@ begin
   refl,
 end
 
-lemma pos_ε_pow (ε : ℝ) (hε : 0 < ε) : 0 < (ε / (2 : ℝ) ^ p.1) := by {apply div_pos hε
-  (real.rpow_pos_of_pos _ _), simp only [zero_lt_bit0, zero_lt_one]}
-
 lemma aux_summability_no_norm (F : filtration (ℒ ϖ) c) : summable
   (λ b : ℤ, (((F punit.star b) : ℝ) * (1 / 2) ^ b)) := aux_thm69.summable_smaller_radius F.1.d (F.1.summable punit.star)
       (λ n, lt_d_eq_zero F.1 punit.star n) half_lt_r
@@ -964,6 +688,11 @@ lemma aux_summability_no_norm (F : filtration (ℒ ϖ) c) : summable
 lemma aux_summability_subtype (F : filtration (ℒ ϖ) c) (B : ℤ) : summable (λ b : {x : ℤ // B ≤ x},
   (((F punit.star b) : ℝ) * (1 / 2) ^ b.1)) :=
     by {exact (aux_summability_no_norm p c F).comp_injective subtype.coe_injective}
+
+
+
+lemma pos_ε_pow (ε : ℝ) (hε : 0 < ε) : 0 < (ε / (2 : ℝ) ^ p.1) := by {apply div_pos hε
+  (real.rpow_pos_of_pos _ _), simp only [zero_lt_bit0, zero_lt_one]}
 
 lemma dist_lt_of_mem_U (ε : ℝ≥0) (hε : 0 < ε) (F G : filtration (ℒ ϖ) c) :
   G ∈ (U c F (geom_B c (ε / (2 : ℝ) ^ p.1) (pos_ε_pow ε hε))) → ∥ ((θ_c c ϖ G) : (ℳ ϖ)) - (θ_c c ϖ) F ∥ < ε :=
@@ -1064,8 +793,9 @@ begin
   --             ... = ε : sub_add_cancel ε _,
 end
 
+
 -- This is the main continuity property needed in `ses2.lean`
-lemma continuous_θ_c (c : ℝ≥0) : continuous (θ_c c S) :=
+theorem continuous_θ_c (c : ℝ≥0) : continuous (θ_c c S) :=
 begin
   apply continuous_of_seval_ℳ_comp_continuous,
   intro s,
