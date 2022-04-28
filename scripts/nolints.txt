@@ -238,6 +238,9 @@ apply_nolint category_theory.triangulated.triangle.shift_add_comp_eq_to_hom unus
 apply_nolint category_theory.triangulated.triangle.shift_add_comp_eq_to_hom' unused_arguments
 apply_nolint category_theory.triangulated.triangle.shift_comm_eq_eq_to_hom unused_arguments
 
+-- free_pfpng/epi.lean
+apply_nolint exists_signed_sum_aux decidable_classical unused_arguments
+
 -- free_pfpng/lemmas.lean
 apply_nolint free_pfpng.discrete_quotient_separates_points' def_lemma
 
@@ -259,12 +262,12 @@ apply_nolint laurent_measures.bdd_filtration_spec def_lemma
 apply_nolint laurent_measures.laurent_measures.norm_nonneg dup_namespace
 
 -- laurent_measures/ses.lean
+apply_nolint laurent_measures_ses.U unused_arguments
 apply_nolint laurent_measures_ses.aux_dist_left unused_arguments
 apply_nolint laurent_measures_ses.aux_dist_right unused_arguments
 apply_nolint laurent_measures_ses.box unused_arguments
-apply_nolint laurent_measures_ses.coe_filtration_sub unused_arguments
 apply_nolint laurent_measures_ses.complement_of_balls_pos_NN unused_arguments
-apply_nolint laurent_measures_ses.geom_B_old unused_arguments
+apply_nolint laurent_measures_ses.pos_ε_pow unused_arguments
 apply_nolint laurent_measures_ses.real_measures.topological_space unused_arguments
 
 -- laurent_measures/theta.lean
@@ -276,7 +279,10 @@ apply_nolint theta.eventually_pos_y ge_or_gt
 apply_nolint theta.ϑ_section unused_arguments
 
 -- laurent_measures/thm69.lean
-apply_nolint r_half unused_arguments
+apply_nolint half_lt_r unused_arguments
+apply_nolint psi_def_aux unused_arguments
+apply_nolint psi_def_aux_2 unused_arguments
+apply_nolint psi_def_aux_3 unused_arguments
 apply_nolint tsum_reindex unused_arguments
 apply_nolint θ unused_arguments
 apply_nolint θ_natural unused_arguments
