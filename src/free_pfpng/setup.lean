@@ -44,6 +44,7 @@ lemma Profinite.to_condensed_free_pfpng_app (S T : Profinite.{u}) (f) :
     S.to_free_pfpng.2.comp (ulift.down f).2, rfl⟩ :=
 rfl
 
+/-
 def profinite_to_condensed_unit :
   Profinite_to_Condensed ⟶
   Profinite.extend free_pfpng_functor ⋙
@@ -55,8 +56,9 @@ def profinite_to_condensed_unit :
   naturality' := λ S T f, begin
     ext X s x, induction X using opposite.rec,
     dsimp at x,
-    sorry
+    admit
   end }
+-/
 
 def Profinite.free' (S : Profinite.{u}) : Condensed.{u} Ab.{u+1} :=
 CondensedSet_to_Condensed_Ab'.obj S.to_Condensed
