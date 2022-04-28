@@ -249,6 +249,31 @@ lemma int.summable_iff_on_nat {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ) (h : �
 summable (λ n, ∥ f n ∥ * ρ ^ n) ↔ summable (λ n : ℕ, ∥ f n ∥ * ρ ^ (n : ℤ)) :=
 summable_iff_on_nat_less d (λ n nd, by simp [h _ nd])
 
+lemma nnreal.summable_iff_on_nat_less_shift {f : ℤ → ℝ≥0} (d : ℤ)
+  (h : ∀ {n : ℤ}, n < d → f n = 0) (M : ℤ) :
+  summable f ↔ summable (λ n : ℕ, f (M + n)) :=
+begin
+  rw [← nnreal.summable_coe, ← nnreal.summable_coe],
+  split,
+  { intro hf,
+    have hinj : function.injective (λ (n : ℕ), M + n),
+    { rintros a b (h2 : M + a = M + b),
+      simpa using h2 },
+    convert hf.comp_injective hinj,
+  },
+  { intro hs,
+    rw ← (equiv.add_left M).summable_iff,
+    rw ← @summable_iff_on_nat_less (λ (a : ℤ), ↑(f (M + a))) (d - M) _ at hs,
+    { exact (summable_congr (λ k, rfl)).1 hs },
+    { intros n hn,
+      dsimp only,
+      rw h, norm_num, linarith } },
+end
+
+-- nnreal.summable_coe.symm.trans $ (summable_iff_on_nat_less d (λ n nd,
+--   ((f n).coe_eq_zero.mpr (h nd)))).trans nnreal.summable_coe
+
+
 lemma summable_smaller_radius_norm {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ) (ρ_half : 1 / 2 < ρ)
 (hf : summable (λ n : ℤ, ∥ f n ∥ * ρ ^ n))
   (hd : ∀ n : ℤ, n < d → f n = 0) : --(F : ℒ S) (s : S) :

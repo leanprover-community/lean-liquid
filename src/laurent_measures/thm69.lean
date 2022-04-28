@@ -251,6 +251,45 @@ sum of sums"
 
 -/
 
+lemma nnreal.summable_mul_left_iff {X : Type*} {f : X → ℝ≥0} {a : ℝ≥0} (ha : a ≠ 0) :
+summable f ↔ summable (λ (x : X), a * f x) :=
+begin
+  rw [← nnreal.summable_coe, ← nnreal.summable_coe],
+  rw summable_mul_left_iff (by exact_mod_cast ha : (a : ℝ) ≠ 0),
+  apply summable_congr,
+  intro b,
+  norm_cast,
+end
+
+lemma psi_def_summable {S : Fintype} (n : ℕ)
+  [fact (0 < p)]
+  [fact (p < 1)]
+  (F : ℒ S)
+  (s : S) :
+  summable
+    (λ (k : ℕ),
+       r ^ (F.d + ↑n) *
+         ((1 / 2) ^ (k : ℤ) * ∥F s (F.d + ↑n + ↑k)∥₊)) :=
+begin
+  have := F.summable_half s,
+  apply summable.mul_left,
+  have h : (1 : ℝ≥0)/ 2 ≠ 0 := by norm_num,
+  rw nnreal.summable_mul_left_iff (show (((1 : ℝ≥0)/ 2) ^ (F.d + n) ≠ 0), from zpow_ne_zero _ h),
+  simp only [← mul_assoc, ← zpow_add₀ h],
+  have this2 := lt_d_eq_zero F s,
+  rw ← summable_norm_iff at this,
+  simp_rw ← _root_.coe_nnnorm at this,
+  rw summable_coe at this,
+  rw nnreal.summable_iff_on_nat_less_shift F.d _ (F.d + n) at this,
+  { convert this,
+    ext1 k,
+    rw [mul_comm, nnnorm_mul],
+    rw nnnorm_zpow,
+    congr,
+    norm_num },
+  { intros n hn,
+    simp [this2 n hn] },
+end
 
 lemma psi_def_aux_4 {S : Fintype} [fact (0 < p)] [fact (p < 1)] (F : ℒ S) (s : ↥S) : summable
   (λ (m : ℕ),
@@ -291,7 +330,9 @@ begin
   apply nnreal.summable_symm,
   -- check various things are summable
   have := F.summable_half s,
-  { sorry }, { sorry },
+  { intro n,
+    apply psi_def_summable },
+  { sorry },
   -- sum is then bounded above by a GP.
   sorry
 end
