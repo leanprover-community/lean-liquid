@@ -102,24 +102,29 @@ def Φ : comphaus_filtered_pseudo_normed_group_hom (ℒ S) (ℒ S) := shift (1) 
 
 lemma Φ_eq_ϕ (F : ℒ S) : Φ S F = ϕ F := rfl
 
-lemma Φ_bound_by_3 [fact (r ≤ 1)] :
-  (Φ S : comphaus_filtered_pseudo_normed_group_hom (ℒ S) (ℒ S)).bound_by 3 :=
-begin
-  let sh : comphaus_filtered_pseudo_normed_group_hom (ℒ S) (ℒ S) := shift (-1),
-  have Hsh : sh.bound_by 1,
-  { refine (mk_of_bound_bound_by _ _ _).mono 1 _,
-    rw [neg_neg], exact (pow_one r).le.trans (fact.out _) },
-  suffices : (sh + sh + (-id)).bound_by (1 + 1 + 1),
-  { convert this using 1, ext1, dsimp only [Φ_eq_ϕ, ϕ], erw two_nsmul, sorry, }, -- was refl
-  refine (Hsh.add Hsh).add (mk_of_bound_bound_by _ _ _).neg,
-end
+-- after the Φ refactor the below lemma is no longer true
+
+-- lemma Φ_bound_by_3 [fact (r ≤ 1)] :
+--   (Φ S : comphaus_filtered_pseudo_normed_group_hom (ℒ S) (ℒ S)).bound_by 3 :=
+-- begin
+--   let sh : comphaus_filtered_pseudo_normed_group_hom (ℒ S) (ℒ S) := shift (-1),
+--   let shup : comphaus_filtered_pseudo_normed_group_hom (ℒ S) (ℒ S) := shift (1),
+--   have Hsh : sh.bound_by 1,
+--   { refine (mk_of_bound_bound_by _ _ _).mono 1 _,
+--     rw [neg_neg], exact (pow_one r).le.trans (fact.out _) },
+--   have Hshup : shup.bound_by 1,
+--   { refine (mk_of_bound_bound_by _ _ _).mono (1) _,
+
+--   }
+--   suffices : (sh + sh + (-id)).bound_by (1 + 1 + 1),
+--   { convert this using 1, ext1, dsimp only [Φ_eq_ϕ, ϕ], erw two_nsmul, sorry, }, -- was refl
+--   refine (Hsh.add Hsh).add (mk_of_bound_bound_by _ _ _).neg,
+-- end
 
 lemma Φ_natural (S T : Fintype) (f : S ⟶ T) (F : ℒ S) (t : T) (n : ℤ) :
   Φ T (map f F) t n = laurent_measures.map f (Φ S F) t n :=
 begin
-  simp only [Φ_eq_ϕ],
-  dsimp only [ϕ],
-  sorry,
+  simp [Φ_eq_ϕ, ϕ, finset.mul_sum],
 end
 
 end phi_to_hom
