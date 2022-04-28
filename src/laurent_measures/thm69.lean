@@ -281,7 +281,7 @@ begin
     rw [inv_zpow₀,inv_zpow₀],
     rw [← zpow_neg₀, ←zpow_neg₀],
     have h2 : (2 : ℝ≥0) ≠ 0 := two_ne_zero,
-    simp only [pow_add₀, ne.def, bit0_eq_zero, one_ne_zero, not_false_iff, zpow_coe_nat, neg_add_rev, zpow_neg₀,
+    simp only [zpow_add₀, ne.def, bit0_eq_zero, one_ne_zero, not_false_iff, zpow_coe_nat, neg_add_rev, zpow_neg₀,
   mul_eq_mul_right_iff],
     field_simp [zpow_ne_zero _ h2], left,
     ring,
