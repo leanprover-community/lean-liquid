@@ -325,20 +325,6 @@ def seval_ℳ_c (c : ℝ≥0) (s : S) : filtration (ℳ S) c → (filtration (�
   apply le_trans this hx,
 end
 
---not sure if these are needed
--- def cast_ℳ_c (c : ℝ≥0) : filtration (ℳ S) c → (S → {x : ℝ // ∥ x ∥ ^ (p : ℝ) ≤ c}) :=
--- begin
---   intros x s,
---   refine ⟨x.1 s, _⟩,
---   have hx := x.2,
---   simp only [filtration, set.mem_set_of_eq, seval_ℒ, nnnorm, laurent_measures.coe_mk,
---     fintype.univ_punit, finset.sum_singleton] at hx,
---   have := finset.sum_le_sum_of_subset (finset.singleton_subset_iff.mpr $ finset.mem_univ_val _),
---   rw finset.sum_singleton at this,
---   apply le_trans this hx,
--- end
-
-
 -- **[FAE]** From here everything might be useless until `lemma inducing_cast_ℳ`: check
 -- also the `variable (c : ℝ≥0)` issue; the idea is to replace cast_ℳ_c with α, for which
 -- everything seems to work
@@ -470,31 +456,7 @@ section topological_generalities
 
 open metric set
 
--- **[FAE]** In this section, many results exist in two versions, with and without `'`. The first is
---  stated in terms of `Icc` and `Ioo`, the second in terms of `closed_ball` and `open_ball`; they
--- are equivalent, and I will need to get rid of the useless ones at the end
 variables {X : Type*} [topological_space X]
---**[FAE]** Probably needed, but check before proving it!
--- lemma continuous_if_for_all_closed (c : ℝ≥0)
---   (f : X → closed_ball (0 : ℝ) c) (H : ∀ a : ℝ≥0, ∀ (H : a ≤ c), is_closed
---     (f⁻¹' ((closed_ball ⟨(0 : ℝ), (mem_closed_ball_self c.2)⟩ a) : set ((closed_ball (0 : ℝ) c)))))
---     : continuous f :=
---  begin
---    sorry,
---  end
-
--- lemma reduction_balls {c : ℝ≥0} (f : X → (Icc (-c : ℝ) c)) (H : ∀ y : (Icc (-c : ℝ) c), ∀ ε : ℝ,
---   is_open (f⁻¹' (ball y ε))) : continuous f :=
--- begin
---   rw continuous_def,
---   intros _ hU,
---   rw is_open_iff_forall_mem_open,
---   intros x hx,
---   obtain ⟨ε, h₀, hε⟩ := (is_open_iff.mp hU) (f x) (mem_preimage.mp hx),
---   use f⁻¹' (ball (f x) ε),
---   exact ⟨preimage_mono hε, H (f x) ε, mem_ball_self h₀⟩,
--- end
-
 
 lemma reduction_balls {c : ℝ≥0} (f : X → (closed_ball (0 : ℝ) c)) (H : ∀ y : (closed_ball 0 c),
   ∀ ε : ℝ, is_open (f⁻¹' (ball y ε))) : continuous f :=
@@ -508,357 +470,279 @@ begin
   exact ⟨preimage_mono hε, H (f x) ε, mem_ball_self h₀⟩,
 end
 
-lemma reduction_balls' {c : ℝ≥0} (f : X → (closed_ball (0 : ℝ) c)) (H : ∀ y : (closed_ball 0 c),
-  ∀ ε : ℝ≥0, is_open (f⁻¹' (ball y ε))) : continuous f :=
-begin
-  rw continuous_def,
-  intros _ hU,
-  rw is_open_iff_forall_mem_open,
-  intros x hx,
-  obtain ⟨ε₀, h_pos, hε₀⟩ := (is_open_iff.mp hU) (f x) (mem_preimage.mp hx),
-  let ε : ℝ≥0 := ⟨ε₀, le_of_lt h_pos⟩,
-  use f⁻¹' (ball (f x) ε),
-  exact ⟨preimage_mono hε₀, H (f x) ε, mem_ball_self h_pos⟩,
-end
-
--- lemma reduction_balls' {c : ℝ≥0} (f : X → filtration (ℳ S) c) (H : ∀ G : filtration (ℳ S) c,
---   ∀ ε : ℝ, is_open (f⁻¹' (ball G ε))) : continuous f :=
+-- lemma reduction_balls' {c : ℝ≥0} (f : X → (closed_ball (0 : ℝ) c)) (H : ∀ y : (closed_ball 0 c),
+--   ∀ ε : ℝ≥0, is_open (f⁻¹' (ball y ε))) : continuous f :=
 -- begin
 --   rw continuous_def,
 --   intros _ hU,
 --   rw is_open_iff_forall_mem_open,
 --   intros x hx,
---   obtain ⟨ε, h₀, hε⟩ := (is_open_iff.mp hU) (f x) (mem_preimage.mp hx),
+--   obtain ⟨ε₀, h_pos, hε₀⟩ := (is_open_iff.mp hU) (f x) (mem_preimage.mp hx),
+--   let ε : ℝ≥0 := ⟨ε₀, le_of_lt h_pos⟩,
 --   use f⁻¹' (ball (f x) ε),
---   exact ⟨preimage_mono hε, H (f x) ε, mem_ball_self h₀⟩,
+--   exact ⟨preimage_mono hε₀, H (f x) ε, mem_ball_self h_pos⟩,
 -- end
 
--- lemma complement_of_balls {c : ℝ≥0} (y : Icc (-c : ℝ) c) (ε : ℝ) : ∃ (x₁ x₂ : Icc (-c : ℝ) c),
---   ∃ (δ₁ δ₂ : ℝ), ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ :=
+-- lemma aux_mem_left {y : (closed_ball (0 : ℝ) c)} {ε x : ℝ} (hx : x = (-ε + y - c) / 2)
+--   (hε : 0 < ε) (h_left : (- c : ℝ) ≤ - ε + y) : x ∈ closed_ball (0 : ℝ) c :=
 -- begin
---   sorry
+--   simp only [mem_closed_ball_zero_iff, norm_div, real.norm_two, real.norm_eq_abs, abs_le],
+--   split,
+--   { linarith },
+--   { have h_yc : (y : ℝ) ≤ c,
+--     have hy := y.2,
+--     rw [mem_closed_ball_zero_iff, subtype.val_eq_coe, real.norm_eq_abs] at hy,
+--     exact (le_abs_self (y : ℝ)).trans hy,
+--     linarith },
 -- end
 
+-- -- lemma aux_mem_right {y : (closed_ball (0 : ℝ) c)} {ε x : ℝ} (hx : x = (ε + y + c) / 2)
+-- --   (hε : 0 < ε) (h_right : ε + y ≤ c) : x ∈ closed_ball (0 : ℝ) c :=
+-- -- begin
+-- --   simp only [mem_closed_ball_zero_iff, norm_div, real.norm_two, real.norm_eq_abs, abs_le],
+-- --   split,
+-- --   { have h_yc : - (c : ℝ) ≤ (y : ℝ),
+-- --     have hy := y.2,
+-- --     rw [mem_closed_ball_zero_iff, subtype.val_eq_coe, real.norm_eq_abs] at hy,
+-- --     exact (abs_le.mp hy).1,
+-- --     linarith },
+-- --   { linarith },
+-- -- end
 
-lemma aux_mem_left {y : (closed_ball (0 : ℝ) c)} {ε x : ℝ} (hx : x = (-ε + y - c) / 2)
-  (hε : 0 < ε) (h_left : (- c : ℝ) ≤ - ε + y) : x ∈ closed_ball (0 : ℝ) c :=
-begin
-  simp only [mem_closed_ball_zero_iff, norm_div, real.norm_two, real.norm_eq_abs, abs_le],
-  split,
-  { linarith },
-  { have h_yc : (y : ℝ) ≤ c,
-    have hy := y.2,
-    rw [mem_closed_ball_zero_iff, subtype.val_eq_coe, real.norm_eq_abs] at hy,
-    exact (le_abs_self (y : ℝ)).trans hy,
-    linarith },
-end
+-- -- lemma aux_dist_left {a y : closed_ball (0 : ℝ) c} {ε x: ℝ}  (ha : a ∈ ball y ε) (hε : 0 < ε)
+-- --   (hx : x = (-ε + y - c) / 2) : dist (a : ℝ) x = a - x :=
+-- -- begin
+-- --   rw [real.dist_eq, abs_eq_self, sub_nonneg],
+-- --   rw [mem_ball, subtype.dist_eq, real.dist_eq, abs_lt, lt_sub_iff_add_lt] at ha,
+-- --   apply le_of_lt,
+-- --   have := a.2,
+-- --   rw [mem_closed_ball, subtype.val_eq_coe, real.dist_eq, sub_zero, abs_le] at this,
+-- --   calc x = (-ε + y - c) / 2 : by {exact hx}
+-- --      ... < (a - c) / 2 : by linarith
+-- --      ... ≤ a : by {rw [div_le_iff, sub_le, mul_two, ← sub_sub, sub_self, zero_sub, neg_le],
+-- --                     exact this.1, simp only [zero_lt_bit0, zero_lt_one]},
+-- -- end
 
-lemma aux_mem_right {y : (closed_ball (0 : ℝ) c)} {ε x : ℝ} (hx : x = (ε + y + c) / 2)
-  (hε : 0 < ε) (h_right : ε + y ≤ c) : x ∈ closed_ball (0 : ℝ) c :=
-begin
-  simp only [mem_closed_ball_zero_iff, norm_div, real.norm_two, real.norm_eq_abs, abs_le],
-  split,
-  { have h_yc : - (c : ℝ) ≤ (y : ℝ),
-    have hy := y.2,
-    rw [mem_closed_ball_zero_iff, subtype.val_eq_coe, real.norm_eq_abs] at hy,
-    exact (abs_le.mp hy).1,
-    linarith },
-  { linarith },
-end
+-- -- lemma aux_dist_right {a y : closed_ball (0 : ℝ) c} {ε x: ℝ}  (ha : a ∈ ball y ε) (hε : 0 < ε)
+-- --   (hx : x = (ε + y + c) / 2) : dist (a : ℝ) x = x - a :=
+-- -- begin
+-- --   have h_neg : - ((a : ℝ) - x) = (x - a) := by {ring},
+-- --   rw [real.dist_eq, ← h_neg, abs_eq_neg_self, sub_nonpos],
+-- --   rw [mem_ball, subtype.dist_eq, real.dist_eq, abs_lt, lt_sub_iff_add_lt] at ha,
+-- --   apply le_of_lt,
+-- --   have := a.2,
+-- --   rw [mem_closed_ball, subtype.val_eq_coe, real.dist_eq, sub_zero, abs_le] at this,
+-- --   calc x = (ε + y + c) / 2 : by {exact hx}
+-- --       ... > (a + c) / 2 : by linarith
+-- --       ... ≥ a : by {rw [ge_iff_le, le_div_iff, ← sub_le_iff_le_add', mul_two, ← add_sub, sub_self,
+-- --         add_zero], exact this.2, simp only [zero_lt_bit0, zero_lt_one]},
+-- -- end
 
-lemma aux_dist_left {a y : closed_ball (0 : ℝ) c} {ε x: ℝ}  (ha : a ∈ ball y ε) (hε : 0 < ε)
-  (hx : x = (-ε + y - c) / 2) : dist (a : ℝ) x = a - x :=
-begin
-  rw [real.dist_eq, abs_eq_self, sub_nonneg],
-  rw [mem_ball, subtype.dist_eq, real.dist_eq, abs_lt, lt_sub_iff_add_lt] at ha,
-  apply le_of_lt,
-  have := a.2,
-  rw [mem_closed_ball, subtype.val_eq_coe, real.dist_eq, sub_zero, abs_le] at this,
-  calc x = (-ε + y - c) / 2 : by {exact hx}
-     ... < (a - c) / 2 : by linarith
-     ... ≤ a : by {rw [div_le_iff, sub_le, mul_two, ← sub_sub, sub_self, zero_sub, neg_le],
-                    exact this.1, simp only [zero_lt_bit0, zero_lt_one]},
-end
+-- -- -- lemma complement_of_balls_nonpos {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) {ε : ℝ} (hε : ε ≤ 0):
+-- -- --  ∃ (x₁ x₂ : (closed_ball 0 c)), ∃ (δ₁ δ₂ : ℝ),
+-- -- --   ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ :=
+-- -- -- begin
+-- -- --   have := (@ball_eq_empty _ _ y ε).mpr hε,
+-- -- --   rw this,
+-- -- --   use [0, 0, c, c],
+-- -- --   simp only [union_self, bot_eq_empty],
+-- -- --   apply (compl_eq_bot.mpr _).symm,
+-- -- --   rw top_eq_univ,
+-- -- --   ext x,
+-- -- --   split;
+-- -- --   intro _,
+-- -- --   simp only [mem_univ],
+-- -- --   exact x.2,
+-- -- -- end
 
-lemma aux_dist_right {a y : closed_ball (0 : ℝ) c} {ε x: ℝ}  (ha : a ∈ ball y ε) (hε : 0 < ε)
-  (hx : x = (ε + y + c) / 2) : dist (a : ℝ) x = x - a :=
-begin
-  have h_neg : - ((a : ℝ) - x) = (x - a) := by {ring},
-  rw [real.dist_eq, ← h_neg, abs_eq_neg_self, sub_nonpos],
-  rw [mem_ball, subtype.dist_eq, real.dist_eq, abs_lt, lt_sub_iff_add_lt] at ha,
-  apply le_of_lt,
-  have := a.2,
-  rw [mem_closed_ball, subtype.val_eq_coe, real.dist_eq, sub_zero, abs_le] at this,
-  calc x = (ε + y + c) / 2 : by {exact hx}
-      ... > (a + c) / 2 : by linarith
-      ... ≥ a : by {rw [ge_iff_le, le_div_iff, ← sub_le_iff_le_add', mul_two, ← add_sub, sub_self,
-        add_zero], exact this.2, simp only [zero_lt_bit0, zero_lt_one]},
-end
+-- -- -- lemma complement_of_balls_pos_Nleft {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) {ε : ℝ} (hε : 0 < ε)
+-- -- --  (Nh_left : ¬ - (c : ℝ) ≤ -ε + y) (h_right : ε + y ≤ c) :
+-- -- --  ∃ (x₁ x₂ : (closed_ball 0 c)), ∃ (δ₁ δ₂ : ℝ),
+-- -- --   ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ :=
+-- -- -- begin
+-- -- --   set δ₂ := (-ε - y + c) / 2 with hδ₂,
+-- -- --   set x₂ := (ε + y + c) / 2 with hx₂,
+-- -- --   use [0, x₂, aux_mem_right c hx₂ hε h_right, -1, δ₂],
+-- -- --   simp only [compl_union],
+-- -- --   ext a,
+-- -- --   simp only [mem_inter_eq, mem_compl_iff, mem_closed_ball, not_le],
+-- -- --   split,
+-- -- --   { intro ha,
+-- -- --     apply and.intro (lt_of_lt_of_le neg_one_lt_zero dist_nonneg),
+-- -- --     rw [hδ₂, subtype.dist_eq, subtype.coe_mk, aux_dist_right c ha hε hx₂, hx₂, div_sub' _ _ _
+-- -- --           (@two_ne_zero ℝ _ _)],
+-- -- --     have : (c : ℝ) - 2 * a = - 2 * a + c := by ring,
+-- -- --     apply div_lt_div_of_lt _,
+-- -- --     rw [← add_sub, this, ← add_assoc],
+-- -- --     apply add_lt_add_right,
+-- -- --     rw [mem_ball, subtype.dist_eq, real.dist_eq, abs_sub_lt_iff] at ha,
+-- -- --     rw [sub_eq_add_neg, neg_add_lt_iff_lt_add, add_assoc, ← add_assoc ε ε _, ← two_mul,
+-- -- --       ← add_assoc, add_comm _ (y : ℝ), add_assoc, ← sub_lt_iff_lt_add', sub_eq_add_neg,
+-- -- --       ← two_mul, neg_mul, ← sub_eq_add_neg, mul_neg, neg_lt_sub_iff_lt_add, ← mul_add,
+-- -- --       mul_lt_mul_left, ← sub_lt_iff_lt_add'],
+-- -- --     exact ha.1,
+-- -- --     repeat {simp only [zero_lt_bit0, zero_lt_one]}},
+-- -- --   { rintros ⟨-, h₂⟩,
+-- -- --     have ha := a.2,
+-- -- --     rw [mem_closed_ball, subtype.val_eq_coe, real.dist_0_eq_abs, abs_le] at ha,
+-- -- --     rw [subtype.dist_eq, real.dist_eq, subtype.coe_mk, lt_abs] at h₂,
+-- -- --     have H₂ : x₂ - δ₂ = ε + y ∧ δ₂ + x₂ = c,
+-- -- --     { rw [hx₂, hδ₂, ← add_div, ← sub_div],
+-- -- --       split,
+-- -- --       repeat {ring}},
+-- -- --     replace h₂ : δ₂ < x₂ - a,
+-- -- --     { rw [neg_sub, lt_sub_iff_add_lt, H₂.2] at h₂,
+-- -- --       exact (or_iff_right (not_lt.mpr ha.2)).mp h₂ },
+-- -- --     rw [mem_ball, subtype.dist_eq, real.dist_eq, abs_lt, lt_sub_iff_add_lt],
+-- -- --     split;
+-- -- --     linarith }
+-- -- -- end
 
-lemma complement_of_balls_nonpos {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) {ε : ℝ} (hε : ε ≤ 0):
- ∃ (x₁ x₂ : (closed_ball 0 c)), ∃ (δ₁ δ₂ : ℝ),
-  ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ :=
-begin
-  have := (@ball_eq_empty _ _ y ε).mpr hε,
-  rw this,
-  use [0, 0, c, c],
-  simp only [union_self, bot_eq_empty],
-  apply (compl_eq_bot.mpr _).symm,
-  rw top_eq_univ,
-  ext x,
-  split;
-  intro _,
-  simp only [mem_univ],
-  exact x.2,
-end
-
-lemma complement_of_balls_pos_Nleft {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) {ε : ℝ} (hε : 0 < ε)
- (Nh_left : ¬ - (c : ℝ) ≤ -ε + y) (h_right : ε + y ≤ c) :
- ∃ (x₁ x₂ : (closed_ball 0 c)), ∃ (δ₁ δ₂ : ℝ),
-  ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ :=
-begin
-  set δ₂ := (-ε - y + c) / 2 with hδ₂,
-  set x₂ := (ε + y + c) / 2 with hx₂,
-  use [0, x₂, aux_mem_right c hx₂ hε h_right, -1, δ₂],
-  simp only [compl_union],
-  ext a,
-  simp only [mem_inter_eq, mem_compl_iff, mem_closed_ball, not_le],
-  split,
-  { intro ha,
-    apply and.intro (lt_of_lt_of_le neg_one_lt_zero dist_nonneg),
-    rw [hδ₂, subtype.dist_eq, subtype.coe_mk, aux_dist_right c ha hε hx₂, hx₂, div_sub' _ _ _
-          (@two_ne_zero ℝ _ _)],
-    have : (c : ℝ) - 2 * a = - 2 * a + c := by ring,
-    apply div_lt_div_of_lt _,
-    rw [← add_sub, this, ← add_assoc],
-    apply add_lt_add_right,
-    rw [mem_ball, subtype.dist_eq, real.dist_eq, abs_sub_lt_iff] at ha,
-    rw [sub_eq_add_neg, neg_add_lt_iff_lt_add, add_assoc, ← add_assoc ε ε _, ← two_mul,
-      ← add_assoc, add_comm _ (y : ℝ), add_assoc, ← sub_lt_iff_lt_add', sub_eq_add_neg,
-      ← two_mul, neg_mul, ← sub_eq_add_neg, mul_neg, neg_lt_sub_iff_lt_add, ← mul_add,
-      mul_lt_mul_left, ← sub_lt_iff_lt_add'],
-    exact ha.1,
-    repeat {simp only [zero_lt_bit0, zero_lt_one]}},
-  { rintros ⟨-, h₂⟩,
-    have ha := a.2,
-    rw [mem_closed_ball, subtype.val_eq_coe, real.dist_0_eq_abs, abs_le] at ha,
-    rw [subtype.dist_eq, real.dist_eq, subtype.coe_mk, lt_abs] at h₂,
-    have H₂ : x₂ - δ₂ = ε + y ∧ δ₂ + x₂ = c,
-    { rw [hx₂, hδ₂, ← add_div, ← sub_div],
-      split,
-      repeat {ring}},
-    replace h₂ : δ₂ < x₂ - a,
-    { rw [neg_sub, lt_sub_iff_add_lt, H₂.2] at h₂,
-      exact (or_iff_right (not_lt.mpr ha.2)).mp h₂ },
-    rw [mem_ball, subtype.dist_eq, real.dist_eq, abs_lt, lt_sub_iff_add_lt],
-    split;
-    linarith }
-end
-
-lemma complement_of_balls_pos_Nright {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) {ε : ℝ} (hε : 0 < ε)
-  (h_left : - (c : ℝ) ≤ -ε + y) (Nh_right : ¬ ε + y ≤ c) :
- ∃ (x₁ x₂ : (closed_ball 0 c)), ∃ (δ₁ δ₂ : ℝ),
-  ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ :=
-begin
-  set δ₁ := (-ε + y + c) / 2 with hδ₁,
-  set x₁ := (- ε + y - c) / 2 with hx₁,
-  have := aux_mem_left c hx₁ hε h_left,
-  use [x₁, aux_mem_left c hx₁ hε h_left, 0, δ₁, -1],
-  simp only [compl_union],
-  ext a,
-  simp only [mem_inter_eq, mem_compl_iff, mem_closed_ball, not_le],
-  split,
-  { intro ha,
-    apply and.intro _ (lt_of_lt_of_le neg_one_lt_zero dist_nonneg),
-      { rw [hδ₁, subtype.dist_eq, subtype.coe_mk, aux_dist_left c ha hε hx₁, hx₁, sub_div' _ _ _
-          (@two_ne_zero ℝ _ _)],
-        apply div_lt_div_of_lt _,
-        rw [sub_sub_assoc_swap, add_comm, add_comm _ (c : ℝ), add_sub_assoc],
-        apply add_lt_add_left,
-        rw [mem_ball, subtype.dist_eq, real.dist_eq, abs_sub_lt_iff] at ha,
-        rw [sub_add_eq_sub_sub, sub_neg_eq_add, add_comm _ ε, ← add_sub, neg_add_lt_iff_lt_add,
-          ← add_assoc, ← two_mul, add_sub, sub_eq_add_neg, lt_add_neg_iff_add_lt, ← two_mul,
-          mul_comm _ (2 : ℝ), ← mul_add, mul_lt_mul_left, ← sub_lt_iff_lt_add],
-        exact ha.2,
-        repeat {simp only [zero_lt_bit0, zero_lt_one]}}},
-  { rintros ⟨h₁, -⟩,
-    have ha := a.2,
-    rw [mem_closed_ball, subtype.val_eq_coe, real.dist_0_eq_abs, abs_le] at ha,
-    rw [subtype.dist_eq, real.dist_eq, subtype.coe_mk, lt_abs] at h₁,
-    have H₁ : x₁ + δ₁ = -ε + y ∧ x₁ - δ₁ = - c,
-    { rw [hx₁, hδ₁, ← add_div, ← sub_div],
-      split,
-      repeat {ring}},
-    replace h₁ :x₁ + δ₁ < a,
-    { cases h₁ with hh₁,
-      rwa lt_sub_iff_add_lt' at hh₁,
-      rw [neg_sub, lt_sub, H₁.2] at h₁,
-      linarith},
-    rw [mem_ball, subtype.dist_eq, real.dist_eq, abs_lt, lt_sub_iff_add_lt, ← H₁.1],
-    split,
-    all_goals {linarith}}
-end
-
-
--- ext x,
---   split;
---   intro _,
---   simp only [mem_univ],
---   exact x.2,
-
-lemma complement_of_balls_pos_NN {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) {ε : ℝ} (hε : 0 < ε)
-  (Nh_left : ¬ - (c : ℝ) ≤ -ε + y) (Nh_right : ¬ ε + y ≤ c) :
- ∃ (x₁ x₂ : (closed_ball 0 c)), ∃ (δ₁ δ₂ : ℝ),
-  ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ :=
-begin
-  use [0, 0, -1, -1],
-  rw [((@closed_ball_eq_empty _ _ (0 : closed_ball (0 : ℝ) c) (-1 : ℝ)).mpr neg_one_lt_zero),
-    union_self, compl_empty],
-  ext a,
-  split,
-  {intro _,
-    simp only [mem_univ]},
-  { rintro -,
-    have := a.2,
-    simp only [mem_closed_ball, subtype.val_eq_coe, top_eq_univ, mem_univ, mem_ball,
-      forall_true_left, subtype.dist_eq, real.dist_eq, abs_le, abs_lt] at this ⊢,
-    split;
-    linarith}
-end
-
-lemma complement_of_balls_pos_centre {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) {ε : ℝ} (hε : 0 < ε)
-  (h_right : ε + y ≤ c) (h_left : - (c : ℝ) ≤ -ε + y) :
-  ∃ (x₁ x₂ : (closed_ball 0 c)), ∃ (δ₁ δ₂ : ℝ),
-  ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ :=
-begin
-  set δ₁ := (-ε + y + c) / 2 with hδ₁,
-  set x₁ := (- ε + y - c) / 2 with hx₁,
-  set δ₂ := (-ε - y + c) / 2 with hδ₂,
-  set x₂ := (ε + y + c) / 2 with hx₂,
-  use [x₁, aux_mem_left c hx₁ hε h_left, x₂, aux_mem_right c hx₂ hε
-      h_right, δ₁, δ₂],
-    simp only [compl_union],
-    ext a,
-    simp only [mem_inter_eq, mem_compl_iff, mem_closed_ball, not_le],
-    split,
-    { intro ha,
-      split,
-      { rw [hδ₁, subtype.dist_eq, subtype.coe_mk, aux_dist_left c ha hε hx₁, hx₁, sub_div' _ _ _
-          (@two_ne_zero ℝ _ _)],
-        apply div_lt_div_of_lt _,
-        rw [sub_sub_assoc_swap, add_comm, add_comm _ (c : ℝ), add_sub_assoc],
-        apply add_lt_add_left,
-        rw [mem_ball, subtype.dist_eq, real.dist_eq, abs_sub_lt_iff] at ha,
-        rw [sub_add_eq_sub_sub, sub_neg_eq_add, add_comm _ ε, ← add_sub, neg_add_lt_iff_lt_add,
-          ← add_assoc, ← two_mul, add_sub, sub_eq_add_neg, lt_add_neg_iff_add_lt, ← two_mul,
-          mul_comm _ (2 : ℝ), ← mul_add, mul_lt_mul_left, ← sub_lt_iff_lt_add],
-        exact ha.2,
-        repeat {simp only [zero_lt_bit0, zero_lt_one]}},
-      { rw [hδ₂, subtype.dist_eq, subtype.coe_mk, aux_dist_right c ha hε hx₂, hx₂, div_sub' _ _ _
-          (@two_ne_zero ℝ _ _)],
-        have : (c : ℝ) - 2 * a = - 2 * a + c := by ring,
-        apply div_lt_div_of_lt _,
-        rw [← add_sub, this, ← add_assoc],
-        apply add_lt_add_right,
-        rw [mem_ball, subtype.dist_eq, real.dist_eq, abs_sub_lt_iff] at ha,
-        rw [sub_eq_add_neg, neg_add_lt_iff_lt_add, add_assoc, ← add_assoc ε ε _, ← two_mul,
-          ← add_assoc, add_comm _ (y : ℝ), add_assoc, ← sub_lt_iff_lt_add', sub_eq_add_neg,
-          ← two_mul, neg_mul, ← sub_eq_add_neg, mul_neg, neg_lt_sub_iff_lt_add, ← mul_add,
-          mul_lt_mul_left, ← sub_lt_iff_lt_add'],
-        exact ha.1,
-        repeat {simp only [zero_lt_bit0, zero_lt_one]}}},
-    { rintros ⟨h₁, h₂⟩,
-      have ha := a.2,
-      rw [mem_closed_ball, subtype.val_eq_coe, real.dist_0_eq_abs, abs_le] at ha,
-      rw [subtype.dist_eq, real.dist_eq, subtype.coe_mk, lt_abs] at h₁ h₂,
-      have H₁ : x₁ + δ₁ = -ε + y ∧ x₁ - δ₁ = - c,
-      { rw [hx₁, hδ₁, ← add_div, ← sub_div],
-        split,
-        repeat {ring}},
-      replace h₁ :x₁ + δ₁ < a,
-      { cases h₁ with hh₁,-- [FAE] Need to split cases to avoid `result contains metavariable`
-        rwa lt_sub_iff_add_lt' at hh₁,
-        rw [neg_sub, lt_sub, H₁.2] at h₁,
-        linarith},
-      have H₂ : x₂ - δ₂ = ε + y ∧ δ₂ + x₂ = c,
-      { rw [hx₂, hδ₂, ← add_div, ← sub_div],
-        split,
-        repeat {ring}},
-      replace h₂ : δ₂ < x₂ - a,
-      { rw [neg_sub, lt_sub_iff_add_lt, H₂.2] at h₂,
-        exact (or_iff_right (not_lt.mpr ha.2)).mp h₂ },
-        rw [mem_ball, subtype.dist_eq, real.dist_eq, abs_lt, lt_sub_iff_add_lt, ← H₁.1],
-        split,
-        all_goals {linarith} },
-end
-
-lemma complement_of_balls' {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) (ε : ℝ) :
- ∃ (x₁ x₂ : (closed_ball 0 c)), ∃ (δ₁ δ₂ : ℝ),
-  ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ :=
-begin
-  by_cases hε : 0 < ε,
-  { by_cases h_right : ε + y ≤ c,
-    by_cases h_left : - (c : ℝ) ≤ - ε + y,
-    { exact complement_of_balls_pos_centre y hε h_right h_left },
-    { exact complement_of_balls_pos_Nleft y hε h_left h_right },
-    { by_cases h_left : - (c : ℝ) ≤ - ε + y,
-    { exact complement_of_balls_pos_Nright y hε h_left h_right, },
-    { exact complement_of_balls_pos_NN y hε h_left h_right }}},
-  { exact complement_of_balls_nonpos y (not_lt.mp hε) },
-end
-
-
--- lemma continuous_if_preimage_closed {c : ℝ≥0} (f : X → (Icc (-c : ℝ) c))
---   (H : ∀ y : Icc (-c : ℝ) c, ∀ ε : ℝ, is_closed (f⁻¹' (closed_ball y ε))) : continuous f :=
+-- lemma complement_of_balls_pos_Nright {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) {ε : ℝ} (hε : 0 < ε)
+--   (h_left : - (c : ℝ) ≤ -ε + y) (Nh_right : ¬ ε + y ≤ c) :
+--  ∃ (x₁ x₂ : (closed_ball 0 c)), ∃ (δ₁ δ₂ : ℝ),
+--   ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ :=
 -- begin
---   apply reduction_balls,
---   intros y ε,
---   obtain ⟨x₁,x₂,δ₁,δ₂,h⟩ := complement_of_balls y ε,
---   rw h,
---   simp only [compl_union, preimage_inter, preimage_compl],
---   apply is_open.inter,
---   all_goals {simp only [is_open_compl_iff], apply H},
+--   set δ₁ := (-ε + y + c) / 2 with hδ₁,
+--   set x₁ := (- ε + y - c) / 2 with hx₁,
+--   have := aux_mem_left c hx₁ hε h_left,
+--   use [x₁, aux_mem_left c hx₁ hε h_left, 0, δ₁, -1],
+--   simp only [compl_union],
+--   ext a,
+--   simp only [mem_inter_eq, mem_compl_iff, mem_closed_ball, not_le],
+--   split,
+--   { intro ha,
+--     apply and.intro _ (lt_of_lt_of_le neg_one_lt_zero dist_nonneg),
+--       { rw [hδ₁, subtype.dist_eq, subtype.coe_mk, aux_dist_left c ha hε hx₁, hx₁, sub_div' _ _ _
+--           (@two_ne_zero ℝ _ _)],
+--         apply div_lt_div_of_lt _,
+--         rw [sub_sub_assoc_swap, add_comm, add_comm _ (c : ℝ), add_sub_assoc],
+--         apply add_lt_add_left,
+--         rw [mem_ball, subtype.dist_eq, real.dist_eq, abs_sub_lt_iff] at ha,
+--         rw [sub_add_eq_sub_sub, sub_neg_eq_add, add_comm _ ε, ← add_sub, neg_add_lt_iff_lt_add,
+--           ← add_assoc, ← two_mul, add_sub, sub_eq_add_neg, lt_add_neg_iff_add_lt, ← two_mul,
+--           mul_comm _ (2 : ℝ), ← mul_add, mul_lt_mul_left, ← sub_lt_iff_lt_add],
+--         exact ha.2,
+--         repeat {simp only [zero_lt_bit0, zero_lt_one]}}},
+--   { rintros ⟨h₁, -⟩,
+--     have ha := a.2,
+--     rw [mem_closed_ball, subtype.val_eq_coe, real.dist_0_eq_abs, abs_le] at ha,
+--     rw [subtype.dist_eq, real.dist_eq, subtype.coe_mk, lt_abs] at h₁,
+--     have H₁ : x₁ + δ₁ = -ε + y ∧ x₁ - δ₁ = - c,
+--     { rw [hx₁, hδ₁, ← add_div, ← sub_div],
+--       split,
+--       repeat {ring}},
+--     replace h₁ :x₁ + δ₁ < a,
+--     { cases h₁ with hh₁,
+--       rwa lt_sub_iff_add_lt' at hh₁,
+--       rw [neg_sub, lt_sub, H₁.2] at h₁,
+--       linarith},
+--     rw [mem_ball, subtype.dist_eq, real.dist_eq, abs_lt, lt_sub_iff_add_lt, ← H₁.1],
+--     split,
+--     all_goals {linarith}}
 -- end
 
--- lemma continuous_if_preimage_closed' {c : ℝ≥0} (f : X → (closed_ball (0 : ℝ) c))
---   (H : ∀ y : (closed_ball (0 : ℝ) c), ∀ ε : ℝ, is_closed (f⁻¹' (closed_ball y ε))) : continuous f :=
+
+-- lemma complement_of_balls_pos_NN {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) {ε : ℝ} (hε : 0 < ε)
+--   (Nh_left : ¬ - (c : ℝ) ≤ -ε + y) (Nh_right : ¬ ε + y ≤ c) :
+--  ∃ (x₁ x₂ : (closed_ball 0 c)), ∃ (δ₁ δ₂ : ℝ),
+--   ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ :=
 -- begin
---   apply reduction_balls,
---   intros y ε,
---   obtain ⟨x₁,x₂,δ₁,δ₂,h⟩ := complement_of_balls' y ε,
---   rw h,
---   simp only [compl_union, preimage_inter, preimage_compl],
---   apply is_open.inter,
---   all_goals {simp only [is_open_compl_iff], apply H},
+--   use [0, 0, -1, -1],
+--   rw [((@closed_ball_eq_empty _ _ (0 : closed_ball (0 : ℝ) c) (-1 : ℝ)).mpr neg_one_lt_zero),
+--     union_self, compl_empty],
+--   ext a,
+--   split,
+--   {intro _,
+--     simp only [mem_univ]},
+--   { rintro -,
+--     have := a.2,
+--     simp only [mem_closed_ball, subtype.val_eq_coe, top_eq_univ, mem_univ, mem_ball,
+--       forall_true_left, subtype.dist_eq, real.dist_eq, abs_le, abs_lt] at this ⊢,
+--     split;
+--     linarith}
 -- end
 
--- instance (c : ℝ≥0) : has_zero (Icc (-c : ℝ) c):=
--- { zero := ⟨(0 : ℝ), by {simp only [mem_Icc, right.neg_nonpos_iff, nnreal.zero_le_coe, and_self]}⟩}
-
--- lemma continuous_if_preimage_closed₀ (c : ℝ≥0) (f : X → (Icc (-c : ℝ) c))
---   (H : ∀ ε : ℝ, is_closed (f⁻¹' (closed_ball 0 ε))) : continuous f :=
+-- lemma complement_of_balls_pos_centre {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) {ε : ℝ} (hε : 0 < ε)
+--   (h_right : ε + y ≤ c) (h_left : - (c : ℝ) ≤ -ε + y) :
+--   ∃ (x₁ x₂ : (closed_ball 0 c)), ∃ (δ₁ δ₂ : ℝ),
+--   ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ :=
 -- begin
---   sorry,
+--   set δ₁ := (-ε + y + c) / 2 with hδ₁,
+--   set x₁ := (- ε + y - c) / 2 with hx₁,
+--   set δ₂ := (-ε - y + c) / 2 with hδ₂,
+--   set x₂ := (ε + y + c) / 2 with hx₂,
+--   use [x₁, aux_mem_left c hx₁ hε h_left, x₂, aux_mem_right c hx₂ hε
+--       h_right, δ₁, δ₂],
+--     simp only [compl_union],
+--     ext a,
+--     simp only [mem_inter_eq, mem_compl_iff, mem_closed_ball, not_le],
+--     split,
+--     { intro ha,
+--       split,
+--       { rw [hδ₁, subtype.dist_eq, subtype.coe_mk, aux_dist_left c ha hε hx₁, hx₁, sub_div' _ _ _
+--           (@two_ne_zero ℝ _ _)],
+--         apply div_lt_div_of_lt _,
+--         rw [sub_sub_assoc_swap, add_comm, add_comm _ (c : ℝ), add_sub_assoc],
+--         apply add_lt_add_left,
+--         rw [mem_ball, subtype.dist_eq, real.dist_eq, abs_sub_lt_iff] at ha,
+--         rw [sub_add_eq_sub_sub, sub_neg_eq_add, add_comm _ ε, ← add_sub, neg_add_lt_iff_lt_add,
+--           ← add_assoc, ← two_mul, add_sub, sub_eq_add_neg, lt_add_neg_iff_add_lt, ← two_mul,
+--           mul_comm _ (2 : ℝ), ← mul_add, mul_lt_mul_left, ← sub_lt_iff_lt_add],
+--         exact ha.2,
+--         repeat {simp only [zero_lt_bit0, zero_lt_one]}},
+--       { rw [hδ₂, subtype.dist_eq, subtype.coe_mk, aux_dist_right c ha hε hx₂, hx₂, div_sub' _ _ _
+--           (@two_ne_zero ℝ _ _)],
+--         have : (c : ℝ) - 2 * a = - 2 * a + c := by ring,
+--         apply div_lt_div_of_lt _,
+--         rw [← add_sub, this, ← add_assoc],
+--         apply add_lt_add_right,
+--         rw [mem_ball, subtype.dist_eq, real.dist_eq, abs_sub_lt_iff] at ha,
+--         rw [sub_eq_add_neg, neg_add_lt_iff_lt_add, add_assoc, ← add_assoc ε ε _, ← two_mul,
+--           ← add_assoc, add_comm _ (y : ℝ), add_assoc, ← sub_lt_iff_lt_add', sub_eq_add_neg,
+--           ← two_mul, neg_mul, ← sub_eq_add_neg, mul_neg, neg_lt_sub_iff_lt_add, ← mul_add,
+--           mul_lt_mul_left, ← sub_lt_iff_lt_add'],
+--         exact ha.1,
+--         repeat {simp only [zero_lt_bit0, zero_lt_one]}}},
+--     { rintros ⟨h₁, h₂⟩,
+--       have ha := a.2,
+--       rw [mem_closed_ball, subtype.val_eq_coe, real.dist_0_eq_abs, abs_le] at ha,
+--       rw [subtype.dist_eq, real.dist_eq, subtype.coe_mk, lt_abs] at h₁ h₂,
+--       have H₁ : x₁ + δ₁ = -ε + y ∧ x₁ - δ₁ = - c,
+--       { rw [hx₁, hδ₁, ← add_div, ← sub_div],
+--         split,
+--         repeat {ring}},
+--       replace h₁ :x₁ + δ₁ < a,
+--       { cases h₁ with hh₁,-- [FAE] Need to split cases to avoid `result contains metavariable`
+--         rwa lt_sub_iff_add_lt' at hh₁,
+--         rw [neg_sub, lt_sub, H₁.2] at h₁,
+--         linarith},
+--       have H₂ : x₂ - δ₂ = ε + y ∧ δ₂ + x₂ = c,
+--       { rw [hx₂, hδ₂, ← add_div, ← sub_div],
+--         split,
+--         repeat {ring}},
+--       replace h₂ : δ₂ < x₂ - a,
+--       { rw [neg_sub, lt_sub_iff_add_lt, H₂.2] at h₂,
+--         exact (or_iff_right (not_lt.mpr ha.2)).mp h₂ },
+--         rw [mem_ball, subtype.dist_eq, real.dist_eq, abs_lt, lt_sub_iff_add_lt, ← H₁.1],
+--         split,
+--         all_goals {linarith} },
 -- end
 
--- **[FAE]** The next `lemma` might be false...
--- lemma continuous_if_preimage_closed₀' (c : ℝ≥0) (f : X → (closed_ball (0 : ℝ) c))
---   (H : ∀ ε : ℝ≥0, ε ≤ c → is_closed (f⁻¹' (closed_ball 0  ε))) : continuous f :=
+-- lemma complement_of_balls' {c : ℝ≥0} (y : (closed_ball (0 : ℝ) c)) (ε : ℝ) :
+--  ∃ (x₁ x₂ : (closed_ball 0 c)), ∃ (δ₁ δ₂ : ℝ),
+--   ball y ε = ((closed_ball x₁ δ₁) ∪ (closed_ball x₂ δ₂))ᶜ :=
 -- begin
---   sorry,
+--   by_cases hε : 0 < ε,
+--   { by_cases h_right : ε + y ≤ c,
+--     by_cases h_left : - (c : ℝ) ≤ - ε + y,
+--     { exact complement_of_balls_pos_centre y hε h_right h_left },
+--     { exact complement_of_balls_pos_Nleft y hε h_left h_right },
+--     { by_cases h_left : - (c : ℝ) ≤ - ε + y,
+--     { exact complement_of_balls_pos_Nright y hε h_left h_right, },
+--     { exact complement_of_balls_pos_NN y hε h_left h_right }}},
+--   { exact complement_of_balls_nonpos y (not_lt.mp hε) },
 -- end
-
---clear p
-
--- **[FAE]** This definition depends on `p` but it should not (although it causes no harm, and in
-  --        all applications a `p` is needed)
--- def geom_B_old (ε : ℝ) : ℤ := ⌊ real.logb (2 * r) (2 * r - 1) * ε ⌋ + 1
-
--- lemma tail_B_old (F : filtration (ℒ ϖ) c) (ε : ℝ) : ∥ tsum (λ b : {n : ℤ // (geom_B_old ε) ≤ n },
---   ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ) ∥ < ε ^ (p⁻¹ : ℝ) := sorry
-
--- lemma tail_B_nat (F : filtration (ℒ ϖ) c) (ε : ℝ) : ∃ B : ℕ, ∥ tsum (λ b : {n : ℕ // B ≤ n },
---   ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ) ∥ < ε ^ (p⁻¹ : ℝ) := sorry
 
 
 lemma mem_filtration_le_monomial (F : filtration (ℒ ϖ) c) (n : ℕ) :
@@ -963,45 +847,6 @@ begin
     exact tsum_congr_subtype g set_eq,
 end
 
--- lemma tail_B_nat' (ε : ℝ) (hε : 0 < ε) : ∀ (F : filtration (ℒ ϖ) c),
---  ∥ tsum (λ b : {n : ℕ // geom_B_nat c ε hε ≤ n }, ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ) ∥ < ε ^ (p⁻¹ : ℝ) :=
--- begin
-
--- end
-
--- lemma tail_B_nat (ε : ℝ) (hε : 0 < ε) : ∃ B : ℕ, ∀ (F : filtration (ℒ ϖ) c),
---  ∥ tsum (λ b : {n : ℕ // B ≤ n }, ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ) ∥ < ε ^ (p⁻¹ : ℝ) :=
--- begin
---   let g := (λ n : ℕ, (c : ℝ) * (1 / (2 * r) ^ n)),
---   have := tendsto_tsum_compl_at_top_zero g,
---   rw tendsto_at_top at this,
---   have h_pos : 0 < ε ^ (p⁻¹ : ℝ) := real.rpow_pos_of_pos hε _,
---   obtain ⟨A, hA⟩ := this (ε ^ (p⁻¹ : ℝ)) h_pos,
---     let B₀ : option ℕ → ℕ := λ a : (option ℕ), option.rec_on a (0 : ℕ) (λ n, n),
---     set B := (B₀ A.max).succ with hB,
---     use B,
---     have h_incl : A ≤ finset.range B,
---     rw finset.le_eq_subset,
---     { by_cases H : A.nonempty,
---       { intros a ha,
---         obtain ⟨s, hs⟩ := finset.max_of_nonempty H,
---         replace hB : s.succ = B := by {simp only [*, option.mem_def] at *},
---         have h_mem := finset.mem_range_succ_iff.mpr (finset.le_max_of_mem ha hs),
---         rwa hB at h_mem },
---       { intros a ha,
---         rw [finset.not_nonempty_iff_eq_empty] at H,
---         finish }},
---     specialize hA (finset.range B) h_incl,
---     rw [real.dist_0_eq_abs, ← real.norm_eq_abs] at hA,
---     intro F,
---     apply lt_of_le_of_lt (mem_filtration_sum_le_geom p c F B),
---     convert hA using 1,
---     apply congr_arg,
---     simp_rw [subtype.val_eq_coe, ← tsum_mul_left],
---     have set_eq : {n : ℕ | B ≤ n} = {n : ℕ | n ∉ finset.range B} :=
---       by {simp only [finset.mem_range, not_lt]},
---     exact tsum_congr_subtype g set_eq,
--- end
 
 def eq_le_int_nat (B : ℕ) : {n : ℤ // (B : ℤ) ≤ n } ≃ {n : ℕ // B ≤ n} :=
 { to_fun :=
@@ -1027,19 +872,6 @@ def eq_le_int_nat (B : ℕ) : {n : ℤ // (B : ℤ) ≤ n } ≃ {n : ℕ // B �
   end, }
 
 
--- lemma tail_B_int (ε : ℝ) (hε : 0 < ε) : ∃ B : ℤ, ∀ (F : filtration (ℒ ϖ) c), ∥ tsum (λ b : {n : ℤ // B ≤ n },
---   ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ) ∥ < ε ^ (p⁻¹ : ℝ) :=
--- begin
---   obtain ⟨B, hB⟩ := tail_B_nat p c ε hε,
---   use B,
---   intro F,
---   specialize hB F,
---   convert hB using 1,
---   apply congr_arg,
---   exact ((eq_le_int_nat B).symm.tsum_eq (λ b : {n : ℤ // ↑B ≤ n },
---   ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 )).symm,
--- end
-
 def geom_B_int (ε : ℝ) (hε : 0 < ε) : {B : ℤ // ∀ (F : filtration (ℒ ϖ) c), ∥ tsum (λ b :
   {n : ℤ // B ≤ n }, ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ) ∥ < ε ^ (p⁻¹ : ℝ)} :=
 begin
@@ -1058,36 +890,6 @@ end
 
 def geom_B (ε : ℝ) (hε : 0 < ε) : ℤ := (geom_B_int c ε hε).1
 
--- lemma nonempty_B (ε : ℝ) (hε : 0 < ε) : inhabited ({B : ℤ // ∀ (F : filtration (ℒ ϖ) c),
---   ∥ tsum (λ b : {n : ℤ // B ≤ n }, ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ) ∥
---     < ε ^ (p⁻¹ : ℝ)} : Type u):=
--- begin
---   apply inhabited.mk,
---   use (tail_B_int p c ε hε).some,
---   use (tail_B_int p c ε hε).some_spec,
--- end
-
-
--- def geom_B' (c : ℝ≥0) [fact (0 < p)] [fact (p < 1)] (ε : ℝ) (hε : 0 < ε) : ℤ :=
--- begin
---   have := (nonempty_B p c ε hε).default,
--- end
-
--- lemma tail_B' (ε : ℝ) (hε : 0 < ε) :  ∀ (F : filtration (ℒ ϖ) c),
---   ∥ tsum (λ b : {n : ℤ // geom_B' c ε hε ≤ n }, ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ) ∥ <
---     ε ^ (p⁻¹ : ℝ) :=
--- begin
---   intro F,
---   dsimp only [geom_B'],
---   simp_rw [subtype.val_eq_coe],
---   convert (nonempty_B p c ε hε).default.2 F,
---   ext B,
---   split,
---   intro h,
---   intro F,
---   specialize h F,
---   -- exact this,
--- end
 
 lemma tail_B (ε : ℝ) (hε : 0 < ε) :  ∀ (F : filtration (ℒ ϖ) c), ∥ tsum (λ b : {n : ℤ // geom_B c ε hε ≤ n },
   ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ) ∥ < ε ^ (p⁻¹ : ℝ) :=
@@ -1098,39 +900,9 @@ begin
 end
 
 
--- lemma tail_B (ε : ℝ) (hε : 0 < ε) :  ∀ (F : filtration (ℒ ϖ) c), ∥ tsum (λ b : {n : ℤ // geom_B c ε hε ≤ n },
---   ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ) ∥ < ε ^ (p⁻¹ : ℝ) :=
--- begin
---   -- sorry,
---   intro F,
---   -- simpa [geom_B],
---   dsimp [geom_B],
---   have := (tail_B_int p c ε hε).some_spec F,
---   convert (tail_B_int p c ε hε).some_spec F using 1,
---   simp_rw [subtype.val_eq_coe],
---   -- refl,
---   -- apply congr_arg,
---   -- rw tsum_eq_tsum_of_has_sum_iff_has_sum,
---   -- intro a,
---   -- -- rw [iff_eq_eq],
---   -- split,intro h,
---   -- -- ext,
--- end
-
-
 def U (F : filtration (ℒ ϖ) c) (B : ℤ) : set (filtration (ℒ ϖ) c) := λ G, ∀ s n, n < B → F s n = G s n
 
--- lemma mem_U_old (F : filtration (ℒ S) c) (ε : ℝ) : F ∈ (U_old S c F ε) := λ _ _ _, rfl
-
--- variables (F : filtration (ℒ ϖ) c) (ε : ℝ)
--- #check U' c F ε
-
 lemma mem_U (F : filtration (ℒ ϖ) c) (B : ℤ) : F ∈ (U c F B) := λ _ _ _, rfl
-
--- lemma is_open_U_old (F : filtration (ℒ S) c) (ε : ℝ) : is_open (U_old S c F ε) :=
--- begin
---   sorry,
--- end
 
 lemma is_open_U (F : filtration (ℒ ϖ) c) (B : ℤ) : is_open (U c F B) :=
 begin
@@ -1168,22 +940,6 @@ begin
   exact H,
 end
 
--- lemma summable_subset (F : filtration (ℒ ϖ) c) (B : ℤ) :
---   summable (λ b : {x : ℤ // B < x}, ∥ ((F punit.star b) : ℝ) * (1 / 2) ^ b.1 ∥) :=
--- begin
---   have : (λ b : {x : ℤ // B < x}, ∥ ((F punit.star b) : ℝ) * (1 / 2) ^ b.1 ∥) =
---     (λ b, (∥ ((F punit.star b) : ℝ) * (1 / 2) ^ b ∥)) ∘ coe := by {simp only [subtype.val_eq_coe]},
---   rw this,
---   refine summable.comp_injective _ (subtype.coe_injective),
---   simp_rw [norm_mul, norm_zpow, ← inv_eq_one_div, norm_inv, real.norm_two, inv_eq_one_div],
---   exact aux_thm69.summable_smaller_radius_norm F.1.d (half_lt_r) (F.1.summable punit.star)
---     (λ n, lt_d_eq_zero F.1 punit.star n),
--- end
-
--- lemma coe_filtration_sub {c₁ c₂ : ℝ≥0} (F : filtration (ℒ S) c₁)
---   (G : filtration (ℒ S) c₂) (s : S) (i : ℤ) :
---   (⟨↑F - ↑G, sub_mem_filtration F.2 G.2⟩ : filtration (ℒ S) (c₁ + c₂)) s i
---   = (F : (ℒ S)) s i - (G : (ℒ S)) s i := rfl
 
 lemma tsum_subtype_sub {f g : ℤ → ℝ} {B : ℤ}
   (hf : summable (λ (b : {x // B ≤ x}), f b * (1 / 2) ^ b.1))
@@ -1273,66 +1029,6 @@ begin
   exact (aux_summability_subtype p c F B),
   exact (aux_summability_subtype p c G B),
 end
-
--- lemma dist_lt_of_mem_U (ε : ℝ≥0) (F G : filtration (ℒ ϖ) c) :
---   G ∈ (U c F ε) → ∥ ((θ_c c ϖ G) : (ℳ ϖ)) - (θ_c c ϖ) F ∥ < ε :=
--- begin
---   intro hG,
---   rw real_measures.norm_def,
---   simp only [fintype.univ_punit, real_measures.sub_apply, finset.sum_singleton],
---   rw real.norm_eq_abs,
---   simp only [θ_c, one_mul, eq_mpr_eq_cast, set_coe_cast, subtype.coe_mk],
---   dsimp only [θ, ϑ],
---   rw [← tsum_sub],
---   rotate,
---   { exact aux_thm69.summable_smaller_radius G.1.d (G.1.summable punit.star)
---       (λ n, lt_d_eq_zero G.1 punit.star n) half_lt_r },
---   { exact aux_thm69.summable_smaller_radius F.1.d (F.1.summable punit.star)
---       (λ n, lt_d_eq_zero F.1 punit.star n) half_lt_r },
---   simp_rw [← sub_mul],
---   let FG_sub : filtration (ℒ ϖ) (c + c) := ⟨↑G - ↑F, sub_mem_filtration G.2 F.2⟩,
---   have h_B : ∀ b : ℤ, b < (geom_B p c F ε) → ((G punit.star b) : ℝ) - (F punit.star b) = 0,
---   { intros b hb,
---     simp only [hG punit.star b hb, sub_self] },
---   let f := λ b : ℤ, ((((G : (ℒ ϖ)) punit.star b) - ((F : (ℒ ϖ)) punit.star b)) : ℝ)
---     * (1 / 2) ^ b,
---   let g : ({ b : ℤ | geom_B p (c + c) FG_sub ε ≤ b}) → ℝ := f ∘ coe,
---   let i := (coe : { b : ℤ | geom_B p (c + c) FG_sub ε ≤ b} → ℤ) ∘
---     (coe : function.support g → { b : ℤ | geom_B p (c + c) FG_sub ε ≤ b}),
---   have hi : ∀ ⦃x y : ↥(function.support g)⦄, i x = i y → ↑x = ↑y,
---   {intros _ _ h,
---     simp only [subtype.coe_inj] at h,
---     rwa [subtype.coe_inj] },
---   have hf : function.support f ⊆ set.range i,
---   { intros a ha,
---     simp only [f, function.mem_support, ne.def] at ha,
---     have ha' : geom_B p (c + c) FG_sub ε ≤ a,
---     { sorry,
---       -- by_contra',
---       -- specialize h_B a this,
---       -- simp only [one_div, inv_zpow', zpow_neg₀, mul_eq_zero, inv_eq_zero, not_or_distrib] at ha,
---       -- replace ha := ha.1,
---       --simpa only
---       },
---   simp only [set.mem_set_of_eq, function.mem_support, ne.def, set.mem_range, set_coe.exists],
---   use [a, ha', ha, refl _] },
---   have h_sum := tsum_eq_tsum_of_ne_zero_bij i hi hf (λ _, refl _),
---   rw [h_sum, ← real.norm_eq_abs, ← real.rpow_lt_rpow_iff _ _ _, ← real.rpow_mul,
---     mul_inv_cancel, real.rpow_one],
---   rotate,
---   { rw ← nnreal.coe_zero,
---     exact ne_of_gt (nnreal.coe_lt_coe.mpr (fact.out _)) },
---   { apply norm_nonneg },
---   { apply real.rpow_nonneg_of_nonneg (norm_nonneg _) },
---   { rw ← nnreal.coe_zero,
---     exact ε.2 },
---   { rw [inv_pos, ← nnreal.coe_zero],
---     exact (nnreal.coe_lt_coe.mpr (fact.out _)) },
---   convert tail_B p (c + c) FG_sub ε,
---   { funext,
---     dsimp [g, f],
---     rw int.cast_sub },
--- end
 
 lemma coe_pow_half (η : ℝ) (η_pos' : 0 < η) (η₀ : ℝ≥0) (hη₀ : η₀ = ⟨η, le_of_lt η_pos'⟩) :
   (η / 2) ^ (p : ℝ) = ((η₀ ^ (p : ℝ) : ℝ)) / 2 ^ (p.1) := by {rw [real.div_rpow (le_of_lt η_pos') _,
