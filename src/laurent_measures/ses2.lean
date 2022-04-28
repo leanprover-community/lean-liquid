@@ -50,7 +50,9 @@ open CompHausFiltPseuNormGrp₁
 theorem short_exact (S : Profinite) :
   short_exact ((condensify_Tinv2 _).app S) ((condensify_map $ Θ_fintype_nat_trans p).app S) :=
 begin
-  refine condensify_nonstrict_exact _ _ (r⁻¹ + 2) (Tinv2_bound_by _) sorry _ sorry _ _ _ _ _ _ _,
+  refine condensify_nonstrict_exact _ _ (r⁻¹ + 2) (Tinv2_bound_by _) _ _ _ _
+    (λ S, injective_ϕ')
+    (λ S, by { ext1 F, apply θ_ϕ_complex }) _ _ _ _,
   all_goals { sorry },
 end
 

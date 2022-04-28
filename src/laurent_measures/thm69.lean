@@ -92,6 +92,14 @@ begin
     simpa only [hk₀, mul_eq_zero, bit0_eq_zero, one_ne_zero, false_or, zero_apply] using H k s }
 end
 
+lemma injective_ϕ' : function.injective (ϕ : ℒ S → ℒ S) :=
+begin
+  let PHI : comphaus_filtered_pseudo_normed_group_hom (ℒ S) (ℒ S) :=
+    shift (1) - 2 • comphaus_filtered_pseudo_normed_group_hom.id,
+  apply (injective_iff_map_eq_zero (PHI.to_add_monoid_hom)).mpr,
+  exact injective_ϕ
+end
+
 end phi
 
 section mem_exact
