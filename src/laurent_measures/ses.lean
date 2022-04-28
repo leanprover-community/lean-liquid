@@ -1334,6 +1334,39 @@ end
 --     rw int.cast_sub },
 -- end
 
+lemma coe_pow_half (η : ℝ) (η_pos' : 0 < η) (η₀ : ℝ≥0) (hη₀ : η₀ = ⟨η, le_of_lt η_pos'⟩) :
+  (η / 2) ^ (p : ℝ) = ((η₀ ^ (p : ℝ) : ℝ)) / 2 ^ (p.1) := by {rw [real.div_rpow (le_of_lt η_pos') _,
+     nnreal.val_eq_coe, hη₀, subtype.coe_mk], simp only [zero_le_bit0, zero_le_one]}
+
+lemma U_subset_preimage (ε η : ℝ) (y : closed_ball (0 : ℝ) (c ^ (p⁻¹ : ℝ)))
+  (F : filtration (ℒ ϖ) c)
+  (hF : |(((homeo_filtration_ϖ_ball c) (θ_c c (Fintype.of punit) F)) : ℝ) - y| < ε)
+  (hη : η = ε - |(homeo_filtration_ϖ_ball c (θ_c c ϖ F)) - y|) (h_pos : 0 < (η / 2) ^ (p : ℝ)) :
+  (U c F (geom_B c ((η / 2) ^ (p : ℝ)) h_pos) )  ⊆
+    ((homeo_filtration_ϖ_ball c) ∘ θ_c c (ϖ) ⁻¹' (ball y ε)) :=
+begin
+  intros G hG,
+  set ξ_F : ℝ := ((homeo_filtration_ϖ_ball c) (θ_c p c (Fintype.of punit) F)) with hξ_F,
+  set ξ_G : ℝ := ((homeo_filtration_ϖ_ball c) (θ_c p c (Fintype.of punit) G)) with hξ_G,
+  simp only [set.mem_preimage, one_mul, eq_self_iff_true, eq_mpr_eq_cast, set_coe_cast,
+  function.comp_app, mem_ball, subtype.dist_eq, real.dist_eq],
+  have hp : 0 < (p : ℝ), { rw [← nnreal.coe_zero, nnreal.coe_lt_coe], from fact.out _ },
+  rw ← hξ_G,
+  have η_pos' : 0 < η := by {rw hη, from (sub_pos.mpr hF)},
+  set η₀ : ℝ≥0 := ⟨η, le_of_lt η_pos'⟩ with hη₀,
+  have h_η_η₀ := @coe_pow_half p _ _ η η_pos' η₀ hη₀,
+  simp_rw [h_η_η₀] at hG,
+  sorry,
+  -- calc |ξ_G - y | ≤ |ξ_G - ξ_F| + |ξ_F - y | : abs_sub_le ξ_G ξ_F y
+  --             ... < ε - | ξ_F - y | + | ξ_F - y | : by { apply add_lt_add_right,
+  --                       rw [← real_measures.dist_eq, ← real.rpow_lt_rpow_iff
+  --                       (real.rpow_nonneg_of_nonneg (real_measures.norm_nonneg _) _)
+  --                       (sub_nonneg.mpr (le_of_lt hF)) hp, ← real.rpow_mul
+  --                       (real_measures.norm_nonneg _), inv_mul_cancel (ne_of_gt hp), real.rpow_one,
+  --                       ← hη], exact dist_lt_of_mem_U p c (η₀ ^ (p : ℝ))
+  --                       (real.rpow_pos_of_pos η_pos' _) F G hG, }
+  --             ... = ε : sub_add_cancel ε _,
+end
 
 -- This is the main continuity property needed in `ses2.lean`
 lemma continuous_θ_c (c : ℝ≥0) : continuous (θ_c c S) :=
@@ -1349,54 +1382,14 @@ begin
   intros F hF,
   simp only [set.mem_preimage, one_mul, eq_self_iff_true, eq_mpr_eq_cast, set_coe_cast,
     function.comp_app, mem_ball, subtype.dist_eq, real.dist_eq] at hF,
-  set ξ_F : ℝ := ((homeo_filtration_ϖ_ball c) (θ_c p c (Fintype.of punit) F)) with hξ_F,
-  set η₀ := ε - |(homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) - y| with hη₀,
-  have η_pos : 0 < η₀ := by {rw hη₀, from (sub_pos.mpr hF)},
-  set η : ℝ≥0 := ⟨η₀, le_of_lt η_pos⟩ with hη,
-  replace hη : η₀ = (η : ℝ) := subtype.coe_mk η₀ η_pos,
-  have η_pos' : 0 < (η₀ / 2) ^ (p : ℝ) := real.rpow_pos_of_pos (half_pos η_pos) _,
-  set V := U p c F (geom_B p c ((η₀ / 2) ^ (p : ℝ)) η_pos') with hV,
-  simp_rw [real.div_rpow (le_of_lt η_pos) (le_of_lt (@two_pos ℝ _ _))] at hV,
+  set η := ε - |(homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) - y| with hη,
+  have η_pos' : 0 < η := by {rw hη, from (sub_pos.mpr hF)},
+  have η_pos : 0 < (η / 2) ^ (p : ℝ) := real.rpow_pos_of_pos (half_pos η_pos') _,
+  set V := U p c F (geom_B p c ((η / 2) ^ (p : ℝ)) η_pos) with hV,
+  simp_rw [real.div_rpow (le_of_lt η_pos') (le_of_lt (@two_pos ℝ _ _))] at hV,
   use V,
-  split,
-  { intros G hG,
-    set ξ_G : ℝ := ((homeo_filtration_ϖ_ball c) (θ_c p c (Fintype.of punit) G)) with hξ_G,
-    simp only [set.mem_preimage, one_mul, eq_self_iff_true, eq_mpr_eq_cast, set_coe_cast,
-    function.comp_app, mem_ball, subtype.dist_eq, real.dist_eq],
-    have hp : 0 < (p : ℝ),
-    { rw [← nnreal.coe_zero, nnreal.coe_lt_coe],
-      from fact.out _ },
-    rw hV at hG,
-    rw ← hξ_G,
-  -- **[FAE]** I rewrote the terms using `ξ_F` and `ξ_G` hoping things get faster
-    have help_calc_1 : | ξ_G - ξ_F| + | ξ_F - y | < ε - | ξ_F - y | + | ξ_F - y |,
-    { apply add_lt_add_right,
-      rw [← real_measures.dist_eq,
-      ← real.rpow_lt_rpow_iff (real.rpow_nonneg_of_nonneg
-      (real_measures.norm_nonneg _) _) (sub_nonneg.mpr (le_of_lt hF)) hp,
-      ← real.rpow_mul (real_measures.norm_nonneg _), inv_mul_cancel (ne_of_gt hp),
-      real.rpow_one, ← hη₀, hη, ← nnreal.coe_rpow],
-      exact dist_lt_of_mem_U p c (η ^ (p : ℝ)) (real.rpow_pos_of_pos η_pos _) F G hG },
-    -- have help_calc_1 : | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ G)) : ℝ) - (homeo_filtration_ϖ_ball c
-    --   (θ_c p c ϖ F)) | + | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) : ℝ) - y | < ε -
-    --     |((homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) : ℝ) - y | + | ((homeo_filtration_ϖ_ball c
-    --       (θ_c p c ϖ F)) : ℝ) - y |,
-    -- { apply add_lt_add_right,
-    --   rw [← real_measures.dist_eq,
-    --   ← real.rpow_lt_rpow_iff (real.rpow_nonneg_of_nonneg
-    --   (real_measures.norm_nonneg _) _) (sub_nonneg.mpr (le_of_lt hF)) hp,
-    --   ← real.rpow_mul (real_measures.norm_nonneg _), inv_mul_cancel (ne_of_gt hp),
-    --   real.rpow_one, ← hη₀, hη, ← nnreal.coe_rpow],
-    --   exact dist_lt_of_mem_U p c (η ^ (p : ℝ)) (real.rpow_pos_of_pos η_pos _) F G hG },
-    rw sub_add_cancel at help_calc_1,
-    have help_calc_2 :=  abs_sub_le ξ_G ξ_F y,
-    -- have help_calc_2 :=  abs_sub_le ((homeo_filtration_ϖ_ball c (θ_c p c ϖ G)) : ℝ) ((homeo_filtration_ϖ_ball
-    --   c (θ_c p c ϖ F)) : ℝ) (y : ℝ),
-    have := @lt_of_le_of_lt ℝ _ (|ξ_G - y|) (|ξ_G - ξ_F| + |ξ_F - y|) ε help_calc_2 help_calc_1,
-    sorry,
-    --simpa both this and `exact this` create a timeout
-     },
-  refine and.intro (is_open_U p c F _) (mem_U p c F _),
+  exact and.intro (U_subset_preimage p c ε η y F hF hη η_pos)
+    (and.intro (is_open_U p c F _) (mem_U p c F _)),
 end
 
 
