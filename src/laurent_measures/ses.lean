@@ -896,7 +896,9 @@ begin
       simp_rw [hc, zero_mul],
       exact summable_zero }, },
   all_goals { simp_rw [norm_mul, norm_pow, norm_div, norm_one, real.norm_two, subtype.val_eq_coe],
-    refine ((aux_thm69.summable_iff_on_nat_less F.1.d _).mp (aux_thm69.summable_smaller_radius_norm F.1.d (half_lt_r) (F.1.summable punit.star) (λ n, lt_d_eq_zero F.1 punit.star n))).comp_injective h_inj,
+    refine ((aux_thm69.summable_iff_on_nat_less F.1.d _).mp (aux_thm69.summable_smaller_radius_norm
+      F.1.d (half_lt_r) (F.1.summable punit.star)
+      (λ n, lt_d_eq_zero F.1 punit.star n))).comp_injective h_inj,
     intros n hn,
     rw [lt_d_eq_zero F.1 punit.star n hn, norm_zero, zero_mul] },
 end
@@ -1068,10 +1070,29 @@ end
 --   (⟨↑F - ↑G, sub_mem_filtration F.2 G.2⟩ : filtration (ℒ S) (c₁ + c₂)) s i
 --   = (F : (ℒ S)) s i - (G : (ℒ S)) s i := rfl
 
-lemma tsum_subtype_sub (f g : ℤ → ℝ) (B : ℤ) : ∥ tsum ((λ (b : ℤ), (((g b) : ℝ) - f b) * (1 / 2) ^ b) ∘ (coe : {b | B ≤ b} → ℤ)) ∥ = ∥ ∑' (b : {x // B ≤ x}), (g b : ℝ) * (1 / 2) ^ b.1 - ∑' (b : {x // B ≤ x}), (f b : ℝ) * (1 / 2) ^ b.1 ∥ := sorry
+lemma tsum_subtype_sub {f g : ℤ → ℝ} {B : ℤ}
+  (hf : summable (λ (b : {x // B ≤ x}), f b * (1 / 2) ^ b.1))
+  (hg : summable (λ (b : {x // B ≤ x}), g b * (1 / 2) ^ b.1)) :
+  ∥ tsum ((λ (b : ℤ), (((g b) : ℝ) - f b) * (1 / 2) ^ b) ∘ (coe : {b | B ≤ b} → ℤ)) ∥ =
+  ∥ ∑' (b : {x // B ≤ x}), (g b : ℝ) * (1 / 2) ^ b.1 - ∑' (b : {x // B ≤ x}),
+    (f b : ℝ) * (1 / 2) ^ b.1 ∥ :=
+begin
+  rw [← tsum_sub hg hf, tsum_eq_tsum_of_has_sum_iff_has_sum],
+  intro _,
+  simp_rw [sub_mul, iff_eq_eq],
+  refl,
+end
 
 lemma pos_ε_pow (ε : ℝ) (hε : 0 < ε) : 0 < (ε / (2 : ℝ) ^ p.1) := by {apply div_pos hε
   (real.rpow_pos_of_pos _ _), simp only [zero_lt_bit0, zero_lt_one]}
+
+lemma aux_summability_no_norm (F : filtration (ℒ ϖ) c) : summable
+  (λ b : ℤ, (((F punit.star b) : ℝ) * (1 / 2) ^ b)) := aux_thm69.summable_smaller_radius F.1.d (F.1.summable punit.star)
+      (λ n, lt_d_eq_zero F.1 punit.star n) half_lt_r
+
+lemma aux_summability_subtype (F : filtration (ℒ ϖ) c) (B : ℤ) : summable (λ b : {x : ℤ // B ≤ x},
+  (((F punit.star b) : ℝ) * (1 / 2) ^ b.1)) :=
+    by {exact (aux_summability_no_norm p c F).comp_injective subtype.coe_injective}
 
 lemma dist_lt_of_mem_U (ε : ℝ≥0) (hε : 0 < ε) (F G : filtration (ℒ ϖ) c) :
   G ∈ (U c F (geom_B c (ε / (2 : ℝ) ^ p.1) (pos_ε_pow ε hε))) → ∥ ((θ_c c ϖ G) : (ℳ ϖ)) - (θ_c c ϖ) F ∥ < ε :=
@@ -1097,10 +1118,8 @@ begin
     simp only [h_mem_G punit.star b hb, sub_self] },
   rw [← tsum_sub],
   rotate,
-  { exact aux_thm69.summable_smaller_radius G.1.d (G.1.summable punit.star)
-      (λ n, lt_d_eq_zero G.1 punit.star n) half_lt_r },
-  { exact aux_thm69.summable_smaller_radius F.1.d (F.1.summable punit.star)
-      (λ n, lt_d_eq_zero F.1 punit.star n) half_lt_r },
+  {exact (aux_summability_no_norm p c G)},
+  {exact (aux_summability_no_norm p c F)},
   simp_rw [← sub_mul],
   set B := (geom_B p c (ε / 2 ^ p.1) (pos_ε_pow p ε hε)) with def_B,
   let f := λ b : ℤ, ((((G : (ℒ ϖ)) punit.star b) - ((F : (ℒ ϖ)) punit.star b)) : ℝ)
@@ -1129,13 +1148,15 @@ begin
   rw [mul_inv_cancel, real.rpow_one] at hF hG,
   rw [tsum_eq_tsum_of_ne_zero_bij i hi hf (λ _, refl _)],
   dsimp [f, g],
-  rw tsum_subtype_sub,
+  rw [tsum_subtype_sub],
   apply lt_of_le_of_lt (norm_sub_le _ _),
   convert add_lt_add hG hF,
   simp only [nnreal.val_eq_coe, add_halves'],
   repeat {exact nnreal.coe_ne_zero.mpr (ne_of_gt (fact.out _))},
   repeat {apply (real.rpow_nonneg_of_nonneg)},
   repeat {exact (le_of_lt (@two_pos ℝ _ _))},
+  exact (aux_summability_subtype p c F B),
+  exact (aux_summability_subtype p c G B),
 end
 
 -- lemma dist_lt_of_mem_U (ε : ℝ≥0) (F G : filtration (ℒ ϖ) c) :
