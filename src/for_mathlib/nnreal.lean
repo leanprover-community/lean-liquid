@@ -64,3 +64,10 @@ begin
   ext1 ⟨x, hx⟩,
   simp [hi' x hx],
 end
+
+lemma nnreal.mul_le_mul_right {a b : ℝ≥0} (h : a ≤ b) (c : ℝ≥0) : a * c ≤ b * c :=
+begin
+  suffices : (a : ℝ) * c ≤ b * c, by assumption_mod_cast,
+  apply mul_le_mul_of_nonneg_right (by assumption_mod_cast),
+  apply zero_le',
+end

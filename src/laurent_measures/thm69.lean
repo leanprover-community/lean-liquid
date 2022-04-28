@@ -331,6 +331,11 @@ begin
     exact lt_d_eq_zero F s n hn },
 end
 
+-- example (r : ℝ≥0) (k : ℕ) : r ^ (k : ℤ) = r ^ k :=
+-- begin
+--   rw zpow_coe_nat,
+-- end
+
 lemma psi_def_summable3 {S : Fintype}
   [fact (0 < p)]
   [fact (p < 1)]
@@ -342,7 +347,57 @@ lemma psi_def_summable3 {S : Fintype}
          r ^ (F.d + ↑n) *
            ((1 / 2) ^ (k : ℤ) * ∥F s (F.d + ↑n + ↑k)∥₊)) :=
 begin
-  sorry,
+  -- take 1/2^k out the tsum,
+  -- put r^k into the tsum,
+  -- bounded by sum of GP,
+  have bdd : ∀ k : ℕ, ∑' (n : ℕ),
+         r ^ (F.d + ↑n + k) * ∥F s (F.d + ↑n + ↑k)∥₊ ≤
+           ∑' (t : ℤ),
+         r ^ t * ∥F s t∥₊,
+  { intro k,
+    simp_rw add_right_comm,
+    have hinj : function.injective (λ (m : ℕ), F.d + k + m),
+    { rintros a b (h2 : F.d + k + a = F.d + k + b),
+      simpa using h2 },
+      refine tsum_le_tsum_of_inj _ hinj _ _ _ _,
+      { intros, apply zero_le' },
+      { intro, refl },
+      { rw ← @nnreal.summable_iff_on_nat_less_shift (λ (z : ℤ), r ^ z * ∥F s z∥₊) F.d _ (F.d + k),
+        { convert F.summable' s,
+          ext z,
+          rw mul_comm,
+          refl },
+        { intros n hn,
+          simp [lt_d_eq_zero F s n hn] } },
+      { convert F.summable' s,
+        ext z,
+        rw mul_comm,
+        refl } },
+  have : ∀ k : ℕ, ∑' (n : ℕ), r ^ (F.d + ↑n) * ((1 / 2) ^ (k : ℤ) * ∥F s (F.d + ↑n + ↑k)∥₊) =
+   (∑' (n : ℕ), r ^ (F.d + ↑n + k) * (∥F s (F.d + ↑n + ↑k)∥₊)) * (1 / 2 / r) ^ (k : ℤ),
+  { intro k,
+    rw ← nnreal.tsum_mul_right,
+    apply tsum_congr,
+    intro n,
+    simp only [zpow_add₀ r_pos.ne.symm, zpow_coe_nat, one_div, inv_pow₀, div_zpow₀],
+    have foo : 2 ^ k * r ^ k ≠ 0,
+    { apply mul_ne_zero,
+      { apply pow_ne_zero, norm_num },
+      { apply pow_ne_zero, exact r_pos.ne.symm },
+
+    },
+    field_simp [foo],
+    ring },
+  rw summable_congr this, clear this,
+  suffices : summable (λ k : ℕ, (∑' (t : ℤ), r ^ t * ∥F s t∥₊) * (1 / 2 / r) ^ k),
+  { refine summable_of_le _ this,
+    intro k,
+    rw zpow_coe_nat,
+    apply nnreal.mul_le_mul_right (bdd k),
+  },
+  apply summable.mul_left,
+  apply summable_geometric,
+  exact div_lt_one_of_lt half_lt_r,
 end
 
 
