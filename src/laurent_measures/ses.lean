@@ -860,8 +860,26 @@ end
 -- lemma tail_B_nat (F : filtration (ℒ ϖ) c) (ε : ℝ) : ∃ B : ℕ, ∥ tsum (λ b : {n : ℕ // B ≤ n },
 --   ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ) ∥ < ε ^ (p⁻¹ : ℝ) := sorry
 
+
 lemma mem_filtration_le_monomial (F : filtration (ℒ ϖ) c) (n : ℕ) :
- ∥ ((F.1 punit.star n) : ℝ) ∥ ≤ c * ( 1 / r ^ n) := sorry
+ ∥ ((F.1 punit.star n) : ℝ) ∥ ≤ c * ( 1 / r ^ n) :=
+begin
+  have h_le : ∑' n : ℤ, ∥ ((F.1 punit.star n) : ℝ) ∥ * r ^ n ≤ c,
+  { have := (laurent_measures.mem_filtration_iff F.1 c).mp F.2,
+    rw laurent_measures.nnnorm_def at this,
+    simp only [fintype.univ_punit, finset.sum_singleton, ← nnreal.coe_le_coe,
+    nnreal.coe_tsum, nnreal.coe_mul, nnreal.coe_zpow, laurent_measures.coe_nnnorm] at this,
+    exact this },
+  have := @sum_le_tsum ℝ _ _ _ _ (λ n, ∥ ((F.1 punit.star n) : ℝ) ∥ * r ^ n) {n} _
+    (F.1.summable punit.star),
+  simp only [finset.sum_singleton, zpow_coe_nat] at this,
+  replace h_le := this.trans h_le,
+  rwa [← inv_eq_one_div, ← inv_mul_le_iff', inv_inv ((r : ℝ) ^ n), mul_comm],
+  { exact (inv_pos.mpr (pow_pos (nnreal.coe_pos.mpr r_pos) _)) },
+  { rintros b -,
+    simp only [subtype.val_eq_coe],
+    exact mul_nonneg (norm_nonneg _) (zpow_nonneg (le_of_lt (nnreal.coe_pos.mpr r_pos)) b) },
+end
 
 
 lemma mem_filtration_sum_le_geom (F : filtration (ℒ ϖ) c) (B : ℕ) : ∥ ∑' n : {x : ℕ // B ≤ x},
@@ -908,34 +926,20 @@ begin
     rw [lt_d_eq_zero F.1 punit.star n hn, norm_zero, zero_mul] },
 end
 
--- variable (A : option ℕ)
--- #check @option.rec_on ℕ _ A
 
-inductive pluto
-| uno : pluto
-| due : ℕ → pluto
-
-def pippo : pluto → ℝ :=
-λ a, pluto.rec_on a (1 : ℝ) (λ _, (2 : ℝ))
--- #eval pippo pluto.uno
-
-def ciao : option ℕ → ℕ :=
-λ a, option.rec_on a 1 (λ n, n)
-
-
-
-lemma tail_B_nat (ε : ℝ) (hε : 0 < ε) : ∃ B : ℕ, ∀ (F : filtration (ℒ ϖ) c), ∥ tsum (λ b : {n : ℕ // B ≤ n },
-  ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ) ∥ < ε ^ (p⁻¹ : ℝ) :=
+def geom_B_nat (ε : ℝ) (hε : 0 < ε) : {B : ℕ // ∀ (F : filtration (ℒ ϖ) c), ∥ tsum (λ b :
+  {n : ℕ // B ≤ n }, ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ) ∥ < ε ^ (p⁻¹ : ℝ)} :=
 begin
   let g := (λ n : ℕ, (c : ℝ) * (1 / (2 * r) ^ n)),
   have := tendsto_tsum_compl_at_top_zero g,
   rw tendsto_at_top at this,
   have h_pos : 0 < ε ^ (p⁻¹ : ℝ) := real.rpow_pos_of_pos hε _,
-  obtain ⟨A, hA⟩ := this (ε ^ (p⁻¹ : ℝ)) h_pos,
+  specialize this (ε ^ (p⁻¹ : ℝ)) h_pos,
+  let A := this.some,
     let B₀ : option ℕ → ℕ := λ a : (option ℕ), option.rec_on a (0 : ℕ) (λ n, n),
     set B := (B₀ A.max).succ with hB,
     use B,
-    have h_incl : A ≤ finset.range B, --sorry,
+    have h_incl : A ≤ finset.range B,
     rw finset.le_eq_subset,
     { by_cases H : A.nonempty,
       { intros a ha,
@@ -946,6 +950,7 @@ begin
       { intros a ha,
         rw [finset.not_nonempty_iff_eq_empty] at H,
         finish }},
+    let hA := this.some_spec,
     specialize hA (finset.range B) h_incl,
     rw [real.dist_0_eq_abs, ← real.norm_eq_abs] at hA,
     intro F,
@@ -957,6 +962,46 @@ begin
       by {simp only [finset.mem_range, not_lt]},
     exact tsum_congr_subtype g set_eq,
 end
+
+-- lemma tail_B_nat' (ε : ℝ) (hε : 0 < ε) : ∀ (F : filtration (ℒ ϖ) c),
+--  ∥ tsum (λ b : {n : ℕ // geom_B_nat c ε hε ≤ n }, ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ) ∥ < ε ^ (p⁻¹ : ℝ) :=
+-- begin
+
+-- end
+
+-- lemma tail_B_nat (ε : ℝ) (hε : 0 < ε) : ∃ B : ℕ, ∀ (F : filtration (ℒ ϖ) c),
+--  ∥ tsum (λ b : {n : ℕ // B ≤ n }, ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ) ∥ < ε ^ (p⁻¹ : ℝ) :=
+-- begin
+--   let g := (λ n : ℕ, (c : ℝ) * (1 / (2 * r) ^ n)),
+--   have := tendsto_tsum_compl_at_top_zero g,
+--   rw tendsto_at_top at this,
+--   have h_pos : 0 < ε ^ (p⁻¹ : ℝ) := real.rpow_pos_of_pos hε _,
+--   obtain ⟨A, hA⟩ := this (ε ^ (p⁻¹ : ℝ)) h_pos,
+--     let B₀ : option ℕ → ℕ := λ a : (option ℕ), option.rec_on a (0 : ℕ) (λ n, n),
+--     set B := (B₀ A.max).succ with hB,
+--     use B,
+--     have h_incl : A ≤ finset.range B,
+--     rw finset.le_eq_subset,
+--     { by_cases H : A.nonempty,
+--       { intros a ha,
+--         obtain ⟨s, hs⟩ := finset.max_of_nonempty H,
+--         replace hB : s.succ = B := by {simp only [*, option.mem_def] at *},
+--         have h_mem := finset.mem_range_succ_iff.mpr (finset.le_max_of_mem ha hs),
+--         rwa hB at h_mem },
+--       { intros a ha,
+--         rw [finset.not_nonempty_iff_eq_empty] at H,
+--         finish }},
+--     specialize hA (finset.range B) h_incl,
+--     rw [real.dist_0_eq_abs, ← real.norm_eq_abs] at hA,
+--     intro F,
+--     apply lt_of_le_of_lt (mem_filtration_sum_le_geom p c F B),
+--     convert hA using 1,
+--     apply congr_arg,
+--     simp_rw [subtype.val_eq_coe, ← tsum_mul_left],
+--     have set_eq : {n : ℕ | B ≤ n} = {n : ℕ | n ∉ finset.range B} :=
+--       by {simp only [finset.mem_range, not_lt]},
+--     exact tsum_congr_subtype g set_eq,
+-- end
 
 def eq_le_int_nat (B : ℕ) : {n : ℤ // (B : ℤ) ≤ n } ≃ {n : ℕ // B ≤ n} :=
 { to_fun :=
@@ -982,10 +1027,25 @@ def eq_le_int_nat (B : ℕ) : {n : ℤ // (B : ℤ) ≤ n } ≃ {n : ℕ // B �
   end, }
 
 
-lemma tail_B_int (ε : ℝ) (hε : 0 < ε) : ∃ B : ℤ, ∀ (F : filtration (ℒ ϖ) c), ∥ tsum (λ b : {n : ℤ // B ≤ n },
-  ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ) ∥ < ε ^ (p⁻¹ : ℝ) :=
+-- lemma tail_B_int (ε : ℝ) (hε : 0 < ε) : ∃ B : ℤ, ∀ (F : filtration (ℒ ϖ) c), ∥ tsum (λ b : {n : ℤ // B ≤ n },
+--   ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ) ∥ < ε ^ (p⁻¹ : ℝ) :=
+-- begin
+--   obtain ⟨B, hB⟩ := tail_B_nat p c ε hε,
+--   use B,
+--   intro F,
+--   specialize hB F,
+--   convert hB using 1,
+--   apply congr_arg,
+--   exact ((eq_le_int_nat B).symm.tsum_eq (λ b : {n : ℤ // ↑B ≤ n },
+--   ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 )).symm,
+-- end
+
+def geom_B_int (ε : ℝ) (hε : 0 < ε) : {B : ℤ // ∀ (F : filtration (ℒ ϖ) c), ∥ tsum (λ b :
+  {n : ℤ // B ≤ n }, ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ) ∥ < ε ^ (p⁻¹ : ℝ)} :=
 begin
-  obtain ⟨B, hB⟩ := tail_B_nat p c ε hε,
+  let ℬ := geom_B_nat p c ε hε,
+  let B := ℬ.1,
+  let hB := ℬ.2,
   use B,
   intro F,
   specialize hB F,
@@ -995,17 +1055,67 @@ begin
   ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 )).symm,
 end
 
-def geom_B (ε : ℝ) (hε : 0 < ε) : ℤ := (tail_B_int c ε hε).some
+
+def geom_B (ε : ℝ) (hε : 0 < ε) : ℤ := (geom_B_int c ε hε).1
+
+-- lemma nonempty_B (ε : ℝ) (hε : 0 < ε) : inhabited ({B : ℤ // ∀ (F : filtration (ℒ ϖ) c),
+--   ∥ tsum (λ b : {n : ℤ // B ≤ n }, ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ) ∥
+--     < ε ^ (p⁻¹ : ℝ)} : Type u):=
+-- begin
+--   apply inhabited.mk,
+--   use (tail_B_int p c ε hε).some,
+--   use (tail_B_int p c ε hε).some_spec,
+-- end
+
+
+-- def geom_B' (c : ℝ≥0) [fact (0 < p)] [fact (p < 1)] (ε : ℝ) (hε : 0 < ε) : ℤ :=
+-- begin
+--   have := (nonempty_B p c ε hε).default,
+-- end
+
+-- lemma tail_B' (ε : ℝ) (hε : 0 < ε) :  ∀ (F : filtration (ℒ ϖ) c),
+--   ∥ tsum (λ b : {n : ℤ // geom_B' c ε hε ≤ n }, ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ) ∥ <
+--     ε ^ (p⁻¹ : ℝ) :=
+-- begin
+--   intro F,
+--   dsimp only [geom_B'],
+--   simp_rw [subtype.val_eq_coe],
+--   convert (nonempty_B p c ε hε).default.2 F,
+--   ext B,
+--   split,
+--   intro h,
+--   intro F,
+--   specialize h F,
+--   -- exact this,
+-- end
 
 lemma tail_B (ε : ℝ) (hε : 0 < ε) :  ∀ (F : filtration (ℒ ϖ) c), ∥ tsum (λ b : {n : ℤ // geom_B c ε hε ≤ n },
   ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ) ∥ < ε ^ (p⁻¹ : ℝ) :=
 begin
   intro F,
-  dsimp only [geom_B],
-  convert (tail_B_int p c ε hε).some_spec F using 1,
-  apply congr_arg,
-  sorry,
+  have := (geom_B_int p c ε hε).2 F,
+  exact this,
 end
+
+
+-- lemma tail_B (ε : ℝ) (hε : 0 < ε) :  ∀ (F : filtration (ℒ ϖ) c), ∥ tsum (λ b : {n : ℤ // geom_B c ε hε ≤ n },
+--   ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ) ∥ < ε ^ (p⁻¹ : ℝ) :=
+-- begin
+--   -- sorry,
+--   intro F,
+--   -- simpa [geom_B],
+--   dsimp [geom_B],
+--   have := (tail_B_int p c ε hε).some_spec F,
+--   convert (tail_B_int p c ε hε).some_spec F using 1,
+--   simp_rw [subtype.val_eq_coe],
+--   -- refl,
+--   -- apply congr_arg,
+--   -- rw tsum_eq_tsum_of_has_sum_iff_has_sum,
+--   -- intro a,
+--   -- -- rw [iff_eq_eq],
+--   -- split,intro h,
+--   -- -- ext,
+-- end
 
 
 def U (F : filtration (ℒ ϖ) c) (B : ℤ) : set (filtration (ℒ ϖ) c) := λ G, ∀ s n, n < B → F s n = G s n
@@ -1224,6 +1334,7 @@ end
 --     rw int.cast_sub },
 -- end
 
+
 -- This is the main continuity property needed in `ses2.lean`
 lemma continuous_θ_c (c : ℝ≥0) : continuous (θ_c c S) :=
 begin
@@ -1238,6 +1349,7 @@ begin
   intros F hF,
   simp only [set.mem_preimage, one_mul, eq_self_iff_true, eq_mpr_eq_cast, set_coe_cast,
     function.comp_app, mem_ball, subtype.dist_eq, real.dist_eq] at hF,
+  set ξ_F : ℝ := ((homeo_filtration_ϖ_ball c) (θ_c p c (Fintype.of punit) F)) with hξ_F,
   set η₀ := ε - |(homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) - y| with hη₀,
   have η_pos : 0 < η₀ := by {rw hη₀, from (sub_pos.mpr hF)},
   set η : ℝ≥0 := ⟨η₀, le_of_lt η_pos⟩ with hη,
@@ -1248,14 +1360,23 @@ begin
   use V,
   split,
   { intros G hG,
+    set ξ_G : ℝ := ((homeo_filtration_ϖ_ball c) (θ_c p c (Fintype.of punit) G)) with hξ_G,
     simp only [set.mem_preimage, one_mul, eq_self_iff_true, eq_mpr_eq_cast, set_coe_cast,
     function.comp_app, mem_ball, subtype.dist_eq, real.dist_eq],
     have hp : 0 < (p : ℝ),
     { rw [← nnreal.coe_zero, nnreal.coe_lt_coe],
       from fact.out _ },
     rw hV at hG,
-    sorry,
-  -- things are faster if these calculations are singled out from the sorried `calc` term below
+    rw ← hξ_G,
+  -- **[FAE]** I rewrote the terms using `ξ_F` and `ξ_G` hoping things get faster
+    have help_calc_1 : | ξ_G - ξ_F| + | ξ_F - y | < ε - | ξ_F - y | + | ξ_F - y |,
+    { apply add_lt_add_right,
+      rw [← real_measures.dist_eq,
+      ← real.rpow_lt_rpow_iff (real.rpow_nonneg_of_nonneg
+      (real_measures.norm_nonneg _) _) (sub_nonneg.mpr (le_of_lt hF)) hp,
+      ← real.rpow_mul (real_measures.norm_nonneg _), inv_mul_cancel (ne_of_gt hp),
+      real.rpow_one, ← hη₀, hη, ← nnreal.coe_rpow],
+      exact dist_lt_of_mem_U p c (η ^ (p : ℝ)) (real.rpow_pos_of_pos η_pos _) F G hG },
     -- have help_calc_1 : | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ G)) : ℝ) - (homeo_filtration_ϖ_ball c
     --   (θ_c p c ϖ F)) | + | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) : ℝ) - y | < ε -
     --     |((homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) : ℝ) - y | + | ((homeo_filtration_ϖ_ball c
@@ -1267,18 +1388,14 @@ begin
     --   ← real.rpow_mul (real_measures.norm_nonneg _), inv_mul_cancel (ne_of_gt hp),
     --   real.rpow_one, ← hη₀, hη, ← nnreal.coe_rpow],
     --   exact dist_lt_of_mem_U p c (η ^ (p : ℝ)) (real.rpow_pos_of_pos η_pos _) F G hG },
-    -- rw sub_add_cancel at help_calc_1,
+    rw sub_add_cancel at help_calc_1,
+    have help_calc_2 :=  abs_sub_le ξ_G ξ_F y,
     -- have help_calc_2 :=  abs_sub_le ((homeo_filtration_ϖ_ball c (θ_c p c ϖ G)) : ℝ) ((homeo_filtration_ϖ_ball
     --   c (θ_c p c ϖ F)) : ℝ) (y : ℝ),
-    -- apply lt_of_le_of_lt help_calc_2 help_calc_1
-    },
-    -- calc | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ G)) : ℝ) - y | ≤
-    --         | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ G)) : ℝ) -
-    --               (homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) | +
-    --             | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) : ℝ) - y | : abs_sub_le _ _ y
-    --     ... < ε - |((homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) : ℝ) - y | +
-    --           | ((homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) : ℝ) - y | : help_calc
-    --     ... = ε : by {rw sub_add_cancel}
+    have := @lt_of_le_of_lt ℝ _ (|ξ_G - y|) (|ξ_G - ξ_F| + |ξ_F - y|) ε help_calc_2 help_calc_1,
+    sorry,
+    --simpa both this and `exact this` create a timeout
+     },
   refine and.intro (is_open_U p c F _) (mem_U p c F _),
 end
 
