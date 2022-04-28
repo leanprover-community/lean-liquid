@@ -291,6 +291,62 @@ begin
     simp [this2 n hn] },
 end
 
+lemma psi_def_summable2 {S : Fintype}
+  [fact (0 < p)]
+  [fact (p < 1)]
+  (F : ℒ S)
+  (s : ↥S) :
+  ∀ (k : ℕ),
+    summable
+      (λ (n : ℕ),
+         r ^ (F.d + ↑n) *
+           ((1 / 2 : ℝ≥0) ^ (k : ℤ) * ∥F s (F.d + ↑n + ↑k)∥₊)) :=
+begin
+  intro k,
+  have hhalf : (2⁻¹ : ℝ≥0) ≠ 0, by norm_num,
+  have hhalf' : (1 / 2 : ℝ≥0) ≠ 0, by norm_num,
+  have hr : r ≠ 0 := r_pos.ne.symm,
+  rw nnreal.summable_mul_left_iff
+    (show (1 / 2 : ℝ≥0) ^ (-(k : ℤ)) * r ^ (k : ℤ) ≠ 0, from mul_ne_zero (zpow_ne_zero _ hhalf') (zpow_ne_zero _ hr)),
+  have : ∀ x : ℕ, (1 / 2) ^ -(k : ℤ) * r ^ (k : ℤ) * (r ^ (F.d + ↑x) * ((1 / 2) ^ (k : ℤ) * ∥F s (F.d + ↑x + ↑k)∥₊))
+    = r ^ (F.d + x + k) * ∥F s (F.d + ↑x + ↑k)∥₊,
+  { intro x,
+    rw (show (1 / 2 : ℝ≥0) ^ -(k : ℤ) * r ^ (k : ℤ) * (r ^ (F.d + ↑x) * ((1 / 2) ^ (k : ℤ) * ∥F s (F.d + ↑x + ↑k)∥₊))
+      = (1 / 2 : ℝ≥0) ^ -(k : ℤ) * (1 / 2) ^ (k : ℤ) * r ^ (k : ℤ) * r ^ (F.d + ↑x) *  ∥F s (F.d + ↑x + ↑k)∥₊, by ring),
+    simp only [zpow_add₀ hr, ← zpow_add₀ hhalf'],
+    simp,
+    left,
+    ring,
+    },
+  rw summable_congr this, clear this,
+  have := F.summable' s,
+  rw nnreal.summable_iff_on_nat_less_shift F.d _ (F.d + k) at this,
+  { convert this,
+    ext n,
+    rw [mul_comm, add_right_comm],
+    refl },
+  { intros n hn,
+    convert zero_mul _,
+    convert nnnorm_zero,
+    exact lt_d_eq_zero F s n hn },
+end
+
+lemma psi_def_summable3 {S : Fintype}
+  [fact (0 < p)]
+  [fact (p < 1)]
+  (F : ℒ S)
+  (s : ↥S) :
+  summable
+    (λ (k : ℕ),
+       ∑' (n : ℕ),
+         r ^ (F.d + ↑n) *
+           ((1 / 2) ^ (k : ℤ) * ∥F s (F.d + ↑n + ↑k)∥₊)) :=
+begin
+  sorry,
+end
+
+
+
 lemma psi_def_aux_4 {S : Fintype} [fact (0 < p)] [fact (p < 1)] (F : ℒ S) (s : ↥S) : summable
   (λ (m : ℕ),
      ∥(2 : ℝ) ^ (F.d + ↑m)∥₊ *
@@ -332,9 +388,9 @@ begin
   have := F.summable_half s,
   { intro n,
     apply psi_def_summable },
-  { sorry },
+  { apply psi_def_summable2 },
   -- sum is then bounded above by a GP.
-  sorry
+  { apply psi_def_summable3, },
 end
 
 lemma psi_def_aux_3 {S : Fintype} [fact (0 < p)] [fact (p < 1)] (F : ℒ S) (s : ↥S) : summable
