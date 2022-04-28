@@ -859,7 +859,8 @@ lemma mem_filtration_le_monomial (F : filtration (ℒ ϖ) c) (n : ℕ) :
  ∥ ((F.1 punit.star n) : ℝ) ∥ ≤ c * ( 1 / r ^ n) := sorry
 
 
-lemma mem_filtration_sum_le_geom (F : filtration (ℒ ϖ) c) (B : ℕ) : ∥ ∑' n : {x : ℕ // B ≤ x}, ((F.1 punit.star n) : ℝ) * (1 / 2) ^ n.1 ∥ ≤ ∥ (c : ℝ) * ∑' n : {x : ℕ // B ≤ x}, 1 / (2 * r) ^ n.1 ∥ :=
+lemma mem_filtration_sum_le_geom (F : filtration (ℒ ϖ) c) (B : ℕ) : ∥ ∑' n : {x : ℕ // B ≤ x},
+  ((F.1 punit.star n) : ℝ) * (1 / 2) ^ n.1 ∥ ≤ ∥ (c : ℝ) * ∑' n : {x : ℕ // B ≤ x}, 1 / (2 * r) ^ n.1 ∥ :=
 begin
   have two_r_nonneg : 0 ≤ 1 / (2 * r : ℝ) := by {apply one_div_nonneg.mpr (mul_nonneg _ r.2), simp only [zero_le_bit0, zero_le_one]},
   have h_inj : function.injective (coe : {x : ℕ // B ≤ x} → ℕ) := subtype.coe_injective,
@@ -900,6 +901,22 @@ begin
     rw [lt_d_eq_zero F.1 punit.star n hn, norm_zero, zero_mul] },
 end
 
+-- variable (A : option ℕ)
+-- #check @option.rec_on ℕ _ A
+
+inductive pluto
+| uno : pluto
+| due : ℕ → pluto
+
+def pippo : pluto → ℝ :=
+λ a, pluto.rec_on a (1 : ℝ) (λ _, (2 : ℝ))
+-- #eval pippo pluto.uno
+
+def ciao : option ℕ → ℕ :=
+λ a, option.rec_on a 1 (λ n, n)
+
+
+
 lemma tail_B_nat (ε : ℝ) (hε : 0 < ε) : ∃ B : ℕ, ∀ (F : filtration (ℒ ϖ) c), ∥ tsum (λ b : {n : ℕ // B ≤ n },
   ((F.1 punit.star b.1) : ℝ) * (1 / 2) ^ b.1 ) ∥ < ε ^ (p⁻¹ : ℝ) :=
 begin
@@ -908,13 +925,20 @@ begin
   rw tendsto_at_top at this,
   have h_pos : 0 < ε ^ (p⁻¹ : ℝ) := real.rpow_pos_of_pos hε _,
   obtain ⟨A, hA⟩ := this (ε ^ (p⁻¹ : ℝ)) h_pos,
-  by_cases H : A.nonempty,
-  { set B := (A.max' H).succ with hB,
+    let B₀ : option ℕ → ℕ := λ a : (option ℕ), option.rec_on a (0 : ℕ) (λ n, n),
+    set B := (B₀ A.max).succ with hB,
     use B,
-    have h_incl : A ≤ finset.range B,
-    { rw finset.le_eq_subset,
-      intros a ha,
-      apply finset.mem_range_succ_iff.mpr (A.le_max' _ ha) },
+    have h_incl : A ≤ finset.range B, --sorry,
+    rw finset.le_eq_subset,
+    { by_cases H : A.nonempty,
+      { intros a ha,
+        obtain ⟨s, hs⟩ := finset.max_of_nonempty H,
+        replace hB : s.succ = B := by {simp only [*, option.mem_def] at *},
+        have h_mem := finset.mem_range_succ_iff.mpr (finset.le_max_of_mem ha hs),
+        rwa hB at h_mem },
+      { intros a ha,
+        rw [finset.not_nonempty_iff_eq_empty] at H,
+        finish }},
     specialize hA (finset.range B) h_incl,
     rw [real.dist_0_eq_abs, ← real.norm_eq_abs] at hA,
     intro F,
@@ -922,17 +946,9 @@ begin
     convert hA using 1,
     apply congr_arg,
     simp_rw [subtype.val_eq_coe, ← tsum_mul_left],
-    have set_eq : {n : ℕ | B ≤ n} = {n : ℕ | n ∉ finset.range B} := by {simp only [finset.mem_range, not_lt]},
-    exact tsum_congr_subtype g set_eq },
-  { simp only [finset.not_nonempty_iff_eq_empty] at H,
-    rw H at hA,
-    use 0,
-    intro F,
-    apply lt_of_le_of_lt (norm_tsum_le_tsum_norm _) _,
-    sorry,
-    -- apply tsum_le_of_sum_lt, -- exists the _le version, not the _lt one
-    sorry,
-  },
+    have set_eq : {n : ℕ | B ≤ n} = {n : ℕ | n ∉ finset.range B} :=
+      by {simp only [finset.mem_range, not_lt]},
+    exact tsum_congr_subtype g set_eq,
 end
 
 def eq_le_int_nat (B : ℕ) : {n : ℤ // (B : ℤ) ≤ n } ≃ {n : ℕ // B ≤ n} :=
