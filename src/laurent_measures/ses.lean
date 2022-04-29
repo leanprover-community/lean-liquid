@@ -760,122 +760,124 @@ end
 lemma coe_pow_half (η : ℝ) (η_pos' : 0 < η) (η₀ : ℝ≥0) (hη₀ : η₀ = ⟨η, le_of_lt η_pos'⟩) :
   (η / 2) ^ (p : ℝ) = ((η₀ ^ (p : ℝ) : ℝ)) / 2 ^ (p.1) := by {rw [real.div_rpow (le_of_lt η_pos') _,
      nnreal.val_eq_coe, hη₀, subtype.coe_mk], simp only [zero_le_bit0, zero_le_one]}
+.
 
-noncomputable! lemma test (ε η : ℝ) (y : closed_ball (0 : ℝ) (c ^ (p⁻¹ : ℝ)))
-  (F : filtration (ℒ ϖ) c)
-  (hF : |(((homeo_filtration_ϖ_ball c) (θ_c c (Fintype.of unit) F)) : ℝ) - y| < ε)
-  (hη : η = ε - |(homeo_filtration_ϖ_ball c (θ_c c ϖ F)) - y|) (h_pos : 0 < (η / 2) ^ (p : ℝ))
-  (answer : U c F (geom_B c ((η / 2) ^ ↑p) h_pos) ⊆ ⇑(homeo_filtration_ϖ_ball c) ∘ θ_c c ϖ ⁻¹' ball y ε)
-   :
-  (U c F (geom_B c ((η / 2) ^ (p : ℝ)) h_pos) )  ⊆
-    ((homeo_filtration_ϖ_ball c) ∘ θ_c c (ϖ) ⁻¹' (ball y ε)) :=
-begin
-  intros G hG,
-  let ξ_F : ℝ := ((homeo_filtration_ϖ_ball c) (θ_c p c (Fintype.of unit) F)),
-  let ξ_G : ℝ := ((homeo_filtration_ϖ_ball c) (θ_c p c (Fintype.of unit) G)),
-  simp only [set.mem_preimage, one_mul, eq_self_iff_true, eq_mpr_eq_cast, set_coe_cast,
-  function.comp_app, mem_ball, subtype.dist_eq, real.dist_eq],
-  have hp : 0 < (p : ℝ), { rw [← nnreal.coe_zero, nnreal.coe_lt_coe], from fact.out _ },
-  have η_pos' : 0 < η := by {rw hη, from (sub_pos.mpr hF)},
-  set η₀ : ℝ≥0 := ⟨η, le_of_lt η_pos'⟩ with hη₀,
-  have h_η_η₀ := @coe_pow_half p _ _ η η_pos' η₀ hη₀,
-  simp_rw [h_η_η₀] at hG,
-  have speed_1 : |ξ_G - y | ≤ |ξ_G - ξ_F| + |ξ_F - y | := abs_sub_le ξ_G ξ_F y,
-  have speed_2 : |ξ_G - ξ_F| + |ξ_F - y | < ε - | ξ_F - y | + | ξ_F - y | := by { apply add_lt_add_right,
-                        rw [← real_measures.dist_eq, ← real.rpow_lt_rpow_iff
-                        (real.rpow_nonneg_of_nonneg (real_measures.norm_nonneg _) _)
-                        (sub_nonneg.mpr (le_of_lt hF)) hp, ← real.rpow_mul
-                        (real_measures.norm_nonneg _), inv_mul_cancel (ne_of_gt hp), real.rpow_one,
-                        ← hη], exact dist_lt_of_mem_U p c (η₀ ^ (p : ℝ))
-                        (real.rpow_pos_of_pos η_pos' _) F G hG},
-  replace speed_2 : |ξ_G - ξ_F| + |ξ_F - y | < ε := by {rwa [sub_add_cancel ε (| ξ_F - y |)]
-    at speed_2},
-  exact lt_of_le_of_lt speed_1 speed_2,
-  sorry,
-  end #exit
+-- noncomputable! lemma test (ε η : ℝ) (y : closed_ball (0 : ℝ) (c ^ (p⁻¹ : ℝ)))
+--   (F : filtration (ℒ ϖ) c)
+--   (hF : |(((homeo_filtration_ϖ_ball c) (θ_c c (Fintype.of unit) F)) : ℝ) - y| < ε)
+--   (hη : η = ε - |(homeo_filtration_ϖ_ball c (θ_c c ϖ F)) - y|) (h_pos : 0 < (η / 2) ^ (p : ℝ))
+--   (answer : (U c F (geom_B c ((η / 2) ^ (p : ℝ)) h_pos) )  ⊆ ((homeo_filtration_ϖ_ball c) ∘ θ_c c (ϖ) ⁻¹' (ball y ε)))
 
-
-noncomputable! lemma U_subset_preimage (ε η : ℝ) (y : closed_ball (0 : ℝ) (c ^ (p⁻¹ : ℝ)))
-  (F : filtration (ℒ ϖ) c)
-  (hF : |(((homeo_filtration_ϖ_ball c) (θ_c c (Fintype.of unit) F)) : ℝ) - y| < ε)
-  (hη : η = ε - |(homeo_filtration_ϖ_ball c (θ_c c ϖ F)) - y|) (h_pos : 0 < (η / 2) ^ (p : ℝ)) :
-  (U c F (geom_B c ((η / 2) ^ (p : ℝ)) h_pos) )  ⊆
-    ((homeo_filtration_ϖ_ball c) ∘ θ_c c (ϖ) ⁻¹' (ball y ε)) :=
-begin
-  intros G hG,
-  set ξ_F : ℝ := ((homeo_filtration_ϖ_ball c) (θ_c p c (Fintype.of unit) F)) with hξ_F,
-  set ξ_G : ℝ := ((homeo_filtration_ϖ_ball c) (θ_c p c (Fintype.of unit) G)) with hξ_G,
-  simp only [set.mem_preimage, one_mul, eq_self_iff_true, eq_mpr_eq_cast, set_coe_cast,
-  function.comp_app, mem_ball, subtype.dist_eq, real.dist_eq],
-  have hp : 0 < (p : ℝ), { rw [← nnreal.coe_zero, nnreal.coe_lt_coe], from fact.out _ },
-  rw ← hξ_G,
-  have η_pos' : 0 < η := by {rw hη, from (sub_pos.mpr hF)},
-  set η₀ : ℝ≥0 := ⟨η, le_of_lt η_pos'⟩ with hη₀,
-  have h_η_η₀ := @coe_pow_half p _ _ η η_pos' η₀ hη₀,
-  simp_rw [h_η_η₀] at hG,
-  have speed_1 : |ξ_G - y | ≤ |ξ_G - ξ_F| + |ξ_F - y | := abs_sub_le ξ_G ξ_F y,
-  have speed_2 : |ξ_G - ξ_F| + |ξ_F - y | < ε - | ξ_F - y | + | ξ_F - y | := by { apply add_lt_add_right,
-                        rw [← real_measures.dist_eq, ← real.rpow_lt_rpow_iff
-                        (real.rpow_nonneg_of_nonneg (real_measures.norm_nonneg _) _)
-                        (sub_nonneg.mpr (le_of_lt hF)) hp, ← real.rpow_mul
-                        (real_measures.norm_nonneg _), inv_mul_cancel (ne_of_gt hp), real.rpow_one,
-                        ← hη], exact dist_lt_of_mem_U p c (η₀ ^ (p : ℝ))
-                        (real.rpow_pos_of_pos η_pos' _) F G hG},
-  replace speed_2 : |ξ_G - ξ_F| + |ξ_F - y | < ε := by {rwa [sub_add_cancel ε (| ξ_F - y |)]
-    at speed_2},
-  exact lt_of_le_of_lt speed_1 speed_2,
-  sorry,
-  end #exit
-  exact this, end #exit
-  -- exact this,--GRRRRRR
-  sorry,
-  -- **[FAE]** This `calc` block does what `speed_1` and `speed_2` do, but causing a timeout
-  -- calc |ξ_G - y | ≤ |ξ_G - ξ_F| + |ξ_F - y | : abs_sub_le ξ_G ξ_F y
-  --             ... < ε - | ξ_F - y | + | ξ_F - y | : by { apply add_lt_add_right,
-  --                       rw [← real_measures.dist_eq, ← real.rpow_lt_rpow_iff
-  --                       (real.rpow_nonneg_of_nonneg (real_measures.norm_nonneg _) _)
-  --                       (sub_nonneg.mpr (le_of_lt hF)) hp, ← real.rpow_mul
-  --                       (real_measures.norm_nonneg _), inv_mul_cancel (ne_of_gt hp), real.rpow_one,
-  --                       ← hη], exact dist_lt_of_mem_U p c (η₀ ^ (p : ℝ))
-  --                       (real.rpow_pos_of_pos η_pos' _) F G hG, }
-  --             ... = ε : sub_add_cancel ε _,
-
-  -- sorry,
-  -- calc |ξ_G - y | ≤ |ξ_G - ξ_F| + |ξ_F - y | : abs_sub_le ξ_G ξ_F y
-  --             ... < ε - | ξ_F - y | + | ξ_F - y | : by { apply add_lt_add_right,
-  --                       rw [← real_measures.dist_eq, ← real.rpow_lt_rpow_iff
-  --                       (real.rpow_nonneg_of_nonneg (real_measures.norm_nonneg _) _)
-  --                       (sub_nonneg.mpr (le_of_lt hF)) hp, ← real.rpow_mul
-  --                       (real_measures.norm_nonneg _), inv_mul_cancel (ne_of_gt hp), real.rpow_one,
-  --                       ← hη], exact dist_lt_of_mem_U p c (η₀ ^ (p : ℝ))
-  --                       (real.rpow_pos_of_pos η_pos' _) F G hG, }
-  --             ... = ε : sub_add_cancel ε _,
-end
+--    :
+--   (U c F (geom_B c ((η / 2) ^ (p : ℝ)) h_pos) )  ⊆ ((homeo_filtration_ϖ_ball c) ∘ θ_c c (ϖ) ⁻¹' (ball y ε))
+--   :=
+-- begin
+--   intros G hG,
+--   let ξ_F : ℝ := ((homeo_filtration_ϖ_ball c) (θ_c p c (Fintype.of unit) F)),
+--   let ξ_G : ℝ := ((homeo_filtration_ϖ_ball c) (θ_c p c (Fintype.of unit) G)),
+--   simp only [set.mem_preimage, one_mul, eq_self_iff_true, eq_mpr_eq_cast, set_coe_cast,
+--   function.comp_app, mem_ball, subtype.dist_eq, real.dist_eq],
+--   have hp : 0 < (p : ℝ), { rw [← nnreal.coe_zero, nnreal.coe_lt_coe], from fact.out _ },
+--   have η_pos' : 0 < η := by {rw hη, from (sub_pos.mpr hF)},
+--   set η₀ : ℝ≥0 := ⟨η, le_of_lt η_pos'⟩ with hη₀,
+--   have h_η_η₀ := @coe_pow_half p _ _ η η_pos' η₀ hη₀,
+--   simp_rw [h_η_η₀] at hG,
+--   have speed_1 : |ξ_G - y | ≤ |ξ_G - ξ_F| + |ξ_F - y | := abs_sub_le ξ_G ξ_F y,
+--   have speed_2 : |ξ_G - ξ_F| + |ξ_F - y | < ε - | ξ_F - y | + | ξ_F - y | := by { apply add_lt_add_right,
+--                         rw [← real_measures.dist_eq, ← real.rpow_lt_rpow_iff
+--                         (real.rpow_nonneg_of_nonneg (real_measures.norm_nonneg _) _)
+--                         (sub_nonneg.mpr (le_of_lt hF)) hp, ← real.rpow_mul
+--                         (real_measures.norm_nonneg _), inv_mul_cancel (ne_of_gt hp), real.rpow_one,
+--                         ← hη], exact dist_lt_of_mem_U p c (η₀ ^ (p : ℝ))
+--                         (real.rpow_pos_of_pos η_pos' _) F G hG},
+--   replace speed_2 : |ξ_G - ξ_F| + |ξ_F - y | < ε := by {rwa [sub_add_cancel ε (| ξ_F - y |)]
+--     at speed_2},
+--   exact lt_of_le_of_lt speed_1 speed_2,
+--   sorry,
+--   end #exit
 
 
--- This is the main continuity property needed in `ses2.lean`
-theorem continuous_θ_c (c : ℝ≥0) : continuous (θ_c c S) :=
-begin
-  apply continuous_of_seval_ℳ_comp_continuous,
-  intro s,
-  rw ← commute_seval_ℒ_ℳ,
-  refine continuous.comp _ (continuous_seval_ℒ_c p S c s),
-  apply (homeo_filtration_ϖ_ball c).comp_continuous_iff.mp,
-  apply reduction_balls,
-  intros y ε,
-  rw is_open_iff_forall_mem_open,
-  intros F hF,
-  simp only [set.mem_preimage, one_mul, eq_self_iff_true, eq_mpr_eq_cast, set_coe_cast,
-    function.comp_app, mem_ball, subtype.dist_eq, real.dist_eq] at hF,
-  set η := ε - |(homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) - y| with hη,
-  have η_pos' : 0 < η := by {rw hη, from (sub_pos.mpr hF)},
-  have η_pos : 0 < (η / 2) ^ (p : ℝ) := real.rpow_pos_of_pos (half_pos η_pos') _,
-  set V := U p c F (geom_B p c ((η / 2) ^ (p : ℝ)) η_pos) with hV,
-  simp_rw [real.div_rpow (le_of_lt η_pos') (le_of_lt (@two_pos ℝ _ _))] at hV,
-  use V,
-  exact and.intro (U_subset_preimage p c ε η y F hF hη η_pos)
-    (and.intro (is_open_U p c F _) (mem_U p c F _)),
-end
+-- noncomputable! lemma U_subset_preimage (ε η : ℝ) (y : closed_ball (0 : ℝ) (c ^ (p⁻¹ : ℝ)))
+--   (F : filtration (ℒ ϖ) c)
+--   (hF : |(((homeo_filtration_ϖ_ball c) (θ_c c (Fintype.of unit) F)) : ℝ) - y| < ε)
+--   (hη : η = ε - |(homeo_filtration_ϖ_ball c (θ_c c ϖ F)) - y|) (h_pos : 0 < (η / 2) ^ (p : ℝ)) :
+--   (U c F (geom_B c ((η / 2) ^ (p : ℝ)) h_pos) )  ⊆
+--     ((homeo_filtration_ϖ_ball c) ∘ θ_c c (ϖ) ⁻¹' (ball y ε)) :=
+-- begin
+--   intros G hG,
+--   set ξ_F : ℝ := ((homeo_filtration_ϖ_ball c) (θ_c p c (Fintype.of unit) F)) with hξ_F,
+--   set ξ_G : ℝ := ((homeo_filtration_ϖ_ball c) (θ_c p c (Fintype.of unit) G)) with hξ_G,
+--   simp only [set.mem_preimage, one_mul, eq_self_iff_true, eq_mpr_eq_cast, set_coe_cast,
+--   function.comp_app, mem_ball, subtype.dist_eq, real.dist_eq],
+--   have hp : 0 < (p : ℝ), { rw [← nnreal.coe_zero, nnreal.coe_lt_coe], from fact.out _ },
+--   rw ← hξ_G,
+--   have η_pos' : 0 < η := by {rw hη, from (sub_pos.mpr hF)},
+--   set η₀ : ℝ≥0 := ⟨η, le_of_lt η_pos'⟩ with hη₀,
+--   have h_η_η₀ := @coe_pow_half p _ _ η η_pos' η₀ hη₀,
+--   simp_rw [h_η_η₀] at hG,
+--   have speed_1 : |ξ_G - y | ≤ |ξ_G - ξ_F| + |ξ_F - y | := abs_sub_le ξ_G ξ_F y,
+--   have speed_2 : |ξ_G - ξ_F| + |ξ_F - y | < ε - | ξ_F - y | + | ξ_F - y | := by { apply add_lt_add_right,
+--                         rw [← real_measures.dist_eq, ← real.rpow_lt_rpow_iff
+--                         (real.rpow_nonneg_of_nonneg (real_measures.norm_nonneg _) _)
+--                         (sub_nonneg.mpr (le_of_lt hF)) hp, ← real.rpow_mul
+--                         (real_measures.norm_nonneg _), inv_mul_cancel (ne_of_gt hp), real.rpow_one,
+--                         ← hη], exact dist_lt_of_mem_U p c (η₀ ^ (p : ℝ))
+--                         (real.rpow_pos_of_pos η_pos' _) F G hG},
+--   replace speed_2 : |ξ_G - ξ_F| + |ξ_F - y | < ε := by {rwa [sub_add_cancel ε (| ξ_F - y |)]
+--     at speed_2},
+--   exact lt_of_le_of_lt speed_1 speed_2,
+--   sorry,
+--   end #exit
+--   exact this, end #exit
+--   -- exact this,--GRRRRRR
+--   sorry,
+--   -- **[FAE]** This `calc` block does what `speed_1` and `speed_2` do, but causing a timeout
+--   -- calc |ξ_G - y | ≤ |ξ_G - ξ_F| + |ξ_F - y | : abs_sub_le ξ_G ξ_F y
+--   --             ... < ε - | ξ_F - y | + | ξ_F - y | : by { apply add_lt_add_right,
+--   --                       rw [← real_measures.dist_eq, ← real.rpow_lt_rpow_iff
+--   --                       (real.rpow_nonneg_of_nonneg (real_measures.norm_nonneg _) _)
+--   --                       (sub_nonneg.mpr (le_of_lt hF)) hp, ← real.rpow_mul
+--   --                       (real_measures.norm_nonneg _), inv_mul_cancel (ne_of_gt hp), real.rpow_one,
+--   --                       ← hη], exact dist_lt_of_mem_U p c (η₀ ^ (p : ℝ))
+--   --                       (real.rpow_pos_of_pos η_pos' _) F G hG, }
+--   --             ... = ε : sub_add_cancel ε _,
+
+--   -- sorry,
+--   -- calc |ξ_G - y | ≤ |ξ_G - ξ_F| + |ξ_F - y | : abs_sub_le ξ_G ξ_F y
+--   --             ... < ε - | ξ_F - y | + | ξ_F - y | : by { apply add_lt_add_right,
+--   --                       rw [← real_measures.dist_eq, ← real.rpow_lt_rpow_iff
+--   --                       (real.rpow_nonneg_of_nonneg (real_measures.norm_nonneg _) _)
+--   --                       (sub_nonneg.mpr (le_of_lt hF)) hp, ← real.rpow_mul
+--   --                       (real_measures.norm_nonneg _), inv_mul_cancel (ne_of_gt hp), real.rpow_one,
+--   --                       ← hη], exact dist_lt_of_mem_U p c (η₀ ^ (p : ℝ))
+--   --                       (real.rpow_pos_of_pos η_pos' _) F G hG, }
+--   --             ... = ε : sub_add_cancel ε _,
+-- end
+
+
+-- -- This is the main continuity property needed in `ses2.lean`
+-- theorem continuous_θ_c (c : ℝ≥0) : continuous (θ_c c S) :=
+-- begin
+--   apply continuous_of_seval_ℳ_comp_continuous,
+--   intro s,
+--   rw ← commute_seval_ℒ_ℳ,
+--   refine continuous.comp _ (continuous_seval_ℒ_c p S c s),
+--   apply (homeo_filtration_ϖ_ball c).comp_continuous_iff.mp,
+--   apply reduction_balls,
+--   intros y ε,
+--   rw is_open_iff_forall_mem_open,
+--   intros F hF,
+--   simp only [set.mem_preimage, one_mul, eq_self_iff_true, eq_mpr_eq_cast, set_coe_cast,
+--     function.comp_app, mem_ball, subtype.dist_eq, real.dist_eq] at hF,
+--   set η := ε - |(homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) - y| with hη,
+--   have η_pos' : 0 < η := by {rw hη, from (sub_pos.mpr hF)},
+--   have η_pos : 0 < (η / 2) ^ (p : ℝ) := real.rpow_pos_of_pos (half_pos η_pos') _,
+--   set V := U p c F (geom_B p c ((η / 2) ^ (p : ℝ)) η_pos) with hV,
+--   simp_rw [real.div_rpow (le_of_lt η_pos') (le_of_lt (@two_pos ℝ _ _))] at hV,
+--   use V,
+--   exact and.intro (U_subset_preimage p c ε η y F hF hη η_pos)
+--     (and.intro (is_open_U p c F _) (mem_U p c F _)),
+-- end
 
 
 end theta
