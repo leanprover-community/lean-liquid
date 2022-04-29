@@ -772,6 +772,46 @@ def ξ (F : filtration (ℒ ϖ) c) : ℝ :=
 def hξ (F : filtration (ℒ ϖ) c) :
   ξ F = (homeo_filtration_ϖ_ball c) (θ_c c (Fintype.of punit) F) := rfl
 
+lemma speed_aux' (ε η : ℝ) (η₀ : ℝ≥0) (hη₀ : η = η₀)
+  (y : (closed_ball (0 : ℝ) (c ^ (p : ℝ)⁻¹)))
+  (F G : (filtration (ℒ (Fintype.of punit)) c))
+  (hF : |(((homeo_filtration_ϖ_ball c) (θ_c c (Fintype.of punit) F)) : ℝ) - y| < ε)
+  (hη : η = ε - |(homeo_filtration_ϖ_ball c (θ_c c ϖ F)) - y|) (h_pos : 0 < (η / 2) ^ (p : ℝ))
+  (h_pos : 0 < (η / 2) ^ (p:ℝ))
+  (hp : 0 < (p:ℝ))
+  (η_pos' : 0 < η)
+  (h_η_η₀ : (η / 2) ^ (p:ℝ) = ↑η₀ ^ (p:ℝ) / 2 ^ p.val) (h_pos'')
+  (hG : G ∈ U c F (geom_B c ((↑η₀ ^ (p:ℝ) / 2 ^ p.val)) h_pos'')) :
+  ∥(θ_c c (Fintype.of punit) G).val - (θ_c c (Fintype.of punit) F).val∥ < η ^ (p:ℝ) :=
+begin
+  have foo : 0 < η₀ ^ (p:ℝ),
+  { apply real.rpow_pos_of_pos, rw ← hη₀, exact η_pos' },
+  -- exact dist_lt_of_mem_U p c (η₀ ^ (p : ℝ)) (real.rpow_pos_of_pos η_pos' _) F G hG
+  have := dist_lt_of_mem_U p c (η₀ ^ (p : ℝ)) foo F G hG,
+  convert this,
+end
+
+lemma speed_aux (ε η : ℝ) (η₀ : ℝ≥0) (hη₀ : η = η₀)
+  (y : (closed_ball (0 : ℝ) (c ^ (p : ℝ)⁻¹)))
+  (F G : (filtration (ℒ (Fintype.of punit)) c))
+  (hF : |(((homeo_filtration_ϖ_ball c) (θ_c c (Fintype.of punit) F)) : ℝ) - y| < ε)
+  (hη : η = ε - |(homeo_filtration_ϖ_ball c (θ_c c ϖ F)) - y|) (h_pos : 0 < (η / 2) ^ (p : ℝ))
+  (h_pos : 0 < (η / 2) ^ (p:ℝ))
+  (hp : 0 < (p:ℝ))
+  (η_pos' : 0 < η)
+  (h_η_η₀ : (η / 2) ^ (p:ℝ) = ↑η₀ ^ (p:ℝ) / 2 ^ p.val) (h_pos'')
+  (hG : G ∈ U c F (geom_B c ((↑η₀ ^ (p:ℝ) / 2 ^ p.val)) h_pos'')) :
+  |ξ G - ξ F| < ε - |ξ F - y| :=
+begin
+  repeat {rw hξ},
+  rw [← real_measures.dist_eq,
+    ← real.rpow_lt_rpow_iff
+      (real.rpow_nonneg_of_nonneg (real_measures.norm_nonneg _) _) (sub_nonneg.mpr (le_of_lt hF)) hp,
+    ← real.rpow_mul (real_measures.norm_nonneg _),
+    inv_mul_cancel (ne_of_gt hp), real.rpow_one, ← hη],
+  apply speed_aux', assumption'
+end
+
 lemma speed (ε η : ℝ) (y : closed_ball (0 : ℝ) (c ^ (p⁻¹ : ℝ)))
   (F G : filtration (ℒ ϖ) c)
   (hF : |(((homeo_filtration_ϖ_ball c) (θ_c c (Fintype.of punit) F)) : ℝ) - y| < ε)
@@ -785,34 +825,9 @@ begin
   have h_η_η₀ := @coe_pow_half p _ _ η η_pos' η₀ hη₀,
   simp_rw [h_η_η₀] at hG,
   apply add_lt_add_right,
-  repeat {rw hξ},
-  rw [← real_measures.dist_eq, ← real.rpow_lt_rpow_iff
-    (real.rpow_nonneg_of_nonneg (real_measures.norm_nonneg _) _)
-    (sub_nonneg.mpr (le_of_lt hF)) hp, ← real.rpow_mul
-    (real_measures.norm_nonneg _), inv_mul_cancel (ne_of_gt hp), real.rpow_one, ← hη],
-  -- exact dist_lt_of_mem_U p c (η₀ ^ (p : ℝ)) (real.rpow_pos_of_pos η_pos' _) F G hG
-  sorry
-  -- **[FAE]** This `calc` block does what `speed_1` and `speed_2` do, but causing a timeout
-  -- calc |ξ_G - y | ≤ |ξ_G - ξ_F| + |ξ_F - y | : abs_sub_le ξ_G ξ_F y
-  --             ... < ε - | ξ_F - y | + | ξ_F - y | : by { apply add_lt_add_right,
-  --                       rw [← real_measures.dist_eq, ← real.rpow_lt_rpow_iff
-  --                       (real.rpow_nonneg_of_nonneg (real_measures.norm_nonneg _) _)
-  --                       (sub_nonneg.mpr (le_of_lt hF)) hp, ← real.rpow_mul
-  --                       (real_measures.norm_nonneg _), inv_mul_cancel (ne_of_gt hp), real.rpow_one,
-  --                       ← hη], exact dist_lt_of_mem_U p c (η₀ ^ (p : ℝ))
-  --                       (real.rpow_pos_of_pos η_pos' _) F G hG, }
-  --             ... = ε : sub_add_cancel ε _,
-
-  -- sorry,
-  -- calc |ξ_G - y | ≤ |ξ_G - ξ_F| + |ξ_F - y | : abs_sub_le ξ_G ξ_F y
-  --             ... < ε - | ξ_F - y | + | ξ_F - y | : by { apply add_lt_add_right,
-  --                       rw [← real_measures.dist_eq, ← real.rpow_lt_rpow_iff
-  --                       (real.rpow_nonneg_of_nonneg (real_measures.norm_nonneg _) _)
-  --                       (sub_nonneg.mpr (le_of_lt hF)) hp, ← real.rpow_mul
-  --                       (real_measures.norm_nonneg _), inv_mul_cancel (ne_of_gt hp), real.rpow_one,
-  --                       ← hη], exact dist_lt_of_mem_U p c (η₀ ^ (p : ℝ))
-  --                       (real.rpow_pos_of_pos η_pos' _) F G hG, }
-  --             ... = ε : sub_add_cancel ε _,
+  apply @speed_aux p _ _ c ε η η₀ _ y F G,
+  assumption',
+  rw hη₀, refl,
 end
 
 end
