@@ -66,6 +66,8 @@ set_option old_structure_cmd true
 
 open comphaus_filtered_pseudo_normed_group_with_Tinv
 
+/-- The type of strict morphisms between two compact Hausdorff filtered pseudo-normed groups
+with an action of T⁻¹. -/
 structure comphaus_filtered_pseudo_normed_group_with_Tinv_hom (r' : ℝ≥0) (M₁ M₂ : Type*)
   [comphaus_filtered_pseudo_normed_group_with_Tinv r' M₁]
   [comphaus_filtered_pseudo_normed_group_with_Tinv r' M₂]
