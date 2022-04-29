@@ -11,7 +11,7 @@ noncomputable theory
 
 /-- `ProFiltPseuNormGrpWithTinv₁ r` is the category of
 `profinitely_filtered_pseudo_normed_group_with_Tinv r M`s such that the filtration is
-exhaustive. -/
+exhaustive. Morphisms are strict (that is, send `filtration c` to `filtration c`). -/
 structure ProFiltPseuNormGrpWithTinv₁ (r : ℝ≥0) : Type (u+1) :=
 (M : Type u)
 [str : profinitely_filtered_pseudo_normed_group_with_Tinv r M]
