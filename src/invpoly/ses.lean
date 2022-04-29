@@ -46,8 +46,10 @@ def eval2_nat_trans :
 { app := λ S, eval2 p S,
   naturality' := λ S T f, begin
     ext x t,
-    show (map f x t).eval 2 = finset.sum _ ((eval2 p S) x),
-    sorry, recover, exact 0,
+    show (map f x t).eval 2 = _,
+    dsimp only [functor.comp_map, normed_free_pfpng_functor_map,
+      CompHausFiltPseuNormGrp₁.comp_apply, map],
+    erw [polynomial.eval_finset_sum], refl, recover, exact 0,
   end }
 .
 
