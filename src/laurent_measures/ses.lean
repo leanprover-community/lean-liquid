@@ -763,41 +763,35 @@ lemma coe_pow_half (η : ℝ) (η_pos' : 0 < η) (η₀ : ℝ≥0) (hη₀ : η�
   (η / 2) ^ (p : ℝ) = ((η₀ ^ (p : ℝ) : ℝ)) / 2 ^ (p.1) := by {rw [real.div_rpow (le_of_lt η_pos') _,
      nnreal.val_eq_coe, hη₀, subtype.coe_mk], simp only [zero_le_bit0, zero_le_one]}
 
-lemma lt_of_le_of_lt_real {a b c : ℝ} : a ≤ b → b < c → a < c := sorry
+section
+variables {c}
 
-lemma U_subset_preimage (ε η : ℝ) (y : closed_ball (0 : ℝ) (c ^ (p⁻¹ : ℝ)))
-  (F : filtration (ℒ ϖ) c)
+def ξ (F : filtration (ℒ ϖ) c) : ℝ :=
+(homeo_filtration_ϖ_ball c) (θ_c c (Fintype.of punit) F)
+
+def hξ (F : filtration (ℒ ϖ) c) :
+  ξ F = (homeo_filtration_ϖ_ball c) (θ_c c (Fintype.of punit) F) := rfl
+
+lemma speed (ε η : ℝ) (y : closed_ball (0 : ℝ) (c ^ (p⁻¹ : ℝ)))
+  (F G : filtration (ℒ ϖ) c)
   (hF : |(((homeo_filtration_ϖ_ball c) (θ_c c (Fintype.of punit) F)) : ℝ) - y| < ε)
-  (hη : η = ε - |(homeo_filtration_ϖ_ball c (θ_c c ϖ F)) - y|) (h_pos : 0 < (η / 2) ^ (p : ℝ)) :
-  (U c F (geom_B c ((η / 2) ^ (p : ℝ)) h_pos) )  ⊆
-    ((homeo_filtration_ϖ_ball c) ∘ θ_c c (ϖ) ⁻¹' (ball y ε)) :=
+  (hη : η = ε - |(homeo_filtration_ϖ_ball c (θ_c c ϖ F)) - y|) (h_pos : 0 < (η / 2) ^ (p : ℝ))
+  (hG : G ∈ U c F (geom_B c ((η / 2) ^ (p:ℝ)) h_pos)) :
+  |(ξ G) - (ξ F)| + |(ξ F) - y| < ε - |(ξ F) - y| + |(ξ F) - y| :=
 begin
-  intros G hG,
-  set ξ_F : ℝ := ((homeo_filtration_ϖ_ball c) (θ_c p c (Fintype.of punit) F)) with hξ_F,
-  set ξ_G : ℝ := ((homeo_filtration_ϖ_ball c) (θ_c p c (Fintype.of punit) G)) with hξ_G,
-  simp only [set.mem_preimage, one_mul, eq_self_iff_true, eq_mpr_eq_cast, set_coe_cast,
-  function.comp_app, mem_ball, subtype.dist_eq, real.dist_eq],
   have hp : 0 < (p : ℝ), { rw [← nnreal.coe_zero, nnreal.coe_lt_coe], from fact.out _ },
-  rw ← hξ_G,
   have η_pos' : 0 < η := by {rw hη, from (sub_pos.mpr hF)},
   set η₀ : ℝ≥0 := ⟨η, le_of_lt η_pos'⟩ with hη₀,
   have h_η_η₀ := @coe_pow_half p _ _ η η_pos' η₀ hη₀,
   simp_rw [h_η_η₀] at hG,
-  have speed_1 : |ξ_G - y | ≤ |ξ_G - ξ_F| + |ξ_F - y | := abs_sub_le ξ_G ξ_F y,
-  have speed_2 : |ξ_G - ξ_F| + |ξ_F - y | < ε - | ξ_F - y | + | ξ_F - y | := by { apply add_lt_add_right,
-                        rw [← real_measures.dist_eq, ← real.rpow_lt_rpow_iff
-                        (real.rpow_nonneg_of_nonneg (real_measures.norm_nonneg _) _)
-                        (sub_nonneg.mpr (le_of_lt hF)) hp, ← real.rpow_mul
-                        (real_measures.norm_nonneg _), inv_mul_cancel (ne_of_gt hp), real.rpow_one,
-                        ← hη], exact dist_lt_of_mem_U p c (η₀ ^ (p : ℝ))
-                        (real.rpow_pos_of_pos η_pos' _) F G hG},
-  replace speed_2 : |ξ_G - ξ_F| + |ξ_F - y | < ε := by {rwa [sub_add_cancel ε (| ξ_F - y |)]
-    at speed_2},
-  clear hξ_F hξ_G hF hG hη h_pos hp h_η_η₀ hη₀ η₀ η_pos',
-  have := lt_of_le_of_lt_real speed_1 speed_2,
-  rw ← real.norm_eq_abs at this ⊢,
-  -- exact this,--GRRRRRR
-  sorry,
+  apply add_lt_add_right,
+  repeat {rw hξ},
+  rw [← real_measures.dist_eq, ← real.rpow_lt_rpow_iff
+    (real.rpow_nonneg_of_nonneg (real_measures.norm_nonneg _) _)
+    (sub_nonneg.mpr (le_of_lt hF)) hp, ← real.rpow_mul
+    (real_measures.norm_nonneg _), inv_mul_cancel (ne_of_gt hp), real.rpow_one, ← hη],
+  -- exact dist_lt_of_mem_U p c (η₀ ^ (p : ℝ)) (real.rpow_pos_of_pos η_pos' _) F G hG
+  sorry
   -- **[FAE]** This `calc` block does what `speed_1` and `speed_2` do, but causing a timeout
   -- calc |ξ_G - y | ≤ |ξ_G - ξ_F| + |ξ_F - y | : abs_sub_le ξ_G ξ_F y
   --             ... < ε - | ξ_F - y | + | ξ_F - y | : by { apply add_lt_add_right,
@@ -819,6 +813,38 @@ begin
   --                       ← hη], exact dist_lt_of_mem_U p c (η₀ ^ (p : ℝ))
   --                       (real.rpow_pos_of_pos η_pos' _) F G hG, }
   --             ... = ε : sub_add_cancel ε _,
+end
+
+end
+
+lemma U_subset_preimage' (ε η : ℝ) (y : closed_ball (0 : ℝ) (c ^ (p⁻¹ : ℝ)))
+  (F : filtration (ℒ ϖ) c)
+  (hF : |(((homeo_filtration_ϖ_ball c) (θ_c c (Fintype.of punit) F)) : ℝ) - y| < ε)
+  (hη : η = ε - |(homeo_filtration_ϖ_ball c (θ_c c ϖ F)) - y|) (h_pos : 0 < (η / 2) ^ (p : ℝ))
+  (G : (filtration (ℒ (Fintype.of punit)) c))
+  (hG : G ∈ U c F (geom_B c ((η / 2) ^ (p:ℝ)) h_pos)) :
+  |ξ G - y| < ε :=
+begin
+  have aux : |(ξ p G) - (ξ p F)| + |(ξ p F) - y | < ε - | (ξ p F) - y | + | (ξ p F) - y |,
+  { apply speed; assumption },
+  replace aux : |(ξ p G) - (ξ p F)| + |(ξ p F) - y | < ε,
+  { rwa [sub_add_cancel ε (| (ξ p F) - y |)] at aux },
+  have := lt_of_le_of_lt (abs_sub_le (ξ p G) (ξ p F) y) aux,
+  rw ← real.norm_eq_abs at this ⊢,
+  exact this,
+end
+
+lemma U_subset_preimage (ε η : ℝ) (y : closed_ball (0 : ℝ) (c ^ (p⁻¹ : ℝ)))
+  (F : filtration (ℒ ϖ) c)
+  (hF : |(((homeo_filtration_ϖ_ball c) (θ_c c (Fintype.of punit) F)) : ℝ) - y| < ε)
+  (hη : η = ε - |(homeo_filtration_ϖ_ball c (θ_c c ϖ F)) - y|) (h_pos : 0 < (η / 2) ^ (p : ℝ)) :
+  (U c F (geom_B c ((η / 2) ^ (p : ℝ)) h_pos) )  ⊆
+    ((homeo_filtration_ϖ_ball c) ∘ θ_c c (ϖ) ⁻¹' (ball y ε)) :=
+begin
+  intros G hG,
+  simp only [set.mem_preimage, one_mul, eq_self_iff_true, eq_mpr_eq_cast, set_coe_cast,
+    function.comp_app, mem_ball, subtype.dist_eq, real.dist_eq],
+  apply U_subset_preimage'; assumption,
 end
 
 
