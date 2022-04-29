@@ -27,6 +27,15 @@ local notation `r` := @r p
   strict' := λ c F hF, begin
     refine (finset.sum_le_sum _).trans hF,
     rintro s -,
+    calc ∥(F s).eval 2∥₊ ^ (p:ℝ) ≤ _ : _,
+    -- suppose that `F s = ∑ (a n) * X ^ n`
+    -- then
+    -- `∥(F s).eval 2∥₊ ^ (p:ℝ)`
+    -- `... = ∥∑ (a n) * 2 ^ n∥₊ ^ (p:ℝ)`
+    -- `... ≤ (∑ ∥(a n) * 2 ^ n∥₊) ^ (p:ℝ)`
+    -- `... ≤ ∑ (∥(a n) * 2 ^ n∥₊ ^ (p:ℝ))` -- use `nnreal.rpow_sum_le_sum_rpow`
+    -- `... = ∑ (∥(a n)∥₊ ^ p * ((1/2) ^ -n) ^ (p:ℝ))`
+    -- `... = ∑ (∥(a n)∥₊ ^ p * (r ^ -n)`
     sorry
   end,
   continuous' := λ c, continuous_of_discrete_topology }
@@ -42,10 +51,88 @@ section ses
 
 open CompHausFiltPseuNormGrp₁
 
+-- move this
+instance (M N : Type*)
+  [comphaus_filtered_pseudo_normed_group M] [comphaus_filtered_pseudo_normed_group N] :
+  add_monoid_hom_class (comphaus_filtered_pseudo_normed_group_hom M N) M N :=
+{ coe := λ f, f,
+  coe_injective' := λ f g h, by { ext, dsimp at h, rw h },
+  map_add := λ f, f.map_add,
+  map_zero := λ f, f.map_zero }
+
+-- move this
+@[simp] lemma _root_.comphaus_filtered_pseudo_normed_group_hom.sub_apply {M N : Type*}
+  [comphaus_filtered_pseudo_normed_group M] [comphaus_filtered_pseudo_normed_group N]
+  (f g : comphaus_filtered_pseudo_normed_group_hom M N) (x : M) :
+  (f - g) x = f x - g x := rfl
+
+-- move this
+@[simp] lemma _root_.comphaus_filtered_pseudo_normed_group_hom.nsmul_apply {M N : Type*}
+  [comphaus_filtered_pseudo_normed_group M] [comphaus_filtered_pseudo_normed_group N]
+  (n : ℕ) (f : comphaus_filtered_pseudo_normed_group_hom M N) (x : M) :
+  (n • f) x = n • (f x) := rfl
+
+@[simp] lemma _root_.comphaus_filtered_pseudo_normed_group_hom.zero_apply (M N : Type*)
+  [comphaus_filtered_pseudo_normed_group M] [comphaus_filtered_pseudo_normed_group N]
+  (x : M) :
+  (0 : comphaus_filtered_pseudo_normed_group_hom M N) x = 0 := rfl
+
+lemma Tinv2_injective (S : Fintype) :
+  function.injective ((Tinv2_nat_trans (fintype_functor r)).app S) :=
+begin
+  rw injective_iff_map_eq_zero,
+  intros f hf,
+  ext s n,
+  apply_fun (λ φ, φ s) at hf,
+  simp only [Tinv2_nat_trans, Tinv_nat_trans, nat_trans.app_nsmul, nat_trans.id_app, sub_apply,
+    nat_trans.app_sub, comphaus_filtered_pseudo_normed_group_hom.sub_apply,
+    pi.nsmul_apply, comphaus_filtered_pseudo_normed_group_hom.nsmul_apply,
+    pi.sub_apply, pi.zero_apply] at hf,
+  simp only [pi.zero_apply, polynomial.coeff_zero],
+  induction n with n ih,
+  { apply_fun (λ φ, φ.coeff 0) at hf,
+    simp only [polynomial.coeff_zero, polynomial.coeff_sub, polynomial.coeff_smul] at hf,
+    erw [invpoly.Tinv_zero, zero_sub, neg_eq_zero, two_nsmul_eq_zero ℤ ℤ] at hf, exact hf, },
+  { apply_fun (λ φ, φ.coeff (n+1)) at hf,
+    simp only [polynomial.coeff_zero, polynomial.coeff_sub, polynomial.coeff_smul] at hf,
+    erw [invpoly.Tinv_succ, ih, zero_sub, neg_eq_zero, two_nsmul_eq_zero ℤ ℤ] at hf, exact hf }
+end
+
+lemma Tinv2_comp_eval2_eq_zero (S : Fintype) :
+  (Tinv2_nat_trans (fintype_functor r)).app S ≫
+    (whisker_right (eval2_nat_trans p) enlarging_functor).app S = 0 :=
+begin
+  ext f s,
+  show (polynomial.X * (f s) - _).eval 2 = (0 : ℤ),
+  simp only [nat_trans.app_nsmul, nat_trans.id_app, comphaus_filtered_pseudo_normed_group_hom.nsmul_apply,
+  category_theory.id_apply, pi.smul_apply, nsmul_eq_mul, nat.cast_bit0, nat.cast_one, polynomial.eval_sub,
+  polynomial.eval_mul, polynomial.eval_X, polynomial.eval_bit0, polynomial.eval_one, sub_self],
+end
+
 theorem short_exact (S : Profinite) :
   short_exact ((condensify_Tinv2 _).app S) ((condensify_map $ eval2_nat_trans p).app S) :=
 begin
-  refine condensify_nonstrict_exact _ _ (r⁻¹ + 2) (Tinv2_bound_by _) sorry _ sorry _ _ _ _ _ _,
+  let κ : ℝ≥0 → ℝ≥0 := λ c, max c (c ^ (↑p⁻¹ : ℝ)),
+  have hκ : id ≤ κ := λ c, le_max_left _ _,
+  have h0p : 0 < p := fact.out _,
+  have hp1 : p ≤ 1 := fact.out _,
+  have h0pinv : 0 ≤ p⁻¹, { rw ← nnreal.inv_pos at h0p, exact h0p.le },
+  refine condensify_nonstrict_exact _ _ (r⁻¹ + 2) (Tinv2_bound_by _) _ κ _ hκ
+    (Tinv2_injective p) (Tinv2_comp_eval2_eq_zero p) _ _ _,
+  swap 4,
+  { rintro S c g (hg : _ ≤ _),
+    let f : invpoly r S := λ s, polynomial.C (g s),
+    refine ⟨f, _, _⟩,
+    { show _ ≤ _,
+      replace hg := nnreal.rpow_le_rpow hg h0pinv,
+      refine le_trans _ (le_max_right _ _),
+      refine le_trans _ hg,
+      rw normed_free_pfpng.nnnorm_def,
+      -- rintro s -,
+      -- simp only [f, zpow_neg₀, zpow_coe_nat, id.def, polynomial.coeff_C],
+      sorry
+       },
+    { ext s, apply polynomial.eval_C } },
   all_goals { sorry },
 end
 
