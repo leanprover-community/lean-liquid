@@ -131,12 +131,18 @@ instance fact_inv_pos : fact (0 < r'⁻¹) := ⟨nnreal.inv_pos.2 $ fact.out _�
 
 --set_option pp.universes true
 
-/-- See docstring for `condednsify_nonstrict`. -/
+/--
+Given a functor from `Fintype` to `ProFiltPseuNormGrpWithTinv₁`, the `T⁻¹` action
+is a nonstrict morphism which is natural (see `Tinv_nat_trans`) and thus
+induces a morphism on the associated condensed abelian groups.
+-/
 def condensify_Tinv (F : Fintype.{u} ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r') :
   condensify.{u} (F ⋙ to_CHFPNG₁ r') ⟶ condensify.{u} (F ⋙ to_CHFPNG₁ r') :=
 condensify_nonstrict (Tinv_nat_trans _) r'⁻¹ (Tinv_bound_by _)
 
-/-- See docstring for `condednsify_nonstrict`. -/
+/--
+A variant of `condensify_Tinv` with a different bound, given by `r'⁻¹ + 2`.
+-/
 def condensify_Tinv2 (F : Fintype.{u} ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r') :
   condensify.{u} (F ⋙ to_CHFPNG₁ r') ⟶ condensify.{u} (F ⋙ to_CHFPNG₁ r') :=
 condensify_nonstrict (Tinv2_nat_trans _) (r'⁻¹ + 2) (Tinv2_bound_by _)
