@@ -263,10 +263,9 @@ apply_nolint laurent_measures.laurent_measures.norm_nonneg dup_namespace
 
 -- laurent_measures/ses.lean
 apply_nolint laurent_measures_ses.U unused_arguments
-apply_nolint laurent_measures_ses.aux_dist_left unused_arguments
-apply_nolint laurent_measures_ses.aux_dist_right unused_arguments
 apply_nolint laurent_measures_ses.box unused_arguments
-apply_nolint laurent_measures_ses.complement_of_balls_pos_NN unused_arguments
+apply_nolint laurent_measures_ses.coe_pow_half unused_arguments
+apply_nolint laurent_measures_ses.mem_filtration_le_monomial unused_arguments
 apply_nolint laurent_measures_ses.pos_ε_pow unused_arguments
 apply_nolint laurent_measures_ses.real_measures.topological_space unused_arguments
 
@@ -283,6 +282,10 @@ apply_nolint half_lt_r unused_arguments
 apply_nolint psi_def_aux unused_arguments
 apply_nolint psi_def_aux_2 unused_arguments
 apply_nolint psi_def_aux_3 unused_arguments
+apply_nolint psi_def_aux_4 unused_arguments
+apply_nolint psi_def_summable unused_arguments
+apply_nolint psi_def_summable2 unused_arguments
+apply_nolint psi_def_summable3 unused_arguments
 apply_nolint tsum_reindex unused_arguments
 apply_nolint θ unused_arguments
 apply_nolint θ_natural unused_arguments
