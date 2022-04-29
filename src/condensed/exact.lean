@@ -586,8 +586,7 @@ end
 variables (C)
 
 lemma exact_with_constant_of_epi (f : A ⟶ B) (r : ℝ≥0 → ℝ≥0) (hr : id ≤ r)
-  (hf : ∀ c, filtration B c ⊆ f '' (filtration A (r c)))
-  [epi ((to_PNG₁ ⋙ PseuNormGrp₁.to_Ab).map f)] :
+  (hf : ∀ c, filtration B c ⊆ f '' (filtration A (r c))) :
   exact_with_constant f (0 : B ⟶ C) r :=
 begin
   refine ⟨_, _, hr⟩,
