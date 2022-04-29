@@ -17,6 +17,9 @@ variables (r' : ℝ≥0) [fact (0 < r')]
 
 open ProFiltPseuNormGrpWithTinv₁
 
+/-- `fintype_functor r'` is an explicit functor from finite types to the category of profinitely
+  exhaustively-filtered pseudo-normed groups with an action of T⁻¹, and strict morphisms. It sends
+  `S` to the Laurent measures on `S` with bound `r'`. -/
 @[simps] def fintype_functor : Fintype.{u} ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r' :=
 { obj := λ S, ⟨laurent_measures r' S, λ F, ⟨∥F∥₊, le_rfl⟩⟩,
   map := λ S T f, map_hom f,
