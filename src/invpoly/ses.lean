@@ -44,7 +44,11 @@ def eval2_nat_trans :
   (fintype_functor.{u} r ⋙ to_CompHausFiltPseuNormGrp₁.{u} r) ⟶
   (normed_free_pfpng_functor.{u} p ⋙ ProFiltPseuNormGrp₁.to_CHFPNG₁) :=
 { app := λ S, eval2 p S,
-  naturality' := λ S T f, by { ext x t, sorry } }
+  naturality' := λ S T f, begin
+    ext x t,
+    show (map f x t).eval 2 = finset.sum _ ((eval2 p S) x),
+    sorry, recover, exact 0,
+  end }
 .
 
 section ses
@@ -127,11 +131,16 @@ begin
       replace hg := nnreal.rpow_le_rpow hg h0pinv,
       refine le_trans _ (le_max_right _ _),
       refine le_trans _ hg,
-      rw normed_free_pfpng.nnnorm_def,
-      -- rintro s -,
-      -- simp only [f, zpow_neg₀, zpow_coe_nat, id.def, polynomial.coeff_C],
-      sorry
-       },
+      refine le_trans _ (nnreal.rpow_le_rpow (nnreal.rpow_sum_le_sum_rpow _ _ h0p hp1) h0pinv),
+      rw [← nnreal.rpow_mul, ← nnreal.coe_mul, mul_inv_cancel h0p.ne', nnreal.coe_one,
+        nnreal.rpow_one, invpoly.nnnorm_def],
+      refine finset.sum_le_sum _,
+      rintro s -,
+      simp only [f, zpow_neg₀, zpow_coe_nat, id.def, polynomial.coeff_C],
+      rw tsum_eq_single 0,
+      { rw [if_pos rfl, pow_zero, inv_one, mul_one], },
+      { intros n hn, rw [if_neg hn, nnnorm_zero, zero_mul], },
+      { apply_instance }, },
     { ext s, apply polynomial.eval_C } },
   all_goals { sorry },
 end
