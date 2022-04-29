@@ -28,6 +28,13 @@ open ProFiltPseuNormGrpWithTinv₁ CompHausFiltPseuNormGrp₁ CompHausFiltPseuNo
 
 variables {r'}
 
+/--
+Given a functor `F` from `Fintype` to `CompHausFiltPseuNormGrp₁`, we can obtain
+a functor `Profinite ⥤ CompHausFiltPseuNormGrp₁` by expressing any profinite
+set as a limit of finite sets and taking a limit in the target category.
+We then compose with the functor to condensed abelian groups, and the result is
+called `condensify F`.
+-/
 def condensify (F : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}) :
   Profinite.{u} ⥤ Condensed.{u} Ab.{u+1} :=
 (Profinite.extend.{u} F ⋙ enlarging_functor.{u}) ⋙ to_Condensed.{u}
@@ -36,6 +43,12 @@ variables {F G H : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}}
 variables (α β : F ⋙ enlarging_functor.{u} ⟶ G ⋙ enlarging_functor.{u})
 variables (c cα cβ cαβ : ℝ≥0) [fact (0 < c)]  [fact (0 < cα)] [fact (0 < cβ)] [fact (0 < cαβ)]
 
+/--
+Given functors `F G : Fintype ⥤ CompHausFiltPseuNormGrp₁` and a
+natural transformation `η` between the induced functors `Fintype ⥤ CompHausFiltPseuNormGrp`
+(obtained by composing with `enlarging_functor`), such that the components of `η` are bounded
+by a *single* `c : ℝ≥0`, this is the morphism between the associated condensed abelian groups.
+-/
 def condensify_nonstrict
   (α : F ⋙ enlarging_functor.{u} ⟶ G ⋙ enlarging_functor.{u}) (c : ℝ≥0) [fact (0 < c)]
   (h : ∀ X, (α.app X).bound_by c) :
@@ -118,10 +131,12 @@ instance fact_inv_pos : fact (0 < r'⁻¹) := ⟨nnreal.inv_pos.2 $ fact.out _�
 
 --set_option pp.universes true
 
+/-- See docstring for `condednsify_nonstrict`. -/
 def condensify_Tinv (F : Fintype.{u} ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r') :
   condensify.{u} (F ⋙ to_CHFPNG₁ r') ⟶ condensify.{u} (F ⋙ to_CHFPNG₁ r') :=
 condensify_nonstrict (Tinv_nat_trans _) r'⁻¹ (Tinv_bound_by _)
 
+/-- See docstring for `condednsify_nonstrict`. -/
 def condensify_Tinv2 (F : Fintype.{u} ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r') :
   condensify.{u} (F ⋙ to_CHFPNG₁ r') ⟶ condensify.{u} (F ⋙ to_CHFPNG₁ r') :=
 condensify_nonstrict (Tinv2_nat_trans _) (r'⁻¹ + 2) (Tinv2_bound_by _)
