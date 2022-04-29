@@ -23,6 +23,8 @@ universes v u
 
 -- Move this!
 -- @[simps obj map {fully_applied := ff}] -- we probably don't want these as global simp lemmas
+/-- `Ab.ulift.{v u}` is the universe lifting functor sending the category of abelian groups in
+  universe `u` into those in universe `max v u`. -/
 def Ab.ulift : Ab.{u} ⥤ Ab.{max v u} :=
 { obj := λ M, AddCommGroup.of $ ulift.{v} M,
   map := λ M N f,
