@@ -10,7 +10,7 @@ noncomputable theory
 
 open category_theory
 
-open_locale nnreal
+open_locale nnreal big_operators
 
 namespace invpoly
 open ProFiltPseuNormGrpWithTinv₁
@@ -27,16 +27,36 @@ local notation `r` := @r p
   strict' := λ c F hF, begin
     refine (finset.sum_le_sum _).trans hF,
     rintro s -,
-    calc ∥(F s).eval 2∥₊ ^ (p:ℝ) ≤ _ : _,
-    -- suppose that `F s = ∑ (a n) * X ^ n`
-    -- then
-    -- `∥(F s).eval 2∥₊ ^ (p:ℝ)`
-    -- `... = ∥∑ (a n) * 2 ^ n∥₊ ^ (p:ℝ)`
-    -- `... ≤ (∑ ∥(a n) * 2 ^ n∥₊) ^ (p:ℝ)`
-    -- `... ≤ ∑ (∥(a n) * 2 ^ n∥₊ ^ (p:ℝ))` -- use `nnreal.rpow_sum_le_sum_rpow`
-    -- `... = ∑ (∥(a n)∥₊ ^ p * ((1/2) ^ -n) ^ (p:ℝ))`
-    -- `... = ∑ (∥(a n)∥₊ ^ p * (r ^ -n)`
-    sorry
+    have h0p : 0 < p := fact.out _,
+    have hp1 : p ≤ 1 := fact.out _,
+    have h0pinv : 0 ≤ p⁻¹, { rw ← nnreal.inv_pos at h0p, exact h0p.le },
+    calc ∥(F s).eval 2∥₊ ^ (p:ℝ)
+        = ∥∑ n in finset.range ((F s).nat_degree + 1), (F s).coeff n * 2 ^ n∥₊ ^ (p:ℝ) : _
+    ... ≤ (∑ n in finset.range ((F s).nat_degree + 1), ∥(F s).coeff n * 2 ^ n∥₊) ^ (p:ℝ) : _
+    ... ≤ ∑ n in finset.range ((F s).nat_degree + 1), (∥(F s).coeff n * 2 ^ n∥₊ ^ (p:ℝ)) : _
+    ... ≤ ∑ n in finset.range ((F s).nat_degree + 1), (∥(F s).coeff n∥₊ * r ^ (-n:ℤ)) : _
+    ... ≤ ∑' n, (∥(F s).coeff n∥₊ * r ^ (-n:ℤ)) : _,
+    { rw polynomial.eval_eq_sum_range, },
+    { refine nnreal.rpow_le_rpow (nnnorm_sum_le _ _) h0p.le, },
+    { refine nnreal.rpow_sum_le_sum_rpow _ _ h0p hp1, },
+    { refine finset.sum_le_sum _,
+      intros n hn,
+      rw [int.nnnorm_mul, nnreal.mul_rpow],
+      refine mul_le_mul' _ (le_of_eq _),
+      { exact nnnorm_int_rpow_le p _ },
+      { have h2n : (2 ^ n : ℤ) = (2 ^ n : ℕ), { norm_cast, },
+        simp only [h2n, ← nnreal.coe_nat_abs, int.nat_abs_of_nat],
+        rw [zpow_neg₀, ← inv_zpow₀, zpow_coe_nat],
+        calc ((2 ^ n : ℕ) : ℝ≥0) ^ (p:ℝ)
+            = (2 ^ (n:ℝ) : ℝ≥0) ^ (p:ℝ) : _
+        ... = (2⁻¹ ^ (p:ℝ) : ℝ≥0)⁻¹ ^ (n:ℝ) : _
+        ... = r⁻¹ ^ n : _,
+        { norm_cast },
+        { rw [← nnreal.rpow_mul, mul_comm, nnreal.rpow_mul, ← nnreal.inv_rpow, inv_inv], },
+        { rw [← one_div (2:ℝ≥0), nnreal.rpow_nat_cast], refl, } } },
+    { refine sum_le_tsum _ _ _,
+      { intros, exact zero_le' },
+      { exact F.nnreal_summable s } },
   end,
   continuous' := λ c, continuous_of_discrete_topology }
 
