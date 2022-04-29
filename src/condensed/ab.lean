@@ -260,6 +260,14 @@ end presheaf
 
 open opposite
 
+/--
+Given `A : CompHausFiltPseuNormGrp`, this is the presheaf which sends a profinite set
+`S` to the collection of functions `f : S → A` such that there exists some `r : ℝ≥0`
+and some continuous map `g : S → A_{≤ r}`, where `f` is the composition of `g` with
+the inclusion of `A_{≤ r}` into `A`.
+This turns out to be a proetale sheaf, and thus defines a condensed abelian group.
+See `to_Condensed` below.
+-/
 @[simps obj map {fully_applied := ff}]
 def Presheaf (A : CompHausFiltPseuNormGrp.{u}) : Profinite.{u}ᵒᵖ ⥤ Ab :=
 { obj := λ S, ⟨presheaf A (unop S)⟩,
@@ -370,6 +378,15 @@ begin
   { apply Presheaf_comp_ulift_is_sheaf_aux_equalizer }
 end
 
+/--
+Given `A : CompHausFiltPseuNormGrp`, this is the condensed abeliian group
+which, as a presheaf, sends a profinite set `S` to the collection of
+functions `f : S → A` such that there exists some `r : ℝ≥0`
+and some continuous map `g : S → A_{≤ r}`, where `f` is the composition of `g` with
+the inclusion of `A_{≤ r}` into `A`.
+
+NOTE: For silly universe reasons, we need to apply a `ulift` as well.
+-/
 @[simps obj map {fully_applied := ff}]
 def to_Condensed : CompHausFiltPseuNormGrp.{u} ⥤ Condensed.{u} Ab.{u+1} :=
 { obj := λ A,
