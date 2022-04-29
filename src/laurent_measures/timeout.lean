@@ -35,8 +35,6 @@ noncomputable! lemma test2 (ε η : ℝ) (y : closed_ball (0 : ℝ) (c ^ (p⁻¹
   (F : filtration (ℒ ϖ) c)
   (hF : |(((real_measures.homeo_filtration_ϖ_ball c) (θ_c p c (Fintype.of unit) F)) : ℝ) - y| < ε)
   (hη : η = ε - |(real_measures.homeo_filtration_ϖ_ball c (θ_c p c ϖ F)) - y|) (h_pos : 0 < (η / 2) ^ (p : ℝ))
-  (answer : (U p c F (geom_B p c ((η / 2) ^ (p : ℝ)) h_pos) )  ⊆ ((real_measures.homeo_filtration_ϖ_ball c) ∘ θ_c p c (ϖ) ⁻¹' (ball y ε)))
-
    :
   (U p c F (geom_B p c ((η / 2) ^ (p : ℝ)) h_pos) )  ⊆ ((real_measures.homeo_filtration_ϖ_ball c) ∘ θ_c p c (ϖ) ⁻¹' (ball y ε))
   :=
