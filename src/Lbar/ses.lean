@@ -473,7 +473,7 @@ theorem short_exact (S : Profinite) [fact (r' < 1)] :
     ((condensify_map
       (whisker_right (laurent_measures.to_Lbar_nat_trans r') (to_CHFPNG₁ r'))).app S) :=
 begin
-  refine condensify_exact _ _ id id le_rfl le_rfl _ _ _ _ _ S,
+  refine condensify_exact _ _ id id le_rfl le_rfl _ _ _ _ S,
   { apply invpoly.to_laurent_measures_injective },
   { intro S, ext F s (_|n); refl, },
   { rintro S c F ⟨hF1, hF2⟩,
@@ -520,9 +520,7 @@ begin
         rw [int.to_nat_le, sub_le_iff_le_add', int.coe_nat_add, ← add_assoc, int.coe_nat_one,
           le_add_iff_nonneg_left] at h,
         rwa [int.neg_succ_of_nat_coe', int.lt_iff_add_one_le, sub_add_cancel,
-          neg_le_iff_add_nonneg] },
-      } },
-  { apply laurent_measures.to_Lbar_surjective },
+          neg_le_iff_add_nonneg] }, } },
   { rintro S c F hF,
     refine ⟨laurent_measures.to_Lbar_section r' S F, _, _⟩,
     { apply laurent_measures.to_Lbar_section_mem_filtration,

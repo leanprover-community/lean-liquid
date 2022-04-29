@@ -241,7 +241,6 @@ lemma condensify_nonstrict_exact
   (H2a : ∀ S, (α.app S) ≫ ((whisker_right β _).app S) = 0)
   (H2b : ∀ S c', (β.app S) ⁻¹' {0} ∩ filtration (G.obj S) c' ⊆
     (α.app S) '' filtration (F.obj S) (cα c' * c⁻¹))
-  (H3a : ∀ S, function.surjective (β.app S))
   (H3b : ∀ S c', filtration (H.obj S) c' ⊆ (β.app S) '' filtration (G.obj S) (cβ c'))
   (X : Profinite.{u}) :
   short_exact ((condensify_nonstrict α c h).app X) ((condensify_map β).app X) :=
@@ -262,7 +261,11 @@ begin
     intro S,
     apply_with (exact_with_constant_of_epi _ _ _ hcβ) { instances := ff },
     { exact H3b S, },
-    { rw AddCommGroup.epi_iff_surjective, exact H3a S }, },
+    { rw AddCommGroup.epi_iff_surjective,
+      intro y,
+      obtain ⟨c, hc⟩ := (H.obj S).exhaustive y,
+      obtain ⟨x, hx, rfl⟩ := H3b S c hc,
+      exact ⟨x, rfl⟩, }, },
   { dsimp only [condensify_map, condensify_nonstrict],
     rw nonstrict_extend_whisker_right_enlarging,
     simp only [nonstrict_extend, whisker_right_comp, nat_trans.comp_app, category.assoc],
@@ -284,12 +287,11 @@ lemma condensify_exact (α : F ⟶ G) (β : G ⟶ H)
   (H2a : ∀ S, α.app S ≫ β.app S = 0)
   (H2b : ∀ S c, (β.app S) ⁻¹' {0} ∩ filtration (G.obj S) c ⊆
     (α.app S) '' filtration (F.obj S) (cα c))
-  (H3a : ∀ S, function.surjective (β.app S))
   (H3b : ∀ S c, filtration (H.obj S) c ⊆ (β.app S) '' filtration (G.obj S) (cβ c))
   (X : Profinite.{u}) :
   short_exact ((condensify_map α).app X) ((condensify_map β).app X) :=
 begin
-  refine condensify_nonstrict_exact _ _ 1 _ cα cβ hcα hcβ H1 _ _ H3a H3b _,
+  refine condensify_nonstrict_exact _ _ 1 _ cα cβ hcα hcβ H1 _ _ H3b _,
   { intro S, simp only [whisker_right_app, ← functor.map_comp, H2a], refl, },
   { intros S c' x H, obtain ⟨x, hx, rfl⟩ := H2b S c' H,
     refine ⟨x, pseudo_normed_group.filtration_mono _ hx, rfl⟩,
