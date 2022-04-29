@@ -1,4 +1,5 @@
 import data.real.nnreal
+import analysis.mean_inequalities_pow
 import for_mathlib.ennreal
 
 open_locale nnreal
@@ -22,7 +23,7 @@ end
 
 attribute [norm_cast] nnreal.coe_zpow
 
-open_locale ennreal
+open_locale ennreal big_operators
 
 /-- sum of row sums equals sum of column sums -/
 lemma nnreal.summable_symm {α β: Type*} (F : α → β → ℝ≥0)
@@ -70,4 +71,15 @@ begin
   suffices : (a : ℝ) * c ≤ b * c, by assumption_mod_cast,
   apply mul_le_mul_of_nonneg_right (by assumption_mod_cast),
   apply zero_le',
+end
+
+lemma nnreal.rpow_sum_le_sum_rpow
+  {ι : Type*} (s : finset ι) {p : ℝ} (a : ι → ℝ≥0) (hp_pos : 0 < p) (hp1 : p ≤ 1) :
+  (∑ i in s, a i) ^ p ≤ ∑ i in s, (a i ^ p) :=
+begin
+  classical,
+  induction s using finset.induction_on with i s his IH,
+  { simp only [nnreal.zero_rpow hp_pos.ne', finset.sum_empty, le_zero_iff], },
+  { simp only [his, finset.sum_insert, not_false_iff],
+    exact (nnreal.rpow_add_le_add_rpow _ _ hp_pos hp1).trans (add_le_add le_rfl IH), }
 end

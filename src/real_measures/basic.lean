@@ -54,26 +54,6 @@ begin
   exact_mod_cast hp.out.ne',
 end
 
--- move this
-lemma nnreal.rpow_add_le_add_rpow {p : ℝ} (a b : ℝ≥0) (hp_pos : 0 < p) (hp1 : p ≤ 1) :
-  (a + b) ^ p ≤ a ^ p + b ^ p :=
-begin
-  rw [← ennreal.coe_le_coe],
-  simpa only [← ennreal.coe_rpow_of_nonneg _ hp_pos.le, ennreal.coe_add]
-    using ennreal.rpow_add_le_add_rpow a b hp_pos hp1,
-end
-
--- move this
-lemma nnreal.rpow_sum_le_sum_rpow
-  {ι : Type*} (s : finset ι) {p : ℝ} (a : ι → ℝ≥0) (hp_pos : 0 < p) (hp1 : p ≤ 1) :
-  (∑ i in s, a i) ^ p ≤ ∑ i in s, (a i ^ p) :=
-begin
-  induction s using finset.induction_on with i s his IH,
-  { simp only [nnreal.zero_rpow hp_pos.ne', finset.sum_empty, le_zero_iff], },
-  { simp only [his, finset.sum_insert, not_false_iff],
-    exact (nnreal.rpow_add_le_add_rpow _ _ hp_pos hp1).trans (add_le_add le_rfl IH), }
-end
-
 protected lemma nnnorm_add [h0p : fact (0 < p)] [hp1 : fact (p ≤ 1)]
   (F G : ℳ p S) : ∥F + G∥₊ ≤ ∥F∥₊ + ∥G∥₊ :=
 begin
