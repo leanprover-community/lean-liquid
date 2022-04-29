@@ -34,7 +34,12 @@ lemma epi_and_is_iso
     (Condensed.of_top_ab V)) :=
 begin
   have SES := Lbar.short_exact.{u u} r' S,
-  haveI : fact (r < r') := sorry,
+  haveI : fact (r < r'),
+  { refine ⟨nnreal.rpow_lt_rpow_of_exponent_gt _ _ _⟩,
+    { exact fact.out _ },
+    { rw [← nnreal.coe_lt_coe, nnreal.coe_div, nnreal.coe_bit0, nnreal.coe_one],
+      exact div_two_lt_of_pos zero_lt_one },
+    { norm_cast, exact fact.out _, } },
   haveI : fact (r < 1) := ⟨(fact.out _ : r < r').trans (fact.out _)⟩,
   haveI : fact (p' ≤ 1) := ⟨(fact.out _ : p' < p).le.trans (fact.out _)⟩,
   rw ← epi_and_is_iso_iff_of_is_iso _ _ _ _
