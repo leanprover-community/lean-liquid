@@ -51,10 +51,7 @@ begin
   let := pBanach.choose_semi_normed_group V,
   let := pBanach.choose_normed_with_aut V (1/2),
   haveI : fact (0 < (1 / 2 : ℝ≥0) ^ (p : ℝ)) := r_pos',
-  convert laurent_measures.epi_and_is_iso _ r S ⟨V⟩ _ using 1,
-  { refine ⟨nnreal.rpow_lt_rpow_of_exponent_gt (fact.out _) _ (fact.out _)⟩,
-    exact nnreal.half_lt_self one_ne_zero, },
-  { apply_instance },
-  { intro v,
-    rw [pBanach.choose_normed_with_aut_T_inv, ← inv_eq_one_div, inv_inv, two_smul, two_nsmul], }
+  convert laurent_measures.epi_and_is_iso p' p S ⟨V⟩ _ using 1,
+  intro v,
+  rw [pBanach.choose_normed_with_aut_T_inv, ← inv_eq_one_div, inv_inv, two_smul, two_nsmul],
 end
