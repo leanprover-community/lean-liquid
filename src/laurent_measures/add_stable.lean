@@ -2,8 +2,6 @@ import laurent_measures.thm69
 
 noncomputable theory
 
-universe u
-
 section add_stable
 
 
@@ -15,9 +13,9 @@ parameter {p : ℝ≥0}
 local notation `r` := @r p
 local notation `ℳ` := real_measures p
 local notation `ℒ` := laurent_measures r
-local notation `ϖ` := Fintype.of (punit : Type u)
+local notation `ϖ` := Fintype.of unit
 
-variable {S : Fintype.{u}}
+variable {S : Fintype.{0}}
 
 instance : has_coe ℝ (ℳ S) := {coe := λ a s, a }
 
