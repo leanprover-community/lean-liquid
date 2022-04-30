@@ -29,7 +29,7 @@ instance : large_category CompHausFiltPseuNormGrp₁.{u} :=
   id := λ A, strict_comphaus_filtered_pseudo_normed_group_hom.id,
   comp := λ A B C f g, g.comp f }
 
-/-- The functor from CompHaus-ly filtered pseudo-normed groups with strict morphisms,
+/-- The "forget ₁" functor from CompHaus-ly filtered pseudo-normed groups with strict morphisms,
   to CompHaus-ly filtered pseudo-normed groups with bounded morphisms, which is the
   identity on objects. -/
 @[simps]
