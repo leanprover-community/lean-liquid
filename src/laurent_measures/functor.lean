@@ -33,13 +33,11 @@ variables (r' : ℝ≥0) [fact (0 < r')]
 
 open ProFiltPseuNormGrpWithTinv₁
 
-open Fintype
-
 @[simps] def profinite : Profinite.{u} ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r' :=
-Profinite.extend (Laurent_measures.{u} r')
+Profinite.extend (Fintype.Laurent_measures.{u} r')
 
 @[simps] def profiniteCH : Profinite.{u} ⥤ CompHausFiltPseuNormGrp₁.{u} :=
-Profinite.extend (Laurent_measures.{u} r' ⋙ to_CompHausFiltPseuNormGrp₁.{u} r')
+Profinite.extend (Fintype.Laurent_measures.{u} r' ⋙ to_CompHausFiltPseuNormGrp₁.{u} r')
 
 def profinite_comp_to_CompHausFiltPseuNormGrp₁ :
   laurent_measures.profinite.{u} r' ⋙ to_CompHausFiltPseuNormGrp₁.{u} r' ≅

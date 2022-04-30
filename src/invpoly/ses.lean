@@ -61,7 +61,7 @@ local notation `r` := @r p
   continuous' := λ c, continuous_of_discrete_topology }
 
 def eval2_nat_trans :
-  (invpoly.Laurent_measures.{u} r ⋙ to_CompHausFiltPseuNormGrp₁.{u} r) ⟶
+  (Fintype_invpoly.{u} r ⋙ to_CompHausFiltPseuNormGrp₁.{u} r) ⟶
   (normed_free_pfpng_functor.{u} p ⋙ ProFiltPseuNormGrp₁.to_CHFPNG₁) :=
 { app := λ S, eval2 p S,
   naturality' := λ S T f, begin
@@ -104,7 +104,7 @@ instance (M N : Type*)
   (0 : comphaus_filtered_pseudo_normed_group_hom M N) x = 0 := rfl
 
 lemma Tinv2_injective (S : Fintype) :
-  function.injective ((Tinv2_nat_trans (invpoly.Laurent_measures r)).app S) :=
+  function.injective ((Tinv2_nat_trans (Fintype_invpoly r)).app S) :=
 begin
   rw injective_iff_map_eq_zero,
   intros f hf,
@@ -125,7 +125,7 @@ begin
 end
 
 lemma Tinv2_comp_eval2_eq_zero (S : Fintype) :
-  (Tinv2_nat_trans (invpoly.Laurent_measures r)).app S ≫
+  (Tinv2_nat_trans (Fintype_invpoly r)).app S ≫
     (whisker_right (eval2_nat_trans p) enlarging_functor).app S = 0 :=
 begin
   ext f s,
