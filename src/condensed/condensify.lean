@@ -92,12 +92,20 @@ def condensify_def (F : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}) :
   condensify F ≅ Profinite.extend.{u} F ⋙ enlarging_functor.{u} ⋙ to_Condensed.{u} :=
 iso.refl _
 
+/-- Given a family `F` of profinitely filtered normed groups with `T⁻¹`,
+  indexed by a category (and such that all the morphisms in the family are strict),
+  `Tinv_nat_trans` is the associated (possibly non-strict) morphism from the
+  corresponding family of `CompHaus`ly filtered pseudo-normed groups coming from `T⁻¹`.
+  -/
 def Tinv_nat_trans (F : C ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r') :
   (F ⋙ to_CHFPNG₁.{u} r') ⋙ enlarging_functor ⟶
   (F ⋙ to_CHFPNG₁.{u} r') ⋙ enlarging_functor :=
 { app := λ X, profinitely_filtered_pseudo_normed_group_with_Tinv.Tinv,
   naturality' := λ X Y f, by { ext x, exact ((F.map f).map_Tinv x).symm } }
 
+/-- The endomorphism `T⁻¹ - 2` of a strict family of profinitely-filtered
+pseudo-normed groups with `T⁻¹`, considered as a possibly non-strict
+endomorphism of the associated `CompHaus`ly filtered pseudo-normed groups. -/
 def Tinv2_nat_trans (F : C ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r') :
   (F ⋙ to_CHFPNG₁.{u} r') ⋙ enlarging_functor ⟶
   (F ⋙ to_CHFPNG₁.{u} r') ⋙ enlarging_functor :=
