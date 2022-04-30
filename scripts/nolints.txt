@@ -45,7 +45,6 @@ apply_nolint ProFiltPseuNormGrpWithTinv₁.to_CHFPNG₁ unused_arguments
 apply_nolint CompHausFiltPseuNormGrp₁.exact_with_constant.P1_to_P2_nat_trans_aux_1 unused_arguments
 apply_nolint CompHausFiltPseuNormGrp₁.exact_with_constant.P1_to_P2_nat_trans_aux_2 unused_arguments
 apply_nolint CompHausFiltPseuNormGrp₁.exact_with_constant.P1_to_P2_nat_trans_aux_3 unused_arguments
-apply_nolint CompHausFiltPseuNormGrp₁.exact_with_constant_of_epi unused_arguments
 
 -- condensed/extr/basic.lean
 apply_nolint product_condition_setup.G unused_arguments
@@ -253,6 +252,9 @@ apply_nolint invpoly.invpoly.norm_nonneg dup_namespace
 apply_nolint invpoly.profinitely_filtered_pseudo_normed_group unused_arguments
 apply_nolint invpoly.set_of.topological_space unused_arguments
 
+-- invpoly/ses.lean
+apply_nolint invpoly.Tinv2_injective unused_arguments
+
 -- laurent_measures/add_stable.lean
 apply_nolint add_eq_add unused_arguments
 apply_nolint θ_section unused_arguments
@@ -265,9 +267,12 @@ apply_nolint laurent_measures.laurent_measures.norm_nonneg dup_namespace
 apply_nolint laurent_measures_ses.U unused_arguments
 apply_nolint laurent_measures_ses.box unused_arguments
 apply_nolint laurent_measures_ses.coe_pow_half unused_arguments
+apply_nolint laurent_measures_ses.hξ def_lemma
 apply_nolint laurent_measures_ses.mem_filtration_le_monomial unused_arguments
 apply_nolint laurent_measures_ses.pos_ε_pow unused_arguments
 apply_nolint laurent_measures_ses.real_measures.topological_space unused_arguments
+apply_nolint laurent_measures_ses.speed_aux unused_arguments
+apply_nolint laurent_measures_ses.speed_aux' unused_arguments
 
 -- laurent_measures/theta.lean
 apply_nolint theta.aux_y unused_arguments
@@ -305,6 +310,9 @@ apply_nolint locally_constant.to_continuous_map_isometry unused_arguments
 -- locally_constant/completion_aux.lean
 apply_nolint locally_constant.density.B unused_arguments
 apply_nolint locally_constant.density.set_clopen unused_arguments
+
+-- normed_free_pfpng/basic.lean
+apply_nolint normed_free_pfpng unused_arguments
 
 -- normed_group/pseudo_normed_group.lean
 apply_nolint semi_normed_group.pseudo_normed_group instance_priority
