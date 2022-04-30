@@ -105,7 +105,7 @@ section mem_exact
 
 parameter {p : ℝ≥0}
 
-def r : ℝ≥0 := (2⁻¹) ^ (p:ℝ)
+def r : ℝ≥0 := 2⁻¹ ^ (p : ℝ)
 
 lemma r_pos : 0 < r :=
 suffices 0 < (2 : ℝ≥0)⁻¹ ^ (p : ℝ), by simpa [r],
@@ -125,7 +125,7 @@ variable [fact(0 < p)]
 
 lemma r_lt_one : r < 1 :=
 begin
-  refine rpow_lt_one (nnreal.inv_lt_one one_lt_two) _,
+  refine rpow_lt_one two_inv_lt_one _,
   rw nnreal.coe_pos,
   exact fact.out _
 end
