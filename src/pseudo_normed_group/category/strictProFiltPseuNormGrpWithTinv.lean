@@ -48,8 +48,8 @@ instance : concrete_category (ProFiltPseuNormGrpWithTinv₁.{u} r) :=
     map := λ X Y f, f },
   forget_faithful := ⟨⟩ } .
 
--- PFPNGT₁_PFPNGT₁_to_PFPNG₁ₗₑₗₑ
-/-- The "forget the action of T⁻¹" functor on profinitely filtered normed groups. -/
+/-- The "forget the action of T⁻¹" functor on
+  profinitely filtered (exhaustive pseudo-)normed groups. -/
 def _root_.PFPNGT₁_to_PFPNG₁ₗₑ : (ProFiltPseuNormGrpWithTinv₁.{u} r) ⥤ ProFiltPseuNormGrp₁.{u} :=
 { obj := λ M,
   { M := M,
@@ -64,9 +64,9 @@ def _root_.PFPNGT₁_to_PFPNG₁ₗₑ : (ProFiltPseuNormGrpWithTinv₁.{u} r) �
 /-- The functor which takes a profinitely filtered normed group with an action of T⁻¹,
 then forgets the action and considered it as a `CompHaus`ly filtered normed group. -/
 @[simps]
-def PFPNGT₁_to_CHFPNG₁ₗₑ (r' : ℝ≥0) :
+def PFPNGT₁_PFPNG₁_to_CHFPNG₁ₗₑₗₑ (r' : ℝ≥0) :
   ProFiltPseuNormGrpWithTinv₁.{u} r' ⥤ CompHausFiltPseuNormGrp₁.{u} :=
-PFPNGT₁_to_PFPNG₁ₗₑ r' ⋙ ProFiltPseuNormGrp₁.to_CHFPNG₁
+PFPNGT₁_to_PFPNG₁ₗₑ r' ⋙ PFPNG₁_to_CHFPNG₁ₗₑ
 
 lemma coe_comp_apply {A B C : ProFiltPseuNormGrpWithTinv₁ r} (f : A ⟶ B) (g : B ⟶ C) (a : A) :
   (f ≫ g) a = g (f a) := rfl
@@ -75,16 +75,16 @@ open profinitely_filtered_pseudo_normed_group_with_Tinv
 
 def Tinv_limit_fun_aux {J : Type u} [small_category J] (K : J ⥤ ProFiltPseuNormGrpWithTinv₁ r)
   (x : Σ (c : ℝ≥0), CompHausFiltPseuNormGrp₁.cone_point_type_filt
-    ((K ⋙ PFPNGT₁_to_PFPNG₁ₗₑ r) ⋙ ProFiltPseuNormGrp₁.to_CHFPNG₁) c) (j : J) :
+    ((K ⋙ PFPNGT₁_to_PFPNG₁ₗₑ r) ⋙ PFPNG₁_to_CHFPNG₁ₗₑ) c) (j : J) :
   (pseudo_normed_group.filtration (K.obj j) x.fst) :=
 x.2 j
 
 def Tinv_limit_fun'
   {J : Type u} [small_category J] (K : J ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r)
   (c : ℝ≥0) (x : CompHausFiltPseuNormGrp₁.cone_point_type_filt
-    ((K ⋙ PFPNGT₁_to_PFPNG₁ₗₑ r) ⋙ ProFiltPseuNormGrp₁.to_CHFPNG₁) c) :
+    ((K ⋙ PFPNGT₁_to_PFPNG₁ₗₑ r) ⋙ PFPNG₁_to_CHFPNG₁ₗₑ) c) :
   (Σ c, CompHausFiltPseuNormGrp₁.cone_point_type_filt
-    ((K ⋙ PFPNGT₁_to_PFPNG₁ₗₑ r) ⋙ ProFiltPseuNormGrp₁.to_CHFPNG₁) c) :=
+    ((K ⋙ PFPNGT₁_to_PFPNG₁ₗₑ r) ⋙ PFPNG₁_to_CHFPNG₁ₗₑ) c) :=
 ⟨r⁻¹ * c, λ j,
   ⟨Tinv (Tinv_limit_fun_aux r K ⟨c,x⟩ j : K.obj j),
     (Tinv_mem_filtration _ _ (Tinv_limit_fun_aux r K ⟨c,x⟩ j).2)⟩,
@@ -170,12 +170,12 @@ begin
     let F : filtration X c → filtration X (r⁻¹ * c) := λ x,
       ⟨Tinv_limit_add_monoid_hom r K x, Tinv_limit_aux _ _ _ _ x.2⟩,
     change continuous F,
-    let e := filt_homeo (K ⋙ PFPNGT₁_to_PFPNG₁ₗₑ _ ⋙ to_CHFPNG₁),
+    let e := filt_homeo (K ⋙ PFPNGT₁_to_PFPNG₁ₗₑ _ ⋙ PFPNG₁_to_CHFPNG₁ₗₑ),
     suffices : continuous (e (r⁻¹ * c) ∘ F ∘ (e c).symm), by simpa,
     let I : Π (j : J), comphaus_filtered_pseudo_normed_group_hom (K.obj j) (K.obj j) :=
       λ j, Tinv,
-    let G : cone_point_type_filt (K ⋙ PFPNGT₁_to_PFPNG₁ₗₑ _ ⋙ to_CHFPNG₁) c →
-      cone_point_type_filt (K ⋙ PFPNGT₁_to_PFPNG₁ₗₑ _ ⋙ to_CHFPNG₁) (r⁻¹ * c) :=
+    let G : cone_point_type_filt (K ⋙ PFPNGT₁_to_PFPNG₁ₗₑ _ ⋙ PFPNG₁_to_CHFPNG₁ₗₑ) c →
+      cone_point_type_filt (K ⋙ PFPNGT₁_to_PFPNG₁ₗₑ _ ⋙ PFPNG₁_to_CHFPNG₁ₗₑ) (r⁻¹ * c) :=
       λ x, ⟨λ j, ⟨I j (x j).1, _⟩, _⟩,
     rotate,
     { apply Tinv_bound_by, exact (x j).2 },
@@ -191,7 +191,7 @@ begin
     { apply continuous_subtype_mk,
       apply continuous_pi,
       intros i,
-      let G1 : cone_point_type_filt (K ⋙ PFPNGT₁_to_PFPNG₁ₗₑ _ ⋙ to_CHFPNG₁) c →
+      let G1 : cone_point_type_filt (K ⋙ PFPNGT₁_to_PFPNG₁ₗₑ _ ⋙ PFPNG₁_to_CHFPNG₁ₗₑ) c →
         filtration (K.obj i) c := λ x, x i,
       let G2 : filtration (K.obj i) c → filtration (K.obj i) (r⁻¹ * c) :=
         λ x, ⟨I i x, _⟩,
@@ -199,7 +199,7 @@ begin
       change continuous (G2 ∘ G1),
       apply continuous.comp,
       { apply comphaus_filtered_pseudo_normed_group_hom.continuous, intros x, refl },
-      { let G11 : cone_point_type_filt (K ⋙ PFPNGT₁_to_PFPNG₁ₗₑ _ ⋙ to_CHFPNG₁) c →
+      { let G11 : cone_point_type_filt (K ⋙ PFPNGT₁_to_PFPNG₁ₗₑ _ ⋙ PFPNG₁_to_CHFPNG₁ₗₑ) c →
           Π j : J, filtration (K.obj j) c := λ x, x,
         let G12 : (Π j : J, filtration (K.obj j) c) → filtration (K.obj i) c := λ x, x i,
         change continuous (G12 ∘ G11),
@@ -232,7 +232,7 @@ def limit_cone {J : Type u} [small_category J] (K : J ⥤ ProFiltPseuNormGrpWith
         rintro ⟨⟨c,x⟩⟩,
         dsimp [Tinv, Tinv_limit, Tinv_limit_fun, Tinv_limit_fun', Tinv_limit_fun_aux],
         dsimp [ProFiltPseuNormGrp₁.limit_cone, CompHausFiltPseuNormGrp₁.limit_cone],
-        change proj (K ⋙ PFPNGT₁_to_PFPNG₁ₗₑ r ⋙ to_CHFPNG₁) j (incl _ _) = _,
+        change proj (K ⋙ PFPNGT₁_to_PFPNG₁ₗₑ r ⋙ PFPNG₁_to_CHFPNG₁ₗₑ) j (incl _ _) = _,
         change _ = Tinv (proj _ _ (incl _ _)),
         dsimp [proj],
         simpa,
@@ -291,7 +291,7 @@ instance {J : Type u} [small_category J] : creates_limits_of_shape J (PFPNGT₁_
 
 instance : creates_limits (PFPNGT₁_to_PFPNG₁ₗₑ r) := ⟨⟩
 
-instance (r') : creates_limits (PFPNGT₁_to_CHFPNG₁ₗₑ r') :=
+instance (r') : creates_limits (PFPNGT₁_PFPNG₁_to_CHFPNG₁ₗₑₗₑ r') :=
 category_theory.comp_creates_limits _ _
 
 def limit_cone_is_limit {J : Type u} [small_category J]

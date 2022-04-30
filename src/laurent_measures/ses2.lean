@@ -22,7 +22,7 @@ local notation `r` := @r p
 
 /-- If `0 < (p : ℝ≥0) < 1` and `S : Fintype` then Θ p S-/
 def Θ (S : Fintype.{u}) :
-  (Fintype_LaurentMeasures.{u} r ⋙ PFPNGT₁_to_CHFPNG₁ₗₑ.{u} r).obj S ⟶
+  (Fintype_LaurentMeasures.{u} r ⋙ PFPNGT₁_PFPNG₁_to_CHFPNG₁ₗₑₗₑ.{u} r).obj S ⟶
   (real_measures.functor p).obj S :=
 strict_comphaus_filtered_pseudo_normed_group_hom.mk' (θ_to_add p)
 begin
@@ -34,7 +34,7 @@ begin
 end
 
 def Θ_fintype_nat_trans :
-  (Fintype_LaurentMeasures.{u} r ⋙ PFPNGT₁_to_CHFPNG₁ₗₑ.{u} r) ⟶ (real_measures.functor.{u} p) :=
+  (Fintype_LaurentMeasures.{u} r ⋙ PFPNGT₁_PFPNG₁_to_CHFPNG₁ₗₑₗₑ.{u} r) ⟶ (real_measures.functor.{u} p) :=
 { app := λ S, Θ p S,
   naturality' := λ S T f, by { ext x t, apply θ_natural, } }
 .
@@ -63,12 +63,15 @@ begin
   -- proof of some boundedness thing
   { clear S,
     -- change to unbundled language
-    rintros S c' (f : laurent_measures r S) ⟨hf1,
-      (hf2 : f ∈ pseudo_normed_group.filtration (laurent_measures r S) c')⟩,
-    rw [set.mem_preimage, set.mem_singleton_iff] at hf1,
-    rw set.mem_image,
+    rintros S c' (f : laurent_measures r S) ⟨(hf1 : Θ p S f = 0),
+      (hf2 : ∥f∥₊ ≤ c')⟩,
     change ∃ x : laurent_measures r S,
-      x ∈ pseudo_normed_group.filtration (laurent_measures r S) _ ∧ _,
+      ∥x∥₊ ≤ 37 * («r»⁻¹ + 2)⁻¹ ∧ _,
+    suffices : ∃ (x : laurent_measures «r» S),
+  ∥x∥₊ ≤ 37 * («r»⁻¹ + 2)⁻¹ ∧ ((Tinv2_nat_trans (Fintype_LaurentMeasures «r»)).app S) x = f,
+      delta Tinv2_nat_trans,
+      dsimp,
+      ext s,
     sorry },
   { clear S,
     rintros S c' f,
