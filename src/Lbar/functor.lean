@@ -44,8 +44,8 @@ end Lbar
 
 open Lbar
 
-/-- `Lbar r' S` is functorial in the finite type `S`. -/
-@[simps] def Lbar.Laurent_measures : Fintype ⥤ ProFiltPseuNormGrpWithTinv₁ r' :=
+/-- `Fintype_Lbar r' S` is functorial in the finite type `S`. -/
+@[simps] def Fintype_Lbar : Fintype ⥤ ProFiltPseuNormGrpWithTinv₁ r' :=
 { obj := λ S,
   { M := Lbar r' S,
     exhaustive' := λ x, ⟨∥x∥₊, by rw Lbar.mem_filtration_iff⟩ },
@@ -63,11 +63,11 @@ namespace Lbar
 
 open category_theory pseudo_normed_group category_theory.limits
 
-example (X : Profinite) : has_limit (X.fintype_diagram ⋙ Lbar.Laurent_measures r') :=
+example (X : Profinite) : has_limit (X.fintype_diagram ⋙ Fintype_Lbar r') :=
 by apply_instance
 
 /-- `Lbar r' S` extends to a functor in `S`, for profinite `S`. -/
 def functor : Profinite ⥤ ProFiltPseuNormGrpWithTinv₁ r' :=
-Profinite.extend (Lbar.Laurent_measures r')
+Profinite.extend (Fintype_Lbar r')
 
 end Lbar

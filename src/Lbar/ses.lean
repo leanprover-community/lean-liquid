@@ -450,12 +450,12 @@ to its positive terms in `Tℤ[[T]]`. -/
   end }
 
 @[simps]
-def to_Lbar_nat_trans : Fintype_LaurentMeasures r' ⟶ Lbar.Laurent_measures r' :=
+def to_Lbar_nat_trans : Fintype_LaurentMeasures r' ⟶ Fintype_Lbar r' :=
 { app := λ S, to_Lbar_hom r' S,
   naturality' := λ S₁ S₂ f, begin
     ext,
     simp only [Fintype_LaurentMeasures_map, category_theory.comp_apply, to_Lbar_hom_to_fun, to_Lbar_to_fun,
-      Lbar.Laurent_measures_map_to_fun, Lbar.map_to_fun, map_hom, map_apply,
+      Fintype_Lbar_map_to_fun, Lbar.map_to_fun, map_hom, map_apply,
       comphaus_filtered_pseudo_normed_group_with_Tinv_hom.coe_mk],
     split_ifs, { simp only [finset.sum_const_zero], }, { refl }
   end }
