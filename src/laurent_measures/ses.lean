@@ -492,7 +492,7 @@ end
 
 
 lemma mem_filtration_sum_le_geom (F : filtration (ℒ ϖ) c) (B : ℕ) : ∥ ∑' n : {x : ℕ // B ≤ x},
-  ((F.1 punit.star n) : ℝ) * (2⁻¹) ^ n.1 ∥ ≤ ∥ (c : ℝ) * ∑' n : {x : ℕ // B ≤ x}, (2⁻¹ * r⁻¹) ^ n.1 ∥ :=
+  ((F.1 punit.star n) : ℝ) * 2⁻¹ ^ n.1 ∥ ≤ ∥ (c : ℝ) * ∑' n : {x : ℕ // B ≤ x}, (2⁻¹ * r⁻¹) ^ n.1 ∥ :=
 begin
   have two_r_nonneg : 0 ≤ (2⁻¹ * r⁻¹ : ℝ) := by {refine mul_nonneg (inv_nonneg.2 two_pos.le) (inv_nonneg.2 r.2) },
   have h_inj : function.injective (coe : {x : ℕ // B ≤ x} → ℕ) := subtype.coe_injective,
