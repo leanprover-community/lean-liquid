@@ -53,5 +53,5 @@ begin
   haveI : fact (0 < (2⁻¹ : ℝ≥0) ^ (p : ℝ)) := r_pos',
   convert laurent_measures.epi_and_is_iso p' p S ⟨V⟩ _ using 1,
   intro v,
-  rw [pBanach.choose_normed_with_aut_T_inv, ← inv_eq_one_div, inv_inv, two_smul, two_nsmul],
+  rw [pBanach.choose_normed_with_aut_T_inv, inv_inv, two_smul, two_nsmul],
 end
