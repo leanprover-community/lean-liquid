@@ -41,10 +41,10 @@ open ProFiltPseuNormGrpWithTinv₁
 Profinite.extend (Fintype_LaurentMeasures.{u} r')
 
 @[simps] def profiniteCH : Profinite.{u} ⥤ CompHausFiltPseuNormGrp₁.{u} :=
-Profinite.extend (Fintype_LaurentMeasures.{u} r' ⋙ PFPNGT₁_to_CHFPNG₁ₗₑ.{u} r')
+Profinite.extend (Fintype_LaurentMeasures.{u} r' ⋙ PFPNGT₁_to_CHFPNG₁ₑₗ.{u} r')
 
-def profinite_comp_PFPNGT₁_to_CHFPNG₁ₗₑ :
-  laurent_measures.profinite.{u} r' ⋙ PFPNGT₁_to_CHFPNG₁ₗₑ.{u} r' ≅
+def profinite_comp_PFPNGT₁_to_CHFPNG₁ₑₗ :
+  laurent_measures.profinite.{u} r' ⋙ PFPNGT₁_to_CHFPNG₁ₑₗ.{u} r' ≅
   profiniteCH.{u} r' :=
 Profinite.extend_commutes _ _
 
