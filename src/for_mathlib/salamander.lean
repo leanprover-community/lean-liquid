@@ -536,7 +536,11 @@ open opposite
 def homology_unop_iso {A B C : 𝓐ᵒᵖ} (f : A ⟶ B) (g : B ⟶ C) (w : f ≫ g = 0) :
   homology f g w ≅ op (homology g.unop f.unop (by { rw [← unop_comp, w, unop_zero] })) :=
 homology_iso_cokernel_lift _ _ _ ≪≫
-  sorry ≪≫ -- goal is: cokernel (kernel.lift g f w) ≅ cokernel (cokernel.desc g.unop f.unop _).op
+  cokernel.map_iso _ (cokernel.desc g.unop f.unop _).op (iso.refl _) (cokernel_unop_op _).symm
+    (by { apply quiver.hom.unop_inj, ext,
+      simp only [unop_comp, iso.symm_hom, cokernel_unop_op_inv, quiver.hom.unop_op,
+        cokernel.π_desc_assoc, iso.refl_hom, category.id_comp, cokernel.π_desc],
+      rw [← unop_comp, kernel.lift_ι] }) ≪≫
   cokernel_op_op _ ≪≫
   (homology_iso_kernel_desc _ _ _).op
 
