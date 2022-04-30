@@ -155,7 +155,7 @@ begin
 end
 
 theorem free_pfpng_acyclic (i : ℤ) (hi : 0 < i) :
-  is_zero (((Ext' i).obj (op ((condensify (free_pfpng_functor ⋙ PFPNG₁_to_CHFPNG₁ₑₗ)).obj S))).obj
+  is_zero (((Ext' i).obj (op ((condensify (free_pfpng_functor ⋙ PFPNG₁_to_CHFPNG₁ₗₑ)).obj S))).obj
     (Condensed.of_top_ab V)) :=
 begin
   refine is_zero_of_iso_of_zero (free_acyclic S V i hi) _,

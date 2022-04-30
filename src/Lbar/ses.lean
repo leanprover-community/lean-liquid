@@ -470,9 +470,9 @@ open category_theory ProFiltPseuNormGrpWithTinv₁
 theorem short_exact (S : Profinite) [fact (r' < 1)] :
   short_exact
     ((condensify_map
-      (whisker_right (invpoly.to_laurent_measures_nat_trans r') (PFPNGT₁_to_CHFPNG₁ₑₗ r'))).app S)
+      (whisker_right (invpoly.to_laurent_measures_nat_trans r') (PFPNGT₁_to_CHFPNG₁ₗₑ r'))).app S)
     ((condensify_map
-      (whisker_right (laurent_measures.to_Lbar_nat_trans r') (PFPNGT₁_to_CHFPNG₁ₑₗ r'))).app S) :=
+      (whisker_right (laurent_measures.to_Lbar_nat_trans r') (PFPNGT₁_to_CHFPNG₁ₗₑ r'))).app S) :=
 begin
   refine condensify_exact _ _ id id le_rfl le_rfl _ _ _ _ S,
   { apply invpoly.to_laurent_measures_injective },

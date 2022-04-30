@@ -186,8 +186,8 @@ end
 def free_pfpng_profinite_natural_map :
   Profinite_to_Condensed ⋙ CondensedSet_to_Condensed_Ab ⟶
   Profinite.extend free_pfpng_functor ⋙
-  PFPNG₁_to_CHFPNG₁ₑₗ ⋙
-  CompHausFiltPseuNormGrp₁.enlarging_functor ⋙
+  PFPNG₁_to_CHFPNG₁ₗₑ ⋙
+  CHFPNG₁_to_CHFPNGₗₑ ⋙
   CompHausFiltPseuNormGrp.to_Condensed :=
 { app := λ X, X.free_to_pfpng,
   naturality' := λ S T f, begin
@@ -238,18 +238,18 @@ begin
 end
 
 def free_pfpng_profinite_iso_aux :
-  condensify (free_pfpng_functor ⋙ PFPNG₁_to_CHFPNG₁ₑₗ) ≅
-  ((Profinite.extend free_pfpng_functor ⋙ PFPNG₁_to_CHFPNG₁ₑₗ) ⋙
-    CompHausFiltPseuNormGrp₁.enlarging_functor) ⋙
+  condensify (free_pfpng_functor ⋙ PFPNG₁_to_CHFPNG₁ₗₑ) ≅
+  ((Profinite.extend free_pfpng_functor ⋙ PFPNG₁_to_CHFPNG₁ₗₑ) ⋙
+    CHFPNG₁_to_CHFPNGₗₑ) ⋙
     CompHausFiltPseuNormGrp.to_Condensed :=
 iso_whisker_right
   (iso_whisker_right
-    (Profinite.extend_commutes free_pfpng_functor PFPNG₁_to_CHFPNG₁ₑₗ).symm
-    CompHausFiltPseuNormGrp₁.enlarging_functor)
+    (Profinite.extend_commutes free_pfpng_functor PFPNG₁_to_CHFPNG₁ₗₑ).symm
+    CHFPNG₁_to_CHFPNGₗₑ)
   CompHausFiltPseuNormGrp.to_Condensed
 
 /-- Prop 2.1 of Analytic.pdf -/
 def free_pfpng_profinite_iso :
-  condensify (free_pfpng_functor ⋙ PFPNG₁_to_CHFPNG₁ₑₗ) ≅
+  condensify (free_pfpng_functor ⋙ PFPNG₁_to_CHFPNG₁ₗₑ) ≅
   Profinite_to_Condensed ⋙ CondensedSet_to_Condensed_Ab :=
 free_pfpng_profinite_iso_aux ≪≫ (as_iso free_pfpng_profinite_natural_map).symm

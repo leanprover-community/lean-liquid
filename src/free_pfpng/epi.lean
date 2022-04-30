@@ -712,8 +712,8 @@ end
 def rhs_helper_equiv
   (A : ProFiltPseuNormGrp₁.{u}) :
   A ≃ (CompHausFiltPseuNormGrp.to_Condensed.obj
-    (CompHausFiltPseuNormGrp₁.enlarging_functor.obj
-      (PFPNG₁_to_CHFPNG₁ₑₗ.obj A))).val.obj
+    (CHFPNG₁_to_CHFPNGₗₑ.obj
+      (PFPNG₁_to_CHFPNG₁ₗₑ.obj A))).val.obj
       (op Profinite.punit) :=
 { to_fun := λ a, ulift.up $ ⟨λ _, a, begin
     obtain ⟨c,hc⟩ := ProFiltPseuNormGrp₁.exhaustive _ a,
@@ -737,16 +737,16 @@ lemma rhs_helper₄ {α : Type u} [fintype α]
   (X : α → Profinite.{u})
   (e : Π (a : α),
     (CompHausFiltPseuNormGrp.to_Condensed.obj
-    (CompHausFiltPseuNormGrp₁.enlarging_functor.obj
-      (PFPNG₁_to_CHFPNG₁ₑₗ.obj A))).val.obj (op $ X a))
+    (CHFPNG₁_to_CHFPNGₗₑ.obj
+      (PFPNG₁_to_CHFPNG₁ₗₑ.obj A))).val.obj (op $ X a))
   (a₀ : α) (x₀ : X a₀) :
   ((Condensed.val_obj_sigma_add_equiv X _).symm e).down.val ⟨a₀,x₀⟩ =
   (e a₀).down.val x₀ :=
 begin
   let B := Condensed_Ab_to_CondensedSet.obj
     (CompHausFiltPseuNormGrp.to_Condensed.obj
-    (CompHausFiltPseuNormGrp₁.enlarging_functor.obj
-      (PFPNG₁_to_CHFPNG₁ₑₗ.obj A))) ,
+    (CHFPNG₁_to_CHFPNGₗₑ.obj
+      (PFPNG₁_to_CHFPNG₁ₗₑ.obj A))) ,
   let e₀ : (X a₀).to_Condensed ⟶ B :=
     (Profinite.to_Condensed_equiv _ B).symm (e a₀),
   let ee : (Profinite.sigma X).to_Condensed ⟶ B :=
@@ -836,8 +836,8 @@ end
 
 lemma key (j : (ulift.{u+1} nnreal)) :
   Profinite_to_Condensed.map (S.pmz_to_free_pfpng j.down) ≫
-    (CompHausFiltPseuNormGrp₁.enlarging_functor.obj
-    (PFPNG₁_to_CHFPNG₁ₑₗ.obj S.free_pfpng)).level_Condensed_diagram_cocone.ι.app j =
+    (CHFPNG₁_to_CHFPNGₗₑ.obj
+    (PFPNG₁_to_CHFPNG₁ₗₑ.obj S.free_pfpng)).level_Condensed_diagram_cocone.ι.app j =
   S.pmz_to_free' ⌊j.down⌋₊ ≫
   Condensed_Ab_to_CondensedSet.map S.free'_to_condensed_free_pfpng :=
 begin
@@ -856,8 +856,8 @@ instance Profinite.epi_free'_to_condensed_free_pfpng_of_nonempty
 begin
   apply faithful_reflects_epi (Condensed_Ab_to_CondensedSet),
   let E := CompHausFiltPseuNormGrp.level_Condensed_diagram_cocone
-    (CompHausFiltPseuNormGrp₁.enlarging_functor.obj
-    ((PFPNG₁_to_CHFPNG₁ₑₗ.obj S.free_pfpng))),
+    (CHFPNG₁_to_CHFPNGₗₑ.obj
+    ((PFPNG₁_to_CHFPNG₁ₗₑ.obj S.free_pfpng))),
   have hh : is_iso (limits.colimit.desc _ E),
   { change is_iso (CompHausFiltPseuNormGrp.colimit_to_Condensed_obj _),
     apply_instance },

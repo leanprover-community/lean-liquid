@@ -45,8 +45,8 @@ open category_theory
 
 noncomputable
 def cond_free_pfpng_to_normed_free_pfpng :
-  condensify (free_pfpng_functor ⋙ PFPNG₁_to_CHFPNG₁ₑₗ) ⟶
-  condensify (normed_free_pfpng_functor p ⋙ PFPNG₁_to_CHFPNG₁ₑₗ) :=
+  condensify (free_pfpng_functor ⋙ PFPNG₁_to_CHFPNG₁ₗₑ) ⟶
+  condensify (normed_free_pfpng_functor p ⋙ PFPNG₁_to_CHFPNG₁ₗₑ) :=
 condensify_map $ whisker_right (free_pfpng_to_normed_free_pfpng p) _
 
 open CompHausFiltPseuNormGrp₁
