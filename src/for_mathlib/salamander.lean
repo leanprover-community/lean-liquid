@@ -533,6 +533,7 @@ open opposite
 -- #check cokernel_unop_unop
 -- -- cokernel g.unop ≅ opposite.unop (kernel g)
 
+@[simps]
 def homology_unop_iso {A B C : 𝓐ᵒᵖ} (f : A ⟶ B) (g : B ⟶ C) (w : f ≫ g = 0) :
   homology f g w ≅ op (homology g.unop f.unop (by { rw [← unop_comp, w, unop_zero] })) :=
 homology_iso_cokernel_lift _ _ _ ≪≫
@@ -548,10 +549,25 @@ def homology_op_iso {A B C : 𝓐} (f : A ⟶ B) (g : B ⟶ C) (w : f ≫ g = 0)
   homology g.op f.op (by rw [← op_comp, w, op_zero]) ≅ op (homology f g w) :=
 homology_unop_iso _ _ _
 
+attribute [reassoc] cokernel.map_desc
+
 lemma op_H_to_don (lbc : LBC f'₁₁ g'₁₁ g'₁₂ f'₂₁ f'₂₂ g'₂₂ g'₂₃ f'₃₂) :
   lbc.H_to_don = (homology_unop_iso _ _ _).hom ≫ lbc.unop.rcp_to_H.op ≫
     (homology_unop_iso _ _ lbc.π_diag_out).inv :=
-sorry
+begin
+  ext,
+  simp only [category.assoc, H_to_don, rcp_to_H,
+    homology_unop_iso_hom, homology_unop_iso_inv,
+    unop_sum₂, symm_sum₁, sum_str.unop_fst, sum_str.symm_inl, homology.map_ι,
+    homology.π'_ι_assoc, cokernel.π_desc,
+    homology_iso_cokernel_lift, homology_iso_kernel_desc,
+    homology_iso_cokernel_image_to_kernel',
+    cokernel_epi_comp_hom, cokernel_epi_comp_inv,
+    category_theory.limits.cokernel.map_desc_assoc,
+    cokernel_iso_of_eq_hom_comp_desc_assoc,
+    iso.trans_hom, iso.trans_inv, iso.symm_hom],
+  sorry
+end
 
 lemma op_rcp_to_H (lbc : LBC f'₁₁ g'₁₁ g'₁₂ f'₂₁ f'₂₂ g'₂₂ g'₂₃ f'₃₂) :
   lbc.rcp_to_H = (homology_unop_iso _ _ lbc.diag_in_ι).hom ≫
