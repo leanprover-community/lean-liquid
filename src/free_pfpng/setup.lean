@@ -23,7 +23,7 @@ universe u
 
 def Profinite.condensed_free_pfpng (S : Profinite.{u}) : Condensed Ab :=
 CompHausFiltPseuNormGrp.to_Condensed.obj $
-  CompHausFiltPseuNormGrp₁.enlarging_functor.obj
+  CHFPNG₁_to_CHFPNGₗₑ.obj
   (PFPNG₁_to_CHFPNG₁ₑₗ.obj S.free_pfpng)
 
 def Profinite.to_free_pfpng_level (S : Profinite.{u}) :
@@ -34,7 +34,7 @@ def Profinite.to_condensed_free_pfpng (S : Profinite.{u}) :
   S.to_Condensed ⟶ Condensed_Ab_to_CondensedSet.obj S.condensed_free_pfpng :=
 S.to_free_pfpng_level ≫
 (CompHausFiltPseuNormGrp.level_Condensed_diagram_cocone
-  (CompHausFiltPseuNormGrp₁.enlarging_functor.obj
+  (CHFPNG₁_to_CHFPNGₗₑ.obj
   (PFPNG₁_to_CHFPNG₁ₑₗ.obj S.free_pfpng))).ι.app ⟨1⟩
 
 @[simp]
@@ -49,7 +49,7 @@ def profinite_to_condensed_unit :
   Profinite_to_Condensed ⟶
   Profinite.extend free_pfpng_functor ⋙
   PFPNG₁_to_CHFPNG₁ₑₗ ⋙
-  CompHausFiltPseuNormGrp₁.enlarging_functor ⋙
+  CHFPNG₁_to_CHFPNGₗₑ ⋙
   CompHausFiltPseuNormGrp.to_Condensed ⋙
   Condensed_Ab_to_CondensedSet :=
 { app := λ S, S.to_condensed_free_pfpng,
