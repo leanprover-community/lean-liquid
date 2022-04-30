@@ -33,7 +33,7 @@ instance : large_category CompHausFiltPseuNormGrp₁.{u} :=
   to CompHaus-ly filtered pseudo-normed groups with bounded morphisms, which is the
   identity on objects. -/
 @[simps]
-def CHFPNG₁_to_CHFPNGₗₑ : CompHausFiltPseuNormGrp₁ ⥤ CompHausFiltPseuNormGrp :=
+def _root_.CHFPNG₁_to_CHFPNGₗₑ : CompHausFiltPseuNormGrp₁ ⥤ CompHausFiltPseuNormGrp :=
 { obj := λ M, CompHausFiltPseuNormGrp.of M,
   map := λ M₁ M₂ f, f.to_chfpsng_hom }
 
