@@ -27,7 +27,7 @@ instance one_half_pos' : fact (0 < (2⁻¹ : ℝ)) := ⟨by norm_num⟩
 instance one_half_lt_one' : fact ((2⁻¹ : ℝ) < 1) := ⟨by norm_num⟩
 
 def θ_section (g : ℳ S) : (ℒ S) := ⟨ϑ_section 2⁻¹ r p S g,
-  summable_ϑ_section (2⁻¹ : ℝ) r p S g⟩
+  summable_ϑ_section 2⁻¹ r p S g⟩
 
 
 def real_add (a : ℝ) (F : ℒ S) : ℒ S := (θ_section a) + F
