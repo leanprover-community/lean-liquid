@@ -276,7 +276,7 @@ def to_laurent_measures_hom [fact (r' < 1)]: comphaus_filtered_pseudo_normed_gro
 
 @[simps]
 def to_laurent_measures_nat_trans [fact (r' < 1)]:
-  Fintype_invpoly r' ⟶ Fintype.Laurent_measures r' :=
+  Fintype_invpoly r' ⟶ Fintype_Laurent_measures r' :=
 { app := λ S, to_laurent_measures_hom r' S,
   naturality' := λ S T f, begin
     ext p t n,
@@ -450,7 +450,7 @@ to its positive terms in `Tℤ[[T]]`. -/
   end }
 
 @[simps]
-def to_Lbar_nat_trans : Fintype.Laurent_measures r' ⟶ Lbar.Laurent_measures r' :=
+def to_Lbar_nat_trans : Fintype_Laurent_measures r' ⟶ Lbar.Laurent_measures r' :=
 { app := λ S, to_Lbar_hom r' S,
   naturality' := λ S₁ S₂ f, begin
     ext,
