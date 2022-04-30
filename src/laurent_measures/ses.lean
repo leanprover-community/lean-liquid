@@ -174,8 +174,8 @@ begin
   { congr,
     funext,
     rw add_mul },
-  all_goals {apply summable_of_summable_norm, simp_rw [norm_mul, norm_inv, norm_zpow, real.norm_two,
-    ← inv_zpow₀, inv_eq_one_div] },
+  all_goals {apply summable_of_summable_norm, simp_rw [← inv_zpow₀, norm_mul, norm_zpow, norm_inv,
+    real.norm_two] },
   exact aux_thm69.summable_smaller_radius_norm F.d half_lt_r (F.summable s) (λ n, lt_d_eq_zero _ _ _),
   exact aux_thm69.summable_smaller_radius_norm G.d half_lt_r (G.summable s) (λ n, lt_d_eq_zero _ _ _),
 end
@@ -214,7 +214,7 @@ lemma aux_bound (F : ℒ S) (s : S) : ∀ (b : ℤ), ∥(F s b : ℝ) ∥₊ ^ (
   (2⁻¹ ^ (p : ℝ)) ^ (b : ℝ) ≤ ∥F s b∥₊ * r ^ b :=
 begin
   intro b,
-  rw [inv_eq_one_div, nnreal.rpow_int_cast],
+  rw [nnreal.rpow_int_cast],
   refine mul_le_mul_of_nonneg_right _ (real.rpow_nonneg_of_nonneg (nnreal.coe_nonneg _) _),
   have p_le_one : (p : ℝ) ≤ 1,
   { rw ← nnreal.coe_one,
@@ -289,7 +289,7 @@ begin
         norm_num, },
       { apply norm_nonneg, } } },
   apply (finset.sum_le_sum ineq).trans,
-  simp_rw [nnnorm_mul, ← inv_eq_one_div, nnnorm_zpow, nnnorm_inv, nnreal.mul_rpow, real.nnnorm_two,
+  simp_rw [nnnorm_mul, nnnorm_zpow, nnnorm_inv, nnreal.mul_rpow, real.nnnorm_two,
     nnreal.rpow_int_cast, ← nnreal.rpow_mul (2 : ℝ≥0)⁻¹, mul_comm, nnreal.rpow_mul (2 : ℝ≥0)⁻¹],
   apply le_trans _ hF,
   apply finset.sum_le_sum,
@@ -471,7 +471,7 @@ begin
 end
 
 lemma mem_filtration_le_monomial (F : filtration (ℒ ϖ) c) (n : ℕ) :
- ∥ ((F.1 punit.star n) : ℝ) ∥ ≤ c * ( 1 / r ^ n) :=
+ ∥ ((F.1 punit.star n) : ℝ) ∥ ≤ c * ( r⁻¹ ^ n) :=
 begin
   have h_le : ∑' n : ℤ, ∥ ((F.1 punit.star n) : ℝ) ∥ * r ^ n ≤ c,
   { have := (laurent_measures.mem_filtration_iff F.1 c).mp F.2,
@@ -483,8 +483,9 @@ begin
     (F.1.summable punit.star),
   simp only [finset.sum_singleton, zpow_coe_nat] at this,
   replace h_le := this.trans h_le,
-  rwa [← inv_eq_one_div, ← inv_mul_le_iff', inv_inv ((r : ℝ) ^ n), mul_comm],
-  { exact (inv_pos.mpr (pow_pos (nnreal.coe_pos.mpr r_pos) _)) },
+  rwa [← inv_mul_le_iff', inv_pow₀, inv_inv ((r : ℝ) ^ n), mul_comm],
+  { rw inv_pow₀,
+    exact (inv_pos.mpr (pow_pos (nnreal.coe_pos.mpr r_pos) _)) },
   { rintros b -,
     simp only [subtype.val_eq_coe],
     exact mul_nonneg (norm_nonneg _) (zpow_nonneg (le_of_lt (nnreal.coe_pos.mpr r_pos)) b) },
@@ -494,12 +495,11 @@ end
 lemma mem_filtration_sum_le_geom (F : filtration (ℒ ϖ) c) (B : ℕ) : ∥ ∑' n : {x : ℕ // B ≤ x},
   ((F.1 punit.star n) : ℝ) * (2⁻¹) ^ n.1 ∥ ≤ ∥ (c : ℝ) * ∑' n : {x : ℕ // B ≤ x}, (2⁻¹ * r⁻¹) ^ n.1 ∥ :=
 begin
-  have two_r_nonneg : 0 ≤ (2⁻¹ * r⁻¹ : ℝ) := by {apply one_div_nonneg.mpr (mul_nonneg _ r.2), simp only [zero_le_bit0, zero_le_one]},
+  have two_r_nonneg : 0 ≤ (2⁻¹ * r⁻¹ : ℝ) := by {refine mul_nonneg (inv_nonneg.2 two_pos.le) (inv_nonneg.2 r.2) },
   have h_inj : function.injective (coe : {x : ℕ // B ≤ x} → ℕ) := subtype.coe_injective,
   have geom_pos : (0 : ℝ) ≤ c * ∑' (n : {x // B ≤ x}), (2⁻¹ * r⁻¹) ^ n.1,
   { apply mul_nonneg c.2 (tsum_nonneg _),
     intro b,
-    rw ← one_div_pow,
     apply pow_nonneg (two_r_nonneg) },
   nth_rewrite 1 [real.norm_eq_abs],
   rw [abs_eq_self.mpr geom_pos],
@@ -507,27 +507,26 @@ begin
   rw [← tsum_mul_left],
   apply tsum_le_tsum,
   { intro b,
-    rw [norm_mul, mul_pow, ← one_div_mul_one_div, mul_comm ((1 : ℝ) / 2 ^ b.1) _, ← mul_assoc],
-    rw [norm_pow, norm_div, norm_one, real.norm_two, div_pow, one_pow],
+    rw [norm_mul, mul_pow, mul_comm ((2⁻¹ : ℝ) ^ b.1) _, ← mul_assoc],
+    rw [norm_pow, norm_inv, real.norm_two ],
     apply (mul_le_mul_right _).mpr,
     apply mem_filtration_le_monomial p c F,
     simp only [one_div, inv_pos, pow_pos, zero_lt_bit0, zero_lt_one] },
   swap,
   { by_cases hc : (c : ℝ) ≠ 0,
     { rw [← summable_mul_left_iff hc],
-      simp_rw [← one_div_pow],
       have two_r_lt : (2⁻¹ * r⁻¹ : ℝ) < 1,
       { have := (div_lt_one (nnreal.coe_lt_coe.mpr (r_pos))).mpr half_lt_r,
         simp only [← inv_eq_one_div] at this ⊢,
-        rw [div_eq_mul_inv, nnreal.coe_inv, ← mul_inv₀] at this,
+        rw [div_eq_mul_inv, nnreal.coe_inv, ← mul_inv₀, mul_inv₀] at this,
         convert this,
-        assumption' },
+        assumption', },
       exact (summable_geometric_of_lt_1 two_r_nonneg two_r_lt).comp_injective h_inj,
       },
     { rw not_ne_iff at hc,
       simp_rw [hc, zero_mul],
       exact summable_zero }, },
-  all_goals { simp_rw [norm_mul, norm_pow, norm_div, norm_one, real.norm_two, subtype.val_eq_coe],
+  all_goals { simp_rw [norm_mul, norm_pow, norm_inv, real.norm_two, subtype.val_eq_coe],
     refine ((aux_thm69.summable_iff_on_nat_less F.1.d _).mp (aux_thm69.summable_smaller_radius_norm
       F.1.d (half_lt_r) (F.1.summable punit.star)
       (λ n, lt_d_eq_zero F.1 punit.star n))).comp_injective h_inj,
@@ -741,8 +740,8 @@ begin
       simpa only },
     simp only [set.mem_set_of_eq, function.mem_support, ne.def, set.mem_range, set_coe.exists],
     use [a, ha', ha, refl _] },
-  have hF := tail_B p c (ε.2⁻¹ ^ p.1) (pos_ε_pow p ε hε) F,
-  have hG := tail_B p c (ε.2⁻¹ ^ p.1) (pos_ε_pow p ε hε) G,
+  have hF := tail_B p c (ε.1 / 2 ^ p.1) (pos_ε_pow p ε hε) F,
+  have hG := tail_B p c (ε.1 / 2 ^ p.1) (pos_ε_pow p ε hε) G,
   rw [real.div_rpow ε.2 _, ← real.rpow_mul] at hF hG,
   simp_rw [@subtype.val_eq_coe _ _ p] at hF hG,
   rw [mul_inv_cancel, real.rpow_one] at hF hG,
