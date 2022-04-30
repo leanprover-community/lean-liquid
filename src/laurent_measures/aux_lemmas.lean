@@ -313,12 +313,7 @@ begin
   { ext,
     field_simp [r0],
     ring_exp },
-  {
-
-    exact nnreal.div_lt_one_of_lt (begin
-
-      exact (nnreal.div_lt_iff' two_ne_zero).mp half_lt_r ,
-    end) }
+  { exact nnreal.div_lt_one_of_lt half_lt_r },
 end
 
 lemma fiberwise_summable_norm {f : ℤ → ℤ} {r : ℝ≥0} (d : ℤ) (half_lt_r : 2⁻¹ < r)
@@ -326,6 +321,7 @@ lemma fiberwise_summable_norm {f : ℤ → ℤ} {r : ℝ≥0} (d : ℤ) (half_lt
   (hd : ∀ n : ℤ, n < d → f n = 0) :
   summable (λ (n : ℕ), 2⁻¹ * ∥ ∑' (i : ℕ), (f (n + 1 + i) : ℝ) * 2⁻¹ ^ i ∥ * ↑r ^ n) :=
 begin
+  have inv_two_pos : 0 < (2 : ℝ≥0)⁻¹ := nnreal.inv_pos.2 zero_lt_two,
   have r_pos : ∀ (b : ℕ), 0 < (r : ℝ) ^ b :=
     pow_pos (lt_trans (by exact nnreal.coe_pos.mp
       (by push_cast; exact inv_pos.2 zero_lt_two)
@@ -348,9 +344,9 @@ begin
     (λ b, (H b).has_sum)).summable,
   dsimp [ϕ] at this,
   apply summable_of_nonneg_of_le (λ b, _) (λ b, _) this,
-  { exact mul_nonneg (mul_nonneg one_half_pos.le (norm_nonneg _)) (r_pos b).le },
+  { exact mul_nonneg (mul_nonneg begin rw inv_nonneg, exact two_pos.le end (norm_nonneg _)) (r_pos b).le },
   { simp_rw mul_assoc,
-    rw [tsum_mul_left, mul_le_mul_left (@one_half_pos ℝ _), tsum_mul_right,
+    rw [tsum_mul_left, mul_le_mul_left (inv_two_pos), tsum_mul_right,
       mul_le_mul_right (r_pos b)],
     exact norm_tsum_le_tsum_norm (smaller_shift b) }
 end
@@ -363,7 +359,7 @@ begin
   suffices h_on_nat : summable (λ (n : ℕ),
     (2⁻¹) * ∥∑' (i : ℕ), (f (n + 1 + i) : ℝ) * (2⁻¹) ^ i∥ * (r : ℝ) ^ n),
   { simp_rw mul_assoc at ⊢ h_on_nat,
-    rw [← summable_mul_left_iff (ne_of_gt (@one_half_pos ℝ _))] at ⊢ h_on_nat,
+    rw [← summable_mul_left_iff (begin exact ne_of_gt (@one_half_pos ℝ _), end)] at ⊢ h_on_nat,
     refine (summable_iff_on_nat_less d (λ n hn, _)).mpr _,
     { rw [hd_shift _ hn, zero_mul] },
     { exact_mod_cast h_on_nat } },
