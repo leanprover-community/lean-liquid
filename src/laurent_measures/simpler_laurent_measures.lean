@@ -14,7 +14,7 @@ section slm
 -- parameter {p : ℝ≥0}
 
 /--  This is the same `r` as before. -/
--- def r : ℝ≥0 := (1 / 2) ^ (p:ℝ)
+-- def r : ℝ≥0 := (2⁻¹) ^ (p:ℝ)
 
 -- lemma r_pos : 0 < r :=
 -- suffices 0 < (2 : ℝ≥0)⁻¹ ^ (p : ℝ), by simpa [r],

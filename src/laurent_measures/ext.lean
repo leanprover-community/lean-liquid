@@ -23,7 +23,7 @@ local notation `r'` := @r p'
 local notation `r` := @r p
 
 -- move me
-instance fact_half_pos : fact ((0:ℝ≥0) < 1/2) := ⟨by simp⟩
+instance fact_half_pos : fact ((0:ℝ≥0) < 2⁻¹) := ⟨by simp⟩
 
 lemma epi_and_is_iso
   (V : SemiNormedGroup.{u}) [normed_with_aut r V] [complete_space V] [separated_space V]

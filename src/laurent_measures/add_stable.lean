@@ -23,19 +23,19 @@ instance : has_coe ℝ (ℳ S) := {coe := λ a s, a }
 
 variable [fact (0 < p)]
 variable [fact (p < 1)]
-instance one_half_pos' : fact (0 < (1/2 : ℝ)) := ⟨one_half_pos⟩
-instance one_half_lt_one' : fact ((1/2 : ℝ) < 1) := ⟨one_half_lt_one⟩
+instance one_half_pos' : fact (0 < (2⁻¹ : ℝ)) := ⟨one_half_pos⟩
+instance one_half_lt_one' : fact ((2⁻¹ : ℝ) < 1) := ⟨one_half_lt_one⟩
 
 
-def θ_section (g : ℳ S) : (ℒ S) := ⟨ϑ_section (1 / 2 : ℝ) r p S g,
-  summable_ϑ_section (1 / 2 : ℝ) r p S g⟩
+def θ_section (g : ℳ S) : (ℒ S) := ⟨ϑ_section (2⁻¹ : ℝ) r p S g,
+  summable_ϑ_section (2⁻¹ : ℝ) r p S g⟩
 
 
 def real_add (a : ℝ) (F : ℒ S) : ℒ S := (θ_section a) + F
 
 def add_real (F : ℒ S) (a : ℝ) : ℒ S := F + (θ_section a)
 
-lemma add_eq_add [fact (0 < (1/2 : ℝ))] [fact ((1/2 : ℝ) < 1)] (a : ℝ) (F : ℒ S) :
+lemma add_eq_add [fact (0 < (2⁻¹ : ℝ))] [fact ((2⁻¹ : ℝ) < 1)] (a : ℝ) (F : ℒ S) :
   real_add a F = add_real F a :=
 begin
   dsimp [real_add, add_real],
