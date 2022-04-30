@@ -199,7 +199,8 @@ begin
   linarith,
 end
 
-
+-- note: can't deduce immediately from `to_laurent_measures_of_laurent_measures`
+-- because `r' < 1` not assumed.
 lemma to_laurent_measures_injective : function.injective (to_laurent_measures r' S) :=
 begin
   intros F G h,
@@ -275,7 +276,7 @@ def to_laurent_measures_hom [fact (r' < 1)]: comphaus_filtered_pseudo_normed_gro
 
 @[simps]
 def to_laurent_measures_nat_trans [fact (r' < 1)]:
-  invpoly.fintype_functor r' ⟶ laurent_measures.fintype_functor r' :=
+  invpoly.Laurent_measures r' ⟶ Fintype.Laurent_measures r' :=
 { app := λ S, to_laurent_measures_hom r' S,
   naturality' := λ S T f, begin
     ext p t n,
@@ -449,12 +450,12 @@ to its positive terms in `Tℤ[[T]]`. -/
   end }
 
 @[simps]
-def to_Lbar_nat_trans : laurent_measures.fintype_functor r' ⟶ Lbar.fintype_functor r' :=
+def to_Lbar_nat_trans : laurent_measures.Fintype.Laurent_measures r' ⟶ Lbar.Fintype.Laurent_measures r' :=
 { app := λ S, to_Lbar_hom r' S,
   naturality' := λ S₁ S₂ f, begin
     ext,
-    simp only [fintype_functor_map, category_theory.comp_apply, to_Lbar_hom_to_fun, to_Lbar_to_fun,
-      Lbar.fintype_functor_map_to_fun, Lbar.map_to_fun, map_hom, map_apply,
+    simp only [Fintype.Laurent_measures_map, category_theory.comp_apply, to_Lbar_hom_to_fun, to_Lbar_to_fun,
+      Lbar.Fintype.Laurent_measures_map_to_fun, Lbar.map_to_fun, map_hom, map_apply,
       comphaus_filtered_pseudo_normed_group_with_Tinv_hom.coe_mk],
     split_ifs, { simp only [finset.sum_const_zero], }, { refl }
   end }

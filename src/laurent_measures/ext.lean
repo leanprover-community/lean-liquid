@@ -28,9 +28,9 @@ instance fact_half_pos : fact ((0:ℝ≥0) < 2⁻¹) := ⟨by simp⟩
 lemma epi_and_is_iso
   (V : SemiNormedGroup.{u}) [normed_with_aut r V] [complete_space V] [separated_space V]
   (hV : ∀ (v : V), (normed_with_aut.T.inv v) = 2 • v) :
-  epi (((Ext' 0).map ((condensify_Tinv2 (fintype_functor r')).app S).op).app
+  epi (((Ext' 0).map ((condensify_Tinv2 (Fintype.Laurent_measures r')).app S).op).app
     (Condensed.of_top_ab V)) ∧
-  ∀ i > 0, is_iso (((Ext' i).map ((condensify_Tinv2 (fintype_functor r')).app S).op).app
+  ∀ i > 0, is_iso (((Ext' i).map ((condensify_Tinv2 (Fintype.Laurent_measures r')).app S).op).app
     (Condensed.of_top_ab V)) :=
 begin
   have SES := Lbar.short_exact.{u u} r' S,

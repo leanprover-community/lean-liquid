@@ -21,7 +21,7 @@ namespace Lbar
 open ProFiltPseuNormGrpWithTinv₁ ProFiltPseuNormGrp₁ CompHausFiltPseuNormGrp₁
 
 def condensed : Profinite.{u} ⥤ Condensed.{u} Ab.{u+1} :=
-condensify (fintype_functor.{u u} r' ⋙ to_CHFPNG₁ r')
+condensify (Fintype.Laurent_measures.{u u} r' ⋙ to_CHFPNG₁ r')
 
 def Tinv_sub (S : Profinite.{u}) (V : SemiNormedGroup.{u}) [normed_with_aut r V] (i : ℤ) :
   ((Ext' i).obj (op $ (Lbar.condensed.{u} r').obj S)).obj (Condensed.of_top_ab V) ⟶
@@ -95,7 +95,7 @@ attribute [simps] Condensed.of_top_ab_map
 /-- Thm 9.4bis of [Analytic]. More precisely: the first observation in the proof 9.4 => 9.1. -/
 theorem is_iso_Tinv2 (S : Profinite.{u}) (V : SemiNormedGroup.{u}) [normed_with_aut r V]
   (hV : ∀ (v : V), (normed_with_aut.T.inv v) = 2 • v) :
-  ∀ i, is_iso (((Ext' i).map ((condensify_Tinv2 (Lbar.fintype_functor.{u u} r')).app S).op).app
+  ∀ i, is_iso (((Ext' i).map ((condensify_Tinv2 (Lbar.Fintype.Laurent_measures.{u u} r')).app S).op).app
     (Condensed.of_top_ab ↥V)) :=
 begin
   intro i,
