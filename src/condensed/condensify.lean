@@ -94,8 +94,8 @@ iso.refl _
   corresponding family of `CompHaus`ly filtered pseudo-normed groups coming from `T⁻¹`.
   -/
 def Tinv_nat_trans (F : C ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r') :
-  (F ⋙ PFPNG₁_to_CHFPNG₁ₗₑ.{u} r') ⋙ enlarging_functor ⟶
-  (F ⋙ PFPNG₁_to_CHFPNG₁ₗₑ.{u} r') ⋙ enlarging_functor :=
+  (F ⋙ PFPNGT₁_to_CHFPNG₁ₗₑ.{u} r') ⋙ enlarging_functor ⟶
+  (F ⋙ PFPNGT₁_to_CHFPNG₁ₗₑ.{u} r') ⋙ enlarging_functor :=
 { app := λ X, profinitely_filtered_pseudo_normed_group_with_Tinv.Tinv,
   naturality' := λ X Y f, by { ext x, exact ((F.map f).map_Tinv x).symm } }
 
@@ -103,8 +103,8 @@ def Tinv_nat_trans (F : C ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r') :
 pseudo-normed groups with `T⁻¹`, considered as a possibly non-strict
 endomorphism of the associated `CompHaus`ly filtered pseudo-normed groups. -/
 def Tinv2_nat_trans (F : C ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r') :
-  (F ⋙ PFPNG₁_to_CHFPNG₁ₗₑ.{u} r') ⋙ enlarging_functor ⟶
-  (F ⋙ PFPNG₁_to_CHFPNG₁ₗₑ.{u} r') ⋙ enlarging_functor :=
+  (F ⋙ PFPNGT₁_to_CHFPNG₁ₗₑ.{u} r') ⋙ enlarging_functor ⟶
+  (F ⋙ PFPNGT₁_to_CHFPNG₁ₗₑ.{u} r') ⋙ enlarging_functor :=
 Tinv_nat_trans F - 2 • 𝟙 _
 
 lemma Tinv_bound_by (F : C ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r') (X : C) :
@@ -113,7 +113,7 @@ profinitely_filtered_pseudo_normed_group_with_Tinv.Tinv_bound_by
 
 lemma twoid_bound_by (F : C ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r') (X : C) :
   comphaus_filtered_pseudo_normed_group_hom.bound_by
-    ((2 • 𝟙 ((F ⋙ PFPNG₁_to_CHFPNG₁ₗₑ r') ⋙ enlarging_functor)).app X) 2 :=
+    ((2 • 𝟙 ((F ⋙ PFPNGT₁_to_CHFPNG₁ₗₑ r') ⋙ enlarging_functor)).app X) 2 :=
 begin
   simp only [nat_trans.app_nsmul, nat_trans.id_app],
   refine ((comphaus_filtered_pseudo_normed_group_hom.mk_of_bound_bound_by _ 1 _).nsmul 2).mono _ _,
@@ -126,8 +126,8 @@ lemma Tinv2_bound_by (F : C ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r') (X : C) :
 
 @[reassoc]
 lemma Tinv_nat_trans_comp {F G : C ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r'} (α : F ⟶ G) :
-  Tinv_nat_trans F ≫ @whisker_right _ _ _ _ _ _ F G α (PFPNG₁_to_CHFPNG₁ₗₑ r' ⋙ enlarging_functor.{u}) =
-  @whisker_right _ _ _ _ _ _ F G α (PFPNG₁_to_CHFPNG₁ₗₑ r' ⋙ enlarging_functor.{u}) ≫ Tinv_nat_trans G :=
+  Tinv_nat_trans F ≫ @whisker_right _ _ _ _ _ _ F G α (PFPNGT₁_to_CHFPNG₁ₗₑ r' ⋙ enlarging_functor.{u}) =
+  @whisker_right _ _ _ _ _ _ F G α (PFPNGT₁_to_CHFPNG₁ₗₑ r' ⋙ enlarging_functor.{u}) ≫ Tinv_nat_trans G :=
 by { ext X x, exact (α.app X).map_Tinv x }
 
 -- move me
@@ -141,20 +141,20 @@ is a nonstrict morphism which is natural (see `Tinv_nat_trans`) and thus
 induces a morphism on the associated condensed abelian groups.
 -/
 def condensify_Tinv (F : Fintype.{u} ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r') :
-  condensify.{u} (F ⋙ PFPNG₁_to_CHFPNG₁ₗₑ r') ⟶ condensify.{u} (F ⋙ PFPNG₁_to_CHFPNG₁ₗₑ r') :=
+  condensify.{u} (F ⋙ PFPNGT₁_to_CHFPNG₁ₗₑ r') ⟶ condensify.{u} (F ⋙ PFPNGT₁_to_CHFPNG₁ₗₑ r') :=
 condensify_nonstrict (Tinv_nat_trans _) r'⁻¹ (Tinv_bound_by _)
 
 /--
 A variant of `condensify_Tinv` with a different bound, given by `r'⁻¹ + 2`.
 -/
 def condensify_Tinv2 (F : Fintype.{u} ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r') :
-  condensify.{u} (F ⋙ PFPNG₁_to_CHFPNG₁ₗₑ r') ⟶ condensify.{u} (F ⋙ PFPNG₁_to_CHFPNG₁ₗₑ r') :=
+  condensify.{u} (F ⋙ PFPNGT₁_to_CHFPNG₁ₗₑ r') ⟶ condensify.{u} (F ⋙ PFPNGT₁_to_CHFPNG₁ₗₑ r') :=
 condensify_nonstrict (Tinv2_nat_trans _) (r'⁻¹ + 2) (Tinv2_bound_by _)
 
 lemma condensify_map_comp_Tinv {F G : Fintype.{u} ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r'}
   (α : F ⟶ G) :
-  condensify_map (whisker_right α (PFPNG₁_to_CHFPNG₁ₗₑ r')) ≫ condensify_Tinv G =
-  condensify_Tinv F ≫ condensify_map (whisker_right α (PFPNG₁_to_CHFPNG₁ₗₑ r')) :=
+  condensify_map (whisker_right α (PFPNGT₁_to_CHFPNG₁ₗₑ r')) ≫ condensify_Tinv G =
+  condensify_Tinv F ≫ condensify_map (whisker_right α (PFPNGT₁_to_CHFPNG₁ₗₑ r')) :=
 begin
   delta condensify_map condensify_Tinv,
   rw [← condensify_nonstrict_comp 1 r'⁻¹ r'⁻¹, ← condensify_nonstrict_comp r'⁻¹ 1 r'⁻¹],
@@ -336,7 +336,7 @@ open category_theory.preadditive
 
 lemma condensify_map_comp_Tinv2 {F G : Fintype.{u} ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r'}
   (α : F ⟶ G) :
-  condensify_map (whisker_right α (PFPNG₁_to_CHFPNG₁ₗₑ r')) ≫ condensify_Tinv2 G =
-  condensify_Tinv2 F ≫ condensify_map (whisker_right α (PFPNG₁_to_CHFPNG₁ₗₑ r')) :=
+  condensify_map (whisker_right α (PFPNGT₁_to_CHFPNG₁ₗₑ r')) ≫ condensify_Tinv2 G =
+  condensify_Tinv2 F ≫ condensify_map (whisker_right α (PFPNGT₁_to_CHFPNG₁ₗₑ r')) :=
 by simp only [condensify_Tinv2_eq, comp_sub, sub_comp, comp_nsmul, nsmul_comp,
     condensify_map_comp_Tinv, category.id_comp, category.comp_id]

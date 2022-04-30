@@ -64,7 +64,7 @@ def _root_.PFPNGT₁_to_PFPNG₁ₗₑ : (ProFiltPseuNormGrpWithTinv₁.{u} r) �
 /-- The functor which takes a profinitely filtered normed group with an action of T⁻¹,
 then forgets the action and considered it as a `CompHaus`ly filtered normed group. -/
 @[simps]
-def PFPNGT₁_to_CHFPNG₁ₗₑ (r' : ℝ≥0) :
+def _root_.PFPNGT₁_to_CHFPNG₁ₗₑ (r' : ℝ≥0) :
   ProFiltPseuNormGrpWithTinv₁.{u} r' ⥤ CompHausFiltPseuNormGrp₁.{u} :=
 PFPNGT₁_to_PFPNG₁ₗₑ r' ⋙ PFPNG₁_to_CHFPNG₁ₗₑ
 
