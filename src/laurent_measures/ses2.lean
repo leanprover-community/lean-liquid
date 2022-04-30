@@ -20,6 +20,7 @@ section theta
 variables (p : ℝ≥0) [fact (0 < p)] [fact (p < 1)]
 local notation `r` := @r p
 
+/-- If `0 < (p : ℝ≥0) < 1` and `S : Fintype` then Θ p S-/
 def Θ (S : Fintype.{u}) :
   (fintype_functor.{u} r ⋙ to_CompHausFiltPseuNormGrp₁.{u} r).obj S ⟶
   (real_measures.functor p).obj S :=
@@ -50,9 +51,21 @@ open CompHausFiltPseuNormGrp₁
 theorem short_exact (S : Profinite) :
   short_exact ((condensify_Tinv2 _).app S) ((condensify_map $ Θ_fintype_nat_trans p).app S) :=
 begin
-  refine condensify_nonstrict_exact _ _ (r⁻¹ + 2) (Tinv2_bound_by _) _ _ _ _
+  refine condensify_nonstrict_exact _ _ (r⁻¹ + 2) (Tinv2_bound_by _)
+  -- C₂ bound
+  (λ x, 37) -- warning: probably not right
+  -- C₄ bound
+  (λ x, 59) -- ditto
+  -- proofs that f(x) ≥ x
+  sorry sorry
     (λ S, injective_ϕ')
     (λ S, by { ext1 F, apply θ_ϕ_complex }) _ _ _,
+  -- proof of some boundedness thing
+  { clear S, intros S c',
+    rintros f ⟨hf1, hf2⟩,
+    rw [set.mem_preimage, set.mem_singleton_iff] at hf1,
+    sorry },
+
   all_goals { sorry },
 end
 
