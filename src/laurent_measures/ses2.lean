@@ -22,7 +22,7 @@ local notation `r` := @r p
 
 /-- If `0 < (p : ℝ≥0) < 1` and `S : Fintype` then Θ p S-/
 def Θ (S : Fintype.{u}) :
-  (Fintype_Laurent_measures.{u} r ⋙ to_CompHausFiltPseuNormGrp₁.{u} r).obj S ⟶
+  (Fintype_LaurentMeasures.{u} r ⋙ to_CompHausFiltPseuNormGrp₁.{u} r).obj S ⟶
   (real_measures.functor p).obj S :=
 strict_comphaus_filtered_pseudo_normed_group_hom.mk' (θ_to_add p)
 begin
@@ -34,7 +34,7 @@ begin
 end
 
 def Θ_fintype_nat_trans :
-  (Fintype_Laurent_measures.{u} r ⋙ to_CompHausFiltPseuNormGrp₁.{u} r) ⟶ (real_measures.functor.{u} p) :=
+  (Fintype_LaurentMeasures.{u} r ⋙ to_CompHausFiltPseuNormGrp₁.{u} r) ⟶ (real_measures.functor.{u} p) :=
 { app := λ S, Θ p S,
   naturality' := λ S T f, by { ext x t, apply θ_natural, } }
 .
