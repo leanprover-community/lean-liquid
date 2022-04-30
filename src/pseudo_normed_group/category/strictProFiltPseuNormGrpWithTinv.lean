@@ -50,7 +50,7 @@ instance : concrete_category (ProFiltPseuNormGrpWithTinv₁.{u} r) :=
 
 -- PFPNGT₁_PFPNGT₁_to_PFPNG₁ₗₑₗₑ
 /-- The "forget the action of T⁻¹" functor on profinitely filtered normed groups. -/
-def PFPNGT₁_to_PFPNG₁ₗₑ : (ProFiltPseuNormGrpWithTinv₁.{u} r) ⥤ ProFiltPseuNormGrp₁.{u} :=
+def _root_.PFPNGT₁_to_PFPNG₁ₗₑ : (ProFiltPseuNormGrpWithTinv₁.{u} r) ⥤ ProFiltPseuNormGrp₁.{u} :=
 { obj := λ M,
   { M := M,
     exhaustive' := M.exhaustive' },
