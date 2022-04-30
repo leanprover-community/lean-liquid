@@ -1,4 +1,5 @@
 -- import laurent_measures.functor
+import data.finset.basic
 import analysis.special_functions.logb
 import for_mathlib.pi_induced
 import laurent_measures.thm69
@@ -622,19 +623,60 @@ begin
   exact this,
 end
 
+open multiset subtype nat function
 
-def U (F : filtration (ℒ ϖ) c) (B : ℤ) : set (filtration (ℒ ϖ) c) := λ G, ∀ s n, n < B → F s n = G s n
+open category_theory topological_space finset
 
--- def V (F : filtration (ℒ ϖ) c) (B : ℤ) : set ({ F : (ℒ ϖ) | ∥ F ∥₊ ≤ c}) :=
---   λ G, ∀ s n, n < B → F s n = G s n
+local notation `𝒞` := ((as_small (finset ℤ))ᵒᵖ : Type u)
 
+variable {h : decidable_eq 𝒞}
+
+def U (F : filtration (ℒ ϖ) c) (B : ℤ) : set (filtration (ℒ ϖ) c) :=
+  λ G, ∀ s n, n < B → F s n = G s n
 
 lemma mem_U (F : filtration (ℒ ϖ) c) (B : ℤ) : F ∈ (U c F B) := λ _ _ _, rfl
 
+def W_single (T : 𝒞) (a : (laurent_measures_bdd_functor r
+ϖ c ⋙ Fintype.to_Profinite).obj T) : set ((Profinite.limit_cone (laurent_measures_bdd_functor r
+ϖ c ⋙ Fintype.to_Profinite)).X) := λ x, x.1 T = a
+
+lemma is_open_W_single (T : 𝒞) (a : (laurent_measures_bdd_functor r
+ϖ c ⋙ Fintype.to_Profinite).obj T) : is_open (W_single c T a) := sorry
+
+
+-- variable (ι : finset 𝒞)
+-- variable T : ι → 𝒞
+-- variable (a : Π (i : ι), (laurent_measures_bdd_functor r
+--   ϖ c ⋙ Fintype.to_Profinite).obj (T i))
+
+-- #check ((λ i : ι, W_single c (T i) (a i)) : (Π (i : ι) set ((laurent_measures_bdd_functor r
+-- ϖ c ⋙ Fintype.to_Profinite).obj T))
+-- #check ι.pi
+
+-- lemma is_U_union_W_single (F : filtration (ℒ ϖ) c) (B : ℤ) [h_dec : decidable_eq (as_small (finset ℤ))ᵒᵖ] :
+--   ∃
+--   (ι : finset ((as_small (finset ℤ))ᵒᵖ))
+--   (T : ι → (as_small (finset ℤ))ᵒᵖ)
+--   (a : Π (i : ι), (laurent_measures_bdd_functor r
+--   ϖ c ⋙ Fintype.to_Profinite).obj (T i)),
+--   --(laurent_measures_bdd_homeo r ϖ c) '' (U c F B) =
+--   ∅ = Π (i : ι), ((λ i, W_single c (T i) (a i)) i) :=
+-- begin
+
+-- end
 
 lemma is_open_U (F : filtration (ℒ ϖ) c) (B : ℤ) : is_open (U c F B) :=
 begin
+  sorry;{
   rw is_open_induced_iff,
+  have := CompHaus_to_Top,
+  let W : set (Π (R : (category_theory.as_small (finset ℤ))ᵒᵖ),
+    (laurent_measures_bdd_functor r ϖ c ⋙ Fintype.to_Profinite).obj R),
+  }
+  -- apply coe.CompHaus_to_Top
+
+  -- let W : set (Π (n : (as_small (finset ℤ))ᵒᵖ), (zmod n.unop.1.succ)) := λ x, x k =
+  --   (0 : (zmod k.unop.1.succ)),
 end
 
 end topological_generalities
