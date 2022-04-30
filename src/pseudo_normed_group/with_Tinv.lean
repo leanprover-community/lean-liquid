@@ -22,8 +22,7 @@ class comphaus_filtered_pseudo_normed_group_with_Tinv (r' : out_param $ ℝ≥0)
 a profinitely filtered pseudo-normed topological group `M` together with a
 nonnegative real `r'` and homomorphism `Tinv : M → M` such that
 `Tinv x ∈ filtration M (r'⁻¹ * c)` for all `x ∈ filtration M c`.
-
-Morphisms are continuous and strict homomorphisms. -/
+-/
 class profinitely_filtered_pseudo_normed_group_with_Tinv (r' : out_param $ ℝ≥0) (M : Type*)
   extends profinitely_filtered_pseudo_normed_group M :=
 (Tinv : comphaus_filtered_pseudo_normed_group_hom M M)

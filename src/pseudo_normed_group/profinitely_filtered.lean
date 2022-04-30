@@ -50,9 +50,7 @@ class comphaus_filtered_pseudo_normed_group (M : Type*)
 
 /-- A *profinitely filtered pseudo-normed topological group* is a *complete Hausdorff filtered
 pseudo-normed topological group* with the additional requirement that
-* `filtration M c` is a profinite set
-
-Morphisms are continuous and bounded homomorphisms. -/
+* `filtration M c` is a profinite set. -/
 class profinitely_filtered_pseudo_normed_group (M : Type*)
   extends comphaus_filtered_pseudo_normed_group M :=
 [td : ∀ c, totally_disconnected_space (filtration c)]

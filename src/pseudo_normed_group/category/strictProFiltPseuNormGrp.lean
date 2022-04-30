@@ -9,6 +9,8 @@ noncomputable theory
 
 local attribute [instance] type_pow
 
+/-- The bundled category whose objects are `profinitely_filtered_pseudo_normed_group`s
+equipped (this is the `₁`) with exhaustive filtrations and strict morphisms. -/
 structure ProFiltPseuNormGrp₁ : Type (u+1) :=
 (M : Type u)
 [str : profinitely_filtered_pseudo_normed_group M]
@@ -37,6 +39,8 @@ instance : concrete_category ProFiltPseuNormGrp₁.{u} :=
     map := λ A B f, f },
   forget_faithful := ⟨⟩ } .
 
+/-- The forgetful functor from groups filtered by profinite spaces to
+groups filtered by compact Hausdorff spaces. -/
 def to_CHFPNG₁ : ProFiltPseuNormGrp₁.{u} ⥤ CompHausFiltPseuNormGrp₁.{u} :=
 { obj := λ M,
   { M := M,

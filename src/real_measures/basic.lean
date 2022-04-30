@@ -10,11 +10,20 @@ import pseudo_normed_group.category
 import for_mathlib.nnreal
 import for_mathlib.real
 
+/-
+
+# Real measures
+
+If `p : ℝ≥0` and `S : Fintype` then `real_measures p S` is just the functions
+from `S` to `ℝ`, equipped with its `ℓᵖ` norm.
+-/
 universe u
 
 noncomputable theory
 open_locale big_operators nnreal classical
 
+/-- `real_measures p S` is the vector space of maps `S → ℝ` equipped with the `ℓᵖ` norm,
+which gives it the structure of a `CompHausl`y-filtered normed group.  -/
 @[nolint unused_arguments, derive add_comm_group]
 def real_measures (p : ℝ≥0) (S : Fintype) := S → ℝ
 

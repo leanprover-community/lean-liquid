@@ -9,9 +9,14 @@ local attribute [instance] type_pow
 
 noncomputable theory
 
-/-- `ProFiltPseuNormGrpWithTinv₁ r` is the category of
-`profinitely_filtered_pseudo_normed_group_with_Tinv r M`s such that the filtration is
-exhaustive. Morphisms are strict (that is, send `filtration c` to `filtration c`). -/
+/-- `ProFiltPseuNormGrpWithTinv₁ r` is the bundled category of
+`profinitely_filtered_pseudo_normed_group_with_Tinv r`s, with
+(this is the `₁`) exhaustive filtrations and strict morphisms.
+The objects are filtered abelian groups equipped with an
+endomorphism `T⁻¹` with norm at most `r`; see the docstring
+of `profinitely_filtered_pseudo_normed_group_with_Tinv` for
+more details.
+-/
 structure ProFiltPseuNormGrpWithTinv₁ (r : ℝ≥0) : Type (u+1) :=
 (M : Type u)
 [str : profinitely_filtered_pseudo_normed_group_with_Tinv r M]
@@ -43,6 +48,7 @@ instance : concrete_category (ProFiltPseuNormGrpWithTinv₁.{u} r) :=
     map := λ X Y f, f },
   forget_faithful := ⟨⟩ } .
 
+/-- The "forget the action of T⁻¹" functor on profinitely filtered normed groups. -/
 def to_PFPNG₁ : (ProFiltPseuNormGrpWithTinv₁.{u} r) ⥤ ProFiltPseuNormGrp₁.{u} :=
 { obj := λ M,
   { M := M,
@@ -54,6 +60,8 @@ def to_PFPNG₁ : (ProFiltPseuNormGrpWithTinv₁.{u} r) ⥤ ProFiltPseuNormGrp�
     strict' := f.strict,
     continuous' := f.continuous' } }
 
+/-- The functor which takes a profinitely filtered normed group with an action of T⁻¹,
+then forgets the action and considered it as a `CompHaus`ly filtered normed group. -/
 @[simps]
 def to_CompHausFiltPseuNormGrp₁ (r' : ℝ≥0) :
   ProFiltPseuNormGrpWithTinv₁.{u} r' ⥤ CompHausFiltPseuNormGrp₁.{u} :=
