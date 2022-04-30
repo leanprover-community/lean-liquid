@@ -285,7 +285,7 @@ lemma psi_def_summable {S : Fintype} (n : ℕ)
   summable
     (λ (k : ℕ),
        r ^ (F.d + ↑n) *
-         ((2⁻¹) ^ (k : ℤ) * ∥F s (F.d + ↑n + ↑k)∥₊)) :=
+         (2⁻¹ ^ (k : ℤ) * ∥F s (F.d + ↑n + ↑k)∥₊)) :=
 begin
   have := F.summable_half s,
   apply summable.mul_left,
@@ -299,10 +299,9 @@ begin
   rw nnreal.summable_iff_on_nat_less_shift F.d _ (F.d + n) at this,
   { convert this,
     ext1 k,
-    rw [mul_comm, nnnorm_mul],
-    rw nnnorm_zpow,
-    congr,
-    simp only [nnnorm_inv, real.nnnorm_two], },
+    rw mul_comm,
+    simp only [inv_zpow', neg_add_rev, nnnorm_mul, nnnorm_zpow, real.nnnorm_two],
+    congr' },
   { intros n hn,
     simp [this2 n hn] },
 end
