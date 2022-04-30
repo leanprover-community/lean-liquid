@@ -625,13 +625,16 @@ end
 
 def U (F : filtration (ℒ ϖ) c) (B : ℤ) : set (filtration (ℒ ϖ) c) := λ G, ∀ s n, n < B → F s n = G s n
 
+-- def V (F : filtration (ℒ ϖ) c) (B : ℤ) : set ({ F : (ℒ ϖ) | ∥ F ∥₊ ≤ c}) :=
+--   λ G, ∀ s n, n < B → F s n = G s n
+
 
 lemma mem_U (F : filtration (ℒ ϖ) c) (B : ℤ) : F ∈ (U c F B) := λ _ _ _, rfl
 
 
 lemma is_open_U (F : filtration (ℒ ϖ) c) (B : ℤ) : is_open (U c F B) :=
 begin
-  sorry,
+  rw is_open_induced_iff,
 end
 
 end topological_generalities
