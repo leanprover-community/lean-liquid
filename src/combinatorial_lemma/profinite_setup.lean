@@ -288,7 +288,7 @@ def ProFiltPseuNormGrpWithTinv₁.to_PNG₁ :
   map := λ X Y f, { strict' := λ c x h, f.strict h .. f.to_add_monoid_hom } }
 
 def drop_Profinite_drop_Tinv :
-  ProFiltPseuNormGrpWithTinv₁.to_PFPNG₁ r ⋙ ProFiltPseuNormGrp₁.to_PNG₁ ≅
+  PFPNGT₁_to_PFPNG₁ₗₑ r ⋙ ProFiltPseuNormGrp₁.to_PNG₁ ≅
   ProFiltPseuNormGrpWithTinv₁.to_PNG₁ r :=
 nat_iso.of_components (λ X, iso.refl _) $ by tidy
 
@@ -298,13 +298,13 @@ preserves_limits_of_nat_iso (drop_Profinite_drop_Tinv r)
 def hom_functor'_forget_iso (c) :
   ProFiltPseuNormGrpWithTinv₁.to_PNG₁ r ⋙ hom_functor' Λ ⋙
   PseuNormGrp₁.level.obj c ≅
-  hom_functor _ Λ ⋙ ProFiltPseuNormGrpWithTinv₁.to_PFPNG₁ r ⋙
+  hom_functor _ Λ ⋙ PFPNGT₁_to_PFPNG₁ₗₑ r ⋙
     ProFiltPseuNormGrp₁.level.obj c ⋙ forget _ :=
 nat_iso.of_components (λ X, eq_to_iso rfl) $ by tidy
 
 instance hom_functor_level_preserves_limits (c) : preserves_limits (
   hom_functor r Λ ⋙
-  ProFiltPseuNormGrpWithTinv₁.to_PFPNG₁ r ⋙
+  PFPNGT₁_to_PFPNG₁ₗₑ r ⋙
   ProFiltPseuNormGrp₁.level.obj c ) :=
 begin
   apply preserves_limits_of_reflects_of_preserves _ (forget Profinite),

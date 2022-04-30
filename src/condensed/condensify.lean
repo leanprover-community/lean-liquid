@@ -22,7 +22,7 @@ open category_theory
 
 abbreviation ProFiltPseuNormGrpWithTinv₁.to_CHFPNG₁ :
   ProFiltPseuNormGrpWithTinv₁.{u} r' ⥤ CompHausFiltPseuNormGrp₁.{u} :=
-ProFiltPseuNormGrpWithTinv₁.to_PFPNG₁ r' ⋙ ProFiltPseuNormGrp₁.to_CHFPNG₁
+PFPNGT₁_to_PFPNG₁ₗₑ r' ⋙ ProFiltPseuNormGrp₁.to_CHFPNG₁
 
 open ProFiltPseuNormGrpWithTinv₁ CompHausFiltPseuNormGrp₁ CompHausFiltPseuNormGrp
 

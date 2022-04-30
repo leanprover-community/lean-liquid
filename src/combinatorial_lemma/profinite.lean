@@ -117,7 +117,7 @@ def level : ℝ≥0 ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r' ⥤ Profinite.{u} :
 
 instance (c) : preserves_limits ((level r').obj c) :=
 begin
-  change preserves_limits (to_PFPNG₁.{u} r' ⋙ ProFiltPseuNormGrp₁.level.obj.{u} c),
+  change preserves_limits (PFPNGT₁_to_PFPNG₁ₗₑ.{u} r' ⋙ ProFiltPseuNormGrp₁.level.obj.{u} c),
   apply_with limits.comp_preserves_limits { instances := ff },
   constructor, constructor, introsI J _, constructor,
   -- <-- looks like we have `preserves_limit` and not `preserves_limits`, but
@@ -397,7 +397,7 @@ open ProFiltPseuNormGrpWithTinv₁
 
 instance (c : ℝ≥0) : preserves_limits (hom_functor.{u} r' Λ ⋙ (level r').obj c) :=
 begin
-  change preserves_limits (hom_functor r' Λ ⋙ to_PFPNG₁ r' ⋙ ProFiltPseuNormGrp₁.level.obj c),
+  change preserves_limits (hom_functor r' Λ ⋙ PFPNGT₁_to_PFPNG₁ₗₑ r' ⋙ ProFiltPseuNormGrp₁.level.obj c),
   apply_instance,
 end
 
