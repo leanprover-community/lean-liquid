@@ -517,7 +517,7 @@ begin
       have two_r_lt : (2⁻¹ * r⁻¹ : ℝ) < 1,
       { have := (div_lt_one (nnreal.coe_lt_coe.mpr (r_pos))).mpr half_lt_r,
         simp only [← inv_eq_one_div] at this ⊢,
-        rw [div_eq_mul_inv, nnreal.coe_inv, ← mul_inv₀, mul_inv₀] at this,
+        rw [div_eq_mul_inv, nnreal.coe_inv] at this,
         convert this,
         assumption', },
       exact (summable_geometric_of_lt_1 two_r_nonneg two_r_lt).comp_injective h_inj,
