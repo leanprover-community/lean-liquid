@@ -204,7 +204,7 @@ variables [fact (p < 1)]
 
 lemma half_lt_r : 2⁻¹ < r :=
 calc (2⁻¹:ℝ≥0)
-    = (2⁻¹) ^ (1:ℝ) : (rpow_one (2⁻¹:ℝ≥0)).symm
+    = 2⁻¹ ^ (1:ℝ) : (rpow_one (2⁻¹:ℝ≥0)).symm
 ... < r : rpow_lt_rpow_of_exponent_gt (begin rw nnreal.inv_pos, norm_num, end)
   (begin apply nnreal.inv_lt_one, norm_num end) $
 (nnreal.coe_lt_coe.mpr (fact.out _)).trans_le (nnreal.coe_one).le
@@ -219,14 +219,14 @@ begin
 end
 
 lemma laurent_measures.summable_half (F : ℒ S) (s : S) :
-  summable (λ n, ((F s n) : ℝ) * (2⁻¹) ^ n) :=
+  summable (λ n, ((F s n) : ℝ) * 2⁻¹ ^ n) :=
 aux_thm69.summable_smaller_radius F.d (F.summable s) (λ n hn, lt_d_eq_zero _ _ _ hn) half_lt_r
 
 lemma θ_ϕ_complex (F : ℒ S) : (θ ∘ ϕ) F = 0 :=
 begin
   have t0 : (2 : ℝ)⁻¹ ≠ 0 := inv_ne_zero two_ne_zero,
   funext s,
-  convert_to ∑' (n : ℤ), ((F s (n + 1) - 2 * F s n) : ℝ) * (2⁻¹) ^ n = 0,
+  convert_to ∑' (n : ℤ), ((F s (n + 1) - 2 * F s n) : ℝ) * 2⁻¹ ^ n = 0,
   { apply tsum_congr,
     intro b,
     field_simp [ϕ] },
@@ -323,11 +323,11 @@ begin
   have hr : r ≠ 0 := r_pos.ne.symm,
   rw nnreal.summable_mul_left_iff
     (show (2⁻¹ : ℝ≥0) ^ (-(k : ℤ)) * r ^ (k : ℤ) ≠ 0, from mul_ne_zero (zpow_ne_zero _ hhalf') (zpow_ne_zero _ hr)),
-  have : ∀ x : ℕ, (2⁻¹) ^ -(k : ℤ) * r ^ (k : ℤ) * (r ^ (F.d + ↑x) * ((2⁻¹) ^ (k : ℤ) * ∥F s (F.d + ↑x + ↑k)∥₊))
+  have : ∀ x : ℕ, 2⁻¹ ^ -(k : ℤ) * r ^ (k : ℤ) * (r ^ (F.d + ↑x) * (2⁻¹ ^ (k : ℤ) * ∥F s (F.d + ↑x + ↑k)∥₊))
     = r ^ (F.d + x + k) * ∥F s (F.d + ↑x + ↑k)∥₊,
   { intro x,
-    rw (show (2⁻¹ : ℝ≥0) ^ -(k : ℤ) * r ^ (k : ℤ) * (r ^ (F.d + ↑x) * ((2⁻¹) ^ (k : ℤ) * ∥F s (F.d + ↑x + ↑k)∥₊))
-      = (2⁻¹ : ℝ≥0) ^ -(k : ℤ) * (2⁻¹) ^ (k : ℤ) * r ^ (k : ℤ) * r ^ (F.d + ↑x) *  ∥F s (F.d + ↑x + ↑k)∥₊, by ring),
+    rw (show (2⁻¹ : ℝ≥0) ^ -(k : ℤ) * r ^ (k : ℤ) * (r ^ (F.d + ↑x) * (2⁻¹ ^ (k : ℤ) * ∥F s (F.d + ↑x + ↑k)∥₊))
+      = (2⁻¹ : ℝ≥0) ^ -(k : ℤ) * 2⁻¹ ^ (k : ℤ) * r ^ (k : ℤ) * r ^ (F.d + ↑x) *  ∥F s (F.d + ↑x + ↑k)∥₊, by ring),
     simp only [zpow_add₀ hr, ← zpow_add₀ hhalf'],
     simp,
     left,
@@ -360,7 +360,7 @@ lemma psi_def_summable3 {S : Fintype}
     (λ (k : ℕ),
        ∑' (n : ℕ),
          r ^ (F.d + ↑n) *
-           ((2⁻¹) ^ (k : ℤ) * ∥F s (F.d + ↑n + ↑k)∥₊)) :=
+           (2⁻¹ ^ (k : ℤ) * ∥F s (F.d + ↑n + ↑k)∥₊)) :=
 begin
   -- take 2⁻¹^k out the tsum,
   -- put r^k into the tsum,
@@ -388,7 +388,7 @@ begin
         ext z,
         rw mul_comm,
         refl } },
-  have : ∀ k : ℕ, ∑' (n : ℕ), r ^ (F.d + ↑n) * ((2⁻¹) ^ (k : ℤ) * ∥F s (F.d + ↑n + ↑k)∥₊) =
+  have : ∀ k : ℕ, ∑' (n : ℕ), r ^ (F.d + ↑n) * (2⁻¹ ^ (k : ℤ) * ∥F s (F.d + ↑n + ↑k)∥₊) =
    (∑' (n : ℕ), r ^ (F.d + ↑n + k) * (∥F s (F.d + ↑n + ↑k)∥₊)) * (2⁻¹ * r⁻¹) ^ (k : ℤ),
   { intro k,
     rw ← nnreal.tsum_mul_right,
@@ -421,24 +421,24 @@ end
 lemma psi_def_aux_4 {S : Fintype} [fact (0 < p)] [fact (p < 1)] (F : ℒ S) (s : ↥S) : summable
   (λ (m : ℕ),
      ∥(2 : ℝ) ^ (F.d + ↑m)∥₊ *
-       ((∑' (k : ℕ), ∥F s (F.d + ↑m + ↑k)∥₊ * (2⁻¹) ^ (F.d + ↑m + ↑k)) * r ^ (F.d + ↑m))) :=
+       ((∑' (k : ℕ), ∥F s (F.d + ↑m + ↑k)∥₊ * 2⁻¹ ^ (F.d + ↑m + ↑k)) * r ^ (F.d + ↑m))) :=
 begin
   -- tidy up
   simp_rw [nnnorm_zpow, real.nnnorm_two],
   have : ∀ m : ℕ, (2 : ℝ≥0) ^ (F.d + ↑m) *
-  ((∑' (k : ℕ), ∥F s (F.d + ↑m + ↑k)∥₊ * (2⁻¹) ^ (F.d + ↑m + ↑k)) * r ^ (F.d + ↑m)) =
-  ∑' (k : ℕ), (2 : ℝ≥0) ^ (F.d + ↑m) * ∥F s (F.d + ↑m + ↑k)∥₊ * (2⁻¹) ^ (F.d + ↑m + ↑k) * r ^ (F.d + ↑m),
+  ((∑' (k : ℕ), ∥F s (F.d + ↑m + ↑k)∥₊ * 2⁻¹ ^ (F.d + ↑m + ↑k)) * r ^ (F.d + ↑m)) =
+  ∑' (k : ℕ), (2 : ℝ≥0) ^ (F.d + ↑m) * ∥F s (F.d + ↑m + ↑k)∥₊ * 2⁻¹ ^ (F.d + ↑m + ↑k) * r ^ (F.d + ↑m),
   { intro m,
     rw [← nnreal.tsum_mul_right, ← nnreal.tsum_mul_left],
     apply tsum_congr,
     intro b,
     ring },
   rw summable_congr this, clear this,
-  -- TODO : maybe now is the time to tidy up a bit (e.g. cancel the 2^x and (2⁻¹)^x)
+  -- TODO : maybe now is the time to tidy up a bit (e.g. cancel the 2^x and 2⁻¹^x)
   suffices : summable
   (λ (m : ℕ), ∑' (k : ℕ),
        ∥F s (F.d + ↑m + ↑k)∥₊ *
-       (2⁻¹) ^ (k : ℤ) * r ^ (F.d + ↑m)),
+       2⁻¹ ^ (k : ℤ) * r ^ (F.d + ↑m)),
   { refine (summable_congr _).2 this,
     intro m,
     apply tsum_congr,
@@ -466,7 +466,7 @@ end
 lemma psi_def_aux_3 {S : Fintype} [fact (0 < p)] [fact (p < 1)] (F : ℒ S) (s : ↥S) : summable
   (λ (n : ℤ),
      ∥-(2 : ℝ) ^ (n - 1)∥₊ *
-       ite (F.d ≤ n) ((∑' (k : ℕ), ∥F s (n + ↑k)∥₊ * (2⁻¹) ^ (n + ↑k)) * r ^ n) 0) :=
+       ite (F.d ≤ n) ((∑' (k : ℕ), ∥F s (n + ↑k)∥₊ * 2⁻¹ ^ (n + ↑k)) * r ^ n) 0) :=
 begin
   -- get rid of factor of -2⁻¹
   simp_rw [_root_.nnnorm_neg, zpow_sub₀ (two_ne_zero : (2 : ℝ) ≠ 0), nnnorm_div, zpow_one,
@@ -478,7 +478,7 @@ begin
   -- change outer sum to m : ℕ with n : ℤ = F.d + m
   suffices : summable (λ (m : ℕ),
      ∥(2 : ℝ) ^ (F.d + m)∥₊ *
-       ((∑' (k : ℕ), ∥F s (F.d + m + ↑k)∥₊ * (2⁻¹) ^ (F.d + m + ↑k)) * r ^ (F.d + m))),
+       ((∑' (k : ℕ), ∥F s (F.d + m + ↑k)∥₊ * 2⁻¹ ^ (F.d + m + ↑k)) * r ^ (F.d + m))),
   refine nnreal.summable_of_comp_injective hinj _ _,
   { intros a ha,
     rw [if_neg], simp,
@@ -492,14 +492,14 @@ end
 
 lemma psi_def_aux_2 {S : Fintype} [fact (0 < p)] [fact (p < 1)] (F : ℒ S) (s : ↥S) : summable
   (λ (n : ℤ),
-     ite (F.d ≤ n) ∥-(2 : ℝ) ^ (n - 1) * ∑' (k : ℕ), ↑(F s (n + ↑k)) * (2⁻¹) ^ (n + ↑k) * r ^ n∥₊ 0) :=
+     ite (F.d ≤ n) ∥-(2 : ℝ) ^ (n - 1) * ∑' (k : ℕ), ↑(F s (n + ↑k)) * 2⁻¹ ^ (n + ↑k) * r ^ n∥₊ 0) :=
 begin
   simp_rw [nnnorm_mul],
   -- next : put norm inside inner tsum (a one way implication)
   suffices : summable
   (λ (n : ℤ), ∥-(2 : ℝ) ^ (n - 1)∥₊ *
      ite (F.d ≤ n)
-     ((∑' (k : ℕ), ∥F s (n + ↑k)∥₊ * (2⁻¹) ^ (n + ↑k)) * r ^ n)
+     ((∑' (k : ℕ), ∥F s (n + ↑k)∥₊ * 2⁻¹ ^ (n + ↑k)) * r ^ n)
        0),
   refine summable_of_le _ this,
   { intro n,
@@ -533,10 +533,10 @@ end
 
 lemma psi_def_aux {S : Fintype} [fact (0 < p)] [fact (p < 1)] (F : ℒ S) (s : ↥S) :
   summable (λ (n : ℤ), ∥ite (F.d ≤ n) (-(2 : ℝ) ^ (n - 1) *
-    ∑' (k : ℕ), ↑(F s (n + ↑k)) * (2⁻¹) ^ (n + ↑k)) 0∥₊ * r ^ n) :=
+    ∑' (k : ℕ), ↑(F s (n + ↑k)) * 2⁻¹ ^ (n + ↑k)) 0∥₊ * r ^ n) :=
 begin
   suffices :  summable (λ (n : ℤ), ite (F.d ≤ n) ∥-(2 : ℝ) ^ (n - 1) *
-    ∑' (k : ℕ), ↑(F s (n + ↑k)) * (2⁻¹) ^ (n + ↑k) * r ^ n∥₊ 0),
+    ∑' (k : ℕ), ↑(F s (n + ↑k)) * 2⁻¹ ^ (n + ↑k) * r ^ n∥₊ 0),
   refine summable_of_le _ this,
   { intro n,
     split_ifs,
@@ -568,7 +568,7 @@ def ψ (F : ℒ S) (hF : θ F = 0) : ℒ S :=
     --{ intros n hn, simp [if_neg hn.not_le] },
     have h1 : ∀ (n : ℤ),
       ite (F.d ≤ n) (∑ (l : ℕ) in range (n - F.d).nat_abs.succ, (F s (n - 1 - ↑l) : ℝ) * 2 ^ l) 0 =
-      ite (F.d ≤ n) (-(2 : ℝ)^(n-1)*∑' (k : ℕ), F s (n + k) * (2⁻¹) ^ (n + k)) 0,
+      ite (F.d ≤ n) (-(2 : ℝ)^(n-1)*∑' (k : ℕ), F s (n + k) * 2⁻¹ ^ (n + k)) 0,
     { intro n,
       split_ifs with hn, swap, refl,
       rw [← inv_mul_eq_iff_eq_mul₀, ← neg_inv, neg_mul, mul_sum, neg_eq_iff_add_eq_zero, ← hF],
@@ -576,7 +576,7 @@ def ψ (F : ℒ S) (hF : θ F = 0) : ℒ S :=
       convert @tsum_add_tsum_compl ℝ ℤ _ _ _ _ _ {x : ℤ | x < n}
         (summable.subtype (F.summable_half s) _) (summable.subtype (F.summable_half s) _) using 2,
       { simp_rw [← inv_zpow₀, mul_comm ((2⁻¹ : ℝ)^(n-1)), mul_assoc],
-        simp_rw (show ∀ (x : ℕ), (2 : ℝ)^x = (2⁻¹)^(-(x : ℤ)), by {intros, simp}),
+        simp_rw (show ∀ (x : ℕ), (2 : ℝ)^x = 2⁻¹^(-(x : ℤ)), by {intros, simp}),
         simp_rw [← zpow_add₀ (by norm_num : (2⁻¹ : ℝ) ≠ 0), add_comm, ← sub_eq_add_neg],
         rw ← tsum_eq_sum,
         convert @equiv.tsum_eq ℝ _ _ _ _ _
@@ -604,7 +604,7 @@ def ψ (F : ℒ S) (hF : θ F = 0) : ℒ S :=
         ext, refl },
     },
     suffices : summable (λ (n : ℤ),
-     ∥ite (F.d ≤ n) (-(2 : ℝ)^(n-1)*∑' (k : ℕ), ↑(F s (n + k)) * (2⁻¹) ^ (n + k)) 0∥₊ *
+     ∥ite (F.d ≤ n) (-(2 : ℝ)^(n-1)*∑' (k : ℕ), ↑(F s (n + k)) * 2⁻¹ ^ (n + k)) 0∥₊ *
        r ^ n),
     { refine (summable_congr _).2 this,
       intro n,

@@ -79,7 +79,7 @@ begin
     split_ifs,
     norm_num,
     exact zero_lt_iff.mpr h },
-  let ε : ℕ → ℝ := λ j, (2⁻¹*(2⁻¹) ^ j) / K' / 2,
+  let ε : ℕ → ℝ := λ j, (2⁻¹*2⁻¹ ^ j) / K' / 2,
   have ε_pos : ∀ j, 0 < ε j,
   { intro j,
     dsimp [ε],
@@ -99,13 +99,13 @@ begin
     simp only [d_res, res_res, normed_group_hom.map_zero, hx, norm_zero, zero_add, mul_zero] at hy,
     refine ⟨y, hy⟩ },
   choose w hw using seq,
-  let δ : ℕ → ℝ := λ j, 2⁻¹*(2⁻¹) ^ j,
+  let δ : ℕ → ℝ := λ j, 2⁻¹*2⁻¹ ^ j,
   have δ_pos : ∀ j, 0 < δ j, { norm_num [δ] },
-  have hεδ : ∀ j, (K : ℝ) * (2 * ε j) + δ j ≤ 1 * (2⁻¹) ^ j,
+  have hεδ : ∀ j, (K : ℝ) * (2 * ε j) + δ j ≤ 1 * 2⁻¹ ^ j,
   { intro j,
     dsimp [ε, δ],
     conv_rhs { congr, rw [show (1 : ℝ) = 2⁻¹ + 2⁻¹, by norm_num] },
-    rw add_mul (2⁻¹ : ℝ) (2⁻¹),
+    rw add_mul (2⁻¹ : ℝ) 2⁻¹,
     by_cases hK : K = 0,
     { simp only [hK, div_zero, nnreal.coe_zero, zero_div, zero_add, le_add_iff_nonneg_left, mul_zero, K', if_pos, zero_mul],
       apply mul_nonneg,
@@ -142,7 +142,7 @@ begin
     ... = ∥res (w (j + 1) - (w j)) - C.d _ _ (z j)∥ : by simp [normed_group_hom.map_sub, sum_range_succ]
     ... ≤ K * ∥C.d _ _ (w (j + 1) - w j)∥ + δ j : hz j
     ... ≤ K * (2* ε j) + δ j : by {apply add_le_add_right, apply mul_le_mul_of_nonneg_left fact (nnreal.coe_nonneg K)}
-    ... ≤ 1 * (2⁻¹) ^ j : hεδ j },
+    ... ≤ 1 * 2⁻¹ ^ j : hεδ j },
   have hdyj : ∀ j, C.d _ _ (y j) = res (C.d _ _ $ w j),
   { intro j,
     calc C.d _ _ (y j) = C.d _ _ (res (w j) - ∑ l in range j, C.d _ i (z l)) : rfl
@@ -166,7 +166,7 @@ begin
     exact (cont.tendsto y₀).comp hy₀ },
   have lim_ε : tendsto ε at_top (𝓝 0),
   { rw show (0 : ℝ) = (2⁻¹*0)/K'/2, by norm_num,
-    refine (tendsto.const_mul (2⁻¹) (tendsto_pow_at_top_nhds_0_of_lt_1 _ _)).div_const.div_const;
+    refine (tendsto.const_mul 2⁻¹ (tendsto_pow_at_top_nhds_0_of_lt_1 _ _)).div_const.div_const;
     norm_num },
   exact le_of_tendsto_of_tendsto' lim_norm lim_ε hblop,
 end

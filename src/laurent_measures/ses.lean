@@ -241,10 +241,10 @@ begin
   rw [one_mul, real_measures.mem_filtration_iff],
   dsimp only [real_measures.has_nnnorm, θ, theta.ϑ],
   let T := S.2.1,
-  have ineq : ∀ (s ∈ T), ∥∑' (n : ℤ), ((F s n) : ℝ) * (2⁻¹) ^ n∥₊ ^ (p : ℝ) ≤ ∑' (n : ℤ),
-    ∥ ((F s n) : ℝ) * (2⁻¹) ^ n∥₊ ^ (p : ℝ),
+  have ineq : ∀ (s ∈ T), ∥∑' (n : ℤ), ((F s n) : ℝ) * 2⁻¹ ^ n∥₊ ^ (p : ℝ) ≤ ∑' (n : ℤ),
+    ∥ ((F s n) : ℝ) * 2⁻¹ ^ n∥₊ ^ (p : ℝ),
   { intros s hs,
-    apply nnreal.tsum_geom_arit_inequality (λ n, ((F s n) * (2⁻¹) ^ n)),
+    apply nnreal.tsum_geom_arit_inequality (λ n, ((F s n) * 2⁻¹ ^ n)),
     { norm_num, exact fact.out _},
     { suffices : p ≤ 1, assumption_mod_cast, exact fact.out _},
     { dsimp only,
@@ -535,7 +535,7 @@ end
 
 
 def geom_B_nat (ε : ℝ) (hε : 0 < ε) : {B : ℕ // ∀ (F : filtration (ℒ ϖ) c), ∥ tsum (λ b :
-  {n : ℕ // B ≤ n }, ((F.1 punit.star b.1) : ℝ) * (2⁻¹) ^ b.1 ) ∥ < ε ^ (p⁻¹ : ℝ)} :=
+  {n : ℕ // B ≤ n }, ((F.1 punit.star b.1) : ℝ) * 2⁻¹ ^ b.1 ) ∥ < ε ^ (p⁻¹ : ℝ)} :=
 begin
   let g := (λ n : ℕ, (c : ℝ) * ((2⁻¹ * r⁻¹) ^ n)),
   have := tendsto_tsum_compl_at_top_zero g,
@@ -596,7 +596,7 @@ def eq_le_int_nat (B : ℕ) : {n : ℤ // (B : ℤ) ≤ n } ≃ {n : ℕ // B �
 
 
 def geom_B_int (ε : ℝ) (hε : 0 < ε) : {B : ℤ // ∀ (F : filtration (ℒ ϖ) c), ∥ tsum (λ b :
-  {n : ℤ // B ≤ n }, ((F.1 punit.star b.1) : ℝ) * (2⁻¹) ^ b.1 ) ∥ < ε ^ (p⁻¹ : ℝ)} :=
+  {n : ℤ // B ≤ n }, ((F.1 punit.star b.1) : ℝ) * 2⁻¹ ^ b.1 ) ∥ < ε ^ (p⁻¹ : ℝ)} :=
 begin
   let ℬ := geom_B_nat p c ε hε,
   let B := ℬ.1,
@@ -607,7 +607,7 @@ begin
   convert hB using 1,
   apply congr_arg,
   exact ((eq_le_int_nat B).symm.tsum_eq (λ b : {n : ℤ // ↑B ≤ n },
-  ((F.1 punit.star b.1) : ℝ) * (2⁻¹) ^ b.1 )).symm,
+  ((F.1 punit.star b.1) : ℝ) * 2⁻¹ ^ b.1 )).symm,
 end
 
 
@@ -615,7 +615,7 @@ def geom_B (ε : ℝ) (hε : 0 < ε) : ℤ := (geom_B_int c ε hε).1
 
 
 lemma tail_B (ε : ℝ) (hε : 0 < ε) :  ∀ (F : filtration (ℒ ϖ) c), ∥ tsum (λ b : {n : ℤ // geom_B c ε hε ≤ n },
-  ((F.1 punit.star b.1) : ℝ) * (2⁻¹) ^ b.1 ) ∥ < ε ^ (p⁻¹ : ℝ) :=
+  ((F.1 punit.star b.1) : ℝ) * 2⁻¹ ^ b.1 ) ∥ < ε ^ (p⁻¹ : ℝ) :=
 begin
   intro F,
   have := (geom_B_int p c ε hε).2 F,
@@ -667,11 +667,11 @@ end
 
 
 lemma tsum_subtype_sub {f g : ℤ → ℝ} {B : ℤ}
-  (hf : summable (λ (b : {x // B ≤ x}), f b * (2⁻¹) ^ b.1))
-  (hg : summable (λ (b : {x // B ≤ x}), g b * (2⁻¹) ^ b.1)) :
-  ∥ tsum ((λ (b : ℤ), (((g b) : ℝ) - f b) * (2⁻¹) ^ b) ∘ (coe : {b | B ≤ b} → ℤ)) ∥ =
-  ∥ ∑' (b : {x // B ≤ x}), (g b : ℝ) * (2⁻¹) ^ b.1 - ∑' (b : {x // B ≤ x}),
-    (f b : ℝ) * (2⁻¹) ^ b.1 ∥ :=
+  (hf : summable (λ (b : {x // B ≤ x}), f b * 2⁻¹ ^ b.1))
+  (hg : summable (λ (b : {x // B ≤ x}), g b * 2⁻¹ ^ b.1)) :
+  ∥ tsum ((λ (b : ℤ), (((g b) : ℝ) - f b) * 2⁻¹ ^ b) ∘ (coe : {b | B ≤ b} → ℤ)) ∥ =
+  ∥ ∑' (b : {x // B ≤ x}), (g b : ℝ) * 2⁻¹ ^ b.1 - ∑' (b : {x // B ≤ x}),
+    (f b : ℝ) * 2⁻¹ ^ b.1 ∥ :=
 begin
   rw [← tsum_sub hg hf, tsum_eq_tsum_of_has_sum_iff_has_sum],
   intro _,
@@ -680,11 +680,11 @@ begin
 end
 
 lemma aux_summability_no_norm (F : filtration (ℒ ϖ) c) : summable
-  (λ b : ℤ, (((F punit.star b) : ℝ) * (2⁻¹) ^ b)) := aux_thm69.summable_smaller_radius F.1.d (F.1.summable punit.star)
+  (λ b : ℤ, (((F punit.star b) : ℝ) * 2⁻¹ ^ b)) := aux_thm69.summable_smaller_radius F.1.d (F.1.summable punit.star)
       (λ n, lt_d_eq_zero F.1 punit.star n) half_lt_r
 
 lemma aux_summability_subtype (F : filtration (ℒ ϖ) c) (B : ℤ) : summable (λ b : {x : ℤ // B ≤ x},
-  (((F punit.star b) : ℝ) * (2⁻¹) ^ b.1)) :=
+  (((F punit.star b) : ℝ) * 2⁻¹ ^ b.1)) :=
     by {exact (aux_summability_no_norm p c F).comp_injective subtype.coe_injective}
 
 
@@ -721,7 +721,7 @@ begin
   simp_rw [← sub_mul],
   set B := (geom_B p c (ε / 2 ^ p.1) (pos_ε_pow p ε hε)) with def_B,
   let f := λ b : ℤ, ((((G : (ℒ ϖ)) punit.star b) - ((F : (ℒ ϖ)) punit.star b)) : ℝ)
-    * (2⁻¹) ^ b,
+    * 2⁻¹ ^ b,
   let g : ({ b : ℤ | B ≤ b}) → ℝ := f ∘ coe,
   let i : function.support g → ℤ := (coe : { b : ℤ | B ≤ b} → ℤ) ∘ (coe : function.support g → { b : ℤ | B ≤ b}),
   have hi : ∀ ⦃x y : ↥(function.support g)⦄, i x = i y → ↑x = ↑y,

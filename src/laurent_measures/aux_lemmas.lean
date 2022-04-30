@@ -277,16 +277,16 @@ end
 lemma summable_smaller_radius_norm {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ) (ρ_half : 2⁻¹ < ρ)
 (hf : summable (λ n : ℤ, ∥ f n ∥ * ρ ^ n))
   (hd : ∀ n : ℤ, n < d → f n = 0) : --(F : ℒ S) (s : S) :
-  summable (λ n, ∥ f n ∥ * (2⁻¹) ^ n) :=
+  summable (λ n, ∥ f n ∥ * 2⁻¹ ^ n) :=
 begin
   refine int_summable_iff.mpr ⟨_, _⟩,
   { apply (int_summable_iff.mp hf).1.smaller_radius ρ_half.le (by simp) },
-  { apply summable_of_eventually_zero (λ n, ∥f n∥ * (2⁻¹) ^ n) d (λ n nd, by simp [hd _ nd]) }
+  { apply summable_of_eventually_zero (λ n, ∥f n∥ * 2⁻¹ ^ n) d (λ n nd, by simp [hd _ nd]) }
 end
 
 lemma summable_smaller_radius {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ)
-  (hf : summable (λ n : ℤ, ∥ f n ∥ * ρ ^ n)) (hd : ∀ n : ℤ, n < d → f n = 0) (hρ : (2⁻¹) < ρ) :
-  summable (λ n, (f n : ℝ) * (2⁻¹) ^ n) :=
+  (hf : summable (λ n : ℤ, ∥ f n ∥ * ρ ^ n)) (hd : ∀ n : ℤ, n < d → f n = 0) (hρ : 2⁻¹ < ρ) :
+  summable (λ n, (f n : ℝ) * 2⁻¹ ^ n) :=
 begin
   refine summable_of_summable_norm _,
   simp_rw [norm_mul, norm_zpow, norm_inv, real.norm_two],
@@ -300,7 +300,7 @@ end
 lemma prod_nat_summable {f : ℤ → ℤ} {r : ℝ≥0} (half_lt_r : 2⁻¹ < r)
   (hf : summable (λ n : ℤ, ∥ f n ∥ * r ^ n)) :
   summable (λ lj: ℕ × ℕ,
-    (2⁻¹ : ℝ) * ∥ (f (lj.fst + 1 + lj.snd) : ℝ) * (2⁻¹)^(lj.snd) ∥ * r ^ (lj.fst)) :=
+    (2⁻¹ : ℝ) * ∥ (f (lj.fst + 1 + lj.snd) : ℝ) * 2⁻¹^(lj.snd) ∥ * r ^ (lj.fst)) :=
 begin
   have r0 : r ≠ 0 := by { rintro rfl, simpa only [not_lt_zero'] using half_lt_r },
   have : summable (λ (n : ℤ), ∥(f n : ℝ) * (2 * r)⁻¹∥ * r ^ n),
