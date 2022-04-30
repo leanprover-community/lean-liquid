@@ -6,7 +6,7 @@ import linear_algebra.free_module.finite.basic
 import for_mathlib.nnrat
 import for_mathlib.rational_cones
 
-/-
+/-!
 
 # Gordan's Lemma
 

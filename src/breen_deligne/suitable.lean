@@ -7,7 +7,7 @@ import for_mathlib.free_abelian_group
 
 import facts.nnreal
 
-/-
+/-!
 
 # "suitability" of a universal map
 

@@ -4,7 +4,7 @@ import for_mathlib.pi_induced
 import laurent_measures.thm69
 -- import data.real.basic
 
-/-
+/-!
 This files introduces the maps `Θ`, `Φ` (***and `Ψ` ???***), which are the "measurifications" of
 `θ`, `ϕ` (*** and `ψ` ???***)
 `laurent_measures.thm69`, they are morphisms in the right category.

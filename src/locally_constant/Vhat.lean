@@ -2,7 +2,7 @@ import locally_constant.SemiNormedGroup
 import normed_group.normed_with_aut
 import analysis.normed.group.SemiNormedGroup.completion
 
-/-
+/-!
 
 # Completions of normed groups
 

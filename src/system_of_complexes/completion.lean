@@ -2,7 +2,7 @@ import analysis.specific_limits.basic
 import system_of_complexes.basic
 import locally_constant.Vhat
 
-/-
+/-!
 
 # A technical lemma
 
@@ -11,8 +11,8 @@ complexes of seminormed groups, and it proves a technical lemma
 saying that a system of complexes of seminormed groups is admissible
 and weak bounded exact, and if the groups in the complex are complete,
 then it's bounded exact (for some slightly different constants).
-
 -/
+
 open finset filter
 open_locale nnreal big_operators topological_space
 

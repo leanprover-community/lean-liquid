@@ -8,7 +8,7 @@ import linear_algebra.basic
 import order.filter.at_top_bot tactic.linarith
 import for_mathlib.nnreal
 
-/-
+/-!
 This file introduces the maps
 * `θ`, which is the specialization of evaluation-at-ξ map `ϑ` from `laurent_measures.theta`
   at `ξ=2⁻¹`.
