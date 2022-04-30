@@ -61,12 +61,19 @@ begin
     (λ S, injective_ϕ')
     (λ S, by { ext1 F, apply θ_ϕ_complex }) _ _ _,
   -- proof of some boundedness thing
-  { clear S, intros S c',
-    rintros f ⟨hf1, hf2⟩,
+  { clear S,
+    -- change to unbundled language
+    rintros S c' (f : laurent_measures r S) ⟨hf1,
+      (hf2 : f ∈ pseudo_normed_group.filtration (laurent_measures r S) c')⟩,
     rw [set.mem_preimage, set.mem_singleton_iff] at hf1,
+    rw set.mem_image,
+    change ∃ x : laurent_measures r S,
+      x ∈ pseudo_normed_group.filtration (laurent_measures r S) _ ∧ _,
     sorry },
+  { clear S,
+    rintros S c' f,
 
-  all_goals { sorry },
+    sorry },
 end
 
 end ses
