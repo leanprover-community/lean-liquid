@@ -53,7 +53,7 @@ local notation `r` := @r p
         ... = r⁻¹ ^ n : _,
         { norm_cast },
         { rw [← nnreal.rpow_mul, mul_comm, nnreal.rpow_mul, ← nnreal.inv_rpow, inv_inv], },
-        { rw [← one_div (2:ℝ≥0), nnreal.rpow_nat_cast], refl, } } },
+        { rw [nnreal.rpow_nat_cast], refl, } } },
     { refine sum_le_tsum _ _ _,
       { intros, exact zero_le' },
       { exact F.nnreal_summable s } },

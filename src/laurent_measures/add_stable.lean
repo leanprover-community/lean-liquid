@@ -23,9 +23,8 @@ instance : has_coe ℝ (ℳ S) := {coe := λ a s, a }
 
 variable [fact (0 < p)]
 variable [fact (p < 1)]
-instance one_half_pos' : fact (0 < (2⁻¹ : ℝ)) := ⟨one_half_pos⟩
-instance one_half_lt_one' : fact ((2⁻¹ : ℝ) < 1) := ⟨one_half_lt_one⟩
-
+instance one_half_pos' : fact (0 < (2⁻¹ : ℝ)) := ⟨by norm_num⟩
+instance one_half_lt_one' : fact ((2⁻¹ : ℝ) < 1) := ⟨by norm_num⟩
 
 def θ_section (g : ℳ S) : (ℒ S) := ⟨ϑ_section (2⁻¹ : ℝ) r p S g,
   summable_ϑ_section (2⁻¹ : ℝ) r p S g⟩
