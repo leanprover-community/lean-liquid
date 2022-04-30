@@ -64,7 +64,7 @@ def _root_.PFPNGT₁_to_PFPNG₁ₗₑ : (ProFiltPseuNormGrpWithTinv₁.{u} r) �
 /-- The functor which takes a profinitely filtered normed group with an action of T⁻¹,
 then forgets the action and considered it as a `CompHaus`ly filtered normed group. -/
 @[simps]
-def PFPNGT₁_PFPNG₁_to_CHFPNG₁ₗₑₗₑ (r' : ℝ≥0) :
+def PFPNGT₁_to_CHFPNG₁ₗₑ (r' : ℝ≥0) :
   ProFiltPseuNormGrpWithTinv₁.{u} r' ⥤ CompHausFiltPseuNormGrp₁.{u} :=
 PFPNGT₁_to_PFPNG₁ₗₑ r' ⋙ PFPNG₁_to_CHFPNG₁ₗₑ
 
@@ -291,7 +291,7 @@ instance {J : Type u} [small_category J] : creates_limits_of_shape J (PFPNGT₁_
 
 instance : creates_limits (PFPNGT₁_to_PFPNG₁ₗₑ r) := ⟨⟩
 
-instance (r') : creates_limits (PFPNGT₁_PFPNG₁_to_CHFPNG₁ₗₑₗₑ r') :=
+instance (r') : creates_limits (PFPNGT₁_to_CHFPNG₁ₗₑ r') :=
 category_theory.comp_creates_limits _ _
 
 def limit_cone_is_limit {J : Type u} [small_category J]
