@@ -492,11 +492,11 @@ end
 
 
 lemma mem_filtration_sum_le_geom (F : filtration (ℒ ϖ) c) (B : ℕ) : ∥ ∑' n : {x : ℕ // B ≤ x},
-  ((F.1 punit.star n) : ℝ) * (2⁻¹) ^ n.1 ∥ ≤ ∥ (c : ℝ) * ∑' n : {x : ℕ // B ≤ x}, (2⁻¹ / r) ^ n.1 ∥ :=
+  ((F.1 punit.star n) : ℝ) * (2⁻¹) ^ n.1 ∥ ≤ ∥ (c : ℝ) * ∑' n : {x : ℕ // B ≤ x}, (2⁻¹ * r⁻¹) ^ n.1 ∥ :=
 begin
-  have two_r_nonneg : 0 ≤ (2⁻¹ / r : ℝ) := by {apply one_div_nonneg.mpr (mul_nonneg _ r.2), simp only [zero_le_bit0, zero_le_one]},
+  have two_r_nonneg : 0 ≤ (2⁻¹ * r⁻¹ : ℝ) := by {apply one_div_nonneg.mpr (mul_nonneg _ r.2), simp only [zero_le_bit0, zero_le_one]},
   have h_inj : function.injective (coe : {x : ℕ // B ≤ x} → ℕ) := subtype.coe_injective,
-  have geom_pos : (0 : ℝ) ≤ c * ∑' (n : {x // B ≤ x}), (2⁻¹ / r) ^ n.1,
+  have geom_pos : (0 : ℝ) ≤ c * ∑' (n : {x // B ≤ x}), (2⁻¹ * r⁻¹) ^ n.1,
   { apply mul_nonneg c.2 (tsum_nonneg _),
     intro b,
     rw ← one_div_pow,
@@ -516,7 +516,7 @@ begin
   { by_cases hc : (c : ℝ) ≠ 0,
     { rw [← summable_mul_left_iff hc],
       simp_rw [← one_div_pow],
-      have two_r_lt : (2⁻¹ / r : ℝ) < 1,
+      have two_r_lt : (2⁻¹ * r⁻¹ : ℝ) < 1,
       { have := (div_lt_one (nnreal.coe_lt_coe.mpr (r_pos))).mpr half_lt_r,
         simp only [← inv_eq_one_div] at this ⊢,
         rw [div_eq_mul_inv, nnreal.coe_inv, ← mul_inv₀] at this,
@@ -539,7 +539,7 @@ end
 def geom_B_nat (ε : ℝ) (hε : 0 < ε) : {B : ℕ // ∀ (F : filtration (ℒ ϖ) c), ∥ tsum (λ b :
   {n : ℕ // B ≤ n }, ((F.1 punit.star b.1) : ℝ) * (2⁻¹) ^ b.1 ) ∥ < ε ^ (p⁻¹ : ℝ)} :=
 begin
-  let g := (λ n : ℕ, (c : ℝ) * ((2⁻¹ / r) ^ n)),
+  let g := (λ n : ℕ, (c : ℝ) * ((2⁻¹ * r⁻¹) ^ n)),
   have := tendsto_tsum_compl_at_top_zero g,
   rw tendsto_at_top at this,
   have h_pos : 0 < ε ^ (p⁻¹ : ℝ) := real.rpow_pos_of_pos hε _,

@@ -8,7 +8,6 @@ import linear_algebra.basic
 import order.filter.at_top_bot tactic.linarith
 import for_mathlib.nnreal
 
-
 /-
 This file introduces the maps
 * `θ`, which is the specialization of evaluation-at-ξ map `ϑ` from `laurent_measures.theta`
@@ -126,7 +125,7 @@ variable [fact(0 < p)]
 
 lemma r_lt_one : r < 1 :=
 begin
-  refine rpow_lt_one (half_lt_self one_ne_zero) _,
+  refine rpow_lt_one (nnreal.inv_lt_one one_lt_two) _,
   rw nnreal.coe_pos,
   exact fact.out _
 end
@@ -146,6 +145,8 @@ end
 
 def θ : ℒ S → ℳ S := ϑ 2⁻¹ r p S
 
+
+--lemma nnreal.le_self_rpow'
 lemma θ_natural [fact (0 < p)] [fact (p ≤ 1)] (S T : Fintype) (f : S ⟶ T) (F : ℒ S) (t : T) :
   θ (map f F) t = real_measures.map f (θ F) t :=
 begin
@@ -178,12 +179,10 @@ begin
     rw hmn,
     norm_cast,
     apply pow_le_pow_of_le, clear hn hmn hm m n,
-    rw (show (2 : nnreal)⁻¹ = (2⁻¹) ^ (1 : ℝ), by simp;norm_num),
-    refine rpow_le_rpow_of_exponent_ge _ _ _,
-    { simp },
-    { simp, norm_num },
-    { exact_mod_cast (fact.elim infer_instance),
-      apply_instance, } },
+    apply nnreal.le_self_rpow' (two_inv_lt_one.le),
+    norm_cast,
+    exact fact.out _,
+  },
   {
     obtain ⟨d, hd⟩ := exists_bdd_filtration (r_pos) (r_lt_one) F,
     apply summable_of_ne_finset_zero, -- missing finset
@@ -206,8 +205,18 @@ variables [fact (p < 1)]
 lemma half_lt_r : 2⁻¹ < r :=
 calc (2⁻¹:ℝ≥0)
     = (2⁻¹) ^ (1:ℝ) : (rpow_one (2⁻¹:ℝ≥0)).symm
-... < r : rpow_lt_rpow_of_exponent_gt (half_pos zero_lt_one) (half_lt_self one_ne_zero) $
+... < r : rpow_lt_rpow_of_exponent_gt (begin rw nnreal.inv_pos, norm_num, end)
+  (begin apply nnreal.inv_lt_one, norm_num end) $
 (nnreal.coe_lt_coe.mpr (fact.out _)).trans_le (nnreal.coe_one).le
+
+lemma one_lt_two_r : 1 < 2 * r :=
+begin
+  have := half_lt_r,
+  have this2 : (2⁻¹ : ℝ) < r,
+    assumption_mod_cast,
+  rw inv_pos_lt_iff_one_lt_mul' at this2, assumption_mod_cast,
+  norm_num,
+end
 
 lemma laurent_measures.summable_half (F : ℒ S) (s : S) :
   summable (λ n, ((F s n) : ℝ) * (2⁻¹) ^ n) :=
@@ -280,8 +289,8 @@ lemma psi_def_summable {S : Fintype} (n : ℕ)
 begin
   have := F.summable_half s,
   apply summable.mul_left,
-  have h : (1 : ℝ≥0)/ 2 ≠ 0 := by norm_num,
-  rw nnreal.summable_mul_left_iff (show (((1 : ℝ≥0)/ 2) ^ (F.d + n) ≠ 0), from zpow_ne_zero _ h),
+  have h : (2⁻¹ : ℝ≥0) ≠ 0 := by norm_num,
+  rw nnreal.summable_mul_left_iff (show ((2⁻¹ : ℝ≥0) ^ (F.d + n) ≠ 0), from zpow_ne_zero _ h),
   simp only [← mul_assoc, ← zpow_add₀ h],
   have this2 := lt_d_eq_zero F s,
   rw ← summable_norm_iff at this,
@@ -293,7 +302,7 @@ begin
     rw [mul_comm, nnnorm_mul],
     rw nnnorm_zpow,
     congr,
-    norm_num },
+    simp only [nnnorm_inv, real.nnnorm_two], },
   { intros n hn,
     simp [this2 n hn] },
 end
@@ -381,22 +390,23 @@ begin
         rw mul_comm,
         refl } },
   have : ∀ k : ℕ, ∑' (n : ℕ), r ^ (F.d + ↑n) * ((2⁻¹) ^ (k : ℤ) * ∥F s (F.d + ↑n + ↑k)∥₊) =
-   (∑' (n : ℕ), r ^ (F.d + ↑n + k) * (∥F s (F.d + ↑n + ↑k)∥₊)) * (2⁻¹ / r) ^ (k : ℤ),
+   (∑' (n : ℕ), r ^ (F.d + ↑n + k) * (∥F s (F.d + ↑n + ↑k)∥₊)) * (2⁻¹ * r⁻¹) ^ (k : ℤ),
   { intro k,
     rw ← nnreal.tsum_mul_right,
     apply tsum_congr,
     intro n,
     simp only [zpow_add₀ r_pos.ne.symm, zpow_coe_nat, one_div, inv_pow₀, div_zpow₀],
-    have foo : 2 ^ k * r ^ k ≠ 0,
-    { apply mul_ne_zero,
-      { apply pow_ne_zero, norm_num },
-      { apply pow_ne_zero, exact r_pos.ne.symm },
+    have foo : (2 * r) ^ k ≠ 0,
+    { apply pow_ne_zero, apply mul_ne_zero,
+      { norm_num },
+      { exact r_pos.ne.symm },
 
     },
     field_simp [foo],
-    ring },
+    rw mul_pow,
+    ring, },
   rw summable_congr this, clear this,
-  suffices : summable (λ k : ℕ, (∑' (t : ℤ), r ^ t * ∥F s t∥₊) * (2⁻¹ / r) ^ k),
+  suffices : summable (λ k : ℕ, (∑' (t : ℤ), r ^ t * ∥F s t∥₊) * (2⁻¹ * r⁻¹) ^ k),
   { refine summable_of_le _ this,
     intro k,
     rw zpow_coe_nat,
@@ -434,7 +444,6 @@ begin
     intro m,
     apply tsum_congr,
     intro b,
-    rw one_div,
     rw [inv_zpow₀,inv_zpow₀],
     rw [← zpow_neg₀, ←zpow_neg₀],
     have h2 : (2 : ℝ≥0) ≠ 0 := two_ne_zero,
@@ -567,9 +576,9 @@ def ψ (F : ℒ S) (hF : θ F = 0) : ℒ S :=
         swap, exact neg_ne_zero.2 (zpow_ne_zero _ two_ne_zero),
       convert @tsum_add_tsum_compl ℝ ℤ _ _ _ _ _ {x : ℤ | x < n}
         (summable.subtype (F.summable_half s) _) (summable.subtype (F.summable_half s) _) using 2,
-      { simp_rw [← inv_zpow₀, inv_eq_one_div, mul_comm (((1 : ℝ)/2)^(n-1)), mul_assoc],
+      { simp_rw [← inv_zpow₀, mul_comm ((2⁻¹ : ℝ)^(n-1)), mul_assoc],
         simp_rw (show ∀ (x : ℕ), (2 : ℝ)^x = (2⁻¹)^(-(x : ℤ)), by {intros, simp}),
-        simp_rw [← zpow_add₀ (by norm_num : (1 : ℝ) / 2 ≠ 0), add_comm, ← sub_eq_add_neg],
+        simp_rw [← zpow_add₀ (by norm_num : (2⁻¹ : ℝ) ≠ 0), add_comm, ← sub_eq_add_neg],
         rw ← tsum_eq_sum,
         convert @equiv.tsum_eq ℝ _ _ _ _ _
           (⟨λ m, ⟨n - 1 - m, lt_of_le_of_lt (sub_le_self _ (int.coe_zero_le m)) (sub_one_lt n)⟩,

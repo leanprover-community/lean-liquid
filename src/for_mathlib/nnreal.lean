@@ -83,3 +83,19 @@ begin
   { simp only [his, finset.sum_insert, not_false_iff],
     exact (nnreal.rpow_add_le_add_rpow _ _ hp_pos hp1).trans (add_le_add le_rfl IH), }
 end
+
+lemma nnreal.le_self_rpow {a : ℝ≥0} {m : ℝ} (ha : 1 ≤ a) (hm : 1 ≤ m) : a ≤ a ^ m :=
+begin
+  suffices : a ^ (1 : ℝ) ≤ a ^ m,
+    simpa,
+  exact rpow_le_rpow_of_exponent_le ha hm,
+end
+
+
+lemma nnreal.le_self_rpow' {a : ℝ≥0} {m : ℝ} (ha : a ≤ 1) (hm : m ≤ 1) : a ≤ a ^ m :=
+begin
+  obtain (rfl|⟨u, rfl⟩) := group_with_zero.eq_zero_or_unit a, apply zero_le, -- a=0 special case
+  suffices : (u : ℝ≥0) ^ (1 : ℝ) ≤ u ^ m,
+    simpa,
+  exact rpow_le_rpow_of_exponent_ge (by simp) ha hm,
+end

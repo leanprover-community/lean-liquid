@@ -289,7 +289,7 @@ lemma summable_smaller_radius {f : ℤ → ℤ} {ρ : ℝ≥0} (d : ℤ)
   summable (λ n, (f n : ℝ) * (2⁻¹) ^ n) :=
 begin
   refine summable_of_summable_norm _,
-  simp_rw [norm_mul, norm_zpow, norm_div, real.norm_two, norm_one],
+  simp_rw [norm_mul, norm_zpow, norm_inv, real.norm_two],
   apply (summable_iff_on_nat_less d _).mpr,
   apply summable.smaller_radius _ hρ.le,
   { exact  (λ x, norm_nonneg _) },
@@ -304,25 +304,32 @@ lemma prod_nat_summable {f : ℤ → ℤ} {r : ℝ≥0} (half_lt_r : 2⁻¹ < r)
 begin
   have r0 : r ≠ 0 := by { rintro rfl, simpa only [not_lt_zero'] using half_lt_r },
   have : summable (λ (n : ℤ), ∥(f n : ℝ) * (2 * r)⁻¹∥ * r ^ n),
-  { convert_to summable (λ (z : ℤ), ((2⁻¹ / r) : ℝ) • (∥f z∥ * ↑r ^ z)),
+  { convert_to summable (λ (z : ℤ), ((2⁻¹ * r⁻¹) : ℝ) • (∥f z∥ * ↑r ^ z)),
     { ext,
       field_simp,
       congr' 0 },
     { exact summable.const_smul hf } },
-  convert prod_nat_summable_aux (_ : (2⁻¹ / r) < 1) this,
+  convert prod_nat_summable_aux (_ : (2⁻¹ * r⁻¹) < 1) this,
   { ext,
     field_simp [r0],
     ring_exp },
-  { exact nnreal.div_lt_one_of_lt ((nnreal.div_lt_iff' two_ne_zero).mp half_lt_r) }
+  {
+
+    exact nnreal.div_lt_one_of_lt (begin
+
+      exact (nnreal.div_lt_iff' two_ne_zero).mp half_lt_r ,
+    end) }
 end
 
 lemma fiberwise_summable_norm {f : ℤ → ℤ} {r : ℝ≥0} (d : ℤ) (half_lt_r : 2⁻¹ < r)
   (hf : summable (λ n : ℤ, ∥ f n ∥ * r ^ n))
   (hd : ∀ n : ℤ, n < d → f n = 0) :
-  summable (λ (n : ℕ), 2⁻¹ * ∥ ∑' (i : ℕ), (f (n + 1 + i) : ℝ) * (2⁻¹) ^ i ∥ * ↑r ^ n) :=
+  summable (λ (n : ℕ), 2⁻¹ * ∥ ∑' (i : ℕ), (f (n + 1 + i) : ℝ) * 2⁻¹ ^ i ∥ * ↑r ^ n) :=
 begin
   have r_pos : ∀ (b : ℕ), 0 < (r : ℝ) ^ b :=
-    pow_pos (lt_trans (by exact nnreal.coe_pos.mp (one_div_pos.mpr zero_lt_two)) half_lt_r),
+    pow_pos (lt_trans (by exact nnreal.coe_pos.mp
+      (by push_cast; exact inv_pos.2 zero_lt_two)
+    ) half_lt_r),
   have smaller_shift : ∀ (b : ℕ), summable (λ j : ℕ, ∥ (f (b + 1 + j) : ℝ)  * (2⁻¹) ^ j ∥),
   { intro b,
     refine (summable_mul_right_iff (by norm_num : (2⁻¹ : ℝ) ^ (b + 1) ≠ 0)).mpr _,
