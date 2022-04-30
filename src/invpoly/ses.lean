@@ -61,7 +61,7 @@ local notation `r` := @r p
   continuous' := λ c, continuous_of_discrete_topology }
 
 def eval2_nat_trans :
-  (Fintype_invpoly.{u} r ⋙ to_CompHausFiltPseuNormGrp₁.{u} r) ⟶
+  (Fintype_invpoly.{u} r ⋙ PFPNGT₁_to_CHFPNG₁ₗₑ.{u} r) ⟶
   (normed_free_pfpng_functor.{u} p ⋙ ProFiltPseuNormGrp₁.to_CHFPNG₁) :=
 { app := λ S, eval2 p S,
   naturality' := λ S T f, begin
