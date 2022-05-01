@@ -67,6 +67,14 @@ begin
       (hf2 : ∥f∥₊ ≤ c')⟩,
     change ∃ x : laurent_measures r S,
       ∥x∥₊ ≤ 37 * («r»⁻¹ + 2)⁻¹ ∧ _,
+    obtain ⟨G, hG⟩ := θ_ϕ_exact f hf1,
+    refine ⟨G, _, _⟩,
+    { sorry }, -- this is not true because of the silly 37 choice which needs
+    -- to be changed when I figure out what to change it to.
+    rw ← hG,
+    ext s n,
+    delta Tinv2_nat_trans,
+    simp,
   --   suffices : ∃ (x : laurent_measures «r» S),
   -- ∥x∥₊ ≤ 37 * («r»⁻¹ + 2)⁻¹ ∧ ((Tinv2_nat_trans (Fintype_LaurentMeasures «r»)).app S) x = f,
   --     delta Tinv2_nat_trans,
