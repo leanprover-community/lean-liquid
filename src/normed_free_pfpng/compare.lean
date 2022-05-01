@@ -57,7 +57,7 @@ lemma condensify_map_zero (F G : Fintype ⥤ CompHausFiltPseuNormGrp₁) :
 begin
   delta condensify_map condensify_nonstrict,
   suffices : nonstrict_extend
-    (whisker_right (0 : F ⟶ G) enlarging_functor) 1 _ = 0,
+    (whisker_right (0 : F ⟶ G) CHFPNG₁_to_CHFPNGₗₑ) 1 _ = 0,
   { rw this, refl, },
   rw [nonstrict_extend_whisker_right_enlarging,
     Profinite.extend_nat_trans_zero],
