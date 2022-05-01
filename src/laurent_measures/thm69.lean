@@ -58,17 +58,17 @@ end
 
 -- #check @ϕ
 
-lemma tsum_reindex (F : ℒ S) (N : ℤ) (s : S) : ∑' (l : ℕ), (F s (N + l) : ℝ) * (2 ^ l)⁻¹ =
- 2 ^ N * ∑' (m : {m : ℤ // N ≤ m}), (F s m : ℝ) * (2 ^ m.1)⁻¹ :=
-begin
-  have h_shift := int_tsum_shift (λ n, (F s n : ℝ) * (2 ^ (-n))) N,
-  simp only at h_shift,
-  simp_rw [subtype.val_eq_coe, ← zpow_neg₀],
-  rw [← h_shift, ← _root_.tsum_mul_left, tsum_congr],
-  intro n,
-  rw [mul_comm (_ ^ N), mul_assoc, ← (zpow_add₀ (@two_ne_zero ℝ _ _)), neg_add_rev,
-    neg_add_cancel_comm, zpow_neg₀, zpow_coe_nat, add_comm],
-end
+-- lemma tsum_reindex (F : ℒ S) (N : ℤ) (s : S) : ∑' (l : ℕ), (F s (N + l) : ℝ) * (2 ^ l)⁻¹ =
+--  2 ^ N * ∑' (m : {m : ℤ // N ≤ m}), (F s m : ℝ) * (2 ^ m.1)⁻¹ :=
+-- begin
+--   have h_shift := int_tsum_shift (λ n, (F s n : ℝ) * (2 ^ (-n))) N,
+--   simp only at h_shift,
+--   simp_rw [subtype.val_eq_coe, ← zpow_neg₀],
+--   rw [← h_shift, ← _root_.tsum_mul_left, tsum_congr],
+--   intro n,
+--   rw [mul_comm (_ ^ N), mul_assoc, ← (zpow_add₀ (@two_ne_zero ℝ _ _)), neg_add_rev,
+--     neg_add_cancel_comm, zpow_neg₀, zpow_coe_nat, add_comm],
+-- end
 
 variable [fact (r < 1)]
 
@@ -145,8 +145,6 @@ end
 
 def θ : ℒ S → ℳ S := ϑ 2⁻¹ r p S
 
-
---lemma nnreal.le_self_rpow'
 lemma θ_natural [fact (0 < p)] [fact (p ≤ 1)] (S T : Fintype) (f : S ⟶ T) (F : ℒ S) (t : T) :
   θ (map f F) t = real_measures.map f (θ F) t :=
 begin
@@ -157,13 +155,10 @@ begin
   rw mem_filter at H,
   rcases H with ⟨-, rfl⟩,
   have := F.summable i,
-
   refine summable.add_compl (_ : summable (_ ∘ (coe : {n : ℤ | 0 ≤ n} → ℤ))) _,
-  {
-    have moo := summable.comp_injective this
+  { have moo := summable.comp_injective this
       (subtype.coe_injective : function.injective (coe : {n : ℤ | 0 ≤ n} → ℤ)),
     refine summable_of_norm_bounded _ (moo) _, clear moo this,
---    have foo := summable.summable_of_eq_zero_or_self this,
     rintro ⟨n, (hn : 0 ≤ n)⟩,
     simp only [function.comp_app, subtype.coe_mk, norm_mul, norm_inv, norm_zpow, real.norm_two],
     rw (F i n).norm_cast_real,
@@ -278,8 +273,6 @@ begin
 end
 
 lemma psi_def_summable {S : Fintype} (n : ℕ)
-  [fact (0 < p)]
-  [fact (p < 1)]
   (F : ℒ S)
   (s : S) :
   summable
@@ -615,9 +608,8 @@ def ψ (F : ℒ S) (hF : θ F = 0) : ℒ S :=
     exact psi_def_aux F s,
   end }
 
-theorem θ_ϕ_exact (F : ℒ S) (hF : θ F = 0) : ∃ G, ϕ G = F :=
+theorem θ_ϕ_split_exact (F : ℒ S) (hF : θ F = 0) : ϕ (ψ F hF) = F :=
 begin
-  use ψ F hF,
   ext s n,
   simp only [ϕ, ψ, sub_apply, shift_to_fun_to_fun, laurent_measures.coe_mk, nsmul_apply,
     nsmul_eq_mul, int.nat_cast_eq_coe_nat, int.coe_nat_succ, int.coe_nat_zero, zero_add],
@@ -639,5 +631,8 @@ begin
   { linarith },
   { exact (lt_d_eq_zero F s n (not_le.mp h)).symm },
 end
+
+theorem θ_ϕ_exact (F : ℒ S) (hF : θ F = 0) : ∃ G, ϕ G = F :=
+⟨ψ F hF, θ_ϕ_split_exact F hF⟩
 
 end mem_exact

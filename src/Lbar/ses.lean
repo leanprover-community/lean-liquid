@@ -276,7 +276,7 @@ def to_laurent_measures_hom [fact (r' < 1)]: comphaus_filtered_pseudo_normed_gro
 
 @[simps]
 def to_laurent_measures_nat_trans [fact (r' < 1)]:
-  invpoly.Laurent_measures r' ⟶ Fintype.Laurent_measures r' :=
+  Fintype_invpoly r' ⟶ Fintype_LaurentMeasures r' :=
 { app := λ S, to_laurent_measures_hom r' S,
   naturality' := λ S T f, begin
     ext p t n,
@@ -450,12 +450,12 @@ to its positive terms in `Tℤ[[T]]`. -/
   end }
 
 @[simps]
-def to_Lbar_nat_trans : Fintype.Laurent_measures r' ⟶ Lbar.Laurent_measures r' :=
+def to_Lbar_nat_trans : Fintype_LaurentMeasures r' ⟶ Fintype_Lbar r' :=
 { app := λ S, to_Lbar_hom r' S,
   naturality' := λ S₁ S₂ f, begin
     ext,
-    simp only [Fintype.Laurent_measures_map, category_theory.comp_apply, to_Lbar_hom_to_fun, to_Lbar_to_fun,
-      Lbar.Laurent_measures_map_to_fun, Lbar.map_to_fun, map_hom, map_apply,
+    simp only [Fintype_LaurentMeasures_map, category_theory.comp_apply, to_Lbar_hom_to_fun, to_Lbar_to_fun,
+      Fintype_Lbar_map_to_fun, Lbar.map_to_fun, map_hom, map_apply,
       comphaus_filtered_pseudo_normed_group_with_Tinv_hom.coe_mk],
     split_ifs, { simp only [finset.sum_const_zero], }, { refl }
   end }
@@ -470,9 +470,9 @@ open category_theory ProFiltPseuNormGrpWithTinv₁
 theorem short_exact (S : Profinite) [fact (r' < 1)] :
   short_exact
     ((condensify_map
-      (whisker_right (invpoly.to_laurent_measures_nat_trans r') (to_CHFPNG₁ r'))).app S)
+      (whisker_right (invpoly.to_laurent_measures_nat_trans r') (PFPNGT₁_to_CHFPNG₁ₑₗ r'))).app S)
     ((condensify_map
-      (whisker_right (laurent_measures.to_Lbar_nat_trans r') (to_CHFPNG₁ r'))).app S) :=
+      (whisker_right (laurent_measures.to_Lbar_nat_trans r') (PFPNGT₁_to_CHFPNG₁ₑₗ r'))).app S) :=
 begin
   refine condensify_exact _ _ id id le_rfl le_rfl _ _ _ _ S,
   { apply invpoly.to_laurent_measures_injective },

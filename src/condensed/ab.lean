@@ -560,4 +560,4 @@ end CompHausFiltPseuNormGrp
 @[simps obj map {fully_applied := ff}]
 def CompHausFiltPseuNormGrp₁.to_Condensed :
   CompHausFiltPseuNormGrp₁.{u} ⥤ Condensed.{u} Ab.{u+1} :=
-CompHausFiltPseuNormGrp₁.enlarging_functor ⋙ CompHausFiltPseuNormGrp.to_Condensed
+CHFPNG₁_to_CHFPNGₑₗ ⋙ CompHausFiltPseuNormGrp.to_Condensed

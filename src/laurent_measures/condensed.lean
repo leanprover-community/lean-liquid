@@ -13,7 +13,7 @@ namespace laurent_measures
 
 def condensed (r' : ℝ≥0) [fact (0 < r')] : Profinite.{u} ⥤ Condensed.{u} Ab.{u+1} :=
 (laurent_measures.profinite.{u} r' ⋙
-  ProFiltPseuNormGrpWithTinv₁.to_CompHausFiltPseuNormGrp₁.{u} r') ⋙
+  PFPNGT₁_to_CHFPNG₁ₑₗ.{u} r') ⋙
   CompHausFiltPseuNormGrp₁.to_Condensed
 
 def condensedCH (r' : ℝ≥0) [fact (0 < r')] : Profinite.{u} ⥤ Condensed.{u} Ab.{u+1} :=

@@ -11,16 +11,14 @@ open_locale nnreal
 
 open category_theory
 
-namespace invpoly
+open invpoly
 
 variables (r' : ℝ≥0) [fact (0 < r')] [fact (r' < 1)]
 
 open ProFiltPseuNormGrpWithTinv₁
 
-@[simps] def Laurent_measures : Fintype.{u} ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r' :=
+@[simps] def Fintype_invpoly : Fintype.{u} ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r' :=
 { obj := λ S, ⟨invpoly r' S, λ F, ⟨∥F∥₊, le_rfl⟩⟩,
   map := λ S T f, map_hom f,
   map_id' := λ S, by { ext1, simp only [map_hom, map_id], refl, },
   map_comp' := λ S S' S'' f g, by { ext1, simp only [map_hom, map_comp], refl } }
-
-end invpoly
