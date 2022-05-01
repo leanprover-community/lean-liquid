@@ -38,7 +38,7 @@ instance : large_category (ProFiltPseuNormGrpWithTinv₁.{u} r) :=
   id := λ A, comphaus_filtered_pseudo_normed_group_with_Tinv_hom.id,
   comp := λ A B C f g, g.comp f } .
 
-def enlarging_functor : (ProFiltPseuNormGrpWithTinv₁.{u} r) ⥤ (ProFiltPseuNormGrpWithTinv.{u} r) :=
+def PFPNGT₁_to_PFPNGTₑₗ : (ProFiltPseuNormGrpWithTinv₁.{u} r) ⥤ (ProFiltPseuNormGrpWithTinv.{u} r) :=
 { obj := λ M, ProFiltPseuNormGrpWithTinv.of r M,
   map := λ A B f, f }
 

@@ -29,7 +29,7 @@ instance : large_category ProFiltPseuNormGrp₁.{u} :=
   id := λ A, strict_comphaus_filtered_pseudo_normed_group_hom.id,
   comp := λ A B C f g, g.comp f }
 
-def enlarging_functor : ProFiltPseuNormGrp₁ ⥤ ProFiltPseuNormGrp :=
+def PFPNG₁_to_PFPNGₑₗ : ProFiltPseuNormGrp₁ ⥤ ProFiltPseuNormGrp :=
 { obj := λ M, ProFiltPseuNormGrp.of M,
   map := λ M₁ M₂ f, f.to_chfpsng_hom }
 
