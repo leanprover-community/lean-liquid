@@ -778,6 +778,9 @@ lemma bound_by.zsmul {f : comphaus_filtered_pseudo_normed_group_hom M₁ M₂} {
 @[simp] lemma add_apply (f g : comphaus_filtered_pseudo_normed_group_hom M₁ M₂) (x : M₁) :
   (f + g) x = f x + g x := rfl
 
+@[simp] lemma sub_apply (f g : comphaus_filtered_pseudo_normed_group_hom M₁ M₂) (x : M₁) :
+  (f - g) x = f x - g x := rfl
+
 @[simp] lemma sum_apply {ι : Type*} (s : finset ι)
   (f : ι → comphaus_filtered_pseudo_normed_group_hom M₁ M₂) (x : M₁) :
   (∑ i in s, f i) x = ∑ i in s, (f i x) :=
@@ -799,6 +802,16 @@ begin
     simp only [finset.sum_insert his],
     apply (hf _ (s.mem_insert_self i)).add (IH $ λ j hj, hf _ $ finset.mem_insert_of_mem hj) }
 end
+
+@[simp] lemma nsmul_apply {M N : Type*}
+  [comphaus_filtered_pseudo_normed_group M] [comphaus_filtered_pseudo_normed_group N]
+  (n : ℕ) (f : comphaus_filtered_pseudo_normed_group_hom M N) (x : M) :
+  (n • f) x = n • (f x) := rfl
+
+@[simp] lemma zero_apply (M N : Type*)
+  [comphaus_filtered_pseudo_normed_group M] [comphaus_filtered_pseudo_normed_group N]
+  (x : M) :
+  (0 : comphaus_filtered_pseudo_normed_group_hom M N) x = 0 := rfl
 
 end comphaus_filtered_pseudo_normed_group_hom
 

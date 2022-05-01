@@ -86,23 +86,7 @@ instance (M N : Type*)
   map_add := λ f, f.map_add,
   map_zero := λ f, f.map_zero }
 
--- move this
-@[simp] lemma _root_.comphaus_filtered_pseudo_normed_group_hom.sub_apply {M N : Type*}
-  [comphaus_filtered_pseudo_normed_group M] [comphaus_filtered_pseudo_normed_group N]
-  (f g : comphaus_filtered_pseudo_normed_group_hom M N) (x : M) :
-  (f - g) x = f x - g x := rfl
-
--- move this
-@[simp] lemma _root_.comphaus_filtered_pseudo_normed_group_hom.nsmul_apply {M N : Type*}
-  [comphaus_filtered_pseudo_normed_group M] [comphaus_filtered_pseudo_normed_group N]
-  (n : ℕ) (f : comphaus_filtered_pseudo_normed_group_hom M N) (x : M) :
-  (n • f) x = n • (f x) := rfl
-
-@[simp] lemma _root_.comphaus_filtered_pseudo_normed_group_hom.zero_apply (M N : Type*)
-  [comphaus_filtered_pseudo_normed_group M] [comphaus_filtered_pseudo_normed_group N]
-  (x : M) :
-  (0 : comphaus_filtered_pseudo_normed_group_hom M N) x = 0 := rfl
-
+--#check comphaus_filtered_pseudo_normed_group_hom.sub_apply
 lemma Tinv2_injective (S : Fintype) :
   function.injective ((Tinv2_nat_trans (Fintype_invpoly r)).app S) :=
 begin
