@@ -53,11 +53,22 @@ theorem short_exact (S : Profinite) :
 begin
   refine condensify_nonstrict_exact _ _ (r⁻¹ + 2) (Tinv2_bound_by _)
   -- C₂ bound
-  (λ x, 37 + x) -- warning: probably not right
+  (λ c, c * ( 1 + 2 * r) / ( 2 * r - 1))
   -- C₄ bound
-  (λ x, 59) -- ditto
+  (λ x, 59) -- placeholder
   -- proofs that f(x) ≥ x
-  sorry sorry
+  begin
+    intro c,
+    dsimp only,
+    rw [nnreal.le_div_iff', mul_comm c],
+    { apply nnreal.mul_le_mul_right,
+      refine le_trans (tsub_le_self) _,
+      apply le_add_self },
+    { have foo := @one_lt_two_r p _ _,
+      apply ne_of_gt,
+      apply tsub_pos_of_lt foo },
+  end
+   sorry
     (λ S, injective_ϕ')
     (λ S, by { ext1 F, apply θ_ϕ_complex }) _ _ _,
   -- proof of some boundedness thing
@@ -66,14 +77,13 @@ begin
     rintros S c' (F : laurent_measures r S) ⟨(hF1 : Θ p S F = 0),
       (hF2 : ∥F∥₊ ≤ c')⟩,
     change ∃ x : laurent_measures r S,
-      ∥x∥₊ ≤ (37 + c') * («r»⁻¹ + 2)⁻¹ ∧ _,
+      ∥x∥₊ ≤ (c' * ( 1 + 2 * r) / ( 2 * r - 1)) * («r»⁻¹ + 2)⁻¹ ∧ _,
     refine ⟨ψ F hF1, _, _⟩,
     --let ZZZ := ϕ f r,
     { delta ψ,
       rw nnnorm_def at hF2 ⊢,
       simp,
-      sorry }, -- this is not true because of the silly 37 choice which needs
-    -- to be changed when I figure out what to change it to.
+      sorry },
     exact θ_ϕ_split_exact F hF1 },
   { clear S,
     rintros S c' f,

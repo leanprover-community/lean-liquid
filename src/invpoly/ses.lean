@@ -86,8 +86,7 @@ instance (M N : Type*)
   map_add := λ f, f.map_add,
   map_zero := λ f, f.map_zero }
 
-#check comphaus_filtered_pseudo_normed_group_hom.sub_apply
-
+--#check comphaus_filtered_pseudo_normed_group_hom.sub_apply
 lemma Tinv2_injective (S : Fintype) :
   function.injective ((Tinv2_nat_trans (Fintype_invpoly r)).app S) :=
 begin
