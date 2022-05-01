@@ -33,32 +33,32 @@ called `condensify F`.
 -/
 def condensify (F : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}) :
   Profinite.{u} ⥤ Condensed.{u} Ab.{u+1} :=
-(Profinite.extend.{u} F ⋙ enlarging_functor.{u}) ⋙ to_Condensed.{u}
+(Profinite.extend.{u} F ⋙ CHFPNG₁_to_CHFPNGₗₑ.{u}) ⋙ to_Condensed.{u}
 
 variables {F G H : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}}
-variables (α β : F ⋙ enlarging_functor.{u} ⟶ G ⋙ enlarging_functor.{u})
+variables (α β : F ⋙ CHFPNG₁_to_CHFPNGₗₑ.{u} ⟶ G ⋙ CHFPNG₁_to_CHFPNGₗₑ.{u})
 variables (c cα cβ cαβ : ℝ≥0) [fact (0 < c)]  [fact (0 < cα)] [fact (0 < cβ)] [fact (0 < cαβ)]
 
 /--
 Given functors `F G : Fintype ⥤ CompHausFiltPseuNormGrp₁` and a
 natural transformation `η` between the induced functors `Fintype ⥤ CompHausFiltPseuNormGrp`
-(obtained by composing with `enlarging_functor`), such that the components of `η` are bounded
+(obtained by composing with `CHFPNG₁_to_CHFPNGₗₑ`), such that the components of `η` are bounded
 by a *single* `c : ℝ≥0`, this is the morphism between the associated condensed abelian groups.
 -/
 def condensify_nonstrict
-  (α : F ⋙ enlarging_functor.{u} ⟶ G ⋙ enlarging_functor.{u}) (c : ℝ≥0) [fact (0 < c)]
+  (α : F ⋙ CHFPNG₁_to_CHFPNGₗₑ.{u} ⟶ G ⋙ CHFPNG₁_to_CHFPNGₗₑ.{u}) (c : ℝ≥0) [fact (0 < c)]
   (h : ∀ X, (α.app X).bound_by c) :
   condensify F ⟶ condensify G :=
 whisker_right (nonstrict_extend.{u} α c h) to_Condensed
 
 lemma condensify_nonstrict_id (c : ℝ≥0) [fact (0 < c)]
-  (h : ∀ X, (nat_trans.app (𝟙 (F ⋙ enlarging_functor.{u})) X).bound_by c) :
+  (h : ∀ X, (nat_trans.app (𝟙 (F ⋙ CHFPNG₁_to_CHFPNGₗₑ.{u})) X).bound_by c) :
   condensify_nonstrict (𝟙 _) c h = 𝟙 _ :=
 by { simp only [condensify_nonstrict, nonstrict_extend_id, whisker_right_id'], refl }
 
 lemma condensify_nonstrict_comp
-  (α : F ⋙ enlarging_functor ⟶ G ⋙ enlarging_functor)
-  (β : G ⋙ enlarging_functor ⟶ H ⋙ enlarging_functor)
+  (α : F ⋙ CHFPNG₁_to_CHFPNGₗₑ ⟶ G ⋙ CHFPNG₁_to_CHFPNGₗₑ)
+  (β : G ⋙ CHFPNG₁_to_CHFPNGₗₑ ⟶ H ⋙ CHFPNG₁_to_CHFPNGₗₑ)
   (hα : ∀ X, (α.app X).bound_by cα) (hβ : ∀ X, (β.app X).bound_by cβ)
   (hαβ : ∀ X, ((α ≫ β).app X).bound_by cαβ) :
   condensify_nonstrict (α ≫ β) cαβ hαβ =
@@ -85,7 +85,7 @@ begin
 end
 
 def condensify_def (F : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}) :
-  condensify F ≅ Profinite.extend.{u} F ⋙ enlarging_functor.{u} ⋙ to_Condensed.{u} :=
+  condensify F ≅ Profinite.extend.{u} F ⋙ CHFPNG₁_to_CHFPNGₗₑ.{u} ⋙ to_Condensed.{u} :=
 iso.refl _
 
 /-- Given a family `F` of profinitely filtered normed groups with `T⁻¹`,
@@ -94,8 +94,8 @@ iso.refl _
   corresponding family of `CompHaus`ly filtered pseudo-normed groups coming from `T⁻¹`.
   -/
 def Tinv_nat_trans (F : C ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r') :
-  (F ⋙ PFPNGT₁_to_CHFPNG₁ₑₗ.{u} r') ⋙ enlarging_functor ⟶
-  (F ⋙ PFPNGT₁_to_CHFPNG₁ₑₗ.{u} r') ⋙ enlarging_functor :=
+  (F ⋙ PFPNGT₁_to_CHFPNG₁ₑₗ.{u} r') ⋙ CHFPNG₁_to_CHFPNGₗₑ ⟶
+  (F ⋙ PFPNGT₁_to_CHFPNG₁ₑₗ.{u} r') ⋙ CHFPNG₁_to_CHFPNGₗₑ :=
 { app := λ X, profinitely_filtered_pseudo_normed_group_with_Tinv.Tinv,
   naturality' := λ X Y f, by { ext x, exact ((F.map f).map_Tinv x).symm } }
 
@@ -103,8 +103,8 @@ def Tinv_nat_trans (F : C ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r') :
 pseudo-normed groups with `T⁻¹`, considered as a possibly non-strict
 endomorphism of the associated `CompHaus`ly filtered pseudo-normed groups. -/
 def Tinv2_nat_trans (F : C ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r') :
-  (F ⋙ PFPNGT₁_to_CHFPNG₁ₑₗ.{u} r') ⋙ enlarging_functor ⟶
-  (F ⋙ PFPNGT₁_to_CHFPNG₁ₑₗ.{u} r') ⋙ enlarging_functor :=
+  (F ⋙ PFPNGT₁_to_CHFPNG₁ₑₗ.{u} r') ⋙ CHFPNG₁_to_CHFPNGₗₑ ⟶
+  (F ⋙ PFPNGT₁_to_CHFPNG₁ₑₗ.{u} r') ⋙ CHFPNG₁_to_CHFPNGₗₑ :=
 Tinv_nat_trans F - 2 • 𝟙 _
 
 lemma Tinv_bound_by (F : C ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r') (X : C) :
@@ -113,7 +113,7 @@ profinitely_filtered_pseudo_normed_group_with_Tinv.Tinv_bound_by
 
 lemma twoid_bound_by (F : C ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r') (X : C) :
   comphaus_filtered_pseudo_normed_group_hom.bound_by
-    ((2 • 𝟙 ((F ⋙ PFPNGT₁_to_CHFPNG₁ₑₗ r') ⋙ enlarging_functor)).app X) 2 :=
+    ((2 • 𝟙 ((F ⋙ PFPNGT₁_to_CHFPNG₁ₑₗ r') ⋙ CHFPNG₁_to_CHFPNGₗₑ)).app X) 2 :=
 begin
   simp only [nat_trans.app_nsmul, nat_trans.id_app],
   refine ((comphaus_filtered_pseudo_normed_group_hom.mk_of_bound_bound_by _ 1 _).nsmul 2).mono _ _,
@@ -126,8 +126,8 @@ lemma Tinv2_bound_by (F : C ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r') (X : C) :
 
 @[reassoc]
 lemma Tinv_nat_trans_comp {F G : C ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r'} (α : F ⟶ G) :
-  Tinv_nat_trans F ≫ @whisker_right _ _ _ _ _ _ F G α (PFPNGT₁_to_CHFPNG₁ₑₗ r' ⋙ enlarging_functor.{u}) =
-  @whisker_right _ _ _ _ _ _ F G α (PFPNGT₁_to_CHFPNG₁ₑₗ r' ⋙ enlarging_functor.{u}) ≫ Tinv_nat_trans G :=
+  Tinv_nat_trans F ≫ @whisker_right _ _ _ _ _ _ F G α (PFPNGT₁_to_CHFPNG₁ₑₗ r' ⋙ CHFPNG₁_to_CHFPNGₗₑ.{u}) =
+  @whisker_right _ _ _ _ _ _ F G α (PFPNGT₁_to_CHFPNG₁ₑₗ r' ⋙ CHFPNG₁_to_CHFPNGₗₑ.{u}) ≫ Tinv_nat_trans G :=
 by { ext X x, exact (α.app X).map_Tinv x }
 
 -- move me
@@ -163,7 +163,7 @@ begin
     rw nat_trans.comp_app,
     rw ← one_mul r'⁻¹,
     apply comphaus_filtered_pseudo_normed_group_hom.bound_by.comp (Tinv_bound_by F X),
-    simp only [whisker_right_twice, whisker_right_app, functor.comp_map, enlarging_functor_map],
+    simp only [whisker_right_twice, whisker_right_app, functor.comp_map, CHFPNG₁_to_CHFPNGₗₑ_map],
     apply strict_comphaus_filtered_pseudo_normed_group_hom.to_chfpsng_hom.bound_by_one
     },
   swap, {
@@ -171,7 +171,7 @@ begin
     rw nat_trans.comp_app,
     rw ← mul_one r'⁻¹,
     refine comphaus_filtered_pseudo_normed_group_hom.bound_by.comp _ (Tinv_bound_by G X),
-    simp only [whisker_right_twice, whisker_right_app, functor.comp_map, enlarging_functor_map],
+    simp only [whisker_right_twice, whisker_right_app, functor.comp_map, CHFPNG₁_to_CHFPNGₗₑ_map],
     apply strict_comphaus_filtered_pseudo_normed_group_hom.to_chfpsng_hom.bound_by_one, },
   { simp only [whisker_right_twice, Tinv_nat_trans_comp], },
 end
@@ -258,7 +258,7 @@ lemma exact_of_iso_comp_exact {V : Type u} [category V] [limits.has_images V]
 by rwa exact_iso_comp
 
 lemma condensify_nonstrict_exact
-  (α : F ⋙ enlarging_functor.{u} ⟶ G ⋙ enlarging_functor.{u}) (β : G ⟶ H)
+  (α : F ⋙ CHFPNG₁_to_CHFPNGₗₑ.{u} ⟶ G ⋙ CHFPNG₁_to_CHFPNGₗₑ.{u}) (β : G ⟶ H)
   (c : ℝ≥0) [fact (0 < c)]
   (h : ∀ X, (α.app X).bound_by c)
   (cα cβ : ℝ≥0 → ℝ≥0) (hcα : id ≤ cα) (hcβ : id ≤ cβ)
