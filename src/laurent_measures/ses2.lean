@@ -53,7 +53,7 @@ theorem short_exact (S : Profinite) :
 begin
   refine condensify_nonstrict_exact _ _ (r⁻¹ + 2) (Tinv2_bound_by _)
   -- C₂ bound
-  (λ x, 37) -- warning: probably not right
+  (λ x, 37 + x) -- warning: probably not right
   -- C₄ bound
   (λ x, 59) -- ditto
   -- proofs that f(x) ≥ x
@@ -63,20 +63,18 @@ begin
   -- proof of some boundedness thing
   { clear S,
     -- change to unbundled language
-    rintros S c' (f : laurent_measures r S) ⟨(hf1 : Θ p S f = 0),
-      (hf2 : ∥f∥₊ ≤ c')⟩,
+    rintros S c' (F : laurent_measures r S) ⟨(hF1 : Θ p S F = 0),
+      (hF2 : ∥F∥₊ ≤ c')⟩,
     change ∃ x : laurent_measures r S,
-      ∥x∥₊ ≤ 37 * («r»⁻¹ + 2)⁻¹ ∧ _,
-    refine ⟨ψ f hf1, _, _⟩,
+      ∥x∥₊ ≤ (37 + c') * («r»⁻¹ + 2)⁻¹ ∧ _,
+    refine ⟨ψ F hF1, _, _⟩,
     --let ZZZ := ϕ f r,
-    {
+    { delta ψ,
+      rw nnnorm_def at hF2 ⊢,
+      simp,
       sorry }, -- this is not true because of the silly 37 choice which needs
     -- to be changed when I figure out what to change it to.
-    rw ← hG,
-    simp only [Tinv2_nat_trans, Tinv_nat_trans, ϕ, two_smul, nat_trans.app_sub, nat_trans.app_add, nat_trans.id_app,
-  comphaus_filtered_pseudo_normed_group_hom.sub_apply, comphaus_filtered_pseudo_normed_group_hom.add_apply,
-  CompHausFiltPseuNormGrp.id_apply, sub_left_inj],
-    ext, refl },
+    exact θ_ϕ_split_exact f hf1 },
   { clear S,
     rintros S c' f,
 

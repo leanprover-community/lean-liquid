@@ -145,8 +145,6 @@ end
 
 def θ : ℒ S → ℳ S := ϑ 2⁻¹ r p S
 
-
---lemma nnreal.le_self_rpow'
 lemma θ_natural [fact (0 < p)] [fact (p ≤ 1)] (S T : Fintype) (f : S ⟶ T) (F : ℒ S) (t : T) :
   θ (map f F) t = real_measures.map f (θ F) t :=
 begin
@@ -157,13 +155,10 @@ begin
   rw mem_filter at H,
   rcases H with ⟨-, rfl⟩,
   have := F.summable i,
-
   refine summable.add_compl (_ : summable (_ ∘ (coe : {n : ℤ | 0 ≤ n} → ℤ))) _,
-  {
-    have moo := summable.comp_injective this
+  { have moo := summable.comp_injective this
       (subtype.coe_injective : function.injective (coe : {n : ℤ | 0 ≤ n} → ℤ)),
     refine summable_of_norm_bounded _ (moo) _, clear moo this,
---    have foo := summable.summable_of_eq_zero_or_self this,
     rintro ⟨n, (hn : 0 ≤ n)⟩,
     simp only [function.comp_app, subtype.coe_mk, norm_mul, norm_inv, norm_zpow, real.norm_two],
     rw (F i n).norm_cast_real,
@@ -278,8 +273,6 @@ begin
 end
 
 lemma psi_def_summable {S : Fintype} (n : ℕ)
-  [fact (0 < p)]
-  [fact (p < 1)]
   (F : ℒ S)
   (s : S) :
   summable
