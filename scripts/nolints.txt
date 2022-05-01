@@ -265,6 +265,7 @@ apply_nolint laurent_measures.laurent_measures.norm_nonneg dup_namespace
 
 -- laurent_measures/ses.lean
 apply_nolint laurent_measures_ses.U unused_arguments
+apply_nolint laurent_measures_ses.W_single unused_arguments
 apply_nolint laurent_measures_ses.box unused_arguments
 apply_nolint laurent_measures_ses.coe_pow_half unused_arguments
 apply_nolint laurent_measures_ses.hξ def_lemma
