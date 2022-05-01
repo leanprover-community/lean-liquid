@@ -660,7 +660,7 @@ begin
   rw AddCommGroup.exact_iff',
   split,
   { show @CompHausFiltPseuNormGrp.presheaf.map.{u}
-      (CHFPNG₁_to_CHFPNGₗₑ.obj A) (CHFPNG₁_to_CHFPNGₗₑ.obj C)
+      (CHFPNG₁_to_CHFPNGₑₗ.obj A) (CHFPNG₁_to_CHFPNGₑₗ.obj C)
       (@strict_comphaus_filtered_pseudo_normed_group_hom.to_chfpsng_hom.{u u} A C _ _ (f ≫ g))
       (unop.{u+2} (ExtrDisc_to_Profinite.{u}.op.obj (op S))) = 0,
     rw hfg, ext x s, refl, },

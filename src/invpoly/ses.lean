@@ -126,7 +126,7 @@ end
 
 lemma Tinv2_comp_eval2_eq_zero (S : Fintype) :
   (Tinv2_nat_trans (Fintype_invpoly r)).app S ≫
-    (whisker_right (eval2_nat_trans p) CHFPNG₁_to_CHFPNGₗₑ).app S = 0 :=
+    (whisker_right (eval2_nat_trans p) CHFPNG₁_to_CHFPNGₑₗ).app S = 0 :=
 begin
   ext f s,
   show (polynomial.X * (f s) - _).eval 2 = (0 : ℤ),
