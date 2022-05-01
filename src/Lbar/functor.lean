@@ -40,8 +40,12 @@ lemma map_Tinv (f : S₁ → S₂) (x : Lbar r' S₁) :
   map f (Tinv x) = Tinv (map f x) :=
 by ext s ⟨_|n⟩; simp only [map_to_fun, Tinv_zero, Tinv_succ, finset.sum_const_zero]
 
-/-- `Lbar r' S` is functorial in the finite type `S`. -/
-@[simps] def Laurent_measures : Fintype ⥤ ProFiltPseuNormGrpWithTinv₁ r' :=
+end Lbar
+
+open Lbar
+
+/-- `Fintype_Lbar r' S` is functorial in the finite type `S`. -/
+@[simps] def Fintype_Lbar : Fintype ⥤ ProFiltPseuNormGrpWithTinv₁ r' :=
 { obj := λ S,
   { M := Lbar r' S,
     exhaustive' := λ x, ⟨∥x∥₊, by rw Lbar.mem_filtration_iff⟩ },
@@ -55,11 +59,15 @@ by ext s ⟨_|n⟩; simp only [map_to_fun, Tinv_zero, Tinv_succ, finset.sum_cons
   map_id' := by { intros, ext1 x, exact map_id x },
   map_comp' := by { intros X Y Z f g, ext1 x, exact map_comp f x g } }
 
-example (X : Profinite) : has_limit (X.fintype_diagram ⋙ Laurent_measures r') :=
+namespace Lbar
+
+open category_theory pseudo_normed_group category_theory.limits
+
+example (X : Profinite) : has_limit (X.fintype_diagram ⋙ Fintype_Lbar r') :=
 by apply_instance
 
 /-- `Lbar r' S` extends to a functor in `S`, for profinite `S`. -/
 def functor : Profinite ⥤ ProFiltPseuNormGrpWithTinv₁ r' :=
-Profinite.extend (Laurent_measures r')
+Profinite.extend (Fintype_Lbar r')
 
 end Lbar

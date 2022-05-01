@@ -204,7 +204,7 @@ end
 
 @[simps]
 def rescale_enlarging_iso (r : ℝ≥0) [fact (0 < r)] :
-  rescale r ⋙ enlarging_functor ≅ enlarging_functor :=
+  rescale r ⋙ CHFPNG₁_to_CHFPNGₑₗ ≅ CHFPNG₁_to_CHFPNGₑₗ :=
 begin
   refine _ ≪≫ (iso_whisker_left _ (CompHausFiltPseuNormGrp.rescale_iso r))
     ≪≫ functor.right_unitor _,
@@ -214,7 +214,7 @@ end
 @[simps]
 def rescale_to_Condensed_iso (r : ℝ≥0) [fact (0 < r)] :
   rescale r ⋙ to_Condensed ≅
-  enlarging_functor ⋙ CompHausFiltPseuNormGrp.rescale r ⋙ CompHausFiltPseuNormGrp.to_Condensed :=
+  CHFPNG₁_to_CHFPNGₑₗ ⋙ CompHausFiltPseuNormGrp.rescale r ⋙ CompHausFiltPseuNormGrp.to_Condensed :=
 nat_iso.of_components (λ M, iso.refl _) $ λ _ _ _, rfl
 
 -- @[simps]
@@ -256,7 +256,7 @@ end comphaus_filtered_pseudo_normed_group_hom
 open CompHausFiltPseuNormGrp₁
 
 def strictify_nat_trans {C : Type*} [category C] {F G : C ⥤ CompHausFiltPseuNormGrp₁.{u}}
-  (α : F ⋙ enlarging_functor.{u} ⟶ G ⋙ enlarging_functor.{u}) (c : ℝ≥0) [fact (0 < c)]
+  (α : F ⋙ CHFPNG₁_to_CHFPNGₑₗ.{u} ⟶ G ⋙ CHFPNG₁_to_CHFPNGₑₗ.{u}) (c : ℝ≥0) [fact (0 < c)]
   (h : ∀ X, (α.app X).bound_by c) :
   F ⋙ CompHausFiltPseuNormGrp₁.rescale.{u u} c ⟶ G :=
 { app := λ X, comphaus_filtered_pseudo_normed_group_hom.strictify _ _ (α.app X) c (h X),
@@ -266,9 +266,9 @@ def strictify_nat_trans {C : Type*} [category C] {F G : C ⥤ CompHausFiltPseuNo
 
 lemma strictify_nat_trans_enlarging {C : Type*} [category C]
   {F G : C ⥤ CompHausFiltPseuNormGrp₁.{u}}
-  (α : F ⋙ enlarging_functor.{u} ⟶ G ⋙ enlarging_functor.{u}) (c : ℝ≥0) [fact (0 < c)]
+  (α : F ⋙ CHFPNG₁_to_CHFPNGₑₗ.{u} ⟶ G ⋙ CHFPNG₁_to_CHFPNGₑₗ.{u}) (c : ℝ≥0) [fact (0 < c)]
   (h : ∀ X, (α.app X).bound_by c) :
-  whisker_right (strictify_nat_trans α c h) enlarging_functor =
+  whisker_right (strictify_nat_trans α c h) CHFPNG₁_to_CHFPNGₑₗ =
   (functor.associator _ _ _).hom ≫ whisker_left F (rescale_enlarging_iso c).hom ≫ α :=
 begin
   ext, refl,
@@ -277,10 +277,10 @@ end
 @[simp]
 lemma strictify_nat_trans_enlarging' {C : Type*} [category C]
   {F G : C ⥤ CompHausFiltPseuNormGrp₁.{u}}
-  (α : F ⋙ enlarging_functor.{u} ⟶ G ⋙ enlarging_functor.{u}) (c : ℝ≥0) [fact (0 < c)]
+  (α : F ⋙ CHFPNG₁_to_CHFPNGₑₗ.{u} ⟶ G ⋙ CHFPNG₁_to_CHFPNGₑₗ.{u}) (c : ℝ≥0) [fact (0 < c)]
   (h : ∀ X, (α.app X).bound_by c) :
   whisker_left F (rescale_enlarging_iso.{u u} c).inv ≫ (functor.associator _ _ _).inv ≫
-  whisker_right (strictify_nat_trans α c h) enlarging_functor = α :=
+  whisker_right (strictify_nat_trans α c h) CHFPNG₁_to_CHFPNGₑₗ = α :=
 begin
   ext, refl,
 end
@@ -294,15 +294,15 @@ instance preadditive_CompHausFiltPseuNormGrp : preadditive CompHausFiltPseuNormG
 section
 
 variables {F G H : Fintype.{u} ⥤ CompHausFiltPseuNormGrp₁.{u}}
-variables (α β : F ⋙ enlarging_functor ⟶ G ⋙ enlarging_functor)
+variables (α β : F ⋙ CHFPNG₁_to_CHFPNGₑₗ ⟶ G ⋙ CHFPNG₁_to_CHFPNGₑₗ)
 variables (c cα cβ cαβ : ℝ≥0) [fact (0 < c)] [fact (0 < cα)] [fact (0 < cβ)] [fact (0 < cαβ)]
 
-def nonstrict_extend (α : F ⋙ enlarging_functor ⟶ G ⋙ enlarging_functor)
+def nonstrict_extend (α : F ⋙ CHFPNG₁_to_CHFPNGₑₗ ⟶ G ⋙ CHFPNG₁_to_CHFPNGₑₗ)
   (c : ℝ≥0) [fact (0 < c)] (h : ∀ X, (α.app X).bound_by c) :
-  Profinite.extend.{u} F ⋙ enlarging_functor ⟶ Profinite.extend.{u} G ⋙ enlarging_functor :=
+  Profinite.extend.{u} F ⋙ CHFPNG₁_to_CHFPNGₑₗ ⟶ Profinite.extend.{u} G ⋙ CHFPNG₁_to_CHFPNGₑₗ :=
 whisker_left (Profinite.extend F) (rescale_enlarging_iso.{u u} c).inv ≫
 whisker_right ((Profinite.extend_commutes _ _).hom ≫
-  Profinite.extend_nat_trans.{u} (strictify_nat_trans α c h)) enlarging_functor
+  Profinite.extend_nat_trans.{u} (strictify_nat_trans α c h)) CHFPNG₁_to_CHFPNGₑₗ
 
 -- move me
 attribute [reassoc] whisker_left_comp whisker_right_comp
@@ -310,8 +310,8 @@ attribute [reassoc] whisker_left_comp whisker_right_comp
 lemma nonstrict_extend_whisker_left (h : ∀ X, (α.app X).bound_by c) :
   whisker_left Fintype.to_Profinite (nonstrict_extend.{u} α c h) =
   (functor.associator _ _ _).inv ≫
-  whisker_right (Profinite.extend_extends.{u} F).hom enlarging_functor.{u} ≫ α ≫
-  whisker_right (Profinite.extend_extends.{u} G).inv enlarging_functor.{u} ≫
+  whisker_right (Profinite.extend_extends.{u} F).hom CHFPNG₁_to_CHFPNGₑₗ.{u} ≫ α ≫
+  whisker_right (Profinite.extend_extends.{u} G).inv CHFPNG₁_to_CHFPNGₑₗ.{u} ≫
   (functor.associator _ _ _).hom :=
 begin
   rw [nonstrict_extend, whisker_right_comp, whisker_left_comp, whisker_left_comp,
@@ -339,7 +339,7 @@ begin
 end
 
 lemma nonstrict_extend_ext'
-  (α β : Profinite.extend.{u} F ⋙ enlarging_functor ⟶ Profinite.extend G ⋙ enlarging_functor)
+  (α β : Profinite.extend.{u} F ⋙ CHFPNG₁_to_CHFPNGₑₗ ⟶ Profinite.extend G ⋙ CHFPNG₁_to_CHFPNGₑₗ)
   (c : ℝ≥0) [fact (0 < c)] (hα : ∀ X, (α.app X).bound_by c) (hβ : ∀ X, (β.app X).bound_by c)
   (h : whisker_left Fintype.to_Profinite α = whisker_left Fintype.to_Profinite β) :
   α = β :=
@@ -349,7 +349,7 @@ begin
   rw ← cancel_epi (Profinite.extend_commutes F (CompHausFiltPseuNormGrp₁.rescale.{u u} c)).inv,
   apply Profinite.extend_nat_trans_ext,
   simp only [whisker_left_comp, cancel_epi],
-  refine ((whiskering_right _ _ _).obj enlarging_functor.{u}).map_injective _,
+  refine ((whiskering_right _ _ _).obj CHFPNG₁_to_CHFPNGₑₗ.{u}).map_injective _,
   simp only [whiskering_right_obj_map, whisker_right_left,
     strictify_nat_trans_enlarging, whisker_left_comp, h],
 end
@@ -368,7 +368,7 @@ begin
 end
 
 lemma nonstrict_extend_ext
-  (α β : Profinite.extend.{u} F ⋙ enlarging_functor ⟶ Profinite.extend G ⋙ enlarging_functor)
+  (α β : Profinite.extend.{u} F ⋙ CHFPNG₁_to_CHFPNGₑₗ ⟶ Profinite.extend G ⋙ CHFPNG₁_to_CHFPNGₑₗ)
   (cα : ℝ≥0) [fact (0 < cα)] (cβ : ℝ≥0) [fact (0 < cβ)]
   (hα : ∀ X, (α.app X).bound_by cα) (hβ : ∀ X, (β.app X).bound_by cβ)
   (h : whisker_left Fintype.to_Profinite α = whisker_left Fintype.to_Profinite β) :
@@ -451,8 +451,8 @@ begin
 end
 
 lemma nonstrict_extend_comp
-  (α : F ⋙ enlarging_functor ⟶ G ⋙ enlarging_functor)
-  (β : G ⋙ enlarging_functor ⟶ H ⋙ enlarging_functor)
+  (α : F ⋙ CHFPNG₁_to_CHFPNGₑₗ ⟶ G ⋙ CHFPNG₁_to_CHFPNGₑₗ)
+  (β : G ⋙ CHFPNG₁_to_CHFPNGₑₗ ⟶ H ⋙ CHFPNG₁_to_CHFPNGₑₗ)
   (hα : ∀ X, (α.app X).bound_by cα) (hβ : ∀ X, (β.app X).bound_by cβ)
   (hαβ : ∀ X, ((α ≫ β).app X).bound_by cαβ) :
   nonstrict_extend (α ≫ β) cαβ hαβ = nonstrict_extend α cα hα ≫ nonstrict_extend β cβ hβ :=
@@ -469,7 +469,7 @@ begin
 end
 
 lemma nonstrict_extend_id
-  (hα : ∀ X, (nat_trans.app (𝟙 (F ⋙ enlarging_functor.{u})) X).bound_by cα) :
+  (hα : ∀ X, (nat_trans.app (𝟙 (F ⋙ CHFPNG₁_to_CHFPNGₑₗ.{u})) X).bound_by cα) :
   nonstrict_extend (𝟙 _) cα hα = 𝟙 _ :=
 begin
   refine nonstrict_extend_ext _ _ cα 1 (nonstrict_extend_bound_by _ _ _) _ _,
@@ -481,7 +481,7 @@ begin
 end
 
 lemma nonstrict_extend_whisker_right_enlarging (α : F ⟶ G) :
-  nonstrict_extend (whisker_right α enlarging_functor) 1
+  nonstrict_extend (whisker_right α CHFPNG₁_to_CHFPNGₑₗ) 1
     (λ X, (comphaus_filtered_pseudo_normed_group_hom.mk_of_strict_strict _ _).bound_by_one) =
   whisker_right (Profinite.extend_nat_trans α) _ :=
 begin

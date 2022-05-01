@@ -29,7 +29,7 @@ instance : large_category ProFiltPseuNormGrp₁.{u} :=
   id := λ A, strict_comphaus_filtered_pseudo_normed_group_hom.id,
   comp := λ A B C f g, g.comp f }
 
-def enlarging_functor : ProFiltPseuNormGrp₁ ⥤ ProFiltPseuNormGrp :=
+def PFPNG₁_to_PFPNGₑₗ : ProFiltPseuNormGrp₁ ⥤ ProFiltPseuNormGrp :=
 { obj := λ M, ProFiltPseuNormGrp.of M,
   map := λ M₁ M₂ f, f.to_chfpsng_hom }
 
@@ -41,7 +41,7 @@ instance : concrete_category ProFiltPseuNormGrp₁.{u} :=
 
 /-- The forgetful functor from groups filtered by profinite spaces to
 groups filtered by compact Hausdorff spaces. -/
-def to_CHFPNG₁ : ProFiltPseuNormGrp₁.{u} ⥤ CompHausFiltPseuNormGrp₁.{u} :=
+def _root_.PFPNG₁_to_CHFPNG₁ₑₗ : ProFiltPseuNormGrp₁.{u} ⥤ CompHausFiltPseuNormGrp₁.{u} :=
 { obj := λ M,
   { M := M,
     exhaustive' := M.exhaustive },
@@ -50,16 +50,16 @@ def to_CHFPNG₁ : ProFiltPseuNormGrp₁.{u} ⥤ CompHausFiltPseuNormGrp₁.{u} 
 def limit_cone {J : Type u} [small_category J] (K : J ⥤ ProFiltPseuNormGrp₁.{u}) :
   limits.cone K :=
 { X :=
-  { M := (CompHausFiltPseuNormGrp₁.limit_cone (K ⋙ to_CHFPNG₁)).X,
+  { M := (CompHausFiltPseuNormGrp₁.limit_cone (K ⋙ PFPNG₁_to_CHFPNG₁ₑₗ)).X,
     str :=
     { continuous_add' := comphaus_filtered_pseudo_normed_group.continuous_add',
       continuous_neg' := comphaus_filtered_pseudo_normed_group.continuous_neg',
       continuous_cast_le := comphaus_filtered_pseudo_normed_group.continuous_cast_le,
       td := begin
         intro c,
-        let E := (CompHausFiltPseuNormGrp₁.cone_point_type.filt_homeo (K ⋙ to_CHFPNG₁) c),
+        let E := (CompHausFiltPseuNormGrp₁.cone_point_type.filt_homeo (K ⋙ PFPNG₁_to_CHFPNG₁ₑₗ) c),
         haveI : totally_disconnected_space
-          (CompHausFiltPseuNormGrp₁.cone_point_type_filt (K ⋙ to_CHFPNG₁) c) :=
+          (CompHausFiltPseuNormGrp₁.cone_point_type_filt (K ⋙ PFPNG₁_to_CHFPNG₁ₑₗ) c) :=
         begin
           dsimp [CompHausFiltPseuNormGrp₁.cone_point_type_filt],
           apply_instance,
@@ -69,28 +69,28 @@ def limit_cone {J : Type u} [small_category J] (K : J ⥤ ProFiltPseuNormGrp₁.
       ..(infer_instance : pseudo_normed_group _) },
     exhaustive' :=  CompHausFiltPseuNormGrp₁.exhaustive _ },
   π :=
-  { app := λ j, (CompHausFiltPseuNormGrp₁.limit_cone (K ⋙ to_CHFPNG₁)).π.app j,
-    naturality' := (CompHausFiltPseuNormGrp₁.limit_cone (K ⋙ to_CHFPNG₁)).π.naturality } }
+  { app := λ j, (CompHausFiltPseuNormGrp₁.limit_cone (K ⋙ PFPNG₁_to_CHFPNG₁ₑₗ)).π.app j,
+    naturality' := (CompHausFiltPseuNormGrp₁.limit_cone (K ⋙ PFPNG₁_to_CHFPNG₁ₑₗ)).π.naturality } }
 
-instance {J : Type u} [small_category J] : creates_limits_of_shape J to_CHFPNG₁ :=
+instance {J : Type u} [small_category J] : creates_limits_of_shape J PFPNG₁_to_CHFPNG₁ₑₗ :=
 { creates_limit := λ K,
   { reflects := λ C hC,
-    { lift := λ S, hC.lift (to_CHFPNG₁.map_cone S),
+    { lift := λ S, hC.lift (PFPNG₁_to_CHFPNG₁ₑₗ.map_cone S),
       fac' := λ S j, hC.fac _ _,
-      uniq' := λ S m h, hC.uniq (to_CHFPNG₁.map_cone S) m h },
+      uniq' := λ S m h, hC.uniq (PFPNG₁_to_CHFPNG₁ₑₗ.map_cone S) m h },
     lifts := λ C hC,
     { lifted_cone := limit_cone _,
       valid_lift :=
-        (CompHausFiltPseuNormGrp₁.limit_cone_is_limit (K ⋙ to_CHFPNG₁)).unique_up_to_iso hC } } }
+        (CompHausFiltPseuNormGrp₁.limit_cone_is_limit (K ⋙ PFPNG₁_to_CHFPNG₁ₑₗ)).unique_up_to_iso hC } } }
 
-instance : creates_limits to_CHFPNG₁ := ⟨⟩
+instance : creates_limits PFPNG₁_to_CHFPNG₁ₑₗ := ⟨⟩
 
 def limit_cone_is_limit {J : Type u} [small_category J] (K : J ⥤ ProFiltPseuNormGrp₁.{u}) :
   limits.is_limit (limit_cone K) :=
-limits.is_limit_of_reflects to_CHFPNG₁ (CompHausFiltPseuNormGrp₁.limit_cone_is_limit _)
+limits.is_limit_of_reflects PFPNG₁_to_CHFPNG₁ₑₗ (CompHausFiltPseuNormGrp₁.limit_cone_is_limit _)
 
 instance : limits.has_limits ProFiltPseuNormGrp₁.{u} :=
-has_limits_of_has_limits_creates_limits to_CHFPNG₁
+has_limits_of_has_limits_creates_limits PFPNG₁_to_CHFPNG₁ₑₗ
 
 lemma eq_of_π_eq {J : Type u} [small_category J] {K : J ⥤ ProFiltPseuNormGrp₁.{u}}
   (C : limits.cone K) (hC : limits.is_limit C) (x y : C.X)
@@ -131,7 +131,7 @@ begin
   intros E hE,
   apply limits.is_limit_of_reflects Profinite_to_CompHaus,
   change limits.is_limit ((CompHausFiltPseuNormGrp₁.level.obj c).map_cone
-    (to_CHFPNG₁.map_cone E)),
+    (PFPNG₁_to_CHFPNG₁ₑₗ.map_cone E)),
   apply limits.is_limit_of_preserves,
   apply limits.is_limit_of_preserves,
   assumption
@@ -142,14 +142,14 @@ lemma mem_filtration_iff_of_is_limit {J : Type u} [small_category J]
   (hC : limits.is_limit C) (c : ℝ≥0) (x : C.X) :
   x ∈ pseudo_normed_group.filtration C.X c ↔
   (∀ j : J, C.π.app j x ∈ pseudo_normed_group.filtration (K.obj j) c) :=
-CompHausFiltPseuNormGrp₁.mem_filtration_iff_of_is_limit (K ⋙ to_CHFPNG₁)
-  (to_CHFPNG₁.map_cone C) (limits.is_limit_of_preserves _ hC) _ _
+CompHausFiltPseuNormGrp₁.mem_filtration_iff_of_is_limit (K ⋙ PFPNG₁_to_CHFPNG₁ₑₗ)
+  (PFPNG₁_to_CHFPNG₁ₑₗ.map_cone C) (limits.is_limit_of_preserves _ hC) _ _
 
 lemma is_limit_ext {J : Type u} [small_category J]
   (K : J ⥤ ProFiltPseuNormGrp₁.{u}) (C : limits.cone K)
   (hC : limits.is_limit C) (x y : C.X)
   (h : ∀ j, C.π.app j x = C.π.app j y) : x = y :=
-CompHausFiltPseuNormGrp₁.is_limit_ext _ _ (limits.is_limit_of_preserves to_CHFPNG₁ hC) _ _ h
+CompHausFiltPseuNormGrp₁.is_limit_ext _ _ (limits.is_limit_of_preserves PFPNG₁_to_CHFPNG₁ₑₗ hC) _ _ h
 
 section explicit_product
 
@@ -157,17 +157,17 @@ def product {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrp₁.{u}) :
   ProFiltPseuNormGrp₁.{u} :=
 { M := Π i, X i,
   str := infer_instance,
-  exhaustive' := (CompHausFiltPseuNormGrp₁.product (λ i, (to_CHFPNG₁.obj (X i)))).exhaustive' }
+  exhaustive' := (CompHausFiltPseuNormGrp₁.product (λ i, (PFPNG₁_to_CHFPNG₁ₑₗ.obj (X i)))).exhaustive' }
 
 @[simps]
 def product.π {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrp₁.{u}) (i) :
   product X ⟶ X i :=
-CompHausFiltPseuNormGrp₁.product.π (λ i, (to_CHFPNG₁.obj (X i))) i
+CompHausFiltPseuNormGrp₁.product.π (λ i, (PFPNG₁_to_CHFPNG₁ₑₗ.obj (X i))) i
 
 @[simps]
 def product.lift {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrp₁.{u})
   (M : ProFiltPseuNormGrp₁.{u}) (f : Π i, M ⟶ X i) : M ⟶ product X :=
-CompHausFiltPseuNormGrp₁.product.lift (λ i, (to_CHFPNG₁.obj (X i))) (to_CHFPNG₁.obj M) f
+CompHausFiltPseuNormGrp₁.product.lift (λ i, (PFPNG₁_to_CHFPNG₁ₑₗ.obj (X i))) (PFPNG₁_to_CHFPNG₁ₑₗ.obj M) f
 
 @[simp, reassoc]
 lemma product.lift_π {α : Type u} [fintype α] (X : α → ProFiltPseuNormGrp₁.{u})

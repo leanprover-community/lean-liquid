@@ -33,11 +33,11 @@ instance : large_category CompHausFiltPseuNormGrp₁.{u} :=
   to CompHaus-ly filtered pseudo-normed groups with bounded morphisms, which is the
   identity on objects. -/
 @[simps]
-def enlarging_functor : CompHausFiltPseuNormGrp₁ ⥤ CompHausFiltPseuNormGrp :=
+def _root_.CHFPNG₁_to_CHFPNGₑₗ : CompHausFiltPseuNormGrp₁ ⥤ CompHausFiltPseuNormGrp :=
 { obj := λ M, CompHausFiltPseuNormGrp.of M,
   map := λ M₁ M₂ f, f.to_chfpsng_hom }
 
-instance : faithful (enlarging_functor.{u}) :=
+instance : faithful (CHFPNG₁_to_CHFPNGₑₗ.{u}) :=
 { map_injective' := λ M₁ M₂ f g h,
   by { ext x, apply_fun (λ φ, φ.to_fun) at h, exact congr_fun h x } }
 

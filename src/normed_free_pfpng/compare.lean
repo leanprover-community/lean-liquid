@@ -45,8 +45,8 @@ open category_theory
 
 noncomputable
 def cond_free_pfpng_to_normed_free_pfpng :
-  condensify (free_pfpng_functor ⋙ ProFiltPseuNormGrp₁.to_CHFPNG₁) ⟶
-  condensify (normed_free_pfpng_functor p ⋙ ProFiltPseuNormGrp₁.to_CHFPNG₁) :=
+  condensify (free_pfpng_functor ⋙ PFPNG₁_to_CHFPNG₁ₑₗ) ⟶
+  condensify (normed_free_pfpng_functor p ⋙ PFPNG₁_to_CHFPNG₁ₑₗ) :=
 condensify_map $ whisker_right (free_pfpng_to_normed_free_pfpng p) _
 
 open CompHausFiltPseuNormGrp₁
@@ -57,7 +57,7 @@ lemma condensify_map_zero (F G : Fintype ⥤ CompHausFiltPseuNormGrp₁) :
 begin
   delta condensify_map condensify_nonstrict,
   suffices : nonstrict_extend
-    (whisker_right (0 : F ⟶ G) enlarging_functor) 1 _ = 0,
+    (whisker_right (0 : F ⟶ G) CHFPNG₁_to_CHFPNGₑₗ) 1 _ = 0,
   { rw this, refl, },
   rw [nonstrict_extend_whisker_right_enlarging,
     Profinite.extend_nat_trans_zero],

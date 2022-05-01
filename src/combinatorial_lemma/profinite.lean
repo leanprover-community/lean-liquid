@@ -117,7 +117,7 @@ def level : ℝ≥0 ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r' ⥤ Profinite.{u} :
 
 instance (c) : preserves_limits ((level r').obj c) :=
 begin
-  change preserves_limits (to_PFPNG₁.{u} r' ⋙ ProFiltPseuNormGrp₁.level.obj.{u} c),
+  change preserves_limits (PFPNGT₁_to_PFPNG₁ₑₗ.{u} r' ⋙ ProFiltPseuNormGrp₁.level.obj.{u} c),
   apply_with limits.comp_preserves_limits { instances := ff },
   constructor, constructor, introsI J _, constructor,
   -- <-- looks like we have `preserves_limit` and not `preserves_limits`, but
@@ -397,18 +397,18 @@ open ProFiltPseuNormGrpWithTinv₁
 
 instance (c : ℝ≥0) : preserves_limits (hom_functor.{u} r' Λ ⋙ (level r').obj c) :=
 begin
-  change preserves_limits (hom_functor r' Λ ⋙ to_PFPNG₁ r' ⋙ ProFiltPseuNormGrp₁.level.obj c),
+  change preserves_limits (hom_functor r' Λ ⋙ PFPNGT₁_to_PFPNG₁ₑₗ r' ⋙ ProFiltPseuNormGrp₁.level.obj c),
   apply_instance,
 end
 
 def hom_diagram : discrete_quotient S ⥤ ProFiltPseuNormGrpWithTinv₁.{u} r' :=
-S.fintype_diagram ⋙ Lbar.Laurent_measures.{u u} r' ⋙ hom_functor r' Λ
+S.fintype_diagram ⋙ Fintype_Lbar.{u u} r' ⋙ hom_functor r' Λ
 
 /-- The cone over `hom_diagram` whose cone point is defeq to `Hom(Λ, Lbar S)`.
 See lemma below. -/
 def hom_Lbar_cone : cone (hom_diagram r' Λ S) :=
 (hom_functor r' Λ).map_cone
-  (limit.cone (S.fintype_diagram ⋙ Lbar.Laurent_measures.{u u} r'))
+  (limit.cone (S.fintype_diagram ⋙ Fintype_Lbar.{u u} r'))
 
 @[simp]
 lemma hom_Lbar_cone_X : (hom_Lbar_cone r' Λ S ).X =
@@ -418,7 +418,7 @@ lemma hom_Lbar_cone_X : (hom_Lbar_cone r' Λ S ).X =
 def hom_Lbar_cone_is_limit (c) : is_limit (((level r').obj c).map_cone
   (hom_Lbar_cone r' Λ S)) :=
 begin
-  let E := (limit.cone (S.fintype_diagram ⋙ Lbar.Laurent_measures.{u u} r')),
+  let E := (limit.cone (S.fintype_diagram ⋙ Fintype_Lbar.{u u} r')),
   change is_limit (((hom_functor.{u} r' Λ ⋙ (level r').obj c)).map_cone E),
   apply is_limit_of_preserves (hom_functor.{u} r' Λ ⋙ (level r').obj c)
     (limit.is_limit _),
