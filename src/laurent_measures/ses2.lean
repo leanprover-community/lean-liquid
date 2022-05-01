@@ -74,7 +74,7 @@ begin
       simp,
       sorry }, -- this is not true because of the silly 37 choice which needs
     -- to be changed when I figure out what to change it to.
-    exact θ_ϕ_split_exact f hf1 },
+    exact θ_ϕ_split_exact F hF1 },
   { clear S,
     rintros S c' f,
 

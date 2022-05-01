@@ -58,17 +58,17 @@ end
 
 -- #check @ϕ
 
-lemma tsum_reindex (F : ℒ S) (N : ℤ) (s : S) : ∑' (l : ℕ), (F s (N + l) : ℝ) * (2 ^ l)⁻¹ =
- 2 ^ N * ∑' (m : {m : ℤ // N ≤ m}), (F s m : ℝ) * (2 ^ m.1)⁻¹ :=
-begin
-  have h_shift := int_tsum_shift (λ n, (F s n : ℝ) * (2 ^ (-n))) N,
-  simp only at h_shift,
-  simp_rw [subtype.val_eq_coe, ← zpow_neg₀],
-  rw [← h_shift, ← _root_.tsum_mul_left, tsum_congr],
-  intro n,
-  rw [mul_comm (_ ^ N), mul_assoc, ← (zpow_add₀ (@two_ne_zero ℝ _ _)), neg_add_rev,
-    neg_add_cancel_comm, zpow_neg₀, zpow_coe_nat, add_comm],
-end
+-- lemma tsum_reindex (F : ℒ S) (N : ℤ) (s : S) : ∑' (l : ℕ), (F s (N + l) : ℝ) * (2 ^ l)⁻¹ =
+--  2 ^ N * ∑' (m : {m : ℤ // N ≤ m}), (F s m : ℝ) * (2 ^ m.1)⁻¹ :=
+-- begin
+--   have h_shift := int_tsum_shift (λ n, (F s n : ℝ) * (2 ^ (-n))) N,
+--   simp only at h_shift,
+--   simp_rw [subtype.val_eq_coe, ← zpow_neg₀],
+--   rw [← h_shift, ← _root_.tsum_mul_left, tsum_congr],
+--   intro n,
+--   rw [mul_comm (_ ^ N), mul_assoc, ← (zpow_add₀ (@two_ne_zero ℝ _ _)), neg_add_rev,
+--     neg_add_cancel_comm, zpow_neg₀, zpow_coe_nat, add_comm],
+-- end
 
 variable [fact (r < 1)]
 
