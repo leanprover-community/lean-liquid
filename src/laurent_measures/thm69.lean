@@ -615,9 +615,8 @@ def ψ (F : ℒ S) (hF : θ F = 0) : ℒ S :=
     exact psi_def_aux F s,
   end }
 
-theorem θ_ϕ_exact (F : ℒ S) (hF : θ F = 0) : ∃ G, ϕ G = F :=
+theorem θ_ϕ_split_exact (F : ℒ S) (hF : θ F = 0) : ϕ (ψ F hF) = F :=
 begin
-  use ψ F hF,
   ext s n,
   simp only [ϕ, ψ, sub_apply, shift_to_fun_to_fun, laurent_measures.coe_mk, nsmul_apply,
     nsmul_eq_mul, int.nat_cast_eq_coe_nat, int.coe_nat_succ, int.coe_nat_zero, zero_add],
@@ -639,5 +638,8 @@ begin
   { linarith },
   { exact (lt_d_eq_zero F s n (not_le.mp h)).symm },
 end
+
+theorem θ_ϕ_exact (F : ℒ S) (hF : θ F = 0) : ∃ G, ϕ G = F :=
+⟨ψ F hF, θ_ϕ_split_exact F hF⟩
 
 end mem_exact

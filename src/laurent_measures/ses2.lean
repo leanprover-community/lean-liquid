@@ -67,20 +67,16 @@ begin
       (hf2 : ∥f∥₊ ≤ c')⟩,
     change ∃ x : laurent_measures r S,
       ∥x∥₊ ≤ 37 * («r»⁻¹ + 2)⁻¹ ∧ _,
-    obtain ⟨G, hG⟩ := θ_ϕ_exact f hf1,
-    refine ⟨G, _, _⟩,
-    { sorry }, -- this is not true because of the silly 37 choice which needs
+    refine ⟨ψ f hf1, _, _⟩,
+    --let ZZZ := ϕ f r,
+    {
+      sorry }, -- this is not true because of the silly 37 choice which needs
     -- to be changed when I figure out what to change it to.
     rw ← hG,
-    ext s n,
-    delta Tinv2_nat_trans,
-    simp,
-  --   suffices : ∃ (x : laurent_measures «r» S),
-  -- ∥x∥₊ ≤ 37 * («r»⁻¹ + 2)⁻¹ ∧ ((Tinv2_nat_trans (Fintype_LaurentMeasures «r»)).app S) x = f,
-  --     delta Tinv2_nat_trans,
-  --     dsimp,
-  --     ext s,
-    sorry },
+    simp only [Tinv2_nat_trans, Tinv_nat_trans, ϕ, two_smul, nat_trans.app_sub, nat_trans.app_add, nat_trans.id_app,
+  comphaus_filtered_pseudo_normed_group_hom.sub_apply, comphaus_filtered_pseudo_normed_group_hom.add_apply,
+  CompHausFiltPseuNormGrp.id_apply, sub_left_inj],
+    ext, refl },
   { clear S,
     rintros S c' f,
 

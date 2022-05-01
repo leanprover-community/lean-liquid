@@ -47,4 +47,7 @@ instance (M : CompHausFiltPseuNormGrp) : comphaus_filtered_pseudo_normed_group M
 def of (M : Type u) [comphaus_filtered_pseudo_normed_group M] : CompHausFiltPseuNormGrp :=
 bundled.of M
 
+@[simp]
+lemma id_apply (M : CompHausFiltPseuNormGrp) (x : M) : (𝟙 M : M ⟶ M) x = x := rfl
+
 end CompHausFiltPseuNormGrp
