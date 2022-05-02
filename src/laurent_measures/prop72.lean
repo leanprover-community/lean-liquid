@@ -199,8 +199,18 @@ else if hz : 0 < -z then (λ m, if m < (useful hz).some then 0 else -(C4_aux_fun
   (useful hz).some_spec.1 (useful hz).some_spec.2 (m - (useful hz).some).nat_abs).1)
 else 37 -- never get here
 
--- todo: (1) sums to z at 1/2, (2) r-sum bounded by some random function
--- (here r=(2⁻¹)ᵖ) -- I need `summable` to make the Laurent series
--- and then I need a bound on the sum to prove the theorem about it.
+-- Needed for a later bound
+lemma C4_abs_le_one (z : ℝ) (n : ℤ) : ∥C4_actual_function z n∥₊ ≤ 1 := sorry
+
+-- needed for definition of missing data (definition of splitting of eval(1/2) map).
+-- Proof is "∥f n∥ ≤ 1 always and = 0 for `n<d` so bounded by sum of a GP".
+lemma C4_summable (z : ℝ) {r : ℝ≥0} (hr : r < 1) :
+summable (λ n : ℤ, ∥C4_actual_function z n∥₊ * r ^ n) := sorry
+
+-- this is false; 37 is a placeholder and needs to be changed to something
+-- like |z|/(1-r). We'll figure out what we need later.
+lemma C4_tsum_le (z : ℝ) {r : ℝ≥0} : ∑' n, ∥C4_actual_function z n∥₊ * r ^ n ≤ 37 := sorry
+
+lemma C4_tsum_half (z : ℝ) : ∑' n, (C4_actual_function z n : ℝ) * 2⁻¹ ^ n = z := sorry
 
 end psi_aux_lemma2
