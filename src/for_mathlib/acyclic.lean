@@ -1,3 +1,6 @@
+import category_theory.preadditive.additive_functor
+import category_theory.limits.preserves.shapes.biproducts
+
 import for_mathlib.derived.les2
 import for_mathlib.derived.les_facts
 import for_mathlib.salamander
@@ -31,7 +34,7 @@ instance category_theory.limits.preserves_binary_biproduct_of_additive
   {𝓐 𝓑 : Type*} [category 𝓐] [category 𝓑] [abelian 𝓐] [abelian 𝓑]
   (F : 𝓐 ⥤ 𝓑) [functor.additive F] (X Y : 𝓐) :
   preserves_binary_biproduct X Y F :=
-sorry
+preserves_binary_biproduct_of_preserves_biproduct _ _ _
 
 -- move me
 @[simp] lemma category_theory.op_neg {𝓐 : Type*} [category 𝓐] [preadditive 𝓐]
