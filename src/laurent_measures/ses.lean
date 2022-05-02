@@ -666,16 +666,42 @@ lemma is_open_W_single (T : 𝒞) (a : (laurent_measures_bdd_functor r
 
 lemma is_open_U (F : filtration (ℒ ϖ) c) (B : ℤ) : is_open (U c F B) :=
 begin
-  sorry;{
-  rw is_open_induced_iff,
-  have := CompHaus_to_Top,
-  let W : set (Π (R : (category_theory.as_small (finset ℤ))ᵒᵖ),
-    (laurent_measures_bdd_functor r ϖ c ⋙ Fintype.to_Profinite).obj R),
-  }
-  -- apply coe.CompHaus_to_Top
-
-  -- let W : set (Π (n : (as_small (finset ℤ))ᵒᵖ), (zmod n.unop.1.succ)) := λ x, x k =
-  --   (0 : (zmod k.unop.1.succ)),
+  let ι : filtration (ℒ ϖ) c → Π (i : ℤ), ℤ :=
+    λ t i, truncate {i} t punit.star ⟨i,by simp⟩,
+  have hι : continuous ι,
+  { rw continuous_pi_iff, intros i,
+    dsimp [ι],
+    change continuous ((λ (t : laurent_measures_bdd r ϖ {i} c),
+      t punit.star ⟨i,by simp⟩) ∘ truncate {i}),
+    refine continuous.comp continuous_bot (truncate_continuous «r» (Fintype.of punit) c {i}) },
+  obtain ⟨n₀,h₀⟩ : ∃ n₀ : ℤ, ∀ (m : ℤ) (H : ℒ ϖ) (hH : H ∈ filtration (ℒ ϖ) c),
+    m < n₀ → H punit.star m = 0,
+  { obtain ⟨n₀,h₀⟩ : ∃ n₀ : ℤ, ∀ (m : ℤ), m < n₀ → c < r^m := sorry,
+    use n₀, intros m H hH hm,
+    exact eq_zero_of_filtration H _ hH punit.star m (h₀ m hm) },
+  classical,
+  let UU : set (Π (i : ℤ), ℤ) :=
+    set.pi (set.Ico n₀ B) (λ i, if i ∈ set.Ico n₀ B then { F punit.star i } else ⊤),
+  have hUU : is_open UU,
+  { apply is_open_set_pi, exact finite_Ico n₀ B,
+    intros a ha, trivial },
+  convert hUU.preimage hι,
+  ext G,
+  split,
+  { intros hG, dsimp [U, UU, ι] at ⊢ hG,
+    rw [set.mem_preimage, set.mem_pi],
+    intros i hi, rw if_pos hi,
+    simp only [mem_singleton_iff],
+    symmetry,
+    apply hG, exact hi.2 },
+  { intros hG, dsimp [U, UU, ι] at ⊢ hG,
+    rintros ⟨⟩ n hn,
+    rw [set.mem_preimage, set.mem_pi] at hG,
+    symmetry,
+    by_cases hn' : n < n₀,
+    { erw [h₀ n G.1 G.2 hn', h₀ n F.1 F.2 hn'] },
+    have hn'' : n ∈ set.Ico n₀ B := ⟨by simpa using hn', hn⟩,
+    specialize hG n hn'', rw if_pos hn'' at hG, simpa using hG },
 end
 
 end topological_generalities
