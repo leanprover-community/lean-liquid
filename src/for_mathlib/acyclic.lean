@@ -142,9 +142,6 @@ begin
     refine is_zero.of_iso (is_zero.unop _) e.symm.unop,
     refine category_theory.limits.is_zero.biprod _ _,
     { simp only [functor.right_op_obj, functor.flip_obj_obj, is_zero_op],
-      -- haveI : projective (P.val.as.X (k + 1)),
-      -- { dsimp [P], apply_instance, sorry },
-      -- exact acyclic_of_projective (P.val.as.X (k + 1)) B i hi,
-      sorry },
+      exact acyclic_of_projective (P.val.as.X (k + 1)) B i hi, },
     { exact (hC k _ hi).op, }, }
 end
