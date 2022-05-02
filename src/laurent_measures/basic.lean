@@ -799,10 +799,13 @@ def map_hom [fact (0 < r)] (f : S ⟶ S') :
 
 /--  Let `F : ℒ S` be a Laurent measure.  `laurent_measures.d` chooses a bound `d ∈ ℤ` for `F`,
 such that, for all `s : S`, the sequence `F s` is zero from `d-1` and below. -/
-def d (F : ℒ S) [h0 : fact (0 < r)] [h1 : fact (r < 1)] : ℤ :=
+def d [h0 : fact (0 < r)] [h1 : fact (r < 1)] (F : ℒ S) : ℤ :=
 (exists_bdd_filtration h0.out h1.out F).some
 
-lemma lt_d_eq_zero (F : ℒ S) (s : S) (n : ℤ) [h0 : fact (0 < r)] [h1 : fact (r < 1)] :
+lemma lt_d_eq_zero [h0 : fact (0 < r)] [h1 : fact (r < 1)] (F : ℒ S) (s : S) (n : ℤ) :
   n < F.d → F s n = 0 := (exists_bdd_filtration h0.out h1.out F).some_spec s n
+
+lemma lt_d_eq_zero' [h0 : fact (0 < r)] [h1 : fact (r < 1)] (F : ℒ S) (s : S) (n : ℤ) :
+  n < F.d → (F s n : ℝ) = 0 := by exact_mod_cast lt_d_eq_zero F s n
 
 end laurent_measures
