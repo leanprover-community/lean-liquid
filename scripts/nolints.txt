@@ -39,7 +39,8 @@ apply_nolint lem98.hom_diagram unused_arguments
 apply_nolint ProFiltPseuNormGrpWithTinv₁.to_PNG₁ unused_arguments
 
 -- condensed/condensify.lean
-apply_nolint ProFiltPseuNormGrpWithTinv₁.to_CHFPNG₁ unused_arguments
+apply_nolint Tinv_nat_trans unused_arguments
+apply_nolint twoid_bound_by unused_arguments
 
 -- condensed/exact.lean
 apply_nolint CompHausFiltPseuNormGrp₁.exact_with_constant.P1_to_P2_nat_trans_aux_1 unused_arguments
@@ -289,10 +290,8 @@ apply_nolint psi_def_aux unused_arguments
 apply_nolint psi_def_aux_2 unused_arguments
 apply_nolint psi_def_aux_3 unused_arguments
 apply_nolint psi_def_aux_4 unused_arguments
-apply_nolint psi_def_summable unused_arguments
 apply_nolint psi_def_summable2 unused_arguments
 apply_nolint psi_def_summable3 unused_arguments
-apply_nolint tsum_reindex unused_arguments
 apply_nolint θ unused_arguments
 apply_nolint θ_natural unused_arguments
 
