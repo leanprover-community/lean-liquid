@@ -191,7 +191,7 @@ begin
     { apply real.log_neg; norm_num } },
 end
 
-noncomputable def C4_actual_function (z : ℝ) : ℤ → ℤ :=
+noncomputable def eval_half_inv (z : ℝ) : ℤ → ℤ :=
 if hz0 : z = 0 then λ n, 0 else
 if hz : 0 < z then (λ m, if m < (useful hz).some then 0 else (C4_aux_function (useful hz).some
   (useful hz).some_spec.1 (useful hz).some_spec.2 (m - (useful hz).some).nat_abs).1)
@@ -200,17 +200,21 @@ else if hz : 0 < -z then (λ m, if m < (useful hz).some then 0 else -(C4_aux_fun
 else 37 -- never get here
 
 -- Needed for a later bound
-lemma C4_abs_le_one (z : ℝ) (n : ℤ) : ∥C4_actual_function z n∥₊ ≤ 1 := sorry
+lemma abs_le_one (z : ℝ) (n : ℤ) : ∥eval_half_inv z n∥₊ ≤ 1 := sorry
 
 -- needed for definition of missing data (definition of splitting of eval(1/2) map).
 -- Proof is "∥f n∥ ≤ 1 always and = 0 for `n<d` so bounded by sum of a GP".
-lemma C4_summable (z : ℝ) {r : ℝ≥0} (hr : r < 1) :
-summable (λ n : ℤ, ∥C4_actual_function z n∥₊ * r ^ n) := sorry
+lemma summable (z : ℝ) {r : ℝ≥0} (hr : r < 1) :
+summable (λ n : ℤ, ∥eval_half_inv z n∥₊ * r ^ n) := sorry
 
--- this is false; 37 is a placeholder and needs to be changed to something
--- like |z|/(1-r). We'll figure out what we need later.
-lemma C4_tsum_le (z : ℝ) {r : ℝ≥0} : ∑' n, ∥C4_actual_function z n∥₊ * r ^ n ≤ 37 := sorry
+-- We'll figure out what we need right now.
+lemma tsum_le (z : ℝ) {r : ℝ≥0} : ∑' n, ∥eval_half_inv z n∥₊ * r ^ n ≤ ∥z∥₊ * (1 - r)⁻¹ :=
+begin
+  have foo : ∀ (n : ℤ), ∥eval_half_inv z n∥₊ * r ^ n ≤ r ^ n := λ n,
+    mul_le_of_le_one_left (zero_le (r ^ n)) (abs_le_one z n),
 
-lemma C4_tsum_half (z : ℝ) : ∑' n, (C4_actual_function z n : ℝ) * 2⁻¹ ^ n = z := sorry
+end
+
+lemma tsum_half (z : ℝ) : ∑' n, (eval_half_inv z n : ℝ) * 2⁻¹ ^ n = z := sorry
 
 end psi_aux_lemma2
