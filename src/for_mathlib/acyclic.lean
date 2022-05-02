@@ -1,5 +1,6 @@
 import for_mathlib.derived.les2
 import for_mathlib.derived.les_facts
+import for_mathlib.salamander
 .
 
 noncomputable theory
@@ -60,7 +61,7 @@ def Ext_compute_with_acyclic
   (hC : ∀ k, ∀ i > 0, is_zero (((Ext' i).obj (op $ C.X k)).obj B))
   (i : ℤ) :
   ((Ext i).obj (op $ of' C)).obj ((single _ 0).obj B) ≅
-  unop ((((preadditive_yoneda.obj B).right_op.map_homological_complex _).obj C).homology i) :=
+  unop ((((preadditive_yoneda.obj B).right_op.map_homological_complex _).obj C).homology (-i)) :=
 begin
   let P := (of' C).replace,
   let π : P ⟶ of' C := (of' C).π,
@@ -70,13 +71,18 @@ begin
   let fq := (homotopy_category.quotient _ _).map f,
   suffices hf : is_quasi_iso fq,
   { resetI,
-    let e := as_iso ((homotopy_category.homology_functor Abᵒᵖ _ i).map fq),
+    let e := as_iso ((homotopy_category.homology_functor Abᵒᵖ _ (-i)).map fq),
     let e' := e.symm.unop,
     refine _ ≪≫ e',
-    -- currently there are some `op`s in the wrong places
-    -- so this is provable, but requires identifying the `op` of homology with the homology of `op`s
-    -- a similar isom is proved in `salamander.lean`, I think
-    sorry },
+    refine _ ≪≫ (homology_iso _ (-i-1) (-i) (-i+1) _ _).unop,
+    rotate, { dsimp, apply sub_add_cancel }, { dsimp, refl },
+    refine _ ≪≫ (LBC.homology_unop_iso _ _ _).unop,
+    refine (preadditive_yoneda.map_iso _).app (op P) ≪≫ _,
+    { exact (single 𝓐 (-i)).obj B },
+    { exact (shift_single_iso 0 i).app B ≪≫ eq_to_iso (by rw zero_sub) },
+    refine hom_single_iso _ _ _ ≪≫ _,
+    refine (homology_iso _ (-i+1) (-i) (-i-1) _ _),
+    { dsimp, refl }, { dsimp, apply sub_add_cancel }, },
   have := cone_triangleₕ_mem_distinguished_triangles _ _ f,
   replace := is_quasi_iso_iff_is_acyclic _ this,
   dsimp [homological_complex.cone.triangleₕ] at this,
