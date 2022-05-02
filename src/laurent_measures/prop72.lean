@@ -212,7 +212,7 @@ lemma tsum_le (z : ℝ) {r : ℝ≥0} : ∑' n, ∥eval_half_inv z n∥₊ * r ^
 begin
   have foo : ∀ (n : ℤ), ∥eval_half_inv z n∥₊ * r ^ n ≤ r ^ n := λ n,
     mul_le_of_le_one_left (zero_le (r ^ n)) (abs_le_one z n),
-
+  sorry,
 end
 
 lemma tsum_half (z : ℝ) : ∑' n, (eval_half_inv z n : ℝ) * 2⁻¹ ^ n = z := sorry
