@@ -2,7 +2,7 @@ import laurent_measures.ses
 import laurent_measures.condensed
 import real_measures.condensed
 import condensed.condensify
-import laurent_measures.aux_lemmas2 -- kmb's attempt to tidy up the analysis argument
+import laurent_measures.prop72 -- kmb's attempt to tidy up the analysis argument
 
 universe u
 
