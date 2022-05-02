@@ -73,6 +73,9 @@ begin
   apply zero_le',
 end
 
+lemma nnreal.mul_le_mul_left {a b : ℝ≥0} (h : a ≤ b) (c : ℝ≥0) : c * a ≤ c * b :=
+by simpa [mul_comm] using nnreal.mul_le_mul_right h c
+
 lemma nnreal.rpow_sum_le_sum_rpow
   {ι : Type*} (s : finset ι) {p : ℝ} (a : ι → ℝ≥0) (hp_pos : 0 < p) (hp1 : p ≤ 1) :
   (∑ i in s, a i) ^ p ≤ ∑ i in s, (a i ^ p) :=
