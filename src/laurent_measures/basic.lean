@@ -20,9 +20,9 @@ structure c_measures (r : ℝ≥0) (c : ℝ≥0) (S : Fintype) :=
 (bdd        : ∀ s, tsum (λ n, (∥ to_fun s n ∥₊ * r ^ n)) ≤ c)
 -/
 
-/-- A term of type `laurent_measures r S` is, for each `s : S`, a function `φ : ℤ → ℤ` such
-  that `∑ |φ(n)|rⁿ` converges. Note that if `0<r<1` then the support of φ can only contain
-  finitely many negative integers.  -/
+/-- A term of type `laurent_measures r S` is, for each `s : S`, a function `φ : ℤ → ℤ`
+  (typically thought of as a power series `∑ φ(n)Tⁿ`) such that `∑ |φ(n)|rⁿ` converges.
+  Note that if `0<r<1` then the support of φ can only contain finitely many negative integers.  -/
 structure laurent_measures (r : ℝ≥0) (S : Fintype) :=
 (to_fun    : S → ℤ → ℤ)
 (summable' : ∀ s, summable (λ n, ∥to_fun s n∥₊ * r ^ n))
