@@ -18,16 +18,6 @@ variables (C : cochain_complex 𝓐 ℤ)
 def category_theory.functor.single (F : bounded_homotopy_category 𝓐 ⥤ 𝓑) (i : ℤ) : 𝓐 ⥤ 𝓑 :=
 bounded_homotopy_category.single _ i ⋙ F
 
--- def compute_with_acyclic
---   (F : bounded_homotopy_category 𝓐 ⥤ 𝓑) (C : cochain_complex 𝓐 ℤ)
---   [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj C)]
---   (hC : ∀ k, ∀ i > 0, is_zero ((F.single (-i)).obj (C.X k)))
---   (i : ℤ) :
---   F.obj (of' C⟦-i⟧) ≅
---   unop ((((preadditive_yoneda.obj B).right_op.map_homological_complex _).obj C).homology i) :=
-
--- #check @category_theory.quotient
-
 -- move me
 lemma category_theory.limits.is_zero.biprod {𝓐 : Type*} [category 𝓐] [abelian 𝓐]
   {X Y : 𝓐} (hX : is_zero X) (hY : is_zero Y) :
@@ -52,6 +42,12 @@ def map_is_acyclic_of_acyclic
   (B : 𝓐)
   (hC : ∀ k, ∀ i > 0, is_zero (((Ext' i).obj (op $ C.X k)).obj B)) :
   is_acyclic (((preadditive_yoneda.obj B).right_op.map_homotopy_category _).obj ((homotopy_category.quotient _ _).obj C)) :=
+begin
+  sorry
+end
+
+lemma acyclic_of_projective (P B : 𝓐) [projective P] (i : ℤ) (hi : 0 < i) :
+  is_zero (((Ext' i).obj (op P)).obj B) :=
 begin
   sorry
 end
@@ -142,6 +138,10 @@ begin
       (P.val.as.X (k + 1)) ((of' C).val.as.X k),
     refine is_zero.of_iso (is_zero.unop _) e.symm.unop,
     refine category_theory.limits.is_zero.biprod _ _,
-    { sorry },
+    { simp only [functor.right_op_obj, functor.flip_obj_obj, is_zero_op],
+      -- haveI : projective (P.val.as.X (k + 1)),
+      -- { dsimp [P], apply_instance, sorry },
+      -- exact acyclic_of_projective (P.val.as.X (k + 1)) B i hi,
+      sorry },
     { exact (hC k _ hi).op, }, }
 end
