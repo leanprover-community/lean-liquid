@@ -52,7 +52,19 @@ end
 lemma acyclic_of_projective (P B : 𝓐) [projective P] (i : ℤ) (hi : 0 < i) :
   is_zero (((Ext' i).obj (op P)).obj B) :=
 begin
-  sorry
+  rw (Ext'_iso (op P) B i _ (𝟙 _) _).is_zero_iff,
+  { rcases i with ((_|i)|i),
+    { exfalso, revert hi, dec_trivial },
+    swap, { exfalso, revert hi, dec_trivial },
+    refine is_zero.homology_is_zero _ _ _ _,
+    apply AddCommGroup.is_zero_of_eq,
+    intros,
+    apply is_zero.eq_of_src,
+    apply is_zero_zero, },
+  { refine ⟨_, _, _⟩,
+    { rintro (_|n), { assumption }, { dsimp, apply_instance } },
+    { exact exact_zero_mono (𝟙 P) },
+    { rintro (_|n); exact exact_of_zero 0 0 } }
 end
 
 def Ext_compute_with_acyclic
