@@ -126,6 +126,7 @@ lemma map_is_acyclic_of_acyclic
   is_acyclic (((preadditive_yoneda.obj B).right_op.map_homotopy_category _).obj ((homotopy_category.quotient _ _).obj C)) :=
 begin
   rw is_acyclic_iff_short_exact_to_cycles,
+  obtain ⟨a, ha⟩ := is_bounded_above.cond ((quotient 𝓐 _).obj C),
   intro i,
   sorry
 end
