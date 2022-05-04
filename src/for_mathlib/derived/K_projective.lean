@@ -35,7 +35,7 @@ variable [enough_projectives A]
 -- add an additional typeclass parameter here.
 theorem exists_K_projective_replacement (X : 𝒦) :
   ∃ (P : 𝒦) [homotopy_category.is_K_projective P.val] (f : P ⟶ X),
-  homotopy_category.is_quasi_iso f :=
+  homotopy_category.is_quasi_iso f ∧ ∀ k, projective (P.val.as.X k) :=
 begin
   obtain ⟨P,h1,h2,f,h3⟩ :=
     homotopy_category.exists_K_projective_replacement_of_bounded X.val,
@@ -55,7 +55,10 @@ def π (X : 𝒦) : X.replace ⟶ X :=
 (exists_K_projective_replacement X).some_spec.some_spec.some
 
 instance (X : 𝒦) : is_quasi_iso X.π :=
-(exists_K_projective_replacement X).some_spec.some_spec.some_spec
+(exists_K_projective_replacement X).some_spec.some_spec.some_spec.1
+
+instance (X : 𝒦) (k : ℤ) : projective (X.replace.val.as.X k) :=
+(exists_K_projective_replacement X).some_spec.some_spec.some_spec.2 k
 
 def lift {P X Y : 𝒦} [is_K_projective P.val] (f : P ⟶ Y) (g : X ⟶ Y) [is_quasi_iso g] :
   P ⟶ X :=

@@ -622,18 +622,59 @@ begin
   exact this,
 end
 
-open multiset subtype nat function
-
-open category_theory topological_space finset
-
-local notation `𝒞` := ((as_small (finset ℤ))ᵒᵖ : Type u)
-
-variable {h : decidable_eq 𝒞}
-
 def U (F : filtration (ℒ ϖ) c) (B : ℤ) : set (filtration (ℒ ϖ) c) :=
   λ G, ∀ s n, n < B → F s n = G s n
 
 lemma mem_U (F : filtration (ℒ ϖ) c) (B : ℤ) : F ∈ (U c F B) := λ _ _ _, rfl
+
+lemma explodes_pow_r (ρ : ℝ≥0) (h₀ : 0 < ρ.1) (h₁ : ρ.1 < 1) (c : ℝ≥0) :
+  ∃ n₀ : ℤ, ∀ (m : ℤ), m < n₀ → c < ρ ^ m :=
+begin
+  convert_to ∃ n₀ : ℕ, ∀ (m : ℕ), (- m : ℤ) < - n₀ → (c : ℝ) < ρ ^ ( - m : ℤ) using 0,
+  { simp only [neg_lt_neg_iff, int.coe_nat_lt, zpow_neg₀, zpow_coe_nat, eq_iff_iff],
+    split,
+    { rintro ⟨n₀, hn₀⟩,
+      induction n₀,
+      { use n₀,
+        intros m hm,
+        rw [← int.coe_nat_lt] at hm,
+        replace hm := neg_lt.mpr (lt_of_le_of_lt (neg_le_self (int.coe_nat_nonneg _)) hm),
+        specialize hn₀ (- m) hm,
+        rwa [← nnreal.coe_lt_coe, nnreal.coe_zpow, zpow_neg₀] at hn₀ },
+      { use n₀ + 1,
+        intros m hm,
+        rw [← int.coe_nat_lt, ← neg_lt_neg_iff, ← int.neg_succ_of_nat_coe] at hm,
+        specialize hn₀ (- m) hm,
+        rwa [← nnreal.coe_lt_coe, nnreal.coe_zpow, zpow_neg₀] at hn₀ },},
+    { rintro ⟨n₀, hn₀⟩,
+      use - n₀,
+      rintro ⟨m⟩ hm,
+      {  have := right.neg_nonpos_iff.mpr (int.of_nat_nonneg n₀),
+        rw [int.of_nat_eq_coe] at this,
+        replace := ne_of_lt (lt_of_lt_of_le (lt_of_le_of_lt (int.of_nat_nonneg m) hm) this),
+        finish },
+      { rw [int.neg_succ_of_nat_coe, neg_lt_neg_iff, int.coe_nat_lt] at hm,
+        specialize hn₀ (m + 1) hm,
+        rwa [int.neg_succ_of_nat_coe, ← nnreal.coe_lt_coe, zpow_neg₀, zpow_coe_nat, nnreal.coe_inv,
+          nnreal.coe_pow] }}},
+  have h := (tendsto_pow_at_top_nhds_within_0_of_lt_1 h₀ h₁).inv_tendsto_zero,
+  simp_rw [← zpow_coe_nat] at h,
+  have : (λ (n : ℕ), ρ.1 ^ (n : ℤ))⁻¹ = (λ (n : ℕ), ρ.1 ^ (- n : ℤ)) := by {ext,
+  simp only [pi.inv_apply, zpow_neg₀] },
+  rw [this, filter.tendsto_at_top] at h,
+  specialize h (c + 1),
+  rw [nnreal.val_eq_coe] at h,
+  simp_rw [← nnreal.coe_zpow] at h,
+  obtain ⟨n₀, hn₀⟩ := filter.eventually.exists_forall_of_at_top h,
+  use n₀,
+  intros m hm,
+  rw [neg_lt_neg_iff, int.coe_nat_lt] at hm,
+  replace hm := le_of_lt hm,
+  specialize hn₀ m hm,
+  rw nnreal.coe_zpow at hn₀,
+  refine lt_of_lt_of_le _ hn₀,
+  exact lt_add_one _,
+end
 
 lemma is_open_U (F : filtration (ℒ ϖ) c) (B : ℤ) : is_open (U c F B) :=
 begin
@@ -647,7 +688,7 @@ begin
     refine continuous.comp continuous_bot (truncate_continuous «r» (Fintype.of punit) c {i}) },
   obtain ⟨n₀,h₀⟩ : ∃ n₀ : ℤ, ∀ (m : ℤ) (H : ℒ ϖ) (hH : H ∈ filtration (ℒ ϖ) c),
     m < n₀ → H punit.star m = 0,
-  { obtain ⟨n₀,h₀⟩ : ∃ n₀ : ℤ, ∀ (m : ℤ), m < n₀ → c < r^m := sorry,
+  { obtain ⟨n₀,h₀⟩ : ∃ n₀ : ℤ, ∀ (m : ℤ), m < n₀ → c < r^m := explodes_pow_r r r_pos r_lt_one c,
     use n₀, intros m H hH hm,
     exact eq_zero_of_filtration H _ hH punit.star m (h₀ m hm) },
   classical,
