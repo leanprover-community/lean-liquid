@@ -119,8 +119,8 @@ begin
   { exact hr },
 end
 
--- lemma is false if w = 1 and n = any and r = 0
--- lemma is false if w = 0 and n ≠ 0 and r = 2⁻¹?
+-- → is false if w = 1 and n = any and r = 0
+-- ← is false if w = 0 and n ≠ 0 and r = 2⁻¹
 lemma nnreal.lt_zpow_iff_log {w r : ℝ≥0} (hw : 0 < w) (hr : 0 < r) {n : ℤ} :
   r < w ^ n ↔ r.log < w.log * n :=
 begin
@@ -137,7 +137,7 @@ lemma int.ceil_sub_one_lt {α : Type*} [linear_ordered_ring α] [floor_ring α]
 (a : α) : (⌈a⌉ : α) - 1 < a :=
 sub_lt_iff_lt_add.mpr (int.ceil_lt_add_one a)
 
-namespace psi_aux_lemma1
+namespace psi_aux_lemma
 
 /-
 
@@ -155,7 +155,14 @@ begin
   sorry
 end
 
-end psi_aux_lemma1
+-- a Lean proof is embedded in the calculations in `laurent_measures/thm69.lean`
+-- between lines 275 and 600 or so: see `psi_def_summable`, `psi_def_summable2`,
+-- `psi_def_summable3`, `psi_def_aux_4`, `psi_def_aux_3`, `psi_def_aux_2`,
+-- `psi_def_aux` and the `summable'` field in the definition of `ψ`.
+-- These are the `summable` versions; we just need to beef everything up
+-- to `tsum` versions, which will probably be easier in `ennreal`.
+
+end psi_aux_lemma
 
 /-
 
@@ -163,7 +170,42 @@ end psi_aux_lemma1
 
 -/
 
-namespace psi_aux_lemma2
+namespace theta_aux_lemma -- so we don't have to think of a better name for `binary`
+
+def binary (r : ℝ≥0) : ℤ → ℕ := sorry
+
+theorem binary_le_one (r : ℝ≥0) (z : ℤ) : binary r z ≤ 1 := sorry
+
+@[simp] theorem binary_zero (z : ℤ) : binary 0 z = 0 := sorry
+
+-- d is the unique solution to 2^{-d} ≤ r < 2^{1-d} if r>0 and is anything if r=0
+theorem binary_bounded (r : ℝ≥0) (n : ℤ) (hsmall : n < ⌈real.log r / real.log (2⁻¹ : ℝ≥0)⌉) :
+  binary r n = 0 := sorry
+
+-- so -d ≤ r/log(2) < 1-d
+-- so d-1 < r/log(2⁻¹) ≤ d
+-- so d = ⌈r / log(2⁻¹)⌉
+theorem binary_sum' (r : ℝ≥0) : has_sum (λ (n : ℤ), (binary r n : ℝ≥0) * 2⁻¹ ^ n) r := sorry
+
+-- proof idea: use ennreal
+
+-- Here are the two facts which Clausen/Scholze need for the application to "splitting θ
+-- in a bounded way", and they could both be deduced from one ennreal tsum.
+
+theorem summable_of_random_facts (r : ℝ≥0) {s : ℝ≥0} (hs : s < 1) :
+  summable (λ n, (binary r n : ℝ≥0) * s ^ n) := sorry
+-- proof: bounded above by sum of a GP
+
+theorem tsum_le_of_random_facts (r : ℝ≥0) {s : ℝ≥0} (hs : s < 1) :
+∑' (n : ℤ), (binary r n : ℝ≥0) * s ^ n ≤ s ^ ⌈real.log r / real.log (2⁻¹ : ℝ≥0)⌉ * (1 - s)⁻¹ :=
+sorry
+/-
+
+## WIP
+
+The remainder of this file is WIP.
+
+-/
 
 -- do I want z : ℝ≥0 here?
 -- construction of C₄ function for z>0
@@ -191,7 +233,18 @@ begin
     { apply real.log_neg; norm_num } },
 end
 
-noncomputable def C4_actual_function (z : ℝ) : ℤ → ℤ :=
+-- idea for how to continue
+-- def binary (r : ℝ≥0) : ℤ → ℕ := sorry
+
+-- theorem binary_le_one (r : ℝ≥0) (z : ℤ) : binary r z ≤ 1 := sorry
+
+-- open_locale ennreal
+
+-- theorem binary_sum (r : ℝ≥0) : ∑' (n : ℤ), (binary r n : ℝ≥0∞) * 2⁻¹ ^ n = r := sorry
+-- -- or equivalently
+-- theorem binary_sum' (r : ℝ≥0) : has_sum (λ (n : ℤ), (binary r n : ℝ≥0) * 2⁻¹ ^ n) r := sorry
+
+noncomputable def eval_half_inv (z : ℝ) : ℤ → ℤ :=
 if hz0 : z = 0 then λ n, 0 else
 if hz : 0 < z then (λ m, if m < (useful hz).some then 0 else (C4_aux_function (useful hz).some
   (useful hz).some_spec.1 (useful hz).some_spec.2 (m - (useful hz).some).nat_abs).1)
@@ -200,17 +253,22 @@ else if hz : 0 < -z then (λ m, if m < (useful hz).some then 0 else -(C4_aux_fun
 else 37 -- never get here
 
 -- Needed for a later bound
-lemma C4_abs_le_one (z : ℝ) (n : ℤ) : ∥C4_actual_function z n∥₊ ≤ 1 := sorry
+lemma abs_le_one (z : ℝ) (n : ℤ) : ∥eval_half_inv z n∥₊ ≤ 1 := sorry
 
 -- needed for definition of missing data (definition of splitting of eval(1/2) map).
 -- Proof is "∥f n∥ ≤ 1 always and = 0 for `n<d` so bounded by sum of a GP".
-lemma C4_summable (z : ℝ) {r : ℝ≥0} (hr : r < 1) :
-summable (λ n : ℤ, ∥C4_actual_function z n∥₊ * r ^ n) := sorry
+lemma summable (z : ℝ) {r : ℝ≥0} (hr : r < 1) :
+summable (λ n : ℤ, ∥eval_half_inv z n∥₊ * r ^ n) := sorry
 
--- this is false; 37 is a placeholder and needs to be changed to something
--- like |z|/(1-r). We'll figure out what we need later.
-lemma C4_tsum_le (z : ℝ) {r : ℝ≥0} : ∑' n, ∥C4_actual_function z n∥₊ * r ^ n ≤ 37 := sorry
+-- We'll figure out what we need right now.
+lemma tsum_le (z : ℝ) {r : ℝ≥0} : ∑' n, ∥eval_half_inv z n∥₊ * r ^ n ≤ ∥z∥₊ * (1 - r)⁻¹ :=
+begin
+  have foo : ∀ (n : ℤ), ∥eval_half_inv z n∥₊ * r ^ n ≤ r ^ n := λ n,
+    mul_le_of_le_one_left (zero_le (r ^ n)) (abs_le_one z n),
+  sorry,
+end
 
-lemma C4_tsum_half (z : ℝ) : ∑' n, (C4_actual_function z n : ℝ) * 2⁻¹ ^ n = z := sorry
+-- it's binary!
+lemma tsum_half (z : ℝ) : ∑' n, (eval_half_inv z n : ℝ) * 2⁻¹ ^ n = z := sorry
 
-end psi_aux_lemma2
+end theta_aux_lemma
