@@ -2,6 +2,7 @@ import data.real.nnreal
 import topology.algebra.infinite_sum
 import analysis.normed_space.basic
 import for_mathlib.nnreal
+import for_mathlib.nnreal_int_binary
 
 open_locale nnreal
 
@@ -104,40 +105,12 @@ refactoring all of them.
 lemma real.nnnorm_int (n : ℤ) : ∥(n : ℝ)∥₊ = ∥n∥₊ :=
 subtype.ext $ by simp [coe_nnnorm, real.norm_eq_abs, int.norm_eq_abs]
 
--- do we want this? I'll use it here just to make things look a bit cleaner
-noncomputable def nnreal.log (z : ℝ≥0) := (z : ℝ).log
 
--- definitely care about 0 < w < 1 so definitely care about negative logs
--- lemma is false if w = 1 and n = any and r = 0
--- lemma is false if w = 0 and n ≠ 0 and r = 2⁻¹
-lemma nnreal.zpow_le_iff_log {w r : ℝ≥0} (hw : 0 < w) (hr : 0 < r) {n : ℤ} :
-  w^n ≤ r ↔ w.log * n ≤ r.log :=
-begin
-  delta nnreal.log,
-  rw [mul_comm, ←real.log_zpow],
-  rw (show w ^ n ≤ r ↔ (w : ℝ) ^ n ≤ (r : ℝ), by norm_cast),
-  rw real.log_le_log; norm_cast,
-  { exact nnreal.zpow_pos hw.ne.symm _ },
-  { exact hr },
-end
 
--- → is false if w = 1 and n = any and r = 0
--- ← is false if w = 0 and n ≠ 0 and r = 2⁻¹
-lemma nnreal.lt_zpow_iff_log {w r : ℝ≥0} (hw : 0 < w) (hr : 0 < r) {n : ℤ} :
-  r < w ^ n ↔ r.log < w.log * n :=
-begin
-  delta nnreal.log,
-  rw [mul_comm, ←real.log_zpow],
-  rw real.log_lt_log_iff,
-  { norm_cast },
-  { assumption_mod_cast },
-  { apply zpow_pos_of_pos,
-    assumption_mod_cast },
-end
 
-lemma int.ceil_sub_one_lt {α : Type*} [linear_ordered_ring α] [floor_ring α]
-(a : α) : (⌈a⌉ : α) - 1 < a :=
-sub_lt_iff_lt_add.mpr (int.ceil_lt_add_one a)
+
+
+
 
 lemma real.neg_nnnorm_of_neg {r : ℝ} (hr : r < 0) : -(∥r∥₊ : ℝ) = r :=
 by rw [coe_nnnorm, neg_eq_iff_neg_eq, real.norm_eq_abs, abs_of_neg hr]
@@ -175,29 +148,8 @@ end psi_aux_lemma
 
 -/
 
-namespace theta_aux_lemma -- so we don't have to think of a better name for `binary`
+namespace theta_aux_lemma
 
-/-- The stream of 0s and 1s (always 0 for n<<0, not always 1 for n>>0)
-such that r = ∑ (binary r n) * 2⁻¹ ^ n -/
-def binary (r : ℝ≥0) : ℤ → ℕ := sorry
-
-theorem binary_le_one (r : ℝ≥0) (z : ℤ) : binary r z ≤ 1 := sorry
-
-@[simp] theorem binary_zero (z : ℤ) : binary 0 z = 0 := sorry
-
--- d = ⌈real.log r / real.log (2⁻¹ : ℝ≥0)⌉ is
--- the unique solution to 2^{-d} ≤ r < 2^{1-d} if r>0
--- and hence the point beyond with all digits are 0
-theorem binary_bounded (r : ℝ≥0) (n : ℤ) (hsmall : n < ⌈real.log r / real.log (2⁻¹ : ℝ≥0)⌉) :
-  binary r n = 0 := sorry
-
--- The following auxiliary lemma is used several times
-
--- proof idea for the next two: use ennreal
-
-theorem binary_sum (r : ℝ≥0) : ∑' (n : ℤ), (binary r n : ℝ≥0) * 2⁻¹ ^ n = r := sorry
-
-theorem binary_summable (r : ℝ≥0) : summable (λ (n : ℤ), (binary r n : ℝ≥0) * 2⁻¹ ^ n) := sorry
 
 -- useful technical lemma
 theorem technical_lemma {α : Type*} [add_comm_monoid α] [topological_space α]
@@ -205,7 +157,7 @@ theorem technical_lemma {α : Type*} [add_comm_monoid α] [topological_space α]
 ∑' m, f m = ∑' (n : ℕ), f (n + d) :=
 calc
 ∑' m, f m = 0 : begin
-  rw nnreal.tsum_comp_le_tsum_of_inj
+  --rw nnreal.tsum_comp_le_tsum_of_inj
   sorry
 end
 ... = ∑' (n : ℕ), f (n + d) : sorry
@@ -215,7 +167,7 @@ end
 -- Neither of them are hard.
 
 theorem summable_of_random_facts (r : ℝ≥0) {s : ℝ≥0} (hs : s < 1) :
-  summable (λ n, (binary r n : ℝ≥0) * s ^ n) :=
+  summable (λ n, (nnreal.int.binary r n : ℝ≥0) * s ^ n) :=
 begin
   sorry
 end
@@ -223,78 +175,7 @@ end
 -- proof: bounded above by sum of a GP
 
 theorem tsum_le_of_random_facts (r : ℝ≥0) {s : ℝ≥0} (hs : s < 1) :
-∑' (n : ℤ), (binary r n : ℝ≥0) * s ^ n ≤ s ^ ⌈real.log r / real.log (2⁻¹ : ℝ≥0)⌉ * (1 - s)⁻¹ :=
+∑' (n : ℤ), (nnreal.int.binary r n : ℝ≥0) * s ^ n ≤ s ^ ⌈real.log r / real.log (2⁻¹ : ℝ≥0)⌉ * (1 - s)⁻¹ :=
 sorry
-/-
-
-## WIP
-
-The remainder of this file is WIP.
-
--/
-
--- do I want z : ℝ≥0 here?
--- construction of C₄ function for z>0
-noncomputable def C4_aux_function {z : ℝ≥0} (d : ℤ) (hd : 2⁻¹ ^ d ≤ z) (h' : z < 2⁻¹ ^ (d - 1)) :
-ℕ → ℕ × ℝ≥0
-| 0 := ⟨⌊z / (2⁻¹ ^ d)⌋₊, z - ⌊z / (2⁻¹ ^ d)⌋₊ * 2⁻¹ ^ d⟩
-| (n + 1) := ⟨⌊(C4_aux_function n).2 / 2⁻¹⌋₊,
-  (C4_aux_function n).2 - ⌊(C4_aux_function n).2 * 2⌋₊ * 2⁻¹⟩
-
-lemma useful {z : ℝ} (hz : 0 < z) : ∃ d : ℤ, 2⁻¹ ^ d ≤ z.to_nnreal ∧ z.to_nnreal < 2⁻¹ ^ (d - 1) :=
-begin
-  use ⌈z.log / (2⁻¹ : ℝ).log⌉,
-  split,
-  { rw nnreal.zpow_le_iff_log (by norm_num : (0 : ℝ≥0) < 2⁻¹) (real.to_nnreal_pos.mpr hz),
-    rw ← div_le_iff_of_neg',
-    { convert int.le_ceil _,
-      exact (real.coe_to_nnreal _ hz.le).symm },
-    { apply real.log_neg; norm_num } },
-  { rw nnreal.lt_zpow_iff_log (by norm_num : (0 : ℝ≥0) < 2⁻¹) (real.to_nnreal_pos.mpr hz),
-    rw ← lt_div_iff_of_neg',
-    { push_cast,
-      convert int.ceil_sub_one_lt _,
-      delta nnreal.log,
-      rw real.coe_to_nnreal _ hz.le },
-    { apply real.log_neg; norm_num } },
-end
-
--- idea for how to continue
--- def binary (r : ℝ≥0) : ℤ → ℕ := sorry
-
--- theorem binary_le_one (r : ℝ≥0) (z : ℤ) : binary r z ≤ 1 := sorry
-
--- open_locale ennreal
-
--- theorem binary_sum (r : ℝ≥0) : ∑' (n : ℤ), (binary r n : ℝ≥0∞) * 2⁻¹ ^ n = r := sorry
--- -- or equivalently
--- theorem binary_sum' (r : ℝ≥0) : has_sum (λ (n : ℤ), (binary r n : ℝ≥0) * 2⁻¹ ^ n) r := sorry
-
-noncomputable def eval_half_inv (z : ℝ) : ℤ → ℤ :=
-if hz0 : z = 0 then λ n, 0 else
-if hz : 0 < z then (λ m, if m < (useful hz).some then 0 else (C4_aux_function (useful hz).some
-  (useful hz).some_spec.1 (useful hz).some_spec.2 (m - (useful hz).some).nat_abs).1)
-else if hz : 0 < -z then (λ m, if m < (useful hz).some then 0 else -(C4_aux_function (useful hz).some
-  (useful hz).some_spec.1 (useful hz).some_spec.2 (m - (useful hz).some).nat_abs).1)
-else 37 -- never get here
-
--- Needed for a later bound
-lemma abs_le_one (z : ℝ) (n : ℤ) : ∥eval_half_inv z n∥₊ ≤ 1 := sorry
-
--- needed for definition of missing data (definition of splitting of eval(1/2) map).
--- Proof is "∥f n∥ ≤ 1 always and = 0 for `n<d` so bounded by sum of a GP".
-lemma summable (z : ℝ) {r : ℝ≥0} (hr : r < 1) :
-summable (λ n : ℤ, ∥eval_half_inv z n∥₊ * r ^ n) := sorry
-
--- We'll figure out what we need right now.
-lemma tsum_le (z : ℝ) {r : ℝ≥0} : ∑' n, ∥eval_half_inv z n∥₊ * r ^ n ≤ ∥z∥₊ * (1 - r)⁻¹ :=
-begin
-  have foo : ∀ (n : ℤ), ∥eval_half_inv z n∥₊ * r ^ n ≤ r ^ n := λ n,
-    mul_le_of_le_one_left (zero_le (r ^ n)) (abs_le_one z n),
-  sorry,
-end
-
--- it's binary!
-lemma tsum_half (z : ℝ) : ∑' n, (eval_half_inv z n : ℝ) * 2⁻¹ ^ n = z := sorry
 
 end theta_aux_lemma

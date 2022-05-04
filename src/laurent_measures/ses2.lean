@@ -113,8 +113,8 @@ begin
     rintros S c' (f : real_measures p S) (hf : _ ≤ _),
     let measure_aux : laurent_measures r S :=
     { to_fun := λ s n,
-      if 0 ≤ f s then theta_aux_lemma.binary (∥f s∥₊) n
-      else -theta_aux_lemma.binary (∥f s∥₊) n,
+      if 0 ≤ f s then nnreal.int.binary (∥f s∥₊) n
+      else -nnreal.int.binary (∥f s∥₊) n,
       summable' := λ s, begin
         convert theta_aux_lemma.summable_of_random_facts (∥f s∥₊) (r_lt_one : r < 1),
         ext,
@@ -146,13 +146,13 @@ begin
       dsimp,
       ext s,
       split_ifs,
-      { convert nnreal.coe_eq.2 (theta_aux_lemma.binary_sum ⟨f s, h⟩),
-        push_cast, refl, },
-      { convert neg_inj.2 (nnreal.coe_eq.2 (theta_aux_lemma.binary_sum ∥f s∥₊)),
+      { convert nnreal.coe_eq.2 (nnreal.int.binary_sum ∥f s∥₊),
+        push_cast, rw real.nnnorm_of_nonneg h, refl, },
+      { convert neg_inj.2 (nnreal.coe_eq.2 (nnreal.int.binary_sum ∥f s∥₊)),
         -- this proof will break (and get simpler) when #13950 hits;
         -- the extra "summable" goal will just disappear.
         { push_cast, rw ← tsum_neg, congr', ext, simp,
-          convert nnreal.summable_coe.2 (theta_aux_lemma.binary_summable ∥f s∥₊),
+          convert nnreal.summable_coe.2 (nnreal.int.binary_summable ∥f s∥₊),
           ext, push_cast },
         { push_neg at h,
           rw real.neg_nnnorm_of_neg h, } } } },
