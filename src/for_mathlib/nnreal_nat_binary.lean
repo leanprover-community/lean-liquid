@@ -61,12 +61,14 @@ expanion of a non-negative real.
 
 /-- An auxiliary function which computes binary expansion of a non-negative real
 and also carries around the remainder. -/
-noncomputable def nnreal.binary (r : ℝ≥0) : ℕ → (ℕ × (ℝ≥0))
+noncomputable def nnreal.nat.binary (r : ℝ≥0) : ℕ → (ℕ × (ℝ≥0))
 | 0 := (⌊r⌋₊, r - ⌊r⌋₊)
-| (n + 1) := let digit := if (nnreal.binary n).2 < 2⁻¹ then 0 else 1 in
-             (digit, 2 * (nnreal.binary n).2 - (digit : ℝ≥0))
+| (n + 1) := let digit := if (nnreal.nat.binary n).2 < 2⁻¹ then 0 else 1 in
+             (digit, 2 * (nnreal.nat.binary n).2 - (digit : ℝ≥0))
 
 namespace nnreal
+
+namespace nat
 
 /-
 
@@ -261,14 +263,14 @@ end
 --   :=
 -- ⟨sum_le_r r B, r_le_pow_add_sum r B⟩
 
-theorem summable : summable (λ (n : ℕ), (r.digit n : ℝ≥0) * 2⁻¹ ^ n) :=
+theorem summable : summable (λ (n : ℕ), (nnreal.nat.digit r n : ℝ≥0) * 2⁻¹ ^ n) :=
 begin
-  have foo : ∀ n, (r.digit n : ℝ≥0) ≤ max (r.digit 0) 1,
+  have foo : ∀ n, (nnreal.nat.digit r n : ℝ≥0) ≤ max (nnreal.nat.digit r 0) 1,
   { rintro (rfl | n),
     { apply le_max_left, },
     { refine le_trans _ (le_max_right _ _),
       exact_mod_cast succ_le_one r n, }, },
-  have bar : ∀ n, (r.digit n : ℝ≥0) * 2⁻¹ ^ n ≤ max (r.digit 0) 1 * 2⁻¹ ^ n,
+  have bar : ∀ n, (nnreal.nat.digit r n : ℝ≥0) * 2⁻¹ ^ n ≤ max (nnreal.nat.digit r 0) 1 * 2⁻¹ ^ n,
   { intro n,
     rw mul_le_mul_right₀, exact foo n,
     apply pow_ne_zero,
@@ -342,5 +344,7 @@ begin
 end
 
 end digit
+
+end nat
 
 end nnreal

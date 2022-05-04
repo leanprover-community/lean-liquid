@@ -57,7 +57,7 @@ namespace int
 such that r = ∑ (binary r n) * 2⁻¹ ^ n -/
 noncomputable def binary (r : ℝ≥0) : ℤ → ℕ := if r = 0 then 0 else
 λ n, let d : ℤ := ⌈(r : ℝ).log / (2⁻¹ : ℝ).log⌉ in
-if n < d then 0 else nnreal.digit r (n - d).nat_abs
+if n < d then 0 else nnreal.nat.digit r (n - d).nat_abs
 
 theorem binary_le_one (r : ℝ≥0) (n : ℤ) : binary r n ≤ 1 :=
 begin
@@ -67,13 +67,13 @@ begin
   rcases lt_or_eq_of_le hn with (h1 | h2),
   { rw [int.lt_iff_add_one_le, le_iff_exists_nonneg_add] at h1,
     rcases h1 with ⟨c, hc1, rfl⟩,
-    convert nnreal.digit.succ_le_one r c.nat_abs,
+    convert nnreal.nat.digit.succ_le_one r c.nat_abs,
     suffices : (c + 1).nat_abs = c.nat_abs + 1,
     { convert this, ring },
     exact int.nat_abs_add_nonneg hc1 zero_le_one },
   { clear hn,
     rw ← h2,
-    simp [nnreal.digit, nnreal.binary],
+    simp [nnreal.nat.digit, nnreal.nat.binary],
     sorry }
 end
 
