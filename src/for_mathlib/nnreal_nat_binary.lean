@@ -1,6 +1,7 @@
 import data.real.nnreal -- non-negative reals
 import topology.algebra.infinite_sum -- infinite sums
 import analysis.special_functions.log -- just need log
+import analysis.special_functions.pow
 
 open_locale nnreal -- notation for non-negative reals
 
@@ -9,24 +10,23 @@ open_locale big_operators -- notation for infinite sums
 
 # Binary stuff
 
-Binary expansion of `nnreal` works great. You get `b(r) : ℕ → ℕ` with b(0)=⌊r⌋₊
-and all the other b(n.succ) are 0 or 1.
+Binary expansion of `nnreal` works great. If `r : ℝ≥0` then you get a
+`digits` function `d(r) : ℕ → ℕ` with `d(0)=⌊r⌋₊` and all the `d(n.succ)`
+are 0 or 1, and the theorem is that `r = ∑ n, 2⁻¹ ^ n * b n`.
 
-TODO if anyone cares: what is relation between binary r and binary (2 * r) or (2⁻¹ * r)?
+TODO if anyone cares: what is relation between binary r
+and binary (2 * r) or (2⁻¹ * r)? Don't think I need it.
 
 -/
 
-
-lemma stupid_lemma {r : ℝ≥0} (hr : r < 1) : 2 * r < 2 :=
+lemma two_mul_lt_two {r : ℝ≥0} (hr : r < 1) : 2 * r < 2 :=
 begin
   suffices : 2 * r < 2 * 1, by simpa,
   exact (mul_lt_mul_left (by norm_num)).mpr hr,
 end
 
--- 2 * x < 2 + 2 -> 2 * x - 2 < 2
-
--- probably true in more generality
-lemma nnreal.sub_lt {a b c : ℝ≥0} (hc : c ≠ 0) (h : a < b + c) : a - b < c :=
+-- probably true in more generality than nnreal.
+lemma nnreal.tsub_lt {a b c : ℝ≥0} (hc : c ≠ 0) (h : a < b + c) : a - b < c :=
 begin
   cases le_or_lt a b with hab hab,
   { rw tsub_eq_zero_of_le hab,
@@ -166,7 +166,7 @@ begin
       generalize hx : (binary r d).snd = x, rw hx at LEM, clear hx,
       intro hx,
       rw [← mul_lt_mul_left (show (0 : ℝ≥0) < 2, by norm_num), mul_one] at hx,
-      apply nnreal.sub_lt, norm_num,
+      apply nnreal.tsub_lt, norm_num,
       convert hx, }, },
 end
 
@@ -245,6 +245,8 @@ begin
       norm_num, },
 end
 
+
+
 lemma r_sub_sum_small : r - ∑ n in finset.range B.succ, ((digit r n) : ℝ≥0) * 2⁻¹ ^ n < 2⁻¹ ^ B :=
 begin
   have := r_le_pow_add_sum r B,
@@ -291,8 +293,28 @@ begin
   -- choose a large enough such that (r-2⁻¹^a,r] ⊆ V
   obtain ⟨ε, hε, hεV⟩ := metric.is_open_iff.mp hV1 r hVr,
   change 0 < ε at hε,
-  have foo : ∃ a : ℕ, 2⁻¹ ^ a < ε,
-    sorry,
+  have foo : ∃ a : ℕ, (2⁻¹ : ℝ≥0) ^ a ≤ ⟨ε, hε.le⟩,
+  { by_cases hε1 : 1 ≤ ε,
+    { use 0, simp, exact_mod_cast hε1, },
+    { push_neg at hε1,
+      use ⌈real.log ε / real.log 2⁻¹⌉₊,
+      have := nat.le_ceil (real.log ε / real.log 2⁻¹),
+      have moo : (2⁻¹ : ℝ≥0) ^ (↑⌈real.log ε / real.log 2⁻¹⌉₊) ≤
+        2⁻¹ ^ (real.log ε / real.log 2⁻¹),
+      exact rpow_le_rpow_of_exponent_ge (by norm_num) (by norm_num) this,
+      convert le_trans moo _ using 1, norm_cast,
+      -- now coerce to real
+      suffices : (2⁻¹ : ℝ) ^ (real.log ε / real.log 2⁻¹) ≤ ε,
+        assumption_mod_cast,
+      -- convenient thing
+      have inv_two_pos : (0 : ℝ) < 2⁻¹,
+      { rw _root_.inv_pos, apply zero_lt_two, },
+      rw ← real.log_le_log (real.rpow_pos_of_pos inv_two_pos _) hε,
+      apply le_of_eq,
+      rw real.log_rpow inv_two_pos,
+      rw div_mul_cancel,
+      apply real.log_ne_zero_of_pos_of_ne_one inv_two_pos,
+      norm_num, } },
   cases foo with B hB,
   use B + 1,
   intros m hm, cases m with m, cases hm,

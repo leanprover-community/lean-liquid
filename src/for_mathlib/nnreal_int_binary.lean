@@ -2,6 +2,11 @@ import for_mathlib.nnreal_nat_binary
 
 open_locale nnreal
 
+/-
+
+If `0<r` then the smallest `d : ℤ` with `2⁻¹ * d ≤ r` is
+`d := ⌈(r : ℝ).log / (2⁻¹ : ℝ).log⌉`
+-/
 -- Scholze's definition
 noncomputable def intbinary (r : ℝ≥0) : ℤ → ℕ :=
 if r = 0 then 0 else
