@@ -159,4 +159,3 @@ end
 end ses
 
 end laurent_measures
--- tsum_neg doesn't need summable, right?
