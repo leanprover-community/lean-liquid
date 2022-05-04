@@ -119,8 +119,8 @@ begin
   { exact hr },
 end
 
--- lemma is false if w = 1 and n = any and r = 0
--- lemma is false if w = 0 and n ≠ 0 and r = 2⁻¹?
+-- → is false if w = 1 and n = any and r = 0
+-- ← is false if w = 0 and n ≠ 0 and r = 2⁻¹
 lemma nnreal.lt_zpow_iff_log {w r : ℝ≥0} (hw : 0 < w) (hr : 0 < r) {n : ℤ} :
   r < w ^ n ↔ r.log < w.log * n :=
 begin
@@ -154,6 +154,13 @@ lemma key_tsum_lemma (f : ℤ → ℝ) (r : ℝ≥0) (hr1 : r < 1) (hr2 : 2⁻¹
 begin
   sorry
 end
+
+-- a Lean proof is embedded in the calculations in `laurent_measures/thm69.lean`
+-- between lines 275 and 600 or so: see `psi_def_summable`, `psi_def_summable2`,
+-- `psi_def_summable3`, `psi_def_aux_4`, `psi_def_aux_3`, `psi_def_aux_2`,
+-- `psi_def_aux` and the `summable'` field in the definition of `ψ`.
+-- These are the `summable` versions; we just need to beef everything up
+-- to `tsum` versions, which will probably be easier in `ennreal`.
 
 end psi_aux_lemma1
 
@@ -191,6 +198,17 @@ begin
     { apply real.log_neg; norm_num } },
 end
 
+-- idea for how to continue
+-- def binary (r : ℝ≥0) : ℤ → ℕ := sorry
+
+-- theorem binary_le_one (r : ℝ≥0) (z : ℤ) : binary r z ≤ 1 := sorry
+
+-- open_locale ennreal
+
+-- theorem binary_sum (r : ℝ≥0) : ∑' (n : ℤ), (binary r n : ℝ≥0∞) * 2⁻¹ ^ n = r := sorry
+-- -- or equivalently
+-- theorem binary_sum' (r : ℝ≥0) : has_sum (λ (n : ℤ), (binary r n : ℝ≥0) * 2⁻¹ ^ n) r := sorry
+
 noncomputable def eval_half_inv (z : ℝ) : ℤ → ℤ :=
 if hz0 : z = 0 then λ n, 0 else
 if hz : 0 < z then (λ m, if m < (useful hz).some then 0 else (C4_aux_function (useful hz).some
@@ -215,6 +233,7 @@ begin
   sorry,
 end
 
+-- it's binary!
 lemma tsum_half (z : ℝ) : ∑' n, (eval_half_inv z n : ℝ) * 2⁻¹ ^ n = z := sorry
 
 end psi_aux_lemma2
