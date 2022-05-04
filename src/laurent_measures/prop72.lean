@@ -175,19 +175,20 @@ end psi_aux_lemma
 
 namespace theta_aux_lemma -- so we don't have to think of a better name for `binary`
 
+/-- The stream of 0s and 1s (always 0 for n<<0, not always 1 for n>>0)
+such that r = ∑ (binary r n) * 2⁻¹ ^ n -/
 def binary (r : ℝ≥0) : ℤ → ℕ := sorry
 
 theorem binary_le_one (r : ℝ≥0) (z : ℤ) : binary r z ≤ 1 := sorry
 
 @[simp] theorem binary_zero (z : ℤ) : binary 0 z = 0 := sorry
 
--- d is the unique solution to 2^{-d} ≤ r < 2^{1-d} if r>0 and is anything if r=0
+-- d = ⌈real.log r / real.log (2⁻¹ : ℝ≥0)⌉ is
+-- the unique solution to 2^{-d} ≤ r < 2^{1-d} if r>0
+-- and hence the point beyond with all digits are 0
 theorem binary_bounded (r : ℝ≥0) (n : ℤ) (hsmall : n < ⌈real.log r / real.log (2⁻¹ : ℝ≥0)⌉) :
   binary r n = 0 := sorry
 
--- so -d ≤ r/log(2) < 1-d
--- so d-1 < r/log(2⁻¹) ≤ d
--- so d = ⌈r / log(2⁻¹)⌉
 theorem binary_has_sum (r : ℝ≥0) : has_sum (λ (n : ℤ), (binary r n : ℝ≥0) * 2⁻¹ ^ n) r := sorry
 
 -- proof idea: use ennreal
@@ -196,10 +197,9 @@ theorem binary_sum (r : ℝ≥0) : ∑' (n : ℤ), (binary r n : ℝ≥0) * 2⁻
 
 theorem binary_summable (r : ℝ≥0) : summable (λ (n : ℤ), (binary r n : ℝ≥0) * 2⁻¹ ^ n) := sorry
 
-variable (r : ℝ≥0)
-#check nnreal.summable_coe.2 (binary_summable r)
 -- Here are the two facts which Clausen/Scholze need for the application to "splitting θ
 -- in a bounded way", and they could both be deduced from one ennreal tsum.
+-- Neither of them are hard.
 
 theorem summable_of_random_facts (r : ℝ≥0) {s : ℝ≥0} (hs : s < 1) :
   summable (λ n, (binary r n : ℝ≥0) * s ^ n) := sorry
