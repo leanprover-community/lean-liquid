@@ -102,3 +102,21 @@ begin
     simpa,
   exact rpow_le_rpow_of_exponent_ge (by simp) ha hm,
 end
+
+-- no need to prove for nnreal because need positive (not non-negative)
+lemma real.injective_log {r s : ℝ} (hr : 0 < r) (hs : 0 < s) (h : real.log r = real.log s) : r = s :=
+begin
+  apply_fun real.exp at h,
+  rwa [real.exp_log hr, real.exp_log hs] at h,
+end
+
+lemma nnreal.pow_log_div_log_self {r : ℝ} {s : ℝ} (hr : 0 < r) (hs : 0 < s) (hs' : s ≠ 1) :
+  s ^ (real.log r / real.log s) = r :=
+begin
+  apply real.injective_log (real.rpow_pos_of_pos hs _) hr,
+  rw real.log_rpow hs,
+  rw ← eq_div_iff,
+  apply mt (λ h, _) hs',
+  rw real.log_eq_zero at h,
+  rcases h with (h|h|h); linarith,
+end

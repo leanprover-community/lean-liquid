@@ -137,6 +137,9 @@ lemma int.ceil_sub_one_lt {α : Type*} [linear_ordered_ring α] [floor_ring α]
 (a : α) : (⌈a⌉ : α) - 1 < a :=
 sub_lt_iff_lt_add.mpr (int.ceil_lt_add_one a)
 
+lemma real.neg_nnnorm_of_neg {r : ℝ} (hr : r < 0) : -(∥r∥₊ : ℝ) = r :=
+by rw [coe_nnnorm, neg_eq_iff_neg_eq, real.norm_eq_abs, abs_of_neg hr]
+
 namespace psi_aux_lemma
 
 /-
@@ -185,10 +188,16 @@ theorem binary_bounded (r : ℝ≥0) (n : ℤ) (hsmall : n < ⌈real.log r / rea
 -- so -d ≤ r/log(2) < 1-d
 -- so d-1 < r/log(2⁻¹) ≤ d
 -- so d = ⌈r / log(2⁻¹)⌉
-theorem binary_sum' (r : ℝ≥0) : has_sum (λ (n : ℤ), (binary r n : ℝ≥0) * 2⁻¹ ^ n) r := sorry
+theorem binary_has_sum (r : ℝ≥0) : has_sum (λ (n : ℤ), (binary r n : ℝ≥0) * 2⁻¹ ^ n) r := sorry
 
 -- proof idea: use ennreal
 
+theorem binary_sum (r : ℝ≥0) : ∑' (n : ℤ), (binary r n : ℝ≥0) * 2⁻¹ ^ n = r := sorry
+
+theorem binary_summable (r : ℝ≥0) : summable (λ (n : ℤ), (binary r n : ℝ≥0) * 2⁻¹ ^ n) := sorry
+
+variable (r : ℝ≥0)
+#check nnreal.summable_coe.2 (binary_summable r)
 -- Here are the two facts which Clausen/Scholze need for the application to "splitting θ
 -- in a bounded way", and they could both be deduced from one ennreal tsum.
 

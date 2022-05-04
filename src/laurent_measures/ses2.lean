@@ -44,56 +44,8 @@ end theta
 
 section ses
 
-lemma real.injective_log {r s : ℝ} (hr : 0 < r) (hs : 0 < s) (h : real.log r = real.log s) : r = s :=
-begin
-  apply_fun real.exp at h,
-  rwa [real.exp_log hr, real.exp_log hs] at h,
-end
-
-lemma nnreal.pow_log_div_log_self {r : ℝ} {s : ℝ} (hr : 0 < r) (hs : 0 < s) (hs' : s ≠ 1) :
-  s ^ (real.log r / real.log s) = r :=
-begin
-  apply real.injective_log (real.rpow_pos_of_pos hs _) hr,
-  rw real.log_rpow hs,
-  rw ← eq_div_iff,
-  apply mt (λ h, _) hs',
-  rw real.log_eq_zero at h,
-  rcases h with (h|h|h); linarith,
-end
-
-lemma nnreal.eq_zero_or_pos (r : ℝ≥0) : r = 0 ∨ 0 < r :=
-eq_zero_or_pos
-
-
 variables (p : ℝ≥0) [fact (0 < p)] [fact (p < 1)]
 local notation `r` := @r p
-
-
-example (S : Fintype) (s : ↥S)
-  ⦃f : real_measures p S⦄
-  (hpos : 0 < ∥f s∥₊)
-  :
-  let measure_aux : laurent_measures r S :=
-        {to_fun := λ (s : ↥S) (n : ℤ),
-                     ite (0 ≤ f s) ↑(theta_aux_lemma.binary ∥f s∥₊ n)
-                       (-↑(theta_aux_lemma.binary ∥f s∥₊ n)),
-         summable' := sorry}
-  in r ^ ⌈real.log ↑∥f s∥₊ / real.log ↑(2⁻¹ : ℝ≥0)⌉ *
-         (1 - r)⁻¹ ≤
-       (1 - r)⁻¹ * ∥f s∥₊ ^ (p : ℝ) :=
-begin
-  intros measure_aux,
-  -- cut and paste this
-  rw mul_comm,
-  apply nnreal.mul_le_mul_left,
-  rw ← nnreal.rpow_int_cast,
-  convert nnreal.rpow_le_rpow_of_exponent_ge (r_pos : 0 < r) (r_lt_one.le) (int.le_ceil _) using 1,
-  delta «r»,
-  rw [← nnreal.rpow_mul, mul_comm, nnreal.rpow_mul],
-  congr', symmetry,
-  rw ← nnreal.coe_eq,
-  exact nnreal.pow_log_div_log_self hpos (by norm_num) (by norm_num),
-end
 
 open CompHausFiltPseuNormGrp₁
 
@@ -118,7 +70,7 @@ begin
     -- (namely binary expansion).
 
     -- Here's a proof of the ϕ goal using ψ.
-    sorry;{ clear S,
+    { clear S,
       -- change to unbundled language
       rintros S c' (F : laurent_measures r S) ⟨(hF1 : Θ p S F = 0),
         (hF2 : ∥F∥₊ ≤ c')⟩,
@@ -190,13 +142,21 @@ begin
           congr', symmetry,
           rw ← nnreal.coe_eq,
           exact nnreal.pow_log_div_log_self hpos (by norm_num) (by norm_num), } } },
-    { delta Θ_fintype_nat_trans,
+    { delta Θ_fintype_nat_trans Θ θ_to_add θ theta.ϑ,
       dsimp,
-      delta Θ θ_to_add θ theta.ϑ,
-      dsimp,
-      sorry} },
+      ext s,
+      split_ifs,
+      { convert nnreal.coe_eq.2 (theta_aux_lemma.binary_sum ⟨f s, h⟩),
+        push_cast, refl, },
+      { convert neg_inj.2 (nnreal.coe_eq.2 (theta_aux_lemma.binary_sum ∥f s∥₊)),
+        { push_cast, rw ← tsum_neg, congr', ext, simp,
+          convert nnreal.summable_coe.2 (theta_aux_lemma.binary_summable ∥f s∥₊),
+          ext, push_cast },
+        { push_neg at h,
+          rw real.neg_nnnorm_of_neg h, } } } },
 end
 
 end ses
 
 end laurent_measures
+-- tsum_neg doesn't need summable, right?
