@@ -21,7 +21,7 @@ We think of `f` as a power series `∑ₙf(n)Tⁿ` in `ℤ⟦T⟧[T⁻¹]`.
 Here's the set-up. Support that `∑' (n : ℤ), ∥f n∥₊ * r ^ n` converges and is `≤ c`
 (so in particular `f(T)` converges for `∥T∥ ≤ c`). Suppose also that
 `∑' (n : ℤ), f n * 2⁻¹ ^ n = 0` (so `f` has a zero at `2⁻¹`; note that the sum
-converges because `0 < 2⁻¹ < r`).
+converges because `0 ≤ 2⁻¹ < r`).
 
 The conclusion is that `∑(n ≥ d) ∥∑(0≤i≤(n-d)) f(n - 1 - i)*2ⁱ∥ * r^n`
 also converges and is bounded above by `c * (2 - r⁻¹)⁻¹`.
@@ -83,6 +83,8 @@ can work with sums taking values in `ℝ≥0∞` a.k.a. the interval `[0,∞]`.
 The second lemma states that if `z : ℝ` then one can find a power series
 `f` in `ℤ⟦T⟧[T⁻¹]` such that `f 2⁻¹` converges to `z` and furthermore
 such that all of the coefficients of `f` have absolute value at most 1.
+We need some other basic results about such sequences but this
+is the main one.
 
 ## The maths proof.
 
@@ -189,20 +191,35 @@ theorem binary_le_one (r : ℝ≥0) (z : ℤ) : binary r z ≤ 1 := sorry
 theorem binary_bounded (r : ℝ≥0) (n : ℤ) (hsmall : n < ⌈real.log r / real.log (2⁻¹ : ℝ≥0)⌉) :
   binary r n = 0 := sorry
 
-theorem binary_has_sum (r : ℝ≥0) : has_sum (λ (n : ℤ), (binary r n : ℝ≥0) * 2⁻¹ ^ n) r := sorry
+-- The following auxiliary lemma is used several times
 
--- proof idea: use ennreal
+-- proof idea for the next two: use ennreal
 
 theorem binary_sum (r : ℝ≥0) : ∑' (n : ℤ), (binary r n : ℝ≥0) * 2⁻¹ ^ n = r := sorry
 
 theorem binary_summable (r : ℝ≥0) : summable (λ (n : ℤ), (binary r n : ℝ≥0) * 2⁻¹ ^ n) := sorry
+
+-- useful technical lemma
+theorem technical_lemma {α : Type*} [add_comm_monoid α] [topological_space α]
+  (f : ℤ → α) (d : ℤ) (hd : ∀ n, n < d → f n = 0) :
+∑' m, f m = ∑' (n : ℕ), f (n + d) :=
+calc
+∑' m, f m = 0 : begin
+  rw nnreal.tsum_comp_le_tsum_of_inj
+  sorry
+end
+... = ∑' (n : ℕ), f (n + d) : sorry
 
 -- Here are the two facts which Clausen/Scholze need for the application to "splitting θ
 -- in a bounded way", and they could both be deduced from one ennreal tsum.
 -- Neither of them are hard.
 
 theorem summable_of_random_facts (r : ℝ≥0) {s : ℝ≥0} (hs : s < 1) :
-  summable (λ n, (binary r n : ℝ≥0) * s ^ n) := sorry
+  summable (λ n, (binary r n : ℝ≥0) * s ^ n) :=
+begin
+  sorry
+end
+
 -- proof: bounded above by sum of a GP
 
 theorem tsum_le_of_random_facts (r : ℝ≥0) {s : ℝ≥0} (hs : s < 1) :

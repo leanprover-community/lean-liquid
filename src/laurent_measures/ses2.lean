@@ -149,6 +149,8 @@ begin
       { convert nnreal.coe_eq.2 (theta_aux_lemma.binary_sum ⟨f s, h⟩),
         push_cast, refl, },
       { convert neg_inj.2 (nnreal.coe_eq.2 (theta_aux_lemma.binary_sum ∥f s∥₊)),
+        -- this proof will break (and get simpler) when #13950 hits;
+        -- the extra "summable" goal will just disappear.
         { push_cast, rw ← tsum_neg, congr', ext, simp,
           convert nnreal.summable_coe.2 (theta_aux_lemma.binary_summable ∥f s∥₊),
           ext, push_cast },
