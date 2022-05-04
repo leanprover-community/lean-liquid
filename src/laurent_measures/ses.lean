@@ -622,60 +622,98 @@ begin
   exact this,
 end
 
-open multiset subtype nat function
-
-open category_theory topological_space finset
-
-local notation `𝒞` := ((as_small (finset ℤ))ᵒᵖ : Type u)
-
-variable {h : decidable_eq 𝒞}
-
 def U (F : filtration (ℒ ϖ) c) (B : ℤ) : set (filtration (ℒ ϖ) c) :=
   λ G, ∀ s n, n < B → F s n = G s n
 
 lemma mem_U (F : filtration (ℒ ϖ) c) (B : ℤ) : F ∈ (U c F B) := λ _ _ _, rfl
 
-def W_single (T : 𝒞) (a : (laurent_measures_bdd_functor r
-ϖ c ⋙ Fintype.to_Profinite).obj T) : set ((Profinite.limit_cone (laurent_measures_bdd_functor r
-ϖ c ⋙ Fintype.to_Profinite)).X) := λ x, x.1 T = a
-
-lemma is_open_W_single (T : 𝒞) (a : (laurent_measures_bdd_functor r
-ϖ c ⋙ Fintype.to_Profinite).obj T) : is_open (W_single c T a) := sorry
-
-
--- variable (ι : finset 𝒞)
--- variable T : ι → 𝒞
--- variable (a : Π (i : ι), (laurent_measures_bdd_functor r
---   ϖ c ⋙ Fintype.to_Profinite).obj (T i))
-
--- #check ((λ i : ι, W_single c (T i) (a i)) : (Π (i : ι) set ((laurent_measures_bdd_functor r
--- ϖ c ⋙ Fintype.to_Profinite).obj T))
--- #check ι.pi
-
--- lemma is_U_union_W_single (F : filtration (ℒ ϖ) c) (B : ℤ) [h_dec : decidable_eq (as_small (finset ℤ))ᵒᵖ] :
---   ∃
---   (ι : finset ((as_small (finset ℤ))ᵒᵖ))
---   (T : ι → (as_small (finset ℤ))ᵒᵖ)
---   (a : Π (i : ι), (laurent_measures_bdd_functor r
---   ϖ c ⋙ Fintype.to_Profinite).obj (T i)),
---   --(laurent_measures_bdd_homeo r ϖ c) '' (U c F B) =
---   ∅ = Π (i : ι), ((λ i, W_single c (T i) (a i)) i) :=
--- begin
-
--- end
+lemma explodes_pow_r (ρ : ℝ≥0) (h₀ : 0 < ρ.1) (h₁ : ρ.1 < 1) (c : ℝ≥0) :
+  ∃ n₀ : ℤ, ∀ (m : ℤ), m < n₀ → c < ρ ^ m :=
+begin
+  convert_to ∃ n₀ : ℕ, ∀ (m : ℕ), (- m : ℤ) < - n₀ → (c : ℝ) < ρ ^ ( - m : ℤ) using 0,
+  { simp only [neg_lt_neg_iff, int.coe_nat_lt, zpow_neg₀, zpow_coe_nat, eq_iff_iff],
+    split,
+    { rintro ⟨n₀, hn₀⟩,
+      induction n₀,
+      { use n₀,
+        intros m hm,
+        rw [← int.coe_nat_lt] at hm,
+        replace hm := neg_lt.mpr (lt_of_le_of_lt (neg_le_self (int.coe_nat_nonneg _)) hm),
+        specialize hn₀ (- m) hm,
+        rwa [← nnreal.coe_lt_coe, nnreal.coe_zpow, zpow_neg₀] at hn₀ },
+      { use n₀ + 1,
+        intros m hm,
+        rw [← int.coe_nat_lt, ← neg_lt_neg_iff, ← int.neg_succ_of_nat_coe] at hm,
+        specialize hn₀ (- m) hm,
+        rwa [← nnreal.coe_lt_coe, nnreal.coe_zpow, zpow_neg₀] at hn₀ },},
+    { rintro ⟨n₀, hn₀⟩,
+      use - n₀,
+      rintro ⟨m⟩ hm,
+      {  have := right.neg_nonpos_iff.mpr (int.of_nat_nonneg n₀),
+        rw [int.of_nat_eq_coe] at this,
+        replace := ne_of_lt (lt_of_lt_of_le (lt_of_le_of_lt (int.of_nat_nonneg m) hm) this),
+        finish },
+      { rw [int.neg_succ_of_nat_coe, neg_lt_neg_iff, int.coe_nat_lt] at hm,
+        specialize hn₀ (m + 1) hm,
+        rwa [int.neg_succ_of_nat_coe, ← nnreal.coe_lt_coe, zpow_neg₀, zpow_coe_nat, nnreal.coe_inv,
+          nnreal.coe_pow] }}},
+  have h := (tendsto_pow_at_top_nhds_within_0_of_lt_1 h₀ h₁).inv_tendsto_zero,
+  simp_rw [← zpow_coe_nat] at h,
+  have : (λ (n : ℕ), ρ.1 ^ (n : ℤ))⁻¹ = (λ (n : ℕ), ρ.1 ^ (- n : ℤ)) := by {ext,
+  simp only [pi.inv_apply, zpow_neg₀] },
+  rw [this, filter.tendsto_at_top] at h,
+  specialize h (c + 1),
+  rw [nnreal.val_eq_coe] at h,
+  simp_rw [← nnreal.coe_zpow] at h,
+  obtain ⟨n₀, hn₀⟩ := filter.eventually.exists_forall_of_at_top h,
+  use n₀,
+  intros m hm,
+  rw [neg_lt_neg_iff, int.coe_nat_lt] at hm,
+  replace hm := le_of_lt hm,
+  specialize hn₀ m hm,
+  rw nnreal.coe_zpow at hn₀,
+  refine lt_of_lt_of_le _ hn₀,
+  exact lt_add_one _,
+end
 
 lemma is_open_U (F : filtration (ℒ ϖ) c) (B : ℤ) : is_open (U c F B) :=
 begin
-  sorry;{
-  rw is_open_induced_iff,
-  have := CompHaus_to_Top,
-  let W : set (Π (R : (category_theory.as_small (finset ℤ))ᵒᵖ),
-    (laurent_measures_bdd_functor r ϖ c ⋙ Fintype.to_Profinite).obj R),
-  }
-  -- apply coe.CompHaus_to_Top
-
-  -- let W : set (Π (n : (as_small (finset ℤ))ᵒᵖ), (zmod n.unop.1.succ)) := λ x, x k =
-  --   (0 : (zmod k.unop.1.succ)),
+  let ι : filtration (ℒ ϖ) c → Π (i : ℤ), ℤ :=
+    λ t i, truncate {i} t punit.star ⟨i,by simp⟩,
+  have hι : continuous ι,
+  { rw continuous_pi_iff, intros i,
+    dsimp [ι],
+    change continuous ((λ (t : laurent_measures_bdd r ϖ {i} c),
+      t punit.star ⟨i,by simp⟩) ∘ truncate {i}),
+    refine continuous.comp continuous_bot (truncate_continuous «r» (Fintype.of punit) c {i}) },
+  obtain ⟨n₀,h₀⟩ : ∃ n₀ : ℤ, ∀ (m : ℤ) (H : ℒ ϖ) (hH : H ∈ filtration (ℒ ϖ) c),
+    m < n₀ → H punit.star m = 0,
+  { obtain ⟨n₀,h₀⟩ : ∃ n₀ : ℤ, ∀ (m : ℤ), m < n₀ → c < r^m := explodes_pow_r r r_pos r_lt_one c,
+    use n₀, intros m H hH hm,
+    exact eq_zero_of_filtration H _ hH punit.star m (h₀ m hm) },
+  classical,
+  let UU : set (Π (i : ℤ), ℤ) :=
+    set.pi (set.Ico n₀ B) (λ i, if i ∈ set.Ico n₀ B then { F punit.star i } else ⊤),
+  have hUU : is_open UU,
+  { apply is_open_set_pi, exact finite_Ico n₀ B,
+    intros a ha, trivial },
+  convert hUU.preimage hι,
+  ext G,
+  split,
+  { intros hG, dsimp [U, UU, ι] at ⊢ hG,
+    rw [set.mem_preimage, set.mem_pi],
+    intros i hi, rw if_pos hi,
+    simp only [mem_singleton_iff],
+    symmetry,
+    apply hG, exact hi.2 },
+  { intros hG, dsimp [U, UU, ι] at ⊢ hG,
+    rintros ⟨⟩ n hn,
+    rw [set.mem_preimage, set.mem_pi] at hG,
+    symmetry,
+    by_cases hn' : n < n₀,
+    { erw [h₀ n G.1 G.2 hn', h₀ n F.1 F.2 hn'] },
+    have hn'' : n ∈ set.Ico n₀ B := ⟨by simpa using hn', hn⟩,
+    specialize hG n hn'', rw if_pos hn'' at hG, simpa using hG },
 end
 
 end topological_generalities

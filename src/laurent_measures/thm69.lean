@@ -213,6 +213,12 @@ begin
   norm_num,
 end
 
+lemma r_inv_lt_2 : r⁻¹ < 2 :=
+begin
+  rw ← inv_inv (2 : ℝ≥0),
+  exact nnreal.inv_lt_inv (by norm_num) half_lt_r,
+end
+
 lemma laurent_measures.summable_half (F : ℒ S) (s : S) :
   summable (λ n, ((F s n) : ℝ) * 2⁻¹ ^ n) :=
 aux_thm69.summable_smaller_radius F.d (F.summable s) (λ n hn, lt_d_eq_zero _ _ _ hn) half_lt_r

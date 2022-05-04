@@ -533,25 +533,22 @@ variable [enough_projectives A]
 lemma exists_K_projective_replacement_of_bounded (X : 𝒦)
   [is_bounded_above X] :
   ∃ (P : 𝒦) [is_K_projective P] [is_bounded_above P]
-    (f : P ⟶ X), is_quasi_iso f :=
+    (f : P ⟶ X), is_quasi_iso f ∧ (∀ k, projective (P.as.X k)) :=
 begin
   obtain ⟨a, H⟩ := is_bounded_above.cond X,
   use projective.replacement X.as a H,
-  refine ⟨_, _, _⟩,
-  { constructor,
-    intros Y hY f,
+  refine ⟨⟨_⟩, ⟨⟨a, _⟩⟩, (quotient _ _).map (projective.replacement.hom X.as a H), ⟨_⟩, _⟩,
+  { intros Y hY f,
     convert eq_of_homotopy _ _ (projective.null_homotopic_of_projective_to_acyclic f.out a
       (projective.replacement_is_projective X.as a H)
       (projective.replacement_is_bounded X.as a H)
       hY.1),
     simp },
-  { use a,
-    apply projective.replacement_is_bounded },
-  { use (quotient _ _).map (projective.replacement.hom X.as a H),
-    constructor,
-    intro i,
+  { apply projective.replacement_is_bounded },
+  { intro i,
     erw ← homology_functor_map_factors,
-    apply_instance }
+    apply_instance },
+  { intro k, dsimp, apply projective.replacement_is_projective }
 end
 
 end homotopy_category

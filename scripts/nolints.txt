@@ -104,6 +104,10 @@ apply_nolint category_theory.limits.preserves_zero_of_preserves_terminal instanc
 -- for_mathlib/abelian_sheaves/functor_category.lean
 apply_nolint category_theory.additive_category_of_abelian instance_priority
 
+-- for_mathlib/acyclic.lean
+apply_nolint category_theory.functor.single unused_arguments
+apply_nolint category_theory.limits.preserves_binary_biproduct_of_additive instance_priority
+
 -- for_mathlib/derived/K_projective.lean
 apply_nolint bounded_homotopy_category.is_K_projective_shift unused_arguments
 apply_nolint bounded_homotopy_category.lift unused_arguments
@@ -264,9 +268,11 @@ apply_nolint θ_section unused_arguments
 apply_nolint laurent_measures.bdd_filtration_spec def_lemma
 apply_nolint laurent_measures.laurent_measures.norm_nonneg dup_namespace
 
+-- laurent_measures/prop72.lean
+apply_nolint psi_aux_lemma2.C4_aux_function unused_arguments
+
 -- laurent_measures/ses.lean
 apply_nolint laurent_measures_ses.U unused_arguments
-apply_nolint laurent_measures_ses.W_single unused_arguments
 apply_nolint laurent_measures_ses.box unused_arguments
 apply_nolint laurent_measures_ses.coe_pow_half unused_arguments
 apply_nolint laurent_measures_ses.hξ def_lemma

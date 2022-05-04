@@ -12,6 +12,66 @@ open category_theory category_theory.limits opposite
 open homotopy_category (hiding single)
 open bounded_homotopy_category
 
+
+section
+
+variables {𝓐 : Type*} [category 𝓐] [abelian 𝓐]
+
+def delta_to_kernel (C : cochain_complex 𝓐 ℤ) (i : ℤ) :
+  C.X i ⟶ kernel (C.d (i+1) (i+1+1)) :=
+factor_thru_image _ ≫ image_to_kernel' (C.d i (i+1)) _ (C.d_comp_d _ _ _)
+
+lemma short_exact_comp_iso {A B C D : 𝓐} (f : A ⟶ B) (g : B ⟶ C) (h : C ⟶ D) (hh : is_iso h) :
+  short_exact f (g ≫ h) ↔ short_exact f g :=
+begin
+  split; intro H,
+  { haveI : mono f := H.mono,
+    haveI : epi g,
+    { haveI := H.epi, have := epi_comp (g ≫ h) (inv h), simpa only [category.assoc, is_iso.hom_inv_id, category.comp_id] },
+    refine ⟨_⟩, have := H.exact, rwa exact_comp_iso at this, },
+  { haveI : mono f := H.mono,
+    haveI : epi g := H.epi,
+    haveI : epi (g ≫ h) := epi_comp g h,
+    refine ⟨_⟩, have := H.exact, rwa exact_comp_iso }
+end
+
+lemma homology_is_zero_iff_image_to_kernel'_is_iso {A B C : 𝓐} (f : A ⟶ B) (g : B ⟶ C) (w : f ≫ g = 0) :
+  is_zero (homology f g w) ↔ is_iso (image_to_kernel' f g w) :=
+sorry
+
+lemma short_exact_kernel_factor_thru_image {A B : 𝓐} (f : A ⟶ B) :
+  short_exact (kernel.ι f) (factor_thru_image f) :=
+sorry
+
+lemma is_acyclic_def
+  (C : homotopy_category 𝓐 (complex_shape.up ℤ)) :
+  is_acyclic C ↔ (∀ i, is_zero (C.as.homology i)) :=
+begin
+  split,
+  { apply is_acyclic.cond },
+  { apply is_acyclic.mk }
+end
+
+lemma is_acyclic_iff_short_exact_to_cycles
+  (C : homotopy_category 𝓐 (complex_shape.up ℤ)) :
+  is_acyclic C ↔
+  (∀ i, short_exact (kernel.ι (C.as.d i (i+1))) (delta_to_kernel C.as i)) :=
+begin
+  rw is_acyclic_def,
+  symmetry,
+  apply (equiv.add_right (1 : ℤ)).forall_congr,
+  intro i,
+  let e := (homology_iso C.as i (i+1) (i+1+1) rfl rfl),
+  dsimp [delta_to_kernel] at e ⊢,
+  rw [e.is_zero_iff, homology_is_zero_iff_image_to_kernel'_is_iso],
+  split,
+  { intro h, sorry },
+  { intro h, rw short_exact_comp_iso _ _ _ h, apply short_exact_kernel_factor_thru_image }
+end
+
+
+end
+
 variables {𝓐 𝓑 : Type*} [category 𝓐] [abelian 𝓐] [enough_projectives 𝓐]
 variables [category 𝓑] [abelian 𝓑] [enough_projectives 𝓑]
 
@@ -40,19 +100,53 @@ preserves_binary_biproduct_of_preserves_biproduct _ _ _
 @[simp] lemma category_theory.op_neg {𝓐 : Type*} [category 𝓐] [preadditive 𝓐]
   {X Y : 𝓐} (f : X ⟶ Y) : (-f).op = - f.op := rfl
 
-def map_is_acyclic_of_acyclic
+lemma acyclic_left_of_short_exact (B : 𝓐) {X Y Z : 𝓐} (f : X ⟶ Y) (g : Y ⟶ Z) (hfg : short_exact f g)
+  (hY : ∀ i > 0, is_zero (((Ext' i).obj (op $ Y)).obj B))
+  (hZ : ∀ i > 0, is_zero (((Ext' i).obj (op $ Z)).obj B)) :
+  ∀ i > 0, is_zero (((Ext' i).obj (op $ X)).obj B) :=
+begin
+  intros i hi,
+  let f' := (homological_complex.single _ (complex_shape.up ℤ) (0:ℤ)).map f,
+  let g' := (homological_complex.single _ (complex_shape.up ℤ) (0:ℤ)).map g,
+  let B' := (bounded_homotopy_category.single _ 0).obj B,
+  have Hfg : ∀ (i : ℤ), short_exact (f'.f i) (g'.f i),
+  { intro i, dsimp, by_cases hi : i = 0,
+    { subst i, dsimp, simp only [eq_self_iff_true, category.comp_id, category.id_comp, if_true, hfg] },
+    { rw [dif_neg hi, dif_neg hi, if_neg hi, if_neg hi, if_neg hi],
+      refine ⟨exact_of_zero _ _⟩, } },
+  have := Ext_five_term_exact_seq' f' g' i B' Hfg,
+  refine (this.drop 1).pair.is_zero_of_is_zero_is_zero (hY _ hi) (hZ _ _),
+  transitivity i, { exact lt_add_one i }, { exact hi }
+end
+
+lemma map_is_acyclic_of_acyclic
   [is_acyclic ((homotopy_category.quotient _ _).obj C)]
   (B : 𝓐)
   (hC : ∀ k, ∀ i > 0, is_zero (((Ext' i).obj (op $ C.X k)).obj B)) :
   is_acyclic (((preadditive_yoneda.obj B).right_op.map_homotopy_category _).obj ((homotopy_category.quotient _ _).obj C)) :=
 begin
+  rw is_acyclic_iff_short_exact_to_cycles,
+  obtain ⟨a, ha⟩ := is_bounded_above.cond ((quotient 𝓐 _).obj C),
+  intro i,
   sorry
 end
 
 lemma acyclic_of_projective (P B : 𝓐) [projective P] (i : ℤ) (hi : 0 < i) :
   is_zero (((Ext' i).obj (op P)).obj B) :=
 begin
-  sorry
+  rw (Ext'_iso (op P) B i _ (𝟙 _) _).is_zero_iff,
+  { rcases i with ((_|i)|i),
+    { exfalso, revert hi, dec_trivial },
+    swap, { exfalso, revert hi, dec_trivial },
+    refine is_zero.homology_is_zero _ _ _ _,
+    apply AddCommGroup.is_zero_of_eq,
+    intros,
+    apply is_zero.eq_of_src,
+    apply is_zero_zero, },
+  { refine ⟨_, _, _⟩,
+    { rintro (_|n), { assumption }, { dsimp, apply_instance } },
+    { exact exact_zero_mono (𝟙 P) },
+    { rintro (_|n); exact exact_of_zero 0 0 } }
 end
 
 def Ext_compute_with_acyclic
@@ -142,9 +236,6 @@ begin
     refine is_zero.of_iso (is_zero.unop _) e.symm.unop,
     refine category_theory.limits.is_zero.biprod _ _,
     { simp only [functor.right_op_obj, functor.flip_obj_obj, is_zero_op],
-      -- haveI : projective (P.val.as.X (k + 1)),
-      -- { dsimp [P], apply_instance, sorry },
-      -- exact acyclic_of_projective (P.val.as.X (k + 1)) B i hi,
-      sorry },
+      exact acyclic_of_projective (P.val.as.X (k + 1)) B i hi, },
     { exact (hC k _ hi).op, }, }
 end
