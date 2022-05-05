@@ -57,7 +57,9 @@ namespace int
 such that r = ∑ (binary r n) * 2⁻¹ ^ n -/
 noncomputable def binary (r : ℝ≥0) : ℤ → ℕ := if r = 0 then 0 else
 λ n, let d : ℤ := ⌈(r : ℝ).log / (2⁻¹ : ℝ).log⌉ in
-if n < d then 0 else nnreal.nat.digit r (n - d).nat_abs
+if n < d then 0 else nnreal.nat.digit (r * 2 ^ d) (n - d).nat_abs
+
+example (n m : ℤ) : n ≤ m ↔ n < m + 1 := int.lt_add_one_iff.symm
 
 theorem binary_le_one (r : ℝ≥0) (n : ℤ) : binary r n ≤ 1 :=
 begin
@@ -67,14 +69,19 @@ begin
   rcases lt_or_eq_of_le hn with (h1 | h2),
   { rw [int.lt_iff_add_one_le, le_iff_exists_nonneg_add] at h1,
     rcases h1 with ⟨c, hc1, rfl⟩,
-    convert nnreal.nat.digit.succ_le_one r c.nat_abs,
+    convert nnreal.nat.digit.succ_le_one (r * 2 ^ d) c.nat_abs,
     suffices : (c + 1).nat_abs = c.nat_abs + 1,
     { convert this, ring },
     exact int.nat_abs_add_nonneg hc1 zero_le_one },
   { clear hn,
     rw ← h2,
-    simp [nnreal.nat.digit, nnreal.nat.binary],
-    sorry }
+    rw [nat.digit, sub_self, int.nat_abs_zero, nat.binary.zero_fst_def, ← nat.lt_add_one_iff],
+    rw nat.floor_lt', swap, norm_num,
+    have := z_lt_pow_d_succ ((zero_lt_iff.mpr hr)),
+    have h : (2⁻¹ : ℝ≥0) ≠ 0, norm_num,
+    rw [zpow_sub_one₀ h, inv_inv] at this,
+    replace this := inv_mul_lt_of_lt_mul₀ this,
+    rw [mul_comm] at this, simpa },
 end
 
 

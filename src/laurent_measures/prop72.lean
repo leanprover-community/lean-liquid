@@ -2,7 +2,7 @@ import data.real.nnreal
 import topology.algebra.infinite_sum
 import analysis.normed_space.basic
 import for_mathlib.nnreal
-import for_mathlib.nnreal_int_binary
+import for_mathlib.nnreal_int_binary -- basic binary expansion for nnreal.
 
 open_locale nnreal
 
@@ -155,12 +155,7 @@ namespace theta_aux_lemma
 theorem technical_lemma {α : Type*} [add_comm_monoid α] [topological_space α]
   (f : ℤ → α) (d : ℤ) (hd : ∀ n, n < d → f n = 0) :
 ∑' m, f m = ∑' (n : ℕ), f (n + d) :=
-calc
-∑' m, f m = 0 : begin
-  --rw nnreal.tsum_comp_le_tsum_of_inj
-  sorry
-end
-... = ∑' (n : ℕ), f (n + d) : sorry
+sorry
 
 -- Here are the two facts which Clausen/Scholze need for the application to "splitting θ
 -- in a bounded way", and they could both be deduced from one ennreal tsum.
