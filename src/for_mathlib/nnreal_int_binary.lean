@@ -172,12 +172,49 @@ end
 
 theorem binary_summable (r : ℝ≥0) : summable (λ (n : ℤ), (binary r n : ℝ≥0) * 2⁻¹ ^ n) :=
 begin
-  sorry
+  rw ← nnreal.summable_coe,
+  let d := ⌈real.log r / real.log (2⁻¹ : ℝ≥0)⌉,
+  rw int.summable_iff_nat_summable_and_nat_summable d (_ : _ → ℝ),
+  split,
+  { simp_rw [zpow_add₀ (show (2⁻¹ : ℝ≥0) ≠ 0, by norm_num), ← mul_assoc],
+    norm_cast,
+    apply summable.mul_right,
+    refine summable_of_le (λ b, _) (summable_geometric two_inv_lt_one),
+    refine mul_le_of_le_one_left (pow_nonneg (by norm_num) _) _,
+    norm_cast,
+    apply binary_le_one, },
+  { convert summable_zero, ext k,
+    norm_cast,
+    convert zero_mul _,
+    norm_cast,
+    convert binary_bounded r _ _,
+    apply sub_lt_self,
+    norm_cast,
+    apply nat.succ_pos,
+  }
 end
+
+lemma tsum_add_tsum_compl' {β : Type*} {f : β → ℝ≥0} (s : set β) (hf : summable f) :
+  ∑' (x : ↥s), f ↑x + ∑' (x : ↥sᶜ), f ↑x = ∑' (x : β), f x :=
+begin
+  apply tsum_add_tsum_compl;
+  apply summable_comp_injective hf;
+  exact subtype.coe_injective,
+end
+
 
 theorem binary_sum (r : ℝ≥0) : ∑' (n : ℤ), (binary r n : ℝ≥0) * 2⁻¹ ^ n = r :=
 begin
-  sorry
+  let d := ⌈real.log r / real.log (2⁻¹ : ℝ≥0)⌉,
+  rw ← tsum_add_tsum_compl' {n : ℤ | n < d} (binary_summable _),
+  convert zero_add r,
+  { convert (tsum_zero : _ = (0 : ℝ≥0)),
+    ext ⟨b, hb : b < d⟩,
+    simp [binary_bounded r b hb], },
+  { rw ← (nat.equiv_int_lt_compl d).tsum_eq, swap, apply_instance,
+    simp [nat.equiv_int_lt_compl],
+    sorry,
+  }
 end
 
 end int
