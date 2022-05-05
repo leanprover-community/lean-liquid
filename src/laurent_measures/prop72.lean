@@ -105,13 +105,6 @@ refactoring all of them.
 lemma real.nnnorm_int (n : ℤ) : ∥(n : ℝ)∥₊ = ∥n∥₊ :=
 subtype.ext $ by simp [coe_nnnorm, real.norm_eq_abs, int.norm_eq_abs]
 
-
-
-
-
-
-
-
 lemma real.neg_nnnorm_of_neg {r : ℝ} (hr : r < 0) : -(∥r∥₊ : ℝ) = r :=
 by rw [coe_nnnorm, neg_eq_iff_neg_eq, real.norm_eq_abs, abs_of_neg hr]
 
@@ -149,7 +142,6 @@ end psi_aux_lemma
 -/
 
 namespace theta_aux_lemma
-
 
 -- useful technical lemma
 theorem technical_lemma {α : Type*} [add_comm_monoid α] [topological_space α]
