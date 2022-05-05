@@ -103,6 +103,37 @@ begin
   refl,
 end
 
+-- this should be somewhere else
+theorem technical_lemma {α : Type*} [add_comm_monoid α] [topological_space α]
+  [has_continuous_add α] [t2_space α] (f : ℤ → α) (d : ℤ) (hd : ∀ n, n < d → f n = 0)
+  (hsum : summable (λ (n : ℕ), f (n + d))) :
+∑' m, f m = ∑' (n : ℕ), f (n + d) :=
+begin
+  have summable_small : summable (λ n : {n : ℤ | n < d}, (f ∘ (coe : _ → ℤ)) n),
+  { convert summable_zero,
+    ext ⟨n, hn⟩,
+    exact hd n hn, },
+  have tsum_small : ∑' n : {n : ℤ | n < d}, f n = 0,
+  { convert tsum_zero,
+    ext ⟨n, hn⟩,
+    exact hd n hn,
+    apply_instance,
+  },
+  -- this should be somewhere else perhaps
+  let e : ℕ ≃ ({n : ℤ | n < d}ᶜ : set ℤ) :=
+  { to_fun := λ m, ⟨m + d, by simp⟩,
+    inv_fun := λ n, ((n : ℤ) - d).nat_abs,
+    left_inv := λ m, by simp,
+    right_inv := begin rintro ⟨n, hn : ¬ (n < d)⟩,
+      have hn := le_of_not_lt hn,
+      have hdn : 0 ≤ n - d := sub_nonneg.mpr hn,
+      simp [hn, int.nat_abs_of_nonneg hdn] end },
+  have summable_big : summable (λ n : {n : ℤ | n < d}ᶜ, (f ∘ (coe : _ → ℤ)) n),
+  { rwa ← e.summable_iff },
+  rw [← tsum_add_tsum_compl summable_small summable_big, tsum_small, zero_add, ← e.tsum_eq],
+  refl, apply_instance,
+end
+
 
 -- proof idea for the next two: use ennreal
 
