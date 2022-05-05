@@ -125,7 +125,19 @@ lemma key_tsum_lemma (f : ℤ → ℝ) (r : ℝ≥0) (hr1 : r < 1) (hr2 : 2⁻¹
 begin
   sorry
 end
+/-
 
+  ∑(n ≥ d) ∥∑(0≤i≤(n-d)) f(n - 1 - i)*2ⁱ∥ * r^n
+= ∑(n ≥ d) ∥∑(i≥0) f(n - 1 - i)2ⁱ∥ * rⁿ (as f(n-1-i) vanishes for i larger than n-d)
+= ∑(n ≥ d) ∥(i<0) f(n - 1 - i)2ⁱ∥ * rⁿ (as sum f(x)2⁻ˣ=0)
+= ∑(n ≥ d) ∥∑(k≥0) f(n + k) 2^(-1-k)∥ * rⁿ (set k=-1-i)
+≤ ∑(n ≥ d) ∑(k≥0)∥ f(n+k)∥ 2^(-1-k) r^n (Cauchy-Schwarz)
+= ∑(k≥0) ∑(n≥d) ∥f(n+k)∥2^(-1-k)r^n (turns out you can interchange the sums)
+= 2⁻¹∑(k≥0) (∑(n≥d) ∥f(n+k)∥r^(n+k)) * (2r)^{-k} (rearranging)
+≤ 2⁻¹∑(k≥0) c (2r)^{-k} (defining property of c)
+= 2⁻¹ * c / (1-(2r)⁻¹) (sum of a GP)
+= c * (2-r⁻¹)⁻¹ (rearranging)
+-/
 -- a Lean proof is embedded in the calculations in `laurent_measures/thm69.lean`
 -- between lines 275 and 600 or so: see `psi_def_summable`, `psi_def_summable2`,
 -- `psi_def_summable3`, `psi_def_aux_4`, `psi_def_aux_3`, `psi_def_aux_2`,
@@ -142,12 +154,6 @@ end psi_aux_lemma
 -/
 
 namespace theta_aux_lemma
-
--- useful technical lemma
-theorem technical_lemma {α : Type*} [add_comm_monoid α] [topological_space α]
-  (f : ℤ → α) (d : ℤ) (hd : ∀ n, n < d → f n = 0) :
-∑' m, f m = ∑' (n : ℕ), f (n + d) :=
-sorry
 
 -- Here are the two facts which Clausen/Scholze need for the application to "splitting θ
 -- in a bounded way", and they could both be deduced from one ennreal tsum.

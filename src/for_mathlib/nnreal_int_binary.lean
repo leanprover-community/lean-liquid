@@ -1,5 +1,67 @@
 import for_mathlib.nnreal_nat_binary
 
+def nat.equiv_le_int (d : ℤ) : ℕ ≃ ({n : ℤ | d ≤ n} : set ℤ) :=
+  { to_fun := λ m, ⟨m + d, by simp⟩,
+    inv_fun := λ n, ((n : ℤ) - d).nat_abs,
+    left_inv := λ m, by simp,
+    right_inv := begin rintro ⟨n, hn⟩,
+      have hdn : 0 ≤ n - d := sub_nonneg.mpr hn,
+      simp [hn, int.nat_abs_of_nonneg hdn] end }
+
+def nat.equiv_int_lt_compl (d : ℤ) : ℕ ≃ ({n : ℤ | n < d}ᶜ : set ℤ) :=
+  { to_fun := λ m, ⟨m + d, by simp⟩,
+    inv_fun := λ n, ((n : ℤ) - d).nat_abs,
+    left_inv := λ m, by simp,
+    right_inv := begin rintro ⟨n, hn : ¬ (n < d)⟩,
+      have hn := le_of_not_lt hn,
+      have hdn : 0 ≤ n - d := sub_nonneg.mpr hn,
+      simp [hn, int.nat_abs_of_nonneg hdn] end }
+
+def nat.equiv_le_int_compl (d : ℤ) : ℕ ≃ ({n : ℤ | d ≤ n}ᶜ : set ℤ) :=
+  { to_fun := λ m, ⟨d - (m + 1), show ¬ d ≤ d - (m + 1), by push_neg;
+      exact sub_lt_self d (by linarith)⟩,
+    inv_fun := λ n, (d - ((n : ℤ) + 1)).nat_abs,
+    left_inv := λ m, by simp; ring_nf, -- `ring` is noisy for some reason?
+    right_inv := begin rintro ⟨n, hn : ¬ d ≤ n⟩,
+      simp,
+      rw int.nat_abs_of_nonneg, ring, linarith
+    end }
+
+lemma int.summable_iff_nat_summable_and_nat_summable {α : Type*} [add_comm_group α]
+  [uniform_space α] [uniform_add_group α] [complete_space α] (d : ℤ) (f : ℤ → α) :
+  summable f ↔ summable (λ n : ℕ, f (n + d)) ∧ summable (λ n : ℕ, f (d - (n + 1))) :=
+begin
+  refine (@summable_subtype_and_compl α _ _ _ _ _ _ {z : ℤ | d ≤ z}).symm.trans _,
+  apply and_congr,
+  { rw ← (nat.equiv_le_int d).summable_iff,
+    refl, },
+  { rw ← (nat.equiv_le_int_compl d).summable_iff,
+    refl, },
+end
+
+-- is this worthy of mathlib?
+theorem int.tsum_eq_nat_tsum_of_bdd_below {α : Type*} [add_comm_monoid α] [topological_space α]
+  [has_continuous_add α] [t2_space α] (f : ℤ → α) (d : ℤ) (hd : ∀ n, n < d → f n = 0)
+  (hsum : summable (λ (n : ℕ), f (n + d))) :
+∑' m, f m = ∑' (n : ℕ), f (n + d) :=
+begin
+  have summable_small : summable (λ n : {n : ℤ | n < d}, (f ∘ (coe : _ → ℤ)) n),
+  { convert summable_zero,
+    ext ⟨n, hn⟩,
+    exact hd n hn, },
+  have tsum_small : ∑' n : {n : ℤ | n < d}, f n = 0,
+  { convert tsum_zero,
+    ext ⟨n, hn⟩,
+    exact hd n hn,
+    apply_instance,
+  },
+  have summable_big : summable (λ n : {n : ℤ | n < d}ᶜ, (f ∘ (coe : _ → ℤ)) n),
+  { rwa ← (nat.equiv_int_lt_compl d).summable_iff },
+  rw [← tsum_add_tsum_compl summable_small summable_big, tsum_small, zero_add,
+    ← (nat.equiv_int_lt_compl d).tsum_eq],
+  refl, apply_instance,
+end
+
 open_locale nnreal
 
 -- lemma is false if w = 1 and n = any and r = 0
@@ -103,43 +165,20 @@ begin
   refl,
 end
 
--- this should be somewhere else
-theorem technical_lemma {α : Type*} [add_comm_monoid α] [topological_space α]
-  [has_continuous_add α] [t2_space α] (f : ℤ → α) (d : ℤ) (hd : ∀ n, n < d → f n = 0)
-  (hsum : summable (λ (n : ℕ), f (n + d))) :
-∑' m, f m = ∑' (n : ℕ), f (n + d) :=
-begin
-  have summable_small : summable (λ n : {n : ℤ | n < d}, (f ∘ (coe : _ → ℤ)) n),
-  { convert summable_zero,
-    ext ⟨n, hn⟩,
-    exact hd n hn, },
-  have tsum_small : ∑' n : {n : ℤ | n < d}, f n = 0,
-  { convert tsum_zero,
-    ext ⟨n, hn⟩,
-    exact hd n hn,
-    apply_instance,
-  },
-  -- this should be somewhere else perhaps
-  let e : ℕ ≃ ({n : ℤ | n < d}ᶜ : set ℤ) :=
-  { to_fun := λ m, ⟨m + d, by simp⟩,
-    inv_fun := λ n, ((n : ℤ) - d).nat_abs,
-    left_inv := λ m, by simp,
-    right_inv := begin rintro ⟨n, hn : ¬ (n < d)⟩,
-      have hn := le_of_not_lt hn,
-      have hdn : 0 ≤ n - d := sub_nonneg.mpr hn,
-      simp [hn, int.nat_abs_of_nonneg hdn] end },
-  have summable_big : summable (λ n : {n : ℤ | n < d}ᶜ, (f ∘ (coe : _ → ℤ)) n),
-  { rwa ← e.summable_iff },
-  rw [← tsum_add_tsum_compl summable_small summable_big, tsum_small, zero_add, ← e.tsum_eq],
-  refl, apply_instance,
-end
+
 
 
 -- proof idea for the next two: use ennreal
 
-theorem binary_sum (r : ℝ≥0) : ∑' (n : ℤ), (binary r n : ℝ≥0) * 2⁻¹ ^ n = r := sorry
+theorem binary_summable (r : ℝ≥0) : summable (λ (n : ℤ), (binary r n : ℝ≥0) * 2⁻¹ ^ n) :=
+begin
+  sorry
+end
 
-theorem binary_summable (r : ℝ≥0) : summable (λ (n : ℤ), (binary r n : ℝ≥0) * 2⁻¹ ^ n) := sorry
+theorem binary_sum (r : ℝ≥0) : ∑' (n : ℤ), (binary r n : ℝ≥0) * 2⁻¹ ^ n = r :=
+begin
+  sorry
+end
 
 end int
 
