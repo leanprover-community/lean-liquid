@@ -14,8 +14,11 @@ variables {𝒜 : Type*} [category 𝒜]
 
 namespace category_theory
 
-variables [abelian 𝒜]
 variables {A B C A' B' C' : 𝒜} (f : A ⟶ B) (g : B ⟶ C) (f' : A' ⟶ B') (g' : B' ⟶ C')
+
+section has_zero_morphisms
+
+variables [has_zero_morphisms 𝒜] [has_kernels 𝒜] [has_images 𝒜]
 
 /-- If `f : A ⟶ B` and `g : B ⟶ C` then `short_exact f g` is the proposition saying
   the resulting diagram `0 ⟶ A ⟶ B ⟶ C ⟶ 0` is an exact sequence. -/
@@ -29,24 +32,6 @@ open_locale zero_object
 instance zero_to_zero_is_iso {C : Type*} [category C] [has_zero_object C] (f : (0 : C) ⟶ 0) :
   is_iso f :=
 by convert (show is_iso (𝟙 (0 : C)), by apply_instance)
-
-
-lemma is_iso_of_short_exact_of_is_iso_of_is_iso (h : short_exact f g) (h' : short_exact f' g')
-  (i₁ : A ⟶ A') (i₂ : B ⟶ B') (i₃ : C ⟶ C')
-  (comm₁ : i₁ ≫ f' = f ≫ i₂) (comm₂ : i₂ ≫ g' = g ≫ i₃) [is_iso i₁] [is_iso i₃] :
-  is_iso i₂ :=
-begin
-  obtain ⟨_, _, _⟩ := h,
-  obtain ⟨_, _, _⟩ := h',
-  resetI,
-  refine @abelian.is_iso_of_is_iso_of_is_iso_of_is_iso_of_is_iso 𝒜 _ _ 0 _ _ _ 0 _ _ _
-    0 f g 0 f' g' 0 i₁ i₂ i₃ _ comm₁ comm₂ 0 0 0 0 0 _ _ _ _ _ _ _ _ _ _ _;
-  try { simp };
-  try { apply exact_zero_left_of_mono };
-  try { assumption };
-  rwa ← epi_iff_exact_zero_right,
-end
-
 
 
 /-- An exact sequence `A -f⟶ B -g⟶ C` is *left split*
@@ -86,6 +71,12 @@ lemma right_split.short_exact {f : A ⟶ B} {g : B ⟶ C} (h : right_split f g) 
   end,
   mono := h.mono,
   exact := h.exact }
+
+end has_zero_morphisms
+
+section preadditive
+
+variables [preadditive 𝒜] [has_kernels 𝒜] [has_images 𝒜]
 
 /-- An exact sequence `A -f⟶ B -g⟶ C` is *split* if there exist
 `φ : B ⟶ A` and `χ : C ⟶ B` such that:
@@ -158,8 +149,36 @@ begin
 end
 
 -- move this?
-lemma exact_inl_snd (A B : 𝒜) : exact (biprod.inl : A ⟶ A ⊞ B) biprod.snd :=
+lemma exact_inl_snd [has_binary_biproducts 𝒜] (A B : 𝒜) :
+  exact (biprod.inl : A ⟶ A ⊞ B) biprod.snd :=
 exact_of_split _ _ biprod.inr biprod.fst biprod.inl_snd biprod.total
+
+end preadditive
+
+section abelian
+
+variables [abelian 𝒜]
+open_locale zero_object
+
+lemma is_iso_of_short_exact_of_is_iso_of_is_iso (h : short_exact f g) (h' : short_exact f' g')
+  (i₁ : A ⟶ A') (i₂ : B ⟶ B') (i₃ : C ⟶ C')
+  (comm₁ : i₁ ≫ f' = f ≫ i₂) (comm₂ : i₂ ≫ g' = g ≫ i₃) [is_iso i₁] [is_iso i₃] :
+  is_iso i₂ :=
+begin
+  obtain ⟨_, _, _⟩ := h,
+  obtain ⟨_, _, _⟩ := h',
+  resetI,
+  refine @abelian.is_iso_of_is_iso_of_is_iso_of_is_iso_of_is_iso 𝒜 _ _ 0 _ _ _ 0 _ _ _
+    0 f g 0 f' g' 0 i₁ i₂ i₃ _ comm₁ comm₂ 0 0 0 0 0 _ _ _ _ _ _ _ _ _ _ _;
+  try { simp };
+  try { apply exact_zero_left_of_mono };
+  try { assumption };
+  rwa ← epi_iff_exact_zero_right,
+end
+
+end abelian
+
+variables [abelian 𝒜]
 
 /-- A *splitting* of a sequence `A -f⟶ B -g⟶ C` is an isomorphism
 to the short exact sequence `0 ⟶ A ⟶ A ⊕ C ⟶ C ⟶ 0` such that
@@ -258,6 +277,8 @@ end
 
 @[reassoc] lemma comp_eq_zero : f ≫ g = 0 :=
 h.split.1.some_spec.some_spec.2.2.1
+
+variables [has_zero_object 𝒜] [has_cokernels 𝒜]
 
 protected lemma exact : exact f g :=
 begin
