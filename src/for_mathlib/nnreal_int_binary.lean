@@ -212,8 +212,26 @@ begin
     ext ⟨b, hb : b < d⟩,
     simp [binary_bounded r b hb], },
   { rw ← (nat.equiv_int_lt_compl d).tsum_eq, swap, apply_instance,
-    simp [nat.equiv_int_lt_compl],
-    sorry,
+    simp only [nat.equiv_int_lt_compl, binary, equiv.coe_fn_mk, subtype.coe_mk, neg_add_rev,
+    zpow_add₀ (show (2⁻¹ : ℝ≥0) ≠ 0, by norm_num), ← mul_assoc, tsum_mul_right],
+    split_ifs with hr hr,
+    { subst hr,
+      convert (tsum_zero : ∑' (n : ℕ), _ = (0 : ℝ≥0)),
+      ext n, simp },
+    {
+      rw ← eq_div_iff (zpow_ne_zero _ (show (2⁻¹ : ℝ≥0) ≠ 0, by norm_num)),
+      convert nnreal.nat.digit.tsum (r * 2 ^ d),
+      { ext n,
+        rw if_neg,
+        { norm_cast,
+          congr',
+          convert int.nat_abs_of_nat n,
+          exact add_sub_cancel _ d, },
+        { push_neg,
+          change d ≤ n + d,
+          linarith, } },
+      { rw [inv_zpow₀, nnreal.div_inv], }
+    },
   }
 end
 

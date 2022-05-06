@@ -120,3 +120,10 @@ begin
   rw real.log_eq_zero at h,
   rcases h with (h|h|h); linarith,
 end
+
+lemma nnreal.div_inv {a b : ℝ≥0} : a / b⁻¹ = a * b :=
+begin
+  rcases eq_or_ne b 0 with (rfl | hb),
+  { rw [inv_zero, div_zero, mul_zero] },
+  rw [div_eq_iff (inv_ne_zero hb), mul_assoc, mul_inv_cancel hb, mul_one],
+end

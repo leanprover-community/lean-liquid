@@ -2,6 +2,7 @@ import data.real.nnreal -- non-negative reals
 import topology.algebra.infinite_sum -- infinite sums
 import analysis.special_functions.log
 import analysis.special_functions.pow
+import for_mathlib.nnreal
 
 open_locale nnreal -- notation for non-negative reals
 
@@ -342,6 +343,9 @@ begin
     linarith,
   }
 end
+
+theorem tsum : ∑' n, (digit r n : ℝ≥0) * 2⁻¹ ^ n = r :=
+has_sum.tsum_eq (has_sum r)
 
 end digit
 
