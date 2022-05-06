@@ -2,7 +2,7 @@ import algebra.homology.exact
 import category_theory.abelian.basic
 import category_theory.abelian.diagram_lemmas.four
 
-import category_theory.preadditive.additive_functor
+-- import category_theory.preadditive.additive_functor
 
 noncomputable theory
 
@@ -76,7 +76,7 @@ end has_zero_morphisms
 
 section preadditive
 
-variables [preadditive 𝒜] [has_kernels 𝒜] [has_images 𝒜]
+variables [preadditive 𝒜]
 
 /-- An exact sequence `A -f⟶ B -g⟶ C` is *split* if there exist
 `φ : B ⟶ A` and `χ : C ⟶ B` such that:
@@ -90,6 +90,8 @@ Such a sequence is automatically short exact (i.e., `f` is mono and `g` is epi).
 structure split : Prop :=
 (split : ∃ (φ : B ⟶ A) (χ : C ⟶ B),
   f ≫ φ = 𝟙 A ∧ χ ≫ g = 𝟙 C ∧ f ≫ g = 0 ∧ χ ≫ φ = 0 ∧ φ ≫ f + g ≫ χ = 𝟙 B)
+
+variables [has_kernels 𝒜] [has_images 𝒜]
 
 lemma exact_of_split {A B C : 𝒜} (f : A ⟶ B) (g : B ⟶ C) (χ : C ⟶ B) (φ : B ⟶ A)
   (hfg : f ≫ g = 0) (H : φ ≫ f + g ≫ χ = 𝟙 B) : exact f g :=
@@ -178,17 +180,18 @@ end
 
 end abelian
 
-variables [abelian 𝒜]
-
 /-- A *splitting* of a sequence `A -f⟶ B -g⟶ C` is an isomorphism
 to the short exact sequence `0 ⟶ A ⟶ A ⊕ C ⟶ C ⟶ 0` such that
 the vertical maps on the left and the right are the identity. -/
-structure splitting :=
+structure splitting [has_zero_morphisms 𝒜] [has_binary_biproducts 𝒜] :=
 (iso : B ≅ A ⊞ C)
 (comp_iso_eq_inl : f ≫ iso.hom = biprod.inl)
 (iso_comp_snd_eq : iso.hom ≫ biprod.snd = g)
 
 namespace splitting
+
+section has_zero_morphisms
+variables [has_zero_morphisms 𝒜] [has_binary_biproducts 𝒜]
 
 attribute [simp, reassoc] comp_iso_eq_inl iso_comp_snd_eq
 
@@ -211,30 +214,31 @@ def retraction : B ⟶ A := h.iso.hom ≫ biprod.fst
 @[simp, reassoc] lemma section_retraction : h.section ≫ h.retraction = 0 :=
 by { delta splitting.section retraction, simp }
 
-lemma split_add : h.retraction ≫ f + g ≫ h.section = 𝟙 _ :=
-begin
-  delta splitting.section retraction,
-  rw [← cancel_mono h.iso.hom, ← cancel_epi h.iso.inv],
-  simp
-end
+protected def split_mono : split_mono f := ⟨h.retraction, by simp⟩
 
-@[reassoc]
-lemma retraction_ι_eq_id_sub :
-  h.retraction ≫ f = 𝟙 _ - g ≫ h.section :=
-eq_sub_iff_add_eq.mpr h.split_add
-
-@[reassoc]
-lemma π_section_eq_id_sub :
-  g ≫ h.section = 𝟙 _ - h.retraction ≫ f :=
-eq_sub_iff_add_eq.mpr ((add_comm _ _).trans h.split_add)
+protected def split_epi : split_epi g := ⟨h.section, by simp⟩
 
 @[simp, reassoc] lemma inr_iso_inv : biprod.inr ≫ h.iso.inv = h.section := rfl
 
 @[simp, reassoc] lemma iso_hom_fst : h.iso.hom ≫ biprod.fst = h.retraction := rfl
 
-protected def split_mono : split_mono f := ⟨h.retraction, by simp⟩
+-- move this, add `iso_zero_biprod`
+@[simps]
+def iso_biprod_zero {C : Type*} [category C] [has_zero_morphisms C]
+  [has_binary_biproducts C] {X Y : C} (hY : is_zero Y) : X ≅ X ⊞ Y :=
+{ hom := biprod.inl,
+  inv := biprod.fst,
+  inv_hom_id' := begin
+    apply category_theory.limits.biprod.hom_ext;
+    simp only [category.assoc, biprod.inl_fst, category.comp_id, category.id_comp,
+      biprod.inl_snd, comp_zero],
+    apply hY.eq_of_tgt
+  end }
+.
 
-protected def split_epi : split_epi g := ⟨h.section, by simp⟩
+def splitting_of_is_iso_zero {X Y Z : 𝒜} (f : X ⟶ Y) [is_iso f] (hZ : is_zero Z) :
+  splitting f (0 : Y ⟶ Z) :=
+⟨(as_iso f).symm ≪≫ iso_biprod_zero hZ, by simp [hZ.eq_of_tgt _ 0], by simp⟩
 
 include h
 
@@ -258,6 +262,32 @@ by { delta splitting.section, apply_instance }
 instance : epi h.retraction :=
 by { delta retraction, apply epi_comp }
 
+end has_zero_morphisms
+
+section preadditive
+variables [preadditive 𝒜] [has_binary_biproducts 𝒜]
+variables {f g} (h : splitting f g)
+
+lemma split_add : h.retraction ≫ f + g ≫ h.section = 𝟙 _ :=
+begin
+  delta splitting.section retraction,
+  rw [← cancel_mono h.iso.hom, ← cancel_epi h.iso.inv],
+  simp only [category.comp_id, category.id_comp, category.assoc,
+    iso.inv_hom_id_assoc, iso.inv_hom_id, limits.biprod.total,
+    preadditive.comp_add, preadditive.add_comp,
+    splitting.comp_iso_eq_inl, splitting.iso_comp_eq_snd_assoc]
+end
+
+@[reassoc]
+lemma retraction_ι_eq_id_sub :
+  h.retraction ≫ f = 𝟙 _ - g ≫ h.section :=
+eq_sub_iff_add_eq.mpr h.split_add
+
+@[reassoc]
+lemma π_section_eq_id_sub :
+  g ≫ h.section = 𝟙 _ - h.retraction ≫ f :=
+eq_sub_iff_add_eq.mpr ((add_comm _ _).trans h.split_add)
+
 lemma splittings_comm (h h' : splitting f g) :
   h'.section ≫ h.retraction = - h.section ≫ h'.retraction :=
 begin
@@ -265,6 +295,10 @@ begin
   rw ← cancel_mono f,
   simp [retraction_ι_eq_id_sub],
 end
+
+variables [has_kernels 𝒜] [has_images 𝒜]
+
+include h
 
 lemma split : split f g :=
 begin
@@ -296,7 +330,11 @@ protected
 lemma short_exact : short_exact f g :=
 { mono := h.mono, epi := h.epi, exact := h.exact }
 
-omit h
+end preadditive
+
+section abelian
+variables [abelian 𝒜]
+variables {f g} (h : splitting f g)
 
 -- TODO: this should be generalized to isoms of short sequences,
 -- because now it forces one direction, and we want both.
@@ -319,7 +357,12 @@ def mk' (h : short_exact f g) (i : B ⟶ A ⊞ C) (h1 : f ≫ i = biprod.inl) (h
   comp_iso_eq_inl := by { rwa as_iso_hom, },
   iso_comp_snd_eq := h2 }
 
+end abelian
+
 end splitting
+
+section
+variables [abelian 𝒜]
 
 /-- A short exact sequence that is left split admits a splitting. -/
 def left_split.splitting {f : A ⟶ B} {g : B ⟶ C} (h : left_split f g) : splitting f g :=
@@ -329,24 +372,6 @@ splitting.mk' h.short_exact (biprod.lift h.left_split.some g)
   { simp only [biprod.inl_snd, biprod.lift_snd, category.assoc, h.exact.w], } })
 (by { simp only [biprod.lift_snd], })
 
-open_locale zero_object
-
--- move this, add `iso_zero_biprod`
-@[simps]
-def iso_biprod_zero {C : Type*} [category C] [has_zero_morphisms C]
-  [has_binary_biproducts C] {X Y : C} (hY : is_zero Y) : X ≅ X ⊞ Y :=
-{ hom := biprod.inl,
-  inv := biprod.fst,
-  inv_hom_id' := begin
-    apply category_theory.limits.biprod.hom_ext;
-    simp only [category.assoc, biprod.inl_fst, category.comp_id, category.id_comp,
-      biprod.inl_snd, comp_zero],
-    apply hY.eq_of_tgt
-  end }
-.
-
-def splitting_of_is_iso_zero {X Y Z : 𝒜} (f : X ⟶ Y) [is_iso f] (hZ : is_zero Z) :
-  splitting f (0 : Y ⟶ Z) :=
-⟨(as_iso f).symm ≪≫ iso_biprod_zero hZ, by simp [hZ.eq_of_tgt _ 0], by simp⟩
+end
 
 end category_theory
