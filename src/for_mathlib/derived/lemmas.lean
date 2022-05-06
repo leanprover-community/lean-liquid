@@ -43,7 +43,7 @@ lemma _root_.category_theory.cochain_complex.exact_cone_in_cone_out
 begin
   refine (homological_complex.six_term_exact_seq (cone.in f) (cone.out f) _ i (i+1) rfl).pair,
   intro n,
-  apply (cone.termwise_split _ _).short_exact,
+  refine (cone.termwise_split _ _).short_exact,
 end
 
 /-

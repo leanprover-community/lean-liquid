@@ -88,7 +88,7 @@ instance : pretriangulated 𝒦 :=
     rintro ⟨X⟩,
     refine ⟨X, X, homological_complex.zero, 𝟙 _, 0, _, ⟨_⟩⟩,
     { intro i, simp only [id_f, zero_f_apply],
-      refine splitting_of_is_iso_zero _ (homological_complex.zero_X _ _),
+      refine splitting.splitting_of_is_iso_zero _ (homological_complex.zero_X _ _),
       exact homological_complex.is_zero_zero },
     refine mk_triangle_iso (iso.refl _) (iso.refl _) _ _ _ _,
     { dsimp [triangleₕ_of_termwise_split],

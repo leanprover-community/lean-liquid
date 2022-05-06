@@ -140,7 +140,7 @@ def cone.π_quasi_iso (w : ∀ i, short_exact (f.f i) (g.f i)) :
     let a' : ↥((X.X (n+1)) ⊞ (Y.X n)) := (biprod.inl : _ ⟶ (X.X (n+1)) ⊞ (Y.X n)) a,
     have ha' : π.f n a' = 0,
     { dsimp only [a', π, cone.π_f],
-      rw [← pseudoelement.comp_apply, (exact_inl_snd _ _).w_assoc,
+      rw [← pseudoelement.comp_apply, (exact_inl_snd (X.X (n+1)) _).w_assoc,
         zero_comp, pseudoelement.zero_apply], },
     have aux' := @pseudoelement.pseudo_exact_of_exact _ _ _ _ _ _ _ _ (aux n).exact,
     obtain ⟨a'', ha''⟩ := aux'.2 a' ha',
