@@ -1,4 +1,19 @@
+/-
+Copyright (c) 2021 Johan Commelin. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Johan Commelin, Andrew Yang
+-/
 import category_theory.abelian.diagram_lemmas.four
+
+/-!
+# Short exacxt sequences, and splittings.
+
+`short_exact f g` is the proposition that `0 ⟶ A -f⟶ B -g⟶ C ⟶ 0` is an exact sequence.
+
+We define when a short exact sequence is left-split, right-split, and split.
+
+In an abelian category, a left-split short exact sequence admits a splitting.
+-/
 
 noncomputable theory
 
@@ -23,6 +38,7 @@ structure short_exact : Prop :=
 
 open_locale zero_object
 
+-- TODO move
 instance zero_to_zero_is_iso {C : Type*} [category C] [has_zero_object C] (f : (0 : C) ⟶ 0) :
   is_iso f :=
 by convert (show is_iso (𝟙 (0 : C)), by apply_instance)
@@ -144,7 +160,7 @@ begin
   simp only [← F.map_comp, ← F.map_id, ← F.map_add, F.map_zero, *, eq_self_iff_true, and_true],
 end
 
--- move this?
+-- TODO move this
 lemma exact_inl_snd [has_binary_biproducts 𝒜] (A B : 𝒜) :
   exact (biprod.inl : A ⟶ A ⊞ B) biprod.snd :=
 exact_of_split _ _ biprod.inr biprod.fst biprod.inl_snd biprod.total
@@ -175,7 +191,7 @@ end
 end abelian
 
 /-- A *splitting* of a sequence `A -f⟶ B -g⟶ C` is an isomorphism
-to the short exact sequence `0 ⟶ A ⟶ A ⊕ C ⟶ C ⟶ 0` such that
+to the short exact sequence `0 ⟶ A ⟶ A ⊞ C ⟶ C ⟶ 0` such that
 the vertical maps on the left and the right are the identity. -/
 @[nolint has_inhabited_instance]
 structure splitting [has_zero_morphisms 𝒜] [has_binary_biproducts 𝒜] :=
@@ -336,7 +352,7 @@ end preadditive
 
 section abelian
 variables [abelian 𝒜]
-variables {f g} (h : splitting f g)
+variables {f g}
 
 -- TODO: this should be generalized to isoms of short sequences,
 -- because now it forces one direction, and we want both.
