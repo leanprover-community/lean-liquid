@@ -34,6 +34,15 @@ C.shift i f hf - 𝟙 _
 
 variables [∀ c i, complete_space (C c i)] [∀ c i, separated_space (C c i)]
 
+lemma _root_.category_theory.homology.π_eq_zero
+  {A B C : Ab} {f : A ⟶ B} {g : B ⟶ C} (w : f ≫ g = 0) (x)
+  (h : ∃ a : A, f a = (kernel_subobject g).arrow x) :
+  homology.π f g w x = 0 :=
+begin
+  rcases h with ⟨a, ha⟩,
+  sorry
+end
+
 lemma shift_eq_zero (hf : monotone f) {k K c₀ : ℝ≥0} [fact (1 ≤ k)]
   (hC : C.is_bounded_exact k K i c₀)
   (hc₀ : ∀ j, c₀ ≤ f j) (hk : ∀ j, k * f j ≤ f (j+1)) :
@@ -60,7 +69,18 @@ begin
   rw [res_res, d_res, hdx', normed_group_hom.map_zero, norm_zero, mul_zero,
     ← coe_nnnorm, ← nnreal.coe_zero, nnreal.coe_le_coe, le_zero_iff,
     nnnorm_eq_zero, sub_eq_zero] at hy,
-  sorry
+  apply category_theory.homology.π_eq_zero,
+  cases i,
+  { refine ⟨0, _⟩,
+    simp only [homological_complex.d_to_eq_zero, cochain_complex.prev_nat_zero,
+      AddCommGroup.zero_apply, kernel_subobject_map_arrow_apply,
+      homological_complex.hom.sq_from_left],
+    rw d_eq_zero at hy, { exact hy.symm }, { dec_trivial } },
+  { refine ⟨((C.to_Ab.obj (op (f j))).X_prev_iso _).inv y, _⟩,
+    { dsimp, refl },
+    rw [← comp_apply, ← comp_apply, homological_complex.X_prev_iso_comp_d_to,
+      kernel_subobject_map_arrow],
+    exact hy.symm, },
 end
 
 lemma shift_sub_id_is_iso (hf : monotone f) {k K c₀ : ℝ≥0} [fact (1 ≤ k)]
