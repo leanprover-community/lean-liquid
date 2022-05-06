@@ -141,7 +141,7 @@ h.left_split.short_exact
 
 end
 
-def split.map {𝒜 ℬ : Type*} [category 𝒜] [abelian 𝒜] [category ℬ] [abelian ℬ] (F : 𝒜 ⥤ ℬ)
+lemma split.map {𝒜 ℬ : Type*} [category 𝒜] [abelian 𝒜] [category ℬ] [abelian ℬ] (F : 𝒜 ⥤ ℬ)
   [functor.additive F] {A B C : 𝒜} (f : A ⟶ B) (g : B ⟶ C) (h : split f g) :
   split (F.map f) (F.map g) :=
 begin
@@ -183,6 +183,7 @@ end abelian
 /-- A *splitting* of a sequence `A -f⟶ B -g⟶ C` is an isomorphism
 to the short exact sequence `0 ⟶ A ⟶ A ⊕ C ⟶ C ⟶ 0` such that
 the vertical maps on the left and the right are the identity. -/
+@[nolint has_inhabited_instance]
 structure splitting [has_zero_morphisms 𝒜] [has_binary_biproducts 𝒜] :=
 (iso : B ≅ A ⊞ C)
 (comp_iso_eq_inl : f ≫ iso.hom = biprod.inl)
@@ -203,19 +204,25 @@ by rw [iso.comp_inv_eq, h.comp_iso_eq_inl]
 @[simp, reassoc] lemma iso_comp_eq_snd : h.iso.inv ≫ g = biprod.snd :=
 by rw [iso.inv_comp_eq, h.iso_comp_snd_eq]
 
+/-- If `h` is a splitting of `A -f⟶ B -g⟶ C`,
+then `h.section : C ⟶ B` is the morphism satisfying `h.section ≫ g = 𝟙 C`. -/
 def _root_.category_theory.splitting.section : C ⟶ B := biprod.inr ≫ h.iso.inv
 
+/-- If `h` is a splitting of `A -f⟶ B -g⟶ C`,
+then `h.retraction : B ⟶ A` is the morphism satisfying `f ≫ h.retraction = 𝟙 A`. -/
 def retraction : B ⟶ A := h.iso.hom ≫ biprod.fst
 
-@[simp, reassoc] lemma section_π : h.section ≫ g = 𝟙 _ := by { delta splitting.section, simp }
+@[simp, reassoc] lemma section_π : h.section ≫ g = 𝟙 C := by { delta splitting.section, simp }
 
-@[simp, reassoc] lemma ι_retraction : f ≫ h.retraction = 𝟙 _ := by { delta retraction, simp }
+@[simp, reassoc] lemma ι_retraction : f ≫ h.retraction = 𝟙 A := by { delta retraction, simp }
 
 @[simp, reassoc] lemma section_retraction : h.section ≫ h.retraction = 0 :=
 by { delta splitting.section retraction, simp }
 
+/-- The retraction in a splitting is a split mono. -/
 protected def split_mono : split_mono f := ⟨h.retraction, by simp⟩
 
+/-- The section in a splitting is a split epi. -/
 protected def split_epi : split_epi g := ⟨h.section, by simp⟩
 
 @[simp, reassoc] lemma inr_iso_inv : biprod.inr ≫ h.iso.inv = h.section := rfl
@@ -223,6 +230,7 @@ protected def split_epi : split_epi g := ⟨h.section, by simp⟩
 @[simp, reassoc] lemma iso_hom_fst : h.iso.hom ≫ biprod.fst = h.retraction := rfl
 
 -- move this, add `iso_zero_biprod`
+/-- If `Y` is a zero object, `X ≅ X ⊞ Y` for any `X`. -/
 @[simps]
 def iso_biprod_zero {C : Type*} [category C] [has_zero_morphisms C]
   [has_binary_biproducts C] {X Y : C} (hY : is_zero Y) : X ≅ X ⊞ Y :=
@@ -236,6 +244,8 @@ def iso_biprod_zero {C : Type*} [category C] [has_zero_morphisms C]
   end }
 .
 
+/-- A short exact sequence of the form `X -f⟶ Y -0⟶ Z` where `f` is an iso and `Z` is zero
+has a splitting. -/
 def splitting_of_is_iso_zero {X Y Z : 𝒜} (f : X ⟶ Y) [is_iso f] (hZ : is_zero Z) :
   splitting f (0 : Y ⟶ Z) :=
 ⟨(as_iso f).symm ≪≫ iso_biprod_zero hZ, by simp [hZ.eq_of_tgt _ 0], by simp⟩
@@ -296,8 +306,6 @@ begin
   simp [retraction_ι_eq_id_sub],
 end
 
-variables [has_kernels 𝒜] [has_images 𝒜]
-
 include h
 
 lemma split : split f g :=
@@ -312,7 +320,7 @@ end
 @[reassoc] lemma comp_eq_zero : f ≫ g = 0 :=
 h.split.1.some_spec.some_spec.2.2.1
 
-variables [has_zero_object 𝒜] [has_cokernels 𝒜]
+variables [has_kernels 𝒜] [has_images 𝒜] [has_zero_object 𝒜] [has_cokernels 𝒜]
 
 protected lemma exact : exact f g :=
 begin
