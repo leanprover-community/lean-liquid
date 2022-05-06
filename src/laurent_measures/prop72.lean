@@ -153,22 +153,19 @@ end psi_aux_lemma
 
 -/
 
+example (a b : ℤ) (ha : 0 < a) : b - a < b := sub_lt_self b ha
+
 namespace theta_aux_lemma
 
--- Here are the two facts which Clausen/Scholze need for the application to "splitting θ
--- in a bounded way", and they could both be deduced from one ennreal tsum.
--- Neither of them are hard.
-
-theorem summable_of_random_facts (r : ℝ≥0) {s : ℝ≥0} (hs : s < 1) :
-  summable (λ n, (nnreal.int.binary r n : ℝ≥0) * s ^ n) :=
-begin
-  sorry
-end
-
+-- Here is the fact which Clausen/Scholze need for the application to "splitting θ
+-- in a bounded way".
 -- proof: bounded above by sum of a GP
 
 theorem tsum_le_of_random_facts (r : ℝ≥0) {s : ℝ≥0} (hs : s < 1) :
-∑' (n : ℤ), (nnreal.int.binary r n : ℝ≥0) * s ^ n ≤ s ^ ⌈real.log r / real.log (2⁻¹ : ℝ≥0)⌉ * (1 - s)⁻¹ :=
+∑' (n : ℤ), (nnreal.int.binary r n : ℝ≥0) * s ^ n ≤
+  s ^ ⌈real.log r / real.log (2⁻¹ : ℝ≥0)⌉ * (1 - s)⁻¹ :=
 sorry
 
 end theta_aux_lemma
+
+-- is `summable_subtype_and_compl` true for add_comm_monoids? Why is it stated for groups?

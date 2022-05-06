@@ -165,22 +165,24 @@ begin
   refl,
 end
 
-
-
-
--- proof idea for the next two: use ennreal
-
-theorem binary_summable (r : ℝ≥0) : summable (λ (n : ℤ), (binary r n : ℝ≥0) * 2⁻¹ ^ n) :=
+theorem binary_summable (r : ℝ≥0) {s : ℝ≥0} (hs : s < 1) :
+  summable (λ (n : ℤ), (binary r n : ℝ≥0) * s ^ n) :=
 begin
+  rcases eq_or_ne s 0 with (rfl | hspos),
+  { apply summable_of_ne_finset_zero,
+    rintro n (hn : n ∉ ({0} : finset ℤ)),
+    rw finset.not_mem_singleton at hn,
+    simp [zero_zpow n hn], },
   rw ← nnreal.summable_coe,
   let d := ⌈real.log r / real.log (2⁻¹ : ℝ≥0)⌉,
   rw int.summable_iff_nat_summable_and_nat_summable d (_ : _ → ℝ),
   split,
-  { simp_rw [zpow_add₀ (show (2⁻¹ : ℝ≥0) ≠ 0, by norm_num), ← mul_assoc],
+  {
+    simp_rw [zpow_add₀ hspos, ← mul_assoc],
     norm_cast,
     apply summable.mul_right,
-    refine summable_of_le (λ b, _) (summable_geometric two_inv_lt_one),
-    refine mul_le_of_le_one_left (pow_nonneg (by norm_num) _) _,
+    refine summable_of_le (λ b, _) (summable_geometric hs),
+    refine mul_le_of_le_one_left (pow_nonneg zero_le' _) _,
     norm_cast,
     apply binary_le_one, },
   { convert summable_zero, ext k,
@@ -202,11 +204,10 @@ begin
   exact subtype.coe_injective,
 end
 
-
 theorem binary_sum (r : ℝ≥0) : ∑' (n : ℤ), (binary r n : ℝ≥0) * 2⁻¹ ^ n = r :=
 begin
   let d := ⌈real.log r / real.log (2⁻¹ : ℝ≥0)⌉,
-  rw ← tsum_add_tsum_compl' {n : ℤ | n < d} (binary_summable _),
+  rw ← tsum_add_tsum_compl' {n : ℤ | n < d} (binary_summable _ two_inv_lt_one),
   convert zero_add r,
   { convert (tsum_zero : _ = (0 : ℝ≥0)),
     ext ⟨b, hb : b < d⟩,

@@ -116,7 +116,7 @@ begin
       if 0 ≤ f s then nnreal.int.binary (∥f s∥₊) n
       else -nnreal.int.binary (∥f s∥₊) n,
       summable' := λ s, begin
-        convert theta_aux_lemma.summable_of_random_facts (∥f s∥₊) (r_lt_one : r < 1),
+        convert nnreal.int.binary_summable (∥f s∥₊) (r_lt_one : r < 1),
         ext,
         split_ifs;
         simp,
@@ -151,8 +151,8 @@ begin
       { convert neg_inj.2 (nnreal.coe_eq.2 (nnreal.int.binary_sum ∥f s∥₊)),
         -- this proof will break (and get simpler) when #13950 hits;
         -- the extra "summable" goal will just disappear.
-        { push_cast, rw ← tsum_neg, congr', ext, simp,
-          convert nnreal.summable_coe.2 (nnreal.int.binary_summable ∥f s∥₊),
+        { push_cast, rw ← tsum_neg, congr', ext, simp, -- should hopefully just be able to put } here
+          convert nnreal.summable_coe.2 (nnreal.int.binary_summable ∥f s∥₊ nnreal.two_inv_lt_one),
           ext, push_cast },
         { push_neg at h,
           rw real.neg_nnnorm_of_neg h, } } } },
