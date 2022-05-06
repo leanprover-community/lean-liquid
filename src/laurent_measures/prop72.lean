@@ -161,7 +161,7 @@ namespace theta_aux_lemma
 -- in a bounded way".
 -- proof: bounded above by sum of a GP
 
-theorem tsum_le_of_random_facts (r : ℝ≥0) {s : ℝ≥0} (hs0 : 0 < s) (hs : s < 1) :
+theorem tsum_le (r : ℝ≥0) {s : ℝ≥0} (hs0 : 0 < s) (hs : s < 1) :
 ∑' (n : ℤ), (nnreal.int.binary r n : ℝ≥0) * s ^ n ≤
   s ^ ⌈real.log r / real.log (2⁻¹ : ℝ≥0)⌉ * (1 - s)⁻¹ :=
 begin
