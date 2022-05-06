@@ -1,5 +1,7 @@
 import category_theory.Fintype
 
+-- Remove when #13984 lands, and use `Fintype.equiv_equiv_iso` instead.
+
 namespace Fintype
 
 /-- An equivalence between finite types induces an isomorphism in `Fintype`. -/

@@ -5,6 +5,9 @@ open_locale classical
 
 universe u
 
+-- This is an awkward hybrid: we should state the induction principle for unbundled fintype
+-- and then if it is necessary provide an interface for using it with `Fintype`.
+
 lemma Fintype.induction_empty_sum {P : Fintype.{u} → Prop}
   (of_equiv : ∀ {α β : Fintype.{u}}, α ≃ β → P α → P β)
   (h_empty : P (Fintype.of pempty))
