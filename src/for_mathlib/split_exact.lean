@@ -6,7 +6,7 @@ Authors: Johan Commelin, Andrew Yang
 import category_theory.abelian.diagram_lemmas.four
 
 /-!
-# Short exacxt sequences, and splittings.
+# Short exact sequences, and splittings.
 
 `short_exact f g` is the proposition that `0 ⟶ A -f⟶ B -g⟶ C ⟶ 0` is an exact sequence.
 
@@ -199,6 +199,8 @@ structure splitting [has_zero_morphisms 𝒜] [has_binary_biproducts 𝒜] :=
 (comp_iso_eq_inl : f ≫ iso.hom = biprod.inl)
 (iso_comp_snd_eq : iso.hom ≫ biprod.snd = g)
 
+variables {f g}
+
 namespace splitting
 
 section has_zero_morphisms
@@ -206,7 +208,7 @@ variables [has_zero_morphisms 𝒜] [has_binary_biproducts 𝒜]
 
 attribute [simp, reassoc] comp_iso_eq_inl iso_comp_snd_eq
 
-variables {f g} (h : splitting f g)
+variables (h : splitting f g)
 
 @[simp, reassoc] lemma inl_comp_iso_eq : biprod.inl ≫ h.iso.inv = f :=
 by rw [iso.comp_inv_eq, h.comp_iso_eq_inl]
@@ -286,7 +288,7 @@ end has_zero_morphisms
 
 section preadditive
 variables [preadditive 𝒜] [has_binary_biproducts 𝒜]
-variables {f g} (h : splitting f g)
+variables (h : splitting f g)
 
 lemma split_add : h.retraction ≫ f + g ≫ h.section = 𝟙 _ :=
 begin
@@ -352,13 +354,12 @@ end preadditive
 
 section abelian
 variables [abelian 𝒜]
-variables {f g}
 
 -- TODO: this should be generalized to isoms of short sequences,
 -- because now it forces one direction, and we want both.
 /-- To construct a splitting of `A -f⟶ B -g⟶ C` it suffices to supply
-a *morphism* `i : B ⟶ A ⊞ C` such that `f ≫ i` is the canonical map `A ⟶ A ⊞ C` and
-`i ≫ q = g`, where `q` is the canonical map `A ⊞ C ⟶ C`,
+a *morphism* `i : B ⟶ A ⊞ C` such that `f ≫ i` is the canonical map `biprod.inl : A ⟶ A ⊞ C` and
+`i ≫ q = g`, where `q` is the canonical map `biprod.snd : A ⊞ C ⟶ C`,
 together with proofs that `f` is mono and `g` is epi.
 
 The morphism `i` is than automatically an isomorphism. -/
@@ -383,7 +384,7 @@ section
 variables [abelian 𝒜]
 
 /-- A short exact sequence that is left split admits a splitting. -/
-def left_split.splitting {f : A ⟶ B} {g : B ⟶ C} (h : left_split f g) : splitting f g :=
+def left_split.splitting (h : left_split f g) : splitting f g :=
 splitting.mk' h.short_exact (biprod.lift h.left_split.some g)
 (by { ext,
   { simpa only [biprod.inl_fst, biprod.lift_fst, category.assoc] using h.left_split.some_spec },
