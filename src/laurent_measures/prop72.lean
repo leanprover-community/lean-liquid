@@ -161,10 +161,27 @@ namespace theta_aux_lemma
 -- in a bounded way".
 -- proof: bounded above by sum of a GP
 
-theorem tsum_le_of_random_facts (r : ℝ≥0) {s : ℝ≥0} (hs : s < 1) :
+theorem tsum_le_of_random_facts (r : ℝ≥0) {s : ℝ≥0} (hs0 : 0 < s) (hs : s < 1) :
 ∑' (n : ℤ), (nnreal.int.binary r n : ℝ≥0) * s ^ n ≤
   s ^ ⌈real.log r / real.log (2⁻¹ : ℝ≥0)⌉ * (1 - s)⁻¹ :=
-sorry
+begin
+  let d := ⌈real.log r / real.log (2⁻¹ : ℝ≥0)⌉,
+  rw mul_comm,
+  rw ← nnreal.int.tsum_add_tsum_compl' {n : ℤ | n < d} (nnreal.int.binary_summable r hs),
+  have h0 : ∑' (x : ↥{n : ℤ | n < d}), (λ (n : ℤ), ↑(nnreal.int.binary r n) * s ^ n) ↑x = 0,
+  { convert (tsum_zero : _ = (0 : ℝ≥0)), ext ⟨n, hn : n < d⟩,
+    simp [nnreal.int.binary_eq_zero r n hn] },
+  rw [h0, zero_add], clear h0,
+  rw ← (nat.equiv_int_lt_compl d).tsum_eq, swap, apply_instance,
+  simp only [nat.equiv_int_lt_compl, zpow_add₀ hs0.ne', ←mul_assoc, equiv.coe_fn_mk, subtype.coe_mk,
+    zpow_coe_nat, nonneg.coe_one, nnreal.tsum_mul_right],
+  rw mul_le_mul_right₀ (zpow_ne_zero _ hs0.ne'),
+  rw ← tsum_geometric_nnreal hs,
+  refine nnreal.tsum_le_tsum (λ n, _) (nnreal.summable_geometric hs),
+  apply mul_le_of_le_one_left',
+  norm_cast,
+  apply nnreal.int.binary_le_one,
+end
 
 end theta_aux_lemma
 

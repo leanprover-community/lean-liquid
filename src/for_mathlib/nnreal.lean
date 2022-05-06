@@ -127,3 +127,7 @@ begin
   { rw [inv_zero, div_zero, mul_zero] },
   rw [div_eq_iff (inv_ne_zero hb), mul_assoc, mul_inv_cancel hb, mul_one],
 end
+
+lemma nnreal.tsum_le_tsum {X : Type*} {f g : X → ℝ≥0} (hle : ∀ x, f x ≤ g x)
+  (hsummable : summable g) : ∑' x, f x ≤ ∑' x, g x :=
+tsum_le_tsum hle (summable_of_le hle hsummable) hsummable

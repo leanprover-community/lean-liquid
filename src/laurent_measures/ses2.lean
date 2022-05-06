@@ -131,12 +131,14 @@ begin
       refine finset.sum_le_sum (λ s _, _),
       rcases (eq_zero_or_pos : ∥f s∥₊ = 0 ∨ _) with (h0 | hpos),
       { simp [h0, measure_aux] },
-      { convert le_trans (theta_aux_lemma.tsum_le_of_random_facts (∥f s∥₊) (r_lt_one : r < 1)) _,
+      { convert le_trans (theta_aux_lemma.tsum_le_of_random_facts
+          (∥f s∥₊) (r_pos : 0 < r) (r_lt_one : r < 1)) _,
         { ext n, congr', dsimp [measure_aux], split_ifs; simp },
         { rw mul_comm,
           apply nnreal.mul_le_mul_left,
           rw ← nnreal.rpow_int_cast,
-          convert nnreal.rpow_le_rpow_of_exponent_ge (r_pos : 0 < r) (r_lt_one.le) (int.le_ceil _) using 1,
+          convert nnreal.rpow_le_rpow_of_exponent_ge
+            (r_pos : 0 < r) (r_lt_one.le) (int.le_ceil _) using 1,
           delta «r»,
           rw [← nnreal.rpow_mul, mul_comm, nnreal.rpow_mul],
           congr', symmetry,

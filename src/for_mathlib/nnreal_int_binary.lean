@@ -157,7 +157,7 @@ end
 -- d = ⌈real.log r / real.log (2⁻¹ : ℝ≥0)⌉ is
 -- the unique solution to 2^{-d} ≤ r < 2^{1-d} if r>0
 -- and hence the point beyond with all digits are 0
-theorem binary_bounded (r : ℝ≥0) (n : ℤ) (hsmall : n < ⌈real.log r / real.log (2⁻¹ : ℝ≥0)⌉) :
+theorem binary_eq_zero (r : ℝ≥0) (n : ℤ) (hsmall : n < ⌈real.log r / real.log (2⁻¹ : ℝ≥0)⌉) :
   binary r n = 0 :=
 begin
   rw [binary],
@@ -189,7 +189,7 @@ begin
     norm_cast,
     convert zero_mul _,
     norm_cast,
-    convert binary_bounded r _ _,
+    convert binary_eq_zero r _ _,
     apply sub_lt_self,
     norm_cast,
     apply nat.succ_pos,
@@ -211,7 +211,7 @@ begin
   convert zero_add r,
   { convert (tsum_zero : _ = (0 : ℝ≥0)),
     ext ⟨b, hb : b < d⟩,
-    simp [binary_bounded r b hb], },
+    simp [binary_eq_zero r b hb], },
   { rw ← (nat.equiv_int_lt_compl d).tsum_eq, swap, apply_instance,
     simp only [nat.equiv_int_lt_compl, binary, equiv.coe_fn_mk, subtype.coe_mk, neg_add_rev,
     zpow_add₀ (show (2⁻¹ : ℝ≥0) ≠ 0, by norm_num), ← mul_assoc, tsum_mul_right],
