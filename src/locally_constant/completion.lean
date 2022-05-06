@@ -1,5 +1,7 @@
 import topology.continuous_function.compact
 
+import for_mathlib.SemiNormedGroup
+
 import locally_constant.completion_aux
 import free_pfpng.main
 import condensed.acyclic
@@ -17,22 +19,6 @@ open_locale nnreal
 variables (S : Profinite.{u})
 variables (V : SemiNormedGroup.{u}) [complete_space V] [separated_space V]
 variables (V' : Type u) [normed_group V'] [complete_space V']
-
-set_option pp.universes true
-
--- move me
-instance SemiNormedGroup.forget₂ : has_forget₂ SemiNormedGroup.{u} Ab.{u} :=
-{ forget₂ :=
-  { obj := λ V, AddCommGroup.of V,
-    map := λ V W f, f.to_add_monoid_hom,
-    map_id' := λ V, rfl,
-    map_comp' := λ _ _ _ f g, rfl },
-  forget_comp := rfl }
-
--- move me
-instance SemiNormedGroup.forget₂_additive :
-  (forget₂ SemiNormedGroup.{u} Ab.{u}).additive :=
-{ map_add' := by { intros, refl } }
 
 def LCC : Profinite.{u}ᵒᵖ ⥤ Ab.{u} :=
 SemiNormedGroup.LCC.obj V ⋙ forget₂ _ _
@@ -140,13 +126,6 @@ begin
   { apply locally_constant.to_continuous_map_uniform_continuous },
   { exact (locally_constant.comap_hom f f.2).uniform_continuous, }
 end
-
-instance SemiNormedGroup.metric_space : metric_space V :=
-metric.of_t2_pseudo_metric_space ‹_›
-
-instance SemiNormedGroup.normed_group : normed_group V :=
-{ dist_eq := semi_normed_group.dist_eq,
-  ..(by apply_instance : semi_normed_group V) }
 
 def LCC_iso_Cond_of_top_ab :
   LCC.{u} V ≅ Condensed.of_top_ab.presheaf.{u} V :=
