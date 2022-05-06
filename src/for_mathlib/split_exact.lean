@@ -1,12 +1,6 @@
-import algebra.homology.exact
-import category_theory.abelian.basic
 import category_theory.abelian.diagram_lemmas.four
 
--- import category_theory.preadditive.additive_functor
-
 noncomputable theory
-
-universes v u
 
 open category_theory category_theory.limits category_theory.preadditive
 
