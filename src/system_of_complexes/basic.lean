@@ -1,6 +1,7 @@
 import category_theory.preadditive.functor_category
 import algebra.homology.additive
 import algebra.homology.homological_complex
+import algebra.category.Group.limits
 import analysis.normed.group.SemiNormedGroup.kernels
 import analysis.normed.group.SemiNormedGroup.completion
 
@@ -421,6 +422,18 @@ begin
 end
 
 end quotient
+
+-- move me
+instance SemiNormedGroup.forget₂_Ab : has_forget₂ SemiNormedGroup Ab :=
+{ forget₂ :=
+  { obj := λ V, AddCommGroup.of V,
+    map := λ _ _ f, f.to_add_monoid_hom },
+  forget_comp := by tidy }
+
+instance SemiNormedGroup.forget₂_Ab_additive : (forget₂ SemiNormedGroup Ab).additive := {}
+
+def to_Ab (C : system_of_complexes) : ℝ≥0ᵒᵖ ⥤ cochain_complex Ab ℕ :=
+C ⋙ functor.map_homological_complex (forget₂ _ _) _
 
 end system_of_complexes
 

@@ -1,4 +1,5 @@
 import thm95
+import system_of_complexes.completion
 import statement
 
 /-!
@@ -76,8 +77,8 @@ The proof reduces to `thm95''` (a variant of Theorem 9.5).
 
 example : first_target_stmt r r' BD κ := first_target r r' BD κ
 
-/-- Theorem 9.4 in [Analytic] -/
-theorem thm94 :
+/-- Theorem 9.4 in [Analytic] for weak bounded exactness -/
+theorem thm94_weak :
   ∀ m : ℕ, ∃ (k K : ℝ≥0) (hk : fact (1 ≤ k)) (c₀ : ℝ≥0),
   ∀ (S : Profinite) (V : SemiNormedGroup.{0}) [normed_with_aut r V],
     ​((BD.data.system κ r V r').obj (op $ of r' ((Lbar.functor.{0 0} r').obj S)))
@@ -95,4 +96,20 @@ begin
   rw ← system_of_complexes.apply_hom_eq_hom_apply,
   apply SemiNormedGroup.iso_isometry_of_norm_noninc;
   apply breen_deligne.data.complex.map_norm_noninc
+end
+
+/-- Theorem 9.4 in [Analytic] -/
+theorem thm94 :
+  ∀ m : ℕ, ∃ (k K : ℝ≥0) (hk : fact (1 ≤ k)) (c₀ : ℝ≥0),
+  ∀ (S : Profinite) (V : SemiNormedGroup.{0}) [normed_with_aut r V],
+    ​((BD.data.system κ r V r').obj (op $ of r' ((Lbar.functor.{0 0} r').obj S)))
+      .is_bounded_exact k K m c₀ :=
+begin
+  intro m,
+  obtain ⟨k, K, hk, c₀, H⟩ := thm94_weak r r' BD κ m,
+  resetI,
+  refine ⟨k ^ 2, K + 1, infer_instance, c₀, _⟩,
+  introsI,
+  refine system_of_complexes.is_weak_bounded_exact.strong_of_complete _ (H _ _) _ _ zero_lt_one,
+  apply breen_deligne.data.system_admissible,
 end

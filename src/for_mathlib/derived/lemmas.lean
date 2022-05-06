@@ -10,6 +10,7 @@ import for_mathlib.triangle_shift
 import for_mathlib.homology_iso
 import for_mathlib.projective_replacement
 import for_mathlib.homology_exact
+import for_mathlib.is_iso_neg
 -- import for_mathlib.arrow_preadditive
 
 noncomputable theory
@@ -200,37 +201,12 @@ instance is_quasi_iso_comp_iso {X Y Z : 𝒦} (f : X ⟶ Y) (g : Y ⟶ Z)
 { cond := λ i, by { rw (homology_functor A (complex_shape.up ℤ) i).map_comp, apply_instance, } }
 -/
 
--- Move This
-@[simp] lemma is_iso_neg_iff (A : Type*) [category A]
-  [preadditive A] (X Y : A) (f : X ⟶ Y) :
-  is_iso (-f) ↔ is_iso f :=
-begin
-  split; rintro ⟨g, hg⟩; refine ⟨⟨-g, _⟩⟩;
-  simpa only [preadditive.comp_neg, preadditive.neg_comp, neg_neg] using hg,
-end
-
--- Move This
-@[simp] lemma is_iso_neg_one_pow_iff (A : Type*) [category A]
-  [preadditive A] (X Y : A) (f : X ⟶ Y) (i : ℤ) :
-  is_iso (i.neg_one_pow • f) ↔ is_iso f :=
-begin
-  induction i using int.induction_on_iff with i,
-  { simp only [int.neg_one_pow_neg_zero, one_zsmul] },
-  dsimp,
-  simp only [int.neg_one_pow_add, int.neg_one_pow_one, mul_neg, mul_one, neg_smul, is_iso_neg_iff],
-end
-
 -- TODO(!): Why is this needed!?!?
 instance : has_shift (triangle 𝒦) ℤ :=
 triangle.has_shift (homotopy_category A (complex_shape.up ℤ))
 
 open category_theory.preadditive
 
--- move me
-instance is_iso_neg {C : Type*} [category C] [preadditive C] {X Y : C} (f : X ⟶ Y) [is_iso f] :
-  is_iso (-f) :=
-by { use (-(inv f)), simp only [comp_neg, neg_comp, is_iso.hom_inv_id, neg_neg,
-  eq_self_iff_true, is_iso.inv_hom_id, and_self] }
 
 /-- If `A → B → C → A[1]` is a distinguished triangle,
 then `A → B` is a quasi-isomorphism if and only if `C` is acyclic. -/
