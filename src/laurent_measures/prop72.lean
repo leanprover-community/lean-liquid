@@ -79,21 +79,6 @@ statements such as `has_sum a s ↔ has_sum b s` or `has_sum a s → ∃ t, has_
 * The fourth approach avoids all of this. Instead of working with sums valued in `ℝ≥0` we
 can work with sums taking values in `ℝ≥0∞` a.k.a. the interval `[0,∞]`.
 
-## Lemma 2 (needed in part 4)
-
-The second lemma states that if `z : ℝ` then one can find a power series
-`f` in `ℤ⟦T⟧[T⁻¹]` such that `f 2⁻¹` converges to `z` and furthermore
-such that all of the coefficients of `f` have absolute value at most 1.
-We need some other basic results about such sequences but this
-is the main one.
-
-## The maths proof.
-
-The case `z=0` is easy, and for negative `z` one can just change sign,
-so WLOG `0 < z`. In this case, che construction is algorithmic.
-First find `d : ℤ` (the index where the power series will start)
-such that `2⁻¹ ^ d ≤ z < 2⁻¹ ^ (d - 1)`. Now simply "write z in binary".
-
 ## TODO
 
 Switch to ennreal and then prove 6 lemmas for the first result. All the
@@ -116,6 +101,19 @@ namespace psi_aux_lemma
 
 -/
 
+open_locale ennreal
+
+lemma step1 (f : ℤ → ℝ) (r : ℝ≥0) (hr1 : r < 1) (hr2 : 2⁻¹ < r) (d : ℤ)
+  (hdf : ∀ n, n < d → f n = 0) (hconv : summable (λ n : ℤ, ∥f n∥₊ * r ^ n))
+  (hzero : ∑' n, f n *  2⁻¹ ^ n = 0) :
+∑' (n : ℤ),
+    ((∥ite (d ≤ n) ((finset.range (n - d).nat_abs.succ).sum (λ (l : ℕ), f (n - 1 - ↑l) * 2 ^ l)) 0∥₊ *
+      r ^ n : ℝ≥0) : ℝ≥0∞) ≤
+  ((2 - r⁻¹)⁻¹ * ∑' (n : ℤ), ∥f n∥₊ * r ^ n : ℝ≥0) :=
+begin
+  sorry
+end
+
 lemma key_tsum_lemma (f : ℤ → ℝ) (r : ℝ≥0) (hr1 : r < 1) (hr2 : 2⁻¹ < r) (d : ℤ)
   (hdf : ∀ n, n < d → f n = 0) (hconv : summable (λ n : ℤ, ∥f n∥₊ * r ^ n))
   (hzero : ∑' n, f n *  2⁻¹ ^ n = 0) :
@@ -123,7 +121,18 @@ lemma key_tsum_lemma (f : ℤ → ℝ) (r : ℝ≥0) (hr1 : r < 1) (hr2 : 2⁻¹
   (λ (l : ℕ), f (n - 1 - ↑l) * 2 ^ l)) 0∥₊ * r ^ n ≤
   (2 - r⁻¹)⁻¹ * ∑' n, ∥f n∥₊ * r ^ n :=
 begin
-  sorry
+  have := step1 f r hr1 hr2 d hdf hconv hzero,
+  have this2 : ∑' (n : ℤ),
+  (((∥ite (d ≤ n) ((finset.range (n - d).nat_abs.succ).sum (λ (l : ℕ), f (n - 1 - ↑l) * 2 ^ l)) 0∥₊ *
+       r ^ n) : ℝ≥0) : ℝ≥0∞) < ⊤,
+  { refine lt_of_le_of_lt this _,
+    exact ennreal.coe_lt_top,
+  },
+  have this3 : summable (λ n, ((∥ite (d ≤ n) ((finset.range (n - d).nat_abs.succ).sum (λ (l : ℕ), f (n - 1 - ↑l) * 2 ^ l)) 0∥₊ *
+       r ^ n) : ℝ≥0)) := ennreal.tsum_coe_ne_top_iff_summable.mp this2.ne,
+  rw ← ennreal.coe_le_coe,
+  convert this,
+  apply ennreal.coe_tsum this3,
 end
 /-
 
@@ -153,13 +162,10 @@ end psi_aux_lemma
 
 -/
 
-example (a b : ℤ) (ha : 0 < a) : b - a < b := sub_lt_self b ha
-
 namespace theta_aux_lemma
 
 -- Here is the fact which Clausen/Scholze need for the application to "splitting θ
 -- in a bounded way".
--- proof: bounded above by sum of a GP
 
 theorem tsum_le (r : ℝ≥0) {s : ℝ≥0} (hs0 : 0 < s) (hs : s < 1) :
 ∑' (n : ℤ), (nnreal.int.binary r n : ℝ≥0) * s ^ n ≤
