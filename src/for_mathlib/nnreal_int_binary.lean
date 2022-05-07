@@ -64,6 +64,23 @@ end
 
 open_locale nnreal
 
+/-
+zpow_le_zpow' :
+  ∀ {α : Type u_1} [_inst_1 : ordered_comm_group α] {n : ℤ} {a b : α}, 0 ≤ n → a ≤ b → a ^ n ≤ b ^ n
+-/
+
+def nnreal.zpow_le_zpow' {n : ℤ} {a b : ℝ≥0} (hn : 0 ≤ n) (hab : a ≤ b) : a ^ n ≤ b ^ n :=
+begin
+  let m := n.nat_abs,
+  rw int.eq_nat_abs_of_zero_le hn,
+  suffices : a ^ m ≤ b ^ m,
+    assumption_mod_cast,
+  generalize : m = d,
+  induction d with d hd, -- I can't believe I'm doing this. Where is this??
+  { refl, },
+  sorry,
+end
+
 -- lemma is false if w = 1 and n = any and r = 0
 -- lemma is false if w = 0 and n ≠ 0 and r = 2⁻¹
 lemma nnreal.zpow_le_iff_log {w r : ℝ≥0} (hw : 0 < w) (hr : 0 < r) {n : ℤ} :
