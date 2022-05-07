@@ -96,6 +96,10 @@ apply_nolint Profinite.image_stabilizes inhabited_nonempty
 -- for_mathlib/Profinite/disjoint_union.lean
 apply_nolint Profinite.sigma_iso_of_equiv_aux unused_arguments
 
+-- for_mathlib/SemiNormedGroup.lean
+apply_nolint SemiNormedGroup.metric_space fails_quickly unused_arguments
+apply_nolint SemiNormedGroup.normed_group fails_quickly
+
 -- for_mathlib/abelian_category.lean
 apply_nolint category_theory.limits.is_zero_of_iso_of_zero unused_arguments
 apply_nolint category_theory.limits.preserves_zero_of_preserves_initial instance_priority
@@ -159,6 +163,7 @@ apply_nolint category_theory.exact_seq.w def_lemma
 apply_nolint homological_complex.complex_to_functor_functor unused_arguments
 
 -- for_mathlib/homology_iso.lean
+apply_nolint category_theory.homology_iso_map def_lemma
 apply_nolint category_theory.kernel_lift_eq unused_arguments
 
 -- for_mathlib/horseshoe.lean
@@ -222,9 +227,6 @@ apply_nolint category_theory.snake_diagram.mk_functor.square_commutes_row unused
 -- for_mathlib/snake_lemma3.lean
 apply_nolint category_theory.snake.row_exact₁_aux unused_arguments
 apply_nolint category_theory.snake.row_exact₂_aux unused_arguments
-
--- for_mathlib/split_exact.lean
-apply_nolint category_theory.split.map def_lemma
 
 -- for_mathlib/triangle.lean
 apply_nolint category_theory.triangulated.triangle.obj₁_functor unused_arguments
@@ -304,8 +306,6 @@ apply_nolint SemiNormedGroup.normed_with_aut_LocallyConstant fails_quickly
 
 -- locally_constant/completion.lean
 apply_nolint LCC unused_arguments
-apply_nolint SemiNormedGroup.metric_space fails_quickly unused_arguments
-apply_nolint SemiNormedGroup.normed_group fails_quickly
 apply_nolint continuous_map.bdd_above_range_norm unused_arguments
 apply_nolint locally_constant.to_continuous_map_dense_range unused_arguments
 apply_nolint locally_constant.to_continuous_map_isometry unused_arguments
