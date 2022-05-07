@@ -3,7 +3,7 @@ import category_theory.limits.preserves.shapes.biproducts
 
 import for_mathlib.derived.les2
 import for_mathlib.derived.les_facts
-import for_mathlib.salamander
+-- import for_mathlib.salamander
 .
 
 noncomputable theory
@@ -169,7 +169,7 @@ begin
     refine _ ≪≫ e',
     refine _ ≪≫ (homology_iso _ (-i-1) (-i) (-i+1) _ _).unop,
     rotate, { dsimp, apply sub_add_cancel }, { dsimp, refl },
-    refine _ ≪≫ (LBC.homology_unop_iso _ _ _).unop,
+    refine _ ≪≫ (homology_unop_iso _ _ _).unop,
     refine (preadditive_yoneda.map_iso _).app (op P) ≪≫ _,
     { exact (single 𝓐 (-i)).obj B },
     { exact (shift_single_iso 0 i).app B ≪≫ eq_to_iso (by rw zero_sub) },

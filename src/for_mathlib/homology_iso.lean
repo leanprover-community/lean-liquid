@@ -120,4 +120,28 @@ begin
       arrow.iso_mk_inv_right, f.next_eq hjk], }
 end
 
+variables {𝓐 : Type*} [category 𝓐] [abelian 𝓐]
+
+open opposite
+
+omit hij hjk
+
+@[simps]
+def homology_unop_iso {A B C : 𝓐ᵒᵖ} (f : A ⟶ B) (g : B ⟶ C) (w : f ≫ g = 0) :
+  homology f g w ≅ opposite.op (homology g.unop f.unop (by { rw [← unop_comp, w, unop_zero] })) :=
+homology_iso_cokernel_lift _ _ _ ≪≫
+  cokernel.map_iso _ (cokernel.desc g.unop f.unop _).op (iso.refl _) (cokernel_unop_op _).symm
+    (by { apply quiver.hom.unop_inj, ext,
+      simp only [unop_comp, iso.symm_hom, cokernel_unop_op_inv, quiver.hom.unop_op,
+        cokernel.π_desc_assoc, iso.refl_hom, category.id_comp, cokernel.π_desc],
+      rw [← unop_comp, kernel.lift_ι] }) ≪≫
+  cokernel_op_op _ ≪≫
+  (homology_iso_kernel_desc _ _ _).op
+
+def homology_op_iso {A B C : 𝓐} (f : A ⟶ B) (g : B ⟶ C) (w : f ≫ g = 0) :
+  homology g.op f.op (by rw [← op_comp, w, op_zero]) ≅ opposite.op (homology f g w) :=
+homology_unop_iso _ _ _
+
+attribute [reassoc] cokernel.map_desc
+
 end category_theory

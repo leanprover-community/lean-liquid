@@ -2,6 +2,7 @@ import category_theory.abelian.homology
 
 import for_mathlib.exact_seq3
 import for_mathlib.homology_exact
+import for_mathlib.homology_iso
 .
 
 noncomputable theory
@@ -508,48 +509,6 @@ variables {f'₅₁ : A'₅₁ ⟶ A'₅₂} {f'₅₂ : A'₅₂ ⟶ A'₅₃} 
 
 
 open opposite
-
--- #check kernel_op_op
--- -- kernel f.op ≅ opposite.op (cokernel f)
-
--- #check kernel_op_unop
--- -- opposite.unop (kernel f.op) ≅ cokernel f
-
--- #check kernel_unop_op
--- -- opposite.op (kernel g.unop) ≅ cokernel g
-
--- #check kernel_unop_unop
--- -- kernel g.unop ≅ opposite.unop (cokernel g)
-
--- #check cokernel_op_op
--- -- cokernel f.op ≅ opposite.op (kernel f)
-
--- #check cokernel_op_unop
--- -- opposite.unop (cokernel f.op) ≅ kernel f
-
--- #check cokernel_unop_op
--- -- opposite.op (cokernel g.unop) ≅ kernel g
-
--- #check cokernel_unop_unop
--- -- cokernel g.unop ≅ opposite.unop (kernel g)
-
-@[simps]
-def homology_unop_iso {A B C : 𝓐ᵒᵖ} (f : A ⟶ B) (g : B ⟶ C) (w : f ≫ g = 0) :
-  homology f g w ≅ op (homology g.unop f.unop (by { rw [← unop_comp, w, unop_zero] })) :=
-homology_iso_cokernel_lift _ _ _ ≪≫
-  cokernel.map_iso _ (cokernel.desc g.unop f.unop _).op (iso.refl _) (cokernel_unop_op _).symm
-    (by { apply quiver.hom.unop_inj, ext,
-      simp only [unop_comp, iso.symm_hom, cokernel_unop_op_inv, quiver.hom.unop_op,
-        cokernel.π_desc_assoc, iso.refl_hom, category.id_comp, cokernel.π_desc],
-      rw [← unop_comp, kernel.lift_ι] }) ≪≫
-  cokernel_op_op _ ≪≫
-  (homology_iso_kernel_desc _ _ _).op
-
-def homology_op_iso {A B C : 𝓐} (f : A ⟶ B) (g : B ⟶ C) (w : f ≫ g = 0) :
-  homology g.op f.op (by rw [← op_comp, w, op_zero]) ≅ op (homology f g w) :=
-homology_unop_iso _ _ _
-
-attribute [reassoc] cokernel.map_desc
 
 lemma op_H_to_don (lbc : LBC f'₁₁ g'₁₁ g'₁₂ f'₂₁ f'₂₂ g'₂₂ g'₂₃ f'₃₂) :
   lbc.H_to_don = (homology_unop_iso _ _ _).hom ≫ lbc.unop.rcp_to_H.op ≫
