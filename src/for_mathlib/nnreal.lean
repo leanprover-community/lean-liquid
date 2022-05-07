@@ -66,6 +66,13 @@ begin
   simp [hi' x hx],
 end
 
+lemma nnreal.summable_subtype {β : Type*} {f : β → ℝ≥0} (hf : summable f)
+  (s : set β) :  summable (f ∘ (coe : s → β)) :=
+begin
+  rw ← summable_coe at ⊢ hf,
+  exact hf.subtype s,
+end
+
 lemma nnreal.mul_le_mul_right {a b : ℝ≥0} (h : a ≤ b) (c : ℝ≥0) : a * c ≤ b * c :=
 begin
   suffices : (a : ℝ) * c ≤ b * c, by assumption_mod_cast,

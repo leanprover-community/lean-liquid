@@ -103,12 +103,77 @@ namespace psi_aux_lemma
 
 open_locale ennreal
 
-lemma step4 {f : ℤ → ℝ} (n : ℤ) {r : ℝ≥0} (hr1 : r < 1) (hr2 : 2⁻¹ < r)
+lemma step5 {f : ℤ → ℝ} {d : ℤ} {r : ℝ≥0} (hr2 : 2⁻¹ < r) (hdf : ∀ n, n < d → f n = 0)
   (hconv : summable (λ n : ℤ, ∥f n∥₊ * r ^ n)) (hzero : ∑' n, f n *  2⁻¹ ^ n = 0) :
-  ∑' (l : ℕ), f (n - 1 - ↑l) * 2 ^ l + ∑' (m : ℕ), f (n + m) * 2 ^ m =
-  0 :=
+  summable (λ (x : ℤ), f x * 2⁻¹ ^ x) :=
 begin
-  sorry
+  rw ← summable_subtype_and_compl,
+  change summable (λ x : {n : ℤ | n < 0}, _) ∧ _,
+  split,
+  { let F : finset ↥{n : ℤ | n < 0} := finset.preimage (finset.Ico d 0 : finset ℤ) coe
+    (set.inj_on_of_injective subtype.coe_injective _),
+    apply summable_of_ne_finset_zero,
+    rintro b (hb : b ∉ F),
+    convert zero_mul _,
+    apply hdf,
+    by_contra hbd, push_neg at hbd,
+    apply hb,
+    rw finset.mem_preimage,
+    rw finset.mem_Ico,
+    exact ⟨hbd, b.2⟩ },
+  { apply summable_of_summable_nnnorm,
+
+    have := nnreal.summable_subtype hconv {n : ℤ | n < 0}ᶜ,
+    refine nnreal.summable_of_le _ this,
+    rintro ⟨b, hb : ¬ b < 0⟩,
+    push_neg at hb,
+    rw nnnorm_mul,
+    suffices : ∥f b∥₊ * (2 ^ b)⁻¹ ≤ ∥f b∥₊ * r ^ b,
+    { simpa },
+--    apply summable_of_nonneg_of_le,
+    sorry },
+end
+
+lemma step4 {f : ℤ → ℝ} {n d : ℤ} {r : ℝ≥0} (hr1 : r < 1) (hr2 : 2⁻¹ < r)
+  (hdf : ∀ n, n < d → f n = 0)
+  (hconv : summable (λ n : ℤ, ∥f n∥₊ * r ^ n)) (hzero : ∑' n, f n *  2⁻¹ ^ n = 0) :
+  ∑' (l : ℕ), f (n - 1 - ↑l) * 2 ^ l =  2⁻¹ * -∑' (m : ℕ), f (n + m) * 2⁻¹ ^ m :=
+begin
+  have : ∀ l : ℕ, (2 : ℝ) ^ l = 2⁻¹ ^ (n - 1 - l) * (2⁻¹ * 2 ^ n),
+    sorry,
+  --refine eq.trans _ _, swap,
+  --simp_rw [this, ← mul_assoc],
+  conv_lhs begin
+    congr,
+    funext,
+    rw [this, ← mul_assoc],
+  end, clear this,
+  rw tsum_mul_right,
+  have : ∀ m : ℕ, (2⁻¹ : ℝ) ^ m = 2⁻¹ ^ (n + m) * 2 ^ n,
+    sorry,
+  conv_rhs begin
+    congr, skip,
+    congr,
+    congr,
+    funext,
+    rw [this, ← mul_assoc],
+  end, clear this,
+  rw [mul_comm, mul_assoc, tsum_mul_right, ← neg_mul, mul_comm ((2 : ℝ) ^ n)],
+  congr,
+  apply eq_neg_of_add_eq_zero,
+  rw [add_comm, ← hzero],
+  rw ← tsum_add_tsum_compl ((step5 hr2 hdf hconv hzero).comp_injective subtype.coe_injective :
+    summable ((_ : ℤ → ℝ) ∘ (coe : {z : ℤ | n ≤ z} → ℤ)))
+    ((step5 hr2 hdf hconv hzero).comp_injective subtype.coe_injective),
+  { congr' 1,
+    { rw ← ((nat.equiv_le_int n).tsum_eq : _ → (_ : ℝ) = _),
+      congr', ext b,
+      rw add_comm n,
+      refl, },
+    { rw ← ((nat.equiv_le_int_compl n).tsum_eq : _ → (_ : ℝ) = _),
+      congr', ext b,
+      rw (show n - 1 - b = n - (b + 1), by ring),
+      refl, } },
 end
 
 -- second line ≤ last line
@@ -117,9 +182,14 @@ lemma step3 {f : ℤ → ℝ} {r : ℝ≥0} (hr1 : r < 1) (hr2 : 2⁻¹ < r) {d 
   (hzero : ∑' n, f n *  2⁻¹ ^ n = 0) :
 ∑' (n : ℤ), ((∥ite (d ≤ n) (∑' (l : ℕ), f (n - 1 - ↑l) * 2 ^ l) 0∥₊ * r ^ n : ℝ≥0) : ℝ≥0∞) ≤
   ((2 - r⁻¹)⁻¹ * ∑' (n : ℤ), ∥f n∥₊ * r ^ n : ℝ≥0) :=
-sorry
+begin
+  simp_rw step4 hr1 hr2 hdf hconv hzero,
+  push_cast, -- maybe?
+  sorry,
+end
 
--- first equality in the proof
+
+-- first line equals second line
 lemma step2 {f : ℤ → ℝ} {n d : ℤ} (hn : d ≤ n) (hdf : ∀ n, n < d → f n = 0) :
   (finset.range (n - d).nat_abs.succ).sum (λ (l : ℕ), f (n - 1 - ↑l) * 2 ^ l) =
   ∑' (l : ℕ), f (n - 1 - l) * 2 ^ l :=
@@ -160,6 +230,7 @@ begin
   apply step3 hr1 hr2 hdf hconv hzero,
 end
 
+-- first line ≤ last line
 lemma key_tsum_lemma (f : ℤ → ℝ) (r : ℝ≥0) (hr1 : r < 1) (hr2 : 2⁻¹ < r) (d : ℤ)
   (hdf : ∀ n, n < d → f n = 0) (hconv : summable (λ n : ℤ, ∥f n∥₊ * r ^ n))
   (hzero : ∑' n, f n *  2⁻¹ ^ n = 0) :
