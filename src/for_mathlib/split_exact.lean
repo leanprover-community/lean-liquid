@@ -160,10 +160,15 @@ begin
   simp only [← F.map_comp, ← F.map_id, ← F.map_add, F.map_zero, *, eq_self_iff_true, and_true],
 end
 
--- TODO move this
+/-- The sequence `A ⟶ A ⊞ B ⟶ B` is exact. -/
 lemma exact_inl_snd [has_binary_biproducts 𝒜] (A B : 𝒜) :
   exact (biprod.inl : A ⟶ A ⊞ B) biprod.snd :=
 exact_of_split _ _ biprod.inr biprod.fst biprod.inl_snd biprod.total
+
+/-- The sequence `B ⟶ A ⊞ B ⟶ A` is exact. -/
+lemma exact_inr_fst [has_binary_biproducts 𝒜] (A B : 𝒜) :
+  exact (biprod.inr : B ⟶ A ⊞ B) biprod.fst :=
+exact_of_split _ _ biprod.inl biprod.snd biprod.inr_fst ((add_comm _ _).trans biprod.total)
 
 end preadditive
 
@@ -384,7 +389,7 @@ section
 variables [abelian 𝒜]
 
 /-- A short exact sequence that is left split admits a splitting. -/
-def left_split.splitting (h : left_split f g) : splitting f g :=
+def left_split.splitting {f : A ⟶ B} {g : B ⟶ C} (h : left_split f g) : splitting f g :=
 splitting.mk' h.short_exact (biprod.lift h.left_split.some g)
 (by { ext,
   { simpa only [biprod.inl_fst, biprod.lift_fst, category.assoc] using h.left_split.some_spec },
