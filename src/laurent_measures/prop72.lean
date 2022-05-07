@@ -103,7 +103,43 @@ namespace psi_aux_lemma
 
 open_locale ennreal
 
-lemma step1 (f : ℤ → ℝ) (r : ℝ≥0) (hr1 : r < 1) (hr2 : 2⁻¹ < r) (d : ℤ)
+lemma step4 {f : ℤ → ℝ} (n : ℤ) {r : ℝ≥0} (hr1 : r < 1) (hr2 : 2⁻¹ < r)
+  (hconv : summable (λ n : ℤ, ∥f n∥₊ * r ^ n)) (hzero : ∑' n, f n *  2⁻¹ ^ n = 0) :
+  ∑' (l : ℕ), f (n - 1 - ↑l) * 2 ^ l + ∑' (m : ℕ), f (n + m) * 2 ^ m =
+  0 :=
+begin
+  sorry
+end
+
+-- second line ≤ last line
+lemma step3 {f : ℤ → ℝ} {r : ℝ≥0} (hr1 : r < 1) (hr2 : 2⁻¹ < r) {d : ℤ}
+  (hdf : ∀ n, n < d → f n = 0) (hconv : summable (λ n : ℤ, ∥f n∥₊ * r ^ n))
+  (hzero : ∑' n, f n *  2⁻¹ ^ n = 0) :
+∑' (n : ℤ), ((∥ite (d ≤ n) (∑' (l : ℕ), f (n - 1 - ↑l) * 2 ^ l) 0∥₊ * r ^ n : ℝ≥0) : ℝ≥0∞) ≤
+  ((2 - r⁻¹)⁻¹ * ∑' (n : ℤ), ∥f n∥₊ * r ^ n : ℝ≥0) :=
+sorry
+
+-- first equality in the proof
+lemma step2 {f : ℤ → ℝ} {n d : ℤ} (hn : d ≤ n) (hdf : ∀ n, n < d → f n = 0) :
+  (finset.range (n - d).nat_abs.succ).sum (λ (l : ℕ), f (n - 1 - ↑l) * 2 ^ l) =
+  ∑' (l : ℕ), f (n - 1 - l) * 2 ^ l :=
+begin
+  apply (tsum_eq_sum _ : (_ : ℝ) = _).symm,
+  intros b hb,
+  convert zero_mul ((2 : ℝ) ^ b),
+  apply hdf,
+  by_contra hbd,
+  push_neg at hbd,
+  apply hb,
+  rw [finset.mem_range, nat.lt_succ_iff],
+  suffices : (b : ℤ) ≤ ((n - d).nat_abs : ℤ),
+  { assumption_mod_cast, },
+  rw ← int.eq_nat_abs_of_zero_le;
+  linarith,
+end
+
+-- coerce to ℝ≥0∞
+lemma step1 {f : ℤ → ℝ} {r : ℝ≥0} (hr1 : r < 1) (hr2 : 2⁻¹ < r) {d : ℤ}
   (hdf : ∀ n, n < d → f n = 0) (hconv : summable (λ n : ℤ, ∥f n∥₊ * r ^ n))
   (hzero : ∑' n, f n *  2⁻¹ ^ n = 0) :
 ∑' (n : ℤ),
@@ -111,7 +147,17 @@ lemma step1 (f : ℤ → ℝ) (r : ℝ≥0) (hr1 : r < 1) (hr2 : 2⁻¹ < r) (d 
       r ^ n : ℝ≥0) : ℝ≥0∞) ≤
   ((2 - r⁻¹)⁻¹ * ∑' (n : ℤ), ∥f n∥₊ * r ^ n : ℝ≥0) :=
 begin
-  sorry
+  have : ∀ n,
+  ∥ite (d ≤ n) ((finset.range (n - d).nat_abs.succ).sum (λ (l : ℕ), f (n - 1 - ↑l) * 2 ^ l)) 0∥₊ * r ^ n
+  =
+  ∥ite (d ≤ n) (∑' (l : ℕ), f (n - 1 - l) * 2 ^ l) 0∥₊ * r ^ n,
+  { intro n,
+    congr' 2,
+    split_ifs with hn,
+    { rw step2 hn hdf },
+    { refl } },
+  simp_rw this,
+  apply step3 hr1 hr2 hdf hconv hzero,
 end
 
 lemma key_tsum_lemma (f : ℤ → ℝ) (r : ℝ≥0) (hr1 : r < 1) (hr2 : 2⁻¹ < r) (d : ℤ)
@@ -121,7 +167,7 @@ lemma key_tsum_lemma (f : ℤ → ℝ) (r : ℝ≥0) (hr1 : r < 1) (hr2 : 2⁻¹
   (λ (l : ℕ), f (n - 1 - ↑l) * 2 ^ l)) 0∥₊ * r ^ n ≤
   (2 - r⁻¹)⁻¹ * ∑' n, ∥f n∥₊ * r ^ n :=
 begin
-  have := step1 f r hr1 hr2 d hdf hconv hzero,
+  have := step1 hr1 hr2 hdf hconv hzero,
   have this2 : ∑' (n : ℤ),
   (((∥ite (d ≤ n) ((finset.range (n - d).nat_abs.succ).sum (λ (l : ℕ), f (n - 1 - ↑l) * 2 ^ l)) 0∥₊ *
        r ^ n) : ℝ≥0) : ℝ≥0∞) < ⊤,
