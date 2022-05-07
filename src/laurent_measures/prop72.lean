@@ -122,7 +122,6 @@ begin
     rw finset.mem_Ico,
     exact ⟨hbd, b.2⟩ },
   { apply summable_of_summable_nnnorm,
-
     have := nnreal.summable_subtype hconv {n : ℤ | n < 0}ᶜ,
     refine nnreal.summable_of_le _ this,
     rintro ⟨b, hb : ¬ b < 0⟩,
@@ -130,8 +129,9 @@ begin
     rw nnnorm_mul,
     suffices : ∥f b∥₊ * (2 ^ b)⁻¹ ≤ ∥f b∥₊ * r ^ b,
     { simpa },
---    apply summable_of_nonneg_of_le,
-    sorry },
+    apply nnreal.mul_le_mul_left,
+    rw ← inv_zpow₀,
+    apply nnreal.zpow_le_zpow' hb hr2.le, },
 end
 
 lemma step4 {f : ℤ → ℝ} {n d : ℤ} {r : ℝ≥0} (hr1 : r < 1) (hr2 : 2⁻¹ < r)
@@ -141,8 +141,6 @@ lemma step4 {f : ℤ → ℝ} {n d : ℤ} {r : ℝ≥0} (hr1 : r < 1) (hr2 : 2�
 begin
   have : ∀ l : ℕ, (2 : ℝ) ^ l = 2⁻¹ ^ (n - 1 - l) * (2⁻¹ * 2 ^ n),
     sorry,
-  --refine eq.trans _ _, swap,
-  --simp_rw [this, ← mul_assoc],
   conv_lhs begin
     congr,
     funext,

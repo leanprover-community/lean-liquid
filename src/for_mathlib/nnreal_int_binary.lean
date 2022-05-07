@@ -78,7 +78,8 @@ begin
   generalize : m = d,
   induction d with d hd, -- I can't believe I'm doing this. Where is this??
   { refl, },
-  sorry,
+  { rw [pow_succ, pow_succ],
+    exact mul_le_mul' hab hd, }
 end
 
 -- lemma is false if w = 1 and n = any and r = 0
