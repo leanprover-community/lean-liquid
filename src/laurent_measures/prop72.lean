@@ -103,8 +103,19 @@ namespace psi_aux_lemma
 
 open_locale ennreal
 
+-- line 5 ≤ line 10
+lemma step6 {f : ℤ → ℝ} {d : ℤ} {r : ℝ≥0} (hr2 : 2⁻¹ < r) (hdf : ∀ n, n < d → f n = 0)
+  (hconv : summable (λ n : ℤ, ∥f n∥₊ * r ^ n)) :
+(2⁻¹ : ℝ≥0∞) * ∑' (i j : ℕ), ↑∥f (d + ↑i + ↑j) * 2⁻¹ ^ j∥₊ * ↑(r ^ (d + ↑i)) ≤
+  ↑(2 - r⁻¹)⁻¹ * ∑' (a : ℤ), ↑(∥f a∥₊ * r ^ a) :=
+begin
+  rw ennreal.tsum_comm,
+  -- woohoo, I just interchanged the sums
+  sorry
+end
+
 lemma step5 {f : ℤ → ℝ} {d : ℤ} {r : ℝ≥0} (hr2 : 2⁻¹ < r) (hdf : ∀ n, n < d → f n = 0)
-  (hconv : summable (λ n : ℤ, ∥f n∥₊ * r ^ n)) (hzero : ∑' n, f n *  2⁻¹ ^ n = 0) :
+  (hconv : summable (λ n : ℤ, ∥f n∥₊ * r ^ n)) :
   summable (λ (x : ℤ), f x * 2⁻¹ ^ x) :=
 begin
   rw ← summable_subtype_and_compl,
@@ -133,14 +144,22 @@ begin
     rw ← inv_zpow₀,
     apply nnreal.zpow_le_zpow' hb hr2.le, },
 end
+example (r : ℝ≥0) (n : ℕ) : r ^ (n : ℤ) = r ^ n := zpow_coe_nat r n
+noncomputable instance xxx : div_inv_monoid ℝ≥0 := infer_instance
 
+--lemma zpow_
 lemma step4 {f : ℤ → ℝ} {n d : ℤ} {r : ℝ≥0} (hr1 : r < 1) (hr2 : 2⁻¹ < r)
   (hdf : ∀ n, n < d → f n = 0)
   (hconv : summable (λ n : ℤ, ∥f n∥₊ * r ^ n)) (hzero : ∑' n, f n *  2⁻¹ ^ n = 0) :
   ∑' (l : ℕ), f (n - 1 - ↑l) * 2 ^ l =  2⁻¹ * -∑' (m : ℕ), f (n + m) * 2⁻¹ ^ m :=
 begin
   have : ∀ l : ℕ, (2 : ℝ) ^ l = 2⁻¹ ^ (n - 1 - l) * (2⁻¹ * 2 ^ n),
-    sorry,
+  { intro l,
+    rw [inv_zpow₀, ← zpow_neg₀, ← zpow_neg_one, ← zpow_coe_nat],
+    push_cast,
+    rw ← zpow_add₀ (two_ne_zero : (2 : ℝ) ≠ 0),
+    rw ← zpow_add₀ (two_ne_zero : (2 : ℝ) ≠ 0),
+    ring_nf, },
   conv_lhs begin
     congr,
     funext,
@@ -148,7 +167,10 @@ begin
   end, clear this,
   rw tsum_mul_right,
   have : ∀ m : ℕ, (2⁻¹ : ℝ) ^ m = 2⁻¹ ^ (n + m) * 2 ^ n,
-    sorry,
+  { intro m,
+    rw [inv_zpow₀, ← zpow_neg₀, ← zpow_coe_nat, ← zpow_add₀ (two_ne_zero : (2 : ℝ) ≠ 0),
+      inv_zpow₀, ← zpow_neg₀],
+    ring_nf, },
   conv_rhs begin
     congr, skip,
     congr,
@@ -160,9 +182,9 @@ begin
   congr,
   apply eq_neg_of_add_eq_zero,
   rw [add_comm, ← hzero],
-  rw ← tsum_add_tsum_compl ((step5 hr2 hdf hconv hzero).comp_injective subtype.coe_injective :
+  rw ← tsum_add_tsum_compl ((step5 hr2 hdf hconv).comp_injective subtype.coe_injective :
     summable ((_ : ℤ → ℝ) ∘ (coe : {z : ℤ | n ≤ z} → ℤ)))
-    ((step5 hr2 hdf hconv hzero).comp_injective subtype.coe_injective),
+    ((step5 hr2 hdf hconv).comp_injective subtype.coe_injective),
   { congr' 1,
     { rw ← ((nat.equiv_le_int n).tsum_eq : _ → (_ : ℝ) = _),
       congr', ext b,
@@ -182,8 +204,68 @@ lemma step3 {f : ℤ → ℝ} {r : ℝ≥0} (hr1 : r < 1) (hr2 : 2⁻¹ < r) {d 
   ((2 - r⁻¹)⁻¹ * ∑' (n : ℤ), ∥f n∥₊ * r ^ n : ℝ≥0) :=
 begin
   simp_rw step4 hr1 hr2 hdf hconv hzero,
-  push_cast, -- maybe?
-  sorry,
+  -- n - d = m
+  rw tsum_eq_tsum_of_ne_zero_bij (λ m : function.support
+  (λ m : ℕ, ((∥(2⁻¹ : ℝ) * (-∑' (l : ℕ), f (d + m + ↑l) * 2⁻¹ ^ l)∥₊ * r ^ (d + m) : ℝ≥0) : ℝ≥0∞)),
+  d + m.1),
+  { dsimp only,
+    simp_rw [nnnorm_mul, nnnorm_neg],
+    push_cast,
+    simp only [nnnorm_inv, real.nnnorm_two, ennreal.coe_inv, ne.def, bit0_eq_zero, one_ne_zero,
+      not_false_iff, ennreal.coe_bit0, ennreal.coe_one],
+    have summable_half : ∀ t : ℤ, summable (λ (x : ℕ), f (t + ↑x) * 2⁻¹ ^ x),
+    { intro t,
+      rw summable_mul_right_iff (show (2 : ℝ)⁻¹ ^ t ≠ 0, from zpow_ne_zero _ (by norm_num)),
+      simp_rw [mul_assoc, ← zpow_coe_nat],
+      simp_rw [← zpow_add₀ (show (2 : ℝ)⁻¹ ≠ 0, by norm_num), add_comm _ t],
+      exact (step5 hr2 hdf hconv).comp_injective (show function.injective (λ x : ℕ, t + x),
+      by {intros x y hxy, simpa using hxy, }), },
+    suffices :
+      ∑' (m : ℕ), (2⁻¹ : ℝ≥0∞) * ↑(∑' (l : ℕ), ∥f (d + ↑m + ↑l) * (2⁻¹ ^ l)∥₊ : ℝ≥0) *
+        ↑(r ^ (d + ↑m)) ≤ ↑(2 - r⁻¹)⁻¹ * ↑∑' (n : ℤ), ∥f n∥₊ * r ^ n,
+    { refine le_trans _ this,
+      apply ennreal.tsum_le_tsum,
+      intro m,
+      apply ennreal.mul_le_mul_of_right,
+      apply ennreal.mul_le_mul_of_left,
+      norm_cast,
+      apply nnnorm_tsum_le,
+      rw ← nnreal.summable_iff_summable_nnnorm,
+      apply summable_half, },
+    rw ennreal.coe_tsum hconv, dsimp only,
+    conv_lhs begin
+      congr,
+      funext,
+      rw ennreal.coe_tsum (show summable (λ (l : ℕ), ∥f (d + m + ↑l) * 2⁻¹ ^ l∥₊), begin
+      rw ← nnreal.summable_iff_summable_nnnorm,
+      apply summable_half, end),
+    end,
+    dsimp only,
+    simp_rw mul_assoc,
+    rw ennreal.tsum_mul_left,
+    simp_rw ← ennreal.tsum_mul_right,
+    apply step6 hr2 hdf hconv, },
+  { rintro ⟨x, _⟩ ⟨y, _⟩ h,
+    have hxy : x = y,
+    { simpa using h },
+    subst hxy },
+  { rintro n hn,
+    rw function.mem_support at hn,
+    split_ifs at hn with hdn,
+    { rw set.mem_range,
+      let m := (n - d).nat_abs,
+      have hm : d + m = n,
+      { apply add_eq_of_eq_sub',
+        rw [int.nat_abs_of_nonneg],
+        exact sub_nonneg.mpr hdn, },
+      refine ⟨⟨m, _⟩, hm⟩,
+      rw function.mem_support,
+      convert hn,
+      rw hm, },
+    { exfalso,
+      apply hn,
+      simp, } },
+  { simp, },
 end
 
 

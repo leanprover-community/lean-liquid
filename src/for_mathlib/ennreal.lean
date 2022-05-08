@@ -26,3 +26,24 @@ by rw [ summable.has_sum_iff ennreal.summable, summable.has_sum_iff ennreal.summ
 --   -- wrong idea have := summable (λ ab : α × β, F ab.1 ab.2),
 --   admit,
 -- end
+
+lemma ennreal.mul_le_mul_of_right {a b c : ℝ≥0∞} (hab : a ≤ b) : a * c ≤ b * c :=
+begin
+  rcases eq_or_ne c 0 with (rfl | hc0),
+  { simp },
+  { rcases eq_or_ne c ⊤ with (rfl | hctop),
+    { rw [@ennreal.mul_top b],
+      split_ifs with hb,
+      { subst hb,
+        change a ≤ ⊥ at hab,
+        rw le_bot_iff at hab,
+        simp [hab], },
+      { exact le_top, } },
+    { rwa ennreal.mul_le_mul_right hc0 hctop }, },
+end
+
+lemma ennreal.mul_le_mul_of_left {a b c : ℝ≥0∞} (hab : a ≤ b) : c * a ≤ c * b :=
+begin
+  rw [mul_comm, mul_comm c],
+  exact ennreal.mul_le_mul_of_right hab,
+end

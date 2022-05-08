@@ -138,3 +138,11 @@ end
 lemma nnreal.tsum_le_tsum {X : Type*} {f g : X → ℝ≥0} (hle : ∀ x, f x ≤ g x)
   (hsummable : summable g) : ∑' x, f x ≤ ∑' x, g x :=
 tsum_le_tsum hle (summable_of_le hle hsummable) hsummable
+
+lemma nnreal.summable_iff_summable_nnnorm {X : Type*} {f : X → ℝ} :
+  summable f ↔ summable (λ x, ∥f x∥₊) :=
+begin
+  rw ← summable_norm_iff,
+  rw ← summable_coe,
+  congr',
+end
