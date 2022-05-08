@@ -184,6 +184,9 @@ apply_nolint homological_complex.termwise_split_epi_retraction unused_arguments
 apply_nolint homological_complex.termwise_split_mono_desc unused_arguments
 apply_nolint homological_complex.termwise_split_mono_section unused_arguments
 
+-- for_mathlib/nnreal_int_binary.lean
+apply_nolint nnreal.zpow_le_zpow' def_lemma
+
 -- for_mathlib/order.lean
 apply_nolint Inter_eq inhabited_nonempty
 apply_nolint eventually_constant inhabited_nonempty
@@ -269,6 +272,9 @@ apply_nolint θ_section unused_arguments
 -- laurent_measures/basic.lean
 apply_nolint laurent_measures.bdd_filtration_spec def_lemma
 apply_nolint laurent_measures.laurent_measures.norm_nonneg dup_namespace
+
+-- laurent_measures/prop72.lean
+apply_nolint psi_aux_lemma.step5 unused_arguments
 
 -- laurent_measures/ses.lean
 apply_nolint laurent_measures_ses.U unused_arguments
