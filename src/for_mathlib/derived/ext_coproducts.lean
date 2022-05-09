@@ -131,4 +131,17 @@ instance {α : Type v} (X : α → homotopy_category A (complex_shape.up ℤ)) :
   has_coproduct X :=
 { exists_colimit := nonempty.intro $ ⟨colimit_cofan _, is_colimit_cofan _⟩ }
 
+instance is_K_projective_sigma {α : Type v}
+  (X : α → homotopy_category A (complex_shape.up ℤ))
+  [∀ a, is_K_projective (X a)] : is_K_projective (sigma_obj X) :=
+begin
+  constructor,
+  introsI Y hY f,
+  apply colimit.hom_ext,
+  intros a,
+  rw comp_zero,
+  apply is_K_projective.cond Y,
+  dsimp, apply_instance,
+end
+
 end homotopy_category
