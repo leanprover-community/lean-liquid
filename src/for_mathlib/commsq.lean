@@ -131,10 +131,12 @@ begin
       sum_str.inl_fst, category.comp_id, sum_str.inr_fst, comp_zero, add_zero,
       sum_str.inl_snd, neg_zero, sum_str.inr_snd, zero_add], },
   have he : epi sq₂.π, { rw [← sq₁.iso_inv_π sq₂], apply epi_comp },
-  have H : exact sq₂.ι sq₂.π,
+  have H : exact (-f₁₁ ≫ sq₂.sum.inl + g₁₁ ≫ sq₂.sum.inr) sq₂.π,
   { apply exact_of_iso_of_exact' _ _ _ _
       (iso.refl _) (sq₁.sum.iso sq₂.sum) (iso.refl _) _ _ h.exact,
-    { simp only [iso.refl_hom, category.id_comp, ι_iso_hom], },
+    { simp only [iso.refl_hom, comp_add, category.id_comp, sum_str.iso_hom, add_comp_assoc,
+        neg_comp, category.assoc, sum_str.inl_fst, sum_str.inr_fst, comp_zero, add_zero,
+        sum_str.inl_snd, neg_zero, sum_str.inr_snd, zero_add], },
     { simp only [iso.refl_hom, category.comp_id, iso_hom_π], }, },
   exactI ⟨H⟩
 end
