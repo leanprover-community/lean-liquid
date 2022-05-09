@@ -114,17 +114,25 @@ iso_hom_π _ _
 end iso
 
 def bicartesian (sq : commsq f₁₁ g₁₁ g₁₂ f₂₁) : Prop :=
-short_exact sq.ι sq.π
+short_exact (-f₁₁ ≫ sq.sum.inl + g₁₁ ≫ sq.sum.inr) sq.π
+
+open category_theory.preadditive
 
 lemma bicartesian.congr {sq₁ : commsq f₁₁ g₁₁ g₁₂ f₂₁}
   (h : sq₁.bicartesian) (sq₂ : commsq f₁₁ g₁₁ g₁₂ f₂₁) :
   sq₂.bicartesian :=
 begin
   have := h.mono, have := h.epi, resetI,
-  have hm : mono sq₂.ι, { rw [← sq₁.ι_iso_hom sq₂], apply mono_comp },
-  have he : epi  sq₂.π, { rw [← sq₁.iso_inv_π sq₂], apply epi_comp },
+  have hm : mono (-f₁₁ ≫ sq₂.sum.inl + g₁₁ ≫ sq₂.sum.inr),
+  { suffices : -f₁₁ ≫ sq₂.sum.inl + g₁₁ ≫ sq₂.sum.inr =
+      (-f₁₁ ≫ sq₁.sum.inl + g₁₁ ≫ sq₁.sum.inr) ≫ (sq₁.sum.iso sq₂.sum).hom,
+    { rw [this], apply mono_comp },
+    simp only [sum_str.iso_hom, comp_add, add_comp_assoc, neg_comp, category.assoc,
+      sum_str.inl_fst, category.comp_id, sum_str.inr_fst, comp_zero, add_zero,
+      sum_str.inl_snd, neg_zero, sum_str.inr_snd, zero_add], },
+  have he : epi sq₂.π, { rw [← sq₁.iso_inv_π sq₂], apply epi_comp },
   have H : exact sq₂.ι sq₂.π,
-  { apply preadditive.exact_of_iso_of_exact' _ _ _ _
+  { apply exact_of_iso_of_exact' _ _ _ _
       (iso.refl _) (sq₁.sum.iso sq₂.sum) (iso.refl _) _ _ h.exact,
     { simp only [iso.refl_hom, category.id_comp, ι_iso_hom], },
     { simp only [iso.refl_hom, category.comp_id, iso_hom_π], }, },
