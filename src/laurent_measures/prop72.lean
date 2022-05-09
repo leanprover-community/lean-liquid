@@ -101,8 +101,6 @@ namespace psi_aux_lemma
 
 -/
 
-#check @inv_mul_le_iff
-
 open_locale ennreal
 
 -- line 5 ≤ line 10
