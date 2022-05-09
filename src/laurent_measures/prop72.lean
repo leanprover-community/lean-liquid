@@ -105,8 +105,7 @@ open_locale ennreal
 
 -- line 7 ≤ line 10
 lemma step7 {f : ℤ → ℝ} {d : ℤ} {r : ℝ≥0} (hr2 : 2⁻¹ < r)
-  (hdf : ∀ (n : ℤ), n < d → f n = 0) -- not sure I use this
-  (hconv : summable (λ (n : ℤ), ∥f n∥₊ * r ^ n)) :
+  (hconv : summable (λ (n : ℤ), ∥f n∥₊ * r ^ n)) : -- do I use hconv??
   ∑' (b : ℕ),
       (∑' (i : ℕ),
            (∥f (d + ↑b + ↑i)∥₊ : ℝ≥0∞) * r ^ (d + b + i)) *
@@ -127,6 +126,12 @@ begin
     intro a,
     apply ennreal.mul_le_mul_of_right,
     apply bound },
+  rw [ennreal.tsum_mul_left, mul_comm, ← mul_assoc],
+  congr,
+  rw ennreal.tsum_geometric,
+  apply ennreal.inv_eq_of_mul_eq_one,
+  rw ← mul_assoc,
+  -- put 2-r⁻¹ on RHS
   sorry,
 end
 
@@ -167,9 +172,10 @@ begin
     rw mul_inv_cancel (by exact_mod_cast hrne0),
     apply one_pow },
   simp_rw [this, ennreal.tsum_mul_right, add_right_comm],
-  exact step7 hr2 hdf hconv,
+  exact step7 hr2 hconv,
 end
 
+-- auxiliary convergence lemma
 lemma step5 {f : ℤ → ℝ} {d : ℤ} {r : ℝ≥0} (hr2 : 2⁻¹ < r) (hdf : ∀ n, n < d → f n = 0)
   (hconv : summable (λ n : ℤ, ∥f n∥₊ * r ^ n)) :
   summable (λ (x : ℤ), f x * 2⁻¹ ^ x) :=
@@ -387,25 +393,6 @@ begin
   convert this,
   apply ennreal.coe_tsum this3,
 end
-/-
-
-  ∑(n ≥ d) ∥∑(0≤i≤(n-d)) f(n - 1 - i)*2ⁱ∥ * r^n
-= ∑(n ≥ d) ∥∑(i≥0) f(n - 1 - i)2ⁱ∥ * rⁿ (as f(n-1-i) vanishes for i larger than n-d)
-= ∑(n ≥ d) ∥(i<0) f(n - 1 - i)2ⁱ∥ * rⁿ (as sum f(x)2⁻ˣ=0)
-= ∑(n ≥ d) ∥∑(k≥0) f(n + k) 2^(-1-k)∥ * rⁿ (set k=-1-i)
-≤ ∑(n ≥ d) ∑(k≥0)∥ f(n+k)∥ 2^(-1-k) r^n (Cauchy-Schwarz)
-= ∑(k≥0) ∑(n≥d) ∥f(n+k)∥2^(-1-k)r^n (turns out you can interchange the sums)
-= 2⁻¹∑(k≥0) (∑(n≥d) ∥f(n+k)∥r^(n+k)) * (2r)^{-k} (rearranging)
-≤ 2⁻¹∑(k≥0) c (2r)^{-k} (defining property of c)
-= 2⁻¹ * c / (1-(2r)⁻¹) (sum of a GP)
-= c * (2-r⁻¹)⁻¹ (rearranging)
--/
--- a Lean proof is embedded in the calculations in `laurent_measures/thm69.lean`
--- between lines 275 and 600 or so: see `psi_def_summable`, `psi_def_summable2`,
--- `psi_def_summable3`, `psi_def_aux_4`, `psi_def_aux_3`, `psi_def_aux_2`,
--- `psi_def_aux` and the `summable'` field in the definition of `ψ`.
--- These are the `summable` versions; we just need to beef everything up
--- to `tsum` versions, which will probably be easier in `ennreal`.
 
 end psi_aux_lemma
 

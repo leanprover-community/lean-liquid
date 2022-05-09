@@ -88,6 +88,27 @@ end
 lemma ennreal.zero_le (a : ℝ≥0∞) : 0 ≤ a := bot_le
 lemma ennreal.zero_le' {a : ℝ≥0∞} : 0 ≤ a := bot_le
 
+lemma ennreal.inv_eq_of_mul_eq_one {a b : ℝ≥0∞} (h : a * b = 1) : a⁻¹ = b :=
+begin
+  induction b using with_top.rec_top_coe,
+  { exfalso,
+    rw ennreal.mul_top at h,
+    split_ifs at h with ha;
+    { revert h, norm_num, }, },
+  induction a using with_top.rec_top_coe,
+  { exfalso,
+    rw ennreal.top_mul at h,
+    split_ifs at h with ha;
+    { revert h, norm_num, }, },
+  norm_cast at h,
+  have ha : a ≠ 0,
+  { rintro rfl, rw zero_mul at h, revert h, norm_num, },
+  rw ← ennreal.coe_inv ha,
+  norm_cast,
+  rwa [← inv_mul_eq_one₀, inv_inv],
+  exact inv_ne_zero ha,
+end
+
 
 -- lemma ennreal.top_zpow (n : ℤ) : (⊤ : ℝ≥0∞) ^ n = if n < 0 then 0 else if n = 0 then 1 else ⊤ :=
 -- begin
