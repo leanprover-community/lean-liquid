@@ -274,7 +274,7 @@ apply_nolint laurent_measures.bdd_filtration_spec def_lemma
 apply_nolint laurent_measures.laurent_measures.norm_nonneg dup_namespace
 
 -- laurent_measures/prop72.lean
-apply_nolint psi_aux_lemma.step5 unused_arguments
+apply_nolint psi_aux_lemma.step4 unused_arguments
 
 -- laurent_measures/ses.lean
 apply_nolint laurent_measures_ses.U unused_arguments
