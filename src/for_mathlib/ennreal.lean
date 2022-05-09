@@ -84,3 +84,19 @@ begin
   norm_cast,
   apply nnreal.inv_mul_le_iff hbne,
 end
+
+lemma ennreal.zero_le (a : ℝ≥0∞) : 0 ≤ a := bot_le
+lemma ennreal.zero_le' {a : ℝ≥0∞} : 0 ≤ a := bot_le
+
+
+-- lemma ennreal.top_zpow (n : ℤ) : (⊤ : ℝ≥0∞) ^ n = if n < 0 then 0 else if n = 0 then 1 else ⊤ :=
+-- begin
+--   have : (⊤ : ℝ≥0∞) ^ (0 : ℤ) = 1,
+--     exact zpow_zero ⊤,
+--   have : (⊤ : ℝ≥0∞) ^ (1 : ℤ) = ⊤,
+--     exact zpow_one ⊤,
+--   have : (⊤ : ℝ≥0∞) ^ (-1 : ℤ) = 0,
+--     rw zpow_neg_one,
+--     exact ennreal.inv_top,
+--   sorry,
+-- end

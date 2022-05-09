@@ -103,6 +103,33 @@ namespace psi_aux_lemma
 
 open_locale ennreal
 
+-- line 7 ≤ line 10
+lemma step7 {f : ℤ → ℝ} {d : ℤ} {r : ℝ≥0} (hr2 : 2⁻¹ < r)
+  (hdf : ∀ (n : ℤ), n < d → f n = 0) -- not sure I use this
+  (hconv : summable (λ (n : ℤ), ∥f n∥₊ * r ^ n)) :
+  ∑' (b : ℕ),
+      (∑' (i : ℕ),
+           (∥f (d + ↑b + ↑i)∥₊ : ℝ≥0∞) * r ^ (d + b + i)) *
+        (2 * r)⁻¹ ^ b ≤
+    2 * (↑(2 - r⁻¹)⁻¹ * ∑' (a : ℤ), ∥f a∥₊ * r ^ a) :=
+begin
+  have bound : ∀ (z : ℤ), ∑' (i : ℕ), (∥f (z + ↑i)∥₊ : ℝ≥0∞) * r ^ (z + ↑i) ≤
+    ∑' (a : ℤ), ∥f a∥₊ * r ^ a,
+  { intro z,
+    refine tsum_le_tsum_of_inj (λ i, z + i) _ _ _ ennreal.summable ennreal.summable,
+    { intros a b h, simpa using h, },
+    { intros, exact ennreal.zero_le', },
+    { intros, apply le_refl _ } },
+  suffices : ∑' (b : ℕ), (∑' (a : ℤ), (∥f a∥₊ : ℝ≥0∞) * r ^ a) * (2 * ↑r)⁻¹ ^ b =
+  2 * (↑(2 - r⁻¹)⁻¹ * ∑' (a : ℤ), ↑∥f a∥₊ * ↑r ^ a),
+  { rw ← this,
+    apply ennreal.tsum_le_tsum,
+    intro a,
+    apply ennreal.mul_le_mul_of_right,
+    apply bound },
+  sorry,
+end
+
 -- line 5 ≤ line 10
 lemma step6 {f : ℤ → ℝ} {d : ℤ} {r : ℝ≥0} (hr2 : 2⁻¹ < r) (hdf : ∀ n, n < d → f n = 0)
   (hconv : summable (λ n : ℤ, ∥f n∥₊ * r ^ n)) :
@@ -116,8 +143,31 @@ begin
   push_cast,
   simp only [nnnorm_inv, real.nnnorm_two, ennreal.coe_inv, ne.def, bit0_eq_zero, one_ne_zero,
     not_false_iff, ennreal.coe_bit0, ennreal.coe_one],
-  rw ennreal.inv_mul_le_iff,
-  sorry, sorry, sorry,
+  have h2ne0 : (2 : ℝ≥0∞) ≠ 0 := by norm_num,
+  have h2netop : (2 : ℝ≥0∞) ≠ ⊤ := by norm_num,
+  have hrne0 : (r : ℝ≥0∞) ≠ 0,
+  { norm_cast,
+    refine (lt_of_le_of_lt _ hr2).ne',
+    norm_num },
+  have hrnetop : (r : ℝ≥0∞) ≠ ⊤ := ennreal.coe_ne_top,
+  rw ennreal.inv_mul_le_iff h2ne0 h2netop,
+  have : ∀ a b : ℕ, (∥f (d + ↑a + ↑b)∥₊ : ℝ≥0∞) * 2⁻¹ ^ b * ↑r ^ (d + ↑a) =
+    ∥f (d + ↑a + ↑b)∥₊ * r ^ (d + a + b) * (2 * r)⁻¹ ^ b,
+  { intros a b,
+    rw [ennreal.mul_inv (or.inl h2ne0) (or.inl h2netop), mul_pow, ← zpow_coe_nat (↑r)⁻¹],
+    rw ennreal.zpow_add hrne0 hrnetop _ b,
+    have : (∥f (d + ↑a + ↑b)∥₊ : ℝ≥0∞) * (↑r ^ (d + ↑a) * ↑r ^ (b : ℤ)) * (2⁻¹ ^ b * (↑r)⁻¹ ^ (b : ℤ)) =
+      ↑∥f (d + ↑a + ↑b)∥₊ * 2⁻¹ ^ b * ↑r ^ (d + ↑a) * (r ^ (b : ℤ) * r⁻¹ ^ (b : ℤ)),
+      { ring },
+    rw this,
+    convert (mul_one _).symm,
+    rw ← ennreal.coe_inv (by exact_mod_cast hrne0),
+    norm_cast,
+    rw ← mul_pow,
+    rw mul_inv_cancel (by exact_mod_cast hrne0),
+    apply one_pow },
+  simp_rw [this, ennreal.tsum_mul_right, add_right_comm],
+  exact step7 hr2 hdf hconv,
 end
 
 lemma step5 {f : ℤ → ℝ} {d : ℤ} {r : ℝ≥0} (hr2 : 2⁻¹ < r) (hdf : ∀ n, n < d → f n = 0)
