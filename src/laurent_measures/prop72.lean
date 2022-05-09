@@ -101,6 +101,8 @@ namespace psi_aux_lemma
 
 -/
 
+#check @inv_mul_le_iff
+
 open_locale ennreal
 
 -- line 5 ≤ line 10
@@ -111,7 +113,13 @@ lemma step6 {f : ℤ → ℝ} {d : ℤ} {r : ℝ≥0} (hr2 : 2⁻¹ < r) (hdf : 
 begin
   rw ennreal.tsum_comm,
   -- woohoo, I just interchanged the sums
-  sorry
+  simp_rw [nnnorm_mul, nnnorm_pow, ennreal.coe_mul,
+    ennreal.coe_zpow (lt_of_le_of_lt zero_le' hr2).ne'],
+  push_cast,
+  simp only [nnnorm_inv, real.nnnorm_two, ennreal.coe_inv, ne.def, bit0_eq_zero, one_ne_zero,
+    not_false_iff, ennreal.coe_bit0, ennreal.coe_one],
+  rw ennreal.inv_mul_le_iff,
+  sorry, sorry, sorry,
 end
 
 lemma step5 {f : ℤ → ℝ} {d : ℤ} {r : ℝ≥0} (hr2 : 2⁻¹ < r) (hdf : ∀ n, n < d → f n = 0)
@@ -147,7 +155,7 @@ end
 example (r : ℝ≥0) (n : ℕ) : r ^ (n : ℤ) = r ^ n := zpow_coe_nat r n
 noncomputable instance xxx : div_inv_monoid ℝ≥0 := infer_instance
 
---lemma zpow_
+-- second line is third line
 lemma step4 {f : ℤ → ℝ} {n d : ℤ} {r : ℝ≥0} (hr1 : r < 1) (hr2 : 2⁻¹ < r)
   (hdf : ∀ n, n < d → f n = 0)
   (hconv : summable (λ n : ℤ, ∥f n∥₊ * r ^ n)) (hzero : ∑' n, f n *  2⁻¹ ^ n = 0) :

@@ -47,3 +47,40 @@ begin
   rw [mul_comm, mul_comm c],
   exact ennreal.mul_le_mul_of_right hab,
 end
+
+lemma nnreal.inv_mul_le_iff {a b c : ℝ≥0} (hb0 : b ≠ 0) : b⁻¹ * a ≤ c ↔ a ≤ b * c :=
+begin
+  rw ← nnreal.coe_le_coe,
+  rw ← nnreal.coe_le_coe,
+  push_cast,
+  apply inv_mul_le_iff,
+  obtain (hb | (hb : 0 < b)) := eq_zero_or_pos,
+  { subst hb, exfalso, apply hb0, refl, },
+  { assumption_mod_cast, }
+end
+
+lemma ennreal.inv_mul_le_iff {a b c : ℝ≥0∞} (hb0 : b ≠ 0) (hb : b ≠ ∞) :
+  b⁻¹ * a ≤ c ↔ a ≤ b * c :=
+begin
+  rcases eq_or_ne c ⊤ with (rfl | hctop),
+  { rw ennreal.mul_top,
+    rw if_neg hb0,
+    simp },
+  rcases eq_or_ne a ⊤ with (rfl | hatop),
+  { rw ennreal.mul_top,
+    rw if_neg,
+    { simp only [hctop, top_le_iff, with_top.mul_eq_top_iff, and_false, false_or, false_iff,
+        not_and, not_not],
+      rintro rfl,
+      exact false.elim (hb rfl) },
+    { intro hbinv,
+      rw ennreal.inv_eq_zero at hbinv,
+      subst hbinv,
+      exact false.elim (hb rfl) } },
+  have hbne : b.to_nnreal ≠ 0,
+    apply (ennreal.to_nnreal_pos hb0 hb).ne',
+  rw [← ennreal.coe_to_nnreal hctop, ← ennreal.coe_to_nnreal hatop, ← ennreal.coe_to_nnreal hb,
+    ← ennreal.coe_inv hbne],
+  norm_cast,
+  apply nnreal.inv_mul_le_iff hbne,
+end
