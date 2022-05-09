@@ -131,8 +131,19 @@ begin
   rw ennreal.tsum_geometric,
   apply ennreal.inv_eq_of_mul_eq_one,
   rw ← mul_assoc,
-  -- put 2-r⁻¹ on RHS
-  sorry,
+  have hr : 0 < 2 - r⁻¹,
+  { rw nnreal.sub_pos,
+    exact nnreal.inv_lt_of_inv_lt (by norm_num) hr2, },
+  rw ennreal.coe_inv hr.ne',
+  apply ennreal.mul_inv_eq_of_eq_mul (by exact_mod_cast hr.ne') ennreal.coe_ne_top,
+  rw [ennreal.sub_mul, one_mul, one_mul, ennreal.coe_sub],
+  { congr,
+    refine ennreal.mul_eq_of_mul_inv_eq (by norm_num) (by norm_num) _,
+    rw [ennreal.mul_inv, mul_comm, ennreal.coe_inv],
+    { refine (lt_of_le_of_lt (by norm_num) hr2).ne', },
+    { left, norm_num, },
+    { left, norm_num, }, },
+  { intros, norm_num, }
 end
 
 -- line 5 ≤ line 10

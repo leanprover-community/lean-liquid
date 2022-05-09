@@ -146,3 +146,23 @@ begin
   rw ← summable_coe,
   congr',
 end
+
+lemma nnreal.le_zero_iff {a : ℝ≥0} : a ≤ 0 ↔ a = 0 := le_bot_iff
+
+lemma nnreal.sub_pos {a b : ℝ≥0} : 0 < a - b ↔ b < a :=
+begin
+  rw ← not_iff_not,
+  push_neg,
+  rw nnreal.le_zero_iff,
+  apply tsub_eq_zero_iff_le,
+end
+
+lemma nnreal.inv_lt_of_inv_lt {a b : ℝ≥0} (ha : a ≠ 0) (hab : a⁻¹ < b) : b⁻¹ < a :=
+begin
+  suffices : (b : ℝ)⁻¹ < a,
+    exact_mod_cast this,
+  apply inv_lt_of_inv_lt,
+  { norm_cast,
+    rwa zero_lt_iff, },
+  { exact_mod_cast hab, },
+end

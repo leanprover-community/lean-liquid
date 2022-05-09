@@ -109,6 +109,33 @@ begin
   exact inv_ne_zero ha,
 end
 
+lemma ennreal.mul_inv_eq_of_eq_mul {a b c : ℝ≥0∞} (hb0 : b ≠ 0) (hbtop : b ≠ ⊤) (h : a = c * b) :
+  a * b⁻¹ = c :=
+by rw [h, mul_assoc, ennreal.mul_inv_cancel hb0 hbtop, mul_one]
+
+lemma ennreal.eq_mul_of_mul_inv_eq {a b c : ℝ≥0∞} (hb0 : b ≠ 0) (hbtop : b ≠ ⊤) (h : a * b⁻¹ = c) :
+  a = c * b :=
+by rw [← h, mul_assoc, ennreal.inv_mul_cancel hb0 hbtop, mul_one]
+
+lemma ennreal.mul_eq_of_mul_inv_eq {a b c : ℝ≥0∞} (hb0 : b ≠ 0) (hbtop : b ≠ ⊤) (h : a * b⁻¹ = c) :
+  c * b = a :=
+(ennreal.eq_mul_of_mul_inv_eq hb0 hbtop h).symm
+
+lemma ennreal.mul_inv_eq_iff_eq_mul {a b c : ℝ≥0∞} (hb0 : b ≠ 0) (hbtop : b ≠ ⊤) :
+  (a * b⁻¹ = c ↔ a = c * b) :=
+⟨ennreal.eq_mul_of_mul_inv_eq hb0 hbtop, ennreal.mul_inv_eq_of_eq_mul hb0 hbtop⟩
+
+lemma ennreal.le_zero_iff {a : ℝ≥0∞} : a ≤ 0 ↔ a = 0 := le_bot_iff
+
+lemma ennreal.sub_pos {a b : ℝ≥0∞} : 0 < a - b ↔ b < a :=
+begin
+  rw ← not_iff_not,
+  push_neg,
+  rw ennreal.le_zero_iff,
+  apply tsub_eq_zero_iff_le,
+end
+
+-- didn't need this in the end; probably should be "top_zpow_of_pos, top_zpow_of_neg" etc
 
 -- lemma ennreal.top_zpow (n : ℤ) : (⊤ : ℝ≥0∞) ^ n = if n < 0 then 0 else if n = 0 then 1 else ⊤ :=
 -- begin
