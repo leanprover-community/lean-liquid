@@ -509,7 +509,26 @@ variable [enough_projectives A]
 lemma exists_K_projective_replacement_of_uniformly_bounded_above {α : Type*}
   (X : α → 𝒦) [is_uniformly_bounded_above X] :
   ∃ (P : α → 𝒦) [∀ a, is_K_projective (P a)] [is_uniformly_bounded_above P]
-    (f : Π a, P a ⟶ X a), (∀ a, is_quasi_iso (f a)) ∧ (∀ a k, projective ((P a).as.X k)) := sorry
+    (f : Π a, P a ⟶ X a), (∀ a, is_quasi_iso (f a)) ∧ (∀ a k, projective ((P a).as.X k)) :=
+begin
+  obtain ⟨a,H⟩ := is_uniformly_bounded_above.cond X,
+  let P : α → homotopy_category A (complex_shape.up ℤ) :=
+    λ t, (quotient _ _).obj (projective.replacement (X t).as a (H t)),
+  use P,
+  refine ⟨λ t, ⟨_⟩, ⟨⟨a, λ t, _⟩⟩, λ t,
+    (quotient _ _).map (projective.replacement.hom (X t).as a (H t)), λ t, ⟨_⟩, λ t, _⟩,
+  { intros Y hY f,
+    convert eq_of_homotopy _ _ (projective.null_homotopic_of_projective_to_acyclic f.out a
+      (projective.replacement_is_projective (X t).as a (H t))
+      (projective.replacement_is_bounded (X t).as a (H t))
+      hY.1),
+    simp },
+  { apply projective.replacement_is_bounded },
+  { intro i,
+    erw ← homology_functor_map_factors,
+    apply_instance },
+  { intro k, dsimp, apply projective.replacement_is_projective },
+end
 
 lemma exists_K_projective_replacement_of_bounded (X : 𝒦)
   [is_bounded_above X] :
