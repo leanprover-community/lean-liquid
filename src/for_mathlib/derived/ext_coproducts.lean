@@ -10,6 +10,37 @@ variables {A : Type u} [category.{v} A] [abelian A] [has_coproducts A]
 
 open_locale zero_object
 
+namespace category_theory
+
+noncomputable
+lemma is_initial_colimit {J : Type v} [small_category J] (K : J ⥤ A)
+  (hK : ∀ j, is_initial (K.obj j)) [has_colimit K] :
+  is_initial (colimit K) :=
+{ desc := λ T, colimit.desc _ ⟨_,
+  { app := λ j, (hK j).to _,
+    naturality' := λ i j f, (hK _).hom_ext _ _ }⟩,
+  fac' := by rintros S ⟨⟩,
+  uniq' := begin
+    intros S m hm, apply colimit.hom_ext, intros j,
+    apply (hK _).hom_ext
+  end }
+
+lemma is_zero_colimit {J : Type v} [small_category J] (K : J ⥤ A)
+  (hK : ∀ j, is_zero (K.obj j)) [has_colimit K] :
+  is_zero (colimit K) :=
+begin
+  suffices : is_initial (colimit K),
+  { let e : colimit K ≅ ⊥_ _ := (initial_iso_is_initial this).symm,
+    apply is_zero_of_iso_of_zero _ e.symm,
+    apply is_zero_initial },
+  apply is_initial_colimit,
+  intros j,
+  apply is_zero.is_initial,
+  apply hK,
+end
+
+end category_theory
+
 namespace homotopy_category
 
 noncomputable
@@ -179,3 +210,55 @@ begin
 end
 
 end homotopy_category
+
+namespace bounded_homotopy_category
+
+def bounded_by (X : bounded_homotopy_category A) (n : ℤ) : Prop :=
+∀ (i : ℤ), n ≤ i → is_zero (X.val.as.X i)
+
+noncomputable
+def cofan {α : Type v} (X : α → bounded_homotopy_category A)
+  (hX : ∃ n, ∀ a, (X a).bounded_by n) : cofan X := cofan.mk
+{ val := (homotopy_category.colimit_cofan $ λ a : α, (X a).val).X,
+  bdd := begin
+    obtain ⟨n,hn⟩ := hX, use n, intros i hi,
+    dsimp [homotopy_category.colimit_cofan],
+    let e : (∐ λ (a : α), (X a).val.as).X i ≅
+      (∐ λ (a : α), (X a).val.as.X i) := homotopy_category.coproduct_iso _ _,
+    refine is_zero_of_iso_of_zero _ e.symm,
+    apply category_theory.is_zero_colimit,
+    intros j,
+    apply hn j _ hi,
+  end }
+(λ a, (homotopy_category.colimit_cofan _).ι.app a)
+
+noncomputable
+def is_colimit_cofan {α : Type v} (X : α → bounded_homotopy_category A)
+  (hX : ∃ n, ∀ a, (X a).bounded_by n) : is_colimit (cofan X hX) :=
+{ desc := λ S, (homotopy_category.is_colimit_cofan
+    (λ a : α, (X a).val)).desc ((forget A).map_cocone S),
+  fac' := begin
+    intros S j,
+    erw (homotopy_category.is_colimit_cofan (λ a : α, (X a).val)).fac
+      ((forget A).map_cocone S) j, refl,
+  end,
+  uniq' := begin
+    intros S m hm,
+    apply (homotopy_category.is_colimit_cofan (λ a : α, (X a).val)).hom_ext,
+    intros j,
+    specialize hm j,
+    erw hm,
+    erw (homotopy_category.is_colimit_cofan (λ a : α, (X a).val)).fac,
+    refl,
+  end }
+
+lemma has_coproduct_of_uniform_bound {α : Type v}
+  (X : α → bounded_homotopy_category A)
+  (uniform_bound : ∃ n, ∀ a, (X a).bounded_by n) :
+  has_coproduct X :=
+begin
+  constructor, apply nonempty.intro,
+  refine ⟨cofan X uniform_bound, is_colimit_cofan X uniform_bound⟩,
+end
+
+end bounded_homotopy_category
