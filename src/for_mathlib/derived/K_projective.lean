@@ -28,6 +28,9 @@ local notation `𝒦` := bounded_homotopy_category A
 
 section enough_projectives
 
+abbreviation uniformly_bounded {α : Type*} (X : α → 𝒦) : Prop :=
+homotopy_category.is_uniformly_bounded_above (val ∘ X)
+
 variable [enough_projectives A]
 
 -- Main theorem about existence of K-projective replacements.
@@ -42,6 +45,20 @@ begin
   resetI,
 
   exact ⟨⟨P⟩, h1, f, h3⟩,
+end
+
+theorem exists_uniform_K_projective_replacement {α : Type*} (X : α → 𝒦)
+  [uniformly_bounded X] :
+  ∃ (P : α → 𝒦)
+  [∀ a, homotopy_category.is_K_projective (P a).val]
+  [uniformly_bounded P]
+  (f : Π a, P a ⟶ X a),
+  (∀ a, homotopy_category.is_quasi_iso (f a)) ∧ ∀ a k, projective ((P a).val.as.X k) :=
+begin
+  obtain ⟨P,h1,h2,f,h3,h4⟩ := homotopy_category.exists_K_projective_replacement_of_uniformly_bounded_above
+    (val ∘ X),
+  resetI,
+  exact ⟨λ a, ⟨P a⟩, infer_instance, infer_instance, f, h3, h4⟩,
 end
 
 open homotopy_category
@@ -59,6 +76,31 @@ instance (X : 𝒦) : is_quasi_iso X.π :=
 
 instance (X : 𝒦) (k : ℤ) : projective (X.replace.val.as.X k) :=
 (exists_K_projective_replacement X).some_spec.some_spec.some_spec.2 k
+
+def replace_uniformly {α : Type v}
+  (X : α → bounded_homotopy_category A)
+  [uniformly_bounded X] : α → bounded_homotopy_category A :=
+(exists_uniform_K_projective_replacement X).some
+
+instance is_K_projective_replace_uniformly_apply {α : Type v}
+  (X : α → bounded_homotopy_category A)
+  [uniformly_bounded X] (a) : homotopy_category.is_K_projective (replace_uniformly X a).val :=
+(exists_uniform_K_projective_replacement X).some_spec.some _
+
+def π_uniformly {α : Type v}
+  (X : α → bounded_homotopy_category A)
+  [uniformly_bounded X] : Π a, replace_uniformly X a ⟶ X a :=
+(exists_uniform_K_projective_replacement X).some_spec.some_spec.some_spec.some
+
+instance is_quasi_iso_π_uniformly {α : Type v}
+  (X : α → bounded_homotopy_category A)
+  [uniformly_bounded X] (a) : homotopy_category.is_quasi_iso (π_uniformly X a) :=
+(exists_uniform_K_projective_replacement X).some_spec.some_spec.some_spec.some_spec.1 _
+
+instance uniform_bound_replace_uniformly {α : Type v}
+  (X : α → bounded_homotopy_category A)
+  [uniformly_bounded X] : uniformly_bounded (replace_uniformly X) :=
+(exists_uniform_K_projective_replacement X).some_spec.some_spec.some
 
 def lift {P X Y : 𝒦} [is_K_projective P.val] (f : P ⟶ Y) (g : X ⟶ Y) [is_quasi_iso g] :
   P ⟶ X :=
@@ -271,7 +313,7 @@ def Ext_iso
   (i : ℤ) (P X Y : 𝒦) [is_K_projective P.val]
   (f : P ⟶ X) [is_quasi_iso f] :
   ((Ext i).obj (opposite.op X)).obj Y ≅ AddCommGroup.of (P ⟶ Y⟦i⟧) :=
-(preadditive_yoneda.obj (Y⟦i⟧)).map_iso (replacement_iso _ _ _ f X.π).op
+(preadditive_yoneda.obj (Y⟦i⟧)).map_iso (replacement_iso P X.replace X f X.π).op
 
 instance ext_additive (i : ℤ) (X : 𝒦) : functor.additive ((Ext i).obj (opposite.op X)) :=
 begin

@@ -35,8 +35,22 @@ class is_K_projective (X : 𝒦) : Prop :=
 class is_quasi_iso {X Y : 𝒦} (f : X ⟶ Y) : Prop :=
 (cond [] : ∀ i, is_iso ((homotopy_category.homology_functor _ _ i).map f))
 
+def bounded_by (X : 𝒦) (n : ℤ) : Prop :=
+∀ i, n ≤ i → is_zero (X.as.X i)
+
 class is_bounded_above (X : 𝒦) : Prop  :=
-(cond [] : ∃ a : ℤ, ∀ i, a ≤ i → is_zero (X.as.X i))
+(cond [] : ∃ a : ℤ, X.bounded_by a)
+
+class is_uniformly_bounded_above {α : Type*} (X : α → 𝒦) : Prop :=
+(cond [] : ∃ n : ℤ, ∀ a, (X a).bounded_by n)
+
+instance is_bounded_above_of_is_uniformly_bounded_above {α : Type*} (X : α → 𝒦)
+  [is_uniformly_bounded_above X] (a) : is_bounded_above (X a) :=
+begin
+  obtain ⟨n,hn⟩ := is_uniformly_bounded_above.cond X,
+  use n,
+  apply hn,
+end
 
 end homotopy_category
 

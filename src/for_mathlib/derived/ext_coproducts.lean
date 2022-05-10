@@ -233,18 +233,13 @@ end homotopy_category
 
 namespace bounded_homotopy_category
 
-def bounded_by (X : bounded_homotopy_category A) (n : ℤ) : Prop :=
-∀ (i : ℤ), n ≤ i → is_zero (X.val.as.X i)
-
-class uniform_bound {α : Type v} (X : α → bounded_homotopy_category A) : Prop :=
-(cond [] : ∃ n : ℤ, ∀ a, (X a).bounded_by n)
-
 noncomputable
 def cofan {α : Type v} (X : α → bounded_homotopy_category A)
-  [uniform_bound X] : cofan X := cofan.mk
+  [uniformly_bounded X] : cofan X := cofan.mk
 { val := (homotopy_category.colimit_cofan $ λ a : α, (X a).val).X,
   bdd := begin
-    obtain ⟨n,hn⟩ := uniform_bound.cond X, use n, intros i hi,
+    obtain ⟨n,hn⟩ := homotopy_category.is_uniformly_bounded_above.cond (val ∘ X),
+      use n, intros i hi,
     dsimp [homotopy_category.colimit_cofan],
     let e : (∐ λ (a : α), (X a).val.as).X i ≅
       (∐ λ (a : α), (X a).val.as.X i) := homotopy_category.coproduct_iso _ _,
@@ -257,7 +252,7 @@ def cofan {α : Type v} (X : α → bounded_homotopy_category A)
 
 noncomputable
 def is_colimit_cofan {α : Type v} (X : α → bounded_homotopy_category A)
-  [uniform_bound X] : is_colimit (cofan X) :=
+  [uniformly_bounded X] : is_colimit (cofan X) :=
 { desc := λ S, (homotopy_category.is_colimit_cofan
     (λ a : α, (X a).val)).desc ((forget A).map_cocone S),
   fac' := begin
@@ -277,7 +272,7 @@ def is_colimit_cofan {α : Type v} (X : α → bounded_homotopy_category A)
 
 instance has_coproduct_of_uniform_bound {α : Type v}
   (X : α → bounded_homotopy_category A)
-  [uniform_bound X] :
+  [uniformly_bounded X] :
   has_coproduct X :=
 begin
   constructor, apply nonempty.intro,
@@ -286,7 +281,7 @@ end
 
 instance is_K_projective_sigma {α : Type v}
   (X : α → bounded_homotopy_category A)
-  [uniform_bound X]
+  [uniformly_bounded X]
   [∀ a, homotopy_category.is_K_projective (X a).val] :
   homotopy_category.is_K_projective (sigma_obj X).val :=
 begin
@@ -299,45 +294,37 @@ begin
   apply_instance,
 end
 
+def is_quasi_iso_sigma
+  {α : Type v}
+  (X P : α → bounded_homotopy_category A)
+  [uniformly_bounded X]
+  [uniformly_bounded P]
+  (π : Π a, P a ⟶ X a)
+  [∀ a, homotopy_category.is_quasi_iso (π a)] :
+  homotopy_category.is_quasi_iso
+    (sigma.desc $ λ a : α, π a ≫ sigma.ι X a : sigma_obj P ⟶ sigma_obj X) :=
+sorry
+
 variables [enough_projectives A]
-
-def replace_uniformly {α : Type v}
-  (X : α → bounded_homotopy_category A)
-  [uniform_bound X] : α → bounded_homotopy_category A := sorry
-
-instance is_K_projective_replace_uniformly_apply {α : Type v}
-  (X : α → bounded_homotopy_category A)
-  [uniform_bound X] (a) : homotopy_category.is_K_projective (replace_uniformly X a).val := sorry
-
-def π_uniformly {α : Type v}
-  (X : α → bounded_homotopy_category A)
-  [uniform_bound X] : Π a, replace_uniformly X a ⟶ X a := sorry
-
-instance is_quasi_iso_π_uniformly {α : Type v}
-  (X : α → bounded_homotopy_category A)
-  [uniform_bound X] (a) : homotopy_category.is_quasi_iso (π_uniformly X a) := sorry
-
-instance uniform_bound_replace_uniformly {α : Type v}
-  (X : α → bounded_homotopy_category A)
-  [uniform_bound X] : uniform_bound (replace_uniformly X) := sorry
 
 noncomputable
 def uniform_π {α : Type v}
   (X : α → bounded_homotopy_category A)
-  [uniform_bound X] : sigma_obj (replace_uniformly X) ⟶ sigma_obj X :=
+  [uniformly_bounded X] : sigma_obj (replace_uniformly X) ⟶ sigma_obj X :=
 sigma.desc $ λ a, π_uniformly _ _ ≫ sigma.ι _ a
 
 instance is_quasi_iso_sigma_map_π_uniformly {α : Type v}
   (X : α → bounded_homotopy_category A)
-  [uniform_bound X] :
-  homotopy_category.is_quasi_iso (uniform_π X) := sorry
+  [uniformly_bounded X] :
+  homotopy_category.is_quasi_iso (uniform_π X) :=
+is_quasi_iso_sigma _ _ _
 
 open opposite
 
 def Ext_coproduct_iso
   {α : Type v}
   (X : α → bounded_homotopy_category A)
-  [uniform_bound X]
+  [uniformly_bounded X]
   (i : ℤ) (Y) :
   ((Ext i).obj (op (sigma_obj X))).obj Y ≅
   (AddCommGroup.of (Π a : α, ((Ext i).obj (op (X a))).obj Y)) :=

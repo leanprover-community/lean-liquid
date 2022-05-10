@@ -506,6 +506,11 @@ end
 
 variable [enough_projectives A]
 
+lemma exists_K_projective_replacement_of_uniformly_bounded_above {α : Type*}
+  (X : α → 𝒦) [is_uniformly_bounded_above X] :
+  ∃ (P : α → 𝒦) [∀ a, is_K_projective (P a)] [is_uniformly_bounded_above P]
+    (f : Π a, P a ⟶ X a), (∀ a, is_quasi_iso (f a)) ∧ (∀ a k, projective ((P a).as.X k)) := sorry
+
 lemma exists_K_projective_replacement_of_bounded (X : 𝒦)
   [is_bounded_above X] :
   ∃ (P : 𝒦) [is_K_projective P] [is_bounded_above P]
