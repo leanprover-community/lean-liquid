@@ -235,6 +235,7 @@ begin
   apply is_K_projective_of_iso _ _ e.symm,
 end
 
+-- Warning: Additional assumptions required! (Cf. Grothendieck's axiom AB4)
 instance is_quasi_iso_sigma {α : Type v}
   (X : α → homotopy_category A (complex_shape.up ℤ))
   (P : α → homotopy_category A (complex_shape.up ℤ))
