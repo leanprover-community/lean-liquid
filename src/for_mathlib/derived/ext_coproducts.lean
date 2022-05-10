@@ -294,7 +294,23 @@ begin
   apply_instance,
 end
 
-def is_quasi_iso_sigma
+noncomputable
+instance forget_preserves_coproduct {α : Type v}
+  (X : α → bounded_homotopy_category A)
+  [uniformly_bounded X] :
+  preserves_colimit (discrete.functor X) (forget A) :=
+begin
+  apply preserves_colimit_of_preserves_colimit_cocone (is_colimit_cofan X),
+  let E : (forget A).map_cocone (cofan X) ≅
+    homotopy_category.colimit_cofan (val ∘ X) :=
+    cocones.ext (iso.refl _) _,
+  rotate,
+  { intros a, dsimp [forget, cofan], simpa only [category.comp_id] },
+  apply is_colimit.of_iso_colimit _ E.symm,
+  apply homotopy_category.is_colimit_cofan,
+end
+
+lemma is_quasi_iso_sigma
   {α : Type v}
   (X P : α → bounded_homotopy_category A)
   [uniformly_bounded X]
@@ -303,7 +319,29 @@ def is_quasi_iso_sigma
   [∀ a, homotopy_category.is_quasi_iso (π a)] :
   homotopy_category.is_quasi_iso
     (sigma.desc $ λ a : α, π a ≫ sigma.ι X a : sigma_obj P ⟶ sigma_obj X) :=
-sorry
+begin
+  let t := sigma.desc (λ (a : α), π a ≫ sigma.ι X a),
+  change homotopy_category.is_quasi_iso ((forget A).map t),
+  let eP : (forget A).obj (∐ P) ≅ ∐ (λ a, (forget A).obj (P a)) :=
+    preserves_colimit_iso (forget A) _,
+  let eX : (forget A).obj (∐ X) ≅ ∐ (λ a, (forget A).obj (X a)) :=
+    preserves_colimit_iso (forget A) _,
+  let s : ∐ (λ a, (forget A).obj (P a)) ⟶ ∐ (λ a, (forget A).obj (X a)) :=
+    sigma.desc (λ (a : α), π a ≫ sigma.ι (val ∘ X) a),
+  suffices : (forget A).map t = eP.hom ≫ s ≫ eX.inv,
+  { rw this,
+    apply homotopy_category.is_quasi_iso_comp },
+  apply (is_colimit_of_preserves (forget A) (colimit.is_colimit _)).hom_ext,
+  swap, apply_instance,
+  intros a,
+  dsimp [t, s, eP, eX, preserves_colimit_iso, is_colimit.cocone_point_unique_up_to_iso],
+  rw [← (forget A).map_comp, colimit.ι_desc],
+  slice_rhs 0 1
+  { erw (is_colimit_of_preserves (forget A) (colimit.is_colimit (discrete.functor P))).fac },
+  erw colimit.ι_desc,
+  dsimp, simp only [category.assoc], erw colimit.ι_desc,
+  dsimp, simp only [functor.map_comp], refl,
+end
 
 variables [enough_projectives A]
 
