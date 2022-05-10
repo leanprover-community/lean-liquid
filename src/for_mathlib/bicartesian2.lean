@@ -3,6 +3,7 @@ import for_mathlib.mapping_cone
 import for_mathlib.exact_seq3
 import for_mathlib.commsq
 import for_mathlib.complex_extend
+import for_mathlib.derived.K_projective
 
 noncomputable theory
 
@@ -101,6 +102,45 @@ rfl
   (quatro_cone h₁ h₂ sq₁ sq₂ sq₃ sq₄).d 3 4 =
   biprod.matrix (-f₁₄) 0 (g₁₄ ≫ 𝟙 _) f₂₃ :=
 rfl
+
+section homotopy_category
+open homotopy_category
+
+instance quatro_cons_acyclic :
+  is_acyclic ((homotopy_category.quotient _ _).obj $
+  (homological_complex.embed complex_shape.embedding.nat_up_int_up).obj
+  (quatro_cons h₁)) :=
+begin
+  constructor,
+  intro n,
+  obtain ⟨n, rfl⟩ : ∃ k, k+1 = n := ⟨n-1, sub_add_cancel _ _⟩,
+  refine is_zero.of_iso _ (homology_iso _ n (n+1) (n+1+1) rfl rfl),
+  refine exact.homology_is_zero _ _ _,
+  rcases n with ((_|_|_|_|_|_|n)|(_|n)),
+  { exact exact_kernel_ι },
+  { exact (h₁.drop 0).pair },
+  { exact (h₁.drop 1).pair },
+  { exact (h₁.drop 2).pair },
+  { exact abelian.exact_cokernel _ },
+  { show exact (cokernel.π _) _, exact exact_epi_zero _, },
+  { exact exact_of_zero _ _ },
+  { show exact _ (kernel.ι _), exact exact_zero_mono _ },
+  { exact exact_of_zero _ _ },
+end
+
+lemma quatro_cons_hom_quasi_iso :
+  is_quasi_iso $
+    (homotopy_category.quotient _ _).map $
+    (homological_complex.embed complex_shape.embedding.nat_up_int_up).map $
+    (quatro_cons_hom h₁ h₂ sq₁ sq₂ sq₃ sq₄) :=
+begin
+  constructor,
+  intro n,
+  refine is_zero.is_iso _ _ _;
+  apply is_acyclic.cond,
+end
+
+end homotopy_category
 
 -- #check biprod.matrix (-f₁₂) 0 (g₁₂ ≫ 𝟙 _) f₂₁
 
