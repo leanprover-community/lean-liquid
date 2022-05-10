@@ -131,7 +131,7 @@ begin
 end
 
 -- can't do!
---lemma ennreal.zpow_neg (a : ℝ≥0∞) : ∀ (n : ℤ), a ^ -n = (a ^ n)⁻¹ := sorry
+--lemma ennreal.zpow_neg (a : ℝ≥0∞) : ∀ (n : ℤ), a ^ -n = (a ^ n)⁻¹ := by admit
 
 -- lemma ennreal.top_zpow_of_neg {n : ℤ} (hn : n < 0) : (⊤ : ℝ≥0∞) ^ n = 0 :=
 -- begin
