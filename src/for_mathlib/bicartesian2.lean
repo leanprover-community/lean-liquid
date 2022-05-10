@@ -106,10 +106,10 @@ rfl
 section homotopy_category
 open homotopy_category
 
-instance quatro_cons_acyclic :
-  is_acyclic ((homotopy_category.quotient _ _).obj $
-  (homological_complex.embed complex_shape.embedding.nat_up_int_up).obj
-  (quatro_cons h₁)) :=
+instance quatro_cons_acyclic : is_acyclic $
+  (homotopy_category.quotient _ _).obj $
+  (homological_complex.embed complex_shape.embedding.nat_up_int_up).obj $
+  quatro_cons h₁ :=
 begin
   constructor,
   intro n,
@@ -128,16 +128,26 @@ begin
   { exact exact_of_zero _ _ },
 end
 
-lemma quatro_cons_hom_quasi_iso :
-  is_quasi_iso $
-    (homotopy_category.quotient _ _).map $
-    (homological_complex.embed complex_shape.embedding.nat_up_int_up).map $
-    (quatro_cons_hom h₁ h₂ sq₁ sq₂ sq₃ sq₄) :=
+instance quatro_cons_hom_quasi_iso : is_quasi_iso $
+  (homotopy_category.quotient _ _).map $
+  (homological_complex.embed complex_shape.embedding.nat_up_int_up).map $
+  quatro_cons_hom h₁ h₂ sq₁ sq₂ sq₃ sq₄ :=
 begin
   constructor,
   intro n,
   refine is_zero.is_iso _ _ _;
   apply is_acyclic.cond,
+end
+
+instance quatro_cone_acyclic : is_acyclic $
+  (homotopy_category.quotient _ _).obj $
+  quatro_cone h₁ h₂ sq₁ sq₂ sq₃ sq₄ :=
+begin
+  let f := (homological_complex.embed complex_shape.embedding.nat_up_int_up).map
+    (quatro_cons_hom h₁ h₂ sq₁ sq₂ sq₃ sq₄),
+  have := cone_triangleₕ_mem_distinguished_triangles _ _ f,
+  refine (is_quasi_iso_iff_is_acyclic _ this).mp _,
+  apply bicartesian.quatro_cons_hom_quasi_iso
 end
 
 end homotopy_category
