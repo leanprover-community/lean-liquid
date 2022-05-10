@@ -299,32 +299,40 @@ begin
   apply_instance,
 end
 
-open opposite
-
 variables [enough_projectives A]
 
-def replace_with_bound {n : ℤ} (X : bounded_homotopy_category A) (hX : X.bounded_by n) :
-  bounded_homotopy_category A :=
-sorry
+def replace_uniformly {α : Type v}
+  (X : α → bounded_homotopy_category A)
+  [uniform_bound X] : α → bounded_homotopy_category A := sorry
 
-instance is_K_projective_replace_with_bound {n : ℤ} (X : bounded_homotopy_category A)
-  (hX : X.bounded_by n) :
-  homotopy_category.is_K_projective (X.replace_with_bound hX).val :=
-sorry
+instance is_K_projective_replace_uniformly_apply {α : Type v}
+  (X : α → bounded_homotopy_category A)
+  [uniform_bound X] (a) : homotopy_category.is_K_projective (replace_uniformly X a).val := sorry
 
-def π_with_bound {n : ℤ} (X : bounded_homotopy_category A) (hX : X.bounded_by n) :
-  (X.replace_with_bound hX) ⟶ X :=
-sorry
+def π_uniformly {α : Type v}
+  (X : α → bounded_homotopy_category A)
+  [uniform_bound X] : Π a, replace_uniformly X a ⟶ X a := sorry
 
-instance is_quasi_iso_π_with_bound {n : ℤ} (X : bounded_homotopy_category A)
-  (hX : X.bounded_by n) :
-  homotopy_category.is_quasi_iso (X.π_with_bound hX) :=
-sorry
+instance is_quasi_iso_π_uniformly {α : Type v}
+  (X : α → bounded_homotopy_category A)
+  [uniform_bound X] (a) : homotopy_category.is_quasi_iso (π_uniformly X a) := sorry
 
-lemma replace_with_bound_bounded_by {n : ℤ} (X : bounded_homotopy_category A)
-  (hX : X.bounded_by n) :
-  (X.replace_with_bound hX).bounded_by n :=
-sorry
+instance uniform_bound_replace_uniformly {α : Type v}
+  (X : α → bounded_homotopy_category A)
+  [uniform_bound X] : uniform_bound (replace_uniformly X) := sorry
+
+noncomputable
+def uniform_π {α : Type v}
+  (X : α → bounded_homotopy_category A)
+  [uniform_bound X] : sigma_obj (replace_uniformly X) ⟶ sigma_obj X :=
+sigma.desc $ λ a, π_uniformly _ _ ≫ sigma.ι _ a
+
+instance is_quasi_iso_sigma_map_π_uniformly {α : Type v}
+  (X : α → bounded_homotopy_category A)
+  [uniform_bound X] :
+  homotopy_category.is_quasi_iso (uniform_π X) := sorry
+
+open opposite
 
 def Ext_coproduct_iso
   {α : Type v}
