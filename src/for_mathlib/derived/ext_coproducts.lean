@@ -1,4 +1,5 @@
 import for_mathlib.derived.K_projective
+import for_mathlib.derived.bounded_homotopy_category
 import category_theory.limits.preserves.limits
 
 open category_theory
@@ -130,6 +131,39 @@ def is_colimit_cofan {α : Type v} (X : α → homotopy_category A (complex_shap
 instance {α : Type v} (X : α → homotopy_category A (complex_shape.up ℤ)) :
   has_coproduct X :=
 { exists_colimit := nonempty.intro $ ⟨colimit_cofan _, is_colimit_cofan _⟩ }
+
+noncomputable
+instance {α : Type v} : preserves_colimits_of_shape (discrete α)
+  (quotient A (complex_shape.up ℤ)) :=
+begin
+  constructor, intros K,
+  apply preserves_colimit_of_preserves_colimit_cocone
+    (colimit.is_colimit K),
+  let T : K ⋙ quotient A _ ≅ discrete.functor
+    ((λ a : α, (quotient _ _).obj (K.obj a))) := nat_iso.of_components
+    (λ _, iso.refl _) _,
+  swap,
+  { rintros i _ ⟨⟨⟨⟩⟩⟩, dsimp, simpa },
+  apply (is_colimit.precompose_inv_equiv T
+    ((quotient A (complex_shape.up ℤ)).map_cocone (colimit.cocone K))).to_fun,
+  let ee : colimit_cofan (λ a : α, (quotient _ _).obj (K.obj a)) ≅
+    (cocones.precompose T.inv).obj
+    ((quotient A (complex_shape.up ℤ)).map_cocone (colimit.cocone K)) := _,
+  swap,
+  { refine cocones.ext _ _,
+    { apply functor.map_iso,
+      refine has_colimit.iso_of_nat_iso _,
+      refine nat_iso.of_components (λ _, iso.refl _) _,
+      rintro i _ ⟨⟨⟨⟩⟩⟩, dsimp, simpa },
+    intros i,
+    dsimp [colimit_cofan, T, nat_iso.of_components,
+      has_colimit.iso_of_nat_iso, is_colimit.map],
+    simp only [← functor.map_comp, category.id_comp, colimit.ι_desc],
+    dsimp [cocones.precompose],
+    simp only [category.id_comp] },
+  apply is_colimit.of_iso_colimit _ ee,
+  apply is_colimit_cofan,
+end
 
 instance is_K_projective_sigma {α : Type v}
   (X : α → homotopy_category A (complex_shape.up ℤ))
