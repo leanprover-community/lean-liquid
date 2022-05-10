@@ -39,6 +39,23 @@ begin
   apply hK,
 end
 
+def preadditive_yoneda_coproduct_iso {A : Type u} [category.{v} A]
+  [preadditive A]
+  {α : Type v} (X : α → A) [has_coproduct X] (Y : A) :
+  (preadditive_yoneda.obj Y).obj (opposite.op $ sigma_obj X) ≅
+  pi_obj (λ a, (preadditive_yoneda.obj Y).obj (opposite.op $ X a)) := sorry
+
+noncomputable
+def pi_iso {A : Type u} [category.{v} A] {α : Type v}
+  (X Y : α → A)
+  (I : Π a, X a ≅ Y a)
+  [has_product X] [has_product Y] :
+  pi_obj X ≅ pi_obj Y :=
+{ hom := pi.lift $ λ b, pi.π _ _ ≫ (I b).hom,
+  inv := pi.lift $ λ b, pi.π _ _ ≫ (I b).inv,
+  hom_inv_id' := sorry,
+  inv_hom_id' := sorry }
+
 end category_theory
 
 namespace homotopy_category
@@ -359,13 +376,16 @@ is_quasi_iso_sigma _ _ _
 
 open opposite
 
+noncomputable
 def Ext_coproduct_iso
   {α : Type v}
   (X : α → bounded_homotopy_category A)
   [uniformly_bounded X]
   (i : ℤ) (Y) :
   ((Ext i).obj (op (sigma_obj X))).obj Y ≅
-  (AddCommGroup.of (Π a : α, ((Ext i).obj (op (X a))).obj Y)) :=
-sorry
+  pi_obj (λ a : α, ((Ext i).obj (op (X a))).obj Y) :=
+Ext_iso i _ _ _ (uniform_π X) ≪≫
+category_theory.preadditive_yoneda_coproduct_iso (replace_uniformly X) (Y⟦i⟧) ≪≫
+category_theory.pi_iso _ _ (λ a, (Ext_iso i _ _ _ (π_uniformly X a)).symm)
 
 end bounded_homotopy_category
