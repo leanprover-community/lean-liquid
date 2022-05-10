@@ -27,6 +27,7 @@ by rw [ summable.has_sum_iff ennreal.summable, summable.has_sum_iff ennreal.summ
 --   admit,
 -- end
 
+-- could go in ennreal line 684 or so
 lemma ennreal.mul_le_mul_of_right {a b c : ℝ≥0∞} (hab : a ≤ b) : a * c ≤ b * c :=
 begin
   rcases eq_or_ne c 0 with (rfl | hc0),
@@ -42,12 +43,14 @@ begin
     { rwa ennreal.mul_le_mul_right hc0 hctop }, },
 end
 
+-- could go in ennreal line 684 or so
 lemma ennreal.mul_le_mul_of_left {a b c : ℝ≥0∞} (hab : a ≤ b) : c * a ≤ c * b :=
 begin
   rw [mul_comm, mul_comm c],
   exact ennreal.mul_le_mul_of_right hab,
 end
 
+-- might not need this
 lemma nnreal.inv_mul_le_iff {a b c : ℝ≥0} (hb0 : b ≠ 0) : b⁻¹ * a ≤ c ↔ a ≤ b * c :=
 begin
   rw ← nnreal.coe_le_coe,
@@ -62,27 +65,9 @@ end
 lemma ennreal.inv_mul_le_iff {a b c : ℝ≥0∞} (hb0 : b ≠ 0) (hb : b ≠ ∞) :
   b⁻¹ * a ≤ c ↔ a ≤ b * c :=
 begin
-  rcases eq_or_ne c ⊤ with (rfl | hctop),
-  { rw ennreal.mul_top,
-    rw if_neg hb0,
-    simp },
-  rcases eq_or_ne a ⊤ with (rfl | hatop),
-  { rw ennreal.mul_top,
-    rw if_neg,
-    { simp only [hctop, top_le_iff, with_top.mul_eq_top_iff, and_false, false_or, false_iff,
-        not_and, not_not],
-      rintro rfl,
-      exact false.elim (hb rfl) },
-    { intro hbinv,
-      rw ennreal.inv_eq_zero at hbinv,
-      subst hbinv,
-      exact false.elim (hb rfl) } },
-  have hbne : b.to_nnreal ≠ 0,
-    apply (ennreal.to_nnreal_pos hb0 hb).ne',
-  rw [← ennreal.coe_to_nnreal hctop, ← ennreal.coe_to_nnreal hatop, ← ennreal.coe_to_nnreal hb,
-    ← ennreal.coe_inv hbne],
-  norm_cast,
-  apply nnreal.inv_mul_le_iff hbne,
+  rw [mul_comm, mul_comm b],
+  apply ennreal.div_le_iff_le_mul;
+  cc,
 end
 
 lemma ennreal.zero_le (a : ℝ≥0∞) : 0 ≤ a := bot_le
@@ -135,16 +120,26 @@ begin
   apply tsub_eq_zero_iff_le,
 end
 
--- didn't need this in the end; probably should be "top_zpow_of_pos, top_zpow_of_neg" etc
+lemma ennreal.top_zpow_of_pos {n : ℤ} (hn : 0 < n) : (⊤ : ℝ≥0∞) ^ n = ⊤ :=
+begin
+  let m := n.nat_abs,
+  have hm : n = m,
+  { rw int.nat_abs_of_nonneg hn.le },
+  rw hm at hn ⊢,
+  apply ennreal.top_pow,
+  exact_mod_cast hn,
+end
 
--- lemma ennreal.top_zpow (n : ℤ) : (⊤ : ℝ≥0∞) ^ n = if n < 0 then 0 else if n = 0 then 1 else ⊤ :=
+-- can't do!
+--lemma ennreal.zpow_neg (a : ℝ≥0∞) : ∀ (n : ℤ), a ^ -n = (a ^ n)⁻¹ := sorry
+
+-- lemma ennreal.top_zpow_of_neg {n : ℤ} (hn : n < 0) : (⊤ : ℝ≥0∞) ^ n = 0 :=
 -- begin
---   have : (⊤ : ℝ≥0∞) ^ (0 : ℤ) = 1,
---     exact zpow_zero ⊤,
---   have : (⊤ : ℝ≥0∞) ^ (1 : ℤ) = ⊤,
---     exact zpow_one ⊤,
---   have : (⊤ : ℝ≥0∞) ^ (-1 : ℤ) = 0,
---     rw zpow_neg_one,
---     exact ennreal.inv_top,
---   sorry,
+--   let m := n.nat_abs,
+--   have hm : n = -m,
+--   { rw [int.of_nat_nat_abs_of_nonpos hn.le, neg_neg] },
+--   rw hm at hn ⊢,
+--   rw neg_lt_zero at hn,
+--   have hm' : 0 < m, by exact_mod_cast hn,
+--   rw [ennreal.zpow_neg, zpow_coe_nat, ennreal.inv_eq_zero, ennreal.top_pow hm'],
 -- end
