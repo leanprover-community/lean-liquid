@@ -209,6 +209,17 @@ begin
   dsimp, apply_instance,
 end
 
+instance is_quasi_iso_sigma {α : Type v}
+  (X : α → homotopy_category A (complex_shape.up ℤ))
+  (P : α → homotopy_category A (complex_shape.up ℤ))
+  (π : Π a, P a ⟶ X a)
+  [∀ a, is_quasi_iso (π a)] :
+  is_quasi_iso (sigma.desc $ λ a : α, π a ≫ sigma.ι X a) :=
+begin
+  constructor, intros i,
+  sorry, -- need to show homology commutes with coproducts.
+end
+
 end homotopy_category
 
 namespace bounded_homotopy_category
@@ -260,5 +271,33 @@ begin
   constructor, apply nonempty.intro,
   refine ⟨cofan X uniform_bound, is_colimit_cofan X uniform_bound⟩,
 end
+
+open opposite
+
+variables [enough_projectives A]
+
+def replace_with_bound {n : ℤ} (X : bounded_homotopy_category A) (hX : X.bounded_by n) :
+  bounded_homotopy_category A :=
+sorry
+
+instance is_K_projective_replace_with_bound {n : ℤ} (X : bounded_homotopy_category A)
+  (hX : X.bounded_by n) :
+  homotopy_category.is_K_projective (X.replace_with_bound hX).val :=
+sorry
+
+lemma replace_with_bound_bounded_by {n : ℤ} (X : bounded_homotopy_category A)
+  (hX : X.bounded_by n) :
+  (X.replace_with_bound hX).bounded_by n :=
+sorry
+
+noncomputable
+def Ext_coproduct_iso
+  {α : Type v}
+  (X : α → bounded_homotopy_category A)
+  (hX : ∃ n, ∀ a, (X a).bounded_by n) (Y : bounded_homotopy_category A)
+  (i : ℤ) :
+  ((Ext i).obj (op (cofan X hX).X)).obj Y ≅
+  pi_obj (λ a : α, ((Ext i).obj (op (X a))).obj Y) :=
+sorry
 
 end bounded_homotopy_category
