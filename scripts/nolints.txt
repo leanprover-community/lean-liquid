@@ -126,6 +126,9 @@ apply_nolint bounded_derived_category.zero_is_K_projective unused_arguments
 apply_nolint AddCommGroup.Ext_is_zero_of_one_lt ge_or_gt
 apply_nolint category_theory.ProjectiveResolution.is_projective_resolution unused_arguments
 
+-- for_mathlib/derived/ext_coproducts.lean
+apply_nolint homotopy_category.homotopic_of_quotient_map_eq unused_arguments
+
 -- for_mathlib/derived/homological.lean
 apply_nolint category_theory.triangulated.homological_of_exists_aux unused_arguments
 apply_nolint category_theory.triangulated.is_iso_hom₁ unused_arguments
@@ -275,6 +278,8 @@ apply_nolint laurent_measures.laurent_measures.norm_nonneg dup_namespace
 
 -- laurent_measures/prop72.lean
 apply_nolint psi_aux_lemma.step4 unused_arguments
+apply_nolint psi_aux_lemma.step6 unused_arguments
+apply_nolint psi_aux_lemma.step7 unused_arguments
 
 -- laurent_measures/ses.lean
 apply_nolint laurent_measures_ses.U unused_arguments
