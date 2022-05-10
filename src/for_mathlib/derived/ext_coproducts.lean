@@ -39,11 +39,48 @@ begin
   apply hK,
 end
 
+noncomputable
+def preadditive_yoneda_coproduct_to_product {A : Type u} [category.{v} A]
+  [preadditive A]
+  {α : Type v} (X : α → A) [has_coproduct X] (Y : A) :
+  (preadditive_yoneda.obj Y).obj (opposite.op $ sigma_obj X) ⟶
+  pi_obj (λ a, (preadditive_yoneda.obj Y).obj (opposite.op $ X a)) :=
+pi.lift $ λ b, functor.map _ $ quiver.hom.op $ sigma.ι _ _
+
+instance is_iso_preadditive_yoneda_coproduct_to_product
+  {A : Type u} [category.{v} A]
+  [preadditive A]
+  {α : Type v} (X : α → A) [has_coproduct X] (Y : A) :
+  is_iso (preadditive_yoneda_coproduct_to_product X Y) :=
+begin
+  apply is_iso_of_reflects_iso _ (forget AddCommGroup),
+  rw is_iso_iff_bijective,
+  split,
+  { intros f g h, dsimp [preadditive_yoneda_coproduct_to_product] at f g h ⊢,
+    apply colimit.hom_ext,
+    intros a,
+    let q : (∏ λ (a : α), AddCommGroup.of (X a ⟶ Y)) ⟶ (AddCommGroup.of (X a ⟶ Y)) :=
+      pi.π _ a,
+    apply_fun (λ e, q e) at h,
+    simp only [← comp_apply, limit.lift_π] at h, exact h },
+  { intros f, dsimp at f,
+    let P : Π a, (∏ λ (a : α), AddCommGroup.of (X a ⟶ Y)) ⟶ (AddCommGroup.of (X a ⟶ Y)) :=
+      λ a, pi.π _ a,
+    let q : sigma_obj X ⟶ Y := sigma.desc (λ a, P a f),
+    use q,
+    apply concrete.limit_ext (discrete.functor (λ a, AddCommGroup.of (X a ⟶ Y))),
+    intros i, dsimp [preadditive_yoneda_coproduct_to_product],
+    simp only [← comp_apply, limit.lift_π],
+    dsimp, rw colimit.ι_desc, refl }
+end
+
+noncomputable
 def preadditive_yoneda_coproduct_iso {A : Type u} [category.{v} A]
   [preadditive A]
   {α : Type v} (X : α → A) [has_coproduct X] (Y : A) :
   (preadditive_yoneda.obj Y).obj (opposite.op $ sigma_obj X) ≅
-  pi_obj (λ a, (preadditive_yoneda.obj Y).obj (opposite.op $ X a)) := sorry
+  pi_obj (λ a, (preadditive_yoneda.obj Y).obj (opposite.op $ X a)) :=
+as_iso (preadditive_yoneda_coproduct_to_product _ _)
 
 noncomputable
 def pi_iso {A : Type u} [category.{v} A] {α : Type v}
@@ -53,8 +90,14 @@ def pi_iso {A : Type u} [category.{v} A] {α : Type v}
   pi_obj X ≅ pi_obj Y :=
 { hom := pi.lift $ λ b, pi.π _ _ ≫ (I b).hom,
   inv := pi.lift $ λ b, pi.π _ _ ≫ (I b).inv,
-  hom_inv_id' := sorry,
-  inv_hom_id' := sorry }
+  hom_inv_id' := begin
+    apply limit.hom_ext, intros i,
+    simp,
+  end,
+  inv_hom_id' := begin
+    apply limit.hom_ext, intros i,
+    simp,
+  end }
 
 end category_theory
 
