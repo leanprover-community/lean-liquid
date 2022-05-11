@@ -1,4 +1,5 @@
 import category_theory.abelian.homology
+import category_theory.limits.constructions.epi_mono
 
 namespace category_theory
 
@@ -18,7 +19,32 @@ begin
   apply AB4.cond, assumption,
 end
 
--- TODO: exactness of coprroducts given AB4.
+variable (A)
+noncomputable
+def sigma_functor (α : Type v) : (α → A) ⥤ A :=
+{ obj := λ X, sigma_obj X,
+  map := λ X Y f, sigma.desc $ λ a, f a ≫ sigma.ι _ a } .
+variable {A}
+
+instance sigma_functor_preserves_mono (α : Type v)
+  {X Y : α → A} (f : X ⟶ Y) [∀ a, mono (f a)] :
+  mono ((sigma_functor A α).map f) :=
+category_theory.AB4_mono X Y f
+
+instance sigma_functor_preserves_epi (α : Type v)
+  {X Y : α → A} (f : X ⟶ Y) [∀ a, epi (f a)] :
+  epi ((sigma_functor A α).map f) :=
+begin
+  constructor, intros Z s t h,
+  apply colimit.hom_ext,
+  intros a,
+  dsimp [sigma_functor] at h,
+  apply_fun (λ e, colimit.ι _ a ≫ e) at h,
+  simp at h,
+  rwa cancel_epi at h,
+end
+
+-- TODO: exactness of `sigma_functor`. Mono and Epi conditions done.
 -- TODO: homology commutes with coproducts given AB4.
 -- TODO: etc...
 
