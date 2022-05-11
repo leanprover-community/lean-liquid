@@ -18,7 +18,8 @@ instance : has_limits (ExtrSheafProd.{u} Ab.{u+1}) :=
 has_limits_of_has_limits_creates_limits
 (Condensed_ExtrSheafProd_equiv _).inverse
 
-instance : has_colimits_of_size.{u} Ab.{u+1} := sorry
+instance : has_colimits_of_size.{u} Ab.{u+1} :=
+has_colimits_of_size_shrink.{u u (u+1) (u+1)} Ab.{u+1}
 
 instance : AB4 Ab.{u+1} := sorry
 
