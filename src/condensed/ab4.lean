@@ -28,17 +28,18 @@ def Ab.pt {X : Ab.{u}} (x : X) :
   map_zero' := by simp,
   map_add' := λ a b, by rw [ulift.add_down, add_monoid_hom.map_add] }
 
-lemma Ab.pt_eq {X : Ab.{u}} (x : X) :
-  Ab.pt x ⟨1⟩ = x := by { dsimp [Ab.pt], simp }
+lemma Ab.pt_apply {X : Ab.{u}} (x : X) (n : ℤ) :
+  Ab.pt x ⟨n⟩ = n • x := by { dsimp [Ab.pt], simp }
 
 lemma AddCommGroup.injective_of_mono' {X Y : Ab.{u}} (f : X ⟶ Y) [mono f] :
   function.injective f :=
 begin
   intros a b h,
-  rw [← Ab.pt_eq a, ← Ab.pt_eq b] at *,
-  simp_rw ← comp_apply at h,
-  congr' 1,
-  sorry
+  have : Ab.pt a ≫ f = Ab.pt b ≫ f,
+  { ext ⟨n⟩, simp [Ab.pt_apply, f.map_zsmul, h], },
+  rw cancel_mono at this,
+  apply_fun (λ e, e ⟨1⟩) at this,
+  simpa [Ab.pt_apply] using this,
 end
 
 open_locale classical
