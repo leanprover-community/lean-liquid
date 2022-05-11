@@ -4,6 +4,10 @@ import topology.category.Profinite.projective
 import for_mathlib.Profinite.disjoint_union
 import condensed.is_proetale_sheaf
 import category_theory.sites.limits
+import algebra.category.Group.filtered_colimits
+import algebra.category.Group.abelian
+import for_mathlib.abelian_sheaves.main
+
 
 /-!
 # Condensed sets
@@ -47,7 +51,7 @@ def natural_fork {S S' : Profinite.{u}} (f : S' ⟶ S) :
   fork (X.map pullback.fst.op) (X.map pullback.snd.op) :=
 fork.of_ι (X.map (quiver.hom.op f)) (maps_comm X f)
 
-section limits
+section
 
 /-
 There are several files where the instances below are needed, but are not found automatically
@@ -77,7 +81,20 @@ instance (C : Type (u+2)) [category.{u+1} C]
   has_colimits (Condensed.{u} C) :=
 Sheaf.category_theory.limits.has_colimits.{(u+2) u (u+1)}
 
-end limits
+instance (X : Profinite) : is_filtered  (proetale_topology.cover X)ᵒᵖ :=
+ by apply_instance
+
+instance Condensed_Ab_has_colimits : has_colimits (Condensed.{u} Ab.{u+1}) :=
+Sheaf.category_theory.limits.has_colimits.{(u+2) u (u+1)}
+
+instance Condensed_Ab_has_limits : has_limits (Condensed.{u} Ab.{u+1}) :=
+Sheaf.category_theory.limits.has_limits.{(u+2) u (u+1)}
+
+instance : abelian (Condensed Ab.{u+1}) :=
+@category_theory.Sheaf.abelian.{(u+2) u (u+1)} Profinite.{u} _
+  proetale_topology Ab.{u+1} _ _ _ _ _ _ _ _
+
+end
 
 /-
 -- TODO (BM): put this in mathlib (it's already in a mathlib branch with API)

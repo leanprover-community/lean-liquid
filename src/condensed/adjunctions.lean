@@ -49,18 +49,6 @@ lemma CondensedSet_presheaf_adjunction_counit_app (Y : CondensedSet) :
   (CondensedSet_presheaf_adjunction.counit.app Y).val =
   proetale_topology.sheafify_lift (𝟙 _) Y.cond := rfl
 
--- I don't know why this is needed...
-instance (X : Profinite.{u}): limits.preserves_colimits_of_shape (proetale_topology.cover X)ᵒᵖ
-  (forget Ab.{u+1}) :=
-preserves_filtered_colimits.preserves_filtered_colimits (proetale_topology.cover X)ᵒᵖ
-
-instance : abelian (Condensed Ab.{u+1}) :=
-begin
-  -- I don't know why this is needed either...
-  apply @category_theory.Sheaf.abelian.{(u+2) u (u+1)}
-    Profinite.{u} _ proetale_topology Ab.{u+1} _ _ _ _ _ _ _ _,
-end
-
 @[simps obj_val map]
 def Condensed_Ab_to_CondensedSet : Condensed Ab ⥤ CondensedSet :=
 Sheaf_compose _ (forget _)
