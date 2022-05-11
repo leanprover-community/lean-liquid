@@ -127,6 +127,7 @@ apply_nolint AddCommGroup.Ext_is_zero_of_one_lt ge_or_gt
 apply_nolint category_theory.ProjectiveResolution.is_projective_resolution unused_arguments
 
 -- for_mathlib/derived/ext_coproducts.lean
+apply_nolint category_theory.is_initial_colimit def_lemma unused_arguments
 apply_nolint homotopy_category.homotopic_of_quotient_map_eq unused_arguments
 
 -- for_mathlib/derived/homological.lean
