@@ -56,8 +56,22 @@ def Ab.is_colimit_cofan {α : Type (u+1)} (X : α → Ab.{u+1}) :
   is_colimit (Ab.cofan X) :=
 { desc := λ S, dfinsupp.lift_add_hom
     (λ i, let e : X i ⟶ S.X := S.ι.app i in e),
-  fac' := sorry,
-  uniq' := sorry }
+  fac' := λ S j, begin
+    dsimp [Ab.cofan], ext t,
+    simp only [comp_apply, dfinsupp.single_add_hom_apply,
+      dfinsupp.sum_add_hom_single],
+  end,
+  uniq' := begin
+    intros S m hm,
+    apply_fun dfinsupp.lift_add_hom.symm,
+    swap, apply_instance,
+    dsimp,
+    erw add_equiv.symm_apply_apply, ext1 a,
+    rw ← hm,
+    ext,
+    dsimp [Ab.cofan],
+    simp only [comp_apply, dfinsupp.single_add_hom_apply],
+  end }
 
 instance : AB4 Ab.{u+1} :=
 begin
@@ -71,7 +85,7 @@ begin
   let q : (Ab.cofan X).X ⟶ (Ab.cofan Y).X :=
     (Ab.is_colimit_cofan X).desc ⟨(Ab.cofan Y).X,
     λ a, f a ≫ (Ab.cofan Y).ι.app a, _⟩,
-  swap, { sorry },
+  swap, { rintros i _ ⟨⟨⟨⟩⟩⟩, dsimp, simp, dsimp, simp },
   haveI : mono q,
   { apply concrete_category.mono_of_injective,
     rintros (u v : Π₀ x, X x) h, ext w,
@@ -79,7 +93,8 @@ begin
     apply_fun (λ e, (e : Π₀ w, Y w) w) at h,
     simp_rw dfinsupp.sum_add_hom_apply at h,
     apply_fun f w,
-    swap, { sorry },
+    swap,
+    { apply AddCommGroup.injective_of_mono' },
     let q : Π i, Y i → Π₀ i, Y i := dfinsupp.single,
     let qq : Π i, X i → Π₀ i, Y i := λ i, (q i) ∘ (f i),
     change u.sum (λ i, qq i) w = v.sum (λ i, qq i) w at h,
@@ -95,7 +110,13 @@ begin
       simp only [hh, (f w).map_zero] } },
   suffices : t = eX.hom ≫ q ≫ eY.inv,
   { rw this, apply_instance },
-  sorry
+  dsimp [t, eX, q, eY],
+  apply colimit.hom_ext,
+  simp only [colimit.ι_desc, cofan.mk_ι_app,
+    is_colimit.cocone_point_unique_up_to_iso_hom_desc_assoc,
+    colimit.is_colimit_desc, colimit.ι_desc_assoc, category.assoc,
+    is_colimit.comp_cocone_point_unique_up_to_iso_inv, colimit.cocone_ι,
+    eq_self_iff_true, implies_true_iff],
 end
 
 instance {C : Type (u+1)} [category.{u} C] : AB4 (C ⥤ Ab.{u+1}) :=
