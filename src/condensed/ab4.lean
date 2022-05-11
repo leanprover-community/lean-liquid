@@ -80,10 +80,18 @@ begin
     apply_fun f w,
     swap, { sorry },
     let q : Π i, Y i → Π₀ i, Y i := dfinsupp.single,
-    change u.sum (λ i, q i ∘ f i) w = v.sum (λ i, q i ∘ f i) w at h,
-    -- convert h,
-    sorry
-  },
+    let qq : Π i, X i → Π₀ i, Y i := λ i, (q i) ∘ (f i),
+    change u.sum (λ i, qq i) w = v.sum (λ i, qq i) w at h,
+    rw @dfinsupp.sum_apply α (λ i, Y i) α _ (λ i, X i) _ _ _ u qq w at h,
+    rw @dfinsupp.sum_apply α (λ i, Y i) α _ (λ i, X i) _ _ _ v qq w at h,
+    simp only [dfinsupp.single_apply] at h,
+    dsimp [dfinsupp.sum] at h,
+    simp_rw [finset.sum_dite_eq'] at h,
+    convert h,
+    all_goals
+    { split_ifs with hh hh, { refl },
+      simp only [dfinsupp.mem_support_to_fun, not_not] at hh,
+      simp only [hh, (f w).map_zero] } },
   suffices : t = eX.hom ≫ q ≫ eY.inv,
   { rw this, apply_instance },
   sorry
