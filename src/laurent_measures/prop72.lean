@@ -253,11 +253,10 @@ begin
   end, clear this,
   rw [mul_comm, mul_assoc, tsum_mul_right, ← neg_mul, mul_comm ((2 : ℝ) ^ n)],
   congr,
-  apply eq_neg_of_add_eq_zero,
-  rw [add_comm, ← hzero],
-  rw ← tsum_add_tsum_compl ((step5 hr2 hdf hconv).comp_injective subtype.coe_injective :
+  rw [eq_neg_iff_add_eq_zero, add_comm, ← hzero,
+    ← tsum_add_tsum_compl ((step5 hr2 hdf hconv).comp_injective subtype.coe_injective :
     summable ((_ : ℤ → ℝ) ∘ (coe : {z : ℤ | n ≤ z} → ℤ)))
-    ((step5 hr2 hdf hconv).comp_injective subtype.coe_injective),
+    ((step5 hr2 hdf hconv).comp_injective subtype.coe_injective)],
   { congr' 1,
     { rw ← ((nat.equiv_le_int n).tsum_eq : _ → (_ : ℝ) = _),
       congr', ext b,

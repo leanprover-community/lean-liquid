@@ -1,14 +1,14 @@
 import algebra.category.Group.limits
 import category_theory.limits.concrete_category
 
-universe u
+universes u v
 
 namespace Ab
 
 open category_theory
 open category_theory.limits
 
-variables {J : Type u} [category_theory.small_category J] (K : J ⥤ Ab.{u})
+variables {J : Type u} [category_theory.small_category J] (K : J ⥤ Ab.{max u v})
 
 lemma comp_apply {A B C : Ab} (f : A ⟶ B) (g : B ⟶ C) (a : A) :
   (f ≫ g) a = g (f a) := rfl
@@ -67,12 +67,20 @@ def explicit_limit_cone_is_limit : is_limit (explicit_limit_cone K) :=
     simpa [← hm],
   end }
 
-lemma is_limit_ext {K : J ⥤ Ab.{u}} (C : limit_cone K) (x y : C.cone.X)
-  (h : ∀ j : J, C.cone.π.app j x = C.cone.π.app j y) : x = y :=
-limits.concrete.is_limit_ext  _ C.2 _ _ h
+noncomputable
+lemma barx : preserves_limit K (forget Ab.{max u v}) :=
+preserves_limits_of_shape.preserves_limit
 
 noncomputable
-instance (J : Type u) [small_category J] (K : J ⥤ Ab.{u}) :
+instance foo {K : J ⥤ Ab.{u}} : preserves_limit K (forget Ab.{u}) :=
+barx.{u u} K
+
+lemma is_limit_ext {K : J ⥤ Ab.{u}} (C : limit_cone K) (x y : C.cone.X)
+  (h : ∀ j : J, C.cone.π.app j x = C.cone.π.app j y) : x = y :=
+limits.concrete.is_limit_ext.{(max u u) (max u u)+1} K C.2 _ _ h
+
+noncomputable
+instance forget_creates_limit (J : Type u) [small_category J] (K : J ⥤ Ab.{max u v}) :
   creates_limit K (forget Ab) :=
 creates_limit_of_reflects_iso $ λ C hC,
 { lifted_cone := explicit_limit_cone _,
@@ -81,7 +89,12 @@ creates_limit_of_reflects_iso $ λ C hC,
 
 -- Do we have this somewhere else?
 noncomputable
-instance forget_creates_limits : creates_limits (forget Ab) :=
-by { constructor, introsI J hJ, constructor }
+instance forget_creates_limits : creates_limits (forget Ab.{max u v}) :=
+by { constructor, introsI J hJ, constructor, intros K, apply Ab.forget_creates_limit.{_ u} J K }
+
+-- Do we have this somewhere else?
+noncomputable
+instance forget_creates_limits' : creates_limits (forget Ab.{u}) :=
+Ab.forget_creates_limits.{u u}
 
 end Ab

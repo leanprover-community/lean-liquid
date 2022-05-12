@@ -118,7 +118,7 @@ variables {J : Type u} [small_category J] (K : J ⥤ PseuNormGrp₁.{u})
 
 def Ab.limit_cone' {J : Type u} [small_category J] (K : J ⥤ Ab.{u}) :
   limit_cone K :=
-⟨Ab.explicit_limit_cone _, Ab.explicit_limit_cone_is_limit _⟩
+⟨Ab.explicit_limit_cone.{u u} _, Ab.explicit_limit_cone_is_limit.{u u} _⟩
 
 attribute [simps] to_Ab Ab.limit_cone'
 
@@ -271,14 +271,15 @@ instance : preserves_limits (hom_functor' Λ) :=
 begin
   constructor, introsI J hJ, constructor, intros K,
   apply preserves_limit_of_preserves_limit_cone
-    (PseuNormGrp₁.bounded_cone_is_limit ⟨_,Ab.explicit_limit_cone_is_limit _⟩),
+    (PseuNormGrp₁.bounded_cone_is_limit ⟨_, Ab.explicit_limit_cone_is_limit.{u u} _⟩),
   refine is_limit.of_iso_limit (PseuNormGrp₁.bounded_cone_is_limit
-    ⟨_,Ab.explicit_limit_cone_is_limit _⟩) _,
+    ⟨_,Ab.explicit_limit_cone_is_limit.{u u} _⟩) _,
   apply hom_functor_cone_iso,
 end
 
-instance (c) : preserves_limits (hom_functor' Λ ⋙ PseuNormGrp₁.level.obj c) :=
-limits.comp_preserves_limits _ _
+instance (c) : preserves_limits (hom_functor'.{u} Λ ⋙ PseuNormGrp₁.level.obj c) :=
+@limits.comp_preserves_limits _ _ _ _ _ _ _ _ _ $
+show preserves_limits _, from PseuNormGrp₁.preserves_limits_level_obj.{u u} _
 
 def ProFiltPseuNormGrpWithTinv₁.to_PNG₁ :
   ProFiltPseuNormGrpWithTinv₁ r ⥤ PseuNormGrp₁ :=

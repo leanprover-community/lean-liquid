@@ -242,7 +242,7 @@ by simp [nnrat.coe_le_coe.symm, nnrat.of_rat, hp]
 
 @[simp] lemma of_rat_lt_of_rat_iff' {r p : ℚ} :
   nnrat.of_rat r < nnrat.of_rat p ↔ r < p ∧ 0 < p :=
-by simp [nnrat.coe_lt_coe.symm, nnrat.of_rat, lt_irrefl]
+by { simp [nnrat.coe_lt_coe.symm, nnrat.of_rat, lt_irrefl], intros h0p hr0, exact hr0.trans h0p }
 
 lemma of_rat_lt_of_rat_iff {r p : ℚ} (h : 0 < p) :
   nnrat.of_rat r < nnrat.of_rat p ↔ r < p :=
@@ -406,7 +406,7 @@ by simp [pos_iff_ne_zero]
 lemma div_pos {r p : ℚ≥0} (hr : 0 < r) (hp : 0 < p) : 0 < r / p :=
 by simpa only [div_eq_mul_inv] using mul_pos hr (inv_pos.2 hp)
 
-protected lemma mul_inv {r p : ℚ≥0} : (r * p)⁻¹ = p⁻¹ * r⁻¹ := nnrat.eq $ mul_inv_rev₀ _ _
+protected lemma mul_inv {r p : ℚ≥0} : (r * p)⁻¹ = p⁻¹ * r⁻¹ := nnrat.eq $ mul_inv_rev _ _
 
 lemma div_self_le (r : ℚ≥0) : r / r ≤ 1 :=
 if h : r = 0 then by simp [h] else by rw [div_self h]

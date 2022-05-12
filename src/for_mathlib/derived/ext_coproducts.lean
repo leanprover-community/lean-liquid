@@ -1,6 +1,8 @@
+import category_theory.limits.preserves.limits
+
 import for_mathlib.derived.K_projective
 import for_mathlib.derived.bounded_homotopy_category
-import category_theory.limits.preserves.limits
+import for_mathlib.AddCommGroup.explicit_limits
 
 open category_theory
 open category_theory.limits
@@ -46,6 +48,8 @@ def preadditive_yoneda_coproduct_to_product {A : Type u} [category.{v} A]
   (preadditive_yoneda.obj Y).obj (opposite.op $ sigma_obj X) ⟶
   pi_obj (λ a, (preadditive_yoneda.obj Y).obj (opposite.op $ X a)) :=
 pi.lift $ λ b, functor.map _ $ quiver.hom.op $ sigma.ι _ _
+
+set_option pp.universes true
 
 instance is_iso_preadditive_yoneda_coproduct_to_product
   {A : Type u} [category.{v} A]

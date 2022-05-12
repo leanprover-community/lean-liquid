@@ -10,7 +10,6 @@ import category_theory.sites.sheaf_of_types
 import category_theory.sites.sheaf
 import category_theory.limits.opposites
 import algebra.category.Group
-import algebra.category.CommRing
 
 /-!
 # Proetale site of a point on Profinite

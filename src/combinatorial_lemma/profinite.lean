@@ -456,9 +456,9 @@ begin
   let E' := Profinite.to_Top.map_cone E,
   let hE' : is_limit E' := is_limit_of_preserves _ hE,
   let G := gadget_diagram (hom_Lbar_cone r' Λ S) N c (d Λ N) t ⋙ Profinite.to_Top,
-  let T : E'.X ≅ (Top.limit_cone G).X :=
+  let T : E'.X ≅ (Top.limit_cone.{u u} G).X :=
     hE'.cone_point_unique_up_to_iso (Top.limit_cone_is_limit G),
-  suffices : nonempty (Top.limit_cone G).X,
+  suffices : nonempty (Top.limit_cone.{u u} G).X,
   { obtain ⟨a⟩ := this, exact ⟨T.inv a⟩, },
   apply_with Top.nonempty_limit_cone_of_compact_t2_cofiltered_system { instances := ff },
   { apply_instance },

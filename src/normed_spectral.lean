@@ -348,7 +348,7 @@ begin
   replace Hx2 := (norm_le_add_norm_add _ _).trans (add_le_add (Hx2.trans Hx1) le_rfl),
   dsimp [ε] at Hx2,
   have K0 : (K:ℝ) ≠ 0 := ne_of_gt (lt_of_lt_of_le zero_lt_one hK.out),
-  simp only [mul_add, add_assoc, mul_inv₀, mul_assoc, inv_mul_cancel_left₀ K0] at Hx2,
+  simp only [mul_add, add_assoc, mul_inv, mul_assoc, inv_mul_cancel_left₀ K0] at Hx2,
   simp only [← div_eq_inv_mul, sub_half, ← sub_le_iff_le_add'] at Hx2,
   simp only [sub_le_iff_le_add', div_le_iff' (zero_lt_two : (0:ℝ) < 2)] at Hx2,
   replace Hx2 := mul_le_mul_of_nonneg_left Hx2 K.coe_nonneg,

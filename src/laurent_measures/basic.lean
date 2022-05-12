@@ -1,5 +1,5 @@
 import analysis.special_functions.pow
-import analysis.special_functions.log
+import analysis.special_functions.log.basic
 import analysis.specific_limits.basic
 import category_theory.Fintype
 import analysis.normed_space.basic

@@ -180,7 +180,7 @@ begin
   { intros h j,
     exact (C.π.app j).strict h },
   { intros h,
-    let E := bounded_cone ⟨_, Ab.explicit_limit_cone_is_limit _⟩,
+    let E := bounded_cone ⟨_, Ab.explicit_limit_cone_is_limit.{u u} _⟩,
     let e : C ≅ E := hC.unique_up_to_iso (bounded_cone_is_limit _),
     let eX : C.X ≅ E.X := (cones.forget _).map_iso e,
     let w := eX.hom x,
@@ -253,7 +253,7 @@ def level_cone_iso_hom (c) (t : (level.obj c).obj (bounded_cone_point C)) :
 def level_cone_iso_inv (c) (t : (K ⋙ level.obj c).sections) :
   (level.obj c).obj (bounded_cone_point C) :=
 { val :=
-  { val := C.2.lift (Ab.explicit_limit_cone _) ⟨λ j, (t.1 j).1, begin
+  { val := C.2.lift (Ab.explicit_limit_cone.{u u} _) ⟨λ j, (t.1 j).1, begin
       intros i j f,
       dsimp,
       change _ = (t.val _).val,
@@ -277,7 +277,7 @@ def level_cone_iso_inv (c) (t : (K ⋙ level.obj c).sections) :
   end } .
 
 def level_cone_iso (c) :
-  (level.obj c).map_cone (bounded_cone C) ≅ types.limit_cone _ :=
+  (level.obj c).map_cone (bounded_cone C) ≅ types.limit_cone.{u u} _ :=
 cones.ext
 { hom := level_cone_iso_hom _ _,
   inv := level_cone_iso_inv _ _,
@@ -301,7 +301,7 @@ begin
   refl,
 end
 
-instance (c) : preserves_limits (level.obj c) :=
+instance preserves_limits_level_obj (c) : preserves_limits (level.obj c) :=
 begin
   constructor, introsI J hJ, constructor, intros K,
   apply preserves_limit_of_preserves_limit_cone
@@ -349,7 +349,7 @@ variable (C : limits.limit_cone ((K ⋙ to_PNG₁) ⋙ PseuNormGrp₁.to_Ab))
 
 def filtration_equiv (c : nnreal) :
   pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) c
-  ≃ (CompHaus.limit_cone (K ⋙ level.obj c)).X :=
+  ≃ (CompHaus.limit_cone.{u u} (K ⋙ level.obj c)).X :=
 ((cones.forget _).map_iso (PseuNormGrp₁.level_cone_iso C c)).to_equiv
 
 instance (c) :
@@ -358,7 +358,7 @@ topological_space.induced (filtration_equiv C c) infer_instance
 
 def filtration_homeo (c : nnreal) :
   pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone_point C) c
-  ≃ₜ (CompHaus.limit_cone (K ⋙ level.obj c)).X :=
+  ≃ₜ (CompHaus.limit_cone.{u u} (K ⋙ level.obj c)).X :=
 homeomorph.homeomorph_of_continuous_open (filtration_equiv _ _) continuous_induced_dom
 begin
   intros U hU,
@@ -389,7 +389,7 @@ def level_π (j c) : pseudo_normed_group.filtration (PseuNormGrp₁.bounded_cone
 lemma level_π_continuous (j c) : continuous (level_π C j c) :=
 begin
   have : level_π C j c ∘ (filtration_homeo C c).symm =
-    (CompHaus.limit_cone _).π.app j,
+    (CompHaus.limit_cone.{u u} _).π.app j,
   { ext,
     change (C.is_limit.lift _ ≫ C.cone.π.app j) _ = _,
     rw C.is_limit.fac,
@@ -528,7 +528,7 @@ def bounded_cone_is_limit : is_limit (bounded_cone C) :=
       change continuous t,
       suffices : continuous ((filtration_homeo C c) ∘ t), by simpa using this,
       have : ⇑(filtration_homeo C c) ∘ t =
-        (CompHaus.limit_cone_is_limit _).lift ((level.obj c).map_cone S),
+        (CompHaus.limit_cone_is_limit.{u u} _).lift ((level.obj c).map_cone S),
       { ext,
         change (C.is_limit.lift _ ≫ C.cone.π.app _) _ = _,
         rw C.is_limit.fac, refl },
@@ -566,7 +566,7 @@ instance : preserves_limit K to_PNG₁ :=
 begin
   apply preserves_limit_of_preserves_limit_cone,
   rotate 2,
-  exact bounded_cone ⟨_,Ab.explicit_limit_cone_is_limit _⟩,
+  exact bounded_cone ⟨_,Ab.explicit_limit_cone_is_limit.{u u} _⟩,
   exact bounded_cone_is_limit _,
   exact PseuNormGrp₁.bounded_cone_is_limit _,
 end
@@ -827,7 +827,7 @@ instance : preserves_limit K to_PNG₁ :=
 begin
   apply preserves_limit_of_preserves_limit_cone,
   rotate 2,
-  exact bounded_cone ⟨_,Ab.explicit_limit_cone_is_limit _⟩,
+  exact bounded_cone ⟨_,Ab.explicit_limit_cone_is_limit.{u u} _⟩,
   exact bounded_cone_is_limit _,
   exact PseuNormGrp₁.bounded_cone_is_limit _,
 end

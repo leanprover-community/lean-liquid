@@ -313,7 +313,7 @@ iso.symm $ PolyhedralLattice.iso_mk
   (finsupp.single_add_hom 0) (finsupp.apply_add_hom 0)
   (λ l, by { dsimp [finsupp.norm_def], simp only [norm_zero, finsupp.sum_single_index] })
   (by { ext l, dsimp, simp only [finsupp.single_eq_same] })
-  (by { ext f x, fin_cases x, dsimp, simp only [finsupp.single_eq_same] })
+  (by { ext f, dsimp, simp only [finsupp.single_eq_same] })
 .
 
 @[simp] lemma finsupp_fin_one_iso_hom (l') :

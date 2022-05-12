@@ -1,12 +1,15 @@
-import condensed.proetale_site
-import for_mathlib.presieve
-import topology.category.Profinite.projective
-import for_mathlib.Profinite.disjoint_union
-import condensed.is_proetale_sheaf
 import category_theory.sites.limits
 import algebra.category.Group.filtered_colimits
 import algebra.category.Group.abelian
+import topology.category.Profinite.projective
+
+import for_mathlib.presieve
+import for_mathlib.Profinite.disjoint_union
 import for_mathlib.abelian_sheaves.main
+import for_mathlib.AddCommGroup.explicit_limits
+
+import condensed.proetale_site
+import condensed.is_proetale_sheaf
 
 
 /-!
@@ -83,6 +86,8 @@ Sheaf.category_theory.limits.has_colimits.{(u+2) u (u+1)}
 
 instance (X : Profinite) : is_filtered  (proetale_topology.cover X)ᵒᵖ :=
  by apply_instance
+
+set_option pp.universes true
 
 instance Condensed_Ab_has_colimits : has_colimits (Condensed.{u} Ab.{u+1}) :=
 Sheaf.category_theory.limits.has_colimits.{(u+2) u (u+1)}

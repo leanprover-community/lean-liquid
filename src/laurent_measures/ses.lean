@@ -1,6 +1,6 @@
 -- import laurent_measures.functor
 import data.finset.basic
-import analysis.special_functions.logb
+import analysis.special_functions.log.base
 import for_mathlib.pi_induced
 import laurent_measures.thm69
 -- import data.real.basic

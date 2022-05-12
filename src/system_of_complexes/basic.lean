@@ -42,7 +42,7 @@ It seems a bit ridiculous that this file has to import `locally_constant.Vhat`.
 
 /-- A system of complexes of seminormed groups, indexed by `ℝ≥0`.
 See also Definition 9.3 of [Analytic]. -/
-@[derive category_theory.category]
+@[derive [category_theory.category, category_theory.preadditive]]
 def system_of_complexes : Type* := ℝ≥0ᵒᵖ ⥤ (cochain_complex SemiNormedGroup ℕ)
 
 -- instance : has_shift system_of_complexes := has_shift.mk $ (shift _).congr_right
@@ -61,8 +61,6 @@ instance hom_to_fun : has_coe_to_fun (M ⟶ N) (λ f, Π {c : ℝ≥0} {i : ℕ}
 
 lemma system_of_complexes.hom_apply (f : M ⟶ N) {c : ℝ≥0} {i : ℕ} (x : M c i) : f x = f.apply x :=
 rfl
-
-instance : preadditive system_of_complexes := functor.preadditive
 
 lemma system_of_complexes.map_sub (f : M ⟶ N) {c i} (m m' : M c i) : f (m-m') = f m - f m' :=
 normed_group_hom.map_sub _ _ _

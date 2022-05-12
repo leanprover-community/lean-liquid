@@ -281,14 +281,9 @@ begin
   replace h_left : ∀ n, n ≥ 1 → (y ξ x n - ξ ^ n) ≤ ⌊(y ξ x n / ξ ^ n)⌋ * ξ ^ n,
   { have h_one : ∀ n : ℕ, 0 < ξ ^ n := (λ n, pow_pos h_pos n),
     intros n hn,
-    calc y ξ x n -  ξ ^ n = (y ξ x n * ξ ^ n / ξ ^ n  - ξ ^ n) :
-                                                by {rw [mul_div_cancel _ (ne_of_lt (h_one n)).symm]}
-                    ... = (y ξ x n / ξ ^ n * ξ ^ n  - ξ ^ n) :
-                                                  by {rw [mul_div_assoc, ← div_mul_eq_mul_div_comm]}
-                    ... = ((y ξ x n / ξ ^ n) - 1 ) * ξ ^ n :
-                                            by {nth_rewrite_lhs 2 [← one_mul (ξ ^ n)], rw ← sub_mul}
-                    ... ≤ ⌊(y ξ x n / ξ ^ n)⌋ * ξ ^ n :
-                                                  (mul_le_mul_right (h_one n)).mpr (h_left n hn) },
+    calc y ξ x n - ξ ^ n
+        = ((y ξ x n / ξ ^ n) - 1) * ξ ^ n : by { rw [sub_mul, one_mul, div_mul_cancel _ (h_one _).ne'], }
+    ... ≤ ⌊(y ξ x n / ξ ^ n)⌋ * ξ ^ n : (mul_le_mul_right (h_one n)).mpr (h_left n hn) },
   replace h_left : ∀ᶠ n in at_top, y ξ x n - ξ ^ n ≤ (⌊(y ξ x n / ξ ^ n)⌋ : ℝ) * ξ ^ n,
   { simp only [eventually_at_top], use [1, h_left] },
   have : tendsto (λ n, y ξ x n - ξ ^ n) at_top (𝓝 (exists_limit_y ξ x).some),

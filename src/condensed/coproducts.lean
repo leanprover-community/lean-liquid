@@ -72,9 +72,7 @@ def _root_.Condensed.val_obj_sigma_add_equiv
   Y.val.obj (op $ Profinite.sigma X) ≃+
   (Π (a : α), Y.val.obj (op $ X a)) :=
 add_equiv.of_bijective
-{ to_fun := λ f a, Y.val.map (Profinite.sigma.ι X a).op f,
-  map_zero' := by { ext1, simp },
-  map_add' := λ x y, by { ext1, simp } }
+(add_monoid_hom.mk' (λ f a, Y.val.map (Profinite.sigma.ι X a).op f) (by { intros, ext1, simp }))
 ((Condensed_Ab_to_CondensedSet.obj Y).val_obj_sigma_equiv X).bijective
 
 @[simp]

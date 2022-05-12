@@ -16,9 +16,6 @@ open category_theory category_theory.limits opposite
 
 namespace system_of_complexes
 
--- show that `Ab.{u}` has limits indexed by `ℕ`.
-instance (f : ℕ → Ab) : has_product f := sorry
-
 variables (C : system_of_complexes) (i : ℕ) (f : ℕ → ℝ≥0)
 
 def shift (hf : monotone f) :

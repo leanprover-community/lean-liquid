@@ -61,7 +61,7 @@ def concrete.equalizer_equiv {X Y : C} (f g : X ⟶ Y) [has_equalizer f g]
   ↥(equalizer f g) ≃ { x // f x = g x } :=
 let h1 := limit.is_limit (parallel_pair f g),
     h2 := is_limit_of_preserves (forget C) h1,
-    E := h2.cone_point_unique_up_to_iso (types.limit_cone_is_limit _) in
+    E := h2.cone_point_unique_up_to_iso (types.limit_cone_is_limit.{_ v} _) in
 E.to_equiv.trans $ concrete.equalizer_equiv_aux _ _
 
 @[simp]

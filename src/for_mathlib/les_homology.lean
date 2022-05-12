@@ -54,7 +54,7 @@ def mod_boundaries_functor (j : ι) : homological_complex C c ⥤ C :=
 def homology_to_mod_boundaries (i : ι) :
   homology_functor C c i ⟶ mod_boundaries_functor i :=
 { app := λ A, cokernel.map _ _ (𝟙 _) ((A.cycles i).arrow)
-    (by simp only [boundaries_to_cycles_arrow, category.id_comp]),
+    (by { simp only [category.id_comp, image_to_kernel_arrow], }),
   naturality' := λ A B f,
   begin
     ext,
@@ -95,7 +95,7 @@ delta_to_boundaries _ i j hij ≫ boundaries_to_cycles _ _
 
 @[simp, reassoc] lemma delta_to_cycles_comp_arrow :
   (delta_to_cycles A i j hij) ≫ (cycles A j).arrow = A.d i j :=
-by rw [delta_to_cycles, category.assoc, boundaries_to_cycles_arrow, delta_to_boundaries_comp_arrow]
+by rw [delta_to_cycles, category.assoc, image_to_kernel_arrow, delta_to_boundaries_comp_arrow]
 
 @[simp, reassoc] lemma boundaries_arrow_comp_delta_to_cycles :
   (boundaries _ _).arrow ≫ delta_to_cycles A i j hij = 0 :=
@@ -444,9 +444,9 @@ begin
   { exact (category_theory.exact_zero_mono _).cons (exact_zero_left_of_mono _).exact_seq, },
   { simp only [zero_comp] },
   { simp only [zero_comp] },
-  { simp only [boundaries_to_cycles_arrow, category.id_comp] },
+  { simp only [image_to_kernel_arrow, category.id_comp] },
   { simp only [boundaries_arrow_comp_delta_to_cycles, zero_comp], },
-  { dsimp [homology.π, cycles], simp only [cokernel.π_desc] },
+  { dsimp [homology.π], simp only [cokernel.π_desc] },
   { simp only [mod_boundaries_to_cycles_app, cokernel.π_desc, category.comp_id] },
 end
 

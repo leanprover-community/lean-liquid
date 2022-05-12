@@ -31,7 +31,7 @@ lemma Profinite.free_pfpng_eq_zero_of_empty (S : Profinite.{u}) [is_empty S]
   (a : S.free_pfpng) : a = 0 :=
 begin
   let E : limits.cone ((S.fintype_diagram ⋙ free_pfpng_functor)) :=
-    ProFiltPseuNormGrp₁.bounded_cone ⟨Ab.explicit_limit_cone _,
+    ProFiltPseuNormGrp₁.bounded_cone ⟨Ab.explicit_limit_cone.{u u} _,
       Ab.explicit_limit_cone_is_limit _⟩,
   let hE : limits.is_limit E :=
     ProFiltPseuNormGrp₁.bounded_cone_is_limit _,

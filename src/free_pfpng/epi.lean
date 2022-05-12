@@ -631,7 +631,7 @@ lemma free_pfpng_ext (u v : S.free_pfpng)
 begin
   let E : limits.cone (S.fintype_diagram ⋙ free_pfpng_functor) :=
     ProFiltPseuNormGrp₁.bounded_cone
-    ⟨Ab.explicit_limit_cone _, Ab.explicit_limit_cone_is_limit _⟩,
+    ⟨Ab.explicit_limit_cone.{u u} _, Ab.explicit_limit_cone_is_limit _⟩,
   let hE : limits.is_limit E := ProFiltPseuNormGrp₁.bounded_cone_is_limit _,
   let ee : S.free_pfpng ≅ E.X := (limits.limit.is_limit _).cone_point_unique_up_to_iso hE,
   apply_fun ee.hom, swap,

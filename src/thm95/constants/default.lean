@@ -335,7 +335,7 @@ end }
 lemma r_pow_b_mul_N_le : r ^ (b m) * (N m) ≤ 2 * k' m * (r / r') ^ (b m) :=
 begin
   rw [mul_comm _ (_ ^ _), N, div_pow, nat.cast_pow, nat.cast_bit0, nat.cast_one, div_eq_mul_one_div,
-    mul_assoc, div_mul_comm', mul_one],
+    mul_assoc, div_mul_comm, mul_one],
   refine mul_le_mul_left' _ _,
   rw [nnreal.le_div_iff_mul_le, mul_comm, ← nnreal.le_div_iff_mul_le],
   { by_cases N0 : N₂ r r' BD κ' m = 0,
@@ -460,37 +460,38 @@ begin
     exact le_sup hi, }
 end
 
+lemma fix_this_in_mathlib :
+  nnreal.semilattice_inf = lattice.to_semilattice_inf ℝ≥0 :=
+begin
+  apply semilattice_inf.ext, intros, refl,
+end
+
 lemma c₀_spec [BD.data.very_suitable r r' κ] (j : ℕ) (hj : j ≤ m) :
   lem98.d Λ (N m) ≤ (k₁_sqrt m - 1) * (r' * (κ j * c₀ m Λ)) / (N m) :=
 begin
   have w := BD.data.pos κ,
   -- TODO golf
   rw nnreal.le_div_iff',
+  swap, { apply ne_of_gt, exact fact.out _ },
   rw ←nnreal.div_le_iff',
+  swap,
+  { rw [← pos_iff_ne_zero, ←add_lt_add_iff_right (1 : ℝ≥0), tsub_add_cancel_of_le, zero_add]; apply fact.out, },
   rw ←nnreal.div_le_iff',
+  swap, { apply ne_of_gt, exact fact.out _ },
   rw ←nnreal.div_le_iff',
+  swap, { exact (w _).ne' },
   cases m,
   { cases hj,
     apply le_refl, },
   refine le_trans _ (le_max_left _ _),
   dsimp [c₀_aux],
   apply nnreal.div_le_div_left_of,
-  rw lt_inf'_iff,
+  swap,
+  { refine inf'_le _ _,
+    exact mem_range_succ_iff.mpr hj },
+  rw [fix_this_in_mathlib, lt_inf'_iff],
   intros b mem,
-  exact w b,
-  refine inf'_le _ _,
-  exact mem_range_succ_iff.mpr hj,
-  exact pos_iff_ne_zero.1 (w j),
-  apply pos_iff_ne_zero.1,
-  apply fact.out,
-  apply pos_iff_ne_zero.1,
-  rw [←add_lt_add_iff_right (1 : ℝ≥0), tsub_add_cancel_of_le],
-  simp only [zero_add],
-  apply fact.out,
-  apply le_of_lt,
-  apply fact.out,
-  apply pos_iff_ne_zero.1,
-  apply fact.out,
+  exact w b
 end
 
 end

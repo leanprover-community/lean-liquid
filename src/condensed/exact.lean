@@ -98,9 +98,9 @@ begin
     simp only [←he, category.assoc] },
   let E' := CompHaus_to_Top.map_cone E,
   let hE' : is_limit E' := is_limit_of_preserves CompHaus_to_Top hE,
-  let ee : E' ≅ Top.limit_cone _ :=
+  let ee : E' ≅ Top.limit_cone.{u u} _ :=
     hE'.unique_up_to_iso (Top.limit_cone_is_limit _),
-  let e : E'.X ≅ (Top.limit_cone _).X :=
+  let e : E'.X ≅ (Top.limit_cone.{u u} _).X :=
     hE'.cone_point_unique_up_to_iso (Top.limit_cone_is_limit _),
   haveI : ∀ j : J, t2_space (((diagram_of_pt F G α cG y ⋙ CompHaus_to_Top).obj j)),
   { intros j, change t2_space ((diagram_of_pt F G α cG y).obj j), apply_instance },

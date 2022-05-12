@@ -76,7 +76,7 @@ def cone_point_type_filt (c : ℝ≥0) : Type u :=
 { x : Π j : J, filtration (G.obj j) c | ∀ ⦃i j : J⦄ (e : i ⟶ j), (G.map e).level (x _) = x _ }
 
 instance (c : ℝ≥0) : compact_space (cone_point_type_filt G c) :=
-(CompHaus.limit_cone (((cone_point_diagram G).obj (as_small.up.obj c)))).X.is_compact -- ;-)
+(CompHaus.limit_cone.{_ u} (((cone_point_diagram G).obj (as_small.up.obj c)))).X.is_compact -- ;-)
 
 namespace cone_point_type_filt
 
@@ -114,8 +114,8 @@ lemma trans_continuous {c₁ c₂ : ℝ≥0} (h : c₁ ≤ c₂) :
 begin
   -- ;-)
   let η := ((cone_point_diagram G).map (as_small.up.map $ hom_of_le $ h)),
-  let hS := (CompHaus.limit_cone_is_limit (((cone_point_diagram G).obj (as_small.up.obj c₂)))),
-  let T := (CompHaus.limit_cone (((cone_point_diagram G).obj (as_small.up.obj c₁)))),
+  let hS := (CompHaus.limit_cone_is_limit.{_ u} (((cone_point_diagram G).obj (as_small.up.obj c₂)))),
+  let T := (CompHaus.limit_cone.{_ u} (((cone_point_diagram G).obj (as_small.up.obj c₁)))),
   exact (hS.map T η).continuous,
 end
 
@@ -391,7 +391,7 @@ instance {c} : t2_space (filt G c) :=
 (filt_homeo G c).symm.t2_space
 
 def filt_iso (c : ℝ≥0) : CompHaus.of (filt G c) ≅
-  (CompHaus.limit_cone (((cone_point_diagram G).obj (as_small.up.obj c)))).X :=
+  (CompHaus.limit_cone.{_ u} (((cone_point_diagram G).obj (as_small.up.obj c)))).X :=
 { hom := (filt_homeo G c).to_continuous_map,
   inv := (filt_homeo G c).symm.to_continuous_map,
   hom_inv_id' := by { ext1, simp },
@@ -698,13 +698,13 @@ instance : has_limits CompHausFiltPseuNormGrp₁ :=
 instance (c : ℝ≥0) : preserves_limit G (level.obj c) :=
 preserves_limit_of_preserves_limit_cone (limit_cone_is_limit _)
 { lift := λ S,
-    (CompHaus.limit_cone_is_limit ((cone_point_diagram G).obj (as_small.up.obj c))).lift
+    (CompHaus.limit_cone_is_limit.{_ u} ((cone_point_diagram G).obj (as_small.up.obj c))).lift
     _ ≫ (cone_point_type.filt_iso _ _).inv,
   fac' := begin
     intros S j,
     dsimp,
     rw category.assoc,
-    convert (CompHaus.limit_cone_is_limit
+    convert (CompHaus.limit_cone_is_limit.{_ u}
       ((cone_point_diagram G).obj (as_small.up.obj c))).fac S j,
     ext ⟨t,ht⟩,
     dsimp [limit_cone, cone_point_type.filt_iso, cone_point_type.filt_homeo,
@@ -715,7 +715,7 @@ preserves_limit_of_preserves_limit_cone (limit_cone_is_limit _)
   uniq' := begin
     intros S m hm,
     rw iso.eq_comp_inv,
-    apply (CompHaus.limit_cone_is_limit ((cone_point_diagram G).obj (as_small.up.obj c))).uniq,
+    apply (CompHaus.limit_cone_is_limit.{_ u} ((cone_point_diagram G).obj (as_small.up.obj c))).uniq,
     intros j,
     rw [← hm, category.assoc],
     congr' 1,

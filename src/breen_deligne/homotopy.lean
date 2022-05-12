@@ -97,13 +97,13 @@ begin
     refine @universal_map.mul_suitable _ _ _ _ _ (id _) _ _,
     refine (homotopy_pow'_suitable N).le _ _ _ _ _ le_rfl,
     calc rescale_constants κ (2 ^ (N + 1)) j
-        = κ j * (2⁻¹ * (2 ^ N)⁻¹) : by simp only [rescale_constants, pow_succ, mul_inv₀]
+        = κ j * (2⁻¹ * (2 ^ N)⁻¹) : by simp only [rescale_constants, pow_succ, mul_inv]
     ... ≤ κ j * (1 * (2 ^ N)⁻¹)   : mul_le_mul' le_rfl (mul_le_mul' (by norm_num) le_rfl)
     ... = κ j * (2 ^ N)⁻¹         : by rw one_mul, },
   { refine @universal_map.suitable.comp
       _ _ _ _ _ _ (rescale_constants κ 2 j) _ _ (id _),
     refine @universal_map.mul_suitable _ _ _ _ _ (id _) 2 ⟨zero_lt_two⟩,
-    simp only [rescale_constants, pow_succ, mul_inv₀],
+    simp only [rescale_constants, pow_succ, mul_inv],
     rw [← mul_assoc, mul_right_comm],
     exact @universal_map.suitable_mul_right _ _ _ _ _ _ _ }
 end

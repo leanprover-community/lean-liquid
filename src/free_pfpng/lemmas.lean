@@ -3,6 +3,8 @@ import pseudo_normed_group.bounded_limits
 import condensed.adjunctions
 import for_mathlib.AddCommGroup
 
+universe u
+
 -- Move this
 namespace Profinite
 
@@ -46,12 +48,12 @@ namespace free_pfpng
 
 open category_theory
 
-theorem discrete_quotient_separates_points (S : Profinite) (t₁ t₂ : S.free_pfpng)
+theorem discrete_quotient_separates_points (S : Profinite.{u}) (t₁ t₂ : S.free_pfpng)
   (h : ∀ T : discrete_quotient S, S.free_pfpng_π T t₁ = S.free_pfpng_π T t₂) : t₁ = t₂ :=
 begin
   let E : limits.cone ((S.fintype_diagram ⋙ free_pfpng_functor) ⋙
       ProFiltPseuNormGrp₁.to_PNG₁ ⋙ PseuNormGrp₁.to_Ab) :=
-    Ab.explicit_limit_cone _,
+    Ab.explicit_limit_cone.{u u} _,
   let hE : limits.is_limit E := Ab.explicit_limit_cone_is_limit _,
   let B := ProFiltPseuNormGrp₁.bounded_cone ⟨E,hE⟩,
   let hB : limits.is_limit B := ProFiltPseuNormGrp₁.bounded_cone_is_limit ⟨E,hE⟩,
@@ -68,8 +70,6 @@ end free_pfpng
 namespace free_pfpng
 
 open AddCommGroup
-
-universe u
 
 /--
 If `t₁ t₂ : ℤ[S]` have the same image in `ℤ[T]` for every discrete quotient `T` of `S`,

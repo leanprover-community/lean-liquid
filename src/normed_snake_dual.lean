@@ -52,7 +52,7 @@ variables {M N P : system_of_complexes.{u}} {f : M ⟶ N} {g : N ⟶ P}
 /-  I (DT) extracted this lemma to speed up the proof of `weak_normed_snake_dual`. -/
 lemma ε₁_le_ε {ε ε₁ : ℝ} (hε : 0 ≤ ε) (mK : ℝ≥0) (hε₁ : ε₁ = ε / 2 * (1 + mK)⁻¹) :
   ε₁ ≤ ε :=
-by { rw [hε₁, div_eq_mul_inv, mul_assoc, ← mul_inv₀],
+by { rw [hε₁, div_eq_mul_inv, mul_assoc, ← mul_inv],
      exact mul_le_of_le_one_right hε (inv_le_one $ nnreal.coe_le_coe.mpr $
       one_le_mul one_le_two $ le_add_of_nonneg_right mK.2) }
 

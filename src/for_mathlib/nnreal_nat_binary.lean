@@ -1,6 +1,6 @@
 import data.real.nnreal -- non-negative reals
 import topology.algebra.infinite_sum -- infinite sums
-import analysis.special_functions.log
+import analysis.special_functions.log.basic
 import analysis.special_functions.pow
 import for_mathlib.nnreal
 

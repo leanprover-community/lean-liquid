@@ -151,11 +151,7 @@ begin
       { convert nnreal.coe_eq.2 (nnreal.int.binary_sum ∥f s∥₊),
         push_cast, rw real.nnnorm_of_nonneg h, refl, },
       { convert neg_inj.2 (nnreal.coe_eq.2 (nnreal.int.binary_sum ∥f s∥₊)),
-        -- this proof will break (and get simpler) when #13950 hits;
-        -- the extra "summable" goal will just disappear.
-        { push_cast, rw ← tsum_neg, congr', ext, simp, -- should hopefully just be able to put } here
-          convert nnreal.summable_coe.2 (nnreal.int.binary_summable ∥f s∥₊ nnreal.two_inv_lt_one),
-          ext, push_cast },
+        { push_cast, rw ← tsum_neg, congr', ext, simp },
         { push_neg at h,
           rw real.neg_nnnorm_of_neg h, } } } },
 end
