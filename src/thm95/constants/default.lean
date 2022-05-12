@@ -470,28 +470,18 @@ lemma c₀_spec [BD.data.very_suitable r r' κ] (j : ℕ) (hj : j ≤ m) :
   lem98.d Λ (N m) ≤ (k₁_sqrt m - 1) * (r' * (κ j * c₀ m Λ)) / (N m) :=
 begin
   have w := BD.data.pos κ,
-  -- TODO golf
-  rw nnreal.le_div_iff',
-  swap, { apply ne_of_gt, exact fact.out _ },
-  rw ←nnreal.div_le_iff',
-  swap,
+  rw [nnreal.le_div_iff', ←nnreal.div_le_iff', ←nnreal.div_le_iff', ←nnreal.div_le_iff'],
+  rotate,
+  { exact (w _).ne' },
+  { apply ne_of_gt, exact fact.out _ },
   { rw [← pos_iff_ne_zero, ←add_lt_add_iff_right (1 : ℝ≥0), tsub_add_cancel_of_le, zero_add]; apply fact.out, },
-  rw ←nnreal.div_le_iff',
-  swap, { apply ne_of_gt, exact fact.out _ },
-  rw ←nnreal.div_le_iff',
-  swap, { exact (w _).ne' },
-  cases m,
-  { cases hj,
-    apply le_refl, },
+  { apply ne_of_gt, exact fact.out _ },
+  cases m, { cases hj, apply le_refl, },
   refine le_trans _ (le_max_left _ _),
   dsimp [c₀_aux],
   apply nnreal.div_le_div_left_of,
-  swap,
-  { refine inf'_le _ _,
-    exact mem_range_succ_iff.mpr hj },
-  rw [fix_this_in_mathlib, lt_inf'_iff],
-  intros b mem,
-  exact w b
+  { rw [fix_this_in_mathlib, lt_inf'_iff], intros b mem, exact w b },
+  { refine inf'_le _ _, exact mem_range_succ_iff.mpr hj },
 end
 
 end
