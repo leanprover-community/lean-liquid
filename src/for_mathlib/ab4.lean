@@ -1,5 +1,6 @@
 import category_theory.abelian.homology
 import category_theory.limits.constructions.epi_mono
+import for_mathlib.homology_iso
 
 namespace category_theory
 
@@ -97,10 +98,9 @@ begin
   simp,
 end
 
-
-
--- TODO: exactness of `sigma_functor`. Mono and Epi conditions done.
--- TODO: homology commutes with coproducts given AB4.
--- TODO: etc...
+instance (M : Type*) (S : complex_shape M) (α : Type v)
+  [abelian A] [has_coproducts A] [AB4 A] (i) :
+  preserves_colimits_of_shape (discrete α)
+  (homology_functor A S i) := sorry
 
 end category_theory
