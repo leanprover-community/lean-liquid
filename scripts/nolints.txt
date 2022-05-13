@@ -86,6 +86,9 @@ apply_nolint category_theory.functor.finite_product_condition_of_sum unused_argu
 -- condensed/rescale.lean
 apply_nolint fact_max_pos unused_arguments
 
+-- for_mathlib/AddCommGroup/explicit_limits.lean
+apply_nolint Ab.barx def_lemma
+
 -- for_mathlib/Gordan.lean
 apply_nolint missing unused_arguments
 
@@ -99,9 +102,6 @@ apply_nolint Profinite.sigma_iso_of_equiv_aux unused_arguments
 -- for_mathlib/SemiNormedGroup.lean
 apply_nolint SemiNormedGroup.metric_space fails_quickly unused_arguments
 apply_nolint SemiNormedGroup.normed_group fails_quickly
-
--- for_mathlib/ab4.lean
-apply_nolint category_theory.sigma_functor unused_arguments
 
 -- for_mathlib/abelian_category.lean
 apply_nolint category_theory.limits.is_zero_of_iso_of_zero unused_arguments
