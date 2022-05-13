@@ -32,6 +32,10 @@ instance : category_struct (FreeAb C) :=
 { id := FreeAb.id,
   comp := λ X Y Z f g, FreeAb.comp f g }
 
+@[simp]
+protected lemma comp_apply {X Y Z : FreeAb C} (f : X ⟶ Y) (g : Y ⟶ Z) :
+  FreeAb.comp f g = f ≫ g := rfl
+
 instance : category (FreeAb C) :=
 { id_comp' := λ X Y f, begin
     show FreeAb.comp X.id f = add_monoid_hom.id _ f, congr' 1, clear f, ext1 f,
@@ -82,5 +86,26 @@ def eval [preadditive C] : FreeAb C ⥤ C :=
   end }
 
 end FreeAb
+
+namespace functor
+
+variables {C D : Type*} [category C] [category D]
+
+def map_FreeAb (F : C ⥤ D) : FreeAb C ⥤ FreeAb D :=
+{ obj := λ X, FreeAb.of (F.obj X.as),
+  map := λ X Y, free_abelian_group.map (λ f, F.map f),
+  map_id' := λ X, by { erw [free_abelian_group.map_of_apply, F.map_id], refl },
+  map_comp' := λ X Y Z f g, begin
+    rw [← FreeAb.comp_apply, ← FreeAb.comp_apply,
+        ← add_monoid_hom.comp_apply, ← add_monoid_hom.comp_apply], congr' 1,
+    rw [← add_monoid_hom.comp_hom_apply_apply, ← add_monoid_hom.comp_apply],
+    conv_rhs { rw [← add_monoid_hom.comp_hom_apply_apply, ← add_monoid_hom.flip_apply,
+      ← add_monoid_hom.comp_apply, ← add_monoid_hom.comp_apply] }, congr' 1, clear f g, ext f g,
+    simp only [add_monoid_hom.comp_apply, add_monoid_hom.comp_hom_apply_apply,
+      add_monoid_hom.flip_apply, FreeAb.comp, free_abelian_group.lift.of,
+      free_abelian_group.map, ← F.map_comp],
+  end }
+
+end functor
 
 end category_theory
