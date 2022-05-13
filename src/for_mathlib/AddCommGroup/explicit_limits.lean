@@ -68,7 +68,7 @@ def explicit_limit_cone_is_limit : is_limit (explicit_limit_cone K) :=
   end }
 
 noncomputable
-lemma barx : preserves_limit K (forget Ab.{max u v}) :=
+def barx : preserves_limit K (forget Ab.{max u v}) :=
 preserves_limits_of_shape.preserves_limit
 
 noncomputable
