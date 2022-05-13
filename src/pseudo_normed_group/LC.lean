@@ -354,49 +354,36 @@ by { simp only [eval_LCFP_eq_eval_LCFP'], apply eval_LCFP'_comp }
 lemma res_comp_eval_LCFP [fact (c₂ ≤ c₁)] [fact (c₄ ≤ c₃)] [ϕ.suitable c₃ c₁] [ϕ.suitable c₄ c₂] :
   res V r' c₁ c₂ n ≫ ϕ.eval_LCFP V r' c₂ c₄ = ϕ.eval_LCFP V r' c₁ c₃ ≫ res V r' c₃ c₄ m :=
 begin
-  simp only [eval_LCFP, comp_sum, sum_comp],
+  simp only [eval_LCFP, comp_sum, sum_comp, comp_zsmul, zsmul_comp],
   apply finset.sum_congr rfl,
   rintros ⟨g, hg⟩ -,
-  -- instead of this crazy `show`, we shoul prove `comp_zsmul` and `zsmul_comp`
-  -- for preadditive categories
-  show @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ SemiNormedGroup) _ _ _ _ _ _ _ =
-    @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ SemiNormedGroup) _ _ _ _ _ _ _,
-  simp only [add_monoid_hom.map_zsmul, add_monoid_hom.smul_apply],
   haveI : g.suitable c₃ c₁ := suitable_of_mem_support ϕ _ _ g hg,
   haveI : g.suitable c₄ c₂ := suitable_of_mem_support ϕ _ _ g hg,
-  congr' 1,
-  apply g.res_comp_eval_LCFP V r' c₁ c₂ c₃ c₄
+  simp only [subtype.coe_mk, g.res_comp_eval_LCFP V r' c₁ c₂ c₃ c₄],
 end
 
 lemma Tinv_comp_eval_LCFP [fact (0 < r')] [fact (c₂ ≤ r' * c₁)] [fact (c₄ ≤ r' * c₃)]
   [ϕ.suitable c₃ c₁] [ϕ.suitable c₄ c₂] :
   Tinv V r' c₁ c₂ n ≫ ϕ.eval_LCFP V r' c₂ c₄ = ϕ.eval_LCFP V r' c₁ c₃ ≫ Tinv V r' c₃ c₄ m :=
 begin
-  simp only [eval_LCFP, comp_sum, sum_comp],
+  simp only [eval_LCFP, comp_sum, sum_comp, comp_zsmul, zsmul_comp],
   apply finset.sum_congr rfl,
   rintros ⟨g, hg⟩ -,
-  show @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ SemiNormedGroup) _ _ _ _ _ _ _ =
-    @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ SemiNormedGroup) _ _ _ _ _ _ _,
-  simp only [add_monoid_hom.map_zsmul, add_monoid_hom.smul_apply],
   haveI : g.suitable c₃ c₁ := suitable_of_mem_support ϕ _ _ g hg,
   haveI : g.suitable c₄ c₂ := suitable_of_mem_support ϕ _ _ g hg,
-  congr' 1,
-  apply basic_universal_map.Tinv_comp_eval_LCFP V r'
+  congr' 1, apply basic_universal_map.Tinv_comp_eval_LCFP V r',
 end
 
 lemma T_inv_comp_eval_LCFP [normed_with_aut r V] [fact (0 < r)] [ϕ.suitable c₂ c₁] :
   T_inv r V r' c₁ n ≫ ϕ.eval_LCFP V r' c₁ c₂ =
     ϕ.eval_LCFP V r' c₁ c₂ ≫ T_inv r V r' c₂ m :=
 begin
-  simp only [eval_LCFP, comp_sum, sum_comp],
+  simp only [eval_LCFP, comp_sum, sum_comp, comp_zsmul, zsmul_comp],
   apply finset.sum_congr rfl,
   rintros ⟨g, hg⟩ -,
-  show @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ SemiNormedGroup) _ _ _ _ _ _ _ =
-    @comp_hom ((ProFiltPseuNormGrpWithTinv r')ᵒᵖ ⥤ SemiNormedGroup) _ _ _ _ _ _ _,
-  simp only [add_monoid_hom.map_zsmul, add_monoid_hom.smul_apply],
   haveI : g.suitable c₂ c₁ := suitable_of_mem_support ϕ _ _ g hg,
   congr' 1,
-  apply basic_universal_map.T_inv_comp_eval_LCFP r V r'
+  apply basic_universal_map.T_inv_comp_eval_LCFP r V r',
 end
 
 lemma norm_eval_LCFP_le [normed_with_aut r V] [fact (0 < r)] [ϕ.suitable c₂ c₁]
