@@ -19,6 +19,12 @@ variables (p : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)]
 
 local notation `r` := @r p
 
+/-- The "evaluate at 2" function, sending an S-indexed family of elements of `ℤ[T⁻¹]`
+  to an S-indexed family of integers, via the assignment `T⁻¹ ↦ 2`. Note that
+  this is a strict (i.e. norm-nonincreasing) morphism of normed groups,
+  with the norm on a polynomial `∑aₙT⁻ⁿ` being `∑ₙ∥aₙ∥₊r⁻ⁿ` and the norm
+  on an integer `z` being `∥z∥₊ᵖ`; this works because `r = 2⁻ᵖ`, the crucial
+  points being that `(∑∥cₙ∥)ᵖ ≤ ∑(∥cₙ∥ᵖ)` as `0 < p ≤ 1`, and `∥z∥ᵖ ≤ ∥z∥` for an integer `z`.   -/
 @[simps] def eval2 (S : Fintype.{u}) :
   strict_comphaus_filtered_pseudo_normed_group_hom (invpoly r S) (normed_free_pfpng p S) :=
 { to_fun := λ F s, (F s).eval 2,
@@ -127,10 +133,16 @@ begin
   have h0p : 0 < p := fact.out _,
   have hp1 : p ≤ 1 := fact.out _,
   have h0pinv : 0 ≤ p⁻¹, { rw ← nnreal.inv_pos at h0p, exact h0p.le },
-  refine condensify_nonstrict_exact _ _ (r⁻¹ + 2) (Tinv2_bound_by _) _ κ _ hκ
+  refine condensify_nonstrict_exact _ _ (r⁻¹ + 2) (Tinv2_bound_by _)
+    -- next line needs to be fixed to be the correct bound
+    (λ c, max c (c + r + 37)) κ
+    (λ c, le_max_left _ _) hκ
     (Tinv2_injective p) (Tinv2_comp_eval2_eq_zero p) _ _ _,
-  swap 4,
-  { rintro S c g (hg : _ ≤ _),
+  { rintros S c f ⟨hf1, hf2⟩,
+
+    sorry,
+  },
+  sorry;{ rintro S c g (hg : _ ≤ _),
     let f : invpoly r S := λ s, polynomial.C (g s),
     refine ⟨f, _, _⟩,
     { show _ ≤ _,
@@ -148,7 +160,6 @@ begin
       { intros n hn, rw [if_neg hn, nnnorm_zero, zero_mul], },
       { apply_instance }, },
     { ext s, apply polynomial.eval_C } },
-  all_goals { sorry },
 end
 
 end ses

@@ -61,7 +61,7 @@ def _root_.PFPNGT₁_to_PFPNG₁ₑₗ : (ProFiltPseuNormGrpWithTinv₁.{u} r) �
     strict' := f.strict,
     continuous' := f.continuous' } }
 
-/-- The functor which takes a profinitely filtered normed group with an action of T⁻¹,
+/-- The forgetful functor which takes a profinitely filtered normed group with an action of T⁻¹,
 then forgets the action and considered it as a `CompHaus`ly filtered normed group. -/
 @[simps]
 def _root_.PFPNGT₁_to_CHFPNG₁ₑₗ (r' : ℝ≥0) :

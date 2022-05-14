@@ -13,6 +13,8 @@ open_locale big_operators nnreal
 universe u
 variables (p : ℝ≥0) (S : Fintype.{u})
 
+/-- The functor represented by ℤ, i.e., sending a finite type `S` to `S → ℤ`,
+  equipped with the "p-norm" sending `s ↦ f(s)` to `∑ₛ∥f(s)∥₊ᵖ`. -/
 @[derive add_comm_group]
 def normed_free_pfpng (p : ℝ≥0) (S : Fintype.{u}) := S → ℤ
 

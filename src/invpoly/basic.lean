@@ -97,6 +97,7 @@ instance : has_norm (ℤ[T⁻¹] S) :=
 
 lemma norm_def (F : ℤ[T⁻¹] S) : ∥F∥ = ∑ s, ∑' n, ∥(F s).coeff n∥ * (r : ℝ)^(-n:ℤ) := rfl
 
+/-- The norm on `ℤ[T⁻¹](S)` sending `s ↦ ∑ aₙ(s) T⁻ⁿ` to `∑_{s,n} ∥aₙ(s)∥₊r^⁻ⁿ`. -/
 instance : has_nnnorm (ℤ[T⁻¹] S) :=
 ⟨λ F, ∑ s, ∑' n, ∥(F s).coeff n∥₊ * r ^ (-n : ℤ)⟩
 

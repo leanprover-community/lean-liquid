@@ -105,6 +105,7 @@ section mem_exact
 
 parameter {p : ℝ≥0}
 
+/-- `r`, or `r(p)`, is `2⁻ᵖ`. -/
 def r : ℝ≥0 := 2⁻¹ ^ (p : ℝ)
 
 lemma r_pos : 0 < r :=
