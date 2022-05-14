@@ -86,9 +86,6 @@ apply_nolint category_theory.functor.finite_product_condition_of_sum unused_argu
 -- condensed/rescale.lean
 apply_nolint fact_max_pos unused_arguments
 
--- for_mathlib/AddCommGroup/explicit_limits.lean
-apply_nolint Ab.barx def_lemma
-
 -- for_mathlib/Gordan.lean
 apply_nolint missing unused_arguments
 
