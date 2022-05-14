@@ -8,8 +8,7 @@ universes v u
 
 namespace category_theory
 
-structure FreeAb (C : Type u) [category.{v} C] := of ::
-(as : C)
+structure FreeAb (C : Type u) [category.{v} C] := of :: (as : C)
 
 namespace FreeAb
 
