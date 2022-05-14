@@ -66,6 +66,8 @@ local notation `r` := @r p
   end,
   continuous' := λ c, continuous_of_discrete_topology }
 
+/-- The "evaluate a polynomial in `T⁻¹` by mapping `T⁻¹` to `2`" functor
+ from `ℤ[T⁻¹]` to `ℤ`. -/
 def eval2_nat_trans :
   (Fintype_invpoly.{u} r ⋙ PFPNGT₁_to_CHFPNG₁ₑₗ.{u} r) ⟶
   (normed_free_pfpng_functor.{u} p ⋙ PFPNG₁_to_CHFPNG₁ₑₗ) :=

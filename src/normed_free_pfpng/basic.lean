@@ -14,7 +14,8 @@ universe u
 variables (p : ℝ≥0) (S : Fintype.{u})
 
 /-- The functor represented by ℤ, i.e., sending a finite type `S` to `S → ℤ`,
-  equipped with the "p-norm" sending `s ↦ f(s)` to `∑ₛ∥f(s)∥₊ᵖ`. -/
+  equipped with the "p-norm" sending `s ↦ f(s)` to `∑ₛ∥f(s)∥₊ᵖ`. This is the
+  construction defined as a bare function. -/
 @[derive add_comm_group]
 def normed_free_pfpng (p : ℝ≥0) (S : Fintype.{u}) := S → ℤ
 
@@ -180,6 +181,10 @@ end normed_free_pfpng
 
 variables [fact (0 < p)] [fact (p ≤ 1)]
 
+/-- The functor represented by ℤ, i.e., sending a finite type `S` to
+  `normed_free_pfpng p S`, otherwise known as `S → ℤ`,
+  equipped with the "p-norm" sending `s ↦ f(s)` to `∑ₛ∥f(s)∥₊ᵖ`. This norm
+  makes `S → ℤ` into a `profinitely_filtered_pseudo_normed_group`. -/
 @[simps]
 def normed_free_pfpng_functor : Fintype ⥤ ProFiltPseuNormGrp₁ :=
 { obj := λ S,
