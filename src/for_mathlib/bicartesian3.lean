@@ -41,12 +41,37 @@ open category_theory.abelian
 
 lemma commsq.bicartesian_iff_isos : sqm.bicartesian ↔ (is_iso gKh ∧ is_iso gQh) :=
 begin
-  delta commsq.bicartesian,
   split,
   { intro h, split,
-    { rw is_iso_iff_mono_and_epi, split,
-      { rw [AddCommGroup.mono_iff_ker_eq_bot, eq_bot_iff], sorry },
-      { sorry } },
-    { sorry } },
+    { haveI : mono gKh,
+      { refine preadditive.mono_of_cancel_zero _ (λ P g hg, _),
+        apply zero_of_comp_mono ιh₁,
+        apply pullback_cone.is_limit.hom_ext h.is_limit,
+        { rw [pullback_cone.mk_fst, category.assoc, zero_comp, (H₁.extract 0 2).w, comp_zero] },
+        { rw [pullback_cone.mk_snd, category.assoc, sqₗ.w, ← category.assoc, hg, zero_comp,
+            zero_comp] } },
+        obtain ⟨l, hl₁, hl₂ : l ≫ g₁ = _⟩ :=
+          pullback_cone.is_limit.lift' h.is_limit 0 ιh₂ (by simp [(H₂.extract 0 2).w]),
+        let ker := is_limit_of_exact_of_mono _ _ ((exact_iff_exact_seq _ _).2 (H₁.extract 0 2)),
+        obtain ⟨inv, hinv : inv ≫ ιh₁ = l⟩ := kernel_fork.is_limit.lift' ker l hl₁,
+        have hinv' : inv ≫ gKh = 𝟙 _,
+        { rw [← cancel_mono ιh₂, category.assoc, ← sqₗ.w, reassoc_of hinv, hl₂, category.id_comp] },
+        refine ⟨⟨inv, _, hinv'⟩⟩,
+        rw [← cancel_mono gKh, category.assoc, hinv', category.comp_id, category.id_comp] },
+    { haveI : epi gQh,
+      { refine preadditive.epi_of_cancel_zero _ (λ P g hg, _),
+        apply zero_of_epi_comp πh₂,
+        apply pushout_cocone.is_colimit.hom_ext h.is_colimit,
+        { rw [pushout_cocone.mk_inl, ← category.assoc, ← sqᵣ.w, category.assoc, hg, comp_zero,
+            comp_zero] },
+        { rw [pushout_cocone.mk_inr, ← category.assoc, (H₂.extract 1 2).w, comp_zero, zero_comp] } },
+      obtain ⟨l, hl₁ : g₂ ≫ l = _, hl₂⟩ :=
+        pushout_cocone.is_colimit.desc' h.is_colimit πh₁ 0 (by simp [(H₁.extract 1 2).w]),
+      let coker := is_colimit_of_exact_of_epi _ _ ((exact_iff_exact_seq _ _).2 (H₂.extract 1 2)),
+      obtain ⟨inv, hinv : πh₂ ≫ inv = l⟩ := cokernel_cofork.is_colimit.desc' coker l hl₂,
+      have hinv' : gQh ≫ inv = 𝟙 _,
+      { rw [← cancel_epi πh₁, ← category.assoc, sqᵣ.w, category.assoc, hinv, hl₁, category.comp_id] },
+      refine ⟨⟨inv, hinv', _⟩⟩,
+      rw [← cancel_epi gQh, reassoc_of hinv', category.comp_id] } },
   { sorry }
 end
