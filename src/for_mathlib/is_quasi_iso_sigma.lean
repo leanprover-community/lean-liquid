@@ -18,6 +18,8 @@ begin
   constructor, intros i,
   let F := homology_functor _ _ _,
   let t := _, change is_iso (F.map t),
+  haveI : preserves_colimits_of_shape (discrete α) F :=
+    category_theory.homotopy_category_homology_functor_preserves_coproducts _ _ _ _,
   let eP : F.obj (∐ λ (a : α), P a) ≅ (∐ λ a, F.obj (P a)) :=
     (is_colimit_of_preserves F (colimit.is_colimit _)).cocone_point_unique_up_to_iso
       (colimit.is_colimit _) ≪≫
