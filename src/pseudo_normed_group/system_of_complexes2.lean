@@ -260,22 +260,39 @@ lemma _root_.SemiNormedGroup.equalizer.forget₂_ι {V W : SemiNormedGroup} (f g
   add_subgroup.subtype (add_monoid_hom.ker ((forget₂ _ Ab).map (f - g))) :=
 rfl
 
-lemma short_exact (κ : ℕ → ℝ≥0) [BD.suitable κ] [hκ₁ : ∀ n, fact (monotone (function.swap κ₁ n))]
-  [∀ c n, fact (κ₁ c n ≤ r' * (c * κ n))] [∀ c n, fact (κ₁ c n ≤ c * κ n)] (c : ℝ≥0ᵒᵖ) (n : ℕ) :
-  short_exact ((incl' r r' BD M V κ c).f n) ((Tinv2' r r' BD M V κ₁ _ c).f n) :=
+instance mul_left_mono' (κ : ℕ → ℝ≥0) (n : ℕ) :
+  fact (monotone (function.swap (λ (c : ℝ≥0) (n : ℕ), r' * (c * κ n)) n)) :=
+⟨λ c₁ c₂ h, mul_le_mul' le_rfl $ mul_le_mul' h le_rfl⟩
+
+lemma neg_surjective {A B : Ab} (f : A ⟶ B) (hf : function.surjective f) :
+  function.surjective (-f) :=
+begin
+  intro y, obtain ⟨x, rfl⟩ := hf y, use -x, simp only [pi.neg_apply, map_neg, neg_neg],
+end
+
+lemma short_exact [fact (r < 1)] (κ : ℕ → ℝ≥0) [BD.suitable κ]
+  [∀ c n, fact (κ₁ c n ≤ r' * (c * κ n))] (c : ℝ≥0ᵒᵖ) (n : ℕ) :
+  short_exact ((incl' r r' BD M V κ c).f n) ((Tinv2' r r' BD M V (λ c n, r' * (c * κ n)) (λ c n, c * κ n) c).f n) :=
 begin
   apply_with @short_exact.mk {instances := ff},
   { rw AddCommGroup.mono_iff_injective,
     dsimp [incl', incl, incl_f,
       breen_deligne.data.complex, breen_deligne.data.complex₂, breen_deligne.data.complex₂_X],
     exact SemiNormedGroup.equalizer.ι_injective _ _, },
-  { rw AddCommGroup.epi_iff_surjective,
-    sorry },
+  { rw [Tinv2', functor.map_homological_complex_map_f, Tinv2_eq,
+      ← nat_trans.comp_app, ← CLCFP.res_comp_T_inv, nat_trans.comp_app,
+      ← neg_sub, functor.map_neg, functor.map_sub, category_theory.functor.map_comp,
+      AddCommGroup.epi_iff_surjective],
+    apply neg_surjective,
+    have := CLCFP.T_inv_sub_Tinv_surjective r r' V (unop c * κ n) (BD.X n) (op M),
+    rw [CLCFP.T_inv_sub_Tinv, nat_trans.app_sub, nat_trans.comp_app] at this,
+    exact this, },
   { rw AddCommGroup.exact_iff,
     dsimp [incl', incl, incl_f, Tinv2',
       breen_deligne.data.complex, breen_deligne.data.complex₂, breen_deligne.data.complex₂_X],
-    rw [SemiNormedGroup.equalizer.forget₂_ι, add_subgroup.subtype_range],
-    sorry }
+    rw [SemiNormedGroup.equalizer.forget₂_ι, add_subgroup.subtype_range, Tinv2_eq,
+      ← nat_trans.comp_app, ← CLCFP.res_comp_T_inv],
+    refl, }
 end
 
 end aux_system
