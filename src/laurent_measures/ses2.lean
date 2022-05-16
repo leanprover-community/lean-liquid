@@ -75,85 +75,83 @@ begin
       rintros S c' (F : laurent_measures r S) ⟨(hF1 : Θ p S F = 0),
         (hF2 : ∥F∥₊ ≤ c')⟩,
       simp only [set.mem_image],
-      refine ⟨ψ F hF1, _, _⟩,
-      --let ZZZ := ϕ f r,
-      { delta ψ,
-        change (∥_∥₊ : ℝ≥0) ≤ _,
-        rw nnnorm_def at hF2 ⊢,
-        simp only [coe_mk],
-        delta Θ at hF1,
-        rw mul_assoc,
-        -- because of silly definition of `C₂` involving max :-)
-        refine le_trans _ (mul_le_mul_right' (le_max_left _ _) _),
-        have foo : ∀ (s : S), ∑' (n : ℤ), ∥ite (F.d ≤ n) ((finset.range (n - F.d).nat_abs.succ).sum
-          (λ (l : ℕ), (F s (n - 1 - l) : ℝ) * 2 ^ l)) 0∥₊ * r ^ n ≤
-          (2 - r⁻¹)⁻¹ * ∑' n, ∥(F s n : ℝ)∥₊ * r ^ n :=
-        λ s,
-        begin
-          convert psi_aux_lemma.key_tsum_lemma (λ n, (F s n : ℝ)) r r_lt_one half_lt_r F.d
-          (λ n hnd, lt_d_eq_zero' F s n hnd) (F.summable' s) (congr_fun hF1 s),
-        end,
-        convert le_trans (finset.sum_le_sum (λ (s : S) _, foo s)) _,
-        { norm_cast },
-        simp_rw real.nnnorm_int,
-        rw ← finset.mul_sum,
-        refine le_trans (nnreal.mul_le_mul_left hF2 _) _,
-        apply le_of_eq,
-        have h1 : 2⁻¹ < r := half_lt_r,
-        have h2 : (2 - 1 / r) ≠ 0 := ne_of_gt (tsub_pos_of_lt
-         (by { rw [one_div], exact r_inv_lt_2 })),
-        have h3 : r ≠ 0 := ne_of_gt r_pos,
-        field_simp,
-        simp [mul_tsub, tsub_mul, one_div, mul_assoc, mul_inv_cancel h3],
-        ring_nf, },
-    exact θ_ϕ_split_exact F hF1 },
+      refine ⟨ψ F hF1, _, θ_ϕ_split_exact F hF1⟩,
+
+      delta ψ,
+      change (∥_∥₊ : ℝ≥0) ≤ _,
+      rw nnnorm_def at hF2 ⊢,
+      simp only [coe_mk],
+      delta Θ at hF1,
+      rw mul_assoc,
+      -- because of silly definition of `C₂` involving max :-)
+      refine le_trans _ (mul_le_mul_right' (le_max_left _ _) _),
+      have foo : ∀ (s : S), ∑' (n : ℤ), ∥ite (F.d ≤ n) ((finset.range (n - F.d).nat_abs.succ).sum
+        (λ (l : ℕ), (F s (n - 1 - l) : ℝ) * 2 ^ l)) 0∥₊ * r ^ n ≤
+        (2 - r⁻¹)⁻¹ * ∑' n, ∥(F s n : ℝ)∥₊ * r ^ n :=
+      λ s,
+      begin
+        convert psi_aux_lemma.key_tsum_lemma (λ n, (F s n : ℝ)) r r_lt_one half_lt_r F.d
+        (λ n hnd, lt_d_eq_zero' F s n hnd) (F.summable' s) (congr_fun hF1 s),
+      end,
+      convert le_trans (finset.sum_le_sum (λ (s : S) _, foo s)) _,
+      { norm_cast },
+      simp_rw real.nnnorm_int,
+      rw ← finset.mul_sum,
+      refine le_trans (nnreal.mul_le_mul_left hF2 _) _,
+      apply le_of_eq,
+      have h1 : 2⁻¹ < r := half_lt_r,
+      have h2 : (2 - 1 / r) ≠ 0 := ne_of_gt (tsub_pos_of_lt
+        (by { rw [one_div], exact r_inv_lt_2 })),
+      have h3 : r ≠ 0 := ne_of_gt r_pos,
+      field_simp,
+      simp [mul_tsub, tsub_mul, one_div, mul_assoc, mul_inv_cancel h3],
+      ring_nf, },
   -- Now here's a proof of the θ goal using binary expansions
-  {
-    clear S,
-    rintros S c' (f : real_measures p S) (hf : _ ≤ _),
-    let measure_aux : laurent_measures r S :=
-    { to_fun := λ s n,
-      if 0 ≤ f s then nnreal.int.binary (∥f s∥₊) n
-      else -nnreal.int.binary (∥f s∥₊) n,
-      summable' := λ s, begin
-        convert nnreal.int.binary_summable (∥f s∥₊) (r_lt_one : r < 1),
-        ext,
-        split_ifs;
-        simp,
-      end },
-    refine ⟨measure_aux, _⟩,
-    change _ ≤ _ ∧ _,
-    split,
-    { refine le_trans _ (le_max_left _ _),
-      refine le_trans _ (mul_le_mul_of_nonneg_left hf zero_le'),
-      change finset.sum _ _ ≤ _ * finset.sum _ _,
-      rw finset.mul_sum,
-      refine finset.sum_le_sum (λ s _, _),
-      rcases (eq_zero_or_pos : ∥f s∥₊ = 0 ∨ _) with (h0 | hpos),
-      { simp [h0, measure_aux] },
-      { convert le_trans (theta_aux_lemma.tsum_le
-          (∥f s∥₊) (r_pos : 0 < r) (r_lt_one : r < 1)) _,
-        { ext n, congr', dsimp [measure_aux], split_ifs; simp },
-        { rw mul_comm,
-          apply nnreal.mul_le_mul_left,
-          rw ← nnreal.rpow_int_cast,
-          convert nnreal.rpow_le_rpow_of_exponent_ge
-            (r_pos : 0 < r) (r_lt_one.le) (int.le_ceil _) using 1,
-          delta «r»,
-          rw [← nnreal.rpow_mul, mul_comm, nnreal.rpow_mul],
-          congr', symmetry,
-          rw ← nnreal.coe_eq,
-          exact nnreal.pow_log_div_log_self hpos (by norm_num) (by norm_num), } } },
-    { delta Θ_fintype_nat_trans Θ θ_to_add θ theta.ϑ,
-      dsimp,
-      ext s,
-      split_ifs,
-      { convert nnreal.coe_eq.2 (nnreal.int.binary_sum ∥f s∥₊),
-        push_cast, rw real.nnnorm_of_nonneg h, refl, },
-      { convert neg_inj.2 (nnreal.coe_eq.2 (nnreal.int.binary_sum ∥f s∥₊)),
-        { push_cast, rw ← tsum_neg, congr', ext, simp },
-        { push_neg at h,
-          rw real.neg_nnnorm_of_neg h, } } } },
+    { clear S,
+      rintros S c' (f : real_measures p S) (hf : _ ≤ _),
+      let measure_aux : laurent_measures r S :=
+      { to_fun := λ s n,
+        if 0 ≤ f s then nnreal.int.binary (∥f s∥₊) n
+        else -nnreal.int.binary (∥f s∥₊) n,
+        summable' := λ s, begin
+          convert nnreal.int.binary_summable (∥f s∥₊) (r_lt_one : r < 1),
+          ext,
+          split_ifs;
+          simp,
+        end },
+      refine ⟨measure_aux, _⟩,
+      change _ ≤ _ ∧ _,
+      split,
+      { refine le_trans _ (le_max_left _ _),
+        refine le_trans _ (mul_le_mul_of_nonneg_left hf zero_le'),
+        change finset.sum _ _ ≤ _ * finset.sum _ _,
+        rw finset.mul_sum,
+        refine finset.sum_le_sum (λ s _, _),
+        rcases (eq_zero_or_pos : ∥f s∥₊ = 0 ∨ _) with (h0 | hpos),
+        { simp [h0, measure_aux] },
+        { convert le_trans (theta_aux_lemma.tsum_le
+            (∥f s∥₊) (r_pos : 0 < r) (r_lt_one : r < 1)) _,
+          { ext n, congr', dsimp [measure_aux], split_ifs; simp },
+          { rw mul_comm,
+            apply nnreal.mul_le_mul_left,
+            rw ← nnreal.rpow_int_cast,
+            convert nnreal.rpow_le_rpow_of_exponent_ge
+              (r_pos : 0 < r) (r_lt_one.le) (int.le_ceil _) using 1,
+            delta «r»,
+            rw [← nnreal.rpow_mul, mul_comm, nnreal.rpow_mul],
+            congr', symmetry,
+            rw ← nnreal.coe_eq,
+            exact nnreal.pow_log_div_log_self hpos (by norm_num) (by norm_num), } } },
+      { delta Θ_fintype_nat_trans Θ θ_to_add θ theta.ϑ,
+        dsimp,
+        ext s,
+        split_ifs,
+        { convert nnreal.coe_eq.2 (nnreal.int.binary_sum ∥f s∥₊),
+          push_cast, rw real.nnnorm_of_nonneg h, refl, },
+        { convert neg_inj.2 (nnreal.coe_eq.2 (nnreal.int.binary_sum ∥f s∥₊)),
+          { push_cast, rw ← tsum_neg, congr', ext, simp },
+          { push_neg at h,
+            rw real.neg_nnnorm_of_neg h, } } } },
 end
 
 end ses
