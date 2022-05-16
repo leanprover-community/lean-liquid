@@ -71,6 +71,11 @@ def map {V₁ V₂ W₁ W₂ : SemiNormedGroup} {f₁ f₂ g₁ g₂} (φ : V₁
   equalizer f₁ g₁ ⟶ equalizer f₂ g₂ :=
 normed_group_hom.equalizer.map _ _ hf.symm hg.symm
 
+lemma map_comp_ι {V₁ V₂ W₁ W₂ : SemiNormedGroup} {f₁ f₂ g₁ g₂} (φ : V₁ ⟶ V₂) (ψ : W₁ ⟶ W₂)
+  (hf : φ ≫ f₂ = f₁ ≫ ψ) (hg : φ ≫ g₂ = g₁ ≫ ψ) :
+  map φ ψ hf hg ≫ ι _ _ = ι _ _ ≫ φ :=
+rfl
+
 theorem map_congr
   {V₁ V₂ W₁ W₂ : SemiNormedGroup} {f₁ f₂ g₁ g₂} {φ : V₁ ⟶ V₂} {ψ : W₁ ⟶ W₂}
   {V₁' V₂' W₁' W₂' : SemiNormedGroup} {f₁' f₂' g₁' g₂'} {φ' : V₁' ⟶ V₂'} {ψ' : W₁' ⟶ W₂'}
