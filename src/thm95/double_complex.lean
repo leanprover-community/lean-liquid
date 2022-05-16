@@ -9,6 +9,7 @@ import system_of_complexes.rescale
 import normed_spectral
 
 import thm95.modify_complex
+import thm95.polyhedral_iso
 
 /-!
 # The double complex that is the protagonist in the proof of Theorem 9.5
@@ -50,6 +51,20 @@ begin
   dsimp only [augmented_cosimplicial, augmented_Cech_conerve],
   rw cosimplicial_object.augment_hom_zero,
   refl
+end
+
+lemma _root_.PolyhedralLattice.Cech_augmentation_map_eq_Hom_sum :
+  (Λ.Hom_cosimplicial_zero_iso N r' M ↑N rfl).inv ≫ (thm95.Cech_augmentation_map r' Λ M N) =
+  (Hom_sum Λ N r' M) :=
+begin
+  dsimp only [thm95.Cech_augmentation_map, Hom_cosimplicial_zero_iso,
+    Hom_cosimplicial_zero_iso_aux_rfl, Hom_cosimplicial_zero_iso'],
+  rw [iso.refl_trans, iso.refl_trans],
+  dsimp only [iso.trans_inv, functor.map_iso_hom, functor.map_iso_inv, iso.symm_inv, op_comp],
+  simp only [category.assoc, ← (Hom M).map_comp, augmentation_eq_diagonal, iso.op_hom, ← op_comp],
+  dsimp only [Hom_rescale_iso, Hom_finsupp_iso],
+  ext f l : 2,
+  exact finsupp_sum_diagonal_embedding Λ N r' M f l,
 end
 
 def cosimplicial_system_of_complexes : cosimplicial_object.augmented system_of_complexes.{u} :=

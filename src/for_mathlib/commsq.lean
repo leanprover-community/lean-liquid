@@ -116,6 +116,83 @@ end iso
 def bicartesian (sq : commsq f₁₁ g₁₁ g₁₂ f₂₁) : Prop :=
 short_exact (-f₁₁ ≫ sq.sum.inl + g₁₁ ≫ sq.sum.inr) sq.π
 
+def bicartesian.is_limit {sq : commsq f₁₁ g₁₁ g₁₂ f₂₁} (h : sq.bicartesian) :
+  is_limit (pullback_cone.mk f₁₁ g₁₁ sq.w) :=
+pullback_cone.is_limit.mk sq.w
+  (λ s, (@abelian.is_limit_of_exact_of_mono _ _ _ _ _ _ _ _ h.mono h.exact).lift
+      (fork.of_ι (-s.fst ≫ sq.sum.inl + s.snd ≫ sq.sum.inr)
+        (by simp only [s.condition, preadditive.add_comp, preadditive.neg_comp, category.assoc,
+          inl_π, inr_π, add_left_neg, comp_zero])))
+  (λ s,
+  begin
+    have : f₁₁ = -((-f₁₁ ≫ sq.sum.inl + g₁₁ ≫ sq.sum.inr) ≫ sq.sum.fst),
+    { simp only [preadditive.add_comp, preadditive.neg_comp, category.assoc, sum_str.inl_fst,
+        category.comp_id, sum_str.inr_fst, comp_zero, add_zero, neg_neg] },
+    conv_lhs { congr, skip, rw this },
+    rw [preadditive.comp_neg, ← category.assoc],
+    erw (@abelian.is_limit_of_exact_of_mono _ _ _ _ _ _ _ _ h.mono h.exact).fac _
+      walking_parallel_pair.zero,
+    simp only [preadditive.add_comp, preadditive.neg_comp, category.assoc, comp_zero,
+      fork.of_ι_π_app, sum_str.inl_fst, category.comp_id, sum_str.inr_fst, add_zero, neg_neg],
+  end)
+  (λ s,
+  begin
+    have : g₁₁ = (-f₁₁ ≫ sq.sum.inl + g₁₁ ≫ sq.sum.inr) ≫ sq.sum.snd,
+    { simp only [preadditive.add_comp, preadditive.neg_comp, category.assoc, sum_str.inl_snd,
+        comp_zero, neg_zero, sum_str.inr_snd, category.comp_id, zero_add] },
+    conv_lhs { congr, skip, rw this },
+    rw ← category.assoc,
+    erw (@abelian.is_limit_of_exact_of_mono _ _ _ _ _ _ _ _ h.mono h.exact).fac _
+      walking_parallel_pair.zero,
+    simp only [preadditive.add_comp, preadditive.neg_comp, category.assoc, comp_zero,
+      fork.of_ι_π_app, sum_str.inl_snd, neg_zero, sum_str.inr_snd, category.comp_id, zero_add],
+  end)
+  (λ s m h₁ h₂,
+  begin
+    apply fork.is_limit.hom_ext (@abelian.is_limit_of_exact_of_mono _ _ _ _ _ _ _ _ h.mono h.exact),
+    erw [is_limit.fac],
+    simp only [reassoc_of h₁, reassoc_of h₂, kernel_fork.ι_of_ι, preadditive.comp_add,
+      preadditive.comp_neg, fork.of_ι_π_app],
+  end)
+
+def bicartesian.is_colimit {sq : commsq f₁₁ g₁₁ g₁₂ f₂₁} (h : sq.bicartesian) :
+  is_colimit (pushout_cocone.mk g₁₂ f₂₁ sq.w) :=
+pushout_cocone.is_colimit.mk sq.w
+  (λ s, (@abelian.is_colimit_of_exact_of_epi _ _ _ _ _ _ _ _ h.epi h.exact).desc
+    (cofork.of_π (sq.sum.fst ≫ s.inl + sq.sum.snd ≫ s.inr)
+      (by simp only [s.condition, preadditive.comp_add, preadditive.add_comp_assoc,
+        preadditive.neg_comp, category.assoc, sum_str.inl_fst, category.comp_id, sum_str.inr_fst,
+        comp_zero, add_zero, sum_str.inl_snd, neg_zero, sum_str.inr_snd, zero_add, add_left_neg,
+        zero_comp])))
+  (λ s,
+  begin
+    conv_lhs { congr, rw [← sq.inl_π] },
+    rw category.assoc,
+    erw (@abelian.is_colimit_of_exact_of_epi _ _ _ _ _ _ _ _ h.epi h.exact).fac _
+      walking_parallel_pair.one,
+    simp only [preadditive.comp_add, add_zero, zero_comp, cofork.of_π_ι_app, sum_str.inl_fst_assoc,
+      sum_str.inl_snd_assoc],
+  end)
+  (λ s,
+  begin
+    conv_lhs { congr, rw [← sq.inr_π] },
+    rw category.assoc,
+    erw (@abelian.is_colimit_of_exact_of_epi _ _ _ _ _ _ _ _ h.epi h.exact).fac _
+      walking_parallel_pair.one,
+    simp only [preadditive.comp_add, zero_add, zero_comp, cofork.of_π_ι_app, sum_str.inr_fst_assoc,
+      sum_str.inr_snd_assoc]
+  end)
+  (λ s m h₁ h₂,
+  begin
+    apply cofork.is_colimit.hom_ext
+      (@abelian.is_colimit_of_exact_of_epi _ _ _ _ _ _ _ _ h.epi h.exact),
+    erw [is_colimit.fac],
+    simp only [cokernel_cofork.π_of_π, cofork.of_π_ι_app],
+    conv_lhs { congr, rw [← category.id_comp sq.π] },
+    rw [← sq.sum.total],
+    simp only [h₁, h₂, preadditive.add_comp, category.assoc, inl_π, inr_π]
+  end)
+
 open category_theory.preadditive
 
 lemma bicartesian.congr {sq₁ : commsq f₁₁ g₁₁ g₁₂ f₂₁}
