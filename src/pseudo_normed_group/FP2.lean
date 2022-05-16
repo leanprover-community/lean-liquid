@@ -1,6 +1,7 @@
 import breen_deligne.constants
 import breen_deligne.suitable
 import pseudo_normed_group.FP
+import system_of_complexes.rescale
 
 noncomputable theory
 
@@ -25,9 +26,9 @@ open category_theory breen_deligne
 
 namespace breen_deligne
 
-variables (r r' : ℝ≥0) -- [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' < 1)]
-variables (BD : breen_deligne.package) (κ : ℕ → ℝ≥0)
-variables [BD.data.very_suitable r r' κ] [∀ (i : ℕ), fact (0 < κ i)]
+variables (r' : ℝ≥0)
+variables (BD : breen_deligne.data) (κ : ℕ → ℝ≥0)
+variables [BD.suitable κ] -- [∀ (i : ℕ), fact (0 < κ i)]
 variables (M : ProFiltPseuNormGrpWithTinv r')
 variables (c c₁ c₂ c₃ c₄ : ℝ≥0) (l m n : ℕ)
 
@@ -285,18 +286,95 @@ end
 end universal_map
 
 def FPsystem.X (c : ℝ≥0) (n : ℕ) : FreeAb Profinite :=
-FreeAb.of $ (FiltrationPow r' (c * κ n) $ BD.data.X n).obj M
+FreeAb.of $ (FiltrationPow r' (c * κ n) $ BD.X n).obj M
 
--- def FPsystem.d (c : ℝ≥0) (n : ℕ) : FPsystem.X r' BD κ M c (n + 1) ⟶ FPsystem.X r' BD κ M c n :=
--- free_abelian_group.map (λ f, eval_FP r' (c * κ (n+1)) (c * κ n) f)
---   (BD.data.d (n+1) n)
+def FPsystem.d (c : ℝ≥0) (n : ℕ) :
+  FPsystem.X r' BD κ M c (n + 1) ⟶ FPsystem.X r' BD κ M c n :=
+(universal_map.eval_FP2 r' (c * κ (n+1)) (c * κ n) (BD.d (n+1) n)).app M
 
--- def FPsystem : ℝ≥0 ⥤ chain_complex (FreeAb Profinite) ℕ :=
--- { obj := λ c, chain_complex.of (FPsystem.X r' BD κ M c) _ _,
---   map := _,
---   map_id' := _,
---   map_comp' := _ }
+lemma FPsystem.d_comp_d (c : ℝ≥0) (n : ℕ) :
+  FPsystem.d r' BD κ M c (n + 1) ≫ FPsystem.d r' BD κ M c n = 0 :=
+begin
+  delta FPsystem.d,
+  rw [← nat_trans.comp_app, ← universal_map.eval_FP2_comp],
+  convert nat_trans.app_zero _, refl, refl,
+  convert universal_map.eval_FP2_zero _ _ _,
+  show BD.d _ _ ≫ BD.d _ _ = 0,
+  rw homological_complex.d_comp_d,
+end
 
--- chain_complex.of _ _ _
+open opposite
+
+def FPsystem : ℝ≥0 ⥤ chain_complex (FreeAb Profinite) ℕ :=
+{ obj := λ c, chain_complex.of (FPsystem.X r' BD κ M c) (FPsystem.d r' BD κ M _) (FPsystem.d_comp_d _ _ _ _ _),
+  map := λ c₁ c₂ h,
+  { f := λ n, by { refine (@FP2.res r' _ _ (id _) (BD.X n)).app M,
+      haveI : fact (c₁ ≤ c₂) := ⟨h.le⟩, apply_instance, },
+    comm' := begin
+      rintro i j (rfl : j + 1 = i),
+      rw [chain_complex.of_d, chain_complex.of_d],
+      delta FPsystem.d, rw [← nat_trans.comp_app, ← nat_trans.comp_app],
+      congr' 1,
+      apply universal_map.res_comp_eval_FP2,
+    end },
+  map_id' := λ c, begin
+    ext n, dsimp, rw [Filtration.cast_le_refl, (FreeAb.of_functor _).map_id], refl,
+  end,
+  map_comp' := λ c₁ c₂ c₃ h₁₂ h₂₃, begin
+    ext n, dsimp, rw [← (FreeAb.of_functor _).map_comp, Filtration.cast_le_comp],
+  end }
+.
+
+def FPsystem.Tinv [fact (0 < r')] :
+  nnreal.MulLeft r' ⋙ FPsystem r' BD κ M ⟶ FPsystem r' BD κ M :=
+{ app := λ c,
+  { f := λ n,
+    begin
+      haveI : fact (r'.MulLeft.obj c * κ n ≤ r' * (c * κ n)),
+      { dsimp only [nnreal.MulLeft], simp only [← mul_assoc], apply_instance, },
+      refine (FP2.Tinv r' _ _ _).app M,
+    end,
+    comm' := begin
+      rintro i j (rfl : j + 1 = i),
+      dsimp only [functor.comp_obj, FPsystem],
+      rw [chain_complex.of_d, chain_complex.of_d],
+      delta FPsystem.d,
+      rw [← nat_trans.comp_app, ← nat_trans.comp_app],
+      congr' 1,
+      apply universal_map.Tinv_comp_eval_FP2
+    end },
+  naturality' := begin
+    intros c₁ c₂ h,
+    ext n,
+    dsimp only [FPsystem, Tinv_app, homological_complex.comp_f, functor.comp_map, res_app],
+    rw [← functor.map_comp, ← functor.map_comp],
+    refl,
+  end }
+
+def FPsystem.res [fact (r' ≤ 1)] :
+  nnreal.MulLeft r' ⋙ FPsystem r' BD κ M ⟶ FPsystem r' BD κ M :=
+{ app := λ c,
+  { f := λ n,
+    begin
+      haveI : fact (r'.MulLeft.obj c * κ n ≤ c * κ n),
+      { dsimp only [nnreal.MulLeft], simp only [mul_assoc], apply_instance, },
+      refine (FP2.res r' _ _ _).app M,
+    end,
+    comm' := begin
+      rintro i j (rfl : j + 1 = i),
+      dsimp only [functor.comp_obj, FPsystem],
+      rw [chain_complex.of_d, chain_complex.of_d],
+      delta FPsystem.d,
+      rw [← nat_trans.comp_app, ← nat_trans.comp_app],
+      congr' 1,
+      apply universal_map.res_comp_eval_FP2
+    end },
+  naturality' := begin
+    intros c₁ c₂ h,
+    ext n,
+    dsimp only [FPsystem, res_app, homological_complex.comp_f, functor.comp_map],
+    rw [← functor.map_comp, ← functor.map_comp],
+    refl,
+  end }
 
 end breen_deligne

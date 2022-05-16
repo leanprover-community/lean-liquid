@@ -5,6 +5,7 @@ import for_mathlib.complex_extend
 import for_mathlib.projectives
 import for_mathlib.two_step_resolution
 import for_mathlib.homology_exact
+import for_mathlib.homological_complex_op
 
 .
 
@@ -178,24 +179,6 @@ end
 .
 
 open opposite
-
-namespace homological_complex
-
-@[simps]
-def op (X : homological_complex C c) : homological_complex Cᵒᵖ c.symm :=
-{ X := λ i, op (X.X i),
-  d := λ i j, (X.d j i).op,
-  shape' := λ i j hij, by { rw [X.shape j i hij, op_zero], },
-  d_comp_d' := by { intros, rw [← op_comp, X.d_comp_d, op_zero], } }
-
-@[simps]
-def unop (X : homological_complex Cᵒᵖ c) : homological_complex C c.symm :=
-{ X := λ i, unop (X.X i),
-  d := λ i j, (X.d j i).unop,
-  shape' := λ i j hij, by { rw [X.shape j i hij, unop_zero], },
-  d_comp_d' := by { intros, rw [← unop_comp, X.d_comp_d, unop_zero], } }
-
-end homological_complex
 
 @[to_additive]
 lemma subgroup.comap_eq_iff {A B : Type*} [comm_group A] [comm_group B] (f : A ≃* B)

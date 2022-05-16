@@ -84,6 +84,9 @@ def eval [preadditive C] : FreeAb C ⥤ C :=
     refl,
   end }
 
+instance eval_additive [preadditive C] : (eval C).additive :=
+{ map_add' := λ X Y f g, add_monoid_hom.map_add _ _ _ }
+
 end FreeAb
 
 namespace functor
@@ -104,6 +107,9 @@ def map_FreeAb (F : C ⥤ D) : FreeAb C ⥤ FreeAb D :=
       add_monoid_hom.flip_apply, FreeAb.comp, free_abelian_group.lift.of,
       free_abelian_group.map, ← F.map_comp],
   end }
+
+instance map_FreeAb_additive (F : C ⥤ D) : F.map_FreeAb.additive :=
+{ map_add' := λ X Y f g, add_monoid_hom.map_add _ _ _ }
 
 end functor
 
