@@ -346,11 +346,6 @@ begin
     exact lt_d_eq_zero F s n hn },
 end
 
--- example (r : ℝ≥0) (k : ℕ) : r ^ (k : ℤ) = r ^ k :=
--- begin
---   rw zpow_coe_nat,
--- end
-
 lemma psi_def_summable3 {S : Fintype}
   [fact (0 < p)]
   [fact (p < 1)]
