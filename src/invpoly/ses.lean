@@ -150,15 +150,13 @@ begin
     { change ∥_∥₊ ≤ c at hf2,
       change ∥_∥₊ ≤ _,
       -- know |(X-2)*g|<=c, want |g|<=?.
+      -- proof idea:
       sorry },
     { ext1 s,
-      replace hf1 := congr_fun hf1 s,
-      change (f s).eval (2 : ℤ) = 0 at hf1,
       convert hf3 s,
-      rw sub_mul,
-      ext,
-      simp [Tinv2_nat_trans, Tinv_nat_trans],
+      simp [sub_mul, Tinv2_nat_trans, Tinv_nat_trans],
       refl } },
+  -- this sorry can be deleted
   sorry;{ rintro S c g (hg : _ ≤ _),
     let f : invpoly r S := λ s, polynomial.C (g s),
     refine ⟨f, _, _⟩,
