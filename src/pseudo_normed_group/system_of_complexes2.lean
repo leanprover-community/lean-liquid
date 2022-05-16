@@ -7,6 +7,8 @@ import pseudo_normed_group.system_of_complexes
 
 import system_of_complexes.rescale
 
+import prop_92.prop_92
+
 noncomputable theory
 
 open_locale nnreal
@@ -29,14 +31,15 @@ lemma category_theory.unop_zsmul {C : Type*} [category C] [preadditive C] {X Y :
   (k : ℤ) (f : X ⟶ Y) : (k • f).unop = k • f.unop := rfl
 
 variables (r r' : ℝ≥0)
-variables (BD : breen_deligne.data) (κ : ℕ → ℝ≥0) [BD.suitable κ]
+variables (BD : breen_deligne.data)
 variables (M : ProFiltPseuNormGrpWithTinv.{u} r')
 variables (V : SemiNormedGroup.{v})
 
 set_option pp.universes true
 
-def aux_system : system_of_complexes :=
-(FPsystem r' BD κ M).op ⋙
+def aux_system (κ : ℝ≥0 → ℕ → ℝ≥0) [∀ c, BD.suitable (κ c)] [∀ (n : ℕ), fact (monotone (function.swap κ n))] :
+  system_of_complexes :=
+(FPsystem r' BD M κ).op ⋙
   (((CLC.{v u} V).right_op.map_FreeAb ⋙ FreeAb.eval _).map_homological_complex _).op ⋙
   homological_complex.unop_functor
 
@@ -46,30 +49,45 @@ variables [fact (0 < r)] [fact (0 < r')] [fact (r' ≤ 1)]
 
 open system_of_complexes opposite
 
-def tweak (c : ℝ≥0ᵒᵖ) (n : ℕ) :
-  ((unop.{u+2} ((FPsystem.{u} r' BD κ M).op.obj (r'.MulLeft.op.obj c))).X n).as ≅
-  (FiltrationPow.{u} r' (r' * (unop.{1} c * κ n)) (BD.X n)).obj M :=
-begin
-  dsimp [FPsystem, FPsystem.X, nnreal.MulLeft],
-  haveI : fact (r' * unop.{1} c * κ n ≤ r' * (unop.{1} c * κ n)) := ⟨(mul_assoc _ _ _).le⟩,
-  haveI : fact (r' * (unop.{1} c * κ n) ≤ r' * unop.{1} c * κ n) := ⟨(mul_assoc _ _ _).ge⟩,
-  refine ⟨Filtration.cast_le.{u} _ _ _, Filtration.cast_le.{u} _ _ _, _, _⟩,
-  tidy,
-end
+-- def tweak (c : ℝ≥0ᵒᵖ) (n : ℕ) :
+--   ((unop.{u+2} ((FPsystem.{u} r' BD M κ).op.obj (r'.MulLeft.op.obj c))).X n).as ≅
+--   (FiltrationPow.{u} r' (r' * (unop.{1} c * κ n)) (BD.X n)).obj M :=
+-- begin
+--   dsimp [FPsystem, FPsystem.X, nnreal.MulLeft],
+--   haveI : fact (r' * unop.{1} c * κ n ≤ r' * (unop.{1} c * κ n)) := ⟨(mul_assoc _ _ _).le⟩,
+--   haveI : fact (r' * (unop.{1} c * κ n) ≤ r' * unop.{1} c * κ n) := ⟨(mul_assoc _ _ _).ge⟩,
+--   refine ⟨Filtration.cast_le.{u} _ _ _, Filtration.cast_le.{u} _ _ _, _, _⟩,
+--   tidy,
+-- end
 
-def Tinv : aux_system r' BD κ M V ⟶ (ScaleIndexLeft r').obj (aux_system r' BD κ M V) :=
-@whisker_right _ _ _ _ _ _ (FPsystem r' BD κ M).op ((nnreal.MulLeft r').op ⋙ (FPsystem r' BD κ M).op)
-  (nat_trans.op $ FPsystem.Tinv r' BD κ M)
+variables (κ₁ κ₂ : ℝ≥0 → ℕ → ℝ≥0) [∀ c, BD.suitable (κ₁ c)] [∀ c, BD.suitable (κ₂ c)]
+
+def Tinv [hκ₁ : ∀ n, fact (monotone (function.swap κ₁ n))] [hκ₂ : ∀ n, fact (monotone (function.swap κ₂ n))]
+  [∀ c n, fact (κ₁ c n ≤ r' * κ₂ c n)] :
+  aux_system r' BD M V κ₂ ⟶ aux_system r' BD M V κ₁ :=
+whisker_right (nat_trans.op $ FPsystem.Tinv r' BD M κ₁ κ₂)
   ((((CLC.{v u} V).right_op.map_FreeAb ⋙ FreeAb.eval _).map_homological_complex _).op ⋙
     homological_complex.unop_functor)
 
--- lemma Tinv_eq (c : ℝ≥0ᵒᵖ) (n : ℕ) : ((Tinv r' BD κ M V).app c).f n =
---   _ ≫ (CLCFP.Tinv V r' _ _ (BD.X n)).app (op M) ≫ _ :=
--- begin
---   sorry
--- end
+lemma Tinv_eq [hκ₁ : ∀ n, fact (monotone (function.swap κ₁ n))] [hκ₂ : ∀ n, fact (monotone (function.swap κ₂ n))]
+  [∀ c n, fact (κ₁ c n ≤ r' * κ₂ c n)] (c : ℝ≥0ᵒᵖ) (n : ℕ) :
+  ((Tinv r' BD M V κ₁ κ₂).app c).f n =
+  ((CLCFP.Tinv V r' _ _ (BD.X n)).app (op M) : _) :=
+begin
+  dsimp only [Tinv, CLCFP.Tinv, FPsystem.Tinv, FP2.Tinv,
+    homological_complex.comp_f, aux_system, functor.comp_map, homological_complex.unop_functor,
+    homological_complex.unop_d, functor.op_obj, functor.map_homological_complex_obj_d,
+    unop_op, CLC, functor.op_map, quiver.hom.unop_op, functor.map_homological_complex_map_f,
+    functor.map_FreeAb, FreeAb.eval, free_abelian_group.map_of_apply,
+    FPsystem, FP2.res_app, FreeAb.of_functor, functor.right_op_map,
+    whisker_right_app, nat_trans.op_app],
+  erw [free_abelian_group.lift.of],
+  refl,
+end
 
-def T_inv [normed_with_aut r V] : aux_system r' BD κ M V ⟶ aux_system r' BD κ M V :=
+def T_inv [normed_with_aut r V]
+  (κ : ℝ≥0 → ℕ → ℝ≥0) [∀ c, BD.suitable (κ c)] [∀ (n : ℕ), fact (monotone (function.swap κ n))] :
+  aux_system r' BD M V κ ⟶ aux_system r' BD M V κ :=
 { app := λ c,
   { f := λ i, normed_group_hom.completion $ (SemiNormedGroup.LocallyConstant.map $ normed_with_aut.T.inv).app _,
     comm' := begin
@@ -110,29 +128,63 @@ def T_inv [normed_with_aut r V] : aux_system r' BD κ M V ⟶ aux_system r' BD �
 
 variables [normed_with_aut r V]
 
--- lemma T_inv_eq (c : ℝ≥0ᵒᵖ) (n : ℕ) : ((T_inv r r' BD κ M V).app c).f n =
---   (CLC V).map _ ≫
---   (CLC.T_inv r V).app (op.{u+2} (pseudo_normed_group.filtration_obj.{u} (↥M ^ BD.X n) (r' * (unop c * κ n))))
---   ≫ (CLC V).map _ :=
--- begin
---   sorry
--- end
+lemma T_inv_eq
+  (κ : ℝ≥0 → ℕ → ℝ≥0) [∀ c, BD.suitable (κ c)] [∀ (n : ℕ), fact (monotone (function.swap κ n))]
+  (c : ℝ≥0ᵒᵖ) (n : ℕ) : ((T_inv r r' BD M V κ).app c).f n =
+  ((CLCFP.T_inv r V r' _ (BD.X n)).app (op M) : _) :=
+begin
+  dsimp only [T_inv, CLCFP.T_inv, FPsystem, chain_complex.of_X, FPsystem.X,
+    homological_complex.comp_f, aux_system, functor.comp_map, homological_complex.unop_functor,
+    homological_complex.unop_d, functor.op_obj, functor.map_homological_complex_obj_d,
+    functor.map_homological_complex_map_f, functor.map_FreeAb,
+    unop_op, CLC, functor.op_map, functor.op_obj, quiver.hom.unop_op,
+    FreeAb.eval, free_abelian_group.map_of_apply, FPsystem, FP2.res_app, FreeAb.of_functor,
+    functor.right_op_map, whisker_right_app, nat_trans.op_app, whisker_left_app],
+  refl,
+end
 
-def res : aux_system r' BD κ M V ⟶ (ScaleIndexLeft r').obj (aux_system r' BD κ M V) :=
-@whisker_right _ _ _ _ _ _ (FPsystem r' BD κ M).op ((nnreal.MulLeft r').op ⋙ (FPsystem r' BD κ M).op)
-  (nat_trans.op $ FPsystem.res r' BD κ M)
+def res [hκ₁ : ∀ n, fact (monotone (function.swap κ₁ n))] [hκ₂ : ∀ n, fact (monotone (function.swap κ₂ n))]
+  [∀ c n, fact (κ₁ c n ≤ κ₂ c n)] :
+  aux_system r' BD M V κ₂ ⟶ aux_system r' BD M V κ₁ :=
+whisker_right (nat_trans.op $ FPsystem.res r' BD M κ₁ κ₂)
   ((((CLC.{v u} V).right_op.map_FreeAb ⋙ FreeAb.eval _).map_homological_complex _).op ⋙
     homological_complex.unop_functor)
 
+lemma res_eq [hκ₁ : ∀ n, fact (monotone (function.swap κ₁ n))] [hκ₂ : ∀ n, fact (monotone (function.swap κ₂ n))]
+  [∀ c n, fact (κ₁ c n ≤ r' * κ₂ c n)] [∀ c n, fact (κ₁ c n ≤ κ₂ c n)] (c : ℝ≥0ᵒᵖ) (n : ℕ) :
+  ((res r' BD M V κ₁ κ₂).app c).f n =
+  ((CLCFP.res V r' _ _ (BD.X n)).app (op M) : _) :=
+begin
+  dsimp only [res, CLCFP.res, FPsystem.res, FP2.res,
+    homological_complex.comp_f, aux_system, functor.comp_map, homological_complex.unop_functor,
+    homological_complex.unop_d, functor.op_obj, functor.map_homological_complex_obj_d,
+    unop_op, CLC, functor.op_map, quiver.hom.unop_op, functor.map_homological_complex_map_f,
+    functor.map_FreeAb, FreeAb.eval, free_abelian_group.map_of_apply,
+    FPsystem, FP2.res_app, FreeAb.of_functor, functor.right_op_map,
+    whisker_right_app, nat_trans.op_app],
+  rw [free_abelian_group.lift.of],
+  refl,
+end
 
-def Tinv2 :
-  aux_system r' BD κ M V ⟶ (ScaleIndexLeft r').obj (aux_system r' BD κ M V) :=
-Tinv r' BD κ M V - T_inv r r' BD κ M V ≫ res r' BD κ M V
+def Tinv2 [hκ₁ : ∀ n, fact (monotone (function.swap κ₁ n))] [hκ₂ : ∀ n, fact (monotone (function.swap κ₂ n))]
+  [∀ c n, fact (κ₁ c n ≤ r' * κ₂ c n)] [∀ c n, fact (κ₁ c n ≤ κ₂ c n)] :
+  aux_system r' BD M V κ₂ ⟶ aux_system r' BD M V κ₁ :=
+Tinv r' BD M V κ₁ κ₂ - T_inv r r' BD M V κ₂ ≫ res r' BD M V κ₁ κ₂
 .
 
-lemma aux_system_d_eq (c : ℝ≥0ᵒᵖ) (i : ℕ) :
-  arrow.mk (((aux_system r' BD κ M V).obj c).d i (i + 1)) =
-  arrow.mk ((universal_map.eval_CLCFP V r' (unop c * κ i) (unop c * κ (i + 1)) (BD.d (i + 1) i) : _).app (op M)) :=
+lemma Tinv2_eq [hκ₁ : ∀ n, fact (monotone (function.swap κ₁ n))] [hκ₂ : ∀ n, fact (monotone (function.swap κ₂ n))]
+  [∀ c n, fact (κ₁ c n ≤ r' * κ₂ c n)] [∀ c n, fact (κ₁ c n ≤ κ₂ c n)] (c : ℝ≥0ᵒᵖ) (n : ℕ) :
+  ((Tinv2 r r' BD M V κ₁ κ₂).app c).f n =
+  ((CLCFP.Tinv V r' _ _ (BD.X n)).app (op M) : _) -
+  ((CLCFP.T_inv r V r' _ (BD.X n)).app (op M) : _) ≫ ((CLCFP.res V r' _ _ (BD.X n)).app (op M) : _) :=
+by rw [Tinv2, nat_trans.app_sub, homological_complex.sub_f_apply, Tinv_eq,
+    nat_trans.comp_app, homological_complex.comp_f, T_inv_eq, res_eq]
+
+lemma aux_system_d_eq
+  (κ : ℝ≥0 → ℕ → ℝ≥0) [∀ c, BD.suitable (κ c)] [∀ (n : ℕ), fact (monotone (function.swap κ n))]
+  (c : ℝ≥0ᵒᵖ) (i : ℕ) :
+  arrow.mk (((aux_system r' BD M V κ).obj c).d i (i + 1)) =
+  arrow.mk ((universal_map.eval_CLCFP V r' (κ (unop c) i) (κ (unop c) (i + 1)) (BD.d (i + 1) i) : _).app (op M)) :=
 begin
   dsimp [aux_system, FPsystem],
   rw [chain_complex.of_d],
@@ -151,8 +203,16 @@ begin
   refl,
 end
 
+section
+
+variables (κ : ℕ → ℝ≥0) [BD.suitable κ]
+
+instance mul_left_mono (n : ℕ) :
+  fact (monotone (function.swap (λ (c : ℝ≥0) (n : ℕ), c * κ n) n)) :=
+⟨λ c₁ c₂ h, mul_le_mul' h le_rfl⟩
+
 def incl_f (c : ℝ≥0ᵒᵖ) (n : ℕ) :
-  ((BD.complex κ r V r' (unop c)).obj (op M)).X n ⟶ ((aux_system r' BD κ M V).obj c).X n :=
+  ((BD.complex κ r V r' (unop c)).obj (op M)).X n ⟶ ((aux_system r' BD M V (λ c n, c * κ n)).obj c).X n :=
 begin
   dsimp [breen_deligne.data.complex, breen_deligne.data.complex₂, breen_deligne.data.complex₂_X,
     CLCTinv, aux_system, FPsystem, FPsystem.X, functor.map_FreeAb, FreeAb.eval],
@@ -160,8 +220,8 @@ begin
 end
 
 lemma incl_comm (c : ℝ≥0ᵒᵖ) (i : ℕ) :
-  incl_f.{u v} r r' BD κ M V c i ≫ ((aux_system.{u v} r' BD κ M V).obj c).d i (i + 1) =
-  ((BD.complex κ r V r' (unop c)).obj (op.{u+2} M)).d i (i + 1) ≫ incl_f.{u v} r r' BD κ M V c (i + 1) :=
+  incl_f.{u v} r r' BD M V κ c i ≫ ((aux_system.{u v} r' BD M V (λ c n, c * κ n)).obj c).d i (i + 1) =
+  ((BD.complex κ r V r' (unop c)).obj (op.{u+2} M)).d i (i + 1) ≫ incl_f.{u v} r r' BD M V κ c (i + 1) :=
 begin
   dsimp [aux_system],
   erw [chain_complex.of_d, breen_deligne.data.complex_obj_d],
@@ -172,21 +232,24 @@ begin
   delta id, dsimp only [], symmetry,
   convert SemiNormedGroup.equalizer.map_comp_ι _ _ _ _ using 2,
   apply arrow.mk_injective,
-  rw ← aux_system_d_eq,
+  rw ← aux_system_d_eq r' BD M V (λ c n, c * κ n),
   dsimp [aux_system],
   erw [chain_complex.of_d],
   refl,
 end
 
-def incl (c : ℝ≥0ᵒᵖ) : (BD.complex κ r V r' (unop c)).obj (op M) ⟶ (aux_system r' BD κ M V).obj c :=
-{ f := incl_f r r' BD κ M V c,
+def incl (c : ℝ≥0ᵒᵖ) : (BD.complex κ r V r' (unop c)).obj (op M) ⟶ (aux_system r' BD M V (λ c n, c * κ n)).obj c :=
+{ f := incl_f r r' BD M V κ c,
   comm' := by { rintro i j (rfl : i + 1 = j), apply incl_comm } }
 
 def incl' (c : ℝ≥0ᵒᵖ) :=
-(functor.map_homological_complex (forget₂ _ Ab) _).map (incl r r' BD κ M V c)
+(functor.map_homological_complex (forget₂ _ Ab) _).map (incl r r' BD M V κ c)
 
-def Tinv2' (c : ℝ≥0ᵒᵖ) :=
-(functor.map_homological_complex (forget₂ _ Ab) _).map ((Tinv2 r r' BD κ M V).app c)
+end
+
+def Tinv2' [hκ₁ : ∀ n, fact (monotone (function.swap κ₁ n))] [hκ₂ : ∀ n, fact (monotone (function.swap κ₂ n))]
+  [∀ c n, fact (κ₁ c n ≤ r' * κ₂ c n)] [∀ c n, fact (κ₁ c n ≤ κ₂ c n)] (c : ℝ≥0ᵒᵖ) :=
+(functor.map_homological_complex (forget₂ _ Ab) _).map ((Tinv2 r r' BD M V κ₁ κ₂).app c)
 
 lemma _root_.SemiNormedGroup.equalizer.ι_injective {V W : SemiNormedGroup} (f g : V ⟶ W) :
   function.injective (SemiNormedGroup.equalizer.ι f g) :=
@@ -197,8 +260,9 @@ lemma _root_.SemiNormedGroup.equalizer.forget₂_ι {V W : SemiNormedGroup} (f g
   add_subgroup.subtype (add_monoid_hom.ker ((forget₂ _ Ab).map (f - g))) :=
 rfl
 
-lemma short_exact (c : ℝ≥0ᵒᵖ) (n : ℕ) :
-  short_exact ((incl' r r' BD κ M V c).f n) ((Tinv2' r r' BD κ M V c).f n) :=
+lemma short_exact (κ : ℕ → ℝ≥0) [BD.suitable κ] [hκ₁ : ∀ n, fact (monotone (function.swap κ₁ n))]
+  [∀ c n, fact (κ₁ c n ≤ r' * (c * κ n))] [∀ c n, fact (κ₁ c n ≤ c * κ n)] (c : ℝ≥0ᵒᵖ) (n : ℕ) :
+  short_exact ((incl' r r' BD M V κ c).f n) ((Tinv2' r r' BD M V κ₁ _ c).f n) :=
 begin
   apply_with @short_exact.mk {instances := ff},
   { rw AddCommGroup.mono_iff_injective,

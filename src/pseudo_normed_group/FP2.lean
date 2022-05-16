@@ -27,8 +27,7 @@ open category_theory breen_deligne
 namespace breen_deligne
 
 variables (r' : ℝ≥0)
-variables (BD : breen_deligne.data) (κ : ℕ → ℝ≥0)
-variables [BD.suitable κ] -- [∀ (i : ℕ), fact (0 < κ i)]
+variables (BD : breen_deligne.data)
 variables (M : ProFiltPseuNormGrpWithTinv r')
 variables (c c₁ c₂ c₃ c₄ : ℝ≥0) (l m n : ℕ)
 
@@ -285,15 +284,18 @@ end
 
 end universal_map
 
+
+variables (κ : ℝ≥0 → ℕ → ℝ≥0) [∀ c, BD.suitable (κ c)]
+
 def FPsystem.X (c : ℝ≥0) (n : ℕ) : FreeAb Profinite :=
-FreeAb.of $ (FiltrationPow r' (c * κ n) $ BD.X n).obj M
+FreeAb.of $ (FiltrationPow r' (κ c n) $ BD.X n).obj M
 
 def FPsystem.d (c : ℝ≥0) (n : ℕ) :
-  FPsystem.X r' BD κ M c (n + 1) ⟶ FPsystem.X r' BD κ M c n :=
-(universal_map.eval_FP2 r' (c * κ (n+1)) (c * κ n) (BD.d (n+1) n)).app M
+  FPsystem.X r' BD M κ c (n + 1) ⟶ FPsystem.X r' BD M κ c n :=
+(universal_map.eval_FP2 r' (κ c (n+1)) (κ c n) (BD.d (n+1) n)).app M
 
 lemma FPsystem.d_comp_d (c : ℝ≥0) (n : ℕ) :
-  FPsystem.d r' BD κ M c (n + 1) ≫ FPsystem.d r' BD κ M c n = 0 :=
+  FPsystem.d r' BD M κ c (n + 1) ≫ FPsystem.d r' BD M κ c n = 0 :=
 begin
   delta FPsystem.d,
   rw [← nat_trans.comp_app, ← universal_map.eval_FP2_comp],
@@ -305,11 +307,12 @@ end
 
 open opposite
 
-def FPsystem : ℝ≥0 ⥤ chain_complex (FreeAb Profinite) ℕ :=
-{ obj := λ c, chain_complex.of (FPsystem.X r' BD κ M c) (FPsystem.d r' BD κ M _) (FPsystem.d_comp_d _ _ _ _ _),
+def FPsystem [hκ : ∀ n, fact (monotone (function.swap κ n))] :
+  ℝ≥0 ⥤ chain_complex (FreeAb Profinite) ℕ :=
+{ obj := λ c, chain_complex.of (FPsystem.X r' BD M κ c) (FPsystem.d r' BD M κ _) (FPsystem.d_comp_d _ _ _ _ _),
   map := λ c₁ c₂ h,
   { f := λ n, by { refine (@FP2.res r' _ _ (id _) (BD.X n)).app M,
-      haveI : fact (c₁ ≤ c₂) := ⟨h.le⟩, apply_instance, },
+      have := (hκ n).out, refine ⟨this h.le⟩, },
     comm' := begin
       rintro i j (rfl : j + 1 = i),
       rw [chain_complex.of_d, chain_complex.of_d],
@@ -325,15 +328,15 @@ def FPsystem : ℝ≥0 ⥤ chain_complex (FreeAb Profinite) ℕ :=
   end }
 .
 
-def FPsystem.Tinv [fact (0 < r')] :
-  nnreal.MulLeft r' ⋙ FPsystem r' BD κ M ⟶ FPsystem r' BD κ M :=
+def FPsystem.Tinv [fact (0 < r')]
+  (κ₁ κ₂ : ℝ≥0 → ℕ → ℝ≥0)
+  [∀ c, BD.suitable (κ₁ c)] [∀ c, BD.suitable (κ₂ c)]
+  [hκ₁ : ∀ n, fact (monotone (function.swap κ₁ n))]
+  [hκ₂ : ∀ n, fact (monotone (function.swap κ₂ n))]
+  [∀ c n, fact (κ₁ c n ≤ r' * κ₂ c n)] :
+  FPsystem r' BD M κ₁ ⟶ FPsystem r' BD M κ₂ :=
 { app := λ c,
-  { f := λ n,
-    begin
-      haveI : fact (r'.MulLeft.obj c * κ n ≤ r' * (c * κ n)),
-      { dsimp only [nnreal.MulLeft], simp only [← mul_assoc], apply_instance, },
-      refine (FP2.Tinv r' _ _ _).app M,
-    end,
+  { f := λ n, (FP2.Tinv r' _ _ _).app M,
     comm' := begin
       rintro i j (rfl : j + 1 = i),
       dsimp only [functor.comp_obj, FPsystem],
@@ -351,15 +354,15 @@ def FPsystem.Tinv [fact (0 < r')] :
     refl,
   end }
 
-def FPsystem.res [fact (r' ≤ 1)] :
-  nnreal.MulLeft r' ⋙ FPsystem r' BD κ M ⟶ FPsystem r' BD κ M :=
+def FPsystem.res [fact (r' ≤ 1)]
+  (κ₁ κ₂ : ℝ≥0 → ℕ → ℝ≥0)
+  [∀ c, BD.suitable (κ₁ c)] [∀ c, BD.suitable (κ₂ c)]
+  [hκ₁ : ∀ n, fact (monotone (function.swap κ₁ n))]
+  [hκ₂ : ∀ n, fact (monotone (function.swap κ₂ n))]
+  [∀ c n, fact (κ₁ c n ≤ κ₂ c n)] :
+  FPsystem r' BD M κ₁ ⟶ FPsystem r' BD M κ₂ :=
 { app := λ c,
-  { f := λ n,
-    begin
-      haveI : fact (r'.MulLeft.obj c * κ n ≤ c * κ n),
-      { dsimp only [nnreal.MulLeft], simp only [mul_assoc], apply_instance, },
-      refine (FP2.res r' _ _ _).app M,
-    end,
+  { f := λ n, (FP2.res r' _ _ _).app M,
     comm' := begin
       rintro i j (rfl : j + 1 = i),
       dsimp only [functor.comp_obj, FPsystem],
