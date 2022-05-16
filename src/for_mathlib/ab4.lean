@@ -99,12 +99,14 @@ begin
   simp,
 end
 
-instance (M : Type*) (S : complex_shape M) (α : Type v)
+instance homology_functor_preserves_coproducts
+  (M : Type*) (S : complex_shape M) (α : Type v)
   [abelian A] [has_coproducts A] [AB4 A] (i) :
   preserves_colimits_of_shape (discrete α)
   (homology_functor A S i) := sorry
 
-instance (M : Type*) (S : complex_shape M) (α : Type v)
+instance homotopy_category_homology_functor_preserves_coproducts
+  (M : Type*) (S : complex_shape M) (α : Type v)
   [abelian A] [has_coproducts A] [AB4 A] (i) :
   preserves_colimits_of_shape (discrete α)
   (homotopy_category.homology_functor A S i) := sorry

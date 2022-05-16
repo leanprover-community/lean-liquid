@@ -3,6 +3,7 @@ import category_theory.limits.preserves.limits
 import for_mathlib.derived.K_projective
 import for_mathlib.derived.bounded_homotopy_category
 import for_mathlib.AddCommGroup.explicit_limits
+import for_mathlib.ab4
 
 open category_theory
 open category_theory.limits
@@ -13,6 +14,16 @@ variables {A : Type u} [category.{v} A] [abelian A] [has_coproducts A]
 open_locale zero_object
 
 namespace category_theory
+
+instance is_iso_coproduct {α : Type v} (X Y : α → A) (f : Π a, X a ⟶ Y a)
+  [∀ a, is_iso (f a)] :
+  is_iso (sigma.desc $ λ a, f a ≫ sigma.ι _ a) :=
+begin
+  use sigma.desc (λ a, inv (f a) ≫ sigma.ι _ a),
+  split,
+  { ext, dsimp, simp },
+  { ext, dsimp, simp }
+end
 
 noncomputable
 lemma is_initial_colimit {J : Type v} [small_category J] (K : J ⥤ A)
@@ -283,7 +294,7 @@ begin
 end
 
 -- Warning: Additional assumptions required! (Cf. Grothendieck's axiom AB4)
-instance is_quasi_iso_sigma {α : Type v}
+instance is_quasi_iso_sigma [AB4 A] {α : Type v}
   (X : α → homotopy_category A (complex_shape.up ℤ))
   (P : α → homotopy_category A (complex_shape.up ℤ))
   (π : Π a, P a ⟶ X a)
@@ -291,7 +302,35 @@ instance is_quasi_iso_sigma {α : Type v}
   is_quasi_iso (sigma.desc $ λ a : α, π a ≫ sigma.ι X a) :=
 begin
   constructor, intros i,
-  sorry, -- need to show homology commutes with coproducts.
+  let F := homology_functor _ _ _,
+  let t := _, change is_iso (F.map t),
+  let eP : F.obj (∐ λ (a : α), P a) ≅ (∐ λ a, F.obj (P a)) :=
+    (is_colimit_of_preserves F (colimit.is_colimit _)).cocone_point_unique_up_to_iso
+      (colimit.is_colimit _) ≪≫
+      has_colimit.iso_of_nat_iso (discrete.nat_iso $ λ _, iso.refl _),
+  let eX : F.obj (∐ λ (a : α), X a) ≅ (∐ λ a, F.obj (X a)) :=
+    (is_colimit_of_preserves F (colimit.is_colimit _)).cocone_point_unique_up_to_iso
+      (colimit.is_colimit _) ≪≫
+      has_colimit.iso_of_nat_iso (discrete.nat_iso $ λ _, iso.refl _),
+  let tt : (∐ λ a, F.obj (P a)) ⟶ (∐ λ a, F.obj (X a)) :=
+    sigma.desc (λ a : α, F.map (π a) ≫ sigma.ι _ a),
+  suffices : F.map t = eP.hom ≫ tt ≫ eX.inv,
+  { rw this, apply_instance },
+  dsimp [eP, tt, eX],
+  apply (is_colimit_of_preserves F (colimit.is_colimit (discrete.functor P))).hom_ext,
+  intros i,
+  simp only [functor.map_cocone_ι_app, colimit.cocone_ι, category.assoc,
+    has_colimit.iso_of_nat_iso_hom_desc_assoc],
+  erw (is_colimit_of_preserves F (colimit.is_colimit (discrete.functor P))).fac_assoc,
+  rw [← F.map_comp, colimit.ι_desc],
+  dsimp,
+  simp only [functor.map_comp, colimit.ι_desc_assoc, cocones.precompose_obj_ι,
+    nat_trans.comp_app, discrete.nat_iso_hom_app,
+    cofan.mk_ι_app, category.assoc, has_colimit.iso_of_nat_iso_ι_inv_assoc,
+    discrete.nat_iso_inv_app, colimit.comp_cocone_point_unique_up_to_iso_inv,
+    functor.map_cocone_ι_app, colimit.cocone_ι],
+  dsimp,
+  simp only [category.id_comp],
 end
 
 end homotopy_category
@@ -376,6 +415,7 @@ begin
 end
 
 lemma is_quasi_iso_sigma
+  [AB4 A]
   {α : Type v}
   (X P : α → bounded_homotopy_category A)
   [uniformly_bounded X]
@@ -416,7 +456,9 @@ def uniform_π {α : Type v}
   [uniformly_bounded X] : sigma_obj (replace_uniformly X) ⟶ sigma_obj X :=
 sigma.desc $ λ a, π_uniformly _ _ ≫ sigma.ι _ a
 
-instance is_quasi_iso_sigma_map_π_uniformly {α : Type v}
+instance is_quasi_iso_sigma_map_π_uniformly
+  [AB4 A]
+  {α : Type v}
   (X : α → bounded_homotopy_category A)
   [uniformly_bounded X] :
   homotopy_category.is_quasi_iso (uniform_π X) :=
@@ -426,6 +468,7 @@ open opposite
 
 noncomputable
 def Ext_coproduct_iso
+  [AB4 A]
   {α : Type v}
   (X : α → bounded_homotopy_category A)
   [uniformly_bounded X]
