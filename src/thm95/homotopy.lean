@@ -6,7 +6,6 @@ import normed_spectral
 import pseudo_normed_group.homotopy
 
 import thm95.double_complex
-import thm95.row_iso
 import thm95.constants
 
 noncomputable theory
@@ -165,14 +164,5 @@ begin
   rw d_next_nat,
 end
 .
-
-def NSC_htpy :
-  normed_spectral_homotopy
-    ((thm95.double_complex BD.data κ r r' V Λ M (N r r' BD κ' m)).row_map 0 1)
-      m (k' κ' m) (ε r r' BD κ' m) (c₀ r r' BD κ κ' m Λ) (H r r' BD κ' m) :=
-(NSH_aux BD r r' V κ κ' m Λ (op (Hom Λ M))).of_iso _ _ _
-  (iso.refl _) (thm95.mul_rescale_iso_row_one BD.data κ r V _ _ (by norm_cast) Λ M)
-  (λ _ _ _, rfl) (thm95.mul_rescale_iso_row_one_strict BD.data κ r V _ _ (by norm_cast) Λ M)
-  (by apply thm95.row_map_eq_sum_comp)
 
 end
