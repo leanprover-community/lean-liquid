@@ -10,7 +10,7 @@ import prop_92.prop_92
 import normed_snake_dual
 import thm95.double_complex
 import thm95.col_exact_prep
-import thm95.polyhedral_iso
+import thm95.double_complex
 import thm95.pfpng_iso
 
 noncomputable theory

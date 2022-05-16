@@ -1,4 +1,4 @@
-import thm95.polyhedral_iso
+import thm95.double_complex
 import pseudo_normed_group.homotopy
 import rescale.FiltrationPow
 
