@@ -106,10 +106,28 @@ instance homology_functor_preserves_coproducts
   preserves_colimits_of_shape (discrete α)
   (homology_functor A S i) := sorry
 
+def is_colimit_homotopy_category_homology_functor_map_cocone
+  {α : Type v} [abelian A] [has_coproducts A] [AB4 A] (i)
+  (K : α → homotopy_category A (complex_shape.up ℤ)) :
+  is_colimit
+  ((homotopy_category.homology_functor A (complex_shape.up ℤ) i).map_cocone
+    (homotopy_category.colimit_cofan K)) :=
+sorry
+
+noncomputable
 instance homotopy_category_homology_functor_preserves_coproducts
   (M : Type*) (S : complex_shape M) (α : Type v)
   [abelian A] [has_coproducts A] [AB4 A] (i) :
   preserves_colimits_of_shape (discrete α)
-  (homotopy_category.homology_functor A S i) := sorry
+  (homotopy_category.homology_functor A (complex_shape.up ℤ) i) :=
+begin
+  constructor, intros K,
+  let E : K ≅ discrete.functor K.obj := discrete.nat_iso (λ i, iso.refl _),
+  suffices : preserves_colimit (discrete.functor K.obj) (homotopy_category.homology_functor A _ i),
+  { apply preserves_colimit_of_iso_diagram _ E.symm, assumption },
+  apply preserves_colimit_of_preserves_colimit_cocone
+    (homotopy_category.is_colimit_cofan K.obj),
+  apply is_colimit_homotopy_category_homology_functor_map_cocone,
+end
 
 end category_theory
