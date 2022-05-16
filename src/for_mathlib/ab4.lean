@@ -117,8 +117,21 @@ def is_colimit_homotopy_category_homology_functor_map_cocone
     (is_colimit_of_preserves (homology_functor A (complex_shape.up ℤ) i)
     (colimit.is_colimit $ discrete.functor $ λ i, (K i).as)).desc ⟨S.X,
     discrete.nat_trans $ λ i, S.ι.app i⟩,
-  fac' := sorry,
-  uniq' := sorry }
+  fac' := begin
+    intros S j, dsimp,
+    erw (is_colimit_of_preserves (homology_functor A (complex_shape.up ℤ) i)
+      (colimit.is_colimit (discrete.functor (λ (i : α), (K i).as)))).fac,
+    refl,
+  end,
+  uniq' := begin
+    intros S m hm,
+    apply (is_colimit_of_preserves (homology_functor A (complex_shape.up ℤ) i)
+      (colimit.is_colimit (discrete.functor (λ (i : α), (K i).as)))).hom_ext,
+    intros j,
+    erw (is_colimit_of_preserves (homology_functor A (complex_shape.up ℤ) i)
+      (colimit.is_colimit (discrete.functor (λ (i : α), (K i).as)))).fac,
+    dsimp, rw ← hm, refl,
+  end }
 
 noncomputable
 instance homotopy_category_homology_functor_preserves_coproducts
