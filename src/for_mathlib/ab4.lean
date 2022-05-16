@@ -3,6 +3,7 @@ import for_mathlib.homotopy_category_pretriangulated
 import category_theory.limits.constructions.epi_mono
 import for_mathlib.homology_iso
 import for_mathlib.homotopy_category_coproducts
+import category_theory.abelian.homology
 
 namespace category_theory
 
@@ -100,11 +101,68 @@ begin
   simp,
 end
 
+noncomputable
+example {X Y Z : A} [abelian A]
+  (f : X ⟶ Y) (g : Y ⟶ Z) (w : f ≫ g = 0): cokernel (image_to_kernel' f g w) ≅ homology f g w :=
+  (homology_iso_cokernel_image_to_kernel' f g w).symm
+
+noncomputable
+def coproduct_kernel_comparison (M : Type*) (S : complex_shape M) (α : Type v)
+  [abelian A] [has_coproducts A] (i : M) (X : α → homological_complex A S) :
+  (∐ λ (a : α), kernel ((X a).d_from i)) ⟶ kernel ((∐ X).d_from i) :=
+sigma.desc $ λ a, kernel.lift _ (kernel.ι _ ≫ (sigma.ι _ a : X a ⟶ ∐ X).f i) sorry
+
+-- This should follow from the AB4 assumption
+instance is_iso_coproduct_kernel_comparison (M : Type*) (S : complex_shape M) (α : Type v)
+  [abelian A] [has_coproducts A] [AB4 A] (i : M) (X : α → homological_complex A S) :
+is_iso (coproduct_kernel_comparison M S α i X) := sorry
+
+noncomputable
+def coproduct_homology_comparison (M : Type*) (S : complex_shape M) (α : Type v)
+  [abelian A] [has_coproducts A] (i : M) (X : α → homological_complex A S) :
+  (∐ λ a : α, (X a).homology i) ⟶ (∐ X).homology i :=
+sigma.desc $ λ b, (homology_functor _ _ _).map $ sigma.ι _ _
+
+noncomputable
+def coproduct_homology_comparison_inv (M : Type*) (S : complex_shape M) (α : Type v)
+  [abelian A] [has_coproducts A] [AB4 A] (i : M) (X : α → homological_complex A S) :
+  (∐ X).homology i ⟶ (∐ λ a : α, (X a).homology i) :=
+homology.desc' _ _ _ (inv (coproduct_kernel_comparison M S α i X) ≫
+  sigma.desc (λ b, homology.π' ((X b).d_to _) ((X b).d_from i) sorry ≫ sigma.ι _ b)) sorry
+
+noncomputable
+def coproduct_homology_iso
+  (M : Type*) (S : complex_shape M) (α : Type v)
+  [abelian A] [has_coproducts A] [AB4 A] (i : M) (X : α → homological_complex A S) :
+  (∐ λ a : α, (X a).homology i) ≅ (∐ X).homology i :=
+{ hom := coproduct_homology_comparison _ _ _ _ _,
+  inv := coproduct_homology_comparison_inv _ _ _ _ _,
+  hom_inv_id' := sorry,
+  inv_hom_id' := sorry }
+
+noncomputable
+def is_colimit_homology_map_cocone  (M : Type*) (S : complex_shape M) (α : Type v)
+  [abelian A] [has_coproducts A] [AB4 A] (i : M) (X : α → homological_complex A S) :
+  is_colimit ((homology_functor A S i).map_cocone (colimit.cocone (discrete.functor X))) :=
+{ desc := λ E, (coproduct_homology_iso _ _ _ _ _).inv ≫ sigma.desc (λ a, E.ι.app _),
+  fac' := sorry,
+  uniq' := sorry }
+
+noncomputable
 instance homology_functor_preserves_coproducts
   (M : Type*) (S : complex_shape M) (α : Type v)
   [abelian A] [has_coproducts A] [AB4 A] (i) :
   preserves_colimits_of_shape (discrete α)
-  (homology_functor A S i) := sorry
+  (homology_functor A S i) :=
+begin
+  constructor, intros K,
+  let E : K ≅ discrete.functor K.obj := discrete.nat_iso (λ i, iso.refl _),
+  suffices : preserves_colimit (discrete.functor K.obj) (homology_functor A _ i),
+  { apply preserves_colimit_of_iso_diagram _ E.symm, assumption },
+  apply preserves_colimit_of_preserves_colimit_cocone
+    (colimit.is_colimit (discrete.functor K.obj)),
+  apply is_colimit_homology_map_cocone,
+end
 
 noncomputable
 def is_colimit_homotopy_category_homology_functor_map_cocone
