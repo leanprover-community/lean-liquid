@@ -2,6 +2,7 @@ import category_theory.abelian.homology
 import for_mathlib.homotopy_category_pretriangulated
 import category_theory.limits.constructions.epi_mono
 import for_mathlib.homology_iso
+import for_mathlib.homotopy_category_coproducts
 
 namespace category_theory
 
