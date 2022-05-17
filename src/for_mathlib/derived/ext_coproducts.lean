@@ -154,4 +154,64 @@ Ext_iso i _ _ _ (uniform_π X) ≪≫
 category_theory.preadditive_yoneda_coproduct_iso (replace_uniformly X) (Y⟦i⟧) ≪≫
 category_theory.pi_iso _ _ (λ a, (Ext_iso i _ _ _ (π_uniformly X a)).symm)
 
+lemma Ext_coproduct_iso_naturality
+  [AB4 A]
+  {α : Type v}
+  (X₁ X₂ : α → bounded_homotopy_category A)
+  [uniformly_bounded X₁]
+  [uniformly_bounded X₂]
+  (g : X₁ ⟶ X₂)
+  (i : ℤ) (Y) :
+  ((Ext i).map (sigma.desc (λ b, g b ≫ sigma.ι X₂ b) : ∐ X₁ ⟶ ∐ X₂).op).app Y ≫
+  (Ext_coproduct_iso _ _ _).hom =
+  (Ext_coproduct_iso _ _ _).hom ≫
+  pi.lift (λ b, pi.π _ b ≫ ((Ext i).map (g b).op).app Y) :=
+begin
+  dsimp only [Ext_coproduct_iso, Ext, Ext0, Ext_iso, functor.comp_map, whiskering_left,
+    whisker_left, iso.trans_hom, functor.map_iso, preadditive_yoneda_coproduct_iso,
+    functor.flip, pi_iso, as_iso, preadditive_yoneda_coproduct_to_product],
+  simp only [category.assoc],
+  simp only [quiver.hom.unop_op, iso.op_hom, replacement_iso_hom, iso.op_inv,
+    replacement_iso_inv, iso.symm_mk],
+  apply limit.hom_ext,
+  intros j,
+  simp only [category.assoc, limit.lift_π, fan.mk_π_app, limit.lift_π_assoc],
+  simp only [← functor.map_comp, ← op_comp],
+  congr' 2,
+  simp only [category.assoc],
+  apply lift_ext (∐ X₂).π, swap, apply_instance,
+  dsimp [quiver.hom.unop_op],
+  simp only [category.assoc, lift_lifts, lift_lifts_assoc],
+  dsimp [uniform_π],
+  simp only [colimit.ι_desc_assoc, cofan.mk_ι_app, category.assoc, colimit.ι_desc,
+    lift_lifts_assoc],
+end
+
+lemma Ext_coproduct_iso_naturality'
+  [AB4 A]
+  {α : Type v}
+  (X : α → bounded_homotopy_category A)
+  [uniformly_bounded X]
+  (i : ℤ) (Y₁ Y₂) (f : Y₁ ⟶ Y₂) :
+  ((Ext i).obj (op (sigma_obj X))).map f ≫
+  (Ext_coproduct_iso _ _ _).hom =
+  (Ext_coproduct_iso _ _ _).hom ≫
+  pi.lift (λ a, pi.π _ a ≫ ((Ext i).obj _).map f) :=
+begin
+  dsimp only [Ext_coproduct_iso, Ext, Ext0, Ext_iso, functor.comp_map, whiskering_left,
+    whisker_left, iso.trans_hom, functor.map_iso, preadditive_yoneda_coproduct_iso,
+    functor.flip, pi_iso, as_iso, preadditive_yoneda_coproduct_to_product,
+    functor.comp_map, functor.comp_obj],
+  simp only [category.assoc],
+  simp only [quiver.hom.unop_op, iso.op_hom, replacement_iso_hom, iso.op_inv,
+    replacement_iso_inv, iso.symm_mk],
+  apply limit.hom_ext,
+  intros j,
+  simp only [category.assoc, limit.lift_π, fan.mk_π_app, limit.lift_π_assoc],
+  erw nat_trans.naturality,
+  erw nat_trans.naturality_assoc,
+  erw nat_trans.naturality_assoc,
+  refl,
+end
+
 end bounded_homotopy_category
