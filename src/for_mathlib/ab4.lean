@@ -192,12 +192,10 @@ begin
   have : mono ((sigma_functor A α).map ι),
   { apply AB4.cond, assumption },
   -- Now need to show that sigma functor commutes with cokernels
-  suffices : mono ((sigma_functor A α).map ι),
   -- Use the fact that this commutes with cokernels to identify the source
   -- with the cokernel of `f`.
   -- Then use exact_iff_exact_cokernel_desc
-  { sorry },
-  apply AB4.cond, assumption,
+  sorry,
 end
 
 instance epi_coproduct_kernel_comparison [has_coproducts A] [AB4 A]
@@ -292,7 +290,8 @@ def coproduct_homology_comparison_inv (M : Type*) (S : complex_shape M) (α : Ty
   [abelian A] [has_coproducts A] [AB4 A] (i : M) (X : α → homological_complex A S) :
   (∐ X).homology i ⟶ (∐ λ a : α, (X a).homology i) :=
 homology.desc' _ _ _ (inv (coproduct_kernel_comparison M S α i X) ≫
-  sigma.desc (λ b, homology.π' ((X b).d_to _) ((X b).d_from i) sorry ≫ sigma.ι _ b)) sorry
+  sigma.desc (λ b, homology.π' ((X b).d_to _) ((X b).d_from i)
+    (homological_complex.d_to_comp_d_from _ _) ≫ sigma.ι _ b)) sorry
 
 noncomputable
 def coproduct_homology_iso
