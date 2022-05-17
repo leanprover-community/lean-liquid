@@ -232,6 +232,30 @@ begin
     simp only [category.assoc, cokernel.π_desc, kernel.condition, zero_comp] }
 end
 
+lemma exact_iff_exact_of_cofork [abelian A] (X Y Z : A)
+  (f : X ⟶ Y) (g : Y ⟶ Z) (T : cokernel_cofork f) (hT : is_colimit T) :
+  exact f g ↔ ∃ w : f ≫ g = 0,
+  mono (hT.desc (cokernel_cofork.of_π g w)) :=
+begin
+  let e : T.X ≅ cokernel f :=
+    hT.cocone_point_unique_up_to_iso (colimit.is_colimit _),
+  rw exact_iff_exact_cokernel_desc,
+  apply exists_congr (λ w, _),
+  have : hT.desc (cokernel_cofork.of_π g w) =
+    e.hom ≫ cokernel.desc f g w,
+  { dsimp [e, limits.is_colimit.cocone_point_unique_up_to_iso],
+    apply hT.hom_ext, intros i,
+    simp only [is_colimit.fac, is_colimit.fac_assoc, colimit.cocone_ι,
+      colimit.ι_desc] },
+  rw this,
+  split,
+  { introI _, apply_instance },
+  { introI, constructor,
+    intros Z a b h,
+    rw [← cancel_mono e.inv, ← cancel_mono (e.hom ≫ cokernel.desc f g w)],
+    simpa }
+end
+
 lemma exact_coproduct [abelian A] [has_coproducts A] [AB4 A]
   {α : Type v} (X Y Z : α → A) (f : X ⟶ Y) (g : Y ⟶ Z)
   (w : ∀ i, exact (f i) (g i)) :
