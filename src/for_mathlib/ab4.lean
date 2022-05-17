@@ -112,10 +112,108 @@ def coproduct_kernel_comparison (M : Type*) (S : complex_shape M) (α : Type v)
   (∐ λ (a : α), kernel ((X a).d_from i)) ⟶ kernel ((∐ X).d_from i) :=
 sigma.desc $ λ a, kernel.lift _ (kernel.ι _ ≫ (sigma.ι _ a : X a ⟶ ∐ X).f i) sorry
 
+open_locale pseudoelement
+
+noncomputable
+def eval_next (A : Type u) [category.{v} A] [abelian A] {M : Type*}
+  (S : complex_shape M) (i : M) :
+  homological_complex A S ⥤ A :=
+{ obj := λ X, X.X_next i,
+  map := λ X Y f, f.next i,
+  map_id' := sorry,
+  map_comp' := sorry }
+
+instance eval_next_preserves_coproducts (α : Type v)
+  (M : Type*) (S : complex_shape M) [abelian A] (i : M) :
+  preserves_colimits_of_shape (discrete α) (eval_next A S i) := sorry
+
+instance epi_coproduct_kernel_comparison (M : Type*) (S : complex_shape M) (α : Type v)
+  [abelian A] [has_coproducts A] (i : M) (X : α → homological_complex A S) :
+  epi (coproduct_kernel_comparison M S α i X) :=
+begin
+  /-
+     _ -ι₁-> _ -π₁-> _
+     |       |       |
+     t     E.inv   Q.inv
+     |       |       |
+     v       v       v
+     _ -ι₂-> _ -π₂-> _
+
+  -/
+  let t := _, change epi t,
+  let F : homological_complex A S ⥤ A := homological_complex.eval _ _ i,
+  let N : homological_complex A S ⥤ A := eval_next _ _ i,
+  let E : (∐ X).X i ≅ (∐ λ b, (X b).X i) :=
+    (is_colimit_of_preserves F (colimit.is_colimit
+      (discrete.functor X))).cocone_point_unique_up_to_iso
+      (colimit.is_colimit _) ≪≫
+      has_colimit.iso_of_nat_iso (discrete.nat_iso $ λ b, iso.refl _),
+  let Q : (∐ X).X_next i ≅ (∐ λ b, (X b).X_next i) :=
+    (is_colimit_of_preserves N (colimit.is_colimit
+      (discrete.functor X))).cocone_point_unique_up_to_iso
+      (colimit.is_colimit _) ≪≫
+      has_colimit.iso_of_nat_iso (discrete.nat_iso $ λ b, iso.refl _),
+  let ι₁ : (∐ λ (a : α), kernel ((X a).d_from i)) ⟶ (∐ λ b, (X b).X i) :=
+    sigma.desc (λ a, kernel.ι _ ≫ sigma.ι _ a),
+  let π₁ : (∐ λ b, (X b).X i) ⟶ (∐ λ b, (X b).X_next i) :=
+    sigma.desc (λ a, (X a).d_from i ≫ sigma.ι _ a),
+  let ι₂ : kernel ((∐ X).d_from i) ⟶ (∐ X).X i := kernel.ι _,
+  let π₂ : (∐ X).X i ⟶ (∐ X).X_next i := (∐ X).d_from i,
+  have sqι : ι₁ ≫ E.inv = t ≫ ι₂ := sorry,
+  have sqπ : π₁ ≫ Q.inv = E.inv ≫ π₂ := sorry,
+  have e1 : exact ι₁ π₁ := sorry,
+  have e2 : exact ι₂ π₂ := sorry,
+  have hι₂ := abelian.pseudoelement.pseudo_injective_of_mono ι₂,
+  replace e1 := abelian.pseudoelement.pseudo_exact_of_exact e1,
+  replace e2 := abelian.pseudoelement.pseudo_exact_of_exact e2,
+  have hEinv := abelian.pseudoelement.pseudo_surjective_of_epi E.inv,
+  have hQinv := abelian.pseudoelement.pseudo_injective_of_mono Q.inv,
+  apply abelian.pseudoelement.epi_of_pseudo_surjective,
+  -- Now we start the diagram chase.
+  intros x,
+  let x' := ι₂ x,
+  obtain ⟨y,hy⟩ := hEinv x',
+  have hy' : π₁ y = 0,
+  { apply hQinv,
+    simp only [abelian.pseudoelement.apply_zero, ← abelian.pseudoelement.comp_apply, sqπ],
+    rw [abelian.pseudoelement.comp_apply, hy],
+    dsimp only [x'], rw e2.1 },
+  obtain ⟨z,hz⟩ := e1.2 _ hy',
+  use z,
+  apply hι₂,
+  rw [← abelian.pseudoelement.comp_apply, ← sqι, abelian.pseudoelement.comp_apply, hz, hy],
+end
+
 -- This should follow from the AB4 assumption
+instance mono_coproduct_kernel_comparison (M : Type*) (S : complex_shape M) (α : Type v)
+  [abelian A] [has_coproducts A] [AB4 A] (i : M) (X : α → homological_complex A S) :
+mono (coproduct_kernel_comparison M S α i X) :=
+begin
+  let ι : kernel ((∐ X).d_from i) ⟶ _ := kernel.ι _,
+  let t := _, change (mono t),
+  suffices : mono (t ≫ ι),
+  { resetI, apply mono_of_mono t ι },
+  let F : homological_complex A S ⥤ A := homological_complex.eval _ _ i,
+  let E : (∐ X).X i ≅ (∐ λ b, (X b).X i) :=
+    (is_colimit_of_preserves F (colimit.is_colimit
+      (discrete.functor X))).cocone_point_unique_up_to_iso
+      (colimit.is_colimit _) ≪≫
+      has_colimit.iso_of_nat_iso (discrete.nat_iso $ λ b, iso.refl _),
+  suffices : t ≫ ι = sigma.desc (λ a, kernel.ι _ ≫ (sigma.ι (λ b, (X b).X i) a)) ≫ E.inv,
+  { rw this, apply_instance },
+  dsimp [t,ι, coproduct_kernel_comparison],
+  apply colimit.hom_ext, intros a,
+  simp only [colimit.ι_desc_assoc, cofan.mk_ι_app, kernel.lift_ι, category.assoc,
+    has_colimit.iso_of_nat_iso_ι_inv_assoc, discrete.nat_iso_inv_app,
+    colimit.comp_cocone_point_unique_up_to_iso_inv, functor.map_cocone_ι_app,
+    colimit.cocone_ι, homological_complex.eval_map],
+  dsimp, simp only [category.id_comp],
+end
+
 instance is_iso_coproduct_kernel_comparison (M : Type*) (S : complex_shape M) (α : Type v)
   [abelian A] [has_coproducts A] [AB4 A] (i : M) (X : α → homological_complex A S) :
-is_iso (coproduct_kernel_comparison M S α i X) := sorry
+is_iso (coproduct_kernel_comparison M S α i X) :=
+is_iso_of_mono_of_epi _
 
 noncomputable
 def coproduct_homology_comparison (M : Type*) (S : complex_shape M) (α : Type v)
