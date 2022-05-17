@@ -405,8 +405,43 @@ def is_colimit_homology_map_cocone  (M : Type*) (S : complex_shape M) (α : Type
   [abelian A] [has_coproducts A] [AB4 A] (i : M) (X : α → homological_complex A S) :
   is_colimit ((homology_functor A S i).map_cocone (colimit.cocone (discrete.functor X))) :=
 { desc := λ E, (coproduct_homology_iso _ _ _ _ _).inv ≫ sigma.desc (λ a, E.ι.app _),
-  fac' := sorry,
-  uniq' := sorry }
+  fac' := begin
+    intros E j,
+    dsimp [coproduct_homology_comparison_inv, coproduct_homology_iso],
+    apply homology.hom_from_ext,
+    rw homology.map_eq_desc'_lift_left,
+    simp only [homological_complex.hom.sq_from_left, homology.π'_desc'_assoc],
+    let t := _, change t ≫ _ = _,
+    have ht : t = kernel.lift _ (kernel.ι _ ≫ _) _ ≫ homology.π' _ _ _,
+    rotate 2,
+    { let e := (sigma.ι X j), exact e.f i },
+    { dsimp, rw [category.assoc],
+      erw (sigma.ι X j : X j ⟶ ∐ X).comm_from,
+      rw [← category.assoc, kernel.condition, zero_comp] },
+    { dsimp [t],
+      apply homology.hom_to_ext,
+      simp only [category.assoc, homology.lift_ι, homological_complex.homology.π'_ι,
+        kernel.lift_ι_assoc] },
+    rw ht, clear ht, clear t,
+    simp only [category.assoc, homology.π'_desc'_assoc],
+    simp only [← category.assoc],
+    let t := _, change (t ≫ _) ≫ _ = _,
+    have ht : t = sigma.ι _ j,
+    { dsimp [t], rw [is_iso.comp_inv_eq],
+      dsimp [coproduct_kernel_comparison],
+      erw colimit.ι_desc, refl },
+    rw ht, clear ht, clear t,
+    simp only [category.assoc], erw [colimit.ι_desc_assoc], dsimp,
+    rw [category.assoc, colimit.ι_desc], refl,
+  end,
+  uniq' := begin
+    intros E m hm,
+    rw iso.eq_inv_comp, dsimp [coproduct_homology_comparison, coproduct_homology_iso],
+    apply colimit.hom_ext, intros j, specialize hm j,
+    simpa only [←hm, colimit.ι_desc_assoc, cofan.mk_ι_app, colimit.ι_desc,
+      functor.map_cocone_ι_app, colimit.cocone_ι,
+      homology_functor_map],
+  end }
 
 noncomputable
 instance homology_functor_preserves_coproducts
