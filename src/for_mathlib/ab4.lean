@@ -142,7 +142,6 @@ begin
   dsimp, simp only [category.id_comp],
 end
 
-
 noncomputable
 def eval_next (A : Type u) [category.{v} A] [abelian A] {M : Type*}
   (S : complex_shape M) (i : M) :
@@ -356,8 +355,50 @@ def coproduct_homology_iso
   (∐ λ a : α, (X a).homology i) ≅ (∐ X).homology i :=
 { hom := coproduct_homology_comparison _ _ _ _ _,
   inv := coproduct_homology_comparison_inv _ _ _ _ _,
-  hom_inv_id' := sorry,
-  inv_hom_id' := sorry }
+  hom_inv_id' := begin
+    dsimp [coproduct_homology_comparison, coproduct_homology_comparison_inv],
+    apply colimit.hom_ext, intros a,
+    dsimp,
+    simp only [colimit.ι_desc_assoc, cofan.mk_ι_app, category.comp_id],
+    apply homology.hom_from_ext,
+    rw homology.map_eq_desc'_lift_left,
+    simp only [homological_complex.hom.sq_from_left, homology.π'_desc'_assoc],
+    let t := _, change t ≫ _ = _,
+    have ht : t = kernel.lift _ (kernel.ι _ ≫ _) _ ≫ homology.π' _ _ _,
+    rotate 2,
+    { let e : X a ⟶ ∐ X := sigma.ι _ a, exact e.f i },
+    { dsimp,
+      rw [category.assoc, (sigma.ι X a : X a ⟶ ∐ X).comm_from, ← category.assoc,
+        kernel.condition, zero_comp] },
+    { dsimp [t], apply homology.hom_to_ext,
+      simp only [category.assoc, homology.lift_ι, homological_complex.homology.π'_ι,
+        kernel.lift_ι_assoc] },
+    { rw ht, clear ht, clear t,
+      rw [category.assoc, homology.π'_desc', ← category.assoc],
+      let t := _, change t ≫ _ = _,
+      have ht : t = sigma.ι _ a,
+      { dsimp [t], rw is_iso.comp_inv_eq,
+        apply equalizer.hom_ext,
+        dsimp [coproduct_kernel_comparison],
+        simp only [category.assoc, kernel.lift_ι],
+        erw colimit.ι_desc_assoc,
+        dsimp,
+        simp only [kernel.lift_ι] },
+      rw ht, clear ht, clear t,
+      erw colimit.ι_desc,
+      refl }
+  end,
+  inv_hom_id' := begin
+    dsimp [coproduct_homology_comparison, coproduct_homology_comparison_inv],
+    apply homology.hom_from_ext,
+    simp only [homology.π'_desc'_assoc, category.assoc, category.comp_id,
+      is_iso.inv_comp_eq],
+    apply colimit.hom_ext, intros a,
+    dsimp,
+    simp only [homological_complex.hom.sq_from_right, homological_complex.hom.sq_to_right,
+      colimit.ι_desc_assoc, cofan.mk_ι_app, category.assoc, colimit.ι_desc, homology.π'_map],
+    erw colimit.ι_desc_assoc, refl,
+  end }
 
 noncomputable
 def is_colimit_homology_map_cocone  (M : Type*) (S : complex_shape M) (α : Type v)
