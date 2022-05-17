@@ -77,30 +77,48 @@ def piH_hom :
   (∏ (λ x : ℕ, (A.obj (op $ ι x)).homology n)) ⟶ (∏ (λ x : ℕ, (B.obj (op $ ι x)).homology n)) :=
 pi.map $ λ k, (homology_functor _ _ _).map $ f.app _
 
+def shift_sub_id.δ (H : ∀ c n, short_exact ((f.app c).f n) ((g.app c).f n)) :
+  C ⋙ homology_functor _ _ n ⟶ A ⋙ homology_functor _ _ (n+1) :=
+{ app := λ c, homological_complex.δ (f.app _) (g.app _) (H _) _ _ rfl,
+  naturality' := λ c₁ c₂ h, begin
+    sorry -- this one might be tricky
+  end }
+
 def piδ (H : ∀ c n, short_exact ((f.app c).f n) ((g.app c).f n)) :
   (∏ (λ x : ℕ, (C.obj (op $ ι x)).homology n)) ⟶ (∏ (λ x : ℕ, (A.obj (op $ ι x)).homology (n+1))) :=
-pi.map $ λ k, homological_complex.δ (f.app _) (g.app _) (H _) _ _ rfl
+pi.map $ λ k, (shift_sub_id.δ _ _ _ H).app _
 
 lemma piH_les (H : ∀ c n, short_exact ((f.app c).f n) ((g.app c).f n)) :
-  exact_seq Ab.{u} [piH_hom f ι n, piH_hom g ι n, piδ f g ι n H, piH_hom f ι (n+1)] :=
+  exact_seq Ab.{u} [piH_hom f ι n, piH_hom g ι n, piδ f g ι n H] :=
 begin
   apply exact.cons,
   { apply pi_map_exact, intro k,
     have := homological_complex.six_term_exact_seq _ _ (H (op $ ι k)) n (n+1) rfl,
     exact this.pair, },
-  apply exact.cons,
-  { apply pi_map_exact, intro k,
-    have := homological_complex.six_term_exact_seq _ _ (H (op $ ι k)) n (n+1) rfl,
-    exact (this.drop 1).pair, },
   apply exact.exact_seq,
   { apply pi_map_exact, intro k,
     have := homological_complex.six_term_exact_seq _ _ (H (op $ ι k)) n (n+1) rfl,
-    exact (this.drop 2).pair, },
+    exact (this.drop 1).pair, },
 end
 
 end step3
 
 section step4
+
+lemma bicartesian_of_aut_of_end_of_end_of_aut
+  {A B C D : Ab.{u}} {f : A ⟶ B} {g : B ⟶ C} {h : C ⟶ D}
+  {α : A ⟶ A} {β : B ⟶ B} {γ : C ⟶ C} {δ : D ⟶ D}
+  (H : exact_seq Ab.{u} [f, g ,h])
+  (sq1 : commsq f α β f) (sq2 : commsq g β γ g) (sq3 : commsq h γ δ h)
+  [is_iso α] [is_iso δ] :
+  sq2.bicartesian :=
+sorry
+  -- use (important!) the fact that we have a `kernel.map` (resp. `cokernel.map`)
+  -- arising between two identical exact sequences
+
+end step4
+
+section step5
 
 variables {A B C : system_of_complexes.{u}} (f : A.to_Ab ⟶ B.to_Ab) (g : B.to_Ab ⟶ C.to_Ab)
 variables (n : ℕ) (ι : ℕ → ℝ≥0) (hι : monotone ι)
@@ -113,17 +131,10 @@ lemma shift_sub_id.bicartesian
     (whisker_right g _) ι hι).bicartesian :=
 begin
   rw ← commsq.bicartesian.symm_iff,
-  let S : _ := _, show commsq.bicartesian S,
-  have aux : _ := _,
-  rw commsq.bicartesian_iff_isos _ _ aux aux S.kernel S S.cokernel,
-  swap,
-  { apply exact.cons, { exact exact_kernel_ι },
-    apply exact.exact_seq, { exact abelian.exact_cokernel _ }, },
-  clear aux,
-  sorry
-  -- use `HA₁` and `HA₂` and
-  -- (important!) the fact that we have a `kernel.map` (resp. `cokernel.map`)
-  -- arising between two identical exact sequences
+  let S1 := ((@shift_sub_id.commsq (A.to_AbH n) (B.to_AbH n) (whisker_right f _) ι hι)).symm,
+  let S2 := ((@shift_sub_id.commsq (B.to_AbH n) (C.to_AbH n) (whisker_right g _) ι hι)).symm,
+  let S3 := ((@shift_sub_id.commsq (C.to_AbH n) (A.to_AbH (n+1)) (shift_sub_id.δ _ _ _ H) ι hι)).symm,
+  apply bicartesian_of_aut_of_end_of_end_of_aut (piH_les _ _ _ _ _) S1 S2 S3,
 end
 
-end step4
+end step5
