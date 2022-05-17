@@ -153,4 +153,10 @@ Ext_iso i _ _ _ (uniform_π X) ≪≫
 category_theory.preadditive_yoneda_coproduct_iso (replace_uniformly X) (Y⟦i⟧) ≪≫
 category_theory.pi_iso _ _ (λ a, (Ext_iso i _ _ _ (π_uniformly X a)).symm)
 
+instance Ext_preserves_pi
+  [AB4 A]
+  {α : Type v} (Y : bounded_homotopy_category A) (i : ℤ) :
+  preserves_limits_of_shape (discrete α)
+  ((Ext i).flip.obj Y) := sorry
+
 end bounded_homotopy_category
