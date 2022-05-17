@@ -156,7 +156,21 @@ instance eval_next_preserves_coproducts (α : Type v)
 lemma exact_coproduct [abelian A] [has_coproducts A] [AB4 A]
   {α : Type v} (X Y Z : α → A) (f : X ⟶ Y) (g : Y ⟶ Z)
   (w : ∀ i, exact (f i) (g i)) :
-  exact ((sigma_functor A α).map f) ((sigma_functor A α).map g) := sorry
+  exact ((sigma_functor A α).map f) ((sigma_functor A α).map g) :=
+begin
+  let ι : (λ a : α, cokernel (f a)) ⟶ Z :=
+    λ a, (cokernel.desc _ (g a) (w a).w),
+  let π : Y ⟶ (λ a : α, cokernel (f a)) :=
+    λ a, (cokernel.π _),
+  haveI : ∀ a, mono (ι a) := sorry,
+  have w' : ∀ a, exact (f a) (π a), sorry,
+  suffices : exact ((sigma_functor A α).map f) ((sigma_functor A α).map π), sorry,
+  -- Now need to show that sigma functor commutes with cokernels
+  -- which follows from the fact that both are colimits of some shape.
+  -- Then, after composing with the isomorphism from the above note, this becomes
+  -- the usual exact sequence of a cokernel.
+  sorry
+end
 
 instance epi_coproduct_kernel_comparison [has_coproducts A] [AB4 A]
   (M : Type*) (S : complex_shape M) (α : Type v)
