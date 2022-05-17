@@ -4,23 +4,38 @@ import algebra.category.Group.limits
 import for_mathlib.is_iso_neg
 import for_mathlib.homology_iso
 import for_mathlib.SemiNormedGroup
+import for_mathlib.AddCommGroup.pt
 
 import system_of_complexes.basic
 .
 
 noncomputable theory
 
+universe u
+
 open_locale nnreal
 
 open category_theory category_theory.limits opposite
 
+set_option pp.universes true
+
 lemma category_theory.homology.π_eq_zero
-  {A B C : Ab} {f : A ⟶ B} {g : B ⟶ C} (w : f ≫ g = 0) (x)
+  {A B C : Ab.{u}} {f : A ⟶ B} {g : B ⟶ C} (w : f ≫ g = 0) (x)
   (h : ∃ a : A, f a = (kernel_subobject g).arrow x) :
   homology.π f g w x = 0 :=
 begin
   rcases h with ⟨a, ha⟩,
-  sorry
+  rw [Ab.apply_eq_pt_comp _ a, Ab.apply_eq_pt_comp _ x,
+    ← image_subobject_arrow_comp f, ← image_to_kernel_arrow _ _ w,
+    ← category.assoc, ← category.assoc] at ha,
+  have : (Ab.pt a ≫ factor_thru_image_subobject f) ≫ image_to_kernel f g w = Ab.pt x,
+  { rw ← cancel_mono (kernel_subobject g).arrow,
+    let e : ℤ ≃+ ulift.{u} ℤ := add_equiv.ulift.symm,
+    have he : function.surjective e.to_add_monoid_hom := e.surjective,
+    refine (add_monoid_hom.cancel_right he).mp _,
+    ext, exact ha, },
+  rw [Ab.apply_eq_pt_comp, ← this, category.assoc, homology.condition, comp_zero],
+  refl,
 end
 
 section
@@ -40,9 +55,10 @@ end
 namespace system_of_complexes
 
 variables (C : system_of_complexes) (i : ℕ) (f : ℕ → ℝ≥0)
-variables [∀ c i, complete_space (C c i)] [∀ c i, separated_space (C c i)]
 
 def to_AbH : ℝ≥0ᵒᵖ ⥤ Ab := C.to_Ab ⋙ homology_functor _ _ i
+
+variables [∀ c i, complete_space (C c i)] [∀ c i, separated_space (C c i)]
 
 lemma shift_eq_zero (hf : monotone f) {k K c₀ : ℝ≥0} [fact (1 ≤ k)]
   (hC : C.is_bounded_exact k K i c₀)

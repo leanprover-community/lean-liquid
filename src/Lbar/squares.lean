@@ -1,6 +1,7 @@
 import for_mathlib.commsq
 import for_mathlib.les_homology
 import for_mathlib.AddCommGroup.pt
+import for_mathlib.bicartesian3
 
 import system_of_complexes.shift_sub_id
 import pseudo_normed_group.system_of_complexes2
@@ -15,7 +16,7 @@ open opposite category_theory category_theory.limits category_theory.preadditive
 
 section step1
 
-variables {A B C : ℝ≥0ᵒᵖ ⥤ Ab.{u}} (f : A ⟶ B) (g : B ⟶ C)
+variables {A B C : ℝ≥0ᵒᵖ ⥤ Ab.{u}} (f : A ⟶ B)
 variables (ι : ℕ → ℝ≥0)
 
 def shift_sub_id.commsq (hι : monotone ι) :
@@ -98,3 +99,31 @@ begin
 end
 
 end step3
+
+section step4
+
+variables {A B C : system_of_complexes.{u}} (f : A.to_Ab ⟶ B.to_Ab) (g : B.to_Ab ⟶ C.to_Ab)
+variables (n : ℕ) (ι : ℕ → ℝ≥0) (hι : monotone ι)
+
+lemma shift_sub_id.bicartesian
+  (HA₁ : is_iso (shift_sub_id (A.to_AbH n) ι hι))
+  (HA₂ : is_iso (shift_sub_id (A.to_AbH (n+1)) ι hι))
+  (H : ∀ c n, short_exact ((f.app c).f n) ((g.app c).f n)) :
+  (@shift_sub_id.commsq (B.to_AbH n) (C.to_AbH n)
+    (whisker_right g _) ι hι).bicartesian :=
+begin
+  rw ← commsq.bicartesian.symm_iff,
+  let S : _ := _, show commsq.bicartesian S,
+  have aux : _ := _,
+  rw commsq.bicartesian_iff_isos _ _ aux aux S.kernel S S.cokernel,
+  swap,
+  { apply exact.cons, { exact exact_kernel_ι },
+    apply exact.exact_seq, { exact abelian.exact_cokernel _ }, },
+  clear aux,
+  sorry
+  -- use `HA₁` and `HA₂` and
+  -- (important!) the fact that we have a `kernel.map` (resp. `cokernel.map`)
+  -- arising between two identical exact sequences
+end
+
+end step4

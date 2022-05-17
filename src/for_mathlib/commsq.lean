@@ -113,6 +113,14 @@ iso_hom_π _ _
 
 end iso
 
+def kernel (sq : commsq f₁₁ g₁₁ g₁₂ f₂₁) :
+  commsq (kernel.ι f₁₁) (kernel.map _ _ _ _ sq.w) g₁₁ (kernel.ι f₂₁) :=
+commsq.of_eq $ by simp only [kernel.lift_ι]
+
+def cokernel (sq : commsq f₁₁ g₁₁ g₁₂ f₂₁) :
+  commsq (cokernel.π f₁₁) g₁₂ (cokernel.map _ _ _ _ sq.w) (cokernel.π f₂₁) :=
+commsq.of_eq $ by simp only [cokernel.π_desc]
+
 def bicartesian (sq : commsq f₁₁ g₁₁ g₁₂ f₂₁) : Prop :=
 short_exact (-f₁₁ ≫ sq.sum.inl + g₁₁ ≫ sq.sum.inr) sq.π
 
@@ -221,5 +229,48 @@ end
 lemma bicartesian_iff (sq₁ sq₂ : commsq f₁₁ g₁₁ g₁₂ f₂₁) :
   sq₁.bicartesian ↔ sq₂.bicartesian :=
 ⟨λ h, h.congr _, λ h, h.congr _⟩
+
+--move this (do we want this?)
+instance {C : Type*} [category C] [preadditive C] {X Y : C} : has_neg (X ≅ Y) :=
+⟨λ e, ⟨-e.hom, -e.inv, by simp, by simp⟩⟩
+
+@[simp] lemma neg_iso_hom {C : Type*} [category C] [preadditive C] {X Y : C} {e : X ≅ Y} :
+  (-e).hom = -(e.hom) := rfl
+
+@[simp] lemma neg_iso_inv {C : Type*} [category C] [preadditive C] {X Y : C} {e : X ≅ Y} :
+  (-e).inv = -(e.inv) := rfl
+
+-- move me
+@[simp] lemma _root_.category_theory.short_exact.neg_left (h : short_exact f₁₁ f₁₂) :
+  short_exact (-f₁₁) f₁₂ :=
+begin
+  haveI := h.mono, haveI := h.epi,
+  refine ⟨_⟩,
+  have : -f₁₁ = (-iso.refl _).hom ≫ f₁₁,
+  { simp only [neg_iso_hom, iso.refl_hom, category.id_comp, neg_comp], },
+  rw [this, exact_iso_comp],
+  exact h.exact
+end
+
+-- move me
+@[simp] lemma _root_.category_theory.short_exact.neg_left_iff :
+  short_exact (-f₁₁) f₁₂ ↔ short_exact f₁₁ f₁₂ :=
+begin
+  refine ⟨_, λ h, h.neg_left⟩,
+  intro h, simpa only [neg_neg] using h.neg_left
+end
+
+lemma bicartesian.symm {sq : commsq f₁₁ g₁₁ g₁₂ f₂₁} (h : sq.bicartesian) :
+  sq.symm.bicartesian :=
+begin
+  rw bicartesian at h ⊢,
+  rw ← category_theory.short_exact.neg_left_iff,
+  simp only [neg_add_rev, neg_neg],
+  exact h
+end
+
+lemma bicartesian.symm_iff (sq : commsq f₁₁ g₁₁ g₁₂ f₂₁) :
+  sq.symm.bicartesian ↔ sq.bicartesian :=
+⟨λ h, h.symm, λ h, h.symm⟩
 
 end commsq
