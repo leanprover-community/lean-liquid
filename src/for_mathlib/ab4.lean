@@ -142,18 +142,50 @@ begin
   dsimp, simp only [category.id_comp],
 end
 
+lemma eval_next_aux_none
+  (A : Type u) [category.{v} A] [abelian A] {M : Type*}
+  (S : complex_shape M) (X : homological_complex A S)
+  (i : M) (h : S.next i = none) : is_zero (X.X_next i) :=
+begin
+  dsimp [homological_complex.X_next],
+  simp [h],
+  dsimp [homological_complex.X_next._match_1],
+  exact is_zero_zero A,
+end
+
 noncomputable
 def eval_next (A : Type u) [category.{v} A] [abelian A] {M : Type*}
   (S : complex_shape M) (i : M) :
   homological_complex A S ⥤ A :=
 { obj := λ X, X.X_next i,
   map := λ X Y f, f.next i,
-  map_id' := sorry,
-  map_comp' := sorry }
+  map_id' := begin
+    intros X,
+    rcases h : S.next i with _ | ⟨j,w⟩,
+    { apply limits.is_zero.eq_of_src, apply eval_next_aux_none, exact h },
+    { simp [homological_complex.hom.next_eq _ w], },
+  end,
+  map_comp' := begin
+    intros X Y Z f g,
+    rcases h : S.next i with _ | ⟨j,w⟩,
+    { apply limits.is_zero.eq_of_src, apply eval_next_aux_none, exact h },
+    { simp [homological_complex.hom.next_eq _ w] }
+  end }
 
 instance eval_next_preserves_coproducts (α : Type v)
   (M : Type*) (S : complex_shape M) [abelian A] (i : M) :
   preserves_colimits_of_shape (discrete α) (eval_next A S i) := sorry
+
+lemma eval_prev_aux_none
+  (A : Type u) [category.{v} A] [abelian A] {M : Type*}
+  (S : complex_shape M) (X : homological_complex A S)
+  (i : M) (h : S.prev i = none) : is_zero (X.X_prev i) :=
+begin
+  dsimp [homological_complex.X_prev],
+  simp [h],
+  dsimp [homological_complex.X_prev._match_1],
+  exact is_zero_zero A,
+end
 
 noncomputable
 def eval_prev (A : Type u) [category.{v} A] [abelian A] {M : Type*}
@@ -161,8 +193,18 @@ def eval_prev (A : Type u) [category.{v} A] [abelian A] {M : Type*}
   homological_complex A S ⥤ A :=
 { obj := λ X, X.X_prev i,
   map := λ X Y f, f.prev i,
-  map_id' := sorry,
-  map_comp' := sorry }
+  map_id' := begin
+    intros X,
+    rcases h : S.prev i with _ | ⟨j,w⟩,
+    { apply limits.is_zero.eq_of_src, apply eval_prev_aux_none, exact h },
+    { simp [homological_complex.hom.prev_eq _ w], },
+  end,
+  map_comp' := begin
+    intros X Y Z f g,
+    rcases h : S.prev i with _ | ⟨j,w⟩,
+    { apply limits.is_zero.eq_of_src, apply eval_prev_aux_none, exact h },
+    { simp [homological_complex.hom.prev_eq _ w] }
+  end }
 
 instance eval_prev_preserves_coproducts (α : Type v)
   (M : Type*) (S : complex_shape M) [abelian A] (i : M) :
