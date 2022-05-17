@@ -172,9 +172,70 @@ def eval_next (A : Type u) [category.{v} A] [abelian A] {M : Type*}
     { simp [homological_complex.hom.next_eq _ w] }
   end }
 
+open_locale zero_object
+
+noncomputable
+def preserves_colimits_of_shape_const_zero_aux
+  (α : Type v) (M : Type*) (S : complex_shape M)
+  [abelian A] [has_coproducts A]
+  (K : discrete α ⥤ homological_complex A S) :
+  is_colimit (((functor.const _).obj (0 : A)).map_cocone (colimit.cocone K)) :=
+{ desc := λ S, 0,
+  fac' := λ S j, (is_zero_zero _).eq_of_src _ _,
+  uniq' := λ S m hm, (is_zero_zero _).eq_of_src _ _ }
+
+noncomputable
+instance preserves_colimits_of_shape_const_zero
+  (α : Type v) (M : Type*) (S : complex_shape M) [abelian A] [has_coproducts A] :
+  preserves_colimits_of_shape (discrete α)
+  ((functor.const _).obj 0 : homological_complex A S ⥤ A) :=
+begin
+  constructor, intros K,
+  apply preserves_colimit_of_preserves_colimit_cocone
+    (colimit.is_colimit K),
+  apply preserves_colimits_of_shape_const_zero_aux,
+end
+
+noncomputable
+def eval_next_iso_of_none
+  (M : Type*) (S : complex_shape M) [abelian A] (i : M)
+  (h : S.next i = none) :
+  eval_next A S i ≅ (functor.const _).obj 0 :=
+nat_iso.of_components
+(λ X, limits.is_zero.iso_zero $ eval_next_aux_none _ _ _ _ h)
+begin
+  intros X Y f,
+  apply is_zero.eq_of_tgt,
+  apply is_zero_zero,
+end
+
+noncomputable
+def eval_next_iso_of_some
+  (M : Type*) (S : complex_shape M) [abelian A] (i j : M) (w)
+  (h : S.next i = some ⟨j,w⟩) :
+  eval_next A S i ≅ homological_complex.eval _ _ j :=
+nat_iso.of_components
+(λ X, homological_complex.X_next_iso _ w)
+begin
+  intros X Y f,
+  dsimp [eval_next],
+  rw homological_complex.hom.next_eq _ w,
+  simp,
+end
+
+noncomputable
 instance eval_next_preserves_coproducts (α : Type v)
-  (M : Type*) (S : complex_shape M) [abelian A] (i : M) :
-  preserves_colimits_of_shape (discrete α) (eval_next A S i) := sorry
+  (M : Type*) (S : complex_shape M) [abelian A] [has_coproducts A] (i : M) :
+  preserves_colimits_of_shape (discrete α) (eval_next A S i) :=
+begin
+  rcases h : S.next i with _ | ⟨j,w⟩,
+  { apply preserves_colimits_of_shape_of_nat_iso
+      (eval_next_iso_of_none M S i h).symm,
+    apply_instance },
+  { apply preserves_colimits_of_shape_of_nat_iso
+      (eval_next_iso_of_some M S i j w h).symm,
+    apply_instance }
+end
 
 lemma eval_prev_aux_none
   (A : Type u) [category.{v} A] [abelian A] {M : Type*}
@@ -206,9 +267,46 @@ def eval_prev (A : Type u) [category.{v} A] [abelian A] {M : Type*}
     { simp [homological_complex.hom.prev_eq _ w] }
   end }
 
+noncomputable
+def eval_prev_iso_of_none
+  (M : Type*) (S : complex_shape M) [abelian A] (i : M)
+  (h : S.prev i = none) :
+  eval_prev A S i ≅ (functor.const _).obj 0 :=
+nat_iso.of_components
+(λ X, limits.is_zero.iso_zero $ eval_prev_aux_none _ _ _ _ h)
+begin
+  intros X Y f,
+  apply is_zero.eq_of_tgt,
+  apply is_zero_zero,
+end
+
+noncomputable
+def eval_prev_iso_of_some
+  (M : Type*) (S : complex_shape M) [abelian A] (i j : M) (w)
+  (h : S.prev i = some ⟨j,w⟩) :
+  eval_prev A S i ≅ homological_complex.eval _ _ j :=
+nat_iso.of_components
+(λ X, homological_complex.X_prev_iso _ w)
+begin
+  intros X Y f,
+  dsimp [eval_prev],
+  rw homological_complex.hom.prev_eq _ w,
+  simp,
+end
+
+noncomputable
 instance eval_prev_preserves_coproducts (α : Type v)
-  (M : Type*) (S : complex_shape M) [abelian A] (i : M) :
-  preserves_colimits_of_shape (discrete α) (eval_prev A S i) := sorry
+  (M : Type*) (S : complex_shape M) [abelian A] [has_coproducts A] (i : M) :
+  preserves_colimits_of_shape (discrete α) (eval_prev A S i) :=
+begin
+  rcases h : S.prev i with _ | ⟨j,w⟩,
+  { apply preserves_colimits_of_shape_of_nat_iso
+      (eval_prev_iso_of_none M S i h).symm,
+    apply_instance },
+  { apply preserves_colimits_of_shape_of_nat_iso
+      (eval_prev_iso_of_some M S i j w h).symm,
+    apply_instance }
+end
 
 lemma exact_iff_exact_cokernel_desc [abelian A] (X Y Z : A)
   (f : X ⟶ Y) (g : Y ⟶ Z) :
