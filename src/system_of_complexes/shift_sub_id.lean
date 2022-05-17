@@ -14,24 +14,7 @@ open_locale nnreal
 
 open category_theory category_theory.limits opposite
 
-namespace system_of_complexes
-
-variables (C : system_of_complexes) (i : ℕ) (f : ℕ → ℝ≥0)
-
-def shift (hf : monotone f) :
-  (∏ (λ x : ℕ, (C.to_Ab.obj (op $ f x)).homology i)) ⟶
-  (∏ (λ x : ℕ, (C.to_Ab.obj (op $ f x)).homology i)) :=
-pi.lift $ λ x, pi.π _ (x+1) ≫ (homology_functor _ _ i).map
-  (C.to_Ab.map (hom_of_le $ hf $ nat.le_succ x).op)
-
-def shift_sub_id (hf : monotone f) :
-  (∏ (λ x : ℕ, (C.to_Ab.obj (op $ f x)).homology i)) ⟶
-  (∏ (λ x : ℕ, (C.to_Ab.obj (op $ f x)).homology i)) :=
-C.shift i f hf - 𝟙 _
-
-variables [∀ c i, complete_space (C c i)] [∀ c i, separated_space (C c i)]
-
-lemma _root_.category_theory.homology.π_eq_zero
+lemma category_theory.homology.π_eq_zero
   {A B C : Ab} {f : A ⟶ B} {g : B ⟶ C} (w : f ≫ g = 0) (x)
   (h : ∃ a : A, f a = (kernel_subobject g).arrow x) :
   homology.π f g w x = 0 :=
@@ -40,13 +23,35 @@ begin
   sorry
 end
 
+section
+
+variables (C : ℝ≥0ᵒᵖ ⥤ Ab) (i : ℕ) (f : ℕ → ℝ≥0)
+
+def shift_sub_id.shift (hf : monotone f) :
+  (∏ (λ x : ℕ, C.obj (op $ f x))) ⟶ (∏ (λ x : ℕ, C.obj (op $ f x))) :=
+pi.lift $ λ x, pi.π _ (x+1) ≫ (C.map (hom_of_le $ hf $ nat.le_succ x).op)
+
+def shift_sub_id (hf : monotone f) :
+  (∏ (λ x : ℕ, C.obj (op $ f x))) ⟶ (∏ (λ x : ℕ, C.obj (op $ f x))) :=
+shift_sub_id.shift C f hf - 𝟙 _
+
+end
+
+namespace system_of_complexes
+
+variables (C : system_of_complexes) (i : ℕ) (f : ℕ → ℝ≥0)
+variables [∀ c i, complete_space (C c i)] [∀ c i, separated_space (C c i)]
+
+def to_AbH : ℝ≥0ᵒᵖ ⥤ Ab := C.to_Ab ⋙ homology_functor _ _ i
+
 lemma shift_eq_zero (hf : monotone f) {k K c₀ : ℝ≥0} [fact (1 ≤ k)]
   (hC : C.is_bounded_exact k K i c₀)
   (hc₀ : ∀ j, c₀ ≤ f j) (hk : ∀ j, k * f j ≤ f (j+1)) :
-  C.shift i f hf = 0 :=
+  shift_sub_id.shift (C.to_AbH i) f hf = 0 :=
 begin
   apply category_theory.limits.limit.hom_ext, intros j,
-  rw [zero_comp, shift, limit.lift_π, fan.mk_π_app, homology_functor_map],
+  rw [zero_comp, shift_sub_id.shift, to_AbH, limit.lift_π, fan.mk_π_app,
+    functor.comp_map, homology_functor_map],
   convert comp_zero using 2,
   apply homology.ext,
   rw [comp_zero, homology.π_map],
@@ -83,7 +88,7 @@ end
 lemma shift_sub_id_is_iso (hf : monotone f) {k K c₀ : ℝ≥0} [fact (1 ≤ k)]
   (hC : C.is_bounded_exact k K i c₀)
   (hc₀ : ∀ j, c₀ ≤ f j) (hk : ∀ j, k * f j ≤ f (j+1)) :
-  is_iso (C.shift_sub_id i f hf) :=
+  is_iso (shift_sub_id (C.to_AbH i) f hf) :=
 begin
   rw [shift_sub_id, shift_eq_zero C i f hf hC hc₀ hk, zero_sub, is_iso_neg_iff],
   apply_instance
