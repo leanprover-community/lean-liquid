@@ -17,7 +17,7 @@ open_locale nnreal big_operators
 namespace invpoly
 open ProFiltPseuNormGrpWithTinv₁
 
-variables (p : ℝ≥0) [fact (0 < p)] [fact (p ≤ 1)]
+variables (p : ℝ≥0) [fact (0 < p)] [fact (p < 1)]
 
 local notation `r` := @r p
 

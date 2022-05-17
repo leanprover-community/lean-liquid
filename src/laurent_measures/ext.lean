@@ -42,6 +42,7 @@ begin
   },
   haveI : fact (r < 1) := ⟨(fact.out _ : r < r').trans (fact.out _)⟩,
   haveI : fact (p' ≤ 1) := ⟨(fact.out _ : p' < p).le.trans (fact.out _)⟩,
+  haveI : fact (p' < 1) := ⟨lt_of_lt_of_le (fact.out _ : p' < p) (fact.out _ : p ≤ 1)⟩,
   rw ← epi_and_is_iso_iff_of_is_iso _ _ _ _
     ((condensify_Tinv2 _).app S) ((condensify_Tinv2 _).app S) ((condensify_Tinv2 _).app S)
     _ _ (Condensed.of_top_ab V) SES SES (Lbar.is_iso_Tinv2 r r' S V hV),
