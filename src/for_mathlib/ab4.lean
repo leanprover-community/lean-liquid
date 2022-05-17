@@ -153,6 +153,28 @@ instance eval_next_preserves_coproducts (α : Type v)
   (M : Type*) (S : complex_shape M) [abelian A] (i : M) :
   preserves_colimits_of_shape (discrete α) (eval_next A S i) := sorry
 
+lemma exact_iff_exact_cokernel_desc [abelian A] (X Y Z : A)
+  (f : X ⟶ Y) (g : Y ⟶ Z) :
+  exact f g ↔ ∃ w, mono (cokernel.desc f g w) :=
+begin
+  split,
+  { intros h, refine ⟨h.w, _⟩,
+    apply abelian.pseudoelement.mono_of_zero_of_map_zero,
+    intros a ha,
+    have h' : exact f (cokernel.π f) := abelian.exact_cokernel f,
+    replace h' := abelian.pseudoelement.pseudo_exact_of_exact h',
+    have hπ := abelian.pseudoelement.pseudo_surjective_of_epi (cokernel.π f),
+    obtain ⟨b,rfl⟩ := hπ a,
+    rw [← abelian.pseudoelement.comp_apply, cokernel.π_desc] at ha,
+    replace h := abelian.pseudoelement.pseudo_exact_of_exact h,
+    obtain ⟨b,rfl⟩ := h.2 _ ha,
+    rw [← abelian.pseudoelement.comp_apply, cokernel.condition],
+    simp only [abelian.pseudoelement.zero_apply] },
+  { rintros ⟨w,h⟩, rw abelian.exact_iff, refine ⟨w, _⟩, resetI,
+    rw ← cancel_mono (cokernel.desc f g w),
+    simp only [category.assoc, cokernel.π_desc, kernel.condition, zero_comp] }
+end
+
 lemma exact_coproduct [abelian A] [has_coproducts A] [AB4 A]
   {α : Type v} (X Y Z : α → A) (f : X ⟶ Y) (g : Y ⟶ Z)
   (w : ∀ i, exact (f i) (g i)) :
@@ -162,14 +184,20 @@ begin
     λ a, (cokernel.desc _ (g a) (w a).w),
   let π : Y ⟶ (λ a : α, cokernel (f a)) :=
     λ a, (cokernel.π _),
-  haveI : ∀ a, mono (ι a) := sorry,
-  have w' : ∀ a, exact (f a) (π a), sorry,
-  suffices : exact ((sigma_functor A α).map f) ((sigma_functor A α).map π), sorry,
+  haveI : ∀ a, mono (ι a),
+  { intros a,
+    suffices : ∃ w, mono (cokernel.desc (f a) (g a) w),
+    { obtain ⟨q,h⟩ := this, exact h },
+    rw ← exact_iff_exact_cokernel_desc, apply w },
+  have : mono ((sigma_functor A α).map ι),
+  { apply AB4.cond, assumption },
   -- Now need to show that sigma functor commutes with cokernels
-  -- which follows from the fact that both are colimits of some shape.
-  -- Then, after composing with the isomorphism from the above note, this becomes
-  -- the usual exact sequence of a cokernel.
-  sorry
+  suffices : mono ((sigma_functor A α).map ι),
+  -- Use the fact that this commutes with cokernels to identify the source
+  -- with the cokernel of `f`.
+  -- Then use exact_iff_exact_cokernel_desc
+  { sorry },
+  apply AB4.cond, assumption,
 end
 
 instance epi_coproduct_kernel_comparison [has_coproducts A] [AB4 A]
