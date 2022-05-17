@@ -4,6 +4,7 @@ import condensed.condensify
 import laurent_measures.thm69
 import normed_free_pfpng.compare
 import Lbar.ses
+import laurent_measures.ses2
 
 universe u
 
@@ -137,8 +138,8 @@ begin
   have hp1 : p ≤ 1 := fact.out _,
   have h0pinv : 0 ≤ p⁻¹, { rw ← nnreal.inv_pos at h0p, exact h0p.le },
   refine condensify_nonstrict_exact _ _ (r⁻¹ + 2) (Tinv2_bound_by _)
-    -- next line needs to be fixed to be the correct bound
-    (λ c, max c (c + r + 37)) κ
+    -- next line can be simplified because 1/2 < r < 1 so the max is always on the right.
+    (λ c, max c (c * (2 - r⁻¹)⁻¹ * (r⁻¹ + 2))) κ
     (λ c, le_max_left _ _) hκ
     (Tinv2_injective p) (Tinv2_comp_eval2_eq_zero p) _ _ _,
   { rintros S c f ⟨hf1, hf2⟩,
@@ -150,9 +151,16 @@ begin
     refine ⟨λ s, (f s) /ₘ (polynomial.X - 2), _, _⟩,
     { change ∥_∥₊ ≤ c at hf2,
       change ∥_∥₊ ≤ _,
-      rw ← to_laurent_measures_addhom_isometry,
-      -- know |(X-2)*g|<=c, want |g|<=?.
-      -- proof idea:
+      have hf1' : ((eval2_nat_trans p).app S) f = 0,
+      { simpa using hf1 },
+      rw ← to_laurent_measures_addhom_isometry at ⊢ hf2,
+      refine le_trans _ (nnreal.mul_le_mul_right (le_max_right _ _) _),
+      rw mul_inv_cancel_right₀ (lt_of_lt_of_le (zero_lt_two : (0 : ℝ≥0) < 2) le_add_self).ne',
+      -- almost ready for next line but we have p<=1 and not p<1 :-/
+      -- need to turn hf1' into the statement that Θ f = 0, and then
+      -- `convert laurent_measures.psi_bound p S c hf1' hf2`
+      -- will reduce us  to the slightly gnarly question of
+      -- showing that the diagram commutes.
       sorry },
     { ext1 s,
       convert hf3 s,
