@@ -337,6 +337,16 @@ begin
       nat_trans.comp_app, discrete.nat_iso_hom_app, colimit.cocone_ι, category.assoc,
       cofan.mk_ι_app, kernel.lift_ι, kernel.lift_ι_assoc],
     dsimp, simp only [category.id_comp] },
+  { rw ht,
+    dsimp [e, limits.is_colimit.cocone_point_unique_up_to_iso],
+    apply (is_colimit_of_preserves (eval_prev A S i) (colimit.is_colimit (discrete.functor X))).hom_ext,
+    intros j,
+    simp only [functor.map_cocone_ι_app, colimit.cocone_ι, category.assoc,
+      has_colimit.iso_of_nat_iso_hom_desc, comp_zero],
+    slice_lhs 1 2
+    { erw (is_colimit_of_preserves (eval_prev A S i) (colimit.is_colimit (discrete.functor X))).fac },
+    simp only [colimit.cocone_ι, colimit.ι_desc, cocones.precompose_obj_ι, nat_trans.comp_app,
+      cofan.mk_ι_app, category.assoc, homology.condition_π'_assoc, zero_comp, comp_zero] }
 end
 
 noncomputable
