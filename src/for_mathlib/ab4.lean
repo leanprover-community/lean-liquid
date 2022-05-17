@@ -110,7 +110,11 @@ noncomputable
 def coproduct_kernel_comparison (M : Type*) (S : complex_shape M) (α : Type v)
   [abelian A] [has_coproducts A] (i : M) (X : α → homological_complex A S) :
   (∐ λ (a : α), kernel ((X a).d_from i)) ⟶ kernel ((∐ X).d_from i) :=
-sigma.desc $ λ a, kernel.lift _ (kernel.ι _ ≫ (sigma.ι _ a : X a ⟶ ∐ X).f i) sorry
+sigma.desc $ λ a, kernel.lift _ (kernel.ι _ ≫ (sigma.ι _ a : X a ⟶ ∐ X).f i)
+begin
+  rw [category.assoc, (sigma.ι X a : X a ⟶ _).comm_from, ← category.assoc, kernel.condition,
+    zero_comp],
+end
 
 -- This should follow from the AB4 assumption
 instance mono_coproduct_kernel_comparison (M : Type*) (S : complex_shape M) (α : Type v)
