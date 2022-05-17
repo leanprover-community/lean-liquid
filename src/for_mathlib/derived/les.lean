@@ -212,6 +212,4 @@ end homological_complex
     { exact S.six_term_exact_seq.pair },
     apply_with snake.mk {instances := ff};
     try { apply_instance },
-    { sorry },
-    { exact exact_kernel_ι },
 -/
