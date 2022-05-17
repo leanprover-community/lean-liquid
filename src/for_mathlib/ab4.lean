@@ -354,6 +354,53 @@ begin
     simpa }
 end
 
+noncomputable
+def sigma_cokernel_cofork [abelian A] [has_coproducts A] [AB4 A]
+  {α : Type v} (X Y : α → A) (f : X ⟶ Y) :
+  cokernel_cofork ((sigma_functor A α).map f) :=
+cokernel_cofork.of_π
+(sigma.desc (λ a : α, cokernel.π (f a) ≫ sigma.ι (λ b, cokernel (f b)) a))
+begin
+  apply colimit.hom_ext,
+  intros a,
+  dsimp [sigma_functor],
+  simp only [colimit.ι_desc_assoc, cofan.mk_ι_app, category.assoc,
+    colimit.ι_desc, cokernel.condition_assoc, zero_comp,
+    comp_zero],
+end
+
+noncomputable
+def is_colimit_sigma_cokernel_cofork [abelian A] [has_coproducts A] [AB4 A]
+  {α : Type v} (X Y : α → A) (f : X ⟶ Y) :
+  is_colimit (sigma_cokernel_cofork X Y f) :=
+is_colimit_aux _
+(λ S, sigma.desc $ λ b, cokernel.desc _ (sigma.ι _ _ ≫ S.π)
+  begin
+    rw ← category.assoc,
+    let t := _, change t ≫ _ = _,
+    have ht : t = sigma.ι X b ≫ (sigma_functor A α).map f,
+    { dsimp [sigma_functor], simp },
+    rw ht, clear ht, clear t,
+    rw [category.assoc, S.condition, comp_zero],
+  end)
+begin
+  intros S,
+  dsimp [sigma_cokernel_cofork],
+  apply colimit.hom_ext,
+  simp only [category.assoc, colimit.ι_desc, cofan.mk_ι_app, eq_self_iff_true,
+    cokernel_cofork.condition, comp_zero,
+    colimit.ι_desc_assoc, cokernel.π_desc, implies_true_iff],
+end
+begin
+  intros S m hm,
+  apply colimit.hom_ext, intros a,
+  simp only [colimit.ι_desc, cofan.mk_ι_app],
+  apply coequalizer.hom_ext, simp only [coequalizer_as_cokernel, cokernel.π_desc],
+  simp_rw [← hm, ← category.assoc], congr' 1,
+  dsimp [sigma_cokernel_cofork],
+  simp only [colimit.ι_desc, cofan.mk_ι_app],
+end
+
 lemma exact_coproduct [abelian A] [has_coproducts A] [AB4 A]
   {α : Type v} (X Y Z : α → A) (f : X ⟶ Y) (g : Y ⟶ Z)
   (w : ∀ i, exact (f i) (g i)) :
@@ -374,7 +421,29 @@ begin
   -- Use the fact that this commutes with cokernels to identify the source
   -- with the cokernel of `f`.
   -- Then use exact_iff_exact_cokernel_desc
-  sorry,
+  rw exact_iff_exact_of_cofork
+    ((sigma_functor A α).obj X)
+    ((sigma_functor A α).obj Y)
+    ((sigma_functor A α).obj Z)
+    ((sigma_functor A α).map f)
+    ((sigma_functor A α).map g)
+    (sigma_cokernel_cofork _ _ f)
+    (is_colimit_sigma_cokernel_cofork _ _ f),
+  refine ⟨_,_⟩,
+  { apply colimit.hom_ext, intros a,
+    dsimp [sigma_functor],
+    simp only [colimit.ι_desc_assoc, cofan.mk_ι_app, category.assoc, colimit.ι_desc, comp_zero],
+    rw [← category.assoc, (w a).w, zero_comp] },
+  simp only [exact_iff_exact_cokernel_desc] at w,
+  choose w₁ w₂ using w,
+  convert AB4.cond _ Z ι w₂ using 1,
+  apply colimit.hom_ext, intros a,
+  dsimp [is_colimit_sigma_cokernel_cofork, is_colimit_aux],
+  simp only [colimit.ι_desc, cofan.mk_ι_app],
+  apply coequalizer.hom_ext,
+  simp only [cokernel.π_desc, cokernel.π_desc_assoc],
+  dsimp [sigma_functor],
+  simp only [colimit.ι_desc, cofan.mk_ι_app],
 end
 
 section
