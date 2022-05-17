@@ -3,6 +3,7 @@ import invpoly.functor
 import condensed.condensify
 import laurent_measures.thm69
 import normed_free_pfpng.compare
+import Lbar.ses
 
 universe u
 
@@ -149,6 +150,7 @@ begin
     refine ⟨λ s, (f s) /ₘ (polynomial.X - 2), _, _⟩,
     { change ∥_∥₊ ≤ c at hf2,
       change ∥_∥₊ ≤ _,
+      rw ← to_laurent_measures_addhom_isometry,
       -- know |(X-2)*g|<=c, want |g|<=?.
       -- proof idea:
       sorry },

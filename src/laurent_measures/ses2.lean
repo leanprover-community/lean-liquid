@@ -49,6 +49,29 @@ local notation `r` := @r p
 
 open CompHausFiltPseuNormGrp₁
 
+lemma psi_bound (S : Fintype) (c' : ℝ≥0)
+  ⦃F : laurent_measures r S⦄
+  (hF1 : (Θ p S) F = 0)
+  (hF2 : ∥F∥₊ ≤ c') :
+  ∥ψ F hF1∥₊ ≤
+    c' * (2 - r⁻¹)⁻¹ :=
+begin
+  delta ψ,
+  rw nnnorm_def at hF2 ⊢,
+  simp only [coe_mk],
+  delta Θ at hF1,
+  have foo : ∀ (s : S), ∑' (n : ℤ), ∥ite (F.d ≤ n) ((finset.range (n - F.d).nat_abs.succ).sum
+    (λ (l : ℕ), (F s (n - 1 - l) : ℝ) * 2 ^ l)) 0∥₊ * r ^ n ≤
+    (2 - r⁻¹)⁻¹ * ∑' n, ∥(F s n : ℝ)∥₊ * r ^ n :=
+  λ s, by convert psi_aux_lemma.key_tsum_lemma (λ n, (F s n : ℝ)) r r_lt_one half_lt_r F.d
+    (λ n hnd, lt_d_eq_zero' F s n hnd) (F.summable' s) (congr_fun hF1 s),
+  convert le_trans (finset.sum_le_sum (λ (s : S) _, foo s)) _,
+  { norm_cast },
+  simp_rw real.nnnorm_int,
+  rw [← finset.mul_sum, mul_comm],
+  exact (nnreal.mul_le_mul_right hF2 _),
+end
+
 theorem short_exact (S : Profinite) :
   short_exact ((condensify_Tinv2 _).app S) ((condensify_map $ Θ_fintype_nat_trans p).app S) :=
 begin
@@ -76,29 +99,10 @@ begin
         (hF2 : ∥F∥₊ ≤ c')⟩,
       simp only [set.mem_image],
       refine ⟨ψ F hF1, _, θ_ϕ_split_exact F hF1⟩,
-
-      delta ψ,
       change (∥_∥₊ : ℝ≥0) ≤ _,
-      rw nnnorm_def at hF2 ⊢,
-      simp only [coe_mk],
-      delta Θ at hF1,
-      rw mul_assoc,
       -- because of silly definition of `C₂` involving max :-)
       refine le_trans _ (mul_le_mul_right' (le_max_left _ _) _),
-      have foo : ∀ (s : S), ∑' (n : ℤ), ∥ite (F.d ≤ n) ((finset.range (n - F.d).nat_abs.succ).sum
-        (λ (l : ℕ), (F s (n - 1 - l) : ℝ) * 2 ^ l)) 0∥₊ * r ^ n ≤
-        (2 - r⁻¹)⁻¹ * ∑' n, ∥(F s n : ℝ)∥₊ * r ^ n :=
-      λ s,
-      begin
-        convert psi_aux_lemma.key_tsum_lemma (λ n, (F s n : ℝ)) r r_lt_one half_lt_r F.d
-        (λ n hnd, lt_d_eq_zero' F s n hnd) (F.summable' s) (congr_fun hF1 s),
-      end,
-      convert le_trans (finset.sum_le_sum (λ (s : S) _, foo s)) _,
-      { norm_cast },
-      simp_rw real.nnnorm_int,
-      rw ← finset.mul_sum,
-      refine le_trans (nnreal.mul_le_mul_left hF2 _) _,
-      apply le_of_eq,
+      convert psi_bound p S c' hF1 hF2 using 1,
       have h1 : 2⁻¹ < r := half_lt_r,
       have h2 : (2 - 1 / r) ≠ 0 := ne_of_gt (tsub_pos_of_lt
         (by { rw [one_div], exact r_inv_lt_2 })),
