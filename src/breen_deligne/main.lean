@@ -15,7 +15,7 @@ namespace package
 
 variables (BD : package)
 variables {𝒜 : Type*} [category 𝒜] [abelian 𝒜] [enough_projectives 𝒜]
-variables (F : 𝒜 ⥤ 𝒜) [preserves_filtered_colimits F]
+variables (F : 𝒜 ⥤ 𝒜) --[preserves_filtered_colimits F]
 
 -- This requires more hypotheses on `BD` and `F`.
 -- We'll figure them out while proving the lemma.

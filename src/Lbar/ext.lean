@@ -31,9 +31,9 @@ def Tinv_sub (S : Profinite.{u}) (V : SemiNormedGroup.{u}) [normed_with_aut r V]
   (normed_group_hom.continuous _))
 
 -- move me
-instance Condensed_Ab_free_preserves_filtered_colimits :
-  preserves_filtered_colimits (Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_Condensed_Ab) :=
-sorry
+-- instance Condensed_Ab_free_preserves_filtered_colimits :
+--   preserves_filtered_colimits (Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_Condensed_Ab) :=
+-- sorry
 
 /-- Thm 9.4bis of [Analytic]. More precisely: the first observation in the proof 9.4 => 9.1. -/
 theorem is_iso_Tinv_sub (S : Profinite.{u}) (V : SemiNormedGroup.{u}) [normed_with_aut r V] :

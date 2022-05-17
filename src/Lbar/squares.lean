@@ -109,13 +109,20 @@ section step4
 lemma bicartesian_of_aut_of_end_of_end_of_aut
   {A B C D : Ab.{u}} {f : A ⟶ B} {g : B ⟶ C} {h : C ⟶ D}
   {α : A ⟶ A} {β : B ⟶ B} {γ : C ⟶ C} {δ : D ⟶ D}
-  (H : exact_seq Ab.{u} [f, g ,h])
+  (H : exact_seq Ab.{u} [f, g, h])
   (sq1 : commsq f α β f) (sq2 : commsq g β γ g) (sq3 : commsq h γ δ h)
   [is_iso α] [is_iso δ] :
   sq2.bicartesian :=
-sorry
+begin
+  have aux : _ := _,
+  rw commsq.bicartesian_iff_isos _ _ aux aux sq2.kernel sq2 sq2.cokernel,
+  swap,
+  { apply exact.cons, { exact exact_kernel_ι },
+    apply exact.exact_seq, { apply abelian.exact_cokernel } },
+  sorry
   -- use (important!) the fact that we have a `kernel.map` (resp. `cokernel.map`)
   -- arising between two identical exact sequences
+end
 
 end step4
 
