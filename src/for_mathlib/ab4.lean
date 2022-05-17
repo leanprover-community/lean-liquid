@@ -162,7 +162,7 @@ begin
   have sqι : ι₁ ≫ E.inv = t ≫ ι₂ := sorry,
   have sqπ : π₁ ≫ Q.inv = E.inv ≫ π₂ := sorry,
   have e1 : exact ι₁ π₁ := sorry,
-  have e2 : exact ι₂ π₂ := sorry,
+  have e2 : exact ι₂ π₂ := exact_kernel_ι,
   have hι₂ := abelian.pseudoelement.pseudo_injective_of_mono ι₂,
   replace e1 := abelian.pseudoelement.pseudo_exact_of_exact e1,
   replace e2 := abelian.pseudoelement.pseudo_exact_of_exact e2,
