@@ -139,6 +139,8 @@ begin
   have h0pinv : 0 ≤ p⁻¹, { rw ← nnreal.inv_pos at h0p, exact h0p.le },
   refine condensify_nonstrict_exact _ _ (r⁻¹ + 2) (Tinv2_bound_by _)
     -- next line can be simplified because 1/2 < r < 1 so the max is always on the right.
+    -- **TODO** URK I just realised we don't have 1/2 < r in this file :-/
+    -- Can I relax p<=1 to p<1??
     (λ c, max c (c * (2 - r⁻¹)⁻¹ * (r⁻¹ + 2))) κ
     (λ c, le_max_left _ _) hκ
     (Tinv2_injective p) (Tinv2_comp_eval2_eq_zero p) _ _ _,
