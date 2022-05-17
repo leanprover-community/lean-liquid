@@ -220,18 +220,14 @@ begin
       laurent_measures.add_apply, polynomial.coeff_add], }
 end
 
-def to_laurent_measures_hom [fact (r' < 1)]: comphaus_filtered_pseudo_normed_group_with_Tinv_hom r'
-  (invpoly r' S) (laurent_measures r' S) :=
-{ strict' := begin
-    rintros c p hp,
-    simp only [add_monoid_hom.to_fun_eq_coe, laurent_measures.mem_filtration_iff],
-    simp only [mem_filtration_iff] at hp,
-    convert hp using 1,
-    unfold nnnorm,
-    congr',
-    ext s,
-    norm_cast,
-    refine tsum_eq_tsum_of_ne_zero_bij (λ n, -((n.1 : ℕ) : ℤ)) _ _ _,
+lemma to_laurent_measures_addhom_isometry (p : invpoly r' S) :
+  ∥(to_laurent_measures_addhom r' S) p∥₊ = ∥p∥₊ :=
+begin
+  unfold nnnorm,
+  congr',
+  ext s,
+  norm_cast,
+  refine tsum_eq_tsum_of_ne_zero_bij (λ n, -((n.1 : ℕ) : ℤ)) _ _ _,
   { rintros ⟨x, _⟩ ⟨y, _⟩ h, simpa using h },
   { intros n hn,
     rw function.mem_support at hn,
@@ -248,6 +244,15 @@ def to_laurent_measures_hom [fact (r' < 1)]: comphaus_filtered_pseudo_normed_gro
     cases n with n,
     { simp [to_laurent_measures_fun_zero], },
     { simp only [to_laurent_measures_fun_neg'], } },
+end
+
+def to_laurent_measures_hom [fact (r' < 1)]: comphaus_filtered_pseudo_normed_group_with_Tinv_hom r'
+  (invpoly r' S) (laurent_measures r' S) :=
+{ strict' := begin
+    rintros c p hp,
+    simp only [add_monoid_hom.to_fun_eq_coe, laurent_measures.mem_filtration_iff],
+    simp only [mem_filtration_iff] at hp,
+    rwa to_laurent_measures_addhom_isometry,
   end,
   continuous' := λ c, continuous_bot,
   map_Tinv' := begin
