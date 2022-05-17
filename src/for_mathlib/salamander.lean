@@ -403,488 +403,497 @@ begin
 end
 .
 
-open_locale pseudoelement
-open category_theory.abelian
-
-section
-
-variables {A'₁₁ A'₁₂ A'₁₃ A'₁₄ A'₁₅ : 𝓐ᵒᵖ}
-variables {A'₂₁ A'₂₂ A'₂₃ A'₂₄ A'₂₅ : 𝓐ᵒᵖ}
-variables {A'₃₁ A'₃₂ A'₃₃ A'₃₄ A'₃₅ : 𝓐ᵒᵖ}
-variables {A'₄₁ A'₄₂ A'₄₃ A'₄₄ A'₄₅ : 𝓐ᵒᵖ}
-variables {A'₅₁ A'₅₂ A'₅₃ A'₅₄ A'₅₅ : 𝓐ᵒᵖ}
-
-variables {f'₁₁ : A'₁₁ ⟶ A'₁₂} {f'₁₂ : A'₁₂ ⟶ A'₁₃} {f'₁₃ : A'₁₃ ⟶ A'₁₄} {f'₁₄ : A'₁₄ ⟶ A'₁₅}
-variables {g'₁₁ : A'₁₁ ⟶ A'₂₁} {g'₁₂ : A'₁₂ ⟶ A'₂₂} {g'₁₃ : A'₁₃ ⟶ A'₂₃} {g'₁₄ : A'₁₄ ⟶ A'₂₄} {g'₁₅ : A'₁₅ ⟶ A'₂₅}
-variables {f'₂₁ : A'₂₁ ⟶ A'₂₂} {f'₂₂ : A'₂₂ ⟶ A'₂₃} {f'₂₃ : A'₂₃ ⟶ A'₂₄} {f'₂₄ : A'₂₄ ⟶ A'₂₅}
-variables {g'₂₁ : A'₂₁ ⟶ A'₃₁} {g'₂₂ : A'₂₂ ⟶ A'₃₂} {g'₂₃ : A'₂₃ ⟶ A'₃₃} {g'₂₄ : A'₂₄ ⟶ A'₃₄} {g'₂₅ : A'₂₅ ⟶ A'₃₅}
-variables {f'₃₁ : A'₃₁ ⟶ A'₃₂} {f'₃₂ : A'₃₂ ⟶ A'₃₃} {f'₃₃ : A'₃₃ ⟶ A'₃₄} {f'₃₄ : A'₃₄ ⟶ A'₃₅}
-variables {g'₃₁ : A'₃₁ ⟶ A'₄₁} {g'₃₂ : A'₃₂ ⟶ A'₄₂} {g'₃₃ : A'₃₃ ⟶ A'₄₃} {g'₃₄ : A'₃₄ ⟶ A'₄₄} {g'₃₅ : A'₃₅ ⟶ A'₄₅}
-variables {f'₄₁ : A'₄₁ ⟶ A'₄₂} {f'₄₂ : A'₄₂ ⟶ A'₄₃} {f'₄₃ : A'₄₃ ⟶ A'₄₄} {f'₄₄ : A'₄₄ ⟶ A'₄₅}
-variables {g'₄₁ : A'₄₁ ⟶ A'₅₁} {g'₄₂ : A'₄₂ ⟶ A'₅₂} {g'₄₃ : A'₄₃ ⟶ A'₅₃} {g'₄₄ : A'₄₄ ⟶ A'₅₄} {g'₄₅ : A'₄₅ ⟶ A'₅₅}
-variables {f'₅₁ : A'₅₁ ⟶ A'₅₂} {f'₅₂ : A'₅₂ ⟶ A'₅₃} {f'₅₃ : A'₅₃ ⟶ A'₅₄} {f'₅₄ : A'₅₄ ⟶ A'₅₅}
-
-
-open opposite
-
-lemma op_H_to_don (lbc : LBC f'₁₁ g'₁₁ g'₁₂ f'₂₁ f'₂₂ g'₂₂ g'₂₃ f'₃₂) :
-  lbc.H_to_don = (homology_unop_iso _ _ _).hom ≫ lbc.unop.rcp_to_H.op ≫
-    (homology_unop_iso _ _ lbc.π_diag_out).inv :=
-begin
-  ext,
-  simp only [category.assoc, H_to_don, rcp_to_H,
-    homology_unop_iso_hom, homology_unop_iso_inv,
-    unop_sum₂, symm_sum₁, sum_str.unop_fst, sum_str.symm_inl, homology.map_ι,
-    homology.π'_ι_assoc, cokernel.π_desc,
-    homology_iso_cokernel_lift, homology_iso_kernel_desc,
-    homology_iso_cokernel_image_to_kernel',
-    cokernel_epi_comp_hom, cokernel_epi_comp_inv,
-    category_theory.limits.cokernel.map_desc_assoc,
-    cokernel_iso_of_eq_hom_comp_desc_assoc,
-    iso.trans_hom, iso.trans_inv, iso.symm_hom],
-  sorry
-end
-
-lemma op_rcp_to_H (lbc : LBC f'₁₁ g'₁₁ g'₁₂ f'₂₁ f'₂₂ g'₂₂ g'₂₃ f'₃₂) :
-  lbc.rcp_to_H = (homology_unop_iso _ _ lbc.diag_in_ι).hom ≫
-    lbc.unop.H_to_don.op ≫ (homology_unop_iso _ _ _).inv :=
-begin
-  sorry
-end
-
-lemma op_V_to_don (lbc : LBC f'₁₁ g'₁₁ g'₁₂ f'₂₁ f'₂₂ g'₂₂ g'₂₃ f'₃₂) :
-  lbc.V_to_don = (homology_unop_iso _ _ _).hom ≫ lbc.unop.rcp_to_V.op ≫
-    (homology_unop_iso _ _ lbc.π_diag_out).inv :=
-lbc.symm.op_H_to_don
-
-lemma op_rcp_to_V (lbc : LBC f'₁₁ g'₁₁ g'₁₂ f'₂₁ f'₂₂ g'₂₂ g'₂₃ f'₃₂) :
-  lbc.rcp_to_V = (homology_unop_iso _ _ lbc.diag_in_ι).hom ≫
-    lbc.unop.V_to_don.op ≫ (homology_unop_iso _ _ _).inv :=
-lbc.symm.op_rcp_to_H
-
-lemma op_ex_h
-  (lbc₁ : LBC f'₁₁ g'₁₁ g'₁₂ f'₂₁ f'₂₂ g'₂₂ g'₂₃ f'₃₂)
-  (lbc₂ : LBC f'₁₂ g'₁₂ g'₁₃ f'₂₂ f'₂₃ g'₂₃ g'₂₄ f'₃₃) :
-  lbc₁.ex_h lbc₂ = (homology_unop_iso _ _ lbc₁.π_diag_out).hom ≫
-    (lbc₂.unop.ex_h lbc₁.unop).op ≫ (homology_unop_iso _ _ lbc₂.diag_in_ι).inv :=
-sorry
-
-lemma op_ex_v
-  (lbc₁ : LBC f'₁₁ g'₁₁ g'₁₂ f'₂₁ f'₂₂ g'₂₂ g'₂₃ f'₃₂)
-  (lbc₂ : LBC f'₂₁ g'₂₁ g'₂₂ f'₃₁ f'₃₂ g'₃₂ g'₃₃ f'₄₂) :
-  lbc₁.ex_v lbc₂ = (homology_unop_iso _ _ lbc₁.π_diag_out).hom ≫
-    (lbc₂.unop.ex_v lbc₁.unop).op ≫ (homology_unop_iso _ _ lbc₂.diag_in_ι).inv  :=
-by convert lbc₁.symm.op_ex_h lbc₂.symm using 1
-
-end
-
-lemma exact_aux_1
-  (lbc₁ : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
-  (lbc₂ : LBC f₂₁ g₂₁ g₂₂ f₃₁ f₃₂ g₃₂ g₃₃ f₄₂) :
-  exact (lbc₁.ex_v lbc₂ ≫ lbc₂.rcp_to_H) lbc₂.H_to_don :=
-begin
-  -- apply pseudoelement.exact_of_pseudo_exact,
-  -- split,
-  -- { suffices : lbc₁.ex_v lbc₂ ≫ lbc₂.rcp_to_V = 0,
-  --   { intro x,
-  --     rw [← pseudoelement.comp_apply, category.assoc, rcp_to_H_comp_H_to_don,
-  --       ← category.assoc, this, zero_comp, pseudoelement.zero_apply] },
-  --   rw pseudoelement.eq_zero_iff,
-  --   intro x,
-  --   delta ex_v rcp_to_V,
-  --  },
-
-  -- refine preadditive.exact_of_iso_of_exact'
-  --   (cokernel.desc _ _ _) _ _ _
-  --   (homology_iso_cokernel_lift _ _ _).symm
-  --   (homology_iso_cokernel_lift _ _ _).symm
-  --   (homology_iso_cokernel_lift _ _ _).symm _ _ _,
-
-  -- rw abelian.exact_iff, split,
-  -- { suffices : lbc₁.ex_v lbc₂ ≫ lbc₂.rcp_to_V = 0,
-  --   rw [category.assoc, rcp_to_H_comp_H_to_don, ← category.assoc, this, zero_comp],
-  --   delta ex_v rcp_to_V,
-  --   rw [homology.map_comp],
-  --   apply homology.ext,
-  --   rw [homology.π_map, comp_zero],
-  --   dsimp [kernel_subobject_map, homology.π],
-  --   simp only [category.comp_id],
-  --   sorry },
-  sorry
-end
-
-lemma exact_aux_2
-  (lbc₁ : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
-  (lbc₂ : LBC f₁₂ g₁₂ g₁₃ f₂₂ f₂₃ g₂₃ g₂₄ f₃₃) :
-  exact lbc₁.H_to_don (lbc₁.ex_h lbc₂) :=
-begin
-  sorry
-end
-
-lemma salamander_v
-  (lbc₁ : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
-  (lbc₂ : LBC f₂₁ g₂₁ g₂₂ f₃₁ f₃₂ g₃₂ g₃₃ f₄₂)
-  (lbc₃ : LBC f₂₂ g₂₂ g₂₃ f₃₂ f₃₃ g₃₃ g₃₄ f₄₃)
-  (lbc₄ : LBC f₃₂ g₃₂ g₃₃ f₄₂ f₄₃ g₄₃ g₄₄ f₅₃) :
-  exact_seq 𝓐 [
-    lbc₁.ex_v lbc₂ ≫ lbc₂.rcp_to_H,
-    lbc₂.H_to_don,
-    lbc₂.ex_h lbc₃,
-    lbc₃.rcp_to_H,
-    lbc₃.H_to_don ≫ lbc₃.ex_v lbc₄] :=
-begin
-  refine (exact_aux_1 lbc₁ lbc₂).cons _,
-  refine (exact_aux_2 lbc₂ lbc₃).cons _,
-  have aux1 := (exact_aux_2 lbc₃.op lbc₂.op).unop,
-  simp only [op_H_to_don, op_ex_h, unop_comp, ← iso.unop_hom, ← iso.unop_inv,
-    exact_comp_iso, exact_iso_comp, exact_comp_hom_inv_comp_iff, quiver.hom.unop_op] at aux1,
-  refine aux1.cons _,
-  have aux2 := (exact_aux_1 lbc₄.op lbc₃.op).unop,
-  simp only [op_H_to_don, op_ex_v, op_rcp_to_H, category.assoc, iso.inv_hom_id_assoc,
-    unop_comp, ← iso.unop_hom, ← iso.unop_inv, quiver.hom.unop_op,
-    exact_iso_comp, exact_comp_hom_inv_comp_iff] at aux2,
-  simp only [← category.assoc, exact_comp_iso] at aux2,
-  exact aux2.exact_seq,
-end
-
-lemma salamander_h
-  (lbc₁ : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
-  (lbc₂ : LBC f₁₂ g₁₂ g₁₃ f₂₂ f₂₃ g₂₃ g₂₄ f₃₃)
-  (lbc₃ : LBC f₂₂ g₂₂ g₂₃ f₃₂ f₃₃ g₃₃ g₃₄ f₄₃)
-  (lbc₄ : LBC f₂₃ g₂₃ g₂₄ f₃₃ f₃₄ g₃₄ g₃₅ f₄₄) :
-  exact_seq 𝓐 [
-    lbc₁.ex_h lbc₂ ≫ lbc₂.rcp_to_V,
-    lbc₂.V_to_don,
-    lbc₂.ex_v lbc₃,
-    lbc₃.rcp_to_V,
-    lbc₃.V_to_don ≫ lbc₃.ex_h lbc₄] :=
-by convert salamander_v lbc₁.symm lbc₂.symm lbc₃.symm lbc₄.symm using 1
-
-open_locale zero_object
-
-section
-/-!
-## Extramural isomorphisms
+/-
+#############################################
+#
+# The rest of this file is very interesting in its own right,
+# but we don't need it for LTE, and it contains some annoying sorries
+#
+#############################################
 -/
 
-lemma iso_ex_h
-  (lbc₁ : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
-  (lbc₂ : LBC f₁₂ g₁₂ g₁₃ f₂₂ f₂₃ g₂₃ g₂₄ f₃₃)
-  (h₁ : f₁₁ ≫ f₁₂ = 0) (h₂ : f₃₂ ≫ f₃₃ = 0)
-  (H₁ : is_zero lbc₁.H) (H₂ : is_zero lbc₂.H) :
-  is_iso (lbc₁.ex_h lbc₂) :=
-begin
-  have := (salamander_v _ lbc₁ lbc₂ _).drop 1, any_goals { exact 0 },
-  rotate,
-  { exact LBC.of_core ⟨h₁, zero_comp, zero_comp.trans zero_comp.symm, lbc₂.sq₁⟩, },
-  { exact LBC.of_core ⟨h₂, comp_zero, lbc₁.sq₂, comp_zero.trans comp_zero.symm⟩, },
-  exact this.is_iso_of_zero_of_zero (H₁.eq_of_src _ _) (H₂.eq_of_tgt _ _),
-end
+-- open_locale pseudoelement
+-- open category_theory.abelian
 
-lemma iso_ex_v
-  (lbc₁ : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
-  (lbc₂ : LBC f₂₁ g₂₁ g₂₂ f₃₁ f₃₂ g₃₂ g₃₃ f₄₂)
-  (h₁ : g₁₁ ≫ g₂₁ = 0) (h₂ : g₂₃ ≫ g₃₃ = 0)
-  (H₁ : is_zero lbc₁.V) (H₂ : is_zero lbc₂.V) :
-  is_iso (lbc₁.ex_v lbc₂) :=
-by convert lbc₁.symm.iso_ex_h lbc₂.symm h₁ h₂ H₁ H₂ using 1
+-- section
 
-end
+-- variables {A'₁₁ A'₁₂ A'₁₃ A'₁₄ A'₁₅ : 𝓐ᵒᵖ}
+-- variables {A'₂₁ A'₂₂ A'₂₃ A'₂₄ A'₂₅ : 𝓐ᵒᵖ}
+-- variables {A'₃₁ A'₃₂ A'₃₃ A'₃₄ A'₃₅ : 𝓐ᵒᵖ}
+-- variables {A'₄₁ A'₄₂ A'₄₃ A'₄₄ A'₄₅ : 𝓐ᵒᵖ}
+-- variables {A'₅₁ A'₅₂ A'₅₃ A'₅₄ A'₅₅ : 𝓐ᵒᵖ}
 
-section intramural_isos
-
-/-!
-## Intramural isomorphisms
-
-The subscripts at the end of the names indicate where the `0`s in the diagram are located:
-`ₗ` = left, `ᵤ` = up, `ᵣ` = right, and `ₛ` down (south, thanks unicode).
-
--/
-
-lemma iso_rcp_to_Hₗ
-  (lbc : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
-  (H₂₁ : is_zero A₂₁) (H₃₁ : is_zero A₃₁) (h : exact f₃₁ f₃₂) :
-  is_iso lbc.rcp_to_H :=
-begin
-  have lbc₄ : LBC f₂₁ 0 g₂₂ f₃₁ f₃₂ 0 (0 : _ ⟶ 0) (0 : 0 ⟶ 0) :=
-  LBC.of_core ⟨H₃₁.eq_of_src _ _, comp_zero, H₂₁.eq_of_src _ _, comp_zero.trans comp_zero.symm⟩,
-  have lbc₃ : LBC 0 0 0 0 f₃₁ 0 0 0 :=
-  LBC.of_core ⟨zero_comp, comp_zero, zero_comp.trans zero_comp.symm, comp_zero.trans comp_zero.symm⟩,
-  haveI aux := iso_ex_h lbc₃ lbc₄ zero_comp zero_comp _ _, any_goals { exact 0 },
-  rotate,
-  { apply H₃₁.homology_is_zero, },
-  { exact exact.homology_is_zero _ _ h, },
-  have := (salamander_v _ _ lbc lbc₄).drop 2, any_goals { exact 0 },
-  rotate,
-  { exact LBC.of_core ⟨zero_comp, zero_comp, zero_comp.trans zero_comp.symm, lbc.sq₁⟩, },
-  { exact LBC.of_core ⟨zero_comp, comp_zero, zero_comp.trans zero_comp.symm, H₂₁.eq_of_src _ _⟩, },
-  refine this.is_iso_of_zero_of_zero _ _,
-  { refine is_zero.eq_of_src _ _ _, apply H₂₁.homology_is_zero },
-  { refine is_zero.eq_of_tgt _ _ _,
-    apply is_zero_of_iso_of_zero _ (as_iso (lbc₃.ex_h lbc₄)),
-    apply H₃₁.homology_is_zero, },
-end
-
-lemma iso_V_to_donₗ
-  (lbc : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
-  (H₂₁ : is_zero A₂₁) (H₃₁ : is_zero A₃₁) (h : exact f₃₁ f₃₂) :
-  is_iso lbc.V_to_don :=
-begin
-  have lbc₄ : LBC f₂₁ 0 g₂₂ f₃₁ f₃₂ 0 (0 : _ ⟶ 0) (0 : 0 ⟶ 0) :=
-  LBC.of_core ⟨H₃₁.eq_of_src _ _, comp_zero, H₂₁.eq_of_src _ _, comp_zero.trans comp_zero.symm⟩,
-  have lbc₃ : LBC 0 0 0 0 f₃₁ 0 0 0 :=
-  LBC.of_core ⟨zero_comp, comp_zero, zero_comp.trans zero_comp.symm, comp_zero.trans comp_zero.symm⟩,
-  haveI aux := iso_ex_h lbc₃ lbc₄ zero_comp zero_comp _ _, any_goals { exact 0 },
-  rotate,
-  { apply H₃₁.homology_is_zero, },
-  { exact exact.homology_is_zero _ _ h, },
-  have := salamander_h _ lbc lbc₄ _, any_goals { exact 0 },
-  rotate,
-  { exact LBC.of_core ⟨zero_comp, comp_zero, zero_comp.trans zero_comp.symm, H₂₁.eq_of_src _ _⟩, },
-  { exact LBC.of_core ⟨comp_zero, comp_zero, lbc.sq₂, comp_zero.trans comp_zero.symm⟩, },
-  refine this.is_iso_of_zero_of_zero _ _,
-  { refine is_zero.eq_of_src _ _ _, apply H₂₁.homology_is_zero },
-  { refine is_zero.eq_of_tgt _ _ _,
-    apply is_zero_of_iso_of_zero _ (as_iso (lbc₃.ex_h lbc₄)),
-    apply H₃₁.homology_is_zero, },
-end
-
-lemma iso_rcp_to_Vᵤ
-  (lbc : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
-  (H₁₂ : is_zero A₁₂) (H₁₃ : is_zero A₁₃) (h : exact g₁₃ g₂₃) :
-  is_iso lbc.rcp_to_V :=
-lbc.symm.iso_rcp_to_Hₗ H₁₂ H₁₃ h
-
-lemma iso_H_to_donᵤ
-  (lbc : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
-  (H₁₂ : is_zero A₁₂) (H₁₃ : is_zero A₁₃) (h : exact g₁₃ g₂₃) :
-  is_iso lbc.H_to_don :=
-lbc.symm.iso_V_to_donₗ H₁₂ H₁₃ h
-
-lemma iso_H_to_donᵣ
-  (lbc : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
-  (H₁₂ : is_zero A₂₃) (H₁₃ : is_zero A₁₃) (h : exact f₁₁ f₁₂) :
-  is_iso lbc.H_to_don :=
-begin
-  have aux := iso_rcp_to_Hₗ lbc.op H₁₂.op H₁₃.op h.op,
-  simp only [op_rcp_to_H] at aux,
-  replace aux := @is_iso.of_is_iso_comp_left _ _ _ _ _ _ _ _ aux,
-  replace aux := @is_iso.of_is_iso_comp_right _ _ _ _ _ _ _ _ aux,
-  rwa is_iso_op_iff at aux,
-end
-
-lemma iso_rcp_to_Vᵣ
-  (lbc : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
-  (H₁₂ : is_zero A₂₃) (H₁₃ : is_zero A₁₃) (h : exact f₁₁ f₁₂) :
-  is_iso lbc.rcp_to_V :=
-begin
-  have aux := iso_V_to_donₗ lbc.op H₁₂.op H₁₃.op h.op,
-  simp only [op_V_to_don] at aux,
-  replace aux := @is_iso.of_is_iso_comp_left _ _ _ _ _ _ _ _ aux,
-  replace aux := @is_iso.of_is_iso_comp_right _ _ _ _ _ _ _ _ aux,
-  rwa is_iso_op_iff at aux,
-end
-
-lemma iso_rcp_to_Hₛ
-  (lbc : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
-  (H₃₁ : is_zero A₃₁) (H₃₂ : is_zero A₃₂) (h : exact g₁₁ g₂₁) :
-  is_iso lbc.rcp_to_H :=
-lbc.symm.iso_rcp_to_Vᵣ H₃₂ H₃₁ h
+-- variables {f'₁₁ : A'₁₁ ⟶ A'₁₂} {f'₁₂ : A'₁₂ ⟶ A'₁₃} {f'₁₃ : A'₁₃ ⟶ A'₁₄} {f'₁₄ : A'₁₄ ⟶ A'₁₅}
+-- variables {g'₁₁ : A'₁₁ ⟶ A'₂₁} {g'₁₂ : A'₁₂ ⟶ A'₂₂} {g'₁₃ : A'₁₃ ⟶ A'₂₃} {g'₁₄ : A'₁₄ ⟶ A'₂₄} {g'₁₅ : A'₁₅ ⟶ A'₂₅}
+-- variables {f'₂₁ : A'₂₁ ⟶ A'₂₂} {f'₂₂ : A'₂₂ ⟶ A'₂₃} {f'₂₃ : A'₂₃ ⟶ A'₂₄} {f'₂₄ : A'₂₄ ⟶ A'₂₅}
+-- variables {g'₂₁ : A'₂₁ ⟶ A'₃₁} {g'₂₂ : A'₂₂ ⟶ A'₃₂} {g'₂₃ : A'₂₃ ⟶ A'₃₃} {g'₂₄ : A'₂₄ ⟶ A'₃₄} {g'₂₅ : A'₂₅ ⟶ A'₃₅}
+-- variables {f'₃₁ : A'₃₁ ⟶ A'₃₂} {f'₃₂ : A'₃₂ ⟶ A'₃₃} {f'₃₃ : A'₃₃ ⟶ A'₃₄} {f'₃₄ : A'₃₄ ⟶ A'₃₅}
+-- variables {g'₃₁ : A'₃₁ ⟶ A'₄₁} {g'₃₂ : A'₃₂ ⟶ A'₄₂} {g'₃₃ : A'₃₃ ⟶ A'₄₃} {g'₃₄ : A'₃₄ ⟶ A'₄₄} {g'₃₅ : A'₃₅ ⟶ A'₄₅}
+-- variables {f'₄₁ : A'₄₁ ⟶ A'₄₂} {f'₄₂ : A'₄₂ ⟶ A'₄₃} {f'₄₃ : A'₄₃ ⟶ A'₄₄} {f'₄₄ : A'₄₄ ⟶ A'₄₅}
+-- variables {g'₄₁ : A'₄₁ ⟶ A'₅₁} {g'₄₂ : A'₄₂ ⟶ A'₅₂} {g'₄₃ : A'₄₃ ⟶ A'₅₃} {g'₄₄ : A'₄₄ ⟶ A'₅₄} {g'₄₅ : A'₄₅ ⟶ A'₅₅}
+-- variables {f'₅₁ : A'₅₁ ⟶ A'₅₂} {f'₅₂ : A'₅₂ ⟶ A'₅₃} {f'₅₃ : A'₅₃ ⟶ A'₅₄} {f'₅₄ : A'₅₄ ⟶ A'₅₅}
 
 
-lemma iso_V_to_donₛ
-  (lbc : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
-  (H₃₁ : is_zero A₃₁) (H₃₂ : is_zero A₃₂) (h : exact g₁₁ g₂₁) :
-  is_iso lbc.V_to_don :=
-lbc.symm.iso_H_to_donᵣ H₃₂ H₃₁ h
+-- open opposite
 
-end intramural_isos
+-- lemma op_H_to_don (lbc : LBC f'₁₁ g'₁₁ g'₁₂ f'₂₁ f'₂₂ g'₂₂ g'₂₃ f'₃₂) :
+--   lbc.H_to_don = (homology_unop_iso _ _ _).hom ≫ lbc.unop.rcp_to_H.op ≫
+--     (homology_unop_iso _ _ lbc.π_diag_out).inv :=
+-- begin
+--   ext,
+--   simp only [category.assoc, H_to_don, rcp_to_H,
+--     homology_unop_iso_hom, homology_unop_iso_inv,
+--     unop_sum₂, symm_sum₁, sum_str.unop_fst, sum_str.symm_inl, homology.map_ι,
+--     homology.π'_ι_assoc, cokernel.π_desc,
+--     homology_iso_cokernel_lift, homology_iso_kernel_desc,
+--     homology_iso_cokernel_image_to_kernel',
+--     cokernel_epi_comp_hom, cokernel_epi_comp_inv,
+--     category_theory.limits.cokernel.map_desc_assoc,
+--     cokernel_iso_of_eq_hom_comp_desc_assoc,
+--     iso.trans_hom, iso.trans_inv, iso.symm_hom],
+--   admit
+-- end
 
-section three_x_three
+-- lemma op_rcp_to_H (lbc : LBC f'₁₁ g'₁₁ g'₁₂ f'₂₁ f'₂₂ g'₂₂ g'₂₃ f'₃₂) :
+--   lbc.rcp_to_H = (homology_unop_iso _ _ lbc.diag_in_ι).hom ≫
+--     lbc.unop.H_to_don.op ≫ (homology_unop_iso _ _ _).inv :=
+-- begin
+--   admit
+-- end
 
-/-!
-## The 3×3 lemma
--/
+-- lemma op_V_to_don (lbc : LBC f'₁₁ g'₁₁ g'₁₂ f'₂₁ f'₂₂ g'₂₂ g'₂₃ f'₃₂) :
+--   lbc.V_to_don = (homology_unop_iso _ _ _).hom ≫ lbc.unop.rcp_to_V.op ≫
+--     (homology_unop_iso _ _ lbc.π_diag_out).inv :=
+-- lbc.symm.op_H_to_don
 
--- move me
-theorem _root_.list.tfae.mp {l} (h : tfae l) (n₁ n₂) {a b}
-  (h₁ : list.nth l n₁ = some a . tactic.interactive.refl)
-  (h₂ : list.nth l n₂ = some b . tactic.interactive.refl) :
-  a → b :=
-(h.out n₁ n₂ h₁ h₂).mp
+-- lemma op_rcp_to_V (lbc : LBC f'₁₁ g'₁₁ g'₁₂ f'₂₁ f'₂₂ g'₂₂ g'₂₃ f'₃₂) :
+--   lbc.rcp_to_V = (homology_unop_iso _ _ lbc.diag_in_ι).hom ≫
+--     lbc.unop.V_to_don.op ≫ (homology_unop_iso _ _ _).inv :=
+-- lbc.symm.op_rcp_to_H
 
-lemma three_x_three_top_row
-  (Hr2 : exact f₂₁ f₂₂) (Hr3 : exact f₃₁ f₃₂)
-  (Hc1 : exact g₁₁ g₂₁) (Hc2 : exact g₁₂ g₂₂) (Hc3 : exact g₁₃ g₂₃)
-  (sq₁₁ : f₁₁ ≫ g₁₂ = g₁₁ ≫ f₂₁) (sq₁₂ : f₁₂ ≫ g₁₃ = g₁₂ ≫ f₂₂)
-  (sq₂₁ : f₂₁ ≫ g₂₂ = g₂₁ ≫ f₃₁) (sq₂₂ : f₂₂ ≫ g₂₃ = g₂₂ ≫ f₃₂)
-  [mono f₂₁] [mono f₃₁] [mono g₁₁] [mono g₁₂] [mono g₁₃] :
-  exact f₁₁ f₁₂ ∧ mono f₁₁ :=
-begin
-  have w : f₁₁ ≫ f₁₂ = 0,
-  { rw [← cancel_mono g₁₃, zero_comp, category.assoc, sq₁₂, reassoc_of sq₁₁, Hr2.w, comp_zero], },
-  let lbc₁₁ : LBC (0 : 0 ⟶ 0) (0 : 0 ⟶ 0) 0 0 f₁₁ g₁₁ g₁₂ f₂₁ :=
-    LBC.of_core ⟨zero_comp, zero_comp, (is_zero_zero _).eq_of_src _ _, sq₁₁⟩,
-  let lbc₁₂ : LBC (0 : 0 ⟶ 0) 0 0 f₁₁ f₁₂ g₁₂ g₁₃ f₂₂ :=
-    LBC.of_core ⟨w, zero_comp, (is_zero_zero _).eq_of_src _ _, sq₁₂⟩,
-  let lbc₂₁ : LBC 0 (0 : 0 ⟶ 0) g₁₁ 0 f₂₁ g₂₁ g₂₂ f₃₁ :=
-    LBC.of_core ⟨zero_comp, Hc1.w, (is_zero_zero _).eq_of_src _ _, sq₂₁⟩,
-  let lbc₂₂ : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂ :=
-    LBC.of_core ⟨Hr2.w, Hc2.w, sq₁₁, sq₂₂⟩,
-  suffices : is_zero lbc₁₁.H ∧ is_zero lbc₁₂.H,
-  { refine ⟨exact_of_homology_is_zero this.2, _⟩,
-    apply (tfae_mono (0:𝓐) f₁₁).mp 2 0,
-    exact exact_of_homology_is_zero this.1, },
-  split,
-  { haveI e1 := lbc₁₁.iso_rcp_to_Hₗ (is_zero_zero _) (is_zero_zero _)
-      ((tfae_mono (0:𝓐) f₂₁).mp 0 2 rfl rfl infer_instance),
-    haveI e2 := lbc₁₁.iso_rcp_to_Vᵤ (is_zero_zero _) (is_zero_zero _)
-      ((tfae_mono (0:𝓐) g₁₂).mp 0 2 rfl rfl infer_instance),
-    refine is_zero_of_iso_of_zero _
-      (as_iso $ inv lbc₁₁.rcp_to_V ≫ lbc₁₁.rcp_to_H),
-    refine exact.homology_is_zero _ _ _,
-    apply exact_zero_left_of_mono },
-  { haveI e1 := lbc₁₂.iso_H_to_donᵤ (is_zero_zero _) (is_zero_zero _)
-      ((tfae_mono (0:𝓐) g₁₃).mp 0 2 rfl rfl infer_instance),
-    haveI e2 := lbc₁₂.iso_ex_v lbc₂₂ zero_comp Hc3.w
-      (exact.homology_is_zero _ _ _) (Hc2.homology_is_zero _ _),
-    swap, { apply exact_zero_left_of_mono },
-    haveI e3 := lbc₂₁.iso_ex_h lbc₂₂ zero_comp Hr3.w
-      (exact.homology_is_zero _ _ _) (Hr2.homology_is_zero _ _),
-    swap, { apply exact_zero_left_of_mono },
-    haveI e4 := lbc₂₁.iso_V_to_donₗ (is_zero_zero _) (is_zero_zero _)
-      ((tfae_mono (0:𝓐) f₃₁).mp 0 2 rfl rfl infer_instance),
-    have aux : is_zero lbc₂₁.V := Hc1.homology_is_zero _ _,
-    apply is_zero_of_iso_of_zero aux,
-    exact as_iso
-      (lbc₂₁.V_to_don ≫ lbc₂₁.ex_h lbc₂₂ ≫ inv (lbc₁₂.ex_v lbc₂₂) ≫ inv lbc₁₂.H_to_don) }
-end
+-- lemma op_ex_h
+--   (lbc₁ : LBC f'₁₁ g'₁₁ g'₁₂ f'₂₁ f'₂₂ g'₂₂ g'₂₃ f'₃₂)
+--   (lbc₂ : LBC f'₁₂ g'₁₂ g'₁₃ f'₂₂ f'₂₃ g'₂₃ g'₂₄ f'₃₃) :
+--   lbc₁.ex_h lbc₂ = (homology_unop_iso _ _ lbc₁.π_diag_out).hom ≫
+--     (lbc₂.unop.ex_h lbc₁.unop).op ≫ (homology_unop_iso _ _ lbc₂.diag_in_ι).inv :=
+-- admit
 
-lemma three_x_three_left_col
-  (Hr1 : exact f₁₁ f₁₂) (Hr2 : exact f₂₁ f₂₂) (Hr3 : exact f₃₁ f₃₂)
-  (Hc2 : exact g₁₂ g₂₂) (Hc3 : exact g₁₃ g₂₃)
-  (sq₁₁ : f₁₁ ≫ g₁₂ = g₁₁ ≫ f₂₁) (sq₁₂ : f₁₂ ≫ g₁₃ = g₁₂ ≫ f₂₂)
-  (sq₂₁ : f₂₁ ≫ g₂₂ = g₂₁ ≫ f₃₁) (sq₂₂ : f₂₂ ≫ g₂₃ = g₂₂ ≫ f₃₂)
-  [mono f₁₁] [mono f₂₁] [mono f₃₁] [mono g₁₂] [mono g₁₃] :
-  exact g₁₁ g₂₁ ∧ mono g₁₁ :=
-three_x_three_top_row Hc2 Hc3 Hr1 Hr2 Hr3 sq₁₁.symm sq₂₁.symm sq₁₂.symm sq₂₂.symm
+-- lemma op_ex_v
+--   (lbc₁ : LBC f'₁₁ g'₁₁ g'₁₂ f'₂₁ f'₂₂ g'₂₂ g'₂₃ f'₃₂)
+--   (lbc₂ : LBC f'₂₁ g'₂₁ g'₂₂ f'₃₁ f'₃₂ g'₃₂ g'₃₃ f'₄₂) :
+--   lbc₁.ex_v lbc₂ = (homology_unop_iso _ _ lbc₁.π_diag_out).hom ≫
+--     (lbc₂.unop.ex_v lbc₁.unop).op ≫ (homology_unop_iso _ _ lbc₂.diag_in_ι).inv  :=
+-- by convert lbc₁.symm.op_ex_h lbc₂.symm using 1
 
-lemma three_x_three_bot_row
-  (Hr1 : exact f₁₁ f₁₂) (Hr2 : exact f₂₁ f₂₂)
-  (Hc1 : exact g₁₁ g₂₁) (Hc2 : exact g₁₂ g₂₂) (Hc3 : exact g₁₃ g₂₃)
-  (sq₁₁ : f₁₁ ≫ g₁₂ = g₁₁ ≫ f₂₁) (sq₁₂ : f₁₂ ≫ g₁₃ = g₁₂ ≫ f₂₂)
-  (sq₂₁ : f₂₁ ≫ g₂₂ = g₂₁ ≫ f₃₁) (sq₂₂ : f₂₂ ≫ g₂₃ = g₂₂ ≫ f₃₂)
-  [epi f₁₂] [epi f₂₂] [epi g₂₁] [epi g₂₂] [epi g₂₃] :
-  exact f₃₁ f₃₂ ∧ epi f₃₂ :=
-begin
-  have : exact f₃₂.op f₃₁.op ∧ mono f₃₂.op :=
-    three_x_three_top_row Hr2.op Hr1.op Hc3.op Hc2.op Hc1.op _ _ _ _,
-  { refine ⟨this.1.unop, _⟩, haveI := this.2, exact category_theory.unop_epi_of_mono f₃₂.op },
-  all_goals { simp only [← op_comp, sq₁₁, sq₁₂, sq₂₁, sq₂₂] },
-end
+-- end
 
-lemma three_x_three_right_col
-  (Hr1 : exact f₁₁ f₁₂) (Hr2 : exact f₂₁ f₂₂) (Hr3 : exact f₃₁ f₃₂)
-  (Hc1 : exact g₁₁ g₂₁) (Hc2 : exact g₁₂ g₂₂)
-  (sq₁₁ : f₁₁ ≫ g₁₂ = g₁₁ ≫ f₂₁) (sq₁₂ : f₁₂ ≫ g₁₃ = g₁₂ ≫ f₂₂)
-  (sq₂₁ : f₂₁ ≫ g₂₂ = g₂₁ ≫ f₃₁) (sq₂₂ : f₂₂ ≫ g₂₃ = g₂₂ ≫ f₃₂)
-  [epi f₁₂] [epi f₂₂] [epi f₃₂] [epi g₂₁] [epi g₂₂] :
-  exact g₁₃ g₂₃ ∧ epi g₂₃ :=
-three_x_three_bot_row Hc1 Hc2 Hr1 Hr2 Hr3 sq₁₁.symm sq₂₁.symm sq₁₂.symm sq₂₂.symm
+-- lemma exact_aux_1
+--   (lbc₁ : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
+--   (lbc₂ : LBC f₂₁ g₂₁ g₂₂ f₃₁ f₃₂ g₃₂ g₃₃ f₄₂) :
+--   exact (lbc₁.ex_v lbc₂ ≫ lbc₂.rcp_to_H) lbc₂.H_to_don :=
+-- begin
+--   -- apply pseudoelement.exact_of_pseudo_exact,
+--   -- split,
+--   -- { suffices : lbc₁.ex_v lbc₂ ≫ lbc₂.rcp_to_V = 0,
+--   --   { intro x,
+--   --     rw [← pseudoelement.comp_apply, category.assoc, rcp_to_H_comp_H_to_don,
+--   --       ← category.assoc, this, zero_comp, pseudoelement.zero_apply] },
+--   --   rw pseudoelement.eq_zero_iff,
+--   --   intro x,
+--   --   delta ex_v rcp_to_V,
+--   --  },
 
-end three_x_three
+--   -- refine preadditive.exact_of_iso_of_exact'
+--   --   (cokernel.desc _ _ _) _ _ _
+--   --   (homology_iso_cokernel_lift _ _ _).symm
+--   --   (homology_iso_cokernel_lift _ _ _).symm
+--   --   (homology_iso_cokernel_lift _ _ _).symm _ _ _,
 
-section four
+--   -- rw abelian.exact_iff, split,
+--   -- { suffices : lbc₁.ex_v lbc₂ ≫ lbc₂.rcp_to_V = 0,
+--   --   rw [category.assoc, rcp_to_H_comp_H_to_don, ← category.assoc, this, zero_comp],
+--   --   delta ex_v rcp_to_V,
+--   --   rw [homology.map_comp],
+--   --   apply homology.ext,
+--   --   rw [homology.π_map, comp_zero],
+--   --   dsimp [kernel_subobject_map, homology.π],
+--   --   simp only [category.comp_id],
+--   --   admit },
+--   admit
+-- end
 
-/-!
-## The four lemma
+-- lemma exact_aux_2
+--   (lbc₁ : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
+--   (lbc₂ : LBC f₁₂ g₁₂ g₁₃ f₂₂ f₂₃ g₂₃ g₂₄ f₃₃) :
+--   exact lbc₁.H_to_don (lbc₁.ex_h lbc₂) :=
+-- begin
+--   admit
+-- end
 
-We prove a version of the four lemma that is slightly more general than the usual version.
--/
+-- lemma salamander_v
+--   (lbc₁ : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
+--   (lbc₂ : LBC f₂₁ g₂₁ g₂₂ f₃₁ f₃₂ g₃₂ g₃₃ f₄₂)
+--   (lbc₃ : LBC f₂₂ g₂₂ g₂₃ f₃₂ f₃₃ g₃₃ g₃₄ f₄₃)
+--   (lbc₄ : LBC f₃₂ g₃₂ g₃₃ f₄₂ f₄₃ g₄₃ g₄₄ f₅₃) :
+--   exact_seq 𝓐 [
+--     lbc₁.ex_v lbc₂ ≫ lbc₂.rcp_to_H,
+--     lbc₂.H_to_don,
+--     lbc₂.ex_h lbc₃,
+--     lbc₃.rcp_to_H,
+--     lbc₃.H_to_don ≫ lbc₃.ex_v lbc₄] :=
+-- begin
+--   refine (exact_aux_1 lbc₁ lbc₂).cons _,
+--   refine (exact_aux_2 lbc₂ lbc₃).cons _,
+--   have aux1 := (exact_aux_2 lbc₃.op lbc₂.op).unop,
+--   simp only [op_H_to_don, op_ex_h, unop_comp, ← iso.unop_hom, ← iso.unop_inv,
+--     exact_comp_iso, exact_iso_comp, exact_comp_hom_inv_comp_iff, quiver.hom.unop_op] at aux1,
+--   refine aux1.cons _,
+--   have aux2 := (exact_aux_1 lbc₄.op lbc₃.op).unop,
+--   simp only [op_H_to_don, op_ex_v, op_rcp_to_H, category.assoc, iso.inv_hom_id_assoc,
+--     unop_comp, ← iso.unop_hom, ← iso.unop_inv, quiver.hom.unop_op,
+--     exact_iso_comp, exact_comp_hom_inv_comp_iff] at aux2,
+--   simp only [← category.assoc, exact_comp_iso] at aux2,
+--   exact aux2.exact_seq,
+-- end
 
-lemma four_lemma_top_epi
-  (Hr1 : exact_seq 𝓐 [f₂₁, f₂₂, f₂₃]) (Hr2 : exact_seq 𝓐 [f₃₁, f₃₂, f₃₃])
-  (Hc1 : exact g₁₂ g₂₂) (Hc2 : exact g₁₃ g₂₃)
-  (sq₁₂ : f₁₂ ≫ g₁₃ = g₁₂ ≫ f₂₂)
-  (sq₂₁ : f₂₁ ≫ g₂₂ = g₂₁ ≫ f₃₁) (sq₂₂ : f₂₂ ≫ g₂₃ = g₂₂ ≫ f₃₂)
-  (sq₂₃ : f₂₃ ≫ g₂₄ = g₂₃ ≫ f₃₃)
-  [mono g₁₃] [epi g₂₁] [mono g₂₄] :
-  epi f₁₂ :=
-begin
-  rw epi_iff_exact_zero_right,
-  let lbc₁₃ : LBC (0 : 0 ⟶ 0) 0 0 f₁₂ (0 : _ ⟶ 0) g₁₃ 0 f₂₃ :=
-    LBC.of_core ⟨comp_zero, zero_comp, (is_zero_zero _).eq_of_src _ _, _⟩,
-  swap, { simp only [← cancel_mono g₂₄, zero_comp, category.assoc, sq₂₃, reassoc_of Hc2.w], },
-  let lbc₂₂ : LBC (0 : 0 ⟶ _) 0 g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂ :=
-    LBC.of_core ⟨Hr1.pair.w, Hc1.w, (is_zero_zero _).eq_of_src _ _, sq₂₂⟩,
-  let lbc₂₃ : LBC f₁₂ g₁₂ g₁₃ f₂₂ f₂₃ g₂₃ g₂₄ f₃₃ :=
-    LBC.of_core ⟨(Hr1.drop 1).pair.w, Hc2.w, sq₁₂, sq₂₃⟩,
-  let lbc₃₁ : LBC 0 (0 : 0 ⟶ _) g₂₁ (kernel.ι f₃₁) f₃₁ 0 (cokernel.π g₂₂) (0 : 0 ⟶ _) :=
-    LBC.of_core ⟨kernel.condition _, comp_zero, (is_zero_zero _).eq_of_src _ _, _⟩,
-  swap, { simp only [← cancel_epi g₂₁, comp_zero, ← reassoc_of sq₂₁, cokernel.condition] },
-  let lbc₃₂ : LBC f₂₁ g₂₁ g₂₂ f₃₁ f₃₂ (cokernel.π g₂₂) 0 (0 : _ ⟶ 0) :=
-    LBC.of_core ⟨Hr2.pair.w, cokernel.condition _, sq₂₁, (is_zero_zero _).eq_of_tgt _ _⟩,
-  let lbc₄₁ : LBC (kernel.ι f₃₁) 0 0 (0 : 0 ⟶ 0) (0 : 0 ⟶ cokernel g₂₂) 0 0 (0 : 0 ⟶ 0) :=
-    LBC.of_core ⟨comp_zero, comp_zero,
-      (is_zero_zero _).eq_of_tgt _ _, (is_zero_zero _).eq_of_src _ _⟩,
-  have e1 := lbc₁₃.iso_H_to_donᵤ (is_zero_zero _) (is_zero_zero _) (exact_of_zero 0 0),
-  have e2 := lbc₁₃.iso_ex_v lbc₂₃ zero_comp zero_comp
-    (exact.homology_is_zero _ _ $ exact_zero_left_of_mono _) (Hc2.homology_is_zero _ _),
-  have e3 := lbc₂₂.iso_ex_h lbc₂₃ zero_comp (Hr2.drop 1).pair.w
-    (Hr1.pair.homology_is_zero _ _) ((Hr1.drop 1).pair.homology_is_zero _ _),
-  have e3 := lbc₂₂.iso_ex_v lbc₃₂ zero_comp comp_zero
-    (Hc1.homology_is_zero _ _) ((abelian.exact_cokernel _).homology_is_zero _ _),
-  have e4 := lbc₃₁.iso_ex_h lbc₃₂ zero_comp zero_comp
-    (exact_kernel_ι.homology_is_zero _ _) (Hr2.pair.homology_is_zero _ _),
-  have e5 := lbc₃₁.iso_ex_v lbc₄₁ comp_zero comp_zero
-    (exact.homology_is_zero _ _ _) ((is_zero_zero _).homology_is_zero _ _ _),
-  swap, { rwa ← epi_iff_exact_zero_right, },
-  have aux : is_zero lbc₄₁.rcp := (is_zero_zero _).homology_is_zero _ _ _,
-  suffices : is_zero lbc₁₃.H, { exact exact_of_homology_is_zero this },
-  refine is_zero_of_iso_of_zero aux _,
-  resetI,
-  exact as_iso (inv (lbc₃₁.ex_v lbc₄₁) ≫ lbc₃₁.ex_h lbc₃₂ ≫ inv (lbc₂₂.ex_v lbc₃₂) ≫
-    lbc₂₂.ex_h lbc₂₃ ≫ inv (lbc₁₃.ex_v lbc₂₃) ≫ inv lbc₁₃.H_to_don),
-end
+-- lemma salamander_h
+--   (lbc₁ : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
+--   (lbc₂ : LBC f₁₂ g₁₂ g₁₃ f₂₂ f₂₃ g₂₃ g₂₄ f₃₃)
+--   (lbc₃ : LBC f₂₂ g₂₂ g₂₃ f₃₂ f₃₃ g₃₃ g₃₄ f₄₃)
+--   (lbc₄ : LBC f₂₃ g₂₃ g₂₄ f₃₃ f₃₄ g₃₄ g₃₅ f₄₄) :
+--   exact_seq 𝓐 [
+--     lbc₁.ex_h lbc₂ ≫ lbc₂.rcp_to_V,
+--     lbc₂.V_to_don,
+--     lbc₂.ex_v lbc₃,
+--     lbc₃.rcp_to_V,
+--     lbc₃.V_to_don ≫ lbc₃.ex_h lbc₄] :=
+-- by convert salamander_v lbc₁.symm lbc₂.symm lbc₃.symm lbc₄.symm using 1
 
--- move me
-lemma sq_op (sq : f₁₁ ≫ g₁₂ = g₁₁ ≫ f₂₁) :
-  f₂₁.op ≫ g₁₁.op = g₁₂.op ≫ f₁₁.op :=
-by simp only [← op_comp, sq]
+-- open_locale zero_object
 
-lemma four_lemma_bot_mono
-  (Hr1 : exact_seq 𝓐 [f₂₁, f₂₂, f₂₃]) (Hr2 : exact_seq 𝓐 [f₃₁, f₃₂, f₃₃])
-  (Hc1 : exact g₂₂ g₃₂) (Hc2 : exact g₂₃ g₃₃)
-  (sq₂₁ : f₂₁ ≫ g₂₂ = g₂₁ ≫ f₃₁) (sq₂₂ : f₂₂ ≫ g₂₃ = g₂₂ ≫ f₃₂)
-  (sq₂₃ : f₂₃ ≫ g₂₄ = g₂₃ ≫ f₃₃) (sq₃₂ : f₃₂ ≫ g₃₃ = g₃₂ ≫ f₄₂)
-  [epi g₂₁] [mono g₂₄] [epi g₃₂] :
-  mono f₄₂ :=
-begin
-  haveI : epi f₄₂.op := four_lemma_top_epi Hr2.op Hr1.op Hc2.op Hc1.op
-    (sq_op sq₃₂) (sq_op sq₂₃) (sq_op sq₂₂) (sq_op sq₂₁),
-  exact category_theory.unop_mono_of_epi f₄₂.op
-end
+-- section
+-- /-!
+-- ## Extramural isomorphisms
+-- -/
 
-lemma four_lemma_left_epi
-  (Hc1 : exact_seq 𝓐 [g₁₂, g₂₂, g₃₂]) (Hc2 : exact_seq 𝓐 [g₁₃, g₂₃, g₃₃])
-  (Hr1 : exact f₂₁ f₂₂) (Hr2 : exact f₃₁ f₃₂)
-  (sq₁₂ : f₁₂ ≫ g₁₃ = g₁₂ ≫ f₂₂)
-  (sq₂₁ : f₂₁ ≫ g₂₂ = g₂₁ ≫ f₃₁) (sq₂₂ : f₂₂ ≫ g₂₃ = g₂₂ ≫ f₃₂)
-  (sq₃₂ : f₃₂ ≫ g₃₃ = g₃₂ ≫ f₄₂)
-  [epi f₁₂] [mono f₄₂] [mono f₃₁] :
-  epi g₂₁ :=
-four_lemma_top_epi Hc1 Hc2 Hr1 Hr2 sq₂₁.symm sq₁₂.symm sq₂₂.symm sq₃₂.symm
+-- lemma iso_ex_h
+--   (lbc₁ : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
+--   (lbc₂ : LBC f₁₂ g₁₂ g₁₃ f₂₂ f₂₃ g₂₃ g₂₄ f₃₃)
+--   (h₁ : f₁₁ ≫ f₁₂ = 0) (h₂ : f₃₂ ≫ f₃₃ = 0)
+--   (H₁ : is_zero lbc₁.H) (H₂ : is_zero lbc₂.H) :
+--   is_iso (lbc₁.ex_h lbc₂) :=
+-- begin
+--   have := (salamander_v _ lbc₁ lbc₂ _).drop 1, any_goals { exact 0 },
+--   rotate,
+--   { exact LBC.of_core ⟨h₁, zero_comp, zero_comp.trans zero_comp.symm, lbc₂.sq₁⟩, },
+--   { exact LBC.of_core ⟨h₂, comp_zero, lbc₁.sq₂, comp_zero.trans comp_zero.symm⟩, },
+--   exact this.is_iso_of_zero_of_zero (H₁.eq_of_src _ _) (H₂.eq_of_tgt _ _),
+-- end
 
-lemma four_lemma_right_mono
-  (Hc1 : exact_seq 𝓐 [g₁₂, g₂₂, g₃₂]) (Hc2 : exact_seq 𝓐 [g₁₃, g₂₃, g₃₃])
-  (Hr1 : exact f₂₂ f₂₃) (Hr2 : exact f₃₂ f₃₃)
-  (sq₁₂ : f₁₂ ≫ g₁₃ = g₁₂ ≫ f₂₂)
-  (sq₂₂ : f₂₂ ≫ g₂₃ = g₂₂ ≫ f₃₂) (sq₂₃ : f₂₃ ≫ g₂₄ = g₂₃ ≫ f₃₃)
-  (sq₃₂ : f₃₂ ≫ g₃₃ = g₃₂ ≫ f₄₂)
-  [epi f₁₂] [mono f₄₂] [epi f₂₃] :
-  mono g₂₄ :=
-four_lemma_bot_mono Hc1 Hc2 Hr1 Hr2 sq₁₂.symm sq₂₂.symm sq₃₂.symm sq₂₃.symm
+-- lemma iso_ex_v
+--   (lbc₁ : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
+--   (lbc₂ : LBC f₂₁ g₂₁ g₂₂ f₃₁ f₃₂ g₃₂ g₃₃ f₄₂)
+--   (h₁ : g₁₁ ≫ g₂₁ = 0) (h₂ : g₂₃ ≫ g₃₃ = 0)
+--   (H₁ : is_zero lbc₁.V) (H₂ : is_zero lbc₂.V) :
+--   is_iso (lbc₁.ex_v lbc₂) :=
+-- by convert lbc₁.symm.iso_ex_h lbc₂.symm h₁ h₂ H₁ H₂ using 1
 
-end four
+-- end
+
+-- section intramural_isos
+
+-- /-!
+-- ## Intramural isomorphisms
+
+-- The subscripts at the end of the names indicate where the `0`s in the diagram are located:
+-- `ₗ` = left, `ᵤ` = up, `ᵣ` = right, and `ₛ` down (south, thanks unicode).
+
+-- -/
+
+-- lemma iso_rcp_to_Hₗ
+--   (lbc : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
+--   (H₂₁ : is_zero A₂₁) (H₃₁ : is_zero A₃₁) (h : exact f₃₁ f₃₂) :
+--   is_iso lbc.rcp_to_H :=
+-- begin
+--   have lbc₄ : LBC f₂₁ 0 g₂₂ f₃₁ f₃₂ 0 (0 : _ ⟶ 0) (0 : 0 ⟶ 0) :=
+--   LBC.of_core ⟨H₃₁.eq_of_src _ _, comp_zero, H₂₁.eq_of_src _ _, comp_zero.trans comp_zero.symm⟩,
+--   have lbc₃ : LBC 0 0 0 0 f₃₁ 0 0 0 :=
+--   LBC.of_core ⟨zero_comp, comp_zero, zero_comp.trans zero_comp.symm, comp_zero.trans comp_zero.symm⟩,
+--   haveI aux := iso_ex_h lbc₃ lbc₄ zero_comp zero_comp _ _, any_goals { exact 0 },
+--   rotate,
+--   { apply H₃₁.homology_is_zero, },
+--   { exact exact.homology_is_zero _ _ h, },
+--   have := (salamander_v _ _ lbc lbc₄).drop 2, any_goals { exact 0 },
+--   rotate,
+--   { exact LBC.of_core ⟨zero_comp, zero_comp, zero_comp.trans zero_comp.symm, lbc.sq₁⟩, },
+--   { exact LBC.of_core ⟨zero_comp, comp_zero, zero_comp.trans zero_comp.symm, H₂₁.eq_of_src _ _⟩, },
+--   refine this.is_iso_of_zero_of_zero _ _,
+--   { refine is_zero.eq_of_src _ _ _, apply H₂₁.homology_is_zero },
+--   { refine is_zero.eq_of_tgt _ _ _,
+--     apply is_zero_of_iso_of_zero _ (as_iso (lbc₃.ex_h lbc₄)),
+--     apply H₃₁.homology_is_zero, },
+-- end
+
+-- lemma iso_V_to_donₗ
+--   (lbc : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
+--   (H₂₁ : is_zero A₂₁) (H₃₁ : is_zero A₃₁) (h : exact f₃₁ f₃₂) :
+--   is_iso lbc.V_to_don :=
+-- begin
+--   have lbc₄ : LBC f₂₁ 0 g₂₂ f₃₁ f₃₂ 0 (0 : _ ⟶ 0) (0 : 0 ⟶ 0) :=
+--   LBC.of_core ⟨H₃₁.eq_of_src _ _, comp_zero, H₂₁.eq_of_src _ _, comp_zero.trans comp_zero.symm⟩,
+--   have lbc₃ : LBC 0 0 0 0 f₃₁ 0 0 0 :=
+--   LBC.of_core ⟨zero_comp, comp_zero, zero_comp.trans zero_comp.symm, comp_zero.trans comp_zero.symm⟩,
+--   haveI aux := iso_ex_h lbc₃ lbc₄ zero_comp zero_comp _ _, any_goals { exact 0 },
+--   rotate,
+--   { apply H₃₁.homology_is_zero, },
+--   { exact exact.homology_is_zero _ _ h, },
+--   have := salamander_h _ lbc lbc₄ _, any_goals { exact 0 },
+--   rotate,
+--   { exact LBC.of_core ⟨zero_comp, comp_zero, zero_comp.trans zero_comp.symm, H₂₁.eq_of_src _ _⟩, },
+--   { exact LBC.of_core ⟨comp_zero, comp_zero, lbc.sq₂, comp_zero.trans comp_zero.symm⟩, },
+--   refine this.is_iso_of_zero_of_zero _ _,
+--   { refine is_zero.eq_of_src _ _ _, apply H₂₁.homology_is_zero },
+--   { refine is_zero.eq_of_tgt _ _ _,
+--     apply is_zero_of_iso_of_zero _ (as_iso (lbc₃.ex_h lbc₄)),
+--     apply H₃₁.homology_is_zero, },
+-- end
+
+-- lemma iso_rcp_to_Vᵤ
+--   (lbc : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
+--   (H₁₂ : is_zero A₁₂) (H₁₃ : is_zero A₁₃) (h : exact g₁₃ g₂₃) :
+--   is_iso lbc.rcp_to_V :=
+-- lbc.symm.iso_rcp_to_Hₗ H₁₂ H₁₃ h
+
+-- lemma iso_H_to_donᵤ
+--   (lbc : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
+--   (H₁₂ : is_zero A₁₂) (H₁₃ : is_zero A₁₃) (h : exact g₁₃ g₂₃) :
+--   is_iso lbc.H_to_don :=
+-- lbc.symm.iso_V_to_donₗ H₁₂ H₁₃ h
+
+-- lemma iso_H_to_donᵣ
+--   (lbc : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
+--   (H₁₂ : is_zero A₂₃) (H₁₃ : is_zero A₁₃) (h : exact f₁₁ f₁₂) :
+--   is_iso lbc.H_to_don :=
+-- begin
+--   have aux := iso_rcp_to_Hₗ lbc.op H₁₂.op H₁₃.op h.op,
+--   simp only [op_rcp_to_H] at aux,
+--   replace aux := @is_iso.of_is_iso_comp_left _ _ _ _ _ _ _ _ aux,
+--   replace aux := @is_iso.of_is_iso_comp_right _ _ _ _ _ _ _ _ aux,
+--   rwa is_iso_op_iff at aux,
+-- end
+
+-- lemma iso_rcp_to_Vᵣ
+--   (lbc : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
+--   (H₁₂ : is_zero A₂₃) (H₁₃ : is_zero A₁₃) (h : exact f₁₁ f₁₂) :
+--   is_iso lbc.rcp_to_V :=
+-- begin
+--   have aux := iso_V_to_donₗ lbc.op H₁₂.op H₁₃.op h.op,
+--   simp only [op_V_to_don] at aux,
+--   replace aux := @is_iso.of_is_iso_comp_left _ _ _ _ _ _ _ _ aux,
+--   replace aux := @is_iso.of_is_iso_comp_right _ _ _ _ _ _ _ _ aux,
+--   rwa is_iso_op_iff at aux,
+-- end
+
+-- lemma iso_rcp_to_Hₛ
+--   (lbc : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
+--   (H₃₁ : is_zero A₃₁) (H₃₂ : is_zero A₃₂) (h : exact g₁₁ g₂₁) :
+--   is_iso lbc.rcp_to_H :=
+-- lbc.symm.iso_rcp_to_Vᵣ H₃₂ H₃₁ h
+
+
+-- lemma iso_V_to_donₛ
+--   (lbc : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂)
+--   (H₃₁ : is_zero A₃₁) (H₃₂ : is_zero A₃₂) (h : exact g₁₁ g₂₁) :
+--   is_iso lbc.V_to_don :=
+-- lbc.symm.iso_H_to_donᵣ H₃₂ H₃₁ h
+
+-- end intramural_isos
+
+-- section three_x_three
+
+-- /-!
+-- ## The 3×3 lemma
+-- -/
+
+-- -- move me
+-- theorem _root_.list.tfae.mp {l} (h : tfae l) (n₁ n₂) {a b}
+--   (h₁ : list.nth l n₁ = some a . tactic.interactive.refl)
+--   (h₂ : list.nth l n₂ = some b . tactic.interactive.refl) :
+--   a → b :=
+-- (h.out n₁ n₂ h₁ h₂).mp
+
+-- lemma three_x_three_top_row
+--   (Hr2 : exact f₂₁ f₂₂) (Hr3 : exact f₃₁ f₃₂)
+--   (Hc1 : exact g₁₁ g₂₁) (Hc2 : exact g₁₂ g₂₂) (Hc3 : exact g₁₃ g₂₃)
+--   (sq₁₁ : f₁₁ ≫ g₁₂ = g₁₁ ≫ f₂₁) (sq₁₂ : f₁₂ ≫ g₁₃ = g₁₂ ≫ f₂₂)
+--   (sq₂₁ : f₂₁ ≫ g₂₂ = g₂₁ ≫ f₃₁) (sq₂₂ : f₂₂ ≫ g₂₃ = g₂₂ ≫ f₃₂)
+--   [mono f₂₁] [mono f₃₁] [mono g₁₁] [mono g₁₂] [mono g₁₃] :
+--   exact f₁₁ f₁₂ ∧ mono f₁₁ :=
+-- begin
+--   have w : f₁₁ ≫ f₁₂ = 0,
+--   { rw [← cancel_mono g₁₃, zero_comp, category.assoc, sq₁₂, reassoc_of sq₁₁, Hr2.w, comp_zero], },
+--   let lbc₁₁ : LBC (0 : 0 ⟶ 0) (0 : 0 ⟶ 0) 0 0 f₁₁ g₁₁ g₁₂ f₂₁ :=
+--     LBC.of_core ⟨zero_comp, zero_comp, (is_zero_zero _).eq_of_src _ _, sq₁₁⟩,
+--   let lbc₁₂ : LBC (0 : 0 ⟶ 0) 0 0 f₁₁ f₁₂ g₁₂ g₁₃ f₂₂ :=
+--     LBC.of_core ⟨w, zero_comp, (is_zero_zero _).eq_of_src _ _, sq₁₂⟩,
+--   let lbc₂₁ : LBC 0 (0 : 0 ⟶ 0) g₁₁ 0 f₂₁ g₂₁ g₂₂ f₃₁ :=
+--     LBC.of_core ⟨zero_comp, Hc1.w, (is_zero_zero _).eq_of_src _ _, sq₂₁⟩,
+--   let lbc₂₂ : LBC f₁₁ g₁₁ g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂ :=
+--     LBC.of_core ⟨Hr2.w, Hc2.w, sq₁₁, sq₂₂⟩,
+--   suffices : is_zero lbc₁₁.H ∧ is_zero lbc₁₂.H,
+--   { refine ⟨exact_of_homology_is_zero this.2, _⟩,
+--     apply (tfae_mono (0:𝓐) f₁₁).mp 2 0,
+--     exact exact_of_homology_is_zero this.1, },
+--   split,
+--   { haveI e1 := lbc₁₁.iso_rcp_to_Hₗ (is_zero_zero _) (is_zero_zero _)
+--       ((tfae_mono (0:𝓐) f₂₁).mp 0 2 rfl rfl infer_instance),
+--     haveI e2 := lbc₁₁.iso_rcp_to_Vᵤ (is_zero_zero _) (is_zero_zero _)
+--       ((tfae_mono (0:𝓐) g₁₂).mp 0 2 rfl rfl infer_instance),
+--     refine is_zero_of_iso_of_zero _
+--       (as_iso $ inv lbc₁₁.rcp_to_V ≫ lbc₁₁.rcp_to_H),
+--     refine exact.homology_is_zero _ _ _,
+--     apply exact_zero_left_of_mono },
+--   { haveI e1 := lbc₁₂.iso_H_to_donᵤ (is_zero_zero _) (is_zero_zero _)
+--       ((tfae_mono (0:𝓐) g₁₃).mp 0 2 rfl rfl infer_instance),
+--     haveI e2 := lbc₁₂.iso_ex_v lbc₂₂ zero_comp Hc3.w
+--       (exact.homology_is_zero _ _ _) (Hc2.homology_is_zero _ _),
+--     swap, { apply exact_zero_left_of_mono },
+--     haveI e3 := lbc₂₁.iso_ex_h lbc₂₂ zero_comp Hr3.w
+--       (exact.homology_is_zero _ _ _) (Hr2.homology_is_zero _ _),
+--     swap, { apply exact_zero_left_of_mono },
+--     haveI e4 := lbc₂₁.iso_V_to_donₗ (is_zero_zero _) (is_zero_zero _)
+--       ((tfae_mono (0:𝓐) f₃₁).mp 0 2 rfl rfl infer_instance),
+--     have aux : is_zero lbc₂₁.V := Hc1.homology_is_zero _ _,
+--     apply is_zero_of_iso_of_zero aux,
+--     exact as_iso
+--       (lbc₂₁.V_to_don ≫ lbc₂₁.ex_h lbc₂₂ ≫ inv (lbc₁₂.ex_v lbc₂₂) ≫ inv lbc₁₂.H_to_don) }
+-- end
+
+-- lemma three_x_three_left_col
+--   (Hr1 : exact f₁₁ f₁₂) (Hr2 : exact f₂₁ f₂₂) (Hr3 : exact f₃₁ f₃₂)
+--   (Hc2 : exact g₁₂ g₂₂) (Hc3 : exact g₁₃ g₂₃)
+--   (sq₁₁ : f₁₁ ≫ g₁₂ = g₁₁ ≫ f₂₁) (sq₁₂ : f₁₂ ≫ g₁₃ = g₁₂ ≫ f₂₂)
+--   (sq₂₁ : f₂₁ ≫ g₂₂ = g₂₁ ≫ f₃₁) (sq₂₂ : f₂₂ ≫ g₂₃ = g₂₂ ≫ f₃₂)
+--   [mono f₁₁] [mono f₂₁] [mono f₃₁] [mono g₁₂] [mono g₁₃] :
+--   exact g₁₁ g₂₁ ∧ mono g₁₁ :=
+-- three_x_three_top_row Hc2 Hc3 Hr1 Hr2 Hr3 sq₁₁.symm sq₂₁.symm sq₁₂.symm sq₂₂.symm
+
+-- lemma three_x_three_bot_row
+--   (Hr1 : exact f₁₁ f₁₂) (Hr2 : exact f₂₁ f₂₂)
+--   (Hc1 : exact g₁₁ g₂₁) (Hc2 : exact g₁₂ g₂₂) (Hc3 : exact g₁₃ g₂₃)
+--   (sq₁₁ : f₁₁ ≫ g₁₂ = g₁₁ ≫ f₂₁) (sq₁₂ : f₁₂ ≫ g₁₃ = g₁₂ ≫ f₂₂)
+--   (sq₂₁ : f₂₁ ≫ g₂₂ = g₂₁ ≫ f₃₁) (sq₂₂ : f₂₂ ≫ g₂₃ = g₂₂ ≫ f₃₂)
+--   [epi f₁₂] [epi f₂₂] [epi g₂₁] [epi g₂₂] [epi g₂₃] :
+--   exact f₃₁ f₃₂ ∧ epi f₃₂ :=
+-- begin
+--   have : exact f₃₂.op f₃₁.op ∧ mono f₃₂.op :=
+--     three_x_three_top_row Hr2.op Hr1.op Hc3.op Hc2.op Hc1.op _ _ _ _,
+--   { refine ⟨this.1.unop, _⟩, haveI := this.2, exact category_theory.unop_epi_of_mono f₃₂.op },
+--   all_goals { simp only [← op_comp, sq₁₁, sq₁₂, sq₂₁, sq₂₂] },
+-- end
+
+-- lemma three_x_three_right_col
+--   (Hr1 : exact f₁₁ f₁₂) (Hr2 : exact f₂₁ f₂₂) (Hr3 : exact f₃₁ f₃₂)
+--   (Hc1 : exact g₁₁ g₂₁) (Hc2 : exact g₁₂ g₂₂)
+--   (sq₁₁ : f₁₁ ≫ g₁₂ = g₁₁ ≫ f₂₁) (sq₁₂ : f₁₂ ≫ g₁₃ = g₁₂ ≫ f₂₂)
+--   (sq₂₁ : f₂₁ ≫ g₂₂ = g₂₁ ≫ f₃₁) (sq₂₂ : f₂₂ ≫ g₂₃ = g₂₂ ≫ f₃₂)
+--   [epi f₁₂] [epi f₂₂] [epi f₃₂] [epi g₂₁] [epi g₂₂] :
+--   exact g₁₃ g₂₃ ∧ epi g₂₃ :=
+-- three_x_three_bot_row Hc1 Hc2 Hr1 Hr2 Hr3 sq₁₁.symm sq₂₁.symm sq₁₂.symm sq₂₂.symm
+
+-- end three_x_three
+
+-- section four
+
+-- /-!
+-- ## The four lemma
+
+-- We prove a version of the four lemma that is slightly more general than the usual version.
+-- -/
+
+-- lemma four_lemma_top_epi
+--   (Hr1 : exact_seq 𝓐 [f₂₁, f₂₂, f₂₃]) (Hr2 : exact_seq 𝓐 [f₃₁, f₃₂, f₃₃])
+--   (Hc1 : exact g₁₂ g₂₂) (Hc2 : exact g₁₃ g₂₃)
+--   (sq₁₂ : f₁₂ ≫ g₁₃ = g₁₂ ≫ f₂₂)
+--   (sq₂₁ : f₂₁ ≫ g₂₂ = g₂₁ ≫ f₃₁) (sq₂₂ : f₂₂ ≫ g₂₃ = g₂₂ ≫ f₃₂)
+--   (sq₂₃ : f₂₃ ≫ g₂₄ = g₂₃ ≫ f₃₃)
+--   [mono g₁₃] [epi g₂₁] [mono g₂₄] :
+--   epi f₁₂ :=
+-- begin
+--   rw epi_iff_exact_zero_right,
+--   let lbc₁₃ : LBC (0 : 0 ⟶ 0) 0 0 f₁₂ (0 : _ ⟶ 0) g₁₃ 0 f₂₃ :=
+--     LBC.of_core ⟨comp_zero, zero_comp, (is_zero_zero _).eq_of_src _ _, _⟩,
+--   swap, { simp only [← cancel_mono g₂₄, zero_comp, category.assoc, sq₂₃, reassoc_of Hc2.w], },
+--   let lbc₂₂ : LBC (0 : 0 ⟶ _) 0 g₁₂ f₂₁ f₂₂ g₂₂ g₂₃ f₃₂ :=
+--     LBC.of_core ⟨Hr1.pair.w, Hc1.w, (is_zero_zero _).eq_of_src _ _, sq₂₂⟩,
+--   let lbc₂₃ : LBC f₁₂ g₁₂ g₁₃ f₂₂ f₂₃ g₂₃ g₂₄ f₃₃ :=
+--     LBC.of_core ⟨(Hr1.drop 1).pair.w, Hc2.w, sq₁₂, sq₂₃⟩,
+--   let lbc₃₁ : LBC 0 (0 : 0 ⟶ _) g₂₁ (kernel.ι f₃₁) f₃₁ 0 (cokernel.π g₂₂) (0 : 0 ⟶ _) :=
+--     LBC.of_core ⟨kernel.condition _, comp_zero, (is_zero_zero _).eq_of_src _ _, _⟩,
+--   swap, { simp only [← cancel_epi g₂₁, comp_zero, ← reassoc_of sq₂₁, cokernel.condition] },
+--   let lbc₃₂ : LBC f₂₁ g₂₁ g₂₂ f₃₁ f₃₂ (cokernel.π g₂₂) 0 (0 : _ ⟶ 0) :=
+--     LBC.of_core ⟨Hr2.pair.w, cokernel.condition _, sq₂₁, (is_zero_zero _).eq_of_tgt _ _⟩,
+--   let lbc₄₁ : LBC (kernel.ι f₃₁) 0 0 (0 : 0 ⟶ 0) (0 : 0 ⟶ cokernel g₂₂) 0 0 (0 : 0 ⟶ 0) :=
+--     LBC.of_core ⟨comp_zero, comp_zero,
+--       (is_zero_zero _).eq_of_tgt _ _, (is_zero_zero _).eq_of_src _ _⟩,
+--   have e1 := lbc₁₃.iso_H_to_donᵤ (is_zero_zero _) (is_zero_zero _) (exact_of_zero 0 0),
+--   have e2 := lbc₁₃.iso_ex_v lbc₂₃ zero_comp zero_comp
+--     (exact.homology_is_zero _ _ $ exact_zero_left_of_mono _) (Hc2.homology_is_zero _ _),
+--   have e3 := lbc₂₂.iso_ex_h lbc₂₃ zero_comp (Hr2.drop 1).pair.w
+--     (Hr1.pair.homology_is_zero _ _) ((Hr1.drop 1).pair.homology_is_zero _ _),
+--   have e3 := lbc₂₂.iso_ex_v lbc₃₂ zero_comp comp_zero
+--     (Hc1.homology_is_zero _ _) ((abelian.exact_cokernel _).homology_is_zero _ _),
+--   have e4 := lbc₃₁.iso_ex_h lbc₃₂ zero_comp zero_comp
+--     (exact_kernel_ι.homology_is_zero _ _) (Hr2.pair.homology_is_zero _ _),
+--   have e5 := lbc₃₁.iso_ex_v lbc₄₁ comp_zero comp_zero
+--     (exact.homology_is_zero _ _ _) ((is_zero_zero _).homology_is_zero _ _ _),
+--   swap, { rwa ← epi_iff_exact_zero_right, },
+--   have aux : is_zero lbc₄₁.rcp := (is_zero_zero _).homology_is_zero _ _ _,
+--   suffices : is_zero lbc₁₃.H, { exact exact_of_homology_is_zero this },
+--   refine is_zero_of_iso_of_zero aux _,
+--   resetI,
+--   exact as_iso (inv (lbc₃₁.ex_v lbc₄₁) ≫ lbc₃₁.ex_h lbc₃₂ ≫ inv (lbc₂₂.ex_v lbc₃₂) ≫
+--     lbc₂₂.ex_h lbc₂₃ ≫ inv (lbc₁₃.ex_v lbc₂₃) ≫ inv lbc₁₃.H_to_don),
+-- end
+
+-- -- move me
+-- lemma sq_op (sq : f₁₁ ≫ g₁₂ = g₁₁ ≫ f₂₁) :
+--   f₂₁.op ≫ g₁₁.op = g₁₂.op ≫ f₁₁.op :=
+-- by simp only [← op_comp, sq]
+
+-- lemma four_lemma_bot_mono
+--   (Hr1 : exact_seq 𝓐 [f₂₁, f₂₂, f₂₃]) (Hr2 : exact_seq 𝓐 [f₃₁, f₃₂, f₃₃])
+--   (Hc1 : exact g₂₂ g₃₂) (Hc2 : exact g₂₃ g₃₃)
+--   (sq₂₁ : f₂₁ ≫ g₂₂ = g₂₁ ≫ f₃₁) (sq₂₂ : f₂₂ ≫ g₂₃ = g₂₂ ≫ f₃₂)
+--   (sq₂₃ : f₂₃ ≫ g₂₄ = g₂₃ ≫ f₃₃) (sq₃₂ : f₃₂ ≫ g₃₃ = g₃₂ ≫ f₄₂)
+--   [epi g₂₁] [mono g₂₄] [epi g₃₂] :
+--   mono f₄₂ :=
+-- begin
+--   haveI : epi f₄₂.op := four_lemma_top_epi Hr2.op Hr1.op Hc2.op Hc1.op
+--     (sq_op sq₃₂) (sq_op sq₂₃) (sq_op sq₂₂) (sq_op sq₂₁),
+--   exact category_theory.unop_mono_of_epi f₄₂.op
+-- end
+
+-- lemma four_lemma_left_epi
+--   (Hc1 : exact_seq 𝓐 [g₁₂, g₂₂, g₃₂]) (Hc2 : exact_seq 𝓐 [g₁₃, g₂₃, g₃₃])
+--   (Hr1 : exact f₂₁ f₂₂) (Hr2 : exact f₃₁ f₃₂)
+--   (sq₁₂ : f₁₂ ≫ g₁₃ = g₁₂ ≫ f₂₂)
+--   (sq₂₁ : f₂₁ ≫ g₂₂ = g₂₁ ≫ f₃₁) (sq₂₂ : f₂₂ ≫ g₂₃ = g₂₂ ≫ f₃₂)
+--   (sq₃₂ : f₃₂ ≫ g₃₃ = g₃₂ ≫ f₄₂)
+--   [epi f₁₂] [mono f₄₂] [mono f₃₁] :
+--   epi g₂₁ :=
+-- four_lemma_top_epi Hc1 Hc2 Hr1 Hr2 sq₂₁.symm sq₁₂.symm sq₂₂.symm sq₃₂.symm
+
+-- lemma four_lemma_right_mono
+--   (Hc1 : exact_seq 𝓐 [g₁₂, g₂₂, g₃₂]) (Hc2 : exact_seq 𝓐 [g₁₃, g₂₃, g₃₃])
+--   (Hr1 : exact f₂₂ f₂₃) (Hr2 : exact f₃₂ f₃₃)
+--   (sq₁₂ : f₁₂ ≫ g₁₃ = g₁₂ ≫ f₂₂)
+--   (sq₂₂ : f₂₂ ≫ g₂₃ = g₂₂ ≫ f₃₂) (sq₂₃ : f₂₃ ≫ g₂₄ = g₂₃ ≫ f₃₃)
+--   (sq₃₂ : f₃₂ ≫ g₃₃ = g₃₂ ≫ f₄₂)
+--   [epi f₁₂] [mono f₄₂] [epi f₂₃] :
+--   mono g₂₄ :=
+-- four_lemma_bot_mono Hc1 Hc2 Hr1 Hr2 sq₁₂.symm sq₂₂.symm sq₃₂.symm sq₂₃.symm
+
+-- end four
 
 end LBC
