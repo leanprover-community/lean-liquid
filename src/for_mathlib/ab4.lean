@@ -142,7 +142,6 @@ begin
   dsimp, simp only [category.id_comp],
 end
 
-open_locale pseudoelement
 
 noncomputable
 def eval_next (A : Type u) [category.{v} A] [abelian A] {M : Type*}
@@ -156,6 +155,19 @@ def eval_next (A : Type u) [category.{v} A] [abelian A] {M : Type*}
 instance eval_next_preserves_coproducts (α : Type v)
   (M : Type*) (S : complex_shape M) [abelian A] (i : M) :
   preserves_colimits_of_shape (discrete α) (eval_next A S i) := sorry
+
+noncomputable
+def eval_prev (A : Type u) [category.{v} A] [abelian A] {M : Type*}
+  (S : complex_shape M) (i : M) :
+  homological_complex A S ⥤ A :=
+{ obj := λ X, X.X_prev i,
+  map := λ X Y f, f.prev i,
+  map_id' := sorry,
+  map_comp' := sorry }
+
+instance eval_prev_preserves_coproducts (α : Type v)
+  (M : Type*) (S : complex_shape M) [abelian A] (i : M) :
+  preserves_colimits_of_shape (discrete α) (eval_prev A S i) := sorry
 
 lemma exact_iff_exact_cokernel_desc [abelian A] (X Y Z : A)
   (f : X ⟶ Y) (g : Y ⟶ Z) :
@@ -202,6 +214,8 @@ begin
   sorry,
 end
 
+section
+open_locale pseudoelement
 instance epi_coproduct_kernel_comparison [has_coproducts A] [AB4 A]
   (M : Type*) (S : complex_shape M) (α : Type v)
   [abelian A] [has_coproducts A] (i : M) (X : α → homological_complex A S) :
@@ -277,6 +291,7 @@ begin
   apply hι₂,
   rw [← abelian.pseudoelement.comp_apply, ← sqι, abelian.pseudoelement.comp_apply, hz, hy],
 end
+end
 
 instance is_iso_coproduct_kernel_comparison (M : Type*) (S : complex_shape M) (α : Type v)
   [abelian A] [has_coproducts A] [AB4 A] (i : M) (X : α → homological_complex A S) :
@@ -295,7 +310,34 @@ def coproduct_homology_comparison_inv (M : Type*) (S : complex_shape M) (α : Ty
   (∐ X).homology i ⟶ (∐ λ a : α, (X a).homology i) :=
 homology.desc' _ _ _ (inv (coproduct_kernel_comparison M S α i X) ≫
   sigma.desc (λ b, homology.π' ((X b).d_to _) ((X b).d_from i)
-    (homological_complex.d_to_comp_d_from _ _) ≫ sigma.ι _ b)) sorry
+    (homological_complex.d_to_comp_d_from _ _) ≫ sigma.ι _ b))
+begin
+  rw ← category.assoc, let t := _, change t ≫ _ = _,
+  let e : (∐ X).X_prev i ≅ ∐ (λ a, (X a).X_prev i) :=
+    (is_colimit_of_preserves (eval_prev A S i)
+      (colimit.is_colimit _)).cocone_point_unique_up_to_iso
+      (colimit.is_colimit _) ≪≫ has_colimit.iso_of_nat_iso (discrete.nat_iso $ λ b, iso.refl _),
+  have ht : t = e.hom ≫ sigma.desc (λ b, _ ≫ sigma.ι _ b),
+  rotate 2,
+  { refine kernel.lift _ _ _, exact (X b).d_to i,
+    exact (X b).d_to_comp_d_from i },
+  { dsimp [t, e, limits.is_colimit.cocone_point_unique_up_to_iso,
+      has_colimit.iso_of_nat_iso, is_colimit.map, coproduct_kernel_comparison],
+    rw is_iso.comp_inv_eq,
+    apply (is_colimit_of_preserves (eval_prev A S i)
+      (colimit.is_colimit (discrete.functor X))).hom_ext,
+    intros j,
+    apply equalizer.hom_ext,
+    simp only [functor.map_cocone_ι_app, colimit.cocone_ι,
+      equalizer_as_kernel, category.assoc, kernel.lift_ι],
+    slice_rhs 1 2
+    { erw (is_colimit_of_preserves (eval_prev A S i) (colimit.is_colimit (discrete.functor X))).fac },
+    dsimp [eval_prev],
+    simp only [homological_complex.hom.comm_to, colimit.ι_desc, cocones.precompose_obj_ι,
+      nat_trans.comp_app, discrete.nat_iso_hom_app, colimit.cocone_ι, category.assoc,
+      cofan.mk_ι_app, kernel.lift_ι, kernel.lift_ι_assoc],
+    dsimp, simp only [category.id_comp] },
+end
 
 noncomputable
 def coproduct_homology_iso
