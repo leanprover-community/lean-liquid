@@ -96,7 +96,6 @@ instance (M N : Type*)
   map_add := λ f, f.map_add,
   map_zero := λ f, f.map_zero }
 
---#check comphaus_filtered_pseudo_normed_group_hom.sub_apply
 lemma Tinv2_injective (S : Fintype) :
   function.injective ((Tinv2_nat_trans (Fintype_invpoly r)).app S) :=
 begin
@@ -139,8 +138,6 @@ begin
   have h0pinv : 0 ≤ p⁻¹, { rw ← nnreal.inv_pos at h0p, exact h0p.le },
   refine condensify_nonstrict_exact _ _ (r⁻¹ + 2) (Tinv2_bound_by _)
     -- next line can be simplified because 1/2 < r < 1 so the max is always on the right.
-    -- **TODO** URK I just realised we don't have 1/2 < r in this file :-/
-    -- Can I relax p<=1 to p<1??
     (λ c, max c (c * (2 - r⁻¹)⁻¹ * (r⁻¹ + 2))) κ
     (λ c, le_max_left _ _) hκ
     (Tinv2_injective p) (Tinv2_comp_eval2_eq_zero p) _ _ _,
@@ -158,12 +155,13 @@ begin
       rw ← to_laurent_measures_addhom_isometry at ⊢ hf2,
       refine le_trans _ (nnreal.mul_le_mul_right (le_max_right _ _) _),
       rw mul_inv_cancel_right₀ (lt_of_lt_of_le (zero_lt_two : (0 : ℝ≥0) < 2) le_add_self).ne',
-      -- almost ready for next line but we have p<=1 and not p<1 :-/
-      -- need to turn hf1' into the statement that Θ f = 0, and then
-      -- `convert laurent_measures.psi_bound p S c hf1' hf2`
-      -- will reduce us  to the slightly gnarly question of
-      -- showing that the diagram commutes.
-      sorry },
+      convert laurent_measures.psi_bound p S c _ hf2,
+      { sorry }, -- this says that ψ defined on Laurent series is just /ₘ (T⁻¹ - 2) on ℤ[T⁻¹].
+                 -- The metavariable is a missing proof that ψ even makes sense, i.e.
+                 -- that the power series vanishes at T⁻¹ = 2.
+
+      { sorry } }, -- and this says that `laurent_measures.Θ` kills f, which should be deducible
+                   -- from `hf1'`.
     { ext1 s,
       convert hf3 s,
       simp [sub_mul, Tinv2_nat_trans, Tinv_nat_trans],
