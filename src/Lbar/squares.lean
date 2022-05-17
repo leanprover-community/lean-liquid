@@ -2,6 +2,7 @@ import for_mathlib.commsq
 import for_mathlib.les_homology
 import for_mathlib.AddCommGroup.pt
 import for_mathlib.bicartesian3
+import for_mathlib.abelian_sheaves.functor_category
 
 import system_of_complexes.shift_sub_id
 import pseudo_normed_group.system_of_complexes2
@@ -138,3 +139,29 @@ begin
 end
 
 end step5
+
+section step6
+
+variables {A B A' B' : ℝ≥0ᵒᵖ ⥤ Ab.{u}} (f : A ⟶ B) (f' : A' ⟶ B') (eA : A ≅ A') (eB : B ≅ B')
+variables (ι : ℕ → ℝ≥0) (hι : monotone ι)
+
+lemma shift_sub_id.bicartesian_iso (w : f ≫ eB.hom = eA.hom ≫ f')
+  (sq : (shift_sub_id.commsq f ι hι).bicartesian) :
+  (shift_sub_id.commsq f' ι hι).bicartesian :=
+begin
+  let H : _ := _,
+  apply commsq.bicartesian.of_iso _ _ _ _ _ H H _ sq,
+  { refine limits.lim.map_iso (discrete.nat_iso $ λ k, eA.app _), },
+  { refine limits.lim.map_iso (discrete.nat_iso $ λ k, eB.app _), },
+  { apply shift_sub_id.commsq },
+  { apply shift_sub_id.commsq },
+  { apply commsq.of_eq, delta pi.map,
+    simp only [functor.map_iso_hom, ← lim_map_eq_lim_map, ← category_theory.functor.map_comp],
+    apply limit.hom_ext,
+    simp only [lim_map_eq_lim_map, lim_map_π, nat_trans.comp_app, discrete.nat_trans_app,
+      discrete.nat_iso_hom_app, iso.app_hom],
+    intro, simp only [← nat_trans.comp_app, w], }
+end
+
+
+end step6

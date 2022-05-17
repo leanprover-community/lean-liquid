@@ -59,8 +59,12 @@ namespace commsq
 
 attribute [simp, reassoc] ι_fst ι_snd inl_π inr_π
 
-lemma w (sq : commsq f₁₁ g₁₁ g₁₂ f₂₁) : f₁₁ ≫ g₁₂ = g₁₁ ≫ f₂₁ :=
+@[reassoc] lemma w (sq : commsq f₁₁ g₁₁ g₁₂ f₂₁) : f₁₁ ≫ g₁₂ = g₁₁ ≫ f₂₁ :=
 by rw [sq.tr₁, sq.tr₂]
+
+@[reassoc] lemma w_inv [is_iso g₁₁] [is_iso g₁₂] (sq : commsq f₁₁ g₁₁ g₁₂ f₂₁) :
+  inv g₁₁ ≫ f₁₁ = f₂₁ ≫ inv g₁₂ :=
+by rw [is_iso.eq_comp_inv, category.assoc, sq.w, is_iso.inv_hom_id_assoc]
 
 def of_eq (w : f₁₁ ≫ g₁₂ = g₁₁ ≫ f₂₁) : commsq f₁₁ g₁₁ g₁₂ f₂₁ :=
 { S := A₁₂ ⊞ A₂₁,
@@ -84,6 +88,24 @@ def symm (sq : commsq f₁₁ g₁₁ g₁₂ f₂₁) : commsq g₁₁ f₁₁ 
   tr₁ := sq.tr₂,
   tr₂ := sq.tr₁,
   .. sq }
+
+lemma ι_eq (sq : commsq f₁₁ g₁₁ g₁₂ f₂₁) :
+  sq.ι = f₁₁ ≫ sq.sum.inl + g₁₁ ≫ sq.sum.inr :=
+begin
+  rw [← cancel_mono (𝟙 sq.S), ← sq.sum.total],
+  simp only [preadditive.add_comp, category.assoc, ι_fst_assoc, ι_snd_assoc, preadditive.comp_add,
+    preadditive.add_comp_assoc, sum_str.inl_fst, category.comp_id, sum_str.inr_fst, comp_zero,
+    add_zero, sum_str.inl_snd, sum_str.inr_snd, zero_add],
+end
+
+lemma π_eq (sq : commsq f₁₁ g₁₁ g₁₂ f₂₁) :
+  sq.π = sq.sum.fst ≫ g₁₂ + sq.sum.snd ≫ f₂₁ :=
+begin
+  rw [← cancel_epi (𝟙 sq.S), ← sq.sum.total],
+  simp only [preadditive.add_comp, category.assoc, inl_π, inr_π, preadditive.comp_add,
+    preadditive.add_comp_assoc, sum_str.inl_fst, category.comp_id, sum_str.inr_fst, comp_zero,
+    add_zero, sum_str.inl_snd, sum_str.inr_snd, zero_add],
+end
 
 section iso
 open category_theory.preadditive
@@ -112,6 +134,13 @@ lemma iso_inv_π (sq₁ sq₂ : commsq f₁₁ g₁₁ g₁₂ f₂₁) :
 iso_hom_π _ _
 
 end iso
+
+lemma of_iso (e₁₁ : A₁₁ ≅ A₃₃) (e₁₂ : A₁₂ ≅ A₃₄) (e₂₁ : A₂₁ ≅ A₄₃) (e₂₂ : A₂₂ ≅ A₄₄)
+  (sqa : commsq f₁₁ e₁₁.hom e₁₂.hom f₃₃) (sqb : commsq g₁₁ e₁₁.hom e₂₁.hom g₃₃)
+  (sqc : commsq g₁₂ e₁₂.hom e₂₂.hom g₃₄) (sqd : commsq f₂₁ e₂₁.hom e₂₂.hom f₄₃)
+  (sq1 : commsq f₁₁ g₁₁ g₁₂ f₂₁) :
+  commsq f₃₃ g₃₃ g₃₄ f₄₃ :=
+of_eq $ by rw [← cancel_epi e₁₁.hom, ← sqa.w_assoc, ← sqc.w, ← sqb.w_assoc, ← sqd.w, sq1.w_assoc]
 
 def kernel (sq : commsq f₁₁ g₁₁ g₁₂ f₂₁) :
   commsq (kernel.ι f₁₁) (kernel.map _ _ _ _ sq.w) g₁₁ (kernel.ι f₂₁) :=
@@ -272,5 +301,53 @@ end
 lemma bicartesian.symm_iff (sq : commsq f₁₁ g₁₁ g₁₂ f₂₁) :
   sq.symm.bicartesian ↔ sq.bicartesian :=
 ⟨λ h, h.symm, λ h, h.symm⟩
+
+section
+variables (g₁₁ g₁₂ g₁₃)
+
+-- move me
+lemma short_exact.of_iso (h : short_exact f₁₁ f₁₂)
+  (sq1 : commsq f₁₁ g₁₁ g₁₂ f₂₁) (sq2 : commsq f₁₂ g₁₂ g₁₃ f₂₂)
+  [is_iso g₁₁] [is_iso g₁₂] [is_iso g₁₃] :
+  short_exact f₂₁ f₂₂ :=
+begin
+  have := h.mono, have := h.epi, resetI,
+  have : mono f₂₁,
+  { suffices : mono (f₂₁ ≫ inv g₁₂), { resetI, apply mono_of_mono f₂₁ (inv g₁₂), },
+    rw ← sq1.w_inv, apply_instance },
+  have : epi f₂₂,
+  { suffices : epi (g₁₂ ≫ f₂₂), { resetI, apply epi_of_epi g₁₂ f₂₂ },
+    { rw ← sq2.w, apply epi_comp } },
+  resetI, refine ⟨_⟩,
+  apply exact_of_iso_of_exact' _ _ _ _ (as_iso g₁₁) (as_iso g₁₂) (as_iso g₁₃)
+    sq1.symm.w sq2.symm.w h.exact,
+end
+
+end
+
+lemma bicartesian.of_iso (e₁₁ : A₁₁ ≅ A₃₃) (e₁₂ : A₁₂ ≅ A₃₄) (e₂₁ : A₂₁ ≅ A₄₃) (e₂₂ : A₂₂ ≅ A₄₄)
+  {sq1 : commsq f₁₁ g₁₁ g₁₂ f₂₁} {sq2 : commsq f₃₃ g₃₃ g₃₄ f₄₃}
+  (sqa : commsq f₁₁ e₁₁.hom e₁₂.hom f₃₃) (sqb : commsq g₁₁ e₁₁.hom e₂₁.hom g₃₃)
+  (sqc : commsq g₁₂ e₁₂.hom e₂₂.hom g₃₄) (sqd : commsq f₂₁ e₂₁.hom e₂₂.hom f₄₃)
+  (h : sq1.bicartesian) :
+  sq2.bicartesian :=
+begin
+  let e : sq1.S ≅ sq2.S := _,
+  apply short_exact.of_iso e₁₁.hom e.hom e₂₂.hom h,
+  swap 3,
+  { refine ⟨sq1.sum.fst ≫ e₁₂.hom ≫ sq2.sum.inl + sq1.sum.snd ≫ e₂₁.hom ≫ sq2.sum.inr,
+            sq2.sum.fst ≫ e₁₂.inv ≫ sq1.sum.inl + sq2.sum.snd ≫ e₂₁.inv ≫ sq1.sum.inr,
+            _, _⟩;
+    { dsimp, simp only [comp_add, add_comp_assoc, category.assoc, sum_str.inl_fst,
+        category.comp_id, sum_str.inr_fst, comp_zero, add_zero, iso.hom_inv_id_assoc,
+        sum_str.inl_snd, sum_str.inr_snd, zero_add, sq1.sum.total, sq2.sum.total,
+        iso.inv_hom_id_assoc], }, },
+  { apply commsq.of_eq, dsimp,
+    simp only [comp_add, add_comp_assoc, neg_comp, category.assoc, sum_str.inl_fst,
+      category.comp_id, sum_str.inr_fst, comp_zero, add_zero, sum_str.inl_snd, neg_zero,
+      sum_str.inr_snd, zero_add, comp_neg, sqa.w_assoc, sqb.w_assoc], },
+  { apply commsq.of_eq, dsimp,
+    simp only [add_comp, category.assoc, inl_π, inr_π, ← sqc.w, ← sqd.w, sq1.π_eq], }
+end
 
 end commsq
