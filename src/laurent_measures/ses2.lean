@@ -49,12 +49,8 @@ local notation `r` := @r p
 
 open CompHausFiltPseuNormGrp₁
 
-lemma psi_bound (S : Fintype) (c' : ℝ≥0)
-  ⦃F : laurent_measures r S⦄
-  (hF1 : (Θ p S) F = 0)
-  (hF2 : ∥F∥₊ ≤ c') :
-  ∥ψ F hF1∥₊ ≤
-    c' * (2 - r⁻¹)⁻¹ :=
+lemma psi_bound (S : Fintype) (c' : ℝ≥0) ⦃F : laurent_measures r S⦄ (hF1 : (Θ p S) F = 0)
+  (hF2 : ∥F∥₊ ≤ c') : ∥ψ F hF1∥₊ ≤ c' * (2 - r⁻¹)⁻¹ :=
 begin
   delta ψ,
   rw nnnorm_def at hF2 ⊢,
