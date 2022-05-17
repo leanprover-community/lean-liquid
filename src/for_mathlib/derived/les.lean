@@ -56,6 +56,9 @@ noncomputable def kernel.ι : kernel f ⟶ X :=
 { f := λ i, kernel.ι _,
   comm' := λ i j hij, by simp only [kernel_d, kernel.lift_ι] }
 
+instance kernel.ι_mono (n : ℕ) : mono ((kernel.ι f).f n) :=
+show mono (limits.kernel.ι (f.f n)), by apply_instance
+
 end
 
 variables {A : Type*} [category A] [abelian A] [enough_projectives A]
@@ -63,37 +66,6 @@ variables {X Y Z : cochain_complex A ℤ} (f : X ⟶ Y) (g : Y ⟶ Z)
 
 open_locale pseudoelement
 open category_theory.abelian
-
--- is this even true?
--- -- move me
--- lemma pseudoelement.biprod_ext {X Y : A} (p q : ↥(X ⊞ Y))
---   (h1 : (biprod.fst : X ⊞ Y ⟶ X) p = (biprod.fst : X ⊞ Y ⟶ X) q)
---   (h2 : (biprod.snd : X ⊞ Y ⟶ Y) p = (biprod.snd : X ⊞ Y ⟶ Y) q) :
---   p = q :=
--- begin
---   letI := pseudoelement.setoid (X ⊞ Y),
---   revert h1 h2,
---   refine quotient.induction_on p _,
---   intros a,
---   refine quotient.induction_on q _,
---   intros b h₁ h₂,
---   simp only [pseudoelement.pseudo_apply_mk, quotient.eq] at h₁ h₂ ⊢,
---   obtain ⟨Z₁, a₁, b₁, ha₁, hb₁, hab₁⟩ := h₁,
---   obtain ⟨Z₂, a₂, b₂, ha₂, hb₂, hab₂⟩ := h₂,
---   simp only [over.coe_hom] at hab₁ hab₂,
---   let Pa := pullback a₁ a₂,
---   let Pb := pullback b₁ b₂,
---   let P := pullback (pullback.fst : Pa ⟶ _) (pullback.fst : Pb ⟶ _),
---   resetI,
---   refine ⟨P, pullback.fst ≫ pullback.fst ≫ a₁, pullback.snd ≫ pullback.fst ≫ b₁, _, _, _⟩,
---   { apply_with epi_comp { instances := ff }, apply_instance, apply epi_comp, },
---   { apply_with epi_comp { instances := ff }, apply_instance, apply epi_comp, },
---   ext; simp only [category.assoc],
---   { rw [hab₁, pullback.condition_assoc], },
---   { simp only [pullback.condition_assoc, hab₂],
---     rw [← pullback.condition_assoc],
---     simp only [← pullback.condition_assoc], admit }
--- end
 
 -- move me
 lemma biprod.lift_desc_comm {X₁ X₂ Y₁ Y₂ : A}
@@ -108,21 +80,36 @@ lemma biprod.comp_lift {W X Y Z : A} (f : W ⟶ X) (g : X ⟶ Y) (h : X ⟶ Z) :
   f ≫ biprod.lift g h = biprod.lift (f ≫ g) (f ≫ h) :=
 by ext; simp only [category.assoc, biprod.lift_fst, biprod.lift_snd]
 
+-- move me
+lemma exact_of_exact_image {X Y Z : A} (f : X ⟶ Y) (g : Y ⟶ Z) (h : exact f (factor_thru_image g)) :
+  exact f g :=
+by { rw ← limits.image.fac g, exact exact_comp_mono h }
+
+-- move me
+@[reassoc]
+lemma comp_factor_thru_image_eq_zero {X Y Z : A} (f : X ⟶ Y) (g : Y ⟶ Z) (w : f ≫ g = 0) :
+  f ≫ factor_thru_image g = 0 :=
+by rw [← cancel_mono (limits.image.ι g), category.assoc, limits.image.fac, w, zero_comp]
+
+open_locale zero_object
+
 def cone.π_quasi_iso (w : ∀ i, short_exact (f.f i) (g.f i)) :
   quasi_iso (cone.π f g (λ i, (w i).exact.w)) :=
 { is_iso := λ i, begin
-    let π := cone.π f g (λ i, (w i).exact.w),
+    have w'' : ∀ i, f.f i ≫ g.f i = 0 := λ i, (w i).exact.w,
+    let π := cone.π f g w'',
     have aux : ∀ n, short_exact ((kernel.ι π).f n) (π.f n) := λ n,
-      { mono := equalizer.ι_mono,
-        epi := by { haveI := (w n).epi, exact category_theory.epi_comp _ _},
-        exact := exact_kernel_ι },
-    suffices : ∀ n, is_zero (homology (kernel π) n),
+    { mono := equalizer.ι_mono,
+      epi := by { haveI := (w n).epi, exact category_theory.epi_comp _ _},
+      exact := exact_kernel_ι },
+    let K := kernel π,
+    suffices : ∀ n, is_zero (homology K n),
     { exact (six_term_exact_seq (kernel.ι π) π aux i (i+1) rfl).is_iso_of_zero_of_zero
         ((this _).eq_of_src _ _) ((this _).eq_of_tgt _ _), },
     intro n,
     obtain ⟨n, rfl⟩ : ∃ k, k+1 = n := ⟨n-1, sub_add_cancel _ _⟩,
     refine is_zero_of_iso_of_zero _
-      (homology_iso (kernel π) n (n+1) (n+1+1) rfl rfl).symm,
+      (homology_iso K n (n+1) (n+1+1) rfl rfl).symm,
     apply exact.homology_is_zero,
     apply pseudoelement.exact_of_pseudo_exact,
     split, { intro a, rw [← pseudoelement.comp_apply, d_comp_d, pseudoelement.zero_apply], },
@@ -175,3 +162,54 @@ def cone.π_quasi_iso (w : ∀ i, short_exact (f.f i) (g.f i)) :
   end }
 
 end homological_complex
+
+/-
+    have w' : ∀ i, f.f i ≫ g.f i = 0 := λ i, (w i).exact.w,
+    let π := cone.π f g w',
+    have aux : ∀ n, short_exact ((kernel.ι π).f n) (π.f n) := λ n,
+    { mono := equalizer.ι_mono,
+      epi := by { haveI := (w n).epi, exact category_theory.epi_comp _ _},
+      exact := exact_kernel_ι },
+    let K := kernel π,
+    suffices : ∀ n, is_zero (homology K n),
+    { exact (six_term_exact_seq (kernel.ι π) π aux i (i+1) rfl).is_iso_of_zero_of_zero
+        ((this _).eq_of_src _ _) ((this _).eq_of_tgt _ _), },
+    intro n,
+    obtain ⟨n, rfl⟩ : ∃ k, k+1 = n := ⟨n-1, sub_add_cancel _ _⟩,
+    refine is_zero_of_iso_of_zero _
+      (homology_iso K n (n+1) (n+1+1) rfl rfl).symm,
+    apply exact.homology_is_zero,
+    apply exact_of_exact_image,
+    let Kd := K.d (n+1) (n+1+1),
+    let Cd := (cone f).d (n+1) (n+1+1),
+    let v2 := (kernel.ι π).f (n+1),
+    let sq : arrow.mk (Kd) ⟶ arrow.mk Cd :=
+    ⟨(kernel.ι π).f _, (kernel.ι π).f _, _⟩, swap,
+    { dsimp [Kd, Cd], simp only [kernel.lift_ι], },
+    let v3 : image Kd ⟶ image Cd := image.map sq,
+    have sq2 : factor_thru_image Kd ≫ v3 = v2 ≫ factor_thru_image Cd,
+    { apply image.factor_map sq },
+    let q : cokernel v2 ⟶ cokernel v3 :=
+      cokernel.map _ _ (factor_thru_image Kd) (factor_thru_image Cd) sq2.symm,
+    have sq4 : factor_thru_image Cd ≫ cokernel.π v3 = cokernel.π v2 ≫ q,
+    { symmetry, apply cokernel.π_desc, },
+    let φ : (cone f).X n ⟶ (limits.kernel q) :=
+      kernel.lift _ ((cone f).d n (n+1) ≫ cokernel.π v2) _, swap,
+    { rw [category.assoc, ← sq4, comp_factor_thru_image_eq_zero_assoc, zero_comp],
+      exact d_comp_d _ _ _ _ },
+    suffices S : category_theory.snake
+      (K.X n)          (K.X (n+1))          (image Kd)
+      ((cone f).X n)   ((cone f).X (n+1))   (image Cd)
+      _                (cokernel v2)        (cokernel v3)
+      _                0                    0
+      (K.d n (n+1))          (factor_thru_image Kd)
+      ((kernel.ι π).f n)     ((kernel.ι π).f (n+1))     v3
+      ((cone f).d n (n+1))   (factor_thru_image Cd)
+      φ                      (cokernel.π v2)            (cokernel.π v3)
+      (limits.kernel.ι q)     q
+      (cokernel.π φ)    0    0
+      0  0,
+    { exact S.six_term_exact_seq.pair },
+    apply_with snake.mk {instances := ff};
+    try { apply_instance },
+-/
