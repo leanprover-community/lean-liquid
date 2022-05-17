@@ -1,8 +1,12 @@
-import for_mathlib.ab4
-import condensed.extr.equivalence
 import category_theory.limits.preserves.limits
 import category_theory.adjunction.evaluation
 import algebra.group.ulift
+
+import for_mathlib.ab4
+import for_mathlib.AddCommGroup.exact
+import for_mathlib.AddCommGroup.pt
+
+import condensed.extr.equivalence
 
 .
 
@@ -22,25 +26,9 @@ has_limits_of_has_limits_creates_limits
 instance : has_colimits_of_size.{u} Ab.{u+1} :=
 has_colimits_of_size_shrink.{u u (u+1) (u+1)} Ab.{u+1}
 
-def Ab.pt {X : Ab.{u}} (x : X) :
-  AddCommGroup.of (ulift.{u} ℤ) ⟶ X :=
-{ to_fun := λ a, zmultiples_add_hom _ x a.down,
-  map_zero' := by simp,
-  map_add' := λ a b, by rw [ulift.add_down, add_monoid_hom.map_add] }
-
-lemma Ab.pt_apply {X : Ab.{u}} (x : X) (n : ℤ) :
-  Ab.pt x ⟨n⟩ = n • x := by { dsimp [Ab.pt], simp }
-
 lemma AddCommGroup.injective_of_mono' {X Y : Ab.{u}} (f : X ⟶ Y) [mono f] :
   function.injective f :=
-begin
-  intros a b h,
-  have : Ab.pt a ≫ f = Ab.pt b ≫ f,
-  { ext ⟨n⟩, simp [Ab.pt_apply, f.map_zsmul, h], },
-  rw cancel_mono at this,
-  apply_fun (λ e, e ⟨1⟩) at this,
-  simpa [Ab.pt_apply] using this,
-end
+by rwa ← AddCommGroup.mono_iff_injective
 
 open_locale classical
 
@@ -94,7 +82,7 @@ begin
     simp_rw dfinsupp.sum_add_hom_apply at h,
     apply_fun f w,
     swap,
-    { apply AddCommGroup.injective_of_mono' },
+    { rw ← AddCommGroup.mono_iff_injective, apply_instance },
     let q : Π i, Y i → Π₀ i, Y i := dfinsupp.single,
     let qq : Π i, X i → Π₀ i, Y i := λ i, (q i) ∘ (f i),
     change u.sum (λ i, qq i) w = v.sum (λ i, qq i) w at h,
