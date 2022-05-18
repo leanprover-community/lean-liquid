@@ -12,7 +12,9 @@ variables {A : Type u} [category.{v} A] [abelian A]
 
 namespace homotopy_category
 
-local notation `𝒦` := homotopy_category A (complex_shape.up ℤ)
+variables {ι : Type*} {c : complex_shape ι}
+
+local notation `𝒦` := homotopy_category A c
 local notation `HH` := homotopy_category.homology_functor A (complex_shape.up ℤ) 0
 
 class is_acyclic (X : 𝒦) : Prop :=
@@ -22,8 +24,7 @@ lemma is_acyclic_of_iso {X Y : 𝒦} (e : X ≅ Y) [is_acyclic X] : is_acyclic Y
 begin
   constructor,
   intros i,
-  let e' : (homology_functor A (complex_shape.up ℤ) i).obj X ≅
-    (homology_functor A (complex_shape.up ℤ) i).obj Y :=
+  let e' : (homology_functor A c i).obj X ≅ (homology_functor A c i).obj Y :=
     functor.map_iso _ e,
   apply is_zero_of_iso_of_zero _ e',
   apply is_acyclic.cond X i,
@@ -34,6 +35,13 @@ class is_K_projective (X : 𝒦) : Prop :=
 
 class is_quasi_iso {X Y : 𝒦} (f : X ⟶ Y) : Prop :=
 (cond [] : ∀ i, is_iso ((homotopy_category.homology_functor _ _ i).map f))
+
+end homotopy_category
+
+namespace homotopy_category
+
+local notation `𝒦` := homotopy_category A (complex_shape.up ℤ)
+local notation `HH` := homotopy_category.homology_functor A (complex_shape.up ℤ) 0
 
 def bounded_by (X : 𝒦) (n : ℤ) : Prop :=
 ∀ i, n ≤ i → is_zero (X.as.X i)

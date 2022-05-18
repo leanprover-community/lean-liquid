@@ -1,5 +1,5 @@
 import category_theory.preadditive.opposite
-import algebra.homology.homological_complex
+import algebra.homology.additive
 
 noncomputable theory
 
@@ -37,5 +37,9 @@ def unop_functor : (homological_complex Cᵒᵖ c)ᵒᵖ ⥤ homological_complex
   map := λ X Y f,
   { f := λ i, (f.unop.f i).unop,
     comm' := λ i j hij, by simp only [unop_d, ← unop_comp, f.unop.comm] }, }
+
+instance op_functor_additive : (@op_functor C _ _ _ c).additive := {}
+
+instance unop_functor_additive : (@unop_functor C _ _ _ c).additive := {}
 
 end homological_complex

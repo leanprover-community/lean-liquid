@@ -149,37 +149,56 @@ begin
     { rintro (_|n); exact exact_of_zero 0 0 } }
 end
 
+section
+
+variables {ι : Type*} {c : complex_shape ι}
+
+lemma is_quasi_iso_of_op {X Y : (homological_complex 𝓐 c)ᵒᵖ} (f : X ⟶ Y)
+  (h : is_quasi_iso ((homotopy_category.quotient _ _).map
+    (homological_complex.op_functor.map f))) :
+  is_quasi_iso ((homotopy_category.quotient _ _).map f.unop) :=
+begin
+  sorry
+end
+
+end
+
 def Ext_compute_with_acyclic
   (B : 𝓐)
   (hC : ∀ k, ∀ i > 0, is_zero (((Ext' i).obj (op $ C.X k)).obj B))
   (i : ℤ) :
   ((Ext i).obj (op $ of' C)).obj ((single _ 0).obj B) ≅
-  unop ((((preadditive_yoneda.obj B).right_op.map_homological_complex _).obj C).homology (-i)) :=
+  (((preadditive_yoneda.obj B).right_op.map_homological_complex _).obj C).unop.homology (-i) :=
 begin
   let P := (of' C).replace,
+  refine (preadditive_yoneda.map_iso _).app (op P) ≪≫ _,
+  { exact (single 𝓐 (-i)).obj B },
+  { exact (shift_single_iso 0 i).app B ≪≫ eq_to_iso (by rw zero_sub) },
+  refine hom_single_iso _ _ _ ≪≫ _,
   let π : P ⟶ of' C := (of' C).π,
-  let B' := (single _ 0).obj B,
-  let HomB := (preadditive_yoneda.obj B).right_op.map_homological_complex (complex_shape.up ℤ),
-  let f := HomB.map π.out,
-  let fq := (homotopy_category.quotient _ _).map f,
+  let HomB := (preadditive_yoneda.obj B).right_op.map_homological_complex (complex_shape.up ℤ) ⋙ homological_complex.unop_functor.right_op,
+  let fq := (homotopy_category.quotient _ _).map (HomB.map π.out).unop,
   suffices hf : is_quasi_iso fq,
-  { resetI,
-    let e := as_iso ((homotopy_category.homology_functor Abᵒᵖ _ (-i)).map fq),
-    let e' := e.symm.unop,
-    refine _ ≪≫ e',
-    refine _ ≪≫ (homology_iso _ (-i-1) (-i) (-i+1) _ _).unop,
-    rotate, { dsimp, apply sub_add_cancel }, { dsimp, refl },
-    refine _ ≪≫ (homology_unop_iso _ _ _).unop,
-    refine (preadditive_yoneda.map_iso _).app (op P) ≪≫ _,
-    { exact (single 𝓐 (-i)).obj B },
-    { exact (shift_single_iso 0 i).app B ≪≫ eq_to_iso (by rw zero_sub) },
-    refine hom_single_iso _ _ _ ≪≫ _,
-    refine (homology_iso _ (-i+1) (-i) (-i-1) _ _),
-    { dsimp, refl }, { dsimp, apply sub_add_cancel }, },
+  { have := @is_quasi_iso.cond _ _ _ _ _ _ _ _ hf (-i),
+    resetI,
+    let e := as_iso ((homotopy_category.homology_functor Ab _ (-i)).map fq),
+    exact e.symm, },
+  -- that was the data,
+  -- now the proof obligation ...
+  /-
+  The proof strategy is roughly the following:
+  the map is a quasi-iso iff its cone is acyclic
+  the cone commutes with the additive functor
+  so you end up with this functor applied to the cone of `π`
+  the cone of `π` is acyclic, since `π` is a quasi-iso
+  by induction, the other cone is also acyclic
+  -/
+  apply is_quasi_iso_of_op,
+  let f := homological_complex.op_functor.map (HomB.map (quot.out π)),
   have := cone_triangleₕ_mem_distinguished_triangles _ _ f,
   replace := is_quasi_iso_iff_is_acyclic _ this,
   dsimp [homological_complex.cone.triangleₕ] at this,
-  rw this, clear this i,
+  erw this, clear this i,
   constructor,
   intro i, obtain ⟨i, rfl⟩ : ∃ j, j + 1 = i := ⟨i - 1, sub_add_cancel _ _⟩,
   refine is_zero.of_iso _ (homology_iso _ i (i+1) (i+1+1) _ _),
@@ -203,7 +222,7 @@ begin
     { apply hb, refine (le_max_right _ _).trans (hk.trans (lt_add_one _).le) },
     { apply ha, exact (le_max_left _ _).trans hk, } },
   have aux := @map_is_acyclic_of_acyclic _ _ _ _ _ _ this B _,
-  { replace := (@is_acyclic.cond _ _ _ _ aux (i+1)).of_iso (homology_iso _ i (i+1) (i+1+1) _ _).symm,
+  { replace := (@is_acyclic.cond _ _ _ _ _ _ aux (i+1)).of_iso (homology_iso _ i (i+1) (i+1+1) _ _).symm,
     rotate, { dsimp, refl }, { dsimp, refl },
     dsimp only [homotopy_category.quotient, quotient.functor_obj_as, homological_complex.cone_d,
       functor.map_homotopy_category_obj, functor.map_homological_complex_obj_d] at this,
@@ -221,7 +240,8 @@ begin
           biprod.lift_desc, preadditive.comp_neg, comp_zero, add_zero,
           ← op_comp, ← category_theory.functor.map_comp, biprod.lift_fst],
         simp only [biprod.desc_eq, comp_zero, add_zero, preadditive.comp_neg,
-          category_theory.op_neg, functor.map_neg], },
+          category_theory.op_neg, functor.map_neg, op_comp, category_theory.functor.map_comp],
+        refl },
       { simp only [category.assoc, functor.right_op_map, homological_complex.cone.d, biprod.lift_snd,
           eq_self_iff_true, functor.map_homological_complex_obj_d, functor.right_op_map,
           functor.map_homological_complex_map_f, homological_complex.X_eq_to_iso_refl,
@@ -229,7 +249,9 @@ begin
         simp only [functor.map_homological_complex_obj_d, functor.right_op_map, functor.comp_map,
           biprod.lift_desc, preadditive.comp_neg, comp_zero, add_zero,
           ← op_comp, ← category_theory.functor.map_comp, biprod.lift_snd],
-        simp only [biprod.desc_eq, op_add, functor.map_neg, functor.map_add] } } },
+        simp only [biprod.desc_eq, op_add, functor.map_neg, functor.map_add, op_comp,
+          category_theory.functor.map_comp],
+        refl } } },
   { clear i, intros k i hi,
     let e := functor.map_biprod ((Ext' i).flip.obj B).right_op
       (P.val.as.X (k + 1)) ((of' C).val.as.X k),
@@ -237,5 +259,5 @@ begin
     refine category_theory.limits.is_zero.biprod _ _,
     { simp only [functor.right_op_obj, functor.flip_obj_obj, is_zero_op],
       exact acyclic_of_projective (P.val.as.X (k + 1)) B i hi, },
-    { exact (hC k _ hi).op, }, }
+    { exact (hC k _ hi).op, }, },
 end
