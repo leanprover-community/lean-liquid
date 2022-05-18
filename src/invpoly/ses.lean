@@ -128,6 +128,20 @@ begin
   polynomial.eval_mul, polynomial.eval_X, polynomial.eval_bit0, polynomial.eval_one, sub_self],
 end
 
+lemma theta_zero_of_eval2_zero {S : Fintype} (c : ℝ≥0) {f : invpoly r S} (hf1 : eval2 p S f = 0) :
+(laurent_measures.Θ p S) ((to_laurent_measures_addhom r S) f) = 0 :=
+begin
+  sorry,
+end
+
+lemma psi_eq_div_X_sub_two {S : Fintype} (c : ℝ≥0) {f : invpoly r S}
+  (hf1 : ((eval2_nat_trans p).app S) f = 0) :
+(to_laurent_measures_addhom r S) (λ (s : ↥S), f s /ₘ (polynomial.X - 2)) =
+  ψ ((to_laurent_measures_addhom «r» S) f) (theta_zero_of_eval2_zero p c hf1) :=
+begin
+  sorry,
+end
+
 theorem short_exact (S : Profinite) :
   short_exact ((condensify_Tinv2 _).app S) ((condensify_map $ eval2_nat_trans p).app S) :=
 begin
@@ -155,19 +169,14 @@ begin
       rw ← to_laurent_measures_addhom_isometry at ⊢ hf2,
       refine le_trans _ (nnreal.mul_le_mul_right (le_max_right _ _) _),
       rw mul_inv_cancel_right₀ (lt_of_lt_of_le (zero_lt_two : (0 : ℝ≥0) < 2) le_add_self).ne',
-      convert laurent_measures.psi_bound p S c _ hf2,
-      { sorry }, -- this says that ψ defined on Laurent series is just /ₘ (T⁻¹ - 2) on ℤ[T⁻¹].
-                 -- The metavariable is a missing proof that ψ even makes sense, i.e.
-                 -- that the power series vanishes at T⁻¹ = 2.
-
-      { sorry } }, -- and this says that `laurent_measures.Θ` kills f, which should be deducible
-                   -- from `hf1'`.
+      convert laurent_measures.psi_bound p S c (theta_zero_of_eval2_zero p c hf1') hf2,
+      exact psi_eq_div_X_sub_two p c hf1,
+    },
     { ext1 s,
       convert hf3 s,
       simp [sub_mul, Tinv2_nat_trans, Tinv_nat_trans],
       refl } },
-  -- this sorry can be deleted
-  sorry;{ rintro S c g (hg : _ ≤ _),
+  { rintro S c g (hg : _ ≤ _),
     let f : invpoly r S := λ s, polynomial.C (g s),
     refine ⟨f, _, _⟩,
     { show _ ≤ _,
