@@ -8,7 +8,7 @@ import combinatorial_lemma.profinite
 
 noncomputable theory
 
-universe variable u
+universes u v
 
 open_locale nnreal -- enable the notation `ℝ≥0` for the nonnegative real numbers.
 
@@ -21,7 +21,7 @@ section
 
 variables (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' < 1)]
 variables (BD : package)
-variables (V : SemiNormedGroup.{u}) [normed_with_aut r V]
+variables (V : SemiNormedGroup.{v}) [normed_with_aut r V]
 variables (κ κ' : ℕ → ℝ≥0) [BD.data.very_suitable r r' κ]
 variables (M : ProFiltPseuNormGrpWithTinv.{u} r')
 variables (m : ℕ)
@@ -96,7 +96,7 @@ include BD κ κ' r r' m
 
 /-- A variant of Theorem 9.5 in [Analytic] using weak bounded exactness. -/
 theorem thm95' : ∀ (Λ : PolyhedralLattice.{u}) (S : Type u) [fintype S]
-  (V : SemiNormedGroup.{u}) [normed_with_aut r V],
+  (V : SemiNormedGroup.{v}) [normed_with_aut r V],
   ​((BD.data.system κ r V r').obj (op $ Hom Λ (Lbar r' S))).is_weak_bounded_exact
     (k κ' m) (K r r' BD κ' m) m (c₀ r r' BD κ κ' m Λ) :=
 begin
@@ -114,7 +114,7 @@ end
 
 /-- A variant of Theorem 9.5 in [Analytic] using weak bounded exactness. -/
 theorem thm95'.profinite : ∀ (Λ : PolyhedralLattice.{u}) (S : Profinite.{u})
-  (V : SemiNormedGroup.{u}) [normed_with_aut r V],
+  (V : SemiNormedGroup.{v}) [normed_with_aut r V],
   ​((BD.data.system κ r V r').obj (op $ Hom Λ ((Lbar.functor.{u u} r').obj S))).is_weak_bounded_exact
     (k κ' m) (K r r' BD κ' m) m (c₀ r r' BD κ κ' m Λ) :=
 begin
@@ -134,7 +134,7 @@ omit BD κ κ' r r' m
 
 /-- Theorem 9.5 in [Analytic] -/
 theorem thm95 (Λ : PolyhedralLattice.{u}) (S : Type u) [fintype S]
-  (V : SemiNormedGroup.{u}) [normed_with_aut r V] :
+  (V : SemiNormedGroup.{v}) [normed_with_aut r V] :
   ((BD.data.system κ r V r').obj (op $ Hom Λ (Lbar r' S))).is_bounded_exact
     (k κ' m ^ 2) (K r r' BD κ' m + 1) m (c₀ r r' BD κ κ' m Λ) :=
 begin
@@ -145,7 +145,7 @@ end
 
 /-- Theorem 9.5 in [Analytic] -/
 theorem thm95.profinite (Λ : PolyhedralLattice.{u}) (S : Profinite.{u})
-  (V : SemiNormedGroup.{u}) [normed_with_aut r V] :
+  (V : SemiNormedGroup.{v}) [normed_with_aut r V] :
   ((BD.data.system κ r V r').obj (op $ Hom Λ ((Lbar.functor.{u u} r').obj S))).is_bounded_exact
     (k κ' m ^ 2) (K r r' BD κ' m + 1) m (c₀ r r' BD κ κ' m Λ) :=
 begin
@@ -174,7 +174,7 @@ theorem thm95'' (BD : package)
   ∀ (Λ : Type u) [polyhedral_lattice Λ],
   ∃ c₀ : ℝ≥0,
   ∀ (S : Type u) [fintype S],
-  ∀ (V : SemiNormedGroup.{u}) [normed_with_aut r V],
+  ∀ (V : SemiNormedGroup.{v}) [normed_with_aut r V],
     by exactI system_of_complexes.is_weak_bounded_exact
     (​(BD.data.system κ r V r').obj (op $ Hom Λ (Lbar r' S))) k K m c₀ :=
 begin
@@ -195,7 +195,7 @@ theorem thm95''.profinite (BD : package)
   ∀ (Λ : Type u) [polyhedral_lattice Λ],
   ∃ c₀ : ℝ≥0,
   ∀ (S : Profinite.{u}),
-  ∀ (V : SemiNormedGroup.{u}) [normed_with_aut r V],
+  ∀ (V : SemiNormedGroup.{v}) [normed_with_aut r V],
     by exactI system_of_complexes.is_weak_bounded_exact
     (​(BD.data.system κ r V r').obj (op $ Hom Λ ((Lbar.functor.{u u} r').obj S))) k K m c₀ :=
 begin

@@ -10,7 +10,7 @@ import thm95.constants
 
 noncomputable theory
 
-universe variable u
+universes u v
 
 open_locale nnreal -- enable the notation `ℝ≥0` for the nonnegative real numbers.
 
@@ -22,7 +22,7 @@ section
 
 variables (BD : package)
 variables (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)]
-variables (V : SemiNormedGroup.{u}) [normed_with_aut r V]
+variables (V : SemiNormedGroup.{v}) [normed_with_aut r V]
 variables (κ κ' : ℕ → ℝ≥0) [BD.data.very_suitable r r' κ]
 variables (M : ProFiltPseuNormGrpWithTinv.{u} r')
 variables (m : ℕ)

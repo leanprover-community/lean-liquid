@@ -17,22 +17,22 @@ noncomputable theory
 open category_theory opposite
 open SemiNormedGroup
 
-universes u
+universes u v
 
 -- We have a surjective morphism of profinite sets.
 variables (F : arrow Profinite.{u}) (surj : function.surjective F.hom)
-variables (M : SemiNormedGroup.{u})
+variables (M : SemiNormedGroup.{v})
 
 /-- The cochain complex built out of the cosimplicial object obtained by applying
   `LocallyConstant.obj M` to the augmented Cech nerve of `F`. -/
 abbreviation FL : cochain_complex SemiNormedGroup ℕ :=
-  (((cosimplicial_object.augmented.whiskering _ _).obj (LocallyConstant.{u u}.obj M)).obj
+  (((cosimplicial_object.augmented.whiskering _ _).obj (LocallyConstant.obj M)).obj
   F.augmented_cech_nerve.right_op).to_cocomplex
 
 /-- The cochain complex built out of the cosimplicial object obtained by applying
   `LCC.obj M` to the augmented Cech nerve of `F`. -/
 abbreviation FLC : cochain_complex SemiNormedGroup ℕ :=
-  (((cosimplicial_object.augmented.whiskering _ _).obj (LCC.{u u}.obj M)).obj
+  (((cosimplicial_object.augmented.whiskering _ _).obj (LCC.obj M)).obj
   F.augmented_cech_nerve.right_op).to_cocomplex
 
 --def Rop : (simplicial_object.augmented Profinite)ᵒᵖ ⥤ cosimplicial_object.augmented Profiniteᵒᵖ :=
@@ -54,7 +54,7 @@ cosimplicial_object.augmented.cocomplex
 @[simps obj map]
 def FLC_functor' : (simplicial_object.augmented Profinite.{u})ᵒᵖ ⥤ cochain_complex SemiNormedGroup ℕ :=
 simplicial_to_cosimplicial_augmented _ ⋙
-  (cosimplicial_object.augmented.whiskering _ _).obj (SemiNormedGroup.LCC.{u u}.obj M) ⋙
+  (cosimplicial_object.augmented.whiskering _ _).obj (SemiNormedGroup.LCC.obj M) ⋙
   cosimplicial_object.augmented.cocomplex
 
 /-- A functorial version of `FLC`. -/
@@ -503,7 +503,7 @@ begin
   let CC : Π (n : ℕ), ((FLF F surj M).obj (op S)).X (n+1) ⟶
       ((FLF F surj M).obj (op S)).X n :=
       ((Profinite.arrow_diagram F surj).obj S).contracting_homotopy
-      (LocallyConstant.{u u}.obj M),
+      (LocallyConstant.obj M),
   let gc := CC _ g,
   let GG := ((FLF_cocone F surj M).ι.app (op S)).f _ gc,
   refine ⟨GG,_,_⟩,
@@ -515,7 +515,7 @@ begin
     congr' 1,
     change (CC n ≫ _) g = g,
     cases n,
-    { have hh := arrow.is_contracting_homotopy_one (LocallyConstant.{u u}.obj M)
+    { have hh := arrow.is_contracting_homotopy_one (LocallyConstant.obj M)
         ((Profinite.arrow_diagram F surj).obj S),
       apply_fun (λ e, e g) at hh,
       change CC 1 (_) + _ = g at hh,
@@ -525,7 +525,7 @@ begin
         erw h2 },
       rw [normed_group_hom.map_zero, zero_add] at hh,
       exact hh },
-    { have hh := arrow.is_contracting_homotopy (LocallyConstant.{u u}.obj M)
+    { have hh := arrow.is_contracting_homotopy (LocallyConstant.obj M)
         ((Profinite.arrow_diagram F surj).obj S) _,
       apply_fun (λ e, e g) at hh,
       change CC _ (_) + _ = g at hh,

@@ -20,13 +20,13 @@ noncomputable theory
 open_locale nnreal big_operators
 open category_theory opposite simplex_category
 
-universe variables u v w
+universe variables u v
 
 namespace thm95
 
 variables (BD : breen_deligne.data) (κ : ℕ → ℝ≥0) [BD.suitable κ]
 variables (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)]
-variables (V : SemiNormedGroup.{u}) [normed_with_aut r V]
+variables (V : SemiNormedGroup.{v}) [normed_with_aut r V]
 variables (Λ : PolyhedralLattice.{u}) (M : ProFiltPseuNormGrpWithTinv.{u} r')
 variables (N : ℕ) [fact (0 < N)]
 
@@ -67,7 +67,7 @@ begin
   exact finsupp_sum_diagonal_embedding Λ N r' M f l,
 end
 
-def cosimplicial_system_of_complexes : cosimplicial_object.augmented system_of_complexes.{u} :=
+def cosimplicial_system_of_complexes : cosimplicial_object.augmented system_of_complexes :=
 (cosimplicial_object.augmented.whiskering_obj.{u} _ _ (BD.system κ r V r')).obj
   (Cech_nerve r' Λ M N)
 
@@ -108,9 +108,9 @@ set_option pp.universes true
 def double_complex_aux_rescaled : cochain_complex system_of_complexes ℕ :=
 @homological_complex.modify _ _ _ _ _ _ _ _
 (double_complex_aux BD κ r r' V Λ M N )
-  system_of_complexes.rescale_functor.{u}
-  system_of_complexes.rescale_nat_trans.{u u}
-  (system_of_complexes.rescale_functor.additive.{u u})
+  system_of_complexes.rescale_functor
+  system_of_complexes.rescale_nat_trans
+  (system_of_complexes.rescale_functor.additive)
 
 @[simps obj map]
 def double_complex : system_of_double_complexes :=
@@ -157,7 +157,7 @@ namespace thm95
 
 variables (BD : breen_deligne.data)
 variables (r r' : ℝ≥0) [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)]
-variables (V : SemiNormedGroup.{u}) [normed_with_aut r V]
+variables (V : SemiNormedGroup.{v}) [normed_with_aut r V]
 variables (κ : ℕ → ℝ≥0) [BD.very_suitable r r' κ]
 variables (Λ : PolyhedralLattice.{u}) (M : ProFiltPseuNormGrpWithTinv.{u} r')
 variables (N : ℕ) [fact (0 < N)]

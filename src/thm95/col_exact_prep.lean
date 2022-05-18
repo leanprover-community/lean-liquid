@@ -11,7 +11,7 @@ open category_theory opposite simplex_category
 
 local attribute [instance] type_pow
 
-universe variables u u₀ uₘ
+universe variables u v u₀ uₘ
 -- set_option pp.universes true
 
 namespace system_of_complexes
@@ -90,7 +90,7 @@ end system_of_complexes
 
 namespace thm95
 
-variables (r' : ℝ) (V : SemiNormedGroup.{u}) (M : Type u) {M₁ M₂ : Type u} (N : ℕ) (d : ℝ≥0)
+variables (r' : ℝ) (V : SemiNormedGroup.{v}) (M : Type u) {M₁ M₂ : Type u} (N : ℕ) (d : ℝ≥0)
 variables [profinitely_filtered_pseudo_normed_group M] [pseudo_normed_group.splittable M N d]
 variables [profinitely_filtered_pseudo_normed_group M₁]
 variables [profinitely_filtered_pseudo_normed_group M₂]

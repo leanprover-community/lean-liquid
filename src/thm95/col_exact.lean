@@ -19,14 +19,14 @@ open_locale nnreal big_operators nat
 open category_theory opposite simplex_category
 local attribute [instance] type_pow
 
-universe variables u u₀ uₘ
+universe variables u v u₀ uₘ
 -- set_option pp.universes true
 
 namespace thm95
 
 variables (BD : breen_deligne.data) (κ : ℕ → ℝ≥0) [BD.suitable κ]
 variables (r r' : ℝ≥0)
-variables (V : SemiNormedGroup.{u})
+variables (V : SemiNormedGroup.{v})
 variables (Λ : PolyhedralLattice.{u}) (M : ProFiltPseuNormGrpWithTinv.{u} r')
 variables (N : ℕ) [fact (0 < N)] (n : ℕ)
 

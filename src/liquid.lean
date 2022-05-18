@@ -80,7 +80,7 @@ example : first_target_stmt r r' BD κ := first_target r r' BD κ
 /-- Theorem 9.4 in [Analytic] for weak bounded exactness -/
 theorem thm94_weak :
   ∀ m : ℕ, ∃ (k K : ℝ≥0) (hk : fact (1 ≤ k)) (c₀ : ℝ≥0),
-  ∀ (S : Profinite) (V : SemiNormedGroup.{0}) [normed_with_aut r V],
+  ∀ (S : Profinite) (V : SemiNormedGroup.{u}) [normed_with_aut r V],
     ​((BD.data.system κ r V r').obj (op $ of r' ((Lbar.functor.{0 0} r').obj S)))
       .is_weak_bounded_exact k K m c₀ :=
 begin
@@ -101,7 +101,7 @@ end
 /-- Theorem 9.4 in [Analytic] -/
 theorem thm94 :
   ∀ m : ℕ, ∃ (k K : ℝ≥0) (hk : fact (1 ≤ k)) (c₀ : ℝ≥0),
-  ∀ (S : Profinite) (V : SemiNormedGroup.{0}) [normed_with_aut r V],
+  ∀ (S : Profinite) (V : SemiNormedGroup.{u}) [normed_with_aut r V],
     ​((BD.data.system κ r V r').obj (op $ of r' ((Lbar.functor.{0 0} r').obj S)))
       .is_bounded_exact k K m c₀ :=
 begin

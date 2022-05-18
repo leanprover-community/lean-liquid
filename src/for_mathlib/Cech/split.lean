@@ -6,7 +6,7 @@ import for_mathlib.arrow.split
 
 namespace category_theory
 
-universes v u
+universes v u v' u'
 
 namespace arrow
 
@@ -87,7 +87,8 @@ section contracting_homotopy
 open category_theory.limits opposite
 
 -- Note: Universe restrictions! I hope this doesn't pose any issues later...
-variables {P N : Type u} [category.{v} P] [category.{v} N] (M : Pᵒᵖ ⥤ N)
+-- jmc: seems like it might! I removed them.
+variables {P : Type u} {N : Type u'} [category.{v} P] [category.{v'} N] (M : Pᵒᵖ ⥤ N)
 variables (f : arrow P)
 variables [∀ n : ℕ, has_wide_pullback f.right (λ i : ulift (fin (n+1)), f.left) (λ i, f.hom)]
 

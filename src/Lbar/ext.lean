@@ -12,6 +12,7 @@ import Lbar.squares
 import pseudo_normed_group.QprimeFP
 import for_mathlib.acyclic
 import free_pfpng.acyclic
+import for_mathlib.SemiNormedGroup_ulift
 
 noncomputable theory
 
@@ -48,7 +49,7 @@ end
 
 def ExtQprime_iso_aux_system (c : ℝ≥0) (n : ℕ) :
   ((Ext n).obj (op $ (QprimeFP r' BD κ M).obj c)).obj ((single _ 0).obj V.to_Cond) ≅
-  Ab.ulift.{u+1}.obj (((aux_system r' BD ⟨M⟩ V κ).to_AbH n).obj (op c)) :=
+  ((aux_system r' BD ⟨M⟩ (SemiNormedGroup.ulift.{u+1}.obj V) κ).to_AbH n).obj (op c) :=
 Ext_compute_with_acyclic _ _ (ExtQprime_iso_aux_system_aux r' BD κ M V c) _ ≪≫
   sorry
 

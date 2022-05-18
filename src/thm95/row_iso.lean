@@ -32,7 +32,7 @@ We need the following isomorphisms
 
 -/
 
-universe variables u
+universes u v
 
 noncomputable theory
 
@@ -66,7 +66,7 @@ section rescale
 variables {BD : breen_deligne.data}
 variables (κ : ℕ → ℝ≥0)
 variables [BD.suitable κ]
-variables (r : ℝ≥0) (V : SemiNormedGroup.{u}) [normed_with_aut r V] [fact (0 < r)]
+variables (r : ℝ≥0) (V : SemiNormedGroup.{v}) [normed_with_aut r V] [fact (0 < r)]
 variables {r' : ℝ≥0} [fact (0 < r')] [fact (r' ≤ 1)] (c : ℝ≥0)
 variables (M : ProFiltPseuNormGrpWithTinv.{u} r')
 
@@ -154,7 +154,7 @@ namespace thm95
 open breen_deligne polyhedral_lattice opposite
 
 variables (BD : breen_deligne.data) (κ : ℕ → ℝ≥0) [BD.suitable κ]
-variables (r : ℝ≥0) (V : SemiNormedGroup.{u}) [normed_with_aut r V] [fact (0 < r)]
+variables (r : ℝ≥0) (V : SemiNormedGroup.{v}) [normed_with_aut r V] [fact (0 < r)]
 variables {r' : ℝ≥0} [fact (0 < r')] [fact (r < r')] [fact (r' ≤ 1)] (c : ℝ≥0)
 
 section
