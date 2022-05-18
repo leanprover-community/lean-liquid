@@ -38,23 +38,27 @@ begin
   refl,
 end
 
+-- move me, generalize
+instance ulift.preorder : preorder (ulift.{u} ℕ) :=
+preorder.lift ulift.down
+
 section
 
-variables (C : ℝ≥0ᵒᵖ ⥤ Ab) (i : ℕ) (f : ℕ → ℝ≥0)
+variables (C : ℝ≥0ᵒᵖ ⥤ Ab.{u}) (i : ℕ) (f : ulift.{u} ℕ → ℝ≥0)
 
 def shift_sub_id.shift (hf : monotone f) :
-  (∏ (λ x : ℕ, C.obj (op $ f x))) ⟶ (∏ (λ x : ℕ, C.obj (op $ f x))) :=
-pi.lift $ λ x, pi.π _ (x+1) ≫ (C.map (hom_of_le $ hf $ nat.le_succ x).op)
+  (∏ (λ x, C.obj (op $ f x))) ⟶ (∏ (λ x, C.obj (op $ f x))) :=
+pi.lift $ λ x, pi.π _ (⟨x.down+1⟩) ≫ (C.map (hom_of_le $ hf $ by apply nat.le_succ).op)
 
 def shift_sub_id (hf : monotone f) :
-  (∏ (λ x : ℕ, C.obj (op $ f x))) ⟶ (∏ (λ x : ℕ, C.obj (op $ f x))) :=
+  (∏ (λ x, C.obj (op $ f x))) ⟶ (∏ (λ x, C.obj (op $ f x))) :=
 shift_sub_id.shift C f hf - 𝟙 _
 
 end
 
 namespace system_of_complexes
 
-variables (C : system_of_complexes) (i : ℕ) (f : ℕ → ℝ≥0)
+variables (C : system_of_complexes.{u}) (i : ℕ) (f : ulift.{u} ℕ → ℝ≥0)
 
 def to_AbH : ℝ≥0ᵒᵖ ⥤ Ab := C.to_Ab ⋙ homology_functor _ _ i
 

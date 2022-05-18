@@ -18,7 +18,7 @@ open opposite category_theory category_theory.limits category_theory.preadditive
 section step1
 
 variables {A B C : ℝ≥0ᵒᵖ ⥤ Ab.{u}} (f : A ⟶ B)
-variables (ι : ℕ → ℝ≥0)
+variables (ι : ulift.{u} ℕ → ℝ≥0)
 
 def shift_sub_id.commsq (hι : monotone ι) :
   commsq (shift_sub_id A ι hι)
@@ -38,7 +38,7 @@ end step1
 
 section step2
 
-variables {A B C : ℕ → Ab.{u}} (f : Π k, A k ⟶ B k) (g : Π k, B k ⟶ C k)
+variables {A B C : ulift.{u} ℕ → Ab.{u}} (f : Π k, A k ⟶ B k) (g : Π k, B k ⟶ C k)
 
 lemma pi_map_exact (H : ∀ k, exact (f k) (g k)) :
   exact (pi.map f) (pi.map g) :=
@@ -50,7 +50,7 @@ begin
       zero_comp, (H j).1, comp_zero], },
   intros x hx,
   rw [add_monoid_hom.mem_ker, Ab.apply_eq_zero] at hx,
-  have : ∀ (k : ℕ), (Ab.pt (limit.π (discrete.functor (λ (k : ℕ), B k)) k x)) ≫ g k = 0,
+  have : ∀ k, (Ab.pt (limit.π (discrete.functor (λ k, B k)) k x)) ≫ g k = 0,
   { intro k,
     suffices : Ab.pt x ≫ pi.map g ≫ pi.π _ k = 0,
     { simpa only [lim_map_π, discrete.nat_trans_app, ← category.assoc, hx, Ab.pt_comp] },
@@ -72,10 +72,10 @@ end step2
 section step3
 
 variables {A B C : ℝ≥0ᵒᵖ ⥤ cochain_complex Ab.{u} ℕ} (f : A ⟶ B) (g : B ⟶ C)
-variables (ι : ℕ → ℝ≥0) (n : ℕ)
+variables (ι : ulift.{u} ℕ → ℝ≥0) (n : ℕ)
 
 def piH_hom :
-  (∏ (λ x : ℕ, (A.obj (op $ ι x)).homology n)) ⟶ (∏ (λ x : ℕ, (B.obj (op $ ι x)).homology n)) :=
+  (∏ (λ x, (A.obj (op $ ι x)).homology n)) ⟶ (∏ (λ x, (B.obj (op $ ι x)).homology n)) :=
 pi.map $ λ k, (homology_functor _ _ _).map $ f.app _
 
 def shift_sub_id.δ (H : ∀ c n, short_exact ((f.app c).f n) ((g.app c).f n)) :
@@ -86,7 +86,7 @@ def shift_sub_id.δ (H : ∀ c n, short_exact ((f.app c).f n) ((g.app c).f n)) :
   end }
 
 def piδ (H : ∀ c n, short_exact ((f.app c).f n) ((g.app c).f n)) :
-  (∏ (λ x : ℕ, (C.obj (op $ ι x)).homology n)) ⟶ (∏ (λ x : ℕ, (A.obj (op $ ι x)).homology (n+1))) :=
+  (∏ (λ x, (C.obj (op $ ι x)).homology n)) ⟶ (∏ (λ x, (A.obj (op $ ι x)).homology (n+1))) :=
 pi.map $ λ k, (shift_sub_id.δ _ _ _ H).app _
 
 lemma piH_les (H : ∀ c n, short_exact ((f.app c).f n) ((g.app c).f n)) :
@@ -129,7 +129,7 @@ end step4
 section step5
 
 variables {A B C : system_of_complexes.{u}} (f : A.to_Ab ⟶ B.to_Ab) (g : B.to_Ab ⟶ C.to_Ab)
-variables (n : ℕ) (ι : ℕ → ℝ≥0) (hι : monotone ι)
+variables (n : ℕ) (ι : ulift.{u} ℕ → ℝ≥0) (hι : monotone ι)
 
 lemma shift_sub_id.bicartesian
   (HA₁ : is_iso (shift_sub_id (A.to_AbH n) ι hι))
@@ -142,7 +142,7 @@ begin
   let S1 := ((@shift_sub_id.commsq (A.to_AbH n) (B.to_AbH n) (whisker_right f _) ι hι)).symm,
   let S2 := ((@shift_sub_id.commsq (B.to_AbH n) (C.to_AbH n) (whisker_right g _) ι hι)).symm,
   let S3 := ((@shift_sub_id.commsq (C.to_AbH n) (A.to_AbH (n+1)) (shift_sub_id.δ _ _ _ H) ι hι)).symm,
-  apply bicartesian_of_aut_of_end_of_end_of_aut (piH_les _ _ _ _ _) S1 S2 S3,
+  convert bicartesian_of_aut_of_end_of_end_of_aut (piH_les _ _ _ _ _) S1 S2 S3,
 end
 
 end step5
@@ -150,7 +150,7 @@ end step5
 section step6
 
 variables {A B A' B' : ℝ≥0ᵒᵖ ⥤ Ab.{u}} (f : A ⟶ B) (f' : A' ⟶ B') (eA : A ≅ A') (eB : B ≅ B')
-variables (ι : ℕ → ℝ≥0) (hι : monotone ι)
+variables (ι : ulift.{u} ℕ → ℝ≥0) (hι : monotone ι)
 
 lemma shift_sub_id.bicartesian_iso (w : f ≫ eB.hom = eA.hom ≫ f')
   (sq : (shift_sub_id.commsq f ι hι).bicartesian) :

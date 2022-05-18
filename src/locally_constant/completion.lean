@@ -4,7 +4,6 @@ import for_mathlib.SemiNormedGroup
 
 import locally_constant.completion_aux
 import free_pfpng.main
-import condensed.acyclic
 import prop819
 .
 

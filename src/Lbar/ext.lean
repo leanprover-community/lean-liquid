@@ -9,16 +9,50 @@ import breen_deligne.eg
 import for_mathlib.derived.ext_coproducts
 import condensed.ab4
 import Lbar.squares
+import pseudo_normed_group.QprimeFP
+import for_mathlib.acyclic
+import free_pfpng.acyclic
 
 noncomputable theory
 
 universes v u
+
+set_option pp.universes true
 
 open opposite category_theory category_theory.limits
 open_locale nnreal
 
 variables (r r' : ℝ≥0)
 variables [fact (0 < r)] [fact (0 < r')] [fact (r < r')] [fact (r < 1)] [fact (r' < 1)]
+
+abbreviation SemiNormedGroup.to_Cond (V : SemiNormedGroup.{u}) := Condensed.of_top_ab V
+
+section
+
+open bounded_homotopy_category
+
+variables (BD : breen_deligne.data)
+variables (κ : ℝ≥0 → ℕ → ℝ≥0) [∀ (c : ℝ≥0), BD.suitable (κ c)] [∀ n, fact (monotone (function.swap κ n))]
+variables (M : ProFiltPseuNormGrpWithTinv₁.{u} r')
+variables (V : SemiNormedGroup.{u}) [complete_space V] [separated_space V]
+
+lemma ExtQprime_iso_aux_system_aux (c : ℝ≥0) (k i : ℤ) (hi : i > 0) :
+  is_zero (((Ext' i).obj (op (((homological_complex.embed complex_shape.embedding.nat_down_int_up).obj
+      ((QprimeFP_nat.{u} r' BD κ M).obj c)).X k))).obj V.to_Cond) :=
+begin
+  rcases k with (_|_)|_,
+  { apply free_acyclic.{u} _ V i hi },
+  { /- prove `Ext(0, V)` is zero -/ sorry },
+  { apply free_acyclic.{u} _ V i hi },
+end
+
+def ExtQprime_iso_aux_system (c : ℝ≥0) (n : ℕ) :
+  ((Ext n).obj (op $ (QprimeFP r' BD κ M).obj c)).obj ((single _ 0).obj V.to_Cond) ≅
+  Ab.ulift.{u+1}.obj (((aux_system r' BD ⟨M⟩ V κ).to_AbH n).obj (op c)) :=
+Ext_compute_with_acyclic _ _ (ExtQprime_iso_aux_system_aux r' BD κ M V c) _ ≪≫
+  sorry
+
+end
 
 namespace Lbar
 

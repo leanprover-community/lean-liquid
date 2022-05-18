@@ -37,19 +37,28 @@ lemma category_theory.nat_iso.is_iso_iff {C D : Type*} [category C] [category D]
 
 open category_theory
 
+lemma chain_complex.bounded_by_one (P : chain_complex C ℕ) :
+  ((homological_complex.embed complex_shape.embedding.nat_down_int_up ⋙
+      quotient C (complex_shape.up ℤ)).obj P).bounded_by 1 :=
+begin
+  rintro ((_|i)|i) h,
+  { exfalso, revert h, dec_trivial },
+  { exact limits.is_zero_zero _ },
+  { exfalso, revert h, dec_trivial }
+end
+
+instance chain_complex.is_bounded_above (P : chain_complex C ℕ) :
+  ((homological_complex.embed complex_shape.embedding.nat_down_int_up ⋙
+      quotient C (complex_shape.up ℤ)).obj P).is_bounded_above :=
+⟨⟨1, chain_complex.bounded_by_one _⟩⟩
+
 @[simps obj obj_val map]
 noncomputable def chain_complex.to_bounded_homotopy_category :
   chain_complex C ℕ ⥤ bounded_homotopy_category C :=
 { obj := λ P,
   { val := (homological_complex.embed (complex_shape.embedding.nat_down_int_up) ⋙
       homotopy_category.quotient C _).obj P,
-    bdd := begin
-      refine ⟨⟨1, _⟩⟩,
-      rintro ((_|i)|i) h,
-      { exfalso, revert h, dec_trivial },
-      { exact limits.is_zero_zero _ },
-      { exfalso, revert h, dec_trivial }
-    end },
+    bdd := by apply chain_complex.is_bounded_above },
   map := λ P Q f, (homological_complex.embed (complex_shape.embedding.nat_down_int_up) ⋙
       homotopy_category.quotient C _).map f,
   map_id' := λ P, (homological_complex.embed (complex_shape.embedding.nat_down_int_up) ⋙
