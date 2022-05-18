@@ -100,6 +100,11 @@ apply_nolint Profinite.sigma_iso_of_equiv_aux unused_arguments
 apply_nolint SemiNormedGroup.metric_space fails_quickly unused_arguments
 apply_nolint SemiNormedGroup.normed_group fails_quickly
 
+-- for_mathlib/ab4.lean
+apply_nolint category_theory.eval_next_iso_of_some unused_arguments
+apply_nolint category_theory.eval_prev_iso_of_some unused_arguments
+apply_nolint category_theory.sigma_cokernel_cofork unused_arguments
+
 -- for_mathlib/abelian_category.lean
 apply_nolint category_theory.limits.is_zero_of_iso_of_zero unused_arguments
 apply_nolint category_theory.limits.preserves_zero_of_preserves_initial instance_priority
@@ -111,6 +116,9 @@ apply_nolint category_theory.additive_category_of_abelian instance_priority
 -- for_mathlib/acyclic.lean
 apply_nolint category_theory.functor.single unused_arguments
 apply_nolint category_theory.limits.preserves_binary_biproduct_of_additive instance_priority
+
+-- for_mathlib/commsq.lean
+apply_nolint commsq.of_iso def_lemma
 
 -- for_mathlib/derived/K_projective.lean
 apply_nolint bounded_homotopy_category.is_K_projective_shift unused_arguments
@@ -125,10 +133,6 @@ apply_nolint bounded_derived_category.zero_is_K_projective unused_arguments
 -- for_mathlib/derived/example.lean
 apply_nolint AddCommGroup.Ext_is_zero_of_one_lt ge_or_gt
 apply_nolint category_theory.ProjectiveResolution.is_projective_resolution unused_arguments
-
--- for_mathlib/derived/ext_coproducts.lean
-apply_nolint category_theory.is_initial_colimit def_lemma unused_arguments
-apply_nolint homotopy_category.homotopic_of_quotient_map_eq unused_arguments
 
 -- for_mathlib/derived/homological.lean
 apply_nolint category_theory.triangulated.homological_of_exists_aux unused_arguments
@@ -145,7 +149,9 @@ apply_nolint homotopy_category.is_quasi_iso_of_is_iso instance_priority
 -- for_mathlib/derived/les.lean
 apply_nolint homological_complex.biprod.comp_lift unused_arguments
 apply_nolint homological_complex.biprod.lift_desc_comm unused_arguments
+apply_nolint homological_complex.comp_factor_thru_image_eq_zero unused_arguments
 apply_nolint homological_complex.cone.π_quasi_iso def_lemma
+apply_nolint homological_complex.exact_of_exact_image unused_arguments
 
 -- for_mathlib/derived/les2.lean
 apply_nolint bounded_homotopy_category.Ext_five_term_exact_seq def_lemma
@@ -169,6 +175,11 @@ apply_nolint homological_complex.complex_to_functor_functor unused_arguments
 -- for_mathlib/homology_iso.lean
 apply_nolint category_theory.homology_iso_map def_lemma
 apply_nolint category_theory.kernel_lift_eq unused_arguments
+
+-- for_mathlib/homotopy_category_coproducts.lean
+apply_nolint category_theory.is_initial_colimit def_lemma unused_arguments
+apply_nolint category_theory.is_iso_coproduct unused_arguments
+apply_nolint homotopy_category.homotopic_of_quotient_map_eq unused_arguments
 
 -- for_mathlib/horseshoe.lean
 apply_nolint short_exact_sequence.biprod_factors unused_arguments
@@ -218,9 +229,6 @@ apply_nolint split_mono_of_is_zero def_lemma
 
 -- for_mathlib/rational_cones.lean
 apply_nolint extended_le_span unused_arguments
-
--- for_mathlib/salamander.lean
-apply_nolint LBC.sq_op unused_arguments
 
 -- for_mathlib/sheafification_mono.lean
 apply_nolint category_theory.grothendieck_topology.eq_zero_of_exists unused_arguments
@@ -352,6 +360,11 @@ apply_nolint CLCFP.T_inv_app unused_arguments
 apply_nolint CLCFP.T_inv_eq unused_arguments
 apply_nolint CLCFP.Tinv unused_arguments
 
+-- pseudo_normed_group/FP2.lean
+apply_nolint breen_deligne.FP2.Tinv unused_arguments
+apply_nolint breen_deligne.FPsystem.X unused_arguments
+apply_nolint breen_deligne.FPsystem.res unused_arguments
+
 -- pseudo_normed_group/LC.lean
 apply_nolint LC.T_inv unused_arguments
 apply_nolint LC.obj.normed_with_aut fails_quickly
@@ -373,6 +386,15 @@ apply_nolint pseudo_normed_group.to_add_comm_group instance_priority
 
 -- pseudo_normed_group/profinitely_filtered.lean
 apply_nolint comphaus_filtered_pseudo_normed_group.prod_pi_homeo_pi_prod unused_arguments
+
+-- pseudo_normed_group/system_of_complexes2.lean
+apply_nolint aux_system.T_inv unused_arguments
+apply_nolint aux_system.Tinv unused_arguments
+apply_nolint aux_system.aux_system_d_eq unused_arguments
+apply_nolint aux_system.mul_left_mono' unused_arguments
+apply_nolint aux_system.res unused_arguments
+apply_nolint aux_system.res_eq unused_arguments
+apply_nolint aux_system.short_exact unused_arguments
 
 -- pseudo_normed_group/with_Tinv.lean
 apply_nolint profinitely_filtered_pseudo_normed_group_with_Tinv.to_comphaus_filtered_pseudo_normed_group_with_Tinv instance_priority
