@@ -127,11 +127,59 @@ begin
   category_theory.id_apply, pi.smul_apply, nsmul_eq_mul, nat.cast_bit0, nat.cast_one, polynomial.eval_sub,
   polynomial.eval_mul, polynomial.eval_X, polynomial.eval_bit0, polynomial.eval_one, sub_self],
 end
+.
+
+lemma theta_eval2_aux {S : Fintype} (s : S) (c : ℝ≥0) {f : invpoly r S} :
+  ∑' (n : ℤ), (to_laurent_measures_fun r S f s n : ℝ) * ((2 : ℝ) ^ n)⁻¹ = ↑(polynomial.eval 2 (f s)) :=
+begin
+  rw polynomial.eval_eq_sum_range,
+  have this : ∀ (n : ℤ),
+  n ∉ finset.Icc (-(f s).nat_degree : ℤ) 0 →
+  (λ (b : ℤ), ↑(to_laurent_measures_fun «r» S f s b) * ((2 : ℝ) ^ b)⁻¹) n = 0,
+  { rintros n hn,
+    rw [finset.mem_Icc, not_and_distrib] at hn,
+    push_neg at hn,
+    dsimp only,
+    convert zero_mul _,
+    norm_cast,
+    cases hn with hn hn,
+    { have : ∃ m : ℕ, n = - m,
+      { use n.nat_abs,
+        rw int.nat_abs_of_nonpos,
+        { simp },
+        exact le_trans hn.le (by simp), },
+      rcases this with ⟨m, rfl⟩,
+      rw to_laurent_measures_fun_nonpos,
+      rw polynomial.coeff_eq_zero_of_nat_degree_lt,
+      simpa using hn },
+    { have : ∃ m : ℕ, n = m + 1,
+      { use (n - 1).nat_abs,
+        rw int.nat_abs_of_nonneg,
+        ring, linarith, },
+      rcases this with ⟨m, rfl⟩,
+      apply to_laurent_measures_fun_pos' } },
+  rw tsum_eq_sum this, clear this,
+  push_cast,
+  apply finset.sum_bij (λ (n : ℤ) hn, n.nat_abs),
+  -- this is supposed to be the easy one! all that remains
+  -- is four boring pieces of easy nonsense e.g.
+  --2^{-n}=2^{n.nat_abs} if n < 0 is probably the hardest one
+  { sorry },
+  { sorry },
+  { sorry },
+  { sorry },
+end
 
 lemma theta_zero_of_eval2_zero {S : Fintype} (c : ℝ≥0) {f : invpoly r S} (hf1 : eval2 p S f = 0) :
 (laurent_measures.Θ p S) ((to_laurent_measures_addhom r S) f) = 0 :=
 begin
-  sorry,
+  ext s,
+  replace hf1 := congr_fun hf1 s,
+  suffices : ∑' (n : ℤ), ↑(to_laurent_measures_fun «r» S f s n) * ((2 : ℝ) ^ n)⁻¹ = 0,
+  { simpa [laurent_measures.Θ, laurent_measures_ses.θ_to_add, θ, theta.ϑ,
+    to_laurent_measures_addhom], },
+  simp only [theta_eval2_aux p s c, int.cast_eq_zero],
+  exact hf1,
 end
 
 lemma psi_eq_div_X_sub_two {S : Fintype} (c : ℝ≥0) {f : invpoly r S}
