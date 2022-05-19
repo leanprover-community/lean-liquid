@@ -277,4 +277,7 @@ lemma Ext_compute_with_acyclic_naturality (C₁ C₂ : cochain_complex 𝓐 ℤ)
   (Ext_compute_with_acyclic C₂ B hC₂ i).hom ≫
     (((preadditive_yoneda.obj B).right_op.map_homological_complex _ ⋙
       homological_complex.unop_functor.right_op ⋙ (_root_.homology_functor _ _ (-i)).op).map f).unop :=
-sorry
+begin
+  dsimp only [Ext_compute_with_acyclic],
+  sorry
+end
