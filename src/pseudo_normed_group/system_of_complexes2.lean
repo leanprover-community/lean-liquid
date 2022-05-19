@@ -242,7 +242,19 @@ def incl : (BD.system κ r V r').obj (op M) ⟶ aux_system r' BD M V (λ c n, c 
 { app := λ c,
   { f := incl_f r r' BD M V κ c,
     comm' := by { rintro i j (rfl : i + 1 = j), apply incl_comm } },
-  naturality' := sorry }
+  naturality' := λ c₁ c₂ h, begin
+    ext n : 2,
+    dsimp [aux_system],
+    dsimp [breen_deligne.data.complex, breen_deligne.data.complex₂, breen_deligne.data.complex₂_X,
+      CLCTinv, FPsystem, FPsystem.X, functor.map_FreeAb, FreeAb.eval, FreeAb.of_functor,
+      universal_map.eval_CLCFPTinv, universal_map.eval_CLCFPTinv₂,
+      SemiNormedGroup.equalizer.map_nat, incl_f],
+    delta id,
+    -- erw [free_abelian_group.lift.of],
+    symmetry,
+    sorry
+    -- convert SemiNormedGroup.equalizer.map_comp_ι _ _ _ _ using 2,
+  end }
 
 def incl' := whisker_right (incl r r' BD M V κ) (functor.map_homological_complex (forget₂ _ Ab.{max u v}) _)
 
