@@ -277,8 +277,9 @@ instance homological_complex_embed_preserves_coproducts {α : Type v}
   preserves_colimits_of_shape (discrete α)
   (homological_complex.embed e : homological_complex A _ ⥤ _) :=
 preserves_coproducts_aux
-_
-sorry
+(homological_complex.embed e : homological_complex A _ ⥤ _)
+(λ (X : α → homological_complex A c₁), homological_complex.hom.iso_of_components
+sorry sorry) -- Ugh... this is so annoying!
 sorry
 
 noncomputable
