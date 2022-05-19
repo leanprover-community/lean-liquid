@@ -216,3 +216,59 @@ begin
 end
 
 end bounded_homotopy_category
+
+#check homological_complex.hom
+
+-- TODO: find better names... And move this stuff!
+
+instance chain_complex_embed_cofan_uniformly_bounded
+  {α : Type v}
+  (X : α → chain_complex A ℕ) :
+  bounded_homotopy_category.uniformly_bounded
+  (λ a, chain_complex.to_bounded_homotopy_category.obj (X a)) :=
+begin
+  constructor, use 1, intros a i hi,
+  rcases i with (_|i)|_,
+  { exfalso, revert hi, dec_trivial },
+  { exact is_zero_zero _, },
+  { exfalso, revert hi, dec_trivial }
+end
+
+universe u'
+
+def whisker_discrete_functor {α : Type v}
+  {C : Type u} {D : Type u'} [category.{v} C] [category.{v} D] (F : C ⥤ D)
+  (X : α → C) : discrete.functor X ⋙ F ≅ discrete.functor (F.obj ∘ X) :=
+  discrete.nat_iso (λ i, iso.refl _)
+
+def chain_complex_embed_cofan_iso
+  {α : Type v}
+  (X : α → chain_complex A ℕ) :
+  (bounded_homotopy_category.cofan
+    (λ a, chain_complex.to_bounded_homotopy_category.obj (X a))) ≅
+    ((cocones.precompose (whisker_discrete_functor _ X).inv).obj
+    (chain_complex.to_bounded_homotopy_category.map_cocone
+      (colimit.cocone (discrete.functor X)))) := sorry
+
+noncomputable
+instance chain_complex_to_bounded_homotopy_category_preserves_coproducts
+  {α : Type v} :
+  preserves_colimits_of_shape (discrete α)
+  (chain_complex.to_bounded_homotopy_category : chain_complex A _ ⥤ _) :=
+begin
+  constructor, intros K,
+  let E : K ≅ discrete.functor K.obj := discrete.nat_iso (λ _, iso.refl _),
+  apply preserves_colimit_of_iso_diagram _ E.symm,
+  apply preserves_colimit_of_preserves_colimit_cocone (colimit.is_colimit _),
+  let Q : α → bounded_homotopy_category A := λ a,
+    chain_complex.to_bounded_homotopy_category.obj (K.obj a),
+  let P := _, change is_colimit P,
+  let T : discrete.functor K.obj ⋙ chain_complex.to_bounded_homotopy_category ≅
+    discrete.functor Q := discrete.nat_iso (λ _, iso.refl _),
+  let P' := (cocones.precompose T.inv).obj P,
+  suffices : is_colimit P',
+  { exact is_colimit.precompose_inv_equiv _ _ this },
+  apply is_colimit.of_iso_colimit (bounded_homotopy_category.is_colimit_cofan Q),
+  swap, apply_instance,
+  apply chain_complex_embed_cofan_iso,
+end
