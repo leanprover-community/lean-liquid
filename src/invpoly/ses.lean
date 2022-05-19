@@ -209,13 +209,46 @@ begin
 end
 .
 
+lemma _root_.int.eq_neg_nat_or_succ_nat (n : ℤ) : ∃ m : ℕ, n = -m ∨ n = m + 1 :=
+begin
+  cases le_or_lt n 0,
+  { use n.nat_abs,
+    left,
+    rw [int.nat_abs_of_nonpos h, neg_neg] },
+  { use (n - 1).nat_abs,
+    right,
+    rw [int.nat_abs_of_nonneg],
+    ring, linarith },
+end
+
 lemma phi_eq_mul_Tinv_sub_two {S : Fintype} (g : invpoly r S) :
   ϕ ((to_laurent_measures_addhom r S) (λ (s : ↥S), g s)) =
     (to_laurent_measures_addhom r S) (λ (s : ↥S), (polynomial.X - 2) * g s) :=
 begin
-  admit,
+  ext s n,
+  delta ϕ,
+  simp only [laurent_measures.sub_apply, laurent_measures.shift_to_fun_to_fun,
+    laurent_measures.nsmul_apply, nsmul_eq_mul, int.nat_cast_eq_coe_nat,
+    int.coe_nat_zero, zero_add],
+  obtain ⟨m, (rfl | rfl)⟩ := n.eq_neg_nat_or_succ_nat,
+  { simp only [to_laurent_measures_addhom, to_laurent_measures_fun_nonpos, add_monoid_hom.mk'_apply,
+      to_laurent_measures_to_fun],
+    cases m,
+    { simp only [nat.nat_zero_eq_zero, int.coe_nat_zero, neg_zero', zero_add,
+        polynomial.mul_coeff_zero, polynomial.coeff_sub,
+        polynomial.coeff_X_zero, zero_sub, neg_mul],
+      rw [to_laurent_measures_fun_pos'' r S g s (show (0 : ℤ) < 1, by norm_num)],
+      simp only [zero_sub, neg_inj, mul_eq_mul_right_iff,
+        show (2 : polynomial ℤ) = polynomial.C 2, by simp, polynomial.coeff_C_zero],
+      left,
+      norm_num, },
+    { simp only [to_laurent_measures_fun_nonpos, sub_mul, int.coe_nat_succ, neg_add_rev,
+        neg_add_cancel_comm, int.coe_nat_bit0, int.coe_nat_zero, zero_add, polynomial.coeff_sub,
+        polynomial.coeff_X_mul, sub_right_inj, show (2 : polynomial ℤ) = polynomial.C 2, by simp,
+        polynomial.coeff_C_mul],
+    } },
+  { norm_cast }, -- didn't expect that to close it!
 end
-
 
 lemma psi_eq_div_X_sub_two {S : Fintype} (c : ℝ≥0) {f : invpoly r S}
   (hf1 : ((eval2_nat_trans p).app S) f = 0) :

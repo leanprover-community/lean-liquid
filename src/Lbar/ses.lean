@@ -52,6 +52,15 @@ lemma to_laurent_measures_fun_pos' (F : invpoly r' S) (s : S) (n : ℕ) :
 to_laurent_measures_fun r' S F s (n + 1) = 0 :=
 rfl
 
+lemma to_laurent_measures_fun_pos'' (F : invpoly r' S) (s : S) {m : ℤ} (hn : 0 < m) :
+to_laurent_measures_fun r' S F s m = 0 :=
+begin
+  convert to_laurent_measures_fun_pos' r' S F s (m - 1).nat_abs,
+  rw int.nat_abs_of_nonneg,
+  { ring },
+  { linarith }
+end
+
 lemma to_laurent_measures_fun_neg (F : invpoly r' S) (s : S) (n : ℕ) :
 to_laurent_measures_fun r' S F s -[1+n] = (F s).coeff (n+1) :=
 rfl
