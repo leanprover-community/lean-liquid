@@ -106,12 +106,12 @@ end step3
 
 section step4
 
-lemma bicartesian_of_aut_of_end_of_end_of_aut
+lemma bicartesian_of_id_of_end_of_end_of_id
   {A B C D : Ab.{u}} {f : A ⟶ B} {g : B ⟶ C} {h : C ⟶ D}
   {α : A ⟶ A} {β : B ⟶ B} {γ : C ⟶ C} {δ : D ⟶ D}
   (H : exact_seq Ab.{u} [f, g, h])
   (sq1 : commsq f α β f) (sq2 : commsq g β γ g) (sq3 : commsq h γ δ h)
-  [is_iso α] [is_iso δ] :
+  (hα : α = -𝟙 _) (hδ : δ = -𝟙 _) :
   sq2.bicartesian :=
 begin
   have aux : _ := _,
@@ -132,8 +132,8 @@ variables {A B C : system_of_complexes.{u}} (f : A.to_Ab ⟶ B.to_Ab) (g : B.to_
 variables (n : ℕ) (ι : ulift.{u} ℕ → ℝ≥0) (hι : monotone ι)
 
 lemma shift_sub_id.bicartesian
-  (HA₁ : is_iso (shift_sub_id (A.to_AbH n) ι hι))
-  (HA₂ : is_iso (shift_sub_id (A.to_AbH (n+1)) ι hι))
+  (HA₁ : (shift_sub_id.shift (A.to_AbH n) ι hι) = 0)
+  (HA₂ : (shift_sub_id.shift (A.to_AbH (n+1)) ι hι) = 0)
   (H : ∀ c n, short_exact ((f.app c).f n) ((g.app c).f n)) :
   (@shift_sub_id.commsq (B.to_AbH n) (C.to_AbH n)
     (whisker_right g _) ι hι).bicartesian :=
@@ -142,7 +142,9 @@ begin
   let S1 := ((@shift_sub_id.commsq (A.to_AbH n) (B.to_AbH n) (whisker_right f _) ι hι)).symm,
   let S2 := ((@shift_sub_id.commsq (B.to_AbH n) (C.to_AbH n) (whisker_right g _) ι hι)).symm,
   let S3 := ((@shift_sub_id.commsq (C.to_AbH n) (A.to_AbH (n+1)) (shift_sub_id.δ _ _ _ H) ι hι)).symm,
-  convert bicartesian_of_aut_of_end_of_end_of_aut (piH_les _ _ _ _ _) S1 S2 S3,
+  apply bicartesian_of_id_of_end_of_end_of_id (piH_les _ _ _ _ _) S1 S2 S3; clear S1 S2 S3,
+  { rw [shift_sub_id, HA₁, zero_sub], refl },
+  { rw [shift_sub_id, HA₂, zero_sub], refl },
 end
 
 end step5

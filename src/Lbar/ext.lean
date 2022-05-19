@@ -16,7 +16,7 @@ import for_mathlib.SemiNormedGroup_ulift
 
 noncomputable theory
 
-universes v u
+universes u
 
 set_option pp.universes true
 
@@ -54,11 +54,18 @@ begin
   { apply free_acyclic.{u} _ V i hi },
 end
 
-def ExtQprime_iso_aux_system (c : ℝ≥0) (n : ℕ) :
+-- this needs to be functorial in `c`
+def ExtQprime_iso_aux_system_obj (c : ℝ≥0) (n : ℕ) :
   ((Ext n).obj (op $ (QprimeFP r' BD κ M).obj c)).obj ((single _ 0).obj V.to_Cond) ≅
   ((aux_system r' BD ⟨M⟩ (SemiNormedGroup.ulift.{u+1}.obj V) κ).to_AbH n).obj (op c) :=
 Ext_compute_with_acyclic _ _ (ExtQprime_iso_aux_system_aux r' BD κ M V c) _ ≪≫
   sorry
+
+def ExtQprime_iso_aux_system (n : ℕ) :
+  (QprimeFP r' BD κ M).op ⋙ (Ext n).flip.obj ((single _ 0).obj V.to_Cond) ≅
+  aux_system r' BD ⟨M⟩ (SemiNormedGroup.ulift.{u+1}.obj V) κ ⋙
+    (forget₂ _ Ab).map_homological_complex _ ⋙ homology_functor _ _ n :=
+sorry
 
 /-- The `Tinv` map induced by `M` -/
 def ExtQprime.Tinv
@@ -83,14 +90,26 @@ def ExtQprime.Tinv2 [normed_with_aut r V]
   (QprimeFP r' BD κ₂ M).op ⋙ (Ext n).flip.obj ((single _ 0).obj V.to_Cond) :=
 ExtQprime.Tinv r' BD κ κ₂ M V n - ExtQprime.T_inv r r' BD κ κ₂ M V n
 
-lemma ExtQprime_iso_aux_system_commsq [normed_with_aut r V]
-  [∀ c n, fact (κ₂ c n ≤ κ c n)] [∀ c n, fact (κ₂ c n ≤ r' * κ c n)]
-  (c : ℝ≥0) (n : ℕ) :
-  commsq (ExtQprime_iso_aux_system r' BD κ M V c n).hom
-    sorry -- ((ExtQprime.Tinv2 r r' BD κ κ₂ M V n).app (op c))
-    ((homology_functor _ _ n).map (aux_system.Tinv2' r r' BD ⟨M⟩ _ _ _ (op c)))
-    (ExtQprime_iso_aux_system r' BD κ₂ M V c n).hom :=
+lemma ExtQprime_iso_aux_system_comm [normed_with_aut r V]
+  [∀ c n, fact (κ₂ c n ≤ κ c n)] [∀ c n, fact (κ₂ c n ≤ r' * κ c n)] (n : ℕ) :
+  (ExtQprime_iso_aux_system r' BD κ M V n).hom ≫
+  whisker_right (aux_system.Tinv2.{u} r r' BD ⟨M⟩ (SemiNormedGroup.ulift.{u+1}.obj V) κ₂ κ)
+    ((forget₂ _ _).map_homological_complex _ ⋙ homology_functor Ab.{u+1} (complex_shape.up ℕ) n) =
+  ExtQprime.Tinv2 r r' BD κ κ₂ M V n ≫
+  (ExtQprime_iso_aux_system r' BD κ₂ M V n).hom :=
 sorry
+
+lemma ExtQprime_iso_aux_system_comm' [normed_with_aut r V]
+  [∀ c n, fact (κ₂ c n ≤ κ c n)] [∀ c n, fact (κ₂ c n ≤ r' * κ c n)] (n : ℕ) :
+  whisker_right (aux_system.Tinv2.{u} r r' BD ⟨M⟩ (SemiNormedGroup.ulift.{u+1}.obj V) κ₂ κ)
+    ((forget₂ _ _).map_homological_complex _ ⋙ homology_functor Ab.{u+1} (complex_shape.up ℕ) n) ≫
+  (ExtQprime_iso_aux_system r' BD κ₂ M V n).inv =
+  (ExtQprime_iso_aux_system r' BD κ M V n).inv ≫
+  ExtQprime.Tinv2 r r' BD κ κ₂ M V n :=
+begin
+  rw [iso.comp_inv_eq, category.assoc, iso.eq_inv_comp],
+  apply ExtQprime_iso_aux_system_comm
+end
 
 end
 
@@ -164,14 +183,50 @@ set_option pp.universes true
 -- move me
 attribute [simps] Condensed.of_top_ab_map
 
-variables (S : Profinite.{u}) (V : SemiNormedGroup.{u})
+variables (S : Profinite.{0}) (V : SemiNormedGroup.{0})
 variables [complete_space V] [separated_space V]
 
 -- This is not true. But the two objects are naturally isomorphic. We'll have to deal with that.
 example :
-  (condensify (Fintype_Lbar.{u u} r' ⋙ PFPNGT₁_to_CHFPNG₁ₑₗ r')).obj S =
-  ((Profinite.extend.{u u+1} (Fintype_Lbar.{u u} r')).obj S).to_Condensed :=
+  (condensify (Fintype_Lbar.{0 0} r' ⋙ PFPNGT₁_to_CHFPNG₁ₑₗ r')).obj S =
+  ((Profinite.extend (Fintype_Lbar.{0 0} r')).obj S).to_Condensed :=
 sorry
+
+variables (i : ℕ) (ι : ulift.{1} ℕ → ℝ≥0) (hι : monotone ι)
+
+def useful_commsq [normed_with_aut r V] :=
+  shift_sub_id.commsq
+    (ExtQprime.Tinv2 r r' breen_deligne.eg.data
+      (λ c n, c * breen_deligne.eg.κ r r' n)
+      (λ c n, r' * (c * breen_deligne.eg.κ r r' n))
+      ((Lbar.functor.{0 0} r').obj S) V i) ι hι
+
+lemma useful_commsq_bicartesian [normed_with_aut r V] :
+  (useful_commsq r r' S V i ι hι).bicartesian :=
+begin
+  apply shift_sub_id.bicartesian_iso _ _
+    (ExtQprime_iso_aux_system r' _ _ _ V i).symm (ExtQprime_iso_aux_system r' _ _ _ V i).symm ι hι
+    (ExtQprime_iso_aux_system_comm' _ _ _ _ _ _ _ _),
+  rw [← whisker_right_twice],
+  refine shift_sub_id.bicartesian (aux_system.incl'.{0 1} r r' _ _ _ (breen_deligne.eg.κ r r')) _
+    i ι hι _ _ _,
+  { apply_with system_of_complexes.shift_eq_zero {instances := ff},
+    swap 3, { apply thm94.explicit r r' _ _ (breen_deligne.eg.κ' r r'), },
+    any_goals { apply_instance },
+    -- we need to put assumptions on `ι` to make these true
+    -- but it's clear that there will always be a `ι` that works
+    sorry, sorry },
+  { apply_with system_of_complexes.shift_eq_zero {instances := ff},
+    swap 3, { apply thm94.explicit r r' _ _ (breen_deligne.eg.κ' r r'), },
+    any_goals { apply_instance },
+    -- we need to put assumptions on `ι` to make these true
+    -- but it's clear that there will always be a `ι` that works
+    sorry, sorry },
+  { intros c n,
+    let κ := breen_deligne.eg.κ r r',
+    apply aux_system.short_exact r r' _ _ _ (λ c n, r' * (c * κ n)) κ,
+    intro c, dsimp, apply_instance, }
+end
 
 /-- Thm 9.4bis of [Analytic]. More precisely: the first observation in the proof 9.4 => 9.1. -/
 theorem is_iso_Tinv_sub [normed_with_aut r V] : ∀ i, is_iso (Tinv_sub r r' S V i) :=
@@ -190,7 +245,7 @@ end
 /-- Thm 9.4bis of [Analytic]. More precisely: the first observation in the proof 9.4 => 9.1. -/
 theorem is_iso_Tinv2 [normed_with_aut r V]
   (hV : ∀ (v : V), (normed_with_aut.T.inv v) = 2 • v) :
-  ∀ i, is_iso (((Ext' i).map ((condensify_Tinv2 (Fintype_Lbar.{u u} r')).app S).op).app
+  ∀ i, is_iso (((Ext' i).map ((condensify_Tinv2 (Fintype_Lbar.{0 0} r')).app S).op).app
     (Condensed.of_top_ab ↥V)) :=
 begin
   intro i,

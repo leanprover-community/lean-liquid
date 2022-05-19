@@ -154,6 +154,20 @@ begin
   apply data.system_admissible
 end
 
+/-- Theorem 9.5 in [Analytic] -/
+theorem thm94.explicit (S : Profinite.{0})
+  (V : SemiNormedGroup.{v}) [normed_with_aut r V] :
+  ((BD.data.system κ r V r').obj (op $ ⟨(Lbar.functor.{0 0} r').obj S⟩)).is_bounded_exact
+    (k κ' m ^ 2) (K r r' BD κ' m + 1) m (c₀ r r' BD κ κ' m ⟨ℤ⟩) :=
+begin
+  refine (thm95.profinite r r' BD κ κ' m ⟨ℤ⟩ S V).of_iso
+    ((BD.data.system κ r V r').map_iso (HomZ_iso ⟨(Lbar.functor.{0 0} r').obj S⟩).symm.op) _,
+  intros c n,
+  rw ← system_of_complexes.apply_hom_eq_hom_apply,
+  apply SemiNormedGroup.iso_isometry_of_norm_noninc;
+  apply breen_deligne.data.complex.map_norm_noninc
+end
+
 end
 
 

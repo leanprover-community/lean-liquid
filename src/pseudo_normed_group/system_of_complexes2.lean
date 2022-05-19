@@ -238,18 +238,20 @@ begin
   refl,
 end
 
-def incl (c : ℝ≥0ᵒᵖ) : (BD.complex κ r V r' (unop c)).obj (op M) ⟶ (aux_system r' BD M V (λ c n, c * κ n)).obj c :=
-{ f := incl_f r r' BD M V κ c,
-  comm' := by { rintro i j (rfl : i + 1 = j), apply incl_comm } }
+def incl : (BD.system κ r V r').obj (op M) ⟶ aux_system r' BD M V (λ c n, c * κ n) :=
+{ app := λ c,
+  { f := incl_f r r' BD M V κ c,
+    comm' := by { rintro i j (rfl : i + 1 = j), apply incl_comm } },
+  naturality' := sorry }
 
-def incl' (c : ℝ≥0ᵒᵖ) :=
-(functor.map_homological_complex (forget₂ _ Ab) _).map (incl r r' BD M V κ c)
+def incl' := whisker_right (incl r r' BD M V κ) (functor.map_homological_complex (forget₂ _ Ab.{max u v}) _)
 
 end
 
 def Tinv2' [hκ₁ : ∀ n, fact (monotone (function.swap κ₁ n))] [hκ₂ : ∀ n, fact (monotone (function.swap κ₂ n))]
-  [∀ c n, fact (κ₁ c n ≤ r' * κ₂ c n)] [∀ c n, fact (κ₁ c n ≤ κ₂ c n)] (c : ℝ≥0ᵒᵖ) :=
-(functor.map_homological_complex (forget₂ _ Ab) _).map ((Tinv2 r r' BD M V κ₁ κ₂).app c)
+  [∀ c n, fact (κ₁ c n ≤ r' * κ₂ c n)] [∀ c n, fact (κ₁ c n ≤ κ₂ c n)] :=
+whisker_right (Tinv2 r r' BD M V κ₁ κ₂)
+(functor.map_homological_complex (forget₂ _ Ab.{max u v}) _)
 
 lemma _root_.SemiNormedGroup.equalizer.ι_injective {V W : SemiNormedGroup} (f g : V ⟶ W) :
   function.injective (SemiNormedGroup.equalizer.ι f g) :=
@@ -272,14 +274,15 @@ end
 
 lemma short_exact [fact (r < 1)] (κ : ℕ → ℝ≥0) [BD.suitable κ]
   [∀ c n, fact (κ₁ c n ≤ r' * (c * κ n))] (c : ℝ≥0ᵒᵖ) (n : ℕ) :
-  short_exact ((incl' r r' BD M V κ c).f n) ((Tinv2' r r' BD M V (λ c n, r' * (c * κ n)) (λ c n, c * κ n) c).f n) :=
+  short_exact (((incl' r r' BD M V κ).app c).f n)
+    (((Tinv2' r r' BD M V (λ c n, r' * (c * κ n)) (λ c n, c * κ n)).app c).f n) :=
 begin
   apply_with @short_exact.mk {instances := ff},
   { rw AddCommGroup.mono_iff_injective,
     dsimp [incl', incl, incl_f,
       breen_deligne.data.complex, breen_deligne.data.complex₂, breen_deligne.data.complex₂_X],
     exact SemiNormedGroup.equalizer.ι_injective _ _, },
-  { rw [Tinv2', functor.map_homological_complex_map_f, Tinv2_eq,
+  { rw [Tinv2', whisker_right_app, functor.map_homological_complex_map_f, Tinv2_eq,
       ← nat_trans.comp_app, ← CLCFP.res_comp_T_inv, nat_trans.comp_app,
       ← neg_sub, functor.map_neg, functor.map_sub, category_theory.functor.map_comp,
       AddCommGroup.epi_iff_surjective],

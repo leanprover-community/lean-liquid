@@ -1,5 +1,4 @@
 import thm95
-import system_of_complexes.completion
 import statement
 
 /-!
@@ -37,7 +36,7 @@ include r r' BD κ
 /-- A mix of Theorems 9.4 and 9.5 in [Analytic] -/
 theorem first_target :
   ∀ m : ℕ, ∃ (k K : ℝ≥0) (hk : fact (1 ≤ k)) (c₀ : ℝ≥0),
-  ∀ (S : Type) [fintype S] (V : SemiNormedGroup.{0}) [normed_with_aut r V],
+  ∀ (S : Type) [fintype S] (V : SemiNormedGroup.{u}) [normed_with_aut r V],
     ​((BD.data.system κ r V r').obj (op $ of r' (Lbar r' S))).is_weak_bounded_exact k K m c₀ :=
 begin
   intro m,
@@ -112,4 +111,25 @@ begin
   introsI,
   refine system_of_complexes.is_weak_bounded_exact.strong_of_complete _ (H _ _) _ _ zero_lt_one,
   apply breen_deligne.data.system_admissible,
+end
+
+/-- Theorem 9.4 in [Analytic] for weak bounded exactness -/
+theorem thm94_weak' :
+  ∀ m : ℕ, ∃ (k K : ℝ≥0) (hk : fact (1 ≤ k)) (c₀ : ℝ≥0),
+  ∀ (S : Profinite) (V : SemiNormedGroup.{u}) [normed_with_aut r V],
+    ​((BD.data.system κ r V r').obj (op $ of r' ((Lbar.functor.{0 0} r').obj S)))
+      .is_weak_bounded_exact k K m c₀ :=
+begin
+  intro m,
+  obtain ⟨k, K, hk, H⟩ := thm95''.profinite BD r r' κ m,
+  obtain ⟨c₀, H⟩ := H ℤ,
+  use [k, K, hk, c₀],
+  introsI S V hV,
+  specialize H S V,
+  let i := (BD.data.system κ r V r').map_iso (HomZ_iso (of r' $ (Lbar.functor.{0 0} r').obj S)).op,
+  refine H.of_iso i.symm _,
+  intros c n,
+  rw ← system_of_complexes.apply_hom_eq_hom_apply,
+  apply SemiNormedGroup.iso_isometry_of_norm_noninc;
+  apply breen_deligne.data.complex.map_norm_noninc
 end
