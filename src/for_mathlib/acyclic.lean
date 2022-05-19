@@ -261,3 +261,20 @@ begin
       exact acyclic_of_projective (P.val.as.X (k + 1)) B i hi, },
     { exact (hC k _ hi).op, }, },
 end
+.
+
+lemma Ext_compute_with_acyclic_naturality (C₁ C₂ : cochain_complex 𝓐 ℤ)
+  [((quotient 𝓐 (complex_shape.up ℤ)).obj C₁).is_bounded_above]
+  [((quotient 𝓐 (complex_shape.up ℤ)).obj C₂).is_bounded_above]
+  (B : 𝓐)
+  (hC₁ : ∀ k, ∀ i > 0, is_zero (((Ext' i).obj (op $ C₁.X k)).obj B))
+  (hC₂ : ∀ k, ∀ i > 0, is_zero (((Ext' i).obj (op $ C₂.X k)).obj B))
+  (f : C₁ ⟶ C₂)
+  (i : ℤ) :
+  ((Ext i).flip.obj ((single _ 0).obj B)).map (quiver.hom.op $
+    show (of' C₁).val ⟶ (of' C₂).val, from (homotopy_category.quotient _ _).map f) ≫
+    (Ext_compute_with_acyclic C₁ B hC₁ i).hom =
+  (Ext_compute_with_acyclic C₂ B hC₂ i).hom ≫
+    (((preadditive_yoneda.obj B).right_op.map_homological_complex _ ⋙
+      homological_complex.unop_functor.right_op ⋙ (_root_.homology_functor _ _ (-i)).op).map f).unop :=
+sorry
