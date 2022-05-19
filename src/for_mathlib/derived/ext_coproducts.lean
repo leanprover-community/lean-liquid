@@ -241,6 +241,21 @@ def whisker_discrete_functor {α : Type v}
   (X : α → C) : discrete.functor X ⋙ F ≅ discrete.functor (F.obj ∘ X) :=
   discrete.nat_iso (λ i, iso.refl _)
 
+instance homological_complex_embed_preserves_coproducts {α : Type v}
+  {M N : Type*} (c₁ : complex_shape M) (c₂ : complex_shape N) (e : c₁.embedding c₂) :
+  preserves_colimits_of_shape (discrete α)
+  (homological_complex.embed e : homological_complex A _ ⥤ _) := sorry
+
+noncomputable
+def embed_coproduct_iso
+  {α : Type v}
+  (X : α → chain_complex A ℕ) :
+  (homological_complex.embed complex_shape.embedding.nat_down_int_up).obj (∐ X) ≅
+  (∐ λ (a : α), (homological_complex.embed complex_shape.embedding.nat_down_int_up).obj (X a)) :=
+preserves_colimit_iso (homological_complex.embed complex_shape.embedding.nat_down_int_up) _ ≪≫
+has_colimit.iso_of_nat_iso (whisker_discrete_functor _ _)
+
+noncomputable
 def chain_complex_embed_cofan_iso
   {α : Type v}
   (X : α → chain_complex A ℕ) :
@@ -248,7 +263,25 @@ def chain_complex_embed_cofan_iso
     (λ a, chain_complex.to_bounded_homotopy_category.obj (X a))) ≅
     ((cocones.precompose (whisker_discrete_functor _ X).inv).obj
     (chain_complex.to_bounded_homotopy_category.map_cocone
-      (colimit.cocone (discrete.functor X)))) := sorry
+      (colimit.cocone (discrete.functor X)))) :=
+cocones.ext
+(bounded_homotopy_category.mk_iso $
+  (homotopy_category.quotient _ _).map_iso $ (embed_coproduct_iso X).symm)
+begin
+  intros a,
+  dsimp [bounded_homotopy_category.cofan,
+    homotopy_category.colimit_cofan, whisker_discrete_functor],
+  erw [category.id_comp, ← functor.map_comp],
+  congr' 1,
+  dsimp [embed_coproduct_iso],
+  simp only [category.assoc],
+  erw colimit.ι_desc_assoc,
+  rw iso.comp_inv_eq,
+  erw (is_colimit_of_preserves
+    (homological_complex.embed complex_shape.embedding.nat_down_int_up) _).fac,
+  dsimp [whisker_discrete_functor],
+  rw category.id_comp,
+end
 
 noncomputable
 instance chain_complex_to_bounded_homotopy_category_preserves_coproducts
