@@ -164,7 +164,7 @@ def embed.d_of_none_tgt {e₁ e₂ : option ι} (he : e₂ = none) :
   embed.d X e₁ e₂ = 0 :=
 by { rw he, cases e₁; refl }
 
-def embed.f_of_some_of_some {e₁ e₂ : option ι} {i j}
+def embed.d_of_some_of_some {e₁ e₂ : option ι} {i j}
   (h₁ : e₁ = some i) (h₂ : e₂ = some j) :
   embed.d X e₁ e₂ = (embed.X_iso_of_some X h₁).hom ≫ X.d i j ≫
     (embed.X_iso_of_some X h₂).inv :=
