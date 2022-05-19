@@ -217,8 +217,6 @@ end
 
 end bounded_homotopy_category
 
-#check homological_complex.hom
-
 -- TODO: find better names... And move this stuff!
 
 instance chain_complex_embed_cofan_uniformly_bounded
@@ -241,10 +239,47 @@ def whisker_discrete_functor {α : Type v}
   (X : α → C) : discrete.functor X ⋙ F ≅ discrete.functor (F.obj ∘ X) :=
   discrete.nat_iso (λ i, iso.refl _)
 
+noncomputable
+lemma preserves_coproducts_aux
+  {α : Type v} {C : Type u} {D : Type u'}
+  [category.{v} C] [category.{v} D]
+  (F : C ⥤ D)
+  [has_coproducts_of_shape α C]
+  [has_coproducts_of_shape α D]
+  (e : Π (X : α → C), F.obj (∐ X) ≅ ∐ (λ a, F.obj (X a)))
+  (he : ∀ (X : α → C) (a : α), F.map (sigma.ι X a) ≫ (e X).hom = sigma.ι _ a) :
+  preserves_colimits_of_shape (discrete α) F :=
+begin
+  constructor, intros K,
+  let E : K ≅ discrete.functor K.obj := discrete.nat_iso (λ _, iso.refl _),
+  apply preserves_colimit_of_iso_diagram _ E.symm,
+  apply preserves_colimit_of_preserves_colimit_cocone (colimit.is_colimit _),
+  swap, apply_instance,
+  let P := _, change is_colimit P,
+  let P' := (cocones.precompose (whisker_discrete_functor F K.obj).inv).obj P,
+  suffices : is_colimit P',
+  { exact is_colimit.precompose_inv_equiv _ _ this },
+  apply is_colimit.of_iso_colimit (colimit.is_colimit _), swap,
+  change has_colimit (discrete.functor (λ a : α, F.obj (K.obj a))),
+  apply_instance,
+  symmetry,
+  fapply cocones.ext,
+  apply e,
+  intros a,
+  convert (he (λ b, (K.obj b))) a,
+  dsimp [P', whisker_discrete_functor],
+  rw category.id_comp,
+end
+
+noncomputable
 instance homological_complex_embed_preserves_coproducts {α : Type v}
-  {M N : Type*} (c₁ : complex_shape M) (c₂ : complex_shape N) (e : c₁.embedding c₂) :
+  {M N : Type} (c₁ : complex_shape M) (c₂ : complex_shape N) (e : c₁.embedding c₂) :
   preserves_colimits_of_shape (discrete α)
-  (homological_complex.embed e : homological_complex A _ ⥤ _) := sorry
+  (homological_complex.embed e : homological_complex A _ ⥤ _) :=
+preserves_coproducts_aux
+_
+sorry
+sorry
 
 noncomputable
 def embed_coproduct_iso
