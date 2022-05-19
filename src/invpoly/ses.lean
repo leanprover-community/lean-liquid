@@ -136,7 +136,7 @@ begin
   have this : ∀ (n : ℤ),
   n ∉ finset.Icc (-(f s).nat_degree : ℤ) 0 →
   (λ (b : ℤ), ↑(to_laurent_measures_fun «r» S f s b) * ((2 : ℝ) ^ b)⁻¹) n = 0,
-  sorry;{ rintros n hn,
+  { rintros n hn,
     rw [finset.mem_Icc, not_and_distrib] at hn,
     push_neg at hn,
     dsimp only,
@@ -207,13 +207,34 @@ begin
   simp only [theta_eval2_aux p s c, int.cast_eq_zero],
   exact hf1,
 end
+.
+
+lemma phi_eq_mul_Tinv_sub_two {S : Fintype} (g : invpoly r S) :
+  ϕ ((to_laurent_measures_addhom r S) (λ (s : ↥S), g s)) =
+    (to_laurent_measures_addhom r S) (λ (s : ↥S), (polynomial.X - 2) * g s) :=
+begin
+  admit,
+end
+
 
 lemma psi_eq_div_X_sub_two {S : Fintype} (c : ℝ≥0) {f : invpoly r S}
   (hf1 : ((eval2_nat_trans p).app S) f = 0) :
 (to_laurent_measures_addhom r S) (λ (s : ↥S), f s /ₘ (polynomial.X - 2)) =
   ψ ((to_laurent_measures_addhom «r» S) f) (theta_zero_of_eval2_zero p c hf1) :=
 begin
-  sorry,
+  apply injective_ϕ',
+  rw θ_ϕ_split_exact,
+  have hf3 : ∀ s : S, (polynomial.X - 2) * ((f s) /ₘ (polynomial.X - 2)) = f s,
+  { intro s,
+    replace hf1 := congr_fun hf1 s,
+    rw (show (2 : polynomial ℤ) = polynomial.C (2 : ℤ), by simp),
+    rwa polynomial.mul_div_by_monic_eq_iff_is_root, },
+  suffices : (to_laurent_measures_addhom r S)
+    (λ s, (polynomial.X - 2) * ((f s) /ₘ (polynomial.X - 2))) =
+    (to_laurent_measures_addhom r S) (λ s, f s),
+  { rw ← this,
+    apply phi_eq_mul_Tinv_sub_two, },
+  simp [hf3],
 end
 
 theorem short_exact (S : Profinite) :
