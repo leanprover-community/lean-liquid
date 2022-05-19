@@ -313,10 +313,34 @@ end) begin
     apply is_zero_colimit, intros b,
     apply homological_complex.embed.X_is_zero_of_none,
     assumption },
-  { dsimp,
-    sorry -- still annoying
-  },
-end) -- Ugh... this is so annoying!
+  { simp_rw [h₁, h₂], dsimp,
+    simp only [category.assoc],
+    rw ← iso.eq_inv_comp,
+    dsimp [homological_complex.embed, homological_complex.embed.obj],
+    rw homological_complex.embed.d_of_some_of_some (∐ X) h₁ h₂,
+    simp only [category.assoc, iso.inv_hom_id_assoc],
+    apply (is_colimit_of_preserves (homological_complex.eval A c₁ i') _).hom_ext,
+    intros a,
+    simp only [functor.map_cocone_ι_app, colimit.cocone_ι, homological_complex.eval_map],
+    slice_lhs 1 2 {
+      erw (is_colimit_of_preserves (homological_complex.eval A c₁ i') _).fac },
+    dsimp,
+    simp only [has_colimit.iso_of_nat_iso_ι_hom, discrete.nat_iso_hom_app, iso.symm_hom,
+      category.assoc, ι_preserves_colimits_iso_inv, homological_complex.eval_map,
+      homological_complex.hom.comm, homological_complex.hom.comm_assoc],
+    dsimp,
+    rw iso.inv_comp_eq,
+    slice_rhs 3 4
+    { erw (is_colimit_of_preserves (homological_complex.eval A c₁ j') _).fac },
+    dsimp,
+    simp only [has_colimit.iso_of_nat_iso_ι_hom, discrete.nat_iso_hom_app, iso.symm_hom,
+      category.assoc, ι_preserves_colimits_iso_inv, homological_complex.eval_map],
+    slice_rhs 1 3
+    { rw ← homological_complex.embed.d_of_some_of_some (X a) h₁ h₂ },
+    apply colimit.is_colimit,
+    apply_instance, }
+    -- still annoying
+  end)
 sorry
 
 noncomputable
