@@ -146,6 +146,17 @@ lemma Tinv2_iso_of_bicartesian [normed_with_aut r V]
           (normed_group_hom.to_add_monoid_hom normed_with_aut.T.inv) (normed_group_hom.continuous _)))) :=
 sorry
 
+lemma Tinv2_iso_of_bicartesian_0 [normed_with_aut r V]
+  [∀ c n, fact (κ₂ c n ≤ κ c n)] [∀ c n, fact (κ₂ c n ≤ r' * κ c n)]
+  (H1 : (shift_sub_id.commsq (ExtQprime.Tinv2 r r' BD.data κ κ₂ M V 0) ι hι).bicartesian) :
+  is_iso (((Ext 0).map ((BD.eval freeCond'.{u}).op.map M.Tinv_cond.op)).app
+    ((single (Condensed Ab) 0).obj V.to_Cond) -
+    ((Ext 0).obj ((BD.eval freeCond').op.obj (op (M.to_Condensed)))).map
+      ((single (Condensed Ab) 0).map
+        (Condensed.of_top_ab_map
+          (normed_group_hom.to_add_monoid_hom normed_with_aut.T.inv) (normed_group_hom.continuous _)))) :=
+sorry
+
 end
 
 namespace Lbar
