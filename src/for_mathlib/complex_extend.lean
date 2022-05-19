@@ -134,6 +134,14 @@ def embed.X : option ι → 𝒞
 | (some i) := X.X i
 | none     := 0
 
+def embed.X_iso_of_none {e : option ι} (he : e = none) :
+  embed.X X e ≅ 0 :=
+by { rw he, refl }
+
+def embed.X_iso_of_some {e : option ι} {i} (he : e = some i) :
+  embed.X X e ≅ X.X i :=
+by { rw he, refl }
+
 @[simp] lemma embed.X_none : embed.X X none = 0 := rfl
 @[simp] lemma embed.X_some (i : ι) : embed.X X (some i) = X.X i := rfl
 
@@ -143,6 +151,20 @@ def embed.d : Π i j, embed.X X i ⟶ embed.X X j
 | (some i) (some j) := X.d i j
 | (some i) none     := 0
 | none     j        := 0
+
+def embed.d_of_none_src {e₁ e₂ : option ι} (he : e₁ = none) :
+  embed.d X e₁ e₂ = 0 :=
+by { rw he, refl }
+
+def embed.d_of_none_tgt {e₁ e₂ : option ι} (he : e₂ = none) :
+  embed.d X e₁ e₂ = 0 :=
+by { rw he, cases e₁; refl }
+
+def embed.f_of_some_of_some {e₁ e₂ : option ι} {i j}
+  (h₁ : e₁ = some i) (h₂ : e₂ = some j) :
+  embed.d X e₁ e₂ = (embed.X_iso_of_some X h₁).hom ≫ X.d i j ≫
+    (embed.X_iso_of_some X h₂).inv :=
+by { subst h₁, subst h₂, change _ = 𝟙 _ ≫ _ ≫ 𝟙 _, simpa }
 
 @[simp] lemma embed.d_some_some (i j : ι) : embed.d X (some i) (some j) = X.d i j :=
 rfl
