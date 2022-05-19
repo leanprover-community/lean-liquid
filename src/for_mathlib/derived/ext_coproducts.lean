@@ -301,19 +301,19 @@ end) begin
   intros i j h,
   rcases h₁ : e.r i with _ | i';
   rcases h₂ : e.r j with _ | j',
-  { apply is_zero.eq_of_src,
+  sorry { apply is_zero.eq_of_src,
     apply homological_complex.embed.X_is_zero_of_none,
     assumption },
-  { apply is_zero.eq_of_src,
+  sorry { apply is_zero.eq_of_src,
     apply homological_complex.embed.X_is_zero_of_none,
     assumption },
-  { apply is_zero.eq_of_tgt,
+  sorry { apply is_zero.eq_of_tgt,
     refine is_zero.of_iso _
       (preserves_colimit_iso (homological_complex.eval _ _ _) _),
     apply is_zero_colimit, intros b,
     apply homological_complex.embed.X_is_zero_of_none,
     assumption },
-  { simp_rw [h₁, h₂], dsimp,
+  sorry { simp_rw [h₁, h₂], dsimp,
     simp only [category.assoc],
     rw ← iso.eq_inv_comp,
     dsimp [homological_complex.embed, homological_complex.embed.obj],
@@ -341,7 +341,26 @@ end) begin
     apply_instance, }
     -- still annoying
   end)
-sorry
+begin
+  intros X a, ext i,
+  rcases h : e.r i with _ | i',
+  { apply is_zero.eq_of_tgt,
+    refine is_zero.of_iso _
+      (preserves_colimit_iso (homological_complex.eval _ _ _) _),
+    apply is_zero_colimit, intros b,
+    apply homological_complex.embed.X_is_zero_of_none,
+    exact h },
+  dsimp [homological_complex.hom.iso_of_components],
+  simp_rw [h], dsimp,
+  simp only [← category.assoc, iso.comp_inv_eq],
+  simp_rw [← iso.eq_comp_inv, category.assoc],
+  slice_rhs 1 2
+  { erw (is_colimit_of_preserves (homological_complex.eval A c₂ i) _).fac },
+  dsimp,
+  simp only [has_colimit.iso_of_nat_iso_ι_inv, discrete.nat_iso_inv_app, iso.symm_inv,
+    category.assoc, ι_preserves_colimits_iso_inv, homological_complex.eval_map],
+  apply homological_complex.embed.f_of_some,
+end
 
 noncomputable
 def embed_coproduct_iso

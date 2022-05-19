@@ -251,6 +251,13 @@ lemma embed.f_comp : ∀ i, embed.f (f ≫ g) i = embed.f f i ≫ embed.f g i
 | (some i) := rfl
 | none     := has_zero_object.from_zero_ext _ _
 
+lemma embed.f_of_some {e : option ι} {i} (he : e = some i) :
+  embed.f f e =
+    (embed.X_iso_of_some _ he).hom ≫
+    f.f i ≫
+    (embed.X_iso_of_some _ he).inv :=
+by { subst he, change _ = 𝟙 _ ≫ _ ≫ 𝟙 _, simp, }
+
 /-- Functor pushing forward, for a fixed abelian category `𝒞`, the category
 of `𝒞`-valued homological complexes of shape `ι₁` along an embedding `ι₁ ↪ ι₂`
 (not Lean notation -- fix somehow?) of complexes. -/
