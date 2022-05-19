@@ -297,7 +297,26 @@ begin
     intros b,
     dsimp,
     refine (homological_complex.embed.X_iso_of_some _ h).symm }
-end) sorry) -- Ugh... this is so annoying!
+end) begin
+  intros i j h,
+  rcases h₁ : e.r i with _ | i';
+  rcases h₂ : e.r j with _ | j',
+  { apply is_zero.eq_of_src,
+    apply homological_complex.embed.X_is_zero_of_none,
+    assumption },
+  { apply is_zero.eq_of_src,
+    apply homological_complex.embed.X_is_zero_of_none,
+    assumption },
+  { apply is_zero.eq_of_tgt,
+    refine is_zero.of_iso _
+      (preserves_colimit_iso (homological_complex.eval _ _ _) _),
+    apply is_zero_colimit, intros b,
+    apply homological_complex.embed.X_is_zero_of_none,
+    assumption },
+  { dsimp,
+    sorry -- still annoying
+  },
+end) -- Ugh... this is so annoying!
 sorry
 
 noncomputable
