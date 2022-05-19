@@ -1,5 +1,8 @@
 import algebra.group.ulift
+
 import for_mathlib.SemiNormedGroup
+
+import normed_group.normed_with_aut
 
 universes v u
 
@@ -23,5 +26,13 @@ def ulift : SemiNormedGroup.{u} ⥤ SemiNormedGroup.{max u v} :=
     bound' := by { obtain ⟨C, h1, h2⟩ := f.bound, refine ⟨C, _⟩, rintro ⟨x⟩, apply h2, } },
   map_id' := λ V, by { ext, refl },
   map_comp' := by { intros, ext, refl } }
+
+open_locale nnreal
+
+noncomputable
+instance ulift.normed_with_aut (r : ℝ≥0) (V : SemiNormedGroup.{u}) [normed_with_aut r V] :
+  normed_with_aut r (SemiNormedGroup.ulift.{v u}.obj V) :=
+{ T :=  ulift.map_iso normed_with_aut.T,
+  norm_T := λ v, normed_with_aut.norm_T _ }
 
 end SemiNormedGroup

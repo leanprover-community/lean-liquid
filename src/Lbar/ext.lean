@@ -33,9 +33,16 @@ section
 open bounded_homotopy_category
 
 variables (BD : breen_deligne.data)
-variables (κ : ℝ≥0 → ℕ → ℝ≥0) [∀ (c : ℝ≥0), BD.suitable (κ c)] [∀ n, fact (monotone (function.swap κ n))]
+variables (κ κ₂ : ℝ≥0 → ℕ → ℝ≥0)
+variables [∀ (c : ℝ≥0), BD.suitable (κ c)] [∀ n, fact (monotone (function.swap κ n))]
+variables [∀ (c : ℝ≥0), BD.suitable (κ₂ c)] [∀ n, fact (monotone (function.swap κ₂ n))]
 variables (M : ProFiltPseuNormGrpWithTinv₁.{u} r')
 variables (V : SemiNormedGroup.{u}) [complete_space V] [separated_space V]
+
+lemma Ext'_zero_left_is_zero {𝓐 : Type*} [category 𝓐] [abelian 𝓐] [enough_projectives 𝓐]
+  (A : 𝓐ᵒᵖ) (B : 𝓐) (hA : is_zero A) (i : ℤ) :
+  is_zero (((Ext' i).obj A).obj B) :=
+sorry
 
 lemma ExtQprime_iso_aux_system_aux (c : ℝ≥0) (k i : ℤ) (hi : i > 0) :
   is_zero (((Ext' i).obj (op (((homological_complex.embed complex_shape.embedding.nat_down_int_up).obj
@@ -43,7 +50,7 @@ lemma ExtQprime_iso_aux_system_aux (c : ℝ≥0) (k i : ℤ) (hi : i > 0) :
 begin
   rcases k with (_|_)|_,
   { apply free_acyclic.{u} _ V i hi },
-  { /- prove `Ext(0, V)` is zero -/ sorry },
+  { apply Ext'_zero_left_is_zero, refine (is_zero_zero _).op },
   { apply free_acyclic.{u} _ V i hi },
 end
 
@@ -53,18 +60,86 @@ def ExtQprime_iso_aux_system (c : ℝ≥0) (n : ℕ) :
 Ext_compute_with_acyclic _ _ (ExtQprime_iso_aux_system_aux r' BD κ M V c) _ ≪≫
   sorry
 
+/-- The `Tinv` map induced by `M` -/
+def ExtQprime.Tinv
+  [∀ c n, fact (κ₂ c n ≤ κ c n)] [∀ c n, fact (κ₂ c n ≤ r' * κ c n)]
+  (n : ℕ) :
+  (QprimeFP r' BD κ M).op ⋙ (Ext n).flip.obj ((single _ 0).obj V.to_Cond) ⟶
+  (QprimeFP r' BD κ₂ M).op ⋙ (Ext n).flip.obj ((single _ 0).obj V.to_Cond) :=
+sorry
+
+/-- The `T_inv` map induced by `V` -/
+def ExtQprime.T_inv [normed_with_aut r V]
+  [∀ c n, fact (κ₂ c n ≤ κ c n)] [∀ c n, fact (κ₂ c n ≤ r' * κ c n)]
+  (n : ℕ) :
+  (QprimeFP r' BD κ M).op ⋙ (Ext n).flip.obj ((single _ 0).obj V.to_Cond) ⟶
+  (QprimeFP r' BD κ₂ M).op ⋙ (Ext n).flip.obj ((single _ 0).obj V.to_Cond) :=
+sorry
+
+def ExtQprime.Tinv2 [normed_with_aut r V]
+  [∀ c n, fact (κ₂ c n ≤ κ c n)] [∀ c n, fact (κ₂ c n ≤ r' * κ c n)]
+  (n : ℕ) :
+  (QprimeFP r' BD κ M).op ⋙ (Ext n).flip.obj ((single _ 0).obj V.to_Cond) ⟶
+  (QprimeFP r' BD κ₂ M).op ⋙ (Ext n).flip.obj ((single _ 0).obj V.to_Cond) :=
+ExtQprime.Tinv r' BD κ κ₂ M V n - ExtQprime.T_inv r r' BD κ κ₂ M V n
+
+lemma ExtQprime_iso_aux_system_commsq [normed_with_aut r V]
+  [∀ c n, fact (κ₂ c n ≤ κ c n)] [∀ c n, fact (κ₂ c n ≤ r' * κ c n)]
+  (c : ℝ≥0) (n : ℕ) :
+  commsq (ExtQprime_iso_aux_system r' BD κ M V c n).hom
+    sorry -- ((ExtQprime.Tinv2 r r' BD κ κ₂ M V n).app (op c))
+    ((homology_functor _ _ n).map (aux_system.Tinv2' r r' BD ⟨M⟩ _ _ _ (op c)))
+    (ExtQprime_iso_aux_system r' BD κ₂ M V c n).hom :=
+sorry
+
+end
+
+section
+
+variables {r'}
+variables (BD : breen_deligne.package)
+variables (κ κ₂ : ℝ≥0 → ℕ → ℝ≥0)
+variables [∀ (c : ℝ≥0), BD.data.suitable (κ c)] [∀ n, fact (monotone (function.swap κ n))]
+variables [∀ (c : ℝ≥0), BD.data.suitable (κ₂ c)] [∀ n, fact (monotone (function.swap κ₂ n))]
+variables (M : ProFiltPseuNormGrpWithTinv₁.{u} r')
+variables (V : SemiNormedGroup.{u}) [complete_space V] [separated_space V]
+
+open bounded_homotopy_category
+
+-- move me
+/-- `Tinv : M → M` as hom of condensed abelian groups -/
+def _root_.ProFiltPseuNormGrpWithTinv₁.Tinv_cond : M.to_Condensed ⟶ M.to_Condensed :=
+(CompHausFiltPseuNormGrp.to_Condensed.{u}).map
+  profinitely_filtered_pseudo_normed_group_with_Tinv.Tinv
+
+variables (ι : ulift.{u+1} ℕ → ℝ≥0) (hι : monotone ι)
+
+lemma Tinv2_iso_of_bicartesian [normed_with_aut r V]
+  [∀ c n, fact (κ₂ c n ≤ κ c n)] [∀ c n, fact (κ₂ c n ≤ r' * κ c n)]
+  (i : ℕ)
+  (H1 : (shift_sub_id.commsq (ExtQprime.Tinv2 r r' BD.data κ κ₂ M V i) ι hι).bicartesian)
+  (H2 : (shift_sub_id.commsq (ExtQprime.Tinv2 r r' BD.data κ κ₂ M V (i+1)) ι hι).bicartesian) :
+  is_iso (((Ext (i+1)).map ((BD.eval freeCond'.{u}).op.map M.Tinv_cond.op)).app
+    ((single (Condensed Ab) 0).obj V.to_Cond) -
+    ((Ext (i+1)).obj ((BD.eval freeCond').op.obj (op (M.to_Condensed)))).map
+      ((single (Condensed Ab) 0).map
+        (Condensed.of_top_ab_map
+          (normed_group_hom.to_add_monoid_hom normed_with_aut.T.inv) (normed_group_hom.continuous _)))) :=
+sorry
+
 end
 
 namespace Lbar
 
 open ProFiltPseuNormGrpWithTinv₁ ProFiltPseuNormGrp₁ CompHausFiltPseuNormGrp₁
+open bounded_homotopy_category
 
 def condensed : Profinite.{u} ⥤ Condensed.{u} Ab.{u+1} :=
 condensify (Fintype_Lbar.{u u} r' ⋙ PFPNGT₁_to_CHFPNG₁ₑₗ r')
 
 def Tinv_sub (S : Profinite.{u}) (V : SemiNormedGroup.{u}) [normed_with_aut r V] (i : ℤ) :
-  ((Ext' i).obj (op $ (Lbar.condensed.{u} r').obj S)).obj (Condensed.of_top_ab V) ⟶
-  ((Ext' i).obj (op $ (Lbar.condensed.{u} r').obj S)).obj (Condensed.of_top_ab V) :=
+  ((Ext' i).obj (op $ (Lbar.condensed.{u} r').obj S)).obj V.to_Cond ⟶
+  ((Ext' i).obj (op $ (Lbar.condensed.{u} r').obj S)).obj V.to_Cond :=
 ((Ext' i).map ((condensify_Tinv _).app S).op).app _ -
 ((Ext' i).obj _).map (Condensed.of_top_ab_map (normed_with_aut.T.inv).to_add_monoid_hom
   (normed_group_hom.continuous _))
@@ -74,15 +149,7 @@ def Tinv_sub (S : Profinite.{u}) (V : SemiNormedGroup.{u}) [normed_with_aut r V]
 --   preserves_filtered_colimits (Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_Condensed_Ab) :=
 -- sorry
 
-/-- Thm 9.4bis of [Analytic]. More precisely: the first observation in the proof 9.4 => 9.1. -/
-theorem is_iso_Tinv_sub (S : Profinite.{u}) (V : SemiNormedGroup.{u}) [normed_with_aut r V] :
-  ∀ i, is_iso (Tinv_sub r r' S V i) :=
-begin
-  refine (breen_deligne.package.main_lemma breen_deligne.eg
-    (Condensed_Ab_to_CondensedSet ⋙ CondensedSet_to_Condensed_Ab)
-    _ _ _ _).mpr _,
-  sorry
-end
+set_option pp.universes true
 
 -- move me
 @[simp] lemma _root_.category_theory.op_nsmul
@@ -97,8 +164,31 @@ end
 -- move me
 attribute [simps] Condensed.of_top_ab_map
 
+variables (S : Profinite.{u}) (V : SemiNormedGroup.{u})
+variables [complete_space V] [separated_space V]
+
+-- This is not true. But the two objects are naturally isomorphic. We'll have to deal with that.
+example :
+  (condensify (Fintype_Lbar.{u u} r' ⋙ PFPNGT₁_to_CHFPNG₁ₑₗ r')).obj S =
+  ((Profinite.extend.{u u+1} (Fintype_Lbar.{u u} r')).obj S).to_Condensed :=
+sorry
+
 /-- Thm 9.4bis of [Analytic]. More precisely: the first observation in the proof 9.4 => 9.1. -/
-theorem is_iso_Tinv2 (S : Profinite.{u}) (V : SemiNormedGroup.{u}) [normed_with_aut r V]
+theorem is_iso_Tinv_sub [normed_with_aut r V] : ∀ i, is_iso (Tinv_sub r r' S V i) :=
+begin
+  refine (breen_deligne.package.main_lemma breen_deligne.eg freeCond' _ _ _ _).mpr _,
+  rintro ((_|_)|_),
+  { sorry },
+  { sorry },
+  { have : 1 + -[1+ i] ≤ 0,
+    { rw [int.neg_succ_of_nat_eq'],
+      simp only [add_sub_cancel'_right, right.neg_nonpos_iff, int.coe_nat_nonneg] },
+    apply is_zero.is_iso;
+    apply Ext_single_right_is_zero _ _ 1 _ _ (chain_complex.bounded_by_one _) this },
+end
+
+/-- Thm 9.4bis of [Analytic]. More precisely: the first observation in the proof 9.4 => 9.1. -/
+theorem is_iso_Tinv2 [normed_with_aut r V]
   (hV : ∀ (v : V), (normed_with_aut.T.inv v) = 2 • v) :
   ∀ i, is_iso (((Ext' i).map ((condensify_Tinv2 (Fintype_Lbar.{u u} r')).app S).op).app
     (Condensed.of_top_ab ↥V)) :=

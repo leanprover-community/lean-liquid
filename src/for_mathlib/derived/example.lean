@@ -478,7 +478,7 @@ lemma category_theory.ProjectiveResolution.is_projective_resolution
   exact := P.exact,
   epi := ProjectiveResolution.f.category_theory.epi P 0 }
 
-lemma Ext_is_zero_of_neg (A : Cᵒᵖ) (B : C) (i : ℤ) (hi : i < 0) :
+lemma Ext'_is_zero_of_neg (A : Cᵒᵖ) (B : C) (i : ℤ) (hi : i < 0) :
   is_zero (((Ext' i).obj A).obj B) :=
 begin
   let P := ProjectiveResolution.of A.unop,
@@ -489,6 +489,37 @@ begin
   refine AddCommGroup.is_zero_of_eq _ _,
   intros f g,
   ext,
+end
+
+section
+open bounded_homotopy_category
+
+lemma Ext_single_right_is_zero
+  (A : homotopy_category C (complex_shape.up ℤ)) (B : C)
+  (i j k : ℤ)
+  (hA : A.bounded_by i) [A.is_bounded_above]
+  (hijk : i + j ≤ k) :
+  is_zero (((Ext j).obj (op ⟨A⟩)).obj ((bounded_homotopy_category.single _ k).obj B)) :=
+begin
+  obtain ⟨P, H1, H2, f, H3, H4⟩ :=
+    exists_bounded_K_projective_replacement_of_bounded _ _ hA,
+  have H5 : P.is_bounded_above := ⟨⟨i, H2⟩⟩,
+  resetI,
+  refine is_zero_of_iso_of_zero _ (Ext_iso j ⟨P⟩ _ _ _).symm,
+  swap, { exact f }, swap, { exact H3 },
+  refine AddCommGroup.is_zero_of_eq _ _,
+  rintro (φ ψ : P ⟶ _),
+  rw [← quotient_map_out φ, ← quotient_map_out ψ],
+  congr' 1,
+  ext n,
+  by_cases hn : i ≤ n,
+  { apply (H2 n hn).eq_of_src },
+  { apply is_zero.eq_of_tgt,
+    dsimp [bounded_homotopy_category.single],
+    rw if_neg, { exact is_zero_zero _ },
+    linarith only [hijk, hn], }
+end
+
 end
 
 namespace AddCommGroup
