@@ -138,6 +138,10 @@ def embed.X_iso_of_none {e : option ι} (he : e = none) :
   embed.X X e ≅ 0 :=
 by { rw he, refl }
 
+def embed.X_is_zero_of_none {e : option ι} (he : e = none) :
+  is_zero (embed.X X e) :=
+is_zero.of_iso (category_theory.limits.is_zero_zero 𝒞) (embed.X_iso_of_none X he)
+
 def embed.X_iso_of_some {e : option ι} {i} (he : e = some i) :
   embed.X X e ≅ X.X i :=
 by { rw he, refl }

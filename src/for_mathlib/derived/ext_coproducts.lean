@@ -279,7 +279,44 @@ instance homological_complex_embed_preserves_coproducts {α : Type v}
 preserves_coproducts_aux
 (homological_complex.embed e : homological_complex A _ ⥤ _)
 (λ (X : α → homological_complex A c₁), homological_complex.hom.iso_of_components
-sorry sorry) -- Ugh... this is so annoying!
+(λ i,
+begin
+  rcases h : e.r i with _ | j,
+  { refine homological_complex.embed.X_iso_of_none _ h ≪≫ _,
+    refine _ ≪≫ (preserves_colimit_iso (homological_complex.eval A c₂ i) _).symm,
+    refine (is_zero.iso_zero _).symm,
+    apply is_zero_colimit,
+    intros a,
+    dsimp,
+    exact homological_complex.embed.X_is_zero_of_none _ h },
+  { refine homological_complex.embed.X_iso_of_some _ h ≪≫ _,
+    refine (preserves_colimit_iso (homological_complex.eval _ _ _) _) ≪≫ _,
+    refine _ ≪≫ (preserves_colimit_iso (homological_complex.eval _ _ _) _).symm,
+    refine has_colimit.iso_of_nat_iso _,
+    refine discrete.nat_iso _,
+    intros b,
+    dsimp,
+    refine (homological_complex.embed.X_iso_of_some _ h).symm }
+end) begin
+  intros i j h,
+  rcases h₁ : e.r i with _ | i';
+  rcases h₂ : e.r j with _ | j',
+  { apply is_zero.eq_of_src,
+    apply homological_complex.embed.X_is_zero_of_none,
+    assumption },
+  { apply is_zero.eq_of_src,
+    apply homological_complex.embed.X_is_zero_of_none,
+    assumption },
+  { apply is_zero.eq_of_tgt,
+    refine is_zero.of_iso _
+      (preserves_colimit_iso (homological_complex.eval _ _ _) _),
+    apply is_zero_colimit, intros b,
+    apply homological_complex.embed.X_is_zero_of_none,
+    assumption },
+  { dsimp,
+    sorry -- still annoying
+  },
+end) -- Ugh... this is so annoying!
 sorry
 
 noncomputable
