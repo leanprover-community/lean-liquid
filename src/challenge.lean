@@ -40,14 +40,14 @@ begin
   { exact fact.out _ }
 end
 
-theorem liquid_tensor_experiment (S : Profinite.{1}) (V : pBanach.{1} p) :
+theorem liquid_tensor_experiment (S : Profinite.{0}) (V : pBanach.{0} p) :
   ∀ i > 0, Ext i (ℳ_{p'} S) V ≅ 0 :=
 begin
   intros i hi,
   apply is_zero.iso_zero,
   revert i,
   haveI : fact (p' < 1) := ⟨lt_of_lt_of_le (fact.out _ : p' < p) (fact.out _)⟩,
-  erw is_zero_iff_epi_and_is_iso _ _ (V : Condensed.{1 2 3} Ab) (laurent_measures.short_exact p' S),
+  erw is_zero_iff_epi_and_is_iso _ _ (V : Condensed.{0 1 2} Ab) (laurent_measures.short_exact p' S),
   let := pBanach.choose_semi_normed_group V,
   let := pBanach.choose_normed_with_aut V 2⁻¹,
   haveI : fact (0 < (2⁻¹ : ℝ≥0) ^ (p : ℝ)) := r_pos',

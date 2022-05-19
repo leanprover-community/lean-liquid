@@ -20,5 +20,5 @@ localized "notation `ℳ_{` p' `}` S := (real_measures.condensed p').obj S"
 abbreviation liquid_tensor_experiment.Ext (i : ℤ) (A B : Condensed.{u} Ab.{u+1}) :=
 ((Ext' i).obj (op A)).obj B
 
-instance [fact (0 < (p:ℝ))] : has_coe (pBanach p) (Condensed Ab) :=
+instance [fact (0 < (p:ℝ))] : has_coe (pBanach.{u} p) (Condensed.{u} Ab.{u+1}) :=
 { coe := λ V, Condensed.of_top_ab V }

@@ -1,6 +1,7 @@
 import for_mathlib.derived.bounded_homotopy_category
 import for_mathlib.is_quasi_iso_sigma
 import for_mathlib.coprod_op
+import for_mathlib.derived.example
 
 open category_theory
 open category_theory.limits
