@@ -3,6 +3,9 @@ import category_theory.limits.preserves.shapes.biproducts
 
 import for_mathlib.derived.les2
 import for_mathlib.derived.les_facts
+import for_mathlib.is_quasi_iso
+import for_mathlib.short_exact
+import for_mathlib.homology
 -- import for_mathlib.salamander
 .
 
@@ -34,14 +37,6 @@ begin
     haveI : epi (g ≫ h) := epi_comp g h,
     refine ⟨_⟩, have := H.exact, rwa exact_comp_iso }
 end
-
-lemma homology_is_zero_iff_image_to_kernel'_is_iso {A B C : 𝓐} (f : A ⟶ B) (g : B ⟶ C) (w : f ≫ g = 0) :
-  is_zero (homology f g w) ↔ is_iso (image_to_kernel' f g w) :=
-sorry
-
-lemma short_exact_kernel_factor_thru_image {A B : 𝓐} (f : A ⟶ B) :
-  short_exact (kernel.ι f) (factor_thru_image f) :=
-sorry
 
 lemma is_acyclic_def
   (C : homotopy_category 𝓐 (complex_shape.up ℤ)) :
@@ -149,19 +144,6 @@ begin
     { rintro (_|n); exact exact_of_zero 0 0 } }
 end
 
-section
-
-variables {ι : Type*} {c : complex_shape ι}
-
-lemma is_quasi_iso_of_op {X Y : (homological_complex 𝓐 c)ᵒᵖ} (f : X ⟶ Y)
-  (h : is_quasi_iso ((homotopy_category.quotient _ _).map
-    (homological_complex.op_functor.map f))) :
-  is_quasi_iso ((homotopy_category.quotient _ _).map f.unop) :=
-begin
-  sorry
-end
-
-end
 
 def Ext_compute_with_acyclic
   (B : 𝓐)
