@@ -49,17 +49,6 @@ variables [fact (0 < r)] [fact (0 < r')] [fact (r' ≤ 1)]
 
 open system_of_complexes opposite
 
--- def tweak (c : ℝ≥0ᵒᵖ) (n : ℕ) :
---   ((unop.{u+2} ((FPsystem.{u} r' BD M κ).op.obj (r'.MulLeft.op.obj c))).X n).as ≅
---   (FiltrationPow.{u} r' (r' * (unop.{1} c * κ n)) (BD.X n)).obj M :=
--- begin
---   dsimp [FPsystem, FPsystem.X, nnreal.MulLeft],
---   haveI : fact (r' * unop.{1} c * κ n ≤ r' * (unop.{1} c * κ n)) := ⟨(mul_assoc _ _ _).le⟩,
---   haveI : fact (r' * (unop.{1} c * κ n) ≤ r' * unop.{1} c * κ n) := ⟨(mul_assoc _ _ _).ge⟩,
---   refine ⟨Filtration.cast_le.{u} _ _ _, Filtration.cast_le.{u} _ _ _, _, _⟩,
---   tidy,
--- end
-
 variables (κ₁ κ₂ : ℝ≥0 → ℕ → ℝ≥0) [∀ c, BD.suitable (κ₁ c)] [∀ c, BD.suitable (κ₂ c)]
 
 def Tinv [hκ₁ : ∀ n, fact (monotone (function.swap κ₁ n))] [hκ₂ : ∀ n, fact (monotone (function.swap κ₂ n))]
@@ -248,12 +237,10 @@ def incl : (BD.system κ r V r').obj (op M) ⟶ aux_system r' BD M V (λ c n, c 
     dsimp [breen_deligne.data.complex, breen_deligne.data.complex₂, breen_deligne.data.complex₂_X,
       CLCTinv, FPsystem, FPsystem.X, functor.map_FreeAb, FreeAb.eval, FreeAb.of_functor,
       universal_map.eval_CLCFPTinv, universal_map.eval_CLCFPTinv₂,
-      SemiNormedGroup.equalizer.map_nat, incl_f],
+      SemiNormedGroup.equalizer.map_nat, incl_f, CLCFPTinv₂.res, CLCTinv.map_nat, CLCTinv.map],
     delta id,
-    -- erw [free_abelian_group.lift.of],
-    symmetry,
-    sorry
-    -- convert SemiNormedGroup.equalizer.map_comp_ι _ _ _ _ using 2,
+    erw [free_abelian_group.lift.of],
+    convert SemiNormedGroup.equalizer.map_comp_ι _ _ _ _ using 1,
   end }
 
 def incl' := whisker_right (incl r r' BD M V κ) (functor.map_homological_complex (forget₂ _ Ab.{max u v}) _)
