@@ -1120,12 +1120,16 @@ section delta_spec
 variables (hD : is_snake_input D)
 
 def to_kernel' : kernel ((1,1) ⟶[D] (2,2)) ⟶ D.obj (0,2) :=
-kernel.lift _ (kernel.ι _ ≫ D.map (hom (1,1) (1,2))) sorry ≫ inv hD.to_kernel
+kernel.lift _ (kernel.ι _ ≫ D.map (hom (1,1) (1,2))) begin
+  erw [category.assoc, ← D.map_comp, kernel.condition],
+end ≫ inv hD.to_kernel
 
 instance to_kernel_epi : epi hD.to_kernel' := sorry
 
 def cokernel_to' : D.obj (3,0) ⟶ cokernel ((1,0) ⟶[D] (2,1)) :=
-inv hD.cokernel_to ≫ cokernel.desc _ (D.map (hom (2,0) (2,1)) ≫ cokernel.π _) sorry
+inv hD.cokernel_to ≫ cokernel.desc _ (D.map (hom (2,0) (2,1)) ≫ cokernel.π _) begin
+  erw [← category.assoc, ← D.map_comp, cokernel.condition],
+end
 
 instance cokernel_to'_mono : mono hD.cokernel_to' := sorry
 
