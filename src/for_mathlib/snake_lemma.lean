@@ -1124,7 +1124,7 @@ kernel.lift _ (kernel.ι _ ≫ D.map (hom (1,1) (1,2))) begin
   erw [category.assoc, ← D.map_comp, kernel.condition],
 end ≫ inv hD.to_kernel
 
---STANDALONE
+-- SELFCONTAINED
 instance to_kernel_epi : epi hD.to_kernel' :=
 begin
   -- A small diagram chase
@@ -1145,7 +1145,7 @@ inv hD.cokernel_to ≫ cokernel.desc _ (D.map (hom (2,0) (2,1)) ≫ cokernel.π 
   erw [← category.assoc, ← D.map_comp, cokernel.condition],
 end
 
---STANDALONE
+-- SELFCONTAINED
 -- This is just dualizing the proof of `to_kernel_epi`.
 instance cokernel_to'_mono : mono hD.cokernel_to' := sorry
 
