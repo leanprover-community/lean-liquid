@@ -17,14 +17,42 @@ namespace δ_natural_setup
 @[reassoc]
 lemma aux1 (hF : is_snake_input F) (hG : is_snake_input G) :
   η.app (0, 2) ≫ hG.to_kernel = hF.to_kernel ≫
-  kernel.lift _ (kernel.ι _ ≫ η.app _) sorry := sorry
+  kernel.lift _ (kernel.ι _ ≫ η.app _) begin
+    simp only [category.assoc, ← η.naturality, kernel.condition_assoc, zero_comp],
+  end :=
+begin
+  apply equalizer.hom_ext,
+  dsimp [is_snake_input.to_kernel],
+  simp,
+end
 
 @[reassoc]
 lemma aux2 (hF : is_snake_input F) (hG : is_snake_input G) :
   kernel.lift ((1, 2) ⟶[G] (2, 2)) (kernel.ι ((1, 2) ⟶[F] (2, 2)) ≫
-    η.app (1, 2)) sorry ≫ inv hG.cokernel_to_top_right_kernel_to_right_kernel =
+    η.app (1, 2)) begin
+      simp only [category.assoc, ← η.naturality, kernel.condition_assoc, zero_comp],
+    end ≫ inv hG.cokernel_to_top_right_kernel_to_right_kernel =
   inv hF.cokernel_to_top_right_kernel_to_right_kernel ≫
-    cokernel.desc _ (kernel.lift _ (kernel.ι _ ≫ η.app _) sorry ≫ cokernel.π _) sorry := sorry
+    cokernel.desc _ (kernel.lift _ (kernel.ι _ ≫ η.app _) begin
+      simp only [category.assoc, ← η.naturality, kernel.condition_assoc, zero_comp],
+    end ≫ cokernel.π _) begin
+      dsimp [is_snake_input.to_top_right_kernel],
+      simp only [← category.assoc], let t := _, change t ≫ _ = _,
+      have ht : t = η.app _ ≫ kernel.lift ((1,1) ⟶[G] (2,2)) ((1,0) ⟶[G] (1,1)) _,
+      { apply equalizer.hom_ext, simp, },
+      rw [ht, category.assoc, cokernel.condition, comp_zero],
+    end :=
+begin
+  simp only [is_iso.eq_inv_comp, is_iso.comp_inv_eq, category.assoc],
+  dsimp [is_snake_input.cokernel_to_top_right_kernel_to_right_kernel],
+  apply equalizer.hom_ext,
+  simp only [le_refl, and_true, category.assoc, nat_trans.naturality,
+    kernel.condition_assoc, zero_comp, true_and,
+    cokernel.condition, comp_zero, equalizer_as_kernel, kernel.lift_ι],
+  apply coequalizer.hom_ext,
+  simp only [category.assoc, nat_trans.naturality, cokernel.π_desc_assoc,
+    kernel.lift_ι_assoc, kernel.lift_ι],
+end
 
 @[reassoc]
 lemma aux3 (hF : is_snake_input F) (hG : is_snake_input G) :
