@@ -2,9 +2,10 @@ import .all
 run_cmd tactic.skip
 
 -- Lbar/ext.lean
-apply_nolint ExtQprime_iso_aux_system_aux ge_or_gt
+apply_nolint ExtQprime_iso_aux_system_aux unused_arguments ge_or_gt
 apply_nolint Lbar.Tinv_sub unused_arguments
 apply_nolint Lbar.condensed unused_arguments
+apply_nolint ProFiltPseuNormGrpWithTinv₁.Tinv_cond unused_arguments
 
 -- Lbar/functor.lean
 apply_nolint Lbar.map_add unused_arguments
@@ -121,6 +122,12 @@ apply_nolint category_theory.limits.preserves_binary_biproduct_of_additive insta
 -- for_mathlib/commsq.lean
 apply_nolint commsq.of_iso def_lemma
 
+-- for_mathlib/complex_extend.lean
+apply_nolint homological_complex.embed.X_is_zero_of_none def_lemma
+apply_nolint homological_complex.embed.d_of_none_src def_lemma
+apply_nolint homological_complex.embed.d_of_none_tgt def_lemma
+apply_nolint homological_complex.embed.d_of_some_of_some def_lemma
+
 -- for_mathlib/derived/K_projective.lean
 apply_nolint bounded_homotopy_category.is_K_projective_shift unused_arguments
 apply_nolint bounded_homotopy_category.lift unused_arguments
@@ -134,6 +141,10 @@ apply_nolint bounded_derived_category.zero_is_K_projective unused_arguments
 -- for_mathlib/derived/example.lean
 apply_nolint AddCommGroup.Ext_is_zero_of_one_lt ge_or_gt
 apply_nolint category_theory.ProjectiveResolution.is_projective_resolution unused_arguments
+
+-- for_mathlib/derived/ext_coproducts.lean
+apply_nolint chain_complex_embed_cofan_uniformly_bounded unused_arguments
+apply_nolint preserves_coproducts_aux def_lemma
 
 -- for_mathlib/derived/homological.lean
 apply_nolint category_theory.triangulated.homological_of_exists_aux unused_arguments
@@ -274,6 +285,8 @@ apply_nolint invpoly.set_of.topological_space unused_arguments
 
 -- invpoly/ses.lean
 apply_nolint invpoly.Tinv2_injective unused_arguments
+apply_nolint invpoly.phi_eq_mul_Tinv_sub_two unused_arguments
+apply_nolint invpoly.theta_eval2_aux unused_arguments
 
 -- laurent_measures/add_stable.lean
 apply_nolint add_eq_add unused_arguments
