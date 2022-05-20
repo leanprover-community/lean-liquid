@@ -1,7 +1,7 @@
 import for_mathlib.commsq
 import for_mathlib.les_homology
 import for_mathlib.AddCommGroup.pt
-import for_mathlib.bicartesian3
+import for_mathlib.bicartesian4
 import for_mathlib.abelian_sheaves.functor_category
 
 import system_of_complexes.shift_sub_id
@@ -82,7 +82,10 @@ def shift_sub_id.δ (H : ∀ c n, short_exact ((f.app c).f n) ((g.app c).f n)) :
   C ⋙ homology_functor _ _ n ⟶ A ⋙ homology_functor _ _ (n+1) :=
 { app := λ c, homological_complex.δ (f.app _) (g.app _) (H _) _ _ rfl,
   naturality' := λ c₁ c₂ h, begin
-    sorry -- this one might be tricky
+    -- this one might be tricky
+    -- needs naturality of the snake `δ`
+    -- people are working on that, discuss on Zulip before attacking this
+    sorry
   end }
 
 def piδ (H : ∀ c n, short_exact ((f.app c).f n) ((g.app c).f n)) :
@@ -106,28 +109,6 @@ end step3
 
 section step4
 
-lemma bicartesian_of_id_of_end_of_end_of_id
-  {A B C D : Ab.{u}} {f : A ⟶ B} {g : B ⟶ C} {h : C ⟶ D}
-  {α : A ⟶ A} {β : B ⟶ B} {γ : C ⟶ C} {δ : D ⟶ D}
-  (H : exact_seq Ab.{u} [f, g, h])
-  (sq1 : commsq f α β f) (sq2 : commsq g β γ g) (sq3 : commsq h γ δ h)
-  (hα : α = -𝟙 _) (hδ : δ = -𝟙 _) :
-  sq2.bicartesian :=
-begin
-  have aux : _ := _,
-  rw commsq.bicartesian_iff_isos _ _ aux aux sq2.kernel sq2 sq2.cokernel,
-  swap,
-  { apply exact.cons, { exact exact_kernel_ι },
-    apply exact.exact_seq, { apply abelian.exact_cokernel } },
-  sorry
-  -- use (important!) the fact that we have a `kernel.map` (resp. `cokernel.map`)
-  -- arising between two identical exact sequences
-end
-
-end step4
-
-section step5
-
 variables {A B C : system_of_complexes.{u}} (f : A.to_Ab ⟶ B.to_Ab) (g : B.to_Ab ⟶ C.to_Ab)
 variables (n : ℕ) (ι : ulift.{u} ℕ → ℝ≥0) (hι : monotone ι)
 
@@ -147,9 +128,9 @@ begin
   { rw [shift_sub_id, HA₂, zero_sub], refl },
 end
 
-end step5
+end step4
 
-section step6
+section step5
 
 variables {A B A' B' : ℝ≥0ᵒᵖ ⥤ Ab.{u}} (f : A ⟶ B) (f' : A' ⟶ B') (eA : A ≅ A') (eB : B ≅ B')
 variables (ι : ulift.{u} ℕ → ℝ≥0) (hι : monotone ι)
@@ -172,5 +153,4 @@ begin
     intro, simp only [← nat_trans.comp_app, w], }
 end
 
-
-end step6
+end step5
