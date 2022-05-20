@@ -1124,13 +1124,29 @@ kernel.lift _ (kernel.ι _ ≫ D.map (hom (1,1) (1,2))) begin
   erw [category.assoc, ← D.map_comp, kernel.condition],
 end ≫ inv hD.to_kernel
 
-instance to_kernel_epi : epi hD.to_kernel' := sorry
+--STANDALONE
+instance to_kernel_epi : epi hD.to_kernel' :=
+begin
+  -- A small diagram chase
+  dsimp [to_kernel'],
+  apply_with epi_comp { instances := ff }, swap, apply_instance,
+  haveI : epi ((1,1) ⟶[D] (1,2)) := hD.row_epi,
+  replace hh := pseudo_surjective_of_epi ((1,1) ⟶[D] (1,2)),
+  apply epi_of_pseudo_surjective,
+  intros t,
+  obtain ⟨s,hs⟩ := hh (kernel.ι ((1,2) ⟶[D] (2,2)) t),
+  obtain ⟨w,hw⟩ : ∃ w, kernel.ι ((1,1) ⟶[D] (2,2)) w = s, sorry,
+  use w,
+  sorry
+end
 
 def cokernel_to' : D.obj (3,0) ⟶ cokernel ((1,0) ⟶[D] (2,1)) :=
 inv hD.cokernel_to ≫ cokernel.desc _ (D.map (hom (2,0) (2,1)) ≫ cokernel.π _) begin
   erw [← category.assoc, ← D.map_comp, cokernel.condition],
 end
 
+--STANDALONE
+-- This is just dualizing the proof of `to_kernel_epi`.
 instance cokernel_to'_mono : mono hD.cokernel_to' := sorry
 
 lemma δ_spec : hD.to_kernel' ≫ hD.δ ≫ hD.cokernel_to' =
