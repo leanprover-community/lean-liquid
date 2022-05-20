@@ -33,7 +33,20 @@ lemma _root_.category_theory.abelian.is_iso_of_is_iso_of_is_iso_of_is_iso_of_is_
 begin
   intros U B C D A' B' C' D' f g h f' g' h' α β γ δ w1 w2 w3 E E' i i' ε w4,
   intros hfg hgh hhi hf'g' hg'h' hh'i' hα hβ hδ hε, resetI,
-  apply abelian.is_iso_of_is_iso_of_is_iso_of_is_iso_of_is_iso w1 w2 w3 w4 hfg hgh hhi hf'g' hg'h' hh'i',
+  apply abelian.is_iso_of_is_iso_of_is_iso_of_is_iso_of_is_iso
+    w1 w2 w3 w4 hfg hgh hhi hf'g' hg'h' hh'i',
+end
+
+lemma is_iso_homology_functor_map_aux (n : ℤ) (ses : ∀ i : ℤ, short_exact (f.f i) (g.f i)) :
+  (homology_functor A (complex_shape.up ℤ) n).map (cone.π f g (λ i, (ses i).exact.w)) ≫
+    δ f g ses n (n + 1) rfl =
+  (homotopy_category.homology_functor A (complex_shape.up ℤ) n).map
+    ((neg₃_functor (homotopy_category A (complex_shape.up ℤ))).obj
+      (cone.triangleₕ f)).mor₃ ≫ ((homology_shift_iso A 1 n).app
+    ((neg₃_functor (homotopy_category A (complex_shape.up ℤ))).obj
+      (cone.triangleₕ f)).obj₁.as).hom :=
+begin
+  sorry
 end
 
 theorem is_iso_homology_functor_map (n : ℤ) (ses : ∀ (i : ℤ), short_exact (f.f i) (g.f i)) :
@@ -93,7 +106,7 @@ begin
     change _ = (homology_functor _ _ _).map _ ≫ _,
     rw ← functor.map_comp,
     congr' 1, ext i, symmetry, apply biprod.inr_snd_assoc },
-  { sorry },
+  { apply is_iso_homology_functor_map_aux },
 end .
 
 instance is_quasi_iso_map_cone_π (ses : ∀ (i : ℤ), short_exact (f.f i) (g.f i)) :
