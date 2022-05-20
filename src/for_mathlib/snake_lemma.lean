@@ -1154,8 +1154,6 @@ inv hD.cokernel_to ≫ cokernel.desc _ (D.map (hom (2,0) (2,1)) ≫ cokernel.π 
   erw [← category.assoc, ← D.map_comp, cokernel.condition],
 end
 
---STANDALONE
--- This is just dualizing the proof of `to_kernel_epi`.
 instance cokernel_to'_mono : mono hD.cokernel_to' := sorry
 
 lemma δ_spec : hD.to_kernel' ≫ hD.δ ≫ hD.cokernel_to' =
