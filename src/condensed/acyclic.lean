@@ -30,7 +30,6 @@ lemma acyclic_of_exact.induction_step
   acyclic_of_exact.IH M (n+1) :=
 begin
   intros S i h1 h2,
-  -- use `arrow.conerve_to_cocomplex_homology_is_zero`
   sorry
 end
 
