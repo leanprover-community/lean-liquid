@@ -1,26 +1,17 @@
 import for_mathlib.derived.derived_cat
 import for_mathlib.derived.example
 import for_mathlib.short_exact
+import for_mathlib.random_homological_lemmas
+import for_mathlib.derived.Ext_lemmas
 
 open category_theory category_theory.triangulated category_theory.limits
 
-namespace bounded_derived_category
-
-variables (A : Type*) [category A] [abelian A] [enough_projectives A]
-
-instance Ext_additive_fst (i : ℤ) (X : bounded_derived_category A) :
-  (((Ext A i).flip.obj X).right_op).additive :=
-{ map_add' := begin
-    intros Y Z f g, dsimp,
-    conv_rhs { rw ← op_add }, congr' 1, ext e,
-    dsimp, rw preadditive.add_comp,
-  end }
-
-instance Ext_homological_fst (i : ℤ) (X : bounded_derived_category A) :
-  homological_functor ((Ext A i).flip.obj X).right_op :=
-category_theory.triangulated.preadditive_yoneda_op_homological (X⟦i⟧)
-
-end bounded_derived_category
+/-
+WARNING!!!
+this `sorry` below is probably not provable
+`for_mathlib/derived/les2.lean` contains a different approach.
+as soon as that file is sorry-free, we can nuke this file
+-/
 
 namespace homological_complex
 
@@ -68,31 +59,9 @@ variables {X Y Z : cochain_complex A ℤ} (f : X ⟶ Y) (g : Y ⟶ Z)
 open_locale pseudoelement
 open category_theory.abelian
 
--- move me
-lemma biprod.lift_desc_comm {X₁ X₂ Y₁ Y₂ : A}
-  (f₁₁ : X₁ ⟶ Y₁) (f₁₂ : X₁ ⟶ Y₂) (f₂₁ : X₂ ⟶ Y₁) (f₂₂ : X₂ ⟶ Y₂) :
-  biprod.lift (biprod.desc f₁₁ f₂₁) (biprod.desc f₁₂ f₂₂) =
-  biprod.desc (biprod.lift f₁₁ f₁₂) (biprod.lift f₂₁ f₂₂) :=
-by ext; simp only [category.assoc,
-  biprod.lift_fst, biprod.lift_snd, biprod.inl_desc, biprod.inr_desc]
-
--- move me
-lemma biprod.comp_lift {W X Y Z : A} (f : W ⟶ X) (g : X ⟶ Y) (h : X ⟶ Z) :
-  f ≫ biprod.lift g h = biprod.lift (f ≫ g) (f ≫ h) :=
-by ext; simp only [category.assoc, biprod.lift_fst, biprod.lift_snd]
-
--- move me
-lemma exact_of_exact_image {X Y Z : A} (f : X ⟶ Y) (g : Y ⟶ Z) (h : exact f (factor_thru_image g)) :
-  exact f g :=
-by { rw ← limits.image.fac g, exact exact_comp_mono h }
-
--- move me
-@[reassoc]
-lemma comp_factor_thru_image_eq_zero {X Y Z : A} (f : X ⟶ Y) (g : Y ⟶ Z) (w : f ≫ g = 0) :
-  f ≫ factor_thru_image g = 0 :=
-by rw [← cancel_mono (limits.image.ι g), category.assoc, limits.image.fac, w, zero_comp]
-
 open_locale zero_object
+
+-- WARNING!!! see WARNING below
 
 def cone.π_quasi_iso (w : ∀ i, short_exact (f.f i) (g.f i)) :
   quasi_iso (cone.π f g (λ i, (w i).exact.w)) :=
@@ -159,58 +128,13 @@ def cone.π_quasi_iso (w : ∀ i, short_exact (f.f i) (g.f i)) :
       ← biprod.comp_lift, pseudoelement.comp_apply, ha, ← pseudoelement.comp_apply,
       biprod.comp_lift, category.comp_id],
     -- use `hb`
+    /-
+    WARNING!!!
+    this sorry is probably not provable
+    `for_mathlib/derived/les2.lean` contains a different approach.
+    as soon as that file is sorry-free, we will nuke this lemma
+    -/
     sorry
   end }
 
 end homological_complex
-
-/-
-    have w' : ∀ i, f.f i ≫ g.f i = 0 := λ i, (w i).exact.w,
-    let π := cone.π f g w',
-    have aux : ∀ n, short_exact ((kernel.ι π).f n) (π.f n) := λ n,
-    { mono := equalizer.ι_mono,
-      epi := by { haveI := (w n).epi, exact category_theory.epi_comp _ _},
-      exact := exact_kernel_ι },
-    let K := kernel π,
-    suffices : ∀ n, is_zero (homology K n),
-    { exact (six_term_exact_seq (kernel.ι π) π aux i (i+1) rfl).is_iso_of_zero_of_zero
-        ((this _).eq_of_src _ _) ((this _).eq_of_tgt _ _), },
-    intro n,
-    obtain ⟨n, rfl⟩ : ∃ k, k+1 = n := ⟨n-1, sub_add_cancel _ _⟩,
-    refine is_zero_of_iso_of_zero _
-      (homology_iso K n (n+1) (n+1+1) rfl rfl).symm,
-    apply exact.homology_is_zero,
-    apply exact_of_exact_image,
-    let Kd := K.d (n+1) (n+1+1),
-    let Cd := (cone f).d (n+1) (n+1+1),
-    let v2 := (kernel.ι π).f (n+1),
-    let sq : arrow.mk (Kd) ⟶ arrow.mk Cd :=
-    ⟨(kernel.ι π).f _, (kernel.ι π).f _, _⟩, swap,
-    { dsimp [Kd, Cd], simp only [kernel.lift_ι], },
-    let v3 : image Kd ⟶ image Cd := image.map sq,
-    have sq2 : factor_thru_image Kd ≫ v3 = v2 ≫ factor_thru_image Cd,
-    { apply image.factor_map sq },
-    let q : cokernel v2 ⟶ cokernel v3 :=
-      cokernel.map _ _ (factor_thru_image Kd) (factor_thru_image Cd) sq2.symm,
-    have sq4 : factor_thru_image Cd ≫ cokernel.π v3 = cokernel.π v2 ≫ q,
-    { symmetry, apply cokernel.π_desc, },
-    let φ : (cone f).X n ⟶ (limits.kernel q) :=
-      kernel.lift _ ((cone f).d n (n+1) ≫ cokernel.π v2) _, swap,
-    { rw [category.assoc, ← sq4, comp_factor_thru_image_eq_zero_assoc, zero_comp],
-      exact d_comp_d _ _ _ _ },
-    suffices S : category_theory.snake
-      (K.X n)          (K.X (n+1))          (image Kd)
-      ((cone f).X n)   ((cone f).X (n+1))   (image Cd)
-      _                (cokernel v2)        (cokernel v3)
-      _                0                    0
-      (K.d n (n+1))          (factor_thru_image Kd)
-      ((kernel.ι π).f n)     ((kernel.ι π).f (n+1))     v3
-      ((cone f).d n (n+1))   (factor_thru_image Cd)
-      φ                      (cokernel.π v2)            (cokernel.π v3)
-      (limits.kernel.ι q)     q
-      (cokernel.π φ)    0    0
-      0  0,
-    { exact S.six_term_exact_seq.pair },
-    apply_with snake.mk {instances := ff};
-    try { apply_instance },
--/
