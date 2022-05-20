@@ -1,8 +1,8 @@
 import for_mathlib.derived.derived_cat
 import for_mathlib.derived.example
 import for_mathlib.short_exact
-import for_mathlib.random_homological_lemmas
-import for_mathlib.derived.Ext_lemmas
+--import for_mathlib.random_homological_lemmas
+--import for_mathlib.derived.Ext_lemmas
 
 open category_theory category_theory.triangulated category_theory.limits
 
@@ -121,6 +121,8 @@ def cone.π_quasi_iso (w : ∀ i, short_exact (f.f i) (g.f i)) :
     change _ = x,
     simp only [X_eq_to_iso_refl, category.comp_id] at hb ⊢,
     simp only [← pseudoelement.comp_apply, category.assoc],
+
+    /-
     simp only [biprod.lift_desc_comm, biprod.inl_desc] at hb ⊢,
     apply @pseudoelement.pseudo_injective_of_mono _ _ _ _ _ _ hφ,
     rw [← pseudoelement.comp_apply, biprod.comp_lift, biprod.lift_fst_assoc, biprod.lift_snd,
@@ -128,7 +130,7 @@ def cone.π_quasi_iso (w : ∀ i, short_exact (f.f i) (g.f i)) :
       ← biprod.comp_lift, pseudoelement.comp_apply, ha, ← pseudoelement.comp_apply,
       biprod.comp_lift, category.comp_id],
     -- use `hb`
-    /-
+
     WARNING!!!
     this sorry is probably not provable
     `for_mathlib/derived/les2.lean` contains a different approach.

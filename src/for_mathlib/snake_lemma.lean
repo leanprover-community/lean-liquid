@@ -1115,6 +1115,58 @@ end
 
 end delta
 
+section delta_spec
+
+variables (hD : is_snake_input D)
+
+def to_kernel' : kernel ((1,1) ⟶[D] (2,2)) ⟶ D.obj (0,2) :=
+kernel.lift _ (kernel.ι _ ≫ D.map (hom (1,1) (1,2))) sorry ≫ inv hD.to_kernel
+
+instance to_kernel_epi : epi hD.to_kernel' := sorry
+
+def cokernel_to' : D.obj (3,0) ⟶ cokernel ((1,0) ⟶[D] (2,1)) :=
+inv hD.cokernel_to ≫ cokernel.desc _ (D.map (hom (2,0) (2,1)) ≫ cokernel.π _) sorry
+
+instance cokernel_to'_mono : mono hD.cokernel_to' := sorry
+
+lemma δ_spec : hD.to_kernel' ≫ hD.δ ≫ hD.cokernel_to' =
+  kernel.ι _ ≫ D.map (hom (1,1) (2,1)) ≫ cokernel.π _ :=
+begin
+  dsimp [is_snake_input.δ ,is_snake_input.to_kernel', is_snake_input.cokernel_to'],
+  simp only [category.assoc, is_iso.hom_inv_id_assoc, is_iso.inv_hom_id_assoc],
+  dsimp [is_snake_input.cokernel_to_top_right_kernel_to_right_kernel],
+  dsimp [is_snake_input.left_cokernel_to_kernel_bottom_left_cokernel_to],
+  dsimp [is_snake_input.δ_aux],
+  let t := _, change _ ≫ _ ≫ _ ≫ t = _,
+  have ht : t = kernel.ι _,
+  { dsimp [t],
+    rw is_iso.inv_comp_eq,
+    apply coequalizer.hom_ext,
+    simp only [cokernel.π_desc, category.assoc, kernel.lift_ι, cokernel.π_desc_assoc] },
+  rw ht, clear ht, clear t,
+  let t := _, change t ≫ _ = _,
+  let s := _, change t ≫ s ≫ _ = _,
+  have hst : t ≫ s = cokernel.π _,
+  { dsimp [s,t],
+    rw is_iso.comp_inv_eq,
+    apply equalizer.hom_ext,
+    simp only [cokernel.π_desc] },
+  rw reassoc_of hst, clear hst, clear s, clear t,
+  simp only [cokernel.π_desc_assoc, kernel.lift_ι],
+end
+
+lemma eq_δ_of_spec (e : D.obj (0,2) ⟶ D.obj (3,0))
+  (he : hD.to_kernel' ≫ e ≫ hD.cokernel_to' = kernel.ι _ ≫
+    D.map (hom (1,1) (2,1)) ≫ cokernel.π _) :
+  e = hD.δ :=
+begin
+  rw ← cancel_mono hD.cokernel_to',
+  rw ← cancel_epi hD.to_kernel',
+  rw [he, δ_spec],
+end
+
+end delta_spec
+
 local attribute [instance] limits.has_zero_object.has_zero
 
 lemma exact_zero_to_ker_row₁_to_top_left (hD : is_snake_input D) :
