@@ -1124,10 +1124,8 @@ kernel.lift _ (kernel.ι _ ≫ D.map (hom (1,1) (1,2))) begin
   erw [category.assoc, ← D.map_comp, kernel.condition],
 end ≫ inv hD.to_kernel
 
---STANDALONE
 instance to_kernel_epi : epi hD.to_kernel' :=
 begin
-  -- A small diagram chase
   dsimp [to_kernel'],
   apply_with epi_comp { instances := ff }, swap, apply_instance,
   haveI : epi ((1,1) ⟶[D] (1,2)) := hD.row_epi,
@@ -1135,9 +1133,20 @@ begin
   apply epi_of_pseudo_surjective,
   intros t,
   obtain ⟨s,hs⟩ := hh (kernel.ι ((1,2) ⟶[D] (2,2)) t),
-  obtain ⟨w,hw⟩ : ∃ w, kernel.ι ((1,1) ⟶[D] (2,2)) w = s, sorry,
+  obtain ⟨w,hw⟩ : ∃ w, kernel.ι ((1,1) ⟶[D] (2,2)) w = s,
+  { have : exact (kernel.ι ((1,1) ⟶[D] (2,2))) ((1,1) ⟶[D] (2,2)) :=
+      exact_kernel_ι,
+    replace this := pseudo_exact_of_exact this,
+    apply this.2,
+    rw [(show (hom (1,1) (2,2)) = hom (1,1) (1,2) ≫ hom (1,2) (2,2), by refl),
+      functor.map_comp, abelian.pseudoelement.comp_apply, hs,
+      ← abelian.pseudoelement.comp_apply, kernel.condition,
+      abelian.pseudoelement.zero_apply] },
   use w,
-  sorry
+  apply abelian.pseudoelement.pseudo_injective_of_mono
+    (kernel.ι ((1,2) ⟶[D] (2,2))),
+  rw [← hs, ← abelian.pseudoelement.comp_apply, kernel.lift_ι,
+    abelian.pseudoelement.comp_apply, hw],
 end
 
 def cokernel_to' : D.obj (3,0) ⟶ cokernel ((1,0) ⟶[D] (2,1)) :=
