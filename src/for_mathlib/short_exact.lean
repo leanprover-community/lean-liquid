@@ -28,3 +28,9 @@ begin
   rw exact_factor_thru_image_iff,
   apply exact_kernel_ι,
 end
+
+-- SELFCONTAINED
+lemma iso_of_short_exact_comp_right {X Y Z W : 𝓐} (f : X ⟶ Y) (g : Y ⟶ Z) (h : Z ⟶ W)
+  (H1 : short_exact f g) (H2 : short_exact f (g ≫ h)) :
+  is_iso h :=
+sorry

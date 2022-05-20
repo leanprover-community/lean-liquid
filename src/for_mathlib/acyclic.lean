@@ -3,10 +3,12 @@ import category_theory.limits.preserves.shapes.biproducts
 
 import for_mathlib.derived.les2
 import for_mathlib.derived.les_facts
+import for_mathlib.derived.Ext_lemmas
+
 import for_mathlib.is_quasi_iso
 import for_mathlib.short_exact
 import for_mathlib.homology
--- import for_mathlib.salamander
+
 .
 
 noncomputable theory
@@ -60,7 +62,7 @@ begin
   dsimp [delta_to_kernel] at e ⊢,
   rw [e.is_zero_iff, homology_is_zero_iff_image_to_kernel'_is_iso],
   split,
-  { intro h, sorry },
+  { apply iso_of_short_exact_comp_right _ _ _, apply short_exact_kernel_factor_thru_image },
   { intro h, rw short_exact_comp_iso _ _ _ h, apply short_exact_kernel_factor_thru_image }
 end
 
@@ -113,6 +115,7 @@ begin
   refine (this.drop 1).pair.is_zero_of_is_zero_is_zero (hY _ hi) (hZ _ _),
   transitivity i, { exact lt_add_one i }, { exact hi }
 end
+.
 
 lemma map_is_acyclic_of_acyclic
   [is_acyclic ((homotopy_category.quotient _ _).obj C)]
@@ -123,6 +126,8 @@ begin
   rw is_acyclic_iff_short_exact_to_cycles,
   obtain ⟨a, ha⟩ := is_bounded_above.cond ((quotient 𝓐 _).obj C),
   intro i,
+  dsimp only [functor.map_homotopy_category_obj, quotient_obj_as,
+    functor.map_homological_complex_obj_d, delta_to_kernel],
   sorry
 end
 
