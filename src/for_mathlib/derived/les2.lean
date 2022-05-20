@@ -37,6 +37,7 @@ begin
     w1 w2 w3 w4 hfg hgh hhi hf'g' hg'h' hh'i',
 end
 
+-- Why is this SO SLOW?!
 lemma is_iso_homology_functor_map_aux (n : ℤ) (ses : ∀ i : ℤ, short_exact (f.f i) (g.f i)) :
   (homology_functor A (complex_shape.up ℤ) n).map (cone.π f g (λ i, (ses i).exact.w)) ≫
     δ f g ses n (n + 1) rfl =
