@@ -1154,7 +1154,28 @@ inv hD.cokernel_to ≫ cokernel.desc _ (D.map (hom (2,0) (2,1)) ≫ cokernel.π 
   erw [← category.assoc, ← D.map_comp, cokernel.condition],
 end
 
-instance cokernel_to'_mono : mono hD.cokernel_to' := sorry
+instance cokernel_to'_mono : mono hD.cokernel_to' := begin
+  dsimp [cokernel_to'],
+  apply_with mono_comp { instances := ff }, apply_instance,
+  apply abelian.pseudoelement.mono_of_zero_of_map_zero,
+  intros a ha,
+  obtain ⟨b,rfl⟩ : ∃ b, cokernel.π ((1,0) ⟶[D] (2,0)) b = a,
+  { apply abelian.pseudoelement.pseudo_surjective_of_epi },
+  rw [← abelian.pseudoelement.comp_apply, cokernel.π_desc,
+    abelian.pseudoelement.comp_apply] at ha,
+  obtain ⟨c,hc⟩ : ∃ c, ((1,0) ⟶[D] (2,1)) c = ((2,0) ⟶[D] (2,1)) b,
+  { have : exact ((1,0) ⟶[D] (2,1)) (cokernel.π _) := abelian.exact_cokernel _,
+    replace this := pseudo_exact_of_exact this,
+    apply this.2,
+    exact ha },
+  have hc' : ((1,0) ⟶[D] (2,0)) c = b,
+  { haveI : mono ((2,0) ⟶[D] (2,1)) := hD.row_mono,
+    apply abelian.pseudoelement.pseudo_injective_of_mono ((2,0) ⟶[D] (2,1)),
+    rw [← abelian.pseudoelement.comp_apply, ← D.map_comp],
+    exact hc },
+  rw [← hc', ← abelian.pseudoelement.comp_apply, cokernel.condition,
+    abelian.pseudoelement.zero_apply],
+end
 
 lemma δ_spec : hD.to_kernel' ≫ hD.δ ≫ hD.cokernel_to' =
   kernel.ι _ ≫ D.map (hom (1,1) (2,1)) ≫ cokernel.π _ :=
