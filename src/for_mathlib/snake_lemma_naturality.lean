@@ -58,10 +58,27 @@ end
 lemma aux3 (hF : is_snake_input F) (hG : is_snake_input G) :
   kernel.lift hG.bottom_left_cokernel_to (kernel.ι hF.bottom_left_cokernel_to ≫
     cokernel.desc ((1, 0) ⟶[F] (2, 1)) (η.app (2, 1) ≫
-    cokernel.π ((1, 0) ⟶[G] (2, 1))) sorry) sorry ≫
+    cokernel.π ((1, 0) ⟶[G] (2, 1))) begin
+      simp only [category.assoc, η.naturality_assoc, cokernel.condition, comp_zero],
+    end) begin
+      dsimp [is_snake_input.bottom_left_cokernel_to],
+      simp only [category.assoc], let t := _, change _ ≫ t = _,
+      have ht : t = cokernel.desc ((1,0) ⟶[F] (2,1)) ((2,1) ⟶[F] (2,2)) _ ≫ η.app _,
+      { apply coequalizer.hom_ext, simp, },
+      rw [ht, kernel.condition_assoc, zero_comp],
+    end ≫
     inv hG.left_cokernel_to_kernel_bottom_left_cokernel_to =
   inv hF.left_cokernel_to_kernel_bottom_left_cokernel_to ≫
-  cokernel.desc _ (η.app _ ≫ cokernel.π _) sorry := sorry
+  cokernel.desc _ (η.app _ ≫ cokernel.π _) begin
+    simp only [category.assoc, η.naturality_assoc, cokernel.condition, comp_zero],
+  end :=
+begin
+  rw [is_iso.comp_inv_eq, category.assoc (inv _), is_iso.eq_inv_comp],
+  dsimp [is_snake_input.left_cokernel_to_kernel_bottom_left_cokernel_to],
+  apply coequalizer.hom_ext, apply equalizer.hom_ext,
+  simp only [nat_trans.naturality_assoc, category.assoc, cokernel.π_desc_assoc,
+    cokernel.π_desc, kernel.lift_ι, kernel.lift_ι_assoc],
+end
 
 end δ_natural_setup
 
@@ -81,8 +98,18 @@ begin
   simp only [← category.assoc], let t := _, change (t ≫ _) ≫ _ = _,
   let s := _, change _ = ((s ≫ _) ≫ _) ≫ _,
   have ht : t = s ≫ kernel.lift _ (kernel.ι _ ≫
-    cokernel.desc _ (η.app _ ≫ cokernel.π _) sorry) sorry,
-  { sorry },
+    cokernel.desc _ (η.app _ ≫ cokernel.π _) begin
+      simp only [category.assoc, η.naturality_assoc, cokernel.condition, comp_zero],
+    end) _,
+  rotate 2,
+  { dsimp [is_snake_input.bottom_left_cokernel_to], simp only [category.assoc],
+    let t := _, change _ ≫ t = _,
+    have ht : t = cokernel.desc ((1,0) ⟶[F] (2,1)) ((2,1) ⟶[F] (2,2)) _ ≫ η.app _,
+    { apply coequalizer.hom_ext, dsimp, simp, },
+    rw [ht, kernel.condition_assoc, zero_comp] },
+  { dsimp [t, s],
+    apply equalizer.hom_ext,
+    simp },
   rw ht, clear ht, clear t, dsimp [s], clear s,
   simp only [category.assoc], congr' 1,
   rw aux3_assoc η hF hG, congr' 1,
