@@ -20,12 +20,13 @@ open bounded_homotopy_category
 
 section
 
-variables {𝓐 : Type*} [category 𝓐] [abelian 𝓐]
+variables {𝓐 : Type*} [category 𝓐] [abelian 𝓐] {ι : Type*} {c : complex_shape ι}
 
-def delta_to_kernel (C : cochain_complex 𝓐 ℤ) (i : ℤ) :
-  C.X i ⟶ kernel (C.d (i+1) (i+1+1)) :=
-factor_thru_image _ ≫ image_to_kernel' (C.d i (i+1)) _ (C.d_comp_d _ _ _)
+def delta_to_kernel (C : homological_complex 𝓐 c) (i j k : ι) :
+  C.X i ⟶ kernel (C.d j k) :=
+factor_thru_image _ ≫ image_to_kernel' (C.d i j) _ (C.d_comp_d _ _ _)
 
+-- move me
 lemma short_exact_comp_iso {A B C D : 𝓐} (f : A ⟶ B) (g : B ⟶ C) (h : C ⟶ D) (hh : is_iso h) :
   short_exact f (g ≫ h) ↔ short_exact f g :=
 begin
@@ -41,7 +42,7 @@ begin
 end
 
 lemma is_acyclic_def
-  (C : homotopy_category 𝓐 (complex_shape.up ℤ)) :
+  (C : homotopy_category 𝓐 c) :
   is_acyclic C ↔ (∀ i, is_zero (C.as.homology i)) :=
 begin
   split,
@@ -52,7 +53,7 @@ end
 lemma is_acyclic_iff_short_exact_to_cycles
   (C : homotopy_category 𝓐 (complex_shape.up ℤ)) :
   is_acyclic C ↔
-  (∀ i, short_exact (kernel.ι (C.as.d i (i+1))) (delta_to_kernel C.as i)) :=
+  (∀ i, short_exact (kernel.ι (C.as.d i (i+1))) (delta_to_kernel C.as i (i+1) (i+1+1))) :=
 begin
   rw is_acyclic_def,
   symmetry,
@@ -66,6 +67,21 @@ begin
   { intro h, rw short_exact_comp_iso _ _ _ h, apply short_exact_kernel_factor_thru_image }
 end
 
+lemma is_acyclic_iff_short_exact_to_cycles'
+  (C : homological_complex 𝓐 (complex_shape.down ℤ)) :
+  (∀ i, is_zero (C.homology i)) ↔
+  (∀ i, short_exact (kernel.ι (C.d (i+1+1) (i+1))) (delta_to_kernel C (i+1+1) (i+1) i)) :=
+begin
+  symmetry,
+  apply (equiv.add_right (1 : ℤ)).forall_congr,
+  intro i,
+  let e := (homology_iso C (i+1+1) (i+1) i rfl rfl),
+  dsimp [delta_to_kernel] at e ⊢,
+  rw [e.is_zero_iff, homology_is_zero_iff_image_to_kernel'_is_iso],
+  split,
+  { apply iso_of_short_exact_comp_right _ _ _, apply short_exact_kernel_factor_thru_image },
+  { intro h, rw short_exact_comp_iso _ _ _ h, apply short_exact_kernel_factor_thru_image }
+end
 
 end
 
@@ -117,18 +133,64 @@ begin
 end
 .
 
+lemma map_is_acyclic_of_acyclic''
+  [is_acyclic ((homotopy_category.quotient _ _).obj C)]
+  (B : 𝓐)
+  (hC : ∀ k, ∀ i > 0, is_zero (((Ext' i).obj (op $ C.X k)).obj B)) :
+  ∀ i, is_zero (((((Ext' 0).flip.obj B).map_homological_complex _).obj C.op).homology i) :=
+begin
+  let ExtB := (Ext' 0).flip.obj B,
+  rw is_acyclic_iff_short_exact_to_cycles',
+  obtain ⟨a, ha⟩ := is_bounded_above.cond ((quotient 𝓐 (complex_shape.up ℤ)).obj C),
+  intro i,
+  apply int.induction_on' i a,
+  { have := ha a,
+    sorry },
+  { sorry },
+  { sorry }
+end
+
+lemma map_is_acyclic_of_acyclic'
+  [is_acyclic ((homotopy_category.quotient _ _).obj C)]
+  (B : 𝓐)
+  (hC : ∀ k, ∀ i > 0, is_zero (((Ext' i).obj (op $ C.X k)).obj B)) :
+  is_acyclic ((((Ext' 0).flip.obj B).right_op.map_homotopy_category _).obj ((homotopy_category.quotient _ _).obj C)) :=
+begin
+  rw is_acyclic_def,
+  intro i,
+  have h1 : (complex_shape.up ℤ).rel (i - 1) i, { dsimp, apply sub_add_cancel },
+  refine is_zero.of_iso _ (homology_iso' _ (i-1) i (i+1) h1 rfl),
+  dsimp only [functor.map_homotopy_category_obj, quotient_obj_as,
+    functor.right_op_map, functor.map_homological_complex_obj_d],
+  apply exact.homology_is_zero,
+  apply exact.op,
+  refine exact_of_homology_is_zero _,
+  { rw [← category_theory.functor.map_comp, ← op_comp, homological_complex.d_comp_d, op_zero, functor.map_zero], },
+  have := map_is_acyclic_of_acyclic'' C B hC i,
+  apply this.of_iso _, clear this,
+  let C' := (((Ext' 0).flip.obj B).map_homological_complex (complex_shape.up ℤ).symm).obj (homological_complex.op C),
+  have h1 : (complex_shape.down ℤ).rel i (i - 1), { dsimp, apply sub_add_cancel },
+  exact (homology_iso' C' (i+1) i (i-1) rfl h1).symm,
+end
+
 lemma map_is_acyclic_of_acyclic
   [is_acyclic ((homotopy_category.quotient _ _).obj C)]
   (B : 𝓐)
   (hC : ∀ k, ∀ i > 0, is_zero (((Ext' i).obj (op $ C.X k)).obj B)) :
   is_acyclic (((preadditive_yoneda.obj B).right_op.map_homotopy_category _).obj ((homotopy_category.quotient _ _).obj C)) :=
 begin
-  rw is_acyclic_iff_short_exact_to_cycles,
-  obtain ⟨a, ha⟩ := is_bounded_above.cond ((quotient 𝓐 _).obj C),
-  intro i,
+  have := map_is_acyclic_of_acyclic' C B hC,
+  rw is_acyclic_def at this ⊢,
+  intro i, specialize this i,
+  apply this.of_iso _, clear this,
+  have h1 : (complex_shape.up ℤ).rel (i - 1) i, { dsimp, apply sub_add_cancel },
+  refine (homology_iso' _ (i-1) i (i+1) h1 rfl) ≪≫ _ ≪≫ (homology_iso' _ (i-1) i (i+1) h1 rfl).symm,
   dsimp only [functor.map_homotopy_category_obj, quotient_obj_as,
-    functor.map_homological_complex_obj_d, delta_to_kernel],
-  sorry
+    functor.right_op_map, functor.map_homological_complex_obj_d],
+  let e := λ i, ((bounded_derived_category.Ext'_zero_flip_iso _ B).app (op $ C.X i)).op,
+  refine homology.map_iso _ _ (arrow.iso_mk (e _) (e _) _) (arrow.iso_mk (e _) (e _) _) rfl,
+  { simp only [iso.op_hom, iso.app_hom, arrow.mk_hom, functor.flip_obj_map, ← op_comp, ← nat_trans.naturality], },
+  { simp only [iso.op_hom, iso.app_hom, arrow.mk_hom, functor.flip_obj_map, ← op_comp, ← nat_trans.naturality], },
 end
 
 lemma acyclic_of_projective (P B : 𝓐) [projective P] (i : ℤ) (hi : 0 < i) :
