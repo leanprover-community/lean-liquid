@@ -2,6 +2,8 @@ import for_mathlib.snake_lemma
 
 namespace category_theory
 
+local notation x `⟶[`D`]` y := D.map (snake_diagram.hom x y)
+
 namespace snake_lemma
 
 open category_theory.limits
@@ -19,8 +21,7 @@ lemma aux1 (hF : is_snake_input F) (hG : is_snake_input G) :
 
 @[reassoc]
 lemma aux2 (hF : is_snake_input F) (hG : is_snake_input G) :
-  kernel.lift (G.map (snake_diagram.hom (1, 2) (2, 2) is_snake_input.to_kernel._proof_2))
-    (kernel.ι (F.map (snake_diagram.hom (1, 2) (2, 2) is_snake_input.to_kernel._proof_2)) ≫
+  kernel.lift ((1, 2) ⟶[G] (2, 2)) (kernel.ι ((1, 2) ⟶[F] (2, 2)) ≫
     η.app (1, 2)) sorry ≫ inv hG.cokernel_to_top_right_kernel_to_right_kernel =
   inv hF.cokernel_to_top_right_kernel_to_right_kernel ≫
     cokernel.desc _ (kernel.lift _ (kernel.ι _ ≫ η.app _) sorry ≫ cokernel.π _) sorry := sorry
@@ -28,10 +29,8 @@ lemma aux2 (hF : is_snake_input F) (hG : is_snake_input G) :
 @[reassoc]
 lemma aux3 (hF : is_snake_input F) (hG : is_snake_input G) :
   kernel.lift hG.bottom_left_cokernel_to (kernel.ι hF.bottom_left_cokernel_to ≫
-    cokernel.desc (F.map (snake_diagram.hom (1, 0) (2, 1)
-    is_snake_input.bottom_left_cokernel_to._proof_2)) (η.app (2, 1) ≫
-    cokernel.π (G.map (snake_diagram.hom (1, 0) (2, 1)
-    is_snake_input.bottom_left_cokernel_to._proof_2))) sorry) sorry ≫
+    cokernel.desc ((1, 0) ⟶[F] (2, 1)) (η.app (2, 1) ≫
+    cokernel.π ((1, 0) ⟶[G] (2, 1))) sorry) sorry ≫
     inv hG.left_cokernel_to_kernel_bottom_left_cokernel_to =
   inv hF.left_cokernel_to_kernel_bottom_left_cokernel_to ≫
   cokernel.desc _ (η.app _ ≫ cokernel.π _) sorry := sorry
