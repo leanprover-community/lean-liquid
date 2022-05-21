@@ -432,6 +432,23 @@ begin
 end
 .
 
+-- Do we not have this?!
+-- TODO: Move this!
+def shift_of_eq {C : Type u} [category.{v} C] [has_shift C ℤ] (i j : ℤ) (h : i = j) (X : C) :
+  X⟦i⟧ ≅ X⟦j⟧ :=
+by { rw h }
+
+def shift_iso_aux {C : Type u} [category.{v} C] [preadditive C] [has_shift C ℤ]
+  (n m : ℤ) (X Y : C) :
+  (X⟦n⟧ ⟶ Y⟦m + n⟧) ≃+ (X ⟶ Y⟦m⟧) :=
+{ to_fun := λ f,
+    let e₁ : X ≅ X⟦n⟧⟦-n⟧ := (shift_shift_neg X n).symm,
+        e₂ : Y⟦m⟧ ≅ Y⟦m+n⟧⟦-n⟧ := shift_of_eq _ _ (by simp) _ ≪≫ (shift_add _ _ _) in
+        e₁.hom ≫ f⟦-n⟧' ≫ e₂.inv,
+  inv_fun := λ f, f⟦n⟧' ≫ (shift_add _ _ _).inv,
+  left_inv := sorry,
+  right_inv := sorry,
+  map_add' := sorry }
 
 def shift_iso [enough_projectives A]
   (n : ℤ) (X : cochain_complex A ℤ) (Y : bounded_homotopy_category A)
@@ -444,8 +461,7 @@ begin
   refine (e' ≪≫ _ ≪≫ e.symm),
   clear e e',
   refine add_equiv.to_AddCommGroup_iso _,
-  let se := shift_equiv (bounded_homotopy_category A) (1:ℤ),
-  sorry
+  apply shift_iso_aux 1 n,
 end
 
 lemma shift_iso_conj
