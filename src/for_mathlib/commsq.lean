@@ -230,6 +230,55 @@ pushout_cocone.is_colimit.mk sq.w
     simp only [h₁, h₂, preadditive.add_comp, category.assoc, inl_π, inr_π]
   end)
 
+lemma bicartesian.of_is_limit_of_is_colimt {sq : commsq f₁₁ g₁₁ g₁₂ f₂₁}
+  (hl : is_limit (pullback_cone.mk f₁₁ g₁₁ sq.w)) (hc : is_colimit (pushout_cocone.mk g₁₂ f₂₁ sq.w)) :
+  sq.bicartesian :=
+begin
+  have h : (-f₁₁ ≫ sq.sum.inl + g₁₁ ≫ sq.sum.inr) ≫ sq.π = 0,
+  { simp only [sq.w, preadditive.add_comp, preadditive.neg_comp, category.assoc, inl_π, inr_π,
+      add_left_neg] },
+  let hker : is_limit (kernel_fork.of_ι _ h),
+  { fapply is_limit.of_ι,
+    { refine λ T g hg, hl.lift (pullback_cone.mk (-g ≫ sq.sum.fst) (g ≫ sq.sum.snd) _),
+      rw [sq.π_eq, preadditive.comp_add] at hg,
+      simp only [add_eq_zero_iff_eq_neg.1 hg, preadditive.neg_comp, category.assoc,
+        neg_neg] },
+    { intros T g hg,
+      simp only [preadditive.comp_add, preadditive.comp_neg, ← category.assoc],
+      erw [hl.fac _ walking_span.left, hl.fac _ walking_span.right],
+      simp only [preadditive.neg_comp, category.assoc, neg_neg, pullback_cone.mk_π_app_left,
+        pullback_cone.mk_π_app_right, ← preadditive.comp_add, sq.sum.total, category.comp_id] },
+    { intros T g hg m hm,
+      apply pullback_cone.is_limit.hom_ext hl,
+      { erw [pullback_cone.mk_fst, hl.fac _ walking_span.left],
+        simp only [← hm, preadditive.neg_comp, category.assoc, neg_neg, pullback_cone.mk_π_app_left,
+        preadditive.comp_neg, preadditive.add_comp, sum_str.inl_fst, category.comp_id,
+        sum_str.inr_fst, comp_zero, add_zero] },
+      { erw [pullback_cone.mk_snd, hl.fac _ walking_span.right],
+        simp only [← hm, preadditive.neg_comp, category.assoc, pullback_cone.mk_π_app_right,
+          preadditive.add_comp, sum_str.inl_snd, comp_zero, neg_zero, sum_str.inr_snd,
+          category.comp_id, zero_add] } } },
+  let hcoker : is_colimit (cokernel_cofork.of_π _ h),
+  { fapply is_colimit.of_π,
+    { refine λ T g hg, hc.desc (pushout_cocone.mk (sq.sum.inl ≫ g) (sq.sum.inr ≫ g) _),
+      rwa [preadditive.add_comp, preadditive.neg_comp, add_eq_zero_iff_neg_eq, neg_neg,
+        category.assoc, category.assoc] at hg },
+    { intros T g hg,
+      simp only [sq.π_eq, preadditive.add_comp, category.assoc],
+      erw [hc.fac _ walking_cospan.left, hc.fac _ walking_cospan.right],
+      simp only [pushout_cocone.mk_ι_app_left, pushout_cocone.mk_ι_app_right, ← category.assoc,
+        ← preadditive.add_comp, sq.sum.total, category.id_comp] },
+    { intros T g hg m hm,
+      apply pushout_cocone.is_colimit.hom_ext hc,
+      { erw [pushout_cocone.mk_inl, hc.fac _ walking_cospan.left],
+        simp only [← hm, pushout_cocone.mk_ι_app_left, inl_π_assoc] },
+      { erw [pushout_cocone.mk_inr, hc.fac _ walking_cospan.right],
+        simp only [←hm, pushout_cocone.mk_ι_app_right, inr_π_assoc] } } },
+  haveI : mono (-f₁₁ ≫ sq.sum.inl + g₁₁ ≫ sq.sum.inr) := mono_of_is_limit_fork hker,
+  haveI : epi sq.π := epi_of_is_colimit_cofork hcoker,
+  exact ⟨abelian.exact_of_is_kernel _ _ h hker⟩
+end
+
 open category_theory.preadditive
 
 lemma bicartesian.congr {sq₁ : commsq f₁₁ g₁₁ g₁₂ f₂₁}
