@@ -41,7 +41,18 @@ namespace is_iso_cone_setup
 
 -- This follows from the fact that homology is a homological functor.
 lemma is_zero_homology_cone_id (n : ℤ) :
-  is_zero ((cone (𝟙 X)).homology n) := sorry
+  is_zero ((cone (𝟙 X)).homology n) :=
+begin
+  let T : triangle (homotopy_category A (complex_shape.up ℤ)) :=
+    (neg₃_functor _).obj (cone.triangleₕ (𝟙 X)),
+  have hT : T ∈ dist_triang 𝒦,
+  { erw homotopy_category.mem_distinguished_iff_exists_iso_cone,
+    refine ⟨_, _, 𝟙 X, ⟨iso.refl _⟩⟩ },
+  have E := five_term_exact_seq' (homotopy_category.homology_functor A
+    (complex_shape.up ℤ) n) T hT,
+  dsimp [T] at E,
+  sorry -- use E.
+end
 
 def cone_id_to_cone :
   cone (𝟙 X) ⟶ cone f :=
@@ -58,6 +69,16 @@ Now combine both results above to see that the map
 `H^i(C(f)) → H^i(Z)`
 is an isomorphism, using the LES for short exact sequences of complexes.
 -/
+
+lemma is_iso_homology_map_cone_π (ses : ∀ i : ℤ, short_exact (f.f i) (g.f i))
+  (n : ℤ) :
+  is_iso ((homology_functor _ _ n).map (cone.π f g (λ i, (ses i).exact.w))) :=
+begin
+  have E := six_term_exact_seq (cone_id_to_cone f)
+    (cone.π f g (λ i, (ses i).exact.w)) (cone_id_to_cone_short_exact _ _ _),
+  -- now use E along with `is_zero_homology_cone_id`.
+  sorry
+end
 
 end is_iso_cone_setup
 
