@@ -36,8 +36,19 @@ begin
   apply exact_kernel_ι,
 end
 
--- SELFCONTAINED
 lemma iso_of_short_exact_comp_right {X Y Z W : 𝓐} (f : X ⟶ Y) (g : Y ⟶ Z) (h : Z ⟶ W)
   (H1 : short_exact f g) (H2 : short_exact f (g ≫ h)) :
   is_iso h :=
-sorry
+begin
+  refine (is_iso_iff_mono_and_epi _).2 ⟨abelian.pseudoelement.mono_of_zero_of_map_zero _ (λ z hz, _),
+  abelian.pseudoelement.epi_of_pseudo_surjective _ (λ w, _)⟩,
+  { haveI := H1.epi,
+    obtain ⟨y, rfl⟩ := abelian.pseudoelement.pseudo_surjective_of_epi g z,
+    rw [← abelian.pseudoelement.comp_apply] at hz,
+    obtain ⟨x, rfl⟩ := (abelian.pseudoelement.pseudo_exact_of_exact H2.exact).2 _ hz,
+    exact (abelian.pseudoelement.pseudo_exact_of_exact H1.exact).1 x },
+  { haveI := H2.epi,
+    obtain ⟨y, rfl⟩ := abelian.pseudoelement.pseudo_surjective_of_epi (g ≫ h) w,
+    refine ⟨g y, _⟩,
+    rw [← abelian.pseudoelement.comp_apply] }
+end
