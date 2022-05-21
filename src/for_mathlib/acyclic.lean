@@ -143,6 +143,8 @@ begin
   let ExtB := (Ext' 0).flip.obj B,
   rw is_acyclic_iff_short_exact_to_cycles',
   obtain ⟨a, ha⟩ := is_bounded_above.cond ((quotient 𝓐 (complex_shape.up ℤ)).obj C),
+  have aux : ((quotient 𝓐 (complex_shape.up ℤ)).obj C).is_acyclic := ‹_›,
+  rw is_acyclic_iff_short_exact_to_cycles at aux,
   intro i,
   let K := λ j, kernel (C.d j (j+1)),
   suffices : ∀ j, ∀ i > 0, is_zero (((Ext' i).obj (op $ K j)).obj B),
@@ -161,8 +163,6 @@ begin
     obtain ⟨j, rfl⟩ : ∃ i, i + 1 = j := ⟨j - 1, sub_add_cancel _ _⟩,
     rw add_sub_cancel,
     apply acyclic_left_of_short_exact B (kernel.ι _) (delta_to_kernel _ _ _ _) _ (hC _) IH,
-    have aux : ((quotient 𝓐 (complex_shape.up ℤ)).obj C).is_acyclic := ‹_›,
-    rw is_acyclic_iff_short_exact_to_cycles at aux,
     exact aux j, }
 end
 
