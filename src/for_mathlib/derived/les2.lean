@@ -71,7 +71,33 @@ def cone_id_to_cone :
 -- `0 → C(𝟙 X) → C(f) → Z → 0` is a SES of complexes.
 lemma cone_id_to_cone_short_exact (ses : ∀ i : ℤ, short_exact (f.f i) (g.f i))
   (n : ℤ) : short_exact ((cone_id_to_cone f).f n)
-  ((cone.π f g (λ i, (ses i).exact.w)).f _) := sorry
+  ((cone.π f g (λ i, (ses i).exact.w)).f _) :=
+{ mono := begin
+    constructor, intros Z i j h,
+    dsimp [cone_id_to_cone] at h,
+    apply biprod.hom_ext,
+    { apply_fun (λ e, e ≫ biprod.fst) at h,
+      simpa using h },
+    { apply_fun (λ e, e ≫ biprod.snd) at h,
+      simp at h, simp_rw [← category.assoc] at h,
+      haveI : mono (f.f n) := (ses n).mono,
+      rwa cancel_mono at h }
+  end,
+  epi := begin
+    constructor, intros W i j h,
+    dsimp [cone_id_to_cone] at h,
+    simp only [category.assoc] at h,
+    rw cancel_epi at h,
+    haveI : epi (g.f n) := (ses n).epi,
+    rwa cancel_epi at h,
+  end,
+  exact := begin
+    rw abelian.exact_iff, split,
+    { dsimp [cone_id_to_cone], ext, simp,
+      erw biprod.lift_snd_assoc,
+      simp [(ses n).exact.w] },
+    { sorry }
+  end }
 
 /-
 Now combine both results above to see that the map
