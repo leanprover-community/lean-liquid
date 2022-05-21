@@ -51,7 +51,7 @@ begin
   have E := five_term_exact_seq' (homotopy_category.homology_functor A
     (complex_shape.up ℤ) n) T hT,
   dsimp [T] at E,
-  sorry -- use E.
+  apply is_zero_of_exact_seq_of_is_iso_of_is_iso _ _ _ _ E,
 end
 
 def cone_id_to_cone :
