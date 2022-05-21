@@ -14,6 +14,8 @@ import for_mathlib.acyclic
 import free_pfpng.acyclic
 import for_mathlib.SemiNormedGroup_ulift
 
+import for_mathlib.derived.Ext_lemmas
+
 noncomputable theory
 
 universes u
@@ -39,22 +41,13 @@ variables [∀ (c : ℝ≥0), BD.suitable (κ₂ c)] [∀ n, fact (monotone (fun
 variables (M : ProFiltPseuNormGrpWithTinv₁.{u} r')
 variables (V : SemiNormedGroup.{u}) [complete_space V] [separated_space V]
 
--- move me
-lemma Ext'_zero_left_is_zero {𝓐 : Type*} [category 𝓐] [abelian 𝓐] [enough_projectives 𝓐]
-  (A : 𝓐ᵒᵖ) (B : 𝓐) (hA : is_zero A) (i : ℤ) :
-  is_zero (((Ext' i).obj A).obj B) :=
-begin
-  rw is_zero_iff_id_eq_zero at hA ⊢,
-  rw [← functor.flip_obj_obj, ← category_theory.functor.map_id, hA, functor.map_zero],
-end
-
 lemma ExtQprime_iso_aux_system_aux (c : ℝ≥0) (k i : ℤ) (hi : i > 0) :
   is_zero (((Ext' i).obj (op (((homological_complex.embed complex_shape.embedding.nat_down_int_up).obj
       ((QprimeFP_nat.{u} r' BD κ M).obj c)).X k))).obj V.to_Cond) :=
 begin
   rcases k with (_|_)|_,
   { apply free_acyclic.{u} _ V i hi },
-  { apply Ext'_zero_left_is_zero, refine (is_zero_zero _).op },
+  { apply bounded_derived_category.Ext'_zero_left_is_zero, refine (is_zero_zero _).op },
   { apply free_acyclic.{u} _ V i hi },
 end
 
