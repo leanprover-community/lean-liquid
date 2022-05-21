@@ -193,7 +193,7 @@ lemma is_iso_homology_functor_map_aux (n : ℤ) (ses : ∀ i : ℤ, short_exact 
     ((neg₃_functor (homotopy_category A (complex_shape.up ℤ))).obj
       (cone.triangleₕ f)).obj₁.as).hom :=
 begin
-  sorry
+  admit
 end
 
 theorem is_iso_homology_functor_map (n : ℤ) (ses : ∀ (i : ℤ), short_exact (f.f i) (g.f i)) :
