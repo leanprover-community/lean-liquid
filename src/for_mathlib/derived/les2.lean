@@ -37,6 +37,30 @@ begin
     w1 w2 w3 w4 hfg hgh hhi hf'g' hg'h' hh'i',
 end
 
+namespace is_iso_cone_setup
+
+-- This follows from the fact that homology is a homological functor.
+lemma is_zero_homology_cone_id (n : ℤ) :
+  is_zero ((cone (𝟙 X)).homology n) := sorry
+
+def cone_id_to_cone :
+  cone (𝟙 X) ⟶ cone f :=
+{ f := λ i, biprod.lift biprod.fst (biprod.snd ≫ f.f _),
+  comm' := sorry }
+
+-- `0 → C(𝟙 X) → C(f) → Z → 0` is a SES of complexes.
+lemma cone_id_to_cone_short_exact (ses : ∀ i : ℤ, short_exact (f.f i) (g.f i))
+  (n : ℤ) : short_exact ((cone_id_to_cone f).f n)
+  ((cone.π f g (λ i, (ses i).exact.w)).f _) := sorry
+
+/-
+Now combine both results above to see that the map
+`H^i(C(f)) → H^i(Z)`
+is an isomorphism, using the LES for short exact sequences of complexes.
+-/
+
+end is_iso_cone_setup
+
 -- Why is this SO SLOW?!
 lemma is_iso_homology_functor_map_aux (n : ℤ) (ses : ∀ i : ℤ, short_exact (f.f i) (g.f i)) :
   (homology_functor A (complex_shape.up ℤ) n).map (cone.π f g (λ i, (ses i).exact.w)) ≫
