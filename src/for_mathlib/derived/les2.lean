@@ -66,13 +66,68 @@ def cone_id_to_cone :
     { simp, dsimp [cone, cone.d], simp },
     { apply category_theory.limits.biprod.hom_ext,
       simp, dsimp [cone, cone.d], simp, dsimp [cone, cone.d], simp, },
+  end } .
+
+def kernel_cone_π_iso (w) (n : ℤ) :
+  limits.kernel ((cone.π f g w).f n) ≅
+  biprod (X.X (n+1)) (limits.kernel (g.f n)) :=
+{ hom := biprod.lift
+    (limits.kernel.ι _ ≫ biprod.fst)
+    (limits.kernel.lift _ (limits.kernel.ι _ ≫ biprod.snd) begin
+      simp,
+      let t := _, change _ ≫ t = _,
+      have ht : t = (cone.π f g w).f n,
+      { ext, dsimp [cone.π], simp, dsimp [cone.π], simp },
+      rw [ht, limits.kernel.condition],
+    end),
+  inv := biprod.desc
+    (limits.kernel.lift _ biprod.inl begin
+      dsimp [cone.π], simp,
+    end)
+    (limits.kernel.lift _ (limits.kernel.ι _ ≫ biprod.inr) begin
+      simp,
+    end),
+  hom_inv_id' := begin
+    ext, dsimp, simp, dsimp, simp,
+  end,
+  inv_hom_id' := begin
+    ext, dsimp, simp, dsimp, simp, dsimp, simp, dsimp, simp,
+  end }
+
+def cokernel_cone_id_to_cone_iso (n) :
+  cokernel ((cone_id_to_cone f).f n) ≅ cokernel (f.f n) :=
+{ hom := cokernel.desc _
+    (biprod.desc 0 (cokernel.π _))
+    begin
+      dsimp [cone_id_to_cone], ext, simp, simp,
+    end,
+  inv := cokernel.desc _
+    (biprod.inr ≫ cokernel.π _)
+    begin
+      rw ← category.assoc,
+      let t := _, change t ≫ _ = _,
+      have ht : t = biprod.inr ≫ (cone_id_to_cone f).f n,
+      { ext, dsimp [cone_id_to_cone], simp, simp,
+        dsimp [cone_id_to_cone], simp },
+      simp [ht],
+    end,
+  hom_inv_id' := begin
+    ext, dsimp, simp, dsimp [cone_id_to_cone], simp,
+    let t := _, let s := _, change _ = t ≫ cokernel.π s,
+    have ht : t = biprod.inl ≫ s,
+    { ext, simp, simp, },
+    rw ht, simp,
+    simp,
+  end,
+  inv_hom_id' := begin
+    ext, dsimp, simp,
   end }
 
 -- `0 → C(𝟙 X) → C(f) → Z → 0` is a SES of complexes.
 lemma cone_id_to_cone_short_exact (ses : ∀ i : ℤ, short_exact (f.f i) (g.f i))
   (n : ℤ) : short_exact ((cone_id_to_cone f).f n)
   ((cone.π f g (λ i, (ses i).exact.w)).f _) :=
-{ mono := by sorry ; begin
+{ mono := begin
     constructor, intros Z i j h,
     dsimp [cone_id_to_cone] at h,
     apply biprod.hom_ext,
@@ -83,7 +138,7 @@ lemma cone_id_to_cone_short_exact (ses : ∀ i : ℤ, short_exact (f.f i) (g.f i
       haveI : mono (f.f n) := (ses n).mono,
       rwa cancel_mono at h }
   end,
-  epi := by sorry ; begin
+  epi := begin
     constructor, intros W i j h,
     dsimp [cone_id_to_cone] at h,
     simp only [category.assoc] at h,
@@ -93,26 +148,17 @@ lemma cone_id_to_cone_short_exact (ses : ∀ i : ℤ, short_exact (f.f i) (g.f i
   end,
   exact := begin
     rw abelian.exact_iff, split,
-    sorry { dsimp [cone_id_to_cone], ext, simp,
+    { dsimp [cone_id_to_cone], ext, simp,
       erw biprod.lift_snd_assoc,
       simp [(ses n).exact.w] },
-    { let e : biprod (X.X (n+1)) (limits.kernel (g.f n)) ⟶
-        limits.kernel ((cone.π f g (λ i, (ses i).exact.w)).f n) :=
-        biprod.desc (limits.kernel.lift _ biprod.inl _)
-          (limits.kernel.lift _ (limits.kernel.ι _ ≫ biprod.inr) _),
-      rotate 2, { sorry }, swap, { sorry },
-      let e' : limits.kernel ((cone.π f g (λ i, (ses i).exact.w)).f n) ⟶
-        biprod (X.X (n+1)) (limits.kernel (g.f n)) :=
-        biprod.lift (limits.kernel.ι _ ≫ biprod.fst)
-          (limits.kernel.lift _ (limits.kernel.ι _ ≫ biprod.snd) _),
-      swap, { sorry },
-      have hee' : e ≫ e' = 𝟙 _, sorry,
-      have he'e : e' ≫ e = 𝟙 _, sorry,
-      -- TODO: Probably need to split off this isomorphism `e`.
-      -- TODO: Need the analogous cokernel isomorphism.
-
-      -- etc..., eventually use `(ses n).exact`.
-      sorry
+    { rw ← cancel_epi (kernel_cone_π_iso f g _ _).inv,
+      swap, apply_instance,
+      rw ← cancel_mono (cokernel_cone_id_to_cone_iso f n).hom,
+      dsimp [kernel_cone_π_iso, cokernel_cone_id_to_cone_iso],
+      ext, simp,
+      simp,
+      have := (ses n).exact, rw abelian.exact_iff at this,
+      exact this.2,
     }
   end }
 
