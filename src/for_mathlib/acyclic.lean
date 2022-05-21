@@ -17,6 +17,7 @@ open category_theory category_theory.limits opposite
 open homotopy_category (hiding single)
 open bounded_homotopy_category
 
+-- main proof in this file is inspired by https://math.stackexchange.com/a/2118042
 
 section
 
@@ -143,11 +144,26 @@ begin
   rw is_acyclic_iff_short_exact_to_cycles',
   obtain ⟨a, ha⟩ := is_bounded_above.cond ((quotient 𝓐 (complex_shape.up ℤ)).obj C),
   intro i,
-  apply int.induction_on' i a,
-  { have := ha a,
-    sorry },
+  let K := λ j, kernel (C.d j (j+1)),
+  suffices : ∀ j, ∀ i > 0, is_zero (((Ext' i).obj (op $ K j)).obj B),
   { sorry },
-  { sorry }
+  clear i, intro j,
+  have : ∀ j ≥ a, ∀ i > 0, is_zero (((Ext' i).obj (op $ K j)).obj B),
+  { intros j hj i hi,
+    apply bounded_derived_category.Ext'_zero_left_is_zero,
+    apply is_zero.op,
+    refine is_zero.of_mono (kernel.ι _) _,
+    exact ha j hj },
+  apply int.induction_on' j a,
+  { exact this _ le_rfl, },
+  { intros j hj aux, apply this, exact int.le_add_one hj, },
+  { intros j hj IH,
+    obtain ⟨j, rfl⟩ : ∃ i, i + 1 = j := ⟨j - 1, sub_add_cancel _ _⟩,
+    rw add_sub_cancel,
+    apply acyclic_left_of_short_exact B (kernel.ι _) (delta_to_kernel _ _ _ _) _ (hC _) IH,
+    have aux : ((quotient 𝓐 (complex_shape.up ℤ)).obj C).is_acyclic := ‹_›,
+    rw is_acyclic_iff_short_exact_to_cycles at aux,
+    exact aux j, }
 end
 
 lemma map_is_acyclic_of_acyclic'
@@ -235,7 +251,7 @@ begin
   -- that was the data,
   -- now the proof obligation ...
   /-
-  The proof strategy is roughly the following:
+  The proof strategy is roughly the following (https://math.stackexchange.com/a/2118042):
   the map is a quasi-iso iff its cone is acyclic
   the cone commutes with the additive functor
   so you end up with this functor applied to the cone of `π`

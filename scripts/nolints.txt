@@ -156,11 +156,7 @@ apply_nolint category_theory.triangulated.is_iso_of_is_iso_rotate unused_argumen
 apply_nolint category_theory.triangulated.is_iso_triangle_hom_of_is_iso unused_arguments
 
 -- for_mathlib/derived/les.lean
-apply_nolint homological_complex.biprod.comp_lift unused_arguments
-apply_nolint homological_complex.biprod.lift_desc_comm unused_arguments
-apply_nolint homological_complex.comp_factor_thru_image_eq_zero unused_arguments
 apply_nolint homological_complex.cone.π_quasi_iso def_lemma
-apply_nolint homological_complex.exact_of_exact_image unused_arguments
 
 -- for_mathlib/derived/les2.lean
 apply_nolint bounded_homotopy_category.Ext_five_term_exact_seq def_lemma
@@ -235,6 +231,11 @@ apply_nolint category_theory.projective.π_cokernel_iso_of_eq unused_arguments
 apply_nolint cochain_complex.as_nat_chain_complex unused_arguments
 apply_nolint split_epi_of_is_zero def_lemma
 apply_nolint split_mono_of_is_zero def_lemma
+
+-- for_mathlib/random_homological_lemmas.lean
+apply_nolint biprod.comp_lift unused_arguments
+apply_nolint biprod.lift_desc_comm unused_arguments
+apply_nolint comp_factor_thru_image_eq_zero unused_arguments
 
 -- for_mathlib/rational_cones.lean
 apply_nolint extended_le_span unused_arguments
