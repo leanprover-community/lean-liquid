@@ -11,7 +11,7 @@ lemma exact_of_exact_image {X Y Z : 𝓐} (f : X ⟶ Y) (g : Y ⟶ Z) (h : exact
   exact f g :=
 by { rw ← limits.image.fac g, exact exact_comp_mono h }
 
--- SELFCONTAINED
+-- SELFCONTAINED RB working on it
 lemma exact_factor_thru_image_iff {X Y Z : 𝓐} (f : X ⟶ Y) (g : Y ⟶ Z) :
   exact f (factor_thru_image g) ↔ exact f g :=
 begin
