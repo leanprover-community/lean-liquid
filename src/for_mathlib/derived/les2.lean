@@ -72,7 +72,7 @@ def cone_id_to_cone :
 lemma cone_id_to_cone_short_exact (ses : ∀ i : ℤ, short_exact (f.f i) (g.f i))
   (n : ℤ) : short_exact ((cone_id_to_cone f).f n)
   ((cone.π f g (λ i, (ses i).exact.w)).f _) :=
-{ mono := begin
+{ mono := by sorry ; begin
     constructor, intros Z i j h,
     dsimp [cone_id_to_cone] at h,
     apply biprod.hom_ext,
@@ -83,7 +83,7 @@ lemma cone_id_to_cone_short_exact (ses : ∀ i : ℤ, short_exact (f.f i) (g.f i
       haveI : mono (f.f n) := (ses n).mono,
       rwa cancel_mono at h }
   end,
-  epi := begin
+  epi := by sorry ; begin
     constructor, intros W i j h,
     dsimp [cone_id_to_cone] at h,
     simp only [category.assoc] at h,
@@ -93,10 +93,27 @@ lemma cone_id_to_cone_short_exact (ses : ∀ i : ℤ, short_exact (f.f i) (g.f i
   end,
   exact := begin
     rw abelian.exact_iff, split,
-    { dsimp [cone_id_to_cone], ext, simp,
+    sorry { dsimp [cone_id_to_cone], ext, simp,
       erw biprod.lift_snd_assoc,
       simp [(ses n).exact.w] },
-    { sorry }
+    { let e : biprod (X.X (n+1)) (limits.kernel (g.f n)) ⟶
+        limits.kernel ((cone.π f g (λ i, (ses i).exact.w)).f n) :=
+        biprod.desc (limits.kernel.lift _ biprod.inl _)
+          (limits.kernel.lift _ (limits.kernel.ι _ ≫ biprod.inr) _),
+      rotate 2, { sorry }, swap, { sorry },
+      let e' : limits.kernel ((cone.π f g (λ i, (ses i).exact.w)).f n) ⟶
+        biprod (X.X (n+1)) (limits.kernel (g.f n)) :=
+        biprod.lift (limits.kernel.ι _ ≫ biprod.fst)
+          (limits.kernel.lift _ (limits.kernel.ι _ ≫ biprod.snd) _),
+      swap, { sorry },
+      have hee' : e ≫ e' = 𝟙 _, sorry,
+      have he'e : e' ≫ e = 𝟙 _, sorry,
+      -- TODO: Probably need to split off this isomorphism `e`.
+      -- TODO: Need the analogous cokernel isomorphism.
+
+      -- etc..., eventually use `(ses n).exact`.
+      sorry
+    }
   end }
 
 /-
