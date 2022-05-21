@@ -57,7 +57,16 @@ end
 def cone_id_to_cone :
   cone (𝟙 X) ⟶ cone f :=
 { f := λ i, biprod.lift biprod.fst (biprod.snd ≫ f.f _),
-  comm' := sorry }
+  comm' := begin
+    -- This proof is a bit slow...
+    rintros i j ⟨rfl⟩,
+    apply category_theory.limits.biprod.hom_ext',
+    apply category_theory.limits.biprod.hom_ext,
+    { simp, dsimp [cone, cone.d], simp },
+    { simp, dsimp [cone, cone.d], simp },
+    { apply category_theory.limits.biprod.hom_ext,
+      simp, dsimp [cone, cone.d], simp, dsimp [cone, cone.d], simp, },
+  end }
 
 -- `0 → C(𝟙 X) → C(f) → Z → 0` is a SES of complexes.
 lemma cone_id_to_cone_short_exact (ses : ∀ i : ℤ, short_exact (f.f i) (g.f i))
@@ -76,8 +85,10 @@ lemma is_iso_homology_map_cone_π (ses : ∀ i : ℤ, short_exact (f.f i) (g.f i
 begin
   have E := six_term_exact_seq (cone_id_to_cone f)
     (cone.π f g (λ i, (ses i).exact.w)) (cone_id_to_cone_short_exact _ _ _),
-  -- now use E along with `is_zero_homology_cone_id`.
-  sorry
+  apply is_iso_of_exact_of_is_zero_of_is_zero _ _ _ _ _
+    ((E n (n+1) rfl).extract 0 3),
+  apply is_zero_homology_cone_id,
+  apply is_zero_homology_cone_id,
 end
 
 end is_iso_cone_setup

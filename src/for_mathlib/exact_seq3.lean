@@ -70,4 +70,17 @@ begin
   apply exact_seq.replace,
 end
 
+lemma is_iso_of_exact_of_is_zero_of_is_zero {X₁ X₂ X₃ X₄ : A}
+  (f₁ : X₁ ⟶ X₂)
+  (f₂ : X₂ ⟶ X₃)
+  (f₃ : X₃ ⟶ X₄)
+  (h₁ : is_zero X₁)
+  (h₄ : is_zero X₄)
+  (e : exact_seq A [f₁, f₂, f₃]) : is_iso f₂ :=
+begin
+  apply_with is_iso_of_mono_of_epi { instances := ff}, apply_instance,
+  apply exact.mono_of_is_zero e.pair, assumption,
+  apply exact.epi_of_is_zero (e.extract 1 2).pair, assumption,
+end
+
 end category_theory
