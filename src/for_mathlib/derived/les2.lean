@@ -58,14 +58,16 @@ def cone_id_to_cone :
   cone (𝟙 X) ⟶ cone f :=
 { f := λ i, biprod.lift biprod.fst (biprod.snd ≫ f.f _),
   comm' := begin
-    -- This proof is a bit slow...
-    rintros i j ⟨rfl⟩,
-    apply category_theory.limits.biprod.hom_ext',
-    apply category_theory.limits.biprod.hom_ext,
-    { simp, dsimp [cone, cone.d], simp },
-    { simp, dsimp [cone, cone.d], simp },
-    { apply category_theory.limits.biprod.hom_ext,
-      simp, dsimp [cone, cone.d], simp, dsimp [cone, cone.d], simp, },
+    rintro i j (rfl : i+1 = j),
+    simp only [cone.d, cone_d, eq_self_iff_true, X_eq_to_iso_refl, category.comp_id,
+      dite_eq_ite, if_true, id_f],
+    apply category_theory.limits.biprod.hom_ext';
+    apply category_theory.limits.biprod.hom_ext;
+    simp only [category.assoc, biprod.lift_desc, comp_zero, zero_comp, add_zero, zero_add,
+      f.comm, category_theory.preadditive.comp_add, category_theory.preadditive.add_comp, category.id_comp,
+      biprod.lift_fst, biprod.lift_snd, biprod.lift_fst_assoc, biprod.lift_snd_assoc,
+      biprod.inl_desc, biprod.inr_desc, biprod.inl_desc_assoc, biprod.inr_desc_assoc,
+      biprod.inl_fst_assoc, biprod.inr_fst_assoc, biprod.inl_snd_assoc, biprod.inr_snd_assoc],
   end }
 
 -- `0 → C(𝟙 X) → C(f) → Z → 0` is a SES of complexes.
