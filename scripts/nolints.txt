@@ -155,9 +155,6 @@ apply_nolint category_theory.triangulated.is_iso_of_is_iso_inv_rotate unused_arg
 apply_nolint category_theory.triangulated.is_iso_of_is_iso_rotate unused_arguments
 apply_nolint category_theory.triangulated.is_iso_triangle_hom_of_is_iso unused_arguments
 
--- for_mathlib/derived/les.lean
-apply_nolint homological_complex.cone.π_quasi_iso def_lemma
-
 -- for_mathlib/derived/les2.lean
 apply_nolint bounded_homotopy_category.Ext_five_term_exact_seq def_lemma
 apply_nolint bounded_homotopy_category.Ext_five_term_exact_seq' def_lemma
