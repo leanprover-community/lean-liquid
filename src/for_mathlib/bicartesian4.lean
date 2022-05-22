@@ -12,6 +12,7 @@ section part1
 -- jmc: feel free to generalize to arbitrary abelian cats
 variables {A B C D : Ab.{u}} {f : A ⟶ B} {g : B ⟶ C} {h : C ⟶ D}
 variables {α : A ⟶ A} {β : B ⟶ B} {γ : C ⟶ C} {δ : D ⟶ D}
+open_locale zero_object
 
 -- jmc: my apologies for the `α = -𝟙 _` assumption below...
 -- it might be worthwile to first prove an aux-lemma with `= 𝟙 _` and then negate all maps
@@ -28,9 +29,51 @@ begin
   swap,
   { apply exact.cons, { exact exact_kernel_ι },
     apply exact.exact_seq, { apply abelian.exact_cokernel } },
-  sorry
-  -- use (important!) the fact that we have a `kernel.map` (resp. `cokernel.map`)
-  -- arising between two identical exact sequences
+  split,
+  { let t : A ⟶ kernel g := kernel.lift g f ((exact_iff_exact_seq _ _).2 (H.extract 0 2)).w,
+    haveI : is_iso α,
+    { rw hα,
+      apply_instance },
+    refine @abelian.is_iso_of_is_iso_of_is_iso_of_is_iso_of_is_iso _ _ _
+      (kernel t) A (kernel g) 0
+      (kernel t) A (kernel g) 0
+      (kernel.ι t) t 0
+      (kernel.ι t) t 0
+      (-𝟙 _) α _ 0
+      _ _ _ 0 0 0 0 0 _ _ _ _ _ _ _ _ _ _ _,
+    { simp only [preadditive.neg_comp, category.id_comp, preadditive.comp_neg, category.comp_id,
+        hα] },
+    { simp only [← cancel_mono (kernel.ι g), sq1.w, category.assoc, kernel.lift_ι,
+        kernel.lift_ι_assoc] },
+    { exact subsingleton.elim _ _ },
+    { exact subsingleton.elim _ _ },
+    { exact exact_kernel_ι },
+    { exact exact_epi_zero t },
+    { exact exact_of_zero 0 0 },
+    { exact exact_kernel_ι },
+    { exact exact_epi_zero t },
+    { exact exact_of_zero 0 0 } },
+  { let t : cokernel g ⟶ D := cokernel.desc g h ((exact_iff_exact_seq _ _).2 (H.extract 1 2)).w,
+    haveI : is_iso δ,
+    { rw hδ,
+      apply_instance },
+    refine @abelian.is_iso_of_is_iso_of_is_iso_of_is_iso_of_is_iso _ _ _
+      0 0 (cokernel g) D 0 0 (cokernel g) D
+      0 0 t 0 0 t
+      0 0 _ δ
+      _ _ _ (cokernel t) (cokernel t) (cokernel.π t) (cokernel.π t) (-𝟙 _) _ _ _ _ _ _ _ _ _ _ _,
+    { exact subsingleton.elim _ _ },
+    { exact subsingleton.elim _ _ },
+    { simp only [← cancel_epi (cokernel.π g), sq3.w, cokernel.π_desc_assoc, category.assoc,
+        cokernel.π_desc] },
+    { simp only [hδ, preadditive.neg_comp, category.id_comp, preadditive.comp_neg,
+        category.comp_id] },
+    { exact exact_of_zero 0 0 },
+    { exact exact_zero_mono t },
+    { exact abelian.exact_cokernel t },
+    { exact exact_of_zero 0 0 },
+    { exact exact_zero_mono t },
+    { exact abelian.exact_cokernel t } }
 end
 
 end part1
