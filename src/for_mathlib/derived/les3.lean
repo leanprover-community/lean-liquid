@@ -131,6 +131,29 @@ def Ext_δ
   ((Ext (n+1)).flip.obj W).obj (opposite.op $ of' Z) :=
 (shift_iso n X W).inv ≫ (connecting_hom' f g (n+1) W w).unop
 
+.
+
+def map_cone {A₁ A₂ B₁ B₂ : cochain_complex A ℤ}
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj A₁)]
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj B₁)]
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj A₂)]
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj B₂)]
+  (f₁ : A₁ ⟶ B₁) (f₂ : A₂ ⟶ B₂) (a : A₁ ⟶ A₂) (b : B₁ ⟶ B₂) (sq : f₁ ≫ b = a ≫ f₂) :
+  cone f₁ ⟶ cone f₂ :=
+(homotopy_category.quotient _ _).map $
+{ f := λ i, biprod.lift (biprod.fst ≫ a.f _) (biprod.snd ≫ b.f _),
+  comm' := begin
+    rintros i j ⟨⟨rfl⟩⟩,
+    ext,
+    { dsimp [homological_complex.cone.d], simp },
+    { dsimp [homological_complex.cone.d], simp,
+      simp only [← homological_complex.comp_f, sq] },
+    { dsimp [homological_complex.cone.d], simp },
+    { dsimp [homological_complex.cone.d], simp },
+  end }
+
+.
+
 lemma Ext_δ_natural
   (i : ℤ)
   [enough_projectives A]
@@ -150,9 +173,57 @@ lemma Ext_δ_natural
   ((Ext i).flip.obj W).map (of_hom α₁).op ≫ Ext_δ f₁ f₂ i W w₁ =
     Ext_δ g₁ g₂ i W w₂ ≫ ((Ext (i + 1)).flip.obj W).map (of_hom α₃).op :=
 begin
+  -- TODO: This proof is SLOW.
   delta Ext_δ,
+  let F := homotopy_category.quotient A (complex_shape.up ℤ),
   simp only [category.assoc],
-  sorry
+  dsimp only [connecting_hom', unop_comp],
+  simp only [unop_inv, category.assoc],
+  simp only [← category.assoc, is_iso.comp_inv_eq],
+  simp only [category.assoc],
+  dsimp only [functor.right_op, quiver.hom.unop_op, functor.flip, opposite.unop_op],
+  let t := _, change _ = _ ≫ _ ≫ t,
+  have ht : t = ((Ext (i+1)).map (quiver.hom.op _)).app W,
+  rotate 2,
+  { apply map_cone,
+    exact sq₁ },
+  { -- Move the inv, and this should be doable.
+    dsimp [t], rw is_iso.inv_comp_eq,
+    ext f,
+    dsimp [Ext, shift_iso, Ext_iso, preadditive_yoneda_obj, linear_map.to_add_monoid_hom],
+    simp only [comp_apply], dsimp,
+    simp only [← category.assoc],
+    congr' 1,
+    apply lift_ext (of' Z₂).π, swap, apply_instance,
+    simp only [category.assoc, lift_lifts, lift_lifts_assoc],
+    congr' 1, dsimp [map_cone, cone.π, homotopy_category.cone.π],
+    erw [← F.map_comp, ← F.map_comp], congr' 1,
+    dsimp [homological_complex.cone.π],
+    ext,
+    { simp },
+    { simp,
+      simp only [← homological_complex.comp_f, sq₂] } },
+  rw ht, clear ht, clear t,
+  ext f,
+  dsimp [Ext, shift_iso, Ext_iso, preadditive_yoneda_obj, linear_map.to_add_monoid_hom],
+  dsimp only [shift_iso_aux, add_equiv.symm],
+  simp only [comp_apply],
+  dsimp,
+  simp only [← category.assoc], congr' 1,
+  simp only [functor.map_comp, ← category.assoc], congr' 1,
+  simp only [category.assoc],
+  apply lift_ext (((of' X₂).π)⟦(1 : ℤ)⟧'),
+  swap, apply_instance,
+  simp only [category.assoc, ← functor.map_comp, lift_lifts],
+  simp only [functor.map_comp, lift_lifts_assoc, lift_lifts, category.assoc],
+  congr' 1,
+  dsimp [cone_triangle, map_cone],
+  simp only [comp_neg, neg_comp], congr' 1,
+  erw [← F.map_comp, ← F.map_comp], congr' 1,
+  dsimp [homological_complex.cone.out],
+  ext,
+  { simp, },
+  { simp, }
 end
 
 -- move me
