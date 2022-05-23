@@ -14,10 +14,6 @@ variables {A B C D : Ab.{u}} {f : A ⟶ B} {g : B ⟶ C} {h : C ⟶ D}
 variables {α : A ⟶ A} {β : B ⟶ B} {γ : C ⟶ C} {δ : D ⟶ D}
 open_locale zero_object
 
--- jmc: my apologies for the `α = -𝟙 _` assumption below...
--- it might be worthwile to first prove an aux-lemma with `= 𝟙 _` and then negate all maps
-
--- SELFCONTAINED
 lemma bicartesian_of_id_of_end_of_end_of_id
   (H : exact_seq Ab.{u} [f, g, h])
   (sq1 : commsq f α β f) (sq2 : commsq g β γ g) (sq3 : commsq h γ δ h)
