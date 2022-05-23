@@ -79,46 +79,30 @@ lemma is_zero_iff_epi_and_is_iso
   (∀ i > 0, is_zero (((Ext' i).obj (op A₃)).obj B)) ↔
   (epi (((Ext' 0).map f.op).app B) ∧ ∀ i > 0, is_iso (((Ext' i).map f.op).app B)) :=
 begin
-  let f' := (homological_complex.single _ (complex_shape.up ℤ) (0:ℤ)).map f,
-  let g' := (homological_complex.single _ (complex_shape.up ℤ) (0:ℤ)).map g,
-  let B' := (bounded_homotopy_category.single _ 0).obj B,
-  have Hfg : ∀ (i : ℤ), short_exact (f'.f i) (g'.f i),
-  { intro i, dsimp, by_cases hi : i = 0,
-    { subst i, dsimp, simp only [eq_self_iff_true, category.comp_id, category.id_comp, if_true, h] },
-    { rw [dif_neg hi, dif_neg hi, if_neg hi, if_neg hi, if_neg hi],
-      refine ⟨exact_of_zero _ _⟩, } },
+  have LES := λ i, h.Ext'_five_term_exact_seq B i,
   split,
   { intro H,
     split,
-    { have := ((Ext_five_term_exact_seq' f' g' 0 B' Hfg).drop 1).pair,
+    { have := ((LES 0).drop 1).pair,
       refine this.epi_iff_eq_zero.mpr _,
       refine is_zero.eq_of_tgt _ _ _,
       exact H 1 zero_lt_one, },
     { rintro i (hi : 0 < i),
-      apply (Ext_five_term_exact_seq' f' g' i B' Hfg).is_iso_of_zero_of_zero,
+      apply (LES i).is_iso_of_zero_of_zero,
       { refine is_zero.eq_of_src _ _ _,
         exact H i hi, },
       { refine is_zero.eq_of_tgt _ _ _,
         exact H (i+1) (hi.trans $ lt_add_one _), }, } },
   { intros H i hi,
     obtain ⟨i, rfl⟩ : ∃ j, j + 1 = i := ⟨i-1, sub_add_cancel _ _⟩,
-    have := λ i, Ext_five_term_exact_seq' f' g' i B' Hfg,
-    refine is_zero_of_exact_zero_zero' _ _ ((this i).drop 2).pair _ _,
-    sorry { refine ((this i).drop 1).pair.epi_iff_eq_zero.mp _,
+    refine is_zero_of_exact_zero_zero' _ _ ((LES i).drop 2).pair _ _,
+    { refine ((LES i).drop 1).pair.epi_iff_eq_zero.mp _,
       rw [gt_iff_lt, int.lt_add_one_iff] at hi,
       obtain (rfl|hi) := hi.eq_or_lt,
       { exact H.1 },
-      { show epi (((Ext i).map (of_hom f').op).app B'),
-        -- this is sloooow...
-        haveI : is_iso (((Ext i).map (of_hom f').op).app B') := H.2 i hi,
-        exact regular_epi.epi (((Ext i).map (of_hom f').op).app B'), } },
-    { refine (this (i+1)).pair.mono_iff_eq_zero.mp _,
-      sorry
-      -- timing out, for some reason
-      -- show mono (((Ext (i+1)).map (of_hom f').op).app B'),
-      -- haveI : is_iso (((Ext (i+1)).map (of_hom f').op).app B') := H.2 (i+1) hi,
-      -- exact regular_mono.mono (((Ext i).map (of_hom f').op).app B'),
-       } }
+      { exact @is_iso.epi_of_iso _ _ _ _ _ (H.2 _ hi), } },
+    { refine (LES (i+1)).pair.mono_iff_eq_zero.mp _,
+      exact @is_iso.mono_of_iso _ _ _ _ _ (H.2 _ hi), } }
 end
 
 lemma epi_and_is_iso_iff_of_is_iso
@@ -131,4 +115,50 @@ lemma epi_and_is_iso_iff_of_is_iso
   (H : ∀ i, is_iso (((Ext' i).map α₃.op).app Z)) :
   (epi (((Ext' 0).map α₁.op).app Z) ∧ ∀ i > 0, is_iso (((Ext' i).map α₁.op).app Z)) ↔
   (epi (((Ext' 0).map α₂.op).app Z) ∧ ∀ i > 0, is_iso (((Ext' i).map α₂.op).app Z)) :=
-sorry
+begin
+  let E : ℤ → Cᵒᵖ ⥤ Ab := λ n, (Ext' n).flip.obj Z,
+  have H1 := λ i, hf.Ext'_five_term_exact_seq Z i,
+  have H2 := λ i, hg.Ext'_five_term_exact_seq Z i,
+  have sq1 : ∀ i, (E i).map α₃.op ≫ (E i).map f₂.op = (E i).map g₂.op ≫ (E i).map α₂.op,
+  { intro, simp only [← (E i).map_comp, ← op_comp, sq₂], },
+  have sq2 : ∀ i, (E i).map α₂.op ≫ (E i).map f₁.op = (E i).map g₁.op ≫ (E i).map α₁.op,
+  { intro, simp only [← (E i).map_comp, ← op_comp, sq₁], },
+  have sq3 : ∀ i, (E i).map α₁.op ≫ Ext'_δ Z hf i = Ext'_δ Z hg i ≫ (E (i+1)).map α₃.op,
+  { sorry },
+  split; rintro ⟨h1, h2⟩,
+  { split,
+    { show epi (((E 0).map α₂.op)),
+      refine abelian.epi_of_epi_of_epi_of_mono (sq1 0) (sq2 0) (sq3 0)
+        ((H2 0).drop 1).pair ((H1 0).drop 0).pair ((H1 0).drop 1).pair _ h1 _,
+      { exact @is_iso.epi_of_iso _ _ _ _ _ (H 0), },
+      { exact @is_iso.mono_of_iso _ _ _ _ _ (H 1), } },
+    { rintros i (hi : 0 < i),
+      suffices : mono ((E i).map α₂.op) ∧ epi ((E i).map α₂.op),
+      { cases this with aux1 aux2, refine @is_iso_of_mono_of_epi _ _ _ _ _ _ aux1 aux2 },
+      split,
+      { obtain ⟨i, rfl⟩ : ∃ j, j+1 = i := ⟨i-1, sub_add_cancel _ _⟩,
+        refine abelian.mono_of_epi_of_mono_of_mono (sq3 i) (sq1 (i+1)) (sq2 (i+1))
+          ((H2 i).drop 2).pair ((H2 (i+1)).drop 0).pair ((H1 i).drop 2).pair _ _ _,
+        { obtain (rfl|hi') := eq_or_ne i 0,
+          { apply h1 },
+          { refine @is_iso.epi_of_iso _ _ _ _ _ (h2 _ _),
+            rw int.lt_add_one_iff at hi, refine lt_of_le_of_ne hi hi'.symm, } },
+        { exact @is_iso.mono_of_iso _ _ _ _ _ (H _), },
+        { exact @is_iso.mono_of_iso _ _ _ _ _ (h2 _ hi), } },
+      { refine abelian.epi_of_epi_of_epi_of_mono (sq1 i) (sq2 i) (sq3 i)
+          ((H2 i).drop 1).pair ((H1 i).drop 0).pair ((H1 i).drop 1).pair _ _ _,
+        { exact @is_iso.epi_of_iso _ _ _ _ _ (H _), },
+        { exact @is_iso.epi_of_iso _ _ _ _ _ (h2 _ hi), },
+        { exact @is_iso.mono_of_iso _ _ _ _ _ (H _), } } } },
+  { split,
+    { refine abelian.epi_of_epi_of_epi_of_mono (sq2 0) (sq3 0) (sq1 1)
+        ((H2 0).drop 2).pair ((H1 0).drop 1).pair ((H1 0).drop 2).pair h1 _ _,
+      { exact @is_iso.epi_of_iso _ _ _ _ _ (H 1), },
+      { exact @is_iso.mono_of_iso _ _ _ _ _ (h2 _ zero_lt_one), } },
+    { intros i hi,
+      refine abelian.is_iso_of_is_iso_of_is_iso_of_is_iso_of_is_iso'
+        (sq1 i) (sq2 i) (sq3 i) (sq1 (i+1))
+        (H2 i).pair ((H2 i).drop 1).pair ((H2 i).drop 2).pair
+        (H1 i).pair ((H1 i).drop 1).pair ((H1 i).drop 2).pair
+        (H _) (h2 _ hi) (H _) (h2 _ (add_pos hi zero_lt_one)), } }
+end
