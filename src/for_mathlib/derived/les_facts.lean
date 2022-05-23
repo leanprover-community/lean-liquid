@@ -74,24 +74,6 @@ instance Ext'.additive (i : ℤ) (A : Cᵒᵖ) : ((Ext' i).obj A).additive :=
 
 end
 
--- move me
-instance single_is_bounded_above (A : C) :
-  is_bounded_above {as := (homological_complex.single C (complex_shape.up ℤ) 0).obj A} :=
-begin
-  refine ⟨⟨1, _⟩⟩,
-  intros i hi,
-  dsimp,
-  rw if_neg,
-  { exact is_zero_zero _ },
-  { rintro rfl, exact zero_lt_one.not_le hi }
-end
-
--- move me
-instance quotient_single_is_bounded_above (A : C) :
-  ((quotient C (complex_shape.up ℤ)).obj
-    ((homological_complex.single C (complex_shape.up ℤ) 0).obj A)).is_bounded_above :=
-single_is_bounded_above A
-
 lemma is_zero_iff_epi_and_is_iso
   {A₁ A₂ A₃ : C} (f : A₁ ⟶ A₂) (g : A₂ ⟶ A₃) (B : C) (h : short_exact f g) :
   (∀ i > 0, is_zero (((Ext' i).obj (op A₃)).obj B)) ↔

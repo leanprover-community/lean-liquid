@@ -120,15 +120,7 @@ lemma acyclic_left_of_short_exact (B : 𝓐) {X Y Z : 𝓐} (f : X ⟶ Y) (g : Y
   ∀ i > 0, is_zero (((Ext' i).obj (op $ X)).obj B) :=
 begin
   intros i hi,
-  let f' := (homological_complex.single _ (complex_shape.up ℤ) (0:ℤ)).map f,
-  let g' := (homological_complex.single _ (complex_shape.up ℤ) (0:ℤ)).map g,
-  let B' := (bounded_homotopy_category.single _ 0).obj B,
-  have Hfg : ∀ (i : ℤ), short_exact (f'.f i) (g'.f i),
-  { intro i, dsimp, by_cases hi : i = 0,
-    { subst i, dsimp, simp only [eq_self_iff_true, category.comp_id, category.id_comp, if_true, hfg] },
-    { rw [dif_neg hi, dif_neg hi, if_neg hi, if_neg hi, if_neg hi],
-      refine ⟨exact_of_zero _ _⟩, } },
-  have := Ext_five_term_exact_seq' f' g' i B' Hfg,
+  have := hfg.Ext'_five_term_exact_seq B i,
   refine (this.drop 1).pair.is_zero_of_is_zero_is_zero (hY _ hi) (hZ _ _),
   transitivity i, { exact lt_add_one i }, { exact hi }
 end

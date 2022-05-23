@@ -541,3 +541,65 @@ def cone (f : X ⟶ Y) : bounded_derived_category A :=
 
 -- UGH
 end bounded_derived_category
+
+-- move me
+instance single_is_bounded_above (X : A) :
+  homotopy_category.is_bounded_above {as := (homological_complex.single A (complex_shape.up ℤ) 0).obj X} :=
+begin
+  refine ⟨⟨1, _⟩⟩,
+  intros i hi,
+  dsimp,
+  rw if_neg,
+  { exact is_zero_zero _ },
+  { rintro rfl, exact zero_lt_one.not_le hi }
+end
+
+-- move me
+instance quotient_single_is_bounded_above (X : A) :
+  ((homotopy_category.quotient A (complex_shape.up ℤ)).obj
+    ((homological_complex.single A (complex_shape.up ℤ) 0).obj X)).is_bounded_above :=
+single_is_bounded_above X
+
+def Ext'_δ [enough_projectives A]
+  {X Y Z : A} (W : A) {f : X ⟶ Y} {g : Y ⟶ Z}
+  (h : short_exact f g) (n : ℤ) :
+  ((Ext' n).flip.obj W).obj (opposite.op $ X) ⟶
+  ((Ext' (n+1)).flip.obj W).obj (opposite.op $ Z) :=
+begin
+  convert bounded_homotopy_category.Ext_δ
+    ((homological_complex.single _ _ _).map f)
+    ((homological_complex.single _ _ _).map g)
+    n _ _,
+  { apply quotient_single_is_bounded_above, },
+  { intro i, dsimp, by_cases hi : i = 0,
+    { subst i, dsimp, simp only [eq_self_iff_true, category.comp_id, category.id_comp, if_true, h] },
+    { rw [dif_neg hi, dif_neg hi, if_neg hi, if_neg hi, if_neg hi],
+      refine ⟨exact_of_zero _ _⟩, } },
+end
+
+namespace category_theory
+namespace short_exact
+
+lemma Ext'_five_term_exact_seq [enough_projectives A]
+  {X Y Z : A} (W : A) {f : X ⟶ Y} {g : Y ⟶ Z}
+  (h : short_exact f g) (n : ℤ) :
+  let E := λ n, ((Ext' n).flip.obj W) in
+  exact_seq Ab.{v} $
+    [ (E n).map g.op
+    , (E n).map f.op
+    , Ext'_δ W h n
+    , (E (n+1)).map g.op ] :=
+begin
+  let f' := (homological_complex.single _ (complex_shape.up ℤ) (0:ℤ)).map f,
+  let g' := (homological_complex.single _ (complex_shape.up ℤ) (0:ℤ)).map g,
+  let W' := (bounded_homotopy_category.single _ 0).obj W,
+  have Hfg : ∀ (i : ℤ), short_exact (f'.f i) (g'.f i),
+  { intro i, dsimp, by_cases hi : i = 0,
+    { subst i, dsimp, simp only [eq_self_iff_true, category.comp_id, category.id_comp, if_true, h] },
+    { rw [dif_neg hi, dif_neg hi, if_neg hi, if_neg hi, if_neg hi],
+      refine ⟨exact_of_zero _ _⟩, } },
+  convert bounded_homotopy_category.Ext_five_term_exact_seq' f' g' n W' Hfg,
+end
+
+end short_exact
+end category_theory
