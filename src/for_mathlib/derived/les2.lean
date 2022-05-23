@@ -443,12 +443,16 @@ def shift_iso_aux {C : Type u} [category.{v} C] [preadditive C] [has_shift C ℤ
   (n m : ℤ) (X Y : C) :
   (X⟦n⟧ ⟶ Y⟦m + n⟧) ≃+ (X ⟶ Y⟦m⟧) :=
 { to_fun := λ f,
-    let e₁ : X ≅ X⟦n⟧⟦-n⟧ := (shift_shift_neg X n).symm,
-        e₂ : Y⟦m⟧ ≅ Y⟦m+n⟧⟦-n⟧ := shift_of_eq _ _ (by simp) _ ≪≫ (shift_add _ _ _) in
-        e₁.hom ≫ f⟦-n⟧' ≫ e₂.inv,
+    (shift_shift_neg X n).inv ≫ (f ≫ (shift_add Y m n).hom)⟦-n⟧' ≫ (shift_shift_neg _ n).hom,
   inv_fun := λ f, f⟦n⟧' ≫ (shift_add _ _ _).inv,
-  left_inv := sorry,
-  right_inv := sorry,
+  left_inv := λ f, begin
+    dsimp only,
+    simp only [category_theory.functor.map_comp, category.assoc, category.comp_id, category.id_comp,
+      shift_shift_neg_inv_shift, shift_shift_neg_hom_shift, shift_neg_shift',
+      iso.inv_hom_id, iso.inv_hom_id_assoc, iso.hom_inv_id],
+  end,
+  right_inv := λ f, by simp only [category.assoc, iso.inv_hom_id, iso.inv_hom_id_assoc,
+    category.comp_id, shift_shift_neg'],
   map_add' := λ x y, by
     simp only [(category_theory.shift_functor C (-n)).map_add, preadditive.comp_add,
       preadditive.add_comp, preadditive.comp_add_assoc, preadditive.add_comp_assoc] }
