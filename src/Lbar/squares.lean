@@ -1,5 +1,5 @@
 import for_mathlib.commsq
-import for_mathlib.les_homology
+import for_mathlib.snake_lemma_naturality2
 import for_mathlib.AddCommGroup.pt
 import for_mathlib.bicartesian4
 import for_mathlib.abelian_sheaves.functor_category
@@ -81,12 +81,7 @@ pi.map $ λ k, (homology_functor _ _ _).map $ f.app _
 def shift_sub_id.δ (H : ∀ c n, short_exact ((f.app c).f n) ((g.app c).f n)) :
   C ⋙ homology_functor _ _ n ⟶ A ⋙ homology_functor _ _ (n+1) :=
 { app := λ c, homological_complex.δ (f.app _) (g.app _) (H _) _ _ rfl,
-  naturality' := λ c₁ c₂ h, begin
-    -- this one might be tricky
-    -- needs naturality of the snake `δ`
-    -- people are working on that, discuss on Zulip before attacking this
-    sorry
-  end }
+  naturality' := λ c₁ c₂ h, by { symmetry, apply homological_complex.δ_natural } }
 
 def piδ (H : ∀ c n, short_exact ((f.app c).f n) ((g.app c).f n)) :
   (∏ (λ x, (C.obj (op $ ι x)).homology n)) ⟶ (∏ (λ x, (A.obj (op $ ι x)).homology (n+1))) :=
