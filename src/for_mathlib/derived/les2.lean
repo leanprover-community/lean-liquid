@@ -464,7 +464,7 @@ begin
   refine (e' ≪≫ _ ≪≫ e.symm),
   clear e e',
   refine add_equiv.to_AddCommGroup_iso _,
-  apply shift_iso_aux 1 n,
+  refine shift_iso_aux 1 n _ _,
 end
 
 lemma shift_iso_conj
