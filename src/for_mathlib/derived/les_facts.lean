@@ -124,7 +124,7 @@ begin
   have sq2 : ∀ i, (E i).map α₂.op ≫ (E i).map f₁.op = (E i).map g₁.op ≫ (E i).map α₁.op,
   { intro, simp only [← (E i).map_comp, ← op_comp, sq₁], },
   have sq3 : ∀ i, (E i).map α₁.op ≫ Ext'_δ Z hf i = Ext'_δ Z hg i ≫ (E (i+1)).map α₃.op,
-  { sorry },
+  { apply Ext'_δ_natural f₁ f₂ g₁ g₂ α₁ α₂ α₃ sq₁ sq₂ Z hf hg, },
   split; rintro ⟨h1, h2⟩,
   { split,
     { show epi (((E 0).map α₂.op)),

@@ -206,6 +206,19 @@ begin
       refine ⟨exact_of_zero _ _⟩, } },
 end
 
+lemma Ext'_δ_natural [enough_projectives A]
+  {X₁ X₂ X₃ Y₁ Y₂ Y₃ : A}
+  (f₁ : X₁ ⟶ X₂) (f₂ : X₂ ⟶ X₃)
+  (g₁ : Y₁ ⟶ Y₂) (g₂ : Y₂ ⟶ Y₃)
+  (α₁ : X₁ ⟶ Y₁) (α₂ : X₂ ⟶ Y₂) (α₃ : X₃ ⟶ Y₃)
+  (sq₁ : f₁ ≫ α₂ = α₁ ≫ g₁) (sq₂ : f₂ ≫ α₃ = α₂ ≫ g₂)
+  (Z : A) (hf : short_exact f₁ f₂) (hg : short_exact g₁ g₂) (i : ℤ) :
+  ((Ext' i).flip.obj Z).map α₁.op ≫ Ext'_δ Z hf i =
+    Ext'_δ Z hg i ≫ ((Ext' (i+1)).flip.obj Z).map α₃.op :=
+begin
+  sorry
+end
+
 namespace category_theory
 namespace short_exact
 
