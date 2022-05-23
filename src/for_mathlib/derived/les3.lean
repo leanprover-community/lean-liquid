@@ -99,6 +99,26 @@ begin
   simp only [← category.assoc, quiver.hom.unop_op, ← category_theory.functor.map_comp],
 end
 
+@[reassoc] lemma shift_iso_Ext_map
+  (n : ℤ)
+  [enough_projectives A]
+  (W : bounded_homotopy_category A)
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj X)]
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj Y)] :
+  (((Ext (n+1)).flip.obj W).right_op.map ((of_hom f)⟦(1 : ℤ)⟧')).unop ≫ (shift_iso _ _ _).hom =
+  (shift_iso _ _ _).hom ≫ ((Ext n).flip.obj W).map (of_hom f).op :=
+by rw [← iso.inv_comp_eq, shift_iso_conj]
+
+@[reassoc] lemma Ext_map_shift_iso_inv
+  (n : ℤ)
+  [enough_projectives A]
+  (W : bounded_homotopy_category A)
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj X)]
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj Y)] :
+  (shift_iso _ _ _).inv ≫ (((Ext (n+1)).flip.obj W).right_op.map ((of_hom f)⟦(1 : ℤ)⟧')).unop =
+  ((Ext n).flip.obj W).map (of_hom f).op ≫ (shift_iso _ _ _).inv :=
+by rw [iso.eq_comp_inv, category.assoc, shift_iso_conj]
+
 def Ext_δ
   (n : ℤ)
   [enough_projectives A]
@@ -111,13 +131,37 @@ def Ext_δ
   ((Ext (n+1)).flip.obj W).obj (opposite.op $ of' Z) :=
 (shift_iso n X W).inv ≫ (connecting_hom' f g (n+1) W w).unop
 
+lemma Ext_δ_natural
+  (i : ℤ)
+  [enough_projectives A]
+  (W : bounded_homotopy_category A)
+  {X₁ Y₁ Z₁ : cochain_complex A ℤ} (f₁ : X₁ ⟶ Y₁) (f₂ : Y₁ ⟶ Z₁)
+  {X₂ Y₂ Z₂ : cochain_complex A ℤ} (g₁ : X₂ ⟶ Y₂) (g₂ : Y₂ ⟶ Z₂)
+  (α₁ : X₁ ⟶ X₂) (α₂ : Y₁ ⟶ Y₂) (α₃ : Z₁ ⟶ Z₂)
+  (sq₁ : f₁ ≫ α₂ = α₁ ≫ g₁) (sq₂ : f₂ ≫ α₃ = α₂ ≫ g₂)
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj X₁)]
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj Y₁)]
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj Z₁)]
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj X₂)]
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj Y₂)]
+  [homotopy_category.is_bounded_above ((homotopy_category.quotient _ _).obj Z₂)]
+  (w₁ : ∀ i, short_exact (f₁.f i) (f₂.f i))
+  (w₂ : ∀ i, short_exact (g₁.f i) (g₂.f i)) :
+  ((Ext i).flip.obj W).map (of_hom α₁).op ≫ Ext_δ f₁ f₂ i W w₁ =
+    Ext_δ g₁ g₂ i W w₂ ≫ ((Ext (i + 1)).flip.obj W).map (of_hom α₃).op :=
+begin
+  delta Ext_δ,
+  simp only [category.assoc],
+  sorry
+end
+
 -- move me
 lemma _root_.category_theory.unop_neg (C : Type*) [category C] [preadditive C]
   {X Y : Cᵒᵖ} (f : X ⟶ Y) :
   (-f).unop = -(f.unop) :=
 rfl
 
-def Ext_five_term_exact_seq'
+lemma Ext_five_term_exact_seq'
   (n : ℤ)
   [enough_projectives A]
   (W : bounded_homotopy_category A)
@@ -195,15 +239,17 @@ def Ext'_δ [enough_projectives A]
   ((Ext' n).flip.obj W).obj (opposite.op $ X) ⟶
   ((Ext' (n+1)).flip.obj W).obj (opposite.op $ Z) :=
 begin
-  convert bounded_homotopy_category.Ext_δ
+  refine @bounded_homotopy_category.Ext_δ _ _ _ _ _ _
     ((homological_complex.single _ _ _).map f)
     ((homological_complex.single _ _ _).map g)
-    n _ _,
-  { apply quotient_single_is_bounded_above, },
-  { intro i, dsimp, by_cases hi : i = 0,
-    { subst i, dsimp, simp only [eq_self_iff_true, category.comp_id, category.id_comp, if_true, h] },
-    { rw [dif_neg hi, dif_neg hi, if_neg hi, if_neg hi, if_neg hi],
-      refine ⟨exact_of_zero _ _⟩, } },
+    n _ _
+    (quotient_single_is_bounded_above _)
+    (quotient_single_is_bounded_above _)
+    (quotient_single_is_bounded_above _) _,
+  intro i, dsimp, by_cases hi : i = 0,
+  { subst i, dsimp, simp only [eq_self_iff_true, category.comp_id, category.id_comp, if_true, h] },
+  { rw [dif_neg hi, dif_neg hi, if_neg hi, if_neg hi, if_neg hi],
+    refine ⟨exact_of_zero _ _⟩, }
 end
 
 lemma Ext'_δ_natural [enough_projectives A]
@@ -216,7 +262,10 @@ lemma Ext'_δ_natural [enough_projectives A]
   ((Ext' i).flip.obj Z).map α₁.op ≫ Ext'_δ Z hf i =
     Ext'_δ Z hg i ≫ ((Ext' (i+1)).flip.obj Z).map α₃.op :=
 begin
-  sorry
+  delta Ext' Ext'_δ,
+  apply bounded_homotopy_category.Ext_δ_natural _ _ _ _ _ _ _
+    ((homological_complex.single A (complex_shape.up ℤ) 0).map α₂),
+  all_goals { simp only [← category_theory.functor.map_comp, sq₁, sq₂, quiver.hom.unop_op] },
 end
 
 namespace category_theory
