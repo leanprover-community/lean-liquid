@@ -94,7 +94,7 @@ lemma iso_of_bicartesian_of_bicartesian
   (sq1 : commsq f₁₁ g₁₁ g₁₂ f₂₁) (sq2 : commsq f₁₂ g₁₂ g₁₃ f₂₂)
   (sq3 : commsq f₁₃ g₁₃ g₁₄ f₂₃) (sq4 : commsq f₁₄ g₁₄ g₁₅ f₂₄)
   (H1 : sq1.bicartesian) (H4 : sq4.bicartesian) :
-  is_iso f₁₃ :=
+  is_iso g₁₃ :=
 sorry
 
 -- SELFCONTAINED
