@@ -104,7 +104,7 @@ lemma iso_of_zero_of_bicartesian
   (hz₁ : is_zero A₁₂) (hz₂ : is_zero A₂₂)
   (sq2 : commsq f₁₂ g₁₂ g₁₃ f₂₂) (sq3 : commsq f₁₃ g₁₃ g₁₄ f₂₃)
   (sq4 : commsq f₁₄ g₁₄ g₁₅ f₂₄) (H4 : sq4.bicartesian) :
-  is_iso f₁₃ :=
+  is_iso g₁₃ :=
 -- apply `iso_of_bicartesian_of_bicartesian` and provide a zero square on the left
 sorry
 
