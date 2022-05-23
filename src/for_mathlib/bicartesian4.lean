@@ -179,7 +179,6 @@ begin
   { exact exact_epi_zero f₂₃' }
 end
 
--- SELFCONTAINED
 lemma iso_of_zero_of_bicartesian
   (h_ex₁ : exact_seq Ab.{u} [f₁₂, f₁₃, f₁₄])
   (h_ex₂ : exact_seq Ab.{u} [f₂₂, f₂₃, f₂₄])
@@ -187,7 +186,21 @@ lemma iso_of_zero_of_bicartesian
   (sq2 : commsq f₁₂ g₁₂ g₁₃ f₂₂) (sq3 : commsq f₁₃ g₁₃ g₁₄ f₂₃)
   (sq4 : commsq f₁₄ g₁₄ g₁₅ f₂₄) (H4 : sq4.bicartesian) :
   is_iso g₁₃ :=
--- apply `iso_of_bicartesian_of_bicartesian` and provide a zero square on the left
-sorry
+begin
+  have aux₁ : exact (0 : A₁₂ ⟶ A₁₂) f₁₂,
+  { have : mono f₁₂ := ⟨λ _ x y h, hz₁.eq_of_tgt _ _⟩, rwa (abelian.tfae_mono A₁₂ f₁₂).out 2 0 },
+  have aux₂ : exact (0 : A₂₂ ⟶ A₂₂) f₂₂,
+  { have : mono f₂₂ := ⟨λ _ x y h, hz₂.eq_of_tgt _ _⟩, rwa (abelian.tfae_mono A₂₂ f₂₂).out 2 0 },
+  refine iso_of_bicartesian_of_bicartesian (aux₁.cons h_ex₁) (aux₂.cons h_ex₂) _ sq2 sq3 sq4 _ H4,
+  { exact g₁₂ },
+  { exact commsq.of_eq (zero_comp.trans comp_zero.symm) },
+  { apply commsq.bicartesian.of_is_limit_of_is_colimt,
+    { refine pullback_cone.is_limit.mk _ (λ s, 0)
+        (λ s, hz₁.eq_of_tgt _ _) (λ s, hz₂.eq_of_tgt _ _) _,
+      intros, apply hz₁.eq_of_tgt, },
+    { refine pushout_cocone.is_colimit.mk _ (λ s, 0)
+        (λ s, hz₁.eq_of_src _ _) (λ s, hz₂.eq_of_src _ _) _,
+      intros, apply hz₂.eq_of_src, } },
+end
 
 end part2
