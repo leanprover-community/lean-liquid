@@ -75,6 +75,7 @@ end
 end part1
 
 section part2
+open_locale zero_object
 
 -- jmc: this part does not depend on the first section,
 -- it's the same file because two lemmas have the same theme
@@ -87,7 +88,60 @@ variables {f₁₁ : A₁₁ ⟶ A₁₂} {f₁₂ : A₁₂ ⟶ A₁₃} {f₁�
 variables {g₁₁ : A₁₁ ⟶ A₂₁} {g₁₂ : A₁₂ ⟶ A₂₂} {g₁₃ : A₁₃ ⟶ A₂₃} {g₁₄ : A₁₄ ⟶ A₂₄} {g₁₅ : A₁₅ ⟶ A₂₅}
 variables {f₂₁ : A₂₁ ⟶ A₂₂} {f₂₂ : A₂₂ ⟶ A₂₃} {f₂₃ : A₂₃ ⟶ A₂₄} {f₂₄ : A₂₄ ⟶ A₂₅}
 
--- SELFCONTAINED
+lemma exact_kernel_cokernel : exact_seq Ab.{u} [kernel.ι f₁₁, f₁₁, cokernel.π f₁₁] :=
+begin
+  apply exact.cons, { exact exact_kernel_ι },
+  apply exact.exact_seq, { apply abelian.exact_cokernel }
+end
+
+lemma is_iso_kernel_map_of_bicartesian {sq : commsq f₁₁ g₁₁ g₁₂ f₂₁} (H : sq.bicartesian) :
+  is_iso (kernel.map f₁₁ f₂₁ _ _ sq.w) :=
+begin
+  rw commsq.bicartesian_iff_isos _ _ _ _ sq.kernel sq sq.cokernel at H,
+  { exact H.1 },
+  { exact exact_kernel_cokernel },
+  { exact exact_kernel_cokernel }
+end
+
+lemma is_iso_cokernel_map_of_bicartesian {sq : commsq f₁₁ g₁₁ g₁₂ f₂₁} (H : sq.bicartesian) :
+  is_iso (cokernel.map f₁₁ f₂₁ _ _ sq.w) :=
+begin
+  rw commsq.bicartesian_iff_isos _ _ _ _ sq.kernel sq sq.cokernel at H,
+  { exact H.2 },
+  { exact exact_kernel_cokernel },
+  { exact exact_kernel_cokernel }
+end
+
+section
+variables (f₁₁)
+
+lemma exact_epi_comp_iff [epi f₁₁] : exact (f₁₁ ≫ f₁₂) f₁₃ ↔ exact f₁₂ f₁₃ :=
+begin
+  refine ⟨λ h, _, λ h, exact_epi_comp h⟩,
+  rw abelian.exact_iff at h,
+  let hc := is_colimit_of_is_colimit_comp (colimit.is_colimit (parallel_pair (f₁₁ ≫ f₁₂) 0))
+    (by rw [← cancel_epi f₁₁, ← category.assoc, cokernel_cofork.condition, comp_zero]),
+  refine (abelian.exact_iff' _ _ (limit.is_limit _) hc).2 ⟨_, h.2⟩,
+  exact zero_of_epi_comp f₁₁ (by rw [← h.1, category.assoc])
+end
+
+end
+
+section
+variables (f₁₃)
+
+lemma exact_comp_mono_iff [mono f₁₃] : exact f₁₁ (f₁₂ ≫ f₁₃) ↔ exact f₁₁ f₁₂ :=
+begin
+  refine ⟨λ h, _, λ h, exact_comp_mono h⟩,
+  rw abelian.exact_iff at h,
+  let hc := is_limit_of_is_limit_comp (limit.is_limit (parallel_pair (f₁₂ ≫ f₁₃) 0))
+    (by rw [← cancel_mono f₁₃, category.assoc, kernel_fork.condition, zero_comp]),
+  refine (abelian.exact_iff' _ _ hc (colimit.is_colimit _)).2 ⟨_, h.2⟩,
+  exact zero_of_comp_mono f₁₃ (by rw [← h.1, category.assoc])
+end
+
+end
+
 lemma iso_of_bicartesian_of_bicartesian
   (h_ex₁ : exact_seq Ab.{u} [f₁₁, f₁₂, f₁₃, f₁₄])
   (h_ex₂ : exact_seq Ab.{u} [f₂₁, f₂₂, f₂₃, f₂₄])
@@ -95,7 +149,35 @@ lemma iso_of_bicartesian_of_bicartesian
   (sq3 : commsq f₁₃ g₁₃ g₁₄ f₂₃) (sq4 : commsq f₁₄ g₁₄ g₁₅ f₂₄)
   (H1 : sq1.bicartesian) (H4 : sq4.bicartesian) :
   is_iso g₁₃ :=
-sorry
+begin
+  haveI := is_iso_cokernel_map_of_bicartesian H1,
+  haveI := is_iso_kernel_map_of_bicartesian H4,
+  let f₁₂' := cokernel.desc f₁₁ f₁₂ ((exact_iff_exact_seq _ _).2 (h_ex₁.extract 0 2)).w,
+  let f₁₃' := kernel.lift f₁₄ f₁₃ ((exact_iff_exact_seq _ _).2 (h_ex₁.extract 2 2)).w,
+  let f₂₂' := cokernel.desc f₂₁ f₂₂ ((exact_iff_exact_seq _ _).2 (h_ex₂.extract 0 2)).w,
+  let f₂₃' := kernel.lift f₂₄ f₂₃ ((exact_iff_exact_seq _ _).2 (h_ex₂.extract 2 2)).w,
+  refine @abelian.is_iso_of_is_iso_of_is_iso_of_is_iso_of_is_iso _ _ _
+    0 (cokernel f₁₁) A₁₃ (kernel f₁₄) 0 (cokernel f₂₁) A₂₃ (kernel f₂₄)
+    0 f₁₂' f₁₃' 0 f₂₂' f₂₃'
+    0 (cokernel.map f₁₁ f₂₁ _ _ sq1.w) g₁₃ (kernel.map f₁₄ f₂₄ _ _ sq4.w)
+    _ _ _ 0 0 0 0 0 _ _ _ _ _ _ _ _ _ _ _,
+  { exact subsingleton.elim _ _ },
+  { simp only [← cancel_epi (cokernel.π f₁₁), sq2.w, cokernel.π_desc_assoc, category.assoc,
+      cokernel.π_desc] },
+  { simp only [← cancel_mono (kernel.ι f₂₄), sq3.w, category.assoc, kernel.lift_ι,
+      kernel.lift_ι_assoc] },
+  { exact subsingleton.elim _ _ },
+  { exact exact_zero_mono f₁₂' },
+  { rw [← exact_epi_comp_iff (cokernel.π f₁₁), cokernel.π_desc,
+      ← exact_comp_mono_iff (kernel.ι f₁₄), kernel.lift_ι],
+    exact (exact_iff_exact_seq _ _).2 (h_ex₁.extract 1 2) },
+  { exact exact_epi_zero f₁₃' },
+  { exact exact_zero_mono f₂₂' },
+  { rw [← exact_epi_comp_iff (cokernel.π f₂₁), cokernel.π_desc,
+      ← exact_comp_mono_iff (kernel.ι f₂₄), kernel.lift_ι],
+    exact (exact_iff_exact_seq _ _).2 (h_ex₂.extract 1 2) },
+  { exact exact_epi_zero f₂₃' }
+end
 
 -- SELFCONTAINED
 lemma iso_of_zero_of_bicartesian
