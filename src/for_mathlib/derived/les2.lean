@@ -439,6 +439,7 @@ def shift_of_eq {C : Type u} [category.{v} C] [has_shift C ℤ] (i j : ℤ) (h :
 by { rw h }
 
 def shift_iso_aux {C : Type u} [category.{v} C] [preadditive C] [has_shift C ℤ]
+  [∀ (n : ℤ), (category_theory.shift_functor C n).additive]
   (n m : ℤ) (X Y : C) :
   (X⟦n⟧ ⟶ Y⟦m + n⟧) ≃+ (X ⟶ Y⟦m⟧) :=
 { to_fun := λ f,
@@ -448,7 +449,9 @@ def shift_iso_aux {C : Type u} [category.{v} C] [preadditive C] [has_shift C ℤ
   inv_fun := λ f, f⟦n⟧' ≫ (shift_add _ _ _).inv,
   left_inv := sorry,
   right_inv := sorry,
-  map_add' := sorry }
+  map_add' := λ x y, by
+    simp only [(category_theory.shift_functor C (-n)).map_add, preadditive.comp_add,
+      preadditive.add_comp, preadditive.comp_add_assoc, preadditive.add_comp_assoc] }
 
 def shift_iso [enough_projectives A]
   (n : ℤ) (X : cochain_complex A ℤ) (Y : bounded_homotopy_category A)
