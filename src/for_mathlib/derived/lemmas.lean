@@ -56,6 +56,25 @@ begin
 end
 -/
 
+lemma _root_.category_theory.abelian.exact_neg_left (X Y Z : A) (f : X ⟶ Y) (g : Y ⟶ Z)
+  (h : exact f g) : exact (-f) g :=
+begin
+  refine preadditive.exact_of_iso_of_exact' f g (-f) g _ (iso.refl _) (iso.refl _) _ _ h,
+  { have : (-𝟙 X) ≫ (-𝟙 X) = 𝟙 X,
+    { simp only [preadditive.comp_neg, category.comp_id, neg_neg], },
+    exact ⟨-𝟙 X, -𝟙 X, this, this⟩, },
+  { simp only [preadditive.comp_neg, category.comp_id, iso.refl_hom, category.id_comp, preadditive.neg_comp, neg_neg], },
+  { simp only [iso.refl_hom, category.id_comp, category.comp_id], },
+end
+
+lemma _root_.category_theory.abelian.exact_neg_left_iff (X Y Z : A) (f : X ⟶ Y) (g : Y ⟶ Z) :
+  exact (-f) g ↔ exact f g :=
+begin
+  refine ⟨_, category_theory.abelian.exact_neg_left _ _ _ _ _⟩,
+  intro h,
+  simpa only [neg_neg] using category_theory.abelian.exact_neg_left _ _ _ _ _ h,
+end
+
 lemma _root_.category_theory.abelian.exact_neg_right (X Y Z : A) (f : X ⟶ Y) (g : Y ⟶ Z)
   (h : exact f g) : exact f (-g) :=
 begin
@@ -65,6 +84,14 @@ begin
     exact ⟨-𝟙 Z, -𝟙 Z, this, this⟩, },
   { simp only [iso.refl_hom, category.id_comp, category.comp_id], },
   { simp only [preadditive.comp_neg, category.comp_id, iso.refl_hom, category.id_comp], }
+end
+
+lemma _root_.category_theory.abelian.exact_neg_right_iff (X Y Z : A) (f : X ⟶ Y) (g : Y ⟶ Z) :
+  exact f (-g) ↔ exact f g :=
+begin
+  refine ⟨_, category_theory.abelian.exact_neg_right _ _ _ _ _⟩,
+  intro h,
+  simpa only [neg_neg] using category_theory.abelian.exact_neg_right _ _ _ _ _ h,
 end
 
 instance homology_functor_homological (i : ℤ) : homological_functor (HH i) :=
