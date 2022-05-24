@@ -176,8 +176,67 @@ begin
   exact hf
 end
 
+def cokernel_to : cokernel (P.complex.d 1 0) ⟶ X :=
+cokernel.desc _ (P.π.f _)
+begin
+  rw ← P.π.comm,
+  convert zero_comp,
+  apply is_zero.eq_of_tgt,
+  exact is_zero_zero _,
+end
+
+instance epi_cokernel_to : category_theory.epi P.cokernel_to :=
+begin
+  dsimp [cokernel_to],
+  apply epi_of_epi_fac (cokernel.π_desc _ _ _),
+  exact P.epi,
+end
+
+instance mono_cokernel_to : mono P.cokernel_to :=
+begin
+  dsimp [cokernel_to],
+  apply abelian.pseudoelement.mono_of_zero_of_map_zero,
+  intros a ha,
+  obtain ⟨a,rfl⟩ := abelian.pseudoelement.pseudo_surjective_of_epi (cokernel.π _) a,
+  rw [← abelian.pseudoelement.comp_apply, cokernel.π_desc] at ha,
+  have e := abelian.pseudoelement.pseudo_exact_of_exact P.exact₀,
+  obtain ⟨b,rfl⟩ := e.2 _ ha,
+  rw [← abelian.pseudoelement.comp_apply, cokernel.condition,
+    abelian.pseudoelement.zero_apply],
+end
+
+instance is_iso_cokernel_to : is_iso P.cokernel_to :=
+is_iso_of_mono_of_epi _
+
 instance epi_hom_to_kernel [enough_projectives A] (Y : A) :
-  category_theory.epi (hom_to_kernel P Y) := sorry
+  category_theory.epi (hom_to_kernel P Y) :=
+begin
+  dsimp only [hom_to_kernel],
+  rw AddCommGroup.epi_iff_surjective,
+  intros f,
+  let g : P.complex.X 0 ⟶ Y :=
+    kernel.ι ((preadditive_yoneda.obj Y).map (P.complex.d 1 0).op) f,
+  have hg : P.complex.d 1 0 ≫ g = 0,
+  { dsimp only [g],
+    change (kernel.ι ((preadditive_yoneda.obj Y).map (P.complex.d 1 0).op) ≫
+      ((preadditive_yoneda.obj Y).map (P.complex.d 1 0).op)) f = 0,
+    rw kernel.condition, refl },
+  change ∃ q : X ⟶ _, _ = _,
+  let q' : cokernel (P.complex.d 1 0) ⟶ Y :=
+    cokernel.desc _ g hg,
+  use inv P.cokernel_to ≫ q',
+  apply_fun (kernel.ι ((preadditive_yoneda.obj Y).map (P.complex.d 1 0).op)),
+  swap,
+  { rw ← AddCommGroup.mono_iff_injective, apply_instance },
+  rw [← comp_apply, kernel.lift_ι],
+  dsimp only [q'],
+  change _ ≫ _ = _,
+  rw ← category.assoc,
+  let t := _, change t ≫ _ = _,
+  have ht : t = cokernel.π _,
+  { dsimp only [t], rw is_iso.comp_inv_eq, dsimp [cokernel_to], simp },
+  rw ht, simp,
+end
 
 instance is_iso_hom_to_kernel [enough_projectives A] (Y : A) :
   is_iso (hom_to_kernel P Y) := is_iso_of_mono_of_epi _
