@@ -70,7 +70,11 @@ homology_iso _ (1 : ℤ) 0 (-1) (by simp) (by simp) ≪≫
       apply is_zero.eq_of_src,
       apply is_zero_hom_of_is_zero,
       exact is_zero_zero _,
-    end) sorry,
+    end) begin
+      apply homology.hom_from_ext,
+      simp only [homology.π'_desc'_assoc, comp_zero],
+      erw kernel.condition,
+    end,
   inv := homology.lift _ _ _
     (kernel.ι _ ≫ cokernel.π _)
     sorry,
