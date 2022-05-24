@@ -4,6 +4,34 @@ import for_mathlib.derived.example
 .
 
 open category_theory
+
+namespace homology
+
+universes v u
+variables {A : Type u} [category.{v} A] [abelian A]
+  {X Y Z : A} (f : X ⟶ Y) (g : Y ⟶ Z) (w : f ≫ g = 0)
+
+lemma desc_zero (w) :
+  homology.desc' (0 : X ⟶ Y) g w (limits.kernel.ι _) (by simp) =
+  homology.ι _ _ _ ≫ limits.cokernel.desc _ (𝟙 _) (by simp) :=
+begin
+  apply homology.hom_from_ext,
+  simp,
+end
+
+lemma lift_desc'_of_eq_zero (hf : f = 0) :
+  homology.lift f g w
+    (limits.kernel.ι g ≫ limits.cokernel.π f) (by simp) ≫
+    homology.desc' _ _ _ (limits.kernel.ι g) (by simp [hf]) =
+  limits.kernel.ι _ :=
+begin
+  subst hf,
+  rw desc_zero,
+  simp,
+end
+
+end homology
+
 namespace category_theory.ProjectiveResolution
 
 open category_theory.limits
@@ -77,9 +105,24 @@ homology_iso _ (1 : ℤ) 0 (-1) (by simp) (by simp) ≪≫
     end,
   inv := homology.lift _ _ _
     (kernel.ι _ ≫ cokernel.π _)
-    sorry,
-  hom_inv_id' := sorry,
-  inv_hom_id' := sorry }
+    begin
+      simp only [functor.map_homological_complex_obj_d,
+        homological_complex.op_d, category.assoc, cokernel.π_desc],
+      erw kernel.condition,
+    end,
+  hom_inv_id' := begin
+    apply homology.hom_to_ext,
+    apply homology.hom_from_ext,
+    simp,
+  end,
+  inv_hom_id' := begin
+    apply equalizer.hom_ext,
+    simp only [category.assoc, kernel.lift_ι, equalizer_as_kernel, category.id_comp],
+    apply homology.lift_desc'_of_eq_zero,
+    apply is_zero.eq_of_src,
+    apply is_zero_hom_of_is_zero,
+    exact is_zero_zero _,
+  end }
 
 def Ext_single_iso_kernel [enough_projectives A] (Y : A) :
   ((bounded_homotopy_category.Ext 0).obj
