@@ -147,7 +147,14 @@ def hom_to_kernel [enough_projectives A] (Y : A) :
   (preadditive_yoneda.obj Y).obj (opposite.op X) ⟶
   kernel ((preadditive_yoneda.obj Y).map (P.complex.d 1 0).op) :=
 kernel.lift _ (category_theory.functor.map _ $ quiver.hom.op $ P.π.f _)
-sorry
+begin
+  rw [← functor.map_comp, ← op_comp, ← P.π.comm, op_comp, functor.map_comp],
+  convert zero_comp,
+  apply is_zero.eq_of_tgt,
+  dsimp,
+  apply is_zero_hom_of_is_zero,
+  exact is_zero_zero _,
+end
 
 instance mono_hom_to_kernel [enough_projectives A] (Y : A) :
   category_theory.mono (hom_to_kernel P Y) := sorry
