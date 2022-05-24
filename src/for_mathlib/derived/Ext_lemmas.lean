@@ -2,6 +2,7 @@ import for_mathlib.derived.derived_cat
 import for_mathlib.derived.example
 import for_mathlib.derived.les_facts
 import for_mathlib.short_exact
+import for_mathlib.derived.ProjectiveResolution
 
 open category_theory category_theory.triangulated category_theory.limits
 
@@ -21,8 +22,11 @@ instance Ext_homological_fst (i : ℤ) (X : bounded_derived_category A) :
   homological_functor ((Ext A i).flip.obj X).right_op :=
 category_theory.triangulated.preadditive_yoneda_op_homological (X⟦i⟧)
 
+noncomputable
 def Ext'_zero_flip_iso (B : A) :
   (Ext' 0).flip.obj B ≅ (preadditive_yoneda.obj B) :=
+nat_iso.of_components
+(λ X, (ProjectiveResolution.of X.unop).Ext_single_iso_hom _)
 sorry
 
 -- move me
