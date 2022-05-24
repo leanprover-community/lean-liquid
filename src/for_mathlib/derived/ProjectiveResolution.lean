@@ -157,7 +157,24 @@ begin
 end
 
 instance mono_hom_to_kernel [enough_projectives A] (Y : A) :
-  category_theory.mono (hom_to_kernel P Y) := sorry
+  category_theory.mono (hom_to_kernel P Y) :=
+begin
+  dsimp only [hom_to_kernel],
+  let e := (preadditive_yoneda.obj Y).map (P.π.f 0).op,
+  suffices : mono e,
+  { resetI,
+    have he : e = kernel.lift ((preadditive_yoneda.obj Y).map
+      (P.complex.d 1 0).op) ((preadditive_yoneda.obj Y).map (P.π.f 0).op) _ ≫ kernel.ι _, by simp,
+    exact mono_of_mono_fac he.symm },
+  rw AddCommGroup.mono_iff_injective,
+  rw injective_iff_map_eq_zero,
+  rintros (f : X ⟶ Y) (hf : _ ≫ f = 0),
+  have : (0 : P.complex.X 0 ⟶ Y) = (P.π.f 0) ≫ 0, by simp,
+  erw this at hf,
+  haveI : category_theory.epi (P.π.f 0) := P.epi,
+  erw cancel_epi at hf,
+  exact hf
+end
 
 instance epi_hom_to_kernel [enough_projectives A] (Y : A) :
   category_theory.epi (hom_to_kernel P Y) := sorry
