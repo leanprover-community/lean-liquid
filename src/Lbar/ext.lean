@@ -13,6 +13,7 @@ import pseudo_normed_group.QprimeFP
 import for_mathlib.acyclic
 import free_pfpng.acyclic
 import for_mathlib.SemiNormedGroup_ulift
+import for_mathlib.bicartesian4
 
 import for_mathlib.derived.Ext_lemmas
 
@@ -209,31 +210,39 @@ def useful_commsq [normed_with_aut r V] :=
       (λ c n, r' * (c * breen_deligne.eg.κ r r' n))
       ((Lbar.functor.{0 0} r').obj S) V i) ι hι
 
-lemma useful_commsq_bicartesian [normed_with_aut r V] :
+section
+open breen_deligne thm95.universal_constants
+
+lemma useful_commsq_bicartesian [normed_with_aut r V]
+  (H1 : ∀ j, c₀ r r' eg (λ n, eg.κ r r' n) (eg.κ' r r') (i+1) ⟨ℤ⟩ ≤ ι j)
+  (H2 : ∀ j, k (eg.κ' r r') i ^ 2 * ι j ≤ ι (j + 1))
+  (H3 : ∀ j, k (eg.κ' r r') (i+1) ^ 2 * ι j ≤ ι (j + 1)) :
   (useful_commsq r r' S V i ι hι).bicartesian :=
 begin
   apply shift_sub_id.bicartesian_iso _ _
     (ExtQprime_iso_aux_system r' _ _ _ V i).symm (ExtQprime_iso_aux_system r' _ _ _ V i).symm ι hι
     (ExtQprime_iso_aux_system_comm' _ _ _ _ _ _ _ _),
   rw [← whisker_right_twice],
-  refine shift_sub_id.bicartesian (aux_system.incl'.{0 1} r r' _ _ _ (breen_deligne.eg.κ r r')) _
+  refine shift_sub_id.bicartesian (aux_system.incl'.{0 1} r r' _ _ _ (eg.κ r r')) _
     i ι hι _ _ _,
   { apply_with system_of_complexes.shift_eq_zero {instances := ff},
-    swap 3, { apply thm94.explicit r r' _ _ (breen_deligne.eg.κ' r r'), },
+    swap 3, { apply thm94.explicit r r' _ _ (eg.κ' r r'), },
     any_goals { apply_instance },
-    -- we need to put assumptions on `ι` to make these true
-    -- but it's clear that there will always be a `ι` that works
-    sorry, sorry },
+    { intro j,
+      refine le_trans _ ((c₀_mono _ _ _ _ _ _ (i+1)).out.trans (H1 j)),
+      rw nat.add_sub_cancel, },
+    { exact H2 } },
   { apply_with system_of_complexes.shift_eq_zero {instances := ff},
-    swap 3, { apply thm94.explicit r r' _ _ (breen_deligne.eg.κ' r r'), },
+    swap 3, { apply thm94.explicit r r' _ _ (eg.κ' r r'), },
     any_goals { apply_instance },
-    -- we need to put assumptions on `ι` to make these true
-    -- but it's clear that there will always be a `ι` that works
-    sorry, sorry },
+    { exact H1 },
+    { exact H3 } },
   { intros c n,
-    let κ := breen_deligne.eg.κ r r',
+    let κ := eg.κ r r',
     apply aux_system.short_exact r r' _ _ _ (λ c n, r' * (c * κ n)) κ,
     intro c, dsimp, apply_instance, }
+end
+
 end
 
 /-- Thm 9.4bis of [Analytic]. More precisely: the first observation in the proof 9.4 => 9.1. -/
