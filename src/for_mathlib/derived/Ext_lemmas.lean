@@ -27,7 +27,28 @@ def Ext'_zero_flip_iso (B : A) :
   (Ext' 0).flip.obj B ≅ (preadditive_yoneda.obj B) :=
 nat_iso.of_components
 (λ X, (ProjectiveResolution.of X.unop).Ext_single_iso_hom _)
-sorry
+begin
+  intros X Y f,
+  dsimp only [ProjectiveResolution.Ext_single_iso_hom,
+    ProjectiveResolution.Ext_single_iso_kernel,
+    as_iso_hom, iso.trans_hom, iso.symm_hom,
+    as_iso_inv],
+  rw [← category.assoc, is_iso.comp_inv_eq],
+  simp_rw [category.assoc],
+  let t := _, change _ = _ ≫ _ ≫ t,
+  let PX := ProjectiveResolution.of X.unop,
+  let PY := ProjectiveResolution.of Y.unop,
+  let e : PY.complex ⟶ PX.complex := PY.lift f.unop _,
+  have ht : t = kernel.lift _ (kernel.ι _ ≫ _) _,
+  rotate 2,
+  { exact (preadditive_yoneda.obj B).map (e.f 0).op },
+  { sorry },
+  { sorry },
+  rw ht, clear ht, clear t,
+  apply equalizer.hom_ext,
+  simp only [category.assoc, kernel.lift_ι],
+  sorry
+end
 
 -- move me
 lemma Ext'_zero_left_is_zero {𝓐 : Type*} [category 𝓐] [abelian 𝓐] [enough_projectives 𝓐]
