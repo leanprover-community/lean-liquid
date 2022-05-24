@@ -57,7 +57,19 @@ def Ext_single_iso [enough_projectives A] (Y : A) :
 P.Ext_iso_zero _ ≪≫ P.bhc.hom_single_iso Y 0
 
 lemma is_zero_hom_of_is_zero {X Y : A} (hX : is_zero X) :
-  is_zero (AddCommGroup.of (X ⟶ Y)) := sorry
+  is_zero (AddCommGroup.of (X ⟶ Y)) :=
+{ unique_to := λ Z,
+  begin
+    refine ⟨{to_inhabited := infer_instance, uniq := λ f, _}⟩,
+    ext x,
+    rw [hX.eq_to x, ← hX.eq_to (0 : X ⟶ Y), map_zero, map_zero]
+  end,
+  unique_from := λ Z,
+  begin
+    refine ⟨{to_inhabited := infer_instance, uniq := λ f, _}⟩,
+    ext z,
+    rw [hX.eq_to (f z), ← hX.eq_to _]
+  end }
 
 def homology_zero_iso [enough_projectives A] (Y : A) :
     (((preadditive_yoneda.obj Y).map_homological_complex _).obj
