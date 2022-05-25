@@ -14,6 +14,17 @@ open function (surjective)
 
 namespace condensed
 
+-- def free_Cech_aux (F : arrow Profinite.{u}) :
+--   cosimplicial_object.augmented (ExtrSheaf.{u} Ab.{u+1}) :=
+-- ((cosimplicial_object.augmented.whiskering _ _).obj _).obj F.augmented_cech_nerve.right_op
+
+def free_Cech (F : arrow Profinite.{u}) :
+  simplicial_object.augmented (Condensed.{u} Ab.{u+1}) :=
+(((simplicial_object.augmented.whiskering _ _).obj
+  (Profinite_to_Condensed ⋙ CondensedSet_to_Condensed_Ab)).obj
+  F.augmented_cech_nerve)
+
+
 variable (M : Condensed.{u} Ab.{u+1})
 
 abbreviation HH (i : ℤ) (S : Profinite.{u}) (M : Condensed.{u} Ab.{u+1}) :=
