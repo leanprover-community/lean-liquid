@@ -38,45 +38,6 @@ begin
   simp only [comp_apply],
   dsimp,
   simp only [functor.map_comp, category.assoc, bounded_homotopy_category.lift_lifts_assoc],
-  /-
-  rw [← category.assoc, is_iso.comp_inv_eq],
-  simp_rw [category.assoc],
-  let t := _, change _ = _ ≫ _ ≫ t,
-  let PX := ProjectiveResolution.of X.unop,
-  let PY := ProjectiveResolution.of Y.unop,
-  let e : PY.complex ⟶ PX.complex := PY.lift f.unop _,
-  have ht : t = kernel.lift _ (kernel.ι _ ≫ _) _,
-  rotate 2,
-  { exact (preadditive_yoneda.obj B).map (e.f 0).op },
-  { sorry },
-  { sorry },
-  rw ht, clear ht, clear t,
-  apply equalizer.hom_ext,
-  simp only [category.assoc, kernel.lift_ι],
-  dsimp only [functor.flip, Ext', functor.comp_map, functor.comp_obj,
-    bounded_homotopy_category.Ext, whiskering_left, whisker_left,
-    bounded_homotopy_category.Ext0,
-    ProjectiveResolution.Ext_single_iso,
-    ProjectiveResolution.Ext_iso_zero,
-    ProjectiveResolution.Ext_iso,
-    ProjectiveResolution.homology_zero_iso,
-    bounded_homotopy_category.Ext_iso,
-    iso.trans_hom, iso.trans_inv,
-    functor.map_iso, iso.op,
-    bounded_homotopy_category.replacement_iso,
-    nat_iso.app_hom,
-    homology_iso, kernel_d_from_iso
-    ],
-  simp only [category.assoc, equalizer_as_kernel, kernel.lift_ι, kernel.lift_ι_assoc],
-  simp only [← functor.map_comp_assoc, ← op_comp, nat_trans.naturality_assoc],
-  erw nat_trans.naturality_assoc, congr' 1,
-  rw [← functor.map_comp_assoc, ← op_comp],
-  let t := _, change _ = _ ≫ t,
-  have ht : t = _,
-
-
-  sorry
-  -/
 end
 
 -- move me
