@@ -107,6 +107,27 @@ begin
     { intros i, convert succ_vertical i k } },
 end
 
+def mk_snake_diagram_nat_trans_app
+  {X Y Z : C ⥤ homological_complex 𝓐 c} (f : X ⟶ Y) (g : Y ⟶ Z)
+  (H : ∀ c i, short_exact ((f.app c).f i) ((g.app c).f i))
+  {c₁ c₂ : C} (φ : c₁ ⟶ c₂) (i j : ι) (hij : c.rel i j) :
+  Π (e : snake_diagram),
+  (snake (f.app c₁) (g.app c₁) (H _) i j hij).snake_diagram.obj e ⟶
+  (snake (f.app c₂) (g.app c₂) (H _) i j hij).snake_diagram.obj e
+| ⟨⟨0,_⟩,⟨0,_⟩⟩ := (homology_functor _ _ i).map (X.map φ)
+| ⟨⟨0,_⟩,⟨1,_⟩⟩ := (homology_functor _ _ i).map (Y.map φ)
+| ⟨⟨0,_⟩,⟨2,_⟩⟩ := (homology_functor _ _ i).map (Z.map φ)
+| ⟨⟨1,_⟩,⟨0,_⟩⟩ := (mod_boundaries_functor _).map (X.map φ)
+| ⟨⟨1,_⟩,⟨1,_⟩⟩ := (mod_boundaries_functor _).map (Y.map φ)
+| ⟨⟨1,_⟩,⟨2,_⟩⟩ := (mod_boundaries_functor _).map (Z.map φ)
+| ⟨⟨2,_⟩,⟨0,_⟩⟩ := (cycles_functor _ _ _).map (X.map φ)
+| ⟨⟨2,_⟩,⟨1,_⟩⟩ := (cycles_functor _ _ _).map (Y.map φ)
+| ⟨⟨2,_⟩,⟨2,_⟩⟩ := (cycles_functor _ _ _).map (Z.map φ)
+| ⟨⟨3,_⟩,⟨0,_⟩⟩ := (homology_functor _ _ j).map (X.map φ)
+| ⟨⟨3,_⟩,⟨1,_⟩⟩ := (homology_functor _ _ j).map (Y.map φ)
+| ⟨⟨3,_⟩,⟨2,_⟩⟩ := (homology_functor _ _ j).map (Z.map φ)
+| _ := 0 -- impossible case
+
 -- TODO: Make a general construction, similar to `snake_diagram.mk_functor`
 def mk_snake_diagram_nat_trans
   {X Y Z : C ⥤ homological_complex 𝓐 c} (f : X ⟶ Y) (g : Y ⟶ Z)
@@ -114,28 +135,13 @@ def mk_snake_diagram_nat_trans
   {c₁ c₂ : C} (φ : c₁ ⟶ c₂) (i j : ι) (hij : c.rel i j) :
   (snake (f.app c₁) (g.app c₁) (H _) i j hij).snake_diagram ⟶
   (snake (f.app c₂) (g.app c₂) (H _) i j hij).snake_diagram :=
-{ app := λ e,
-  match e with
-  | ⟨⟨0,_⟩,⟨0,_⟩⟩ := (homology_functor _ _ i).map (X.map φ)
-  | ⟨⟨0,_⟩,⟨1,_⟩⟩ := (homology_functor _ _ i).map (Y.map φ)
-  | ⟨⟨0,_⟩,⟨2,_⟩⟩ := (homology_functor _ _ i).map (Z.map φ)
-  | ⟨⟨1,_⟩,⟨0,_⟩⟩ := (mod_boundaries_functor _).map (X.map φ)
-  | ⟨⟨1,_⟩,⟨1,_⟩⟩ := (mod_boundaries_functor _).map (Y.map φ)
-  | ⟨⟨1,_⟩,⟨2,_⟩⟩ := (mod_boundaries_functor _).map (Z.map φ)
-  | ⟨⟨2,_⟩,⟨0,_⟩⟩ := (cycles_functor _ _ _).map (X.map φ)
-  | ⟨⟨2,_⟩,⟨1,_⟩⟩ := (cycles_functor _ _ _).map (Y.map φ)
-  | ⟨⟨2,_⟩,⟨2,_⟩⟩ := (cycles_functor _ _ _).map (Z.map φ)
-  | ⟨⟨3,_⟩,⟨0,_⟩⟩ := (homology_functor _ _ j).map (X.map φ)
-  | ⟨⟨3,_⟩,⟨1,_⟩⟩ := (homology_functor _ _ j).map (Y.map φ)
-  | ⟨⟨3,_⟩,⟨2,_⟩⟩ := (homology_functor _ _ j).map (Z.map φ)
-  | _ := 0 -- impossible case
-  end,
+{ app := λ e, mk_snake_diagram_nat_trans_app f g H φ i j hij e,
   naturality' := begin
     apply snake_diagram_induction,
-    { simp },
-    { intros i j k f g h1 h2, dsimp,
-      simp only [functor.map_comp, category.assoc, h2, reassoc_of h1] },
-    { sorry },
+    { intro, simp only [category_theory.functor.map_id, category.id_comp, category.comp_id] },
+    { intros i j k f g h1 h2, simp only [functor.map_comp, category.assoc, h2, reassoc_of h1] },
+    { rintros ⟨a, _⟩ ⟨b, _⟩,
+      sorry },
     { sorry }
   end }
 
