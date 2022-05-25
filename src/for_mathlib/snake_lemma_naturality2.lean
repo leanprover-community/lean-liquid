@@ -14,6 +14,25 @@ variables {ι : Type*} {c : complex_shape ι}
 
 local notation x `⟶[`D`]` y := D.map (snake_diagram.hom x y)
 
+def cast_horizontal (i : fin 4) (j : fin 2) : snake_diagram := (i,j.cast_succ)
+def cast_vertical (i : fin 3) (j : fin 3) : snake_diagram := (i.cast_succ,j)
+def succ_horizontal (i : fin 4) (j : fin 2) : snake_diagram := (i, j.succ)
+def succ_vertical (i : fin 3) (j : fin 3) : snake_diagram := (i.succ,j)
+def to_succ_horizontal (i : fin 4) (j : fin 2) :
+  cast_horizontal i j ⟶ succ_horizontal i j := sorry
+def to_succ_vertical ( i : fin 3) (j : fin 3) :
+  cast_vertical i j ⟶ succ_vertical i j := sorry
+
+lemma snake_diagram_induction
+  {motive : Π ⦃i j : snake_diagram⦄ (f : i ⟶ j), Prop}
+  (id : ∀ i : snake_diagram, motive (𝟙 i))
+  (comp : ∀ (i j k : snake_diagram) (f : i ⟶ j) (g : j ⟶ k),
+    motive f → motive g → motive (f ≫ g))
+  (succ_horizontal : ∀ (i : fin 4) (j : fin 2),
+    motive (to_succ_horizontal i j))
+  (succ_vertical : ∀ (i : fin 3) (j : fin 3),
+    motive (to_succ_vertical i j)) ⦃i j : snake_diagram⦄ (f : i ⟶ j) : motive f := sorry
+
 -- TODO: Make a general construction, similar to `snake_diagram.mk_functor`
 def mk_snake_diagram_nat_trans
   {X Y Z : C ⥤ homological_complex 𝓐 c} (f : X ⟶ Y) (g : Y ⟶ Z)
@@ -38,7 +57,12 @@ def mk_snake_diagram_nat_trans
   | _ := 0 -- impossible case
   end,
   naturality' := begin
-    sorry
+    apply snake_diagram_induction,
+    { simp },
+    { intros i j k f g h1 h2, dsimp,
+      simp only [functor.map_comp, category.assoc, h2, reassoc_of h1] },
+    { sorry },
+    { sorry }
   end }
 
 lemma δ_natural {X Y Z : C ⥤ homological_complex 𝓐 c} (f : X ⟶ Y) (g : Y ⟶ Z)
