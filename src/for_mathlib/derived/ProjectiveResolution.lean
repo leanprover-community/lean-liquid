@@ -241,11 +241,52 @@ end
 instance is_iso_hom_to_kernel [enough_projectives A] (Y : A) :
   is_iso (hom_to_kernel P Y) := is_iso_of_mono_of_epi _
 
+def hom_to [enough_projectives A] (Y : A) :
+  (preadditive_yoneda.obj Y).obj (opposite.op X) ⟶
+  (preadditive_yoneda.obj ((bounded_homotopy_category.single _ 0).obj Y)).obj
+    (opposite.op P.bhc) :=
+{ to_fun := λ (f : X ⟶ Y), P.bhc_π ≫ (bounded_homotopy_category.single _ _).map f,
+  map_zero' := begin
+    convert comp_zero,
+    dsimp [bounded_homotopy_category.single],
+    simp,
+  end,
+  map_add' := begin
+    -- Missing additive isntance for bounded_homotopy_category.single
+    dsimp [bounded_homotopy_category.single],
+    intros a b,
+    rw ← preadditive.comp_add, congr' 1,
+    rw ← functor.map_add,
+    congr' 1,
+    -- Missing additive instance....
+    ext i,
+    dsimp,
+    split_ifs; simp,
+  end }
+
+instance is_iso_hom_to [enough_projectives A] (Y : A) :
+  is_iso (P.hom_to Y) :=
+begin
+  -- rw AddCommGroup.is_iso_iff_bijective, <-- missing :(
+  apply_with is_iso_of_mono_of_epi { instances := ff }, apply_instance,
+  { rw AddCommGroup.mono_iff_injective,
+    intros a b h,
+    dsimp [hom_to] at h,
+    sorry
+  },
+  { rw AddCommGroup.epi_iff_surjective,
+    rintros (a : P.bhc ⟶ _),
+    change ∃ (b : X ⟶ Y), _ ≫ _ = _,
+    sorry
+  },
+end
+
 def Ext_single_iso_hom [enough_projectives A] (Y : A) :
+  (preadditive_yoneda.obj Y).obj (opposite.op X) ≅
   ((bounded_homotopy_category.Ext 0).obj
     (opposite.op ((bounded_homotopy_category.single _ 0).obj X))).obj
-    ((bounded_homotopy_category.single _ 0).obj Y) ≅
-  (preadditive_yoneda.obj Y).obj (opposite.op X) :=
-P.Ext_single_iso_kernel Y ≪≫ (as_iso (P.hom_to_kernel Y)).symm
+    ((bounded_homotopy_category.single _ 0).obj Y) :=
+(as_iso $ P.hom_to _) ≪≫ (preadditive_yoneda.map_iso $ (shift_zero _ _).symm).app _ ≪≫
+(P.Ext_iso ((bounded_homotopy_category.single _ 0).obj Y) 0).symm
 
 end category_theory.ProjectiveResolution

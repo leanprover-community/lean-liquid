@@ -25,14 +25,20 @@ category_theory.triangulated.preadditive_yoneda_op_homological (X⟦i⟧)
 noncomputable
 def Ext'_zero_flip_iso (B : A) :
   (Ext' 0).flip.obj B ≅ (preadditive_yoneda.obj B) :=
+iso.symm $
 nat_iso.of_components
 (λ X, (ProjectiveResolution.of X.unop).Ext_single_iso_hom _)
 begin
-  intros X Y f,
-  dsimp only [ProjectiveResolution.Ext_single_iso_hom,
-    ProjectiveResolution.Ext_single_iso_kernel,
-    as_iso_hom, iso.trans_hom, iso.symm_hom,
-    as_iso_inv],
+  intros X Y f, ext F,
+  dsimp [ProjectiveResolution.Ext_single_iso_hom,
+    ProjectiveResolution.Ext_iso,
+    bounded_homotopy_category.Ext_iso,
+    ProjectiveResolution.hom_to, Ext',
+    bounded_homotopy_category.Ext],
+  simp only [comp_apply],
+  dsimp,
+  simp only [functor.map_comp, category.assoc, bounded_homotopy_category.lift_lifts_assoc],
+  /-
   rw [← category.assoc, is_iso.comp_inv_eq],
   simp_rw [category.assoc],
   let t := _, change _ = _ ≫ _ ≫ t,
@@ -47,7 +53,30 @@ begin
   rw ht, clear ht, clear t,
   apply equalizer.hom_ext,
   simp only [category.assoc, kernel.lift_ι],
+  dsimp only [functor.flip, Ext', functor.comp_map, functor.comp_obj,
+    bounded_homotopy_category.Ext, whiskering_left, whisker_left,
+    bounded_homotopy_category.Ext0,
+    ProjectiveResolution.Ext_single_iso,
+    ProjectiveResolution.Ext_iso_zero,
+    ProjectiveResolution.Ext_iso,
+    ProjectiveResolution.homology_zero_iso,
+    bounded_homotopy_category.Ext_iso,
+    iso.trans_hom, iso.trans_inv,
+    functor.map_iso, iso.op,
+    bounded_homotopy_category.replacement_iso,
+    nat_iso.app_hom,
+    homology_iso, kernel_d_from_iso
+    ],
+  simp only [category.assoc, equalizer_as_kernel, kernel.lift_ι, kernel.lift_ι_assoc],
+  simp only [← functor.map_comp_assoc, ← op_comp, nat_trans.naturality_assoc],
+  erw nat_trans.naturality_assoc, congr' 1,
+  rw [← functor.map_comp_assoc, ← op_comp],
+  let t := _, change _ = _ ≫ t,
+  have ht : t = _,
+
+
   sorry
+  -/
 end
 
 -- move me
