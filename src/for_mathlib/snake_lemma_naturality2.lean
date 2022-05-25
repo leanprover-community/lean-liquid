@@ -19,9 +19,13 @@ def cast_vertical (i : fin 3) (j : fin 3) : snake_diagram := (i.cast_succ,j)
 def succ_horizontal (i : fin 4) (j : fin 2) : snake_diagram := (i, j.succ)
 def succ_vertical (i : fin 3) (j : fin 3) : snake_diagram := (i.succ,j)
 def to_succ_horizontal (i : fin 4) (j : fin 2) :
-  cast_horizontal i j ⟶ succ_horizontal i j := sorry
+  cast_horizontal i j ⟶ succ_horizontal i j :=
+(cast_horizontal i j).hom (succ_horizontal i j)
+  (by simp [cast_horizontal, succ_horizontal, le_trans (fin.cast_succ_lt_succ j).le le_rfl])
 def to_succ_vertical ( i : fin 3) (j : fin 3) :
-  cast_vertical i j ⟶ succ_vertical i j := sorry
+  cast_vertical i j ⟶ succ_vertical i j :=
+(cast_vertical i j).hom (succ_vertical i j)
+  (by simp [cast_vertical, succ_vertical, le_trans (fin.cast_succ_lt_succ i).le le_rfl])
 
 lemma snake_diagram_induction
   {motive : Π ⦃i j : snake_diagram⦄ (f : i ⟶ j), Prop}
