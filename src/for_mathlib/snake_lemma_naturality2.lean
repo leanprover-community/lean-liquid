@@ -107,11 +107,12 @@ begin
     { intros i, convert succ_vertical i k } },
 end
 
-def mk_snake_diagram_nat_trans_app
+variables
   {X Y Z : C ⥤ homological_complex 𝓐 c} (f : X ⟶ Y) (g : Y ⟶ Z)
   (H : ∀ c i, short_exact ((f.app c).f i) ((g.app c).f i))
-  {c₁ c₂ : C} (φ : c₁ ⟶ c₂) (i j : ι) (hij : c.rel i j) :
-  Π (e : snake_diagram),
+  {c₁ c₂ : C} (φ : c₁ ⟶ c₂) (i j : ι) (hij : c.rel i j)
+
+def mk_snake_diagram_nat_trans_app : Π (e : snake_diagram),
   (snake (f.app c₁) (g.app c₁) (H _) i j hij).snake_diagram.obj e ⟶
   (snake (f.app c₂) (g.app c₂) (H _) i j hij).snake_diagram.obj e
 | ⟨⟨0,_⟩,⟨0,_⟩⟩ := (homology_functor _ _ i).map (X.map φ)
@@ -127,12 +128,52 @@ def mk_snake_diagram_nat_trans_app
 | ⟨⟨3,_⟩,⟨1,_⟩⟩ := (homology_functor _ _ j).map (Y.map φ)
 | ⟨⟨3,_⟩,⟨2,_⟩⟩ := (homology_functor _ _ j).map (Z.map φ)
 | _ := 0 -- impossible case
+.
+
+def mk_snake_diagram_nat_trans_hor :
+  ∀ (a : fin 4) (b : fin 2),
+  (snake (f.app c₁) (g.app c₁) (H _) i j hij).snake_diagram.map (to_succ_horizontal a b) ≫
+    mk_snake_diagram_nat_trans_app f g H φ i j hij (succ_horizontal a b) =
+    mk_snake_diagram_nat_trans_app f g H φ i j hij (cast_horizontal a b) ≫
+    (snake (f.app c₂) (g.app c₂) (H _) i j hij).snake_diagram.map (to_succ_horizontal a b)
+| ⟨0,_⟩ ⟨0,_⟩ := by { repeat { erw [snake_diagram.mk_functor_map_f0, ← category_theory.functor.map_comp] }, rw nat_trans.naturality, }
+| ⟨0,_⟩ ⟨1,_⟩ := by { repeat { erw [snake_diagram.mk_functor_map_g0, ← category_theory.functor.map_comp] }, rw nat_trans.naturality, }
+| ⟨0,_⟩ ⟨n+2,h⟩ := by { exfalso, rw [nat.succ_lt_succ_iff, nat.succ_lt_succ_iff] at h, exact nat.not_lt_zero n h }
+| ⟨1,_⟩ ⟨0,_⟩ := by { repeat { erw [snake_diagram.mk_functor_map_f1, ← category_theory.functor.map_comp] }, rw nat_trans.naturality, }
+| ⟨1,_⟩ ⟨1,_⟩ := by { repeat { erw [snake_diagram.mk_functor_map_g1, ← category_theory.functor.map_comp] }, rw nat_trans.naturality, }
+| ⟨1,_⟩ ⟨n+2,h⟩ := by { exfalso, rw [nat.succ_lt_succ_iff, nat.succ_lt_succ_iff] at h, exact nat.not_lt_zero n h }
+| ⟨2,_⟩ ⟨0,_⟩ := by { repeat { erw [snake_diagram.mk_functor_map_f2, ← category_theory.functor.map_comp] }, rw nat_trans.naturality, }
+| ⟨2,_⟩ ⟨1,_⟩ := by { repeat { erw [snake_diagram.mk_functor_map_g2, ← category_theory.functor.map_comp] }, rw nat_trans.naturality, }
+| ⟨2,_⟩ ⟨n+2,h⟩ := by { exfalso, rw [nat.succ_lt_succ_iff, nat.succ_lt_succ_iff] at h, exact nat.not_lt_zero n h }
+| ⟨3,_⟩ ⟨0,_⟩ := by { repeat { erw [snake_diagram.mk_functor_map_f3, ← category_theory.functor.map_comp] }, rw nat_trans.naturality, }
+| ⟨3,_⟩ ⟨1,_⟩ := by { repeat { erw [snake_diagram.mk_functor_map_g3, ← category_theory.functor.map_comp] }, rw nat_trans.naturality, }
+| ⟨3,_⟩ ⟨n+2,h⟩ := by { exfalso, rw [nat.succ_lt_succ_iff, nat.succ_lt_succ_iff] at h, exact nat.not_lt_zero n h }
+| ⟨n+4,h⟩ _   := by { exfalso, repeat { rw [nat.succ_lt_succ_iff] at h }, exact nat.not_lt_zero n h }
+.
+
+def mk_snake_diagram_nat_trans_ver :
+  ∀ (a b : fin 3),
+  (snake (f.app c₁) (g.app c₁) (H _) i j hij).snake_diagram.map (to_succ_vertical a b) ≫
+    mk_snake_diagram_nat_trans_app f g H φ i j hij (succ_vertical a b) =
+    mk_snake_diagram_nat_trans_app f g H φ i j hij (cast_vertical a b) ≫
+    (snake (f.app c₂) (g.app c₂) (H _) i j hij).snake_diagram.map (to_succ_vertical a b)
+| ⟨0,_⟩ ⟨0,_⟩ := by { repeat { erw [snake_diagram.mk_functor_map_a0] }, erw nat_trans.naturality, refl }
+| ⟨0,_⟩ ⟨1,_⟩ := by { repeat { erw [snake_diagram.mk_functor_map_b0] }, erw nat_trans.naturality, refl }
+| ⟨0,_⟩ ⟨2,_⟩ := by { repeat { erw [snake_diagram.mk_functor_map_c0] }, erw nat_trans.naturality, refl }
+| ⟨0,_⟩ ⟨n+3,h⟩ := by { exfalso, repeat { rw [nat.succ_lt_succ_iff] at h }, exact nat.not_lt_zero n h }
+| ⟨1,_⟩ ⟨0,_⟩ := by { repeat { erw [snake_diagram.mk_functor_map_a1] }, erw nat_trans.naturality, refl }
+| ⟨1,_⟩ ⟨1,_⟩ := by { repeat { erw [snake_diagram.mk_functor_map_b1] }, erw nat_trans.naturality, refl }
+| ⟨1,_⟩ ⟨2,_⟩ := by { repeat { erw [snake_diagram.mk_functor_map_c1] }, erw nat_trans.naturality, refl }
+| ⟨1,_⟩ ⟨n+3,h⟩ := by { exfalso, repeat { rw [nat.succ_lt_succ_iff] at h }, exact nat.not_lt_zero n h }
+| ⟨2,_⟩ ⟨0,_⟩ := by { repeat { erw [snake_diagram.mk_functor_map_a2] }, erw nat_trans.naturality, refl }
+| ⟨2,_⟩ ⟨1,_⟩ := by { repeat { erw [snake_diagram.mk_functor_map_b2] }, erw nat_trans.naturality, refl }
+| ⟨2,_⟩ ⟨2,_⟩ := by { repeat { erw [snake_diagram.mk_functor_map_c2] }, erw nat_trans.naturality, refl }
+| ⟨2,_⟩ ⟨n+3,h⟩ := by { exfalso, repeat { rw [nat.succ_lt_succ_iff] at h }, exact nat.not_lt_zero n h }
+| ⟨n+3,h⟩ _   := by { exfalso, repeat { rw [nat.succ_lt_succ_iff] at h }, exact nat.not_lt_zero n h }
+.
 
 -- TODO: Make a general construction, similar to `snake_diagram.mk_functor`
-def mk_snake_diagram_nat_trans
-  {X Y Z : C ⥤ homological_complex 𝓐 c} (f : X ⟶ Y) (g : Y ⟶ Z)
-  (H : ∀ c i, short_exact ((f.app c).f i) ((g.app c).f i))
-  {c₁ c₂ : C} (φ : c₁ ⟶ c₂) (i j : ι) (hij : c.rel i j) :
+def mk_snake_diagram_nat_trans :
   (snake (f.app c₁) (g.app c₁) (H _) i j hij).snake_diagram ⟶
   (snake (f.app c₂) (g.app c₂) (H _) i j hij).snake_diagram :=
 { app := λ e, mk_snake_diagram_nat_trans_app f g H φ i j hij e,
@@ -140,14 +181,11 @@ def mk_snake_diagram_nat_trans
     apply snake_diagram_induction,
     { intro, simp only [category_theory.functor.map_id, category.id_comp, category.comp_id] },
     { intros i j k f g h1 h2, simp only [functor.map_comp, category.assoc, h2, reassoc_of h1] },
-    { rintros ⟨a, _⟩ ⟨b, _⟩,
-      sorry },
-    { sorry }
+    { exact mk_snake_diagram_nat_trans_hor f g H φ i j hij },
+    { exact mk_snake_diagram_nat_trans_ver f g H φ i j hij },
   end }
 
-lemma δ_natural {X Y Z : C ⥤ homological_complex 𝓐 c} (f : X ⟶ Y) (g : Y ⟶ Z)
-  (H : ∀ c i, short_exact ((f.app c).f i) ((g.app c).f i))
-  {c₁ c₂ : C} (φ : c₁ ⟶ c₂) (i j : ι) (hij : c.rel i j) :
+lemma δ_natural :
   δ (f.app c₁) (g.app c₁) (H _) i j hij ≫ (homology_functor _ _ j).map (X.map φ) =
     (homology_functor _ _ i).map (Z.map φ) ≫ δ (f.app c₂) (g.app c₂) (H _) i j hij :=
 begin
