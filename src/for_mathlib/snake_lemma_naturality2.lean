@@ -1,5 +1,6 @@
 import for_mathlib.snake_lemma3
 import for_mathlib.les_homology
+import for_mathlib.snake_lemma_naturality
 
 noncomputable theory
 
@@ -13,12 +14,43 @@ variables {ι : Type*} {c : complex_shape ι}
 
 local notation x `⟶[`D`]` y := D.map (snake_diagram.hom x y)
 
+-- TODO: Make a general construction, similar to `snake_diagram.mk_functor`
+def mk_snake_diagram_nat_trans
+  {X Y Z : C ⥤ homological_complex 𝓐 c} (f : X ⟶ Y) (g : Y ⟶ Z)
+  (H : ∀ c i, short_exact ((f.app c).f i) ((g.app c).f i))
+  {c₁ c₂ : C} (φ : c₁ ⟶ c₂) (i j : ι) (hij : c.rel i j) :
+  (snake (f.app c₁) (g.app c₁) (H _) i j hij).snake_diagram ⟶
+  (snake (f.app c₂) (g.app c₂) (H _) i j hij).snake_diagram :=
+{ app := λ e,
+  match e with
+  | ⟨⟨0,_⟩,⟨0,_⟩⟩ := (homology_functor _ _ i).map (X.map φ)
+  | ⟨⟨0,_⟩,⟨1,_⟩⟩ := (homology_functor _ _ i).map (Y.map φ)
+  | ⟨⟨0,_⟩,⟨2,_⟩⟩ := (homology_functor _ _ i).map (Z.map φ)
+  | ⟨⟨1,_⟩,⟨0,_⟩⟩ := (mod_boundaries_functor _).map (X.map φ)
+  | ⟨⟨1,_⟩,⟨1,_⟩⟩ := (mod_boundaries_functor _).map (Y.map φ)
+  | ⟨⟨1,_⟩,⟨2,_⟩⟩ := (mod_boundaries_functor _).map (Z.map φ)
+  | ⟨⟨2,_⟩,⟨0,_⟩⟩ := (cycles_functor _ _ _).map (X.map φ)
+  | ⟨⟨2,_⟩,⟨1,_⟩⟩ := (cycles_functor _ _ _).map (Y.map φ)
+  | ⟨⟨2,_⟩,⟨2,_⟩⟩ := (cycles_functor _ _ _).map (Z.map φ)
+  | ⟨⟨3,_⟩,⟨0,_⟩⟩ := (homology_functor _ _ j).map (X.map φ)
+  | ⟨⟨3,_⟩,⟨1,_⟩⟩ := (homology_functor _ _ j).map (Y.map φ)
+  | ⟨⟨3,_⟩,⟨2,_⟩⟩ := (homology_functor _ _ j).map (Z.map φ)
+  | _ := 0 -- impossible case
+  end,
+  naturality' := begin
+    sorry
+  end }
+
 lemma δ_natural {X Y Z : C ⥤ homological_complex 𝓐 c} (f : X ⟶ Y) (g : Y ⟶ Z)
   (H : ∀ c i, short_exact ((f.app c).f i) ((g.app c).f i))
   {c₁ c₂ : C} (φ : c₁ ⟶ c₂) (i j : ι) (hij : c.rel i j) :
   δ (f.app c₁) (g.app c₁) (H _) i j hij ≫ (homology_functor _ _ j).map (X.map φ) =
     (homology_functor _ _ i).map (Z.map φ) ≫ δ (f.app c₂) (g.app c₂) (H _) i j hij :=
 begin
+  let η := mk_snake_diagram_nat_trans f g H φ i j hij,
+  apply (snake_lemma.δ_natural η _ _).symm,
+
+  /-
   delta δ snake.δ,
   have h1 : snake_diagram.hom (1,0) (2,1) =
     snake_diagram.hom (1,0) (1,1) ≫ snake_diagram.hom (1,1) (2,1) := snake_diagram.hom_ext _ _,
@@ -39,6 +71,7 @@ begin
   sorry
   -- simp only [category.assoc],
   -- delta is_snake_input.to_kernel' is_snake_input.cokernel_to',
+  -/
 end
 
 end homological_complex
