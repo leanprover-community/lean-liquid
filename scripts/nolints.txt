@@ -134,6 +134,10 @@ apply_nolint bounded_homotopy_category.lift unused_arguments
 apply_nolint bounded_homotopy_category.lift_ext unused_arguments
 apply_nolint bounded_homotopy_category.map.homotopy_category.is_quasi_iso unused_arguments
 
+-- for_mathlib/derived/ProjectiveResolution.lean
+apply_nolint category_theory.ProjectiveResolution.hom_to_kernel unused_arguments
+apply_nolint category_theory.ProjectiveResolution.homology_zero_iso unused_arguments
+
 -- for_mathlib/derived/derived_cat.lean
 apply_nolint bounded_derived_category.lift_unique unused_arguments
 apply_nolint bounded_derived_category.zero_is_K_projective unused_arguments
