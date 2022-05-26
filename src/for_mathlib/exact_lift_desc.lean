@@ -14,8 +14,9 @@ variables {A B C T : 𝓐} {f : A ⟶ B} {g : B ⟶ C}
 section lift
 
 variables (h : exact f g) [mono f] (φ : T ⟶ B) (w : φ ≫ g = 0)
+include h w
 
-def mono_lift (h : exact f g) [mono f] (φ : T ⟶ B) (w : φ ≫ g = 0) : T ⟶ A :=
+def mono_lift : T ⟶ A :=
 abelian.mono_lift f φ $
   by { obtain ⟨t, rfl⟩ := kernel.lift' _ _ w, simp [kernel_comp_cokernel _ _ h] }
 
@@ -29,8 +30,9 @@ end lift
 section desc
 
 variables (h : exact f g) [category_theory.epi g] (φ : B ⟶ T) (w : f ≫ φ = 0)
+include h w
 
-def epi_desc (h : exact f g) [category_theory.epi g] (φ : B ⟶ T) (w : f ≫ φ = 0) : C ⟶ T :=
+def epi_desc : C ⟶ T :=
 abelian.epi_desc g φ $
   by { obtain ⟨t, rfl⟩ := cokernel.desc' _ _ w, simp [kernel_comp_cokernel_assoc _ _ h] }
 
