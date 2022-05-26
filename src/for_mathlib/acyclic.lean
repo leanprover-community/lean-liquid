@@ -141,7 +141,12 @@ begin
   intro i,
   let K := λ j, kernel (C.d j (j+1)),
   suffices : ∀ j, ∀ i > 0, is_zero (((Ext' i).obj (op $ K j)).obj B),
-  { sorry },
+  { suffices hepi : epi (delta_to_kernel ((((Ext' 0).flip.obj B).map_homological_complex
+      (complex_shape.up ℤ).symm).obj (homological_complex.op C)) (i + 1 + 1) (i + 1) i),
+    { resetI, refine ⟨_⟩,
+      delta delta_to_kernel image_to_kernel',
+      apply exact_comp_mono, rw exact_factor_thru_image_iff, exact exact_kernel_ι },
+    sorry },
   clear i, intro j,
   have : ∀ j ≥ a, ∀ i > 0, is_zero (((Ext' i).obj (op $ K j)).obj B),
   { intros j hj i hi,

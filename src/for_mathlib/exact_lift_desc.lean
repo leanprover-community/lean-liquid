@@ -16,13 +16,13 @@ section lift
 variables (h : exact f g) [mono f] (φ : T ⟶ B) (w : φ ≫ g = 0)
 
 -- SELFCONTAINED
-def lift (h : exact f g) [mono f] (φ : T ⟶ B) (w : φ ≫ g = 0) : T ⟶ A :=
+def mono_lift (h : exact f g) [mono f] (φ : T ⟶ B) (w : φ ≫ g = 0) : T ⟶ A :=
 abelian.mono_lift f φ sorry
 
-@[reassoc] lemma lift_comp : h.lift φ w ≫ f = φ := abelian.mono_lift_comp f φ _
+@[reassoc] lemma mono_lift_comp : h.mono_lift φ w ≫ f = φ := abelian.mono_lift_comp f φ _
 
-lemma lift_unique (e : T ⟶ A) (he : e ≫ f = φ) : e = h.lift φ w :=
-by rw [← cancel_mono f, he, h.lift_comp]
+lemma mono_lift_unique (e : T ⟶ A) (he : e ≫ f = φ) : e = h.mono_lift φ w :=
+by rw [← cancel_mono f, he, h.mono_lift_comp]
 
 end lift
 
@@ -31,13 +31,13 @@ section desc
 variables (h : exact f g) [category_theory.epi g] (φ : B ⟶ T) (w : f ≫ φ = 0)
 
 -- SELFCONTAINED
-def desc (h : exact f g) [category_theory.epi g] (φ : B ⟶ T) (w : f ≫ φ = 0) : C ⟶ T :=
+def epi_desc (h : exact f g) [category_theory.epi g] (φ : B ⟶ T) (w : f ≫ φ = 0) : C ⟶ T :=
 abelian.epi_desc g φ sorry
 
-@[reassoc] lemma comp_desc : g ≫ h.desc φ w = φ := abelian.comp_epi_desc g φ _
+@[reassoc] lemma comp_epi_desc : g ≫ h.epi_desc φ w = φ := abelian.comp_epi_desc g φ _
 
-lemma desc_unique (e : C ⟶ T) (he : g ≫ e = φ) : e = h.desc φ w :=
-by rw [← cancel_epi g, he, h.comp_desc]
+lemma epi_desc_unique (e : C ⟶ T) (he : g ≫ e = φ) : e = h.epi_desc φ w :=
+by rw [← cancel_epi g, he, h.comp_epi_desc]
 
 end desc
 
