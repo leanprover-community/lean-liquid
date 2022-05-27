@@ -429,15 +429,30 @@ lemma Ext_compute_with_acylic_inv_eq (B : 𝓐)
   (kernel.ι _ ≫ Ext_compute_with_acyclic_inv_eq_aux _ _ _)
 sorry := sorry
 
-lemma homology.lift_desc (U V X Y Z : 𝓐) (f : X ⟶ Y) (g : Y ⟶ Z) (w)
-  (e : U ⟶ cokernel f) (t : Y ⟶ V) (h) (h') :
-  homology.lift f g w e h ≫ homology.desc' f g w (kernel.ι _ ≫ t)
-    (by { simp only [h', kernel.lift_ι_assoc] }) =
-  (e ≫ cokernel.desc _ t h') :=
+lemma homology.lift_desc (X Y Z : 𝓐) (f : X ⟶ Y) (g : Y ⟶ Z) (w)
+  (U : 𝓐) (e : _ ⟶ U) (he : f ≫ e = 0) (V : 𝓐) (t : V ⟶ _) (ht : t ≫ g = 0) :
+  homology.lift f g w (t ≫ cokernel.π _) (by { simp [ht] } ) ≫
+  homology.desc' _ _ _ (kernel.ι _ ≫ e) (by { simp [he] }) =
+  t ≫ e :=
 begin
-  -- We're 95% sure this is true.
-  sorry
+  let s := _, change s ≫ _ = _,
+  have hs : s = kernel.lift _ t ht ≫ homology.π' _ _ _,
+  { apply homology.hom_to_ext,
+    simp only [homology.lift_ι, category.assoc, projective.homology.π'_ι, kernel.lift_ι_assoc] },
+  simp [hs],
 end
+
+lemma homology.lift_desc' (X Y Z : 𝓐) (f : X ⟶ Y) (g : Y ⟶ Z) (w)
+  (U : 𝓐) (e : _ ⟶ U) (he : f ≫ e = 0) (V : 𝓐) (t : V ⟶ _) (ht : t ≫ g = 0)
+  (u v) (hu : u = t ≫ cokernel.π _) (hv : v = kernel.ι _ ≫ e) :
+  homology.lift f g w u (by simpa [hu] ) ≫ homology.desc' _ _ _ v (by simpa [hv]) = t ≫ e :=
+begin
+  subst hu,
+  subst hv,
+  apply homology.lift_desc,
+  assumption'
+end
+
 
 lemma Ext_compute_with_acyclic_naturality (C₁ C₂ : cochain_complex 𝓐 ℤ)
   [((quotient 𝓐 (complex_shape.up ℤ)).obj C₁).is_bounded_above]
@@ -464,7 +479,15 @@ begin
   simp only [category.assoc],
   erw [homology.π'_desc'_assoc],
   dsimp,
-  rw homology.lift_desc,
-  sorry,
-  sorry
+  rw (homology.lift_desc' _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ rfl),
+  rotate 3,
+  { exact kernel.ι _ ≫ (preadditive_yoneda.obj _).map (f.f _).op },
+  swap,
+  { simpa },
+  { dsimp, sorry },
+  { dsimp, simp only [category.assoc],
+    congr' 1,
+    sorry },
+  { apply_instance },
+  { sorry }
 end
