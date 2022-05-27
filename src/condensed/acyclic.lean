@@ -37,10 +37,13 @@ lemma acyclic_of_exact.induction_step
     ∀ i, is_zero
     (((((cosimplicial_object.augmented.whiskering _ _).obj M.val).obj
       F.augmented_cech_nerve.right_op).to_cocomplex).homology i))
-  (n : ℤ) (hn : acyclic_of_exact.IH M n) :
+  (n : ℤ) (ih : acyclic_of_exact.IH M n) :
   acyclic_of_exact.IH M (n+1) :=
 begin
   intros S i h1 h2,
+  rw [le_iff_eq_or_lt, or_comm, int.lt_add_one_iff] at h2,
+  cases h2 with h2 h2, { exact ih S i h1 h2 },
+  subst i,
   sorry
 end
 

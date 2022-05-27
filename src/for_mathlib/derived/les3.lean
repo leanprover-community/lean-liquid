@@ -1,4 +1,5 @@
 import for_mathlib.derived.les2
+import for_mathlib.unop
 
 noncomputable theory
 
@@ -225,12 +226,6 @@ begin
   { simp, },
   { simp, }
 end
-
--- move me
-lemma _root_.category_theory.unop_neg (C : Type*) [category C] [preadditive C]
-  {X Y : Cᵒᵖ} (f : X ⟶ Y) :
-  (-f).unop = -(f.unop) :=
-rfl
 
 lemma Ext_five_term_exact_seq'
   (n : ℤ)
