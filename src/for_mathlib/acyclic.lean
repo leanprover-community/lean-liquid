@@ -395,6 +395,50 @@ begin
 end
 .
 
+def homological_complex.single_iso (B : 𝓐) {i j : ℤ} (h : j = i) :
+  ((homological_complex.single _ (complex_shape.up ℤ) i).obj B).X j ≅ B :=
+eq_to_iso (if_pos h)
+
+def cochain_complex.hom_to_single_of_hom
+  (C : cochain_complex 𝓐 ℤ) (B : 𝓐) (i : ℤ) (f : C.X i ⟶ B) :
+  C ⟶ (homological_complex.single _ _ i).obj B :=
+{ f := λ j, if h : j = i then eq_to_hom (by rw h) ≫ f ≫ (homological_complex.single_iso _ h).inv
+    else 0,
+  comm' := sorry }
+
+def Ext_compute_with_acyclic_inv_eq_aux (B) (i) :
+  AddCommGroup.of (C.X (-i) ⟶ B) ⟶ ((Ext i).obj (op (of' C))).obj ((single 𝓐 0).obj B) :=
+{ to_fun := λ f, (of' C).π ≫ begin
+    dsimp at f,
+    refine (homotopy_category.quotient _ _).map _,
+    refine _ ≫ (homological_complex.single_shift _ _).inv.app _,
+    refine cochain_complex.hom_to_single_of_hom _ _ _ _,
+    refine _ ≫ f,
+    refine eq_to_hom _,
+    apply congr_arg,
+    exact zero_sub _,
+  end,
+  map_zero' := sorry,
+  map_add' := sorry }
+
+lemma Ext_compute_with_acylic_inv_eq (B : 𝓐)
+  (hC : ∀ k, ∀ i > 0, is_zero (((Ext' i).obj (op $ C.X k)).obj B))
+  (i : ℤ) :
+  (Ext_compute_with_acyclic _ B hC i).inv =
+  homology.desc' _ _ _
+  (kernel.ι _ ≫ Ext_compute_with_acyclic_inv_eq_aux _ _ _)
+sorry := sorry
+
+lemma homology.lift_desc (U V X Y Z : 𝓐) (f : X ⟶ Y) (g : Y ⟶ Z) (w)
+  (e : U ⟶ cokernel f) (t : Y ⟶ V) (h) (h') :
+  homology.lift f g w e h ≫ homology.desc' f g w (kernel.ι _ ≫ t)
+    (by { simp only [h', kernel.lift_ι_assoc] }) =
+  (e ≫ cokernel.desc _ t h') :=
+begin
+  -- We're 95% sure this is true.
+  sorry
+end
+
 lemma Ext_compute_with_acyclic_naturality (C₁ C₂ : cochain_complex 𝓐 ℤ)
   [((quotient 𝓐 (complex_shape.up ℤ)).obj C₁).is_bounded_above]
   [((quotient 𝓐 (complex_shape.up ℤ)).obj C₂).is_bounded_above]
@@ -410,6 +454,17 @@ lemma Ext_compute_with_acyclic_naturality (C₁ C₂ : cochain_complex 𝓐 ℤ)
     (((preadditive_yoneda.obj B).right_op.map_homological_complex _ ⋙
       homological_complex.unop_functor.right_op ⋙ (_root_.homology_functor _ _ (-i)).op).map f).unop :=
 begin
-  dsimp only [Ext_compute_with_acyclic],
+  rw [← iso.inv_comp_eq, ← category.assoc, ← iso.eq_comp_inv],
+  rw Ext_compute_with_acylic_inv_eq,
+  rw Ext_compute_with_acylic_inv_eq,
+  apply homology.hom_from_ext,
+  simp only [category.assoc, homology.π'_desc'_assoc],
+  dsimp only [functor.comp_map, functor.op_map, homology_functor_map],
+  erw homology.map_eq_desc'_lift_left,
+  simp only [category.assoc],
+  erw [homology.π'_desc'_assoc],
+  dsimp,
+  rw homology.lift_desc,
+  sorry,
   sorry
 end
