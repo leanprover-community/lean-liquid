@@ -70,11 +70,11 @@ begin
     { apply bounded_derived_category.Ext'_zero_left_is_zero,
       exact (is_zero_zero _).op, } },
   let K := λ i, kernel ((free_Cech F).d (i + 1) i),
-  suffices : ∀ i j, i + j ≤ n + 1 → is_zero ((E i).obj (op $ K j)),
+  suffices : ∀ i j, 0 < i → i + j ≤ n → is_zero ((E i).obj (op $ K j)),
   { have SES := (free_Cech_kernel_SES F (-2)).Ext'_five_term_exact_seq M (n+1),
     refine is_zero_of_exact_is_zero_is_zero _ _ SES.pair _ _; clear SES,
-    { refine this (n+1) (-2) _, sorry },
-    { refine this (n+1) (-1) _, sorry } },
+    { refine this (n+1) (-2) h1 _, sorry },
+    { refine this (n+1) (-1) h1 _, sorry } },
   have aux : ∀ (i j : ℤ) (hi0 : 0 < i) (hi : i+1 ≤ n),
     is_zero ((E i).obj (op $ K (j+1))) ↔ is_zero ((E (i+1)).obj (op $ K j)),
   { intros i j hi0 hi,
@@ -83,6 +83,11 @@ begin
     { resetI, rw (as_iso $ Ext'_δ M (free_Cech_kernel_SES F j) i).is_zero_iff, },
     { refine ih' i _ hi0 _, sorry },
     { refine ih' (i+1) _ _ _, { exact add_pos hi0 zero_lt_one }, sorry } },
+  intros i j h0i,
+  -- induction j with j j, swap,
+  -- { intro hjn,
+  --   apply bounded_derived_category.Ext'_zero_left_is_zero,
+  --   refine (is_zero_of_mono (kernel.ι _) _).op, },
   sorry
 end
 
