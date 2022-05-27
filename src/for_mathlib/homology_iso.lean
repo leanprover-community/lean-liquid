@@ -164,4 +164,6 @@ begin
   refl,
 end
 
+attribute [reassoc] cokernel.map_desc
+
 end category_theory
