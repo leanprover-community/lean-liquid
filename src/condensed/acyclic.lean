@@ -13,6 +13,10 @@ universes u
 open category_theory category_theory.limits homotopy_category opposite
 open function (surjective)
 
+lemma projective_of_iso {𝓐 : Type*} [category 𝓐] {X Y : 𝓐} (e : X ≅ Y) (h : projective X) :
+  projective Y :=
+sorry
+
 namespace condensed
 
 def free_Cech' (F : arrow Profinite.{u}) :
@@ -41,6 +45,10 @@ begin
   erw ← is_acyclic_iff_short_exact_to_cycles' (free_Cech F), exact free_Cech_exact F
 end
 
+def arrow.cech_nerve_obj_0 (F : arrow Profinite) :
+  F.cech_nerve.obj (op (simplex_category.mk 0)) ≅ F.left :=
+sorry
+
 variable (M : Condensed.{u} Ab.{u+1})
 
 abbreviation HH (i : ℤ) (S : Profinite.{u}) (M : Condensed.{u} Ab.{u+1}) :=
@@ -62,39 +70,45 @@ begin
   subst i,
   let F := arrow.mk S.projective_presentation.f,
   let E := λ i, (Ext' i).flip.obj M,
-  have ih' : ∀ (i j : ℤ) (hi0 : i > 0) (hin : i ≤ n),
+  have ih' : ∀ (i j : ℤ) (h0i : 0 < i) (hin : i ≤ n),
     is_zero ((E i).obj (op ((free_Cech F).X j))),
-  { intros i j hi0 hin,
+  { intros i j h0i hin,
     cases j with j j,
-    { cases j; exact ih _ _ hi0 hin, },
+    { cases j; exact ih _ _ h0i hin, },
     { apply bounded_derived_category.Ext'_zero_left_is_zero,
       exact (is_zero_zero _).op, } },
   let K := λ i, kernel ((free_Cech F).d (i + 1) i),
-  have aux0 : ∀ (i : ℤ) (hi0 : 0 < i) (H : is_zero ((E (i+1)).obj (op $ K (-1)))),
+  have aux0 : ∀ (i : ℤ) (h0i : 0 < i) (H : is_zero ((E (i+1)).obj (op $ K (-1)))),
     is_zero ((E i).obj (op $ K 0)),
-  { intros i hi0 H,
+  { intros i h0i H,
     have SES := (free_Cech_kernel_SES F (-1)).Ext'_five_term_exact_seq M i,
-    refine is_zero_of_exact_is_zero_is_zero _ _ (SES.drop 1).pair _ H,
-    sorry, -- use `Ext'_is_zero_of_projective`
-    -- have := Ext
-    -- refine ih' i _ hi0 _, sorry,
-     },
-  have aux : ∀ (i j : ℤ) (hi0 : 0 < i) (hi : i ≤ n) (H : is_zero ((E (i+1)).obj (op $ K j))),
+    refine is_zero_of_exact_is_zero_is_zero _ _ (SES.drop 1).pair _ H, clear SES,
+    apply bounded_derived_category.Ext'_is_zero_of_projective _ _ _ _ h0i,
+    apply_with Condensed_Ab.free.category_theory.projective {instances:=ff},
+    rw [simplicial_object.augmented.drop_obj, arrow.augmented_cech_nerve_left],
+    apply projective_of_iso (arrow.cech_nerve_obj_0 F).symm,
+    apply projective_presentation.projective, },
+  have aux : ∀ (i j : ℤ) (h0i : 0 < i) (hi : i ≤ n) (H : is_zero ((E (i+1)).obj (op $ K j))),
     is_zero ((E i).obj (op $ K (j+1))),
-  { intros i j hi0 hi H,
+  { intros i j h0i hi H,
     have SES := (free_Cech_kernel_SES F j).Ext'_five_term_exact_seq M i,
     refine is_zero_of_exact_is_zero_is_zero _ _ (SES.drop 1).pair _ H,
-    refine ih' i _ hi0 _, sorry, },
+    refine ih' i _ h0i _, sorry, },
   suffices : ∀ i j, 0 < i → i + j ≤ n → is_zero ((E i).obj (op $ K j)),
   { have SES := (free_Cech_kernel_SES F (-2)).Ext'_five_term_exact_seq M (n+1),
     refine is_zero_of_exact_is_zero_is_zero _ _ SES.pair _ _; clear SES,
     { refine this (n+1) (-2) h1 _, sorry },
     { refine this (n+1) (-1) h1 _, sorry } },
   intros i j h0i,
+  apply int.induction_on' j (-2); clear j,
+  { intro hjn,
+    apply bounded_derived_category.Ext'_zero_left_is_zero,
+    refine (is_zero_of_mono (kernel.ι _) _).op, refine is_zero_zero _, },
+  { intros j hj IH hijn,
+    rw [le_iff_eq_or_lt] at hj, cases hj with hj hj,
+    { subst j, sorry },
+    apply aux _ _ h0i, sorry, sorry },
   -- induction j with j j, swap,
-  -- { intro hjn,
-  --   apply bounded_derived_category.Ext'_zero_left_is_zero,
-  --   refine (is_zero_of_mono (kernel.ι _) _).op, },
   sorry
 end
 
