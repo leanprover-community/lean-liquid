@@ -28,6 +28,19 @@ def delta_to_kernel (C : homological_complex 𝓐 c) (i j k : ι) :
   C.X i ⟶ kernel (C.d j k) :=
 factor_thru_image _ ≫ image_to_kernel' (C.d i j) _ (C.d_comp_d _ _ _)
 
+def delta_to_kernel_ι (C : homological_complex 𝓐 c) (i j k : ι) :
+  delta_to_kernel C i j k ≫ kernel.ι (C.d j k) = C.d i j :=
+begin
+  delta delta_to_kernel image_to_kernel',
+  rw [category.assoc, kernel.lift_ι, image.fac],
+end
+
+def d_delta_to_kernel (C : homological_complex 𝓐 c) (h i j k : ι) :
+  C.d h i ≫ delta_to_kernel C i j k = 0 :=
+begin
+  rw [← cancel_mono (kernel.ι (C.d j k)), category.assoc, delta_to_kernel_ι, C.d_comp_d, zero_comp],
+end
+
 -- move me
 lemma short_exact_comp_iso {A B C D : 𝓐} (f : A ⟶ B) (g : B ⟶ C) (h : C ⟶ D) (hh : is_iso h) :
   short_exact f (g ≫ h) ↔ short_exact f g :=
@@ -127,26 +140,82 @@ begin
 end
 .
 
+lemma map_is_acyclic_of_acyclic_aux
+  {A B C D X Y Z W : 𝓐} (f : A ⟶ B) (g : C ⟶ D) (π : B ⟶ kernel g)
+  {α : X ⟶ B} {β : B ⟶ Y} {γ : Y ⟶ C} {δ : C ⟶ Z} {ε : Z ⟶ D} {ζ : D ⟶ W}
+  (hαβ : short_exact α β) (hγδ : short_exact γ δ) (hεζ : short_exact ε ζ)
+  (hf : mono f) (hfπ : exact f π)
+  (hαπ : α ≫ π = 0) (hγg : γ ≫ g = 0) (hδε : δ ≫ ε = g)
+  (hπι : π ≫ kernel.ι g = β ≫ γ) :
+  short_exact f π :=
+begin
+  suffices : epi π, { resetI, exact ⟨hfπ⟩ },
+  have hβ : epi β := hαβ.epi,
+  have hγ : mono γ := hγδ.mono,
+  have hε : mono ε := hεζ.mono,
+  resetI,
+  have hιδ : kernel.ι g ≫ δ = 0,
+  { rw [← cancel_mono ε, category.assoc, hδε, kernel.condition, zero_comp], },
+  let e1 : Y ⟶ kernel g := hαβ.exact.epi_desc π hαπ,
+  let e2 : Y ⟶ kernel g := kernel.lift g γ hγg,
+  let e3 : kernel g ⟶ Y := hγδ.exact.mono_lift (kernel.ι g) hιδ,
+  have he12 : e1 = e2,
+  { rw [← cancel_epi β, ← cancel_mono (kernel.ι g)],
+    simp only [hπι, category.assoc, kernel.lift_ι, exact.comp_epi_desc_assoc], },
+  have he13 : e1 ≫ e3 = 𝟙 _,
+  { rw [he12, ← cancel_mono γ, category.assoc, exact.mono_lift_comp, kernel.lift_ι, category.id_comp], },
+  have he31 : e3 ≫ e1 = 𝟙 _,
+  { rw [he12, ← cancel_mono (kernel.ι g), category.assoc, kernel.lift_ι, exact.mono_lift_comp, category.id_comp], },
+  let e : Y ≅ kernel g := ⟨e1, e3, he13, he31⟩,
+  have hπ : β ≫ e.hom = π := exact.comp_epi_desc _ _ _,
+  rw ← hπ, exact epi_comp _ _,
+end
+
+lemma short_exact_Ext_of_short_exact_of_acyclic {A B C : 𝓐} (Z : 𝓐) {f : A ⟶ B} {g : B ⟶ C}
+  (hfg : short_exact f g) (hC : ∀ i > 0, is_zero (((Ext' i).obj (op $ C)).obj Z)) :
+  short_exact (((Ext' 0).flip.obj Z).map g.op) (((Ext' 0).flip.obj Z).map f.op) :=
+begin
+  have H0 := hfg.Ext'_five_term_exact_seq Z 0,
+  apply_with short_exact.mk {instances:=ff},
+  { have H := ((hfg.Ext'_five_term_exact_seq Z (-1)).drop 2).pair,
+    apply H.mono_of_is_zero,
+    apply Ext'_is_zero_of_neg, dec_trivial },
+  { apply (H0.drop 1).pair.epi_of_is_zero,
+    apply hC, dec_trivial },
+  { exact H0.pair }
+end
+
 lemma map_is_acyclic_of_acyclic''
   [is_acyclic ((homotopy_category.quotient _ _).obj C)]
   (B : 𝓐)
   (hC : ∀ k, ∀ i > 0, is_zero (((Ext' i).obj (op $ C.X k)).obj B)) :
   ∀ i, is_zero (((((Ext' 0).flip.obj B).map_homological_complex _).obj C.op).homology i) :=
 begin
-  let ExtB := (Ext' 0).flip.obj B,
   rw is_acyclic_iff_short_exact_to_cycles',
   obtain ⟨a, ha⟩ := is_bounded_above.cond ((quotient 𝓐 (complex_shape.up ℤ)).obj C),
   have aux : ((quotient 𝓐 (complex_shape.up ℤ)).obj C).is_acyclic := ‹_›,
   rw is_acyclic_iff_short_exact_to_cycles at aux,
   intro i,
   let K := λ j, kernel (C.d j (j+1)),
-  suffices : ∀ j, ∀ i > 0, is_zero (((Ext' i).obj (op $ K j)).obj B),
-  { suffices hepi : epi (delta_to_kernel ((((Ext' 0).flip.obj B).map_homological_complex
-      (complex_shape.up ℤ).symm).obj (homological_complex.op C)) (i + 1 + 1) (i + 1) i),
-    { resetI, refine ⟨_⟩,
-      delta delta_to_kernel image_to_kernel',
+  suffices hK : ∀ j, ∀ i > 0, is_zero (((Ext' i).obj (op $ K j)).obj B),
+  { have SES1 := short_exact_Ext_of_short_exact_of_acyclic B (aux (i+1+1)) (hK _),
+    have SES2 := short_exact_Ext_of_short_exact_of_acyclic B (aux (i+1)) (hK _),
+    have SES3 := short_exact_Ext_of_short_exact_of_acyclic B (aux i) (hK _),
+    apply map_is_acyclic_of_acyclic_aux _ _ _ SES1 SES2 SES3 infer_instance;
+      clear SES1 SES2 SES3 aux,
+    { delta delta_to_kernel image_to_kernel',
       apply exact_comp_mono, rw exact_factor_thru_image_iff, exact exact_kernel_ι },
-    sorry },
+    { rw [← cancel_mono (kernel.ι _), zero_comp, category.assoc, delta_to_kernel_ι],
+      swap, apply_instance,
+      erw [functor.map_homological_complex_obj_d, ← functor.map_comp],
+      dsimp only [homological_complex.op_d, quotient_obj_as],
+      rw [← op_comp, d_delta_to_kernel, op_zero, functor.map_zero], },
+    { erw [functor.map_homological_complex_obj_d, ← functor.map_comp],
+      dsimp only [homological_complex.op_d, quotient_obj_as],
+      rw [← op_comp, d_delta_to_kernel, op_zero, functor.map_zero], },
+    { rw [← functor.map_comp, ← op_comp, delta_to_kernel_ι], refl, },
+    { rw [delta_to_kernel_ι, ← functor.map_comp, ← op_comp, delta_to_kernel_ι], refl, },
+    { apply_instance } },
   clear i, intro j,
   have : ∀ j ≥ a, ∀ i > 0, is_zero (((Ext' i).obj (op $ K j)).obj B),
   { intros j hj i hi,
