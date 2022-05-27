@@ -17,10 +17,10 @@ variables (h : exact f g) [mono f] (φ : T ⟶ B) (w : φ ≫ g = 0)
 include h w
 
 def mono_lift : T ⟶ A :=
-abelian.mono_lift f φ $
-  by { obtain ⟨t, rfl⟩ := kernel.lift' _ _ w, simp [kernel_comp_cokernel _ _ h] }
+(abelian.is_limit_of_exact_of_mono f g h).lift (kernel_fork.of_ι _ w)
 
-@[reassoc] lemma mono_lift_comp : h.mono_lift φ w ≫ f = φ := abelian.mono_lift_comp f φ _
+@[simp, reassoc] lemma mono_lift_comp : h.mono_lift φ w ≫ f = φ :=
+(abelian.is_limit_of_exact_of_mono f g h).fac (kernel_fork.of_ι _ w) walking_parallel_pair.zero
 
 lemma mono_lift_unique (e : T ⟶ A) (he : e ≫ f = φ) : e = h.mono_lift φ w :=
 by rw [← cancel_mono f, he, h.mono_lift_comp]
@@ -33,10 +33,10 @@ variables (h : exact f g) [category_theory.epi g] (φ : B ⟶ T) (w : f ≫ φ =
 include h w
 
 def epi_desc : C ⟶ T :=
-abelian.epi_desc g φ $
-  by { obtain ⟨t, rfl⟩ := cokernel.desc' _ _ w, simp [kernel_comp_cokernel_assoc _ _ h] }
+(abelian.is_colimit_of_exact_of_epi f g h).desc (cokernel_cofork.of_π _ w)
 
-@[reassoc] lemma comp_epi_desc : g ≫ h.epi_desc φ w = φ := abelian.comp_epi_desc g φ _
+@[simp, reassoc] lemma comp_epi_desc : g ≫ h.epi_desc φ w = φ :=
+(abelian.is_colimit_of_exact_of_epi f g h).fac (cokernel_cofork.of_π _ w) walking_parallel_pair.one
 
 lemma epi_desc_unique (e : C ⟶ T) (he : g ≫ e = φ) : e = h.epi_desc φ w :=
 by rw [← cancel_epi g, he, h.comp_epi_desc]
