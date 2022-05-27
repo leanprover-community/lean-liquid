@@ -1,4 +1,4 @@
-import for_mathlib.derived.example
+import for_mathlib.derived.Ext_lemmas
 import for_mathlib.Cech.homotopy
 import for_mathlib.acyclic
 import for_mathlib.exact_seq4
@@ -70,6 +70,15 @@ begin
     { apply bounded_derived_category.Ext'_zero_left_is_zero,
       exact (is_zero_zero _).op, } },
   let K := λ i, kernel ((free_Cech F).d (i + 1) i),
+  have aux0 : ∀ (i : ℤ) (hi0 : 0 < i) (H : is_zero ((E (i+1)).obj (op $ K (-1)))),
+    is_zero ((E i).obj (op $ K 0)),
+  { intros i hi0 H,
+    have SES := (free_Cech_kernel_SES F (-1)).Ext'_five_term_exact_seq M i,
+    refine is_zero_of_exact_is_zero_is_zero _ _ (SES.drop 1).pair _ H,
+    sorry, -- use `Ext'_is_zero_of_projective`
+    -- have := Ext
+    -- refine ih' i _ hi0 _, sorry,
+     },
   have aux : ∀ (i j : ℤ) (hi0 : 0 < i) (hi : i ≤ n) (H : is_zero ((E (i+1)).obj (op $ K j))),
     is_zero ((E i).obj (op $ K (j+1))),
   { intros i j hi0 hi H,
