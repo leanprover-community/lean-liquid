@@ -142,6 +142,26 @@ def homology_op_iso {A B C : 𝓐} (f : A ⟶ B) (g : B ⟶ C) (w : f ≫ g = 0)
   homology g.op f.op (by rw [← op_comp, w, op_zero]) ≅ opposite.op (homology f g w) :=
 homology_unop_iso _ _ _
 
-attribute [reassoc] cokernel.map_desc
+lemma homology_op_iso_eq_desc' {A B C : 𝓐} (f : A ⟶ B) (g : B ⟶ C) (w : f ≫ g = 0) :
+  (homology_op_iso f g w).hom =
+  homology.desc' _ _ _ ((kernel_op_op f).hom ≫ (homology.ι _ _ _).op)
+  begin
+    rw ← category.assoc, let t := _, change t ≫ _ = _,
+    have ht : t = (cokernel.desc _ g w).op,
+    { dsimp [t],
+      rw [← (kernel.lift f.op g.op _).op_unop, ← op_comp], congr' 1,
+      apply coequalizer.hom_ext,
+      simp only [cokernel.π_desc_assoc, cokernel.π_desc],
+      rw [← unop_comp, kernel.lift_ι],
+      refl },
+    rw [ht, ← op_comp, homology.condition_ι], refl,
+  end :=
+begin
+  apply homology.hom_from_ext,
+  simp only [kernel_op_op_hom, homology.π'_desc'],
+  dsimp [homology_op_iso, homology.π'],
+  simp only [category.assoc, iso.inv_hom_id_assoc, cokernel.π_desc_assoc],
+  refl,
+end
 
 end category_theory
