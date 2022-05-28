@@ -49,4 +49,9 @@ begin
   rw [← functor.flip_obj_obj, ← category_theory.functor.map_id, hA, functor.map_zero],
 end
 
+lemma Ext'_is_zero_of_projective {𝓐 : Type*} [category 𝓐] [abelian 𝓐] [enough_projectives 𝓐]
+  (A B : 𝓐) (hA : projective A) (i : ℤ) (hi : 0 < i) :
+  is_zero (((Ext' i).obj (opposite.op A)).obj B) :=
+sorry
+
 end bounded_derived_category

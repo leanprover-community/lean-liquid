@@ -8,6 +8,7 @@ import for_mathlib.derived.Ext_lemmas
 import for_mathlib.is_quasi_iso
 import for_mathlib.short_exact
 import for_mathlib.homology
+import for_mathlib.exact_lift_desc
 
 .
 
@@ -26,6 +27,19 @@ variables {𝓐 : Type*} [category 𝓐] [abelian 𝓐] {ι : Type*} {c : comple
 def delta_to_kernel (C : homological_complex 𝓐 c) (i j k : ι) :
   C.X i ⟶ kernel (C.d j k) :=
 factor_thru_image _ ≫ image_to_kernel' (C.d i j) _ (C.d_comp_d _ _ _)
+
+def delta_to_kernel_ι (C : homological_complex 𝓐 c) (i j k : ι) :
+  delta_to_kernel C i j k ≫ kernel.ι (C.d j k) = C.d i j :=
+begin
+  delta delta_to_kernel image_to_kernel',
+  rw [category.assoc, kernel.lift_ι, image.fac],
+end
+
+def d_delta_to_kernel (C : homological_complex 𝓐 c) (h i j k : ι) :
+  C.d h i ≫ delta_to_kernel C i j k = 0 :=
+begin
+  rw [← cancel_mono (kernel.ι (C.d j k)), category.assoc, delta_to_kernel_ι, C.d_comp_d, zero_comp],
+end
 
 -- move me
 lemma short_exact_comp_iso {A B C D : 𝓐} (f : A ⟶ B) (g : B ⟶ C) (h : C ⟶ D) (hh : is_iso h) :
@@ -126,21 +140,82 @@ begin
 end
 .
 
+lemma map_is_acyclic_of_acyclic_aux
+  {A B C D X Y Z W : 𝓐} (f : A ⟶ B) (g : C ⟶ D) (π : B ⟶ kernel g)
+  {α : X ⟶ B} {β : B ⟶ Y} {γ : Y ⟶ C} {δ : C ⟶ Z} {ε : Z ⟶ D} {ζ : D ⟶ W}
+  (hαβ : short_exact α β) (hγδ : short_exact γ δ) (hεζ : short_exact ε ζ)
+  (hf : mono f) (hfπ : exact f π)
+  (hαπ : α ≫ π = 0) (hγg : γ ≫ g = 0) (hδε : δ ≫ ε = g)
+  (hπι : π ≫ kernel.ι g = β ≫ γ) :
+  short_exact f π :=
+begin
+  suffices : epi π, { resetI, exact ⟨hfπ⟩ },
+  have hβ : epi β := hαβ.epi,
+  have hγ : mono γ := hγδ.mono,
+  have hε : mono ε := hεζ.mono,
+  resetI,
+  have hιδ : kernel.ι g ≫ δ = 0,
+  { rw [← cancel_mono ε, category.assoc, hδε, kernel.condition, zero_comp], },
+  let e1 : Y ⟶ kernel g := hαβ.exact.epi_desc π hαπ,
+  let e2 : Y ⟶ kernel g := kernel.lift g γ hγg,
+  let e3 : kernel g ⟶ Y := hγδ.exact.mono_lift (kernel.ι g) hιδ,
+  have he12 : e1 = e2,
+  { rw [← cancel_epi β, ← cancel_mono (kernel.ι g)],
+    simp only [hπι, category.assoc, kernel.lift_ι, exact.comp_epi_desc_assoc], },
+  have he13 : e1 ≫ e3 = 𝟙 _,
+  { rw [he12, ← cancel_mono γ, category.assoc, exact.mono_lift_comp, kernel.lift_ι, category.id_comp], },
+  have he31 : e3 ≫ e1 = 𝟙 _,
+  { rw [he12, ← cancel_mono (kernel.ι g), category.assoc, kernel.lift_ι, exact.mono_lift_comp, category.id_comp], },
+  let e : Y ≅ kernel g := ⟨e1, e3, he13, he31⟩,
+  have hπ : β ≫ e.hom = π := exact.comp_epi_desc _ _ _,
+  rw ← hπ, exact epi_comp _ _,
+end
+
+lemma short_exact_Ext_of_short_exact_of_acyclic {A B C : 𝓐} (Z : 𝓐) {f : A ⟶ B} {g : B ⟶ C}
+  (hfg : short_exact f g) (hC : ∀ i > 0, is_zero (((Ext' i).obj (op $ C)).obj Z)) :
+  short_exact (((Ext' 0).flip.obj Z).map g.op) (((Ext' 0).flip.obj Z).map f.op) :=
+begin
+  have H0 := hfg.Ext'_five_term_exact_seq Z 0,
+  apply_with short_exact.mk {instances:=ff},
+  { have H := ((hfg.Ext'_five_term_exact_seq Z (-1)).drop 2).pair,
+    apply H.mono_of_is_zero,
+    apply Ext'_is_zero_of_neg, dec_trivial },
+  { apply (H0.drop 1).pair.epi_of_is_zero,
+    apply hC, dec_trivial },
+  { exact H0.pair }
+end
+
 lemma map_is_acyclic_of_acyclic''
   [is_acyclic ((homotopy_category.quotient _ _).obj C)]
   (B : 𝓐)
   (hC : ∀ k, ∀ i > 0, is_zero (((Ext' i).obj (op $ C.X k)).obj B)) :
   ∀ i, is_zero (((((Ext' 0).flip.obj B).map_homological_complex _).obj C.op).homology i) :=
 begin
-  let ExtB := (Ext' 0).flip.obj B,
   rw is_acyclic_iff_short_exact_to_cycles',
   obtain ⟨a, ha⟩ := is_bounded_above.cond ((quotient 𝓐 (complex_shape.up ℤ)).obj C),
   have aux : ((quotient 𝓐 (complex_shape.up ℤ)).obj C).is_acyclic := ‹_›,
   rw is_acyclic_iff_short_exact_to_cycles at aux,
   intro i,
   let K := λ j, kernel (C.d j (j+1)),
-  suffices : ∀ j, ∀ i > 0, is_zero (((Ext' i).obj (op $ K j)).obj B),
-  { sorry },
+  suffices hK : ∀ j, ∀ i > 0, is_zero (((Ext' i).obj (op $ K j)).obj B),
+  { have SES1 := short_exact_Ext_of_short_exact_of_acyclic B (aux (i+1+1)) (hK _),
+    have SES2 := short_exact_Ext_of_short_exact_of_acyclic B (aux (i+1)) (hK _),
+    have SES3 := short_exact_Ext_of_short_exact_of_acyclic B (aux i) (hK _),
+    apply map_is_acyclic_of_acyclic_aux _ _ _ SES1 SES2 SES3 infer_instance;
+      clear SES1 SES2 SES3 aux,
+    { delta delta_to_kernel image_to_kernel',
+      apply exact_comp_mono, rw exact_factor_thru_image_iff, exact exact_kernel_ι },
+    { rw [← cancel_mono (kernel.ι _), zero_comp, category.assoc, delta_to_kernel_ι],
+      swap, apply_instance,
+      erw [functor.map_homological_complex_obj_d, ← functor.map_comp],
+      dsimp only [homological_complex.op_d, quotient_obj_as],
+      rw [← op_comp, d_delta_to_kernel, op_zero, functor.map_zero], },
+    { erw [functor.map_homological_complex_obj_d, ← functor.map_comp],
+      dsimp only [homological_complex.op_d, quotient_obj_as],
+      rw [← op_comp, d_delta_to_kernel, op_zero, functor.map_zero], },
+    { rw [← functor.map_comp, ← op_comp, delta_to_kernel_ι], refl, },
+    { rw [delta_to_kernel_ι, ← functor.map_comp, ← op_comp, delta_to_kernel_ι], refl, },
+    { apply_instance } },
   clear i, intro j,
   have : ∀ j ≥ a, ∀ i > 0, is_zero (((Ext' i).obj (op $ K j)).obj B),
   { intros j hj i hi,
@@ -320,6 +395,65 @@ begin
 end
 .
 
+def homological_complex.single_iso (B : 𝓐) {i j : ℤ} (h : j = i) :
+  ((homological_complex.single _ (complex_shape.up ℤ) i).obj B).X j ≅ B :=
+eq_to_iso (if_pos h)
+
+def cochain_complex.hom_to_single_of_hom
+  (C : cochain_complex 𝓐 ℤ) (B : 𝓐) (i : ℤ) (f : C.X i ⟶ B) :
+  C ⟶ (homological_complex.single _ _ i).obj B :=
+{ f := λ j, if h : j = i then eq_to_hom (by rw h) ≫ f ≫ (homological_complex.single_iso _ h).inv
+    else 0,
+  comm' := sorry }
+
+def Ext_compute_with_acyclic_inv_eq_aux (B) (i) :
+  AddCommGroup.of (C.X (-i) ⟶ B) ⟶ ((Ext i).obj (op (of' C))).obj ((single 𝓐 0).obj B) :=
+{ to_fun := λ f, (of' C).π ≫ begin
+    dsimp at f,
+    refine (homotopy_category.quotient _ _).map _,
+    refine _ ≫ (homological_complex.single_shift _ _).inv.app _,
+    refine cochain_complex.hom_to_single_of_hom _ _ _ _,
+    refine _ ≫ f,
+    refine eq_to_hom _,
+    apply congr_arg,
+    exact zero_sub _,
+  end,
+  map_zero' := sorry,
+  map_add' := sorry }
+
+lemma Ext_compute_with_acylic_inv_eq (B : 𝓐)
+  (hC : ∀ k, ∀ i > 0, is_zero (((Ext' i).obj (op $ C.X k)).obj B))
+  (i : ℤ) :
+  (Ext_compute_with_acyclic _ B hC i).inv =
+  homology.desc' _ _ _
+  (kernel.ι _ ≫ Ext_compute_with_acyclic_inv_eq_aux _ _ _)
+sorry := sorry
+
+lemma homology.lift_desc (X Y Z : 𝓐) (f : X ⟶ Y) (g : Y ⟶ Z) (w)
+  (U : 𝓐) (e : _ ⟶ U) (he : f ≫ e = 0) (V : 𝓐) (t : V ⟶ _) (ht : t ≫ g = 0) :
+  homology.lift f g w (t ≫ cokernel.π _) (by { simp [ht] } ) ≫
+  homology.desc' _ _ _ (kernel.ι _ ≫ e) (by { simp [he] }) =
+  t ≫ e :=
+begin
+  let s := _, change s ≫ _ = _,
+  have hs : s = kernel.lift _ t ht ≫ homology.π' _ _ _,
+  { apply homology.hom_to_ext,
+    simp only [homology.lift_ι, category.assoc, projective.homology.π'_ι, kernel.lift_ι_assoc] },
+  simp [hs],
+end
+
+lemma homology.lift_desc' (X Y Z : 𝓐) (f : X ⟶ Y) (g : Y ⟶ Z) (w)
+  (U : 𝓐) (e : _ ⟶ U) (he : f ≫ e = 0) (V : 𝓐) (t : V ⟶ _) (ht : t ≫ g = 0)
+  (u v) (hu : u = t ≫ cokernel.π _) (hv : v = kernel.ι _ ≫ e) :
+  homology.lift f g w u (by simpa [hu] ) ≫ homology.desc' _ _ _ v (by simpa [hv]) = t ≫ e :=
+begin
+  subst hu,
+  subst hv,
+  apply homology.lift_desc,
+  assumption'
+end
+
+
 lemma Ext_compute_with_acyclic_naturality (C₁ C₂ : cochain_complex 𝓐 ℤ)
   [((quotient 𝓐 (complex_shape.up ℤ)).obj C₁).is_bounded_above]
   [((quotient 𝓐 (complex_shape.up ℤ)).obj C₂).is_bounded_above]
@@ -335,6 +469,25 @@ lemma Ext_compute_with_acyclic_naturality (C₁ C₂ : cochain_complex 𝓐 ℤ)
     (((preadditive_yoneda.obj B).right_op.map_homological_complex _ ⋙
       homological_complex.unop_functor.right_op ⋙ (_root_.homology_functor _ _ (-i)).op).map f).unop :=
 begin
-  dsimp only [Ext_compute_with_acyclic],
-  sorry
+  rw [← iso.inv_comp_eq, ← category.assoc, ← iso.eq_comp_inv],
+  rw Ext_compute_with_acylic_inv_eq,
+  rw Ext_compute_with_acylic_inv_eq,
+  apply homology.hom_from_ext,
+  simp only [category.assoc, homology.π'_desc'_assoc],
+  dsimp only [functor.comp_map, functor.op_map, homology_functor_map],
+  erw homology.map_eq_desc'_lift_left,
+  simp only [category.assoc],
+  erw [homology.π'_desc'_assoc],
+  dsimp,
+  rw (homology.lift_desc' _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ rfl),
+  rotate 3,
+  { exact kernel.ι _ ≫ (preadditive_yoneda.obj _).map (f.f _).op },
+  swap,
+  { simpa },
+  { dsimp, sorry },
+  { dsimp, simp only [category.assoc],
+    congr' 1,
+    sorry },
+  { apply_instance },
+  { sorry }
 end

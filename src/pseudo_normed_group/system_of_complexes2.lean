@@ -1,6 +1,7 @@
 import for_mathlib.homological_complex_op
 import for_mathlib.split_exact
 import for_mathlib.AddCommGroup.exact
+import for_mathlib.unop
 
 import pseudo_normed_group.FP2
 import pseudo_normed_group.system_of_complexes
@@ -16,19 +17,6 @@ open_locale nnreal
 universes u v
 
 open category_theory breen_deligne
-
-lemma category_theory.unop_sum {C : Type*} [category C] [preadditive C] {X Y : Cᵒᵖ}
-  {ι : Type*} (s : finset ι) (f : ι → (X ⟶ Y)) :
-  (s.sum f).unop = s.sum (λ i, (f i).unop) :=
-begin
-  classical,
-  refine finset.induction_on s (by simp) _,
-  intros,
-  simp only [*, finset.sum_insert, not_false_iff, unop_add],
-end
-
-lemma category_theory.unop_zsmul {C : Type*} [category C] [preadditive C] {X Y : Cᵒᵖ}
-  (k : ℤ) (f : X ⟶ Y) : (k • f).unop = k • f.unop := rfl
 
 variables (r r' : ℝ≥0)
 variables (BD : breen_deligne.data)
