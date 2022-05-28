@@ -413,7 +413,9 @@ def cochain_complex.hom_to_single_of_hom
       have hzero : is_zero (((homological_complex.single 𝓐 (complex_shape.up ℤ) j).obj B).X (j.add 1)),
       { simp [is_zero_zero], },
       exact category_theory.limits.is_zero.eq_of_tgt hzero _ _, },
-    { sorry },
+    { subst h, clear hji,
+      rw [zero_comp, eq_to_hom_refl, category.id_comp],
+      sorry },
     { sorry },
   end }
 
