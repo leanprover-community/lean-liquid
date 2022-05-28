@@ -2,6 +2,7 @@ import for_mathlib.derived.Ext_lemmas
 import for_mathlib.Cech.homotopy
 import for_mathlib.acyclic
 import for_mathlib.exact_seq4
+import for_mathlib.cech
 
 import condensed.projective_resolution
 .
@@ -13,6 +14,7 @@ universes u
 open category_theory category_theory.limits homotopy_category opposite
 open function (surjective)
 
+-- SELFCONTAINED
 lemma projective_of_iso {𝓐 : Type*} [category 𝓐] {X Y : 𝓐} (e : X ≅ Y) (h : projective X) :
   projective Y :=
 sorry
@@ -45,21 +47,59 @@ begin
   erw ← is_acyclic_iff_short_exact_to_cycles' (free_Cech F), exact free_Cech_exact F
 end
 
-def arrow.cech_nerve_obj_0 (F : arrow Profinite) :
-  F.cech_nerve.obj (op (simplex_category.mk 0)) ≅ F.left :=
-sorry
-
 variable (M : Condensed.{u} Ab.{u+1})
 
 abbreviation HH (i : ℤ) (S : Profinite.{u}) (M : Condensed.{u} Ab.{u+1}) :=
 ((Ext' i).obj (op $ (CondensedSet_to_Condensed_Ab).obj $ Profinite.to_Condensed S)).obj M
 
+lemma acyclic_of_exact.zero
+  (h : ∀ (F : arrow Profinite.{u}) (surj : function.surjective F.hom),
+    ∀ i, is_zero (((((cosimplicial_object.augmented.whiskering _ _).obj M.val).obj
+      F.augmented_cech_nerve.right_op).to_cocomplex).homology i))
+  (S : Profinite) :
+  is_zero (HH 1 S M) :=
+sorry
+
 def acyclic_of_exact.IH (n : ℤ) : Prop := ∀ S, ∀ i > 0, i ≤ n → is_zero (HH i S M)
+
+/-- Consider the following commutative diagram
+```
+     O₀
+     ↓
+A₁ → B₁ → C₁ → O₁
+   ↘ ↓
+     B₂
+     ↓  ↘
+O₃ → B₃ → C₃
+```
+where `O₀`, `O₁`, and `O₃` are zero objects, and all sequence are exact.
+
+Then `C₁` is also a zero object.
+-/
+lemma acyclic_of_exact.induction_step_aux {𝓐 : Type*} [category 𝓐] [abelian 𝓐]
+  {O₀ O₁ O₃ A₁ B₁ C₁ B₂ B₃ C₃ : 𝓐}
+  {α₁ : A₁ ⟶ B₁} {β₁ : B₁ ⟶ C₁} {γ₁ : C₁ ⟶ O₁} (ex₁ : exact_seq 𝓐 [α₁, β₁, γ₁])
+  {d₁ : A₁ ⟶ B₂} {d₂ : B₂ ⟶ C₃}                 (exd : exact d₁ d₂)
+  {b₀ : O₀ ⟶ B₁} {b₁ : B₁ ⟶ B₂} {b₂ : B₂ ⟶ B₃} (exb : exact_seq 𝓐 [b₀, b₁, b₂])
+  {α₃ : O₃ ⟶ B₃} {β₃ : B₃ ⟶ C₃}                 (ex₃ : exact α₃ β₃)
+  (hO₀ : is_zero O₀) (hO₁ : is_zero O₁) (hO₃ : is_zero O₃)
+  (tr₁ : α₁ ≫ b₁ = d₁) (tr₂ : b₂ ≫ β₃ = d₂) :
+  is_zero C₁ :=
+-- SELFCONTAINED
+sorry
+
+lemma acyclic_of_exact.induction_step_ex
+  (F : arrow Profinite.{u}) (surj : function.surjective F.hom)
+  (h : ∀ i, is_zero (((((cosimplicial_object.augmented.whiskering _ _).obj M.val).obj
+      F.augmented_cech_nerve.right_op).to_cocomplex).homology i))
+  (i : ℤ) :
+  exact (((Ext' 0).flip.obj M).map $ ((free_Cech F).d (i+1) i).op)
+        (((Ext' 0).flip.obj M).map $ ((free_Cech F).d (i+1+1) (i+1)).op) :=
+sorry
 
 lemma acyclic_of_exact.induction_step
   (h : ∀ (F : arrow Profinite.{u}) (surj : function.surjective F.hom),
-    ∀ i, is_zero
-    (((((cosimplicial_object.augmented.whiskering _ _).obj M.val).obj
+    ∀ i, is_zero (((((cosimplicial_object.augmented.whiskering _ _).obj M.val).obj
       F.augmented_cech_nerve.right_op).to_cocomplex).homology i))
   (n : ℤ) (ih : acyclic_of_exact.IH M n) :
   acyclic_of_exact.IH M (n+1) :=
@@ -68,7 +108,12 @@ begin
   rw [le_iff_eq_or_lt, or_comm, int.lt_add_one_iff] at h2,
   cases h2 with h2 h2, { exact ih S i h1 h2 },
   subst i,
+  rw [gt_iff_lt, int.lt_add_one_iff, le_iff_eq_or_lt] at h1,
+  rcases h1 with (rfl|h1),
+  { apply acyclic_of_exact.zero M h S },
   let F := arrow.mk S.projective_presentation.f,
+  have hF : function.surjective F.hom,
+  { rw ← Profinite.epi_iff_surjective, apply projective_presentation.epi },
   let E := λ i, (Ext' i).flip.obj M,
   have ih' : ∀ (i j : ℤ) (h0i : 0 < i) (hin : i ≤ n),
     is_zero ((E i).obj (op ((free_Cech F).X j))),
@@ -78,38 +123,48 @@ begin
     { apply bounded_derived_category.Ext'_zero_left_is_zero,
       exact (is_zero_zero _).op, } },
   let K := λ i, kernel ((free_Cech F).d (i + 1) i),
-  have aux0 : ∀ (i : ℤ) (h0i : 0 < i) (H : is_zero ((E (i+1)).obj (op $ K (-1)))),
-    is_zero ((E i).obj (op $ K 0)),
+  have LES := λ i j, (free_Cech_kernel_SES F i).Ext'_five_term_exact_seq M j,
+  have aux0 : ∀ (i : ℤ) (h0i : 0 < i+1) (H : is_zero ((E i).obj (op $ K 0))),
+    is_zero ((E (i+1)).obj (op $ K (-1))),
   { intros i h0i H,
-    have SES := (free_Cech_kernel_SES F (-1)).Ext'_five_term_exact_seq M i,
-    refine is_zero_of_exact_is_zero_is_zero _ _ (SES.drop 1).pair _ H, clear SES,
+    refine is_zero_of_exact_is_zero_is_zero _ _ ((LES (-1) i).drop 2).pair H _, clear LES,
     apply bounded_derived_category.Ext'_is_zero_of_projective _ _ _ _ h0i,
     apply_with Condensed_Ab.free.category_theory.projective {instances:=ff},
     rw [simplicial_object.augmented.drop_obj, arrow.augmented_cech_nerve_left],
     apply projective_of_iso (arrow.cech_nerve_obj_0 F).symm,
     apply projective_presentation.projective, },
-  have aux : ∀ (i j : ℤ) (h0i : 0 < i) (hi : i ≤ n) (H : is_zero ((E (i+1)).obj (op $ K j))),
-    is_zero ((E i).obj (op $ K (j+1))),
+  have aux : ∀ (i j : ℤ) (h0i : 0 < i+1) (hi : i+1 ≤ n) (H : is_zero ((E i).obj (op $ K (j+1)))),
+    is_zero ((E (i+1)).obj (op $ K j)),
   { intros i j h0i hi H,
-    have SES := (free_Cech_kernel_SES F j).Ext'_five_term_exact_seq M i,
-    refine is_zero_of_exact_is_zero_is_zero _ _ (SES.drop 1).pair _ H,
-    refine ih' i _ h0i _, sorry, },
-  suffices : ∀ i j, 0 < i → i + j ≤ n → is_zero ((E i).obj (op $ K j)),
-  { have SES := (free_Cech_kernel_SES F (-2)).Ext'_five_term_exact_seq M (n+1),
-    refine is_zero_of_exact_is_zero_is_zero _ _ SES.pair _ _; clear SES,
-    { refine this (n+1) (-2) h1 _, sorry },
-    { refine this (n+1) (-1) h1 _, sorry } },
-  intros i j h0i,
-  apply int.induction_on' j (-2); clear j,
-  { intro hjn,
-    apply bounded_derived_category.Ext'_zero_left_is_zero,
-    refine (is_zero_of_mono (kernel.ι _) _).op, refine is_zero_zero _, },
-  { intros j hj IH hijn,
-    rw [le_iff_eq_or_lt] at hj, cases hj with hj hj,
-    { subst j, sorry },
-    apply aux _ _ h0i, sorry, sorry },
-  -- induction j with j j, swap,
-  sorry
+    refine is_zero_of_exact_is_zero_is_zero _ _ ((LES j i).drop 2).pair H _,
+    refine ih' _ _ h0i hi },
+  suffices : ∀ i j, 0 < i → -1 ≤ j → i + j = n → is_zero ((E i).obj (op $ K j)),
+  { refine is_zero_of_exact_is_zero_is_zero _ _ (LES (-2) (n+1)).pair _ _; clear LES,
+    { apply bounded_derived_category.Ext'_zero_left_is_zero,
+      refine (is_zero_of_mono (kernel.ι _) _).op, refine is_zero_zero _, },
+    { refine this (n+1) (-1) _ le_rfl _,
+      { exact add_pos h1 zero_lt_one },
+      { rw [← sub_eq_add_neg, add_sub_cancel] } } },
+  obtain ⟨n, rfl⟩ : ∃ k, k+1 = n := ⟨n-1, sub_add_cancel _ _⟩,
+  suffices : is_zero ((E 1).obj (op $ K n)),
+  { intro i,
+    apply int.induction_on' i 1; clear i,
+    { intros j h0i hj hijn, rw [add_comm (1:ℤ), add_left_inj] at hijn, subst j, exact this },
+    { intros i hi IH j hi' hj hijn,
+      rw le_iff_eq_or_lt at hj, cases hj with hj hj,
+      { subst j, apply aux0 _ hi', apply IH; linarith only [hi, hijn] },
+      { apply aux _ _ hi' _ (IH _ _ _ _); linarith only [hi, hijn, hj], } },
+    { intros i hi IH j hi', exfalso, linarith only [hi, hi'] } },
+  clear aux0 aux,
+  have aux := λ i, ((LES i (-1)).drop 2).pair.cons (LES i 0),
+  have exd := acyclic_of_exact.induction_step_ex M F hF (h F hF) (n+1+1),
+  apply acyclic_of_exact.induction_step_aux
+    ((LES n 0).drop 1) exd ((aux (n+1)).extract 0 3) (aux (n+1+1)).pair; clear LES aux exd,
+  { apply Ext'_is_zero_of_neg, dec_trivial },
+  { apply ih' _ _ zero_lt_one, linarith only [h1] },
+  { apply Ext'_is_zero_of_neg, dec_trivial },
+  { conv_rhs { rw [← delta_to_kernel_ι _ _ _ (n+1), op_comp, functor.map_comp] }, refl },
+  { conv_rhs { rw [← delta_to_kernel_ι _ _ _ (n+1+1), op_comp, functor.map_comp] }, refl },
 end
 
 lemma acyclic_of_exact
