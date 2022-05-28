@@ -405,17 +405,11 @@ def cochain_complex.hom_to_single_of_hom
 { f := λ j, if h : j = i then eq_to_hom (by rw h) ≫ f ≫ (homological_complex.single_iso _ h).inv
     else 0,
   comm' := begin
-    rintro j _ ⟨-⟩, clear ᾰ,
-    split_ifs with hji hj1i,
-    { subst hji, exfalso, change j + 1 = j at hj1i,
-      linarith, },
-    { rcases hji with rfl, clear hj1i,
-      have hzero : is_zero (((homological_complex.single 𝓐 (complex_shape.up ℤ) j).obj B).X (j.add 1)),
-      { simp [is_zero_zero], },
-      exact category_theory.limits.is_zero.eq_of_tgt hzero _ _, },
-    { subst h, clear hji,
-      rw [zero_comp, eq_to_hom_refl, category.id_comp],
-      sorry },
+    rintro j k rjk,
+    split_ifs with hji hki,
+    { sorry },
+    { sorry },
+    { sorry },
     { sorry },
   end }
 
