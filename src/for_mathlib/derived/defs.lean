@@ -33,6 +33,8 @@ end
 class is_K_projective (X : 𝒦) : Prop :=
 (cond [] : ∀ (Y : 𝒦) [is_acyclic Y] (f : X ⟶ Y), f = 0)
 
+/-- A morphism in the homotopy category is a quasi-isomorphism if it
+induces isomorphisms on all homology groups. -/
 class is_quasi_iso {X Y : 𝒦} (f : X ⟶ Y) : Prop :=
 (cond [] : ∀ i, is_iso ((homotopy_category.homology_functor _ _ i).map f))
 
