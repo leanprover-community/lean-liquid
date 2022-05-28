@@ -82,18 +82,31 @@ begin
 end
 
 -- lemma acyclic_of_exact.induction_step_ex_aux
---   (F : arrow Profinite.{u}) (surj : function.surjective F.hom)
---   (h : ∀ i, is_zero (((((cosimplicial_object.augmented.whiskering _ _).obj M.val).obj
---       F.augmented_cech_nerve.right_op).to_cocomplex).homology i))
---   (i : ℕ) :
+--   (F : arrow Profinite.{u}) (surj : function.surjective F.hom) (i : ℕ) :
 --   (preadditive_yoneda.obj M).map ((free_Cech F).d (i + 1) i).op =
---   (((cosimplicial_object.augmented.whiskering _ _).obj M.val).obj
+--   (((cosimplicial_object.augmented.whiskering _ _).obj
+--   ((Profinite_to_Condensed ⋙ CondensedSet_to_Condensed_Ab).op ⋙ preadditive_yoneda.obj M)).obj
 --       F.augmented_cech_nerve.right_op).to_cocomplex.d (i+1) i :=
 
 def foobar :
   (Profinite_to_Condensed ⋙ CondensedSet_to_Condensed_Ab).op ⋙ preadditive_yoneda.obj M ≅
   M.val :=
 sorry
+
+-- def foobar' (F : arrow Profinite.{u}) :
+--   (((preadditive_yoneda.obj M).right_op.map_homological_complex _).obj (free_Cech F)).unop ≅
+
+
+lemma acyclic_of_exact.induction_step_ex'
+  (F : arrow Profinite.{u})
+  (h : ∀ i, exact ((preadditive_yoneda.obj M).map $ ((free_Cech' F).d (i+1) i).op)
+        ((preadditive_yoneda.obj M).map $ ((free_Cech' F).d (i+1+1) (i+1)).op))
+  (i : ℤ) :
+  exact ((preadditive_yoneda.obj M).map $ ((free_Cech F).d (i+1) i).op)
+        ((preadditive_yoneda.obj M).map $ ((free_Cech F).d (i+1+1) (i+1)).op) :=
+begin
+  sorry
+end
 
 lemma acyclic_of_exact.induction_step_ex
   (F : arrow Profinite.{u}) (surj : function.surjective F.hom)
@@ -110,15 +123,23 @@ begin
     apply preadditive.exact_of_iso_of_exact' _ _ _ _ (e.app _) (e.app _) (e.app _) _ _ this,
     { simp only [nat_iso.app_hom, nat_trans.naturality], },
     { simp only [nat_iso.app_hom, nat_trans.naturality], } },
-  let C := (((cosimplicial_object.augmented.whiskering Profiniteᵒᵖ Ab).obj M.val).obj
+  let C := (((cosimplicial_object.augmented.whiskering Profiniteᵒᵖ Ab).obj
+    ((Profinite_to_Condensed ⋙ CondensedSet_to_Condensed_Ab).op ⋙ preadditive_yoneda.obj M)).obj
     F.augmented_cech_nerve.right_op).to_cocomplex,
+  have h' : ∀ i, is_zero (C.homology i),
+  { intro i,
+    apply is_zero.of_iso (h i),
+    refine (_root_.homology_functor _ _ i).map_iso _,
+    refine cosimplicial_object.augmented.cocomplex.map_iso _,
+    refine iso.app (functor.map_iso _ (foobar _)) _, },
+  clear h,
   rcases i with (i|i),
   { sorry },
   { have aux : (preadditive_yoneda.obj M).map ((free_Cech F).d (-[1+ i] + 1) -[1+ i]).op = 0,
     { cases i; erw [op_zero, functor.map_zero], },
     rw [aux], clear aux, apply_with exact_zero_left_of_mono {instances:=ff}, { apply_instance },
     cases i,
-    { rw AddCommGroup.mono_iff_injective, clear h,
+    { rw AddCommGroup.mono_iff_injective,
       dsimp,
       intros f g h, sorry },
     { apply mono_of_is_zero_object,
