@@ -52,6 +52,23 @@ end
 lemma Ext'_is_zero_of_projective {𝓐 : Type*} [category 𝓐] [abelian 𝓐] [enough_projectives 𝓐]
   (A B : 𝓐) (hA : projective A) (i : ℤ) (hi : 0 < i) :
   is_zero (((Ext' i).obj (opposite.op A)).obj B) :=
-sorry
+begin
+  let := Ext'_iso (opposite.op A) B i,
+  dsimp at this,
+  refine is_zero_of_iso_of_zero _ (this _ (𝟙 _) _).symm,
+  swap,
+  { refine ⟨_, _, _⟩,
+    { rintro (_|n), { exact hA }, { exact projective_zero } },
+    { apply exact_zero_left_of_mono, },
+    { intro, apply exact_zero_left_of_mono, } },
+  rcases i with ((_|i)|i),
+  { exfalso, revert hi, dec_trivial },
+  swap,
+  { exfalso, revert hi, dec_trivial },
+  refine is_zero.homology_is_zero _ _ _ _,
+  refine AddCommGroup.is_zero_of_eq _ _,
+  intros f g,
+  apply category_theory.limits.has_zero_object.from_zero_ext
+end
 
 end bounded_derived_category
