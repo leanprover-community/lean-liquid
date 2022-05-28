@@ -81,6 +81,20 @@ begin
   apply epi_comp
 end
 
+-- lemma acyclic_of_exact.induction_step_ex_aux
+--   (F : arrow Profinite.{u}) (surj : function.surjective F.hom)
+--   (h : ∀ i, is_zero (((((cosimplicial_object.augmented.whiskering _ _).obj M.val).obj
+--       F.augmented_cech_nerve.right_op).to_cocomplex).homology i))
+--   (i : ℕ) :
+--   (preadditive_yoneda.obj M).map ((free_Cech F).d (i + 1) i).op =
+--   (((cosimplicial_object.augmented.whiskering _ _).obj M.val).obj
+--       F.augmented_cech_nerve.right_op).to_cocomplex.d (i+1) i :=
+
+def foobar :
+  (Profinite_to_Condensed ⋙ CondensedSet_to_Condensed_Ab).op ⋙ preadditive_yoneda.obj M ≅
+  M.val :=
+sorry
+
 lemma acyclic_of_exact.induction_step_ex
   (F : arrow Profinite.{u}) (surj : function.surjective F.hom)
   (h : ∀ i, is_zero (((((cosimplicial_object.augmented.whiskering _ _).obj M.val).obj
@@ -88,7 +102,30 @@ lemma acyclic_of_exact.induction_step_ex
   (i : ℤ) :
   exact (((Ext' 0).flip.obj M).map $ ((free_Cech F).d (i+1) i).op)
         (((Ext' 0).flip.obj M).map $ ((free_Cech F).d (i+1+1) (i+1)).op) :=
-sorry
+begin
+  suffices : exact
+    ((preadditive_yoneda.obj M).map $ ((free_Cech F).d (i+1) i).op)
+    ((preadditive_yoneda.obj M).map $ ((free_Cech F).d (i+1+1) (i+1)).op),
+  { let e := (bounded_derived_category.Ext'_zero_flip_iso _ M).symm,
+    apply preadditive.exact_of_iso_of_exact' _ _ _ _ (e.app _) (e.app _) (e.app _) _ _ this,
+    { simp only [nat_iso.app_hom, nat_trans.naturality], },
+    { simp only [nat_iso.app_hom, nat_trans.naturality], } },
+  let C := (((cosimplicial_object.augmented.whiskering Profiniteᵒᵖ Ab).obj M.val).obj
+    F.augmented_cech_nerve.right_op).to_cocomplex,
+  rcases i with (i|i),
+  { sorry },
+  { have aux : (preadditive_yoneda.obj M).map ((free_Cech F).d (-[1+ i] + 1) -[1+ i]).op = 0,
+    { cases i; erw [op_zero, functor.map_zero], },
+    rw [aux], clear aux, apply_with exact_zero_left_of_mono {instances:=ff}, { apply_instance },
+    cases i,
+    { rw AddCommGroup.mono_iff_injective, clear h,
+      dsimp,
+      intros f g h, sorry },
+    { apply mono_of_is_zero_object,
+      rw [is_zero_iff_id_eq_zero, ← category_theory.functor.map_id,
+        is_zero_iff_id_eq_zero.mp, functor.map_zero],
+      refine (is_zero_zero _).op, } }
+end
 
 lemma acyclic_of_exact.induction_step
   (h : ∀ (F : arrow Profinite.{u}) (surj : function.surjective F.hom),
