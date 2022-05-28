@@ -14,11 +14,6 @@ universes u
 open category_theory category_theory.limits homotopy_category opposite
 open function (surjective)
 
--- SELFCONTAINED
-lemma projective_of_iso {𝓐 : Type*} [category 𝓐] {X Y : 𝓐} (e : X ≅ Y) (h : projective X) :
-  projective Y :=
-sorry
-
 namespace condensed
 
 def free_Cech' (F : arrow Profinite.{u}) :
@@ -71,8 +66,20 @@ lemma acyclic_of_exact.induction_step_aux {𝓐 : Type*} [category 𝓐] [abelia
   (hO₀ : is_zero O₀) (hO₁ : is_zero O₁) (hO₃ : is_zero O₃)
   (tr₁ : α₁ ≫ b₁ = d₁) (tr₂ : b₂ ≫ β₃ = d₂) :
   is_zero C₁ :=
--- SELFCONTAINED
-sorry
+begin
+  refine (ex₁.drop 1).pair.is_zero_of_eq_zero_eq_zero
+    (ex₁.pair.eq_zero_of_epi _) (hO₁.eq_of_tgt _ _),
+  haveI : mono b₁ := exb.pair.mono_of_eq_zero (hO₀.eq_of_src _ _),
+  haveI : mono β₃ := ex₃.mono_of_eq_zero (hO₃.eq_of_src _ _),
+  let l' := abelian.is_limit_of_exact_of_mono _ _ (exb.drop 1).pair,
+  let l := is_kernel_comp_mono l' β₃ tr₂.symm,
+  obtain rfl :
+    α₁ = kernel.lift _ _ exd.w ≫ (is_limit.cone_point_unique_up_to_iso (limit.is_limit _) l).hom,
+  { erw [← cancel_mono b₁, category.assoc,
+      is_limit.cone_point_unique_up_to_iso_hom_comp _ _ walking_parallel_pair.zero, is_limit.fac,
+      fork.of_ι_π_app, tr₁] },
+  apply epi_comp
+end
 
 lemma acyclic_of_exact.induction_step_ex
   (F : arrow Profinite.{u}) (surj : function.surjective F.hom)
@@ -112,7 +119,7 @@ begin
     apply bounded_derived_category.Ext'_is_zero_of_projective _ _ _ _ hi,
     apply_with Condensed_Ab.free.category_theory.projective {instances:=ff},
     rw [simplicial_object.augmented.drop_obj, arrow.augmented_cech_nerve_left],
-    apply projective_of_iso (arrow.cech_nerve_obj_0 F).symm,
+    apply projective.of_iso (arrow.cech_nerve_obj_0 F).symm,
     apply projective_presentation.projective, },
   have aux0 : ∀ (i : ℤ) (h0i : 0 < i+1) (H : is_zero ((E i).obj (op $ K 0))),
     is_zero ((E (i+1)).obj (op $ K (-1))),
