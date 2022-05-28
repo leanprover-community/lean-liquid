@@ -43,7 +43,6 @@ begin
   simp only [← op_comp, sq.w]
 end
 
--- SELFCONTAINED
 lemma homology_map_homology_op_iso {A₁ B₁ C₁ A₂ B₂ C₂ : 𝓐}
   (f₁ : A₁ ⟶ B₁) (g₁ : B₁ ⟶ C₁) (w₁ : f₁ ≫ g₁ = 0)
   (f₂ : A₂ ⟶ B₂) (g₂ : B₂ ⟶ C₂) (w₂ : f₂ ≫ g₂ = 0)
