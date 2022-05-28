@@ -118,6 +118,10 @@ apply_nolint category_theory.additive_category_of_abelian instance_priority
 -- for_mathlib/acyclic.lean
 apply_nolint category_theory.functor.single unused_arguments
 apply_nolint category_theory.limits.preserves_binary_biproduct_of_additive instance_priority
+apply_nolint d_delta_to_kernel def_lemma
+apply_nolint delta_to_kernel_ι def_lemma
+apply_nolint homological_complex.single_iso unused_arguments
+apply_nolint map_is_acyclic_of_acyclic_aux unused_arguments
 
 -- for_mathlib/commsq.lean
 apply_nolint commsq.of_iso def_lemma
@@ -196,6 +200,9 @@ apply_nolint category_theory.monoidal.split_right unused_arguments
 
 -- for_mathlib/is_iso_iota.lean
 apply_nolint category_theory.limits.is_initial.colimit_cocone unused_arguments
+
+-- for_mathlib/is_quasi_iso.lean
+apply_nolint is_iso_of_square unused_arguments
 
 -- for_mathlib/mapping_cone.lean
 apply_nolint homological_complex.homological_complex.zero_X dup_namespace
