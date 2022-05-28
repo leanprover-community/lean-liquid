@@ -404,7 +404,18 @@ def cochain_complex.hom_to_single_of_hom
   C ⟶ (homological_complex.single _ _ i).obj B :=
 { f := λ j, if h : j = i then eq_to_hom (by rw h) ≫ f ≫ (homological_complex.single_iso _ h).inv
     else 0,
-  comm' := sorry }
+  comm' := begin
+    rintro j _ ⟨-⟩, clear ᾰ,
+    split_ifs with hji hj1i,
+    { subst hji, exfalso, change j + 1 = j at hj1i,
+      linarith, },
+    { rcases hji with rfl, clear hj1i,
+      have hzero : is_zero (((homological_complex.single 𝓐 (complex_shape.up ℤ) j).obj B).X (j.add 1)),
+      { simp [is_zero_zero], },
+      exact category_theory.limits.is_zero.eq_of_tgt hzero _ _, },
+    { sorry },
+    { sorry },
+  end }
 
 def Ext_compute_with_acyclic_inv_eq_aux (B) (i) :
   AddCommGroup.of (C.X (-i) ⟶ B) ⟶ ((Ext i).obj (op (of' C))).obj ((single 𝓐 0).obj B) :=
