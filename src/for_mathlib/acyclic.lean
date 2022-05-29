@@ -399,41 +399,57 @@ def homological_complex.single_iso (B : 𝓐) {i j : ℤ} (h : j = i) :
   ((homological_complex.single _ (complex_shape.up ℤ) i).obj B).X j ≅ B :=
 eq_to_iso (if_pos h)
 
-def cochain_complex.hom_to_single_of_hom
-  (C : cochain_complex 𝓐 ℤ) (B : 𝓐) (i : ℤ) (f : C.X i ⟶ B) :
-  C ⟶ (homological_complex.single _ _ i).obj B :=
-{ f := λ j, if h : j = i then eq_to_hom (by rw h) ≫ f ≫ (homological_complex.single_iso _ h).inv
-    else 0,
-  comm' := begin
-    rintro j k rjk,
-    split_ifs with hji hki,
-    { sorry },
-    { sorry },
-    { sorry },
-    { sorry },
-  end }
-
+/-- The morphism in `Ab` which eats a morphism of complexes `C ⟶ B[-i]`
+  and returns an element of Extⁱ(C,B[0]). -/
 def Ext_compute_with_acyclic_inv_eq_aux (B) (i) :
-  AddCommGroup.of (C.X (-i) ⟶ B) ⟶ ((Ext i).obj (op (of' C))).obj ((single 𝓐 0).obj B) :=
+  AddCommGroup.of (C ⟶ (homological_complex.single _ _ (-i)).obj B) ⟶
+  ((Ext i).obj (op (of' C))).obj ((single 𝓐 0).obj B) :=
 { to_fun := λ f, (of' C).π ≫ begin
-    dsimp at f,
     refine (homotopy_category.quotient _ _).map _,
     refine _ ≫ (homological_complex.single_shift _ _).inv.app _,
-    refine cochain_complex.hom_to_single_of_hom _ _ _ _,
-    refine _ ≫ f,
+    refine (f : C ⟶ (homological_complex.single 𝓐 (complex_shape.up ℤ) (-i)).obj B) ≫ _,
     refine eq_to_hom _,
-    apply congr_arg,
-    exact zero_sub _,
+    simp,
   end,
-  map_zero' := sorry,
-  map_add' := sorry }
+  map_zero' := begin
+    simp only [zero_comp, functor.map_zero, comp_zero],
+  end,
+  map_add' := begin
+    intros,
+    simp only [preadditive.add_comp, functor.map_add, preadditive.comp_add],
+  end }
+
+-- Note: in the application of the below, j = -i
+/-- The construction which given something in the kernel of (Cⱼ ⟶ B) ⟶ (Cⱼ₊₁ ⟶ B),
+  constructs a morphism of complexes from C to the "skyscraper complex" B[j]. -/
+def kernel_yoneda_complex_to_morphism_to_single (B : 𝓐) (j : ℤ) :
+kernel ((((preadditive_yoneda.obj B).right_op.map_homological_complex
+  (complex_shape.up ℤ)).obj C).unop.d_from j)
+  ⟶ AddCommGroup.of (C ⟶ (homological_complex.single 𝓐 (complex_shape.up ℤ) j).obj B) :=
+{ to_fun := λ f, { f := λ k, if hk : k = j then (eq_to_hom (by rw hk) : C.X k ⟶ C.X j) ≫
+(kernel.ι ((((preadditive_yoneda.obj B).right_op.map_homological_complex (complex_shape.up ℤ)).obj C).unop.d_from j) f) ≫
+      (homological_complex.single_obj_X_self _ (complex_shape.up ℤ) j B).inv ≫ eq_to_hom (by rw hk) else 0,
+    comm' := begin
+      -- should be fine -- kmb will try later on (evening 29/5 UK)
+      sorry,
+    end },
+  map_zero' := by {simp only [map_zero, homological_complex.single_obj_X_self_inv,
+    eq_to_hom_trans, zero_comp, comp_zero, dite_eq_ite, if_t_t], refl },
+  map_add' := by { intros, ext, simp only [map_add, homological_complex.single_obj_X_self_inv,
+    eq_to_hom_trans, preadditive.add_comp, preadditive.comp_add, homological_complex.add_f_apply],
+    split_ifs,
+    { refl },
+    { refl },
+    { exact (add_zero _).symm, } } }
+
 
 lemma Ext_compute_with_acylic_inv_eq (B : 𝓐)
   (hC : ∀ k, ∀ i > 0, is_zero (((Ext' i).obj (op $ C.X k)).obj B))
   (i : ℤ) :
   (Ext_compute_with_acyclic _ B hC i).inv =
   homology.desc' _ _ _
-  (kernel.ι _ ≫ Ext_compute_with_acyclic_inv_eq_aux _ _ _)
+  ( kernel_yoneda_complex_to_morphism_to_single C B (-i) ≫
+    Ext_compute_with_acyclic_inv_eq_aux _ _ _)
 sorry := sorry
 
 lemma homology.lift_desc (X Y Z : 𝓐) (f : X ⟶ Y) (g : Y ⟶ Z) (w)
@@ -460,7 +476,6 @@ begin
   assumption'
 end
 
-
 lemma Ext_compute_with_acyclic_naturality (C₁ C₂ : cochain_complex 𝓐 ℤ)
   [((quotient 𝓐 (complex_shape.up ℤ)).obj C₁).is_bounded_above]
   [((quotient 𝓐 (complex_shape.up ℤ)).obj C₂).is_bounded_above]
@@ -486,6 +501,8 @@ begin
   simp only [category.assoc],
   erw [homology.π'_desc'_assoc],
   dsimp,
+  -- darn it, I broke the below rewrite; bailing
+  sorry end #exit
   rw (homology.lift_desc' _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ rfl),
   rotate 3,
   { exact kernel.ι _ ≫ (preadditive_yoneda.obj _).map (f.f _).op },
