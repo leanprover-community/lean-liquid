@@ -429,9 +429,22 @@ kernel ((((preadditive_yoneda.obj B).right_op.map_homological_complex
 { to_fun := λ f, { f := λ k, if hk : k = j then (eq_to_hom (by rw hk) : C.X k ⟶ C.X j) ≫
 (kernel.ι ((((preadditive_yoneda.obj B).right_op.map_homological_complex (complex_shape.up ℤ)).obj C).unop.d_from j) f) ≫
       (homological_complex.single_obj_X_self _ (complex_shape.up ℤ) j B).inv ≫ eq_to_hom (by rw hk) else 0,
-    comm' := begin
-      -- should be fine -- kmb will try later on (evening 29/5 UK)
-      sorry,
+    comm' := λ i k, begin
+      split_ifs with hij hkj hkj,
+      { subst hij, subst hkj, simp {contextual := tt}, },
+      { simp only [homological_complex.single_obj_d, comp_zero, eq_self_iff_true,
+          implies_true_iff] },
+      { subst hkj,
+        simp only [complex_shape.up_rel, zero_comp, eq_to_hom_refl,
+          homological_complex.single_obj_X_self_inv, category.comp_id, category.id_comp],
+        rintro rfl, clear hij,
+        -- the meat is here; need to use that f is in the kernel to check
+        -- that
+        -- C.d i (i + 1) ≫ ⇑(kernel.ι ((((preadditive_yoneda.obj B).right_op.map_homological_complex (complex_shape.up ℤ)).obj C).unop.d_from (i + 1))) f
+        -- is zero.
+        -- should be fine -- kmb will try later on (evening 29/5 UK)
+        sorry },
+      { simp only [zero_comp, comp_zero, eq_self_iff_true, implies_true_iff]},
     end },
   map_zero' := by {simp only [map_zero, homological_complex.single_obj_X_self_inv,
     eq_to_hom_trans, zero_comp, comp_zero, dite_eq_ite, if_t_t], refl },
@@ -501,7 +514,7 @@ begin
   simp only [category.assoc],
   erw [homology.π'_desc'_assoc],
   dsimp,
-  -- darn it, I broke the below rewrite; bailing
+  -- darn it, kmb broke the below rewrite; bailing
   sorry end #exit
   rw (homology.lift_desc' _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ rfl),
   rotate 3,
