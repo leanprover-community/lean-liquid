@@ -419,6 +419,15 @@ def Ext_compute_with_acyclic_inv_eq_aux (B) (i) :
     simp only [preadditive.add_comp, functor.map_add, preadditive.comp_add],
   end }
 
+lemma iso_equiv_inv_apply_eq_zero_cancel
+  {A B C : AddCommGroup} {a : A} {f : A ⟶ B} {e : C ≅ B}
+  (h : (f ≫ e.inv) a = 0) : f a = 0 :=
+begin
+  rw comp_apply at h,
+  apply_fun e.hom at h,
+  simpa using h,
+end
+
 -- Note: in the application of the below, j = -i
 /-- The construction which given something in the kernel of `(Cⱼ ⟶ B) ⟶ (Cⱼ-₁ ⟶ B)`
   constructs a morphism of complexes from C to the "skyscraper complex" B[j]. -/
@@ -451,19 +460,15 @@ kernel ((((preadditive_yoneda.obj B).map_homological_complex _).obj
           homological_complex.single_obj_X_self_inv, category.comp_id, category.id_comp],
         rintro hik, clear hij,
         have := kernel.condition ((((preadditive_yoneda.obj B).map_homological_complex _).obj
-   (homological_complex.op C)).d_from k),
+          (homological_complex.op C)).d_from k),
         replace this := congr_hom this f,
         rw [comp_apply, ← hg, AddCommGroup.zero_apply] at this,
         rw ← category.assoc,
         symmetry,
         convert zero_comp,
-        -- `this` should express exactly the goal
-        -- It says that something in an abelian group is 0
-        -- It says that evaluating the canonical
-        -- map (Cₖ ⟶ B) ⟶ (Cₖ-₁ ⟶ B) at `g` gives `0`
-        -- Everything else can be ignored.
-        -- should be fine
-        sorry },
+        have foo : (complex_shape.up ℤ).symm.rel k i := hik,
+        rw homological_complex.d_from_eq _ foo at this,
+        exact iso_equiv_inv_apply_eq_zero_cancel this, },
       { simp only [zero_comp, comp_zero, eq_self_iff_true, implies_true_iff]},
     end },
   map_zero' := by {simp only [map_zero, homological_complex.single_obj_X_self_inv,
