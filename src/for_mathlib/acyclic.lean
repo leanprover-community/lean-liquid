@@ -419,39 +419,13 @@ def Ext_compute_with_acyclic_inv_eq_aux (B) (i) :
     simp only [preadditive.add_comp, functor.map_add, preadditive.comp_add],
   end }
 
--- is it definitely `simp`?
-@[simp] lemma zero_op {𝒞 : Type*} [category 𝒞] [has_zero_morphisms 𝒞]
-  {x y : 𝒞}: (0 : x ⟶ y).op = 0 := rfl -- phew
-
-/-
-
-something indexed by 𝓐 with pattern (C : cochain_complex 𝓐 *)
-should give us something indexed by 𝓐ᵒᵖ with pattern (C : chain_complex 𝓐 *)
--/
-def homological_complex.op_of_up {𝒞 : Type*} [category 𝒞] [has_zero_morphisms 𝒞]
-{α : Type*} [add_right_cancel_semigroup α] [has_one α]
-(Xᵢ : homological_complex 𝒞 (complex_shape.up α)) :
-homological_complex 𝒞ᵒᵖ (complex_shape.down α) :=
-{ X := λ i, op (Xᵢ.X i),
-  d := λ i j, (Xᵢ.d j i).op,
-  shape' := λ i j h, begin
-    rw [complex_shape.down_rel, ← complex_shape.up_rel] at h,
-    simp [homological_complex.shape' Xᵢ j i h],
-  end,
-  d_comp_d' := λ i j k hij hjk, begin
-    rw [complex_shape.down_rel, ← complex_shape.up_rel] at *,
-    simp [← op_comp, homological_complex.d_comp_d' Xᵢ k j i hjk hij],
-  end }
-
-example (a b : AddCommGroup) (f : a ⟶ b) (x : a) : b := f x
-
 -- Note: in the application of the below, j = -i
 /-- The construction which given something in the kernel of `(Cⱼ ⟶ B) ⟶ (Cⱼ-₁ ⟶ B)`
   constructs a morphism of complexes from C to the "skyscraper complex" B[j]. -/
 def kernel_yoneda_complex_to_morphism_to_single (B : 𝓐) (j : ℤ) :
 -- we're going from the kernel of `(C.X j ⟶ B) ⟶ (C.X_prev j ⟶ B)` (it's actually `C.symm.X_next`)
 kernel ((((preadditive_yoneda.obj B).map_homological_complex _).obj
-  (homological_complex.op_of_up C)).d_from j)
+  (homological_complex.op C)).d_from j)
   -- to the additive group of homs
   ⟶ AddCommGroup.of (
   -- from C to B j
@@ -460,7 +434,7 @@ kernel ((((preadditive_yoneda.obj B).map_homological_complex _).obj
   if hk : k = j then
     (eq_to_hom (by rw hk) : C.X k ⟶ C.X j) ≫
     (kernel.ι ((((preadditive_yoneda.obj B).map_homological_complex _).obj
-                (homological_complex.op_of_up C)).d_from j) f : C.X j ⟶ B) ≫
+                (homological_complex.op C)).d_from j) f : C.X j ⟶ B) ≫
     (homological_complex.single_obj_X_self 𝓐 (complex_shape.up ℤ) j B).inv ≫
     eq_to_hom (by rw hk)
   else 0,
@@ -471,13 +445,13 @@ kernel ((((preadditive_yoneda.obj B).map_homological_complex _).obj
           implies_true_iff] },
       { subst hkj,
         set g := ((kernel.ι ((((preadditive_yoneda.obj B).map_homological_complex
-                            (complex_shape.down ℤ)).obj
-                  (homological_complex.op_of_up C)).d_from k)) f) with hg,
+                            (complex_shape.up ℤ).symm).obj
+                  (homological_complex.op C)).d_from k)) f) with hg,
         simp only [complex_shape.up_rel, zero_comp, eq_to_hom_refl,
           homological_complex.single_obj_X_self_inv, category.comp_id, category.id_comp],
         rintro hik, clear hij,
         have := kernel.condition ((((preadditive_yoneda.obj B).map_homological_complex _).obj
-   (homological_complex.op_of_up C)).d_from k),
+   (homological_complex.op C)).d_from k),
         replace this := congr_hom this f,
         rw [comp_apply, ← hg, AddCommGroup.zero_apply] at this,
         rw ← category.assoc,
