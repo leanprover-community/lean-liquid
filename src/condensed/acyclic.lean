@@ -4,6 +4,7 @@ import for_mathlib.acyclic
 import for_mathlib.exact_seq4
 import for_mathlib.cech
 
+import condensed.adjunctions2
 import condensed.projective_resolution
 .
 
@@ -81,31 +82,102 @@ begin
   apply epi_comp
 end
 
--- lemma acyclic_of_exact.induction_step_ex_aux
---   (F : arrow Profinite.{u}) (surj : function.surjective F.hom) (i : ℕ) :
---   (preadditive_yoneda.obj M).map ((free_Cech F).d (i + 1) i).op =
---   (((cosimplicial_object.augmented.whiskering _ _).obj
---   ((Profinite_to_Condensed ⋙ CondensedSet_to_Condensed_Ab).op ⋙ preadditive_yoneda.obj M)).obj
---       F.augmented_cech_nerve.right_op).to_cocomplex.d (i+1) i :=
+lemma acyclic_of_exact.induction_step_ex₁
+  (F : arrow Profinite.{u})
+  (h : ∀ i, is_zero (((((cosimplicial_object.augmented.whiskering _ _).obj M.val).obj
+      F.augmented_cech_nerve.right_op).to_cocomplex).homology i)) :
+  let C := (((cosimplicial_object.augmented.whiskering Profiniteᵒᵖ Ab).obj
+    ((Profinite_to_Condensed ⋙ CondensedSet_to_Condensed_Ab).op ⋙ preadditive_yoneda.obj M)).obj
+    F.augmented_cech_nerve.right_op).to_cocomplex
+  in ∀ i, is_zero (C.homology i) :=
+begin
+  intros C i,
+  apply is_zero.of_iso (h i),
+  refine (_root_.homology_functor _ _ i).map_iso _,
+  refine cosimplicial_object.augmented.cocomplex.map_iso _,
+  refine iso.app (functor.map_iso _ (condensed.profinite_free_adj _)) _,
+end
 
-def foobar :
-  (Profinite_to_Condensed ⋙ CondensedSet_to_Condensed_Ab).op ⋙ preadditive_yoneda.obj M ≅
-  M.val :=
+-- SELFCONTAINED
+lemma acyclic_of_exact.induction_step_ex₂_aux
+  {C : Type*} [category C] {𝓐 : Type*} [category 𝓐] [abelian 𝓐] {𝓑 : Type*} [category 𝓑] [abelian 𝓑]
+  (f : arrow C) [∀ (n : ℕ),
+    has_wide_pullback f.right (λ (i : ulift (fin (n + 1))), f.left) (λ (i : ulift (fin (n + 1))), f.hom)]
+  (F : C ⥤ 𝓐) (G : 𝓐ᵒᵖ ⥤ 𝓑) [G.additive] (i : ℕ)
+  (h : is_zero ((((cosimplicial_object.augmented.whiskering _ _).obj (F.op ⋙ G)).obj
+    f.augmented_cech_nerve.right_op).to_cocomplex.homology i)) :
+  is_zero (((G.map_homological_complex _).obj ((((simplicial_object.augmented.whiskering _ _).obj F).obj
+    f.augmented_cech_nerve).to_complex).op).homology i) :=
 sorry
 
--- def foobar' (F : arrow Profinite.{u}) :
---   (((preadditive_yoneda.obj M).right_op.map_homological_complex _).obj (free_Cech F)).unop ≅
-
-
-lemma acyclic_of_exact.induction_step_ex'
+lemma acyclic_of_exact.induction_step_ex₂
   (F : arrow Profinite.{u})
-  (h : ∀ i, exact ((preadditive_yoneda.obj M).map $ ((free_Cech' F).d (i+1) i).op)
-        ((preadditive_yoneda.obj M).map $ ((free_Cech' F).d (i+1+1) (i+1)).op))
-  (i : ℤ) :
-  exact ((preadditive_yoneda.obj M).map $ ((free_Cech F).d (i+1) i).op)
-        ((preadditive_yoneda.obj M).map $ ((free_Cech F).d (i+1+1) (i+1)).op) :=
+  (h : let C := (((cosimplicial_object.augmented.whiskering Profiniteᵒᵖ Ab).obj
+    ((Profinite_to_Condensed ⋙ CondensedSet_to_Condensed_Ab).op ⋙ preadditive_yoneda.obj M)).obj
+    F.augmented_cech_nerve.right_op).to_cocomplex
+    in ∀ i, is_zero (C.homology i)) :
+  ∀ i, is_zero ((((preadditive_yoneda.obj M).map_homological_complex _).obj (free_Cech' F).op).homology i) :=
+begin
+  intro i, apply acyclic_of_exact.induction_step_ex₂_aux, exact h i
+end
+
+lemma int.of_nat_add_one (i : ℕ) : int.of_nat i + 1 = int.of_nat (i+1) := rfl
+
+lemma complex_shape.embedding.nat_down_int_down.r_int_of_nat (i : ℕ) :
+  complex_shape.embedding.nat_down_int_down.r (int.of_nat i) = option.some i := rfl
+
+-- move me
+-- SELFCONTAINED
+lemma cochain_complex.mono_of_is_zero_homology_0
+  {𝓐 : Type*} [category 𝓐] [abelian 𝓐]
+  (C : cochain_complex 𝓐 ℕ) (h : is_zero $ C.homology 0) :
+  mono (C.d 0 1) :=
 begin
   sorry
+end
+
+lemma acyclic_of_exact.induction_step_ex₃
+  (F : arrow Profinite.{u}) (i : ℤ)
+  (h : ∀ i, is_zero ((((preadditive_yoneda.obj M).map_homological_complex _).obj (free_Cech' F).op).homology i)) :
+  exact ((preadditive_yoneda.obj M).map $ ((free_Cech F).d (i+1) i).op)
+    ((preadditive_yoneda.obj M).map $ ((free_Cech F).d (i+1+1) (i+1)).op) :=
+begin
+  rcases i with (i|i),
+  { delta free_Cech,
+    dsimp only [homological_complex.embed, homological_complex.embed.obj],
+    rw [int.of_nat_add_one, int.of_nat_add_one],
+    erw [complex_shape.embedding.nat_down_int_down.r_int_of_nat],
+    erw [complex_shape.embedding.nat_down_int_down.r_int_of_nat],
+    erw [complex_shape.embedding.nat_down_int_down.r_int_of_nat],
+    dsimp only [homological_complex.embed.d],
+    refine exact_of_homology_is_zero ((h (i+1)).of_iso $ _),
+    { rw [← functor.map_comp, ← op_comp, homological_complex.d_comp_d, op_zero, functor.map_zero] },
+    clear h,
+    refine _ ≪≫ (homology_iso _ i (i+1) (i+1+1) _ _).symm,
+    swap, { dsimp, refl }, swap, { dsimp, refl },
+    refl, },
+  { have aux : (preadditive_yoneda.obj M).map ((free_Cech F).d (-[1+ i] + 1) -[1+ i]).op = 0,
+    { cases i; erw [op_zero, functor.map_zero], },
+    rw [aux], clear aux, apply_with exact_zero_left_of_mono {instances:=ff}, { apply_instance },
+    cases i,
+    { exact cochain_complex.mono_of_is_zero_homology_0 _ (h 0), },
+    { apply mono_of_is_zero_object,
+      rw [is_zero_iff_id_eq_zero, ← category_theory.functor.map_id,
+        is_zero_iff_id_eq_zero.mp, functor.map_zero],
+      refine (is_zero_zero _).op, } },
+end
+
+lemma acyclic_of_exact.induction_step_ex₄
+  (F : arrow Profinite.{u}) (i : ℤ)
+  (h : exact ((preadditive_yoneda.obj M).map $ ((free_Cech F).d (i+1) i).op)
+    ((preadditive_yoneda.obj M).map $ ((free_Cech F).d (i+1+1) (i+1)).op)) :
+  exact (((Ext' 0).flip.obj M).map $ ((free_Cech F).d (i+1) i).op)
+        (((Ext' 0).flip.obj M).map $ ((free_Cech F).d (i+1+1) (i+1)).op) :=
+begin
+  let e := (bounded_derived_category.Ext'_zero_flip_iso _ M).symm,
+  apply preadditive.exact_of_iso_of_exact' _ _ _ _ (e.app _) (e.app _) (e.app _) _ _ h,
+  { simp only [nat_iso.app_hom, nat_trans.naturality], },
+  { simp only [nat_iso.app_hom, nat_trans.naturality], }
 end
 
 lemma acyclic_of_exact.induction_step_ex
@@ -116,36 +188,10 @@ lemma acyclic_of_exact.induction_step_ex
   exact (((Ext' 0).flip.obj M).map $ ((free_Cech F).d (i+1) i).op)
         (((Ext' 0).flip.obj M).map $ ((free_Cech F).d (i+1+1) (i+1)).op) :=
 begin
-  suffices : exact
-    ((preadditive_yoneda.obj M).map $ ((free_Cech F).d (i+1) i).op)
-    ((preadditive_yoneda.obj M).map $ ((free_Cech F).d (i+1+1) (i+1)).op),
-  { let e := (bounded_derived_category.Ext'_zero_flip_iso _ M).symm,
-    apply preadditive.exact_of_iso_of_exact' _ _ _ _ (e.app _) (e.app _) (e.app _) _ _ this,
-    { simp only [nat_iso.app_hom, nat_trans.naturality], },
-    { simp only [nat_iso.app_hom, nat_trans.naturality], } },
-  let C := (((cosimplicial_object.augmented.whiskering Profiniteᵒᵖ Ab).obj
-    ((Profinite_to_Condensed ⋙ CondensedSet_to_Condensed_Ab).op ⋙ preadditive_yoneda.obj M)).obj
-    F.augmented_cech_nerve.right_op).to_cocomplex,
-  have h' : ∀ i, is_zero (C.homology i),
-  { intro i,
-    apply is_zero.of_iso (h i),
-    refine (_root_.homology_functor _ _ i).map_iso _,
-    refine cosimplicial_object.augmented.cocomplex.map_iso _,
-    refine iso.app (functor.map_iso _ (foobar _)) _, },
-  clear h,
-  rcases i with (i|i),
-  { sorry },
-  { have aux : (preadditive_yoneda.obj M).map ((free_Cech F).d (-[1+ i] + 1) -[1+ i]).op = 0,
-    { cases i; erw [op_zero, functor.map_zero], },
-    rw [aux], clear aux, apply_with exact_zero_left_of_mono {instances:=ff}, { apply_instance },
-    cases i,
-    { rw AddCommGroup.mono_iff_injective,
-      dsimp,
-      intros f g h, sorry },
-    { apply mono_of_is_zero_object,
-      rw [is_zero_iff_id_eq_zero, ← category_theory.functor.map_id,
-        is_zero_iff_id_eq_zero.mp, functor.map_zero],
-      refine (is_zero_zero _).op, } }
+  apply acyclic_of_exact.induction_step_ex₄,
+  apply acyclic_of_exact.induction_step_ex₃,
+  apply acyclic_of_exact.induction_step_ex₂,
+  apply acyclic_of_exact.induction_step_ex₁ _ F h,
 end
 
 lemma acyclic_of_exact.induction_step
