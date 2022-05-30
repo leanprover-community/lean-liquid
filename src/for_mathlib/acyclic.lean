@@ -295,37 +295,73 @@ begin
     { rintro (_|n); exact exact_of_zero 0 0 } }
 end
 
+def Ext_compute_with_acyclic_aux₁
+  (B : 𝓐)
+  (i : ℤ) :
+  ((Ext i).obj (op $ of' C)).obj ((single _ 0).obj B) ≅
+  (preadditive_yoneda.obj ((single 𝓐 (-i)).obj B)).obj (op (of' C).replace) :=
+(preadditive_yoneda.map_iso $ (shift_single_iso 0 i).app B ≪≫ eq_to_iso (by rw zero_sub)).app _
 
-def Ext_compute_with_acyclic
+abbreviation of'_hom {C₁ C₂ : cochain_complex 𝓐 ℤ}
+  [((quotient 𝓐 (complex_shape.up ℤ)).obj C₁).is_bounded_above]
+  [((quotient 𝓐 (complex_shape.up ℤ)).obj C₂).is_bounded_above]
+  (f : C₁ ⟶ C₂) :
+  of' C₁ ⟶ of' C₂ :=
+(homotopy_category.quotient _ _).map f
+
+lemma Ext_compute_with_acyclic_aux₁_naturality
+  (C₁ C₂ : cochain_complex 𝓐 ℤ)
+  [((quotient 𝓐 (complex_shape.up ℤ)).obj C₁).is_bounded_above]
+  [((quotient 𝓐 (complex_shape.up ℤ)).obj C₂).is_bounded_above]
+  (B : 𝓐)
+  (f : C₁ ⟶ C₂)
+  (i : ℤ) :
+  ((Ext i).map $ quiver.hom.op $ of'_hom f).app _ ≫
+    (Ext_compute_with_acyclic_aux₁ C₁ B i).hom =
+  (Ext_compute_with_acyclic_aux₁ C₂ B i).hom ≫
+  (preadditive_yoneda.obj _).map (quiver.hom.op $
+  bounded_homotopy_category.lift ((of' C₁).π ≫ of'_hom f) (of' C₂).π) := sorry
+
+def Ext_compute_with_acyclic_aux₂
+  (B : 𝓐)
+  (i : ℤ) :
+  (preadditive_yoneda.obj ((single 𝓐 (-i)).obj B)).obj (op (of' C).replace) ≅
+  (((preadditive_yoneda.obj B).map_homological_complex (complex_shape.up ℤ).symm).obj
+  ((of' C).replace).val.as.op).homology (-i) :=
+  hom_single_iso _ _ _
+
+lemma Ext_compute_with_acyclic_aux₂_naturality
+  (C₁ C₂ : cochain_complex 𝓐 ℤ)
+  [((quotient 𝓐 (complex_shape.up ℤ)).obj C₁).is_bounded_above]
+  [((quotient 𝓐 (complex_shape.up ℤ)).obj C₂).is_bounded_above]
+  (B : 𝓐)
+  (f : C₁ ⟶ C₂)
+  (i : ℤ) :
+  (preadditive_yoneda.obj _).map (quiver.hom.op $
+    bounded_homotopy_category.lift ((of' C₁).π ≫ of'_hom f) (of' C₂).π) ≫
+    (Ext_compute_with_acyclic_aux₂ C₁ B i).hom =
+  (Ext_compute_with_acyclic_aux₂ C₂ B i).hom ≫
+  (((preadditive_yoneda.obj B).right_op.map_homological_complex _ ⋙
+      homological_complex.unop_functor.right_op ⋙
+      (_root_.homology_functor _ _ (-i)).op).map
+      (bounded_homotopy_category.lift ((of' C₁).π ≫ of'_hom f) (of' C₂).π).out).unop := sorry
+
+def Ext_compute_with_acyclic_HomB
+  (B : 𝓐) := (preadditive_yoneda.obj B).right_op.map_homological_complex (complex_shape.up ℤ) ⋙
+  homological_complex.unop_functor.right_op
+
+lemma Ext_compute_with_acyclic_is_quasi_iso_aux
   (B : 𝓐)
   (hC : ∀ k, ∀ i > 0, is_zero (((Ext' i).obj (op $ C.X k)).obj B))
   (i : ℤ) :
-  ((Ext i).obj (op $ of' C)).obj ((single _ 0).obj B) ≅
-  (((preadditive_yoneda.obj B).right_op.map_homological_complex _).obj C).unop.homology (-i) :=
+  is_quasi_iso ((homotopy_category.quotient _ _).map
+    ((Ext_compute_with_acyclic_HomB B).map (of' C).π.out).unop) :=
 begin
   let P := (of' C).replace,
-  refine (preadditive_yoneda.map_iso _).app (op P) ≪≫ _,
-  { exact (single 𝓐 (-i)).obj B },
-  { exact (shift_single_iso 0 i).app B ≪≫ eq_to_iso (by rw zero_sub) },
-  refine hom_single_iso _ _ _ ≪≫ _,
   let π : P ⟶ of' C := (of' C).π,
-  let HomB := (preadditive_yoneda.obj B).right_op.map_homological_complex (complex_shape.up ℤ) ⋙ homological_complex.unop_functor.right_op,
+  let HomB := (preadditive_yoneda.obj B).right_op.map_homological_complex (complex_shape.up ℤ) ⋙
+    homological_complex.unop_functor.right_op,
   let fq := (homotopy_category.quotient _ _).map (HomB.map π.out).unop,
-  suffices hf : is_quasi_iso fq,
-  { have := @is_quasi_iso.cond _ _ _ _ _ _ _ _ hf (-i),
-    resetI,
-    let e := as_iso ((homotopy_category.homology_functor Ab _ (-i)).map fq),
-    exact e.symm, },
-  -- that was the data,
-  -- now the proof obligation ...
-  /-
-  The proof strategy is roughly the following (https://math.stackexchange.com/a/2118042):
-  the map is a quasi-iso iff its cone is acyclic
-  the cone commutes with the additive functor
-  so you end up with this functor applied to the cone of `π`
-  the cone of `π` is acyclic, since `π` is a quasi-iso
-  by induction, the other cone is also acyclic
-  -/
   apply is_quasi_iso_of_op,
   let f := homological_complex.op_functor.map (HomB.map (quot.out π)),
   have := cone_triangleₕ_mem_distinguished_triangles _ _ f,
@@ -394,8 +430,56 @@ begin
       exact acyclic_of_projective (P.val.as.X (k + 1)) B i hi, },
     { exact (hC k _ hi).op, }, },
 end
-.
 
+def Ext_compute_with_acyclic_aux₃
+  (B : 𝓐)
+  (i : ℤ) :
+  (((preadditive_yoneda.obj B).right_op.map_homological_complex _).obj C).unop.homology (-i) ⟶
+  (((preadditive_yoneda.obj B).map_homological_complex (complex_shape.up ℤ).symm).obj
+  ((of' C).replace).val.as.op).homology (-i) :=
+by apply (homotopy_category.homology_functor Ab _ (-i)).map
+  (((homotopy_category.quotient _ _).map
+    ((Ext_compute_with_acyclic_HomB B).map (of' C).π.out).unop))
+
+lemma Ext_compute_with_acyclic_aux₃_naturality
+  (C₁ C₂ : cochain_complex 𝓐 ℤ)
+  [((quotient 𝓐 (complex_shape.up ℤ)).obj C₁).is_bounded_above]
+  [((quotient 𝓐 (complex_shape.up ℤ)).obj C₂).is_bounded_above]
+  (B : 𝓐)
+  (f : C₁ ⟶ C₂)
+  (i : ℤ) :
+  (((preadditive_yoneda.obj B).right_op.map_homological_complex _ ⋙
+    homological_complex.unop_functor.right_op ⋙ (_root_.homology_functor _ _ (-i)).op).map f).unop
+    ≫ Ext_compute_with_acyclic_aux₃ C₁ B i =
+  Ext_compute_with_acyclic_aux₃ C₂ B i ≫
+  (((preadditive_yoneda.obj B).right_op.map_homological_complex _ ⋙
+      homological_complex.unop_functor.right_op ⋙
+      (_root_.homology_functor _ _ (-i)).op).map
+      (bounded_homotopy_category.lift ((of' C₁).π ≫ of'_hom f) (of' C₂).π).out).unop := sorry
+
+lemma Ext_compute_with_acyclic_aux₃_is_iso
+  (B : 𝓐)
+  (hC : ∀ k, ∀ i > 0, is_zero (((Ext' i).obj (op $ C.X k)).obj B))
+  (i : ℤ) : is_iso (Ext_compute_with_acyclic_aux₃ C B i) :=
+begin
+  haveI := Ext_compute_with_acyclic_is_quasi_iso_aux C B hC i,
+  apply is_quasi_iso.cond,
+end
+
+def Ext_compute_with_acyclic
+  (B : 𝓐)
+  (hC : ∀ k, ∀ i > 0, is_zero (((Ext' i).obj (op $ C.X k)).obj B))
+  (i : ℤ) :
+  ((Ext i).obj (op $ of' C)).obj ((single _ 0).obj B) ≅
+  (((preadditive_yoneda.obj B).right_op.map_homological_complex _).obj C).unop.homology (-i) :=
+Ext_compute_with_acyclic_aux₁ C B i ≪≫
+Ext_compute_with_acyclic_aux₂ _ _ _ ≪≫
+begin
+  haveI := Ext_compute_with_acyclic_aux₃_is_iso C B hC i,
+  exact (as_iso (Ext_compute_with_acyclic_aux₃ C B i)).symm,
+end
+
+/-
 def homological_complex.single_iso (B : 𝓐) {i j : ℤ} (h : j = i) :
   ((homological_complex.single _ (complex_shape.up ℤ) i).obj B).X j ≅ B :=
 eq_to_iso (if_pos h)
@@ -481,7 +565,6 @@ kernel ((((preadditive_yoneda.obj B).map_homological_complex _).obj
     { refl },
     { exact (add_zero _).symm, } } }
 
-
 lemma Ext_compute_with_acylic_inv_eq (B : 𝓐)
   (hC : ∀ k, ∀ i > 0, is_zero (((Ext' i).obj (op $ C.X k)).obj B))
   (i : ℤ) :
@@ -518,6 +601,8 @@ end
 -- Replacing some `End` with `cend` fixes my bracket pair colorizer!
 -- notation `cend` := category_theory.End
 
+-/
+
 lemma Ext_compute_with_acyclic_naturality (C₁ C₂ : cochain_complex 𝓐 ℤ)
   [((quotient 𝓐 (complex_shape.up ℤ)).obj C₁).is_bounded_above]
   [((quotient 𝓐 (complex_shape.up ℤ)).obj C₂).is_bounded_above]
@@ -533,33 +618,15 @@ lemma Ext_compute_with_acyclic_naturality (C₁ C₂ : cochain_complex 𝓐 ℤ)
     (((preadditive_yoneda.obj B).right_op.map_homological_complex _ ⋙
       homological_complex.unop_functor.right_op ⋙ (_root_.homology_functor _ _ (-i)).op).map f).unop :=
 begin
-  rw [← iso.inv_comp_eq, ← category.assoc, ← iso.eq_comp_inv],
-  rw Ext_compute_with_acylic_inv_eq,
-  rw Ext_compute_with_acylic_inv_eq,
-  apply homology.hom_from_ext,
-  simp only [category.assoc, homology.π'_desc'_assoc],
-  dsimp only [functor.comp_map, functor.op_map, homology_functor_map],
-  erw homology.map_eq_desc'_lift_left,
+  dsimp only [Ext_compute_with_acyclic, iso.trans_hom],
+  slice_lhs 1 2
+  { erw Ext_compute_with_acyclic_aux₁_naturality },
+  slice_lhs 2 3
+  { rw Ext_compute_with_acyclic_aux₂_naturality },
   simp only [category.assoc],
-  erw [homology.π'_desc'_assoc],
-  dsimp,
-  rw homology.lift_desc' _ _ _ _ _ _ _ _ _ _ (kernel.ι _ ≫ (preadditive_yoneda.obj _).map (f.f _).op), -- rewrite now works; I removed a `refl` though.
-  -- one of the 6 goals is data
-  rotate 4, -- put the data goal at the top
-  { sorry }, -- this goal is data (the missing function)
-  { sorry }, -- this goal has a metavariable (the sorried function)
-  { sorry }, -- this goal has a metavariable
-  { rw category.assoc, -- this goal is a metavariable-free Prop. Hooray!
-    -- my bracket pair colorizer goes crazy about the next line
-    -- and I think it's because `End` is being interpreted as `end`??
-    -- It compiles just fine, but there's red everywhere!
-    have foo := kernel.condition ((((preadditive_yoneda_obj.{u_3 u_1} B ⋙
-      forget₂.{u_3+1 u_3+1 u_3 u_3 u_3} (Module.{u_3 u_3} (End B))
-      AddCommGroup.{u_3}).right_op.map_homological_complex
-      (complex_shape.up.{0} ℤ)).obj C₂).unop.d_from (-i)),
-    -- I think we're one or two rewrites away from happiness here.
-    -- `foo` mentions `obj C₂` twice, but one of them is `obj C₁` in the goal.
-    sorry },
-  { refl }, -- this might have been the `rfl` in the previous version
-  { sorry }, -- this goal has a metavariable,
+  congr' 2,
+  dsimp only [iso.symm_hom, as_iso_inv],
+  rw [is_iso.eq_inv_comp, ← category.assoc, is_iso.comp_inv_eq],
+  symmetry,
+  apply Ext_compute_with_acyclic_aux₃_naturality,
 end
