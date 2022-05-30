@@ -127,13 +127,20 @@ lemma complex_shape.embedding.nat_down_int_down.r_int_of_nat (i : ℕ) :
   complex_shape.embedding.nat_down_int_down.r (int.of_nat i) = option.some i := rfl
 
 -- move me
--- SELFCONTAINED
 lemma cochain_complex.mono_of_is_zero_homology_0
   {𝓐 : Type*} [category 𝓐] [abelian 𝓐]
   (C : cochain_complex 𝓐 ℕ) (h : is_zero $ C.homology 0) :
   mono (C.d 0 1) :=
 begin
-  sorry
+  delta homological_complex.homology at h,
+  simp only [homological_complex.d_to_eq_zero, cochain_complex.prev_nat_zero, eq_self_iff_true] at h,
+  have f := homology_iso_cokernel_lift (C.d_to 0) (C.d_from 0) (by simp),
+  simp only [homological_complex.d_to_eq_zero, cochain_complex.prev_nat_zero, eq_self_iff_true,
+    kernel.lift_zero] at f,
+  replace f := f ≪≫ limits.cokernel_zero_iso_target,
+  simp_rw [C.d_from_eq (show (complex_shape.up ℕ).rel 0 1, by simp)] at f h,
+  exact preadditive.mono_of_kernel_zero (is_zero.eq_of_src (is_zero.of_iso h
+    (f ≪≫ (kernel_comp_mono _ _)).symm) _ _)
 end
 
 lemma acyclic_of_exact.induction_step_ex₃
