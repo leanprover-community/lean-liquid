@@ -41,6 +41,10 @@ def free_Cech (F : arrow Profinite.{u}) :
   chain_complex (Condensed.{u} Ab.{u+1}) ℤ :=
 (homological_complex.embed $ complex_shape.embedding.nat_down_int_down).obj (free_Cech' F)
 
+def free_Chech_iso (F : arrow Profinite.{u}) :
+  free_Cech F ≅ (presheaf_to_Condensed_Ab.map_homological_complex _).obj
+  (unsheafified_free_Chech F) := sorry
+
 lemma free_Cech_exact (F : arrow Profinite.{u}) (n : ℤ) :
   is_zero $ (free_Cech F).homology n :=
 sorry
