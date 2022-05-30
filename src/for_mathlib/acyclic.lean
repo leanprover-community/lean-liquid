@@ -351,7 +351,8 @@ lemma Ext_compute_with_acyclic_aux₂_naturality
   (((preadditive_yoneda.obj B).right_op.map_homological_complex _ ⋙
       homological_complex.unop_functor.right_op ⋙
       (_root_.homology_functor _ _ (-i)).op).map
-      (bounded_homotopy_category.lift ((of' C₁).π ≫ of'_hom f) (of' C₂).π).out).unop := sorry
+      (bounded_homotopy_category.lift ((of' C₁).π ≫ of'_hom f) (of' C₂).π).out).unop :=
+hom_single_iso_naturality _ _ _ _ _
 
 def Ext_compute_with_acyclic_HomB
   (B : 𝓐) := (preadditive_yoneda.obj B).right_op.map_homological_complex (complex_shape.up ℤ) ⋙
