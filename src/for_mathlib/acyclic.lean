@@ -515,6 +515,9 @@ begin
   assumption'
 end
 
+-- Replacing some `End` with `cend` fixes my bracket pair colorizer!
+-- notation `cend` := category_theory.End
+
 lemma Ext_compute_with_acyclic_naturality (C₁ C₂ : cochain_complex 𝓐 ℤ)
   [((quotient 𝓐 (complex_shape.up ℤ)).obj C₁).is_bounded_above]
   [((quotient 𝓐 (complex_shape.up ℤ)).obj C₂).is_bounded_above]
@@ -551,7 +554,7 @@ begin
     -- and I think it's because `End` is being interpreted as `end`??
     -- It compiles just fine, but there's red everywhere!
     have foo := kernel.condition ((((preadditive_yoneda_obj.{u_3 u_1} B ⋙
-      forget₂.{u_3+1 u_3+1 u_3 u_3 u_3} (Module.{u_3 u_3} (End.{u_3 u_1} B))
+      forget₂.{u_3+1 u_3+1 u_3 u_3 u_3} (Module.{u_3 u_3} (End B))
       AddCommGroup.{u_3}).right_op.map_homological_complex
       (complex_shape.up.{0} ℤ)).obj C₂).unop.d_from (-i)),
     -- I think we're one or two rewrites away from happiness here.
