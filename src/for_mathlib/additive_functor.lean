@@ -1,5 +1,6 @@
 import category_theory.preadditive.additive_functor
-
+import algebra.category.Module.basic
+import algebra.category.Group.preadditive
 import for_mathlib.is_biprod
 
 open category_theory category_theory.limits
@@ -30,6 +31,9 @@ def obj_biprod_iso (F : 𝒜 ⥤ ℬ) [F.additive]
   (A B : 𝒜) [has_binary_biproduct A B] [has_binary_biproduct (F.obj A) (F.obj B)] :
   F.obj (A ⊞ B) ≅ F.obj A ⊞ F.obj B :=
 is_biprod.iso_biprod _ (F.map_is_biprod _ (biprod.is_biprod A B))
+
+instance forget₂_additive (R : Type*) [ring R] : (forget₂ (Module R) AddCommGroup).additive :=
+{ map_add' := λ M N f g, rfl }
 
 end functor
 
