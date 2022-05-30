@@ -101,3 +101,18 @@ lemma Condensed_Ab_CondensedSet_adjunction'_hom_equiv_symm_apply (X : CondensedS
   ((Condensed_Ab_CondensedSet_adjunction'.hom_equiv _ _).symm e).val =
   proetale_topology.sheafify_lift
     (((AddCommGroup.adj'.whisker_right _).hom_equiv _ _).symm e.val) Y.2 := rfl
+
+def presheaf_to_Condensed_Ab :
+  (Profinite.{u}ᵒᵖ ⥤ Ab.{u+1}) ⥤ Condensed.{u} Ab.{u+1} :=
+presheaf_to_Sheaf _ _
+
+def Condensed_Ab_to_presheaf :
+  Condensed.{u} Ab.{u+1} ⥤ Profinite.{u}ᵒᵖ ⥤ Ab.{u+1} :=
+Sheaf_to_presheaf _ _
+
+def Condensed_Ab_presheaf_adjunction :
+  presheaf_to_Condensed_Ab ⊣ Condensed_Ab_to_presheaf :=
+sheafification_adjunction _ _
+
+instance : functor.additive presheaf_to_Condensed_Ab := sorry
+instance : functor.additive Condensed_Ab_to_presheaf := sorry
