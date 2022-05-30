@@ -88,17 +88,22 @@ def mk_bo_ho_ca (X : bounded_homotopy_category 𝓐) (f : X ⟶ X) :
     rw is_zero_iff_id_eq_zero, ext, dsimp, rw ← is_zero_iff_id_eq_zero,
     exact ha i hi,
   end }
+.
 
-lemma Ext_is_zero_iff (X Y : bounded_homotopy_category (endomorphisms 𝓐)) (i : ℤ) :
-  is_zero (((Ext i).obj (op $ X)).obj $ Y) ↔
-  (is_iso $ ((Ext i).map (quiver.hom.op X.e)).app Y.unEnd - ((Ext i).obj (op X.unEnd)).map Y.e) :=
+def mk_bo_ha_ca_single (X : 𝓐) (f : X ⟶ X) :
+  mk_bo_ho_ca ((single _ 0).obj X) ((single _ 0).map f) ≅ (single _ 0).obj ⟨X, f⟩ :=
+sorry
+
+lemma Ext_is_zero_iff (X Y : bounded_homotopy_category (endomorphisms 𝓐)) :
+  (∀ i, is_zero (((Ext i).obj (op $ X)).obj $ Y)) ↔
+  (∀ i, is_iso $ ((Ext i).map (quiver.hom.op X.e)).app Y.unEnd - ((Ext i).obj (op X.unEnd)).map Y.e) :=
 begin
   sorry
 end
 
-lemma Ext_is_zero_iff' (X Y : bounded_homotopy_category 𝓐) (f : X ⟶ X) (g : Y ⟶ Y) (i : ℤ) :
-  is_zero (((Ext i).obj (op $ mk_bo_ho_ca X f)).obj $ mk_bo_ho_ca Y g) ↔
-  (is_iso $ ((Ext i).map f.op).app Y - ((Ext i).obj (op X)).map g) :=
+lemma Ext_is_zero_iff' (X Y : bounded_homotopy_category 𝓐) (f : X ⟶ X) (g : Y ⟶ Y) :
+  (∀ i, is_zero (((Ext i).obj (op $ mk_bo_ho_ca X f)).obj $ mk_bo_ho_ca Y g)) ↔
+  (∀ i, is_iso $ ((Ext i).map f.op).app Y - ((Ext i).obj (op X)).map g) :=
 begin
   rw Ext_is_zero_iff,
   conv_rhs { rw [← homotopy_category.quotient_map_out f, ← homotopy_category.quotient_map_out g] },
@@ -123,11 +128,12 @@ by rw [← category.assoc, iso.comp_inv_eq, single_unEnd_e]
 
 open category_theory.preadditive
 
-lemma Ext'_is_zero_iff (X Y : endomorphisms 𝓐) (i : ℤ) :
-  is_zero (((Ext' i).obj (op X)).obj Y) ↔
-  (is_iso $ ((Ext' i).map X.e.op).app Y.X - ((Ext' i).obj (op X.X)).map Y.e) :=
+lemma Ext'_is_zero_iff (X Y : endomorphisms 𝓐) :
+  (∀ i, is_zero (((Ext' i).obj (op X)).obj Y)) ↔
+  (∀ i, is_iso $ ((Ext' i).map X.e.op).app Y.X - ((Ext' i).obj (op X.X)).map Y.e) :=
 begin
-  refine (Ext_is_zero_iff ((single _ 0).obj X) ((single _ 0).obj Y) i).trans _,
+  refine (Ext_is_zero_iff ((single _ 0).obj X) ((single _ 0).obj Y)).trans _,
+  apply forall_congr, intro i,
   rw [← single_e X, ← single_e Y],
   rw [← is_iso.comp_left_iff    (((Ext i).obj (op ((single (endomorphisms 𝓐) 0).obj X).unEnd)).map Y.single_unEnd.inv),
       ← is_iso.comp_right_iff _ (((Ext i).obj (op ((single (endomorphisms 𝓐) 0).obj X).unEnd)).map Y.single_unEnd.hom)],
@@ -149,10 +155,10 @@ begin
   refl,
 end
 
-lemma Ext'_is_zero_iff' (X Y : 𝓐) (f : X ⟶ X) (g : Y ⟶ Y) (i : ℤ) :
-  is_zero (((Ext' i).obj (op $ endomorphisms.mk X f)).obj $ endomorphisms.mk Y g) ↔
-  (is_iso $ ((Ext' i).map f.op).app _ - ((Ext' i).obj _).map g) :=
-Ext'_is_zero_iff _ _ _
+lemma Ext'_is_zero_iff' (X Y : 𝓐) (f : X ⟶ X) (g : Y ⟶ Y) :
+  (∀ i, is_zero (((Ext' i).obj (op $ endomorphisms.mk X f)).obj $ endomorphisms.mk Y g)) ↔
+  (∀ i, is_iso $ ((Ext' i).map f.op).app _ - ((Ext' i).obj _).map g) :=
+Ext'_is_zero_iff _ _
 
 end endomorphisms
 
