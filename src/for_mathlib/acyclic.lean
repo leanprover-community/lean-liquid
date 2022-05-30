@@ -320,7 +320,13 @@ lemma Ext_compute_with_acyclic_aux₁_naturality
     (Ext_compute_with_acyclic_aux₁ C₁ B i).hom =
   (Ext_compute_with_acyclic_aux₁ C₂ B i).hom ≫
   (preadditive_yoneda.obj _).map (quiver.hom.op $
-  bounded_homotopy_category.lift ((of' C₁).π ≫ of'_hom f) (of' C₂).π) := sorry
+  bounded_homotopy_category.lift ((of' C₁).π ≫ of'_hom f) (of' C₂).π) :=
+begin
+  ext F,
+  dsimp [Ext, Ext_compute_with_acyclic_aux₁],
+  simp only [comp_apply],
+  dsimp, simp,
+end
 
 def Ext_compute_with_acyclic_aux₂
   (B : 𝓐)
@@ -330,6 +336,7 @@ def Ext_compute_with_acyclic_aux₂
   ((of' C).replace).val.as.op).homology (-i) :=
   hom_single_iso _ _ _
 
+-- TODO: We should prove naturality of `hom_single_iso` independently!
 lemma Ext_compute_with_acyclic_aux₂_naturality
   (C₁ C₂ : cochain_complex 𝓐 ℤ)
   [((quotient 𝓐 (complex_shape.up ℤ)).obj C₁).is_bounded_above]
