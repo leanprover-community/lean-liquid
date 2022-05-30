@@ -438,6 +438,29 @@ begin
   rw [← is_iso.comp_inv_eq, inv_eq_to_hom, eq_comm, category.assoc],
 end
 
+.
+
+/-
+
+  (((preadditive_yoneda.obj B).right_op.map_homological_complex _ ⋙
+      homological_complex.unop_functor.right_op ⋙
+      (_root_.homology_functor _ _ (-i)).op).map
+      (bounded_homotopy_category.lift ((of' C₁).π ≫ of'_hom f) (of' C₂).π).out).unop := sorry
+-/
+
+lemma bounded_homotopy_category.hom_single_iso_naturality
+  (P₁ P₂ : bounded_homotopy_category C) (B : C) (i : ℤ)
+  (f : P₁ ⟶ P₂) :
+  (preadditive_yoneda.obj _).map f.op ≫ (bounded_homotopy_category.hom_single_iso P₁ B i).hom =
+  (bounded_homotopy_category.hom_single_iso P₂ B i).hom ≫
+  (((preadditive_yoneda.obj B).right_op.map_homological_complex _ ⋙
+      homological_complex.unop_functor.right_op ⋙
+      (_root_.homology_functor _ _ _).op).map f.out).unop :=
+begin
+  sorry
+end
+
+
 variable [enough_projectives C]
 
 noncomputable
