@@ -9,6 +9,7 @@ import for_mathlib.is_quasi_iso
 import for_mathlib.short_exact
 import for_mathlib.homology
 import for_mathlib.exact_lift_desc
+import for_mathlib.additive_functor
 
 .
 
@@ -504,7 +505,7 @@ begin
 end
 
 lemma homology.lift_desc' (X Y Z : 𝓐) (f : X ⟶ Y) (g : Y ⟶ Z) (w)
-  (U : 𝓐) (e : _ ⟶ U) (he : f ≫ e = 0) (V : 𝓐) (t : V ⟶ _) (ht : t ≫ g = 0)
+  (U : 𝓐) (e : Y ⟶ U) (he : f ≫ e = 0) (V : 𝓐) (t : V ⟶ Y) (ht : t ≫ g = 0)
   (u v) (hu : u = t ≫ cokernel.π _) (hv : v = kernel.ι _ ≫ e) :
   homology.lift f g w u (by simpa [hu] ) ≫ homology.desc' _ _ _ v (by simpa [hv]) = t ≫ e :=
 begin
@@ -513,6 +514,9 @@ begin
   apply homology.lift_desc,
   assumption'
 end
+
+-- Replacing some `End` with `cend` fixes my bracket pair colorizer!
+-- notation `cend` := category_theory.End
 
 lemma Ext_compute_with_acyclic_naturality (C₁ C₂ : cochain_complex 𝓐 ℤ)
   [((quotient 𝓐 (complex_shape.up ℤ)).obj C₁).is_bounded_above]
@@ -539,17 +543,23 @@ begin
   simp only [category.assoc],
   erw [homology.π'_desc'_assoc],
   dsimp,
-  -- darn it, kmb broke the below rewrite; bailing
-  sorry end #exit
-  rw (homology.lift_desc' _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ rfl),
-  rotate 3,
-  { exact kernel.ι _ ≫ (preadditive_yoneda.obj _).map (f.f _).op },
-  swap,
-  { simpa },
-  { dsimp, sorry },
-  { dsimp, simp only [category.assoc],
-    congr' 1,
+  rw homology.lift_desc' _ _ _ _ _ _ _ _ _ _ (kernel.ι _ ≫ (preadditive_yoneda.obj _).map (f.f _).op), -- rewrite now works; I removed a `refl` though.
+  -- one of the 6 goals is data
+  rotate 4, -- put the data goal at the top
+  { sorry }, -- this goal is data (the missing function)
+  { sorry }, -- this goal has a metavariable (the sorried function)
+  { sorry }, -- this goal has a metavariable
+  { rw category.assoc, -- this goal is a metavariable-free Prop. Hooray!
+    -- my bracket pair colorizer goes crazy about the next line
+    -- and I think it's because `End` is being interpreted as `end`??
+    -- It compiles just fine, but there's red everywhere!
+    have foo := kernel.condition ((((preadditive_yoneda_obj.{u_3 u_1} B ⋙
+      forget₂.{u_3+1 u_3+1 u_3 u_3 u_3} (Module.{u_3 u_3} (End B))
+      AddCommGroup.{u_3}).right_op.map_homological_complex
+      (complex_shape.up.{0} ℤ)).obj C₂).unop.d_from (-i)),
+    -- I think we're one or two rewrites away from happiness here.
+    -- `foo` mentions `obj C₂` twice, but one of them is `obj C₁` in the goal.
     sorry },
-  { apply_instance },
-  { sorry }
+  { refl }, -- this might have been the `rfl` in the previous version
+  { sorry }, -- this goal has a metavariable,
 end
