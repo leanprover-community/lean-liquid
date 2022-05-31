@@ -2,7 +2,7 @@ import breen_deligne.eval2
 import for_mathlib.derived.K_projective
 import for_mathlib.endomorphisms.Ext
 import for_mathlib.endomorphisms.functor
-import for_mathlib.truncation
+import for_mathlib.truncation_Ext
 
 .
 
@@ -41,6 +41,7 @@ end
 variables (hH0 : ((BD.eval F).obj A).val.as.homology 0 ≅ A)
 
 include hH0
+
 lemma IH_0 : IH BD F A B 0 :=
 begin
   apply forall_congr, intro i, apply forall_congr, intro hi0,
@@ -55,9 +56,82 @@ begin
   sorry
 end
 
+lemma bdd_step₁ (j : ℤ) :
+  (∀ i ≤ j, is_zero $ ((Ext' i).obj (op A)).obj B) ↔
+  (∀ i ≤ j, is_zero $ ((Ext' i).obj (op $ ((BD.eval F).obj A).val.as.homology 0)).obj B) :=
+begin
+  apply forall_congr, intro i, apply forall_congr, intro hi,
+  apply iso.is_zero_iff,
+  -- use `hH0` and some `map_iso`
+  sorry
+end
+
+open bounded_homotopy_category (of')
+
+lemma bdd_step₂ (j : ℤ) :
+  (∀ i ≤ j, is_zero $ ((Ext i).obj (op ((BD.eval F).obj A))).obj ((single _ 0).obj B)) ↔
+  (∀ i ≤ j, is_zero $ ((Ext i).obj (op $ of' $ ((BD.eval' F).obj A).truncation 0)).obj ((single _ 0).obj B)) :=
+begin
+  apply forall_congr, intro i, apply forall_congr, intro hi,
+  apply iso.is_zero_iff,
+  -- use `cochain_complex.truncation.ι_iso` and some `functor.map_iso`
+  sorry
+end
+
+omit hH0
+
+lemma bdd_step₃
+  (H : ∀ i ≤ j + 1, is_zero (((Ext i).obj (op (of' (((BD.eval' F).obj A).truncation (-1))))).obj ((single 𝓐 0).obj B))) :
+  (∀ i ≤ j + 1, is_zero (((Ext i).obj (op (of' (((BD.eval' F).obj A).truncation 0)))).obj ((single 𝓐 0).obj B))) ↔
+  ∀ i ≤ j + 1, is_zero (((Ext' i).obj (op (((BD.eval F).obj A).val.as.homology 0))).obj B) :=
+-- use `Ext_ι_succ_five_term_exact_seq`
+sorry
+
+lemma bdd_step₄
+  (H : ∀ t ≤ (-1:ℤ), ∀ i ≤ j, is_zero (((Ext i).obj (op $ (single _ t).obj (((BD.eval F).obj A).val.as.homology t))).obj ((single 𝓐 0).obj B))) :
+  ∀ t ≤ (-1:ℤ), ∀ i ≤ j + 1, is_zero (((Ext i).obj (op (of' (((BD.eval' F).obj A).truncation t)))).obj ((single 𝓐 0).obj B)) :=
+-- induction on `t` and use `Ext_ι_succ_five_term_exact_seq`
+sorry
+
+lemma bdd_step₅ (t i : ℤ) :
+  is_zero (((Ext i).obj (op ((single 𝓐 t).obj (((BD.eval F).obj A).val.as.homology t)))).obj ((single 𝓐 0).obj B)) ↔
+  is_zero (((Ext' (i+t)).obj (op $ ((BD.eval F).obj A).val.as.homology t)).obj B) :=
+begin
+  apply iso.is_zero_iff,
+  -- this should follow from the defn of `Ext`
+  sorry
+end
+
+-- `T` is a tensor product functor
+variables (T : 𝓐 ⥤ Ab ⥤ 𝓐)
+
+-- this needs extra assumptions:
+-- * `T.obj A` should map a free resolution `0 → F₁ → F₂ → A' → 0` to a short exact sequence
+-- * `T.obj A` should map a free object `F = ℤ^κ` to `A^κ`
+lemma bdd_step₆ (IH : ∀ i ≤ j, is_zero $ ((Ext' i).obj (op A)).obj B)
+  (i : ℤ) (hi : i ≤ j) (A' : Ab) :
+  is_zero (((Ext' i).flip.obj B).obj (op ((T.obj A).obj A'))) :=
+sorry
+
+variables (hAT : ∀ t ≤ (-1:ℤ), ∃ A', nonempty ((T.obj A).obj A' ≅ ((BD.eval F).obj A).val.as.homology t))
+
+include hH0 hAT
+
 lemma bdd_step (j : ℤ) (hj : 0 ≤ j) (ih : IH BD F A B j) : IH BD F A B (j + 1) :=
 begin
-  sorry
+  by_cases ih' : (∀ i ≤ j, is_zero $ ((Ext' i).obj (op A)).obj B), swap,
+  { split,
+    { intro h, refine (ih' $ λ i hi, _).elim, apply h _ (int.le_add_one hi), },
+    { intro h, refine (ih' $ ih.mpr $ λ i hi, _).elim, apply h _ (int.le_add_one hi), } },
+  refine (bdd_step₁ BD F _ _ hH0 _).trans ((bdd_step₂ BD F _ _ hH0 _).trans _).symm,
+  apply bdd_step₃,
+  apply bdd_step₄ BD F A B _ _ _ le_rfl,
+  intros t ht i hi,
+  rw bdd_step₅,
+  obtain ⟨A', ⟨e⟩⟩ := hAT t ht,
+  apply (((Ext' (i+t)).flip.obj B).map_iso e.op).is_zero_iff.mpr,
+  apply bdd_step₆ A B _ T ih',
+  linarith only [ht, hi]
 end
 
 -- This requires more hypotheses on `BD` and `F`.
@@ -70,7 +144,7 @@ lemma bdd (j : ℤ) : IH BD F A B j :=
 begin
   apply int.induction_on' j,
   { exact IH_0 BD F A B hH0 },
-  { exact bdd_step BD F A B hH0 },
+  { exact bdd_step BD F A B hH0 T hAT },
   { exact IH_neg BD F A B, },
 end
 
@@ -80,11 +154,11 @@ lemma is_zero :
 begin
   split,
   { intros H j,
-    refine (bdd BD F A B hH0 j).mp _ j le_rfl,
+    refine (bdd BD F A B hH0 T hAT j).mp _ j le_rfl,
     intros i hij,
     apply H },
   { intros H j,
-    refine (bdd BD F A B hH0 j).mpr _ j le_rfl,
+    refine (bdd BD F A B hH0 T hAT j).mpr _ j le_rfl,
     intros i hij,
     apply H }
 end
@@ -109,7 +183,11 @@ lemma main_lemma (A : 𝓐) (B : 𝓐) (f : A ⟶ A) (g : B ⟶ B)
 begin
   rw [← endomorphisms.Ext'_is_zero_iff' A B f g],
   rw [← endomorphisms.Ext_is_zero_iff'],
-  refine (main_lemma.is_zero BD F.map_endomorphisms _ _ _).trans _,
+  refine (main_lemma.is_zero BD F.map_endomorphisms _ _ _ _ _).trans _,
+  { sorry },
+  -- the next `sorry` are not provable in general,
+  -- they should be made assumptions that can be filled in when applied to `Cond(Ab)`
+  { sorry },
   { sorry },
   apply forall_congr, intro i,
   apply iso.is_zero_iff,

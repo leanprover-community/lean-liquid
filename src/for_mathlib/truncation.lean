@@ -31,6 +31,14 @@ namespace imker
 
 open homological_complex (single)
 
+lemma bounded_by (i : ℤ) :
+  ((homotopy_category.quotient _ _).obj (C.imker i)).bounded_by (i+1) :=
+sorry
+
+instance is_bounded_above (i : ℤ) :
+  ((homotopy_category.quotient _ _).obj (C.imker i)).is_bounded_above :=
+⟨⟨i+1, bounded_by C i⟩⟩
+
 /-- The natural map from `H_n(C)[n]` to `imker C n`. -/
 def from_single (n : ℤ) : (single _ _ n).obj (C.homology n) ⟶ C.imker n :=
 sorry
@@ -62,18 +70,22 @@ instance is_bounded_above (i : ℤ) :
 def ι (i : ℤ) : C.truncation i ⟶ C :=
 sorry
 
--- feel free to skip this, and directly provide a defn for `succ_ι` below
+lemma ι_iso (i : ℤ) (hC : ((homotopy_category.quotient _ _).obj C).bounded_by (i+1)) :
+  is_iso (truncation.ι C i) :=
+sorry
+
+-- feel free to skip this, and directly provide a defn for `ι_succ` below
 def map_of_le (i j : ℤ) (h : i ≤ j) : C.truncation i ⟶ C.truncation j :=
 sorry
 
-def succ_ι (i : ℤ) : C.truncation i ⟶ C.truncation (i+1) :=
+def ι_succ (i : ℤ) : C.truncation i ⟶ C.truncation (i+1) :=
 truncation.map_of_le _ _ _ $ by simp only [le_add_iff_nonneg_right, zero_le_one]
 
 def to_imker (i : ℤ) : C.truncation i ⟶ imker C i :=
 sorry
 
-lemma short_exact_succ_ι_to_imker (i : ℤ) :
-  ∀ n, short_exact ((succ_ι C i).f n) ((to_imker C (i+1)).f n) :=
+lemma short_exact_ι_succ_to_imker (i : ℤ) :
+  ∀ n, short_exact ((ι_succ C i).f n) ((to_imker C (i+1)).f n) :=
 sorry
 
 end truncation
