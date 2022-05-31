@@ -473,6 +473,73 @@ begin
   simp [hs],
 end
 
+namespace Ext_compute_with_acyclic_aux₃_naturality_helpers
+
+variables (C₁ C₂ : cochain_complex 𝓐 ℤ)
+  [((quotient 𝓐 (complex_shape.up ℤ)).obj C₁).is_bounded_above]
+  [((quotient 𝓐 (complex_shape.up ℤ)).obj C₂).is_bounded_above]
+  (B : 𝓐)
+  (f : C₁ ⟶ C₂)
+  (i : ℤ)
+
+lemma helper₁ (h1 h2) :
+  homology.lift ((unop
+    (homological_complex.unop_functor.right_op.obj
+    (((preadditive_yoneda.obj B).right_op.map_homological_complex
+      (complex_shape.up ℤ)).obj C₁))).d_to (-i))
+  ((unop (homological_complex.unop_functor.right_op.obj
+    (((preadditive_yoneda.obj B).right_op.map_homological_complex
+    (complex_shape.up ℤ)).obj C₁))).d_from (-i)) h1
+  (kernel.ι ((unop (homological_complex.unop_functor.right_op.obj
+    (((preadditive_yoneda.obj B).right_op.map_homological_complex
+    (complex_shape.up ℤ)).obj C₂))).d_from (-i)) ≫
+    (homological_complex.unop_functor.right_op.map
+    (((preadditive_yoneda.obj B).right_op.map_homological_complex
+    (complex_shape.up ℤ)).map f)).unop.f (-i) ≫ cokernel.π
+    ((unop (homological_complex.unop_functor.right_op.obj
+    (((preadditive_yoneda.obj B).right_op.map_homological_complex
+    (complex_shape.up ℤ)).obj C₁))).d_to (-i))) h2 =
+  kernel.lift _ (kernel.ι _ ≫ (preadditive_yoneda.obj B).map (f.f (-i)).op) begin
+    rw category.assoc,
+    have aux := ((((preadditive_yoneda.obj B).right_op.map_homological_complex _ ⋙
+      homological_complex.unop_functor.right_op).map f)).unop.comm_from (-i),
+    dsimp at aux,
+    erw [aux, kernel.condition_assoc, zero_comp],
+  end ≫
+  homology.π' _ _ _ :=
+begin
+  apply homology.hom_to_ext,
+  rw [category.assoc, homology.π'_ι, kernel.lift_ι_assoc,
+    homology.lift_ι],
+  refl,
+end
+
+lemma helper₂ (h1 h2) :
+  homology.lift ((unop ((Ext_compute_with_acyclic_HomB B).obj (of' C₂).replace.val.as)).d_to (-i))
+  ((unop ((Ext_compute_with_acyclic_HomB B).obj (of' C₂).replace.val.as)).d_from (-i))
+  h1
+  (kernel.ι ((unop ((Ext_compute_with_acyclic_HomB B).obj (of' C₂).val.as)).d_from (-i)) ≫
+     ((Ext_compute_with_acyclic_HomB B).map (quot.out (of' C₂).π)).unop.f (-i) ≫
+       cokernel.π ((unop ((Ext_compute_with_acyclic_HomB B).obj (of' C₂).replace.val.as)).d_to (-i)))
+  h2 =
+  kernel.lift _ (kernel.ι _ ≫ begin
+    apply homological_complex.hom.f,
+    exact (((preadditive_yoneda.obj B).right_op.map_homological_complex _ ⋙
+      homological_complex.unop_functor.right_op).map (of' C₂).π.out).unop,
+  end) begin
+    rw category.assoc,
+    have := (((preadditive_yoneda.obj B).right_op.map_homological_complex _ ⋙
+      homological_complex.unop_functor.right_op).map (of' C₂).π.out).unop.comm_from (-i),
+    erw [this, kernel.condition_assoc, zero_comp],
+  end ≫ homology.π' _ _ _ :=
+begin
+  apply homology.hom_to_ext,
+  simp only [homology.lift_ι, category.assoc, homology.π'_ι, kernel.lift_ι_assoc],
+  refl,
+end
+
+end Ext_compute_with_acyclic_aux₃_naturality_helpers
+
 lemma Ext_compute_with_acyclic_aux₃_naturality
   (C₁ C₂ : cochain_complex 𝓐 ℤ)
   [((quotient 𝓐 (complex_shape.up ℤ)).obj C₁).is_bounded_above]
@@ -489,35 +556,45 @@ lemma Ext_compute_with_acyclic_aux₃_naturality
       (_root_.homology_functor _ _ (-i)).op).map
       (bounded_homotopy_category.lift ((of' C₁).π ≫ of'_hom f) (of' C₂).π).out).unop :=
 begin
-  dsimp only [Ext_compute_with_acyclic_aux₃, functor.comp_map, ← unop_comp],
-  have : ∀ (j) (X Y : homological_complex Ab (complex_shape.up ℤ).symm) (g : X ⟶ Y),
-    (homotopy_category.homology_functor _ _ j).map ((quotient _ _).map g) =
-    (_root_.homology_functor _ _ j).map g,
-  { intros j X Y g, refl },
-  rw this, rw this,
-  apply homology.hom_to_ext,
-  dsimp only [_root_.homology_functor],
-  rw homology.map_eq_lift_desc'_left,
-  simp only [category.assoc], erw homology.lift_ι,
-  dsimp,
-  rw homology.map_eq_desc'_lift_left,
+  dsimp only [Ext_compute_with_acyclic_aux₃, functor.comp_map,
+    _root_.homology_functor, functor.op, homological_complex.hom.sq_from,
+    homological_complex.hom.sq_to, homotopy_category.quotient,
+    homotopy_category.homology_functor, quotient.functor,
+    category_theory.quotient.lift, quot.lift_on, quiver.hom.unop_op],
+  simp_rw homology.map_eq_desc'_lift_left,
   apply homology.hom_from_ext,
   simp only [category.assoc, homology.π'_desc'_assoc],
-  rw homology.map_eq_desc'_lift_left,
   slice_rhs 1 2
   { erw homology.π'_desc' },
-  rw homology.map_eq_lift_desc'_left,
+  dsimp only [arrow.hom_mk_left],
+  rw Ext_compute_with_acyclic_aux₃_naturality_helpers.helper₁,
+  conv_rhs { rw Ext_compute_with_acyclic_aux₃_naturality_helpers.helper₂ },
   simp only [category.assoc],
-  erw homology.lift_ι,
-  let s := homology.lift _ _ _ _ _,
-  change s ≫ _ = _,
-  have hs : s = kernel.lift _ (kernel.ι _ ≫ (preadditive_yoneda.obj B).map (f.f (-i)).op) _
-    ≫ homology.π' _ _ _,
-  { sorry },
-  rw hs, clear hs, clear s,
-  erw [category.assoc, homology.π'_desc', kernel.lift_ι_assoc],
-  -- AT: Now do something similar with the RH to finish, using naturality of HomB or something...
-  all_goals { sorry },
+  slice_lhs 2 3
+  { erw homology.π'_desc' },
+  slice_rhs 2 3
+  { erw homology.π'_desc' },
+  apply homology.hom_to_ext,
+  slice_lhs 2 3
+  { erw homology.lift_ι },
+  slice_rhs 2 3
+  { erw homology.lift_ι },
+  slice_lhs 1 2
+  { erw kernel.lift_ι },
+  slice_rhs 1 2
+  { erw kernel.lift_ι },
+  simp only [category.assoc],
+  /-
+  congr' 1,
+  simp only [← category.assoc],
+  congr' 1,
+  dsimp only [Ext_compute_with_acyclic_HomB, functor.comp_map],
+  change (((preadditive_yoneda.obj B).right_op.map_homological_complex _ ⋙
+      homological_complex.unop_functor.right_op).map f).unop.f _ ≫ _ = _,
+  --simp only [← homological_complex.comp_f],
+  --congr' 1,
+  -/
+  sorry
 end
 
 
