@@ -46,19 +46,14 @@ def free_Cech (F : arrow Profinite.{u}) :
 def free_Chech_iso (F : arrow Profinite.{u}) :
   free_Cech F ≅ (presheaf_to_Condensed_Ab.map_homological_complex _).obj
   (unsheafified_free_Cech F) :=
-begin
-  fapply homological_complex.hom.iso_of_components,
-  intros i,
-  rcases i with (_|n)|n,
-  rotate 4,
-  --change CondensedSet_to_Condensed_Ab.obj F.right.to_Condensed ≅
-  --  presheaf_to_Condensed_Ab.obj (Profinite_to_presheaf.obj F.right),
-  exact iso.refl _,
-  exact iso.refl _,
-  -- sheafification of zero is zero.
-  --refine is_zero.iso (is_zero_zero _) (presheaf_to_Condensed_Ab.map_is_zero _),
-  all_goals { sorry }
-end
+homological_complex.hom.iso_of_components
+(λ i,
+match i with
+| int.of_nat 0 := iso.refl _
+| int.of_nat (n+1) := iso.refl _
+| -[1+i] := (is_zero_zero _).iso (presheaf_to_Condensed_Ab.map_is_zero (is_zero_zero _))
+end)
+sorry
 
 lemma free_Cech_exact (F : arrow Profinite.{u}) (n : ℤ) :
   is_zero $ (free_Cech F).homology n :=
