@@ -19,11 +19,13 @@ namespace condensed
 
 set_option pp.universes true
 
+def Profinite_to_presheaf : Profinite.{u} ⥤ Profinite.{u}ᵒᵖ ⥤ Ab.{u+1} :=
+yoneda ⋙ (whiskering_right _ _ _).obj (ulift_functor.{u+1} ⋙ AddCommGroup.free)
+
 def unsheafified_free_Cech' (F : arrow Profinite.{u}) :
   chain_complex (Profinite.{u}ᵒᵖ ⥤ Ab.{u+1}) ℕ :=
 simplicial_object.augmented.to_complex $
-(((simplicial_object.augmented.whiskering _ _).obj
-  (yoneda ⋙ (whiskering_right _ _ _).obj (AddCommGroup.free ⋙ Ab.ulift.{(u+1) u}))).obj
+(((simplicial_object.augmented.whiskering _ _).obj Profinite_to_presheaf).obj
   F.augmented_cech_nerve)
 
 def free_Cech' (F : arrow Profinite.{u}) :
@@ -32,7 +34,7 @@ def free_Cech' (F : arrow Profinite.{u}) :
   (Profinite_to_Condensed ⋙ CondensedSet_to_Condensed_Ab)).obj
   F.augmented_cech_nerve).to_complex
 
-def unsheafified_free_Chech (F : arrow Profinite.{u}) :
+def unsheafified_free_Cech (F : arrow Profinite.{u}) :
   chain_complex (Profinite.{u}ᵒᵖ ⥤ Ab.{u+1}) ℤ :=
 (homological_complex.embed $ complex_shape.embedding.nat_down_int_down).obj
   (unsheafified_free_Cech' F)
@@ -43,7 +45,20 @@ def free_Cech (F : arrow Profinite.{u}) :
 
 def free_Chech_iso (F : arrow Profinite.{u}) :
   free_Cech F ≅ (presheaf_to_Condensed_Ab.map_homological_complex _).obj
-  (unsheafified_free_Chech F) := sorry
+  (unsheafified_free_Cech F) :=
+begin
+  fapply homological_complex.hom.iso_of_components,
+  intros i,
+  rcases i with (_|n)|n,
+  rotate 4,
+  --change CondensedSet_to_Condensed_Ab.obj F.right.to_Condensed ≅
+  --  presheaf_to_Condensed_Ab.obj (Profinite_to_presheaf.obj F.right),
+  exact iso.refl _,
+  exact iso.refl _,
+  -- sheafification of zero is zero.
+  --refine is_zero.iso (is_zero_zero _) (presheaf_to_Condensed_Ab.map_is_zero _),
+  sorry
+end
 
 lemma free_Cech_exact (F : arrow Profinite.{u}) (n : ℤ) :
   is_zero $ (free_Cech F).homology n :=
