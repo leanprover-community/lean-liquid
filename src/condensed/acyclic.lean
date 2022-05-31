@@ -92,10 +92,16 @@ sorry
 instance presheaf_to_Sheaf_additive :
   (presheaf_to_Sheaf.{u+2 u u+1} ExtrDisc.proetale_topology.{u} Ab.{u+1}).additive := sorry
 
-
 def free_ExtrDisc_Cech'_iso (F : arrow Profinite.{u}) :
   free_ExtrDisc_Cech' F ≅
-  ((presheaf_to_Sheaf _ _).map_homological_complex _).obj (unsheafified_free_ExtrDiscr_Cech F) := sorry
+  ((presheaf_to_Sheaf _ _).map_homological_complex _).obj (unsheafified_free_ExtrDiscr_Cech F) :=
+homological_complex.hom.iso_of_components
+(λ i,
+match i with
+| 0 := iso.refl _
+| i+1 := iso.refl _
+end)
+sorry
 
 /-
 def free_Cech_iso (F : arrow Profinite.{u}) :
@@ -128,6 +134,8 @@ begin
   intros i,
   dsimp only [equivalence.symm_functor],
   let E := (_root_.homology_functor _ _ i).map_iso (free_Cech'_iso_ExtrDisc F),
+  apply is_zero.of_iso _ E, clear E,
+  let E := (_root_.homology_functor _ _ i).map_iso (free_ExtrDisc_Cech'_iso F),
   apply is_zero.of_iso _ E, clear E,
   dsimp only [_root_.homology_functor],
   sorry
