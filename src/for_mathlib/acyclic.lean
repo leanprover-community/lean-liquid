@@ -449,6 +449,17 @@ by apply (homotopy_category.homology_functor Ab _ (-i)).map
   (((homotopy_category.quotient _ _).map
     ((Ext_compute_with_acyclic_HomB B).map (of' C).π.out).unop))
 
+-- Are these two lemmas useful? Do we have them?
+lemma functor.map_unop {𝓐 : Type*} [category 𝓐] {𝓑 : Type*}
+  [category 𝓑] (F : 𝓐 ⥤ 𝓑) {a₁ a₂ : 𝓐ᵒᵖ}
+  (f : a₁ ⟶ a₂) : F.map f.unop = (F.op.map f).unop :=
+rfl
+
+lemma functor.map_map' {𝓐 : Type*} [category 𝓐] {𝓑 : Type*}
+  [category 𝓑] {𝓒 : Type*} [category 𝓒] (F : 𝓐 ⥤ 𝓑) (G : 𝓑 ⥤ 𝓒) {a₁ a₂ : 𝓐}
+  (φ : a₁ ⟶ a₂) : G.map (F.map φ) = (F ⋙ G).map φ :=
+rfl
+
 lemma homology.lift_desc (X Y Z : 𝓐) (f : X ⟶ Y) (g : Y ⟶ Z) (w)
   (U : 𝓐) (e : _ ⟶ U) (he : f ≫ e = 0) (V : 𝓐) (t : V ⟶ _) (ht : t ≫ g = 0) :
   homology.lift f g w (t ≫ cokernel.π _) (by { simp [ht] } ) ≫
