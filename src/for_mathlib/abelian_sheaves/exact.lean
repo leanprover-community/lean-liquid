@@ -1,6 +1,7 @@
 import for_mathlib.abelian_sheaves.main
 import category_theory.abelian.exact
 import category_theory.sites.left_exact
+import for_mathlib.chain_complex_exact
 
 universes w v u
 
@@ -61,5 +62,15 @@ begin
     simp only [category.assoc, e.2, ← P.map_comp_assoc,
       P.map_zero, zero_comp, comp_zero] }
 end
+
+instance presheaf_to_Sheaf_additive :
+  functor.additive (presheaf_to_Sheaf J A) := sorry
+
+lemma map_presheaf_to_Sheaf_homology_zero_of_homology_zero
+  (D : chain_complex (Cᵒᵖ ⥤ A) ℕ)
+  (h : ∀ i : ℕ, is_zero (D.homology i)) :
+  ∀ i : ℕ, is_zero
+    ((((presheaf_to_Sheaf J A).map_homological_complex _).obj D).homology i) := sorry
+-- Use `exact_of_exact` for this, and the fact that sheafification preserves colimits.
 
 end category_theory.Sheaf

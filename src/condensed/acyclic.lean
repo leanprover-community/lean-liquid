@@ -138,28 +138,10 @@ begin
   let E := (_root_.homology_functor _ _ i).map_iso (free_ExtrDisc_Cech'_iso F),
   apply is_zero.of_iso _ E, clear E,
   dsimp only [_root_.homology_functor],
-  sorry
-  /-
-  intros n,
-  apply is_zero.of_iso _ ((_root_.homology_functor _ _ _).map_iso (free_Cech_iso F)),
-  dsimp only [_root_.homology_functor],
-  revert n,
-  rw ← chain_complex.epi_and_exact_iff_is_zero_homology,
-  suffices : epi.{u+1 u+2} ((unsheafified_free_Cech'.{u} F).d 1 0) ∧
-    (∀ (i : ℕ), exact ((unsheafified_free_Cech' F).d (i + 2) (i + 1))
-      ((unsheafified_free_Cech' F).d (i + 1) i)),
-  split,
-  { apply_with category_theory.preserves_epi { instances := ff },
-    { apply_instance },
-    exact this.1 },
-  { intros i,
-    apply category_theory.Sheaf.exact_of_exact.{(u+2) u (u+1)},
-    exact this.2 i },
-  rw chain_complex.epi_and_exact_iff_is_zero_homology,
-  rw chain_complex.homology_zero_iff_homology_zero,
-  sorry
+  revert i,
+  apply category_theory.Sheaf.map_presheaf_to_Sheaf_homology_zero_of_homology_zero.{(u+2) u (u+1)},
   --apply arrow.conerve_to_cocomplex_homology_is_zero,
-  -/
+  sorry
 end
 
 lemma free_Cech_kernel_SES (F : arrow Profinite.{u}) : ∀ n,
