@@ -83,4 +83,12 @@ lemma homology_zero_iff_homology_zero :
     complex_shape.embedding.nat_down_int_down).obj D).homology i)) ↔
   (∀ i : ℕ, is_zero (D.homology i)) := sorry
 
+universes v' u'
+
+lemma homology_zero_iff_map_homology_zero
+  {B : Type u'} [category.{v'} B] [abelian B] (E : A ≌ B)
+  [E.functor.additive] :
+  (∀ i : ℕ, is_zero (D.homology i)) ↔
+  (∀ i : ℕ, is_zero (((E.functor.map_homological_complex _).obj D).homology i)) := sorry
+
 end chain_complex

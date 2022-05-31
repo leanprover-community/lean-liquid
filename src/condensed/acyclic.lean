@@ -9,6 +9,7 @@ import for_mathlib.Cech.homotopy
 
 import condensed.adjunctions2
 import condensed.projective_resolution
+import condensed.extr.equivalence
 .
 
 noncomputable theory
@@ -29,10 +30,20 @@ category_theory.functor_category_is_abelian.{(u+2) u (u+1)}
 def Profinite_to_presheaf : Profinite.{u} ⥤ Profinite.{u}ᵒᵖ ⥤ Ab.{u+1} :=
 yoneda ⋙ (whiskering_right _ _ _).obj (ulift_functor.{u+1} ⋙ AddCommGroup.free)
 
+def Profinite_to_ExtrDisc_presheaf : Profinite.{u} ⥤ ExtrDisc.{u}ᵒᵖ ⥤ Ab.{u+1} :=
+yoneda ⋙ (whiskering_left _ _ _).obj ExtrDisc_to_Profinite.op ⋙
+  (whiskering_right _ _ _).obj (ulift_functor.{u+1} ⋙ AddCommGroup.free)
+
 def unsheafified_free_Cech' (F : arrow Profinite.{u}) :
   chain_complex (Profinite.{u}ᵒᵖ ⥤ Ab.{u+1}) ℕ :=
 simplicial_object.augmented.to_complex $
 (((simplicial_object.augmented.whiskering _ _).obj Profinite_to_presheaf).obj
+  F.augmented_cech_nerve)
+
+def unsheafified_free_ExtrDiscr_Cech (F : arrow Profinite.{u}) :
+  chain_complex (ExtrDisc.{u}ᵒᵖ ⥤ Ab.{u+1}) ℕ :=
+simplicial_object.augmented.to_complex $
+(((simplicial_object.augmented.whiskering _ _).obj Profinite_to_ExtrDisc_presheaf).obj
   F.augmented_cech_nerve)
 
 def free_Cech' (F : arrow Profinite.{u}) :
@@ -66,6 +77,10 @@ begin
   We need to first compose with the equivalence with sheaves on `ExtrDisc` and
   reduce to the unsheafified version there.
   -/
+  dsimp only [free_Cech],
+  rw chain_complex.homology_zero_iff_homology_zero,
+  sorry
+  /-
   intros n,
   apply is_zero.of_iso _ ((_root_.homology_functor _ _ _).map_iso (free_Cech_iso F)),
   dsimp only [_root_.homology_functor],
@@ -85,6 +100,7 @@ begin
   rw chain_complex.homology_zero_iff_homology_zero,
   sorry
   --apply arrow.conerve_to_cocomplex_homology_is_zero,
+  -/
 end
 
 lemma free_Cech_kernel_SES (F : arrow Profinite.{u}) : ∀ n,
