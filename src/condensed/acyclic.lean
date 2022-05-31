@@ -40,23 +40,27 @@ category_theory.Sheaf.abelian.{(u+2) u (u+1)}
 instance ExtrSheaf_abelian : abelian (ExtrSheaf.{u} Ab.{u+1}) :=
 category_theory.Sheaf.abelian.{(u+2) u (u+1)}
 
-def Profinite_to_presheaf : Profinite.{u} ⥤ Profinite.{u}ᵒᵖ ⥤ Ab.{u+1} :=
+def Profinite_to_presheaf_Ab : Profinite.{u} ⥤ Profinite.{u}ᵒᵖ ⥤ Ab.{u+1} :=
 yoneda ⋙ (whiskering_right _ _ _).obj (ulift_functor.{u+1} ⋙ AddCommGroup.free)
 
-def Profinite_to_ExtrDisc_presheaf : Profinite.{u} ⥤ ExtrDisc.{u}ᵒᵖ ⥤ Ab.{u+1} :=
+def Profinite_to_ExtrDisc_presheaf : Profinite.{u} ⥤ ExtrDisc.{u}ᵒᵖ ⥤ Type (u+1) :=
+yoneda ⋙ (whiskering_left _ _ _).obj ExtrDisc_to_Profinite.op ⋙
+  (whiskering_right _ _ _).obj ulift_functor.{u+1}
+
+def Profinite_to_ExtrDisc_presheaf_Ab : Profinite.{u} ⥤ ExtrDisc.{u}ᵒᵖ ⥤ Ab.{u+1} :=
 yoneda ⋙ (whiskering_left _ _ _).obj ExtrDisc_to_Profinite.op ⋙
   (whiskering_right _ _ _).obj (ulift_functor.{u+1} ⋙ AddCommGroup.free)
 
 def unsheafified_free_Cech' (F : arrow Profinite.{u}) :
   chain_complex (Profinite.{u}ᵒᵖ ⥤ Ab.{u+1}) ℕ :=
 simplicial_object.augmented.to_complex $
-(((simplicial_object.augmented.whiskering _ _).obj Profinite_to_presheaf).obj
+(((simplicial_object.augmented.whiskering _ _).obj Profinite_to_presheaf_Ab).obj
   F.augmented_cech_nerve)
 
 def unsheafified_free_ExtrDiscr_Cech (F : arrow Profinite.{u}) :
   chain_complex (ExtrDisc.{u}ᵒᵖ ⥤ Ab.{u+1}) ℕ :=
 simplicial_object.augmented.to_complex $
-(((simplicial_object.augmented.whiskering _ _).obj Profinite_to_ExtrDisc_presheaf).obj
+(((simplicial_object.augmented.whiskering _ _).obj Profinite_to_ExtrDisc_presheaf_Ab).obj
   F.augmented_cech_nerve)
 
 def free_Cech' (F : arrow Profinite.{u}) :
@@ -68,7 +72,7 @@ def free_Cech' (F : arrow Profinite.{u}) :
 def free_ExtrDisc_Cech' (F : arrow Profinite.{u}) :
   chain_complex (ExtrSheaf.{u} Ab.{u+1}) ℕ :=
 (((simplicial_object.augmented.whiskering _ _).obj
-  (Profinite_to_ExtrDisc_presheaf ⋙ presheaf_to_Sheaf _ _)).obj
+  (Profinite_to_ExtrDisc_presheaf_Ab ⋙ presheaf_to_Sheaf _ _)).obj
   F.augmented_cech_nerve).to_complex
 
 def free_Cech (F : arrow Profinite.{u}) :
@@ -120,6 +124,40 @@ end)
 sorry
 -/
 
+-- SO ANNOYING
+instance evaluation_additive (X : ExtrDisc.{u}) :
+  functor.additive ((evaluation ExtrDisc.{u}ᵒᵖ Ab.{u+1}).obj (op X)) :=
+category_theory.evaluation_additive.{(u+2) u (u+1)} _
+
+def evaluated_free_ExtrDisc_Cech (F : arrow Profinite.{u}) (X : ExtrDisc.{u}) :
+  chain_complex Ab.{u+1} ℕ :=
+(((simplicial_object.augmented.whiskering _ _).obj
+  AddCommGroup.free).obj $
+  ((Profinite_to_ExtrDisc_presheaf.flip.obj (op X)).map_arrow.obj F).augmented_cech_nerve).to_complex
+
+def yet_another_iso (F : arrow Profinite.{u}) (X : ExtrDisc.{u}) :
+  (((evaluation.{u u+1 u+1 u+2} ExtrDisc.{u}ᵒᵖ Ab.{u+1}).obj
+  (op X)).map_homological_complex
+  (complex_shape.down.{0} ℕ)).obj
+  (unsheafified_free_ExtrDiscr_Cech.{u} F) ≅
+  evaluated_free_ExtrDisc_Cech F X :=
+homological_complex.hom.iso_of_components
+(λ i,
+match i with
+| 0 := iso.refl _
+| i+1 := begin
+    dsimp [unsheafified_free_ExtrDiscr_Cech,
+      simplicial_object.augmented.to_complex,
+      simplicial_object.augmented.to_complex_obj,
+      Profinite_to_ExtrDisc_presheaf_Ab,
+      evaluated_free_ExtrDisc_Cech],
+    apply AddCommGroup.free.map_iso,
+  sorry
+  -- Need to use that evalaution preserves limits.
+end
+end)
+sorry
+
 lemma free_Cech_exact (F : arrow Profinite.{u}) : ∀ (n : ℤ),
   is_zero $ (free_Cech F).homology n :=
 begin
@@ -142,7 +180,14 @@ begin
   dsimp only [_root_.homology_functor],
   revert i,
   apply category_theory.Sheaf.map_presheaf_to_Sheaf_homology_zero_of_homology_zero.{(u+2) u (u+1)},
-  --have := arrow.conerve_to_cocomplex_homology_is_zero,
+  apply category_theory.homology_zero_of_eval.{(u+2) u (u+1)},
+  any_goals { apply_instance },
+  intros X, tactic.op_induction',
+  intros i,
+  let E := (_root_.homology_functor _ _ i).map_iso (yet_another_iso F X),
+  apply is_zero.of_iso _ E,
+  -- Now we can use the splitting similarly to arrow.conerve_to_cocomplex_homology_is_zero
+  -- but we need a dual variant.
   sorry
 end
 
