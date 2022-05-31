@@ -3,9 +3,13 @@ import for_mathlib.Cech.homotopy
 import for_mathlib.acyclic
 import for_mathlib.exact_seq4
 import for_mathlib.cech
+import for_mathlib.chain_complex_exact
+import for_mathlib.abelian_sheaves.exact
+import for_mathlib.Cech.homotopy
 
 import condensed.adjunctions2
 import condensed.projective_resolution
+import condensed.extr.equivalence
 .
 
 noncomputable theory
@@ -19,11 +23,44 @@ namespace condensed
 
 set_option pp.universes true
 
+-- ANNOYING!
+instance presheaf_abelian : abelian (Profinite.{u}ᵒᵖ ⥤ Ab.{u+1}) :=
+category_theory.functor_category_is_abelian.{(u+2) u (u+1)}
+
+-- ANNOYING!
+instance ExtrDisc_presheaf_abelian : abelian (ExtrDisc.{u}ᵒᵖ ⥤ Ab.{u+1}) :=
+category_theory.functor_category_is_abelian.{(u+2) u (u+1)}
+
+instance ExtrDisc_proetale_topology_filtered (X : ExtrDisc.{u}) :
+  is_filtered (ExtrDisc.proetale_topology.{u}.cover X)ᵒᵖ := infer_instance
+
+instance ExtrSheaf_abelian' : abelian (Sheaf ExtrDisc.proetale_topology.{u} Ab.{u+1}) :=
+category_theory.Sheaf.abelian.{(u+2) u (u+1)}
+
+instance ExtrSheaf_abelian : abelian (ExtrSheaf.{u} Ab.{u+1}) :=
+category_theory.Sheaf.abelian.{(u+2) u (u+1)}
+
+def Profinite_to_presheaf_Ab : Profinite.{u} ⥤ Profinite.{u}ᵒᵖ ⥤ Ab.{u+1} :=
+yoneda ⋙ (whiskering_right _ _ _).obj (ulift_functor.{u+1} ⋙ AddCommGroup.free)
+
+def Profinite_to_ExtrDisc_presheaf : Profinite.{u} ⥤ ExtrDisc.{u}ᵒᵖ ⥤ Type (u+1) :=
+yoneda ⋙ (whiskering_left _ _ _).obj ExtrDisc_to_Profinite.op ⋙
+  (whiskering_right _ _ _).obj ulift_functor.{u+1}
+
+def Profinite_to_ExtrDisc_presheaf_Ab : Profinite.{u} ⥤ ExtrDisc.{u}ᵒᵖ ⥤ Ab.{u+1} :=
+yoneda ⋙ (whiskering_left _ _ _).obj ExtrDisc_to_Profinite.op ⋙
+  (whiskering_right _ _ _).obj (ulift_functor.{u+1} ⋙ AddCommGroup.free)
+
 def unsheafified_free_Cech' (F : arrow Profinite.{u}) :
   chain_complex (Profinite.{u}ᵒᵖ ⥤ Ab.{u+1}) ℕ :=
 simplicial_object.augmented.to_complex $
-(((simplicial_object.augmented.whiskering _ _).obj
-  (yoneda ⋙ (whiskering_right _ _ _).obj (AddCommGroup.free ⋙ Ab.ulift.{(u+1) u}))).obj
+(((simplicial_object.augmented.whiskering _ _).obj Profinite_to_presheaf_Ab).obj
+  F.augmented_cech_nerve)
+
+def unsheafified_free_ExtrDiscr_Cech (F : arrow Profinite.{u}) :
+  chain_complex (ExtrDisc.{u}ᵒᵖ ⥤ Ab.{u+1}) ℕ :=
+simplicial_object.augmented.to_complex $
+(((simplicial_object.augmented.whiskering _ _).obj Profinite_to_ExtrDisc_presheaf_Ab).obj
   F.augmented_cech_nerve)
 
 def free_Cech' (F : arrow Profinite.{u}) :
@@ -32,22 +69,127 @@ def free_Cech' (F : arrow Profinite.{u}) :
   (Profinite_to_Condensed ⋙ CondensedSet_to_Condensed_Ab)).obj
   F.augmented_cech_nerve).to_complex
 
-def unsheafified_free_Chech (F : arrow Profinite.{u}) :
-  chain_complex (Profinite.{u}ᵒᵖ ⥤ Ab.{u+1}) ℤ :=
-(homological_complex.embed $ complex_shape.embedding.nat_down_int_down).obj
-  (unsheafified_free_Cech' F)
+def free_ExtrDisc_Cech' (F : arrow Profinite.{u}) :
+  chain_complex (ExtrSheaf.{u} Ab.{u+1}) ℕ :=
+(((simplicial_object.augmented.whiskering _ _).obj
+  (Profinite_to_ExtrDisc_presheaf_Ab ⋙ presheaf_to_Sheaf _ _)).obj
+  F.augmented_cech_nerve).to_complex
 
 def free_Cech (F : arrow Profinite.{u}) :
   chain_complex (Condensed.{u} Ab.{u+1}) ℤ :=
 (homological_complex.embed $ complex_shape.embedding.nat_down_int_down).obj (free_Cech' F)
 
-def free_Chech_iso (F : arrow Profinite.{u}) :
-  free_Cech F ≅ (presheaf_to_Condensed_Ab.map_homological_complex _).obj
-  (unsheafified_free_Chech F) := sorry
+instance Condensed_ExtrSheaf_equiv_additive :
+  functor.additive (Condensed_ExtrSheaf_equiv Ab.{u+1}).inverse :=
+by constructor
 
-lemma free_Cech_exact (F : arrow Profinite.{u}) (n : ℤ) :
-  is_zero $ (free_Cech F).homology n :=
+def free_Cech'_iso_ExtrDisc (F : arrow Profinite.{u}) :
+  ((Condensed_ExtrSheaf_equiv _).inverse.map_homological_complex _).obj (free_Cech' F) ≅
+  free_ExtrDisc_Cech' F :=
+homological_complex.hom.iso_of_components
+(λ i,
+match i with
+| 0 := sorry
+| i+1 := sorry
+end)
 sorry
+
+instance presheaf_to_Sheaf_additive :
+  (presheaf_to_Sheaf.{u+2 u u+1} ExtrDisc.proetale_topology.{u} Ab.{u+1}).additive :=
+category_theory.Sheaf.presheaf_to_Sheaf_additive
+
+def free_ExtrDisc_Cech'_iso (F : arrow Profinite.{u}) :
+  free_ExtrDisc_Cech' F ≅
+  ((presheaf_to_Sheaf _ _).map_homological_complex _).obj (unsheafified_free_ExtrDiscr_Cech F) :=
+homological_complex.hom.iso_of_components
+(λ i,
+match i with
+| 0 := iso.refl _
+| i+1 := iso.refl _
+end)
+sorry
+
+/-
+def free_Cech_iso (F : arrow Profinite.{u}) :
+  free_Cech F ≅ (homological_complex.embed $ complex_shape.embedding.nat_down_int_down).obj
+  ((presheaf_to_Condensed_Ab.map_homological_complex _).obj
+  (unsheafified_free_Cech' F)) :=
+homological_complex.hom.iso_of_components
+(λ i,
+match i with
+| int.of_nat 0 := iso.refl _
+| int.of_nat (n+1) := iso.refl _
+| -[1+i] := iso.refl _
+end)
+sorry
+-/
+
+-- SO ANNOYING
+instance evaluation_additive (X : ExtrDisc.{u}) :
+  functor.additive ((evaluation ExtrDisc.{u}ᵒᵖ Ab.{u+1}).obj (op X)) :=
+category_theory.evaluation_additive.{(u+2) u (u+1)} _
+
+def evaluated_free_ExtrDisc_Cech (F : arrow Profinite.{u}) (X : ExtrDisc.{u}) :
+  chain_complex Ab.{u+1} ℕ :=
+(((simplicial_object.augmented.whiskering _ _).obj
+  AddCommGroup.free).obj $
+  ((Profinite_to_ExtrDisc_presheaf.flip.obj (op X)).map_arrow.obj F).augmented_cech_nerve).to_complex
+
+def yet_another_iso (F : arrow Profinite.{u}) (X : ExtrDisc.{u}) :
+  (((evaluation.{u u+1 u+1 u+2} ExtrDisc.{u}ᵒᵖ Ab.{u+1}).obj
+  (op X)).map_homological_complex
+  (complex_shape.down.{0} ℕ)).obj
+  (unsheafified_free_ExtrDiscr_Cech.{u} F) ≅
+  evaluated_free_ExtrDisc_Cech F X :=
+homological_complex.hom.iso_of_components
+(λ i,
+match i with
+| 0 := iso.refl _
+| i+1 := begin
+    dsimp [unsheafified_free_ExtrDiscr_Cech,
+      simplicial_object.augmented.to_complex,
+      simplicial_object.augmented.to_complex_obj,
+      Profinite_to_ExtrDisc_presheaf_Ab,
+      evaluated_free_ExtrDisc_Cech],
+    apply AddCommGroup.free.map_iso,
+  sorry
+  -- Need to use that evalaution preserves limits.
+end
+end)
+sorry
+
+lemma free_Cech_exact (F : arrow Profinite.{u}) : ∀ (n : ℤ),
+  is_zero $ (free_Cech F).homology n :=
+begin
+  /-
+  AT: This is just a sketch...
+  We need to first compose with the equivalence with sheaves on `ExtrDisc` and
+  reduce to the unsheafified version there.
+  -/
+  dsimp only [free_Cech],
+  rw chain_complex.homology_zero_iff_homology_zero,
+  haveI : functor.additive (Condensed_ExtrSheaf_equiv Ab.{u+1}).symm.functor, sorry,
+  rw chain_complex.homology_zero_iff_map_homology_zero _
+    (Condensed_ExtrSheaf_equiv Ab.{u+1}).symm,
+  intros i,
+  dsimp only [equivalence.symm_functor],
+  let E := (_root_.homology_functor _ _ i).map_iso (free_Cech'_iso_ExtrDisc F),
+  apply is_zero.of_iso _ E, clear E,
+  let E := (_root_.homology_functor _ _ i).map_iso (free_ExtrDisc_Cech'_iso F),
+  apply is_zero.of_iso _ E, clear E,
+  dsimp only [_root_.homology_functor],
+  revert i,
+  apply category_theory.Sheaf.map_presheaf_to_Sheaf_homology_zero_of_homology_zero.{(u+2) u (u+1)},
+  apply category_theory.homology_zero_of_eval.{(u+2) u (u+1)},
+  any_goals { apply_instance },
+  intros X, tactic.op_induction',
+  intros i,
+  let E := (_root_.homology_functor _ _ i).map_iso (yet_another_iso F X),
+  apply is_zero.of_iso _ E,
+  -- Now we can use the splitting similarly to arrow.conerve_to_cocomplex_homology_is_zero
+  -- but we need a dual variant.
+  sorry
+end
 
 lemma free_Cech_kernel_SES (F : arrow Profinite.{u}) : ∀ n,
   short_exact (kernel.ι $ (free_Cech F).d (n+1+1) (n+1)) (delta_to_kernel _ (n+1+1) (n+1) n) :=

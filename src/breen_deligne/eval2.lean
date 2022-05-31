@@ -12,6 +12,9 @@ variables (BD : package)
 variables {𝒜 : Type*} [category 𝒜] [abelian 𝒜]
 variables (F : 𝒜 ⥤ 𝒜)
 
+def eval' : 𝒜 ⥤ cochain_complex 𝒜 ℤ :=
+(data.eval_functor F).obj BD.data ⋙ homological_complex.embed complex_shape.embedding.nat_down_int_up
+
 def eval : 𝒜 ⥤ bounded_homotopy_category 𝒜 :=
 (data.eval_functor F).obj BD.data ⋙ chain_complex.to_bounded_homotopy_category
 

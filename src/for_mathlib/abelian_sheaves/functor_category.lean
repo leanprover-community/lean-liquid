@@ -230,7 +230,7 @@ end
 instance functor_category_is_iso_coim_to_im {F G : C ⥤ D} (η : F ⟶ G) :
   is_iso (abelian.coimage_image_comparison η) := nat_iso.is_iso_of_is_iso_app _
 
-instance : abelian (C ⥤ D) :=
+instance functor_category_is_abelian : abelian (C ⥤ D) :=
 abelian.of_coimage_image_comparison_is_iso
 
 end abelian

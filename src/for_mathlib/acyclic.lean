@@ -10,6 +10,7 @@ import for_mathlib.short_exact
 import for_mathlib.homology
 import for_mathlib.exact_lift_desc
 import for_mathlib.additive_functor
+import for_mathlib.homotopy_category_lemmas
 
 .
 
@@ -584,21 +585,24 @@ begin
   slice_rhs 1 2
   { erw kernel.lift_ι },
   simp only [category.assoc],
-  congr' 1,
-  simp only [← category.assoc],
-  congr' 1,
   dsimp only [Ext_compute_with_acyclic_HomB, functor.comp_map],
-  change (((preadditive_yoneda.obj B).right_op.map_homological_complex _ ⋙
+  change _ ≫ (((preadditive_yoneda.obj B).right_op.map_homological_complex _ ⋙
       homological_complex.unop_functor.right_op).map f).unop.f _ ≫ _ = _,
-  simp only [← homological_complex.comp_f],
-  congr' 1,
-  simp_rw [← unop_comp],
-  congr' 1,
-  simp_rw [← functor.map_comp, functor.comp_map, ← functor.map_comp],
-  -- This is now unprovable because we got rid of all homology, and what we really have
-  -- is a homotopy between the two morphiisms involved... some of the steps above will need
-  -- to be modified.
-  sorry
+  slice_lhs 2 3
+  { simp only [← homological_complex.comp_f, ← unop_comp],
+    simp only [functor.comp_map, ← functor.map_comp] },
+  slice_rhs 2 3
+  { simp only [← homological_complex.comp_f, ← unop_comp, ← functor.map_comp] },
+  apply homotopy.kernel_ι_comp_comp_cokernel_π_of_homotopy,
+  apply homotopy.homotopy_unop_functor_right_op_map_unop_of_homotopy,
+  apply functor.map_homotopy,
+  suffices : (lift ((of' C₁).π ≫ of'_hom f) (of' C₂).π) ≫ (of' C₂).π =
+    (of' C₁).π ≫ of'_hom f,
+  { apply homotopy_category.homotopy_of_eq,
+    convert this.symm,
+    { simpa only [functor.map_comp, quotient_map_out], },
+    { simpa only [functor.map_comp, quotient_map_out], } },
+  simp,
 end
 
 
@@ -717,7 +721,7 @@ lemma Ext_compute_with_acylic_inv_eq (B : 𝓐)
   homology.desc' _ _ _
   ( kernel_yoneda_complex_to_morphism_to_single C B (-i) ≫
     Ext_compute_with_acyclic_inv_eq_aux C B i)
-sorry := sorry
+admit := admit
 
 lemma homology.lift_desc (X Y Z : 𝓐) (f : X ⟶ Y) (g : Y ⟶ Z) (w)
   (U : 𝓐) (e : _ ⟶ U) (he : f ≫ e = 0) (V : 𝓐) (t : V ⟶ _) (ht : t ≫ g = 0) :

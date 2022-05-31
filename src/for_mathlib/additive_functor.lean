@@ -35,6 +35,14 @@ is_biprod.iso_biprod _ (F.map_is_biprod _ (biprod.is_biprod A B))
 instance forget₂_additive (R : Type*) [ring R] : (forget₂ (Module R) AddCommGroup).additive :=
 { map_add' := λ M N f g, rfl }
 
+lemma map_is_zero {X : 𝒜} [F.additive] (hX : limits.is_zero X) :
+  limits.is_zero (F.obj X) :=
+begin
+  rw limits.is_zero.iff_id_eq_zero at hX ⊢,
+  convert congr_arg (@category_theory.functor.map _ _ _ _ F _ _) hX;
+  simp,
+end
+
 end functor
 
 end category_theory
