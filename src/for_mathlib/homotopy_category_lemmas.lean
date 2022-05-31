@@ -36,7 +36,7 @@ def homotopy_unop_functor_right_op_map_unop_of_homotopy
   comm := begin
     intros i,
     dsimp,
-    sorry
+    sorry -- annoying...
   end }
 
 end homotopy
