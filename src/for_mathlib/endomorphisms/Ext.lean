@@ -26,11 +26,19 @@ variables {𝓐 : Type u} [category.{v} 𝓐] [abelian 𝓐]
 variables {𝓑 : Type*} [category 𝓑] [abelian 𝓑]
 variables (F : 𝓐 ⥤ 𝓑) [functor.additive F]
 
--- SELFCONTAINED
 instance map_homotopy_category_is_bounded_above
   (X : homotopy_category 𝓐 $ complex_shape.up ℤ) [X.is_bounded_above] :
   ((F.map_homotopy_category _).obj X).is_bounded_above :=
-sorry
+begin
+  obtain ⟨b, hb⟩ := is_bounded_above.cond X,
+  refine ⟨⟨b, λ i hi, _⟩⟩,
+  specialize hb i hi,
+  change is_zero (F.obj (X.as.X i)),
+  have := category_theory.functor.map_zero_object F,
+  rw is_zero.iff_id_eq_zero at hb ⊢,
+  convert congr_arg (@category_theory.functor.map _ _ _ _ F _ _) hb;
+  simp,
+ end
 
 end homotopy_category
 
