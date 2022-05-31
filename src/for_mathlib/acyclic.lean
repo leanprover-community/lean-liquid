@@ -449,6 +449,17 @@ by apply (homotopy_category.homology_functor Ab _ (-i)).map
   (((homotopy_category.quotient _ _).map
     ((Ext_compute_with_acyclic_HomB B).map (of' C).π.out).unop))
 
+-- Are these two lemmas useful? Do we have them?
+lemma functor.map_unop {𝓐 : Type*} [category 𝓐] {𝓑 : Type*}
+  [category 𝓑] (F : 𝓐 ⥤ 𝓑) {a₁ a₂ : 𝓐ᵒᵖ}
+  (f : a₁ ⟶ a₂) : F.map f.unop = (F.op.map f).unop :=
+rfl
+
+lemma functor.map_map' {𝓐 : Type*} [category 𝓐] {𝓑 : Type*}
+  [category 𝓑] {𝓒 : Type*} [category 𝓒] (F : 𝓐 ⥤ 𝓑) (G : 𝓑 ⥤ 𝓒) {a₁ a₂ : 𝓐}
+  (φ : a₁ ⟶ a₂) : G.map (F.map φ) = (F ⋙ G).map φ :=
+rfl
+
 lemma Ext_compute_with_acyclic_aux₃_naturality
   (C₁ C₂ : cochain_complex 𝓐 ℤ)
   [((quotient 𝓐 (complex_shape.up ℤ)).obj C₁).is_bounded_above]
@@ -463,7 +474,16 @@ lemma Ext_compute_with_acyclic_aux₃_naturality
   (((preadditive_yoneda.obj B).right_op.map_homological_complex _ ⋙
       homological_complex.unop_functor.right_op ⋙
       (_root_.homology_functor _ _ (-i)).op).map
-      (bounded_homotopy_category.lift ((of' C₁).π ≫ of'_hom f) (of' C₂).π).out).unop := sorry
+      (bounded_homotopy_category.lift ((of' C₁).π ≫ of'_hom f) (of' C₂).π).out).unop :=
+begin
+  -- remove all unops
+  simp only [Ext_compute_with_acyclic_aux₃],
+  simp only [functor.map_unop, ← unop_comp],
+  congr' 1,
+  simp only [functor.map_map'],
+  -- not even sure if I'm going the right way
+  sorry,
+end
 
 lemma Ext_compute_with_acyclic_aux₃_is_iso
   (B : 𝓐)
