@@ -78,4 +78,9 @@ lemma epi_and_exact_iff_is_zero_homology :
 ⟨λ h, is_zero_homology_of_epi_and_exact D h.1 h.2,
   epi_and_exact_of_is_zero_homology _⟩
 
+lemma homology_zero_iff_homology_zero :
+  (∀ i : ℤ, is_zero (((homological_complex.embed $
+    complex_shape.embedding.nat_down_int_down).obj D).homology i)) ↔
+  (∀ i : ℕ, is_zero (D.homology i)) := sorry
+
 end chain_complex

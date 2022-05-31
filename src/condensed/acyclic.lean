@@ -3,6 +3,9 @@ import for_mathlib.Cech.homotopy
 import for_mathlib.acyclic
 import for_mathlib.exact_seq4
 import for_mathlib.cech
+import for_mathlib.chain_complex_exact
+import for_mathlib.abelian_sheaves.exact
+import for_mathlib.Cech.homotopy
 
 import condensed.adjunctions2
 import condensed.projective_resolution
@@ -19,6 +22,10 @@ namespace condensed
 
 set_option pp.universes true
 
+-- ANNOYING!
+instance presheaf_abelian : abelian (Profinite.{u}ᵒᵖ ⥤ Ab.{u+1}) :=
+category_theory.functor_category_is_abelian.{(u+2) u (u+1)}
+
 def Profinite_to_presheaf : Profinite.{u} ⥤ Profinite.{u}ᵒᵖ ⥤ Ab.{u+1} :=
 yoneda ⋙ (whiskering_right _ _ _).obj (ulift_functor.{u+1} ⋙ AddCommGroup.free)
 
@@ -34,30 +41,51 @@ def free_Cech' (F : arrow Profinite.{u}) :
   (Profinite_to_Condensed ⋙ CondensedSet_to_Condensed_Ab)).obj
   F.augmented_cech_nerve).to_complex
 
-def unsheafified_free_Cech (F : arrow Profinite.{u}) :
-  chain_complex (Profinite.{u}ᵒᵖ ⥤ Ab.{u+1}) ℤ :=
-(homological_complex.embed $ complex_shape.embedding.nat_down_int_down).obj
-  (unsheafified_free_Cech' F)
-
 def free_Cech (F : arrow Profinite.{u}) :
   chain_complex (Condensed.{u} Ab.{u+1}) ℤ :=
 (homological_complex.embed $ complex_shape.embedding.nat_down_int_down).obj (free_Cech' F)
 
-def free_Chech_iso (F : arrow Profinite.{u}) :
-  free_Cech F ≅ (presheaf_to_Condensed_Ab.map_homological_complex _).obj
-  (unsheafified_free_Cech F) :=
+def free_Cech_iso (F : arrow Profinite.{u}) :
+  free_Cech F ≅ (homological_complex.embed $ complex_shape.embedding.nat_down_int_down).obj
+  ((presheaf_to_Condensed_Ab.map_homological_complex _).obj
+  (unsheafified_free_Cech' F)) :=
 homological_complex.hom.iso_of_components
 (λ i,
 match i with
 | int.of_nat 0 := iso.refl _
 | int.of_nat (n+1) := iso.refl _
-| -[1+i] := (is_zero_zero _).iso (presheaf_to_Condensed_Ab.map_is_zero (is_zero_zero _))
+| -[1+i] := iso.refl _
 end)
 sorry
 
-lemma free_Cech_exact (F : arrow Profinite.{u}) (n : ℤ) :
+lemma free_Cech_exact (F : arrow Profinite.{u}) : ∀ (n : ℤ),
   is_zero $ (free_Cech F).homology n :=
-sorry
+begin
+  /-
+  AT: This is just a sketch...
+  We need to first compose with the equivalence with sheaves on `ExtrDisc` and
+  reduce to the unsheafified version there.
+  -/
+  intros n,
+  apply is_zero.of_iso _ ((_root_.homology_functor _ _ _).map_iso (free_Cech_iso F)),
+  dsimp only [_root_.homology_functor],
+  revert n,
+  rw ← chain_complex.epi_and_exact_iff_is_zero_homology,
+  suffices : epi.{u+1 u+2} ((unsheafified_free_Cech'.{u} F).d 1 0) ∧
+    (∀ (i : ℕ), exact ((unsheafified_free_Cech' F).d (i + 2) (i + 1))
+      ((unsheafified_free_Cech' F).d (i + 1) i)),
+  split,
+  { apply_with category_theory.preserves_epi { instances := ff },
+    { apply_instance },
+    exact this.1 },
+  { intros i,
+    apply category_theory.Sheaf.exact_of_exact.{(u+2) u (u+1)},
+    exact this.2 i },
+  rw chain_complex.epi_and_exact_iff_is_zero_homology,
+  rw chain_complex.homology_zero_iff_homology_zero,
+  sorry
+  --apply arrow.conerve_to_cocomplex_homology_is_zero,
+end
 
 lemma free_Cech_kernel_SES (F : arrow Profinite.{u}) : ∀ n,
   short_exact (kernel.ι $ (free_Cech F).d (n+1+1) (n+1)) (delta_to_kernel _ (n+1+1) (n+1) n) :=

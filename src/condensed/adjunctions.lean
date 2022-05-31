@@ -115,4 +115,8 @@ def Condensed_Ab_presheaf_adjunction :
 sheafification_adjunction _ _
 
 instance : functor.additive presheaf_to_Condensed_Ab := sorry
+
 instance : functor.additive Condensed_Ab_to_presheaf := ⟨⟩
+
+instance : preserves_colimits presheaf_to_Condensed_Ab :=
+Condensed_Ab_presheaf_adjunction.left_adjoint_preserves_colimits
