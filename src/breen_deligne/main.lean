@@ -27,17 +27,25 @@ variables (F : 𝓐 ⥤ 𝓐) --[preserves_filtered_colimits F]
 -- `BD = breen_deligne.package.eg` and
 -- `F` = "free condensed abelian group"
 -- Also missing: the condition that `A` is torsion free.
-lemma main_lemma_bdd (A : 𝓐ᵒᵖ) (B : 𝓐) (f : A ⟶ A) (g : B ⟶ B) (j : ℤ) :
-  (∀ i ≤ j, is_iso $ ((Ext' i).map f).app B - ((Ext' i).obj A).map g) ↔
-  (∀ i ≤ j, is_iso $
-    ((Ext i).map ((BD.eval F).op.map f)).app ((single _ 0).obj B) -
-    ((Ext i).obj ((BD.eval F).op.obj A)).map ((single _ 0).map g)) :=
+lemma main_lemma_bdd (A : 𝓐ᵒᵖ) (B : 𝓐) (j : ℤ) :
+  (∀ i ≤ j, is_zero $ ((Ext' i).obj A).obj B) ↔
+  (∀ i ≤ j, is_zero $ ((Ext i).obj ((BD.eval F).op.obj A)).obj ((single _ 0).obj B)) :=
 sorry
 
 lemma main_lemma_is_zero (A : 𝓐ᵒᵖ) (B : 𝓐) :
   (∀ i, is_zero $ ((Ext' i).obj A).obj B) ↔
   (∀ i, is_zero $ ((Ext i).obj ((BD.eval F).op.obj A)).obj ((single _ 0).obj B)) :=
-sorry
+begin
+  split,
+  { intros H j,
+    refine (main_lemma_bdd BD F A B j).mp _ j le_rfl,
+    intros i hij,
+    apply H },
+  { intros H j,
+    refine (main_lemma_bdd BD F A B j).mpr _ j le_rfl,
+    intros i hij,
+    apply H }
+end
 
 section
 
