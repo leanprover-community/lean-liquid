@@ -16,7 +16,11 @@ variables (C₁ C₂ : homological_complex A c) (f₁ f₂ : C₁ ⟶ C₂)
 lemma kernel_ι_comp_comp_cokernel_π_of_homotopy (h : homotopy f₁ f₂) (i : M) :
   kernel.ι (C₁.d_from i) ≫ f₁.f i ≫ cokernel.π (C₂.d_to i) =
   kernel.ι _ ≫ f₂.f i ≫ cokernel.π _ :=
-sorry
+begin
+  have := h.comm i,
+  apply_fun (λ e, kernel.ι (C₁.d_from i) ≫ e ≫ cokernel.π (C₂.d_to i)) at this,
+  simpa using this,
+end
 
 def homotopy_unop_functor_right_op_map_unop_of_homotopy
   (C₁ C₂ : homological_complex Aᵒᵖ c) (f₁ f₂ : C₁ ⟶ C₂) (h : homotopy f₁ f₂) :
