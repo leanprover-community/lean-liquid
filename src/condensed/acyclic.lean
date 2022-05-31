@@ -57,7 +57,7 @@ begin
   exact iso.refl _,
   -- sheafification of zero is zero.
   --refine is_zero.iso (is_zero_zero _) (presheaf_to_Condensed_Ab.map_is_zero _),
-  sorry
+  all_goals { sorry }
 end
 
 lemma free_Cech_exact (F : arrow Profinite.{u}) (n : ℤ) :
