@@ -26,11 +26,22 @@ variables {𝓐 : Type u} [category.{v} 𝓐] [abelian 𝓐]
 variables {𝓑 : Type*} [category 𝓑] [abelian 𝓑]
 variables (F : 𝓐 ⥤ 𝓑) [functor.additive F]
 
--- SELFCONTAINED
+-- move
+lemma _root_.functor.map_is_zero {F : 𝓐 ⥤ 𝓑} [functor.additive F] {Z : 𝓐} (hZ : is_zero Z) :
+  is_zero (F.obj Z) :=
+begin
+  rw is_zero.iff_id_eq_zero at hZ ⊢,
+  convert congr_arg (@category_theory.functor.map _ _ _ _ F _ _) hZ;
+  simp,
+end
+
 instance map_homotopy_category_is_bounded_above
   (X : homotopy_category 𝓐 $ complex_shape.up ℤ) [X.is_bounded_above] :
   ((F.map_homotopy_category _).obj X).is_bounded_above :=
-sorry
+begin
+  obtain ⟨b, hb⟩ := is_bounded_above.cond X,
+  exact ⟨⟨b, λ i hi, functor.map_is_zero (hb i hi)⟩⟩,
+ end
 
 end homotopy_category
 
