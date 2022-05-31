@@ -26,6 +26,17 @@ def homotopy_unop_functor_right_op_map_unop_of_homotopy
   (C₁ C₂ : homological_complex Aᵒᵖ c) (f₁ f₂ : C₁ ⟶ C₂) (h : homotopy f₁ f₂) :
   homotopy
     (homological_complex.unop_functor.right_op.map f₁).unop
-    (homological_complex.unop_functor.right_op.map f₂).unop := sorry
+    (homological_complex.unop_functor.right_op.map f₂).unop :=
+{ hom := λ i j, (h.hom _ _).unop,
+  zero' := λ i j hh, begin
+    let z := _, change _ = z, rw ← z.unop_op,
+    congr' 1,
+    exact h.zero _ _ hh,
+  end,
+  comm := begin
+    intros i,
+    dsimp,
+    sorry
+  end }
 
 end homotopy
