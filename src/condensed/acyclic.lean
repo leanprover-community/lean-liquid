@@ -76,7 +76,8 @@ def free_Cech (F : arrow Profinite.{u}) :
 (homological_complex.embed $ complex_shape.embedding.nat_down_int_down).obj (free_Cech' F)
 
 instance Condensed_ExtrSheaf_equiv_additive :
-  functor.additive (Condensed_ExtrSheaf_equiv Ab.{u+1}).inverse := sorry
+  functor.additive (Condensed_ExtrSheaf_equiv Ab.{u+1}).inverse :=
+by constructor
 
 def free_Cech'_iso_ExtrDisc (F : arrow Profinite.{u}) :
   ((Condensed_ExtrSheaf_equiv _).inverse.map_homological_complex _).obj (free_Cech' F) ≅
@@ -90,7 +91,8 @@ end)
 sorry
 
 instance presheaf_to_Sheaf_additive :
-  (presheaf_to_Sheaf.{u+2 u u+1} ExtrDisc.proetale_topology.{u} Ab.{u+1}).additive := sorry
+  (presheaf_to_Sheaf.{u+2 u u+1} ExtrDisc.proetale_topology.{u} Ab.{u+1}).additive :=
+category_theory.Sheaf.presheaf_to_Sheaf_additive
 
 def free_ExtrDisc_Cech'_iso (F : arrow Profinite.{u}) :
   free_ExtrDisc_Cech' F ≅
@@ -140,7 +142,7 @@ begin
   dsimp only [_root_.homology_functor],
   revert i,
   apply category_theory.Sheaf.map_presheaf_to_Sheaf_homology_zero_of_homology_zero.{(u+2) u (u+1)},
-  --apply arrow.conerve_to_cocomplex_homology_is_zero,
+  --have := arrow.conerve_to_cocomplex_homology_is_zero,
   sorry
 end
 
