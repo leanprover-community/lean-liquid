@@ -2,6 +2,7 @@ import breen_deligne.eval2
 import for_mathlib.derived.K_projective
 import for_mathlib.endomorphisms.Ext
 import for_mathlib.endomorphisms.functor
+import for_mathlib.truncation
 
 .
 
@@ -37,6 +38,9 @@ begin
   { apply Ext'_is_zero_of_neg, linarith only [hj, hij] }
 end
 
+variables (hH0 : ((BD.eval F).obj A).val.as.homology 0 ≅ A)
+
+include hH0
 lemma IH_0 : IH BD F A B 0 :=
 begin
   apply forall_congr, intro i, apply forall_congr, intro hi0,
@@ -51,9 +55,10 @@ begin
   sorry
 end
 
-
 lemma bdd_step (j : ℤ) (hj : 0 ≤ j) (ih : IH BD F A B j) : IH BD F A B (j + 1) :=
-sorry
+begin
+  sorry
+end
 
 -- This requires more hypotheses on `BD` and `F`.
 -- We'll figure them out while proving the lemma.
@@ -61,25 +66,25 @@ sorry
 -- `BD = breen_deligne.package.eg` and
 -- `F` = "free condensed abelian group"
 -- Also missing: the condition that `A` is torsion free.
-lemma bdd (A : 𝓐) (B : 𝓐) (j : ℤ) : IH BD F A B j :=
+lemma bdd (j : ℤ) : IH BD F A B j :=
 begin
   apply int.induction_on' j,
-  { exact IH_0 BD F A B },
-  { exact bdd_step BD F A B },
+  { exact IH_0 BD F A B hH0 },
+  { exact bdd_step BD F A B hH0 },
   { exact IH_neg BD F A B, },
 end
 
-lemma is_zero (A : 𝓐) (B : 𝓐) :
+lemma is_zero :
   (∀ i, is_zero $ ((Ext' i).obj (op A)).obj B) ↔
   (∀ i, is_zero $ ((Ext i).obj (op ((BD.eval F).obj A))).obj ((single _ 0).obj B)) :=
 begin
   split,
   { intros H j,
-    refine (bdd BD F A B j).mp _ j le_rfl,
+    refine (bdd BD F A B hH0 j).mp _ j le_rfl,
     intros i hij,
     apply H },
   { intros H j,
-    refine (bdd BD F A B j).mpr _ j le_rfl,
+    refine (bdd BD F A B hH0 j).mpr _ j le_rfl,
     intros i hij,
     apply H }
 end
@@ -95,17 +100,17 @@ def mk_bo_ha_ca_Q (X : 𝓐) (f : X ⟶ X) :
   (BD.eval F.map_endomorphisms).obj ⟨X, f⟩ :=
 sorry
 
-lemma main_lemma (A : 𝓐ᵒᵖ) (B : 𝓐) (f : A ⟶ A) (g : B ⟶ B) :
-  (∀ i, is_iso $ ((Ext' i).map f).app B - ((Ext' i).obj A).map g) ↔
+lemma main_lemma (A : 𝓐) (B : 𝓐) (f : A ⟶ A) (g : B ⟶ B)
+  (hH0 : (((data.eval_functor F).obj BD.data).obj A).homology 0 ≅ A) :
+  (∀ i, is_iso $ ((Ext' i).map f.op).app B - ((Ext' i).obj (op A)).map g) ↔
   (∀ i, is_iso $
-    ((Ext i).map ((BD.eval F).op.map f)).app ((single _ 0).obj B) -
-    ((Ext i).obj ((BD.eval F).op.obj A)).map ((single _ 0).map g)) :=
+    ((Ext i).map ((BD.eval F).map f).op).app ((single _ 0).obj B) -
+    ((Ext i).obj (op $ (BD.eval F).obj A)).map ((single _ 0).map g)) :=
 begin
-  induction A using opposite.rec,
-  rw [← f.op_unop, ← endomorphisms.Ext'_is_zero_iff' A B f.unop g, (BD.eval F).op_map, f.op_unop],
-  dsimp,
+  rw [← endomorphisms.Ext'_is_zero_iff' A B f g],
   rw [← endomorphisms.Ext_is_zero_iff'],
-  refine (main_lemma.is_zero BD F.map_endomorphisms _ _).trans _,
+  refine (main_lemma.is_zero BD F.map_endomorphisms _ _ _).trans _,
+  { sorry },
   apply forall_congr, intro i,
   apply iso.is_zero_iff,
   refine functor.map_iso _ _ ≪≫ iso.app (functor.map_iso _ _) _,
