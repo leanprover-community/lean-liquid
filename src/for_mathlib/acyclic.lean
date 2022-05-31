@@ -584,17 +584,15 @@ begin
   slice_rhs 1 2
   { erw kernel.lift_ι },
   simp only [category.assoc],
-  congr' 1,
-  simp only [← category.assoc],
-  congr' 1,
   dsimp only [Ext_compute_with_acyclic_HomB, functor.comp_map],
-  change (((preadditive_yoneda.obj B).right_op.map_homological_complex _ ⋙
+  change _ ≫ (((preadditive_yoneda.obj B).right_op.map_homological_complex _ ⋙
       homological_complex.unop_functor.right_op).map f).unop.f _ ≫ _ = _,
-  simp only [← homological_complex.comp_f],
-  congr' 1,
-  simp_rw [← unop_comp],
-  congr' 1,
-  simp_rw [← functor.map_comp, functor.comp_map, ← functor.map_comp],
+  slice_lhs 2 3
+  { simp only [← homological_complex.comp_f, ← unop_comp],
+    simp only [functor.comp_map, ← functor.map_comp] },
+  slice_rhs 2 3
+  { simp only [← homological_complex.comp_f, ← unop_comp, ← functor.map_comp] },
+
   -- This is now unprovable because we got rid of all homology, and what we really have
   -- is a homotopy between the two morphiisms involved... some of the steps above will need
   -- to be modified.
