@@ -721,7 +721,7 @@ lemma Ext_compute_with_acylic_inv_eq (B : 𝓐)
   homology.desc' _ _ _
   ( kernel_yoneda_complex_to_morphism_to_single C B (-i) ≫
     Ext_compute_with_acyclic_inv_eq_aux C B i)
-sorry := sorry
+admit := admit
 
 lemma homology.lift_desc (X Y Z : 𝓐) (f : X ⟶ Y) (g : Y ⟶ Z) (w)
   (U : 𝓐) (e : _ ⟶ U) (he : f ≫ e = 0) (V : 𝓐) (t : V ⟶ _) (ht : t ≫ g = 0) :
