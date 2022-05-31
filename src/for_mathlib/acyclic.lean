@@ -10,6 +10,7 @@ import for_mathlib.short_exact
 import for_mathlib.homology
 import for_mathlib.exact_lift_desc
 import for_mathlib.additive_functor
+import for_mathlib.homotopy_category_lemmas
 
 .
 
@@ -592,11 +593,16 @@ begin
     simp only [functor.comp_map, ← functor.map_comp] },
   slice_rhs 2 3
   { simp only [← homological_complex.comp_f, ← unop_comp, ← functor.map_comp] },
-
-  -- This is now unprovable because we got rid of all homology, and what we really have
-  -- is a homotopy between the two morphiisms involved... some of the steps above will need
-  -- to be modified.
-  sorry
+  apply homotopy.kernel_ι_comp_comp_cokernel_π_of_homotopy,
+  apply homotopy.homotopy_unop_functor_right_op_map_unop_of_homotopy,
+  apply functor.map_homotopy,
+  suffices : (lift ((of' C₁).π ≫ of'_hom f) (of' C₂).π) ≫ (of' C₂).π =
+    (of' C₁).π ≫ of'_hom f,
+  { apply homotopy_category.homotopy_of_eq,
+    convert this.symm,
+    { simpa only [functor.map_comp, quotient_map_out], },
+    { simpa only [functor.map_comp, quotient_map_out], } },
+  simp,
 end
 
 
