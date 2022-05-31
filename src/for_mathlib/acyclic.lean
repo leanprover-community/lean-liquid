@@ -460,6 +460,19 @@ lemma functor.map_map' {𝓐 : Type*} [category 𝓐] {𝓑 : Type*}
   (φ : a₁ ⟶ a₂) : G.map (F.map φ) = (F ⋙ G).map φ :=
 rfl
 
+lemma homology.lift_desc (X Y Z : 𝓐) (f : X ⟶ Y) (g : Y ⟶ Z) (w)
+  (U : 𝓐) (e : _ ⟶ U) (he : f ≫ e = 0) (V : 𝓐) (t : V ⟶ _) (ht : t ≫ g = 0) :
+  homology.lift f g w (t ≫ cokernel.π _) (by { simp [ht] } ) ≫
+  homology.desc' _ _ _ (kernel.ι _ ≫ e) (by { simp [he] }) =
+  t ≫ e :=
+begin
+  let s := _, change s ≫ _ = _,
+  have hs : s = kernel.lift _ t ht ≫ homology.π' _ _ _,
+  { apply homology.hom_to_ext,
+    simp only [homology.lift_ι, category.assoc, projective.homology.π'_ι, kernel.lift_ι_assoc] },
+  simp [hs],
+end
+
 lemma Ext_compute_with_acyclic_aux₃_naturality
   (C₁ C₂ : cochain_complex 𝓐 ℤ)
   [((quotient 𝓐 (complex_shape.up ℤ)).obj C₁).is_bounded_above]
@@ -476,14 +489,37 @@ lemma Ext_compute_with_acyclic_aux₃_naturality
       (_root_.homology_functor _ _ (-i)).op).map
       (bounded_homotopy_category.lift ((of' C₁).π ≫ of'_hom f) (of' C₂).π).out).unop :=
 begin
-  -- remove all unops
-  simp only [Ext_compute_with_acyclic_aux₃],
-  simp only [functor.map_unop, ← unop_comp],
-  congr' 1,
-  simp only [functor.map_map'],
-  -- not even sure if I'm going the right way
-  sorry,
+  dsimp only [Ext_compute_with_acyclic_aux₃, functor.comp_map, ← unop_comp],
+  have : ∀ (j) (X Y : homological_complex Ab (complex_shape.up ℤ).symm) (g : X ⟶ Y),
+    (homotopy_category.homology_functor _ _ j).map ((quotient _ _).map g) =
+    (_root_.homology_functor _ _ j).map g,
+  { intros j X Y g, refl },
+  rw this, rw this,
+  apply homology.hom_to_ext,
+  dsimp only [_root_.homology_functor],
+  rw homology.map_eq_lift_desc'_left,
+  simp only [category.assoc], erw homology.lift_ι,
+  dsimp,
+  rw homology.map_eq_desc'_lift_left,
+  apply homology.hom_from_ext,
+  simp only [category.assoc, homology.π'_desc'_assoc],
+  rw homology.map_eq_desc'_lift_left,
+  slice_rhs 1 2
+  { erw homology.π'_desc' },
+  rw homology.map_eq_lift_desc'_left,
+  simp only [category.assoc],
+  erw homology.lift_ι,
+  let s := homology.lift _ _ _ _ _,
+  change s ≫ _ = _,
+  have hs : s = kernel.lift _ (kernel.ι _ ≫ (preadditive_yoneda.obj B).map (f.f (-i)).op) _
+    ≫ homology.π' _ _ _,
+  { sorry },
+  rw hs, clear hs, clear s,
+  erw [category.assoc, homology.π'_desc', kernel.lift_ι_assoc],
+  -- AT: Now do something similar with the RH to finish, using naturality of HomB or something...
+  all_goals { sorry },
 end
+
 
 lemma Ext_compute_with_acyclic_aux₃_is_iso
   (B : 𝓐)
