@@ -2,6 +2,7 @@ import algebra.homology.homology
 import category_theory.abelian.exact
 import category_theory.limits.shapes.zero_objects
 import for_mathlib.complex_extend
+import for_mathlib.homology_exact
 
 open category_theory
 open category_theory.limits
@@ -160,12 +161,43 @@ begin
     exact h, }, -- more defeq abuse
 end
 
+lemma exact_of_epi {𝒞 : Type*} [category 𝒞] [abelian 𝒞] {A B C : 𝒞} {f : A ⟶ B} {g : B ⟶ C}
+  (hfg : f ≫ g = 0) [epi f] : exact f g :=
+begin
+  rw abelian.exact_iff,
+  refine ⟨hfg, _⟩,
+  rw [(abelian.epi_iff_cokernel_π_eq_zero _).1 (show epi f, from infer_instance), comp_zero],
+end
 
 lemma is_zero_homology_of_epi_and_exact
   (h1 : epi (D.d 1 0))
   (h2 : ∀ i : ℕ, exact (D.d (i+2) (i+1)) (D.d (i+1) (i))) :
   ∀ i : ℤ, is_zero (((homological_complex.embed $
-    complex_shape.embedding.nat_down_int_down).obj D).homology i) := sorry
+    complex_shape.embedding.nat_down_int_down).obj D).homology i) :=
+begin
+  intro i,
+  rw category_theory.is_zero_homology_iff_exact,
+  rcases lt_trichotomy i 0 with (hi | rfl | hi),
+  { have : is_zero (((homological_complex.embed complex_shape.embedding.nat_down_int_down).obj D).X i),
+    { delta homological_complex.embed homological_complex.embed.obj
+        complex_shape.embedding.nat_down_int_down complex_shape.embedding.pos_int_to_onat,
+      obtain ⟨j, rfl⟩ := int.eq_neg_succ_of_lt_zero hi,
+      simp only [is_zero_zero A, homological_complex.embed.X_none],
+    },
+  exact category_theory.limits.is_zero.exact this _ _ },
+  { rw [homological_complex.d_from_eq _ (show (complex_shape.down ℤ).rel 0 (-1), by simp),
+    exact_comp_iso, homological_complex.d_to_eq _ (show (complex_shape.down ℤ).rel 1 0, by simp),
+    exact_iso_comp],
+    apply exact_of_epi (homological_complex.d_comp_d _ (1 : ℤ) 0 (-1)),
+    exact h1 }, -- maybe defeq abuse?
+  { obtain ⟨j, rfl⟩ := int.eq_succ_of_zero_lt hi, clear hi,
+    specialize h2 j,
+    rw [homological_complex.d_from_eq _ (show (complex_shape.down ℤ).rel (j.succ : ℕ) j, by simp),
+    exact_comp_iso, homological_complex.d_to_eq _ (show (complex_shape.down ℤ).rel
+      (j.succ.succ : ℕ) (j.succ), by simp),
+    exact_iso_comp],
+    exact h2 }, -- maybe defeq abuse
+end
 
 lemma epi_and_exact_iff_is_zero_homology :
   (epi (D.d 1 0) ∧ ∀ i : ℕ, exact (D.d (i+2) (i+1)) (D.d (i+1) (i))) ↔
