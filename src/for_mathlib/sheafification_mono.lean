@@ -78,7 +78,7 @@ fork.is_limit.mk _ (λ S,
   end
 
 noncomputable instance : abelian (Cᵒᵖ ⥤ Ab.{u+1}) :=
-functor.abelian.{(u+2) u (u+1)}
+category_theory.functor_category_is_abelian.{(u+2) u (u+1)}
 
 noncomputable instance : preserves_limits (forget Ab.{u+1}) := infer_instance
 
