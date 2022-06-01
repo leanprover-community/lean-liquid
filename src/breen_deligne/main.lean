@@ -38,6 +38,11 @@ begin
   { apply Ext'_is_zero_of_neg, linarith only [hj, hij] }
 end
 
+lemma IH_0_aux (C : bounded_homotopy_category 𝓐) (hC : C.val.bounded_by 1) :
+  ((Ext' 0).flip.obj B).obj (op (C.val.as.homology 0)) ≅
+  ((Ext 0).obj (op C)).obj ((single 𝓐 0).obj B) :=
+sorry
+
 variables (hH0 : ((BD.eval F).obj A).val.as.homology 0 ≅ A)
 
 include hH0
@@ -51,9 +56,9 @@ begin
       linarith only [hi0] },
     { apply Ext'_is_zero_of_neg, linarith only [hi0] } },
   apply iso.is_zero_iff,
-  -- this can probaby be simplified further,
-  -- but ultimately, we need the assumption that `H₀((BD.eval F).obj A)` is isom to `A`
-  sorry
+  refine ((Ext' 0).flip.obj B).map_iso hH0.op ≪≫ _,
+  apply IH_0_aux,
+  apply chain_complex.bounded_by_one,
 end
 
 lemma bdd_step₁ (j : ℤ) :
@@ -62,11 +67,10 @@ lemma bdd_step₁ (j : ℤ) :
 begin
   apply forall_congr, intro i, apply forall_congr, intro hi,
   apply iso.is_zero_iff,
-  -- use `hH0` and some `map_iso`
-  sorry
+  exact ((Ext' _).flip.obj B).map_iso hH0.op,
 end
 
-open bounded_homotopy_category (of')
+open bounded_homotopy_category (of' Ext_map_is_iso_of_quasi_iso)
 
 lemma bdd_step₂ (j : ℤ) :
   (∀ i ≤ j, is_zero $ ((Ext i).obj (op ((BD.eval F).obj A))).obj ((single _ 0).obj B)) ↔
@@ -74,24 +78,60 @@ lemma bdd_step₂ (j : ℤ) :
 begin
   apply forall_congr, intro i, apply forall_congr, intro hi,
   apply iso.is_zero_iff,
-  -- use `cochain_complex.truncation.ι_iso` and some `functor.map_iso`
-  sorry
+  refine ((Ext _).flip.obj ((single _ 0).obj B)).map_iso _,
+  refine iso.op _,
+  haveI := cochain_complex.truncation.ι_iso ((BD.eval' F).obj A) 0 _,
+  swap, { apply chain_complex.bounded_by_one },
+  let e' := (as_iso $ cochain_complex.truncation.ι ((BD.eval' F).obj A) 0),
+  let e := (homotopy_category.quotient _ _).map_iso e',
+  refine ⟨e.hom, e.inv, e.hom_inv_id, e.inv_hom_id⟩,
 end
 
 omit hH0
+
+lemma bdd_step₃_aux (i j : ℤ) :
+  is_zero (((Ext i).obj (op $ (single 𝓐 j).obj (((BD.eval F).obj A).val.as.homology j))).obj ((single 𝓐 0).obj B)) ↔
+  is_zero (((Ext i).obj (op $ of' (((BD.eval' F).obj A).imker j))).obj ((single 𝓐 0).obj B)) :=
+begin
+  apply iso.is_zero_iff,
+  let φ : (single 𝓐 j).obj (((BD.eval F).obj A).val.as.homology j) ⟶ of' (((BD.eval' F).obj A).imker j) :=
+    (homotopy_category.quotient _ _).map (cochain_complex.imker.from_single ((BD.eval' F).obj A) _),
+  haveI : homotopy_category.is_quasi_iso φ :=
+    cochain_complex.imker.from_single_quasi_iso ((BD.eval' F).obj A) _,
+  let e := @as_iso _ _ _ _ _ (Ext_map_is_iso_of_quasi_iso _ _ ((single 𝓐 0).obj B) φ i),
+  exact e.symm,
+end
 
 lemma bdd_step₃
   (H : ∀ i ≤ j + 1, is_zero (((Ext i).obj (op (of' (((BD.eval' F).obj A).truncation (-1))))).obj ((single 𝓐 0).obj B))) :
   (∀ i ≤ j + 1, is_zero (((Ext i).obj (op (of' (((BD.eval' F).obj A).truncation 0)))).obj ((single 𝓐 0).obj B))) ↔
   ∀ i ≤ j + 1, is_zero (((Ext' i).obj (op (((BD.eval F).obj A).val.as.homology 0))).obj B) :=
--- use `Ext_ι_succ_five_term_exact_seq`
-sorry
+begin
+  apply forall_congr, intro i, apply forall_congr, intro hi,
+  refine iff.trans _ (bdd_step₃_aux BD F A B i 0).symm,
+  obtain ⟨i, rfl⟩ : ∃ k, k+1 = i := ⟨i-1, sub_add_cancel _ _⟩,
+  have LES1 := cochain_complex.Ext_ι_succ_five_term_exact_seq ((BD.eval' F).obj A) ((single 𝓐 0).obj B) (-1) i,
+  have LES2 := cochain_complex.Ext_ι_succ_five_term_exact_seq ((BD.eval' F).obj A) ((single 𝓐 0).obj B) (-1) (i+1),
+  have aux := ((LES1.drop 2).pair.cons LES2).is_iso_of_zero_of_zero; clear LES1 LES2,
+  refine (@as_iso _ _ _ _ _ (aux _ _)).is_zero_iff; clear aux,
+  { apply (H _ _).eq_of_src, exact (int.le_add_one le_rfl).trans hi },
+  { apply (H _ hi).eq_of_tgt, },
+end
 
 lemma bdd_step₄
   (H : ∀ t ≤ (-1:ℤ), ∀ i ≤ j, is_zero (((Ext i).obj (op $ (single _ t).obj (((BD.eval F).obj A).val.as.homology t))).obj ((single 𝓐 0).obj B))) :
   ∀ t ≤ (-1:ℤ), ∀ i ≤ j + 1, is_zero (((Ext i).obj (op (of' (((BD.eval' F).obj A).truncation t)))).obj ((single 𝓐 0).obj B)) :=
--- induction on `t` and use `Ext_ι_succ_five_term_exact_seq`
-sorry
+begin
+  intros t ht i, revert ht,
+  apply int.induction_on' t (-i-1),
+  { intros hi1 hi2,
+    apply Ext_single_right_is_zero _ _ (-i-1+1),
+    { apply cochain_complex.truncation.bounded_by },
+    { simp only [sub_add_cancel, add_left_neg], } },
+  -- induction on `t` and use `Ext_ι_succ_five_term_exact_seq`
+  sorry,
+  sorry
+end
 
 lemma bdd_step₅ (t i : ℤ) :
   is_zero (((Ext i).obj (op ((single 𝓐 t).obj (((BD.eval F).obj A).val.as.homology t)))).obj ((single 𝓐 0).obj B)) ↔

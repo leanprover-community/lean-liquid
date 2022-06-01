@@ -15,7 +15,6 @@ namespace homotopy_category
 variables {ι : Type*} {c : complex_shape ι}
 
 local notation `𝒦` := homotopy_category A c
-local notation `HH` := homotopy_category.homology_functor A (complex_shape.up ℤ) 0
 
 class is_acyclic (X : 𝒦) : Prop :=
 (cond [] : ∀ i, is_zero ((homotopy_category.homology_functor _ _ i).obj X))
@@ -58,8 +57,7 @@ instance is_bounded_above_of_is_uniformly_bounded_above {α : Type*} (X : α →
   [is_uniformly_bounded_above X] (a) : is_bounded_above (X a) :=
 begin
   obtain ⟨n,hn⟩ := is_uniformly_bounded_above.cond X,
-  use n,
-  apply hn,
+  exact ⟨⟨n, hn a⟩⟩,
 end
 
 end homotopy_category
