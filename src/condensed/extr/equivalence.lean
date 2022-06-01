@@ -38,6 +38,9 @@ end
 def ExtrDisc.proetale_topology : grothendieck_topology ExtrDisc.{u} :=
   ExtrDisc.cover_dense.induced_topology.{u}
 
+instance ExtrDisc_proetale_topology_filtered (X : ExtrDisc.{u}) :
+  is_filtered (ExtrDisc.proetale_topology.{u}.cover X)ᵒᵖ := infer_instance
+
 @[derive category]
 def ExtrSheaf (C : Type u') [category.{v'} C] := Sheaf ExtrDisc.proetale_topology.{u} C
 
@@ -52,6 +55,30 @@ ExtrDisc.cover_dense.Sheaf_equiv_of_cover_preserving_cover_lifting
 @[simp] lemma Condensed_ExtrSheaf_equiv_inverse_val (C : Type u') [category.{u+1} C]
   [limits.has_limits C] (F : Condensed.{u} C) :
   ((Condensed_ExtrSheaf_equiv C).inverse.obj F).val = ExtrDisc_to_Profinite.op ⋙ F.val := rfl
+
+def ExtrDisc_sheafification_iso_aux :
+  Sheaf_to_presheaf ExtrDisc.proetale_topology.{u} Ab.{u+1} ⋙ Ran ExtrDisc_to_Profinite.{u}.op ≅
+  (Condensed_ExtrSheaf_equiv Ab.{u+1}).functor ⋙  Sheaf_to_presheaf proetale_topology Ab :=
+nat_iso.of_components
+(λ F, iso.refl _) $ by tidy
+
+def ExtrDisc_sheafification_iso :
+  (whiskering_left _ _ _).obj ExtrDisc_to_Profinite.op ⋙
+  presheaf_to_Sheaf ExtrDisc.proetale_topology Ab.{u+1} ≅
+  presheaf_to_Sheaf proetale_topology _ ⋙ (Condensed_ExtrSheaf_equiv _).inverse :=
+begin
+  let A1 : (whiskering_left _ _ Ab.{u+1}).obj ExtrDisc_to_Profinite.{u}.op ⊣ _ :=
+    Ran.adjunction _ _,
+  let A2 : presheaf_to_Sheaf ExtrDisc.proetale_topology Ab.{u+1} ⊣ _ :=
+    sheafification_adjunction _ _,
+  let B1 : presheaf_to_Sheaf proetale_topology Ab.{u+1} ⊣ _ :=
+    sheafification_adjunction _ _,
+  let B2 : (Condensed_ExtrSheaf_equiv Ab.{u+1}).inverse ⊣ _ :=
+    equivalence.to_adjunction _,
+  let A := A1.comp _ _ A2,
+  let B := B1.comp _ _ B2,
+  exact A.nat_iso_of_right_adjoint_nat_iso B ExtrDisc_sheafification_iso_aux,
+end
 
 open opposite
 

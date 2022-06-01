@@ -32,9 +32,6 @@ category_theory.functor_category_is_abelian.{(u+2) u (u+1)}
 instance ExtrDisc_presheaf_abelian : abelian (ExtrDisc.{u}ᵒᵖ ⥤ Ab.{u+1}) :=
 category_theory.functor_category_is_abelian.{(u+2) u (u+1)}
 
-instance ExtrDisc_proetale_topology_filtered (X : ExtrDisc.{u}) :
-  is_filtered (ExtrDisc.proetale_topology.{u}.cover X)ᵒᵖ := infer_instance
-
 instance ExtrSheaf_abelian' : abelian (Sheaf ExtrDisc.proetale_topology.{u} Ab.{u+1}) :=
 category_theory.Sheaf.abelian.{(u+2) u (u+1)}
 
@@ -90,7 +87,10 @@ def free_Cech'_iso_ExtrDisc (F : arrow Profinite.{u}) :
 homological_complex.hom.iso_of_components
 (λ i,
 match i with
-| 0 := sorry
+| 0 := Sheaf.iso.mk _ _ $ begin
+    dsimp [free_Cech', simplicial_object.augmented.to_complex_obj,
+      free_ExtrDisc_Cech', Profinite_to_ExtrDisc_presheaf_Ab, Profinite.to_Condensed],
+  end
 | i+1 := sorry
 end)
 sorry
