@@ -6,6 +6,7 @@ import for_mathlib.cech
 import for_mathlib.chain_complex_exact
 import for_mathlib.abelian_sheaves.exact
 import for_mathlib.Cech.homotopy
+import for_mathlib.wide_pullback_iso
 
 import condensed.adjunctions2
 import condensed.projective_resolution
@@ -145,16 +146,7 @@ homological_complex.hom.iso_of_components
 (λ i,
 match i with
 | 0 := iso.refl _
-| i+1 := begin
-    dsimp [unsheafified_free_ExtrDiscr_Cech,
-      simplicial_object.augmented.to_complex,
-      simplicial_object.augmented.to_complex_obj,
-      Profinite_to_ExtrDisc_presheaf_Ab,
-      evaluated_free_ExtrDisc_Cech],
-    apply AddCommGroup.free.map_iso,
-  sorry
-  -- Need to use that evalaution preserves limits.
-end
+| i+1 := begin apply AddCommGroup.free.map_iso, apply ulift_wide_pullback_iso, end
 end)
 sorry
 
