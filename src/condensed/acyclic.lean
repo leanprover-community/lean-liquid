@@ -87,11 +87,8 @@ def free_Cech'_iso_ExtrDisc (F : arrow Profinite.{u}) :
 homological_complex.hom.iso_of_components
 (λ i,
 match i with
-| 0 := Sheaf.iso.mk _ _ $ begin
-    dsimp [free_Cech', simplicial_object.augmented.to_complex_obj,
-      free_ExtrDisc_Cech', Profinite_to_ExtrDisc_presheaf_Ab, Profinite.to_Condensed],
-  end
-| i+1 := sorry
+| 0 := (ExtrDisc_sheafification_iso.app _).symm
+| i+1 := (ExtrDisc_sheafification_iso.app _).symm
 end)
 sorry
 
