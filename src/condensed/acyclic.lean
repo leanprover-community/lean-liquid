@@ -158,7 +158,7 @@ end
 end)
 sorry
 
-lemma free_Cech_exact (F : arrow Profinite.{u}) : ∀ (n : ℤ),
+lemma free_Cech_exact (F : arrow Profinite.{u}) (hF : function.surjective F.hom) : ∀ (n : ℤ),
   is_zero $ (free_Cech F).homology n :=
 begin
   /-
@@ -188,13 +188,25 @@ begin
   apply is_zero.of_iso _ E,
   -- Now we can use the splitting similarly to arrow.conerve_to_cocomplex_homology_is_zero
   -- but we need a dual variant.
-  sorry
+  let G := ((Profinite_to_ExtrDisc_presheaf.flip.obj (op X)).map_arrow.obj F),
+  haveI : G.split,
+  { suffices : function.surjective G.hom,
+    { refine ⟨λ i, (this i).some, _⟩,
+      ext1 i, exact (this i).some_spec },
+    dsimp [G, functor.map_arrow, Profinite_to_ExtrDisc_presheaf, ulift_functor, yoneda],
+    rintros ⟨e⟩,
+    use ExtrDisc.lift _ hF e,
+    ext1,
+    dsimp,
+    rw ExtrDisc.lift_lifts },
+  apply arrow.nerve_to_complex_homology_is_zero AddCommGroup.free G,
+  recover,
 end
 
-lemma free_Cech_kernel_SES (F : arrow Profinite.{u}) : ∀ n,
+lemma free_Cech_kernel_SES (F : arrow Profinite.{u}) (hF : function.surjective F.hom) : ∀ n,
   short_exact (kernel.ι $ (free_Cech F).d (n+1+1) (n+1)) (delta_to_kernel _ (n+1+1) (n+1) n) :=
 begin
-  erw ← is_acyclic_iff_short_exact_to_cycles' (free_Cech F), exact free_Cech_exact F
+  erw ← is_acyclic_iff_short_exact_to_cycles' (free_Cech F), exact free_Cech_exact F hF
 end
 
 variable (M : Condensed.{u} Ab.{u+1})
@@ -384,7 +396,7 @@ begin
     { apply bounded_derived_category.Ext'_zero_left_is_zero,
       exact (is_zero_zero _).op, } },
   let K := λ i, kernel ((free_Cech F).d (i + 1) i),
-  have LES := λ i j, (free_Cech_kernel_SES F i).Ext'_five_term_exact_seq M j,
+  have LES := λ i j, (free_Cech_kernel_SES F hF i).Ext'_five_term_exact_seq M j,
   have H1 : ∀ i > 0, is_zero ((E i).obj (op ((free_Cech F).X 1))),
   { intros i hi,
     apply bounded_derived_category.Ext'_is_zero_of_projective _ _ _ _ hi,
