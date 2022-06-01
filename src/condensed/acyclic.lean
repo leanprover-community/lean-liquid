@@ -161,11 +161,6 @@ sorry
 lemma free_Cech_exact (F : arrow Profinite.{u}) (hF : function.surjective F.hom) : ∀ (n : ℤ),
   is_zero $ (free_Cech F).homology n :=
 begin
-  /-
-  AT: This is just a sketch...
-  We need to first compose with the equivalence with sheaves on `ExtrDisc` and
-  reduce to the unsheafified version there.
-  -/
   dsimp only [free_Cech],
   rw chain_complex.homology_zero_iff_homology_zero,
   haveI : functor.additive (Condensed_ExtrSheaf_equiv Ab.{u+1}).symm.functor, sorry,
