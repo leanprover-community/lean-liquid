@@ -87,15 +87,8 @@ noncomputable instance : preserves_filtered_colimits (forget Ab.{u+1}) := infer_
 noncomputable
 instance sheafification_preserves_finite_limits :
   preserves_finite_limits (J.sheafification Ab.{u+1}) :=
-begin
-  -- Annoying.
-  apply sheafification.category_theory.limits.preserves_finite_limits.{(u+2) u (u+1)},
-  apply_instance,
-  intros x, apply_instance,
-  apply_instance,
-  apply_instance,
-  apply_instance,
-end
+@sheafification.category_theory.limits.preserves_finite_limits.{(u+2) u (u+1)} _ _ _ _ _ _ _ _
+  (λ _, infer_instance) _ _ _
 
 theorem sheafify_lift_mono_iff (η : F ⟶ G.val) (K : limits.kernel_fork η)
   (hK : is_limit K) :
