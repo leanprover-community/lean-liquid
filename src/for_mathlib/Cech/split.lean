@@ -223,6 +223,116 @@ end
 
 end contracting_homotopy
 
+section covariant_contracting_homotopy
+
+open category_theory.limits opposite
+
+variables {P : Type u} {N : Type u'} [category.{v} P] [category.{v'} N] (M : P ⥤ N)
+variables (f : arrow P)
+variables [∀ n : ℕ, has_wide_pullback f.right (λ i : ulift (fin (n+1)), f.left) (λ i, f.hom)]
+
+/-- The augmented Cech nerve induced by applying M to `f.augmented_cech_nerve`. -/
+abbreviation nerve : simplicial_object.augmented N :=
+((simplicial_object.augmented.whiskering _ _).obj M).obj f.augmented_cech_nerve
+
+variables [arrow.split f] [preadditive N]
+
+open simplicial_object.augmented
+open_locale big_operators
+
+def covariant_contracting_homotopy : Π (n : ℕ),
+  (f.nerve M).to_complex.X n ⟶ (f.nerve M).to_complex.X (n+1)
+| 0 := M.map $ wide_pullback.lift (𝟙 _) (λ i, (split.σ : f.right ⟶ _)) (by simpa)
+| (n+1) := M.map $ f.cech_splitting n
+
+lemma covariant_is_contracting_homotopy_zero :
+  f.covariant_contracting_homotopy M 0 ≫ (f.nerve M).to_complex.d 1 0 = 𝟙 _ :=
+begin
+  dsimp,
+  rw if_pos,
+  swap, { simp },
+  delta nerve,
+  dsimp [to_complex_obj, to_complex_d, covariant_contracting_homotopy],
+  simp only [category.id_comp, category.comp_id],
+  simp_rw [← M.map_comp, ← M.map_id],
+  congr' 2,
+  simp,
+end
+
+lemma covariant_is_contracting_homotopy_one :
+  f.covariant_contracting_homotopy M 1 ≫ (f.nerve M).to_complex.d 2 1 +
+  (f.nerve M).to_complex.d 1 0 ≫ f.covariant_contracting_homotopy M 0 = 𝟙 _ :=
+begin
+  dsimp [covariant_contracting_homotopy],
+  rw if_pos, rw if_pos, any_goals { dec_trivial },
+  dsimp [to_complex_d, simplicial_object.boundary, simplicial_object.δ],
+  delta nerve,
+  dsimp [to_complex_obj],
+  simp only [fin.sum_univ_succ, fin.coe_zero, pow_zero, one_zsmul, fintype.univ_of_subsingleton,
+    nat.add_def, fin.mk_eq_subtype_mk, fin.mk_zero, fin.coe_succ, pow_one, neg_smul,
+    finset.sum_singleton, preadditive.comp_add, category.id_comp,
+    preadditive.comp_neg, category.comp_id],
+  simp only [← M.map_comp],
+  rw add_assoc,
+  convert add_zero _,
+  swap,
+  { symmetry,
+    convert M.map_id _,
+    dsimp [arrow.cech_splitting],
+    ext ⟨⟨j,hj⟩⟩, simp,
+    rw dif_neg, refl,
+    dsimp [simplex_category.δ],
+    have : j = 0, by simpa using hj, subst this, dec_trivial,
+    simp },
+  { rw neg_add_eq_zero,
+    congr' 1,
+    dsimp [cech_splitting],
+    ext ⟨⟨j,hj⟩⟩,
+    { simp only [category.assoc, wide_pullback.lift_π], dsimp,
+      rw dif_pos, have : j = 0, by simpa using hj, subst this,
+      dsimp [simplex_category.δ], dec_trivial },
+    { simp } }
+end
+
+lemma covariant_is_contracting_homotopy (n : ℕ) :
+  f.covariant_contracting_homotopy M (n+2) ≫ (f.nerve M).to_complex.d (n+3) (n+2) +
+  (f.nerve M).to_complex.d (n+2) (n+1) ≫ f.covariant_contracting_homotopy M (n+1) = 𝟙 _ :=
+begin
+  dsimp, rw if_pos, rw if_pos, swap, { refl }, swap, { refl },
+  simp only [category.comp_id, category.id_comp],
+  dsimp only [to_complex_d, simplicial_object.boundary],
+  simp only [preadditive.sum_comp, preadditive.comp_sum],
+  rw [fin.sum_univ_succ, add_assoc, ← finset.sum_add_distrib],
+  convert add_zero _,
+  { apply fintype.sum_eq_zero, intros j,
+    have : ((j.succ : fin _) : ℕ) = (j : ℕ) + 1 := by simp, rw this, clear this,
+    rw [pow_succ],
+    simp only [neg_mul, one_mul, neg_smul, preadditive.comp_neg],
+    rw neg_add_eq_zero,
+    simp only [preadditive.comp_zsmul, preadditive.zsmul_comp],
+    congr' 1,
+    dsimp [covariant_contracting_homotopy, simplicial_object.δ],
+    delta nerve,
+    dsimp [whiskering],
+    simp only [← M.map_comp],
+    congr' 1,
+    convert cech_splitting_face _ _ _ (fin.succ_ne_zero _), funext i,
+    congr, simp },
+  { dsimp [covariant_contracting_homotopy],
+    simp only [pow_zero, one_zsmul],
+    delta nerve,
+    dsimp [arrow.cech_splitting, simplicial_object.whiskering, simplicial_object.δ],
+    rw ← M.map_comp, symmetry,
+    convert M.map_id _,
+    ext ⟨⟨j,hj⟩⟩,
+    simp only [category.assoc, wide_pullback.lift_π],
+    rw dif_neg, dsimp, simpa, dsimp [simplex_category.δ],
+    intro c, apply_fun (λ e, e.1) at c, simpa using c,
+    simp, dsimp, simp }
+end
+
+end covariant_contracting_homotopy
+
 end arrow
 
 end category_theory
