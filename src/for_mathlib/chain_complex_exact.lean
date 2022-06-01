@@ -169,6 +169,27 @@ begin
   rw [(abelian.epi_iff_cokernel_π_eq_zero _).1 (show epi f, from infer_instance), comp_zero],
 end
 
+lemma nat_epi_iff_exact : epi (D.d 1 0) ↔
+  exact (homological_complex.d_to D 0) (homological_complex.d_from D 0) :=
+begin
+  rw [homological_complex.d_to_eq _ (show (complex_shape.down ℕ).rel 1 0, by simp),
+    exact_iso_comp],
+  split,
+  { introI h,
+    apply exact_of_epi,
+    simp only [homological_complex.d_from_eq_zero, next_nat_zero, comp_zero], },
+  { intro h,
+    simp only [homological_complex.d_from_eq_zero, next_nat_zero] at h,
+    exact exact.epi_of_eq_zero h rfl, },
+end
+
+lemma nat_exact_iff_to_from_exact (i : ℕ) :
+  exact (D.d (i + 2) (i + 1)) (D.d (i + 1) i) ↔
+  exact (homological_complex.d_to D (i + 1)) (homological_complex.d_from D (i + 1)) :=
+by rw [homological_complex.d_from_eq _ (show (complex_shape.down ℕ).rel i.succ i, by simp),
+    exact_comp_iso, homological_complex.d_to_eq _ (show (complex_shape.down ℕ).rel
+      i.succ.succ i.succ, by simp), exact_iso_comp ]
+
 lemma is_zero_homology_of_epi_and_exact
   (h1 : epi (D.d 1 0))
   (h2 : ∀ i : ℕ, exact (D.d (i+2) (i+1)) (D.d (i+1) (i))) :
@@ -209,7 +230,18 @@ lemma epi_and_exact_iff_is_zero_homology :
 lemma homology_zero_iff_homology_zero :
   (∀ i : ℤ, is_zero (((homological_complex.embed $
     complex_shape.embedding.nat_down_int_down).obj D).homology i)) ↔
-  (∀ i : ℕ, is_zero (D.homology i)) := sorry
+  (∀ i : ℕ, is_zero (D.homology i)) :=
+begin
+  rw ← epi_and_exact_iff_is_zero_homology,
+  simp_rw [category_theory.is_zero_homology_iff_exact, nat_epi_iff_exact,
+    nat_exact_iff_to_from_exact],
+  split,
+  { rintro ⟨h0, hS⟩ ( _ | i),
+    { exact h0 },
+    { exact hS i }, },
+  { intro h,
+    exact ⟨h 0, λ i, h i.succ⟩, },
+end
 
 universes v' u'
 
@@ -217,6 +249,15 @@ lemma homology_zero_iff_map_homology_zero
   {B : Type u'} [category.{v'} B] [abelian B] (E : A ≌ B)
   [E.functor.additive] :
   (∀ i : ℕ, is_zero (D.homology i)) ↔
-  (∀ i : ℕ, is_zero (((E.functor.map_homological_complex _).obj D).homology i)) := sorry
+  (∀ i : ℕ, is_zero (((E.functor.map_homological_complex _).obj D).homology i)) :=
+begin
+  apply forall_congr,
+  intro i,
+  rw category_theory.is_zero_homology_iff_exact,
+  rw category_theory.is_zero_homology_iff_exact,
+  rw functor.map_homological_complex,
+  dsimp,
+  sorry,
+end
 
 end chain_complex
