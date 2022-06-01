@@ -77,7 +77,7 @@ begin
     equivalence.to_adjunction _,
   let A := A1.comp _ _ A2,
   let B := B1.comp _ _ B2,
-  exact A.nat_iso_of_right_adjoint_nat_iso B ExtrDisc_sheafification_iso_aux,
+  exact A.left_adjoint_uniq B -- ExtrDisc_sheafification_iso_aux,
 end
 
 open opposite
