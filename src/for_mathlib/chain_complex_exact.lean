@@ -122,7 +122,7 @@ begin
   -/
   convert h,
   -- gives me `heq`s
-  repeat {sorry },
+  repeat {admit },
 end
 
 -/
