@@ -277,10 +277,42 @@ end
 
 universes v' u'
 
+-- `kernel_comparison_comp_ι` in mathlib master (as I write) is not
+-- maximally universe-polymorphic; the morphisms of both categories live in the
+-- same universe. So we write `[category.{v} B]` instead of `[category.{v'} B]` here.
+
+-- TODO : fix kernel_comparison_comp_ι
+
+lemma exact_iff_map_exact {α : Type*} {c : complex_shape α}
+  (D : homological_complex A c)
+  {B : Type u'} [category.{v} B] [abelian B] (E : A ≌ B)
+  [E.functor.additive] (i j k : α) (f : D.X i ⟶ D.X j) (g : D.X j ⟶ D.X k) :
+  exact f g ↔ exact (E.functor.map f) (E.functor.map g) :=
+begin
+  rw abelian.exact_iff,
+  rw abelian.exact_iff,
+  apply and_congr,
+   { rw [← functor.map_comp],
+     exact (functor.map_eq_zero_iff _).symm, },
+   { rw [← functor.map_eq_zero_iff E.functor, functor.map_comp],
+     rw ← kernel_comparison_comp_ι,
+     rw ← π_comp_cokernel_comparison,
+     rw ← preserves_kernel.iso_hom,
+     rw ← preserves_cokernel.iso_inv,
+     rw category.assoc,
+     rw preadditive.is_iso.comp_left_eq_zero,
+     rw ← category.assoc,
+     rw preadditive.is_iso.comp_right_eq_zero, }
+end
+
+
+
+-- morphisms of B in same universe as morphisms of A because of
+-- `exact_iff_map_exact`
 lemma homology_zero_iff_map_homology_zero
   {α : Type*} {c : complex_shape α}
   (D : homological_complex A c)
-  {B : Type u'} [category.{v'} B] [abelian B] (E : A ≌ B)
+  {B : Type u'} [category.{v} B] [abelian B] (E : A ≌ B)
   [E.functor.additive] :
   (∀ i : α, is_zero (D.homology i)) ↔
   (∀ i : α, is_zero (((E.functor.map_homological_complex _).obj D).homology i)) :=
@@ -341,10 +373,7 @@ begin
     rw exact_comp_iso,
     rw exact_iso_comp,
     rw exact_iso_comp,
-    dsimp,
-    -- factor this out.
-    sorry
-  }
+    apply exact_iff_map_exact, }
 end
 
 end chain_complex
