@@ -94,7 +94,7 @@ lemma bdd_step₃_aux (i j : ℤ) :
   is_zero (((Ext i).obj (op $ of' (((BD.eval' F).obj A).imker j))).obj ((single 𝓐 0).obj B)) :=
 begin
   apply iso.is_zero_iff,
-  let φ : (single 𝓐 j).obj (((BD.eval F).obj A).val.as.homology j) ⟶ of' (((BD.eval' F).obj A).imker j) :=
+  let φ : of' (((BD.eval' F).obj A).imker j) ⟶ (single 𝓐 j).obj (((BD.eval F).obj A).val.as.homology j) :=
     (homotopy_category.quotient _ _).map (cochain_complex.imker.to_single ((BD.eval' F).obj A) _),
   haveI : homotopy_category.is_quasi_iso φ :=
     cochain_complex.imker.to_single_quasi_iso ((BD.eval' F).obj A) _,
