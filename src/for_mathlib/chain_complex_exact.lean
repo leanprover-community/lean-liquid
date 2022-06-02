@@ -305,10 +305,7 @@ begin
      rw preadditive.is_iso.comp_right_eq_zero, }
 end
 
-
-
--- morphisms of B in same universe as morphisms of A because of
--- `exact_iff_map_exact`
+-- morphisms of B in same universe as morphisms of A because of `exact_iff_map_exact`
 lemma homology_zero_iff_map_homology_zero
   {α : Type*} {c : complex_shape α}
   (D : homological_complex A c)
