@@ -111,10 +111,25 @@ def Condensed_Ab_to_presheaf :
 Sheaf_to_presheaf _ _
 
 def Condensed_Ab_presheaf_adjunction :
-  presheaf_to_Condensed_Ab ⊣ Condensed_Ab_to_presheaf :=
+  presheaf_to_Condensed_Ab.{u} ⊣ Condensed_Ab_to_presheaf.{u} :=
 sheafification_adjunction _ _
 
-instance : functor.additive presheaf_to_Condensed_Ab := sorry
+instance presheaf_to_Condensed_Ab_preserves_colimits :
+  preserves_colimits presheaf_to_Condensed_Ab.{u} :=
+Condensed_Ab_presheaf_adjunction.left_adjoint_preserves_colimits
+
+set_option pp.universes true
+
+instance : functor.additive presheaf_to_Condensed_Ab.{u} :=
+begin
+  apply_with functor.additive_of_preserves_binary_biproducts { instances := ff },
+  haveI : abelian (Profinite.{u}ᵒᵖ ⥤ Ab.{u+1}) :=
+    category_theory.functor_category_is_abelian.{u+2 u u+1},
+  apply_with has_binary_biproducts_of_finite_biproducts { instances := ff },
+  exact has_finite_biproducts.of_has_finite_products.{u+1 u+2},
+  apply preserves_binary_biproducts_of_preserves_binary_coproducts,
+  apply_instance,
+end
 
 instance : functor.additive Condensed_Ab_to_presheaf := ⟨⟩
 
