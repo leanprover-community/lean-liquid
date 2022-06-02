@@ -39,12 +39,12 @@ instance is_bounded_above (i : ℤ) :
   ((homotopy_category.quotient _ _).obj (C.imker i)).is_bounded_above :=
 ⟨⟨i+1, bounded_by C i⟩⟩
 
-/-- The natural map from `H_n(C)[n]` to `imker C n`. -/
-def from_single (n : ℤ) : (single _ _ n).obj (C.homology n) ⟶ C.imker n :=
+/-- The natural map from `imker C n` to `H_n(C)[n]`. -/
+def to_single (n : ℤ) : C.imker n ⟶ (single _ _ n).obj (C.homology n) :=
 sorry
 
-instance from_single_quasi_iso (n : ℤ) :
-  homotopy_category.is_quasi_iso $ (homotopy_category.quotient _ _).map (from_single C n) :=
+instance to_single_quasi_iso (n : ℤ) :
+  homotopy_category.is_quasi_iso $ (homotopy_category.quotient _ _).map (to_single C n) :=
 sorry
 
 end imker
