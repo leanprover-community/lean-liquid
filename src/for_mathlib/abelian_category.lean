@@ -57,6 +57,15 @@ begin
   rw [← @kernel_subobject_zero _ _ _ Y Z, ← @image_subobject_zero _ _ _ _ X Y, h],
 end
 
+lemma exact_of_is_zero {C : Type*} [category C] [abelian C]
+  {X Y Z : C} (hY : is_zero Y) (f : X ⟶ Y) (g : Y ⟶ Z) : exact f g :=
+by simp only [abelian.exact_iff, is_zero.eq_zero_of_tgt hY f,
+  is_zero.eq_zero_of_tgt hY (kernel.ι g), zero_comp, eq_self_iff_true, and_self]
+
+lemma is_zero_iff_exact_zero_zero {C : Type*} [category C] [abelian C]
+  {X Y Z : C} : is_zero Y ↔ exact (0 : X ⟶ Y) (0 : Y ⟶ Z) :=
+⟨λ h, exact_of_is_zero h 0 0, is_zero_of_exact_zero_zero⟩
+
 lemma is_zero_of_exact_zero_zero' {C : Type*} [category C] [abelian C]
   {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) (h : exact f g) (hf : f = 0) (hg : g = 0) : is_zero Y :=
 by { rw [hf, hg] at h, exact is_zero_of_exact_zero_zero h }
