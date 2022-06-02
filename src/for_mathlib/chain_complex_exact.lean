@@ -169,6 +169,38 @@ begin
   rw [(abelian.epi_iff_cokernel_π_eq_zero _).1 (show epi f, from infer_instance), comp_zero],
 end
 
+lemma exact_zero_snd_iff_epi {𝒞 : Type*} [category 𝒞] [abelian 𝒞] {A B C : 𝒞}
+  {f : A ⟶ B} : exact f (0 : B ⟶ C) ↔ epi f :=
+begin
+  split,
+  { intro h,
+    apply preadditive.epi_of_cokernel_zero,
+    rcases (abelian.exact_iff _ _).1 h with ⟨-, h2⟩,
+    simpa using h2, },
+  { introI _,
+    exact exact_of_epi comp_zero, },
+end
+
+lemma exact_of_mono {𝒞 : Type*} [category 𝒞] [abelian 𝒞] {A B C : 𝒞} {f : A ⟶ B} {g : B ⟶ C}
+  (hfg : f ≫ g = 0) [mono g] : exact f g :=
+begin
+  rw abelian.exact_iff,
+  refine ⟨hfg, _⟩,
+  rw [(abelian.mono_iff_kernel_ι_eq_zero g).1 infer_instance, zero_comp],
+end
+
+lemma exact_zero_fst_iff_mono {𝒞 : Type*} [category 𝒞] [abelian 𝒞] {A B C : 𝒞}
+  {g : B ⟶ C} : exact (0 : A ⟶ B) g ↔ mono g :=
+begin
+  split,
+  { intro h,
+    apply preadditive.mono_of_kernel_zero,
+    rcases (abelian.exact_iff _ _).1 h with ⟨-, h2⟩,
+    simpa using h2, },
+  { introI _,
+    exact exact_of_mono zero_comp, },
+end
+
 lemma nat_epi_iff_exact : epi (D.d 1 0) ↔
   exact (homological_complex.d_to D 0) (homological_complex.d_from D 0) :=
 begin
@@ -246,18 +278,73 @@ end
 universes v' u'
 
 lemma homology_zero_iff_map_homology_zero
+  {α : Type*} {c : complex_shape α}
+  (D : homological_complex A c)
   {B : Type u'} [category.{v'} B] [abelian B] (E : A ≌ B)
   [E.functor.additive] :
-  (∀ i : ℕ, is_zero (D.homology i)) ↔
-  (∀ i : ℕ, is_zero (((E.functor.map_homological_complex _).obj D).homology i)) :=
+  (∀ i : α, is_zero (D.homology i)) ↔
+  (∀ i : α, is_zero (((E.functor.map_homological_complex _).obj D).homology i)) :=
 begin
   apply forall_congr,
   intro i,
   rw category_theory.is_zero_homology_iff_exact,
   rw category_theory.is_zero_homology_iff_exact,
   rw functor.map_homological_complex,
-  dsimp,
-  sorry,
+  dsimp only,
+  rcases hnext : c.next i with _ | ⟨knext,wnext⟩;
+  rcases hprev : c.prev i with _ | ⟨kprev,wprev⟩,
+  { rw homological_complex.d_from_eq_zero _ hnext,
+    rw homological_complex.d_from_eq_zero _ hnext,
+    rw homological_complex.d_to_eq_zero _ hprev,
+    rw homological_complex.d_to_eq_zero _ hprev,
+    rw ← is_zero_iff_exact_zero_zero,
+    rw ← is_zero_iff_exact_zero_zero,
+    rw is_zero_iff_id_eq_zero,
+    rw is_zero_iff_id_eq_zero,
+    rw ← category_theory.functor.map_id,
+    rw E.functor.map_eq_zero_iff,
+  },
+  { rw homological_complex.d_from_eq_zero _ hnext,
+    rw homological_complex.d_from_eq_zero _ hnext,
+    rw homological_complex.d_to_eq _ wprev,
+    rw homological_complex.d_to_eq _ wprev,
+    rw exact_iso_comp,
+    rw exact_iso_comp,
+    rw exact_zero_snd_iff_epi,
+    rw exact_zero_snd_iff_epi,
+    split,
+    { introI _,
+      exact category_theory.preserves_epi E.functor (D.d kprev i) },
+    { introI _,
+      exact reflects_epi E.functor (D.d kprev i), }, },
+  {
+    rw homological_complex.d_from_eq _ wnext,
+    rw homological_complex.d_from_eq _ wnext,
+    rw homological_complex.d_to_eq_zero _ hprev,
+    rw homological_complex.d_to_eq_zero _ hprev,
+    rw exact_comp_iso,
+    rw exact_comp_iso,
+    rw exact_zero_fst_iff_mono,
+    rw exact_zero_fst_iff_mono,
+    dsimp,
+    split,
+    { introI _,
+      exact category_theory.preserves_mono E.functor (D.d i knext),
+    },
+    { introI _,
+      exact reflects_mono E.functor (D.d i knext) }, },
+  { rw homological_complex.d_to_eq _ wprev,
+    rw homological_complex.d_to_eq _ wprev,
+    rw homological_complex.d_from_eq _ wnext,
+    rw homological_complex.d_from_eq _ wnext,
+    rw exact_comp_iso,
+    rw exact_comp_iso,
+    rw exact_iso_comp,
+    rw exact_iso_comp,
+    dsimp,
+    -- factor this out.
+    sorry
+  }
 end
 
 end chain_complex
