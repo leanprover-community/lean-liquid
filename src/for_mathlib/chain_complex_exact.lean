@@ -281,7 +281,7 @@ universes v' u'
 -- maximally universe-polymorphic; the morphisms of both categories live in the
 -- same universe. So we write `[category.{v} B]` instead of `[category.{v'} B]` here.
 
--- TODO : fix kernel_comparison_comp_ι
+-- TODO : fix kernel_comparison_comp_ι (if this is indeed an oversight)
 
 lemma exact_iff_map_exact {α : Type*} {c : complex_shape α}
   (D : homological_complex A c)
