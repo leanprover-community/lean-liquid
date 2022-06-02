@@ -7,6 +7,7 @@ import for_mathlib.chain_complex_exact
 import for_mathlib.abelian_sheaves.exact
 import for_mathlib.Cech.homotopy
 import for_mathlib.wide_pullback_iso
+import for_mathlib.equivalence_additive
 
 import condensed.adjunctions2
 import condensed.projective_resolution
@@ -152,7 +153,6 @@ lemma free_Cech_exact (F : arrow Profinite.{u}) (hF : function.surjective F.hom)
 begin
   dsimp only [free_Cech],
   rw chain_complex.homology_zero_iff_homology_zero,
-  haveI : functor.additive (Condensed_ExtrSheaf_equiv Ab.{u+1}).symm.functor, sorry,
   rw chain_complex.homology_zero_iff_map_homology_zero _
     (Condensed_ExtrSheaf_equiv Ab.{u+1}).symm,
   intros i,
