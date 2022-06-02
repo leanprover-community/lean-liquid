@@ -68,7 +68,41 @@ wide_pullback
   (λ _, ulift_functor.map $ (yoneda.map f).app (opposite.op T)) :=
 { hom := ulift_wide_pullback_iso_hom_aux _ _ _ _ _,
   inv := ulift_wide_pullback_iso_inv_aux _ _ _ _ _,
-  hom_inv_id' := sorry,
-  inv_hom_id' := sorry }
+  hom_inv_id' := begin
+    dsimp [
+      ulift_wide_pullback_iso_hom_aux,
+      ulift_wide_pullback_iso_inv_aux],
+    ext t : 2, dsimp, apply wide_pullback.hom_ext, rintros ⟨j⟩,
+    { simp only [wide_pullback.lift_π],
+      have := types_comp_apply
+        (wide_pullback.lift.{u+1 u+2} (ulift_functor.{u+1 u}.map
+          ((yoneda.{u u+1}.map (wide_pullback.base.{u u+1} (λ (_x : ulift.{u 0} (fin i)), f))).app
+          (op.{u+2} T))) (λ (q : ulift.{u+1 0} (fin i)), ulift_functor.{u+1 u}.map
+          ((yoneda.{u u+1}.map (wide_pullback.π.{u u+1} (λ (_x : ulift.{u 0} (fin i)), f)
+          {down := q.down})).app (op.{u+2} T))) _)
+        (wide_pullback.π.{u+1 u+2} (λ (_x : ulift.{u+1 0} (fin i)), ulift_functor.{u+1 u}.map
+          ((yoneda.{u u+1}.map f).app (op.{u+2} T))) _) t,
+      rw [← this, wide_pullback.lift_π], refl },
+    { simp only [wide_pullback.lift_base],
+      have := types_comp_apply
+        (wide_pullback.lift.{u+1 u+2} (ulift_functor.{u+1 u}.map
+          ((yoneda.{u u+1}.map (wide_pullback.base.{u u+1} (λ (_x : ulift.{u 0} (fin i)), f))).app
+          (op.{u+2} T))) (λ (q : ulift.{u+1 0} (fin i)), ulift_functor.{u+1 u}.map
+          ((yoneda.{u u+1}.map (wide_pullback.π.{u u+1} (λ (_x : ulift.{u 0} (fin i)), f)
+          {down := q.down})).app (op.{u+2} T))) _)
+        (wide_pullback.base.{u+1 u+2} (λ (_x : ulift.{u+1 0} (fin i)),
+          ulift_functor.{u+1 u}.map ((yoneda.{u u+1}.map f).app (op.{u+2} T)))) t,
+      rw [← this, limits.wide_pullback.lift_base], refl }
+  end,
+  inv_hom_id' := begin
+    dsimp [
+      ulift_wide_pullback_iso_hom_aux,
+      ulift_wide_pullback_iso_inv_aux],
+    ext ⟨t⟩ : 1,
+    { simp only [category.assoc, wide_pullback.lift_π, category.id_comp],
+      ext x, dsimp, simp, },
+    { simp only [category.assoc, wide_pullback.lift_base, category.id_comp],
+      ext x, dsimp, simp }
+  end }
 
 end category_theory
