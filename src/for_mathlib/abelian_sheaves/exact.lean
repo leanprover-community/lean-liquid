@@ -1,7 +1,9 @@
 import for_mathlib.abelian_sheaves.main
 import category_theory.abelian.exact
+import category_theory.abelian.homology
 import category_theory.sites.left_exact
 import for_mathlib.chain_complex_exact
+import for_mathlib.homology_iso
 
 universes w v u
 
@@ -94,11 +96,43 @@ namespace category_theory
 instance evaluation_additive (X : C) : functor.additive ((evaluation C A).obj X) :=
 ⟨λ F G η γ, rfl⟩
 
+def evaluation_homology_iso (X Y Z : C ⥤ A) (f : X ⟶ Y) (g : Y ⟶ Z) (w : f ≫ g = 0) (t : C) :
+  (homology f g w).obj t ≅ (homology (f.app t) (g.app t) $
+    by { rw [← nat_trans.comp_app, w], simp, }) :=
+{ hom := homology.lift _ _ _
+    ((homology.ι f g w).app t ≫ (nat_trans.cokernel_obj_iso f t).hom) sorry,
+  inv := homology.desc' _ _ _
+    ((nat_trans.kernel_obj_iso g t).inv ≫ (homology.π' f g w).app t) sorry,
+  hom_inv_id' := sorry,
+  inv_hom_id' := sorry }
+
 -- Homology of functors is computed pointwise...
 lemma homology_zero_of_eval
   (D : chain_complex (C ⥤ A) ℕ)
   (h : ∀ (X : C) (i : ℕ), is_zero
     (((((evaluation C A).obj X).map_homological_complex _).obj D).homology i)) :
-  ∀ i : ℕ, is_zero (D.homology i) := sorry
+  ∀ i : ℕ, is_zero (D.homology i) :=
+begin
+  rw ← chain_complex.epi_and_exact_iff_zero_homology',
+  split,
+  { apply_with nat_trans.epi_app_of_epi { instances := ff },
+    intros X,
+    specialize h X,
+    rw ← chain_complex.epi_and_exact_iff_zero_homology' at h,
+    exact h.1 },
+  { intros i, rw preadditive.exact_iff_homology_zero,
+    refine ⟨_,_⟩,
+    { ext X, specialize h X,
+      rw ← chain_complex.epi_and_exact_iff_zero_homology' at h, replace h := h.2 i,
+      rw preadditive.exact_iff_homology_zero at h,
+      obtain ⟨w,hw⟩ := h, exact w },
+    { refine ⟨is_zero.iso_zero _⟩,
+      apply functor.is_zero,
+      intros X,
+      specialize h X (i+1),
+      refine is_zero.of_iso _ (evaluation_homology_iso _ _ _ _ _ _ _),
+      apply is_zero.of_iso h,
+      symmetry, apply homology_iso; exact rfl } }
+end
 
 end category_theory
