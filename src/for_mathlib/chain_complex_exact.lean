@@ -275,6 +275,16 @@ begin
     exact ⟨h 0, λ i, h i.succ⟩, },
 end
 
+lemma epi_and_exact_iff_zero_homology' :
+  (epi (D.d 1 0) ∧ ∀ i : ℕ, exact (D.d (i+2) (i+1)) (D.d (i+1) (i))) ↔
+  (∀ i : ℕ, is_zero (D.homology i)) :=
+begin
+  rw ← homology_zero_iff_homology_zero,
+  apply epi_and_exact_iff_is_zero_homology,
+end
+
+
+
 universes v' u'
 
 -- `kernel_comparison_comp_ι` in mathlib master (as I write) is not

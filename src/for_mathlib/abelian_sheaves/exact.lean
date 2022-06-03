@@ -77,8 +77,15 @@ lemma map_presheaf_to_Sheaf_homology_zero_of_homology_zero
   (D : chain_complex (Cᵒᵖ ⥤ A) ℕ)
   (h : ∀ i : ℕ, is_zero (D.homology i)) :
   ∀ i : ℕ, is_zero
-    ((((presheaf_to_Sheaf J A).map_homological_complex _).obj D).homology i) := sorry
--- Use `exact_of_exact` for this, and the fact that sheafification preserves colimits.
+    ((((presheaf_to_Sheaf J A).map_homological_complex _).obj D).homology i) :=
+begin
+  rw ← chain_complex.epi_and_exact_iff_zero_homology' at *,
+  split,
+  { haveI := h.1, apply category_theory.preserves_epi },
+  { intros i,
+    apply exact_of_exact,
+    apply h.2 },
+end
 
 end category_theory.Sheaf
 
