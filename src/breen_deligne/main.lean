@@ -113,6 +113,7 @@ begin
   have LES1 := cochain_complex.Ext_ι_succ_five_term_exact_seq ((BD.eval' F).obj A) ((single 𝓐 0).obj B) (-1) i,
   have LES2 := cochain_complex.Ext_ι_succ_five_term_exact_seq ((BD.eval' F).obj A) ((single 𝓐 0).obj B) (-1) (i+1),
   have aux := ((LES1.drop 2).pair.cons LES2).is_iso_of_zero_of_zero; clear LES1 LES2,
+  symmetry,
   refine (@as_iso _ _ _ _ _ (aux _ _)).is_zero_iff; clear aux,
   { apply (H _ _).eq_of_src, exact (int.le_add_one le_rfl).trans hi },
   { apply (H _ hi).eq_of_tgt, },

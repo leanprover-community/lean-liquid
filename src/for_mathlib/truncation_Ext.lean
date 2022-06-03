@@ -32,11 +32,11 @@ variables (C : cochain_complex 𝓐 ℤ)
 lemma Ext_ι_succ_five_term_exact_seq (B : bounded_homotopy_category 𝓐) (i j : ℤ) :
   let E := λ n, ((Ext n).flip.obj B) in
   exact_seq Ab.{v} $
-    [ (E j).map (bounded_homotopy_category.of_hom (truncation.ι_succ C i)).op
-    , (E j).map (bounded_homotopy_category.of_hom (truncation.to_imker C (i+1))).op
+    [
+      (E j).map (bounded_homotopy_category.of_hom (truncation.to_imker C (i+1))).op
+    , (E j).map (bounded_homotopy_category.of_hom (truncation.ι_succ C i)).op
     , Ext_δ _ _ j B (truncation.short_exact_ι_succ_to_imker C i)
-    , (E (j+1)).map (bounded_homotopy_category.of_hom (truncation.ι_succ C i)).op ] :=
-Ext_five_term_exact_seq' _ _ _ _ $
-  truncation.short_exact_ι_succ_to_imker C _
+    , (E (j+1)).map (bounded_homotopy_category.of_hom (truncation.to_imker C (i+1))).op ] :=
+Ext_five_term_exact_seq' _ _ j B (truncation.short_exact_ι_succ_to_imker C i)
 
 end cochain_complex
