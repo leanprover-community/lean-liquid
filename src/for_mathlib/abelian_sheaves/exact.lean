@@ -100,9 +100,26 @@ def evaluation_homology_iso (X Y Z : C ⥤ A) (f : X ⟶ Y) (g : Y ⟶ Z) (w : f
   (homology f g w).obj t ≅ (homology (f.app t) (g.app t) $
     by { rw [← nat_trans.comp_app, w], simp, }) :=
 { hom := homology.lift _ _ _
-    ((homology.ι f g w).app t ≫ (nat_trans.cokernel_obj_iso f t).hom) sorry,
+    ((homology.ι f g w).app t ≫ (nat_trans.cokernel_obj_iso f t).hom) begin
+      rw category.assoc, let e := _, change _ ≫ e = _,
+      have he : e = (cokernel.desc f g w).app t,
+      { dsimp [e],
+        rw ← iso.eq_inv_comp,
+        ext,
+        simp },
+      rw [he, ← nat_trans.comp_app],
+      simp only [homology.condition_ι, nat_trans.app_zero],
+    end,
   inv := homology.desc' _ _ _
-    ((nat_trans.kernel_obj_iso g t).inv ≫ (homology.π' f g w).app t) sorry,
+    ((nat_trans.kernel_obj_iso g t).inv ≫ (homology.π' f g w).app t) begin
+      rw ← category.assoc, let e := _, change e ≫ _ = _,
+      have he : e = (kernel.lift g f w).app t,
+      { dsimp [e], rw iso.comp_inv_eq,
+        ext,
+        simp },
+      rw [he, ← nat_trans.comp_app],
+      simp only [homology.condition_π', nat_trans.app_zero],
+    end,
   hom_inv_id' := sorry,
   inv_hom_id' := sorry }
 
