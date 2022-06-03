@@ -121,7 +121,14 @@ def evaluation_homology_iso (X Y Z : C ⥤ A) (f : X ⟶ Y) (g : Y ⟶ Z) (w : f
       simp only [homology.condition_π', nat_trans.app_zero],
     end,
   hom_inv_id' := sorry,
-  inv_hom_id' := sorry }
+  inv_hom_id' := begin
+    apply homology.hom_from_ext, apply homology.hom_to_ext,
+    simp only [category.assoc, homology.π'_desc'_assoc, homology.lift_ι,
+      category.comp_id, homology.π'_ι],
+    rw [iso.inv_comp_eq, ← category.assoc, ← iso.eq_comp_inv,
+      ← nat_trans.comp_app, homology.π'_ι],
+    simp,
+  end }
 
 -- Homology of functors is computed pointwise...
 lemma homology_zero_of_eval
