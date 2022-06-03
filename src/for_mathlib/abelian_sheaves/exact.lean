@@ -64,7 +64,14 @@ begin
 end
 
 instance presheaf_to_Sheaf_additive :
-  functor.additive (presheaf_to_Sheaf J A) := sorry
+  functor.additive (presheaf_to_Sheaf J A) :=
+begin
+  apply_with functor.additive_of_preserves_binary_biproducts { instances := ff },
+  apply_with has_binary_biproducts_of_finite_biproducts { instances := ff },
+  apply_instance,
+  apply preserves_binary_biproducts_of_preserves_binary_coproducts,
+  apply_instance,
+end
 
 lemma map_presheaf_to_Sheaf_homology_zero_of_homology_zero
   (D : chain_complex (Cᵒᵖ ⥤ A) ℕ)

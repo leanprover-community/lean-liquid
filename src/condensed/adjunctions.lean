@@ -5,6 +5,7 @@ import algebra.category.Group.filtered_colimits
 
 import for_mathlib.SheafOfTypes_sheafification
 import for_mathlib.whisker_adjunction
+import for_mathlib.abelian_sheaves.exact
 import for_mathlib.abelian_sheaves.main
 import for_mathlib.AddCommGroup
 
@@ -121,15 +122,7 @@ Condensed_Ab_presheaf_adjunction.left_adjoint_preserves_colimits
 set_option pp.universes true
 
 instance : functor.additive presheaf_to_Condensed_Ab.{u} :=
-begin
-  apply_with functor.additive_of_preserves_binary_biproducts { instances := ff },
-  haveI : abelian (Profinite.{u}ᵒᵖ ⥤ Ab.{u+1}) :=
-    category_theory.functor_category_is_abelian.{u+2 u u+1},
-  apply_with has_binary_biproducts_of_finite_biproducts { instances := ff },
-  exact has_finite_biproducts.of_has_finite_products.{u+1 u+2},
-  apply preserves_binary_biproducts_of_preserves_binary_coproducts,
-  apply_instance,
-end
+by apply category_theory.Sheaf.presheaf_to_Sheaf_additive.{u+2 u u+1}
 
 instance : functor.additive Condensed_Ab_to_presheaf := ⟨⟩
 
