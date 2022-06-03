@@ -84,7 +84,8 @@ end category_theory.Sheaf
 
 namespace category_theory
 
-instance evaluation_additive (X : C) : functor.additive ((evaluation C A).obj X) := sorry
+instance evaluation_additive (X : C) : functor.additive ((evaluation C A).obj X) :=
+⟨λ F G η γ, rfl⟩
 
 -- Homology of functors is computed pointwise...
 lemma homology_zero_of_eval
