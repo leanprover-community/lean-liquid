@@ -120,7 +120,7 @@ begin
 end
 
 lemma bdd_step₄
-  (H : ∀ t ≤ (-1:ℤ), ∀ i ≤ j, is_zero (((Ext i).obj (op $ (single _ t).obj (((BD.eval F).obj A).val.as.homology t))).obj ((single 𝓐 0).obj B))) :
+  (H : ∀ t ≤ (-1:ℤ), ∀ i ≤ j + 1, is_zero (((Ext i).obj (op $ (single _ t).obj (((BD.eval F).obj A).val.as.homology t))).obj ((single 𝓐 0).obj B))) :
   ∀ t ≤ (-1:ℤ), ∀ i ≤ j + 1, is_zero (((Ext i).obj (op (of' (((BD.eval' F).obj A).truncation t)))).obj ((single 𝓐 0).obj B)) :=
 begin
   intros t ht i, revert ht,
@@ -129,9 +129,16 @@ begin
     apply Ext_single_right_is_zero _ _ (-i-1+1),
     { apply cochain_complex.truncation.bounded_by },
     { simp only [sub_add_cancel, add_left_neg], } },
-  -- induction on `t` and use `Ext_ι_succ_five_term_exact_seq`
-  sorry,
-  sorry
+  { intros k hk ih hk' hij,
+    have LES := cochain_complex.Ext_ι_succ_five_term_exact_seq ((BD.eval' F).obj A) ((single 𝓐 0).obj B) k i,
+    apply LES.pair.is_zero_of_is_zero_is_zero; clear LES,
+    { erw ← bdd_step₃_aux,
+      apply H _ hk' _ hij, },
+    { exact ih ((int.le_add_one le_rfl).trans hk') hij, }, },
+  { intros k hk ih hk' hij,
+    apply Ext_single_right_is_zero _ _ (k-1+1),
+    { apply cochain_complex.truncation.bounded_by },
+    { linarith only [hk, hk', hij] } },
 end
 
 lemma bdd_step₅ (t i : ℤ) :
