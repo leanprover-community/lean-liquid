@@ -106,7 +106,30 @@ match i with
 | 0 := iso.refl _
 | i+1 := iso.refl _
 end)
-sorry
+begin
+  rintros i j (rfl : j + 1 = i),
+  dsimp only [functor.map_homological_complex_obj_d,
+    unsheafified_free_ExtrDiscr_Cech, free_ExtrDisc_Cech',
+    simplicial_object.augmented.to_complex],
+  rw [chain_complex.of_d, chain_complex.of_d],
+  cases j,
+  { refine (category.id_comp _).trans ((category.comp_id _).trans _).symm,
+    dsimp only [simplicial_object.augmented.to_complex_d,
+      simplicial_object.augmented.whiskering_obj_2,
+      simplicial_object.augmented.whiskering_obj,
+      nat_trans.comp_app, whisker_right_app, functor.const_comp_hom_app],
+    rw [category.comp_id, category.comp_id],
+    refl, },
+  { refine (category.id_comp _).trans ((category.comp_id _).trans _).symm,
+    dsimp only [simplicial_object.augmented.to_complex_d,
+      simplicial_object.augmented.drop_obj,
+      simplicial_object.augmented.whiskering_obj_2,
+      simplicial_object.augmented.whiskering_obj,
+      simplicial_object.whiskering_obj_obj_map,
+      simplicial_object.boundary],
+    simp only [functor.map_sum, functor.map_zsmul],
+    refl, },
+end
 
 /-
 def free_Cech_iso (F : arrow Profinite.{u}) :
