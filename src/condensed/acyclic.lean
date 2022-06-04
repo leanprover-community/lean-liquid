@@ -196,7 +196,7 @@ match i with
 | int.of_nat (n+1) := iso.refl _
 | -[1+i] := iso.refl _
 end)
-sorry
+(by admit)
 -/
 
 -- SO ANNOYING
