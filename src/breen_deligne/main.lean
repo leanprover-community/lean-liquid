@@ -218,6 +218,7 @@ end main_lemma
 section
 
 variables [has_coproducts_of_shape (ulift.{v} ℕ) 𝓐]
+variables [has_products_of_shape (ulift.{v} ℕ) 𝓐]
 
 def mk_bo_ha_ca_Q (X : 𝓐) (f : X ⟶ X) :
   endomorphisms.mk_bo_ho_ca ((BD.eval F).obj X) ((BD.eval F).map f) ≅
