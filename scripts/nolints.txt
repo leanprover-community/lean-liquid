@@ -122,6 +122,8 @@ apply_nolint category_theory.limits.preserves_zero_of_preserves_initial instance
 apply_nolint category_theory.limits.preserves_zero_of_preserves_terminal instance_priority
 
 -- for_mathlib/abelian_sheaves/exact.lean
+apply_nolint category_theory.evaluation_additive unused_arguments
+apply_nolint category_theory.evaluation_homology_iso unused_arguments
 apply_nolint category_theory.presheaf_to_Sheaf.category_theory.limits.preserves_colimits unused_arguments
 
 -- for_mathlib/abelian_sheaves/functor_category.lean
