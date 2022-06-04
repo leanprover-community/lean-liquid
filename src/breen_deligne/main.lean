@@ -157,7 +157,7 @@ variables (T : Ab ⥤ 𝓐)
 
 -- this needs extra assumptions:
 -- * `T` should map a free resolution `0 → F₁ → F₂ → A' → 0` to a short exact sequence
--- * `T` should map a free object `F = ℤ^κ` to `A^κ`
+-- * `T` should map a free object `F = ℤ^{⊕κ}` to `A^{⊕κ}`
 lemma bdd_step₆ (IH : ∀ i ≤ j, is_zero $ ((Ext' i).obj (op A)).obj B)
   (i : ℤ) (hi : i ≤ j) (A' : Ab) :
   is_zero (((Ext' i).flip.obj B).obj (op (T.obj A'))) :=
