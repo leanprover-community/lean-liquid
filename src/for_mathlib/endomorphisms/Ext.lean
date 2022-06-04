@@ -77,6 +77,7 @@ namespace endomorphisms
 
 variables {𝓐 : Type u} [category.{v} 𝓐] [abelian 𝓐] [enough_projectives 𝓐]
 variables [has_coproducts_of_shape (ulift.{v} ℕ) 𝓐]
+variables [has_products_of_shape (ulift.{v} ℕ) 𝓐]
 
 def mk_bo_ho_ca (X : bounded_homotopy_category 𝓐) (f : X ⟶ X) :
   bounded_homotopy_category (endomorphisms 𝓐) :=

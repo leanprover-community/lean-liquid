@@ -76,6 +76,7 @@ end category
 section projectives
 
 variables {C : Type u} [category.{v} C] [has_coproducts_of_shape (ulift.{v} ℕ) C]
+  [has_products_of_shape (ulift.{v} ℕ) C]
 
 @[simps]
 def free (X : C) : endomorphisms C :=
@@ -115,9 +116,35 @@ begin
   simp only [colimit.ι_desc_assoc, cofan.mk_ι_app, colimit.ι_desc, category.assoc, pow_comm],
 end
 
--- this needs an extra assumption; which one is best?
+def cofree (X : C) : endomorphisms C :=
+{ X := ∏ (λ i : ulift.{v} ℕ, X),
+  e := pi.lift $ λ i, pi.π _ ⟨i.down + 1⟩ }
+
+def cofree.lift {X : C} {A : endomorphisms C} (f : A.X ⟶ X) :
+  A ⟶ cofree X :=
+{ f := pi.lift $ λ i, (A.e ^ i.down : End A.X) ≫ f,
+  comm := begin
+    dsimp [cofree],
+    ext ⟨j⟩, dsimp,
+    simp only [category.assoc, limit.lift_π, fan.mk_π_app],
+    rw [← category.assoc, pow_succ, ← End.mul_def], congr' 1,
+    induction j with j hj,
+    { simp },
+    { simp only [End.mul_def, pow_succ] at *,
+      simp [reassoc_of hj] }
+  end }
+
 lemma f_epi {X Y : endomorphisms C} (f : X ⟶ Y) [epi f] : epi f.f :=
-{ left_cancellation := λ Z g h w, sorry }
+{ left_cancellation := λ Z g h w, begin
+    let gg : Y ⟶ cofree Z := cofree.lift g,
+    let hh : Y ⟶ cofree Z := cofree.lift h,
+    have : f ≫ gg = f ≫ hh,
+    { ext, dsimp [gg, hh, cofree.lift], simp,
+      simp_rw [← category.assoc, ← pow_comm, category.assoc, w] },
+    rw cancel_epi at this,
+    apply_fun (λ e, e.f ≫ pi.π (λ i : ulift.{v} ℕ, Z) (ulift.up 0)) at this,
+    dsimp [gg, hh, cofree.lift] at this, simpa using this,
+  end }
 
 instance free.projective (X : C) [projective X] : projective (free X) :=
 { factors := λ E Y f e he, begin
