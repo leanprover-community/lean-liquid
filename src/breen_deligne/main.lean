@@ -141,12 +141,13 @@ begin
     { linarith only [hk, hk', hij] } },
 end
 
-lemma bdd_step₅ (t i : ℤ) :
-  is_zero (((Ext i).obj (op ((single 𝓐 t).obj (((BD.eval F).obj A).val.as.homology t)))).obj ((single 𝓐 0).obj B)) ↔
-  is_zero (((Ext' (i+t)).obj (op $ ((BD.eval F).obj A).val.as.homology t)).obj B) :=
+lemma bdd_step₅ (k i : ℤ) :
+  is_zero (((Ext i).obj (op ((single 𝓐 k).obj A))).obj ((single 𝓐 0).obj B)) ↔
+  is_zero (((Ext' (i+k)).obj (op $ A)).obj B) :=
 begin
   apply iso.is_zero_iff,
   -- this should follow from the defn of `Ext`
+  -- dsimp [Ext', Ext],
   sorry
 end
 
