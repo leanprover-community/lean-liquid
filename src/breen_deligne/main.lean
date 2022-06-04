@@ -120,7 +120,7 @@ begin
 end
 
 lemma bdd_step₄
-  (H : ∀ t ≤ (-1:ℤ), ∀ i ≤ j, is_zero (((Ext i).obj (op $ (single _ t).obj (((BD.eval F).obj A).val.as.homology t))).obj ((single 𝓐 0).obj B))) :
+  (H : ∀ t ≤ (-1:ℤ), ∀ i ≤ j + 1, is_zero (((Ext i).obj (op $ (single _ t).obj (((BD.eval F).obj A).val.as.homology t))).obj ((single 𝓐 0).obj B))) :
   ∀ t ≤ (-1:ℤ), ∀ i ≤ j + 1, is_zero (((Ext i).obj (op (of' (((BD.eval' F).obj A).truncation t)))).obj ((single 𝓐 0).obj B)) :=
 begin
   intros t ht i, revert ht,
@@ -129,32 +129,41 @@ begin
     apply Ext_single_right_is_zero _ _ (-i-1+1),
     { apply cochain_complex.truncation.bounded_by },
     { simp only [sub_add_cancel, add_left_neg], } },
-  -- induction on `t` and use `Ext_ι_succ_five_term_exact_seq`
-  sorry,
-  sorry
+  { intros k hk ih hk' hij,
+    have LES := cochain_complex.Ext_ι_succ_five_term_exact_seq ((BD.eval' F).obj A) ((single 𝓐 0).obj B) k i,
+    apply LES.pair.is_zero_of_is_zero_is_zero; clear LES,
+    { erw ← bdd_step₃_aux,
+      apply H _ hk' _ hij, },
+    { exact ih ((int.le_add_one le_rfl).trans hk') hij, }, },
+  { intros k hk ih hk' hij,
+    apply Ext_single_right_is_zero _ _ (k-1+1),
+    { apply cochain_complex.truncation.bounded_by },
+    { linarith only [hk, hk', hij] } },
 end
 
-lemma bdd_step₅ (t i : ℤ) :
-  is_zero (((Ext i).obj (op ((single 𝓐 t).obj (((BD.eval F).obj A).val.as.homology t)))).obj ((single 𝓐 0).obj B)) ↔
-  is_zero (((Ext' (i+t)).obj (op $ ((BD.eval F).obj A).val.as.homology t)).obj B) :=
+lemma bdd_step₅ (k i : ℤ) :
+  is_zero (((Ext i).obj (op ((single 𝓐 k).obj A))).obj ((single 𝓐 0).obj B)) ↔
+  is_zero (((Ext' (i+k)).obj (op $ A)).obj B) :=
 begin
   apply iso.is_zero_iff,
   -- this should follow from the defn of `Ext`
+  -- dsimp [Ext', Ext],
   sorry
 end
 
--- `T` is a tensor product functor
-variables (T : 𝓐 ⥤ Ab ⥤ 𝓐)
+-- `T` should be thought of as a tensor product functor,
+-- taking tensor products with `A : Condensed Ab`
+variables (T : Ab ⥤ 𝓐)
 
 -- this needs extra assumptions:
--- * `T.obj A` should map a free resolution `0 → F₁ → F₂ → A' → 0` to a short exact sequence
--- * `T.obj A` should map a free object `F = ℤ^κ` to `A^κ`
+-- * `T` should map a free resolution `0 → F₁ → F₂ → A' → 0` to a short exact sequence
+-- * `T` should map a free object `F = ℤ^{⊕κ}` to `A^{⊕κ}`
 lemma bdd_step₆ (IH : ∀ i ≤ j, is_zero $ ((Ext' i).obj (op A)).obj B)
   (i : ℤ) (hi : i ≤ j) (A' : Ab) :
-  is_zero (((Ext' i).flip.obj B).obj (op ((T.obj A).obj A'))) :=
+  is_zero (((Ext' i).flip.obj B).obj (op (T.obj A'))) :=
 sorry
 
-variables (hAT : ∀ t ≤ (-1:ℤ), ∃ A', nonempty ((T.obj A).obj A' ≅ ((BD.eval F).obj A).val.as.homology t))
+variables (hAT : ∀ t ≤ (-1:ℤ), ∃ A', nonempty (T.obj A' ≅ ((BD.eval F).obj A).val.as.homology t))
 
 include hH0 hAT
 

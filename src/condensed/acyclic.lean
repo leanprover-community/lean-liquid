@@ -8,6 +8,7 @@ import for_mathlib.abelian_sheaves.exact
 import for_mathlib.Cech.homotopy
 import for_mathlib.wide_pullback_iso
 import for_mathlib.equivalence_additive
+import for_mathlib.op
 
 import condensed.adjunctions2
 import condensed.projective_resolution
@@ -97,6 +98,58 @@ instance presheaf_to_Sheaf_additive :
   (presheaf_to_Sheaf.{u+2 u u+1} ExtrDisc.proetale_topology.{u} Ab.{u+1}).additive :=
 category_theory.Sheaf.presheaf_to_Sheaf_additive
 
+-- SELFCONTAINED
+def acyclic_of_exact.induction_step_ex₂_aux
+  {C : Type*} [category C] {𝓐 : Type*} [category 𝓐] [abelian 𝓐] {𝓑 : Type*} [category 𝓑] [abelian 𝓑]
+  (f : arrow C) [∀ (n : ℕ),
+    has_wide_pullback f.right (λ (i : ulift (fin (n + 1))), f.left) (λ (i : ulift (fin (n + 1))), f.hom)]
+  (F : C ⥤ 𝓐) (G : 𝓐ᵒᵖ ⥤ 𝓑) [G.additive] :
+  (G.map_homological_complex _).obj ((((simplicial_object.augmented.whiskering _ _).obj F).obj
+    f.augmented_cech_nerve).to_complex).op ≅
+  (((cosimplicial_object.augmented.whiskering _ _).obj (F.op ⋙ G)).obj
+    f.augmented_cech_nerve.right_op).to_cocomplex :=
+homological_complex.hom.iso_of_components
+(λ i,
+match i with
+| 0 := iso.refl _
+| i+1 := iso.refl _
+end)
+begin
+  rintros i j (rfl : i + 1 = j),
+  dsimp only [functor.map_homological_complex_obj_d,
+    unsheafified_free_ExtrDiscr_Cech, free_ExtrDisc_Cech',
+    cosimplicial_object.augmented.to_cocomplex,
+    simplicial_object.augmented.to_complex, homological_complex.op_d],
+  rw [cochain_complex.of_d, chain_complex.of_d],
+  cases i,
+  { refine (category.id_comp _).trans ((category.comp_id _).trans _).symm,
+    dsimp only [simplicial_object.augmented.to_complex_d,
+      cosimplicial_object.augmented.to_cocomplex_d,
+      simplicial_object.augmented.whiskering_obj_2,
+      simplicial_object.augmented.whiskering_obj,
+      cosimplicial_object.augmented.whiskering_obj_2,
+      cosimplicial_object.augmented.whiskering_obj,
+      nat_trans.comp_app, whisker_right_app,
+      functor.const_comp_hom_app, functor.const_comp_inv_app],
+    rw [category.comp_id, category.id_comp],
+    refl, },
+  { refine (category.id_comp _).trans ((category.comp_id _).trans _).symm,
+    dsimp only [simplicial_object.augmented.to_complex_d,
+      simplicial_object.augmented.drop_obj,
+      simplicial_object.augmented.whiskering_obj_2,
+      simplicial_object.augmented.whiskering_obj,
+      simplicial_object.whiskering_obj_obj_map,
+      simplicial_object.boundary,
+      cosimplicial_object.augmented.to_cocomplex_d,
+      cosimplicial_object.augmented.drop_obj,
+      cosimplicial_object.augmented.whiskering_obj_2,
+      cosimplicial_object.augmented.whiskering_obj,
+      cosimplicial_object.whiskering_obj_obj_map,
+      cosimplicial_object.coboundary],
+    simp only [G.map_sum, G.map_zsmul, op_sum, op_zsmul],
+    refl, },
+end
+
 def free_ExtrDisc_Cech'_iso (F : arrow Profinite.{u}) :
   free_ExtrDisc_Cech' F ≅
   ((presheaf_to_Sheaf _ _).map_homological_complex _).obj (unsheafified_free_ExtrDiscr_Cech F) :=
@@ -106,7 +159,30 @@ match i with
 | 0 := iso.refl _
 | i+1 := iso.refl _
 end)
-sorry
+begin
+  rintros i j (rfl : j + 1 = i),
+  dsimp only [functor.map_homological_complex_obj_d,
+    unsheafified_free_ExtrDiscr_Cech, free_ExtrDisc_Cech',
+    simplicial_object.augmented.to_complex],
+  rw [chain_complex.of_d, chain_complex.of_d],
+  cases j,
+  { refine (category.id_comp _).trans ((category.comp_id _).trans _).symm,
+    dsimp only [simplicial_object.augmented.to_complex_d,
+      simplicial_object.augmented.whiskering_obj_2,
+      simplicial_object.augmented.whiskering_obj,
+      nat_trans.comp_app, whisker_right_app, functor.const_comp_hom_app],
+    rw [category.comp_id, category.comp_id],
+    refl, },
+  { refine (category.id_comp _).trans ((category.comp_id _).trans _).symm,
+    dsimp only [simplicial_object.augmented.to_complex_d,
+      simplicial_object.augmented.drop_obj,
+      simplicial_object.augmented.whiskering_obj_2,
+      simplicial_object.augmented.whiskering_obj,
+      simplicial_object.whiskering_obj_obj_map,
+      simplicial_object.boundary],
+    simp only [functor.map_sum, functor.map_zsmul],
+    refl, },
+end
 
 /-
 def free_Cech_iso (F : arrow Profinite.{u}) :
@@ -120,7 +196,7 @@ match i with
 | int.of_nat (n+1) := iso.refl _
 | -[1+i] := iso.refl _
 end)
-sorry
+(by admit)
 -/
 
 -- SO ANNOYING
@@ -254,18 +330,6 @@ begin
   refine iso.app (functor.map_iso _ (condensed.profinite_free_adj _)) _,
 end
 
--- SELFCONTAINED
-lemma acyclic_of_exact.induction_step_ex₂_aux
-  {C : Type*} [category C] {𝓐 : Type*} [category 𝓐] [abelian 𝓐] {𝓑 : Type*} [category 𝓑] [abelian 𝓑]
-  (f : arrow C) [∀ (n : ℕ),
-    has_wide_pullback f.right (λ (i : ulift (fin (n + 1))), f.left) (λ (i : ulift (fin (n + 1))), f.hom)]
-  (F : C ⥤ 𝓐) (G : 𝓐ᵒᵖ ⥤ 𝓑) [G.additive] (i : ℕ)
-  (h : is_zero ((((cosimplicial_object.augmented.whiskering _ _).obj (F.op ⋙ G)).obj
-    f.augmented_cech_nerve.right_op).to_cocomplex.homology i)) :
-  is_zero (((G.map_homological_complex _).obj ((((simplicial_object.augmented.whiskering _ _).obj F).obj
-    f.augmented_cech_nerve).to_complex).op).homology i) :=
-sorry
-
 lemma acyclic_of_exact.induction_step_ex₂
   (F : arrow Profinite.{u})
   (h : let C := (((cosimplicial_object.augmented.whiskering Profiniteᵒᵖ Ab).obj
@@ -274,7 +338,9 @@ lemma acyclic_of_exact.induction_step_ex₂
     in ∀ i, is_zero (C.homology i)) :
   ∀ i, is_zero ((((preadditive_yoneda.obj M).map_homological_complex _).obj (free_Cech' F).op).homology i) :=
 begin
-  intro i, apply acyclic_of_exact.induction_step_ex₂_aux, exact h i
+  intro i, apply (h i).of_iso,
+  refine (_root_.homology_functor _ _ _).map_iso _,
+  apply acyclic_of_exact.induction_step_ex₂_aux,
 end
 
 lemma int.of_nat_add_one (i : ℕ) : int.of_nat i + 1 = int.of_nat (i+1) := rfl
