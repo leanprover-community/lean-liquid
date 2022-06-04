@@ -260,6 +260,104 @@ lemma is_iso_cokernel.desc {V : Type*} [category V] [abelian V] {A B C : V} {f :
   (cokernel.desc f g h.1) :=
 is_iso_of_op (cokernel.desc f g h.w)
 
+lemma sq_from_epi_of_epi {ι : Type*} {V : Type*} [_inst_1 : category V] [_inst_2 : abelian V] {c : complex_shape ι}
+  {C₁ C₂ : homological_complex V c} [_inst_3 : has_zero_object V] (φ : C₁.hom C₂) (i : ι)
+  (h2 : is_zero (C₂.X_next i)) [epi (φ.f i)] :
+epi (homological_complex.hom.sq_from φ i) :=
+⟨begin
+  rintros ψ ⟨fL, fR, fw⟩ ⟨gL, gR, gw⟩,
+  intro h,
+  congr',
+  { apply_fun category_theory.comma_morphism.left at h,
+    simp at h,
+    rwa cancel_epi at h, },
+  { dsimp at fR gR,
+    have fR0 : fR = 0 := is_zero.eq_zero_of_src h2 _,
+    subst fR0,
+    have gR0 : gR = 0 := is_zero.eq_zero_of_src h2 _,
+    subst gR0, },
+end⟩
+
+@[simp] lemma epi_comp_iso_iff_epi {V : Type*} [category V] {A B C : V} (e : A ≅ B) (f : B ⟶ C) :
+  epi (e.hom ≫ f) ↔ epi f :=
+begin
+  split,
+  { rintro ⟨h⟩,
+    constructor,
+    intros Z s t h2,
+    apply h,
+    simp [h2], },
+  { rintro ⟨h⟩,
+    constructor,
+    intros Z s t h2,
+    apply h,
+    simpa using h2,
+  },
+end
+
+@[simp] lemma epi_iso_comp_iff_epi {V : Type*} [category V] {A B C : V} (f : A ⟶ B) (e : B ≅ C) :
+  epi (f ≫ e.hom) ↔ epi f :=
+begin
+  split,
+  { introI h,
+    constructor,
+    intros Z s t h2,
+    suffices : e.inv ≫ s = e.inv ≫ t,
+      simpa,
+    rw ← cancel_epi (f ≫ e.hom),
+    simpa using h2, },
+  { introI h,
+    constructor,
+    intros Z s t h2,
+    simp only [category.assoc] at h2,
+    rw cancel_epi at h2,
+    rwa cancel_epi at h2, },
+end
+
+@[simp] lemma epi_comp_is_iso_iff_epi {V : Type*} [category V] {A B C : V} (e : A ⟶ B) (f : B ⟶ C) [is_iso e] :
+  epi (e ≫ f) ↔ epi f :=
+epi_comp_iso_iff_epi (as_iso e) f
+
+@[simp] lemma epi_is_iso_comp_iff_epi {V : Type*} [category V] {A B C : V} (f : A ⟶ B) (e : B ⟶ C) [is_iso e] :
+  epi (f ≫ e) ↔ epi f :=
+epi_iso_comp_iff_epi f (as_iso e)
+
+lemma kernel_subobject_map_epi_of_epi {C : Type*} [_inst_1 : category C] [abelian C] {X Y : C}
+  {f : X ⟶ Y} (hY : is_zero Y)
+   {X' Y' : C} {f' : X' ⟶ Y'} (hY' : is_zero Y')
+    (φ : arrow.mk f ⟶ arrow.mk f') [epi φ.left] : epi (kernel_subobject_map φ) :=
+begin
+  have hf : f = 0 := is_zero.eq_zero_of_tgt hY _,
+  have hf' : f' = 0 := is_zero.eq_zero_of_tgt hY' _,
+  haveI hfiso : is_iso (kernel_subobject f).arrow,
+  { rw [← kernel_subobject_arrow, hf],
+    simp,
+    apply_instance },
+  haveI hf'iso : is_iso (kernel_subobject f').arrow,
+  { rw [← kernel_subobject_arrow, hf'],
+    simp,
+    apply_instance },
+  -- I just made epi (iso ≫ f) ↔ epi f and epi (f ≫ iso) ↔ epi f
+  -- but now I realise I need is_iso versions :-/
+  suffices : epi (kernel_subobject_map φ ≫ (kernel_subobject f').arrow),
+  { constructor,
+    intros A g h h',
+    suffices : inv ((kernel_subobject f').arrow) ≫ g = inv ((kernel_subobject f').arrow) ≫ h,
+    { simpa },
+    resetI,
+    rw ← cancel_epi (kernel_subobject_map φ ≫ (kernel_subobject f').arrow),
+    simp only [category.assoc, h', is_iso.hom_inv_id_assoc],
+  },
+  simp only [kernel_subobject_map_arrow],
+  constructor,
+  intros A g h h',
+  simp only [category.assoc] at h',
+  rw cancel_epi at h',
+  rwa cancel_epi at h',
+end
+
+
+
 -- looks simple? kmb didn't find it so simple ;-)
 instance to_single_quasi_iso (n : ℤ) :
   homotopy_category.is_quasi_iso $ (homotopy_category.quotient _ _).map (to_single C n) :=
@@ -312,7 +410,19 @@ instance to_single_quasi_iso (n : ℤ) :
       --delta kernel_subobject_map subobject.factor_thru,
       --dsimp,
       -- This one shouldn't be too bad.
-      sorry },
+      apply kernel_subobject_map_epi_of_epi _ _ _,
+      { have := homological_complex.X_next_iso (C.imker i) (show i + 1 = i + 1, by refl),
+        apply is_zero_of_iso_of_zero _ this.symm,
+        apply X_is_zero_of_ne;
+        linarith, },
+      { have := homological_complex.X_next_iso ((single 𝓐 (complex_shape.up ℤ) i).obj (homological_complex.homology C i)) (show i + 1 = i + 1, by refl),
+        apply is_zero_of_iso_of_zero _ this.symm,
+        delta single, dsimp, rw if_neg, apply is_zero_zero, linarith, },
+      { delta homological_complex.hom.sq_from to_single to_single arrow.hom_mk,
+        dsimp,
+        rw dif_pos rfl,
+        simp,
+        exact strong_epi.epi, } },
     { refine ⟨foo, _⟩,
       -- This one is the main challenge but I think we can pick plenty of pieces off.
       sorry }, },
