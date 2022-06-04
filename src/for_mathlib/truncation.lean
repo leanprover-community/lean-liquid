@@ -189,27 +189,135 @@ begin
   exact is_zero_of_iso_of_zero hB (homology_zero_zero.symm),
 end
 
+lemma single.d_eq_zero (V : Type*) [category V] [has_zero_morphisms V] [has_zero_object V]
+  {ι : Type*} [decidable_eq ι] (c : complex_shape ι) (i j k : ι) ( v : V) :
+  ((single V c i).obj v).d j k = 0 := rfl
+
+lemma single.d_from_eq_zero (V : Type*) [category V] [has_zero_morphisms V] [has_zero_object V]
+  {ι : Type*} [decidable_eq ι] (c : complex_shape ι) (i j : ι) ( v : V) :
+  ((single V c i).obj v).d_from j = 0 :=
+begin
+  rcases hj : c.next j with _ | ⟨k, hjk⟩,
+  { rw homological_complex.d_from_eq_zero _ hj, },
+  { rw homological_complex.d_from_eq _ hjk,
+    rw single.d_eq_zero,
+    apply zero_comp,
+  },
+end
+
+lemma single.d_to_eq_zero (V : Type*) [category V] [has_zero_morphisms V] [has_zero_object V]
+  {ι : Type*} [decidable_eq ι] (c : complex_shape ι) (i j : ι) ( v : V) :
+  ((single V c i).obj v).d_to j = 0 :=
+begin
+  rcases hj : c.prev j with _ | ⟨k, hjk⟩,
+  { rw homological_complex.d_to_eq_zero _ hj, },
+  { rw homological_complex.d_to_eq _ hjk,
+    rw single.d_eq_zero,
+    apply comp_zero,
+  },
+end
+
+-- variant of homology_zero_zero
+def homology_zero_zero' {V : Type*} [category V] [abelian V]
+  {A B C : V} {f : A ⟶ B} {g : B ⟶ C} (hf : f = 0) (hg : g = 0) :
+  homology f g (by simp [hf]) ≅ B :=
+(eq_to_iso (show homology f g _ = homology (0 : A ⟶ B) (0 : B ⟶ C) (by simp), by simp [hf, hg])) ≪≫ homology_zero_zero
+
+lemma is_iso_cokernel_pi_image_to_kernel_of_zero_of_zero {V : Type*} [category V]
+  [abelian V] {A B C : V} {f : A ⟶ B} {g : B ⟶ C} (hf : f = 0) (hg : g = 0) :
+is_iso (cokernel.π (image_to_kernel f g (by simp [hf]))) :=
+begin
+  subst hf,
+  subst hg,
+  rw image_to_kernel_zero_left,
+  apply cokernel.π_of_zero,
+end
+
+lemma cokernel.desc_spec {V : Type*} [category V]
+  [abelian V] {A B C : V} {f : A ⟶ B} {g : B ⟶ C} (w : f ≫ g = 0)
+  (c : cokernel f ⟶ C) : (cokernel.π f ≫ c = g) ↔ c = cokernel.desc f g w :=
+begin
+  have h2 := cokernel.π_desc f g w,
+  split,
+  { rintro rfl,
+    symmetry,
+    rwa cancel_epi at h2, },
+  { rintro rfl,
+    assumption },
+end
+
+lemma cokernel.desc_comp_left {V : Type*} [category V]
+  [abelian V] {A B C D : V} {f : A ⟶ B} {g : B ⟶ C} {e : C ⟶ D} (w : f ≫ g = 0) :
+  (cokernel.desc f g w) ≫ e =
+  (cokernel.desc f (g ≫ e) (by rw [← category.assoc, w, zero_comp])) :=
+begin
+  rw ← cokernel.desc_spec,
+  simp [cokernel.π_desc],
+end
+
+lemma is_iso_cokernel.desc {V : Type*} [category V] [abelian V] {A B C : V} {f : A ⟶ B} {g : B ⟶ C}
+  (h : exact f g) (h2 : epi g) : is_iso
+  (cokernel.desc f g h.1) :=
+is_iso_of_op (cokernel.desc f g h.w)
+
+-- looks simple? kmb didn't find it so simple ;-)
 instance to_single_quasi_iso (n : ℤ) :
   homotopy_category.is_quasi_iso $ (homotopy_category.quotient _ _).map (to_single C n) :=
 ⟨begin
   intro i,
+  -- split into cases : the n'th map, and all the other maps,
   rcases eq_or_ne i n with (rfl | hin),
-  { rw ← functor.comp_map,
+  { -- The n'th map is the nontrivial case.
+    -- First there's this quotient map to the homotopy category which we replace by `homology_functor`.
+    rw ← functor.comp_map,
     apply map_is_iso_of_iso_of_map_is_iso (homotopy_category.homology_factors 𝓐
       (complex_shape.up ℤ) i).symm,
-    simp only [homology_functor_map],
-    delta homology.map,
-    dsimp,
-    have : ((single 𝓐 (complex_shape.up ℤ) i).obj (homological_complex.homology C i)).d_from i = 0,
-    { apply is_zero.eq_zero_of_tgt,
-      refine is_zero_of_iso_of_zero _ (homological_complex.X_next_iso _ _).symm,
-      { use i+1 },
-      { apply _root_.homological_complex.single_obj_is_zero,
-        linarith },
-      { exact eq.refl _ }, },
-    -- this might be harder than it looks with this approach.
-    sorry },
-  -- the below sorry can be removed
+      /- The goal now states that the middle arrow induces an isomorphism
+         on homology of the below complexes:
+
+         im d -> ker d -> 0
+          |       |       |
+          \/      \⧸      \/
+           0  -> ker/im-> 0
+
+
+      The main problem right now is that the homology of 0 -> ker/im -> 0 is in some sense
+      quite far from ker/im, it's ker(ker/im->0)/im(0->ker/im).
+      -/
+    delta homology_functor homology.map,
+    dsimp only [homological_complex.d_to_comp_d_from, cokernel.condition, comp_zero, homological_complex.hom.sq_from_id,
+      homology.π_map, kernel_subobject_map_id, category.id_comp, category.comp_id, homological_complex.hom.sq_from_comp,
+      kernel_subobject_map_comp, category.assoc, homology.π_map_assoc],
+    have foo : image_to_kernel (homological_complex.d_to (C.imker i) i) (homological_complex.d_from (C.imker i) i) _ ≫
+      kernel_subobject_map (homological_complex.hom.sq_from (to_single C i) i) = 0,
+    { rw [← cancel_epi (factor_thru_image_subobject (homological_complex.d_to (C.imker i) i)), comp_zero],
+      rw [← cancel_mono ((kernel_subobject _).arrow)], swap, exact (kernel_subobject (((single 𝓐 (complex_shape.up ℤ) i).obj (homological_complex.homology C i)).d_from i)).arrow_mono,
+      rw zero_comp,
+      simp only [category.assoc, kernel_subobject_map_arrow, homological_complex.hom.sq_from_left, image_to_kernel_arrow_assoc,
+        image_subobject_arrow_comp_assoc],
+      rw homological_complex.d_to_eq,
+      rw category.assoc,
+      rw ← homological_complex.hom.comm,
+      simp, swap, use i-1, show (i - 1) + 1 = i, ring,
+    },
+    rw ← cokernel.desc_comp_left foo,
+    apply @is_iso.comp_is_iso _ _ _ _ _ _ _ _ _, swap,
+    { apply is_iso_cokernel_pi_image_to_kernel_of_zero_of_zero,
+      { apply single.d_to_eq_zero, },
+      { apply single.d_from_eq_zero, },
+    },
+    apply is_iso_cokernel.desc, swap,
+    { -- prove epi iff map in the middle epi because so many 0s
+      --delta homological_complex.hom.sq_from arrow.hom_mk,
+      --delta kernel_subobject_map subobject.factor_thru,
+      --dsimp,
+      -- This one shouldn't be too bad.
+      sorry },
+    { refine ⟨foo, _⟩,
+      -- This one is the main challenge but I think we can pick plenty of pieces off.
+      sorry }, },
+  -- the below sorry can be removed, it's not even there. It's the proof that all the other
+  -- vertical maps are isos on homology.
   sorry;{ rcases eq_or_ne i (n-1) with (rfl | hin'),
     { rw ← functor.comp_map,
       apply map_is_iso_of_iso_of_map_is_iso (homotopy_category.homology_factors 𝓐
