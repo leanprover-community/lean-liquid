@@ -143,18 +143,19 @@ begin
   sorry
 end
 
--- `T` is a tensor product functor
-variables (T : 𝓐 ⥤ Ab ⥤ 𝓐)
+-- `T` should be thought of as a tensor product functor,
+-- taking tensor products with `A : Condensed Ab`
+variables (T : Ab ⥤ 𝓐)
 
 -- this needs extra assumptions:
 -- * `T.obj A` should map a free resolution `0 → F₁ → F₂ → A' → 0` to a short exact sequence
 -- * `T.obj A` should map a free object `F = ℤ^κ` to `A^κ`
 lemma bdd_step₆ (IH : ∀ i ≤ j, is_zero $ ((Ext' i).obj (op A)).obj B)
   (i : ℤ) (hi : i ≤ j) (A' : Ab) :
-  is_zero (((Ext' i).flip.obj B).obj (op ((T.obj A).obj A'))) :=
+  is_zero (((Ext' i).flip.obj B).obj (op (T.obj A'))) :=
 sorry
 
-variables (hAT : ∀ t ≤ (-1:ℤ), ∃ A', nonempty ((T.obj A).obj A' ≅ ((BD.eval F).obj A).val.as.homology t))
+variables (hAT : ∀ t ≤ (-1:ℤ), ∃ A', nonempty (T.obj A' ≅ ((BD.eval F).obj A).val.as.homology t))
 
 include hH0 hAT
 
