@@ -195,6 +195,10 @@ apply_nolint category_theory.functor.left_derived.β unused_arguments
 -- for_mathlib/endomorphisms/Ext.lean
 apply_nolint category_theory.endomorphisms.mk_bo_ho_ca unused_arguments
 
+-- for_mathlib/endomorphisms/basic.lean
+apply_nolint category_theory.endomorphisms.cofree unused_arguments
+apply_nolint category_theory.endomorphisms.free unused_arguments
+
 -- for_mathlib/exact_seq3.lean
 apply_nolint category_theory.exact_seq.w def_lemma
 
@@ -299,6 +303,10 @@ apply_nolint category_theory.triangulated.triangle.right_unitality_aux unused_ar
 apply_nolint category_theory.triangulated.triangle.shift_add_comp_eq_to_hom unused_arguments
 apply_nolint category_theory.triangulated.triangle.shift_add_comp_eq_to_hom' unused_arguments
 apply_nolint category_theory.triangulated.triangle.shift_comm_eq_eq_to_hom unused_arguments
+
+-- for_mathlib/truncation.lean
+apply_nolint cochain_complex.imker.map_is_iso_of_iso_of_map_is_iso unused_arguments
+apply_nolint cochain_complex.imker.obj_is_zero_of_iso unused_arguments
 
 -- free_pfpng/epi.lean
 apply_nolint exists_signed_sum_aux decidable_classical unused_arguments
