@@ -23,9 +23,10 @@ C^{n-2} → C^{n-1} → C^n → C^{n+1}
 ```
 `imker C n` should be the cochain complex
 ```
-   0  → Im(d^n) → Ker(d^n) → 0
+   0  → Im(d^{n-1}) → Ker(d^n) → 0
 ```
-As a result, `H_i(imker C n) = 0` for all `i≠n` and `= H_i(C)` for `i=n`.
+supported in degrees n-1 and n (note that both terms are naturally subobjects
+of C^n). As a result, `H_i(imker C n) = 0` for all `i≠n`, and `= H_i(C)` for `i=n`.
 -/
 def imker (C : cochain_complex 𝓐 ℤ) (n : ℤ) : cochain_complex 𝓐 ℤ :=
 { X := λ i, if i = n-1 then image_subobject (C.d_to n) else
@@ -103,13 +104,6 @@ begin
   simp only [h, hj, eq_self_iff_true, d_def, eq_to_iso.hom, dif_pos, X_iso_image_of_eq_hom,
     X_iso_kernel_of_eq_inv],
   refl,
-end
-
-lemma image_to_kernel_epi (i : ℤ) :
-  epi (image_to_kernel (homological_complex.d_to (C.imker i) i)
-    (homological_complex.d_from (C.imker i) i) ((C.imker i).d_to_comp_d_from i)) :=
-begin
-  sorry
 end
 
 lemma bounded_by (i : ℤ) :
@@ -228,7 +222,8 @@ end
 def homology_zero_zero' {V : Type*} [category V] [abelian V]
   {A B C : V} {f : A ⟶ B} {g : B ⟶ C} (hf : f = 0) (hg : g = 0) :
   homology f g (by simp [hf]) ≅ B :=
-(eq_to_iso (show homology f g _ = homology (0 : A ⟶ B) (0 : B ⟶ C) (by simp), by simp [hf, hg])) ≪≫ homology_zero_zero
+(eq_to_iso (show homology f g _ = homology (0 : A ⟶ B) (0 : B ⟶ C) (by simp), by simp [hf, hg]))
+  ≪≫ homology_zero_zero
 
 lemma is_iso_cokernel_pi_image_to_kernel_of_zero_of_zero {V : Type*} [category V]
   [abelian V] {A B C : V} {f : A ⟶ B} {g : B ⟶ C} (hf : f = 0) (hg : g = 0) :
@@ -267,7 +262,8 @@ lemma is_iso_cokernel.desc {V : Type*} [category V] [abelian V] {A B C : V} {f :
   (cokernel.desc f g h.1) :=
 is_iso_of_op (cokernel.desc f g h.w)
 
-lemma sq_from_epi_of_epi {ι : Type*} {V : Type*} [_inst_1 : category V] [_inst_2 : abelian V] {c : complex_shape ι}
+lemma sq_from_epi_of_epi {ι : Type*} {V : Type*} [_inst_1 : category V] [_inst_2 : abelian V]
+  {c : complex_shape ι}
   {C₁ C₂ : homological_complex V c} [_inst_3 : has_zero_object V] (φ : C₁.hom C₂) (i : ι)
   (h2 : is_zero (C₂.X_next i)) [epi (φ.f i)] :
 epi (homological_complex.hom.sq_from φ i) :=
@@ -321,12 +317,12 @@ begin
     rwa cancel_epi at h2, },
 end
 
-@[simp] lemma epi_comp_is_iso_iff_epi {V : Type*} [category V] {A B C : V} (e : A ⟶ B) (f : B ⟶ C) [is_iso e] :
-  epi (e ≫ f) ↔ epi f :=
+@[simp] lemma epi_comp_is_iso_iff_epi {V : Type*} [category V] {A B C : V} (e : A ⟶ B) (f : B ⟶ C)
+  [is_iso e] : epi (e ≫ f) ↔ epi f :=
 epi_comp_iso_iff_epi (as_iso e) f
 
-@[simp] lemma epi_is_iso_comp_iff_epi {V : Type*} [category V] {A B C : V} (f : A ⟶ B) (e : B ⟶ C) [is_iso e] :
-  epi (f ≫ e) ↔ epi f :=
+@[simp] lemma epi_is_iso_comp_iff_epi {V : Type*} [category V] {A B C : V} (f : A ⟶ B) (e : B ⟶ C)
+  [is_iso e] : epi (f ≫ e) ↔ epi f :=
 epi_iso_comp_iff_epi f (as_iso e)
 
 lemma kernel_subobject_map_epi_of_epi {C : Type*} [_inst_1 : category C] [abelian C] {X Y : C}
@@ -366,8 +362,6 @@ end
 lemma zero_of_epi_of_comp_zero {V : Type*} [category V] [abelian V]
   {A B C : V} {f : A ⟶ B} {g : B ⟶ C} (w : f ≫ g = 0) [epi f] : g = 0 :=
 (preadditive.epi_iff_cancel_zero f).mp infer_instance C g w
-
--- A -> B -> C is epi and B -> C is mono then A -> B is epi
 
 lemma epi_of_epi_of_comp_epi_of_mono {V : Type*} [category V] [abelian V]
   {A B C : V} (f : A ⟶ B) (g : B ⟶ C) [epi (f ≫ g)] [mono g] : epi f :=
@@ -456,7 +450,8 @@ instance to_single_quasi_iso (n : ℤ) :
         apply is_zero_of_iso_of_zero _ this.symm,
         apply X_is_zero_of_ne;
         linarith, },
-      { have := homological_complex.X_next_iso ((single 𝓐 (complex_shape.up ℤ) i).obj (homological_complex.homology C i)) (show i + 1 = i + 1, by refl),
+      { have := homological_complex.X_next_iso ((single 𝓐 (complex_shape.up ℤ) i).obj
+          (homological_complex.homology C i)) (show i + 1 = i + 1, by refl),
         apply is_zero_of_iso_of_zero _ this.symm,
         delta single, dsimp, rw if_neg, apply is_zero_zero, linarith, },
       { delta homological_complex.hom.sq_from to_single to_single arrow.hom_mk,
