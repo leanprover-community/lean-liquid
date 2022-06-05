@@ -105,6 +105,13 @@ begin
   refl,
 end
 
+lemma image_to_kernel_epi (i : ℤ) :
+  epi (image_to_kernel (homological_complex.d_to (C.imker i) i)
+    (homological_complex.d_from (C.imker i) i) ((C.imker i).d_to_comp_d_from i)) :=
+begin
+  sorry
+end
+
 lemma bounded_by (i : ℤ) :
   ((homotopy_category.quotient _ _).obj (C.imker i)).bounded_by (i+1) :=
 begin
@@ -356,7 +363,39 @@ begin
   rwa cancel_epi at h',
 end
 
+lemma zero_of_epi_of_comp_zero {V : Type*} [category V] [abelian V]
+  {A B C : V} {f : A ⟶ B} {g : B ⟶ C} (w : f ≫ g = 0) [epi f] : g = 0 :=
+(preadditive.epi_iff_cancel_zero f).mp infer_instance C g w
 
+-- A -> B -> C is epi and B -> C is mono then A -> B is epi
+
+lemma epi_of_epi_of_comp_epi_of_mono {V : Type*} [category V] [abelian V]
+  {A B C : V} (f : A ⟶ B) (g : B ⟶ C) [epi (f ≫ g)] [mono g] : epi f :=
+begin
+  haveI foo : is_iso g,
+  { rw is_iso_iff_mono_and_epi,
+    refine ⟨infer_instance, _⟩,
+    apply epi_of_epi f,
+  },
+  simp * at *,
+end
+
+lemma image_to_kernel_epi_of_epi {V : Type*} [category V] [abelian V]
+  {A B C : V} (f : A ⟶ B) (g : B ⟶ C) [epi f] (w : f ≫ g = 0) :
+  epi (image_to_kernel f g w) :=
+begin
+  have claim0 := image_subobject_arrow_comp f,
+  have claim : (image_subobject f).arrow = (image_to_kernel f g w) ≫ (kernel_subobject g).arrow,
+  { exact (image_to_kernel_arrow f g w).symm},
+  have claim2 := factor_thru_image_subobject_comp_image_to_kernel _ _ w,
+  suffices : epi (factor_thru_kernel_subobject g f w),
+  { rw ← claim2 at this,
+    resetI,
+    apply epi_of_epi (factor_thru_image_subobject f) (image_to_kernel f g w), },
+  apply epi_of_epi_of_comp_epi_of_mono _ (kernel_subobject g).arrow,
+  rw factor_thru_kernel_subobject_comp_arrow g f w,
+  apply_instance,
+end
 
 -- looks simple? kmb didn't find it so simple ;-)
 instance to_single_quasi_iso (n : ℤ) :
@@ -382,7 +421,9 @@ instance to_single_quasi_iso (n : ℤ) :
       The main problem right now is that the homology of 0 -> ker/im -> 0 is in some sense
       quite far from ker/im, it's ker(ker/im->0)/im(0->ker/im).
       -/
-    delta homology_functor homology.map,
+    delta homology_functor, dsimp,
+    -- Adam says "do something else here"
+    delta homology.map,
     dsimp only [homological_complex.d_to_comp_d_from, cokernel.condition, comp_zero, homological_complex.hom.sq_from_id,
       homology.π_map, kernel_subobject_map_id, category.id_comp, category.comp_id, homological_complex.hom.sq_from_comp,
       kernel_subobject_map_comp, category.assoc, homology.π_map_assoc],
@@ -424,7 +465,25 @@ instance to_single_quasi_iso (n : ℤ) :
         simp,
         exact strong_epi.epi, } },
     { refine ⟨foo, _⟩,
-      -- This one is the main challenge but I think we can pick plenty of pieces off.
+      /-
+      C_{i-1}---(f)---> C_i ---(g)--> C_{i+1} (f and g both called d)
+
+      It's a complex, so we get an induced map Im(f)->Ker(g).
+
+      This map also forms part of a complex:
+
+      im(f)->ker(g)->ker(ker(g)/im(f)->0) is a complex, so we get an induced map
+
+      im(im(f)->ker(g)) -> ker(ker(g)->ker(ker(g)/im(f)->0))
+
+      and the claim is that this is an epi.
+
+      If
+      A --(mono)-> B --(epi)-> C is a complex, then
+      Im(d) -> Ker(d) is epi iff A -> ker(d) is an epi
+      -/
+      -- perhaps the next step is to show that ker(ker(g)->ker(ker(g)/im(f)->0) is iso to ker(g)?
+
       sorry }, },
   -- the below sorry can be removed, it's not even there. It's the proof that all the other
   -- vertical maps are isos on homology.
