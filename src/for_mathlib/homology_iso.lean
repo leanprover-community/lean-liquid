@@ -120,6 +120,14 @@ begin
       arrow.iso_mk_inv_right, f.next_eq hjk], }
 end
 
+noncomputable
+def homology_iso_inv_homology_functor_map {X Y : homological_complex A c} (f : X ⟶ Y) :
+  (homology_iso' X _ _ _ hij hjk).inv ≫
+  (homology_functor A _ j).map f =
+  homology.map _ _ ⟨f.f i, f.f j, f.comm _ _⟩ ⟨f.f j, f.f k, f.comm _ _⟩ rfl ≫
+  (homology_iso' Y _ _ _ hij hjk).inv :=
+by rw [iso.inv_comp_eq, homology_iso_map]
+
 variables {𝓐 : Type*} [category 𝓐] [abelian 𝓐]
 
 open opposite

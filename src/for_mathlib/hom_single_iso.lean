@@ -107,7 +107,7 @@ def hom_single_iso
   AddCommGroup.of (P ⟶ (bounded_homotopy_category.single C i).obj B) ≅
   (((preadditive_yoneda.obj B).map_homological_complex _).obj P.val.as.op).homology i :=
 begin
-  refine _ ≪≫ (homology_iso _ (i+1) i (i-1) _ _).symm,
+  refine _ ≪≫ (homology_iso' _ (i+1) i (i-1) _ _).symm,
   rotate, { dsimp, refl }, { dsimp, exact sub_add_cancel _ _ },
   refine add_equiv_iso_AddCommGroup_iso.hom _ ≪≫ (AddCommGroup.homology_iso _ _ _).symm,
   refine add_equiv.surjective_congr (homological_complex.hom_single_iso P.val.as B i)
@@ -133,23 +133,18 @@ end
 
 .
 
-/-
-
-  (((preadditive_yoneda.obj B).right_op.map_homological_complex _ ⋙
-      homological_complex.unop_functor.right_op ⋙
-      (_root_.homology_functor _ _ (-i)).op).map
-      (bounded_homotopy_category.lift ((of' C₁).π ≫ of'_hom f) (of' C₂).π).out).unop := by admit
--/
-
 lemma hom_single_iso_naturality
   (P₁ P₂ : bounded_homotopy_category C) (B : C) (i : ℤ)
   (f : P₁ ⟶ P₂) :
-  (preadditive_yoneda.obj _).map f.op ≫ (bounded_homotopy_category.hom_single_iso P₁ B i).hom =
-  (bounded_homotopy_category.hom_single_iso P₂ B i).hom ≫
+  (preadditive_yoneda.obj _).map f.op ≫ (hom_single_iso P₁ B i).hom =
+  (hom_single_iso P₂ B i).hom ≫
   (((preadditive_yoneda.obj B).right_op.map_homological_complex _ ⋙
       homological_complex.unop_functor.right_op ⋙
       (_root_.homology_functor _ _ _).op).map f.out).unop :=
 begin
+  dsimp only [hom_single_iso, iso.trans_hom, iso.symm_hom, functor.comp_map, functor.op_map,
+    functor.right_op_map, quiver.hom.unop_op],
+  simp only [category.assoc, homology_iso_inv_homology_functor_map],
   sorry
 end
 
