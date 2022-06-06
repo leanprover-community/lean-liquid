@@ -169,6 +169,7 @@ begin
   let f := F.subtype,
   let F₀ : Ab := AddCommGroup.of (↥A →₀ ℤ),
   let F₁ : Ab := AddCommGroup.of F,
+  refine ⟨F₁, F₀, _⟩,
   -- let f' : F₁ ⟶ F₀ := by { exact f },
   sorry
 end
@@ -211,7 +212,8 @@ begin
   apply is_zero.of_iso _ e,
   apply is_zero_colimit,
   intros j,
-  sorry
+  apply is_zero.of_iso _ (((Ext' i).flip.obj B).right_op.map_iso hT1),
+  apply (IH i hi).op,
 end
 
 lemma bdd_step₆_free
