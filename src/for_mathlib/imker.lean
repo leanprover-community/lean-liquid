@@ -388,12 +388,36 @@ begin
   apply_instance,
 end
 
+lemma image_to_kernel_zero_left' {V : Type*} [category V] [has_zero_morphisms V]
+  {A B C : V} {f : A ⟶ B} (hf : f = 0) (g : B ⟶ C) [has_kernels V]
+  [has_zero_object V] [has_image f] :
+image_to_kernel f g (by rw [hf, zero_comp]) = 0 :=
+begin
+  convert image_to_kernel_zero_left g,
+  rw zero_comp,
+end
+
+lemma cokernel.desc_is_iso {A B C D : 𝓐} (f : A ⟶ B) (g : B ⟶ C) (e : C ⟶ D) [is_iso e]
+  (w : f ≫ g = 0) : cokernel.desc f g w ≫ e = cokernel.desc f (g ≫ e)
+  (begin rw [← category.assoc, w, zero_comp] end) :=
+begin
+  rw ← cancel_epi (cokernel.π f),
+  simp,
+end
+
 lemma homology_functor.is_iso_of_is_zero_of_is_zero_of_is_zero {ι : Type*} {c : complex_shape ι}
   {i j : ι} (hij : c.rel i j) {C₁ C₂ : homological_complex 𝓐 c} (h1from : C₁.d_from j = 0)
   (h2to : C₂.d_to j = 0) (h2from : C₂.d_from j = 0) (isomap : cokernel (C₁.d_to j) ≅ C₂.X j)
   {f : C₁ ⟶ C₂} (hf : f.f j = cokernel.π (C₁.d_to j) ≫ isomap.hom) :
 is_iso ((homology_functor 𝓐 c j).map f) :=
 begin
+  simp,
+  delta homology.map,
+  dsimp,
+  have foo : image_to_kernel (C₁.d_to j) (C₁.d_from j) (C₁.d_to_comp_d_from j) =
+    (image_to_kernel (C₁.d_to j) (0 : C₁.X j ⟶ C₁.X_next j) (comp_zero)) ≫
+    eq_to_hom (by rw h1from),
+  { sorry, }, -- assuming this is right, it should be factored out as a lemma
   sorry
 end
 
