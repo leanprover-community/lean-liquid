@@ -36,8 +36,7 @@ lemma profinite_free_adj_aux₁_naturality
   Profinite_to_Condensed.map f.unop ≫ profinite_free_adj_aux₁ _ _ x :=
 begin
   dsimp only [profinite_free_adj_aux₁],
-  simp only [adjunction.hom_equiv_naturality_left],
-  refl,
+  simpa only [adjunction.hom_equiv_naturality_left],
 end
 
 def profinite_free_adj_aux₂ (M : Condensed.{u} Ab.{u+1}) (S : Profinite.{u}ᵒᵖ) :
